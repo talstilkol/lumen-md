@@ -60,6 +60,12 @@
       "icon": "Download"
     },
     {
+      "id": "file.exportMarkdownAiMarks",
+      "label": "Export Markdown with AI marks",
+      "group": "File",
+      "icon": "Download"
+    },
+    {
       "id": "file.exportLatex",
       "label": "Export to LaTeX (.tex)",
       "group": "File",
@@ -201,6 +207,20 @@
       "group": "File",
       "hint": "Open or create the daily note for today (journal/YYYY-MM-DD.md)",
       "shortcut": "⌥⌘D",
+      "icon": "FileText"
+    },
+    {
+      "id": "pdf.open",
+      "label": "Open a PDF for reading…",
+      "group": "File",
+      "hint": "Highlights go to a .pdf.md note",
+      "icon": "FileText"
+    },
+    {
+      "id": "note.capture",
+      "label": "Quick capture",
+      "group": "File",
+      "shortcut": "⌥⌘N",
       "icon": "FileText"
     },
     {
@@ -349,6 +369,13 @@
       "icon": "Sparkles"
     },
     {
+      "id": "ai.analyse",
+      "label": "AI: Analyse the table",
+      "group": "Tools",
+      "hint": "Answer a question about this note's table with Python on this device",
+      "icon": "Sparkles"
+    },
+    {
       "id": "ai.ollamaModels",
       "label": "AI: Ollama Models",
       "group": "Tools",
@@ -412,6 +439,34 @@
       "icon": "Sparkles"
     },
     {
+      "id": "ai.autofill",
+      "label": "AI: Fill Properties for Notes…",
+      "group": "Tools",
+      "hint": "Proposes missing properties for the notes of a folder; nothing is written until you approve",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "ai.summarize",
+      "label": "AI: Summarize This Note (on this device)",
+      "group": "Tools",
+      "hint": "A short summary whose every sentence is copied from the note and checked against it",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "ai.fim",
+      "label": "AI: Local Autocomplete (FIM) — On/Off",
+      "group": "Tools",
+      "hint": "Complete as you type with a coding model on this device; Tab accepts, Esc dismisses",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "ai.batchJobs",
+      "label": "AI: Batch Jobs — Progress, Pause, Resume",
+      "group": "Tools",
+      "hint": "Live progress of batch jobs, with pause, resume and cancel",
+      "icon": "Sparkles"
+    },
+    {
       "id": "ai.mode",
       "label": "AI: Cost Mode (Economy / Balanced / Quality)…",
       "group": "Tools",
@@ -430,6 +485,20 @@
       "label": "AI: My Writing Style (local)",
       "group": "AI Prompts",
       "hint": "Learn your style from your notes on this device and use it when the AI writes — instead of fine-tuning",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "settings.open",
+      "label": "Settings",
+      "group": "View",
+      "hint": "Search settings",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "ai.marks.toggle",
+      "label": "AI text marks: show / hide",
+      "group": "View",
+      "hint": "Text the AI wrote looks lighter until you edit it",
       "icon": "Sparkles"
     },
     {
@@ -480,6 +549,13 @@
       "group": "File",
       "hint": "Copies every note from the folder into the browser's private storage, checks it, then works there. The folder is not changed.",
       "icon": "Save"
+    },
+    {
+      "id": "view.properties",
+      "label": "Properties: edit this note's frontmatter",
+      "group": "Tools",
+      "hint": "Text, number, date, list, checkbox and link fields; only the edited value changes",
+      "icon": "Sparkles"
     },
     {
       "id": "file.trash",
@@ -537,11 +613,25 @@
       "icon": "Sparkles"
     },
     {
+      "id": "ai.reviewChanges",
+      "label": "AI: Review changes proposed by agents",
+      "group": "AI Prompts",
+      "hint": "Each change an agent proposed, as a diff, to approve or reject",
+      "icon": "Sparkles"
+    },
+    {
       "id": "ai.doctor",
       "label": "AI: Doctor (diagnose local AI)",
       "group": "Tools",
       "hint": "Checks Ollama, CORS, models, WebGPU, storage and services — each with its fix",
       "icon": "Sparkles"
+    },
+    {
+      "id": "help.feedback",
+      "label": "Help: Send feedback",
+      "group": "Tools",
+      "hint": "A GitHub issue or text to copy — nothing is sent without your click",
+      "icon": "Link"
     },
     {
       "id": "ai.policy",
@@ -569,6 +659,27 @@
       "label": "AI: Switch Provider",
       "group": "Tools",
       "hint": "Switch AI provider: OpenAI, Claude, Gemini, Mistral, Ollama, or local WebGPU",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "nikud.add",
+      "label": "Hebrew: add niqqud",
+      "group": "Tools",
+      "hint": "Point the selection (or the whole note) on this device",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "nikud.partial",
+      "label": "Hebrew: add partial niqqud",
+      "group": "Tools",
+      "hint": "Point only the words that could be read more than one way",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "nikud.remove",
+      "label": "Hebrew: remove niqqud",
+      "group": "Tools",
+      "hint": "Strip the vowel points from the selection (or the whole note)",
       "icon": "Sparkles"
     },
     {
@@ -686,6 +797,13 @@
       "icon": "Sparkles"
     },
     {
+      "id": "canvas.migrateToExcalidraw",
+      "label": "🎨 Canvas: convert tldraw canvases to Excalidraw",
+      "group": "View",
+      "hint": "the .tldr files stay as backups",
+      "icon": "Sparkles"
+    },
+    {
       "id": "view.plugins",
       "label": "🔌 Plugin Gallery",
       "group": "View",
@@ -749,6 +867,12 @@
       "icon": "Sparkles"
     },
     {
+      "id": "help.credits",
+      "label": "Credits & model licences",
+      "group": "Tools",
+      "icon": "Sparkles"
+    },
+    {
       "id": "voice.meeting",
       "label": "🎙 Meeting notes (record on this device)",
       "group": "Tools",
@@ -789,6 +913,13 @@
       "group": "Security",
       "hint": "Encrypt the whole vault at rest; lock, recovery key",
       "icon": "Save"
+    },
+    {
+      "id": "editor.copyBlockLink",
+      "label": "Copy link to block",
+      "group": "Insert",
+      "hint": "Gives the block at the cursor a ^id and copies [[Note#^id]]",
+      "icon": "Link"
     },
     {
       "id": "ai.prompt.en.summarize",
@@ -1198,6 +1329,12 @@
       "icon": "Download"
     },
     {
+      "id": "file.exportMarkdownAiMarks",
+      "label": "Export Markdown with AI marks",
+      "group": "File",
+      "icon": "Download"
+    },
+    {
       "id": "file.exportLatex",
       "label": "Export to LaTeX (.tex)",
       "group": "File",
@@ -1339,6 +1476,20 @@
       "group": "File",
       "hint": "Open or create the daily note for today (journal/YYYY-MM-DD.md)",
       "shortcut": "⌥⌘D",
+      "icon": "FileText"
+    },
+    {
+      "id": "pdf.open",
+      "label": "Open a PDF for reading…",
+      "group": "File",
+      "hint": "Highlights go to a .pdf.md note",
+      "icon": "FileText"
+    },
+    {
+      "id": "note.capture",
+      "label": "Quick capture",
+      "group": "File",
+      "shortcut": "⌥⌘N",
       "icon": "FileText"
     },
     {
@@ -1494,6 +1645,13 @@
       "icon": "Sparkles"
     },
     {
+      "id": "ai.analyse",
+      "label": "AI: Analyse the table",
+      "group": "Tools",
+      "hint": "Answer a question about this note's table with Python on this device",
+      "icon": "Sparkles"
+    },
+    {
       "id": "ai.ollamaModels",
       "label": "AI: Ollama Models",
       "group": "Tools",
@@ -1557,6 +1715,34 @@
       "icon": "Sparkles"
     },
     {
+      "id": "ai.autofill",
+      "label": "AI: Fill Properties for Notes…",
+      "group": "Tools",
+      "hint": "Proposes missing properties for the notes of a folder; nothing is written until you approve",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "ai.summarize",
+      "label": "AI: Summarize This Note (on this device)",
+      "group": "Tools",
+      "hint": "A short summary whose every sentence is copied from the note and checked against it",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "ai.fim",
+      "label": "AI: Local Autocomplete (FIM) — On/Off",
+      "group": "Tools",
+      "hint": "Complete as you type with a coding model on this device; Tab accepts, Esc dismisses",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "ai.batchJobs",
+      "label": "AI: Batch Jobs — Progress, Pause, Resume",
+      "group": "Tools",
+      "hint": "Live progress of batch jobs, with pause, resume and cancel",
+      "icon": "Sparkles"
+    },
+    {
       "id": "ai.mode",
       "label": "AI: Cost Mode (Economy / Balanced / Quality)…",
       "group": "Tools",
@@ -1575,6 +1761,20 @@
       "label": "AI: My Writing Style (local)",
       "group": "AI Prompts",
       "hint": "Learn your style from your notes on this device and use it when the AI writes — instead of fine-tuning",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "settings.open",
+      "label": "Settings",
+      "group": "View",
+      "hint": "Search settings",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "ai.marks.toggle",
+      "label": "AI text marks: show / hide",
+      "group": "View",
+      "hint": "Text the AI wrote looks lighter until you edit it",
       "icon": "Sparkles"
     },
     {
@@ -1625,6 +1825,13 @@
       "group": "File",
       "hint": "Copies every note from the folder into the browser's private storage, checks it, then works there. The folder is not changed.",
       "icon": "Save"
+    },
+    {
+      "id": "view.properties",
+      "label": "Properties: edit this note's frontmatter",
+      "group": "Tools",
+      "hint": "Text, number, date, list, checkbox and link fields; only the edited value changes",
+      "icon": "Sparkles"
     },
     {
       "id": "file.trash",
@@ -1682,11 +1889,25 @@
       "icon": "Sparkles"
     },
     {
+      "id": "ai.reviewChanges",
+      "label": "AI: Review changes proposed by agents",
+      "group": "AI Prompts",
+      "hint": "Each change an agent proposed, as a diff, to approve or reject",
+      "icon": "Sparkles"
+    },
+    {
       "id": "ai.doctor",
       "label": "AI: Doctor (diagnose local AI)",
       "group": "Tools",
       "hint": "Checks Ollama, CORS, models, WebGPU, storage and services — each with its fix",
       "icon": "Sparkles"
+    },
+    {
+      "id": "help.feedback",
+      "label": "Help: Send feedback",
+      "group": "Tools",
+      "hint": "A GitHub issue or text to copy — nothing is sent without your click",
+      "icon": "Link"
     },
     {
       "id": "ai.policy",
@@ -1714,6 +1935,27 @@
       "label": "AI: Switch Provider",
       "group": "Tools",
       "hint": "Switch AI provider: OpenAI, Claude, Gemini, Mistral, Ollama, or local WebGPU",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "nikud.add",
+      "label": "Hebrew: add niqqud",
+      "group": "Tools",
+      "hint": "Point the selection (or the whole note) on this device",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "nikud.partial",
+      "label": "Hebrew: add partial niqqud",
+      "group": "Tools",
+      "hint": "Point only the words that could be read more than one way",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "nikud.remove",
+      "label": "Hebrew: remove niqqud",
+      "group": "Tools",
+      "hint": "Strip the vowel points from the selection (or the whole note)",
       "icon": "Sparkles"
     },
     {
@@ -1828,6 +2070,13 @@
       "label": "🎨 Canvas / Whiteboard",
       "group": "View",
       "hint": "Infinite canvas for visual notes",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "canvas.migrateToExcalidraw",
+      "label": "🎨 Canvas: convert tldraw canvases to Excalidraw",
+      "group": "View",
+      "hint": "the .tldr files stay as backups",
       "icon": "Sparkles"
     },
     {
@@ -1964,6 +2213,12 @@
       "icon": "Sparkles"
     },
     {
+      "id": "help.credits",
+      "label": "Credits & model licences",
+      "group": "Tools",
+      "icon": "Sparkles"
+    },
+    {
       "id": "voice.meeting",
       "label": "🎙 Meeting notes (record on this device)",
       "group": "Tools",
@@ -2011,6 +2266,13 @@
       "group": "Security",
       "hint": "Encrypt the whole vault at rest; lock, recovery key",
       "icon": "Save"
+    },
+    {
+      "id": "editor.copyBlockLink",
+      "label": "Copy link to block",
+      "group": "Insert",
+      "hint": "Gives the block at the cursor a ^id and copies [[Note#^id]]",
+      "icon": "Link"
     },
     {
       "id": "ai.prompt.en.summarize",
@@ -2377,6 +2639,7 @@
     "file.publishSite",
     "file.exportDocx",
     "file.exportRtf",
+    "file.exportMarkdownAiMarks",
     "file.exportLatex",
     "file.exportRst",
     "file.exportAdoc",
@@ -2397,6 +2660,8 @@
     "view.pageView",
     "view.workspace",
     "note.today",
+    "pdf.open",
+    "note.capture",
     "view.calendar",
     "view.backlinks",
     "view.search",
@@ -2417,6 +2682,7 @@
     "ai.actionItems",
     "ai.translate",
     "ai.chart",
+    "ai.analyse",
     "ai.ollamaModels",
     "ai.usage",
     "research.ask",
@@ -2426,9 +2692,15 @@
     "research.settings",
     "ai.batch",
     "ai.batchCheck",
+    "ai.autofill",
+    "ai.summarize",
+    "ai.fim",
+    "ai.batchJobs",
     "ai.mode",
     "ai.localModels",
     "ai.styleProfile",
+    "settings.open",
+    "ai.marks.toggle",
     "ai.agentSettings",
     "spell.hebrewDictionary",
     "vault.export",
@@ -2436,6 +2708,7 @@
     "vault.toFolder",
     "vault.openFolder",
     "vault.toBrowser",
+    "view.properties",
     "file.trash",
     "sync.open",
     "ai.cancel",
@@ -2444,11 +2717,16 @@
     "image.altText",
     "ai.rerankModel",
     "ai.privacyLedger",
+    "ai.reviewChanges",
     "ai.doctor",
+    "help.feedback",
     "ai.policy",
     "ai.trace",
     "ai.cache",
     "ai.switchProvider",
+    "nikud.add",
+    "nikud.partial",
+    "nikud.remove",
     "tools.checkGrammar",
     "view.rtl",
     "lang.en",
@@ -2465,6 +2743,7 @@
     "insert.table",
     "view.autoSave",
     "view.canvas",
+    "canvas.migrateToExcalidraw",
     "view.plugins",
     "template.meeting-notes",
     "template.blog-post",
@@ -2474,12 +2753,14 @@
     "template.changelog",
     "template.lesson-plan",
     "voice.memo",
+    "help.credits",
     "voice.meeting",
     "ai.meetingNotes",
     "voice.dictate",
     "vault.encrypt",
     "vault.decrypt",
     "vault.encryptAtRest",
+    "editor.copyBlockLink",
     "ai.prompt.he.summarize",
     "ai.prompt.he.improve",
     "ai.prompt.he.translate_to_en",
