@@ -1514,5 +1514,20 @@
   "hl.exportFailed": "تعذّر تصدير التمييزات: {error}",
   "hl.loadFailed": "تعذّرت قراءة التمييزات: {error}",
   "hl.tagFailed": "تعذّر حفظ الوسم: {error}",
-  "cmd.highlights.all": "كل التمييزات"
+  "cmd.highlights.all": "كل التمييزات",
+  "srs.title": "المراجعة اليومية",
+  "srs.loading": "جارٍ تحضير بطاقات اليوم…",
+  "srs.progress": "{n} من {total}",
+  "srs.showAnswer": "إظهار الإجابة (مسافة)",
+  "srs.showSource": "إظهار المصدر (مسافة)",
+  "srs.rate.1": "مرة أخرى",
+  "srs.rate.2": "صعب",
+  "srs.rate.3": "جيد",
+  "srs.rate.4": "سهل",
+  "srs.done": "انتهيت لليوم: روجعت {n}.",
+  "srs.empty": "لا شيء للمراجعة بعد. ميّز مقاطع، أو اكتب أسطر سؤال::جواب في ملاحظاتك.",
+  "srs.unreadable": "لا يمكن قراءة {path}، لذا لن يُغيَّر. أصلحه أو أزله لتراجع مجددًا.",
+  "srs.failed": "تعذّر حفظ المراجعة: {error}",
+  "cmd.review.daily": "المراجعة اليومية",
+  "srs.close": "إغلاق"
 }

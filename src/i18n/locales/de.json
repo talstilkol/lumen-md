@@ -1514,5 +1514,20 @@
   "hl.exportFailed": "Die Markierungen konnten nicht exportiert werden: {error}",
   "hl.loadFailed": "Die Markierungen konnten nicht gelesen werden: {error}",
   "hl.tagFailed": "Der Tag konnte nicht gespeichert werden: {error}",
-  "cmd.highlights.all": "Alle Markierungen"
+  "cmd.highlights.all": "Alle Markierungen",
+  "srs.title": "Tägliche Wiederholung",
+  "srs.loading": "Die Karten für heute werden geholt…",
+  "srs.progress": "{n} von {total}",
+  "srs.showAnswer": "Antwort zeigen (Leertaste)",
+  "srs.showSource": "Herkunft zeigen (Leertaste)",
+  "srs.rate.1": "Nochmal",
+  "srs.rate.2": "Schwer",
+  "srs.rate.3": "Gut",
+  "srs.rate.4": "Leicht",
+  "srs.done": "Fertig für heute: {n} wiederholt.",
+  "srs.empty": "Noch nichts zu wiederholen. Markiere Stellen oder schreibe Frage::Antwort-Zeilen in deine Notizen.",
+  "srs.unreadable": "{path} ist nicht lesbar und wird darum nicht geändert. Reparieren oder entfernen, um wieder zu wiederholen.",
+  "srs.failed": "Die Wiederholung konnte nicht gespeichert werden: {error}",
+  "cmd.review.daily": "Tägliche Wiederholung",
+  "srs.close": "Schließen"
 }

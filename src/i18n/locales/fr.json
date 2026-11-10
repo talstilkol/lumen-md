@@ -1514,5 +1514,20 @@
   "hl.exportFailed": "Impossible d’exporter les surlignages : {error}",
   "hl.loadFailed": "Impossible de lire les surlignages : {error}",
   "hl.tagFailed": "Impossible d’enregistrer l’étiquette : {error}",
-  "cmd.highlights.all": "Tous les surlignages"
+  "cmd.highlights.all": "Tous les surlignages",
+  "srs.title": "Révision du jour",
+  "srs.loading": "Préparation des cartes du jour…",
+  "srs.progress": "{n} sur {total}",
+  "srs.showAnswer": "Afficher la réponse (espace)",
+  "srs.showSource": "Afficher la source (espace)",
+  "srs.rate.1": "À revoir",
+  "srs.rate.2": "Difficile",
+  "srs.rate.3": "Bien",
+  "srs.rate.4": "Facile",
+  "srs.done": "Terminé pour aujourd’hui : {n} révisées.",
+  "srs.empty": "Rien à réviser pour l’instant. Surlignez des passages ou écrivez des lignes question::réponse dans vos notes.",
+  "srs.unreadable": "{path} est illisible et n’est donc pas modifié. Corrigez-le ou supprimez-le pour réviser à nouveau.",
+  "srs.failed": "Impossible d’enregistrer la révision : {error}",
+  "cmd.review.daily": "Révision du jour",
+  "srs.close": "Fermer"
 }

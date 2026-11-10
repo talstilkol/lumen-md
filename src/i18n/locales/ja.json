@@ -1514,5 +1514,20 @@
   "hl.exportFailed": "ハイライトを書き出せませんでした: {error}",
   "hl.loadFailed": "ハイライトを読み込めませんでした: {error}",
   "hl.tagFailed": "タグを保存できませんでした: {error}",
-  "cmd.highlights.all": "すべてのハイライト"
+  "cmd.highlights.all": "すべてのハイライト",
+  "srs.title": "今日の復習",
+  "srs.loading": "今日のカードを準備中…",
+  "srs.progress": "{total} 枚中 {n} 枚目",
+  "srs.showAnswer": "答えを表示（スペース）",
+  "srs.showSource": "出典を表示（スペース）",
+  "srs.rate.1": "もう一度",
+  "srs.rate.2": "難しい",
+  "srs.rate.3": "良い",
+  "srs.rate.4": "簡単",
+  "srs.done": "今日はおしまい: {n} 枚復習しました。",
+  "srs.empty": "まだ復習するものがありません。文をハイライトするか、メモに 質問::答え の行を書いてください。",
+  "srs.unreadable": "{path} を読めないため変更しません。修正または削除するとまた復習できます。",
+  "srs.failed": "復習を保存できませんでした: {error}",
+  "cmd.review.daily": "今日の復習",
+  "srs.close": "閉じる"
 }
