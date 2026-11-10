@@ -34,6 +34,47 @@
       "vars": []
     },
     {
+      "key": "canvas.jsonCanvas.export",
+      "en": "Export .canvas",
+      "vars": []
+    },
+    {
+      "key": "canvas.jsonCanvas.exported",
+      "en": "Saved {name}.canvas: {nodes} nodes, {edges} edges",
+      "vars": [
+        "name",
+        "nodes",
+        "edges"
+      ]
+    },
+    {
+      "key": "canvas.jsonCanvas.failed",
+      "en": "Couldn't import the JSON Canvas: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "canvas.jsonCanvas.import",
+      "en": "Import .canvas",
+      "vars": []
+    },
+    {
+      "key": "canvas.jsonCanvas.imported",
+      "en": "Imported {name} ({count} items)",
+      "vars": [
+        "name",
+        "count"
+      ]
+    },
+    {
+      "key": "canvas.jsonCanvas.skipped",
+      "en": "{count} element(s) have no JSON Canvas form and were left out (images, free-hand drawing, unconnected arrows)",
+      "vars": [
+        "count"
+      ]
+    },
+    {
       "key": "canvas.legacy.convert",
       "en": "Convert {name} → tldraw",
       "vars": [

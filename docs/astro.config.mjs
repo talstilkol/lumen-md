@@ -66,6 +66,7 @@ export default defineConfig({
             { label: "Tasks across the vault", slug: "workspace/tasks" },
             { label: "Ask a PDF", translations: { he: "שאלו את ה-PDF" }, slug: "workspace/pdf-chat" },
             { label: "Vault in a folder on the phone", slug: "workspace/mobile-vault-folder" },
+            { label: "JSON Canvas (Obsidian .canvas)", slug: "workspace/json-canvas", translations: { he: "JSON Canvas (‏.canvas של Obsidian)" } },
           ],
         },
         {
