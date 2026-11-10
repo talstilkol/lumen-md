@@ -6,6 +6,7 @@ import { cpSync, existsSync, mkdirSync, statSync, readdirSync, readFileSync, wri
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
+import { stripSourceMapComments } from "./lib/stripSourceMaps.mjs";
 
 const require = createRequire(import.meta.url);
 const here = dirname(fileURLToPath(import.meta.url));
@@ -114,4 +115,6 @@ if (existsSync(workerFile)) {
   if (!body.startsWith("/* Lumen:")) writeFileSync(workerFile, WORKER_TT_PRELUDE + WORKER_ISOLATION_PRELUDE + body);
 }
 
+// Plan 11.5: no sourceMappingURL comments in what ships (the .map files are not copied).
+stripSourceMapComments(outDir);
 console.log(`copy-webr: ${copied} entries → public/webr/ (${(bytes / 1e6).toFixed(1)} MB)`);

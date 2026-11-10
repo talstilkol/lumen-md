@@ -8,6 +8,7 @@
 import { copyFileSync, existsSync, mkdirSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { stripSourceMapComments } from "./lib/stripSourceMaps.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const nm = join(here, "..", "node_modules");
@@ -35,4 +36,6 @@ for (const [from, to] of FILES) {
   if (!existsSync(dest) || statSync(dest).size !== statSync(src).size) copyFileSync(src, dest);
   total += statSync(src).size;
 }
+// Plan 11.5: no sourceMappingURL comments in what ships (the .map files are not copied).
+stripSourceMapComments(outDir);
 console.log(`copy-tesseract: ${FILES.length} files → public/tesseract/ (${(total / 1e6).toFixed(1)} MB)`);
