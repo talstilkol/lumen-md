@@ -290,7 +290,7 @@ describe("aiQuota counter", () => {
     const running = translate[0].action() as unknown as Promise<void>;
     // e.g. the AI commit message counts itself and dispatches as prepaid.
     expect(consumeAiPrompt(now)).toBe(true);
-    await chat([{ role: "user", content: "x" }], { prepaid: true, maxTokens: 1 }).catch(() => {});
+    await chat([{ role: "user", content: "x" }], { prepaid: true, maxTokens: 1 }).catch(() => { /* why: the test only needs the quota counted; the fake model's answer or failure does not matter */ });
     resume();
     await running;
     expect(getAiUsage(now)).toBe(2); // two model requests, two prompts
@@ -377,7 +377,7 @@ describe("aiQuota counter", () => {
       const dialog = new Promise<void>((r) => (resume = r));
       const [cmd] = withAiQuota([{ id: "ai.translate", action: async () => { await dialog; chargeAiCommandDispatch(now); } }]);
       const running = cmd.action() as unknown as Promise<void>;
-      await chat([{ role: "user", content: "x" }], { ownPrompt: true, maxTokens: 1 }).catch(() => {});
+      await chat([{ role: "user", content: "x" }], { ownPrompt: true, maxTokens: 1 }).catch(() => { /* why: the test only needs the quota counted; the fake model's answer or failure does not matter */ });
       expect(getAiUsage(now)).toBe(1);
       resume();
       await running;
@@ -451,7 +451,7 @@ describe("aiQuota counter", () => {
     const running = translate[0].action() as unknown as Promise<void>;
     // Inline suggestion fires meanwhile: counts itself, then dispatches as prepaid.
     expect(consumeAiPrompt(new Date(), { silent: true })).toBe(true);
-    await chat([{ role: "user", content: "x" }], { prepaid: true, maxTokens: 1 }).catch(() => {});
+    await chat([{ role: "user", content: "x" }], { prepaid: true, maxTokens: 1 }).catch(() => { /* why: the test only needs the quota counted; the fake model's answer or failure does not matter */ });
     finishDialog(); // user cancels the translation
     await running;
     expect(getAiUsage()).toBe(1);

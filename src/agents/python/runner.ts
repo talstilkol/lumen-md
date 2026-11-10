@@ -76,7 +76,7 @@ export function runPython(opts: { code: string; inputsJson: string; timeoutMs: n
       try {
         worker.terminate();
       } catch {
-        /* already gone */
+        /* why: already gone */
       }
       settle();
     };

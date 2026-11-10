@@ -108,7 +108,7 @@ export function parseProtocolTurn(text: string): ProtocolTurn {
         return { kind: "final", content: typeof f === "string" ? f : JSON.stringify(f) };
       }
     } catch {
-      /* not JSON after all */
+      /* why: not JSON after all */
     }
   }
   return { kind: "text", content: text.trim() };

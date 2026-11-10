@@ -38,7 +38,7 @@ export function setMonitoringConsent(on: boolean): void {
     else localStorage.removeItem(CONSENT_KEY);
     localStorage.removeItem(LEGACY_OPT_OUT_KEY);
   } catch {
-    // private mode — consent can't be stored, so monitoring stays off
+    // why: private mode — consent can't be stored, so monitoring stays off
   }
   if (on) void initTelemetry();
   else setErrorSink(null);

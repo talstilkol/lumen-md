@@ -95,7 +95,7 @@ export function useCollab(docContent: string): UseCollabReturn {
           try {
             setCollabPeers(snapshotPeers(session));
           } catch {
-            /* awareness snapshot failed — non-fatal */
+            /* why: awareness snapshot failed — non-fatal */
           }
         };
         session.awareness.on("change", awarenessTick);
@@ -109,7 +109,7 @@ export function useCollab(docContent: string): UseCollabReturn {
 
         if (!joinName) {
           const link = roomShareLink(name, password);
-          navigator.clipboard?.writeText(link).catch(() => {});
+          navigator.clipboard?.writeText(link).catch(() => { /* why: clipboard denied: the share dialog shows the link to copy by hand */ });
         }
         // ε.2 — record start/join. Counts-only payload so the audit
         // log doesn't leak the room name (which can be brand-named).

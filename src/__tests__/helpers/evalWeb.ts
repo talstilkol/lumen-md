@@ -24,7 +24,7 @@ export function installEvalWeb(): () => void {
     localStorage.setItem("lumen.research.endpoint", EVAL_RESEARCH_ENDPOINT);
     localStorage.setItem("lumen.research.provider", "searxng");
   } catch {
-    /* storage denied */
+    /* why: storage denied */
   }
   return () => {
     globalThis.fetch = real;

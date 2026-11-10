@@ -95,7 +95,7 @@ export function handleWikiLinkClick(
       else open(path);
     })
     .catch(() => {
-      /* no workspace (OPFS unavailable) — nothing to open */
+      /* why: no workspace (OPFS unavailable) — nothing to open */
     });
   return true;
 }

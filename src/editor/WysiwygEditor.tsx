@@ -710,7 +710,7 @@ export default function WysiwygEditor({ value, onChange, spellCheck = true }: Pr
     try {
       await ed.destroy(true);
     } catch {
-      /* ignore */
+      /* why: the editor may already be torn down by an earlier unmount */
     }
   };
 
@@ -936,7 +936,7 @@ export default function WysiwygEditor({ value, onChange, spellCheck = true }: Pr
         try {
           await editor.destroy(true);
         } catch {
-          /* ignore */
+          /* why: the editor may already be torn down by an earlier unmount */
         }
         return;
       }

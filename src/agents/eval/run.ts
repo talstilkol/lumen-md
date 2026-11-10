@@ -25,7 +25,7 @@ export async function runEvalCase(c: EvalCase, opts: { executor?: ExecutorId; mo
     // Answers must come from the model, not from an earlier run's cache.
     localStorage.setItem("lumen.ai.cache", "off");
   } catch {
-    /* storage denied */
+    /* why: storage denied */
   }
   const started = Date.now();
   const run = await runAgent(def, c.input, {

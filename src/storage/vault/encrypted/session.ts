@@ -202,7 +202,7 @@ export function setAutoLockMinutes(n: number): void {
   try {
     localStorage.setItem(LOCK_KEY, String(Math.max(0, Math.round(n))));
   } catch {
-    /* storage blocked: the default stays */
+    /* why: storage blocked: the default stays */
   }
 }
 
@@ -283,7 +283,7 @@ export async function enableEncryption(
     const { useAppStore } = await import("../../../store/useStore");
     useAppStore.setState({});
   } catch {
-    /* it is dropped at the next change anyway */
+    /* why: it is dropped at the next change anyway */
   }
   return { recoveryKey, report };
 }

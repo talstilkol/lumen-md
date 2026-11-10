@@ -76,7 +76,7 @@ export function requestTarget(args: readonly unknown[]): string {
       if (typeof u === "string") return u.slice(0, 500);
     }
   } catch {
-    /* a hostile getter: no target */
+    /* why: a hostile getter: no target */
   }
   return "";
 }
@@ -87,7 +87,7 @@ function removeEverywhere(obj: object | null, name: string): void {
     try {
       delete (o as Record<string, unknown>)[name];
     } catch {
-      /* non-configurable */
+      /* why: non-configurable */
     }
     if (Object.prototype.hasOwnProperty.call(o, name)) pin(o, name, undefined);
   }
@@ -97,7 +97,7 @@ function pin(obj: object, name: string, value: unknown): void {
   try {
     Object.defineProperty(obj, name, { value, writable: false, configurable: false, enumerable: false });
   } catch {
-    /* already pinned by the platform */
+    /* why: already pinned by the platform */
   }
 }
 
@@ -198,7 +198,7 @@ export function sealPyodideApi(api: object, report: SandboxReport): void {
       try {
         (api as Record<string, unknown>)[name] = stub;
       } catch {
-        /* frozen API object: the global fetch stub still stops it */
+        /* why: frozen API object: the global fetch stub still stops it */
       }
     }
   }

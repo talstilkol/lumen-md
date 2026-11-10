@@ -76,7 +76,7 @@ export async function pluginFetch(plugin: Pick<PluginInstance, "id" | "grants">,
     try {
       origin = new URL(String(url)).origin;
     } catch {
-      /* "?" */
+      /* why: not a URL: the denial names the origin "?" */
     }
     throw new PluginDenied(plugin.id, `network:${origin}`);
   }

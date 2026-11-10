@@ -198,7 +198,7 @@ export function parseAnswer(raw: string): { report: string; quotes: Map<number, 
         quotes.set(q.n, list);
       }
     } catch {
-      /* no quotes: footnotes without them */
+      /* why: no quotes: footnotes without them */
     }
   }
   return { report, quotes };
@@ -321,7 +321,7 @@ export async function agentResearch(o: ResearchOptions, settings: ResearchSettin
     try {
       a = args ? (JSON.parse(args) as Record<string, unknown>) : {};
     } catch {
-      /* shortened */
+      /* why: shortened */
     }
     if (step.label === "search_web" || step.label === "search_workspace") o.onProgress?.(`Searching: ${typeof a.query === "string" ? a.query : "…"}`);
     else if (step.label === "fetch_page" || step.label === "read_file") o.onProgress?.(`Reading ${typeof a.url === "string" ? hostOf(a.url) : typeof a.path === "string" ? stemOf(a.path) : "a source"}…`);

@@ -213,7 +213,7 @@ export async function createSandbox(opts: SandboxOptions): Promise<Sandbox> {
       try {
         origin = new URL(url).origin;
       } catch {
-        /* keep "?" */
+        /* why: keep "?" */
       }
       return networkGranted(opts.grants, url) ? null : new PluginDenied(opts.manifest.id, `network:${origin}`);
     }
@@ -241,12 +241,12 @@ export async function createSandbox(opts: SandboxOptions): Promise<Sandbox> {
     try {
       context.dispose();
     } catch {
-      /* already gone */
+      /* why: already gone */
     }
     try {
       runtime.dispose();
     } catch {
-      /* already gone */
+      /* why: already gone */
     }
   };
 

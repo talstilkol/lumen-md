@@ -72,7 +72,7 @@ async function fetchFile(f: ModelFile, cache: Cache | null, onBytes: (n: number)
   try {
     await cache?.put(url, new Response(out, { headers: { "content-type": "application/octet-stream" } }));
   } catch {
-    /* quota: it still works for this session */
+    /* why: quota: it still works for this session */
   }
   return out;
 }
@@ -108,6 +108,6 @@ export async function deleteDictationModel(): Promise<void> {
   try {
     await caches.delete(DICTATION_CACHE);
   } catch {
-    /* nothing to delete */
+    /* why: nothing to delete */
   }
 }

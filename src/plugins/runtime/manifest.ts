@@ -135,7 +135,7 @@ export function parseManifest(input: string | unknown): PluginManifest {
     try {
       u = new URL(homepage);
     } catch {
-      /* invalid */
+      /* why: invalid */
     }
     if (!u || u.protocol !== "https:") throw new ManifestError('manifest: "homepage" must be an https URL');
   }

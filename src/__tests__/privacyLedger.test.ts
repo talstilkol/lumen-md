@@ -95,7 +95,7 @@ describe("privacy ledger", () => {
   it("blocked attempts did not leave the device", async () => {
     setAiPolicy("local-only");
     const f = withLedger(fakeFetch() as unknown as typeof fetch);
-    await f("https://api.openai.com/v1/x").catch(() => {});
+    await f("https://api.openai.com/v1/x").catch(() => { /* why: local-only blocks this request on purpose; the test checks the ledger, not the rejection */ });
     await f("http://localhost:11434/api/tags");
     setAiPolicy("cloud");
     await f("https://api.openai.com/v1/x");

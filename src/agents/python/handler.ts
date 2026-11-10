@@ -90,7 +90,7 @@ export function toResultValue(value: unknown, budget: OutputBudget): PythonResul
     try {
       (value as { destroy?: () => void }).destroy?.();
     } catch {
-      /* already destroyed */
+      /* why: already destroyed */
     }
   }
   const taken = budget.take(text);

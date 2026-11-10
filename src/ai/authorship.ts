@@ -179,7 +179,7 @@ export function saveSpans(noteKey: string, doc: string, spans: readonly Span[], 
     if (Object.keys(store).length) localStorage.setItem(STORE_KEY, JSON.stringify(store));
     else localStorage.removeItem(STORE_KEY);
   } catch {
-    /* storage full or denied: the marks stay for this session */
+    /* why: storage full or denied: the marks stay for this session */
   }
 }
 
@@ -209,7 +209,7 @@ export function setMarksShown(shown: boolean): void {
     if (shown) localStorage.removeItem(SHOW_KEY);
     else localStorage.setItem(SHOW_KEY, "1");
   } catch {
-    /* storage denied */
+    /* why: storage denied */
   }
   if (typeof document !== "undefined") document.documentElement.toggleAttribute("data-ai-marks-hidden", !shown);
 }

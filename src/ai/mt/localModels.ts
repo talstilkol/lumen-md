@@ -73,7 +73,7 @@ export function createOpusLayer(consent: ConsentDeps, env: Env = defaultEnv(cons
       try {
         if (await isModelCached(await env.opfsRoot(), entry, dtype)) return { state: "ready" };
       } catch {
-        /* no OPFS here: it will download into the Cache API fallback */
+        /* why: no OPFS here: it will download into the Cache API fallback */
       }
       return { state: "downloadable", bytes: downloadBytes(entry, dtype) };
     },
@@ -140,7 +140,7 @@ export function createM2m100Layer(consent: ConsentDeps, env: Env = defaultEnv(co
       try {
         env.storage?.setItem(M2M100_FLAG, "1");
       } catch {
-        /* private mode */
+        /* why: private mode */
       }
       return out;
     },

@@ -184,7 +184,7 @@ export function tPlural(base: string, n: number, vars?: Record<string, string | 
   try {
     category = new Intl.PluralRules(activeLocale).select(n);
   } catch {
-    /* unsupported locale — use "other" */
+    /* why: unsupported locale — use "other" */
   }
   const key =
     `${base}.${category}` in bundle || `${base}.${category}` in en
@@ -218,7 +218,7 @@ export async function initLocale(storageKey = "lumen-md"): Promise<Locale> {
     const persisted = parsed?.state?.locale;
     if (isLocale(persisted)) locale = persisted;
   } catch {
-    /* corrupt storage — stay on English */
+    /* why: corrupt storage — stay on English */
   }
   if (locale !== "en") {
     await loadLocale(locale);

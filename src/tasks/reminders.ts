@@ -24,7 +24,7 @@ export async function setRemindersEnabled(on: boolean, N: typeof Notification | 
     try {
       localStorage.removeItem(KEY);
     } catch {
-      /* storage blocked: reminders are off anyway */
+      /* why: storage denied: the in-memory meter is reset by the listeners below */
     }
     return false;
   }
@@ -60,7 +60,7 @@ function saveSeen(today: string, seen: Set<string>): void {
   try {
     localStorage.setItem(SEEN, JSON.stringify({ day: today, keys: [...seen] }));
   } catch {
-    /* storage full: a reminder may repeat once */
+    /* why: storage full: a reminder may repeat once */
   }
 }
 

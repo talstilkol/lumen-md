@@ -22,7 +22,7 @@ export function firstDayOfWeek(locale: string): number {
     const info = loc.getWeekInfo?.() ?? loc.weekInfo;
     if (info?.firstDay) return info.firstDay;
   } catch {
-    /* fall back */
+    /* why: fall back */
   }
   return FIRST_DAY_FALLBACK[locale] ?? FIRST_DAY_FALLBACK[locale.split("-")[0]] ?? 1;
 }
@@ -77,7 +77,7 @@ export function CalendarPanel() {
       }
       setWithNotes(set);
     } catch {
-      /* no workspace */
+      /* why: no workspace */
     }
   }, [settings]);
 

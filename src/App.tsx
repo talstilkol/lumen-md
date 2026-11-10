@@ -327,7 +327,7 @@ export default function App() {
     try {
       if (!localStorage.getItem("lumen-tour-done")) setSetupOpen(true);
     } catch {
-      /* storage may be denied in private browsing — setup silently skips */
+      /* why: storage may be denied in private browsing — setup silently skips */
     }
     // run once
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -515,7 +515,7 @@ export default function App() {
           scrollToHeadingWhenRendered(detail.heading, { docKey: docIdentity(useAppStore.getState().doc) ?? undefined });
         }
       } catch {
-        /* file moved/deleted — silently ignore */
+        /* why: the file was moved or deleted since the link was made; the click does nothing */
       }
     }
     window.addEventListener("lumen-open-file", onOpen);
@@ -766,7 +766,7 @@ export default function App() {
           if (saved && now.workspaceName === name && now.content === text) markSaved();
         })
         .catch(() => {
-          /* best effort; the debounced autosave retries on the next edit */
+          /* why: best effort; the debounced autosave retries on the next edit */
         });
     };
     const onVisibility = () => {
@@ -1125,7 +1125,7 @@ export default function App() {
                 });
                 if (!showWorkspace) toggleWorkspace();
               } catch {
-                /* missing file */
+                /* why: the linking note was moved or deleted since the backlinks were listed; the click does nothing */
               }
             }}
           />
@@ -1332,7 +1332,7 @@ export default function App() {
         onClose={() => {
           setTourOpen(false);
           try { localStorage.setItem("lumen-tour-done", "1"); } catch {
-            /* storage denied — tour will simply replay next session */
+            /* why: storage denied — tour will simply replay next session */
           }
         }}
         actions={[

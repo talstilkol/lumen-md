@@ -214,7 +214,7 @@ export async function review(f: Failure): Promise<Verdict> {
       const m = await modelCritic(f, v);
       if (m) return learned({ ...v, ...m, byModel: !!m.retry, suggestions: m.suggestions.length ? m.suggestions : v.suggestions }, f);
     } catch {
-      /* stage 2 is best effort */
+      /* why: stage 2 is best effort */
     }
   }
   return v;

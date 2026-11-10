@@ -27,7 +27,7 @@ export function setAiMode(mode: AiMode): void {
     if (mode === "balanced") localStorage.removeItem(KEY);
     else localStorage.setItem(KEY, mode);
   } catch {
-    /* storage denied */
+    /* why: storage denied */
   }
 }
 

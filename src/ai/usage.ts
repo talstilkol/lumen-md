@@ -195,7 +195,7 @@ function save(store: Store): void {
   try {
     localStorage.setItem(KEY, JSON.stringify(store));
   } catch {
-    /* storage full or blocked: the meter is best-effort */
+    /* why: storage full or blocked: the meter is best-effort */
   }
   for (const fn of listeners) fn();
 }
@@ -294,7 +294,7 @@ export function clearUsage(): void {
   try {
     localStorage.removeItem(KEY);
   } catch {
-    /* */
+    /* why: storage denied: the in-memory meter is reset by the listeners below */
   }
   for (const fn of listeners) fn();
 }

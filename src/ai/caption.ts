@@ -118,7 +118,7 @@ export async function captionInBrowser(image: Blob, deps: CaptionDeps = {}): Pro
     try {
       storage?.setItem(readyKey(m.id), "1"); // in the browser's cache now: no second dialog
     } catch {
-      /* private mode */
+      /* why: private mode */
     }
     const text = cleanCaption(raw);
     if (validCaption(text, deps.name)) return { text, model: m.id };

@@ -165,7 +165,7 @@ export function rewriteLinks(content: string, notePath: string, oldPath: string,
     try {
       decoded = decodeURI(path);
     } catch {
-      /* keep as is */
+      /* why: a malformed %-escape: resolve the link as written */
     }
     const before = resolve(prevDir, decoded);
     const after = moved(before, oldPath, newPath, folder) ?? before;

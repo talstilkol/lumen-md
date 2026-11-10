@@ -63,7 +63,7 @@ function LocalVitals() {
         off = m.subscribeVitals(read);
       })
       .catch(() => {
-        /* chunk failed to load — the section stays empty */
+        /* why: chunk failed to load — the section stays empty */
       });
     return () => {
       alive = false;

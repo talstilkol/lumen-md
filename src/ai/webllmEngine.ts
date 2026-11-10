@@ -99,7 +99,7 @@ function call<T>(msg: WorkerCall, onDelta?: (text: string) => void, signal?: Abo
         // dropped — and tell the worker to stop or skip exactly this chat.
         if (pending.delete(id)) {
           reject(new DOMException("aborted", "AbortError"));
-          void call<boolean>({ type: "interrupt", target: id }).catch(() => {});
+          void call<boolean>({ type: "interrupt", target: id }).catch(() => { /* why: the call is already rejected; a worker that cannot take the interrupt has stopped anyway */ });
         }
       };
       signal.addEventListener("abort", onAbort, { once: true });
@@ -151,7 +151,7 @@ export async function deleteWebLlmModel(modelId: string): Promise<void> {
 
 /** Stop the current generation (no-op when idle). */
 export function interruptWebLlm(): void {
-  if (worker) void call<boolean>({ type: "interrupt" }).catch(() => {});
+  if (worker) void call<boolean>({ type: "interrupt" }).catch(() => { /* why: idle or gone worker: there is nothing to interrupt */ });
 }
 
 /** Drop the model and terminate the worker (frees GPU memory). */
@@ -161,7 +161,7 @@ export async function unloadWebLlm(): Promise<void> {
   try {
     await call<boolean>({ type: "unload" });
   } catch {
-    /* worker may already be gone */
+    /* why: worker may already be gone */
   }
   worker = null;
   loadedModel = null;

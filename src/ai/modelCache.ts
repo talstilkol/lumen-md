@@ -148,6 +148,6 @@ export async function removeCachedModel(root: Dir, id: string): Promise<void> {
   try {
     await dir?.removeEntry(id, { recursive: true });
   } catch {
-    /* not downloaded */
+    /* why: not downloaded */
   }
 }

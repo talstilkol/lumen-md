@@ -91,7 +91,7 @@ function saveMockStore(store: Record<string, MockPublishRecord>): void {
   try {
     localStorage.setItem(PUBLISH_MOCK_KEY, JSON.stringify(store));
   } catch {
-    // Mock publish should stay functional even when storage is unavailable.
+    // why: Mock publish should stay functional even when storage is unavailable.
   }
 }
 

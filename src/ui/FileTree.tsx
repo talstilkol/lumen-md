@@ -413,7 +413,7 @@ export function FileTree({
     try {
       await navigator.clipboard.writeText(node.path);
     } catch {
-      /* clipboard denied — silently ignore */
+      /* why: clipboard denied — silently ignore */
     }
   }
 

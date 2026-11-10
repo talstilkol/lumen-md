@@ -176,7 +176,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
       // their hit lives. Slight delay so the doc has loaded into the editor.
       if (q) setTimeout(() => flashSearchHighlight(q), 80);
     } catch {
-      /* file gone */
+      /* why: the file was deleted since the search ran; nothing to open */
     }
   }
 
@@ -189,7 +189,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
       onOpenFile(hit.path, content);
       if (q) setTimeout(() => flashSearchHighlight(q), 80);
     } catch {
-      /* file gone */
+      /* why: the file was deleted since the search ran; nothing to open */
     }
   }
 

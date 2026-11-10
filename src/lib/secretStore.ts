@@ -109,7 +109,7 @@ function lsSet(name: string, value: string | null): void {
     if (value === null) localStorage.removeItem(name);
     else localStorage.setItem(name, value);
   } catch {
-    /* storage denied */
+    /* why: storage denied */
   }
 }
 
@@ -223,7 +223,7 @@ async function migrateLegacyToPlain(): Promise<void> {
       if (v && lsGet(name) === null) lsSet(name, v);
       if (!v || lsGet(name) !== null) await del(name);
     } catch {
-      /* default idb-keyval store unavailable */
+      /* why: default idb-keyval store unavailable */
     }
   }
 }
@@ -237,7 +237,7 @@ async function migratePlaintext(): Promise<void> {
       if (k && isSecretName(k)) names.push(k);
     }
   } catch {
-    /* no localStorage */
+    /* why: no localStorage */
   }
   for (const name of names) {
     const value = lsGet(name);
@@ -253,7 +253,7 @@ async function migratePlaintext(): Promise<void> {
         await del(name);
       }
     } catch {
-      /* default idb-keyval store unavailable */
+      /* why: default idb-keyval store unavailable */
     }
   }
 }
@@ -315,7 +315,7 @@ export function setSecret(name: string, value: string | null): Promise<void> {
     failures.push(e);
   });
   // Keep the queue usable after a failure.
-  pending = op.catch(() => {});
+  pending = op.catch(() => { /* why: the caller gets op's own rejection; this copy only keeps the queue usable */ });
   return op;
 }
 

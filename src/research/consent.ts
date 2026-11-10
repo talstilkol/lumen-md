@@ -21,7 +21,7 @@ export function grantWebConsent(): void {
   try {
     localStorage.setItem(WEB_CONSENT_KEY, "1");
   } catch {
-    /* asked again next time */
+    /* why: asked again next time */
   }
 }
 
@@ -29,6 +29,6 @@ export function revokeWebConsent(): void {
   try {
     localStorage.removeItem(WEB_CONSENT_KEY);
   } catch {
-    /* nothing stored */
+    /* why: nothing stored */
   }
 }

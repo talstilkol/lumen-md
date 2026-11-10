@@ -48,7 +48,7 @@ export async function storageState(
       quota = est.quota;
     }
   } catch {
-    /* no estimate */
+    /* why: no estimate */
   }
   return { persisted, usage, quota };
 }

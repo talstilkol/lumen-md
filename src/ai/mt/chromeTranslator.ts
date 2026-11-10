@@ -60,7 +60,7 @@ export function createChromeLayer(getApi: () => ChromeTranslatorStatic | null = 
         if (a === "available") return { state: "ready" };
         if (a === "downloadable" || a === "downloading") return { state: "downloadable" };
       } catch {
-        /* an unknown pair or a disabled API */
+        /* why: an unknown pair or a disabled API */
       }
       return { state: "unavailable", reason: "mt.layer.chrome.pair" };
     },

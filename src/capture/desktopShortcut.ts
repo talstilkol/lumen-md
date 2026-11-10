@@ -73,6 +73,6 @@ async function bringToFront(): Promise<void> {
     await w.unminimize();
     await w.setFocus();
   } catch {
-    /* not permitted by the capability: the box still opens when the user switches back */
+    /* why: not permitted by the capability: the box still opens when the user switches back */
   }
 }

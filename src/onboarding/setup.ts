@@ -23,7 +23,7 @@ export function markSetupDone(): void {
   try {
     localStorage.setItem(DONE_KEY, "1");
   } catch {
-    /* storage denied: setup shows again next time, nothing else breaks */
+    /* why: storage denied: setup shows again next time, nothing else breaks */
   }
 }
 

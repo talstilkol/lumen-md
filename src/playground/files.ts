@@ -295,7 +295,7 @@ export function formatValue(value: unknown, max = 10_000): string {
       try {
         v = (v as { toJSON: () => unknown }).toJSON();
       } catch {
-        /* keep the object */
+        /* why: a throwing toJSON: show the object itself */
       }
     }
     if (typeof v === "function") return write(str(`[Function ${String((v as { name?: string }).name || "anonymous").slice(0, max)}]`));

@@ -840,7 +840,7 @@ const PdfPageView = memo(function PdfPageView({
       onText(page, text);
       setReady((n) => n + 1);
     })().catch(() => {
-      /* cancelled (scrolled away / zoomed) or a broken page: the box stays empty */
+      /* why: cancelled (scrolled away / zoomed) or a broken page: the box stays empty */
     });
     return () => {
       cancelled = true;

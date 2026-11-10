@@ -143,7 +143,7 @@ export async function* chatGeminiStream(
         const delta = extractText(json);
         if (delta) yield delta;
       } catch {
-        /* skip */
+        /* why: a keep-alive or partial line that is not JSON carries no text */
       }
     }
   }

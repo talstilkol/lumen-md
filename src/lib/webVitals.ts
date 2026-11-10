@@ -55,7 +55,7 @@ function observe(type: string, cb: (list: PerformanceObserverEntryList) => void,
     o.observe({ type, buffered: true, ...extra } as PerformanceObserverInit);
     observers.push(o);
   } catch {
-    /* entry type not supported by this browser */
+    /* why: entry type not supported by this browser */
   }
 }
 
@@ -148,7 +148,7 @@ export function disposeWebVitals(): void {
     try {
       o.disconnect();
     } catch {
-      /* ignore */
+      /* why: an observer that is already disconnected throws in some browsers */
     }
   }
   observers.length = 0;

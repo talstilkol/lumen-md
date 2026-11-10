@@ -3,6 +3,7 @@ import { Link2 } from "lucide-react";
 import { findBacklinks, type BacklinkHit } from "../storage/workspaceIndex";
 import { t } from "../i18n";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
+import { log } from "../lib/logger";
 
 // Unlinked mentions (4.6): its scan and Link action load with the section.
 const UnlinkedMentions = lazy(() => import("./UnlinkedMentions"));
@@ -49,7 +50,7 @@ export function BacklinksPanel({ filePath, onOpen }: Props) {
     function refresh() {
       findBacklinks(filePath!)
         .then((h) => setHits(h))
-        .catch(() => {});
+        .catch((e) => log.warn("backlinks: could not scan the vault", e));
     }
     return onWorkspaceChanged(refresh, { debounceMs: 500 });
   }, [filePath]);

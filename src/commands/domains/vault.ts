@@ -188,7 +188,7 @@ export function buildDigestCommands(): Command[] {
         try {
           since = Number(localStorage.getItem(KEY)) || since;
         } catch {
-          /* default: last 24 h */
+          /* why: storage denied: the digest covers the last 24 h */
         }
         const lang = getLocale();
         const FOLDER_KEY = "lumen.digest.folder";
@@ -196,7 +196,7 @@ export function buildDigestCommands(): Command[] {
         try {
           storedFolder = localStorage.getItem(FOLDER_KEY);
         } catch {
-          /* the UI language's default */
+          /* why: the UI language's default */
         }
         // Fixed once chosen: a language switch keeps writing to the same folder (and the same day's note).
         const folder = digestFolder(storedFolder, lang);
@@ -215,7 +215,7 @@ export function buildDigestCommands(): Command[] {
           localStorage.setItem(KEY, String(now));
           localStorage.setItem(FOLDER_KEY, folder);
         } catch {
-          /* next digest covers 24 h again */
+          /* why: next digest covers 24 h again */
         }
         window.dispatchEvent(new Event("lumen-workspace-changed"));
         useAppStore.getState().openTab({ name: path.split("/").pop()!, content: body, workspaceName: path });

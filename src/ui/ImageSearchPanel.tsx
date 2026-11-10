@@ -33,7 +33,7 @@ function Thumb({ path }: { path: string }) {
         made = URL.createObjectURL(await readWorkspaceBlob(path));
         if (alive) setUrl(made);
       } catch {
-        /* unreadable: the name is still shown */
+        /* why: unreadable: the name is still shown */
       }
     })();
     return () => {

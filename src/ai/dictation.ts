@@ -110,7 +110,7 @@ export class Segmenter {
 export class SerialQueue {
   private tail: Promise<void> = Promise.resolve();
   add(job: () => Promise<void>): Promise<void> {
-    this.tail = this.tail.then(job, job).catch(() => {});
+    this.tail = this.tail.then(job, job).catch(() => { /* why: each job reports its own failure; the queue only keeps the order */ });
     return this.tail;
   }
   idle(): Promise<void> {

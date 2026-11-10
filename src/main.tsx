@@ -40,7 +40,7 @@ startVaultSnapshots();
 try {
   if (localStorage.getItem("lumen.tasks.reminders") === "1") setTimeout(() => void import("./tasks/reminders").then((m) => m.startReminders()), 5000);
 } catch {
-  /* storage blocked: no reminders */
+  /* why: storage blocked: no reminders */
 }
 // The vault lives in OPFS/IndexedDB; without this the browser may evict it.
 // Safari grants persistence to installed apps only and deletes the rest after
@@ -53,7 +53,7 @@ void requestPersistentStorage().then((status) => {
 // Runtime metrics panel. Loaded off the startup path; the observers are
 // buffered, so the page-load entries are still seen.
 void import("./lib/webVitals").then((m) => m.startLocalVitals()).catch(() => {
-  /* chunk failed to load — no local vitals this session */
+  /* why: chunk failed to load — no local vitals this session */
 });
 
 // ─── Native Sync Dialog Capture (Milkdown overrides) ────────────────────

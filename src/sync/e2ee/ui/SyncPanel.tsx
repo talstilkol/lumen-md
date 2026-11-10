@@ -68,7 +68,7 @@ function ProviderForm({ session, initial, onDone }: { session: SyncSession; init
       try {
         sessionStorage.setItem(PENDING_OAUTH, JSON.stringify(settings));
       } catch {
-        /* private mode: the user connects again after signing in */
+        /* why: private mode: the user connects again after signing in */
       }
       await legacyStore(kind)!.connect();
       return;

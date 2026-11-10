@@ -45,7 +45,9 @@ export function loadTrace(): Promise<void> {
         }
         if (Array.isArray(v)) runs = [...(v as AgentRun[]), ...runs].slice(0, TRACE_LIMIT);
       })
-      .catch(() => {});
+      .catch(() => {
+        // why: IndexedDB unavailable or unreadable: the trace starts empty for this session
+      });
     loaded = p;
   }
   return loaded;
@@ -60,7 +62,9 @@ export async function recordRun(run: AgentRun): Promise<void> {
   await loadTrace();
   runs = [previewOf(run), ...runs].slice(0, TRACE_LIMIT);
   for (const l of listeners) l(runs);
-  await persist().catch(() => {});
+  await persist().catch(() => {
+    // why: storage full or blocked: the run stays in the in-memory trace for this session
+  });
 }
 
 /** Store the list again — sealed now that the vault is encrypted (plan 11.4). */
@@ -83,7 +87,7 @@ export async function clearTrace(): Promise<void> {
   runs = [];
   loaded = Promise.resolve();
   for (const l of listeners) l(runs);
-  await set(IDB_KEY, []).catch(() => {});
+  await set(IDB_KEY, []).catch(() => { /* why: the in-memory trace is already cleared; IndexedDB unavailable means nothing was stored */ });
 }
 
 /** One line per run, for the palette report. */

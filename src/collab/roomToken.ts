@@ -41,7 +41,7 @@ export function requestRoomToken(
       try {
         ws.close();
       } catch {
-        /* already closed */
+        /* why: already closed */
       }
       fn();
     };

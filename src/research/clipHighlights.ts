@@ -48,7 +48,7 @@ function save(all: Record<string, Highlight[]>): void {
   try {
     localStorage.setItem(KEY, JSON.stringify(all));
   } catch {
-    /* storage full or blocked: the highlights still go into this clip */
+    /* why: storage full or blocked: the highlights still go into this clip */
   }
 }
 

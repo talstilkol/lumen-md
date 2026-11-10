@@ -90,7 +90,7 @@ export async function imageText(blob: Blob, lang: string, opts: ImageTextOptions
       return { alt: `${prefix}${firstLine}`, title: ocr.text.slice(0, 600), source: "ocr", lang: ocr.lang };
     }
   } catch {
-    /* OCR unavailable (offline before the first download, old engine) */
+    /* why: OCR unavailable (offline before the first download, old engine) */
   }
   const { captionInBrowser, captionInLanguage, validCaption } = await import("./caption");
   const d = await describeImage(blob, lang, undefined, opts.signal);
@@ -126,7 +126,7 @@ export function altIsPlaceholder(alt: string, url: string): boolean {
   try {
     file = decodeURIComponent(file);
   } catch {
-    /* keep it encoded */
+    /* why: keep it encoded */
   }
   const stem = file.replace(/\.[^.]+$/, "");
   const lower = a.toLowerCase();

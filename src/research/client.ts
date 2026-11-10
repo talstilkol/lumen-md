@@ -103,7 +103,7 @@ export function saveResearchToken(token: string, edited: boolean, built = builtE
     if (keep && active) localStorage.setItem(TOKEN_ENDPOINT_KEY, active.replace(/\/+$/, ""));
     else localStorage.removeItem(TOKEN_ENDPOINT_KEY);
   } catch {
-    /* storage denied */
+    /* why: storage denied */
   }
   return keep;
 }
@@ -145,7 +145,7 @@ export function setResearchSettings(s: Partial<ResearchSettings>): void {
       setSecret("lumen.research.searchKey", s.key || null);
     }
   } catch {
-    /* */
+    /* why: storage denied: the settings last for this session only */
   }
 }
 

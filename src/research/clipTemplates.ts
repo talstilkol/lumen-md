@@ -193,7 +193,7 @@ export function varsFor(page: Extracted, url: string, extra: { selection?: strin
   try {
     domain = new URL(url).hostname;
   } catch {
-    /* not a URL: no domain */
+    /* why: not a URL: no domain */
   }
   const date = (extra.date ?? new Date()).toISOString().slice(0, 10);
   const content = extra.selection?.trim() ? extra.selection.trim() : page.markdown;

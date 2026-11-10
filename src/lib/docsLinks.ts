@@ -29,7 +29,7 @@ function readDocsBase(): string {
     const raw = publicEnv("VITE_DOCS_URL");
     if (raw && /^https?:\/\//i.test(raw)) return raw.replace(/\/+$/, "");
   } catch {
-    /* no env in this runtime */
+    /* why: no env in this runtime */
   }
   return DEFAULT_DOCS_BASE;
 }

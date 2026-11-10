@@ -456,7 +456,7 @@ export function pickRecordingMimeType(): string {
     try {
       if (MediaRecorder.isTypeSupported(type)) return type;
     } catch {
-      /* some engines throw on unknown types */
+      /* why: some engines throw on unknown types */
     }
   }
   return "";
@@ -511,7 +511,7 @@ export async function startVoiceMemo(opts: { language?: string; plain?: boolean;
     try {
       root.unmount();
     } catch {
-      /* */
+      // why: already unmounted by an earlier stop
     }
     host.remove();
     stream.getTracks().forEach((t) => t.stop());

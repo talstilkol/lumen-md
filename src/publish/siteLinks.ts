@@ -91,7 +91,7 @@ export function rewriteWikiLinks(
     try {
       frag = href.startsWith("#") ? decodeURIComponent(href.slice(1)) : "";
     } catch {
-      /* malformed escape: not one of our ids */
+      /* why: malformed escape: not one of our ids */
     }
     if ((frag && ids.has(frag)) || ids.has(headingSlug(target))) return tag;
     const { note, heading } = splitWikiTarget(target);

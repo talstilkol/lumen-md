@@ -71,7 +71,7 @@ function saveTypes(types: Record<string, PropertyType>) {
   try {
     localStorage.setItem(TYPE_STORE, JSON.stringify(types));
   } catch {
-    /* private mode: types are not remembered */
+    /* why: private mode: types are not remembered */
   }
 }
 
@@ -334,7 +334,7 @@ async function openNote(target: string) {
     if (path) window.dispatchEvent(new CustomEvent("lumen-open-file", { detail: heading ? { path, heading: headingSlug(heading) } : { path } }));
     else toast.error(t("props.linkMissing", { target: note }));
   } catch {
-    /* no workspace */
+    /* why: no workspace */
   }
 }
 
@@ -361,7 +361,7 @@ export function PropertiesPanel({ open, onClose, text, applyEdit }: Props) {
           notes: files.filter((f) => /\.(md|markdown)$/i.test(f.path)).map((f) => f.name.replace(/\.(md|markdown)$/i, "")),
         });
       } catch {
-        /* no workspace: no suggestions */
+        /* why: no workspace: no suggestions */
       }
     };
     void refresh();

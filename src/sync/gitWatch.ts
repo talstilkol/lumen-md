@@ -58,7 +58,7 @@ export function setWatching(on: boolean): void {
     if (on) localStorage.setItem(STORAGE_KEY, "1");
     else localStorage.removeItem(STORAGE_KEY);
   } catch {
-    /* private mode — best-effort */
+    /* why: private mode — best-effort */
   }
 }
 

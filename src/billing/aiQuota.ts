@@ -47,7 +47,7 @@ export function recordAiPrompt(now: Date = new Date()): number {
       if (k && k.startsWith(KEY_PREFIX) && k !== key) localStorage.removeItem(k);
     }
   } catch {
-    /* storage denied — the counter just doesn't persist */
+    /* why: storage denied — the counter just doesn't persist */
   }
   return next;
 }

@@ -15,7 +15,7 @@ function setWidth(px: number): number {
   try {
     localStorage.setItem(STORAGE_KEY, String(next));
   } catch {
-    /* storage denied: the width still applies for this session */
+    /* why: storage denied: the width still applies for this session */
   }
   return next;
 }

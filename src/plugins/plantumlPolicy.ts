@@ -52,7 +52,7 @@ export function optInKroki(source: string): void {
     const list = storedOptIns().filter((x) => x !== id);
     localStorage.setItem(OPT_IN_KEY, JSON.stringify([...list, id].slice(-OPT_IN_MAX)));
   } catch {
-    /* storage blocked: this session only */
+    /* why: storage blocked: this session only */
   }
 }
 

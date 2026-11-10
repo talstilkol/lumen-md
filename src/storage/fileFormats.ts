@@ -826,7 +826,7 @@ export async function pdfToMarkdown(file: File): Promise<string> {
         const url = (await import("pdfjs-dist/legacy/build/pdf.worker.min.mjs?url")).default;
         if (typeof url === "string" && url) workerSrc = url;
       } catch {
-        /* keep the bare specifier */
+        /* why: keep the bare specifier, which Node and the tests resolve */
       }
     }
     pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;

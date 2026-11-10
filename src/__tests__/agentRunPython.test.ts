@@ -379,7 +379,7 @@ describe("run_python: no network", () => {
 
   it("caps the reports a run can push into the ledger", async () => {
     useBehaviour(async (_c, env) => {
-      for (let i = 0; i < 100; i++) await (env.js.fetch as (u: string) => Promise<unknown>)(`https://example.com/${i}`).catch(() => {});
+      for (let i = 0; i < 100; i++) await (env.js.fetch as (u: string) => Promise<unknown>)(`https://example.com/${i}`).catch(() => { /* why: every request is blocked on purpose; the test counts the ledger entries */ });
       return null;
     });
     const r = await run({ code: "spam" });

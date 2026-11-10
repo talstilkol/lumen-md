@@ -160,7 +160,7 @@ function readDevTier(): Entitlement | null {
       return { tier: raw, status: "active" };
     }
   } catch {
-    /* storage may be denied */
+    /* why: storage may be denied */
   }
   return null;
 }
@@ -202,7 +202,7 @@ export const useEntitlement = create<EntitlementStore>((set) => ({
     try {
       localStorage.setItem(DEV_KEY, tier);
     } catch {
-      /* */
+      /* why: storage denied: the tier still applies for this session below */
     }
     const ent: Entitlement = { tier, status: "active" };
     set({ entitlement: ent, capabilities: capabilitiesFor(ent), loading: false, failed: false });

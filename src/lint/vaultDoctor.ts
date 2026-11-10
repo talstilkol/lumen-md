@@ -563,7 +563,7 @@ export function runVaultDoctor(notes: readonly DoctorNote[], opts: DoctorOptions
       try {
         decoded = decodeURIComponent(href);
       } catch {
-        /* keep as written */
+        /* why: a malformed %-escape: check the link as written */
       }
       const parts: string[] = [];
       let escapes = false;

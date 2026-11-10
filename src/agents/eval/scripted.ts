@@ -24,7 +24,7 @@ export function scriptedAnswer(c: EvalCase, req: ExecutorRequest): ExecutorRespo
     try {
       final = JSON.parse(c.example);
     } catch {
-      /* a text answer */
+      /* why: a text answer */
     }
     return { content: JSON.stringify({ final }), toolCalls: [], model, usage };
   }

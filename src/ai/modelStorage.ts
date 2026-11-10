@@ -64,7 +64,7 @@ export async function modelCacheNames(): Promise<Record<ModelCacheKind, string[]
       if (kind) out[kind].push(name);
     }
   } catch {
-    /* Cache Storage denied (private mode) */
+    /* why: Cache Storage denied (private mode) */
   }
   return out;
 }
@@ -106,7 +106,7 @@ export async function clearModelCaches(kind: ModelCacheKind): Promise<number> {
     try {
       if (await caches.delete(n)) removed++;
     } catch {
-      /* already gone */
+      /* why: already gone */
     }
   }
   if (kind === "webllm") await Promise.all(WEBLLM_IDB.map(deleteDb));

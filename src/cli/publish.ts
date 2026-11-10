@@ -134,7 +134,7 @@ export function clearPreviousPublish(outAbs: string): void {
     try {
       if (readdirSync(d).length === 0) rmdirSync(d);
     } catch {
-      /* already gone or not empty */
+      /* why: already gone or not empty */
     }
   }
 }
@@ -184,7 +184,7 @@ export function prepareOutputPath(outAbs: string, rel: string): string {
   try {
     if (lstatSync(target).isSymbolicLink()) unlinkSync(target);
   } catch {
-    /* doesn't exist yet */
+    /* why: doesn't exist yet */
   }
   return target;
 }
@@ -214,7 +214,7 @@ export function referencedLocalFiles(html: string, fromDir: string, root: string
     try {
       if (lstatSync(abs).isFile()) out.add(abs);
     } catch {
-      /* missing — leave the link as is */
+      /* why: missing — leave the link as is */
     }
   }
   return [...out];

@@ -19,7 +19,7 @@ export function laneCacheDir(root: string): string | undefined {
   try {
     if (lstatSync(path.join(root, "node_modules")).isSymbolicLink()) return path.join(root, ".vite");
   } catch {
-    /* no node_modules yet */
+    /* why: no node_modules yet */
   }
   return undefined;
 }

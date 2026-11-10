@@ -745,7 +745,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
         if (key) {
           const { putCached } = await import("../ai/responseCache");
           // Text agents cache the raw model text (re-parsed on a hit); JSON agents the value.
-          await putCached(key, def.outputSchema || !def.parse ? JSON.stringify(output) : text, run.model ?? "").catch(() => {});
+          await putCached(key, def.outputSchema || !def.parse ? JSON.stringify(output) : text, run.model ?? "").catch(() => { /* why: the answer is already returned; a failed cache write only means no cache hit next time */ });
         }
         return finish("ok", { output });
       }

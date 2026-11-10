@@ -241,7 +241,7 @@ export async function renameWorkspaceFile(
     try {
       prov.restoreRecords(before);
     } catch {
-      /* the records stay on the new name as well: outside content is never lost */
+      /* why: the records stay on the new name as well: outside content is never lost */
     }
     throw e;
   }

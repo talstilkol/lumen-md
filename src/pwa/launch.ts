@@ -85,7 +85,7 @@ export function onLaunchFiles(open: (name: string, content: string, handle: File
         const f = await h.getFile();
         open(f.name, await f.text(), h);
       } catch {
-        /* unreadable file */
+        /* why: a launched file that cannot be read is skipped; the others still open */
       }
     }
   });

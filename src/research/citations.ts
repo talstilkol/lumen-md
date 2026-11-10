@@ -340,7 +340,7 @@ export function formatCitationReport(docName: string, checks: readonly CitationC
     try {
       host = new URL(c.url).hostname;
     } catch {
-      /* malformed: show it as written */
+      /* why: malformed: show it as written */
     }
     const src = `[${esc(c.title || host)}](${c.url})`;
     lines.push(`| ${ICON[c.status]} | \`[^${esc(c.id)}]\` | ${c.line} | ${src} | ${LABEL[c.status]}${c.detail ? ` (${esc(c.detail)})` : ""} |`);

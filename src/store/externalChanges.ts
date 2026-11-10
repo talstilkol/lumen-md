@@ -73,7 +73,7 @@ function persistHashes(): void {
     try {
       localStorage.setItem(HASH_KEY, JSON.stringify(diskHashes()));
     } catch {
-      /* storage full / blocked: the in-memory base still works this session */
+      /* why: storage full / blocked: the in-memory base still works this session */
     }
   }, 300);
 }
@@ -163,7 +163,7 @@ export function __resetExternalChanges(): void {
   try {
     localStorage.removeItem(HASH_KEY);
   } catch {
-    /* */
+    /* why: storage denied: nothing was persisted to clear */
   }
 }
 

@@ -352,7 +352,7 @@ async function workspacePathOf(text: string | undefined): Promise<string | null>
     const s = useAppStore.getState() as { doc?: { content?: string; workspaceName?: string | null }; openTabs?: Array<{ content?: string; workspaceName?: string | null }> };
     for (const d of [s.doc, ...(s.openTabs ?? [])]) if (d?.workspaceName && typeof d.content === "string" && d.content.includes(text)) return d.workspaceName;
   } catch {
-    /* no store (tests, workers): no provenance from the path */
+    /* why: no store (tests, workers): no provenance from the path */
   }
   return null;
 }

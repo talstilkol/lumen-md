@@ -195,7 +195,7 @@ export function buildResearchCommands({ liveDoc }: CommandContext): Command[] {
           try {
             localStorage.setItem("lumen.research.endpoint", usable);
           } catch {
-            /* storage denied */
+            /* why: storage denied */
           }
           setResearchSettings({ provider: "searxng" });
         } else if (choice !== "claude") {

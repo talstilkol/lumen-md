@@ -85,7 +85,7 @@ export async function remindIfEvictable(status: PersistenceStatus | null): Promi
   try {
     localStorage.setItem(REMINDER_KEY, String(env.now));
   } catch {
-    /* private mode: the reminder simply shows again next time */
+    /* why: private mode: the reminder simply shows again next time */
   }
   return true;
 }

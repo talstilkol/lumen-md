@@ -51,7 +51,7 @@ async function save(): Promise<void> {
   try {
     await set(KEY, book, s);
   } catch {
-    /* storage denied: learning stays in memory for the session */
+    /* why: storage denied: learning stays in memory for the session */
   }
 }
 

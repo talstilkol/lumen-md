@@ -250,12 +250,12 @@ export async function cloneRepo(
   try {
     await fs.promises.mkdir("/git");
   } catch {
-    /* exists */
+    /* why: the directory already exists */
   }
   try {
     await fs.promises.mkdir(dir);
   } catch {
-    /* exists */
+    /* why: the directory already exists */
   }
 
   const token = opts.token ?? (await getGitToken());

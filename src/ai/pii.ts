@@ -156,7 +156,7 @@ export async function findPii(text: string, opts: { ner?: NerFn | null; types?: 
     try {
       names = await opts.ner(text);
     } catch {
-      /* the model failed: patterns only */
+      /* why: the model failed: patterns only */
     }
     spans = dropOverlaps([...spans, ...names.filter((n) => n.end > n.start).map((n) => ({ ...n, text: text.slice(n.start, n.end) }))]);
   }

@@ -103,7 +103,7 @@ export function endpointOrigins(
       const u = new URL(raw);
       if (["https:", "http:", "wss:", "ws:"].includes(u.protocol)) addOrigin(u, raw);
     } catch {
-      /* not an origin — ignore */
+      /* why: not an origin — ignore */
     }
   }
   return [...out].sort();
@@ -201,12 +201,12 @@ export function cspEndpointsPlugin(): MinimalPlugin {
         const text = await fs.readFile(headers, "utf8");
         await fs.writeFile(headers, extendHeadersFileCsp(text, origins));
       } catch {
-        /* no _headers in this build (e.g. tests) */
+        /* why: no _headers in this build (e.g. tests) */
       }
       try {
         await fs.writeFile(`${outDir}/${EXTRA_ORIGINS_FILE}`, origins.join(" ") + "\n");
       } catch {
-        /* outDir missing — nothing was built */
+        /* why: outDir missing — nothing was built */
       }
     },
   };

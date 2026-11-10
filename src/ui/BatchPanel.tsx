@@ -20,7 +20,7 @@ export function formatEta(ms: number, locale?: string): string {
   try {
     fmt = new Intl.RelativeTimeFormat(locale, { numeric: "always", style: "short" });
   } catch {
-    /* old engine */
+    /* why: old engine */
   }
   const [value, unit]: [number, Intl.RelativeTimeFormatUnit] = s < 90 ? [s, "second"] : s < 5400 ? [Math.round(s / 60), "minute"] : [Math.round(s / 3600), "hour"];
   if (!fmt) return `${value} ${unit}${value === 1 ? "" : "s"}`;

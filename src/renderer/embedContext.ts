@@ -42,7 +42,7 @@ export async function loadEmbedContext(markdownText: string, docKey: string | nu
     await ensureIndex();
     files = indexedFiles();
   } catch {
-    /* no workspace */
+    /* why: no workspace */
   }
   const make = (extra: typeof files = []) =>
     createEmbedContext({ hostPath: hostPathOf(docKey), hostText: markdownText, files: extra.length ? [...files, ...extra] : files, notice: embedNotice });

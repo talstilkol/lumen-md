@@ -37,7 +37,7 @@ function baseUrl(doc: Document, source?: string): URL | null {
       const b = new URL(declared, base);
       if (b.protocol === "http:" || b.protocol === "https:") base = b;
     } catch {
-      /* ignore a broken <base> */
+      /* why: ignore a broken <base> */
     }
   }
   return base;

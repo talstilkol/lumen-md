@@ -72,7 +72,7 @@ export async function engineFindings(probe?: Partial<EngineProbe>): Promise<Doct
   try {
     registry = await p.registry();
   } catch {
-    /* an unreadable registry: every converted model reads as "no files" */
+    /* why: an unreadable registry: every converted model reads as "no files" */
   }
 
   // The host of the self-converted models (Opus-MT, Nakdimon): none until Tal picks one.

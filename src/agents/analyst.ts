@@ -94,7 +94,7 @@ export function parseAnswer(run: PythonRunResult): AnalystAnswer {
         return out;
       }
     } catch {
-      /* not this line */
+      /* why: not this line */
     }
   }
   throw new AnalystError("parse", 'the program printed no {"answer": …} line');

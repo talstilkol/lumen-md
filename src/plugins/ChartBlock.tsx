@@ -21,7 +21,7 @@ function parseSpec(source: string): {
     const o = JSON.parse(trimmed);
     if (o && typeof o === "object") return { option: o };
   } catch {
-    /* fall through to YAML */
+    /* why: fall through to YAML */
   }
   try {
     const o = YAML.parse(trimmed);

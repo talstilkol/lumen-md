@@ -86,7 +86,7 @@ export default function FirstRun({ onDone }: Props) {
         setStatus(t("onboard.vault.folder.chosen", { folder: handle.name }));
       } else setStatus(t("onboard.vault.folder.denied", { folder: handle.name }));
     } catch {
-      /* picker cancelled: the vault stays where it was */
+      /* why: picker cancelled: the vault stays where it was */
     }
   };
 

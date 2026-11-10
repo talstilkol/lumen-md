@@ -35,7 +35,7 @@ export function setFimEnabled(on: boolean): void {
     if (on) localStorage.setItem(FIM_ENABLED_KEY, "1");
     else localStorage.removeItem(FIM_ENABLED_KEY);
   } catch {
-    /* storage blocked: stays as it was */
+    /* why: storage blocked: stays as it was */
   }
 }
 
@@ -154,7 +154,7 @@ export async function completeFim(prefix: string, suffix: string, opts: { signal
       cache.set(key, text);
       if (!text) return null;
       const r: FimResult = { text, engine: "ollama", model, ms: Math.round(performance.now() - t0), cached: false };
-      void traceLatency(r, startedAt, tokens).catch(() => {});
+      void traceLatency(r, startedAt, tokens).catch(() => { /* why: latency tracing is best effort; the completion is already returned */ });
       return r;
     }
     const web = await viaWebLlm(prefix, suffix, opts.signal);

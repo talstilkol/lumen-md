@@ -575,7 +575,7 @@ export async function exportToDocx(content: string, fileName: string): Promise<v
       }
       URL.revokeObjectURL(url);
     } catch {
-      // already torn down
+      // why: already torn down
     }
   }, 100);
 }

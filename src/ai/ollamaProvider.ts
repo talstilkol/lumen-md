@@ -160,7 +160,7 @@ export async function* pullOllamaModel(
       if (!line.trim()) continue;
       try {
         yield JSON.parse(line);
-      } catch { /* skip */ }
+      } catch { /* why: a partial or non-JSON line from the stream carries no text */ }
     }
   }
 }
@@ -247,7 +247,7 @@ export async function* chatOllamaStream(
         const json = JSON.parse(trimmed.slice(6));
         const delta = json.choices?.[0]?.delta?.content;
         if (delta) yield delta;
-      } catch { /* skip */ }
+      } catch { /* why: a keep-alive or partial line that is not JSON carries no text */ }
     }
   }
 }

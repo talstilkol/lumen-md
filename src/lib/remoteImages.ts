@@ -40,7 +40,7 @@ export function remoteImageHost(src: string | null | undefined, base: string | u
     try {
       if (url.origin === new URL(base).origin) return null;
     } catch {
-      /* unusable base: treat as remote */
+      /* why: unusable base: treat as remote */
     }
   }
   return url.host.toLowerCase();
@@ -81,7 +81,7 @@ function persist() {
   try {
     localStorage.setItem(ALLOWED_HOSTS_KEY, JSON.stringify([...allowedHosts()].sort()));
   } catch {
-    /* storage unavailable: the choice lasts for this session */
+    /* why: storage unavailable: the choice lasts for this session */
   }
 }
 

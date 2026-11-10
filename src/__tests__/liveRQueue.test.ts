@@ -94,7 +94,7 @@ describe("runR", () => {
       },
     });
     const second = rt.runR("fast", undefined, { onStart: () => events.push("start fast") });
-    await first.catch(() => {});
+    await first.catch(() => { /* why: the first run is cancelled on purpose; only the queue order is under test */ });
     await new Promise((r) => setTimeout(r, 5));
     // Still booting: the queued run has not started (its timer isn't armed).
     expect(events).toEqual(["start slow"]);

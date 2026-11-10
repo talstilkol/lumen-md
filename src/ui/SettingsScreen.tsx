@@ -102,7 +102,7 @@ function writeLocal(key: string, value: string): void {
     if (value === "") localStorage.removeItem(key);
     else localStorage.setItem(key, value);
   } catch {
-    /* storage denied */
+    /* why: storage denied */
   }
 }
 

@@ -49,7 +49,7 @@ function parseSpec(source: string): ModelSpec | null {
   try {
     return JSON.parse(trimmed) as ModelSpec;
   } catch {
-    /* fall through */
+    /* why: not JSON: try YAML next */
   }
   try {
     return YAML.parse(trimmed) as ModelSpec;

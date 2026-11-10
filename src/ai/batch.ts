@@ -852,7 +852,7 @@ export async function clearLocalBatch(id: string): Promise<void> {
   memory.delete(id);
   unsaved.delete(id);
   inFlight.get(id)?.abort();
-  await idbDel(LOCAL_KEY(id)).catch(() => {});
+  await idbDel(LOCAL_KEY(id)).catch(() => { /* why: the answers were applied already; a stale entry is overwritten by the next job with this id */ });
 }
 
 /** Tests: a reload — this session's in-memory state is gone, IndexedDB is not. */

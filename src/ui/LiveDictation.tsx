@@ -200,7 +200,7 @@ export async function openLiveDictation(lang: string, fallbacks: DictationFallba
     try {
       root.unmount();
     } catch {
-      /* already gone */
+      /* why: the root may already be unmounted by an earlier close */
     }
     host.remove();
   };

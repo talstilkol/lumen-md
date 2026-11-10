@@ -43,7 +43,7 @@ function writeKey(key: string, value: string): void {
     if (value) localStorage.setItem(key, value);
     else localStorage.removeItem(key);
   } catch {
-    /* storage denied */
+    /* why: storage denied */
   }
 }
 

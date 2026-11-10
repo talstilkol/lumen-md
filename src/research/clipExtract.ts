@@ -79,7 +79,7 @@ export function extractPage(html: string, url?: string): Extracted {
     const r = new Defuddle(parse(), { url }).parse();
     out = { title: r.title ?? "", author: r.author ?? "", published: r.published ?? "", site: r.site ?? "", description: r.description ?? "", language: r.language ?? "", html: r.content ?? "", wordCount: r.wordCount ?? 0, engine: "defuddle" };
   } catch {
-    /* Defuddle failed on this page: Readability below */
+    /* why: Defuddle failed on this page: Readability below */
   }
   if (textLength(out.html) < 140) {
     try {
@@ -99,7 +99,7 @@ export function extractPage(html: string, url?: string): Extracted {
         };
       }
     } catch {
-      /* neither engine could read it: an empty clip, said so by the caller */
+      /* why: neither engine could read it: an empty clip, said so by the caller */
     }
   }
   if (url) out.html = absolutize(out.html, url);
@@ -122,7 +122,7 @@ function absolutize(html: string, url: string): string {
       try {
         el.setAttribute(attr, new URL(el.getAttribute(attr)!.trim(), base).href);
       } catch {
-        /* keep a broken value as it was */
+        /* why: keep a broken value as it was */
       }
     });
   }
