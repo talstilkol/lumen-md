@@ -49,6 +49,7 @@ export default defineConfig({
             { label: "PDF reader and highlights", slug: "workspace/pdf-reader" },
             { label: "EPUB reader and reading mode", translations: { he: "קורא EPUB ומצב קריאה" }, slug: "workspace/epub-reader" },
             { label: "All highlights", translations: { he: "כל ההדגשות" }, slug: "workspace/highlights" },
+            { label: "Daily review (spaced repetition)", translations: { he: "חזרה יומית" }, slug: "workspace/review" },
           ],
         },
         {
