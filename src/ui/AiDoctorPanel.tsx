@@ -10,6 +10,7 @@ import { Stethoscope, X } from "lucide-react";
 import { t } from "../i18n";
 import "../agents/doctorStrings";
 import type { DoctorFinding, DoctorReport, DoctorStatus } from "../agents/doctor";
+import { HelpButton } from "./HelpButton";
 
 interface Props {
   open: boolean;
@@ -171,6 +172,7 @@ export function AiDoctorPanel({ open, onClose }: Props) {
               {t("ai.doctor.summary", { ok: report.summary.ok, warn: report.summary.warn, fail: report.summary.fail })}
             </span>
           )}
+          <HelpButton topic="ai/doctor" />
           <button type="button" style={ghost} onClick={onClose} aria-label={t("ai.doctor.close")}>
             <X size={16} />
           </button>

@@ -19,6 +19,8 @@
     "docs:sync": "node scripts/docs-sync.mjs",
     "docs:complete": "node scripts/docs-complete.mjs",
     "docs:search": "node scripts/docs-search.mjs",
+    "help:bundle": "node scripts/help-bundle.mjs",
+    "help:check": "node scripts/help-bundle.mjs --check",
     "licenses": "node scripts/licenses.mjs",
     "golden": "node scripts/golden.mjs",
     "models:registry": "node scripts/models/registry-from-run.mjs",

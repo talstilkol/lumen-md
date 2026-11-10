@@ -27,6 +27,7 @@ import { docsUrl } from "../lib/docsLinks";
 import { showAiToast } from "./AiToast";
 import { UpgradeNotice } from "./UpgradeNotice";
 import { t } from "../i18n";
+import { HelpButton } from "./HelpButton";
 
 interface Props {
   open: boolean;
@@ -127,6 +128,7 @@ export function OrgSettings({ open, onClose, onOpenAuditLog }: Props) {
               {t("org.localOnly")}
             </span>
           )}
+          <HelpButton topic="account/organization#what-you-can-set" />
           <button type="button" onClick={onClose} aria-label={t("org.close")} style={closeBtn}>
             <X size={14} />
           </button>

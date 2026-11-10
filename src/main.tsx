@@ -6,6 +6,7 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import { UpdateBanner } from "./ui/UpdateBanner";
 import { ErrorBoundary } from "./ui/ErrorBoundary";
+import { ErrorActions } from "./ui/ErrorActions";
 import { showAiToast } from "./ui/AiToast";
 import { ToastContainer } from "./components/Toast";
 import { initTelemetry } from "./lib/telemetry";
@@ -98,8 +99,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           height: "100vh", background: "#0c0f17", color: "#e8e8e8",
           fontFamily: "Inter, system-ui, sans-serif", flexDirection: "column", gap: 16,
         }}>
-          <h1 style={{ fontSize: 24, fontWeight: 600, margin: 0 }}>Something went wrong</h1>
-          <p style={{ fontSize: 14, opacity: 0.7, margin: 0 }}>Lumen encountered an unexpected error.</p>
+          <h1 style={{ fontSize: 24, fontWeight: 600, margin: 0 }}>{t("errorScreen.title")}</h1>
+          <p style={{ fontSize: 14, opacity: 0.7, margin: 0 }}>{t("errorScreen.body")}</p>
           <button
             onClick={() => window.location.reload()}
             style={{
@@ -108,8 +109,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             fontSize: 13, fontWeight: 500,
           }}
         >
-          Reload Lumen
+          {t("errorScreen.reload")}
         </button>
+        {/* W3.7: report it, with the diagnostics bundle. */}
+        <ErrorActions />
       </div>
     }>
       <Suspense fallback={

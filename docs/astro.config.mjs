@@ -51,6 +51,7 @@ export default defineConfig({
           items: [
             { label: "Source / Split / Preview / WYSIWYG", slug: "editor/modes" },
             { label: "Smart Insert", slug: "editor/smart-insert" },
+            { label: "Writing tools", slug: "editor/tools", translations: { he: "כלי כתיבה" } },
             { label: "Hebrew and right-to-left", slug: "editor/hebrew", translations: { he: "עברית ומימין לשמאל" } },
           ],
         },
@@ -64,6 +65,7 @@ export default defineConfig({
             { label: "Database views", slug: "workspace/database-views" },
             { label: "Search (BM25 + Smart)", slug: "workspace/search" },
             { label: "Vault Doctor", slug: "workspace/doctor" },
+            { label: "Side panels", slug: "workspace/panels", translations: { he: "חלוניות צד" } },
             { label: "Export and import", slug: "workspace/export-import", translations: { he: "ייצוא וייבוא" } },
           ],
         },

@@ -40,6 +40,7 @@ const SearchDialog = lazy(() =>
   import("./ui/SearchDialog").then((m) => ({ default: m.SearchDialog })),
 );
 import { AiToastContainer, showAiToast } from "./ui/AiToast";
+import { HelpHost } from "./ui/HelpHost";
 import { AiSuggestionsPanel } from "./ui/AiSuggestionsPanel";
 import { MobileKeyboardBar } from "./ui/MobileKeyboardBar";
 import { TagsPanel } from "./ui/TagsPanel";
@@ -1018,6 +1019,7 @@ export default function App() {
       />
       </Suspense>}
       <AiToastContainer />
+      <HelpHost />
       <AiSuggestionsPanel />
       <AiInlinePromptOverlay />
       <MobileKeyboardBar />

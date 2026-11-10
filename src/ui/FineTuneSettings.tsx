@@ -20,6 +20,7 @@ import { startFineTune, getFineTuneJob, type FineTuneJob } from "../ai/fineTune"
 import { uiConfirm } from "./PromptDialog";
 import { log } from "../lib/logger";
 import { t } from "../i18n";
+import { HelpButton } from "./HelpButton";
 
 interface Props {
   open: boolean;
@@ -178,7 +179,8 @@ export function FineTuneSettings({ open, onClose }: Props) {
       >
         <header style={{ padding: "14px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <Brain size={18} style={{ color: "hsl(var(--accent))" }} />
-          <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>{t("fineTune.title")}</h2>
+          <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600, flex: 1 }}>{t("fineTune.title")}</h2>
+          <HelpButton topic="ai/local-llm" />
         </header>
 
         <div style={{ padding: 18, display: "flex", flexDirection: "column", gap: 16, fontSize: 13, lineHeight: 1.5 }}>

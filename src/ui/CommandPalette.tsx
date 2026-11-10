@@ -28,6 +28,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { t } from "../i18n";
 import "./CommandPalette.css";
+import { HelpButton } from "./HelpButton";
 
 export interface Command {
   id: string;
@@ -326,6 +327,7 @@ export function CommandPalette({ open, onClose, commands }: Props) {
             aria-activedescendant={filtered.length > 0 ? `cmd-item-${active}` : undefined}
             spellCheck={false}
           />
+          <HelpButton topic="getting-started/shortcuts#anywhere-in-the-app" />
         </div>
 
         {/* ─── Category Tabs ─── */}

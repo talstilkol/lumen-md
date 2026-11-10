@@ -32,6 +32,7 @@ import { flushActiveWorkspaceDoc, syncOpenDocsAfterMove } from "../store/openDoc
 import type { TrashItem } from "../storage/trash";
 import { toast, useToastStore } from "../store/useToastStore";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
+import { HelpButton } from "./HelpButton";
 
 interface Props {
   /** Currently active workspace path (if any). */
@@ -362,7 +363,10 @@ export function FileTree({
   if (!available) {
     return (
       <aside className="file-tree" aria-label={t("tree.title")}>
-        <div className="file-tree-header">{t("tree.title")}</div>
+        <div className="file-tree-header">
+          {t("tree.title")}
+          <HelpButton topic="workspace/panels#file-tree" />
+        </div>
         <div
           style={{
             padding: "1rem",
@@ -381,6 +385,7 @@ export function FileTree({
       <div className="file-tree-header">
         <span style={{ fontWeight: 600 }}>{t("tree.title")}</span>
         <div style={{ display: "flex", gap: 6 }}>
+          <HelpButton topic="workspace/panels#file-tree" />
           <button
             className="icon-btn"
             title={t("tree.newFileRoot")}

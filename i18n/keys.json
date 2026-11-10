@@ -1,7 +1,7 @@
 {
   "version": 1,
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1521,
+  "count": 1543,
   "entries": [
     {
       "key": "cmd.nikud.add",
@@ -5157,6 +5157,118 @@
     {
       "key": "cmd.feedback.hint",
       "en": "A GitHub issue or text to copy — nothing is sent without your click",
+      "vars": []
+    },
+    {
+      "key": "cmd.help.open",
+      "en": "Help",
+      "vars": []
+    },
+    {
+      "key": "cmd.help.open.hint",
+      "en": "the docs, on this device: search and read them offline",
+      "vars": []
+    },
+    {
+      "key": "cmd.help.diagnostics",
+      "en": "Save a diagnostics file",
+      "vars": []
+    },
+    {
+      "key": "cmd.help.diagnostics.hint",
+      "en": "version, settings, vault size and recent errors — no note text, no keys — to attach to an issue",
+      "vars": []
+    },
+    {
+      "key": "help.button",
+      "en": "Help for this panel",
+      "vars": []
+    },
+    {
+      "key": "help.title",
+      "en": "Help",
+      "vars": []
+    },
+    {
+      "key": "help.back",
+      "en": "Back to the contents",
+      "vars": []
+    },
+    {
+      "key": "help.web",
+      "en": "Open on the web",
+      "vars": []
+    },
+    {
+      "key": "help.close",
+      "en": "Close help",
+      "vars": []
+    },
+    {
+      "key": "help.search",
+      "en": "Search the help",
+      "vars": []
+    },
+    {
+      "key": "help.loading",
+      "en": "Loading…",
+      "vars": []
+    },
+    {
+      "key": "help.results",
+      "en": "{count} results",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "help.noResults",
+      "en": "Nothing found. Try fewer or other words.",
+      "vars": []
+    },
+    {
+      "key": "help.contents",
+      "en": "Contents",
+      "vars": []
+    },
+    {
+      "key": "diagnostics.saved",
+      "en": "Diagnostics saved. Attach the file to your issue.",
+      "vars": []
+    },
+    {
+      "key": "diagnostics.failed",
+      "en": "Couldn't build the diagnostics file.",
+      "vars": []
+    },
+    {
+      "key": "errorScreen.title",
+      "en": "Something went wrong",
+      "vars": []
+    },
+    {
+      "key": "errorScreen.body",
+      "en": "Lumen hit an unexpected error.",
+      "vars": []
+    },
+    {
+      "key": "errorScreen.reload",
+      "en": "Reload Lumen",
+      "vars": []
+    },
+    {
+      "key": "errorScreen.report",
+      "en": "Report this problem",
+      "vars": []
+    },
+    {
+      "key": "errorScreen.diagnostics",
+      "en": "Save diagnostics",
+      "vars": []
+    },
+    {
+      "key": "errorScreen.diagnosticsHint",
+      "en": "The diagnostics file holds the version, the settings and the recent errors — no note text and no keys.",
       "vars": []
     },
     {

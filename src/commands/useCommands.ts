@@ -1808,6 +1808,24 @@ export function useCommands({
         },
       },
       {
+        // W3.7: the docs, packed into the app and searched on the device.
+        id: "help.open",
+        label: t("cmd.help.open"),
+        hint: t("cmd.help.open.hint"),
+        shortcut: "F1",
+        icon: cmdIcons.FileText,
+        group: t("group.tools"),
+        action: () => void import("../ui/HelpButton").then((m) => m.openHelp()),
+      },
+      {
+        id: "help.diagnostics",
+        label: t("cmd.help.diagnostics"),
+        hint: t("cmd.help.diagnostics.hint"),
+        icon: cmdIcons.FileText,
+        group: t("group.tools"),
+        action: () => void import("../ui/diagnosticsActions").then((m) => m.saveDiagnostics()),
+      },
+      {
         id: "ai.policy",
         label: t("cmd.ai.policy"),
         hint: t("cmd.ai.policy.hint"),

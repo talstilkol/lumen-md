@@ -3,6 +3,7 @@ import { Link2 } from "lucide-react";
 import { findBacklinks, type BacklinkHit } from "../storage/workspaceIndex";
 import { t } from "../i18n";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
+import { HelpButton } from "./HelpButton";
 
 interface Props {
   /** Active workspace path. */
@@ -58,6 +59,7 @@ export function BacklinksPanel({ filePath, onOpen }: Props) {
           <Link2 size={12} />
           {t("backlinks.title")}
         </span>
+        <HelpButton topic="workspace/panels#backlinks" />
       </div>
       {!filePath && (
         <div style={{ padding: "1rem", color: "hsl(var(--fg-muted))", fontSize: 12 }}>

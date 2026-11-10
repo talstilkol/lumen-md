@@ -16,6 +16,7 @@ import { ollamaLicenceNotice } from "../ai/modelCatalog";
 import type { AgentRun, ExecutorId } from "../agents/types";
 import type { AiPolicy } from "../ai/policy";
 import type { Hardware } from "../ai/modelManager";
+import { HelpButton } from "./HelpButton";
 
 interface Props {
   open: boolean;
@@ -253,6 +254,7 @@ export function AiSettingsPanel({ open, onClose }: Props) {
           <Cpu size={18} style={{ color: "hsl(var(--accent))" }} />
           <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600, flex: 1 }}>{t("ai.settings.title")}</h2>
           {saved && <span style={muted}>{t("ai.settings.saved")}</span>}
+          <HelpButton topic="ai/local-agents#ai-settings" />
           <button type="button" style={ghost} onClick={onClose} aria-label={t("ai.settings.close")}>
             <X size={16} />
           </button>

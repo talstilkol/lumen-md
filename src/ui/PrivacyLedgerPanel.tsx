@@ -7,6 +7,7 @@ import { ShieldCheck, X } from "lucide-react";
 import { t, getLocale } from "../i18n";
 import { clearLedger, leftDevice, ledgerEntries, ledgerSummary, subscribeLedger, type LedgerEntry } from "../ai/privacyLedger";
 import { getAiPolicy } from "../ai/policy";
+import { HelpButton } from "./HelpButton";
 
 interface Props {
   open: boolean;
@@ -50,6 +51,7 @@ export function PrivacyLedgerPanel({ open, onClose }: Props) {
         <header style={{ padding: "12px 16px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <ShieldCheck size={16} />
           <strong style={{ flex: 1 }}>{t("privacy.title")}</strong>
+          <HelpButton topic="ai/privacy#the-privacy-ledger" />
           <button type="button" style={btn} onClick={onClose} aria-label={t("privacy.close")}>
             <X size={14} />
           </button>

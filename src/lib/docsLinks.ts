@@ -33,6 +33,9 @@ function readDocsBase(): string {
   return DEFAULT_DOCS_BASE;
 }
 
+/** The docs site's base URL (VITE_DOCS_URL, else the default). */
+export const docsBaseUrl = (): string => readDocsBase();
+
 /** Absolute URL of a docs topic, optionally with an in-page anchor. */
 export function docsUrl(topic: DocsTopic, anchor?: string): string {
   const url = `${readDocsBase()}/${DOCS_TOPICS[topic]}/`;

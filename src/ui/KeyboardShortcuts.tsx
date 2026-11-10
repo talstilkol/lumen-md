@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import { t } from "../i18n";
+import { HelpButton } from "./HelpButton";
 
 interface Props {
   open: boolean;
@@ -135,6 +136,7 @@ export function KeyboardShortcuts({ open, onClose }: Props) {
           }}
         >
           ⌨️ {t("cmd.shortcuts") ?? "Keyboard Shortcuts"}
+          <HelpButton topic="getting-started/shortcuts" />
           <button
             onClick={onClose}
             style={{
