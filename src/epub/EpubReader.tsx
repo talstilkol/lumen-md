@@ -226,18 +226,13 @@ export function EpubReader({ path, fragment = null, openSeq = 0, onClose }: Prop
       pending.current++;
       writes.current = writes.current
         .then(async () => {
-          const ws = await import("../storage/workspace");
-          let existing: string | null = null;
-          try {
-            existing = await ws.readWorkspaceFile(notePath);
-          } catch (e) {
-            if ((e as { name?: string })?.name !== "NotFoundError") throw e;
-          }
-          if (readEpubNote(existing) === null) throw new Error(t("epub.notesUnreadable", { name: baseName(notePath) }));
           const labels = { title: t("epub.noteTitle", { name: book.title || baseName(path) }), chapter: (n: number, label: string) => (label ? t("epub.noteChapterNamed", { n, label }) : t("epub.noteChapter", { n })), empty: t("epub.noteEmpty") };
-          await ws.writeWorkspaceFile(notePath, upsertEpubNote(existing, path, next, labels, (n) => chapterLabel(book.toc, n - 1)));
-          const { notifyWorkspaceChanged } = await import("../storage/workspaceEvents");
-          notifyWorkspaceChanged();
+          const { writeSidecar } = await import("../highlights/sidecar");
+          // Saves the open note first and updates its open copies (W1.15), like the PDF reader.
+          await writeSidecar(notePath, (existing) => {
+            if (readEpubNote(existing) === null) throw new Error(t("epub.notesUnreadable", { name: baseName(notePath) }));
+            return upsertEpubNote(existing, path, next, labels, (n) => chapterLabel(book.toc, n - 1));
+          });
         })
         .catch((e: unknown) => showAiToast(t("epub.saveFailed", { error: e instanceof Error ? e.message : String(e) }), "error"))
         .finally(() => {

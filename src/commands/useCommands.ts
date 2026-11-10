@@ -595,6 +595,14 @@ export function useCommands({
         action: () => void import("../epub/ReadingMode").then((m) => m.openReadingMode()),
       },
       {
+        id: "view.highlights",
+        label: t("cmd.highlights.all"),
+        icon: cmdIcons.FileText,
+        group: t("group.file"),
+        // Plan W1.15: every PDF, EPUB and clip highlight — search, tags, export.
+        action: () => void import("../highlights/HighlightsPanel").then((m) => m.openHighlightsPanel()),
+      },
+      {
         id: "view.calendar",
         label: t("cmd.view.calendar"),
         hint: t("cmd.view.calendar.hint"),
