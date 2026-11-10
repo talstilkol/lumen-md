@@ -9,7 +9,7 @@
  * Transcription goes through a seam (`setVoiceTranscriber`): the live
  * streaming dictation of plan 6.1 (#255) registers itself there; without
  * it, the recording is transcribed after it stops with local Whisper
- * (ai/transcribe, which never uses the cloud under local-only). If no
+ * (transformers.js, on this device under every policy). If no
  * transcript can be made, the note is kept as audio with a placeholder.
  *
  * Loaded with the capture box; nothing here is in the startup bundle.
@@ -30,11 +30,19 @@ export function setVoiceTranscriber(fn: VoiceTranscriber | null): void {
   transcriber = fn;
 }
 
-/** The default: local Whisper after the recording stops (ai/transcribe follows the AI policy). */
+/**
+ * The default: local Whisper (transformers.js worker) after the recording
+ * stops — on this device under every AI policy; a voice note is never sent
+ * to a cloud service. (Not through ai/transcribe, whose cloud fallback a
+ * voice capture must not take, and which the startup bundle already holds.)
+ */
 async function defaultTranscriber(audio: Blob, opts: { language?: string; signal?: AbortSignal }): Promise<string | null> {
-  const { transcribe } = await import("../ai/transcribe");
-  const out = await transcribe(audio, opts);
-  return out.text.trim() || null;
+  const { decodeAudioTo16k, transcribeAudio } = await import("../ai/transformersEngine");
+  const samples = await decodeAudioTo16k(audio);
+  if (!samples.length) return null;
+  const language = opts.language ? opts.language.split(/[-_]/)[0].toLowerCase() : undefined;
+  const out = await transcribeAudio(samples, { language, signal: opts.signal });
+  return typeof out.text === "string" ? out.text.trim() || null : null;
 }
 
 export function transcribeVoice(audio: Blob, opts: { language?: string; signal?: AbortSignal } = {}): Promise<string | null> {
