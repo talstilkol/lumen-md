@@ -12,9 +12,10 @@ vi.mock("../storage/workspace", () => ({
   listWorkspace: vi.fn().mockResolvedValue([]),
   readWorkspaceFile: vi.fn().mockResolvedValue(""),
 }));
-vi.mock("../views/louvain", () => ({
-  louvain: vi.fn().mockReturnValue({ communities: new Map() }),
-  communityPalette: vi.fn().mockReturnValue(["hsl(0 0% 50%)"]),
+// The graph (plan W1.10) is built from the vault index.
+vi.mock("../storage/workspaceIndex", () => ({
+  ensureIndex: vi.fn().mockResolvedValue(undefined),
+  indexedFiles: vi.fn().mockReturnValue([]),
 }));
 
 describe("GraphView", () => {

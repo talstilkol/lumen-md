@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-20T19:44:50.605Z",
+  "generated_at": "2026-11-10T02:28:12.242Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1427,
+  "count": 1448,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1419,6 +1419,121 @@
     {
       "key": "graphView.renderFailedDetail",
       "en": "The workspace data resulted in an invalid node structure that crashed the renderer.",
+      "vars": []
+    },
+    {
+      "key": "graph.search",
+      "en": "Find a note",
+      "vars": []
+    },
+    {
+      "key": "graph.filters",
+      "en": "Graph filters",
+      "vars": []
+    },
+    {
+      "key": "graph.filter.tag",
+      "en": "Tag",
+      "vars": []
+    },
+    {
+      "key": "graph.filter.folder",
+      "en": "Folder",
+      "vars": []
+    },
+    {
+      "key": "graph.filter.property",
+      "en": "Property (key=value)",
+      "vars": []
+    },
+    {
+      "key": "graph.groupBy",
+      "en": "Colour by",
+      "vars": []
+    },
+    {
+      "key": "graph.groupBy.folder",
+      "en": "Folder",
+      "vars": []
+    },
+    {
+      "key": "graph.groupBy.tag",
+      "en": "Tag",
+      "vars": []
+    },
+    {
+      "key": "graph.groupBy.none",
+      "en": "Nothing",
+      "vars": []
+    },
+    {
+      "key": "graph.groups",
+      "en": "Colour groups",
+      "vars": []
+    },
+    {
+      "key": "graph.layingOut",
+      "en": "laying out…",
+      "vars": []
+    },
+    {
+      "key": "graph.ariaLabel",
+      "en": "Knowledge graph of {nodes} notes",
+      "vars": [
+        "nodes"
+      ]
+    },
+    {
+      "key": "graph.roleDescription",
+      "en": "graph",
+      "vars": []
+    },
+    {
+      "key": "graph.focused",
+      "en": "{name} — {links} links ({index} of {total})",
+      "vars": [
+        "name",
+        "links",
+        "index",
+        "total"
+      ]
+    },
+    {
+      "key": "graph.keys",
+      "en": "Arrows: next linked note · Enter: open · + / −: zoom · 0: fit · Shift + arrows: pan",
+      "vars": []
+    },
+    {
+      "key": "graph.local.title",
+      "en": "Local graph",
+      "vars": []
+    },
+    {
+      "key": "graph.local.depth",
+      "en": "Depth",
+      "vars": []
+    },
+    {
+      "key": "graph.local.noNote",
+      "en": "Open a note from the workspace to see its links.",
+      "vars": []
+    },
+    {
+      "key": "graph.local.ariaLabel",
+      "en": "Local graph of {name}: {nodes} notes",
+      "vars": [
+        "name",
+        "nodes"
+      ]
+    },
+    {
+      "key": "cmd.view.localGraph",
+      "en": "Show / hide the local graph",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.localGraph.hint",
+      "en": "the open note's links, 1–3 steps out",
       "vars": []
     },
     {

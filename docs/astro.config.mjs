@@ -47,6 +47,7 @@ export default defineConfig({
             { label: "Search (BM25 + Smart)", slug: "workspace/search" },
             { label: "Vault Doctor", slug: "workspace/doctor" },
             { label: "Large vaults and long notes", slug: "workspace/large-vaults" },
+            { label: "Graph and local graph", slug: "workspace/graph", translations: { he: "גרף וגרף מקומי" } },
           ],
         },
         {

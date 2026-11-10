@@ -8,6 +8,7 @@ import { StatusBar } from "./ui/StatusBar";
 import { ScrollProgress } from "./ui/ScrollProgress";
 import { SearchReplace } from "./ui/SearchReplace";
 const GraphView = lazy(() => import("./ui/GraphView").then(m => ({ default: m.GraphView })));
+const LocalGraphPanel = lazy(() => import("./ui/LocalGraphPanel").then(m => ({ default: m.LocalGraphPanel })));
 // γ.2 — Canvas now backed by tldraw. The legacy custom-canvas component
 // `CanvasWhiteboard.tsx` remains in tree as a fallback in case we ever
 // need to surface old `.canvas.json` files; it's intentionally unused.
@@ -103,6 +104,7 @@ export default function App() {
   const locale = useAppStore((s) => s.locale);
   const toggleWorkspace = useAppStore((s) => s.toggleWorkspace);
   const showBacklinks = useAppStore((s) => s.showBacklinks);
+  const showLocalGraph = useAppStore((s) => s.showLocalGraph);
   const vimEnabled = useAppStore((s) => s.vimEnabled);
   const spellCheck = useAppStore((s) => s.spellCheck);
   const grammarCheck = useAppStore((s) => s.grammarCheck);
@@ -934,6 +936,21 @@ export default function App() {
               }
             }}
           />
+        )}
+        {showLocalGraph && (
+          <Suspense fallback={null}>
+            <LocalGraphPanel
+              filePath={doc.workspaceName ?? null}
+              onOpen={async (path) => {
+                try {
+                  const content = await readWorkspaceFile(path);
+                  setDoc({ name: path.split("/").pop() ?? path, content, handle: undefined, workspaceName: path, dirty: false });
+                } catch {
+                  /* missing file */
+                }
+              }}
+            />
+          </Suspense>
         )}
         {dragHover && (
           <div
