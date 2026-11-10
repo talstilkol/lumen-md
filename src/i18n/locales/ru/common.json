@@ -454,6 +454,8 @@
   "pii.type.LOCATION": "место",
   "pii.type.PERSON": "имя",
   "pii.type.PHONE": "телефон",
+  "plantuml.blocked": "Эту диаграмму PlantUML рисует онлайн-сервис kroki.io, а ваша политика ИИ оставляет её на этом устройстве. При отрисовке текст диаграммы отправляется на kroki.io.",
+  "plantuml.send": "Нарисовать эту диаграмму через kroki.io",
   "plugins.block.failed": "Плагин не смог отобразить этот блок: {error}",
   "plugins.block.loading": "Плагин отображает…",
   "plugins.panel.close": "Закрыть панель плагина",

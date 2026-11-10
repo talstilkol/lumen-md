@@ -454,6 +454,8 @@
   "pii.type.LOCATION": "מקום",
   "pii.type.PERSON": "שם",
   "pii.type.PHONE": "טלפון",
+  "plantuml.blocked": "את תרשים ה-PlantUML הזה מצייר kroki.io, שירות מקוון, ומדיניות ה-AI שלכם משאירה אותו במכשיר הזה. ציור התרשים שולח את הטקסט שלו ל-kroki.io.",
+  "plantuml.send": "לצייר את התרשים הזה עם kroki.io",
   "plugins.block.failed": "התוסף לא הצליח לרנדר את הבלוק: {error}",
   "plugins.block.loading": "התוסף מרנדר…",
   "plugins.panel.close": "סגירת חלונית התוסף",

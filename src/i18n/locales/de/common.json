@@ -454,6 +454,8 @@
   "pii.type.LOCATION": "Ort",
   "pii.type.PERSON": "Name",
   "pii.type.PHONE": "Telefon",
+  "plantuml.blocked": "Dieses PlantUML-Diagramm zeichnet kroki.io, ein Online-Dienst, und deine AI-Richtlinie hält es auf diesem Gerät. Zum Zeichnen wird der Text des Diagramms an kroki.io gesendet.",
+  "plantuml.send": "Dieses Diagramm mit kroki.io zeichnen",
   "plugins.block.failed": "Das Plugin konnte diesen Block nicht rendern: {error}",
   "plugins.block.loading": "Das Plugin rendert …",
   "plugins.panel.close": "Plugin-Bereich schließen",

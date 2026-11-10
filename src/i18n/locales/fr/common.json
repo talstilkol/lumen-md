@@ -454,6 +454,8 @@
   "pii.type.LOCATION": "lieu",
   "pii.type.PERSON": "nom",
   "pii.type.PHONE": "téléphone",
+  "plantuml.blocked": "Ce diagramme PlantUML est dessiné par kroki.io, un service en ligne, et votre politique d'IA le garde sur cet appareil. Le dessiner envoie le texte du diagramme à kroki.io.",
+  "plantuml.send": "Dessiner ce diagramme avec kroki.io",
   "plugins.block.failed": "L’extension n’a pas pu afficher ce bloc : {error}",
   "plugins.block.loading": "Rendu par l’extension…",
   "plugins.panel.close": "Fermer le panneau de l’extension",

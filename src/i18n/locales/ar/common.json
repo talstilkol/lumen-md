@@ -454,6 +454,8 @@
   "pii.type.LOCATION": "مكان",
   "pii.type.PERSON": "اسم",
   "pii.type.PHONE": "هاتف",
+  "plantuml.blocked": "يرسم kroki.io، وهو خدمة على الإنترنت، مخطط PlantUML هذا، وسياسة الذكاء الاصطناعي لديك تُبقيه على هذا الجهاز. رسمه يرسل نص المخطط إلى kroki.io.",
+  "plantuml.send": "ارسم هذا المخطط باستخدام kroki.io",
   "plugins.block.failed": "تعذّر على الإضافة عرض هذه الكتلة: {error}",
   "plugins.block.loading": "تعرض الإضافة…",
   "plugins.panel.close": "إغلاق لوحة الإضافة",

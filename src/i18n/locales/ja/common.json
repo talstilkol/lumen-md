@@ -454,6 +454,8 @@
   "pii.type.LOCATION": "場所",
   "pii.type.PERSON": "名前",
   "pii.type.PHONE": "電話",
+  "plantuml.blocked": "この PlantUML 図はオンラインサービスの kroki.io が描画します。AI ポリシーにより、この図はこのデバイスに留められています。描画すると図のテキストが kroki.io に送信されます。",
+  "plantuml.send": "この図を kroki.io で描画",
   "plugins.block.failed": "プラグインがこのブロックを描画できませんでした: {error}",
   "plugins.block.loading": "プラグインで描画中…",
   "plugins.panel.close": "プラグインパネルを閉じる",
