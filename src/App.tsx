@@ -556,6 +556,12 @@ export default function App() {
         window.dispatchEvent(new CustomEvent("lumen-open-today"));
         return;
       }
+      // ⌥⌘C → the cite dialog (plan W2.16).
+      if (e.altKey && e.code === "KeyC") {
+        e.preventDefault();
+        void import("./citations/CiteDialog").then((m) => m.openCiteDialog());
+        return;
+      }
       if (e.key === "k" || e.key === "K") {
         e.preventDefault();
         setPaletteOpen((v) => !v);
