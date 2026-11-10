@@ -8,8 +8,6 @@
 import type * as WebRModule from "webr";
 import { webrBaseUrl } from "./webrPaths";
 
-export type { WebRModule };
-
 export function loadWebRModule(): Promise<typeof WebRModule> {
   return import(/* @vite-ignore */ `${webrBaseUrl()}webr.js`) as Promise<typeof WebRModule>;
 }
