@@ -94,11 +94,16 @@ VITE_YJS_WEBSOCKET_URL=wss://lumen-collab.fly.dev
 
 ## 3. CSP + headers in production (DONE — verify only)
 
-The CSP lives in two places that are both enforced: the `<meta>` tag in
-`index.html` and `public/_headers` (copied to `dist/_headers`). Cloudflare
-Pages **and Netlify** serve `dist/_headers`; `netlify.toml` deliberately
-sets no CSP of its own. The self-hosted nginx image uses
-`docker/nginx.conf`.
+Every policy is written once, in `security/policy.json`, and rendered into
+the files each host reads: the `<meta>` tags in `index.html` and
+`livejs-runner.html`, `public/_headers` (copied to `dist/_headers`),
+`vercel.json`, `docker/nginx.conf`, `deploy/nginx.conf` and
+`src-tauri/tauri.conf.json`. Change the policy there and run
+`npm run headers:write`; CI (`npm run headers`) fails when any copy
+differs. Per-route decisions and per-host exceptions are explained in
+`docs/security/headers.md`. On the web the `<meta>` tag and the response
+header are both enforced. Cloudflare Pages **and Netlify** serve
+`dist/_headers`; `netlify.toml` deliberately sets no CSP of its own.
 
 Your own workers (SSO, billing/entitlements, publish, audit, marketplace,
 self-hosted LanguageTool, Supabase) are added to `connect-src`
@@ -107,7 +112,10 @@ variables (see `src/build/cspEndpoints.ts`): set them before
 `npm run build`. For the Docker web image pass them as build args, e.g.
 `docker build -f docker/Dockerfile.web --build-arg VITE_WORKOS_ENDPOINT=https://auth.example.org .`
 Verify after deploy: the response header and the meta tag both list your
-worker origins in `connect-src`.
+worker origins in `connect-src`. A desktop build with these variables also
+passes them to the Tauri CLI, because `tauri.conf.json` holds the public
+list only: `npm run tauri:build -- --config "$(node scripts/headers.mjs --tauri-config dist/.csp-connect-extra)"`
+after `npm run build` (see "Desktop (Tauri)" in `docs/security/headers.md`).
 
 `connect-src` is an explicit allowlist, so endpoints users set at
 **runtime** (a LAN Ollama host in `lumen.ollama.baseUrl`, a marketplace
