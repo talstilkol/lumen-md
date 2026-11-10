@@ -429,21 +429,6 @@ const en: Strings = {
   "daily.noWorkspace": "Daily notes need the workspace, which this browser can't provide.",
   "daily.failed": "Couldn't open the daily note: {error}",
   "capture.title": "Quick capture",
-  "capture.placeholder": "A thought, a task, a link",
-  "capture.hint": "Enter: add · Shift+Enter: new line · Esc: close",
-  "capture.save": "Add to inbox",
-  "capture.openInbox": "Open inbox",
-  "capture.saved": "Added to {path}",
-  "capture.failed": "Couldn't add to the inbox: {error}",
-  "capture.noWorkspace": "Quick capture needs the workspace, which this browser can't provide.",
-  "capture.inboxHeading": "Inbox",
-  "capture.voice.start": "Record",
-  "capture.voice.recording": "Stop · {time}",
-  "capture.voice.transcribing": "Transcribing…",
-  "capture.voice.keepAudio": "Keep audio",
-  "capture.voice.noMic": "No microphone access.",
-  "capture.voice.noTranscript": "Not transcribed; audio kept.",
-  "capture.voice.placeholderNote": "Voice note (not transcribed)",
   "cmd.ai.cancel": "AI: Cancel",
   "cmd.ai.cancel.hint": "Stops every running AI request (Esc does the same)",
   "toast.aiCancelled": "AI request cancelled ({count})",
@@ -1625,6 +1610,17 @@ export function applyLocale(locale: Locale): void {
   if (!SYNCHRONOUS_LOCALES.has(locale) && !(locale in BUNDLES)) {
     void loadLocale(locale);
   }
+}
+
+/**
+ * English for a lazily loaded domain. Its strings live in
+ * `src/i18n/lazy/<domain>.json` and ship in that domain's chunk, not in the
+ * startup bundle; the domain registers them when it loads (other locales
+ * keep the keys in their own JSON as usual). Keys already in `en` win. The
+ * i18n tools and tests read these files together with the `en` block.
+ */
+export function registerEnglish(strings: Strings): void {
+  for (const [k, v] of Object.entries(strings)) if (!(k in en)) en[k] = v;
 }
 
 /** Translate `id` using the active locale, with optional `{name}` substitutions. */

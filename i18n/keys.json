@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "generated_at": "2026-11-10T00:23:30.602Z",
-  "source": "src/i18n/index.ts (en bundle)",
+  "generated_at": "2026-11-10T00:30:26.656Z",
+  "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
   "count": 1448,
   "entries": [
     {
@@ -1808,87 +1808,6 @@
     {
       "key": "capture.title",
       "en": "Quick capture",
-      "vars": []
-    },
-    {
-      "key": "capture.placeholder",
-      "en": "A thought, a task, a link",
-      "vars": []
-    },
-    {
-      "key": "capture.hint",
-      "en": "Enter: add · Shift+Enter: new line · Esc: close",
-      "vars": []
-    },
-    {
-      "key": "capture.save",
-      "en": "Add to inbox",
-      "vars": []
-    },
-    {
-      "key": "capture.openInbox",
-      "en": "Open inbox",
-      "vars": []
-    },
-    {
-      "key": "capture.saved",
-      "en": "Added to {path}",
-      "vars": [
-        "path"
-      ]
-    },
-    {
-      "key": "capture.failed",
-      "en": "Couldn't add to the inbox: {error}",
-      "vars": [
-        "error"
-      ]
-    },
-    {
-      "key": "capture.noWorkspace",
-      "en": "Quick capture needs the workspace, which this browser can't provide.",
-      "vars": []
-    },
-    {
-      "key": "capture.inboxHeading",
-      "en": "Inbox",
-      "vars": []
-    },
-    {
-      "key": "capture.voice.start",
-      "en": "Record",
-      "vars": []
-    },
-    {
-      "key": "capture.voice.recording",
-      "en": "Stop · {time}",
-      "vars": [
-        "time"
-      ]
-    },
-    {
-      "key": "capture.voice.transcribing",
-      "en": "Transcribing…",
-      "vars": []
-    },
-    {
-      "key": "capture.voice.keepAudio",
-      "en": "Keep audio",
-      "vars": []
-    },
-    {
-      "key": "capture.voice.noMic",
-      "en": "No microphone access.",
-      "vars": []
-    },
-    {
-      "key": "capture.voice.noTranscript",
-      "en": "Not transcribed; audio kept.",
-      "vars": []
-    },
-    {
-      "key": "capture.voice.placeholderNote",
-      "en": "Voice note (not transcribed)",
       "vars": []
     },
     {
@@ -7778,6 +7697,87 @@
     {
       "key": "chart.alternatives",
       "en": "Chart suggestions",
+      "vars": []
+    },
+    {
+      "key": "capture.placeholder",
+      "en": "A thought, a task, a link",
+      "vars": []
+    },
+    {
+      "key": "capture.hint",
+      "en": "Enter: add · Shift+Enter: new line · Esc: close",
+      "vars": []
+    },
+    {
+      "key": "capture.save",
+      "en": "Add to inbox",
+      "vars": []
+    },
+    {
+      "key": "capture.openInbox",
+      "en": "Open inbox",
+      "vars": []
+    },
+    {
+      "key": "capture.saved",
+      "en": "Added to {path}",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "capture.failed",
+      "en": "Couldn't add to the inbox: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "capture.noWorkspace",
+      "en": "Quick capture needs the workspace, which this browser can't provide.",
+      "vars": []
+    },
+    {
+      "key": "capture.inboxHeading",
+      "en": "Inbox",
+      "vars": []
+    },
+    {
+      "key": "capture.voice.start",
+      "en": "Record",
+      "vars": []
+    },
+    {
+      "key": "capture.voice.recording",
+      "en": "Stop · {time}",
+      "vars": [
+        "time"
+      ]
+    },
+    {
+      "key": "capture.voice.transcribing",
+      "en": "Transcribing…",
+      "vars": []
+    },
+    {
+      "key": "capture.voice.keepAudio",
+      "en": "Keep audio",
+      "vars": []
+    },
+    {
+      "key": "capture.voice.noMic",
+      "en": "No microphone access.",
+      "vars": []
+    },
+    {
+      "key": "capture.voice.noTranscript",
+      "en": "Not transcribed; audio kept.",
+      "vars": []
+    },
+    {
+      "key": "capture.voice.placeholderNote",
+      "en": "Voice note (not transcribed)",
       "vars": []
     }
   ]

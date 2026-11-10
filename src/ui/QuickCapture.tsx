@@ -15,6 +15,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Inbox } from "lucide-react";
+import "../capture/strings";
 import { t } from "../i18n";
 import { captureToInbox, INBOX_PATH, openInbox } from "../capture/quickCapture";
 import { isOPFSAvailable } from "../storage/workspace";
