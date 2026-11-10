@@ -1439,5 +1439,12 @@
   "cmd.ai.cancel": "AI: إلغاء",
   "cmd.ai.cancel.hint": "يوقف كل طلبات الذكاء الاصطناعي الجارية (Esc يفعل ذلك أيضاً)",
   "toast.aiCancelled": "أُلغي طلب الذكاء الاصطناعي ({count})",
-  "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ"
+  "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ",
+  "capture.voice.start": "تسجيل",
+  "capture.voice.recording": "إيقاف · {time}",
+  "capture.voice.transcribing": "التفريغ على هذا الجهاز…",
+  "capture.voice.keepAudio": "الاحتفاظ بالتسجيل",
+  "capture.voice.noMic": "لا ميكروفون، أو رُفض الإذن.",
+  "capture.voice.noTranscript": "تعذّر التفريغ على هذا الجهاز؛ يُحفظ التسجيل مع الملاحظة.",
+  "capture.voice.placeholderNote": "ملاحظة صوتية (غير مفرّغة)"
 }
