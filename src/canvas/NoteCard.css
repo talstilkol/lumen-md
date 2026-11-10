@@ -1,0 +1,83 @@
+/* Note cards on the canvas (plan W1.16). Logical properties: they mirror under dir="rtl". */
+.lumen-note-card {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  inline-size: 100%;
+  block-size: 100%;
+  padding-block: 10px;
+  padding-inline: 12px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: hsl(var(--bg));
+  color: hsl(var(--fg));
+  font-family: "Assistant", "Nunito", system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  text-align: start;
+}
+
+.lumen-note-card-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-block-end: 6px;
+}
+
+.lumen-note-card-title {
+  flex: 1;
+  overflow: hidden;
+  font-size: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lumen-note-card-open {
+  flex: none;
+  padding-block: 1px;
+  padding-inline: 8px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 4px;
+  background: transparent;
+  color: hsl(var(--accent));
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.lumen-note-card-body {
+  flex: 1;
+  overflow: hidden;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.lumen-note-card-hint {
+  margin-block-start: 6px;
+  color: hsl(var(--fg-muted));
+  font-size: 11px;
+}
+
+.lumen-note-card-edit {
+  flex: 1;
+  box-sizing: border-box;
+  inline-size: 100%;
+  resize: none;
+  border: 1px solid hsl(var(--accent));
+  border-radius: 4px;
+  background: hsl(var(--bg));
+  color: hsl(var(--fg));
+  font: inherit;
+  padding: 6px;
+}
+
+.lumen-note-card-missing {
+  margin: 0;
+  color: hsl(var(--fg-muted));
+  font-style: italic;
+}
+
+.lumen-canvas-export {
+  display: inline-flex;
+  gap: 4px;
+}

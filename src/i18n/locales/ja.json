@@ -1436,5 +1436,16 @@
   "canvas.jsonCanvas.imported": "{name} を読み込みました（{count} 項目）",
   "canvas.jsonCanvas.exported": "{name}.canvas を保存しました: ノード {nodes}、エッジ {edges}",
   "canvas.jsonCanvas.skipped": "JSON Canvas で表せない要素 {count} 個を省きました（画像、手書き、つながっていない矢印）",
-  "canvas.jsonCanvas.failed": "JSON Canvas を読み込めませんでした: {error}"
+  "canvas.jsonCanvas.failed": "JSON Canvas を読み込めませんでした: {error}",
+  "canvas.card.add": "ノートカード",
+  "canvas.card.prompt": "キャンバスに置くノート（名前または ![[ノート]]）:",
+  "canvas.card.notFound": "保管庫にノート「{ref}」がありません",
+  "canvas.card.open": "開く",
+  "canvas.card.missing": "ノート「{path}」が保管庫にありません（移動または削除？）",
+  "canvas.card.editLabel": "{name} を編集",
+  "canvas.card.editHint": "ダブルクリックで編集 · ⌘Enter で保存",
+  "canvas.card.empty": "（空のノート）",
+  "canvas.export.label": "画像を書き出す",
+  "canvas.export.working": "書き出し中…",
+  "canvas.export.failed": "書き出しに失敗しました: {error}"
 }

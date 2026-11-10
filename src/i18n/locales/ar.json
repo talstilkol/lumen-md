@@ -1436,5 +1436,16 @@
   "canvas.jsonCanvas.imported": "تم استيراد {name} ({count} عنصرًا)",
   "canvas.jsonCanvas.exported": "تم حفظ {name}.canvas: {nodes} عقدة، {edges} وصلة",
   "canvas.jsonCanvas.skipped": "{count} عنصر ليس له شكل في JSON Canvas فتم استبعاده (صور، رسم حر، أسهم غير موصولة)",
-  "canvas.jsonCanvas.failed": "تعذّر استيراد JSON Canvas: {error}"
+  "canvas.jsonCanvas.failed": "تعذّر استيراد JSON Canvas: {error}",
+  "canvas.card.add": "بطاقة ملاحظة",
+  "canvas.card.prompt": "الملاحظة التي تريد وضعها على اللوحة (اسم أو ![[ملاحظة]]):",
+  "canvas.card.notFound": "لا توجد ملاحظة «{ref}» في الخزنة",
+  "canvas.card.open": "فتح",
+  "canvas.card.missing": "الملاحظة «{path}» غير موجودة في الخزنة (نُقلت أو حُذفت؟)",
+  "canvas.card.editLabel": "تحرير {name}",
+  "canvas.card.editHint": "انقر نقرًا مزدوجًا للتحرير · ⌘Enter للحفظ",
+  "canvas.card.empty": "(ملاحظة فارغة)",
+  "canvas.export.label": "تصدير صورة",
+  "canvas.export.working": "جارٍ التصدير…",
+  "canvas.export.failed": "فشل التصدير: {error}"
 }

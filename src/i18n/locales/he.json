@@ -1436,5 +1436,16 @@
   "canvas.jsonCanvas.imported": "יובא {name} ({count} פריטים)",
   "canvas.jsonCanvas.exported": "נשמר {name}.canvas: {nodes} צמתים, {edges} קשתות",
   "canvas.jsonCanvas.skipped": "ל-{count} רכיבים אין צורה ב-JSON Canvas והם הושמטו (תמונות, ציור חופשי, חצים לא מחוברים)",
-  "canvas.jsonCanvas.failed": "לא ניתן לייבא את ה-JSON Canvas: {error}"
+  "canvas.jsonCanvas.failed": "לא ניתן לייבא את ה-JSON Canvas: {error}",
+  "canvas.card.add": "כרטיס פתק",
+  "canvas.card.prompt": "איזה פתק להציב בקנבס? (שם או ![[פתק]]):",
+  "canvas.card.notFound": "אין פתק „{ref}” בכספת",
+  "canvas.card.open": "פתיחה",
+  "canvas.card.missing": "הפתק „{path}” לא נמצא בכספת (הועבר או נמחק?)",
+  "canvas.card.editLabel": "עריכת {name}",
+  "canvas.card.editHint": "לחיצה כפולה לעריכה · ⌘Enter שומר",
+  "canvas.card.empty": "(פתק ריק)",
+  "canvas.export.label": "ייצוא תמונה",
+  "canvas.export.working": "מייצא…",
+  "canvas.export.failed": "הייצוא נכשל: {error}"
 }

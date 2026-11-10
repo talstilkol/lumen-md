@@ -1436,5 +1436,16 @@
   "canvas.jsonCanvas.imported": "{name} importé ({count} éléments)",
   "canvas.jsonCanvas.exported": "{name}.canvas enregistré : {nodes} nœuds, {edges} liens",
   "canvas.jsonCanvas.skipped": "{count} élément(s) sans équivalent JSON Canvas ont été omis (images, dessin à main levée, flèches non reliées)",
-  "canvas.jsonCanvas.failed": "Impossible d'importer le JSON Canvas : {error}"
+  "canvas.jsonCanvas.failed": "Impossible d'importer le JSON Canvas : {error}",
+  "canvas.card.add": "Carte de note",
+  "canvas.card.prompt": "Note à placer sur le canevas (un nom ou ![[note]]) :",
+  "canvas.card.notFound": "Aucune note « {ref} » dans le coffre",
+  "canvas.card.open": "Ouvrir",
+  "canvas.card.missing": "La note « {path} » n’est pas dans le coffre (déplacée ou supprimée ?)",
+  "canvas.card.editLabel": "Modifier {name}",
+  "canvas.card.editHint": "Double-clic pour modifier · ⌘Entrée enregistre",
+  "canvas.card.empty": "(note vide)",
+  "canvas.export.label": "Exporter l’image",
+  "canvas.export.working": "Exportation…",
+  "canvas.export.failed": "Échec de l’export : {error}"
 }

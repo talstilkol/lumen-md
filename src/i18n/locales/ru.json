@@ -1436,5 +1436,16 @@
   "canvas.jsonCanvas.imported": "Импортировано: {name} ({count} элементов)",
   "canvas.jsonCanvas.exported": "Сохранено {name}.canvas: узлов {nodes}, связей {edges}",
   "canvas.jsonCanvas.skipped": "Элементов без формы в JSON Canvas: {count}, они пропущены (изображения, рисунки от руки, несвязанные стрелки)",
-  "canvas.jsonCanvas.failed": "Не удалось импортировать JSON Canvas: {error}"
+  "canvas.jsonCanvas.failed": "Не удалось импортировать JSON Canvas: {error}",
+  "canvas.card.add": "Карточка заметки",
+  "canvas.card.prompt": "Какую заметку поместить на холст? (имя или ![[заметка]]):",
+  "canvas.card.notFound": "В хранилище нет заметки «{ref}»",
+  "canvas.card.open": "Открыть",
+  "canvas.card.missing": "Заметки «{path}» нет в хранилище (перемещена или удалена?)",
+  "canvas.card.editLabel": "Изменить {name}",
+  "canvas.card.editHint": "Двойной щелчок — редактировать · ⌘Enter — сохранить",
+  "canvas.card.empty": "(пустая заметка)",
+  "canvas.export.label": "Экспорт изображения",
+  "canvas.export.working": "Экспорт…",
+  "canvas.export.failed": "Не удалось экспортировать: {error}"
 }

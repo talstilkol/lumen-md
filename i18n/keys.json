@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-09T21:46:41.157Z",
-  "source": "src/i18n/index.ts (en bundle)",
-  "count": 1438,
+  "generated_at": "2026-11-10T02:37:24.723Z",
+  "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
+  "count": 1449,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -7739,6 +7739,69 @@
       "key": "chart.alternatives",
       "en": "Chart suggestions",
       "vars": []
+    },
+    {
+      "key": "canvas.card.add",
+      "en": "Note card",
+      "vars": []
+    },
+    {
+      "key": "canvas.card.prompt",
+      "en": "Note to place on the canvas (a name or ![[note]]):",
+      "vars": []
+    },
+    {
+      "key": "canvas.card.notFound",
+      "en": "No note “{ref}” in the vault",
+      "vars": [
+        "ref"
+      ]
+    },
+    {
+      "key": "canvas.card.open",
+      "en": "Open",
+      "vars": []
+    },
+    {
+      "key": "canvas.card.missing",
+      "en": "The note “{path}” isn't in the vault (moved or deleted?)",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "canvas.card.editLabel",
+      "en": "Edit {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "canvas.card.editHint",
+      "en": "Double-click to edit · ⌘Enter saves",
+      "vars": []
+    },
+    {
+      "key": "canvas.card.empty",
+      "en": "(empty note)",
+      "vars": []
+    },
+    {
+      "key": "canvas.export.label",
+      "en": "Export image",
+      "vars": []
+    },
+    {
+      "key": "canvas.export.working",
+      "en": "Exporting…",
+      "vars": []
+    },
+    {
+      "key": "canvas.export.failed",
+      "en": "Export failed: {error}",
+      "vars": [
+        "error"
+      ]
     }
   ]
 }
