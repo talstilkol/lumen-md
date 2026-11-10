@@ -14,6 +14,9 @@ const PORT = 5173;
  * the production build — never in the per-browser PR jobs.
  */
 const NIGHTLY = /@nightly/;
+/** Plan W1.22: the responsiveness budget (e2e/inp-budget.spec.ts), only in the "inp" project. */
+const INP = /@inp/;
+const NOT_IN_PR_RUNS = /@nightly|@inp/;
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${PORT}`;
 
 export default defineConfig({
@@ -33,10 +36,10 @@ export default defineConfig({
     video: "retain-on-failure",
   },
   projects: [
-    { name: "chromium", grepInvert: NIGHTLY, use: { ...devices["Desktop Chrome"] } },
+    { name: "chromium", grepInvert: NOT_IN_PR_RUNS, use: { ...devices["Desktop Chrome"] } },
     {
       name: "firefox",
-      grepInvert: NIGHTLY,
+      grepInvert: NOT_IN_PR_RUNS,
       use: {
         ...devices["Desktop Firefox"],
         // Headless Firefox on CI runners (no GPU) blocks WebGL by default,
@@ -53,9 +56,11 @@ export default defineConfig({
         },
       },
     },
-    { name: "webkit", grepInvert: NIGHTLY, use: { ...devices["Desktop Safari"] } },
+    { name: "webkit", grepInvert: NOT_IN_PR_RUNS, use: { ...devices["Desktop Safari"] } },
     // `npx playwright test --project=perf` (.github/workflows/nightly-perf.yml).
     { name: "perf", grep: NIGHTLY, use: { ...devices["Desktop Chrome"] } },
+    // `npm run perf:inp`: 20 interactions and keypress → paint with the CPU 4× slower (plan W1.22).
+    { name: "inp", grep: INP, use: { ...devices["Desktop Chrome"] } },
   ],
   webServer: process.env.PLAYWRIGHT_BASE_URL
     ? undefined

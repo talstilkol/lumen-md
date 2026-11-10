@@ -29,6 +29,8 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "e2e:flake": "node scripts/e2e-flake.mjs",
+    "perf:inp": "playwright test --project=inp && node scripts/perf/inp-gate.mjs",
+    "perf:inp:gate": "node scripts/perf/inp-gate.mjs",
     "preview:visual": "node scripts/preview-visual.mjs",
     "budget": "node scripts/bundle-budget.mjs",
     "lighthouse": "lhci autorun --config=./lighthouserc.json",
