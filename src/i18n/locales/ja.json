@@ -1444,5 +1444,7 @@
   "callout.example": "例",
   "callout.quote": "引用",
   "preview.imageResize.hint": "端をドラッグしてサイズを変更します。幅はノートに保存されます。",
-  "preview.footnote.label": "脚注 {n}"
+  "preview.footnote.label": "脚注 {n}",
+  "print.toc": "目次",
+  "print.untitled": "無題"
 }

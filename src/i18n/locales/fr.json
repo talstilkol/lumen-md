@@ -1444,5 +1444,7 @@
   "callout.example": "Exemple",
   "callout.quote": "Citation",
   "preview.imageResize.hint": "Faites glisser le bord pour redimensionner. La largeur est enregistrée dans la note.",
-  "preview.footnote.label": "Note de bas de page {n}"
+  "preview.footnote.label": "Note de bas de page {n}",
+  "print.toc": "Sommaire",
+  "print.untitled": "Sans titre"
 }

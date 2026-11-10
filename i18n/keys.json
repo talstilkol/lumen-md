@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-10T03:08:38.520Z",
+  "generated_at": "2026-11-10T03:29:21.674Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1446,
+  "count": 1448,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -5915,6 +5915,16 @@
       "vars": [
         "n"
       ]
+    },
+    {
+      "key": "print.toc",
+      "en": "Contents",
+      "vars": []
+    },
+    {
+      "key": "print.untitled",
+      "en": "Untitled",
+      "vars": []
     },
     {
       "key": "errorBoundary.heading",

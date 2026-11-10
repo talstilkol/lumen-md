@@ -1444,5 +1444,7 @@
   "callout.example": "مثال",
   "callout.quote": "اقتباس",
   "preview.imageResize.hint": "اسحب الحافة لتغيير الحجم. يُحفظ العرض في الملاحظة.",
-  "preview.footnote.label": "حاشية {n}"
+  "preview.footnote.label": "حاشية {n}",
+  "print.toc": "المحتويات",
+  "print.untitled": "بلا عنوان"
 }

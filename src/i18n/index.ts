@@ -1205,6 +1205,8 @@ const en: Strings = {
   "callout.quote": "Quote",
   "preview.imageResize.hint": "Drag the edge to resize. The width is saved in the note.",
   "preview.footnote.label": "Footnote {n}",
+  "print.toc": "Contents",
+  "print.untitled": "Untitled",
   "errorBoundary.heading": "Rendering Error",
   "errorBoundary.renderDetail": "One of the embedded visualizations crashed during render. The rest of the editor is kept safe.",
   "cmd.view.grammarCheck.on": "Enable grammar check (LanguageTool)",

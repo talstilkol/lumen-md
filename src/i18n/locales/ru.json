@@ -1444,5 +1444,7 @@
   "callout.example": "Пример",
   "callout.quote": "Цитата",
   "preview.imageResize.hint": "Потяните за край, чтобы изменить размер. Ширина сохраняется в заметке.",
-  "preview.footnote.label": "Сноска {n}"
+  "preview.footnote.label": "Сноска {n}",
+  "print.toc": "Содержание",
+  "print.untitled": "Без названия"
 }

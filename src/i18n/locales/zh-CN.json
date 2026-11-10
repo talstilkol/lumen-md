@@ -1444,5 +1444,7 @@
   "callout.example": "示例",
   "callout.quote": "引用",
   "preview.imageResize.hint": "拖动边缘调整大小。宽度会保存在笔记中。",
-  "preview.footnote.label": "脚注 {n}"
+  "preview.footnote.label": "脚注 {n}",
+  "print.toc": "目录",
+  "print.untitled": "无标题"
 }
