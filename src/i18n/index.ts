@@ -429,6 +429,7 @@ const en: Strings = {
   "daily.noWorkspace": "Daily notes need the workspace, which this browser can't provide.",
   "daily.failed": "Couldn't open the daily note: {error}",
   "capture.title": "Quick capture",
+  "widgets.captured": "Added to the inbox from Siri / Shortcuts",
   "cmd.ai.cancel": "AI: Cancel",
   "cmd.ai.cancel.hint": "Stops every running AI request (Esc does the same)",
   "toast.aiCancelled": "AI request cancelled ({count})",

@@ -1245,6 +1245,7 @@
   "daily.noWorkspace": "פתקים יומיים צריכים את מרחב העבודה, והדפדפן הזה לא תומך בו.",
   "daily.failed": "לא ניתן לפתוח את הפתק היומי: {error}",
   "capture.title": "לכידה מהירה",
+  "widgets.captured": "נוסף לתיבת הלכידה מ-Siri / קיצורים",
   "capture.placeholder": "מחשבה, משימה, קישור…",
   "capture.hint": "Enter: הוספה · ‏Shift+Enter: שורה חדשה · ‏Esc: סגירה",
   "capture.save": "הוספה לתיבה",

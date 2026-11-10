@@ -1245,6 +1245,7 @@
   "daily.noWorkspace": "デイリーノートにはワークスペースが必要ですが、このブラウザーでは使えません。",
   "daily.failed": "デイリーノートを開けませんでした：{error}",
   "capture.title": "クイックキャプチャ",
+  "widgets.captured": "Siri／ショートカットから受信箱に追加しました",
   "capture.placeholder": "アイデア、タスク、リンク…",
   "capture.hint": "Enter：追加 · Shift+Enter：改行 · Esc：閉じる",
   "capture.save": "受信箱に追加",

@@ -1245,6 +1245,7 @@
   "daily.noWorkspace": "Les notes quotidiennes ont besoin de l'espace de travail, que ce navigateur ne fournit pas.",
   "daily.failed": "Impossible d'ouvrir la note quotidienne : {error}",
   "capture.title": "Capture rapide",
+  "widgets.captured": "Ajouté à la boîte de réception depuis Siri / Raccourcis",
   "capture.placeholder": "Une idée, une tâche, un lien…",
   "capture.hint": "Entrée : ajouter · Maj+Entrée : nouvelle ligne · Échap : fermer",
   "capture.save": "Ajouter à la boîte",

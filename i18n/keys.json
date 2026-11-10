@@ -1,7 +1,7 @@
 {
   "version": 1,
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1466,
+  "count": 1467,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1807,6 +1807,11 @@
     {
       "key": "capture.title",
       "en": "Quick capture",
+      "vars": []
+    },
+    {
+      "key": "widgets.captured",
+      "en": "Added to the inbox from Siri / Shortcuts",
       "vars": []
     },
     {

@@ -21,6 +21,8 @@ import { captureToInbox, INBOX_PATH, openInbox } from "../capture/quickCapture";
 import { isOPFSAvailable } from "../storage/workspace";
 import { toast } from "../store/useToastStore";
 import "./PromptDialog.css";
+import { tapReady } from "../mobile/nativeActions";
+import { log } from "../lib/logger";
 
 interface Props {
   open: boolean;
@@ -99,6 +101,9 @@ export function QuickCapture({ open, onClose, voice: voiceOnOpen }: Props) {
     if (!open) return;
     const previous = document.activeElement as HTMLElement | null;
     ref.current?.focus();
+    // Plan W3.4: a widget tap → the cursor here; the time is kept locally for the < 1 s check.
+    const ms = tapReady();
+    if (ms !== null) log.info("widget tap → typing", `${ms} ms`);
     return () => previous?.focus?.();
   }, [open]);
 

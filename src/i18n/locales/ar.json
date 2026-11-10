@@ -1245,6 +1245,7 @@
   "daily.noWorkspace": "تحتاج الملاحظات اليومية إلى مساحة العمل، وهذا المتصفح لا يوفرها.",
   "daily.failed": "تعذّر فتح الملاحظة اليومية: {error}",
   "capture.title": "التقاط سريع",
+  "widgets.captured": "أُضيف إلى صندوق الوارد من Siri / الاختصارات",
   "capture.placeholder": "فكرة، مهمة، رابط…",
   "capture.hint": "Enter: إضافة · ‏Shift+Enter: سطر جديد · ‏Esc: إغلاق",
   "capture.save": "أضف إلى الوارد",
