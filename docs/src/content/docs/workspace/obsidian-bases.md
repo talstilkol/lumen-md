@@ -91,3 +91,76 @@ written back unedited holds the same YAML.
 To confirm against Obsidian 1.14: create the notes of `vault.ts` in an empty
 vault, copy the 20 `.base` files into it, open each one and compare its
 first view with `expected.json`. Any difference is a bug to file.
+
+## Relations and rollups (Lumen)
+
+Two top-level keys add Notion-style relations and rollups. They are a Lumen
+extension: the file stays valid YAML, but Obsidian does not read these keys,
+so their columns are empty there.
+
+```yaml
+relations:
+  tasks:                 # notes whose `project` property links here
+    property: project
+    incoming: true
+  team: members          # the notes this note's `members` links point to
+rollups:
+  hours:    { relation: tasks, property: estimate, function: sum }
+  open:     { relation: tasks, function: count }
+  next_due: { relation: tasks, property: due, function: earliest }
+  cost:     { relation: team, property: rate, function: sum }
+views:
+  - type: table
+    name: Projects
+    order: [file.name, relation.tasks, rollup.hours, rollup.next_due]
+```
+
+- A **relation** follows a link property: one `[[link]]` or a list of
+  them, as Obsidian writes them (aliases and paths resolve like any link).
+  Outgoing by default: the notes the property points to. With
+  `incoming: true` it runs the other way: the notes whose property points
+  at this one. That gives you both sides of a link without writing it twice.
+- A **rollup** computes `count`, `sum`, `avg`, `min`, `max`, `earliest` or
+  `latest` over a property of the related notes. That can be `note.x`,
+  `file.x`, one of the base's formulas (`formula.x`, computed for each
+  related note), or another rollup.
+- In a view, the columns are `relation.<name>` and `rollup.<name>`.
+  Their headers are the names, unless `properties:` gives them a
+  `displayName`.
+
+## Calendar and timeline views (Lumen)
+
+```yaml
+views:
+  - type: calendar
+    name: Due
+    date: due            # default: date
+  - type: timeline
+    name: Phases
+    date: start
+    end: finish          # optional: without it an item is one day long
+```
+
+- **Calendar** shows a month with each note on the day of its date.
+  **Timeline** shows a bar from the start date to the end date for each note.
+- To move a note to another day, drag it, or focus it and press
+  **Alt + ←/→** for a day, **Alt + ↑/↓** for a week (the arrows follow the
+  text direction, so in Hebrew → moves back). Only that date property changes in the note's file; every other byte
+  stays as it was. A timeline bar keeps its length, so its end moves by
+  the same number of days.
+- In Obsidian these view types show as a table.
+
+## Big bases and CSV
+
+- A table of more than 200 rows draws only the rows in sight, so 10,000
+  rows scroll smoothly. Filtering and sorting 10,000 notes takes well under
+  100 ms.
+- **Export CSV** saves the current view: its columns and rows, UTF-8 with a
+  BOM, so Excel opens Hebrew correctly.
+- **Import CSV…** adds one note per row to a folder named after the base:
+  - The first column is the note's name.
+  - The other columns become properties: numbers, `true` / `false` and
+    text, with Hebrew headers kept.
+  - Properties the base's filter pins (such as `type == "task"`) are added,
+    so the new notes show in the view.
+  - A name that's taken gets a number.
