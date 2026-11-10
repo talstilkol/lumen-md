@@ -2010,6 +2010,14 @@ export function useCommands({
             },
           ]
         : []),
+      {
+        id: "view.readingOptions",
+        label: t("cmd.view.readingOptions"),
+        hint: t("cmd.view.readingOptions.hint"),
+        icon: cmdIcons.FileText,
+        group: t("group.view"),
+        action: () => window.dispatchEvent(new Event("lumen-open-reading")),
+      },
       ...(setFineTuneOpen
         ? [
             {

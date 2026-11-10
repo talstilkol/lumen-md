@@ -34,6 +34,7 @@ export default defineConfig({
           items: [
             { label: "Source / Split / Preview / WYSIWYG", slug: "editor/modes" },
             { label: "Smart Insert", slug: "editor/smart-insert" },
+            { label: "Reading options and Hebrew fonts", slug: "editor/reading", translations: { he: "אפשרויות קריאה וגופנים עבריים" } },
           ],
         },
         {

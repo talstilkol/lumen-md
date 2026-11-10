@@ -1443,6 +1443,8 @@ const en: Strings = {
   "org.audit.open": "Open audit log",
   "cmd.settings.theme": "Theme settings…",
   "cmd.settings.theme.hint": "Accent color, editor font, size, line height, content width and presets",
+  "cmd.view.readingOptions": "Reading options: font, size, spacing…",
+  "cmd.view.readingOptions.hint": "For every note or just this one; Hebrew fonts that keep nikud in place",
   "themeSettings.title": "Theme",
   "themeSettings.close": "Close",
   "themeSettings.preview": "Live preview",
@@ -1588,6 +1590,17 @@ export function applyLocale(locale: Locale): void {
   if (!SYNCHRONOUS_LOCALES.has(locale) && !(locale in BUNDLES)) {
     void loadLocale(locale);
   }
+}
+
+/**
+ * English for a lazily loaded domain. Its strings live in
+ * `src/i18n/lazy/<domain>.json` and ship in that domain's chunk, not in the
+ * startup bundle; the domain registers them when it loads (other locales
+ * keep the keys in their own JSON as usual). Keys already in `en` win. The
+ * i18n tools and tests read these files together with the `en` block.
+ */
+export function registerEnglish(strings: Strings): void {
+  for (const [k, v] of Object.entries(strings)) if (!(k in en)) en[k] = v;
 }
 
 /** Translate `id` using the active locale, with optional `{name}` substitutions. */
