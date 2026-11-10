@@ -4,7 +4,7 @@
  * versions that failed are not shown. Install opens the permission screen,
  * which scans the version again before anything is granted.
  */
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { t } from "../../i18n";
 import { fetchWithRetry } from "../../lib/fetchRetry";
 import { showAiToast } from "../../ui/AiToast";
@@ -12,6 +12,9 @@ import { describeFindings, reportUrl } from "./permissions";
 import { InstallDialog } from "./InstallDialog";
 import type { PluginManifest } from "./manifest";
 import type { ScanResult } from "./scan";
+import "./devStrings";
+
+const DevPanel = lazy(() => import("./DevPanel").then((m) => ({ default: m.DevPanel })));
 
 const BASE = "/plugins/examples";
 
@@ -50,6 +53,7 @@ export function SandboxedPlugins() {
   const [failed, setFailed] = useState(false);
   const [asking, setAsking] = useState<Listed | null>(null);
   const [busy, setBusy] = useState(false);
+  const [devOpen, setDevOpen] = useState(false);
 
   useEffect(() => {
     const ac = new AbortController();
@@ -112,6 +116,14 @@ export function SandboxedPlugins() {
           ))}
         </div>
       )}
+      <details data-testid="plugin-dev" style={{ marginTop: 12 }} onToggle={(e) => setDevOpen((e.currentTarget as HTMLDetailsElement).open)}>
+        <summary style={{ fontSize: 13, cursor: "pointer" }}>{t("pluginDev.title")}</summary>
+        {devOpen && (
+          <Suspense fallback={<p style={{ fontSize: 12 }}>{t("pluginTrust.loading")}</p>}>
+            <DevPanel />
+          </Suspense>
+        )}
+      </details>
       {asking && <InstallDialog manifest={asking.manifest} scan={asking.scan} busy={busy} onCancel={() => setAsking(null)} onInstall={() => void install(asking)} />}
     </section>
   );

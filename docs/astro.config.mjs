@@ -69,6 +69,7 @@ export default defineConfig({
           label: "Plugins + Templates",
           items: [
             { label: "Plugin SDK", slug: "plugins/sdk" },
+            { label: "Developing a plugin", slug: "plugins/develop", translations: { he: "פיתוח תוסף" } },
             { label: "Sandbox and permissions", slug: "plugins/sandbox" },
             { label: "Plugin API", slug: "plugins/api" },
             { label: "Permissions and safety scan", slug: "plugins/permissions" },

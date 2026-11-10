@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-09T23:25:14.844Z",
+  "generated_at": "2026-11-10T03:41:43.499Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1562,
+  "count": 1586,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -8153,6 +8153,145 @@
       "key": "chart.alternatives",
       "en": "Chart suggestions",
       "vars": []
+    },
+    {
+      "key": "pluginDev.title",
+      "en": "Developer mode",
+      "vars": []
+    },
+    {
+      "key": "pluginDev.about",
+      "en": "Run a plugin you are writing from its dev server (npm run dev) and reload it on every save. Only this computer can connect.",
+      "vars": []
+    },
+    {
+      "key": "pluginDev.url",
+      "en": "Dev server",
+      "vars": []
+    },
+    {
+      "key": "pluginDev.connect",
+      "en": "Connect",
+      "vars": []
+    },
+    {
+      "key": "pluginDev.reload",
+      "en": "Reload",
+      "vars": []
+    },
+    {
+      "key": "pluginDev.disconnect",
+      "en": "Disconnect",
+      "vars": []
+    },
+    {
+      "key": "pluginDev.failed",
+      "en": "Could not connect: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "pluginDev.state.connecting",
+      "en": "connecting",
+      "vars": []
+    },
+    {
+      "key": "pluginDev.state.running",
+      "en": "running",
+      "vars": []
+    },
+    {
+      "key": "pluginDev.state.error",
+      "en": "error",
+      "vars": []
+    },
+    {
+      "key": "pluginDev.state.closed",
+      "en": "disconnected",
+      "vars": []
+    },
+    {
+      "key": "pluginDev.reloads",
+      "en": "Reloads: {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "pluginDev.reloadMs",
+      "en": "last reload {ms} ms",
+      "vars": [
+        "ms"
+      ]
+    },
+    {
+      "key": "pluginDev.loadMs",
+      "en": "start {ms} ms",
+      "vars": [
+        "ms"
+      ]
+    },
+    {
+      "key": "pluginDev.cpu",
+      "en": "CPU {ms} ms in {n} runs (longest {max} ms)",
+      "vars": [
+        "ms",
+        "n",
+        "max"
+      ]
+    },
+    {
+      "key": "pluginDev.memory",
+      "en": "memory {size}",
+      "vars": [
+        "size"
+      ]
+    },
+    {
+      "key": "pluginDev.scanNotes",
+      "en": "Scan: {n} notes, grade {grade}",
+      "vars": [
+        "n",
+        "grade"
+      ]
+    },
+    {
+      "key": "pluginDev.caps",
+      "en": "Permissions: asked for and used",
+      "vars": []
+    },
+    {
+      "key": "pluginDev.cap",
+      "en": "Permission",
+      "vars": []
+    },
+    {
+      "key": "pluginDev.used",
+      "en": "Calls",
+      "vars": []
+    },
+    {
+      "key": "pluginDev.denied",
+      "en": "Refused",
+      "vars": []
+    },
+    {
+      "key": "pluginDev.notAsked",
+      "en": "not in the manifest",
+      "vars": []
+    },
+    {
+      "key": "pluginDev.unused",
+      "en": "never used",
+      "vars": []
+    },
+    {
+      "key": "pluginDev.calls",
+      "en": "Last calls ({n})",
+      "vars": [
+        "n"
+      ]
     },
     {
       "key": "pluginTrust.section.title",
