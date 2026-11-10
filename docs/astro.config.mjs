@@ -48,6 +48,7 @@ export default defineConfig({
             { label: "Vault Doctor", slug: "workspace/doctor" },
             { label: "Canvas (Excalidraw)", slug: "workspace/canvas", translations: { he: "קנבס (Excalidraw)" } },
             { label: "JSON Canvas (Obsidian .canvas)", slug: "workspace/json-canvas", translations: { he: "JSON Canvas (‏.canvas של Obsidian)" } },
+            { label: "Note cards and image export", slug: "workspace/canvas-cards", translations: { he: "כרטיסי פתקים וייצוא תמונה" } },
           ],
         },
         {

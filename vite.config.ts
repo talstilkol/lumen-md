@@ -160,6 +160,18 @@ function vendorChunk(id: string): string | undefined {
   if (id.includes("isomorphic-git") || id.includes("lightning-fs")) return "vendor-git";
   // Excalidraw (the canvas, plan 4.19): its own lazy chunk; its Mermaid → diagram
   // dialog loads on demand and stays apart from the Mermaid block renderer.
+  // A code-splitting group takes every module it matches, dynamic imports
+  // included, so one "vendor-excalidraw" group folded into the canvas chunk
+  // what Excalidraw itself loads only on demand: every translation
+  // (dist/<env>/locales/…, one file per language, of which the UI needs one)
+  // and the font-subsetting code (subset-shared / subset-worker with the
+  // harfbuzz and woff2 wasm, used only when exporting). Each of those keeps a
+  // chunk of its own, still named vendor-excalidraw-… so the PWA leaves it to
+  // the runtime cache and the budget counts it as Excalidraw. (Same rules as
+  // verify/train cb943f4.)
+  const exSub = /@excalidraw\/excalidraw\/dist\/(?:prod|dev)\/([^/]+)\/([^/]+?)\.js$/.exec(id);
+  if (exSub) return `vendor-excalidraw-${exSub[1]}-${exSub[2]}`.replace(/[^A-Za-z0-9-]/g, "_");
+  if (/@excalidraw\/excalidraw\/dist\/(prod|dev)\/subset-/.test(id)) return "vendor-excalidraw-subset";
   if (id.includes("@excalidraw/mermaid-to-excalidraw")) return "vendor-excalidraw-mermaid";
   if (id.includes("@excalidraw/")) return "vendor-excalidraw";
   // Anchor `y-*` to node_modules/y-… so we don't accidentally
