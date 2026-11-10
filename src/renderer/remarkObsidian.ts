@@ -148,6 +148,8 @@ export function stripComments(tree: Root): void {
 
 const PHRASING_PARENTS = new Set(["paragraph", "heading", "tableCell", "emphasis", "strong", "delete", "link", "linkReference", "footnoteDefinition"]);
 const MARK = /(?<!=)==(?!=)/g;
+/** The emoji presentation selector (U+FE0F) after a colour emoji; built at runtime so no invisible character sits in the source. */
+const VARIATION_SELECTOR = new RegExp(`^${String.fromCharCode(0xfe0f)}`);
 
 /** Wrap `==…==` in `highlight` nodes (with an optional colour). */
 export function wrapHighlights(tree: Root): void {
@@ -200,7 +202,7 @@ export function wrapHighlights(tree: Root): void {
         for (const [emoji, name] of Object.entries(HIGHLIGHT_COLORS)) {
           if (first.value.startsWith(emoji)) {
             color = name;
-            first.value = first.value.slice(emoji.length).replace(/^️/, "");
+            first.value = first.value.slice(emoji.length).replace(VARIATION_SELECTOR, "");
             if (!first.value) inner.shift();
             break;
           }
