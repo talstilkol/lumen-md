@@ -1460,5 +1460,11 @@
   "update.available.title": "Доступен Lumen {version}",
   "update.available.body": "У вас {current}. Скачать, проверить и установить {version}? Lumen перезапустится.",
   "update.install": "Установить и перезапустить",
-  "update.failed": "Не удалось обновить: {message}"
+  "update.failed": "Не удалось обновить: {message}",
+  "whatsNew.title": "Что нового в Lumen {version}",
+  "whatsNew.untranslated": "Эти заметки ещё не переведены, поэтому они на английском.",
+  "whatsNew.loading": "…",
+  "whatsNew.none": "Для этой версии нет заметок о выпуске.",
+  "whatsNew.close": "Понятно",
+  "cmd.help.whatsNew": "Что нового в этой версии"
 }

@@ -1460,5 +1460,11 @@
   "update.available.title": "Lumen {version} 可用",
   "update.available.body": "您当前是 {current}。要下载、验证并安装 {version} 吗？Lumen 随后会重启。",
   "update.install": "安装并重启",
-  "update.failed": "更新失败：{message}"
+  "update.failed": "更新失败：{message}",
+  "whatsNew.title": "Lumen {version} 新功能",
+  "whatsNew.untranslated": "这些说明尚未翻译，因此以英文显示。",
+  "whatsNew.loading": "…",
+  "whatsNew.none": "此版本没有发布说明。",
+  "whatsNew.close": "知道了",
+  "cmd.help.whatsNew": "此版本的新功能"
 }

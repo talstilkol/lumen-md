@@ -1460,5 +1460,11 @@
   "update.available.title": "Lumen {version} متاح",
   "update.available.body": "لديك {current}. هل تريد تنزيل {version} والتحقق منه وتثبيته؟ سيُعاد تشغيل Lumen.",
   "update.install": "تثبيت وإعادة التشغيل",
-  "update.failed": "فشل التحديث: {message}"
+  "update.failed": "فشل التحديث: {message}",
+  "whatsNew.title": "ما الجديد في Lumen {version}",
+  "whatsNew.untranslated": "لم تُترجم هذه الملاحظات بعد، لذا هي بالإنجليزية.",
+  "whatsNew.loading": "…",
+  "whatsNew.none": "لا توجد ملاحظات إصدار لهذه النسخة.",
+  "whatsNew.close": "فهمت",
+  "cmd.help.whatsNew": "ما الجديد في هذه النسخة"
 }

@@ -1460,5 +1460,11 @@
   "update.available.title": "Lumen {version} est disponible",
   "update.available.body": "Vous avez {current}. Télécharger, vérifier et installer {version} ? Lumen redémarrera.",
   "update.install": "Installer et redémarrer",
-  "update.failed": "Échec de la mise à jour : {message}"
+  "update.failed": "Échec de la mise à jour : {message}",
+  "whatsNew.title": "Nouveautés de Lumen {version}",
+  "whatsNew.untranslated": "Ces notes ne sont pas encore traduites ; elles sont donc en anglais.",
+  "whatsNew.loading": "…",
+  "whatsNew.none": "Il n’y a pas de notes de version pour cette version.",
+  "whatsNew.close": "Compris",
+  "cmd.help.whatsNew": "Nouveautés de cette version"
 }
