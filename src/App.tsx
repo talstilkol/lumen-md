@@ -26,6 +26,7 @@ const TrashPanel = lazy(() => import("./ui/TrashPanel").then(m => ({ default: m.
 // Properties editor (plan 4.9) — lazy: the yaml-editing code is not in the startup bundle.
 const PropertiesPanel = lazy(() => import("./ui/PropertiesPanel").then(m => ({ default: m.PropertiesPanel })));
 const AiDoctorPanel = lazy(() => import("./ui/AiDoctorPanel").then(m => ({ default: m.AiDoctorPanel })));
+const ImportWizard = lazy(() => import("./ui/ImportWizard").then(m => ({ default: m.ImportWizard })));
 const FineTuneSettings = lazy(() => import("./ui/FineTuneSettings").then(m => ({ default: m.FineTuneSettings })));
 const VersionHistory = lazy(() => import("./ui/VersionHistory").then(m => ({ default: m.VersionHistory })));
 const MarkdownTableEditor = lazy(() => import("./ui/MarkdownTableEditor").then(m => ({ default: m.MarkdownTableEditor })));
@@ -146,6 +147,7 @@ export default function App() {
   const [themeSettingsOpen, setThemeSettingsOpen] = useState(false);
   const [aiSettingsOpen, setAiSettingsOpen] = useState(false);
   const [aiDoctorOpen, setAiDoctorOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [trashOpen, setTrashOpen] = useState(false);
   const [propertiesOpen, setPropertiesOpen] = useState(false);
   // The search dialog loads on first open and then stays mounted, so an
@@ -789,6 +791,11 @@ export default function App() {
     window.addEventListener("lumen-open-ai-doctor", onOpen);
     return () => window.removeEventListener("lumen-open-ai-doctor", onOpen);
   }, []);
+  useEffect(() => {
+    const onOpen = () => setImportOpen(true);
+    window.addEventListener("lumen-open-import", onOpen);
+    return () => window.removeEventListener("lumen-open-import", onOpen);
+  }, []);
   // Stage 2 of the improvement agent (a small local model proposes suggestions).
   useEffect(() => {
     void import("./agents/modelCritic").then((m) => m.installModelCritic());
@@ -1117,6 +1124,7 @@ export default function App() {
           {aiDoctorOpen && <AiDoctorPanel open={aiDoctorOpen} onClose={() => setAiDoctorOpen(false)} />}
           {privacyOpen && <PrivacyLedgerPanel open={privacyOpen} onClose={() => setPrivacyOpen(false)} />}
           {trashOpen && <TrashPanel open={trashOpen} onClose={() => setTrashOpen(false)} />}
+          {importOpen && <ImportWizard open={importOpen} onClose={() => setImportOpen(false)} />}
           {propertiesOpen && <PropertiesPanel open={propertiesOpen} onClose={() => setPropertiesOpen(false)} text={doc.content} applyEdit={applyPropertiesEdit} />}
           {themeSettingsOpen && <ThemeSettings open={themeSettingsOpen} onClose={() => setThemeSettingsOpen(false)} />}
         </ErrorBoundary>
