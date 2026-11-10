@@ -5,6 +5,9 @@
  *
  * Keys are never stored: after a reload the passphrase is asked again.
  * Provider settings live in IndexedDB, provider secrets in the secret store.
+ *
+ * A live provider (the local network, plan W2.19) also syncs right after a
+ * local edit and after the other device reports a change.
  */
 
 import { createVault, E2eeSync, unlockVault, type SyncResult } from "../engine";
@@ -14,6 +17,7 @@ import { idbStateStore, type SyncStateStore } from "../state";
 import { vaultLocalFiles, type LocalFiles } from "../localFiles";
 import { createSyncProvider, loadProviderSettings, saveProviderSecret, saveProviderSettings, type ConnectedProvider, type ProviderSettings } from "../providers";
 import type { FetchLike } from "../providers/http";
+import { liveSync } from "../lan/rpc";
 
 export type Phase = "disconnected" | "connected" | "unlocked";
 
@@ -37,6 +41,10 @@ export interface SessionDeps {
   kdfPolicy?: { minPbkdf2Iterations: number };
   /** Minutes between automatic rounds while unlocked; 0 turns them off. */
   intervalMinutes?: number;
+  /** Local edits, for live providers (default: the vault's own change feed). */
+  watchLocal?: (fn: () => void) => () => void;
+  /** Delay before a live round, after the last change (ms). */
+  liveDebounceMs?: number;
 }
 
 const initial = (): SessionState => ({ phase: "disconnected", settings: null, vaultExists: false, syncing: false, last: null, lastAt: null, error: null });
@@ -46,6 +54,7 @@ export function createSession(deps: SessionDeps = {}) {
   let provider: ConnectedProvider | null = null;
   let engine: E2eeSync | null = null;
   let timer: ReturnType<typeof setInterval> | null = null;
+  let stopLive: (() => void) | null = null;
   const listeners = new Set<(s: SessionState) => void>();
 
   const set = (patch: Partial<SessionState>) => {
@@ -62,6 +71,8 @@ export function createSession(deps: SessionDeps = {}) {
   function stopTimer() {
     if (timer) clearInterval(timer);
     timer = null;
+    stopLive?.();
+    stopLive = null;
     if (typeof window !== "undefined") window.removeEventListener("online", onOnline);
   }
   const onOnline = () => void syncNow().catch(() => undefined);
@@ -77,6 +88,23 @@ export function createSession(deps: SessionDeps = {}) {
       set({ syncing: false, error: (e as Error).message ?? String(e) });
       throw e;
     }
+  }
+
+  /** Live providers: a round shortly after a local edit or a change on the other side. */
+  async function startLive(p: ConnectedProvider): Promise<void> {
+    const live = liveSync(() => (engine ? syncNow() : Promise.resolve()), { debounceMs: deps.liveDebounceMs ?? 300 });
+    const offRemote = p.onRemoteChange?.(live.kick);
+    let offLocal: () => void;
+    if (deps.watchLocal) offLocal = deps.watchLocal(live.kick);
+    else {
+      const { watchVault } = await import("../../../storage/vault");
+      offLocal = watchVault(live.kick);
+    }
+    stopLive = () => {
+      live.stop();
+      offRemote?.();
+      offLocal();
+    };
   }
 
   return {
@@ -128,6 +156,7 @@ export function createSession(deps: SessionDeps = {}) {
         created = await createVault(provider, passphrase, deps.pbkdf2Iterations ? { pbkdf2Iterations: deps.pbkdf2Iterations } : {});
         keys = created.keys;
       }
+      await provider.unlocked?.(keys);
       engine = new E2eeSync({ provider, keys, local: files, store: await makeStore(keys.vaultId), resolver: deps.resolver ?? dialogResolver });
       if (created) await engine.markCreated(created.anchor);
       set({ phase: "unlocked", vaultExists: true });
@@ -136,6 +165,7 @@ export function createSession(deps: SessionDeps = {}) {
         timer = setInterval(() => void syncNow().catch(() => undefined), minutes * 60_000);
         if (typeof window !== "undefined") window.addEventListener("online", onOnline);
       }
+      if (provider.live) await startLive(provider);
       return syncNow();
     },
 
@@ -145,6 +175,7 @@ export function createSession(deps: SessionDeps = {}) {
     lock(): void {
       engine = null;
       stopTimer();
+      provider?.locked?.();
       if (provider) set({ phase: "connected" });
     },
 
@@ -153,6 +184,7 @@ export function createSession(deps: SessionDeps = {}) {
       const kind = state.settings?.kind;
       stopTimer();
       engine = null;
+      provider?.locked?.();
       provider = null;
       await saveProviderSettings(null);
       if (kind) await saveProviderSecret(kind, null);
