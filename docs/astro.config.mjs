@@ -97,6 +97,7 @@ export default defineConfig({
             { label: "Secrets and encryption", slug: "security/vault" },
             { label: "Threat model", slug: "security/threat-model" },
             { label: "Supply chain", slug: "security/supply-chain" },
+            { label: "A privacy report you can prove", slug: "security/privacy-report", translations: { he: "דוח פרטיות שאפשר להוכיח" } },
           ],
         },
         {

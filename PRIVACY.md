@@ -17,6 +17,10 @@ Lumen is a local-first markdown editor. **By default, no data leaves your device
 | Telemetry | Disabled by default. Opt-in via Sentry DSN environment variable. | Only if your operator configured `VITE_SENTRY_DSN` |
 | Collab session state | Peer-to-peer over WebRTC | Only between you and your collab peers |
 
+## Check it yourself
+
+You don't have to take this page's word for it. The privacy ledger (⌘K → *Privacy ledger…*) exports a **signed report** of every request the session made, and `node scripts/privacy/verify-report.mjs` checks it. Every release is audited under the local-only policy with an outside network analyzer (mitmproxy), and the results are published per version. See the docs page *A privacy report you can prove* (`docs/src/content/docs/security/privacy-report.md`).
+
 ## Local storage breakdown
 
 Lumen uses two browser storage layers:
