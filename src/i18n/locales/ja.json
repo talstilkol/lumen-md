@@ -1473,5 +1473,12 @@
   "toast.nikud.doneHigh": "DictaBERT-char-menaked（高品質）でこのデバイスにニクードを付けました。下線の付いた語は複数の読み方があります。クリックすると表示します。",
   "models.purpose.nikudHigh": "このデバイスでの高品質なヘブライ語ニクード（DictaBERT-char-menaked）",
   "nikud.alt.title": "ほかの読み方",
-  "nikud.alt.choose": "「{word}」を使う"
+  "nikud.alt.choose": "「{word}」を使う",
+  "tts.resumed": "{total} 文中 {n} 文目から再開します（止めた位置）。最後まで読むと最初から始まります。",
+  "tts.settings.title": "読み上げ",
+  "tts.settings.rate": "速度",
+  "tts.settings.voice": "{lang} の音声",
+  "tts.settings.saved": "読み上げの設定を保存しました（{rate}）。",
+  "tts.neural.none": "ヘブライ語はシステムのヘブライ語音声で読み上げます。ライセンス上利用できるデバイス上のニューラルなヘブライ語音声はまだありません。",
+  "cmd.note.readSettings": "読み上げ: 音声と速度…"
 }

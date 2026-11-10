@@ -1473,5 +1473,12 @@
   "toast.nikud.doneHigh": "Niqqud ajouté sur cet appareil avec DictaBERT-char-menaked (haute qualité). Les mots soulignés ont plusieurs lectures : cliquez sur un mot pour les voir.",
   "models.purpose.nikudHigh": "Niqqud hébreu de haute qualité (DictaBERT-char-menaked) sur cet appareil",
   "nikud.alt.title": "Autres lectures",
-  "nikud.alt.choose": "Utiliser « {word} »"
+  "nikud.alt.choose": "Utiliser « {word} »",
+  "tts.resumed": "Reprise à la phrase {n} sur {total} — là où vous vous êtes arrêté. Après la fin, la lecture recommence.",
+  "tts.settings.title": "Lecture à voix haute",
+  "tts.settings.rate": "Vitesse",
+  "tts.settings.voice": "Voix pour {lang}",
+  "tts.settings.saved": "Réglages de lecture enregistrés ({rate}).",
+  "tts.neural.none": "L’hébreu est lu avec la voix hébraïque du système : il n’existe pas encore de voix hébraïque neuronale sur l’appareil dont la licence le permet.",
+  "cmd.note.readSettings": "Lecture à voix haute : voix et vitesse…"
 }

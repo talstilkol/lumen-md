@@ -1473,5 +1473,12 @@
   "toast.nikud.doneHigh": "הניקוד נוסף במכשיר עם DictaBERT-char-menaked (איכות גבוהה). למילים המסומנות בקו יש יותר מקריאה אחת: לחצו על מילה כדי לראות את הקריאות.",
   "models.purpose.nikudHigh": "ניקוד עברי באיכות גבוהה (DictaBERT-char-menaked) במכשיר",
   "nikud.alt.title": "קריאות אחרות",
-  "nikud.alt.choose": "להשתמש ב„{word}”"
+  "nikud.alt.choose": "להשתמש ב„{word}”",
+  "tts.resumed": "ממשיך מהמשפט {n} מתוך {total} — איפה שעצרת. אחרי הסוף מתחילים מההתחלה.",
+  "tts.settings.title": "הקראה",
+  "tts.settings.rate": "מהירות",
+  "tts.settings.voice": "קול ל-{lang}",
+  "tts.settings.saved": "הגדרות ההקראה נשמרו ({rate}).",
+  "tts.neural.none": "עברית מוקראת בקול העברי של המערכת: עדיין אין קול עברי עצבי במכשיר עם רישיון שמתיר זאת.",
+  "cmd.note.readSettings": "הקראה: קול ומהירות…"
 }

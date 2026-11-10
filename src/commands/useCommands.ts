@@ -1542,24 +1542,16 @@ export function useCommands({
         icon: cmdIcons.Sparkles,
         group: t("group.tools"),
         action: async () => {
-          const tts = await import("../ai/tts");
-          if (tts.isSpeaking()) {
-            tts.stopSpeaking();
-            return;
-          }
-          if (!tts.ttsAvailable()) {
-            showAiToast(t("toast.tts.unavailable"), "error");
-            return;
-          }
-          const content = useAppStore.getState().doc.content;
-          const ok = await tts
-            .speak(content, {
-              uiLang: getLocale(),
-              onSentence: (s) => window.dispatchEvent(new CustomEvent("lumen-speech-range", { detail: { from: s.from, to: s.to } })),
-            })
-            .finally(() => window.dispatchEvent(new CustomEvent("lumen-speech-range", { detail: null })));
-          if (!ok) showAiToast(t("toast.tts.noHebrewVoice"), "info");
+          const store = useAppStore.getState();
+          await (await import("../ai/tts")).readAloudCommand({ content: store.doc.content, doc: store.doc, uiLang: getLocale(), t, toast: showAiToast });
         },
+      },
+      {
+        id: "note.readSettings",
+        label: t("cmd.note.readSettings"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => (await import("../ai/tts")).readAloudSettings({ content: useAppStore.getState().doc.content, uiLang: getLocale(), t, toast: showAiToast, select: uiSelect }),
       },
       {
         id: "vault.digest",

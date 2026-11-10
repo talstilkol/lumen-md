@@ -14,6 +14,7 @@
     "typecheck": "tsc --noEmit",
     "hygiene": "node scripts/check-code-hygiene.mjs",
     "licenses": "node scripts/licenses.mjs",
+    "tts:mos": "node scripts/tts-mos.mjs",
     "golden": "node scripts/golden.mjs",
     "models:registry": "node scripts/models/registry-from-run.mjs",
     "tauri": "tauri",

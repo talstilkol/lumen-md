@@ -1473,5 +1473,12 @@
   "toast.nikud.doneHigh": "أُضيف التشكيل على هذا الجهاز باستخدام DictaBERT-char-menaked (جودة عالية). الكلمات المسطَّرة لها أكثر من قراءة: انقر على كلمة لترى قراءاتها.",
   "models.purpose.nikudHigh": "تشكيل عبري عالي الجودة (DictaBERT-char-menaked) على هذا الجهاز",
   "nikud.alt.title": "قراءات أخرى",
-  "nikud.alt.choose": "استخدم «{word}»"
+  "nikud.alt.choose": "استخدم «{word}»",
+  "tts.resumed": "الاستئناف من الجملة {n} من {total} — حيث توقفت. يبدأ من جديد بعد النهاية.",
+  "tts.settings.title": "القراءة بصوت عالٍ",
+  "tts.settings.rate": "السرعة",
+  "tts.settings.voice": "الصوت لـ {lang}",
+  "tts.settings.saved": "حُفظت إعدادات القراءة ({rate}).",
+  "tts.neural.none": "تُقرأ العبرية بصوت النظام العبري: لا يوجد بعد صوت عبري عصبي على الجهاز برخصة تسمح بذلك.",
+  "cmd.note.readSettings": "القراءة بصوت عالٍ: الصوت والسرعة…"
 }
