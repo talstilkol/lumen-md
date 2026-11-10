@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, type CSSProperties } from "react";
 import { t } from "../i18n";
+import { arrowStep, inlineDirectionOf } from "../lib/logicalKeys";
 
 interface TourStep {
   target: string; // CSS selector
@@ -93,11 +94,13 @@ export function OnboardingTour({ open, onClose, actions }: Props) {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
-      if (e.key === "ArrowRight" || e.key === "Enter") {
+      // The "next" arrow points the way the interface reads (← in Hebrew).
+      const dirStep = arrowStep(e.key, inlineDirectionOf(null));
+      if (dirStep === 1 || e.key === "Enter") {
         if (step < STEPS.length - 1) setStep(step + 1);
         else onClose();
       }
-      if (e.key === "ArrowLeft" && step > 0) setStep(step - 1);
+      if (dirStep === -1 && step > 0) setStep(step - 1);
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);

@@ -341,7 +341,7 @@ export function EditorLayout({
             mode === "split"
               ? isVerticalSplit
                 ? "w-full h-1/2 min-h-0 border-b border-border bg-bg flex flex-col"
-                : "w-1/2 min-w-0 h-full min-h-0 border-r border-border bg-bg flex flex-col"
+                : "w-1/2 min-w-0 h-full min-h-0 border-e border-border bg-bg flex flex-col"
               : "w-full min-w-0 h-full min-h-0 bg-bg flex flex-col"
           }
         >

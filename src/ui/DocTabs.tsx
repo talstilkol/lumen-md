@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 import { X, FileText } from "lucide-react";
 import type { DocFile } from "../store/useStore";
 import { t } from "../i18n";
+import { inlineDirectionOf, rovingIndex } from "../lib/logicalKeys";
 
 export interface TabItem {
   id: string;
@@ -173,7 +174,7 @@ export const DocTabs = React.memo(function DocTabs({
               position: "relative",
               display: "flex",
               alignItems: "stretch",
-              borderRight: "1px solid hsl(var(--border) / 0.5)",
+              borderInlineEnd: "1px solid hsl(var(--border) / 0.5)",
               borderBottom: isActive
                 ? "2px solid hsl(var(--accent))"
                 : "2px solid transparent",
@@ -191,12 +192,20 @@ export const DocTabs = React.memo(function DocTabs({
               // active tab when not using the strict tab/tablist pattern.
               aria-current={isActive ? "page" : undefined}
               onClick={() => onSelect(tab.id)}
+              data-doc-tab=""
               onKeyDown={(e) => {
                 // Cmd/Ctrl+W → close from the keyboard while focused on the tab.
                 if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "w") {
                   e.preventDefault();
                   onClose(tab.id);
+                  return;
                 }
+                // ←/→ move to the tab drawn on that side (reversed in RTL), Home/End to the ends.
+                const strip = e.currentTarget.closest(".doc-tabs");
+                const next = rovingIndex(e.key, inlineDirectionOf(strip), idx, tabs.length);
+                if (next === null || e.altKey || e.metaKey || e.ctrlKey || e.shiftKey) return;
+                e.preventDefault();
+                strip?.querySelectorAll<HTMLButtonElement>("button[data-doc-tab]")[next]?.focus();
               }}
               title={tab.name}
               style={{

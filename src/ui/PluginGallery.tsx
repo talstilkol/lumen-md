@@ -360,7 +360,7 @@ export function PluginGallery({ open, onClose }: Props) {
               aria-hidden
               style={{
                 position: "absolute",
-                left: 10,
+                insetInlineStart: 10,
                 top: "50%",
                 transform: "translateY(-50%)",
                 color: "hsl(var(--fg-muted))",
@@ -370,13 +370,16 @@ export function PluginGallery({ open, onClose }: Props) {
               type="text"
               placeholder={t("pluginGallery.search")}
               aria-label={t("pluginGallery.search")}
+              data-testid="plugin-search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               style={{
                 background: "hsl(var(--bg-subtle))",
                 border: "1px solid hsl(var(--border))",
                 borderRadius: 8,
-                padding: "7px 12px 7px 30px",
+                // Room for the search icon on the inline-start side (mirrors in RTL).
+                padding: "7px 12px",
+                paddingInlineStart: 30,
                 fontSize: 13,
                 color: "hsl(var(--fg))",
                 width: 240,

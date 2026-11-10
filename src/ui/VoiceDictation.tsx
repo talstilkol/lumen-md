@@ -63,7 +63,7 @@ function showRecordingPill(label: string, onStop: () => void): () => void {
         style={{
           position: "fixed",
           bottom: 20,
-          right: 20,
+          insetInlineEnd: 20,
           zIndex: 9999,
           display: "flex",
           alignItems: "center",
@@ -582,7 +582,7 @@ export async function startVoiceMemo(opts: { language?: string; plain?: boolean 
       style={{
         position: "fixed",
         bottom: 20,
-        right: 20,
+        insetInlineEnd: 20,
         zIndex: 9999,
         display: "flex",
         alignItems: "center",

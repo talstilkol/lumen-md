@@ -105,7 +105,7 @@ export function AiSuggestionsPanel() {
       style={{
         position: "fixed",
         bottom: 40,
-        left: 16,
+        insetInlineStart: 16,
         zIndex: 99998,
         width: 380,
         maxWidth: "calc(100vw - 32px)",

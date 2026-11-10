@@ -67,7 +67,7 @@ export function ScrollProgress() {
       onMouseLeave={() => setHover(false)}
       style={{
         position: "fixed",
-        right: 16,
+        insetInlineEnd: 16,
         bottom: 36,
         zIndex: 100,
         display: "flex",

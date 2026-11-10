@@ -243,7 +243,7 @@ export function RuntimeMetricsPanel({ onClose }: Props) {
           {hasData ? (
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.25 }}>
               <thead>
-                <tr style={{ textAlign: "left", color: "hsl(var(--fg-muted))", borderBottom: "1px solid hsl(var(--border))" }}>
+                <tr style={{ textAlign: "start", color: "hsl(var(--fg-muted))", borderBottom: "1px solid hsl(var(--border))" }}>
                   <th style={{ padding: "8px 10px" }}>{t("runtimeMetrics.column.label")}</th>
                   <th style={{ padding: "8px 10px" }}>{t("runtimeMetrics.column.total")}</th>
                   <th style={{ padding: "8px 10px" }}>{t("runtimeMetrics.column.success")}</th>
