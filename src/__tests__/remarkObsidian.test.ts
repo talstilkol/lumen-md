@@ -127,6 +127,9 @@ describe("==highlights==", () => {
     expect(h.map((x) => x.color)).toEqual(["red", "blue"]);
     expect(h.map(text)).toEqual(["urgent", " calm"]);
     expect(h[0].data.hProperties.className).toEqual(["obsidian-highlight", "hl-red"]);
+    // The emoji with its presentation selector (U+FE0F) is removed whole.
+    const vs = find(tree(`==🟢${String.fromCharCode(0xfe0f)}ok==\n`), (n) => n.type === "highlight");
+    expect(vs.map(text)).toEqual(["ok"]);
   });
 
   it("spans inline formatting and works in Hebrew", () => {
