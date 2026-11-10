@@ -5,7 +5,7 @@ import { t } from "../../i18n";
 import type { CommandContext } from "./context";
 
 /** Export the open note to each format (exporters load on first use), and print. */
-export function buildExportCommands({ handleExportHtml, liveDoc }: CommandContext): Command[] {
+export function buildExportCommands({ handleExportHtml, liveDoc, getEditorView }: CommandContext): Command[] {
   return [
     {
       id: "file.exportHtml",
@@ -40,6 +40,22 @@ export function buildExportCommands({ handleExportHtml, liveDoc }: CommandContex
         const { markdownToRtf, downloadText } = await import("../../storage/exportFormats");
         const baseName = doc.name.replace(/\.[^.]+$/, "");
         downloadText(`${baseName}.rtf`, markdownToRtf(doc.content), "application/rtf");
+      },
+    },
+    {
+      id: "file.exportMarkdownAiMarks",
+      label: t("cmd.ai.marks.export"),
+      icon: cmdIcons.Download,
+      group: t("group.file"),
+      action: async () => {
+        // Snapshot before any await (as above).
+        const doc = liveDoc();
+        const view = getEditorView?.() ?? null;
+        const [{ withAuthorshipFooter, loadSpans }, { downloadText }] = await Promise.all([import("../../ai/authorship"), import("../../storage/exportFormats")]);
+        // The open source editor has the live marks; otherwise the saved ones.
+        const spans = view ? (await import("../../editor/aiAuthorship")).aiSpansOf(view) : loadSpans(doc.workspaceName ?? `file:${doc.name}`, doc.content);
+        const text = view ? view.state.doc.toString() : doc.content;
+        downloadText(doc.name.endsWith(".md") ? doc.name : `${doc.name}.md`, withAuthorshipFooter(text, spans), "text/markdown");
       },
     },
     {

@@ -10,6 +10,7 @@
 import { EditorView, Decoration, WidgetType, ViewPlugin, ViewUpdate, keymap } from "@codemirror/view";
 import { StateField, StateEffect, type Extension } from "@codemirror/state";
 import { log } from "../lib/logger";
+import { aiAuthored } from "./aiAuthorship";
 
 const setSuggestion = StateEffect.define<string | null>();
 
@@ -141,6 +142,7 @@ const acceptKeymap = {
       changes: { from: pos, to: pos, insert: suggestion },
       effects: setSuggestion.of(null),
       selection: { anchor: pos + suggestion.length },
+      annotations: aiAuthored.of(true),
     });
     return true;
   },

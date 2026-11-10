@@ -284,6 +284,17 @@ export function buildAiModelCommands(): Command[] {
       },
     },
     {
+      id: "ai.marks.toggle",
+      label: t("cmd.ai.marks.toggle"),
+      hint: t("cmd.ai.marks.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.view"),
+      action: async () => {
+        const { marksShown, setMarksShown } = await import("../../ai/authorship");
+        setMarksShown(!marksShown());
+      },
+    },
+    {
       id: "ai.agentSettings",
       label: t("cmd.ai.agentSettings"),
       hint: t("cmd.ai.agentSettings.hint"),

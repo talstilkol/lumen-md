@@ -84,6 +84,7 @@ export default defineConfig({
             { label: "Image search by description", slug: "ai/image-search" },
             { label: "Data analyst", slug: "ai/data-analyst" },
             { label: "Train a model on your style, locally", slug: "ai/local-fine-tune" },
+            { label: "AI-written text", translations: { he: "טקסט שנכתב ב-AI" }, slug: "ai/authorship" },
             { label: "AI cost: usage meter + answer cache", slug: "ai/cost" },
             { label: "Batch jobs: pause, resume, progress", translations: { he: "משימות אצווה: השהיה, המשך, התקדמות" }, slug: "ai/batch" },
             { label: "Research + citation checks", slug: "ai/research" },

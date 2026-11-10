@@ -144,6 +144,21 @@
       "vars": []
     },
     {
+      "key": "cmd.ai.marks.export",
+      "en": "Export Markdown with AI marks",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.marks.hint",
+      "en": "Text the AI wrote looks lighter until you edit it",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.marks.toggle",
+      "en": "AI text marks: show / hide",
+      "vars": []
+    },
+    {
       "key": "cmd.ai.mode",
       "en": "AI: Cost Mode (Economy / Balanced / Quality)…",
       "vars": []

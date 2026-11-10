@@ -50,6 +50,7 @@ import { markdownLintExtension } from "./lintExtension";
 import { searchHighlightExtension } from "./searchHighlight";
 import { showSpokenRange, speechHighlightExtension } from "./speechHighlight";
 import { inlineSuggestion } from "./inlineSuggestion";
+import { aiAuthored, aiAuthorshipExtension } from "./aiAuthorship";
 import { formatKeymap } from "./formatKeymap";
 import { setSuggesting, suggestingAuthor, suggestingExtension, suggestingSkip } from "./suggestingExtension";
 import { useAuth } from "../auth/useAuth";
@@ -239,6 +240,7 @@ function ghostTextExtension(): Extension {
             changes: { from: ghost.pos, insert: ghost.text },
             selection: { anchor: ghost.pos + ghost.text.length },
             effects: setGhostText.of(null),
+            annotations: aiAuthored.of(true),
           });
           return true;
         },
@@ -418,6 +420,11 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       // extension flashes the matches and scrolls the first one into view.
       searchHighlightExtension(),
       speechHighlightExtension(),
+      // Plan 5.9: text the AI wrote is shown lighter until it is edited.
+      aiAuthorshipExtension(() => {
+        const d = useAppStore.getState().doc;
+        return d.workspaceName ?? `file:${d.name}`;
+      }),
       // Suggesting mode (track changes) — CriticMarkup decorations are
       // always on; the edit-rewriting filter only while the flag is set.
       suggestingExtension(suggesting),
