@@ -1,6 +1,6 @@
 {
  "$comment": "The plan's single source (plan 0.6). Edit this file, then `npm run plan` regenerates the board in MASTER_PLAN.md and plan/board.html; CI (`npm run plan:check`) fails when they differ. A task's status is one line: phases[].tasks[].status.",
- "updated": "2026-11-10T04:00",
+ "updated": "2026-11-10T04:30",
  "note": "**המצב ב-ב׳ 9.11 23:05:** אף PR לא מוזג מאז 17.10 (main = 552ea5b7). סשן 24.10 פתח #282–#316 (כ-30 משימות) — נרשמו כאן עכשיו. כמעט כל ה-PR-ים אדומים משתי סיבות שאינן בקוד: (1) מ-19.10 GitHub מעביר את ubuntu-latest ל-Ubuntu 26 והתקנת Playwright נשברת — #330 מצמיד ל-ubuntu-24.04; (2) תקציבי החבילה (startup 460 KB ותקציבי קובץ) — #330 גם מוסיף annotation שמראה איזה קובץ חורג. **החלטת טל 9.11: לא משתמשים יותר ב-GitHub Actions** — כל commit עם [skip ci], הבדיקות רצות ב-Vercel Sandbox. אזהרה: כל ענף מודד startup לבד (459–460 KB); אחרי 15.1 התוספות מכל השרשראות יצטברו — צריך את #248 או החלטה 15.16 (14) לפני המיזוג.\n\n**מחקר world class (9.11, plan/research-2026-11.md):** ציון ממוצע ב-19 תחומים מול Obsidian, Notion, Logseq, Typora, Word ואחרים — main 3.7 → עם ה-PR-ים הפתוחים 6.6 → כל התוכנית 7.3 → אחרי הגלים W1–W3 9.1. הפערים הגדולים: מסירה (אף PR לא מוזג), קריאה ומחקר (PDF), תאימות לפורמטים של Obsidian, INP ונגישות אמיתית עם קורא מסך (ת״י 5568), שיתוף והרשאות. 65 משימות חדשות בשלושה גלים (W1 ≈173 ש׳, W2 ≈119 ש׳, W3 ≈49 ש׳).\n\n**החלטות 10.11 (Claude, בהסמכת טל ״תחליט לבד כל החלטה״):** כל ההחלטות הפתוחות ב-15.2, 15.9, 15.10, 15.16 הוכרעו (פירוט בפריטים עצמם). נוסף: שער ה-OCR האנגלי (7.5) — ratchet ברמה הנמדדת (≤ 12.5% CER) ויעד ≤ 5% דרך W1.18, בלי להוריד את שער העברית; #271 — טוקן המחקר רק מההגדרות, לא VITE_RESEARCH_TOKEN (שום סוד בבנייה); החבילות שמחכות להתקנה (hash-wasm, @noble/ciphers, @excalidraw/excalidraw, @mlc-ai/web-llm@0.2.86, @capacitor/filesystem, quickjs-emscripten, knip, @citation-js) — מאושרות, כולן MIT / Apache / ISC, יותקנו ב-Vercel Sandbox; baselines ויזואליים — ייווצרו שם; שערי CI בלי Actions — W1.35. **בדיקה אמיתית בלי Actions:** Vercel בונה כל ענף (tsc -b מחמיר כולל בדיקות + vite build): 77 מתוך 86 PR-ים פתוחים ירוקים, 8 אדומים (#257, #261, #274, #277, #279, #280, #336, #347), 1 בתהליך.\n\n**10.11 01:30:** probe על chore/dod: build + budget עוברים ב-Vercel; עם vitest — נכשל (אין לוגים עד ש-Vercel מאושר). 83 מה-PR-ים ה\"אדומים\" ב-Vercel לא נכשלו בקוד — הבנייה שלהם נחסמה במגבלת 100 פריסות ביום (״Deployment rate limited״); כשל אמיתי היה רק ב-#336.\n\n**10.11 04:00 — Vercel חסם:** מגבלת השימוש של חשבון Hobby נוצלה (402 payment_required, מתאפס ב-1.12): אי אפשר לפתוח Sandbox חדש. מה שנבדק עד עכשיו נבדק במלואו; מה שלא — מחכה. החלטה של טל: לשדרג ל-Pro, או לחכות ל-1.12 (בינתיים בדיקות node בלבד).",
  "start": "2026-10-18T08:00",
  "buffer": 0.35,
@@ -4516,7 +4516,9 @@
       "0 בקשות רשת בזמן הלכידה הקולית ב-local-only (יומן הפרטיות)",
       "פתק קולי של 60 שניות: WER ≤ יעד 6.1"
      ],
-     "why": "Obsidian Mobile 1.15 הוסיף לכידה קולית עם תמלול גם ממסך הנעילה; Heptabase ו-Tana מובילים בקול."
+     "why": "Obsidian Mobile 1.15 הוסיף לכידה קולית עם תמלול גם ממסך הנעילה; Heptabase ו-Tana מובילים בקול.",
+     "branch": "feat/voice-capture",
+     "status": "⏳ #376 (על #268; הקלטה ותמלול מקומי לתיבת הלכידה, /?capture=voice וקיצור PWA; Vercel Sandbox (Node 24): vitest 317/3152, dod 27/27, e2e chromium 4/4 (964ms ללחיצה→הקלטה, 0 בקשות יוצאות); **תקציב startup נכשל 460.1/460** — צריך מחרוזות אנגליות עצלות או פינוי בתים)"
     },
     {
      "id": "W1.14",
@@ -4949,7 +4951,9 @@
      "acceptance": [
       "grep בבניית הייצור לא מוצא agentReview"
      ],
-     "why": "החלטה 10.11 על פריט בעלים"
+     "why": "החלטה 10.11 על פריט בעלים",
+     "branch": "feat/agent-review-dev-only",
+     "status": "⏳ #368 **מוכן למיזוג** — (על #223; agentReview רק ב-DEV או VITE_LUMEN_TEST_SURFACE=1 + check:test-surface; Vercel Sandbox (Node 24): typecheck 0, vitest 316/3033, budget 441.8/460, 0 מופעים ב-dist, e2e 5/5 בשלושה דפדפנים; dod: npx vitest run src/__tests__/testSurfaceGate.test.ts src/__tests__/agentReviewPanel.test.tsx · npm run build && npm run check:test-surface · npx playwright test e2e/agent-review.spec.ts e2e/paste-html.spec.ts)"
     },
     {
      "id": "W1.32",
@@ -5062,7 +5066,9 @@
       "0 כתיבות בלי אישור (e2e)",
       "ריצה על 1,000 פתקים במודל מקומי < 15 דקות על Mac M1"
      ],
-     "why": "Heptabase הוסיף ב-2026 סוכן שמארגן את כל בסיס הידע; אצלנו אפשר לעשות את זה מקומית ובאישור."
+     "why": "Heptabase הוסיף ב-2026 סוכן שמארגן את כל בסיס הידע; אצלנו אפשר לעשות את זה מקומית ובאישור.",
+     "branch": "feat/vault-organizer",
+     "status": "⏳ #374 (על #315 + #223 + #334; סוכן ארגון: קישורים, תגיות, מיזוגים ו-MOC עם ביטחון והסבר, דרך מסך האישור; Vercel Sandbox (Node 24) @9b1f613: vitest 329/3626, budget 446.4; @58531c3: dod 10/10, e2e chromium+firefox 4/4; ✅* — כספת זהב סינתטית; בעלים: דירוג 50 הצעות (יעד ≥80%) ו-Ollama qwen2.5:7b על 1000 פתקים)"
     },
     {
      "id": "W2.2",
@@ -5087,7 +5093,9 @@
       "עדכון הסרגל < 150ms אחרי עצירת הקלדה",
       "0 עיכוב הקלדה (keypress→paint ללא שינוי, W1.22)"
      ],
-     "why": "Reor בנה את כל המוצר סביב קשרים סמנטיים מקומיים; אצלנו יש את האינדקס — חסר הממשק."
+     "why": "Reor בנה את כל המוצר סביב קשרים סמנטיים מקומיים; אצלנו יש את האינדקס — חסר הממשק.",
+     "branch": "feat/related-notes",
+     "status": "⏳ #375 (על #362; פאנל פתקים קשורים + אזכורים לא מקושרים; Recall@5 100% על 100 זוגות זהב בנויים, 4–6ms מול 10,000 פתקים; Vercel Sandbox (Node 24): dod 23/23, e2e chromium+firefox 2/2; vitest מלא ובנייה לא הורצו על הראש; ✅* — בעלים: מבחן latency של W1.22 עם הפאנל פתוח)"
     },
     {
      "id": "W2.3",
@@ -5111,7 +5119,9 @@
       "כתיבה של לקוח MCP לא נשמרת בלי אישור (בדיקה)",
       "כבוי כברירת מחדל; הפעלה מפורשת לכל לקוח"
      ],
-     "why": "Obsidian 1.12 (CLI), Bear 2.8 (CLI + MCP), Logseq ו-Heptabase (MCP/CLI) — זה הפך לציפייה בסיסית ב-2026."
+     "why": "Obsidian 1.12 (CLI), Bear 2.8 (CLI + MCP), Logseq ו-Heptabase (MCP/CLI) — זה הפך לציפייה בסיסית ב-2026.",
+     "branch": "feat/vault-mcp-cli",
+     "status": "⏳ #369 **מוכן למיזוג** — (על #223; שרת MCP + CLI לכספת: כבוי כברירת מחדל, הרשאות לכל לקוח, כתיבה רק כהצעה שמחכה לאישור; Vercel Sandbox (Node 24): typecheck 0, vitest 317/3047, budget 441.9, e2e chromium+firefox 5/5, stdio עם SDK אמיתי, חיפוש ב-10,000 פתקים 2–3ms; dod: npx vitest run src/__tests__/mcpVault.test.ts src/__tests__/mcpInbox.test.ts src/__tests__/mcpFrontmatter.test.ts · npm --prefix mcp-server ci && npm --prefix mcp-server run test:stdio · npx playwright test e2e/mcp-approval.spec.ts; בעלים: חיבור Claude Desktop אמיתי, npm publish)"
     },
     {
      "id": "W2.4",
