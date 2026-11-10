@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-09T22:16:04.017Z",
+  "generated_at": "2026-11-10T02:13:12.356Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1501,
+  "count": 1513,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -6189,6 +6189,82 @@
       "en": "Saved to {file}",
       "vars": [
         "file"
+      ]
+    },
+    {
+      "key": "base.csv.export",
+      "en": "Export CSV",
+      "vars": []
+    },
+    {
+      "key": "base.csv.import",
+      "en": "Import CSV…",
+      "vars": []
+    },
+    {
+      "key": "base.csv.imported",
+      "en": "Added {count} notes to {folder}",
+      "vars": [
+        "count",
+        "folder"
+      ]
+    },
+    {
+      "key": "base.csv.failed",
+      "en": "Couldn't import the CSV: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "base.calendar.prev",
+      "en": "Previous month",
+      "vars": []
+    },
+    {
+      "key": "base.calendar.next",
+      "en": "Next month",
+      "vars": []
+    },
+    {
+      "key": "base.calendar.undated",
+      "en": "{count} without a date",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "base.move.hint",
+      "en": "Drag to another day, or Alt + arrow keys",
+      "vars": []
+    },
+    {
+      "key": "base.moved",
+      "en": "Moved {name} to {date}",
+      "vars": [
+        "name",
+        "date"
+      ]
+    },
+    {
+      "key": "base.moveFailed",
+      "en": "Couldn't move it: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "base.move.readOnly",
+      "en": "{property} can't be changed from here: only note properties can",
+      "vars": [
+        "property"
+      ]
+    },
+    {
+      "key": "base.timeline.empty",
+      "en": "No item has a date in {property}",
+      "vars": [
+        "property"
       ]
     },
     {
