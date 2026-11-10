@@ -46,6 +46,7 @@ export default defineConfig({
             { label: "Database views", slug: "workspace/database-views" },
             { label: "Search (BM25 + Smart)", slug: "workspace/search" },
             { label: "Vault Doctor", slug: "workspace/doctor" },
+            { label: "Backups to a second drive", slug: "workspace/backups", translations: { he: "גיבוי לכונן שני" } },
           ],
         },
         {
