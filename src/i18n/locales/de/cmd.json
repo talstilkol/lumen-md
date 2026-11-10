@@ -6,6 +6,8 @@
   "cmd.ai.analyse": "KI: Tabelle analysieren",
   "cmd.ai.analyse.ask": "Was möchtest du über die Tabelle in dieser Notiz wissen?",
   "cmd.ai.analyse.hint": "Eine Frage zur Tabelle dieser Notiz mit Python auf diesem Gerät beantworten",
+  "cmd.ai.autofill": "AI: Eigenschaften für Notizen ausfüllen…",
+  "cmd.ai.autofill.hint": "Schlägt fehlende Eigenschaften für die Notizen eines Ordners vor; geschrieben wird erst nach deiner Freigabe",
   "cmd.ai.batch": "KI: Stapel über einen Ordner (halber Preis)…",
   "cmd.ai.batch.hint": "Viele Notizen über die Batch-API des Anbieters taggen, zusammenfassen oder übersetzen — Ergebnisse binnen 24 h",
   "cmd.ai.batchCheck": "KI: Stapelaufträge prüfen",

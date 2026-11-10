@@ -368,6 +368,77 @@
       "vars": []
     },
     {
+      "key": "autofill.approve",
+      "en": "Approve",
+      "vars": []
+    },
+    {
+      "key": "autofill.approveAll",
+      "en": "Approve all ({n})",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "autofill.empty",
+      "en": "No proposals waiting",
+      "vars": []
+    },
+    {
+      "key": "autofill.folder",
+      "en": "Fill properties for the notes in which folder? (empty = the whole workspace)",
+      "vars": []
+    },
+    {
+      "key": "autofill.hint",
+      "en": "Nothing is written until you approve. A note that changed since is skipped.",
+      "vars": []
+    },
+    {
+      "key": "autofill.noFields",
+      "en": "No property is used in at least two notes yet — add some, then try again",
+      "vars": []
+    },
+    {
+      "key": "autofill.progress",
+      "en": "Reading note {i} of {n}…",
+      "vars": [
+        "i",
+        "n"
+      ]
+    },
+    {
+      "key": "autofill.proposed",
+      "en": "{n} proposals are waiting for your approval",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "autofill.reject",
+      "en": "Reject",
+      "vars": []
+    },
+    {
+      "key": "autofill.stale",
+      "en": "{n} notes changed since the proposal and were not written",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "autofill.title",
+      "en": "Property proposals",
+      "vars": []
+    },
+    {
+      "key": "autofill.written",
+      "en": "Properties written to {n} notes",
+      "vars": [
+        "n"
+      ]
+    },
+    {
       "key": "blockLink.copied",
       "en": "Copied {link}",
       "vars": [

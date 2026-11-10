@@ -39,6 +39,16 @@
       "vars": []
     },
     {
+      "key": "cmd.ai.autofill",
+      "en": "AI: Fill Properties for Notes…",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.autofill.hint",
+      "en": "Proposes missing properties for the notes of a folder; nothing is written until you approve",
+      "vars": []
+    },
+    {
       "key": "cmd.ai.batch",
       "en": "AI: Batch over a Folder (half price)…",
       "vars": []

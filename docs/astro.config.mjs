@@ -54,6 +54,7 @@ export default defineConfig({
           items: [
             { label: "Database views", slug: "workspace/database-views" },
             { label: "Database formulas + map", slug: "workspace/database-formulas" },
+            { label: "Fill properties with AI", translations: { he: "מילוי מאפיינים ב-AI" }, slug: "workspace/ai-autofill" },
             { label: "Search (BM25 + Smart)", slug: "workspace/search" },
             { label: "Search operators and #tags", slug: "workspace/search-operators", translations: { he: "אופרטורי חיפוש ו-#תגיות" } },
             { label: "Vault Doctor", slug: "workspace/doctor" },

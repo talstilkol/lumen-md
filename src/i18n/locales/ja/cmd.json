@@ -6,6 +6,8 @@
   "cmd.ai.analyse": "AI: 表を分析",
   "cmd.ai.analyse.ask": "このノートの表について何を知りたいですか？",
   "cmd.ai.analyse.hint": "このノートの表についての質問に、このデバイス上の Python で答えます",
+  "cmd.ai.autofill": "AI: ノートのプロパティを入力…",
+  "cmd.ai.autofill.hint": "フォルダー内のノートに足りないプロパティを提案します。承認するまで何も書き込みません",
   "cmd.ai.batch": "AI：フォルダーを一括処理（半額）…",
   "cmd.ai.batch.hint": "プロバイダーのバッチ API で多数のノートをタグ付け・要約・翻訳 — 24 時間以内に結果",
   "cmd.ai.batchCheck": "AI：バッチジョブを確認",

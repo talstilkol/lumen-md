@@ -16,3 +16,4 @@ export { researcherAgent, checkCited, checkVerified, citedNumbers, RESEARCHER_SC
 export { completerAgent, rewriterAgent, answererAgent, memoSummarizerAgent, builderArchAgent, builderTestAgent, builderDocsAgent, batchAgent, cleanCompletion, checkBullets, type CompleterInput, type RewriterInput, type AnswererInput, type MemoInput, type BuilderStageInput, type BatchStepInput } from "./inline";
 export { pdfAnswererAgent, citationVerified, type PdfAnswererInput } from "./pdfAnswerer";
 export { summarizerAgent, SUMMARY_MAX_CHARS, SUMMARY_MIN_GROUNDED, type SummarizerInput } from "./summarizer";
+export { autofillerAgent, type AutofillerInput, type AutofillerOutput } from "./autofiller";

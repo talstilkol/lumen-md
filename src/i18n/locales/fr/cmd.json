@@ -6,6 +6,8 @@
   "cmd.ai.analyse": "IA : analyser le tableau",
   "cmd.ai.analyse.ask": "Que voulez-vous savoir sur le tableau de cette note ?",
   "cmd.ai.analyse.hint": "Répondre à une question sur le tableau de cette note avec Python sur cet appareil",
+  "cmd.ai.autofill": "AI : Remplir les propriétés des notes…",
+  "cmd.ai.autofill.hint": "Propose les propriétés manquantes des notes d'un dossier ; rien n'est écrit sans votre accord",
   "cmd.ai.batch": "IA : lot sur un dossier (moitié prix)…",
   "cmd.ai.batch.hint": "Taguer, résumer ou traduire de nombreuses notes via l’API batch du fournisseur — résultats sous 24 h",
   "cmd.ai.batchCheck": "IA : vérifier les lots",
