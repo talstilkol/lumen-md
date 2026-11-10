@@ -578,8 +578,17 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
             (tr as unknown as { annotations: ReadonlyArray<{ value: unknown }> }).annotations
               .some((a) => a.value === syncConf),
           ),
+          // Plan W1.19: a "view" or "comment" participant can't change the
+          // note (the server refuses it too); remote edits still apply.
+          EditorState.transactionFilter.of((tr) =>
+            !tr.docChanged ||
+            collab.canEdit() ||
+            (tr as unknown as { annotations: ReadonlyArray<{ value: unknown }> }).annotations.some((a) => a.value === syncConf)
+              ? tr
+              : [],
+          ),
         ];
-        if (collab.doc) commentsExt = commentDecorations({ doc: collab.doc });
+        if (collab.doc) commentsExt = commentDecorations({ doc: collab.doc, commentsDoc: collab.commentsDoc });
       }
       if (cancelled || !viewRef.current) return;
       viewRef.current.dispatch({

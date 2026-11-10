@@ -38,13 +38,17 @@ class CursorWidget extends WidgetType {
       position: relative;
       display: inline-block;
       width: 0;
-      border-left: 2px solid ${this.color};
+      border-inline-start: 2px solid ${this.color};
       height: 1.2em;
       vertical-align: text-bottom;
       pointer-events: none;
     `;
     const tag = document.createElement("span");
+    tag.className = "cm-collab-cursor-name";
     tag.textContent = this.name;
+    // Plan W1.19: a Hebrew name in an English line (or the reverse) is laid
+    // out in its own direction and never reorders the text around it.
+    tag.dir = "auto";
     tag.style.cssText = `
       position: absolute;
       top: -1.4em;
@@ -54,7 +58,11 @@ class CursorWidget extends WidgetType {
       line-height: 1.4em;
       color: white;
       background: ${this.color};
-      border-radius: 3px 3px 3px 0;
+      border-start-start-radius: 3px;
+      border-start-end-radius: 3px;
+      border-end-end-radius: 3px;
+      border-end-start-radius: 0;
+      unicode-bidi: isolate;
       font-family: Inter, ui-sans-serif, system-ui;
       white-space: nowrap;
       pointer-events: none;
@@ -118,8 +126,20 @@ function decorationsFor(view: EditorView, awareness: Awareness): DecorationSet {
  * Wire awareness into a CodeMirror view. Call from `Editor.tsx` when a
  * `CollabSession` is active. Returns an Extension (a plugin + a theme).
  */
+/**
+ * y-codemirror's own remote carets and name labels are placed with
+ * physical `left`: in a right-to-left line the label hung off the wrong
+ * side of the caret. Logical properties follow the line's direction, and
+ * the name is isolated so it never reorders the text around it (plan W1.19).
+ */
+export const rtlCaretTheme = EditorView.theme({
+  ".cm-ySelectionInfo": { left: "auto", insetInlineStart: "-1px", unicodeBidi: "isolate" },
+  ".cm-ySelectionCaretDot": { left: "auto", insetInlineStart: "-0.2em" },
+});
+
 export function collabAwarenessExtension(awareness: Awareness): Extension {
   return [
+    rtlCaretTheme,
     ViewPlugin.fromClass(
       class {
         decorations: DecorationSet;
