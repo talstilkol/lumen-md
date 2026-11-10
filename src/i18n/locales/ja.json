@@ -1429,5 +1429,11 @@
   "cmd.ai.cancel": "AI: キャンセル",
   "cmd.ai.cancel.hint": "実行中の AI リクエストをすべて停止します（Esc でも可）",
   "toast.aiCancelled": "AI リクエストをキャンセルしました（{count}）",
-  "toast.aiNothingRunning": "実行中の AI リクエストはありません"
+  "toast.aiNothingRunning": "実行中の AI リクエストはありません",
+  "cmd.edit.pastePlain": "プレーンテキストとして貼り付け",
+  "cmd.edit.pastePlain.hint": "クリップボードのテキストを書式なしで貼り付けます",
+  "cmd.edit.pasteFormatted": "書式を保持して貼り付け",
+  "cmd.edit.pasteFormatted.hint": "Word、Google ドキュメント、Web サイトの HTML を、見出し・リスト・表・リンク・強調を保ったきれいな Markdown として貼り付けます（スタイルなし）",
+  "paste.clipboardDenied": "Lumen はクリップボードを読み取れません。アクセスを許可するか、Ctrl+V で貼り付けてください。",
+  "paste.clipboardEmpty": "クリップボードは空です。"
 }

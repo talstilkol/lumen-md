@@ -1429,5 +1429,11 @@
   "cmd.ai.cancel": "KI: Abbrechen",
   "cmd.ai.cancel.hint": "Stoppt alle laufenden KI-Anfragen (auch mit Esc)",
   "toast.aiCancelled": "KI-Anfrage abgebrochen ({count})",
-  "toast.aiNothingRunning": "Keine KI-Anfrage läuft"
+  "toast.aiNothingRunning": "Keine KI-Anfrage läuft",
+  "cmd.edit.pastePlain": "Als reinen Text einfügen",
+  "cmd.edit.pastePlain.hint": "Fügt den Text der Zwischenablage ohne Formatierung ein",
+  "cmd.edit.pasteFormatted": "Mit Formatierung einfügen",
+  "cmd.edit.pasteFormatted.hint": "Fügt HTML aus Word, Google Docs oder einer Website als sauberes Markdown ein: Überschriften, Listen, Tabellen, Links und Hervorhebungen, ohne Stile",
+  "paste.clipboardDenied": "Lumen kann die Zwischenablage nicht lesen. Erlauben Sie den Zugriff oder fügen Sie mit Strg+V ein.",
+  "paste.clipboardEmpty": "Die Zwischenablage ist leer."
 }

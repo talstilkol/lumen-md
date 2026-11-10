@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-09T23:31:54.300Z",
+  "generated_at": "2026-11-10T03:24:34.520Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1431,
+  "count": 1437,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -5837,6 +5837,36 @@
     {
       "key": "voice.memo.stop",
       "en": "⏹ Stop & insert",
+      "vars": []
+    },
+    {
+      "key": "cmd.edit.pastePlain",
+      "en": "Paste as plain text",
+      "vars": []
+    },
+    {
+      "key": "cmd.edit.pastePlain.hint",
+      "en": "Pastes the clipboard's text without any formatting",
+      "vars": []
+    },
+    {
+      "key": "cmd.edit.pasteFormatted",
+      "en": "Paste with formatting",
+      "vars": []
+    },
+    {
+      "key": "cmd.edit.pasteFormatted.hint",
+      "en": "Pastes HTML from Word, Google Docs or a website as clean Markdown: headings, lists, tables, links and emphasis, without styles",
+      "vars": []
+    },
+    {
+      "key": "paste.clipboardDenied",
+      "en": "Lumen can't read the clipboard. Allow clipboard access, or paste with Ctrl+V.",
+      "vars": []
+    },
+    {
+      "key": "paste.clipboardEmpty",
+      "en": "The clipboard is empty.",
       "vars": []
     },
     {

@@ -1429,5 +1429,11 @@
   "cmd.ai.cancel": "AI: إلغاء",
   "cmd.ai.cancel.hint": "يوقف كل طلبات الذكاء الاصطناعي الجارية (Esc يفعل ذلك أيضاً)",
   "toast.aiCancelled": "أُلغي طلب الذكاء الاصطناعي ({count})",
-  "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ"
+  "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ",
+  "cmd.edit.pastePlain": "لصق كنص عادي",
+  "cmd.edit.pastePlain.hint": "يلصق نص الحافظة دون أي تنسيق",
+  "cmd.edit.pasteFormatted": "لصق مع التنسيق",
+  "cmd.edit.pasteFormatted.hint": "يلصق HTML من Word أو Google Docs أو موقع ويب كـ Markdown نظيف: عناوين وقوائم وجداول وروابط وتأكيد، دون أنماط",
+  "paste.clipboardDenied": "لا يستطيع Lumen قراءة الحافظة. اسمح بالوصول إلى الحافظة، أو الصق باستخدام Ctrl+V.",
+  "paste.clipboardEmpty": "الحافظة فارغة."
 }

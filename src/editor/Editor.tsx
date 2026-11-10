@@ -13,6 +13,8 @@ import { readyToReveal } from "./revealLine";
 import { useEffect, useImperativeHandle, useRef, useState, forwardRef } from "react";
 import { Compartment, EditorState } from "@codemirror/state";
 import { lineSeparatorFor } from "./lineEndings";
+import { pastedHtmlToMarkdown, shouldConvertPaste } from "../paste/htmlPaste";
+import { wysiwygTakesPaste, type PasteDetail } from "../paste/pasteCommands";
 import { EditorView, keymap, highlightActiveLine, Decoration, WidgetType } from "@codemirror/view";
 import type { DecorationSet } from "@codemirror/view";
 import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
@@ -345,7 +347,18 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
             if (f) files.push(f);
           }
         }
-        if (files.length === 0) return false;
+        if (files.length === 0) {
+          // W1.4 — HTML from Word, Google Docs or a website pastes as clean Markdown.
+          const html = event.clipboardData?.getData("text/html");
+          const text = event.clipboardData?.getData("text/plain");
+          if (!html || !shouldConvertPaste(html, text)) return false;
+          const md = pastedHtmlToMarkdown(html);
+          if (!md) return false;
+          event.preventDefault();
+          const { from, to } = view.state.selection.main;
+          view.dispatch({ changes: { from, to, insert: md }, selection: { anchor: from + md.length }, userEvent: "input.paste" });
+          return true;
+        }
         event.preventDefault();
         void handleAssetFiles(view, files);
         return true;
@@ -695,6 +708,22 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     }
     window.addEventListener("lumen-mobile-insert", onInsert);
     return () => window.removeEventListener("lumen-mobile-insert", onInsert);
+  }, []);
+
+  // W1.4 — "Paste as plain text" / "Paste with formatting" from the palette,
+  // when the WYSIWYG editor is not the one showing.
+  useEffect(() => {
+    function onPaste(e: Event) {
+      const view = viewRef.current;
+      const detail = (e as CustomEvent<PasteDetail>).detail;
+      if (!view || !detail || wysiwygTakesPaste()) return;
+      const insert = detail.mode === "plain" ? detail.text : detail.markdown;
+      const { from, to } = view.state.selection.main;
+      view.dispatch({ changes: { from, to, insert }, selection: { anchor: from + insert.length }, userEvent: "input.paste" });
+      view.focus();
+    }
+    window.addEventListener("lumen-paste", onPaste);
+    return () => window.removeEventListener("lumen-paste", onPaste);
   }, []);
 
   // `lumen-reveal-line` {line} (1-based): jump to and select that line —

@@ -1429,5 +1429,11 @@
   "cmd.ai.cancel": "AI: ביטול",
   "cmd.ai.cancel.hint": "עוצר כל בקשת AI שרצה (גם Esc עושה זאת)",
   "toast.aiCancelled": "בקשת ה-AI בוטלה ({count})",
-  "toast.aiNothingRunning": "אין בקשת AI שרצה"
+  "toast.aiNothingRunning": "אין בקשת AI שרצה",
+  "cmd.edit.pastePlain": "הדבקה כטקסט פשוט",
+  "cmd.edit.pastePlain.hint": "מדביק את הטקסט שבלוח בלי שום עיצוב",
+  "cmd.edit.pasteFormatted": "הדבקה עם עיצוב",
+  "cmd.edit.pasteFormatted.hint": "מדביק HTML מ-Word, מ-Google Docs או מאתר כ-Markdown נקי: כותרות, רשימות, טבלאות, קישורים והדגשות, בלי סגנונות",
+  "paste.clipboardDenied": "ל-Lumen אין גישה ללוח. אפשרו גישה ללוח, או הדביקו עם Ctrl+V.",
+  "paste.clipboardEmpty": "הלוח ריק."
 }
