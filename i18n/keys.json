@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-24T19:23:18.281Z",
+  "generated_at": "2026-11-09T23:38:32.588Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1439,
+  "count": 1520,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1862,6 +1862,222 @@
     {
       "key": "agents.netConsent.perCall",
       "en": "Under the \"local only\" policy you are asked for every call.",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.reviewChanges",
+      "en": "AI: Review changes proposed by agents",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.reviewChanges.hint",
+      "en": "Each change an agent proposed, as a diff, to approve or reject",
+      "vars": []
+    },
+    {
+      "key": "agentReview.title",
+      "en": "Changes proposed by agents",
+      "vars": []
+    },
+    {
+      "key": "agentReview.intro",
+      "en": "Nothing is written until you approve it. Changes to an open document go into the editor, not straight to the file.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.empty",
+      "en": "No changes are waiting.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "agentReview.approve",
+      "en": "Approve",
+      "vars": []
+    },
+    {
+      "key": "agentReview.reject",
+      "en": "Reject",
+      "vars": []
+    },
+    {
+      "key": "agentReview.approveAll",
+      "en": "Approve all ({count})",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "agentReview.rejectAll",
+      "en": "Reject all",
+      "vars": []
+    },
+    {
+      "key": "agentReview.proposedBy",
+      "en": "Proposed by {agent}",
+      "vars": [
+        "agent"
+      ]
+    },
+    {
+      "key": "agentReview.unknownAgent",
+      "en": "an agent",
+      "vars": []
+    },
+    {
+      "key": "agentReview.run",
+      "en": "run {run}",
+      "vars": [
+        "run"
+      ]
+    },
+    {
+      "key": "agentReview.target.document",
+      "en": "The open document",
+      "vars": []
+    },
+    {
+      "key": "agentReview.target.documentPath",
+      "en": "The open document · {path}",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "agentReview.target.newFile",
+      "en": "{path} (new file)",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "agentReview.tooBig",
+      "en": "Too many changes to show line by line.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.noEol",
+      "en": "No newline at end of file",
+      "vars": []
+    },
+    {
+      "key": "agentReview.gap",
+      "en": "{count} unchanged lines",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "agentReview.done",
+      "en": "Done",
+      "vars": []
+    },
+    {
+      "key": "agentReview.status.document",
+      "en": "Applied in the editor, not saved yet (Undo takes it back).",
+      "vars": []
+    },
+    {
+      "key": "agentReview.status.documentNoUndo",
+      "en": "Applied to the document, not saved yet. Undo can't take it back in this view.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.status.tab",
+      "en": "Applied in another tab, not saved yet.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.status.file",
+      "en": "Written to the file.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.status.suggestion",
+      "en": "Added as a tracked change (suggesting mode is on).",
+      "vars": []
+    },
+    {
+      "key": "agentReview.status.rejected",
+      "en": "Rejected — nothing was written.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.status.withdrawn",
+      "en": "Withdrawn: the run was cancelled.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.conflict.file-changed",
+      "en": "Not written: the file changed after the agent proposed this.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.conflict.file-created",
+      "en": "Not written: a file with this name was created since.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.conflict.doc-changed",
+      "en": "Not applied: the text it changes was edited after the proposal.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.conflict.overlap",
+      "en": "Not applied: it overlaps a change approved before it.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.conflict.open-unsaved",
+      "en": "Not applied: the file is open with edits the agent did not see.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.conflict.not-open",
+      "en": "Not applied: its document is no longer open.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.conflict.failed",
+      "en": "Not applied: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "agentReview.badge",
+      "en": "Review {count}",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "agentReview.badge.tooltip",
+      "en": "Changes proposed by agents are waiting for your approval",
+      "vars": []
+    },
+    {
+      "key": "agentReview.toast.one",
+      "en": "{agent} proposed a change. Nothing is written until you approve it.",
+      "vars": [
+        "agent"
+      ]
+    },
+    {
+      "key": "agentReview.toast.other",
+      "en": "{agent} proposed {n} changes. Nothing is written until you approve them.",
+      "vars": [
+        "agent",
+        "n"
+      ]
+    },
+    {
+      "key": "agentReview.toast.review",
+      "en": "Review",
       "vars": []
     },
     {
@@ -4964,6 +5180,96 @@
       ]
     },
     {
+      "key": "cmd.ai.batchJobs",
+      "en": "AI: Batch Jobs — Progress, Pause, Resume",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.batchJobs.hint",
+      "en": "Live progress of batch jobs, with pause, resume and cancel",
+      "vars": []
+    },
+    {
+      "key": "batch.panel.title",
+      "en": "Batch jobs",
+      "vars": []
+    },
+    {
+      "key": "batch.panel.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "batch.panel.progress",
+      "en": "{done} of {total} done · {failed} failed",
+      "vars": [
+        "done",
+        "total",
+        "failed"
+      ]
+    },
+    {
+      "key": "batch.panel.eta",
+      "en": "About {time} left",
+      "vars": [
+        "time"
+      ]
+    },
+    {
+      "key": "batch.panel.paused",
+      "en": "Paused",
+      "vars": []
+    },
+    {
+      "key": "batch.panel.blocked",
+      "en": "Waiting for a local model — Resume tries again",
+      "vars": []
+    },
+    {
+      "key": "batch.panel.finished",
+      "en": "Finished — apply the results to your notes",
+      "vars": []
+    },
+    {
+      "key": "batch.panel.cloud",
+      "en": "Running at {provider}; results arrive within 24 hours",
+      "vars": [
+        "provider"
+      ]
+    },
+    {
+      "key": "batch.panel.pause",
+      "en": "Pause",
+      "vars": []
+    },
+    {
+      "key": "batch.panel.resume",
+      "en": "Resume",
+      "vars": []
+    },
+    {
+      "key": "batch.panel.cancel",
+      "en": "Cancel job",
+      "vars": []
+    },
+    {
+      "key": "batch.panel.confirmCancel",
+      "en": "Cancel this batch job? None of its results will be applied.",
+      "vars": []
+    },
+    {
+      "key": "batch.panel.apply",
+      "en": "Apply results",
+      "vars": []
+    },
+    {
+      "key": "batch.panel.rejected",
+      "en": "Rejected answers ({n})",
+      "vars": [
+        "n"
+      ]
+    },
+    {
       "key": "cmd.ai.mode",
       "en": "AI: Cost Mode (Economy / Balanced / Quality)…",
       "vars": []
@@ -7750,6 +8056,168 @@
       "key": "chart.alternatives",
       "en": "Chart suggestions",
       "vars": []
+    },
+    {
+      "key": "cmd.ai.organize",
+      "en": "AI: Organize the vault",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.organize.hint",
+      "en": "Missing links, tags, duplicates and maps of content — each change waits for your approval",
+      "vars": []
+    },
+    {
+      "key": "organizer.title",
+      "en": "Organize the vault",
+      "vars": []
+    },
+    {
+      "key": "organizer.intro",
+      "en": "Suggestions only. Each goes to the review screen as a change; nothing is written until you approve it.",
+      "vars": []
+    },
+    {
+      "key": "organizer.reading",
+      "en": "Reading notes: {read} of {total}",
+      "vars": [
+        "read",
+        "total"
+      ]
+    },
+    {
+      "key": "organizer.analysing",
+      "en": "Looking for links, tags, duplicates and maps of content…",
+      "vars": []
+    },
+    {
+      "key": "organizer.ready",
+      "en": "{count} suggestions: {link} links, {tag} tags, {merge} merges, {moc} maps of content",
+      "vars": [
+        "count",
+        "link",
+        "tag",
+        "merge",
+        "moc"
+      ]
+    },
+    {
+      "key": "organizer.none",
+      "en": "No suggestions: the vault looks organized.",
+      "vars": []
+    },
+    {
+      "key": "organizer.sent",
+      "en": "{staged} of {count} sent to the review screen",
+      "vars": [
+        "staged",
+        "count"
+      ]
+    },
+    {
+      "key": "organizer.next",
+      "en": "Review the next {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "organizer.openReview",
+      "en": "Open the review screen",
+      "vars": []
+    },
+    {
+      "key": "organizer.pause",
+      "en": "Pause",
+      "vars": []
+    },
+    {
+      "key": "organizer.resume",
+      "en": "Resume",
+      "vars": []
+    },
+    {
+      "key": "organizer.cancel",
+      "en": "Cancel",
+      "vars": []
+    },
+    {
+      "key": "organizer.paused",
+      "en": "Paused",
+      "vars": []
+    },
+    {
+      "key": "organizer.cancelled",
+      "en": "Cancelled. Nothing was written.",
+      "vars": []
+    },
+    {
+      "key": "organizer.failed",
+      "en": "Stopped: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "organizer.kind.link",
+      "en": "Link",
+      "vars": []
+    },
+    {
+      "key": "organizer.kind.tag",
+      "en": "Tags",
+      "vars": []
+    },
+    {
+      "key": "organizer.kind.merge",
+      "en": "Merge",
+      "vars": []
+    },
+    {
+      "key": "organizer.kind.moc",
+      "en": "Map of content",
+      "vars": []
+    },
+    {
+      "key": "organizer.reason.link",
+      "en": "“{title}” is mentioned in {note} but not linked",
+      "vars": [
+        "title",
+        "note"
+      ]
+    },
+    {
+      "key": "organizer.reason.tagWord",
+      "en": "Add {tag}: the word is in the note, and {count} notes use the tag",
+      "vars": [
+        "tag",
+        "count"
+      ]
+    },
+    {
+      "key": "organizer.reason.tagNear",
+      "en": "Add {tag}: notes linked with it have it ({near})",
+      "vars": [
+        "tag",
+        "near"
+      ]
+    },
+    {
+      "key": "organizer.reason.merge",
+      "en": "{from} repeats {into} ({percent}% the same): merge it in",
+      "vars": [
+        "from",
+        "into",
+        "percent"
+      ]
+    },
+    {
+      "key": "organizer.reason.moc",
+      "en": "{count} notes tagged {tag}, and no note links them",
+      "vars": [
+        "count",
+        "tag"
+      ]
     }
   ]
 }

@@ -1244,6 +1244,8 @@ export function useCommands({
             const job = await batch.submitBatch(op, notes, { lang });
             if (Number.isFinite(quota.limit)) for (let i = 0; i < notes.length; i++) recordAiPrompt();
             showAiToast(t("batch.submitted", { count: job.items.length }), "success");
+            // Live progress, with pause / resume / cancel (plan 5.8).
+            if (job.provider === "local") void import("../ui/BatchPanel").then((m) => m.openBatchPanel());
           } catch (e) {
             if (isAbort(e)) return;
             if ((await import("../agents/suggestions")).reportAgentFailure(e, "ai.batch")) return;
@@ -1346,6 +1348,17 @@ export function useCommands({
           // File tree, tags, backlinks and database views refresh on this.
           if (wroteAny) window.dispatchEvent(new CustomEvent("lumen-workspace-changed"));
           if (processing) showAiToast(t("batch.processing", { count: processing }), "info");
+        },
+      },
+      {
+        id: "ai.batchJobs",
+        label: t("cmd.ai.batchJobs"),
+        hint: t("cmd.ai.batchJobs.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          const { openBatchPanel } = await import("../ui/BatchPanel");
+          openBatchPanel();
         },
       },
       {
@@ -1749,6 +1762,28 @@ export function useCommands({
         group: t("group.ai", { defaultValue: "AI Copilot" }),
         action: () => {
           window.dispatchEvent(new CustomEvent("lumen-open-privacy-ledger"));
+        },
+      },
+      {
+        id: "ai.organize",
+        label: t("cmd.ai.organize"),
+        hint: t("cmd.ai.organize.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.ai", { defaultValue: "AI Copilot" }),
+        action: async () => {
+          // Plan W2.1: suggestions only; every change goes through the review screen.
+          const { openOrganizerPanel } = await import("../ui/OrganizerPanel");
+          await openOrganizerPanel();
+        },
+      },
+      {
+        id: "ai.reviewChanges",
+        label: t("cmd.ai.reviewChanges"),
+        hint: t("cmd.ai.reviewChanges.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.ai", { defaultValue: "AI Copilot" }),
+        action: () => {
+          window.dispatchEvent(new CustomEvent("lumen-open-agent-review"));
         },
       },
       {
