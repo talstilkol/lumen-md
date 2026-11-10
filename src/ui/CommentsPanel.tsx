@@ -46,10 +46,10 @@ export function CommentsPanel({ open, onClose, collab, onJump }: Props) {
   useEffect(() => {
     if (!open) return;
     const refresh = () =>
-      setComments(listComments(collab.doc, { onlyOpen: !showResolved }));
+      setComments(listComments(collab.commentsDoc, { onlyOpen: !showResolved }));
     refresh();
-    return onCommentsChanged(collab.doc, refresh);
-  }, [open, collab.doc, showResolved]);
+    return onCommentsChanged(collab.commentsDoc, refresh);
+  }, [open, collab.commentsDoc, showResolved]);
 
   // Listen for `lumen-comment-focus` events fired when the user clicks
   // a comment decoration in the editor — scroll the matching thread
@@ -79,7 +79,9 @@ export function CommentsPanel({ open, onClose, collab, onJump }: Props) {
   if (!open) return null;
 
   const total = comments.length;
-  const unresolvedCount = listComments(collab.doc, { onlyOpen: true }).length;
+  const unresolvedCount = listComments(collab.commentsDoc, { onlyOpen: true }).length;
+  // Plan W1.19: a "view" participant reads the threads; writing needs "comment" or "edit".
+  const mayComment = collab.canComment();
 
   return (
     <aside
@@ -206,9 +208,10 @@ export function CommentsPanel({ open, onClose, collab, onJump }: Props) {
                 <span style={{ fontSize: 10, color: "hsl(var(--fg-muted))" }}>
                   {new Date(c.createdAt).toLocaleString(getLocale())}
                 </span>
+                {mayComment && (<>
                 <button
                   type="button"
-                  onClick={() => toggleResolved(collab.doc, c.id)}
+                  onClick={() => toggleResolved(collab.commentsDoc, c.id)}
                   aria-label={t(c.resolvedAt ? "commentsPanel.reopen" : "commentsPanel.resolve")}
                   title={t(c.resolvedAt ? "commentsPanel.reopen" : "commentsPanel.resolve")}
                   style={iconBtn(c.resolvedAt ? "hsl(140 60% 60%)" : "hsl(var(--fg-muted))")}
@@ -217,13 +220,14 @@ export function CommentsPanel({ open, onClose, collab, onJump }: Props) {
                 </button>
                 <button
                   type="button"
-                  onClick={() => deleteComment(collab.doc, c.id)}
+                  onClick={() => deleteComment(collab.commentsDoc, c.id)}
                   aria-label={t("commentsPanel.delete")}
                   title={t("commentsPanel.delete")}
                   style={iconBtn("hsl(0 80% 65%)")}
                 >
                   <Trash2 size={11} />
                 </button>
+                </>)}
               </header>
 
               {excerpt && (
@@ -252,7 +256,7 @@ export function CommentsPanel({ open, onClose, collab, onJump }: Props) {
                 </button>
               )}
 
-              <div>{c.body}</div>
+              <div dir="auto"><MentionText text={c.body} /></div>
 
               {c.replies.length > 0 && (
                 <ul style={{ margin: "8px 0 0", padding: 0, listStyle: "none", borderInlineStart: "2px solid hsl(var(--border))" }}>
@@ -262,7 +266,7 @@ export function CommentsPanel({ open, onClose, collab, onJump }: Props) {
                       <span style={{ color: "hsl(var(--fg-muted))", fontSize: 10 }}>
                         {new Date(r.createdAt).toLocaleTimeString(getLocale())}
                       </span>
-                      <div>{r.body}</div>
+                      <div dir="auto"><MentionText text={r.body} /></div>
                     </li>
                   ))}
                 </ul>
@@ -273,7 +277,7 @@ export function CommentsPanel({ open, onClose, collab, onJump }: Props) {
                   onSubmit={(e) => {
                     e.preventDefault();
                     if (!replyBody.trim()) return;
-                    replyToComment(collab.doc, c.id, replyBody, collab.user);
+                    replyToComment(collab.commentsDoc, c.id, replyBody, collab.user);
                     setReplyBody("");
                     setReplyingTo(null);
                   }}
@@ -296,7 +300,7 @@ export function CommentsPanel({ open, onClose, collab, onJump }: Props) {
                     }}
                   />
                 </form>
-              ) : (
+              ) : mayComment ? (
                 <button
                   type="button"
                   onClick={() => setReplyingTo(c.id)}
@@ -316,7 +320,7 @@ export function CommentsPanel({ open, onClose, collab, onJump }: Props) {
                   <Reply size={11} />
                   {t("commentsPanel.reply")}
                 </button>
-              )}
+              ) : null}
             </article>
           );
         })}
@@ -344,6 +348,25 @@ export function addCommentFromSelection(
   to: number,
 ): string | null {
   if (!body.trim() || from === to) return null;
-  const c = addCommentApi(collab.doc, collab.ytext, body, from, to, collab.user);
+  if (!collab.canComment()) return null;
+  const c = addCommentApi(collab.commentsDoc, collab.ytext, body, from, to, collab.user);
   return c.id;
+}
+
+/** A comment's text with its @mentions marked (plan W1.19). */
+function MentionText({ text }: { text: string }) {
+  const parts = text.split(/((?:^|(?<=[\s(\[{"'״׳\-־]))@[\p{L}\p{M}\p{N}_.-]{1,40})/u);
+  return (
+    <>
+      {parts.map((p, i) =>
+        i % 2 === 1 ? (
+          <bdi key={i} className="comment-mention" style={{ color: "hsl(var(--accent))", fontWeight: 600 }}>
+            {p}
+          </bdi>
+        ) : (
+          <span key={i}>{p}</span>
+        ),
+      )}
+    </>
+  );
 }
