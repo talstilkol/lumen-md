@@ -100,3 +100,8 @@ it). The other locales keep these keys in their files as usual, and
 `extract-i18n-keys.mjs`, `i18n-split.mjs` (for `i18n/keys/`), the drift /
 values / placeholder tests and `print-missing-i18n-keys.mjs` read the lazy
 files together with `locales/en/`. A key lives in exactly one of the two places.
+
+**New keys:** `npm run i18n:draft` drafts every English key a language
+lacks, in all seven languages, with a local model, and lists the drafts in
+`i18n/needs-review/<domain>.json` (plan 9.6). The values gate counts a
+listed draft as untranslated until `npm run i18n:draft -- --approve=<lang>`.

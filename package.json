@@ -41,6 +41,7 @@
     "i18n:hardcoded": "node scripts/check-i18n-hardcoded.mjs",
     "i18n:fix": "node scripts/i18n-split.mjs && node scripts/extract-i18n-keys.mjs > /dev/null",
     "i18n:split": "node scripts/i18n-split.mjs",
+    "i18n:draft": "node scripts/i18n-draft.mjs",
     "docker:build": "docker build -t lumen-md .",
     "docker:run": "docker run -p 8080:8080 lumen-md",
     "eval:agents": "node scripts/agent-eval.mjs",
