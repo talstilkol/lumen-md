@@ -92,7 +92,7 @@ export function FileTree({
    * folder too) and get the same link rewrite as the files on disk.
    */
   function afterMove(from: string, r: MoveResult): void {
-    syncOpenDocsAfterMove(from, r.path, r.rewrite);
+    syncOpenDocsAfterMove(from, r.path, r.rewrite, r.replaced?.originalPath ?? null);
     const nextActive = activePath ? movedPath(activePath, from, r.path) : null;
     if (nextActive) onActiveRenamed(nextActive);
     if (r.linksError) toast.error(t("tree.linksFailed", { error: r.linksError.message }));

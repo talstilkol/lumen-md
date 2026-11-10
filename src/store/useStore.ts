@@ -43,6 +43,38 @@ export interface DocFile {
 
 let nextLoadId = 0;
 
+/**
+ * What an open tab keeps while it is not the active document and that
+ * cannot be persisted with it: its load identity (live-JS approval and the
+ * worker scope follow `docIdentity`) and the disk handle of a file opened
+ * from the system (PWA file handling), so Save still writes back after a
+ * tab switch. Runtime only — handles are not serializable.
+ */
+const tabRuntime = new Map<string, { loadId?: number; handle?: FileSystemFileHandle }>();
+
+/** Test hook. */
+export function __tabRuntime(): ReadonlyMap<string, { loadId?: number; handle?: FileSystemFileHandle }> {
+  return tabRuntime;
+}
+
+/** A tab's id changed (rename, move, detach): its runtime state follows it. */
+export function moveTabRuntime(fromId: string, toId: string): void {
+  moveTabRuntimes([[fromId, toId]]);
+}
+
+/**
+ * Several id changes at once, collision-safe: every source entry is read
+ * before any is written, so a move into an id that is itself moving away in
+ * the same batch (a moved note landing where an overwritten tab was) does not
+ * carry the wrong runtime along.
+ */
+export function moveTabRuntimes(moves: ReadonlyArray<readonly [string, string]>): void {
+  const real = moves.filter(([from, to]) => from !== to);
+  const taken = real.map(([from, to]) => [to, tabRuntime.get(from)] as const);
+  for (const [from] of real) tabRuntime.delete(from);
+  for (const [to, rt] of taken) if (rt) tabRuntime.set(to, rt);
+}
+
 interface AppState {
   doc: DocFile;
   mode: ViewMode;
@@ -355,6 +387,12 @@ export const useAppStore = create<AppState>()(
           // and back. Then either focus the existing tab for `id` or push a
           // new one onto the strip.
           const currentId = tabIdOf(state.doc);
+          if (state.openTabs.some((t) => t.id === currentId)) tabRuntime.set(currentId, { loadId: state.doc.loadId, handle: state.doc.handle });
+          // Focusing a tab that is already open with the same text is the same load:
+          // keep its identity, handle and unsaved marker instead of minting a new load.
+          const existing = state.openTabs.find((t) => t.id === id);
+          const kept = id === currentId ? { loadId: state.doc.loadId, handle: state.doc.handle } : tabRuntime.get(id);
+          const sameLoad = !!existing && existing.content === input.content && kept?.loadId !== undefined;
           const baseTabs = state.openTabs.some((t) => t.id === currentId)
             ? state.openTabs.map((t) =>
                 t.id === currentId
@@ -382,15 +420,19 @@ export const useAppStore = create<AppState>()(
               },
             ];
           }
+          const loadId = sameLoad ? kept!.loadId : ++nextLoadId;
+          const handle = input.handle ?? (sameLoad ? kept?.handle : undefined);
+          const dirty = sameLoad ? (id === currentId ? state.doc.dirty : existing!.dirty) : false;
+          tabRuntime.set(id, { loadId, handle });
           return {
             openTabs: nextTabs,
             doc: {
               name: input.name,
               content: input.content,
               workspaceName: input.workspaceName ?? null,
-              handle: input.handle,
-              dirty: false,
-              loadId: ++nextLoadId,
+              handle,
+              dirty,
+              loadId,
             },
           };
         })),
@@ -402,6 +444,7 @@ export const useAppStore = create<AppState>()(
           const openTabs = state.openTabs.map((t) =>
             t.id === prevId ? { ...t, id, name: doc.name, content: doc.content, workspaceName, dirty: false } : t,
           );
+          moveTabRuntime(prevId, id);
           return { doc, openTabs };
         }),
       closeTab: afterPendingEdits((id) =>
@@ -410,6 +453,7 @@ export const useAppStore = create<AppState>()(
           if (idx === -1) return state;
           const nextTabs = state.openTabs.filter((t) => t.id !== id);
           const wasActive = tabIdOf(state.doc) === id;
+          tabRuntime.delete(id);
           if (!wasActive) return { openTabs: nextTabs };
           // Active tab closed — fall back to the neighbour at the same index
           // (or the previous one if we just lost the rightmost tab).
@@ -426,6 +470,7 @@ export const useAppStore = create<AppState>()(
               },
             };
           }
+          const kept = tabRuntime.get(fallback.id);
           return {
             openTabs: nextTabs,
             doc: {
@@ -433,6 +478,8 @@ export const useAppStore = create<AppState>()(
               content: fallback.content,
               workspaceName: fallback.workspaceName ?? null,
               dirty: fallback.dirty,
+              handle: kept?.handle,
+              loadId: kept?.loadId ?? ++nextLoadId,
             },
           };
         })),
