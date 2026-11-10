@@ -13,6 +13,8 @@ export interface GraphNoteInput {
   wikiTargets: readonly string[];
   /** The note's text, for tags and frontmatter properties (optional). */
   content?: string;
+  /** Tags and properties read already (`noteMeta`), instead of the text. */
+  meta?: { tags: string[]; props: Record<string, string> };
 }
 
 export interface GraphData {
@@ -112,7 +114,7 @@ export function buildGraph(notes: readonly GraphNoteInput[]): GraphData {
     neighbors[fill[edges[e]]++] = edges[e + 1];
     neighbors[fill[edges[e + 1]]++] = edges[e];
   }
-  const metas = notes.map((x) => noteMeta(x.content));
+  const metas = notes.map((x) => x.meta ?? noteMeta(x.content));
   return {
     paths: notes.map((x) => x.path),
     labels: notes.map((x) => basename(x.path)),

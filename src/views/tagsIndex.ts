@@ -57,8 +57,8 @@ export async function buildTagsIndex(): Promise<TagsIndex> {
     if (!/\.(md|markdown)$/i.test(f.path)) continue;
     if (isAssetName(f.name)) continue;
     totalNotes++;
-    const body = f.content;
-    const fm = extractFrontmatter(body) ?? {};
+    // W2.22: the frontmatter block the index kept, not the note's text.
+    const fm = (f.frontmatter ? extractFrontmatter(f.frontmatter) : null) ?? {};
     const tags = tagsFromFrontmatter(fm);
     if (tags.length === 0) {
       untagged.push(f.path);

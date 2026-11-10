@@ -11,6 +11,23 @@ import type { IndexRequest } from "./vaultIndexProtocol";
 
 const index = new VaultIndex();
 
+// W2.22 — after a batch of changes, build the chunks' search texts while
+// the worker is idle, so the first query after opening a large vault scans
+// instead of folding 100,000 notes.
+let prepareTimer: ReturnType<typeof setTimeout> | null = null;
+
+// Requests run one after another: a snapshot restore finishes before the
+// upserts sent after it (W2.22: some requests are asynchronous now).
+let queue: Promise<void> = Promise.resolve();
+
 self.onmessage = (e: MessageEvent<IndexRequest>) => {
-  (self as unknown as Worker).postMessage(handleIndexRequest(index, e.data));
+  const req = e.data;
+  queue = queue.then(async () => (self as unknown as Worker).postMessage(await handleIndexRequest(index, req))).catch(() => {});
+  if (req.op === "upsert" || req.op === "remove" || req.op === "move" || req.op === "snapshotRestore") {
+    if (prepareTimer) clearTimeout(prepareTimer);
+    prepareTimer = setTimeout(() => {
+      prepareTimer = null;
+      queue = queue.then(() => index.prepare());
+    }, 200);
+  }
 };

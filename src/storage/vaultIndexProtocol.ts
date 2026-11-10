@@ -8,6 +8,14 @@
  */
 
 import type { BacklinkHit, IndexInput, IndexStats, SearchHit, SearchOptions } from "./vaultIndexCore";
+import type { NoteSummary } from "./noteSummary";
+
+/** A note restored from the snapshot, as the main thread keeps it. */
+export interface RestoredNote extends NoteSummary {
+  path: string;
+  name: string;
+  modified: number;
+}
 
 export type IndexRequestBody =
   | { op: "upsert"; files: IndexInput[] }
@@ -15,7 +23,11 @@ export type IndexRequestBody =
   | { op: "clear" }
   | { op: "search"; query: string; opts: SearchOptions }
   | { op: "backlinks"; target: string }
-  | { op: "stats" };
+  | { op: "stats" }
+  // W2.22: the text stays in the index; these work on what it holds.
+  | { op: "move"; moves: { from: string; to: string; name: string }[] }
+  | { op: "snapshotSave"; vault: string }
+  | { op: "snapshotRestore"; vault: string; listing: { path: string; name: string; modified: number }[] };
 
 export type IndexRequest = IndexRequestBody & { id: number };
 
@@ -30,6 +42,15 @@ export interface IndexEngine {
   search(query: string, opts: SearchOptions): Promise<SearchHit[]>;
   backlinks(target: string): Promise<BacklinkHit[]>;
   stats(): Promise<IndexStats>;
+  /** Move notes inside the index (no text sent). */
+  move(moves: { from: string; to: string; name: string }[]): Promise<void>;
+  /** Save the indexed notes for the next session (indexSnapshot.ts). */
+  saveSnapshot(vault: string): Promise<void>;
+  /**
+   * Index every listed note the snapshot holds with the same mtime; returns
+   * their summaries (the caller reads only the others).
+   */
+  restoreSnapshot(vault: string, listing: { path: string; name: string; modified: number }[]): Promise<RestoredNote[]>;
   dispose(): void;
 }
 
@@ -42,6 +63,9 @@ export function engineOver(kind: IndexEngine["kind"], send: (req: IndexRequestBo
     search: (query, opts) => send({ op: "search", query, opts }) as Promise<SearchHit[]>,
     backlinks: (target) => send({ op: "backlinks", target }) as Promise<BacklinkHit[]>,
     stats: () => send({ op: "stats" }) as Promise<IndexStats>,
+    move: async (moves) => void (await send({ op: "move", moves })),
+    saveSnapshot: async (vault) => void (await send({ op: "snapshotSave", vault })),
+    restoreSnapshot: (vault, listing) => send({ op: "snapshotRestore", vault, listing }) as Promise<RestoredNote[]>,
     dispose,
   };
 }
