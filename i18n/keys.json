@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-10T02:30:17.163Z",
+  "generated_at": "2026-11-10T02:37:39.353Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1496,
+  "count": 1526,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1501,6 +1501,16 @@
     {
       "key": "cmd.vault.export.hint",
       "en": "Every note and attachment, with folders, as a .zip or into a folder",
+      "vars": []
+    },
+    {
+      "key": "cmd.vault.backups",
+      "en": "Backups…",
+      "vars": []
+    },
+    {
+      "key": "cmd.vault.backups.hint",
+      "en": "Daily backups to another drive, and restore",
       "vars": []
     },
     {
@@ -7967,6 +7977,163 @@
       "key": "chart.alternatives",
       "en": "Chart suggestions",
       "vars": []
+    },
+    {
+      "key": "backup.title",
+      "en": "Backups",
+      "vars": []
+    },
+    {
+      "key": "backup.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "backup.intro",
+      "en": "Once a day while Lumen is open, the whole vault is copied to another drive or folder. Kept: 7 daily, 4 weekly and 6 monthly backups. Version history stays on this disk; this protects against losing the disk.",
+      "vars": []
+    },
+    {
+      "key": "backup.status.ok",
+      "en": "Last backup: {time}",
+      "vars": [
+        "time"
+      ]
+    },
+    {
+      "key": "backup.status.failed",
+      "en": "The last backup failed ({time}): {error}",
+      "vars": [
+        "time",
+        "error"
+      ]
+    },
+    {
+      "key": "backup.status.stale",
+      "en": "No backup for {days} days.",
+      "vars": [
+        "days"
+      ]
+    },
+    {
+      "key": "backup.status.never",
+      "en": "No backup yet.",
+      "vars": []
+    },
+    {
+      "key": "backup.running",
+      "en": "Backing up…",
+      "vars": []
+    },
+    {
+      "key": "backup.target",
+      "en": "{name} · {mode}",
+      "vars": [
+        "name",
+        "mode"
+      ]
+    },
+    {
+      "key": "backup.mode.plain",
+      "en": "plain copy (.tar, any tool opens it)",
+      "vars": []
+    },
+    {
+      "key": "backup.mode.age",
+      "en": "encrypted (.tar.age, opens with your backup key)",
+      "vars": []
+    },
+    {
+      "key": "backup.none",
+      "en": "Not set up yet.",
+      "vars": []
+    },
+    {
+      "key": "backup.choose.plain",
+      "en": "Back up to a folder or drive…",
+      "vars": []
+    },
+    {
+      "key": "backup.choose.age",
+      "en": "Back up encrypted to a folder or drive…",
+      "vars": []
+    },
+    {
+      "key": "backup.now",
+      "en": "Back up now",
+      "vars": []
+    },
+    {
+      "key": "backup.key.title",
+      "en": "Your backup key",
+      "vars": []
+    },
+    {
+      "key": "backup.key.note",
+      "en": "Save this key somewhere safe, away from this device. Without it nobody can open an encrypted backup, you included.",
+      "vars": []
+    },
+    {
+      "key": "backup.list",
+      "en": "Backups there",
+      "vars": []
+    },
+    {
+      "key": "backup.keyPrompt",
+      "en": "The backup key (AGE-SECRET-KEY-1…)",
+      "vars": []
+    },
+    {
+      "key": "backup.restoreAll",
+      "en": "Restore everything to a new folder…",
+      "vars": []
+    },
+    {
+      "key": "backup.restorePath",
+      "en": "Path to restore (a file or a folder)",
+      "vars": []
+    },
+    {
+      "key": "backup.restoreFile",
+      "en": "Restore it into the vault",
+      "vars": []
+    },
+    {
+      "key": "backup.restored",
+      "en": "Restored {n} files.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "backup.restoredKept",
+      "en": "Restored {n} files; {m} were already there, so they were restored next to them.",
+      "vars": [
+        "n",
+        "m"
+      ]
+    },
+    {
+      "key": "backup.insideVault",
+      "en": "That folder is the vault or inside it. Choose a folder on another drive, outside the vault.",
+      "vars": []
+    },
+    {
+      "key": "backup.reconnect",
+      "en": "Allow access to the backup folder again: open Backups and press Back up now.",
+      "vars": []
+    },
+    {
+      "key": "backup.toast.failed",
+      "en": "Backup failed",
+      "vars": []
+    },
+    {
+      "key": "backup.toast.stale",
+      "en": "No backup for {days} days",
+      "vars": [
+        "days"
+      ]
     },
     {
       "key": "e2ee.conflict.title",

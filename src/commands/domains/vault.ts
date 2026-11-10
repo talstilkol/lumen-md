@@ -101,6 +101,15 @@ export function buildVaultDoctorCommands(): Command[] {
 export function buildVaultTransferCommands(): Command[] {
   return [
     {
+      id: "vault.backups",
+      label: t("cmd.vault.backups"),
+      hint: t("cmd.vault.backups.hint"),
+      icon: cmdIcons.Save,
+      group: t("group.file"),
+      // Plan W1.6: lazy, with its own root.
+      action: () => void import("../../backup/BackupPanel").then((m) => m.openBackupPanel()),
+    },
+    {
       id: "vault.export",
       label: t("cmd.vault.export"),
       hint: t("cmd.vault.export.hint"),

@@ -375,6 +375,8 @@ const en: Strings = {
   "versionHistory.noVersions": "No versions yet. A version is kept every couple of minutes while you type, on every save and when you close the tab.",
   "cmd.vault.export": "Export the whole vault…",
   "cmd.vault.export.hint": "Every note and attachment, with folders, as a .zip or into a folder",
+  "cmd.vault.backups": "Backups…",
+  "cmd.vault.backups.hint": "Daily backups to another drive, and restore",
   "cmd.vault.import": "Import notes (zip / folder: Obsidian, Notion, Lumen)…",
   "cmd.vault.import.hint": "Into a new folder — nothing existing is overwritten",
   "vault.export.where": "Export as…",

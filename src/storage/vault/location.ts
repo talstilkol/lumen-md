@@ -156,6 +156,12 @@ export function isFolderVaultSupported(): boolean {
   return typeof window !== "undefined" && typeof (window as PickerWindow).showDirectoryPicker === "function";
 }
 
+/** The vault's folder handle when the vault is a folder the user picked (null for OPFS and the desktop). Plan W1.6 refuses backup targets inside it. */
+export async function vaultFolderHandle(): Promise<FileSystemDirectoryHandle | null> {
+  const loc = await kv.get<StoredLocation>(LOCATION_KEY);
+  return loc?.kind === "folder" ? loc.handle : null;
+}
+
 /** Ask the user for a folder (null when they cancel). */
 export async function pickVaultFolder(): Promise<FileSystemDirectoryHandle | null> {
   const picker = (window as PickerWindow).showDirectoryPicker;

@@ -35,6 +35,12 @@ installAiEscape((n) => showAiToast(t("toast.aiCancelled", { count: n }), "info")
 initTelemetry();
 void initAuth();
 startAutoBackup();
+// Plan W1.6: scheduled backups to a second drive, loaded only once they are set up.
+try {
+  if (localStorage.getItem("lumen.backup.enabled") === "1") void import("./backup/start").then((m) => m.startBackups());
+} catch {
+  /* storage blocked: no backups to schedule */
+}
 startVaultSnapshots();
 // The vault lives in OPFS/IndexedDB; without this the browser may evict it.
 void requestPersistentStorage();
