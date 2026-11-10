@@ -33,6 +33,8 @@ import type { BacklinkHit, IndexInput, IndexStats, SearchHit } from "./vaultInde
 import { wikiTargetsOf } from "./wikiTargets";
 import type { IndexEngine } from "./vaultIndexProtocol";
 import { log } from "../lib/logger";
+import { scheduleIdle } from "../lib/idle";
+import { dropSnapshot, loadSnapshot, saveSnapshot } from "./indexSnapshot";
 
 export type { BacklinkHit, SearchHit } from "./vaultIndexCore";
 
@@ -200,6 +202,35 @@ async function listNotes(reuseTree: boolean): Promise<WorkspaceEntry[]> {
 
 // ── Keeping the index in step ───────────────────────────────────────────
 
+// ── W2.22: the index survives a restart (./indexSnapshot.ts) ─────────────
+
+/** How the last full build got its notes: from the snapshot or by reading them. */
+export const snapshotCounters = { fromSnapshot: 0, read: 0 };
+const SNAPSHOT_DELAY_MS = 5_000;
+let snapshotTimer: ReturnType<typeof setTimeout> | null = null;
+let snapshotReset: Promise<void> = Promise.resolve();
+let snapshotGen = 0;
+
+function snapshotVault(): string {
+  try {
+    return getVaultBackend().id;
+  } catch {
+    return "default";
+  }
+}
+
+/** Write the snapshot a little after the last change, while idle (never on the typing path). */
+function scheduleSnapshot(): void {
+  if (snapshotTimer) clearTimeout(snapshotTimer);
+  const gen = snapshotGen;
+  snapshotTimer = setTimeout(() => {
+    snapshotTimer = null;
+    scheduleIdle(() => {
+      if (gen === snapshotGen) void saveSnapshot(snapshotVault(), cache.byPath.values());
+    });
+  }, SNAPSHOT_DELAY_MS);
+}
+
 /** Build the whole index (first use, or `ensureIndex(true)`). */
 async function build(): Promise<void> {
   if (!isOPFSAvailable()) return;
@@ -210,11 +241,25 @@ async function build(): Promise<void> {
   cache.stale = false;
   const list = await listNotes(false);
   const next = new Map<string, IndexedFile>();
+  // W2.22 — notes the snapshot holds with the same mtime are not read again.
+  const vault = snapshotVault();
+  await snapshotReset;
+  const snap = await loadSnapshot(vault);
+  snapshotCounters.fromSnapshot = 0;
+  snapshotCounters.read = 0;
   await mapLimit(list, 16, async (e) => {
+    const s = snap?.get(e.path);
+    if (s && e.modified && s.modified === e.modified) {
+      next.set(e.path, { path: e.path, name: e.name, content: s.content, modified: s.modified, wikiTargets: wikiTargetsOf(s.content) });
+      snapshotCounters.fromSnapshot++;
+      return;
+    }
     const f = await indexFile(e);
+    snapshotCounters.read++;
     if (f) next.set(e.path, f);
   });
   cache.byPath = next;
+  scheduleSnapshot();
   await withEngine(async (eng) => {
     await eng.clear();
     await upsertAll(eng, [...next.values()]);
@@ -292,6 +337,7 @@ async function refresh(): Promise<void> {
   const written = new Set(toWrite.map((f) => f.path));
   const removedNow = gone.filter((p) => !written.has(p) && !cache.byPath.has(p));
   if (!removedNow.length && !toWrite.length) return;
+  scheduleSnapshot();
   await withEngine(async (eng) => {
     if (removedNow.length) await eng.remove(removedNow);
     // Only what the index holds now: a path moved again (A → B → C) or
@@ -432,4 +478,9 @@ export function __resetWorkspaceIndex(engineFactory?: () => IndexEngine): void {
   void engine?.then((e) => e.dispose(), () => undefined);
   engine = null;
   engineOverride = engineFactory ?? null;
+  // Tests start from an empty vault: no snapshot from an earlier one.
+  if (snapshotTimer) clearTimeout(snapshotTimer);
+  snapshotTimer = null;
+  snapshotGen++;
+  snapshotReset = dropSnapshot();
 }

@@ -91,23 +91,44 @@ interface Entry {
   /** Insertion order: a re-indexed note keeps its place, like a Map entry. */
   order: number;
   nameLower: string;
-  /** The name folded like `folded`, for Hebrew name matches without normalising per query. */
+  /** The name folded like the search text, for Hebrew name matches without normalising per query. */
   nameFolded: string | null;
   pathLower: string;
-  lower: string;
   /**
-   * `normalizeWithMap(content).text` (niqqud, finals and case folded) for
-   * notes that have Hebrew letters; null for the rest, which a Hebrew
-   * search can only match through `lower`.
+   * The note has Hebrew letters: its search text is the folded form
+   * (niqqud, finals and case folded), otherwise the lower-cased content.
    */
-  folded: string | null;
+  hebrew: boolean;
   links: Link[];
+  /** The chunk whose search text holds this note's. */
+  chunk: Chunk;
 }
+
+/**
+ * W2.22 — notes' search texts live in chunks, joined into one string per
+ * chunk, instead of a lower-cased and a folded copy per note. At 100,000
+ * notes that is one copy of the text instead of two or three, and a query
+ * is one `indexOf` scan per chunk instead of 100,000 short ones. A change
+ * marks only its chunk; the chunk's string is rebuilt on the next query.
+ */
+interface Chunk {
+  members: Entry[];
+  /** Search texts joined by SEP; null after a change, until the next query. */
+  text: string | null;
+  /** Where each member's text starts in `text`. */
+  starts: number[];
+}
+
+/** Between two notes' texts in a chunk: a noncharacter, stripped from queries, so no match spans notes. */
+const SEP = String.fromCharCode(0xffff);
+const CHUNK_SIZE = 256;
 
 /** Hebrew letters, marks and presentation forms: only notes with one of these need the folded form. */
 const MAY_FOLD_TO_HEBREW = /[֐-׿יִ-ﭏ]/;
 
 const foldMemo = new Map<string, string>();
+
+const WHOLE_TEXT_SAFE = /^[\t\n\r -~\u00A0-\u00FF\u0590-\u05FF\u2000-\u206F\u20AA\uFB1D-\uFB4F]*$/;
 
 /**
  * `normalizeWithMap(text).text` without the map: the same per-character
@@ -116,6 +137,13 @@ const foldMemo = new Map<string, string>();
  * `normalizeForMatch` does to it.
  */
 export function foldForSearch(text: string): string {
+  // W2.22 — for text of ASCII, Latin-1, Hebrew and general punctuation, the
+  // whole text through `normalizeForMatch` at once (a few regex passes in
+  // native code) gives the same result as character by character: nothing
+  // there composes across characters under NFC, and nothing lower-cases by
+  // context. Anything else (combining marks, Greek, jamo, controls) takes
+  // the per-character path.
+  if (WHOLE_TEXT_SAFE.test(text)) return normalizeForMatch(text);
   let out = "";
   for (const ch of text) {
     const code = ch.charCodeAt(0);
@@ -169,6 +197,7 @@ export class VaultIndex {
   private readonly incoming = new Map<string, Set<string>>();
   private nextOrder = 0;
   private readonly counters = { indexed: 0, removed: 0, backlinkReads: 0 };
+  private chunks: Chunk[] = [];
 
   get size(): number {
     return this.files.size;
@@ -199,6 +228,7 @@ export class VaultIndex {
       const target = m[1].split("#")[0].trim();
       if (target) links.push({ key: noteKey(basenameOf(target)), offset: m.index });
     }
+    const chunk = prev ? prev.chunk : this.chunkForNew();
     const entry: Entry = {
       path: input.path,
       name: input.name,
@@ -208,10 +238,13 @@ export class VaultIndex {
       nameLower: input.name.toLowerCase(),
       nameFolded: MAY_FOLD_TO_HEBREW.test(input.name) ? foldForSearch(input.name) : null,
       pathLower: input.path.toLowerCase(),
-      lower: content.toLowerCase(),
-      folded: MAY_FOLD_TO_HEBREW.test(content) ? foldForSearch(content) : null,
+      hebrew: MAY_FOLD_TO_HEBREW.test(content),
       links,
+      chunk,
     };
+    if (prev) chunk.members[chunk.members.indexOf(prev)] = entry;
+    else chunk.members.push(entry);
+    chunk.text = null;
     // Map.set on an existing key keeps its position, as the old index did.
     this.files.set(input.path, entry);
     for (const l of links) {
@@ -222,12 +255,71 @@ export class VaultIndex {
     this.counters.indexed++;
   }
 
+  /**
+   * Build the search text of every changed chunk now (the worker calls it
+   * after a batch, while idle), so the next query only scans.
+   */
+  prepare(): void {
+    for (const c of this.chunks) this.textOf(c);
+  }
+
+  private chunkForNew(): Chunk {
+    const last = this.chunks[this.chunks.length - 1];
+    if (last && last.members.length < CHUNK_SIZE) return last;
+    const c: Chunk = { members: [], text: null, starts: [] };
+    this.chunks.push(c);
+    return c;
+  }
+
+  /** The chunk's joined search text, rebuilt if a member changed. */
+  private textOf(c: Chunk): string {
+    if (c.text !== null) return c.text;
+    const parts: string[] = [];
+    const starts: number[] = [];
+    let at = 0;
+    for (const e of c.members) {
+      const t = (e.hebrew ? foldForSearch(e.content) : e.content.toLowerCase()).split(SEP).join("");
+      starts.push(at);
+      parts.push(t);
+      at += t.length + 1;
+    }
+    c.starts = starts;
+    c.text = parts.join(SEP);
+    return c.text;
+  }
+
+  /** Members of `c` whose search text contains `needle` (and pass `accept`). */
+  private scan(c: Chunk, needle: string, accept: (e: Entry) => boolean, out: Set<Entry>): void {
+    const text = this.textOf(c);
+    const starts = c.starts;
+    let from = 0;
+    while (from <= text.length) {
+      const at = text.indexOf(needle, from);
+      if (at < 0) return;
+      // The member holding `at`: the last start <= at.
+      let lo = 0;
+      let hi = starts.length - 1;
+      while (lo < hi) {
+        const mid = (lo + hi + 1) >> 1;
+        if (starts[mid] <= at) lo = mid;
+        else hi = mid - 1;
+      }
+      const e = c.members[lo];
+      if (accept(e)) out.add(e);
+      from = lo + 1 < starts.length ? starts[lo + 1] : text.length + 1;
+    }
+  }
+
   /** Remove one note. O(its links). */
   remove(path: string): boolean {
     const prev = this.files.get(path);
     if (!prev) return false;
     this.unlink(prev);
     this.files.delete(path);
+    const c = prev.chunk;
+    c.members.splice(c.members.indexOf(prev), 1);
+    c.text = null;
+    if (!c.members.length) this.chunks = this.chunks.filter((x) => x !== c);
     this.counters.removed++;
     return true;
   }
@@ -235,6 +327,7 @@ export class VaultIndex {
   clear(): void {
     this.files.clear();
     this.incoming.clear();
+    this.chunks = [];
   }
 
   private unlink(e: Entry): void {
@@ -280,6 +373,20 @@ export class VaultIndex {
     // What `hebrewFind` looks for: the folded query, or its bare forms.
     const n = hebrewQuery ? normalizeForMatch(q.trim()) : "";
     const candidates = !n ? [] : /\s/.test(n) ? [n] : prefixVariants(n);
+    // Which notes contain the query: one scan per chunk (W2.22).
+    const hits = new Set<Entry>();
+    const qs = q.split(SEP).join("");
+    // A Latin query matches a Hebrew note's folded text exactly when folding leaves it as is.
+    const foldSafe = /^[\x20-\x7e]*$/.test(qs) && !/['"-]/.test(qs);
+    for (const c of this.chunks) {
+      // A Hebrew query cannot be in a note without Hebrew letters: only the folded variants are scanned.
+      if (!hebrewQuery) this.scan(c, qs, (e) => !e.hebrew || foldSafe, hits);
+      if (hebrewQuery) for (const cand of candidates) this.scan(c, cand.split(SEP).join(""), (e) => e.hebrew, hits);
+    }
+    if (!hebrewQuery && !foldSafe) {
+      // Rare: punctuation folding could differ; compare Hebrew notes' lower-cased text directly.
+      for (const e of this.files.values()) if (e.hebrew && !hits.has(e) && e.content.toLowerCase().includes(q)) hits.add(e);
+    }
     const scored: { e: Entry; score: number; found: boolean }[] = [];
     for (const e of this.files.values()) {
       if (allow && !allow.has(e.path)) continue;
@@ -290,8 +397,7 @@ export class VaultIndex {
       if (e.nameLower.startsWith(q)) score += 5;
       if (e.pathLower.includes(q) && e.pathLower !== e.nameLower) score += 6;
       // Niqqud-, final-letter- and prefix-insensitive for Hebrew (T26).
-      const found =
-        e.lower.includes(q) || (hebrewQuery && e.folded !== null && candidates.some((c) => e.folded!.includes(c)));
+      const found = hits.has(e);
       // = `hebrewFind(e.name, q)`, against the name folded at index time.
       if (!inName && hebrewQuery && e.nameFolded !== null && candidates.some((c) => e.nameFolded!.includes(c))) score += 10;
       if (found) score += 4;
@@ -301,7 +407,7 @@ export class VaultIndex {
     scored.sort((a, b) => b.score - a.score);
     return scored.slice(0, limit).map(({ e, score, found }) => {
       const hit: SearchHit = { path: e.path, name: e.name, score, snippet: null };
-      const at = found ? findIn(e.content, e.lower, q) : null;
+      const at = found ? findIn(e.content, e.content.toLowerCase(), q) : null;
       if (at) {
         const ctx = snippetAround(e.content, at.start, 80);
         // Re-locate the hit inside the (whitespace-collapsed, "…"-prefixed) snippet.

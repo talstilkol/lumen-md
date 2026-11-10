@@ -188,6 +188,14 @@ async function embedTextsInBatches(texts: string[]): Promise<Float32Array[]> {
 // C4: the index is read from IndexedDB once per session and its vectors
 // decoded once — not on every query.
 let memIndex: SemanticIndex | null = null;
+/** W2.22 — the loaded index is large: keep its vectors as int8. */
+let int8Index = false;
+
+function chunkCount(index: SemanticIndex): number {
+  let n = 0;
+  for (const f of Object.values(index.files)) n += f.chunks.length;
+  return n;
+}
 
 /**
  * Plan 8.4: the vectors of one file, decoded once into ONE Float32Array —
@@ -199,15 +207,26 @@ let memIndex: SemanticIndex | null = null;
 export interface FileVectors {
   dims: number;
   count: number;
-  data: Float32Array;
+  /**
+   * Float32 values, or (W2.22, large vaults) int8 values: chunk i is then
+   * `data[…] * scales[i]`, a quarter of the memory, with cosine scores within
+   * about 1% of the float ones.
+   */
+  data: Float32Array | Int8Array;
+  /** Per chunk, for int8 data only. */
+  scales?: Float32Array;
   /** Euclidean norm of each chunk vector (float64, as `cosine` computes it). */
   norms: Float64Array;
 }
 
+/** Above this many chunks in the index, vectors are kept in memory as int8 (W2.22). */
+export const INT8_CHUNK_THRESHOLD = 50_000;
+
 /** Pack same-length vectors; null when their lengths differ (then each is scored on its own). */
-export function packVectors(vectors: Float32Array[]): FileVectors | null {
+export function packVectors(vectors: Float32Array[], opts: { int8?: boolean } = {}): FileVectors | null {
   const dims = vectors[0]?.length ?? 0;
   if (vectors.some((v) => v.length !== dims)) return null;
+  if (opts.int8) return packInt8(vectors, dims);
   const data = new Float32Array(dims * vectors.length);
   const norms = new Float64Array(vectors.length);
   vectors.forEach((v, i) => {
@@ -217,6 +236,27 @@ export function packVectors(vectors: Float32Array[]): FileVectors | null {
     norms[i] = Math.sqrt(nb);
   });
   return { dims, count: vectors.length, data, norms };
+}
+
+/** Symmetric int8 quantisation, one scale per chunk (its largest absolute value maps to 127). */
+function packInt8(vectors: Float32Array[], dims: number): FileVectors {
+  const data = new Int8Array(dims * vectors.length);
+  const scales = new Float32Array(vectors.length);
+  const norms = new Float64Array(vectors.length);
+  vectors.forEach((v, i) => {
+    let max = 0;
+    for (let j = 0; j < dims; j++) max = Math.max(max, Math.abs(v[j]));
+    const scale = max / 127 || 1;
+    scales[i] = scale;
+    let nb = 0;
+    for (let j = 0; j < dims; j++) {
+      const q = Math.round(v[j] / scale);
+      data[i * dims + j] = q;
+      nb += q * scale * (q * scale);
+    }
+    norms[i] = Math.sqrt(nb);
+  });
+  return { dims, count: vectors.length, data, scales, norms };
 }
 
 /**
@@ -234,6 +274,7 @@ export function bestChunk(q: Float32Array, v: FileVectors): { index: number; sco
     const off = i * v.dims;
     let dot = 0;
     for (let j = 0; j < v.dims; j++) dot += q[j] * v.data[off + j];
+    if (v.scales) dot *= v.scales[i];
     const denom = qNorm * v.norms[i];
     const s = denom === 0 ? 0 : dot / denom;
     if (i === 0 || s > best.score) best = { index: i, score: s };
@@ -247,17 +288,19 @@ async function loadIndex(): Promise<SemanticIndex> {
   if (memIndex) return memIndex;
   const cached = (await get(IDB_KEY).catch(() => undefined)) as SemanticIndex | undefined;
   memIndex = cached ?? { builtAt: 0, files: {} };
+  int8Index = chunkCount(memIndex) > INT8_CHUNK_THRESHOLD;
   return memIndex;
 }
 
 async function saveIndex(index: SemanticIndex): Promise<void> {
   memIndex = index;
+  int8Index = chunkCount(index) > INT8_CHUNK_THRESHOLD;
   await set(IDB_KEY, index).catch((err) => log.warn("semantic index persist failed", err));
 }
 
 /** A file's vectors, decoded from base64 and packed once. */
 function vectorsOf(file: FileRecord): FileVectors | null {
-  if (!packed.has(file)) packed.set(file, packVectors(file.chunks.map((c) => base64ToVector(c.vector))));
+  if (!packed.has(file)) packed.set(file, packVectors(file.chunks.map((c) => base64ToVector(c.vector)), { int8: int8Index }));
   return packed.get(file) ?? null;
 }
 
