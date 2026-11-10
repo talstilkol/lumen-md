@@ -9,7 +9,8 @@
     "installation": "getting-started/install",
     "local models": "ai/local-llm",
     "privacy": "ai/privacy",
-    "plugins": "plugins/sdk"
+    "plugins": "plugins/sdk",
+    "migration guides": "getting-started/from-obsidian"
   },
   "pending": {
     "sync/git": "#269 feat/safe-git (plan 3.3)",
@@ -17,7 +18,5 @@
     "sync/cloud": "#291 feat/e2ee-sync-providers (plan 3.5)",
     "plugins/gallery": "feat/plugins-install (plan 11.2 part 3, S5b)"
   },
-  "hebrewPending": {
-    "plugins/sdk": "feat/plugins-install (plan 11.2 part 3, S5b) rewrites this page with its Hebrew twin"
-  }
+  "hebrewPending": {}
 }
