@@ -50,3 +50,9 @@ them with the change.
 
 `visual/selftest.visual.ts` writes a throwaway baseline of the split view,
 moves the toolbar by 3 px and checks that the comparison fails.
+
+## The RTL matrix
+
+`visual/rtl.visual.ts` adds six shots of the RTL matrix note
+(`e2e/rtl-note.ts`): the preview and WYSIWYG in Hebrew, light and dark, and
+the preview on an iPhone 14 and a Pixel 7.

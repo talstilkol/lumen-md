@@ -48,3 +48,9 @@ npm run test:visual
 
 `visual/selftest.visual.ts` כותב תמונת בסיס זמנית של התצוגה המפוצלת, מזיז
 את סרגל הכלים ב-3 פיקסלים ובודק שההשוואה נכשלת.
+
+## מטריצת RTL
+
+`visual/rtl.visual.ts` מוסיף שישה צילומים של פתק מטריצת ה-RTL
+(`e2e/rtl-note.ts`): התצוגה ו-WYSIWYG בעברית, בהיר וכהה, והתצוגה על iPhone 14
+ועל Pixel 7.
