@@ -50,6 +50,7 @@ import { CARD_HEIGHT, CARD_WIDTH, NOTE_LINK, cardPositions, noteLink, notePathOf
 import { NoteCard, readNote } from "../canvas/NoteCard";
 import { listWorkspace } from "../storage/workspace";
 import type { ExportKind } from "../canvas/canvasExport";
+import { DiagramDialog } from "../canvas/DiagramDialog";
 
 // Fonts (and anything else Excalidraw fetches by relative path) come from
 // this origin. Without it Excalidraw falls back to esm.sh.
@@ -70,6 +71,7 @@ interface CanvasApi {
   getSceneElements(): readonly SceneElement[];
   getAppState(): { scrollX: number; scrollY: number; width: number; height: number; zoom: { value: number } };
   updateScene(scene: { elements: readonly SceneElement[] }): void;
+  addFiles(files: unknown[]): void;
 }
 
 
@@ -136,6 +138,7 @@ export function CanvasExcalidraw({ open, onClose }: Props) {
   const saverRef = useRef<{ schedule(): void; flush(): void } | null>(null);
   const apiRef = useRef<CanvasApi | null>(null);
   const [exporting, setExporting] = useState<ExportKind | null>(null);
+  const [diagramOpen, setDiagramOpen] = useState(false);
 
   const refreshLists = useCallback(async () => {
     if (!store) return;
@@ -336,6 +339,26 @@ export function CanvasExcalidraw({ open, onClose }: Props) {
     [onClose],
   );
 
+  /** Mermaid → editable elements in the middle of the view (plan W2.18). */
+  const insertDiagram = useCallback(async (code: string): Promise<{ missing: string[]; editable: boolean } | { error: string }> => {
+    const api = apiRef.current;
+    if (!api) return { error: "the canvas isn't ready" };
+    try {
+      const { mermaidToElements, centredOn } = await import("../canvas/mermaidToCanvas");
+      const res = await mermaidToElements(code);
+      const st = api.getAppState();
+      const z = st.zoom.value || 1;
+      const placed = centredOn(res.elements as unknown as Array<SceneElement & { x: number; y: number; width: number; height: number }>, { x: -st.scrollX + st.width / 2 / z, y: -st.scrollY + st.height / 2 / z });
+      const files = Object.values(res.files);
+      if (files.length) api.addFiles(files);
+      api.updateScene({ elements: [...api.getSceneElements(), ...placed] });
+      if (!res.editable) showAiToast(t("canvas.diagram.insertedAsImage"), "info");
+      return { missing: res.missing, editable: res.editable };
+    } catch (err) {
+      return { error: (err as Error).message };
+    }
+  }, []);
+
   /** PNG / SVG / PDF with note cards drawn and Hebrew kept (src/canvas/canvasExport.ts). */
   const handleImageExport = useCallback(
     async (kind: ExportKind) => {
@@ -419,6 +442,9 @@ export function CanvasExcalidraw({ open, onClose }: Props) {
             + {t("canvas.card.add")}
           </button>
         )}
+        <button type="button" onClick={() => setDiagramOpen(true)} disabled={!scene} className="lumen-canvas-btn" data-testid="canvas-diagram">
+          {t("canvas.diagram.open")}
+        </button>
         <span className="lumen-canvas-export" role="group" aria-label={t("canvas.export.label")}>
           {(["png", "svg", "pdf"] as const).map((k) => (
             <button key={k} type="button" onClick={() => void handleImageExport(k)} disabled={!scene || exporting !== null} className="lumen-canvas-btn" data-testid={`canvas-export-${k}`}>
@@ -463,6 +489,7 @@ export function CanvasExcalidraw({ open, onClose }: Props) {
             UIOptions={{ canvasActions: { loadScene: false, saveToActiveFile: false, toggleTheme: false, saveAsImage: false, export: { saveFileToDisk: true } } }}
           />
         )}
+        {diagramOpen && <DiagramDialog onInsert={insertDiagram} onClose={() => setDiagramOpen(false)} />}
       </div>
     </div>
   );

@@ -49,6 +49,7 @@ export default defineConfig({
             { label: "Canvas (Excalidraw)", slug: "workspace/canvas", translations: { he: "קנבס (Excalidraw)" } },
             { label: "JSON Canvas (Obsidian .canvas)", slug: "workspace/json-canvas", translations: { he: "JSON Canvas (‏.canvas של Obsidian)" } },
             { label: "Note cards and image export", slug: "workspace/canvas-cards", translations: { he: "כרטיסי פתקים וייצוא תמונה" } },
+            { label: "Diagrams on the canvas (Mermaid, draw me)", slug: "workspace/canvas-diagrams", translations: { he: "תרשימים בקנבס (Mermaid,‏ צייר לי)" } },
           ],
         },
         {
