@@ -1429,5 +1429,20 @@
   "cmd.ai.cancel": "AI: キャンセル",
   "cmd.ai.cancel.hint": "実行中の AI リクエストをすべて停止します（Esc でも可）",
   "toast.aiCancelled": "AI リクエストをキャンセルしました（{count}）",
-  "toast.aiNothingRunning": "実行中の AI リクエストはありません"
+  "toast.aiNothingRunning": "実行中の AI リクエストはありません",
+  "callout.note": "ノート",
+  "callout.abstract": "要約",
+  "callout.info": "情報",
+  "callout.todo": "ToDo",
+  "callout.tip": "ヒント",
+  "callout.success": "成功",
+  "callout.question": "質問",
+  "callout.warning": "警告",
+  "callout.failure": "失敗",
+  "callout.danger": "危険",
+  "callout.bug": "バグ",
+  "callout.example": "例",
+  "callout.quote": "引用",
+  "preview.imageResize.hint": "端をドラッグしてサイズを変更します。幅はノートに保存されます。",
+  "preview.footnote.label": "脚注 {n}"
 }

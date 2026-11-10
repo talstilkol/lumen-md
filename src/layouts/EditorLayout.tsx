@@ -379,7 +379,7 @@ export function EditorLayout({
               <PageView markdownText={deferredContent} docKey={deferredDocKey} />
             </Suspense>
           ) : (
-            <Preview markdownText={deferredContent} docKey={deferredDocKey} />
+            <Preview markdownText={deferredContent} docKey={deferredDocKey} onSourceEdit={setContent} />
           )}
         </section>
       )}

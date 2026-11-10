@@ -1429,5 +1429,20 @@
   "cmd.ai.cancel": "AI: إلغاء",
   "cmd.ai.cancel.hint": "يوقف كل طلبات الذكاء الاصطناعي الجارية (Esc يفعل ذلك أيضاً)",
   "toast.aiCancelled": "أُلغي طلب الذكاء الاصطناعي ({count})",
-  "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ"
+  "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ",
+  "callout.note": "ملاحظة",
+  "callout.abstract": "ملخص",
+  "callout.info": "معلومات",
+  "callout.todo": "مهمة",
+  "callout.tip": "نصيحة",
+  "callout.success": "نجاح",
+  "callout.question": "سؤال",
+  "callout.warning": "تحذير",
+  "callout.failure": "إخفاق",
+  "callout.danger": "خطر",
+  "callout.bug": "خلل",
+  "callout.example": "مثال",
+  "callout.quote": "اقتباس",
+  "preview.imageResize.hint": "اسحب الحافة لتغيير الحجم. يُحفظ العرض في الملاحظة.",
+  "preview.footnote.label": "حاشية {n}"
 }

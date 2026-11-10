@@ -36,6 +36,7 @@ export default defineConfig({
             { label: "Smart Insert", slug: "editor/smart-insert" },
             { label: "Outline mode", slug: "editor/outline-mode", translations: { he: "מצב מתאר" } },
             { label: "Markdown fidelity", slug: "editor/markdown-fidelity", translations: { he: "נאמנות ל-Markdown" } },
+            { label: "Obsidian syntax", slug: "editor/obsidian-syntax", translations: { he: "תחביר Obsidian" } },
           ],
         },
         {

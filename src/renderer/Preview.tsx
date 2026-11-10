@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { renderMarkdown, renderMarkdownFast, extractFrontmatter } from "./pipeline";
 import { PreviewDocKeyContext } from "./previewDoc";
 import { handleWikiLinkClick } from "./wikiLinks";
+import { attachFootnoteHover } from "./footnoteHover";
+import { attachImageResize, setImageWidth } from "./imageSize";
 import { slug as headingSlug } from "github-slugger";
 import { scheduleIdle } from "../lib/idle";
 import { CopyButtonHandler } from "./components";
@@ -15,6 +17,11 @@ interface Props {
   docKey?: string | null;
   /** Re-render is debounced by this many ms */
   debounceMs?: number;
+  /**
+   * W1.3 — the preview can edit the note (dragging an image's edge writes
+   * its width). Without it, images are not resizable.
+   */
+  onSourceEdit?: (next: string) => void;
 }
 
 /**
@@ -33,7 +40,28 @@ function safeFastRender(markdownText: string): React.ReactElement | null {
   }
 }
 
-export function Preview({ markdownText, docKey = null }: Props) {
+export function Preview({ markdownText, docKey = null, onSourceEdit }: Props) {
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const textRef = useRef(markdownText);
+  textRef.current = markdownText;
+  const editRef = useRef(onSourceEdit);
+  editRef.current = onSourceEdit;
+  const canEdit = !!onSourceEdit;
+  // Footnote previews on hover / focus.
+  useEffect(() => {
+    const root = rootRef.current;
+    return root ? attachFootnoteHover(root) : undefined;
+  }, []);
+  // Drag an image's edge to resize it; the width is written to the note.
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root || !canEdit) return;
+    return attachImageResize(root, (offset, target, width) => {
+      const md = textRef.current;
+      const next = setImageWidth(md, offset, width, target);
+      if (next !== md) editRef.current?.(next);
+    });
+  }, [canEdit]);
   // First paint (A7 levers 1 + 3): render the text synchronously on the
   // very first commit with the chunk-free pipeline, so the LCP element
   // (the welcome doc's headings / paragraphs) never waits on Shiki, KaTeX
@@ -106,6 +134,7 @@ export function Preview({ markdownText, docKey = null }: Props) {
     <div
       className="flex-1 min-h-0 overflow-y-auto"
       data-preview-root
+      ref={rootRef}
       // The document the displayed tree belongs to (it lags behind while a
       // newly opened note renders) — lets callers wait for the right one.
       data-preview-doc={treeDocKey ?? ""}

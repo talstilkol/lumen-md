@@ -1429,5 +1429,20 @@
   "cmd.ai.cancel": "ИИ: отменить",
   "cmd.ai.cancel.hint": "Останавливает все запросы ИИ (то же делает Esc)",
   "toast.aiCancelled": "Запрос ИИ отменён ({count})",
-  "toast.aiNothingRunning": "Нет активных запросов ИИ"
+  "toast.aiNothingRunning": "Нет активных запросов ИИ",
+  "callout.note": "Заметка",
+  "callout.abstract": "Кратко",
+  "callout.info": "Информация",
+  "callout.todo": "Задача",
+  "callout.tip": "Совет",
+  "callout.success": "Успех",
+  "callout.question": "Вопрос",
+  "callout.warning": "Предупреждение",
+  "callout.failure": "Неудача",
+  "callout.danger": "Опасность",
+  "callout.bug": "Ошибка",
+  "callout.example": "Пример",
+  "callout.quote": "Цитата",
+  "preview.imageResize.hint": "Потяните за край, чтобы изменить размер. Ширина сохраняется в заметке.",
+  "preview.footnote.label": "Сноска {n}"
 }
