@@ -57,6 +57,8 @@
   "cmd.ai.settings.hint": "OpenAI API キーとドキュメントごとのオプションを設定します",
   "cmd.ai.styleProfile": "AI: 私の文体（ローカル）",
   "cmd.ai.styleProfile.hint": "このデバイス上のノートから文体を学び、AI が書くときに使います — ファインチューニングの代わり",
+  "cmd.ai.summarize": "AI: このノートを要約（このデバイスで）",
+  "cmd.ai.summarize.hint": "すべての文をノートから写し、照合した短い要約",
   "cmd.ai.trace": "AI: 最近のエージェント実行",
   "cmd.ai.trace.hint": "このデバイスでの直近の実行の実行エンジン、モデル、ツール、再試行、失敗",
   "cmd.ai.translate": "AI: ドキュメントを翻訳",

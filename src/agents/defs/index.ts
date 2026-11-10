@@ -15,3 +15,4 @@ export { formulatorAgent, cleanFormula, formulaFields, type FormulatorInput } fr
 export { researcherAgent, checkCited, checkVerified, citedNumbers, RESEARCHER_SCHEMA, type ResearcherInput, type ResearcherOutput, type ResearchMode, type ResearchSource, type ResearchQuote } from "./researcher";
 export { completerAgent, rewriterAgent, answererAgent, memoSummarizerAgent, builderArchAgent, builderTestAgent, builderDocsAgent, batchAgent, cleanCompletion, checkBullets, type CompleterInput, type RewriterInput, type AnswererInput, type MemoInput, type BuilderStageInput, type BatchStepInput } from "./inline";
 export { pdfAnswererAgent, citationVerified, type PdfAnswererInput } from "./pdfAnswerer";
+export { summarizerAgent, SUMMARY_MAX_CHARS, SUMMARY_MIN_GROUNDED, type SummarizerInput } from "./summarizer";

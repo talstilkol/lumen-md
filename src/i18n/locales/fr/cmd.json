@@ -57,6 +57,8 @@
   "cmd.ai.settings.hint": "Configurer votre clé API OpenAI + options par document",
   "cmd.ai.styleProfile": "IA : mon style d’écriture (local)",
   "cmd.ai.styleProfile.hint": "Apprend votre style à partir de vos notes sur cet appareil et l’utilise quand l’IA écrit — au lieu du fine-tuning",
+  "cmd.ai.summarize": "AI : Résumer cette note (sur cet appareil)",
+  "cmd.ai.summarize.hint": "Un court résumé dont chaque phrase est copiée de la note et vérifiée",
   "cmd.ai.trace": "IA : derniers passages d’agents",
   "cmd.ai.trace.hint": "Exécuteur, modèle, outils, nouvelles tentatives et échecs des derniers passages sur cet appareil",
   "cmd.ai.translate": "IA : Traduire le document",

@@ -294,6 +294,16 @@
       "vars": []
     },
     {
+      "key": "cmd.ai.summarize",
+      "en": "AI: Summarize This Note (on this device)",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.summarize.hint",
+      "en": "A short summary whose every sentence is copied from the note and checked against it",
+      "vars": []
+    },
+    {
       "key": "cmd.ai.trace",
       "en": "AI: Recent Agent Runs",
       "vars": []

@@ -57,6 +57,8 @@
   "cmd.ai.settings.hint": "OpenAI-API-Schlüssel + Optionen pro Dokument konfigurieren",
   "cmd.ai.styleProfile": "KI: Mein Schreibstil (lokal)",
   "cmd.ai.styleProfile.hint": "Lernt deinen Stil aus deinen Notizen auf diesem Gerät und nutzt ihn, wenn die KI schreibt — statt Fine-Tuning",
+  "cmd.ai.summarize": "AI: Diese Notiz zusammenfassen (auf diesem Gerät)",
+  "cmd.ai.summarize.hint": "Eine kurze Zusammenfassung, deren Sätze alle aus der Notiz kopiert und daran geprüft sind",
   "cmd.ai.trace": "KI: Letzte Agentenläufe",
   "cmd.ai.trace.hint": "Executor, Modell, Werkzeuge, Wiederholungen und Fehler der letzten Läufe auf diesem Gerät",
   "cmd.ai.translate": "KI: Dokument übersetzen",

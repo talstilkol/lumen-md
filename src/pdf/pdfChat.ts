@@ -196,3 +196,30 @@ export async function answerFrom(index: PdfIndex, question: string, signal?: Abo
 export function __clearPdfIndexes(): void {
   indexes.clear();
 }
+
+export interface PdfSummary {
+  /** Each sentence of the summary with the page and line it was copied from. */
+  sentences: Array<{ text: string; page: number | null; line: number | null }>;
+  engine: string;
+  model?: string;
+}
+
+/** A grounded summary of the whole PDF (plan 6.11), each sentence placed on its page and line. */
+export async function summarizePdf(path: string, opts: { signal?: AbortSignal; onProgress?: (p: PdfIndexProgress) => void } = {}): Promise<PdfSummary> {
+  const index = await indexPdf(path, opts);
+  const { summarize } = await import("../ai/summarize");
+  const res = await summarize(index.pages.map((p) => p.text).join("\n\n"), { signal: opts.signal });
+  return {
+    engine: res.engine,
+    model: res.model,
+    sentences: res.sentences.map((text) => {
+      // The first piece before a "…" cut is enough to find the line.
+      const head = text.split(/\.\.\.|…/)[0].trim();
+      for (const c of index.chunks) {
+        const at = head ? locateQuote(head, c) : null;
+        if (at) return { text, page: at.page, line: at.line };
+      }
+      return { text, page: null, line: null };
+    }),
+  };
+}

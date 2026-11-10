@@ -57,6 +57,8 @@
   "cmd.ai.settings.hint": "הגדרת מפתח OpenAI ואפשרויות פר-מסמך",
   "cmd.ai.styleProfile": "AI: סגנון הכתיבה שלי (מקומי)",
   "cmd.ai.styleProfile.hint": "לומד את הסגנון שלך מהפתקים במכשיר הזה ומשתמש בו כשה-AI כותב — במקום fine-tune",
+  "cmd.ai.summarize": "AI: סיכום הפתק (במכשיר הזה)",
+  "cmd.ai.summarize.hint": "סיכום קצר שכל משפט בו מועתק מהפתק ונבדק מולו",
   "cmd.ai.trace": "AI: ריצות סוכנים אחרונות",
   "cmd.ai.trace.hint": "מבצע, מודל, כלים, ניסיונות חוזרים וכשלים של הריצות האחרונות במכשיר הזה",
   "cmd.ai.translate": "AI: תרגום מסמך",

@@ -61,7 +61,8 @@
     "ci:real-model": "node scripts/real-tiny-model.mjs",
     "docs:complete": "node scripts/docs-complete.mjs",
     "bench:fim": "node --experimental-strip-types scripts/bench-fim.mjs",
-    "eval:pdf-chat": "LUMEN_EVAL_PDF=1 vitest run --config vitest.eval.config.ts src/agents/eval/pdfChat.eval.ts"
+    "eval:pdf-chat": "LUMEN_EVAL_PDF=1 vitest run --config vitest.eval.config.ts src/agents/eval/pdfChat.eval.ts",
+    "eval:summarize": "LUMEN_EVAL_SUMMARY=1 vitest run --config vitest.eval.config.ts src/agents/eval/summarize.eval.ts"
   },
   "dependencies": {
     "@bjorn3/browser_wasi_shim": "0.4.2",

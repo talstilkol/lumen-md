@@ -2,9 +2,9 @@
 import { cmdIcons, type Command } from "../../ui/CommandPalette";
 import { useAppStore } from "../../store/useStore";
 import { t } from "../../i18n";
-import { uiConfirm, uiPrompt, uiSelect } from "../../ui/PromptDialog";
+import { uiAlert, uiConfirm, uiPrompt, uiSelect } from "../../ui/PromptDialog";
 import { showAiToast } from "../../ui/AiToast";
-import { isAbort } from "../../ai/aiAbort";
+import { aiOperation, isAbort } from "../../ai/aiAbort";
 
 /** Submit a batch job over a folder of notes; check jobs and apply their results. */
 export function buildBatchCommands(): Command[] {
@@ -197,6 +197,31 @@ export function buildBatchCommands(): Command[] {
         // File tree, tags, backlinks and database views refresh on this.
         if (wroteAny) window.dispatchEvent(new CustomEvent("lumen-workspace-changed"));
         if (processing) showAiToast(t("batch.processing", { count: processing }), "info");
+      },
+    },
+    {
+      id: "ai.summarize",
+      label: t("cmd.ai.summarize"),
+      hint: t("cmd.ai.summarize.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      action: async () => {
+        // Plan 6.11: a grounded summary on this device — every sentence is in the note.
+        const text = useAppStore.getState().doc.content;
+        const { summarize } = await import("../../ai/summarize");
+        const op = aiOperation();
+        try {
+          const res = await summarize(text, { signal: op.signal });
+          if (!res.sentences.length) {
+            showAiToast(t("summary.empty"), "info");
+            return;
+          }
+          await uiAlert({ title: t("cmd.ai.summarize"), message: `${res.sentences.map((s) => `• ${s}`).join("\n")}\n\n${t(res.engine === "extractive" ? "pdf.summary.extractive" : "pdf.summary.local")}` });
+        } catch (e) {
+          if (!isAbort(e)) showAiToast(t("pdf.ask.failed", { error: (e as Error).message }), "error");
+        } finally {
+          op.end();
+        }
       },
     },
     {

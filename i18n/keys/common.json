@@ -2201,6 +2201,26 @@
       "vars": []
     },
     {
+      "key": "pdf.summarize",
+      "en": "Summarize",
+      "vars": []
+    },
+    {
+      "key": "pdf.summary.extractive",
+      "en": "Sentences picked from the text without a model (no local model was available).",
+      "vars": []
+    },
+    {
+      "key": "pdf.summary.local",
+      "en": "Every sentence is copied from the text and checked against it; made on this device.",
+      "vars": []
+    },
+    {
+      "key": "pdf.summary.title",
+      "en": "Summary",
+      "vars": []
+    },
+    {
       "key": "pdf.unanchored",
       "en": "Text not found on the page.",
       "vars": []
@@ -2808,6 +2828,11 @@
     {
       "key": "storage.eviction.title",
       "en": "Safari may delete your notes",
+      "vars": []
+    },
+    {
+      "key": "summary.empty",
+      "en": "Nothing to summarise here",
       "vars": []
     },
     {

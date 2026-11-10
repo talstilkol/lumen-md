@@ -57,6 +57,8 @@
   "cmd.ai.settings.hint": "配置 OpenAI API 密钥和各文档的选项",
   "cmd.ai.styleProfile": "AI：我的写作风格（本地）",
   "cmd.ai.styleProfile.hint": "在此设备上从你的笔记学习风格，并在 AI 写作时使用 — 代替微调",
+  "cmd.ai.summarize": "AI：总结此笔记（在本设备上）",
+  "cmd.ai.summarize.hint": "简短摘要，每句都摘自笔记并已核对",
   "cmd.ai.trace": "AI：最近的代理运行",
   "cmd.ai.trace.hint": "本设备最近运行的执行器、模型、工具、重试和失败",
   "cmd.ai.translate": "AI：翻译文档",

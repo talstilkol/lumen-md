@@ -93,6 +93,7 @@ export default defineConfig({
             { label: "Local agents: tools, critic, suggestions", slug: "ai/local-agents", translations: { he: "סוכנים מקומיים: כלים, מבקר, הצעות" } },
             { label: "Agent eval: 14 agents, HTML report", slug: "ai/agent-eval", translations: { he: "הערכת סוכנים: 14 סוכנים, דוח HTML" } },
             { label: "Personal data before the cloud", slug: "ai/pii-redaction", translations: { he: "מידע אישי לפני הענן" } },
+            { label: "Grounded summaries", translations: { he: "סיכומים מעוגנים" }, slug: "ai/summarize" },
             { label: "MCP integration (Claude Desktop, Cursor)", slug: "ai/mcp" },
             { label: "Privacy and the AI policy", slug: "ai/privacy", translations: { he: "פרטיות ומדיניות ה-AI" } },
             { label: "Cloud only by choice", translations: { he: "ענן רק בבחירה" }, slug: "ai/cloud-routes" },
