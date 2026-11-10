@@ -1582,5 +1582,9 @@
   "cmd.a11y.whereAmI": "Annoncer la position du curseur",
   "cmd.a11y.whereAmI.hint": "Ligne, colonne et le titre au-dessus, lus par le lecteur d’écran",
   "cmd.help.a11yStatement": "Déclaration d’accessibilité",
-  "cmd.help.a11yStatement.hint": "Le niveau d’accessibilité de Lumen (IS 5568, WCAG 2.2 AA), les lacunes connues et comment signaler un obstacle"
+  "cmd.help.a11yStatement.hint": "Le niveau d’accessibilité de Lumen (IS 5568, WCAG 2.2 AA), les lacunes connues et comment signaler un obstacle",
+  "cmd.help.acr": "Rapport de conformité d'accessibilité (WCAG 2.2)",
+  "cmd.help.acr.hint": "Chaque critère WCAG 2.2 de niveau A et AA : statut, preuves, plan de correction",
+  "cmd.help.a11yReport": "Signaler un problème d'accessibilité",
+  "cmd.help.a11yReport.hint": "Ouvre le formulaire de signalement d'accessibilité ; ces signalements sont traités en premier"
 }

@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-09T22:27:45.946Z",
+  "generated_at": "2026-11-10T02:53:30.260Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1584,
+  "count": 1588,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -8564,6 +8564,26 @@
     {
       "key": "cmd.help.a11yStatement.hint",
       "en": "How accessible Lumen is (IS 5568, WCAG 2.2 AA), known gaps, and how to report a barrier",
+      "vars": []
+    },
+    {
+      "key": "cmd.help.acr",
+      "en": "Accessibility conformance report (WCAG 2.2)",
+      "vars": []
+    },
+    {
+      "key": "cmd.help.acr.hint",
+      "en": "Every WCAG 2.2 A and AA criterion: status, evidence, remediation plan",
+      "vars": []
+    },
+    {
+      "key": "cmd.help.a11yReport",
+      "en": "Report an accessibility problem",
+      "vars": []
+    },
+    {
+      "key": "cmd.help.a11yReport.hint",
+      "en": "Opens the accessibility issue form; these reports are triaged first",
       "vars": []
     }
   ]

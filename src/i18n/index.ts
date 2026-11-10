@@ -1694,6 +1694,10 @@ const en: Strings = {
   "cmd.a11y.whereAmI.hint": "Line, column and the heading above, read by the screen reader",
   "cmd.help.a11yStatement": "Accessibility statement",
   "cmd.help.a11yStatement.hint": "How accessible Lumen is (IS 5568, WCAG 2.2 AA), known gaps, and how to report a barrier",
+  "cmd.help.acr": "Accessibility conformance report (WCAG 2.2)",
+  "cmd.help.acr.hint": "Every WCAG 2.2 A and AA criterion: status, evidence, remediation plan",
+  "cmd.help.a11yReport": "Report an accessibility problem",
+  "cmd.help.a11yReport.hint": "Opens the accessibility issue form; these reports are triaged first",
 };
 
 

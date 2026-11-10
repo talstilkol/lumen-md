@@ -1582,5 +1582,9 @@
   "cmd.a11y.whereAmI": "Cursorposition ansagen",
   "cmd.a11y.whereAmI.hint": "Zeile, Spalte und die Überschrift darüber, vom Screenreader gelesen",
   "cmd.help.a11yStatement": "Erklärung zur Barrierefreiheit",
-  "cmd.help.a11yStatement.hint": "Wie barrierefrei Lumen ist (IS 5568, WCAG 2.2 AA), bekannte Lücken und wie man eine Barriere meldet"
+  "cmd.help.a11yStatement.hint": "Wie barrierefrei Lumen ist (IS 5568, WCAG 2.2 AA), bekannte Lücken und wie man eine Barriere meldet",
+  "cmd.help.acr": "Barrierefreiheits-Konformitätsbericht (WCAG 2.2)",
+  "cmd.help.acr.hint": "Jedes WCAG-2.2-Kriterium der Stufen A und AA: Status, Belege, Behebungsplan",
+  "cmd.help.a11yReport": "Barrierefreiheitsproblem melden",
+  "cmd.help.a11yReport.hint": "Öffnet das Formular für Barrierefreiheitsmeldungen; diese werden zuerst bearbeitet"
 }

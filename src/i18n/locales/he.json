@@ -1582,5 +1582,9 @@
   "cmd.a11y.whereAmI": "הכרזת מיקום הסמן",
   "cmd.a11y.whereAmI.hint": "שורה, עמודה והכותרת שמעל, בקורא המסך",
   "cmd.help.a11yStatement": "הצהרת נגישות",
-  "cmd.help.a11yStatement.hint": "רמת הנגישות של Lumen (ת״י 5568, WCAG 2.2 AA), פערים ידועים ואיך לדווח על חסם"
+  "cmd.help.a11yStatement.hint": "רמת הנגישות של Lumen (ת״י 5568, WCAG 2.2 AA), פערים ידועים ואיך לדווח על חסם",
+  "cmd.help.acr": "דוח תאימות נגישות (WCAG 2.2)",
+  "cmd.help.acr.hint": "כל קריטריון של WCAG 2.2 ברמות A ו-AA: סטטוס, ראיות, תוכנית תיקון",
+  "cmd.help.a11yReport": "דיווח על בעיית נגישות",
+  "cmd.help.a11yReport.hint": "פותח את טופס דיווח הנגישות; דיווחים כאלה מטופלים ראשונים"
 }
