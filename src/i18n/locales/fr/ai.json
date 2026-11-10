@@ -100,6 +100,7 @@
   "ai.doctor.goldenRunning": "Exécution des agents…",
   "ai.doctor.intro": "Chaque vérification ci-dessous dit ce qu'elle a trouvé et exactement comment le corriger. Rien ne quitte cet ordinateur.",
   "ai.doctor.pulling": "Téléchargement de {model} : {status}",
+  "ai.doctor.report": "Signaler un problème…",
   "ai.doctor.rerun": "Vérifier à nouveau",
   "ai.doctor.runGolden": "Lancer un cas de référence par agent",
   "ai.doctor.running": "Vérification…",

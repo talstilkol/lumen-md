@@ -95,6 +95,8 @@
   "cmd.edit.formatCodeBlock.hint": "Prettier: den Codeblock unter dem Cursor formatieren",
   "cmd.edit.formatDocument": "Dokument formatieren",
   "cmd.edit.formatDocument.hint": "Prettier: Markdown, Frontmatter und Codeblöcke aufräumen",
+  "cmd.feedback": "Hilfe: Feedback senden",
+  "cmd.feedback.hint": "Ein GitHub-Issue oder Text zum Kopieren — nichts wird ohne deinen Klick gesendet",
   "cmd.file.exportAdoc": "Exportieren to AsciiDoc",
   "cmd.file.exportAdoc.hint": "Asciidoctor-kompatible Quelle",
   "cmd.file.exportDocx": "Exportieren to Word (.doc)",

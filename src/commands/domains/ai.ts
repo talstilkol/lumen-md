@@ -379,6 +379,17 @@ export function buildAiControlCommands(): Command[] {
       },
     },
     {
+      // 14.2: feedback without a server — the dialog (and its strings) load on use.
+      id: "help.feedback",
+      label: t("cmd.feedback"),
+      hint: t("cmd.feedback.hint"),
+      icon: cmdIcons.Link,
+      group: t("group.tools"),
+      action: () => {
+        void import("../ui/FeedbackDialog").then((m) => m.openFeedback());
+      },
+    },
+    {
       id: "ai.policy",
       label: t("cmd.ai.policy"),
       hint: t("cmd.ai.policy.hint"),

@@ -100,6 +100,7 @@
   "ai.doctor.goldenRunning": "エージェントを実行中…",
   "ai.doctor.intro": "以下の各チェックは、見つかった内容と正確な修正方法を示します。このコンピュータから何も送信されません。",
   "ai.doctor.pulling": "{model} をダウンロード中: {status}",
+  "ai.doctor.report": "問題を報告…",
   "ai.doctor.rerun": "再確認",
   "ai.doctor.runGolden": "エージェントごとに基準ケースを1件実行",
   "ai.doctor.running": "確認中…",

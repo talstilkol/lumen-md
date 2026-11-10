@@ -100,6 +100,7 @@
   "ai.doctor.goldenRunning": "Agenten laufen…",
   "ai.doctor.intro": "Jede Prüfung unten sagt, was gefunden wurde und wie genau es zu beheben ist. Nichts verlässt diesen Rechner.",
   "ai.doctor.pulling": "Lade {model}: {status}",
+  "ai.doctor.report": "Problem melden…",
   "ai.doctor.rerun": "Erneut prüfen",
   "ai.doctor.runGolden": "Einen Referenzfall pro Agent ausführen",
   "ai.doctor.running": "Prüfe…",

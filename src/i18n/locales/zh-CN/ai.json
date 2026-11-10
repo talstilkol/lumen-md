@@ -100,6 +100,7 @@
   "ai.doctor.goldenRunning": "正在运行代理…",
   "ai.doctor.intro": "下面每项检查都会说明发现了什么以及确切的修复方法。没有任何数据离开这台电脑。",
   "ai.doctor.pulling": "正在下载 {model}：{status}",
+  "ai.doctor.report": "报告问题…",
   "ai.doctor.rerun": "再次检查",
   "ai.doctor.runGolden": "为每个代理运行一个基准用例",
   "ai.doctor.running": "检查中…",

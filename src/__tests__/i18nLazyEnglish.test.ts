@@ -30,6 +30,7 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "mt.json": { module: "ai/mt/strings.ts", users: ["ai/mt/index.ts", "agents/commands.ts"], prefixes: ["models.", "mt.", "toast.translatedWith", "toast.localMtUnavailable"] },
   // Encrypted sync (plan 3.4): the whole of src/sync/e2ee/ loads on demand.
   "e2ee.json": { module: "sync/e2ee/strings.ts", users: ["sync/e2ee/conflict.ts", "sync/e2ee/ui/FreshnessBanner.tsx", "sync/e2ee/ui/PassphraseForm.tsx"], prefixes: ["e2ee."], within: "sync/e2ee/" },
+  "feedback.json": { module: "feedback/strings.ts", users: ["ui/FeedbackDialog.tsx"], prefixes: ["feedback."] },
 };
 
 function sources(dir: string): string[] {

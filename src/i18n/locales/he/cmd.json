@@ -95,6 +95,8 @@
   "cmd.edit.formatCodeBlock.hint": "Prettier: עיצוב בלוק הקוד שהסמן נמצא בו",
   "cmd.edit.formatDocument": "עיצוב המסמך",
   "cmd.edit.formatDocument.hint": "Prettier: סידור Markdown, ‏frontmatter ובלוקי קוד",
+  "cmd.feedback": "עזרה: שליחת משוב",
+  "cmd.feedback.hint": "issue ב-GitHub או טקסט להעתקה — שום דבר לא נשלח בלי לחיצה שלך",
   "cmd.file.exportAdoc": "ייצוא ל-AsciiDoc",
   "cmd.file.exportAdoc.hint": "מקור תואם Asciidoctor",
   "cmd.file.exportDocx": "ייצוא ל-Word (.doc)",

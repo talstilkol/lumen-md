@@ -484,6 +484,16 @@
       "vars": []
     },
     {
+      "key": "cmd.feedback",
+      "en": "Help: Send feedback",
+      "vars": []
+    },
+    {
+      "key": "cmd.feedback.hint",
+      "en": "A GitHub issue or text to copy — nothing is sent without your click",
+      "vars": []
+    },
+    {
       "key": "cmd.file.exportAdoc",
       "en": "Export to AsciiDoc",
       "vars": []

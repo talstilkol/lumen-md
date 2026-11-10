@@ -100,6 +100,7 @@
   "ai.doctor.goldenRunning": "מריץ את הסוכנים…",
   "ai.doctor.intro": "כל בדיקה למטה אומרת מה נמצא ובדיוק איך לתקן. שום דבר לא יוצא מהמחשב הזה.",
   "ai.doctor.pulling": "מוריד את {model}: {status}",
+  "ai.doctor.report": "דיווח על בעיה…",
   "ai.doctor.rerun": "לבדוק שוב",
   "ai.doctor.runGolden": "להריץ מקרה זהב אחד לכל סוכן",
   "ai.doctor.running": "בודק…",

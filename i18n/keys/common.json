@@ -1482,6 +1482,157 @@
       ]
     },
     {
+      "key": "feedback.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "feedback.copied",
+      "en": "Copied. Paste it into an issue, an e-mail or wherever you like.",
+      "vars": []
+    },
+    {
+      "key": "feedback.copy",
+      "en": "Copy text",
+      "vars": []
+    },
+    {
+      "key": "feedback.copyFailed",
+      "en": "Couldn't copy. Select the text in the preview and copy it by hand.",
+      "vars": []
+    },
+    {
+      "key": "feedback.description",
+      "en": "What happened",
+      "vars": []
+    },
+    {
+      "key": "feedback.description.placeholder",
+      "en": "What you did, what you expected, and what you saw instead",
+      "vars": []
+    },
+    {
+      "key": "feedback.doctorFailed",
+      "en": "The AI doctor could not run: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "feedback.doctorRunning",
+      "en": "Running the AI doctor…",
+      "vars": []
+    },
+    {
+      "key": "feedback.includeDoctor",
+      "en": "Include the AI doctor's report (checks of the local AI only, never note text)",
+      "vars": []
+    },
+    {
+      "key": "feedback.includeEnvironment",
+      "en": "Include app and browser details (version, platform, language, AI policy)",
+      "vars": []
+    },
+    {
+      "key": "feedback.intro",
+      "en": "Lumen has no feedback server. What you write here becomes a GitHub issue that you open yourself, or text that you copy. Nothing leaves this device until you click one of the two buttons at the bottom.",
+      "vars": []
+    },
+    {
+      "key": "feedback.kind",
+      "en": "Kind",
+      "vars": []
+    },
+    {
+      "key": "feedback.kind.bug",
+      "en": "Something is broken",
+      "vars": []
+    },
+    {
+      "key": "feedback.kind.idea",
+      "en": "An idea",
+      "vars": []
+    },
+    {
+      "key": "feedback.kind.question",
+      "en": "A question",
+      "vars": []
+    },
+    {
+      "key": "feedback.needTitle",
+      "en": "Add a title first",
+      "vars": []
+    },
+    {
+      "key": "feedback.openGithub",
+      "en": "Open on GitHub",
+      "vars": []
+    },
+    {
+      "key": "feedback.openGithub.hint",
+      "en": "Opens github.com in a new tab with the issue filled in. You need a GitHub account to submit it.",
+      "vars": []
+    },
+    {
+      "key": "feedback.opened",
+      "en": "GitHub opened in a new tab. Check the issue there and submit it.",
+      "vars": []
+    },
+    {
+      "key": "feedback.preview",
+      "en": "Exactly what will be sent",
+      "vars": []
+    },
+    {
+      "key": "feedback.screenshot",
+      "en": "Save a screenshot to attach",
+      "vars": []
+    },
+    {
+      "key": "feedback.screenshot.failed",
+      "en": "No screenshot: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "feedback.screenshot.hint",
+      "en": "Your browser asks which screen, window or tab to capture. The picture is saved on this computer, not sent: attach it to the issue yourself. It may show your notes, so look at it first.",
+      "vars": []
+    },
+    {
+      "key": "feedback.screenshot.saved",
+      "en": "Saved {name}. Attach it to the issue.",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "feedback.screenshot.unsupported",
+      "en": "this browser cannot capture the screen",
+      "vars": []
+    },
+    {
+      "key": "feedback.subject",
+      "en": "Title",
+      "vars": []
+    },
+    {
+      "key": "feedback.subject.placeholder",
+      "en": "In one line",
+      "vars": []
+    },
+    {
+      "key": "feedback.title",
+      "en": "Send feedback",
+      "vars": []
+    },
+    {
+      "key": "feedback.tooLong",
+      "en": "Too long for a link: the issue opens with the title only. The text is on your clipboard, so paste it into the issue.",
+      "vars": []
+    },
+    {
       "key": "fim.off",
       "en": "Local autocomplete off",
       "vars": []

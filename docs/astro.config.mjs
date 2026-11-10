@@ -30,6 +30,7 @@ export default defineConfig({
             { label: "Desktop app updates", slug: "getting-started/desktop-updates" },
             { label: "Install Lumen", slug: "getting-started/install", translations: { he: "התקנת Lumen" } },
             { label: "Keyboard shortcuts", slug: "getting-started/shortcuts", translations: { he: "קיצורי מקלדת" } },
+            { label: "Send feedback", slug: "getting-started/feedback" },
           ],
         },
         {

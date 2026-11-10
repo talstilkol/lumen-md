@@ -550,6 +550,11 @@
       ]
     },
     {
+      "key": "ai.doctor.report",
+      "en": "Report a problem…",
+      "vars": []
+    },
+    {
       "key": "ai.doctor.rerun",
       "en": "Check again",
       "vars": []
