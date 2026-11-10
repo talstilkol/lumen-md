@@ -145,12 +145,31 @@ fn secret_set(name: String, value: Option<String>) -> Result<(), String> {
     }
 }
 
+mod zotero_local;
+
+/// Zotero's answer for the web view (plan W2.15).
+#[derive(serde::Serialize)]
+struct ZoteroAnswer {
+    status: u16,
+    total: Option<u64>,
+    body: String,
+}
+
+/// GET from Zotero's local API on this computer (127.0.0.1:23119, /api/ only).
+#[tauri::command]
+async fn zotero_local_get(path: String) -> Result<ZoteroAnswer, String> {
+    let r = tauri::async_runtime::spawn_blocking(move || zotero_local::get(zotero_local::ZOTERO_PORT, &path))
+        .await
+        .map_err(|e| e.to_string())??;
+    Ok(ZoteroAnswer { status: r.status, total: r.total, body: r.body })
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
-        .invoke_handler(tauri::generate_handler![secret_available, secret_get, secret_set])
+        .invoke_handler(tauri::generate_handler![secret_available, secret_get, secret_set, zotero_local_get])
         .setup(|app| {
             #[cfg(desktop)]
             {

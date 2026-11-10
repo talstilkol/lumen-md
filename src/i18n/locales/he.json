@@ -1514,5 +1514,19 @@
   "hl.exportFailed": "לא הצלחתי לייצא את ההדגשות: {error}",
   "hl.loadFailed": "לא הצלחתי לקרוא את ההדגשות: {error}",
   "hl.tagFailed": "לא הצלחתי לשמור את התגית: {error}",
-  "cmd.highlights.all": "כל ההדגשות"
+  "cmd.highlights.all": "כל ההדגשות",
+  "hlimport.pick": "ייבוא הדגשות מ…",
+  "hlimport.kindle": "Kindle — הקובץ My Clippings.txt",
+  "hlimport.kobo": "Kobo — הקובץ KoboReader.sqlite (בתיקייה ‎.kobo של הקורא)",
+  "hlimport.readwise": "Readwise — ייצוא CSV",
+  "hlimport.zotero": "Zotero — במחשב הזה (Zotero 7)",
+  "hlimport.done": "ההדגשות יובאו: {added} חדשות, {updated} עודכנו, {unchanged} כבר היו, ב־{books} פתקים בתיקייה Highlights/‎.",
+  "hlimport.none": "לא נמצאו הדגשות בקובץ הזה.",
+  "hlimport.skipped": "{n} רשומות לא יובאו (סימניות, הערות תמונה או רשומות בלי טקסט).",
+  "hlimport.failed": "לא הצלחנו לייבא את ההדגשות: {error}",
+  "hlimport.zotero.disabled": "ה־API המקומי של Zotero כבוי. ב־Zotero: הגדרות ← מתקדם ← \"Allow other applications on this computer to communicate with Zotero\", ואז לנסות שוב.",
+  "hlimport.zotero.notRunning": "Zotero לא פועל במחשב הזה. פתחו את Zotero 7 ונסו שוב.",
+  "hlimport.zotero.browser": "Zotero עונה רק לאפליקציות במחשב הזה, לא לדפי אינטרנט: ייבאו מ־Zotero באפליקציית שולחן העבודה.",
+  "hl.kind.import": "מיובאות",
+  "cmd.highlights.import": "ייבוא הדגשות (Kindle,‏ Kobo,‏ Readwise,‏ Zotero)…"
 }

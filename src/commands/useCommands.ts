@@ -603,6 +603,14 @@ export function useCommands({
         action: () => void import("../highlights/HighlightsPanel").then((m) => m.openHighlightsPanel()),
       },
       {
+        id: "highlights.import",
+        label: t("cmd.highlights.import"),
+        icon: cmdIcons.FileText,
+        group: t("group.file"),
+        // Plan W2.15: Kindle, Kobo, Readwise and Zotero highlights into one note per book.
+        action: () => void import("../highlights/import/runImport").then((m) => m.importHighlights()),
+      },
+      {
         id: "view.calendar",
         label: t("cmd.view.calendar"),
         hint: t("cmd.view.calendar.hint"),

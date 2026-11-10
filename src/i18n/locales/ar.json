@@ -1514,5 +1514,19 @@
   "hl.exportFailed": "تعذّر تصدير التمييزات: {error}",
   "hl.loadFailed": "تعذّرت قراءة التمييزات: {error}",
   "hl.tagFailed": "تعذّر حفظ الوسم: {error}",
-  "cmd.highlights.all": "كل التمييزات"
+  "cmd.highlights.all": "كل التمييزات",
+  "hlimport.pick": "استيراد التظليلات من…",
+  "hlimport.kindle": "Kindle — الملف My Clippings.txt",
+  "hlimport.kobo": "Kobo — الملف KoboReader.sqlite (في مجلد ‎.kobo في القارئ)",
+  "hlimport.readwise": "Readwise — تصدير CSV",
+  "hlimport.zotero": "Zotero — على هذا الحاسوب (Zotero 7)",
+  "hlimport.done": "تم استيراد التظليلات: {added} جديدة، {updated} محدَّثة، {unchanged} موجودة مسبقًا، في {books} ملاحظات ضمن Highlights/‎.",
+  "hlimport.none": "لم يُعثر على تظليلات في هذا الملف.",
+  "hlimport.skipped": "تُركت {n} عناصر (إشارات مرجعية أو تعليقات صور أو عناصر بلا نص).",
+  "hlimport.failed": "تعذّر استيراد التظليلات: {error}",
+  "hlimport.zotero.disabled": "واجهة Zotero المحلية متوقفة. في Zotero: الإعدادات ← متقدم ← \"Allow other applications on this computer to communicate with Zotero\"، ثم أعد المحاولة.",
+  "hlimport.zotero.notRunning": "Zotero لا يعمل على هذا الحاسوب. افتح Zotero 7 وأعد المحاولة.",
+  "hlimport.zotero.browser": "يجيب Zotero التطبيقات على هذا الحاسوب فقط، لا صفحات الويب: استورد من Zotero في تطبيق سطح المكتب.",
+  "hl.kind.import": "مستوردة",
+  "cmd.highlights.import": "استيراد التظليلات (Kindle وKobo وReadwise وZotero)…"
 }

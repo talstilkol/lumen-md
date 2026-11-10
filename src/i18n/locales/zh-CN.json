@@ -1514,5 +1514,19 @@
   "hl.exportFailed": "无法导出高亮：{error}",
   "hl.loadFailed": "无法读取高亮：{error}",
   "hl.tagFailed": "无法保存标签：{error}",
-  "cmd.highlights.all": "所有高亮"
+  "cmd.highlights.all": "所有高亮",
+  "hlimport.pick": "从以下来源导入标注…",
+  "hlimport.kindle": "Kindle — My Clippings.txt",
+  "hlimport.kobo": "Kobo — KoboReader.sqlite（阅读器 .kobo 文件夹中）",
+  "hlimport.readwise": "Readwise — CSV 导出",
+  "hlimport.zotero": "Zotero — 本机（Zotero 7）",
+  "hlimport.done": "已导入标注：新增 {added}，更新 {updated}，已有 {unchanged}，保存在 Highlights/ 下的 {books} 篇笔记中。",
+  "hlimport.none": "该文件中没有找到标注。",
+  "hlimport.skipped": "有 {n} 条未导入（书签、图片批注或没有文本的条目）。",
+  "hlimport.failed": "无法导入标注：{error}",
+  "hlimport.zotero.disabled": "Zotero 的本地 API 已关闭。请在 Zotero 中：设置 → 高级 → \"Allow other applications on this computer to communicate with Zotero\"，然后重试。",
+  "hlimport.zotero.notRunning": "本机没有运行 Zotero。请打开 Zotero 7 后重试。",
+  "hlimport.zotero.browser": "Zotero 只响应本机的应用，不响应网页：请在桌面应用中从 Zotero 导入。",
+  "hl.kind.import": "已导入",
+  "cmd.highlights.import": "导入标注（Kindle、Kobo、Readwise、Zotero）…"
 }

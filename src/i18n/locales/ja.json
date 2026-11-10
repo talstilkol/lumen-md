@@ -1514,5 +1514,19 @@
   "hl.exportFailed": "ハイライトを書き出せませんでした: {error}",
   "hl.loadFailed": "ハイライトを読み込めませんでした: {error}",
   "hl.tagFailed": "タグを保存できませんでした: {error}",
-  "cmd.highlights.all": "すべてのハイライト"
+  "cmd.highlights.all": "すべてのハイライト",
+  "hlimport.pick": "ハイライトの読み込み元…",
+  "hlimport.kindle": "Kindle — My Clippings.txt",
+  "hlimport.kobo": "Kobo — KoboReader.sqlite（リーダーの .kobo フォルダ内）",
+  "hlimport.readwise": "Readwise — CSV エクスポート",
+  "hlimport.zotero": "Zotero — このコンピューター（Zotero 7）",
+  "hlimport.done": "ハイライトを読み込みました: 新規 {added}、更新 {updated}、既存 {unchanged}。Highlights/ の {books} 件のノートに保存しました。",
+  "hlimport.none": "このファイルにハイライトはありません。",
+  "hlimport.skipped": "{n} 件を除外しました（ブックマーク、画像注釈、テキストのない項目）。",
+  "hlimport.failed": "ハイライトを読み込めませんでした: {error}",
+  "hlimport.zotero.disabled": "Zotero のローカル API がオフです。Zotero の 設定 → 詳細 → \"Allow other applications on this computer to communicate with Zotero\" をオンにしてから再試行してください。",
+  "hlimport.zotero.notRunning": "このコンピューターで Zotero が起動していません。Zotero 7 を開いて再試行してください。",
+  "hlimport.zotero.browser": "Zotero はこのコンピューターのアプリにだけ応答し、Web ページには応答しません。デスクトップアプリから読み込んでください。",
+  "hl.kind.import": "読み込み済み",
+  "cmd.highlights.import": "ハイライトを読み込む（Kindle、Kobo、Readwise、Zotero）…"
 }
