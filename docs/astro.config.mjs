@@ -103,6 +103,11 @@ export default defineConfig({
             { label: "Docker compose bundle", slug: "self-hosting/docker" },
           ],
         },
+        {
+          label: "Contributing",
+          translations: { he: "תרומה לפרויקט" },
+          items: [{ label: "The PR check", slug: "contributing/pr-check", translations: { he: "בדיקת ה־PR" } }],
+        },
       ],
     }),
   ],
