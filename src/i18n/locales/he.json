@@ -1426,5 +1426,21 @@
   "cmd.ai.cancel": "AI: ביטול",
   "cmd.ai.cancel.hint": "עוצר כל בקשת AI שרצה (גם Esc עושה זאת)",
   "toast.aiCancelled": "בקשת ה-AI בוטלה ({count})",
-  "toast.aiNothingRunning": "אין בקשת AI שרצה"
+  "toast.aiNothingRunning": "אין בקשת AI שרצה",
+  "cmd.settings.trustedRepos": "מאגרים מהימנים…",
+  "cmd.settings.trustedRepos.hint": "לאפשר לסוכנים לכתוב בריפו משוכפל בלי השאלה הנוספת",
+  "trustedRepos.title": "מאגרים מהימנים",
+  "trustedRepos.close": "סגירה",
+  "trustedRepos.intro": "פתקים מריפו משוכפל עשויים להיות של אחרים, ולכן סוכן שקורא אותם שואל לפני שהוא מציע שינוי. סמנו ריפו שלכם כמהימן כדי לדלג על השאלה. השינויים עדיין ממתינים לבדיקה שלכם, ובקשות לרשת עדיין שואלות. נשמר במכשיר הזה בלבד.",
+  "trustedRepos.loading": "טוען…",
+  "trustedRepos.empty": "עדיין אין ריפו משוכפל.",
+  "trustedRepos.loadFailed": "לא ניתן להציג את המאגרים המשוכפלים.",
+  "trustedRepos.toggle.aria": "לסמוך על {repo}",
+  "trustedRepos.state.on": "מהימן",
+  "trustedRepos.state.off": "שואל קודם",
+  "trustedRepos.confirm.title": "לסמוך על הריפו הזה?",
+  "trustedRepos.confirm.body": "סוכנים שקוראים פתקים מ-{repo} יציעו שינויים בלי לשאול קודם. כל מי שיכול לדחוף אליו יכול לשים טקסט מול הסוכנים שלכם. סמנו אותו כמהימן רק אם אתם שולטים במי שכותב אליו.",
+  "trustedRepos.on": "{repo} מסומן כמהימן",
+  "trustedRepos.off": "{repo}: הסוכנים שואלים שוב קודם",
+  "trustedRepos.saveFailed": "לא ניתן לשמור את ההגדרה: {error}"
 }

@@ -1537,6 +1537,22 @@ const en: Strings = {
   "chart.reason.radar": "{k} measures for {n} items — compare their profiles.",
   "chart.reason.summary": "No category or time column — comparing column averages.",
   "chart.alternatives": "Chart suggestions",
+  "cmd.settings.trustedRepos": "Trusted repositories…",
+  "cmd.settings.trustedRepos.hint": "Let agents write in a cloned repo without the extra question",
+  "trustedRepos.title": "Trusted repositories",
+  "trustedRepos.close": "Close",
+  "trustedRepos.intro": "Notes from a cloned repo may be other people's, so an agent that reads them asks before it proposes a change. Trust a repo you own to skip that question. Changes still wait for your review, and web requests still ask. Saved on this device only.",
+  "trustedRepos.loading": "Loading…",
+  "trustedRepos.empty": "No cloned repositories yet.",
+  "trustedRepos.loadFailed": "Couldn't list the cloned repositories.",
+  "trustedRepos.toggle.aria": "Trust {repo}",
+  "trustedRepos.state.on": "Trusted",
+  "trustedRepos.state.off": "Asks first",
+  "trustedRepos.confirm.title": "Trust this repository?",
+  "trustedRepos.confirm.body": "Agents that read notes from {repo} will propose changes without asking first. Anyone who can push to it can put text in front of your agents. Trust it only if you control who writes to it.",
+  "trustedRepos.on": "{repo} is trusted",
+  "trustedRepos.off": "{repo}: agents ask first again",
+  "trustedRepos.saveFailed": "Couldn't save the setting: {error}",
 };
 
 

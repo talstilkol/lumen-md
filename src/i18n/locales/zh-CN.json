@@ -1426,5 +1426,21 @@
   "cmd.ai.cancel": "AI：取消",
   "cmd.ai.cancel.hint": "停止所有正在运行的 AI 请求（Esc 也可以）",
   "toast.aiCancelled": "已取消 AI 请求（{count}）",
-  "toast.aiNothingRunning": "没有正在运行的 AI 请求"
+  "toast.aiNothingRunning": "没有正在运行的 AI 请求",
+  "cmd.settings.trustedRepos": "受信任的仓库…",
+  "cmd.settings.trustedRepos.hint": "允许代理在克隆的仓库中写入，无需额外确认",
+  "trustedRepos.title": "受信任的仓库",
+  "trustedRepos.close": "关闭",
+  "trustedRepos.intro": "克隆仓库中的笔记可能来自他人，因此读取它们的代理在提出更改前会先询问。信任您自己的仓库即可跳过此问题。更改仍需您审核，网络请求仍会询问。仅保存在此设备上。",
+  "trustedRepos.loading": "加载中…",
+  "trustedRepos.empty": "还没有克隆的仓库。",
+  "trustedRepos.loadFailed": "无法列出克隆的仓库。",
+  "trustedRepos.toggle.aria": "信任 {repo}",
+  "trustedRepos.state.on": "已信任",
+  "trustedRepos.state.off": "先询问",
+  "trustedRepos.confirm.title": "信任此仓库？",
+  "trustedRepos.confirm.body": "读取 {repo} 中笔记的代理将不经询问直接提出更改。任何能向其推送的人都可以把文本放到您的代理面前。只有在您能控制谁向其写入时才信任它。",
+  "trustedRepos.on": "已信任 {repo}",
+  "trustedRepos.off": "{repo}：代理将再次先询问",
+  "trustedRepos.saveFailed": "无法保存设置：{error}"
 }

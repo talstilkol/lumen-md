@@ -1426,5 +1426,21 @@
   "cmd.ai.cancel": "KI: Abbrechen",
   "cmd.ai.cancel.hint": "Stoppt alle laufenden KI-Anfragen (auch mit Esc)",
   "toast.aiCancelled": "KI-Anfrage abgebrochen ({count})",
-  "toast.aiNothingRunning": "Keine KI-Anfrage läuft"
+  "toast.aiNothingRunning": "Keine KI-Anfrage läuft",
+  "cmd.settings.trustedRepos": "Vertrauenswürdige Repositorys…",
+  "cmd.settings.trustedRepos.hint": "Agenten in einem geklonten Repo ohne Zusatzfrage schreiben lassen",
+  "trustedRepos.title": "Vertrauenswürdige Repositorys",
+  "trustedRepos.close": "Schließen",
+  "trustedRepos.intro": "Notizen aus einem geklonten Repo können von anderen stammen, daher fragt ein Agent, der sie liest, bevor er eine Änderung vorschlägt. Vertraue einem eigenen Repo, um diese Frage zu überspringen. Änderungen warten weiter auf deine Prüfung, Webanfragen fragen weiterhin. Nur auf diesem Gerät gespeichert.",
+  "trustedRepos.loading": "Wird geladen…",
+  "trustedRepos.empty": "Noch keine geklonten Repositorys.",
+  "trustedRepos.loadFailed": "Die geklonten Repositorys konnten nicht aufgelistet werden.",
+  "trustedRepos.toggle.aria": "{repo} vertrauen",
+  "trustedRepos.state.on": "Vertraut",
+  "trustedRepos.state.off": "Fragt zuerst",
+  "trustedRepos.confirm.title": "Diesem Repository vertrauen?",
+  "trustedRepos.confirm.body": "Agenten, die Notizen aus {repo} lesen, schlagen Änderungen vor, ohne vorher zu fragen. Wer dorthin pushen kann, kann deinen Agenten Text vorlegen. Vertraue ihm nur, wenn du kontrollierst, wer hineinschreibt.",
+  "trustedRepos.on": "{repo} ist vertrauenswürdig",
+  "trustedRepos.off": "{repo}: Agenten fragen wieder zuerst",
+  "trustedRepos.saveFailed": "Einstellung konnte nicht gespeichert werden: {error}"
 }
