@@ -36,6 +36,7 @@ export default defineConfig({
             { label: "Smart Insert", slug: "editor/smart-insert" },
             { label: "Accessibility", slug: "editor/accessibility", translations: { he: "נגישות" } },
             { label: "Accessibility statement", slug: "editor/accessibility-statement", translations: { he: "הצהרת נגישות" } },
+            { label: "Accessibility conformance report (WCAG 2.2)", slug: "editor/acr", translations: { he: "דוח תאימות נגישות (WCAG 2.2)" } },
             { label: "Screen reader protocol", slug: "editor/screen-reader-protocol", translations: { he: "פרוטוקול קוראי מסך" } },
           ],
         },

@@ -1582,5 +1582,9 @@
   "cmd.a11y.whereAmI": "播报光标位置",
   "cmd.a11y.whereAmI.hint": "由屏幕阅读器读出行、列和上方的标题",
   "cmd.help.a11yStatement": "无障碍声明",
-  "cmd.help.a11yStatement.hint": "Lumen 的无障碍程度（IS 5568、WCAG 2.2 AA）、已知不足以及如何报告障碍"
+  "cmd.help.a11yStatement.hint": "Lumen 的无障碍程度（IS 5568、WCAG 2.2 AA）、已知不足以及如何报告障碍",
+  "cmd.help.acr": "无障碍符合性报告（WCAG 2.2）",
+  "cmd.help.acr.hint": "WCAG 2.2 A 级和 AA 级的每条成功标准：状态、证据、改进计划",
+  "cmd.help.a11yReport": "报告无障碍问题",
+  "cmd.help.a11yReport.hint": "打开无障碍问题表单；这类报告会优先处理"
 }

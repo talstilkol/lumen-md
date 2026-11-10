@@ -29,13 +29,20 @@ jobs:
         with: { node-version: 22, cache: npm }
       - run: npm ci || npm install
       - run: npm run typecheck && npm run test
+      # The accessibility conformance report is reviewed for every release (plan W3.8).
+      - name: ACR is complete and for this version
+        run: node scripts/acr.mjs --check
       - run: npm run build
       - run: npm run budget
       - name: Tar the dist folder
         run: tar -czf lumen-web-${{ github.ref_name }}.tgz -C dist .
+      - name: Attach the ACR
+        run: cp docs/acr/wcag22.json lumen-acr-wcag22-${{ github.ref_name }}.json
       - uses: softprops/action-gh-release@v3
         with:
-          files: lumen-web-${{ github.ref_name }}.tgz
+          files: |
+            lumen-web-${{ github.ref_name }}.tgz
+            lumen-acr-wcag22-${{ github.ref_name }}.json
           fail_on_unmatched_files: true
           generate_release_notes: true
 

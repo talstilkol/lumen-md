@@ -52,6 +52,10 @@ level AA**, which includes everything WCAG 2.0 AA asks for.
 
 ## Known gaps
 
+The [accessibility conformance report](/editor/acr/) lists every WCAG 2.2
+level A and AA criterion with its status, and a remediation plan for each
+one that is only partly met. In short:
+
 - The screen-reader journey has not yet been run with all three screen
   readers for this version. The results are recorded in the protocol when
   it is.
@@ -62,7 +66,8 @@ level AA**, which includes everything WCAG 2.0 AA asks for.
 
 ## Report a barrier
 
-Open an issue labelled **accessibility** at
-[github.com/talstilkol/lumen-md/issues](https://github.com/talstilkol/lumen-md/issues).
-Say what you were doing, which screen reader or tool you used, and what
-happened. Accessibility reports are triaged before other bugs.
+Use the [accessibility report form](https://github.com/talstilkol/lumen-md/issues/new?template=accessibility.yml)
+(it is labelled **accessibility**), or **Report an accessibility problem**
+in the command palette. Say what you were doing, which screen reader or
+tool you used, and what happened. You can write in Hebrew or English.
+Accessibility reports are triaged before other bugs.
