@@ -1439,5 +1439,13 @@
   "cmd.ai.cancel": "KI: Abbrechen",
   "cmd.ai.cancel.hint": "Stoppt alle laufenden KI-Anfragen (auch mit Esc)",
   "toast.aiCancelled": "KI-Anfrage abgebrochen ({count})",
-  "toast.aiNothingRunning": "Keine KI-Anfrage läuft"
+  "toast.aiNothingRunning": "Keine KI-Anfrage läuft",
+  "capture.voice.start": "Aufnehmen",
+  "capture.voice.stop": "Aufnahme stoppen",
+  "capture.voice.recording": "Stopp · {time}",
+  "capture.voice.transcribing": "Transkription auf diesem Gerät…",
+  "capture.voice.keepAudio": "Aufnahme behalten",
+  "capture.voice.noMic": "Kein Mikrofon oder keine Berechtigung.",
+  "capture.voice.noTranscript": "Transkription auf diesem Gerät fehlgeschlagen; die Aufnahme bleibt bei der Notiz.",
+  "capture.voice.placeholderNote": "Sprachnotiz (nicht transkribiert)"
 }

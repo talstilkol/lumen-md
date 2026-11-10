@@ -1439,5 +1439,13 @@
   "cmd.ai.cancel": "AI: ביטול",
   "cmd.ai.cancel.hint": "עוצר כל בקשת AI שרצה (גם Esc עושה זאת)",
   "toast.aiCancelled": "בקשת ה-AI בוטלה ({count})",
-  "toast.aiNothingRunning": "אין בקשת AI שרצה"
+  "toast.aiNothingRunning": "אין בקשת AI שרצה",
+  "capture.voice.start": "הקלטה",
+  "capture.voice.stop": "עצירת ההקלטה",
+  "capture.voice.recording": "עצירה · {time}",
+  "capture.voice.transcribing": "מתמלל במכשיר…",
+  "capture.voice.keepAudio": "לשמור את ההקלטה",
+  "capture.voice.noMic": "אין מיקרופון, או שההרשאה נדחתה.",
+  "capture.voice.noTranscript": "לא הצלחתי לתמלל במכשיר; ההקלטה נשמרת עם הפתק.",
+  "capture.voice.placeholderNote": "פתק קולי (לא תומלל)"
 }

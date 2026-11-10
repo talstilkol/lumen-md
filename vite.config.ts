@@ -227,6 +227,7 @@ export default defineConfig({
           { name: "Command Palette", short_name: "Commands", url: "/?action=palette", icons: [{ src: "icons/icon-192.png", sizes: "192x192", type: "image/png" }] },
           // Plan 4.16: a line straight into inbox.md (src/ui/QuickCapture.tsx).
           { name: "Quick Capture", short_name: "Capture", url: "/?capture=1", icons: [{ src: "icons/icon-192.png", sizes: "192x192", type: "image/png" }] },
+          { name: "Voice note", short_name: "Voice", url: "/?capture=voice", icons: [{ src: "icons/icon-192.png", sizes: "192x192", type: "image/png" }] },
         ],
         // GET: the app reads ?title / ?text / ?url on launch (src/pwa/launch.ts)
         // and appends what was shared to inbox.md (plan 4.16).

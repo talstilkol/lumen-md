@@ -1439,5 +1439,13 @@
   "cmd.ai.cancel": "AI: キャンセル",
   "cmd.ai.cancel.hint": "実行中の AI リクエストをすべて停止します（Esc でも可）",
   "toast.aiCancelled": "AI リクエストをキャンセルしました（{count}）",
-  "toast.aiNothingRunning": "実行中の AI リクエストはありません"
+  "toast.aiNothingRunning": "実行中の AI リクエストはありません",
+  "capture.voice.start": "録音",
+  "capture.voice.stop": "録音を停止",
+  "capture.voice.recording": "停止 · {time}",
+  "capture.voice.transcribing": "この端末で文字起こし中…",
+  "capture.voice.keepAudio": "録音を保存",
+  "capture.voice.noMic": "マイクがないか、許可されませんでした。",
+  "capture.voice.noTranscript": "この端末で文字起こしできませんでした。録音はノートと一緒に保存されます。",
+  "capture.voice.placeholderNote": "音声メモ（未文字起こし）"
 }

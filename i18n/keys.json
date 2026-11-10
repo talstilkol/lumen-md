@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-20T15:07:05.383Z",
+  "generated_at": "2026-11-10T00:00:01.538Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1441,
+  "count": 1449,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1852,6 +1852,48 @@
     {
       "key": "capture.inboxHeading",
       "en": "Inbox",
+      "vars": []
+    },
+    {
+      "key": "capture.voice.start",
+      "en": "Record",
+      "vars": []
+    },
+    {
+      "key": "capture.voice.stop",
+      "en": "Stop recording",
+      "vars": []
+    },
+    {
+      "key": "capture.voice.recording",
+      "en": "Stop · {time}",
+      "vars": [
+        "time"
+      ]
+    },
+    {
+      "key": "capture.voice.transcribing",
+      "en": "Transcribing on this device…",
+      "vars": []
+    },
+    {
+      "key": "capture.voice.keepAudio",
+      "en": "Keep the recording",
+      "vars": []
+    },
+    {
+      "key": "capture.voice.noMic",
+      "en": "No microphone, or permission was refused.",
+      "vars": []
+    },
+    {
+      "key": "capture.voice.noTranscript",
+      "en": "Couldn't transcribe on this device; the recording is kept with the note.",
+      "vars": []
+    },
+    {
+      "key": "capture.voice.placeholderNote",
+      "en": "Voice note (not transcribed)",
       "vars": []
     },
     {
