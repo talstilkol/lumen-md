@@ -61,7 +61,9 @@ export function createEpubAnnotation(opts: { id: string; source: string; chapter
 export function withEpubNote(a: EpubAnnotation, note: string, now = new Date()): EpubAnnotation {
   const value = note.trim();
   const next: EpubAnnotation = { ...a, modified: now.toISOString(), motivation: value ? "commenting" : "highlighting" };
-  if (value) next.body = [{ type: "TextualBody", value, format: "text/plain", purpose: "commenting" }];
+  // Tags (W1.15) are kept; only the note changes.
+  const body: TextualBody[] = [...(value ? [{ type: "TextualBody" as const, value, format: "text/plain" as const, purpose: "commenting" as const }] : []), ...(a.body ?? []).filter((b) => b.purpose === "tagging")];
+  if (body.length) next.body = body;
   else delete next.body;
   return next;
 }
@@ -87,7 +89,7 @@ export function describeEpubAnnotation(a: EpubAnnotation): { chapter: number; qu
     if (s.refinedBy?.type === "TextQuoteSelector" && !quote) quote = s.refinedBy;
     if (s.refinedBy?.type === "TextPositionSelector" && !position) position = s.refinedBy;
   }
-  return { chapter, quote, position, note: a.body?.find((b) => b.type === "TextualBody")?.value ?? "" };
+  return { chapter, quote, position, note: a.body?.find((b) => b.type === "TextualBody" && b.purpose !== "tagging")?.value ?? "" };
 }
 
 /** Find the highlight again in its chapter's current text. */

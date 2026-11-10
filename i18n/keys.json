@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-10T01:43:25.164Z",
+  "generated_at": "2026-11-10T01:48:41.432Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1493,
+  "count": 1516,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1823,6 +1823,11 @@
     {
       "key": "cmd.reading.mode",
       "en": "Reading mode",
+      "vars": []
+    },
+    {
+      "key": "cmd.highlights.all",
+      "en": "All highlights",
       "vars": []
     },
     {
@@ -7899,6 +7904,134 @@
       "key": "reading.highlightFailed",
       "en": "That passage can't be marked: select text within one paragraph, outside links and formatting.",
       "vars": []
+    },
+    {
+      "key": "hl.title",
+      "en": "All highlights",
+      "vars": []
+    },
+    {
+      "key": "hl.loading",
+      "en": "Reading the vault…",
+      "vars": []
+    },
+    {
+      "key": "hl.count",
+      "en": "{n} of {total}",
+      "vars": [
+        "n",
+        "total"
+      ]
+    },
+    {
+      "key": "hl.search",
+      "en": "Search highlights and notes",
+      "vars": []
+    },
+    {
+      "key": "hl.kind",
+      "en": "Kind",
+      "vars": []
+    },
+    {
+      "key": "hl.kind.all",
+      "en": "All kinds",
+      "vars": []
+    },
+    {
+      "key": "hl.kind.clip",
+      "en": "Clips",
+      "vars": []
+    },
+    {
+      "key": "hl.source",
+      "en": "Document",
+      "vars": []
+    },
+    {
+      "key": "hl.source.all",
+      "en": "All documents",
+      "vars": []
+    },
+    {
+      "key": "hl.tag",
+      "en": "Tag",
+      "vars": []
+    },
+    {
+      "key": "hl.tag.all",
+      "en": "All tags",
+      "vars": []
+    },
+    {
+      "key": "hl.tag.add",
+      "en": "+ tag",
+      "vars": []
+    },
+    {
+      "key": "hl.tag.remove",
+      "en": "Remove tag {tag}",
+      "vars": [
+        "tag"
+      ]
+    },
+    {
+      "key": "hl.none",
+      "en": "No highlights yet: highlight text in a PDF, a book or a clipped page.",
+      "vars": []
+    },
+    {
+      "key": "hl.noMatch",
+      "en": "Nothing matches.",
+      "vars": []
+    },
+    {
+      "key": "hl.more",
+      "en": "Show {n} more",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "hl.export",
+      "en": "Export to a note",
+      "vars": []
+    },
+    {
+      "key": "hl.exportName",
+      "en": "Highlights {date}",
+      "vars": [
+        "date"
+      ]
+    },
+    {
+      "key": "hl.exportTitle",
+      "en": "Highlights — {date} ({n})",
+      "vars": [
+        "date",
+        "n"
+      ]
+    },
+    {
+      "key": "hl.exportFailed",
+      "en": "Couldn't export the highlights: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "hl.loadFailed",
+      "en": "Couldn't read the highlights: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "hl.tagFailed",
+      "en": "Couldn't save the tag: {error}",
+      "vars": [
+        "error"
+      ]
     },
     {
       "key": "pdf.failed",

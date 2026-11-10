@@ -432,6 +432,7 @@ const en: Strings = {
   "cmd.pdf.open.hint": "Highlights go to a .pdf.md note",
   "cmd.epub.open": "Open an EPUB for reading…",
   "cmd.reading.mode": "Reading mode",
+  "cmd.highlights.all": "All highlights",
   "cmd.ai.cancel": "AI: Cancel",
   "cmd.ai.cancel.hint": "Stops every running AI request (Esc does the same)",
   "toast.aiCancelled": "AI request cancelled ({count})",
