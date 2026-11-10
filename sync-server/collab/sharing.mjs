@@ -25,6 +25,13 @@
  * comments document, "edit" may write both. This holds in end-to-end
  * encrypted rooms too: the server can't read either document, but it
  * knows which one an update is for.
+ *
+ * ── Sealed rooms (plan W2.20, collab/sealed.mjs) ─────────────────────────
+ * Any token request (and a share) may carry `e2ee: true`: the client syncs
+ * the room end-to-end encrypted, so the server seals it and from then on
+ * holds every connection to ciphertext only. `sealable(room)` (from the
+ * server) says no when the room already stores readable content; the answer
+ * says whether the room is sealed.
  */
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { accessKeyOk, issueRoomToken, ROLES } from "./roomToken.mjs";
@@ -77,10 +84,22 @@ const publicShare = (s, nowMs) => ({ id: s.id, role: s.role, label: s.label, cre
  *   {action: "revoke", room, key?, owner, share} → {ok: true}
  *   {action: "status", room, share}              → {role, expiresAt, state}
  */
-export function handleTokenRequest(req, { store, key, accessKey = "", tokenTtlS, nowMs = Date.now() }) {
+export function handleTokenRequest(req, { store, key, accessKey = "", tokenTtlS, nowMs = Date.now(), requireE2ee = false, sealable = () => true }) {
   if (!req || typeof req !== "object" || typeof req.room !== "string" || !ROOM_NAME.test(req.room)) return { error: "bad-room" };
   const room = req.room;
   const action = req.action ?? "token";
+  /** Seal the room when an end-to-end client asks (only once it holds no readable content). */
+  const seal = () => {
+    if (requireE2ee) return true;
+    if (store.isSealed?.(room)) return true;
+    if (req.e2ee !== true || !store.sealRoom || !sealable(room)) return false;
+    store.sealRoom(room);
+    return true;
+  };
+  const issue = (opts) => {
+    const t = issueRoomToken(key, room, opts);
+    return t && typeof t === "object" && !t.error ? { ...t, sealed: seal() } : t;
+  };
 
   // A share link's own status, for "Shared with me" (the id is the capability).
   if (action === "status") {
@@ -95,7 +114,7 @@ export function handleTokenRequest(req, { store, key, accessKey = "", tokenTtlS,
     if (!s || s.room !== room) return { error: "no-share" };
     const state = shareState(s, nowMs);
     if (state !== "active") return { error: state };
-    return issueRoomToken(key, room, { ttlS: tokenTtlS, nowMs, role: s.role, share: s.id, notAfterMs: s.expiresAt });
+    return issue({ ttlS: tokenTtlS, nowMs, role: s.role, share: s.id, notAfterMs: s.expiresAt });
   }
 
   if (!accessKeyOk(req.key, accessKey)) return { error: "unauthorized" };
@@ -104,7 +123,7 @@ export function handleTokenRequest(req, { store, key, accessKey = "", tokenTtlS,
 
   if (action === "token") {
     // An unclaimed room: as before roles existed.
-    if (owner === null || ownerOk) return issueRoomToken(key, room, { ttlS: tokenTtlS, nowMs });
+    if (owner === null || ownerOk) return issue({ ttlS: tokenTtlS, nowMs });
     return { error: "owner-required" };
   }
 
@@ -126,14 +145,15 @@ export function handleTokenRequest(req, { store, key, accessKey = "", tokenTtlS,
     if (!Number.isFinite(ttlS) || ttlS < 60 || ttlS > MAX_SHARE_TTL_S) return { error: "bad-ttl" };
     const label = typeof req.label === "string" ? req.label.slice(0, 80) : "";
     const share = store.addShare({ id: randomBytes(16).toString("base64url"), room, role, label, createdAt: nowMs, expiresAt: nowMs + Math.round(ttlS) * 1000 });
-    return { share: publicShare(share, nowMs) };
+    return { share: publicShare(share, nowMs), sealed: seal() };
   }
   return { error: "bad-request" };
 }
 
 /**
  * Is this Hocuspocus message a write to the document? Message layout:
- * varString document name, varUint type (0 = sync), varUint sync step
+ * varString document name, varUint type (0 = sync; 4 = sync reply, which
+ * Hocuspocus handles the same way, plan W2.20), varUint sync step
  * (0 = step 1, a request; 1 = step 2 and 2 = update, both carry changes).
  * Used as a second guard after the read-only connection flag.
  */
@@ -155,7 +175,8 @@ export function isDocumentWrite(bytes) {
     const len = varUint();
     i += len;
     if (i > bytes.length) return false;
-    if (varUint() !== 0) return false;
+    const type = varUint();
+    if (type !== 0 && type !== 4) return false;
     const step = varUint();
     return step === 1 || step === 2;
   } catch {

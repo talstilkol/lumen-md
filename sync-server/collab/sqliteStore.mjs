@@ -12,6 +12,9 @@
  * owner secret (the secret itself stays on the owner's devices); `shares`
  * holds the share links — role, expiry, revocation. Nothing in either table
  * is document content.
+ *
+ * Sealed rooms (plan W2.20): `meta` holds `sealed:<room>` for each room the
+ * server holds to ciphertext only (collab/sealed.mjs). Sealing is never undone.
  */
 import { mkdirSync, readdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
@@ -71,6 +74,7 @@ export function openStore(dir, { keepBackups = 24 } = {}) {
       "ON CONFLICT(name) DO UPDATE SET state = excluded.state, updated_at = excluded.updated_at",
   );
   let closed = false;
+  const sealedCache = new Map();
 
   return {
     /** The stored state of `name`, or null for a new room. */
@@ -102,6 +106,15 @@ export function openStore(dir, { keepBackups = 24 } = {}) {
     /** Revoke a share of `room`; false when there is no such live share. */
     revokeShare(room, id, nowMs = Date.now()) {
       return Number(shareRevoke.run(nowMs, id, room).changes) === 1;
+    },
+    /** Is `room` held to ciphertext only? */
+    isSealed(room) {
+      if (!sealedCache.has(room)) sealedCache.set(room, getMeta.get(`sealed:${room}`)?.value === "1");
+      return sealedCache.get(room);
+    },
+    sealRoom(room) {
+      setMeta.run(`sealed:${room}`, "1");
+      sealedCache.set(room, true);
     },
     getMeta(key) {
       return getMeta.get(key)?.value ?? null;
