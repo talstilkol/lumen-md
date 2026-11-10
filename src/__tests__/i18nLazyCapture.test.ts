@@ -1,8 +1,8 @@
 /**
  * English of lazily loaded domains (src/i18n/lazy/<domain>.json): kept out
  * of the startup bundle, registered when the domain's chunk loads. Here: the
- * quick / voice capture strings (plan W1.13 — the voice button pushed the
- * startup total over its 460 KB budget).
+ * quick / voice capture strings and the fine-tune panel's (plan W1.13 — the
+ * voice button pushed the startup total over its 460 KB budget).
  */
 
 import { describe, it, expect } from "vitest";
@@ -26,43 +26,75 @@ function sources(dir: string): string[] {
 
 const rel = (f: string) => relative(SRC, f).replace(/\\/g, "/");
 
-describe("i18n: lazy English for capture", () => {
+/** Modules (paths under src/, without extension) that `text` in `from` imports statically. */
+function staticImports(from: string, text: string): string[] {
+  const out: string[] = [];
+  for (const m of text.matchAll(/^import (?!type )(?:[^;]*? from )?"(\.[^"]+)";/gm)) {
+    out.push(rel(resolve(SRC, from, "..", m[1])).replace(/\.tsx?$/, ""));
+  }
+  return out;
+}
+const noExt = (p: string) => p.replace(/\.tsx?$/, "");
+
+/** Each lazy file → its prefix, its strings module, the modules that import that, and what must stay lazy. */
+const DOMAINS = [
+  {
+    file: "capture.json",
+    prefix: "capture.",
+    module: "capture/strings.ts",
+    users: ["capture/quickCapture.ts", "ui/QuickCapture.tsx"],
+    // Loaded with the capture box (QuickCapture.tsx imports it dynamically).
+    sameChunk: ["capture/voiceCapture.ts"],
+    min: 15,
+  },
+  {
+    file: "fineTune.json",
+    prefix: "fineTune.",
+    module: "ui/fineTuneStrings.ts",
+    users: ["ui/FineTuneSettings.tsx"],
+    sameChunk: [] as string[],
+    min: 20,
+  },
+];
+
+describe("i18n: lazy English (capture, fine-tune)", () => {
   const lazy = lazyEnglish();
   const index = readFileSync(join(SRC, "i18n", "index.ts"), "utf8");
   const files = sources(SRC).map((f) => ({ path: rel(f), text: readFileSync(f, "utf8") }));
 
-  it("has the capture strings, none of them duplicated in the startup bundle", () => {
-    const capture = Object.keys(lazy).filter((k) => k.startsWith("capture."));
-    expect(capture.length).toBeGreaterThanOrEqual(15);
-    expect(capture).toContain("capture.voice.start");
+  it("no lazy key is duplicated in the startup bundle", () => {
     for (const k of Object.keys(lazy)) expect(index.includes(`"${k}":`), k).toBe(false);
-    // The palette and the shortcuts list show the title at startup.
-    expect(index.includes(`"capture.title":`)).toBe(true);
-    expect(lazy["capture.title"]).toBeUndefined();
-  });
-
-  it("capture.json is imported only by src/capture/strings.ts", () => {
-    const importers = files.filter((f) => f.text.includes("i18n/lazy/capture.json")).map((f) => f.path);
-    expect(importers).toEqual(["capture/strings.ts"]);
-  });
-
-  it("the strings module is used only by modules that load on demand", () => {
-    const users = files
-      .filter((f) => /import "(\.\/|\.\.\/capture\/)strings";/.test(f.text))
-      .map((f) => f.path)
-      .sort();
-    expect(users).toEqual(["capture/quickCapture.ts", "ui/QuickCapture.tsx"]);
-    // …and neither of them is imported statically from outside capture.
-    for (const f of files) {
-      if (f.path.startsWith("capture/") || f.path === "ui/QuickCapture.tsx") continue;
-      expect(/^import [^;]*from "[./]*(capture\/quickCapture|ui\/QuickCapture)";/m.test(f.text), f.path).toBe(false);
+    // The palette and the shortcuts list show these at startup.
+    for (const k of ["capture.title", "cmd.fineTune.open"]) {
+      expect(index.includes(`"${k}":`), k).toBe(true);
+      expect(lazy[k], k).toBeUndefined();
     }
   });
 
+  for (const d of DOMAINS) {
+    it(`${d.file}: its keys, imported only by ${d.module}, used only by modules that load on demand`, () => {
+      const own = JSON.parse(readFileSync(join(SRC, "i18n", "lazy", d.file), "utf8")) as Record<string, string>;
+      expect(Object.keys(own).length).toBeGreaterThanOrEqual(d.min);
+      expect(Object.keys(own).every((k) => k.startsWith(d.prefix))).toBe(true);
+      const importers = files.filter((f) => f.text.includes(`i18n/lazy/${d.file}`)).map((f) => f.path);
+      expect(importers).toEqual([d.module]);
+      const users = files.filter((f) => staticImports(f.path, f.text).includes(noExt(d.module))).map((f) => f.path).sort();
+      expect(users).toEqual(d.users);
+      // …and no module outside the domain's own lazy chunk imports a user statically.
+      for (const f of files) {
+        if (d.users.includes(f.path) || d.sameChunk.includes(f.path)) continue;
+        const imports = staticImports(f.path, f.text);
+        for (const u of d.users) expect(imports.includes(noExt(u)), `${f.path} imports ${u} statically`).toBe(false);
+      }
+    });
+  }
+
   it("registerEnglish makes t() resolve the keys, without replacing existing English", async () => {
     await import("../capture/strings");
+    await import("../ui/fineTuneStrings");
     expect(t("capture.voice.start")).toBe(lazy["capture.voice.start"]);
     expect(t("capture.saved", { path: "inbox.md" })).toBe("Added to inbox.md");
+    expect(t("fineTune.training", { status: "queued" })).toBe("Training… (queued)");
     registerEnglish({ "capture.title": "replaced?", "test.lazy.capture": "lazy" });
     expect(t("capture.title")).toBe("Quick capture");
     expect(t("test.lazy.capture")).toBe("lazy");

@@ -19,6 +19,7 @@ import { showAiToast } from "./AiToast";
 import { startFineTune, getFineTuneJob, type FineTuneJob } from "../ai/fineTune";
 import { uiConfirm } from "./PromptDialog";
 import { log } from "../lib/logger";
+import "./fineTuneStrings";
 import { t } from "../i18n";
 
 interface Props {
