@@ -74,7 +74,7 @@ export default defineConfig({
             { label: "Plugin SDK", slug: "plugins/sdk" },
             { label: "Plugin gallery", slug: "plugins/gallery" },
             { label: "Plugin signing keys", slug: "plugins/signing" },
-            { label: "Templates marketplace", slug: "plugins/templates" },
+            { label: "Templates and sample vaults", slug: "plugins/templates", translations: { he: "תבניות וכספות לדוגמה" } },
             { label: "Web Clipper extension", slug: "plugins/web-clipper" },
           ],
         },

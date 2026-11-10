@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-10T00:19:45.288Z",
+  "generated_at": "2026-11-10T01:38:06.438Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1550,
+  "count": 1572,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -671,6 +671,26 @@
     {
       "key": "cmd.file.openSampleWorkspace.hint",
       "en": "linked demo notes: wiki-links, tags, database, chart, diagram",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.sampleVault.student",
+      "en": "Open sample vault: student",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.sampleVault.researcher",
+      "en": "Open sample vault: researcher",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.sampleVault.writer",
+      "en": "Open sample vault: writer",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.sampleVault.hint",
+      "en": "notes made from the templates, with Bases views, in your language",
       "vars": []
     },
     {
@@ -4208,6 +4228,16 @@
     {
       "key": "cmd.templates.open.hint",
       "en": "Browse + install community templates",
+      "vars": []
+    },
+    {
+      "key": "cmd.template.importFromFile",
+      "en": "Import template from file…",
+      "vars": []
+    },
+    {
+      "key": "cmd.template.importFromFile.hint",
+      "en": "copy a .md file into templates/, for ⌘K",
       "vars": []
     },
     {
@@ -8382,6 +8412,94 @@
       "vars": [
         "n"
       ]
+    },
+    {
+      "key": "templates.installedWithBase",
+      "en": "Installed “{name}” to {path}, with its table view in {base}.",
+      "vars": [
+        "name",
+        "path",
+        "base"
+      ]
+    },
+    {
+      "key": "templates.importFromFile",
+      "en": "Import from file…",
+      "vars": []
+    },
+    {
+      "key": "templates.imported",
+      "en": "Imported “{name}”: it's in ⌘K → Templates.",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "templates.importFailed",
+      "en": "Couldn't import the template: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "templates.importNotMarkdown",
+      "en": "Pick a Markdown file (.md).",
+      "vars": []
+    },
+    {
+      "key": "templates.category.Engineering",
+      "en": "Engineering",
+      "vars": []
+    },
+    {
+      "key": "templates.category.Home",
+      "en": "Home",
+      "vars": []
+    },
+    {
+      "key": "templates.category.Journaling",
+      "en": "Journaling",
+      "vars": []
+    },
+    {
+      "key": "templates.category.Personal",
+      "en": "Personal",
+      "vars": []
+    },
+    {
+      "key": "templates.category.Planning",
+      "en": "Planning",
+      "vars": []
+    },
+    {
+      "key": "templates.category.Reading",
+      "en": "Reading",
+      "vars": []
+    },
+    {
+      "key": "templates.category.Reflection",
+      "en": "Reflection",
+      "vars": []
+    },
+    {
+      "key": "templates.category.Research",
+      "en": "Research",
+      "vars": []
+    },
+    {
+      "key": "templates.category.Student",
+      "en": "Student",
+      "vars": []
+    },
+    {
+      "key": "templates.category.Work",
+      "en": "Work",
+      "vars": []
+    },
+    {
+      "key": "templates.category.Writing",
+      "en": "Writing",
+      "vars": []
     }
   ]
 }

@@ -2076,9 +2076,44 @@ export function useCommands({
       ...buildInstalledTemplateCommands(installedTemplates, {
         groupLabel: t("group.templates"),
         hint: t("templates.installed.button"),
-        apply: (name, content) => openTemplateDoc(name, content),
+        apply: (name, content) => {
+          // {{title}}, {{date}}, {{time}}, {{hebrewDate}}: as Obsidian's Templates plugin fills them.
+          void import("../editor/templateVars").then(({ expandTemplate }) =>
+            openTemplateDoc(name, expandTemplate(content, { title: name, locale: getLocale() })),
+          );
+        },
         onError: (e) => showAiToast(t("templates.loadFailed", { error: e.message }), "error"),
       }),
+      {
+        id: "template.importFromFile",
+        label: t("cmd.template.importFromFile"),
+        hint: t("cmd.template.importFromFile.hint"),
+        icon: cmdIcons.FileText,
+        group: t("group.templates"),
+        action: async () => {
+          if (!isOPFSAvailable()) {
+            await uiAlert({ message: t("doc.alert.workspaceUnavailable") });
+            return;
+          }
+          const [{ pickMarkdownFile }, { importTemplateFile }] = await Promise.all([
+            import("./installedTemplates"),
+            import("../storage/templateMarketplace"),
+            import("../storage/templateStrings"),
+          ]);
+          const file = await pickMarkdownFile();
+          if (!file) return;
+          if (!/\.(md|markdown)$/i.test(file.name)) {
+            showAiToast(t("templates.importNotMarkdown"), "error");
+            return;
+          }
+          try {
+            const tpl = await importTemplateFile(file.name, await file.text());
+            showAiToast(t("templates.imported", { name: tpl.name }), "success");
+          } catch (e) {
+            showAiToast(t("templates.importFailed", { error: (e as Error).message }), "error");
+          }
+        },
+      },
       // ── Voice-to-Markdown ─────────────────────────────────────────────────
       {
         id: "voice.memo",
@@ -2490,6 +2525,36 @@ export function useCommands({
           }
         },
       },
+      // Sample vaults for Israeli use cases (W3.6), in the UI's language.
+      ...(["student", "researcher", "writer"] as const).map((vault) => ({
+        id: `file.sampleVault.${vault}`,
+        label: t(`cmd.file.sampleVault.${vault}`),
+        hint: t("cmd.file.sampleVault.hint"),
+        icon: cmdIcons.FolderOpen,
+        group: t("group.file"),
+        action: async () => {
+          if (!isOPFSAvailable()) {
+            await uiAlert({ message: t("doc.alert.workspaceUnavailable") });
+            return;
+          }
+          try {
+            const { createSampleVault } = await import("../storage/sampleVaults");
+            const result = await createSampleVault(vault, getLocale());
+            window.dispatchEvent(new Event("lumen-workspace-changed"));
+            if (!useAppStore.getState().showWorkspace) toggleWorkspace();
+            const content = await readWorkspaceFile(result.entry);
+            useAppStore.getState().openTab({ name: result.entry, content, workspaceName: result.entry });
+            showAiToast(
+              result.created.length > 0
+                ? t("sample.toast.created", { count: result.created.length, folder: result.root })
+                : t("sample.toast.exists", { folder: result.root }),
+              "info",
+            );
+          } catch (e) {
+            await uiAlert({ message: t("sample.alert.failed", { error: (e as Error).message }) });
+          }
+        },
+      })),
       {
         id: "file.saveToWorkspace",
         label: t("cmd.file.saveToWorkspace"),
