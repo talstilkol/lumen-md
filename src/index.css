@@ -354,7 +354,7 @@
     margin: 0 auto;
     font-family: var(--font-serif);
     font-size: 17px;
-    line-height: 1.7;
+    line-height: var(--preview-line-height, 1.7);
     padding: 2.5rem 2rem 30vh;
   }
   .prose-lumen :is(h1, h2, h3, h4, h5, h6) {

@@ -50,6 +50,9 @@ interface AppState {
   theme: Theme;
   /** Theme customisation (preset, accent, typography, measure). */
   themeSettings: ThemeSettings;
+  /** CSS snippets switched on (names of `.lumen/snippets/*.css`, plan W1.21). */
+  enabledSnippets: string[];
+  setSnippetEnabled: (name: string, on: boolean) => void;
   locale: Locale;
   showOutline: boolean;
   showWorkspace: boolean;
@@ -222,6 +225,9 @@ export const useAppStore = create<AppState>()(
       mode: defaultMode(),
       theme: "dark",
       themeSettings: { ...DEFAULT_THEME_SETTINGS },
+      enabledSnippets: [],
+      setSnippetEnabled: (name, on) =>
+        set((s) => ({ enabledSnippets: on ? [...new Set([...s.enabledSnippets, name])] : s.enabledSnippets.filter((x) => x !== name) })),
       locale: "en",
       showOutline: true,
       showWorkspace: false,
@@ -471,6 +477,7 @@ export const useAppStore = create<AppState>()(
         mode: s.mode,
         theme: s.theme,
         themeSettings: s.themeSettings,
+        enabledSnippets: s.enabledSnippets,
         locale: s.locale,
         showOutline: s.showOutline,
         showWorkspace: s.showWorkspace,
@@ -513,6 +520,7 @@ export const useAppStore = create<AppState>()(
           ...current,
           ...p,
           themeSettings: sanitizeThemeSettings(p.themeSettings),
+          enabledSnippets: Array.isArray(p.enabledSnippets) ? p.enabledSnippets.filter((x): x is string => typeof x === "string").slice(0, 200) : [],
           // A hand-edited or older store: keep only string fields, fall back per field.
           dailyNotes: {
             folder: typeof p.dailyNotes?.folder === "string" ? p.dailyNotes.folder : DEFAULT_DAILY.folder,
