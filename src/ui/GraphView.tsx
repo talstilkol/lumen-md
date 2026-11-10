@@ -3,6 +3,7 @@ import { listWorkspace, readWorkspaceFile } from "../storage/workspace";
 import { log } from "../lib/logger";
 import { t } from "../i18n";
 import { louvain, communityPalette } from "../views/louvain";
+import { EmptyState, runCommand } from "./EmptyState";
 
 interface Node {
   id: string;
@@ -250,16 +251,11 @@ export function GraphView({ onOpenFile }: { onOpenFile: (path: string, content: 
   return (
     <div style={{ width: "100%", height: "100%", position: "relative" }}>
       {nodes.length === 0 ? (
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100%",
-          color: "hsl(var(--fg-muted))",
-          fontSize: 13,
-        }}>
-          {t("graphView.empty")}
-        </div>
+        <EmptyState
+          style={{ height: "100%", alignItems: "center", justifyContent: "center", fontSize: 13 }}
+          message={t("graphView.empty")}
+          action={{ label: t("graphView.openWorkspace"), onClick: () => runCommand("view.workspace") }}
+        />
       ) : (
         <canvas
           ref={canvasRef}

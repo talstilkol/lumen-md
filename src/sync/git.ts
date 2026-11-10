@@ -10,7 +10,6 @@
 import { get, set } from "idb-keyval";
 import {
   createWorkspaceFolder,
-  deleteWorkspaceFile,
   listWorkspace,
   readWorkspaceFile,
   workspaceHasFile,
@@ -353,11 +352,13 @@ export async function pullRepo(
     }
   }
   await walk(dir, repoFolder);
-  // Remove files that no longer exist upstream.
-  for (const path of opfsBefore) {
-    if (!seen.has(path)) {
+  // Files that no longer exist upstream go to the trash (restorable for 30 days), not away.
+  const gone = [...opfsBefore].filter((p) => !seen.has(p));
+  if (gone.length) {
+    const { moveToTrash } = await import("../storage/trash");
+    for (const path of gone) {
       try {
-        await deleteWorkspaceFile(path);
+        await moveToTrash([path], { [path]: "file" });
         changed++;
       } catch {
         /* ignore */

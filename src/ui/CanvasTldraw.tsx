@@ -27,6 +27,7 @@ import { showAiToast } from "./AiToast";
 import { isOPFSAvailable } from "../storage/workspace";
 import { t } from "../i18n";
 import { log } from "../lib/logger";
+import { explainError } from "../lib/userError";
 
 interface Props {
   open: boolean;
@@ -294,7 +295,7 @@ export function CanvasTldraw({ open, onClose }: Props) {
       } catch (err) {
         log.error("legacy canvas convert failed", err);
         showAiToast(
-          t("canvas.legacy.convertFailed", { error: (err as Error).message }),
+          t("canvas.legacy.convertFailed", { error: explainError(err) }),
           "error",
         );
       } finally {

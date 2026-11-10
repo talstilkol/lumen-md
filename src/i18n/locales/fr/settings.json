@@ -1,4 +1,5 @@
 {
+  "audit.clearFilters": "Effacer les filtres",
   "audit.close": "Fermer",
   "audit.col.action": "Action",
   "audit.col.payload": "Charge utile",
@@ -131,6 +132,7 @@
   "privacy.footer": "Enregistré : heure, destination, taille, raison. Jamais le texte des invites ou des réponses. Les requêtes des workers de modèles (téléchargements) ne sont pas listées.",
   "privacy.localRequests": "Locales : {n}",
   "privacy.onlyLeaving": "Seulement ce qui a quitté l’appareil",
+  "privacy.openAiSettings": "Ouvrir les réglages IA",
   "privacy.policy": "Politique : {policy}",
   "privacy.policyName.cloud": "cloud",
   "privacy.policyName.local-first": "local d’abord",

@@ -1,4 +1,5 @@
 {
+  "audit.clearFilters": "Clear the filters",
   "audit.close": "Close",
   "audit.col.action": "Action",
   "audit.col.payload": "Payload",
@@ -131,6 +132,7 @@
   "privacy.footer": "Recorded: time, host, size, reason. Never the text of prompts or answers. Requests from inside model workers (downloads) are not listed.",
   "privacy.localRequests": "Local: {n}",
   "privacy.onlyLeaving": "Only what left this device",
+  "privacy.openAiSettings": "Open AI settings",
   "privacy.policy": "Policy: {policy}",
   "privacy.policyName.cloud": "cloud",
   "privacy.policyName.local-first": "local first",

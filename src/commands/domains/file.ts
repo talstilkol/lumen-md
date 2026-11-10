@@ -11,6 +11,7 @@ import { isOPFSAvailable, readWorkspaceFile } from "../../storage/workspace";
 import { relativeTime } from "../../lib/relativeTime";
 import { openTemplateDoc } from "../openDoc";
 import type { CommandContext } from "./context";
+import { explainError } from "../../lib/userError";
 
 /** Recently opened files (the last 8): reopen one, or drop it from the list. */
 export function buildRecentCommands({ recents, setRecents, handleReopenRecent }: CommandContext): Command[] {
@@ -144,7 +145,7 @@ export function buildWorkspaceFileCommands({ handleSaveToWorkspace, toggleWorksp
           );
         } catch (e) {
           await uiAlert({
-            message: t("sample.alert.failed", { error: (e as Error).message }),
+            message: t("sample.alert.failed", { error: explainError(e) }),
           });
         }
       },

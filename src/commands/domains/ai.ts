@@ -8,6 +8,7 @@ import { showAiToast } from "../../ui/AiToast";
 import { getSecret, setSecret } from "../../lib/secretStore";
 import { cancelAllAi, isAbort } from "../../ai/aiAbort";
 import { cancellable, type CommandContext } from "./context";
+import { explainError } from "../../lib/userError";
 
 /** Privacy Mode: run every AI prompt in the browser (WebGPU). */
 export function buildPrivacyModeCommands({ useLocalAi, toggleLocalAi }: CommandContext): Command[] {
@@ -181,7 +182,7 @@ export function buildAiModelCommands(): Command[] {
           await loadWebLlmModel(choice);
           showAiToast(t("ai.localModels.ready", { model: choice }), "success");
         } catch (err) {
-          showAiToast(t("ai.localModels.failed", { error: err instanceof Error ? err.message : String(err) }), "error");
+          showAiToast(t("ai.localModels.failed", { error: explainError(err) }), "error");
         } finally {
           off();
         }
@@ -189,6 +190,7 @@ export function buildAiModelCommands(): Command[] {
     },
     {
       id: "ai.styleProfile",
+      destructive: "confirm",
       label: t("cmd.ai.styleProfile"),
       hint: t("cmd.ai.styleProfile.hint"),
       icon: cmdIcons.Sparkles,
@@ -240,7 +242,7 @@ export function buildAiModelCommands(): Command[] {
         } catch (e) {
           if (isAbort(e)) return;
           if ((await import("../../agents/suggestions")).reportAgentFailure(e, "ai.styleProfile")) return;
-          showAiToast((e as Error).message, "error");
+          showAiToast(explainError(e), "error");
         }
       },
     },

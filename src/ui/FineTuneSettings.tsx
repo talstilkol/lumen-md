@@ -20,6 +20,7 @@ import { startFineTune, getFineTuneJob, type FineTuneJob } from "../ai/fineTune"
 import { uiConfirm } from "./PromptDialog";
 import { log } from "../lib/logger";
 import { t } from "../i18n";
+import { explainError } from "../lib/userError";
 
 interface Props {
   open: boolean;
@@ -147,7 +148,7 @@ export function FineTuneSettings({ open, onClose }: Props) {
       );
     } catch (e) {
       log.error("fine-tune start failed", e);
-      showAiToast(t("fineTune.toast.error", { error: (e as Error).message }), "error");
+      showAiToast(t("fineTune.toast.error", { error: explainError(e) }), "error");
     } finally {
       setRunning(false);
     }

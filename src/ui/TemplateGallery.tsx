@@ -20,6 +20,8 @@ import {
 import { showAiToast } from "./AiToast";
 import { log } from "../lib/logger";
 import { t } from "../i18n";
+import { explainError } from "../lib/userError";
+import { EmptyState } from "./EmptyState";
 
 interface Props {
   open: boolean;
@@ -49,7 +51,7 @@ export function TemplateGallery({ open, onClose }: Props) {
       .then(setTemplates)
       .catch((e) => {
         log.error("template registry fetch failed", e);
-        setError((e as Error).message);
+        setError(explainError(e, "templates"));
       })
       .finally(() => setLoading(false));
   }, [open]);
@@ -92,7 +94,7 @@ export function TemplateGallery({ open, onClose }: Props) {
     } catch (e) {
       log.error("template install failed", e);
       showAiToast(
-        t("templates.installFailed", { error: (e as Error).message }),
+        t("templates.installFailed", { error: explainError(e) }),
         "error",
       );
     } finally {
@@ -277,16 +279,17 @@ export function TemplateGallery({ open, onClose }: Props) {
             </div>
           )}
           {!loading && !error && filtered.length === 0 && (
-            <div
-              style={{
-                padding: 32,
-                textAlign: "center",
-                color: "hsl(var(--fg-muted))",
-                fontSize: 13,
+            <EmptyState
+              style={{ padding: 32, alignItems: "center", fontSize: 13 }}
+              message={t("templates.empty")}
+              action={{
+                label: t("templates.clearFilter"),
+                onClick: () => {
+                  setQuery("");
+                  setActiveCategory(null);
+                },
               }}
-            >
-              {t("templates.empty")}
-            </div>
+            />
           )}
           {!loading && !error && filtered.length > 0 && (
             <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>

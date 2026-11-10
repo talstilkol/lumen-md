@@ -20,6 +20,7 @@
   "canvas.unsaved": "{name}（未保存）",
   "canvas.zoom": "ズーム: {pct}%",
   "graphView.empty": "ファイルが見つかりません。ワークスペースを開いてファイルを追加し、ナレッジグラフを表示します。",
+  "graphView.openWorkspace": "ワークスペースを開く",
   "graphView.renderFailed": "グラフの描画に失敗しました",
   "graphView.renderFailedDetail": "ワークスペースのデータが不正なノード構造となり、レンダラーがクラッシュしました。",
   "graphView.stats": "{nodes} ノード · {edges} リンク",

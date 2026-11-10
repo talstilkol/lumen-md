@@ -14,6 +14,7 @@ import { buildTagsIndex, type TagsIndex } from "../views/tagsIndex";
 import { t } from "../i18n";
 import { useAppStore } from "../store/useStore";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
+import { EmptyState } from "./EmptyState";
 
 interface Props {
   open: boolean;
@@ -147,16 +148,14 @@ export function TagsPanel({ open, onClose }: Props) {
         )}
 
         {index && buckets.length === 0 && (
-          <div
-            style={{
-              padding: 16,
-              fontSize: 12,
-              color: "hsl(var(--fg-muted))",
-              lineHeight: 1.5,
+          <EmptyState
+            message={t("tagsPanel.emptyHint")}
+            action={{
+              label: t("tagsPanel.addTag"),
+              // An inline #tag at the cursor: the quickest tag there is.
+              onClick: () => window.dispatchEvent(new CustomEvent("lumen-mobile-insert", { detail: { insert: "#", cursorOffset: 0 } })),
             }}
-          >
-            {t("tagsPanel.emptyHint")}
-          </div>
+          />
         )}
 
         {/* Tag chips */}
