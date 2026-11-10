@@ -62,6 +62,7 @@ export default defineConfig({
             { label: "Export and import", slug: "workspace/export-import", translations: { he: "ייצוא וייבוא" } },
             { label: "Tasks across the vault", slug: "workspace/tasks" },
             { label: "Ask a PDF", translations: { he: "שאלו את ה-PDF" }, slug: "workspace/pdf-chat" },
+            { label: "Vault in a folder on the phone", slug: "workspace/mobile-vault-folder" },
           ],
         },
         {

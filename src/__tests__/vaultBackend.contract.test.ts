@@ -3,7 +3,8 @@
  * the OPFS backend on the in-memory fake OPFS, the directory-handle backend
  * on a fake picked folder (what the Chromium real-folder vault and the
  * folder export use), and the pure in-memory backend. A new backend (Tauri
- * fs, 4.2) joins by adding one line to `backends`. The encrypted layer
+ * fs, 4.2) joins by adding one line to `backends`; the phone folders (4.20)
+ * run over fakes of their two native APIs. The encrypted layer
  * (plan 11.4) runs the same suite over each of them: encryption must not
  * change what a backend promises.
  */
@@ -22,6 +23,8 @@ import {
 import { createFolderBackend } from "../storage/vault/location";
 import { createTauriBackend } from "../storage/vault/tauri";
 import { fakeTauriVault } from "./helpers/fakeTauriVault";
+import { capacitorFs, createMobileBackend, safFs } from "../storage/vault/mobile";
+import { fakeCapacitorFilesystem, fakeSafPlugin } from "./helpers/fakeMobile";
 import { createEncryptedBackend } from "../storage/vault/encrypted/backend";
 import { createRestHeader } from "../storage/vault/encrypted/format";
 
@@ -52,6 +55,19 @@ const backends: [string, () => VaultBackend][] = [
     () => createTauriBackend(fakeTauriVault("/home/tal/Notes").invoke, "/home/tal/Notes"),
   ],
   ["memory", () => createMemoryBackend()],
+  [
+    "phone: iOS Documents (plan 4.20, Capacitor Filesystem faked)",
+    () => createMobileBackend(capacitorFs(fakeCapacitorFilesystem().plugin, "DOCUMENTS")),
+  ],
+  [
+    "phone: Android folder via SAF (plan 4.20, Lumen's plugin faked)",
+    () => {
+      const saf = fakeSafPlugin();
+      const uri = "content://com.android.externalstorage.documents/tree/primary%3ANotes";
+      saf.granted.add(uri);
+      return createMobileBackend(safFs(saf.plugin, uri));
+    },
+  ],
   [
     "encrypted at rest (plan 11.4) over OPFS (fake)",
     () => {
