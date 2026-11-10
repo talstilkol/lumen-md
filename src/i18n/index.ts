@@ -433,6 +433,7 @@ const en: Strings = {
   "cmd.epub.open": "Open an EPUB for reading…",
   "cmd.reading.mode": "Reading mode",
   "cmd.highlights.all": "All highlights",
+  "cmd.highlights.import": "Import highlights (Kindle, Kobo, Readwise, Zotero)…",
   "cmd.ai.cancel": "AI: Cancel",
   "cmd.ai.cancel.hint": "Stops every running AI request (Esc does the same)",
   "toast.aiCancelled": "AI request cancelled ({count})",

@@ -1514,5 +1514,19 @@
   "hl.exportFailed": "Impossible d’exporter les surlignages : {error}",
   "hl.loadFailed": "Impossible de lire les surlignages : {error}",
   "hl.tagFailed": "Impossible d’enregistrer l’étiquette : {error}",
-  "cmd.highlights.all": "Tous les surlignages"
+  "cmd.highlights.all": "Tous les surlignages",
+  "hlimport.pick": "Importer des surlignages depuis…",
+  "hlimport.kindle": "Kindle — My Clippings.txt",
+  "hlimport.kobo": "Kobo — KoboReader.sqlite (dans le dossier .kobo de la liseuse)",
+  "hlimport.readwise": "Readwise — export CSV",
+  "hlimport.zotero": "Zotero — sur cet ordinateur (Zotero 7)",
+  "hlimport.done": "Surlignages importés : {added} nouveaux, {updated} mis à jour, {unchanged} déjà présents, dans {books} notes sous Highlights/.",
+  "hlimport.none": "Aucun surlignage trouvé dans ce fichier.",
+  "hlimport.skipped": "{n} entrées ont été ignorées (signets, annotations d’image ou entrées sans texte).",
+  "hlimport.failed": "Impossible d’importer les surlignages : {error}",
+  "hlimport.zotero.disabled": "L’API locale de Zotero est désactivée. Dans Zotero : Réglages → Avancé → « Allow other applications on this computer to communicate with Zotero », puis réessayez.",
+  "hlimport.zotero.notRunning": "Zotero n’est pas lancé sur cet ordinateur. Ouvrez Zotero 7 et réessayez.",
+  "hlimport.zotero.browser": "Zotero ne répond qu’aux applications de cet ordinateur, pas aux pages web : importez depuis Zotero dans l’application de bureau.",
+  "hl.kind.import": "Importés",
+  "cmd.highlights.import": "Importer des surlignages (Kindle, Kobo, Readwise, Zotero)…"
 }

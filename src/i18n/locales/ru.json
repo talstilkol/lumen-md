@@ -1514,5 +1514,19 @@
   "hl.exportFailed": "Не удалось экспортировать выделения: {error}",
   "hl.loadFailed": "Не удалось прочитать выделения: {error}",
   "hl.tagFailed": "Не удалось сохранить тег: {error}",
-  "cmd.highlights.all": "Все выделения"
+  "cmd.highlights.all": "Все выделения",
+  "hlimport.pick": "Импортировать выделения из…",
+  "hlimport.kindle": "Kindle — My Clippings.txt",
+  "hlimport.kobo": "Kobo — KoboReader.sqlite (в папке .kobo читалки)",
+  "hlimport.readwise": "Readwise — экспорт CSV",
+  "hlimport.zotero": "Zotero — на этом компьютере (Zotero 7)",
+  "hlimport.done": "Выделения импортированы: новых {added}, обновлено {updated}, уже было {unchanged}, в {books} заметках в Highlights/.",
+  "hlimport.none": "В этом файле нет выделений.",
+  "hlimport.skipped": "Пропущено записей: {n} (закладки, аннотации к изображениям или записи без текста).",
+  "hlimport.failed": "Не удалось импортировать выделения: {error}",
+  "hlimport.zotero.disabled": "Локальный API Zotero выключен. В Zotero: Настройки → Дополнительно → «Allow other applications on this computer to communicate with Zotero», затем попробуйте снова.",
+  "hlimport.zotero.notRunning": "Zotero не запущен на этом компьютере. Откройте Zotero 7 и попробуйте снова.",
+  "hlimport.zotero.browser": "Zotero отвечает только приложениям на этом компьютере, а не веб-страницам: импортируйте из Zotero в настольном приложении.",
+  "hl.kind.import": "Импортированные",
+  "cmd.highlights.import": "Импорт выделений (Kindle, Kobo, Readwise, Zotero)…"
 }

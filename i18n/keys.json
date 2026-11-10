@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-10T01:48:41.432Z",
+  "generated_at": "2026-11-10T03:10:22.240Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1516,
+  "count": 1530,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1828,6 +1828,11 @@
     {
       "key": "cmd.highlights.all",
       "en": "All highlights",
+      "vars": []
+    },
+    {
+      "key": "cmd.highlights.import",
+      "en": "Import highlights (Kindle, Kobo, Readwise, Zotero)…",
       "vars": []
     },
     {
@@ -7906,6 +7911,75 @@
       "vars": []
     },
     {
+      "key": "hlimport.pick",
+      "en": "Import highlights from…",
+      "vars": []
+    },
+    {
+      "key": "hlimport.kindle",
+      "en": "Kindle — My Clippings.txt",
+      "vars": []
+    },
+    {
+      "key": "hlimport.kobo",
+      "en": "Kobo — KoboReader.sqlite (in the reader's .kobo folder)",
+      "vars": []
+    },
+    {
+      "key": "hlimport.readwise",
+      "en": "Readwise — CSV export",
+      "vars": []
+    },
+    {
+      "key": "hlimport.zotero",
+      "en": "Zotero — on this computer (Zotero 7)",
+      "vars": []
+    },
+    {
+      "key": "hlimport.done",
+      "en": "Highlights imported: {added} new, {updated} updated, {unchanged} already there, in {books} notes under Highlights/.",
+      "vars": [
+        "added",
+        "updated",
+        "unchanged",
+        "books"
+      ]
+    },
+    {
+      "key": "hlimport.none",
+      "en": "No highlights found in that file.",
+      "vars": []
+    },
+    {
+      "key": "hlimport.skipped",
+      "en": "{n} entries were left out (bookmarks, image annotations or entries without text).",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "hlimport.failed",
+      "en": "Couldn't import the highlights: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "hlimport.zotero.disabled",
+      "en": "Zotero's local API is off. In Zotero: Settings → Advanced → \"Allow other applications on this computer to communicate with Zotero\", then try again.",
+      "vars": []
+    },
+    {
+      "key": "hlimport.zotero.notRunning",
+      "en": "Zotero isn't running on this computer. Open Zotero 7 and try again.",
+      "vars": []
+    },
+    {
+      "key": "hlimport.zotero.browser",
+      "en": "Zotero only answers apps on this computer, not web pages: import from Zotero in the desktop app.",
+      "vars": []
+    },
+    {
       "key": "hl.title",
       "en": "All highlights",
       "vars": []
@@ -8032,6 +8106,11 @@
       "vars": [
         "error"
       ]
+    },
+    {
+      "key": "hl.kind.import",
+      "en": "Imported",
+      "vars": []
     },
     {
       "key": "pdf.failed",

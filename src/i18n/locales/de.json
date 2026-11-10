@@ -1514,5 +1514,19 @@
   "hl.exportFailed": "Die Markierungen konnten nicht exportiert werden: {error}",
   "hl.loadFailed": "Die Markierungen konnten nicht gelesen werden: {error}",
   "hl.tagFailed": "Der Tag konnte nicht gespeichert werden: {error}",
-  "cmd.highlights.all": "Alle Markierungen"
+  "cmd.highlights.all": "Alle Markierungen",
+  "hlimport.pick": "Markierungen importieren aus…",
+  "hlimport.kindle": "Kindle — My Clippings.txt",
+  "hlimport.kobo": "Kobo — KoboReader.sqlite (im Ordner .kobo des Readers)",
+  "hlimport.readwise": "Readwise — CSV-Export",
+  "hlimport.zotero": "Zotero — auf diesem Computer (Zotero 7)",
+  "hlimport.done": "Markierungen importiert: {added} neu, {updated} aktualisiert, {unchanged} schon vorhanden, in {books} Notizen unter Highlights/.",
+  "hlimport.none": "In dieser Datei wurden keine Markierungen gefunden.",
+  "hlimport.skipped": "{n} Einträge wurden ausgelassen (Lesezeichen, Bildanmerkungen oder Einträge ohne Text).",
+  "hlimport.failed": "Die Markierungen konnten nicht importiert werden: {error}",
+  "hlimport.zotero.disabled": "Zoteros lokale API ist aus. In Zotero: Einstellungen → Erweitert → „Allow other applications on this computer to communicate with Zotero“, dann erneut versuchen.",
+  "hlimport.zotero.notRunning": "Zotero läuft auf diesem Computer nicht. Öffne Zotero 7 und versuche es erneut.",
+  "hlimport.zotero.browser": "Zotero antwortet nur Apps auf diesem Computer, nicht Webseiten: Importiere aus Zotero in der Desktop-App.",
+  "hl.kind.import": "Importiert",
+  "cmd.highlights.import": "Markierungen importieren (Kindle, Kobo, Readwise, Zotero)…"
 }

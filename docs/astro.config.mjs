@@ -49,6 +49,7 @@ export default defineConfig({
             { label: "PDF reader and highlights", slug: "workspace/pdf-reader" },
             { label: "EPUB reader and reading mode", translations: { he: "קורא EPUB ומצב קריאה" }, slug: "workspace/epub-reader" },
             { label: "All highlights", translations: { he: "כל ההדגשות" }, slug: "workspace/highlights" },
+            { label: "Import highlights (Kindle, Kobo, Readwise, Zotero)", translations: { he: "ייבוא הדגשות (Kindle,‏ Kobo,‏ Readwise,‏ Zotero)" }, slug: "workspace/highlight-import" },
           ],
         },
         {
