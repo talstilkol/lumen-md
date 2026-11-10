@@ -70,7 +70,7 @@ export function RuntimeMetricsPanel({ onClose }: Props) {
         position: "fixed",
         inset: 0,
         zIndex: 10000,
-        background: "hsl(var(--bg) / 0.72)",
+        background: "var(--overlay)",
         backdropFilter: "blur(5px)",
         display: "grid",
         placeItems: "center",
@@ -86,7 +86,7 @@ export function RuntimeMetricsPanel({ onClose }: Props) {
           borderRadius: 16,
           border: "1px solid hsl(var(--border))",
           background: "hsl(var(--bg))",
-          boxShadow: "0 20px 60px hsl(0 0% 0% / 0.35)",
+          boxShadow: "var(--shadow-xl)",
           color: "hsl(var(--fg))",
           overflow: "auto",
           padding: 16,
@@ -194,7 +194,7 @@ export function RuntimeMetricsPanel({ onClose }: Props) {
           {hasData ? (
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.25 }}>
               <thead>
-                <tr style={{ textAlign: "left", color: "hsl(var(--fg-muted))", borderBottom: "1px solid hsl(var(--border))" }}>
+                <tr style={{ textAlign: "start", color: "hsl(var(--fg-muted))", borderBottom: "1px solid hsl(var(--border))" }}>
                   <th style={{ padding: "8px 10px" }}>{t("runtimeMetrics.column.label")}</th>
                   <th style={{ padding: "8px 10px" }}>{t("runtimeMetrics.column.total")}</th>
                   <th style={{ padding: "8px 10px" }}>{t("runtimeMetrics.column.success")}</th>

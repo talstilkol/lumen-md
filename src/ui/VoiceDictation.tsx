@@ -109,7 +109,7 @@ export function startVoiceRecording(lang: string): void {
       style={{
         position: "fixed",
         bottom: 20,
-        right: 20,
+        insetInlineEnd: 20,
         zIndex: 9999,
         display: "flex",
         alignItems: "center",
@@ -118,7 +118,7 @@ export function startVoiceRecording(lang: string): void {
         border: "1px solid hsl(var(--border-strong))",
         borderRadius: 12,
         padding: "10px 16px",
-        boxShadow: "0 8px 32px hsl(0 0% 0%/0.3)",
+        boxShadow: "var(--shadow-md)",
         fontSize: 13,
         color: "hsl(var(--fg))",
       }}
@@ -128,7 +128,7 @@ export function startVoiceRecording(lang: string): void {
           width: 10,
           height: 10,
           borderRadius: "50%",
-          background: "#ef4444",
+          background: "hsl(var(--danger))",
           animation: "pulse 1s infinite",
         }}
       />
@@ -136,7 +136,7 @@ export function startVoiceRecording(lang: string): void {
       <button
         onClick={stopRecording}
         style={{
-          background: "#ef4444",
+          background: "hsl(var(--danger))",
           color: "white",
           border: "none",
           borderRadius: 6,
@@ -264,7 +264,7 @@ export async function startVoiceMemo(): Promise<void> {
       style={{
         position: "fixed",
         bottom: 20,
-        right: 20,
+        insetInlineEnd: 20,
         zIndex: 9999,
         display: "flex",
         alignItems: "center",
@@ -273,7 +273,7 @@ export async function startVoiceMemo(): Promise<void> {
         border: "1px solid hsl(var(--border-strong))",
         borderRadius: 12,
         padding: "10px 16px",
-        boxShadow: "0 8px 32px hsl(0 0% 0%/0.3)",
+        boxShadow: "var(--shadow-md)",
         fontSize: 13,
         color: "hsl(var(--fg))",
       }}
@@ -283,7 +283,7 @@ export async function startVoiceMemo(): Promise<void> {
           width: 10,
           height: 10,
           borderRadius: "50%",
-          background: "#ef4444",
+          background: "hsl(var(--danger))",
           animation: "pulse 1s infinite",
         }}
       />
@@ -292,7 +292,7 @@ export async function startVoiceMemo(): Promise<void> {
         type="button"
         onClick={() => recorder.stop()}
         style={{
-          background: "#ef4444",
+          background: "hsl(var(--danger))",
           color: "white",
           border: "none",
           borderRadius: 6,

@@ -31,9 +31,9 @@ const row: React.CSSProperties = { display: "flex", gap: 8, alignItems: "center"
 const pre: React.CSSProperties = { margin: 0, padding: "6px 8px", fontSize: 11, borderRadius: 6, background: "hsl(var(--bg))", border: "1px solid hsl(var(--border))", whiteSpace: "pre-wrap", direction: "ltr", textAlign: "start", userSelect: "all" };
 
 const COLOR: Record<DoctorStatus, string> = {
-  ok: "hsl(142 70% 45%)",
-  warn: "hsl(38 92% 50%)",
-  fail: "hsl(0 80% 60%)",
+  ok: "hsl(var(--success))",
+  warn: "hsl(var(--warning))",
+  fail: "hsl(var(--danger))",
   skip: "hsl(var(--fg-muted))",
 };
 const MARK: Record<DoctorStatus, string> = { ok: "✓", warn: "!", fail: "✗", skip: "–" };

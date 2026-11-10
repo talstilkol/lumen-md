@@ -531,10 +531,10 @@ export function FileTree({
                 style={{
                   padding: "3px 9px",
                   fontSize: 11,
-                  border: "1px solid hsl(0 80% 60% / 0.5)",
+                  border: "1px solid hsl(var(--danger) / 0.5)",
                   borderRadius: 6,
-                  background: "hsl(0 80% 60% / 0.10)",
-                  color: "hsl(0 80% 70%)",
+                  background: "hsl(var(--danger) / 0.10)",
+                  color: "hsl(var(--danger))",
                   cursor: "pointer",
                 }}
               >

@@ -269,7 +269,7 @@ export function TemplateGallery({ open, onClose }: Props) {
             <div
               style={{
                 padding: 16,
-                color: "hsl(0 80% 65%)",
+                color: "hsl(var(--danger))",
                 fontSize: 12,
               }}
             >
@@ -418,7 +418,7 @@ function TemplateRow({
             }}
             title={t("templates.rating", { rating: String(template.rating) })}
           >
-            <Star size={11} style={{ color: "hsl(40 90% 60%)" }} />
+            <Star size={11} style={{ color: "hsl(var(--warning))" }} />
             {template.rating.toFixed(1)}
           </span>
           <span

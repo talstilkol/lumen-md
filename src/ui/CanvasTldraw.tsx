@@ -388,7 +388,7 @@ export function CanvasTldraw({ open, onClose }: Props) {
                 padding: 8,
                 marginTop: 4,
                 minWidth: 220,
-                boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+                boxShadow: "var(--shadow-sm)",
                 zIndex: 200,
               }}
             >
