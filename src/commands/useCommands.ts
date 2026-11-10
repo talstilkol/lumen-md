@@ -2419,6 +2419,21 @@ export function useCommands({
               },
             },
             {
+              id: "collab.share",
+              label: t("cmd.collab.share"),
+              hint: t("cmd.collab.share.hint"),
+              icon: cmdIcons.Link,
+              group: t("group.collab"),
+              action: async () => (await import("../ui/ShareDialog")).openShareDialog({ session: collab }),
+            },
+            {
+              id: "collab.sharedWithMe",
+              label: t("cmd.collab.sharedWithMe"),
+              icon: cmdIcons.Link,
+              group: t("group.collab"),
+              action: async () => (await import("../ui/ShareDialog")).openShareDialog({ session: collab, tab: "shared" }),
+            },
+            {
               id: "collab.leave",
               label: t("cmd.collab.leave"),
               hint: collab.roomName,
@@ -2428,6 +2443,13 @@ export function useCommands({
             },
           ]
         : [
+            {
+              id: "collab.sharedWithMe",
+              label: t("cmd.collab.sharedWithMe"),
+              icon: cmdIcons.Link,
+              group: t("group.collab"),
+              action: async () => (await import("../ui/ShareDialog")).openShareDialog({ session: null, tab: "shared" }),
+            },
             {
               id: "collab.start",
               label: t("cmd.collab.start"),

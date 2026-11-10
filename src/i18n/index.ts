@@ -1520,6 +1520,9 @@ const en: Strings = {
   "chart.reason.radar": "{k} measures for {n} items — compare their profiles.",
   "chart.reason.summary": "No category or time column — comparing column averages.",
   "chart.alternatives": "Chart suggestions",
+  "cmd.collab.share": "Share this note…",
+  "cmd.collab.share.hint": "A link to view, comment or edit, that expires",
+  "cmd.collab.sharedWithMe": "Shared with me",
 };
 
 
