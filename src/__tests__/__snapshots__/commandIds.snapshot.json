@@ -1074,6 +1074,13 @@
       "group": "Insert",
       "hint": "[[Page|label]]",
       "icon": "Link"
+    },
+    {
+      "id": "tasks.open",
+      "label": "Tasks: Today and upcoming",
+      "group": "Tools",
+      "hint": "Overdue, today and the next 7 days, from every note",
+      "icon": "Sparkles"
     }
   ],
   "full": [
@@ -2286,6 +2293,13 @@
       "group": "Insert",
       "hint": "[[Page|label]]",
       "icon": "Link"
+    },
+    {
+      "id": "tasks.open",
+      "label": "Tasks: Today and upcoming",
+      "group": "Tools",
+      "hint": "Overdue, today and the next 7 days, from every note",
+      "icon": "Sparkles"
     }
   ],
   "autoSaveOn": [
@@ -2450,6 +2464,7 @@
     "insert.embed",
     "insert.htmlpreview",
     "insert.bibtex",
-    "insert.wikilink"
+    "insert.wikilink",
+    "tasks.open"
   ]
 }

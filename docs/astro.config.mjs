@@ -59,6 +59,7 @@ export default defineConfig({
             { label: "Large vaults and long notes", slug: "workspace/large-vaults" },
             { label: "Canvas (Excalidraw)", slug: "workspace/canvas", translations: { he: "קנבס (Excalidraw)" } },
             { label: "Export and import", slug: "workspace/export-import", translations: { he: "ייצוא וייבוא" } },
+            { label: "Tasks across the vault", slug: "workspace/tasks" },
           ],
         },
         {

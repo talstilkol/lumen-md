@@ -226,6 +226,8 @@
   "cmd.suggest.toggle.off": "提案モードをオフ",
   "cmd.suggest.toggle.on": "提案モードをオン（変更の追跡）",
   "cmd.sync.open": "暗号化同期…",
+  "cmd.tasks.open": "タスク：今日と今後",
+  "cmd.tasks.open.hint": "すべてのノートから、期限切れ・今日・今後7日間のタスク",
   "cmd.templates.open": "テンプレートギャラリーを開く",
   "cmd.templates.open.hint": "コミュニティのテンプレートを閲覧してインストールします",
   "cmd.tools.autoTag": "🏷️ このノートに自動でタグ付け",

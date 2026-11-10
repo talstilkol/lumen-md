@@ -1143,6 +1143,16 @@
       "vars": []
     },
     {
+      "key": "cmd.tasks.open",
+      "en": "Tasks: Today and upcoming",
+      "vars": []
+    },
+    {
+      "key": "cmd.tasks.open.hint",
+      "en": "Overdue, today and the next 7 days, from every note",
+      "vars": []
+    },
+    {
       "key": "cmd.templates.open",
       "en": "Browse template gallery",
       "vars": []

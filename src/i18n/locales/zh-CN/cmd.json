@@ -226,6 +226,8 @@
   "cmd.suggest.toggle.off": "关闭建议模式",
   "cmd.suggest.toggle.on": "开启建议模式（修订跟踪）",
   "cmd.sync.open": "加密同步…",
+  "cmd.tasks.open": "任务：今天与即将到来",
+  "cmd.tasks.open.hint": "所有笔记中的逾期、今天和未来 7 天的任务",
   "cmd.templates.open": "浏览模板库",
   "cmd.templates.open.hint": "浏览并安装社区模板",
   "cmd.tools.autoTag": "🏷️ 自动为此笔记添加标签",

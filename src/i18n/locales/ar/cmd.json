@@ -226,6 +226,8 @@
   "cmd.suggest.toggle.off": "إيقاف وضع الاقتراح",
   "cmd.suggest.toggle.on": "تفعيل وضع الاقتراح (تتبّع التغييرات)",
   "cmd.sync.open": "المزامنة المشفّرة…",
+  "cmd.tasks.open": "المهام: اليوم والقادمة",
+  "cmd.tasks.open.hint": "المتأخرة واليوم والأيام السبعة القادمة، من كل الملاحظات",
   "cmd.templates.open": "تصفّح معرض القوالب",
   "cmd.templates.open.hint": "تصفّح قوالب المجتمع وثبّتها",
   "cmd.tools.autoTag": "🏷️ وسم هذه الملاحظة تلقائيًا",

@@ -29,6 +29,7 @@ const EmbedBlock = lazy(() => import("../plugins/EmbedBlock"));
 const HtmlPreviewBlock = lazy(() => import("../plugins/HtmlPreviewBlock"));
 const BibtexBlock = lazy(() => import("../plugins/BibtexBlock"));
 const PluginBlockView = lazy(() => import("../plugins/runtime/PluginBlock"));
+const TasksBlock = lazy(() => import("../plugins/TasksBlock"));
 const DataBlock = lazy(() => import("../plugins/DataBlock"));
 const DatabaseBlock = lazy(() => import("../views/DatabaseBlock"));
 const LiveCssBlock = lazy(() => import("../plugins/LiveCssBlock"));
@@ -306,6 +307,8 @@ const Bibtex = withSuspense<BlockProps>(
   (props) => <BibtexBlock source={getText(props.children)} />,
   "bibliography",
 );
+
+const Tasks = withSuspense<BlockProps>((props) => <TasksBlock source={getText(props.children)} />, "tasks");
 
 // `lumen-data` covers the SQL / Pandas / JS-object / auto-detect family.
 // The fence language flows through as `props.lang` so DataBlock can pick
@@ -628,6 +631,7 @@ export const components: Record<string, LumenBlock> = {
   "lumen-htmlpreview": HtmlPreview as unknown as LumenBlock,
   "lumen-bibtex": Bibtex as unknown as LumenBlock,
   "lumen-pluginblock": PluginBlockComp as unknown as LumenBlock,
+  "lumen-tasks": Tasks as unknown as LumenBlock,
   "lumen-data": DataBlockComp as unknown as LumenBlock,
   "lumen-database": Database as unknown as LumenBlock,
   "lumen-livecss": LiveCss as unknown as LumenBlock,

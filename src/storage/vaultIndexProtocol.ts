@@ -8,6 +8,7 @@
  */
 
 import type { BacklinkHit, IndexInput, IndexStats, SearchHit, SearchOptions } from "./vaultIndexCore";
+import type { QueryResult } from "../tasks/taskQuery";
 
 export type IndexRequestBody =
   | { op: "upsert"; files: IndexInput[] }
@@ -15,7 +16,8 @@ export type IndexRequestBody =
   | { op: "clear" }
   | { op: "search"; query: string; opts: SearchOptions }
   | { op: "backlinks"; target: string }
-  | { op: "stats" };
+  | { op: "stats" }
+  | { op: "tasks"; query: string; today: string };
 
 export type IndexRequest = IndexRequestBody & { id: number };
 
@@ -30,6 +32,8 @@ export interface IndexEngine {
   search(query: string, opts: SearchOptions): Promise<SearchHit[]>;
   backlinks(target: string): Promise<BacklinkHit[]>;
   stats(): Promise<IndexStats>;
+  /** Run a ```tasks``` query (plan 4.13); `today` is YYYY-MM-DD in the user's time zone. */
+  tasks(query: string, today: string): Promise<QueryResult>;
   dispose(): void;
 }
 
@@ -42,6 +46,7 @@ export function engineOver(kind: IndexEngine["kind"], send: (req: IndexRequestBo
     search: (query, opts) => send({ op: "search", query, opts }) as Promise<SearchHit[]>,
     backlinks: (target) => send({ op: "backlinks", target }) as Promise<BacklinkHit[]>,
     stats: () => send({ op: "stats" }) as Promise<IndexStats>,
+    tasks: (query, today) => send({ op: "tasks", query, today }) as Promise<QueryResult>,
     dispose,
   };
 }

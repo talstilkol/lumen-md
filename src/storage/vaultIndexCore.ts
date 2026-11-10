@@ -22,6 +22,8 @@
  * (src/__tests__/vaultWorker.test.ts compares them through edits).
  */
 
+import { tasksInNote, type Task } from "../tasks/taskParser";
+import { parseQuery as parseTaskQuery, runQuery, type QueryResult } from "../tasks/taskQuery";
 import { noteKey } from "../lib/slug";
 import { hasHebrew, hebrewFind, normalizeForMatch, prefixVariants } from "../text/hebrew";
 import { WIKI_RE } from "./wikiTargets";
@@ -173,8 +175,13 @@ function findIn(text: string, lower: string, q: string): { start: number; end: n
   return hasHebrew(q) ? hebrewFind(text, q) : null;
 }
 
+/** Files whose tasks are read (plan 4.13): Markdown, as obsidian-tasks. */
+const TASK_NOTE = /\.(md|markdown|mdx)$/i;
+
 export class VaultIndex {
   private readonly files = new Map<string, Entry>();
+  /** Parsed tasks per note (plan 4.13), filled lazily on the first task query. */
+  private readonly taskCache = new Map<string, Task[]>();
   /** Link target key → the notes that link to it. */
   private readonly incoming = new Map<string, Set<string>>();
   private nextOrder = 0;
@@ -210,6 +217,7 @@ export class VaultIndex {
       this.counters.unchanged++;
       return false;
     }
+    this.taskCache.delete(input.path);
     if (prev) this.unlink(prev);
     const content = input.content;
     const links: Link[] = [];
@@ -251,6 +259,7 @@ export class VaultIndex {
 
   /** Remove one note. O(its links). */
   remove(path: string): boolean {
+    this.taskCache.delete(path);
     const prev = this.files.get(path);
     if (!prev) return false;
     this.unlink(prev);
@@ -261,6 +270,7 @@ export class VaultIndex {
   }
 
   clear(): void {
+    this.taskCache.clear();
     for (const p of this.files.keys()) this.bm25.remove(p);
     this.files.clear();
     this.incoming.clear();
@@ -304,6 +314,32 @@ export class VaultIndex {
       }
     }
     return out;
+  }
+
+  /**
+   * Every task in the vault (plan 4.13). A note is parsed once and again
+   * only after it changes; notes without "[" are skipped without parsing.
+   * Only Markdown notes have tasks: other files in the index (a PDF or an
+   * image read as text) are never parsed for them.
+   */
+  allTasks(): Task[] {
+    const out: Task[] = [];
+    for (const [path, e] of this.files) {
+      let ts = this.taskCache.get(path);
+      if (!ts) {
+        ts = TASK_NOTE.test(path) && e.content.includes("[") ? tasksInNote(path, e.content) : [];
+        this.taskCache.set(path, ts);
+      }
+      for (const t of ts) out.push(t);
+    }
+    return out;
+  }
+
+  /** Run a ```tasks``` query over the vault. */
+  queryTasks(source: string, todayIso: string): QueryResult {
+    const [y, m, d] = todayIso.split("-").map(Number);
+    const today = new Date(y, m - 1, d);
+    return runQuery(parseTaskQuery(source, today), this.allTasks(), today);
   }
 
   /**

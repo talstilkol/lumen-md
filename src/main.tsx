@@ -36,6 +36,12 @@ void initTelemetry();
 void initAuth();
 startAutoBackup();
 startVaultSnapshots();
+// Task reminders (plan 4.13.4), only when the user turned them on; loaded after start-up.
+try {
+  if (localStorage.getItem("lumen.tasks.reminders") === "1") setTimeout(() => void import("./tasks/reminders").then((m) => m.startReminders()), 5000);
+} catch {
+  /* storage blocked: no reminders */
+}
 // The vault lives in OPFS/IndexedDB; without this the browser may evict it.
 // Safari grants persistence to installed apps only and deletes the rest after
 // seven days without a visit: remind once a week to export or install (13.3.3).

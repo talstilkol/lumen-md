@@ -2730,6 +2730,101 @@
       ]
     },
     {
+      "key": "tasks.changed",
+      "en": "The note changed since this list was made — nothing was written. Try again.",
+      "vars": []
+    },
+    {
+      "key": "tasks.count",
+      "en": "{n} tasks",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "tasks.error.date",
+      "en": "Not a date: {text}",
+      "vars": [
+        "text"
+      ]
+    },
+    {
+      "key": "tasks.error.query",
+      "en": "Not understood: {text}",
+      "vars": [
+        "text"
+      ]
+    },
+    {
+      "key": "tasks.error.regex",
+      "en": "Not a regular expression: {text}",
+      "vars": [
+        "text"
+      ]
+    },
+    {
+      "key": "tasks.group.done",
+      "en": "Done",
+      "vars": []
+    },
+    {
+      "key": "tasks.group.none",
+      "en": "(none)",
+      "vars": []
+    },
+    {
+      "key": "tasks.group.todo",
+      "en": "To do",
+      "vars": []
+    },
+    {
+      "key": "tasks.loading",
+      "en": "Looking through the vault…",
+      "vars": []
+    },
+    {
+      "key": "tasks.none",
+      "en": "No tasks.",
+      "vars": []
+    },
+    {
+      "key": "tasks.panel.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "tasks.panel.title",
+      "en": "Tasks",
+      "vars": []
+    },
+    {
+      "key": "tasks.panel.today",
+      "en": "Today and overdue",
+      "vars": []
+    },
+    {
+      "key": "tasks.panel.upcoming",
+      "en": "Next 7 days",
+      "vars": []
+    },
+    {
+      "key": "tasks.reminder.title",
+      "en": "Task due today",
+      "vars": []
+    },
+    {
+      "key": "tasks.reminders",
+      "en": "Reminders",
+      "vars": []
+    },
+    {
+      "key": "tasks.toggle",
+      "en": "Done: {task}",
+      "vars": [
+        "task"
+      ]
+    },
+    {
       "key": "time.daysAgo",
       "en": "{n}d ago",
       "vars": [

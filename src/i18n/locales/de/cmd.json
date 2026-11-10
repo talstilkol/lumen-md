@@ -226,6 +226,8 @@
   "cmd.suggest.toggle.off": "Vorschlagsmodus ausschalten",
   "cmd.suggest.toggle.on": "Vorschlagsmodus einschalten (Änderungen nachverfolgen)",
   "cmd.sync.open": "Verschlüsselte Synchronisierung…",
+  "cmd.tasks.open": "Aufgaben: heute und demnächst",
+  "cmd.tasks.open.hint": "Überfällig, heute und die nächsten 7 Tage, aus allen Notizen",
   "cmd.templates.open": "Vorlagengalerie durchsuchen",
   "cmd.templates.open.hint": "Community-Vorlagen durchsuchen und installieren",
   "cmd.tools.autoTag": "🏷️ Diese Notiz automatisch taggen",

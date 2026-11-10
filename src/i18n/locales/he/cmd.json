@@ -226,6 +226,8 @@
   "cmd.suggest.toggle.off": "כיבוי מצב הצעות",
   "cmd.suggest.toggle.on": "הפעלת מצב הצעות (מעקב שינויים)",
   "cmd.sync.open": "סנכרון מוצפן…",
+  "cmd.tasks.open": "משימות: היום ובקרוב",
+  "cmd.tasks.open.hint": "באיחור, היום ו-7 הימים הבאים, מכל הפתקים",
   "cmd.templates.open": "פתח גלריית תבניות",
   "cmd.templates.open.hint": "עיון והתקנה של תבניות קהילתיות",
   "cmd.tools.autoTag": "🏷️ תיוג אוטומטי",
