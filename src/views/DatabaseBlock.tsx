@@ -41,6 +41,7 @@ import {
   applyQuery,
   compileFormulas,
   displayValue,
+  groupKey,
   groupRows,
   kanbanColumnValue,
   NO_VALUE,
@@ -743,10 +744,8 @@ function KanbanView({ rows, allRows, spec, fields, groupBy, edit, formulaNames }
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }), useSensor(KeyboardSensor, { coordinateGetter }));
 
   const byPath = useMemo(() => new Map(rows.map((r) => [r.path, r])), [rows]);
-  const columnOf = (path: string) => {
-    const v = byPath.get(path)?.fm[groupBy];
-    return v === null || v === undefined || v === "" ? NONE : String(v);
-  };
+  // The same key as groupRows, so a card's own column is recognised.
+  const columnOf = (path: string) => groupKey(byPath.get(path)?.fm[groupBy]);
   homeRef.current = columnOf;
   /** The value a column stands for, in the type its notes use (`3`, not `"3"`). */
   const valueFor = (col: string) => kanbanColumnValue(col, groups.get(col)?.[0]?.fm[groupBy], columnType(allRows.map((r) => r.fm[groupBy]), groupBy));

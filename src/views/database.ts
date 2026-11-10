@@ -207,8 +207,25 @@ export function kanbanColumnValue(col: string, sample: unknown, type: PropertyTy
   if (col === NO_VALUE) return undefined;
   if (typeof sample === "number" || typeof sample === "boolean") return sample;
   if (Array.isArray(sample)) return sample.map((x) => String(x));
+  // An empty `columns: [true, false]` column of a checkbox: a boolean, not the text "false" (W1.32, Codex on #231).
+  if (type === "checkbox" && (col === "true" || col === "false")) return col === "true";
   if (type === "list") return [col];
   return type === "number" && Number.isFinite(Number(col)) ? Number(col) : col;
+}
+
+/**
+ * The column a value belongs to. A list joins its items with "," (`fav,sci-fi`,
+ * the column `columns:` names), unless an item has a comma of its own: then
+ * `["a,b"]` and `[a, b]` would share a column, and a drop there would write
+ * whichever list loaded first, so such a list keys by its JSON (W1.32, Codex on #231).
+ */
+export function groupKey(v: unknown): string {
+  if (v == null || v === "") return NO_VALUE;
+  if (Array.isArray(v)) {
+    const items = v.map((x) => String(x));
+    return items.some((x) => x.includes(",")) ? JSON.stringify(items) : items.join(",");
+  }
+  return String(v);
 }
 
 export function groupRows(
@@ -217,8 +234,7 @@ export function groupRows(
 ): Map<string, DatabaseRow[]> {
   const out = new Map<string, DatabaseRow[]>();
   for (const r of rows) {
-    const v = r.fm[groupBy];
-    const key = v == null || v === "" ? NO_VALUE : String(v);
+    const key = groupKey(r.fm[groupBy]);
     if (!out.has(key)) out.set(key, []);
     out.get(key)!.push(r);
   }
