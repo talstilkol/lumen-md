@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-24T19:18:31.128Z",
+  "generated_at": "2026-11-10T03:41:43.178Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1462,
+  "count": 1485,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1559,6 +1559,125 @@
       "key": "cmd.app.checkUpdates.hint",
       "en": "Desktop app: asks the release server for a newer, signed version",
       "vars": []
+    },
+    {
+      "key": "flag.update.checkOnLaunch.name",
+      "en": "Check for updates at launch",
+      "vars": []
+    },
+    {
+      "key": "flag.update.checkOnLaunch.desc",
+      "en": "Desktop app: look for a new version once a day when Lumen starts, so beta fixes arrive quickly. Never in local-only mode; every check is in the privacy log.",
+      "vars": []
+    },
+    {
+      "key": "flags.title",
+      "en": "Feature flags",
+      "vars": []
+    },
+    {
+      "key": "flags.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "flags.intro.beta",
+      "en": "This is a beta build: features still in beta are on. You can turn any of them off here; the choice stays on this device.",
+      "vars": []
+    },
+    {
+      "key": "flags.intro.stable",
+      "en": "Features still in beta are off in this build. You can try one here; the choice stays on this device.",
+      "vars": []
+    },
+    {
+      "key": "flags.stage.beta",
+      "en": "Beta",
+      "vars": []
+    },
+    {
+      "key": "flags.stage.stable",
+      "en": "Stable",
+      "vars": []
+    },
+    {
+      "key": "flags.source.override",
+      "en": "Your choice (default here: {default})",
+      "vars": [
+        "default"
+      ]
+    },
+    {
+      "key": "flags.source.channel",
+      "en": "Default for this build",
+      "vars": []
+    },
+    {
+      "key": "flags.useDefault",
+      "en": "Use the default",
+      "vars": []
+    },
+    {
+      "key": "flags.on",
+      "en": "On",
+      "vars": []
+    },
+    {
+      "key": "flags.off",
+      "en": "Off",
+      "vars": []
+    },
+    {
+      "key": "flags.reset",
+      "en": "Reset all",
+      "vars": []
+    },
+    {
+      "key": "flags.badge",
+      "en": "Beta",
+      "vars": []
+    },
+    {
+      "key": "flags.badge.title",
+      "en": "Beta build: open the feature flags",
+      "vars": []
+    },
+    {
+      "key": "cmd.app.featureFlags",
+      "en": "Feature flags…",
+      "vars": []
+    },
+    {
+      "key": "cmd.app.featureFlags.hint",
+      "en": "Turn beta features on or off on this device",
+      "vars": []
+    },
+    {
+      "key": "cmd.app.updateChannel",
+      "en": "Update channel: switch between stable and beta",
+      "vars": []
+    },
+    {
+      "key": "cmd.app.updateChannel.hint",
+      "en": "Beta gets new features first; stable gets tested releases",
+      "vars": []
+    },
+    {
+      "key": "update.channel.beta",
+      "en": "Update channel: beta. Update checks now include beta releases.",
+      "vars": []
+    },
+    {
+      "key": "update.channel.stable",
+      "en": "Update channel: stable. You stay on this version until a stable release is newer.",
+      "vars": []
+    },
+    {
+      "key": "update.launch.available",
+      "en": "Lumen {version} is available. Run “Check for updates…” to install it.",
+      "vars": [
+        "version"
+      ]
     },
     {
       "key": "update.localOnly",

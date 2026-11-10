@@ -81,6 +81,20 @@ export function buildVaultLocationCommands(): Command[] {
   ];
 }
 
+/** Feature flags (plan 14.4): beta features on or off on this device. */
+export function buildFeatureFlagCommands(): Command[] {
+  return [
+    {
+      id: "app.featureFlags",
+      label: t("cmd.app.featureFlags"),
+      hint: t("cmd.app.featureFlags.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      action: () => window.dispatchEvent(new CustomEvent("lumen-open-feature-flags")),
+    },
+  ];
+}
+
 /** Desktop updates (plan 11.5): checked only on request, never in local-only. */
 export function buildDesktopUpdateCommands(): Command[] {
   if (typeof window === "undefined" || !("__TAURI_INTERNALS__" in window)) return [];
@@ -105,6 +119,21 @@ export function buildDesktopUpdateCommands(): Command[] {
         } catch (e) {
           showAiToast(t("update.failed", { message: (e as Error).message }), "error");
         }
+      },
+    },
+    {
+      // Plan 14.4: stable follows releases; beta also gets betas. Switching back
+      // to stable keeps this version until a stable release passes it.
+      id: "app.updateChannel",
+      label: t("cmd.app.updateChannel"),
+      hint: t("cmd.app.updateChannel.hint"),
+      icon: cmdIcons.Download,
+      group: t("group.file"),
+      action: async () => {
+        const { setUpdateChannel, updateChannel } = await import("../../desktop/updates");
+        const next = updateChannel() === "beta" ? "stable" : "beta";
+        setUpdateChannel(next);
+        showAiToast(next === "beta" ? t("update.channel.beta") : t("update.channel.stable"), "info");
       },
     },
   ];

@@ -28,6 +28,7 @@ export default defineConfig({
             { label: "Welcome to Lumen", slug: "getting-started/welcome" },
             { label: "Quickstart", slug: "getting-started/quickstart" },
             { label: "Desktop app updates", slug: "getting-started/desktop-updates" },
+            { label: "Beta channel and feature flags", slug: "getting-started/beta" },
           ],
         },
         {

@@ -8,6 +8,7 @@ import { getTelemetryOptOut, setTelemetryOptOut } from "../lib/telemetry";
 import type { ConfigHealthReport } from "../lib/configHealth";
 import { subscribeSyncStatus } from "../sync/syncStatus";
 import { parseSuggestions, mayContainCriticMarkup } from "../editor/suggesting";
+import { BetaBadge } from "./FeatureFlagsPanel";
 
 /** Number of CriticMarkup suggestions (cheap no-op for plain docs). */
 function countCriticMarkup(text: string): number {
@@ -74,6 +75,7 @@ export const StatusBar = React.memo(function StatusBar({
         : "hsl(12 90% 58%)";
   return (
     <footer className="status-bar">
+      <BetaBadge />
       <span className="sb-item" title="Document">
         {dirty ? "●" : "○"} {filename}
       </span>
