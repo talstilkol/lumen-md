@@ -60,8 +60,10 @@ test("an agent's change waits for approval; approving applies it to the unsaved 
   await expect(page.getByTestId("status-agent-review")).toContainText("Review 1");
   const toastButton = page.getByTestId("toast-action");
   await expect(toastButton).toBeVisible();
-  await page.waitForTimeout(500);
   const source = page.locator(".cm-content").first();
+  // Staged, not applied: the proposal is in the review queue (the badge above
+  // counts it) and the document still holds the original text.
+  await expect.poll(() => page.evaluate(() => document.querySelector(".cm-content")?.textContent ?? "")).toContain("Hello wrld,");
   await expect(source).toContainText("Hello wrld,");
 
   await toastButton.click();

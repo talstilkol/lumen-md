@@ -130,8 +130,30 @@ test("an edit made outside Lumen appears in the open note within 2 s", async ({ 
   await expect(page.locator("aside.file-tree .file-tree-name", { hasText: "Welcome.md" })).toBeVisible({ timeout: 10_000 });
   await run(page, "vault.toFolder");
   await expect(page.getByText(/The vault is now in the folder “picked-folder”/)).toBeVisible({ timeout: 15_000 });
-  // Let the watcher take its first snapshot.
-  await page.waitForTimeout(1500);
+  // Wait until the watcher has its first snapshot: a file another editor
+  // creates is only noticed against one. Each attempt writes a new canary
+  // note in the folder; once one shows up in the file tree, the watcher is
+  // comparing, and the edit below is measured from a known start.
+  let canary = 0;
+  await expect
+    .poll(
+      async () => {
+        canary++;
+        await page.evaluate(
+          async ({ picked, name }) => {
+            const realRoot = await (Object.getPrototypeOf(navigator.storage) as { getDirectory: () => Promise<FileSystemDirectoryHandle> }).getDirectory.call(navigator.storage);
+            const dir = await realRoot.getDirectoryHandle(picked);
+            const w = await (await dir.getFileHandle(name, { create: true })).createWritable();
+            await w.write("# canary");
+            await w.close();
+          },
+          { picked: PICKED, name: `canary-${canary}.md` },
+        );
+        return page.locator("aside.file-tree .file-tree-name", { hasText: /^canary-\d+\.md$/ }).count();
+      },
+      { timeout: 15_000, intervals: [500, 1000] },
+    )
+    .toBeGreaterThan(0);
 
   // "Another editor" writes the file in the folder, not through Lumen.
   const t0 = Date.now();

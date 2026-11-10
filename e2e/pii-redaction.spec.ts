@@ -89,6 +89,40 @@ test("local-only: nothing reaches a cloud provider at all", async ({ page }) => 
   await expect(page.locator(".cm-content").first()).toContainText("Welcome to", { timeout: 15_000 });
   await loadNote(page);
   await page.evaluate(() => window.dispatchEvent(new CustomEvent("lumen-run-command", { detail: { id: "ai.actionItems" } })));
-  await page.waitForTimeout(2000);
+  // The agent run is over (answered locally or failed for want of a local
+  // model): every run ends in the agent trace, so by then any cloud request
+  // would have been made.
+  await expect.poll(() => tracedRuns(page), { timeout: 20_000 }).toBeGreaterThan(0);
   expect(reached).toBe(0);
 });
+
+/** Finished agent runs in the trace (idb-keyval's store, key lumen-agent-trace); 0 until it exists. */
+async function tracedRuns(page: Page): Promise<number> {
+  return page.evaluate(async () => {
+    // Opening a database that does not exist yet would create it without
+    // idb-keyval's object store: only look once the app has created it.
+    if (!(await indexedDB.databases()).some((d) => d.name === "keyval-store")) return 0;
+    return new Promise<number>((resolve) => {
+      const req = indexedDB.open("keyval-store");
+      req.onerror = () => resolve(0);
+      req.onsuccess = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains("keyval")) {
+          db.close();
+          resolve(0);
+          return;
+        }
+        const get = db.transaction("keyval", "readonly").objectStore("keyval").get("lumen-agent-trace");
+        get.onsuccess = () => {
+          db.close();
+          const runs = get.result as Array<{ endedAt?: number }> | undefined;
+          resolve(Array.isArray(runs) ? runs.filter((r) => typeof r.endedAt === "number").length : 0);
+        };
+        get.onerror = () => {
+          db.close();
+          resolve(0);
+        };
+      };
+    });
+  });
+}

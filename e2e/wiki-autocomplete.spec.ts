@@ -74,10 +74,11 @@ test("source editor: [[ completes notes, Hebrew and headings, and creates a note
   const list = page.locator(".cm-tooltip-autocomplete");
   /** Enter on the first option once it reads `text`. CodeMirror ignores an
    * Enter within 75 ms of the list updating (its interactionDelay), and the
-   * last keystroke's query lands up to ~100 ms after it: let it settle. */
+   * last keystroke's query lands up to ~100 ms after it: wait until the list
+   * has stopped changing (no DOM update for 150 ms). */
   const pickFirst = async (text: string) => {
     await expect(list.locator("li").first()).toContainText(text, { timeout: 8_000 });
-    await page.waitForTimeout(250);
+    await expect.poll(() => listSettled(page), { timeout: 5_000 }).toBe(true);
     await expect(list.locator("li").first()).toContainText(text);
     await page.keyboard.press("Enter");
   };
@@ -136,3 +137,32 @@ test("WYSIWYG: [[ completes notes in English and Hebrew and writes a real wiki l
   await expect(source).toContainText("Start here [[Project Alpha]] [[שלום עולם]]", { timeout: 5_000 });
   await expect(source).not.toContainText("\\[");
 });
+
+/**
+ * True once the open completion list has had no DOM change for 150 ms
+ * (false if it changes, or is gone, within 1 s), so an Enter lands after
+ * CodeMirror's interaction delay on the list the last keystroke produced.
+ */
+async function listSettled(page: Page): Promise<boolean> {
+  return page.evaluate(
+    () =>
+      new Promise<boolean>((resolve) => {
+        const el = document.querySelector(".cm-tooltip-autocomplete");
+        if (!el) return resolve(false);
+        let quiet: ReturnType<typeof setTimeout>;
+        const done = (v: boolean) => {
+          observer.disconnect();
+          clearTimeout(quiet);
+          clearTimeout(limit);
+          resolve(v);
+        };
+        const observer = new MutationObserver(() => {
+          clearTimeout(quiet);
+          quiet = setTimeout(() => done(true), 150);
+        });
+        observer.observe(el, { subtree: true, childList: true, characterData: true, attributes: true });
+        quiet = setTimeout(() => done(true), 150);
+        const limit = setTimeout(() => done(false), 1000);
+      }),
+  );
+}

@@ -101,6 +101,7 @@ export const DIRECT_FS_ALLOWLIST = {
   "src/ai/nikudService.ts": "hands the OPFS root to modelCache for the niqqud model (plan 6.3): model files, not vault files",
   "src/ai/piiNer.ts": "checks whether the converted NER model is cached in OPFS (plan 2.6): model files, not vault files",
   "src/ai/transformers.worker.ts": "the worker's model cache root for converted models (plan 6.0): model files, not vault files",
+  "src/ai/imageSearchService.ts": "checks whether the converted image-search model is cached in OPFS (plan 6.7): model files, not vault files",
 };
 
 /** Handle methods that read or change a file system directly. */
