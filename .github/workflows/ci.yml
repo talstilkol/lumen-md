@@ -185,7 +185,7 @@ jobs:
 
   licenses:
     name: licence gate (npm • models • datasets)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
       contents: read
@@ -220,7 +220,7 @@ jobs:
 
   lint:
     name: lint (ESLint, with baseline)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # pinned: ubuntu-latest becomes Ubuntu 26 from 19.10.2026 (actions/runner-images#14748)
     timeout-minutes: 15
     permissions:
       contents: read
@@ -574,7 +574,7 @@ jobs:
     # GOLDEN_SEED, so this is the public dev split, and the job says so; the
     # held-out test split is measured in golden-sets.yml (task=test).
     name: OCR CER (Hebrew, English)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # pinned: ubuntu-latest becomes Ubuntu 26 from 19.10.2026 (actions/runner-images#14748)
     timeout-minutes: 25
     permissions:
       contents: read

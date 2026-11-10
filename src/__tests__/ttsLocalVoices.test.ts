@@ -58,8 +58,15 @@ describe("read-aloud voices and the AI policy", () => {
     expect(voiceFor("en-US")?.name).toBe("Samantha");
   });
 
-  it("other policies use a network voice only after the opt-in", () => {
+  it("local-first never picks a network voice, even after an opt-in (plan 6.17)", () => {
     localStorage.setItem("lumen.ai.policy", "local-first");
+    allowNetworkVoices();
+    expect(networkVoicesAllowed()).toBe(false);
+    expect(voiceFor("he-IL")).toBeUndefined();
+  });
+
+  it("the cloud policy uses a network voice only after the opt-in", () => {
+    localStorage.setItem("lumen.ai.policy", "cloud");
     expect(voiceFor("he-IL")).toBeUndefined();
     allowNetworkVoices();
     expect(networkVoicesAllowed()).toBe(true);
@@ -82,7 +89,7 @@ describe("read-aloud voices and the AI policy", () => {
   });
 
   it("an allowed network voice is recorded in the privacy ledger once per voice", async () => {
-    localStorage.setItem("lumen.ai.policy", "local-first");
+    localStorage.setItem("lumen.ai.policy", "cloud");
     allowNetworkVoices();
     const before = ledgerEntries().length;
     const ok = await speak("שלום לכולם. מה שלומכם היום.", { uiLang: "he" });
@@ -94,7 +101,7 @@ describe("read-aloud voices and the AI policy", () => {
   });
 
   it("records every sentence sent through a network voice, as UTF-8 bytes, in one entry", async () => {
-    localStorage.setItem("lumen.ai.policy", "local-first");
+    localStorage.setItem("lumen.ai.policy", "cloud");
     allowNetworkVoices();
     const before = ledgerEntries().length;
     const a = "שלום לכולם.";
@@ -108,7 +115,7 @@ describe("read-aloud voices and the AI policy", () => {
   });
 
   it("starts a new ledger entry when the ledger is cleared mid-reading", async () => {
-    localStorage.setItem("lumen.ai.policy", "local-first");
+    localStorage.setItem("lumen.ai.policy", "cloud");
     allowNetworkVoices();
     const a = "שלום לכולם.";
     const b = "מה שלומכם היום.";
@@ -144,7 +151,7 @@ describe("read-aloud voices and the AI policy", () => {
   });
 
   it("keeps a confirmed opt-in for the session when storage refuses to save it", () => {
-    localStorage.setItem("lumen.ai.policy", "local-first");
+    localStorage.setItem("lumen.ai.policy", "cloud");
     const spy = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
       throw new Error("denied");
     });

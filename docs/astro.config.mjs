@@ -90,6 +90,7 @@ export default defineConfig({
             { label: "Personal data before the cloud", slug: "ai/pii-redaction", translations: { he: "מידע אישי לפני הענן" } },
             { label: "MCP integration (Claude Desktop, Cursor)", slug: "ai/mcp" },
             { label: "Privacy and the AI policy", slug: "ai/privacy", translations: { he: "פרטיות ומדיניות ה-AI" } },
+            { label: "Cloud only by choice", translations: { he: "ענן רק בבחירה" }, slug: "ai/cloud-routes" },
           ],
         },
         {

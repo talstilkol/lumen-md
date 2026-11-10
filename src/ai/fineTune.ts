@@ -133,6 +133,7 @@ export async function uploadTrainingFile(
   jsonl: string,
   opts: FineTuneOptions = {},
 ): Promise<string> {
+  assertCloudAllowed("OpenAI fine-tuning (uploads your writing)");
   const key = getAiKey();
   if (!jsonl.trim()) {
     throw new AiError("PARSE_ERROR", "No training data to upload — write more notes in the last 90 days.");
@@ -170,6 +171,7 @@ export async function createFineTuneJob(
   trainingFileId: string,
   opts: FineTuneOptions = {},
 ): Promise<FineTuneJob> {
+  assertCloudAllowed("OpenAI fine-tuning");
   const key = getAiKey();
   const res = await fetchWithRetry(
     "https://api.openai.com/v1/fine_tuning/jobs",

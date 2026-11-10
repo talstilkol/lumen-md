@@ -111,6 +111,17 @@ export function cloudAllowed(policy: AiPolicy = getAiPolicy()): boolean {
 }
 
 /**
+ * May content go to a third-party service the user never set up — the public
+ * LanguageTool API, the browser's online speech recognition, a server-side
+ * read-aloud voice? Only under the `cloud` policy. `local-first` falls back
+ * only to the AI provider whose key the user entered; every other service
+ * needs the explicit cloud choice (plan 6.17).
+ */
+export function thirdPartyServicesAllowed(policy: AiPolicy = getAiPolicy()): boolean {
+  return policy === "cloud";
+}
+
+/**
  * May a request go to `provider` under the current policy? Local providers
  * are always allowed; cloud providers only outside `local-only`.
  */

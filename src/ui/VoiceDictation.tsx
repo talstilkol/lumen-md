@@ -7,8 +7,8 @@
  *     6.1); other languages, and Hebrew when the live engine is not used,
  *     run Whisper on this device in ~5-second segments (plan 1.3). The
  *     browser's `SpeechRecognition` sends audio to its vendor, so it is used
- *     only outside local-only and only after the user agrees; every use is
- *     in the privacy ledger.
+ *     only under the `cloud` AI policy (plan 6.17) and only after the user
+ *     agrees; every use is in the privacy ledger.
  *   - **Memo mode** (when `aiKey` is set OR Privacy Mode is on):
  *     `MediaRecorder` captures the audio, on stop we Whisper-transcribe
  *     + AI-summarize and insert a `> 🎙 Voice memo` block at the cursor.
@@ -27,7 +27,7 @@ import { t } from "../i18n";
 import { transcribe, summarizeMemo, formatVoiceMemo } from "../ai/transcribe";
 import { aiOperation, isAbort } from "../ai/aiAbort";
 import { log } from "../lib/logger";
-import { getAiPolicy, onAiPolicyChange } from "../ai/policy";
+import { getAiPolicy, onAiPolicyChange, thirdPartyServicesAllowed } from "../ai/policy";
 import { recordBrowserService, recordSpeechRecognition } from "../ai/privacyLedger";
 import { chooseDictationEngine, webSpeechOptedIn, WEB_SPEECH_KEY, Segmenter, SerialQueue } from "../ai/dictation";
 
@@ -213,6 +213,13 @@ export function startBrowserSpeech(lang: string): void {
     showAiToast(t("dictation.localOnlyNoBrowser"), "error");
     return;
   }
+  // The browser's speech recognition streams the audio to its vendor's
+  // servers (Chrome: Google). Only under the explicit `cloud` policy;
+  // otherwise record and transcribe on this device (plan 6.17).
+  if (!thirdPartyServicesAllowed()) {
+    startDeviceDictation(lang);
+    return;
+  }
   const Ctor = webSpeechCtor();
   if (!Ctor) {
     showAiToast(t("toast.speechRecognitionNotSupportedIn"), "error");
@@ -255,6 +262,8 @@ async function offerWebSpeech(Ctor: SpeechCtor | null, lang: string): Promise<vo
     return;
   }
   if (refuseUnderLocalOnly()) return;
+  // why: outside the `cloud` policy the browser service is not offered (plan 6.17); the local failure was already reported
+  if (!thirdPartyServicesAllowed()) return;
   const { uiConfirm } = await import("./PromptDialog");
   const yes = await uiConfirm({ title: t("dictate.webSpeech.title"), message: t("dictate.webSpeech.body"), okLabel: t("dictate.webSpeech.ok") });
   if (!yes) return;
@@ -277,6 +286,7 @@ function refuseUnderLocalOnly(): boolean {
 function startWebSpeech(Ctor: SpeechCtor, lang: string): void {
   // why: the single gate in front of the network service — re-checked after any await
   if (refuseUnderLocalOnly()) return;
+  if (!thirdPartyServicesAllowed()) return; // why: only under the `cloud` policy (plan 6.17)
   const appendDictated = dictationSink();
   recordSpeechRecognition("allowed");
   showAiToast(t("toast.dictate.webSpeechActive"), "info");

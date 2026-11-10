@@ -1,5 +1,5 @@
 import { fetchWithRetry } from "../lib/fetchRetry";
-import { cloudAllowed, isLocalOrigin } from "./policy";
+import { cloudAllowed, isLocalOrigin, thirdPartyServicesAllowed } from "./policy";
 import { connectAllowedByCsp } from "../lib/cspConnect";
 
 /**
@@ -85,6 +85,11 @@ export async function grammarLanguage(text: string, fallback = "en-US"): Promise
   }
 }
 
+/** May a check go to `url`, which is not on this machine or network? */
+function remoteGrammarAllowed(url: string): boolean {
+  return url === DEFAULT_URL ? thirdPartyServicesAllowed() : cloudAllowed();
+}
+
 /** Grammar through the local proofreader agent: issues mapped to LanguageTool-shaped matches. */
 async function checkWithModel(text: string, language: string, signal?: AbortSignal): Promise<GrammarMatch[]> {
   const { runAgentOrThrow } = await import("../agents/runtime");
@@ -117,10 +122,12 @@ export async function checkGrammar(
   const cached = RECENT.get(cacheKey);
   if (cached) return cached;
   // A self-hosted LanguageTool on this machine or network is fine under
-  // every policy; the public API is a third party.
+  // every policy. A remote one the user configured counts as their cloud
+  // choice outside local-only; the public API nobody configured needs the
+  // explicit `cloud` policy (plan 6.17).
   // Without it: English spelling on this device (plan 6.10), plus the
   // proofreader model when the user asked for a check.
-  if (!isLocalOrigin(endpoint()) && !cloudAllowed()) {
+  if (!isLocalOrigin(endpoint()) && !remoteGrammarAllowed(endpoint())) {
     const { checkEnglishParagraphs } = await import("./englishSpellService");
     const spelling = await checkEnglishParagraphs(trimmed).catch(() => [] as GrammarMatch[]);
     const matches = opts.allowModel ? mergeMatches(spelling, await checkWithModel(trimmed, language, opts.signal)) : spelling;

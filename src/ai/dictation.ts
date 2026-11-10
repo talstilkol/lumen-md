@@ -20,7 +20,8 @@ export type DictationEngine = "local" | "webspeech";
 
 /** Local unless the policy allows a network service and the user opted in. */
 export function chooseDictationEngine(policy: AiPolicy, webSpeechAvailable: boolean, optedIn: boolean): DictationEngine {
-  if (policy === "local-only" || !webSpeechAvailable || !optedIn) return "local";
+  // The browser service only under the explicit `cloud` policy (plan 6.17), and only once agreed.
+  if (policy !== "cloud" || !webSpeechAvailable || !optedIn) return "local";
   return "webspeech";
 }
 

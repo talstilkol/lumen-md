@@ -1,11 +1,13 @@
 /**
  * Read a note aloud (T32) with the system's own voices (Web Speech API) —
- * on macOS / Windows / Android that includes Hebrew. Nothing leaves the
- * device. Text is spoken sentence by sentence; each sentence's range in the
+ * on macOS / Windows / Android that includes Hebrew. Some browsers also list
+ * voices that synthesize on a server (Chrome's "Google …" voices send the
+ * text out): those are used only under the `cloud` AI policy (plan 6.17);
+ * otherwise only voices with `localService` speak. Text is spoken sentence by sentence; each sentence's range in the
  * document is reported so the editor can highlight what is being read.
  */
 import { hebrewRatio } from "../text/hebrew";
-import { getAiPolicy } from "./policy";
+import { thirdPartyServicesAllowed } from "./policy";
 import { addSpeechVoiceBytes, recordSpeechVoice } from "./privacyLedger";
 
 /** Opt-in for voices that synthesize on a server (Chrome's "Google …" voices send the text out). */
@@ -14,9 +16,9 @@ export const NETWORK_VOICES_KEY = "lumen.tts.networkVoices";
 /** The opt-in for this page session, kept even when storage refuses to save it. */
 let sessionOptIn = false;
 
-/** May a voice that is not `localService` be used? Never under local-only; otherwise only after opt-in. */
+/** May a voice that is not `localService` be used? Only under the `cloud` policy (plan 6.17), and only after opt-in. */
 export function networkVoicesAllowed(): boolean {
-  if (getAiPolicy() === "local-only") return false;
+  if (!thirdPartyServicesAllowed()) return false;
   if (sessionOptIn) return true;
   try {
     return localStorage.getItem(NETWORK_VOICES_KEY) === "1";

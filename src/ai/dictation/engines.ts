@@ -7,7 +7,7 @@
  *   files          → Whisper: ivrit.ai turbo on WebGPU for Hebrew when the
  *                    GPU can hold it (owner-measured, 15.3), else whisper-base
  *                    on WASM (77 MB); the language is forced, never detected
- *   browser speech → only when the policy allows the cloud (the browser sends
+ *   browser speech → only under the `cloud` policy (plan 6.17; the browser sends
  *                    the audio to its vendor) and never under local-only (1.3)
  *
  * Pure: the caller passes what it knows; nothing is probed or loaded here.
@@ -81,9 +81,10 @@ export function chooseEngine(ctx: EngineContext): EngineChoice {
     else if (!ctx.webSpeech) webSpeechBlocked = "unsupported";
     // Under `cloud` the user chose the cloud: browser speech is fine as the
     // first choice when no local engine is downloaded yet. Under
-    // `local-first` it is the last resort.
+    // `local-first` it is not offered: a third-party service the user never
+    // set up needs the explicit `cloud` policy (plan 6.17).
     else if (ctx.policy === "cloud" && !out.some((e) => ctx.downloaded.has(e))) out.unshift("web-speech");
-    else out.push("web-speech");
+    else if (ctx.policy === "cloud") out.push("web-speech");
   }
   const best = out[0];
   return { candidates: out, needsDownload: ENGINES[best].downloadMB > 0 && !ctx.downloaded.has(best) ? best : null, webSpeechBlocked };

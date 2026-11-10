@@ -11,6 +11,7 @@
  */
 
 import type { ChatMessage, ChatOptions } from "./llm";
+import { assertCloudAllowed } from "./policy";
 import { getProviderKey, AiError, PROVIDER_DEFAULT_MODELS, isRetiredGeminiModel } from "./llm";
 
 const BASE = "https://generativelanguage.googleapis.com/v1beta/models";
@@ -83,6 +84,7 @@ export async function chatGemini(
   messages: ChatMessage[],
   opts: ChatOptions = {},
 ): Promise<string> {
+  assertCloudAllowed("Google Gemini");
   const key = getProviderKey("gemini");
   const url = `${BASE}/${getGeminiModel(opts)}:generateContent?key=${encodeURIComponent(key)}`;
   const res = await fetch(url, {
@@ -107,6 +109,7 @@ export async function* chatGeminiStream(
   messages: ChatMessage[],
   opts: ChatOptions = {},
 ): AsyncGenerator<string, void, undefined> {
+  assertCloudAllowed("Google Gemini");
   const key = getProviderKey("gemini");
   const url = `${BASE}/${getGeminiModel(opts)}:streamGenerateContent?alt=sse&key=${encodeURIComponent(key)}`;
   const res = await fetch(url, {

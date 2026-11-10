@@ -80,8 +80,9 @@ describe("chooseEngine", () => {
       expect(c.webSpeechBlocked).toBe("local-only");
     }
   });
-  it("keeps browser speech last under local-first, first under cloud with nothing downloaded", () => {
-    expect(chooseEngine(ctx({ language: "en" })).candidates).toEqual(["whisper-live", "web-speech"]);
+  it("no browser speech under local-first (plan 6.17); last under cloud, first under cloud with nothing downloaded", () => {
+    expect(chooseEngine(ctx({ language: "en" })).candidates).toEqual(["whisper-live"]);
+    expect(chooseEngine(ctx({ language: "en", policy: "cloud", downloaded: new Set(["whisper-live"]) })).candidates).toEqual(["whisper-live", "web-speech"]);
     expect(chooseEngine(ctx({ language: "en", policy: "cloud" })).candidates[0]).toBe("web-speech");
     expect(chooseEngine(ctx({ policy: "cloud", downloaded: new Set(["zipformer-he"]) })).candidates[0]).toBe("zipformer-he");
     expect(chooseEngine(ctx({ webSpeech: false })).webSpeechBlocked).toBe("unsupported");

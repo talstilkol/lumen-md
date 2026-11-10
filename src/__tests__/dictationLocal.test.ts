@@ -9,8 +9,9 @@ describe("engine choice", () => {
   it("local-only always dictates on the device, even after an opt-in", () => {
     expect(chooseDictationEngine("local-only", true, true)).toBe("local");
   });
-  it("elsewhere the browser service needs both availability and the opt-in", () => {
+  it("only under cloud, and the browser service needs both availability and the opt-in (plan 6.17)", () => {
     expect(chooseDictationEngine("local-first", true, false)).toBe("local");
+    expect(chooseDictationEngine("local-first", true, true)).toBe("local");
     expect(chooseDictationEngine("cloud", false, true)).toBe("local");
     expect(chooseDictationEngine("cloud", true, true)).toBe("webspeech");
   });
@@ -77,8 +78,8 @@ describe("startVoiceRecording and the privacy policy", () => {
     delete (window as unknown as { SpeechRecognition?: unknown }).SpeechRecognition;
   });
 
-  it("outside local-only it asks first, then uses the browser service and logs it", async () => {
-    localStorage.setItem("lumen.ai.policy", "local-first");
+  it("under cloud it asks first, then uses the browser service and logs it", async () => {
+    localStorage.setItem("lumen.ai.policy", "cloud");
     const started = vi.fn();
     class FakeSR {
       lang = "";
@@ -357,7 +358,7 @@ describe("dictation setup and failures (review: #197)", () => {
     stop() {}
   }
   it("releases the microphone when the audio graph cannot be built, then offers the fallback", async () => {
-    localStorage.setItem("lumen.ai.policy", "local-first");
+    localStorage.setItem("lumen.ai.policy", "cloud");
     const stopTrack = fakeMic();
     const close = vi.fn(async () => {});
     (globalThis as unknown as { AudioContext: unknown }).AudioContext = class {
@@ -380,7 +381,7 @@ describe("dictation setup and failures (review: #197)", () => {
   });
 
   it("re-reads the policy after the consent dialog: a switch to local-only in the meantime blocks the browser service", async () => {
-    localStorage.setItem("lumen.ai.policy", "local-first");
+    localStorage.setItem("lumen.ai.policy", "cloud");
     FakeSR.made = 0;
     (window as unknown as { SpeechRecognition: unknown }).SpeechRecognition = FakeSR;
     Object.defineProperty(navigator, "mediaDevices", { configurable: true, value: undefined });
@@ -400,7 +401,7 @@ describe("dictation setup and failures (review: #197)", () => {
   });
 
   it("a failed transcription is reported once, releases the mic and offers the fallback", async () => {
-    localStorage.setItem("lumen.ai.policy", "local-first");
+    localStorage.setItem("lumen.ai.policy", "cloud");
     const stopTrack = fakeMic();
     let proc: { onaudioprocess: ((e: unknown) => void) | null } | null = null;
     (globalThis as unknown as { AudioContext: unknown }).AudioContext = class {
