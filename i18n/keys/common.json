@@ -2015,6 +2015,74 @@
       "vars": []
     },
     {
+      "key": "pdf.ask",
+      "en": "Ask",
+      "vars": []
+    },
+    {
+      "key": "pdf.ask.cite",
+      "en": "Page {page}, line {line}",
+      "vars": [
+        "page",
+        "line"
+      ]
+    },
+    {
+      "key": "pdf.ask.dropped",
+      "en": "{n} quotes that aren't in the PDF were left out",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "pdf.ask.failed",
+      "en": "Couldn't answer: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "pdf.ask.indexing",
+      "en": "Reading page {page} of {pages}…",
+      "vars": [
+        "page",
+        "pages"
+      ]
+    },
+    {
+      "key": "pdf.ask.notFound",
+      "en": "This PDF doesn't seem to answer that.",
+      "vars": []
+    },
+    {
+      "key": "pdf.ask.ocr",
+      "en": "Reading scanned page {page} of {pages} (OCR)…",
+      "vars": [
+        "page",
+        "pages"
+      ]
+    },
+    {
+      "key": "pdf.ask.placeholder",
+      "en": "A question about this PDF…",
+      "vars": []
+    },
+    {
+      "key": "pdf.ask.submit",
+      "en": "Ask",
+      "vars": []
+    },
+    {
+      "key": "pdf.ask.thinking",
+      "en": "Looking for the answer in the PDF…",
+      "vars": []
+    },
+    {
+      "key": "pdf.ask.title",
+      "en": "Ask this PDF",
+      "vars": []
+    },
+    {
       "key": "pdf.failed",
       "en": "Couldn't open this PDF: {error}",
       "vars": [
