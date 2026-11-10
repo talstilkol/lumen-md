@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T04:31:22.318Z",
-  "source": "src/i18n/index.ts (en bundle)",
-  "count": 1426,
+  "generated_at": "2026-11-10T01:55:03.953Z",
+  "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
+  "count": 1431,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -7656,6 +7656,36 @@
     {
       "key": "chart.alternatives",
       "en": "Chart suggestions",
+      "vars": []
+    },
+    {
+      "key": "privacy.cat.network",
+      "en": "Other request (audit mode): listed, never blocked",
+      "vars": []
+    },
+    {
+      "key": "privacy.report.export",
+      "en": "Export signed report",
+      "vars": []
+    },
+    {
+      "key": "privacy.report.done",
+      "en": "Saved the signed report ({n} requests, {left} left this device). Check it with node scripts/privacy/verify-report.mjs.",
+      "vars": [
+        "n",
+        "left"
+      ]
+    },
+    {
+      "key": "privacy.report.failed",
+      "en": "Couldn't export the report: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "privacy.audit.on",
+      "en": "Audit mode: every request that leaves this device is listed, not only AI.",
       "vars": []
     }
   ]

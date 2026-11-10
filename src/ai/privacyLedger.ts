@@ -12,6 +12,11 @@
  * What is stored: time, host, method, byte counts, category, reason,
  * policy, decision. Never the prompt, the response or any header.
  *
+ * Audit mode (plan W2.24, `lumen.privacy.audit` = "1"): every other fetch
+ * to a host off this device and the LAN is listed too, as "network" (never
+ * blocked: it only makes the ledger complete), so an outside observer
+ * (mitmproxy, scripts/privacy/audit.mjs) can be compared with it.
+ *
  * Not covered: requests made from inside Web Workers (web-llm and
  * transformers.js fetch model weights there — downloads, no user text),
  * unless the module that starts the worker reports them with
@@ -22,7 +27,7 @@ import { getBaseUrl } from "./ollamaProvider";
 import { grammarEndpoint } from "./grammar";
 import { researchEndpoint } from "../research/client";
 
-export type LedgerCategory = "cloud-ai" | "cloud-text" | "local-ai" | "model-download" | "static-asset" | "research" | "third-party";
+export type LedgerCategory = "cloud-ai" | "cloud-text" | "local-ai" | "model-download" | "static-asset" | "research" | "third-party" | "network";
 
 export interface LedgerEntry {
   id: number;
@@ -88,6 +93,23 @@ let entries: LedgerEntry[] = [];
 let nextId = 1;
 const listeners = new Set<() => void>();
 let installed = false;
+/** When this tab's ledger started: the privacy report covers entries from here on. */
+let sessionStart = Date.now();
+
+export const AUDIT_MODE_KEY = "lumen.privacy.audit";
+
+/** Audit mode: the ledger lists every request that leaves this device, not only AI traffic. */
+export function auditMode(): boolean {
+  try {
+    return localStorage.getItem(AUDIT_MODE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function ledgerSessionStart(): number {
+  return sessionStart;
+}
 let onBlocked: ((entry: LedgerEntry) => void) | null = null;
 
 function load(): void {
@@ -230,12 +252,32 @@ function bodySize(body: BodyInit | null | undefined): number {
   return 0;
 }
 
+/** Audit mode: list a request the rules don't track, when it goes off this device and the LAN. Never blocked. */
+async function audited(inner: typeof fetch, input: RequestInfo | URL, init: RequestInit | undefined, url: string): Promise<Response> {
+  let u: URL;
+  try {
+    u = new URL(url, typeof location !== "undefined" ? location.href : "http://localhost/");
+  } catch {
+    return inner(input, init);
+  }
+  if ((u.protocol !== "http:" && u.protocol !== "https:") || isLocalOrigin(u.href)) return inner(input, init);
+  const method = (init?.method ?? (input instanceof Request ? input.method : "GET")).toUpperCase();
+  const id = record({ host: u.hostname.toLowerCase(), method, bytesOut: bodySize(init?.body), bytesIn: null, category: "network", reason: "Other request (audit mode)", policy: getAiPolicy(), decision: "allowed" });
+  const res = await inner(input, init);
+  const len = Number(res.headers.get("content-length"));
+  patch(id, { bytesIn: Number.isFinite(len) && res.headers.has("content-length") ? len : null, status: res.status });
+  return res;
+}
+
 /** Wrap a fetch implementation with the ledger. Exported for tests. */
 export function withLedger(inner: typeof fetch): typeof fetch {
   return async function ledgerFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
     const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
     const hit = classify(url);
-    if (!hit) return inner(input, init);
+    if (!hit) {
+      if (!auditMode()) return inner(input, init);
+      return audited(inner, input, init, url);
+    }
     const policy = getAiPolicy();
     const method = (init?.method ?? (input instanceof Request ? input.method : "GET")).toUpperCase();
     const bytesOut = bodySize(init?.body);
@@ -345,6 +387,7 @@ export function ledgerSummary(list: readonly LedgerEntry[] = entries) {
 
 /** Test hook. */
 export function __resetLedger(): void {
+  sessionStart = Date.now();
   entries = [];
   nextId = 1;
   installed = false;

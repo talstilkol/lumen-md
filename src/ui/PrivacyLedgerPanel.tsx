@@ -5,7 +5,8 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { ShieldCheck, X } from "lucide-react";
 import { t, getLocale } from "../i18n";
-import { clearLedger, leftDevice, ledgerEntries, ledgerSummary, subscribeLedger, type LedgerEntry } from "../ai/privacyLedger";
+import { auditMode, clearLedger, leftDevice, ledgerEntries, ledgerSummary, subscribeLedger, type LedgerEntry } from "../ai/privacyLedger";
+import "../privacy/strings";
 import { getAiPolicy } from "../ai/policy";
 
 interface Props {
@@ -25,6 +26,21 @@ function bytes(n: number | null): string {
 export function PrivacyLedgerPanel({ open, onClose }: Props) {
   const list = useSyncExternalStore(subscribeLedger, ledgerEntries, ledgerEntries);
   const [onlyCloud, setOnlyCloud] = useState(false);
+  const [exported, setExported] = useState<string | null>(null);
+
+  // Plan W2.24: the session's ledger as a signed report (lazy: the signing code loads on use).
+  const exportReport = () => {
+    setExported(null);
+    void import("../privacy/report")
+      .then((m) => m.exportPrivacyReport(ledgerEntries(), { auditMode: auditMode() }))
+      .then(
+        (b) => {
+          const r = JSON.parse(b.report) as { summary: { requests: number; leftDevice: number } };
+          setExported(t("privacy.report.done", { n: r.summary.requests, left: r.summary.leftDevice }));
+        },
+        (e: unknown) => setExported(t("privacy.report.failed", { error: String((e as Error)?.message ?? e) })),
+      );
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -66,10 +82,19 @@ export function PrivacyLedgerPanel({ open, onClose }: Props) {
             <input type="checkbox" checked={onlyCloud} onChange={(e) => setOnlyCloud(e.target.checked)} />
             {t("privacy.onlyLeaving")}
           </label>
+          <button type="button" style={btn} onClick={exportReport} data-testid="privacy-export">
+            {t("privacy.report.export")}
+          </button>
           <button type="button" style={btn} onClick={clearLedger} disabled={!list.length}>
             {t("privacy.clear")}
           </button>
         </div>
+        {(auditMode() || exported) && (
+          <div style={{ padding: "0 16px 8px", fontSize: 12, display: "grid", gap: 4 }}>
+            {auditMode() && <span data-testid="privacy-audit-mode">{t("privacy.audit.on")}</span>}
+            {exported && <span role="status">{exported}</span>}
+          </div>
+        )}
         <div style={{ overflow: "auto", flex: 1 }}>
           {shown.length === 0 ? (
             <p style={{ padding: "16px", color: "hsl(var(--fg-muted))", fontSize: 13, margin: 0 }}>{t("privacy.empty")}</p>
