@@ -1430,5 +1430,12 @@
   "cmd.ai.cancel": "IA : annuler",
   "cmd.ai.cancel.hint": "Arrête toutes les requêtes IA en cours (Échap aussi)",
   "toast.aiCancelled": "Requête IA annulée ({count})",
-  "toast.aiNothingRunning": "Aucune requête IA en cours"
+  "toast.aiNothingRunning": "Aucune requête IA en cours",
+  "models.consent.title": "Télécharger un modèle sur cet appareil ?",
+  "models.consent.body": "{purpose}\n\n{name} · {size}. Il est téléchargé une seule fois, vérifié avec sa somme de contrôle publiée et conservé dans le stockage de ce navigateur. Rien de ce que vous écrivez n’est envoyé.\n\nLicence : {license}. {attribution}",
+  "models.consent.ok": "Télécharger ({size})",
+  "models.purpose.translateEnHe": "Traduction de l’anglais vers l’hébreu",
+  "models.purpose.translateHeEn": "Traduction de l’hébreu vers l’anglais",
+  "models.purpose.nerHe": "Repérer les noms, lieux et organisations dans un texte en hébreu",
+  "models.purpose.imageSearch": "Recherche d’images par texte"
 }

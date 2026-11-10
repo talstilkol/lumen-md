@@ -1430,5 +1430,12 @@
   "cmd.ai.cancel": "AI：取消",
   "cmd.ai.cancel.hint": "停止所有正在运行的 AI 请求（Esc 也可以）",
   "toast.aiCancelled": "已取消 AI 请求（{count}）",
-  "toast.aiNothingRunning": "没有正在运行的 AI 请求"
+  "toast.aiNothingRunning": "没有正在运行的 AI 请求",
+  "models.consent.title": "要将模型下载到此设备吗？",
+  "models.consent.body": "{purpose}\n\n{name} · {size}。只下载一次，按公布的校验和验证，并保存在此浏览器的存储中。你写的任何内容都不会被发送出去。\n\n许可证：{license}。{attribution}",
+  "models.consent.ok": "下载（{size}）",
+  "models.purpose.translateEnHe": "英语到希伯来语翻译",
+  "models.purpose.translateHeEn": "希伯来语到英语翻译",
+  "models.purpose.nerHe": "识别希伯来语文本中的人名、地名和机构名",
+  "models.purpose.imageSearch": "按文字搜索图片"
 }
