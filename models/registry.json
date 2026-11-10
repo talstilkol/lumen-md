@@ -922,42 +922,6 @@
       "notes": "Converted to ONNX by .github/workflows/model-convert.yml (plan 6.0). Downloaded only with consent, size shown first, cached in OPFS; not downloadable until the host is chosen (15.9)."
     },
     {
-      "id": "tessdata_fast/heb.traineddata",
-      "kind": "ocr",
-      "source": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/main/heb.traineddata",
-      "license": "Apache-2.0",
-      "class": "allowed",
-      "commercial": "yes",
-      "attribution": "Tesseract tessdata_fast © Google / tesseract-ocr contributors, licensed under the Apache License 2.0.",
-      "size": "~1 MB",
-      "runs": "browser",
-      "delivery": "download",
-      "catalog": "LANG_PATH / LANGS (src/ai/ocr.ts)",
-      "match": [
-        "tessdata_fast"
-      ],
-      "verified": true,
-      "notes": ""
-    },
-    {
-      "id": "tessdata_fast/eng.traineddata",
-      "kind": "ocr",
-      "source": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/main/eng.traineddata",
-      "license": "Apache-2.0",
-      "class": "allowed",
-      "commercial": "yes",
-      "attribution": "Tesseract tessdata_fast © Google / tesseract-ocr contributors, licensed under the Apache License 2.0.",
-      "size": "~4 MB",
-      "runs": "browser",
-      "delivery": "download",
-      "catalog": "LANG_PATH / LANGS (src/ai/ocr.ts)",
-      "match": [
-        "tessdata_fast"
-      ],
-      "verified": true,
-      "notes": ""
-    },
-    {
       "id": "Xenova/m2m100_418M",
       "kind": "mt",
       "source": "https://huggingface.co/Xenova/m2m100_418M",
