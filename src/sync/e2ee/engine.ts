@@ -16,6 +16,11 @@
  *      to 1 with the newer manifest: pull, merge, retry. Two devices pushing
  *      from the same version N both end up in the manifest.
  *
+ * Plan W1.8: every step is reported through `onEvent` (activity panel, time
+ * estimate), the paths held and why are kept for `fileStates()`, and paths
+ * this device's rules exclude (`exclude`) are skipped in both directions:
+ * an excluded local file is never read for upload.
+ *
  * Interruption at any point loses nothing: blobs are written before the
  * manifest that references them, the base is saved per file after the local
  * write, and the next round recognises work that was already done (same hash
@@ -29,7 +34,7 @@ import { conflictCopyPath, keepBothResolver, type ConflictResolver } from "./con
 import { createHeader, decodeHeader, encodeHeader, HEADER_NAME, unlockHeader, type VaultHeader } from "./header";
 import { PBKDF2_MIN_ITERATIONS, type KdfPolicy } from "./kdf";
 import { DecryptError, seal, unseal, type VaultKeys } from "./keys";
-import { isSyncedPath, type LocalFiles } from "./localFiles";
+import { isSyncedPath, type LocalFile, type LocalFiles } from "./localFiles";
 import {
   blobName,
   checkFreshness,
@@ -47,6 +52,8 @@ import {
 import { readPairingCode, createPairingCode, PairingError } from "./pairing";
 import { PreconditionFailedError, type SyncProvider } from "./provider";
 import type { DeviceState, FreshnessSource, SyncStateStore } from "./state";
+import type { SyncEvent, SyncEventListener } from "./activity";
+import { computeFileStates, liveHash, sameEntry, type ExcludeRule, type FileStatus, type HoldReason } from "./status";
 
 export class VaultExistsError extends Error {
   constructor() {
@@ -64,6 +71,9 @@ export class NoVaultError extends Error {
 
 /** A blob the manifest names is missing (replaced by a newer commit meanwhile): the round restarts. */
 class BlobMissingError extends Error {}
+
+/** Files above this size keep no ancestor bytes for merges (attachments; plan W1.8). */
+export const BASE_BYTES_LIMIT = 4 * 1024 * 1024;
 
 /**
  * Create a vault at `provider`: the header (create-only) and the first,
@@ -150,15 +160,10 @@ export interface E2eeSyncOptions {
   maxAttempts?: number;
   /** Clock, for conflict-copy names and pairing codes (tests). */
   now?: () => number;
-}
-
-function sameEntry(a: ManifestEntry | undefined, b: ManifestEntry | undefined): boolean {
-  if (!a || !b) return a === b;
-  return a.ver === b.ver && a.rev === b.rev && !!a.deleted === !!b.deleted;
-}
-
-function liveHash(e: ManifestEntry | undefined): string | null {
-  return e && !e.deleted ? e.hash : null;
+  /** This device's selective-sync rule (plan W1.8): the reason a path is kept out, or null. Read every round. */
+  exclude?: ExcludeRule;
+  /** Each step of a round, as it happens (plan W1.8). A listener that throws is ignored. */
+  onEvent?: SyncEventListener;
 }
 
 export class E2eeSync {
@@ -169,6 +174,11 @@ export class E2eeSync {
   private remoteDigest = "";
   /** Opaque names already computed (HMAC is cheap, but not free over thousands of rounds). */
   private readonly names = new Map<string, string>();
+  /** What the last round saw, for `fileStates()` (plan W1.8). */
+  private lastLocal: LocalFile[] | null = null;
+  private lastRemote: Manifest | null = null;
+  /** Paths the last round held, and why. */
+  private holds = new Map<string, HoldReason>();
 
   constructor(opts: E2eeSyncOptions) {
     // `??`, not a spread: an option passed as undefined must still get its default.
@@ -177,7 +187,47 @@ export class E2eeSync {
       resolver: opts.resolver ?? keepBothResolver,
       maxAttempts: opts.maxAttempts ?? 8,
       now: opts.now ?? (() => Date.now()),
+      exclude: opts.exclude ?? (() => null),
+      onEvent: opts.onEvent ?? (() => undefined),
     };
+  }
+
+  private emit(e: SyncEvent): void {
+    try {
+      this.o.onEvent(e);
+    } catch {
+      /* the activity panel must never break a round */
+    }
+  }
+
+  private hold(held: Set<string>, path: string, reason: HoldReason): void {
+    held.add(path);
+    this.holds.set(path, reason);
+    this.emit({ kind: "held", at: this.o.now(), path, reason });
+  }
+
+  /** The local files, for this round and for `fileStates()`. */
+  private async listLocal(): Promise<LocalFile[]> {
+    const list = (await this.o.local.list()).filter((f) => isSyncedPath(f.path));
+    this.lastLocal = list;
+    return list;
+  }
+
+  /**
+   * The sync state of every file and folder as of the last round (plan
+   * W1.8). `rescan` lists the local files again first, so edits made since
+   * the round show as pending.
+   */
+  async fileStates(opts: { rescan?: boolean } = {}): Promise<Map<string, FileStatus>> {
+    const s = await this.loadState();
+    if (opts.rescan || !this.lastLocal) await this.listLocal();
+    return computeFileStates({
+      local: new Map((this.lastLocal ?? []).map((f) => [f.path, f])),
+      base: s.base,
+      remote: this.lastRemote?.files ?? null,
+      holds: this.holds,
+      exclude: this.o.exclude,
+    });
   }
 
   private async loadState(): Promise<DeviceState> {
@@ -263,12 +313,25 @@ export class E2eeSync {
   }
 
   sync(): Promise<SyncResult> {
-    return this.exclusive(() => this.round());
+    return this.exclusive(async () => {
+      this.emit({ kind: "start", at: this.o.now() });
+      try {
+        const r = await this.round();
+        this.emit({ kind: "done", at: this.o.now(), uploaded: r.uploaded, downloaded: r.downloaded, deleted: r.deleted, conflicts: r.conflicts.length, held: r.held.length, incomplete: r.incomplete });
+        return r;
+      } catch (e) {
+        this.emit({ kind: "error", at: this.o.now(), message: (e as Error)?.message ?? String(e) });
+        throw e;
+      }
+    });
   }
 
   private async setBase(path: string, entry: ManifestEntry, data: Uint8Array | null): Promise<void> {
     const s = await this.loadState();
-    await this.o.store.setBase(path, entry.deleted ? null : data);
+    // Ancestor bytes are kept for the three-way merge of a note; a large
+    // file (an attachment) keeps only its manifest entry, so a first sync of
+    // a big vault does not hold a second copy of it (plan W1.8 benchmark).
+    await this.o.store.setBase(path, entry.deleted || !data || data.length > BASE_BYTES_LIMIT ? null : data);
     s.base[path] = entry;
     await this.save();
   }
@@ -332,6 +395,7 @@ export class E2eeSync {
       await this.save();
     }
     this.remoteDigest = digest;
+    this.lastRemote = manifest;
     if (s.committing?.length) await this.reconcileCommit(manifest);
     return { manifest, etag: obj.etag };
   }
@@ -361,8 +425,9 @@ export class E2eeSync {
     const s = await this.loadState();
     const res: SyncResult = { uploaded: 0, downloaded: 0, deleted: 0, conflicts: [], held: [], counter: 0, retries: 0, incomplete: false };
     const held = new Set<string>();
+    this.holds = new Map();
     /** Blobs uploaded in this round, reused when a retry pushes the same content again. */
-    const uploads = new Map<string, { hash: string; rev: string; size: number; data: Uint8Array }>();
+    const uploads = new Map<string, { hash: string; rev: string; size: number; data: Uint8Array | null }>();
 
     for (let attempt = 0; attempt < this.o.maxAttempts; attempt++) {
       let remote: Manifest;
@@ -418,13 +483,16 @@ export class E2eeSync {
       // The replaced blobs are queued in the same save as the new anchor, before
       // any base entry forgets them, so an interruption cannot leak them.
       s.anchor = { counter: next.counter, digest: sealed.digest };
+      this.lastRemote = next;
       s.pending.push(...superseded);
       s.committing = [];
       await this.save();
       for (const [path, c] of changes) {
         await this.setBase(path, c.entry, c.data);
-        if (c.entry.deleted) res.deleted++;
-        else res.uploaded++;
+        if (c.entry.deleted) {
+          res.deleted++;
+          this.emit({ kind: "delete", at: this.o.now(), path, bytes: 0, direction: "up" });
+        } else res.uploaded++;
       }
       await this.collectGarbage(next);
       res.counter = next.counter;
@@ -439,13 +507,30 @@ export class E2eeSync {
   /** Step 2: bring every path the manifest changed into this device. */
   private async pull(remote: Manifest, res: SyncResult, held: Set<string>): Promise<void> {
     const s = await this.loadState();
-    const local = new Map((await this.o.local.list()).filter((f) => isSyncedPath(f.path)).map((f) => [f.path, f.hash]));
+    const local = new Map((await this.listLocal()).map((f) => [f.path, f.hash]));
     const sorted = [...new Set([...Object.keys(remote.files), ...Object.keys(s.base), ...local.keys()])].sort();
+    // Paths this device keeps out (plan W1.8): judged on the version in the vault.
+    const excluded = new Set<string>();
+    let planFiles = 0;
+    let planBytes = 0;
+    for (const path of sorted) {
+      const r = remote.files[path];
+      if (!r || sameEntry(r, s.base[path]) || held.has(path)) continue;
+      const why = this.o.exclude(path, r.deleted ? null : r.size);
+      if (why) {
+        excluded.add(path);
+        this.emit({ kind: "excluded", at: this.o.now(), path, reason: why, direction: "down" });
+      } else if (!r.deleted && liveHash(r) !== (local.get(path) ?? null)) {
+        planFiles++;
+        planBytes += r.size;
+      }
+    }
+    this.emit({ kind: "plan", at: this.o.now(), direction: "down", files: planFiles, bytes: planBytes });
     // Deletions first: a folder `a/` replaced by a file `a` (or the reverse)
     // must be cleared before the new entry is written.
     const gone = (p: string) => remote.files[p]?.deleted === true;
     for (const path of [...sorted.filter(gone), ...sorted.filter((p) => !gone(p))]) {
-      if (held.has(path)) continue;
+      if (held.has(path) || excluded.has(path)) continue;
       const r = remote.files[path];
       const b = s.base[path];
       if (sameEntry(r, b) || !r) continue;
@@ -461,25 +546,28 @@ export class E2eeSync {
         }
         if (rh === null) {
           if (!(await this.o.local.remove(path, lh as string))) {
-            held.add(path);
+            this.hold(held, path, "retry");
             continue;
           }
           res.deleted++;
           await this.setBase(path, r, null);
+          this.emit({ kind: "delete", at: this.o.now(), path, bytes: 0, direction: "down" });
         } else {
           const data = await this.fetchBlob(path, r);
           if (!(await this.o.local.write(path, data, lh))) {
-            held.add(path);
+            this.hold(held, path, "retry");
             continue;
           }
           res.downloaded++;
           await this.setBase(path, r, data);
+          this.emit({ kind: "download", at: this.o.now(), path, bytes: data.length, direction: "down" });
         }
         continue;
       }
 
-      // Both sides changed, differently.
+      // Both sides changed, differently. Reported now, before any dialog opens.
       res.conflicts.push(path);
+      this.emit({ kind: "conflict", at: this.o.now(), path });
       if (rh === null) {
         // Deleted there, edited here: the edit wins and is pushed as a new version.
         await this.setBase(path, r, null);
@@ -489,16 +577,17 @@ export class E2eeSync {
       if (lh === null) {
         // Deleted here, edited there: the edit comes back.
         if (!(await this.o.local.write(path, remoteData, null))) {
-          held.add(path);
+          this.hold(held, path, "retry");
           continue;
         }
         res.downloaded++;
         await this.setBase(path, r, remoteData);
+        this.emit({ kind: "download", at: this.o.now(), path, bytes: remoteData.length, direction: "down" });
         continue;
       }
       const localData = await this.o.local.read(path);
       if (!localData || (await sha256Hex(localData)) !== lh) {
-        held.add(path); // edited while we looked: next round
+        this.hold(held, path, "retry"); // edited while we looked: next round
         continue;
       }
       const decision = await this.o.resolver({
@@ -509,7 +598,7 @@ export class E2eeSync {
       });
       switch (decision.kind) {
         case "hold":
-          held.add(path);
+          this.hold(held, path, "conflict");
           break;
         case "local":
           await this.setBase(path, r, remoteData);
@@ -518,23 +607,25 @@ export class E2eeSync {
         case "content": {
           const data = decision.kind === "remote" ? remoteData : decision.data;
           if (!(await this.o.local.write(path, data, lh))) {
-            held.add(path);
+            this.hold(held, path, "retry");
             break;
           }
           res.downloaded++;
           await this.setBase(path, r, remoteData);
+          this.emit({ kind: "download", at: this.o.now(), path, bytes: remoteData.length, direction: "down" });
           break;
         }
         case "keepBoth": {
           const tag = `${new Date(this.o.now()).toISOString().slice(0, 10)} ${s.deviceId.slice(0, 4)}`;
           const copy = conflictCopyPath(path, tag, (p) => p in remote.files || local.has(p) || p in s.base);
           if (!(await this.o.local.write(copy, remoteData, null))) {
-            held.add(path);
+            this.hold(held, path, "retry");
             break;
           }
           local.set(copy, r.hash);
           res.downloaded++;
           await this.setBase(path, r, remoteData);
+          this.emit({ kind: "download", at: this.o.now(), path: copy, bytes: remoteData.length, direction: "down" });
           break;
         }
       }
@@ -545,19 +636,36 @@ export class E2eeSync {
   private async collectChanges(
     remote: Manifest,
     held: Set<string>,
-    uploads: Map<string, { hash: string; rev: string; size: number; data: Uint8Array }>,
+    uploads: Map<string, { hash: string; rev: string; size: number; data: Uint8Array | null }>,
   ): Promise<Map<string, { entry: ManifestEntry; data: Uint8Array | null }>> {
     const s = await this.loadState();
-    const local = new Map((await this.o.local.list()).filter((f) => isSyncedPath(f.path)).map((f) => [f.path, f.hash]));
+    const listed = await this.listLocal();
+    const local = new Map(listed.map((f) => [f.path, f.hash]));
+    const sizes = new Map(listed.map((f) => [f.path, f.size ?? null]));
     const out = new Map<string, { entry: ManifestEntry; data: Uint8Array | null }>();
-    const paths = new Set([...Object.keys(s.base), ...local.keys()]);
-    for (const path of [...paths].sort()) {
+    const paths = [...new Set([...Object.keys(s.base), ...local.keys()])].sort();
+    // What goes up, and what this device keeps (plan W1.8): judged before
+    // anything is read, so an excluded file never even enters the round.
+    const todo: string[] = [];
+    let planBytes = 0;
+    for (const path of paths) {
       if (held.has(path)) continue;
       const b = s.base[path];
-      const r = remote.files[path];
       const lh = local.get(path) ?? null;
       if (lh === liveHash(b)) continue;
-      if (!sameEntry(r, b)) continue; // not pulled yet (held or raced): next round
+      if (!sameEntry(remote.files[path], b)) continue; // not pulled yet (held or raced): next round
+      const why = this.o.exclude(path, lh === null ? null : (sizes.get(path) ?? null));
+      if (why) {
+        this.emit({ kind: "excluded", at: this.o.now(), path, reason: why, direction: "up" });
+        continue;
+      }
+      todo.push(path);
+      planBytes += lh === null ? 0 : (sizes.get(path) ?? 0);
+    }
+    this.emit({ kind: "plan", at: this.o.now(), direction: "up", files: todo.length, bytes: planBytes });
+    for (const path of todo) {
+      const r = remote.files[path];
+      const lh = local.get(path) ?? null;
       const ver = (r?.ver ?? 0) + 1;
       if (lh === null) {
         if (!r || r.deleted) continue; // never existed there, or already deleted
@@ -566,6 +674,12 @@ export class E2eeSync {
       }
       const data = await this.o.local.read(path);
       if (!data) continue;
+      // The size was unknown or changed since the listing: judge the bytes about to leave.
+      const late = this.o.exclude(path, data.length);
+      if (late) {
+        this.emit({ kind: "excluded", at: this.o.now(), path, reason: late, direction: "up" });
+        continue;
+      }
       const hash = await sha256Hex(data);
       let up = uploads.get(path);
       if (!up || up.hash !== hash) {
@@ -575,8 +689,10 @@ export class E2eeSync {
         s.pending.push(name);
         await this.save();
         await this.o.provider.put(name, sealed, { ifNoneMatch: "*" });
-        up = { hash, rev, size: data.length, data };
+        // Kept for the base after the commit only when it will be stored (see setBase).
+        up = { hash, rev, size: data.length, data: data.length > BASE_BYTES_LIMIT ? null : data };
         uploads.set(path, up);
+        this.emit({ kind: "upload", at: this.o.now(), path, bytes: data.length, direction: "up" });
       }
       out.set(path, { entry: { ver, rev: up.rev, hash, size: up.size, by: s.deviceId }, data: up.data });
     }
@@ -598,7 +714,7 @@ export class E2eeSync {
         const below = [...live].some((q) => q.startsWith(`${p}/`));
         if (above || below) {
           out.delete(p);
-          held.add(p);
+          this.hold(held, p, "clash");
           changed = true;
           break;
         }

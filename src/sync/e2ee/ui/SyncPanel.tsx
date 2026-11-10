@@ -10,6 +10,8 @@ import { t } from "../../../i18n";
 import "../strings";
 import { PassphraseForm } from "./PassphraseForm";
 import { FreshnessBanner } from "./FreshnessBanner";
+import { SyncActivity } from "./SyncActivity";
+import { SyncRulesForm } from "./SyncRulesForm";
 import { syncSession, type SyncSession } from "./session";
 import { ProviderAuthError, ProviderUnreachableError, ProviderUnsupportedError } from "../providers/http";
 import { defaultSettings, hasProviderSecret, legacyStore, oauthAvailable, PROVIDER_KINDS, providerHosts, SECRET_NAMES, type ProviderKind, type ProviderSettings } from "../providers";
@@ -280,6 +282,16 @@ function Unlocked({ session }: { session: SyncSession }) {
           {s.error}
         </div>
       )}
+      {s.notice && (
+        <div role="status" data-testid="sync-notice" style={{ display: "flex", gap: 8, alignItems: "baseline", fontSize: 13, padding: "6px 8px", border: "1px solid hsl(var(--border))", borderRadius: 6 }}>
+          <span style={{ flex: 1 }}>{t(s.notice.key, { minutes: s.notice.minutes })}</span>
+          <button type="button" onClick={() => session.dismissNotice()}>
+            {t("e2ee.bg.dismiss")}
+          </button>
+        </div>
+      )}
+      <SyncActivity session={session} />
+      <SyncRulesForm session={session} />
       {engine && (
         <div style={{ display: "grid", gap: 4 }}>
           <button type="button" style={{ justifySelf: "start" }} onClick={() => void engine.pairingCode().then(setCode, (e) => setCode(String((e as Error).message)))}>
@@ -357,6 +369,8 @@ export function SyncPanel({ onClose, session = syncSession() }: { onClose: () =>
               <>
                 <div style={muted}>{t(s.vaultExists ? "e2ee.sync.existingVault" : "e2ee.sync.newVault")}</div>
                 <PassphraseForm mode={s.vaultExists ? "unlock" : "create"} onSubmit={async (pass) => void (await session.open(pass))} />
+                {/* Before the first round: what this device leaves out (plan W1.8). */}
+                <SyncRulesForm session={session} />
               </>
             )}
             {s.phase === "unlocked" && <Unlocked session={session} />}
