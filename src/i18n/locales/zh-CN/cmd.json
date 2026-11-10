@@ -22,6 +22,8 @@
   "cmd.ai.diagram.hint": "从文档生成 Mermaid 图表",
   "cmd.ai.doctor": "AI：医生（诊断本地 AI）",
   "cmd.ai.doctor.hint": "检查 Ollama、CORS、模型、WebGPU、存储和服务——并给出每项的修复方法",
+  "cmd.ai.fim": "AI：本地自动补全 (FIM) — 开/关",
+  "cmd.ai.fim.hint": "在输入时用本设备上的代码模型补全；Tab 接受，Esc 放弃",
   "cmd.ai.local.hint": "在设备本地运行提示词 — 私密、可离线使用",
   "cmd.ai.local.off": "切换 to cloud AI (OpenAI)",
   "cmd.ai.local.on": "切换 to local AI (WebGPU)",

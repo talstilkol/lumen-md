@@ -119,6 +119,16 @@
       "vars": []
     },
     {
+      "key": "cmd.ai.fim",
+      "en": "AI: Local Autocomplete (FIM) — On/Off",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.fim.hint",
+      "en": "Complete as you type with a coding model on this device; Tab accepts, Esc dismisses",
+      "vars": []
+    },
+    {
       "key": "cmd.ai.local.hint",
       "en": "Run prompts on-device — private, offline",
       "vars": []

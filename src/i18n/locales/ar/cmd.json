@@ -22,6 +22,8 @@
   "cmd.ai.diagram.hint": "إنشاء رسم Mermaid من المستند",
   "cmd.ai.doctor": "AI: الطبيب (تشخيص الذكاء الاصطناعي المحلي)",
   "cmd.ai.doctor.hint": "يفحص Ollama وCORS والنماذج وWebGPU والتخزين والخدمات — مع الإصلاح لكل منها",
+  "cmd.ai.fim": "AI: الإكمال التلقائي المحلي (FIM) — تشغيل/إيقاف",
+  "cmd.ai.fim.hint": "إكمال أثناء الكتابة بنموذج برمجة على هذا الجهاز؛ Tab للقبول وEsc للإلغاء",
   "cmd.ai.local.hint": "شغّل الأوامر على الجهاز — خاص ودون اتصال",
   "cmd.ai.local.off": "تبديل to cloud AI (OpenAI)",
   "cmd.ai.local.on": "تبديل to local AI (WebGPU)",

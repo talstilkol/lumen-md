@@ -22,6 +22,8 @@
   "cmd.ai.diagram.hint": "צור דיאגרמת Mermaid מהמסמך",
   "cmd.ai.doctor": "AI: רופא (אבחון AI מקומי)",
   "cmd.ai.doctor.hint": "בודק Ollama, CORS, מודלים, WebGPU, אחסון ושירותים — עם התיקון לכל אחד",
+  "cmd.ai.fim": "AI: השלמה אוטומטית מקומית (FIM) — הפעלה/כיבוי",
+  "cmd.ai.fim.hint": "השלמה תוך כדי הקלדה עם מודל קוד במכשיר הזה; Tab מאשר, Esc מבטל",
   "cmd.ai.local.hint": "הפרומפטים רצים על המכשיר — פרטי, לא מקוון",
   "cmd.ai.local.off": "מעבר ל-AI בענן (OpenAI)",
   "cmd.ai.local.on": "מעבר ל-AI מקומי (WebGPU)",

@@ -22,6 +22,8 @@
   "cmd.ai.diagram.hint": "Mermaid-Diagramm aus dem Dokument erzeugen",
   "cmd.ai.doctor": "KI: Doktor (lokale KI diagnostizieren)",
   "cmd.ai.doctor.hint": "Prüft Ollama, CORS, Modelle, WebGPU, Speicher und Dienste — jeweils mit der Lösung",
+  "cmd.ai.fim": "AI: Lokale Autovervollständigung (FIM) — An/Aus",
+  "cmd.ai.fim.hint": "Vervollständigt beim Tippen mit einem Code-Modell auf diesem Gerät; Tab übernimmt, Esc verwirft",
   "cmd.ai.local.hint": "Prompts auf dem Gerät ausführen — privat, offline",
   "cmd.ai.local.off": "Wechseln to cloud AI (OpenAI)",
   "cmd.ai.local.on": "Wechseln to local AI (WebGPU)",

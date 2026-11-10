@@ -22,6 +22,8 @@
   "cmd.ai.diagram.hint": "Générer un diagramme Mermaid à partir du document",
   "cmd.ai.doctor": "IA : Docteur (diagnostic de l'IA locale)",
   "cmd.ai.doctor.hint": "Vérifie Ollama, CORS, les modèles, WebGPU, le stockage et les services — avec le correctif de chacun",
+  "cmd.ai.fim": "AI : Saisie semi-automatique locale (FIM) — activer/désactiver",
+  "cmd.ai.fim.hint": "Complète pendant la frappe avec un modèle de code sur cet appareil ; Tab accepte, Échap ignore",
   "cmd.ai.local.hint": "Exécuter les requêtes sur l'appareil — privé, hors ligne",
   "cmd.ai.local.off": "Changer to cloud AI (OpenAI)",
   "cmd.ai.local.on": "Changer to local AI (WebGPU)",

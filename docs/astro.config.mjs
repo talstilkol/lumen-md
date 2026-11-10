@@ -85,6 +85,7 @@ export default defineConfig({
             { label: "Data analyst", slug: "ai/data-analyst" },
             { label: "Train a model on your style, locally", slug: "ai/local-fine-tune" },
             { label: "AI-written text", translations: { he: "טקסט שנכתב ב-AI" }, slug: "ai/authorship" },
+            { label: "Local autocomplete (FIM)", translations: { he: "השלמה אוטומטית מקומית (FIM)" }, slug: "ai/autocomplete" },
             { label: "AI cost: usage meter + answer cache", slug: "ai/cost" },
             { label: "Batch jobs: pause, resume, progress", translations: { he: "משימות אצווה: השהיה, המשך, התקדמות" }, slug: "ai/batch" },
             { label: "Research + citation checks", slug: "ai/research" },

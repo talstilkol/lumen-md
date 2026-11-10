@@ -22,6 +22,8 @@
   "cmd.ai.diagram.hint": "ドキュメントから Mermaid 図を生成",
   "cmd.ai.doctor": "AI: ドクター（ローカルAIの診断）",
   "cmd.ai.doctor.hint": "Ollama、CORS、モデル、WebGPU、ストレージ、サービスを確認し、それぞれの修正方法を示します",
+  "cmd.ai.fim": "AI: ローカル自動補完 (FIM) — オン/オフ",
+  "cmd.ai.fim.hint": "このデバイス上のコードモデルで入力中に補完します。Tab で確定、Esc で破棄",
   "cmd.ai.local.hint": "プロンプトをデバイス上で実行 — プライベート、オフライン対応",
   "cmd.ai.local.off": "切替 to cloud AI (OpenAI)",
   "cmd.ai.local.on": "切替 to local AI (WebGPU)",
