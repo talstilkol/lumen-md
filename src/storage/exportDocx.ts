@@ -492,6 +492,9 @@ export async function markdownToDocxBlob(content: string): Promise<Blob> {
 /** Export markdown content as a downloadable .docx file. */
 export async function exportToDocx(content: string, fileName: string): Promise<void> {
   const baseName = fileName.replace(/\.[^.]+$/, "");
+  // Plan W2.16: [@key] citations formatted and the reference list added, as in the preview.
+  const { mayHaveCitations, expandWithLibrary } = await import("../citations/expand");
+  if (mayHaveCitations(content)) content = (await expandWithLibrary(content).catch(() => ({ markdown: content }))).markdown;
   const blob = await markdownToDocxBlob(content);
 
   if ("showSaveFilePicker" in window) {

@@ -236,10 +236,19 @@ function hasMath(source: string): boolean {
   return source.includes("$");
 }
 
+/** Pandoc citations ([@key], @key): expanded from the vault's library (plan W2.16), loaded only when a note has one. */
+const CITATION_HINT = /(^|[\s([;\u2014\u2013"\u201C'])-?@[\p{L}\p{N}_]/mu;
+
 export async function renderMarkdown(
   markdownText: string,
   isDark: () => boolean,
 ): Promise<ReactElement> {
+  if (CITATION_HINT.test(markdownText)) {
+    markdownText = await import("../citations/expand")
+      .then((m) => m.expandWithLibrary(markdownText))
+      .then((r) => r.markdown)
+      .catch(() => markdownText);
+  }
   const proc = await getFullProcessor(isDark, {
     raw: hasRawHtml(markdownText),
     math: hasMath(markdownText),

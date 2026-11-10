@@ -317,6 +317,22 @@ export function useCommands({
         },
       },
       {
+        id: "cite.insert",
+        label: t("cmd.cite.insert"),
+        icon: cmdIcons.FileText,
+        group: t("group.tools"),
+        shortcut: "⌥⌘C",
+        // Plan W2.16: one dialog for every source (BibTeX, CSL-JSON, Zotero); Enter inserts [@key].
+        action: () => void import("../citations/CiteDialog").then((m) => m.openCiteDialog()),
+      },
+      {
+        id: "cite.syncZotero",
+        label: t("cmd.cite.syncZotero"),
+        icon: cmdIcons.FileText,
+        group: t("group.tools"),
+        action: () => void import("../citations/run").then((m) => m.syncZoteroLibrary()),
+      },
+      {
         id: "file.exportRtf",
         label: t("cmd.file.exportRtf"),
         hint: t("cmd.file.exportRtf.hint"),
