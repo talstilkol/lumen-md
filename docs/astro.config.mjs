@@ -34,6 +34,7 @@ export default defineConfig({
           items: [
             { label: "Source / Split / Preview / WYSIWYG", slug: "editor/modes" },
             { label: "Smart Insert", slug: "editor/smart-insert" },
+            { label: "Widgets, Shortcuts and Siri", slug: "editor/widgets", translations: { he: "ווידג'טים, קיצורים ו-Siri" } },
           ],
         },
         {
@@ -96,13 +97,15 @@ export default defineConfig({
         {
           label: "Security",
           items: [
-            { label: "Vault + recovery phrase", slug: "security/vault" },
+            { label: "Secrets and encryption", slug: "security/vault" },
           ],
         },
         {
           label: "Self-hosting",
           items: [
             { label: "Docker compose bundle", slug: "self-hosting/docker" },
+            { label: "Where Lumen runs", slug: "self-hosting/hosting", translations: { he: "איפה Lumen רץ" } },
+            { label: "Android and iOS builds", slug: "self-hosting/mobile", translations: { he: "בניית Android ו-iOS" } },
           ],
         },
       ],

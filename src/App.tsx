@@ -238,6 +238,35 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Plan W3.4: home-screen widgets, App Shortcuts, Siri / Shortcuts and Spotlight
+  // reach the app as lumen:// action links and a queue of captures (iOS / Android only).
+  const [searchQuery, setSearchQuery] = useState("");
+  useEffect(() => {
+    let stop: (() => void) | undefined;
+    void import("./mobile/nativeActions").then(async (m) => {
+      stop = await m.initNativeBridge({
+        capture: (mode, tappedAt) => {
+          m.noteTap(tappedAt);
+          setCaptureVoice(mode === "voice");
+          setCaptureOpen(true);
+        },
+        captureText: async (text, when) => {
+          const { captureToInbox } = await import("./capture/quickCapture");
+          await captureToInbox(text, when);
+          showAiToast(t("widgets.captured"), "success");
+        },
+        newNote: () => openNewDoc(t("doc.untitled"), "", false),
+        search: (query) => {
+          setSearchQuery(query);
+          setSearchOpen(true);
+        },
+        daily: () => window.dispatchEvent(new CustomEvent("lumen-open-today")),
+      });
+    });
+    return () => stop?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Check for a shared note from the iOS Share Extension.
   useEffect(() => {
     const pending = (window as unknown as Record<string, unknown>).__pendingSharedNote;
@@ -1042,7 +1071,11 @@ export default function App() {
       {searchMounted && <Suspense fallback={null}>
       <SearchDialog
         open={searchOpen}
-        onClose={() => setSearchOpen(false)}
+        initialQuery={searchQuery}
+        onClose={() => {
+          setSearchOpen(false);
+          setSearchQuery("");
+        }}
         onOpenFile={(path, content) => {
           setDoc({
             name: path.split("/").pop() ?? path,

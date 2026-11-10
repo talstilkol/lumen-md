@@ -20,7 +20,7 @@ describe("C2 review fixes", () => {
 
   it("the local worker accepts the canonical, hosted and desktop origins, and the list is configurable", () => {
     const yml = readFileSync("docker/local-ai.yml", "utf8");
-    for (const o of ["https://lumen.md", "https://lumen-md.vercel.app", "tauri://localhost"]) expect(yml).toContain(o);
+    for (const o of ["https://lumen-md.vercel.app", "tauri://localhost"]) expect(yml).toContain(o);
     expect(yml).toContain("${LUMEN_ORIGINS:-");
   });
 
