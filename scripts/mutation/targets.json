@@ -1,0 +1,78 @@
+{
+  "$comment": "Plan 0.15: critical pure modules and the tests that must kill their mutants. `filter` is a test-name regex (the slow 10,000-round tests are left out).",
+  "modules": {
+    "src/sync/e2ee/primitives/chacha20poly1305.ts": [
+      {
+        "file": "src/__tests__/e2eeAge.test.ts"
+      }
+    ],
+    "src/sync/e2ee/primitives/blake2b.ts": [
+      {
+        "file": "src/__tests__/e2eeAge.test.ts"
+      }
+    ],
+    "src/sync/e2ee/primitives/scrypt.ts": [
+      {
+        "file": "src/__tests__/e2eeAge.test.ts"
+      }
+    ],
+    "src/sync/e2ee/primitives/argon2.ts": [
+      {
+        "file": "src/__tests__/e2eeCrypto.test.ts"
+      },
+      {
+        "file": "src/__tests__/e2eeVectors.test.ts"
+      }
+    ],
+    "src/sync/e2ee/age.ts": [
+      {
+        "file": "src/__tests__/e2eeAge.test.ts"
+      },
+      {
+        "file": "src/__tests__/e2eeVectors.test.ts"
+      }
+    ],
+    "src/sync/e2ee/keyring.ts": [
+      {
+        "file": "src/__tests__/e2eeKeyring.test.ts",
+        "filter": "rotates|rollback|revoked|passphrase"
+      },
+      {
+        "file": "src/__tests__/e2eeMutants.test.ts"
+      }
+    ],
+    "src/sync/e2ee/conflict.ts": [
+      {
+        "file": "src/__tests__/e2eeSync.test.ts"
+      },
+      {
+        "file": "src/__tests__/e2eeMutants.test.ts"
+      }
+    ],
+    "src/sync/e2ee/manifest.ts": [
+      {
+        "file": "src/__tests__/e2eeSync.test.ts"
+      },
+      {
+        "file": "src/__tests__/e2eeKeyring.test.ts",
+        "filter": "rotates|rollback|revoked|passphrase"
+      }
+    ],
+    "src/sync/e2ee/header.ts": [
+      {
+        "file": "src/__tests__/e2eeCrypto.test.ts"
+      },
+      {
+        "file": "src/__tests__/e2eeSync.test.ts"
+      }
+    ],
+    "src/ai/privacyLedger.ts": [
+      {
+        "file": "src/__tests__/privacyLedger.test.ts"
+      },
+      {
+        "file": "src/__tests__/privacyLedgerMutants.test.ts"
+      }
+    ]
+  }
+}
