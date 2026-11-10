@@ -1,7 +1,7 @@
 {
  "$comment": "The plan's single source (plan 0.6). Edit this file, then `npm run plan` regenerates the board in MASTER_PLAN.md and plan/board.html; CI (`npm run plan:check`) fails when they differ. A task's status is one line: phases[].tasks[].status.",
- "updated": "2026-11-10T03:40",
- "note": "**המצב ב-ב׳ 9.11 23:05:** אף PR לא מוזג מאז 17.10 (main = 552ea5b7). סשן 24.10 פתח #282–#316 (כ-30 משימות) — נרשמו כאן עכשיו. כמעט כל ה-PR-ים אדומים משתי סיבות שאינן בקוד: (1) מ-19.10 GitHub מעביר את ubuntu-latest ל-Ubuntu 26 והתקנת Playwright נשברת — #330 מצמיד ל-ubuntu-24.04; (2) תקציבי החבילה (startup 460 KB ותקציבי קובץ) — #330 גם מוסיף annotation שמראה איזה קובץ חורג. **החלטת טל 9.11: לא משתמשים יותר ב-GitHub Actions** — כל commit עם [skip ci], הבדיקות רצות ב-Vercel Sandbox. אזהרה: כל ענף מודד startup לבד (459–460 KB); אחרי 15.1 התוספות מכל השרשראות יצטברו — צריך את #248 או החלטה 15.16 (14) לפני המיזוג.\n\n**מחקר world class (9.11, plan/research-2026-11.md):** ציון ממוצע ב-19 תחומים מול Obsidian, Notion, Logseq, Typora, Word ואחרים — main 3.7 → עם ה-PR-ים הפתוחים 6.6 → כל התוכנית 7.3 → אחרי הגלים W1–W3 9.1. הפערים הגדולים: מסירה (אף PR לא מוזג), קריאה ומחקר (PDF), תאימות לפורמטים של Obsidian, INP ונגישות אמיתית עם קורא מסך (ת״י 5568), שיתוף והרשאות. 65 משימות חדשות בשלושה גלים (W1 ≈173 ש׳, W2 ≈119 ש׳, W3 ≈49 ש׳).\n\n**החלטות 10.11 (Claude, בהסמכת טל ״תחליט לבד כל החלטה״):** כל ההחלטות הפתוחות ב-15.2, 15.9, 15.10, 15.16 הוכרעו (פירוט בפריטים עצמם). נוסף: שער ה-OCR האנגלי (7.5) — ratchet ברמה הנמדדת (≤ 12.5% CER) ויעד ≤ 5% דרך W1.18, בלי להוריד את שער העברית; #271 — טוקן המחקר רק מההגדרות, לא VITE_RESEARCH_TOKEN (שום סוד בבנייה); החבילות שמחכות להתקנה (hash-wasm, @noble/ciphers, @excalidraw/excalidraw, @mlc-ai/web-llm@0.2.86, @capacitor/filesystem, quickjs-emscripten, knip, @citation-js) — מאושרות, כולן MIT / Apache / ISC, יותקנו ב-Vercel Sandbox; baselines ויזואליים — ייווצרו שם; שערי CI בלי Actions — W1.35. **בדיקה אמיתית בלי Actions:** Vercel בונה כל ענף (tsc -b מחמיר כולל בדיקות + vite build): 77 מתוך 86 PR-ים פתוחים ירוקים, 8 אדומים (#257, #261, #274, #277, #279, #280, #336, #347), 1 בתהליך.\n\n**10.11 01:30:** probe על chore/dod: build + budget עוברים ב-Vercel; עם vitest — נכשל (אין לוגים עד ש-Vercel מאושר). 83 מה-PR-ים ה\"אדומים\" ב-Vercel לא נכשלו בקוד — הבנייה שלהם נחסמה במגבלת 100 פריסות ביום (״Deployment rate limited״); כשל אמיתי היה רק ב-#336.",
+ "updated": "2026-11-10T04:00",
+ "note": "**המצב ב-ב׳ 9.11 23:05:** אף PR לא מוזג מאז 17.10 (main = 552ea5b7). סשן 24.10 פתח #282–#316 (כ-30 משימות) — נרשמו כאן עכשיו. כמעט כל ה-PR-ים אדומים משתי סיבות שאינן בקוד: (1) מ-19.10 GitHub מעביר את ubuntu-latest ל-Ubuntu 26 והתקנת Playwright נשברת — #330 מצמיד ל-ubuntu-24.04; (2) תקציבי החבילה (startup 460 KB ותקציבי קובץ) — #330 גם מוסיף annotation שמראה איזה קובץ חורג. **החלטת טל 9.11: לא משתמשים יותר ב-GitHub Actions** — כל commit עם [skip ci], הבדיקות רצות ב-Vercel Sandbox. אזהרה: כל ענף מודד startup לבד (459–460 KB); אחרי 15.1 התוספות מכל השרשראות יצטברו — צריך את #248 או החלטה 15.16 (14) לפני המיזוג.\n\n**מחקר world class (9.11, plan/research-2026-11.md):** ציון ממוצע ב-19 תחומים מול Obsidian, Notion, Logseq, Typora, Word ואחרים — main 3.7 → עם ה-PR-ים הפתוחים 6.6 → כל התוכנית 7.3 → אחרי הגלים W1–W3 9.1. הפערים הגדולים: מסירה (אף PR לא מוזג), קריאה ומחקר (PDF), תאימות לפורמטים של Obsidian, INP ונגישות אמיתית עם קורא מסך (ת״י 5568), שיתוף והרשאות. 65 משימות חדשות בשלושה גלים (W1 ≈173 ש׳, W2 ≈119 ש׳, W3 ≈49 ש׳).\n\n**החלטות 10.11 (Claude, בהסמכת טל ״תחליט לבד כל החלטה״):** כל ההחלטות הפתוחות ב-15.2, 15.9, 15.10, 15.16 הוכרעו (פירוט בפריטים עצמם). נוסף: שער ה-OCR האנגלי (7.5) — ratchet ברמה הנמדדת (≤ 12.5% CER) ויעד ≤ 5% דרך W1.18, בלי להוריד את שער העברית; #271 — טוקן המחקר רק מההגדרות, לא VITE_RESEARCH_TOKEN (שום סוד בבנייה); החבילות שמחכות להתקנה (hash-wasm, @noble/ciphers, @excalidraw/excalidraw, @mlc-ai/web-llm@0.2.86, @capacitor/filesystem, quickjs-emscripten, knip, @citation-js) — מאושרות, כולן MIT / Apache / ISC, יותקנו ב-Vercel Sandbox; baselines ויזואליים — ייווצרו שם; שערי CI בלי Actions — W1.35. **בדיקה אמיתית בלי Actions:** Vercel בונה כל ענף (tsc -b מחמיר כולל בדיקות + vite build): 77 מתוך 86 PR-ים פתוחים ירוקים, 8 אדומים (#257, #261, #274, #277, #279, #280, #336, #347), 1 בתהליך.\n\n**10.11 01:30:** probe על chore/dod: build + budget עוברים ב-Vercel; עם vitest — נכשל (אין לוגים עד ש-Vercel מאושר). 83 מה-PR-ים ה\"אדומים\" ב-Vercel לא נכשלו בקוד — הבנייה שלהם נחסמה במגבלת 100 פריסות ביום (״Deployment rate limited״); כשל אמיתי היה רק ב-#336.\n\n**10.11 04:00 — Vercel חסם:** מגבלת השימוש של חשבון Hobby נוצלה (402 payment_required, מתאפס ב-1.12): אי אפשר לפתוח Sandbox חדש. מה שנבדק עד עכשיו נבדק במלואו; מה שלא — מחכה. החלטה של טל: לשדרג ל-Pro, או לחכות ל-1.12 (בינתיים בדיקות node בלבד).",
  "start": "2026-10-18T08:00",
  "buffer": 0.35,
  "ownerWindow": [
@@ -4928,7 +4928,9 @@
      "acceptance": [
       "e2e: אישור שרת, ביטול, והתמונה נחסמת שוב"
      ],
-     "why": "החלטה 10.11 על פריט בעלים"
+     "why": "החלטה 10.11 על פריט בעלים",
+     "branch": "feat/image-hosts",
+     "status": "⏳ #372 (על #221; מסך שרתי תמונות מותרים עם ביטול לכל שרת / הכול, נפתח מהפלטה; רק i18n נבדק — ה-Sandbox חסום (מגבלת שימוש של Vercel עד 1.12))"
     },
     {
      "id": "W1.31",
@@ -5258,7 +5260,7 @@
      ],
      "why": "Word עושה את זה עשרות שנים; עורכי Markdown לא — וזה מה שגורם לטקסט עברי להיראות מקצועי.",
      "branch": "feat/hebrew-typography",
-     "status": "⏳ #365 feat/hebrew-typography (על #252; גרשיים, מקף, מרכאות עבריות אוטומטיים בעורך המקור + דיאלוג; Vercel Sandbox (Node 24) @fab0f34: vitest 317/3136, startup 458.8/460; e2e 9/9 בשלושה דפדפנים @125e482 — vitest ובנייה מלאים לא הורצו שוב על הראש)"
+     "status": "⏳ #365 feat/hebrew-typography **מוכן למיזוג** — (על #252; Vercel Sandbox (Node 24) @125e482: typecheck 0, vitest 317/3137, build + budget 458.8/460, e2e 9/9 בשלושה דפדפנים; dod: npx vitest run src/__tests__/hebrewTypography.test.ts · npx playwright test e2e/hebrew-typography.spec.ts)"
     },
     {
      "id": "W2.10",
@@ -5332,7 +5334,9 @@
       "עדכון אחרי שמירה < 100ms",
       "0 eval (בדיקה סטטית)"
      ],
-     "why": "Dataview הוא אחד התוספים הנפוצים ב-Obsidian; כספות שמגיעות משם מלאות בבלוקים כאלה."
+     "why": "Dataview הוא אחד התוספים הנפוצים ב-Obsidian; כספות שמגיעות משם מלאות בבלוקים כאלה.",
+     "branch": "feat/embedded-queries",
+     "status": "⏳ #371 (על #306; בלוקי query ו-dataview + חיפושים שמורים; Vercel Sandbox (Node 24) @e15ff94: 98/99 (30 שאילתות זהב, 20 בלוקי Dataview), התיקון @e96b2e9 לא נבדק — ה-Sandbox חסום (מגבלת שימוש של Vercel עד 1.12))"
     },
     {
      "id": "W2.13",
@@ -5355,7 +5359,9 @@
       "10 פעולות הבלוק עובדות בשני העורכים, ב-RTL וב-LTR",
       "קיפול נשמר לכל פתק ולא נכנס לקובץ"
      ],
-     "why": "Logseq, Tana ו-Workflowy מראים שכתיבה במתאר היא דרך עבודה נפרדת; אפשר לתת אותה בלי לנעול את הקובץ."
+     "why": "Logseq, Tana ו-Workflowy מראים שכתיבה במתאר היא דרך עבודה נפרדת; אפשר לתת אותה בלי לנעול את הקובץ.",
+     "branch": "feat/outline-mode",
+     "status": "⏳ #370 **מוכן למיזוג** — (על #252; מצב מתאר: 10 פעולות בלוק בשני העורכים, קיפולים לכל פתק מחוץ לקובץ; Vercel Sandbox (Node 24) @f662bc0: typecheck 0, vitest 317/3141, startup 458.7/460, i18n + hygiene, e2e 4/4 בכל דפדפן; dod: npx vitest run src/__tests__/outlineMode.test.ts · npx playwright test e2e/outline-mode.spec.ts; בעלים: מקשי macOS על Mac אמיתי)"
     },
     {
      "id": "W2.14",
