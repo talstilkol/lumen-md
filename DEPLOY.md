@@ -94,18 +94,30 @@ VITE_YJS_WEBSOCKET_URL=wss://lumen-collab.fly.dev
 
 ## 3. CSP + headers in production (DONE — verify only)
 
-The CSP lives in two places that are both enforced: the `<meta>` tag in
-`index.html` and `public/_headers` (copied to `dist/_headers`). Cloudflare
-Pages **and Netlify** serve `dist/_headers`; `netlify.toml` deliberately
-sets no CSP of its own. The self-hosted nginx image uses
-`docker/nginx.conf`.
+Every policy is written once, in `security/policy.json`, and rendered into
+the files each host reads: the `<meta>` tags in `index.html`,
+`livejs-runner.html` and `playground-runner.html`, `public/_headers`
+(copied to `dist/_headers`), `deploy/vercel.base.json` (read through
+`vercel.ts`, which adds the build's endpoint origins), `deploy/nginx.conf`
+(the one nginx image: `Dockerfile`, used by `fly.toml` and
+`docker-compose.yml`), `netlify/edge-functions/runner-headers.ts` and
+`src-tauri/tauri.conf.json`. Change the policy there and run
+`npm run headers:write`; CI (`npm run headers`) fails when any copy
+differs. Per-route decisions and per-host exceptions are explained in
+`docs/security/headers.md`. On the web the `<meta>` tag and the response
+header are both enforced. Cloudflare Pages **and Netlify** serve
+`dist/_headers`; `netlify.toml` deliberately sets no CSP of its own, and
+an edge function gives the two runner pages their own policy there (Netlify
+cannot detach the catch-all headers). What works on which host:
+`docs/src/content/docs/self-hosting/hosting.md`.
 
 Your own workers (SSO, billing/entitlements, publish, audit, marketplace,
 self-hosted LanguageTool, Supabase) are added to `connect-src`
 **automatically at build time** from the `VITE_*_ENDPOINT` / `VITE_*_URL`
 variables (see `src/build/cspEndpoints.ts`): set them before
 `npm run build`. For the Docker web image pass them as build args, e.g.
-`docker build -f docker/Dockerfile.web --build-arg VITE_WORKOS_ENDPOINT=https://auth.example.org .`
+`docker build --build-arg VITE_WORKOS_ENDPOINT=https://auth.example.org .`
+(or `[build.args]` in `fly.toml`, or `build.args` of `lumen-web` in `docker-compose.yml`).
 Verify after deploy: the response header and the meta tag both list your
 worker origins in `connect-src`.
 

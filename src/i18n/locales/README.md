@@ -36,10 +36,10 @@ inflate the main JS chunk by ~80 KB per locale.
 
 ## English of lazily loaded domains
 
-A domain that only loads on demand (quick and voice capture, for one) keeps its
+A domain that only loads on demand (local translation, quick and voice capture) keeps its
 English in `src/i18n/lazy/<domain>.json` instead of the `en` block, so it
 ships with that domain's chunk and not the startup bundle. The domain calls
-`registerEnglish()` when it loads (see `src/capture/strings.ts`). The
+`registerEnglish()` when it loads (see `src/ai/mt/strings.ts` or `src/capture/strings.ts`; `src/__tests__/i18nLazyEnglish.test.ts` lists each domain and who may import it). The
 other locales keep these keys in their files as usual, and
 `extract-i18n-keys.mjs`, the drift / values / placeholder tests and
 `print-missing-i18n-keys.mjs` read the lazy files together with the `en`

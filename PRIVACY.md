@@ -65,7 +65,7 @@ Because all your data lives on your device, your rights are exercised directly:
 - **Right to export**: use File → Export to download your workspace as Markdown / HTML / DOCX / PDF.
 - **Right to rectification**: edit your documents directly.
 
-If you use the hosted version at lumen.md and it serves a third-party signaling/sync, contact the operator (see the hosted instance's footer) for rights-related questions.
+If you use a hosted version and it serves a third-party signaling/sync, contact the operator (see the hosted instance's footer) for rights-related questions.
 
 ## Contact
 

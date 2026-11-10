@@ -66,9 +66,17 @@ const postError = (message: string) => {
 addEventListener("error", (e) => postError(e.error ? show(e.error) : e.message));
 addEventListener("unhandledrejection", (e) => postError(show(e.reason)));
 
+// The page's CSP nonce (security/policy.json, route playground-runner). A
+// script element created here does not inherit it the way imported modules
+// do, and WebKit does not match 'self' in this opaque-origin frame, so the
+// vendor scripts carry it explicitly. The browser hides the attribute; the
+// property keeps the value.
+const NONCE = document.querySelector<HTMLScriptElement>("script[nonce]")?.nonce ?? "";
+
 function loadScript(src: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const s = document.createElement("script");
+    if (NONCE) s.nonce = NONCE;
     s.src = src;
     s.onload = () => resolve();
     s.onerror = () => reject(new Error(`Failed to load ${src}`));
