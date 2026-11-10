@@ -4,8 +4,10 @@ export interface DailySettings {
   folder: string;
   /** File name pattern: YYYY, MM, DD (".md" is added when missing). */
   pattern: string;
-  /** New-note template: {{date}}, {{hebrewDate}}, {{weekday}}, {{title}}. */
+  /** New-note template: {{date}}, {{hebrewDate}}, {{weekday}}, {{title}}, {{holiday}}, {{parasha}}. */
   template: string;
+  /** Holidays and Torah portions as in Israel (true) or the diaspora (false); unset: from the UI language / time zone. */
+  israel?: boolean;
 }
 
 export const DEFAULT_DAILY: DailySettings = {
