@@ -263,5 +263,14 @@ export function buildEncryptionCommands({ setContent, liveDoc }: CommandContext)
         }
       },
     },
+    {
+      // The whole vault, encrypted where it is stored (plan 11.4).
+      id: "vault.encryptAtRest",
+      label: t("cmd.vault.encryptAtRest"),
+      hint: t("cmd.vault.encryptAtRest.hint"),
+      icon: cmdIcons.Save,
+      group: t("group.security"),
+      action: () => void import("../../ui/VaultEncryptionDialog").then((m) => m.showVaultEncryptionDialog()),
+    },
   ];
 }

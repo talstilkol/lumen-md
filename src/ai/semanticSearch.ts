@@ -19,6 +19,7 @@
  */
 
 import { get, set } from "idb-keyval";
+import { forStore, fromStore, isSealedValue } from "../storage/vault/restStore";
 import { log } from "../lib/logger";
 import { pickEmbeddingProvider, type EmbeddingKind, type EmbeddingProvider } from "./embeddingProvider";
 import {
@@ -243,16 +244,33 @@ export function bestChunk(q: Float32Array, v: FileVectors): { index: number; sco
 
 const packed = new WeakMap<FileRecord, FileVectors | null>();
 
+// In an encrypted vault (plan 11.4) the index (vectors and chunk text) is
+// stored sealed, and not written while the vault is locked.
+const LABEL = "semantic-index";
+
 async function loadIndex(): Promise<SemanticIndex> {
   if (memIndex) return memIndex;
-  const cached = (await get(IDB_KEY).catch(() => undefined)) as SemanticIndex | undefined;
+  const stored: unknown = await get(IDB_KEY).catch(() => undefined);
+  const cached = await fromStore<SemanticIndex>(LABEL, stored as SemanticIndex | undefined);
+  // Sealed and locked: an empty index for now, read again once unlocked.
+  if (cached === undefined && isSealedValue(stored)) return { builtAt: 0, files: {} };
   memIndex = cached ?? { builtAt: 0, files: {} };
   return memIndex;
 }
 
 async function saveIndex(index: SemanticIndex): Promise<void> {
   memIndex = index;
-  await set(IDB_KEY, index).catch((err) => log.warn("semantic index persist failed", err));
+  try {
+    const v = await forStore(LABEL, index);
+    if (v !== undefined) await set(IDB_KEY, v);
+  } catch (err) {
+    log.warn("semantic index persist failed", err);
+  }
+}
+
+/** Store the index again — sealed now that the vault is encrypted (plan 11.4). */
+export async function resealSemanticIndex(): Promise<void> {
+  await saveIndex(await loadIndex());
 }
 
 /** A file's vectors, decoded from base64 and packed once. */

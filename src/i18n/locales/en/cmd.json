@@ -255,6 +255,8 @@
   "cmd.tools.writingGoal.unset": "✍️ Set a daily writing goal",
   "cmd.vault.digest": "Digest: what changed",
   "cmd.vault.digest.hint": "A note with every note changed since the last digest, and their open tasks",
+  "cmd.vault.encryptAtRest": "🔐 Vault encryption…",
+  "cmd.vault.encryptAtRest.hint": "Encrypt the whole vault at rest; lock, recovery key",
   "cmd.vault.export": "Export the whole vault…",
   "cmd.vault.export.hint": "Every note and attachment, with folders, as a .zip or into a folder",
   "cmd.vault.import": "Import notes (zip / folder: Obsidian, Notion, Lumen)…",

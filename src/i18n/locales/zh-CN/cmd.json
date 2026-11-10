@@ -256,6 +256,8 @@
   "cmd.tools.writingGoal.unset": "✍️ 设置每日写作目标",
   "cmd.vault.digest": "摘要：有哪些变化",
   "cmd.vault.digest.hint": "一篇笔记，列出自上次摘要以来更改的所有笔记及其未完成任务",
+  "cmd.vault.encryptAtRest": "🔐 资料库加密…",
+  "cmd.vault.encryptAtRest.hint": "静态加密整个资料库；锁定、恢复密钥",
   "cmd.vault.export": "导出整个保险库…",
   "cmd.vault.export.hint": "所有笔记和附件（含文件夹）导出为 .zip 或到文件夹",
   "cmd.vault.import": "导入笔记（zip／文件夹：Obsidian、Notion、Lumen）…",

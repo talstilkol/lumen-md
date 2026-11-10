@@ -256,6 +256,8 @@
   "cmd.tools.writingGoal.unset": "✍️ Задать ежедневную цель по письму",
   "cmd.vault.digest": "Сводка: что изменилось",
   "cmd.vault.digest.hint": "Заметка со всеми изменёнными с прошлой сводки заметками и открытыми задачами",
+  "cmd.vault.encryptAtRest": "🔐 Шифрование хранилища…",
+  "cmd.vault.encryptAtRest.hint": "Шифровать всё хранилище при хранении; блокировка, ключ восстановления",
   "cmd.vault.export": "Экспорт всего хранилища…",
   "cmd.vault.export.hint": "Все заметки и вложения с папками — в .zip или в папку",
   "cmd.vault.import": "Импорт заметок (zip / папка: Obsidian, Notion, Lumen)…",

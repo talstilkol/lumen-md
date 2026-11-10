@@ -256,6 +256,8 @@
   "cmd.tools.writingGoal.unset": "✍️ 1日の執筆目標を設定",
   "cmd.vault.digest": "ダイジェスト: 変更点",
   "cmd.vault.digest.hint": "前回以降に変更されたノートと未完了タスクをまとめたノート",
+  "cmd.vault.encryptAtRest": "🔐 保管庫の暗号化…",
+  "cmd.vault.encryptAtRest.hint": "保管庫全体を保存時に暗号化。ロック、回復キー",
   "cmd.vault.export": "保管庫全体を書き出す…",
   "cmd.vault.export.hint": "すべてのノートと添付をフォルダ構造ごと .zip かフォルダへ",
   "cmd.vault.import": "ノートを読み込む（zip／フォルダ: Obsidian・Notion・Lumen）…",

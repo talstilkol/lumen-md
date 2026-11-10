@@ -1295,6 +1295,16 @@
       "vars": []
     },
     {
+      "key": "cmd.vault.encryptAtRest",
+      "en": "🔐 Vault encryption…",
+      "vars": []
+    },
+    {
+      "key": "cmd.vault.encryptAtRest.hint",
+      "en": "Encrypt the whole vault at rest; lock, recovery key",
+      "vars": []
+    },
+    {
       "key": "cmd.vault.export",
       "en": "Export the whole vault…",
       "vars": []

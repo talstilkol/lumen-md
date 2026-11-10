@@ -256,6 +256,8 @@
   "cmd.tools.writingGoal.unset": "✍️ Tägliches Schreibziel festlegen",
   "cmd.vault.digest": "Zusammenfassung: was sich geändert hat",
   "cmd.vault.digest.hint": "Eine Notiz mit allen seit der letzten Zusammenfassung geänderten Notizen und ihren offenen Aufgaben",
+  "cmd.vault.encryptAtRest": "🔐 Tresor-Verschlüsselung…",
+  "cmd.vault.encryptAtRest.hint": "Den ganzen Tresor im Ruhezustand verschlüsseln; Sperre, Wiederherstellungsschlüssel",
   "cmd.vault.export": "Ganzen Tresor exportieren…",
   "cmd.vault.export.hint": "Alle Notizen und Anhänge mit Ordnern als .zip oder in einen Ordner",
   "cmd.vault.import": "Notizen importieren (zip / Ordner: Obsidian, Notion, Lumen)…",

@@ -256,6 +256,8 @@
   "cmd.tools.writingGoal.unset": "✍️ הגדר יעד כתיבה יומי",
   "cmd.vault.digest": "סיכום: מה השתנה",
   "cmd.vault.digest.hint": "פתק עם כל הפתקים שהשתנו מאז הסיכום הקודם, והמשימות הפתוחות בהם",
+  "cmd.vault.encryptAtRest": "🔐 הצפנת הכספת…",
+  "cmd.vault.encryptAtRest.hint": "הצפנת כל הכספת במנוחה; נעילה, מפתח שחזור",
   "cmd.vault.export": "ייצוא כל הכספת…",
   "cmd.vault.export.hint": "כל הפתקים והקבצים, עם התיקיות, כ-zip או לתיקייה",
   "cmd.vault.import": "ייבוא פתקים (zip / תיקייה: Obsidian, ‏Notion, ‏Lumen)…",

@@ -19,9 +19,17 @@
  * record here too (reason "collab", with the author). When the browser's
  * quota runs out the oldest snapshots of all documents go first and the
  * write is retried once; past 80 % of the quota listeners are warned.
+ *
+ * In an encrypted vault (plan 11.4) the content of each version is stored
+ * sealed and whole — no deltas, which would carry the text in the clear (the
+ * document's name is not sealed); nothing is recorded while the vault is
+ * locked, and sealed versions read as absent until it is unlocked.
  */
 
 import { log } from "../lib/logger";
+import { forStore, fromStore, isSealedValue, type SealedValue } from "./vault/restStore";
+
+const LABEL = "history";
 
 export type SnapshotReason = "autosave" | "save" | "auto-backup" | "vault" | "close" | "restore" | "manual" | "collab" | "migrated" | "git-pull";
 
@@ -111,8 +119,8 @@ interface Row {
   timestamp: number;
   reason?: SnapshotReason;
   author?: string;
-  /** Full text (every row written before plan 3.2 is one). */
-  content?: string;
+  /** Full text (every row written before plan 3.2 is one); sealed in an encrypted vault (plan 11.4). */
+  content?: string | SealedValue;
   /** Delta from the row `base` (else from the previous row) of the same document. */
   delta?: Uint8Array | string;
   /** Id of the row the delta applies to. */
@@ -123,11 +131,33 @@ type DeltaModule = typeof import("./historyDelta");
 let deltaModule: Promise<DeltaModule> | null = null;
 const deltas = () => (deltaModule ??= import("./historyDelta"));
 
-async function readRows(name: string): Promise<Row[]> {
+/** A full row (plain or sealed), not a delta. */
+const isFull = (r: Row) => r.content !== undefined;
+
+/**
+ * Sealed contents opened (plan 11.4). A row that cannot be opened (the
+ * vault is locked) keeps its sealed content: it is still a full row, whose
+ * text reads as absent. `sealed` holds the ids of the rows stored sealed.
+ */
+async function openRows(rows: Row[], sealed?: Set<number>): Promise<Row[]> {
+  const out: Row[] = [];
+  for (const r of rows) {
+    if (!isSealedValue(r.content)) {
+      out.push(r);
+      continue;
+    }
+    sealed?.add(r.id);
+    const text = await fromStore<string>(LABEL, r.content);
+    out.push(typeof text === "string" ? { ...r, content: text } : r);
+  }
+  return out;
+}
+
+async function readRows(name: string, sealed?: Set<number>): Promise<Row[]> {
   const db = await openDB();
   const tx = db.transaction(STORE, "readonly");
   const rows = (await promisify(tx.objectStore(STORE).index("name").getAll(name))) as Row[];
-  return rows.sort((a, b) => a.timestamp - b.timestamp || a.id - b.id);
+  return openRows(rows.sort((a, b) => a.timestamp - b.timestamp || a.id - b.id), sealed);
 }
 
 /**
@@ -144,6 +174,7 @@ async function reconstruct(rows: Row[]): Promise<Array<string | null>> {
     // A delta names its base; rows from another tab may interleave.
     const base = r.base !== undefined ? byId.get(r.base) ?? null : cur;
     if (typeof r.content === "string") cur = r.content;
+    else if (r.content !== undefined) cur = null; // sealed, and the vault is locked
     else if (r.delta !== undefined && base !== null) {
       mod ??= await deltas();
       try {
@@ -198,19 +229,30 @@ async function dropRows(byDoc: Map<string, Row[]>, victims: Set<number>): Promis
     const keep = rows.filter((r) => !victims.has(r.id));
     if (!keep.length || keep.length === rows.length) continue;
     // Kept deltas whose base goes: the first kept row, and any naming a victim.
-    const orphans = keep.filter((r, i) => typeof r.content !== "string" && (i === 0 || (r.base !== undefined && victims.has(r.base))));
+    const orphans = keep.filter((r, i) => !isFull(r) && (i === 0 || (r.base !== undefined && victims.has(r.base))));
     if (!orphans.length) continue;
     // Rebuild only from the last full row before the first orphan — at the
     // cap that is at most FULL_EVERY rows, not the whole history.
     let from = rows.indexOf(orphans[0]);
-    while (from > 0 && typeof rows[from].content !== "string") from--;
+    while (from > 0 && !isFull(rows[from])) from--;
     const span = rows.slice(from);
     const texts = await reconstruct(span);
+    const docRebased: Row[] = [];
+    let blocked = false;
     for (const r of orphans) {
       const text = texts[span.indexOf(r)];
-      if (text === null) victims.add(r.id);
-      else rebased.push({ ...r, content: text, delta: undefined, base: undefined });
+      if (text === null) {
+        victims.add(r.id);
+        continue;
+      }
+      // The new full row is sealed in an encrypted vault (plan 11.4).
+      const stored = await forStore(LABEL, text);
+      if (stored === undefined) blocked = true;
+      else docRebased.push({ ...r, content: stored, delta: undefined, base: undefined });
     }
+    // Locked: a full row can't be written now, so this document keeps its rows.
+    if (blocked) for (const r of rows) victims.delete(r.id);
+    else rebased.push(...docRebased);
   }
   const db = await openDB();
   const tx = db.transaction(STORE, "readwrite");
@@ -243,6 +285,10 @@ function writeSnapshot(name: string, content: string, reason: SnapshotReason, no
 }
 
 async function writeSnapshotNow(name: string, content: string, reason: SnapshotReason, now: number, author?: string): Promise<boolean> {
+  // Sealing is asynchronous work outside IndexedDB, so it happens before the
+  // write transaction opens (an await inside it would end the transaction).
+  const stored = await forStore(LABEL, content);
+  if (stored === undefined) return false; // an encrypted vault, locked: record nothing
   const rows = await readRows(name);
   const newest = rows[rows.length - 1];
   const backdated = !!newest && now < newest.timestamp;
@@ -266,12 +312,14 @@ async function writeSnapshotNow(name: string, content: string, reason: SnapshotR
   }
   // A full text every FULL_EVERY versions bounds how many deltas a read applies.
   let sinceFull = 0;
-  for (let i = rows.length - 1; i >= 0 && typeof rows[i].content !== "string"; i--) sinceFull++;
+  for (let i = rows.length - 1; i >= 0 && !isFull(rows[i]); i--) sinceFull++;
   const row: Omit<Row, "id"> = { name, timestamp: now, reason };
   if (author) row.author = author;
   // A backdated version (an imported backup older than the history) sorts
   // before rows it can't be a delta for: it is stored whole.
-  if (prev === null || sinceFull >= FULL_EVERY - 1 || backdated) row.content = content;
+  // Sealed (an encrypted vault): always whole — a delta would hold the text in the clear.
+  if (isSealedValue(stored)) row.content = stored;
+  else if (prev === null || sinceFull >= FULL_EVERY - 1 || backdated) row.content = content;
   else {
     const mod = await deltas();
     const payload = await mod.encodeDelta(mod.diff(prev, content));
@@ -314,7 +362,7 @@ export async function historyStats(name: string): Promise<{ versions: number; st
 export async function pruneOldest(fraction = 0.25): Promise<number> {
   const db = await openDB();
   const tx = db.transaction(STORE, "readonly");
-  const rows = ((await promisify(tx.objectStore(STORE).getAll())) as Row[]).sort((a, b) => a.timestamp - b.timestamp || a.id - b.id);
+  const rows = await openRows(((await promisify(tx.objectStore(STORE).getAll())) as Row[]).sort((a, b) => a.timestamp - b.timestamp || a.id - b.id));
   const byDoc = new Map<string, Row[]>();
   for (const r of rows) {
     const list = byDoc.get(r.name) ?? [];
@@ -405,6 +453,44 @@ export async function clearHistory(name: string): Promise<void> {
   await done(tx);
   latestText.delete(name);
 }
+
+/**
+ * Every version's content into (`seal`) or out of (`open`) the vault's
+ * encryption (plan 11.4: turning it on, and off). Sealed versions are stored
+ * whole, so a delta chain becomes full rows. Document by document; a row
+ * that cannot be converted stays as it is.
+ */
+async function convertHistory(direction: "seal" | "open"): Promise<number> {
+  if (typeof indexedDB === "undefined") return 0;
+  let n = 0;
+  for (const { name } of await listDocuments()) {
+    const sealed = new Set<number>();
+    const rows = await readRows(name, sealed);
+    const texts = await reconstruct(rows);
+    const puts: Row[] = [];
+    for (const [i, r] of rows.entries()) {
+      const text = texts[i];
+      if (text === null || sealed.has(r.id) === (direction === "seal")) continue;
+      const content = direction === "seal" ? await forStore(LABEL, text) : text;
+      if (content === undefined || (direction === "seal" && !isSealedValue(content))) continue;
+      const { delta: _delta, base: _base, ...rest } = r;
+      void _delta;
+      void _base;
+      puts.push({ ...rest, content });
+    }
+    if (!puts.length) continue;
+    const db = await openDB();
+    const tx = db.transaction(STORE, "readwrite");
+    for (const r of puts) tx.objectStore(STORE).put(r);
+    await done(tx);
+    n += puts.length;
+  }
+  latestText.clear();
+  return n;
+}
+
+export const resealHistory = () => convertHistory("seal");
+export const unsealHistory = () => convertHistory("open");
 
 /** Tests: drop the cached connection (fake-indexeddb is reset between files). */
 export function __resetHistoryDb(): void {

@@ -3370,6 +3370,230 @@
       ]
     },
     {
+      "key": "vaultEnc.autoLock",
+      "en": "Lock after inactivity",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.broken",
+      "en": "{n} files don't decrypt with this vault's key and were left as they are: {paths}",
+      "vars": [
+        "n",
+        "paths"
+      ]
+    },
+    {
+      "key": "vaultEnc.cancel",
+      "en": "Cancel",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.change",
+      "en": "Change passphrase",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.changed",
+      "en": "Passphrase changed.",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.current",
+      "en": "Current passphrase",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.doneOff",
+      "en": "Encryption is off.",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.doneOn",
+      "en": "The vault is encrypted.",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.encryptNow",
+      "en": "Encrypt the vault",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.forgot",
+      "en": "Forgot the passphrase? Use the recovery key",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.headerBroken",
+      "en": "The vault's encryption header can't be read ({reason}). The recovery key opens the vault and writes a new one.",
+      "vars": [
+        "reason"
+      ]
+    },
+    {
+      "key": "vaultEnc.intro",
+      "en": "Encrypts every note and file of this vault where it is stored, and the history, agent traces and search index Lumen keeps about them. Only the passphrase or the recovery key opens it.",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.lockNow",
+      "en": "Lock now",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.lockedNote",
+      "en": "Enter the passphrase to open your notes.",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.lockedTitle",
+      "en": "The vault is locked",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.minutes",
+      "en": "{n} min",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "vaultEnc.mismatch",
+      "en": "The two passphrases differ.",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.never",
+      "en": "Never",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.newPassphrase",
+      "en": "New passphrase",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.notDone",
+      "en": "Not finished: run Check and repair.",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.passphrase",
+      "en": "Passphrase",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.progress",
+      "en": "{done} of {total} files…",
+      "vars": [
+        "done",
+        "total"
+      ]
+    },
+    {
+      "key": "vaultEnc.recover",
+      "en": "Open and set the new passphrase",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.recoveryKey",
+      "en": "Recovery key",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.recoveryNote",
+      "en": "Write it down or keep it in a password manager. It opens the vault if the passphrase is forgotten, even if the vault's encryption header is lost. Lumen shows it only now.",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.recoverySaved",
+      "en": "I have saved the recovery key",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.recoveryTitle",
+      "en": "Your recovery key",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.repair",
+      "en": "Check and repair",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.repaired",
+      "en": "{encrypted} encrypted, {plain} still plain text, {broken} not decryptable, {recovered} interrupted copies finished.",
+      "vars": [
+        "encrypted",
+        "plain",
+        "broken",
+        "recovered"
+      ]
+    },
+    {
+      "key": "vaultEnc.repeat",
+      "en": "Repeat the passphrase",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.retry",
+      "en": "{n} files changed meanwhile: run Check and repair.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "vaultEnc.statusOn",
+      "en": "This vault is encrypted.",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.title",
+      "en": "Vault encryption",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.tooShort",
+      "en": "At least {n} characters.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "vaultEnc.turnOff",
+      "en": "Turn off encryption",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.turnOffNote",
+      "en": "Decrypts every file back to plain text. Agent traces and the search index are deleted; history is kept.",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.turnOn",
+      "en": "Turn on encryption",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.unlock",
+      "en": "Unlock",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.warning",
+      "en": "An encrypted vault can't be read as plain text by Obsidian, git or any other program — only by Lumen with the passphrase. File and folder names stay visible.",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.wrong",
+      "en": "Wrong passphrase or recovery key.",
+      "vars": []
+    },
+    {
       "key": "wikiComplete.aliasOf",
       "en": "alias of {name}",
       "vars": [

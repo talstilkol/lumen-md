@@ -138,6 +138,7 @@ export default defineConfig({
           translations: { he: "תרומה לפרויקט" },
           items: [
             { label: "Translation drafts", translations: { he: "טיוטות תרגום" }, slug: "contributing/translation-drafts" },
+            { label: "Vault encryption at rest", slug: "security/vault-encryption" },
           ],
         },
         {

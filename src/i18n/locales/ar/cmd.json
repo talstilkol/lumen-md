@@ -256,6 +256,8 @@
   "cmd.tools.writingGoal.unset": "✍️ تعيين هدف كتابة يومي",
   "cmd.vault.digest": "ملخص: ما الذي تغيّر",
   "cmd.vault.digest.hint": "ملاحظة بكل الملاحظات التي تغيّرت منذ الملخص السابق ومهامها المفتوحة",
+  "cmd.vault.encryptAtRest": "🔐 تشفير الخزنة…",
+  "cmd.vault.encryptAtRest.hint": "تشفير الخزنة كاملة أثناء التخزين؛ القفل، مفتاح الاسترداد",
   "cmd.vault.export": "تصدير الخزنة كاملة…",
   "cmd.vault.export.hint": "كل الملاحظات والمرفقات مع المجلدات كملف zip أو إلى مجلد",
   "cmd.vault.import": "استيراد ملاحظات (zip / مجلد: Obsidian، Notion، Lumen)…",

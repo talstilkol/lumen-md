@@ -256,6 +256,8 @@
   "cmd.tools.writingGoal.unset": "✍️ Définir un objectif d'écriture quotidien",
   "cmd.vault.digest": "Résumé : ce qui a changé",
   "cmd.vault.digest.hint": "Une note listant les notes modifiées depuis le dernier résumé et leurs tâches ouvertes",
+  "cmd.vault.encryptAtRest": "🔐 Chiffrement du coffre…",
+  "cmd.vault.encryptAtRest.hint": "Chiffrer tout le coffre au repos ; verrouillage, clé de récupération",
   "cmd.vault.export": "Exporter tout le coffre…",
   "cmd.vault.export.hint": "Toutes les notes et pièces jointes, avec les dossiers, en .zip ou dans un dossier",
   "cmd.vault.import": "Importer des notes (zip / dossier : Obsidian, Notion, Lumen)…",

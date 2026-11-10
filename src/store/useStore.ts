@@ -1,6 +1,7 @@
 import { DEFAULT_DAILY, isValidDailyPattern, type DailySettings } from "../daily/defaults";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { vaultEncryptionState } from "../storage/vault";
 import { deferredJSONStorage, persistedTextLength } from "./deferredStorage";
 import type { Locale } from "../i18n";
 import { applyLocale, isLocaleLoaded, loadLocale } from "../i18n";
@@ -296,16 +297,23 @@ const partializeAppState = (s: AppState) =>
     useFineTunedModel: s.useFineTunedModel,
     fineTunedModelId: s.fineTunedModelId,
     // aiKey intentionally excluded — session-only for security
-    doc: {
-      name: s.doc.name,
-      content: s.doc.content,
-      dirty: s.doc.dirty,
-      workspaceName: s.doc.workspaceName ?? null,
-    },
-    // Persist open tabs so the user's session resumes after reload.
-    // Heavy `handle` references are intentionally excluded (not
-    // structured-cloneable through localStorage anyway).
-    openTabs: s.openTabs,
+    // An encrypted vault (plan 11.4): the open note and the tabs hold
+    // note text, and localStorage is plain — they are not kept; after a
+    // reload the notes open again from the (encrypted) vault.
+    ...(vaultEncryptionState() === "locked" || vaultEncryptionState() === "unlocked"
+      ? {}
+      : {
+          doc: {
+            name: s.doc.name,
+            content: s.doc.content,
+            dirty: s.doc.dirty,
+            workspaceName: s.doc.workspaceName ?? null,
+          },
+          // Persist open tabs so the user's session resumes after reload.
+          // Heavy `handle` references are intentionally excluded (not
+          // structured-cloneable through localStorage anyway).
+          openTabs: s.openTabs,
+        }),
   });
 
 type PersistedAppState = ReturnType<typeof partializeAppState>;
