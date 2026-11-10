@@ -12,6 +12,7 @@
 import { readyToReveal } from "./revealLine";
 import { useEffect, useImperativeHandle, useRef, useState, forwardRef } from "react";
 import { Compartment, EditorState } from "@codemirror/state";
+import { lineSeparatorFor } from "./lineEndings";
 import { EditorView, keymap, highlightActiveLine, Decoration, WidgetType } from "@codemirror/view";
 import type { DecorationSet } from "@codemirror/view";
 import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
@@ -122,6 +123,8 @@ const commentsCompartment = new Compartment();
 const grammarCompartment = new Compartment();
 // Outline mode: folding, zoom and block operations (plan W2.13), loaded after mount.
 const outlineCompartment = new Compartment();
+// W1.2 — the document's own line ending, so a CRLF file saves as CRLF.
+const lineSeparatorCompartment = new Compartment();
 
 let vimExtensionPromise: Promise<unknown> | null = null;
 async function loadVimExtension() {
@@ -364,6 +367,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     const initialDoc = value;
 
     const baseExtensions = [
+      lineSeparatorCompartment.of(EditorState.lineSeparator.of(lineSeparatorFor(initialDoc))),
       vimCompartment.of([]),
       embedHintExtension(),
       insertSlashMenuExtension(),
@@ -515,6 +519,12 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     if (current === value) return;
     syncingRef.current = true;
     try {
+      // A newly opened file may use other line endings: switch first, since
+      // the inserted text is split with the separator in force before it.
+      const sep = lineSeparatorFor(value);
+      if (view.state.lineBreak !== sep) {
+        view.dispatch({ effects: lineSeparatorCompartment.reconfigure(EditorState.lineSeparator.of(sep)) });
+      }
       view.dispatch({
         changes: { from: 0, to: current.length, insert: value },
       });

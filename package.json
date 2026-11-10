@@ -28,6 +28,7 @@
     "lumen": "tsx bin/lumen.ts",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
+    "md:conformance": "vitest run src/__tests__/mdConformance.test.ts src/__tests__/mdRoundTrip.test.ts src/__tests__/sourcePreserve.test.ts",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "e2e:flake": "node scripts/e2e-flake.mjs",
