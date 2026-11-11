@@ -10,7 +10,6 @@ import { appendFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 // @ts-expect-error — plain .mjs module without types
 import { loadSet } from "../../scripts/lib/golden.mjs";
-// @ts-expect-error — plain .mjs module without type declarations
 import { readLocale } from "../../scripts/lib/i18n-files.mjs";
 import { detectLanguage, languageCode } from "../text/langId";
 import { dominantScript, languageFromScript, looksYiddish, proseForLanguage } from "../text/script";

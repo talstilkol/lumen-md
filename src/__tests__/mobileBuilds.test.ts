@@ -12,7 +12,6 @@ import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import YAML from "yaml";
 import { REMINDER_EVERY_MS, isWebKitBrowser, shouldRemind, type ReminderEnv } from "../storage/evictionReminder";
-// @ts-expect-error — plain .mjs module without type declarations
 import { readLocale } from "../../scripts/lib/i18n-files.mjs";
 
 const ROOT = resolve(__dirname, "..", "..");
