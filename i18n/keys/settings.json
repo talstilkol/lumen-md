@@ -688,7 +688,7 @@
     },
     {
       "key": "privacy.footer",
-      "en": "Recorded: time, host, size, reason. Never the text of prompts or answers. Requests from inside model workers (downloads) are not listed.",
+      "en": "Recorded: time, host, size, reason. Never the text of prompts or answers. Model downloads made inside workers are listed too; their size may show as unknown.",
       "vars": []
     },
     {
