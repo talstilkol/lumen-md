@@ -19,7 +19,7 @@ const SRC = resolve(__dirname, "..");
  * a folder that is itself loaded only lazily (nothing outside it imports it
  * statically); the users may import each other statically inside it.
  */
-const DOMAINS: Record<string, { module: string; users: string[]; prefixes: string[]; within?: string }> = {
+const DOMAINS: Record<string, { module: string; users: string[]; prefixes: string[]; within?: string; shared?: string[] }> = {
   "caption.json": { module: "ai/captionStrings.ts", users: ["ai/caption.ts"], prefixes: ["caption."] },
   "nikud.json": { module: "ai/nikudStrings.ts", users: ["ai/nikudService.ts"], prefixes: ["toast.nikud.", "models.purpose.nikud"] },
   "eviction.json": { module: "storage/evictionStrings.ts", users: ["storage/evictionReminder.ts"], prefixes: ["storage.eviction."] },
@@ -29,8 +29,18 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "imageSearch.json": { module: "ai/imageSearchStrings.ts", users: ["ui/SearchDialog.tsx", "ui/ImageSearchPanel.tsx", "ai/imageSearchService.ts"], prefixes: ["imageSearch."] },
   "mt.json": { module: "ai/mt/strings.ts", users: ["ai/mt/index.ts", "agents/commands.ts"], prefixes: ["models.", "mt.", "toast.translatedWith", "toast.localMtUnavailable"] },
   // Encrypted sync (plan 3.4): the whole of src/sync/e2ee/ loads on demand.
-  "e2ee.json": { module: "sync/e2ee/strings.ts", users: ["sync/e2ee/conflict.ts", "sync/e2ee/ui/FreshnessBanner.tsx", "sync/e2ee/ui/PassphraseForm.tsx"], prefixes: ["e2ee."], within: "sync/e2ee/" },
+  // `shared`: the string-free crypto helpers the encrypted vault (plan 11.4) uses too; they may be
+  // imported from outside, and must not reach the strings.
+  "e2ee.json": {
+    module: "sync/e2ee/strings.ts",
+    users: ["sync/e2ee/conflict.ts", "sync/e2ee/ui/FreshnessBanner.tsx", "sync/e2ee/ui/PassphraseForm.tsx", "sync/e2ee/ui/SyncPanel.tsx"],
+    prefixes: ["e2ee."],
+    within: "sync/e2ee/",
+    shared: ["sync/e2ee/bytes.ts", "sync/e2ee/kdf.ts"],
+  },
   "feedback.json": { module: "feedback/strings.ts", users: ["ui/FeedbackDialog.tsx"], prefixes: ["feedback."] },
+  // The encrypted vault's dialogs (plan 11.4), opened with a dynamic import.
+  "vaultEncryption.json": { module: "storage/vault/encrypted/strings.ts", users: ["ui/VaultEncryptionDialog.tsx", "ui/VaultUnlock.tsx"], prefixes: ["vaultEnc."] },
   // The webR download offer (plan W1.34), in the lazily rendered live-R block.
   "webr.json": { module: "plugins/r/webrStrings.ts", users: ["plugins/LiveRBlock.tsx"], prefixes: ["block.liveR.install."] },
 };
@@ -90,13 +100,23 @@ describe("i18n: lazy English", () => {
   it("the declared users are themselves only loaded with a dynamic import", () => {
     for (const d of Object.values(DOMAINS)) {
       if (d.within) {
-        // Nothing outside the lazily loaded folder imports it statically.
+        const shared = new Set((d.shared ?? []).map((x) => x.replace(/\.tsx?$/, "")));
+        // A shared helper imports nothing but the other shared helpers, so it never reaches the strings.
+        for (const x of d.shared ?? []) {
+          const f = join(SRC, x);
+          for (const m of readFileSync(f, "utf8").matchAll(/^\s*(?:import|export)\s+(?!type\b)(?:[^"';]*from\s+)?["']([^"']+)["']/gm)) {
+            expect(shared.has(rel(resolve(join(f, ".."), m[1]))), `${x} imports ${m[1]}`).toBe(true);
+          }
+        }
+        // Nothing outside the lazily loaded folder imports it statically (the shared helpers aside).
         for (const f of files) {
           if (rel(f).startsWith(d.within)) continue;
           const src = readFileSync(f, "utf8");
           for (const m of src.matchAll(/^\s*(?:import|export)\s+(?!type\b)(?:[^"';]*from\s+)?["']([^"']+)["']/gm)) {
             if (!m[1].startsWith(".")) continue;
-            expect(rel(resolve(join(f, ".."), m[1])).startsWith(d.within), `${rel(f)} imports ${m[1]} statically`).toBe(false);
+            const target = rel(resolve(join(f, ".."), m[1]));
+            if (shared.has(target)) continue;
+            expect(target.startsWith(d.within), `${rel(f)} imports ${m[1]} statically`).toBe(false);
           }
         }
         continue;

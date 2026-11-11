@@ -11,10 +11,9 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { t } from "../i18n";
 import { encryptionStatus, recover, unlock, UNLOCKED_EVENT } from "../storage/vault/encrypted/session";
-import { WrongPassphraseError } from "../storage/vault/encrypted/format";
+import { WrongPassphraseError, MIN_PASSPHRASE_LENGTH } from "../storage/vault/encrypted/format";
 import "../storage/vault/encrypted/strings";
 
-export const MIN_PASSPHRASE_LENGTH = 12;
 
 const field: React.CSSProperties = {
   width: "100%",

@@ -35,6 +35,9 @@ import { bs, concat, fromB64u, fromUtf8, randomBytes, toB64u, utf8 } from "../..
 import { ENCRYPTED_PREFIX } from "./paths";
 import { deriveMasterKey, newKdfParams, validateKdfParams, type KdfParams, type KdfPolicy } from "../../../sync/e2ee/kdf";
 
+/** The shortest passphrase the vault accepts (characters), for the setup and unlock dialogs. */
+export const MIN_PASSPHRASE_LENGTH = 12;
+
 export const MAGIC = new Uint8Array(ENCRYPTED_PREFIX);
 const NONCE = 12;
 const TAG = 16;

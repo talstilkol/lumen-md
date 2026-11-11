@@ -19,8 +19,7 @@ import {
   setAutoLockMinutes,
 } from "../storage/vault/encrypted/session";
 import type { ConvertProgress, ConvertReport } from "../storage/vault/encrypted/convert";
-import { WrongPassphraseError } from "../storage/vault/encrypted/format";
-import { MIN_PASSPHRASE_LENGTH } from "./VaultUnlock";
+import { WrongPassphraseError, MIN_PASSPHRASE_LENGTH } from "../storage/vault/encrypted/format";
 import "../storage/vault/encrypted/strings";
 
 const field: React.CSSProperties = { width: "100%", padding: "6px 8px", border: "1px solid hsl(var(--border))", borderRadius: 6, background: "transparent", color: "inherit", font: "inherit" };
