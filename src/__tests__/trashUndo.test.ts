@@ -11,10 +11,13 @@ import { __resetTrashUndo, TRASH_UNDO_LIMIT, trashPaths, trashUndoDepth, undoLas
 import { listTrash, restoreFromTrash } from "../storage/trash";
 import { flushOpenDocsUnder } from "../store/openDocs";
 import { handleTrashUndoKey, isEditingTarget, isUndoKey } from "../ui/trashUndoShortcut";
+import { __resetExternalChanges } from "../store/externalChanges";
 
 beforeEach(() => {
   installFakeOpfs();
   __resetTrashUndo();
+  // The outside-change guard (#258) remembers what each path held; a fresh vault starts with no memory.
+  __resetExternalChanges();
   useAppStore.setState({ doc: { name: "Untitled.md", content: "", dirty: false, workspaceName: null }, openTabs: [] });
 });
 
