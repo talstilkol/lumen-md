@@ -12,8 +12,9 @@ const SCRIPT = join(ROOT, "scripts", "vercel-ignore.sh");
  * "skip the build". The real logic lives in scripts/vercel-ignore.sh; these
  * tests pin both the config contract and the script's decisions.
  */
-describe("vercel.json ignoreCommand", () => {
-  const cfg = JSON.parse(readFileSync(join(ROOT, "vercel.json"), "utf8")) as {
+describe("the Vercel config's ignoreCommand", () => {
+  // vercel.json is deploy/vercel.base.json, read through vercel.ts (#239).
+  const cfg = JSON.parse(readFileSync(join(ROOT, "deploy", "vercel.base.json"), "utf8")) as {
     ignoreCommand?: string;
   };
 
