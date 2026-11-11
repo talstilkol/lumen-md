@@ -181,6 +181,13 @@ function propsOf(name: string): Props {
   if (!p) throw new Error(`${name} was never rendered`);
   return p;
 }
+/** A lazily loaded surface mounted only while open (#261): wait for the chunk, then read its props. */
+async function opened(name: string): Promise<Props> {
+  await waitFor(() => expect(propsOf(name).open).toBe(true), { timeout: 3000 });
+  return propsOf(name);
+}
+const mounted = (name: string) => screen.queryByText(`[${name}]`) !== null;
+
 function cb<T = AnyFn>(name: string, key: string): T {
   return propsOf(name)[key] as T;
 }
@@ -296,16 +303,17 @@ describe("App first launch", () => {
   it("starts the onboarding tour on a first visit and remembers when it is closed", async () => {
     localStorage.removeItem("lumen-tour-done");
     await renderApp();
-    expect(propsOf("OnboardingTour").open).toBe(false);
-    await waitFor(() => expect(propsOf("OnboardingTour").open).toBe(true), { timeout: 3000 });
+    // The tour is mounted only while open (#261), after a short delay on a first visit.
+    await opened("OnboardingTour");
     await run(() => cb("OnboardingTour", "onClose")());
-    expect(propsOf("OnboardingTour").open).toBe(false);
+    expect(mounted("OnboardingTour")).toBe(false);
     expect(localStorage.getItem("lumen-tour-done")).toBe("1");
   });
 
   it("the tour's action opens the runtime metrics panel", async () => {
     await renderApp();
-    const actions = propsOf("OnboardingTour").actions as Array<{ id: string; label: string; onRun: () => void }>;
+    await run(() => cb("Toolbar", "onTour")());
+    const actions = (await opened("OnboardingTour")).actions as Array<{ id: string; label: string; onRun: () => void }>;
     expect(actions[0].id).toBe("runtimeMetrics.open");
     expect(actions[0].label).toBe(t("tour.action.openRuntimeMetrics"));
     await run(() => actions[0].onRun());
@@ -387,7 +395,7 @@ describe("App keyboard shortcuts", () => {
     key("K", { meta: true });
     expect(propsOf("CommandPalette").open).toBe(false);
     key("/");
-    expect(propsOf("KeyboardShortcuts").open).toBe(true);
+    await opened("KeyboardShortcuts");
     key("h");
     expect(propsOf("SearchReplace").open).toBe(true);
     // Without a modifier nothing happens.
@@ -828,11 +836,11 @@ describe("App toolbar callbacks", () => {
     await run(() => cb("CommandPalette", "onClose")());
     expect(propsOf("CommandPalette").open).toBe(false);
     await run(() => cb("Toolbar", "onShortcuts")());
-    expect(propsOf("KeyboardShortcuts").open).toBe(true);
+    await opened("KeyboardShortcuts");
     await run(() => cb("KeyboardShortcuts", "onClose")());
-    expect(propsOf("KeyboardShortcuts").open).toBe(false);
+    expect(mounted("KeyboardShortcuts")).toBe(false);
     await run(() => cb("Toolbar", "onTour")());
-    expect(propsOf("OnboardingTour").open).toBe(true);
+    await opened("OnboardingTour");
     await run(() => cb("Toolbar", "onFocusMode")());
     expect(screen.getByText("[FocusMode]")).toBeTruthy();
     await run(() => cb("FocusMode", "onExit")());
@@ -970,9 +978,9 @@ describe("App native (Tauri) menu", () => {
     await run(() => menu.onCommandPalette());
     expect(propsOf("CommandPalette").open).toBe(true);
     await run(() => menu.onShortcuts?.());
-    expect(propsOf("KeyboardShortcuts").open).toBe(true);
+    await opened("KeyboardShortcuts");
     await run(() => menu.onTour?.());
-    expect(propsOf("OnboardingTour").open).toBe(true);
+    await opened("OnboardingTour");
     await run(() => menu.onFindReplace?.());
     expect(propsOf("SearchReplace").open).toBe(true);
     await run(() => menu.onWorkspaceSearch?.());
