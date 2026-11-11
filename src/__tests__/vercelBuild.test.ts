@@ -6,7 +6,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 // @ts-expect-error — plain .mjs script without type declarations
-import { GATES, PREVIEW_GATES, PRODUCTION_GATES, gatesFor } from "../../scripts/vercel-build.mjs";
+import { GATES, GATE_EXTRA, PREVIEW_GATES, PRODUCTION_GATES, gatesFor, vitestSummary } from "../../scripts/vercel-build.mjs";
 
 const ROOT = resolve(__dirname, "..", "..");
 const pkg = JSON.parse(readFileSync(resolve(ROOT, "package.json"), "utf8")) as { scripts: Record<string, string> };
@@ -26,6 +26,33 @@ describe("scripts/vercel-build.mjs", () => {
       const script = args[args.length - 1];
       expect(pkg.scripts[script], gate).toBeDefined();
     }
+  });
+
+  it("a failed vitest run ends with one block naming every failing file (W1.1)", () => {
+    expect(GATE_EXTRA.vitest).toContain("--reporter=json");
+    const lines = vitestSummary({
+      numFailedTestSuites: 2,
+      numTotalTestSuites: 3,
+      numFailedTests: 1,
+      numPassedTests: 9,
+      numTotalTests: 10,
+      testResults: [
+        { name: "/vercel/path0/src/__tests__/a.test.ts", status: "failed", assertionResults: [{ fullName: "a works", status: "failed", failureMessages: ["\u001b[31mAssertionError: expected 1 to be 2\u001b[39m\n    at x"] }] },
+        { name: "/vercel/path0/src/__tests__/b.test.ts", status: "failed", message: "Error: Failed to load url ./missing\n stack", assertionResults: [] },
+        { name: "/vercel/path0/src/__tests__/c.test.ts", status: "passed", assertionResults: [] },
+      ],
+    }) as string[];
+    expect(lines[0]).toBe("✗ vitest summary: files 2 failed / 3; tests 1 failed, 9 passed / 10");
+    expect(lines).toContain("  src/__tests__/a.test.ts: 1 failed");
+    expect(lines).toContain("      AssertionError: expected 1 to be 2");
+    expect(lines).toContain("  src/__tests__/b.test.ts: the file failed to run");
+    expect(lines.join("\n")).not.toContain("c.test.ts");
+    expect(vitestSummary(null)).toBeNull();
+  });
+
+  it("the upload keeps what the gates read: e2e specs, docs, native configs (W1.1)", () => {
+    const ignore = readFileSync(resolve(ROOT, ".vercelignore"), "utf8").split("\n").map((l) => l.trim()).filter((l) => l && !l.startsWith("#"));
+    for (const tree of ["e2e", "docs", "src-tauri", "ios", "android"]) expect(ignore, tree).not.toContain(tree);
   });
 
   it("deploy/vercel.base.json builds through it", () => {

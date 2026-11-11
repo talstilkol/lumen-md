@@ -21,6 +21,7 @@
  * Usage: node scripts/vercel-build.mjs [--production | --preview] [--dry-run]
  */
 import { spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
 
@@ -34,6 +35,42 @@ export const GATES = {
   "docs:sync": ["run", "-s", "docs:sync"],
   licenses: ["run", "-s", "licenses"],
 };
+
+/**
+ * Arguments a gate's npm script gets on top. Vitest also writes its JSON
+ * report, so a failed run ends with one short block naming every failing
+ * file: the build log shows only its tail, and the failure dump of a big run
+ * is thousands of lines (W1.1).
+ */
+export const VITEST_REPORT = "reports/vitest.json";
+export const GATE_EXTRA = {
+  vitest: ["--", "--reporter=default", "--reporter=json", `--outputFile.json=${VITEST_REPORT}`],
+};
+
+/**
+ * The end-of-log summary of a vitest JSON report (its jest-style shape):
+ * the counts, then each failing file with up to three failing tests and the
+ * first line of the first error. Lines, or null when there is no report.
+ */
+export function vitestSummary(report, { maxFiles = 80 } = {}) {
+  if (!report || !Array.isArray(report.testResults)) return null;
+  const firstLine = (m) => String(m ?? "").replace(/\u001b\[[0-9;]*m/g, "").split("\n").map((l) => l.trim()).find(Boolean) ?? "";
+  const cut = (t, n = 220) => (t.length > n ? `${t.slice(0, n - 1)}…` : t);
+  const rel = (f) => String(f).replace(/^.*?(?=src\/|scripts\/|e2e\/)/, "");
+  const failed = report.testResults.filter((f) => f.status === "failed");
+  const out = [
+    `✗ vitest summary: files ${report.numFailedTestSuites ?? failed.length} failed / ${report.numTotalTestSuites ?? report.testResults.length}; tests ${report.numFailedTests ?? 0} failed, ${report.numPassedTests ?? 0} passed / ${report.numTotalTests ?? 0}`,
+  ];
+  for (const f of failed.slice(0, maxFiles)) {
+    const tests = (f.assertionResults ?? []).filter((a) => a.status === "failed");
+    out.push(`  ${rel(f.name)}: ${tests.length ? `${tests.length} failed` : "the file failed to run"}`);
+    if (!tests.length && f.message) out.push(`      ${cut(firstLine(f.message))}`);
+    for (const a of tests.slice(0, 3)) out.push(`    × ${cut(a.fullName ?? a.title ?? "?", 160)}`, `      ${cut(firstLine(a.failureMessages?.[0]))}`);
+    if (tests.length > 3) out.push(`    … ${tests.length - 3} more`);
+  }
+  if (failed.length > maxFiles) out.push(`  … ${failed.length - maxFiles} more files`);
+  return out;
+}
 
 export const PRODUCTION_GATES = ["build", "budget"];
 export const PREVIEW_GATES = ["build", "budget", "vitest", "i18n:check", "hygiene", "docs:sync", "licenses"];
@@ -56,9 +93,19 @@ function main() {
   for (const gate of gates) {
     const started = Date.now();
     console.log(`\n▶ ${gate}`);
-    const r = spawnSync(npm, GATES[gate], { stdio: "inherit", env: process.env });
+    const r = spawnSync(npm, [...GATES[gate], ...(GATE_EXTRA[gate] ?? [])], { stdio: "inherit", env: process.env });
     const secs = ((Date.now() - started) / 1000).toFixed(1);
     if (r.status !== 0) {
+      if (gate === "vitest") {
+        let report = null;
+        try {
+          report = JSON.parse(readFileSync(VITEST_REPORT, "utf8"));
+        } catch {
+          /* no report: vitest did not get that far */
+        }
+        const lines = vitestSummary(report);
+        if (lines) console.error(`\n${lines.join("\n")}`);
+      }
       console.error(`\n✗ vercel-build: the ${gate} gate failed (${secs} s, exit ${r.status ?? r.signal}). Passed before it: ${done.join(", ") || "none"}.`);
       process.exit(1);
     }
