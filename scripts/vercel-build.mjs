@@ -14,7 +14,8 @@
  *   (not on Vercel)         the preview set, so `node scripts/vercel-build.mjs`
  *                           reproduces a preview build locally
  *
- * The gates run in that order and stop at the first failure (exit code
+ * The gates run in that order; after the build, a failing gate no longer
+ * stops the later ones, and the run exits at the end (exit code
  * 1), with one line per gate and its time. Playwright e2e does not run
  * here: it needs browsers and runs in the Vercel Sandbox (W1.1).
  *
@@ -90,6 +91,9 @@ function main() {
   if (argv.includes("--dry-run")) return;
   const npm = process.platform === "win32" ? "npm.cmd" : "npm";
   const done = [];
+  // After build, every gate runs even if an earlier one failed, so one
+  // deployment reports every gate (the daily deployment quota is small).
+  const failedGates = [];
   for (const gate of gates) {
     const started = Date.now();
     console.log(`\n▶ ${gate}`);
@@ -106,10 +110,16 @@ function main() {
         const lines = vitestSummary(report);
         if (lines) console.error(`\n${lines.join("\n")}`);
       }
-      console.error(`\n✗ vercel-build: the ${gate} gate failed (${secs} s, exit ${r.status ?? r.signal}). Passed before it: ${done.join(", ") || "none"}.`);
-      process.exit(1);
+      console.error(`\n✗ vercel-build: the ${gate} gate failed (${secs} s, exit ${r.status ?? r.signal}).`);
+      failedGates.push(`${gate} ${secs} s`);
+      if (gate === "build") break; // nothing to check without a build
+      continue;
     }
     done.push(`${gate} ${secs} s`);
+  }
+  if (failedGates.length) {
+    console.error(`\n✗ vercel-build: failed: ${failedGates.join(" · ")}. Passed: ${done.join(" · ") || "none"}.`);
+    process.exit(1);
   }
   console.log(`\n✓ vercel-build: ${done.join(" · ")}`);
 }
