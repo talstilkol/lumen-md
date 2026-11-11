@@ -21,6 +21,8 @@ vi.mock("../store/useStore", () => ({
   useAppStore: { getState: () => state, setState: vi.fn() },
   // The real helper: dictation now keys its target note by tab id.
   tabIdOf: (d: { workspaceName?: string | null; name: string }) => d.workspaceName || d.name || "Untitled",
+  // Dictation follows its note across a rename (#197); no renames happen here.
+  onTabIdChange: () => () => undefined,
 }));
 vi.mock("../store/useToastStore", () => ({ toast: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));
 vi.mock("../ui/AiToast", () => ({ showAiToast: vi.fn() }));
