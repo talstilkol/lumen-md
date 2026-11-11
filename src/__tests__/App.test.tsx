@@ -76,6 +76,7 @@ vi.mock("../ui/RuntimeMetricsPanel", () => ({ RuntimeMetricsPanel: h.stub("Runti
 vi.mock("../ui/KeyboardShortcuts", () => ({ KeyboardShortcuts: h.stub("KeyboardShortcuts"), detectIsMac: () => false }));
 vi.mock("../ui/FocusMode", () => ({ FocusMode: h.stub("FocusMode") }));
 vi.mock("../ui/OnboardingTour", () => ({ OnboardingTour: h.stub("OnboardingTour") }));
+vi.mock("../onboarding/FirstRun", () => ({ default: h.stub("FirstRun") }));
 vi.mock("../layouts/EditorLayout", () => ({ EditorLayout: h.stub("EditorLayout") }));
 vi.mock("../ui/DocTabs", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../ui/DocTabs")>()),
@@ -300,10 +301,12 @@ describe("App first launch", () => {
     expect(propsOf("DocTabs").activeId).toBe("notes.md");
   });
 
-  it("starts the onboarding tour on a first visit and remembers when it is closed", async () => {
+  it("starts the setup, then the onboarding tour, on a first visit and remembers when it is closed", async () => {
     localStorage.removeItem("lumen-tour-done");
     await renderApp();
-    // The tour is mounted only while open (#261), after a short delay on a first visit.
+    // A first visit opens the setup (#261, plan 14.1); the tour follows when it is done.
+    await waitFor(() => expect(mounted("FirstRun")).toBe(true), { timeout: 3000 });
+    await run(() => cb("FirstRun", "onDone")({ note: { path: "Welcome.md", content: "# Welcome\n" } }));
     await opened("OnboardingTour");
     await run(() => cb("OnboardingTour", "onClose")());
     expect(mounted("OnboardingTour")).toBe(false);
@@ -598,9 +601,15 @@ describe("App autosave", () => {
     act(() => {
       window.dispatchEvent(new Event("pagehide"));
     });
-    expect(h.writeWorkspaceFile).toHaveBeenCalledWith("w.md", "unflushed");
+    // The write goes through the outside-change guard (#258), loaded on demand: wait for it.
+    await waitFor(() => expect(h.writeWorkspaceFile).toHaveBeenCalledWith("w.md", "unflushed"));
     expect(h.recordSnapshot).toHaveBeenCalledWith("w.md", "unflushed", "close");
     h.writeWorkspaceFile.mockClear();
+    // The flush marked the note saved (main); a new edit makes it pending again.
+    await waitFor(() => expect(doc().dirty).toBe(false));
+    act(() => {
+      useAppStore.getState().setContent("unflushed, again");
+    });
     const vis = Object.getOwnPropertyDescriptor(document, "visibilityState");
     Object.defineProperty(document, "visibilityState", { configurable: true, get: () => "hidden" });
     act(() => {
@@ -608,7 +617,7 @@ describe("App autosave", () => {
     });
     if (vis) Object.defineProperty(document, "visibilityState", vis);
     else delete (document as unknown as Record<string, unknown>).visibilityState;
-    expect(h.writeWorkspaceFile).toHaveBeenCalledWith("w.md", "unflushed");
+    await waitFor(() => expect(h.writeWorkspaceFile).toHaveBeenCalledWith("w.md", "unflushed, again"));
   });
 
   it("warns before unloading only with unsaved changes", async () => {
