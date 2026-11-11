@@ -69,7 +69,8 @@ describe("startVoiceRecording and the privacy policy", () => {
     const { ledgerEntries } = await import("../ai/privacyLedger");
     const before = ledgerEntries().length;
     const { startVoiceRecording } = await import("../ui/VoiceDictation");
-    startVoiceRecording("he-IL"); // jsdom has no getUserMedia → local path unavailable
+    // Hebrew opens the live engine's panel first (#255); this case is the device path's fallback.
+    startVoiceRecording("en-US"); // jsdom has no getUserMedia → local path unavailable
     await new Promise((r) => setTimeout(r, 0));
     expect(ctor).not.toHaveBeenCalled();
     const added = ledgerEntries().slice(before);
@@ -172,6 +173,9 @@ describe("the browser speech service and a policy change mid-session (review: #1
   beforeEach(() => {
     localStorage.clear();
     vi.resetModules();
+    // A session left by an earlier case keeps its pill: it belongs to a module instance that
+    // resetModules dropped, which only a storage event (not setAiPolicy here) would reach.
+    document.getElementById("voice-recording-root")?.remove();
   });
 
   it.each(["this tab", "another tab"])("stops when the policy turns local-only in %s", async (where) => {
