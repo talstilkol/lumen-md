@@ -42,7 +42,7 @@ function NotGood() {
   }, []);
   if (!answer) return null;
   return (
-    <div role="status" data-testid="ai-not-good" style={{ position: "fixed", bottom: 40, left: 16, zIndex: 99997, display: "flex", gap: 8, alignItems: "center", padding: "6px 10px", borderRadius: 10, background: "hsl(var(--bg-subtle))", border: "1px solid hsl(var(--border))", fontSize: 12.5 }}>
+    <div role="status" data-testid="ai-not-good" style={{ position: "fixed", bottom: 40, insetInlineStart: 16, zIndex: 99997, display: "flex", gap: 8, alignItems: "center", padding: "6px 10px", borderRadius: 10, background: "hsl(var(--bg-subtle))", border: "1px solid hsl(var(--border))", fontSize: 12.5 }}>
       <span>{t("agent.notGood.prompt", { agent: answer.run.agentId })}</span>
       <button
         type="button"
