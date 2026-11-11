@@ -15,6 +15,9 @@ vi.mock("../storage/workspace", () => ({
   listWorkspace: vi.fn(async () => []),
   readWorkspaceFile: vi.fn(async () => ""),
   workspaceHasFile: vi.fn(async () => false),
+  // The clone mirror asks these since #269 (safe git): nothing is in the vault yet.
+  workspaceHasEntry: vi.fn(async () => false),
+  readWorkspaceBlob: vi.fn(async () => new Blob([])),
   writeWorkspaceBlob: vi.fn(async (p: string) => {
     // What provenance says at the moment of each write.
     const { untrustedSourcesOfNote } = await import("../agents/provenance");
@@ -22,6 +25,12 @@ vi.mock("../storage/workspace", () => ({
     if (writes.length >= failAt) throw new DOMException("full", "QuotaExceededError");
     writes.push(p);
   }),
+}));
+
+// The mirror looks at the vault through its backend (#269): an empty vault.
+vi.mock("../storage/vault", async (orig) => ({
+  ...(await orig<typeof import("../storage/vault")>()),
+  getVaultBackend: () => ({ stat: async () => null }),
 }));
 
 // A two-file checkout in a fake lightning-fs volume.
