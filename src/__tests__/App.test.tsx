@@ -122,6 +122,9 @@ vi.mock("../pwa/launch", () => ({
   parseLaunch: (...a: unknown[]) => h.parseLaunch(...a),
   clearLaunchParams: (...a: unknown[]) => h.clearLaunchParams(...a),
   onLaunchFiles: (...a: unknown[]) => h.onLaunchFiles(...a),
+  // Quick capture (#268): App also asks for a shared item and listens for the desktop capture shortcut.
+  sharedItem: () => null,
+  onDesktopCapture: () => {},
 }));
 vi.mock("../storage/fs", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../storage/fs")>()),
