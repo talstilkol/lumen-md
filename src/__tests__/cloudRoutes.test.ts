@@ -17,7 +17,11 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 
 const state = { aiKey: "sk", useLocalAi: false, useFineTunedModel: false, fineTunedModelId: null, doc: { content: "" }, setContent: vi.fn() };
-vi.mock("../store/useStore", () => ({ useAppStore: { getState: () => state, setState: vi.fn() } }));
+vi.mock("../store/useStore", () => ({
+  useAppStore: { getState: () => state, setState: vi.fn() },
+  // The real helper: dictation now keys its target note by tab id.
+  tabIdOf: (d: { workspaceName?: string | null; name: string }) => d.workspaceName || d.name || "Untitled",
+}));
 vi.mock("../store/useToastStore", () => ({ toast: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));
 vi.mock("../ui/AiToast", () => ({ showAiToast: vi.fn() }));
 vi.mock("../lib/logger", () => ({ log: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() } }));
