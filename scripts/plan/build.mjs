@@ -534,19 +534,16 @@ export const roadmapState = (status) => {
 
 /**
  * public/roadmap.html: the plan's phases with every task's number, title and
- * state, and nothing else — no steps, acceptance, estimates, dates, branches,
- * PR numbers or the owner's items. The page renders the JSON block with /roadmap.js
+ * state, and nothing else — no steps, acceptance, estimates, dates, branches
+ * or the owner's items. The page renders the JSON block with /roadmap.js
  * (an external script: the app's CSP allows no inline script).
  */
-/** A task title for the public page: a PR reference ("#176", "ב-#176") is internal and is left out. */
-export const publicTitle = (title) => title.replace(/\s*(?:ב-)?#\d+\b/g, "");
-
 export function renderRoadmap(M) {
   const states = { done: 0, partial: 0, planned: 0 };
   const phases = M.phases.map((p, i) => [i, p.title, p.tasks.map((t) => {
     const st = roadmapState(t.status);
     states[st]++;
-    return [t.id, st, publicTitle(t.t)];
+    return [t.id, st, t.t];
   })]);
   const total = M.agent.length;
   const pct = Math.round((states.done / total) * 100);
