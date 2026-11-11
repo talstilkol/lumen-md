@@ -139,7 +139,7 @@
   "searchDialog.smartHint": "بحث هجين دلالي + بالكلمات المفتاحية (يستخدم مفتاح الذكاء الاصطناعي لإنشاء التضمينات)",
   "searchDialog.sources": "المصادر",
   "searchDialog.thinking": "جارٍ التفكير…",
-  "searchDialog.turns.one": "دور واحد في هذه المحادثة",
+  "searchDialog.turns.one": "{n} دور في هذه المحادثة",
   "searchDialog.turns.other": "{n} أدوار في هذه المحادثة",
   "tagsPanel.close": "إغلاق لوحة الوسوم",
   "tagsPanel.emptyHint": "أضف `tags: [foo, bar]` إلى YAML frontmatter في ملاحظة وستظهر هنا.",

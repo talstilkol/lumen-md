@@ -1,5 +1,5 @@
 {
-  "agent.grammar.found.one": "تم العثور على مشكلة واحدة:\n\n{list}",
+  "agent.grammar.found.one": "تم العثور على {n} مشكلة:\n\n{list}",
   "agent.grammar.found.other": "تم العثور على {n} من المشكلات:\n\n{list}",
   "agent.links.needWorkspace": "افتح الملف من مساحة العمل أولاً — وكيل الروابط يقرأ الملاحظات المجاورة.",
   "agent.links.no": "لا",
