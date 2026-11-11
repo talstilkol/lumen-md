@@ -496,7 +496,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     const outputs: O[] = [];
     for (const [i, part] of parts.entries()) {
       if (opts.signal?.aborted) return finish("aborted", { errorCode: "aborted", error: "aborted" });
-      const sub = await runAgent(def, { ...input, text: part } as I, { ...opts, patch: rest, document: part, selection: undefined, executor: executor.id, part: true });
+      const sub = await runAgent(def, { ...input, text: part } as I, { ...opts, signal: opts.signal, patch: rest, document: part, selection: undefined, executor: executor.id, part: true });
       run.tokens.input += sub.tokens.input;
       run.tokens.output += sub.tokens.output;
       run.attempts = Math.max(run.attempts, sub.attempts);
