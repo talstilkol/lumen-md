@@ -247,6 +247,12 @@ function vendorChunk(id: string): string | undefined {
   const exSub = /@excalidraw\/excalidraw\/dist\/(?:prod|dev)\/([^/]+)\/([^/]+?)\.js$/.exec(id);
   if (exSub) return `vendor-excalidraw-${exSub[1]}-${exSub[2]}`.replace(/[^A-Za-z0-9-]/g, "_");
   if (/@excalidraw\/excalidraw\/dist\/(prod|dev)\/subset-/.test(id)) return "vendor-excalidraw-subset";
+  // Excalidraw's own build splits its code into shared chunk-<hash>.js files
+  // (the font-subsetting wasm among them, loaded on export only). In one
+  // group they all became the canvas chunk; each keeps a chunk of its own,
+  // so the ones Excalidraw imports on demand stay on demand.
+  const exChunk = /@excalidraw\/excalidraw\/dist\/(?:prod|dev)\/(chunk-[^/]+?)\.js$/.exec(id);
+  if (exChunk) return `vendor-excalidraw-${exChunk[1]}`.replace(/[^A-Za-z0-9-]/g, "_");
   if (id.includes("@excalidraw/mermaid-to-excalidraw")) return "vendor-excalidraw-mermaid";
   if (id.includes("@excalidraw/")) return "vendor-excalidraw";
   // The web clipper's extractors (plan 4.15): vendor code apart from the clip
