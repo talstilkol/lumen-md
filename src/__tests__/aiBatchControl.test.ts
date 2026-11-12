@@ -122,7 +122,8 @@ describe("batch control (5.8)", () => {
     expect((await batch.batchProgress(job)).etaMs).toBeNull();
     await a.finishNext();
     await vi.waitFor(async () => expect((await batch.batchProgress(job)).done).toBe(1));
-    expect(heard).toHaveBeenCalled();
+    // The note counts as done in memory first; listeners hear it once its state is stored.
+    await vi.waitFor(() => expect(heard).toHaveBeenCalled());
     expect((await batch.batchProgress(job)).etaMs).not.toBeNull();
     await a.finishNext();
     await batch.__localBatchRun(job.id);

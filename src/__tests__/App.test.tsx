@@ -44,6 +44,7 @@ const h = await vi.hoisted(async () => {
     writeWorkspaceFile: vi.fn<AnyFn>(),
     writeWorkspaceBlob: vi.fn<AnyFn>(),
     readWorkspaceFile: vi.fn<AnyFn>(),
+    workspaceHasFile: vi.fn<AnyFn>(),
     uiAlert: vi.fn<AnyFn>(),
     uiConfirm: vi.fn<AnyFn>(),
     uiPrompt: vi.fn<AnyFn>(),
@@ -145,6 +146,7 @@ vi.mock("../storage/workspace", async (importOriginal) => ({
   writeWorkspaceFile: (...a: unknown[]) => h.writeWorkspaceFile(...a),
   writeWorkspaceBlob: (...a: unknown[]) => h.writeWorkspaceBlob(...a),
   readWorkspaceFile: (...a: unknown[]) => h.readWorkspaceFile(...a),
+  workspaceHasFile: (...a: unknown[]) => h.workspaceHasFile(...a),
   makeAssetName: (name: string) => `lumen-asset-${name}`,
 }));
 vi.mock("../storage/exportHtml", async (importOriginal) => ({
@@ -236,7 +238,7 @@ beforeEach(() => {
   for (const fn of [
     h.openNewDoc, h.openFileDialog, h.saveFile, h.getRecents, h.pushRecent, h.reopenRecent,
     h.isOPFSAvailable, h.uniqueWorkspaceName, h.writeWorkspaceFile, h.writeWorkspaceBlob,
-    h.readWorkspaceFile, h.uiAlert, h.uiConfirm, h.uiPrompt, h.openInsertTextDialog,
+    h.readWorkspaceFile, h.workspaceHasFile, h.uiAlert, h.uiConfirm, h.uiPrompt, h.openInsertTextDialog,
     h.exportToHtml, h.recordSnapshot, h.scrollToHeading, h.parseLaunch, h.clearLaunchParams, h.onLaunchFiles,
   ]) fn.mockReset();
   h.getRecents.mockResolvedValue([]);
@@ -246,6 +248,7 @@ beforeEach(() => {
   h.writeWorkspaceFile.mockResolvedValue(undefined);
   h.writeWorkspaceBlob.mockResolvedValue(undefined);
   h.readWorkspaceFile.mockResolvedValue("");
+  h.workspaceHasFile.mockResolvedValue(false);
   h.uiAlert.mockResolvedValue(null);
   h.uiConfirm.mockResolvedValue(true);
   h.uiPrompt.mockResolvedValue(null);
@@ -608,8 +611,11 @@ describe("App autosave", () => {
     await waitFor(() => expect(h.writeWorkspaceFile).toHaveBeenCalledWith("w.md", "unflushed"));
     expect(h.recordSnapshot).toHaveBeenCalledWith("w.md", "unflushed", "close");
     h.writeWorkspaceFile.mockClear();
-    // The flush marked the note saved (main); a new edit makes it pending again.
+    // The flush marked the note saved (main); a new edit makes it pending again. The vault
+    // now holds what was written, so the guard (#258) sees no outside change.
     await waitFor(() => expect(doc().dirty).toBe(false));
+    h.workspaceHasFile.mockResolvedValue(true);
+    h.readWorkspaceFile.mockResolvedValue("unflushed");
     act(() => {
       useAppStore.getState().setContent("unflushed, again");
     });
