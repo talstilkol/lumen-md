@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="he" dir="rtl" class="dark">
   <head>
     <meta charset="UTF-8" />
     <!-- CSP rendered from security/policy.json (npm run headers:write). -->
@@ -7,21 +7,25 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="color-scheme" content="dark light" />
-    <!-- The saved theme, applied before the boot shell paints (no inline
-         script: the CSP forbids it). -->
+    <!-- The interface language and direction (plan W4.10: the saved choice,
+         else the system's language) and the saved theme, applied before the
+         boot shell paints (no inline script: the CSP forbids it). The page is
+         written Hebrew-first, so it is right even without JavaScript. -->
+    <script src="/locale-boot.js"></script>
     <script src="/theme-boot.js"></script>
-    <meta name="description" content="Lumen — the markdown editor that turns text and data into beautiful documents." />
-    <title>Lumen — Markdown, illuminated</title>
+    <meta name="description" content="Lumen — עורך Markdown מקומי ופרטי שנבנה לעברית. A local, private Markdown editor built for Hebrew." />
+    <title>Lumen — עורך פתקים בעברית</title>
     <!-- SEO & Social -->
-    <meta property="og:title" content="Lumen — Markdown, illuminated" />
-    <meta property="og:description" content="Free, open-source markdown editor with live preview, diagrams, charts, AI, collaboration, and 30+ export formats." />
+    <meta property="og:title" content="Lumen — עורך פתקים שנבנה לעברית" />
+    <meta property="og:description" content="עורך Markdown חינמי וקוד פתוח: הפתקים נשארים במכשיר, עובד בלי אינטרנט, ועברית מימין לשמאל עובדת כמו שצריך." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://lumen-md.vercel.app" />
     <meta property="og:image" content="https://lumen-md.vercel.app/og-image.png" />
-    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale" content="he_IL" />
+    <meta property="og:locale:alternate" content="en_US" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Lumen — Markdown, illuminated" />
-    <meta name="twitter:description" content="Free, open-source markdown editor with live preview, diagrams, charts, AI, and collaboration." />
+    <meta name="twitter:title" content="Lumen — עורך פתקים שנבנה לעברית" />
+    <meta name="twitter:description" content="עורך Markdown מקומי ופרטי שנבנה לעברית." />
     <meta name="twitter:image" content="https://lumen-md.vercel.app/og-image.png" />
     <link rel="canonical" href="https://lumen-md.vercel.app" />
     <!-- PWA -->
@@ -38,7 +42,8 @@
       "url": "https://lumen-md.vercel.app",
       "applicationCategory": "DeveloperApplication",
       "operatingSystem": "Web, iOS, Android",
-      "description": "Free, open-source markdown editor with live preview, diagrams, charts, AI, collaboration, and 30+ export formats.",
+      "description": "A free, open-source, local Markdown editor built for Hebrew and right-to-left writing.",
+      "inLanguage": ["he", "en"],
       "offers": {
         "@type": "Offer",
         "price": "0",
