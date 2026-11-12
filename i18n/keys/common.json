@@ -1936,6 +1936,302 @@
       ]
     },
     {
+      "key": "importWizard.back",
+      "en": "Back",
+      "vars": []
+    },
+    {
+      "key": "importWizard.chooseSource",
+      "en": "Where are your notes now?",
+      "vars": []
+    },
+    {
+      "key": "importWizard.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "importWizard.detected",
+      "en": "These files look like an export of {source}.",
+      "vars": [
+        "source"
+      ]
+    },
+    {
+      "key": "importWizard.done.dates",
+      "en": "Creation and edit dates are kept as the properties created and updated.",
+      "vars": []
+    },
+    {
+      "key": "importWizard.done.title",
+      "en": "Imported into “{folder}”",
+      "vars": [
+        "folder"
+      ]
+    },
+    {
+      "key": "importWizard.drop",
+      "en": "or drop the export here",
+      "vars": []
+    },
+    {
+      "key": "importWizard.error.failed",
+      "en": "The import stopped ({error}). Nothing was left half-written; your vault is as it was.",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "importWizard.error.nothing",
+      "en": "No notes in these files. Check that they are the export of {source}.",
+      "vars": [
+        "source"
+      ]
+    },
+    {
+      "key": "importWizard.how.appleNotes",
+      "en": "Apple Notes has no export of its own: save the notes as HTML or Markdown with an exporter app, then pick the folder or a .zip of it. Images inside the notes come along.",
+      "vars": []
+    },
+    {
+      "key": "importWizard.how.bear",
+      "en": "In Bear: File → Backup notes (.bearbk), or Export notes as TextBundle. Pick the file or the folder.",
+      "vars": []
+    },
+    {
+      "key": "importWizard.how.evernote",
+      "en": "In Evernote: select a notebook or notes → Export → ENEX (.enex). Pick one or more .enex files; each notebook becomes a folder.",
+      "vars": []
+    },
+    {
+      "key": "importWizard.how.keep",
+      "en": "At takeout.google.com choose only Keep and download the .zip. Pick it as it came; labels become tags, archived notes go to Archive/.",
+      "vars": []
+    },
+    {
+      "key": "importWizard.how.logseq",
+      "en": "Pick the graph folder (the one with pages/ and journals/), or a .zip of it. Properties, block references and tasks are converted.",
+      "vars": []
+    },
+    {
+      "key": "importWizard.how.lumen",
+      "en": "A Lumen export (.zip), or any folder of Markdown files.",
+      "vars": []
+    },
+    {
+      "key": "importWizard.how.notion",
+      "en": "In Notion: Settings → Export → Markdown & CSV (or HTML), with subpages. Pick the .zip as it came. Every database becomes a .base file with the same columns.",
+      "vars": []
+    },
+    {
+      "key": "importWizard.how.obsidian",
+      "en": "Pick the vault folder, or a .zip of it. Obsidian's own settings (.obsidian) are left out.",
+      "vars": []
+    },
+    {
+      "key": "importWizard.how.onenote",
+      "en": "In OneNote for Windows: File → Export → Page or Section → Single File Web Page (.mht). Pick one or more .mht files.",
+      "vars": []
+    },
+    {
+      "key": "importWizard.importing",
+      "en": "Importing…",
+      "vars": []
+    },
+    {
+      "key": "importWizard.intro",
+      "en": "Bring your notes from another app. Everything goes into a new folder: nothing you already have is changed, and one click takes the import back.",
+      "vars": []
+    },
+    {
+      "key": "importWizard.lost",
+      "en": "{n} attachments of the export are not in the vault.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "importWizard.more",
+      "en": "… and {n} more",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "importWizard.pickFile",
+      "en": "Choose files…",
+      "vars": []
+    },
+    {
+      "key": "importWizard.pickFolder",
+      "en": "Choose a folder…",
+      "vars": []
+    },
+    {
+      "key": "importWizard.reading",
+      "en": "Reading {n} files…",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "importWizard.reason.appFolder",
+      "en": "the app's own settings",
+      "vars": []
+    },
+    {
+      "key": "importWizard.reason.duplicate",
+      "en": "another copy of a file that is imported",
+      "vars": []
+    },
+    {
+      "key": "importWizard.reason.empty",
+      "en": "empty",
+      "vars": []
+    },
+    {
+      "key": "importWizard.reason.encrypted",
+      "en": "encrypted in the app",
+      "vars": []
+    },
+    {
+      "key": "importWizard.reason.hint",
+      "en": "export it as {hint}",
+      "vars": [
+        "hint"
+      ]
+    },
+    {
+      "key": "importWizard.reason.trashed",
+      "en": "in the app's trash",
+      "vars": []
+    },
+    {
+      "key": "importWizard.reason.unreadable",
+      "en": "the file is damaged, or not what this source exports",
+      "vars": []
+    },
+    {
+      "key": "importWizard.reason.unsupported",
+      "en": "a format this source cannot convert",
+      "vars": []
+    },
+    {
+      "key": "importWizard.report.from",
+      "en": "From {source}, {date}.",
+      "vars": [
+        "source",
+        "date"
+      ]
+    },
+    {
+      "key": "importWizard.report.heading",
+      "en": "Import report",
+      "vars": []
+    },
+    {
+      "key": "importWizard.report.save",
+      "en": "Save the report as a note",
+      "vars": []
+    },
+    {
+      "key": "importWizard.review.links",
+      "en": "Internal links: {resolved} of {total} reach their note or file ({pct}%).",
+      "vars": [
+        "resolved",
+        "total",
+        "pct"
+      ]
+    },
+    {
+      "key": "importWizard.review.noLinks",
+      "en": "No internal links.",
+      "vars": []
+    },
+    {
+      "key": "importWizard.review.skipped",
+      "en": "Not imported ({n})",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "importWizard.review.summary",
+      "en": "{notes} notes, {attachments} attachments and {bases} databases will go into “{folder}”.",
+      "vars": [
+        "notes",
+        "attachments",
+        "bases",
+        "folder"
+      ]
+    },
+    {
+      "key": "importWizard.review.unresolved",
+      "en": "Links that point at nothing ({n})",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "importWizard.review.warnings",
+      "en": "Imported, with something missing ({n})",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "importWizard.start",
+      "en": "Import",
+      "vars": []
+    },
+    {
+      "key": "importWizard.title",
+      "en": "Import notes",
+      "vars": []
+    },
+    {
+      "key": "importWizard.undo",
+      "en": "Undo the import",
+      "vars": []
+    },
+    {
+      "key": "importWizard.undoGone",
+      "en": "Nothing to undo: the import's folder is no longer there.",
+      "vars": []
+    },
+    {
+      "key": "importWizard.undone",
+      "en": "The import is undone: the vault is as it was before.",
+      "vars": []
+    },
+    {
+      "key": "importWizard.undoneTrash",
+      "en": "The import is undone. You had changed files in it, so the folder is in the trash.",
+      "vars": []
+    },
+    {
+      "key": "importWizard.useDetected",
+      "en": "Import them as {source}",
+      "vars": [
+        "source"
+      ]
+    },
+    {
+      "key": "importWizard.warn.encryptedPart",
+      "en": "an encrypted part was left out",
+      "vars": []
+    },
+    {
+      "key": "importWizard.warn.missingAttachment",
+      "en": "an attachment it points at is not in the export",
+      "vars": []
+    },
+    {
+      "key": "importWizard.warn.noDates",
+      "en": "the export has no creation or edit dates",
+      "vars": []
+    },
+    {
       "key": "loading.generic",
       "en": "Loading…",
       "vars": []

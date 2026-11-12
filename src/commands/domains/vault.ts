@@ -50,7 +50,17 @@ export function buildVaultTransferCommands(): Command[] {
       hint: t("cmd.vault.import.hint"),
       icon: cmdIcons.Save,
       group: t("group.file"),
-      action: async () => (await import("./vaultActions")).importVault(),
+      action: () => {
+        window.dispatchEvent(new Event("lumen-open-import"));
+      },
+    },
+    {
+      id: "vault.importUndo",
+      label: t("cmd.vault.importUndo"),
+      hint: t("cmd.vault.importUndo.hint"),
+      icon: cmdIcons.Save,
+      group: t("group.file"),
+      action: async () => (await import("./vaultActions")).undoLastImport(),
     },
   ];
 }

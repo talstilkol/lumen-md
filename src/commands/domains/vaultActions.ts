@@ -1,5 +1,5 @@
 /**
- * The vault commands' bodies (export / import, digest, encryption), loaded
+ * The vault commands' bodies (export, undoing an import, digest, encryption), loaded
  * when one runs — out of the startup bundle, which the merge engine (plan
  * W1.9) and safe git's strings needed room in. Same behaviour. Vault
  * Doctor's bodies are in ./vaultDoctorActions.
@@ -41,27 +41,14 @@ export async function exportVault(): Promise<void> {
 
 }
 
-export async function importVault(): Promise<void> {
-  const choice = await uiSelect({ message: t("vault.import.what"), choices: [{ value: "zip", label: t("vault.import.zip") }, { value: "folder", label: t("vault.import.folder") }] });
-  if (!choice) return;
-  const input = document.createElement("input");
-  input.type = "file";
-  if (choice === "zip") input.accept = ".zip,application/zip";
-  else (input as HTMLInputElement & { webkitdirectory: boolean }).webkitdirectory = true;
-  input.onchange = async () => {
-    const files = input.files;
-    if (!files?.length) return;
-    const { importZip, importFileList } = await import("../../storage/exportAll");
-    try {
-      const r = choice === "zip" ? await importZip(await files[0].arrayBuffer(), files[0].name) : await importFileList(files);
-      window.dispatchEvent(new Event("lumen-workspace-changed"));
-      showAiToast(t("vault.import.done", { notes: String(r.notes), files: String(r.attachments), folder: r.folder, source: r.source }), "info");
-    } catch (e) {
-      showAiToast(t("vault.import.failed", { error: (e as Error).message }), "error");
-    }
-  };
-  input.click();
-
+/** Undo the last import (plan W1.26 import wizard): its notes leave, or go to the trash if edited since. */
+export async function undoLastImport(): Promise<void> {
+  const { lastImport, undoImport } = await import("../../storage/import/commit");
+  await import("../../storage/import/strings");
+  const last = lastImport();
+  const r = last ? await undoImport(last) : "gone";
+  window.dispatchEvent(new Event("lumen-workspace-changed"));
+  showAiToast(t(r === "removed" ? "importWizard.undone" : r === "trashed" ? "importWizard.undoneTrash" : "importWizard.undoGone"), "info");
 }
 
 export async function writeDigest(): Promise<void> {

@@ -1528,12 +1528,22 @@
     },
     {
       "key": "cmd.vault.import",
-      "en": "Import notes (zip / folder: Obsidian, Notion, Lumen)…",
+      "en": "Import notes from another app (Obsidian, Notion, Evernote, Bear, Keep, Logseq, OneNote…)…",
       "vars": []
     },
     {
       "key": "cmd.vault.import.hint",
-      "en": "Into a new folder — nothing existing is overwritten",
+      "en": "Into a new folder — nothing existing is overwritten; one click undoes it",
+      "vars": []
+    },
+    {
+      "key": "cmd.vault.importUndo",
+      "en": "Undo the last import",
+      "vars": []
+    },
+    {
+      "key": "cmd.vault.importUndo.hint",
+      "en": "Removes the folder the last import created",
       "vars": []
     },
     {

@@ -1535,38 +1535,6 @@
       "vars": []
     },
     {
-      "key": "vault.import.done",
-      "en": "Imported {notes} notes and {files} files ({source}) into “{folder}”.",
-      "vars": [
-        "notes",
-        "files",
-        "source",
-        "folder"
-      ]
-    },
-    {
-      "key": "vault.import.failed",
-      "en": "Import failed: {error}",
-      "vars": [
-        "error"
-      ]
-    },
-    {
-      "key": "vault.import.folder",
-      "en": "A folder",
-      "vars": []
-    },
-    {
-      "key": "vault.import.what",
-      "en": "Import from…",
-      "vars": []
-    },
-    {
-      "key": "vault.import.zip",
-      "en": "A .zip file",
-      "vars": []
-    },
-    {
       "key": "vault.prompt.decryptPassword",
       "en": "Enter decryption password:",
       "vars": []

@@ -32,6 +32,7 @@ const QuickCapture = lazy(() => import("./ui/QuickCapture").then(m => ({ default
 const ImageHostsPanel = lazy(() => import("./ui/ImageHostsPanel").then(m => ({ default: m.ImageHostsPanel })));
 const AiDoctorPanel = lazy(() => import("./ui/AiDoctorPanel").then(m => ({ default: m.AiDoctorPanel })));
 const AgentReviewPanel = lazy(() => import("./ui/AgentReviewPanel").then(m => ({ default: m.AgentReviewPanel })));
+const ImportWizard = lazy(() => import("./ui/ImportWizard").then(m => ({ default: m.ImportWizard })));
 const VersionHistory = lazy(() => import("./ui/VersionHistory").then(m => ({ default: m.VersionHistory })));
 const MarkdownTableEditor = lazy(() => import("./ui/MarkdownTableEditor").then(m => ({ default: m.MarkdownTableEditor })));
 // PDF reader (plan 4.14): pdf.js and the reader load only when a PDF is opened.
@@ -181,6 +182,7 @@ export default function App() {
   const [aiDoctorOpen, setAiDoctorOpen] = useState(false);
   const [agentReviewOpen, setAgentReviewOpen] = useState(false);
   const openAgentReview = useCallback(() => setAgentReviewOpen(true), []);
+  const [importOpen, setImportOpen] = useState(false);
   const [trashOpen, setTrashOpen] = useState(false);
   const [propertiesOpen, setPropertiesOpen] = useState(false);
   const [captureOpen, setCaptureOpen] = useState(false);
@@ -961,6 +963,11 @@ export default function App() {
     window.addEventListener("lumen-open-agent-review", openAgentReview);
     return () => window.removeEventListener("lumen-open-agent-review", openAgentReview);
   }, [openAgentReview]);
+  useEffect(() => {
+    const onOpen = () => setImportOpen(true);
+    window.addEventListener("lumen-open-import", onOpen);
+    return () => window.removeEventListener("lumen-open-import", onOpen);
+  }, []);
   // Stage 2 of the improvement agent (a small local model proposes suggestions).
   useEffect(() => {
     void import("./agents/modelCritic").then((m) => m.installModelCritic());
@@ -1299,6 +1306,7 @@ export default function App() {
           {agentReviewOpen && <AgentReviewPanel open={agentReviewOpen} onClose={() => setAgentReviewOpen(false)} />}
           {privacyOpen && <PrivacyLedgerPanel open={privacyOpen} onClose={() => setPrivacyOpen(false)} />}
           {trashOpen && <TrashPanel open={trashOpen} onClose={() => setTrashOpen(false)} />}
+          {importOpen && <ImportWizard open={importOpen} onClose={() => setImportOpen(false)} />}
           {propertiesOpen && <PropertiesPanel open={propertiesOpen} onClose={() => setPropertiesOpen(false)} text={doc.content} applyEdit={applyPropertiesEdit} />}
           {captureOpen && <QuickCapture open={captureOpen} voice={captureVoice} onClose={() => { setCaptureOpen(false); setCaptureVoice(false); }} />}
           {imageHostsOpen && <ImageHostsPanel open={imageHostsOpen} onClose={() => setImageHostsOpen(false)} />}
