@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import { vaultOrSkip } from "./_opfs";
+import { testHooks, type LumenTestWindow } from "./_lumen";
 
 /**
  * Plan 11.4 — vault encryption at rest, in a real browser, on each backend
@@ -78,7 +79,8 @@ test("OPFS vault: turn on in the dialog, only ciphertext stored, unlock after re
   await lock.getByLabel("Passphrase").fill(PASS);
   await lock.getByRole("button", { name: "Unlock" }).click();
   await expect(lock).toBeHidden({ timeout: 15_000 });
-  const read = await page.evaluate(async () => (await import(/* @vite-ignore */ "/src/storage/workspace.ts")).readWorkspaceFile("Private/Plan.md"));
+  await testHooks(page);
+  const read = await page.evaluate(async () => (await (window as unknown as LumenTestWindow).__lumenTest.load("storage/workspace")).readWorkspaceFile("Private/Plan.md"));
   expect(read).toBe(NOTE);
 
   // Check and repair: everything encrypted, nothing broken.
@@ -95,7 +97,7 @@ test("OPFS vault: turn on in the dialog, only ciphertext stored, unlock after re
   await lock.getByLabel("Repeat the passphrase").fill("a new passphrase, long enough");
   await lock.getByRole("button", { name: "Open and set the new passphrase" }).click();
   await expect(lock).toBeHidden({ timeout: 30_000 });
-  expect(await page.evaluate(async () => (await import(/* @vite-ignore */ "/src/storage/workspace.ts")).readWorkspaceFile("Private/Plan.md"))).toBe(NOTE);
+  expect(await page.evaluate(async () => (await (window as unknown as LumenTestWindow).__lumenTest.load("storage/workspace")).readWorkspaceFile("Private/Plan.md"))).toBe(NOTE);
 });
 
 test("a real folder (FileSystemDirectoryHandle): only ciphertext, scan, wrong passphrase, recovery, off again", async ({ page, browserName }) => {
@@ -103,14 +105,15 @@ test("a real folder (FileSystemDirectoryHandle): only ciphertext, scan, wrong pa
   await page.addInitScript(() => localStorage.setItem("lumen-tour-done", "1"));
   await page.goto("/");
   await expect(page.locator(".cm-content").first()).toBeVisible({ timeout: 15_000 });
+  await testHooks(page);
   const result = await page.evaluate(async (note) => {
     const root = await navigator.storage.getDirectory().catch(() => null);
     if (!root) return null;
     // A directory handle like the one the folder picker returns.
     const handle = await root.getDirectoryHandle("picked-folder", { create: true });
-    const vault = await import(/* @vite-ignore */ "/src/storage/vault/index.ts");
-    const { createFolderBackend } = await import(/* @vite-ignore */ "/src/storage/vault/location.ts");
-    const s = await import(/* @vite-ignore */ "/src/storage/vault/encrypted/session.ts");
+    const vault = await (window as unknown as LumenTestWindow).__lumenTest.load("storage/vault");
+    const { createFolderBackend } = await (window as unknown as LumenTestWindow).__lumenTest.load("storage/vault/location");
+    const s = await (window as unknown as LumenTestWindow).__lumenTest.load("storage/vault/encrypted/session");
     const folder = createFolderBackend(handle);
     await folder.write("Notes/Plan.md", note);
     const previous = vault.setVaultBackend(folder);

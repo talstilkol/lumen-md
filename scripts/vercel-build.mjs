@@ -21,7 +21,7 @@
  * of this build: the specs that fit (the smoke spec today), time-boxed so
  * the build ends inside Vercel's 45 minutes.
  *
- * Usage: node scripts/vercel-build.mjs [--production | --preview] [--dry-run]
+ * Usage: node scripts/vercel-build.mjs [--production | --preview | --e2e-only] [--dry-run]
  */
 import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
@@ -80,9 +80,16 @@ export function vitestSummary(report, { maxFiles = 80 } = {}) {
 
 export const PRODUCTION_GATES = ["build", "budget"];
 export const PREVIEW_GATES = ["build", "budget", "secrets", "vitest", "e2e", "i18n:check", "hygiene", "docs:sync", "licenses"];
+/**
+ * `--e2e-only`: build and the e2e gate, nothing else. For a probe branch
+ * that runs Playwright specs (LUMEN_E2E_SPECS, a longer LUMEN_E2E_MINUTES)
+ * without the 13 minutes of vitest; never a branch's real gate.
+ */
+export const E2E_ONLY_GATES = ["build", "e2e"];
 
 /** Which gates a build runs: production only for VERCEL_ENV=production (or --production). */
 export function gatesFor(env = process.env, argv = []) {
+  if (argv.includes("--e2e-only")) return E2E_ONLY_GATES;
   if (argv.includes("--production")) return PRODUCTION_GATES;
   if (argv.includes("--preview")) return PREVIEW_GATES;
   return env.VERCEL_ENV === "production" ? PRODUCTION_GATES : PREVIEW_GATES;
@@ -101,6 +108,9 @@ function main() {
   const failedGates = [];
   // The e2e gate sizes its time box from the build's start (scripts/e2e-gate.mjs).
   process.env.LUMEN_BUILD_STARTED ??= String(Date.now());
+  // A build the e2e gate tests carries window.__lumenTest (src/testing/e2eHooks.ts),
+  // through which specs reach the app's modules; production builds never do.
+  if (gates.includes("e2e")) process.env.VITE_E2E ??= "1";
   for (const gate of gates) {
     const started = Date.now();
     console.log(`\n▶ ${gate}`);

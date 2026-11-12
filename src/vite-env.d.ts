@@ -12,3 +12,5 @@ declare module "virtual:lumen-whats-new" {
   const notes: import("../scripts/lib/whats-new.mjs").WhatsNew | null;
   export default notes;
 }
+/** True in a build made with VITE_E2E=1: install window.__lumenTest (vite.config.ts `define`). */
+declare const __LUMEN_E2E__: boolean;

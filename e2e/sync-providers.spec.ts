@@ -94,6 +94,10 @@ async function connect(page: Page) {
 const result = (page: Page) => page.getByTestId("sync-result");
 
 test("two browsers sync through one WebDAV server without losing a note", async ({ browser, browserName }) => {
+  // Two browsers, two key derivations and five sync rounds, each allowed 30 s
+  // below: the default 30 s for the whole test ran out on the 2-CPU Vercel
+  // build machine (W4.2), before any step had failed.
+  test.setTimeout(150_000);
   const server = fakeWebdav({ baseUrl: DAV, username: "tal", password: "app-password" });
   const ctxA = await browser.newContext();
   const ctxB = await browser.newContext();

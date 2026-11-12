@@ -29,6 +29,14 @@ describe("the Vercel config's ignoreCommand", () => {
   });
 });
 
+/** The environment without Vercel's git variables (a Vercel build sets them for vitest too). */
+function cleanEnv(extra: Record<string, string> = {}): NodeJS.ProcessEnv {
+  const env = { ...process.env };
+  delete env.VERCEL_GIT_COMMIT_REF;
+  delete env.VERCEL_GIT_COMMIT_SHA;
+  return { ...env, ...extra };
+}
+
 describe("scripts/vercel-ignore.sh", () => {
   let repo: string;
   const git = (...args: string[]) =>
@@ -43,7 +51,7 @@ describe("scripts/vercel-ignore.sh", () => {
     }
     git("-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qm", files.join(" "));
     try {
-      execFileSync("bash", ["scripts/vercel-ignore.sh"], { cwd: repo, stdio: "ignore" });
+      execFileSync("bash", ["scripts/vercel-ignore.sh"], { cwd: repo, stdio: "ignore", env: cleanEnv() });
       return 0;
     } catch (e) {
       return (e as { status?: number }).status ?? -1;
@@ -105,12 +113,46 @@ describe("scripts/vercel-ignore.sh", () => {
     expect(decide(["docs/a.md", "src/lib/y.ts"])).toBe(BUILD);
   });
 
+  it("skips a commit that is no longer its branch's head; reads nothing it cannot reach", () => {
+    // A remote whose branch "train" is at the current HEAD.
+    const remote = mkdtempSync(join(tmpdir(), "lumen-vercel-ignore-remote-"));
+    try {
+      execFileSync("git", ["init", "-q", "--bare", remote]);
+      git("push", "-q", remote, "HEAD:refs/heads/train");
+      const head = git("rev-parse", "HEAD").trim();
+      decide(["src/lib/head.ts"]); // a newer local commit; the remote still has `head`
+      const newer = git("rev-parse", "HEAD").trim();
+      const run = (sha: string, ref = "train", remoteUrl = remote) => {
+        try {
+          execFileSync("bash", ["scripts/vercel-ignore.sh"], {
+            cwd: repo,
+            stdio: "ignore",
+            env: cleanEnv({ VERCEL_GIT_COMMIT_REF: ref, VERCEL_GIT_COMMIT_SHA: sha, LUMEN_IGNORE_REMOTE: remoteUrl }),
+          });
+          return 0;
+        } catch (e) {
+          return (e as { status?: number }).status ?? -1;
+        }
+      };
+      // The commit being built is not what the branch points at: skipped.
+      expect(run(newer)).toBe(SKIP);
+      // It is the head: the other rules decide (src/ changed: build).
+      git("push", "-q", "-f", remote, "HEAD:refs/heads/train");
+      expect(run(newer)).toBe(BUILD);
+      // No such branch, or no remote to ask: the other rules decide.
+      expect(run(head, "gone")).toBe(BUILD);
+      expect(run(head, "train", join(remote, "missing"))).toBe(BUILD);
+    } finally {
+      rmSync(remote, { recursive: true, force: true });
+    }
+  });
+
   it("builds when there is no parent commit to diff against", () => {
     git("checkout", "-q", "--orphan", "solo");
     git("-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qm", "root", "--allow-empty");
     let code = 0;
     try {
-      execFileSync("bash", ["scripts/vercel-ignore.sh"], { cwd: repo, stdio: "ignore" });
+      execFileSync("bash", ["scripts/vercel-ignore.sh"], { cwd: repo, stdio: "ignore", env: cleanEnv() });
     } catch (e) {
       code = (e as { status?: number }).status ?? -1;
     }

@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { testHooks, type LumenTestWindow } from "./_lumen";
 import { opfsWritable, vaultOrSkip } from "./_opfs";
 
 /**
@@ -215,22 +216,21 @@ test("G7: the whole vault exports as a zip", async ({ page, browserName }) => {
  *
  * The remote commit is made in the browser's own git store (no network): the
  * merge half of the pull (`integrateIntoVault`) and the real dialogs are
- * what is tested. The modules are imported from the dev server.
+ * what is tested. The modules come through window.__lumenTest (e2e/_lumen.ts),
+ * on the dev server and on the gate's production build alike.
  */
 test("G2: git pull merges three ways, opens the conflict screen, keeps unsaved edits, and deletes nothing", async ({ page, browserName }) => {
-  const dev = await page.evaluate(() => !!document.querySelector('script[src*="/@vite/client"]'));
-  // skip-reason: imports the git modules from the dev server; the production bundle has no /src/ | task: 3.3 | until: 2027-05-12
-  test.skip(!dev, "imports the git modules from the dev server");
+  await testHooks(page);
   vaultOrSkip(await opfsWritable(page), browserName);
   const repo = `safe-git-${Date.now().toString(36)}`;
   // The vault opens shortly after start-up.
   await expect
-    .poll(() => page.evaluate(async () => (await import(/* @vite-ignore */ "/src/storage/workspace.ts")).isOPFSAvailable()), { timeout: 10_000 })
+    .poll(() => page.evaluate(async () => (await (window as unknown as LumenTestWindow).__lumenTest.load("storage/workspace")).isOPFSAvailable()), { timeout: 10_000 })
     .toBe(true);
 
   const before = await page.evaluate(async (repo) => {
-    const ws = await import(/* @vite-ignore */ "/src/storage/workspace.ts");
-    const g = await import(/* @vite-ignore */ "/src/sync/git.ts");
+    const ws = await (window as unknown as LumenTestWindow).__lumenTest.load("storage/workspace");
+    const g = await (window as unknown as LumenTestWindow).__lumenTest.load("sync/git");
     const { fs, git } = await g.__gitRuntime();
     const dir = `/git/${repo}`;
     const author = { name: "Test", email: "test@example.com" };
@@ -269,9 +269,9 @@ test("G2: git pull merges three ways, opens the conflict screen, keeps unsaved e
   // open.md is open with an unsaved edit; pull at once (the merge half),
   // then the summary and the resolution screen.
   await page.evaluate(async (repo) => {
-    const g = await import(/* @vite-ignore */ "/src/sync/git.ts");
-    const docs = await import(/* @vite-ignore */ "/src/store/gitPullDocs.ts");
-    const { useAppStore } = await import(/* @vite-ignore */ "/src/store/useStore.ts");
+    const g = await (window as unknown as LumenTestWindow).__lumenTest.load("sync/git");
+    const docs = await (window as unknown as LumenTestWindow).__lumenTest.load("store/gitPullDocs");
+    const { useAppStore } = await (window as unknown as LumenTestWindow).__lumenTest.load("store/useStore");
     const content = "ALPHA local\nbeta\ngamma";
     useAppStore.setState({
       doc: { name: "open.md", content, workspaceName: `${repo}/open.md`, dirty: true },
@@ -298,11 +298,11 @@ test("G2: git pull merges three ways, opens the conflict screen, keeps unsaved e
   await expect(editor).toContainText("ALPHA local");
   await expect(editor).toContainText("gamma remote");
   await expect
-    .poll(() => page.evaluate(async (repo) => (await import(/* @vite-ignore */ "/src/storage/workspace.ts")).readWorkspaceFile(`${repo}/open.md`), repo), { timeout: 10_000 })
+    .poll(() => page.evaluate(async (repo) => (await (window as unknown as LumenTestWindow).__lumenTest.load("storage/workspace")).readWorkspaceFile(`${repo}/open.md`), repo), { timeout: 10_000 })
     .toBe("ALPHA local\nbeta\ngamma remote");
 
   const after = await page.evaluate(async (repo) => {
-    const ws = await import(/* @vite-ignore */ "/src/storage/workspace.ts");
+    const ws = await (window as unknown as LumenTestWindow).__lumenTest.load("storage/workspace");
     const paths = (await ws.listWorkspace({ includeHidden: true })).map((e: { path: string }) => e.path).filter((p: string) => p.startsWith(`${repo}/`)).sort();
     const read = (p: string) => ws.readWorkspaceFile(`${repo}/${p}`);
     const pull = (window as unknown as { __pull: { deletedFiles: number; conflicts: unknown[] } }).__pull;
