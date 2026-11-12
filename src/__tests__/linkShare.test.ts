@@ -218,10 +218,12 @@ describe("review 12.11: inflation cap, public origin, the export door", () => {
     const { hasExportDoor, shareReadyText } = await import("../share/shareReady");
     const { existsSync } = await import("node:fs");
     expect(hasExportDoor()).toBe(existsSync(join(__dirname, "..", "storage", "exportReady.ts")));
-    const text = await shareReadyText("Public. <redact>Dana Levi</redact> <!-- hidden -->");
+    const note = "Public. <redact>Dana Levi</redact> <!-- hidden -->";
     if (hasExportDoor()) {
+      const text = await shareReadyText(note);
       expect(text).not.toContain("Dana Levi");
       expect(text).not.toContain("hidden");
-    } else expect(text).toBe("Public. <redact>Dana Levi</redact> <!-- hidden -->");
+      // Without the door the link is refused, never made of the raw note (review 2).
+    } else await expect(shareReadyText(note)).rejects.toThrow(/no export door/);
   });
 });

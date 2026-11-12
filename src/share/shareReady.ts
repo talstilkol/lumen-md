@@ -10,8 +10,9 @@
  * no change here.
  *
  * TODO(#473): when both are merged, replace the lookup with a plain
- * `import { exportReadyText } from "../storage/exportReady"` and drop the
- * fallback.
+ * `import { exportReadyText } from "../storage/exportReady"`.
+ * Until then a build without the door refuses to make a link (review 2):
+ * the text never leaves raw because the file moved.
  */
 
 type ExportDoor = { exportReadyText: (markdown: string, inlinePhotos?: boolean) => Promise<string> };
@@ -31,6 +32,15 @@ export function hasExportDoor(): boolean {
  */
 export async function shareReadyText(markdown: string): Promise<string> {
   const load = doors["../storage/exportReady.ts"];
-  if (!load) return markdown;
+  // Fail closed (review 2): a build without the door makes no link, rather than a link of the raw note.
+  if (!load) throw new ExportDoorMissingError();
   return (await load()).exportReadyText(markdown, false);
+}
+
+/** This build has no export door, so no share link is made (the note would leave unredacted). */
+export class ExportDoorMissingError extends Error {
+  constructor() {
+    super("share link: this build has no export door (src/storage/exportReady.ts), so no link is made");
+    this.name = "ExportDoorMissingError";
+  }
 }
