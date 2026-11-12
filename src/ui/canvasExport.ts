@@ -13,13 +13,16 @@
  * - PDF: the fixed SVG printed on a page of its own size ("Save as PDF").
  *
  * Everything stays on the device: the fonts come from this origin.
+ *
+ * In src/ui, not src/canvas: it calls Excalidraw's exporters, and the canvas
+ * modules import nothing from outside src/ (tldrawToExcalidraw.test).
  */
 
 import { exportToBlob, exportToSvg } from "@excalidraw/excalidraw";
-import { cardsForExport, noteExcerpt, notePathOf, noteTitle, type CardContent } from "./noteCards";
-import { BOLD_FAMILIES, fixHebrewSvg } from "./exportFix";
-import type { SceneAppState, SceneElement } from "./excalidrawScene";
-import type { ExBinaryFile, ExcalidrawElement } from "./tldrawToExcalidraw";
+import { cardsForExport, noteExcerpt, notePathOf, noteTitle, type CardContent } from "../canvas/noteCards";
+import { BOLD_FAMILIES, fixHebrewSvg } from "../canvas/exportFix";
+import type { SceneAppState, SceneElement } from "../canvas/excalidrawScene";
+import type { ExBinaryFile, ExcalidrawElement } from "../canvas/tldrawToExcalidraw";
 
 export type ExportKind = "png" | "svg" | "pdf";
 

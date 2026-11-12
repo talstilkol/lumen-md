@@ -103,7 +103,8 @@ export async function runProbe(p: ToolProbe, specs: ProbeTool[], opts: { executo
   const spy: Executor = {
     ...base,
     chat: async (req: ExecutorRequest) => {
-      const res = await base.chat(req);
+      // The spy forwards the run's own cancel signal (T55).
+      const res = await base.chat({ ...req, signal: req.signal });
       first ??= res;
       return res;
     },

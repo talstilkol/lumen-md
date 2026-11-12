@@ -10,8 +10,8 @@
  */
 
 import { checkMermaid } from "../agents/tools/validate";
-import { expectedLabels, extractMermaid, missingLabels, precheck } from "./mermaidPrep";
-import type { SceneElement } from "./excalidrawScene";
+import { expectedLabels, extractMermaid, missingLabels, precheck } from "../canvas/mermaidPrep";
+import type { SceneElement } from "../canvas/excalidrawScene";
 
 export class MermaidError extends Error {
   readonly kind: "empty" | "unknown" | "syntax";

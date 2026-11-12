@@ -75,7 +75,7 @@ export async function presentCanvas(
   if (!frames.length) return 0;
   const [{ exportToSvg }, { cardContents }, { cardsForExport }, { fixHebrewSvg }] = await Promise.all([
     import("@excalidraw/excalidraw"),
-    import("../canvas/canvasExport"),
+    import("../ui/canvasExport"),
     import("../canvas/noteCards"),
     import("../canvas/exportFix"),
   ]);

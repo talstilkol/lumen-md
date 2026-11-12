@@ -49,7 +49,7 @@ import { JSON_CANVAS_EXT, excalidrawToJsonCanvas, jsonCanvasToExcalidraw, serial
 import { CARD_HEIGHT, CARD_WIDTH, NOTE_LINK, cardPositions, noteLink, notePathOf, pastedNoteRefs, resolveNoteRef } from "../canvas/noteCards";
 import { NoteCard, readNote } from "../canvas/NoteCard";
 import { listWorkspace } from "../storage/workspace";
-import type { ExportKind } from "../canvas/canvasExport";
+import type { ExportKind } from "./canvasExport";
 // The Mermaid → diagram dialog loads when it opens (its own strings and the converter come with it).
 const DiagramDialog = lazy(() => import("../canvas/DiagramDialog").then((m) => ({ default: m.DiagramDialog })));
 import "./canvasExcalidrawStrings";
@@ -346,7 +346,7 @@ export function CanvasExcalidraw({ open, onClose }: Props) {
     const api = apiRef.current;
     if (!api) return { error: "the canvas isn't ready" };
     try {
-      const { mermaidToElements, centredOn } = await import("../canvas/mermaidToCanvas");
+      const { mermaidToElements, centredOn } = await import("./mermaidToCanvas");
       const res = await mermaidToElements(code);
       const st = api.getAppState();
       const z = st.zoom.value || 1;
@@ -384,7 +384,7 @@ export function CanvasExcalidraw({ open, onClose }: Props) {
       const sceneNow = cur ?? { elements: (scene.file?.elements ?? []) as unknown as SceneElement[], appState: (scene.file?.appState ?? {}) as SceneAppState, files: scene.file?.files ?? {} };
       setExporting(kind);
       try {
-        const { exportCanvas, download, printSvgAsPdf } = await import("../canvas/canvasExport");
+        const { exportCanvas, download, printSvgAsPdf } = await import("./canvasExport");
         const res = await exportCanvas(kind === "pdf" ? "svg" : kind, sceneNow, scene.name, readNote);
         if (kind === "pdf" && res.svg) await printSvgAsPdf(res.svg, scene.name);
         else download(res);

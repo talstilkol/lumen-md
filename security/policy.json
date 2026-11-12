@@ -497,6 +497,17 @@
           "routes": [
             "app"
           ],
+          "remove": {
+            "connect-src": [
+              "https://cdn.jsdelivr.net"
+            ]
+          },
+          "why": "cdn.jsdelivr.net is webR's npm fallback for the web build's download (plan W1.34). The desktop app keeps webR's own CDN (webr.r-wasm.org) only, so the policy compiled into the app names no general-purpose CDN (review 13.5)."
+        },
+        {
+          "routes": [
+            "app"
+          ],
           "add": {
             "frame-src": [
               "https://www.youtube.com",
