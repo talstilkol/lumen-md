@@ -16,7 +16,11 @@ import {
   createShareLink,
   fromBase64Url,
   isShareHash,
+  MAX_INFLATE_RATIO,
   MAX_LINK_DATA,
+  maxInflated,
+  PUBLIC_APP_ORIGIN,
+  shareOrigin,
   openNote,
   parseShareHash,
   sealNote,
@@ -153,5 +157,71 @@ describe("share link: the fragment", () => {
     for (const h of ["#view=abc&key=def", "#view=abc", "#view-file&key=x", "#view", "#room=a", "#viewer", "#views=1", ""]) {
       expect(re.test(h), h).toBe(isShareHash(h));
     }
+  });
+});
+
+describe("review 12.11: inflation cap, public origin, the export door", () => {
+  /** Seal `json` by hand, as a crafted link would (sealNote refuses such notes). */
+  async function craft(json: string): Promise<{ data: Uint8Array; key: Uint8Array }> {
+    const cs = new CompressionStream("deflate-raw");
+    const w = cs.writable.getWriter();
+    void w.write(new TextEncoder().encode(json)).then(() => w.close());
+    const compressed = new Uint8Array(await new Response(cs.readable).arrayBuffer());
+    const key = crypto.getRandomValues(new Uint8Array(32));
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const k = await crypto.subtle.importKey("raw", key, { name: "AES-GCM" }, false, ["encrypt"]);
+    const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv, additionalData: new TextEncoder().encode("lumen-share:1") }, k, compressed));
+    const data = new Uint8Array(1 + 12 + ct.length);
+    data[0] = 1;
+    data.set(iv, 1);
+    data.set(ct, 13);
+    return { data, key };
+  }
+
+  it("a crafted link that inflates past the bound is refused, not inflated", async () => {
+    const huge = JSON.stringify({ v: 1, t: "x", m: "a".repeat(maxInflated(0) + 1), c: 1 });
+    const { data, key } = await craft(huge);
+    expect(data.length).toBeLessThan(MAX_LINK_DATA); // a small link …
+    await expectThrows(openNote(data, key), "malformed"); // … that would inflate to megabytes
+    // Right under the bound it opens.
+    const fine = await craft(JSON.stringify({ v: 1, t: "x", m: "a".repeat(maxInflated(0) - 100), c: 1 }));
+    expect((await openNote(fine.data, fine.key)).markdown.length).toBe(maxInflated(0) - 100);
+    expect(maxInflated(0)).toBe(MAX_LINK_DATA * MAX_INFLATE_RATIO);
+  });
+
+  it("sealNote refuses a note that would not open under the bound", async () => {
+    await expectThrows(sealNote({ title: "x", markdown: "a".repeat(maxInflated(0) + 1), created: 1 }), "malformed");
+  });
+
+  it("links made in the desktop or mobile app, or on localhost, name the public app", () => {
+    const at = (href: string) => {
+      const u = new URL(href);
+      return { protocol: u.protocol, hostname: u.hostname, origin: u.origin };
+    };
+    expect(shareOrigin(at("tauri://localhost/"), undefined)).toBe(PUBLIC_APP_ORIGIN);
+    expect(shareOrigin(at("capacitor://localhost/"), undefined)).toBe(PUBLIC_APP_ORIGIN);
+    expect(shareOrigin(at("http://localhost:5173/"), undefined)).toBe(PUBLIC_APP_ORIGIN);
+    expect(shareOrigin(at("https://127.0.0.1:4443/"), undefined)).toBe(PUBLIC_APP_ORIGIN);
+    expect(shareOrigin(at("https://192.168.1.20/"), undefined)).toBe(PUBLIC_APP_ORIGIN);
+    expect(shareOrigin(at("http://notes.example.com/"), undefined)).toBe(PUBLIC_APP_ORIGIN);
+    // A self-hosted Lumen on a public https host keeps its own links.
+    expect(shareOrigin(at("https://notes.example.com/app"), undefined)).toBe("https://notes.example.com");
+    // The build can name another public app; only https.
+    expect(shareOrigin(at("tauri://localhost/"), "https://lumen.example.org/")).toBe("https://lumen.example.org");
+    expect(shareOrigin(at("tauri://localhost/"), "http://lumen.example.org/")).toBe(PUBLIC_APP_ORIGIN);
+    expect(shareOrigin(null, undefined)).toBe(PUBLIC_APP_ORIGIN);
+  });
+
+  it("the share command sends the note through shareReadyText; with #473 in the build, that is the export door", async () => {
+    const cmd = readFileSync(join(__dirname, "..", "commands", "domains", "export.ts"), "utf8");
+    expect(cmd).toMatch(/markdown: await shareReadyText\(doc\.content\)/);
+    const { hasExportDoor, shareReadyText } = await import("../share/shareReady");
+    const { existsSync } = await import("node:fs");
+    expect(hasExportDoor()).toBe(existsSync(join(__dirname, "..", "storage", "exportReady.ts")));
+    const text = await shareReadyText("Public. <redact>Dana Levi</redact> <!-- hidden -->");
+    if (hasExportDoor()) {
+      expect(text).not.toContain("Dana Levi");
+      expect(text).not.toContain("hidden");
+    } else expect(text).toBe("Public. <redact>Dana Levi</redact> <!-- hidden -->");
   });
 });

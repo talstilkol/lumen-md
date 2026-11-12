@@ -37,8 +37,9 @@ export function buildExportCommands({ handleExportHtml, liveDoc, getEditorView }
       action: async () => {
         // Snapshot before any await: a tab switch while the chunk loads must not share another note.
         const doc = liveDoc();
-        const { openShareLink } = await import("../../share/ShareLinkDialog");
-        openShareLink({ title: doc.name, markdown: doc.content });
+        // Review 12.11: the link carries the export text (through #473's door once it is in the build).
+        const [{ openShareLink }, { shareReadyText }] = await Promise.all([import("../../share/ShareLinkDialog"), import("../../share/shareReady")]);
+        openShareLink({ title: doc.name, markdown: await shareReadyText(doc.content) });
       },
     },
     {

@@ -11,7 +11,7 @@ import { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { Link2, X } from "lucide-react";
 import { t } from "../i18n";
-import { createShareLink, EXPIRY_DAYS, MAX_LINK_DATA, SHARE_FILE_EXTENSION, ShareLinkError, type ShareLink } from "./linkShare";
+import { createShareLink, EXPIRY_DAYS, MAX_LINK_DATA, SHARE_FILE_EXTENSION, ShareLinkError, shareOrigin, type ShareLink } from "./linkShare";
 import { HelpButton } from "../ui/HelpButton";
 import { explainError } from "../lib/userError";
 
@@ -23,9 +23,9 @@ const row: React.CSSProperties = { display: "flex", gap: 8, alignItems: "center"
 
 const DAY = 24 * 60 * 60 * 1000;
 
-/** The app's own address: share links open the viewer there. */
+/** Where share links open the viewer: this page on a public https host, else the public app (review 12.11). */
 function appOrigin(): string {
-  return location.origin;
+  return shareOrigin();
 }
 
 function CopyField({ value, label, testId }: { value: string; label: string; testId: string }) {

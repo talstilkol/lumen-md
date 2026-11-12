@@ -47,6 +47,16 @@ browsers and in messaging apps. For a larger note, the dialog offers an **encryp
 file** (`.lumenshare`) and a short link that holds only its key. The recipient opens the
 link and picks the file. The file is decrypted on their device too.
 
+Opening a link or a file inflates the note at most 100 times its compressed size,
+so a crafted link can't freeze the viewer. Every note Lumen shares fits that bound.
+
+## Which address the link opens
+
+A link opens the viewer on a web address the recipient can reach. A link made in the
+desktop or mobile app, or on `localhost`, names the public app,
+`https://lumen-md.vercel.app` (a build can name another one with `VITE_SHARE_ORIGIN`).
+A Lumen served over https from a public host keeps its own address.
+
 ## Who can read it
 
 Anyone who has the whole link (or the file and its key link), and nobody else. Treat

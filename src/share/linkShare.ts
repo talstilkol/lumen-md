@@ -28,7 +28,13 @@
  * - Size: the data part is capped at MAX_LINK_DATA characters, so the link
  *   stays usable in browsers and messengers. A larger note is offered as an
  *   encrypted file instead (`.lumenshare`, the same bytes), opened through
- *   `#view-file&key=<key>`.
+ *   `#view-file&key=<key>`. Opening inflates at most MAX_INFLATE_RATIO times
+ *   the compressed size (and at least MAX_LINK_DATA × that), then stops: a
+ *   crafted link or file can't make the viewer inflate gigabytes (review
+ *   12.11). sealNote refuses a note that would not open under that bound.
+ * - Origin: a link made in the desktop or mobile app, or on localhost, would
+ *   open for nobody else, so links name the public app (shareOrigin) unless
+ *   this page is itself served over https from a public host.
  *
  * WebCrypto (crypto.subtle) and CompressionStream run in every supported
  * browser and in Node; nothing here touches the network.
@@ -37,6 +43,43 @@
 export const SHARE_VERSION = 1;
 /** Characters of the data part a link may carry (24 KB of encrypted, compressed note; a 20 KB note of prose takes about 7,000 to 11,000). */
 export const MAX_LINK_DATA = 32 * 1024;
+/** The most a note inflates over its compressed size (prose: 3 to 10; deflate's ceiling: about 1,000). */
+export const MAX_INFLATE_RATIO = 100;
+/** The public app that links open on, unless the page is a public https one (build-time: VITE_SHARE_ORIGIN). */
+export const PUBLIC_APP_ORIGIN = "https://lumen-md.vercel.app";
+
+/** The most bytes a note of `compressed` bytes may inflate to. */
+export function maxInflated(compressed: number): number {
+  return Math.max(MAX_LINK_DATA, compressed) * MAX_INFLATE_RATIO;
+}
+
+/** Is `host` a name others can reach (not loopback, not a local-network name)? */
+function publicHost(host: string): boolean {
+  const h = host.replace(/^\[|\]$/g, "").toLowerCase();
+  if (!h || h === "localhost" || h.endsWith(".localhost") || h.endsWith(".local") || h === "::1" || h === "0.0.0.0") return false;
+  if (/^127\./.test(h) || /^10\./.test(h) || /^192\.168\./.test(h) || /^172\.(1[6-9]|2\d|3[01])\./.test(h) || /^169\.254\./.test(h)) return false;
+  return h.includes(".") || h.includes(":");
+}
+
+/**
+ * The origin a share link opens on: this page's, when it is https on a
+ * public host (a self-hosted Lumen keeps its own links); otherwise the
+ * build's VITE_SHARE_ORIGIN, or the public app.
+ */
+export function shareOrigin(
+  loc: { protocol: string; hostname: string; origin: string } | null = typeof location !== "undefined" ? location : null,
+  configured: string | undefined = (import.meta as ImportMeta & { env?: Record<string, string | undefined> }).env?.VITE_SHARE_ORIGIN,
+): string {
+  if (loc && loc.protocol === "https:" && publicHost(loc.hostname)) return loc.origin;
+  try {
+    const u = new URL(configured || PUBLIC_APP_ORIGIN);
+    if (u.protocol === "https:") return u.origin;
+  } catch {
+    /* why: a malformed build setting: the public app */
+  }
+  return PUBLIC_APP_ORIGIN;
+}
+
 /** The encrypted file's first bytes: "LMSH". */
 const FILE_MAGIC = [0x4c, 0x4d, 0x53, 0x48];
 export const SHARE_FILE_EXTENSION = ".lumenshare";
@@ -87,12 +130,33 @@ export function fromBase64Url(text: string): Uint8Array {
 
 /* ─── compression ─── */
 
-async function pipe(bytes: Uint8Array, stream: CompressionStream | DecompressionStream): Promise<Uint8Array> {
+/** Run `bytes` through `stream`; past `limit` output bytes the stream is cancelled and this throws "malformed". */
+async function pipe(bytes: Uint8Array, stream: CompressionStream | DecompressionStream, limit = Infinity): Promise<Uint8Array> {
   const writer = stream.writable.getWriter();
   void writer.write(bytes as Uint8Array<ArrayBuffer>).then(() => writer.close()).catch(() => {
     /* why: a corrupt stream rejects the read side below, which reports it */
   });
-  return new Uint8Array(await new Response(stream.readable).arrayBuffer());
+  const reader = stream.readable.getReader();
+  const chunks: Uint8Array[] = [];
+  let n = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    n += value.length;
+    if (n > limit) {
+      await reader.cancel().catch(() => undefined);
+      await writer.abort().catch(() => undefined);
+      throw new ShareLinkError("malformed");
+    }
+    chunks.push(value);
+  }
+  const out = new Uint8Array(n);
+  let at = 0;
+  for (const c of chunks) {
+    out.set(c, at);
+    at += c.length;
+  }
+  return out;
 }
 
 function supported(): boolean {
@@ -118,7 +182,10 @@ export async function sealNote(note: SharedNote): Promise<SealedNote> {
   if (!supported()) throw new ShareLinkError("unsupported");
   const json: Record<string, unknown> = { v: SHARE_VERSION, t: note.title, m: note.markdown, c: note.created };
   if (note.expires !== undefined) json.e = note.expires;
-  const plain = await pipe(new TextEncoder().encode(JSON.stringify(json)), new CompressionStream("deflate-raw"));
+  const raw = new TextEncoder().encode(JSON.stringify(json));
+  const plain = await pipe(raw, new CompressionStream("deflate-raw"));
+  // A note the viewer would refuse to inflate is refused here, so every link made opens.
+  if (raw.length > maxInflated(plain.length)) throw new ShareLinkError("malformed");
   const key = crypto.getRandomValues(new Uint8Array(32));
   const iv = crypto.getRandomValues(new Uint8Array(IV_BYTES));
   const sealed = new Uint8Array(
@@ -153,7 +220,7 @@ export async function openNote(data: Uint8Array, key: Uint8Array, now: number = 
   }
   let json: unknown;
   try {
-    json = JSON.parse(new TextDecoder().decode(await pipe(plain, new DecompressionStream("deflate-raw"))));
+    json = JSON.parse(new TextDecoder().decode(await pipe(plain, new DecompressionStream("deflate-raw"), maxInflated(plain.length))));
   } catch {
     throw new ShareLinkError("malformed");
   }
