@@ -7,6 +7,8 @@
  *
  *   node scripts/safari/run.mjs                 # in the checkout to test (the factory runs it in its container)
  *   node scripts/safari/run.mjs --seal --out safari.json   # standalone: a sealed "safari" receipt (nightly key)
+ *   node scripts/safari/run.mjs --seal --tasks W6.1,3.7      # …that names the plan tasks it verifies on real
+ *                                                            # devices (W6.7 counts "real" only for named tasks)
  *   node scripts/safari/run.mjs --dry-run       # print browserstack.yml and the commands; run nothing
  *
  * Needs BROWSERSTACK_USERNAME and BROWSERSTACK_ACCESS_KEY (the open-source
@@ -79,7 +81,7 @@ function main() {
         finishedAt: new Date().toISOString(),
         commit: { sha, branch: spawnSync("git", ["rev-parse", "--abbrev-ref", "HEAD"], { encoding: "utf8" }).stdout.trim() },
         machine: { platform: process.platform, arch: process.arch, node: process.version, host: process.env.LUMEN_FACTORY_HOST ?? "manual" },
-        real: { type: "device", what: "BrowserStack Automate: real iOS devices (Safari) and a real Mac (playwright-webkit)" },
+        real: { type: "device", what: "BrowserStack Automate: real iOS devices (Safari) and a real Mac (playwright-webkit)", tasks: opt("tasks")?.split(",").map((x) => x.trim()).filter(Boolean) ?? [] },
         steps,
         ...out,
       },
