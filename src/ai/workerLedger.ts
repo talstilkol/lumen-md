@@ -10,7 +10,7 @@
  * (`listenToWorkerLedger` in privacyLedger.ts). A BroadcastChannel keeps the
  * reports out of each worker's own message protocol.
  *
- * Limits, stated: the worker only reports — it does not block. Workers only
+ * Limits, stated: outside airplane mode the worker only reports — it does not block. Workers only
  * download models (a category the policy never blocks), and the CSP still
  * bounds where they can connect. Requests made by `Cache.add()` (web-llm's
  * cache) bypass `fetch` entirely; the worker reports those itself with
@@ -24,8 +24,11 @@ export const LEDGER_CHANNEL = "lumen-privacy-ledger";
  * Airplane mode (plan W5.9, src/privacy/airplane.ts): the worker asks the
  * window whether the switch is on ("hello" → "state") and reports every
  * attempt ("attempt"); while it is on, a request to another host fails here,
- * before it leaves. The window answers at once; a worker that hears nothing
- * within AIRPLANE_WAIT_MS proceeds (no airplane-mode window in this page).
+ * before it leaves. The window answers at once, from the startup bundle
+ * (src/privacy/airplaneBoot.ts). A worker that hears nothing within
+ * AIRPLANE_WAIT_MS blocks every request to another host (fail closed: the
+ * window's CSP <meta> does not cover workers) until an answer says the switch
+ * is off; later answers keep updating it.
  */
 export const AIRPLANE_CHANNEL = "lumen-airplane";
 export const AIRPLANE_WAIT_MS = 3000;
@@ -104,7 +107,7 @@ export function installWorkerLedger(
       const timer = setTimeout(resolve, AIRPLANE_WAIT_MS);
       air.addEventListener("message", ((e: MessageEvent<AirplaneMessage>) => {
         if (e.data?.kind !== "state") return;
-        airplane = e.data.on;
+        airplane = e.data.on === false ? false : true;
         clearTimeout(timer);
         resolve();
       }) as EventListener);
@@ -116,13 +119,14 @@ export function installWorkerLedger(
     const method = (init?.method ?? (typeof Request !== "undefined" && input instanceof Request ? input.method : "GET")).toUpperCase();
     if (air) {
       if (airplane === null) await heard;
-      const blocked = airplane === true && !stays(url, scope.location?.href);
+      // No answer (null) is treated as on: fail closed.
+      const blocked = airplane !== false && !stays(url, scope.location?.href);
       try {
         air.postMessage({ kind: "attempt", url, method, worker, blocked } satisfies AirplaneMessage);
       } catch {
         /* why: a closed channel: the request is still decided here */
       }
-      if (blocked) throw new TypeError(`Blocked: airplane mode is on (${new URL(url, scope.location?.href).host})`);
+      if (blocked) throw new TypeError(`Blocked: airplane mode is ${airplane === null ? "not confirmed off" : "on"} (${new URL(url, scope.location?.href).host})`);
     }
     const id = next();
     post({ kind: "start", id, url, method, bytesOut: bodySize(init?.body), worker });

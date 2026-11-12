@@ -22,9 +22,9 @@ import {
   subscribeEgress,
   verdict,
 } from "../privacy/airplane";
-import { AIRPLANE_CSP, AIRPLANE_KEY } from "../privacy/airplaneBoot";
+import { AIRPLANE_CSP, AIRPLANE_KEY, answerWorkers, __setAirplaneFlag } from "../privacy/airplaneBoot";
 import { buildCertificate, reachedNetwork, sealCertificate, verifyCertificate } from "../privacy/airplaneCertificate";
-import { installWorkerLedger, type AirplaneMessage } from "../ai/workerLedger";
+import { AIRPLANE_WAIT_MS, installWorkerLedger, type AirplaneMessage } from "../ai/workerLedger";
 
 const BASE = "https://lumen-md.vercel.app/notes/x";
 
@@ -271,7 +271,7 @@ describe("certificate", () => {
     await fake.win.fetch("/assets/app.js");
     await fake.win.fetch("http://127.0.0.1:11434/api/tags");
     const cert = buildCertificate(egressAttempts(), from, Date.now() + 1, "test");
-    expect(cert.summary).toEqual({ attempts: 3, blocked: 1, local: 1, cacheOnly: 1, left: 0 });
+    expect(cert.summary).toEqual({ attempts: 3, blocked: 1, local: 1, cacheOnly: 1, inFlight: 0, left: 0 });
     const sealed = await sealCertificate(cert);
     expect(sealed.sha256).toMatch(/^[0-9a-f]{64}$/);
     expect((await verifyCertificate(sealed)).ok).toBe(true);
@@ -287,5 +287,88 @@ describe("certificate", () => {
     expect(reachedNetwork({ ...base, kind: "resource", decision: "allowed", transferSize: 0 })).toBe(false);
     expect(reachedNetwork({ ...base, kind: "resource", decision: "allowed", transferSize: 512 })).toBe(true);
     expect(reachedNetwork({ ...base, kind: "csp", decision: "blocked" })).toBe(false);
+  });
+});
+
+/** The next millisecond (so an attempt made before it is outside a window that starts there). */
+function nextMs(): number {
+  const t = Date.now();
+  let n = t;
+  while (n === t) n = Date.now();
+  return n;
+}
+
+describe("review 12.11 fixes", () => {
+  it("runner frames: the airplane CSP loads frames from blob: only, never a URL-loaded page", () => {
+    const frameSrc = /frame-src ([^;]+)/.exec(AIRPLANE_CSP)?.[1].trim();
+    expect(frameSrc).toBe("blob:");
+  });
+
+  it("a worker that hears no answer blocks (fail closed), and a later 'off' lets the next request go", async () => {
+    const inner: string[] = [];
+    const scope = { fetch: (async (u: string) => (inner.push(u), new Response(""))) as unknown as typeof fetch, name: "w", location: { href: "https://lumen-md.vercel.app/assets/w.js" } };
+    let listener: ((e: MessageEvent<AirplaneMessage>) => void) | null = null;
+    const air = {
+      postMessage() {},
+      addEventListener(_t: string, fn: EventListenerOrEventListenerObject) {
+        listener = fn as unknown as (e: MessageEvent<AirplaneMessage>) => void;
+      },
+    } as unknown as BroadcastChannel;
+    installWorkerLedger(scope, { postMessage() {} } as unknown as BroadcastChannel, air);
+    const t0 = Date.now();
+    await expect(scope.fetch("https://huggingface.co/model.onnx")).rejects.toThrow(/not confirmed off/);
+    expect(Date.now() - t0).toBeGreaterThanOrEqual(AIRPLANE_WAIT_MS - 50);
+    expect(inner).toEqual([]);
+    listener!({ data: { kind: "state", on: false } } as MessageEvent<AirplaneMessage>);
+    await scope.fetch("https://huggingface.co/model.onnx");
+    expect(inner).toEqual(["https://huggingface.co/model.onnx"]);
+  }, 10_000);
+
+  it("the startup half answers a worker's hello with the switch's state", () => {
+    const posted: unknown[] = [];
+    let fn: ((e: MessageEvent) => void) | null = null;
+    const ch = { postMessage: (m: unknown) => posted.push(m), addEventListener: (_t: string, f: EventListener) => (fn = f as unknown as (e: MessageEvent) => void) };
+    __setAirplaneFlag(true);
+    answerWorkers(() => ch as unknown as BroadcastChannel);
+    fn!({ data: { kind: "hello" } } as MessageEvent);
+    __setAirplaneFlag(false);
+    fn!({ data: { kind: "hello" } } as MessageEvent);
+    fn!({ data: { kind: "attempt" } } as MessageEvent);
+    expect(posted).toEqual([{ kind: "state", on: true }, { kind: "state", on: false }]);
+  });
+
+  it("a request still waiting for its answer when the switch goes on is counted as having left, and aborted", async () => {
+    let seen: AbortSignal | undefined;
+    fake.win.fetch = ((_: RequestInfo | URL, init?: RequestInit) => {
+      seen = init?.signal ?? undefined;
+      return new Promise<Response>((_res, rej) => seen?.addEventListener("abort", () => rej(seen?.reason)));
+    }) as typeof fetch;
+    __resetAirplane();
+    installAirplaneMode(fake.win);
+    const pending = fake.win.fetch("https://upload.example.com/big", { method: "POST" });
+    const from = nextMs(); // the window starts after the request did
+    enableAirplaneMode();
+    await expect(pending).rejects.toBeInstanceOf(AirplaneBlockedError);
+    expect(seen?.aborted).toBe(true);
+    const cert = buildCertificate(egressAttempts(), from, Date.now() + 1, "test");
+    expect(cert.summary.inFlight).toBe(1);
+    expect(cert.summary.left).toBe(1);
+    expect(cert.attempts.find((a) => a.decision === "in-flight")).toMatchObject({ kind: "fetch", target: "https://upload.example.com/big", method: "POST" });
+    expect(cert.counts.length).toBeGreaterThan(0);
+    expect(cert.notCounted.length).toBeGreaterThan(0);
+  });
+
+  it("an open socket at the switch is closed and counted", () => {
+    new fake.win.WebSocket("wss://collab.example.com/room");
+    const from = nextMs();
+    enableAirplaneMode();
+    expect(fake.sockets[0].closed).toBe(true);
+    expect(buildCertificate(egressAttempts(), from, Date.now() + 1, "test").summary).toMatchObject({ inFlight: 1, left: 1 });
+  });
+
+  it("counts attempts, not bytes: a resource with no reported size (another origin) reached the network", () => {
+    const base = { id: 1, ts: 1, method: "img", origin: "img", target: "https://tracker.example.com/p.gif" };
+    expect(reachedNetwork({ ...base, kind: "resource", decision: "allowed" })).toBe(true);
+    expect(reachedNetwork({ ...base, kind: "fetch", decision: "in-flight" })).toBe(true);
   });
 });

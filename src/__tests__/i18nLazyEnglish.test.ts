@@ -43,8 +43,9 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "vaultEncryption.json": { module: "storage/vault/encrypted/strings.ts", users: ["ui/VaultEncryptionDialog.tsx", "ui/VaultUnlock.tsx"], prefixes: ["vaultEnc."] },
   // The webR download offer (plan W1.34), in the lazily rendered live-R block.
   "webr.json": { module: "plugins/r/webrStrings.ts", users: ["plugins/LiveRBlock.tsx"], prefixes: ["block.liveR.install."] },
-  // Airplane mode's network monitor (plan W5.9), opened with a dynamic import.
-  "airplane.json": { module: "privacy/airplaneStrings.ts", users: ["privacy/NetworkMonitor.tsx"], prefixes: ["airplane."] },
+  // Airplane mode's network monitor (plan W5.9), opened with a dynamic import; the
+  // playground and live-js blocks (lazily rendered) say why they don't run while it is on.
+  "airplane.json": { module: "privacy/airplaneStrings.ts", users: ["plugins/LiveJsBlock.tsx", "plugins/PlaygroundBlock.tsx", "privacy/NetworkMonitor.tsx"], prefixes: ["airplane."] },
 };
 
 function sources(dir: string): string[] {

@@ -1,7 +1,8 @@
 /**
  * Airplane-mode certificate (plan W5.9): "from X to Y, airplane mode was on,
- * N attempts, N blocked, 0 left the device" — with every attempt of the
- * window listed, as canonical JSON (keys sorted, no whitespace: the same
+ * N attempts, N blocked, N reached the network" — with every attempt of the
+ * window listed, and the exact scope of what it counts (`counts` /
+ * `notCounted`, review 12.11), as canonical JSON (keys sorted, no whitespace: the same
  * certificate always gives the same bytes) and its SHA-256.
  *
  * Signing: the plan signs it with the signed privacy report's mechanism
@@ -13,7 +14,22 @@
  */
 import type { EgressAttempt } from "./airplane";
 
-export const CERTIFICATE_FORMAT = "lumen-airplane-certificate/1";
+/** /2 (review 12.11): attempts, not bytes; requests in flight at the switch; the stated scope. */
+export const CERTIFICATE_FORMAT = "lumen-airplane-certificate/2";
+
+/** What the certificate counts: every one of these that reached the network is in `left`. */
+export const CERTIFICATE_COUNTS: readonly string[] = [
+  "Every request this page made through fetch, XMLHttpRequest, WebSocket, EventSource, sendBeacon or RTCPeerConnection after airplane mode's wrappers loaded, and every fetch of its workers: each attempt counts once, whatever its size.",
+  "Every resource load (image, font, style sheet, script) the browser lists in Resource Timing: a load from another origin counts as reaching the network even when the browser reports 0 bytes; a load from the app's own origin counts when it transferred bytes (it did not come from a cache).",
+  "Every request, socket and peer still open when the switch went on: counted as having reached the network, then aborted or closed at that moment.",
+];
+
+/** What it does not prove, said plainly. */
+export const CERTIFICATE_NOT_COUNTED: readonly string[] = [
+  "Requests made through a reference to fetch taken before airplane mode's wrappers loaded are not listed; the browser's Content-Security-Policy still refuses them to any other site.",
+  "Frames load nothing from a URL while the switch is on (frame-src allows blob: only); a frame open before it went on is not counted.",
+  "What other apps, browser extensions or the operating system send is outside this page.",
+];
 
 export interface CertificateSummary {
   attempts: number;
@@ -22,7 +38,9 @@ export interface CertificateSummary {
   local: number;
   /** The app's own files, answered from a cache only. */
   cacheOnly: number;
-  /** Attempts that reached the network. The claim is that this is 0. */
+  /** Requests, sockets and peers that were open when the switch went on (counted in `left` too). */
+  inFlight: number;
+  /** Attempts that reached the network (attempts, not bytes). The claim is that this is 0. */
   left: number;
 }
 
@@ -32,6 +50,9 @@ export interface AirplaneCertificate {
   from: number;
   to: number;
   summary: CertificateSummary;
+  /** The exact scope of the claim (CERTIFICATE_COUNTS / CERTIFICATE_NOT_COUNTED). */
+  counts: readonly string[];
+  notCounted: readonly string[];
   attempts: EgressAttempt[];
 }
 
@@ -55,12 +76,15 @@ export function canonicalJson(value: unknown): string {
 
 /**
  * Did this attempt reach the network? Blocked attempts and CSP refusals did
- * not; local and cache-only ones stay on the device; a resource the browser
- * served from a cache transferred 0 bytes.
+ * not; local and cache-only ones stay on the device. A request in flight when
+ * the switch went on did. A resource counts by attempt: one with no size
+ * (another origin: the browser hides it) did; one of the app's own origin
+ * that transferred 0 bytes came from a cache.
  */
 export function reachedNetwork(a: EgressAttempt): boolean {
+  if (a.decision === "in-flight") return true;
   if (a.decision !== "allowed" || a.kind === "csp") return false;
-  if (a.kind === "resource") return (a.transferSize ?? 0) > 0;
+  if (a.kind === "resource") return a.transferSize === undefined || a.transferSize > 0;
   return true;
 }
 
@@ -70,6 +94,7 @@ export function summarize(attempts: readonly EgressAttempt[]): CertificateSummar
     blocked: attempts.filter((a) => a.decision === "blocked").length,
     local: attempts.filter((a) => a.decision === "local").length,
     cacheOnly: attempts.filter((a) => a.decision === "cache-only").length,
+    inFlight: attempts.filter((a) => a.decision === "in-flight").length,
     left: attempts.filter(reachedNetwork).length,
   };
 }
@@ -82,7 +107,7 @@ export function appVersion(): string {
 /** The certificate of the window [from, to]: every attempt in it. */
 export function buildCertificate(all: readonly EgressAttempt[], from: number, to: number, app: string = appVersion()): AirplaneCertificate {
   const attempts = all.filter((a) => a.ts >= from && a.ts <= to);
-  return { format: CERTIFICATE_FORMAT, app, from, to, summary: summarize(attempts), attempts };
+  return { format: CERTIFICATE_FORMAT, app, from, to, summary: summarize(attempts), counts: CERTIFICATE_COUNTS, notCounted: CERTIFICATE_NOT_COUNTED, attempts };
 }
 
 async function sha256Hex(text: string): Promise<string> {
