@@ -888,6 +888,8 @@
   "plugins.panel.close": "プラグインパネルを閉じる",
   "preview.footnote.label": "脚注 {n}",
   "preview.imageResize.hint": "端をドラッグしてサイズを変更します。幅はノートに保存されます。",
+  "print.toc": "目次",
+  "print.untitled": "無題",
   "props.add": "プロパティを追加",
   "props.addItem": "追加…",
   "props.addItemTo": "{key} に項目を追加",

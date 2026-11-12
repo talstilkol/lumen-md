@@ -309,6 +309,8 @@ export default function App() {
       runPython: async (args: { code: string; inputs?: Record<string, unknown>; timeoutMs?: number }) =>
         (await import("./agents/tools/python")).runPythonTool.run(args, { grants: new Set(["read" as const]) }),
       ledger: () => ledgerEntries(),
+      // W2.23 — the print document as HTML, for the print golden tests.
+      buildPrintHtml: (md: string, name: string) => import("./ui/PrintExport").then((m) => m.buildPrintHtml(md, name)),
     };
     return () => {
       unregisterPlugin(wordCountPlugin.id);

@@ -888,6 +888,8 @@
   "plugins.panel.close": "Fermer le panneau de l’extension",
   "preview.footnote.label": "Note de bas de page {n}",
   "preview.imageResize.hint": "Faites glisser le bord pour redimensionner. La largeur est enregistrée dans la note.",
+  "print.toc": "Sommaire",
+  "print.untitled": "Sans titre",
   "props.add": "Ajouter une propriété",
   "props.addItem": "Ajouter…",
   "props.addItemTo": "Ajouter un élément à {key}",

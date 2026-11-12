@@ -888,6 +888,8 @@
   "plugins.panel.close": "סגירת חלונית התוסף",
   "preview.footnote.label": "הערת שוליים {n}",
   "preview.imageResize.hint": "גררו את הקצה כדי לשנות גודל. הרוחב נשמר בפתק.",
+  "print.toc": "תוכן עניינים",
+  "print.untitled": "ללא שם",
   "props.add": "הוספת מאפיין",
   "props.addItem": "הוספה…",
   "props.addItemTo": "הוספת פריט אל {key}",

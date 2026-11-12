@@ -418,6 +418,8 @@
   "plugins.panel.close": "Close the plugin panel",
   "preview.footnote.label": "Footnote {n}",
   "preview.imageResize.hint": "Drag the edge to resize. The width is saved in the note.",
+  "print.toc": "Contents",
+  "print.untitled": "Untitled",
   "props.add": "Add property",
   "props.addItem": "Add…",
   "props.addItemTo": "Add an item to {key}",

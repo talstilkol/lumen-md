@@ -5005,6 +5005,16 @@
       "vars": []
     },
     {
+      "key": "print.toc",
+      "en": "Contents",
+      "vars": []
+    },
+    {
+      "key": "print.untitled",
+      "en": "Untitled",
+      "vars": []
+    },
+    {
       "key": "props.add",
       "en": "Add property",
       "vars": []

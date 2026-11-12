@@ -113,6 +113,7 @@ export default defineConfig({
             { label: "Diagrams on the canvas (Mermaid, draw me)", slug: "workspace/canvas-diagrams", translations: { he: "תרשימים בקנבס (Mermaid,‏ צייר לי)" } },
             { label: "Slides from notes and the canvas", slug: "workspace/slides", translations: { he: "מצגות מפתקים ומהקנבס" } },
             { label: "Import highlights (Kindle, Kobo, Readwise, Zotero)", translations: { he: "ייבוא הדגשות (Kindle,‏ Kobo,‏ Readwise,‏ Zotero)" }, slug: "workspace/highlight-import" },
+            { label: "Print and PDF", slug: "workspace/print", translations: { he: "הדפסה ו-PDF" } },
           ],
         },
         {

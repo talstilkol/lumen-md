@@ -888,6 +888,8 @@
   "plugins.panel.close": "إغلاق لوحة الإضافة",
   "preview.footnote.label": "حاشية {n}",
   "preview.imageResize.hint": "اسحب الحافة لتغيير الحجم. يُحفظ العرض في الملاحظة.",
+  "print.toc": "المحتويات",
+  "print.untitled": "بلا عنوان",
   "props.add": "إضافة خاصية",
   "props.addItem": "إضافة…",
   "props.addItemTo": "إضافة عنصر إلى {key}",

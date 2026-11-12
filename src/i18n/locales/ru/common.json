@@ -888,6 +888,8 @@
   "plugins.panel.close": "Закрыть панель плагина",
   "preview.footnote.label": "Сноска {n}",
   "preview.imageResize.hint": "Потяните за край, чтобы изменить размер. Ширина сохраняется в заметке.",
+  "print.toc": "Содержание",
+  "print.untitled": "Без названия",
   "props.add": "Добавить свойство",
   "props.addItem": "Добавить…",
   "props.addItemTo": "Добавить элемент в {key}",

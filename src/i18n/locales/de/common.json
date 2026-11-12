@@ -888,6 +888,8 @@
   "plugins.panel.close": "Plugin-Bereich schließen",
   "preview.footnote.label": "Fußnote {n}",
   "preview.imageResize.hint": "Ziehen Sie den Rand, um die Größe zu ändern. Die Breite wird in der Notiz gespeichert.",
+  "print.toc": "Inhalt",
+  "print.untitled": "Ohne Titel",
   "props.add": "Eigenschaft hinzufügen",
   "props.addItem": "Hinzufügen…",
   "props.addItemTo": "Eintrag zu {key} hinzufügen",
