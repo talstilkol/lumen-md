@@ -42,7 +42,8 @@ export function ocrPageOf(
 /**
  * Pixel scale the page is rendered at for OCR: 72 dpi × 2 = 144 dpi, as the
  * reader always did. Measured on the 20 scanned Hebrew pages
- * (scripts/ocr/scanned-he/measure.mjs): CER 13.5% at 144 dpi, 20.9% at 216.
+ * (scripts/ocr/scanned-he/measure.mjs): CER 13.5% at 144 dpi, 20.9% at 216, on
+ * tesseract's lines alone; 12.2% at 144 dpi through the app's whole path.
  */
 export const OCR_SCALE = 2;
 

@@ -3,19 +3,22 @@
  * reader does it, measured: each scanned PDF is rendered at the reader's
  * OCR scale (pdftoppm, 72 dpi × scale), read with Tesseract's LSTM engine and
  * the same tessdata_fast Hebrew + English models the app ships
- * (public/tesseract/lang), and compared with the printed text (CER, through
- * src/ai/ocrCer.ts). It also records, per page, the recognised lines with
- * their boxes and where one phrase of the printed text really is on the
- * scanned page (from the text PDF's word boxes, carried through the scan's
- * skew) — the fixture the highlight test (src/__tests__/pdfOcrLayer.test.tsx)
- * runs on.
+ * (public/tesseract/lang), through the app's own path, `recognizeWithMixedFix`
+ * (src/ai/ocr.ts: gutters, the re-read of mixed Hebrew/Latin words in
+ * src/ai/ocrMixed.ts with Hebrew-only and Latin-only single-word workers,
+ * reading order), and compared with the printed text (CER, through
+ * src/ai/ocrCer.ts). The engine is the tesseract CLI standing in for
+ * tesseract.js (./tesseractCli.mjs). It also records, per page, the placed
+ * lines the reader lays over the page and where one phrase of the printed
+ * text really is on the scanned page (from the text PDF's word boxes,
+ * carried through the scan's skew) — the fixture the highlight test
+ * (src/__tests__/pdfOcrLayer.test.tsx) runs on.
  *
- *   node --experimental-strip-types scripts/ocr/scanned-he/measure.mjs <scans dir> <out.json> [scale=2]
- *   (PSM=3: Tesseract's automatic page layout instead of the reader's 6; MEDIAN=1: a 3×3 median first)
+ *   npx tsx scripts/ocr/scanned-he/measure.mjs <scans dir> <out.json> [scale=2]
+ *   RAW=1: tesseract's lines only, without the app's mixed-word pass (the first measurement)
+ *   PSM=3: Tesseract's automatic page layout instead of the reader's 6; MEDIAN=1: a 3×3 median first
  *
- * Needs poppler-utils and the tesseract CLI (5.x). The app runs the same
- * engine as WebAssembly (tesseract.js); its extra pass that re-reads mixed
- * Hebrew/Latin words (src/ai/ocrMixed.ts) is not run here.
+ * Needs poppler-utils, ImageMagick and the tesseract CLI (5.x).
  */
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
@@ -24,6 +27,8 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { gunzipSync } from "node:zlib";
 import { measureItem } from "../../../src/ai/ocrCer.ts";
+import { recognizeWithMixedFix } from "../../../src/ai/ocr.ts";
+import { cliWorker } from "./tesseractCli.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, "../../..");
@@ -32,10 +37,15 @@ const SCALE = Number(scaleArg);
 const MEDIAN = process.env.MEDIAN === "1";
 /** Tesseract's page segmentation mode: 6 (one block of text) is tesseract.js's default, which the app runs with. */
 const PSM = process.env.PSM ?? "6";
+const RAW = process.env.RAW === "1";
 const tmp = mkdtempSync(join(tmpdir(), "ocr-he-"));
 const tessdata = join(tmp, "tessdata");
 execFileSync("mkdir", ["-p", tessdata]);
 for (const l of ["heb", "eng"]) writeFileSync(join(tessdata, `${l}.traineddata`), gunzipSync(readFileSync(join(root, `public/tesseract/lang/${l}.traineddata.gz`))));
+
+const main = cliWorker("heb+eng", PSM, tessdata);
+const heb = cliWorker("heb", 8, tessdata);
+const latin = cliWorker("eng", 8, tessdata);
 
 const manifest = JSON.parse(readFileSync(join(dir, "manifest.json"), "utf8"));
 const pageSize = (pdf) => {
@@ -55,19 +65,26 @@ for (const item of manifest.items) {
   execFileSync("pdftoppm", ["-r", String(72 * SCALE), "-gray", "-png", "-singlefile", pdf, png]);
   // Tried and measured worse (41% at scale 3): a 3×3 median against speckle.
   if (MEDIAN) execFileSync("convert", [`${png}.png`, "-statistic", "median", "3x3", `${png}.png`]);
-  const tsv = execFileSync("tesseract", [`${png}.png`, "stdout", "-l", "heb+eng", "--oem", "1", "--psm", PSM, "--tessdata-dir", tessdata, "-c", "tessedit_create_tsv=1"], { stdio: ["ignore", "pipe", "ignore"] }).toString();
-  const lines = new Map();
-  for (const row of tsv.split("\n").slice(1)) {
-    const c = row.split("\t");
-    if (c[0] !== "5" || !c[11]?.trim()) continue;
-    const key = `${c[2]}/${c[3]}/${c[4]}`;
-    const [x, y, w, h] = c.slice(6, 10).map(Number);
-    const l = lines.get(key) ?? { words: [], bbox: { x0: Infinity, y0: Infinity, x1: 0, y1: 0 } };
-    l.words.push(c[11]);
-    l.bbox = { x0: Math.min(l.bbox.x0, x), y0: Math.min(l.bbox.y0, y), x1: Math.max(l.bbox.x1, x + w), y1: Math.max(l.bbox.y1, y + h) };
-    lines.set(key, l);
+  let placed;
+  if (RAW) {
+    const tsv = execFileSync("tesseract", [`${png}.png`, "stdout", "-l", "heb+eng", "--oem", "1", "--psm", PSM, "--tessdata-dir", tessdata, "-c", "tessedit_create_tsv=1"], { stdio: ["ignore", "pipe", "ignore"] }).toString();
+    const lines = new Map();
+    for (const row of tsv.split("\n").slice(1)) {
+      const c = row.split("\t");
+      if (c[0] !== "5" || !c[11]?.trim()) continue;
+      const key = `${c[2]}/${c[3]}/${c[4]}`;
+      const [x, y, w, h] = c.slice(6, 10).map(Number);
+      const l = lines.get(key) ?? { words: [], bbox: { x0: Infinity, y0: Infinity, x1: 0, y1: 0 } };
+      l.words.push(c[11]);
+      l.bbox = { x0: Math.min(l.bbox.x0, x), y0: Math.min(l.bbox.y0, y), x1: Math.max(l.bbox.x1, x + w), y1: Math.max(l.bbox.y1, y + h) };
+      lines.set(key, l);
+    }
+    placed = [...lines.values()].map((l) => ({ text: l.words.join(" "), bbox: l.bbox, column: 0 }));
+  } else {
+    // The app's path: the main heb+eng worker, and the single-word workers the mixed-word pass asks.
+    const r = await recognizeWithMixedFix(main, heb, `${png}.png`, latin);
+    placed = r.lines ?? [];
   }
-  const placed = [...lines.values()].map((l) => ({ text: l.words.join(" "), bbox: l.bbox, column: 0 }));
   const hyp = placed.map((l) => l.text).join("\n");
   const m = measureItem(truth, hyp).all;
   edits += m.edits;
@@ -100,6 +117,6 @@ for (const item of manifest.items) {
   pages.push({ id: item.id, page, image: img, lines: placed, phrase: words.join(" "), truthBox, cer: { edits: m.edits, length: m.length } });
   console.log(`${item.id}  CER ${(m.edits / m.length * 100).toFixed(1)}%  lines ${placed.length}`);
 }
-const out = { scale: SCALE, psm: PSM, median: MEDIAN, engine: execFileSync("tesseract", ["--version"]).toString().split("\n")[0], models: "tessdata_fast heb+eng (public/tesseract/lang)", cer: edits / length, edits, length, pages };
+const out = { scale: SCALE, psm: PSM, median: MEDIAN, path: RAW ? "tesseract lines" : "recognizeWithMixedFix (src/ai/ocr.ts)", engine: execFileSync("tesseract", ["--version"]).toString().split("\n")[0], models: "tessdata_fast heb+eng (public/tesseract/lang)", cer: edits / length, edits, length, pages };
 writeFileSync(outFile, JSON.stringify(out) + "\n");
 console.log(`CER ${(out.cer * 100).toFixed(2)}% over ${length} characters, ${pages.length} pages`);
