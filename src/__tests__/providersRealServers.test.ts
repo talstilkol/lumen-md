@@ -313,7 +313,9 @@ async function t8(cfg: ServerConfig, supported: boolean): Promise<Outcome> {
     async (n) => {
       if (!fired && n === KEYRING_NAME) {
         fired = true;
-        bRun.p = b.sync.rekey({ enroll: { laptop: laptop.recipient } }).then((r) => r, (e: unknown) => e);
+        // B may be refused before its keyring write (it sees A's freeze, review 5 Q2):
+        // that ends the race too.
+        bRun.p = b.sync.rekey({ enroll: { laptop: laptop.recipient } }).then((r) => r, (e: unknown) => e).finally(() => bReached.open());
         await bReached.wait();
       }
     },
