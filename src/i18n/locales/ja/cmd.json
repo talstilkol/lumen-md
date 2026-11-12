@@ -114,6 +114,8 @@
   "cmd.copyBlockLink.hint": "カーソル位置のブロックに ^id を付け、[[ノート#^id]] をコピーします",
   "cmd.edit.bidiFix": "方向マークを整理して括弧を修正",
   "cmd.edit.bidiFix.hint": "画面表示を変えないマークを削除し、逆向きに入力された括弧を入れ替える（1回で元に戻せます）",
+  "cmd.edit.fixPdfHebrew": "反転したヘブライ語を修正（PDF から）",
+  "cmd.edit.fixPdfHebrew.hint": "PDF からコピーしたヘブライ語を読み順に戻し、数字と英語は正しい向きのまま、語末形の文字も修正します",
   "cmd.edit.formatCodeBlock": "カーソル位置のコードブロックを整形",
   "cmd.edit.formatCodeBlock.hint": "Prettier: カーソルがあるコードブロックを整形",
   "cmd.edit.formatDocument": "ドキュメントを整形",

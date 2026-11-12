@@ -18,6 +18,7 @@ import { lineSeparatorFor } from "./lineEndings";
 import { obsidianSourceExtension } from "./obsidianSource";
 import { pastedHtmlToMarkdown, shouldConvertPaste } from "../paste/htmlPaste";
 import { wysiwygTakesPaste, type PasteDetail } from "../paste/pasteCommands";
+import { FIX_PDF_HEBREW_EVENT, fixSourceSelection, offerInSourceEditor } from "../paste/pdfPaste";
 import { EditorView, keymap, highlightActiveLine, Decoration, WidgetType } from "@codemirror/view";
 import type { DecorationSet } from "@codemirror/view";
 import { defaultKeymap, history, historyKeymap, indentWithTab, redo, undo } from "@codemirror/commands";
@@ -473,6 +474,16 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
         return user?.name?.trim() || user?.email?.split("@")[0] || null;
       }),
       imageDropPasteHandlers,
+      // W5.5 — Hebrew pasted from a PDF in visual order (or with broken finals): offer the fix.
+      EditorView.updateListener.of((u) => {
+        for (const tr of u.transactions) {
+          if (!tr.isUserEvent("input.paste")) continue;
+          tr.changes.iterChanges((_fa, _ta, fromB, _tb, text) => {
+            const pasted = text.toString();
+            if (pasted.length > 1) offerInSourceEditor(u.view, fromB, pasted);
+          });
+        }
+      }),
       // Shift-Alt-F → format document (Prettier, lazy-loaded on first use).
       formatKeymap(),
       keymap.of([
@@ -863,6 +874,18 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     }
     window.addEventListener("lumen-mobile-action", onAction);
     return () => window.removeEventListener("lumen-mobile-action", onAction);
+  }, []);
+
+  // W5.5 — "Fix reversed Hebrew (from a PDF)" on the selection, from the palette.
+  useEffect(() => {
+    function onFix(e: Event) {
+      const view = viewRef.current;
+      const done = (e as CustomEvent<{ done: (message: string | null) => void }>).detail?.done;
+      if (!view || !done || wysiwygTakesPaste()) return;
+      done(fixSourceSelection(view));
+    }
+    window.addEventListener(FIX_PDF_HEBREW_EVENT, onFix);
+    return () => window.removeEventListener(FIX_PDF_HEBREW_EVENT, onFix);
   }, []);
 
   // `lumen-reveal-line` {line} (1-based): jump to and select that line —

@@ -5387,6 +5387,53 @@
       "vars": []
     },
     {
+      "key": "pdfPaste.changed",
+      "en": "The pasted text has changed since; select it and run “Fix reversed Hebrew” from the palette.",
+      "vars": []
+    },
+    {
+      "key": "pdfPaste.finals.title",
+      "en": "The final letters look wrong — fix?",
+      "vars": []
+    },
+    {
+      "key": "pdfPaste.fix",
+      "en": "Fix",
+      "vars": []
+    },
+    {
+      "key": "pdfPaste.fixed",
+      "en": "Fixed. Undo (Ctrl+Z) restores it.",
+      "vars": []
+    },
+    {
+      "key": "pdfPaste.looksFine",
+      "en": "The selected text reads correctly — nothing to fix.",
+      "vars": []
+    },
+    {
+      "key": "pdfPaste.needsEditor",
+      "en": "Open the note in the editor to fix text.",
+      "vars": []
+    },
+    {
+      "key": "pdfPaste.preview",
+      "en": "Preview: {text}",
+      "vars": [
+        "text"
+      ]
+    },
+    {
+      "key": "pdfPaste.reversed.title",
+      "en": "Looks reversed — fix?",
+      "vars": []
+    },
+    {
+      "key": "pdfPaste.selectFirst",
+      "en": "Select the reversed text first.",
+      "vars": []
+    },
+    {
       "key": "pii.ledger.redacted",
       "en": "Hidden before sending: {n} in {requests} requests",
       "vars": [

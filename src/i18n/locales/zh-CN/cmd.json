@@ -114,6 +114,8 @@
   "cmd.copyBlockLink.hint": "为光标所在的块添加 ^id 并复制 [[笔记#^id]]",
   "cmd.edit.bidiFix": "清理方向标记并修正括号",
   "cmd.edit.bidiFix.hint": "删除不改变显示效果的标记，并交换反向输入的括号——一次撤销即可还原",
+  "cmd.edit.fixPdfHebrew": "修正反向的希伯来语（来自 PDF）",
+  "cmd.edit.fixPdfHebrew.hint": "把从 PDF 复制的希伯来语恢复为阅读顺序，数字和英文保持正确方向，并修正词尾字母",
   "cmd.edit.formatCodeBlock": "格式化光标处的代码块",
   "cmd.edit.formatCodeBlock.hint": "Prettier：格式化光标所在的代码块",
   "cmd.edit.formatDocument": "格式化文档",

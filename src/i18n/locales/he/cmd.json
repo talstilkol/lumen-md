@@ -114,6 +114,8 @@
   "cmd.copyBlockLink.hint": "נותן לבלוק שבסמן מזהה ^id ומעתיק [[פתק#^id]]",
   "cmd.edit.bidiFix": "ניקוי סימני כיוון ותיקון סוגריים",
   "cmd.edit.bidiFix.hint": "הסרת סימנים שלא משנים דבר על המסך והחלפת סוגריים שהוקלדו הפוך — ביטול אחד מחזיר הכול",
+  "cmd.edit.fixPdfHebrew": "תיקון עברית הפוכה (מ-PDF)",
+  "cmd.edit.fixPdfHebrew.hint": "מחזיר עברית שהועתקה מ-PDF לסדר הקריאה, עם מספרים ואנגלית בכיוון הנכון, ומתקן אותיות סופיות",
   "cmd.edit.formatCodeBlock": "עיצוב בלוק הקוד שבסמן",
   "cmd.edit.formatCodeBlock.hint": "Prettier: עיצוב בלוק הקוד שהסמן נמצא בו",
   "cmd.edit.formatDocument": "עיצוב המסמך",

@@ -113,6 +113,8 @@
   "cmd.copyBlockLink.hint": "Gives the block at the cursor a ^id and copies [[Note#^id]]",
   "cmd.edit.bidiFix": "Clean direction marks and fix brackets",
   "cmd.edit.bidiFix.hint": "Remove marks that change nothing on screen and swap brackets typed backwards — one undo",
+  "cmd.edit.fixPdfHebrew": "Fix reversed Hebrew (from a PDF)",
+  "cmd.edit.fixPdfHebrew.hint": "Puts Hebrew copied from a PDF back in reading order, keeping numbers and English the right way round, and fixes final letters",
   "cmd.edit.formatCodeBlock": "Format code block at cursor",
   "cmd.edit.formatCodeBlock.hint": "Prettier: format the fenced block under the cursor",
   "cmd.edit.formatDocument": "Format document",

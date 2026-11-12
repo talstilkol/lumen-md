@@ -114,6 +114,8 @@
   "cmd.copyBlockLink.hint": "يمنح الكتلة عند المؤشر معرّفًا ^id وينسخ [[ملاحظة#^id]]",
   "cmd.edit.bidiFix": "تنظيف علامات الاتجاه وإصلاح الأقواس",
   "cmd.edit.bidiFix.hint": "إزالة العلامات التي لا تغيّر شيئًا على الشاشة وقلب الأقواس المكتوبة بالعكس — تراجع واحد",
+  "cmd.edit.fixPdfHebrew": "إصلاح العبرية المعكوسة (من PDF)",
+  "cmd.edit.fixPdfHebrew.hint": "يعيد النص العبري المنسوخ من PDF إلى ترتيب القراءة مع إبقاء الأرقام والإنجليزية في اتجاهها، ويصلح الحروف النهائية",
   "cmd.edit.formatCodeBlock": "تنسيق كتلة الشيفرة عند المؤشر",
   "cmd.edit.formatCodeBlock.hint": "Prettier: تنسيق كتلة الشيفرة التي يقع فيها المؤشر",
   "cmd.edit.formatDocument": "تنسيق المستند",

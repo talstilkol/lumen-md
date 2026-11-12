@@ -34,6 +34,7 @@ import { log } from "../lib/logger";
 import { getMarkdown, insert as insertMarkdown, $prose } from "@milkdown/utils";
 import { cleanPastedHtml, shouldConvertPaste } from "../paste/htmlPaste";
 import { setWysiwygPasteTarget, type PasteDetail } from "../paste/pasteCommands";
+import { wysiwygPdfPastePlugin } from "../paste/wysiwygPdfPaste";
 import { wysiwygSourcePreserver } from "./wysiwygSource";
 import { wysiwygObsidianPlugins } from "./wysiwygObsidian";
 import {
@@ -807,6 +808,8 @@ const pasteCleanPlugin = $prose(
             new Plugin({ props: { attributes: () => ({ spellcheck: spellCheckRef.current ? "true" : "false" }) } }),
             // W5.4 — direction-control tags, the Trojan Source paste warning.
             wysiwygBidiMarksPlugin(),
+            // W5.5 — "Looks reversed — fix?" after pasting Hebrew from a PDF.
+            wysiwygPdfPastePlugin(),
             new Plugin({
               appendTransaction: (trs) => {
                 if (trs.some((t) => t.docChanged || t.storedMarksSet)) pendingSinceRef.current = Date.now();

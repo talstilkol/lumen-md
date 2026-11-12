@@ -112,6 +112,15 @@ export function buildEditCommands({ getEditorView, suggestingMode, toggleSuggest
           if (msg) useToastStore.getState().push({ kind: "warning", title: msg });
         }),
     })),
+    // W5.5 — Hebrew copied from a PDF, reversed or with broken final letters (loaded on use).
+    {
+      id: "edit.fixPdfHebrew",
+      label: t("cmd.edit.fixPdfHebrew"),
+      hint: t("cmd.edit.fixPdfHebrew.hint"),
+      icon: cmdIcons.Pencil,
+      group: t("group.edit"),
+      action: () => void import("../../paste/pdfPaste").then((m) => m.runFixPdfHebrew()),
+    },
   ];
 }
 

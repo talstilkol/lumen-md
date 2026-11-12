@@ -581,6 +581,16 @@
       "vars": []
     },
     {
+      "key": "cmd.edit.fixPdfHebrew",
+      "en": "Fix reversed Hebrew (from a PDF)",
+      "vars": []
+    },
+    {
+      "key": "cmd.edit.fixPdfHebrew.hint",
+      "en": "Puts Hebrew copied from a PDF back in reading order, keeping numbers and English the right way round, and fixes final letters",
+      "vars": []
+    },
+    {
       "key": "cmd.edit.formatCodeBlock",
       "en": "Format code block at cursor",
       "vars": []

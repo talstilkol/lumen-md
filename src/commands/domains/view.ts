@@ -2,6 +2,7 @@
 import { cmdIcons, type Command } from "../../ui/CommandPalette";
 import { useAppStore } from "../../store/useStore";
 import { t, SUPPORTED_LOCALES } from "../../i18n";
+import { showAiToast } from "../../ui/AiToast";
 import type { CommandContext } from "./context";
 import { EXCALIDRAW_CANVAS_ENABLED } from "../../canvas/engine";
 import { log } from "../../lib/logger";
