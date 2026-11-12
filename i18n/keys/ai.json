@@ -106,6 +106,14 @@
       "vars": []
     },
     {
+      "key": "agent.suggest.clarifyTool",
+      "en": "Say what {tool} needs, then run it again ({problem})",
+      "vars": [
+        "tool",
+        "problem"
+      ]
+    },
+    {
       "key": "agent.suggest.configureKey",
       "en": "Add your {provider} key",
       "vars": [
