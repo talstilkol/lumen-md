@@ -58,7 +58,7 @@ export function buildHebrewDictionaryCommands(): Command[] {
   ];
 }
 
-/** Plan W1.29: the moderator's usability-session recorder (local only, consent first). */
+/** Plan W1.29: the moderator's usability-session recorder; W4.25: the self-guided session (local only, consent first). */
 export function buildUsabilityStudyCommands(): Command[] {
   return [
     {
@@ -68,6 +68,15 @@ export function buildUsabilityStudyCommands(): Command[] {
       icon: cmdIcons.Sparkles,
       group: t("group.tools"),
       action: () => window.dispatchEvent(new CustomEvent("lumen-open-usability")),
+    },
+    // Plan W4.25: the participant runs the same tasks alone (opt-in, consent first, local only).
+    {
+      id: "research.usabilitySelf",
+      label: t("cmd.research.usabilitySelf"),
+      hint: t("cmd.research.usabilitySelf.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      action: () => window.dispatchEvent(new CustomEvent("lumen-open-usability-self")),
     },
   ];
 }
