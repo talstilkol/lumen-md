@@ -26,7 +26,14 @@
  *
  * A browser cannot drop a CSP it has applied, so turning the switch off
  * reloads the page. While it is on, the monitor's certificate (src/privacy/
- * airplaneCertificate.ts) states the window and counts what left: 0.
+ * airplaneCertificate.ts) states the window and counts the attempts that
+ * reached the network (attempts, not bytes). Requests still waiting for an
+ * answer when the switch goes on are counted in that number and aborted;
+ * response bodies still downloading are cut off.
+ *
+ * Frames: a URL-loaded frame (the playground and live-js runners) has its own
+ * header policy, so the <meta> allows frames from blob: only and those
+ * blocks don't run while the switch is on (review 12.11).
  *
  * Not covered, said plainly: the app's own script chunks that the service
  * worker does not have cached load from the app's server like any page
@@ -38,7 +45,8 @@ import { __setAirplaneFlag, addAirplaneCsp, AIRPLANE_KEY, airplaneSinceStored } 
 import { AIRPLANE_CHANNEL, type AirplaneMessage } from "../ai/workerLedger";
 
 export type EgressKind = "fetch" | "xhr" | "websocket" | "eventsource" | "beacon" | "webrtc" | "worker" | "resource" | "csp";
-export type EgressDecision = "allowed" | "blocked" | "cache-only" | "local";
+/** "in-flight": a request still waiting for its answer when the switch went on (counted, then aborted). */
+export type EgressDecision = "allowed" | "blocked" | "cache-only" | "local" | "in-flight";
 
 export interface EgressAttempt {
   id: number;
@@ -50,7 +58,12 @@ export interface EgressAttempt {
   decision: EgressDecision;
   /** Where in the code it came from: the first stack frame outside this module. */
   origin: string;
-  /** Bytes transferred over the network, when the browser reports them (Resource Timing). */
+  /**
+   * Bytes transferred over the network (Resource Timing), for the app's own
+   * origin only. A load from another origin reports 0 without
+   * Timing-Allow-Origin, so it carries no size and always counts as an
+   * attempt that reached the network.
+   */
   transferSize?: number;
 }
 
@@ -159,7 +172,21 @@ const isBlocked = (v: Verdict) => v === "blocked" || (v === "self" && on);
 
 /* ─── the switch ─── */
 
-const openSockets = new Set<{ close: () => void }>();
+/** Sockets and peers open now, with what they connect to (closed and counted when the switch goes on). */
+const openSockets = new Map<{ close: () => void }, { kind: EgressKind; url: string; origin: string }>();
+
+/** Requests that reached the network and have no answer yet. */
+interface Flight {
+  kind: EgressKind;
+  url: string;
+  method: string;
+  origin: string;
+  abort: () => void;
+}
+const inFlight = new Set<Flight>();
+/** Answered fetches whose body may still be downloading (aborting a finished one does nothing). */
+let bodies: AbortController[] = [];
+const MAX_BODIES = 200;
 let channel: BroadcastChannel | null = null;
 
 function broadcast(): void {
@@ -174,14 +201,33 @@ function broadcast(): void {
 export function enableAirplaneMode(): void {
   if (on) return;
   on = true;
-  since = Date.now();
+  const at = Date.now();
+  since = at;
   try {
     localStorage.setItem(AIRPLANE_KEY, JSON.stringify({ since }));
   } catch {
     /* why: storage denied: on for this page only */
   }
   if (typeof document !== "undefined") addAirplaneCsp(document);
-  for (const s of [...openSockets]) {
+  // What was already on the network: counted at this moment, then stopped.
+  for (const f of [...inFlight]) {
+    record({ kind: f.kind, target: egressTarget(f.url), method: f.method, decision: "in-flight", origin: f.origin, ts: at });
+    try {
+      f.abort();
+    } catch {
+      /* why: already settled */
+    }
+  }
+  inFlight.clear();
+  for (const c of bodies.splice(0)) {
+    try {
+      c.abort(new AirplaneBlockedError("response body"));
+    } catch {
+      /* why: already done */
+    }
+  }
+  for (const [s, info] of [...openSockets]) {
+    record({ kind: info.kind, target: egressTarget(info.url), method: info.kind === "webrtc" ? "PEER" : "GET", decision: "in-flight", origin: info.origin, ts: at });
     try {
       s.close();
     } catch {
@@ -212,8 +258,9 @@ function blockedAttempt(kind: EgressKind, url: string, method: string): Airplane
   return new AirplaneBlockedError(egressTarget(url));
 }
 
-function note(kind: EgressKind, url: string, method: string, v: Verdict): void {
-  record({ kind, target: egressTarget(url), method, decision: v === "local" ? "local" : v === "self" ? "cache-only" : "allowed", origin: codeOrigin(new Error().stack, 2) });
+/** Record an attempt that goes ahead; returns where in the code it came from. */
+function note(kind: EgressKind, url: string, method: string, v: Verdict): string {
+  return record({ kind, target: egressTarget(url), method, decision: v === "local" ? "local" : v === "self" ? "cache-only" : "allowed", origin: codeOrigin(new Error().stack, 2) }).origin;
 }
 
 type W = Window & typeof globalThis;
@@ -232,10 +279,30 @@ export function installAirplaneMode(win: W = window as W): void {
     const method = (init?.method ?? (typeof Request !== "undefined" && input instanceof Request ? input.method : "GET")).toUpperCase();
     const v = verdict(url, win.location?.href);
     if (v === "blocked" || (v === "self" && method !== "GET")) return Promise.reject(blockedAttempt("fetch", url, method));
-    note("fetch", url, method, v);
+    const origin = note("fetch", url, method, v);
     // The app's own files, from a cache only: the service worker passes the mode on.
     if (v === "self") return innerFetch(input, { ...init, cache: "only-if-cached", mode: "same-origin" });
-    return innerFetch(input, init);
+    if (v !== "network" || typeof AbortController === "undefined") return innerFetch(input, init);
+    // On the network: kept in reach, so turning the switch on counts it and aborts it.
+    const ctrl = new AbortController();
+    const outer = init?.signal ?? (typeof Request !== "undefined" && input instanceof Request ? input.signal : undefined);
+    if (outer) {
+      if (outer.aborted) ctrl.abort(outer.reason);
+      else outer.addEventListener("abort", () => ctrl.abort(outer.reason), { once: true });
+    }
+    const flight: Flight = { kind: "fetch", url, method, origin, abort: () => ctrl.abort(new AirplaneBlockedError(egressTarget(url))) };
+    inFlight.add(flight);
+    return innerFetch(input, { ...init, signal: ctrl.signal }).then(
+      (res) => {
+        inFlight.delete(flight);
+        bodies = [...bodies, ctrl].slice(-MAX_BODIES);
+        return res;
+      },
+      (err: unknown) => {
+        inFlight.delete(flight);
+        throw err;
+      },
+    );
   } as typeof fetch;
 
   const XHR = win.XMLHttpRequest;
@@ -251,7 +318,12 @@ export function installAirplaneMode(win: W = window as W): void {
       const [method, url] = urls.get(this) ?? ["GET", ""];
       const v = verdict(url, win.location?.href);
       if (isBlocked(v)) throw blockedAttempt("xhr", url, method);
-      note("xhr", url, method, v);
+      const origin = note("xhr", url, method, v);
+      if (v === "network") {
+        const flight: Flight = { kind: "xhr", url, method, origin, abort: () => this.abort() };
+        inFlight.add(flight);
+        this.addEventListener?.("loadend", () => inFlight.delete(flight));
+      }
       return send.call(this, body);
     };
   }
@@ -263,11 +335,11 @@ export function installAirplaneMode(win: W = window as W): void {
       const url = urlOf(args);
       const v = kind === "webrtc" ? (on ? "blocked" : "network") : verdict(url, win.location?.href);
       if (isBlocked(v)) throw blockedAttempt(kind, url, kind === "webrtc" ? "PEER" : "GET");
-      note(kind, url, kind === "webrtc" ? "PEER" : "GET", v);
+      const origin = note(kind, url, kind === "webrtc" ? "PEER" : "GET", v);
       const inst = Reflect.construct(Inner, args, new.target ?? Inner) as { close?: () => void; addEventListener?: (t: string, f: () => void) => void };
       if (track && typeof inst.close === "function") {
         const s = inst as { close: () => void };
-        openSockets.add(s);
+        openSockets.set(s, { kind, url, origin });
         inst.addEventListener?.("close", () => openSockets.delete(s));
       }
       return inst;
@@ -307,7 +379,9 @@ export function installAirplaneMode(win: W = window as W): void {
         if (r.initiatorType === "fetch" || r.initiatorType === "xmlhttprequest" || r.initiatorType === "beacon") continue;
         const rv = verdict(r.name, win.location?.href);
         if (rv === "local" || (!on && sameOrigin(r.name, win.location?.href))) continue;
-        record({ kind: "resource", target: egressTarget(r.name), method: r.initiatorType, decision: "allowed", origin: r.initiatorType, transferSize: r.transferSize, ts: Math.round(performance.timeOrigin + r.startTime) });
+        // Another origin's transferSize is 0 without Timing-Allow-Origin: no size, so it counts as an attempt.
+        const own = sameOrigin(r.name, win.location?.href);
+        record({ kind: "resource", target: egressTarget(r.name), method: r.initiatorType, decision: "allowed", origin: r.initiatorType, ...(own ? { transferSize: r.transferSize } : {}), ts: Math.round(performance.timeOrigin + r.startTime) });
       }
     }).observe({ type: "resource", buffered: false });
   } catch {
@@ -340,6 +414,8 @@ export function __resetAirplane(): void {
   since = null;
   installed = false;
   openSockets.clear();
+  inFlight.clear();
+  bodies = [];
   channel?.close();
   channel = null;
 }

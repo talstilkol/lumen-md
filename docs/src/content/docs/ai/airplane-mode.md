@@ -15,8 +15,9 @@ where in the code it came from. A badge in the corner shows that the mode is on.
 | `fetch` to another site | refused before it runs |
 | `fetch` to Lumen's own server | GET only, and only from a cache (`only-if-cached`): never the network |
 | `XMLHttpRequest`, `WebSocket`, `EventSource`, `sendBeacon`, WebRTC peers | refused. Live-collaboration sockets that were open are closed |
-| Workers (model downloads) | the worker asks the page and refuses the request itself |
+| Workers (model downloads) | the worker asks the page and refuses the request itself. A worker that gets no answer refuses too |
 | Images, fonts, media, frames, stylesheets from other sites | refused by the browser itself: a Content-Security-Policy is added to the page |
+| Playground and live-JS blocks | they don't run. Their runner page is a separate frame with its own policy, so the page's policy can't cover it. Frames load only from `blob:` while the mode is on |
 | Cloud dictation (the browser's speech service) | not started |
 
 These stay allowed, because they don't leave the computer: `localhost` / `127.0.0.1`
@@ -35,8 +36,19 @@ test request to `example.com`, so you can watch it appear as blocked.
 
 While the mode is on, **Download certificate** saves a file that states the time span
 and lists every attempt in it, with a count of how many reached the network (the claim
-is 0). The file is canonical JSON with its SHA-256. It is not signed yet: signing with
-this device's key comes with the signed privacy report.
+is 0). It counts attempts, not bytes:
+
+- every request the page and its workers made through the wrapped network calls;
+- every resource load the browser lists. A load from another site counts as reaching the
+  network even when the browser reports 0 bytes (it hides the size of other sites' files);
+- every request, socket or peer still open when you turned the mode on. These count as
+  having reached the network, and are stopped at that moment.
+
+The file also lists what it doesn't prove (`notCounted`). For example, a request made
+through a copy of `fetch` that a library took before the wrappers loaded isn't listed,
+although the page's policy still refuses it to any other site. The file is canonical
+JSON with its SHA-256. It is not signed yet: signing with this device's key comes with
+the signed privacy report.
 
 ## Limits
 

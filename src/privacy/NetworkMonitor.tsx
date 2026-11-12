@@ -25,10 +25,11 @@ const DECISION_COLOR: Record<EgressAttempt["decision"], string> = {
   blocked: "hsl(0 70% 55%)",
   "cache-only": "hsl(var(--fg-muted))",
   local: "hsl(140 50% 45%)",
+  "in-flight": "hsl(35 90% 50%)",
 };
 
 const decisionLabel = (d: EgressAttempt["decision"]) =>
-  ({ allowed: t("airplane.decision.allowed"), blocked: t("airplane.decision.blocked"), "cache-only": t("airplane.decision.cache-only"), local: t("airplane.decision.local") })[d];
+  ({ allowed: t("airplane.decision.allowed"), blocked: t("airplane.decision.blocked"), "cache-only": t("airplane.decision.cache-only"), local: t("airplane.decision.local"), "in-flight": t("airplane.decision.in-flight") })[d];
 
 const time = (ms: number) => new Date(ms).toLocaleTimeString(getLocale(), { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 

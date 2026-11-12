@@ -346,7 +346,7 @@
     },
     {
       "key": "airplane.certificate.hint",
-      "en": "A file stating the time span and every attempt in it, with its SHA-256.",
+      "en": "A file with the time span, every attempt in it, and exactly what it counts (attempts, not bytes; requests in flight when the switch went on count too), with its SHA-256.",
       "vars": []
     },
     {
@@ -424,6 +424,11 @@
       "vars": []
     },
     {
+      "key": "airplane.decision.in-flight",
+      "en": "in flight at the switch (stopped)",
+      "vars": []
+    },
+    {
       "key": "airplane.decision.local",
       "en": "local",
       "vars": []
@@ -436,6 +441,11 @@
     {
       "key": "airplane.limits",
       "en": "Loopback (a local model on this computer) stays allowed. The app's own files load from the cache only; a script chunk that isn't cached would load from the app's server, and is then counted as reaching the network.",
+      "vars": []
+    },
+    {
+      "key": "airplane.runner.paused",
+      "en": "Paused while airplane mode is on: code run here could reach other sites. Turn airplane mode off to run it.",
       "vars": []
     },
     {

@@ -7,6 +7,15 @@
  * file, frame and connection to another site. The wrappers and the live list
  * of attempts (src/privacy/airplane.ts) load right after, off the startup
  * bundle.
+ *
+ * Frames: a URL-loaded frame (the playground and live-js runners) runs under
+ * its own header policy, not this <meta>, so `frame-src` allows only blob:
+ * while the switch is on: the browser refuses to load those pages at all
+ * (review 12.11). srcdoc and blob: frames inherit this policy.
+ *
+ * Workers: this module also answers their "is airplane mode on?" question
+ * (src/ai/workerLedger.ts) from the startup bundle, so the answer never
+ * depends on a lazy chunk loading. A worker that hears nothing blocks.
  */
 
 export const AIRPLANE_KEY = "lumen.airplane";
@@ -14,7 +23,7 @@ const META_ID = "lumen-airplane-csp";
 
 /** What the page may still load while the switch is on: itself, blob:, data:, loopback. */
 export const AIRPLANE_CSP =
-  "default-src 'self' blob: data:; script-src 'self' 'wasm-unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; media-src 'self' blob: data:; font-src 'self' data:; frame-src 'self' blob:; worker-src 'self' blob:; connect-src 'self' blob: data: http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:*";
+  "default-src 'self' blob: data:; script-src 'self' 'wasm-unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; media-src 'self' blob: data:; font-src 'self' data:; frame-src blob:; worker-src 'self' blob:; connect-src 'self' blob: data: http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:*";
 
 /** When the switch went on (ms since the epoch), or null when it is off. */
 export function airplaneSinceStored(): number | null {
@@ -45,6 +54,29 @@ export function addAirplaneCsp(doc: Document = document): void {
 }
 
 if (on && typeof document !== "undefined" && document.head) addAirplaneCsp(document);
+
+/** The workers' channel (the same name as AIRPLANE_CHANNEL in src/ai/workerLedger.ts). */
+const WORKER_CHANNEL = "lumen-airplane";
+
+/**
+ * Answer a worker's "hello" with the switch's state, at once. Exported for
+ * tests; runs on load in a window. Returns the channel, or null.
+ */
+export function answerWorkers(make: () => Pick<BroadcastChannel, "postMessage" | "addEventListener"> = () => new BroadcastChannel(WORKER_CHANNEL)): Pick<BroadcastChannel, "postMessage" | "addEventListener"> | null {
+  try {
+    const ch = make();
+    ch.addEventListener("message", ((e: MessageEvent<{ kind?: unknown } | null>) => {
+      if (e.data?.kind === "hello") ch.postMessage({ kind: "state", on });
+    }) as EventListener);
+    (ch as { unref?: () => void }).unref?.();
+    return ch;
+  } catch {
+    // why: no BroadcastChannel here: workers then hear nothing and block (fail closed)
+    return null;
+  }
+}
+
+if (typeof window !== "undefined" && typeof document !== "undefined" && typeof BroadcastChannel !== "undefined") answerWorkers();
 
 /** Tests only: the flag as if the page had just loaded with it. */
 export function __setAirplaneFlag(value: boolean): void {
