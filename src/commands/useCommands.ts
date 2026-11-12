@@ -4,6 +4,7 @@ import { cmdIcons } from "../ui/CommandPalette";
 import { tabIdOf, useAppStore } from "../store/useStore";
 import { t, SUPPORTED_LOCALES, getLocale } from "../i18n";
 import { runPaste } from "../paste/pasteCommands";
+import { runFixPdfHebrew } from "../paste/pdfPaste";
 import { useToastStore } from "../store/useToastStore";
 import { getGitIdentity, setGitIdentity, setGitToken, cloneRepo, pullRepo, commitAndPush, gitStatusSummary } from "../sync/git";
 import { getRecents, removeRecent } from "../storage/recent";
@@ -2263,6 +2264,15 @@ export function useCommands({
             if (msg) useToastStore.getState().push({ kind: "warning", title: msg });
           }),
       })),
+      // W5.5 — Hebrew copied from a PDF, reversed or with broken final letters.
+      {
+        id: "edit.fixPdfHebrew",
+        label: t("cmd.edit.fixPdfHebrew"),
+        hint: t("cmd.edit.fixPdfHebrew.hint"),
+        icon: cmdIcons.Pencil,
+        group: t("group.edit"),
+        action: () => runFixPdfHebrew(),
+      },
       // ── Plans (billing builds only) ─────────────────────────────────────
       ...(canPurchasePlans()
         ? [

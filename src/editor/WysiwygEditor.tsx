@@ -32,6 +32,7 @@ import { log } from "../lib/logger";
 import { getMarkdown, insert as insertMarkdown, $prose } from "@milkdown/utils";
 import { cleanPastedHtml, shouldConvertPaste } from "../paste/htmlPaste";
 import { setWysiwygPasteTarget, type PasteDetail } from "../paste/pasteCommands";
+import { wysiwygPdfPastePlugin } from "../paste/wysiwygPdfPaste";
 import { wysiwygSourcePreserver } from "./wysiwygSource";
 import {
   configureWysiwygSuggest,
@@ -766,6 +767,8 @@ export default function WysiwygEditor({ value, onChange }: Props) {
             dragHandlePlugin,
             // T25 — every block reads in the direction of its own text.
             wysiwygBidiPlugin(),
+            // W5.5 — "Looks reversed — fix?" after pasting Hebrew from a PDF.
+            wysiwygPdfPastePlugin(),
             new Plugin({
               appendTransaction: (trs) => {
                 if (trs.some((t) => t.docChanged || t.storedMarksSet)) pendingSinceRef.current = Date.now();

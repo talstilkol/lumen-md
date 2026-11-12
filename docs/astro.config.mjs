@@ -37,6 +37,7 @@ export default defineConfig({
             { label: "Outline mode", slug: "editor/outline-mode", translations: { he: "מצב מתאר" } },
             { label: "Markdown fidelity", slug: "editor/markdown-fidelity", translations: { he: "נאמנות ל-Markdown" } },
             { label: "Pasting from Word and the web", slug: "editor/paste", translations: { he: "הדבקה מ-Word ומהרשת" } },
+            { label: "Hebrew pasted from a PDF", slug: "editor/pdf-paste", translations: { he: "הדבקת עברית מ-PDF" } },
           ],
         },
         {

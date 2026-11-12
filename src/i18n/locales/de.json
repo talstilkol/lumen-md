@@ -1435,5 +1435,16 @@
   "cmd.edit.pasteFormatted": "Mit Formatierung einfügen",
   "cmd.edit.pasteFormatted.hint": "Fügt HTML aus Word, Google Docs oder einer Website als sauberes Markdown ein: Überschriften, Listen, Tabellen, Links und Hervorhebungen, ohne Stile",
   "paste.clipboardDenied": "Lumen kann die Zwischenablage nicht lesen. Erlauben Sie den Zugriff oder fügen Sie mit Strg+V ein.",
-  "paste.clipboardEmpty": "Die Zwischenablage ist leer."
+  "paste.clipboardEmpty": "Die Zwischenablage ist leer.",
+  "cmd.edit.fixPdfHebrew": "Umgedrehtes Hebräisch reparieren (aus PDF)",
+  "cmd.edit.fixPdfHebrew.hint": "Bringt aus einem PDF kopiertes Hebräisch in Leserichtung, Zahlen und Englisch bleiben richtig herum, und korrigiert Endbuchstaben",
+  "pdfPaste.reversed.title": "Sieht umgedreht aus – reparieren?",
+  "pdfPaste.finals.title": "Die Endbuchstaben sehen falsch aus – reparieren?",
+  "pdfPaste.preview": "Vorschau: {text}",
+  "pdfPaste.fix": "Reparieren",
+  "pdfPaste.changed": "Der eingefügte Text hat sich seitdem geändert; markiere ihn und führe „Umgedrehtes Hebräisch reparieren“ aus der Befehlspalette aus.",
+  "pdfPaste.selectFirst": "Markiere zuerst den umgedrehten Text.",
+  "pdfPaste.looksFine": "Der markierte Text liest sich richtig – nichts zu reparieren.",
+  "pdfPaste.fixed": "Repariert. Rückgängig (Strg+Z) stellt ihn wieder her.",
+  "pdfPaste.needsEditor": "Öffne die Notiz im Editor, um Text zu reparieren."
 }

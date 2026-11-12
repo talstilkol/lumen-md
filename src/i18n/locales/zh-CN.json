@@ -1435,5 +1435,16 @@
   "cmd.edit.pasteFormatted": "带格式粘贴",
   "cmd.edit.pasteFormatted.hint": "将 Word、Google 文档或网站的 HTML 粘贴为干净的 Markdown：标题、列表、表格、链接和强调，不含样式",
   "paste.clipboardDenied": "Lumen 无法读取剪贴板。请允许访问剪贴板，或使用 Ctrl+V 粘贴。",
-  "paste.clipboardEmpty": "剪贴板为空。"
+  "paste.clipboardEmpty": "剪贴板为空。",
+  "cmd.edit.fixPdfHebrew": "修正反向的希伯来语（来自 PDF）",
+  "cmd.edit.fixPdfHebrew.hint": "把从 PDF 复制的希伯来语恢复为阅读顺序，数字和英文保持正确方向，并修正词尾字母",
+  "pdfPaste.reversed.title": "文字似乎是反向的 — 要修正吗？",
+  "pdfPaste.finals.title": "词尾字母似乎有误 — 要修正吗？",
+  "pdfPaste.preview": "预览：{text}",
+  "pdfPaste.fix": "修正",
+  "pdfPaste.changed": "粘贴的文字此后已更改；请选中它，然后在命令面板中运行“修正反向的希伯来语”。",
+  "pdfPaste.selectFirst": "请先选中反向的文字。",
+  "pdfPaste.looksFine": "所选文字读起来是正确的 — 无需修正。",
+  "pdfPaste.fixed": "已修正。撤销（Ctrl+Z）可恢复。",
+  "pdfPaste.needsEditor": "请在编辑器中打开笔记以修正文字。"
 }

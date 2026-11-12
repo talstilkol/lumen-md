@@ -1435,5 +1435,16 @@
   "cmd.edit.pasteFormatted": "書式を保持して貼り付け",
   "cmd.edit.pasteFormatted.hint": "Word、Google ドキュメント、Web サイトの HTML を、見出し・リスト・表・リンク・強調を保ったきれいな Markdown として貼り付けます（スタイルなし）",
   "paste.clipboardDenied": "Lumen はクリップボードを読み取れません。アクセスを許可するか、Ctrl+V で貼り付けてください。",
-  "paste.clipboardEmpty": "クリップボードは空です。"
+  "paste.clipboardEmpty": "クリップボードは空です。",
+  "cmd.edit.fixPdfHebrew": "反転したヘブライ語を修正（PDF から）",
+  "cmd.edit.fixPdfHebrew.hint": "PDF からコピーしたヘブライ語を読み順に戻し、数字と英語は正しい向きのまま、語末形の文字も修正します",
+  "pdfPaste.reversed.title": "テキストが反転しているようです — 修正しますか？",
+  "pdfPaste.finals.title": "語末形の文字が誤っているようです — 修正しますか？",
+  "pdfPaste.preview": "プレビュー: {text}",
+  "pdfPaste.fix": "修正",
+  "pdfPaste.changed": "貼り付けたテキストはその後変更されています。選択してコマンドパレットから「反転したヘブライ語を修正」を実行してください。",
+  "pdfPaste.selectFirst": "まず反転したテキストを選択してください。",
+  "pdfPaste.looksFine": "選択したテキストは正しく読めます — 修正は不要です。",
+  "pdfPaste.fixed": "修正しました。元に戻す（Ctrl+Z）で戻せます。",
+  "pdfPaste.needsEditor": "テキストを修正するにはノートをエディターで開いてください。"
 }
