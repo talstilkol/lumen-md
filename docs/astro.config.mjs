@@ -169,6 +169,7 @@ export default defineConfig({
             { label: "Automatic merging", slug: "sync/merge" },
             { label: "Sync status, selective sync, time left", slug: "sync/status", translations: { he: "מצב הסנכרון וסנכרון סלקטיבי" } },
             { label: "Sync on the local network", slug: "sync/lan", translations: { he: "סנכרון ברשת המקומית" } },
+            { label: "Keys, rotation and revocation", slug: "sync/e2ee-keys", translations: { he: "מפתחות, החלפה וביטול" } },
           ],
         },
         {

@@ -21,6 +21,12 @@
  * this device's rules exclude (`exclude`) are skipped in both directions:
  * an excluded local file is never read for upload.
  *
+ * Keys (plan W1.7): at the start of a round the device brings its keys up to
+ * the keyring (./keyring.ts): a newer epoch is unwrapped, an older one is a
+ * rollback and refused, a missing wrap means this device was revoked.
+ * `rekey()` starts a new epoch and re-seals the manifest under it; blobs
+ * keep the epoch they were written in (`e` in their manifest entry).
+ *
  * Interruption at any point loses nothing: blobs are written before the
  * manifest that references them, the base is saved per file after the local
  * write, and the next round recognises work that was already done (same hash
@@ -31,9 +37,10 @@
 
 import { randomBytes, sha256Hex, toB64u } from "./bytes";
 import { conflictCopyPath, keepBothResolver, type ConflictResolver } from "./conflict";
-import { createHeader, decodeHeader, encodeHeader, HEADER_NAME, unlockHeader, type VaultHeader } from "./header";
+import { createHeader, decodeHeader, encodeHeader, HEADER_NAME, rekeyHeader, unlockHeader, type VaultHeader } from "./header";
 import { PBKDF2_MIN_ITERATIONS, type KdfPolicy } from "./kdf";
-import { DecryptError, seal, unseal, type VaultKeys } from "./keys";
+import { blobKey, DecryptError, seal, unseal, type VaultKeys } from "./keys";
+import { KEYRING_NAME, keysFromKeyring, readKeyring, refreshKeys, unwrapSecret, writeNewEpoch, type KeyAccess } from "./keyring";
 import { isSyncedPath, type LocalFile, type LocalFiles } from "./localFiles";
 import {
   blobName,
@@ -131,7 +138,31 @@ export async function unlockVault(
   const obj = await provider.get(HEADER_NAME);
   if (!obj) throw new NoVaultError();
   const header = decodeHeader(obj.data, policy);
-  return { header, keys: await unlockHeader(header, passphrase) };
+  const base = await unlockHeader(header, passphrase);
+  // Plan W1.7: a vault with a keyring keeps its current keys there.
+  const ring = await readKeyring(provider);
+  if (!ring) return { header, keys: base };
+  if (ring.file.vaultId !== base.vaultId) throw new DecryptError("The keyring belongs to another vault");
+  return { header, keys: await keysFromKeyring(ring.file, await unwrapSecret(ring.file, { wrap: base.wrap! }), base) };
+}
+
+/**
+ * Open the vault with this device's own key (an age identity enrolled in
+ * the keyring), without the passphrase. `RevokedError` once it was revoked.
+ */
+export async function unlockWithDevice(provider: SyncProvider, device: string, identity: string): Promise<{ keys: VaultKeys }> {
+  const ring = await readKeyring(provider);
+  if (!ring) throw new NoVaultError();
+  const secret = await unwrapSecret(ring.file, { device, identity });
+  const placeholder = await crypto.subtle.generateKey({ name: "HMAC", hash: "SHA-256", length: 256 }, false, ["sign", "verify"]);
+  return { keys: await keysFromKeyring(ring.file, secret, { header: placeholder, wrap: null }) };
+}
+
+export interface RekeyResult {
+  epoch: number;
+  counter: number;
+  /** Objects written: the keyring, the manifest, and the header when the passphrase changed. No blob. */
+  written: string[];
 }
 
 export interface SyncResult {
@@ -164,10 +195,16 @@ export interface E2eeSyncOptions {
   exclude?: ExcludeRule;
   /** Each step of a round, as it happens (plan W1.8). A listener that throws is ignored. */
   onEvent?: SyncEventListener;
+  /**
+   * How this device opens newer keyrings (plan W1.7). Default: the
+   * passphrase's wrap key when the keys have one. A device opened with its
+   * own key passes `{device, identity}`.
+   */
+  access?: KeyAccess;
 }
 
 export class E2eeSync {
-  private readonly o: Required<Omit<E2eeSyncOptions, "resolver">> & { resolver: ConflictResolver };
+  private readonly o: Required<Omit<E2eeSyncOptions, "resolver" | "access">> & { resolver: ConflictResolver; access: KeyAccess | null };
   private running: Promise<unknown> = Promise.resolve();
   private state: DeviceState | null = null;
   /** Digest of the manifest `readManifest` returned last (the parent of the next commit). */
@@ -189,6 +226,7 @@ export class E2eeSync {
       now: opts.now ?? (() => Date.now()),
       exclude: opts.exclude ?? (() => null),
       onEvent: opts.onEvent ?? (() => undefined),
+      access: opts.access ?? (opts.keys.wrap ? { wrap: opts.keys.wrap } : null),
     };
   }
 
@@ -227,6 +265,74 @@ export class E2eeSync {
       remote: this.lastRemote?.files ?? null,
       holds: this.holds,
       exclude: this.o.exclude,
+    });
+  }
+
+  /** The keys this device uses now (they change at a re-key). */
+  keys(): VaultKeys {
+    return this.o.keys;
+  }
+
+  /** Step 0: bring the keys up to the keyring. */
+  private async refresh(): Promise<void> {
+    if (!this.o.access) return;
+    const s = await this.loadState();
+    const next = await refreshKeys(this.o.provider, this.o.keys, this.o.access, Math.max(s.epoch ?? 0, this.o.keys.epoch));
+    if (next !== this.o.keys) this.o.keys = next;
+    if ((s.epoch ?? 0) < next.epoch) {
+      s.epoch = next.epoch;
+      await this.save();
+    }
+  }
+
+  /**
+   * Start a new key epoch (plan W1.7): re-key, revoke devices, enroll
+   * devices, change the passphrase. Writes the keyring, re-seals the
+   * manifest (counter + 1) and, for a new passphrase, the header. No blob is
+   * downloaded or uploaded: older blobs keep their epoch's key.
+   */
+  rekey(opts: { revoke?: string[]; enroll?: Record<string, string>; newPassphrase?: string; pbkdf2Iterations?: number } = {}): Promise<RekeyResult> {
+    return this.exclusive(async () => {
+      const s = await this.loadState();
+      await this.refresh();
+      const written: string[] = [];
+      let header: { header: VaultHeader; master: Uint8Array } | null = null;
+      if (opts.newPassphrase !== undefined) header = await rekeyHeader(this.o.keys.vaultId, opts.newPassphrase, opts.pbkdf2Iterations !== undefined ? { pbkdf2Iterations: opts.pbkdf2Iterations } : {});
+      let current = await this.readManifest();
+      const previous = this.o.keys;
+      const keys = await writeNewEpoch(this.o.provider, previous, { revoke: opts.revoke, enroll: opts.enroll, newPassphraseMaster: header?.master, now: this.o.now });
+      written.push(KEYRING_NAME);
+      if (header) {
+        await this.o.provider.put(HEADER_NAME, encodeHeader(header.header));
+        written.push(HEADER_NAME);
+      }
+      // Re-seal the manifest under the new epoch; a commit that raced in
+      // under the old epoch is read with the previous key and carried over.
+      for (let attempt = 0; ; attempt++) {
+        const m = current.manifest;
+        const next: Manifest = {
+          ...m,
+          counter: m.counter + 1,
+          files: pathRecord(m.files),
+          history: m.counter > 0 ? [...m.history, [m.counter, this.remoteDigest] as [number, string]].slice(-HISTORY_LENGTH) : [],
+        };
+        const name = await this.manifestObject();
+        const sealed = await sealManifest(keys, next, name);
+        try {
+          await this.o.provider.put(name, sealed.bytes, current.etag ? { ifMatch: current.etag } : { ifNoneMatch: "*" });
+        } catch (e) {
+          if (!(e instanceof PreconditionFailedError) || attempt >= this.o.maxAttempts) throw e;
+          current = await this.readManifest(previous.manifest);
+          continue;
+        }
+        written.push(name);
+        this.o.keys = keys;
+        if (keys.wrap && (!this.o.access || "wrap" in this.o.access)) this.o.access = { wrap: keys.wrap };
+        s.anchor = { counter: next.counter, digest: sealed.digest };
+        s.epoch = keys.epoch;
+        await this.save();
+        return { epoch: keys.epoch, counter: next.counter, written };
+      }
     });
   }
 
@@ -370,12 +476,13 @@ export class E2eeSync {
     const name = await this.blob(path, e.rev);
     const obj = await this.o.provider.get(name);
     if (!obj) throw new BlobMissingError();
-    const data = await unseal(this.o.keys.blobs, this.o.keys.vaultId, "blob", name, obj.data);
+    const data = await unseal(blobKey(this.o.keys, e.e), this.o.keys.vaultId, "blob", name, obj.data);
     if ((await sha256Hex(data)) !== e.hash) throw new DecryptError("A file does not match its manifest entry");
     return data;
   }
 
-  private async readManifest(): Promise<{ manifest: Manifest; etag: string | null }> {
+  /** `previousKey`: also accept a manifest sealed under the previous epoch (only while re-keying). */
+  private async readManifest(previousKey?: CryptoKey): Promise<{ manifest: Manifest; etag: string | null }> {
     const s = await this.loadState();
     const obj = await this.o.provider.get(await this.manifestObject());
     if (!obj) {
@@ -383,7 +490,14 @@ export class E2eeSync {
       if (s.anchor) throw new RollbackError(s.anchor.counter, 0, "older");
       return { manifest: emptyManifest(this.o.keys.vaultId), etag: null };
     }
-    const { manifest, digest } = await openManifest(this.o.keys, obj.data, await this.manifestObject());
+    let opened: { manifest: Manifest; digest: string };
+    try {
+      opened = await openManifest(this.o.keys, obj.data, await this.manifestObject());
+    } catch (e) {
+      if (!(e instanceof DecryptError) || !previousKey) throw e;
+      opened = await openManifest({ ...this.o.keys, manifest: previousKey }, obj.data, await this.manifestObject());
+    }
+    const { manifest, digest } = opened;
     const got = { counter: manifest.counter, digest };
     if (checkFreshness(s.anchor, got, manifest.history) === "unproven" && s.freshness !== "unverified") {
       // Too far behind to prove this manifest descends from the one we trusted:
@@ -423,11 +537,12 @@ export class E2eeSync {
 
   private async round(): Promise<SyncResult> {
     const s = await this.loadState();
+    await this.refresh();
     const res: SyncResult = { uploaded: 0, downloaded: 0, deleted: 0, conflicts: [], held: [], counter: 0, retries: 0, incomplete: false };
     const held = new Set<string>();
     this.holds = new Map();
     /** Blobs uploaded in this round, reused when a retry pushes the same content again. */
-    const uploads = new Map<string, { hash: string; rev: string; size: number; data: Uint8Array | null }>();
+    const uploads = new Map<string, { hash: string; rev: string; size: number; data: Uint8Array | null; epoch: number }>();
 
     for (let attempt = 0; attempt < this.o.maxAttempts; attempt++) {
       let remote: Manifest;
@@ -636,7 +751,7 @@ export class E2eeSync {
   private async collectChanges(
     remote: Manifest,
     held: Set<string>,
-    uploads: Map<string, { hash: string; rev: string; size: number; data: Uint8Array | null }>,
+    uploads: Map<string, { hash: string; rev: string; size: number; data: Uint8Array | null; epoch: number }>,
   ): Promise<Map<string, { entry: ManifestEntry; data: Uint8Array | null }>> {
     const s = await this.loadState();
     const listed = await this.listLocal();
@@ -690,11 +805,11 @@ export class E2eeSync {
         await this.save();
         await this.o.provider.put(name, sealed, { ifNoneMatch: "*" });
         // Kept for the base after the commit only when it will be stored (see setBase).
-        up = { hash, rev, size: data.length, data: data.length > BASE_BYTES_LIMIT ? null : data };
+        up = { hash, rev, size: data.length, data: data.length > BASE_BYTES_LIMIT ? null : data, epoch: this.o.keys.epoch };
         uploads.set(path, up);
         this.emit({ kind: "upload", at: this.o.now(), path, bytes: data.length, direction: "up" });
       }
-      out.set(path, { entry: { ver, rev: up.rev, hash, size: up.size, by: s.deviceId }, data: up.data });
+      out.set(path, { entry: { ver, rev: up.rev, hash, size: up.size, by: s.deviceId, ...(up.epoch ? { e: up.epoch } : {}) }, data: up.data });
     }
     // The manifest must describe a tree a file system can hold: never a live
     // file `x` together with live entries under `x/`. A change that would
