@@ -7,6 +7,7 @@
 
 import { randomId } from "../lib/cryptoRandom";
 import { needsSyncWriteFallback, syncWriteOpfs } from "./opfsSyncWrite";
+import { readText } from "./textCodec";
 
 export interface WorkspaceEntry {
   /** File path relative to the workspace root. */
@@ -166,7 +167,8 @@ export async function listWorkspace(
 export async function readWorkspaceFile(path: string): Promise<string> {
   const handle = await getFileHandleAt(path);
   const file = await handle.getFile();
-  return await file.text();
+  // Keeps a BOM: `file.text()` drops it, and the next save would too (W4.30).
+  return await readText(file);
 }
 
 export async function writeWorkspaceFile(

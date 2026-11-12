@@ -12,6 +12,7 @@
 import { unzip, unzipText } from "./zip";
 import { iworkToMarkdown } from "./iwork";
 import { parseInertDocument } from "../lib/trustedTypes";
+import { readText } from "./textCodec";
 
 /* ─── HTML → Markdown (zero-dep, uses DOMParser) ─── */
 
@@ -382,7 +383,7 @@ export async function fileToMarkdown(file: File): Promise<{ name: string; conten
     case "mkd":
     case "md":
     case "txt":
-      return { name: file.name, content: await file.text() };
+      return { name: file.name, content: await readText(file) };
     default:
       return { name: file.name, content: await file.text() };
   }
