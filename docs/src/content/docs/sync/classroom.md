@@ -32,6 +32,8 @@ VAULT_RELAY_DIR=/srv/lumen-relay PORT=4446 node sync-server/vault-relay.js
 
 It can also run inside the live-share server (`VAULT_RELAY=1 node sync-server/server.js`). Then build Lumen for the school with `VITE_SYNC_RELAY_URL` pointing at that relay. The setting also allows the relay's address in the app's Content-Security-Policy. The school's Lumen and its relay can work with no internet at all. A link always names its relay. A copy of Lumen built for another relay refuses the link and says why.
 
+The relay counts, per network address and per day, the new spaces it opens and the bytes it takes (5 spaces and 1 GiB by default; see [sync in two clicks](/sync/two-clicks/)). A whole school usually reaches the relay from one address, and each assignment is a new space. On a school relay, raise `VAULT_RELAY_NEW_SPACES_PER_DAY` and `VAULT_RELAY_ADDRESS_BYTES_PER_DAY` to fit the class.
+
 ## How it works
 
 | What | Where it goes | Who can read it |

@@ -111,7 +111,10 @@ export interface ClassDeps {
 const enc = new TextEncoder();
 const dec = new TextDecoder();
 const nowOf = (deps: ClassDeps) => (deps.now ?? Date.now)();
-const providerOf = (deps: ClassDeps, relay: string, token: string) => (deps.provider ?? ((url, t) => relayProvider({ url, token: t }, { fetch: deps.fetch })))(relay, token);
+/** The build's relay invite (review 12.11): a relay that asks for one won't open a drop box without it. */
+const relayInvite = () => (import.meta as ImportMeta & { env?: Record<string, string | undefined> }).env?.VITE_SYNC_RELAY_INVITE || undefined;
+const providerOf = (deps: ClassDeps, relay: string, token: string) =>
+  (deps.provider ?? ((url, t) => relayProvider({ url, token: t, invite: relayInvite() }, { fetch: deps.fetch })))(relay, token);
 const random = (n: number) => toBase64Url(crypto.getRandomValues(new Uint8Array(n)));
 
 /** The drop box id an owner token opens: the relay derives the same (vault-relay.js `dropIdOf`). */
