@@ -170,6 +170,83 @@ export function buildViewCommands({ setSearchOpen, setRuntimeMetricsOpen, vimEna
       },
     },
     {
+      id: "note.morning",
+      label: t("cmd.note.morning"),
+      hint: t("cmd.note.morning.hint"),
+      icon: cmdIcons.FileText,
+      group: t("group.file"),
+      // Plan W5.19: turn "Your morning" on (off by default) and write it into today's note now.
+      action: async () => {
+        const store = useAppStore.getState();
+        const settings = { ...store.dailyNotes, morning: true };
+        if (!store.dailyNotes.morning) store.setDailyNotes({ morning: true });
+        const [{ dayOf, dailyPath, ensureDailyNote }, m] = await Promise.all([import("../../daily/dailyNote"), import("../../daily/morning")]);
+        const day = dayOf(new Date());
+        const path = dailyPath(day, settings);
+        try {
+          const t0 = performance.now();
+          if (store.doc.workspaceName === path) store.setContent(await m.applyToText(store.doc.content, day, settings, store.locale));
+          else {
+            await ensureDailyNote(day, settings, store.locale);
+            await m.refreshMorningFile(day, settings, store.locale);
+            window.dispatchEvent(new CustomEvent("lumen-open-today"));
+          }
+          showAiToast(t("morning.done", { ms: Math.round(performance.now() - t0) }), "success");
+        } catch (e) {
+          showAiToast(t("morning.failed", { error: e instanceof Error ? e.message : String(e) }), "error");
+        }
+      },
+    },
+    {
+      id: "note.morningOff",
+      label: t("cmd.note.morningOff"),
+      hint: t("cmd.note.morningOff.hint"),
+      icon: cmdIcons.FileText,
+      group: t("group.file"),
+      action: () => useAppStore.getState().setDailyNotes({ morning: false }),
+    },
+    {
+      id: "pdf.open",
+      label: t("cmd.pdf.open"),
+      hint: t("cmd.pdf.open.hint"),
+      icon: cmdIcons.FileText,
+      group: t("group.file"),
+      // Plan 4.14: copies the PDF into the vault and opens it in the reader.
+      action: () => void import("../../pdf/openPdf").then((m) => m.pickAndOpenPdf()),
+    },
+    {
+      id: "epub.open",
+      label: t("cmd.epub.open"),
+      icon: cmdIcons.FileText,
+      group: t("group.file"),
+      // Plan W1.14: copies the book into the vault and opens it in the reader.
+      action: () => void import("../../epub/openEpub").then((m) => m.pickAndOpenEpub()),
+    },
+    {
+      id: "view.reading",
+      label: t("cmd.reading.mode"),
+      icon: cmdIcons.FileText,
+      group: t("group.file"),
+      // Plan W1.14: the open note (a clip, typically) as a page to read and highlight.
+      action: () => void import("../../epub/ReadingMode").then((m) => m.openReadingMode()),
+    },
+    {
+      id: "view.highlights",
+      label: t("cmd.highlights.all"),
+      icon: cmdIcons.FileText,
+      group: t("group.file"),
+      // Plan W1.15: every PDF, EPUB and clip highlight — search, tags, export.
+      action: () => void import("../../highlights/HighlightsPanel").then((m) => m.openHighlightsPanel()),
+    },
+    {
+      id: "view.review",
+      label: t("cmd.review.daily"),
+      icon: cmdIcons.FileText,
+      group: t("group.file"),
+      // Plan W3.3: today's spaced-repetition cards (highlights and question::answer).
+      action: () => void import("../../srs/ReviewPanel").then((m) => m.openDailyReview()),
+    },
+    {
       id: "view.calendar",
       label: t("cmd.view.calendar"),
       hint: t("cmd.view.calendar.hint"),

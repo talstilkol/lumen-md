@@ -197,6 +197,11 @@ export async function openDailyNote(day: Day, settings: DailySettings, locale: s
     return null;
   }
   const path = await ensureDailyNote(day, settings, locale);
+  // Plan W5.19: today's "Your morning" block, when it is on and the note is not open with edits.
+  const open = useAppStore.getState();
+  if (settings.morning && isoOf(day) === isoOf(dayOf(new Date())) && open.doc.workspaceName !== path && !open.openTabs.some((x) => x.workspaceName === path)) {
+    await import("./morning").then((m) => m.refreshMorningFile(day, settings, locale)).catch(() => undefined);
+  }
   const store = useAppStore.getState();
   if (store.doc.workspaceName === path) return path;
   const tab = store.openTabs.find((x) => x.workspaceName === path);

@@ -4578,6 +4578,81 @@
       "vars": []
     },
     {
+      "key": "morning.changed",
+      "en": "Changed since the last morning",
+      "vars": []
+    },
+    {
+      "key": "morning.done",
+      "en": "“Your morning” is in today's note ({ms} ms).",
+      "vars": [
+        "ms"
+      ]
+    },
+    {
+      "key": "morning.failed",
+      "en": "“Your morning” could not be written: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "morning.holidays",
+      "en": "Today",
+      "vars": []
+    },
+    {
+      "key": "morning.more",
+      "en": "and {n} more",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "morning.noChanges",
+      "en": "Nothing changed.",
+      "vars": []
+    },
+    {
+      "key": "morning.noReview",
+      "en": "Nothing to review today.",
+      "vars": []
+    },
+    {
+      "key": "morning.noTasks",
+      "en": "No task is due today.",
+      "vars": []
+    },
+    {
+      "key": "morning.openReview",
+      "en": "Open them: ⌘K → Daily review",
+      "vars": []
+    },
+    {
+      "key": "morning.overdue",
+      "en": "due {date}",
+      "vars": [
+        "date"
+      ]
+    },
+    {
+      "key": "morning.review",
+      "en": "Cards to review: {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "morning.tasks",
+      "en": "Tasks for today",
+      "vars": []
+    },
+    {
+      "key": "morning.title",
+      "en": "Your morning",
+      "vars": []
+    },
+    {
       "key": "mt.layer.chrome.absent",
       "en": "this browser has no built-in translator",
       "vars": []

@@ -1250,6 +1250,26 @@
       "vars": []
     },
     {
+      "key": "cmd.note.morning",
+      "en": "Daily note: “Your morning”",
+      "vars": []
+    },
+    {
+      "key": "cmd.note.morning.hint",
+      "en": "Adds what changed, today's tasks, the cards to review and the Hebrew date to today's note — from this device only. Turns it on for every morning.",
+      "vars": []
+    },
+    {
+      "key": "cmd.note.morningOff",
+      "en": "Daily note: turn off “Your morning”",
+      "vars": []
+    },
+    {
+      "key": "cmd.note.morningOff.hint",
+      "en": "Today's notes are created without the morning block.",
+      "vars": []
+    },
+    {
       "key": "cmd.note.read",
       "en": "Read aloud",
       "vars": []
