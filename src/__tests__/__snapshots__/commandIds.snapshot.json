@@ -320,6 +320,12 @@
       "icon": "Sparkles"
     },
     {
+      "id": "vault.check",
+      "label": "Check vault integrity",
+      "group": "Tools",
+      "icon": "Sparkles"
+    },
+    {
       "id": "tools.autoTag",
       "label": "🏷️ Auto-tag this note",
       "group": "Tools",
@@ -1596,6 +1602,12 @@
       "icon": "Sparkles"
     },
     {
+      "id": "vault.check",
+      "label": "Check vault integrity",
+      "group": "Tools",
+      "icon": "Sparkles"
+    },
+    {
       "id": "tools.autoTag",
       "label": "🏷️ Auto-tag this note",
       "group": "Tools",
@@ -2675,6 +2687,7 @@
     "ai.localToggle",
     "tools.vaultDoctor",
     "tools.vaultDoctorFix",
+    "vault.check",
     "tools.autoTag",
     "tools.suggestLinks",
     "ai.productAgent",

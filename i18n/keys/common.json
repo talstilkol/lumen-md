@@ -3905,6 +3905,202 @@
       ]
     },
     {
+      "key": "vaultCheck.checking",
+      "en": "Checking every file in the vault…",
+      "vars": []
+    },
+    {
+      "key": "vaultCheck.clean",
+      "en": "Checked {files} files in {seconds} s: no problems.",
+      "vars": [
+        "files",
+        "seconds"
+      ]
+    },
+    {
+      "key": "vaultCheck.confirm",
+      "en": "Repair {n} problems? Every file is copied to {folder} before it changes. Notes open in a tab are left alone.",
+      "vars": [
+        "n",
+        "folder"
+      ]
+    },
+    {
+      "key": "vaultCheck.failed",
+      "en": "The vault check stopped: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "vaultCheck.fix.collision",
+      "en": "rename to “name (2)”",
+      "vars": []
+    },
+    {
+      "key": "vaultCheck.fix.interrupted-write",
+      "en": "finish the save (or put the old version back)",
+      "vars": []
+    },
+    {
+      "key": "vaultCheck.fix.invalid-utf8",
+      "en": "convert from Windows-1255 to UTF-8",
+      "vars": []
+    },
+    {
+      "key": "vaultCheck.fix.no",
+      "en": "Not repaired automatically: {why}",
+      "vars": [
+        "why"
+      ]
+    },
+    {
+      "key": "vaultCheck.fix.nul-bytes",
+      "en": "remove the NUL bytes",
+      "vars": []
+    },
+    {
+      "key": "vaultCheck.fix.orphan-temp",
+      "en": "remove the temporary file",
+      "vars": []
+    },
+    {
+      "key": "vaultCheck.fix.truncated-utf8",
+      "en": "drop the cut character",
+      "vars": []
+    },
+    {
+      "key": "vaultCheck.fix.utf16",
+      "en": "convert to UTF-8",
+      "vars": []
+    },
+    {
+      "key": "vaultCheck.fix.yes",
+      "en": "Repair: {fix}",
+      "vars": [
+        "fix"
+      ]
+    },
+    {
+      "key": "vaultCheck.kind.bad-data",
+      "en": "Data files that do not parse (JSON / YAML)",
+      "vars": []
+    },
+    {
+      "key": "vaultCheck.kind.bad-frontmatter",
+      "en": "Broken front matter",
+      "vars": []
+    },
+    {
+      "key": "vaultCheck.kind.broken-link",
+      "en": "Links to notes that are not there",
+      "vars": []
+    },
+    {
+      "key": "vaultCheck.kind.case-collision",
+      "en": "Names that differ only in upper/lower case",
+      "vars": []
+    },
+    {
+      "key": "vaultCheck.kind.empty-file",
+      "en": "Empty files",
+      "vars": []
+    },
+    {
+      "key": "vaultCheck.kind.interrupted-write",
+      "en": "Saves interrupted half way (the note is missing)",
+      "vars": []
+    },
+    {
+      "key": "vaultCheck.kind.invalid-utf8",
+      "en": "Not UTF-8 (for example Hebrew saved as Windows-1255)",
+      "vars": []
+    },
+    {
+      "key": "vaultCheck.kind.normalization-collision",
+      "en": "Names that differ only in Unicode form",
+      "vars": []
+    },
+    {
+      "key": "vaultCheck.kind.nul-bytes",
+      "en": "NUL bytes in a text file",
+      "vars": []
+    },
+    {
+      "key": "vaultCheck.kind.orphan-temp",
+      "en": "Temporary files of interrupted saves",
+      "vars": []
+    },
+    {
+      "key": "vaultCheck.kind.truncated-utf8",
+      "en": "Cut off in the middle of a character",
+      "vars": []
+    },
+    {
+      "key": "vaultCheck.kind.utf16",
+      "en": "Saved as UTF-16",
+      "vars": []
+    },
+    {
+      "key": "vaultCheck.more",
+      "en": "… and {n} more",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "vaultCheck.repaired",
+      "en": "Repaired {n} problems. The originals are in {folder}.",
+      "vars": [
+        "n",
+        "folder"
+      ]
+    },
+    {
+      "key": "vaultCheck.same",
+      "en": "same folder as {other}",
+      "vars": [
+        "other"
+      ]
+    },
+    {
+      "key": "vaultCheck.skipped",
+      "en": "{n} could not be repaired (they changed since the check, or are open in a tab).",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "vaultCheck.summary",
+      "en": "Checked {files} files in {seconds} s: {count} problems, {repairable} of them can be repaired.",
+      "vars": [
+        "files",
+        "seconds",
+        "count",
+        "repairable"
+      ]
+    },
+    {
+      "key": "vaultCheck.title",
+      "en": "Vault integrity check",
+      "vars": []
+    },
+    {
+      "key": "vaultCheck.why.broken-link",
+      "en": "use Vault Doctor: Apply Suggested Link Fixes",
+      "vars": []
+    },
+    {
+      "key": "vaultCheck.why.data",
+      "en": "open the file's history to bring back a version that parses",
+      "vars": []
+    },
+    {
+      "key": "vaultCheck.why.empty-file",
+      "en": "open the note's history to bring back a version",
+      "vars": []
+    },
+    {
       "key": "vaultEnc.autoLock",
       "en": "Lock after inactivity",
       "vars": []

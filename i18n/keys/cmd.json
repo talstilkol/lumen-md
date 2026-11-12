@@ -1335,6 +1335,11 @@
       "vars": []
     },
     {
+      "key": "cmd.vault.check",
+      "en": "Check vault integrity",
+      "vars": []
+    },
+    {
       "key": "cmd.vault.digest",
       "en": "Digest: what changed",
       "vars": []
