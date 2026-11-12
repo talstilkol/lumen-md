@@ -4947,6 +4947,145 @@
       "vars": []
     },
     {
+      "key": "pluginDev.about",
+      "en": "Run a plugin you are writing from its dev server (npm run dev) and reload it on every save. Only this computer can connect.",
+      "vars": []
+    },
+    {
+      "key": "pluginDev.calls",
+      "en": "Last calls ({n})",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "pluginDev.cap",
+      "en": "Permission",
+      "vars": []
+    },
+    {
+      "key": "pluginDev.caps",
+      "en": "Permissions: asked for and used",
+      "vars": []
+    },
+    {
+      "key": "pluginDev.connect",
+      "en": "Connect",
+      "vars": []
+    },
+    {
+      "key": "pluginDev.cpu",
+      "en": "CPU {ms} ms in {n} runs (longest {max} ms)",
+      "vars": [
+        "ms",
+        "n",
+        "max"
+      ]
+    },
+    {
+      "key": "pluginDev.denied",
+      "en": "Refused",
+      "vars": []
+    },
+    {
+      "key": "pluginDev.disconnect",
+      "en": "Disconnect",
+      "vars": []
+    },
+    {
+      "key": "pluginDev.failed",
+      "en": "Could not connect: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "pluginDev.loadMs",
+      "en": "start {ms} ms",
+      "vars": [
+        "ms"
+      ]
+    },
+    {
+      "key": "pluginDev.memory",
+      "en": "memory {size}",
+      "vars": [
+        "size"
+      ]
+    },
+    {
+      "key": "pluginDev.notAsked",
+      "en": "not in the manifest",
+      "vars": []
+    },
+    {
+      "key": "pluginDev.reload",
+      "en": "Reload",
+      "vars": []
+    },
+    {
+      "key": "pluginDev.reloadMs",
+      "en": "last reload {ms} ms",
+      "vars": [
+        "ms"
+      ]
+    },
+    {
+      "key": "pluginDev.reloads",
+      "en": "Reloads: {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "pluginDev.scanNotes",
+      "en": "Scan: {n} notes, grade {grade}",
+      "vars": [
+        "n",
+        "grade"
+      ]
+    },
+    {
+      "key": "pluginDev.state.closed",
+      "en": "disconnected",
+      "vars": []
+    },
+    {
+      "key": "pluginDev.state.connecting",
+      "en": "connecting",
+      "vars": []
+    },
+    {
+      "key": "pluginDev.state.error",
+      "en": "error",
+      "vars": []
+    },
+    {
+      "key": "pluginDev.state.running",
+      "en": "running",
+      "vars": []
+    },
+    {
+      "key": "pluginDev.title",
+      "en": "Developer mode",
+      "vars": []
+    },
+    {
+      "key": "pluginDev.unused",
+      "en": "never used",
+      "vars": []
+    },
+    {
+      "key": "pluginDev.url",
+      "en": "Dev server",
+      "vars": []
+    },
+    {
+      "key": "pluginDev.used",
+      "en": "Calls",
+      "vars": []
+    },
+    {
       "key": "pluginTrust.cap.clipboard-write",
       "en": "Copy text to your clipboard",
       "vars": []

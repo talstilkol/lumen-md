@@ -112,7 +112,7 @@ describe("the registry: 100% of versions scanned, with a card", () => {
     expect(scans.results.length).toBe(versions.length);
   });
 
-  it("the three examples pass, each using exactly what it declares", () => {
+  it("every example passes, each using exactly what it declares", () => {
     for (const r of scans.results) {
       expect(r.passed, r.id).toBe(true);
       expect(r.findings.filter((f) => f.rule === "unused" || f.rule === "undeclared"), r.id).toEqual([]);

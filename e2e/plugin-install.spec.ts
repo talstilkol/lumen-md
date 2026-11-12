@@ -21,8 +21,8 @@ test.beforeEach(async ({ page }) => {
   await page.locator("header").first().waitFor({ state: "visible", timeout: 10_000 });
 });
 
-test("the install screen shows every permission of the three example plugins", async ({ page }) => {
-  expect(manifests).toHaveLength(3);
+test("the install screen shows every permission of every example plugin", async ({ page }) => {
+  expect(manifests).toHaveLength(index.plugins.length);
   const pageErrors: string[] = [];
   page.on("pageerror", (err) => pageErrors.push(err.message));
 
@@ -35,7 +35,7 @@ test("the install screen shows every permission of the three example plugins", a
 
   const gallery = page.locator('[role="dialog"][aria-labelledby="plugin-gallery-title"]');
   const section = gallery.getByTestId("sandboxed-plugins");
-  await expect(section.getByTestId("sandboxed-plugin-card")).toHaveCount(3, { timeout: 15_000 });
+  await expect(section.getByTestId("sandboxed-plugin-card")).toHaveCount(manifests.length, { timeout: 15_000 });
 
   for (const m of manifests) {
     const card = section.locator(`[data-testid="sandboxed-plugin-card"][data-plugin="${m.id}"]`);
