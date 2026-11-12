@@ -18,6 +18,7 @@
   "toast.chartFailed": "Échec du graphique : {error}",
   "toast.chartInserted": "✅ Graphique inséré",
   "toast.checkingGrammar": "📝 Vérification de la grammaire…",
+  "toast.cite.noCaseNumber": "Pas de numéro de dossier sous le curseur : remplissez la référence à la main.",
   "toast.clonedFilesIntoWorkspace": "✅ Fichiers clonés dans l'espace de travail : {count}",
   "toast.cloningRepository": "Clonage du dépôt…",
   "toast.completed": "✅ {name} terminé",

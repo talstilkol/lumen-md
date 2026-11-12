@@ -18,6 +18,7 @@
   "toast.chartFailed": "图表生成失败：{error}",
   "toast.chartInserted": "✅ 已插入图表",
   "toast.checkingGrammar": "📝 正在检查语法…",
+  "toast.cite.noCaseNumber": "光标处没有案件编号：请手动填写引用。",
   "toast.clonedFilesIntoWorkspace": "✅ 已克隆到工作区的文件：{count}",
   "toast.cloningRepository": "正在克隆仓库…",
   "toast.completed": "✅ {name} 已完成",

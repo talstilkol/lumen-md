@@ -18,6 +18,7 @@
   "toast.chartFailed": "יצירת התרשים נכשלה: {error}",
   "toast.chartInserted": "✅ התרשים נוסף",
   "toast.checkingGrammar": "📝 בודק דקדוק…",
+  "toast.cite.noCaseNumber": "אין מספר תיק ליד הסמן: מלאו את האזכור ידנית.",
   "toast.clonedFilesIntoWorkspace": "✅ קבצים ששוכפלו לסביבת העבודה: {count}",
   "toast.cloningRepository": "משכפל מאגר…",
   "toast.completed": "✅ {name} הושלם",

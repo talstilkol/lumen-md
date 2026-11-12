@@ -18,6 +18,7 @@
   "toast.chartFailed": "グラフの生成に失敗しました: {error}",
   "toast.chartInserted": "✅ グラフを挿入しました",
   "toast.checkingGrammar": "📝 文法をチェック中…",
+  "toast.cite.noCaseNumber": "カーソル位置に事件番号がありません。手動で入力してください。",
   "toast.clonedFilesIntoWorkspace": "✅ ワークスペースにクローンしたファイル: {count}",
   "toast.cloningRepository": "リポジトリをクローン中…",
   "toast.completed": "✅ {name} が完了しました",

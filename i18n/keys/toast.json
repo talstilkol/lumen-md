@@ -119,6 +119,11 @@
       "vars": []
     },
     {
+      "key": "toast.cite.noCaseNumber",
+      "en": "No case number at the cursor: fill in the citation by hand.",
+      "vars": []
+    },
+    {
       "key": "toast.clonedFilesIntoWorkspace",
       "en": "✅ Cloned files into the workspace: {count}",
       "vars": [

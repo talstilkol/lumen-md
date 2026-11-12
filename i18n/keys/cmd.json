@@ -486,6 +486,26 @@
       "vars": []
     },
     {
+      "key": "cmd.cite.legal",
+      "en": "Citations: legal source (uniform citation rules)…",
+      "vars": []
+    },
+    {
+      "key": "cmd.cite.legal.hint",
+      "en": "A ruling, a law, regulations, a bill, a book or an article, written by the Israeli uniform citation rules (3rd edition, 2021)",
+      "vars": []
+    },
+    {
+      "key": "cmd.cite.legalFromCase",
+      "en": "Citations: legal citation from the case number at the cursor",
+      "vars": []
+    },
+    {
+      "key": "cmd.cite.legalFromCase.hint",
+      "en": "Finds ע\"א, בג\"ץ, ת\"א … numbers and fills the citation picker; the citation replaces the number",
+      "vars": []
+    },
+    {
       "key": "cmd.cite.syncZotero",
       "en": "Citations: copy the Zotero library into the vault",
       "vars": []

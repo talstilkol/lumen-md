@@ -18,6 +18,7 @@
   "toast.chartFailed": "فشل المخطط البياني: {error}",
   "toast.chartInserted": "✅ تم إدراج المخطط البياني",
   "toast.checkingGrammar": "📝 جارٍ التدقيق النحوي…",
+  "toast.cite.noCaseNumber": "لا يوجد رقم قضية عند المؤشر: املأ الإحالة يدويًا.",
   "toast.clonedFilesIntoWorkspace": "✅ الملفات المستنسخة إلى مساحة العمل: {count}",
   "toast.cloningRepository": "جارٍ استنساخ المستودع…",
   "toast.completed": "✅ اكتمل {name}",

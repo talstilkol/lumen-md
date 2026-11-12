@@ -18,6 +18,7 @@
   "toast.chartFailed": "Diagramm fehlgeschlagen: {error}",
   "toast.chartInserted": "✅ Diagramm eingefügt",
   "toast.checkingGrammar": "📝 Grammatik wird geprüft…",
+  "toast.cite.noCaseNumber": "Kein Aktenzeichen am Cursor: Zitat von Hand ausfüllen.",
   "toast.clonedFilesIntoWorkspace": "✅ In den Workspace geklonte Dateien: {count}",
   "toast.cloningRepository": "Repository wird geklont…",
   "toast.completed": "✅ {name} abgeschlossen",

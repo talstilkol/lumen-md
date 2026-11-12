@@ -18,6 +18,7 @@
   "toast.chartFailed": "Не удалось создать график: {error}",
   "toast.chartInserted": "✅ График вставлен",
   "toast.checkingGrammar": "📝 Проверка грамматики…",
+  "toast.cite.noCaseNumber": "У курсора нет номера дела: заполните ссылку вручную.",
   "toast.clonedFilesIntoWorkspace": "✅ Файлов клонировано в рабочее пространство: {count}",
   "toast.cloningRepository": "Клонирование репозитория…",
   "toast.completed": "✅ {name}: готово",

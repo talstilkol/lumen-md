@@ -18,6 +18,7 @@
   "toast.chartFailed": "Chart failed: {error}",
   "toast.chartInserted": "✅ Chart inserted",
   "toast.checkingGrammar": "📝 Checking grammar…",
+  "toast.cite.noCaseNumber": "No case number at the cursor: fill in the citation by hand.",
   "toast.clonedFilesIntoWorkspace": "✅ Cloned files into the workspace: {count}",
   "toast.cloningRepository": "Cloning repository…",
   "toast.completed": "✅ {name} completed",
