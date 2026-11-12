@@ -74,9 +74,13 @@ export interface CollabSession {
  * Override at runtime via `localStorage["lumen.collab.signaling"]` or the
  * `VITE_WEBRTC_SIGNALING_URL` env var (single URL or comma-separated list).
  */
+// Plan W4.15: the Heroku server (y-webrtc-signaling-eu.herokuapp.com) is
+// gone — Heroku ended free dynos in November 2022, and y-webrtc itself (the
+// 10.3.0 in package-lock.json) replaced it with y-webrtc-eu.fly.dev as its
+// default `signaling`. That is the second public server now.
 const PUBLIC_SIGNALING_FALLBACK = [
   "wss://signaling.yjs.dev",
-  "wss://y-webrtc-signaling-eu.herokuapp.com",
+  "wss://y-webrtc-eu.fly.dev",
 ];
 
 const getSignalingUrls = (): string[] => {
@@ -97,7 +101,7 @@ const getSignalingUrls = (): string[] => {
     log.warn(`Collab signaling ${u} skipped: ${cspAdvice(u, "VITE_WEBRTC_SIGNALING_URL")}`);
   }
   // T49: by default only the configured signaling server (none when the
-  // build sets none). The public third-party servers (yjs.dev, heroku) see
+  // build sets none). The public third-party servers (yjs.dev, fly.dev) see
   // who meets whom, so they are used only when the user opts in (Collab
   // settings) — then also as a fallback behind a custom server.
   if (!publicSignalingAllowed()) return configured;
