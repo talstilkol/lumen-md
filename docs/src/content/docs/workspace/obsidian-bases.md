@@ -164,3 +164,35 @@ views:
   - Properties the base's filter pins (such as `type == "task"`) are added,
     so the new notes show in the view.
   - A name that's taken gets a number.
+
+## Real vaults
+
+The golden set was written from the Bases documentation. To check Lumen
+against files people really write, `src/__tests__/fixtures/obsidian-corpus/`
+holds byte-for-byte copies of seven public vaults with open licences (MIT,
+and MIT + CC BY 4.0), each pinned to a commit in `manifest.json` with its
+licence and a SHA-256 per file: 333 notes, 44 `.base` files and a canvas,
+with callouts, `%%` comments, embeds, block ids, frontmatter and Dataview
+inline fields. `node scripts/obsidian-corpus.mjs` checks the copies;
+`--fetch` downloads them again. The test `obsidianCorpus.test.ts` runs
+Lumen's own open → save path over every file:
+
+- **Open and save, no edit:** every note and every `.base` comes back
+  byte-identical — also when the note was saved by Windows (a byte-order
+  mark and CRLF line endings stay; before W4.30 the first edit turned every
+  line ending into LF and opening dropped the mark).
+- **Properties:** writing a value that is already there changes nothing,
+  for every editable property. A key written twice (`tags:` twice is common)
+  is shown but not editable: a write could reach only one of the two.
+- **Bases:** all 89 views run over their own vault without an error. The
+  syntax of the first Bases releases is read too: `sort: - column: x`,
+  top-level `display:`, `not()` and `empty()`, and an empty formula.
+- **Rename and rename back:** the linking notes come back byte-identical; a
+  `./` prefix, a `.md` in a wiki link and a Hebrew file name in a Markdown
+  link are kept as written. The one exception is a link written in another
+  case (`[[evergreen]]` comes back as `[[Evergreen]]`), which Obsidian
+  rewrites the same way.
+
+The WYSIWYG editor writes the note's body again on the first edit (its
+Markdown writer has its own spelling of lists and emphasis); edit notes from
+another app in the source editor.

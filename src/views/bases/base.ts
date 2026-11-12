@@ -117,8 +117,12 @@ function readFilter(v: unknown, where: string): BasesFilter | undefined {
 
 function readSort(v: unknown): BasesSort | null {
   if (typeof v === "string") return { property: v, direction: "ASC" };
-  if (!isRecord(v) || typeof v.property !== "string") return null;
-  return { property: v.property, direction: String(v.direction ?? "ASC").toUpperCase() === "DESC" ? "DESC" : "ASC" };
+  if (!isRecord(v)) return null;
+  // `column:` is how the first Bases releases (1.9) wrote it, and real
+  // files still have it (plan W4.30); it means the same as `property:`.
+  const property = typeof v.property === "string" ? v.property : typeof v.column === "string" ? v.column : null;
+  if (property === null) return null;
+  return { property, direction: String(v.direction ?? "ASC").toUpperCase() === "DESC" ? "DESC" : "ASC" };
 }
 
 /** Parse a `.base` file. Never throws. */
@@ -136,6 +140,8 @@ export function parseBase(text: string): BaseParse {
     const formulas: Record<string, string> = {};
     if (isRecord(raw.formulas)) for (const [k, v] of Object.entries(raw.formulas)) if (v !== null && v !== undefined) formulas[k] = String(v);
     const displayNames: Record<string, string> = {};
+    // `display: { note.x: Label }`: the 1.9 form of `properties: { x: { displayName } }` (W4.30).
+    if (isRecord(raw.display)) for (const [k, v] of Object.entries(raw.display)) if (typeof v === "string") displayNames[propertyId(k)] = v;
     if (isRecord(raw.properties))
       for (const [k, v] of Object.entries(raw.properties)) if (isRecord(v) && typeof v.displayName === "string") displayNames[propertyId(k)] = v.displayName;
     const summaries: Record<string, string> = {};
@@ -392,7 +398,8 @@ export function runBase(base: BaseModel, files: readonly BasesFile[], opts: RunO
     return p.ok ? p.tree : null;
   };
   const formulaTrees = new Map<string, BasesNode | null>();
-  for (const [name, src] of Object.entries(base.formulas)) formulaTrees.set(name, parse(src, `formula ${name}`));
+  // An empty formula (`name: ""`, as Obsidian saves a new column) is an empty column, not an error.
+  for (const [name, src] of Object.entries(base.formulas)) formulaTrees.set(name, src.trim() ? parse(src, `formula ${name}`) : null);
 
   // One "now" for the whole run (and no clock read per expression).
   const evalOpts: BasesEvalOptions = { now: opts.now ?? new Date(), limits: opts.limits, locale: opts.locale, random: opts.random };

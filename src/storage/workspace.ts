@@ -16,6 +16,7 @@ import { basename, dirname, splitPath } from "./vault/shared";
 export { basename, dirname, joinPath, splitPath } from "./vault/shared";
 export { WorkspaceConflictError } from "./vault/types";
 export type { VaultEntry } from "./vault/types";
+import { readText } from "./textCodec";
 
 export interface WorkspaceEntry {
   /** File path relative to the workspace root. */
@@ -124,7 +125,8 @@ export async function listWorkspaceDir(dir: string): Promise<VaultEntry[]> {
 }
 
 export async function readWorkspaceFile(path: string): Promise<string> {
-  return vault().readText(path);
+  // Keeps a BOM: a plain text read drops it, and the next save would too (W4.30).
+  return readText(await vault().read(path));
 }
 
 /**
