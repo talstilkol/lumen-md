@@ -19,6 +19,8 @@
  *   --cache DIR        downloads (ASR model, FLEURS clips); default ~/.cache/lumen-models-day
  *   --sign-key PEM     an Ed25519 private key: the receipt is also signed
  *   --heldout-key-file F   the held-out evaluator's key (or $LUMEN_HELDOUT_KEY): adds the held-out step (plan W6.17)
+ *   --whisper-ggml F   the ivrit.ai turbo ggml file (or $LUMEN_WHISPER_GGML) and --whisper-cli PATH (or
+ *                      $LUMEN_WHISPER_CLI, default whisper-cli): the desktop dictation step (plan W1.17, W6.19)
  *   --yes              run even when the checklist has open items
  *
  * Resumable: each step's result is saved as it finishes; stop with Ctrl-C and
@@ -143,7 +145,10 @@ if (opts["heldout-key-file"] && !process.env.LUMEN_HELDOUT_KEY) process.env.LUME
 const heldoutKey = !!process.env.LUMEN_HELDOUT_KEY;
 const withOptional = [...list(opts.with), ...(heldoutKey && !list(opts.skip).includes("heldout") ? ["heldout"] : [])];
 const heldoutStore = resolve(process.env.LUMEN_HELDOUT_DIR ?? join(homedir(), ".cache", "lumen-heldout"));
-const selected = selectSteps(STEPS, { only: list(opts.only), skip: list(opts.skip), withOptional }).map((s) => ({ ...s, available: availability(s, { scripts, root, options: { meetingsDir: opts["meetings-dir"], heldoutKey } }) }));
+// Desktop Whisper (plan W1.17, W6.19): a whisper.cpp build and the ivrit.ai turbo ggml file, when this machine has them.
+const whisperGgml = opts["whisper-ggml"] ?? process.env.LUMEN_WHISPER_GGML ?? null;
+const whisperCli = opts["whisper-cli"] ?? process.env.LUMEN_WHISPER_CLI ?? "whisper-cli";
+const selected = selectSteps(STEPS, { only: list(opts.only), skip: list(opts.skip), withOptional }).map((s) => ({ ...s, available: availability(s, { scripts, root, options: { meetingsDir: opts["meetings-dir"], heldoutKey, whisperGgml: whisperGgml && existsSync(whisperGgml) ? whisperGgml : null } }) }));
 const items = checklist(selected, env);
 const open = items.filter((i) => !i.ok);
 
@@ -271,7 +276,7 @@ for (const step of selected) {
     exit = 3;
     log.write(`missing model(s): ${missing.join(", ")} — ollama pull ${missing.join(" && ollama pull ")}\n`);
   } else {
-    for (const c of step.commands({ url, dir, cache, meetingsDir: opts["meetings-dir"], heldoutStore })) {
+    for (const c of step.commands({ url, dir, cache, meetingsDir: opts["meetings-dir"], heldoutStore, whisperGgml, whisperCli })) {
       if (c.skipIf?.()) continue;
       exit = await exec(c, log);
       // A command marked allowFail (a download the later commands can do without) does not stop the step.

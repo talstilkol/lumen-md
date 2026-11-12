@@ -134,7 +134,9 @@ export const STEPS = [
   },
   {
     id: "asr-web",
-    title: "Dictation WER in the browser — Whisper (ivrit.ai) on WebGPU / WASM",
+    // The WER is the model's (the app's ONNX files and dtypes on onnxruntime-node, CPU), so it runs in the
+    // cloud too (plan W6.19); the WebGPU latency is bench-models'. Ozen v1 is not measured while it is off.
+    title: "Dictation WER in the browser — ivrit.ai turbo (ONNX q4f16, the app's files) on FLEURS-he validation",
     plan: ["W4.13", "1.3", "W5.13", "15.3"],
     requires: { script: "eval:asr-web" },
     providedBy: "plan W4.13 (lane A, after this PR)",
@@ -142,8 +144,35 @@ export const STEPS = [
     needs: ["chromium", "network"],
     minutes: 20,
     target: { metric: "wer", max: 0.15, text: "WER ≤ 15 % on FLEURS-he validation, p95 ≤ 2 s (plan W4.13)" },
-    commands: (c) => [npm("eval:asr-web", ["--fleurs", join(c.cache, "fleurs-validation"), "--out", join(c.dir, "asr-web.json")])],
+    commands: (c) => {
+      const fleurs = join(c.cache, "fleurs-validation");
+      return [
+        { cmd: "python3", args: ["-I", "scripts/asr/fleurs_spike.py", "--out", fleurs, "--n", "30"], skipIf: () => existsSync(join(fleurs, "fleurs.json")) },
+        npm("eval:asr-web", ["--fleurs", fleurs, "--models", "turbo", "--out", join(c.dir, "asr-web.json")]),
+      ];
+    },
     parse: (dir) => asrMetrics(join(dir, "asr-web.json"), "fleurs-validation"),
+  },
+  {
+    id: "asr-whisper-cpp",
+    title: "Desktop dictation WER — whisper.cpp with ivrit.ai turbo (ggml) on FLEURS-he validation",
+    plan: ["W1.17", "W6.19"],
+    requires: { file: "scripts/whisper-desktop.mjs" },
+    providedBy: "#383 (W1.17, desktop Whisper)",
+    models: [],
+    needs: ["python3", "ffmpeg", "network"],
+    // 30 clips (~5 min of audio) at whisper.cpp's speed on a GPU or Apple silicon, plus the model load.
+    minutes: 5,
+    blockedUnless: { option: "whisperGgml", reason: "needs --whisper-ggml <ivrit.ai turbo ggml .bin> and whisper-cli (--whisper-cli); the cloud kernel builds whisper.cpp and fetches the file (plan W6.19)" },
+    target: { metric: "wer", max: 0.1, text: "WER ≤ 10 % on FLEURS-he validation on the desktop (plan W6.19)" },
+    commands: (c) => {
+      const fleurs = join(c.cache, "fleurs-validation");
+      return [
+        { cmd: "python3", args: ["-I", "scripts/asr/fleurs_spike.py", "--out", fleurs, "--n", "30"], skipIf: () => existsSync(join(fleurs, "fleurs.json")) },
+        { cmd: "node", args: ["scripts/whisper-desktop.mjs", "wer", "--split", `fleurs-validation=${fleurs}`, "--model", c.whisperGgml, "--cli", c.whisperCli ?? "whisper-cli", "--out", join(c.dir, "whisper-cpp.json")] },
+      ];
+    },
+    parse: (dir) => asrMetrics(join(dir, "whisper-cpp.json"), "fleurs-validation"),
   },
   {
     id: "tool-calls",
@@ -234,7 +263,8 @@ export const STEPS = [
         // A run copy (LUMEN_HELDOUT_EXPORT, plan W6.18) scores only: nothing to build.
         { ...npm("heldout", ["build"]), skipIf: () => !!process.env.LUMEN_HELDOUT_EXPORT || (!!store && HELDOUT_SETS.every((id) => existsSync(join(store, `${id}.lho`)))) },
         npm("heldout", ["scan", "--require-key", "--out", join(c.dir, "scan.json")]),
-        npm("heldout", ["run", "--models", "qwen2.5:7b,gemma3:12b", "--url", c.url, "--out", c.dir, "--asr-model", model]),
+        // Plan W6.19: asr-he through every dictation path — phone (Zipformer), browser (turbo ONNX), desktop (whisper.cpp).
+        npm("heldout", ["run", "--models", "qwen2.5:7b,gemma3:12b", "--url", c.url, "--out", c.dir, "--asr-model", model, "--asr-engines", "zipformer,whisper-web,whisper-cpp", ...(c.whisperGgml ? ["--whisper-ggml", c.whisperGgml, "--whisper-cli", c.whisperCli ?? "whisper-cli"] : [])]),
       ];
     },
     parse: (dir) => heldoutMetrics(dir),
@@ -278,7 +308,7 @@ export const COVERAGE = [
   ["7.6", "rerank", "dev split only"],
   ["7.8", "bench-models", "refuses SwiftShader; needs a real GPU"],
   ["7.9", "agents-qwen", "processing this report is 7.9"],
-  ["W1.17", null, "desktop whisper.cpp: needs whisper-cli and a pinned ggml file — `npm run whisper:desktop -- wer` from #383, a separate desktop check"],
+  ["W1.17", "asr-whisper-cpp", "desktop whisper.cpp with the ivrit.ai turbo ggml; the cloud kernel builds whisper-cli and records the file it measured (plan W6.19)"],
   ["W2.1", null, "owed: the owner's rating of 50 suggestions; the 1,000-note run is not scripted yet"],
   ["W2.4", "dictalm3", "optional: blocked while the variant's owner checks are open"],
   ["W2.5", null, "DictaBERT-char-menaked needs the owner's ONNX export first (scripts/models/export-menaked.py)"],
@@ -292,6 +322,7 @@ export const COVERAGE = [
   ["W5.13", "asr-web", "Whisper on WebGPU; the 90-minute lecture timing is a hand check"],
   ["W5.28", "crosslingual", "e5 nDCG never measured"],
   ["W6.17", "heldout", "a held-out number beside every dev number: sets the authors never see, scored by the evaluator; the scan must find 0 items in the repo"],
+  ["W6.19", "heldout", "held-out WER per dictation path: phone (Zipformer), browser (turbo ONNX), desktop (whisper.cpp); FLEURS in asr-zipformer, asr-web, asr-whisper-cpp"],
 ].map(([task, step, note]) => ({ task, step, note }));
 
 // ── helpers that build commands ───────────────────────────────────────────
@@ -503,7 +534,7 @@ export function asrMetrics(file, split) {
   if (!j) return null;
   const s = j.splits?.[split] ?? null;
   const dev = j.splits?.dev ?? null;
-  return { engine: j.engine, wer: s?.wer ?? null, cer: s?.cer ?? null, p95Ms: s?.["latency.p95Ms"] ?? s?.p95Ms ?? null, devWer: dev?.wer ?? null, modelLoadMs: j.modelLoadMs ?? null };
+  return { engine: j.engine, wer: s?.wer ?? null, cer: s?.cer ?? null, ...(typeof s?.["wer.v2"] === "number" ? { werV2: s["wer.v2"] } : {}), p95Ms: s?.["latency.p95Ms"] ?? s?.p95Ms ?? null, ...(typeof s?.rtf === "number" ? { rtf: s.rtf } : {}), devWer: dev?.wer ?? null, modelLoadMs: j.modelLoadMs ?? null };
 }
 
 export function toolCallMetrics(dir) {
@@ -534,7 +565,8 @@ export function heldoutMetrics(dir) {
     }
     const per = {};
     for (const [m, v] of Object.entries(r.models ?? {})) per[m] = v.status ? v.status : (v.share ?? null);
-    sets[id] = { version: r.version, locked: r.locked, n: r.n, ...(Object.keys(per).length ? { models: per } : {}), ...(r.engine ? { engine: r.engine.status ?? { wer: r.engine.wer, cer: r.engine.cer } } : {}) };
+    const engines = r.engines ? Object.fromEntries(Object.entries(r.engines).map(([e, v]) => [e, v.status ?? { wer: v.wer, cer: v.cer, ...(v.werV2 !== undefined ? { werV2: v.werV2 } : {}), target: v.target, met: v.met }])) : null;
+    sets[id] = { version: r.version, locked: r.locked, n: r.n, ...(Object.keys(per).length ? { models: per } : {}), ...(r.engine ? { engine: r.engine.status ?? { wer: r.engine.wer, cer: r.engine.cer } } : {}), ...(engines ? { engines } : {}) };
   }
   const tc = Object.values(j?.sets?.["toolcall-he"]?.models ?? {}).map((v) => v.valid).filter((x) => typeof x === "number");
   return {
