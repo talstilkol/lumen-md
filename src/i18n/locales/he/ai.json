@@ -17,6 +17,7 @@
   "agent.product.prompt": "תארו את המוצר שתרצו ליצור:\n(למשל 'אפליקציית משימות עם גרירה ושחרור, מצב כהה ואחסון מקומי')",
   "agent.suggest.allowCloud": "לאפשר ענן כגיבוי",
   "agent.suggest.allowCloud.detail": "מעביר את מדיניות ה-AI ל\"מקומי קודם\": מפתח הענן משמש רק כשאף מודל מקומי לא יכול לענות.",
+  "agent.suggest.clarifyTool": "כתבו במפורש מה {tool} צריך, ואז הריצו שוב ({problem})",
   "agent.suggest.configureKey": "להוסיף מפתח {provider}",
   "agent.suggest.largerModel": "לנסות שוב עם מודל גדול יותר ({tier})",
   "agent.suggest.ollamaOrigins": "לאשר את האפליקציה ב-Ollama (OLLAMA_ORIGINS)",
