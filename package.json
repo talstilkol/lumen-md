@@ -109,7 +109,8 @@
     "store:check": "node scripts/store.mjs check",
     "eval:crosslingual": "LUMEN_EVAL_XL=1 vitest run --config vitest.eval.config.ts src/agents/eval/crosslingual.eval.ts",
     "eval:lit-review": "LUMEN_EVAL_LIT=1 vitest run --config vitest.eval.config.ts src/agents/eval/litReview.eval.ts",
-    "skips": "node scripts/skip-report.mjs"
+    "skips": "node scripts/skip-report.mjs",
+    "nightly": "node scripts/nightly/run.mjs"
   },
   "dependencies": {
     "@bjorn3/browser_wasi_shim": "0.4.2",
