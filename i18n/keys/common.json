@@ -658,6 +658,43 @@
       "vars": []
     },
     {
+      "key": "capture.voice.keepAudio",
+      "en": "Keep audio",
+      "vars": []
+    },
+    {
+      "key": "capture.voice.noMic",
+      "en": "No microphone access.",
+      "vars": []
+    },
+    {
+      "key": "capture.voice.noTranscript",
+      "en": "Not transcribed; audio kept.",
+      "vars": []
+    },
+    {
+      "key": "capture.voice.placeholderNote",
+      "en": "Voice note (not transcribed)",
+      "vars": []
+    },
+    {
+      "key": "capture.voice.recording",
+      "en": "Stop · {time}",
+      "vars": [
+        "time"
+      ]
+    },
+    {
+      "key": "capture.voice.start",
+      "en": "Record",
+      "vars": []
+    },
+    {
+      "key": "capture.voice.transcribing",
+      "en": "Transcribing…",
+      "vars": []
+    },
+    {
       "key": "credits.close",
       "en": "Close",
       "vars": []

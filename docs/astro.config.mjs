@@ -76,6 +76,7 @@ export default defineConfig({
             { label: "Vault in a folder on the phone", slug: "workspace/mobile-vault-folder" },
             { label: "JSON Canvas (Obsidian .canvas)", slug: "workspace/json-canvas", translations: { he: "JSON Canvas (‏.canvas של Obsidian)" } },
             { label: "Safe saves and the vault check", slug: "workspace/vault-integrity" },
+            { label: "Voice notes into the inbox", translations: { he: "פתקים קוליים ל-inbox" }, slug: "workspace/voice-capture" },
           ],
         },
         {

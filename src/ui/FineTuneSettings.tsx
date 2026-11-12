@@ -20,6 +20,7 @@ import { showAiToast } from "./AiToast";
 import { startFineTune, getFineTuneJob, fineTuneJobActive, type FineTuneJob } from "../ai/fineTune";
 import { uiConfirm } from "./PromptDialog";
 import { log } from "../lib/logger";
+import "./fineTuneStrings";
 import { t } from "../i18n";
 import "../ai/localLoraStrings";
 

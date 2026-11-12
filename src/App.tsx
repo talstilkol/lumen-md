@@ -184,6 +184,7 @@ export default function App() {
   const [trashOpen, setTrashOpen] = useState(false);
   const [propertiesOpen, setPropertiesOpen] = useState(false);
   const [captureOpen, setCaptureOpen] = useState(false);
+  const [captureVoice, setCaptureVoice] = useState(false);
   // The search dialog loads on first open and then stays mounted, so an
   // Ask Workspace conversation survives closing it (perf: not at startup).
   const [searchMounted, setSearchMounted] = useState(false);
@@ -271,6 +272,9 @@ export default function App() {
         if (shared && isOPFSAvailable()) void import("./capture/quickCapture").then((m) => m.captureShared(shared)).catch(asNote);
         else asNote();
       } else if (l.kind === "action" && l.action === "capture") {
+        setCaptureOpen(true);
+      } else if (l.kind === "action" && l.action === "voice") {
+        setCaptureVoice(true);
         setCaptureOpen(true);
       } else if (l.kind === "action" && l.action === "new") {
         openNewDoc(t("doc.untitled"), "", false);
@@ -1296,7 +1300,7 @@ export default function App() {
           {privacyOpen && <PrivacyLedgerPanel open={privacyOpen} onClose={() => setPrivacyOpen(false)} />}
           {trashOpen && <TrashPanel open={trashOpen} onClose={() => setTrashOpen(false)} />}
           {propertiesOpen && <PropertiesPanel open={propertiesOpen} onClose={() => setPropertiesOpen(false)} text={doc.content} applyEdit={applyPropertiesEdit} />}
-          {captureOpen && <QuickCapture open={captureOpen} onClose={() => setCaptureOpen(false)} />}
+          {captureOpen && <QuickCapture open={captureOpen} voice={captureVoice} onClose={() => { setCaptureOpen(false); setCaptureVoice(false); }} />}
           {imageHostsOpen && <ImageHostsPanel open={imageHostsOpen} onClose={() => setImageHostsOpen(false)} />}
         </ErrorBoundary>
       </Suspense>
