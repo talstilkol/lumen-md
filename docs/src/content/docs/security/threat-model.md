@@ -39,7 +39,7 @@ is a known gap.
 
 | | Threat | Defence | Where |
 |---|---|---|---|
-| T | A crash or kill half way through a save leaves a cut note | Atomic saves: temporary file, fsync, rename; recovery after restart | plan W1.5, `npm run test:crash` |
+| T | A crash or kill half way through a save leaves a cut note | Atomic saves: temporary file, fsync, rename; recovery after restart | plan W1.5 (branch `feat/atomic-writes`, its crash test) |
 | T | A path from a note, a zip or git leaves the vault (`../`) | Every path checked: no `.`/`..`/NUL segments; Rust checks the folder again | `src/storage/vault`, `src-tauri/vault` tests |
 | I | A desktop WebView script reads other files | The WebView has no `fs:` permission; only the app's `vault_*` commands, inside the picked folder | `src-tauri/capabilities` |
 | D | A huge or malformed file hangs the app | Decoders fuzzed: 1,000,000 inputs each, no crash, nothing over 1 s | `npm run fuzz` |

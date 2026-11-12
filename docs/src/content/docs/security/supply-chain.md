@@ -31,6 +31,17 @@ the worker is stopped and the run continues. Failing inputs are saved to
 `--engine fast-check` runs the same decoders through
 [fast-check](https://fast-check.dev) (with shrinking) once it is installed.
 
+**Pathological Markdown (plan W4.16).** The first run found seven inputs
+(8–14 KB) that took 0.5–2.8 s to render: thousands of `[` or `]` in one
+paragraph, or lists nested 231 levels deep, make the parser's work grow with
+the square of the text. A note like that would freeze the editor. Now a
+block (the text between blank lines) with more than 256 brackets or more
+than 32 nesting levels is shown as raw text, in a code block, exactly as
+written (`src/renderer/boundMarkdown.ts`). Every real note stays far inside
+both bounds and renders as before. The live preview also shows a block as
+raw text once its render took more than 200 ms. The seven inputs are pinned
+in `src/__tests__/markdownSlowInputs.test.ts` (each under 50 ms).
+
 ## 2. The build is reproducible
 
 ```bash
@@ -40,6 +51,12 @@ npm run repro
 builds the same commit twice from clean (with `SOURCE_DATE_EPOCH` set to
 the commit time) and compares the SHA-256 of every file in `dist/`. Any
 difference is listed by file.
+
+A release build has no source maps (plan 11.5), and the check fails if one
+appears, so there is no map that could differ between two builds. Maps are
+for a local investigation only (`LUMEN_SOURCEMAP=1`):
+`node scripts/supply-chain/repro-check.mjs --sourcemap` builds with them and
+says which fields of each differing map differ.
 
 ## 3. Every release has an SBOM
 

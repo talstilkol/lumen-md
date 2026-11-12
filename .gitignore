@@ -108,3 +108,8 @@ fuzz-findings/
 
 # Plan 13.7: store screenshots are build output (node scripts/store-screenshots.mjs)
 store/screenshots/
+reports/
+
+# Signed release output and fuzzer findings (plan W1.27)
+/release/
+fuzz-findings/

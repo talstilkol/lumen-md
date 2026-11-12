@@ -35,6 +35,8 @@ export const TARGETS = [
         imp(root, "src/renderer/remarkLumen.ts"),
         imp(root, "src/renderer/rehypeSanitizeRaw.ts"),
       ]);
+      // As the preview does (src/renderer/pipeline.ts input()): blocks over the parser's bounds become raw text (plan W4.16).
+      const { boundMarkdown } = await imp(root, "src/renderer/boundMarkdown.ts");
       const proc = unified()
         .use(parse.default)
         .use(gfm.default)
@@ -46,7 +48,7 @@ export const TARGETS = [
         .use(raw.default)
         .use(rehypeSanitizeRaw)
         .use(slug.default);
-      return (s) => proc.runSync(proc.parse(s));
+      return (s) => proc.runSync(proc.parse(boundMarkdown(s)));
     },
   },
   {
