@@ -8,7 +8,7 @@
 
 import { useEffect, useState } from "react";
 import { t } from "../../../i18n";
-import { PairingError } from "../pairing";
+import { PairingEpochError, PairingError } from "../pairing";
 import type { E2eeSync } from "../engine";
 import "../strings";
 
@@ -37,7 +37,7 @@ export function FreshnessBanner({ sync }: Props) {
       await fn();
       setState(await sync.freshness());
     } catch (e) {
-      setError(e instanceof PairingError ? t("e2ee.fresh.badCode") : String((e as Error)?.message ?? e));
+      setError(e instanceof PairingEpochError && e.kind === "newer" ? t("e2ee.fresh.olderKeys") : e instanceof PairingError ? t("e2ee.fresh.badCode") : String((e as Error)?.message ?? e));
     }
   }
 

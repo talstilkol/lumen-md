@@ -194,6 +194,7 @@
   "e2ee.fresh.pair": "Associer",
   "e2ee.fresh.unverified": "Fraîcheur non vérifiée : cet appareil ne peut pas encore savoir si le service de synchronisation affiche vos notes les plus récentes. Associez-le à un appareil que vous utilisez déjà, ou confirmez après vérification.",
   "e2ee.fresh.verified": "Fraîcheur vérifiée",
+  "e2ee.fresh.olderKeys": "L'autre appareil est à une époque de clés plus récente que celle que voit cet appareil : le service de synchronisation montre peut-être d'anciennes clés à cet appareil. Synchronisez les deux appareils et réessayez ; si rien ne change, ne faites pas confiance à ce service.",
   "e2ee.setup.create": "Chiffrer et synchroniser",
   "e2ee.setup.mismatch": "Les phrases secrètes ne correspondent pas.",
   "e2ee.setup.note": "Les notes sont chiffrées sur cet appareil avant l'envoi ; le service de synchronisation ne voit que du texte chiffré. Une phrase secrète perdue est irrécupérable.",
