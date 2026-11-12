@@ -12,6 +12,7 @@ import {
   prepareForExport,
   REDACTED,
   redactedPassages,
+  redactMarks,
   removeHiddenComments,
   removeRedacted,
   wrapRedaction,
@@ -107,6 +108,49 @@ describe("removeRedacted", () => {
     expect(redactedPassages("x <redact>one</redact> y <Redact >two")).toEqual(["one", "two"]);
     expect(hasRedactions("plain")).toBe(false);
     expect(hasRedactions("a <REDACT>b</REDACT>")).toBe(true);
+  });
+  it("a mark with attributes, a tab or a slash is a mark, as in the preview (F-8)", () => {
+    const S = "Dana Levi";
+    for (const md of [`a <redact class="x">${S}</redact> b`, `a <redact\tid=1>${S}</redact> b`, `a <redact title="1 > 2">${S}</redact> b`, `a <REDACT data-x='>'>${S}</Redact > b`, `a <redact/>${S}</redact> b`]) {
+      expect(removeRedacted(md).text, md).toBe(`a ${REDACTED} b`);
+    }
+    // No closing mark: the rest goes (fail closed); a tag cut off by the end opens a mark too.
+    expect(removeRedacted(`a <redact/>${S} b`).text).toBe(`a ${REDACTED}`);
+    expect(removeRedacted(`a <redact class="${S}`).text).toBe(`a ${REDACTED}`);
+    // `</ redact>` is a comment in HTML, not a closing mark: the mark stays open.
+    expect(removeRedacted(`a <redact>${S}</ redact> b`).text).toBe(`a ${REDACTED}`);
+    // Names that only start with "redact" are other elements.
+    expect(redactMarks("<redaction>x</redactor>")).toEqual([]);
+  });
+
+  it("the export removes everything the preview's HTML parser puts in a redact element (F-8)", () => {
+    const S = "SECRET";
+    const corpus = [
+      `<redact class="x">${S}</redact>`, `<redact\tid=1>${S}</redact>`, `<redact\nid=1>${S}</redact>`, `<redact/>${S}`, `<redact title='a>b'>${S}</redact>`,
+      `<redact a=b>c>${S}</redact>`, `<REDACT>${S}</REDACT>`, `<redact >${S}</redact foo>`, `<redact><redact>${S}</redact>${S}</redact>`, `<redact x="y" / >${S}</redact>`,
+    ];
+    for (const md of corpus) {
+      const doc = new DOMParser().parseFromString(`<body>${md}</body>`, "text/html");
+      const shaded = [...doc.querySelectorAll("redact")].map((e) => e.textContent ?? "").join("");
+      expect(shaded, md).toContain(S);
+      expect(removeRedacted(md).text, md).not.toContain(S);
+    }
+  });
+
+  it("Redact selection over existing marks makes one mark over the whole selection and uncovers nothing (F-9)", () => {
+    const exp = (md: string) => removeRedacted(md).text;
+    // The selection ends past an existing closing mark.
+    expect(exp(`x ${wrapRedaction("Dana</redact> at Cafe X")} y`)).toBe(`x ${REDACTED} y`);
+    // The selection starts inside a mark and ends inside another: text before and after stays covered.
+    const note = "a <redact>B1 B2</redact> c <redact>D1 D2</redact> e";
+    const from = note.indexOf("B2");
+    const to = note.indexOf(" D2");
+    const merged = note.slice(0, from) + wrapRedaction(note.slice(from, to)) + note.slice(to);
+    const out = exp(merged);
+    for (const secret of ["B1", "B2", " c ", "D1", "D2"]) expect(out, merged).not.toContain(secret);
+    expect(out.startsWith("a ") && out.endsWith(" e")).toBe(true);
+    // A plain selection is wrapped as before.
+    expect(wrapRedaction("plain")).toBe("<redact>plain</redact>");
   });
 });
 

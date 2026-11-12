@@ -10,8 +10,15 @@
  * Rules, all of which fail closed (when in doubt, more is removed):
  *   - The placeholder has the same length whatever was removed, so its size
  *     tells nothing about a name's length.
+ *   - A mark is what the preview takes for a `redact` element: the HTML
+ *     tokenizer's rules (`redactMarks`), so `<redact class="x">`,
+ *     `<redact\tid=1>` and `<redact/>` are marks too (review F-8). A tag cut
+ *     off by the end of the note opens a mark.
  *   - Marks nest; the outermost pair wins. A `<redact>` that is never closed
  *     removes everything to the end of the note.
+ *   - "Redact selection" over text that already holds marks merges them into
+ *     one mark over the whole selection, and leaves every passage outside it
+ *     as covered as it was (review F-9).
  *   - Marks count inside code blocks and code spans too: a secret in a code
  *     block is still a secret.
  *   - Hidden text that a reader of the file could find is removed too: HTML
@@ -32,17 +39,87 @@ export const REDACTED = "█████";
 export const REDACT_OPEN = "<redact>";
 export const REDACT_CLOSE = "</redact>";
 
-const TAG = /<(\/?)redact\s*>/gi;
+/** A redaction mark in the text: `[index, end)` is the whole tag. */
+export interface RedactMark {
+  index: number;
+  end: number;
+  close: boolean;
+}
 
-/** Wrap `text` in redaction marks (the editor's "Redact selection"). */
+/** The HTML tokenizer's whitespace (CR included: the input stream turns it into LF). */
+const isSpace = (c: string) => c === " " || c === "\t" || c === "\n" || c === "\f" || c === "\r";
+
+/**
+ * Every redaction mark in `text`, in order — the one parser for the export
+ * and for what the preview shades. It follows the HTML tokenizer that builds
+ * the preview's `redact` elements (rehype-raw / parse5, the same rules as a
+ * browser's): `<` or `</`, the name `redact` in any ASCII case, then
+ * whitespace, `/` or `>`; attributes up to the `>` that ends the tag, where a
+ * `>` inside a quoted value does not end it. `<redact/>` opens a mark (HTML
+ * ignores the slash on an element that is not void). A tag that the end of
+ * the text cuts off runs to the end: as an opening mark it removes the rest
+ * (fail closed). `</ redact>` is not a closing mark (HTML reads it as a
+ * comment), so the mark before it stays open.
+ */
+export function redactMarks(text: string): RedactMark[] {
+  const out: RedactMark[] = [];
+  for (let i = text.indexOf("<"); i >= 0; i = text.indexOf("<", i + 1)) {
+    const close = text[i + 1] === "/";
+    const nameAt = i + (close ? 2 : 1);
+    if (text.slice(nameAt, nameAt + 6).replace(/[A-Z]/g, (c) => c.toLowerCase()) !== "redact") continue;
+    const after = text[nameAt + 6];
+    if (after !== undefined && !isSpace(after) && after !== "/" && after !== ">") continue;
+    // The tag's attributes, as the tokenizer reads them, up to the `>` that ends it.
+    let j = nameAt + 6;
+    let quote: string | null = null;
+    let valueStart = false;
+    let end = text.length;
+    for (; j < text.length; j++) {
+      const c = text[j];
+      if (quote) {
+        if (c === quote) quote = null;
+        continue;
+      }
+      if (c === ">") {
+        end = j + 1;
+        break;
+      }
+      if (valueStart && (c === '"' || c === "'")) quote = c;
+      if (c === "=") valueStart = true;
+      else if (!isSpace(c)) valueStart = false;
+    }
+    out.push({ index: i, end, close });
+    i = end - 1;
+  }
+  return out;
+}
+
+/**
+ * Wrap `text` in redaction marks (the editor's "Redact selection"). Marks
+ * already in the selection merge into the new one, which covers all of it;
+ * the closing and opening marks after it keep every passage before and after
+ * the selection covered as it was (review F-9).
+ */
 export function wrapRedaction(text: string): string {
-  return `${REDACT_OPEN}${text}${REDACT_CLOSE}`;
+  let inner = "";
+  let last = 0;
+  // The selection's own marks, reduced: closes of marks opened before it, then opens of marks that run past it.
+  let closes = 0;
+  let opens = 0;
+  for (const m of redactMarks(text)) {
+    inner += text.slice(last, m.index);
+    last = m.end;
+    if (!m.close) opens++;
+    else if (opens > 0) opens--;
+    else closes++;
+  }
+  inner += text.slice(last);
+  return REDACT_OPEN + inner + REDACT_CLOSE.repeat(1 + closes) + REDACT_OPEN.repeat(opens);
 }
 
 /** Does the note have any redaction mark? */
 export function hasRedactions(markdown: string): boolean {
-  TAG.lastIndex = 0;
-  return TAG.test(markdown);
+  return redactMarks(markdown).length > 0;
 }
 
 /** The marked passages, as written (for the author's own review before an export). */
@@ -50,10 +127,9 @@ export function redactedPassages(markdown: string): string[] {
   const out: string[] = [];
   let depth = 0;
   let start = 0;
-  TAG.lastIndex = 0;
-  for (let m = TAG.exec(markdown); m; m = TAG.exec(markdown)) {
-    if (m[1] === "") {
-      if (depth === 0) start = m.index + m[0].length;
+  for (const m of redactMarks(markdown)) {
+    if (!m.close) {
+      if (depth === 0) start = m.end;
       depth++;
     } else if (depth > 0) {
       depth--;
@@ -70,9 +146,8 @@ export function removeRedacted(markdown: string): { text: string; count: number 
   let depth = 0;
   let last = 0;
   let count = 0;
-  TAG.lastIndex = 0;
-  for (let m = TAG.exec(markdown); m; m = TAG.exec(markdown)) {
-    if (m[1] === "") {
+  for (const m of redactMarks(markdown)) {
+    if (!m.close) {
       if (depth === 0) {
         out += markdown.slice(last, m.index);
         count++;
@@ -85,7 +160,7 @@ export function removeRedacted(markdown: string): { text: string; count: number 
       // A stray closing mark: drop the mark, keep the text before it.
       out += markdown.slice(last, m.index);
     }
-    last = m.index + m[0].length;
+    last = m.end;
   }
   if (depth > 0) return { text: out + REDACTED, count };
   return { text: out + markdown.slice(last), count };
