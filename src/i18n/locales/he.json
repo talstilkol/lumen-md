@@ -1467,5 +1467,22 @@
   "pdf.ask.notFound": "נראה שה-PDF הזה לא עונה על כך.",
   "pdf.ask.cite": "עמוד {page}, שורה {line}",
   "pdf.ask.failed": "לא ניתן לענות: {error}",
-  "pdf.ask.dropped": "הושמטו {n} ציטוטים שאינם מופיעים ב-PDF"
+  "pdf.ask.dropped": "הושמטו {n} ציטוטים שאינם מופיעים ב-PDF",
+  "cmd.research.litReview": "סקירת ספרות מקובצי ה־PDF בכספת",
+  "cmd.research.litReview.hint": "טבלה של כל קובצי ה־PDF: שאלה, שיטה, מדגם, ממצאים ומגבלות, כל ערך עם ציטוט שאומת בעמוד שלו. רץ במכשיר הזה.",
+  "litReview.started": "בונה את סקירת הספרות…",
+  "litReview.progress": "סקירת ספרות: {done} מתוך {total} — {title}",
+  "litReview.done": "סקירת ספרות: {papers} מאמרים, {values} ערכים מאומתים, ב„{folder}”.",
+  "litReview.failed": "סקירת הספרות נעצרה: {error}",
+  "litReview.field.question": "שאלה",
+  "litReview.field.method": "שיטה",
+  "litReview.field.sample": "מדגם",
+  "litReview.field.findings": "ממצאים",
+  "litReview.field.limitations": "מגבלות",
+  "litReview.source": "מקור",
+  "litReview.noValue": "אין ערך עם ציטוט מאומת.",
+  "litReview.pageLine": "עמ׳ {page}, שורה {line}",
+  "litReview.verifiedFields": "שדות מאומתים",
+  "litReview.view.all": "כל המאמרים",
+  "litReview.view.verifiedOnly": "מאומתים בלבד"
 }

@@ -48,6 +48,7 @@ export default defineConfig({
             { label: "Vault Doctor", slug: "workspace/doctor" },
             { label: "PDF reader and highlights", slug: "workspace/pdf-reader" },
             { label: "Ask a PDF", translations: { he: "שאלו את ה-PDF" }, slug: "workspace/pdf-chat" },
+            { label: "Literature review matrix", translations: { he: "מטריצת סקירת ספרות" }, slug: "workspace/literature-review" },
           ],
         },
         {

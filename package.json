@@ -42,6 +42,7 @@
     "eval:agents": "node scripts/agent-eval.mjs",
     "eval:compare": "node scripts/eval-compare.mjs",
     "eval:pdf-chat": "LUMEN_EVAL_PDF=1 vitest run --config vitest.eval.config.ts src/agents/eval/pdfChat.eval.ts",
+    "eval:lit-review": "LUMEN_EVAL_LIT=1 vitest run --config vitest.eval.config.ts src/agents/eval/litReview.eval.ts",
     "fake-ollama": "node --experimental-strip-types scripts/fake-ollama.mjs"
   },
   "dependencies": {

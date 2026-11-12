@@ -1467,5 +1467,22 @@
   "pdf.ask.notFound": "Dieses PDF scheint das nicht zu beantworten.",
   "pdf.ask.cite": "Seite {page}, Zeile {line}",
   "pdf.ask.failed": "Keine Antwort möglich: {error}",
-  "pdf.ask.dropped": "{n} Zitate, die nicht im PDF stehen, wurden weggelassen"
+  "pdf.ask.dropped": "{n} Zitate, die nicht im PDF stehen, wurden weggelassen",
+  "cmd.research.litReview": "Literaturübersicht aus den PDFs der Ablage",
+  "cmd.research.litReview.hint": "Eine Tabelle aller PDFs: Frage, Methode, Stichprobe, Ergebnisse, Einschränkungen — jeder Wert mit einem auf seiner Seite geprüften Zitat. Läuft auf diesem Gerät.",
+  "litReview.started": "Literaturübersicht wird erstellt…",
+  "litReview.progress": "Literaturübersicht: {done} von {total} — {title}",
+  "litReview.done": "Literaturübersicht: {papers} Artikel, {values} geprüfte Werte, in „{folder}“.",
+  "litReview.failed": "Die Literaturübersicht wurde abgebrochen: {error}",
+  "litReview.field.question": "Frage",
+  "litReview.field.method": "Methode",
+  "litReview.field.sample": "Stichprobe",
+  "litReview.field.findings": "Ergebnisse",
+  "litReview.field.limitations": "Einschränkungen",
+  "litReview.source": "Quelle",
+  "litReview.noValue": "Kein Wert mit geprüftem Zitat.",
+  "litReview.pageLine": "S. {page}, Zeile {line}",
+  "litReview.verifiedFields": "Geprüfte Felder",
+  "litReview.view.all": "Alle Artikel",
+  "litReview.view.verifiedOnly": "Nur geprüfte"
 }

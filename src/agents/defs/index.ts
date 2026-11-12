@@ -12,3 +12,4 @@ export { builderSpecAgent, builderFileAgent, checkGeneratedFile, type ProductSpe
 export { proofreaderAgent, locateIssues, PROOF_MAX_CHARS, type ProofreaderInput, type ProofIssue } from "./proofreader";
 export { stylistAgent, type StylistInput, type StyleProfileOut } from "./stylist";
 export { pdfAnswererAgent, citationVerified, type PdfAnswererInput } from "./pdfAnswerer";
+export { litExtractorAgent, type LitExtractorInput } from "./litExtractor";

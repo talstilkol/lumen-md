@@ -1467,5 +1467,22 @@
   "pdf.ask.notFound": "Ce PDF ne semble pas répondre à cette question.",
   "pdf.ask.cite": "Page {page}, ligne {line}",
   "pdf.ask.failed": "Réponse impossible : {error}",
-  "pdf.ask.dropped": "{n} citations absentes du PDF ont été écartées"
+  "pdf.ask.dropped": "{n} citations absentes du PDF ont été écartées",
+  "cmd.research.litReview": "Revue de littérature à partir des PDF du coffre",
+  "cmd.research.litReview.hint": "Un tableau de tous les PDF : question, méthode, échantillon, résultats, limites — chaque valeur avec une citation vérifiée sur sa page. Sur cet appareil.",
+  "litReview.started": "Création de la revue de littérature…",
+  "litReview.progress": "Revue de littérature : {done} sur {total} — {title}",
+  "litReview.done": "Revue de littérature : {papers} articles, {values} valeurs vérifiées, dans « {folder} ».",
+  "litReview.failed": "La revue de littérature s’est arrêtée : {error}",
+  "litReview.field.question": "Question",
+  "litReview.field.method": "Méthode",
+  "litReview.field.sample": "Échantillon",
+  "litReview.field.findings": "Résultats",
+  "litReview.field.limitations": "Limites",
+  "litReview.source": "Source",
+  "litReview.noValue": "Aucune valeur avec une citation vérifiée.",
+  "litReview.pageLine": "p. {page}, ligne {line}",
+  "litReview.verifiedFields": "Champs vérifiés",
+  "litReview.view.all": "Tous les articles",
+  "litReview.view.verifiedOnly": "Vérifiés uniquement"
 }

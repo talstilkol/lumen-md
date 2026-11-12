@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-09T21:24:54.668Z",
+  "generated_at": "2026-11-12T09:37:34.422Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1469,
+  "count": 1486,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1956,6 +1956,104 @@
     {
       "key": "pdf.ask",
       "en": "Ask",
+      "vars": []
+    },
+    {
+      "key": "cmd.research.litReview",
+      "en": "Literature review from the vault's PDFs",
+      "vars": []
+    },
+    {
+      "key": "cmd.research.litReview.hint",
+      "en": "A table of every PDF: question, method, sample, findings, limitations — each value with a quote verified on its page. Runs on this device.",
+      "vars": []
+    },
+    {
+      "key": "litReview.started",
+      "en": "Building the literature review…",
+      "vars": []
+    },
+    {
+      "key": "litReview.progress",
+      "en": "Literature review: {done} of {total} — {title}",
+      "vars": [
+        "done",
+        "total",
+        "title"
+      ]
+    },
+    {
+      "key": "litReview.done",
+      "en": "Literature review: {papers} papers, {values} verified values, in “{folder}”.",
+      "vars": [
+        "papers",
+        "values",
+        "folder"
+      ]
+    },
+    {
+      "key": "litReview.failed",
+      "en": "The literature review stopped: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "litReview.field.question",
+      "en": "Question",
+      "vars": []
+    },
+    {
+      "key": "litReview.field.method",
+      "en": "Method",
+      "vars": []
+    },
+    {
+      "key": "litReview.field.sample",
+      "en": "Sample",
+      "vars": []
+    },
+    {
+      "key": "litReview.field.findings",
+      "en": "Findings",
+      "vars": []
+    },
+    {
+      "key": "litReview.field.limitations",
+      "en": "Limitations",
+      "vars": []
+    },
+    {
+      "key": "litReview.source",
+      "en": "Source",
+      "vars": []
+    },
+    {
+      "key": "litReview.noValue",
+      "en": "No value with a verified quote.",
+      "vars": []
+    },
+    {
+      "key": "litReview.pageLine",
+      "en": "p. {page}, line {line}",
+      "vars": [
+        "page",
+        "line"
+      ]
+    },
+    {
+      "key": "litReview.verifiedFields",
+      "en": "Verified fields",
+      "vars": []
+    },
+    {
+      "key": "litReview.view.all",
+      "en": "All papers",
+      "vars": []
+    },
+    {
+      "key": "litReview.view.verifiedOnly",
+      "en": "Verified only",
       "vars": []
     },
     {

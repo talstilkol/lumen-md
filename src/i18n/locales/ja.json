@@ -1467,5 +1467,22 @@
   "pdf.ask.notFound": "この PDF にはその答えがないようです。",
   "pdf.ask.cite": "{page} ページ、{line} 行目",
   "pdf.ask.failed": "回答できませんでした: {error}",
-  "pdf.ask.dropped": "PDF にない引用 {n} 件を除外しました"
+  "pdf.ask.dropped": "PDF にない引用 {n} 件を除外しました",
+  "cmd.research.litReview": "保管庫の PDF から文献レビュー",
+  "cmd.research.litReview.hint": "すべての PDF の表：研究課題・方法・標本・結果・限界。各値にはそのページで確認した引用が付きます。この端末で動作します。",
+  "litReview.started": "文献レビューを作成中…",
+  "litReview.progress": "文献レビュー：{total} 件中 {done} 件 — {title}",
+  "litReview.done": "文献レビュー：論文 {papers} 件、確認済みの値 {values} 件を「{folder}」に作成しました。",
+  "litReview.failed": "文献レビューが停止しました：{error}",
+  "litReview.field.question": "研究課題",
+  "litReview.field.method": "方法",
+  "litReview.field.sample": "標本",
+  "litReview.field.findings": "結果",
+  "litReview.field.limitations": "限界",
+  "litReview.source": "出典",
+  "litReview.noValue": "確認済みの引用がある値はありません。",
+  "litReview.pageLine": "{page} ページ {line} 行",
+  "litReview.verifiedFields": "確認済みの項目",
+  "litReview.view.all": "すべての論文",
+  "litReview.view.verifiedOnly": "確認済みのみ"
 }

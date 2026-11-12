@@ -1467,5 +1467,22 @@
   "pdf.ask.notFound": "此 PDF 似乎无法回答这个问题。",
   "pdf.ask.cite": "第 {page} 页，第 {line} 行",
   "pdf.ask.failed": "无法回答：{error}",
-  "pdf.ask.dropped": "已省略 {n} 条不在 PDF 中的引文"
+  "pdf.ask.dropped": "已省略 {n} 条不在 PDF 中的引文",
+  "cmd.research.litReview": "根据库中的 PDF 生成文献综述",
+  "cmd.research.litReview.hint": "所有 PDF 的表格：研究问题、方法、样本、发现、局限——每个值都附有在其页面上核实过的引文。在此设备上运行。",
+  "litReview.started": "正在生成文献综述…",
+  "litReview.progress": "文献综述：第 {done}/{total} 篇 — {title}",
+  "litReview.done": "文献综述：{papers} 篇论文，{values} 个已核实的值，位于“{folder}”。",
+  "litReview.failed": "文献综述已停止：{error}",
+  "litReview.field.question": "研究问题",
+  "litReview.field.method": "方法",
+  "litReview.field.sample": "样本",
+  "litReview.field.findings": "发现",
+  "litReview.field.limitations": "局限",
+  "litReview.source": "来源",
+  "litReview.noValue": "没有附核实引文的值。",
+  "litReview.pageLine": "第 {page} 页第 {line} 行",
+  "litReview.verifiedFields": "已核实字段",
+  "litReview.view.all": "全部论文",
+  "litReview.view.verifiedOnly": "仅已核实"
 }
