@@ -48,6 +48,7 @@ export default defineConfig({
             { label: "From Bear", slug: "getting-started/from-bear", translations: { he: "מ-Bear" } },
             { label: "Beta channel and feature flags", slug: "getting-started/beta" },
             { label: "The desktop app", slug: "getting-started/desktop-app", translations: { he: "אפליקציית שולחן העבודה" } },
+            { label: "Install with a package manager", slug: "getting-started/install-packages", translations: { he: "התקנה דרך מנהל חבילות" } },
           ],
         },
         {

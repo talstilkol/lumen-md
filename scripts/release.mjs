@@ -28,6 +28,10 @@
  *                                                  updates and download links fall back), and the commands to
  *                                                  redeploy the web app from the good tag are printed
  *   node scripts/release.mjs notes <version>       the version's notes, from CHANGELOG.md
+ *   node scripts/release.mjs packages [--dir release] [--version X] [--repo owner/name]
+ *                                                  Homebrew cask, winget, Flathub and AUR manifests from
+ *                                                  release/SHA256SUMS → release/packages/, checked offline
+ *                                                  (plan W1.24). Nothing is submitted: that is the owner's.
  *
  * Signing keys are the owner's (plan 15.7) and all optional: without one,
  * that signature is skipped with a warning and the release still builds.
@@ -39,6 +43,9 @@ import { bumpManifests, changelogSection, insertChangelog, nextVersion, parseCom
 import { LOCALES, UNTRANSLATED, addUntranslated } from "./lib/whats-new.mjs";
 import { betaFlags } from "./lib/flags.mjs";
 import { latestJson } from "./lib/tauriSigning.mjs";
+import { allPackages, flatpakManifest, packagingMeta, parseSums, wingetObjects } from "./lib/packaging.mjs";
+import { checkAur, checkCask, checkFlatpak, checkWinget } from "./lib/packagingCheck.mjs";
+import { createHash } from "node:crypto";
 
 const ROOT = process.cwd();
 const OUT = path.join(ROOT, "release");
@@ -279,6 +286,36 @@ Web app: redeploy the good tag —
   (or, on Vercel, promote the previous production deployment: npx vercel rollback)`);
   },
 
+  packages() {
+    const dir = path.resolve(ROOT, opt("--dir") ?? "release");
+    const sumsFile = path.join(dir, "SHA256SUMS");
+    if (!existsSync(sumsFile)) throw new Error(`${path.relative(ROOT, sumsFile)} is missing: run \`node scripts/release.mjs build --desktop\` first (every hash comes from it)`);
+    const sums = parseSums(readFileSync(sumsFile, "utf8"));
+    const meta = packagingMeta({
+      pkg: JSON.parse(read("package.json")),
+      tauri: JSON.parse(read("src-tauri/tauri.conf.json")),
+      version: opt("--version") ?? current(),
+      repo: opt("--repo") ?? repoSlug(),
+      licenseSha256: createHash("sha256").update(readFileSync(path.join(ROOT, "LICENSE"))).digest("hex"),
+    });
+    const { files, report } = allPackages(meta, sums);
+    const out = path.join(dir, "packages");
+    rmSync(out, { recursive: true, force: true });
+    for (const [rel, text] of Object.entries(files)) {
+      mkdirSync(path.dirname(path.join(out, rel)), { recursive: true });
+      writeFileSync(path.join(out, rel), text);
+    }
+    const problems = [];
+    const has = (f) => report.find((r) => r.format === f)?.status === "written";
+    if (has("winget")) problems.push(...checkWinget(wingetObjects(meta, sums)));
+    if (has("homebrew")) problems.push(...checkCask(files[`homebrew/${meta.caskName}.rb`]));
+    if (has("flatpak")) problems.push(...checkFlatpak(flatpakManifest(meta, sums).manifest, files[`flatpak/${meta.flatpakId}.metainfo.xml`]));
+    if (has("aur")) problems.push(...checkAur(files[`aur/${meta.aurName}/PKGBUILD`], files[`aur/${meta.aurName}/.SRCINFO`]));
+    for (const r of report) console.log(`${r.format.padEnd(9)} ${r.status}: ${r.detail}`);
+    if (problems.length) throw new Error(`the manifests do not pass the offline checks:\n  ${problems.join("\n  ")}`);
+    console.log(`checked offline → ${path.relative(ROOT, out)}/ (submit them yourself: see RELEASE.md "Stores and package managers")`);
+  },
+
   notes() {
     const v = args[0] ?? current();
     const n = releaseNotes(read("CHANGELOG.md"), v);
@@ -288,7 +325,7 @@ Web app: redeploy the good tag —
 };
 
 if (!commands[cmd]) {
-  console.error("usage: node scripts/release.mjs plan | prepare | build | publish | deploy-beta | verify | rollback <bad> | notes <version>");
+  console.error("usage: node scripts/release.mjs plan | prepare | build | publish | deploy-beta | verify | rollback <bad> | notes <version> | packages");
   process.exit(2);
 }
 try {
