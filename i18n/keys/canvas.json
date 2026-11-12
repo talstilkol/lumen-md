@@ -19,6 +19,52 @@
       "vars": []
     },
     {
+      "key": "canvas.card.add",
+      "en": "Note card",
+      "vars": []
+    },
+    {
+      "key": "canvas.card.editHint",
+      "en": "Double-click to edit · ⌘Enter saves",
+      "vars": []
+    },
+    {
+      "key": "canvas.card.editLabel",
+      "en": "Edit {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "canvas.card.empty",
+      "en": "(empty note)",
+      "vars": []
+    },
+    {
+      "key": "canvas.card.missing",
+      "en": "The note “{path}” isn't in the vault (moved or deleted?)",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "canvas.card.notFound",
+      "en": "No note “{ref}” in the vault",
+      "vars": [
+        "ref"
+      ]
+    },
+    {
+      "key": "canvas.card.open",
+      "en": "Open",
+      "vars": []
+    },
+    {
+      "key": "canvas.card.prompt",
+      "en": "Note to place on the canvas (a name or ![[note]]):",
+      "vars": []
+    },
+    {
       "key": "canvas.close",
       "en": "Close",
       "vars": []
@@ -31,6 +77,23 @@
     {
       "key": "canvas.done",
       "en": "Done",
+      "vars": []
+    },
+    {
+      "key": "canvas.export.failed",
+      "en": "Export failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "canvas.export.label",
+      "en": "Export image",
+      "vars": []
+    },
+    {
+      "key": "canvas.export.working",
+      "en": "Exporting…",
       "vars": []
     },
     {

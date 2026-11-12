@@ -99,6 +99,7 @@ export default defineConfig({
             { label: "Daily review (spaced repetition)", translations: { he: "חזרה יומית" }, slug: "workspace/review" },
             { label: "Daily notes and the Hebrew calendar", slug: "workspace/hebrew-calendar", translations: { he: "פתק יומי ולוח עברי" } },
             { label: "Graph and local graph", slug: "workspace/graph", translations: { he: "גרף וגרף מקומי" } },
+            { label: "Note cards and image export", slug: "workspace/canvas-cards", translations: { he: "כרטיסי פתקים וייצוא תמונה" } },
           ],
         },
         {
