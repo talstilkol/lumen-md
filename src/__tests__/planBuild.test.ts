@@ -52,11 +52,13 @@ describe("plan build", () => {
     const dir = copy("status");
     const path = join(dir, "plan/plan.json");
     const before = readFileSync(path, "utf8");
-    // A task that already has a status, edited the way a person would: one line.
-    const line = before.split("\n").find((l) => l.includes('"status": "✅ #202"'))!;
-    writeFileSync(path, before.replace(line, line.replace("✅ #202", "⏳ בעבודה")));
+    // A task that already has a status, edited the way a person would: one line. 0.6 has a
+    // dod and isn't grandfathered, so reopening it is one line (a grandfathered task also
+    // leaves dodGrandfathered — plan 0.7).
+    const line = before.split("\n").find((l) => l.includes('"status": "✅ #251"'))!;
+    writeFileSync(path, before.replace(line, line.replace("✅ #251", "⏳ בעבודה")));
     const after = readFileSync(path, "utf8").split("\n");
-    expect(after.filter((l, i) => l !== before.split("\n")[i])).toEqual([line.replace("✅ #202", "⏳ בעבודה")]);
+    expect(after.filter((l, i) => l !== before.split("\n")[i])).toEqual([line.replace("✅ #251", "⏳ בעבודה")]);
 
     const cli = (...args: string[]) => spawnSync(process.execPath, [join(ROOT, "scripts/plan/build.mjs"), ...args], { cwd: dir, encoding: "utf8" });
     // The CLI works on the repo it lives in, so drive run() for the copy.
