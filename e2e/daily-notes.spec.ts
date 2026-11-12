@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { vaultOrSkip } from "./_opfs";
 
 /**
  * Plan 4.12 — daily notes: ⌥⌘D (Ctrl+Alt+D) creates and opens
@@ -75,8 +76,8 @@ const journalFiles = (page: Page) =>
     }
   });
 
-test("today's note is created, opened, and not duplicated when opened again", async ({ page }) => {
-  test.skip(!(await opfsWritable(page)), "this engine refuses OPFS writes here, so there is no vault to keep daily notes in");
+test("today's note is created, opened, and not duplicated when opened again", async ({ page, browserName }) => {
+  vaultOrSkip(await opfsWritable(page), browserName);
   const today = await todayIso(page);
   expect(await journalFiles(page)).toEqual([]);
 
