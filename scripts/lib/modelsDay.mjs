@@ -137,12 +137,18 @@ export const STEPS = [
     title: "Dictation WER in the browser — Whisper (ivrit.ai) on WebGPU / WASM",
     plan: ["W4.13", "1.3", "W5.13", "15.3"],
     requires: { script: "eval:asr-web" },
-    providedBy: "plan W4.13 (lane A, after this PR)",
+    providedBy: "plan W4.13 feat/hebrew-dictation-web",
     models: [],
-    needs: ["chromium", "network"],
+    needs: ["python3", "ffmpeg", "network"],
     minutes: 20,
     target: { metric: "wer", max: 0.15, text: "WER ≤ 15 % on FLEURS-he validation, p95 ≤ 2 s (plan W4.13)" },
-    commands: (c) => [npm("eval:asr-web", ["--fleurs", join(c.cache, "fleurs-validation"), "--out", join(c.dir, "asr-web.json")])],
+    commands: (c) => {
+      const fleurs = join(c.cache, "fleurs-validation");
+      return [
+        { cmd: "python3", args: ["-I", "scripts/asr/fleurs_spike.py", "--out", fleurs, "--n", "30"], skipIf: () => existsSync(join(fleurs, "fleurs.json")) },
+        npm("eval:asr-web", ["--fleurs", fleurs, "--out", join(c.dir, "asr-web.json")]),
+      ];
+    },
     parse: (dir) => asrMetrics(join(dir, "asr-web.json"), "fleurs-validation"),
   },
   {
@@ -477,7 +483,9 @@ export function asrMetrics(file, split) {
   if (!j) return null;
   const s = j.splits?.[split] ?? null;
   const dev = j.splits?.dev ?? null;
-  return { engine: j.engine, wer: s?.wer ?? null, cer: s?.cer ?? null, p95Ms: s?.["latency.p95Ms"] ?? s?.p95Ms ?? null, devWer: dev?.wer ?? null, modelLoadMs: j.modelLoadMs ?? null };
+  // Normal form v2 (numbers as digits, plan W4.13) is the headline where the eval reports it; v1 stays next to it.
+  const v2 = s?.["wer.v2"];
+  return { engine: j.engine, wer: v2 ?? s?.wer ?? null, werV1: s?.wer ?? null, cer: s?.cer ?? null, p95Ms: s?.["latency.p95Ms"] ?? s?.p95Ms ?? null, devWer: dev?.["wer.v2"] ?? dev?.wer ?? null, modelLoadMs: j.modelLoadMs ?? null };
 }
 
 export function toolCallMetrics(dir) {
@@ -574,7 +582,7 @@ function headline(s) {
   if (!m) return s.reason ?? (s.exit ? `exit ${s.exit} — see ${s.id}/log.txt` : "");
   if (m.byAgent) return `${m.passed}/${m.total} cases (${pct(m.share)}), ${m.agents} agents`;
   if (m.p50Ms !== undefined && m.requests !== undefined) return `p50 ${m.p50Ms} ms, p95 ${m.p95Ms} ms (${m.requests} requests)`;
-  if (m.wer !== undefined) return `WER ${pct(m.wer)}${m.devWer !== null && m.devWer !== undefined ? `, dev ${pct(m.devWer)}` : ""}`;
+  if (m.wer !== undefined) return `WER ${pct(m.wer)}${m.werV1 !== undefined && m.werV1 !== m.wer ? ` (v1 ${pct(m.werV1)})` : ""}${m.devWer !== null && m.devWer !== undefined ? `, dev ${pct(m.devWer)}` : ""}`;
   if (m.citationNdcg5 !== undefined) return `${m.passed}/${m.total} cited (${pct(m.share)}), citation nDCG@5 ${m.citationNdcg5 ?? "—"}`;
   if (m.share !== undefined) return pct(m.share);
   return Object.entries(m).map(([k, v]) => `${k} ${typeof v === "object" ? JSON.stringify(v) : v}`).join(", ");
