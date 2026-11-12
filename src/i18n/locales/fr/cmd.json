@@ -311,6 +311,8 @@
   "cmd.spell.hebrewDictionary": "Orthographe hébraïque : dictionnaire (télécharger / supprimer)",
   "cmd.spell.hebrewDictionary.hint": "Correcteur hébreu hors ligne (Hspell, 5,7 Mo, AGPL)",
   "cmd.split": "Éditeur + aperçu côte à côte",
+  "cmd.student.lecture": "Mode étudiant : enregistrer un cours",
+  "cmd.student.lecture.hint": "Enregistrez, touchez « Important ! » et obtenez une transcription avec ▶ pour chaque phrase, un résumé et des cartes de révision — sur cet appareil.",
   "cmd.suggest.accept": "Accepter la suggestion sous le curseur",
   "cmd.suggest.accept.hint": "Appliquer la modification suivie sous le curseur",
   "cmd.suggest.acceptAll": "Accepter toutes les suggestions",

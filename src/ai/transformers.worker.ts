@@ -89,6 +89,9 @@ export interface TimedSegment {
   text: string;
 }
 
+export type { TimedSegment };
+
+
 export interface EmbedResult {
   vectors: number[][];
   dims: number;

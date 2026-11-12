@@ -311,6 +311,8 @@
   "cmd.spell.hebrewDictionary": "希伯来语拼写：词典（下载／删除）",
   "cmd.spell.hebrewDictionary.hint": "离线希伯来语拼写检查（Hspell，5.7 MB，AGPL）",
   "cmd.split": "分栏显示编辑器 + 预览",
+  "cmd.student.lecture": "学生模式：录制讲座",
+  "cmd.student.lecture.hint": "录音、点按“重要！”，即可得到每句带 ▶ 的转写、摘要和复习卡片——都在此设备上。",
   "cmd.suggest.accept": "接受光标处的建议",
   "cmd.suggest.accept.hint": "应用光标处的修订",
   "cmd.suggest.acceptAll": "接受所有建议",

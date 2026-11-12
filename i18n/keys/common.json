@@ -7357,6 +7357,110 @@
       "vars": []
     },
     {
+      "key": "student.about",
+      "en": "Everything stays on this device: the recording, the transcript (local Whisper), the summary and the cards. Tap “Important!” or press the space bar when something matters.",
+      "vars": []
+    },
+    {
+      "key": "student.cards",
+      "en": "Review cards",
+      "vars": []
+    },
+    {
+      "key": "student.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "student.done",
+      "en": "Done: {important} important sentences, {cards} cards.",
+      "vars": [
+        "important",
+        "cards"
+      ]
+    },
+    {
+      "key": "student.failed",
+      "en": "The lecture could not be processed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "student.important",
+      "en": "Important",
+      "vars": []
+    },
+    {
+      "key": "student.mark",
+      "en": "Important!",
+      "vars": []
+    },
+    {
+      "key": "student.marks",
+      "en": "Marked moments: {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "student.micFailed",
+      "en": "The microphone could not start: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "student.name",
+      "en": "Lecture name",
+      "vars": []
+    },
+    {
+      "key": "student.noCards",
+      "en": "No moment was marked important, so there are no cards.",
+      "vars": []
+    },
+    {
+      "key": "student.processing",
+      "en": "Transcribing and writing the lecture note…",
+      "vars": []
+    },
+    {
+      "key": "student.recording",
+      "en": "Recording",
+      "vars": []
+    },
+    {
+      "key": "student.start",
+      "en": "Start recording",
+      "vars": []
+    },
+    {
+      "key": "student.stop",
+      "en": "Stop and process",
+      "vars": []
+    },
+    {
+      "key": "student.summary",
+      "en": "Summary",
+      "vars": []
+    },
+    {
+      "key": "student.title",
+      "en": "Record a lecture",
+      "vars": []
+    },
+    {
+      "key": "student.transcript",
+      "en": "Transcript",
+      "vars": []
+    },
+    {
+      "key": "student.untitled",
+      "en": "Lecture",
+      "vars": []
+    },
+    {
       "key": "summary.empty",
       "en": "Nothing to summarise here",
       "vars": []

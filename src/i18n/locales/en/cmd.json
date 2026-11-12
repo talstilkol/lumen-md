@@ -310,6 +310,8 @@
   "cmd.spell.hebrewDictionary": "Hebrew spelling: dictionary (download / remove)",
   "cmd.spell.hebrewDictionary.hint": "Offline Hebrew spell check (Hspell, 5.7 MB, AGPL)",
   "cmd.split": "Split editor + preview",
+  "cmd.student.lecture": "Student mode: record a lecture",
+  "cmd.student.lecture.hint": "Record, tap “Important!”, and get a transcript with ▶ for each sentence, a summary and review cards — on this device.",
   "cmd.suggest.accept": "Accept suggestion at cursor",
   "cmd.suggest.accept.hint": "Apply the tracked change under the cursor",
   "cmd.suggest.acceptAll": "Accept all suggestions",

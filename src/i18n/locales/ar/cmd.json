@@ -311,6 +311,8 @@
   "cmd.spell.hebrewDictionary": "التدقيق الإملائي العبري: القاموس (تنزيل / إزالة)",
   "cmd.spell.hebrewDictionary.hint": "تدقيق عبري دون اتصال (Hspell، 5.7MB، AGPL)",
   "cmd.split": "تقسيم المحرر + المعاينة",
+  "cmd.student.lecture": "وضع الطالب: تسجيل محاضرة",
+  "cmd.student.lecture.hint": "سجّل واضغط «مهم!» واحصل على نص بزر ▶ لكل جملة وملخص وبطاقات مراجعة — على هذا الجهاز.",
   "cmd.suggest.accept": "قبول الاقتراح عند المؤشر",
   "cmd.suggest.accept.hint": "تطبيق التغيير المتتبَّع تحت المؤشر",
   "cmd.suggest.acceptAll": "قبول كل الاقتراحات",

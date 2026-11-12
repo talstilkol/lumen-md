@@ -1570,6 +1570,16 @@
       "vars": []
     },
     {
+      "key": "cmd.student.lecture",
+      "en": "Student mode: record a lecture",
+      "vars": []
+    },
+    {
+      "key": "cmd.student.lecture.hint",
+      "en": "Record, tap “Important!”, and get a transcript with ▶ for each sentence, a summary and review cards — on this device.",
+      "vars": []
+    },
+    {
       "key": "cmd.suggest.accept",
       "en": "Accept suggestion at cursor",
       "vars": []

@@ -311,6 +311,8 @@
   "cmd.spell.hebrewDictionary": "איות עברי: מילון (הורדה / הסרה)",
   "cmd.spell.hebrewDictionary.hint": "בדיקת איות עברית בלי רשת (Hspell, ‏5.7MB, AGPL)",
   "cmd.split": "עורך + תצוגה מקדימה",
+  "cmd.student.lecture": "מצב סטודנט: הקלטת הרצאה",
+  "cmd.student.lecture.hint": "מקליטים, מקישים „חשוב!”, ומקבלים תמליל עם ▶ לכל משפט, סיכום וכרטיסי חזרה — במכשיר הזה.",
   "cmd.suggest.accept": "אישור ההצעה במיקום הסמן",
   "cmd.suggest.accept.hint": "החלת השינוי שבמעקב שמתחת לסמן",
   "cmd.suggest.acceptAll": "אישור כל ההצעות",

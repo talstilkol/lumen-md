@@ -311,6 +311,8 @@
   "cmd.spell.hebrewDictionary": "Hebräische Rechtschreibung: Wörterbuch (laden / entfernen)",
   "cmd.spell.hebrewDictionary.hint": "Hebräische Prüfung offline (Hspell, 5,7 MB, AGPL)",
   "cmd.split": "Editor + Vorschau teilen",
+  "cmd.student.lecture": "Studienmodus: Vorlesung aufnehmen",
+  "cmd.student.lecture.hint": "Aufnehmen, „Wichtig!“ tippen und ein Transkript mit ▶ für jeden Satz, eine Zusammenfassung und Lernkarten erhalten — auf diesem Gerät.",
   "cmd.suggest.accept": "Vorschlag am Cursor annehmen",
   "cmd.suggest.accept.hint": "Die nachverfolgte Änderung unter dem Cursor übernehmen",
   "cmd.suggest.acceptAll": "Alle Vorschläge annehmen",

@@ -121,6 +121,7 @@ export default defineConfig({
             { label: "Import highlights (Kindle, Kobo, Readwise, Zotero)", translations: { he: "ייבוא הדגשות (Kindle,‏ Kobo,‏ Readwise,‏ Zotero)" }, slug: "workspace/highlight-import" },
             { label: "Print and PDF", slug: "workspace/print", translations: { he: "הדפסה ו-PDF" } },
             { label: "Literature review matrix", translations: { he: "מטריצת סקירת ספרות" }, slug: "workspace/literature-review" },
+            { label: "Student mode", translations: { he: "מצב סטודנט" }, slug: "workspace/student-mode" },
           ],
         },
         {
