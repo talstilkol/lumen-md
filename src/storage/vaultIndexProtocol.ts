@@ -11,6 +11,7 @@ import type { BacklinkHit, IndexInput, IndexStats, NoteText, SearchHit, SearchOp
 import type { QueryResult } from "../tasks/taskQuery";
 import type { RelatedHit } from "../related/related";
 import type { NoteSummary } from "./noteSummary";
+import type { SnapshotKeys } from "./snapshotSeal";
 
 /** A note restored from the snapshot, as the main thread keeps it. */
 export interface RestoredNote extends NoteSummary {
@@ -40,8 +41,9 @@ export type IndexRequestBody =
   | { op: "move"; moves: { from: string; to: string; name: string }[] }
   | { op: "texts"; paths?: string[] }
   | { op: "related"; query: RelatedQuery }
-  | { op: "snapshotSave"; vault: string }
-  | { op: "snapshotRestore"; vault: string; listing: { path: string; name: string; modified: number }[] };
+  // W6.36: `keys` (an encrypted vault) seals / opens the snapshot in the worker.
+  | { op: "snapshotSave"; vault: string; keys?: SnapshotKeys }
+  | { op: "snapshotRestore"; vault: string; listing: { path: string; name: string; modified: number }[]; keys?: SnapshotKeys };
 
 export type IndexRequest = IndexRequestBody & { id: number };
 
@@ -64,13 +66,13 @@ export interface IndexEngine {
   texts(paths?: string[]): Promise<NoteText[]>;
   /** Notes related to a paragraph, ranked in the index (plan W2.2). */
   related(query: RelatedQuery): Promise<RelatedHit[]>;
-  /** Save the indexed notes for the next session (indexSnapshot.ts). */
-  saveSnapshot(vault: string): Promise<void>;
+  /** Save the indexed notes for the next session (indexSnapshot.ts); sealed with `keys` in an encrypted vault (W6.36). */
+  saveSnapshot(vault: string, keys?: SnapshotKeys): Promise<void>;
   /**
    * Index every listed note the snapshot holds with the same mtime; returns
    * their summaries (the caller reads only the others).
    */
-  restoreSnapshot(vault: string, listing: { path: string; name: string; modified: number }[]): Promise<RestoredNote[]>;
+  restoreSnapshot(vault: string, listing: { path: string; name: string; modified: number }[], keys?: SnapshotKeys): Promise<RestoredNote[]>;
   dispose(): void;
 }
 
@@ -87,8 +89,8 @@ export function engineOver(kind: IndexEngine["kind"], send: (req: IndexRequestBo
     move: async (moves) => void (await send({ op: "move", moves })),
     texts: (paths) => send({ op: "texts", paths }) as Promise<NoteText[]>,
     related: (query) => send({ op: "related", query }) as Promise<RelatedHit[]>,
-    saveSnapshot: async (vault) => void (await send({ op: "snapshotSave", vault })),
-    restoreSnapshot: (vault, listing) => send({ op: "snapshotRestore", vault, listing }) as Promise<RestoredNote[]>,
+    saveSnapshot: async (vault, keys) => void (await send(keys ? { op: "snapshotSave", vault, keys } : { op: "snapshotSave", vault })),
+    restoreSnapshot: (vault, listing, keys) => send(keys ? { op: "snapshotRestore", vault, listing, keys } : { op: "snapshotRestore", vault, listing }) as Promise<RestoredNote[]>,
     dispose,
   };
 }

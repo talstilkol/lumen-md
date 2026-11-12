@@ -8,25 +8,49 @@ import { VaultIndex, type IndexInput } from "./vaultIndexCore";
 import { engineOver, type IndexEngine, type IndexRequest, type IndexRequestBody, type IndexResponse, type RestoredNote } from "./vaultIndexProtocol";
 import { loadSnapshot, saveSnapshot } from "./indexSnapshot";
 import { summarize } from "./noteSummary";
+import type { SnapshotKeys } from "./snapshotSeal";
 
-/** Index the listed notes the snapshot holds unchanged; their summaries for the main thread (W2.22). */
-async function restoreInto(index: VaultIndex, vault: string, listing: { path: string; name: string; modified: number }[]): Promise<RestoredNote[]> {
-  const snap = await loadSnapshot(vault);
+/**
+ * Index the listed notes the snapshot holds unchanged; their summaries for
+ * the main thread (W2.22). W6.36: with `defer`, the summaries are answered
+ * first and the indexing itself is handed to `defer` — the worker runs it
+ * right after posting the answer, before any later request, so the vault
+ * is open (tree, tags, graph) while the index fills, and every search still
+ * sees all of it.
+ */
+async function restoreInto(
+  index: VaultIndex,
+  vault: string,
+  listing: { path: string; name: string; modified: number }[],
+  keys?: SnapshotKeys,
+  defer?: (work: () => void) => void,
+): Promise<RestoredNote[]> {
+  const snap = await loadSnapshot(vault, keys);
   if (!snap) return [];
   const out: RestoredNote[] = [];
+  const take: IndexInput[] = [];
   for (const e of listing) {
     const s = snap.get(e.path);
     if (!s || !e.modified || s.modified !== e.modified) continue;
-    index.upsert({ path: e.path, name: e.name, content: s.content, modified: s.modified });
+    take.push({ path: e.path, name: e.name, content: s.content, modified: s.modified });
     out.push({ path: e.path, name: e.name, modified: s.modified, ...summarize(s.content) });
   }
+  const work = () => {
+    for (const f of take) index.upsert(f);
+  };
+  if (defer) defer(work);
+  else work();
   return out;
 }
 
 export { VaultIndex };
 
-/** Apply one request to `index`. Never throws: a failure is an `ok: false` answer. */
-export function handleIndexRequest(index: VaultIndex, req: IndexRequest): IndexResponse | Promise<IndexResponse> {
+/**
+ * Apply one request to `index`. Never throws: a failure is an `ok: false`
+ * answer. `defer` (the worker passes one): work to run after the answer is
+ * posted and before the next request (W6.36).
+ */
+export function handleIndexRequest(index: VaultIndex, req: IndexRequest, defer?: (work: () => void) => void): IndexResponse | Promise<IndexResponse> {
   try {
     switch (req.op) {
       case "upsert":
@@ -58,12 +82,12 @@ export function handleIndexRequest(index: VaultIndex, req: IndexRequest): IndexR
       case "related":
         return { id: req.id, ok: true, result: index.related(req.query.paragraph, req.query) };
       case "snapshotSave":
-        return saveSnapshot(req.vault, index.notes()).then(
+        return saveSnapshot(req.vault, index.notes(), req.keys).then(
           () => ({ id: req.id, ok: true as const, result: index.size }),
           (err: unknown) => ({ id: req.id, ok: false as const, error: String(err) }),
         );
       case "snapshotRestore":
-        return restoreInto(index, req.vault, req.listing).then(
+        return restoreInto(index, req.vault, req.listing, req.keys, defer).then(
           (result) => ({ id: req.id, ok: true as const, result }),
           (err: unknown) => ({ id: req.id, ok: false as const, error: String(err) }),
         );

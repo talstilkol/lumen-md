@@ -8,8 +8,15 @@
  * The snapshot is a cache, never the truth: a note's text is used only if
  * the vault still lists it with the same mtime, and a missing, old-format or
  * unreadable snapshot just means a full build, as before.
+ *
+ * W6.36: in an encrypted vault the snapshot is sealed and signed with the
+ * snapshot subkeys (./snapshotSeal.ts) — given `keys`, only a sealed record
+ * is written or accepted. Without `keys` (a plain vault) only a plain one
+ * is. A record of the other kind, or one that fails its checks, is refused
+ * and deleted: the open builds in full, as with no snapshot.
  */
 import { createStore, get, set, del } from "idb-keyval";
+import { isSealedSnapshot, openSnapshot, sealSnapshot, type SnapshotKeys } from "./snapshotSeal";
 
 export const SNAPSHOT_VERSION = 1;
 
@@ -62,17 +69,62 @@ export function decodeSnapshot(raw: unknown, vault: string): Map<string, Snapsho
   return out;
 }
 
-export async function loadSnapshot(vault: string): Promise<Map<string, SnapshotFile> | null> {
+/** What the last `loadSnapshot` found: for tests and the perf receipt. */
+export type SnapshotOutcome = "none" | "restored" | "refused";
+export let lastSnapshotOutcome: SnapshotOutcome = "none";
+
+/**
+ * The stored record as a snapshot. Given `keys` it must be sealed by them
+ * for this vault; without, it must be plain. Anything else is refused
+ * (null), and `refused` is set when a record was there but not taken.
+ */
+export async function readSnapshotRecord(raw: unknown, vault: string, keys?: SnapshotKeys): Promise<{ snap: Map<string, SnapshotFile> | null; refused: boolean }> {
+  if (raw === undefined) return { snap: null, refused: false };
+  if (!keys) {
+    const snap = isSealedSnapshot(raw) ? null : decodeSnapshot(raw, vault);
+    return { snap, refused: !snap };
+  }
+  let plain: Uint8Array;
   try {
-    return decodeSnapshot(await get(KEY, db()), vault);
+    plain = await openSnapshot(keys, vault, raw);
+  } catch {
+    return { snap: null, refused: true };
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(plain));
+  } catch {
+    return { snap: null, refused: true };
+  }
+  const snap = decodeSnapshot(parsed, vault);
+  return { snap, refused: !snap };
+}
+
+export async function loadSnapshot(vault: string, keys?: SnapshotKeys): Promise<Map<string, SnapshotFile> | null> {
+  lastSnapshotOutcome = "none";
+  try {
+    const { snap, refused } = await readSnapshotRecord(await get(KEY, db()), vault, keys);
+    if (refused) {
+      lastSnapshotOutcome = "refused";
+      // A tampered, foreign or wrong-kind record is never tried again.
+      await del(KEY, db()).catch(() => {});
+    } else if (snap) lastSnapshotOutcome = "restored";
+    return snap;
   } catch {
     return null;
   }
 }
 
-export async function saveSnapshot(vault: string, files: Iterable<SnapshotFile>): Promise<void> {
+/** The record to store: plain, or sealed with `keys` (W6.36). */
+export async function snapshotRecord(vault: string, files: Iterable<SnapshotFile>, keys?: SnapshotKeys): Promise<unknown> {
+  const plain = encodeSnapshot(vault, files);
+  if (!keys) return plain;
+  return sealSnapshot(keys, vault, new TextEncoder().encode(JSON.stringify(plain)));
+}
+
+export async function saveSnapshot(vault: string, files: Iterable<SnapshotFile>, keys?: SnapshotKeys): Promise<void> {
   try {
-    await set(KEY, encodeSnapshot(vault, files), db());
+    await set(KEY, await snapshotRecord(vault, files, keys), db());
   } catch {
     // Quota or private mode: the next open builds in full, as before.
     await del(KEY, db()).catch(() => {});
@@ -81,4 +133,12 @@ export async function saveSnapshot(vault: string, files: Iterable<SnapshotFile>)
 
 export async function dropSnapshot(): Promise<void> {
   await del(KEY, db()).catch(() => {});
+}
+
+/** Test hooks (W6.36): the stored record as it is, and a record put in its place. */
+export async function __snapshotRecord(): Promise<unknown> {
+  return get(KEY, db());
+}
+export async function __putSnapshotRecord(v: unknown): Promise<void> {
+  await set(KEY, v, db());
 }
