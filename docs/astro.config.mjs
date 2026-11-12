@@ -161,6 +161,7 @@ export default defineConfig({
             { label: "Where Lumen runs", slug: "self-hosting/hosting", translations: { he: "איפה Lumen רץ" } },
             { label: "Android and iOS builds", slug: "self-hosting/mobile", translations: { he: "בניית Android ו-iOS" } },
             { label: "A second host and tests without Vercel", slug: "self-hosting/second-host", translations: { he: "אירוח שני ובדיקות בלי Vercel" } },
+            { label: "Moving production to another host", slug: "self-hosting/cut-over", translations: { he: "העברת הייצור למארח אחר" } },
           ],
         },
         {
