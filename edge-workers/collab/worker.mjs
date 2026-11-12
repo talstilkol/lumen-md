@@ -26,9 +26,15 @@
  *     public server), /token answers only a request that carries the room
  *     proof, which the app derives from the room's password in the share
  *     link (sync-server/collab/roomToken.mjs). The token names the proof's
- *     hash, and the room binds the first one it stores: a token for any
- *     other proof is refused there. So knowing a room's name is not enough
- *     to join it, write to it or keep it alive. A new proof also costs a
+ *     hash. The app's room names commit to that hash (`<name>_k<32 hex>`,
+ *     review 4): /token and the room accept only the matching proof, so not
+ *     even the first to connect can bind a room without its password. A name
+ *     the app made before commitments binds the first proof; any other name
+ *     binds none. So knowing a room's name is not enough to join it, write to
+ *     it, keep it alive or lock its owners out.
+ *   - New rooms are limited (review 2): per day on the whole server, per
+ *     address and per IPv6 /48, and in how many are stored at once
+ *     (sync-server/collab/roomQuota.mjs, the Quota object below). A new proof also costs a
  *     proof of work of COLLAB_POW_BITS (wrangler.toml sets 18), bound to the
  *     room and the proof, which the app solves once per room and session.
  *     With COLLAB_ACCESS_KEY (a private server), the key is enough.
@@ -43,17 +49,25 @@
 import { createRelayRoom } from "../../sync-server/collab/relay.mjs";
 import {
   accessKeyOk,
+  commitmentOk,
   issueRoomToken,
   proofVerifier,
+  roomKind,
   roomPowOk,
   signingKey,
+  splitCommittedRoom,
   tokenVerifier,
+  admit,
+  dayOf,
+  quotaBuckets,
+  quotaLimits,
   verifyRoomToken,
   DEFAULT_TOKEN_TTL_S,
   MAX_ROOM_POW_BITS,
 } from "../../sync-server/collab/roomToken.mjs";
 
-const ROOM_NAME = /^[\w-]{1,128}$/;
+// A name, or a name with its commitment (`<name>_k<32 hex>`, roomToken.mjs).
+const ROOM_NAME = /^[\w-]{1,162}$/;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const CHUNK = 1_000_000; // a Durable Object value holds at most 2 MB
 const SAVE_DEBOUNCE_MS = 2000;
@@ -98,6 +112,8 @@ function tokenSocket(env) {
     else if (keyed && !accessKeyOk(req.key, env.COLLAB_ACCESS_KEY)) answer = { error: "unauthorized" };
     // The public server: no token without the room proof, and a proof of work for it.
     else if (!keyed && !verifier) answer = { error: "proof" };
+    // Review 4 (RR4-469-1): a name that commits to its proof gets a token only for that proof.
+    else if (verifier && splitCommittedRoom(req.room) && !commitmentOk(req.room, verifier)) answer = { error: "commitment" };
     else if (!keyed && bits > 0 && !roomPowOk(req.room, verifier, req.pow, bits)) answer = { error: "pow", bits };
     else answer = issueRoomToken(tokenKey(env), req.room, { ttlS, ...(verifier ? { verifier } : {}) });
     server.send(JSON.stringify(answer));
@@ -132,12 +148,36 @@ export class CollabRoom {
     this.dirty = false;
     /** The hash of the room proof this room is bound to (stored with the room), or null before the first. */
     this.verifier = null;
+    /** Something of the room is stored (so it is not a new room for the quota). */
+    this.stored = false;
+    /** The quota's answer for this new room, asked once (review 2 RR2-469-1). */
+    this.admitting = null;
+  }
+
+  /**
+   * A new room (nothing stored) opens only within the server's limits
+   * (quota.mjs): asked once, when its first peer authenticates. Without a
+   * QUOTA binding (tests, a private server) there are no limits;
+   * wrangler.toml binds it on the public server.
+   */
+  async admitNew(socket) {
+    if (this.stored || !this.env.QUOTA) return true;
+    this.admitting ??= (async () => {
+      const q = socket?.ws?.deserializeAttachment?.()?.q ?? null;
+      const { keys, day } = q ?? quotaBuckets(this.env.COLLAB_TOKEN_SECRET, "?");
+      const stub = this.env.QUOTA.get(this.env.QUOTA.idFromName("quota"));
+      return (await stub.admit(keys, day)) === null;
+    })().catch(() => false);
+    const ok = await this.admitting;
+    if (!ok) this.admitting = null; // why: refused today: a later try asks again
+    return ok;
   }
 
   async loadRoom(name) {
     if (this.room) return this.room;
     const stored = await this.state.storage.get(["name", "chunks", "verifier"]);
     const chunks = stored.get("chunks") ?? 0;
+    this.stored = chunks > 0;
     this.verifier = typeof stored.get("verifier") === "string" ? stored.get("verifier") : null;
     let state = null;
     if (chunks > 0) {
@@ -159,14 +199,22 @@ export class CollabRoom {
       state,
       e2eeOnly: true,
       maxBytes: num(this.env.MAX_ROOM_BYTES, 4_000_000),
-      authorize: async (token, room) => {
+      authorize: async (token, room, socket) => {
         if (verifyRoomToken(key, token, room) !== null) return false;
         const v = tokenVerifier(token);
         // A token with no verifier comes only from a server with an access key.
-        if (v === null) return Boolean(this.env.COLLAB_ACCESS_KEY);
-        // The first proof binds the room (kept with its first save); any other is refused.
-        this.verifier ??= v;
-        return v === this.verifier;
+        if (v === null) return Boolean(this.env.COLLAB_ACCESS_KEY) && (await this.admitNew(socket));
+        const kind = roomKind(name);
+        // Review 4 (RR4-469-1): a committed name lets in only the proof it commits to.
+        if (kind === "committed" && !commitmentOk(name, v)) return false;
+        // A bound room (kept with its first save) refuses any other proof.
+        if (this.verifier !== null && v !== this.verifier) return false;
+        if (!(await this.admitNew(socket))) return false;
+        // The first proof binds a committed or app-made room. An "open" name (typed, so
+        // known in advance) binds nothing: a stranger connecting first can't lock out
+        // its owners. The app commits every name it uses here.
+        if (this.verifier === null && kind !== "open") this.verifier = v;
+        return this.verifier === null || v === this.verifier;
       },
       onAuthenticated: (socket, address) => socket.ws.serializeAttachment({ ready: true, address, room: name }),
       onChange: () => {
@@ -224,10 +272,18 @@ export class CollabRoom {
       await this.state.storage.put(entries);
       if (old > chunks) await this.state.storage.delete(Array.from({ length: old - chunks }, (_, i) => `s${chunks + i}`));
       await this.state.storage.setAlarm(Date.now() + num(this.env.RETENTION_DAYS, 90) * DAY_MS);
+      if (!this.stored) {
+        this.stored = true;
+        await this.quotaStub()?.stored(1).catch(() => {}); // why: a count that drifts is not a reason to lose the room
+      }
     } catch (e) {
       this.dirty = true; // why: not stored: the next save tries again
       throw e;
     }
+  }
+
+  quotaStub() {
+    return this.env.QUOTA ? this.env.QUOTA.get(this.env.QUOTA.idFromName("quota")) : null;
   }
 
   async fetch(request) {
@@ -237,7 +293,9 @@ export class CollabRoom {
     const room = await this.loadRoom(name);
     const { server, response } = upgrade();
     this.state.acceptWebSocket(server);
-    server.serializeAttachment({ ready: false, address: name, room: name });
+    // The quota's buckets for this client (HMACs under the day's key, no address), for a new room.
+    const q = this.env.QUOTA && !this.stored ? quotaBuckets(this.env.COLLAB_TOKEN_SECRET, request.headers?.get?.("cf-connecting-ip")) : undefined;
+    server.serializeAttachment({ ready: false, address: name, room: name, ...(q ? { q } : {}) });
     this.peers.set(server, room.join(this.socketFor(server)));
     return response;
   }
@@ -278,9 +336,13 @@ export class CollabRoom {
     const lastWrite = (await this.state.storage.get("lastWrite")) ?? 0;
     const keep = num(this.env.RETENTION_DAYS, 90) * DAY_MS;
     if (this.state.getWebSockets().length === 0 && Date.now() - lastWrite >= keep) {
+      const had = this.stored || ((await this.state.storage.get("chunks")) ?? 0) > 0;
       await this.state.storage.deleteAll();
       this.room?.destroy();
       this.room = null;
+      this.stored = false;
+      this.verifier = null;
+      if (had) await this.quotaStub()?.stored(-1).catch(() => {});
     } else {
       await this.state.storage.setAlarm(lastWrite + keep);
     }
@@ -350,4 +412,53 @@ export class Signal {
   async webSocketClose() {}
 
   async webSocketError() {}
+}
+
+/**
+ * The one counter for new rooms (review 2 RR2-469-1; the rules are in
+ * sync-server/collab/roomQuota.mjs).
+ * Its storage: day, rooms, stored and one key per bucket.
+ */
+export class Quota {
+  constructor(state, env) {
+    this.state = state;
+    this.env = env;
+    this.counts = null;
+  }
+
+  async load() {
+    if (this.counts) return this.counts;
+    const all = await this.state.storage.list();
+    const buckets = new Map();
+    for (const [k, v] of all) if (k.startsWith("b:")) buckets.set(k.slice(2), v);
+    this.counts = { day: all.get("day") ?? "", rooms: all.get("rooms") ?? 0, stored: all.get("stored") ?? 0, buckets };
+    return this.counts;
+  }
+
+  /** RPC: may a new room open for a client with these buckets? null = yes (counted), else the reason. */
+  async admit(keys, day = dayOf()) {
+    const c = await this.load();
+    const before = c.day;
+    const ks = Array.isArray(keys) ? keys.filter((k) => typeof k === "string" && /^[ap]:[\w-]{22}$/.test(k)).slice(0, 2) : [];
+    const why = admit(c, ks, day, quotaLimits(this.env));
+    if (before !== c.day) {
+      // A new day: yesterday's buckets go.
+      await this.state.storage.deleteAll();
+      await this.state.storage.put({ day: c.day, rooms: c.rooms, stored: c.stored });
+    }
+    if (why === null) {
+      const put = { day: c.day, rooms: c.rooms };
+      for (const k of ks) put[`b:${k}`] = c.buckets.get(k);
+      await this.state.storage.put(put);
+    }
+    return why;
+  }
+
+  /** RPC: a room was stored for the first time (+1) or deleted (−1). */
+  async stored(delta) {
+    const c = await this.load();
+    c.stored = Math.max(0, c.stored + (delta > 0 ? 1 : -1));
+    await this.state.storage.put({ stored: c.stored });
+    return c.stored;
+  }
 }

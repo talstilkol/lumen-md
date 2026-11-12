@@ -52,10 +52,11 @@ import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
 import { openStore } from "./collab/sqliteStore.mjs";
 import { importLegacyDir } from "./collab/legacyImport.mjs";
-import { DEFAULT_TOKEN_TTL_S, accessKeyOk, issueRoomToken, signingKey, verifyRoomToken } from "./collab/roomToken.mjs";
+import { DEFAULT_TOKEN_TTL_S, accessKeyOk, issueRoomToken, signingKey, splitCommittedRoom, verifyRoomToken } from "./collab/roomToken.mjs";
 import { checkE2eeUpdate, updateInMessage } from "./collab/relay.mjs";
 
-const ROOM_NAME = /^[\w-]{1,128}$/;
+// A name, or a name with its proof commitment (`<name>_k<32 hex>`, review 4, roomToken.mjs).
+const ROOM_NAME = /^[\w-]{1,162}$/;
 
 /**
  * Build (not start) a collab server. `listen()` resolves with the bound
@@ -149,7 +150,10 @@ export function createCollabServer(opts = {}) {
       }
     },
     async onLoadDocument({ document, documentName }) {
-      const state = store.load(documentName);
+      // The app now names a password room `<name>_k<commit>` (review 4): a room stored
+      // under its plain name before that is found there, and saved under the new name.
+      const legacy = splitCommittedRoom(documentName)?.base;
+      const state = store.load(documentName) ?? (legacy ? store.load(legacy) : null);
       if (state) Y.applyUpdate(document, state);
     },
     async onStoreDocument({ document, documentName }) {

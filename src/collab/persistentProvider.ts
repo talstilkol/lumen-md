@@ -49,16 +49,19 @@ export async function createPersistentProvider(
   const mod = (await import("@hocuspocus/provider")) as unknown as {
     HocuspocusProvider: new (cfg: Record<string, unknown>) => HocuspocusLike;
   };
+  // Review 4 (RR4-469-1): with the room's password, the server-side name commits to the
+  // room proof, so nobody who lacks the password can bind the room before its owners.
+  const serverRoom = password ? await (await import("./roomProof")).committedRoomName(roomName, password) : roomName;
   const listeners = { sync: new Set<SyncListener>(), "connection-error": new Set<SyncListener>() };
   const emit = (event: keyof typeof listeners, v: boolean) => {
     for (const fn of [...listeners[event]]) fn(v);
   };
   const provider = new mod.HocuspocusProvider({
-    url: roomSocketUrl(url, roomName),
-    name: roomName,
+    url: roomSocketUrl(url, serverRoom),
+    name: serverRoom,
     document: doc,
     // Called on every connect, so a reconnect after expiry gets a new token.
-    token: async () => (await requestRoomToken(url, roomName, accessKey, { password })).token,
+    token: async () => (await requestRoomToken(url, serverRoom, accessKey, { password })).token,
   });
   provider.on("synced", (data) => emit("sync", (data as { state?: boolean } | undefined)?.state !== false));
   provider.on("authenticationFailed", () => emit("connection-error", false));
