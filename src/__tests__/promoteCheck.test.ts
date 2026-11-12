@@ -7,7 +7,7 @@ import { SAFARI_PLATFORMS, SAFARI_SPECS, browserstackYml, platformOf, resultsByP
 
 const A = "a".repeat(40);
 const B = "b".repeat(40);
-const good = { ok: true, problems: [] };
+const good: { ok: boolean; problems: string[] } = { ok: true, problems: [] };
 type Suites = Record<string, { ok: boolean; detail: string }>;
 const full = (sha: string, suites: Suites, verified = good, path = `commits/${sha}/full-1.json`) => ({ path, verified, report: { kind: "full", commit: { sha }, suites } });
 const pass = (detail = "300 passed, 0 failed, 0 flaky") => ({ ok: true, detail });
