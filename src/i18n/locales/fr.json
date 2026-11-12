@@ -239,6 +239,8 @@
   "cmd.insert.json": "Insertion JSON table",
   "cmd.insert.map": "Insertion map",
   "cmd.insert.math": "Insertion math block",
+  "cmd.insert.inlineMath": "Insérer une formule dans la ligne",
+  "cmd.insert.inlineMath.hint": "Une formule au milieu de la phrase, $…$ (Ctrl/⌘+M). Elle reste de gauche à droite dans un texte hébreu.",
   "cmd.insert.mermaid": "Insertion diagram (Mermaid)",
   "cmd.insert.model": "Insertion 3D model",
   "cmd.insert.model.hint": ".glb / .gltf",

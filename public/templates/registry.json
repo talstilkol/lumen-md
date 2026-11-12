@@ -161,6 +161,54 @@
       "rating": 4.8,
       "downloads": 0,
       "tags": ["travel", "personal"]
+    },
+    {
+      "id": "bagrut-math",
+      "name": "Math exam practice",
+      "category": "Study",
+      "author": "Lumen Team",
+      "description": "Bagrut-style math practice: quadratic equation, derivative and extremum, sequences. Formulas inline in the text with $…$.",
+      "name_he": "תרגול לבגרות במתמטיקה",
+      "description_he": "תרגול בסגנון בגרות: משוואה ריבועית, נגזרת ונקודות קיצון, סדרות. נוסחאות בתוך הטקסט עם $…$.",
+      "url_he": "templates/he/bagrut-math.md",
+      "icon": "📐",
+      "version": "1.0.0",
+      "url": "templates/bagrut-math.md",
+      "rating": 4.8,
+      "downloads": 0,
+      "tags": ["study", "math", "bagrut"]
+    },
+    {
+      "id": "intro-physics",
+      "name": "Physics lab report",
+      "category": "Study",
+      "author": "Lumen Team",
+      "description": "Intro physics lab report: goal, theory with formulas, a measurement table, error analysis and conclusion.",
+      "name_he": "דוח מעבדה בפיזיקה",
+      "description_he": "דוח מעבדה למבוא לפיזיקה: מטרה, רקע תאורטי עם נוסחאות, טבלת מדידות, ניתוח שגיאות ומסקנה.",
+      "url_he": "templates/he/intro-physics.md",
+      "icon": "🧪",
+      "version": "1.0.0",
+      "url": "templates/intro-physics.md",
+      "rating": 4.7,
+      "downloads": 0,
+      "tags": ["study", "physics", "lab"]
+    },
+    {
+      "id": "intro-stats",
+      "name": "Statistics problem set",
+      "category": "Study",
+      "author": "Lumen Team",
+      "description": "Intro statistics problem set: descriptive statistics, standard score, hypothesis test and probability, with the formulas in place.",
+      "name_he": "תרגיל בסטטיסטיקה",
+      "description_he": "תרגיל במבוא לסטטיסטיקה: סטטיסטיקה תיאורית, ציון תקן, בדיקת השערות והסתברות, עם הנוסחאות במקומן.",
+      "url_he": "templates/he/intro-stats.md",
+      "icon": "📊",
+      "version": "1.0.0",
+      "url": "templates/intro-stats.md",
+      "rating": 4.7,
+      "downloads": 0,
+      "tags": ["study", "statistics"]
     }
   ]
 }

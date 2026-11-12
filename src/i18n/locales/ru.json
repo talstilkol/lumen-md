@@ -239,6 +239,8 @@
   "cmd.insert.json": "Вставка JSON table",
   "cmd.insert.map": "Вставка map",
   "cmd.insert.math": "Вставка math block",
+  "cmd.insert.inlineMath": "Вставить формулу в строку",
+  "cmd.insert.inlineMath.hint": "Формула внутри предложения, $…$ (Ctrl/⌘+M). В тексте на иврите она остаётся слева направо.",
   "cmd.insert.mermaid": "Вставка diagram (Mermaid)",
   "cmd.insert.model": "Вставка 3D model",
   "cmd.insert.model.hint": ".glb / .gltf",

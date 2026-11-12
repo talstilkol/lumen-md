@@ -239,6 +239,8 @@
   "cmd.insert.json": "挿入 JSON table",
   "cmd.insert.map": "挿入 map",
   "cmd.insert.math": "挿入 math block",
+  "cmd.insert.inlineMath": "行内に数式を挿入",
+  "cmd.insert.inlineMath.hint": "文中の数式 $…$（Ctrl/⌘+M）。ヘブライ語の文中でも左から右のまま表示されます。",
   "cmd.insert.mermaid": "挿入 diagram (Mermaid)",
   "cmd.insert.model": "挿入 3D model",
   "cmd.insert.model.hint": ".glb / .gltf",

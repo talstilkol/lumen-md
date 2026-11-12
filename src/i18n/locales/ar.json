@@ -239,6 +239,8 @@
   "cmd.insert.json": "إدراج JSON table",
   "cmd.insert.map": "إدراج map",
   "cmd.insert.math": "إدراج math block",
+  "cmd.insert.inlineMath": "إدراج صيغة داخل السطر",
+  "cmd.insert.inlineMath.hint": "صيغة داخل الجملة، $…$ (Ctrl/⌘+M). تبقى من اليسار إلى اليمين داخل النص العربي أو العبري.",
   "cmd.insert.mermaid": "إدراج diagram (Mermaid)",
   "cmd.insert.model": "إدراج 3D model",
   "cmd.insert.model.hint": ".glb / .gltf",
