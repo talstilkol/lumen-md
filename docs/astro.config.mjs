@@ -257,6 +257,14 @@ export default defineConfig({
           translations: { he: "תרומה לפרויקט" },
           items: [{ label: "The PR check", slug: "contributing/pr-check", translations: { he: "בדיקת ה־PR" } }],
         },
+        {
+          label: "Project",
+          translations: { he: "הפרויקט" },
+          items: [
+            { label: "Lumen, Obsidian, Notion and Google Docs", slug: "project/compare", translations: { he: "Lumen, ‏Obsidian, ‏Notion ו-Google Docs" } },
+            { label: "Community and the beta", slug: "project/community", translations: { he: "הקהילה והבטא" } },
+          ],
+        },
       ],
     }),
   ],
