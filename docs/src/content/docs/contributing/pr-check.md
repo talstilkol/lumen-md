@@ -39,6 +39,11 @@ with 1 when a check fails. Warnings do not fail it.
   lockfile has an allowed licence (no copyleft, no non-commercial, not
   missing).
 - **Domain.** No added line names the project's domain.
+- **Budgets only go down** (plan W6.26). A diff that raises a bundle
+  budget, the startup budget, an exception's expiry date, the ratchet
+  margin, a performance-gate FCP/LCP limit or a Lighthouse assertion
+  fails. So does a budget number written into `scripts/bundle-budget.mjs`
+  itself. See [Budgets that only go down](/contributing/budgets/).
 
 It also warns:
 - when source changed and no test did;

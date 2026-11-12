@@ -16,6 +16,8 @@
  *   - Source changed with no test changed (a warning).
  *   - Added lines that name the project's domain (the owner's rule).
  *   - Written by an AI agent → the PR wants the `ai-written` label.
+ *   - Budgets only go down (plan W6.26): no bundle budget, startup budget,
+ *     exception date, perf-gate FCP/LCP limit or Lighthouse assertion loosened.
  *
  *   npm run pr:check -- --base origin/main --body pr-body.md
  *   npm run build && npm run pr:check -- --base origin/main --body pr-body.md --build-base --out pr-check.md
@@ -29,6 +31,7 @@ import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { addedLinesFromDiff, AI_LABEL, bodyProblems, domainMentions, licenceChanges, skipCiViolations, unregisteredNetworkCalls, untestedChanges, writtenByAi } from "./lib/prGate.mjs";
 import { bundleDiffMarkdown } from "./bundle-diff.mjs";
+import { RATCHET_FILES, raiseLine, raisesFor } from "./lib/budgetRatchet.mjs";
 
 export function parseArgs(argv) {
   const opt = (n) => (argv.includes(n) ? argv[argv.indexOf(n) + 1] : undefined);
@@ -120,6 +123,28 @@ export function runChecks(opts) {
     const bad = rows.filter((r) => r.level === "fail");
     add("Licences of production packages", bad.length ? "fail" : rows.some((r) => r.level === "warn") ? "warn" : "ok", rows.length ? ["| Package | Version | Licence | Before | |", "|---|---|---|---|---|", ...rows.map((r) => `| ${r.name} | ${r.version} | ${r.license} | ${r.previous ?? "new"} | ${r.level} |`)] : ["The lockfile changed, no production package did."]);
   } else add("Licences of production packages", "ok", ["package-lock.json is unchanged."]);
+
+  // Budgets only go down (W6.26): every ratchet file the diff changes, against the merge base.
+  {
+    const raised = [];
+    const touched = RATCHET_FILES.filter((f) => changed.includes(f));
+    for (const f of touched) {
+      let before = null;
+      try {
+        before = git(cwd, "show", `${mergeBase}:${f}`);
+      } catch {
+        // why: the base has no such file yet — this diff introduces it, so there is nothing to raise.
+      }
+      const after = existsSync(join(cwd, f)) ? readFileSync(join(cwd, f), "utf8") : null;
+      if (before != null && after == null) raised.push(`- \`${f}\` was deleted.`);
+      else if (before != null) raised.push(...raisesFor(f, before, after).map((x) => raiseLine(f, x)));
+    }
+    // The numbers live in the JSON: a number written into the enforcer itself would bypass the check.
+    for (const a of added["scripts/bundle-budget.mjs"] ?? []) {
+      if (/\bbudgetKb\s*:\s*\d|STARTUP_BUDGET_KB\s*=\s*\d/.test(a.text)) raised.push(`- \`scripts/bundle-budget.mjs:${a.line}\` sets a budget in code; budgets live in \`scripts/bundle-budgets.json\`.`);
+    }
+    add("Budgets only go down", raised.length ? "fail" : "ok", raised.length ? [...raised, "", "A budget is never raised: split the chunk, load it lazily, or make the page faster."] : [touched.length ? `${touched.map((f) => `\`${f}\``).join(", ")}: nothing raised.` : "No budget file changed."]);
+  }
 
   // AI label
   const messages = git(cwd, "log", "--format=%B%x1e", range).split("\x1e");
