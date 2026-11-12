@@ -134,6 +134,7 @@ export default defineConfig({
             { label: "Encrypted sync (E2EE)", slug: "sync/e2ee", translations: { he: "סנכרון מוצפן (E2EE)" } },
             { label: "Read-mode publishing", slug: "sync/publish", translations: { he: "פרסום לקריאה" } },
             { label: "Publish to your own site", slug: "sync/own-site", translations: { he: "פרסום לאתר משלך" } },
+            { label: "Automatic merging", slug: "sync/merge" },
           ],
         },
         {

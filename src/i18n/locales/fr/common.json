@@ -275,6 +275,7 @@
   "external.conflict.theirs": "la leur",
   "external.conflict.title": "Modifié hors de Lumen — {path}",
   "external.deleted": "« {path} » a été supprimé hors de Lumen. La note ouverte est gardée, non enregistrée.",
+  "external.merged": "« {path} » a aussi été modifié hors de Lumen. Les deux modifications ont été fusionnées ; les deux versions sont dans l'historique de la note.",
   "external.reloaded": "« {path} » a été modifié hors de Lumen et rechargé.",
   "external.renamed": "« {from} » a été renommé hors de Lumen en « {to} » ; la note ouverte suit.",
   "feedback.close": "Fermer",

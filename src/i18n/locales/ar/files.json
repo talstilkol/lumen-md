@@ -278,6 +278,7 @@
   "versionHistory.reason.collab": "جلسة تعاونية",
   "versionHistory.reason.git-pull": "قبل git pull",
   "versionHistory.reason.manual": "يدوي",
+  "versionHistory.reason.merge": "محفوظ عند الدمج",
   "versionHistory.reason.migrated": "من النسخ الاحتياطية القديمة",
   "versionHistory.reason.restore": "قبل الاستعادة",
   "versionHistory.reason.save": "محفوظ",

@@ -278,6 +278,7 @@
   "versionHistory.reason.collab": "Collab-Sitzung",
   "versionHistory.reason.git-pull": "vor Git-Pull",
   "versionHistory.reason.manual": "manuell",
+  "versionHistory.reason.merge": "beim Zusammenführen gesichert",
   "versionHistory.reason.migrated": "aus alten Backups",
   "versionHistory.reason.restore": "vor Wiederherstellung",
   "versionHistory.reason.save": "gespeichert",

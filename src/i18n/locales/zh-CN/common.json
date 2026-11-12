@@ -275,6 +275,7 @@
   "external.conflict.theirs": "外部的",
   "external.conflict.title": "在 Lumen 之外被修改 — {path}",
   "external.deleted": "“{path}”在 Lumen 之外被删除。打开的笔记仍保留，未保存。",
+  "external.merged": "“{path}”也在 Lumen 之外被修改。两处编辑已合并；两个版本都在笔记的历史记录中。",
   "external.reloaded": "“{path}”在 Lumen 之外被修改，已重新载入。",
   "external.renamed": "“{from}”在 Lumen 之外被重命名为“{to}”；打开的笔记已跟随。",
   "feedback.close": "关闭",

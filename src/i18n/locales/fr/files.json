@@ -278,6 +278,7 @@
   "versionHistory.reason.collab": "session collaborative",
   "versionHistory.reason.git-pull": "avant un pull git",
   "versionHistory.reason.manual": "manuel",
+  "versionHistory.reason.merge": "conservé lors d'une fusion",
   "versionHistory.reason.migrated": "depuis les anciennes sauvegardes",
   "versionHistory.reason.restore": "avant restauration",
   "versionHistory.reason.save": "enregistré",

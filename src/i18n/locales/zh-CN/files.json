@@ -278,6 +278,7 @@
   "versionHistory.reason.collab": "协作会话",
   "versionHistory.reason.git-pull": "git 拉取之前",
   "versionHistory.reason.manual": "手动",
+  "versionHistory.reason.merge": "合并时保留",
   "versionHistory.reason.migrated": "来自旧备份",
   "versionHistory.reason.restore": "恢复前",
   "versionHistory.reason.save": "已保存",

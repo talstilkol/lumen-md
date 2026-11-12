@@ -203,6 +203,7 @@
   "external.conflict.theirs": "theirs",
   "external.conflict.title": "Changed outside Lumen — {path}",
   "external.deleted": "“{path}” was deleted outside Lumen. The open note is kept, unsaved.",
+  "external.merged": "“{path}” changed outside Lumen too. Both edits were merged; both versions are in the note's history.",
   "external.reloaded": "“{path}” was changed outside Lumen and reloaded.",
   "external.renamed": "“{from}” was renamed outside Lumen to “{to}”; the open note follows it.",
   "fim.off": "Local autocomplete off",

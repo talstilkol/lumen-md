@@ -278,6 +278,7 @@
   "versionHistory.reason.collab": "совместная сессия",
   "versionHistory.reason.git-pull": "перед git pull",
   "versionHistory.reason.manual": "вручную",
+  "versionHistory.reason.merge": "сохранено при слиянии",
   "versionHistory.reason.migrated": "из старых резервных копий",
   "versionHistory.reason.restore": "перед восстановлением",
   "versionHistory.reason.save": "сохранено",

@@ -278,6 +278,7 @@
   "versionHistory.reason.collab": "סשן שיתופי",
   "versionHistory.reason.git-pull": "לפני git pull",
   "versionHistory.reason.manual": "ידני",
+  "versionHistory.reason.merge": "נשמר במיזוג",
   "versionHistory.reason.migrated": "מגיבויים ישנים",
   "versionHistory.reason.restore": "לפני שחזור",
   "versionHistory.reason.save": "נשמר",

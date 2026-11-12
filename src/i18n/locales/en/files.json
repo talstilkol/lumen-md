@@ -278,6 +278,7 @@
   "versionHistory.reason.collab": "collab session",
   "versionHistory.reason.git-pull": "before git pull",
   "versionHistory.reason.manual": "manual",
+  "versionHistory.reason.merge": "kept at a merge",
   "versionHistory.reason.migrated": "from old backups",
   "versionHistory.reason.restore": "before restore",
   "versionHistory.reason.save": "saved",

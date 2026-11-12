@@ -275,6 +275,7 @@
   "external.conflict.theirs": "их",
   "external.conflict.title": "Изменено вне Lumen — {path}",
   "external.deleted": "«{path}» удалён вне Lumen. Открытая заметка сохраняется несохранённой.",
+  "external.merged": "«{path}» изменили и вне Lumen. Обе правки объединены; обе версии есть в истории заметки.",
   "external.reloaded": "«{path}» изменён вне Lumen и перезагружен.",
   "external.renamed": "«{from}» переименован вне Lumen в «{to}»; открытая заметка следует за ним.",
   "feedback.close": "Закрыть",

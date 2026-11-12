@@ -278,6 +278,7 @@
   "versionHistory.reason.collab": "共同編集セッション",
   "versionHistory.reason.git-pull": "git プルの前",
   "versionHistory.reason.manual": "手動",
+  "versionHistory.reason.merge": "統合時に保存",
   "versionHistory.reason.migrated": "古いバックアップから",
   "versionHistory.reason.restore": "復元前",
   "versionHistory.reason.save": "保存済み",

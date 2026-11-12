@@ -1604,6 +1604,11 @@
       "vars": []
     },
     {
+      "key": "versionHistory.reason.merge",
+      "en": "kept at a merge",
+      "vars": []
+    },
+    {
       "key": "versionHistory.reason.migrated",
       "en": "from old backups",
       "vars": []

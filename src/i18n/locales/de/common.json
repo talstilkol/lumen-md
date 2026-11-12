@@ -275,6 +275,7 @@
   "external.conflict.theirs": "deren",
   "external.conflict.title": "Außerhalb von Lumen geändert — {path}",
   "external.deleted": "„{path}“ wurde außerhalb von Lumen gelöscht. Die offene Notiz bleibt erhalten, ungespeichert.",
+  "external.merged": "„{path}“ wurde auch außerhalb von Lumen geändert. Beide Änderungen wurden zusammengeführt; beide Versionen liegen im Verlauf der Notiz.",
   "external.reloaded": "„{path}“ wurde außerhalb von Lumen geändert und neu geladen.",
   "external.renamed": "„{from}“ wurde außerhalb von Lumen in „{to}“ umbenannt; die offene Notiz folgt.",
   "feedback.close": "Schließen",

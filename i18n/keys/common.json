@@ -1579,6 +1579,13 @@
       ]
     },
     {
+      "key": "external.merged",
+      "en": "“{path}” changed outside Lumen too. Both edits were merged; both versions are in the note's history.",
+      "vars": [
+        "path"
+      ]
+    },
+    {
       "key": "external.reloaded",
       "en": "“{path}” was changed outside Lumen and reloaded.",
       "vars": [

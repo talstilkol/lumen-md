@@ -275,6 +275,7 @@
   "external.conflict.theirs": "نسختهم",
   "external.conflict.title": "تغيّر خارج Lumen — {path}",
   "external.deleted": "حُذف «{path}» خارج Lumen. تبقى الملاحظة المفتوحة غير محفوظة.",
+  "external.merged": "تغيّر „{path}” خارج Lumen أيضًا. دُمجت التعديلات كلها؛ والنسختان في سجل الملاحظة.",
   "external.reloaded": "تغيّر «{path}» خارج Lumen وأُعيد تحميله.",
   "external.renamed": "أُعيدت تسمية «{from}» خارج Lumen إلى «{to}»؛ الملاحظة المفتوحة تتبعه.",
   "feedback.close": "إغلاق",

@@ -275,6 +275,7 @@
   "external.conflict.theirs": "外部の版",
   "external.conflict.title": "Lumen の外で変更されました — {path}",
   "external.deleted": "「{path}」が Lumen の外で削除されました。開いているノートは未保存のまま残ります。",
+  "external.merged": "「{path}」は Lumen の外でも変更されていました。両方の編集を統合しました。両方の版はノートの履歴にあります。",
   "external.reloaded": "「{path}」が Lumen の外で変更されたので再読み込みしました。",
   "external.renamed": "「{from}」が Lumen の外で「{to}」に名前変更されました。開いているノートも追従します。",
   "feedback.close": "閉じる",
