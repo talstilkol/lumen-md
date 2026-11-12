@@ -51,3 +51,37 @@ The report, with the score per module and every surviving mutant's line, is
 written to `reports/mutation/`. The plan's target is a score of at least
 70% per module. A mutant that survives in a security module should get a
 test that catches it.
+
+## The 80% floor in every preview build
+
+The critical modules (the `critical` list in `targets.json`) must score at
+least **80%**:
+
+- encryption: the primitives, age, the keyring and `storage/encryption`
+- sync: conflict, manifest and header
+- the privacy ledger
+- the raw-HTML sanitizer
+- the secret store
+- vault writes: `storage/vault/shared` and `handleBackend`
+
+`npm run test:mutation` fails when one of them is under 80%, and when any
+other module is under 70%.
+
+A full run takes too long for a preview build, so the build checks a
+**receipt** instead. `scripts/mutation/receipt.json` records each critical
+module's last score and the sha256 of the source it was measured on.
+`npm run mutation:check`, a preview-build gate, fails when a critical module
+on the branch:
+
+- has no score in the receipt,
+- scores under 80%, or
+- changed since its score was measured.
+
+After changing a critical module, measure it again and commit the receipt:
+
+```sh
+node scripts/mutation/run.mjs --critical --module privacyLedger --receipt
+```
+
+A module that isn't on the branch yet (it comes with another pull request)
+is listed and skipped.

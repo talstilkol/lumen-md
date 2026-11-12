@@ -30,6 +30,7 @@
     "lumen": "tsx bin/lumen.ts",
     "test:coverage": "vitest run --coverage",
     "test:mutation": "node scripts/mutation/run.mjs --min 70",
+    "mutation:check": "node scripts/mutation/check.mjs",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",

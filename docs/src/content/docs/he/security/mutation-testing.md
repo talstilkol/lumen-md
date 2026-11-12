@@ -50,3 +50,35 @@ node scripts/mutation/run.mjs --max 200        # מדגם גדול יותר לכ
 הדוח, עם הציון לכל מודול והשורה של כל מוטציה ששרדה, נכתב
 ל-`reports/mutation/`. היעד בתוכנית הוא ציון של 70% לפחות בכל מודול.
 מוטציה ששורדת במודול אבטחה צריכה לקבל בדיקה שתופסת אותה.
+
+## רצפה של 80% בכל build של preview
+
+המודולים הקריטיים (הרשימה `critical` ב-`targets.json`) חייבים לקבל
+**80%** לפחות:
+
+- הצפנה: הפרימיטיבים, age, ה-keyring ו-`storage/encryption`
+- סנכרון: conflict, ‏manifest ו-header
+- יומן הפרטיות
+- המסנן של HTML גולמי
+- מאגר הסודות
+- כתיבה לכספת: `storage/vault/shared` ו-`handleBackend`
+
+`npm run test:mutation` נכשל כשאחד מהם מתחת ל-80%, וכשמודול אחר כלשהו מתחת
+ל-70%.
+
+הרצה מלאה ארוכה מדי ל-build של preview, ולכן ה-build בודק **קבלה**.
+`scripts/mutation/receipt.json` מתעד לכל מודול קריטי את הציון האחרון שלו ואת
+ה-sha256 של הקוד שעליו הוא נמדד. `npm run mutation:check`, שער ב-build של
+preview, נכשל כשמודול קריטי בענף:
+
+- אין לו ציון בקבלה,
+- הציון שלו מתחת ל-80%, או
+- הוא השתנה מאז שהציון שלו נמדד.
+
+אחרי שמשנים מודול קריטי, מודדים אותו שוב ושומרים את הקבלה בקומיט:
+
+```sh
+node scripts/mutation/run.mjs --critical --module privacyLedger --receipt
+```
+
+מודול שעוד לא נמצא בענף (הוא מגיע עם pull request אחר) מופיע ברשימה ומדולג.
