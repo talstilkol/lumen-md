@@ -266,6 +266,7 @@ export default defineConfig({
           translations: { he: "הפרויקט" },
           items: [
             { label: "Issue triage", slug: "project/issue-triage", translations: { he: "מיון issues" } },
+            { label: "Releasing a version", slug: "project/releasing", translations: { he: "שחרור גרסה" } },
           ],
         },
         {
@@ -288,6 +289,7 @@ export default defineConfig({
           items: [
             { label: "Lumen, Obsidian, Notion and Google Docs", slug: "project/compare", translations: { he: "Lumen, ‏Obsidian, ‏Notion ו-Google Docs" } },
             { label: "Community and the beta", slug: "project/community", translations: { he: "הקהילה והבטא" } },
+            { label: "The beta programme", slug: "project/beta-programme", translations: { he: "תוכנית הבטא" } },
           ],
         },
       ],

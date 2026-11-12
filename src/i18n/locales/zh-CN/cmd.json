@@ -88,6 +88,8 @@
   "cmd.app.updateChannel.hint": "测试版先获得新功能；稳定版获得经过测试的版本",
   "cmd.audit.open": "审计日志…",
   "cmd.audit.open.hint": "查看所有已记录的变更;可导出 CSV 用于合规",
+  "cmd.beta": "帮助：测试版计划",
+  "cmd.beta.hint": "在本设备上加入测试版、发送反馈，并仅在你要求时生成每周报告",
   "cmd.billing.manage": "账单：管理订阅",
   "cmd.billing.managePersonal": "账单：管理个人订阅",
   "cmd.billing.upgradePro": "账单：升级到 Pro",

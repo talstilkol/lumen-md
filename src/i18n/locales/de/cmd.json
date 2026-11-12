@@ -88,6 +88,8 @@
   "cmd.app.updateChannel.hint": "Beta bekommt neue Funktionen zuerst; stabil bekommt getestete Versionen",
   "cmd.audit.open": "Audit-Protokoll…",
   "cmd.audit.open.hint": "Jede aufgezeichnete Änderung prüfen; CSV für Compliance exportieren",
+  "cmd.beta": "Hilfe: Beta-Programm",
+  "cmd.beta.hint": "Auf diesem Gerät an der Beta teilnehmen, Feedback senden und einen Wochenbericht nur auf Wunsch",
   "cmd.billing.manage": "Abrechnung: Abo verwalten",
   "cmd.billing.managePersonal": "Abrechnung: Persönliches Abo verwalten",
   "cmd.billing.upgradePro": "Abrechnung: Auf Pro upgraden",

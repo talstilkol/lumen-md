@@ -88,6 +88,8 @@
   "cmd.app.updateChannel.hint": "בבטא פיצ'רים חדשים מגיעים קודם; ביציב מגיעות גרסאות שנבדקו",
   "cmd.audit.open": "יומן ביקורת…",
   "cmd.audit.open.hint": "בדוק כל פעולה שנרשמה; ייצא CSV לדרישות תאימות",
+  "cmd.beta": "עזרה: תוכנית הבטא",
+  "cmd.beta.hint": "הצטרפות לבטא במכשיר הזה, שליחת משוב, ודוח שבועי רק אם ביקשת",
   "cmd.billing.manage": "חיוב: ניהול מנוי",
   "cmd.billing.managePersonal": "חיוב: ניהול מנוי אישי",
   "cmd.billing.upgradePro": "חיוב: שדרוג ל-Pro",

@@ -87,6 +87,8 @@
   "cmd.app.updateChannel.hint": "Beta gets new features first; stable gets tested releases",
   "cmd.audit.open": "Audit log…",
   "cmd.audit.open.hint": "Inspect every recorded mutation; export CSV for compliance",
+  "cmd.beta": "Help: Beta programme",
+  "cmd.beta.hint": "Join the beta on this device, send feedback, and a weekly report only if you ask for it",
   "cmd.billing.manage": "Billing: Manage subscription",
   "cmd.billing.managePersonal": "Billing: Manage personal subscription",
   "cmd.billing.upgradePro": "Billing: Upgrade to Pro",

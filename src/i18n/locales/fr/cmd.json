@@ -88,6 +88,8 @@
   "cmd.app.updateChannel.hint": "La bêta reçoit les nouveautés en premier ; le stable reçoit des versions testées",
   "cmd.audit.open": "Journal d'audit…",
   "cmd.audit.open.hint": "Consulter chaque modification enregistrée ; exporter en CSV pour la conformité",
+  "cmd.beta": "Aide : programme bêta",
+  "cmd.beta.hint": "Rejoindre la bêta sur cet appareil, envoyer un avis, et un rapport hebdomadaire seulement si vous le demandez",
   "cmd.billing.manage": "Facturation : gérer l'abonnement",
   "cmd.billing.managePersonal": "Facturation : gérer l'abonnement personnel",
   "cmd.billing.upgradePro": "Facturation : passer à Pro",
