@@ -82,6 +82,7 @@ export default defineConfig({
             { label: "Sync providers (WebDAV, S3, Dropbox, Drive)", slug: "sync/cloud" },
             { label: "Encrypted sync (E2EE)", slug: "sync/e2ee" },
             { label: "Sync in two clicks", slug: "sync/two-clicks", translations: { he: "סנכרון בשתי לחיצות" } },
+            { label: "Private classroom", slug: "sync/classroom", translations: { he: "כיתה פרטית" } },
             { label: "Sync status, selective sync, time left", slug: "sync/status", translations: { he: "מצב הסנכרון וסנכרון סלקטיבי" } },
             { label: "Read-mode publishing", slug: "sync/publish" },
           ],
