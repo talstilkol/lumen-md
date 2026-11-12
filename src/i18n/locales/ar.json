@@ -1532,5 +1532,22 @@
   "srs.unreadable": "لا يمكن قراءة {path}، لذا لن يُغيَّر. أصلحه أو أزله لتراجع مجددًا.",
   "srs.failed": "تعذّر حفظ المراجعة: {error}",
   "cmd.review.daily": "المراجعة اليومية",
-  "srs.close": "إغلاق"
+  "srs.close": "إغلاق",
+  "cmd.note.morning": "الملاحظة اليومية: «صباحك»",
+  "cmd.note.morning.hint": "يضيف إلى ملاحظة اليوم ما تغيّر ومهام اليوم والبطاقات للمراجعة والتاريخ العبري — من هذا الجهاز فقط. ويفعّله كل صباح.",
+  "cmd.note.morningOff": "الملاحظة اليومية: إيقاف «صباحك»",
+  "cmd.note.morningOff.hint": "تُنشأ ملاحظات اليوم بدون كتلة الصباح.",
+  "morning.title": "صباحك",
+  "morning.changed": "ما تغيّر منذ الصباح السابق",
+  "morning.noChanges": "لم يتغير شيء.",
+  "morning.tasks": "مهام اليوم",
+  "morning.noTasks": "لا مهمة مستحقة اليوم.",
+  "morning.overdue": "مستحقة في {date}",
+  "morning.review": "بطاقات للمراجعة: {n}",
+  "morning.noReview": "لا شيء للمراجعة اليوم.",
+  "morning.openReview": "افتحها: ⌘K ← المراجعة اليومية",
+  "morning.more": "و{n} أخرى",
+  "morning.holidays": "اليوم",
+  "morning.done": "أُضيف «صباحك» إلى ملاحظة اليوم ({ms} م.ث).",
+  "morning.failed": "تعذّرت كتابة «صباحك»: {error}"
 }

@@ -78,3 +78,32 @@ for the diaspora — is computed in a few milliseconds, in your browser.
 The tests check the arithmetic against the browser's own Hebrew calendar on
 every day from 1990 to 2060, and every holiday rule against a hand-checked
 table of the years 2025–2030.
+
+
+## Your morning
+
+`⌘K` → **Daily note: “Your morning”** adds a block to today's note, and from
+then on writes it each morning when you open today's note. It is off until
+you run it, and `⌘K` → **Daily note: turn off “Your morning”** stops it.
+
+The block has:
+
+- the Hebrew date, this week's parasha and today's holidays;
+- the notes changed since the last morning, newest first (daily notes are
+  left out);
+- the open tasks due today or earlier. Due dates can be written as
+  `📅 2026-11-12` (Tasks), `[due:: 2026-11-12]` (Dataview) or
+  `@due(2026-11-12)`;
+- how many review cards are waiting, with the first few.
+
+Every row links to its note or card.
+
+Everything comes from this device: the vault index that search keeps in
+memory, `.lumen/review.json` and the Hebrew calendar. Nothing is sent
+anywhere. On a 10,000-note vault the block takes a few milliseconds, once
+the index is built.
+
+The block sits between `<!-- lumen:morning:start -->` and
+`<!-- lumen:morning:end -->`. Writing it again replaces only that part, so
+your own text in the note stays as it is. While today's note is open with
+edits, the block is written into the editor instead of the file.

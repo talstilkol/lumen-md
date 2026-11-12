@@ -8,6 +8,8 @@ export interface DailySettings {
   template: string;
   /** Holidays and Torah portions as in Israel (true) or the diaspora (false); unset: from the UI language / time zone. */
   israel?: boolean;
+  /** "Your morning" block in today's note (plan W5.19): changes, tasks, reviews, the Hebrew date. Off by default. */
+  morning?: boolean;
 }
 
 export const DEFAULT_DAILY: DailySettings = {

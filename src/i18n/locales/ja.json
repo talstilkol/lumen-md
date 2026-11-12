@@ -1532,5 +1532,22 @@
   "srs.unreadable": "{path} を読めないため変更しません。修正または削除するとまた復習できます。",
   "srs.failed": "復習を保存できませんでした: {error}",
   "cmd.review.daily": "今日の復習",
-  "srs.close": "閉じる"
+  "srs.close": "閉じる",
+  "cmd.note.morning": "デイリーノート：「あなたの朝」",
+  "cmd.note.morning.hint": "今日のノートに、変更されたもの・今日のタスク・復習するカード・ヘブライ暦の日付を追加します（この端末のみ）。毎朝オンになります。",
+  "cmd.note.morningOff": "デイリーノート：「あなたの朝」をオフ",
+  "cmd.note.morningOff.hint": "今日のノートは朝のブロックなしで作成されます。",
+  "morning.title": "あなたの朝",
+  "morning.changed": "前回の朝以降の変更",
+  "morning.noChanges": "変更はありません。",
+  "morning.tasks": "今日のタスク",
+  "morning.noTasks": "今日期限のタスクはありません。",
+  "morning.overdue": "期限 {date}",
+  "morning.review": "復習するカード：{n} 枚",
+  "morning.noReview": "今日は復習はありません。",
+  "morning.openReview": "開く：⌘K → 毎日の復習",
+  "morning.more": "ほか {n} 件",
+  "morning.holidays": "今日",
+  "morning.done": "「あなたの朝」を今日のノートに追加しました（{ms} ms）。",
+  "morning.failed": "「あなたの朝」を書き込めませんでした：{error}"
 }

@@ -570,6 +570,42 @@ export function useCommands({
         action: () => window.dispatchEvent(new CustomEvent("lumen-open-today")),
       },
       {
+        id: "note.morning",
+        label: t("cmd.note.morning"),
+        hint: t("cmd.note.morning.hint"),
+        icon: cmdIcons.FileText,
+        group: t("group.file"),
+        // Plan W5.19: turn "Your morning" on (off by default) and write it into today's note now.
+        action: async () => {
+          const store = useAppStore.getState();
+          const settings = { ...store.dailyNotes, morning: true };
+          if (!store.dailyNotes.morning) store.setDailyNotes({ morning: true });
+          const [{ dayOf, dailyPath, ensureDailyNote }, m] = await Promise.all([import("../daily/dailyNote"), import("../daily/morning")]);
+          const day = dayOf(new Date());
+          const path = dailyPath(day, settings);
+          try {
+            const t0 = performance.now();
+            if (store.doc.workspaceName === path) store.setContent(await m.applyToText(store.doc.content, day, settings, store.locale));
+            else {
+              await ensureDailyNote(day, settings, store.locale);
+              await m.refreshMorningFile(day, settings, store.locale);
+              window.dispatchEvent(new CustomEvent("lumen-open-today"));
+            }
+            showAiToast(t("morning.done", { ms: Math.round(performance.now() - t0) }), "success");
+          } catch (e) {
+            showAiToast(t("morning.failed", { error: e instanceof Error ? e.message : String(e) }), "error");
+          }
+        },
+      },
+      {
+        id: "note.morningOff",
+        label: t("cmd.note.morningOff"),
+        hint: t("cmd.note.morningOff.hint"),
+        icon: cmdIcons.FileText,
+        group: t("group.file"),
+        action: () => useAppStore.getState().setDailyNotes({ morning: false }),
+      },
+      {
         id: "pdf.open",
         label: t("cmd.pdf.open"),
         hint: t("cmd.pdf.open.hint"),

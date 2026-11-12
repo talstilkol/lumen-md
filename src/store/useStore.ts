@@ -519,6 +519,7 @@ export const useAppStore = create<AppState>()(
             pattern: typeof p.dailyNotes?.pattern === "string" && isValidDailyPattern(p.dailyNotes.pattern) ? p.dailyNotes.pattern : DEFAULT_DAILY.pattern,
             template: typeof p.dailyNotes?.template === "string" ? p.dailyNotes.template : DEFAULT_DAILY.template,
             ...(typeof p.dailyNotes?.israel === "boolean" ? { israel: p.dailyNotes.israel } : {}),
+            ...(typeof p.dailyNotes?.morning === "boolean" ? { morning: p.dailyNotes.morning } : {}),
           },
           showCalendar: p.showCalendar === true,
         };

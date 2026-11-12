@@ -1532,5 +1532,22 @@
   "srs.unreadable": "{path} est illisible et n’est donc pas modifié. Corrigez-le ou supprimez-le pour réviser à nouveau.",
   "srs.failed": "Impossible d’enregistrer la révision : {error}",
   "cmd.review.daily": "Révision du jour",
-  "srs.close": "Fermer"
+  "srs.close": "Fermer",
+  "cmd.note.morning": "Note du jour : « Votre matin »",
+  "cmd.note.morning.hint": "Ajoute à la note du jour ce qui a changé, les tâches du jour, les cartes à réviser et la date hébraïque — depuis cet appareil uniquement. L’active pour chaque matin.",
+  "cmd.note.morningOff": "Note du jour : désactiver « Votre matin »",
+  "cmd.note.morningOff.hint": "Les notes du jour sont créées sans le bloc du matin.",
+  "morning.title": "Votre matin",
+  "morning.changed": "Modifié depuis le dernier matin",
+  "morning.noChanges": "Rien n’a changé.",
+  "morning.tasks": "Tâches du jour",
+  "morning.noTasks": "Aucune tâche n’est due aujourd’hui.",
+  "morning.overdue": "due le {date}",
+  "morning.review": "Cartes à réviser : {n}",
+  "morning.noReview": "Rien à réviser aujourd’hui.",
+  "morning.openReview": "Les ouvrir : ⌘K → Révision du jour",
+  "morning.more": "et {n} de plus",
+  "morning.holidays": "Aujourd’hui",
+  "morning.done": "« Votre matin » est dans la note du jour ({ms} ms).",
+  "morning.failed": "Impossible d’écrire « Votre matin » : {error}"
 }

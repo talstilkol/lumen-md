@@ -1532,5 +1532,22 @@
   "srs.unreadable": "无法读取 {path}，因此不会改动它。修复或删除后才能继续复习。",
   "srs.failed": "无法保存复习：{error}",
   "cmd.review.daily": "每日复习",
-  "srs.close": "关闭"
+  "srs.close": "关闭",
+  "cmd.note.morning": "每日笔记：“你的早晨”",
+  "cmd.note.morning.hint": "在今天的笔记中加入变更、今日任务、待复习卡片和希伯来历日期——仅来自此设备。之后每天早晨都会开启。",
+  "cmd.note.morningOff": "每日笔记：关闭“你的早晨”",
+  "cmd.note.morningOff.hint": "今天的笔记将不含早晨区块。",
+  "morning.title": "你的早晨",
+  "morning.changed": "自上次早晨以来的变更",
+  "morning.noChanges": "没有变更。",
+  "morning.tasks": "今日任务",
+  "morning.noTasks": "今天没有到期的任务。",
+  "morning.overdue": "{date} 到期",
+  "morning.review": "待复习卡片：{n}",
+  "morning.noReview": "今天没有要复习的。",
+  "morning.openReview": "打开：⌘K → 每日复习",
+  "morning.more": "还有 {n} 项",
+  "morning.holidays": "今天",
+  "morning.done": "“你的早晨”已加入今天的笔记（{ms} 毫秒）。",
+  "morning.failed": "无法写入“你的早晨”：{error}"
 }

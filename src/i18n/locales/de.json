@@ -1532,5 +1532,22 @@
   "srs.unreadable": "{path} ist nicht lesbar und wird darum nicht geändert. Reparieren oder entfernen, um wieder zu wiederholen.",
   "srs.failed": "Die Wiederholung konnte nicht gespeichert werden: {error}",
   "cmd.review.daily": "Tägliche Wiederholung",
-  "srs.close": "Schließen"
+  "srs.close": "Schließen",
+  "cmd.note.morning": "Tagesnotiz: „Dein Morgen“",
+  "cmd.note.morning.hint": "Fügt der heutigen Notiz hinzu, was sich geändert hat, die Aufgaben von heute, die Karten zum Wiederholen und das hebräische Datum — nur von diesem Gerät. Schaltet es für jeden Morgen ein.",
+  "cmd.note.morningOff": "Tagesnotiz: „Dein Morgen“ ausschalten",
+  "cmd.note.morningOff.hint": "Tagesnotizen werden ohne den Morgenblock angelegt.",
+  "morning.title": "Dein Morgen",
+  "morning.changed": "Geändert seit dem letzten Morgen",
+  "morning.noChanges": "Nichts geändert.",
+  "morning.tasks": "Aufgaben für heute",
+  "morning.noTasks": "Heute ist keine Aufgabe fällig.",
+  "morning.overdue": "fällig am {date}",
+  "morning.review": "Karten zum Wiederholen: {n}",
+  "morning.noReview": "Heute nichts zu wiederholen.",
+  "morning.openReview": "Öffnen: ⌘K → Tägliche Wiederholung",
+  "morning.more": "und {n} weitere",
+  "morning.holidays": "Heute",
+  "morning.done": "„Dein Morgen“ steht in der heutigen Notiz ({ms} ms).",
+  "morning.failed": "„Dein Morgen“ konnte nicht geschrieben werden: {error}"
 }

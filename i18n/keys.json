@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-12T09:41:36.390Z",
+  "generated_at": "2026-11-12T09:45:28.259Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1534,
+  "count": 1551,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1716,6 +1716,26 @@
     {
       "key": "cmd.note.today.hint",
       "en": "Open or create the daily note for today (journal/YYYY-MM-DD.md)",
+      "vars": []
+    },
+    {
+      "key": "cmd.note.morning",
+      "en": "Daily note: “Your morning”",
+      "vars": []
+    },
+    {
+      "key": "cmd.note.morning.hint",
+      "en": "Adds what changed, today's tasks, the cards to review and the Hebrew date to today's note — from this device only. Turns it on for every morning.",
+      "vars": []
+    },
+    {
+      "key": "cmd.note.morningOff",
+      "en": "Daily note: turn off “Your morning”",
+      "vars": []
+    },
+    {
+      "key": "cmd.note.morningOff.hint",
+      "en": "Today's notes are created without the morning block.",
       "vars": []
     },
     {
@@ -8053,6 +8073,81 @@
     {
       "key": "hl.tagFailed",
       "en": "Couldn't save the tag: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "morning.title",
+      "en": "Your morning",
+      "vars": []
+    },
+    {
+      "key": "morning.changed",
+      "en": "Changed since the last morning",
+      "vars": []
+    },
+    {
+      "key": "morning.noChanges",
+      "en": "Nothing changed.",
+      "vars": []
+    },
+    {
+      "key": "morning.tasks",
+      "en": "Tasks for today",
+      "vars": []
+    },
+    {
+      "key": "morning.noTasks",
+      "en": "No task is due today.",
+      "vars": []
+    },
+    {
+      "key": "morning.overdue",
+      "en": "due {date}",
+      "vars": [
+        "date"
+      ]
+    },
+    {
+      "key": "morning.review",
+      "en": "Cards to review: {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "morning.noReview",
+      "en": "Nothing to review today.",
+      "vars": []
+    },
+    {
+      "key": "morning.openReview",
+      "en": "Open them: ⌘K → Daily review",
+      "vars": []
+    },
+    {
+      "key": "morning.more",
+      "en": "and {n} more",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "morning.holidays",
+      "en": "Today",
+      "vars": []
+    },
+    {
+      "key": "morning.done",
+      "en": "“Your morning” is in today's note ({ms} ms).",
+      "vars": [
+        "ms"
+      ]
+    },
+    {
+      "key": "morning.failed",
+      "en": "“Your morning” could not be written: {error}",
       "vars": [
         "error"
       ]

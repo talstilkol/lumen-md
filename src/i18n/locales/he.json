@@ -1532,5 +1532,22 @@
   "srs.unreadable": "אי אפשר לקרוא את {path}, ולכן הוא לא משתנה. תקנו או הסירו אותו כדי לחזור שוב.",
   "srs.failed": "לא הצלחתי לשמור את החזרה: {error}",
   "cmd.review.daily": "חזרה יומית",
-  "srs.close": "סגירה"
+  "srs.close": "סגירה",
+  "cmd.note.morning": "פתק יומי: „הבוקר שלך”",
+  "cmd.note.morning.hint": "מוסיף לפתק של היום את מה שהשתנה, את המשימות של היום, את הכרטיסים לחזרה ואת התאריך העברי — הכול מהמכשיר הזה. מפעיל את זה בכל בוקר.",
+  "cmd.note.morningOff": "פתק יומי: כיבוי „הבוקר שלך”",
+  "cmd.note.morningOff.hint": "הפתקים היומיים נוצרים בלי בלוק הבוקר.",
+  "morning.title": "הבוקר שלך",
+  "morning.changed": "השתנה מאז הבוקר הקודם",
+  "morning.noChanges": "שום דבר לא השתנה.",
+  "morning.tasks": "משימות להיום",
+  "morning.noTasks": "אין משימה להיום.",
+  "morning.overdue": "היה אמור להיות ב־{date}",
+  "morning.review": "כרטיסים לחזרה: {n}",
+  "morning.noReview": "אין מה לחזור עליו היום.",
+  "morning.openReview": "לפתוח אותם: ⌘K ← חזרה יומית",
+  "morning.more": "ועוד {n}",
+  "morning.holidays": "היום",
+  "morning.done": "„הבוקר שלך” נכנס לפתק של היום ({ms} מ״ש).",
+  "morning.failed": "לא הצלחנו לכתוב את „הבוקר שלך”: {error}"
 }
