@@ -72,8 +72,5 @@
   "toast.templateFailed": "Template failed: {msg}",
   "toast.translatingTo": "🌐 Translating to {target}…",
   "toast.translationFailed": "Translation failed: {error}",
-  "toast.tts.noHebrewVoice": "No Hebrew voice is installed on this system — add one in the system's speech settings",
-  "toast.tts.noLocalVoice": "No voice on this device for part of the text — install one in the system's speech settings (network voices are off under local-only)",
-  "toast.tts.unavailable": "This browser can't read aloud",
   "toast.useTheFloatingMenuOr": "Use the floating (/) menu or text selection tooltip for media insertions."
 }

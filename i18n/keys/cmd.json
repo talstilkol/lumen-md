@@ -1395,6 +1395,11 @@
       "vars": []
     },
     {
+      "key": "cmd.note.readSettings",
+      "en": "Read aloud: voice and speed…",
+      "vars": []
+    },
+    {
       "key": "cmd.note.today",
       "en": "Today's note",
       "vars": []

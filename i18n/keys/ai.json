@@ -1837,6 +1837,43 @@
       "vars": []
     },
     {
+      "key": "tts.neural.none",
+      "en": "Hebrew is read with your system's Hebrew voice: no on-device neural Hebrew voice with a licence that allows it exists yet.",
+      "vars": []
+    },
+    {
+      "key": "tts.resumed",
+      "en": "Resuming at sentence {n} of {total} — where you stopped. It starts over after the end.",
+      "vars": [
+        "n",
+        "total"
+      ]
+    },
+    {
+      "key": "tts.settings.rate",
+      "en": "Speed",
+      "vars": []
+    },
+    {
+      "key": "tts.settings.saved",
+      "en": "Read-aloud settings saved ({rate}).",
+      "vars": [
+        "rate"
+      ]
+    },
+    {
+      "key": "tts.settings.title",
+      "en": "Read aloud",
+      "vars": []
+    },
+    {
+      "key": "tts.settings.voice",
+      "en": "Voice for {lang}",
+      "vars": [
+        "lang"
+      ]
+    },
+    {
       "key": "voice.languagePrompt",
       "en": "Select language for voice recognition:",
       "vars": []

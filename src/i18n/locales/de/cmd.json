@@ -276,6 +276,7 @@
   "cmd.note.morningOff.hint": "Tagesnotizen werden ohne den Morgenblock angelegt.",
   "cmd.note.read": "Vorlesen",
   "cmd.note.read.hint": "Liest diese Notiz mit den Systemstimmen vor (auch Hebräisch); erneut ausführen zum Stoppen",
+  "cmd.note.readSettings": "Vorlesen: Stimme und Geschwindigkeit…",
   "cmd.note.today": "Notiz für heute",
   "cmd.note.today.hint": "Die Tagesnotiz für heute öffnen oder anlegen (journal/YYYY-MM-DD.md)",
   "cmd.open": "Öffnen file…",

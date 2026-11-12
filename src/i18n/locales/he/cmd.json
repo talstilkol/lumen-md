@@ -276,6 +276,7 @@
   "cmd.note.morningOff.hint": "הפתקים היומיים נוצרים בלי בלוק הבוקר.",
   "cmd.note.read": "הקראה בקול",
   "cmd.note.read.hint": "מקריא את הפתק בקולות של המערכת (כולל עברית); הפעלה נוספת עוצרת",
+  "cmd.note.readSettings": "הקראה: קול ומהירות…",
   "cmd.note.today": "הפתק של היום",
   "cmd.note.today.hint": "פתיחה או יצירה של הפתק היומי של היום (journal/YYYY-MM-DD.md)",
   "cmd.open": "פתח קובץ…",

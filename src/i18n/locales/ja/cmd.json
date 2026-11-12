@@ -276,6 +276,7 @@
   "cmd.note.morningOff.hint": "今日のノートは朝のブロックなしで作成されます。",
   "cmd.note.read": "読み上げ",
   "cmd.note.read.hint": "システムの音声でこのノートを読み上げます（ヘブライ語対応）。もう一度実行で停止",
+  "cmd.note.readSettings": "読み上げ: 音声と速度…",
   "cmd.note.today": "今日のノート",
   "cmd.note.today.hint": "今日のデイリーノートを開くか作成する（journal/YYYY-MM-DD.md）",
   "cmd.open": "開く file…",

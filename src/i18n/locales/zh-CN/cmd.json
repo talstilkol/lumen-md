@@ -276,6 +276,7 @@
   "cmd.note.morningOff.hint": "今天的笔记将不含早晨区块。",
   "cmd.note.read": "朗读",
   "cmd.note.read.hint": "用系统语音朗读此笔记（包括希伯来语）；再次运行可停止",
+  "cmd.note.readSettings": "朗读：语音和速度…",
   "cmd.note.today": "今天的笔记",
   "cmd.note.today.hint": "打开或创建今天的每日笔记（journal/YYYY-MM-DD.md）",
   "cmd.open": "打开 file…",

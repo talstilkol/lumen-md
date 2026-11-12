@@ -158,6 +158,7 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "canvasWhiteboard.json": { module: "ui/canvasWhiteboardStrings.ts", users: ["ui/CanvasWhiteboard.tsx"], prefixes: ["canvas.addNote", "canvas.back", "canvas.done", "canvas.new.placeholder", "canvas.new.title", "canvas.switch", "canvas.unsaved", "canvas.zoom"] },
   "relatedPanel.json": { module: "ui/relatedPanelStrings.ts", users: ["ui/RelatedPanel.tsx"], prefixes: ["related."] },
   "tasksBlock.json": { module: "plugins/tasksBlockStrings.ts", users: ["plugins/TasksBlock.tsx"], prefixes: ["tasks.count", "tasks.error.date", "tasks.error.query", "tasks.error.regex", "tasks.group.done", "tasks.group.none", "tasks.group.todo"] },
+  "tts.json": { module: "ai/ttsStrings.ts", users: ["ai/tts.ts"], prefixes: ["tts.", "toast.tts."] },
 };
 
 function sources(dir: string): string[] {

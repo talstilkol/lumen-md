@@ -772,6 +772,12 @@
       "icon": "Sparkles"
     },
     {
+      "id": "note.readSettings",
+      "label": "Read aloud: voice and speed…",
+      "group": "Tools",
+      "icon": "Sparkles"
+    },
+    {
       "id": "reading.aids",
       "label": "Reading aids…",
       "group": "Tools",
@@ -2578,6 +2584,12 @@
       "icon": "Sparkles"
     },
     {
+      "id": "note.readSettings",
+      "label": "Read aloud: voice and speed…",
+      "group": "Tools",
+      "icon": "Sparkles"
+    },
+    {
       "id": "reading.aids",
       "label": "Reading aids…",
       "group": "Tools",
@@ -3815,6 +3827,7 @@
     "tasks.open",
     "ai.cancel",
     "note.read",
+    "note.readSettings",
     "reading.aids",
     "nikud.display",
     "vault.digest",

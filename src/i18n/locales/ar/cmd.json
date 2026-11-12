@@ -276,6 +276,7 @@
   "cmd.note.morningOff.hint": "تُنشأ ملاحظات اليوم بدون كتلة الصباح.",
   "cmd.note.read": "القراءة بصوت عالٍ",
   "cmd.note.read.hint": "يقرأ هذه الملاحظة بأصوات النظام (بما فيها العبرية)؛ شغّله مجدداً للإيقاف",
+  "cmd.note.readSettings": "القراءة بصوت عالٍ: الصوت والسرعة…",
   "cmd.note.today": "ملاحظة اليوم",
   "cmd.note.today.hint": "فتح ملاحظة اليوم أو إنشاؤها (journal/YYYY-MM-DD.md)",
   "cmd.open": "فتح file…",

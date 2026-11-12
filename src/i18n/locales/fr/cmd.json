@@ -276,6 +276,7 @@
   "cmd.note.morningOff.hint": "Les notes du jour sont créées sans le bloc du matin.",
   "cmd.note.read": "Lire à voix haute",
   "cmd.note.read.hint": "Lit cette note avec les voix du système (hébreu compris) ; relancer pour arrêter",
+  "cmd.note.readSettings": "Lecture à voix haute : voix et vitesse…",
   "cmd.note.today": "Note du jour",
   "cmd.note.today.hint": "Ouvrir ou créer la note quotidienne d'aujourd'hui (journal/YYYY-MM-DD.md)",
   "cmd.open": "Ouvrir file…",
