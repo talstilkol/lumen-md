@@ -104,6 +104,7 @@ export default defineConfig({
             { label: "Meeting notes", translations: { he: "סיכום פגישה" }, slug: "ai/meeting-notes" },
             { label: "MCP integration (Claude Desktop, Cursor)", slug: "ai/mcp" },
             { label: "Privacy and the AI policy", slug: "ai/privacy", translations: { he: "פרטיות ומדיניות ה-AI" } },
+            { label: "Airplane mode and the network monitor", slug: "ai/airplane-mode", translations: { he: "מצב טיסה וצג הרשת" } },
             { label: "Cloud only by choice", translations: { he: "ענן רק בבחירה" }, slug: "ai/cloud-routes" },
           ],
         },
