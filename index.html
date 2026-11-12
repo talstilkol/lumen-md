@@ -58,6 +58,7 @@
       .boot-line.w60{width:60%;height:22px}.boot-line.w80{width:80%}.boot-line.w70{width:70%}
       @media (prefers-reduced-motion:no-preference){.boot-line{animation:boot 1.2s ease-in-out infinite alternate}}
       @keyframes boot{to{opacity:.5}}
+      .boot-note{margin:0;white-space:pre-wrap;word-break:break-word;font:15px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;opacity:.85}
     </style>
   </head>
   <body class="bg-bg text-fg antialiased">
@@ -70,6 +71,9 @@
         <div class="boot-page"><div class="boot-line w60"></div><div class="boot-line"></div><div class="boot-line w80"></div><div class="boot-line w70"></div></div>
       </div>
     </div>
+    <!-- The last note in the shell, before the bundle (plan W2.21); after the
+         shell so it can fill it, before the module so it paints first. -->
+    <script src="/note-boot.js"></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -84,7 +84,8 @@
     "bench:sync": "tsx scripts/bench/sync-first.ts",
     "dictalm3": "node scripts/dictalm3.mjs",
     "whisper:desktop": "node scripts/whisper-desktop.mjs",
-    "docs:search": "node scripts/docs-search.mjs"
+    "docs:search": "node scripts/docs-search.mjs",
+    "perf:coldstart": "playwright test --project=coldstart --project=coldstart-phone"
   },
   "dependencies": {
     "@bjorn3/browser_wasi_shim": "0.4.2",
