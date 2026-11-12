@@ -8,24 +8,9 @@ import { isAbort } from "../../ai/aiAbort";
 import { openTemplateDoc } from "../openDoc";
 import { cancellable, type CommandContext } from "./context";
 
-/** Save a clip into the library folder and open it (T34). Exported for tests. */
+/** Save a clip into the library folder and open it (T34). Exported for tests; the work is in a lazy module. */
 export async function saveClip(clip: { title: string; markdown: string }): Promise<void> {
-  const { clipFileName, libraryDir } = await import("../../research/clipper");
-  const { writeWorkspaceFile, workspaceHasEntry, isOPFSAvailable } = await import("../../storage/workspace");
-  const name = clipFileName(clip.title);
-  if (!isOPFSAvailable()) {
-    // Nothing was written: open it as an unsaved (dirty) document in its own
-    // tab, so closing the tab or the page warns instead of losing the clip.
-    openTemplateDoc(name.replace(/\.md$/, ""), clip.markdown);
-    return;
-  }
-  const dir = libraryDir(getLocale());
-  let path = `${dir}/${name}`;
-  for (let i = 2; await workspaceHasEntry(path); i++) path = `${dir}/${name.replace(/\.md$/, "")} (${i}).md`;
-  await writeWorkspaceFile(path, clip.markdown);
-  window.dispatchEvent(new Event("lumen-workspace-changed"));
-  useAppStore.getState().openTab({ name: path.split("/").pop()!, content: clip.markdown, workspaceName: path });
-  showAiToast(t("clip.saved", { path }), "success");
+  await (await import("../../research/clipSave")).saveClipToLibrary(clip, openTemplateDoc);
 }
 
 /**

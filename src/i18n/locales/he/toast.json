@@ -64,6 +64,8 @@
   "toast.microphoneAccessDenied": "הגישה למיקרופון נדחתה",
   "toast.minReadWords": "📖 ~{minutes} דק׳ קריאה ({words} מילים)",
   "toast.nikud.declined": "הניקוד דורש להוריד את המודל; שום דבר לא השתנה.",
+  "toast.nikud.done": "הניקוד נוסף במכשיר. למילים המסומנות בקו יש יותר מקריאה אחת: לחצו על מילה כדי לראות את הקריאות (Alt+לחיצה על כל מילה).",
+  "toast.nikud.doneHigh": "הניקוד נוסף במכשיר עם DictaBERT-char-menaked (איכות גבוהה). למילים המסומנות בקו יש יותר מקריאה אחת: לחצו על מילה כדי לראות את הקריאות.",
   "toast.nikud.failed": "הניקוד נכשל: {error}",
   "toast.nikud.noHost": "מודל הניקוד עדיין לא זמין להורדה (האחסון שלו עוד לא הוגדר).",
   "toast.nikud.nothing": "אין טקסט עברי לשנות.",

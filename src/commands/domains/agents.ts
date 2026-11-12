@@ -282,26 +282,11 @@ export function buildAltTextCommands(): Command[] {
   ];
 }
 
-/** Niqqud on the selection or the note (plan 6.3): Nakdimon in a worker, with consent. */
+/** Niqqud on the selection or the note (plans 6.3, W2.5): the whole flow is loaded on use. */
 export function buildNikudCommands({ getEditorView, locale }: CommandContext): Command[] {
   const runNikud = async (mode: "add" | "partial" | "remove") => {
     const view = getEditorView?.();
-    if (!view) return;
-    try {
-      const [{ runNikudCommand }, svc] = await Promise.all([import("../../editor/nikudCommand"), import("../../ai/nikudService")]);
-      if (mode !== "remove") showAiToast(t("toast.nikud.working"), "info");
-      const changed = await cancellable((signal) =>
-        runNikudCommand(view, mode, {
-          point: (text, partial) => svc.pointHebrew(text, { consent: { confirm: uiConfirm, t, locale }, signal }, { partial }),
-          unpoint: svc.unpointHebrew,
-        }),
-      );
-      if (!changed) showAiToast(t("toast.nikud.nothing"), "info");
-    } catch (e) {
-      if (isAbort(e)) return;
-      const reason = (e as { name?: string; reason?: string }).name === "NikudUnavailableError" ? (e as { reason: string }).reason : null;
-      showAiToast(reason ? t(`toast.nikud.${reason}`) : t("toast.nikud.failed", { error: (e as Error).message }), reason ? "info" : "error");
-    }
+    if (view) await (await import("../../editor/nikudPalette")).runNikudFromPalette(view, mode, locale);
   };
   return [
     {

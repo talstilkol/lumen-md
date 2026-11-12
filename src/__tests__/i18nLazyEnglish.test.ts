@@ -21,7 +21,7 @@ const SRC = resolve(__dirname, "..");
  */
 const DOMAINS: Record<string, { module: string; users: string[]; prefixes: string[]; within?: string; shared?: string[] }> = {
   "caption.json": { module: "ai/captionStrings.ts", users: ["ai/caption.ts"], prefixes: ["caption."] },
-  "nikud.json": { module: "ai/nikudStrings.ts", users: ["ai/nikudService.ts"], prefixes: ["toast.nikud.", "models.purpose.nikud"] },
+  "nikud.json": { module: "ai/nikudStrings.ts", users: ["ai/nikudService.ts"], prefixes: ["toast.nikud.", "models.purpose.nikud", "nikud.alt."] },
   "eviction.json": { module: "storage/evictionStrings.ts", users: ["storage/evictionReminder.ts"], prefixes: ["storage.eviction."] },
   "analyst.json": { module: "agents/analystStrings.ts", users: ["agents/analyst.ts"], prefixes: ["analyst.", "cmd.ai.analyse.ask"] },
   "lora.json": { module: "ai/localLoraStrings.ts", users: ["ui/FineTuneSettings.tsx", "ui/LocalLoraSection.tsx"], prefixes: ["lora.", "fineTune.cloudRoute"] },

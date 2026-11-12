@@ -64,6 +64,8 @@
   "toast.microphoneAccessDenied": "Accès au microphone refusé",
   "toast.minReadWords": "📖 ~{minutes} min de lecture ({words} mots)",
   "toast.nikud.declined": "Le niqqud nécessite le téléchargement du modèle ; rien n'a été modifié.",
+  "toast.nikud.done": "Niqqud ajouté sur cet appareil. Les mots soulignés ont plusieurs lectures : cliquez sur un mot pour les voir (Alt+clic sur n’importe quel mot).",
+  "toast.nikud.doneHigh": "Niqqud ajouté sur cet appareil avec DictaBERT-char-menaked (haute qualité). Les mots soulignés ont plusieurs lectures : cliquez sur un mot pour les voir.",
   "toast.nikud.failed": "Échec du niqqud : {error}",
   "toast.nikud.noHost": "Le modèle de niqqud n'est pas encore téléchargeable (son hébergement n'est pas configuré).",
   "toast.nikud.nothing": "Aucun texte hébreu à modifier.",

@@ -2005,6 +2005,11 @@
       "vars": []
     },
     {
+      "key": "models.purpose.nikudHigh",
+      "en": "High-quality Hebrew niqqud (DictaBERT-char-menaked) on this device",
+      "vars": []
+    },
+    {
       "key": "models.purpose.translateEnHe",
       "en": "Translation from English to Hebrew",
       "vars": []
@@ -2095,6 +2100,18 @@
       "vars": [
         "size"
       ]
+    },
+    {
+      "key": "nikud.alt.choose",
+      "en": "Use “{word}”",
+      "vars": [
+        "word"
+      ]
+    },
+    {
+      "key": "nikud.alt.title",
+      "en": "Other readings",
+      "vars": []
     },
     {
       "key": "onboard.back",

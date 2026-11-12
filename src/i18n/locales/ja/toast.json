@@ -64,6 +64,8 @@
   "toast.microphoneAccessDenied": "マイクへのアクセスが拒否されました",
   "toast.minReadWords": "📖 約{minutes}分で読めます({words}語)",
   "toast.nikud.declined": "ニクードにはモデルのダウンロードが必要です。何も変更していません。",
+  "toast.nikud.done": "このデバイスでニクードを付けました。下線の付いた語は複数の読み方があります。クリックすると読み方を表示します（どの語でも Alt+クリック）。",
+  "toast.nikud.doneHigh": "DictaBERT-char-menaked（高品質）でこのデバイスにニクードを付けました。下線の付いた語は複数の読み方があります。クリックすると表示します。",
   "toast.nikud.failed": "ニクードに失敗しました：{error}",
   "toast.nikud.noHost": "ニクードのモデルはまだダウンロードできません（ホストが未設定です）。",
   "toast.nikud.nothing": "変更するヘブライ語のテキストがありません。",
