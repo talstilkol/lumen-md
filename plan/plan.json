@@ -249,6 +249,8 @@
      "dep": [],
      "priority": "P0",
      "status": "✅ #202",
+     "verified": "browser",
+     "pr": 202,
      "new": true,
      "was": "0.1",
      "source": "תהליך",
@@ -274,6 +276,8 @@
      ],
      "priority": "P0",
      "status": "✅ #208",
+     "verified": "browser",
+     "pr": 208,
      "was": "0.2",
      "source": "C2, O1, T38",
      "steps": [
@@ -303,6 +307,8 @@
      ],
      "priority": "P0",
      "status": "✅ #244",
+     "verified": "browser",
+     "pr": 244,
      "new": true,
      "source": "חיסכון בזמן",
      "steps": [
@@ -329,6 +335,8 @@
      ],
      "priority": "P0",
      "status": "✅ #246",
+     "verified": "browser",
+     "pr": 246,
      "was": "0.3",
      "source": "E1, E2, O4",
      "steps": [
@@ -356,6 +364,8 @@
      ],
      "priority": "P0",
      "status": "⏳ #234 (0 waitForTimeout ו-retries: 0 ✓; 3 לילות בלי flakes לא נמדדו — אחרי המיזוג, בהרצה מקומית / Sandbox כי GitHub Actions לא בשימוש מ-9.11) · ביקורת 1.8 (10.11)",
+     "verified": "built",
+     "pr": 234,
      "was": "0.4",
      "source": "E3, P2, P4",
      "steps": [
@@ -384,6 +394,8 @@
      ],
      "priority": "P0",
      "status": "✅ #251",
+     "verified": "browser",
+     "pr": 251,
      "new": true,
      "was": "0.5",
      "source": "תהליך",
@@ -413,6 +425,8 @@
      ],
      "priority": "P0",
      "status": "⏳ #265 (הבודק, צעד ה-CI ותבנית ה-PR; 2 ממצאי Codex P1 תוקנו ב-21fb05d8 — רשימת ה-grandfather קפואה בקוד (DOD_GRANDFATHER_BASELINE, 60) ומשימה שנפתחה מחדש יוצאת ממנה; CI ירוק על bead92e6; ה-dod של 60 המשימות אחרי המיזוג 15.1)",
+     "verified": "browser",
+     "pr": 265,
      "new": true,
      "was": "0.6",
      "source": "נספח 16",
@@ -445,6 +459,8 @@
      ],
      "priority": "P0",
      "status": "✅ #203",
+     "verified": "browser",
+     "pr": 203,
      "new": true,
      "was": "0.7",
      "source": "נספח 16.1",
@@ -469,6 +485,8 @@
      ],
      "priority": "P0",
      "status": "⏳ #204 (הכלי + 35 בדיקות ✓; --around/--window נוסף ב-42c8474: על #189 עכשיו 100 ריצות מאותו חלון זמן, 50 בקומיטים דומים → FLAKY (עבר רק ב-retry ב-#191 ועוד 9) במקום UNKNOWN; הקבלה כפי שנוסחה (״עבר ב-#191 על אותו קוד״) לא מתקיימת מילולית — ב-#191 עבר רק ב-retry) · ביקורת 1.8",
+     "verified": "built",
+     "pr": 204,
      "new": true,
      "was": "0.8",
      "source": "תהליך",
@@ -492,6 +510,8 @@
      ],
      "priority": "P0",
      "status": "✅ #199",
+     "verified": "browser",
+     "pr": 199,
      "new": true,
      "was": "0.9",
      "source": "T28, נספח 18 R3, נספח 19",
@@ -520,6 +540,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #245 (4 ה-workflows מוכנים; 0 ריצות מתוזמנות — לא מוזג ו-GitHub Actions לא בשימוש מ-9.11; צריך מקבילה מקומית / Sandbox) · ביקורת 1.8",
+     "verified": "built",
+     "pr": 245,
      "new": true,
      "was": "0.10",
      "source": "תהליך",
@@ -548,6 +570,8 @@
      ],
      "priority": "P0",
      "status": "✅ #201",
+     "verified": "browser",
+     "pr": 201,
      "new": true,
      "was": "0.11",
      "source": "תהליך",
@@ -571,6 +595,8 @@
      ],
      "priority": "P0",
      "status": "✅ #211",
+     "verified": "browser",
+     "pr": 211,
      "new": true,
      "was": "0.12",
      "source": "נספח 18 R9",
@@ -594,6 +620,8 @@
      ],
      "priority": "P0",
      "status": "⏳ #210 (ci:local, --changed ו-hook ✓; מדידת 20 ה-PR-ים לא התחילה) · ביקורת 1.8",
+     "verified": "built",
+     "pr": 210,
      "new": true,
      "was": "0.13",
      "source": "תהליך",
@@ -627,7 +655,9 @@
      "acceptance": [
       "mutation score ≥ 70% במודולים הקריטיים"
      ],
-     "status": "⏳ #427 (על #402; מריץ mutation משלנו על המהדר של TypeScript (Stryker לא בלוקפייל), סף 70%; ציונים: chacha20poly1305 80, blake2b 96.3, scrypt 95, argon2 90, age 78.8, keyring 64.4→80.8, conflict 60→72, manifest 73.8, header 86.7, privacyLedger 38.8→77.5; נוספו: text/hebrew 80.8, rehypeSanitizeRaw 89.6, secretStore 48.8→86.3, storage/encryption 71.4, storage/zip 77.5, **agents/runtime 36.3→58.3 — מתחת ל-70** (נתיבי quota/cache/abort נבדקים רק עם mocks של vitest); לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #427 (על #402; מריץ mutation משלנו על המהדר של TypeScript (Stryker לא בלוקפייל), סף 70%; ציונים: chacha20poly1305 80, blake2b 96.3, scrypt 95, argon2 90, age 78.8, keyring 64.4→80.8, conflict 60→72, manifest 73.8, header 86.7, privacyLedger 38.8→77.5; נוספו: text/hebrew 80.8, rehypeSanitizeRaw 89.6, secretStore 48.8→86.3, storage/encryption 71.4, storage/zip 77.5, **agents/runtime 36.3→58.3 — מתחת ל-70** (נתיבי quota/cache/abort נבדקים רק עם mocks של vitest); לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "built",
+     "pr": 427
     },
     {
      "id": "0.16",
@@ -640,6 +670,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #266 (שער קבצים יתומים בלי תלות: 376 קובצי ייצור, 11 ב-baseline, קובץ חדש שאיש לא מייבא נכשל; CI ירוק על ae930f52; חסר: חבילת knip ל-exports ותלויות — דורש lockfile על ה-Mac)",
+     "verified": "browser",
+     "pr": 266,
      "new": true,
      "was": "0.15",
      "source": "O2",
@@ -669,6 +701,8 @@
      ],
      "priority": "P0",
      "status": "✅ #207",
+     "verified": "browser",
+     "pr": 207,
      "new": true,
      "was": "12.2",
      "source": "N2, P3",
@@ -695,6 +729,8 @@
      ],
      "priority": "P0",
      "status": "✅ #227",
+     "verified": "browser",
+     "pr": 227,
      "new": true,
      "was": "12.1",
      "source": "J3, N1",
@@ -731,7 +767,9 @@
      "groups": [
       "ci"
      ],
-     "status": "⏳ #426 (על #266; npm run pr:check במקום Danger ו-size-limit: הפרש גודל חבילה, [skip ci], חלקי גוף ה-PR, קריאות רשת מול יומן הפרטיות, רישיונות, הדומיין; prGate 11/11, prCheck 3/3; מצא פער ב-#418; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #426 (על #266; npm run pr:check במקום Danger ו-size-limit: הפרש גודל חבילה, [skip ci], חלקי גוף ה-PR, קריאות רשת מול יומן הפרטיות, רישיונות, הדומיין; prGate 11/11, prCheck 3/3; מצא פער ב-#418; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "built",
+     "pr": 426
     },
     {
      "id": "0.20",
@@ -744,6 +782,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #239 (headers --check ✓, e2e WebKit ✓; worker עם endpoint ב-Vercel ו-webR ב-preview לא נבדקו) · ביקורת 1.8",
+     "verified": "built",
+     "pr": 239,
      "new": true,
      "source": "דוח 0.17 (#207)",
      "steps": [
@@ -772,6 +812,8 @@
      ],
      "priority": "P1",
      "status": "✅ #209",
+     "verified": "browser",
+     "pr": 209,
      "new": true,
      "source": "נמצא בפיצול 0.2",
      "steps": [
@@ -801,6 +843,8 @@
      "dep": [],
      "priority": "P0",
      "status": "⏳ #194 + #206 (Lighthouse CI אדום על 9e13289c ב-#194; 23 שרשורי P2 פתוחים ב-#199–#251, אחד מהם ב-#206 (CanvasTldraw.tsx:486)) · ביקורת 1.8",
+     "verified": "built",
+     "pr": 194,
      "was": "1.1",
      "source": "נספח 16.1 (1)",
      "steps": [
@@ -833,6 +877,8 @@
      ],
      "priority": "P0",
      "status": "✅ #195 + #213",
+     "verified": "browser",
+     "pr": 195,
      "was": "1.2",
      "source": "16.1 (2), K1",
      "steps": [
@@ -855,6 +901,8 @@
      ],
      "priority": "P0",
      "status": "✅* #197 + #215 (הכתבה offline נבדקה מול Whisper מדומה בלבד) · ביקורת 1.8",
+     "verified": "owner",
+     "pr": 197,
      "was": "1.3",
      "source": "16.1 (10)",
      "steps": [
@@ -887,6 +935,8 @@
      ],
      "priority": "P0",
      "status": "✅ #196 + #214",
+     "verified": "browser",
+     "pr": 196,
      "was": "1.4",
      "source": "K3, T55",
      "steps": [
@@ -914,6 +964,8 @@
      ],
      "priority": "P0",
      "status": "✅ #195 + #213",
+     "verified": "browser",
+     "pr": 195,
      "was": "1.5",
      "source": "T32, review #136",
      "steps": [
@@ -936,6 +988,8 @@
      ],
      "priority": "P0",
      "status": "✅ #195 + #213",
+     "verified": "browser",
+     "pr": 195,
      "was": "1.7",
      "source": "J3, T36",
      "steps": [
@@ -960,6 +1014,8 @@
      ],
      "priority": "P0",
      "status": "⏳ #200 + #429 (סיווג, 0 אסורים והודעת רישיון ✓; מסך ״קרדיטים למודלים״ נבנה ב-#429: רשומה לכל 37 המודלים שמגיעים למשתמש מ-models/registry.json עם רישיון, מקור ודרישות ייחוס, ivrit.ai ו-Dicta ראשונים; modelCredits 5/5 — לא נבדק ב-Sandbox) · ביקורת 1.8",
+     "verified": "built",
+     "pr": 200,
      "new": true,
      "source": "ביקורת התוכנית §4",
      "steps": [
@@ -987,6 +1043,8 @@
      ],
      "priority": "P0",
      "status": "✅ #198 + #216",
+     "verified": "browser",
+     "pr": 198,
      "new": true,
      "source": "מחקר הקוד הפתוח (18.10)",
      "steps": [
@@ -1031,6 +1089,7 @@
       "0 פערים בין סטטוס ל-DoD"
      ],
      "status": "✅ ביקורת עצמאית 10.11 (scratchpad audit-1.8.md): 25 ✅ בשלבים 0–1 — 17 עקביים, 8 פערים שתוקנו כאן (0.5, 0.9, 0.11, 0.14, 0.20, 1.1, 1.7 → ⏳; 1.3 → ✅* עם dod); 0 הפרות של כללי התוכנית",
+     "verified": "browser",
      "dod": [
       "node scripts/dod.mjs --list",
       "npm run plan:check"
@@ -1054,6 +1113,8 @@
      ],
      "priority": "P0",
      "status": "✅ #220",
+     "verified": "browser",
+     "pr": 220,
      "was": "2.1",
      "source": "F4, T48",
      "steps": [
@@ -1082,6 +1143,8 @@
      ],
      "priority": "P0",
      "status": "✅ #221",
+     "verified": "browser",
+     "pr": 221,
      "was": "2.2",
      "source": "F4",
      "steps": [
@@ -1111,6 +1174,8 @@
      ],
      "priority": "P0",
      "status": "✅ #222",
+     "verified": "browser",
+     "pr": 222,
      "was": "2.3",
      "source": "T48",
      "steps": [
@@ -1136,6 +1201,8 @@
      ],
      "priority": "P0",
      "status": "✅ #212",
+     "verified": "browser",
+     "pr": 212,
      "was": "2.4",
      "source": "T37",
      "steps": [
@@ -1160,6 +1227,8 @@
      ],
      "priority": "P0",
      "status": "✅ #230 + #243 (אין סודות מ-VITE_*; טוקן המחקר ב-secret store; החלפת מפתחות — 15.18)",
+     "verified": "browser",
+     "pr": 230,
      "was": "2.5",
      "source": "T36",
      "steps": [
@@ -1190,6 +1259,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #307 feat/pii-redactor (נפתח 24.10 / 20.10; CI אדום על בדיקות (צעד Test); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
+     "verified": "built",
+     "pr": 307,
      "new": true,
      "was": "2.6",
      "source": "פרטיות, נספח 19",
@@ -1216,6 +1287,8 @@
      ],
      "priority": "P1",
      "status": "✅* #242 (130 מקרים מול מודל מדומה שמציית: 0 כתיבות לא מאושרות; סט הזהב הרשמי + 30 בעברית — 15.11)",
+     "verified": "owner",
+     "pr": 242,
      "new": true,
      "was": "2.7",
      "source": "אבטחת AI",
@@ -1245,6 +1318,8 @@
      ],
      "priority": "P0",
      "status": "✅ #236 (CodeQL/Scorecard ירוצו רק על main)",
+     "verified": "browser",
+     "pr": 236,
      "new": true,
      "was": "2.8",
      "source": "אבטחה",
@@ -1279,6 +1354,8 @@
      ],
      "priority": "P0",
      "status": "✅ #218",
+     "verified": "browser",
+     "pr": 218,
      "was": "3.1",
      "source": "T46",
      "steps": [
@@ -1304,6 +1381,8 @@
      ],
      "priority": "P0",
      "status": "✅ #229",
+     "verified": "browser",
+     "pr": 229,
      "was": "3.2",
      "source": "T35, G4, G1",
      "steps": [
@@ -1334,6 +1413,8 @@
      ],
      "priority": "P0",
      "status": "⏳ #269 (pull = fetch + מיזוג תלת-כיווני, 0 מחיקות, פתק פתוח עם עריכות לא נדרס, clone ציבורי בלי טוקן, CORS proxy ניתן להגדרה בלי מארח מובנה, LFS מתועד; CI ירוק על 2e2c637e כולל data-safety חלק ד׳ ב-3 דפדפנים; 14 שרשורי review תוקנו, 1 P1 נדחה עם ראיה (פקודת cors-proxy) ונשאר לטל; ✅* אחרי המיזוג — proxy מתארח 15.4)",
+     "verified": "browser",
+     "pr": 269,
      "was": "3.3",
      "source": "G2, G3",
      "steps": [
@@ -1368,6 +1449,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #275 (ליבת E2EE על WebCrypto: manifest מוצפן, שמות אטומים, מונה + היסטוריית 100 גרסאות נגד rollback/fork, צימוד + TOFU, CAS; 10,000 סבבים 0 אובדן; CI ירוק על 4eb3e599; חסר: Argon2id ו-age — hash-wasm/@noble ב-lockfile על ה-Mac)",
+     "verified": "browser",
+     "pr": 275,
      "new": true,
      "source": "G8, מחקר פערים #6",
      "steps": [
@@ -1408,6 +1491,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #291 feat/e2ee-sync-providers (נפתח 24.10 / 20.10; CI אדום על תקציב החבילה (צעד Bundle-size budget); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
+     "verified": "built",
+     "pr": 291,
      "was": "3.4",
      "source": "G8",
      "steps": [
@@ -1440,6 +1525,8 @@
      ],
      "priority": "P0",
      "status": "✅ #237 (פריסה — 15.4)",
+     "verified": "browser",
+     "pr": 237,
      "was": "3.5",
      "source": "L1, T49",
      "steps": [
@@ -1471,6 +1558,8 @@
      ],
      "priority": "P0",
      "status": "⏳ #297 test/data-safety-matrix (נפתח 24.10 / 20.10; CI אדום על תקציב החבילה (צעד Bundle-size budget); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
+     "verified": "built",
+     "pr": 297,
      "was": "3.6",
      "source": "G1–G11",
      "steps": [
@@ -1501,6 +1590,8 @@
      ],
      "priority": "P0",
      "status": "✅ #226",
+     "verified": "browser",
+     "pr": 226,
      "new": true,
      "source": "מחקר פערים #1",
      "steps": [
@@ -1528,6 +1619,8 @@
      ],
      "priority": "P0",
      "status": "✅ #235 (Obsidian — 15.8)",
+     "verified": "browser",
+     "pr": 235,
      "new": true,
      "source": "מחקר פערים #1",
      "steps": [
@@ -1556,6 +1649,8 @@
      ],
      "priority": "P0",
      "status": "✅ #247 (Obsidian והאפליקציה עצמה — 15.8)",
+     "verified": "browser",
+     "pr": 247,
      "was": "10.4",
      "source": "N3, T57",
      "steps": [
@@ -1584,6 +1679,8 @@
      ],
      "priority": "P0",
      "status": "✅ #258",
+     "verified": "browser",
+     "pr": 258,
      "new": true,
      "source": "מחקר פערים #1",
      "steps": [
@@ -1610,6 +1707,8 @@
      ],
      "priority": "P0",
      "status": "✅ #217",
+     "verified": "browser",
+     "pr": 217,
      "new": true,
      "source": "מחקר פערים #2",
      "steps": [
@@ -1639,6 +1738,8 @@
      ],
      "priority": "P1",
      "status": "✅ #250 (0.9–1.3ms במטמון; 8/8 מקרי dev, 22 ה-test — 15.9; רינדור ב-main thread, לא ב-worker — 15.16)",
+     "verified": "browser",
+     "pr": 250,
      "new": true,
      "source": "מחקר פערים #2",
      "steps": [
@@ -1667,6 +1768,8 @@
      ],
      "priority": "P0",
      "status": "✅ #224",
+     "verified": "browser",
+     "pr": 224,
      "new": true,
      "source": "מחקר פערים #3",
      "steps": [
@@ -1695,6 +1798,8 @@
      ],
      "priority": "P1",
      "status": "✅ #238",
+     "verified": "browser",
+     "pr": 238,
      "new": true,
      "source": "מחקר פערים #3",
      "steps": [
@@ -1721,6 +1826,8 @@
      ],
      "priority": "P1",
      "status": "✅ #228",
+     "verified": "browser",
+     "pr": 228,
      "new": true,
      "source": "מחקר פערים #4",
      "steps": [
@@ -1744,6 +1851,8 @@
      ],
      "priority": "P1",
      "status": "✅ #231",
+     "verified": "browser",
+     "pr": 231,
      "new": true,
      "source": "מחקר פערים #4",
      "steps": [
@@ -1769,6 +1878,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #267 (מפרש נוסחאות סגור בלי eval — jsep/formula.js לא נוספו בלי registry; 30 נוסחאות זהב, fuzz, מגבלות לפי צעדים; עמודות מחושבות, תצוגת מפה עצלה, סוכן formulator; CI ירוק על 575b2ecf; 8 סבבי Codex — 1 P2 (כינויי קואורדינטות) לטל; ✅* אחרי המיזוג — formulator מול מודל אמיתי 15.3)",
+     "verified": "browser",
+     "pr": 267,
      "new": true,
      "source": "מחקר פערים #4",
      "steps": [
@@ -1801,6 +1912,8 @@
      ],
      "priority": "P0",
      "status": "✅ #249",
+     "verified": "browser",
+     "pr": 249,
      "new": true,
      "source": "מחקר פערים #5",
      "steps": [
@@ -1825,6 +1938,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #331 feat/vault-tasks (משימות בכל הכספת, סימון משנה רק את התיבה והתאריך, רק קובצי md) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox; Codex לא סקר (מכסה)",
+     "verified": "node",
+     "pr": 331,
      "new": true,
      "source": "מחקר פערים #7",
      "steps": [
@@ -1853,6 +1968,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #272 (קורא PDF על pdf.js, הדגשות כ-W3C Web Annotation, העברה/שכפול בטוחים; CI ירוק על dcaa8d51; 10 ממצאי P2 לרשימת המשך בגוף ה-PR; ✅ אחרי המיזוג)",
+     "verified": "browser",
+     "pr": 272,
      "new": true,
      "source": "מחקר פערים #8",
      "steps": [
@@ -1881,6 +1998,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #308 feat/clipper-v2 (נפתח 24.10 / 20.10; CI אדום על תקציב החבילה (צעד Bundle-size budget); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
+     "verified": "built",
+     "pr": 308,
      "was": "5.11",
      "source": "T34, מחקר פערים #9",
      "steps": [
@@ -1905,6 +2024,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #268 (inbox.md: חלון לכידה ⌥⌘N, share target, קיצור PWA, תפריט; CI ירוק על c52a2c71, startup 459.9/460 KB; 15 שרשורי review — 14 תוקנו, 1 P2 נשאר לטל (נעילת autosave בין חלונות); ✅* אחרי המיזוג; בדיקה במכשיר — Android share ו-⌥⌘N גלובלי ב-macOS — 15.12)",
+     "verified": "browser",
+     "pr": 268,
      "new": true,
      "source": "מחקר פערים #10",
      "steps": [
@@ -1932,6 +2053,8 @@
      ],
      "priority": "P2",
      "status": "⏳ #351 feat/json-canvas (על #283; JSON Canvas ↔ Excalidraw עם round-trip ללא שינוי, מה שלא ניתן להביע מדווח; Vercel build ירוק (tsc -b מחמיר כולל בדיקות + vite build); jsonCanvas.test 18/18 ב-shim; dod: npx vitest run src/__tests__/jsonCanvas.test.ts; npx playwright test e2e/canvas-excalidraw.spec.ts -g \"JSON Canvas\")",
+     "verified": "node",
+     "pr": 351,
      "new": true,
      "source": "תאימות",
      "steps": [
@@ -1952,6 +2075,8 @@
      ],
      "priority": "P2",
      "status": "⏳ #354 feat/publish-own (על #269; Publish site: עמוד לכל פתק, ניווט, חיפוש בלי ניקוד, RTL, 404, deploy ל-GitHub Pages ב-REST בלי force או zip; Vercel build ירוק (tsc -b מחמיר כולל בדיקות + vite build); publishSite.test 10/10 ב-shim; dod: npx vitest run src/__tests__/publishSite.test.ts src/__tests__/commandIds.test.ts src/__tests__/cliPublish.test.ts; npx playwright test e2e/publish-site.spec.ts; בעלים: פרסום אחד לריפו אמיתי)",
+     "verified": "node",
+     "pr": 354,
      "new": true,
      "source": "מחקר פערים #17",
      "steps": [
@@ -1974,6 +2099,8 @@
      ],
      "priority": "P0",
      "status": "⏳ #276 + חלק 2 #283 (ממיר tldraw → Excalidraw בלי תלויות, 20 קנבסים בלי אובדן צורה, קבצי .excalidraw עם גיבוי .tldr, הגירה מאחורי דגל; CI ירוק על cc0b65ad; חסר: @excalidraw/excalidraw ב-lockfile, החלפת הרכיב, הסרת tldraw)",
+     "verified": "browser",
+     "pr": 276,
      "new": true,
      "source": "מחקר הקוד הפתוח: tldraw דורש מפתח בייצור",
      "steps": [
@@ -2004,6 +2131,8 @@
      ],
      "priority": "P2",
      "status": "⏳ #344 feat/vault-folder-mobile (backend לטלפון: Capacitor Filesystem + SAF; התוסף ב-mobile/android לא מחובר עד ש-13.3 ו-4.4 ייפגשו; ✅* — 15.13) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox; Codex לא סקר (מכסה)",
+     "verified": "node",
+     "pr": 344,
      "new": true,
      "source": "Codex על התוכנית (#136)",
      "steps": [
@@ -2039,6 +2168,8 @@
      ],
      "priority": "P1",
      "status": "✅ #205",
+     "verified": "browser",
+     "pr": 205,
      "was": "4.1",
      "source": "T2",
      "steps": [
@@ -2064,6 +2195,8 @@
      ],
      "priority": "P1",
      "status": "✅ #232 (own BM25 1.000 vs Orama 0.597 on HeQ dev)",
+     "verified": "browser",
+     "pr": 232,
      "was": "4.2",
      "source": "T2, J5",
      "steps": [
@@ -2095,6 +2228,8 @@
      ],
      "priority": "P0",
      "status": "✅* #241 (15/15 מקרי eval מול Ollama מזויף; המודל האמיתי — 7.2)",
+     "verified": "owner",
+     "pr": 241,
      "was": "4.3",
      "source": "T8, §4",
      "steps": [
@@ -2125,6 +2260,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #285 feat/researcher-agent (נפתח 24.10 / 20.10; CI אדום על e2e — התקנת Playwright נשברת על Ubuntu 26 (#330); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
+     "verified": "built",
+     "pr": 285,
      "was": "4.4",
      "source": "T14",
      "steps": [
@@ -2155,6 +2292,8 @@
      ],
      "priority": "P0",
      "status": "⏳ #288 refactor/all-through-runtime (נפתח 24.10 / 20.10; CI אדום על e2e — התקנת Playwright נשברת על Ubuntu 26 (#330); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
+     "verified": "built",
+     "pr": 288,
      "was": "4.5",
      "source": "§4, T17",
      "steps": [
@@ -2183,6 +2322,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #315 feat/critic-complete (נפתח 24.10 / 20.10; CI אדום על בדיקות (צעד Test); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
+     "verified": "built",
+     "pr": 315,
      "was": "4.6",
      "source": "T7, T12, §5",
      "steps": [
@@ -2211,6 +2352,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #277 (pull של Ollama עם התקדמות, מצבי economy/balanced/quality, ניקוי מטמון ומכסה, הודעה בלי WebGPU; CI ירוק על f0e78b51, startup 460.0/460; חסר: web-llm 0.2.86 ב-lockfile; ✅* אחרי המיזוג — Ollama ו-WebGPU אמיתיים 15.3)",
+     "verified": "browser",
+     "pr": 277,
      "was": "4.7",
      "source": "T4, T6, T11",
      "steps": [
@@ -2243,6 +2386,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #334 feat/batch-ui (השהיה/המשך/ביטול נשמרים ב-IndexedDB, ETA, ולידציה + ניסיון חוזר אחד עם מבקר) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox",
+     "verified": "node",
+     "pr": 334,
      "was": "4.8",
      "source": "T16",
      "steps": [
@@ -2269,6 +2414,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #335 feat/ai-authorship (סימון טקסט שנכתב ב-AI, נשמר לפתק, ייצוא עם סימון) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox; Codex לא סקר (מכסה)",
+     "verified": "node",
+     "pr": 335,
      "new": true,
      "source": "מחקר פערים §3",
      "steps": [
@@ -2298,6 +2445,8 @@
      ],
      "priority": "P2",
      "status": "⏳ #349 feat/ai-autofill (על #228; תשובה חייבת לעמוד ב-JSON Schema, רק ערכים חסרים, approve() הכותב היחיד ומסרב לפתק שהשתנה) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox",
+     "verified": "node",
+     "pr": 349,
      "new": true,
      "source": "מחקר פערים §3",
      "steps": [
@@ -2323,6 +2472,8 @@
      ],
      "priority": "P1",
      "status": "✅ #223",
+     "verified": "browser",
+     "pr": 223,
      "new": true,
      "source": "דוח 5.1 (#205)",
      "steps": [
@@ -2359,6 +2510,8 @@
      ],
      "priority": "P1",
      "status": "✅* #260 (צינור, רישום ושער; ריצת ההוכחה של 4 המודלים — אחרי 15.9(0))",
+     "verified": "owner",
+     "pr": 260,
      "new": true,
      "source": "נספח 19",
      "steps": [
@@ -2389,6 +2542,8 @@
      ],
      "priority": "P1",
      "status": "✅* #255 (CI ב-WASM: FLEURS dev WER 8.9%, validation 23.6% — מעל יעד ה-15% (עברית בלבד 13.8%; הפער סביב לטינית וספרות הוא תכונת המודל, גם ב-sherpa-onnx); השהיה p95 1.5s; Common Voice ו-test — 15.9; Whisper-turbo — 15.3; החלטה — 15.16)",
+     "verified": "owner",
+     "pr": 255,
      "new": true,
      "was": "5.1",
      "source": "מחליף Google Web Speech / whisper-1, נספח 19",
@@ -2423,6 +2578,8 @@
      ],
      "priority": "P2",
      "status": "⏳ #312 feat/neural-tts (נפתח 24.10 / 20.10; CI אדום על תקציב החבילה (צעד Bundle-size budget); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
+     "verified": "built",
+     "pr": 312,
      "new": true,
      "was": "5.2",
      "source": "מחליף TTS בענן, נספח 19",
@@ -2455,6 +2612,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #293 feat/nikud (נפתח 24.10 / 20.10; CI אדום על תקציב החבילה (צעד Bundle-size budget); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
+     "verified": "built",
+     "pr": 293,
      "new": true,
      "was": "5.3",
      "source": "מחליף Dicta Nakdan, נספח 19",
@@ -2484,6 +2643,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #282 feat/local-mt (נפתח 24.10 / 20.10; CI אדום על תקציב החבילה (צעד Bundle-size budget); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
+     "verified": "built",
+     "pr": 282,
      "new": true,
      "was": "5.4",
      "source": "מחליף Google Translate / DeepL, נספח 19",
@@ -2510,6 +2671,8 @@
      ],
      "priority": "P0",
      "status": "⏳ #256 (נבנה; 10/10 dev, 96.5% על 4,298 מחרוזות UI; CI ירוק מ-20.10 — בדיקת הפתק היומי של 4.12 מסננת `.crswap` ועושה polling; Tatoeba ≥ 95% נמדד רק אחרי 15.9(0), ואז ✅)",
+     "verified": "browser",
+     "pr": 256,
      "new": true,
      "was": "5.5",
      "source": "review #136, #173",
@@ -2534,6 +2697,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #286 feat/local-vision (נפתח 24.10 / 20.10; CI אדום על תקציב החבילה (צעד Bundle-size budget); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
+     "verified": "built",
+     "pr": 286,
      "new": true,
      "was": "5.6",
      "source": "T31, נספח 19",
@@ -2561,6 +2726,8 @@
      ],
      "priority": "P2",
      "status": "⏳ #309 feat/image-search (נפתח 24.10 / 20.10; CI אדום על תקציב החבילה (צעד Bundle-size budget); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
+     "verified": "built",
+     "pr": 309,
      "new": true,
      "was": "5.7",
      "source": "יכולת חדשה, נספח 19",
@@ -2590,6 +2757,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #339 feat/pdf-chat (BM25 עברי + embeddings מקומיים, ציטוטים מאומתים לעמוד ושורה; BM25 בלבד: 8/8 שאלות dev ב-top 3 על טקסט; ✅* — 15.17: npm run eval:pdf-chat) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox",
+     "verified": "browser",
+     "pr": 339,
      "new": true,
      "was": "5.8",
      "source": "מחליף ChatPDF",
@@ -2621,6 +2790,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #336 feat/local-fim (Ollama suffix על qwen2.5-coder, debounce 150ms, אף הקשה לא מתחילה הורדה; ✅* — 15.17: npm run bench:fim -- --assert 300) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox · 10.11: כשל ה-Vercel (TS2493 ב-fim.test) תוקן @49e1c83d; בדיקה מלאה ב-Vercel Sandbox (Node 24): typecheck 0, vitest 324 קבצים/3397, startup 443.0/460, e2e fim chromium 1/1",
+     "verified": "browser",
+     "pr": 336,
      "new": true,
      "was": "5.9",
      "source": "מחליף Copilot",
@@ -2657,6 +2828,8 @@
      ],
      "priority": "P0",
      "status": "⏳ #284 feat/local-spell-en (נפתח 24.10 / 20.10; CI אדום על תקציב החבילה (צעד Bundle-size budget); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
+     "verified": "built",
+     "pr": 284,
      "new": true,
      "was": "5.10",
      "source": "מחליף LanguageTool ציבורי",
@@ -2682,6 +2855,8 @@
      ],
      "priority": "P2",
      "status": "⏳ #342 feat/local-summarize (כל משפט מועתק מהמקור ונבדק; Chrome Summarizer / סוכן מקומי / חילוץ בלי מודל; יעד 95% לא נמדד — צריך מודל אמיתי) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox",
+     "verified": "node",
+     "pr": 342,
      "new": true,
      "source": "מחקר פערים §3",
      "steps": [
@@ -2707,6 +2882,8 @@
      ],
      "priority": "P2",
      "status": "⏳ #313 feat/local-lora (נפתח 24.10 / 20.10; CI אדום על תקציב החבילה (צעד Bundle-size budget); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
+     "verified": "built",
+     "pr": 313,
      "new": true,
      "was": "5.12",
      "source": "מחליף OpenAI fine-tune",
@@ -2735,6 +2912,8 @@
      ],
      "priority": "P2",
      "status": "⏳ #341 feat/citations (APA 7, Chicago, MLA 9 בעברית ובאנגלית, אופליין; DOI ו-citation-js לא נוספו) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox; Codex לא סקר (מכסה)",
+     "verified": "node",
+     "pr": 341,
      "new": true,
      "was": "5.13",
      "source": "מחליף כלי ציטוט, נספח 19",
@@ -2768,6 +2947,8 @@
      ],
      "priority": "P2",
      "status": "⏳ #279 (run_python על Pyodide ב-worker לכל קריאה, ערוצי רשת/אחסון/התקנים חסומים ונרשמים ביומן; e2e על Pyodide אמיתי ב-3 דפדפנים ו-prod: 0 בקשות; CI ירוק על 4f22348c; ✅ אחרי המיזוג)",
+     "verified": "browser",
+     "pr": 279,
      "new": true,
      "was": "5.14",
      "source": "יכולת חדשה",
@@ -2796,6 +2977,8 @@
      ],
      "priority": "P2",
      "status": "⏳ #311 feat/data-analyst (נפתח 24.10 / 20.10; CI אדום על תקציב החבילה (צעד Bundle-size budget); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
+     "verified": "built",
+     "pr": 311,
      "new": true,
      "was": "5.15",
      "source": "מחליף ChatGPT Data Analysis",
@@ -2823,6 +3006,8 @@
      ],
      "priority": "P2",
      "status": "⏳ #353 feat/meeting-notes (על #331; סוכן meeting-writer: החלטות, משימות עם אחראי ותאריך בפורמט 4.13, שאלות פתוחות, ייצוא .ics; meetingCore.test.ts עבר תחת ה-shim 4/0; dodMock — סט הזהב מחכה ל-15.11; dod: npx vitest run src/__tests__/meetingCore.test.ts src/__tests__/meetingNotes.test.ts src/__tests__/commandIds.test.ts)",
+     "verified": "node",
+     "pr": 353,
      "new": true,
      "was": "5.16",
      "source": "מחליף Otter",
@@ -2851,6 +3036,8 @@
      ],
      "priority": "P0",
      "status": "⏳ #332 chore/no-cloud-defaults (הביקורת מצאה פערים אמיתיים: הכתבה של הדפדפן שולחת אודיו ל-Google, LanguageTool ציבורי ב-local-first, ספקי Gemini/Anthropic/Mistral ו-fine-tune בלי שער — נסגרו; בדיקה שנכשלת על כל מסלול ענן לא מבוקר; e2e של 22 פקודות, 0 בקשות ענן) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox · דליפת PlantUML→kroki.io נסגרה ב-#352 fix/kroki-policy (מרנדר בלי לשאול רק במדיניות cloud; אחרת כפתור הסכמה לכל דיאגרמה; נרשם ב-ledger; dod: npx vitest run src/__tests__/cloudRoutes.test.ts — לא רץ עדיין)",
+     "verified": "node",
+     "pr": 332,
      "new": true,
      "was": "5.17",
      "source": "§2",
@@ -2885,6 +3072,8 @@
      ],
      "priority": "P0",
      "status": "✅ #225 (החלק הציבורי; ה-test נבנה ב-CI אחרי 15.9)",
+     "verified": "browser",
+     "pr": 225,
      "new": true,
      "source": "מחקר סטי הזהב, נספח 20",
      "steps": [
@@ -2915,6 +3104,8 @@
      ],
      "priority": "P0",
      "status": "⏳ #292 ci/real-tiny-model (נפתח 24.10 / 20.10; CI אדום על e2e — התקנת Playwright נשברת על Ubuntu 26 (#330); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
+     "verified": "built",
+     "pr": 292,
      "new": true,
      "source": "E0, T15",
      "steps": [
@@ -2945,6 +3136,8 @@
      ],
      "priority": "P0",
      "status": "⏳ #298 feat/eval-complete (נפתח 24.10 / 20.10; CI אדום על e2e — התקנת Playwright נשברת על Ubuntu 26 (#330); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
+     "verified": "built",
+     "pr": 298,
      "was": "6.1",
      "source": "T19",
      "steps": [
@@ -2971,6 +3164,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #305 feat/doctor-complete (נפתח 24.10 / 20.10; CI אדום על תקציב החבילה (צעד Bundle-size budget); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
+     "verified": "built",
+     "pr": 305,
      "was": "6.2",
      "source": "T21",
      "steps": [
@@ -2995,6 +3190,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #278 (tessdata_fast heb/eng בריפו, CER לכל PR על ה-split הציבורי (34 תמונות): עברית 2.66% / 1.32% עוברת, אנגלית 12.33% / 40.54% נכשלת — מילים לועזיות בתוך שורות עבריות; השער לא שונה — החלטה לטל; ✅* אחרי 15.11 ו-GOLDEN_SEED)",
+     "verified": "built",
+     "pr": 278,
      "was": "6.3",
      "source": "T31",
      "steps": [
@@ -3027,6 +3224,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #345 feat/rerank-library (HeQ dev: BM25 לבד nDCG@10 = 1.0000, עם reranker 1.0000 — אין רווח; ההחלטה: כבוי כברירת מחדל; bge-reranker ו-Belebele חסומים — Hugging Face; ספריית הקריאה לא נבנתה) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox",
+     "verified": "node",
+     "pr": 345,
      "was": "6.4",
      "source": "T29, T34, נספח 19",
      "steps": [
@@ -3054,6 +3253,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #254 (תיקייה קבועה תוקנה + בדיקת הקבלה; ״מאז הביקור האחרון״ = החלטת מוצר — 15.16)",
+     "verified": "built",
+     "pr": 254,
      "was": "6.5",
      "source": "T33",
      "steps": [
@@ -3094,7 +3295,9 @@
       "registry עם מדדים אמיתיים לכל מנוע"
      ],
      "owner": "15.14",
-     "status": "⏳ #421 (על #345; npm run bench:models ב-Chromium אמיתי עם WebGPU או WASM: זמן טעינה, p50/p95, זיכרון, איכות; כותב measured רק בריצה מלאה ואמיתית (מסרב ל-SwiftShader וחלקי); bm25 מקצה לקצה: nDCG@10 1.0; ✅* עד 15.14 על ה-GPU של טל; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #421 (על #345; npm run bench:models ב-Chromium אמיתי עם WebGPU או WASM: זמן טעינה, p50/p95, זיכרון, איכות; כותב measured רק בריצה מלאה ואמיתית (מסרב ל-SwiftShader וחלקי); bm25 מקצה לקצה: nDCG@10 1.0; ✅* עד 15.14 על ה-GPU של טל; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "built",
+     "pr": 421
     },
     {
      "id": "7.9",
@@ -3131,6 +3334,8 @@
      ],
      "priority": "P1",
      "status": "✅ #240 (11/12 סטים; פגישות — 15.11)",
+     "verified": "browser",
+     "pr": 240,
      "new": true,
      "source": "ביקורת v5 #16",
      "steps": [
@@ -3163,6 +3368,8 @@
      ],
      "priority": "P0",
      "status": "⏳ #259 (שלב 1 בלבד — פרופיל: רצפת ה-shell 198ms, ה-worker לבדו לא מגיע ל-300ms, צריך גם viewport-first (≈ 9 ש׳) — החלטה 15.16 (16); סף LCP הועלה ל-3700ms לפי 15.16 (20); Lighthouse עדיין אדום: FCP 1083 > 1000ms בריצה האחרונה — 15.16 (21))",
+     "verified": "built",
+     "pr": 259,
      "was": "7.1",
      "source": "C1",
      "steps": [
@@ -3190,6 +3397,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #248 (parse5 ו-react-dom/server מחוץ להפעלה: 456.5 → 385.7 KB gz; היעד 250 KB — שאר הצעדים פתוחים)",
+     "verified": "built",
+     "pr": 248,
      "was": "7.2",
      "source": "C2, T38",
      "steps": [
@@ -3226,7 +3435,9 @@
      "groups": [
       "ci"
      ],
-     "status": "⏳ #424 (על #386; Lighthouse לא בלוקפייל — npm run perf:gate עם Playwright ומדדי הדפדפן: FCP, LCP, CLS, TBT, TTI; desktop נכשל ב-FCP 1200/LCP 3500 (החלטה 15.16(20–21)), mobile רק מזהיר עד מדידה; 5 טעינות, חציון; perfGate 9/9; אין עדיין מספר מ-Lumen עצמו; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #424 (על #386; Lighthouse לא בלוקפייל — npm run perf:gate עם Playwright ומדדי הדפדפן: FCP, LCP, CLS, TBT, TTI; desktop נכשל ב-FCP 1200/LCP 3500 (החלטה 15.16(20–21)), mobile רק מזהיר עד מדידה; 5 טעינות, חציון; perfGate 9/9; אין עדיין מספר מ-Lumen עצמו; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "built",
+     "pr": 424
     },
     {
      "id": "8.4",
@@ -3239,6 +3450,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #274 (אינדקס ב-Web Worker מעל VaultBackend, עץ מהאינדקס, Float32Array, מתאר ותצוגה אינקרמנטליים; e2e: פתיחה < 1s וחיפוש < 100ms עוברים ב-chromium/firefox/prod; הקלדה ב-2MB — רק בלילה, עוד לא רץ; CI ירוק על db567ae7; startup 459.6/460)",
+     "verified": "browser",
+     "pr": 274,
      "was": "7.4",
      "source": "C4, C6, T39",
      "steps": [
@@ -3270,6 +3483,8 @@
      ],
      "priority": "P1",
      "status": "✅ #262 (OCR לא offline — tessdata מורד בשימוש ראשון)",
+     "verified": "browser",
+     "pr": 262,
      "was": "7.5",
      "source": "D1, D4, B8",
      "steps": [
@@ -3299,6 +3514,8 @@
      ],
      "priority": "P0",
      "status": "✅ #253 (294 מחרוזות, לא 18; תרגומי ar/ru/fr/de/ja/zh בלי דובר שפת אם — 15.16)",
+     "verified": "browser",
+     "pr": 253,
      "was": "8.1",
      "source": "H4, P6, T45",
      "steps": [
@@ -3324,6 +3541,8 @@
      ],
      "priority": "P1",
      "status": "✅* #257 (dev: recall 75%, FP 2.5% / 3.9%; ה-test — 15.11)",
+     "verified": "owner",
+     "pr": 257,
      "was": "8.2",
      "source": "T28",
      "steps": [
@@ -3351,6 +3570,8 @@
      ],
      "priority": "P1",
      "status": "✅ #219",
+     "verified": "browser",
+     "pr": 219,
      "was": "8.3",
      "source": "T25, T26",
      "steps": [
@@ -3373,6 +3594,8 @@
      ],
      "priority": "P2",
      "status": "⏳ #348 feat/i18n-review-agent (npm run i18n:review: ההרצה הראשונה מצאה 34 משתנים חסרים בתרגומים — תוקנו; 4 אזהרות אורך ו-43 לא מתורגמים נשארו) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox",
+     "verified": "node",
+     "pr": 348,
      "was": "8.4",
      "source": "P5",
      "steps": [
@@ -3400,6 +3623,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #346 test/rtl-matrix (מטריצת RTL: תצוגה, WYSIWYG ויצוא × 3 דפדפנים × 2 טלפונים; נמצא: טבלה ב-WYSIWYG בלי dir) — Playwright/typecheck/build ממתינים ל-Vercel Sandbox",
+     "verified": "built",
+     "pr": 346,
      "was": "8.5",
      "source": "B1–B11",
      "steps": [
@@ -3426,6 +3651,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #337 feat/i18n-draft-agent (npm run i18n:draft עם Ollama, רשימת needs-review) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox; Codex לא סקר (מכסה)",
+     "verified": "node",
+     "pr": 337,
      "new": true,
      "was": "8.6",
      "source": "חיסכון בזמן",
@@ -3455,6 +3682,8 @@
      ],
      "priority": "P1",
      "status": "✅ #252 (30 שורות × 2 עורכים × 3 דפדפנים ב-CI)",
+     "verified": "browser",
+     "pr": 252,
      "new": true,
      "source": "ביקורת התוכנית §6",
      "steps": [
@@ -3481,6 +3710,8 @@
      ],
      "priority": "P1",
      "status": "✅* #263 (ה-XML נבדק; Word אמיתי — 15.12)",
+     "verified": "owner",
+     "pr": 263,
      "new": true,
      "source": "review #177",
      "steps": [
@@ -3506,6 +3737,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #350 feat/rtl-parity (כל left/right ב-CSS הפך ללוגי, חיצים שומרים משמעות חזותית, שער שנכשל על מאפיין פיזי חדש; 4.10 ו-10.2 יחוברו אחרי 15.1) — Playwright/typecheck/build ממתינים ל-Vercel Sandbox",
+     "verified": "built",
+     "pr": 350,
      "new": true,
      "source": "Obsidian 1.14 (המחקר המורחב, 18.10)",
      "steps": [
@@ -3544,6 +3777,8 @@
      ],
      "priority": "P0",
      "status": "⏳ #290 feat/a11y (נפתח 24.10 / 20.10; CI אדום על e2e — התקנת Playwright נשברת על Ubuntu 26 (#330); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
+     "verified": "built",
+     "pr": 290,
      "was": "9.1",
      "source": "H1–H3",
      "steps": [
@@ -3571,6 +3806,8 @@
      ],
      "priority": "P0",
      "status": "⏳ #300 feat/touch (נפתח 24.10 / 20.10; CI אדום על e2e — התקנת Playwright נשברת על Ubuntu 26 (#330); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
+     "verified": "built",
+     "pr": 300,
      "was": "9.2",
      "source": "I1–I3",
      "steps": [
@@ -3598,6 +3835,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #343 test/visual-local (רגרסיה חזותית מקומית — לא ב-Actions: 40 צילומים, 10 משטחים × עברית/אנגלית × בהיר/כהה; בדיקה עצמית שהזזה של 3px נכשלת; baselines נוצרים בהרצה ראשונה) — Playwright/typecheck/build ממתינים ל-Vercel Sandbox",
+     "verified": "built",
+     "pr": 343,
      "was": "9.3",
      "source": "T24",
      "steps": [
@@ -3627,6 +3866,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #281 test/coverage-all (נפתח 24.10 / 20.10; CI אדום על e2e — התקנת Playwright נשברת על Ubuntu 26 (#330); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
+     "verified": "built",
+     "pr": 281,
      "was": "9.4",
      "source": "E4",
      "steps": [
@@ -3663,6 +3904,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #333 feat/settings-one (מסך הגדרות אחד עם לשוניות, חיפוש, ייצוא/ייבוא בלי סודות; 3.5/5.4/6.1/3.6 יחוברו אחרי 15.1) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox; Codex לא סקר (מכסה)",
+     "verified": "browser",
+     "pr": 333,
      "was": "10.1",
      "source": "J1",
      "steps": [
@@ -3693,6 +3936,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #287 feat/plugins-runtime + #289 feat/plugins-api (נפתח 24.10 / 20.10; CI אדום על e2e — התקנת Playwright נשברת על Ubuntu 26 (#330); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
+     "verified": "built",
+     "pr": 287,
      "was": "10.2",
      "source": "J2, M1",
      "steps": [
@@ -3724,6 +3969,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #306 feat/search-ops (נפתח 24.10 / 20.10; CI אדום על תקציב החבילה (צעד Bundle-size budget); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
+     "verified": "built",
+     "pr": 306,
      "was": "10.3",
      "source": "J5",
      "steps": [
@@ -3754,6 +4001,8 @@
      ],
      "priority": "P2",
      "status": "⏳ #338 feat/vault-encryption (AES-GCM לכל קובץ, מפתח שחזור, המרה copy-first, נעילה אוטומטית; Argon2id דורש hash-wasm ב-lockfile) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox; Codex לא סקר (מכסה)",
+     "verified": "node",
+     "pr": 338,
      "new": true,
      "was": "10.5",
      "source": "J3 (החלטה ב-1.6)",
@@ -3783,6 +4032,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #314 feat/desktop-release (נפתח 24.10 / 20.10; CI אדום על תקציב החבילה (צעד Bundle-size budget); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
+     "verified": "built",
+     "pr": 314,
      "was": "10.4",
      "source": "N3, F7",
      "steps": [
@@ -3816,6 +4067,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #340 chore/catch-split (על #271 + #246; 182 catch ריקים קיבלו סיבה, 4 שהסתירו כשלים → log.warn; 10 קבצים מעל 800 שורות פוצלו, App.tsx 1157→789; max-lines 800 + codeHealth.test; Vercel build ירוק (tsc -b מחמיר כולל בדיקות + vite build); dod: npx vitest run src/__tests__/codeHealth.test.ts src/__tests__/eslintEmptyCatchWhy.test.ts; npm run lint) · 10.11: נעשה מחדש על verify/train — 245 catch עם סיבה, הכלל מכסה .catch(), 147 רשומות baseline הוסרו, codeHealth; פיצול 16 הקבצים מעל 800 שורות לא נעשה (מסוכן בלי vitest) — max-lines עוד לא נאכף",
+     "verified": "built",
+     "pr": 340,
      "was": "11.1",
      "source": "E1, O1",
      "steps": [
@@ -3860,6 +4113,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #271 (A1–A3, A6, A8, A9 תוקנו; A4, A5, A7 החלטה מתועדת עם בדיקה; 9/9 עם בדיקה; CI ירוק על aeab395b; פתוח לטל: VITE_RESEARCH_TOKEN מול טוקן בהגדרות בלבד)",
+     "verified": "browser",
+     "pr": 271,
      "was": "11.3",
      "source": "A1–A9",
      "steps": [
@@ -3886,6 +4141,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #280 feat/monitoring (נפתח 24.10 / 20.10; CI אדום על e2e — התקנת Playwright נשברת על Ubuntu 26 (#330); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
+     "verified": "built",
+     "pr": 280,
      "was": "11.4",
      "source": "A10, P7",
      "steps": [
@@ -3919,6 +4176,8 @@
      ],
      "priority": "P0",
      "status": "⏳ #316 docs/complete (נפתח 24.10 / 20.10; CI אדום על e2e — התקנת Playwright נשברת על Ubuntu 26 (#330); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
+     "verified": "built",
+     "pr": 316,
      "was": "12.1",
      "source": "N1",
      "steps": [
@@ -3940,6 +4199,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #301 chore/hosting (נפתח 24.10 / 20.10; CI אדום על e2e — התקנת Playwright נשברת על Ubuntu 26 (#330); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
+     "verified": "built",
+     "pr": 301,
      "was": "12.2",
      "source": "N2",
      "steps": [
@@ -3962,6 +4223,8 @@
      ],
      "priority": "P2",
      "status": "⏳ #302 feat/mobile-builds (נפתח 24.10 / 20.10; CI אדום על תקציב החבילה (צעד Bundle-size budget); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
+     "verified": "built",
+     "pr": 302,
      "was": "12.3",
      "source": "I4",
      "steps": [
@@ -3989,6 +4252,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #355 chore/release (על #314; scripts/release.mjs: plan/prepare/build/publish/verify/rollback מקומי בלי Actions, SHA256SUMS חתום; Vercel build ירוק (tsc -b מחמיר כולל בדיקות + vite build); releasePipeline 9/9 ו-desktopRelease 9/9 ב-shim; ✅* לכל היותר עד 15.7; dod: npx vitest run src/__tests__/releasePipeline.test.ts src/__tests__/desktopRelease.test.ts)",
+     "verified": "node",
+     "pr": 355,
      "new": true,
      "was": "12.4",
      "source": "תהליך",
@@ -4024,7 +4289,9 @@
       "`v1.0.0-rc` רק אחרי הביקורת"
      ],
      "depRule": "allP0",
-     "status": "⏳ סקירה עצמאית של #431 (12.11, scratchpad review-13.5.md): 65 commits אינטגרציה — 60 תקינים, 4 הערות, 1 חובה לתקן; 0 בדיקות שהוחלשו או דולגו, 0 צדדים שנפלו. חובה: ייבוא הגדרות יכול היה לרכך פרטיות (lumen.ai.redact, tokenEndpoint, vaultLock) — בתיקון במסלול D; הערות: כלל 740 KB רחב מדי, jsdelivr גם ב-Tauri, 5 מסמכים יצאו מסט הצילומים, צילומים שנבנו ידנית צריכים ריצה אמיתית"
+     "status": "⏳ סקירה עצמאית של #431 (12.11, scratchpad review-13.5.md): 65 commits אינטגרציה — 60 תקינים, 4 הערות, 1 חובה לתקן; 0 בדיקות שהוחלשו או דולגו, 0 צדדים שנפלו. חובה: ייבוא הגדרות יכול היה לרכך פרטיות (lumen.ai.redact, tokenEndpoint, vaultLock) — בתיקון במסלול D; הערות: כלל 740 KB רחב מדי, jsdelivr גם ב-Tauri, 5 מסמכים יצאו מסט הצילומים, צילומים שנבנו ידנית צריכים ריצה אמיתית",
+     "verified": "built",
+     "pr": 431
     },
     {
      "id": "13.6",
@@ -4069,7 +4336,9 @@
       "זמינות בחנות — אבן דרך מותנית באישור החנות, לא חלק מתאריך הסיום"
      ],
      "owner": "15.7",
-     "status": "⏳ #430 (על #302; הכנה בלבד: רישומים בעברית ובאנגלית ל-fastlane (מילות מפתח נספרות בבתים — עברית חורגת מהר), תשובות תוויות פרטיות, סקריפט 32 צילומי מסך במידות המדויקות, צ׳קליסט לכל חנות; storeSubmit 15/15; לא נבדק ב-Sandbox (חסום עד 1.12); ההגשה — טל, 15.7)"
+     "status": "⏳ #430 (על #302; הכנה בלבד: רישומים בעברית ובאנגלית ל-fastlane (מילות מפתח נספרות בבתים — עברית חורגת מהר), תשובות תוויות פרטיות, סקריפט 32 צילומי מסך במידות המדויקות, צ׳קליסט לכל חנות; storeSubmit 15/15; לא נבדק ב-Sandbox (חסום עד 1.12); ההגשה — טל, 15.7)",
+     "verified": "built",
+     "pr": 430
     }
    ]
   },
@@ -4090,6 +4359,8 @@
      ],
      "priority": "P1",
      "status": "✅ #261 (3.4–3.8s לפתק ראשון ב-e2e)",
+     "verified": "browser",
+     "pr": 261,
      "new": true,
      "source": "השקה",
      "steps": [
@@ -4113,6 +4384,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #347 feat/feedback (Help: Send feedback + Report a problem מהרופא; תצוגה מקדימה של מה שיוצא, ניקוי סודות, כלום לא יוצא בלי לחיצה; Vercel build ירוק (tsc -b מחמיר כולל בדיקות + vite build); feedback.test 10/10 ב-shim; dod: npx vitest run src/__tests__/feedback.test.ts src/__tests__/FeedbackDialogRender.test.tsx; npx playwright test e2e/feedback.spec.ts)",
+     "verified": "node",
+     "pr": 347,
      "new": true,
      "source": "השקה",
      "steps": [
@@ -4136,6 +4409,8 @@
      ],
      "priority": "P1",
      "status": "⏳ #303 chore/issue-triage (נפתח 24.10 / 20.10; CI אדום על e2e — התקנת Playwright נשברת על Ubuntu 26 (#330); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
+     "verified": "built",
+     "pr": 303,
      "new": true,
      "source": "חיסכון בזמן",
      "steps": [
@@ -4166,7 +4441,9 @@
      "acceptance": [
       "פיצ'ר חדש מגיע לבטא לפני היציב"
      ],
-     "status": "⏳ #417 (על #355; ערוץ בטא: 0.2.0-beta.N, pre-release, latest.json מתגלגל שלא חוזר אחורה, deploy-beta בלי --prod, דגלי פיצ׳רים עם פאנל ו-flags:check שחוסם דגל ליציב בלי בטא; 12/12 + 9/9 + 9/9; לא נבדק ב-Sandbox (חסום עד 1.12); בעלים: שחרור בטא אמיתי (15.7))"
+     "status": "⏳ #417 (על #355; ערוץ בטא: 0.2.0-beta.N, pre-release, latest.json מתגלגל שלא חוזר אחורה, deploy-beta בלי --prod, דגלי פיצ׳רים עם פאנל ו-flags:check שחוסם דגל ליציב בלי בטא; 12/12 + 9/9 + 9/9; לא נבדק ב-Sandbox (חסום עד 1.12); בעלים: שחרור בטא אמיתי (15.7))",
+     "verified": "built",
+     "pr": 417
     },
     {
      "id": "14.5",
@@ -4179,6 +4456,8 @@
      ],
      "priority": "P2",
      "status": "⏳ #304 feat/public-roadmap (נפתח 24.10 / 20.10; CI אדום על e2e — התקנת Playwright נשברת על Ubuntu 26 (#330); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
+     "verified": "built",
+     "pr": 304,
      "new": true,
      "source": "השקה",
      "steps": [
@@ -4206,7 +4485,9 @@
      "acceptance": [
       "מוצג פעם אחת לכל גרסה"
      ],
-     "status": "⏳ #413 (״מה חדש״ בתוך האפליקציה; whatsNew 6/6, דיאלוג 2/2 ב-Chromium; snapshot פקודות צריך -u; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #413 (״מה חדש״ בתוך האפליקציה; whatsNew 6/6, דיאלוג 2/2 ב-Chromium; snapshot פקודות צריך -u; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "browser",
+     "pr": 413
     }
    ]
   },
@@ -4227,6 +4508,8 @@
      ],
      "priority": "P0",
      "status": "⏳ #431 verify/train → main @04699ec — **כל השערים ירוקים ב-Vercel על Node 24 (dpl_DWPdh9Km, 12.11): build 49.6s · budget ✓ (startup 402/460) · vitest 6,605/6,608 (2 skipped, 1 todo; 518/519 קבצים) · i18n · hygiene · docs-sync · licences (fail 0)**. 121→74→22→7→0 כשלים בשלושה ימים, כ-50 תיקוני אינטגרציה לפי זוגות PR. נשאר לפני מיזוג ל-main: Playwright e2e בשלושה דפדפנים (צריך Vercel Sandbox — חסום עד 1.12 או Pro)",
+     "verified": "node",
+     "pr": 431,
      "source": "GitHub API: 100+ PR-ים פתוחים, אחרון שמוזג #134 (17.10.2026)",
      "steps": [
       "לסדר את כ-150 ה-PR-ים הפתוחים (#143–#347) לפי שכבות המחסנית, ממוספרים לפי תלות",
@@ -4266,7 +4549,9 @@
      ],
      "why": "Typora ו-Obsidian נמדדים בנאמנות לקובץ; אין בתוכנית מדד תאימות למפרט.",
      "branch": "test/md-conformance",
-     "status": "⏳ #407 (על #370; סט המפרט של CommonMark 0.31.2 ו-GFM 0.29 (CC BY-SA, מתועד), סף 99%/98%; תוקן: עורך המקור הפך CRLF ל-LF; שמירה ששומרת בלוקים לא ערוכים בדיוק — 230/230 קבצים זהים מול 6/230 קודם; ב-Chromium: 647/652, 5 הכשלים הם החריגות המתועדות; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #407 (על #370; סט המפרט של CommonMark 0.31.2 ו-GFM 0.29 (CC BY-SA, מתועד), סף 99%/98%; תוקן: עורך המקור הפך CRLF ל-LF; שמירה ששומרת בלוקים לא ערוכים בדיוק — 230/230 קבצים זהים מול 6/230 קודם; ב-Chromium: 647/652, 5 הכשלים הם החריגות המתועדות; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "browser",
+     "pr": 407
     },
     {
      "id": "W1.3",
@@ -4292,7 +4577,9 @@
      ],
      "why": "כספת שבאה מ-Obsidian משתמשת בתחביר הזה כל יום; בלי זה ״תאימות ל-Obsidian״ חלקית.",
      "branch": "feat/obsidian-syntax",
-     "status": "⏳ #410 (על #407; callouts (כל הסוגים, מתקפלים, RTL), %%הערות%%, ==הדגשות== עם צבעי Obsidian 1.14, גודל תמונות בגרירה, popover להערות שוליים; 40 פתקי זהב; 20/20 + 277/277; Temml לא הותקן; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #410 (על #407; callouts (כל הסוגים, מתקפלים, RTL), %%הערות%%, ==הדגשות== עם צבעי Obsidian 1.14, גודל תמונות בגרירה, popover להערות שוליים; 40 פתקי זהב; 20/20 + 277/277; Temml לא הותקן; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "built",
+     "pr": 410
     },
     {
      "id": "W1.4",
@@ -4317,7 +4604,9 @@
      ],
      "why": "רוב הטקסט העברי נכנס בהדבקה מ-Word/Docs; זה המקום שבו עורכי Markdown נשברים.",
      "branch": "feat/paste-fidelity",
-     "status": "⏳ #412 (על #407; הדבקה מ-Word, Google Docs ואתרים: רשימות מקוננות, ניקוי סגנונות וסימני כיוון; ״הדבק כטקסט״ / ״עם עיצוב״; 30/30 snapshots, מבנה 89/89 — דוגמאות בנויות, לא מלוח אמיתי; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #412 (על #407; הדבקה מ-Word, Google Docs ואתרים: רשימות מקוננות, ניקוי סגנונות וסימני כיוון; ״הדבק כטקסט״ / ״עם עיצוב״; 30/30 snapshots, מבנה 89/89 — דוגמאות בנויות, לא מלוח אמיתי; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "built",
+     "pr": 412
     },
     {
      "id": "W1.5",
@@ -4344,7 +4633,9 @@
      ],
      "why": "קבצים אמיתיים בדיסק (4.2–4.4) מעבירים את הסיכון מ-OPFS למערכת הקבצים; שמירה חצויה היא מסלול האובדן הנפוץ אחרי פריצה או קריסה.",
      "branch": "feat/atomic-writes",
-     "status": "⏳ #356 **מוכן למיזוג** — (על #344; כתיבה אטומית + בדיקת שלמות כספת; Vercel Sandbox (Node 24): typecheck 0, vitest 3378/3379 (snapshot פקודות עודכן), startup 459.6/460, test:crash 1000 SIGKILL / 0 קבצים פגומים, e2e chromium 18/18; dod: npm run test:crash · npx vitest run src/__tests__/vaultAtomic.test.ts src/__tests__/vaultIntegrity.test.ts src/__tests__/vaultBackend.contract.test.ts · npm run build && npm run budget; לא נבדק: cargo/Android, Safari אמיתי)"
+     "status": "⏳ #356 **מוכן למיזוג** — (על #344; כתיבה אטומית + בדיקת שלמות כספת; Vercel Sandbox (Node 24): typecheck 0, vitest 3378/3379 (snapshot פקודות עודכן), startup 459.6/460, test:crash 1000 SIGKILL / 0 קבצים פגומים, e2e chromium 18/18; dod: npm run test:crash · npx vitest run src/__tests__/vaultAtomic.test.ts src/__tests__/vaultIntegrity.test.ts src/__tests__/vaultBackend.contract.test.ts · npm run build && npm run budget; לא נבדק: cargo/Android, Safari אמיתי)",
+     "verified": "browser",
+     "pr": 356
     },
     {
      "id": "W1.6",
@@ -4370,7 +4661,9 @@
      ],
      "why": "היסטוריה בתוך אותו דיסק לא מגינה מאובדן דיסק; Obsidian Sync נותן שנה של היסטוריה מרוחקת.",
      "branch": "feat/backup-drill",
-     "status": "⏳ #402 (על #229 + W1.7; גיבוי מתוזמן לתיקייה/כונן (.tar או .tar.age) עם manifest ובדיקת קריאה, רוטציה 7/4/6, שחזור בלי דריסה, התראה תוך דקה; שחזור 1,200/1,200 זהים; ✅* — בעלים: USB אמיתי כולל ניתוק; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #402 (על #229 + W1.7; גיבוי מתוזמן לתיקייה/כונן (.tar או .tar.age) עם manifest ובדיקת קריאה, רוטציה 7/4/6, שחזור בלי דריסה, התראה תוך דקה; שחזור 1,200/1,200 זהים; ✅* — בעלים: USB אמיתי כולל ניתוק; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "built",
+     "pr": 402
     },
     {
      "id": "W1.7",
@@ -4398,7 +4691,9 @@
      ],
      "why": "E2EE בלי KDF חזק, בלי ביטול התקן ובלי מפרט שאפשר לבדוק הוא לא בר-השוואה ל-Obsidian Sync ול-Anytype.",
      "branch": "feat/sync-crypto",
-     "status": "⏳ #399 (על #275; Argon2id, BLAKE2b, ChaCha20-Poly1305 ו-scrypt ב-TypeScript משלנו מאומתים מול וקטורי RFC, Node ו-Python — בלי חבילות; פורמט age דו-כיווני, keyring עם epochs, ביטול והוספת מכשיר, מפרט פומבי + קורא Python עצמאי; keyring 6/6 (10,000 סבבים, 0 אבדות), vectors 16/16; לא נבדק ב-Sandbox (חסום עד 1.12); בעלים: הזמנת ביקורת ציבורית)"
+     "status": "⏳ #399 (על #275; Argon2id, BLAKE2b, ChaCha20-Poly1305 ו-scrypt ב-TypeScript משלנו מאומתים מול וקטורי RFC, Node ו-Python — בלי חבילות; פורמט age דו-כיווני, keyring עם epochs, ביטול והוספת מכשיר, מפרט פומבי + קורא Python עצמאי; keyring 6/6 (10,000 סבבים, 0 אבדות), vectors 16/16; לא נבדק ב-Sandbox (חסום עד 1.12); בעלים: הזמנת ביקורת ציבורית)",
+     "verified": "built",
+     "pr": 399
     },
     {
      "id": "W1.8",
@@ -4423,7 +4718,9 @@
      ],
      "why": "Obsidian Sync נותן סנכרון סלקטיבי והיסטוריה; משתמשים עוזבים סנכרון שאי אפשר לראות מה הוא עושה.",
      "branch": "feat/sync-explained",
-     "status": "⏳ #378 (על #291; מצב לכל קובץ, פאנל פעילות, סנכרון סלקטיבי, הערכת זמן, תיקון זיכרון למנוע; **benchmark מלא: 10,000 פתקים + 1 GB — סנכרון ראשון 141.6s/98.6s (גבול 600s), שינוי אחד 0.24s/0.12s (גבול 3s)**; ✅* (WebDAV מדומה); לא נבדק ב-Sandbox (חסום עד 1.12); dod: npm run bench:sync · npx vitest run src/__tests__/syncExplained.test.tsx src/__tests__/e2eeSync.test.ts src/__tests__/syncPanel.test.tsx)"
+     "status": "⏳ #378 (על #291; מצב לכל קובץ, פאנל פעילות, סנכרון סלקטיבי, הערכת זמן, תיקון זיכרון למנוע; **benchmark מלא: 10,000 פתקים + 1 GB — סנכרון ראשון 141.6s/98.6s (גבול 600s), שינוי אחד 0.24s/0.12s (גבול 3s)**; ✅* (WebDAV מדומה); לא נבדק ב-Sandbox (חסום עד 1.12); dod: npm run bench:sync · npx vitest run src/__tests__/syncExplained.test.tsx src/__tests__/e2eeSync.test.ts src/__tests__/syncPanel.test.tsx)",
+     "verified": "built",
+     "pr": 378
     },
     {
      "id": "W1.9",
@@ -4450,7 +4747,9 @@
      ],
      "why": "כל דיאלוג קונפליקט מיותר הוא פגיעה באמון; Logseq ו-Obsidian Sync ממזגים טקסט אוטומטית.",
      "branch": "feat/auto-merge",
-     "status": "⏳ #366 **מוכן למיזוג** — (על #275 + safe-git; מיזוג תלת-כיווני לפני דיאלוג: 459/500 עריכות מקבילות (91.8%) בלי דיאלוג, front matter תקין תמיד; Vercel Sandbox (Node 24): typecheck 0, vitest 334/3395, startup 458.9/460; dod: npx vitest run src/__tests__/textMerge.test.ts · npm run build && npm run budget; אין e2e)"
+     "status": "⏳ #366 **מוכן למיזוג** — (על #275 + safe-git; מיזוג תלת-כיווני לפני דיאלוג: 459/500 עריכות מקבילות (91.8%) בלי דיאלוג, front matter תקין תמיד; Vercel Sandbox (Node 24): typecheck 0, vitest 334/3395, startup 458.9/460; dod: npx vitest run src/__tests__/textMerge.test.ts · npm run build && npm run budget; אין e2e)",
+     "verified": "node",
+     "pr": 366
     },
     {
      "id": "W1.10",
@@ -4475,7 +4774,9 @@
      ],
      "why": "Logseq בנה מחדש את Graph View V2 למהירות על גרפים גדולים; הגרף הקיים לא נמדד.",
      "branch": "feat/graph-10k",
-     "status": "⏳ #400 (על #274; גרף WebGL עם Barnes–Hut ב-worker, גרף מקומי לעומק 1–3, מסננים; graph10k 14/14; 13–14 fps ב-SwiftShader בלי GPU — fps על GPU אמיתי לא נמדד; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #400 (על #274; גרף WebGL עם Barnes–Hut ב-worker, גרף מקומי לעומק 1–3, מסננים; graph10k 14/14; 13–14 fps ב-SwiftShader בלי GPU — fps על GPU אמיתי לא נמדד; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "built",
+     "pr": 400
     },
     {
      "id": "W1.11",
@@ -4501,7 +4802,9 @@
      ],
      "why": "Bases הוא תקן הדה-פקטו למסדי נתונים על Markdown; בלי תאימות, מעבר מ-Obsidian מאבד את כל התצוגות.",
      "branch": "feat/obsidian-bases",
-     "status": "⏳ #358 feat/obsidian-bases (על #267; קריאה, תצוגה ועריכה של קובצי .base, 66/68 פונקציות, round-trip 20/20; Vercel Sandbox (Node 24): typecheck 0, vitest 322/3240, startup 459.2/460, obsidian-bases e2e chromium+firefox; dodMock — הציפיות נגזרו מהתיעוד; בעלים: לפתוח את 20 הקבצים ב-Obsidian 1.14 ולהשוות ל-expected.json)"
+     "status": "⏳ #358 feat/obsidian-bases (על #267; קריאה, תצוגה ועריכה של קובצי .base, 66/68 פונקציות, round-trip 20/20; Vercel Sandbox (Node 24): typecheck 0, vitest 322/3240, startup 459.2/460, obsidian-bases e2e chromium+firefox; dodMock — הציפיות נגזרו מהתיעוד; בעלים: לפתוח את 20 הקבצים ב-Obsidian 1.14 ולהשוות ל-expected.json)",
+     "verified": "owner",
+     "pr": 358
     },
     {
      "id": "W1.12",
@@ -4527,7 +4830,9 @@
      ],
      "why": "Notion ו-Tana מנצחים במסדי נתונים בזכות קשרים ו-rollups; Bases עדיין בלי זה — הזדמנות לעבור את Obsidian.",
      "branch": "feat/bases-relations",
-     "status": "⏳ #397 (על #358; קשרים, rollups (count/sum/avg/min/max/earliest/latest), לוח שנה וציר זמן; basesRelations 41/41, מיון rollup 220→35–60ms; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #397 (על #358; קשרים, rollups (count/sum/avg/min/max/earliest/latest), לוח שנה וציר זמן; basesRelations 41/41, מיון rollup 220→35–60ms; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "built",
+     "pr": 397
     },
     {
      "id": "W1.13",
@@ -4553,7 +4858,9 @@
      ],
      "why": "Obsidian Mobile 1.15 הוסיף לכידה קולית עם תמלול גם ממסך הנעילה; Heptabase ו-Tana מובילים בקול.",
      "branch": "feat/voice-capture",
-     "status": "⏳ #376 (על #268; הקלטה ותמלול מקומי לתיבת הלכידה, /?capture=voice וקיצור PWA; Vercel Sandbox (Node 24): vitest 317/3152, dod 27/27, e2e chromium 4/4 (964ms ללחיצה→הקלטה, 0 בקשות יוצאות); תיקון תקציב @bcab862: 37 מחרוזות עברו ל-i18n עצל (הערכה −0.77 KB → ~459.3) — לא נמדד; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #376 (על #268; הקלטה ותמלול מקומי לתיבת הלכידה, /?capture=voice וקיצור PWA; Vercel Sandbox (Node 24): vitest 317/3152, dod 27/27, e2e chromium 4/4 (964ms ללחיצה→הקלטה, 0 בקשות יוצאות); תיקון תקציב @bcab862: 37 מחרוזות עברו ל-i18n עצל (הערכה −0.77 KB → ~459.3) — לא נמדד; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "browser",
+     "pr": 376
     },
     {
      "id": "W1.14",
@@ -4579,7 +4886,9 @@
      ],
      "why": "Zotero 8 ו-Readwise Reader מאחדים PDF, EPUB ודפי רשת בקורא אחד עם ערכות נושא; אצלנו רק PDF.",
      "branch": "feat/epub-reader",
-     "status": "⏳ #391 (על #272; קורא EPUB עם מפענח משלנו (ZIP על DecompressionStream, בלי חבילה חדשה) + מצב קריאה לקליפים; epub 15/15, reader 2/2 ב-Chromium; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #391 (על #272; קורא EPUB עם מפענח משלנו (ZIP על DecompressionStream, בלי חבילה חדשה) + מצב קריאה לקליפים; epub 15/15, reader 2/2 ב-Chromium; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "browser",
+     "pr": 391
     },
     {
      "id": "W1.15",
@@ -4605,7 +4914,9 @@
      ],
      "why": "ב-Zotero 8 ההדגשות הן ישויות שאפשר לחפש ולתייג; בלי זה הקורא הוא אי.",
      "branch": "feat/highlights-hub",
-     "status": "⏳ #393 (על #391; כל ההדגשות במקום אחד: חיפוש ב-5,000 הדגשות < 100ms, תגיות, ייצוא לפתק עם קישור לעמוד/פרק; 7/7 + 1/1; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #393 (על #391; כל ההדגשות במקום אחד: חיפוש ב-5,000 הדגשות < 100ms, תגיות, ייצוא לפתק עם קישור לעמוד/פרק; 7/7 + 1/1; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "built",
+     "pr": 393
     },
     {
      "id": "W1.16",
@@ -4631,7 +4942,9 @@
      ],
      "why": "Heptabase ו-Obsidian Canvas מבוססים על כרטיסי פתקים; Excalidraw עצמו תיקן רק באוגוסט 2026 טקסט RTL שנעלם בייצוא.",
      "branch": "feat/excalidraw-notes",
-     "status": "⏳ #401 (על #351; כרטיסי פתק חיים בקנבס (file nodes ב-JSON Canvas), ייצוא PNG/SVG/PDF עם תיקון באג של Excalidraw 0.18 שמוציא עברית מיושרת לימין מחוץ לציור + גופן Assistant מוטמע; כללי chunk מ-cb943f4; canvasExportFix 4/4 ב-Chromium, noteCards 10/10; לא נבדק ב-Sandbox (חסום עד 1.12); baselines ויזואליים לייצר ולבדוק)"
+     "status": "⏳ #401 (על #351; כרטיסי פתק חיים בקנבס (file nodes ב-JSON Canvas), ייצוא PNG/SVG/PDF עם תיקון באג של Excalidraw 0.18 שמוציא עברית מיושרת לימין מחוץ לציור + גופן Assistant מוטמע; כללי chunk מ-cb943f4; canvasExportFix 4/4 ב-Chromium, noteCards 10/10; לא נבדק ב-Sandbox (חסום עד 1.12); baselines ויזואליים לייצר ולבדוק)",
+     "verified": "browser",
+     "pr": 401
     },
     {
      "id": "W1.17",
@@ -4658,7 +4971,9 @@
      ],
      "why": "6.1 הגיע ל-23.6% WER ב-validation — רחוק מ-ivrit.ai, שמפרסם מודלים פתוחים מותאמים לעברית.",
      "branch": "feat/ivrit-whisper",
-     "status": "⏳ #383 (על #255 + 6.0; whisper.cpp בשולחן העבודה עם בדיקת sha256, חותמות זמן וקישורי ▶ לכל משפט; ליבת Rust 7/7 (תוקן באג SHA-256), lib.rs לא קומפל; לא נבדק ב-Sandbox (חסום עד 1.12); בעלים: npm run whisper:desktop -- pin ואז wer על FLEURS-he)"
+     "status": "⏳ #383 (על #255 + 6.0; whisper.cpp בשולחן העבודה עם בדיקת sha256, חותמות זמן וקישורי ▶ לכל משפט; ליבת Rust 7/7 (תוקן באג SHA-256), lib.rs לא קומפל; לא נבדק ב-Sandbox (חסום עד 1.12); בעלים: npm run whisper:desktop -- pin ואז wer על FLEURS-he)",
+     "verified": "built",
+     "pr": 383
     },
     {
      "id": "W1.18",
@@ -4683,7 +4998,9 @@
      ],
      "why": "המדידה של 7.5 נכשלה בדיוק במקרה הנפוץ בעברית: מונחים לועזיים בתוך משפט.",
      "branch": "feat/ocr-mixed-layout",
-     "status": "⏳ #357 feat/ocr-mixed-layout (על #278; קריאה חוזרת של מילים לועזיות, חיתוך עמודות וסדר RTL, שכבת טקסט; בדיקה מלאה ב-Vercel Sandbox (Node 24): typecheck 0, vitest 319/3133, startup 457.5/460, ocr.spec 1/1; שער ה-CER בדפדפן: אנגלית 0.00%/0.00% (היה 12.33%/40.54%), עברית 1.37%/0.96%; יעדי העמודות לא הושגו בבדיקה מקומית: עברית 8.38%, אנגלית 18.83%, סדר מילים 85.1%; חסר split mixed — בעלים: node scripts/golden/build.mjs ocr-he --split dev)"
+     "status": "⏳ #357 feat/ocr-mixed-layout (על #278; קריאה חוזרת של מילים לועזיות, חיתוך עמודות וסדר RTL, שכבת טקסט; בדיקה מלאה ב-Vercel Sandbox (Node 24): typecheck 0, vitest 319/3133, startup 457.5/460, ocr.spec 1/1; שער ה-CER בדפדפן: אנגלית 0.00%/0.00% (היה 12.33%/40.54%), עברית 1.37%/0.96%; יעדי העמודות לא הושגו בבדיקה מקומית: עברית 8.38%, אנגלית 18.83%, סדר מילים 85.1%; חסר split mixed — בעלים: node scripts/golden/build.mjs ocr-he --split dev)",
+     "verified": "browser",
+     "pr": 357
     },
     {
      "id": "W1.19",
@@ -4708,7 +5025,9 @@
      ],
      "why": "Google Docs ו-Notion מגדירים את הרף; בתוכנית יש חדרים מתמידים בלי הרשאות ובלי תגובות מנוהלות.",
      "branch": "feat/real-sharing",
-     "status": "⏳ #381 (על #237; תפקידים נאכפים בשרת, שרשורי תגובות, קישורים עם תפוגה וביטול (ניתוק תוך ~1s), @mentions, תיקוני RTL; לוגיקת שרת plain-Node 26/26, לקוח 11/11; לא נבדק ב-Sandbox (חסום עד 1.12); dod: npx vitest run src/__tests__/collabSharing.test.ts src/__tests__/commentThreads.test.ts src/__tests__/collabServer.test.ts · npx playwright test e2e/collab-sharing.spec.ts --project=chromium)"
+     "status": "⏳ #381 (על #237; תפקידים נאכפים בשרת, שרשורי תגובות, קישורים עם תפוגה וביטול (ניתוק תוך ~1s), @mentions, תיקוני RTL; לוגיקת שרת plain-Node 26/26, לקוח 11/11; לא נבדק ב-Sandbox (חסום עד 1.12); dod: npx vitest run src/__tests__/collabSharing.test.ts src/__tests__/commentThreads.test.ts src/__tests__/collabServer.test.ts · npx playwright test e2e/collab-sharing.spec.ts --project=chromium)",
+     "verified": "node",
+     "pr": 381
     },
     {
      "id": "W1.20",
@@ -4733,7 +5052,9 @@
      ],
      "why": "Obsidian הכריז במאי 2026 על סריקה אוטומטית לכל גרסה וגילוי הרשאות; אצלנו ה-sandbox חזק יותר — צריך גם להראות את זה.",
      "branch": "feat/plugin-trust",
-     "status": "⏳ #367 **מוכן למיזוג** — (על #289; מסך הרשאות לפני התקנה + סריקה לכל גרסה; גם מחזיר את #289 מתחת לתקציב (460.4→459.2); Vercel Sandbox (Node 24): typecheck 0, vitest 331/3475, scan-plugins --check, e2e chromium/firefox/webkit; בעלים: חתימת תוספי הדוגמה במפתח שלך)"
+     "status": "⏳ #367 **מוכן למיזוג** — (על #289; מסך הרשאות לפני התקנה + סריקה לכל גרסה; גם מחזיר את #289 מתחת לתקציב (460.4→459.2); Vercel Sandbox (Node 24): typecheck 0, vitest 331/3475, scan-plugins --check, e2e chromium/firefox/webkit; בעלים: חתימת תוספי הדוגמה במפתח שלך)",
+     "verified": "owner",
+     "pr": 367
     },
     {
      "id": "W1.21",
@@ -4759,7 +5080,9 @@
      ],
      "why": "חלק גדול מאלפי פרויקטי הקהילה של Obsidian הם ערכות נושא ו-snippets; זה הדבר הראשון שמשתמשים מתאימים.",
      "branch": "feat/safe-themes",
-     "status": "⏳ #403 (על #367 + #389; 5 ערכות נושא AA בבהיר וכהה, snippets מ-.lumen ו-.obsidian; מנקה CSS עמד ב-32 מקרים עוינים; בדפדפן אמיתי: snippet מנוקה 0 בקשות מול 7 בגרסה הגולמית; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #403 (על #367 + #389; 5 ערכות נושא AA בבהיר וכהה, snippets מ-.lumen ו-.obsidian; מנקה CSS עמד ב-32 מקרים עוינים; בדפדפן אמיתי: snippet מנוקה 0 בקשות מול 7 בגרסה הגולמית; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "built",
+     "pr": 403
     },
     {
      "id": "W1.22",
@@ -4786,7 +5109,9 @@
      ],
      "why": "Lighthouse מודד טעינה; Linear ו-Obsidian מנצחים בתגובה מיידית לכל פעולה — ואת זה אין בתוכנית.",
      "branch": "perf/inp-budget",
-     "status": "⏳ #385 (על #274; e2e INP ב-CPU 4×: p75 < 100ms, מקש→ציור p95 < 16/33ms ב-50KB/2MB, שער רגרסיה 10%; אין baseline עד ריצה ראשונה; לא נבדק — אין דפדפנים/vitest)"
+     "status": "⏳ #385 (על #274; e2e INP ב-CPU 4×: p75 < 100ms, מקש→ציור p95 < 16/33ms ב-50KB/2MB, שער רגרסיה 10%; אין baseline עד ריצה ראשונה; לא נבדק — אין דפדפנים/vitest)",
+     "verified": "built",
+     "pr": 385
     },
     {
      "id": "W1.23",
@@ -4811,7 +5136,9 @@
      ],
      "why": "axe תופס כ-30–40% מהבעיות; קוראי מסך בעברית הם המקום שבו כולם נכשלים — ויש חובה חוקית בישראל.",
      "branch": "feat/a11y-hebrew-sr",
-     "status": "⏳ #360 feat/a11y-hebrew-sr (על #290; הכרזות לקורא מסך בעברית, reflow ב-320px תוקן, הצהרת נגישות לפי ת״י 5568; Vercel Sandbox (Node 24): typecheck 0, vitest 337/3533, startup 458.9/460, reflow + sr-announce בשלושה דפדפנים; dodMock — בעלים: להריץ את פרוטוקול NVDA/VoiceOver/TalkBack ולמנות רכז נגישות)"
+     "status": "⏳ #360 feat/a11y-hebrew-sr (על #290; הכרזות לקורא מסך בעברית, reflow ב-320px תוקן, הצהרת נגישות לפי ת״י 5568; Vercel Sandbox (Node 24): typecheck 0, vitest 337/3533, startup 458.9/460, reflow + sr-announce בשלושה דפדפנים; dodMock — בעלים: להריץ את פרוטוקול NVDA/VoiceOver/TalkBack ולמנות רכז נגישות)",
+     "verified": "owner",
+     "pr": 360
     },
     {
      "id": "W1.24",
@@ -4839,7 +5166,9 @@
      ],
      "why": "13.3 מנוסח על CI בכל PR, בסתירה להחלטה מ-9.11; ובלי מנהלי חבילות ההתקנה בשולחן העבודה לא ברמת Obsidian.",
      "branch": "feat/store-packaging",
-     "status": "⏳ #423 (על #355; release.mjs packages: Homebrew cask, winget 1.6 (נבדק מול הסכמות הרשמיות), Flathub + AppStream, AUR — לעולם לא hash מזויף; packaging 16/16 עם ruby -c ו-bash -n; מזהים (החלטה 10.11): io.github.talstilkol.Lumen, Talstilkol.Lumen, lumen-md-bin; לא נבדק ב-Sandbox (חסום עד 1.12); ההגשה לחנויות — טל)"
+     "status": "⏳ #423 (על #355; release.mjs packages: Homebrew cask, winget 1.6 (נבדק מול הסכמות הרשמיות), Flathub + AppStream, AUR — לעולם לא hash מזויף; packaging 16/16 עם ruby -c ו-bash -n; מזהים (החלטה 10.11): io.github.talstilkol.Lumen, Talstilkol.Lumen, lumen-md-bin; לא נבדק ב-Sandbox (חסום עד 1.12); ההגשה לחנויות — טל)",
+     "verified": "built",
+     "pr": 423
     },
     {
      "id": "W1.25",
@@ -4866,7 +5195,9 @@
      ],
      "why": "10.2 מתקן מגע בסיסי; Bear, Craft ו-Obsidian Mobile נמדדים בכמה מהר אפשר לכתוב באגודל.",
      "branch": "feat/mobile-native",
-     "status": "⏳ #415 (על #300; סרגל מקלדת מותאם (פעולה = צעד undo אחד, מראה ב-RTL), השלמת [[, החלקות קצה, פתיחה לקריאה ועריכה בשורה שנגעו בה; 24/24 + harness 4/4 ב-Pixel 7 ו-iPhone 14; עמודת Obsidian בטבלת ההקשות נספרה ידנית; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #415 (על #300; סרגל מקלדת מותאם (פעולה = צעד undo אחד, מראה ב-RTL), השלמת [[, החלקות קצה, פתיחה לקריאה ועריכה בשורה שנגעו בה; 24/24 + harness 4/4 ב-Pixel 7 ו-iPhone 14; עמודת Obsidian בטבלת ההקשות נספרה ידנית; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "built",
+     "pr": 415
     },
     {
      "id": "W1.26",
@@ -4892,7 +5223,9 @@
      ],
      "why": "המעבר הוא הרגע שבו משתמש מחליט; Obsidian Importer הוא הסטנדרט, ופתוח ב-MIT.",
      "branch": "feat/import-wizard",
-     "status": "⏳ #377 (על #358; ייבוא מ-Obsidian, Notion (מסדי נתונים → .base), Evernote, Bear, Apple Notes, Keep, Logseq, OneNote; תמיד לתיקייה חדשה, דוח מה יובא ומה לא, ביטול בלחיצה; Vercel build ירוק; ב-Chromium: 22/22 + 19/19 + 10/10; ✅* — ייצואים מבוססי תיעוד; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #377 (על #358; ייבוא מ-Obsidian, Notion (מסדי נתונים → .base), Evernote, Bear, Apple Notes, Keep, Logseq, OneNote; תמיד לתיקייה חדשה, דוח מה יובא ומה לא, ביטול בלחיצה; Vercel build ירוק; ב-Chromium: 22/22 + 19/19 + 10/10; ✅* — ייצואים מבוססי תיעוד; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "browser",
+     "pr": 377
     },
     {
      "id": "W1.27",
@@ -4918,7 +5251,9 @@
      ],
      "why": "Standard Notes ו-Anytype מפרסמים מודל אבטחה ובדיקות; פרטיות כטענה מרכזית דורשת הוכחה שאפשר לבדוק מבחוץ.",
      "branch": "chore/threat-model",
-     "status": "⏳ #361 (על #236; מודל איום, fuzzing של 5 מפענחים (1M קלטים: 0 קריסות), חתימת שחרורים מקומית; **לא עומד בשניים:** 7 קלטי Markdown איטיים (0.5–2.8s, נרשמו כממצא עד 2027-02-07) ו-2–3 קובצי .map לא משתחזרים; בעלים: מפתח שחרור offline — node scripts/supply-chain/keys.mjs)"
+     "status": "⏳ #361 (על #236; מודל איום, fuzzing של 5 מפענחים (1M קלטים: 0 קריסות), חתימת שחרורים מקומית; **לא עומד בשניים:** 7 קלטי Markdown איטיים (0.5–2.8s, נרשמו כממצא עד 2027-02-07) ו-2–3 קובצי .map לא משתחזרים; בעלים: מפתח שחרור offline — node scripts/supply-chain/keys.mjs)",
+     "verified": "built",
+     "pr": 361
     },
     {
      "id": "W1.28",
@@ -4943,7 +5278,9 @@
      ],
      "why": "Obsidian Help ו-Zotero documentation הם חלק מהמוצר; תיעוד בלי חיפוש עברי ובלי מדריכי מעבר לא מחזיק השקה.",
      "branch": "docs/hebrew-first",
-     "status": "⏳ #384 (על #316; תיעוד עברי-ראשון, חיפוש עברי, מדריכי מעבר; docs-complete + docs-sync, חיפוש 20/20 על מודל אינדקס; ✅* — Pagefind אמיתי, 30 GIF ו-Discussions מחכים; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #384 (על #316; תיעוד עברי-ראשון, חיפוש עברי, מדריכי מעבר; docs-complete + docs-sync, חיפוש 20/20 על מודל אינדקס; ✅* — Pagefind אמיתי, 30 GIF ו-Discussions מחכים; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "built",
+     "pr": 384
     },
     {
      "id": "W1.29",
@@ -4969,7 +5306,9 @@
      ],
      "why": "התוכנית מודדת הכול חוץ מאנשים; Linear ו-Craft מגיעים לליטוש בזכות לולאות משוב ישירות.",
      "branch": "research/usability-hebrew",
-     "status": "⏳ #419 (על verify/train; ערכת בדיקות שימושיות בעברית: פרוטוקול 10 משימות + SEQ + SUS, גיוס, הסכמה, תבנית ממצאים, מקליט מקומי שמתחיל רק בהסכמה ולא שומר טקסט או שמות, סקריפט ניתוח; 20/20; **מחכה לטל: 5–8 מפגשים בכל סבב**)"
+     "status": "⏳ #419 (על verify/train; ערכת בדיקות שימושיות בעברית: פרוטוקול 10 משימות + SEQ + SUS, גיוס, הסכמה, תבנית ממצאים, מקליט מקומי שמתחיל רק בהסכמה ולא שומר טקסט או שמות, סקריפט ניתוח; 20/20; **מחכה לטל: 5–8 מפגשים בכל סבב**)",
+     "verified": "built",
+     "pr": 419
     },
     {
      "id": "W1.30",
@@ -4991,7 +5330,9 @@
      ],
      "why": "החלטה 10.11 על פריט בעלים",
      "branch": "feat/image-hosts",
-     "status": "⏳ #372 (על #221; מסך שרתי תמונות מותרים עם ביטול לכל שרת / הכול, נפתח מהפלטה; רק i18n נבדק — ה-Sandbox חסום (מגבלת שימוש של Vercel עד 1.12))"
+     "status": "⏳ #372 (על #221; מסך שרתי תמונות מותרים עם ביטול לכל שרת / הכול, נפתח מהפלטה; רק i18n נבדק — ה-Sandbox חסום (מגבלת שימוש של Vercel עד 1.12))",
+     "verified": "built",
+     "pr": 372
     },
     {
      "id": "W1.31",
@@ -5012,7 +5353,9 @@
      ],
      "why": "החלטה 10.11 על פריט בעלים",
      "branch": "feat/agent-review-dev-only",
-     "status": "⏳ #368 **מוכן למיזוג** — (על #223; agentReview רק ב-DEV או VITE_LUMEN_TEST_SURFACE=1 + check:test-surface; Vercel Sandbox (Node 24): typecheck 0, vitest 316/3033, budget 441.8/460, 0 מופעים ב-dist, e2e 5/5 בשלושה דפדפנים; dod: npx vitest run src/__tests__/testSurfaceGate.test.ts src/__tests__/agentReviewPanel.test.tsx · npm run build && npm run check:test-surface · npx playwright test e2e/agent-review.spec.ts e2e/paste-html.spec.ts)"
+     "status": "⏳ #368 **מוכן למיזוג** — (על #223; agentReview רק ב-DEV או VITE_LUMEN_TEST_SURFACE=1 + check:test-surface; Vercel Sandbox (Node 24): typecheck 0, vitest 316/3033, budget 441.8/460, 0 מופעים ב-dist, e2e 5/5 בשלושה דפדפנים; dod: npx vitest run src/__tests__/testSurfaceGate.test.ts src/__tests__/agentReviewPanel.test.tsx · npm run build && npm run check:test-surface · npx playwright test e2e/agent-review.spec.ts e2e/paste-html.spec.ts)",
+     "verified": "browser",
+     "pr": 368
     },
     {
      "id": "W1.32",
@@ -5033,7 +5376,9 @@
      ],
      "why": "החלטה 10.11 על פריט בעלים",
      "branch": "verify/train",
-     "status": "⏳ על verify/train (לא נדחף) — 32 שרשורי P2 קיבלו החלטה, כל אחד ב-commit נפרד עם בדיקה (#199, #201, #202, #204, #210, #211, #225, #218, #231, #232, #238, #235); 3 מקרים נרשמו כהחלטה ב-docs/known-limits.md; vitest לא רץ"
+     "status": "⏳ על verify/train (לא נדחף) — 32 שרשורי P2 קיבלו החלטה, כל אחד ב-commit נפרד עם בדיקה (#199, #201, #202, #204, #210, #211, #225, #218, #231, #232, #238, #235); 3 מקרים נרשמו כהחלטה ב-docs/known-limits.md; vitest לא רץ",
+     "verified": "built",
+     "pr": 199
     },
     {
      "id": "W1.33",
@@ -5054,7 +5399,9 @@
      ],
      "why": "החלטה 10.11 על פריט בעלים",
      "branch": "feat/trust-repo",
-     "status": "⏳ #373 (על #242; מתג ״לסמוך על הריפו הזה״ לכל ריפו, כבוי כברירת מחדל, קשור לרשומת המקור של git ונופל בשיבוט מחדש או העברה; כתיבות עדיין עוברות סקירה; plain-Node 21/21, i18n:check; לא נבדק ב-Sandbox (חסום עד 1.12); dod: npx vitest run src/__tests__/trustedRepos.test.tsx src/__tests__/injectionGuard.test.ts)"
+     "status": "⏳ #373 (על #242; מתג ״לסמוך על הריפו הזה״ לכל ריפו, כבוי כברירת מחדל, קשור לרשומת המקור של git ונופל בשיבוט מחדש או העברה; כתיבות עדיין עוברות סקירה; plain-Node 21/21, i18n:check; לא נבדק ב-Sandbox (חסום עד 1.12); dod: npx vitest run src/__tests__/trustedRepos.test.tsx src/__tests__/injectionGuard.test.ts)",
+     "verified": "node",
+     "pr": 373
     },
     {
      "id": "W1.34",
@@ -5076,7 +5423,8 @@
      ],
      "why": "החלטה 10.11 על פריט בעלים",
      "branch": "verify/train",
-     "status": "⏳ על verify/train (25eff7bf1, 1ae4f9ae3; לא נדחף עד איפוס מכסת Vercel) — webR יצא מהבנייה: הורדה ביוזמת המשתמש מ-webr.r-wasm.org (גיבוי jsDelivr) עם בדיקת גודל ו-SHA-256 מול manifest, הצעה שמציגה GPL-3.0 ולא מורידה כלום לפני לחיצה; חריגת webR בשער הרישיונות הוסרה; עוברים ב-node: hygiene, i18n, docs, licences"
+     "status": "⏳ על verify/train (25eff7bf1, 1ae4f9ae3; לא נדחף עד איפוס מכסת Vercel) — webR יצא מהבנייה: הורדה ביוזמת המשתמש מ-webr.r-wasm.org (גיבוי jsDelivr) עם בדיקת גודל ו-SHA-256 מול manifest, הצעה שמציגה GPL-3.0 ולא מורידה כלום לפני לחיצה; חריגת webR בשער הרישיונות הוסרה; עוברים ב-node: hygiene, i18n, docs, licences",
+     "verified": "built"
     },
     {
      "id": "W1.35",
@@ -5102,6 +5450,7 @@
      "why": "החלטת טל 9.11: בלי GitHub Actions. Vercel כבר בונה כל ענף ומדווח סטטוס ל-GitHub — זה השער הזמין בלי חשבון נוסף (probe verify/chore-dod)",
      "branch": "verify/train",
      "status": "✅* על verify/train — vercel-build הוא השער בלי Actions: ב-12.11 כל 7 השערים עברו ב-Vercel ונבנה READY; Playwright נשאר ל-Sandbox",
+     "verified": "owner",
      "dod": [
       "node scripts/vercel-build.mjs --dry-run",
       "npx vitest run src/__tests__/vercelBuild.test.ts"
@@ -5128,7 +5477,8 @@
      ],
      "why": "החלטה 11.11: כלל נפרד של 740 KB לליבה (נמדד 718.6) כדי לא לחסום את הרכבת; זו חוב שצריך לסגור",
      "source": "החלטה 11.11",
-     "status": "⏳ אבחון: כל chunk של vendor-excalidraw הוא מודול יחיד מה-dist הבנוי של Excalidraw (EIO257PC 1795.9 KB) — אין מה לפצל ברמת מודול; כלל 740 KB צומצם ל-EIO257PC בלבד"
+     "status": "⏳ אבחון: כל chunk של vendor-excalidraw הוא מודול יחיד מה-dist הבנוי של Excalidraw (EIO257PC 1795.9 KB) — אין מה לפצל ברמת מודול; כלל 740 KB צומצם ל-EIO257PC בלבד",
+     "verified": "built"
     }
    ]
   },
@@ -5162,7 +5512,9 @@
      ],
      "why": "Heptabase הוסיף ב-2026 סוכן שמארגן את כל בסיס הידע; אצלנו אפשר לעשות את זה מקומית ובאישור.",
      "branch": "feat/vault-organizer",
-     "status": "⏳ #374 (על #315 + #223 + #334; סוכן ארגון: קישורים, תגיות, מיזוגים ו-MOC עם ביטחון והסבר, דרך מסך האישור; Vercel Sandbox (Node 24) @9b1f613: vitest 329/3626, budget 446.4; @58531c3: dod 10/10, e2e chromium+firefox 4/4; ✅* — כספת זהב סינתטית; בעלים: דירוג 50 הצעות (יעד ≥80%) ו-Ollama qwen2.5:7b על 1000 פתקים)"
+     "status": "⏳ #374 (על #315 + #223 + #334; סוכן ארגון: קישורים, תגיות, מיזוגים ו-MOC עם ביטחון והסבר, דרך מסך האישור; Vercel Sandbox (Node 24) @9b1f613: vitest 329/3626, budget 446.4; @58531c3: dod 10/10, e2e chromium+firefox 4/4; ✅* — כספת זהב סינתטית; בעלים: דירוג 50 הצעות (יעד ≥80%) ו-Ollama qwen2.5:7b על 1000 פתקים)",
+     "verified": "owner",
+     "pr": 374
     },
     {
      "id": "W2.2",
@@ -5189,7 +5541,9 @@
      ],
      "why": "Reor בנה את כל המוצר סביב קשרים סמנטיים מקומיים; אצלנו יש את האינדקס — חסר הממשק.",
      "branch": "feat/related-notes",
-     "status": "⏳ #375 (על #362; פאנל פתקים קשורים + אזכורים לא מקושרים; Recall@5 100% על 100 זוגות זהב בנויים, 4–6ms מול 10,000 פתקים; Vercel Sandbox (Node 24): dod 23/23, e2e chromium+firefox 2/2; vitest מלא ובנייה לא הורצו על הראש; ✅* — בעלים: מבחן latency של W1.22 עם הפאנל פתוח)"
+     "status": "⏳ #375 (על #362; פאנל פתקים קשורים + אזכורים לא מקושרים; Recall@5 100% על 100 זוגות זהב בנויים, 4–6ms מול 10,000 פתקים; Vercel Sandbox (Node 24): dod 23/23, e2e chromium+firefox 2/2; vitest מלא ובנייה לא הורצו על הראש; ✅* — בעלים: מבחן latency של W1.22 עם הפאנל פתוח)",
+     "verified": "browser",
+     "pr": 375
     },
     {
      "id": "W2.3",
@@ -5215,7 +5569,9 @@
      ],
      "why": "Obsidian 1.12 (CLI), Bear 2.8 (CLI + MCP), Logseq ו-Heptabase (MCP/CLI) — זה הפך לציפייה בסיסית ב-2026.",
      "branch": "feat/vault-mcp-cli",
-     "status": "⏳ #369 **מוכן למיזוג** — (על #223; שרת MCP + CLI לכספת: כבוי כברירת מחדל, הרשאות לכל לקוח, כתיבה רק כהצעה שמחכה לאישור; Vercel Sandbox (Node 24): typecheck 0, vitest 317/3047, budget 441.9, e2e chromium+firefox 5/5, stdio עם SDK אמיתי, חיפוש ב-10,000 פתקים 2–3ms; dod: npx vitest run src/__tests__/mcpVault.test.ts src/__tests__/mcpInbox.test.ts src/__tests__/mcpFrontmatter.test.ts · npm --prefix mcp-server ci && npm --prefix mcp-server run test:stdio · npx playwright test e2e/mcp-approval.spec.ts; בעלים: חיבור Claude Desktop אמיתי, npm publish)"
+     "status": "⏳ #369 **מוכן למיזוג** — (על #223; שרת MCP + CLI לכספת: כבוי כברירת מחדל, הרשאות לכל לקוח, כתיבה רק כהצעה שמחכה לאישור; Vercel Sandbox (Node 24): typecheck 0, vitest 317/3047, budget 441.9, e2e chromium+firefox 5/5, stdio עם SDK אמיתי, חיפוש ב-10,000 פתקים 2–3ms; dod: npx vitest run src/__tests__/mcpVault.test.ts src/__tests__/mcpInbox.test.ts src/__tests__/mcpFrontmatter.test.ts · npm --prefix mcp-server ci && npm --prefix mcp-server run test:stdio · npx playwright test e2e/mcp-approval.spec.ts; בעלים: חיבור Claude Desktop אמיתי, npm publish)",
+     "verified": "owner",
+     "pr": 369
     },
     {
      "id": "W2.4",
@@ -5243,7 +5599,9 @@
      ],
      "why": "DictaLM 3.0 (פברואר 2026) הוא מודל עברי-אנגלי פתוח עם tool calling ו-65k הקשר — מתאים בדיוק לסוכנים.",
      "branch": "feat/dictalm3",
-     "status": "⏳ #379 (על #277; DictaLM 3.0 בקטלוג: 1.7B Apache-2.0 מאומת, 12B ו-24B עם repo/revision/רישיון null מאחורי בדיקת בעלים; npm run dictalm3 status/eval/decide — מחליף ברירת מחדל רק ברישיון מותר ושיפור ≥5 נק׳; dictalm3 14/14 ב-shim; לא נבדק ב-Sandbox (חסום עד 1.12); בעלים: ollama pull hf.co/dicta-il/DictaLM-3.0-1.7B-Thinking-GGUF ואז eval)"
+     "status": "⏳ #379 (על #277; DictaLM 3.0 בקטלוג: 1.7B Apache-2.0 מאומת, 12B ו-24B עם repo/revision/רישיון null מאחורי בדיקת בעלים; npm run dictalm3 status/eval/decide — מחליף ברירת מחדל רק ברישיון מותר ושיפור ≥5 נק׳; dictalm3 14/14 ב-shim; לא נבדק ב-Sandbox (חסום עד 1.12); בעלים: ollama pull hf.co/dicta-il/DictaLM-3.0-1.7B-Thinking-GGUF ואז eval)",
+     "verified": "node",
+     "pr": 379
     },
     {
      "id": "W2.5",
@@ -5268,7 +5626,9 @@
      ],
      "why": "Dicta היא המובילה בניקוד; Nakdimon לבדו לא מספיק כדי לטעון לרמה עולמית בעברית.",
      "branch": "feat/nikud-dicta",
-     "status": "⏳ #359 feat/nikud-dicta (על #293; DictaBERT-char-menaked מאחורי seam + חלופות לכל מילה; גם מוריד את #293 מ-460.5 ל-459.4 KB; בדיקה מלאה ב-Vercel Sandbox (Node 24): typecheck 0, vitest 327 קבצים; דיוק ≥95% ו-latency לא נמדדו — המודל ב-HF; dodMock; בעלים: python -I scripts/models/export-menaked.py --revision <sha> --out out/dictabert-char-menaked)"
+     "status": "⏳ #359 feat/nikud-dicta (על #293; DictaBERT-char-menaked מאחורי seam + חלופות לכל מילה; גם מוריד את #293 מ-460.5 ל-459.4 KB; בדיקה מלאה ב-Vercel Sandbox (Node 24): typecheck 0, vitest 327 קבצים; דיוק ≥95% ו-latency לא נמדדו — המודל ב-HF; dodMock; בעלים: python -I scripts/models/export-menaked.py --revision <sha> --out out/dictabert-char-menaked)",
+     "verified": "node",
+     "pr": 359
     },
     {
      "id": "W2.6",
@@ -5294,7 +5654,9 @@
      ],
      "why": "Readwise Reader הפך האזנה לשימוש יומי; בעברית אין כמעט TTS מקומי טוב — מבדל.",
      "branch": "feat/hebrew-neural-tts",
-     "status": "⏳ #388 (על #312 + #359; G2P עברי משלנו + worker של Piper, רדום עד שיהיה קול עברי ברישיון מותר (15.10); חי לכולם: הדגשת המילה הנקראת, שמירת מיקום קריאה, הגדרות קול ומהירות; hebrewTts 37/37 ב-shim; לא נבדק ב-Sandbox (חסום עד 1.12); בעלים: tts:mos עם 5 מדרגים)"
+     "status": "⏳ #388 (על #312 + #359; G2P עברי משלנו + worker של Piper, רדום עד שיהיה קול עברי ברישיון מותר (15.10); חי לכולם: הדגשת המילה הנקראת, שמירת מיקום קריאה, הגדרות קול ומהירות; hebrewTts 37/37 ב-shim; לא נבדק ב-Sandbox (חסום עד 1.12); בעלים: tts:mos עם 5 מדרגים)",
+     "verified": "node",
+     "pr": 388
     },
     {
      "id": "W2.7",
@@ -5320,7 +5682,9 @@
      ],
      "why": "Tana ו-Notion בנו מוצרים שלמים סביב פגישות; גרסה מקומית ופרטית היא בדיוק ההבטחה של Lumen.",
      "branch": "feat/meeting-speakers",
-     "status": "⏳ #398 (על #353 + #383; זיהוי דוברים pyannote 3.1 ב-ONNX מאחורי seam — לא מוריד כלום עד הצמדה; שינוי שם דובר בכל הפתק; diarize 17/17 (DER < 5% על פגישה סינתטית); ✅* — בעלים: הצמדת המודלים ו-5 פגישות זהב (DER ≤ 20%); לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #398 (על #353 + #383; זיהוי דוברים pyannote 3.1 ב-ONNX מאחורי seam — לא מוריד כלום עד הצמדה; שינוי שם דובר בכל הפתק; diarize 17/17 (DER < 5% על פגישה סינתטית); ✅* — בעלים: הצמדת המודלים ו-5 פגישות זהב (DER ≤ 20%); לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "built",
+     "pr": 398
     },
     {
      "id": "W2.8",
@@ -5345,7 +5709,9 @@
      ],
      "why": "כל משתמש עברי מקליד בפריסה הלא נכונה כמה פעמים ביום; אף מתחרה לא פותר את זה.",
      "branch": "feat/hebrew-layout",
-     "status": "⏳ #363 feat/hebrew-layout (על #208; קיצורים לפי keyCode בפריסה עברית + זיהוי פריסה שגויה; תוקן גם ⇧⌘F כפול; Vercel Sandbox (Node 24): typecheck 0, vitest 316/3006, startup 457.5/460, hebrew-layout 8 עברו (מקרה undo ב-webkit מדולג); בעלים: Safari עם פריסה עברית אמיתית)"
+     "status": "⏳ #363 feat/hebrew-layout (על #208; קיצורים לפי keyCode בפריסה עברית + זיהוי פריסה שגויה; תוקן גם ⇧⌘F כפול; Vercel Sandbox (Node 24): typecheck 0, vitest 316/3006, startup 457.5/460, hebrew-layout 8 עברו (מקרה undo ב-webkit מדולג); בעלים: Safari עם פריסה עברית אמיתית)",
+     "verified": "owner",
+     "pr": 363
     },
     {
      "id": "W2.9",
@@ -5370,7 +5736,9 @@
      ],
      "why": "Word עושה את זה עשרות שנים; עורכי Markdown לא — וזה מה שגורם לטקסט עברי להיראות מקצועי.",
      "branch": "feat/hebrew-typography",
-     "status": "⏳ #365 feat/hebrew-typography **מוכן למיזוג** — (על #252; Vercel Sandbox (Node 24) @125e482: typecheck 0, vitest 317/3137, build + budget 458.8/460, e2e 9/9 בשלושה דפדפנים; dod: npx vitest run src/__tests__/hebrewTypography.test.ts · npx playwright test e2e/hebrew-typography.spec.ts)"
+     "status": "⏳ #365 feat/hebrew-typography **מוכן למיזוג** — (על #252; Vercel Sandbox (Node 24) @125e482: typecheck 0, vitest 317/3137, build + budget 458.8/460, e2e 9/9 בשלושה דפדפנים; dod: npx vitest run src/__tests__/hebrewTypography.test.ts · npx playwright test e2e/hebrew-typography.spec.ts)",
+     "verified": "browser",
+     "pr": 365
     },
     {
      "id": "W2.10",
@@ -5396,7 +5764,9 @@
      ],
      "why": "4.12 השאיר חגים ופרשות מחוץ להיקף בגלל רישיון @hebcal; לוח עברי שלם הוא דבר שאף PKM לא נותן.",
      "branch": "feat/hebrew-calendar",
-     "status": "⏳ #396 (על #249; לוח עברי משלנו (MIT): מולד ודחיות, כל החגים, צומות, ראשי חודשים, ימים לאומיים, פרשות ארץ ישראל וחו״ל; {{holiday}} ו-{{parasha}} בפתק יומי; hebrewCalendar 29/29 — מול לוח הדפדפן 1990–2060 וטבלה ידנית 2025–2030; נמצא באג ICU בשנה 5806; השוואה לטבלה ציבורית 2010–2030 חסרה (hebcal חסום); לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #396 (על #249; לוח עברי משלנו (MIT): מולד ודחיות, כל החגים, צומות, ראשי חודשים, ימים לאומיים, פרשות ארץ ישראל וחו״ל; {{holiday}} ו-{{parasha}} בפתק יומי; hebrewCalendar 29/29 — מול לוח הדפדפן 1990–2060 וטבלה ידנית 2025–2030; נמצא באג ICU בשנה 5806; השוואה לטבלה ציבורית 2010–2030 חסרה (hebcal חסום); לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "built",
+     "pr": 396
     },
     {
      "id": "W2.11",
@@ -5422,7 +5792,9 @@
      ],
      "why": "כתיב מלא/חסר ונטייה הם הסיבה שחיפוש עברי נכשל אצל כל המתחרים.",
      "branch": "feat/hebrew-search-morph",
-     "status": "⏳ #362 feat/hebrew-search-morph (על #345; למטיזציה, כתיב מלא/חסר, מילים נרדפות, עברית→אנגלית; HeQ dev 1.0000→1.0000, probe מורפולוגיה 0.9004→0.9544, מלא/חסר 2/30→30/30, עברית→אנגלית 0/5→5/5 (probe פיתוח, לא held-out); בדיקה מלאה ב-Vercel Sandbox (Node 24): typecheck 0, vitest 326/3406, startup 442.9/460, search-flash 1/1; dod: npx vitest run src/__tests__/hebrewSearch.test.ts src/__tests__/hebrewMorph.test.ts src/__tests__/bm25Golden.test.ts)"
+     "status": "⏳ #362 feat/hebrew-search-morph (על #345; למטיזציה, כתיב מלא/חסר, מילים נרדפות, עברית→אנגלית; HeQ dev 1.0000→1.0000, probe מורפולוגיה 0.9004→0.9544, מלא/חסר 2/30→30/30, עברית→אנגלית 0/5→5/5 (probe פיתוח, לא held-out); בדיקה מלאה ב-Vercel Sandbox (Node 24): typecheck 0, vitest 326/3406, startup 442.9/460, search-flash 1/1; dod: npx vitest run src/__tests__/hebrewSearch.test.ts src/__tests__/hebrewMorph.test.ts src/__tests__/bm25Golden.test.ts)",
+     "verified": "node",
+     "pr": 362
     },
     {
      "id": "W2.12",
@@ -5448,7 +5820,9 @@
      ],
      "why": "Dataview הוא אחד התוספים הנפוצים ב-Obsidian; כספות שמגיעות משם מלאות בבלוקים כאלה.",
      "branch": "feat/embedded-queries",
-     "status": "⏳ #371 (על #306; בלוקי query ו-dataview + חיפושים שמורים; Vercel Sandbox (Node 24) @e15ff94: 98/99 (30 שאילתות זהב, 20 בלוקי Dataview), התיקון @e96b2e9 לא נבדק — ה-Sandbox חסום (מגבלת שימוש של Vercel עד 1.12))"
+     "status": "⏳ #371 (על #306; בלוקי query ו-dataview + חיפושים שמורים; Vercel Sandbox (Node 24) @e15ff94: 98/99 (30 שאילתות זהב, 20 בלוקי Dataview), התיקון @e96b2e9 לא נבדק — ה-Sandbox חסום (מגבלת שימוש של Vercel עד 1.12))",
+     "verified": "node",
+     "pr": 371
     },
     {
      "id": "W2.13",
@@ -5473,7 +5847,9 @@
      ],
      "why": "Logseq, Tana ו-Workflowy מראים שכתיבה במתאר היא דרך עבודה נפרדת; אפשר לתת אותה בלי לנעול את הקובץ.",
      "branch": "feat/outline-mode",
-     "status": "⏳ #370 **מוכן למיזוג** — (על #252; מצב מתאר: 10 פעולות בלוק בשני העורכים, קיפולים לכל פתק מחוץ לקובץ; Vercel Sandbox (Node 24) @f662bc0: typecheck 0, vitest 317/3141, startup 458.7/460, i18n + hygiene, e2e 4/4 בכל דפדפן; dod: npx vitest run src/__tests__/outlineMode.test.ts · npx playwright test e2e/outline-mode.spec.ts; בעלים: מקשי macOS על Mac אמיתי)"
+     "status": "⏳ #370 **מוכן למיזוג** — (על #252; מצב מתאר: 10 פעולות בלוק בשני העורכים, קיפולים לכל פתק מחוץ לקובץ; Vercel Sandbox (Node 24) @f662bc0: typecheck 0, vitest 317/3141, startup 458.7/460, i18n + hygiene, e2e 4/4 בכל דפדפן; dod: npx vitest run src/__tests__/outlineMode.test.ts · npx playwright test e2e/outline-mode.spec.ts; בעלים: מקשי macOS על Mac אמיתי)",
+     "verified": "owner",
+     "pr": 370
     },
     {
      "id": "W2.14",
@@ -5499,7 +5875,9 @@
      ],
      "why": "Interpreter של Obsidian Web Clipper תומך ב-Ollama אבל דורש הגדרת OLLAMA_ORIGINS וחלון 2048; אצלנו זה יכול לעבוד מהקופסה.",
      "branch": "feat/clip-interpreter",
-     "status": "⏳ #364 feat/clip-interpreter (על #308; משתני פרומפט במודל מקומי בלבד, guard להזרקה, תבניות YouTube/arXiv/GitHub; chunk הקליפ פוצל 103→99.6 KB; בדיקה מלאה ב-Vercel Sandbox (Node 24): typecheck 0, vitest 322 קבצים, startup 444.2/460, clipper-v2 1/1; ✅* לכל היותר — בעלים: Ollama qwen2.5:3b על 3 אתרים אמיתיים)"
+     "status": "⏳ #364 feat/clip-interpreter (על #308; משתני פרומפט במודל מקומי בלבד, guard להזרקה, תבניות YouTube/arXiv/GitHub; chunk הקליפ פוצל 103→99.6 KB; בדיקה מלאה ב-Vercel Sandbox (Node 24): typecheck 0, vitest 322 קבצים, startup 444.2/460, clipper-v2 1/1; ✅* לכל היותר — בעלים: Ollama qwen2.5:3b על 3 אתרים אמיתיים)",
+     "verified": "node",
+     "pr": 364
     },
     {
      "id": "W2.15",
@@ -5524,7 +5902,9 @@
      ],
      "why": "Heptabase הוסיף אינטגרציית Zotero ב-2026; Readwise בנוי על ייבוא הדגשות — הקורא שלנו צריך את המקורות האלה.",
      "branch": "feat/highlight-import",
-     "status": "⏳ #408 (על #393; ייבוא מ-Kindle, Kobo (sql.js), Readwise (CSV) ו-Zotero (דרך שולחן העבודה, רק 127.0.0.1:23119) בלי כפילויות; 10/10 בשני אזורי זמן, ייבוא שני לא הוסיף כלום; zotero_local 4/4 ב-rustc; לא נבדק ב-Sandbox (חסום עד 1.12); בעלים: Zotero 7 אמיתי)"
+     "status": "⏳ #408 (על #393; ייבוא מ-Kindle, Kobo (sql.js), Readwise (CSV) ו-Zotero (דרך שולחן העבודה, רק 127.0.0.1:23119) בלי כפילויות; 10/10 בשני אזורי זמן, ייבוא שני לא הוסיף כלום; zotero_local 4/4 ב-rustc; לא נבדק ב-Sandbox (חסום עד 1.12); בעלים: Zotero 7 אמיתי)",
+     "verified": "built",
+     "pr": 408
     },
     {
      "id": "W2.16",
@@ -5550,7 +5930,9 @@
      ],
      "why": "Zotero 8 איחד את דיאלוג הציטוט; Zettlr הוא הרף לכתיבה אקדמית ב-Markdown.",
      "branch": "feat/citations-zotero",
-     "status": "⏳ #411 (על ענף 6.13; דיאלוג ציטוט מאוחד ו-[@key], תבניות משלנו APA/Chicago/MLA/ישראלי (החלטה 15.10, בלי citeproc), ייצוא pandoc/DOCX; pandoc 11/11, דיאלוג ב-2 הקשות 3/3; לא נבדק ב-Sandbox (חסום עד 1.12); בעלים: Zotero 7 אמיתי)"
+     "status": "⏳ #411 (על ענף 6.13; דיאלוג ציטוט מאוחד ו-[@key], תבניות משלנו APA/Chicago/MLA/ישראלי (החלטה 15.10, בלי citeproc), ייצוא pandoc/DOCX; pandoc 11/11, דיאלוג ב-2 הקשות 3/3; לא נבדק ב-Sandbox (חסום עד 1.12); בעלים: Zotero 7 אמיתי)",
+     "verified": "built",
+     "pr": 411
     },
     {
      "id": "W2.17",
@@ -5575,7 +5957,9 @@
      ],
      "why": "Capacities (7.2026) ו-Excalidraw+ (2026) הוסיפו מצגות; זה שימוש נפוץ לסטודנטים ומרצים.",
      "branch": "feat/slides",
-     "status": "⏳ #406 (על #401; מצגות מפתקים (כותרות ו----, Note:/הערות:) ומ-frames בקנבס, חצים לפי כיוון, PDF דרך print, תצוגת מציג מסונכרנת, מסך שני בשולחן העבודה; slidesDeck 17/17, presentation 3/3 (כל מעבר < 50ms); cargo לא קומפל; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #406 (על #401; מצגות מפתקים (כותרות ו----, Note:/הערות:) ומ-frames בקנבס, חצים לפי כיוון, PDF דרך print, תצוגת מציג מסונכרנת, מסך שני בשולחן העבודה; slidesDeck 17/17, presentation 3/3 (כל מעבר < 50ms); cargo לא קומפל; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "built",
+     "pr": 406
     },
     {
      "id": "W2.18",
@@ -5600,7 +5984,9 @@
      ],
      "why": "Excalidraw+ הוסיף ב-2026 Mermaid מורחב ו-AI על הקנבס — בענן; כאן זה מקומי.",
      "branch": "feat/canvas-mermaid",
-     "status": "⏳ #404 (על #401; Mermaid לצורות קנבס + ״צייר לי״ במודל מקומי בלבד (agent עם executors מוגדרים לא נוגע בענן); mermaidGolden 21/21 עם Mermaid 11.16.1 אמיתי; ✅* — בעלים: npm run eval:canvas-draw -- --model qwen2.5:7b; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #404 (על #401; Mermaid לצורות קנבס + ״צייר לי״ במודל מקומי בלבד (agent עם executors מוגדרים לא נוגע בענן); mermaidGolden 21/21 עם Mermaid 11.16.1 אמיתי; ✅* — בעלים: npm run eval:canvas-draw -- --model qwen2.5:7b; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "built",
+     "pr": 404
     },
     {
      "id": "W2.19",
@@ -5626,7 +6012,9 @@
      ],
      "why": "Anytype מציע רשת מקומית בלבד; זה המימוש הטהור ביותר של local-first — ובלי שירות בתשלום.",
      "branch": "feat/lan-sync",
-     "status": "⏳ #392 (על #291; WebRTC ישיר בלי שרת signaling, צימוד בשני קודים/QR, רק כתובות רשת מקומית, הוכחת סיסמה הדדית; lanSync 8/8 אמיתי (1000 סבבים, 0 אבדות, אין טקסט פתקים על הקו), מקודד QR משלנו נבדק ב-OpenCV; ✅* — בעלים: שני מכשירים אמיתיים; mDNS לא נבנה; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #392 (על #291; WebRTC ישיר בלי שרת signaling, צימוד בשני קודים/QR, רק כתובות רשת מקומית, הוכחת סיסמה הדדית; lanSync 8/8 אמיתי (1000 סבבים, 0 אבדות, אין טקסט פתקים על הקו), מקודד QR משלנו נבדק ב-OpenCV; ✅* — בעלים: שני מכשירים אמיתיים; mDNS לא נבנה; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "built",
+     "pr": 392
     },
     {
      "id": "W2.20",
@@ -5652,7 +6040,9 @@
      ],
      "why": "Google Docs ו-Notion רואים הכול; שיתוף בזמן אמת מוצפן הוא מבדל אמיתי מול כולם חוץ מ-Anytype.",
      "branch": "feat/e2ee-live-sharing",
-     "status": "⏳ #387 (על #381; שמות, צבעים וסמנים מוצפנים במפתח החדר; ״חדרים חתומים״ בשרת דוחים כל עדכון קריא; קישורי שיתוף רק לחדרים מוצפנים; תוקן פער ב-W1.19 (הודעת sync מסוג 4 ככתיבה); plain-Node 66/66 + 26/26 + 11/11; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #387 (על #381; שמות, צבעים וסמנים מוצפנים במפתח החדר; ״חדרים חתומים״ בשרת דוחים כל עדכון קריא; קישורי שיתוף רק לחדרים מוצפנים; תוקן פער ב-W1.19 (הודעת sync מסוג 4 ככתיבה); plain-Node 66/66 + 26/26 + 11/11; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "node",
+     "pr": 387
     },
     {
      "id": "W2.21",
@@ -5679,7 +6069,9 @@
      ],
      "why": "Linear מציג עבודה מקומית לפני שהקוד נטען כולו; Obsidian ו-Bear נפתחים מיד.",
      "branch": "perf/cold-start",
-     "status": "⏳ #386 (על #248; note-boot.js מצייר את 4,000 התווים הראשונים של הפתק האחרון לפני ה-bundle; e2e cold-start: < 800ms שולחן עבודה, < 1.5s Pixel 7; modulepreload והידרציה עצלה ממתינים למדידה; לא נבדק)"
+     "status": "⏳ #386 (על #248; note-boot.js מצייר את 4,000 התווים הראשונים של הפתק האחרון לפני ה-bundle; e2e cold-start: < 800ms שולחן עבודה, < 1.5s Pixel 7; modulepreload והידרציה עצלה ממתינים למדידה; לא נבדק)",
+     "verified": "built",
+     "pr": 386
     },
     {
      "id": "W2.22",
@@ -5704,7 +6096,9 @@
      ],
      "why": "8.4 מודד 10k; משתמשי Obsidian כבדים מגיעים ל-50–100k ושם רוב האפליקציות נשברות.",
      "branch": "feat/vault-100k",
-     "status": "⏳ #420 (על #400; אינדקס קומפקטי: ב-100,000 פתקים חיפוש 300–420→73–148ms (יעד < 200), שמירה→אינדקס 8.6ms, זיכרון אינדקס 4,335→757 MB, בנייה 29→7s, soak 2 דק׳ 0 שגיאות; תוצאות זהות לאינדקס הישן; אינדקס נשמר ב-IndexedDB; embeddings ב-int8 מעל 50,000; follow-up: ה-main thread שומר רק סיכום לכל פתק — cache 364→67 MB, הטקסט חי רק ב-worker; חיפוש 94–168ms, שמירה→אינדקס 20.7ms; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #420 (על #400; אינדקס קומפקטי: ב-100,000 פתקים חיפוש 300–420→73–148ms (יעד < 200), שמירה→אינדקס 8.6ms, זיכרון אינדקס 4,335→757 MB, בנייה 29→7s, soak 2 דק׳ 0 שגיאות; תוצאות זהות לאינדקס הישן; אינדקס נשמר ב-IndexedDB; embeddings ב-int8 מעל 50,000; follow-up: ה-main thread שומר רק סיכום לכל פתק — cache 364→67 MB, הטקסט חי רק ב-worker; חיפוש 94–168ms, שמירה→אינדקס 20.7ms; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "built",
+     "pr": 420
     },
     {
      "id": "W2.23",
@@ -5729,7 +6123,9 @@
      ],
      "why": "Obsidian Mobile 1.15 הוסיף ייצוא PDF; ב-Word עברית מודפסת נכון — זה הרף לסטודנטים ולמשרדים.",
      "branch": "feat/hebrew-print",
-     "status": "⏳ #414 (על #410; הדפסה/PDF: כותרת, מספרי עמודים עבריים (א/ה), בלי שבירת טבלאות ותמונות, כותרות טבלה חוזרות, \\newpage, תוכן עניינים, כיוון לפי הפתק; תוקנו באנר אנגלי ו-lang=en קשיחים ועמודים ריקים במובייל; נבדק ב-page.pdf + poppler; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #414 (על #410; הדפסה/PDF: כותרת, מספרי עמודים עבריים (א/ה), בלי שבירת טבלאות ותמונות, כותרות טבלה חוזרות, \\newpage, תוכן עניינים, כיוון לפי הפתק; תוקנו באנר אנגלי ו-lang=en קשיחים ועמודים ריקים במובייל; נבדק ב-page.pdf + poppler; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "built",
+     "pr": 414
     },
     {
      "id": "W2.24",
@@ -5756,7 +6152,9 @@
      ],
      "why": "המתחרים אומרים ״פרטי״; כאן אפשר להוכיח את זה מבחוץ — הבידול הכי חזק של Lumen.",
      "branch": "feat/privacy-report",
-     "status": "⏳ #395 (על #361; דוח פרטיות חתום Ed25519 בפורמט minisign + verify-report, מצב ביקורת, השוואה ל-mitmproxy, טבלת תוצאות לכל גרסה, privacy-labels לחנויות; 15/15 ב-shim; ✅* — בעלים: הרצת audit.mjs עם mitmproxy; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #395 (על #361; דוח פרטיות חתום Ed25519 בפורמט minisign + verify-report, מצב ביקורת, השוואה ל-mitmproxy, טבלת תוצאות לכל גרסה, privacy-labels לחנויות; 15/15 ב-shim; ✅* — בעלים: הרצת audit.mjs עם mitmproxy; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "node",
+     "pr": 395
     },
     {
      "id": "W2.25",
@@ -5783,7 +6181,9 @@
      ],
      "why": "אין בתוכנית שום משימה שמביאה משתמשים; מוצר מצוין בלי השקה מקבל ציון 0 בפועל.",
      "branch": "launch/hebrew-beta",
-     "status": "⏳ #428 (על #384; השוואה עם מקורות (11/20 טענות אומתו מול דפי היצרנים, 9 מסומנות לא מאומתות), דף בטא בעברית בלי בקשות משלו (רשימת מייל כבויה עד endpoint + הסכמה), מדריך קהילה וקוד התנהגות, צ׳קליסט, ערכת עיתונות, סקר; launchKit 9/9; לא נבדק ב-Sandbox (חסום עד 1.12); בעלים: 9 טענות, Discussions, ≥50 בודקים)"
+     "status": "⏳ #428 (על #384; השוואה עם מקורות (11/20 טענות אומתו מול דפי היצרנים, 9 מסומנות לא מאומתות), דף בטא בעברית בלי בקשות משלו (רשימת מייל כבויה עד endpoint + הסכמה), מדריך קהילה וקוד התנהגות, צ׳קליסט, ערכת עיתונות, סקר; launchKit 9/9; לא נבדק ב-Sandbox (חסום עד 1.12); בעלים: 9 טענות, Discussions, ≥50 בודקים)",
+     "verified": "built",
+     "pr": 428
     }
    ]
   },
@@ -5815,7 +6215,9 @@
      ],
      "why": "Linear מגיע לתחושה של ״מהיר״ גם בזכות תנועה מרוסנת ואחידה.",
      "branch": "feat/design-tokens",
-     "status": "⏳ #389 (על #343; טוקנים לעיצוב ותנועה, ביקורת 40/40 משטחים, designSystem 11/11; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #389 (על #343; טוקנים לעיצוב ותנועה, ביקורת 40/40 משטחים, designSystem 11/11; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "built",
+     "pr": 389
     },
     {
      "id": "W3.2",
@@ -5840,7 +6242,9 @@
      ],
      "why": "Craft ו-Notion מלמדים בתוך המוצר; משתמש חדש פוגש מצבים ריקים לפני כל דבר אחר.",
      "branch": "feat/respectful-messages",
-     "status": "⏳ #380 (על #253; explainError ב-64 מקומות, EmptyState עם פעולה ב-20 מצבים ריקים, שלושה שערים חדשים (שגיאות גולמיות, מצבים ריקים, פעולות הרסניות), git pull מעביר לסל במקום למחוק; ~45 מחרוזות startup — תקציב בסיכון; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #380 (על #253; explainError ב-64 מקומות, EmptyState עם פעולה ב-20 מצבים ריקים, שלושה שערים חדשים (שגיאות גולמיות, מצבים ריקים, פעולות הרסניות), git pull מעביר לסל במקום למחוק; ~45 מחרוזות startup — תקציב בסיכון; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "built",
+     "pr": 380
     },
     {
      "id": "W3.3",
@@ -5865,7 +6269,9 @@
      ],
      "why": "Readwise נבנה על סקירה יומית; Obsidian Spaced Repetition הוא מהתוספים הפופולריים.",
      "branch": "feat/spaced-review",
-     "status": "⏳ #394 (על #393; חזרה מרווחת FSRS-5 במימוש משלנו; fsrs 12/12, פאנל < 300ms; ✅* — השוואה ל-ts-fsrs על 50 תרחישים מחכה ל-fixture: npm install --no-save ts-fsrs@4 && node scripts/fsrs-golden.mjs; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #394 (על #393; חזרה מרווחת FSRS-5 במימוש משלנו; fsrs 12/12, פאנל < 300ms; ✅* — השוואה ל-ts-fsrs על 50 תרחישים מחכה ל-fixture: npm install --no-save ts-fsrs@4 && node scripts/fsrs-golden.mjs; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "built",
+     "pr": 394
     },
     {
      "id": "W3.4",
@@ -5891,7 +6297,9 @@
      ],
      "why": "Obsidian 1.15 (Siri/Spotlight) ו-Heptabase (וידג׳ט) — זה מה שהופך אפליקציה ל״תמיד בהישג יד״.",
      "branch": "feat/widgets-siri",
-     "status": "⏳ #425 (על #376 + #302; seam ב-nativeActions.ts + תור לכידות מ-Siri בלי לפתוח את האפליקציה; iOS: App Intents, WidgetKit, ביטויי Siri בעברית; Android: widget RTL, App Shortcuts; widgets 12/12, javac 8/8; שום דבר native לא נבנה; לא נבדק ב-Sandbox (חסום עד 1.12); בעלים: צעדי Xcode/Android Studio ובדיקות במכשיר)"
+     "status": "⏳ #425 (על #376 + #302; seam ב-nativeActions.ts + תור לכידות מ-Siri בלי לפתוח את האפליקציה; iOS: App Intents, WidgetKit, ביטויי Siri בעברית; Android: widget RTL, App Shortcuts; widgets 12/12, javac 8/8; שום דבר native לא נבנה; לא נבדק ב-Sandbox (חסום עד 1.12); בעלים: צעדי Xcode/Android Studio ובדיקות במכשיר)",
+     "verified": "built",
+     "pr": 425
     },
     {
      "id": "W3.5",
@@ -5916,7 +6324,9 @@
      ],
      "why": "iA Writer ו-Bear נבחרים בזכות טיפוגרפיה; בעברית עם ניקוד רוב הגופנים נשברים.",
      "branch": "feat/hebrew-fonts",
-     "status": "⏳ #382 (על #262; 5 גופנים עבריים (OFL 1.1) נטענים רק בבחירה, 0.34 MB, לא ב-precache; גודל, ריווח ורוחב עמודה לפתק או לכולם; בדיקת עיגון ניקוד 5/5 גופנים; ✅* — בעלים: להסתכל על צילומי הניקוד; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #382 (על #262; 5 גופנים עבריים (OFL 1.1) נטענים רק בבחירה, 0.34 MB, לא ב-precache; גודל, ריווח ורוחב עמודה לפתק או לכולם; בדיקת עיגון ניקוד 5/5 גופנים; ✅* — בעלים: להסתכל על צילומי הניקוד; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "built",
+     "pr": 382
     },
     {
      "id": "W3.6",
@@ -5942,7 +6352,9 @@
      ],
      "why": "Notion ו-Capacities מגייסים משתמשים דרך תבניות; זה גם בדיקת שימוש אמיתית לכל הפיצ׳רים.",
      "branch": "feat/israeli-templates",
-     "status": "⏳ #390 (על #377; 20 תבניות בעברית ובאנגלית עם .base נלווה, 3 כספות דוגמה, ייבוא תבנית מקובץ; תוקן: placeholders לא מולאו בתבניות מותקנות; israeliTemplates 35/35; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #390 (על #377; 20 תבניות בעברית ובאנגלית עם .base נלווה, 3 כספות דוגמה, ייבוא תבנית מקובץ; תוקן: placeholders לא מולאו בתבניות מותקנות; israeliTemplates 35/35; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "built",
+     "pr": 390
     },
     {
      "id": "W3.7",
@@ -5968,7 +6380,9 @@
      ],
      "why": "אפליקציה local-first צריכה עזרה שעובדת בלי רשת; Obsidian Help זמין גם offline.",
      "branch": "feat/in-app-help",
-     "status": "⏳ #409 (על #384 + #347; עזרה בתוך האפליקציה: ״?״ ב-28 פאנלים, חיפוש עברי offline 20/20, חבילת אבחון שאף אחד מ-19 סודות שתולים לא דולף אליה; chunks העזרה 63.6/69.8 KB gzip (מתחת ל-100; 232/305 היו גדלים גולמיים), help:check אוכף 100 KB; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #409 (על #384 + #347; עזרה בתוך האפליקציה: ״?״ ב-28 פאנלים, חיפוש עברי offline 20/20, חבילת אבחון שאף אחד מ-19 סודות שתולים לא דולף אליה; chunks העזרה 63.6/69.8 KB gzip (מתחת ל-100; 232/305 היו גדלים גולמיים), help:check אוכף 100 KB; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "built",
+     "pr": 409
     },
     {
      "id": "W3.8",
@@ -5993,7 +6407,9 @@
      ],
      "why": "Google Docs ו-Microsoft מפרסמים ACR; מוסדות אקדמיים בישראל דורשים זאת לפני אימוץ.",
      "branch": "docs/acr-wcag22",
-     "status": "⏳ #405 (על #360; דוח ACR לכל 55 קריטריוני WCAG 2.2 — רמה A: 22 תומך, 5 חלקית, 0 לא תומך; כל טענה נבדקה מול הקוד; תוקן: לטוסטים לא היו live regions; לא נבדק ב-Sandbox (חסום עד 1.12); axe לא רץ)"
+     "status": "⏳ #405 (על #360; דוח ACR לכל 55 קריטריוני WCAG 2.2 — רמה A: 22 תומך, 5 חלקית, 0 לא תומך; כל טענה נבדקה מול הקוד; תוקן: לטוסטים לא היו live regions; לא נבדק ב-Sandbox (חסום עד 1.12); axe לא רץ)",
+     "verified": "built",
+     "pr": 405
     },
     {
      "id": "W3.9",
@@ -6019,7 +6435,9 @@
      ],
      "why": "Obsidian ו-Typora מתנהגים כאפליקציות מקוריות לגמרי; פערים כאלה מורגשים מיד.",
      "branch": "feat/desktop-native",
-     "status": "⏳ #422 (על #314; crate חדש בלי תלויות src-tauri/desktop: deep links קפדניים (אין יציאה מהכספת), שיוך קבצים md/base/excalidraw, מגש ולכידה מהירה, העברת לשונית בין חלונות דו-שלבית; cargo test --offline 12/12, desktopShell 10/10; ה-glue של Tauri לא קומפל; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #422 (על #314; crate חדש בלי תלויות src-tauri/desktop: deep links קפדניים (אין יציאה מהכספת), שיוך קבצים md/base/excalidraw, מגש ולכידה מהירה, העברת לשונית בין חלונות דו-שלבית; cargo test --offline 12/12, desktopShell 10/10; ה-glue של Tauri לא קומפל; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "built",
+     "pr": 422
     },
     {
      "id": "W3.10",
@@ -6045,7 +6463,9 @@
      ],
      "why": "אקוסיסטם לא קונים — מגדלים; VS Code ו-Obsidian ניצחו בגלל חוויית מפתח טובה.",
      "branch": "feat/plugin-dx",
-     "status": "⏳ #418 (על #367; create-lumen-plugin בלי תלויות, hot reload מקומי (127.0.0.1:5199 בלבד), פאנל מפתח (זמן טעינה, CPU, זיכרון, יכולות מבוקשות/בשימוש/נדחו), ערכת בדיקות, 5 דוגמאות חדשות (text-format מ-MIT, Smart Typography נדחה כ-GPL); pluginDx 16/16, סריקה 8/8 A 90; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #418 (על #367; create-lumen-plugin בלי תלויות, hot reload מקומי (127.0.0.1:5199 בלבד), פאנל מפתח (זמן טעינה, CPU, זיכרון, יכולות מבוקשות/בשימוש/נדחו), ערכת בדיקות, 5 דוגמאות חדשות (text-format מ-MIT, Smart Typography נדחה כ-GPL); pluginDx 16/16, סריקה 8/8 A 90; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "built",
+     "pr": 418
     },
     {
      "id": "W3.11",
@@ -6071,7 +6491,9 @@
      ],
      "why": "Google Docs ו-Word מגדירים עבודה משותפת דרך הצעות; iA Writer מראה מחברים בצבעים.",
      "branch": "feat/suggest-versions",
-     "status": "⏳ #416 (על #381; קבלה/דחייה לפי מחבר, גרסאות בשם משותפות לחדר, השוואה ברמת מילה עברית (תחיליות, ניקוד, גרשיים); 29/29; תפקיד ״מגיב״ עוד לא יכול להציע; לא נבדק ב-Sandbox (חסום עד 1.12))"
+     "status": "⏳ #416 (על #381; קבלה/דחייה לפי מחבר, גרסאות בשם משותפות לחדר, השוואה ברמת מילה עברית (תחיליות, ניקוד, גרשיים); 29/29; תפקיד ״מגיב״ עוד לא יכול להציע; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "verified": "built",
+     "pr": 416
     }
    ]
   },
@@ -6105,7 +6527,9 @@
      ],
      "why": "#431 מכסה רק את #135–#354. כל עבודת הגלים W1–W3 (כ-70 PR-ים) נבנתה בענפים נפרדים ומעולם לא נבדקה יחד; כל אחד מהם כמעט ממצה את התקציב לבד.",
      "branch": "verify/train-2",
-     "status": "⏳ verify/train-2 ב-d43e94db3 (על verify/train 7b746900c): 104 מ-107 PR-ים מוזגו (#355–#463); נכשלו ודורשים העברה ידנית: #388 (TTS), #420 (100k פתקים), #450 (זמן ישראלי); 60 פתרונות ידניים מתועדים; #356 (כתיבה אטומית) זהה בבייט — תרגיל בטיחות הנתונים על train-2: 0 פתקים פגומים או חסרים ב-4 הנתיבים (היה 348/376 בלעדיו); offline עברו: i18n, docs:sync, headers, design, 0 בעיות תחביר/כפילויות ב-404 קבצים; צפוי כישלון תקציב (מחרוזות אנגלית בהפעלה +10.8 KB) — תיקון ב-lazy i18n, בלי להעלות תקציב; בניית Vercel בתור"
+     "status": "⏳ verify/train-2 ב-d43e94db3 (על verify/train 7b746900c): 104 מ-107 PR-ים מוזגו (#355–#463); נכשלו ודורשים העברה ידנית: #388 (TTS), #420 (100k פתקים), #450 (זמן ישראלי); 60 פתרונות ידניים מתועדים; #356 (כתיבה אטומית) זהה בבייט — תרגיל בטיחות הנתונים על train-2: 0 פתקים פגומים או חסרים ב-4 הנתיבים (היה 348/376 בלעדיו); offline עברו: i18n, docs:sync, headers, design, 0 בעיות תחביר/כפילויות ב-404 קבצים; צפוי כישלון תקציב (מחרוזות אנגלית בהפעלה +10.8 KB) — תיקון ב-lazy i18n, בלי להעלות תקציב; בניית Vercel בתור",
+     "verified": "built",
+     "pr": 355
     },
     {
      "id": "W4.2",
@@ -6132,7 +6556,8 @@
      ],
      "why": "82 קובצי e2e לא רצו מעולם על הקוד הממוזג. Sandbox חסום עד 1.12, ו-GitHub Actions לא בשימוש — אין כרגע שום דרך לבדוק UI אמיתי.",
      "branch": "verify/train",
-     "status": "⏳ e2e רץ בתוך בניית Vercel (Amazon Linux 2023 + dnf nss/nspr): smoke chromium 9/9 ו-firefox 9/9; פרויקט chromium מלא 291/327 עברו, 32 נכשלו (רשימה בדוח D); שער e2e חדש ב-vercel-build (smoke, 8 דק׳) עבר ב-78 ש׳; WebKit בלתי אפשרי באימג׳ (glibc 2.38) — נשאר ל-Mac; בעבודה: תיקון 32 הכישלונות"
+     "status": "⏳ e2e רץ בתוך בניית Vercel (Amazon Linux 2023 + dnf nss/nspr): smoke chromium 9/9 ו-firefox 9/9; פרויקט chromium מלא 291/327 עברו, 32 נכשלו (רשימה בדוח D); שער e2e חדש ב-vercel-build (smoke, 8 דק׳) עבר ב-78 ש׳; WebKit בלתי אפשרי באימג׳ (glibc 2.38) — נשאר ל-Mac; בעבודה: תיקון 32 הכישלונות",
+     "verified": "browser"
     },
     {
      "id": "W4.3",
@@ -6152,7 +6577,9 @@
       "שער הדומיין נכשל על קובץ שתול עם הדומיין הישן"
      ],
      "why": "ה-production של היום (main 17.10) שולח תצוגות שיתוף, SEO ו-canonical לדומיין שתפוס ע״י אחר — נזק למותג וסיכון שמשתמשים יגיעו לאתר זר.",
-     "status": "⏳ #432 fix/live-domain-meta → main (index.html, robots, sitemap מצביעים על lumen-md.vercel.app) — המיזוג שמור לטל"
+     "status": "⏳ #432 fix/live-domain-meta → main (index.html, robots, sitemap מצביעים על lumen-md.vercel.app) — המיזוג שמור לטל",
+     "verified": "built",
+     "pr": 432
     },
     {
      "id": "W4.4",
@@ -6176,7 +6603,9 @@
      ],
      "why": "עד #243 כל VITE_* נכנס ל-bundle, ו-production עדיין בנוי מ-main הישן. 15.18 פתוח — ייתכן שיש מפתח חשוף באוויר עכשיו.",
      "branch": "chore/secrets-live",
-     "status": "⏳ #436 (על verify/train; 0 סודות חשופים: ל-Vercel אין משתני סביבה, production ו-3 ה-previews האחרונים נסרקו — רק VITE_VERCEL_* מערכתיים; secrets:scan-live, רשימה מותרת security/vite-env-allowlist.json, שער build viteEnvGate, שער preview secrets, צ׳קליסט 15.18 לטל; secretsScanLive 13/13, vercelBuild 5/5 ב-Node נקי; בדיקה עצמית: 6 סוגי טוקנים שתולים נמצאו; לא רץ vite build אמיתי, hygiene ו-vitest מלא; סודות GitHub Actions ו-Netlify לא נבדקו — בצ׳קליסט)"
+     "status": "⏳ #436 (על verify/train; 0 סודות חשופים: ל-Vercel אין משתני סביבה, production ו-3 ה-previews האחרונים נסרקו — רק VITE_VERCEL_* מערכתיים; secrets:scan-live, רשימה מותרת security/vite-env-allowlist.json, שער build viteEnvGate, שער preview secrets, צ׳קליסט 15.18 לטל; secretsScanLive 13/13, vercelBuild 5/5 ב-Node נקי; בדיקה עצמית: 6 סוגי טוקנים שתולים נמצאו; לא רץ vite build אמיתי, hygiene ו-vitest מלא; סודות GitHub Actions ו-Netlify לא נבדקו — בצ׳קליסט)",
+     "verified": "node",
+     "pr": 436
     },
     {
      "id": "W4.5",
@@ -6229,7 +6658,9 @@
      ],
      "why": "לא נמדד עד היום אף מודל אמיתי: כל איכות ה-AI מבוססת על Ollama מזויף. זה החסם הגדול ביותר לציון אמין בתחום ה-AI.",
      "branch": "feat/models-day",
-     "status": "⏳ #443 (על verify/train; npm run models:day: check (רשימת התקנה עם תגיות מודל מדויקות), plan, הרצה (175 דק׳, ≤180 נאכף בבדיקה, ממשיך אחרי Ctrl-C), verify; דוח אחד עם digest לכל מודל ו-sha256 לכל קובץ, חתימת Ed25519 אופציונלית; טבלת כיסוי ל-29 משימות AI עם dodMock; modelsDay 13/13 מול Ollama מזויף; Vercel build עבר; חסר: הרצה אמיתית של טל (15.3, 15.14, 15.17); dodMock)"
+     "status": "⏳ #443 (על verify/train; npm run models:day: check (רשימת התקנה עם תגיות מודל מדויקות), plan, הרצה (175 דק׳, ≤180 נאכף בבדיקה, ממשיך אחרי Ctrl-C), verify; דוח אחד עם digest לכל מודל ו-sha256 לכל קובץ, חתימת Ed25519 אופציונלית; טבלת כיסוי ל-29 משימות AI עם dodMock; modelsDay 13/13 מול Ollama מזויף; Vercel build עבר; חסר: הרצה אמיתית של טל (15.3, 15.14, 15.17); dodMock)",
+     "verified": "built",
+     "pr": 443
     },
     {
      "id": "W4.7",
@@ -6252,7 +6683,9 @@
      ],
      "why": "כ-25 פריטי בעלים חוסמים ✅ אמיתי (מודלים, חתימות, שרתים, מכשירים, משתמשים). אדם אחד הוא צוואר הבקבוק.",
      "branch": "docs/owner-sessions",
-     "status": "⏳ #486 (40 פריטי בעלים מ-15.x ומ-37 PR-ים עם Owner commands, ב-3 ישיבות: חשבונות ~2:10, Mac עם GPU ~2:55 + 2 ש׳ לא מושגחות, מכשירים ~3:35 (BrowserStack OSS, Firebase Test Lab); 15.x מ-18 ל-11 (−39%, יעד ≥40%); 15.5 ו-15.6 נדחו (אופציונליים), 15.16 עבר להחלטת המתאם)"
+     "status": "⏳ #486 (40 פריטי בעלים מ-15.x ומ-37 PR-ים עם Owner commands, ב-3 ישיבות: חשבונות ~2:10, Mac עם GPU ~2:55 + 2 ש׳ לא מושגחות, מכשירים ~3:35 (BrowserStack OSS, Firebase Test Lab); 15.x מ-18 ל-11 (−39%, יעד ≥40%); 15.5 ו-15.6 נדחו (אופציונליים), 15.16 עבר להחלטת המתאם)",
+     "verified": "built",
+     "pr": 486
     },
     {
      "id": "W4.8",
@@ -6278,7 +6711,9 @@
      ],
      "why": "15.4 (פריסת שרתים) לא נעשה: הרשאות, שרשורים וקישורים (W1.19) לא שווים כלום כי אין שרת שמשתמש יכול להתחבר אליו.",
      "branch": "feat/collab-relay-free",
-     "status": "⏳ #469 (על verify/train; Cloudflare Workers + Durable Objects בחינם (יש מרכז נתונים בתל אביב; ל-Fly.io אין יותר שכבה חינמית); Durable Object לכל חדר, טוקנים, signaling; חדרים לא מוצפנים נדחים (4403), מחיקה אחרי 90 יום, אין IP בלוגים; collabRelay 10/10 מול ה-provider וה-Hocuspocus האמיתיים; חסר: פריסה (טל: wrangler login + npm run collab:deploy), מדידת השהיה מישראל; dodMock)"
+     "status": "⏳ #469 (על verify/train; Cloudflare Workers + Durable Objects בחינם (יש מרכז נתונים בתל אביב; ל-Fly.io אין יותר שכבה חינמית); Durable Object לכל חדר, טוקנים, signaling; חדרים לא מוצפנים נדחים (4403), מחיקה אחרי 90 יום, אין IP בלוגים; collabRelay 10/10 מול ה-provider וה-Hocuspocus האמיתיים; חסר: פריסה (טל: wrangler login + npm run collab:deploy), מדידת השהיה מישראל; dodMock)",
+     "verified": "built",
+     "pr": 469
     },
     {
      "id": "W4.9",
@@ -6329,7 +6764,9 @@
      ],
      "why": "המוצר הוא עברית-קודם ומקומי, אבל ה-README פותח ב-OpenAI ו-index.html מוגדר lang=en. זה הרושם הראשון של כל משתמש ותורם.",
      "branch": "feat/hebrew-first-load",
-     "status": "⏳ #433 (על docs/hebrew-first; lang/dir עבריים כבר בפריים הראשון, README עברי קודם, og:locale; hebrewFirstLoad 7/7, פריים ראשון ב-Chromium offline 5/5; חסר: e2e וצילומי מסך)"
+     "status": "⏳ #433 (על docs/hebrew-first; lang/dir עבריים כבר בפריים הראשון, README עברי קודם, og:locale; hebrewFirstLoad 7/7, פריים ראשון ב-Chromium offline 5/5; חסר: e2e וצילומי מסך)",
+     "verified": "browser",
+     "pr": 433
     },
     {
      "id": "W4.11",
@@ -6374,7 +6811,9 @@
      ],
      "why": "50 בדיקות e2e מדולגות ב-29 קבצים הן כיסוי שנראה קיים אבל לא בודק כלום.",
      "branch": "test/skip-audit",
-     "status": "⏳ #445 (על verify/train; דילוגים ב-e2e מ-49 ל-11, ב-vitest מ-11 ל-10, כל אחד עם skip-reason, משימה ותאריך; 35 בדיקות כספת שדילגו על כל דפדפן כשה-seed נכשל — עכשיו מדלגות רק ב-WebKit ונכשלות ב-chromium/firefox; שער ב-hygiene על דילוג בלי נימוק; skipAudit 7/7, golden-sets 50/50; חסר: Playwright ב-3 דפדפנים)"
+     "status": "⏳ #445 (על verify/train; דילוגים ב-e2e מ-49 ל-11, ב-vitest מ-11 ל-10, כל אחד עם skip-reason, משימה ותאריך; 35 בדיקות כספת שדילגו על כל דפדפן כשה-seed נכשל — עכשיו מדלגות רק ב-WebKit ונכשלות ב-chromium/firefox; שער ב-hygiene על דילוג בלי נימוק; skipAudit 7/7, golden-sets 50/50; חסר: Playwright ב-3 דפדפנים)",
+     "verified": "built",
+     "pr": 445
     },
     {
      "id": "W4.13",
@@ -6400,7 +6839,9 @@
      ],
      "why": "6.1 לא עומד ביעד (23.6% מול 15%), ו-W1.17 פותר רק בשולחן העבודה. רוב המשתמשים בדפדפן ובטלפון.",
      "branch": "feat/hebrew-dictation-web",
-     "status": "⏳ #454 (על #443; Zipformer זורם + קריאה חוזרת של המשפט ב-Whisper שכבר במכשיר (ivrit.ai turbo ב-WebGPU, אחרת Ozen v1 (Apache-2.0)) תוך ≤2 ש׳; נרמול WER v2; eval:asr-web; asr-he-eval 14/14, dictationCorrection 5/5, dictation-text 13/13; דגל רישיון: נתוני האימון של Ozen כוללים סט בלי רישיון — verified:false עד אישור טל; חסר: WER אמיתי ב-FLEURS (ייתכן שלא יגיע ל-15%); dodMock)"
+     "status": "⏳ #454 (על #443; Zipformer זורם + קריאה חוזרת של המשפט ב-Whisper שכבר במכשיר (ivrit.ai turbo ב-WebGPU, אחרת Ozen v1 (Apache-2.0)) תוך ≤2 ש׳; נרמול WER v2; eval:asr-web; asr-he-eval 14/14, dictationCorrection 5/5, dictation-text 13/13; דגל רישיון: נתוני האימון של Ozen כוללים סט בלי רישיון — verified:false עד אישור טל; חסר: WER אמיתי ב-FLEURS (ייתכן שלא יגיע ל-15%); dodMock)",
+     "verified": "built",
+     "pr": 454
     },
     {
      "id": "W4.14",
@@ -6424,7 +6865,9 @@
      ],
      "why": "חלק מהמודלים חסומים מאחורי Hugging Face (7.6: bge-reranker ו-Belebele), ו-15.9 (טוקן HF) פתוח. הורדה שנכשלת = פיצ׳ר שלא קיים.",
      "branch": "feat/model-mirrors",
-     "status": "⏳ #476 (על verify/train; שרשרת HF → מראה (GitHub Releases דרך Worker של CORS) → כתובת/קובץ של המשתמש, sha256 לכל מקור; R2 נדחה (10 GB חינם, r2.dev לפיתוח בלבד); 15.9 הוכרע; modelHosting 18/18, modelMirror 8/8; חסר: --pin ו---upload של טל (רק 1 מ-24 נעוץ), פריסת ה-Worker; dodMock)"
+     "status": "⏳ #476 (על verify/train; שרשרת HF → מראה (GitHub Releases דרך Worker של CORS) → כתובת/קובץ של המשתמש, sha256 לכל מקור; R2 נדחה (10 GB חינם, r2.dev לפיתוח בלבד); 15.9 הוכרע; modelHosting 18/18, modelMirror 8/8; חסר: --pin ו---upload של טל (רק 1 מ-24 נעוץ), פריסת ה-Worker; dodMock)",
+     "verified": "built",
+     "pr": 476
     },
     {
      "id": "W4.15",
@@ -6450,7 +6893,9 @@
      ],
      "why": "ה-CSP הראשי מתיר כל תמונה ב-https, 22 מקורות frame ו-'unsafe-inline' — רחב יותר ממה שמוצר ״פרטי״ מבטיח.",
      "branch": "feat/csp-content-frame",
-     "status": "⏳ #444 (על verify/train; CSP האפליקציה בלי https: ב-img/media ו-frame-src self בלבד (היה 22); דף content-frame נפרד עם CSP משלו; embeds ו-iframe גולמי בלחיצה; Gist עובד שוב; הוסרו herokuapp (מת — y-webrtc עבר ל-fly.dev), cdn-lfs, gstatic, *.supabase.co; Vercel ב-58fc37ae8: build ו-budget עברו, vitest 6,629/6,631 (2 תוקנו בראש); headers 10/10, Chromium offline 52/52; חסר: e2e ב-3 דפדפנים (WebKit ל-nonce), הרצת Vercel על הראש)"
+     "status": "⏳ #444 (על verify/train; CSP האפליקציה בלי https: ב-img/media ו-frame-src self בלבד (היה 22); דף content-frame נפרד עם CSP משלו; embeds ו-iframe גולמי בלחיצה; Gist עובד שוב; הוסרו herokuapp (מת — y-webrtc עבר ל-fly.dev), cdn-lfs, gstatic, *.supabase.co; Vercel ב-58fc37ae8: build ו-budget עברו, vitest 6,629/6,631 (2 תוקנו בראש); headers 10/10, Chromium offline 52/52; חסר: e2e ב-3 דפדפנים (WebKit ל-nonce), הרצת Vercel על הראש)",
+     "verified": "browser",
+     "pr": 444
     },
     {
      "id": "W4.16",
@@ -6474,7 +6919,9 @@
      ],
      "why": "W1.27 לא עומד בשני קריטריונים. פתק עם קלט כזה תוקע את העורך (ReDoS), ושחרור שלא משתחזר לא ניתן לאימות.",
      "branch": "perf/markdown-slow-inputs",
-     "status": "⏳ #460 (על #361; הסיבה: אלפי [ ] בפסקה ורשימות בעומק 231; בלוק מעל 1,024 סוגריים או 32 רמות מוצג כטקסט גולמי + מגבלת 200ms לבלוק בתצוגה; 462–2,601ms → 1–20ms, 0 מ-291 קבצי ה-Markdown של הריפו מושפעים; 11/11; source maps: הרכבת לא שולחת אף map ו-repro-check נכשל על map; חסר: fuzz של 1M קלטים, npm run repro)"
+     "status": "⏳ #460 (על #361; הסיבה: אלפי [ ] בפסקה ורשימות בעומק 231; בלוק מעל 1,024 סוגריים או 32 רמות מוצג כטקסט גולמי + מגבלת 200ms לבלוק בתצוגה; 462–2,601ms → 1–20ms, 0 מ-291 קבצי ה-Markdown של הריפו מושפעים; 11/11; source maps: הרכבת לא שולחת אף map ו-repro-check נכשל על map; חסר: fuzz של 1M קלטים, npm run repro)",
+     "verified": "built",
+     "pr": 460
     },
     {
      "id": "W4.17",
@@ -6496,7 +6943,9 @@
      ],
      "why": "המודולים שמגנים על פרטיות ועל קונפליקטים בסנכרון הם החלשים ביותר במבחן ה-mutation.",
      "branch": "test/mutation-80",
-     "status": "⏳ #474 (על verify/train + 2 commits של #427; ‏9 מודולים קריטיים ≥ 80: manifest 97.5, privacyLedger 85, sanitizer 93.8, encryption 85.7, conflict 92; שער mutation:check עם קבלה ו-hash של המקור; age היה 78.8 ב-#427 — צריך בדיקות כשייכנס; חסר: הרצת vitest אמיתית (~שעה), בנייה)"
+     "status": "⏳ #474 (על verify/train + 2 commits של #427; ‏9 מודולים קריטיים ≥ 80: manifest 97.5, privacyLedger 85, sanitizer 93.8, encryption 85.7, conflict 92; שער mutation:check עם קבלה ו-hash של המקור; age היה 78.8 ב-#427 — צריך בדיקות כשייכנס; חסר: הרצת vitest אמיתית (~שעה), בנייה)",
+     "verified": "built",
+     "pr": 474
     },
     {
      "id": "W4.18",
@@ -6521,7 +6970,9 @@
      ],
      "why": "6 שפות תורגמו בלי דובר שפת אם (9.1). תרגום שגוי פוגע באמון יותר מהיעדר תרגום.",
      "branch": "feat/locale-beta",
-     "status": "⏳ #459 (על verify/train; ar, ru, fr, de, ja, zh-CN מסומנות ״בטא״ בהגדרות ובלוח הפקודות, ״הצע תרגום טוב יותר״ פותח issue מוכן בלי שרת; localeBeta 5/5; חסר: מטריצת RTL בערבית, סקירת דובר, קריאה אחת ב-FirstRun אחרי #435)"
+     "status": "⏳ #459 (על verify/train; ar, ru, fr, de, ja, zh-CN מסומנות ״בטא״ בהגדרות ובלוח הפקודות, ״הצע תרגום טוב יותר״ פותח issue מוכן בלי שרת; localeBeta 5/5; חסר: מטריצת RTL בערבית, סקירת דובר, קריאה אחת ב-FirstRun אחרי #435)",
+     "verified": "built",
+     "pr": 459
     },
     {
      "id": "W4.19",
@@ -6546,7 +6997,9 @@
      ],
      "why": "Obsidian Sync ו-Anytype עובדים מיד. אצלנו Drive ו-Dropbox תלויים ב-client IDs שלא נרשמו, ו-WebDAV/S3 לא מתאימים לרוב המשתמשים.",
      "branch": "feat/sync-two-clicks",
-     "status": "⏳ #483 (על #378; אשף בעברית קודם: תיקיית סנכרון של שולחן העבודה (iCloud/Dropbox/Drive/OneDrive) בלי OAuth, אחר כך relay מוצפן, אחר כך WebDAV; מפתח של 13 מילים עבריות עם מילת בדיקה; סטטוס לכל קובץ; 2 לחיצות במכשיר 1, 3 במכשיר 2 (Chromium); syncSetup 15/15 כולל 2 מכשירים דרך שרת relay אמיתי — 0 טקסט פתקים בבקשות; חסר: OAuth של Drive/Dropbox ושרת relay ציבורי (טל); dodMock)"
+     "status": "⏳ #483 (על #378; אשף בעברית קודם: תיקיית סנכרון של שולחן העבודה (iCloud/Dropbox/Drive/OneDrive) בלי OAuth, אחר כך relay מוצפן, אחר כך WebDAV; מפתח של 13 מילים עבריות עם מילת בדיקה; סטטוס לכל קובץ; 2 לחיצות במכשיר 1, 3 במכשיר 2 (Chromium); syncSetup 15/15 כולל 2 מכשירים דרך שרת relay אמיתי — 0 טקסט פתקים בבקשות; חסר: OAuth של Drive/Dropbox ושרת relay ציבורי (טל); dodMock)",
+     "verified": "owner",
+     "pr": 483
     },
     {
      "id": "W4.20",
@@ -6571,7 +7024,9 @@
      ],
      "why": "11.4 תקוע על חבילה שלא בלוקפייל, בזמן ש-W1.7 כבר מימש Argon2id בעצמו.",
      "branch": "feat/vault-argon2id",
-     "status": "⏳ #472 (על verify/train + #399; Argon2id מכויל למכשיר (46 MiB×1 או 19 MiB×2), כספת PBKDF2 עוברת ל-Argon2id בפתיחה הבאה; נמצא ב-#399: 3 מ-5 הפרמטרים של OWASP מתחת לרצפה שלו — הוצעו רק 2 שעוברים; vaultArgon2 6/6, vaultEncryption 27/28 (מגבלת harness); כישלון ה-e2e לא מהקוד — ה-spec מייבא /src; חסר: מדידה ב-Pixel 7)"
+     "status": "⏳ #472 (על verify/train + #399; Argon2id מכויל למכשיר (46 MiB×1 או 19 MiB×2), כספת PBKDF2 עוברת ל-Argon2id בפתיחה הבאה; נמצא ב-#399: 3 מ-5 הפרמטרים של OWASP מתחת לרצפה שלו — הוצעו רק 2 שעוברים; vaultArgon2 6/6, vaultEncryption 27/28 (מגבלת harness); כישלון ה-e2e לא מהקוד — ה-spec מייבא /src; חסר: מדידה ב-Pixel 7)",
+     "verified": "built",
+     "pr": 472
     },
     {
      "id": "W4.21",
@@ -6594,7 +7049,9 @@
      ],
      "why": "W1.23 דורש מטל להריץ פרוטוקול NVDA ידני; ללא זה הנגישות היא רק axe, שתופס חלק קטן מהבעיות.",
      "branch": "feat/sr-automation",
-     "status": "⏳ #467 (על verify/train; toMatchAriaSnapshot לזרימות העבריות בשער ה-e2e; מסע W1.23 כ-10 משימות Guidepup עם VoiceOver ו-NVDA; srJourney 3/3; חסר: ריצה ראשונה של ה-aria spec, ריצות Guidepup ב-Mac/Windows (טל))"
+     "status": "⏳ #467 (על verify/train; toMatchAriaSnapshot לזרימות העבריות בשער ה-e2e; מסע W1.23 כ-10 משימות Guidepup עם VoiceOver ו-NVDA; srJourney 3/3; חסר: ריצה ראשונה של ה-aria spec, ריצות Guidepup ב-Mac/Windows (טל))",
+     "verified": "built",
+     "pr": 467
     },
     {
      "id": "W4.22",
@@ -6639,7 +7096,9 @@
      ],
      "why": "כמה משימות מדווחות ״lib.rs לא קומפל״ / ״ה-glue של Tauri לא קומפל״ — קוד שלא קומפל אינו פיצ׳ר.",
      "branch": "chore/native-check",
-     "status": "⏳ #479 (על verify/train; אין crates.io כאן — רתמה offline: crates בלי תלויות קומפלו ונבדקו (whisper_core 7/7, desktop 12/12, vault 13/13, keychain 4/4), lib.rs ו-main.rs נבדקו מול stubs של חתימות tauri 2, Java עם javac -Werror; נמצא ותוקן: Cargo.lock של #422 חסר 3 חבילות (דחיפה ל-#422); חסר: cargo/tauri build אמיתי, Swift, Gradle)"
+     "status": "⏳ #479 (על verify/train; אין crates.io כאן — רתמה offline: crates בלי תלויות קומפלו ונבדקו (whisper_core 7/7, desktop 12/12, vault 13/13, keychain 4/4), lib.rs ו-main.rs נבדקו מול stubs של חתימות tauri 2, Java עם javac -Werror; נמצא ותוקן: Cargo.lock של #422 חסר 3 חבילות (דחיפה ל-#422); חסר: cargo/tauri build אמיתי, Swift, Gradle)",
+     "verified": "built",
+     "pr": 479
     },
     {
      "id": "W4.24",
@@ -6684,7 +7143,9 @@
      ],
      "why": "אפס משתמשים אמיתיים בדקו את המוצר. W1.29 מחכה ל-5–8 מפגשים של טל.",
      "branch": "research/usability-unmoderated",
-     "status": "⏳ #487 (על #419; מצב ״מבחן שימושיות עצמאי״ באפליקציה: הסכמה, קוד U-XXXX במקום שם, תסריטי משימות בעברית עם טיימר, בדיקת הצלחה במכשיר (כן/לא בלבד), SUS, שמירת zip; Tally לקבלת הקבצים (Maze/Clarity/Hotjar נדחו — מקליטים מסך); usabilityUnmoderated 8/8, Chromium עם OPFS 4/4; חסר: גיוס 12 משתתפים (טל))"
+     "status": "⏳ #487 (על #419; מצב ״מבחן שימושיות עצמאי״ באפליקציה: הסכמה, קוד U-XXXX במקום שם, תסריטי משימות בעברית עם טיימר, בדיקת הצלחה במכשיר (כן/לא בלבד), SUS, שמירת zip; Tally לקבלת הקבצים (Maze/Clarity/Hotjar נדחו — מקליטים מסך); usabilityUnmoderated 8/8, Chromium עם OPFS 4/4; חסר: גיוס 12 משתתפים (טל))",
+     "verified": "owner",
+     "pr": 487
     },
     {
      "id": "W4.26",
@@ -6708,7 +7169,9 @@
      ],
      "why": "אין שום דרך לדעת אם מישהו משתמש ומה נשבר. ניטור 12.4 תלוי ב-DSN שלא הוגדר.",
      "branch": "feat/local-usage-metrics",
-     "status": "⏳ #461 (על verify/train; מונים מקומיים בלבד לפי מזהה פקודה, לוח ״שימוש במכשיר הזה״ (הפעלה, שימור 7/30 יום, פקודות מובילות/לא בשימוש), שליחה רק בלחיצה (issue מוכן או העתקה), נרשם ביומן הפרטיות; usageMetrics 13/13 — 0 בקשות בלי לחיצה, סודות שתולים לא מופיעים; חסר: snapshot של commandIds, בנייה ותקציב (459–460 KB))"
+     "status": "⏳ #461 (על verify/train; מונים מקומיים בלבד לפי מזהה פקודה, לוח ״שימוש במכשיר הזה״ (הפעלה, שימור 7/30 יום, פקודות מובילות/לא בשימוש), שליחה רק בלחיצה (issue מוכן או העתקה), נרשם ביומן הפרטיות; usageMetrics 13/13 — 0 בקשות בלי לחיצה, סודות שתולים לא מופיעים; חסר: snapshot של commandIds, בנייה ותקציב (459–460 KB))",
+     "verified": "built",
+     "pr": 461
     },
     {
      "id": "W4.27",
@@ -6731,7 +7194,9 @@
      ],
      "why": "מגבלת 100 בניות ביום ומכסת השימוש עצרו את הבדיקות ל-3 שבועות. לפי תנאי Vercel, Hobby מיועד לשימוש אישי ולא מסחרי.",
      "branch": "chore/second-host",
-     "status": "⏳ #484 (על verify/train; Cloudflare Pages Free ב-Direct Upload (לא נספר ב-500 בניות, תעבורה לא מוגבלת, $0); Netlify ו-GitHub Pages נדחו; pages:check, pages:deploy, ci:docker; ruby.wasm (30.6 MB) מעל 25 MiB — live-ruby חסר רק שם; pagesLimits 5/5, ciLocal 20/20; חסר: הפעלה (טל), ci:docker)"
+     "status": "⏳ #484 (על verify/train; Cloudflare Pages Free ב-Direct Upload (לא נספר ב-500 בניות, תעבורה לא מוגבלת, $0); Netlify ו-GitHub Pages נדחו; pages:check, pages:deploy, ci:docker; ruby.wasm (30.6 MB) מעל 25 MiB — live-ruby חסר רק שם; pagesLimits 5/5, ciLocal 20/20; חסר: הפעלה (טל), ci:docker)",
+     "verified": "built",
+     "pr": 484
     },
     {
      "id": "W4.28",
@@ -6755,7 +7220,9 @@
      ],
      "why": "אדם אחד וסוכני AI; Codex הוסר, אין סקירה אנושית. לקוד קריפטו וסנכרון זה סיכון.",
      "branch": "chore/bus-factor",
-     "status": "⏳ #481 (על #426; CODEOWNERS ל-41 נתיבים רגישים, כלל pr:check שדורש תווית human-reviewed אחרי ה-commit האחרון, SECURITY.md עם תהליך גילוי, מדריך מתחזק שני; humanReview 28/28; נמצא: דיווח פגיעויות פרטי וסריקת סודות כבויים בריפו — פקודות להפעלה לטל)"
+     "status": "⏳ #481 (על #426; CODEOWNERS ל-41 נתיבים רגישים, כלל pr:check שדורש תווית human-reviewed אחרי ה-commit האחרון, SECURITY.md עם תהליך גילוי, מדריך מתחזק שני; humanReview 28/28; נמצא: דיווח פגיעויות פרטי וסריקת סודות כבויים בריפו — פקודות להפעלה לטל)",
+     "verified": "built",
+     "pr": 481
     },
     {
      "id": "W4.29",
@@ -6779,7 +7246,9 @@
      ],
      "why": "ברגע שיש שרת שיתוף ומשוב, המוצר מחזיק מידע אישי של ישראלים. תיקון 13 בתוקף מאוגוסט 2025.",
      "branch": "docs/privacy-amendment-13",
-     "status": "⏳ #456 (על verify/train; PRIVACY.he.md חדש: מפת נתונים לכל מסלול ביומן הפרטיות, זכויות, תיקון 13, הערכת השפעה לשרת השיתוף (3 פעולות לפני שרת ציבורי); PRIVACY.md תוקן (טען דברים שכבר לא נכונים); privacyDoc 7/7 — כבר תפס את tts.ts; לא ייעוץ משפטי — טל יעביר לעו״ד; חסר: חידוש snapshot של renderSnapshotDocs)"
+     "status": "⏳ #456 (על verify/train; PRIVACY.he.md חדש: מפת נתונים לכל מסלול ביומן הפרטיות, זכויות, תיקון 13, הערכת השפעה לשרת השיתוף (3 פעולות לפני שרת ציבורי); PRIVACY.md תוקן (טען דברים שכבר לא נכונים); privacyDoc 7/7 — כבר תפס את tts.ts; לא ייעוץ משפטי — טל יעביר לעו״ד; חסר: חידוש snapshot של renderSnapshotDocs)",
+     "verified": "built",
+     "pr": 456
     },
     {
      "id": "W4.30",
@@ -6803,7 +7272,9 @@
      ],
      "why": "W1.11 הוא dodMock — הציפיות נגזרו מהתיעוד. Obsidian ממשיך לשנות את Bases (1.15).",
      "branch": "test/obsidian-real-corpus",
-     "status": "⏳ #462 + #463 (קורפוס של 7 כספות ציבוריות אמיתיות (MIT / CC BY), 333 פתקים, 44 .base, נעוץ ל-commit עם sha256; תוקנו: BOM ו-CRLF (333/333 עכשיו), תחביר .base ישן (89/89 תצוגות), מפתחות frontmatter כפולים, שינוי שם שמקודד עברית ב-%; .base 44/44 זהה בבייט (יעד ≥95%); canvas זהה בבייט (#463); חסר: suite מלא, בנייה, WYSIWYG, פתיחה ב-Obsidian 1.15 (בעלים))"
+     "status": "⏳ #462 + #463 (קורפוס של 7 כספות ציבוריות אמיתיות (MIT / CC BY), 333 פתקים, 44 .base, נעוץ ל-commit עם sha256; תוקנו: BOM ו-CRLF (333/333 עכשיו), תחביר .base ישן (89/89 תצוגות), מפתחות frontmatter כפולים, שינוי שם שמקודד עברית ב-%; .base 44/44 זהה בבייט (יעד ≥95%); canvas זהה בבייט (#463); חסר: suite מלא, בנייה, WYSIWYG, פתיחה ב-Obsidian 1.15 (בעלים))",
+     "verified": "built",
+     "pr": 462
     },
     {
      "id": "W4.31",
@@ -6828,7 +7299,9 @@
      ],
      "why": "15/15 מקרי eval עברו מול Ollama מזויף. מודלים מקומיים קטנים נכשלים בקריאות כלים הרבה יותר מ-API בענן.",
      "branch": "feat/tool-call-reliability",
-     "status": "⏳ #449 (על #443; JSON schema של Ollama בכל תור כלי בכל דרגה (קודם רק tiny/small), תיקון טעויות נפוצות בלי להמציא ערכים, ניסיון חוזר אחד עם הסכמה; 200 בדיקות (100 עברית, 100 אנגלית); מול mock: 195/200 (97.5%), לפני השינוי 158; toolRepair 11/11, toolCallsMock 5/5, agentProtocol 10/10; חסר: שיעור אמיתי ב-qwen2.5:7b ו-gemma3:12b (models:day); dodMock)"
+     "status": "⏳ #449 (על #443; JSON schema של Ollama בכל תור כלי בכל דרגה (קודם רק tiny/small), תיקון טעויות נפוצות בלי להמציא ערכים, ניסיון חוזר אחד עם הסכמה; 200 בדיקות (100 עברית, 100 אנגלית); מול mock: 195/200 (97.5%), לפני השינוי 158; toolRepair 11/11, toolCallsMock 5/5, agentProtocol 10/10; חסר: שיעור אמיתי ב-qwen2.5:7b ו-gemma3:12b (models:day); dodMock)",
+     "verified": "built",
+     "pr": 449
     },
     {
      "id": "W4.32",
@@ -6852,7 +7325,9 @@
      ],
      "why": "יש sandbox טוב יותר מ-Obsidian אבל 0 תוספים אמיתיים. אקוסיסטם לא מתחיל מעצמו.",
      "branch": "feat/plugin-ecosystem",
-     "status": "⏳ #477 (על #418; 10 תוספים MIT לפי הקטגוריות הנפוצות ב-Obsidian (תבניות, קנבן, לוח שנה, טבלאות, linter, תגיות, כרטיסיות, refactor, תאריכים טבעיים, מיון), כולם בלי רשת; רישום סטטי עם sha256 וסריקה: 18/18 גרסאות ok A 90; כפתור הסרה; pluginEcosystem 38/38; חסר: הרצה ב-QuickJS אמיתי, e2e, חתימת תוספים (טל))"
+     "status": "⏳ #477 (על #418; 10 תוספים MIT לפי הקטגוריות הנפוצות ב-Obsidian (תבניות, קנבן, לוח שנה, טבלאות, linter, תגיות, כרטיסיות, refactor, תאריכים טבעיים, מיון), כולם בלי רשת; רישום סטטי עם sha256 וסריקה: 18/18 גרסאות ok A 90; כפתור הסרה; pluginEcosystem 38/38; חסר: הרצה ב-QuickJS אמיתי, e2e, חתימת תוספים (טל))",
+     "verified": "built",
+     "pr": 477
     },
     {
      "id": "W4.33",
@@ -6876,7 +7351,9 @@
      ],
      "why": "כל מנגנוני הבטיחות נבדקו בענפים נפרדים; השילוב שלהם לא נבדק אף פעם.",
      "branch": "test/data-safety-drill",
-     "status": "⏳ #470 (תרגיל על verify/train: נכשל — נתיב תיקיית הטלפון: 348 פתקים אבודים/פגומים, Safari OPFS: 376, שולחן עבודה: 0; דיסק מלא מוחק את הפתק הנשמר 36/36; התיקון הוא #356 (W1.5) שלא ברכבת — עליו: 0 בכל הנתיבים; חייב להיכנס ברכבת 2; dataSafetyMatrix 11/11, vaultBackend.contract 426/426; חסר: 3 דפדפנים, תרחיש משולב, תרגיל שחזור גיבוי)"
+     "status": "⏳ #470 (תרגיל על verify/train: נכשל — נתיב תיקיית הטלפון: 348 פתקים אבודים/פגומים, Safari OPFS: 376, שולחן עבודה: 0; דיסק מלא מוחק את הפתק הנשמר 36/36; התיקון הוא #356 (W1.5) שלא ברכבת — עליו: 0 בכל הנתיבים; חייב להיכנס ברכבת 2; dataSafetyMatrix 11/11, vaultBackend.contract 426/426; חסר: 3 דפדפנים, תרחיש משולב, תרגיל שחזור גיבוי)",
+     "verified": "built",
+     "pr": 470
     },
     {
      "id": "W4.34",
@@ -6900,7 +7377,9 @@
      ],
      "why": "W1.28 הוא ✅*: Pagefind, ה-GIF-ים ו-Discussions מחכים.",
      "branch": "docs/finish-pagefind-gifs",
-     "status": "⏳ #480 (על #384; Pagefind 1.5.2 (checksum תואם): 20/20 בשאילתות הזהב בעברית על אתר חלופי; 30 זרימות GIF בעברית עם מקודד GIF בלי תלויות; תבניות Discussions בעברית; docsGifs 7/7, docsPagefind 3/3; חסר: בניית Astro אמיתית ופריסה, הקלטת ה-GIF-ים, הפעלת Discussions (טל))"
+     "status": "⏳ #480 (על #384; Pagefind 1.5.2 (checksum תואם): 20/20 בשאילתות הזהב בעברית על אתר חלופי; 30 זרימות GIF בעברית עם מקודד GIF בלי תלויות; תבניות Discussions בעברית; docsGifs 7/7, docsPagefind 3/3; חסר: בניית Astro אמיתית ופריסה, הקלטת ה-GIF-ים, הפעלת Discussions (טל))",
+     "verified": "built",
+     "pr": 480
     },
     {
      "id": "W4.35",
@@ -6924,7 +7403,9 @@
      ],
      "why": "מוצר עברית-קודם צריך להרגיש כזה מהשנייה הראשונה, בלי לחפש הגדרה.",
      "branch": "feat/first-run-language",
-     "status": "⏳ #435 (על feat/hebrew-first-load + 14.1; עברית בשפות המערכת → עברית בלי שלב שפה, עם קישור לשינוי; אחרת שאלה אחת עם עברית ראשונה; firstRunLanguage 6/6, Chromium offline he-IL ו-en-US, i18n, hygiene; חסר: e2e (פתק ראשון ≤ 4 ש׳), בנייה)"
+     "status": "⏳ #435 (על feat/hebrew-first-load + 14.1; עברית בשפות המערכת → עברית בלי שלב שפה, עם קישור לשינוי; אחרת שאלה אחת עם עברית ראשונה; firstRunLanguage 6/6, Chromium offline he-IL ו-en-US, i18n, hygiene; חסר: e2e (פתק ראשון ≤ 4 ש׳), בנייה)",
+     "verified": "browser",
+     "pr": 435
     },
     {
      "id": "W4.36",
@@ -6951,7 +7432,9 @@
      ],
      "why": "שלוש משימות P0/P1 תקועות כי הקבלה שלהן נכתבה סביב GitHub Actions.",
      "branch": "chore/nightly-receipts",
-     "status": "⏳ #455 (על verify/train; npm run nightly: flake (e2e ×5 ב-3 דפדפנים), perf, triage, weekly — כל דוח חתום sha256 + Ed25519; status.json מחשב 0.5/0.11/0.14; ריצת weekly אמיתית נחתמה ואומתה; 0.14 לא עומד היום (32 בניות preview נכשלו ב-20 PR-ים); nightlyReceipts 12/12; חסר: 3 לילות מתוזמנים ב-Mac של טל (launchd))"
+     "status": "⏳ #455 (על verify/train; npm run nightly: flake (e2e ×5 ב-3 דפדפנים), perf, triage, weekly — כל דוח חתום sha256 + Ed25519; status.json מחשב 0.5/0.11/0.14; ריצת weekly אמיתית נחתמה ואומתה; 0.14 לא עומד היום (32 בניות preview נכשלו ב-20 PR-ים); nightlyReceipts 12/12; חסר: 3 לילות מתוזמנים ב-Mac של טל (launchd))",
+     "verified": "built",
+     "pr": 455
     }
    ]
   },
@@ -6984,7 +7467,9 @@
      ],
      "why": "לומדי תורה, סטודנטים למדעי היהדות ומרצים כותבים על מקורות כל יום. אף כלי PKM לא מחבר אותם לספריא.",
      "branch": "feat/sefaria-sources",
-     "status": "⏳ #452 (על verify/train; ציטוט לפי הפניה, רישיון לכל גרסה: PD/CC0/CC-BY/CC-BY-SA נשמרים עם קרדיט, השאר קישור בלבד; בקשה רק אחרי אישור, ביומן הפרטיות וב-CSP; sefariaSources 12/12, 50/50 פורמטים, 0 בקשות בביקור שני; תנאי השימוש, מגבלת קצב ו-CORS לא אומתו (הפרוקסי חוסם את sefaria.org); חסר: פאנל צד ונקודות פסוק בגרף)"
+     "status": "⏳ #452 (על verify/train; ציטוט לפי הפניה, רישיון לכל גרסה: PD/CC0/CC-BY/CC-BY-SA נשמרים עם קרדיט, השאר קישור בלבד; בקשה רק אחרי אישור, ביומן הפרטיות וב-CSP; sefariaSources 12/12, 50/50 פורמטים, 0 בקשות בביקור שני; תנאי השימוש, מגבלת קצב ו-CORS לא אומתו (הפרוקסי חוסם את sefaria.org); חסר: פאנל צד ונקודות פסוק בגרף)",
+     "verified": "built",
+     "pr": 452
     },
     {
      "id": "W5.2",
@@ -7007,7 +7492,9 @@
      ],
      "why": "סטודנטים למשפטים ולמדעי הרוח בישראל מבזבזים שעות על אזכורים ידניים; Zotero לא תומך בכללים האלה כראוי.",
      "branch": "feat/israeli-citations",
-     "status": "⏳ #457 (על #411; כללי האזכור האחיד מהדורה 3 (2021): פסיקה, חקיקה, תקנות, הצעות חוק, ספרים ומאמרים; זיהוי 30 סוגי הליכים; דיאלוג בחירה מהמספר שליד הסמן; legalCitations 26/26, israeliAcademicCitations 22/22; חסר: סקירת סטודנט למשפטים ≥38/40, ייצוא DOCX)"
+     "status": "⏳ #457 (על #411; כללי האזכור האחיד מהדורה 3 (2021): פסיקה, חקיקה, תקנות, הצעות חוק, ספרים ומאמרים; זיהוי 30 סוגי הליכים; דיאלוג בחירה מהמספר שליד הסמן; legalCitations 26/26, israeliAcademicCitations 22/22; חסר: סקירת סטודנט למשפטים ≥38/40, ייצוא DOCX)",
+     "verified": "built",
+     "pr": 457
     },
     {
      "id": "W5.3",
@@ -7032,7 +7519,9 @@
      ],
      "why": "Word ו-Google Docs מציעים דקדוק עברי בסיסי בענן. בודק מקומי ופרטי שמבין עברית לא קיים.",
      "branch": "feat/hebrew-grammar",
-     "status": "⏳ #437 (על #257; כללי מספר ומין, הכי…ביותר, את/עם, ה׳ הידיעה בסמיכות, משלב; 14/14; recall 200/200, שגיאות שווא 0/200 ו-0/1,302 משפטי HeQ אמיתיים; p95 0.25ms, 0 בקשות; מודל Ollama מקומי אופציונלי (loopback בלבד); חסר: סט מוחזק של 200 משפטים אמיתיים (בעלים), בדיקת grammarExtension, עורך אמיתי; dodMock)"
+     "status": "⏳ #437 (על #257; כללי מספר ומין, הכי…ביותר, את/עם, ה׳ הידיעה בסמיכות, משלב; 14/14; recall 200/200, שגיאות שווא 0/200 ו-0/1,302 משפטי HeQ אמיתיים; p95 0.25ms, 0 בקשות; מודל Ollama מקומי אופציונלי (loopback בלבד); חסר: סט מוחזק של 200 משפטים אמיתיים (בעלים), בדיקת grammarExtension, עורך אמיתי; dodMock)",
+     "verified": "built",
+     "pr": 437
     },
     {
      "id": "W5.4",
@@ -7055,7 +7544,9 @@
      ],
      "why": "כל כותב עברית נתקל בסוגריים הפוכים ובפסקאות ״משוגעות״ אחרי הדבקה. אף עורך לא מראה את הסיבה.",
      "branch": "feat/bidi-marks",
-     "status": "⏳ #439 (על #252; תגיות ל-12 סימני כיוון בשני העורכים, Trojan Source באדום, אזהרה בהדבקה, ניקוי בצעד undo אחד; bidiMarks 15/15, 30/30 שורות מסומנות, 30 שורות הזהב זהות אחרי ניקוי ב-Chromium; חסר: e2e ב-3 דפדפנים, ה-glue של העורכים, בנייה)"
+     "status": "⏳ #439 (על #252; תגיות ל-12 סימני כיוון בשני העורכים, Trojan Source באדום, אזהרה בהדבקה, ניקוי בצעד undo אחד; bidiMarks 15/15, 30/30 שורות מסומנות, 30 שורות הזהב זהות אחרי ניקוי ב-Chromium; חסר: e2e ב-3 דפדפנים, ה-glue של העורכים, בנייה)",
+     "verified": "browser",
+     "pr": 439
     },
     {
      "id": "W5.5",
@@ -7078,7 +7569,9 @@
      ],
      "why": "העתקת עברית מ-PDF ממשלתי או אקדמי נותנת טקסט הפוך — בעיה יומיומית של סטודנטים ועורכי דין.",
      "branch": "feat/pdf-paste-reversed",
-     "status": "⏳ #442 (על feat/paste-fidelity; 100 שורות סינתטיות דרך PDF אמיתי ו-pdf.js: 96/100 שורות הפוכות תוקנו, 0 הצעות על 1,400+ מחרוזות עבריות תקינות, אותיות סופיות 46/47; pdfHebrew 12/12, pdfPaste 8/8 ב-Chromium; חסר: PDF-ים אמיתיים מ-Word/InDesign, e2e)"
+     "status": "⏳ #442 (על feat/paste-fidelity; 100 שורות סינתטיות דרך PDF אמיתי ו-pdf.js: 96/100 שורות הפוכות תוקנו, 0 הצעות על 1,400+ מחרוזות עבריות תקינות, אותיות סופיות 46/47; pdfHebrew 12/12, pdfPaste 8/8 ב-Chromium; חסר: PDF-ים אמיתיים מ-Word/InDesign, e2e)",
+     "verified": "browser",
+     "pr": 442
     },
     {
      "id": "W5.6",
@@ -7101,7 +7594,9 @@
      ],
      "why": "ניקוד עוזר לקוראים צעירים, לעולים ולבעלי דיסלקציה. אף עורך לא נותן ניקוד ״זמני״ לקריאה.",
      "branch": "feat/accessible-reading",
-     "status": "⏳ #447 (על verify/train; ניקוד לתצוגה בלבד (הקובץ לא משתנה, נבדק בבייטים), פריסה לדיסלקציה (Noto Sans Hebrew — אין גופן דיסלקציה פתוח עם עברית; OpenDyslexic ללטינית), הקראה עם הדגשת מילה; wordSync 5/5, readingAids 8/8, Chromium offline 11/11; חסר: מודל Nakdimon אמיתי, 3 קוראים עם דיסלקציה, בנייה; dodMock)"
+     "status": "⏳ #447 (על verify/train; ניקוד לתצוגה בלבד (הקובץ לא משתנה, נבדק בבייטים), פריסה לדיסלקציה (Noto Sans Hebrew — אין גופן דיסלקציה פתוח עם עברית; OpenDyslexic ללטינית), הקראה עם הדגשת מילה; wordSync 5/5, readingAids 8/8, Chromium offline 11/11; חסר: מודל Nakdimon אמיתי, 3 קוראים עם דיסלקציה, בנייה; dodMock)",
+     "verified": "browser",
+     "pr": 447
     },
     {
      "id": "W5.7",
@@ -7124,7 +7619,9 @@
      ],
      "why": "בישראל, החלטות, מתכונים ומידע לימודי נמצאים ב-WhatsApp. אין דרך פרטית להוציא אותם לפתקים.",
      "branch": "feat/chat-import",
-     "status": "⏳ #478 (על verify/train; WhatsApp ‏Android/iOS בעברית/אנגלית/ערבית (שני סדרי תאריך, לפנה״צ/אחה״צ, סימני כיוון) ו-Telegram JSON; פתק ליום או לשיחה עם מדיה; הודעה בודדת לתיבת הדואר; chatImport 23/23 (8 ייצואים סינתטיים, 0 בקשות); חסר: 10 ייצואים אמיתיים ושיתוף ב-Android (טל); dodMock)"
+     "status": "⏳ #478 (על verify/train; WhatsApp ‏Android/iOS בעברית/אנגלית/ערבית (שני סדרי תאריך, לפנה״צ/אחה״צ, סימני כיוון) ו-Telegram JSON; פתק ליום או לשיחה עם מדיה; הודעה בודדת לתיבת הדואר; chatImport 23/23 (8 ייצואים סינתטיים, 0 בקשות); חסר: 10 ייצואים אמיתיים ושיתוף ב-Android (טל); dodMock)",
+     "verified": "built",
+     "pr": 478
     },
     {
      "id": "W5.8",
@@ -7148,7 +7645,9 @@
      ],
      "why": "כותבים עבריים עובדים היום ב-Word או ב-Scrivener (שתמיכת ה-RTL שלו חלשה). זה שוק ברור.",
      "branch": "feat/book-mode",
-     "status": "⏳ #465 (על verify/train; ספר = פתק אינדקס בפורמט Longform (נפתח גם ב-Obsidian), יעדי מילים לפרק ולספר, ספירת מילים עברית; EPUB 3 RTL — epubcheck 5.3.0 על ספר של 30 פרקים: 0 שגיאות, 0 אזהרות; PDF של 62 עמודי A5; הרכבה 0.3 ש׳; bookMode 17/17, bookEpub 5/5; חסר: suite מלא, בנייה, Apple Books ו-Kindle (בעלים))"
+     "status": "⏳ #465 (על verify/train; ספר = פתק אינדקס בפורמט Longform (נפתח גם ב-Obsidian), יעדי מילים לפרק ולספר, ספירת מילים עברית; EPUB 3 RTL — epubcheck 5.3.0 על ספר של 30 פרקים: 0 שגיאות, 0 אזהרות; PDF של 62 עמודי A5; הרכבה 0.3 ש׳; bookMode 17/17, bookEpub 5/5; חסר: suite מלא, בנייה, Apple Books ו-Kindle (בעלים))",
+     "verified": "built",
+     "pr": 465
     },
     {
      "id": "W5.9",
@@ -7172,7 +7671,9 @@
      ],
      "why": "עיתונאים, עורכי דין ומטפלים צריכים להוכיח, לא רק להאמין, שהמידע לא יצא.",
      "branch": "feat/airplane-mode",
-     "status": "⏳ #451 (על verify/train; חסימה של fetch, XHR, WebSocket, EventSource, sendBeacon, WebRTC ו-workers, ו-CSP דינמי בזמן המתג; מוניטור חי עם מיקום בקוד; תעודה SHA-256 לא חתומה (W2.24 לא ברכבת — חתימה בשורה אחת אחר כך); airplane 15/15 ב-Chromium; חסר: 22 פקודות מול mitmproxy (טל), e2e, Firefox/WebKit)"
+     "status": "⏳ #451 (על verify/train; חסימה של fetch, XHR, WebSocket, EventSource, sendBeacon, WebRTC ו-workers, ו-CSP דינמי בזמן המתג; מוניטור חי עם מיקום בקוד; תעודה SHA-256 לא חתומה (W2.24 לא ברכבת — חתימה בשורה אחת אחר כך); airplane 15/15 ב-Chromium; חסר: 22 פקודות מול mitmproxy (טל), e2e, Firefox/WebKit)",
+     "verified": "browser",
+     "pr": 451
     },
     {
      "id": "W5.10",
@@ -7196,7 +7697,9 @@
      ],
      "why": "שיתוף מהיר ופרטי בלי שרת ובלי חשבון — כמו Excalidraw ו-PrivateBin, אבל לפתקים.",
      "branch": "feat/share-link-fragment",
-     "status": "⏳ #448 (על verify/train; פתק ומפתח ב-#fragment בלבד (AES-GCM-256 + deflate), צפייה בלי חשבון, תפוגה אופציונלית, תקרה 32,768 תווים ומעליה קובץ .lumenshare מוצפן; linkShare 8/8; חסר: e2e ב-Safari/Chrome/Firefox, Vercel)"
+     "status": "⏳ #448 (על verify/train; פתק ומפתח ב-#fragment בלבד (AES-GCM-256 + deflate), צפייה בלי חשבון, תפוגה אופציונלית, תקרה 32,768 תווים ומעליה קובץ .lumenshare מוצפן; linkShare 8/8; חסר: e2e ב-Safari/Chrome/Firefox, Vercel)",
+     "verified": "built",
+     "pr": 448
     },
     {
      "id": "W5.11",
@@ -7220,7 +7723,9 @@
      ],
      "why": "השחרה ״קוסמטית״ ב-PDF היא דליפה ידועה. משתמשים שעובדים עם מקורות צריכים כלי שעושה את זה נכון.",
      "branch": "feat/journalist-mode",
-     "status": "⏳ #473 (כל 3 החלקים; השחרה אמיתית ב-DOCX, HTML, PDF ו-MD דרך נקודת ייצוא אחת, נכשלת סגור; pdftotext: 0/50 קבצים עם סוד (בקרה: 50/50 דולפים), DOCX XML: 0/50; ניקוי מטא-דאטה של תמונות בייצוא; פתקים עם סיסמה משלהם (AES-256-GCM, Argon2id אוטומטית אחרי #472); מתג בהגדרות שייבוא לא מדליק; redaction 11/11, lockedNote 6/6, imageMetadata 7/7; חסר: בנייה ותקציב, e2e, HEIC/AVIF)"
+     "status": "⏳ #473 (כל 3 החלקים; השחרה אמיתית ב-DOCX, HTML, PDF ו-MD דרך נקודת ייצוא אחת, נכשלת סגור; pdftotext: 0/50 קבצים עם סוד (בקרה: 50/50 דולפים), DOCX XML: 0/50; ניקוי מטא-דאטה של תמונות בייצוא; פתקים עם סיסמה משלהם (AES-256-GCM, Argon2id אוטומטית אחרי #472); מתג בהגדרות שייבוא לא מדליק; redaction 11/11, lockedNote 6/6, imageMetadata 7/7; חסר: בנייה ותקציב, e2e, HEIC/AVIF)",
+     "verified": "built",
+     "pr": 473
     },
     {
      "id": "W5.12",
@@ -7244,7 +7749,9 @@
      ],
      "why": "Elicit ו-SciSpace עושים את זה בענן. חוקרים עם נתונים רגישים או ללא תקציב צריכים את זה מקומי.",
      "branch": "feat/lit-review-matrix",
-     "status": "⏳ #438 (על #339; 5 שדות למאמר, ערך נשמר רק עם ציטוט שנמצא בעמוד, אחרת null; קובץ Literature review.base; ‏10/10; סט פיתוח 24/25 שדות, 0 ערכים בלי ציטוט; חסר: מודל אמיתי ו-20 מאמרי זהב (בעלים); dodMock)"
+     "status": "⏳ #438 (על #339; 5 שדות למאמר, ערך נשמר רק עם ציטוט שנמצא בעמוד, אחרת null; קובץ Literature review.base; ‏10/10; סט פיתוח 24/25 שדות, 0 ערכים בלי ציטוט; חסר: מודל אמיתי ו-20 מאמרי זהב (בעלים); dodMock)",
+     "verified": "built",
+     "pr": 438
     },
     {
      "id": "W5.13",
@@ -7270,7 +7777,9 @@
      ],
      "why": "Capacities ו-Notion הוסיפו הקלטה ותמלול בענן. לסטודנט עברי אין שרשרת מקומית מהרצאה לחזרה.",
      "branch": "feat/student-mode",
-     "status": "⏳ #441 (על #376; הקלטה → תמלול עם חותמות זמן → סיכום מתוך התמלול → כרטיסי cloze עם ▶ לרגע; סימון ״חשוב!״; ‏studentMode 10/10, מקליט 2/2 ב-Chromium offline; המודל Whisper יורד פעם אחת מ-Hugging Face; חסר: Whisper אמיתי ב-WebGPU, יעד 90 דק׳ ≤ 20 דק׳ (בעלים); dodMock)"
+     "status": "⏳ #441 (על #376; הקלטה → תמלול עם חותמות זמן → סיכום מתוך התמלול → כרטיסי cloze עם ▶ לרגע; סימון ״חשוב!״; ‏studentMode 10/10, מקליט 2/2 ב-Chromium offline; המודל Whisper יורד פעם אחת מ-Hugging Face; חסר: Whisper אמיתי ב-WebGPU, יעד 90 דק׳ ≤ 20 דק׳ (בעלים); dodMock)",
+     "verified": "browser",
+     "pr": 441
     },
     {
      "id": "W5.14",
@@ -7294,7 +7803,9 @@
      ],
      "why": "נוסחה באמצע משפט עברי נשברת כמעט בכל עורך. זה כאב יומיומי לתלמידים ולסטודנטים למדעים.",
      "branch": "feat/math-in-hebrew",
-     "status": "⏳ #446 (על #252, בלי W2.8 — שתי ערימות שהתפצלו; נוסחה = בידוד LTR בתצוגה, בעורך ובהדפסה, OMML ב-DOCX 50/50; 50 שורות זהב 0/50 → 50/50 בתצוגה, 11/50 → 50/50 בעורך; Ctrl+M; 3 תבניות לימוד; חסר: e2e, פתיחה ב-Word, KaTeX 0.18 (נבדק ב-0.16))"
+     "status": "⏳ #446 (על #252, בלי W2.8 — שתי ערימות שהתפצלו; נוסחה = בידוד LTR בתצוגה, בעורך ובהדפסה, OMML ב-DOCX 50/50; 50 שורות זהב 0/50 → 50/50 בתצוגה, 11/50 → 50/50 בעורך; Ctrl+M; 3 תבניות לימוד; חסר: e2e, פתיחה ב-Word, KaTeX 0.18 (נבדק ב-0.16))",
+     "verified": "built",
+     "pr": 446
     },
     {
      "id": "W5.15",
@@ -7318,7 +7829,9 @@
      ],
      "why": "כל כלי משימות ״זר״ מניח שבוע ב׳–ו׳ ומתעלם מחגים. זה מבדל קטן עם השפעה יומיומית.",
      "branch": "feat/israeli-time",
-     "status": "⏳ #450 (על #396; ימי עבודה א׳–ה׳, דדליין שזז ליום העבודה הבא עם הסבר (חוק הפרשנות §10), תאריך עברי במאפיינים וב-DB; israeliTime 36/36 (30 תרחישי זהב + בדיקה מול ICU), dateCells 6/6, hebrewCalendar 29/29; חסר: חיבור ל-rollups של #397, בנייה)"
+     "status": "⏳ #450 (על #396; ימי עבודה א׳–ה׳, דדליין שזז ליום העבודה הבא עם הסבר (חוק הפרשנות §10), תאריך עברי במאפיינים וב-DB; israeliTime 36/36 (30 תרחישי זהב + בדיקה מול ICU), dateCells 6/6, hebrewCalendar 29/29; חסר: חיבור ל-rollups של #397, בנייה)",
+     "verified": "built",
+     "pr": 450
     },
     {
      "id": "W5.16",
@@ -7342,7 +7855,9 @@
      ],
      "why": "סטודנטים כותבים ב-Lumen אבל מגישים ב-Word. הייצוא הוא נקודת הנטישה.",
      "branch": "feat/academic-docx",
-     "status": "⏳ #464 (על verify/train; 5 פרופילי מוסדות מהנחיות שנקראו (העברית, בר-אילן, חיפה, הפתוחה, ת״א רפואה); דף שער, תוכן עניינים של Word, מספור, RTL, ביבליוגרפיה; הערות שוליים אמיתיות בכל ייצוא; תוקן באג: מודגש ונטוי עבריים לא הופיעו ב-Word (bCs/iCs); exportDocxAcademic 30/30, exportBidi 11/11; LibreOffice → PDF 19–20 עמודים; חסר: פתיחה ב-Word אמיתי (טל), בדיקת הדיאלוג, בנייה)"
+     "status": "⏳ #464 (על verify/train; 5 פרופילי מוסדות מהנחיות שנקראו (העברית, בר-אילן, חיפה, הפתוחה, ת״א רפואה); דף שער, תוכן עניינים של Word, מספור, RTL, ביבליוגרפיה; הערות שוליים אמיתיות בכל ייצוא; תוקן באג: מודגש ונטוי עבריים לא הופיעו ב-Word (bCs/iCs); exportDocxAcademic 30/30, exportBidi 11/11; LibreOffice → PDF 19–20 עמודים; חסר: פתיחה ב-Word אמיתי (טל), בדיקת הדיאלוג, בנייה)",
+     "verified": "built",
+     "pr": 464
     },
     {
      "id": "W5.17",
@@ -7366,7 +7881,9 @@
      ],
      "why": "כ-21% מאזרחי ישראל דוברי ערבית; מורים, סטודנטים ומתרגמים עובדים בשתי השפות.",
      "branch": "feat/arabic-first",
-     "status": "⏳ #466 (על #459; הצגה/הסרה של תשכיל, חיפוש שמתעלם מתשכיל ומאחד أ/إ/آ/ا ו-ة/ه ומקלף ו/ف/ب/ك/ل/ال, בדיקת ערבית במכשיר בלבד, Ayaspell בהורדה מפורשת (GPL — לא נארז), מטריצת RTL בערבית, 15 שורות זהב עברית-ערבית-אנגלית; arabic 27/27; חסר: recall אמיתי (הפרוקסי חוסם), גופן ערבי פתוח, סקירת דובר; נשאר ״בטא״)"
+     "status": "⏳ #466 (על #459; הצגה/הסרה של תשכיל, חיפוש שמתעלם מתשכיל ומאחד أ/إ/آ/ا ו-ة/ه ומקלף ו/ف/ب/ك/ل/ال, בדיקת ערבית במכשיר בלבד, Ayaspell בהורדה מפורשת (GPL — לא נארז), מטריצת RTL בערבית, 15 שורות זהב עברית-ערבית-אנגלית; arabic 27/27; חסר: recall אמיתי (הפרוקסי חוסם), גופן ערבי פתוח, סקירת דובר; נשאר ״בטא״)",
+     "verified": "built",
+     "pr": 466
     },
     {
      "id": "W5.18",
@@ -7389,7 +7906,9 @@
      ],
      "why": "ידע אישי רב תקוע בדואר. הקידודים העבריים הישנים שוברים רוב הכלים.",
      "branch": "feat/mail-import",
-     "status": "⏳ #482 (על #478; MIME (RFC 2047/2231), windows-1255 ו-ISO-8859-8-I לוגיים, ISO-8859-8 חזותי מתהפך לפי אותיות סופיות; mbox עם שרשורים ותוויות Gmail; Takeout: ‏Keep ו-Docs; mailImport 11/11, 50/50 הודעות בקידוד ישן, 5,000 הודעות ב-1.1 ש׳; חסר: ארכיון דואר עברי אמיתי, Takeout אמיתי; dodMock)"
+     "status": "⏳ #482 (על #478; MIME (RFC 2047/2231), windows-1255 ו-ISO-8859-8-I לוגיים, ISO-8859-8 חזותי מתהפך לפי אותיות סופיות; mbox עם שרשורים ותוויות Gmail; Takeout: ‏Keep ו-Docs; mailImport 11/11, 50/50 הודעות בקידוד ישן, 5,000 הודעות ב-1.1 ש׳; חסר: ארכיון דואר עברי אמיתי, Takeout אמיתי; dodMock)",
+     "verified": "built",
+     "pr": 482
     },
     {
      "id": "W5.19",
@@ -7414,7 +7933,9 @@
      ],
      "why": "Notion ו-Heptabase מציעים סיכומים דרך סוכן בענן. גרסה פרטית ופשוטה מחזירה משתמשים מדי יום.",
      "branch": "feat/morning-summary",
-     "status": "⏳ #440 (על #394 + #396; בלוק ״הבוקר שלך״ בפתק היומי: שינויים, משימות להיום (3 תחבירים), כרטיסי חזרה, תאריך עברי, פרשה וחגים; כל שורה מקושרת; כבוי כברירת מחדל; 9/9, ‏hebrewCalendar 29/29, ‏fsrs 12/12; ‏10k פתקים חציון 6.6ms; חסר: e2e ובניית אינדקס בכספת אמיתית)"
+     "status": "⏳ #440 (על #394 + #396; בלוק ״הבוקר שלך״ בפתק היומי: שינויים, משימות להיום (3 תחבירים), כרטיסי חזרה, תאריך עברי, פרשה וחגים; כל שורה מקושרת; כבוי כברירת מחדל; 9/9, ‏hebrewCalendar 29/29, ‏fsrs 12/12; ‏10k פתקים חציון 6.6ms; חסר: e2e ובניית אינדקס בכספת אמיתית)",
+     "verified": "built",
+     "pr": 440
     },
     {
      "id": "W5.20",
@@ -7437,7 +7958,9 @@
      ],
      "why": "Siri בעברית מוגבלת, ו-Google Assistant שולח הכול לענן. פקודות קוליות מקומיות הן נגישות ונוחות.",
      "branch": "feat/voice-commands",
-     "status": "⏳ #458 (על #454; פקודה ״פקודה קולית״ — כפתור, לא מילת הפעלה; דקדוק של 20 כוונות בעברית ובאנגלית; ״מחק פתק״ שואל לפני; voiceIntents 7/7; סט הפיתוח 200/200 ו-0/20 שגיאות שווא (לא סט מוחזק); חסר: 200 הקלטות של טל, e2e עם מיקרופון מזויף; dodMock)"
+     "status": "⏳ #458 (על #454; פקודה ״פקודה קולית״ — כפתור, לא מילת הפעלה; דקדוק של 20 כוונות בעברית ובאנגלית; ״מחק פתק״ שואל לפני; voiceIntents 7/7; סט הפיתוח 200/200 ו-0/20 שגיאות שווא (לא סט מוחזק); חסר: 200 הקלטות של טל, e2e עם מיקרופון מזויף; dodMock)",
+     "verified": "built",
+     "pr": 458
     },
     {
      "id": "W5.21",
@@ -7482,7 +8005,9 @@
      ],
      "why": "תזות בפיזיקה, מתמטיקה ומדעי המחשב בישראל נכתבות ב-LaTeX; המעבר מהפתקים לשם ידני היום.",
      "branch": "feat/latex-academic",
-     "status": "⏳ #468 (על verify/train; babel (bidi=basic ב-LuaLaTeX, default ב-XeLaTeX) במקום polyglossia; ציטוטים ל-natbib, רשימת מקורות APA בכיוון לכל פריט; 10/10 מסמכי זהב מתקמפלים ב-XeLaTeX: 0 שגיאות, 0 תווים חסרים; latexAcademic 17/17; חסר: LuaLaTeX (חסר luatexbase כאן), goldens מול remark האמיתי, בנייה)"
+     "status": "⏳ #468 (על verify/train; babel (bidi=basic ב-LuaLaTeX, default ב-XeLaTeX) במקום polyglossia; ציטוטים ל-natbib, רשימת מקורות APA בכיוון לכל פריט; 10/10 מסמכי זהב מתקמפלים ב-XeLaTeX: 0 שגיאות, 0 תווים חסרים; latexAcademic 17/17; חסר: LuaLaTeX (חסר luatexbase כאן), goldens מול remark האמיתי, בנייה)",
+     "verified": "built",
+     "pr": 468
     },
     {
      "id": "W5.23",
@@ -7505,7 +8030,9 @@
      ],
      "why": "W2.15 ו-W2.16 דורשים Zotero Desktop פתוח. במובייל ובדפדפן זה לא אפשרי.",
      "branch": "feat/zotero-web-api",
-     "status": "⏳ #485 (על #411; סנכרון קריאה בלבד ומצטבר (If-Modified-Since-Version, 304), 50 פריטים לבקשה, Backoff/429; המפתח באחסון הסודות, קטגוריית research ביומן הפרטיות; zoteroWeb 8/8: ספרייה של 1,000 פריטים ב-25 בקשות; fixtures מהתיעוד, לא מוקלטים (הפרוקסי חוסם); חסר: סנכרון אמיתי, api.zotero.org ב-vercel.json; dodMock)"
+     "status": "⏳ #485 (על #411; סנכרון קריאה בלבד ומצטבר (If-Modified-Since-Version, 304), 50 פריטים לבקשה, Backoff/429; המפתח באחסון הסודות, קטגוריית research ביומן הפרטיות; zoteroWeb 8/8: ספרייה של 1,000 פריטים ב-25 בקשות; fixtures מהתיעוד, לא מוקלטים (הפרוקסי חוסם); חסר: סנכרון אמיתי, api.zotero.org ב-vercel.json; dodMock)",
+     "verified": "built",
+     "pr": 485
     },
     {
      "id": "W5.24",
@@ -7529,7 +8056,9 @@
      ],
      "why": "Notion ו-Tana מציעים אוטומציות; ב-Obsidian צריך תוסף וקוד. כללים פשוטים ובטוחים חוסכים זמן יומיומי.",
      "branch": "feat/automations",
-     "status": "⏳ #471 (על verify/train; טריגרים: פתק נוצר, תגית, מאפיין, יומי; פעולות: העברה, תגית, תבנית, הוספה ליומי; הרצת ניסיון = המתכנן עצמו, undo מדויק בבייט, הגנת לולאות (עומק 3); automations 26/26 (20 כללי זהב); חסר: suite, בנייה, e2e, פעולות ״הרץ סוכן״ ו״צור משימה״)"
+     "status": "⏳ #471 (על verify/train; טריגרים: פתק נוצר, תגית, מאפיין, יומי; פעולות: העברה, תגית, תבנית, הוספה ליומי; הרצת ניסיון = המתכנן עצמו, undo מדויק בבייט, הגנת לולאות (עומק 3); automations 26/26 (20 כללי זהב); חסר: suite, בנייה, e2e, פעולות ״הרץ סוכן״ ו״צור משימה״)",
+     "verified": "built",
+     "pr": 471
     },
     {
      "id": "W5.25",
@@ -7575,7 +8104,9 @@
      ],
      "why": "כותבים מחפשים מילה נרדפת ב-Google עשרות פעמים ביום; בעברית אין כלי offline משולב.",
      "branch": "feat/hebrew-lexicon",
-     "status": "⏳ #453 (על verify/train; Wiktionary עברי (CC BY-SA, קובץ נפרד; Hspell נדחה — AGPL), חיפוש עם קילוף תחיליות, הורדה לפי בקשה עם sha256, מילים נרדפות/הגדרה/ניקוד בקליק ימני; hebrewLexicon 13/13, חיפוש < 20ms ב-25k ערכים; חסר: בניית החבילה האמיתית — הפרוקסי חוסם את dumps.wikimedia.org, טל מריץ npm run lexicon:build; dodMock)"
+     "status": "⏳ #453 (על verify/train; Wiktionary עברי (CC BY-SA, קובץ נפרד; Hspell נדחה — AGPL), חיפוש עם קילוף תחיליות, הורדה לפי בקשה עם sha256, מילים נרדפות/הגדרה/ניקוד בקליק ימני; hebrewLexicon 13/13, חיפוש < 20ms ב-25k ערכים; חסר: בניית החבילה האמיתית — הפרוקסי חוסם את dumps.wikimedia.org, טל מריץ npm run lexicon:build; dodMock)",
+     "verified": "built",
+     "pr": 453
     },
     {
      "id": "W5.27",
@@ -7599,7 +8130,9 @@
      ],
      "why": "סטודנטים עם iPad כותבים ביד (GoodNotes, Notability). שילוב כתב יד בפתקי Markdown חסר אצל רוב המתחרים.",
      "branch": "feat/ink-notes",
-     "status": "⏳ #475 (על verify/train; דיו כ-SVG בתוך ה-Markdown (קווי perfect-freehand + דגימות לחץ), חזרה זהה בבייט; לחץ עט, מחק בקצה העט, דחיית כף יד, undo; מיקום לפי כיוון הטקסט; ink 32/32, Chromium 6/6 עם עט ומגע אמיתיים דרך CDP, p95 0.8ms; חסר: e2e, iPad אמיתי ופתיחה ב-Obsidian (טל))"
+     "status": "⏳ #475 (על verify/train; דיו כ-SVG בתוך ה-Markdown (קווי perfect-freehand + דגימות לחץ), חזרה זהה בבייט; לחץ עט, מחק בקצה העט, דחיית כף יד, undo; מיקום לפי כיוון הטקסט; ink 32/32, Chromium 6/6 עם עט ומגע אמיתיים דרך CDP, p95 0.8ms; חסר: e2e, iPad אמיתי ופתיחה ב-Obsidian (טל))",
+     "verified": "browser",
+     "pr": 475
     },
     {
      "id": "W5.28",
@@ -7623,7 +8156,9 @@
      ],
      "why": "חוקרים ישראלים קוראים באנגלית וחושבים בעברית. W2.11 הוסיף עברית→אנגלית ב-probe של 5 שאילתות; זה הופך את זה ליכולת מדודה.",
      "branch": "feat/crosslingual-search",
-     "status": "⏳ #434 (על #362; חיפוש חכם מסמן תוצאות בשפה אחרת ומציג תרגום מקומי, multilingual-e5 (MIT), אזהרה למודל אנגלי בלבד; 10/10 ב-Node נקי; קו בסיס BM25: nDCG@10 0.175; 10k פתקים p95 17.6ms; 0 בקשות; חסר: nDCG אמיתי של e5 וסט מוחזק Belebele (הקפאת golden set — החלטת טל); dodMock)"
+     "status": "⏳ #434 (על #362; חיפוש חכם מסמן תוצאות בשפה אחרת ומציג תרגום מקומי, multilingual-e5 (MIT), אזהרה למודל אנגלי בלבד; 10/10 ב-Node נקי; קו בסיס BM25: nDCG@10 0.175; 10k פתקים p95 17.6ms; 0 בקשות; חסר: nDCG אמיתי של e5 וסט מוחזק Belebele (הקפאת golden set — החלטת טל); dodMock)",
+     "verified": "node",
+     "pr": 434
     }
    ]
   }
