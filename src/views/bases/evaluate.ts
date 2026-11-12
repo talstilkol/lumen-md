@@ -91,7 +91,14 @@ export const BASES_DOCUMENTED: readonly string[] = [
  */
 export const BASES_UNSUPPORTED: ReadonlySet<string> = new Set(["global.icon", "global.html"]);
 
-const GLOBAL_SET: ReadonlySet<string> = new Set(BASES_GLOBALS.filter((n) => !BASES_UNSUPPORTED.has(`global.${n}`)).concat(["html"]));
+/**
+ * Global functions of the first Bases releases (1.9), no longer in the
+ * reference but still in real files (plan W4.30: kepano's own vault has
+ * `not(empty(note.last))`): `not(x)` is `!x`, `empty(x)` is `x.isEmpty()`.
+ */
+export const BASES_LEGACY_GLOBALS = ["not", "empty"] as const;
+
+const GLOBAL_SET: ReadonlySet<string> = new Set<string>([...BASES_GLOBALS.filter((n) => !BASES_UNSUPPORTED.has(`global.${n}`)), "html", ...BASES_LEGACY_GLOBALS]);
 const METHOD_NAMES: ReadonlySet<string> = new Set(
   BASES_DOCUMENTED.filter((n) => !n.startsWith("global.")).map((n) => n.slice(n.indexOf(".") + 1)).concat(["upper", "length", "toLowerCase", "toUpperCase", "includes", "matches"]),
 );
@@ -582,6 +589,12 @@ class Interpreter {
       case "random":
         arity(0, 0);
         return this.random();
+      case "not":
+        arity(1, 1);
+        return !truthy(args[0]);
+      case "empty":
+        arity(1, 1);
+        return isEmptyValue(args[0]);
     }
     throw new FormulaError("unknown-function", `unknown function "${n.name}"`, at);
   }
