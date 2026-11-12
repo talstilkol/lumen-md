@@ -13,7 +13,8 @@
 #   • Markdown outside public/ and src/ never triggers a build.
 #   • Directories that are deployed elsewhere (docs site, edge workers, the
 #     signaling server, MCP/API/marketplace servers, packages, the browser
-#     extension, Tauri/iOS/Android shells, e2e, CI) do not trigger a build —
+#     extension, Tauri/iOS/Android shells, e2e, CI, the committed nightly
+#     reports under reports/) do not trigger a build —
 #     EXCEPT for files inside them that src/ (non-test code) imports; those
 #     are web build inputs even though they live outside src/.
 #   • Anything else (src/, public/, index.html, package*.json, vite/tsconfig,
@@ -43,7 +44,7 @@ git rev-parse --verify -q "$BASE" >/dev/null 2>&1 || exit 1
 changed="$(git diff --name-only "$BASE" "$HEAD_REF" 2>/dev/null)" || exit 1
 [ -z "$changed" ] && exit 0
 
-NON_APP='^(docs|edge-workers|sync-server|mcp-server|api-server|marketplace-server|packages|extension|src-tauri|ios|android|e2e|\.github)/'
+NON_APP='^(docs|edge-workers|sync-server|mcp-server|api-server|marketplace-server|packages|extension|src-tauri|ios|android|e2e|reports|\.github)/'
 
 # Repo-relative stems (no extension) of modules outside src/ that src/ imports,
 # e.g. "edge-workers/research/extract". Test files are ignored: they are not
