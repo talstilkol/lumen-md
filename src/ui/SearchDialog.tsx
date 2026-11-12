@@ -36,6 +36,12 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
   // self-hosted setups always have it.
   const smartAllowed = useCapability("smartSearch");
   const [query, setQuery] = useState("");
+  // A spoken "search …" (plan W5.20, src/ai/voice/run.ts) fills the box.
+  useEffect(() => {
+    const onQuery = (e: Event) => setQuery(String((e as CustomEvent<{ query?: string }>).detail?.query ?? ""));
+    window.addEventListener("lumen-search-query", onQuery);
+    return () => window.removeEventListener("lumen-search-query", onQuery);
+  }, []);
   const [hits, setHits] = useState<SearchHit[]>([]);
   const [smartHits, setSmartHits] = useState<SemanticHit[]>([]);
   const [smartIndexing, setSmartIndexing] = useState(false);
