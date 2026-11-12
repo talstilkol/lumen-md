@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { X, FileText } from "lucide-react";
 import type { DocFile } from "../store/useStore";
 import { t } from "../i18n";
+import { droppedOutside } from "../desktop/shell";
 
 export interface TabItem {
   id: string;
@@ -16,6 +17,8 @@ interface Props {
   onClose: (id: string) => void;
   /** Reorder a tab by drag-and-drop. Indexes are relative to the `tabs` prop. */
   onReorder?: (fromIndex: number, toIndex: number) => void;
+  /** Desktop (plan W3.9): a tab dropped outside the window moves to the window under the pointer, or a new one. */
+  onDragOut?: (id: string) => void;
 }
 
 /**
@@ -33,6 +36,7 @@ export const DocTabs = React.memo(function DocTabs({
   onSelect,
   onClose,
   onReorder,
+  onDragOut,
 }: Props) {
   const [dragSrc, setDragSrc] = useState<number | null>(null);
   const [dragHover, setDragHover] = useState<number | null>(null);
@@ -103,9 +107,10 @@ export const DocTabs = React.memo(function DocTabs({
               setDragSrc(null);
               setDragHover(null);
             }}
-            onDragEnd={() => {
+            onDragEnd={(e) => {
               setDragSrc(null);
               setDragHover(null);
+              if (onDragOut && e.dataTransfer.dropEffect === "none" && droppedOutside(e, { w: window.innerWidth, h: window.innerHeight })) onDragOut(tab.id);
             }}
             style={{
               position: "relative",

@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
+import { windowLabel, windowStorage } from "../desktop/shell";
 import type { Locale } from "../i18n";
 import { applyLocale, isLocaleLoaded, loadLocale } from "../i18n";
 import {
@@ -449,6 +450,9 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: "lumen-md",
+      // Desktop (plan W3.9): every window keeps its own tabs; a new window
+      // starts with the main window's settings and none of its notes.
+      storage: createJSONStorage(() => windowStorage(windowLabel(), localStorage)),
       partialize: (s) => ({
         mode: s.mode,
         theme: s.theme,
