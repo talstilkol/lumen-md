@@ -1,10 +1,11 @@
 import * as Y from "yjs";
 import { WebrtcProvider } from "y-webrtc";
-import type { Awareness } from "y-protocols/awareness";
+import { Awareness } from "y-protocols/awareness";
 import { randomChoice, randomId, randomInt } from "../lib/cryptoRandom";
 import { log } from "../lib/logger";
 import { effectiveCapabilities, entitlementResolved, waitForEntitlement } from "../billing/gates";
 import { wireE2E, type E2EChannel, type E2EErrorReason } from "./e2e";
+import { wireE2EAwareness, type AwarenessLike, type E2EAwarenessBridge } from "./e2eAwareness";
 import { getSecret } from "../lib/secretStore";
 import { connectAllowedByCsp, isIpv6LiteralUrl } from "../lib/cspConnect";
 import { canComment, canEdit, commentsDocName, isServerOnly, readShareFromHash, type Role } from "./sharing";
@@ -50,6 +51,11 @@ export interface CollabSession {
   /** True when the room password is set and the E2E transport is active. */
   encrypted: boolean;
   ytext: Y.Text;
+  /**
+   * Presence (names, colours, cursors) as the editor sees it. In password
+   * rooms this one is local too: the providers sync a transport awareness
+   * whose states are sealed under the room key (plan W2.20, `./e2eAwareness.ts`).
+   */
   awareness: Awareness;
   provider: WebrtcProvider;
   /** Optional persistent provider (Hocuspocus) — null on WebRTC-only sessions. */
@@ -343,6 +349,22 @@ export function connectCollab(
   }
   const syncedDoc = transportDoc ?? doc;
 
+  // Plan W2.20: presence is end-to-end encrypted like the document. The
+  // editor binds to `plainAwareness`; the providers only ever see
+  // `transportAwareness`, whose states are `{ e2e: <sealed> }`.
+  let plainAwareness: Awareness | null = null;
+  let transportAwareness: Awareness | null = null;
+  let awarenessBridge: E2EAwarenessBridge | null = null;
+  if (password && transportDoc) {
+    plainAwareness = new Awareness(doc);
+    transportAwareness = new Awareness(transportDoc);
+    awarenessBridge = wireE2EAwareness(plainAwareness as unknown as AwarenessLike, transportAwareness as unknown as AwarenessLike, {
+      password,
+      room: roomName,
+      onDecryptError: (reason) => log.warn("collab e2e: could not open a participant's presence", reason),
+    });
+  }
+
   // A room with share links syncs through the server only: the server holds
   // every participant to their role, a WebRTC mesh could not (plan W1.19).
   const serverOnly = isServerOnly(roomName, share) && !!configuredWebsocketUrl();
@@ -377,7 +399,9 @@ export function connectCollab(
     signaling: serverOnly ? [] : getSignalingUrls(),
     maxConns: 20,
     ...(password ? { password } : {}),
+    ...(transportAwareness ? { awareness: transportAwareness } : {}),
   });
+  const awareness = plainAwareness ?? provider.awareness;
   let commentsWebsocket: WebsocketLike | null = null;
 
   // If a persistent server is configured, attach a WebsocketProvider in the
@@ -402,12 +426,12 @@ export function connectCollab(
   };
   const startPersistent = (url: string) => {
     if (serverOnly) {
-      void attachWebsocketProvider(url, roomName, commentsSynced, { share, docName: commentsDocName(roomName) }).then((p) => {
+      void attachWebsocketProvider(url, roomName, commentsSynced, { share, docName: commentsDocName(roomName), e2ee: !!password }).then((p) => {
         if (destroyed) p?.destroy();
         else commentsWebsocket = p;
       });
     }
-    void attachWebsocketProvider(url, roomName, syncedDoc, { share, onRole: setRole, ...(serverOnly ? { awareness: provider.awareness } : {}) }).then((p) => {
+    void attachWebsocketProvider(url, roomName, syncedDoc, { share, onRole: setRole, e2ee: !!password, ...(serverOnly ? { awareness: transportAwareness ?? provider.awareness } : transportAwareness ? { awareness: transportAwareness } : {}) }).then((p) => {
       if (destroyed) {
         p?.destroy();
         return;
@@ -538,7 +562,7 @@ export function connectCollab(
   }
 
   const user = randomUser();
-  provider.awareness.setLocalStateField("user", user);
+  awareness.setLocalStateField("user", user);
 
   // Comments made before the room had share links live in the note's
   // document: in a server-only room an editor moves them into the comments
@@ -574,7 +598,7 @@ export function connectCollab(
     transportDoc,
     encrypted: transportDoc !== null,
     ytext,
-    awareness: provider.awareness,
+    awareness,
     provider,
     get websocketProvider() {
       return websocketProvider;
@@ -611,6 +635,7 @@ export function connectCollab(
         stopSnapshots = null;
       }
       e2e?.destroy();
+      awarenessBridge?.destroy();
       try {
         provider.destroy();
       } catch {
@@ -620,6 +645,13 @@ export function connectCollab(
         websocketProvider?.destroy();
       } catch {
         /* why: teardown is best effort; one failure must not keep the doc or socket open */
+      }
+      // After the providers, which still announce this participant's departure.
+      try {
+        plainAwareness?.destroy();
+        transportAwareness?.destroy();
+      } catch {
+        /* */
       }
       try {
         doc.destroy();

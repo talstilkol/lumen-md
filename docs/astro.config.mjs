@@ -103,6 +103,7 @@ export default defineConfig({
             { label: "End-to-end encryption", slug: "collab/encryption" },
             { label: "Persistent rooms", slug: "collab/persistent", translations: { he: "חדרים מתמשכים" } },
             { label: "Sharing, roles and comment threads", slug: "collab/sharing", translations: { he: "שיתוף, תפקידים ותגובות" } },
+            { label: "Encrypted live sharing", slug: "collab/e2ee-sharing", translations: { he: "שיתוף חי מוצפן" } },
           ],
         },
         {
