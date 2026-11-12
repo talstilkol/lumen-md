@@ -229,6 +229,8 @@
   "cmd.pdf.open": "PDF zum Lesen öffnen…",
   "cmd.pdf.open.hint": "Markierungen landen in einer .pdf.md-Notiz",
   "cmd.preview": "Nur Vorschau",
+  "cmd.privacy.imageHosts": "Datenschutz: erlaubte Bild-Hosts…",
+  "cmd.privacy.imageHosts.hint": "Websites, für die du „Immer erlauben“ gewählt hast — eine oder alle widerrufen",
   "cmd.research.ask": "🔎 Recherche: Frage stellen…",
   "cmd.research.ask.hint": "Sucht im Web, liest Quellen und schreibt eine Notiz mit zitierter Fußnote zu jeder Aussage",
   "cmd.research.settings": "🔎 Recherche: Einstellungen…",

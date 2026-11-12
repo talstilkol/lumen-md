@@ -229,6 +229,8 @@
   "cmd.pdf.open": "فتح ملف PDF للقراءة…",
   "cmd.pdf.open.hint": "تُحفظ التظليلات في ملاحظة ‎.pdf.md",
   "cmd.preview": "المعاينة فقط",
+  "cmd.privacy.imageHosts": "الخصوصية: مضيفو الصور المسموح بهم…",
+  "cmd.privacy.imageHosts.hint": "المواقع التي اخترت لها «السماح دائمًا» — ألغِ واحدًا أو الكل",
   "cmd.research.ask": "🔎 بحث: اطرح سؤالًا…",
   "cmd.research.ask.hint": "يبحث في الويب ويقرأ المصادر ويكتب ملاحظة بحاشية مقتبسة لكل ادعاء",
   "cmd.research.settings": "🔎 بحث: الإعدادات…",

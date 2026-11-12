@@ -229,6 +229,8 @@
   "cmd.pdf.open": "PDF を開いて読む…",
   "cmd.pdf.open.hint": "ハイライトは .pdf.md ノートに保存",
   "cmd.preview": "プレビューのみ",
+  "cmd.privacy.imageHosts": "プライバシー: 許可した画像ホスト…",
+  "cmd.privacy.imageHosts.hint": "「常に許可」を選んだサイト — 1 つずつ、またはすべて取り消し",
   "cmd.research.ask": "🔎 リサーチ：質問する…",
   "cmd.research.ask.hint": "ウェブを検索し、出典を読み、各主張に引用付き脚注を付けたノートを作成",
   "cmd.research.settings": "🔎 リサーチ：設定…",

@@ -29,6 +29,7 @@ const TrashPanel = lazy(() => import("./ui/TrashPanel").then(m => ({ default: m.
 const PropertiesPanel = lazy(() => import("./ui/PropertiesPanel").then(m => ({ default: m.PropertiesPanel })));
 // Quick capture to inbox.md (plan 4.16): its own chunk, loaded on first open.
 const QuickCapture = lazy(() => import("./ui/QuickCapture").then(m => ({ default: m.QuickCapture })));
+const ImageHostsPanel = lazy(() => import("./ui/ImageHostsPanel").then(m => ({ default: m.ImageHostsPanel })));
 const AiDoctorPanel = lazy(() => import("./ui/AiDoctorPanel").then(m => ({ default: m.AiDoctorPanel })));
 const AgentReviewPanel = lazy(() => import("./ui/AgentReviewPanel").then(m => ({ default: m.AgentReviewPanel })));
 const VersionHistory = lazy(() => import("./ui/VersionHistory").then(m => ({ default: m.VersionHistory })));
@@ -925,6 +926,13 @@ export default function App() {
     window.addEventListener("lumen-note-edit", onEdit);
     return () => window.removeEventListener("lumen-note-edit", onEdit);
   }, [applyPropertiesEdit]);
+  // Allowed image hosts (plan W1.30), opened from the palette.
+  const [imageHostsOpen, setImageHostsOpen] = useState(false);
+  useEffect(() => {
+    const onOpen = () => setImageHostsOpen(true);
+    window.addEventListener("lumen-open-image-hosts", onOpen);
+    return () => window.removeEventListener("lumen-open-image-hosts", onOpen);
+  }, []);
   useEffect(() => {
     const onOpen = () => setTrashOpen(true);
     window.addEventListener("lumen-open-trash", onOpen);
@@ -1289,6 +1297,7 @@ export default function App() {
           {trashOpen && <TrashPanel open={trashOpen} onClose={() => setTrashOpen(false)} />}
           {propertiesOpen && <PropertiesPanel open={propertiesOpen} onClose={() => setPropertiesOpen(false)} text={doc.content} applyEdit={applyPropertiesEdit} />}
           {captureOpen && <QuickCapture open={captureOpen} onClose={() => setCaptureOpen(false)} />}
+          {imageHostsOpen && <ImageHostsPanel open={imageHostsOpen} onClose={() => setImageHostsOpen(false)} />}
         </ErrorBoundary>
       </Suspense>
 

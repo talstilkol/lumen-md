@@ -1793,6 +1793,55 @@
       ]
     },
     {
+      "key": "imageHosts.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "imageHosts.empty",
+      "en": "No site is always allowed. Images from other sites wait for you.",
+      "vars": []
+    },
+    {
+      "key": "imageHosts.intro",
+      "en": "Images from these sites load without asking. Revoke one, and its images wait for you again.",
+      "vars": []
+    },
+    {
+      "key": "imageHosts.revoke",
+      "en": "Revoke",
+      "vars": []
+    },
+    {
+      "key": "imageHosts.revokeAll",
+      "en": "Revoke all",
+      "vars": []
+    },
+    {
+      "key": "imageHosts.revokeHost",
+      "en": "Stop always allowing {host}",
+      "vars": [
+        "host"
+      ]
+    },
+    {
+      "key": "imageHosts.revoked",
+      "en": "{host}: images wait for you again",
+      "vars": [
+        "host"
+      ]
+    },
+    {
+      "key": "imageHosts.revokedAll",
+      "en": "Every site's images wait for you again",
+      "vars": []
+    },
+    {
+      "key": "imageHosts.title",
+      "en": "Allowed image hosts",
+      "vars": []
+    },
+    {
       "key": "imageSearch.copied",
       "en": "Image link copied — paste it into the note.",
       "vars": []

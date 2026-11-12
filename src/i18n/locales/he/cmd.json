@@ -229,6 +229,8 @@
   "cmd.pdf.open": "פתיחת PDF לקריאה…",
   "cmd.pdf.open.hint": "הסימונים נשמרים בפתק ‎.pdf.md",
   "cmd.preview": "תצוגה מקדימה בלבד",
+  "cmd.privacy.imageHosts": "פרטיות: שרתי תמונות מותרים…",
+  "cmd.privacy.imageHosts.hint": "אתרים שבחרתם ״תמיד לאפשר״ עבורם — ביטול של אחד או של כולם",
   "cmd.research.ask": "🔎 מחקר: שאלה…",
   "cmd.research.ask.hint": "מחפש ברשת, קורא מקורות וכותב פתק עם הערת שוליים מצוטטת לכל טענה",
   "cmd.research.settings": "🔎 מחקר: הגדרות…",
