@@ -49,10 +49,13 @@ dictation panel offers **Send to my desktop**:
 - **It stays on your network.** The audio travels only over the local
   network link between your two devices (no server, no STUN or TURN, local
   addresses only, the same link the sync uses), and it is also encrypted
-  with your vault's keys, so only your own devices can read it.
+  with your vault's keys, so only your own devices can read it. When the
+  browser doesn't tell Lumen the other device's address, the sentence isn't
+  sent: an address that can't be checked doesn't count as local.
 - If the desktop doesn't answer in time (10 seconds per minute of audio,
   at least 2.5 seconds per sentence), is busy or goes away, that sentence
-  keeps the phone's text. You never lose words.
+  keeps the phone's text. You never lose words. A sentence the phone stopped
+  waiting for is dropped on the desktop too, so it doesn't hold up the next one.
 - The desktop's vault must be unlocked, and the phone must have unlocked
   the same vault.
 

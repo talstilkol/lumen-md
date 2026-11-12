@@ -17,9 +17,16 @@
  * involved; nothing leaves the local network.
  *
  *   peer → host  svc.dictation.status                        → {v, ready, engine, reason?}
- *   peer → host  svc.dictation.transcribe {v, rid, language, samples}
+ *   peer → host  svc.dictation.transcribe {v, rid, language, samples, deadlineMs}
  *                + seal(blobs, "dictation-audio", rid, PCM16) → {v, rid, engine, computeMs}
  *                                                               + seal(blobs, "dictation-text", rid, JSON {text})
+ *   peer → host  svc.dictation.cancel {v, rid}                 → {v, rid, cancelled}
+ *
+ * The desktop's side (review 6): a sentence the phone gave up on (its
+ * deadline passed, or it cancelled) gives back its place at once and never
+ * starts, and only the device that sent it can cancel it; the payload's size
+ * is checked against the header before anything is decrypted; and a link
+ * whose address is unknown counts as not local.
  *
  * Never costs the user their words: a sentence the desktop doesn't answer in
  * time (OFFLOAD_MS_PER_MINUTE) keeps this device's streaming text.
@@ -27,7 +34,7 @@
  * Lazy: loaded by the dictation panel and by the LAN pairing dialog.
  */
 import { fromB64u, randomBytes, toB64u, utf8 } from "../../sync/e2ee/bytes";
-import { seal, unseal, type VaultKeys } from "../../sync/e2ee/keys";
+import { padLength, seal, unseal, type VaultKeys } from "../../sync/e2ee/keys";
 import { isLanHost } from "../../sync/e2ee/lan/address";
 import type { LanService, LanServiceReply } from "../../sync/e2ee/lan/rpc";
 import { CORRECTION_MAX_SECONDS, pickText, type SegmentCorrector } from "./correction";
@@ -36,6 +43,7 @@ import type { EngineId } from "./engines";
 export const OFFLOAD_PROTOCOL = 1;
 export const OP_STATUS = "svc.dictation.status";
 export const OP_TRANSCRIBE = "svc.dictation.transcribe";
+export const OP_CANCEL = "svc.dictation.cancel";
 const AUDIO_KIND = "dictation-audio";
 const TEXT_KIND = "dictation-text";
 const RATE = 16_000;
@@ -48,6 +56,11 @@ export const OFFLOAD_MIN_MS = 2_500;
 export const MOBILE_WER_TARGET = 0.15;
 /** Sentences the desktop holds at once; more are refused ("busy") and keep this device's text. */
 export const MAX_QUEUE = 4;
+/** A deadline shorter than this can't be met by any model over the link: refused at once, never run. */
+export const MIN_DEADLINE_MS = 250;
+const MAX_SAMPLES = CORRECTION_MAX_SECONDS * RATE;
+/** The sealed size of `samples` 16-bit samples (keys.ts seal: format byte, nonce, padded data, tag). */
+export const sealedAudioBytes = (samples: number): number => 1 + 12 + padLength(samples * 2) + 16;
 
 /** How long one sentence may take on the desktop before this device's text goes in. */
 export function offloadDeadlineMs(samples: number): number {
@@ -152,9 +165,13 @@ export class NotLocalError extends Error {
   }
 }
 
-/** The link must be a local-network one; the LAN link already closes any other, this checks again. */
+/**
+ * The link must be a local-network one; the LAN link already closes any
+ * other, this checks again. An address the link doesn't know counts as not
+ * local (review 6, RR6-520-3): the audio goes nowhere it can't be placed.
+ */
 function assertLocal(link: DesktopLink): void {
-  if (link.address !== null && !isLanHost(link.address)) throw new NotLocalError();
+  if (link.address === null || !isLanHost(link.address)) throw new NotLocalError();
 }
 
 /** Can the linked desktop transcribe, and with what? Never throws: an unreachable desktop is "not ready". */
@@ -208,7 +225,16 @@ export async function transcribeOnDesktop(link: DesktopLink, samples: Float32Arr
   const rid = toB64u(randomBytes(16));
   const { keys } = link;
   const sealed = await seal(keys.blobs, keys.vaultId, AUDIO_KIND, rid, pcm16(samples));
-  const r = await link.call(OP_TRANSCRIBE, { v: OFFLOAD_PROTOCOL, rid, language: opts.language ?? "he", samples: samples.length }, sealed, { timeoutMs: opts.timeoutMs ?? offloadDeadlineMs(samples.length) });
+  const deadlineMs = opts.timeoutMs ?? offloadDeadlineMs(samples.length);
+  let r: Awaited<ReturnType<DesktopLink["call"]>>;
+  try {
+    // The deadline goes with it: the desktop drops the sentence once this device stops waiting (review 6, RR6-520-1).
+    r = await link.call(OP_TRANSCRIBE, { v: OFFLOAD_PROTOCOL, rid, language: opts.language ?? "he", samples: samples.length, deadlineMs }, sealed, { timeoutMs: deadlineMs });
+  } catch (e) {
+    // Given up on here: tell the desktop, so it stops spending its model on it.
+    void link.call(OP_CANCEL, { v: OFFLOAD_PROTOCOL, rid }, undefined, { timeoutMs: OFFLOAD_MIN_MS }).catch(() => undefined);
+    throw e;
+  }
   if (r.header.rid !== rid) throw new Error("the desktop answered another request");
   const body = JSON.parse(new TextDecoder().decode(await unseal(keys.blobs, keys.vaultId, TEXT_KIND, rid, r.payload))) as { text?: unknown };
   return {
@@ -251,11 +277,23 @@ export function serveDesktopDictation(host: { serve(op: string, service: LanServ
   const now = opts.now ?? (() => performance.now());
   const maxQueue = opts.maxQueue ?? MAX_QUEUE;
   let queue: Promise<unknown> = Promise.resolve();
-  let waiting = 0;
+  /** Sentences taken and not finished: rid → its place (released at once when given up on). */
+  const jobs = new Map<string, { peer: string; done: boolean; cancelled: boolean; release: () => void }>();
+  const peerKey = (peer: { address: string | null; connectedAt?: number }) => `${peer.address ?? "?"}|${peer.connectedAt ?? 0}`;
 
   const status: LanService = async () => {
     const s = await engine.status().catch((): DesktopStatus => ({ ready: false, engine: null, reason: "error" }));
     return { header: { v: OFFLOAD_PROTOCOL, ready: s.ready, engine: s.engine, ...(s.reason ? { reason: s.reason } : {}) } };
+  };
+
+  const cancel: LanService = async ({ header, peer }) => {
+    const rid = typeof header.rid === "string" ? header.rid : "";
+    const job = jobs.get(rid);
+    // Only the device that sent it can take it back.
+    if (!job || job.peer !== peerKey(peer)) return { header: { v: OFFLOAD_PROTOCOL, rid, cancelled: false } };
+    job.cancelled = true;
+    job.release();
+    return { header: { v: OFFLOAD_PROTOCOL, rid, cancelled: true } };
   };
 
   const transcribe: LanService = async ({ header, payload, keys, peer }): Promise<LanServiceReply> => {
@@ -265,10 +303,31 @@ export function serveDesktopDictation(host: { serve(op: string, service: LanServ
     } catch {
       return { header: { error: "bad-request" } };
     }
-    if (peer.address !== null && !isLanHost(peer.address)) return { header: { error: "not-local" } };
+    // An address the link doesn't know is not local (RR6-520-3).
+    if (peer.address === null || !isLanHost(peer.address)) return { header: { error: "not-local" } };
+    // Size before anything is decrypted (RR6-520-2): the header names the samples, the payload must be their sealed size.
+    const n = header.samples;
+    if (typeof n !== "number" || !Number.isInteger(n) || n < 1 || n > MAX_SAMPLES) return { header: { error: "too-long" } };
+    if (payload.length !== sealedAudioBytes(n)) return { header: { error: "bad-request" } };
+    const deadlineMs = typeof header.deadlineMs === "number" && Number.isFinite(header.deadlineMs) ? header.deadlineMs : offloadDeadlineMs(n);
+    if (deadlineMs < MIN_DEADLINE_MS) return { header: { error: "deadline" } };
+    if (jobs.has(rid)) return { header: { error: "bad-request" } };
+    const who = peerKey(peer);
     // A place in the queue is taken before the first await, so a burst can't slip past the limit.
-    if (waiting >= maxQueue) return { header: { error: "busy" } };
-    waiting++;
+    if (jobs.size >= maxQueue) return { header: { error: "busy" } };
+    const job = { peer: who, done: false, cancelled: false, release: () => {} };
+    jobs.set(rid, job);
+    // The phone stops waiting at its deadline: from then on this sentence costs nothing here.
+    const timer = setTimeout(() => {
+      job.cancelled = true;
+      job.release();
+    }, Math.min(deadlineMs, offloadDeadlineMs(MAX_SAMPLES) * 2));
+    job.release = () => {
+      if (job.done) return;
+      job.done = true;
+      clearTimeout(timer);
+      jobs.delete(rid);
+    };
     try {
       let audio: Uint8Array;
       try {
@@ -277,26 +336,28 @@ export function serveDesktopDictation(host: { serve(op: string, service: LanServ
         return { header: { error: "key" } };
       }
       const samples = fromPcm16(audio);
-      if (!samples.length || samples.length > CORRECTION_MAX_SECONDS * RATE) return { header: { error: "too-long" } };
+      if (samples.length !== n) return { header: { error: "bad-request" } };
       const language = typeof header.language === "string" && /^[a-z]{2,3}$/.test(header.language) ? header.language : "he";
-      // One sentence at a time: the model is the bottleneck, and the order is the user's.
+      // One sentence at a time: the model is the bottleneck, and the order is the user's. One given up on is skipped.
       const run = queue.then(async () => {
+        if (job.cancelled) return null;
         const t0 = now();
         const out = await engine.transcribe(samples, language);
         return { ...out, computeMs: Math.round(now() - t0) };
       });
       queue = run.catch(() => undefined);
       const out = await run;
+      if (!out || job.cancelled) return { header: { error: "cancelled" } };
       const sealed = await seal(keys.blobs, keys.vaultId, TEXT_KIND, rid, utf8(JSON.stringify({ text: out.text })));
       return { header: { v: OFFLOAD_PROTOCOL, rid, engine: out.engine, computeMs: out.computeMs }, payload: sealed };
     } catch {
       return { header: { error: "engine" } };
     } finally {
-      waiting--;
+      job.release();
     }
   };
 
-  const offs = [host.serve(OP_STATUS, status), host.serve(OP_TRANSCRIBE, transcribe)];
+  const offs = [host.serve(OP_STATUS, status), host.serve(OP_TRANSCRIBE, transcribe), host.serve(OP_CANCEL, cancel)];
   return () => {
     for (const off of offs) off();
   };

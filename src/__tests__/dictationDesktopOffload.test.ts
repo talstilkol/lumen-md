@@ -11,11 +11,11 @@
  * @vitest-environment node
  */
 import { afterEach, describe, expect, it } from "vitest";
-import { deriveVaultKeys, type VaultKeys } from "../sync/e2ee/keys";
+import { deriveVaultKeys, seal, type VaultKeys } from "../sync/e2ee/keys";
 import { memoryProvider } from "../sync/e2ee/provider";
 import { memoryChannelPair } from "../sync/e2ee/lan/channel";
 import { lanHost, remoteLanProvider, LanAuthError, LanHostLockedError } from "../sync/e2ee/lan/rpc";
-import { utf8 } from "../sync/e2ee/bytes";
+import { randomBytes, toB64u, utf8 } from "../sync/e2ee/bytes";
 import {
   MEASURED_WER,
   MOBILE_WER_TARGET,
@@ -29,6 +29,7 @@ import {
   makeDesktopCorrector,
   offloadDeadlineMs,
   pcm16,
+  sealedAudioBytes,
   serveDesktopDictation,
   shouldOfferDesktop,
   transcribeOnDesktop,
@@ -203,7 +204,9 @@ describe("W6.19 a sentence to the desktop and back, over the LAN link", () => {
     bare.attach(a);
     const r = remoteLanProvider(b);
     await r.authenticate(keys);
-    expect(await desktopStatus({ address: null, keys, call: (op, h, p, o) => r.service(op, h, p, o) })).toEqual({ ready: false, engine: null, reason: "unsupported" });
+    expect(await desktopStatus({ address: "192.168.1.20", keys, call: (op, h, p, o) => r.service(op, h, p, o) })).toEqual({ ready: false, engine: null, reason: "unsupported" });
+    // An address the link doesn't know counts as not local (review 6, RR6-520-3).
+    expect(await desktopStatus({ address: null, keys, call: (op, h, p, o) => r.service(op, h, p, o) })).toEqual({ ready: false, engine: null, reason: "not-local" });
     expect(() => bare.serve("list", async () => ({ header: {} }))).toThrow();
     await expect(r.service("list", {})).rejects.toThrow();
     for (const d of [unproven, locked]) d.stop();
@@ -217,6 +220,22 @@ describe("W6.19 a sentence to the desktop and back, over the LAN link", () => {
     const lying: DesktopLink = { ...d.link, address: "192.168.1.30" };
     await expect(transcribeOnDesktop(lying, tone(1))).rejects.toMatchObject({ code: "not-local" });
     expect(d.desktop.seen).toEqual([]);
+    d.stop();
+  });
+
+  it("a sentence given up on costs the desktop nothing; the size is checked before decrypting; an unknown address is not local (review 6)", async () => {
+    const d = await linked();
+    // A deadline no model can meet is refused at once, never run.
+    await expect(transcribeOnDesktop(d.link, tone(1), { timeoutMs: 20 })).rejects.toThrow();
+    expect(d.desktop.seen).toEqual([]);
+    // A payload that is not the sealed size of the samples the header names is refused before it is opened.
+    const rid = toB64u(randomBytes(16));
+    const sealed = await seal(d.link.keys.blobs, d.link.keys.vaultId, "dictation-audio", rid, new Uint8Array(4 * 1024 * 1024));
+    await expect(d.link.call(OP_TRANSCRIBE, { v: 1, rid, language: "he", samples: 16_000 }, sealed)).rejects.toMatchObject({ code: "bad-request" });
+    await expect(d.link.call(OP_TRANSCRIBE, { v: 1, rid, language: "he", samples: 2_000_000 }, sealed)).rejects.toMatchObject({ code: "too-long" });
+    expect(sealedAudioBytes(16_000)).toBe((await seal(d.link.keys.blobs, d.link.keys.vaultId, "dictation-audio", rid, new Uint8Array(32_000))).length);
+    // The phone refuses a link whose address it doesn't know.
+    await expect(transcribeOnDesktop({ ...d.link, address: null }, tone(1))).rejects.toBeInstanceOf(NotLocalError);
     d.stop();
   });
 
