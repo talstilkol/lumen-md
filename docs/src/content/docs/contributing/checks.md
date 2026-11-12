@@ -22,6 +22,21 @@ failed and the ones that passed before it, with their times:
 ✗ vercel-build: the vitest gate failed (212.4 s, exit 1). Passed before it: build 95.1 s, budget 1.2 s.
 ```
 
+## Builds that are skipped
+
+Vercel builds one deployment at a time, so every queued build delays the
+ones behind it. `scripts/vercel-ignore.sh` (the config's `ignoreCommand`)
+skips a build before it starts when:
+
+- its commit is no longer the head of its branch: a newer push is queued
+  and will be built instead. When the branch head cannot be read (no
+  network, a deleted branch), the next rule decides;
+- the commit changes nothing the web build reads (Markdown outside `src/`
+  and `public/`, the docs site, the other deployables).
+
+A skipped build shows as **Canceled** in Vercel, not as a pass: the
+branch's status comes from its newest commit.
+
 ## Running the same checks locally
 
 ```bash
