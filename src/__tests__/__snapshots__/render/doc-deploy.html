@@ -9,14 +9,14 @@ code is done.</p>
 <hr/>
 <h2 id="0-prerequisites-one-time-30-min" dir="auto">0. Prerequisites (one-time, ~30 min)</h2>
 <ul class="contains-task-list" dir="ltr">
-<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="task"/> Buy <code>lumen.app</code> (or whichever domain) — Cloudflare Registrar / Namecheap.</li>
-<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="task"/> Cloudflare account (free) — used for DNS + Workers.</li>
-<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="task"/> Stripe account (free until you start billing).</li>
-<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="task"/> Apple Developer Program ($99/yr).</li>
-<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="task"/> Google Play Developer ($25 one-time).</li>
-<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="task"/> Sentry account (free tier).</li>
-<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="task"/> Supabase project (free) — already optional; required for billing/sync/publish.</li>
-<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="task"/> Chrome Web Store registration ($5 one-time).</li>
+<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="Task"/> Buy <code>lumen.app</code> (or whichever domain) — Cloudflare Registrar / Namecheap.</li>
+<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="Task"/> Cloudflare account (free) — used for DNS + Workers.</li>
+<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="Task"/> Stripe account (free until you start billing).</li>
+<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="Task"/> Apple Developer Program ($99/yr).</li>
+<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="Task"/> Google Play Developer ($25 one-time).</li>
+<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="Task"/> Sentry account (free tier).</li>
+<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="Task"/> Supabase project (free) — already optional; required for billing/sync/publish.</li>
+<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="Task"/> Chrome Web Store registration ($5 one-time).</li>
 </ul>
 <hr/>
 <h2 id="1-signaling-server-for-collab-p1-09--30-min" dir="auto">1. Signaling server for collab (P1-09) — 30 min</h2>
@@ -479,10 +479,10 @@ npm run android:open
 <p dir="auto">The landing page lives at <code>public/landing.html</code> and ships in the same Pages<br/>
 deploy. Audit:</p>
 <ul class="contains-task-list" dir="ltr">
-<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="task"/> Replace placeholder screenshots with real ones (use <code>npm run preview</code><br/>
+<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="Task"/> Replace placeholder screenshots with real ones (use <code>npm run preview</code><br/>
 to capture).</li>
-<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="task"/> <code>&lt;title&gt;</code> + Open Graph meta on every social card.</li>
-<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="task"/> Run <code>npx lhci autorun</code> and confirm Lighthouse Performance ≥ 90,<br/>
+<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="Task"/> <code>&lt;title&gt;</code> + Open Graph meta on every social card.</li>
+<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="Task"/> Run <code>npx lhci autorun</code> and confirm Lighthouse Performance ≥ 90,<br/>
 Accessibility ≥ 95, SEO ≥ 95.</li>
 </ul>
 <hr/>
@@ -557,16 +557,16 @@ zip -r lumen-clipper-0.1.0.zip extension/* -x &quot;*.DS_Store&quot;
 <h2 id="post-launch-checklist" dir="auto">Post-launch checklist</h2>
 <p dir="auto">After every step above is green:</p>
 <ul class="contains-task-list" dir="ltr">
-<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="task"/> All 9 Playwright E2E pass on CI Mac runner (chromium / firefox / webkit).</li>
-<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="task"/> Lighthouse: Performance ≥ 90, A11y ≥ 95, Best practices ≥ 95, SEO ≥ 95, PWA ≥ 90.</li>
-<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="task"/> axe-core a11y test passes (no critical/serious violations).</li>
-<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="task"/> <code>npm run budget</code> passes — bundle still within targets.</li>
-<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="task"/> Sentry receiving events from at least one production session.</li>
-<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="task"/> First 10 users invited via TestFlight + Play Internal track.</li>
-<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="task"/> <code>https://lumen.app/p/&lt;test-slug&gt;</code> returns a published note.</li>
-<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="task"/> Right-click → &quot;Save selection to Lumen&quot; creates a clip.</li>
-<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="task"/> Subscribe → return to app → Pro features unlock.</li>
-<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="task"/> <code>⌘K → &quot;AI: Switch to local AI&quot;</code> downloads + serves answers offline.</li>
+<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="Task"/> All 9 Playwright E2E pass on CI Mac runner (chromium / firefox / webkit).</li>
+<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="Task"/> Lighthouse: Performance ≥ 90, A11y ≥ 95, Best practices ≥ 95, SEO ≥ 95, PWA ≥ 90.</li>
+<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="Task"/> axe-core a11y test passes (no critical/serious violations).</li>
+<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="Task"/> <code>npm run budget</code> passes — bundle still within targets.</li>
+<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="Task"/> Sentry receiving events from at least one production session.</li>
+<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="Task"/> First 10 users invited via TestFlight + Play Internal track.</li>
+<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="Task"/> <code>https://lumen.app/p/&lt;test-slug&gt;</code> returns a published note.</li>
+<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="Task"/> Right-click → &quot;Save selection to Lumen&quot; creates a clip.</li>
+<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="Task"/> Subscribe → return to app → Pro features unlock.</li>
+<li class="task-list-item" dir="ltr"><input type="checkbox" disabled="" readonly="" aria-label="Task"/> <code>⌘K → &quot;AI: Switch to local AI&quot;</code> downloads + serves answers offline.</li>
 </ul>
 <hr/>
 <h2 id="rollback-plan" dir="auto">Rollback plan</h2>

@@ -571,6 +571,13 @@
       "icon": "Sparkles"
     },
     {
+      "id": "tasks.open",
+      "label": "Tasks: Today and upcoming",
+      "group": "Tools",
+      "hint": "Overdue, today and the next 7 days, from every note",
+      "icon": "Sparkles"
+    },
+    {
       "id": "ai.cancel",
       "label": "AI: Cancel",
       "group": "AI Prompts",
@@ -915,13 +922,6 @@
       "icon": "Save"
     },
     {
-      "id": "editor.copyBlockLink",
-      "label": "Copy link to block",
-      "group": "Insert",
-      "hint": "Gives the block at the cursor a ^id and copies [[Note#^id]]",
-      "icon": "Link"
-    },
-    {
       "id": "ai.prompt.en.summarize",
       "label": "📝 Summarize in English",
       "group": "AI Prompts",
@@ -962,6 +962,13 @@
       "group": "AI Prompts",
       "hint": "translation",
       "icon": "Sparkles"
+    },
+    {
+      "id": "editor.copyBlockLink",
+      "label": "Copy link to block",
+      "group": "Insert",
+      "hint": "Gives the block at the cursor a ^id and copies [[Note#^id]]",
+      "icon": "Link"
     },
     {
       "id": "edit.formatDocument",
@@ -1233,13 +1240,6 @@
       "group": "Insert",
       "hint": "[[Page|label]]",
       "icon": "Link"
-    },
-    {
-      "id": "tasks.open",
-      "label": "Tasks: Today and upcoming",
-      "group": "Tools",
-      "hint": "Overdue, today and the next 7 days, from every note",
-      "icon": "Sparkles"
     }
   ],
   "full": [
@@ -1847,6 +1847,13 @@
       "icon": "Sparkles"
     },
     {
+      "id": "tasks.open",
+      "label": "Tasks: Today and upcoming",
+      "group": "Tools",
+      "hint": "Overdue, today and the next 7 days, from every note",
+      "icon": "Sparkles"
+    },
+    {
       "id": "ai.cancel",
       "label": "AI: Cancel",
       "group": "AI Prompts",
@@ -2268,13 +2275,6 @@
       "icon": "Save"
     },
     {
-      "id": "editor.copyBlockLink",
-      "label": "Copy link to block",
-      "group": "Insert",
-      "hint": "Gives the block at the cursor a ^id and copies [[Note#^id]]",
-      "icon": "Link"
-    },
-    {
       "id": "ai.prompt.en.summarize",
       "label": "📝 Summarize in English",
       "group": "AI Prompts",
@@ -2315,6 +2315,13 @@
       "group": "AI Prompts",
       "hint": "translation",
       "icon": "Sparkles"
+    },
+    {
+      "id": "editor.copyBlockLink",
+      "label": "Copy link to block",
+      "group": "Insert",
+      "hint": "Gives the block at the cursor a ^id and copies [[Note#^id]]",
+      "icon": "Link"
     },
     {
       "id": "edit.formatDocument",
@@ -2611,13 +2618,6 @@
       "group": "Insert",
       "hint": "[[Page|label]]",
       "icon": "Link"
-    },
-    {
-      "id": "tasks.open",
-      "label": "Tasks: Today and upcoming",
-      "group": "Tools",
-      "hint": "Overdue, today and the next 7 days, from every note",
-      "icon": "Sparkles"
     }
   ],
   "autoSaveOn": [
@@ -2711,6 +2711,7 @@
     "view.properties",
     "file.trash",
     "sync.open",
+    "tasks.open",
     "ai.cancel",
     "note.read",
     "vault.digest",
@@ -2760,12 +2761,12 @@
     "vault.encrypt",
     "vault.decrypt",
     "vault.encryptAtRest",
-    "editor.copyBlockLink",
     "ai.prompt.he.summarize",
     "ai.prompt.he.improve",
     "ai.prompt.he.translate_to_en",
     "ai.prompt.he.formal",
     "ai.prompt.he.explain",
+    "editor.copyBlockLink",
     "edit.formatDocument",
     "edit.formatCodeBlock",
     "edit.suggesting.toggle",
@@ -2805,7 +2806,6 @@
     "insert.embed",
     "insert.htmlpreview",
     "insert.bibtex",
-    "insert.wikilink",
-    "tasks.open"
+    "insert.wikilink"
   ]
 }
