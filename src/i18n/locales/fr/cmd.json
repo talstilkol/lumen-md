@@ -392,6 +392,7 @@
   "group.tools": "Outils",
   "group.view": "Affichage",
   "palette.close": "fermer",
+  "palette.layoutHint": "Résultats aussi pour « {text} » (l’autre disposition du clavier)",
   "palette.navigate": "naviguer",
   "palette.noMatch": "Aucune commande correspondante",
   "palette.placeholder": "Tapez une commande ou recherchez…",

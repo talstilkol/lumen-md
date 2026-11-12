@@ -392,6 +392,7 @@
   "group.tools": "כלים",
   "group.view": "תצוגה",
   "palette.close": "סגירה",
+  "palette.layoutHint": "מוצגות גם תוצאות עבור „{text}” (פריסת המקלדת השנייה)",
   "palette.navigate": "ניווט",
   "palette.noMatch": "אין פקודות תואמות",
   "palette.placeholder": "הקלד פקודה, או חפש…",

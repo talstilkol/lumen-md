@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { t } from "../i18n";
+import { rankCommands } from "./paletteSearch";
 import "./CommandPalette.css";
 
 export interface Command {
@@ -204,16 +205,13 @@ export function CommandPalette({ open, onClose, commands }: Props) {
     return out;
   }, [commands]);
 
+  const search = useMemo(() => rankCommands(flatAll, query), [flatAll, query]);
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
 
-    // If searching, search across ALL commands (including children)
-    if (q) {
-      return flatAll.filter((c) => {
-        const haystack = `${c.label} ${c.hint ?? ""} ${c.group ?? ""}`.toLowerCase();
-        return haystack.includes(q);
-      });
-    }
+    // If searching, search across ALL commands (including children), ranked —
+    // and in the other keyboard layout too (plan W2.8).
+    if (q) return search.items;
 
     // Otherwise filter top-level by tab. The palette deliberately suppresses
     // commands that already live in the toolbar (File / Edit / View / Help)
@@ -239,7 +237,7 @@ export function CommandPalette({ open, onClose, commands }: Props) {
       }
     }
     return out;
-  }, [query, commands, flatAll, tab, expanded]);
+  }, [query, commands, search, tab, expanded]);
 
   useEffect(() => {
     if (active >= filtered.length) setActive(0);
@@ -360,6 +358,11 @@ export function CommandPalette({ open, onClose, commands }: Props) {
           </div>
         )}
 
+        {query.trim() && search.variant && (
+          <div className="cmd-palette-empty" role="status" data-testid="palette-layout-hint" dir="auto" style={{ padding: "6px 14px", textAlign: "start" }}>
+            {t("palette.layoutHint", { text: search.variant })}
+          </div>
+        )}
         <div
           className="cmd-palette-list"
           ref={listRef}

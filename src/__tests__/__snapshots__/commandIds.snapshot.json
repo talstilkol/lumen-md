@@ -242,7 +242,6 @@
       "id": "view.search",
       "label": "Search workspace…",
       "group": "View",
-      "shortcut": "⇧⌘F",
       "icon": "PanelRightOpen"
     },
     {
@@ -1538,7 +1537,6 @@
       "id": "view.search",
       "label": "Search workspace…",
       "group": "View",
-      "shortcut": "⇧⌘F",
       "icon": "PanelRightOpen"
     },
     {

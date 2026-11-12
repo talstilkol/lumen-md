@@ -391,6 +391,7 @@
   "group.tools": "Tools",
   "group.view": "View",
   "palette.close": "close",
+  "palette.layoutHint": "Also showing results for “{text}” (the other keyboard layout)",
   "palette.navigate": "navigate",
   "palette.noMatch": "No matching commands",
   "palette.placeholder": "Type a command, or search…",

@@ -392,6 +392,7 @@
   "group.tools": "Werkzeuge",
   "group.view": "Ansicht",
   "palette.close": "schließen",
+  "palette.layoutHint": "Auch Ergebnisse für „{text}“ (das andere Tastaturlayout)",
   "palette.navigate": "navigieren",
   "palette.noMatch": "Keine passenden Befehle",
   "palette.placeholder": "Befehl eingeben oder suchen…",

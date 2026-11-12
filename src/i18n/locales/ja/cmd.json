@@ -392,6 +392,7 @@
   "group.tools": "ツール",
   "group.view": "表示",
   "palette.close": "閉じる",
+  "palette.layoutHint": "「{text}」の結果も表示しています（もう一方のキーボード配列）",
   "palette.navigate": "移動",
   "palette.noMatch": "一致するコマンドがありません",
   "palette.placeholder": "コマンドを入力、または検索…",

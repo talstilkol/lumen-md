@@ -1,6 +1,8 @@
 import { useCommands, openNewDoc } from "./commands/useCommands";
 import type { NoteEditDetail } from "./views/databaseEdit";
 import { baseAsMarkdown } from "./views/bases/embed";
+import { appShortcutFor } from "./lib/shortcuts";
+import { noteTypedKey } from "./lib/keyboardLayout";
 import { lazy, Suspense, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import type { EditorHandle } from "./editor/Editor";
 import type { SettingsTab } from "./settings/schema";
@@ -644,21 +646,66 @@ export default function App() {
   // Keyboard shortcuts
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      const meta = e.metaKey || e.ctrlKey;
-      if (!meta) return;
+      noteTypedKey(e.key);
+      // Matched by the physical key, so the Hebrew layout works too (plan W2.8).
+      const id = appShortcutFor(e);
+      if (!id) return;
+      e.preventDefault();
+      switch (id) {
+        case "view.focusMode":
+          // ⇧⌘F → focus mode toggle
+          setFocusMode(!focusMode);
+          return;
+        case "palette.toggle":
+          setPaletteOpen((v) => !v);
+          return;
+        case "file.save":
+        case "file.saveAs":
+          handleSave(id === "file.saveAs");
+          return;
+        case "view.findReplace":
+          setFindReplaceOpen((v) => !v);
+          return;
+        case "file.open":
+          handleOpen();
+          return;
+        case "file.new":
+          handleNew();
+          return;
+        case "view.source":
+          useAppStore.getState().setMode("source");
+          return;
+        case "view.split":
+          useAppStore.getState().setMode("split");
+          return;
+        case "view.preview":
+          useAppStore.getState().setMode("preview");
+          return;
+        case "view.wysiwyg":
+          useAppStore.getState().setMode("wysiwyg");
+          return;
+        case "help.shortcuts":
+          setShortcutsOpen((v) => !v);
+          return;
+        case "insert.smart":
+          // ⌘⇧V — Smart Insert (paste anything → auto-detect → wrap).
+          (async () => {
+            const result = await openInsertTextDialog();
+            if (!result) return;
+            const cur = useAppStore.getState().doc.content;
+            const setter = useAppStore.getState().setContent;
+            if (result.mode === "replace") setter(result.markdown);
+            else if (result.mode === "atCursor" && editorRef.current) {
+              editorRef.current.insertText(result.markdown);
+            } else {
+              const trimmed = cur.endsWith("\n") ? cur : cur + "\n";
+              setter(trimmed + (result.mode === "append" ? "\n" : "") + result.markdown);
+            }
+          })();
+          return;
       // ⌘Z / Ctrl+Z outside the editor: restore the last delete (plan 3.1).
       // In an editor or a text field it stays their own undo.
       if (handleTrashUndoKey(e)) return;
-      // ⇧⌘F → focus mode toggle (or workspace search if already in focus mode)
-      if (e.shiftKey && (e.key === "f" || e.key === "F")) {
-        e.preventDefault();
-        if (focusMode) {
-          setFocusMode(false);
-        } else {
-          setFocusMode(true);
-        }
-        return;
-      }
       // ⌥⌘D → today's daily note (e.code: Option changes e.key on a Mac).
       if (e.altKey && e.code === "KeyD") {
         e.preventDefault();
@@ -672,52 +719,6 @@ export default function App() {
         setCaptureOpen(true);
         return;
       }
-      if (e.key === "k" || e.key === "K") {
-        e.preventDefault();
-        setPaletteOpen((v) => !v);
-      } else if (e.key === "s" || e.key === "S") {
-        e.preventDefault();
-        handleSave(e.shiftKey);
-      } else if (e.key === "h" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        setFindReplaceOpen((v) => !v);
-      } else if (e.key === "o" || e.key === "O") {
-        e.preventDefault();
-        handleOpen();
-      } else if (e.key === "n" || e.key === "N") {
-        e.preventDefault();
-        handleNew();
-      } else if (e.key === "1") {
-        e.preventDefault();
-        useAppStore.getState().setMode("source");
-      } else if (e.key === "2") {
-        e.preventDefault();
-        useAppStore.getState().setMode("split");
-      } else if (e.key === "3") {
-        e.preventDefault();
-        useAppStore.getState().setMode("preview");
-      } else if (e.key === "4") {
-        e.preventDefault();
-        useAppStore.getState().setMode("wysiwyg");
-      } else if (e.key === "/") {
-        e.preventDefault();
-        setShortcutsOpen((v) => !v);
-      } else if (e.shiftKey && (e.key === "v" || e.key === "V")) {
-        // ⌘⇧V — Smart Insert (paste anything → auto-detect → wrap).
-        e.preventDefault();
-        (async () => {
-          const result = await openInsertTextDialog();
-          if (!result) return;
-          const cur = useAppStore.getState().doc.content;
-          const setter = useAppStore.getState().setContent;
-          if (result.mode === "replace") setter(result.markdown);
-          else if (result.mode === "atCursor" && editorRef.current) {
-            editorRef.current.insertText(result.markdown);
-          } else {
-            const trimmed = cur.endsWith("\n") ? cur : cur + "\n";
-            setter(trimmed + (result.mode === "append" ? "\n" : "") + result.markdown);
-          }
-        })();
       }
     }
     window.addEventListener("keydown", onKey);

@@ -1981,6 +1981,13 @@
       "vars": []
     },
     {
+      "key": "palette.layoutHint",
+      "en": "Also showing results for “{text}” (the other keyboard layout)",
+      "vars": [
+        "text"
+      ]
+    },
+    {
       "key": "palette.navigate",
       "en": "navigate",
       "vars": []

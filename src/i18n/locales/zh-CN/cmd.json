@@ -392,6 +392,7 @@
   "group.tools": "工具",
   "group.view": "视图",
   "palette.close": "关闭",
+  "palette.layoutHint": "同时显示“{text}”的结果（另一种键盘布局）",
   "palette.navigate": "导航",
   "palette.noMatch": "没有匹配的命令",
   "palette.placeholder": "输入命令或搜索…",

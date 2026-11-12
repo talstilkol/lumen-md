@@ -1,9 +1,21 @@
 import { useMemo, useRef } from "react";
 import { useFocusTrap } from "./useFocusTrap";
-import { t } from "../i18n";
+import { getLocale, t } from "../i18n";
 import { detectIsMac } from "../lib/detectIsMac";
+import { activeLayout, hebrewOnKey } from "../lib/keyboardLayout";
 
 export { detectIsMac };
+
+/**
+ * With the Hebrew layout active, a letter shortcut also shows the Hebrew
+ * letter on that key — "Ctrl+K (ל)" — since that is what the key is labelled (plan W2.8).
+ */
+export function withLayout(keys: string, layout: "he" | "latin" = activeLayout(getLocale())): string {
+  if (layout !== "he") return keys;
+  const m = /([A-Za-z])$/.exec(keys);
+  const he = m ? hebrewOnKey(m[1]) : null;
+  return he ? `${keys} (${he})` : keys;
+}
 
 interface Props {
   open: boolean;
@@ -171,7 +183,7 @@ export function KeyboardShortcuts({ open, onClose }: Props) {
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {item.keys}
+                    {withLayout(item.keys)}
                   </kbd>
                 </div>
               ))}

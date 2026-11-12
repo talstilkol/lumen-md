@@ -110,7 +110,8 @@ export function buildViewCommands({ setSearchOpen, setRuntimeMetricsOpen, vimEna
     {
       id: "view.search",
       label: t("cmd.view.search"),
-      shortcut: "⇧⌘F",
+      // No shortcut shown: ⇧⌘F is focus mode (App.tsx) — the palette promised
+      // a key that did something else (W2.8 conflict check).
       icon: cmdIcons.PanelRightOpen,
       group: t("group.view"),
       action: () => setSearchOpen(true),

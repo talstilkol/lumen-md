@@ -392,6 +392,7 @@
   "group.tools": "أدوات",
   "group.view": "عرض",
   "palette.close": "إغلاق",
+  "palette.layoutHint": "تُعرض أيضًا نتائج „{text}” (تخطيط لوحة المفاتيح الآخر)",
   "palette.navigate": "تنقل",
   "palette.noMatch": "لا توجد أوامر مطابقة",
   "palette.placeholder": "اكتب أمرًا أو ابحث…",
