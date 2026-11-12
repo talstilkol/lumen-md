@@ -3139,6 +3139,11 @@
       "vars": []
     },
     {
+      "key": "shareLink.noExportDoor",
+      "en": "This build can't make share links: the part that removes redacted text and hidden comments from what leaves the device is missing, so nothing is shared.",
+      "vars": []
+    },
+    {
       "key": "shareLink.separateKey",
       "en": "Send the key separately",
       "vars": []

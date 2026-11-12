@@ -226,7 +226,10 @@ describe("review 12.11: inflation cap, public origin, the export door", () => {
 
   it("the share command sends the note through shareReadyText; with #473 in the build, that is the export door", async () => {
     const cmd = readFileSync(join(__dirname, "..", "commands", "domains", "export.ts"), "utf8");
-    expect(cmd).toMatch(/markdown: await shareReadyText\(doc\.content\)/);
+    expect(cmd).toMatch(/markdown = await shareReadyText\(doc\.content\)/);
+    expect(cmd).toMatch(/openShareLink\(\{ title: doc\.name, markdown \}\)/);
+    // A refusal says why (review 4).
+    expect(cmd).toMatch(/instanceof ExportDoorMissingError[\s\S]{0,300}uiAlert\(\{ message: t\("shareLink\.noExportDoor"\) \}\)/);
     const { hasExportDoor, shareReadyText } = await import("../share/shareReady");
     const { existsSync } = await import("node:fs");
     expect(hasExportDoor()).toBe(existsSync(join(__dirname, "..", "storage", "exportReady.ts")));
