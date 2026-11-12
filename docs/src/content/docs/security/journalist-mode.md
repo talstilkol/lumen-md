@@ -22,6 +22,14 @@ The exporters never receive the text at all.
 The rules fail closed:
 
 - A `<redact>` that is never closed removes everything after it.
+- A mark with attributes or a slash (`<redact class="x">`, `<redact/>`) is a
+  mark too, exactly as the preview reads it, so what you see shaded is what
+  goes.
+- **Redact selection** over text that already has marks makes one mark over
+  the whole selection; nothing that was covered before is uncovered.
+- Photos inlined as `data:` URLs are judged by their bytes, whatever their
+  label, and so are photos embedded in an SVG: a JPEG, PNG or WebP loses its
+  metadata, and one that can't be cleaned (HEIC, AVIF) is left out.
 - Marks count inside code blocks too.
 - Exports also leave out hidden text a reader of the file could find: HTML
   comments (`<!-- … -->`) and Obsidian comments (`%% … %%`).
@@ -47,6 +55,9 @@ in backups it is ciphertext, with one line saying how to open it.
   version history) keeps the encrypted text, not the plain one. Locking a
   note deletes its earlier, plain versions from history.
 - **Forgotten password = lost note.** There is no recovery key, by design.
+- **While it is locked,** nothing replaces the note but its own encrypted
+  text, byte for byte: plain text from a tool or an old tab is refused, and
+  so is any other encrypted text, even one that copies the note's salt.
 - The key comes from the password through the vault's key-derivation
   function (PBKDF2-SHA256, 600,000 iterations today; Argon2id once it lands),
   and every save is sealed with AES-256-GCM under a fresh nonce.

@@ -24,14 +24,17 @@
  *   - Hidden text that a reader of the file could find is removed too: HTML
  *     comments (`<!-- … -->`, an unclosed one runs to the end) and Obsidian
  *     comments (`%% … %%`), except inside code, where they are code.
- *   - Photos inlined as `data:` URLs lose their GPS, time and device
+ *   - Photos inlined as `data:` URLs, under any label (the bytes decide, as in
+ *     a browser), lose their GPS, time and device
  *     metadata, unless the user keeps it (Settings, the same switch as for
  *     photos added to a note). A photo whose metadata can't be removed (it
  *     can't be parsed, and there is no canvas to re-encode it) is replaced by
  *     an empty image: it never leaves as it was (review 12.11).
  */
 
-import { cleanImageBytes, keepImageMetadata, stripImageMetadata } from "./imageMetadata";
+import { cleanDataUrls, cleanDataUrlsAsync, cleanImageBytes, keepImageMetadata, WITHHELD_IMAGE } from "./imageMetadata";
+
+export { WITHHELD_IMAGE };
 
 /** What replaces each redacted passage. Fixed length on purpose. */
 export const REDACTED = "█████";
@@ -267,77 +270,24 @@ function removeHiddenCommentsKeepingUnclosedPercent(markdown: string): string {
   return removeHiddenComments(swapped).split(sentinel).join("%%");
 }
 
-const DATA_IMAGE = /data:image\/(jpeg|jpg|png|webp);base64,([A-Za-z0-9+/]+={0,2})/gi;
+/**
+ * Photos inlined in the note as data: URLs, without their metadata, judged by
+ * their bytes whatever their label (review 4): see `cleanDataUrls`. One that
+ * can't be cleaned is withheld: replaced by WITHHELD_IMAGE.
+ */
+export function cleanInlineImages(markdown: string): { text: string; cleaned: number; withheld: number } {
+  return cleanDataUrls(markdown);
+}
 
-function fromBase64(b64: string): Uint8Array {
-  const bin = atob(b64);
-  const out = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
-  return out;
+/** The async form: a photo that can't be stripped in place is re-encoded through a canvas first, withheld only when that fails. */
+export async function cleanInlineImagesAsync(markdown: string): Promise<{ text: string; cleaned: number; withheld: number }> {
+  return cleanDataUrlsAsync(markdown);
 }
 
 function toBase64(bytes: Uint8Array): string {
   let bin = "";
   for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
   return btoa(bin);
-}
-
-/** What a photo becomes when its metadata can't be removed: a 1×1 transparent GIF. */
-export const WITHHELD_IMAGE = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
-
-/**
- * Photos inlined in the note as data: URLs, without their metadata. One that
- * can't be parsed (or decoded) is withheld: replaced by WITHHELD_IMAGE.
- */
-export function cleanInlineImages(markdown: string): { text: string; cleaned: number; withheld: number } {
-  let cleaned = 0;
-  let withheld = 0;
-  const text = markdown.replace(DATA_IMAGE, (whole, type: string, b64: string) => {
-    try {
-      // The declared type is checked against the bytes: a HEIC labelled image/jpeg is withheld (review 2).
-      const r = stripImageMetadata(fromBase64(b64), `image/${type.toLowerCase() === "jpg" ? "jpeg" : type.toLowerCase()}`);
-      if (!r.format || r.removed.length === 0) return whole;
-      cleaned++;
-      return `data:image/${type.toLowerCase()};base64,${toBase64(r.bytes)}`;
-    } catch {
-      // why: fail closed: a photo we can't clean never goes out as it was
-      withheld++;
-      return WITHHELD_IMAGE;
-    }
-  });
-  return { text, cleaned, withheld };
-}
-
-/** The async form: a photo that can't be parsed is re-encoded through a canvas first, withheld only when that fails. */
-export async function cleanInlineImagesAsync(markdown: string): Promise<{ text: string; cleaned: number; withheld: number }> {
-  const found = [...markdown.matchAll(DATA_IMAGE)];
-  if (!found.length) return { text: markdown, cleaned: 0, withheld: 0 };
-  const out = new Map<string, string | null>();
-  let cleaned = 0;
-  let withheld = 0;
-  for (const m of found) {
-    if (out.has(m[0])) continue;
-    const type = m[1].toLowerCase() === "jpg" ? "image/jpeg" : `image/${m[1].toLowerCase()}`;
-    let bytes: Uint8Array;
-    try {
-      bytes = fromBase64(m[2]);
-    } catch {
-      out.set(m[0], null);
-      continue;
-    }
-    const r = await cleanImageBytes(bytes, type);
-    out.set(m[0], !r ? null : !r.format || r.removed.length === 0 ? m[0] : `data:${r.type};base64,${toBase64(r.bytes)}`);
-  }
-  const text = markdown.replace(DATA_IMAGE, (whole) => {
-    const url = out.get(whole);
-    if (url === null || url === undefined) {
-      withheld++;
-      return WITHHELD_IMAGE;
-    }
-    if (url !== whole) cleaned++;
-    return url;
-  });
-  return { text, cleaned, withheld };
 }
 
 /** `![alt](lumen-asset-…)` and `![[lumen-asset-…]]`: photos stored in the vault. */

@@ -7,6 +7,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import fixtures from "./fixtures/gps-photos.json";
 import {
   cleanInlineImages,
+  WITHHELD_IMAGE,
   hasRedactions,
   inlineVaultImages,
   prepareForExport,
@@ -151,6 +152,31 @@ describe("removeRedacted", () => {
     expect(out.startsWith("a ") && out.endsWith(" e")).toBe(true);
     // A plain selection is wrapped as before.
     expect(wrapRedaction("plain")).toBe("<redact>plain</redact>");
+  });
+});
+
+describe("inline photos under any label (review 4, RR4-473-2)", () => {
+  const exifGps = [0xff, 0xe1, 0, 34, 0x45, 0x78, 0x69, 0x66, 0, 0, 0x4d, 0x4d, 0, 0x2a, 0, 0, 0, 8, 0, 1, 0x88, 0x25, 0, 4, 0, 0, 0, 1, 0, 0, 0, 26, 0, 0, 0, 0];
+  const JPEG = new Uint8Array([0xff, 0xd8, ...exifGps, 0xff, 0xda, 0, 8, 1, 1, 0, 0, 0x3f, 0, 0x12, 0x34, 0xff, 0xd9]);
+  const asc = (t: string) => [...t].map((c) => c.charCodeAt(0));
+  const HEIC = new Uint8Array([0, 0, 0, 0x18, ...asc("ftypheic"), 0, 0, 0, 0, ...asc("mif1heic"), 0, 0, 0, 0x2a, ...asc("Exif"), ...exifGps.slice(4, 22)]);
+  const b64 = (b: Uint8Array) => btoa(String.fromCharCode(...b));
+  it("the bytes decide: a JPEG labelled gif or octet-stream is cleaned, a HEIC is withheld without a canvas", () => {
+    for (const label of ["image/gif", "application/octet-stream", "image/jpeg"]) {
+      const out = cleanInlineImages(`![p](data:${label};base64,${b64(JPEG)})`);
+      expect(out.text, label).not.toContain(b64(JPEG));
+      expect(out.text, label).toContain("data:image/jpeg;base64,");
+    }
+    expect(cleanInlineImages(`![p](data:image/heic;base64,${b64(HEIC)})`).text).toBe(`![p](${WITHHELD_IMAGE})`);
+    // Data that is no image, under a label that is not image/*, stays.
+    const pdf = `[f](data:application/pdf;base64,${btoa("%PDF-1.7 x")})`;
+    expect(cleanInlineImages(pdf).text).toBe(pdf);
+  });
+  it("an SVG that embeds the photo has the embedded photo cleaned", () => {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg"><image href="data:image/jpeg;base64,${b64(JPEG)}"/></svg>`;
+    const out = cleanInlineImages(`![d](data:image/svg+xml;base64,${btoa(svg)})`);
+    expect(out.cleaned).toBe(1);
+    expect(atob(/base64,([^)]+)\)/.exec(out.text)![1])).not.toContain(b64(JPEG));
   });
 });
 
