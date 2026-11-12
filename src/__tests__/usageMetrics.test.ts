@@ -15,6 +15,7 @@ import {
   countOpen,
   dayKey,
   FEATURE_ID,
+  featureId,
   KEEP_DAYS,
   LAST_REPORT_KEY,
   listenForErrors,
@@ -240,5 +241,34 @@ describe("nothing leaves without the user's click", () => {
       const src = readFileSync(join(dir, f), "utf8").replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, "");
       expect(src, f).not.toMatch(/\bfetch\s*\(|sendBeacon|XMLHttpRequest|new\s+(Image|WebSocket|EventSource)\b|window\.open/);
     }
+  });
+});
+
+describe("ids made from vault names never reach the report (review 12.11)", () => {
+  it("an installed template, a recent file and a plugin command are counted under one fixed id each", () => {
+    expect(featureId("template.installed.interview-dana-levi")).toBe("template.apply");
+    expect(featureId("recent.k9x2ab")).toBe("recent.open");
+    expect(featureId("recent.remove.k9x2ab")).toBe("recent.remove");
+    expect(featureId("plugin:my-diary:open")).toBe("plugin.command");
+    expect(featureId("file.save")).toBe("file.save");
+    countFeature("template.installed.interview-dana-levi", localStorage, at("2026-11-12"));
+    countFeature("template.installed.source-yossi", localStorage, at("2026-11-12"));
+    expect(Object.keys(loadUsage().days["2026-11-12"].features)).toEqual(["template.apply"]);
+    const ids = ["file.save", "template.installed.interview-dana-levi", "template.installed.source-yossi"];
+    const report = weeklyReport(loadUsage(), "2026-11-12", ids, "0.0.0-test");
+    expect(report.topFeatures).toEqual({ "template.apply": 2 });
+    expect(decodeURIComponent(reportIssueUrl(report))).not.toMatch(/dana|yossi/);
+  });
+
+  it("a count kept before this fix, under a file name, is never reported", () => {
+    const old = bump(empty(), { kind: "open" }, "2026-11-12");
+    old.days["2026-11-12"].features["template.installed.interview-dana-levi"] = 3;
+    const report = weeklyReport(old, "2026-11-12", ["template.installed.interview-dana-levi"], "0.0.0-test");
+    expect(report.topFeatures).toEqual({});
+  });
+
+  it("the allowlist is strict: with no command ids given, no command is reported", () => {
+    countFeature("file.save", localStorage, at("2026-11-12"));
+    expect(weeklyReport(loadUsage(), "2026-11-12", [], "0.0.0-test").topFeatures).toEqual({});
   });
 });

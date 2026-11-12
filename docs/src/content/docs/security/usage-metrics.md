@@ -20,6 +20,10 @@ Per day, in the browser's local storage (`lumen.usage.v1`):
 The counters hold no note text, no file names, no user or device id and no
 time of day. A counter name has to look like a command id: no spaces, no
 slashes, no runs of digits or capitals. Anything you typed can't become one.
+Commands named after something in your vault are counted under one fixed
+name each: every installed template as `template.apply`, every recent file
+as `recent.open`, every plugin command as `plugin.command`. So a template
+called after a source never shows its name.
 The last 60 days are kept.
 
 ## The dashboard

@@ -39,6 +39,25 @@ export const KEEP_DAYS = 60;
  */
 export const FEATURE_ID = /^(?!.*(?:\d{3}|[A-Z]{3}))[a-z][a-zA-Z0-9_]{0,39}(?:[.:-][a-zA-Z0-9_]{1,40}){0,5}$/;
 
+/**
+ * Command ids made from something in the vault (review 12.11): an installed
+ * template's file name, a recent file's name hash, a plugin's own command.
+ * Each family is counted under one fixed id, so no name is ever kept, and
+ * the report can't carry one.
+ */
+const FAMILIES: readonly (readonly [RegExp, string])[] = [
+  [/^template\.installed\./, "template.apply"],
+  [/^recent\.remove\./, "recent.remove"],
+  [/^recent\./, "recent.open"],
+  [/^plugin:/, "plugin.command"],
+];
+
+/** The id a command is counted under: its family's fixed id, or itself. */
+export function featureId(id: string): string {
+  for (const [re, fixed] of FAMILIES) if (re.test(id)) return fixed;
+  return id;
+}
+
 export interface UsageDay {
   opens: number;
   errors: number;
@@ -127,6 +146,7 @@ type Bump = { kind: "open" } | { kind: "error" } | { kind: "feature"; id: string
 
 /** The store after one event on `today`; unchanged for a feature id that is not a command id. */
 export function bump(store: UsageStore, event: Bump, today: string): UsageStore {
+  if (event.kind === "feature") event = { kind: "feature", id: featureId(event.id) };
   if (event.kind === "feature" && !FEATURE_ID.test(event.id)) return store;
   const next = prune({ ...store, firstDay: store.firstDay ?? today, days: { ...store.days } }, today);
   const day = { ...(next.days[today] ?? { opens: 0, errors: 0, features: {} }) };
@@ -140,7 +160,7 @@ export function bump(store: UsageStore, event: Bump, today: string): UsageStore 
 
 function apply(event: Bump, storage: Storage | null = safeStorage(), at: Date = new Date()): void {
   if (!storage || !countingEnabled(storage)) return;
-  if (event.kind === "feature" && !FEATURE_ID.test(event.id)) return;
+  if (event.kind === "feature" && !FEATURE_ID.test(featureId(event.id))) return;
   try {
     storage.setItem(USAGE_KEY, JSON.stringify(bump(loadUsage(storage), event, dayKey(at))));
   } catch {
@@ -218,7 +238,7 @@ export function summarize(store: UsageStore, today: string): UsageSummary {
 /** Command ids that ran in none of the last 30 days: the dead features, given the full list. */
 export function unusedFeatures(summary: UsageSummary, allIds: readonly string[]): string[] {
   const used = new Set(summary.features30.map(([id]) => id));
-  return allIds.filter((id) => FEATURE_ID.test(id) && !used.has(id)).sort();
+  return [...new Set(allIds.map(featureId))].filter((id) => FEATURE_ID.test(id) && !used.has(id)).sort();
 }
 
 export interface WeeklyReport {
@@ -242,13 +262,15 @@ export interface WeeklyReport {
 
 /**
  * The report the dialog shows and the user may send: counts only, nothing
- * else. Given the app's command ids, only those are reported, so even a
- * counter name that slipped past FEATURE_ID stays on the device.
+ * else. Only the app's command ids are reported (an allowlist: with none
+ * given, no command is), each family under its fixed id (featureId), so a
+ * counter name that slipped past FEATURE_ID, or one made from a file name,
+ * stays on the device.
  */
 export function weeklyReport(store: UsageStore, today: string, allIds: readonly string[] = [], app = appVersion): WeeklyReport {
-  const known = new Set(allIds);
+  const known = new Set(allIds.map(featureId));
   const all = summarize(store, today);
-  const s = known.size ? { ...all, features30: all.features30.filter(([id]) => known.has(id)) } : all;
+  const s = { ...all, features30: all.features30.filter(([id]) => known.has(id) && featureId(id) === id) };
   const [y, m, d] = today.split("-").map(Number);
   const weekday = (new Date(y, m - 1, d).getDay() + 6) % 7;
   const week = shiftDay(today, -weekday);
