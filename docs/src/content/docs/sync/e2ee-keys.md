@@ -21,7 +21,19 @@ Only the keyring and the manifest are rewritten. **No note is downloaded or
 uploaded again**: older notes keep the key of the epoch they were written in,
 and that key is sealed inside the new epoch.
 
-Tested on a vault of 10,000 notes (2 objects written, every note readable
+A re-key commits in a single write: the new keyring. If the connection drops
+or the tab closes partway, nothing breaks:
+
+- **Before the keyring is written**, devices keep downloading changes, and
+  their own changes wait. Run the re-key again. After 10 minutes, the other
+  devices go on without it.
+- **After the keyring is written**, the next device that syncs finishes the
+  re-key.
+- **During a passphrase change**, the old passphrase keeps opening the vault
+  until the new one is fully in place, but only at the keys from before the
+  change. After that, only the new passphrase opens it.
+
+Tested on a vault of 10,000 notes (3 objects written, every note readable
 after), and over 10,000 random sync rounds with 40 re-keys and revocations
 in between, with 0 lost.
 
@@ -34,6 +46,11 @@ the new epoch was never wrapped for it. If whoever has the device also knows
 the passphrase, change the passphrase in the same re-key. A device can't
 be handed an old keyring either: every device remembers the newest epoch it
 has seen.
+
+The list of enrolled devices is sealed with the vault's keys, so the sync
+provider can't add a device of its own or bring back a removed one. A removed
+device can't be enrolled again under its old name or key either: enroll it
+as a new device with a new key.
 
 ## age
 
