@@ -17,6 +17,7 @@
   "agentReview.empty": "Изменений, ожидающих проверки, нет.",
   "agentReview.gap": "Строк без изменений: {count}",
   "agentReview.intro": "Без вашего согласия ничего не записывается. Изменения открытого документа попадают в редактор, а не сразу в файл.",
+  "agentReview.mcpClient": "{client} (клиент MCP)",
   "agentReview.noEol": "Нет перевода строки в конце файла",
   "agentReview.proposedBy": "Предложил: {agent}",
   "agentReview.reject": "Отклонить",

@@ -17,6 +17,7 @@
   "agentReview.empty": "אין שינויים שמחכים.",
   "agentReview.gap": "{count} שורות ללא שינוי",
   "agentReview.intro": "שום דבר לא נכתב לפני אישור. שינויים במסמך פתוח נכנסים לעורך, לא ישר לקובץ.",
+  "agentReview.mcpClient": "{client} (לקוח MCP)",
   "agentReview.noEol": "אין ירידת שורה בסוף הקובץ",
   "agentReview.proposedBy": "הוצע על ידי {agent}",
   "agentReview.reject": "דחייה",

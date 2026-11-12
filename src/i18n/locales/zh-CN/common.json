@@ -17,6 +17,7 @@
   "agentReview.empty": "没有等待中的更改。",
   "agentReview.gap": "{count} 行未更改",
   "agentReview.intro": "在你批准之前不会写入任何内容。对已打开文档的更改会进入编辑器，而不是直接写入文件。",
+  "agentReview.mcpClient": "{client}（MCP 客户端）",
   "agentReview.noEol": "文件末尾没有换行符",
   "agentReview.proposedBy": "提议者：{agent}",
   "agentReview.reject": "拒绝",

@@ -39,6 +39,8 @@ const STATUS_COLOR: Record<StagedChange["status"], string> = {
 };
 
 function agentName(agentId: string | undefined): string {
+  // Proposals from an MCP client (plan W2.3, agents/mcpInbox.ts) are staged as `mcp:<client>`.
+  if (agentId?.startsWith("mcp:")) return t("agentReview.mcpClient", { client: agentId.slice(4) });
   return agentId ?? t("agentReview.unknownAgent");
 }
 

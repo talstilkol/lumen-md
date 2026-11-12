@@ -17,6 +17,7 @@
   "agentReview.empty": "Aucune modification en attente.",
   "agentReview.gap": "{count} lignes inchangées",
   "agentReview.intro": "Rien n’est écrit sans votre accord. Les modifications d’un document ouvert vont dans l’éditeur, pas directement dans le fichier.",
+  "agentReview.mcpClient": "{client} (client MCP)",
   "agentReview.noEol": "Pas de saut de ligne à la fin du fichier",
   "agentReview.proposedBy": "Proposé par {agent}",
   "agentReview.reject": "Refuser",

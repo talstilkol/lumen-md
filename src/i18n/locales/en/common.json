@@ -17,6 +17,7 @@
   "agentReview.empty": "No changes are waiting.",
   "agentReview.gap": "{count} unchanged lines",
   "agentReview.intro": "Nothing is written until you approve it. Changes to an open document go into the editor, not straight to the file.",
+  "agentReview.mcpClient": "{client} (MCP client)",
   "agentReview.noEol": "No newline at end of file",
   "agentReview.proposedBy": "Proposed by {agent}",
   "agentReview.reject": "Reject",

@@ -102,6 +102,13 @@
       "vars": []
     },
     {
+      "key": "agentReview.mcpClient",
+      "en": "{client} (MCP client)",
+      "vars": [
+        "client"
+      ]
+    },
+    {
       "key": "agentReview.noEol",
       "en": "No newline at end of file",
       "vars": []

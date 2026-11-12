@@ -11,7 +11,9 @@
  *  - reports how many changes wait for review (the status-bar badge);
  *  - announces new proposals with a toast that opens the review panel;
  *  - in development and tests only, adds `agentReview` to the e2e test
- *    surface (`window.__lumen`); see `TEST_SURFACE` below (plan W1.31).
+ *    surface (`window.__lumen`); see `TEST_SURFACE` below (plan W1.31);
+ *  - stages the proposals of MCP clients from `.lumen/mcp/pending`
+ *    (plan W2.3, `mcpInbox.ts`).
  */
 
 import type { RefObject } from "react";
@@ -122,7 +124,16 @@ export function startAgentReview(opts: { editorRef: RefObject<EditorHandle | nul
   const off = onStagedChanges(onList);
   const surface = window as unknown as { __lumen?: Record<string, unknown> };
   if (TEST_SURFACE) (surface.__lumen ??= {}).agentReview = { stage: stageForTest, withdrawRun: discardRunChanges };
+  // Changes proposed by MCP clients (plan W2.3) wait in the same panel.
+  let inbox: { stop(): void } | null = null;
+  let stopped = false;
+  void import("./mcpInbox")
+    .then((m) => m.startMcpInbox())
+    .then((i) => (stopped ? i.stop() : (inbox = i)))
+    .catch(() => {});
   return () => {
+    stopped = true;
+    inbox?.stop();
     off();
     if (timer) clearTimeout(timer);
     setDocumentApplier(null);

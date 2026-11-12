@@ -17,6 +17,7 @@
   "agentReview.empty": "待機中の変更はありません。",
   "agentReview.gap": "変更のない {count} 行",
   "agentReview.intro": "承認するまで何も書き込まれません。開いている文書への変更は、ファイルではなくエディターに入ります。",
+  "agentReview.mcpClient": "{client}（MCP クライアント）",
   "agentReview.noEol": "ファイル末尾に改行がありません",
   "agentReview.proposedBy": "提案元: {agent}",
   "agentReview.reject": "却下",
