@@ -18,6 +18,7 @@ import {
   STEPS,
   agentsMetrics,
   artifacts,
+  asrMetrics,
   availability,
   checklist,
   compareVersions,
@@ -144,6 +145,17 @@ describe("metrics from the evals' own files", () => {
     const dir = tmp();
     writeFileSync(join(dir, "pdf-chat-2026-11-12-qwen2.5_7b.json"), JSON.stringify({ passed: 1, total: 2, rows: [{ pages: [2], answerPages: [2] }, { pages: [5], answerPages: [1] }] }));
     expect(pdfChatMetrics(dir)).toEqual({ passed: 1, total: 2, share: 0.5, citationNdcg5: 0.5 });
+  });
+});
+
+describe("dictation WER (plan W4.13)", () => {
+  it("reads normal form v2 as the headline and keeps v1 next to it", () => {
+    const dir = tmp();
+    writeFileSync(join(dir, "asr-web.json"), JSON.stringify({ engine: "itayinbar/Ozen-v1", splits: { "fleurs-validation": { wer: 0.21, "wer.v2": 0.14, "latency.p95Ms": 900 } } }));
+    expect(asrMetrics(join(dir, "asr-web.json"), "fleurs-validation")).toMatchObject({ wer: 0.14, werV1: 0.21, p95Ms: 900 });
+    const s = steps.find((x) => x.id === "asr-web")!;
+    expect(judge(s, 0, { wer: 0.14 })).toBe("pass");
+    expect(judge(s, 0, { wer: 0.151 })).toBe("fail");
   });
 });
 

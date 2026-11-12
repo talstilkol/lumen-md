@@ -128,8 +128,10 @@ function progressFor(id: number) {
  * split; ivrit.ai's Hebrew turbo ships q4f16 for both (≈ 563 MB); wasm: q8.
  */
 export function asrOptions(device: Device, model = "") {
-  if (device !== "webgpu") return { device, dtype: "q8" };
+  if (device !== "webgpu" && model !== "itayinbar/Ozen-v1") return { device, dtype: "q8" };
   if (model === "ivrit-ai/whisper-large-v3-turbo-onnx") return { device, dtype: { encoder_model: "q4f16", decoder_model_merged: "q4f16" } };
+  // Ozen v1 ships an fp16 encoder and an fp32 decoder only (its card: an fp16 decoder does not load, int8 changes transcripts).
+  if (model === "itayinbar/Ozen-v1") return { device, dtype: { encoder_model: "fp16", decoder_model_merged: "fp32" } };
   return { device, dtype: { encoder_model: "fp32", decoder_model_merged: "q4" } };
 }
 
@@ -187,7 +189,8 @@ export function windowsOf(audio: Float32Array, windowSeconds = WINDOW_SECONDS, s
 
 async function transcribe(id: number, msg: Extract<WorkerIn, { type: "transcribe" }>): Promise<TranscribeResult> {
   const pipe = await getAsr(id, msg.model, msg.device);
-  const kwargs = { ...(msg.language ? { language: msg.language } : {}), task: msg.task ?? "transcribe" };
+  // A Hebrew-only model (Ozen) has no language / task tokens: plain generate.
+  const kwargs = msg.model === "itayinbar/Ozen-v1" ? {} : { ...(msg.language ? { language: msg.language } : {}), task: msg.task ?? "transcribe" };
   const parts: string[] = [];
   let language: string | undefined;
   for (const window of windowsOf(msg.audio)) {
