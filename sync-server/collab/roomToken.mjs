@@ -9,7 +9,7 @@
 import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 
 // The new-room limits' pure part (review 2 RR2-469-1), for the Worker through this one module.
-export { addressParts, admit, dayOf, quotaBuckets, quotaLimits } from "./roomQuota.mjs";
+export { addressParts, admit, cleanIds, dayBuckets, dayOf, evictionOrder, ownerOf, quotaBuckets, quotaIds, quotaLimits, storeFull } from "./roomQuota.mjs";
 
 export const DEFAULT_TOKEN_TTL_S = 10 * 60;
 

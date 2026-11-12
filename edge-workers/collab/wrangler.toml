@@ -22,12 +22,17 @@ COLLAB_TOKEN_TTL_S = "600"
 # which the app solves once per room and session (at most 24).
 COLLAB_POW_BITS = "18"
 # New rooms (review 2 RR2-469-1, sync-server/collab/roomQuota.mjs): per UTC day on the
-# whole server, per client address (IPv4, or IPv6 /64) and per IPv6 /48; and the
-# rooms stored at once (1,000 × MAX_ROOM_BYTES = 4 GB, under the Free plan's 5 GB).
+# whole server, per client address (IPv4, or IPv6 /64) and per IPv6 /48.
 COLLAB_NEW_ROOMS_PER_DAY = "2000"
 COLLAB_NEW_ROOMS_PER_ADDRESS = "20"
 COLLAB_NEW_ROOMS_PER_48 = "80"
-COLLAB_MAX_ROOMS = "1000"
+# What is stored (review 6 RR6-469-2): rooms, bytes (4 GB, under the Free plan's
+# 5 GB) and rooms per address. When rooms or bytes are full, a new room replaces the
+# smallest stored room nobody joined again in COLLAB_PROTECT_DAYS.
+COLLAB_MAX_ROOMS = "20000"
+COLLAB_MAX_STORED_BYTES = "4000000000"
+COLLAB_STORED_ROOMS_PER_ADDRESS = "50"
+COLLAB_PROTECT_DAYS = "14"
 
 [[durable_objects.bindings]]
 name = "ROOMS"

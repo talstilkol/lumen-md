@@ -1,24 +1,44 @@
 /**
- * New-room limits for the public collab server (review 2 RR2-469-1, review 4).
+ * New-room limits for the public collab server (review 2 RR2-469-1, review 4, review 6).
  *
  * One Durable Object (`Quota`, one instance named "quota") counts, per UTC day:
  *   - new rooms on the whole server   COLLAB_NEW_ROOMS_PER_DAY      (default 2,000)
  *   - new rooms per client address     COLLAB_NEW_ROOMS_PER_ADDRESS  (default 20)
  *     (an IPv4 address, or an IPv6 /64)
  *   - new rooms per IPv6 /48           COLLAB_NEW_ROOMS_PER_48       (default 4 × the per-address limit)
- * and, all the time, the rooms that are stored: COLLAB_MAX_ROOMS (default 1,000).
- * With MAX_ROOM_BYTES at 4 MB, 1,000 rooms are at most 4 GB, under the Workers
- * Free plan's 5 GB of Durable Object storage.
+ * and, all the time, what is stored (review 6, RR6-469-2):
+ *   - rooms                            COLLAB_MAX_ROOMS              (default 20,000)
+ *   - bytes                            COLLAB_MAX_STORED_BYTES       (default 4 GB, under the
+ *                                      Workers Free plan's 5 GB of Durable Object storage)
+ *   - rooms per address                COLLAB_STORED_ROOMS_PER_ADDRESS (default 50)
+ * When the rooms or the bytes are full, a new room may take the place of a
+ * stored one that nobody came back to: the smallest first, then the least
+ * recently written. A room someone joined again (a second person, or the same
+ * one later) within COLLAB_PROTECT_DAYS (default 14) is never evicted, and
+ * neither is a room with someone connected.
+ *
+ * The day is the Quota's own (review 6, RR6-469-1): a room passes ids that do
+ * not depend on the day, and the Quota turns them into the day's bucket
+ * names with its own clock, which never moves backwards. So a socket opened
+ * before midnight and authenticated after it counts against today, and can't
+ * reset today's counts.
  *
  * Why a Durable Object and not the Workers rate-limit binding: the binding
  * needs wrangler 4.36 (the deploy script pins 4.20.0), counts per Cloudflare
  * location, not globally, is eventually consistent, and only knows periods of
  * 10 or 60 seconds. A daily cap on the whole server needs one exact counter.
  *
- * What it keeps: counts under bucket names that are an HMAC of the address
- * under a key for the day (from COLLAB_TOKEN_SECRET), so no address is stored,
- * and yesterday's buckets are dropped with the day. A room is counted once,
- * when its first peer authenticates and nothing of it is stored yet.
+ * What it keeps, and no address:
+ *   - the day's counts under bucket names that are an HMAC, under a key for
+ *     the day, of an HMAC of the address (from COLLAB_TOKEN_SECRET); the
+ *     previous day's buckets are dropped with the day;
+ *   - per stored room (by its Durable Object id): its size, when it was last
+ *     written and last joined again, and its owner: 20 bits of a keyed hash
+ *     of the address that created it. About 4,000 IPv4 addresses share each
+ *     owner value, so it names none, and two people who share one rarely
+ *     both have rooms.
+ * A room is counted once, when its first peer authenticates and nothing of
+ * it is stored yet.
  * The counter itself is the `Quota` Durable Object in edge-workers/collab/worker.mjs;
  * this file is its pure part (tested in plain Node).
  */
@@ -66,15 +86,46 @@ export function addressParts(raw) {
   return { address: `${hex(4)}::/64`, p48: `${hex(3)}::/48` };
 }
 
+const hmacKey = (secret, label) => createHmac("sha256", String(secret || "")).update(label).digest();
+const h22 = (key, s) => createHmac("sha256", key).update(s).digest("base64url").slice(0, 22);
+const ID = /^[ap]:[\w-]{22}$/;
+
 /**
- * The bucket names for a client on `day`: ["a:<hmac>"] and, for IPv6,
- * "p:<hmac>" for its /48. Cloudflare sets CF-Connecting-IP; a client can't.
+ * A client's ids, which do not depend on the day: ["a:<hmac>"] and, for
+ * IPv6, "p:<hmac>" for its /48. The room keeps them with the socket (no
+ * address); the Quota makes the day's bucket names from them. Cloudflare
+ * sets CF-Connecting-IP; a client can't.
  */
-export function quotaBuckets(secret, rawAddress, day = dayOf()) {
-  const key = createHmac("sha256", String(secret || "")).update(`lumen-collab quota v1|${day}`).digest();
-  const h = (s) => createHmac("sha256", key).update(s).digest("base64url").slice(0, 22);
+export function quotaIds(secret, rawAddress) {
+  const key = hmacKey(secret, "lumen-collab quota id v2");
   const { address, p48 } = addressParts(rawAddress);
-  return { day, keys: [`a:${h(address)}`, ...(p48 ? [`p:${h(p48)}`] : [])] };
+  return [`a:${h22(key, address)}`, ...(p48 ? [`p:${h22(key, p48)}`] : [])];
+}
+
+/** Ids as the Quota accepts them: at most one of each kind, well formed. */
+export function cleanIds(ids) {
+  if (!Array.isArray(ids)) return [];
+  const a = ids.find((k) => typeof k === "string" && ID.test(k) && k.startsWith("a:"));
+  const p = ids.find((k) => typeof k === "string" && ID.test(k) && k.startsWith("p:"));
+  return [a, p].filter(Boolean);
+}
+
+/** The day's bucket names for those ids, under a key for the day: the Quota's own day, never a caller's. */
+export function dayBuckets(secret, ids, day) {
+  const key = hmacKey(secret, `lumen-collab quota v2|${day}`);
+  return cleanIds(ids).map((id) => `${id[0]}:${h22(key, id)}`);
+}
+
+/** The bucket names for a client on `day` (ids, then the day's names). */
+export function quotaBuckets(secret, rawAddress, day = dayOf()) {
+  return { day, keys: dayBuckets(secret, quotaIds(secret, rawAddress), day) };
+}
+
+/** A room's owner: 20 bits of a keyed hash of the creator's address id (about 4,000 IPv4 addresses share each value). */
+export function ownerOf(secret, ids) {
+  const a = cleanIds(ids).find((k) => k.startsWith("a:"));
+  if (!a) return null;
+  return createHmac("sha256", hmacKey(secret, "lumen-collab owner v1")).update(a).digest().readUInt32BE(0) >>> 12;
 }
 
 /** The limits, from the Worker's vars. */
@@ -84,22 +135,31 @@ export function quotaLimits(env = {}) {
     perDay: Math.max(1, Math.floor(num(env.COLLAB_NEW_ROOMS_PER_DAY, 2000))),
     perAddress,
     per48: Math.max(perAddress, Math.floor(num(env.COLLAB_NEW_ROOMS_PER_48, 4 * perAddress))),
-    maxRooms: Math.max(1, Math.floor(num(env.COLLAB_MAX_ROOMS, 1000))),
+    maxRooms: Math.max(1, Math.floor(num(env.COLLAB_MAX_ROOMS, 20_000))),
+    maxBytes: Math.max(1, Math.floor(num(env.COLLAB_MAX_STORED_BYTES, 4_000_000_000))),
+    storedPerAddress: Math.max(1, Math.floor(num(env.COLLAB_STORED_ROOMS_PER_ADDRESS, 50))),
+    protectMs: Math.max(0, num(env.COLLAB_PROTECT_DAYS, 14)) * 86_400_000,
   };
 }
 
+/** Is the store full (rooms or bytes)? */
+export const storeFull = (counts, limits) => counts.stored >= limits.maxRooms || (counts.bytes ?? 0) >= limits.maxBytes;
+
 /**
  * The decision, as a pure function of the counts: `counts` is
- * {day, rooms, stored, buckets: Map}. Returns null to admit (and counts it),
- * or the reason: "rooms-full" | "day" | "address" | "prefix".
+ * {day, rooms, stored, bytes, buckets: Map, owners: Map}. `day` is the
+ * Quota's own; the counts never go back to an earlier day. Returns null to
+ * admit (and counts it), or the reason: "rooms-full" | "address-stored" |
+ * "day" | "address" | "prefix".
  */
-export function admit(counts, keys, day, limits) {
-  if (counts.day !== day) {
+export function admit(counts, keys, day, limits, owner = null) {
+  if (day > counts.day) {
     counts.day = day;
     counts.rooms = 0;
     counts.buckets = new Map();
   }
-  if (counts.stored >= limits.maxRooms) return "rooms-full";
+  if (storeFull(counts, limits)) return "rooms-full";
+  if (owner !== null && (counts.owners?.get(owner) ?? 0) >= limits.storedPerAddress) return "address-stored";
   if (counts.rooms >= limits.perDay) return "day";
   for (const k of keys) {
     const cap = k.startsWith("p:") ? limits.per48 : limits.perAddress;
@@ -108,4 +168,16 @@ export function admit(counts, keys, day, limits) {
   counts.rooms++;
   for (const k of keys) counts.buckets.set(k, (counts.buckets.get(k) ?? 0) + 1);
   return null;
+}
+
+/**
+ * The stored rooms a new one may replace, in order: none that someone joined
+ * again within `protectMs`; the smallest first, then the least recently
+ * written. `rooms` is a Map of id → {b: bytes, w: last write, a: last joined again}.
+ */
+export function evictionOrder(rooms, nowMs, limits) {
+  return [...rooms]
+    .filter(([, r]) => !(r.a && nowMs - r.a < limits.protectMs))
+    .sort(([, x], [, y]) => (x.b ?? 0) - (y.b ?? 0) || (x.w ?? 0) - (y.w ?? 0))
+    .map(([id]) => id);
 }

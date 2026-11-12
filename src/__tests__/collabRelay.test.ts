@@ -452,6 +452,7 @@ describe("edge-workers/collab: the public server on Cloudflare (simulated runtim
       storage: {
         list: async () => new Map(qs),
         put: async (o: Record<string, unknown>) => void Object.entries(o).forEach(([k, v]) => qs.set(k, v)),
+        delete: async (k: string | string[]) => void ([] as string[]).concat(k).forEach((x) => qs.delete(x)),
         deleteAll: async () => qs.clear(),
       },
     };
