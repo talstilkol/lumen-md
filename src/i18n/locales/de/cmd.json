@@ -1,4 +1,8 @@
 {
+  "cmd.a11y.srVerbosity": "Screenreader-Ansagen: {mode}",
+  "cmd.a11y.srVerbosity.hint": "Was der Editor sagt, wenn sich der Cursor bewegt: Überschriften und Struktur, jede Zeile oder nichts",
+  "cmd.a11y.whereAmI": "Cursorposition ansagen",
+  "cmd.a11y.whereAmI.hint": "Zeile, Spalte und die Überschrift darüber, vom Screenreader gelesen",
   "cmd.ai.actionItems": "KI: Aufgaben extrahieren",
   "cmd.ai.actionItems.hint": "Aufgabenliste aus Besprechungsnotizen extrahieren",
   "cmd.ai.agentSettings": "KI: Einstellungen (lokale Agenten)",
@@ -162,6 +166,8 @@
   "cmd.git.token.hint": "lokal gespeichert (IndexedDB)",
   "cmd.git.watch": "Git: Auto-Pull im Beobachtungsmodus umschalten",
   "cmd.git.watch.hint": "Fragt das Remote alle 5 Min. ab und pullt bei Änderungen",
+  "cmd.help.a11yStatement": "Erklärung zur Barrierefreiheit",
+  "cmd.help.a11yStatement.hint": "Wie barrierefrei Lumen ist (IS 5568, WCAG 2.2 AA), bekannte Lücken und wie man eine Barriere meldet",
   "cmd.help.credits": "Danksagungen & Modelllizenzen",
   "cmd.help.setup": "Lumen einrichten…",
   "cmd.help.setup.hint": "Sprache, Speicherort, Aussehen und Beispiel-Tresor: die Ersteinrichtung noch einmal",

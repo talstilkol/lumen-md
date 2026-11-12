@@ -20,6 +20,7 @@ export const DOCS_TOPICS = {
   pluginSigning: "plugins/signing",
   localLlm: "ai/local-llm",
   localAgents: "ai/local-agents",
+  a11yStatement: "editor/accessibility-statement",
 } as const;
 
 export type DocsTopic = keyof typeof DOCS_TOPICS;
@@ -34,8 +35,8 @@ function readDocsBase(): string {
   return DEFAULT_DOCS_BASE;
 }
 
-/** Absolute URL of a docs topic, optionally with an in-page anchor. */
-export function docsUrl(topic: DocsTopic, anchor?: string): string {
-  const url = `${readDocsBase()}/${DOCS_TOPICS[topic]}/`;
+/** Absolute URL of a docs topic, optionally with an in-page anchor; `he` for the Hebrew page. */
+export function docsUrl(topic: DocsTopic, anchor?: string, locale?: "he"): string {
+  const url = `${readDocsBase()}/${locale ? `${locale}/` : ""}${DOCS_TOPICS[topic]}/`;
   return anchor ? `${url}#${anchor}` : url;
 }

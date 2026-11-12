@@ -1,4 +1,8 @@
 {
+  "cmd.a11y.srVerbosity": "הכרזות לקורא מסך: {mode}",
+  "cmd.a11y.srVerbosity.hint": "מה העורך אומר כשהסמן זז: כותרות ומבנה, כל שורה, או כלום",
+  "cmd.a11y.whereAmI": "הכרזת מיקום הסמן",
+  "cmd.a11y.whereAmI.hint": "שורה, עמודה והכותרת שמעל, בקורא המסך",
   "cmd.ai.actionItems": "AI: חילוץ משימות",
   "cmd.ai.actionItems.hint": "הפק רשימת משימות מסיכום פגישה",
   "cmd.ai.agentSettings": "AI: הגדרות (סוכנים מקומיים)",
@@ -162,6 +166,8 @@
   "cmd.git.token.hint": "נשמר מקומית (IndexedDB)",
   "cmd.git.watch": "Git: החלף מצב משיכה אוטומטית",
   "cmd.git.watch.hint": "בודק את ה־remote כל 5 דקות ומושך אם יש שינוי",
+  "cmd.help.a11yStatement": "הצהרת נגישות",
+  "cmd.help.a11yStatement.hint": "רמת הנגישות של Lumen (ת״י 5568, WCAG 2.2 AA), פערים ידועים ואיך לדווח על חסם",
   "cmd.help.credits": "קרדיטים ורישיונות מודלים",
   "cmd.help.setup": "הגדרת Lumen…",
   "cmd.help.setup.hint": "שפה, מיקום הכספת, מראה וכספת דוגמה: הגדרת ההתחלה שוב",

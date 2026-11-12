@@ -1,4 +1,8 @@
 {
+  "cmd.a11y.srVerbosity": "屏幕阅读器播报：{mode}",
+  "cmd.a11y.srVerbosity.hint": "光标移动时编辑器播报的内容：标题和结构、每一行，或不播报",
+  "cmd.a11y.whereAmI": "播报光标位置",
+  "cmd.a11y.whereAmI.hint": "由屏幕阅读器读出行、列和上方的标题",
   "cmd.ai.actionItems": "AI：提取行动项",
   "cmd.ai.actionItems.hint": "从会议记录中提取任务清单",
   "cmd.ai.agentSettings": "AI：设置（本地代理）",
@@ -162,6 +166,8 @@
   "cmd.git.token.hint": "存储在本地 (IndexedDB)",
   "cmd.git.watch": "Git:切换监视模式自动拉取",
   "cmd.git.watch.hint": "每 5 分钟轮询远程仓库,有更改时自动拉取",
+  "cmd.help.a11yStatement": "无障碍声明",
+  "cmd.help.a11yStatement.hint": "Lumen 的无障碍程度（IS 5568、WCAG 2.2 AA）、已知不足以及如何报告障碍",
   "cmd.help.credits": "致谢与模型许可证",
   "cmd.help.setup": "设置 Lumen…",
   "cmd.help.setup.hint": "语言、库位置、外观和示例库：重新进行首次设置",

@@ -4,6 +4,28 @@
   "source": "src/i18n/locales/en/cmd.json",
   "entries": [
     {
+      "key": "cmd.a11y.srVerbosity",
+      "en": "Screen reader announcements: {mode}",
+      "vars": [
+        "mode"
+      ]
+    },
+    {
+      "key": "cmd.a11y.srVerbosity.hint",
+      "en": "What the editor says as the cursor moves: headings and structure, every line, or nothing",
+      "vars": []
+    },
+    {
+      "key": "cmd.a11y.whereAmI",
+      "en": "Announce cursor position",
+      "vars": []
+    },
+    {
+      "key": "cmd.a11y.whereAmI.hint",
+      "en": "Line, column and the heading above, read by the screen reader",
+      "vars": []
+    },
+    {
       "key": "cmd.ai.actionItems",
       "en": "AI: Extract Action Items",
       "vars": []
@@ -820,6 +842,16 @@
     {
       "key": "cmd.git.watch.hint",
       "en": "Polls the remote every 5 min and pulls on change",
+      "vars": []
+    },
+    {
+      "key": "cmd.help.a11yStatement",
+      "en": "Accessibility statement",
+      "vars": []
+    },
+    {
+      "key": "cmd.help.a11yStatement.hint",
+      "en": "How accessible Lumen is (IS 5568, WCAG 2.2 AA), known gaps, and how to report a barrier",
       "vars": []
     },
     {

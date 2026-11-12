@@ -1,4 +1,8 @@
 {
+  "cmd.a11y.srVerbosity": "إعلانات قارئ الشاشة: {mode}",
+  "cmd.a11y.srVerbosity.hint": "ما يقوله المحرر عند تحرك المؤشر: العناوين والبنية، أو كل سطر، أو لا شيء",
+  "cmd.a11y.whereAmI": "إعلان موضع المؤشر",
+  "cmd.a11y.whereAmI.hint": "السطر والعمود والعنوان أعلاه، بقارئ الشاشة",
   "cmd.ai.actionItems": "AI: استخراج المهام",
   "cmd.ai.actionItems.hint": "استخراج قائمة مهام من ملاحظات الاجتماع",
   "cmd.ai.agentSettings": "الذكاء الاصطناعي: الإعدادات (وكلاء محليون)",
@@ -162,6 +166,8 @@
   "cmd.git.token.hint": "يُخزَّن محليًا (IndexedDB)",
   "cmd.git.watch": "Git: تبديل السحب التلقائي في وضع المراقبة",
   "cmd.git.watch.hint": "يفحص المستودع البعيد كل 5 دقائق ويسحب عند وجود تغيير",
+  "cmd.help.a11yStatement": "بيان إمكانية الوصول",
+  "cmd.help.a11yStatement.hint": "مدى إتاحة Lumen ‏(IS 5568، WCAG 2.2 AA)، والثغرات المعروفة، وكيفية الإبلاغ عن عائق",
   "cmd.help.credits": "شكر وتقدير وتراخيص النماذج",
   "cmd.help.setup": "إعداد Lumen…",
   "cmd.help.setup.hint": "اللغة وموقع الخزنة والمظهر وخزنة نموذجية: إعداد البداية مرة أخرى",

@@ -1,4 +1,8 @@
 {
+  "cmd.a11y.srVerbosity": "スクリーンリーダーの読み上げ: {mode}",
+  "cmd.a11y.srVerbosity.hint": "カーソル移動時にエディターが読み上げる内容: 見出しと構造、すべての行、またはなし",
+  "cmd.a11y.whereAmI": "カーソル位置を読み上げ",
+  "cmd.a11y.whereAmI.hint": "行、列、上の見出しをスクリーンリーダーで読み上げます",
   "cmd.ai.actionItems": "AI: アクション項目を抽出",
   "cmd.ai.actionItems.hint": "会議メモからタスク一覧を抽出",
   "cmd.ai.agentSettings": "AI: 設定（ローカルエージェント）",
@@ -162,6 +166,8 @@
   "cmd.git.token.hint": "ローカルに保存されます (IndexedDB)",
   "cmd.git.watch": "Git: 監視モードの自動プルを切り替え",
   "cmd.git.watch.hint": "5分ごとにリモートを確認し、変更があればプルします",
+  "cmd.help.a11yStatement": "アクセシビリティ宣言",
+  "cmd.help.a11yStatement.hint": "Lumen のアクセシビリティ (IS 5568、WCAG 2.2 AA)、既知の課題、障壁の報告方法",
   "cmd.help.credits": "クレジットとモデルのライセンス",
   "cmd.help.setup": "Lumen をセットアップ…",
   "cmd.help.setup.hint": "言語、保管場所、見た目、サンプルの保管庫: 初回セットアップをもう一度",

@@ -1,4 +1,8 @@
 {
+  "cmd.a11y.srVerbosity": "Annonces du lecteur d’écran : {mode}",
+  "cmd.a11y.srVerbosity.hint": "Ce que l’éditeur dit quand le curseur bouge : titres et structure, chaque ligne, ou rien",
+  "cmd.a11y.whereAmI": "Annoncer la position du curseur",
+  "cmd.a11y.whereAmI.hint": "Ligne, colonne et le titre au-dessus, lus par le lecteur d’écran",
   "cmd.ai.actionItems": "IA : Extraire les tâches",
   "cmd.ai.actionItems.hint": "Extraire une liste de tâches des notes de réunion",
   "cmd.ai.agentSettings": "IA : Réglages (agents locaux)",
@@ -162,6 +166,8 @@
   "cmd.git.token.hint": "stocké localement (IndexedDB)",
   "cmd.git.watch": "Git : activer/désactiver le pull automatique en surveillance",
   "cmd.git.watch.hint": "Interroge le dépôt distant toutes les 5 min et fait un pull en cas de changement",
+  "cmd.help.a11yStatement": "Déclaration d’accessibilité",
+  "cmd.help.a11yStatement.hint": "Le niveau d’accessibilité de Lumen (IS 5568, WCAG 2.2 AA), les lacunes connues et comment signaler un obstacle",
   "cmd.help.credits": "Crédits et licences des modèles",
   "cmd.help.setup": "Configurer Lumen…",
   "cmd.help.setup.hint": "Langue, emplacement du coffre, apparence et coffre d'exemple : la configuration initiale à nouveau",

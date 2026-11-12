@@ -1,4 +1,8 @@
 {
+  "cmd.a11y.srVerbosity": "Screen reader announcements: {mode}",
+  "cmd.a11y.srVerbosity.hint": "What the editor says as the cursor moves: headings and structure, every line, or nothing",
+  "cmd.a11y.whereAmI": "Announce cursor position",
+  "cmd.a11y.whereAmI.hint": "Line, column and the heading above, read by the screen reader",
   "cmd.ai.actionItems": "AI: Extract Action Items",
   "cmd.ai.actionItems.hint": "Pull a task list out of meeting notes",
   "cmd.ai.agentSettings": "AI: Settings (local agents)",
@@ -161,6 +165,8 @@
   "cmd.git.token.hint": "stored locally (IndexedDB)",
   "cmd.git.watch": "Git: toggle watch-mode auto-pull",
   "cmd.git.watch.hint": "Polls the remote every 5 min and pulls on change",
+  "cmd.help.a11yStatement": "Accessibility statement",
+  "cmd.help.a11yStatement.hint": "How accessible Lumen is (IS 5568, WCAG 2.2 AA), known gaps, and how to report a barrier",
   "cmd.help.credits": "Credits & model licences",
   "cmd.help.setup": "Set up Lumen…",
   "cmd.help.setup.hint": "Language, vault location, look and a sample vault: the first-run setup again",

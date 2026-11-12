@@ -164,7 +164,9 @@
   /* Skip-to-content link revealed when focused */
   .skip-link {
     position: fixed;
-    inset-inline-start: 50%;
+    /* Physical left: inset-inline-start + translateX(-50%) pushed it off the
+       screen in right-to-left layouts (reflow check, plan W1.23). */
+    left: 50%;
     top: -40px;
     transform: translateX(-50%);
     background: hsl(var(--accent));
@@ -398,9 +400,14 @@
   .prose-lumen li > ol {
     margin: 0.25rem 0;
   }
+  /* The checkbox takes the bullet's place inside the list's own padding;
+     a negative margin pushed it past the window's edge when narrow (plan W1.23). */
+  .prose-lumen ul.contains-task-list {
+    padding-inline-start: 0.25rem;
+  }
   .prose-lumen li.task-list-item {
     list-style: none;
-    margin-inline-start: -1.25rem;
+    margin-inline-start: 0;
     padding-inline-start: 0;
     display: flex;
     align-items: flex-start;
@@ -1940,4 +1947,75 @@
 .lumen-hover-card-empty {
   color: hsl(var(--fg-muted));
   font-size: 12px;
+}
+
+/* ── Forced colours and reflow (plan W1.23) ─────────────────────────────
+   Windows high contrast / forced-colors: the system palette replaces ours,
+   so state must not rest on background colour alone. Focus gets a system
+   outline, controls a border, selected items the system highlight. */
+@media (forced-colors: active) {
+  :focus-visible {
+    outline: 2px solid CanvasText !important;
+    outline-offset: 2px;
+  }
+  button,
+  [role="button"],
+  [role="tab"],
+  input,
+  select,
+  textarea {
+    border: 1px solid ButtonText;
+  }
+  [aria-selected="true"],
+  [aria-pressed="true"],
+  [aria-current]:not([aria-current="false"]) {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
+  }
+  .cm-editor .cm-cursor {
+    border-inline-start-color: CanvasText !important;
+  }
+  .cm-editor .cm-selectionBackground {
+    background: Highlight !important;
+  }
+}
+
+/* 400 % zoom is a 320 px-wide window (WCAG 1.4.10): media and wide blocks
+   stay inside it, and long words wrap instead of pushing the page wider.
+   Code scrolls inside its own box (the WCAG exception). Tables keep
+   display: table — display: block would drop their table semantics for
+   screen readers. */
+.prose-lumen img,
+.prose-lumen video,
+.prose-lumen iframe,
+.prose-lumen svg {
+  max-inline-size: 100%;
+  block-size: auto;
+}
+.prose-lumen {
+  overflow-wrap: anywhere;
+}
+.prose-lumen pre {
+  max-inline-size: 100%;
+  overflow-x: auto;
+}
+[role="dialog"] {
+  max-inline-size: 100vw;
+}
+/* Narrow windows (and 200–400 % zoom): the title bar and the status bar wrap
+   onto a second row instead of pushing their last buttons off the screen. */
+@media (max-width: 760px) {
+  .titlebar {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 44px;
+    row-gap: 2px;
+  }
+  .status-bar {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 26px;
+    row-gap: 2px;
+  }
 }
