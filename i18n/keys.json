@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-10T01:55:13.497Z",
+  "generated_at": "2026-11-12T09:41:36.390Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1531,
+  "count": 1534,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1775,12 +1775,14 @@
     },
     {
       "key": "calendar.templateHint",
-      "en": "Placeholders: {{date}}, {{hebrewDate}}, {{weekday}}, {{title}}",
+      "en": "Placeholders: {{date}}, {{hebrewDate}}, {{weekday}}, {{title}}, {{holiday}}, {{parasha}}",
       "vars": [
         "date",
         "hebrewDate",
         "weekday",
-        "title"
+        "title",
+        "holiday",
+        "parasha"
       ]
     },
     {
@@ -1792,6 +1794,23 @@
       "key": "calendar.save",
       "en": "Save",
       "vars": []
+    },
+    {
+      "key": "calendar.israel",
+      "en": "Holidays and Torah portions as in Israel (unchecked: the diaspora)",
+      "vars": []
+    },
+    {
+      "key": "calendar.holidays",
+      "en": "Holidays this month",
+      "vars": []
+    },
+    {
+      "key": "calendar.parasha",
+      "en": "Torah portion: {name}",
+      "vars": [
+        "name"
+      ]
     },
     {
       "key": "daily.noWorkspace",
