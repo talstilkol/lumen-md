@@ -181,7 +181,9 @@ async function measureEditor(page: Page, editor: EditorName, env: Env): Promise<
     }
     await throttle(page, 1);
     const times = await page.evaluate(() => window.__lumenK2p ?? []);
-    expect(times.length, `keypress → paint samples in ${label}`).toBeGreaterThanOrEqual(95);
+    // Typed Hebrew arrives as text input with no keydown, so only the pressed keys (70 of 100) are timed.
+    const pressed = Array.from({ length: 100 }, (_, i) => i).filter((i) => !(i % 3 === 0 && i % 10 !== 9)).length;
+    expect(times.length, `keypress → paint samples in ${label}`).toBeGreaterThanOrEqual(pressed - 5);
     k2pP95[label] = quantile(times, 0.95);
     note(`${editor} keypress → paint p95 (${label})`, k2pP95[label]);
   }
