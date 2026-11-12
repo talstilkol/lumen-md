@@ -446,6 +446,48 @@
       ]
     },
     {
+      "key": "base.calendar.next",
+      "en": "Next month",
+      "vars": []
+    },
+    {
+      "key": "base.calendar.prev",
+      "en": "Previous month",
+      "vars": []
+    },
+    {
+      "key": "base.calendar.undated",
+      "en": "{count} without a date",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "base.csv.export",
+      "en": "Export CSV",
+      "vars": []
+    },
+    {
+      "key": "base.csv.failed",
+      "en": "Couldn't import the CSV: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "base.csv.import",
+      "en": "Import CSV…",
+      "vars": []
+    },
+    {
+      "key": "base.csv.imported",
+      "en": "Added {count} notes to {folder}",
+      "vars": [
+        "count",
+        "folder"
+      ]
+    },
+    {
       "key": "base.error",
       "en": "Can't read this base: {error}",
       "vars": [
@@ -458,6 +500,33 @@
       "vars": [
         "count",
         "total"
+      ]
+    },
+    {
+      "key": "base.move.hint",
+      "en": "Drag to another day, or Alt + arrow keys",
+      "vars": []
+    },
+    {
+      "key": "base.move.readOnly",
+      "en": "{property} can't be changed from here: only note properties can",
+      "vars": [
+        "property"
+      ]
+    },
+    {
+      "key": "base.moveFailed",
+      "en": "Couldn't move it: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "base.moved",
+      "en": "Moved {name} to {date}",
+      "vars": [
+        "name",
+        "date"
       ]
     },
     {
@@ -484,6 +553,13 @@
       "en": "Saved to {file}",
       "vars": [
         "file"
+      ]
+    },
+    {
+      "key": "base.timeline.empty",
+      "en": "No item has a date in {property}",
+      "vars": [
+        "property"
       ]
     },
     {
