@@ -73,7 +73,12 @@ const BUDGETS = [
   // of its own at 740 KB — measured + 3% headroom, never a blanket raise.
   // Lazy (canvas only) and not precached. Plan task W1.36 looks for a smaller
   // build of it and lowers this rule when one lands.
-  { name: "vendor: excalidraw core", pattern: /^vendor-excalidraw-chunk-/, budgetKb: 740 },
+  // The rule names that one module only: Excalidraw's chunk stem EIO257PC
+  // (0.18.1; the W1.36 probe build lists it as a single 1,796 KB module).
+  // Every other Excalidraw shared chunk stays at 700 (review 13.5). A new
+  // Excalidraw build renames the stem, falls to 700 and fails: the rule is
+  // then decided again, not inherited.
+  { name: "vendor: excalidraw core", pattern: /^vendor-excalidraw-chunk-EIO257PC-/, budgetKb: 740 },
   { name: "vendor: excalidraw", pattern: /^vendor-excalidraw-/,   budgetKb: 700 },
   // @google/model-viewer + three.js, self-hosted (CSP bans the unpkg CDN).
   // Dynamic-imported only when a document contains a ```model3d block.

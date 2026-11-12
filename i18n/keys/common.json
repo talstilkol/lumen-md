@@ -3030,6 +3030,13 @@
       "vars": []
     },
     {
+      "key": "settings.importRefused",
+      "en": "Not imported, so this device keeps its privacy settings: {keys}",
+      "vars": [
+        "keys"
+      ]
+    },
+    {
       "key": "settings.imported",
       "en": "{n} settings imported, {skipped} skipped",
       "vars": [

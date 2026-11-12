@@ -536,6 +536,7 @@
   "settings.empty": "没有匹配的设置",
   "settings.general": "常规",
   "settings.importFailed": "该文件不是 Lumen 设置文件。",
+  "settings.importRefused": "为保留此设备的隐私设置，未导入：{keys}",
   "settings.imported": "已导入 {n} 项设置，跳过 {skipped} 项",
   "settings.language": "语言",
   "settings.search": "搜索设置",

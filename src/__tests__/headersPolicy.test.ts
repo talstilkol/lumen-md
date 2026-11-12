@@ -102,6 +102,15 @@ describe("renderers", () => {
     );
   });
 
+  it("webR's jsDelivr fallback is in the web policies only, never the desktop app's (review 13.5)", () => {
+    const policy = loadPolicy(ROOT);
+    const connect = (host: string) => parseCsp(renderCsp(policy, "app", host)).get("connect-src") as string[];
+    for (const host of ["meta", "cloudflare", "vercel", "deploy-nginx"]) expect(connect(host), host).toContain("https://cdn.jsdelivr.net");
+    expect(connect("tauri")).not.toContain("https://cdn.jsdelivr.net");
+    expect(connect("tauri")).toContain("https://webr.r-wasm.org");
+    expect(readFileSync(join(ROOT, "src-tauri/tauri.conf.json"), "utf8")).not.toContain("cdn.jsdelivr.net");
+  });
+
   it("Tauri: --tauri-config adds the build's endpoint origins to connect-src only", () => {
     expect(tauriConfigWithOrigins(fixture, ["https://sso.acme.example", "https://api.example"])).toEqual({
       app: {
