@@ -11,7 +11,7 @@ description: השערים של Lumen רצים בבניית Vercel של כל ענ
 
 | בנייה | מה רץ, לפי הסדר |
 |---|---|
-| ‏Preview (כל ענף חוץ מ-`main`) | build, תקציב החבילה, vitest, ‏e2e (smoke ב-chromium), ‏`i18n:check`, ‏hygiene, ‏`docs:sync`, שער הרישיונות |
+| ‏Preview (כל ענף חוץ מ-`main`) | build, תקציב החבילה, vitest, ‏e2e (smoke ב-chromium וב-firefox), ‏`i18n:check`, ‏hygiene, ‏`docs:sync`, שער הרישיונות |
 | ‏Production (`main`) | build, תקציב החבילה — כמו קודם |
 
 השערים נעצרים בכישלון הראשון. יומן הבנייה מסתיים בשער שנכשל ובאלה שעברו
@@ -45,7 +45,7 @@ node scripts/vercel-build.mjs --dry-run    # print the gates, run nothing
 | 0.19 שער PR ‏(Danger.js, ‏size-limit) | תגובת Danger ו-size-limit בכל PR | חלק הגודל הוא שער **תקציב החבילה** (לכל chunk ראשי יש תקציב, `scripts/bundle-budget.mjs`); קריאת רשת שלא רשומה מכשילה את **vitest** ‏(`src/__tests__/cloudRoutes.test.ts` בודק כל נתיב ענן); הפרש הרישיונות הוא **שער הרישיונות**. לתגובה עצמה ב-PR עוד אין תחליף |
 | 13.3 בניות Android ו-iOS | בניות מובייל ב-CI | `npm run android:sync` / `npm run ios:sync` במחשב עם ה-SDK (‏iOS דורש macOS); חלק הרשת שהן כוללות הוא מה שבניית ה-preview בודקת |
 | 13.4 צינור שחרור | workflow של שחרור | סקריפט שחרור מקומי, ארטיפקטים חתומים ו-rollback במחשב של מפתח; השחרור של אפליקציית הרשת הוא בניית ה-production |
-| e2e של Playwright | משימות e2e בכל PR | שער **e2e** מריץ את `e2e/smoke.spec.ts` ב-chromium בתוך הבנייה (`scripts/e2e-gate.mjs`); כל החבילה, firefox ו-webkit רצים ב-`npx playwright test` במחשב של מפתח או ב-Sandbox ‏(W1.1): במכונת הבנייה פרויקט chromium לבדו לוקח כ-30 דקות, ו-WebKit צריך glibc חדש מזה שיש בתמונת הבנייה |
+| e2e של Playwright | משימות e2e בכל PR | שער **e2e** מריץ את `e2e/smoke.spec.ts` ב-chromium וב-firefox בתוך הבנייה (`scripts/e2e-gate.mjs`); כל החבילה רצה ב-`npx playwright test` במחשב של מפתח או ב-Sandbox ‏(W1.1), כי במכונת הבנייה פרויקט chromium לבדו לוקח כ-30 דקות. WebKit לא יכול לרוץ בבנייה: ה-WebKit של Playwright צריך glibc 2.38, ובתמונת הבנייה (Amazon Linux 2023) יש 2.34. הכיסוי של Safari נעשה על Mac ‏(W4.22) |
 
 ## כששער אדום
 

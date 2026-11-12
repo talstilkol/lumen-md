@@ -8,7 +8,7 @@ import { resolve } from "node:path";
 // @ts-expect-error — plain .mjs script without type declarations
 import { GATES, GATE_EXTRA, PREVIEW_GATES, PRODUCTION_GATES, gatesFor, vitestSummary } from "../../scripts/vercel-build.mjs";
 // @ts-expect-error — plain .mjs script without type declarations
-import { E2E_SPECS, boxMinutes } from "../../scripts/e2e-gate.mjs";
+import { E2E_SPECS, FIREFOX_SPECS, boxMinutes, e2eRuns } from "../../scripts/e2e-gate.mjs";
 // @ts-expect-error — plain .mjs script without type declarations
 import { failureLines } from "../../scripts/e2e-report.mjs";
 
@@ -71,6 +71,10 @@ describe("scripts/vercel-build.mjs", () => {
     expect(GATES.e2e).toEqual(["run", "-s", "e2e:gate"]);
     // The whole chromium project took 29.7 min on the build machine; the gate runs the specs that fit.
     expect(E2E_SPECS).toEqual(["e2e/smoke.spec.ts"]);
+    // Firefox runs the smoke spec too; WebKit cannot run on the build image (glibc 2.34).
+    expect(FIREFOX_SPECS).toEqual(["e2e/smoke.spec.ts"]);
+    expect(e2eRuns().map((r: { project: string }) => r.project)).toEqual(["chromium", "firefox"]);
+    expect(e2eRuns(["e2e/a.spec.ts"], []).map((r: { project: string }) => r.project)).toEqual(["chromium"]);
     expect(PREVIEW_GATES.indexOf("e2e")).toBe(PREVIEW_GATES.indexOf("vitest") + 1);
   });
 
