@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { vaultOrSkip } from "./_opfs";
 
 /**
  * Plan 11.4 — vault encryption at rest, in a real browser, on each backend
@@ -30,7 +31,7 @@ async function runCommand(page: Page, name: string) {
   await page.keyboard.press("Enter");
 }
 
-test("OPFS vault: turn on in the dialog, only ciphertext stored, unlock after reload, check and repair, recovery key", async ({ page }) => {
+test("OPFS vault: turn on in the dialog, only ciphertext stored, unlock after reload, check and repair, recovery key", async ({ page, browserName }) => {
   test.setTimeout(120_000);
   await page.addInitScript(() => localStorage.setItem("lumen-tour-done", "1"));
   await page.goto("/");
@@ -47,7 +48,7 @@ test("OPFS vault: turn on in the dialog, only ciphertext stored, unlock after re
       return false;
     }
   }, NOTE);
-  test.skip(!ok, "OPFS writes are unavailable in this engine's test context");
+  vaultOrSkip(ok, browserName);
 
   await runCommand(page, "Vault encryption");
   const dialog = page.getByTestId("vault-encryption");
@@ -97,7 +98,7 @@ test("OPFS vault: turn on in the dialog, only ciphertext stored, unlock after re
   expect(await page.evaluate(async () => (await import(/* @vite-ignore */ "/src/storage/workspace.ts")).readWorkspaceFile("Private/Plan.md"))).toBe(NOTE);
 });
 
-test("a real folder (FileSystemDirectoryHandle): only ciphertext, scan, wrong passphrase, recovery, off again", async ({ page }) => {
+test("a real folder (FileSystemDirectoryHandle): only ciphertext, scan, wrong passphrase, recovery, off again", async ({ page, browserName }) => {
   test.setTimeout(120_000);
   await page.addInitScript(() => localStorage.setItem("lumen-tour-done", "1"));
   await page.goto("/");
@@ -135,7 +136,7 @@ test("a real folder (FileSystemDirectoryHandle): only ciphertext, scan, wrong pa
       vault.setVaultBackend(previous);
     }
   }, NOTE);
-  test.skip(!result, "OPFS is unavailable in this engine's test context");
+  vaultOrSkip(result !== null, browserName);
   expect(result!.prefix).toEqual([0x00, 0x4c, 0x4d, 0x45, 0x01]);
   expect(result!.leaks).toBe(false);
   expect(result!.scan).toEqual({ encrypted: 1, plain: 0, broken: 0 });

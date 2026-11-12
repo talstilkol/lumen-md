@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { vaultOrSkip } from "./_opfs";
 
 /**
  * Plan 8.4 — a large vault and a long document, in a real browser.
@@ -85,9 +86,9 @@ test.beforeEach(async ({ page }) => {
   await expect(page.locator(".cm-content").first()).toBeVisible({ timeout: 30_000 });
 });
 
-test("a 10,000-note vault: open < 1 s, save → index < 50 ms, search < 100 ms", async ({ page }) => {
+test("a 10,000-note vault: open < 1 s, save → index < 50 ms, search < 100 ms", async ({ page, browserName }) => {
   test.setTimeout(300_000);
-  test.skip(!(await canSeed(page)), "OPFS createWritable is unavailable in this engine's test context");
+  vaultOrSkip(await canSeed(page), browserName);
   report("seed 10,000 notes (test setup)", await seedVault(page, NOTES));
 
   // Reopen with the workspace panel showing, as a user with a big vault would.
@@ -163,9 +164,9 @@ test("a 10,000-note vault: open < 1 s, save → index < 50 ms, search < 100 ms",
   expect(search.back.ms).toBeLessThan(100);
 });
 
-test("typing in a 2 MB note keeps each keystroke under a frame", { tag: "@nightly" }, async ({ page }) => {
+test("typing in a 2 MB note keeps each keystroke under a frame", { tag: "@nightly" }, async ({ page, browserName }) => {
   test.setTimeout(300_000);
-  test.skip(!(await canSeed(page)), "OPFS createWritable is unavailable in this engine's test context");
+  vaultOrSkip(await canSeed(page), browserName);
   const last = await page.evaluate(async () => {
     let s = "";
     let i = 0;

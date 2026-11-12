@@ -44,6 +44,7 @@ test.describe.configure({ retries: 0 });
 test.use({ trace: "off", video: "off", screenshot: "off" });
 
 test("OCR CER on the golden set ocr-he (Hebrew and English, per condition)", async ({ page }) => {
+  // skip-reason: a 20-minute measurement over the golden set, not a check; the nightly run sets OCR_CER=1 | task: 7.5 | until: 2027-05-12
   test.skip(!process.env.OCR_CER, "set OCR_CER=1 to measure (ci.yml job ocr-cer)");
   test.setTimeout(20 * 60_000);
 
