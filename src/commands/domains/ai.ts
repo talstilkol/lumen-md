@@ -252,7 +252,7 @@ export function buildAiCancelCommands(): Command[] {
 }
 
 /** Reranker, privacy ledger, AI doctor, policy, trace, response cache, provider. */
-export function buildAiControlCommands(): Command[] {
+export function buildAiControlCommands({ getEditorView }: CommandContext): Command[] {
   return [
     {
       id: "ai.rerankModel",
