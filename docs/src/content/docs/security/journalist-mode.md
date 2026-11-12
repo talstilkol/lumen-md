@@ -35,6 +35,20 @@ The rules fail closed:
   address, in a comment, or while a paragraph or table opened inside the
   passage is still open) doesn't end the passage. Everything the preview
   shades is gone from the export, and sometimes a little more.
+- The same goes for Markdown structure. A `<redact>` on a line of its own
+  shades the blocks after it, and a `</redact>` typed inside one of them (a
+  list item, a quote, a table cell, a heading or a paragraph) doesn't end the
+  passage. To end it, put the `</redact>` on a line of its own, after a blank
+  line:
+
+  ```markdown
+  <redact>
+
+  - Source A
+  - Source B
+
+  </redact>
+  ```
 - Exports also leave out hidden text a reader of the file could find: HTML
   comments (`<!-- … -->`) and Obsidian comments (`%% … %%`).
 - **Print** (⌘P) of a note with redactions goes through the same export.

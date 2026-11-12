@@ -27,7 +27,12 @@
  *     comment, another tag's attribute, a raw-text element such as
  *     <textarea>) ends only a mark also written as text, and none ends a
  *     passage while an element HTML doesn't close through (p, div, table…)
- *     is open inside it (`markInertCloses`).
+ *     is open inside it (`markInertCloses`). The same holds for the
+ *     elements Markdown makes: a close typed in a list item, a quote, a
+ *     table cell or a paragraph after a `<redact>` on its own line ends
+ *     nothing, decided on micromark's tree, the one the preview renders
+ *     (`treeInertCloses`, review 6). A close counts only where both passes
+ *     say it closes.
  *   - Hidden text that a reader of the file could find is removed too: HTML
  *     comments (`<!-- … -->`, an unclosed one runs to the end) and Obsidian
  *     comments (`%% … %%`), except inside code, where they are code.
@@ -40,6 +45,7 @@
  */
 
 import { cleanDataUrls, cleanDataUrlsAsync, cleanImageBytes, keepImageMetadata, WITHHELD_IMAGE } from "./imageMetadata";
+import { treeInertCloses } from "./redactionTree";
 
 export { WITHHELD_IMAGE };
 
@@ -80,7 +86,12 @@ const isSpace = (c: string) => c === " " || c === "\t" || c === "\n" || c === "\
  */
 export function redactMarks(text: string): RedactMark[] {
   const marks = candidateMarks(text);
-  if (marks.some((m) => m.close)) markInertCloses(text, marks);
+  if (marks.some((m) => m.close)) {
+    // Two passes, and a close counts only where both say it closes (fail closed): the Markdown tree the
+    // preview builds (review 6, RR6-473-1), then the text with the HTML tokenizer's rules (review F-8).
+    treeInertCloses(text, marks);
+    markInertCloses(text, marks);
+  }
   return marks;
 }
 

@@ -13,7 +13,16 @@
  * token inside a `redact` element must not survive `exportReadyText`.
  * Under vitest's jsdom, DOMParser is parse5 itself, the preview's parser; in
  * the offline Chromium harness it is Blink's. Skipped where there is none.
+ *
+ * Review 6 (RR6-473-1) added a second generator: notes built from Markdown
+ * blocks (paragraphs, headings, block quotes and lists two deep, fences,
+ * indented code and math inside them, tables, HTML blocks), rendered the way
+ * the preview renders them, Markdown first (micromark, CommonMark + GFM
+ * tables + math, raw HTML kept) and that HTML through DOMParser.
  */
+import { micromark } from "micromark";
+import { gfmTable, gfmTableHtml } from "micromark-extension-gfm-table";
+import { math, mathHtml } from "micromark-extension-math";
 import { describe, expect, it } from "vitest";
 import { exportReadyText } from "../storage/exportReady";
 
@@ -107,6 +116,63 @@ function shadedTokens(md: string, tokens: string[]): string[] {
   return tokens.filter((t) => shaded.includes(t));
 }
 
+
+/** Review 6's PRNG and generator (`rr6/r473-md-fuzz.mjs`), kept as written so its seeds name the same notes. */
+function rng6(seed: number) {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x9e3779b9) >>> 0;
+    let t = a ^ (a >>> 16);
+    t = Math.imul(t, 0x21f0aaad);
+    t ^= t >>> 15;
+    t = Math.imul(t, 0x735a2d97);
+    t ^= t >>> 15;
+    return (t >>> 0) / 4294967296;
+  };
+}
+
+function markdownNote(r: () => number, T: () => string): string {
+  const one = <X,>(a: readonly X[]): X => a[Math.floor(r() * a.length)];
+  const OPEN = () => one(["<redact>", "<REDACT>", "<redact class=x>"]);
+  const CLOSE = () => one(["</redact>", "</REDACT>", "</redact >"]);
+  const inline = () => {
+    const parts: string[] = [];
+    const n = 1 + Math.floor(r() * 4);
+    for (let i = 0; i < n; i++) parts.push(one([T, T, T, OPEN, CLOSE, () => "`" + CLOSE() + "`", () => "*" + T() + "*", () => `[${T()}](x)`])());
+    return parts.join(" ");
+  };
+  const codeBody = () => one([() => CLOSE(), () => T() + " " + CLOSE(), () => OPEN(), () => T()])();
+  const leaf = (pre: string, cont: string): string[] =>
+    one([
+      () => [pre + inline()],
+      () => [pre + "# " + inline()],
+      () => [pre + "```", cont + codeBody(), cont + "```"],
+      () => [pre + "~~~ js", cont + codeBody(), cont + "~~~"],
+      () => [pre + "    " + codeBody()],
+      () => [pre + "$$", cont + codeBody(), cont + "$$"],
+      () => [pre + OPEN()],
+      () => [pre + CLOSE()],
+      () => [pre + "| a | b |", cont + "| - | - |", cont + `| ${T()} ${one(["", CLOSE()])} | ${T()} |`],
+      () => [pre + "<div>", cont + T() + " " + one(["", CLOSE()]), cont + "</div>"],
+    ])();
+  const block = (depth = 0): string[] => {
+    const kind = depth < 2 ? one(["leaf", "leaf", "quote", "list", "olist"]) : "leaf";
+    if (kind === "leaf") return leaf("", "");
+    if (kind === "quote") return block(depth + 1).map((l) => "> " + l);
+    const marker = kind === "list" ? "- " : "1. ";
+    const pad = " ".repeat(marker.length);
+    return block(depth + 1).map((l, i) => (i === 0 ? marker : pad) + l);
+  };
+  const blocks: string[] = [];
+  const n = 2 + Math.floor(r() * 5);
+  for (let i = 0; i < n; i++) blocks.push(block().join("\n"));
+  return blocks.map((b, i) => (i ? one(["\n\n", "\n\n", "\n"]) : "") + b).join("");
+}
+
+/** The preview's HTML for a note: Markdown first, raw HTML kept, as remark-rehype + rehype-raw hand it to parse5. */
+const previewHtml = (md: string) =>
+  micromark(md, { allowDangerousHtml: true, extensions: [gfmTable(), math()], htmlExtensions: [gfmTableHtml(), mathHtml()] });
+
 const haveDom = typeof DOMParser !== "undefined" && typeof document !== "undefined";
 
 describe("what the preview shades, the export removes (F-8, preview ⊆ export)", () => {
@@ -151,15 +217,58 @@ describe("what the preview shades, the export removes (F-8, preview ⊆ export)"
       `<redact>a [l](</redact>) ${S}</redact> b`,
       `<redact>a [l](x "</redact>") ${S}</redact> b`,
       `<redact>a [[</redact>]] ${S}</redact> b`,
-      `<redact>\n\n\`\`\`\n</redact>\n\`\`\`\n\n${S}</redact> b`,
-      `<redact>\n\n    </redact>\n\n${S}</redact> b`,
     ]) {
       const out = await exportReadyText(md);
       expect(out, JSON.stringify(md)).not.toContain(S);
       expect(out.endsWith(" b"), JSON.stringify(md)).toBe(true);
     }
+    // A `<redact>` on its own line opens an HTML block: the paragraph after the code is a `p` inside the
+    // passage, and the `</redact>` typed in it closes nothing in the preview (review 6), so " b" is shaded too.
+    for (const md of [`<redact>\n\n\`\`\`\n</redact>\n\`\`\`\n\n${S}</redact> b`, `<redact>\n\n    </redact>\n\n${S}</redact> b`]) {
+      expect(await exportReadyText(md), JSON.stringify(md)).toBe("█████");
+    }
     // A closing mark the preview does read still closes: the text after it stays.
     expect(await exportReadyText(`<redact>${S}</redact> <p>kept</p> \`code\` after`)).toBe(`█████ <p>kept</p> \`code\` after`);
     expect(await exportReadyText(`<redact><b>${S}</b><span>x</span></redact> kept`)).toBe("█████ kept");
+  });
+  (haveDom ? it : it.skip)("notes built from Markdown blocks, 3 seeds × 4,000: no shaded token survives the export (review 6)", async () => {
+    const kept: string[] = [];
+    let shadedTotal = 0;
+    for (const seed of [6, 11, 12]) {
+      const r = rng6(seed);
+      let tok = 0;
+      const T = () => `Q${(tok++).toString(36).padStart(4, "0")}Z`;
+      for (let i = 0; i < 4000; i++) {
+        const md = markdownNote(r, T);
+        const doc = new DOMParser().parseFromString(`<!doctype html><body>${previewHtml(md)}`, "text/html");
+        const shaded = new Set<string>();
+        for (const el of doc.querySelectorAll("redact")) for (const m of (el.textContent ?? "").matchAll(/Q[0-9a-z]{4}Z/g)) shaded.add(m[0]);
+        if (!shaded.size) continue;
+        shadedTotal += shaded.size;
+        const out = await exportReadyText(md);
+        const leak = [...shaded].filter((t) => out.includes(t));
+        if (leak.length) kept.push(`seed ${seed} #${i}: ${JSON.stringify(md)} kept ${leak.join(",")}`);
+      }
+    }
+    expect(shadedTotal).toBeGreaterThan(3000);
+    expect(kept.slice(0, 10)).toEqual([]);
+  }, 120_000);
+
+  it("a close inside a list item, a block quote or a table cell ends nothing the preview shades (review 6, RR6-473-1)", async () => {
+    const secret = "Yossi Cohen";
+    for (const md of [
+      "Interview notes.\n\n<redact>\n\n- Source A: Dana Levi</redact>\n- Source B: Yossi Cohen, 054-0000000\n\nPublished text.",
+      "<redact>\n\n> Source: Dana Levi</redact>\n> Source: Yossi Cohen\n\nPublished text.",
+      "<redact>\n\n| name | phone |\n| --- | --- |\n| Dana Levi</redact> | 1 |\n| Yossi Cohen | 2 |\n\nPublished text.",
+      "<redact>\n\n- raw notes:\n  ```\n  </redact>\n  ```\n- Source: Yossi Cohen\n",
+      "<redact>\n\n- 1. raw:\n     ```\n     </redact>\n     ```\n- Source: Yossi Cohen\n",
+    ]) {
+      const out = await exportReadyText(md);
+      expect(out, JSON.stringify(md)).not.toContain(secret);
+      expect(out, JSON.stringify(md)).not.toContain("Dana Levi");
+    }
+    // The close on its own line after the list does close: the text after it stays.
+    expect(await exportReadyText("<redact>\n\n- Source A: Dana Levi\n- Source B: Yossi Cohen\n\n</redact>\n\nPublished text.")).toBe("█████\n\nPublished text.");
+    expect(await exportReadyText("> <redact>Dana Levi</redact> said\n\nPublished text.")).toBe("> █████ said\n\nPublished text.");
   });
 });
