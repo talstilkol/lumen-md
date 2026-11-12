@@ -74,6 +74,8 @@
   "block.diagram.renderedIn": "عُرض خلال {ms} ms",
   "block.diagram.rendering": "جارٍ العرض…",
   "block.diagram.scrollToRender": "مرّر للعرض",
+  "block.embed.gistDesktop": "يعرض تطبيق سطح المكتب Gist كرابط.",
+  "block.embed.notEmbeddable": "{host} ليس من المواقع التي يستطيع Lumen تضمينها. افتح الرابط بدلاً من ذلك.",
   "block.embed.open": "فتح ↗",
   "block.embed.unrecognized": "⚠︎ تعذّر التعرّف على رابط التضمين.",
   "block.glsl.error": "⚠︎ خطأ في GLSL:",

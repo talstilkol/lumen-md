@@ -3,11 +3,13 @@
  *
  * An image from another site in a note is a request the reader never chose:
  * a tracking pixel in a shared note tells its author who opened it, when,
- * and from where. The web CSP has to keep `img-src https:` (a static policy
- * cannot hold one user's choices), so the renderer enforces the choice
- * instead: an image whose host the user has not allowed renders as a
- * placeholder, and nothing is requested until the user clicks "Load" (this
- * image, this session) or "Always allow" (its host, kept in this browser).
+ * and from where. A static policy cannot hold one user's choices, so the
+ * renderer enforces the choice: an image whose host the user has not
+ * allowed renders as a placeholder, and nothing is requested until the
+ * user clicks "Load" (this image, this session) or "Always allow" (its
+ * host, kept in this browser). An allowed image then renders inside the
+ * content frame (plan W4.15, src/lib/contentFrame.ts): the app's own CSP
+ * has no `https:` in img-src or media-src.
  *
  * The desktop app's CSP has no `https:` in img-src (plan 2.1), so there the
  * placeholder offers no load at all — the request would be blocked anyway.
@@ -178,9 +180,18 @@ export function loadRemoteImagesOnce(urls: readonly string[]): void {
 
 /** May the page request this URL now? Local and same-origin URLs always may. */
 export function remoteImageAllowed(src: string | null | undefined): boolean {
+  if (remoteImageHost(src) && remoteImagesUnavailable()) return false;
+  return remoteContentAllowed(src);
+}
+
+/**
+ * The same choice for other-site content that the desktop app can show:
+ * embeds (plan W4.15). Its CSP frames the embed providers, so "Load" is
+ * offered there too.
+ */
+export function remoteContentAllowed(src: string | null | undefined): boolean {
   const host = remoteImageHost(src);
   if (!host) return true;
-  if (remoteImagesUnavailable()) return false;
   return allowedHosts().has(host) || loadedOnce.has(src!.trim());
 }
 

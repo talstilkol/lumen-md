@@ -74,6 +74,8 @@
   "block.diagram.renderedIn": "Отрисовано за {ms} мс",
   "block.diagram.rendering": "Отрисовка…",
   "block.diagram.scrollToRender": "Прокрутите, чтобы отрисовать",
+  "block.embed.gistDesktop": "Настольное приложение показывает Gist как ссылку.",
+  "block.embed.notEmbeddable": "{host} не входит в число сайтов, которые Lumen может встроить. Откройте ссылку.",
   "block.embed.open": "Открыть ↗",
   "block.embed.unrecognized": "⚠︎ Не удалось распознать адрес для встраивания.",
   "block.glsl.error": "⚠︎ Ошибка GLSL:",

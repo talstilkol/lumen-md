@@ -43,6 +43,8 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "vaultEncryption.json": { module: "storage/vault/encrypted/strings.ts", users: ["ui/VaultEncryptionDialog.tsx", "ui/VaultUnlock.tsx"], prefixes: ["vaultEnc."] },
   // The webR download offer (plan W1.34), in the lazily rendered live-R block.
   "webr.json": { module: "plugins/r/webrStrings.ts", users: ["plugins/LiveRBlock.tsx"], prefixes: ["block.liveR.install."] },
+  // The content frame's click-to-load (plan W4.15): the raw-iframe gate and the embed block, both loaded lazily.
+  "contentFrame.json": { module: "renderer/contentFrameStrings.ts", users: ["renderer/RemoteFrame.tsx", "plugins/EmbedBlock.tsx"], prefixes: ["remoteFrame.", "block.embed.notEmbeddable", "block.embed.gistDesktop"] },
 };
 
 function sources(dir: string): string[] {

@@ -445,6 +445,18 @@
       "vars": []
     },
     {
+      "key": "block.embed.gistDesktop",
+      "en": "The desktop app shows a Gist as a link.",
+      "vars": []
+    },
+    {
+      "key": "block.embed.notEmbeddable",
+      "en": "{host} is not one of the sites Lumen can embed. Open the link instead.",
+      "vars": [
+        "host"
+      ]
+    },
+    {
       "key": "block.embed.open",
       "en": "Open ↗",
       "vars": []

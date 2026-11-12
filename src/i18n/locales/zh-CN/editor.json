@@ -74,6 +74,8 @@
   "block.diagram.renderedIn": "渲染耗时 {ms} ms",
   "block.diagram.rendering": "渲染中…",
   "block.diagram.scrollToRender": "滚动以渲染",
+  "block.embed.gistDesktop": "桌面应用将 Gist 显示为链接。",
+  "block.embed.notEmbeddable": "{host} 不在 Lumen 可嵌入的网站之列。请改为打开链接。",
   "block.embed.open": "打开 ↗",
   "block.embed.unrecognized": "⚠︎ 无法识别嵌入网址。",
   "block.glsl.error": "⚠︎ GLSL 错误：",

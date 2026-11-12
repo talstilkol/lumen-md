@@ -8,6 +8,7 @@ import {
   allowRemoteImageHosts,
   loadRemoteImagesOnce,
   remoteImageGate,
+  remoteImageHost,
   remoteImagesUnavailable,
   remoteImagesVersion,
   subscribeRemoteImages,
@@ -44,6 +45,9 @@ const PlaygroundBlock = lazy(() => import("../plugins/PlaygroundBlock"));
 const LiveSqlBlock = lazy(() => import("../plugins/LiveSqlBlock"));
 const LiveSvgBlock = lazy(() => import("../plugins/LiveSvgBlock"));
 const LiveGlslBlock = lazy(() => import("../plugins/LiveGlslBlock"));
+// Other-site content the user allowed, and raw <iframe> click-to-load (plan W4.15).
+const ContentFrame = lazy(() => import("./ContentFrame"));
+const RawFrame = lazy(() => import("./RemoteFrame"));
 
 function getText(children: React.ReactNode): string {
   if (typeof children === "string") return children;
@@ -473,6 +477,15 @@ function gatedMedia(Tag: "video" | "audio") {
       const name = (props.src ?? "").split(/[?#]/)[0].split("/").pop() || undefined;
       return <RemoteImagePlaceholder alt={props.title || name} gate={gate} media />;
     }
+    // Allowed: the app's policy has no https: in media-src (plan W4.15), so
+    // it plays inside the content frame.
+    if (!isStatic && props.src && remoteImageHost(props.src)) {
+      return (
+        <Suspense fallback={null}>
+          <ContentFrame request={{ kind: Tag, src: props.src, title: props.title, loop: !!props.loop, muted: !!props.muted }} />
+        </Suspense>
+      );
+    }
     return <Tag {...(props as React.HTMLAttributes<HTMLElement>)} />;
   };
 }
@@ -531,7 +544,33 @@ function LumenImg(props: ImgProps) {
     : undefined;
   if (isStatic) return <img alt={fallbackAlt} loading="lazy" {...rest} srcSet={srcSet} src={shown} />;
   if (!key && gate.blocked) return <RemoteImagePlaceholder alt={rest.alt} gate={gate} />;
+  // Allowed, from another site: inside the content frame (plan W4.15; the
+  // app's policy has no https: in img-src).
+  if (!key && src && remoteImageHost(src)) {
+    const px = (v: unknown) => (typeof v === "number" ? v : typeof v === "string" && /^\d+$/.test(v) ? Number(v) : undefined);
+    return (
+      <Suspense fallback={null}>
+        <ContentFrame
+          request={{ kind: "img", src, srcset: gate.srcSet, alt: rest.alt, title: rest.title, width: px(rest.width), height: px(rest.height) }}
+        />
+      </Suspense>
+    );
+  }
   return <img alt={fallbackAlt} loading="lazy" {...rest} srcSet={key ? undefined : gate.srcSet} src={shown} />;
+}
+
+/**
+ * A raw `<iframe>` in a note: click-to-load, then the content frame (plan
+ * W4.15, src/renderer/RemoteFrame.tsx). Exports keep the element.
+ */
+function LumenIframe(props: React.IframeHTMLAttributes<HTMLIFrameElement>) {
+  const isStatic = useContext(StaticRenderContext);
+  if (isStatic) return <iframe {...props} />;
+  return (
+    <Suspense fallback={null}>
+      <RawFrame src={props.src} title={props.title} width={props.width} height={props.height} />
+    </Suspense>
+  );
 }
 
 /**
@@ -664,6 +703,7 @@ export const components: Record<string, LumenBlock> = {
   img: LumenImg as unknown as LumenBlock,
   video: LumenVideo as unknown as LumenBlock,
   audio: LumenAudio as unknown as LumenBlock,
+  iframe: LumenIframe as unknown as LumenBlock,
   // `![[file.pdf]]` card.
   "lumen-embed-file": LumenEmbedFile as unknown as LumenBlock,
   // GFM task-list checkboxes get an aria-label so they aren't announced bare.

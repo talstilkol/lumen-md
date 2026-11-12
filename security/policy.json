@@ -3,7 +3,7 @@
   "routes": {
     "app": {
       "kind": "document",
-      "why": "The editor: index.html and every SPA route. No eval on the page (Graphviz, ruby.wasm and the TypeScript checker run in workers with their own policy); WebAssembly compiles ('wasm-unsafe-eval'). Trusted Types guard every DOM sink (src/lib/trustedTypes.ts). img-src lists the hosts the app itself loads images from (the map block's OpenStreetMap tiles, GitHub / Google account avatars); the trailing https: is only for images inside notes. media-src https: is the same, for <video> / <audio> in notes. connect-src has no bare ws: / wss:: the WebSockets the app opens are collaboration signaling (the deployment's own server, and the two public servers when the user opts in) and the deployment's own collab servers, which the build adds from VITE_WEBRTC_SIGNALING_URL / VITE_YJS_WEBSOCKET_URL (src/build/cspEndpoints.ts). The renderer holds back images in notes from hosts the user has not allowed (src/lib/remoteImages.ts). webr.r-wasm.org (webR's own CDN) and cdn.jsdelivr.net (its npm package, the fallback) are for one thing only: the webR download the user starts from an R block (plan W1.34; every file checked against the build's checksums), so connect-src, never script-src: the code runs from this origin's cache.",
+      "why": "The editor: index.html and every SPA route. No eval on the page (Graphviz, ruby.wasm and the TypeScript checker run in workers with their own policy); WebAssembly compiles ('wasm-unsafe-eval'). Trusted Types guard every DOM sink (src/lib/trustedTypes.ts). img-src lists only the hosts the app itself loads images from (the map block's OpenStreetMap tiles, GitHub / Google account avatars): there is no https: in img-src or media-src and frame-src is 'self' alone (plan W4.15). Images, video and audio from other sites in notes, and embeds (the embed block, raw <iframe> in notes, Gist), render only after the user allows them, inside /content-frame.html (route content-frame), a same-origin page with its own policy (src/lib/contentFrame.ts); the renderer holds them back until then (src/lib/remoteImages.ts). connect-src has no bare ws: / wss:: the WebSockets the app opens are collaboration signaling (the deployment's own server, and the two public servers when the user opts in: signaling.yjs.dev and y-webrtc-eu.fly.dev, the y-webrtc package's own default since the Heroku servers went away) and the deployment's own collab servers, which the build adds from VITE_WEBRTC_SIGNALING_URL / VITE_YJS_WEBSOCKET_URL (src/build/cspEndpoints.ts). Supabase is not listed: a deployment that uses it sets VITE_SUPABASE_URL, which the build adds the same way. The font hosts stay in connect-src: the service worker's runtime cache fetches the Google Fonts stylesheet and files. webr.r-wasm.org (webR's own CDN) and cdn.jsdelivr.net (its npm package, the fallback) are for one thing only: the webR download the user starts from an R block (plan W1.34; every file checked against the build's checksums), so connect-src, never script-src: the code runs from this origin's cache.",
       "samples": ["/", "/index.html", "/notes/some-doc"],
       "csp": {
         "default-src": ["'self'"],
@@ -16,16 +16,15 @@
           "blob:",
           "https://*.tile.openstreetmap.org",
           "https://avatars.githubusercontent.com",
-          "https://*.googleusercontent.com",
-          "https:"
+          "https://*.googleusercontent.com"
         ],
-        "media-src": ["'self'", "blob:", "https:"],
+        "media-src": ["'self'", "blob:"],
         "connect-src": [
           "'self'",
           "blob:",
           "data:",
           "wss://signaling.yjs.dev",
-          "wss://y-webrtc-signaling-eu.herokuapp.com",
+          "wss://y-webrtc-eu.fly.dev",
           "https://api.openai.com",
           "https://api.anthropic.com",
           "https://generativelanguage.googleapis.com",
@@ -50,41 +49,15 @@
           "https://api.github.com",
           "https://huggingface.co",
           "https://*.huggingface.co",
-          "https://cdn-lfs.huggingface.co",
           "https://*.hf.co",
           "https://raw.githubusercontent.com",
           "https://webr.r-wasm.org",
           "https://cdn.jsdelivr.net",
-          "https://www.gstatic.com",
           "https://fonts.googleapis.com",
-          "https://fonts.gstatic.com",
-          "https://*.supabase.co"
+          "https://fonts.gstatic.com"
         ],
         "worker-src": ["'self'", "blob:"],
-        "frame-src": [
-          "'self'",
-          "data:",
-          "https://www.youtube.com",
-          "https://www.youtube-nocookie.com",
-          "https://player.vimeo.com",
-          "https://www.loom.com",
-          "https://codepen.io",
-          "https://codesandbox.io",
-          "https://www.figma.com",
-          "https://open.spotify.com",
-          "https://www.google.com",
-          "https://maps.google.com",
-          "https://www.openstreetmap.org",
-          "https://platform.twitter.com",
-          "https://www.facebook.com",
-          "https://www.instagram.com",
-          "https://www.tiktok.com",
-          "https://www.redditmedia.com",
-          "https://www.reddit.com",
-          "https://www.linkedin.com",
-          "https://gist.github.com",
-          "https://w.soundcloud.com"
-        ],
+        "frame-src": ["'self'"],
         "object-src": ["'none'"],
         "base-uri": ["'self'"],
         "form-action": ["'self'"],
@@ -123,6 +96,44 @@
         "connect-src": ["'none'"],
         "img-src": ["'none'"],
         "style-src": ["'none'"],
+        "frame-ancestors": ["'self'"],
+        "base-uri": ["'none'"],
+        "form-action": ["'none'"]
+      }
+    },
+    "content-frame": {
+      "kind": "document",
+      "frameable": true,
+      "why": "Content frame (plan W4.15): the same-origin page in which the app shows what other sites serve into a note, after the user allowed it: an image, a video or audio file, a provider embed (the embed block, a raw <iframe>) or a GitHub Gist. It keeps https: in img-src / media-src and the embed providers in frame-src out of the app's own policy. The app frames it (src/lib/contentFrame.ts) with sandbox=\"allow-scripts\" (opaque origin) for images, media and Gists, and with the providers' old sandbox (allow-same-origin included, which the providers' own frames inherit and need) for embeds; its script (public/content-frame.js) only builds elements from the request in its #fragment \u2014 no HTML sink, no network of its own (connect-src 'none'). frame-src: the providers the embed block knows (src/plugins/EmbedBlock.tsx). script-src https://gist.github.com and style-src https://github.githubassets.com: a Gist embed is a script that document.write()s the gist and its stylesheet; the page writes it only in an opaque-origin frame. The nonce is the build's one public nonce, for WebKit, which does not match 'self' in an opaque-origin frame (as the runner pages).",
+      "samples": ["/content-frame.html"],
+      "csp": {
+        "default-src": ["'none'"],
+        "script-src": ["'self'", "'nonce-lumen-livejs-runner'", "https://gist.github.com"],
+        "style-src": ["'self'", "'unsafe-inline'", "https://github.githubassets.com"],
+        "img-src": ["'self'", "data:", "blob:", "https:"],
+        "media-src": ["'self'", "blob:", "https:"],
+        "frame-src": [
+          "https://www.youtube.com",
+          "https://www.youtube-nocookie.com",
+          "https://player.vimeo.com",
+          "https://www.loom.com",
+          "https://codepen.io",
+          "https://codesandbox.io",
+          "https://www.figma.com",
+          "https://open.spotify.com",
+          "https://www.google.com",
+          "https://maps.google.com",
+          "https://www.openstreetmap.org",
+          "https://platform.twitter.com",
+          "https://www.facebook.com",
+          "https://www.instagram.com",
+          "https://www.tiktok.com",
+          "https://www.redditmedia.com",
+          "https://www.reddit.com",
+          "https://www.linkedin.com",
+          "https://w.soundcloud.com"
+        ],
+        "connect-src": ["'none'"],
         "frame-ancestors": ["'self'"],
         "base-uri": ["'none'"],
         "form-action": ["'none'"]
@@ -167,7 +178,7 @@
     },
     "X-Frame-Options": {
       "value": "DENY",
-      "why": "Legacy twin of frame-ancestors 'none'. Nothing frames the app; the two runner pages are framed by the app and must not carry it (they use frame-ancestors 'self').",
+      "why": "Legacy twin of frame-ancestors 'none'. Nothing frames the app; the two runner pages and the content frame are framed by the app and must not carry it (they use frame-ancestors 'self').",
       "required": { "kinds": ["document"], "notFrameable": true }
     },
     "Referrer-Policy": {
@@ -213,7 +224,7 @@
       ]
     },
     "netlify": {
-      "why": "public/_headers (Netlify applies the publish directory's _headers, but cannot detach the catch-all rules) plus netlify/edge-functions/runner-headers.ts, which gives the two runner pages their own policy and drops the frame denial (plan 13.2)."
+      "why": "public/_headers (Netlify applies the publish directory's _headers, but cannot detach the catch-all rules) plus netlify/edge-functions/runner-headers.ts, which gives the two runner pages and the content frame their own policy and drops the frame denial (plan 13.2, W4.15)."
     },
     "deploy-nginx": {
       "why": "deploy/nginx.conf + deploy/lumen-runtime-headers.conf: the one nginx image (Dockerfile), built by fly.toml and docker-compose.yml (plan 13.2).",
@@ -255,13 +266,8 @@
         },
         {
           "routes": ["app"],
-          "remove": { "img-src": ["https:"], "media-src": ["https:"] },
-          "why": "The desktop app loads images and media only from itself and the hosts the app needs (img-src above). Remote images and media inside notes are not loaded on desktop: a per-user approval cannot widen a policy compiled into the app."
-        },
-        {
-          "routes": ["app"],
-          "remove": { "connect-src": ["https://cdn.jsdelivr.net"] },
-          "why": "cdn.jsdelivr.net is webR's npm fallback for the web build's download (plan W1.34). The desktop app keeps webR's own CDN (webr.r-wasm.org) only, so the policy compiled into the app names no general-purpose CDN (review 13.5)."
+          "add": { "frame-src": ["https://www.youtube.com", "https://www.youtube-nocookie.com", "https://player.vimeo.com", "https://www.loom.com", "https://codepen.io", "https://codesandbox.io", "https://www.figma.com", "https://open.spotify.com", "https://www.google.com", "https://maps.google.com", "https://www.openstreetmap.org", "https://platform.twitter.com", "https://www.facebook.com", "https://www.instagram.com", "https://www.tiktok.com", "https://www.redditmedia.com", "https://www.reddit.com", "https://www.linkedin.com", "https://w.soundcloud.com"] },
+          "why": "Tauri sends this one policy with every .html asset, /content-frame.html included (it has no per-route header), so the providers that frame embeds need are here. The app's own windows never frame them: the embed block frames /content-frame.html. Images and media from other sites are not loaded on desktop (no https: in img-src / media-src): a per-user approval cannot widen a policy compiled into the app; Gists stay a link (no gist.github.com in script-src)."
         }
       ]
     }
@@ -274,7 +280,8 @@
       "host": "netlify",
       "routes": {
         "/playground-runner.html": "playground-runner",
-        "/livejs-runner.html": "livejs-runner"
+        "/livejs-runner.html": "livejs-runner",
+        "/content-frame.html": "content-frame"
       }
     },
     "deploy/nginx.conf": {
@@ -284,6 +291,7 @@
         "http": "app",
         "location = /playground-runner.html": "playground-runner",
         "location = /livejs-runner.html": "livejs-runner",
+        "location = /content-frame.html": "content-frame",
         "location ^~ /tesseract/": "tesseract",
         "location ~ ^/assets/(graphviz|ruby|tsCheck)\\.worker-": "eval-workers",
         "location /assets/": "app",
@@ -298,6 +306,7 @@
     "index.html": { "format": "meta", "host": "meta", "route": "app" },
     "livejs-runner.html": { "format": "meta", "host": "meta", "route": "livejs-runner" },
     "playground-runner.html": { "format": "meta", "host": "meta", "route": "playground-runner" },
+    "public/content-frame.html": { "format": "meta", "host": "meta", "route": "content-frame" },
     "src-tauri/tauri.conf.json": { "format": "tauri", "host": "tauri", "route": "app" }
   }
 }

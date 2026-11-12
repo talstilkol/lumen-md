@@ -74,6 +74,8 @@
   "block.diagram.renderedIn": "הוצג תוך {ms} מ״ש",
   "block.diagram.rendering": "מציג…",
   "block.diagram.scrollToRender": "גללו כדי להציג",
+  "block.embed.gistDesktop": "באפליקציה למחשב Gist מוצג כקישור.",
+  "block.embed.notEmbeddable": "{host} אינו אחד האתרים ש-Lumen יכול להטמיע. אפשר לפתוח את הקישור.",
   "block.embed.open": "פתיחה ↗",
   "block.embed.unrecognized": "⚠︎ כתובת ההטמעה לא זוהתה.",
   "block.glsl.error": "⚠︎ שגיאת GLSL:",
