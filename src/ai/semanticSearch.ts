@@ -373,6 +373,13 @@ function cosine(a: Float32Array, b: Float32Array): number {
   return denom === 0 ? 0 : dot / denom;
 }
 
+/** Which embedding provider built the stored index (`ollama:…`, `transformers:…`, `openai:…`), or null when there is none. */
+export async function semanticIndexEmbedding(): Promise<string | null> {
+  const index = await loadIndex();
+  if (!Object.keys(index.files).length) return null;
+  return index.embedding ?? "openai:text-embedding-3-small";
+}
+
 export async function searchSemantic(query: string, k = 8, filter?: (path: string) => boolean): Promise<SemanticHit[]> {
   if (!query.trim()) return [];
   const index = await loadIndex();

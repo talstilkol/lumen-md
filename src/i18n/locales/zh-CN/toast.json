@@ -100,6 +100,8 @@
   "toast.refactorFailed": "重构失败：{msg}",
   "toast.refactoringDocument": "正在重构文档...",
   "toast.region": "通知",
+  "toast.related.folderOff": "{folder} 中的相关笔记已关闭",
+  "toast.related.folderOn": "{folder} 中的相关笔记已开启",
   "toast.rerankModelOff": "搜索排序：词语匹配",
   "toast.rerankModelOn": "搜索排序：本地模型（首次使用时下载）",
   "toast.rerankUnsupported": "搜索重排序模型需要 WebGPU 或桌面应用；此浏览器继续使用内置重排序。",

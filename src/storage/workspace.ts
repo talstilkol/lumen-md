@@ -215,15 +215,12 @@ export async function deleteWorkspaceFile(path: string): Promise<void> {
  * such as `.lumen/mcp/pending`, which the tree listing leaves out.
  */
 export async function listWorkspaceFolder(path: string): Promise<string[]> {
-  let dir: FileSystemDirectoryHandle;
   try {
-    dir = await walkDir(splitPath(path));
+    return (await vault().list(path)).filter((e) => e.kind === "file").map((e) => e.name).sort();
   } catch {
+    // why: a folder that does not exist (or is not a folder) has no files
     return [];
   }
-  const out: string[] = [];
-  for await (const [name, handle] of dir.entries()) if (handle.kind === "file") out.push(name);
-  return out.sort();
 }
 
 /** Does anything (file or folder) exist at `path`? */

@@ -100,6 +100,8 @@
   "toast.refactorFailed": "הריפקטורינג נכשל: {msg}",
   "toast.refactoringDocument": "מבצע ריפקטורינג למסמך...",
   "toast.region": "התראות",
+  "toast.related.folderOff": "פתקים קשורים כבויים ב-{folder}",
+  "toast.related.folderOn": "פתקים קשורים פועלים ב-{folder}",
   "toast.rerankModelOff": "דירוג החיפוש: התאמת מילים",
   "toast.rerankModelOn": "דירוג החיפוש: מודל מקומי (יורד בשימוש הראשון)",
   "toast.rerankUnsupported": "מודל הדירוג מחדש בחיפוש צריך WebGPU או את אפליקציית שולחן העבודה; בדפדפן הזה נשאר הדירוג המובנה.",

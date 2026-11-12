@@ -100,6 +100,8 @@
   "toast.refactorFailed": "リファクタリングに失敗しました: {msg}",
   "toast.refactoringDocument": "ドキュメントをリファクタリング中...",
   "toast.region": "通知",
+  "toast.related.folderOff": "{folder} では関連ノートはオフです",
+  "toast.related.folderOn": "{folder} では関連ノートはオンです",
   "toast.rerankModelOff": "検索の並べ替え: 単語一致",
   "toast.rerankModelOn": "検索の並べ替え: ローカルモデル（初回使用時にダウンロード）",
   "toast.rerankUnsupported": "検索の再ランキングモデルには WebGPU かデスクトップアプリが必要です。このブラウザでは組み込みの再ランキングを使います。",

@@ -64,6 +64,7 @@ export default defineConfig({
             { label: "Obsidian Bases (.base files)", slug: "workspace/obsidian-bases", translations: { he: "Obsidian Bases (קובצי ‎.base)" } },
             { label: "Search operators and #tags", slug: "workspace/search-operators", translations: { he: "אופרטורי חיפוש ו-#תגיות" } },
             { label: "Embedded queries", slug: "workspace/embedded-queries", translations: { he: "שאילתות מוטמעות" } },
+            { label: "Related notes while writing", translations: { he: "פתקים קשורים בזמן כתיבה" }, slug: "workspace/related" },
             { label: "Vault Doctor", slug: "workspace/doctor" },
             { label: "Quick capture (inbox)", slug: "workspace/quick-capture", translations: { he: "לכידה מהירה (תיבת דואר נכנס)" } },
             { label: "PDF reader and highlights", slug: "workspace/pdf-reader", translations: { he: "קורא PDF והדגשות" } },

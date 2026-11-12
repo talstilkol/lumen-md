@@ -100,6 +100,8 @@
   "toast.refactorFailed": "Не удалось выполнить рефакторинг: {msg}",
   "toast.refactoringDocument": "Рефакторинг документа...",
   "toast.region": "Уведомления",
+  "toast.related.folderOff": "Связанные заметки выключены в {folder}",
+  "toast.related.folderOn": "Связанные заметки включены в {folder}",
   "toast.rerankModelOff": "Ранжирование: совпадение слов",
   "toast.rerankModelOn": "Ранжирование: локальная модель (загрузится при первом использовании)",
   "toast.rerankUnsupported": "Модели переранжирования поиска нужен WebGPU или настольное приложение; в этом браузере остаётся встроенное переранжирование.",

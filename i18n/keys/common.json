@@ -3539,6 +3539,43 @@
       "vars": []
     },
     {
+      "key": "related.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "related.hint",
+      "en": "Link to {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "related.link",
+      "en": "Link",
+      "vars": []
+    },
+    {
+      "key": "related.links",
+      "en": "Mentioned, not linked",
+      "vars": []
+    },
+    {
+      "key": "related.none",
+      "en": "Nothing related to this paragraph yet.",
+      "vars": []
+    },
+    {
+      "key": "related.off",
+      "en": "Off for this note or its folder.",
+      "vars": []
+    },
+    {
+      "key": "related.title",
+      "en": "Related",
+      "vars": []
+    },
+    {
       "key": "remoteImage.allowHint",
       "en": "Load images from {host} in every note, in this browser.",
       "vars": [

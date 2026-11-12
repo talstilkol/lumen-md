@@ -92,6 +92,8 @@
   "toast.refactorFailed": "Refactor failed: {msg}",
   "toast.refactoringDocument": "Refactoring document...",
   "toast.region": "Notifications",
+  "toast.related.folderOff": "Related notes are off in {folder}",
+  "toast.related.folderOn": "Related notes are on in {folder}",
   "toast.rerankModelOff": "Search reranking: word matching",
   "toast.rerankModelOn": "Search reranking: local model (downloads on first use)",
   "toast.rerankUnsupported": "The search reranking model needs WebGPU or the desktop app; this browser keeps the built-in reranking.",

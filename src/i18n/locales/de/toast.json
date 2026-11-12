@@ -100,6 +100,8 @@
   "toast.refactorFailed": "Umstrukturierung fehlgeschlagen: {msg}",
   "toast.refactoringDocument": "Dokument wird umstrukturiert...",
   "toast.region": "Benachrichtigungen",
+  "toast.related.folderOff": "Verwandte Notizen sind in {folder} aus",
+  "toast.related.folderOn": "Verwandte Notizen sind in {folder} an",
   "toast.rerankModelOff": "Neuordnung: Wortabgleich",
   "toast.rerankModelOn": "Neuordnung: lokales Modell (Download bei erster Nutzung)",
   "toast.rerankUnsupported": "Das Reranking-Modell der Suche braucht WebGPU oder die Desktop-App; dieser Browser behält das eingebaute Reranking.",

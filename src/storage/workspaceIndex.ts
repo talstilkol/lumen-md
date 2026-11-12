@@ -404,6 +404,58 @@ export async function findBacklinks(targetPath: string): Promise<BacklinkHit[]> 
   return withEngine((e) => e.backlinks(targetPath));
 }
 
+/* ── A main-thread BM25 index for related notes (plan W2.2) ───────────
+ * Search runs on the index engine (worker); related notes rank the open
+ * note against every other one, so they keep their own BM25 index, built
+ * on first use from the file cache and kept in step one note at a time.
+ */
+type Bm25 = import("../search/bm25").Bm25Index;
+let bm25: Bm25 | null = null;
+/** The pass running now, and the one queued behind it (a change may arrive while a long pass yields). */
+let bm25Sync: Promise<Bm25> | null = null;
+let bm25Next: Promise<Bm25> | null = null;
+
+const bm25Name = (file: IndexedFile) => file.name.replace(/\.(md|markdown|txt)$/i, "");
+
+/**
+ * Bring BM25 in step with the file cache. A call made while a pass runs
+ * waits for one more pass after it — the running pass may already have
+ * gone past a note that changed since — and calls in between share it.
+ */
+function syncBm25(): Promise<Bm25> {
+  if (!bm25Sync) return (bm25Sync = bm25Pass());
+  return (bm25Next ??= bm25Sync.then(() => {
+    bm25Next = null;
+    return syncBm25();
+  }));
+}
+
+function bm25Pass(): Promise<Bm25> {
+  return (async () => {
+    if (!bm25) bm25 = new (await import("../search/bm25")).Bm25Index();
+    const index = bm25;
+    let slice = performance.now();
+    for (const file of cache.byPath.values()) {
+      if (index.isCurrent(file.path, file.content, bm25Name(file))) continue;
+      index.set(file.path, file.content, bm25Name(file));
+      if (performance.now() - slice > 30) {
+        await new Promise((r) => setTimeout(r, 0));
+        slice = performance.now();
+      }
+    }
+    for (const id of [...index.ids()]) if (!cache.byPath.has(id)) index.remove(id);
+    return index;
+  })().finally(() => {
+    bm25Sync = null;
+  });
+}
+
+/** The BM25 index, in step with the workspace (related notes, plan W2.2). */
+export async function bm25Index(): Promise<Bm25> {
+  await ensureIndex();
+  return syncBm25();
+}
+
 /** Cheap fuzzy + substring search across filenames, paths, and content. */
 export async function searchWorkspace(
   query: string,
@@ -453,4 +505,7 @@ export function __resetWorkspaceIndex(engineFactory?: () => IndexEngine): void {
   void engine?.then((e) => e.dispose(), () => undefined);
   engine = null;
   engineOverride = engineFactory ?? null;
+  bm25 = null;
+  bm25Sync = null;
+  bm25Next = null;
 }

@@ -1180,6 +1180,21 @@
       "vars": []
     },
     {
+      "key": "cmd.related.folderOff",
+      "en": "Related notes: on / off for this folder",
+      "vars": []
+    },
+    {
+      "key": "cmd.related.toggle",
+      "en": "Related notes: show / hide",
+      "vars": []
+    },
+    {
+      "key": "cmd.related.toggle.hint",
+      "en": "Notes close to the paragraph you are writing, and notes it mentions without a link",
+      "vars": []
+    },
+    {
       "key": "cmd.research.ask",
       "en": "🔎 Research: Ask a Question…",
       "vars": []

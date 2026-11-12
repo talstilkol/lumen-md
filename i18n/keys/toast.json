@@ -589,6 +589,20 @@
       "vars": []
     },
     {
+      "key": "toast.related.folderOff",
+      "en": "Related notes are off in {folder}",
+      "vars": [
+        "folder"
+      ]
+    },
+    {
+      "key": "toast.related.folderOn",
+      "en": "Related notes are on in {folder}",
+      "vars": [
+        "folder"
+      ]
+    },
+    {
       "key": "toast.rerankModelOff",
       "en": "Search reranking: word matching",
       "vars": []

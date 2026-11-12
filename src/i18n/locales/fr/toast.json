@@ -100,6 +100,8 @@
   "toast.refactorFailed": "Échec de la refactorisation : {msg}",
   "toast.refactoringDocument": "Refactorisation du document...",
   "toast.region": "Notifications",
+  "toast.related.folderOff": "Notes liées désactivées dans {folder}",
+  "toast.related.folderOn": "Notes liées activées dans {folder}",
   "toast.rerankModelOff": "Réordonnancement : correspondance des mots",
   "toast.rerankModelOn": "Réordonnancement : modèle local (téléchargé à la première utilisation)",
   "toast.rerankUnsupported": "Le modèle de reclassement de la recherche requiert WebGPU ou l'application de bureau ; ce navigateur garde le reclassement intégré.",
