@@ -85,6 +85,8 @@ describe("scripts/vercel-ignore.sh", () => {
     expect(decide(["mcp-server/src/frontmatter.ts"])).toBe(SKIP);
     expect(decide([".github/workflows/ci.yml"])).toBe(SKIP);
     expect(decide(["sync-server/server.js"])).toBe(SKIP);
+    // The sealed nightly reports (W4.36) are committed by the nightly run.
+    expect(decide(["reports/nightly/2026-11-13-flake.json", "reports/nightly/status.json"])).toBe(SKIP);
   });
 
   it("builds when a module outside src/ that src/ imports changes", () => {
