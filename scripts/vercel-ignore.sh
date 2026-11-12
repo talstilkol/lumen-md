@@ -19,13 +19,28 @@
 #   • Anything else (src/, public/, index.html, package*.json, vite/tsconfig,
 #     vercel.json, scripts/, …) triggers a build.
 #   • When history is unavailable (shallow clone, first commit), build.
-#   • First of all: a commit that is no longer its branch's head when its
+#   • Before anything else: only main (production) and the integration
+#     trains (verify/*) build. A PR branch is verified through the train
+#     (verify/train-2) and skipped here. LUMEN_BUILD_ALL=1 (a Vercel project
+#     variable) builds every branch again.
+#   • Then: a commit that is no longer its branch's head when its
 #     build starts is skipped. A newer push is queued behind it, and Vercel
 #     builds one deployment at a time, so the superseded one only delays it.
 #     When the branch head cannot be read (no network, a deleted branch),
 #     the other rules decide.
 set -u
 cd "$(dirname "$0")/.." || exit 1
+
+REF="${VERCEL_GIT_COMMIT_REF:-}"
+if [ -n "$REF" ] && [ "${LUMEN_BUILD_ALL:-}" != "1" ] && [ "$REF" != "main" ]; then
+  case "$REF" in
+    verify/*) ;;
+    *)
+      echo "vercel-ignore: $REF is a PR branch: verified through the train (verify/train-2)"
+      exit 0
+      ;;
+  esac
+fi
 
 REMOTE="${LUMEN_IGNORE_REMOTE:-https://github.com/talstilkol/lumen-md}"
 if [ -n "${VERCEL_GIT_COMMIT_REF:-}" ] && [ -n "${VERCEL_GIT_COMMIT_SHA:-}" ]; then

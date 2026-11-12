@@ -2,10 +2,11 @@
 /**
  * The Vercel build, and the project's gates without GitHub Actions (W1.35).
  *
- * Vercel builds every branch and reports the result to GitHub as the
- * "Vercel" commit status. A preview build therefore runs the checks CI
- * used to run, and any failing gate fails the build, so a pull request with
- * a failing test gets a red status. Production (main) builds as before:
+ * Vercel builds main and the verify/* integration trains (a PR branch is
+ * verified through the train: scripts/vercel-ignore.sh) and reports the
+ * result to GitHub as the "Vercel" commit status. A preview build therefore
+ * runs the checks CI used to run, and any failing gate fails the build, so
+ * a train with a failing test gets a red status. Production (main) builds as before:
  * the app and its bundle budget, nothing else.
  *
  *   VERCEL_ENV=preview      build, budget, vitest, e2e, i18n:check,
