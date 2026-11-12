@@ -376,6 +376,8 @@
   "cmd.view.grammarCheck.on": "Aktivieren grammar check (LanguageTool)",
   "cmd.view.graphView": "Wissensgraph",
   "cmd.view.graphView.hint": "visuelle Karte der Dateiverknüpfungen",
+  "cmd.view.hebrewGrammarLevel": "Hebräische Grammatik: Schreibstil wechseln",
+  "cmd.view.hebrewGrammarLevel.hint": "Alltag, akademisch oder juristisch: akademisch und juristisch markieren auch informellen Stil. Geprüft auf diesem Gerät.",
   "cmd.view.language": "Sprache: {label}",
   "cmd.view.language.ltr": "links nach rechts",
   "cmd.view.language.rtl": "rechts nach links",

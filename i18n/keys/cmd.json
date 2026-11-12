@@ -1905,6 +1905,16 @@
       "vars": []
     },
     {
+      "key": "cmd.view.hebrewGrammarLevel",
+      "en": "Hebrew grammar: change the writing level",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.hebrewGrammarLevel.hint",
+      "en": "Everyday, academic or legal: academic and legal also flag informal style. Checked on this device.",
+      "vars": []
+    },
+    {
       "key": "cmd.view.language",
       "en": "Language: {label}",
       "vars": [

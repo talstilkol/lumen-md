@@ -3144,6 +3144,147 @@
       "vars": []
     },
     {
+      "key": "grammar.he.ANI_FUTURE",
+      "en": "“אני {wrong}”: write “{fix}”",
+      "vars": [
+        "wrong",
+        "fix"
+      ]
+    },
+    {
+      "key": "grammar.he.ANI_FUTURE.why",
+      "en": "With אני the future tense starts with א.",
+      "vars": []
+    },
+    {
+      "key": "grammar.he.ET_IM",
+      "en": "“{verb} {wrong}”: write “{fix}”",
+      "vars": [
+        "verb",
+        "wrong",
+        "fix"
+      ]
+    },
+    {
+      "key": "grammar.he.ET_IM.why",
+      "en": "This verb takes עם (“with”), not a direct object with את.",
+      "vars": []
+    },
+    {
+      "key": "grammar.he.HACHI_BEYOTER",
+      "en": "“{phrase}”: use one of them",
+      "vars": [
+        "phrase"
+      ]
+    },
+    {
+      "key": "grammar.he.HACHI_BEYOTER.why",
+      "en": "הכי and ביותר both mean “most”: one is enough.",
+      "vars": []
+    },
+    {
+      "key": "grammar.he.NUM_GENDER",
+      "en": "“{number} {noun}”: write “{fix}”",
+      "vars": [
+        "number",
+        "noun",
+        "fix"
+      ]
+    },
+    {
+      "key": "grammar.he.NUM_GENDER.why",
+      "en": "From three to ten the number has the form that looks like the other gender: שלושה ילדים, שלוש בנות.",
+      "vars": []
+    },
+    {
+      "key": "grammar.he.PLEONASM",
+      "en": "“{wrong}”: “{fix}” is enough",
+      "vars": [
+        "wrong",
+        "fix"
+      ]
+    },
+    {
+      "key": "grammar.he.PLEONASM.why",
+      "en": "The extra word repeats what the other one already says.",
+      "vars": []
+    },
+    {
+      "key": "grammar.he.REGISTER_BIGLAL",
+      "en": "“{phrase}”: in formal writing, “{fix}”",
+      "vars": [
+        "phrase",
+        "fix"
+      ]
+    },
+    {
+      "key": "grammar.he.REGISTER_BIGLAL.why",
+      "en": "בגלל ש is spoken Hebrew; formal texts use מכיוון ש or משום ש.",
+      "vars": []
+    },
+    {
+      "key": "grammar.he.REGISTER_HACHI",
+      "en": "“{phrase}”: in formal writing, “{fix}”",
+      "vars": [
+        "phrase",
+        "fix"
+      ]
+    },
+    {
+      "key": "grammar.he.REGISTER_HACHI.why",
+      "en": "הכי is spoken Hebrew; formal texts use ביותר.",
+      "vars": []
+    },
+    {
+      "key": "grammar.he.SMICHUT_DEF",
+      "en": "“{wrong}”: write “{fix}”",
+      "vars": [
+        "wrong",
+        "fix"
+      ]
+    },
+    {
+      "key": "grammar.he.SMICHUT_DEF.why",
+      "en": "In a construct pair the article goes on the last noun.",
+      "vars": []
+    },
+    {
+      "key": "grammar.he.TWO_GENDER",
+      "en": "“{number} {noun}”: write “{fix}”",
+      "vars": [
+        "number",
+        "noun",
+        "fix"
+      ]
+    },
+    {
+      "key": "grammar.he.TWO_GENDER.why",
+      "en": "Before a noun two is שני (masculine) or שתי (feminine); שניים and שתיים stand alone.",
+      "vars": []
+    },
+    {
+      "key": "grammar.he.level.academic",
+      "en": "academic",
+      "vars": []
+    },
+    {
+      "key": "grammar.he.level.everyday",
+      "en": "everyday",
+      "vars": []
+    },
+    {
+      "key": "grammar.he.level.legal",
+      "en": "legal",
+      "vars": []
+    },
+    {
+      "key": "grammar.he.levelSet",
+      "en": "Hebrew grammar level: {level}",
+      "vars": [
+        "level"
+      ]
+    },
+    {
       "key": "graph.ariaLabel",
       "en": "Knowledge graph of {nodes} notes",
       "vars": [

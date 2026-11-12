@@ -376,6 +376,8 @@
   "cmd.view.grammarCheck.on": "تفعيل grammar check (LanguageTool)",
   "cmd.view.graphView": "الرسم البياني للمعرفة",
   "cmd.view.graphView.hint": "خريطة مرئية لروابط الملفات",
+  "cmd.view.hebrewGrammarLevel": "القواعد العبرية: تغيير مستوى الكتابة",
+  "cmd.view.hebrewGrammarLevel.hint": "يومي أو أكاديمي أو قانوني: المستويان الأكاديمي والقانوني يشيران أيضًا إلى الأسلوب غير الرسمي. الفحص على هذا الجهاز.",
   "cmd.view.language": "اللغة: {label}",
   "cmd.view.language.ltr": "من اليسار إلى اليمين",
   "cmd.view.language.rtl": "من اليمين إلى اليسار",

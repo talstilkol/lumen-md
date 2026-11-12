@@ -55,6 +55,7 @@ export default defineConfig({
           label: "Editor modes",
           items: [
             { label: "Source / Split / Preview / WYSIWYG", slug: "editor/modes" },
+            { label: "Hebrew grammar and style", slug: "editor/hebrew-grammar", translations: { he: "דקדוק וסגנון בעברית" } },
             { label: "Smart Insert", slug: "editor/smart-insert" },
             { label: "Accessibility", slug: "editor/accessibility", translations: { he: "נגישות" } },
             { label: "Touch and phones", slug: "editor/touch", translations: { he: "מגע וטלפונים" } },

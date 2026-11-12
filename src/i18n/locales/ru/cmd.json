@@ -376,6 +376,8 @@
   "cmd.view.grammarCheck.on": "Включить grammar check (LanguageTool)",
   "cmd.view.graphView": "Граф знаний",
   "cmd.view.graphView.hint": "визуальная карта связей между файлами",
+  "cmd.view.hebrewGrammarLevel": "Грамматика иврита: сменить уровень письма",
+  "cmd.view.hebrewGrammarLevel.hint": "Повседневный, академический или юридический: на двух последних отмечается и разговорный стиль. Проверка на этом устройстве.",
   "cmd.view.language": "Язык: {label}",
   "cmd.view.language.ltr": "слева направо",
   "cmd.view.language.rtl": "справа налево",

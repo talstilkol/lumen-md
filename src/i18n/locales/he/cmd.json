@@ -376,6 +376,8 @@
   "cmd.view.grammarCheck.on": "הפעל בדיקת דקדוק (LanguageTool)",
   "cmd.view.graphView": "גרף ידע",
   "cmd.view.graphView.hint": "מפה חזותית של קשרי קבצים",
+  "cmd.view.hebrewGrammarLevel": "דקדוק עברי: שינוי רמת הכתיבה",
+  "cmd.view.hebrewGrammarLevel.hint": "יומיומי, אקדמי או משפטי: ברמה אקדמית ומשפטית מסומן גם סגנון לא רשמי. הבדיקה נעשית במכשיר הזה.",
   "cmd.view.language": "שפה: {label}",
   "cmd.view.language.ltr": "שמאל-לימין",
   "cmd.view.language.rtl": "ימין-לשמאל",
