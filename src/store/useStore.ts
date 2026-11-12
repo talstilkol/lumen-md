@@ -519,6 +519,9 @@ export const useAppStore = create<AppState>()(
             pattern: typeof p.dailyNotes?.pattern === "string" && isValidDailyPattern(p.dailyNotes.pattern) ? p.dailyNotes.pattern : DEFAULT_DAILY.pattern,
             template: typeof p.dailyNotes?.template === "string" ? p.dailyNotes.template : DEFAULT_DAILY.template,
             ...(typeof p.dailyNotes?.israel === "boolean" ? { israel: p.dailyNotes.israel } : {}),
+            ...(p.dailyNotes?.workWeek === "sun-thu" || p.dailyNotes?.workWeek === "mon-fri" ? { workWeek: p.dailyNotes.workWeek } : {}),
+            ...(typeof p.dailyNotes?.hebrewDates === "boolean" ? { hebrewDates: p.dailyNotes.hebrewDates } : {}),
+            ...(p.dailyNotes?.deadlineMove === "next" || p.dailyNotes?.deadlineMove === "previous" || p.dailyNotes?.deadlineMove === "off" ? { deadlineMove: p.dailyNotes.deadlineMove } : {}),
           },
           showCalendar: p.showCalendar === true,
         };
