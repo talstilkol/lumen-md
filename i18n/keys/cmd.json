@@ -1567,6 +1567,16 @@
       "vars": []
     },
     {
+      "key": "cmd.vault.backups",
+      "en": "Backups…",
+      "vars": []
+    },
+    {
+      "key": "cmd.vault.backups.hint",
+      "en": "Daily backups to another drive, and restore",
+      "vars": []
+    },
+    {
       "key": "cmd.vault.check",
       "en": "Check vault integrity",
       "vars": []

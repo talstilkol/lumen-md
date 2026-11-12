@@ -310,6 +310,8 @@
   "cmd.tools.writingGoal.hint": "在编辑器上方显示简洁的进度横幅",
   "cmd.tools.writingGoal.set": "✍️ 写作目标:每天 {{words}} 字",
   "cmd.tools.writingGoal.unset": "✍️ 设置每日写作目标",
+  "cmd.vault.backups": "备份…",
+  "cmd.vault.backups.hint": "每天备份到另一块硬盘，以及恢复",
   "cmd.vault.check": "检查库的完整性",
   "cmd.vault.digest": "摘要：有哪些变化",
   "cmd.vault.digest.hint": "一篇笔记，列出自上次摘要以来更改的所有笔记及其未完成任务",

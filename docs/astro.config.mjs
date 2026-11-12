@@ -100,6 +100,7 @@ export default defineConfig({
             { label: "Daily notes and the Hebrew calendar", slug: "workspace/hebrew-calendar", translations: { he: "פתק יומי ולוח עברי" } },
             { label: "Graph and local graph", slug: "workspace/graph", translations: { he: "גרף וגרף מקומי" } },
             { label: "Note cards and image export", slug: "workspace/canvas-cards", translations: { he: "כרטיסי פתקים וייצוא תמונה" } },
+            { label: "Backups to a second drive", slug: "workspace/backups", translations: { he: "גיבוי לכונן שני" } },
           ],
         },
         {

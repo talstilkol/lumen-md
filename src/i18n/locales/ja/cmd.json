@@ -310,6 +310,8 @@
   "cmd.tools.writingGoal.hint": "エディタ上部に控えめな進捗バナーを表示します",
   "cmd.tools.writingGoal.set": "✍️ 執筆目標: 1日 {{words}} 語",
   "cmd.tools.writingGoal.unset": "✍️ 1日の執筆目標を設定",
+  "cmd.vault.backups": "バックアップ…",
+  "cmd.vault.backups.hint": "別のドライブへの毎日のバックアップと復元",
   "cmd.vault.check": "ボールトの整合性をチェック",
   "cmd.vault.digest": "ダイジェスト: 変更点",
   "cmd.vault.digest.hint": "前回以降に変更されたノートと未完了タスクをまとめたノート",

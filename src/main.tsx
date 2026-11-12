@@ -38,6 +38,12 @@ void initTelemetry();
 onAiBusy(aiBusyAnnouncer((busy) => announce(t(busy ? "sr.aiWorking" : "sr.aiDone"))));
 void initAuth();
 startAutoBackup();
+// Plan W1.6: scheduled backups to a second drive, loaded only once they are set up.
+try {
+  if (localStorage.getItem("lumen.backup.enabled") === "1") void import("./backup/start").then((m) => m.startBackups());
+} catch {
+  /* storage blocked: no backups to schedule */
+}
 startVaultSnapshots();
 // Task reminders (plan 4.13.4), only when the user turned them on; loaded after start-up.
 try {
