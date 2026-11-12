@@ -4364,6 +4364,207 @@
       "vars": []
     },
     {
+      "key": "share.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "share.copied",
+      "en": "Copied. The link carries the room key: send it only to the person it is for.",
+      "vars": []
+    },
+    {
+      "key": "share.create",
+      "en": "Create link",
+      "vars": []
+    },
+    {
+      "key": "share.error.expired",
+      "en": "This link has expired.",
+      "vars": []
+    },
+    {
+      "key": "share.error.no-share",
+      "en": "This link doesn't exist (any more).",
+      "vars": []
+    },
+    {
+      "key": "share.error.owner-required",
+      "en": "Only the note's owner can manage its links.",
+      "vars": []
+    },
+    {
+      "key": "share.error.revoked",
+      "en": "This link was revoked.",
+      "vars": []
+    },
+    {
+      "key": "share.error.timeout",
+      "en": "The collab server didn't answer in time.",
+      "vars": []
+    },
+    {
+      "key": "share.error.unauthorized",
+      "en": "The collab server refused the access key (Collab settings).",
+      "vars": []
+    },
+    {
+      "key": "share.error.unreachable",
+      "en": "The collab server can't be reached.",
+      "vars": []
+    },
+    {
+      "key": "share.expires",
+      "en": "Expires after",
+      "vars": []
+    },
+    {
+      "key": "share.intro",
+      "en": "Anyone with a link gets its access until it expires or you revoke it. The server holds everyone to their role; a revoked link stops working within seconds.",
+      "vars": []
+    },
+    {
+      "key": "share.label",
+      "en": "Who it's for (optional)",
+      "vars": []
+    },
+    {
+      "key": "share.links",
+      "en": "Links for this note",
+      "vars": []
+    },
+    {
+      "key": "share.loading",
+      "en": "Loading…",
+      "vars": []
+    },
+    {
+      "key": "share.needServer",
+      "en": "Share links need a collab server (Collab settings → Persistent server).",
+      "vars": []
+    },
+    {
+      "key": "share.needSession",
+      "en": "Start or join a collaboration session to share this note.",
+      "vars": []
+    },
+    {
+      "key": "share.none",
+      "en": "No links yet.",
+      "vars": []
+    },
+    {
+      "key": "share.notOwner",
+      "en": "This note was shared with you. Only its owner can make links.",
+      "vars": []
+    },
+    {
+      "key": "share.revoke",
+      "en": "Revoke",
+      "vars": []
+    },
+    {
+      "key": "share.revoke.aria",
+      "en": "Revoke the {role} link",
+      "vars": [
+        "role"
+      ]
+    },
+    {
+      "key": "share.role",
+      "en": "Access",
+      "vars": []
+    },
+    {
+      "key": "share.role.comment",
+      "en": "Can comment",
+      "vars": []
+    },
+    {
+      "key": "share.role.edit",
+      "en": "Can edit",
+      "vars": []
+    },
+    {
+      "key": "share.role.view",
+      "en": "Can view",
+      "vars": []
+    },
+    {
+      "key": "share.state.active",
+      "en": "until {date}",
+      "vars": [
+        "date"
+      ]
+    },
+    {
+      "key": "share.state.expired",
+      "en": "expired {date}",
+      "vars": [
+        "date"
+      ]
+    },
+    {
+      "key": "share.state.revoked",
+      "en": "revoked",
+      "vars": []
+    },
+    {
+      "key": "share.state.unknown",
+      "en": "status unknown (server unreachable)",
+      "vars": []
+    },
+    {
+      "key": "share.tab.share",
+      "en": "Share this note",
+      "vars": []
+    },
+    {
+      "key": "share.tab.withMe",
+      "en": "Shared with me",
+      "vars": []
+    },
+    {
+      "key": "share.title",
+      "en": "Share",
+      "vars": []
+    },
+    {
+      "key": "share.ttl.day",
+      "en": "1 day",
+      "vars": []
+    },
+    {
+      "key": "share.ttl.hour",
+      "en": "1 hour",
+      "vars": []
+    },
+    {
+      "key": "share.ttl.month",
+      "en": "30 days",
+      "vars": []
+    },
+    {
+      "key": "share.ttl.week",
+      "en": "1 week",
+      "vars": []
+    },
+    {
+      "key": "share.withMe.forget",
+      "en": "Remove",
+      "vars": []
+    },
+    {
+      "key": "share.withMe.none",
+      "en": "Links you open appear here.",
+      "vars": []
+    },
+    {
+      "key": "share.withMe.open",
+      "en": "Open",
+      "vars": []
+    },
+    {
       "key": "sr.aiDone",
       "en": "AI finished.",
       "vars": []

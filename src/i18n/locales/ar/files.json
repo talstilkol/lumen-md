@@ -30,6 +30,8 @@
   "collab.persistent.token": "رمز الوصول إلى الخادم (إن طلبه الخادم)",
   "collab.prompt.join": "الانضمام إلى جلسة التعاون \"{room}\"؟ سيُستبدل مستندك الحالي إذا كان هناك مشاركون آخرون.",
   "collab.prompt.room": "اسم الغرفة:",
+  "collab.role.comment": "يمكنك قراءة هذه الملاحظة والتعليق عليها، لا تغييرها.",
+  "collab.role.view": "يمكنك عرض هذه الملاحظة. التغييرات والتعليقات تحتاج إلى رابط بصلاحيات أكبر.",
   "collab.settings.cancel": "إلغاء",
   "collab.settings.cspBlocked": "سياسة الأمان في هذا النشر تحظر {url}، لذا لن يُستخدم. أضِفه وقت البناء (VITE_CSP_CONNECT_EXTRA).",
   "collab.settings.publicSignaling": "استخدام خوادم إشارة عامة أيضاً",

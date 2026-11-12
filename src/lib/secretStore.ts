@@ -38,7 +38,8 @@
 import { createStore, get, set, del, keys, type UseStore } from "idb-keyval";
 
 const KEY_ENTRY = "__key__";
-const PREFIX_SECRETS = ["lumen.ai.key."];
+// lumen.collab.owner.<room>: a room's owner secret for sharing (plan W1.19).
+const PREFIX_SECRETS = ["lumen.ai.key.", "lumen.collab.owner."];
 const EXACT_SECRETS = new Set([
   "lumen.cloud.dropbox.token",
   "lumen.cloud.dropbox.refresh",

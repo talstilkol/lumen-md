@@ -18,6 +18,9 @@ vi.mock("../collab/comments", () => ({
 function makeCollab() {
   return {
     doc: {} as any,
+    commentsDoc: {} as any,
+    canComment: () => true,
+    canEdit: () => true,
     ytext: { toString: () => "sample text" } as any,
     user: { name: "Test User", color: "#ff0" } as any,
   };

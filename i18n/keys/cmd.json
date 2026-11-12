@@ -491,6 +491,21 @@
       "vars": []
     },
     {
+      "key": "cmd.collab.share",
+      "en": "Share this note…",
+      "vars": []
+    },
+    {
+      "key": "cmd.collab.share.hint",
+      "en": "A link to view, comment or edit, that expires",
+      "vars": []
+    },
+    {
+      "key": "cmd.collab.sharedWithMe",
+      "en": "Shared with me",
+      "vars": []
+    },
+    {
       "key": "cmd.collab.start",
       "en": "Start collaboration…",
       "vars": []

@@ -175,6 +175,16 @@
       "vars": []
     },
     {
+      "key": "collab.role.comment",
+      "en": "You can read and comment on this note, not change it.",
+      "vars": []
+    },
+    {
+      "key": "collab.role.view",
+      "en": "You can view this note. Changes and comments need a link with more access.",
+      "vars": []
+    },
+    {
       "key": "collab.settings.cancel",
       "en": "Cancel",
       "vars": []

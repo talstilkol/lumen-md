@@ -30,6 +30,8 @@
   "collab.persistent.token": "Zugriffstoken für den Server (falls verlangt)",
   "collab.prompt.join": "Der gemeinsamen Sitzung „{room}“ beitreten? Dein aktuelles Dokument wird ersetzt, wenn andere Teilnehmer da sind.",
   "collab.prompt.room": "Raumname:",
+  "collab.role.comment": "Du kannst diese Notiz lesen und kommentieren, aber nicht ändern.",
+  "collab.role.view": "Du kannst diese Notiz ansehen. Für Änderungen und Kommentare brauchst du einen Link mit mehr Rechten.",
   "collab.settings.cancel": "Abbrechen",
   "collab.settings.cspBlocked": "Die Sicherheitsrichtlinie dieser Installation blockiert {url}, daher wird es nicht verwendet. Füge es beim Build hinzu (VITE_CSP_CONNECT_EXTRA).",
   "collab.settings.publicSignaling": "Auch öffentliche Signaling-Server verwenden",

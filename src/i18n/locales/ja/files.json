@@ -30,6 +30,8 @@
   "collab.persistent.token": "サーバーのアクセストークン（必要な場合）",
   "collab.prompt.join": "共同編集セッション「{room}」に参加しますか？ほかの参加者がいる場合、現在のドキュメントは置き換えられます。",
   "collab.prompt.room": "ルーム名:",
+  "collab.role.comment": "このノートは閲覧とコメントのみ可能で、変更はできません。",
+  "collab.role.view": "このノートは閲覧のみ可能です。変更やコメントには権限の広いリンクが必要です。",
   "collab.settings.cancel": "キャンセル",
   "collab.settings.cspBlocked": "このデプロイのセキュリティポリシーは {url} をブロックするため、使用されません。ビルド時に追加してください（VITE_CSP_CONNECT_EXTRA）。",
   "collab.settings.publicSignaling": "公開シグナリングサーバーも使う",

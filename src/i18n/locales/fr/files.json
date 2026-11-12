@@ -30,6 +30,8 @@
   "collab.persistent.token": "Jeton d’accès au serveur (s’il en exige un)",
   "collab.prompt.join": "Rejoindre la session collaborative « {room} » ? Votre document actuel sera remplacé si d'autres participants sont présents.",
   "collab.prompt.room": "Nom de la salle :",
+  "collab.role.comment": "Vous pouvez lire et commenter cette note, pas la modifier.",
+  "collab.role.view": "Vous pouvez lire cette note. Modifier ou commenter demande un lien avec plus de droits.",
   "collab.settings.cancel": "Annuler",
   "collab.settings.cspBlocked": "La politique de sécurité de ce déploiement bloque {url} ; il ne sera donc pas utilisé. Ajoutez-le à la compilation (VITE_CSP_CONNECT_EXTRA).",
   "collab.settings.publicSignaling": "Utiliser aussi des serveurs de signalisation publics",

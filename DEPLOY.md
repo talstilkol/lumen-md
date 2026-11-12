@@ -81,6 +81,7 @@ fly deploy
 | `COLLAB_ACCESS_KEY` | Operator key users enter in Collab settings → "Server access token". It only buys a short-lived token for one room. Unset = anyone who knows a room name gets one (warned at start). `COLLAB_TOKEN` is the older name. |
 | `COLLAB_TOKEN_SECRET` | HMAC key that signs room tokens, ≥ 32 characters. Never leaves the server. Unset = random per start. |
 | `COLLAB_TOKEN_TTL_S` | Room token lifetime, default 600. The client asks for a new one on every reconnect. |
+| `COLLAB_REVOKE_CHECK_MS` | How often connections of revoked or expired share links are dropped, default 1000 (plan W1.19; docs: collab/sharing). |
 | `COLLAB_DATA_DIR` | `collab.sqlite` and `backups/` (the image uses `/data/collab`, on the volume). |
 | `COLLAB_BACKUP_INTERVAL_MS` / `COLLAB_BACKUP_KEEP` | Backup every hour by default and on shutdown; keep the newest 24. |
 

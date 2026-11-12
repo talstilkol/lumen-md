@@ -30,6 +30,8 @@
   "collab.persistent.token": "אסימון גישה לשרת (אם השרת דורש)",
   "collab.prompt.join": "להצטרף לחדר \"{room}\"? המסמך הנוכחי יוחלף אם יש משתתפים אחרים.",
   "collab.prompt.room": "שם חדר:",
+  "collab.role.comment": "אפשר לקרוא ולהגיב על הפתק, לא לשנות אותו.",
+  "collab.role.view": "אפשר לצפות בפתק. שינויים ותגובות דורשים קישור עם הרשאה רחבה יותר.",
   "collab.settings.cancel": "ביטול",
   "collab.settings.cspBlocked": "מדיניות האבטחה של הפריסה הזו חוסמת את {url}, ולכן לא ייעשה בו שימוש. אפשר להוסיף אותו בזמן הבנייה (VITE_CSP_CONNECT_EXTRA).",
   "collab.settings.publicSignaling": "להשתמש גם בשרתי תיאום ציבוריים",
