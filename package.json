@@ -89,7 +89,8 @@
     "design:check": "node scripts/check-design.mjs && node scripts/design-audit.mjs",
     "eval:canvas-draw": "node scripts/canvas-draw-eval.mjs",
     "acr": "node scripts/acr.mjs",
-    "acr:check": "node scripts/acr.mjs --check"
+    "acr:check": "node scripts/acr.mjs --check",
+    "md:conformance": "vitest run src/__tests__/mdConformance.test.ts src/__tests__/mdRoundTrip.test.ts src/__tests__/sourcePreserve.test.ts"
   },
   "dependencies": {
     "@bjorn3/browser_wasi_shim": "0.4.2",

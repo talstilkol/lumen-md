@@ -4,10 +4,7 @@ import { unified } from "unified";
 import type { Processor } from "unified";
 import type { ReactElement } from "react";
 import remarkParse from "remark-parse";
-import remarkGfm from "remark-gfm";
-import remarkMath from "remark-math";
-import remarkFrontmatter from "remark-frontmatter";
-import remarkDirective from "remark-directive";
+import { markdownSyntax } from "./syntax";
 import remarkRehype from "remark-rehype";
 // rehype-katex (+ katex + mhchem, ~84 KB gz) is dynamically imported via
 // ./katexPlugin only for docs that contain `$` — it is no longer a static
@@ -179,12 +176,10 @@ type RehypeKatex = typeof import("./katexPlugin").default;
 function buildDialect() {
   return unified()
     .use(remarkParse)
-    .use(remarkFrontmatter, ["yaml"])
+    // Frontmatter, GFM, math and directives: the syntax the conformance suite tests.
+    .use(markdownSyntax)
     .use(remarkStripFrontmatter)
-    .use(remarkGfm)
     .use(remarkBreaks)
-    .use(remarkMath)
-    .use(remarkDirective)
     .use(remarkAdmonitions)
     .use(remarkColumns)
     // ![[x.base]] becomes a base block before note embeds are expanded (Obsidian Bases).

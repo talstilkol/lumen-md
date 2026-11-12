@@ -31,6 +31,7 @@ import { showAiToast } from "../ui/AiToast";
 import { openAiPrompt } from "../ui/AiInlinePrompt";
 import { log } from "../lib/logger";
 import { getMarkdown } from "@milkdown/utils";
+import { wysiwygSourcePreserver } from "./wysiwygSource";
 import {
   configureWysiwygSuggest,
   encodeCriticForWysiwyg,
@@ -667,6 +668,19 @@ export default function WysiwygEditor({ value, onChange, spellCheck = true }: Pr
   // The editor's markdown as of its creation / last emission: on unmount,
   // anything else is an edit the debounced listener hasn't emitted yet.
   const serializedRef = useRef<string | null>(null);
+  // W1.2 — maps each emission back onto the file as written, so unedited
+  // blocks keep their exact source (see sourcePreserve.ts).
+  const preserveRef = useRef<((md: string) => string) | null>(null);
+  const restoreSource = (md: string) => {
+    const p = preserveRef.current;
+    if (!p) return md;
+    try {
+      return p(md);
+    } catch (e) {
+      log.warn("[wysiwyg] source-preserving save failed; writing the serialization", e);
+      return md;
+    }
+  };
   // This instance's view as registered for the palette's commands; another
   // instance (Focus Mode over the main editor) may be registered too, so
   // only this one is unregistered.
@@ -683,7 +697,7 @@ export default function WysiwygEditor({ value, onChange, spellCheck = true }: Pr
     }
     if (md === serializedRef.current) return;
     serializedRef.current = md;
-    const full = frontmatterRef.current + md;
+    const full = frontmatterRef.current + restoreSource(md);
     if (full !== lastEmittedRef.current) {
       lastEmittedRef.current = full;
       onChangeRef.current(full);
@@ -704,6 +718,7 @@ export default function WysiwygEditor({ value, onChange, spellCheck = true }: Pr
     const ed = editorRef.current;
     editorRef.current = null;
     serializedRef.current = null;
+    preserveRef.current = null;
     if (registeredViewRef.current) unregisterWysiwygView(registeredViewRef.current);
     registeredViewRef.current = null;
     if (!ed) return;
@@ -756,7 +771,7 @@ export default function WysiwygEditor({ value, onChange, spellCheck = true }: Pr
             if (gen !== genRef.current) return;
             if (md === serializedRef.current) return; // already flushed
             serializedRef.current = md;
-            const full = frontmatterRef.current + md;
+            const full = frontmatterRef.current + restoreSource(md);
             lastEmittedRef.current = full;
             onChangeRef.current(full);
           });
@@ -950,6 +965,12 @@ export default function WysiwygEditor({ value, onChange, spellCheck = true }: Pr
       registeredViewRef.current = editor.action((ctx) => ctx.get(editorViewCtx));
       registerWysiwygView(registeredViewRef.current);
       serializedRef.current = editor.action(getMarkdown());
+      try {
+        preserveRef.current = wysiwygSourcePreserver(body, serializedRef.current).restore;
+      } catch (e) {
+        log.warn("[wysiwyg] could not map the source; saves will use the serialization", e);
+        preserveRef.current = null;
+      }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
