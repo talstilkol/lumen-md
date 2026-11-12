@@ -217,47 +217,6 @@ export function buildViewCommands({ setSearchOpen, setRuntimeMetricsOpen, vimEna
       action: () => useAppStore.getState().setDailyNotes({ morning: false }),
     },
     {
-      id: "pdf.open",
-      label: t("cmd.pdf.open"),
-      hint: t("cmd.pdf.open.hint"),
-      icon: cmdIcons.FileText,
-      group: t("group.file"),
-      // Plan 4.14: copies the PDF into the vault and opens it in the reader.
-      action: () => void import("../../pdf/openPdf").then((m) => m.pickAndOpenPdf()),
-    },
-    {
-      id: "epub.open",
-      label: t("cmd.epub.open"),
-      icon: cmdIcons.FileText,
-      group: t("group.file"),
-      // Plan W1.14: copies the book into the vault and opens it in the reader.
-      action: () => void import("../../epub/openEpub").then((m) => m.pickAndOpenEpub()),
-    },
-    {
-      id: "view.reading",
-      label: t("cmd.reading.mode"),
-      icon: cmdIcons.FileText,
-      group: t("group.file"),
-      // Plan W1.14: the open note (a clip, typically) as a page to read and highlight.
-      action: () => void import("../../epub/ReadingMode").then((m) => m.openReadingMode()),
-    },
-    {
-      id: "view.highlights",
-      label: t("cmd.highlights.all"),
-      icon: cmdIcons.FileText,
-      group: t("group.file"),
-      // Plan W1.15: every PDF, EPUB and clip highlight — search, tags, export.
-      action: () => void import("../../highlights/HighlightsPanel").then((m) => m.openHighlightsPanel()),
-    },
-    {
-      id: "view.review",
-      label: t("cmd.review.daily"),
-      icon: cmdIcons.FileText,
-      group: t("group.file"),
-      // Plan W3.3: today's spaced-repetition cards (highlights and question::answer).
-      action: () => void import("../../srs/ReviewPanel").then((m) => m.openDailyReview()),
-    },
-    {
       id: "view.calendar",
       label: t("cmd.view.calendar"),
       hint: t("cmd.view.calendar.hint"),

@@ -116,24 +116,6 @@ export function buildVoiceCommands(): Command[] {
       },
     },
     {
-      id: "voice.transcribeFile",
-      label: t("cmd.tools.transcribeFile"),
-      icon: cmdIcons.Sparkles,
-      group: t("group.tools"),
-      // Plan W1.17: an audio file, a timestamp per sentence (merged from #383).
-      action: async () => (await import("../../ui/TranscribeFile")).transcribeAudioFile(),
-    },
-    {
-      id: "help.credits",
-      label: t("cmd.help.credits"),
-      icon: cmdIcons.Sparkles,
-      group: t("group.tools"),
-      action: async () => {
-        const { openCredits } = await import("../../ui/CreditsDialog");
-        openCredits();
-      },
-    },
-    {
       id: "voice.meeting",
       label: t("cmd.voice.meeting"),
       hint: t("cmd.voice.meeting.hint"),
