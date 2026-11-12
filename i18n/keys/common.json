@@ -1149,6 +1149,145 @@
       "vars": []
     },
     {
+      "key": "e2ee.activity.attention",
+      "en": "Needs attention",
+      "vars": []
+    },
+    {
+      "key": "e2ee.activity.conflict",
+      "en": "Conflict: {path}",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "e2ee.activity.deleteDown",
+      "en": "Deleted here: {path}",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "e2ee.activity.deleteUp",
+      "en": "Deleted in the vault: {path}",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "e2ee.activity.done",
+      "en": "Sync finished: {up} up, {down} down, {deleted} deleted",
+      "vars": [
+        "up",
+        "down",
+        "deleted"
+      ]
+    },
+    {
+      "key": "e2ee.activity.download",
+      "en": "Received {path} ({size})",
+      "vars": [
+        "path",
+        "size"
+      ]
+    },
+    {
+      "key": "e2ee.activity.empty",
+      "en": "Nothing yet. The list fills as the sync works.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.activity.error",
+      "en": "Sync failed: {message}",
+      "vars": [
+        "message"
+      ]
+    },
+    {
+      "key": "e2ee.activity.excluded",
+      "en": "Kept on this device: {path} ({rule})",
+      "vars": [
+        "path",
+        "rule"
+      ]
+    },
+    {
+      "key": "e2ee.activity.held.clash",
+      "en": "A file and a folder share this name: {path}",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "e2ee.activity.held.conflict",
+      "en": "Waiting for your decision: {path}",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "e2ee.activity.held.retry",
+      "en": "Will retry: {path}",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "e2ee.activity.start",
+      "en": "Sync started",
+      "vars": []
+    },
+    {
+      "key": "e2ee.activity.summary",
+      "en": "{synced} synced · {pending} waiting · {conflict} conflicts · {error} errors · {excluded} kept on this device",
+      "vars": [
+        "synced",
+        "pending",
+        "conflict",
+        "error",
+        "excluded"
+      ]
+    },
+    {
+      "key": "e2ee.activity.title",
+      "en": "Activity",
+      "vars": []
+    },
+    {
+      "key": "e2ee.activity.upload",
+      "en": "Sent {path} ({size})",
+      "vars": [
+        "path",
+        "size"
+      ]
+    },
+    {
+      "key": "e2ee.bg.didNotRun",
+      "en": "Sync did not run while Lumen was in the background ({minutes} min). Syncing now.",
+      "vars": [
+        "minutes"
+      ]
+    },
+    {
+      "key": "e2ee.bg.didNotRunNative",
+      "en": "iOS and Android pause Lumen in the background, so sync did not run for {minutes} min. Syncing now.",
+      "vars": [
+        "minutes"
+      ]
+    },
+    {
+      "key": "e2ee.bg.dismiss",
+      "en": "OK",
+      "vars": []
+    },
+    {
+      "key": "e2ee.bg.locked",
+      "en": "Sync is paused while the vault is locked ({minutes} min). Unlock it to sync.",
+      "vars": [
+        "minutes"
+      ]
+    },
+    {
       "key": "e2ee.conflict.body",
       "en": "This note was also changed on another device. Choose what to keep; it is not synced until you decide.",
       "vars": []
@@ -1164,6 +1303,37 @@
       "vars": [
         "path"
       ]
+    },
+    {
+      "key": "e2ee.eta.hours",
+      "en": "about {n} h left",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "e2ee.eta.minutes",
+      "en": "about {n} min left",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "e2ee.eta.seconds",
+      "en": "about {n} s left",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "e2ee.eta.seconds.few",
+      "en": "a few seconds left",
+      "vars": []
+    },
+    {
+      "key": "e2ee.eta.unknown",
+      "en": "estimating time left…",
+      "vars": []
     },
     {
       "key": "e2ee.fresh.badCode",
@@ -1193,6 +1363,77 @@
     {
       "key": "e2ee.fresh.verified",
       "en": "Freshness verified",
+      "vars": []
+    },
+    {
+      "key": "e2ee.progress",
+      "en": "{done} of {total} files · {bytesDone} of {bytes}",
+      "vars": [
+        "done",
+        "total",
+        "bytesDone",
+        "bytes"
+      ]
+    },
+    {
+      "key": "e2ee.rule.folder",
+      "en": "folder {value}",
+      "vars": [
+        "value"
+      ]
+    },
+    {
+      "key": "e2ee.rule.size",
+      "en": "over {value}",
+      "vars": [
+        "value"
+      ]
+    },
+    {
+      "key": "e2ee.rule.type",
+      "en": "type .{value}",
+      "vars": [
+        "value"
+      ]
+    },
+    {
+      "key": "e2ee.rules.extensions",
+      "en": "File types to leave out (e.g. mp4, mov)",
+      "vars": []
+    },
+    {
+      "key": "e2ee.rules.folders",
+      "en": "Folders to leave out (one per line)",
+      "vars": []
+    },
+    {
+      "key": "e2ee.rules.maxSize",
+      "en": "Largest attachment to sync, in MB (empty: no limit)",
+      "vars": []
+    },
+    {
+      "key": "e2ee.rules.none",
+      "en": "Everything is synced.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.rules.note",
+      "en": "Saved on this device only. Files left out stay here and are never sent; newer versions from other devices are not downloaded, and deletions are not applied.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.rules.save",
+      "en": "Save",
+      "vars": []
+    },
+    {
+      "key": "e2ee.rules.saved",
+      "en": "Saved. Applies from the next sync.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.rules.title",
+      "en": "What syncs on this device",
       "vars": []
     },
     {
@@ -1240,6 +1481,31 @@
     {
       "key": "e2ee.setup.wrong",
       "en": "Wrong passphrase.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.state.conflict",
+      "en": "Conflict",
+      "vars": []
+    },
+    {
+      "key": "e2ee.state.error",
+      "en": "Can't sync",
+      "vars": []
+    },
+    {
+      "key": "e2ee.state.excluded",
+      "en": "Not synced on this device",
+      "vars": []
+    },
+    {
+      "key": "e2ee.state.pending",
+      "en": "Waiting to sync",
+      "vars": []
+    },
+    {
+      "key": "e2ee.state.synced",
+      "en": "Synced",
       "vars": []
     },
     {

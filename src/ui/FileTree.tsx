@@ -767,6 +767,7 @@ function renderNode(
     >
       <div
         className={`file-tree-item ${isActive ? "active" : ""}${isSelected ? " selected" : ""}`}
+        data-path={node.path}
         onContextMenu={(e) => {
           e.preventDefault();
           ctx.openContextMenu(e.clientX, e.clientY, node);
