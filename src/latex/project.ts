@@ -22,7 +22,7 @@ export interface LatexProjectInput {
   author?: string;
 }
 
-const FRONTMATTER = /^﻿?---\r?\n([\s\S]*?)\r?\n---[ \t]*(?:\r?\n|$)/;
+const FRONTMATTER = /^\uFEFF?---\r?\n([\s\S]*?)\r?\n---[ \t]*(?:\r?\n|$)/;
 
 /** The entries of `bib` that `tex` cites, as BibTeX text (whole entries, as written). */
 export function citedEntries(bib: string, tex: string): string {
