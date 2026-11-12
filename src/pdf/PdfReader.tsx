@@ -470,7 +470,8 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
             pageTexts.current.set(p, text);
             if (seq !== searchSeq.current) return;
           }
-          findAll(text, q).forEach((_, occurrence) => found.push({ page: p, occurrence }));
+          // A scanned page's text is what OCR read: matched loosely (W6.47), the same way when the hit is drawn below.
+          findAll(text, q, { loose: !!ocrPages[p] }).forEach((_, occurrence) => found.push({ page: p, occurrence }));
         }
         list = found;
         setHits(found);
@@ -1001,11 +1002,12 @@ const PdfPageView = memo(function PdfPageView({
   useEffect(() => {
     const box = boxRef.current;
     if (!active || !box || !ready) return;
-    const layers: { el: HTMLElement; ocr: boolean }[] = [];
-    if (textRef.current && layerText(textRef.current).trim()) layers.push({ el: textRef.current, ocr: false });
+    // `loose`: text that OCR read, searched loosely (findAll).
+    const layers: { el: HTMLElement; ocr: boolean; loose: boolean }[] = [];
+    if (textRef.current && layerText(textRef.current).trim()) layers.push({ el: textRef.current, ocr: false, loose: false });
     // W6.47: the OCR layer over the page is in page coordinates, like the page's own text.
-    if (ocrLayerRef.current) layers.push({ el: ocrLayerRef.current, ocr: false });
-    if (ocrRef.current) layers.push({ el: ocrRef.current, ocr: true });
+    if (ocrLayerRef.current) layers.push({ el: ocrLayerRef.current, ocr: false, loose: true });
+    if (ocrRef.current) layers.push({ el: ocrRef.current, ocr: true, loose: true });
     const out: DrawnRect[] = [];
     const missing: string[] = [];
     for (const a of annotations) {
@@ -1023,8 +1025,8 @@ const PdfPageView = memo(function PdfPageView({
       if (!placed) missing.push(id);
     }
     if (query && occurrence >= 0) {
-      for (const { el, ocr } of layers) {
-        const hit = findAll(layerText(el), query)[occurrence];
+      for (const { el, ocr, loose } of layers) {
+        const hit = findAll(layerText(el), query, { loose })[occurrence];
         const range = hit && offsetsToRange(el, hit.start, hit.end);
         if (!range) continue;
         const origin = (ocr ? el : box).getBoundingClientRect();

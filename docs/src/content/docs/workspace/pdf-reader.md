@@ -92,10 +92,12 @@ nothing is written while the vault is locked.
 
 Measured on 20 scanned Hebrew pages (printed to PDF, rasterised with
 poppler, skewed, blurred and speckled like a desk scan; made by
-`scripts/ocr/scanned-he/make.mjs`), the OCR got 13.5% of the characters
-wrong, and a highlight of a phrase landed on it on 16 of the 20 pages; on the
-other four the OCR misread the phrase or placed it too loosely. Check
-recognised text against the image before quoting it.
+`scripts/ocr/scanned-he/make.mjs`), the OCR got 12.2% of the characters
+wrong, and a highlight of a phrase landed on it on all 20 pages. Search on a
+scanned page is forgiving: when nothing matches exactly, it also finds a
+phrase of 8 or more characters that OCR read with a letter or two wrong
+(about 15% of the characters), and it treats Hebrew final letters like their
+plain forms. Check recognised text against the image before quoting it.
 
 ## Reading mode
 

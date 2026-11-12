@@ -1,17 +1,18 @@
 /**
  * W6.47 — highlighting on scanned Hebrew PDFs. For each of 20 real scanned
  * pages (scripts/ocr/scanned-he: printed by Chromium, rasterised by poppler,
- * skewed, blurred and speckled, read by Tesseract's LSTM with the app's
- * models at the reader's OCR scale), the recognised lines are laid over the
- * page exactly as the reader does (OcrTextLayer), a phrase of the printed
- * text is found in that layer and turned into a highlight, and the highlight
- * must land on the phrase where it really is on the scanned page (from the
- * text PDF's word boxes) and re-anchor from the saved annotation.
- * Plan acceptance: highlighting works on ≥ 18 of 20. Measured here: 16 of
- * 20 — three phrases are misread by the OCR (CER 13.5% on this set) and one
- * highlight covers too little of its phrase. This test holds that floor so
- * it can't get worse; the 18 is owed (W6.47 PR).
- */
+ * skewed, blurred and speckled), the fixture holds what the app's own OCR
+ * path (`recognizeWithMixedFix`: Tesseract's LSTM with the app's models at
+ * the reader's OCR scale, the gutter split and the re-read of mixed
+ * Hebrew/Latin words) placed on the page. Those lines are laid over the page
+ * exactly as the reader does (OcrTextLayer), a phrase of the printed text is
+ * found in that layer the way the reader's search finds it on a scanned page
+ * (findAll, loose), turned into a highlight, and the highlight must land on
+ * the phrase where it really is on the scanned page (from the text PDF's word
+ * boxes) and re-anchor from the saved annotation.
+ * Plan acceptance: highlighting works on ≥ 18 of 20. Measured: 20 of 20
+ * (19 exactly, scan-10 loosely: OCR read "איךר" for "איך"), CER 12.17%.
+  */
 import { describe, expect, it } from "vitest";
 import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
@@ -46,8 +47,11 @@ function highlightLands(p: Page, scale: number): { ok: boolean; why: string } {
     const layer = host.querySelector<HTMLElement>("[data-pdf-text=ocr-layer]")!;
     const text = layerText(layer);
     if (text !== ocr.text) return { ok: false, why: "layer text differs" };
-    const hit = findAll(text, p.phrase)[0];
-    if (!hit) return { ok: false, why: `phrase not recognised: ${p.phrase}` };
+    const hits = findAll(text, p.phrase, { loose: true });
+    if (!hits.length) return { ok: false, why: `phrase not recognised: ${p.phrase}` };
+    // The loose match must not find the phrase anywhere else on the page.
+    if (hits.length > 1) return { ok: false, why: `phrase found ${hits.length} times` };
+    const hit = hits[0];
     const range = offsetsToRange(layer, hit.start, hit.end);
     if (!range) return { ok: false, why: "no range" };
     const rect = unionRect(rangePageRects(range, host.getBoundingClientRect(), scale));
@@ -74,12 +78,12 @@ describe("W6.47 highlights on 20 scanned Hebrew PDFs", () => {
     expect(pages.every((p) => p.truthBox)).toBe(true);
   });
 
-  it("a highlight lands on the phrase in at least 16 of 20 (plan: 18), at two zoom levels", () => {
+  it("a highlight lands on the phrase in at least 18 of 20, at two zoom levels", () => {
     for (const scale of [1, 1.5]) {
       const results = pages.map((p) => ({ id: p.id, ...highlightLands(p, scale) }));
       const ok = results.filter((r) => r.ok).length;
       console.log(`scale ${scale}: ${ok}/20 ` + results.filter((r) => !r.ok).map((r) => `${r.id} ${r.why}`).join("; "));
-      expect(ok).toBeGreaterThanOrEqual(16);
+      expect(ok).toBeGreaterThanOrEqual(18);
     }
   });
 });
