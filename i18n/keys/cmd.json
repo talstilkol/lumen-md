@@ -2367,6 +2367,16 @@
       "vars": []
     },
     {
+      "key": "cmd.voice.command",
+      "en": "Voice command",
+      "vars": []
+    },
+    {
+      "key": "cmd.voice.command.hint",
+      "en": "Say one: new note, search…, add task…, daily note, read aloud — recognised on this device",
+      "vars": []
+    },
+    {
       "key": "cmd.voice.meeting",
       "en": "🎙 Meeting notes (record on this device)",
       "vars": []

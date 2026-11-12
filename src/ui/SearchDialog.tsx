@@ -46,6 +46,12 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
   const [query, setQuery] = useState("");
   // Re-render after saving / removing a saved search (its state lives in localStorage).
   const [, setSavedTick] = useState(0);
+  // A spoken "search …" (plan W5.20, src/ai/voice/run.ts) fills the box.
+  useEffect(() => {
+    const onQuery = (e: Event) => setQuery(String((e as CustomEvent<{ query?: string }>).detail?.query ?? ""));
+    window.addEventListener("lumen-search-query", onQuery);
+    return () => window.removeEventListener("lumen-search-query", onQuery);
+  }, []);
   const [hits, setHits] = useState<SearchHit[]>([]);
   /** The other-layout reading of the query whose hits are shown too. */
   const [layoutVariant, setLayoutVariant] = useState<string | null>(null);

@@ -79,6 +79,15 @@ export function buildReadAloudCommands(): Command[] {
 export function buildVoiceCommands(): Command[] {
   return [
     {
+      // Plan W5.20: one spoken command, recognised and parsed on this device.
+      id: "voice.command",
+      label: t("cmd.voice.command"),
+      hint: t("cmd.voice.command.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      action: () => void import("../../ai/voice/run").then((m) => m.runVoiceCommand()),
+    },
+    {
       id: "voice.memo",
       label: t("cmd.tools.voiceMemo"),
       hint: t("cmd.tools.voiceMemo.hint"),

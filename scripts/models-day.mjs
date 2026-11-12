@@ -16,6 +16,7 @@
  *   --fresh            start a new run instead of resuming the last unfinished one
  *   --no-pull          never pull a model (a step whose model is missing fails)
  *   --meetings-dir D   the owner's meeting recordings (15.11) for the meetings step
+ *   --voice-dir D      the owner's recorded voice commands (W5.20) for the voice-commands step
  *   --cache DIR        downloads (ASR model, FLEURS clips); default ~/.cache/lumen-models-day
  *   --sign-key PEM     an Ed25519 private key: the receipt is also signed
  *   --yes              run even when the checklist has open items
@@ -137,7 +138,7 @@ const env = {
   tools: { python3: which("python3") && spawnSync("python3", ["-I", "-c", "import huggingface_hub, pyarrow"], { timeout: 20_000 }).status === 0, ffmpeg: which("ffmpeg"), chromium: chromium() },
   diskFreeGB: diskFreeGB(outRoot),
 };
-const selected = selectSteps(STEPS, { only: list(opts.only), skip: list(opts.skip), withOptional: list(opts.with) }).map((s) => ({ ...s, available: availability(s, { scripts, root, options: { meetingsDir: opts["meetings-dir"] } }) }));
+const selected = selectSteps(STEPS, { only: list(opts.only), skip: list(opts.skip), withOptional: list(opts.with) }).map((s) => ({ ...s, available: availability(s, { scripts, root, options: { meetingsDir: opts["meetings-dir"], voiceDir: opts["voice-dir"] } }) }));
 const items = checklist(selected, env);
 const open = items.filter((i) => !i.ok);
 
@@ -265,7 +266,7 @@ for (const step of selected) {
     exit = 3;
     log.write(`missing model(s): ${missing.join(", ")} — ollama pull ${missing.join(" && ollama pull ")}\n`);
   } else {
-    for (const c of step.commands({ url, dir, cache, meetingsDir: opts["meetings-dir"] })) {
+    for (const c of step.commands({ url, dir, cache, meetingsDir: opts["meetings-dir"], voiceDir: opts["voice-dir"] })) {
       if (c.skipIf?.()) continue;
       exit = await exec(c, log);
       if (exit !== 0 || stopping) break;

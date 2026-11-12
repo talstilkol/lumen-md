@@ -467,6 +467,8 @@
   "cmd.view.workspace.hint": "in-browser file storage (OPFS)",
   "cmd.view.wysiwyg": "WYSIWYG",
   "cmd.view.wysiwyg.hint": "rich-text editing",
+  "cmd.voice.command": "Voice command",
+  "cmd.voice.command.hint": "Say one: new note, search…, add task…, daily note, read aloud — recognised on this device",
   "cmd.voice.meeting": "🎙 Meeting notes (record on this device)",
   "cmd.voice.meeting.hint": "Record a meeting, transcribe it on this device, and insert its decisions, tasks with owner and date, and open questions",
   "cmd.voice.meetingFile": "🎙 Transcribe a meeting recording (who said what)…",

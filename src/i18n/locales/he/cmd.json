@@ -468,6 +468,8 @@
   "cmd.view.workspace.hint": "אחסון קבצים מקומי בדפדפן (OPFS)",
   "cmd.view.wysiwyg": "WYSIWYG",
   "cmd.view.wysiwyg.hint": "עריכת טקסט עשיר",
+  "cmd.voice.command": "פקודה קולית",
+  "cmd.voice.command.hint": "אמרו פקודה: פתק חדש, חפש…, הוסף משימה…, פתק יומי, הקרא — מזוהה במכשיר הזה",
   "cmd.voice.meeting": "🎙 סיכום פגישה (הקלטה במכשיר הזה)",
   "cmd.voice.meeting.hint": "הקלטת פגישה, תמלול במכשיר הזה, והוספת ההחלטות, המשימות עם אחראי ותאריך, והשאלות הפתוחות",
   "cmd.voice.meetingFile": "🎙 תמלול הקלטת פגישה (מי אמר מה)…",
