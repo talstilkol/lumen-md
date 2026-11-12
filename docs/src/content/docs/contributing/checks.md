@@ -43,6 +43,14 @@ skips a build before it starts when:
 A skipped build shows as **Canceled** in Vercel, not as a pass: the
 branch's status comes from its newest commit.
 
+**These rules take effect only once the Vercel project's Ignored Build
+Step is set.** Lumen's config is `vercel.ts`, which Vercel compiles after
+the ignore step has already run, so the `ignoreCommand` in
+`deploy/vercel.base.json` is never read. The project setting (Settings →
+Git → Ignored Build Step) must be `bash scripts/vercel-ignore.sh`. Until it
+is, every pushed branch builds. A branch whose commit has no such script
+fails that command with a non-zero exit, so it builds as before.
+
 ## Running the same checks locally
 
 ```bash
