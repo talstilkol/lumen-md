@@ -536,6 +536,7 @@
   "settings.empty": "Нет подходящих настроек",
   "settings.general": "Общие",
   "settings.importFailed": "Этот файл не является файлом настроек Lumen.",
+  "settings.importRefused": "Не импортировано, чтобы на этом устройстве сохранились настройки конфиденциальности: {keys}",
   "settings.imported": "Импортировано настроек: {n}, пропущено: {skipped}",
   "settings.language": "Язык",
   "settings.search": "Поиск по настройкам",

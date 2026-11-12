@@ -536,6 +536,7 @@
   "settings.empty": "لا يوجد إعداد مطابق",
   "settings.general": "عام",
   "settings.importFailed": "هذا الملف ليس ملف إعدادات Lumen.",
+  "settings.importRefused": "لم تُستورد، ليحتفظ هذا الجهاز بإعدادات الخصوصية الخاصة به: {keys}",
   "settings.imported": "تم استيراد {n} من الإعدادات، وتخطي {skipped}",
   "settings.language": "اللغة",
   "settings.search": "ابحث في الإعدادات",

@@ -141,11 +141,11 @@ export const SETTINGS: readonly SettingEntry[] = [
   local("lumen.grammar.endpoint", { kind: "setting", tab: "ai", label: "ai.settings.grammar", type: "text" }),
   local("lumen.research.endpoint", { kind: "setting", tab: "ai", label: "ai.settings.research", type: "text" }),
   local("lumen.research.provider", { kind: "setting", tab: "ai", type: "text" }),
-  local("lumen.research.webConsent", { kind: "setting", tab: "ai", type: "text" }),
+  // A consent: like the other opt-ins, never taken from an imported file.
+  data("lumen.research.webConsent"),
   local("lumen.ai.rerank", { kind: "setting", tab: "ai", label: "cmd.ai.rerankModel", type: "choice", options: [{ value: "lexical" }, { value: "model" }] }),
   local("lumen.ai.imageText", { kind: "setting", tab: "ai", label: "cmd.image.altText", type: "boolean", values: ["off", ""] }),
   local("lumen.ai.styleProfile.active", { kind: "setting", tab: "ai", label: "ai.settings.style.use", type: "boolean", values: ["", "1"] }),
-  local("lumen.research.tokenEndpoint", { kind: "setting", tab: "ai", type: "text" }),
   local("lumen.fim.enabled", { kind: "setting", tab: "ai", type: "boolean", values: ["", "1"] }),
   local("lumen.fim.model", { kind: "setting", tab: "ai", type: "text" }),
   local("lumen.ai.redact", { kind: "setting", tab: "ai", type: "boolean", values: ["off", "on"] }),
@@ -158,6 +158,8 @@ export const SETTINGS: readonly SettingEntry[] = [
   secret("lumen.ai.key.*", "ai"),
   secret("lumen.research.searchKey", "ai"),
   secret("lumen.research.serviceToken", "ai"),
+  // The endpoint the service token is bound to: importing it would send the token elsewhere.
+  secret("lumen.research.tokenEndpoint", "ai"),
 
   // ── Sync and collaboration ────────────────────────────────────────────
   local("lumen.collab.signaling", { kind: "setting", tab: "sync", label: "collab.settings.signalingHint", type: "text" }),

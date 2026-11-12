@@ -139,9 +139,11 @@ export function SettingsScreen({ tab: initialTab = "general", onClose, onOpenAud
       showAiToast(t("settings.importFailed"), "error");
       return;
     }
-    const { applied, skipped } = importSettings(parsed, browserTarget());
+    const { applied, skipped, refused } = importSettings(parsed, browserTarget());
     setLocalVersion((v) => v + 1);
     showAiToast(t("settings.imported", { n: applied, skipped: skipped.length }), "success");
+    // An import never loosens privacy (settings/io.ts): name what it left as it was.
+    if (refused.length) showAiToast(t("settings.importRefused", { keys: refused.join(", ") }), "info");
   };
 
   const onExport = () => {
