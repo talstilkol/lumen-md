@@ -561,6 +561,11 @@
       "vars": []
     },
     {
+      "key": "cmd.epub.open",
+      "en": "Open an EPUB for reading…",
+      "vars": []
+    },
+    {
       "key": "cmd.feedback",
       "en": "Help: Send feedback",
       "vars": []
@@ -1212,6 +1217,11 @@
     {
       "key": "cmd.privacy.imageHosts.hint",
       "en": "Sites you chose “Always allow” for — revoke one or all",
+      "vars": []
+    },
+    {
+      "key": "cmd.reading.mode",
+      "en": "Reading mode",
       "vars": []
     },
     {

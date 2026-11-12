@@ -1792,6 +1792,174 @@
       ]
     },
     {
+      "key": "epub.chapterOf",
+      "en": "Chapter {n} of {total}",
+      "vars": [
+        "n",
+        "total"
+      ]
+    },
+    {
+      "key": "epub.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "epub.external",
+      "en": "This link leads outside the book and is not opened here: {url}",
+      "vars": [
+        "url"
+      ]
+    },
+    {
+      "key": "epub.failed",
+      "en": "Couldn't open this book: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "epub.fontLarger",
+      "en": "Larger text",
+      "vars": []
+    },
+    {
+      "key": "epub.fontSmaller",
+      "en": "Smaller text",
+      "vars": []
+    },
+    {
+      "key": "epub.highlight",
+      "en": "Highlight",
+      "vars": []
+    },
+    {
+      "key": "epub.highlight.hint",
+      "en": "Select text, then press H",
+      "vars": []
+    },
+    {
+      "key": "epub.highlights",
+      "en": "Highlights",
+      "vars": []
+    },
+    {
+      "key": "epub.highlights.empty",
+      "en": "Select text and press Highlight.",
+      "vars": []
+    },
+    {
+      "key": "epub.loading",
+      "en": "Opening…",
+      "vars": []
+    },
+    {
+      "key": "epub.narrower",
+      "en": "Narrower lines",
+      "vars": []
+    },
+    {
+      "key": "epub.next",
+      "en": "Next chapter",
+      "vars": []
+    },
+    {
+      "key": "epub.noWorkspace",
+      "en": "Books need the workspace, which this browser can't provide.",
+      "vars": []
+    },
+    {
+      "key": "epub.note.placeholder",
+      "en": "Add a note…",
+      "vars": []
+    },
+    {
+      "key": "epub.noteChapter",
+      "en": "ch. {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "epub.noteChapterNamed",
+      "en": "ch. {n}: {label}",
+      "vars": [
+        "n",
+        "label"
+      ]
+    },
+    {
+      "key": "epub.noteEmpty",
+      "en": "_No highlights yet._",
+      "vars": []
+    },
+    {
+      "key": "epub.noteTitle",
+      "en": "Highlights — {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "epub.notesUnreadable",
+      "en": "the highlights block in {name} can't be read. Fix or remove it to highlight again.",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "epub.openNotes",
+      "en": "Open the notes",
+      "vars": []
+    },
+    {
+      "key": "epub.prev",
+      "en": "Previous chapter",
+      "vars": []
+    },
+    {
+      "key": "epub.remove",
+      "en": "Remove",
+      "vars": []
+    },
+    {
+      "key": "epub.saveFailed",
+      "en": "Couldn't save the highlights: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "epub.theme.dark",
+      "en": "Dark",
+      "vars": []
+    },
+    {
+      "key": "epub.theme.light",
+      "en": "Light",
+      "vars": []
+    },
+    {
+      "key": "epub.theme.sepia",
+      "en": "Sepia",
+      "vars": []
+    },
+    {
+      "key": "epub.toc",
+      "en": "Contents",
+      "vars": []
+    },
+    {
+      "key": "epub.unanchored",
+      "en": "Text not found in the chapter.",
+      "vars": []
+    },
+    {
+      "key": "epub.wider",
+      "en": "Wider lines",
+      "vars": []
+    },
+    {
       "key": "error.aiNoKey",
       "en": "No AI key is set, so nothing was sent. Your text is unchanged; add a key in AI settings, or use a local model.",
       "vars": []
@@ -4240,6 +4408,11 @@
       "vars": []
     },
     {
+      "key": "reading.highlightFailed",
+      "en": "That passage can't be marked: select text within one paragraph, outside links and formatting.",
+      "vars": []
+    },
+    {
       "key": "reading.license",
       "en": "Every font here is under the SIL Open Font License 1.1; the licences are in fonts/reading/.",
       "vars": []
@@ -4278,6 +4451,14 @@
       "key": "reading.size",
       "en": "Text size",
       "vars": []
+    },
+    {
+      "key": "reading.source",
+      "en": "From {source} · clipped {clipped}",
+      "vars": [
+        "source",
+        "clipped"
+      ]
     },
     {
       "key": "reading.spacedHebrew",
