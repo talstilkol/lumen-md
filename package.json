@@ -78,7 +78,8 @@
     "release:verify": "node scripts/supply-chain/verify-release.mjs",
     "repro": "node scripts/supply-chain/repro-check.mjs",
     "check:test-surface": "node scripts/check-test-surface.mjs",
-    "bench:sync": "tsx scripts/bench/sync-first.ts"
+    "bench:sync": "tsx scripts/bench/sync-first.ts",
+    "dictalm3": "node scripts/dictalm3.mjs"
   },
   "dependencies": {
     "@bjorn3/browser_wasi_shim": "0.4.2",
