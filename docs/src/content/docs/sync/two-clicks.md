@@ -87,7 +87,7 @@ any address it liked:
 | not set | on Fly, as `fly`; anywhere else, the connection's own address |
 | `0` | the connection's own address |
 | `fly` | `Fly-Client-IP`, only on Fly and only from Fly's proxy |
-| a list of ranges, e.g. `10.0.0.2/32,fd00::/8` | the connections from those proxies: the right-most `X-Forwarded-For` entry that is not one of them |
+| a list of the proxies' own addresses, e.g. `10.0.0.2/32,fd00::2/128` | the connections from those proxies: the right-most `X-Forwarded-For` entry that is not one of them. When every entry is a proxy, the connection's own address. A range wider than /24 (IPv4) or /64 (IPv6) would hold clients too, so the relay ignores it |
 
 An IPv6 client counts as its /64 for every limit. For new spaces, its /48
 counts as well (`VAULT_RELAY_NEW_SPACES_PER_48`, 16 times the per-address

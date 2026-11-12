@@ -61,7 +61,7 @@
  *   VAULT_RELAY_TRUST_PROXY unset    on Fly (FLY_APP_NAME set): as "fly"; elsewhere: no header
  *   VAULT_RELAY_TRUST_PROXY=0        no header: the socket's address
  *   VAULT_RELAY_TRUST_PROXY=fly      Fly-Client-IP, only on Fly and only from a private peer (Fly's proxy)
- *   VAULT_RELAY_TRUST_PROXY=<CIDRs>  e.g. "10.0.0.2/32,fd00::/8": the peers that are proxies; the
+ *   VAULT_RELAY_TRUST_PROXY=<CIDRs>  e.g. "10.0.0.2/32,fd00::2/128": the proxies' own addresses; the
  *                                    client is the right-most X-Forwarded-For hop that is not one of them
  * IPv6 clients are counted by their /64, and new spaces also by their /48
  * (VAULT_RELAY_NEW_SPACES_PER_48, default 16 × the per-address limit), so a
@@ -301,9 +301,10 @@ function groupsOf(raw) {
   return v6Groups(a);
 }
 
-/** "10.0.0.2/32,fd00::/8" → a test of whether an address is in one of the ranges; null when the list doesn't parse. */
+/** "10.0.0.2/32,fd00::2/128" → a test of whether an address is in one of the ranges; null when the list doesn't parse. */
 function cidrList(text) {
   const ranges = [];
+  let parsed = 0;
   for (const part of String(text).split(",").map((x) => x.trim()).filter(Boolean)) {
     const [addr, bits] = part.split("/");
     const g = groupsOf(addr);
@@ -311,9 +312,16 @@ function cidrList(text) {
     const isV4 = /^\d+\.\d+\.\d+\.\d+$/.test(addr.trim());
     const n = bits === undefined ? 128 : Number(bits) + (isV4 ? 96 : 0);
     if (!Number.isInteger(n) || n < (isV4 ? 96 : 0) || n > 128) return null;
+    parsed++;
+    // Review 6 (RR6-483-1): a range wider than /24 (IPv4) or /64 (IPv6) holds clients too (a school's
+    // laptops, every ULA address), and a client in the list picks its own address. Such a range is not a proxy.
+    if (n < (isV4 ? 120 : 64)) {
+      console.warn(`vault-relay: VAULT_RELAY_TRUST_PROXY: "${part}" is wider than ${isV4 ? "/24" : "/64"}, ignored: list the proxies' own addresses (/32, /128)`);
+      continue;
+    }
     ranges.push({ g, n });
   }
-  if (!ranges.length) return null;
+  if (!parsed) return null;
   return (raw) => {
     const g = groupsOf(raw);
     if (!g) return false;
@@ -354,7 +362,8 @@ function addressReader(setting, env) {
     const hops = typeof xff === "string" ? xff.split(",").map((x) => x.trim()).filter(Boolean) : [];
     // From the right: each hop a proxy appended; the first that is not a proxy is the client.
     for (let i = hops.length - 1; i >= 0; i--) if (!isProxy(hops[i])) return hops[i];
-    return hops[0] ?? peer;
+    // Every hop is a proxy (review 6, RR6-483-1): the left-most is the client's own word, so the socket's address counts.
+    return peer;
   };
 }
 
