@@ -513,11 +513,13 @@ export const useAppStore = create<AppState>()(
           ...current,
           ...p,
           themeSettings: sanitizeThemeSettings(p.themeSettings),
-          // A hand-edited or older store: keep only string fields, fall back per field.
+          // A hand-edited or older store: keep only fields of the right type, fall back per field.
           dailyNotes: {
             folder: typeof p.dailyNotes?.folder === "string" ? p.dailyNotes.folder : DEFAULT_DAILY.folder,
             pattern: typeof p.dailyNotes?.pattern === "string" && isValidDailyPattern(p.dailyNotes.pattern) ? p.dailyNotes.pattern : DEFAULT_DAILY.pattern,
             template: typeof p.dailyNotes?.template === "string" ? p.dailyNotes.template : DEFAULT_DAILY.template,
+            ...(typeof p.dailyNotes?.israel === "boolean" ? { israel: p.dailyNotes.israel } : {}),
+            ...(typeof p.dailyNotes?.morning === "boolean" ? { morning: p.dailyNotes.morning } : {}),
           },
           showCalendar: p.showCalendar === true,
         };
