@@ -7,7 +7,7 @@
     { "q": "מימין לשמאל", "page": "he/editor/hebrew" },
     { "q": "מודל מקומי", "page": "he/ai/local-llm" },
     { "q": "פרטיות", "page": "he/ai/privacy" },
-    { "q": "תוסף", "page": "he/plugins/sdk" },
+    { "q": "תוסף", "page": "he/plugins/develop" },
     { "q": "חתימה", "page": "he/plugins/signing" },
     { "q": "תבניות", "page": "he/plugins/templates" },
     { "q": "מעבר מ-Notion", "page": "he/getting-started/from-notion" },

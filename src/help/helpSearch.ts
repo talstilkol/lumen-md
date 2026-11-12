@@ -150,9 +150,25 @@ export class HelpIndex {
 
 const cache: Partial<Record<"en" | "he", Promise<HelpIndex>>> = {};
 
+/**
+ * The packed docs come in shards (scripts/help-bundle.mjs), each its own
+ * lazy chunk under the 100 KB lazy-chunk budget. Not eager: nothing loads
+ * until the help panel asks.
+ */
+const SHARDS: Record<"en" | "he", Record<string, () => Promise<HelpBundle>>> = {
+  en: import.meta.glob<HelpBundle>("./generated/help.en.*.json", { import: "default" }),
+  he: import.meta.glob<HelpBundle>("./generated/help.he.*.json", { import: "default" }),
+};
+
+/** Shard paths in order: help.he.2.json before help.he.10.json. */
+const shardNo = (path: string) => Number(/\.(\d+)\.json$/.exec(path)?.[1] ?? 0);
+
 /** The help index for a UI language (Hebrew for he, English otherwise), loaded once, lazily. */
 export function loadHelp(locale: string): Promise<HelpIndex> {
   const lang = locale === "he" ? "he" : "en";
-  cache[lang] ??= (lang === "he" ? import("./generated/help.he.json") : import("./generated/help.en.json")).then((m) => new HelpIndex((m as { default: HelpBundle }).default));
+  const loaders = Object.entries(SHARDS[lang]).sort(([a], [b]) => shardNo(a) - shardNo(b));
+  cache[lang] ??= Promise.all(loaders.map(([, load]) => load())).then(
+    (parts) => new HelpIndex({ version: parts[0]?.version ?? 1, lang, pages: parts.flatMap((p) => p.pages) }),
+  );
   return cache[lang]!;
 }

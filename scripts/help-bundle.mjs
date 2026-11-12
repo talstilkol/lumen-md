@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 /**
  * The docs, packed into the app (plan W3.7): every page of
- * docs/src/content/docs, English and Hebrew, as one JSON file per language
- * under src/help/generated/. The help panel loads it lazily (it is not in
- * the startup bundle) and searches it on the device, so help works offline.
+ * docs/src/content/docs, English and Hebrew, as JSON shards per language
+ * under src/help/generated/ (help.<lang>.<n>.json). The help panel loads
+ * them lazily (they are not in the startup bundle) and searches them on the
+ * device, so help works offline.
  *
  * Each page keeps its Markdown body (rendered in the panel by the app's own
  * renderer) and, for search, its sections: heading, the anchor the renderer
@@ -12,22 +13,30 @@
  *   node scripts/help-bundle.mjs           # write
  *   node scripts/help-bundle.mjs --check   # fail if the bundle is out of date with the docs
  */
-import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import { gzipSync } from "node:zlib";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DOCS = join(ROOT, "docs/src/content/docs");
-export const OUT = { en: "src/help/generated/help.en.json", he: "src/help/generated/help.he.json" };
+export const OUT_DIR = "src/help/generated";
+/** help.en.0.json, help.he.3.json … */
+export const SHARD = /^help\.(en|he)\.(\d+)\.json$/;
 /**
- * Each bundle becomes its own lazy chunk, which scripts/bundle-budget.mjs
- * holds to the "lazy plugin chunk" rule: 100 KB gzipped. Fail here first,
- * with room to spare, so a growing docs tree is caught before the build.
- * Measured at W3.7: en 63.6 KB, he 69.8 KB.
+ * Each shard becomes its own lazy chunk, which scripts/bundle-budget.mjs
+ * holds to the "lazy plugin chunk" rule: 100 KB gzipped. Shards are filled
+ * up to the warning line, so each stays well under the budget however the
+ * docs grow (W3.7 had one file per language, 63.6 / 69.8 KB; by train 2
+ * the docs had tripled, to ~300 KB, so the bundle is sharded).
  */
 export const CHUNK_BUDGET_KB = 100;
 export const CHUNK_WARN_KB = 85;
+
+/** What Vite emits for a large JSON import: JSON.parse of one string literal, gzipped, in KB. */
+export function chunkKb(json) {
+  return gzipSync(`export default JSON.parse(${JSON.stringify(json.trim())})`).length / 1024;
+}
 
 function walk(dir) {
   const out = [];
@@ -121,28 +130,76 @@ export function bundle(lang) {
   return { version: 1, lang, pages };
 }
 
+/** Split a bundle into shards, in page order, each under CHUNK_WARN_KB gzipped. */
+export function shards(b) {
+  const out = [];
+  let pages = [];
+  const text = (ps) => `${JSON.stringify({ version: b.version, lang: b.lang, pages: ps })}\n`;
+  for (const p of b.pages) {
+    if (pages.length && chunkKb(text([...pages, p])) > CHUNK_WARN_KB) {
+      out.push(text(pages));
+      pages = [];
+    }
+    pages.push(p);
+  }
+  if (pages.length) out.push(text(pages));
+  return out;
+}
+
+/** The shard files on disk for a language, in order. */
+export function shardFiles(lang, root = ROOT) {
+  const dir = join(root, OUT_DIR);
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir)
+    .map((n) => SHARD.exec(n))
+    .filter((m) => m && m[1] === lang)
+    .sort((a, b) => Number(a[2]) - Number(b[2]))
+    .map((m) => join(dir, m[0]));
+}
+
+/** The bundle as packed on disk: every shard of a language, joined. */
+export function readBundle(lang, root = ROOT) {
+  const parts = shardFiles(lang, root).map((f) => JSON.parse(readFileSync(f, "utf8")));
+  return { version: parts[0]?.version ?? 1, lang, pages: parts.flatMap((p) => p.pages) };
+}
+
 function main() {
   const check = process.argv.includes("--check");
   let stale = 0;
-  for (const [lang, rel] of Object.entries(OUT)) {
-    const want = `${JSON.stringify(bundle(lang))}\n`;
-    // What Vite emits for a large JSON import: JSON.parse of one string literal.
-    const kb = gzipSync(`export default JSON.parse(${JSON.stringify(want.trim())})`).length / 1024;
-    if (kb > CHUNK_BUDGET_KB) {
-      console.error(`✖ ${rel}: ~${kb.toFixed(1)} KB gzipped, over the ${CHUNK_BUDGET_KB} KB lazy-chunk budget: split the bundle (per section, or a separate search index)`);
-      stale++;
-    } else if (kb > CHUNK_WARN_KB) console.error(`⚠ ${rel}: ~${kb.toFixed(1)} KB gzipped, near the ${CHUNK_BUDGET_KB} KB lazy-chunk budget`);
-    else if (check) console.error(`  ${rel}: ~${kb.toFixed(1)} KB gzipped / ${CHUNK_BUDGET_KB} KB`);
-    const path = join(ROOT, rel);
-    const have = existsSync(path) ? readFileSync(path, "utf8") : null;
-    if (have === want) continue;
-    if (check) {
-      console.error(`✖ ${rel} is out of date with the docs: run node scripts/help-bundle.mjs`);
-      stale++;
-    } else {
-      mkdirSync(dirname(path), { recursive: true });
-      writeFileSync(path, want);
-      console.error(`wrote ${rel} (${(want.length / 1024).toFixed(0)} KB)`);
+  for (const lang of ["en", "he"]) {
+    const want = shards(bundle(lang));
+    const have = shardFiles(lang);
+    want.forEach((json, i) => {
+      const rel = `${OUT_DIR}/help.${lang}.${i}.json`;
+      const kb = chunkKb(json);
+      if (kb > CHUNK_BUDGET_KB) {
+        console.error(`✖ ${rel}: ~${kb.toFixed(1)} KB gzipped, over the ${CHUNK_BUDGET_KB} KB lazy-chunk budget: one page is too large, split it`);
+        stale++;
+      } else if (check) console.error(`  ${rel}: ~${kb.toFixed(1)} KB gzipped / ${CHUNK_BUDGET_KB} KB`);
+      const path = join(ROOT, rel);
+      if (existsSync(path) && readFileSync(path, "utf8") === json) return;
+      if (check) {
+        console.error(`✖ ${rel} is out of date with the docs: run node scripts/help-bundle.mjs`);
+        stale++;
+      } else {
+        mkdirSync(dirname(path), { recursive: true });
+        writeFileSync(path, json);
+        console.error(`wrote ${rel} (${(json.length / 1024).toFixed(0)} KB)`);
+      }
+    });
+    for (const extra of have.slice(want.length)) {
+      if (check) {
+        console.error(`✖ ${relative(ROOT, extra)} is left over: run node scripts/help-bundle.mjs`);
+        stale++;
+      } else unlinkSync(extra);
+    }
+    // The single-file bundle of W3.7.
+    const legacy = join(ROOT, OUT_DIR, `help.${lang}.json`);
+    if (existsSync(legacy)) {
+      if (check) {
+        console.error(`✖ ${OUT_DIR}/help.${lang}.json is the old single-file bundle: run node scripts/help-bundle.mjs`);
+        stale++;
+      } else unlinkSync(legacy);
     }
   }
   if (stale) process.exit(1);
