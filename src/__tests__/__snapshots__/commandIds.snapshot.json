@@ -1322,6 +1322,27 @@
       "group": "Tools",
       "hint": "Turn beta features on or off on this device",
       "icon": "Sparkles"
+    },
+    {
+      "id": "sources.insertSefaria",
+      "label": "Insert a source from Sefaria…",
+      "group": "Insert",
+      "hint": "The Hebrew and a translation of a verse, mishnah or folio (בראשית א:א, ב״ר א, א, Berakhot 2a), with each text's licence",
+      "icon": "Quote"
+    },
+    {
+      "id": "sources.saveOffline",
+      "label": "Save this source for offline",
+      "group": "Insert",
+      "hint": "Keep a copy in Sources/Sefaria (freely licensed texts only), so it opens without a network request",
+      "icon": "Download"
+    },
+    {
+      "id": "sources.notesOnVerse",
+      "label": "My notes on this verse",
+      "group": "Insert",
+      "hint": "Every note that cites the verse under the cursor",
+      "icon": "Link"
     }
   ],
   "full": [
@@ -2782,6 +2803,27 @@
       "group": "Tools",
       "hint": "Turn beta features on or off on this device",
       "icon": "Sparkles"
+    },
+    {
+      "id": "sources.insertSefaria",
+      "label": "Insert a source from Sefaria…",
+      "group": "Insert",
+      "hint": "The Hebrew and a translation of a verse, mishnah or folio (בראשית א:א, ב״ר א, א, Berakhot 2a), with each text's licence",
+      "icon": "Quote"
+    },
+    {
+      "id": "sources.saveOffline",
+      "label": "Save this source for offline",
+      "group": "Insert",
+      "hint": "Keep a copy in Sources/Sefaria (freely licensed texts only), so it opens without a network request",
+      "icon": "Download"
+    },
+    {
+      "id": "sources.notesOnVerse",
+      "label": "My notes on this verse",
+      "group": "Insert",
+      "hint": "Every note that cites the verse under the cursor",
+      "icon": "Link"
     }
   ],
   "autoSaveOn": [
@@ -2981,6 +3023,9 @@
     "a11y.srVerbosity",
     "a11y.whereAmI",
     "help.a11yStatement",
-    "app.featureFlags"
+    "app.featureFlags",
+    "sources.insertSefaria",
+    "sources.saveOffline",
+    "sources.notesOnVerse"
   ]
 }

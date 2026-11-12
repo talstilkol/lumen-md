@@ -20,6 +20,7 @@ import { buildGitCommands } from "./git";
 import { buildCollabCommands, buildCommentCommands } from "./collab";
 import { buildBillingCommands, buildOptionalPanelCommands, buildAirplaneCommands } from "./settings";
 import { buildAccessibilityCommands } from "./a11y";
+import { buildSourceCommands } from "./sources";
 
 export const COMMAND_SECTIONS: ReadonlyArray<(ctx: CommandContext) => Command[]> = [
   buildRecentCommands,
@@ -71,4 +72,5 @@ export const COMMAND_SECTIONS: ReadonlyArray<(ctx: CommandContext) => Command[]>
   buildInsertCommands,
   // Appended (plan W1.23) so the earlier order stays as pinned.
   buildAccessibilityCommands,
+  buildSourceCommands,
 ];

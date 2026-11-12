@@ -124,6 +124,7 @@ export default defineConfig({
             { label: "Print and PDF", slug: "workspace/print", translations: { he: "הדפסה ו-PDF" } },
             { label: "Literature review matrix", translations: { he: "מטריצת סקירת ספרות" }, slug: "workspace/literature-review" },
             { label: "Student mode", translations: { he: "מצב סטודנט" }, slug: "workspace/student-mode" },
+            { label: "Jewish sources (Sefaria)", slug: "workspace/jewish-sources", translations: { he: "מקורות יהודיים (ספריא)" } },
           ],
         },
         {
