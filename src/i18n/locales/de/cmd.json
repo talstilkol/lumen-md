@@ -103,6 +103,8 @@
   "cmd.edit.formatCodeBlock.hint": "Prettier: den Codeblock unter dem Cursor formatieren",
   "cmd.edit.formatDocument": "Dokument formatieren",
   "cmd.edit.formatDocument.hint": "Prettier: Markdown, Frontmatter und Codeblöcke aufräumen",
+  "cmd.edit.hebrewTypography": "Hebräische Typografie…",
+  "cmd.edit.hebrewTypography.hint": "Gerschajim, Geresch, Makaf, Anführungszeichen und Zahlen — beim Tippen oder für die ganze Notiz mit Vorschau",
   "cmd.feedback": "Hilfe: Feedback senden",
   "cmd.feedback.hint": "Ein GitHub-Issue oder Text zum Kopieren — nichts wird ohne deinen Klick gesendet",
   "cmd.file.exportAdoc": "Exportieren to AsciiDoc",

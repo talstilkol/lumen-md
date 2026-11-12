@@ -46,6 +46,7 @@ export default defineConfig({
             { label: "Accessibility statement", slug: "editor/accessibility-statement", translations: { he: "הצהרת נגישות" } },
             { label: "Screen reader protocol", slug: "editor/screen-reader-protocol", translations: { he: "פרוטוקול קוראי מסך" } },
             { label: "Hebrew keyboard layout", slug: "editor/hebrew-keyboard", translations: { he: "פריסת מקלדת עברית" } },
+            { label: "Hebrew typography", slug: "editor/hebrew-typography", translations: { he: "טיפוגרפיה עברית" } },
           ],
         },
         {

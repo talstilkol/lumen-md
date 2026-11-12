@@ -103,6 +103,8 @@
   "cmd.edit.formatCodeBlock.hint": "Prettier: カーソルがあるコードブロックを整形",
   "cmd.edit.formatDocument": "ドキュメントを整形",
   "cmd.edit.formatDocument.hint": "Prettier: Markdown・フロントマター・コードブロックを整える",
+  "cmd.edit.hebrewTypography": "ヘブライ語の組版…",
+  "cmd.edit.hebrewTypography.hint": "ゲルシャイム、ゲレシュ、マカフ、引用符、数字 — 入力中に、またはプレビュー付きでノート全体に",
   "cmd.feedback": "ヘルプ: フィードバックを送る",
   "cmd.feedback.hint": "GitHub の issue またはコピー用テキスト — クリックするまで何も送信されません",
   "cmd.file.exportAdoc": "エクスポート to AsciiDoc",

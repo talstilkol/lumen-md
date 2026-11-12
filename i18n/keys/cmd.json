@@ -526,6 +526,16 @@
       "vars": []
     },
     {
+      "key": "cmd.edit.hebrewTypography",
+      "en": "Hebrew typography…",
+      "vars": []
+    },
+    {
+      "key": "cmd.edit.hebrewTypography.hint",
+      "en": "Gershayim, geresh, maqaf, quotation marks and numbers — as you type, or for the whole note with a preview",
+      "vars": []
+    },
+    {
       "key": "cmd.feedback",
       "en": "Help: Send feedback",
       "vars": []

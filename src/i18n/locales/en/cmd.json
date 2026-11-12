@@ -102,6 +102,8 @@
   "cmd.edit.formatCodeBlock.hint": "Prettier: format the fenced block under the cursor",
   "cmd.edit.formatDocument": "Format document",
   "cmd.edit.formatDocument.hint": "Prettier: tidy Markdown, frontmatter and fenced code",
+  "cmd.edit.hebrewTypography": "Hebrew typography…",
+  "cmd.edit.hebrewTypography.hint": "Gershayim, geresh, maqaf, quotation marks and numbers — as you type, or for the whole note with a preview",
   "cmd.feedback": "Help: Send feedback",
   "cmd.feedback.hint": "A GitHub issue or text to copy — nothing is sent without your click",
   "cmd.file.exportAdoc": "Export to AsciiDoc",

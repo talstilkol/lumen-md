@@ -3990,6 +3990,80 @@
       "vars": []
     },
     {
+      "key": "typo.applied",
+      "en": "{count} typography changes applied",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "typo.apply",
+      "en": "Apply to the note",
+      "vars": []
+    },
+    {
+      "key": "typo.asYouType",
+      "en": "Fix as I type",
+      "vars": []
+    },
+    {
+      "key": "typo.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "typo.none",
+      "en": "Nothing to change in this note.",
+      "vars": []
+    },
+    {
+      "key": "typo.preview",
+      "en": "{count} changes in this note",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "typo.rule.dash",
+      "en": "Dash between words: אחד - שניים → אחד – שניים",
+      "vars": []
+    },
+    {
+      "key": "typo.rule.geresh",
+      "en": "Geresh: ג'ירפה → ג׳ירפה",
+      "vars": []
+    },
+    {
+      "key": "typo.rule.gershayim",
+      "en": "Gershayim: צה\"ל → צה״ל",
+      "vars": []
+    },
+    {
+      "key": "typo.rule.maqaf",
+      "en": "Maqaf: בית-ספר → בית־ספר",
+      "vars": []
+    },
+    {
+      "key": "typo.rule.mixedLine",
+      "en": "Mixed lines: a Hebrew line that starts in English reads right to left",
+      "vars": []
+    },
+    {
+      "key": "typo.rule.numbers",
+      "en": "Numbers: 50 % → 50%, %50 → 50%, 10–20 → 10-20",
+      "vars": []
+    },
+    {
+      "key": "typo.rule.quotes",
+      "en": "Hebrew quotation marks: \"שלום\" → „שלום”",
+      "vars": []
+    },
+    {
+      "key": "typo.title",
+      "en": "Hebrew typography",
+      "vars": []
+    },
+    {
       "key": "update.available",
       "en": "A new version of Lumen is available.",
       "vars": []

@@ -47,6 +47,22 @@ export function buildEditCommands({ getEditorView, suggestingMode, toggleSuggest
       suggesting: suggestingMode,
       toggle: toggleSuggestingMode,
     }).map((c) => ({ ...c, icon: cmdIcons.Pencil })),
+    // ── Hebrew typography (plan W2.9, dialog loaded on use) ─────────────
+    {
+      id: "edit.hebrewTypography",
+      label: t("cmd.edit.hebrewTypography"),
+      hint: t("cmd.edit.hebrewTypography.hint"),
+      icon: cmdIcons.Pencil,
+      group: t("group.edit"),
+      action: async () => {
+        const { openTypographyDialog } = await import("../../ui/TypographyDialog");
+        openTypographyDialog({
+          getView: () => getEditorView?.() ?? null,
+          getContent: () => useAppStore.getState().doc.content,
+          setContent: (s: string) => useAppStore.getState().setContent(s),
+        });
+      },
+    },
   ];
 }
 
