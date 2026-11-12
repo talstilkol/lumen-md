@@ -28,6 +28,7 @@ const ImageSearchPanel = lazy(() => import("./ImageSearchPanel").then((m) => ({ 
 import { explainError } from "../lib/userError";
 import { EmptyState, runCommand } from "./EmptyState";
 import { HelpButton } from "./HelpButton";
+import "./searchDialogStrings";
 
 interface Props {
   open: boolean;

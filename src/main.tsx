@@ -25,7 +25,7 @@ import { installAiEscape, onAiBusy } from "./ai/aiAbort";
 import { aiBusyAnnouncer, announce } from "./a11y/announce";
 import { adoptBootLocale } from "./store/useStore";
 import "./index.css";
-import { windowLabel } from "./desktop/shell";
+import { windowLabel } from "./desktop/window";
 
 // Plan W2.17: this window is a presentation's presenter view (opened by the slides), not the editor.
 const IS_PRESENTER = typeof location !== "undefined" && location.hash === "#lumen-presenter";

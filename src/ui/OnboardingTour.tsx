@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, type CSSProperties } from "react";
 import { t } from "../i18n";
 import { arrowStep, inlineDirectionOf } from "../lib/logicalKeys";
+import "./onboardingTourStrings";
 
 interface TourStep {
   target: string; // CSS selector

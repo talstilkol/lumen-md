@@ -5,6 +5,7 @@
 import { describe, expect, it } from "vitest";
 import { readdirSync, readFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
+import { readLocale } from "../../scripts/lib/i18n-files.mjs";
 
 const SRC = resolve(__dirname, "..");
 const lazy = JSON.parse(readFileSync(join(SRC, "i18n", "lazy", "pluginDev.json"), "utf8")) as Record<string, string>;
@@ -22,15 +23,16 @@ function sources(dir: string): string[] {
 
 describe("i18n: the plugin developer panel's lazy English", () => {
   it("has only pluginDev.* keys, none of them in the startup bundle, and every locale has them", () => {
-    const index = readFileSync(join(SRC, "i18n", "index.ts"), "utf8");
+    // The startup English: every domain file of locales/en/ (plan 0.3).
+    const startup = readLocale("en") as Record<string, string>;
     expect(Object.keys(lazy).length).toBeGreaterThan(20);
     for (const loc of ["he", "ar", "de", "fr", "ja", "ru", "zh-CN"]) {
-      const l = JSON.parse(readFileSync(join(SRC, "i18n", "locales", `${loc}.json`), "utf8")) as Record<string, string>;
+      const l = readLocale(loc) as Record<string, string>;
       for (const k of Object.keys(lazy)) expect(typeof l[k], `${loc} ${k}`).toBe("string");
     }
     for (const k of Object.keys(lazy)) {
       expect(k.startsWith("pluginDev."), k).toBe(true);
-      expect(index.includes(`"${k}":`), k).toBe(false);
+      expect(k in startup, k).toBe(false);
     }
   });
 

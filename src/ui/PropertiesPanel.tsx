@@ -28,6 +28,7 @@ import {
   type PropertyType,
   type PropertyValue,
 } from "../properties/frontmatter";
+import "./propertiesPanelStrings";
 
 interface Props {
   open: boolean;

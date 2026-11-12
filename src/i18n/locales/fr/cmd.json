@@ -472,6 +472,8 @@
   "cmd.view.workspace.hint": "stockage de fichiers dans le navigateur (OPFS)",
   "cmd.view.wysiwyg": "WYSIWYG",
   "cmd.view.wysiwyg.hint": "édition en texte enrichi",
+  "cmd.voice.command": "Commande vocale",
+  "cmd.voice.command.hint": "Dites-en une : nouvelle note, rechercher…, ajouter une tâche…, note du jour, lire à voix haute — reconnue sur cet appareil",
   "cmd.voice.meeting": "🎙 Notes de réunion (enregistrées sur cet appareil)",
   "cmd.voice.meeting.hint": "Enregistre une réunion, la transcrit sur cet appareil et insère ses décisions, ses tâches avec responsable et date, et ses questions ouvertes",
   "cmd.voice.meetingFile": "🎙 Transcrire l’enregistrement d’une réunion (qui a dit quoi)…",

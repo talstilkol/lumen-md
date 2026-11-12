@@ -21,6 +21,7 @@ import { uiAlert, uiConfirm, uiPrompt } from "../ui/PromptDialog";
 import { showAiToast } from "../ui/AiToast";
 import { t } from "../i18n";
 import { explainError } from "../lib/userError";
+import "./useGitStrings";
 
 export interface UseGitOptions {
   setDoc: (d: Partial<DocFile>) => void;

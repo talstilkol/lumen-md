@@ -27,6 +27,7 @@ import { t } from "../i18n";
 import { explainError } from "../lib/userError";
 import { EmptyState } from "./EmptyState";
 import { HelpButton } from "./HelpButton";
+import "./templateGalleryStrings";
 
 interface Props {
   open: boolean;

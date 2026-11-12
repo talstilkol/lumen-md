@@ -9,7 +9,6 @@ import { showAiToast } from "../../ui/AiToast";
 import { openTemplateDoc } from "../../commands/openDoc";
 import { getVaultBackend } from "./index";
 import { checkVault, repairVault, REPAIRABLE } from "./integrity";
-import { formatIntegrityReport } from "./integrityReport";
 
 /**
  * The vault integrity check (plan W1.5): a report note, then — when
@@ -22,6 +21,8 @@ export async function runVaultCheck(): Promise<void> {
     showAiToast(t("vaultCheck.checking"), "info");
     const backend = getVaultBackend();
     const report = await checkVault(backend);
+    // The report module registers the vault-check strings; it loads only here.
+    const { formatIntegrityReport } = await import("./integrityReport");
     openTemplateDoc(t("vaultCheck.title"), formatIntegrityReport(report));
     const open = new Set(useAppStore.getState().openTabs.map((tab) => tab.workspaceName).filter(Boolean));
     const current = useAppStore.getState().doc.workspaceName;

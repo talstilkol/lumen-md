@@ -29,6 +29,7 @@ import { showAiToast } from "./AiToast";
 import { UpgradeNotice } from "./UpgradeNotice";
 import { t } from "../i18n";
 import { HelpButton } from "./HelpButton";
+import "./orgSettingsStrings";
 
 interface Props {
   open: boolean;

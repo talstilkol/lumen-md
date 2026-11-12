@@ -8,6 +8,7 @@ import { TaskList } from "../tasks/TaskList";
 import { parseQuery, type QueryResult } from "../tasks/taskQuery";
 import { todayIso, toggleTaskInVault } from "../tasks/toggle";
 import type { Task } from "../tasks/taskParser";
+import "./tasksBlockStrings";
 
 export default function TasksBlock({ source }: { source: string }) {
   const [result, setResult] = useState<QueryResult | null>(null);

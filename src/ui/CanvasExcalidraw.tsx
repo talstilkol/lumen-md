@@ -19,7 +19,7 @@
  * the canvas closes or another one is opened.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Excalidraw, convertToExcalidrawElements } from "@excalidraw/excalidraw";
 import "@excalidraw/excalidraw/index.css";
 import "./CanvasExcalidraw.css";
@@ -50,7 +50,9 @@ import { CARD_HEIGHT, CARD_WIDTH, NOTE_LINK, cardPositions, noteLink, notePathOf
 import { NoteCard, readNote } from "../canvas/NoteCard";
 import { listWorkspace } from "../storage/workspace";
 import type { ExportKind } from "../canvas/canvasExport";
-import { DiagramDialog } from "../canvas/DiagramDialog";
+// The Mermaid → diagram dialog loads when it opens (its own strings and the converter come with it).
+const DiagramDialog = lazy(() => import("../canvas/DiagramDialog").then((m) => ({ default: m.DiagramDialog })));
+import "./canvasExcalidrawStrings";
 
 // Fonts (and anything else Excalidraw fetches by relative path) come from
 // this origin. Without it Excalidraw falls back to esm.sh.
@@ -507,7 +509,11 @@ export function CanvasExcalidraw({ open, onClose }: Props) {
             UIOptions={{ canvasActions: { loadScene: false, saveToActiveFile: false, toggleTheme: false, saveAsImage: false, export: { saveFileToDisk: true } } }}
           />
         )}
-        {diagramOpen && <DiagramDialog onInsert={insertDiagram} onClose={() => setDiagramOpen(false)} />}
+        {diagramOpen && (
+          <Suspense fallback={null}>
+            <DiagramDialog onInsert={insertDiagram} onClose={() => setDiagramOpen(false)} />
+          </Suspense>
+        )}
       </div>
     </div>
   );

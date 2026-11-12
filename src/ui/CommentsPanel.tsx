@@ -31,6 +31,7 @@ import { scrollBehavior } from "../lib/motion";
 import { EmptyState, runCommand } from "./EmptyState";
 import { uiConfirm } from "./PromptDialog";
 import { HelpButton } from "./HelpButton";
+import "./commentsPanelStrings";
 
 interface Props {
   open: boolean;

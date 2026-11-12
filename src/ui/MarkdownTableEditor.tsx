@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { Plus, Minus } from "lucide-react";
 import { t } from "../i18n";
+import "./markdownTableEditorStrings";
 
 interface Props {
   /** Initial markdown table text, or empty for a new table */

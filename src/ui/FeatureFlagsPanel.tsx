@@ -7,37 +7,10 @@
 import { useEffect, useRef, useState } from "react";
 import { t } from "../i18n";
 import { buildChannel, FLAGS, FLAGS_CHANGED, flagState, resetFlags, setFlag } from "../flags/flags";
+import "./featureFlagsPanelStrings";
 
-export const OPEN_FEATURE_FLAGS = "lumen-open-feature-flags";
-
-/** Mounted once in App; renders the panel when asked. */
-export function FeatureFlagsHost() {
-  const [open, setOpen] = useState(false);
-  useEffect(() => {
-    const on = () => setOpen(true);
-    window.addEventListener(OPEN_FEATURE_FLAGS, on);
-    return () => window.removeEventListener(OPEN_FEATURE_FLAGS, on);
-  }, []);
-  return open ? <FeatureFlagsPanel onClose={() => setOpen(false)} /> : null;
-}
-
-/** "Beta" in the status bar of a beta build; opens the flags. */
-export function BetaBadge() {
-  if (buildChannel() !== "beta") return null;
-  return (
-    <button
-      type="button"
-      className="sb-item"
-      data-testid="beta-badge"
-      title={t("flags.badge.title")}
-      onClick={() => window.dispatchEvent(new CustomEvent(OPEN_FEATURE_FLAGS))}
-      style={{ border: "1px solid hsl(var(--accent) / 0.5)", borderRadius: 4, paddingInline: 6, color: "hsl(var(--accent))", background: "transparent", cursor: "pointer", font: "inherit" }}
-    >
-      {t("flags.badge")}
-    </button>
-  );
-}
-
+// The host, the event name and the Beta badge live in ./FeatureFlagsHost (startup);
+// this panel loads when it opens.
 export function FeatureFlagsPanel({ onClose }: { onClose: () => void }) {
   const [, setTick] = useState(0);
   const ref = useRef<HTMLDivElement | null>(null);

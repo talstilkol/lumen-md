@@ -51,6 +51,7 @@ import { EChart } from "./EChart";
 import { t, tPlural } from "../i18n";
 import { tRich } from "../i18n/rich";
 import { explainError } from "../lib/userError";
+import "./insightsBlockStrings";
 
 interface Props {
   source: string;

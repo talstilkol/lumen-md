@@ -10,6 +10,7 @@ import { t, getLocale } from "../i18n";
 import { renderMarkdownFast } from "../renderer/pipeline";
 import { loadHelp, type HelpIndex, type HelpPage } from "../help/helpSearch";
 import { docsBaseUrl } from "../lib/docsLinks";
+import "./helpPanelStrings";
 
 export function HelpPanel({ topic, initialQuery = "", onClose }: { topic: string; initialQuery?: string; onClose: () => void }) {
   const lang = getLocale() === "he" ? "he" : "en";

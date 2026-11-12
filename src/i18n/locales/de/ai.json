@@ -17,6 +17,7 @@
   "agent.product.prompt": "Beschreiben Sie das Produkt, das Sie erstellen möchten:\n(z. B. „Eine To-do-App mit Drag-and-drop, Dark Mode und lokalem Speicher“)",
   "agent.suggest.allowCloud": "Die Cloud als Rückfall erlauben",
   "agent.suggest.allowCloud.detail": "Stellt die KI-Richtlinie auf „lokal zuerst“: dein Cloud-Schlüssel wird nur genutzt, wenn kein lokales Modell antworten kann.",
+  "agent.suggest.clarifyTool": "Sag, was {tool} braucht, und führe es dann erneut aus ({problem})",
   "agent.suggest.configureKey": "{provider}-Schlüssel hinzufügen",
   "agent.suggest.largerModel": "Erneut mit einem größeren Modell versuchen ({tier})",
   "agent.suggest.ollamaOrigins": "Diese App in Ollama erlauben (OLLAMA_ORIGINS)",

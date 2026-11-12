@@ -18,6 +18,7 @@ import { onWorkspaceChanged } from "../storage/workspaceEvents";
 import { useAppStore } from "../store/useStore";
 import { MAX_LIMIT, parseEmbeddedQuery, rowsFor, type QueryNote, type QueryRow } from "../search/embeddedQuery";
 import { DataviewError, parseDataview, runDataview, show, type DvResult, type Value } from "../search/dataview";
+import "./queryBlockStrings";
 
 interface Props {
   source: string;

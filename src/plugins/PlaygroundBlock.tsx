@@ -11,6 +11,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Code2, Play, RotateCcw, Terminal } from "lucide-react";
 import { t } from "../i18n";
 import { buildProject, type RunnerMessage, type RunnerRequest } from "../playground/files";
+import "./playgroundBlockStrings";
 
 interface Props {
   source: string;

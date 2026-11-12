@@ -11,6 +11,7 @@ import { uiPrompt } from "./PromptDialog";
 import { randomId } from "../lib/cryptoRandom";
 import { t } from "../i18n";
 import { resolvedColor } from "./tokens";
+import "./canvasWhiteboardStrings";
 
 /**
  * Canvas / Whiteboard mode — an infinite canvas for visual note-taking.

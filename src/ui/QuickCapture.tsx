@@ -17,7 +17,8 @@ import { useEffect, useRef, useState } from "react";
 import { Inbox } from "lucide-react";
 import "../capture/strings";
 import { t } from "../i18n";
-import { captureToInbox, INBOX_PATH, openInbox } from "../capture/quickCapture";
+// The capture itself (../capture/quickCapture) loads on use, like ../capture/voiceCapture.
+const captureMod = () => import("../capture/quickCapture");
 import { isOPFSAvailable } from "../storage/workspace";
 import { toast } from "../store/useToastStore";
 import "./PromptDialog.css";
@@ -127,10 +128,10 @@ export function QuickCapture({ open, onClose, voice: voiceOnOpen }: Props) {
       if (voiceTake && (keepAudio || voiceTake.untranscribed)) {
         const m = await voiceMod();
         await m.captureVoice(text.trim() || null, { placeholder: t("capture.voice.placeholderNote"), audio: voiceTake.audio, durationMs: voiceTake.durationMs });
-      } else await captureToInbox(text);
+      } else await (await captureMod()).captureToInbox(text);
       take.current = null;
       setText("");
-      toast.success(t("capture.saved", { path: INBOX_PATH }));
+      toast.success(t("capture.saved", { path: (await captureMod()).INBOX_PATH }));
       onClose();
     } catch (e) {
       toast.error(t("capture.failed", { error: e instanceof Error ? e.message : String(e) }));
@@ -211,7 +212,9 @@ export function QuickCapture({ open, onClose, voice: voiceOnOpen }: Props) {
             disabled={busy}
             onClick={() => {
               onClose();
-              void openInbox().catch((e: unknown) => toast.error(t("capture.failed", { error: e instanceof Error ? e.message : String(e) })));
+              void captureMod()
+                .then((m) => m.openInbox())
+                .catch((e: unknown) => toast.error(t("capture.failed", { error: e instanceof Error ? e.message : String(e) })));
             }}
           >
             {t("capture.openInbox")}

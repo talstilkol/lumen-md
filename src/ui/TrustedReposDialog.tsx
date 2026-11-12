@@ -18,6 +18,7 @@ import { uiConfirm } from "./PromptDialog";
 import { showAiToast } from "./AiToast";
 import { docsUrl } from "../lib/docsLinks";
 import { t } from "../i18n";
+import "./trustedReposDialogStrings";
 
 interface Props {
   onClose: () => void;

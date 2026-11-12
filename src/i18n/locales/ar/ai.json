@@ -17,6 +17,7 @@
   "agent.product.prompt": "صف المنتج الذي تريد إنشاءه:\n(مثلاً 'تطبيق مهام مع السحب والإفلات والوضع الداكن والتخزين المحلي')",
   "agent.suggest.allowCloud": "اسمح بالسحابة كاحتياط",
   "agent.suggest.allowCloud.detail": "يغيّر سياسة الذكاء الاصطناعي إلى \"محلي أولًا\": يُستخدم مفتاح السحابة فقط عندما لا يستطيع أي نموذج محلي الإجابة.",
+  "agent.suggest.clarifyTool": "وضّح ما يحتاجه {tool}، ثم شغّله مرة أخرى ({problem})",
   "agent.suggest.configureKey": "أضف مفتاح {provider}",
   "agent.suggest.largerModel": "أعد المحاولة بنموذج أكبر ({tier})",
   "agent.suggest.ollamaOrigins": "اسمح لهذا التطبيق في Ollama (OLLAMA_ORIGINS)",

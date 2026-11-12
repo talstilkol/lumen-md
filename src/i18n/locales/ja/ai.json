@@ -17,6 +17,7 @@
   "agent.product.prompt": "作成したいプロダクトを説明してください:\n（例: 「ドラッグ＆ドロップ、ダークモード、ローカル保存に対応した ToDo アプリ」）",
   "agent.suggest.allowCloud": "クラウドをフォールバックとして許可",
   "agent.suggest.allowCloud.detail": "AI ポリシーを「ローカル優先」に切り替えます。ローカルモデルが回答できない場合のみクラウドのキーを使います。",
+  "agent.suggest.clarifyTool": "{tool} に必要なものを指定してから、もう一度実行してください（{problem}）",
   "agent.suggest.configureKey": "{provider} のキーを追加",
   "agent.suggest.largerModel": "より大きなモデルで再試行（{tier}）",
   "agent.suggest.ollamaOrigins": "Ollama でこのアプリを許可（OLLAMA_ORIGINS）",

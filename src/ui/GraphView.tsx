@@ -15,6 +15,7 @@ import { t } from "../i18n";
 import { GraphCanvas } from "./graph/GraphCanvas";
 import { EmptyState, runCommand } from "./EmptyState";
 import { groupColor, nodeStyle, resolveColor, useVaultGraph } from "./graph/graphData";
+import "./graphViewStrings";
 
 const field = { fontSize: 12, paddingInline: 6, paddingBlock: 3, borderRadius: 4, border: "1px solid hsl(var(--border))", background: "hsl(var(--bg))", color: "hsl(var(--fg))", inlineSize: 120 } as const;
 

@@ -24,6 +24,7 @@ import { UpgradeNotice } from "./UpgradeNotice";
 import { explainError } from "../lib/userError";
 import { EmptyState } from "./EmptyState";
 import { HelpButton } from "./HelpButton";
+import "./auditLogStrings";
 
 interface Props {
   open: boolean;

@@ -14,6 +14,7 @@ import { ImageOff, X } from "lucide-react";
 import { t } from "../i18n";
 import { showAiToast } from "./AiToast";
 import { allowedRemoteImageHosts, forgetAllRemoteImageHosts, forgetRemoteImageHost, remoteImagesVersion, subscribeRemoteImages } from "../lib/remoteImages";
+import "./imageHostsPanelStrings";
 
 function useAllowedHosts(): string[] {
   useSyncExternalStore(subscribeRemoteImages, remoteImagesVersion, remoteImagesVersion);

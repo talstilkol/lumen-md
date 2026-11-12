@@ -3,6 +3,7 @@ import { sanitizeSvgMarkup } from "../lib/markupSanitizer";
 import { toTrustedHTML } from "../lib/trustedTypes";
 import { t } from "../i18n";
 import { KrokiBlockedError, optInKroki, renderViaKroki } from "./plantumlPolicy";
+import "./plantUMLBlockStrings";
 
 interface Props {
   source: string;

@@ -64,6 +64,7 @@ import { log } from "../lib/logger";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
 import { showAiToast } from "../ui/AiToast";
 import { t } from "../i18n";
+import "./databaseBlockStrings";
 
 // Leaflet comes with the map view only, when it is first picked.
 const DatabaseMapView = lazy(() => import("./DatabaseMapView"));

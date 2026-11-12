@@ -12,6 +12,7 @@ import { PRESET_IDS, type PresetId } from "../lib/themeSettings";
 import { createFirstNote, currentVault, importInto, languageOrder, languagePlan, markSetupDone, openBrowserVault, openFolderVault, reconnectFolderVault, setupDue, type StartChoice } from "./setup";
 import "./FirstRun.css";
 import { useFocusTrap } from "../ui/useFocusTrap";
+import "./firstRunStrings";
 
 const ALL_STEPS = ["lang", "vault", "look", "start"] as const;
 const THEMES: Theme[] = ["light", "dark", "system"];

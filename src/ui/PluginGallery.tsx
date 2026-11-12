@@ -1,6 +1,6 @@
 import { headingSlugger } from "../lib/slug";
 import { countWords } from "../text/hebrew";
-import { useEffect, useMemo, useState, useRef } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState, useRef } from "react";
 import { useFocusTrap } from "./useFocusTrap";
 import { Search, Download, Trash2, ExternalLink, BadgeCheck } from "lucide-react";
 import { getRegisteredPlugins, registerPlugin, unregisterPlugin } from "../plugins/pluginSystem";
@@ -8,8 +8,10 @@ import type { LumenPlugin } from "../plugins/pluginSystem";
 import { log } from "../lib/logger";
 import { t } from "../i18n";
 import { fetchWithRetry } from "../lib/fetchRetry";
-import { SandboxedPlugins } from "../plugins/runtime/SandboxedPlugins";
+// The sandboxed-plugin list loads with its section (it brings the trust and developer strings).
+const SandboxedPlugins = lazy(() => import("../plugins/runtime/SandboxedPlugins").then((m) => ({ default: m.SandboxedPlugins })));
 import { HelpButton } from "./HelpButton";
+import "./pluginGalleryStrings";
 
 interface RemotePluginEntry {
   id: string;
@@ -622,7 +624,9 @@ export function PluginGallery({ open, onClose }: Props) {
         </div>
 
         {/* Sandboxed plugins: permissions shown before install, every version scanned (W1.20). */}
-        <SandboxedPlugins />
+        <Suspense fallback={null}>
+          <SandboxedPlugins />
+        </Suspense>
 
         {/* Footer */}
         <div

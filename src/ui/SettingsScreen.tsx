@@ -23,6 +23,7 @@ import { showAiToast } from "./AiToast";
 import { SUPPORTED_LOCALES, t, type Locale } from "../i18n";
 import { isBetaLocale } from "../i18n/review";
 import { useFocusTrap } from "./useFocusTrap";
+import "./settingsScreenStrings";
 
 const ThemeSettings = lazy(() => import("./ThemeSettings").then((m) => ({ default: m.ThemeSettings })));
 const AiSettingsPanel = lazy(() => import("./AiSettingsPanel").then((m) => ({ default: m.AiSettingsPanel })));

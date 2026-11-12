@@ -14,6 +14,7 @@ import { noteKey } from "../lib/slug";
 import { useAppStore } from "../store/useStore";
 import { showAiToast } from "./AiToast";
 import { t } from "../i18n";
+import "./unlinkedMentionsStrings";
 
 const MD = /\.(md|markdown)$/i;
 const stem = (p: string) => basename(p).replace(MD, "");

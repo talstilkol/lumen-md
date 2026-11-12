@@ -32,6 +32,7 @@ import { airplaneFlagOn } from "../privacy/airplaneBoot";
 import { chooseDictationEngine, webSpeechOptedIn, WEB_SPEECH_KEY, Segmenter, SerialQueue } from "../ai/dictation";
 import { explainError } from "../lib/userError";
 import { HelpButton } from "./HelpButton";
+import "./voiceDictationStrings";
 
 // SpeechRecognition is poorly + inconsistently typed across DOM lib
 // variants; keep the surface deliberately loose so we don't fight the

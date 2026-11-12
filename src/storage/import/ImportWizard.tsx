@@ -5,13 +5,13 @@
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Download, X } from "lucide-react";
-import "../storage/import/strings";
-import { t } from "../i18n";
-import { IMPORT_SOURCES, SOURCE_ACCEPT, SOURCE_NAMES } from "../storage/import/convert";
-import { addToImport, commitImport, prepareImport, readPicked, undoImport, type PreparedImport, type UndoRecord } from "../storage/import/commit";
-import { linkPercent, reportMarkdown, skipText, warningText } from "../storage/import/report";
-import type { ImportReport, ImportSourceId } from "../storage/import/types";
-import { toast } from "../store/useToastStore";
+import "./strings";
+import { t } from "../../i18n";
+import { IMPORT_SOURCES, SOURCE_ACCEPT, SOURCE_NAMES } from "./convert";
+import { addToImport, commitImport, prepareImport, readPicked, undoImport, type PreparedImport, type UndoRecord } from "./commit";
+import { linkPercent, reportMarkdown, skipText, warningText } from "./report";
+import type { ImportReport, ImportSourceId } from "./types";
+import { toast } from "../../store/useToastStore";
 
 interface Props {
   open: boolean;

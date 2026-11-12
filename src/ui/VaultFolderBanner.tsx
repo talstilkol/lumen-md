@@ -20,6 +20,7 @@ import {
   switchToBrowserStorage,
   VaultMoveConflictError,
 } from "../storage/vault/location";
+import "./vaultFolderBannerStrings";
 
 export function VaultFolderBanner() {
   const [, setTick] = useState(0);

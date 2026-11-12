@@ -20,6 +20,7 @@ import { linkHints, relatedNotes, titleEntries, type LinkHint, type RelatedHit, 
 import { acceptHint, currentHints, hasRelatedExtension, relatedExtension } from "../related/editorPlugin";
 import { relatedOff } from "../related/prefs";
 import type { Bm25Index } from "../search/bm25";
+import "./relatedPanelStrings";
 
 /** Debounce after the last keystroke (the plan's budget: the panel is up to date < 150 ms after typing stops). */
 export const RELATED_DELAY_MS = 100;

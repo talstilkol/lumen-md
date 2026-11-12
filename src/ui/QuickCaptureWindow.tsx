@@ -7,6 +7,7 @@
 import { useEffect, useRef, useState } from "react";
 import { getLocale, t } from "../i18n";
 import { formatCapture, INBOX_PATH } from "../desktop/shell";
+import "./quickCaptureWindowStrings";
 
 async function closeWindow(): Promise<void> {
   try {

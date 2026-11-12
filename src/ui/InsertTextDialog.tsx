@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import { t } from "../i18n";
 import { smartDetect, renderAs, ALL_KINDS, type DetectedKind } from "../data/smartDetect";
 import { HelpButton } from "./HelpButton";
+import "./insertTextDialogStrings";
 
 /**
  * Smart Insert dialog — single text area, the system figures out what to

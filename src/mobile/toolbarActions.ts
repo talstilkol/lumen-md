@@ -9,24 +9,10 @@
  * ⋯ button at the end of the row), stored as a list of ids.
  */
 
-export type ToolbarActionId =
-  | "indent"
-  | "outdent"
-  | "task"
-  | "link"
-  | "image"
-  | "heading"
-  | "bold"
-  | "italic"
-  | "bullet"
-  | "numbered"
-  | "wikilink"
-  | "tag"
-  | "code"
-  | "quote"
-  | "undo"
-  | "redo"
-  | "hideKeyboard";
+import type { ToolbarActionId } from "./toolbarRow";
+
+// The ids, the default row and its clean-up live in ./toolbarRow (the store needs them at startup).
+export { DEFAULT_TOOLBAR, sanitizeToolbar, TOOLBAR_ACTION_IDS, type ToolbarActionId } from "./toolbarRow";
 
 export interface ToolbarAction {
   id: ToolbarActionId;
@@ -65,39 +51,6 @@ export const TOOLBAR_ACTIONS: readonly ToolbarAction[] = [
 
 const BY_ID = new Map(TOOLBAR_ACTIONS.map((a) => [a.id, a]));
 export const actionById = (id: string): ToolbarAction | undefined => BY_ID.get(id as ToolbarActionId);
-
-/**
- * The default row: the four the plan names first (indent/outdent, task,
- * link, image), then what the tap-count table (docs/mobile-taps.json) shows
- * people reach for most. Hide-keyboard is last so a thumb finds it at the
- * row's end in both directions.
- */
-export const DEFAULT_TOOLBAR: readonly ToolbarActionId[] = [
-  "indent",
-  "outdent",
-  "task",
-  "link",
-  "image",
-  "heading",
-  "bold",
-  "bullet",
-  "wikilink",
-  "undo",
-  "hideKeyboard",
-];
-
-/** A stored row, cleaned: known ids only, no repeats; an empty or broken row falls back to the default. */
-export function sanitizeToolbar(ids: unknown): ToolbarActionId[] {
-  if (!Array.isArray(ids)) return [...DEFAULT_TOOLBAR];
-  const seen = new Set<string>();
-  const out: ToolbarActionId[] = [];
-  for (const id of ids) {
-    if (typeof id !== "string" || seen.has(id) || !BY_ID.has(id as ToolbarActionId)) continue;
-    seen.add(id);
-    out.push(id as ToolbarActionId);
-  }
-  return out.length ? out : [...DEFAULT_TOOLBAR];
-}
 
 /** Move one action in the row (the customise sheet's ↑/↓ buttons). */
 export function moveAction(row: readonly ToolbarActionId[], id: ToolbarActionId, delta: -1 | 1): ToolbarActionId[] {

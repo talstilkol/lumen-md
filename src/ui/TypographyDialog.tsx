@@ -11,6 +11,7 @@ import type { EditorView } from "@codemirror/view";
 import { t } from "../i18n";
 import { showAiToast } from "./AiToast";
 import { applyEdits, loadTypographySettings, saveTypographySettings, typographyEdits, TYPO_RULES, type TypographySettings, type TypoEdit } from "../text/hebrewTypography";
+import "./typographyDialogStrings";
 
 export interface TypographyTarget {
   getView: () => EditorView | null;

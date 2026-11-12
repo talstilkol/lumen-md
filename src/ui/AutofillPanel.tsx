@@ -10,6 +10,7 @@ import { Check, X } from "lucide-react";
 import { t } from "../i18n";
 import { AutofillQueue, type Proposal } from "../properties/autofill";
 import { showAiToast } from "./AiToast";
+import "./autofillPanelStrings";
 
 const btn: React.CSSProperties = { padding: "4px 10px", fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer" };
 

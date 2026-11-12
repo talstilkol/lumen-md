@@ -8,6 +8,7 @@ import { uiConfirm } from "../../ui/PromptDialog";
 import { showAiToast } from "../../ui/AiToast";
 import { isOPFSAvailable, readWorkspaceFile } from "../../storage/workspace";
 import { openTemplateDoc } from "../openDoc";
+import "./vaultDoctorActionsStrings";
 
 /** Every Markdown note in the workspace, for Vault Doctor (null when there is none). */
 async function loadDoctorNotes(): Promise<Array<{ path: string; text: string }> | null> {

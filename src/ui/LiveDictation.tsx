@@ -23,6 +23,7 @@ import { isDictationModelDownloaded, loadDictationFiles } from "../ai/dictation/
 import { createDictationAudioContext, startDictationSession, type DictationSession } from "../ai/dictation/session";
 import { appendSegment } from "../ai/dictation/punctuate";
 import { log } from "../lib/logger";
+import "./liveDictationStrings";
 
 type Phase = { kind: "ask"; browserAllowed: boolean } | { kind: "downloading"; percent: number } | { kind: "loading" } | { kind: "listening"; speaking: boolean; interim: string };
 

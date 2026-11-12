@@ -12,6 +12,7 @@ import { getAiPolicy } from "../ai/policy";
 import { redactionLog, redactionTotals, subscribeRedactionLog } from "../ai/piiRedactor";
 import { EmptyState } from "./EmptyState";
 import { HelpButton } from "./HelpButton";
+import "./privacyLedgerPanelStrings";
 
 interface Props {
   open: boolean;

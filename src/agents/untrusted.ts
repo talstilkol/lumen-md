@@ -39,6 +39,7 @@
 
 import type { AgentInput, ExecutorMessage, UntrustedConsentRequest } from "./types";
 import { ensureProvenanceBackfill, untrustedSourcesOfNote } from "./provenance";
+import "./untrustedStrings";
 
 export { clearUntrustedNote, ensureProvenanceBackfill, isClipLibraryPath, markUntrustedNote, moveUntrustedNotes, untrustedSourcesOfNote } from "./provenance";
 export { taintIsTrusted } from "./repoTrust";

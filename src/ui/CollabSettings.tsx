@@ -16,6 +16,7 @@ import { useCapability, useEntitlementResolved } from "../billing/gates";
 import { UpgradeNotice } from "./UpgradeNotice";
 import { getSecret, setSecret } from "../lib/secretStore";
 import { connectAllowedByCsp } from "../lib/cspConnect";
+import "./collabSettingsStrings";
 
 interface Props {
   onClose: () => void;

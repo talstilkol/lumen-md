@@ -14,6 +14,7 @@ import { deleteSession, endSession, exportFile, listen, loadSession, NOTE_CODES,
 import { SEQ_QUESTION, SUS_ITEMS, SUS_SCALE, TASKS } from "../research/usability/study";
 import { uiStrings } from "../research/usability/uiStrings";
 import { version as appVersion } from "../../package.json";
+import "./usabilitySessionPanelStrings";
 
 
 const box: React.CSSProperties = { position: "fixed", insetBlockEnd: 12, insetInlineEnd: 12, zIndex: 80, inlineSize: "min(380px, calc(100vw - 24px))", maxBlockSize: "70vh", overflowY: "auto", background: "hsl(var(--bg))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border))", borderRadius: 10, boxShadow: "var(--shadow-md)", padding: 12, fontSize: 13 };

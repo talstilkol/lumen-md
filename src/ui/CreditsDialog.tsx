@@ -8,6 +8,7 @@ import { createRoot } from "react-dom/client";
 import registry from "../../models/registry.json";
 import { modelCredits, type LicenceFamily, type ModelCredit } from "../ai/modelCredits";
 import { t } from "../i18n";
+import "./creditsDialogStrings";
 
 interface Entry {
   id: string;

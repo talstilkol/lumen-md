@@ -16,7 +16,6 @@
  */
 import { writeWorkspaceBlob } from "../storage/workspace";
 import { notifyWorkspaceChanged } from "../storage/workspaceEvents";
-import { captureToInbox } from "./quickCapture";
 
 export const ATTACHMENTS_DIR = "attachments";
 export const TITLE_MAX = 80;
@@ -154,5 +153,7 @@ export async function captureVoice(transcript: string | null, opts: { placeholde
     await writeWorkspaceBlob(audioPath, opts.audio);
     notifyWorkspaceChanged({ kind: "structure", paths: [audioPath] });
   }
+  // Loaded here, not at the top: quickCapture registers the capture strings and must only load lazily.
+  const { captureToInbox } = await import("./quickCapture");
   return captureToInbox(voiceEntryText(transcript, { placeholder: opts.placeholder, audioPath, durationMs: opts.durationMs }), when);
 }

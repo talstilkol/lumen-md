@@ -1,11 +1,11 @@
 import { DEFAULT_DAILY, isValidDailyPattern, type DailySettings } from "../daily/defaults";
-import { DEFAULT_TOOLBAR, sanitizeToolbar, type ToolbarActionId } from "../mobile/toolbarActions";
+import { DEFAULT_TOOLBAR, sanitizeToolbar, type ToolbarActionId } from "../mobile/toolbarRow";
 import { DEFAULT_READING_WORDS } from "../mobile/gestures";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { vaultEncryptionState } from "../storage/vault";
 import { deferredJSONStorage, persistedTextLength } from "./deferredStorage";
-import { windowLabel, windowStorage } from "../desktop/shell";
+import { windowLabel, windowStorage } from "../desktop/window";
 import type { Locale } from "../i18n";
 import { applyLocale, isLocaleLoaded, loadLocale } from "../i18n";
 import {

@@ -23,6 +23,7 @@ import { docsUrl } from "../lib/docsLinks";
 import { t } from "../i18n";
 import { explainError } from "../lib/userError";
 import { HelpButton } from "./HelpButton";
+import "./trustedKeysSettingsStrings";
 
 interface Props {
   open: boolean;

@@ -16,6 +16,7 @@ import { getLocale, t } from "../i18n";
 import { approveStagedChange, listStagedChanges, onStagedChanges, rejectStagedChange } from "../agents/staging";
 import { approveAll, inlineDiff, lineDiffRows, rejectAll, reviewModel, type RunGroup } from "../agents/review";
 import type { StagedChange } from "../agents/types";
+import "./agentReviewPanelStrings";
 
 interface Props {
   open: boolean;

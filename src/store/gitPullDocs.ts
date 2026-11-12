@@ -21,6 +21,7 @@ import { showAiToast } from "../ui/AiToast";
 import { uiAlert, uiPrompt } from "../ui/PromptDialog";
 import { flushPendingEdits, useAppStore } from "./useStore";
 import { flushActiveWorkspaceDoc } from "./openDocs";
+import "./gitPullDocsStrings";
 
 /** The open note (active document or a tab) at a vault path. */
 function openNote(path: string): { content: string; dirty: boolean } | null {

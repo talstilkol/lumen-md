@@ -17,6 +17,7 @@
   "agent.product.prompt": "Décrivez le produit que vous voulez créer :\n(par ex. « Une appli de tâches avec glisser-déposer, mode sombre et stockage local »)",
   "agent.suggest.allowCloud": "Autoriser le cloud en secours",
   "agent.suggest.allowCloud.detail": "Passe la politique IA en « local d’abord » : votre clé cloud n’est utilisée que si aucun modèle local ne peut répondre.",
+  "agent.suggest.clarifyTool": "Précisez ce dont {tool} a besoin, puis relancez-le ({problem})",
   "agent.suggest.configureKey": "Ajouter votre clé {provider}",
   "agent.suggest.largerModel": "Réessayer avec un modèle plus grand ({tier})",
   "agent.suggest.ollamaOrigins": "Autoriser cette app dans Ollama (OLLAMA_ORIGINS)",

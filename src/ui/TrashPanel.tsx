@@ -12,6 +12,7 @@ import { toast } from "../store/useToastStore";
 import { EmptyState } from "./EmptyState";
 import { uiConfirm } from "./PromptDialog";
 import { HelpButton } from "./HelpButton";
+import "./trashPanelStrings";
 
 interface Props {
   open: boolean;

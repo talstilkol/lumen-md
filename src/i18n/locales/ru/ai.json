@@ -17,6 +17,7 @@
   "agent.product.prompt": "Опишите продукт, который хотите создать:\n(например, «Список задач с перетаскиванием, тёмной темой и локальным хранением»)",
   "agent.suggest.allowCloud": "Разрешить облако как запасной вариант",
   "agent.suggest.allowCloud.detail": "Переключает политику ИИ на «сначала локально»: облачный ключ используется, только если ни одна локальная модель не может ответить.",
+  "agent.suggest.clarifyTool": "Уточните, что нужно {tool}, и запустите снова ({problem})",
   "agent.suggest.configureKey": "Добавить ключ {provider}",
   "agent.suggest.largerModel": "Повторить с моделью побольше ({tier})",
   "agent.suggest.ollamaOrigins": "Разрешить это приложение в Ollama (OLLAMA_ORIGINS)",

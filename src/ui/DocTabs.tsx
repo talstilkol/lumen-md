@@ -4,7 +4,7 @@ import type { DocFile } from "../store/useStore";
 import { t } from "../i18n";
 import { inlineDirectionOf, rovingIndex } from "../lib/logicalKeys";
 import { matchShortcut } from "../lib/keyboardLayout";
-import { droppedOutside } from "../desktop/shell";
+import { droppedOutside } from "../desktop/window";
 
 export interface TabItem {
   id: string;

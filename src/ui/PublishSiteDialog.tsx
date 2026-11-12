@@ -14,6 +14,7 @@ import { createRoot } from "react-dom/client";
 import { Globe, X } from "lucide-react";
 import { t, getLocale } from "../i18n";
 import type { SiteNote } from "../publish/site";
+import "./publishSiteDialogStrings";
 
 const SETTINGS_KEY = "lumen.publishSite.v1";
 const TOKEN_SECRET = "lumen.publish.github.token";

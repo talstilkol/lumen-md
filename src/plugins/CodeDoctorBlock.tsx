@@ -34,6 +34,7 @@ import { DataTable } from "./DataTable";
 import { toast } from "../store/useToastStore";
 import { t, tPlural } from "../i18n";
 import { tRich } from "../i18n/rich";
+import "./codeDoctorBlockStrings";
 
 interface Props {
   source: string;

@@ -7,6 +7,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync, readdirSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
+import { readLocale } from "../../scripts/lib/i18n-files.mjs";
 import { lazyEnglish } from "./helpers/i18nLazy";
 import { t } from "../i18n";
 
@@ -36,12 +37,13 @@ const DOMAINS = [
 
 describe("i18n: lazy English for the readers (W1.14)", () => {
   const lazy = lazyEnglish();
-  const index = readFileSync(join(SRC, "i18n", "index.ts"), "utf8");
+  // The startup English: every domain file of locales/en/ (plan 0.3).
+  const startup = readLocale("en") as Record<string, string>;
   const files = sources(SRC).map((f) => ({ path: rel(f), text: readFileSync(f, "utf8") }));
 
   it("no lazy key is in the startup bundle; the palette labels are", () => {
-    for (const k of Object.keys(lazy)) expect(index.includes(`"${k}":`), k).toBe(false);
-    for (const k of ["cmd.epub.open", "cmd.reading.mode", "cmd.pdf.open", "cmd.highlights.all", "cmd.review.daily"]) expect(index.includes(`"${k}":`), k).toBe(true);
+    for (const k of Object.keys(lazy)) expect(k in startup, k).toBe(false);
+    for (const k of ["cmd.epub.open", "cmd.reading.mode", "cmd.pdf.open", "cmd.highlights.all", "cmd.review.daily"]) expect(k in startup, k).toBe(true);
   });
 
   for (const d of DOMAINS) {

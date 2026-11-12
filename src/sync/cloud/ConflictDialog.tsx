@@ -19,6 +19,7 @@ import { createRoot } from "react-dom/client";
 import { applyMerge, threeWayDiff, type DiffHunk } from "./diff";
 import { t } from "../../i18n";
 import { HelpButton } from "../../ui/HelpButton";
+import "./conflictDialogStrings";
 
 export type ConflictChoice =
   | { kind: "merged"; content: string }

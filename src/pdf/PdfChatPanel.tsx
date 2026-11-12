@@ -7,6 +7,7 @@
 import { useEffect, useRef, useState } from "react";
 import { t } from "../i18n";
 import type { PdfAnswer, PdfIndexProgress, PdfSummary } from "./pdfChat";
+import "./pdfChatPanelStrings";
 
 interface Props {
   path: string;

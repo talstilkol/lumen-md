@@ -10,6 +10,7 @@
 
 import { t } from "../i18n";
 import { createEmbedContext, embeddedTexts, hasEmbeds, type EmbedContext, type EmbedNoticeKind } from "./embeds";
+import "./embedContextStrings";
 
 /** The workspace path a preview doc key (./previewDoc) names, or null. */
 export function hostPathOf(docKey: string | null | undefined): string | null {

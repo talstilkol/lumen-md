@@ -19,6 +19,7 @@ import { t } from "../i18n";
 import { actionById, DEFAULT_TOOLBAR, moveAction, sanitizeToolbar, toggleAction, TOOLBAR_ACTIONS, type ToolbarActionId } from "../mobile/toolbarActions";
 import { useAppStore } from "../store/useStore";
 import { useFocusTrap } from "./useFocusTrap";
+import "./mobileKeyboardBarStrings";
 
 export const MOBILE_ACTION_EVENT = "lumen-mobile-action";
 
@@ -60,11 +61,12 @@ const btn: React.CSSProperties = {
   justifyContent: "center",
 };
 
-export function MobileKeyboardBar() {
+/** `startCustomizing`: the host loaded the bar for the customise sheet (palette → Customize mobile toolbar). */
+export function MobileKeyboardBar({ startCustomizing = false }: { startCustomizing?: boolean } = {}) {
   const row = useAppStore((s) => s.mobileToolbar) ?? DEFAULT_TOOLBAR;
   const [visible, setVisible] = useState(false);
   const [inset, setInset] = useState(0);
-  const [customizing, setCustomizing] = useState(false);
+  const [customizing, setCustomizing] = useState(startCustomizing);
 
   useEffect(() => {
     if (typeof window.matchMedia !== "function") return;

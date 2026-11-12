@@ -12,6 +12,7 @@ import { t } from "../i18n";
 import { startOrganizer, workspaceSource, DEFAULT_BATCH, type OrganizerJob, type OrganizerState } from "../agents/organizer/job";
 import { basenameOf } from "../agents/organizer/analyze";
 import { formatEta } from "./BatchPanel";
+import "./organizerPanelStrings";
 
 const btn: React.CSSProperties = { padding: "4px 10px", fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer" };
 const primary: React.CSSProperties = { ...btn, background: "hsl(var(--accent))", color: "hsl(var(--accent-fg, 0 0% 100%))", borderColor: "transparent" };

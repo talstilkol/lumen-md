@@ -7,6 +7,7 @@ import { t } from "../i18n";
 import { showAiToast } from "../ui/AiToast";
 import { uiConfirm, uiSelect } from "../ui/PromptDialog";
 import { explainError } from "../lib/userError";
+import "./localModelsCommandStrings";
 
 export async function runLocalModelsCommand(): Promise<void> {
   const { detectHardware, WEBLLM_CATALOG, webLlmModelId, vramBudgetMB, recommendWebLlmModel, selectedWebLlmModel, setWebLlmModel } = await import("./modelManager");

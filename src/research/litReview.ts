@@ -8,6 +8,7 @@
  */
 import { extractPaper, FIELDS, noteName, paperNote, reviewBase, type NoteWords, type PaperResult } from "./litReviewCore";
 import { t } from "../i18n";
+import "./litReviewStrings";
 
 function words(): NoteWords & { verified: string; all: string; verifiedOnly: string } {
   return {

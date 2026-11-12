@@ -472,6 +472,8 @@
   "cmd.view.workspace.hint": "Dateispeicher im Browser (OPFS)",
   "cmd.view.wysiwyg": "WYSIWYG",
   "cmd.view.wysiwyg.hint": "Rich-Text-Bearbeitung",
+  "cmd.voice.command": "Sprachbefehl",
+  "cmd.voice.command.hint": "Sag einen: neue Notiz, suche …, Aufgabe hinzufügen …, Tagesnotiz, vorlesen – erkannt auf diesem Gerät",
   "cmd.voice.meeting": "🎙 Besprechungsnotizen (auf diesem Gerät aufnehmen)",
   "cmd.voice.meeting.hint": "Eine Besprechung aufnehmen, auf diesem Gerät transkribieren und ihre Beschlüsse, Aufgaben mit Verantwortlichen und Termin sowie offenen Fragen einfügen",
   "cmd.voice.meetingFile": "🎙 Besprechungsaufnahme transkribieren (wer hat was gesagt)…",

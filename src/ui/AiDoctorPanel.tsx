@@ -12,6 +12,7 @@ import { t } from "../i18n";
 import "../agents/doctorStrings";
 import type { DoctorFinding, DoctorReport, DoctorStatus } from "../agents/doctor";
 import { HelpButton } from "./HelpButton";
+import "./aiDoctorPanelStrings";
 
 interface Props {
   open: boolean;

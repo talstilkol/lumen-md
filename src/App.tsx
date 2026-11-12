@@ -34,7 +34,7 @@ const QuickCapture = lazy(() => import("./ui/QuickCapture").then(m => ({ default
 const ImageHostsPanel = lazy(() => import("./ui/ImageHostsPanel").then(m => ({ default: m.ImageHostsPanel })));
 const AiDoctorPanel = lazy(() => import("./ui/AiDoctorPanel").then(m => ({ default: m.AiDoctorPanel })));
 const AgentReviewPanel = lazy(() => import("./ui/AgentReviewPanel").then(m => ({ default: m.AgentReviewPanel })));
-const ImportWizard = lazy(() => import("./ui/ImportWizard").then(m => ({ default: m.ImportWizard })));
+const ImportWizard = lazy(() => import("./storage/import/ImportWizard").then(m => ({ default: m.ImportWizard })));
 const VersionHistory = lazy(() => import("./ui/VersionHistory").then(m => ({ default: m.VersionHistory })));
 const MarkdownTableEditor = lazy(() => import("./ui/MarkdownTableEditor").then(m => ({ default: m.MarkdownTableEditor })));
 // PDF reader (plan 4.14): pdf.js and the reader load only when a PDF is opened.
@@ -60,7 +60,7 @@ import { minimalChange, propertiesTransaction, trackedPropertiesText } from "./e
 import { HelpHost } from "./ui/HelpHost";
 import { AiSuggestionsPanel } from "./ui/AiSuggestionsPanel";
 import { ledgerEntries } from "./ai/privacyLedger";
-import { MobileKeyboardBar } from "./ui/MobileKeyboardBar";
+import { MobileKeyboardBarHost } from "./ui/MobileKeyboardBarHost";
 import { TagsPanel } from "./ui/TagsPanel";
 // CommentsPanel pulls collab/comments.ts → yjs; comments only exist inside a
 // collab session, so the panel is lazy and addCommentFromSelection is
@@ -111,7 +111,7 @@ import { scrollToHeadingWhenRendered } from "./renderer/wikiLinks";
 import { notifyWorkspaceChanged } from "./storage/workspaceEvents";
 import { explainError } from "./lib/userError";
 import { useEdgeSwipes, useLongNotesOpenForReading } from "./mobile/useMobileGestures";
-import { FeatureFlagsHost } from "./ui/FeatureFlagsPanel";
+import { FeatureFlagsHost } from "./ui/FeatureFlagsHost";
 import { announceCommand } from "./research/usability/commandEvents";
 import { useDesktopShell } from "./desktop/useDesktopShell";
 import { countCommand } from "./metrics/count";
@@ -1422,7 +1422,7 @@ export default function App() {
       <FeatureFlagsHost />
       <AiSuggestionsPanel />
       <AiInlinePromptOverlay />
-      <MobileKeyboardBar />
+      <MobileKeyboardBarHost />
       {usabilityOpen && (
         <Suspense fallback={null}>
           <UsabilitySessionPanel onClose={() => setUsabilityOpen(false)} />

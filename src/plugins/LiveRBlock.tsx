@@ -17,6 +17,7 @@ import { t } from "../i18n";
 import { resetWebR, runR, webrAvailable, type ROutputLine } from "./r/rRuntime";
 import type { WebRInstallError, WebRManifest } from "./r/webrInstall";
 import "./r/webrStrings";
+import "./liveRBlockStrings";
 
 interface Props {
   source: string;

@@ -29,6 +29,7 @@ import { addDays, csvToNotes, daysBetween, monthWeeks, moveDateInText, pinnedPro
 import { showAiToast } from "../../ui/AiToast";
 import { log } from "../../lib/logger";
 import { t } from "../../i18n";
+import "./basesBlockStrings";
 
 const DatabaseMapView = lazy(() => import("../DatabaseMapView"));
 

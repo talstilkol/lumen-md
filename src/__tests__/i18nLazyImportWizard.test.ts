@@ -42,9 +42,10 @@ describe("i18n: the import wizard's lazy English", () => {
     const all = sources(SRC);
     expect(all.filter((f) => readFileSync(f, "utf8").includes("i18n/lazy/importWizard.json")).map(rel)).toEqual(["storage/import/strings.ts"]);
     const users = all.filter((f) => readFileSync(f, "utf8").includes("storage/import/strings") || (rel(f).startsWith("storage/import/") && readFileSync(f, "utf8").includes('"./strings"'))).map(rel);
-    expect(users.sort()).toEqual(["commands/useCommands.ts", "storage/import/report.ts", "ui/ImportWizard.tsx"]);
-    // useCommands loads it with a dynamic import(), never statically.
-    expect(readFileSync(join(SRC, "commands", "useCommands.ts"), "utf8")).not.toMatch(/^import [^;]*storage\/import\/strings/m);
+    // The palette's vault actions (split out of useCommands, train 2) and the wizard, which now sits in storage/import/.
+    expect(users.sort()).toEqual(["commands/domains/vaultActions.ts", "storage/import/ImportWizard.tsx", "storage/import/report.ts"]);
+    // The vault actions load it with a dynamic import(), never statically.
+    expect(readFileSync(join(SRC, "commands", "domains", "vaultActions.ts"), "utf8")).not.toMatch(/^import [^;]*storage\/import\/strings/m);
   });
 
   it("registers when the report module loads", async () => {

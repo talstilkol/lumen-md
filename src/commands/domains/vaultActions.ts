@@ -11,6 +11,7 @@ import { showAiToast } from "../../ui/AiToast";
 import { encryptDocument, decryptDocument, isEncrypted } from "../../storage/encryption";
 import { explainError } from "../../lib/userError";
 import type { CommandContext } from "./context";
+import "./vaultActionsStrings";
 
 export async function exportVault(): Promise<void> {
   const { exportVaultZip, exportVaultToFolder } = await import("../../storage/exportAll");

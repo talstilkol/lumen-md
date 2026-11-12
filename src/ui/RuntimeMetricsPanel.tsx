@@ -4,6 +4,7 @@ import { RefreshCw, Eraser, X } from "lucide-react";
 import { clearRuntimeMetrics, getRuntimeMetricsSnapshot, type RuntimeMetricSnapshotRow } from "../lib/runtimeMetrics";
 import { t, getLocale } from "../i18n";
 import { showAiToast } from "./AiToast";
+import "./runtimeMetricsPanelStrings";
 
 interface Props {
   onClose: () => void;

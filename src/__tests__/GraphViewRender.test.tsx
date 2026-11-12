@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, waitFor } from "@testing-library/react";
 
-vi.mock("../i18n", () => ({ t: (k: string, p?: Record<string, string>) => {
+vi.mock("../i18n", () => ({ registerEnglish: () => undefined, t: (k: string, p?: Record<string, string>) => {
   if (p) return Object.entries(p).reduce((s, [k2, v]) => s.replace(`{${k2}}`, v), k);
   return k;
 }}));

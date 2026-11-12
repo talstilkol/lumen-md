@@ -16,6 +16,7 @@ import { onWorkspaceChanged } from "../storage/workspaceEvents";
 import { dayOf, dayOfPath, isIsrael, isoOf, isolatedHebrewDate, isValidDailyPattern, openDailyNote, type Day } from "../daily/dailyNote";
 import { calendarOfRange, gregorianOf, type Holiday } from "../daily/hebrewCalendar";
 import { holidayLabel, nameLang, readingName } from "../daily/hebrewCalendarNames";
+import "./calendarPanelStrings";
 
 /** Holidays that get a mark on their day (the rest are in the day's label only). */
 const MARKED = new Set<Holiday["kind"]>(["major", "modern", "fast", "minor"]);

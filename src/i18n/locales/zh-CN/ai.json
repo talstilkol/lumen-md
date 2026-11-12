@@ -17,6 +17,7 @@
   "agent.product.prompt": "描述你想创建的产品：\n（例如“支持拖放、深色模式和本地存储的待办应用”）",
   "agent.suggest.allowCloud": "允许云端作为后备",
   "agent.suggest.allowCloud.detail": "将 AI 策略切换为“本地优先”：仅当没有本地模型能回答时才使用你的云端密钥。",
+  "agent.suggest.clarifyTool": "说明 {tool} 需要什么，然后再运行一次（{problem}）",
   "agent.suggest.configureKey": "添加你的 {provider} 密钥",
   "agent.suggest.largerModel": "用更大的模型重试（{tier}）",
   "agent.suggest.ollamaOrigins": "在 Ollama 中允许此应用（OLLAMA_ORIGINS）",

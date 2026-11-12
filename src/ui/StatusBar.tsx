@@ -10,7 +10,7 @@ import type { ConfigHealthReport } from "../lib/configHealth";
 import { subscribeSyncStatus } from "../sync/syncStatus";
 import { secretStoreMode, subscribeSecretStoreMode } from "../lib/secretStore";
 import { parseSuggestions, mayContainCriticMarkup } from "../editor/suggesting";
-import { BetaBadge } from "./FeatureFlagsPanel";
+import { BetaBadge } from "./FeatureFlagsHost";
 
 /** Number of CriticMarkup suggestions (cheap no-op for plain docs). */
 function countCriticMarkup(text: string): number {

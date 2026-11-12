@@ -28,6 +28,7 @@ import type { ModelCacheKind, StorageEstimateResult } from "../ai/modelStorage";
 import { EmptyState } from "./EmptyState";
 import { uiConfirm } from "./PromptDialog";
 import { HelpButton } from "./HelpButton";
+import "./aiSettingsPanelStrings";
 
 interface Props {
   open: boolean;

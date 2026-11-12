@@ -8,6 +8,7 @@ import { useRef, useState } from "react";
 import { Database, Play, Code2 } from "lucide-react";
 import { t } from "../i18n";
 import { explainError } from "../lib/userError";
+import "./liveSqlBlockStrings";
 
 interface Props {
   source: string;

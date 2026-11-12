@@ -50,6 +50,7 @@ function StorageStatus() {
 }
 import { EmptyState } from "./EmptyState";
 import { HelpButton } from "./HelpButton";
+import "./versionHistoryStrings";
 
 /** Save a snapshot (kept for callers of the old API). */
 export async function saveSnapshot(name: string, content: string): Promise<void> {

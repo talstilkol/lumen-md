@@ -11,6 +11,7 @@ import { useAppStore } from "../store/useStore";
 import { hoistTopLevelBindings } from "./liveJsScope";
 import { SharedScopeRegistry, sharedScopeName } from "./liveJsShared";
 import { makeSandboxedWorker, type SandboxedWorker } from "./liveJsSandbox";
+import "./liveJsBlockStrings";
 
 type LogLevel = "log" | "info" | "warn" | "error";
 

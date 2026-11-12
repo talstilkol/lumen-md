@@ -31,6 +31,7 @@ import { notifyWorkspaceChanged } from "../storage/workspaceEvents";
 import { flushPendingEdits, tabIdOf, useAppStore } from "./useStore";
 import { syncOpenDocsAfterMove } from "./openDocs";
 import { movedPath } from "../storage/fileOps";
+import "./externalChangesStrings";
 
 /** What Lumen last saw in each open note's file (read or written). */
 const known = new Map<string, string>();
