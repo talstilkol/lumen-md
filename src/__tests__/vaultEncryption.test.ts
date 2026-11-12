@@ -61,8 +61,11 @@ async function expectOnlyCiphertext(inner: VaultBackend): Promise<void> {
   for (const h of [HEADER_PATH, HEADER_BACKUP_PATH]) expect(text(await raw(inner, h))).not.toMatch(/secret|יומן|Daily|Projects/);
 }
 
+/** Cheap Argon2id for the headers the session writes (production: this device's calibration, plan W4.20). */
+const ARGON2_TEST = { memoryKiB: 8, iterations: 1, parallelism: 1 };
+
 beforeEach(() => {
-  session.setKdfPolicyForTests({ minPbkdf2Iterations: ITER });
+  session.setKdfPolicyForTests({ minPbkdf2Iterations: ITER, minArgon2CostKiB: 8, argon2: ARGON2_TEST });
 });
 
 describe("format", () => {
@@ -75,14 +78,21 @@ describe("format", () => {
     expect(normalizeRecoveryKey("ab-cd o i l")).toBe("ABCD011");
   });
 
-  it("a header changed outside Lumen is refused: lower KDF cost, flipped direction, Argon2id it can't run", async () => {
+  it("a header changed outside Lumen is refused: lower KDF cost, flipped direction, Argon2id below the floor", async () => {
     const { header } = await createRestHeader(PASS, { pbkdf2Iterations: ITER });
     const policy = { minPbkdf2Iterations: ITER };
     await expect(unlockRestHeader({ ...header, target: "plain" }, PASS)).rejects.toMatchObject({ name: "HeaderTamperedError" });
     const weaker = { ...header, passphrase: { ...header.passphrase, kdf: { ...header.passphrase.kdf, iterations: 10 } } };
     expect(() => decodeRestHeader(encodeRestHeader(weaker), policy)).toThrow(/below/);
+    // Argon2id runs in this build (plan W4.20, W1.7's own TypeScript): a header asking for it is read…
     const argon = { ...header, passphrase: { ...header.passphrase, kdf: { alg: "argon2id", memoryKiB: 65536, iterations: 3, parallelism: 1, salt: header.passphrase.kdf.salt } } };
-    expect(() => decodeRestHeader(encodeRestHeader(argon as typeof header), policy)).toThrow(/"argon2id" is not available/);
+    expect(decodeRestHeader(encodeRestHeader(argon as typeof header), policy).passphrase.kdf).toMatchObject({ alg: "argon2id", memoryKiB: 65536, iterations: 3 });
+    // …but not one below OWASP's floor (7 MiB, and 37 MiB × passes).
+    const cheap = { ...argon, passphrase: { ...argon.passphrase, kdf: { ...argon.passphrase.kdf, memoryKiB: 4096, iterations: 1 } } };
+    expect(() => decodeRestHeader(encodeRestHeader(cheap as typeof header), policy)).toThrow(/below/);
+    // Unknown ids are still refused, never misread.
+    const scrypt = { ...header, passphrase: { ...header.passphrase, kdf: { alg: "bcrypt", salt: header.passphrase.kdf.salt } } };
+    expect(() => decodeRestHeader(encodeRestHeader(scrypt as unknown as typeof header), policy)).toThrow(/"bcrypt" is not available/);
     // Production floor: 600,000 PBKDF2 iterations.
     expect(() => decodeRestHeader(encodeRestHeader(header))).toThrow(/below 600000/);
   });
@@ -186,6 +196,39 @@ describe("turning it on, locking, recovering, turning it off", () => {
     await session.unlock(PASS);
     await pending;
     expect(read).toBe(NOTES["Projects/Home.md"]);
+  });
+
+  it("a vault made with PBKDF2 moves to Argon2id at the next unlock: only the header changes, and it opens again (plan W4.20)", async () => {
+    await enable();
+    expect((await readHeader(inner, { minPbkdf2Iterations: ITER }))?.passphrase.kdf.alg).toBe("pbkdf2-sha256");
+    const files = await allPaths(inner);
+    const before = new Map<string, Uint8Array>();
+    for (const p of files) if (p !== HEADER_PATH && p !== HEADER_BACKUP_PATH) before.set(p, await raw(inner, p));
+    session.lock();
+    await expect(session.unlock("wrong passphrase!!")).rejects.toBeInstanceOf(WrongPassphraseError);
+    expect((await readHeader(inner, { minPbkdf2Iterations: ITER }))?.passphrase.kdf.alg).toBe("pbkdf2-sha256");
+    await session.unlock(PASS);
+    const policy = { minPbkdf2Iterations: ITER, minArgon2CostKiB: 8 };
+    for (const path of [HEADER_PATH, HEADER_BACKUP_PATH]) {
+      const h = decodeRestHeader(await raw(inner, path), policy);
+      expect(h.passphrase.kdf).toMatchObject({ alg: "argon2id", ...ARGON2_TEST });
+    }
+    for (const [p, bytes] of before) expect(await raw(inner, p), p).toEqual(bytes);
+    expect(await readWorkspaceFile("Projects/Home.md")).toBe(NOTES["Projects/Home.md"]);
+    session.lock();
+    await expect(session.unlock("wrong passphrase!!")).rejects.toBeInstanceOf(WrongPassphraseError);
+    await session.unlock(PASS);
+    expect(await readWorkspaceFile("Daily/2026-11-09.md")).toBe(NOTES["Daily/2026-11-09.md"]);
+  });
+
+  it("a new vault gets Argon2id when no PBKDF2 is asked for (plan W4.20)", async () => {
+    const r = await session.enableEncryption(PASS, { confirmRecoveryKey: async () => true });
+    expect(r).not.toBeNull();
+    const h = await readHeader(inner, { minArgon2CostKiB: 8 });
+    expect(h?.passphrase.kdf).toMatchObject({ alg: "argon2id", ...ARGON2_TEST });
+    session.lock();
+    await session.unlock(PASS);
+    expect(await readWorkspaceFile("Projects/Home.md")).toBe(NOTES["Projects/Home.md"]);
   });
 
   it("auto-lock after the chosen idle time", async () => {
