@@ -120,7 +120,8 @@ describe("config", () => {
     for (const e of ["md", "base", "excalidraw"]) expect(exts).toContain(e);
     expect(conf.plugins["deep-link"].desktop.schemes).toEqual(["lumen"]);
     const cap = JSON.parse(readFileSync(join(root, "src-tauri/capabilities/default.json"), "utf8"));
-    expect(cap.windows).toEqual(["main", "w-*", "capture"]);
+    // The presenter window (#406, slides) shares the main window's capabilities.
+    expect(cap.windows).toEqual(["main", "presenter", "w-*", "capture"]);
     // Still no fs: permission for the WebView.
     expect(cap.permissions.some((p: string) => p.startsWith("fs:"))).toBe(false);
   });

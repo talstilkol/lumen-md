@@ -11,6 +11,8 @@ import { applyEdit, applyTextAction, DEFAULT_TOOLBAR, moveAction, sanitizeToolba
 import { classifySwipe, DEFAULT_READING_WORDS, EDGE_PX, isTap, lineForTap, opensInReading, wordCount } from "../mobile/gestures";
 import { lumenTaps, TAP_ROWS } from "../mobile/tapCounts";
 import { noteOptions, wikiQueryAt } from "../editor/wikiLinkQuery";
+import { readLocale } from "../../scripts/lib/i18n-files.mjs";
+import { lazyEnglish } from "./helpers/i18nLazy";
 
 /** Run an action on "text with | as the cursor" (or [ ] as the selection) and return the same notation. */
 function run(id: ToolbarActionId, marked: string): string {
@@ -128,10 +130,11 @@ describe("the customisable row", () => {
   });
 
   it("every action has a label in English and Hebrew", () => {
-    const en = readFileSync(join(process.cwd(), "src/i18n/index.ts"), "utf8");
-    const he = JSON.parse(readFileSync(join(process.cwd(), "src/i18n/locales/he.json"), "utf8")) as Record<string, string>;
+    // English: the startup files plus the lazy files (the toolbar's own strings load with it); Hebrew: its domain files.
+    const en = { ...readLocale("en"), ...lazyEnglish() } as Record<string, string>;
+    const he = readLocale("he") as Record<string, string>;
     for (const a of TOOLBAR_ACTIONS) {
-      expect(en, a.labelKey).toContain(`"${a.labelKey}":`);
+      expect(en[a.labelKey], a.labelKey).toBeTruthy();
       expect(he[a.labelKey], a.labelKey).toBeTruthy();
     }
   });
