@@ -245,9 +245,11 @@ describe("base64url and the export door (S10, S11)", () => {
     }
   });
 
-  it("without the export door in the build, the text goes out as written", async () => {
+  // Spec decision (coordinator, 12.11): without the door the share fails closed. The text is
+  // never sent unredacted; the share command refuses (ExportDoorMissingError, #448 round 2).
+  it("without the export door in the build, no link is made: the share refuses", async () => {
     if (hasExportDoor()) return; // a build with #473: covered by blindRedaction
     const t = "plain <!-- c --> text";
-    expect(await shareReadyText(t)).toBe(t);
+    await expect(shareReadyText(t)).rejects.toMatchObject({ name: "ExportDoorMissingError" });
   });
 });

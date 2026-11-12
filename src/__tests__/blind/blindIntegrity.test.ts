@@ -230,14 +230,4 @@ describe("repairVault (I4–I7)", () => {
   });
 });
 
-describe("speed (I8)", () => {
-  it("checks 10,000 notes in under 5 seconds", async () => {
-    const b = createMemoryBackend();
-    for (let i = 0; i < 10_000; i++) await b.write(`d${i % 50}/n${i}.md`, `# ${i}\nלינק [[n${(i + 1) % 10_000}]]\n`);
-    const t = Date.now();
-    const r = await checkVault(b);
-    expect(Date.now() - t).toBeLessThan(5000);
-    expect(r.files).toBe(10_000);
-    expect(r.findings).toEqual([]);
-  }, 60_000);
-});
+// I8 (speed) is a wall-clock budget: it runs in the nightly perf tier, blindIntegrityPerf.test.ts.
