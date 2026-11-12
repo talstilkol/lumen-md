@@ -37,6 +37,7 @@
     "nightly": "node scripts/nightly/run.mjs",
     "perf:inp": "playwright test --project=inp && node scripts/perf/inp-gate.mjs",
     "perf:inp:gate": "node scripts/perf/inp-gate.mjs",
+    "perf:responsiveness": "node scripts/perf/responsiveness.mjs",
     "preview:visual": "node scripts/preview-visual.mjs",
     "test:visual": "playwright test -c playwright.visual.config.ts",
     "test:visual:update": "playwright test -c playwright.visual.config.ts --update-snapshots",
