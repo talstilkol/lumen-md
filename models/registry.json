@@ -826,6 +826,21 @@
       "notes": "Hebrew files on WebGPU with f16 and >= 1.2 GB VRAM budget (plan 6.1). The ONNX repo's card declares no licence; the source model ivrit-ai/whisper-large-v3-turbo is apache-2.0 (HF API, 2026-10-19). Load/latency measured by the owner (15.3)."
     },
     {
+      "id": "itayinbar/Ozen-v1",
+      "kind": "asr",
+      "source": "https://huggingface.co/itayinbar/Ozen-v1",
+      "license": "Apache-2.0",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "Ozen v1 (Hebrew speech recognition, distilled from ivrit.ai's Whisper large-v3-turbo) © Itay Inbar, Apache License 2.0; architecture from OpenAI Whisper (MIT).",
+      "size": "~164 MB (fp16 encoder + fp32 decoder, transformers.js)",
+      "runs": "browser",
+      "delivery": "download",
+      "catalog": "WHISPER_MODELS.ozenHe (src/ai/transformersEngine.ts)",
+      "verified": false,
+      "notes": "Hebrew files without the turbo's GPU budget, and the WASM / mobile re-read of live dictation sentences (plan W4.13). Weights Apache-2.0 per the model card (read 12.11.2026); its card says the training audio is ivrit.ai's (ivrit.ai License), FLEURS (CC BY 4.0) and imvladikon/hebrew_speech_kan (no licence declared on the Hub) — the owner confirms before release. Revision to pin and FLEURS WER measured by `npm run eval:asr-web` (15.3)."
+    },
+    {
       "id": "franc-min",
       "kind": "other",
       "source": "https://www.npmjs.com/package/franc-min",

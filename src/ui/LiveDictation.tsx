@@ -14,7 +14,10 @@ import { showAiToast } from "./AiToast";
 import { useAppStore } from "../store/useStore";
 import { getAiPolicy } from "../ai/policy";
 import { detectHardware, vramBudgetMB } from "../ai/modelManager";
-import { chooseEngine, type EngineId } from "../ai/dictation/engines";
+import { chooseCorrection, chooseEngine, type EngineId } from "../ai/dictation/engines";
+import { downloadedCorrectionModels, makeCorrector } from "../ai/dictation/correction";
+
+type CorrectionEngine = ReturnType<typeof chooseCorrection>;
 import { dictationDownloadBytes, formatMB } from "../ai/dictation/models";
 import { isDictationModelDownloaded, loadDictationFiles } from "../ai/dictation/modelStore";
 import { createDictationAudioContext, startDictationSession, type DictationSession } from "../ai/dictation/session";
@@ -41,7 +44,7 @@ function removeText(text: string): void {
   if (store.doc.content.endsWith(text)) store.setContent(store.doc.content.slice(0, -text.length));
 }
 
-function Panel({ initial, onBrowser, onClose }: { initial: Phase; onBrowser: () => void; onClose: () => void }) {
+function Panel({ initial, onBrowser, onClose, correction = null }: { initial: Phase; onBrowser: () => void; onClose: () => void; correction?: CorrectionEngine }) {
   const [phase, setPhase] = useState<Phase>(initial);
   const session = useRef<DictationSession | null>(null);
   const abort = useRef<AbortController | null>(null);
@@ -91,7 +94,12 @@ function Panel({ initial, onBrowser, onClose }: { initial: Phase; onBrowser: () 
           showAiToast(t("dictation.error", { error: message }), "error");
           void stop();
         },
-      }, { signal: ctl.signal, audioContext });
+      }, {
+        signal: ctl.signal,
+        audioContext,
+        // Plan W4.13: each sentence re-read by a Whisper already on this device.
+        correct: correction ? makeCorrector(correction, async (audio, o) => (await import("../ai/transformersEngine")).transcribeAudio(audio, o)) : undefined,
+      });
       // Cancelled or closed while the model loaded: never leave a hidden session holding the microphone.
       if (ctl.signal.aborted) {
         await started.stop();
@@ -192,6 +200,7 @@ export async function openLiveDictation(lang: string, fallbacks: DictationFallba
   });
   if (choice.candidates[0] === "web-speech") return fallbackToBrowser();
   if (choice.candidates[0] !== "zipformer-he") return fallbacks.record();
+  const correction = chooseCorrection({ language: lang, webgpu: hw.webgpu, f16: hw.f16, vramMB: vramBudgetMB(hw), downloaded: await downloadedCorrectionModels() });
   const host = document.createElement("div");
   document.body.appendChild(host);
   const root = createRoot(host);
@@ -209,6 +218,7 @@ export async function openLiveDictation(lang: string, fallbacks: DictationFallba
   root.render(
     <Panel
       initial={initial}
+      correction={correction}
       onClose={close}
       onBrowser={() => {
         close();
