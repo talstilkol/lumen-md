@@ -27,6 +27,7 @@ import type {
 } from "./types";
 import { DEFAULT_EXECUTOR_ORDER, getExecutor, listExecutors, pickExecutor } from "./executors";
 import { parseProtocolTurn, protocolSchema, toolProtocolPrompt, toolResultMessage } from "./protocol";
+import { repairCall, retryMessage } from "./toolRepair";
 import { hebrewRatio } from "../text/hebrew";
 import { checkJson } from "./tools/validate";
 import { formatSchemaErrors, validateSchema } from "./schema";
@@ -608,9 +609,12 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     const model = patch.model ?? executor.modelFor(tier, { tools: offered.length > 0 });
     // Small models get every turn held to a JSON Schema where the executor can
     // (5.3.5): JSON-ReAct under the protocol's schema is more reliable for
-    // them than free-form native tool calls, whose final answer is not
-    // constrained. Larger models use native tools when they have them.
-    const constrain = (tier === "tiny" || tier === "small") && executor.supportsSchema(model);
+    // them than free-form native tool calls, whose arguments and final answer
+    // are not constrained. Every local model is small next to a cloud one, so
+    // a local executor constrains at every tier (plan W4.31: Ollama's
+    // structured outputs on every tool call); cloud models above "small" use
+    // native tools when they have them.
+    const constrain = (executor.id !== "chat" || tier === "tiny" || tier === "small") && executor.supportsSchema(model);
     const nativeTools = offered.length > 0 && !constrain && executor.supportsTools(model);
     const nativeSchema = !!def.outputSchema && !offered.length && executor.supportsSchema(model);
     // A model without native tools speaks JSON-ReAct; where the executor can
@@ -625,9 +629,13 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
 
     let failure: Failure | null = null;
     let finalText: string | null = null;
+    // Plan W4.31: an invalid tool call gets one retry with the schema error;
+    // a second invalid turn in a row stops the run and asks the user.
+    let invalidTurns = 0;
+    let askUser: { tool: string; problem: string } | null = null;
 
     try {
-      for (let i = 0; i < maxSteps && finalText === null; i++) {
+      for (let i = 0; i < maxSteps && finalText === null && !askUser; i++) {
         if (opts.signal?.aborted) throw new DOMException("aborted", "AbortError");
         // The chat adapter charges at dispatch, after its own checks.
         if (executor.id !== "chat") chargeOnce();
@@ -655,7 +663,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
         let calls: ToolCall[] = res.toolCalls;
         let assistantContent = res.content;
         if (!calls.length && offered.length && !nativeTools) {
-          const turn = parseProtocolTurn(res.content);
+          const turn = parseProtocolTurn(res.content, offered);
           if (turn.kind === "tool") {
             calls = [turn.call];
             assistantContent = "";
@@ -668,24 +676,41 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
           finalText = res.content;
           break;
         }
+        // Plan W4.31: the slips small models make (shape, name case, string
+        // numbers, a wrapper object…) are fixed before the call is checked.
+        const repaired = calls.map((c) => repairCall(c, offered));
+        calls = repaired.map((r) => r.call);
         messages.push({ role: "assistant", content: assistantContent, toolCalls: calls });
-        for (const call of calls) {
+        const priorInvalid = invalidTurns > 0;
+        let turnInvalid = false;
+        for (const [ci, call] of calls.entries()) {
           const t1 = Date.now();
           const r = await execTool(offered, call, toolEnv);
           let body: string;
           let guardNote = "";
-          if (r.error !== undefined) body = toolResultMessage(call, undefined, r.error);
+          const repairNote = repaired[ci].repairs.length ? `repaired: ${repaired[ci].repairs.join(", ")}` : "";
+          const invalid = r.error !== undefined && (r.error.startsWith("bad-args:") || r.error.startsWith("Unknown tool"));
+          turnInvalid ||= invalid;
+          if (invalid && priorInvalid) {
+            // The one retry was spent: ask the user instead of guessing (plan W4.31).
+            step({ kind: "tool", ms: Date.now() - t1, label: call.name, ok: false, detail: r.error });
+            askUser = { tool: call.name, problem: r.error!.replace(/^bad-args:\s*/, "") };
+            break;
+          }
+          if (invalid) body = toolResultMessage(call, undefined, retryMessage(call, offered, r.error!));
+          else if (r.error !== undefined) body = toolResultMessage(call, undefined, r.error);
           else if (r.untrusted?.length) {
             // Outside content: cleaned, then delimited (after truncation, so the closing marker stays).
             ({ body, note: guardNote } = guard.guardToolResult((v) => truncate(toolResultMessage(call, v), TOOL_RESULT_LIMIT), r.result, r.untrusted, toolEnv.taint, messages));
           } else body = truncate(toolResultMessage(call, r.result), TOOL_RESULT_LIMIT);
           const argsText = truncate(JSON.stringify(call.args), 200);
-          const detail = [r.note, guardNote, argsText].filter(Boolean).join(" · ");
+          const detail = [r.note, guardNote, repairNote, argsText].filter(Boolean).join(" · ");
           step({ kind: "tool", ms: Date.now() - t1, label: call.name, ok: r.error === undefined, detail: r.error ?? detail });
           messages.push({ role: "tool", content: body, toolCallId: call.id, name: call.name });
         }
+        invalidTurns = turnInvalid ? invalidTurns + 1 : 0;
       }
-      if (finalText === null) {
+      if (finalText === null && !askUser) {
         failure = { kind: "empty", attempt, maxRetries, tier, executor: executor.id, reason: `no final answer after ${maxSteps} steps`, inputChars, splittable: !!def.splittable };
       }
     } catch (e) {
@@ -696,6 +721,14 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
       failure = { kind: "error", attempt, maxRetries, tier, executor: executor.id, reason: msg, inputChars, splittable: !!def.splittable };
     }
 
+    if (askUser) {
+      const ask: { tool: string; problem: string } = askUser;
+      return finish("failed", {
+        errorCode: "tool-args",
+        error: `The model could not make a valid call to ${ask.tool} (${ask.problem}). Say exactly what it needs and run the command again.`,
+        suggestions: [{ id: "clarify-tool", title: "agent.suggest.clarifyTool", params: { tool: ask.tool, problem: truncate(ask.problem, 120) } }],
+      });
+    }
     if (!failure && finalText !== null) {
       let output: O | undefined;
       const text = finalText.trim();

@@ -16,6 +16,7 @@
   "agent.product.prompt": "Describe the product you want to create:\n(e.g. 'A todo app with drag-and-drop, dark mode and local storage')",
   "agent.suggest.allowCloud": "Allow the cloud as a fallback",
   "agent.suggest.allowCloud.detail": "Switches the AI policy to \"local first\": your cloud key is used only when no local model can answer.",
+  "agent.suggest.clarifyTool": "Say what {tool} needs, then run it again ({problem})",
   "agent.suggest.configureKey": "Add your {provider} key",
   "agent.suggest.largerModel": "Try again with a larger model ({tier})",
   "agent.suggest.ollamaOrigins": "Allow this app in Ollama (OLLAMA_ORIGINS)",
