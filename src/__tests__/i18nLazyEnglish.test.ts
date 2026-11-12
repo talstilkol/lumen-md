@@ -81,6 +81,8 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "templates.json": { module: "storage/templateStrings.ts", users: ["ui/TemplateGallery.tsx"], prefixes: ["templates."] },
   "transcribeFile.json": { module: "ai/dictation/strings.ts", users: ["ui/TranscribeFile.ts"], prefixes: ["transcribeFile."] },
   "usage.json": { module: "metrics/strings.ts", users: ["metrics/reminder.ts", "ui/UsageDialog.tsx"], prefixes: ["usage."] },
+  // Automations (plan W5.24, merged here for W6.46's row trigger): the app module, loaded with a dynamic import.
+  "automations.json": { module: "automations/automationStrings.ts", users: ["automations/app.ts"], prefixes: ["automations."] },
   "vaultCheck.json": { module: "storage/vault/integrityStrings.ts", users: ["storage/vault/integrityReport.ts"], prefixes: ["vaultCheck."] },
   "versions.json": { module: "collab/versionStrings.ts", users: ["ui/NamedVersionsDialog.tsx"], prefixes: ["versions."] },
   "voiceCommands.json": { module: "ai/voice/strings.ts", users: ["ai/voice/run.ts"], prefixes: ["voiceCmd."] },

@@ -45,5 +45,11 @@
   "pluginTrust.rule.indirect-api": "calls the API indirectly",
   "pluginTrust.rule.dynamic-network": "builds network addresses while it runs",
   "pluginTrust.rule.unsigned": "not signed",
-  "pluginTrust.rule.untrusted-signer": "signed by an unknown key"
+  "pluginTrust.rule.untrusted-signer": "signed by an unknown key",
+  "pluginTrust.cap.bases-read": "Read the rows of your bases (.base views) and the notes in them",
+  "pluginTrust.cap.bases-write": "Change note properties through a base — each change asks you first",
+  "pluginTrust.bases.title": "“{name}” wants to change {n} notes",
+  "pluginTrust.bases.body": "Properties: {properties}. Nothing is written unless you allow it.",
+  "pluginTrust.bases.more": "…and {n} more",
+  "pluginTrust.bases.ok": "Change {n} notes"
 }
