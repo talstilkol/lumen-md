@@ -18,7 +18,7 @@ import { buildDesktopUpdateCommands, buildVaultLocationCommands } from "./vaultL
 import { buildReadAloudCommands, buildVoiceCommands } from "./voice";
 import { buildGitCommands } from "./git";
 import { buildCollabCommands, buildCommentCommands } from "./collab";
-import { buildBillingCommands, buildOptionalPanelCommands } from "./settings";
+import { buildAirplaneCommands, buildBillingCommands, buildOptionalPanelCommands } from "./settings";
 
 export const COMMAND_SECTIONS: ReadonlyArray<(ctx: CommandContext) => Command[]> = [
   buildRecentCommands,
@@ -50,6 +50,7 @@ export const COMMAND_SECTIONS: ReadonlyArray<(ctx: CommandContext) => Command[]>
   buildLanguageCommands,
   buildPanelCommands,
   buildOptionalPanelCommands,
+  buildAirplaneCommands,
   buildCommentCommands,
   buildTemplateCommands,
   buildVoiceCommands,
