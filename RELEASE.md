@@ -339,6 +339,13 @@ git push --tags
 
 ---
 
+## Store submission (plan 13.7)
+
+Listings (English and Hebrew), privacy-label answers, the screenshot script
+and the desktop manifests are prepared in `store/` and `fastlane/metadata/`.
+The step-by-step for each store is in [store/SUBMISSION.md](store/SUBMISSION.md).
+`npm run store:check` keeps the listings within each store's limits.
+
 ## Smoke-test checklist
 
 After every build, before publishing:

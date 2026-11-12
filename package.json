@@ -98,7 +98,8 @@
     "flags:check": "node scripts/check-flags.mjs",
     "bench:models": "node scripts/bench-models.mjs",
     "pr:check": "node scripts/pr-check.mjs",
-    "launch:check": "node scripts/launch-check.mjs"
+    "launch:check": "node scripts/launch-check.mjs",
+    "store:check": "node scripts/store.mjs check"
   },
   "dependencies": {
     "@bjorn3/browser_wasi_shim": "0.4.2",
