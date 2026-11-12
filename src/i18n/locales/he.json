@@ -1431,5 +1431,8 @@
   "cmd.ai.cancel": "AI: ביטול",
   "cmd.ai.cancel.hint": "עוצר כל בקשת AI שרצה (גם Esc עושה זאת)",
   "toast.aiCancelled": "בקשת ה-AI בוטלה ({count})",
-  "toast.aiNothingRunning": "אין בקשת AI שרצה"
+  "toast.aiNothingRunning": "אין בקשת AI שרצה",
+  "searchDialog.localTranslation": "תרגום מקומי",
+  "searchDialog.noLocalTranslator": "אין במכשיר הזה מתרגם: מוצג המקור.",
+  "searchDialog.monolingualEmbeddings": "מודל ההטמעה כאן הוא לאנגלית בלבד, ולכן שאלות בעברית מוצאות פתקים באנגלית רק לפי מילות מפתח. לחיפוש בין שפות, השתמשו במודל המובנה (multilingual-e5)."
 }

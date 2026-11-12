@@ -42,6 +42,7 @@
     "eval:agents": "node scripts/agent-eval.mjs",
     "eval:compare": "node scripts/eval-compare.mjs",
     "eval:rerank": "LUMEN_EVAL_RERANK=1 vitest run --config vitest.eval.config.ts src/agents/eval/rerank.eval.ts",
+    "eval:crosslingual": "LUMEN_EVAL_XL=1 vitest run --config vitest.eval.config.ts src/agents/eval/crosslingual.eval.ts",
     "fake-ollama": "node --experimental-strip-types scripts/fake-ollama.mjs"
   },
   "dependencies": {

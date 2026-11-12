@@ -33,6 +33,9 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
   const [query, setQuery] = useState("");
   const [hits, setHits] = useState<SearchHit[]>([]);
   const [smartHits, setSmartHits] = useState<SemanticHit[]>([]);
+  // W5.28: local translations of the hits in another language than the query, and whether the embeddings bridge languages.
+  const [translations, setTranslations] = useState<Record<string, string | null>>({});
+  const [monolingual, setMonolingual] = useState(false);
   const [smartIndexing, setSmartIndexing] = useState(false);
   const [smartIndexedAt, setSmartIndexedAt] = useState<number | null>(null);
   const [active, setActive] = useState(0);
@@ -198,6 +201,30 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
       /* file gone */
     }
   }
+
+  useEffect(() => {
+    if (mode !== "smart" || !smartHits.length) {
+      setTranslations({});
+      return;
+    }
+    const ac = new AbortController();
+    setTranslations({});
+    void (async () => {
+      const [{ markCrossLingual, scriptOf }, { translatePassage }, { embeddingStatus }] = await Promise.all([import("../search/crossLingual"), import("../search/passageTranslator"), import("../ai/semanticSearch")]);
+      const marked = markCrossLingual(query, smartHits).slice(0, 8).filter((h) => h.crossLingual);
+      if (scriptOf(query) === "he") {
+        const st = await embeddingStatus().catch(() => null);
+        if (!ac.signal.aborted) setMonolingual(st ? !st.multilingual : false);
+      }
+      const to = scriptOf(query) === "he" ? "he" : "en";
+      for (const h of marked) {
+        const r = await translatePassage(h.snippet, h.lang, to, { signal: ac.signal });
+        if (ac.signal.aborted) return;
+        setTranslations((cur) => ({ ...cur, [h.path]: r.text }));
+      }
+    })();
+    return () => ac.abort();
+  }, [mode, smartHits, query]);
 
   async function openSmartHit(hit: SemanticHit) {
     const q = query.trim();
@@ -615,10 +642,27 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
                       {hit.snippet}
                     </div>
                   )}
+                  {hit.path in translations && (
+                    <div data-testid="smart-hit-translation" dir="auto" style={{ fontSize: 11.5, marginTop: 2, color: "hsl(var(--fg))" }}>
+                      {translations[hit.path] ? (
+                        <>
+                          <span style={{ color: "hsl(var(--fg-muted))" }}>{t("searchDialog.localTranslation")}: </span>
+                          {translations[hit.path]}
+                        </>
+                      ) : (
+                        <span style={{ color: "hsl(var(--fg-muted))" }}>{t("searchDialog.noLocalTranslator")}</span>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             );
           })}
+          {mode === "smart" && monolingual && smartHits.length > 0 && (
+            <div role="note" data-testid="smart-monolingual" style={{ padding: "6px 12px", fontSize: 11.5, color: "hsl(var(--fg-muted))" }}>
+              {t("searchDialog.monolingualEmbeddings")}
+            </div>
+          )}
         </div>
         
         {mode === "ai" && (

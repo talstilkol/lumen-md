@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-09T21:38:54.736Z",
+  "generated_at": "2026-11-12T09:18:20.188Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1433,
+  "count": 1436,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1459,6 +1459,21 @@
     {
       "key": "searchDialog.thinking",
       "en": "Thinking…",
+      "vars": []
+    },
+    {
+      "key": "searchDialog.localTranslation",
+      "en": "Local translation",
+      "vars": []
+    },
+    {
+      "key": "searchDialog.noLocalTranslator",
+      "en": "No translator on this device: the original is shown.",
+      "vars": []
+    },
+    {
+      "key": "searchDialog.monolingualEmbeddings",
+      "en": "The embedding model here is English-only, so Hebrew questions find English notes by keywords only. Use the built-in model (multilingual-e5) for cross-language search.",
       "vars": []
     },
     {
