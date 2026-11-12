@@ -7,6 +7,7 @@ import { showAiToast } from "../../ui/AiToast";
 import { isAbort } from "../../ai/aiAbort";
 import { openTemplateDoc } from "../openDoc";
 import { cancellable, type CommandContext } from "./context";
+import { explainError } from "../../lib/userError";
 
 /** Save a clip into the library folder and open it (T34). Exported for tests; the work is in a lazy module. */
 export async function saveClip(clip: { title: string; markdown: string }): Promise<void> {
@@ -66,8 +67,8 @@ export function buildResearchCommands({ liveDoc }: CommandContext): Command[] {
           if (result.unverified) showAiToast(t("research.unverified", { count: result.unverified }), "error");
         } catch (e) {
           if (isAbort(e)) return;
+          showAiToast(t("research.failed", { message: explainError(e) }), "error");
           if ((await import("../../agents/suggestions")).reportAgentFailure(e, "research.ask")) return;
-          showAiToast(t("research.failed", { message: (e as Error).message }), "error");
         }
       },
     },
@@ -85,8 +86,9 @@ export function buildResearchCommands({ liveDoc }: CommandContext): Command[] {
           await saveClip(await clipUrl(url.trim()));
         } catch (e) {
           if ((e as Error)?.name === "ResearchUnavailableError") showAiToast(t("clip.needsService"), "error");
+          else showAiToast(t("clip.failed", { message: explainError(e) }), "error");
+          if ((e as Error)?.name === "ResearchUnavailableError") showAiToast(t("clip.needsService"), "error");
           else if ((e as Error)?.name === "PrivacyBlockedError") showAiToast(t("clip.localOnly"), "info");
-          else showAiToast(t("clip.failed", { message: (e as Error).message }), "error");
         }
       },
     },
@@ -112,7 +114,7 @@ export function buildResearchCommands({ liveDoc }: CommandContext): Command[] {
           const source = (await uiPrompt({ message: t("clip.source.prompt"), defaultValue: "https://" }))?.trim() || t("clip.source.unknown");
           await saveClip(clipFromHtml(html || `<pre>${text.replace(/[<&]/g, (c) => (c === "<" ? "&lt;" : "&amp;"))}</pre>`, source));
         } catch (e) {
-          showAiToast(t("clip.failed", { message: (e as Error).message }), "error");
+          showAiToast(t("clip.failed", { message: explainError(e) }), "error");
         }
       },
     },

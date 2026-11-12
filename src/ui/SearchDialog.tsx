@@ -25,6 +25,8 @@ import { isSaved, removeSavedSearch, saveSearch } from "../search/savedSearches"
 
 // The Images tab (plan 6.7) and its model code load only when it is opened.
 const ImageSearchPanel = lazy(() => import("./ImageSearchPanel").then((m) => ({ default: m.ImageSearchPanel })));
+import { explainError } from "../lib/userError";
+import { EmptyState, runCommand } from "./EmptyState";
 
 interface Props {
   open: boolean;
@@ -163,7 +165,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
       showAiToast(t("toast.indexedFiles", { count: Object.keys(idx.files).length }), "success");
     } catch (e) {
       log.error("indexWorkspace failed", e);
-      showAiToast(t("toast.indexingFailed", { error: (e as Error).message }), "error");
+      showAiToast(t("toast.indexingFailed", { error: explainError(e) }), "error");
     } finally {
       setSmartIndexing(false);
     }
@@ -514,13 +516,22 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
             <UpgradeNotice compact plan="pro" message={t("billing.upgrade.smartSearch")} />
           )}
           {empty && mode !== "images" && !(mode === "smart" && !smartAllowed) && (
-            <div className="cmd-palette-empty">
-              {mode === "smart" && !smartIndexedAt && !query
-                ? t("searchDialog.buildHint")
-                : query
-                  ? t("search.noMatches")
-                  : t("search.empty")}
-            </div>
+            mode === "smart" && !smartIndexedAt && !query ? (
+              <div className="cmd-palette-empty">{t("searchDialog.buildHint")}</div>
+            ) : query ? (
+              <EmptyState message={t("search.noMatches")} action={{ label: t("search.clear"), onClick: () => setQuery("") }} />
+            ) : (
+              <EmptyState
+                message={t("search.empty")}
+                action={{
+                  label: t("search.newNote"),
+                  onClick: () => {
+                    onClose();
+                    runCommand("file.new");
+                  },
+                }}
+              />
+            )
           )}
           {/* Recent-searches chip row — only when the query is empty and the
               user has actually run searches before. Click a chip to re-run

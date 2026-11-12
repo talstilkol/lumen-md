@@ -34,6 +34,7 @@
   "canvas.unsaved": "{name} (non enregistré)",
   "canvas.zoom": "Zoom : {pct} %",
   "graphView.empty": "Aucun fichier trouvé. Ouvrez l'espace de travail et ajoutez des fichiers pour voir le graphe de connaissances.",
+  "graphView.openWorkspace": "Ouvrir l’espace de travail",
   "graphView.renderFailed": "Échec du rendu du graphe",
   "graphView.renderFailedDetail": "Les données de l'espace de travail ont produit une structure de nœuds invalide qui a fait planter le moteur de rendu.",
   "graphView.stats": "{nodes} nœuds · {edges} liens",

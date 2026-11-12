@@ -34,6 +34,7 @@
   "canvas.unsaved": "{name} (לא נשמר)",
   "canvas.zoom": "זום: {pct}%",
   "graphView.empty": "לא נמצאו קבצים. פתח את מרחב העבודה והוסף קבצים כדי לראות את גרף הידע.",
+  "graphView.openWorkspace": "פתיחת סביבת העבודה",
   "graphView.renderFailed": "רינדור הגרף נכשל",
   "graphView.renderFailedDetail": "נתוני מרחב העבודה גרמו למבנה צמתים לא תקין שגרם לקריסת המרנדר.",
   "graphView.stats": "{nodes} צמתים · {edges} חיבורים",

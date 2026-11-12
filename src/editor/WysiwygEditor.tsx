@@ -43,6 +43,7 @@ import { wysiwygWikiComplete } from "./wysiwygWikiComplete";
 import { registerPendingEdits, useAppStore } from "../store/useStore";
 import { useAuth } from "../auth/useAuth";
 import { t } from "../i18n";
+import { explainError } from "../lib/userError";
 
 // Suggesting mode (track changes) works in WYSIWYG too: CriticMarkup ↔
 // marks, edits tracked while the store's suggestingMode is on.
@@ -335,7 +336,7 @@ function buildSlashItems(): SlashItem[] {
           showAiToast(
             e instanceof AiError && e.code === "NO_KEY"
               ? t("toast.pleaseConfigureYourAiKey")
-              : t("ai.ghostwriter.failed", { error: (e as Error)?.message ?? t("ai.error.unknown") }),
+              : t("ai.ghostwriter.failed", { error: explainError(e) }),
             "error",
           );
         } finally {

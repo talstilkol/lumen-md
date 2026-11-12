@@ -117,6 +117,7 @@ export default function DatabaseBlock({ source, meta }: Props) {
       .catch((e: Error) => {
         if (cancelled) return;
         log.warn("database query failed", e);
+        // raw-error-allow: names the part of the block's own query that is wrong
         setError(e.message);
       })
       .finally(() => !cancelled && setLoading(false));
@@ -843,6 +844,7 @@ function KanbanCard({ row, fields }: { row: DatabaseRow; fields: string[] }) {
         {fields.map((f) => (
           <div key={f} style={{ fontSize: 11, color: "hsl(var(--fg-muted))", marginBlockStart: 2 }} dir="auto">
             <span style={{ opacity: 0.7 }}>{f}:</span> {displayValue(row.fm[f])}
+            {/* empty-allow: the name of a column without a value, not an empty state */}
           </div>
         ))}
       </div>

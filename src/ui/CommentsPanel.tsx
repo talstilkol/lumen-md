@@ -28,6 +28,8 @@ import {
 import type { CollabSession } from "../collab/yjs";
 import { t, getLocale } from "../i18n";
 import { scrollBehavior } from "../lib/motion";
+import { EmptyState, runCommand } from "./EmptyState";
+import { uiConfirm } from "./PromptDialog";
 
 interface Props {
   open: boolean;
@@ -153,11 +155,7 @@ export function CommentsPanel({ open, onClose, collab, onJump }: Props) {
       </header>
 
       <div style={{ flex: 1, overflowY: "auto", padding: "8px 12px 24px" }}>
-        {total === 0 && (
-          <div style={{ padding: 16, fontSize: 12, color: "hsl(var(--fg-muted))", lineHeight: 1.5 }}>
-            {t("commentsPanel.empty")}
-          </div>
-        )}
+        {total === 0 && <EmptyState message={t("commentsPanel.empty")} action={{ label: t("commentsPanel.add"), onClick: () => runCommand("collab.addComment") }} />}
 
         {comments.map((c) => {
           const anchor = resolveAnchor(collab.doc, c);
@@ -218,7 +216,9 @@ export function CommentsPanel({ open, onClose, collab, onJump }: Props) {
                 </button>
                 <button
                   type="button"
-                  onClick={() => deleteComment(collab.doc, c.id)}
+                  onClick={() => {
+                    void uiConfirm({ message: t("commentsPanel.deleteConfirm") }).then((ok) => ok && deleteComment(collab.doc, c.id));
+                  }}
                   aria-label={t("commentsPanel.delete")}
                   title={t("commentsPanel.delete")}
                   style={iconBtn("hsl(0 80% 65%)")}

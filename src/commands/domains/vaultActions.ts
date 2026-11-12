@@ -9,6 +9,7 @@ import { t, getLocale } from "../../i18n";
 import { uiPrompt, uiSelect } from "../../ui/PromptDialog";
 import { showAiToast } from "../../ui/AiToast";
 import { encryptDocument, decryptDocument, isEncrypted } from "../../storage/encryption";
+import { explainError } from "../../lib/userError";
 import type { CommandContext } from "./context";
 
 export async function exportVault(): Promise<void> {
@@ -36,7 +37,7 @@ export async function exportVault(): Promise<void> {
     showAiToast(t("vault.export.done", { n: String(files) }), "info");
   } catch (e) {
     if ((e as DOMException)?.name === "AbortError") return;
-    showAiToast(t("vault.export.failed", { error: (e as Error).message }), "error");
+    showAiToast(t("vault.export.failed", { error: explainError(e) }), "error");
   }
 
 }

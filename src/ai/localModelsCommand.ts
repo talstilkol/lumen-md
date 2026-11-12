@@ -6,6 +6,7 @@
 import { t } from "../i18n";
 import { showAiToast } from "../ui/AiToast";
 import { uiConfirm, uiSelect } from "../ui/PromptDialog";
+import { explainError } from "../lib/userError";
 
 export async function runLocalModelsCommand(): Promise<void> {
   const { detectHardware, WEBLLM_CATALOG, webLlmModelId, vramBudgetMB, recommendWebLlmModel, selectedWebLlmModel, setWebLlmModel } = await import("./modelManager");
@@ -77,7 +78,7 @@ export async function runLocalModelsCommand(): Promise<void> {
     await loadWebLlmModel(choice);
     showAiToast(t("ai.localModels.ready", { model: choice }), "success");
   } catch (err) {
-    showAiToast(t("ai.localModels.failed", { error: err instanceof Error ? err.message : String(err) }), "error");
+    showAiToast(t("ai.localModels.failed", { error: explainError(err) }), "error");
   } finally {
     off();
   }

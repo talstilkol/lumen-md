@@ -16,6 +16,7 @@ export function buildVaultDoctorCommands(): Command[] {
     },
     {
       id: "tools.vaultDoctorFix",
+      destructive: "confirm",
       label: t("cmd.tools.vaultDoctorFix"),
       hint: t("cmd.tools.vaultDoctorFix.hint"),
       icon: cmdIcons.Sparkles,

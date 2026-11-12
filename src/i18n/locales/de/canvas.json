@@ -34,6 +34,7 @@
   "canvas.unsaved": "{name} (nicht gespeichert)",
   "canvas.zoom": "Zoom: {pct} %",
   "graphView.empty": "Keine Dateien gefunden. Öffne den Arbeitsbereich und füge Dateien hinzu, um den Wissensgraphen zu sehen.",
+  "graphView.openWorkspace": "Arbeitsbereich öffnen",
   "graphView.renderFailed": "Graph konnte nicht gerendert werden",
   "graphView.renderFailedDetail": "Die Daten des Arbeitsbereichs ergaben eine ungültige Knotenstruktur, die den Renderer zum Absturz brachte.",
   "graphView.stats": "{nodes} Knoten · {edges} Verbindungen",

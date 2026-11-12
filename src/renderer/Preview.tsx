@@ -13,6 +13,7 @@ import { CopyButtonHandler } from "./components";
 import { Frontmatter } from "../ui/Frontmatter";
 import { ErrorBoundary } from "../ui/ErrorBoundary";
 import { t } from "../i18n";
+import { explainError } from "../lib/userError";
 
 interface Props {
   markdownText: string;
@@ -97,7 +98,7 @@ export function Preview({ markdownText, docKey = null }: Props) {
         })
         .catch((e: Error) => {
           if (stale()) return;
-          setError(e.message);
+          setError(explainError(e, "preview"));
         });
     };
     if (fullPipelineWarm || markdownText.length >= LARGE_DOC_CHARS) {

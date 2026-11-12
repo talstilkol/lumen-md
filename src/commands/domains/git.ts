@@ -1,11 +1,12 @@
 /** Git commands for a repository cloned into the workspace. */
 import { cmdIcons, type Command } from "../../ui/CommandPalette";
 import { t } from "../../i18n";
-import { uiAlert, uiPrompt } from "../../ui/PromptDialog";
+import { uiAlert, uiConfirm, uiPrompt } from "../../ui/PromptDialog";
 import { generateAiCommitMessage } from "../../ai/commands";
 import { log } from "../../lib/logger";
 import { showAiToast } from "../../ui/AiToast";
 import { cancellable, type CommandContext } from "./context";
+import { explainError } from "../../lib/userError";
 
 // The git modules (and isomorphic-git behind them) load on first use: the
 // palette lists these commands at start-up, so nothing here may pull them
@@ -84,13 +85,14 @@ export function buildGitCommands({ showWorkspace, toggleWorkspace, liveDoc }: Co
             return;
           }
           await uiAlert({
-            message: t("git.alert.commitFailed", { error: (e as Error).message }),
+            message: t("git.alert.commitFailed", { error: explainError(e) }),
           });
         }
       },
     },
     {
       id: "git.pull",
+      destructive: "confirm",
       label: t("cmd.git.pull"),
       hint: t("cmd.git.pull.hint"),
       icon: cmdIcons.Download,
@@ -101,6 +103,7 @@ export function buildGitCommands({ showWorkspace, toggleWorkspace, liveDoc }: Co
           return;
         }
         const repoFolder = liveDoc().workspaceName!.split("/")[0];
+        if (!(await uiConfirm({ message: t("git.pull.confirm", { folder: repoFolder }) }))) return;
         try {
           // Safe pull (plan 3.3): merges into the vault, never deletes, never
           // overwrites a note with unsaved edits; the open notes are updated by it.
@@ -141,7 +144,7 @@ export function buildGitCommands({ showWorkspace, toggleWorkspace, liveDoc }: Co
                 }),
           });
         } catch (e) {
-          await uiAlert({ message: (e as Error).message });
+          await uiAlert({ message: explainError(e) });
         }
       },
     },

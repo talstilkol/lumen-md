@@ -30,6 +30,7 @@ import { log } from "../lib/logger";
 import { getAiPolicy, onAiPolicyChange, thirdPartyServicesAllowed } from "../ai/policy";
 import { recordBrowserService, recordSpeechRecognition } from "../ai/privacyLedger";
 import { chooseDictationEngine, webSpeechOptedIn, WEB_SPEECH_KEY, Segmenter, SerialQueue } from "../ai/dictation";
+import { explainError } from "../lib/userError";
 
 // SpeechRecognition is poorly + inconsistently typed across DOM lib
 // variants; keep the surface deliberately loose so we don't fight the
@@ -410,7 +411,7 @@ async function startLocalDictation(lang: string, onFailure: () => void): Promise
             // why: one failure means the worker or model is unusable — say so once, release the mic, offer the fallback
             failed = true;
             log.warn("dictation segment failed", err);
-            showAiToast(t("toast.dictate.localFailed", { error: (err as Error)?.message ?? String(err) }), "error");
+            showAiToast(t("toast.dictate.localFailed", { error: explainError(err) }), "error");
             stop(true);
             onFailure();
           }
@@ -495,7 +496,7 @@ export async function startVoiceMemo(opts: { language?: string; plain?: boolean;
   } catch (err) {
     stream.getTracks().forEach((t) => t.stop());
     log.warn("voice memo: MediaRecorder unavailable", err);
-    showAiToast(t("toast.recordingIsNotSupportedIn", { error: (err as Error).message }), "error");
+    showAiToast(t("toast.recordingIsNotSupportedIn", { error: explainError(err) }), "error");
     return;
   }
   const chunks: Blob[] = [];
@@ -534,7 +535,7 @@ export async function startVoiceMemo(opts: { language?: string; plain?: boolean;
       } catch (err) {
         if (op.signal.aborted || isAbort(err)) return;
         log.error("voice memo transcribe failed", err);
-        showAiToast(t("toast.transcribeFailed", { error: (err as Error).message }), "error");
+        showAiToast(t("toast.transcribeFailed", { error: explainError(err) }), "error");
         return;
       }
       if (op.signal.aborted) return;

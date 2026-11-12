@@ -26,6 +26,7 @@ import "../ai/localLoraStrings";
 
 // The local LoRA route (plan 6.12.4) comes first; its code loads with this dialog's first paint.
 const LocalLoraSection = lazy(() => import("./LocalLoraSection").then((m) => ({ default: m.LocalLoraSection })));
+import { explainError } from "../lib/userError";
 
 interface Props {
   open: boolean;
@@ -156,7 +157,7 @@ export function FineTuneSettings({ open, onClose, embedded = false }: Props) {
       );
     } catch (e) {
       log.error("fine-tune start failed", e);
-      showAiToast(t("fineTune.toast.error", { error: (e as Error).message }), "error");
+      showAiToast(t("fineTune.toast.error", { error: explainError(e) }), "error");
     } finally {
       setRunning(false);
     }

@@ -1,4 +1,5 @@
 {
+  "audit.clearFilters": "ניקוי המסננים",
   "audit.close": "סגור",
   "audit.col.action": "פעולה",
   "audit.col.payload": "נתונים",
@@ -133,6 +134,7 @@
   "privacy.footer": "נרשם: שעה, יעד, גודל, סיבה. אף פעם לא תוכן הפרומפט או התשובה. גם הורדות מודלים מתוך ה-Workers מופיעות; ייתכן שהגודל שלהן יוצג כלא ידוע.",
   "privacy.localRequests": "מקומיות: {n}",
   "privacy.onlyLeaving": "רק מה שיצא מהמכשיר",
+  "privacy.openAiSettings": "פתיחת הגדרות ה-AI",
   "privacy.policy": "מדיניות: {policy}",
   "privacy.policyName.cloud": "ענן",
   "privacy.policyName.local-first": "מקומי קודם",

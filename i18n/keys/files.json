@@ -9,6 +9,11 @@
       "vars": []
     },
     {
+      "key": "backlinks.copyLink",
+      "en": "Copy a link to this note",
+      "vars": []
+    },
+    {
       "key": "backlinks.empty",
       "en": "No other file links here yet.",
       "vars": []
@@ -570,6 +575,13 @@
       "vars": []
     },
     {
+      "key": "git.pull.confirm",
+      "en": "Pull replaces the files of “{folder}” with the versions on the remote. Files deleted there go to the trash. Pull now?",
+      "vars": [
+        "folder"
+      ]
+    },
+    {
       "key": "git.pull.copies",
       "en": "Versions that could not be merged are kept as copies: {files}",
       "vars": [
@@ -655,8 +667,18 @@
       ]
     },
     {
+      "key": "search.clear",
+      "en": "Clear the search",
+      "vars": []
+    },
+    {
       "key": "search.empty",
       "en": "Workspace is empty.",
+      "vars": []
+    },
+    {
+      "key": "search.newNote",
+      "en": "New note",
       "vars": []
     },
     {
@@ -844,6 +866,11 @@
       ]
     },
     {
+      "key": "tagsPanel.addTag",
+      "en": "Add a tag here",
+      "vars": []
+    },
+    {
       "key": "tagsPanel.close",
       "en": "Close tags panel",
       "vars": []
@@ -949,6 +976,11 @@
       "vars": [
         "author"
       ]
+    },
+    {
+      "key": "templates.clearFilter",
+      "en": "Clear the filter",
+      "vars": []
     },
     {
       "key": "templates.close",
@@ -1059,6 +1091,11 @@
       "vars": []
     },
     {
+      "key": "trash.backToNotes",
+      "en": "Back to the notes",
+      "vars": []
+    },
+    {
       "key": "trash.close",
       "en": "Close",
       "vars": []
@@ -1076,6 +1113,13 @@
       "vars": []
     },
     {
+      "key": "trash.deleteForeverConfirm",
+      "en": "Delete “{path}” for good? It cannot be restored afterwards.",
+      "vars": [
+        "path"
+      ]
+    },
+    {
       "key": "trash.empty",
       "en": "The trash is empty.",
       "vars": []
@@ -1084,6 +1128,13 @@
       "key": "trash.emptyAll",
       "en": "Empty trash",
       "vars": []
+    },
+    {
+      "key": "trash.emptyAllConfirm",
+      "en": "Delete all {n} items in the trash for good? They cannot be restored afterwards.",
+      "vars": [
+        "n"
+      ]
     },
     {
       "key": "trash.restore",
@@ -1269,6 +1320,11 @@
     {
       "key": "tree.newFolderRoot",
       "en": "New folder at root",
+      "vars": []
+    },
+    {
+      "key": "tree.newNote",
+      "en": "New note",
       "vars": []
     },
     {
@@ -1562,6 +1618,11 @@
       "vars": [
         "n"
       ]
+    },
+    {
+      "key": "versionHistory.keepNow",
+      "en": "Keep a version now",
+      "vars": []
     },
     {
       "key": "versionHistory.noVersions",

@@ -1,4 +1,5 @@
 {
+  "audit.clearFilters": "清除筛选条件",
   "audit.close": "关闭",
   "audit.col.action": "操作",
   "audit.col.payload": "载荷",
@@ -133,6 +134,7 @@
   "privacy.footer": "记录：时间、去向、大小、原因。从不记录提示或回答的内容。模型 Worker 内的下载也会列出，其大小可能显示为未知。",
   "privacy.localRequests": "本地：{n}",
   "privacy.onlyLeaving": "仅显示离开本设备的请求",
+  "privacy.openAiSettings": "打开 AI 设置",
   "privacy.policy": "策略：{policy}",
   "privacy.policyName.cloud": "云端",
   "privacy.policyName.local-first": "本地优先",

@@ -1792,6 +1792,71 @@
       ]
     },
     {
+      "key": "error.aiNoKey",
+      "en": "No AI key is set, so nothing was sent. Your text is unchanged; add a key in AI settings, or use a local model.",
+      "vars": []
+    },
+    {
+      "key": "error.aiPolicy",
+      "en": "Your AI privacy setting blocked this request, so nothing left the device. Allow the provider in AI settings, or use a local model.",
+      "vars": []
+    },
+    {
+      "key": "error.badFile",
+      "en": "The file could not be read: it is damaged or in another format. Nothing was changed; check the file and try again.",
+      "vars": []
+    },
+    {
+      "key": "error.conflict",
+      "en": "Something with that name is already there. Nothing was overwritten; choose another name.",
+      "vars": []
+    },
+    {
+      "key": "error.network",
+      "en": "No connection. Your notes are safe on this device; try again when you are online.",
+      "vars": []
+    },
+    {
+      "key": "error.noLocalModel",
+      "en": "No local AI model is running, so nothing was sent. Start Ollama, or open Lumen in a browser with WebGPU, then try again.",
+      "vars": []
+    },
+    {
+      "key": "error.notFound",
+      "en": "The file is no longer there (moved or deleted). Nothing else changed; look for it in the trash or reopen it.",
+      "vars": []
+    },
+    {
+      "key": "error.permission",
+      "en": "The browser did not allow this. Nothing was changed; allow access when it asks, then try again.",
+      "vars": []
+    },
+    {
+      "key": "error.quota",
+      "en": "This device is out of storage space. Your text is still open here; free some space or export the vault, then try again.",
+      "vars": []
+    },
+    {
+      "key": "error.rateLimit",
+      "en": "The AI service is busy (too many requests). Nothing was lost; wait a minute and try again.",
+      "vars": []
+    },
+    {
+      "key": "error.timeout",
+      "en": "This took too long and was stopped. Nothing was lost; try again, or try a smaller piece.",
+      "vars": []
+    },
+    {
+      "key": "error.unavailable",
+      "en": "This service is not set up in this version of Lumen. Nothing was changed.",
+      "vars": []
+    },
+    {
+      "key": "error.unknown",
+      "en": "Something went wrong. Nothing you wrote is lost; try again, and if it happens again, the AI doctor and the log have the details.",
+      "vars": []
+    },
+    {
       "key": "errorBoundary.heading",
       "en": "Rendering Error",
       "vars": []

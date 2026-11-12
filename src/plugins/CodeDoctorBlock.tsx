@@ -314,8 +314,8 @@ function RepairedPanel({
 }) {
   const onCopy = () => {
     navigator.clipboard?.writeText(repair.output).then(
-      () => toast.success("Repaired JSON copied to clipboard."),
-      () => toast.error("Could not copy to clipboard."),
+      () => toast.success(t("block.codeDoctor.copied")),
+      () => toast.error(t("block.codeDoctor.copyFailed")),
     );
   };
   return (

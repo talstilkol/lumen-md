@@ -39,6 +39,12 @@ export interface Command {
   icon?: LucideIcon;
   group?: string;
   action: () => void;
+  /**
+   * The action deletes or replaces what the person made (plan W3.2): it
+   * asks first ("confirm") or offers an undo ("undo").
+   * scripts/check-destructive.mjs holds every command to it.
+   */
+  destructive?: "confirm" | "undo";
   /** Sub-commands — renders as expandable group in palette */
   children?: Command[];
 }

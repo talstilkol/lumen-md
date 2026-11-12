@@ -1,4 +1,5 @@
 {
+  "audit.clearFilters": "Сбросить фильтры",
   "audit.close": "Закрыть",
   "audit.col.action": "Действие",
   "audit.col.payload": "Данные",
@@ -133,6 +134,7 @@
   "privacy.footer": "Записывается: время, адрес, размер, причина. Никогда — текст запросов и ответов. Загрузки моделей из воркеров тоже показаны; их размер может быть неизвестен.",
   "privacy.localRequests": "Локально: {n}",
   "privacy.onlyLeaving": "Только то, что ушло с устройства",
+  "privacy.openAiSettings": "Открыть настройки ИИ",
   "privacy.policy": "Политика: {policy}",
   "privacy.policyName.cloud": "облако",
   "privacy.policyName.local-first": "сначала локально",

@@ -11,6 +11,8 @@ import { Lightbulb, X } from "lucide-react";
 import { t } from "../i18n";
 import { markNotGood, onAgentAnswer, onAgentSuggestions, rerunCommand, runSuggestion, type AnswerEvent, type SuggestionsEvent } from "../agents/suggestions";
 import type { Suggestion } from "../agents/types";
+import { EmptyState } from "./EmptyState";
+import { explainError } from "../lib/userError";
 
 function label(s: Suggestion): string {
   return s.raw ? s.title : t(s.title, s.params);
@@ -87,7 +89,7 @@ export function AiSuggestionsPanel() {
         rerunCommand(event.commandId ?? run.commandId);
       }
     } catch (e) {
-      setProgress(`${(e as Error).message}`);
+      setProgress(explainError(e));
     } finally {
       setBusy(null);
       setLive(null);
@@ -154,7 +156,7 @@ export function AiSuggestionsPanel() {
           ))}
         </ul>
       ) : (
-        <div>{t("agent.panel.none")}</div>
+        <EmptyState style={{ padding: 0 }} message={t("agent.panel.none")} action={{ label: t("agent.panel.retry"), onClick: () => { setEvent(null); rerunCommand(event.commandId ?? run.commandId); } }} />
       )}
       {progress ? <div style={{ fontSize: 12, color: "hsl(var(--fg-muted))" }}>{progress}</div> : null}
       <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>

@@ -85,6 +85,7 @@ export default function PlantUMLBlock({ source }: Props) {
           return;
         }
         if (!cancelled) {
+          // raw-error-allow: the syntax error of the person's own diagram source, with its line
           setError(e.message);
           setState("failed");
         }

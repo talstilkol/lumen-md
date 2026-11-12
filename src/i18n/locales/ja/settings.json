@@ -1,4 +1,5 @@
 {
+  "audit.clearFilters": "絞り込みを解除",
   "audit.close": "閉じる",
   "audit.col.action": "操作",
   "audit.col.payload": "ペイロード",
@@ -133,6 +134,7 @@
   "privacy.footer": "記録内容: 時刻・宛先・サイズ・理由。プロンプトや回答の本文は記録しません。モデル Worker 内のダウンロードも記録されます（サイズは不明と表示される場合があります）。",
   "privacy.localRequests": "ローカル: {n}",
   "privacy.onlyLeaving": "端末外への通信のみ",
+  "privacy.openAiSettings": "AI 設定を開く",
   "privacy.policy": "ポリシー: {policy}",
   "privacy.policyName.cloud": "クラウド",
   "privacy.policyName.local-first": "ローカル優先",

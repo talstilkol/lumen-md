@@ -220,6 +220,11 @@
       "vars": []
     },
     {
+      "key": "graphView.openWorkspace",
+      "en": "Open the workspace",
+      "vars": []
+    },
+    {
       "key": "graphView.renderFailed",
       "en": "Graph Render Failed",
       "vars": []

@@ -71,6 +71,11 @@
       "vars": []
     },
     {
+      "key": "agent.panel.retry",
+      "en": "Run it again",
+      "vars": []
+    },
+    {
       "key": "agent.panel.summary",
       "en": "{agent} · {attempts} attempt(s) · {executor} / {model}",
       "vars": [
@@ -920,6 +925,11 @@
       "vars": []
     },
     {
+      "key": "ai.settings.ollama.copyPull",
+      "en": "Copy the install command",
+      "vars": []
+    },
+    {
       "key": "ai.settings.ollama.installed",
       "en": "Installed: {models}",
       "vars": [
@@ -1204,8 +1214,20 @@
       "vars": []
     },
     {
+      "key": "ai.trace.clearConfirm",
+      "en": "Delete the record of {n} agent runs? This cannot be undone.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
       "key": "ai.trace.empty",
       "en": "No agent runs yet.",
+      "vars": []
+    },
+    {
+      "key": "ai.trace.testSetup",
+      "en": "Test the AI setup",
       "vars": []
     },
     {

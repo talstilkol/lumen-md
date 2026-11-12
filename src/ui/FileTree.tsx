@@ -83,6 +83,8 @@ function folderStats(nodes: WorkspaceNode[], dirs: string[] = []): { dirs: strin
   }
   return { dirs, files };
 }
+import { explainError } from "../lib/userError";
+import { EmptyState } from "./EmptyState";
 
 interface Props {
   /** Currently active workspace path (if any). */
@@ -192,7 +194,7 @@ export function FileTree({
       if (settled && activePath && paths.some((p) => activePath === p || activePath.startsWith(p + "/"))) onActiveDeleted();
       announceTrash(items);
     } catch (e) {
-      await uiAlert({ message: t("tree.alert.deleteFailed", { error: (e as Error).message }) });
+      await uiAlert({ message: t("tree.alert.deleteFailed", { error: explainError(e) }) });
     }
     clearSelection();
     await refresh();
@@ -223,7 +225,7 @@ export function FileTree({
           afterMove(from, r);
         }
       } catch (e) {
-        await uiAlert({ message: t("tree.alert.renameFailed", { error: (e as Error).message }) });
+        await uiAlert({ message: t("tree.alert.renameFailed", { error: explainError(e) }) });
       }
     }
     announceMove([...updated]);
@@ -352,7 +354,7 @@ export function FileTree({
       await createWorkspaceFolder(joinPath(parentPath, name));
     } catch (e) {
       await uiAlert({
-        message: t("tree.alert.folderFailed", { error: (e as Error).message }),
+        message: t("tree.alert.folderFailed", { error: explainError(e) }),
       });
       return;
     }
@@ -370,7 +372,7 @@ export function FileTree({
       const text = await readWorkspaceFile(node.path);
       onOpenFile(node.path, text);
     } catch (e) {
-      await uiAlert({ message: t("tree.alert.openFailed", { error: (e as Error).message }) });
+      await uiAlert({ message: t("tree.alert.openFailed", { error: explainError(e) }) });
     }
   }
 
@@ -394,7 +396,7 @@ export function FileTree({
       await refresh();
     } catch (e) {
       await uiAlert({
-        message: t("tree.alert.renameFailed", { error: (e as Error).message }),
+        message: t("tree.alert.renameFailed", { error: explainError(e) }),
       });
     }
   }
@@ -406,7 +408,7 @@ export function FileTree({
       await duplicateFile(node.path);
       await refresh();
     } catch (e) {
-      await uiAlert({ message: (e as Error).message });
+      await uiAlert({ message: explainError(e) });
     }
   }
 
@@ -437,7 +439,7 @@ export function FileTree({
       await refresh();
     } catch (e) {
       await uiAlert({
-        message: t("tree.alert.deleteFailed", { error: (e as Error).message }),
+        message: t("tree.alert.deleteFailed", { error: explainError(e) }),
       });
     }
   }
@@ -568,17 +570,11 @@ export function FileTree({
         </div>
       )}
       {displayedTree.length === 0 ? (
-        <div
-          style={{
-            padding: "1rem 0.85rem",
-            color: "hsl(var(--fg-muted))",
-            fontSize: 12,
-          }}
-        >
-          {tagFilter
-            ? (t("tree.tagFilter.empty"))
-            : t("tree.emptyHint")}
-        </div>
+        tagFilter ? (
+          <EmptyState message={t("tree.tagFilter.empty")} action={{ label: t("tree.tagFilter.clear"), onClick: () => setTagFilter(null) }} />
+        ) : (
+          <EmptyState message={t("tree.emptyHint")} action={{ label: t("tree.newNote"), onClick: () => void newFile("") }} />
+        )
       ) : (
         <>
           {selectedPaths.size > 0 && (

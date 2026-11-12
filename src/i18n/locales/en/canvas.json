@@ -34,6 +34,7 @@
   "canvas.unsaved": "{name} (unsaved)",
   "canvas.zoom": "Zoom: {pct}%",
   "graphView.empty": "No workspace files found. Open the workspace panel and add files to see the knowledge graph.",
+  "graphView.openWorkspace": "Open the workspace",
   "graphView.renderFailed": "Graph Render Failed",
   "graphView.renderFailedDetail": "The workspace data resulted in an invalid node structure that crashed the renderer.",
   "graphView.stats": "{nodes} nodes · {edges} connections",
