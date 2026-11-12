@@ -333,6 +333,14 @@ export function useCommands({
         action: () => void import("../citations/run").then((m) => m.syncZoteroLibrary()),
       },
       {
+        // Plan W5.23: the Web API, for the browser and phones (no Zotero Desktop).
+        id: "cite.syncZoteroWeb",
+        label: t("cmd.cite.syncZoteroWeb"),
+        icon: cmdIcons.FileText,
+        group: t("group.tools"),
+        action: () => void import("../citations/run").then((m) => m.syncZoteroWebLibrary()),
+      },
+      {
         id: "file.exportRtf",
         label: t("cmd.file.exportRtf"),
         hint: t("cmd.file.exportRtf.hint"),

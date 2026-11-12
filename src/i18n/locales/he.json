@@ -1451,5 +1451,15 @@
   "cite.zotero.browser": "Zotero עונה רק לאפליקציות במחשב הזה, לא לדפי אינטרנט: העתיקו את הספרייה מאפליקציית שולחן העבודה.",
   "cite.zotero.failed": "לא הצלחנו לקרוא את ספריית Zotero: {error}",
   "cmd.cite.insert": "הוספת ציטוט ‎[@key]…",
-  "cmd.cite.syncZotero": "ציטוטים: העתקת ספריית Zotero לכספת"
+  "cmd.cite.syncZotero": "ציטוטים: העתקת ספריית Zotero לכספת",
+  "cite.web.keyTitle": "מפתח API של Zotero",
+  "cite.web.keyBody": "Lumen קורא את ספריית Zotero שלך מ-api.zotero.org עם מפתח שיוצרים ב-zotero.org ← Settings ← Security ← Applications (מספיקה גישת קריאה לספרייה). המפתח נשמר בכספת הסודות של המכשיר ונשלח רק ל-api.zotero.org; כל בקשה מופיעה ביומן הפרטיות. שום דבר לא נכתב ל-Zotero.",
+  "cite.web.synced": "ספריית Zotero סונכרנה מ-zotero.org: {n} מקורות ({changed} שהשתנו, {deleted} שהוסרו, {notes} פתקים).",
+  "cite.web.upToDate": "ספריית Zotero מעודכנת ({n} מקורות).",
+  "cite.web.forbidden": "Zotero דחה את המפתח. יש להריץ שוב את הסנכרון ולהזין מפתח מ-zotero.org ← Settings ← Security ← Applications.",
+  "cite.web.noAccess": "המפתח הזה לא יכול לקרוא את הספרייה: יש לערוך אותו ב-zotero.org ולאפשר גישה לספרייה.",
+  "cite.web.rateLimited": "Zotero ביקש להאט; כדאי לנסות שוב בעוד כמה דקות.",
+  "cite.web.blocked": "מדיניות ה-AI והפרטיות היא מקומית בלבד, ולכן Lumen לא פונה ל-zotero.org.",
+  "cite.web.failed": "הסנכרון מ-zotero.org נכשל: {error}",
+  "cmd.cite.syncZoteroWeb": "ציטוטים: סנכרון ספריית Zotero מ-zotero.org (קריאה בלבד)"
 }

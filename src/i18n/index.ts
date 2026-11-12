@@ -173,6 +173,7 @@ const en: Strings = {
   "cmd.file.exportDocx": "Export to Word (.doc)",
   "cmd.cite.insert": "Insert a citation [@key]…",
   "cmd.cite.syncZotero": "Citations: copy the Zotero library into the vault",
+  "cmd.cite.syncZoteroWeb": "Citations: sync the Zotero library from zotero.org (read-only)",
   "cmd.file.exportDocx.hint": "Download as Word document",
   "cmd.file.exportRtf": "Export to RTF",
   "cmd.file.exportRtf.hint": "Rich Text Format — opens in Pages, Word, TextEdit",
