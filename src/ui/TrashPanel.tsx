@@ -11,6 +11,7 @@ import { onWorkspaceChanged } from "../storage/workspaceEvents";
 import { toast } from "../store/useToastStore";
 import { EmptyState } from "./EmptyState";
 import { uiConfirm } from "./PromptDialog";
+import { HelpButton } from "./HelpButton";
 
 interface Props {
   open: boolean;
@@ -74,6 +75,7 @@ export function TrashPanel({ open, onClose }: Props) {
               {t("trash.emptyAll")}
             </button>
           )}
+          <HelpButton topic="workspace/panels#trash" />
           <button type="button" style={btn} onClick={onClose} aria-label={t("trash.close")}>
             <X size={14} />
           </button>

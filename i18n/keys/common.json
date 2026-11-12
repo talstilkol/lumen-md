@@ -1311,6 +1311,16 @@
       "vars": []
     },
     {
+      "key": "diagnostics.failed",
+      "en": "Couldn't build the diagnostics file.",
+      "vars": []
+    },
+    {
+      "key": "diagnostics.saved",
+      "en": "Diagnostics saved. Attach the file to your issue.",
+      "vars": []
+    },
+    {
       "key": "dialog.cancel",
       "en": "Cancel",
       "vars": []
@@ -2467,6 +2477,36 @@
       "vars": []
     },
     {
+      "key": "errorScreen.body",
+      "en": "Lumen hit an unexpected error.",
+      "vars": []
+    },
+    {
+      "key": "errorScreen.diagnostics",
+      "en": "Save diagnostics",
+      "vars": []
+    },
+    {
+      "key": "errorScreen.diagnosticsHint",
+      "en": "The diagnostics file holds the version, the settings and the recent errors — no note text and no keys.",
+      "vars": []
+    },
+    {
+      "key": "errorScreen.reload",
+      "en": "Reload Lumen",
+      "vars": []
+    },
+    {
+      "key": "errorScreen.report",
+      "en": "Report this problem",
+      "vars": []
+    },
+    {
+      "key": "errorScreen.title",
+      "en": "Something went wrong",
+      "vars": []
+    },
+    {
       "key": "external.conflict.body",
       "en": "This note was changed by another program while you had unsaved edits. The other version is already kept as a copy, so nothing is lost. Choose what this note should contain.",
       "vars": []
@@ -2851,6 +2891,58 @@
     {
       "key": "graph.search",
       "en": "Find a note",
+      "vars": []
+    },
+    {
+      "key": "help.back",
+      "en": "Back to the contents",
+      "vars": []
+    },
+    {
+      "key": "help.button",
+      "en": "Help for this panel",
+      "vars": []
+    },
+    {
+      "key": "help.close",
+      "en": "Close help",
+      "vars": []
+    },
+    {
+      "key": "help.contents",
+      "en": "Contents",
+      "vars": []
+    },
+    {
+      "key": "help.loading",
+      "en": "Loading…",
+      "vars": []
+    },
+    {
+      "key": "help.noResults",
+      "en": "Nothing found. Try fewer or other words.",
+      "vars": []
+    },
+    {
+      "key": "help.results",
+      "en": "{count} results",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "help.search",
+      "en": "Search the help",
+      "vars": []
+    },
+    {
+      "key": "help.title",
+      "en": "Help",
+      "vars": []
+    },
+    {
+      "key": "help.web",
+      "en": "Open on the web",
       "vars": []
     },
     {

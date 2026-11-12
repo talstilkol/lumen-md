@@ -8,6 +8,7 @@ import { log } from "../lib/logger";
 // Unlinked mentions (4.6): its scan and Link action load with the section.
 const UnlinkedMentions = lazy(() => import("./UnlinkedMentions"));
 import { EmptyState } from "./EmptyState";
+import { HelpButton } from "./HelpButton";
 
 interface Props {
   /** Active workspace path. */
@@ -63,6 +64,7 @@ export function BacklinksPanel({ filePath, onOpen }: Props) {
           <Link2 size={12} />
           {t("backlinks.title")}
         </span>
+        <HelpButton topic="workspace/panels#backlinks" />
       </div>
       {!filePath && (
         <div style={{ padding: "1rem", color: "hsl(var(--fg-muted))", fontSize: 12 }}>

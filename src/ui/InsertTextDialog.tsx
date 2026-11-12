@@ -3,6 +3,7 @@ import { useFocusTrap } from "./useFocusTrap";
 import { createRoot } from "react-dom/client";
 import { t } from "../i18n";
 import { smartDetect, renderAs, ALL_KINDS, type DetectedKind } from "../data/smartDetect";
+import { HelpButton } from "./HelpButton";
 
 /**
  * Smart Insert dialog — single text area, the system figures out what to
@@ -135,8 +136,11 @@ function InsertTextDialogImpl({
           gap: 12,
         }}
       >
-        <div id="insert-text-title" style={{ fontSize: 15, fontWeight: 600 }}>
-          {t("insertText.title")}
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div id="insert-text-title" style={{ fontSize: 15, fontWeight: 600, flex: 1 }}>
+            {t("insertText.title")}
+          </div>
+          <HelpButton topic="editor/smart-insert" />
         </div>
         <div style={{ fontSize: 12, color: "hsl(var(--fg-muted))", marginTop: -6 }}>
           {t("insertText.smartHelp")}

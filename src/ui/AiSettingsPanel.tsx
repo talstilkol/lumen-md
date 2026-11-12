@@ -27,6 +27,7 @@ import type { PullProgress } from "../ai/ollamaPull";
 import type { ModelCacheKind, StorageEstimateResult } from "../ai/modelStorage";
 import { EmptyState } from "./EmptyState";
 import { uiConfirm } from "./PromptDialog";
+import { HelpButton } from "./HelpButton";
 
 interface Props {
   open: boolean;
@@ -412,6 +413,7 @@ export function AiSettingsPanel({ open, onClose, embedded = false }: Props) {
               <X size={16} />
             </button>
           )}
+          <HelpButton topic="ai/local-agents#ai-settings" />
         </header>
 
         <div style={{ padding: 18, display: "flex", flexDirection: "column", gap: 14, fontSize: 13, lineHeight: 1.5, overflowY: "auto" }}>

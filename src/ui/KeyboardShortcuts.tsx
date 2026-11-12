@@ -16,6 +16,7 @@ export function withLayout(keys: string, layout: "he" | "latin" = activeLayout(g
   const he = m ? hebrewOnKey(m[1]) : null;
   return he ? `${keys} (${he})` : keys;
 }
+import { HelpButton } from "./HelpButton";
 
 interface Props {
   open: boolean;
@@ -121,6 +122,7 @@ export function KeyboardShortcuts({ open, onClose }: Props) {
           }}
         >
           ⌨️ {t("cmd.shortcuts")}
+          <HelpButton topic="getting-started/shortcuts" />
           <button
             onClick={onClose}
             style={{

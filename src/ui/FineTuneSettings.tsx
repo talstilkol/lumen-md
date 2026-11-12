@@ -27,6 +27,7 @@ import "../ai/localLoraStrings";
 // The local LoRA route (plan 6.12.4) comes first; its code loads with this dialog's first paint.
 const LocalLoraSection = lazy(() => import("./LocalLoraSection").then((m) => ({ default: m.LocalLoraSection })));
 import { explainError } from "../lib/userError";
+import { HelpButton } from "./HelpButton";
 
 interface Props {
   open: boolean;
@@ -193,7 +194,8 @@ export function FineTuneSettings({ open, onClose, embedded = false }: Props) {
       >
         <header style={{ padding: "14px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <Brain size={18} style={{ color: "hsl(var(--accent))" }} />
-          <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>{t("fineTune.title")}</h2>
+          <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600, flex: 1 }}>{t("fineTune.title")}</h2>
+          <HelpButton topic="ai/local-llm" />
         </header>
 
         <div style={{ padding: 18, display: "flex", flexDirection: "column", gap: 16, fontSize: 13, lineHeight: 1.5, overflowY: "auto" }}>

@@ -30,6 +30,7 @@ import { t, getLocale } from "../i18n";
 import { scrollBehavior } from "../lib/motion";
 import { EmptyState, runCommand } from "./EmptyState";
 import { uiConfirm } from "./PromptDialog";
+import { HelpButton } from "./HelpButton";
 
 interface Props {
   open: boolean;
@@ -140,6 +141,7 @@ export function CommentsPanel({ open, onClose, collab, onJump }: Props) {
         >
           {showResolved ? t("commentsPanel.viewAll") : t("commentsPanel.viewOpen")}
         </button>
+        <HelpButton topic="workspace/panels#comments" />
         <button
           type="button"
           onClick={onClose}

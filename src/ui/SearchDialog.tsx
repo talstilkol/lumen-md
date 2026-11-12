@@ -27,6 +27,7 @@ import { isSaved, removeSavedSearch, saveSearch } from "../search/savedSearches"
 const ImageSearchPanel = lazy(() => import("./ImageSearchPanel").then((m) => ({ default: m.ImageSearchPanel })));
 import { explainError } from "../lib/userError";
 import { EmptyState, runCommand } from "./EmptyState";
+import { HelpButton } from "./HelpButton";
 
 interface Props {
   open: boolean;
@@ -400,6 +401,9 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
           <button className={`chart-block-tab ${mode === "images" ? "active" : ""}`} style={{ fontSize: 13, background: "transparent" }} onClick={() => setMode("images")} data-testid="search-tab-images">
              <ImageIcon size={11} style={{ display: "inline", marginInlineEnd: 4 }} /> {t("imageSearch.tab")}
           </button>
+          <span style={{ marginInlineStart: "auto" }}>
+            <HelpButton topic="workspace/search" />
+          </span>
           {mode === "smart" && smartAllowed && (
             <button
               type="button"

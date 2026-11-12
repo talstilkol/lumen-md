@@ -22,6 +22,7 @@ import { showAiToast } from "./AiToast";
 import { docsUrl } from "../lib/docsLinks";
 import { t } from "../i18n";
 import { explainError } from "../lib/userError";
+import { HelpButton } from "./HelpButton";
 
 interface Props {
   open: boolean;
@@ -137,6 +138,7 @@ export function TrustedKeysSettings({ open, onClose, embedded = false }: Props) 
               <X size={14} />
             </button>
           )}
+          <HelpButton topic="plugins/signing#manage-trusted-keys" />
         </div>
 
         <div style={{ overflow: "auto", padding: "12px 16px", display: "flex", flexDirection: "column", gap: 16 }}>

@@ -8,6 +8,7 @@ import { UpdateBanner } from "./ui/UpdateBanner";
 import { setVaultBackend, createDirectoryHandleBackend } from "./storage/vault";
 import { openVaultAtBoot } from "./storage/vault/boot";
 import { ErrorBoundary } from "./ui/ErrorBoundary";
+import { ErrorActions } from "./ui/ErrorActions";
 import { showAiToast } from "./ui/AiToast";
 import { ToastContainer } from "./components/Toast";
 import { initTelemetry } from "./lib/telemetry";
@@ -181,6 +182,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         >
           {t("boot.reload")}
         </button>
+        {/* W3.7: report it, with the diagnostics bundle. */}
+        <ErrorActions />
       </div>
     }>
       <Suspense fallback={

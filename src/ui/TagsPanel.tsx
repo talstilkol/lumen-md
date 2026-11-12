@@ -15,6 +15,7 @@ import { t } from "../i18n";
 import { useAppStore } from "../store/useStore";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
 import { EmptyState } from "./EmptyState";
+import { HelpButton } from "./HelpButton";
 
 interface Props {
   open: boolean;
@@ -116,6 +117,7 @@ export function TagsPanel({ open, onClose }: Props) {
               })
             : ""}
         </span>
+        <HelpButton topic="workspace/panels#tags" />
         <button
           type="button"
           onClick={onClose}

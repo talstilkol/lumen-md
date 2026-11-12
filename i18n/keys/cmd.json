@@ -940,6 +940,26 @@
       "vars": []
     },
     {
+      "key": "cmd.help.diagnostics",
+      "en": "Save a diagnostics file",
+      "vars": []
+    },
+    {
+      "key": "cmd.help.diagnostics.hint",
+      "en": "version, settings, vault size and recent errors — no note text, no keys — to attach to an issue",
+      "vars": []
+    },
+    {
+      "key": "cmd.help.open",
+      "en": "Help",
+      "vars": []
+    },
+    {
+      "key": "cmd.help.open.hint",
+      "en": "the docs, on this device: search and read them offline",
+      "vars": []
+    },
+    {
       "key": "cmd.help.setup",
       "en": "Set up Lumen…",
       "vars": []

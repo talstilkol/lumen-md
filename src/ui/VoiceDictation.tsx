@@ -30,6 +30,7 @@ import { getAiPolicy, onAiPolicyChange, thirdPartyServicesAllowed } from "../ai/
 import { recordBrowserService, recordSpeechRecognition } from "../ai/privacyLedger";
 import { chooseDictationEngine, webSpeechOptedIn, WEB_SPEECH_KEY, Segmenter, SerialQueue } from "../ai/dictation";
 import { explainError } from "../lib/userError";
+import { HelpButton } from "./HelpButton";
 
 // SpeechRecognition is poorly + inconsistently typed across DOM lib
 // variants; keep the surface deliberately loose so we don't fight the
@@ -329,6 +330,7 @@ function startWebSpeech(Ctor: SpeechCtor, lang: string): void {
     showAiToast(t("toast.dictate.stoppedLocalOnly"), "info");
   });
   hidePill = showRecordingPill(t("voice.recording", { lang }), stop);
+      <HelpButton topic="editor/tools#voice-memos-and-dictation" />
   recognition.start();
 }
 
@@ -623,6 +625,7 @@ export async function startVoiceMemo(opts: { language?: string; plain?: boolean;
         }}
       />
       <span>🎙 {opts.plain ? t("dictation.localRecording") : t("voice.memo.recording")}</span>
+      <HelpButton topic="editor/tools#voice-memos-and-dictation" />
       <button
         type="button"
         onClick={() => recorder.stop()}

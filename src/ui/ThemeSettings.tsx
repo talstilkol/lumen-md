@@ -31,6 +31,7 @@ import { downloadText } from "../storage/exportFormats";
 import { showAiToast } from "./AiToast";
 import { t } from "../i18n";
 import { SnippetSettings } from "./SnippetSettings";
+import { HelpButton } from "./HelpButton";
 
 interface Props {
   open: boolean;
@@ -135,6 +136,7 @@ export function ThemeSettings({ open, onClose, embedded = false }: Props) {
               <X size={14} />
             </button>
           )}
+          <HelpButton topic="editor/tools#theme-settings" />
         </div>
 
         <div style={{ overflow: "auto", padding: "12px 16px", display: "flex", flexDirection: "column", gap: 16 }}>

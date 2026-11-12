@@ -58,6 +58,7 @@ const SearchDialog = lazy(() =>
 );
 import { AiToastContainer, showAiToast } from "./ui/AiToast";
 import { minimalChange, propertiesTransaction, trackedPropertiesText } from "./editor/propertiesEdit";
+import { HelpHost } from "./ui/HelpHost";
 import { AiSuggestionsPanel } from "./ui/AiSuggestionsPanel";
 import { ledgerEntries } from "./ai/privacyLedger";
 import { MobileKeyboardBar } from "./ui/MobileKeyboardBar";
@@ -1304,6 +1305,7 @@ export default function App() {
       />
       </Suspense>}
       <AiToastContainer />
+      <HelpHost />
       <AiSuggestionsPanel />
       <AiInlinePromptOverlay />
       <MobileKeyboardBar />
