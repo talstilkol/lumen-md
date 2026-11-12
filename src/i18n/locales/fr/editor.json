@@ -72,6 +72,8 @@
   "block.diagram.renderedIn": "Rendu en {ms} ms",
   "block.diagram.rendering": "Rendu en cours…",
   "block.diagram.scrollToRender": "Faites défiler pour afficher",
+  "block.embed.gistDesktop": "L’application de bureau affiche un Gist sous forme de lien.",
+  "block.embed.notEmbeddable": "{host} ne fait pas partie des sites que Lumen peut intégrer. Ouvrez plutôt le lien.",
   "block.embed.open": "Ouvrir ↗",
   "block.embed.unrecognized": "⚠︎ URL d’intégration non reconnue.",
   "block.glsl.error": "⚠︎ Erreur GLSL :",

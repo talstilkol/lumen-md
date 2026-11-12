@@ -72,6 +72,8 @@
   "block.diagram.renderedIn": "In {ms} ms gerendert",
   "block.diagram.rendering": "Wird gerendert…",
   "block.diagram.scrollToRender": "Zum Darstellen scrollen",
+  "block.embed.gistDesktop": "Die Desktop-App zeigt einen Gist als Link.",
+  "block.embed.notEmbeddable": "{host} gehört nicht zu den Seiten, die Lumen einbetten kann. Öffne stattdessen den Link.",
   "block.embed.open": "Öffnen ↗",
   "block.embed.unrecognized": "⚠︎ Einbettungs-URL nicht erkannt.",
   "block.glsl.error": "⚠︎ GLSL-Fehler:",

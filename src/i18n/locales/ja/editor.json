@@ -72,6 +72,8 @@
   "block.diagram.renderedIn": "{ms} ms で描画",
   "block.diagram.rendering": "描画中…",
   "block.diagram.scrollToRender": "スクロールすると描画",
+  "block.embed.gistDesktop": "デスクトップアプリでは Gist はリンクとして表示されます。",
+  "block.embed.notEmbeddable": "{host} は Lumen が埋め込めるサイトではありません。リンクを開いてください。",
   "block.embed.open": "開く ↗",
   "block.embed.unrecognized": "⚠︎ 埋め込み URL を認識できませんでした。",
   "block.glsl.error": "⚠︎ GLSL のエラー:",
