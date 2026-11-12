@@ -68,11 +68,17 @@ const browsers = [
   { name: "webkit", install: ["webkit"], prefix: "webkit", exes: ["pw_run.sh", "MiniBrowser"] },
 ];
 const result = {};
+// Run 1: the build runs as root on Amazon Linux 2023 with dnf, and the headless shell lacked nss / nspr.
+run("dnf", ["-y", "-q", "install", "nss", "nspr"], { timeoutMs: 4 * 60_000 });
+// WebKit's Ubuntu build wants Ubuntu sonames (libjpeg.so.8, libavif.so.16, flite…): see what AL2023 can give.
+const webkitPkgs = ["libsecret", "hyphen", "enchant2", "harfbuzz-icu", "libavif", "libjpeg-turbo", "woff2", "mesa-libGLES", "libmanette", "flite", "x264-libs", "gstreamer1-plugins-base", "libwpe", "wpebackend-fdo", "libxslt", "lcms2", "libwebp", "openjpeg2"];
+for (const pkg of webkitPkgs) log(`dnf ${pkg}: ${sh(`dnf -y -q install ${pkg} >/dev/null 2>&1 && echo installed || echo unavailable`)}`);
 for (const b of browsers) {
   const left = 42 - (Date.now() - T0) / 60000;
   if (left < 4) { log(`${b.name}: skipped, ${left.toFixed(1)} min left`); result[b.name] = "skipped (time)"; continue; }
   if (!run("npx", ["playwright", "install", ...b.install], { timeoutMs: 6 * 60_000 })) { result[b.name] = "install failed"; continue; }
   missingLibs(b.name, findExe(b.prefix, b.exes));
+  if (b.name === "webkit") { result.webkit = "libs only (see ldd)"; continue; }
   const smoke = pw(["e2e/smoke.spec.ts", `--project=${b.name}`], 5 * 60_000);
   result[b.name] = smoke ? "smoke passed" : "smoke failed";
   if (smoke && b.name === "chromium") {
