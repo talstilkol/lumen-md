@@ -56,6 +56,7 @@ async function fetchFile(f: ModelFile, cache: Cache | null, onBytes: (n: number)
   const cands = f.path
     ? candidates({ id: ZIPFORMER_REPO, hosting: { hf: ZIPFORMER_REPO, revision: ZIPFORMER_REVISION } }, { path: f.path, sha256: f.sha256 ?? "", bytes: f.bytes }, await currentSources())
     : [{ kind: "hf" as const, url }];
+  // privacy-ledger: model-download — window.fetch, so the ledger records each source tried
   const { data: out } = await fetchVerified({ path: f.path ?? url, sha256: f.sha256 ?? "", bytes: f.bytes }, cands, { fetch: (u, init) => fetch(u, init), onBytes, signal, digest: sha256Hex });
   try {
     await cache?.put(url, new Response(out, { headers: { "content-type": "application/octet-stream" } }));

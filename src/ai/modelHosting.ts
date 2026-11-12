@@ -245,6 +245,7 @@ export async function fetchVerified(
     if (deps.signal?.aborted) throw new DOMException("aborted", "AbortError");
     let counted = 0;
     try {
+      // privacy-ledger: model-download — Hugging Face (ledger rule), Lumen's mirror (VITE_MODEL_MIRROR_URL rule) or the user's own copy; window.fetch / the worker ledger record it
       const res = await deps.fetch(c.url, { signal: deps.signal });
       if (!res.ok) {
         attempts.push({ ...c, error: `HTTP ${res.status}` });
@@ -491,6 +492,7 @@ export async function prefillFor(
   if (!m?.files?.length) return null;
   const open = deps.open ?? ((n: string) => caches.open(n));
   const sources = deps.sources ?? (await currentSources(open));
+  // privacy-ledger: model-download — the global fetch, wrapped by the ledger (window) or workerLedgerInstall (workers)
   const doFetch = deps.fetch ?? ((u: string, init?: RequestInit) => fetch(u, init));
   return ensureModelFiles(m, { ...deps, fetch: doFetch, sources, open });
 }
