@@ -183,6 +183,7 @@
   "cmd.help.credits": "קרדיטים ורישיונות מודלים",
   "cmd.help.setup": "הגדרת Lumen…",
   "cmd.help.setup.hint": "שפה, מיקום הכספת, מראה וכספת דוגמה: הגדרת ההתחלה שוב",
+  "cmd.highlights.all": "כל ההדגשות",
   "cmd.image.altText": "תמונות: טקסט חלופי מ-OCR / ראייה מקומית",
   "cmd.image.altText.hint": "קורא את הטקסט שבתמונות הפתק במכשיר (עברית ואנגלית); מתאר את השאר עם מודל ראייה מקומי ב-Ollama",
   "cmd.insert.abc": "הוספת תווים מוזיקליים (ABC)",

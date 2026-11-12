@@ -930,6 +930,11 @@
       "vars": []
     },
     {
+      "key": "cmd.highlights.all",
+      "en": "All highlights",
+      "vars": []
+    },
+    {
       "key": "cmd.image.altText",
       "en": "Images: alt text from OCR / local vision",
       "vars": []

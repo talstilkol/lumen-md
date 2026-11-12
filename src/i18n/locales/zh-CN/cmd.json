@@ -183,6 +183,7 @@
   "cmd.help.credits": "致谢与模型许可证",
   "cmd.help.setup": "设置 Lumen…",
   "cmd.help.setup.hint": "语言、库位置、外观和示例库：重新进行首次设置",
+  "cmd.highlights.all": "所有高亮",
   "cmd.image.altText": "图片：用 OCR / 本地视觉生成替代文本",
   "cmd.image.altText.hint": "在本设备识别此笔记图片中的文字（希伯来语+英语）；其余用本地 Ollama 视觉模型描述",
   "cmd.insert.abc": "插入 music notation (ABC)",
