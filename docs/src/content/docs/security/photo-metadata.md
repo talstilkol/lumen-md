@@ -17,9 +17,13 @@ note, before the image is stored in the vault or put inline:
   colour profile, and the photo's orientation, so a portrait photo still
   stands upright.
 
-GIF, SVG, HEIC and AVIF images are stored as they are. Photos already in
-the vault are not changed.
+GIF, SVG, HEIC and AVIF images are stored as they are.
 
-To keep the metadata (for example, for your own photo archive), set
-`localStorage["lumen.images.keepMetadata"] = "1"` in the browser's developer
-tools. A switch in Settings is planned.
+**On export too:** photos already in the vault (including ones added before
+this cleaning existed) are inlined clean into PDF and HTML exports, and
+photos inlined in the note as `data:` URLs are cleaned in every export. The
+file in the vault itself is not changed.
+
+To keep the metadata (for example, for your own photo archive): **Settings →
+General →** "Keep photos' location, time and camera details". Importing a
+settings file never turns this switch on by itself.
