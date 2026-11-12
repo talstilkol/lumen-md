@@ -14,6 +14,7 @@ test("OCR reads Hebrew and English text from an image on this device", async ({ 
   // Imports the module straight from the dev server; the production-bundle
   // job has no /src/ to import from.
   const dev = await page.evaluate(() => !!document.querySelector('script[src*="/@vite/client"]'));
+  // skip-reason: imports src/ modules from the dev server; the production bundle has no /src/ to import | task: 7.5 | until: 2027-05-12
   test.skip(!dev, "runs against the dev server only");
   const text = await page.evaluate(async () => {
     const c = document.createElement("canvas");
