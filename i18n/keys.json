@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-10T00:36:02.358Z",
+  "generated_at": "2026-11-12T09:50:44.665Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1448,
+  "count": 1469,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1716,6 +1716,16 @@
     {
       "key": "cmd.note.today.hint",
       "en": "Open or create the daily note for today (journal/YYYY-MM-DD.md)",
+      "vars": []
+    },
+    {
+      "key": "cmd.student.lecture",
+      "en": "Student mode: record a lecture",
+      "vars": []
+    },
+    {
+      "key": "cmd.student.lecture.hint",
+      "en": "Record, tap “Important!”, and get a transcript with ▶ for each sentence, a summary and review cards — on this device.",
       "vars": []
     },
     {
@@ -7778,6 +7788,110 @@
     {
       "key": "fineTune.privacy",
       "en": "Note: training uploads ~5 MB of your writing to OpenAI. The resulting model is only accessible from your account. Click \"Forget\" to drop the id from this device — to fully remove the trained model, delete it in your OpenAI dashboard too.",
+      "vars": []
+    },
+    {
+      "key": "student.title",
+      "en": "Record a lecture",
+      "vars": []
+    },
+    {
+      "key": "student.about",
+      "en": "Everything stays on this device: the recording, the transcript (local Whisper), the summary and the cards. Tap “Important!” or press the space bar when something matters.",
+      "vars": []
+    },
+    {
+      "key": "student.name",
+      "en": "Lecture name",
+      "vars": []
+    },
+    {
+      "key": "student.untitled",
+      "en": "Lecture",
+      "vars": []
+    },
+    {
+      "key": "student.start",
+      "en": "Start recording",
+      "vars": []
+    },
+    {
+      "key": "student.stop",
+      "en": "Stop and process",
+      "vars": []
+    },
+    {
+      "key": "student.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "student.mark",
+      "en": "Important!",
+      "vars": []
+    },
+    {
+      "key": "student.marks",
+      "en": "Marked moments: {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "student.processing",
+      "en": "Transcribing and writing the lecture note…",
+      "vars": []
+    },
+    {
+      "key": "student.done",
+      "en": "Done: {important} important sentences, {cards} cards.",
+      "vars": [
+        "important",
+        "cards"
+      ]
+    },
+    {
+      "key": "student.failed",
+      "en": "The lecture could not be processed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "student.micFailed",
+      "en": "The microphone could not start: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "student.recording",
+      "en": "Recording",
+      "vars": []
+    },
+    {
+      "key": "student.summary",
+      "en": "Summary",
+      "vars": []
+    },
+    {
+      "key": "student.cards",
+      "en": "Review cards",
+      "vars": []
+    },
+    {
+      "key": "student.noCards",
+      "en": "No moment was marked important, so there are no cards.",
+      "vars": []
+    },
+    {
+      "key": "student.transcript",
+      "en": "Transcript",
+      "vars": []
+    },
+    {
+      "key": "student.important",
+      "en": "Important",
       "vars": []
     }
   ]

@@ -48,6 +48,7 @@ export default defineConfig({
             { label: "Vault Doctor", slug: "workspace/doctor" },
             { label: "Quick capture (inbox)", slug: "workspace/quick-capture" },
             { label: "Voice notes into the inbox", translations: { he: "פתקים קוליים ל-inbox" }, slug: "workspace/voice-capture" },
+            { label: "Student mode", translations: { he: "מצב סטודנט" }, slug: "workspace/student-mode" },
           ],
         },
         {
