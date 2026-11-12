@@ -152,6 +152,7 @@ export default defineConfig({
             { label: "Translation drafts", translations: { he: "טיוטות תרגום" }, slug: "contributing/translation-drafts" },
             { label: "Visual regression", translations: { he: "רגרסיה חזותית" }, slug: "contributing/visual-regression" },
             { label: "Checks on every branch (Vercel)", translations: { he: "בדיקות בכל ענף (Vercel)" }, slug: "contributing/checks" },
+            { label: "Nightly runs and receipts", translations: { he: "ריצות לילה וקבלות" }, slug: "contributing/nightly" },
           ],
         },
         {
@@ -161,6 +162,7 @@ export default defineConfig({
             { label: "Where Lumen runs", slug: "self-hosting/hosting", translations: { he: "איפה Lumen רץ" } },
             { label: "Android and iOS builds", slug: "self-hosting/mobile", translations: { he: "בניית Android ו-iOS" } },
             { label: "A second host and tests without Vercel", slug: "self-hosting/second-host", translations: { he: "אירוח שני ובדיקות בלי Vercel" } },
+            { label: "The verification factory", slug: "self-hosting/verification-factory", translations: { he: "מפעל האימות" } },
           ],
         },
         {
