@@ -4,7 +4,9 @@
  *
  *   live, Hebrew   → Zipformer2 streaming (ivrit.ai, 72 MB, WASM) — real time
  *   live, other    → Whisper on this device after each pause (push-to-talk feel)
- *   files          → Whisper: ivrit.ai turbo on WebGPU for Hebrew when the
+ *   files          → Whisper: on the desktop app, ivrit.ai turbo as ggml in
+ *                    whisper.cpp when it is installed and verified (W1.17);
+ *                    else ivrit.ai turbo on WebGPU for Hebrew when the
  *                    GPU can hold it (owner-measured, 15.3), else whisper-base
  *                    on WASM (77 MB); the language is forced, never detected
  *   browser speech → only under the `cloud` policy (plan 6.17; the browser sends
@@ -14,7 +16,7 @@
  */
 import type { AiPolicy } from "../policy";
 
-export type EngineId = "zipformer-he" | "whisper-turbo-he" | "whisper-base" | "whisper-live" | "web-speech";
+export type EngineId = "zipformer-he" | "whisper-cpp-he" | "whisper-turbo-he" | "whisper-base" | "whisper-live" | "web-speech";
 
 export interface EngineInfo {
   id: EngineId;
@@ -30,6 +32,8 @@ export interface EngineInfo {
 
 export const ENGINES: Record<EngineId, EngineInfo> = {
   "zipformer-he": { id: "zipformer-he", local: true, streaming: true, downloadMB: 72 + 2.3, languages: "he", license: "CC-BY-4.0 (ivrit.ai) + MIT (Silero VAD)" },
+  // Installed by the user next to the desktop app (whisperDesktop.ts); offered only once it is there and verified.
+  "whisper-cpp-he": { id: "whisper-cpp-he", local: true, streaming: false, downloadMB: 0, languages: "he", license: "Apache-2.0 (ivrit.ai) + MIT (whisper.cpp)" },
   "whisper-turbo-he": { id: "whisper-turbo-he", local: true, streaming: false, downloadMB: 563, languages: "he", license: "Apache-2.0" },
   "whisper-base": { id: "whisper-base", local: true, streaming: false, downloadMB: 77, languages: "any", license: "MIT" },
   "whisper-live": { id: "whisper-live", local: true, streaming: false, downloadMB: 77 + 2.3, languages: "any", license: "MIT" },
@@ -49,6 +53,8 @@ export interface EngineContext {
   webSpeech: boolean;
   /** Engines whose files are already on this device. */
   downloaded: ReadonlySet<EngineId>;
+  /** The desktop app has whisper-cli and the pinned ivrit.ai ggml model (W1.17). */
+  desktopWhisper?: boolean;
 }
 
 export interface EngineChoice {
@@ -72,6 +78,7 @@ export function chooseEngine(ctx: EngineContext): EngineChoice {
     if (he) out.push("zipformer-he");
     out.push("whisper-live");
   } else {
+    if (he && ctx.desktopWhisper) out.push("whisper-cpp-he");
     if (he && ctx.webgpu && ctx.f16 && ctx.vramMB >= TURBO_VRAM_MB) out.push("whisper-turbo-he");
     out.push("whisper-base");
   }

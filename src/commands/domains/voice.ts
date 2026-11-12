@@ -64,6 +64,13 @@ export function buildVoiceCommands(): Command[] {
       },
     },
     {
+      id: "voice.transcribeFile",
+      label: t("cmd.tools.transcribeFile"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      action: async () => (await import("../../ui/TranscribeFile")).transcribeAudioFile(),
+    },
+    {
       id: "help.credits",
       label: t("cmd.help.credits"),
       icon: cmdIcons.Sparkles,

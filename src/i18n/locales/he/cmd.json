@@ -287,6 +287,7 @@
   "cmd.tools.grammar.hint": "שירות חינמי וציבורי",
   "cmd.tools.suggestLinks": "🔗 הצע קישורי wiki",
   "cmd.tools.suggestLinks.hint": "AI סורק את מרחב העבודה ומציע קישורים",
+  "cmd.tools.transcribeFile": "🎙 תמלול קובץ שמע (עם חותמות זמן)",
   "cmd.tools.vaultDoctor": "🩺 רופא הכספת: בדיקת סביבת העבודה",
   "cmd.tools.vaultDoctor.hint": "קישורים שבורים, דפים יתומים, כפילויות, תמונות בלי alt — בלי AI, שום דבר לא יוצא מהמכשיר",
   "cmd.tools.vaultDoctorFix": "🩺 רופא הכספת: החלת תיקוני הקישורים המוצעים",

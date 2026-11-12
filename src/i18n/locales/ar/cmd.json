@@ -287,6 +287,7 @@
   "cmd.tools.grammar.hint": "خدمة LanguageTool العامة المجانية",
   "cmd.tools.suggestLinks": "🔗 اقتراح روابط wiki",
   "cmd.tools.suggestLinks.hint": "يفحص الذكاء الاصطناعي مساحة عملك بحثًا عن روابط متبادلة ذات صلة",
+  "cmd.tools.transcribeFile": "🎙 تفريغ ملف صوتي (مع الطوابع الزمنية)",
   "cmd.tools.vaultDoctor": "🩺 طبيب الخزنة: فحص مساحة العمل",
   "cmd.tools.vaultDoctor.hint": "روابط معطّلة، صفحات يتيمة، تكرارات، صور بلا نص بديل — دون ذكاء اصطناعي ودون مغادرة جهازك",
   "cmd.tools.vaultDoctorFix": "🩺 طبيب الخزنة: تطبيق إصلاحات الروابط المقترحة",

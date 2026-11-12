@@ -286,6 +286,7 @@
   "cmd.tools.grammar.hint": "Free public LanguageTool service",
   "cmd.tools.suggestLinks": "🔗 Suggest wiki-links",
   "cmd.tools.suggestLinks.hint": "AI scans your workspace for relevant cross-links",
+  "cmd.tools.transcribeFile": "🎙 Transcribe an audio file (with timestamps)",
   "cmd.tools.vaultDoctor": "🩺 Vault Doctor: Check Workspace",
   "cmd.tools.vaultDoctor.hint": "Broken links, orphans, near-duplicates, missing alt text — no AI, nothing leaves your device",
   "cmd.tools.vaultDoctorFix": "🩺 Vault Doctor: Apply Suggested Link Fixes",

@@ -5524,6 +5524,57 @@
       "vars": []
     },
     {
+      "key": "transcribeFile.audioSaved",
+      "en": "The audio is saved as {path}; each time links to it.",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "transcribeFile.desktop.checksum",
+      "en": "Desktop Whisper: the model file does not match its pinned checksum, so it is not used — using the in-browser model.",
+      "vars": []
+    },
+    {
+      "key": "transcribeFile.desktop.missing",
+      "en": "Desktop Whisper: the model file is not in the app's whisper folder yet — using the in-browser model. See the docs: AI → Hebrew Whisper on the desktop.",
+      "vars": []
+    },
+    {
+      "key": "transcribeFile.desktop.noCli",
+      "en": "Desktop Whisper: whisper-cli is not installed — using the in-browser model. See the docs: AI → Hebrew Whisper on the desktop.",
+      "vars": []
+    },
+    {
+      "key": "transcribeFile.done",
+      "en": "Transcribed {n} sentences in {seconds} s.",
+      "vars": [
+        "n",
+        "seconds"
+      ]
+    },
+    {
+      "key": "transcribeFile.empty",
+      "en": "No speech found in the file.",
+      "vars": []
+    },
+    {
+      "key": "transcribeFile.failed",
+      "en": "Couldn't transcribe the file: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "transcribeFile.working",
+      "en": "Transcribing “{name}” ({duration}) on this device with {engine}…",
+      "vars": [
+        "name",
+        "duration",
+        "engine"
+      ]
+    },
+    {
       "key": "trustedRepos.close",
       "en": "Close",
       "vars": []

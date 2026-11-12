@@ -287,6 +287,7 @@
   "cmd.tools.grammar.hint": "Service public gratuit LanguageTool",
   "cmd.tools.suggestLinks": "🔗 Suggérer des liens wiki",
   "cmd.tools.suggestLinks.hint": "L'IA analyse votre espace de travail pour trouver des liens pertinents",
+  "cmd.tools.transcribeFile": "🎙 Transcrire un fichier audio (avec horodatage)",
   "cmd.tools.vaultDoctor": "🩺 Docteur du coffre : vérifier l’espace de travail",
   "cmd.tools.vaultDoctor.hint": "Liens cassés, notes orphelines, quasi-doublons, texte alternatif manquant — sans IA, rien ne quitte votre appareil",
   "cmd.tools.vaultDoctorFix": "🩺 Docteur du coffre : appliquer les corrections de liens suggérées",

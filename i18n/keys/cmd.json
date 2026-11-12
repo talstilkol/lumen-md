@@ -1450,6 +1450,11 @@
       "vars": []
     },
     {
+      "key": "cmd.tools.transcribeFile",
+      "en": "🎙 Transcribe an audio file (with timestamps)",
+      "vars": []
+    },
+    {
       "key": "cmd.tools.vaultDoctor",
       "en": "🩺 Vault Doctor: Check Workspace",
       "vars": []

@@ -287,6 +287,7 @@
   "cmd.tools.grammar.hint": "Kostenloser öffentlicher LanguageTool-Dienst",
   "cmd.tools.suggestLinks": "🔗 Wiki-Links vorschlagen",
   "cmd.tools.suggestLinks.hint": "KI durchsucht deinen Arbeitsbereich nach passenden Querverweisen",
+  "cmd.tools.transcribeFile": "🎙 Audiodatei transkribieren (mit Zeitmarken)",
   "cmd.tools.vaultDoctor": "🩺 Vault-Doktor: Arbeitsbereich prüfen",
   "cmd.tools.vaultDoctor.hint": "Defekte Links, Waisen, Beinahe-Duplikate, fehlender Alt-Text — ohne KI, nichts verlässt dein Gerät",
   "cmd.tools.vaultDoctorFix": "🩺 Vault-Doktor: Vorgeschlagene Link-Korrekturen anwenden",

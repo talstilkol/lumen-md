@@ -287,6 +287,7 @@
   "cmd.tools.grammar.hint": "無料の公開 LanguageTool サービス",
   "cmd.tools.suggestLinks": "🔗 wiki リンクを提案",
   "cmd.tools.suggestLinks.hint": "AI がワークスペース内の関連リンクを探します",
+  "cmd.tools.transcribeFile": "🎙 音声ファイルを文字起こし（タイムスタンプ付き）",
   "cmd.tools.vaultDoctor": "🩺 Vault Doctor：ワークスペースを検査",
   "cmd.tools.vaultDoctor.hint": "壊れたリンク、孤立ノート、重複、alt なし画像 — AI 不要、データは端末外に出ません",
   "cmd.tools.vaultDoctorFix": "🩺 Vault Doctor：提案されたリンク修正を適用",

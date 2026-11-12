@@ -287,6 +287,7 @@
   "cmd.tools.grammar.hint": "免费的公共 LanguageTool 服务",
   "cmd.tools.suggestLinks": "🔗 推荐 wiki 链接",
   "cmd.tools.suggestLinks.hint": "AI 扫描工作区,查找相关的交叉链接",
+  "cmd.tools.transcribeFile": "🎙 转写音频文件（带时间戳）",
   "cmd.tools.vaultDoctor": "🩺 库医生：检查工作区",
   "cmd.tools.vaultDoctor.hint": "失效链接、孤立笔记、近似重复、缺少替代文字 — 无需 AI，数据不离开设备",
   "cmd.tools.vaultDoctorFix": "🩺 库医生：应用建议的链接修复",

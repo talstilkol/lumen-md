@@ -5,6 +5,8 @@ use tauri::{Emitter, Manager};
 
 mod updates;
 
+mod whisper_core;
+
 /// Build the native menu bar and emit `lumen-menu` events when an item fires.
 /// The frontend listens for these events in `useTauriMenu` and dispatches the
 /// matching command from the in-app palette so behaviour stays identical to
@@ -331,7 +333,6 @@ fn secret_set(name: String, value: Option<String>) -> Result<(), String> {
     lumen_keychain::set(lumen_keychain::SERVICE, &name, value.as_deref())
 }
 
-#[cfg_attr(mobile, tauri::mobile_entry_point)]
 /// A `lumen://` link (plan 4.15.2: `lumen://clip?data=…` from the web
 /// clipper), passed to the window. Anything else is ignored.
 fn forward_deep_links(app: &tauri::AppHandle, urls: Vec<String>) {
@@ -348,6 +349,112 @@ pub fn is_lumen_link(url: &str) -> bool {
     url.len() <= 4 * 1024 * 1024 && url.to_ascii_lowercase().starts_with("lumen://")
 }
 
+// ── Desktop Whisper (plan W1.17) ────────────────────────────────────────
+//
+// ivrit.ai's Hebrew Whisper as ggml through the whisper.cpp CLI
+// (`whisper-cli`, MIT), which the user installs; Lumen bundles neither the
+// binary nor the model. The model file must be the pinned one (size +
+// sha256 from the app); nothing here downloads anything. Logic and tests:
+// whisper_core.rs.
+
+#[derive(serde::Serialize)]
+struct WhisperStatus {
+    cli: Option<String>,
+    model: &'static str,
+    model_path: Option<String>,
+}
+
+#[derive(serde::Serialize)]
+struct WhisperSegment {
+    start_ms: u64,
+    end_ms: u64,
+    text: String,
+}
+
+fn whisper_dirs(app: &tauri::AppHandle) -> Result<std::path::PathBuf, String> {
+    app.path().app_data_dir().map_err(|e| e.to_string())
+}
+
+fn whisper_cli(app_data: &std::path::Path) -> Option<std::path::PathBuf> {
+    let env = std::env::var("LUMEN_WHISPER_CLI").ok();
+    let path = std::env::var("PATH").ok();
+    whisper_core::find_cli(&whisper_core::cli_candidates(env.as_deref(), app_data, path.as_deref()))
+}
+
+/// Is desktop Whisper usable: a `whisper-cli` binary and the pinned model file?
+#[tauri::command]
+async fn whisper_status(app: tauri::AppHandle, file: String, bytes: u64, sha256: String) -> Result<WhisperStatus, String> {
+    let data = whisper_dirs(&app)?;
+    let cli = whisper_cli(&data).map(|p| p.display().to_string());
+    let Some(model) = whisper_core::model_path(&data, &file) else { return Err("invalid model file name".into()) };
+    let state = tauri::async_runtime::spawn_blocking({
+        let model = model.clone();
+        move || whisper_core::check_model(&model, bytes, &sha256)
+    })
+    .await
+    .map_err(|e| e.to_string())?;
+    Ok(WhisperStatus { cli, model: state.as_str(), model_path: Some(model.display().to_string()) })
+}
+
+/// Transcribe raw 16 kHz mono 16-bit LE PCM (the request body) with
+/// whisper-cli. Headers: x-lumen-lang (ISO-639-1), x-lumen-model-file,
+/// x-lumen-model-bytes, x-lumen-model-sha256. The audio is written to a
+/// temporary WAV that is removed afterwards; it never leaves the machine.
+#[tauri::command]
+async fn whisper_transcribe(app: tauri::AppHandle, request: tauri::ipc::Request<'_>) -> Result<Vec<WhisperSegment>, String> {
+    let tauri::ipc::InvokeBody::Raw(pcm) = request.body() else { return Err("expected raw PCM".into()) };
+    let pcm = pcm.clone();
+    let header = |name: &str| request.headers().get(name).and_then(|v| v.to_str().ok()).unwrap_or("").to_string();
+    let lang = header("x-lumen-lang");
+    let file = header("x-lumen-model-file");
+    let sha256 = header("x-lumen-model-sha256");
+    let bytes: u64 = header("x-lumen-model-bytes").parse().map_err(|_| "x-lumen-model-bytes".to_string())?;
+    if !whisper_core::valid_language(&lang) {
+        return Err("invalid language".into());
+    }
+    let data = whisper_dirs(&app)?;
+    let cli = whisper_cli(&data).ok_or("whisper-cli not found")?;
+    let model = whisper_core::model_path(&data, &file).ok_or("invalid model file name")?;
+    tauri::async_runtime::spawn_blocking(move || -> Result<Vec<WhisperSegment>, String> {
+        let state = whisper_core::check_model(&model, bytes, &sha256);
+        if state != whisper_core::ModelState::Ok {
+            return Err(format!("model {}", state.as_str()));
+        }
+        let stamp = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_nanos()).unwrap_or(0);
+        let tmp = std::env::temp_dir().join(format!("lumen-whisper-{}-{}", std::process::id(), stamp));
+        std::fs::create_dir_all(&tmp).map_err(|e| e.to_string())?;
+        let wav = tmp.join("in.wav");
+        let out_prefix = tmp.join("out");
+        let run = (|| -> Result<Vec<WhisperSegment>, String> {
+            let mut f = std::fs::File::create(&wav).map_err(|e| e.to_string())?;
+            whisper_core::write_wav(&mut f, &pcm).map_err(|e| e.to_string())?;
+            drop(f);
+            let threads = std::thread::available_parallelism().map(|n| n.get()).unwrap_or(4);
+            let status = std::process::Command::new(&cli)
+                .args(whisper_core::cli_args(&model, &wav, &lang, &out_prefix, threads))
+                .stdin(std::process::Stdio::null())
+                .stdout(std::process::Stdio::null())
+                .stderr(std::process::Stdio::piped())
+                .output()
+                .map_err(|e| e.to_string())?;
+            if !status.status.success() {
+                let err = String::from_utf8_lossy(&status.stderr);
+                return Err(format!("whisper-cli failed: {}", err.chars().rev().take(300).collect::<String>().chars().rev().collect::<String>()));
+            }
+            let srt = std::fs::read_to_string(tmp.join("out.srt")).map_err(|e| e.to_string())?;
+            Ok(whisper_core::parse_srt(&srt)
+                .into_iter()
+                .map(|s| WhisperSegment { start_ms: s.start_ms, end_ms: s.end_ms, text: s.text })
+                .collect())
+        })();
+        let _ = std::fs::remove_dir_all(&tmp);
+        run
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+#[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let builder = tauri::Builder::default();
     // Must be the first plugin: a second launch (the OS opening lumen://…)
@@ -379,6 +486,8 @@ pub fn run() {
             desktop_vault::vault_rename,
             desktop_vault::vault_remove,
             desktop_vault::vault_backup,
+            whisper_status,
+            whisper_transcribe,
             #[cfg(desktop)]
             updates::imp::update_check,
             #[cfg(desktop)]
