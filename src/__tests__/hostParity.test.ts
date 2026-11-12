@@ -4,7 +4,7 @@
  * (scripts/lib/hostParity.mjs, `npm run hosts:parity`).
  */
 import { describe, expect, it } from "vitest";
-import { createServer, type Server } from "node:http";
+import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import type { AddressInfo } from "node:net";
@@ -131,7 +131,7 @@ describe("host parity --live", () => {
   /** A server that answers like the emulated host. */
   const serve = (handler: (path: string) => { status: number; served: string | null; headers: Map<string, string> }) =>
     new Promise<Server>((done) => {
-      const s = createServer((req, res) => {
+      const s = createServer((req: IncomingMessage, res: ServerResponse) => {
         const path = new URL(req.url ?? "/", "http://x").pathname;
         const r = handler(path);
         if (r.status === 308) {
