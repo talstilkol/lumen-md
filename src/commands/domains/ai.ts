@@ -192,6 +192,8 @@ export function buildAiModelCommands(): Command[] {
             await writeWorkspaceFile(path, sp.styleModelfile(getOllamaConfigModel()));
             showAiToast(t("ai.style.modelfileSaved", { path }), "success");
           } else if (choice === "clear") {
+            // The profile took a read of the notes to build: ask before it goes (messages:check).
+            if (!(await uiConfirm({ title: t("ai.style.title"), message: t("ai.style.clear"), okLabel: t("ai.style.clear") }))) return;
             sp.clearStyleProfile();
             showAiToast(t("ai.style.cleared"), "success");
           }
