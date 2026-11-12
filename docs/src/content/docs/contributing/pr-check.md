@@ -44,6 +44,21 @@ It also warns:
 - when source changed and no test did;
 - when an AI agent wrote the PR (add the `ai-written` label).
 
+## The branch's base (plan W6.22)
+
+Every PR is based on the current train (the highest-numbered
+`verify/train-N` on the remote) or on `main`, not on another PR's branch.
+The check:
+- warns when the base is something else, and names the
+  `scripts/restack.mjs` command that prints how to move it;
+- warns when the branch is behind its base (the train head, for a
+  stacked PR) and says by how many commits;
+- fails when the merge base is more than 7 days old
+  (`--max-age-days`), or when there is more than one merge base
+  (a criss-cross).
+
+See [Every PR on the train head](/contributing/train-base/).
+
 ## Options
 
 | Option | Meaning |
@@ -53,4 +68,6 @@ It also warns:
 | `--base-sizes <file>`, `--head-sizes <file>` | Sizes already measured |
 | `--build-base` | Build the base to measure it |
 | `--no-size` | Skip the size check |
+| `--train <branch>` | The current train, when it isn't the highest `verify/train-N` on the remote |
+| `--max-age-days <n>` | The age limit of the merge base (default 7) |
 | `--out <file>` | Write the report |
