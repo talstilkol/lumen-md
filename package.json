@@ -93,7 +93,8 @@
     "md:conformance": "vitest run src/__tests__/mdConformance.test.ts src/__tests__/mdRoundTrip.test.ts src/__tests__/sourcePreserve.test.ts",
     "help:bundle": "node scripts/help-bundle.mjs",
     "help:check": "node scripts/help-bundle.mjs --check",
-    "flags:check": "node scripts/check-flags.mjs"
+    "flags:check": "node scripts/check-flags.mjs",
+    "bench:models": "node scripts/bench-models.mjs"
   },
   "dependencies": {
     "@bjorn3/browser_wasi_shim": "0.4.2",

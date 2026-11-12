@@ -154,6 +154,7 @@ export default defineConfig({
             { label: "Agent eval: 14 agents, HTML report", slug: "ai/agent-eval", translations: { he: "הערכת סוכנים: 14 סוכנים, דוח HTML" } },
             { label: "Personal data before the cloud", slug: "ai/pii-redaction", translations: { he: "מידע אישי לפני הענן" } },
             { label: "Grounded summaries", translations: { he: "סיכומים מעוגנים" }, slug: "ai/summarize" },
+            { label: "Measuring the local models", slug: "ai/model-bench", translations: { he: "מדידת המודלים המקומיים" } },
             { label: "Search reranking, measured", translations: { he: "דירוג מחדש בחיפוש, במדידה" }, slug: "ai/reranker" },
             { label: "Meeting notes", translations: { he: "סיכום פגישה" }, slug: "ai/meeting-notes" },
             { label: "Privacy and the AI policy", slug: "ai/privacy", translations: { he: "פרטיות ומדיניות ה-AI" } },
