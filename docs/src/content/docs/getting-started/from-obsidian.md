@@ -10,7 +10,7 @@ nothing has to be converted.
 
 1. In Obsidian nothing needs exporting. Zip the vault folder, or keep it as
    a folder.
-2. In Lumen: `⌘K → Import notes (zip / folder: Obsidian, Notion, Lumen)…`
+2. In Lumen: `⌘K → Import notes from another app (Obsidian, Notion, Evernote, Bear, Keep, Logseq, OneNote…)…`
    and pick the .zip or the folder.
 3. Lumen recognises the vault by its `.obsidian/` folder and imports every
    note and attachment into a new folder, `Imported/<vault name>`. Nothing

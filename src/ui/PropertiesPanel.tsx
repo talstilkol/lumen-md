@@ -455,7 +455,7 @@ export function PropertiesPanel({ open, onClose, text, applyEdit }: Props) {
 
       <div style={{ flex: 1, overflowY: "auto", paddingBlock: 8, paddingInline: 12 }}>
         {parsed.status === "invalid" && (
-          <div role="alert" style={{ fontSize: 12, color: "hsl(0 70% 55%)", lineHeight: 1.5, paddingBlockEnd: 8 }}>
+          <div role="alert" style={{ fontSize: 12, color: "hsl(var(--danger))", lineHeight: 1.5, paddingBlockEnd: 8 }}>
             {t("props.invalid", { error: parsed.error ?? "" })}
           </div>
         )}

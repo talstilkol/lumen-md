@@ -41,9 +41,9 @@ function renderRow(row: RuntimeMetricSnapshotRow) {
 }
 
 const RATING_COLOR: Record<VitalsSample["rating"], string> = {
-  good: "hsl(140 60% 40%)",
-  "needs-improvement": "hsl(35 90% 45%)",
-  poor: "hsl(0 70% 50%)",
+  good: "hsl(var(--success))",
+  "needs-improvement": "hsl(var(--warning))",
+  poor: "hsl(var(--danger))",
 };
 
 /**

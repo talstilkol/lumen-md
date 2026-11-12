@@ -13,7 +13,7 @@ New features reach a **beta** first, then a stable release after testing.
   stable site are separate origins and don't share storage. To move notes
   between them, keep the vault in a folder on disk and open that folder in
   both, or export from one and import into the other.
-- **In the desktop app:** command palette → **Update channel**. Beta also
+- **In the desktop app:** command palette → **Update channel: switch between stable and beta**. Beta also
   installs beta releases; stable installs only tested releases. If you go
   back to stable, you stay on your current version until a stable release
   is newer, because the app never installs an older version.

@@ -65,6 +65,7 @@ export function resolveColor(css: string, alpha = 1): [number, number, number, n
 }
 
 /** Group colours: evenly spaced hues at the theme's lightness, as CSS. */
+// design-allow: generated category hues for graph groups (data colours, not interface colours)
 export const groupColor = (k: number) => `hsl(${(k * 137.508 + 250) % 360} 62% 56%)`;
 
 /** Node colours (by group, else the accent) and sizes (by number of links) for nodes `ids` of the graph. */

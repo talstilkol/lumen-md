@@ -103,7 +103,7 @@ export function VaultUnlockScreen() {
           </>
         )}
         {error && (
-          <div role="alert" style={{ fontSize: 13, color: "hsl(0 70% 50%)" }}>
+          <div role="alert" style={{ fontSize: 13, color: "hsl(var(--danger))" }}>
             {error}
           </div>
         )}

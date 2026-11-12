@@ -32,7 +32,7 @@ function Status({ s }: { s: OrganizerState }) {
   }
   if (s.phase === "analysing") return <span style={muted}>{s.paused ? t("organizer.paused") : t("organizer.analysing")}</span>;
   if (s.phase === "cancelled") return <span style={muted}>{t("organizer.cancelled")}</span>;
-  if (s.phase === "failed") return <span style={{ ...muted, color: "hsl(0 80% 60%)" }}>{t("organizer.failed", { error: s.error ?? "" })}</span>;
+  if (s.phase === "failed") return <span style={{ ...muted, color: "hsl(var(--danger))" }}>{t("organizer.failed", { error: s.error ?? "" })}</span>;
   if (!s.suggestions.length) return <span style={muted}>{t("organizer.none")}</span>;
   return (
     <span data-testid="organizer-summary" style={{ fontSize: 13 }}>

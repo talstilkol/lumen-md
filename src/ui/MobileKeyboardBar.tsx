@@ -165,7 +165,7 @@ export function MobileToolbarSheet({ onClose }: { onClose: () => void }) {
   const off = TOOLBAR_ACTIONS.filter((a) => !row.includes(a.id));
   const item: React.CSSProperties = { display: "flex", alignItems: "center", gap: 8, minBlockSize: 44, borderBlockEnd: "1px solid hsl(var(--border))" };
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 60, background: "hsl(0 0% 0% / 0.35)", display: "flex", alignItems: "flex-end" }} onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 60, background: "var(--overlay)", display: "flex", alignItems: "flex-end" }} onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div
         ref={ref}
         role="dialog"

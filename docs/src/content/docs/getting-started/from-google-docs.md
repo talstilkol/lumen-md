@@ -17,7 +17,7 @@ description: Turn Google Docs into Markdown notes in Lumen — one document, or 
 Google Takeout (takeout.google.com → **Drive**) exports a folder of
 documents as `.docx`. Unzip it, and open the files in Lumen one by one, or
 convert them in bulk to Markdown first and import the folder with
-`⌘K → Import notes (zip / folder: Obsidian, Notion, Lumen)…`.
+`⌘K → Import notes from another app (Obsidian, Notion, Evernote, Bear, Keep, Logseq, OneNote…)…`.
 
 ## What changes
 

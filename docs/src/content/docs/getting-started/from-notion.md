@@ -10,7 +10,7 @@ description: Export a Notion workspace and bring its pages, links and attachment
 
 ## Bring it in
 
-`⌘K → Import notes (zip / folder: Obsidian, Notion, Lumen)…`, then pick the
+`⌘K → Import notes from another app (Obsidian, Notion, Evernote, Bear, Keep, Logseq, OneNote…)…`, then pick the
 .zip as it came. Lumen recognises a Notion export by the 32-character IDs
 Notion adds to every file name, and:
 

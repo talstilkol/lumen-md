@@ -3,7 +3,7 @@ title: Hebrew grammar and style
 description: Hebrew grammar and style checks that run on this device, beyond spelling, with three writing levels and a short explanation for each suggestion.
 ---
 
-With grammar checking on (`⌘K` → **Enable grammar check**), Hebrew
+With grammar checking on (`⌘K` → **Enable grammar check (LanguageTool)**), Hebrew
 paragraphs are checked on this device. Nothing is sent anywhere. Each
 suggestion comes with a one-line explanation.
 

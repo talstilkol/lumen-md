@@ -295,8 +295,8 @@ export const StatusBar = React.memo(function StatusBar({
           style={{ gap: 4, paddingInline: 4 }}
           data-testid="status-secrets-plain"
         >
-          <AlertCircle size={10} style={{ color: "hsl(12 90% 58%)" }} aria-hidden="true" />
-          <span style={{ color: "hsl(12 90% 58%)", fontSize: 10, fontWeight: 600 }}>{t("status.secretsPlain")}</span>
+          <AlertCircle size={10} style={{ color: "hsl(var(--danger))" }} aria-hidden="true" />
+          <span style={{ color: "hsl(var(--danger))", fontSize: 10, fontWeight: 600 }}>{t("status.secretsPlain")}</span>
         </span>
       )}
       {useLocalAi && (

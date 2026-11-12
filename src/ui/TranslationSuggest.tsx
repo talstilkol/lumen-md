@@ -37,7 +37,7 @@ export function TranslationSuggest({ onClose, open = (u) => window.open(u, "_bla
   const link = input0 ? suggestionLink(input0) : null;
   const dir = SUPPORTED_LOCALES.find((l) => l.code === locale)?.dir ?? "ltr";
   return (
-    <div role="presentation" onMouseDown={(e) => e.target === e.currentTarget && onClose()} style={{ position: "fixed", inset: 0, zIndex: 9999, background: "hsl(0 0% 0%/0.4)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+    <div role="presentation" onMouseDown={(e) => e.target === e.currentTarget && onClose()} style={{ position: "fixed", inset: 0, zIndex: 9999, background: "var(--overlay)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
       <div ref={ref} role="dialog" aria-modal="true" aria-labelledby="ts-title" data-testid="translation-suggest" tabIndex={-1} style={{ background: "hsl(var(--bg))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border-strong))", borderRadius: 12, padding: 16, inlineSize: "min(560px, 100%)", maxBlockSize: "85vh", overflow: "auto", fontSize: 13 }}>
         <h2 id="ts-title" style={{ marginBlockStart: 0, fontSize: 16 }}>
           {t("i18nSuggest.title", { language: name })}

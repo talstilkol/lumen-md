@@ -103,6 +103,7 @@ export function DiagramDialog({ onInsert, onClose }: DiagramDialogProps) {
           className="lumen-diagram-code"
           value={code}
           spellCheck={false}
+          // i18n-allow: a Mermaid code sample (the syntax is not translated; the node labels show Hebrew works)
           placeholder={"flowchart TD\n  A[\"התחלה\"] --> B[\"סוף\"]"}
           data-testid="canvas-diagram-code"
           onChange={(e) => setCode(e.target.value)}

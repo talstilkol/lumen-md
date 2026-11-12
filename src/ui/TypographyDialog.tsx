@@ -64,7 +64,7 @@ function TypographyDialogImpl({ target, onClose }: { target: TypographyTarget; o
       aria-modal="true"
       aria-labelledby="typo-title"
       data-testid="typography-dialog"
-      style={{ position: "fixed", inset: 0, background: "hsl(0 0% 0% / 0.45)", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingTop: "8vh", zIndex: 9999 }}
+      style={{ position: "fixed", inset: 0, background: "var(--overlay)", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingTop: "8vh", zIndex: 9999 }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}

@@ -29,13 +29,13 @@ const row: React.CSSProperties = { display: "flex", gap: 8, alignItems: "center"
 const card: React.CSSProperties = { padding: "10px 12px", borderRadius: 8, background: "hsl(var(--bg-subtle))", border: "1px solid hsl(var(--border))", display: "flex", flexDirection: "column", gap: 8 };
 const code: React.CSSProperties = { fontFamily: "var(--font-mono, ui-monospace, monospace)", fontSize: 12 };
 // The editor's suggestion marks (editor/suggestingExtension.ts), so a proposal reads like a tracked change.
-const INS: React.CSSProperties = { textDecoration: "underline 2px", textDecorationColor: "hsl(145 60% 40%)", textUnderlineOffset: 3, background: "hsl(145 60% 45% / 0.14)" };
-const DEL: React.CSSProperties = { textDecoration: "line-through 2px", textDecorationColor: "hsl(0 75% 55%)", background: "hsl(0 75% 55% / 0.12)" };
+const INS: React.CSSProperties = { textDecoration: "underline 2px", textDecorationColor: "hsl(var(--success))", textUnderlineOffset: 3, background: "hsl(var(--success) / 0.14)" };
+const DEL: React.CSSProperties = { textDecoration: "line-through 2px", textDecorationColor: "hsl(var(--danger))", background: "hsl(var(--danger) / 0.12)" };
 const STATUS_COLOR: Record<StagedChange["status"], string> = {
   pending: "hsl(var(--fg-muted))",
-  applied: "hsl(142 70% 45%)",
+  applied: "hsl(var(--success))",
   rejected: "hsl(var(--fg-muted))",
-  conflict: "hsl(0 80% 60%)",
+  conflict: "hsl(var(--danger))",
 };
 
 function agentName(agentId: string | undefined): string {
@@ -109,13 +109,13 @@ function LineDiff({ before, after }: { before: string | null; after: string }) {
                 display: "flex",
                 gap: 8,
                 padding: "0 8px",
-                background: r.op === "add" ? "hsl(145 60% 45% / 0.14)" : r.op === "del" ? "hsl(0 75% 55% / 0.12)" : undefined,
+                background: r.op === "add" ? "hsl(var(--success) / 0.14)" : r.op === "del" ? "hsl(var(--danger) / 0.12)" : undefined,
               }}
             >
-              <span aria-hidden style={{ width: 12, flexShrink: 0, color: r.op === "add" ? "hsl(145 60% 40%)" : r.op === "del" ? "hsl(0 75% 55%)" : "hsl(var(--fg-muted))" }}>
+              <span aria-hidden style={{ width: 12, flexShrink: 0, color: r.op === "add" ? "hsl(var(--success))" : r.op === "del" ? "hsl(var(--danger))" : "hsl(var(--fg-muted))" }}>
                 {r.op === "add" ? "+" : r.op === "del" ? "−" : " "}
               </span>
-              <span dir="auto" style={{ whiteSpace: "pre-wrap", wordBreak: "break-word", flex: 1, textDecoration: r.op === "del" ? "line-through" : undefined, textDecorationColor: "hsl(0 75% 55% / 0.6)" }}>
+              <span dir="auto" style={{ whiteSpace: "pre-wrap", wordBreak: "break-word", flex: 1, textDecoration: r.op === "del" ? "line-through" : undefined, textDecorationColor: "hsl(var(--danger) / 0.6)" }}>
                 {r.text || " "}
               </span>
             </div>

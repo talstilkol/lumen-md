@@ -263,7 +263,7 @@ export function PublishSiteDialog({ onClose }: { onClose: () => void }) {
             </div>
           )}
           {result && (
-            <div role={result.error ? "alert" : "status"} style={{ fontSize: 13, color: result.error ? "hsl(0 70% 55%)" : undefined }} data-testid="publish-result">
+            <div role={result.error ? "alert" : "status"} style={{ fontSize: 13, color: result.error ? "hsl(var(--danger))" : undefined }} data-testid="publish-result">
               {result.text}
               {result.url && (
                 <>

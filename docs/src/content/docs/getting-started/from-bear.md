@@ -13,7 +13,7 @@ description: Export Bear notes as Markdown and bring them, with their images, in
 ## Bring it in
 
 Zip the export folder, or keep it as a folder, then
-`⌘K → Import notes (zip / folder: Obsidian, Notion, Lumen)…`. The notes and
+`⌘K → Import notes from another app (Obsidian, Notion, Evernote, Bear, Keep, Logseq, OneNote…)…`. The notes and
 their images go into a new folder, `Imported/<name>`, with the image links
 intact.
 

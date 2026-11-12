@@ -63,7 +63,7 @@ export function FeatureFlagsPanel({ onClose }: { onClose: () => void }) {
   }, [onClose]);
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 70, background: "hsl(0 0% 0% / 0.35)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }} onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 70, background: "var(--overlay)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }} onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div
         ref={ref}
         role="dialog"

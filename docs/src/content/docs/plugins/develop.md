@@ -13,7 +13,7 @@ npm run dev        # http://127.0.0.1:5199, watches the folder
 
 1. In Lumen open **Plugin gallery**, then **Developer mode** at the bottom.
    Keep `http://127.0.0.1:5199` and press **Connect**.
-2. `⌘K` → **My plugin**: the side panel shows the word count of the note.
+2. Run the command your plugin registers from `⌘K` (in the template: *My plugin*): the side panel shows the word count of the note.
 3. Change `main.js` and save. Lumen reloads the plugin by itself, usually
    in well under a second. The panel shows how long the last reload took.
 

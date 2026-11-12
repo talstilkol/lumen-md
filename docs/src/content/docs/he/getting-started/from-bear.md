@@ -12,7 +12,7 @@ description: מייצאים פתקי Bear כ-Markdown ומביאים אותם, �
 ## מביאים ל-Lumen
 
 מכווצים את תיקיית הייצוא ל-zip, או משאירים אותה כתיקייה, ואז
-`⌘K → Import notes (zip / folder: Obsidian, Notion, Lumen)…`. הפתקים והתמונות
+`⌘K → Import notes from another app (Obsidian, Notion, Evernote, Bear, Keep, Logseq, OneNote…)…`. הפתקים והתמונות
 נכנסים לתיקייה חדשה, `Imported/<שם>`, והקישורים לתמונות נשארים תקינים.
 
 ## מה משתנה

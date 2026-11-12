@@ -52,7 +52,7 @@ function Panel({ getView, onClose, subscribe }: { getView: () => EditorView | nu
     if (file) useAppStore.getState().openTab({ name: file.name, content: file.content, workspaceName: file.path });
   };
   return (
-    <aside dir="auto" data-testid="related-panel" aria-label={t("related.title")} style={{ position: "fixed", insetInlineEnd: 12, top: 72, width: 280, maxHeight: "70vh", overflow: "auto", zIndex: 40, background: "hsl(var(--bg))", border: "1px solid hsl(var(--border))", borderRadius: 10, boxShadow: "0 6px 24px hsl(0 0% 0% / 0.15)", padding: 10, display: "flex", flexDirection: "column", gap: 8 }}>
+    <aside dir="auto" data-testid="related-panel" aria-label={t("related.title")} style={{ position: "fixed", insetInlineEnd: 12, top: 72, width: 280, maxHeight: "70vh", overflow: "auto", zIndex: 40, background: "hsl(var(--bg))", border: "1px solid hsl(var(--border))", borderRadius: 10, boxShadow: "var(--shadow-sm)", padding: 10, display: "flex", flexDirection: "column", gap: 8 }}>
       <header style={{ display: "flex", alignItems: "center", gap: 6 }}>
         <Link2 size={14} />
         <strong style={{ flex: 1, fontSize: 13 }}>{t("related.title")}</strong>

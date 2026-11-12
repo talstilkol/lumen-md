@@ -16,7 +16,7 @@ description: הופכים מסמכי Google Docs לפתקי Markdown ב-Lumen �
 ‏Google Takeout ‏(takeout.google.com ← **Drive**) מייצא תיקיית מסמכים
 כקובצי `.docx`. פותחים את ה-zip, ופותחים את הקבצים ב-Lumen אחד אחד, או
 ממירים אותם קודם ל-Markdown ומייבאים את התיקייה עם
-`⌘K → Import notes (zip / folder: Obsidian, Notion, Lumen)…`.
+`⌘K → Import notes from another app (Obsidian, Notion, Evernote, Bear, Keep, Logseq, OneNote…)…`.
 
 ## מה משתנה
 

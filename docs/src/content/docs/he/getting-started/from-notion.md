@@ -10,7 +10,7 @@ description: מייצאים סביבת עבודה מ-Notion ומביאים את 
 
 ## מביאים ל-Lumen
 
-`⌘K → Import notes (zip / folder: Obsidian, Notion, Lumen)…`, ובוחרים את
+`⌘K → Import notes from another app (Obsidian, Notion, Evernote, Bear, Keep, Logseq, OneNote…)…`, ובוחרים את
 ה-zip כמו שהגיע. ‏Lumen מזהה ייצוא של Notion לפי המזהים בני 32 התווים
 ש-Notion מוסיפה לכל שם קובץ, ואז:
 

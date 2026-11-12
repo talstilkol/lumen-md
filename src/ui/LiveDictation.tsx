@@ -130,7 +130,7 @@ function Panel({ initial, onBrowser, onClose, correction = null }: { initial: Ph
   );
 
   return (
-    <div role="dialog" aria-live="polite" aria-label={t("dictation.download.title")} dir="auto" style={{ position: "fixed", bottom: 20, insetInlineEnd: 20, zIndex: 9999, maxWidth: 420, display: "flex", flexDirection: "column", gap: 8, background: "hsl(var(--bg))", border: "1px solid hsl(var(--border-strong))", borderRadius: 12, padding: "12px 16px", boxShadow: "0 8px 32px hsl(0 0% 0%/0.3)", fontSize: 13, color: "hsl(var(--fg))" }}>
+    <div role="dialog" aria-live="polite" aria-label={t("dictation.download.title")} dir="auto" style={{ position: "fixed", bottom: 20, insetInlineEnd: 20, zIndex: 9999, maxWidth: 420, display: "flex", flexDirection: "column", gap: 8, background: "hsl(var(--bg))", border: "1px solid hsl(var(--border-strong))", borderRadius: 12, padding: "12px 16px", boxShadow: "var(--shadow-md)", fontSize: 13, color: "hsl(var(--fg))" }}>
       {phase.kind === "ask" && (
         <>
           <strong>{t("dictation.download.title")}</strong>
@@ -160,7 +160,7 @@ function Panel({ initial, onBrowser, onClose, correction = null }: { initial: Ph
       {phase.kind === "listening" && (
         <>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ width: 10, height: 10, borderRadius: "50%", background: phase.speaking ? "#ef4444" : "#9ca3af", animation: phase.speaking ? "pulse 1s infinite" : undefined }} />
+            <div style={{ width: 10, height: 10, borderRadius: "50%", background: phase.speaking ? "hsl(var(--danger))" : "hsl(var(--fg-muted))", animation: phase.speaking ? "pulse 1s infinite" : undefined }} />
             <span>{phase.speaking ? t("dictation.speaking") : t("dictation.listening")}</span>
             <span style={{ flex: 1 }} />
             {button(t("dictation.stop"), () => void stop(), true)}

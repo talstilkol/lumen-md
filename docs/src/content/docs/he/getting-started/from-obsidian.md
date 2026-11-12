@@ -9,7 +9,7 @@ description: מביאים כספת Obsidian ל-Lumen — פתקים, קבצים 
 
 1. ב-Obsidian אין צורך לייצא. מכווצים את תיקיית הכספת ל-zip, או משאירים אותה
    כתיקייה.
-2. ב-Lumen: `⌘K → Import notes (zip / folder: Obsidian, Notion, Lumen)…`
+2. ב-Lumen: `⌘K → Import notes from another app (Obsidian, Notion, Evernote, Bear, Keep, Logseq, OneNote…)…`
    (בעברית: „ייבוא פתקים”) ובוחרים את ה-zip או את התיקייה.
 3. ‏Lumen מזהה את הכספת לפי תיקיית `.obsidian/` שלה ומייבא כל פתק וכל קובץ
    מצורף לתיקייה חדשה, `Imported/<שם הכספת>`. שום דבר שכבר נמצא ב-Lumen לא

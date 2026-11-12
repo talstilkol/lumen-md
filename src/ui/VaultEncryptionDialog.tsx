@@ -40,7 +40,7 @@ function Field({ label, value, onChange, autoComplete = "new-password" }: { labe
 
 function Alert({ children }: { children: ReactNode }) {
   return (
-    <div role="alert" style={{ fontSize: 12, color: "hsl(0 70% 50%)" }}>
+    <div role="alert" style={{ fontSize: 12, color: "hsl(var(--danger))" }}>
       {children}
     </div>
   );
@@ -137,7 +137,7 @@ function TurnOn({ onDone }: { onDone: () => void }) {
   return (
     <form onSubmit={submit} style={{ display: "grid", gap: 10 }}>
       <div style={{ fontSize: 13 }}>{t("vaultEnc.intro")}</div>
-      <div role="note" style={{ fontSize: 13, padding: "8px 10px", borderInlineStart: "3px solid hsl(40 90% 50%)", background: "hsl(40 90% 50% / 0.08)" }}>
+      <div role="note" style={{ fontSize: 13, padding: "8px 10px", borderInlineStart: "3px solid hsl(var(--warning))", background: "hsl(var(--warning) / 0.08)" }}>
         {t("vaultEnc.warning")}
       </div>
       <Field label={t("vaultEnc.passphrase")} value={pass} onChange={setPass} />
@@ -289,7 +289,7 @@ export function VaultEncryptionDialog({ onClose }: { onClose: () => void }) {
   }, [onClose]);
 
   return (
-    <div role="presentation" onClick={(e) => e.target === e.currentTarget && onClose()} style={{ position: "fixed", inset: 0, zIndex: 9000, background: "rgb(0 0 0 / 0.35)", display: "grid", placeItems: "center", padding: 16 }}>
+    <div role="presentation" onClick={(e) => e.target === e.currentTarget && onClose()} style={{ position: "fixed", inset: 0, zIndex: 9000, background: "var(--overlay)", display: "grid", placeItems: "center", padding: 16 }}>
       <div
         role="dialog"
         aria-modal="true"

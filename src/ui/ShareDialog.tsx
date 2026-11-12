@@ -162,7 +162,7 @@ function ShareTab({ session, server }: { session: CollabSession | null; server: 
         </div>
       )}
       {error && (
-        <p role="alert" style={{ ...muted, color: "hsl(0 70% 55%)" }}>
+        <p role="alert" style={{ ...muted, color: "hsl(var(--danger))" }}>
           {error}
         </p>
       )}
