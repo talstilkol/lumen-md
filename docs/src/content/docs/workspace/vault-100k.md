@@ -30,7 +30,10 @@ slow down. Lumen is measured against a synthetic vault of 100,000 notes:
   are saved in the browser's database while it is idle. The next time the app
   opens, every note whose modification time hasn't changed comes from there,
   and only the others are read from disk. If the saved index is missing or
-  out of date, Lumen just builds it in full.
+  out of date, Lumen just builds it in full. In an [encrypted vault](/security/vault-encryption/)
+  the saved index is encrypted and signed inside the worker, and a copy that
+  was changed is refused, so an encrypted vault no longer reads and decrypts
+  every note when it opens.
 - **All of this runs off the main thread.** The index lives in a worker, so
   opening the app and typing are never blocked by it. The file tree shows a
   limited number of rows per folder.

@@ -34,6 +34,7 @@ import type { IndexEngine } from "./vaultIndexProtocol";
 import { log } from "../lib/logger";
 import { scheduleIdle } from "../lib/idle";
 import { dropSnapshot } from "./indexSnapshot";
+import type { SnapshotKeys } from "./snapshotSeal";
 import { summarize, type NoteSummary } from "./noteSummary";
 
 export type { BacklinkHit, SearchHit } from "./vaultIndexCore";
@@ -121,11 +122,14 @@ function getEngine(): Promise<IndexEngine> {
  * engine, give it every indexed note again, and retry once.
  */
 async function withEngine<T>(fn: (e: IndexEngine) => Promise<T>): Promise<T> {
-  const e = await getEngine();
+  const current = getEngine();
+  const e = await current;
   try {
     return await fn(e);
   } catch (err) {
-    if (e.kind !== "worker") throw err;
+    // W6.36: a request to an engine that was replaced meanwhile (a reset) is
+    // not a dead worker: it must not swap the new engine for a local one.
+    if (e.kind !== "worker" || engine !== current) throw err;
     log.warn("vault index worker failed; indexing on the main thread", err);
     e.dispose();
     const local = await localIndexEngine();
@@ -232,16 +236,20 @@ function snapshotVault(): string {
 }
 
 /**
- * The snapshot holds note text in IndexedDB, written by the index worker,
- * which has no key to seal it with: in an encrypted vault (plan 11.4) there
- * is no snapshot at all, and the vault opens with a full build.
+ * Whether there is a snapshot now, and how it is kept. A plain vault: in
+ * the clear (`{}`). An encrypted, unlocked vault (plan 11.4): sealed and
+ * signed in the worker with the snapshot subkeys (W6.36, ./snapshotSeal.ts).
+ * A locked vault: none (null) — nothing is written, and the one on disk
+ * stays for the next unlock.
  */
-async function snapshotAllowed(): Promise<boolean> {
+async function snapshotMode(): Promise<{ keys?: SnapshotKeys } | null> {
   try {
-    const { storesMustSeal } = await import("./vault/restStore");
-    return !(await storesMustSeal());
+    const { storesMustSeal, restSnapshotKeys } = await import("./vault/restStore");
+    if (!(await storesMustSeal())) return {};
+    const keys = restSnapshotKeys();
+    return keys ? { keys } : null;
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -253,8 +261,8 @@ function scheduleSnapshot(): void {
     snapshotTimer = null;
     scheduleIdle(() => {
       if (gen !== snapshotGen) return;
-      void snapshotAllowed()
-        .then((ok) => (ok ? withEngine((eng) => eng.saveSnapshot(snapshotVault())) : dropSnapshot()))
+      void snapshotMode()
+        .then((mode) => (mode ? withEngine((eng) => eng.saveSnapshot(snapshotVault(), mode.keys)) : undefined))
         .catch(() => {});
     });
   }, SNAPSHOT_DELAY_MS);
@@ -267,7 +275,8 @@ function scheduleSnapshot(): void {
  */
 async function fillEngine(eng: IndexEngine, entries: { path: string; name: string; modified: number }[]): Promise<Map<string, IndexedFile>> {
   const out = new Map<string, IndexedFile>();
-  const restored = (await snapshotAllowed()) ? await eng.restoreSnapshot(snapshotVault(), entries.map((e) => ({ path: e.path, name: e.name, modified: e.modified }))) : [];
+  const mode = await snapshotMode();
+  const restored = mode ? await eng.restoreSnapshot(snapshotVault(), entries.map((e) => ({ path: e.path, name: e.name, modified: e.modified })), mode.keys) : [];
   for (const r of restored) out.set(r.path, r);
   snapshotCounters.fromSnapshot += restored.length;
   let batch: ReadNote[] = [];
@@ -567,8 +576,17 @@ export async function indexStats(): Promise<IndexStats & { engine: IndexEngine["
   return { ...stats, engine: (await getEngine()).kind };
 }
 
-/** Test hook. `engineFactory` replaces the worker (e.g. with a fake one). */
-export function __resetWorkspaceIndex(engineFactory?: () => IndexEngine): void {
+/** Test hook (W6.36): write the snapshot now, as the idle timer would. */
+export async function __saveSnapshotNow(): Promise<void> {
+  const mode = await snapshotMode();
+  if (mode) await withEngine((eng) => eng.saveSnapshot(snapshotVault(), mode.keys));
+}
+
+/**
+ * Test hook. `engineFactory` replaces the worker (e.g. with a fake one).
+ * `keepSnapshot` keeps the stored snapshot, as a restart does (W6.36).
+ */
+export function __resetWorkspaceIndex(engineFactory?: () => IndexEngine, opts: { keepSnapshot?: boolean } = {}): void {
   cache.version++;
   cache.byPath = new Map();
   cache.builtAt = 0;
@@ -585,5 +603,5 @@ export function __resetWorkspaceIndex(engineFactory?: () => IndexEngine): void {
   if (snapshotTimer) clearTimeout(snapshotTimer);
   snapshotTimer = null;
   snapshotGen++;
-  snapshotReset = dropSnapshot();
+  snapshotReset = opts.keepSnapshot ? Promise.resolve() : dropSnapshot();
 }
