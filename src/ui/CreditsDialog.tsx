@@ -9,6 +9,7 @@ import registry from "../../models/registry.json";
 import { modelCredits, type LicenceFamily, type ModelCredit } from "../ai/modelCredits";
 import { t } from "../i18n";
 import "./creditsDialogStrings";
+import { HelpButton } from "./HelpButton";
 
 interface Entry {
   id: string;
@@ -102,6 +103,7 @@ export function openCredits(): void {
     <div role="dialog" aria-modal="true" aria-label={t("credits.title")} onClick={(e) => e.target === e.currentTarget && close()} onKeyDown={(e) => e.key === "Escape" && close()} style={{ position: "fixed", inset: 0, zIndex: 9999, background: "var(--overlay)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
       <div style={{ background: "hsl(var(--bg))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border-strong))", borderRadius: 12, padding: 20, maxWidth: 720, width: "100%", maxHeight: "80vh", overflow: "auto", fontSize: 13 }}>
         <h2 style={{ marginTop: 0 }}>{t("credits.title")}</h2>
+        <HelpButton topic="ai/model-credits" />
         <p>{t("credits.intro")}</p>
         <ModelCreditsSection credits={modelCredits()} />
         <button type="button" autoFocus onClick={close} style={{ border: "1px solid hsl(var(--border-strong))", borderRadius: 6, padding: "4px 12px", background: "transparent", color: "inherit", cursor: "pointer" }}>

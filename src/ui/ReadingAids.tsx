@@ -13,6 +13,7 @@ import { uiConfirm } from "./PromptDialog";
 import { showAiToast } from "./AiToast";
 import { AIDS_FONTS, AIDS_LIMITS, AIDS_TINTS, applyAids, loadAids, saveAids, type ReadingAids } from "../reading/readingAids";
 import { watchDisplayNikud, type PointMany } from "../reading/displayNikud";
+import { HelpButton } from "./HelpButton";
 
 let nikudWatch: { stop: () => void } | null = null;
 
@@ -87,6 +88,7 @@ function Panel({ close }: { close: () => void }) {
         <h2 id="ra-title" style={{ marginTop: 0 }}>
           {t("readingAids.title")}
         </h2>
+        <HelpButton topic="editor/reading-aids" />
 
         <fieldset style={{ border: 0, padding: 0, margin: "0 0 12px" }}>
           <legend style={{ fontWeight: 600 }}>{t("readingAids.nikud.legend")}</legend>

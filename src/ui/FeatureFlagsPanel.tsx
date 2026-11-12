@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { t } from "../i18n";
 import { buildChannel, FLAGS, FLAGS_CHANGED, flagState, resetFlags, setFlag } from "../flags/flags";
 import "./featureFlagsPanelStrings";
+import { HelpButton } from "./HelpButton";
 
 // The host, the event name and the Beta badge live in ./FeatureFlagsHost (startup);
 // this panel loads when it opens.
@@ -49,6 +50,7 @@ export function FeatureFlagsPanel({ onClose }: { onClose: () => void }) {
           <h2 id="feature-flags-title" style={{ flex: 1, margin: 0, fontSize: 16, fontWeight: 600 }}>
             {t("flags.title")}
           </h2>
+          <HelpButton topic="getting-started/beta#feature-flags" />
           <button type="button" className="btn" onClick={onClose} data-autofocus>
             {t("flags.close")}
           </button>

@@ -18,6 +18,7 @@ import "./Presentation.css";
 import { t } from "../i18n";
 import { slideForKey, type Dir } from "./deck";
 import { closePresenterWindow, openChannel, openPresenterWindow, type SharedSlide } from "./channel";
+import { HelpButton } from "../ui/HelpButton";
 
 export interface SlideView {
   title: string;
@@ -156,6 +157,7 @@ export function Presentation({ title, dir, slides, start = 0, onClose }: Present
         <span className="lumen-slides-title" dir="auto">
           {cur?.title}
         </span>
+        <HelpButton topic="workspace/slides#presenting" />
         <button type="button" onClick={() => void openPresenterWindow()} data-testid="slides-presenter">
           {t("slides.presenter")}
         </button>

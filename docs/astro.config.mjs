@@ -94,6 +94,7 @@ export default defineConfig({
             { label: "Database views", slug: "workspace/database-views" },
             { label: "Search (BM25 + Smart)", translations: { he: "חיפוש (BM25 + חכם)" }, slug: "workspace/search" },
             { label: "Database formulas + map", slug: "workspace/database-formulas", translations: { he: "נוסחאות במסד נתונים ותצוגת מפה" } },
+            { label: "Note properties", translations: { he: "מאפייני פתק" }, slug: "workspace/properties" },
             { label: "Fill properties with AI", translations: { he: "מילוי מאפיינים ב-AI" }, slug: "workspace/ai-autofill" },
             { label: "Obsidian Bases (.base files)", slug: "workspace/obsidian-bases", translations: { he: "Obsidian Bases (קובצי ‎.base)" } },
             { label: "Search operators and #tags", slug: "workspace/search-operators", translations: { he: "אופרטורי חיפוש ו-#תגיות" } },

@@ -15,6 +15,7 @@ import { useFocusTrap } from "../ui/useFocusTrap";
 import { loadLexicon } from "./store";
 import { lookup, withPrefix, type LookupResult } from "./lexicon";
 import { wordAt } from "./wordAt";
+import { HelpButton } from "../ui/HelpButton";
 
 export type LexiconMode = "menu" | "synonyms" | "definition" | "nikud";
 
@@ -65,6 +66,7 @@ function Panel({ view, range, initial, x, y, close }: { view: EditorView; range:
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
         <strong>{range.word}</strong>
+        <HelpButton topic="editor/hebrew-dictionary#use-it" />
         <button type="button" style={btn} onClick={close} aria-label={t("lexicon.close")}>
           ×
         </button>

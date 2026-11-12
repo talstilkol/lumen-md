@@ -14,6 +14,7 @@ import "./CiteDialog.css";
 import { t } from "../i18n";
 import { plainTitle } from "../data/citationStyles";
 import { searchLibrary, type LibraryItem } from "./library";
+import { HelpButton } from "../ui/HelpButton";
 
 const RECENT = "lumen.cite.recent";
 const SHOWN = 8;
@@ -97,6 +98,7 @@ export function CiteDialog({ load, onInsert, onClose, onSyncZotero }: CiteDialog
         <div className="cite-fields">
           <input ref={queryRef} dir="auto" type="search" value={query} placeholder={t("cite.search")} aria-label={t("cite.search")} onChange={(e) => setQuery(e.target.value)} data-testid="cite-search" />
           <input dir="auto" className="cite-locator" value={locator} placeholder={t("cite.locator")} aria-label={t("cite.locator")} onChange={(e) => setLocator(e.target.value)} data-testid="cite-locator" />
+          <HelpButton topic="editor/citations" />
         </div>
         <ul className="cite-list" role="listbox" aria-label={t("cite.results")}>
           {items === null && <li className="cite-empty">{t("cite.loading")}</li>}

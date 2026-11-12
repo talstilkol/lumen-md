@@ -10,6 +10,7 @@ import "../reading/strings";
 import { t } from "../i18n";
 import { DYSLEXIA_FONT, HEBREW_FONTS, downloadBytes, type ReadingFontId } from "../reading/fonts";
 import { DEFAULT_READING, READING_LIMITS, applyReading, effectiveReading, globalReading, noteReading, saveGlobalReading, saveNoteReading, type ReadingSettings as Settings } from "../reading/settings";
+import { HelpButton } from "./HelpButton";
 
 interface Props {
   open: boolean;
@@ -100,6 +101,7 @@ export function ReadingSettings({ open, onClose, notePath }: Props) {
         <header style={{ padding: "12px 16px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <BookOpen size={16} />
           <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, flex: 1 }}>{t("reading.title")}</h2>
+          <HelpButton topic="editor/reading" />
           <button type="button" style={btn} onClick={onClose} aria-label={t("reading.close")}>
             <X size={14} />
           </button>

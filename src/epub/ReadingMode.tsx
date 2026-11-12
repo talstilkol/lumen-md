@@ -16,6 +16,7 @@ import { anchorTextQuote, createTextQuoteSelector } from "../pdf/annotations";
 import { loadPrefs, savePrefs, THEMES, type ReaderPrefs, type ReaderTheme } from "./readerPrefs";
 import { chapterText, rangeToOffsets } from "./textRange";
 import "./EpubReader.css";
+import { HelpButton } from "../ui/HelpButton";
 
 /** `==x==` (clipper / Obsidian highlights) → CriticMarkup `{==x==}`, which the renderer shows as a mark. */
 export function markHighlights(md: string): string {
@@ -109,6 +110,7 @@ function ReadingView({ onClose }: { onClose: () => void }) {
     <div ref={rootRef} className={`epub-reader epub-theme-${prefs.theme}`} style={style} role="dialog" aria-label={t("reading.title")} tabIndex={-1} onKeyDown={onKey}>
       <div className="epub-toolbar">
         <span className="epub-title" dir="auto">{doc.name}</span>
+        <HelpButton topic="workspace/epub-reader#reading-mode-for-clipped-pages" />
         <span className="epub-spacer" />
         {(["light", "sepia", "dark"] as ReaderTheme[]).map((th) => (
           <button key={th} type="button" aria-pressed={prefs.theme === th} onClick={() => setPrefs((p) => ({ ...p, theme: th }))}>

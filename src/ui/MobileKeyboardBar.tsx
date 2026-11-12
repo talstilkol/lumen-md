@@ -20,6 +20,7 @@ import { actionById, DEFAULT_TOOLBAR, moveAction, sanitizeToolbar, toggleAction,
 import { useAppStore } from "../store/useStore";
 import { useFocusTrap } from "./useFocusTrap";
 import "./mobileKeyboardBarStrings";
+import { HelpButton } from "./HelpButton";
 
 export const MOBILE_ACTION_EVENT = "lumen-mobile-action";
 
@@ -180,6 +181,7 @@ export function MobileToolbarSheet({ onClose }: { onClose: () => void }) {
           <h2 id="mobile-toolbar-sheet-title" style={{ flex: 1, fontSize: 16, fontWeight: 600, margin: 0 }}>
             {t("mobileBar.customize.title")}
           </h2>
+          <HelpButton topic="editor/touch#the-editing-toolbar" />
           <button type="button" style={btn} onClick={() => set([...DEFAULT_TOOLBAR])}>
             {t("mobileBar.customize.reset")}
           </button>

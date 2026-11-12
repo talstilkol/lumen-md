@@ -11,6 +11,7 @@ import { layoutGraph } from "../graph/layout";
 import { t } from "../i18n";
 import { GraphCanvas } from "./graph/GraphCanvas";
 import { nodeStyle, resolveColor, useVaultGraph } from "./graph/graphData";
+import { HelpButton } from "./HelpButton";
 
 const field = { fontSize: 11, paddingInline: 4, paddingBlock: 2, borderRadius: 4, border: "1px solid hsl(var(--border))", background: "hsl(var(--bg))", color: "hsl(var(--fg))", minInlineSize: 0, flex: 1 } as const;
 
@@ -59,6 +60,7 @@ export function LocalGraphPanel({ filePath, onOpen }: { filePath: string | null;
     <aside aria-label={t("graph.local.title")} data-testid="local-graph" style={{ inlineSize: 280, flexShrink: 0, borderInlineStart: "1px solid hsl(var(--border))", display: "flex", flexDirection: "column", fontSize: 12 }}>
       <div style={{ padding: "6px 8px", display: "flex", gap: 6, alignItems: "center", borderBlockEnd: "1px solid hsl(var(--border))" }}>
         <strong style={{ flex: 1 }}>{t("graph.local.title")}</strong>
+        <HelpButton topic="workspace/graph#the-local-graph" />
         <label style={{ display: "inline-flex", gap: 4, alignItems: "center" }}>
           {t("graph.local.depth")}
           <select value={depth} onChange={(e) => setDepth(Number(e.target.value))} data-testid="local-graph-depth" style={{ fontSize: 11 }}>

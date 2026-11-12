@@ -27,7 +27,17 @@ function walk(dir: string, out: string[] = []): string[] {
 const panels = walk(SRC)
   .map((p) => ({ rel: relative(ROOT, p).split("\\").join("/"), text: readFileSync(p, "utf8") }))
   .filter((f) => !NOT_PANELS.has(f.rel) && (/role="dialog"|aria-modal/.test(f.text) || /<aside\b/.test(f.text)));
-const bundles = { en: JSON.parse(readFileSync(join(SRC, "help/generated/help.en.json"), "utf8")) as HelpBundle, he: JSON.parse(readFileSync(join(SRC, "help/generated/help.he.json"), "utf8")) as HelpBundle };
+/** The packed docs of a language: every shard (scripts/help-bundle.mjs), joined. */
+function packed(lang: "en" | "he"): HelpBundle {
+  const dir = join(SRC, "help/generated");
+  const files = readdirSync(dir)
+    .map((n) => new RegExp(`^help\\.${lang}\\.(\\d+)\\.json$`).exec(n))
+    .filter((m): m is RegExpExecArray => m !== null)
+    .sort((a, b) => Number(a[1]) - Number(b[1]));
+  const parts = files.map((m) => JSON.parse(readFileSync(join(dir, m[0]), "utf8")) as HelpBundle);
+  return { version: parts[0].version, lang, pages: parts.flatMap((p) => p.pages) };
+}
+const bundles = { en: packed("en"), he: packed("he") };
 
 describe('every panel has a "?"', () => {
   it("finds the panels", () => {
