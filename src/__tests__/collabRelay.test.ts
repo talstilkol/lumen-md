@@ -34,6 +34,7 @@ import { openStore } from "../../sync-server/collab/sqliteStore.mjs";
 
 type Check = (doc: Y.Doc, update: Uint8Array) => string | null;
 
+/** Integration tests wait on real sockets: 30 s each, not vitest's 5 s. */
 /** The parts of a `ws` server socket these tests use. */
 interface NodeSocket {
   readyState: number;
@@ -185,7 +186,7 @@ describe("the relay room, with the real provider and the app's encryption", () =
     b.provider.destroy();
     const c = connect(url, room, "correct horse", async () => "ok");
     expect(await until(() => c.plain.getText("codemirror").toString() === "B: שלום, a secret note")).toBe(true);
-  });
+  }, 30_000);
 
   it("refuses a plaintext room (4403) and keeps nothing of it; a wrong token is refused", async () => {
     const { url, rooms, closes } = await serve();
@@ -201,7 +202,7 @@ describe("the relay room, with the real provider and the app's encryption", () =
     w.on("authenticationFailed", () => (denied = true));
     cleanups.push(() => w.destroy());
     expect(await until(() => denied)).toBe(true);
-  });
+  }, 30_000);
 });
 
 /* ─── The Cloudflare Worker, in a small simulation of its runtime ─────── */
@@ -411,7 +412,7 @@ describe("edge-workers/collab: the public server on Cloudflare (simulated runtim
     await o.state.storage.put({ lastWrite: Date.now() - 91 * 864e5 });
     await o.inst.alarm!();
     expect(o.data.size).toBe(0);
-  });
+  }, 30_000);
 
   it("refuses a plaintext room and stores nothing of it; answers /healthz; relays signaling", async () => {
     const { url, rooms, fetchWorker, env } = await serveWorker();
@@ -443,7 +444,7 @@ describe("edge-workers/collab: the public server on Cloudflare (simulated runtim
     expect(await until(() => got.some((m) => m.type === "pong"))).toBe(true);
     s1.send(JSON.stringify({ type: "publish", topic: "t1", data: "offer" }));
     expect(await until(() => got.some((m) => m.data === "offer" && m.clients === 2))).toBe(true);
-  });
+  }, 30_000);
 });
 
 describe("sync-server/collab-server.mjs: E2EE only and retention", () => {
@@ -491,7 +492,7 @@ describe("sync-server/collab-server.mjs: E2EE only and retention", () => {
     } finally {
       store.close();
     }
-  });
+  }, 30_000);
 
   it("deletes rooms nobody changed for COLLAB_RETENTION_DAYS", () => {
     const dataDir = tempDir();
