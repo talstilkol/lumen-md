@@ -315,13 +315,16 @@
   }
 
   /* === Preview prose === */
+  /* Reading options (plan W3.5, src/reading/settings.ts) override these per note or globally. */
   .prose-lumen {
     color: hsl(var(--fg));
-    max-width: var(--preview-width, 72ch);
+    max-width: var(--reading-width, var(--preview-width, 72ch));
     margin: 0 auto;
-    font-family: var(--font-serif);
-    font-size: 17px;
-    line-height: 1.7;
+    font-family: var(--reading-font, var(--font-serif));
+    font-size: var(--reading-size, 17px);
+    line-height: var(--reading-line-height, 1.7);
+    word-spacing: var(--reading-word-spacing, normal);
+    letter-spacing: var(--reading-letter-spacing, normal);
     padding: 2.5rem 2rem 30vh;
   }
   .prose-lumen :is(h1, h2, h3, h4, h5, h6) {

@@ -342,6 +342,8 @@
   "cmd.view.preview": "Nur Vorschau",
   "cmd.view.properties": "Eigenschaften: Frontmatter dieser Notiz bearbeiten",
   "cmd.view.properties.hint": "Felder für Text, Zahl, Datum, Liste, Kontrollkästchen und Link; nur der bearbeitete Wert ändert sich",
+  "cmd.view.readingOptions": "Leseoptionen: Schrift, Größe, Abstände…",
+  "cmd.view.readingOptions.hint": "Für alle Notizen oder nur diese; hebräische Schriften mit richtig gesetztem Nikud",
   "cmd.view.rtl.off": "Textrichtung: LTR (links nach rechts)",
   "cmd.view.rtl.on": "Textrichtung: RTL (rechts nach links)",
   "cmd.view.runtimeMetrics": "Laufzeitmetriken",

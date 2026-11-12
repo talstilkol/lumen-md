@@ -342,6 +342,8 @@
   "cmd.view.preview": "Aperçu uniquement",
   "cmd.view.properties": "Propriétés : modifier le frontmatter de cette note",
   "cmd.view.properties.hint": "Champs texte, nombre, date, liste, case à cocher et lien ; seule la valeur modifiée change",
+  "cmd.view.readingOptions": "Options de lecture : police, taille, espacement…",
+  "cmd.view.readingOptions.hint": "Pour toutes les notes ou celle-ci ; des polices hébraïques qui placent bien le nikoud",
   "cmd.view.rtl.off": "Direction du texte : LTR (de gauche à droite)",
   "cmd.view.rtl.on": "Direction du texte : RTL (de droite à gauche)",
   "cmd.view.runtimeMetrics": "Métriques d'exécution",

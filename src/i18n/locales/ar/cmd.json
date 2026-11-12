@@ -342,6 +342,8 @@
   "cmd.view.preview": "المعاينة فقط",
   "cmd.view.properties": "الخصائص: تحرير الـ frontmatter لهذه الملاحظة",
   "cmd.view.properties.hint": "حقول نص ورقم وتاريخ وقائمة وخانة اختيار ورابط؛ تتغير القيمة المحرَّرة فقط",
+  "cmd.view.readingOptions": "خيارات القراءة: الخط والحجم والتباعد…",
+  "cmd.view.readingOptions.hint": "لكل الملاحظات أو لهذه فقط؛ خطوط عبرية تحفظ التشكيل في مكانه",
   "cmd.view.rtl.off": "اتجاه النص: LTR (من اليسار إلى اليمين)",
   "cmd.view.rtl.on": "اتجاه النص: RTL (من اليمين إلى اليسار)",
   "cmd.view.runtimeMetrics": "مقاييس التشغيل",

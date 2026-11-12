@@ -1731,6 +1731,16 @@
       "vars": []
     },
     {
+      "key": "cmd.view.readingOptions",
+      "en": "Reading options: font, size, spacing…",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.readingOptions.hint",
+      "en": "For every note or just this one; Hebrew fonts that keep nikud in place",
+      "vars": []
+    },
+    {
       "key": "cmd.view.rtl.off",
       "en": "Text Direction: LTR (Left to Right)",
       "vars": []

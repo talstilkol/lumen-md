@@ -342,6 +342,8 @@
   "cmd.view.preview": "プレビューのみ",
   "cmd.view.properties": "プロパティ：このノートのフロントマターを編集",
   "cmd.view.properties.hint": "テキスト、数値、日付、リスト、チェックボックス、リンクの各フィールド。編集した値だけが変わります",
+  "cmd.view.readingOptions": "読みやすさの設定：フォント・大きさ・間隔…",
+  "cmd.view.readingOptions.hint": "すべてのノート、またはこのノートだけ。ニクードが正しく付くヘブライ文字フォント",
   "cmd.view.rtl.off": "テキストの方向: LTR (左から右)",
   "cmd.view.rtl.on": "テキストの方向: RTL (右から左)",
   "cmd.view.runtimeMetrics": "ランタイムメトリクス",

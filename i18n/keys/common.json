@@ -4203,6 +4203,98 @@
       "vars": []
     },
     {
+      "key": "reading.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "reading.dyslexia",
+      "en": "Dyslexia-friendly font for English text",
+      "vars": []
+    },
+    {
+      "key": "reading.failed",
+      "en": "The font could not be downloaded. The text stays in its current font; try again when you are online.",
+      "vars": []
+    },
+    {
+      "key": "reading.font",
+      "en": "Hebrew font",
+      "vars": []
+    },
+    {
+      "key": "reading.font.default",
+      "en": "The app's font",
+      "vars": []
+    },
+    {
+      "key": "reading.font.download",
+      "en": "{kb} KB download",
+      "vars": [
+        "kb"
+      ]
+    },
+    {
+      "key": "reading.font.local",
+      "en": "Fonts come from this app, never from a font service, and download only when you choose them; after that they also work offline.",
+      "vars": []
+    },
+    {
+      "key": "reading.license",
+      "en": "Every font here is under the SIL Open Font License 1.1; the licences are in fonts/reading/.",
+      "vars": []
+    },
+    {
+      "key": "reading.lineHeight",
+      "en": "Line height",
+      "vars": []
+    },
+    {
+      "key": "reading.loading",
+      "en": "Downloading the font…",
+      "vars": []
+    },
+    {
+      "key": "reading.reset",
+      "en": "Back to the defaults",
+      "vars": []
+    },
+    {
+      "key": "reading.scope",
+      "en": "Apply to",
+      "vars": []
+    },
+    {
+      "key": "reading.scope.all",
+      "en": "Every note",
+      "vars": []
+    },
+    {
+      "key": "reading.scope.note",
+      "en": "This note only",
+      "vars": []
+    },
+    {
+      "key": "reading.size",
+      "en": "Text size",
+      "vars": []
+    },
+    {
+      "key": "reading.spacedHebrew",
+      "en": "Spaced Hebrew (more room between words, letters and lines)",
+      "vars": []
+    },
+    {
+      "key": "reading.title",
+      "en": "Reading options",
+      "vars": []
+    },
+    {
+      "key": "reading.width",
+      "en": "Column width",
+      "vars": []
+    },
+    {
       "key": "related.close",
       "en": "Close",
       "vars": []

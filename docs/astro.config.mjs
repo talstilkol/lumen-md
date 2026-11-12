@@ -49,6 +49,7 @@ export default defineConfig({
             { label: "Hebrew typography", slug: "editor/hebrew-typography", translations: { he: "טיפוגרפיה עברית" } },
             { label: "Outline mode", slug: "editor/outline-mode", translations: { he: "מצב מתאר" } },
             { label: "Messages, empty states and undo", slug: "editor/messages", translations: { he: "הודעות, מצבים ריקים וביטול" } },
+            { label: "Reading options and Hebrew fonts", slug: "editor/reading", translations: { he: "אפשרויות קריאה וגופנים עבריים" } },
           ],
         },
         {

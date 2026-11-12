@@ -23,6 +23,7 @@ const AuditLog = lazy(() => import("./ui/AuditLog").then(m => ({ default: m.Audi
 // One settings screen (plan 11.1); the theme, AI, training, trusted-key and
 // organization dialogs are its tabs.
 const SettingsScreen = lazy(() => import("./ui/SettingsScreen").then(m => ({ default: m.SettingsScreen })));
+const ReadingSettings = lazy(() => import("./ui/ReadingSettings").then(m => ({ default: m.ReadingSettings })));
 const PrivacyLedgerPanel = lazy(() => import("./ui/PrivacyLedgerPanel").then(m => ({ default: m.PrivacyLedgerPanel })));
 const TrashPanel = lazy(() => import("./ui/TrashPanel").then(m => ({ default: m.TrashPanel })));
 // Properties editor (plan 4.9) — lazy: the yaml-editing code is not in the startup bundle.
@@ -109,6 +110,35 @@ import { explainError } from "./lib/userError";
 
 export default function App() {
   const doc = useAppStore((s) => s.doc);
+  // Reading options (plan W3.5): the open note's face, size and spacing.
+  // The module (and any face) loads only once the person has set one.
+  const readingPath = doc.workspaceName ?? null;
+  useEffect(() => {
+    let live = true;
+    const apply = () => {
+      let stored = false;
+      try {
+        stored = localStorage.getItem("lumen-reading") !== null;
+      } catch {
+        /* no storage: nothing set */
+      }
+      if (!stored) return;
+      void import("./reading/settings").then((m) => {
+        if (live) void m.applyReading(m.effectiveReading(readingPath));
+      });
+    };
+    apply();
+    window.addEventListener("lumen-reading-changed", apply);
+    return () => {
+      live = false;
+      window.removeEventListener("lumen-reading-changed", apply);
+    };
+  }, [readingPath]);
+  useEffect(() => {
+    const onOpen = () => setReadingOpen(true);
+    window.addEventListener("lumen-open-reading", onOpen);
+    return () => window.removeEventListener("lumen-open-reading", onOpen);
+  }, []);
   const setContent = useAppStore((s) => s.setContent);
   const setDoc = useAppStore((s) => s.setDoc);
   const markSaved = useAppStore((s) => s.markSaved);
@@ -180,6 +210,7 @@ export default function App() {
   const setOrgSettingsOpen = useCallback((open: boolean) => setSettingsTab(open ? "org" : null), []);
   const setTrustedKeysOpen = useCallback((open: boolean) => setSettingsTab(open ? "security" : null), []);
   const setThemeSettingsOpen = useCallback((open: boolean) => setSettingsTab(open ? "appearance" : null), []);
+  const [readingOpen, setReadingOpen] = useState(false);
   const [aiDoctorOpen, setAiDoctorOpen] = useState(false);
   const [agentReviewOpen, setAgentReviewOpen] = useState(false);
   const openAgentReview = useCallback(() => setAgentReviewOpen(true), []);
@@ -1311,6 +1342,7 @@ export default function App() {
           {propertiesOpen && <PropertiesPanel open={propertiesOpen} onClose={() => setPropertiesOpen(false)} text={doc.content} applyEdit={applyPropertiesEdit} />}
           {captureOpen && <QuickCapture open={captureOpen} voice={captureVoice} onClose={() => { setCaptureOpen(false); setCaptureVoice(false); }} />}
           {imageHostsOpen && <ImageHostsPanel open={imageHostsOpen} onClose={() => setImageHostsOpen(false)} />}
+          {readingOpen && <ReadingSettings open={readingOpen} onClose={() => setReadingOpen(false)} notePath={doc.workspaceName ?? null} />}
         </ErrorBoundary>
       </Suspense>
 

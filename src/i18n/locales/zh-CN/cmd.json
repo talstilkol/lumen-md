@@ -342,6 +342,8 @@
   "cmd.view.preview": "仅预览",
   "cmd.view.properties": "属性：编辑此笔记的 frontmatter",
   "cmd.view.properties.hint": "文本、数字、日期、列表、复选框和链接字段；只有被编辑的值会改变",
+  "cmd.view.readingOptions": "阅读选项：字体、大小、间距…",
+  "cmd.view.readingOptions.hint": "适用于所有笔记或仅此笔记；希伯来文字体的元音符号位置正确",
   "cmd.view.rtl.off": "文字方向:LTR(从左到右)",
   "cmd.view.rtl.on": "文字方向:RTL(从右到左)",
   "cmd.view.runtimeMetrics": "运行时指标",

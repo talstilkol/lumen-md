@@ -342,6 +342,8 @@
   "cmd.view.preview": "תצוגה מקדימה בלבד",
   "cmd.view.properties": "מאפיינים: עריכת ה-frontmatter של הפתק",
   "cmd.view.properties.hint": "שדות טקסט, מספר, תאריך, רשימה, תיבת סימון וקישור; רק הערך שנערך משתנה",
+  "cmd.view.readingOptions": "אפשרויות קריאה: גופן, גודל, ריווח…",
+  "cmd.view.readingOptions.hint": "לכל הפתקים או רק לזה; גופנים עבריים שהניקוד בהם במקום",
   "cmd.view.rtl.off": "כיוון טקסט: LTR (שמאל לימין)",
   "cmd.view.rtl.on": "כיוון טקסט: RTL (ימין לשמאל)",
   "cmd.view.runtimeMetrics": "מדדי ריצה",
