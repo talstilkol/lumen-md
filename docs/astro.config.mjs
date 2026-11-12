@@ -153,6 +153,7 @@ export default defineConfig({
             { label: "Visual regression", translations: { he: "רגרסיה חזותית" }, slug: "contributing/visual-regression" },
             { label: "Checks on every branch (Vercel)", translations: { he: "בדיקות בכל ענף (Vercel)" }, slug: "contributing/checks" },
             { label: "Nightly runs and receipts", translations: { he: "ריצות לילה וקבלות" }, slug: "contributing/nightly" },
+            { label: "Before main, WebKit and Safari", translations: { he: "לפני main, WebKit ו-Safari" }, slug: "contributing/promotion" },
           ],
         },
         {
