@@ -1275,6 +1275,11 @@
       "vars": []
     },
     {
+      "key": "cmd.review.daily",
+      "en": "Daily review",
+      "vars": []
+    },
+    {
       "key": "cmd.save",
       "en": "Save",
       "vars": []

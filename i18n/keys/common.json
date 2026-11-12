@@ -5239,6 +5239,85 @@
       "vars": []
     },
     {
+      "key": "srs.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "srs.done",
+      "en": "Done for today: {n} reviewed.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "srs.empty",
+      "en": "Nothing to review yet. Highlight passages, or write question::answer lines in your notes.",
+      "vars": []
+    },
+    {
+      "key": "srs.failed",
+      "en": "Couldn't save the review: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "srs.loading",
+      "en": "Getting today's cards…",
+      "vars": []
+    },
+    {
+      "key": "srs.progress",
+      "en": "{n} of {total}",
+      "vars": [
+        "n",
+        "total"
+      ]
+    },
+    {
+      "key": "srs.rate.1",
+      "en": "Again",
+      "vars": []
+    },
+    {
+      "key": "srs.rate.2",
+      "en": "Hard",
+      "vars": []
+    },
+    {
+      "key": "srs.rate.3",
+      "en": "Good",
+      "vars": []
+    },
+    {
+      "key": "srs.rate.4",
+      "en": "Easy",
+      "vars": []
+    },
+    {
+      "key": "srs.showAnswer",
+      "en": "Show the answer (space)",
+      "vars": []
+    },
+    {
+      "key": "srs.showSource",
+      "en": "Show where it's from (space)",
+      "vars": []
+    },
+    {
+      "key": "srs.title",
+      "en": "Daily review",
+      "vars": []
+    },
+    {
+      "key": "srs.unreadable",
+      "en": "{path} can't be read, so it isn't changed. Fix or remove it to review again.",
+      "vars": [
+        "path"
+      ]
+    },
+    {
       "key": "status.aiActive",
       "en": "AI Copilot Active",
       "vars": []

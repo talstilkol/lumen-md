@@ -252,6 +252,7 @@
   "cmd.research.settings.hint": "بحث Claude على الويب، أو Brave / Tavily بمفتاحك",
   "cmd.research.verify": "🔎 بحث: التحقق من الاستشهادات في هذه الملاحظة",
   "cmd.research.verify.hint": "يتحقق من أن كل رابط في الحواشي يعمل وأن الاقتباس موجود فعلًا في الصفحة",
+  "cmd.review.daily": "المراجعة اليومية",
   "cmd.save": "حفظ",
   "cmd.saveAs": "حفظ as…",
   "cmd.search": "بحث workspace…",

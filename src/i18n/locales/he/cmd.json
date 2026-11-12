@@ -252,6 +252,7 @@
   "cmd.research.settings.hint": "חיפוש הרשת של Claude, או Brave / Tavily עם מפתח משלך",
   "cmd.research.verify": "🔎 מחקר: בדיקת הציטוטים בפתק",
   "cmd.research.verify.hint": "בודק שכל קישור בהערות השוליים חי ושהציטוט באמת מופיע בעמוד",
+  "cmd.review.daily": "חזרה יומית",
   "cmd.save": "שמירה",
   "cmd.saveAs": "שמירה בשם…",
   "cmd.search": "חיפוש במרחב העבודה…",

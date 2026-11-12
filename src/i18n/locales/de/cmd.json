@@ -252,6 +252,7 @@
   "cmd.research.settings.hint": "Claude-Websuche oder Brave / Tavily mit eigenem Schlüssel",
   "cmd.research.verify": "🔎 Recherche: Zitate in dieser Notiz prüfen",
   "cmd.research.verify.hint": "Prüft, ob jeder Fußnoten-Link lebt und das Zitat wirklich auf der Seite steht",
+  "cmd.review.daily": "Tägliche Wiederholung",
   "cmd.save": "Speichern",
   "cmd.saveAs": "Speichern as…",
   "cmd.search": "Suchen workspace…",

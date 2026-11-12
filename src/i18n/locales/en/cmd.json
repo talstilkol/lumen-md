@@ -251,6 +251,7 @@
   "cmd.research.settings.hint": "Claude web search, or Brave / Tavily with your own key",
   "cmd.research.verify": "🔎 Research: Verify Citations in This Note",
   "cmd.research.verify.hint": "Checks every footnote link is alive and its quote really appears on the page",
+  "cmd.review.daily": "Daily review",
   "cmd.save": "Save",
   "cmd.saveAs": "Save as…",
   "cmd.search": "Search workspace…",

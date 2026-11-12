@@ -252,6 +252,7 @@
   "cmd.research.settings.hint": "Recherche web de Claude, ou Brave / Tavily avec votre clé",
   "cmd.research.verify": "🔎 Recherche : vérifier les citations de cette note",
   "cmd.research.verify.hint": "Vérifie que chaque lien de note fonctionne et que la citation figure vraiment sur la page",
+  "cmd.review.daily": "Révision du jour",
   "cmd.save": "Enregistrer",
   "cmd.saveAs": "Enregistrer as…",
   "cmd.search": "Rechercher workspace…",

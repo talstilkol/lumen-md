@@ -116,6 +116,14 @@ export function buildViewCommands({ setSearchOpen, setRuntimeMetricsOpen, vimEna
       action: () => void import("../../highlights/HighlightsPanel").then((m) => m.openHighlightsPanel()),
     },
     {
+      id: "view.review",
+      label: t("cmd.review.daily"),
+      icon: cmdIcons.FileText,
+      group: t("group.file"),
+      // Plan W3.3: today's spaced-repetition cards (highlights and question::answer).
+      action: () => void import("../../srs/ReviewPanel").then((m) => m.openDailyReview()),
+    },
+    {
       id: "view.calendar",
       label: t("cmd.view.calendar"),
       hint: t("cmd.view.calendar.hint"),

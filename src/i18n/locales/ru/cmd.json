@@ -252,6 +252,7 @@
   "cmd.research.settings.hint": "Веб-поиск Claude или Brave / Tavily со своим ключом",
   "cmd.research.verify": "🔎 Исследование: проверить цитаты в заметке",
   "cmd.research.verify.hint": "Проверяет, что ссылки в сносках живы, а цитаты действительно есть на странице",
+  "cmd.review.daily": "Ежедневное повторение",
   "cmd.save": "Сохранить",
   "cmd.saveAs": "Сохранить as…",
   "cmd.search": "Поиск workspace…",

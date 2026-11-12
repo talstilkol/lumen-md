@@ -252,6 +252,7 @@
   "cmd.research.settings.hint": "Claude のウェブ検索、または自分のキーで Brave / Tavily",
   "cmd.research.verify": "🔎 リサーチ：このノートの引用を検証",
   "cmd.research.verify.hint": "脚注のリンクが生きていて、引用が実際にページにあるかを確認",
+  "cmd.review.daily": "今日の復習",
   "cmd.save": "保存",
   "cmd.saveAs": "保存 as…",
   "cmd.search": "検索 workspace…",
