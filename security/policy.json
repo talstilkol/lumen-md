@@ -255,6 +255,11 @@
           "routes": ["app"],
           "remove": { "img-src": ["https:"], "media-src": ["https:"] },
           "why": "The desktop app loads images and media only from itself and the hosts the app needs (img-src above). Remote images and media inside notes are not loaded on desktop: a per-user approval cannot widen a policy compiled into the app."
+        },
+        {
+          "routes": ["app"],
+          "remove": { "connect-src": ["https://cdn.jsdelivr.net"] },
+          "why": "cdn.jsdelivr.net is webR's npm fallback for the web build's download (plan W1.34). The desktop app keeps webR's own CDN (webr.r-wasm.org) only, so the policy compiled into the app names no general-purpose CDN (review 13.5)."
         }
       ]
     }
