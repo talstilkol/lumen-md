@@ -69,6 +69,7 @@ export default defineConfig({
             { label: "Themes and CSS snippets", slug: "editor/themes", translations: { he: "ערכות נושא וקטעי CSS" } },
             { label: "Markdown fidelity", slug: "editor/markdown-fidelity", translations: { he: "נאמנות ל-Markdown" } },
             { label: "Obsidian syntax", slug: "editor/obsidian-syntax", translations: { he: "תחביר Obsidian" } },
+            { label: "Citations with [@key]", slug: "editor/citations", translations: { he: "ציטוטים עם ‎[@key]" } },
           ],
         },
         {

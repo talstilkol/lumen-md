@@ -1010,6 +1010,100 @@
       "vars": []
     },
     {
+      "key": "cite.keys",
+      "en": "Enter [@key] · ⇧Enter @key · Tab locator · Esc",
+      "vars": []
+    },
+    {
+      "key": "cite.loading",
+      "en": "Reading the library…",
+      "vars": []
+    },
+    {
+      "key": "cite.locator",
+      "en": "p. 10",
+      "vars": []
+    },
+    {
+      "key": "cite.noLibrary",
+      "en": "No sources yet: add a .bib or .csl.json file to the vault, or copy your Zotero library (desktop app).",
+      "vars": []
+    },
+    {
+      "key": "cite.noMatch",
+      "en": "No source matches.",
+      "vars": []
+    },
+    {
+      "key": "cite.origin.bibtex",
+      "en": "BibTeX",
+      "vars": []
+    },
+    {
+      "key": "cite.origin.csl",
+      "en": "CSL-JSON",
+      "vars": []
+    },
+    {
+      "key": "cite.origin.zotero",
+      "en": "Zotero",
+      "vars": []
+    },
+    {
+      "key": "cite.results",
+      "en": "Sources",
+      "vars": []
+    },
+    {
+      "key": "cite.search",
+      "en": "Search author, title, year or key",
+      "vars": []
+    },
+    {
+      "key": "cite.syncZotero",
+      "en": "Copy from Zotero",
+      "vars": []
+    },
+    {
+      "key": "cite.synced",
+      "en": "Zotero library copied into the vault: {n} sources.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "cite.syncing",
+      "en": "Copying…",
+      "vars": []
+    },
+    {
+      "key": "cite.title",
+      "en": "Insert a citation",
+      "vars": []
+    },
+    {
+      "key": "cite.zotero.browser",
+      "en": "Zotero only answers apps on this computer, not web pages: copy the library from the desktop app.",
+      "vars": []
+    },
+    {
+      "key": "cite.zotero.disabled",
+      "en": "Zotero's local API is off. In Zotero: Settings → Advanced → \"Allow other applications on this computer to communicate with Zotero\".",
+      "vars": []
+    },
+    {
+      "key": "cite.zotero.failed",
+      "en": "Couldn't read the Zotero library: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "cite.zotero.notRunning",
+      "en": "Zotero isn't running on this computer. Open Zotero 7 and try again.",
+      "vars": []
+    },
+    {
       "key": "credits.close",
       "en": "Close",
       "vars": []

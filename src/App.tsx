@@ -782,6 +782,12 @@ export default function App() {
       // ⌥⌘N → quick capture to inbox.md (plan 4.16).
       // Not AltGr (reported as Ctrl+Alt on Windows / Linux): AltGr+N types a letter (ń).
       if (e.altKey && e.code === "KeyN" && !e.getModifierState("AltGraph")) {
+      // ⌥⌘C → the cite dialog (plan W2.16).
+      if (e.altKey && e.code === "KeyC") {
+        e.preventDefault();
+        void import("./citations/CiteDialog").then((m) => m.openCiteDialog());
+        return;
+      }
         e.preventDefault();
         setCaptureOpen(true);
         return;

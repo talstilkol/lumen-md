@@ -85,6 +85,8 @@
   "cmd.billing.upgradeTeam": "請求: Team にアップグレード",
   "cmd.canvas.migrate": "🎨 キャンバス: tldraw のキャンバスを Excalidraw に変換",
   "cmd.canvas.migrate.hint": ".tldr ファイルはバックアップとして残ります",
+  "cmd.cite.insert": "引用を挿入 [@key]…",
+  "cmd.cite.syncZotero": "引用: Zotero ライブラリを保管庫にコピー",
   "cmd.clip.clipboard": "クリップボードからクリップ",
   "cmd.clip.clipboard.hint": "ブラウザーでページの一部をコピーしてライブラリに保存",
   "cmd.clip.url": "Web ページをクリップ…",

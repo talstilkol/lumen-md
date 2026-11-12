@@ -436,6 +436,16 @@
       "vars": []
     },
     {
+      "key": "cmd.cite.insert",
+      "en": "Insert a citation [@key]…",
+      "vars": []
+    },
+    {
+      "key": "cmd.cite.syncZotero",
+      "en": "Citations: copy the Zotero library into the vault",
+      "vars": []
+    },
+    {
       "key": "cmd.clip.clipboard",
       "en": "Clip from clipboard",
       "vars": []

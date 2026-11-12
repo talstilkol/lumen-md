@@ -1,0 +1,20 @@
+{
+  "cite.title": "Insert a citation",
+  "cite.search": "Search author, title, year or key",
+  "cite.locator": "p. 10",
+  "cite.results": "Sources",
+  "cite.loading": "Reading the library…",
+  "cite.noLibrary": "No sources yet: add a .bib or .csl.json file to the vault, or copy your Zotero library (desktop app).",
+  "cite.noMatch": "No source matches.",
+  "cite.keys": "Enter [@key] · ⇧Enter @key · Tab locator · Esc",
+  "cite.syncZotero": "Copy from Zotero",
+  "cite.syncing": "Copying…",
+  "cite.origin.bibtex": "BibTeX",
+  "cite.origin.csl": "CSL-JSON",
+  "cite.origin.zotero": "Zotero",
+  "cite.synced": "Zotero library copied into the vault: {n} sources.",
+  "cite.zotero.disabled": "Zotero's local API is off. In Zotero: Settings → Advanced → \"Allow other applications on this computer to communicate with Zotero\".",
+  "cite.zotero.notRunning": "Zotero isn't running on this computer. Open Zotero 7 and try again.",
+  "cite.zotero.browser": "Zotero only answers apps on this computer, not web pages: copy the library from the desktop app.",
+  "cite.zotero.failed": "Couldn't read the Zotero library: {error}"
+}

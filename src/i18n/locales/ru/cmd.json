@@ -85,6 +85,8 @@
   "cmd.billing.upgradeTeam": "Оплата: перейти на Team",
   "cmd.canvas.migrate": "🎨 Холст: перевести холсты tldraw в Excalidraw",
   "cmd.canvas.migrate.hint": "файлы .tldr остаются как резервные копии",
+  "cmd.cite.insert": "Вставить цитату [@key]…",
+  "cmd.cite.syncZotero": "Цитаты: скопировать библиотеку Zotero в хранилище",
   "cmd.clip.clipboard": "Сохранить из буфера обмена",
   "cmd.clip.clipboard.hint": "Скопируйте часть страницы в браузере и сохраните в библиотеку",
   "cmd.clip.url": "Сохранить веб-страницу…",
