@@ -16,6 +16,7 @@ import { getVaultBackend, refreshVaultEncryption, setVaultEncryptionState, unwra
 import type { VaultBackend } from "../types";
 import { log } from "../../../lib/logger";
 import type { KdfPolicy } from "../../../sync/e2ee/kdf";
+import { calibrateArgon2, type Argon2Cost } from "../../../sync/e2ee/kdfCalibrate";
 import { setRestSealer } from "../restStore";
 import { createEncryptedBackend, createLockedBackend } from "./backend";
 import { canRemoveHeader, convertFiles, readHeader, recoverInterrupted, removeHeader, scanVault, writeHeader, type ConvertProgress, type ConvertReport, type ScanReport } from "./convert";
@@ -47,8 +48,19 @@ const sessions = new WeakMap<VaultBackend, Session>();
 let current: Session | null = null;
 /** Tests only: accept cheap KDF parameters (production keeps the 600,000-iteration floor). */
 let policy: KdfPolicy = {};
-export function setKdfPolicyForTests(p: KdfPolicy): void {
-  policy = p;
+/** Tests only: the Argon2id cost new headers get, instead of this device's calibration. */
+let argon2ForTests: Argon2Cost | null = null;
+export function setKdfPolicyForTests(p: KdfPolicy & { argon2?: Argon2Cost }): void {
+  const { argon2, ...rest } = p;
+  policy = rest;
+  argon2ForTests = argon2 ?? null;
+}
+
+/** The Argon2id cost for a header written now (plan W4.20): ≤ 1 s on this device. */
+async function argon2Cost(): Promise<Argon2Cost> {
+  if (argon2ForTests) return argon2ForTests;
+  const { memoryKiB, iterations, parallelism } = await calibrateArgon2();
+  return { memoryKiB, iterations, parallelism };
 }
 
 export const LOCKED_EVENT = "lumen-vault-locked";
@@ -119,11 +131,28 @@ export function encryptionStatus(): { locked: boolean; headerError: string | nul
   return { locked: !s?.keys, headerError: s?.headerError?.message ?? null, target: s?.header?.target ?? null };
 }
 
-/** Unlock with the passphrase. Throws `WrongPassphraseError`; nothing is written either way. */
+/**
+ * Unlock with the passphrase. Throws `WrongPassphraseError`, and then nothing
+ * is written. A vault made before plan W4.20 (PBKDF2) moves to Argon2id
+ * here: the right passphrase re-wraps the data key in a new header (both
+ * copies, each checked), no file changes. If that write fails, the vault
+ * stays on PBKDF2 and opens all the same.
+ */
 export async function unlock(passphrase: string): Promise<void> {
   const s = await active();
   if (!s.header) throw s.headerError ?? new Error("The encryption header is missing");
-  open(s, await unlockRestHeader(s.header, passphrase), s.header);
+  const keys = await unlockRestHeader(s.header, passphrase);
+  if (s.header.passphrase.kdf.alg === "pbkdf2-sha256") {
+    try {
+      const next = await rewrapPassphrase(s.header, passphrase, { newPassphrase: passphrase, argon2: await argon2Cost() });
+      await writeHeader(s.inner, next.header, policy);
+      open(s, next.keys, next.header);
+      return;
+    } catch (err) {
+      log.warn("vault encryption: moving the header to Argon2id failed; it stays on PBKDF2", err);
+    }
+  }
+  open(s, keys, s.header);
 }
 
 /**
@@ -147,9 +176,9 @@ export async function recover(recoveryKey: string, newPassphrase: string, opts: 
   }
   let next: { header: RestHeader; keys: RestKeys };
   if (s.header) {
-    next = await rewrapPassphrase(s.header, recoveryKey, { recovery: true, newPassphrase, ...opts });
+    next = await rewrapPassphrase(s.header, recoveryKey, { recovery: true, newPassphrase, argon2: await argon2Cost(), ...opts });
   } else {
-    next = await headerFromRecoveryKey(recoveryKey, newPassphrase, "encrypted", opts);
+    next = await headerFromRecoveryKey(recoveryKey, newPassphrase, "encrypted", { argon2: await argon2Cost(), ...opts });
     const scan = await scanVault(s.inner, next.keys);
     if (scan.encrypted === 0 && scan.broken.length > 0) throw new WrongPassphraseError();
   }
@@ -162,7 +191,7 @@ export async function recover(recoveryKey: string, newPassphrase: string, opts: 
 export async function changePassphrase(currentPassphrase: string, newPassphrase: string, opts: CreateOptions = {}): Promise<void> {
   const s = await active();
   if (!s.header) throw new Error("The encryption header is missing");
-  const next = await rewrapPassphrase(s.header, currentPassphrase, { newPassphrase, ...opts });
+  const next = await rewrapPassphrase(s.header, currentPassphrase, { newPassphrase, argon2: await argon2Cost(), ...opts });
   await writeHeader(s.inner, next.header, policy);
   open(s, next.keys, next.header);
 }
@@ -269,7 +298,7 @@ export async function enableEncryption(
 ): Promise<(EnableResult & { report: ConvertReport }) | null> {
   const inner = unwrapVaultBackend(getVaultBackend());
   if (await readHeader(inner, policy).catch(() => "broken")) throw new Error("The vault is already encrypted");
-  const { header, keys, recoveryKey } = await createRestHeader(passphrase, opts);
+  const { header, keys, recoveryKey } = await createRestHeader(passphrase, { argon2: await argon2Cost(), ...opts });
   if (opts.confirmRecoveryKey && !(await opts.confirmRecoveryKey(recoveryKey))) return null;
   await writeHeader(inner, header, policy);
   const s = sessionFor(inner);

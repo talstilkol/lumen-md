@@ -7,9 +7,12 @@
  * even if both header files were lost. Day to day the vault opens with a
  * passphrase: the header holds the data key wrapped (AES-256-GCM) under a
  * key derived from the passphrase with the E2EE sync's KDF (plan 3.4,
- * ../../../sync/e2ee/kdf.ts): PBKDF2-SHA256, ≥ 600,000 iterations, behind
- * an id with "argon2id" reserved — a header that asks for it is refused with
- * `KdfUnavailableError` until hash-wasm is in the lockfile, never misread.
+ * ../../../sync/e2ee/kdf.ts). Since plan W4.20 that is Argon2id (RFC 9106,
+ * our own TypeScript from W1.7, checked against the RFC vectors), with the
+ * most memory this device opens within a second (../../../sync/e2ee/
+ * kdfCalibrate.ts). Vaults made before it, with PBKDF2-SHA256 (≥ 600,000
+ * iterations), still open, and move to Argon2id the first time the right
+ * passphrase unlocks them: only the header is rewritten.
  * A new passphrase re-wraps the data key; no file is re-encrypted.
  *
  * From the data key, HKDF-SHA256 (salt = vault id) makes one key per job:
@@ -33,7 +36,7 @@
 
 import { bs, concat, fromB64u, fromUtf8, randomBytes, toB64u, utf8 } from "../../../sync/e2ee/bytes";
 import { ENCRYPTED_PREFIX } from "./paths";
-import { deriveMasterKey, newKdfParams, validateKdfParams, type KdfParams, type KdfPolicy } from "../../../sync/e2ee/kdf";
+import { deriveMasterKey, newKdfParams, validateKdfParams, type Argon2idParams, type KdfParams, type KdfPolicy } from "../../../sync/e2ee/kdf";
 
 /** The shortest passphrase the vault accepts (characters), for the setup and unlock dialogs. */
 export const MIN_PASSPHRASE_LENGTH = 12;
@@ -180,12 +183,14 @@ async function sign(keys: RestKeys, body: HeaderBody): Promise<RestHeader> {
 }
 
 export interface CreateOptions {
-  /** Tests only: cheaper PBKDF2 (production uses the 600,000-iteration default). */
+  /** Tests only: PBKDF2 instead of Argon2id, with cheap iterations. */
   pbkdf2Iterations?: number;
+  /** The Argon2id cost (the device's calibration; tests pass a cheap one). Default: ARGON2_DEFAULT. */
+  argon2?: Omit<Argon2idParams, "alg" | "salt">;
 }
 
 async function headerFor(dataKey: Uint8Array, vaultId: string, passphrase: string, target: RestTarget, opts: CreateOptions): Promise<{ header: RestHeader; keys: RestKeys }> {
-  const kdf = newKdfParams(opts.pbkdf2Iterations);
+  const kdf = newKdfParams(opts.pbkdf2Iterations, opts.argon2);
   const body: HeaderBody = { format: FORMAT, version: VERSION, vaultId, target, passphrase: { kdf, wrapped: await wrap(await kek(passphrase, kdf), dataKey, vaultId, "passphrase") } };
   const keys = await deriveRestKeys(dataKey, vaultId);
   return { header: await sign(keys, body), keys };
@@ -259,8 +264,9 @@ export async function rewrapPassphrase(
   // Check the header is genuine before writing a new one from it.
   await unlockRestHeader(header, secret, { recovery: opts.recovery });
   const dataKey = await dataKeyOf(header, secret, !!opts.recovery);
-  const iterations = opts.pbkdf2Iterations ?? (header.passphrase.kdf.alg === "pbkdf2-sha256" ? header.passphrase.kdf.iterations : undefined);
-  return headerFor(dataKey, header.vaultId, opts.newPassphrase, header.target, { pbkdf2Iterations: iterations });
+  // Always the current KDF (Argon2id, plan W4.20): a re-wrap is also how an
+  // old PBKDF2 vault moves to it. PBKDF2 only when a test asks for it.
+  return headerFor(dataKey, header.vaultId, opts.newPassphrase, header.target, { pbkdf2Iterations: opts.pbkdf2Iterations, argon2: opts.argon2 });
 }
 
 /** The header pointing the other way (turning encryption off, or back on). */
