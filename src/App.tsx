@@ -167,6 +167,23 @@ export default function App() {
   const toggleWorkspace = useAppStore((s) => s.toggleWorkspace);
   const showBacklinks = useAppStore((s) => s.showBacklinks);
   const showLocalGraph = useAppStore((s) => s.showLocalGraph);
+  const enabledSnippets = useAppStore((s) => s.enabledSnippets);
+  // CSS snippets from the vault (plan W1.21): sanitized, applied, kept in step with the files.
+  useEffect(() => {
+    if (!enabledSnippets.length && !document.querySelector("style[data-lumen-snippet]")) return;
+    let off: (() => void) | undefined;
+    let cancelled = false;
+    void Promise.all([import("./theme/snippets"), import("./storage/workspaceEvents")]).then(([m, ev]) => {
+      if (cancelled) return;
+      const run = () => void m.refreshSnippets(useAppStore.getState().enabledSnippets).catch(() => undefined);
+      run();
+      off = ev.onWorkspaceChanged(run, { debounceMs: 300 });
+    });
+    return () => {
+      cancelled = true;
+      off?.();
+    };
+  }, [enabledSnippets]);
   const vimEnabled = useAppStore((s) => s.vimEnabled);
   const spellCheck = useAppStore((s) => s.spellCheck);
   const grammarCheck = useAppStore((s) => s.grammarCheck);

@@ -825,14 +825,12 @@
     },
     {
       "key": "calendar.templateHint",
-      "en": "Placeholders: {{date}}, {{hebrewDate}}, {{weekday}}, {{title}}, {{holiday}}, {{parasha}}",
+      "en": "Placeholders: {{date}}, {{hebrewDate}}, {{weekday}}, {{title}}",
       "vars": [
         "date",
         "hebrewDate",
         "weekday",
-        "title",
-        "holiday",
-        "parasha"
+        "title"
       ]
     },
     {
@@ -5507,6 +5505,61 @@
     {
       "key": "share.withMe.open",
       "en": "Open",
+      "vars": []
+    },
+    {
+      "key": "snippets.createExample",
+      "en": "Create an example snippet",
+      "vars": []
+    },
+    {
+      "key": "snippets.intro",
+      "en": "Your own CSS, from .css files in the vault's .lumen/snippets folder. Snippets can restyle Lumen but never load anything from the network: @import and url() to anything but data: are removed.",
+      "vars": []
+    },
+    {
+      "key": "snippets.reason.at-rule",
+      "en": "unsupported at-rule",
+      "vars": []
+    },
+    {
+      "key": "snippets.reason.import",
+      "en": "@import",
+      "vars": []
+    },
+    {
+      "key": "snippets.reason.remote-url",
+      "en": "loads a URL",
+      "vars": []
+    },
+    {
+      "key": "snippets.reason.script",
+      "en": "script hook",
+      "vars": []
+    },
+    {
+      "key": "snippets.reload",
+      "en": "Reload snippets",
+      "vars": []
+    },
+    {
+      "key": "snippets.removed",
+      "en": "Removed {count} unsafe rule(s):",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "snippets.removedAt",
+      "en": "line {line} ({reason})",
+      "vars": [
+        "line",
+        "reason"
+      ]
+    },
+    {
+      "key": "snippets.title",
+      "en": "CSS snippets",
       "vars": []
     },
     {

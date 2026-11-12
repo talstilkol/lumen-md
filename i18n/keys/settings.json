@@ -997,6 +997,11 @@
       "vars": []
     },
     {
+      "key": "themeSettings.font.hebrew",
+      "en": "Hebrew serif",
+      "vars": []
+    },
+    {
       "key": "themeSettings.font.mono",
       "en": "Monospace",
       "vars": []
@@ -1075,6 +1080,11 @@
     {
       "key": "themeSettings.preset.default",
       "en": "Default",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.preset.hebrew",
+      "en": "Ktav (Hebrew reading)",
       "vars": []
     },
     {

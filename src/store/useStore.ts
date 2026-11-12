@@ -89,6 +89,9 @@ export interface AppState {
   theme: Theme;
   /** Theme customisation (preset, accent, typography, measure). */
   themeSettings: ThemeSettings;
+  /** CSS snippets switched on (names of `.lumen/snippets/*.css`, plan W1.21). */
+  enabledSnippets: string[];
+  setSnippetEnabled: (name: string, on: boolean) => void;
   locale: Locale;
   showOutline: boolean;
   /** Phones (plan 10.2.4): the outline as a bottom sheet — this session only, closed at start. */
@@ -335,6 +338,9 @@ export const useAppStore = create<AppState>()(
       mode: defaultMode(),
       theme: "dark",
       themeSettings: { ...DEFAULT_THEME_SETTINGS },
+      enabledSnippets: [],
+      setSnippetEnabled: (name, on) =>
+        set((s) => ({ enabledSnippets: on ? [...new Set([...s.enabledSnippets, name])] : s.enabledSnippets.filter((x) => x !== name) })),
       locale: "en",
       showOutline: true,
       outlineSheet: false,
@@ -622,6 +628,7 @@ export const useAppStore = create<AppState>()(
       // not on every keystroke (plan 8.4).
       storage: deferredJSONStorage<PersistedAppState>((v) => persistedTextLength(v.state) >= LARGE_PERSIST_CHARS),
       partialize: partializeAppState,
+        enabledSnippets: s.enabledSnippets,
       // Persisted theme settings may be stale or hand-edited — sanitise
       // field-by-field on rehydrate instead of trusting localStorage.
       merge: (persisted, current) => {
@@ -631,6 +638,7 @@ export const useAppStore = create<AppState>()(
           ...p,
           themeSettings: sanitizeThemeSettings(p.themeSettings),
           // A hand-edited or older store: keep only fields of the right type, fall back per field.
+          enabledSnippets: Array.isArray(p.enabledSnippets) ? p.enabledSnippets.filter((x): x is string => typeof x === "string").slice(0, 200) : [],
           dailyNotes: {
             folder: typeof p.dailyNotes?.folder === "string" ? p.dailyNotes.folder : DEFAULT_DAILY.folder,
             pattern: typeof p.dailyNotes?.pattern === "string" && isValidDailyPattern(p.dailyNotes.pattern) ? p.dailyNotes.pattern : DEFAULT_DAILY.pattern,

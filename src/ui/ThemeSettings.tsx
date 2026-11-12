@@ -16,6 +16,7 @@ import {
   LIMITS,
   PRESET_IDS,
   PRESETS,
+  PRESET_TYPOGRAPHY,
   STYLESHEET_PALETTE,
   contrastReport,
   effectivePalette,
@@ -29,6 +30,7 @@ import { isHexColor, normalizeHex } from "../lib/contrast";
 import { downloadText } from "../storage/exportFormats";
 import { showAiToast } from "./AiToast";
 import { t } from "../i18n";
+import { SnippetSettings } from "./SnippetSettings";
 
 interface Props {
   open: boolean;
@@ -165,7 +167,7 @@ export function ThemeSettings({ open, onClose, embedded = false }: Props) {
                   id={id}
                   dark={dark}
                   active={settings.preset === id}
-                  onSelect={() => setThemeSettings({ preset: id })}
+                  onSelect={() => setThemeSettings({ preset: id, ...(PRESET_TYPOGRAPHY[id] ?? {}) })}
                 />
               ))}
             </div>
@@ -302,6 +304,8 @@ export function ThemeSettings({ open, onClose, embedded = false }: Props) {
               ))}
             </ul>
           </fieldset>
+
+          <SnippetSettings />
 
           {importError && (
             <p role="alert" style={{ ...muted, color: "hsl(var(--danger))" }} data-testid="theme-import-error">

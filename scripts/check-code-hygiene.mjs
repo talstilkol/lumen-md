@@ -202,9 +202,11 @@ export function findViolations(fileName, text, { e2e = false } = {}) {
         (p && ts.isElementAccessExpression(p) && p.expression === outer && ts.isStringLiteralLike(p.argumentExpression));
       if (!oneName) report(node, "env-whole");
     }
-    if (ts.isCallExpression(node) && isDirectFsCall(node)) {
+    // Direct file-system calls are a rule for the app; e2e tests seed OPFS on purpose.
+    if (!e2e && ts.isCallExpression(node) && isDirectFsCall(node)) {
       report(node, "direct-fs");
     } else if (
+      !e2e &&
       (ts.isStringLiteral(node) ||
         ts.isNoSubstitutionTemplateLiteral(node) ||
         ts.isTemplateHead(node) ||

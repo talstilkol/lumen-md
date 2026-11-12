@@ -64,6 +64,7 @@ export default defineConfig({
             { label: "Outline mode", slug: "editor/outline-mode", translations: { he: "מצב מתאר" } },
             { label: "Messages, empty states and undo", slug: "editor/messages", translations: { he: "הודעות, מצבים ריקים וביטול" } },
             { label: "Reading options and Hebrew fonts", slug: "editor/reading", translations: { he: "אפשרויות קריאה וגופנים עבריים" } },
+            { label: "Themes and CSS snippets", slug: "editor/themes", translations: { he: "ערכות נושא וקטעי CSS" } },
           ],
         },
         {

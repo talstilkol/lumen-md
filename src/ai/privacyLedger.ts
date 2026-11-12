@@ -557,6 +557,23 @@ export function recordPluginRequest(pluginId: string, url: string, method: strin
   return entry;
 }
 
+/**
+ * A request a stylesheet made (plan W1.21): theme and snippet CSS is
+ * sanitized so it cannot load anything, and the theme layer watches the
+ * page's resource timing for any "css" request to another origin — should
+ * one ever slip through, it is recorded here rather than going unseen.
+ */
+export function recordStyleRequest(url: string): LedgerEntry {
+  let host = "?";
+  try {
+    host = new URL(url).hostname.toLowerCase();
+  } catch {
+    /* keep "?" */
+  }
+  const id = record({ host, method: "GET", bytesOut: 0, bytesIn: null, category: "third-party", reason: "A stylesheet (theme or CSS snippet) loaded it", policy: getAiPolicy(), decision: "allowed" });
+  return entries.find((x) => x.id === id)!;
+}
+
 /** Response size and status of a recorded request. */
 export function completeLedgerEntry(id: number, status: number, bytesIn: number | null): void {
   patch(id, { status, bytesIn });

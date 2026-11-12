@@ -373,7 +373,7 @@
     margin: 0 auto;
     font-family: var(--reading-font, var(--font-serif));
     font-size: var(--reading-size, 17px);
-    line-height: var(--reading-line-height, 1.7);
+    line-height: var(--reading-line-height, var(--preview-line-height, 1.7));
     word-spacing: var(--reading-word-spacing, normal);
     letter-spacing: var(--reading-letter-spacing, normal);
     padding: 2.5rem 2rem 30vh;
