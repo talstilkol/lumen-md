@@ -111,10 +111,40 @@ export function endpointOrigins(
 
 /** Append `origins` to the `connect-src` directive of a CSP string (no duplicates). */
 export function addConnectSrc(csp: string, origins: readonly string[]): string {
+  return addSources(csp, "connect-src", origins);
+}
+
+/**
+ * The content frame's own site (plan W6.40, src/lib/contentFrame.ts): the
+ * app page must be allowed to frame it. The policy names the official one;
+ * this adds another a build is made with (dev and e2e use the other loopback
+ * name: http://127.0.0.1:5173/content-frame.html for http://localhost:5173).
+ * Only an https: URL, or http: on a loopback host.
+ */
+export const CONTENT_FRAME_ENV_VAR = "VITE_CONTENT_FRAME_URL";
+export function contentFrameOrigins(env: Record<string, string | undefined>): string[] {
+  const raw = env[CONTENT_FRAME_ENV_VAR]?.trim();
+  if (!raw || raw.includes("#") || raw.includes("?")) return [];
+  try {
+    const u = new URL(raw);
+    const loopback = ["127.0.0.1", "localhost", "[::1]"].includes(u.hostname);
+    if (u.username || u.password || !(u.protocol === "https:" || (u.protocol === "http:" && loopback))) return [];
+    return [u.origin];
+  } catch {
+    return [];
+  }
+}
+
+/** Append `origins` to the `frame-src` directive of a CSP string (no duplicates). */
+export function addFrameSrc(csp: string, origins: readonly string[]): string {
+  return addSources(csp, "frame-src", origins);
+}
+
+function addSources(csp: string, directive: "connect-src" | "frame-src", origins: readonly string[]): string {
   if (!origins.length) return csp;
   let found = false;
   const parts = csp.split(";").map((part) => {
-    const m = part.match(/^(\s*)connect-src(\s+)([^]*)$/i);
+    const m = part.match(new RegExp(`^(\\s*)${directive}(\\s+)([^]*)$`, "i"));
     if (!m) return part;
     found = true;
     const trailing = m[3].match(/\s*$/)?.[0] ?? "";
@@ -123,24 +153,25 @@ export function addConnectSrc(csp: string, origins: readonly string[]): string {
     // any added source would make the browser ignore 'none'.
     if (values.includes("'none'")) return part;
     for (const o of origins) if (!values.includes(o)) values.push(o);
-    return `${m[1]}connect-src${m[2]}${values.join(" ")}${trailing}`;
+    return `${m[1]}${directive}${m[2]}${values.join(" ")}${trailing}`;
   });
   return found ? parts.join(";") : csp;
 }
 
 /** Rewrite the CSP in an index.html `<meta http-equiv="Content-Security-Policy">`. */
-export function extendIndexHtmlCsp(html: string, origins: readonly string[]): string {
+export function extendIndexHtmlCsp(html: string, origins: readonly string[], frames: readonly string[] = []): string {
   return html.replace(
     /(<meta\s+http-equiv="Content-Security-Policy"\s+content=")([^"]+)(")/i,
-    (_m, a: string, csp: string, b: string) => a + addConnectSrc(csp, origins) + b,
+    (_m, a: string, csp: string, b: string) => a + addFrameSrc(addConnectSrc(csp, origins), frames) + b,
   );
 }
 
 /** Rewrite every `Content-Security-Policy:` line of a Cloudflare/Netlify `_headers` file. */
-export function extendHeadersFileCsp(text: string, origins: readonly string[]): string {
+export function extendHeadersFileCsp(text: string, origins: readonly string[], frames: readonly string[] = []): string {
   return text.replace(
     /^(\s*Content-Security-Policy:\s*)(.+)$/gm,
-    (_m, a: string, csp: string) => a + addConnectSrc(csp, origins),
+    // frame-src only where the policy has one that frames the app itself ('self').
+    (_m, a: string, csp: string) => a + (/frame-src\s+'self'/.test(csp) ? addFrameSrc(addConnectSrc(csp, origins), frames) : addConnectSrc(csp, origins)),
   );
 }
 
@@ -180,6 +211,7 @@ export function devServerOrigins(server: { port?: number; hmr?: boolean | { port
 export function cspEndpointsPlugin(): MinimalPlugin {
   let origins: string[] = [];
   let pageOrigins: string[] = [];
+  let frames: string[] = [];
   let outDir = "dist";
   return {
     name: "lumen-csp-endpoints",
@@ -188,18 +220,19 @@ export function cspEndpointsPlugin(): MinimalPlugin {
         config.logger?.warn(`[lumen-csp-endpoints] not added to connect-src: ${value} (${reason})`),
       );
       pageOrigins = config.command === "serve" ? [...origins, ...devServerOrigins(config.server)] : origins;
+      frames = contentFrameOrigins({ ...process.env, ...config.env });
       const path = config.build.outDir;
       outDir = path.startsWith("/") ? path : `${config.root}/${path}`;
     },
     transformIndexHtml(html) {
-      return extendIndexHtmlCsp(html, pageOrigins);
+      return extendIndexHtmlCsp(html, pageOrigins, frames);
     },
     async closeBundle() {
       const fs = await import("node:fs/promises");
       const headers = `${outDir}/_headers`;
       try {
         const text = await fs.readFile(headers, "utf8");
-        await fs.writeFile(headers, extendHeadersFileCsp(text, origins));
+        await fs.writeFile(headers, extendHeadersFileCsp(text, origins, frames));
       } catch {
         /* why: no _headers in this build (e.g. tests) */
       }
