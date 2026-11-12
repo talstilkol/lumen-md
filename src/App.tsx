@@ -107,11 +107,14 @@ import { FocusMode } from "./ui/FocusMode";
 const OnboardingTour = lazy(() => import("./ui/OnboardingTour").then(m => ({ default: m.OnboardingTour })));
 // First-run setup (plan 14.1): its own chunk, loaded only on a first visit or from ⌘K.
 const FirstRun = lazy(() => import("./onboarding/FirstRun"));
+// Plan W1.29: the moderator's usability-session panel, loaded only when a study runs.
+const UsabilitySessionPanel = lazy(() => import("./ui/UsabilitySessionPanel").then((m) => ({ default: m.UsabilitySessionPanel })));
 import { scrollToHeadingWhenRendered } from "./renderer/wikiLinks";
 import { notifyWorkspaceChanged } from "./storage/workspaceEvents";
 import { explainError } from "./lib/userError";
 import { useEdgeSwipes, useLongNotesOpenForReading } from "./mobile/useMobileGestures";
 import { FeatureFlagsHost } from "./ui/FeatureFlagsPanel";
+import { announceCommand } from "./research/usability/commandEvents";
 
 export default function App() {
   const doc = useAppStore((s) => s.doc);
@@ -232,6 +235,19 @@ export default function App() {
         .catch(() => undefined);
     }, 5000);
     return () => clearTimeout(timer);
+  }, []);
+  // A usability session (W1.29) survives a reload: reopen its panel.
+  const [usabilityOpen, setUsabilityOpen] = useState(() => {
+    try {
+      return !!localStorage.getItem("lumen-usability-session");
+    } catch {
+      return false;
+    }
+  });
+  useEffect(() => {
+    const on = () => setUsabilityOpen(true);
+    window.addEventListener("lumen-open-usability", on);
+    return () => window.removeEventListener("lumen-open-usability", on);
   }, []);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -960,7 +976,10 @@ export default function App() {
         return undefined;
       };
       const cmd = id ? find(commandsRef.current) : undefined;
-      if (cmd) void cmd.action();
+      if (cmd) {
+        announceCommand(cmd.id);
+        void cmd.action();
+      }
     };
     window.addEventListener("lumen-run-command", onRun);
     return () => window.removeEventListener("lumen-run-command", onRun);
@@ -1354,6 +1373,11 @@ export default function App() {
       <AiSuggestionsPanel />
       <AiInlinePromptOverlay />
       <MobileKeyboardBar />
+      {usabilityOpen && (
+        <Suspense fallback={null}>
+          <UsabilitySessionPanel onClose={() => setUsabilityOpen(false)} />
+        </Suspense>
+      )}
       <TagsPanel open={tagsPanelOpen} onClose={() => setTagsPanelOpen(false)} />
       {collab && (
         <Suspense fallback={null}>
