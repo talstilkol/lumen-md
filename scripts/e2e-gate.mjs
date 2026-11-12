@@ -23,7 +23,11 @@
  * 38 of the build). A box that runs out fails the gate: it means the specs
  * no longer fit, not that they passed.
  *
- *   node scripts/e2e-gate.mjs              build first (dist/), then this
+ * Specs that drive the app's modules from inside the page load them through
+ * window.__lumenTest (e2e/_lumen.ts), which a build has only when made with
+ * VITE_E2E=1; scripts/vercel-build.mjs sets it whenever the e2e gate runs.
+ *
+ *   VITE_E2E=1 npm run build && node scripts/e2e-gate.mjs
  */
 import { spawn, spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
