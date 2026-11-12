@@ -403,8 +403,10 @@ describe("re-review 12.11: who may change keys", () => {
     expect(held.uploaded).toBe(0);
     expect(held.waiting).toEqual(["b.md"]);
     await expect(b.sync.enroll("t", (await generateIdentity()).recipient)).rejects.toBeInstanceOf(UnverifiedDeviceError);
-    // It can't vouch for the device list: its re-key wraps the next epoch for no device (they enroll again).
-    const r = await b.sync.rekey();
+    // It can't vouch for the device list: its re-key would wrap the next epoch for no device (they pair again),
+    // so it needs the user's consent, after the UI showed who (fifth review F3).
+    await expect(b.sync.rekey()).rejects.toMatchObject({ name: "DropDevicesRequiredError", devices: ["phone"] });
+    const r = await b.sync.rekey({ dropDevices: true });
     expect(r).toMatchObject({ epoch: 2, devices: [], dropped: true, confirmed: true });
     expect(await wrapsFor(p, "phone", phone.identity)).toBeNull();
     // Paired (two-way), it uploads what waited, and its re-keys carry the device list again.
@@ -424,7 +426,7 @@ describe("re-review 12.11: who may change keys", () => {
     await a.sync.sync();
     await a.sync.rekey();
     const code = await a.sync.pairingCode();
-    expect(code).toMatch(/^lumen-pair:2:1:/);
+    expect(code).toMatch(/^lumen-pair:3:1:/);
     // The same vault on a withheld copy, re-sealed at 1.1 differently on each side.
     const other = memoryProvider();
     for (const [k, v] of p.objects) other.objects.set(k, { data: v.data.slice(), etag: v.etag });
