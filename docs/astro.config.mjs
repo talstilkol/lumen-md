@@ -1,5 +1,6 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
+import rehypeHebrewSearch from "./src/plugins/rehype-hebrew-search.mjs";
 
 // Lumen's user docs. Hosted at docs.lumen.app — point your CNAME there.
 //
@@ -8,6 +9,8 @@ import starlight from "@astrojs/starlight";
 // GitHub Pages).
 export default defineConfig({
   site: "https://docs.lumen.app",
+  // Search finds Hebrew words with and without their prefixes (plan W1.28).
+  markdown: { rehypePlugins: [rehypeHebrewSearch] },
   integrations: [
     starlight({
       title: "Lumen Docs",
@@ -27,6 +30,19 @@ export default defineConfig({
           items: [
             { label: "Welcome to Lumen", slug: "getting-started/welcome" },
             { label: "Quickstart", slug: "getting-started/quickstart" },
+            { label: "Install Lumen", slug: "getting-started/install", translations: { he: "התקנת Lumen" } },
+            { label: "Keyboard shortcuts", slug: "getting-started/shortcuts", translations: { he: "קיצורי מקלדת" } },
+          ],
+        },
+        {
+          label: "Moving to Lumen",
+          translations: { he: "מעבר ל-Lumen" },
+          items: [
+            { label: "From Obsidian", slug: "getting-started/from-obsidian", translations: { he: "מ-Obsidian" } },
+            { label: "From Notion", slug: "getting-started/from-notion", translations: { he: "מ-Notion" } },
+            { label: "From Evernote", slug: "getting-started/from-evernote", translations: { he: "מ-Evernote" } },
+            { label: "From Google Docs", slug: "getting-started/from-google-docs", translations: { he: "מ-Google Docs" } },
+            { label: "From Bear", slug: "getting-started/from-bear", translations: { he: "מ-Bear" } },
           ],
         },
         {
@@ -34,6 +50,7 @@ export default defineConfig({
           items: [
             { label: "Source / Split / Preview / WYSIWYG", slug: "editor/modes" },
             { label: "Smart Insert", slug: "editor/smart-insert" },
+            { label: "Hebrew and right-to-left", slug: "editor/hebrew", translations: { he: "עברית ומימין לשמאל" } },
           ],
         },
         {
@@ -46,6 +63,7 @@ export default defineConfig({
             { label: "Database views", slug: "workspace/database-views" },
             { label: "Search (BM25 + Smart)", slug: "workspace/search" },
             { label: "Vault Doctor", slug: "workspace/doctor" },
+            { label: "Export and import", slug: "workspace/export-import", translations: { he: "ייצוא וייבוא" } },
           ],
         },
         {
@@ -53,6 +71,7 @@ export default defineConfig({
           items: [
             { label: "Real-time WebRTC", slug: "collab/webrtc" },
             { label: "End-to-end encryption", slug: "collab/encryption" },
+            { label: "Persistent rooms", slug: "collab/persistent", translations: { he: "חדרים מתמשכים" } },
           ],
         },
         {
@@ -60,9 +79,11 @@ export default defineConfig({
           items: [
             { label: "Auto-tag + link suggestions", slug: "ai/agents" },
             { label: "Local LLM (web-llm)", slug: "ai/local-llm" },
+            { label: "Local agents", slug: "ai/local-agents", translations: { he: "סוכנים מקומיים" } },
             { label: "AI cost: usage meter + answer cache", slug: "ai/cost" },
             { label: "Research + citation checks", slug: "ai/research" },
             { label: "MCP integration (Claude Desktop, Cursor)", slug: "ai/mcp" },
+            { label: "Privacy and the AI policy", slug: "ai/privacy", translations: { he: "פרטיות ומדיניות ה-AI" } },
           ],
         },
         {
@@ -71,7 +92,7 @@ export default defineConfig({
             { label: "Plugin SDK", slug: "plugins/sdk" },
             { label: "Plugin gallery", slug: "plugins/gallery" },
             { label: "Plugin signing keys", slug: "plugins/signing" },
-            { label: "Templates marketplace", slug: "plugins/templates" },
+            { label: "Templates", slug: "plugins/templates", translations: { he: "תבניות" } },
             { label: "Web Clipper extension", slug: "plugins/web-clipper" },
           ],
         },
@@ -80,7 +101,8 @@ export default defineConfig({
           items: [
             { label: "Git sync", slug: "sync/git" },
             { label: "Cloud sync (Dropbox, Drive)", slug: "sync/cloud" },
-            { label: "Read-mode publishing", slug: "sync/publish" },
+            { label: "Encrypted sync (E2EE)", slug: "sync/e2ee" },
+            { label: "Read-mode publishing", slug: "sync/publish", translations: { he: "פרסום לקריאה" } },
           ],
         },
         {
