@@ -172,6 +172,7 @@ vi.mock("../renderer/wikiLinks", async (importOriginal) => ({
 
 import App from "../App";
 import { useAppStore } from "../store/useStore";
+import { __resetExternalChanges } from "../store/externalChanges";
 import { welcomeDoc } from "../welcomeDoc";
 import { applyLocale, loadLocale, t } from "../i18n";
 import { useToastStore } from "../store/useToastStore";
@@ -225,6 +226,8 @@ function setDocState(d: Partial<ReturnType<typeof doc>>, tabs = true) {
 }
 
 beforeEach(() => {
+  // The outside-change guard (#258) remembers what each path last held, across cases: start clean.
+  __resetExternalChanges();
   for (const k of Object.keys(h.props)) delete h.props[k];
   h.commandOpts = null;
   h.menu = null;
