@@ -1301,6 +1301,7 @@
   "e2ee.fresh.confirm": "J'ai vérifié — c'est à jour",
   "e2ee.fresh.badCode": "Ce code d'association n'est pas valable pour ce coffre, ou il a expiré.",
   "e2ee.fresh.verified": "Fraîcheur vérifiée",
+  "e2ee.fresh.olderKeys": "L'autre appareil est à une époque de clés plus récente que celle que voit cet appareil : le service de synchronisation montre peut-être d'anciennes clés à cet appareil. Synchronisez les deux appareils et réessayez ; si rien ne change, ne faites pas confiance à ce service.",
   "vault.import.what": "Importer depuis…",
   "vault.import.zip": "Un fichier .zip",
   "vault.import.folder": "Un dossier",

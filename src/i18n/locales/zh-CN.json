@@ -1301,6 +1301,7 @@
   "e2ee.fresh.confirm": "已核对 — 是最新的",
   "e2ee.fresh.badCode": "此配对码不适用于该库，或已过期。",
   "e2ee.fresh.verified": "已验证最新性",
+  "e2ee.fresh.olderKeys": "另一台设备的密钥纪元比本设备看到的更新：同步服务可能在向本设备展示旧密钥。请同步两台设备后重试；如果仍然如此，请不要信任此服务。",
   "vault.import.what": "导入自…",
   "vault.import.zip": ".zip 文件",
   "vault.import.folder": "文件夹",

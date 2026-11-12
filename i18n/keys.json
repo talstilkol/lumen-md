@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-20T19:56:34.410Z",
+  "generated_at": "2026-11-12T15:30:18.372Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1487,
+  "count": 1488,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -8007,6 +8007,11 @@
     {
       "key": "e2ee.fresh.verified",
       "en": "Freshness verified",
+      "vars": []
+    },
+    {
+      "key": "e2ee.fresh.olderKeys",
+      "en": "The other device is at a newer key epoch than this one sees: the sync service may be showing this device old keys. Sync both devices and try again; if it stays like this, don't trust this service.",
       "vars": []
     }
   ]

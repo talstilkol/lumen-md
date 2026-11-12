@@ -1301,6 +1301,7 @@
   "e2ee.fresh.confirm": "Geprüft — ist aktuell",
   "e2ee.fresh.badCode": "Dieser Kopplungscode gilt nicht für diesen Tresor oder ist abgelaufen.",
   "e2ee.fresh.verified": "Aktualität geprüft",
+  "e2ee.fresh.olderKeys": "Das andere Gerät ist auf einer neueren Schlüssel-Epoche, als dieses Gerät sieht: Der Sync-Dienst zeigt diesem Gerät womöglich alte Schlüssel. Synchronisiere beide Geräte und versuche es erneut; bleibt es so, vertraue diesem Dienst nicht.",
   "vault.import.what": "Importieren aus…",
   "vault.import.zip": "Einer .zip-Datei",
   "vault.import.folder": "Einem Ordner",
