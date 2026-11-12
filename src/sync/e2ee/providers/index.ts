@@ -166,6 +166,6 @@ export function createSyncProvider(settings: ProviderSettings, opts: { secret?: 
     case "folder":
       return folderProvider(async () => (await import("../setup/folderHandle")).syncFolderBackend());
     case "relay":
-      return relayProvider({ url: settings.url, token: secret }, deps);
+      return relayProvider({ url: settings.url, token: secret, invite: (import.meta as ImportMeta & { env?: Record<string, string | undefined> }).env?.VITE_SYNC_RELAY_INVITE || undefined }, deps);
   }
 }
