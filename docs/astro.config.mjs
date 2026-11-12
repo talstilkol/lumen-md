@@ -165,6 +165,7 @@ export default defineConfig({
             { label: "DictaLM 3.0 (Hebrew)", translations: { he: "DictaLM 3.0 (עברית)" }, slug: "ai/dictalm3" },
             { label: "Meeting transcripts with speakers", translations: { he: "תמלול פגישה עם דוברים" }, slug: "ai/meeting-speakers" },
             { label: "Hebrew Whisper on the desktop", translations: { he: "Whisper עברי בשולחן העבודה" }, slug: "ai/whisper-desktop" },
+            { label: "Model credits", slug: "ai/model-credits", translations: { he: "קרדיטים למודלים" } },
           ],
         },
         {

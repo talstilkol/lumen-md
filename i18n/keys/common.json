@@ -1109,8 +1109,63 @@
       "vars": []
     },
     {
+      "key": "credits.hebrew",
+      "en": "Hebrew models (ivrit.ai, Dicta)",
+      "vars": []
+    },
+    {
       "key": "credits.intro",
       "en": "Models and data Lumen can download, and the attribution their licences ask for.",
+      "vars": []
+    },
+    {
+      "key": "credits.licence",
+      "en": "Licence",
+      "vars": []
+    },
+    {
+      "key": "credits.models",
+      "en": "Model credits",
+      "vars": []
+    },
+    {
+      "key": "credits.other",
+      "en": "Other models and data",
+      "vars": []
+    },
+    {
+      "key": "credits.req.apache",
+      "en": "Apache 2.0: the copyright and licence notice (and NOTICE file, if any) are kept.",
+      "vars": []
+    },
+    {
+      "key": "credits.req.ccBy",
+      "en": "CC BY 4.0: the creator is credited, the licence is linked, and changes are noted.",
+      "vars": []
+    },
+    {
+      "key": "credits.req.gemma",
+      "en": "Gemma Terms of Use: the terms come with the model; Google's Prohibited Use Policy applies.",
+      "vars": []
+    },
+    {
+      "key": "credits.req.llama",
+      "en": "Llama Community License: the licence notice and “Built with Llama” are shown; Meta's Acceptable Use Policy applies.",
+      "vars": []
+    },
+    {
+      "key": "credits.req.mit",
+      "en": "MIT: the copyright and licence notice are kept.",
+      "vars": []
+    },
+    {
+      "key": "credits.req.mpl",
+      "en": "MPL 2.0: the notice is kept and the MPL-covered source stays available.",
+      "vars": []
+    },
+    {
+      "key": "credits.source",
+      "en": "Source",
       "vars": []
     },
     {
