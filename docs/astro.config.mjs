@@ -68,6 +68,7 @@ export default defineConfig({
             { label: "Reading options and Hebrew fonts", slug: "editor/reading", translations: { he: "אפשרויות קריאה וגופנים עבריים" } },
             { label: "Themes and CSS snippets", slug: "editor/themes", translations: { he: "ערכות נושא וקטעי CSS" } },
             { label: "Markdown fidelity", slug: "editor/markdown-fidelity", translations: { he: "נאמנות ל-Markdown" } },
+            { label: "Obsidian syntax", slug: "editor/obsidian-syntax", translations: { he: "תחביר Obsidian" } },
           ],
         },
         {

@@ -683,6 +683,61 @@
     --admon-bg: hsl(0 80% 60% / 0.1);
   }
 
+  /* W1.3 — Obsidian callouts (preview; WYSIWYG marks its quotes the same way) */
+  .callout {
+    --co: 220 90% 60%;
+    margin: 1.25rem 0;
+    padding: 0.75rem 1rem;
+    border-inline-start: 4px solid hsl(var(--co));
+    background: hsl(var(--co) / 0.08);
+    border-start-end-radius: 0.5rem;
+    border-end-end-radius: 0.5rem;
+  }
+  .callout-title {
+    font-weight: 600;
+    color: hsl(var(--co));
+  }
+  summary.callout-title { cursor: pointer; }
+  .callout-content > :first-child { margin-top: 0.5rem; }
+  .callout-content > :last-child { margin-bottom: 0; }
+  .callout-abstract, .callout-info, .callout-todo { --co: 200 85% 50%; }
+  .callout-tip, .callout-success { --co: 160 70% 40%; }
+  .callout-question, .callout-warning { --co: 38 92% 50%; }
+  .callout-failure, .callout-danger, .callout-bug { --co: 0 80% 58%; }
+  .callout-example { --co: 265 70% 60%; }
+  .callout-quote { --co: 0 0% 55%; }
+  blockquote.callout > p:first-child { font-weight: 600; color: hsl(var(--co)); }
+
+  /* ==highlights== (both editors and the preview) */
+  mark.obsidian-highlight, .cm-obs-highlight { background: hsl(50 100% 60% / 0.45); color: inherit; border-radius: 2px; }
+  .hl-red { background: hsl(0 90% 65% / 0.4) !important; }
+  .hl-orange { background: hsl(28 95% 60% / 0.4) !important; }
+  .hl-yellow { background: hsl(50 100% 60% / 0.45) !important; }
+  .hl-green { background: hsl(130 60% 55% / 0.4) !important; }
+  .hl-blue { background: hsl(210 90% 65% / 0.4) !important; }
+  .hl-purple { background: hsl(275 70% 65% / 0.4) !important; }
+  .cm-obs-comment, .obs-comment { opacity: 0.55; font-style: italic; }
+  .cm-obs-callout { font-weight: 600; }
+
+  /* Footnote preview on hover / focus */
+  .footnote-popover {
+    position: fixed;
+    z-index: 60;
+    max-width: min(28rem, calc(100vw - 2rem));
+    padding: 0.5rem 0.75rem;
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.5rem;
+    background: hsl(var(--bg));
+    color: hsl(var(--fg));
+    box-shadow: 0 6px 24px hsl(0 0% 0% / 0.18);
+    font-size: 14px;
+  }
+  .footnote-popover > :first-child { margin-top: 0; }
+  .footnote-popover > :last-child { margin-bottom: 0; }
+
+  /* Drag-to-resize images (writes ![[img|300]]) */
+  img[data-md-offset][data-resize-edge] { cursor: ew-resize; outline: 2px solid hsl(var(--accent) / 0.5); }
+
   /* KaTeX */
   .prose-lumen .katex-display {
     margin: 1.25rem 0;

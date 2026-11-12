@@ -5,7 +5,7 @@
  * Corpus: every Markdown file in the repository (English and Hebrew docs,
  * templates, READMEs, eval goldens, …) plus each heading section of the
  * two vendored spec files, which are themselves long Markdown documents full
- * of edge cases: 207 files today. A CRLF copy of every tenth file is added on
+ * of edge cases. A CRLF copy of every tenth file is added on
  * top. The suite asserts at least 200.
  *
  * - Source editor (CodeMirror): open and save must be byte-identical for
@@ -28,6 +28,7 @@ import { math } from "@milkdown/plugin-math";
 import { getMarkdown } from "@milkdown/utils";
 import type { Node as PmNode } from "@milkdown/prose/model";
 import { listSpreadFix } from "../editor/milkdownListSpread";
+import { wysiwygObsidianPlugins } from "../editor/wysiwygObsidian";
 import { encodeCriticForWysiwyg, wysiwygSuggestPlugins } from "../editor/wysiwygSuggest";
 import { splitFrontmatter } from "../editor/WysiwygEditor";
 import { lineSeparatorFor } from "../editor/lineEndings";
@@ -193,6 +194,7 @@ async function openWysiwyg(text: string) {
     .use(commonmark)
     .use(gfm)
     .use(listSpreadFix)
+    .use(wysiwygObsidianPlugins)
     .use(math)
     .create();
   const loaded = ed.action(getMarkdown());

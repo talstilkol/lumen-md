@@ -5,6 +5,8 @@ import type { Processor } from "unified";
 import type { ReactElement } from "react";
 import remarkParse from "remark-parse";
 import { markdownSyntax } from "./syntax";
+import { defaultCalloutTitle, isKnownCallout, remarkObsidian } from "./remarkObsidian";
+import { t } from "../i18n";
 import remarkRehype from "remark-rehype";
 // rehype-katex (+ katex + mhchem, ~84 KB gz) is dynamically imported via
 // ./katexPlugin only for docs that contain `$` — it is no longer a static
@@ -174,11 +176,20 @@ type RehypeKatex = typeof import("./katexPlugin").default;
 
 /** Parse + the Lumen dialect transforms that run before embeds are expanded. */
 function buildDialect() {
+/** A callout's default title: translated for Obsidian's own types, the type itself otherwise. */
+function calloutTitle(kind: string, type: string): string {
+  return isKnownCallout(type) ? t(`callout.${kind}`) : defaultCalloutTitle(kind, type);
+}
+
   return unified()
     .use(remarkParse)
     // Frontmatter, GFM, math and directives: the syntax the conformance suite tests.
     .use(markdownSyntax)
     .use(remarkStripFrontmatter)
+    // W1.3 — Obsidian callouts, %%comments%%, ==highlights==, ![[image|300]].
+    // Before soft breaks (a callout's title ends at the first line break)
+    // and before wiki links (an embed is not a link).
+    .use(remarkObsidian, { calloutTitle })
     .use(remarkBreaks)
     .use(remarkAdmonitions)
     .use(remarkColumns)

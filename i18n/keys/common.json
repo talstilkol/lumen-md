@@ -844,6 +844,71 @@
       "vars": []
     },
     {
+      "key": "callout.abstract",
+      "en": "Abstract",
+      "vars": []
+    },
+    {
+      "key": "callout.bug",
+      "en": "Bug",
+      "vars": []
+    },
+    {
+      "key": "callout.danger",
+      "en": "Danger",
+      "vars": []
+    },
+    {
+      "key": "callout.example",
+      "en": "Example",
+      "vars": []
+    },
+    {
+      "key": "callout.failure",
+      "en": "Failure",
+      "vars": []
+    },
+    {
+      "key": "callout.info",
+      "en": "Info",
+      "vars": []
+    },
+    {
+      "key": "callout.note",
+      "en": "Note",
+      "vars": []
+    },
+    {
+      "key": "callout.question",
+      "en": "Question",
+      "vars": []
+    },
+    {
+      "key": "callout.quote",
+      "en": "Quote",
+      "vars": []
+    },
+    {
+      "key": "callout.success",
+      "en": "Success",
+      "vars": []
+    },
+    {
+      "key": "callout.tip",
+      "en": "Tip",
+      "vars": []
+    },
+    {
+      "key": "callout.todo",
+      "en": "Todo",
+      "vars": []
+    },
+    {
+      "key": "callout.warning",
+      "en": "Warning",
+      "vars": []
+    },
+    {
       "key": "caption.attribution.florence",
       "en": "Florence-2 © Microsoft, MIT License; ONNX conversion by onnx-community (Hugging Face).",
       "vars": []
@@ -4821,6 +4886,18 @@
     {
       "key": "plugins.panel.close",
       "en": "Close the plugin panel",
+      "vars": []
+    },
+    {
+      "key": "preview.footnote.label",
+      "en": "Footnote {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "preview.imageResize.hint",
+      "en": "Drag the edge to resize. The width is saved in the note.",
       "vars": []
     },
     {

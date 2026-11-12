@@ -15,6 +15,7 @@ import { readyToReveal } from "./revealLine";
 import { useEffect, useImperativeHandle, useRef, useState, forwardRef } from "react";
 import { Compartment, EditorState } from "@codemirror/state";
 import { lineSeparatorFor } from "./lineEndings";
+import { obsidianSourceExtension } from "./obsidianSource";
 import { EditorView, keymap, highlightActiveLine, Decoration, WidgetType } from "@codemirror/view";
 import type { DecorationSet } from "@codemirror/view";
 import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
@@ -372,6 +373,8 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       lineSeparatorCompartment.of(EditorState.lineSeparator.of(lineSeparatorFor(initialDoc))),
       vimCompartment.of([]),
       embedHintExtension(),
+      // W1.3 — ==highlights==, %%comments%% and callout heads, marked.
+      obsidianSourceExtension,
       insertSlashMenuExtension(),
       history(),
       bracketMatching(),

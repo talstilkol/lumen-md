@@ -32,6 +32,7 @@ import { openAiPrompt } from "../ui/AiInlinePrompt";
 import { log } from "../lib/logger";
 import { getMarkdown } from "@milkdown/utils";
 import { wysiwygSourcePreserver } from "./wysiwygSource";
+import { wysiwygObsidianPlugins } from "./wysiwygObsidian";
 import {
   configureWysiwygSuggest,
   encodeCriticForWysiwyg,
@@ -942,6 +943,8 @@ export default function WysiwygEditor({ value, onChange, spellCheck = true }: Pr
         .use(gfm)
         // After both presets: their list schemas, without the spread check that broke every list.
         .use(listSpreadFix)
+        // W1.3 — ==highlights==, callouts and %%comments%%.
+        .use(wysiwygObsidianPlugins)
         .use(history)
         .use(listener)
         .use(clipboard)
