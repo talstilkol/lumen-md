@@ -160,7 +160,8 @@ describe("the Capacitor Filesystem adapter", () => {
     const bin = new Uint8Array(Array.from({ length: 70_000 }, (_, i) => i % 256));
     await fs.writeFile("a/b.bin", bin);
     expect([...(await fs.readFile("a/b.bin"))]).toEqual([...bin]);
-    expect(fromBase64(toBase64(new TextEncoder().encode("שלום")))).toEqual(new TextEncoder().encode("שלום"));
+    // Compared as plain arrays: jsdom's TextEncoder returns another realm's Uint8Array.
+    expect([...fromBase64(toBase64(new TextEncoder().encode("שלום")))]).toEqual([...new TextEncoder().encode("שלום")]);
     expect(await fs.stat("missing.md")).toBeNull();
     expect(await fs.stat("a")).toMatchObject({ type: "directory" });
   });

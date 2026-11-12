@@ -389,6 +389,7 @@ const en: Strings = {
   "cmd.vault.openFolder.hint": "Work in an existing folder (for example an Obsidian vault) without copying. Notes in browser storage stay where they are.",
   "cmd.vault.toBrowser": "Move the vault back to browser storage",
   "cmd.vault.toBrowser.hint": "Copies every note from the folder into the browser's private storage, checks it, then works there. The folder is not changed.",
+  "cmd.vault.check": "Check vault integrity",
   "vault.folder.unsupported": "This browser can't open a folder on your computer, so your notes stay in the browser's private storage (OPFS). To keep the vault in a folder, use Chrome or Edge, or the desktop app.",
   "vault.folder.permissionDenied": "Lumen didn't get permission to edit the folder “{folder}”.",
   "vault.folder.moving": "Moving the vault… {done} of {total} files",
@@ -1646,6 +1647,17 @@ export function applyLocale(locale: Locale): void {
   if (!SYNCHRONOUS_LOCALES.has(locale) && !(locale in BUNDLES)) {
     void loadLocale(locale);
   }
+}
+
+/**
+ * English for a lazily loaded domain. Its strings live in
+ * `src/i18n/lazy/<domain>.json` and ship in that domain's chunk, not in the
+ * startup bundle; the domain registers them when it loads (other locales
+ * keep the keys in their own JSON as usual). Keys already in `en` win. The
+ * i18n tools and tests read these files together with the `en` block.
+ */
+export function registerEnglish(strings: Strings): void {
+  for (const [k, v] of Object.entries(strings)) if (!(k in en)) en[k] = v;
 }
 
 /** Translate `id` using the active locale, with optional `{name}` substitutions. */

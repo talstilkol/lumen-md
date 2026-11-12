@@ -7,21 +7,45 @@
  * which calls it when a file handle has no `createWritable`.
  */
 
+import { journalBytes, journalNameFor, oldNameFor, saveId, tempNameFor } from "./atomic";
+
 const WORKER_SOURCE = `
+async function put(dir, name, bytes) {
+  var file = await dir.getFileHandle(name, { create: true });
+  var handle = await file.createSyncAccessHandle();
+  try {
+    handle.truncate(0);
+    handle.write(bytes, { at: 0 });
+    handle.flush();
+    if (handle.getSize() !== bytes.byteLength) throw new Error("the write was cut short");
+  } finally {
+    handle.close();
+  }
+  return file;
+}
 self.onmessage = async function (e) {
   var msg = e.data || {};
   try {
     var dir = await navigator.storage.getDirectory();
     var parts = msg.parts || [];
     for (var i = 0; i < parts.length - 1; i++) dir = await dir.getDirectoryHandle(parts[i], { create: true });
-    var file = await dir.getFileHandle(parts[parts.length - 1], { create: true });
-    var handle = await file.createSyncAccessHandle();
-    try {
-      handle.truncate(0);
-      handle.write(new Uint8Array(msg.bytes), { at: 0 });
-      handle.flush();
-    } finally {
-      handle.close();
+    var name = parts[parts.length - 1];
+    var bytes = new Uint8Array(msg.bytes);
+    var probe = await dir.getFileHandle(name, { create: true });
+    if (typeof probe.move !== "function") {
+      await put(dir, name, bytes);
+    } else {
+      // Atomic save (src/storage/vault/atomic.ts): new version complete in a
+      // temporary file first, then it takes the name.
+      // The names come from atomic.ts; a long note name gets short ones and
+      // a journal that names the note, written first and removed last.
+      var tmp = msg.names.tmp, old = msg.names.old, journal = msg.names.journal;
+      if (journal) await put(dir, journal, new Uint8Array(msg.names.journalBytes));
+      var file = await put(dir, tmp, bytes);
+      await probe.move(old);
+      await file.move(name);
+      await dir.removeEntry(old);
+      if (journal) await dir.removeEntry(journal);
     }
     self.postMessage({ id: msg.id, ok: true });
   } catch (err) {
@@ -63,8 +87,17 @@ export async function syncWriteOpfs(parts: string[], data: string | Blob | Array
   else if (data instanceof Blob) bytes = await data.arrayBuffer();
   else if (data instanceof Uint8Array) bytes = data.slice().buffer as ArrayBuffer;
   else bytes = data.slice(0);
+  const name = parts[parts.length - 1] ?? "";
+  const sid = saveId();
+  const journal = journalNameFor(name, sid);
+  const names = {
+    tmp: tempNameFor(name, sid),
+    old: oldNameFor(name, sid),
+    journal,
+    journalBytes: journal === null ? null : (journalBytes(name).buffer as ArrayBuffer),
+  };
   const id = ++nextId;
   const done = new Promise<void>((resolve, reject) => pending.set(id, { resolve, reject }));
-  getWorker().postMessage({ id, parts, bytes }, [bytes]);
+  getWorker().postMessage({ id, names, parts, bytes }, [bytes]);
   return done;
 }

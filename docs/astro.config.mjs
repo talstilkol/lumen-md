@@ -47,6 +47,7 @@ export default defineConfig({
             { label: "Search (BM25 + Smart)", slug: "workspace/search" },
             { label: "Vault Doctor", slug: "workspace/doctor" },
             { label: "Vault in a folder on the phone", slug: "workspace/mobile-vault-folder" },
+            { label: "Safe saves and the vault check", slug: "workspace/vault-integrity" },
           ],
         },
         {
