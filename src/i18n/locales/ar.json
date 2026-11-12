@@ -1435,5 +1435,16 @@
   "cmd.edit.pasteFormatted": "لصق مع التنسيق",
   "cmd.edit.pasteFormatted.hint": "يلصق HTML من Word أو Google Docs أو موقع ويب كـ Markdown نظيف: عناوين وقوائم وجداول وروابط وتأكيد، دون أنماط",
   "paste.clipboardDenied": "لا يستطيع Lumen قراءة الحافظة. اسمح بالوصول إلى الحافظة، أو الصق باستخدام Ctrl+V.",
-  "paste.clipboardEmpty": "الحافظة فارغة."
+  "paste.clipboardEmpty": "الحافظة فارغة.",
+  "cmd.edit.fixPdfHebrew": "إصلاح العبرية المعكوسة (من PDF)",
+  "cmd.edit.fixPdfHebrew.hint": "يعيد النص العبري المنسوخ من PDF إلى ترتيب القراءة مع إبقاء الأرقام والإنجليزية في اتجاهها، ويصلح الحروف النهائية",
+  "pdfPaste.reversed.title": "يبدو النص معكوسًا — هل نصلحه؟",
+  "pdfPaste.finals.title": "تبدو الحروف النهائية خاطئة — هل نصلحها؟",
+  "pdfPaste.preview": "معاينة: {text}",
+  "pdfPaste.fix": "إصلاح",
+  "pdfPaste.changed": "تغيّر النص الملصق منذ ذلك الحين؛ حدّده وشغّل «إصلاح العبرية المعكوسة» من لوحة الأوامر.",
+  "pdfPaste.selectFirst": "حدّد النص المعكوس أولًا.",
+  "pdfPaste.looksFine": "النص المحدد يُقرأ بشكل صحيح — لا شيء لإصلاحه.",
+  "pdfPaste.fixed": "تم الإصلاح. التراجع (Ctrl+Z) يعيده.",
+  "pdfPaste.needsEditor": "افتح الملاحظة في المحرر لإصلاح النص."
 }

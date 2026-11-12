@@ -1435,5 +1435,16 @@
   "cmd.edit.pasteFormatted": "Coller avec la mise en forme",
   "cmd.edit.pasteFormatted.hint": "Colle le HTML de Word, Google Docs ou d'un site en Markdown propre : titres, listes, tableaux, liens et emphase, sans styles",
   "paste.clipboardDenied": "Lumen ne peut pas lire le presse-papiers. Autorisez l'accès, ou collez avec Ctrl+V.",
-  "paste.clipboardEmpty": "Le presse-papiers est vide."
+  "paste.clipboardEmpty": "Le presse-papiers est vide.",
+  "cmd.edit.fixPdfHebrew": "Corriger l’hébreu inversé (depuis un PDF)",
+  "cmd.edit.fixPdfHebrew.hint": "Remet dans l’ordre de lecture l’hébreu copié d’un PDF, en gardant chiffres et anglais dans le bon sens, et corrige les lettres finales",
+  "pdfPaste.reversed.title": "Le texte semble inversé — corriger ?",
+  "pdfPaste.finals.title": "Les lettres finales semblent fausses — corriger ?",
+  "pdfPaste.preview": "Aperçu : {text}",
+  "pdfPaste.fix": "Corriger",
+  "pdfPaste.changed": "Le texte collé a changé depuis ; sélectionnez-le et lancez « Corriger l’hébreu inversé » depuis la palette.",
+  "pdfPaste.selectFirst": "Sélectionnez d’abord le texte inversé.",
+  "pdfPaste.looksFine": "Le texte sélectionné se lit correctement — rien à corriger.",
+  "pdfPaste.fixed": "Corrigé. Annuler (Ctrl+Z) le restaure.",
+  "pdfPaste.needsEditor": "Ouvrez la note dans l’éditeur pour corriger du texte."
 }

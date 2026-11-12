@@ -1435,5 +1435,16 @@
   "cmd.edit.pasteFormatted": "הדבקה עם עיצוב",
   "cmd.edit.pasteFormatted.hint": "מדביק HTML מ-Word, מ-Google Docs או מאתר כ-Markdown נקי: כותרות, רשימות, טבלאות, קישורים והדגשות, בלי סגנונות",
   "paste.clipboardDenied": "ל-Lumen אין גישה ללוח. אפשרו גישה ללוח, או הדביקו עם Ctrl+V.",
-  "paste.clipboardEmpty": "הלוח ריק."
+  "paste.clipboardEmpty": "הלוח ריק.",
+  "cmd.edit.fixPdfHebrew": "תיקון עברית הפוכה (מ-PDF)",
+  "cmd.edit.fixPdfHebrew.hint": "מחזיר עברית שהועתקה מ-PDF לסדר הקריאה, עם מספרים ואנגלית בכיוון הנכון, ומתקן אותיות סופיות",
+  "pdfPaste.reversed.title": "נראה שהטקסט הפוך — לתקן?",
+  "pdfPaste.finals.title": "נראה שהאותיות הסופיות שגויות — לתקן?",
+  "pdfPaste.preview": "תצוגה מקדימה: {text}",
+  "pdfPaste.fix": "לתקן",
+  "pdfPaste.changed": "הטקסט שהודבק השתנה מאז; סמנו אותו והריצו ״תיקון עברית הפוכה״ מלוח הפקודות.",
+  "pdfPaste.selectFirst": "קודם סמנו את הטקסט ההפוך.",
+  "pdfPaste.looksFine": "הטקסט המסומן נקרא כראוי — אין מה לתקן.",
+  "pdfPaste.fixed": "תוקן. ביטול (Ctrl+Z) מחזיר אותו.",
+  "pdfPaste.needsEditor": "פתחו את הפתק בעורך כדי לתקן טקסט."
 }
