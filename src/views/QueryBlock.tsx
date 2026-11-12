@@ -12,7 +12,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { AlertCircle } from "lucide-react";
 import { t } from "../i18n";
-import { ensureIndex, indexedFiles, searchWorkspace } from "../storage/workspaceIndex";
+import { ensureIndex, indexedNotes, searchWorkspace } from "../storage/workspaceIndex";
 import { watchVault } from "../storage/vault";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
 import { useAppStore } from "../store/useStore";
@@ -73,14 +73,15 @@ export default function QueryBlock({ source, lang }: Props) {
         else if (parsed.dv) {
           await ensureIndex();
           const self = selfPath();
-          const notes = indexedFiles().filter((f) => f.path !== self);
+          // W2.22: the text is read from the index for this run, then let go.
+          const notes = (await indexedNotes()).filter((f) => f.path !== self);
           next = { kind: "dataview", result: runDataview(parsed.dv, notes) };
         } else {
           const q = parsed.q!;
           if (!q.query.trim()) next = { kind: "error", message: t("query.empty") };
           else {
             const hits = await searchWorkspace(q.query, { limit: MAX_LIMIT + 1 });
-            const notes = new Map<string, QueryNote>(indexedFiles().map((f) => [f.path, f]));
+            const notes = new Map<string, QueryNote>((await indexedNotes(hits.map((h) => h.path))).map((f) => [f.path, f]));
             next = { kind: "query", view: q.view, rows: rowsFor(q, hits, notes, selfPath()) };
           }
         }

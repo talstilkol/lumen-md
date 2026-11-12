@@ -5,7 +5,7 @@
  * one backlinks, search and tags read — never from an index of its own.
  */
 
-import { ensureIndex, indexVersion, indexedFiles } from "../storage/workspaceIndex";
+import { ensureIndex, indexVersion, indexedFiles, indexedNotes } from "../storage/workspaceIndex";
 import { basename, createWorkspaceFile, isOPFSAvailable } from "../storage/workspace";
 import { notifyWorkspaceChanged } from "../storage/workspaceEvents";
 import { useAppStore } from "../store/useStore";
@@ -24,7 +24,8 @@ export async function linkCatalog(): Promise<NoteCatalog> {
   if (!indexedFiles().length) await refresh;
   // Rebuilt only when the index changed — not on every keystroke.
   const version = indexVersion();
-  if (memo?.version !== version) memo = { version, catalog: noteCatalog(indexedFiles()) };
+  // W2.22: the notes' text (aliases, headings, blocks) comes from the index.
+  if (memo?.version !== version) memo = { version, catalog: noteCatalog(await indexedNotes()) };
   return memo.catalog;
 }
 

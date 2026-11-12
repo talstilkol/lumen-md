@@ -117,6 +117,7 @@ export default defineConfig({
             { label: "All highlights", translations: { he: "כל ההדגשות" }, slug: "workspace/highlights" },
             { label: "Daily review (spaced repetition)", translations: { he: "חזרה יומית" }, slug: "workspace/review" },
             { label: "Daily notes and the Hebrew calendar", slug: "workspace/hebrew-calendar", translations: { he: "פתק יומי ולוח עברי" } },
+            { label: "Very large vaults (100,000 notes)", slug: "workspace/vault-100k", translations: { he: "כספות גדולות מאוד" } },
             { label: "Graph and local graph", slug: "workspace/graph", translations: { he: "גרף וגרף מקומי" } },
             { label: "Note cards and image export", slug: "workspace/canvas-cards", translations: { he: "כרטיסי פתקים וייצוא תמונה" } },
             { label: "Backups to a second drive", slug: "workspace/backups", translations: { he: "גיבוי לכונן שני" } },

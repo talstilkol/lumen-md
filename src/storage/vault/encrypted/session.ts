@@ -351,6 +351,8 @@ async function migrateStores(direction: "seal" | "open"): Promise<void> {
     await step("agent traces", async () => (await import("../../../agents/trace")).resealTrace());
     await step("semantic index", async () => (await import("../../../ai/semanticSearch")).resealSemanticIndex());
     await step("history", async () => (await import("../../history")).resealHistory());
+    // The vault index snapshot (W2.22) holds note text in the clear and cannot be sealed in its worker: drop it.
+    await step("index snapshot", async () => (await import("../../indexSnapshot")).dropSnapshot());
   } else {
     await step("history", async () => (await import("../../history")).unsealHistory());
     await step("agent traces", async () => (await import("../../../agents/trace")).clearTrace());

@@ -17,7 +17,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { createMemoryBackend, setVaultBackend } from "../storage/vault";
 import { writeWorkspaceFile } from "../storage/workspace";
-import { __resetWorkspaceIndex, ensureIndex, indexedFiles, searchWorkspace } from "../storage/workspaceIndex";
+import { __resetWorkspaceIndex, ensureIndex, indexedNotes, searchWorkspace } from "../storage/workspaceIndex";
 import { VaultIndex } from "../storage/vaultIndexCore";
 import { parseEmbeddedQuery, rowsFor, filterNotes, type QueryNote } from "../search/embeddedQuery";
 import { DataviewError, frontMatter, inlineFields, parseDataview, runDataview, show, type DvNote } from "../search/dataview";
@@ -55,7 +55,8 @@ beforeAll(async () => {
 async function runQuery(src: string, self: string | null = null): Promise<string[]> {
   const q = parseEmbeddedQuery(src);
   const hits = await searchWorkspace(q.query, { limit: 501 });
-  const byPath = new Map<string, QueryNote>(indexedFiles().map((f) => [f.path, { ...f, modified: NOW - (VAULT[f.path]?.[1] ?? 0) * DAY }]));
+  // As QueryBlock does (W2.22): the hits' text, read from the index.
+  const byPath = new Map<string, QueryNote>((await indexedNotes(hits.map((h) => h.path))).map((f) => [f.path, { ...f, modified: NOW - (VAULT[f.path]?.[1] ?? 0) * DAY }]));
   return rowsFor(q, hits, byPath, self).map((r) => r.path);
 }
 

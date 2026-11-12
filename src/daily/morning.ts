@@ -43,7 +43,7 @@ function lastMorning(now: number): number {
 
 /** The day's data, from the vault index and the review file. */
 export async function collectMorning(day: Day, settings: DailySettings, locale: string, now = new Date()): Promise<MorningData> {
-  const [{ ensureIndex, indexedFiles }, ws, { dailyQueue, parseReviewFile, REVIEW_PATH }] = await Promise.all([import("../storage/workspaceIndex"), import("../storage/workspace"), import("../srs/cards")]);
+  const [{ ensureIndex, indexedNotes }, ws, { dailyQueue, parseReviewFile, REVIEW_PATH }] = await Promise.all([import("../storage/workspaceIndex"), import("../storage/workspace"), import("../srs/cards")]);
   await ensureIndex();
   const israel = isIsrael(settings, locale);
   const lang = nameLang(locale);
@@ -55,7 +55,8 @@ export async function collectMorning(day: Day, settings: DailySettings, locale: 
     hebrewDate: hebrewDate(day),
     parasha: readingName(weeklyReading(day, { israel }), lang),
     holidays: holidaysOn(day, { israel }).map((h) => holidayLabel(h, lang)),
-    notes: indexedFiles(),
+    // W2.22: the text comes from the index for this one pass.
+    notes: await indexedNotes(),
     since: lastMorning(now.getTime()),
     skip: (p) => p.startsWith(".lumen/") || (folder ? p.startsWith(`${folder}/`) : p === dailyPath(day, settings)),
     cardsDue: due.length,

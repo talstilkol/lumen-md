@@ -358,7 +358,8 @@ export function PropertiesPanel({ open, onClose, text, applyEdit }: Props) {
         const files = indexedFiles();
         if (cancelled) return;
         setVault({
-          suggestions: collectPropertySuggestions(files),
+          // W2.22: the frontmatter block the index keeps is all the suggestions read.
+          suggestions: collectPropertySuggestions(files.map((f) => ({ path: f.path, content: f.frontmatter ?? "" }))),
           notes: files.filter((f) => /\.(md|markdown)$/i.test(f.path)).map((f) => f.name.replace(/\.(md|markdown)$/i, "")),
         });
       } catch {

@@ -15,11 +15,10 @@ import type { EditorView } from "@codemirror/view";
 import { Link2, X } from "lucide-react";
 import { t } from "../i18n";
 import { useAppStore } from "../store/useStore";
-import { bm25Index, indexedFiles } from "../storage/workspaceIndex";
-import { linkHints, relatedNotes, titleEntries, type LinkHint, type RelatedHit, type TitleEntry } from "../related/related";
+import { ensureIndex, indexedFiles, indexedNoteText, relatedInIndex } from "../storage/workspaceIndex";
+import { linkHints, titleEntries, type LinkHint, type RelatedHit, type TitleEntry } from "../related/related";
 import { acceptHint, currentHints, hasRelatedExtension, relatedExtension } from "../related/editorPlugin";
-import { relatedOff } from "../related/prefs";
-import type { Bm25Index } from "../search/bm25";
+import { offFolders, relatedOff } from "../related/prefs";
 import "./relatedPanelStrings";
 
 /** Debounce after the last keystroke (the plan's budget: the panel is up to date < 150 ms after typing stops). */
@@ -50,7 +49,11 @@ function Panel({ getView, onClose, subscribe }: { getView: () => EditorView | nu
   useEffect(() => subscribe(setSnap), [subscribe]);
   const open = (path: string) => {
     const file = indexedFiles().find((f) => f.path === path);
-    if (file) useAppStore.getState().openTab({ name: file.name, content: file.content, workspaceName: file.path });
+    if (!file) return;
+    // W2.22: the note's text is in the index, not on this thread.
+    void indexedNoteText(file.path).then((content) => {
+      if (content !== null) useAppStore.getState().openTab({ name: file.name, content, workspaceName: file.path });
+    });
   };
   return (
     <aside dir="auto" data-testid="related-panel" aria-label={t("related.title")} style={{ position: "fixed", insetInlineEnd: 12, top: 72, width: 280, maxHeight: "70vh", overflow: "auto", zIndex: 40, background: "hsl(var(--bg))", border: "1px solid hsl(var(--border))", borderRadius: 10, boxShadow: "var(--shadow-sm)", padding: 10, display: "flex", flexDirection: "column", gap: 8 }}>
@@ -121,7 +124,8 @@ export async function toggleRelatedPanel(getView: () => EditorView | null): Prom
     mounted.stop();
     return;
   }
-  let index: Bm25Index | null = await bm25Index();
+  // W2.22: related notes are ranked by the index's own BM25, in the index worker.
+  await ensureIndex();
   if (!semantic) setRelatedSemantic(await onDeviceSemantic().catch(() => null));
   let titles: TitleEntry[] = titleEntries(indexedFiles().map((f) => f.path));
   const listeners = new Set<(s: Snapshot) => void>();
@@ -141,24 +145,28 @@ export async function toggleRelatedPanel(getView: () => EditorView | null): Prom
         publish({ related: [], hints: [], off: true });
         return [];
       }
-      const notOff = (p: string) => !relatedOff(p, "");
-      const related = index ? relatedNotes(index, paragraph.text, { self, filter: notOff }) : [];
+      const folders = offFolders();
+      const relSeq = ++semSeq;
       const linked = new Set([...doc.content.matchAll(/\[\[([^\]|#]+)/g)].map((m) => m[1].trim().toLowerCase()));
       const hints = linkHints(paragraph.text, paragraph.from, titles, { self, cursor, linked });
       relatedTiming.ms = performance.now() - t0;
       relatedTiming.at = Date.now();
       relatedTiming.runs++;
-      publish({ related, hints, off: false });
-      // Embeddings, when an on-device index exists, refine the list a moment later.
-      if (semantic && index && paragraph.text.trim().length > 20) {
-        const seq = ++semSeq;
-        void semantic(paragraph.text, 10)
-          .then((sem) => {
-            if (seq !== semSeq || !mounted || !index) return;
-            publish({ ...last, related: relatedNotes(index, paragraph.text, { self, filter: notOff, semantic: sem }) });
-          })
-          .catch(() => {});
-      }
+      publish({ related: last.related, hints, off: false });
+      // The ranking comes back from the index a moment later; embeddings, when an on-device index exists, refine it.
+      void relatedInIndex({ paragraph: paragraph.text, self, offFolders: folders })
+        .then((related) => {
+          if (relSeq !== semSeq || !mounted) return;
+          publish({ ...last, related });
+          if (!semantic || paragraph.text.trim().length <= 20) return;
+          return semantic(paragraph.text, 10).then((sem) => {
+            if (relSeq !== semSeq || !mounted) return;
+            return relatedInIndex({ paragraph: paragraph.text, self, offFolders: folders, semantic: sem.map((h) => ({ path: h.path, score: h.score })) }).then((r) => {
+              if (relSeq === semSeq && mounted) publish({ ...last, related: r });
+            });
+          });
+        })
+        .catch(() => {});
       return hints;
     },
   };
@@ -172,8 +180,7 @@ export async function toggleRelatedPanel(getView: () => EditorView | null): Prom
     attach();
   }, 1000);
   const refresh = setInterval(() => {
-    void bm25Index().then((i) => {
-      index = i;
+    void ensureIndex().then(() => {
       titles = titleEntries(indexedFiles().map((f) => f.path));
     });
   }, 15_000);
@@ -186,7 +193,6 @@ export async function toggleRelatedPanel(getView: () => EditorView | null): Prom
     clearInterval(refresh);
     // The plugin stays in this editor until it is rebuilt; with no panel it only clears its hints.
     host.pause = () => [];
-    index = null;
     mounted = null;
     root.unmount();
     el.remove();

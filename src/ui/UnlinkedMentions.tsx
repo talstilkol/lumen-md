@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
-import { ensureIndex, indexedFiles } from "../storage/workspaceIndex";
+import { ensureIndex, indexedFiles, indexedNotes } from "../storage/workspaceIndex";
 import { basename, readWorkspaceFile, writeWorkspaceFile } from "../storage/workspace";
 import { notifyWorkspaceChanged, onWorkspaceChanged } from "../storage/workspaceEvents";
 import { findUnlinkedMentions, linkMention, type Mention } from "../lib/unlinkedMentions";
@@ -64,7 +64,7 @@ export default function UnlinkedMentions({ filePath, onOpen }: { filePath: strin
     await ensureIndex();
     // The open note's latest text, not the index's copy.
     const doc = useAppStore.getState().doc;
-    const files = indexedFiles().map((f) => (f.path === doc.workspaceName ? { path: f.path, content: doc.content } : f));
+    const files = (await indexedNotes()).map((f) => (f.path === doc.workspaceName ? { path: f.path, content: doc.content } : f));
     return unlinkedMentionsOf(filePath, files);
   }, [filePath]);
 
