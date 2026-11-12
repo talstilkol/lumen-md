@@ -299,7 +299,7 @@ describe("1,000 random kills (A10)", () => {
 describe("long names (A12, adversarial)", () => {
   // F-1 (Medium): a name the file systems accept (≤ 255 bytes) gets a 266-byte
   // temporary name, so step 1 fails with ENAMETOOLONG on the phones' folders.
-  it.fails("a 240-byte note name gets a temporary name of at most 255 bytes (F-1)", () => {
+  it("a 240-byte note name gets a temporary name of at most 255 bytes (F-1)", () => {
     const name = "א".repeat(118) + ".md"; // 118 × 2 + 3 = 239 bytes of UTF-8
     expect(enc(name).length).toBeLessThanOrEqual(255);
     const id = saveId();

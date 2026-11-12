@@ -130,14 +130,14 @@ describe.skipIf(!red || !door)("redaction (#473)", () => {
     // F-8 (Medium): the preview styles every <redact> element (.prose-lumen redact), so the
     // author sees these passages shaded as "will be removed", but the export keeps them.
     for (const md of [`a <redact class="x">${S}</redact> b`, `a <redact\tid=1>${S}</redact> b`, `a <redact/>${S} b`]) {
-      it.fails(`(F-8) ${JSON.stringify(md.slice(0, 22))}… fails closed`, () => {
+      it(`(F-8) ${JSON.stringify(md.slice(0, 22))}… fails closed`, () => {
         expect(exp(md)).not.toContain(S);
       });
     }
 
     // F-9 (Medium): "Redact selection" over a selection that ends past an existing
     // </redact> ("Dana</redact> at Cafe X") leaves the rest of the selection in every export.
-    it.fails("wrapping a selection that contains a closing mark leaves none of it behind (F-9)", () => {
+    it("wrapping a selection that contains a closing mark leaves none of it behind (F-9)", () => {
       const sel = `first part</redact>${S}`;
       const md = `x ${r.wrapRedaction(sel)} y`;
       const out = r.removeRedacted(md).text;

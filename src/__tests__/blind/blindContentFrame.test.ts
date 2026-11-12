@@ -118,7 +118,7 @@ describe("the request travels in the fragment (C4, C5)", () => {
   });
 
   // F-6 (Low): "null when it is not one", but a fragment with an unknown kind comes back as a request.
-  it.fails("is null for a fragment whose kind is not one of the five (F-6)", () => {
+  it("is null for a fragment whose kind is not one of the five (F-6)", () => {
     const fragment = contentFrameSrc(requests[2]).split("#")[1].replace("audio", "nope");
     expect(contentFrameRequest(`${CONTENT_FRAME_PATH}#${fragment}`)).toBeNull();
     expect(contentFrameRequest(`${CONTENT_FRAME_PATH}#${encodeURIComponent('{"kind":"nope"}')}`)).toBeNull();
@@ -135,7 +135,7 @@ describe("hostile requests fail closed (C6, adversarial)", () => {
   // F-6 (Low, defence in depth): the parser hands back javascript:, data: and http: sources.
   // CSP (no 'unsafe-inline' script, frame-src = the providers) still stops them running.
   for (const req of bad) {
-    it.fails(`(F-6) a ${req.kind} with src ${"src" in req ? req.src.slice(0, 24) : ""}… does not come out of the fragment`, () => {
+    it(`(F-6) a ${req.kind} with src ${"src" in req ? req.src.slice(0, 24) : ""}… does not come out of the fragment`, () => {
       let src: string | null = null;
       try {
         src = contentFrameSrc(req);

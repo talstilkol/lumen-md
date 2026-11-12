@@ -229,7 +229,7 @@ describe("which address a link opens (S8, S9)", () => {
   // F-7 (Low): these non-public hosts are taken for public ones, so a link made there
   // opens for nobody else (no leak: the fragment is never sent).
   for (const href of ["https://[fd00::1]/", "https://[fe80::1]/", "https://[::ffff:127.0.0.1]/", "https://[::ffff:192.168.1.1]/", "https://localhost./", "https://100.64.0.1/", "https://nas.home.arpa/", "https://box.internal/"]) {
-    it.fails(`(F-7) ${href} names the public app`, () => {
+    it(`(F-7) ${href} names the public app`, () => {
       expect(shareOrigin(loc(href))).toBe(PUBLIC_APP_ORIGIN);
     });
   }

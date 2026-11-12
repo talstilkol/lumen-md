@@ -98,7 +98,7 @@ describe("bump (U3, U4)", () => {
   // F-3 (Low): the per-day counts are a plain object, so an id named after an
   // Object.prototype member starts from the inherited function: "constructor" is stored
   // as "function Object() { [native code] }11", and the summary and report carry it.
-  it.fails("names of Object.prototype count as plain numbers (F-3)", () => {
+  it("names of Object.prototype count as plain numbers (F-3)", () => {
     let s = empty();
     for (const id of ["constructor", "toString", "hasOwnProperty", "valueOf"]) s = feat(s, id, "2026-11-10", 2);
     const f = s.days["2026-11-10"].features;
