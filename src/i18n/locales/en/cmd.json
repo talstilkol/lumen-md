@@ -196,6 +196,7 @@
   "cmd.help.open.hint": "the docs, on this device: search and read them offline",
   "cmd.help.setup": "Set up Lumen…",
   "cmd.help.setup.hint": "Language, vault location, look and a sample vault: the first-run setup again",
+  "cmd.help.whatsNew": "What's new in this version",
   "cmd.highlights.all": "All highlights",
   "cmd.highlights.import": "Import highlights (Kindle, Kobo, Readwise, Zotero)…",
   "cmd.image.altText": "Images: alt text from OCR / local vision",

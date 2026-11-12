@@ -197,6 +197,7 @@
   "cmd.help.open.hint": "この端末にあるドキュメント：オフラインで検索・閲覧",
   "cmd.help.setup": "Lumen をセットアップ…",
   "cmd.help.setup.hint": "言語、保管場所、見た目、サンプルの保管庫: 初回セットアップをもう一度",
+  "cmd.help.whatsNew": "このバージョンの新機能",
   "cmd.highlights.all": "すべてのハイライト",
   "cmd.highlights.import": "ハイライトを読み込む（Kindle、Kobo、Readwise、Zotero）…",
   "cmd.image.altText": "画像: OCR / ローカル画像認識で代替テキスト",

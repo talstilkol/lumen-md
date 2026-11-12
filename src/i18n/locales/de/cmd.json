@@ -197,6 +197,7 @@
   "cmd.help.open.hint": "die Dokumentation auf diesem Gerät: offline suchen und lesen",
   "cmd.help.setup": "Lumen einrichten…",
   "cmd.help.setup.hint": "Sprache, Speicherort, Aussehen und Beispiel-Tresor: die Ersteinrichtung noch einmal",
+  "cmd.help.whatsNew": "Neu in dieser Version",
   "cmd.highlights.all": "Alle Markierungen",
   "cmd.highlights.import": "Markierungen importieren (Kindle, Kobo, Readwise, Zotero)…",
   "cmd.image.altText": "Bilder: Alternativtext per OCR / lokaler Bildanalyse",

@@ -197,6 +197,7 @@
   "cmd.help.open.hint": "الوثائق على هذا الجهاز: ابحث واقرأ دون اتصال",
   "cmd.help.setup": "إعداد Lumen…",
   "cmd.help.setup.hint": "اللغة وموقع الخزنة والمظهر وخزنة نموذجية: إعداد البداية مرة أخرى",
+  "cmd.help.whatsNew": "ما الجديد في هذه النسخة",
   "cmd.highlights.all": "كل التمييزات",
   "cmd.highlights.import": "استيراد التظليلات (Kindle وKobo وReadwise وZotero)…",
   "cmd.image.altText": "الصور: نص بديل من OCR / رؤية محلية",

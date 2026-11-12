@@ -1000,6 +1000,11 @@
       "vars": []
     },
     {
+      "key": "cmd.help.whatsNew",
+      "en": "What's new in this version",
+      "vars": []
+    },
+    {
       "key": "cmd.highlights.all",
       "en": "All highlights",
       "vars": []

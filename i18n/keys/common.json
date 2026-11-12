@@ -7690,6 +7690,33 @@
       "vars": []
     },
     {
+      "key": "whatsNew.close",
+      "en": "Got it",
+      "vars": []
+    },
+    {
+      "key": "whatsNew.loading",
+      "en": "…",
+      "vars": []
+    },
+    {
+      "key": "whatsNew.none",
+      "en": "There are no release notes for this version.",
+      "vars": []
+    },
+    {
+      "key": "whatsNew.title",
+      "en": "What's new in Lumen {version}",
+      "vars": [
+        "version"
+      ]
+    },
+    {
+      "key": "whatsNew.untranslated",
+      "en": "These notes aren't translated yet, so they're in English.",
+      "vars": []
+    },
+    {
       "key": "wikiComplete.aliasOf",
       "en": "alias of {name}",
       "vars": [

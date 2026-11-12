@@ -4,6 +4,7 @@ import type { Plugin, UserConfig as ViteUserConfig } from "vite";
 import { cspEndpointsPlugin } from "./src/build/cspEndpoints";
 import { laneCacheDir } from "./src/build/laneCache";
 import { webrManifestPlugin } from "./src/build/webrManifest";
+import { LOCALES, whatsNew } from "./scripts/lib/whats-new.mjs";
 
 interface VitestConfig {
   test?: {
@@ -302,6 +303,27 @@ function vendorChunk(id: string): string | undefined {
 
 const viteCacheDir = laneCacheDir(__dirname);
 
+/**
+ * "What's new" (plan 14.6): this version's notes from CHANGELOG.md and the
+ * translations in changelog/<locale>.md, as `virtual:lumen-whats-new` — a
+ * small lazy chunk (so it is precached and works offline), loaded only
+ * when the app was updated or the user asks for it.
+ */
+const APP_VERSION = (JSON.parse(readFileSync(path.resolve(__dirname, "package.json"), "utf8")) as { version: string }).version;
+const WHATS_NEW_ID = "virtual:lumen-whats-new";
+const whatsNewNotes = {
+  name: "lumen-whats-new",
+  resolveId(id: string) {
+    return id === WHATS_NEW_ID ? "\0" + WHATS_NEW_ID : null;
+  },
+  load(id: string) {
+    if (id !== "\0" + WHATS_NEW_ID) return null;
+    const read = (f: string) => (existsSync(path.resolve(__dirname, f)) ? readFileSync(path.resolve(__dirname, f), "utf8") : "");
+    const translations = Object.fromEntries(LOCALES.filter((l) => l !== "en").map((l) => [l, read(`changelog/${l}.md`)]));
+    return `export default ${JSON.stringify(whatsNew(APP_VERSION, read("CHANGELOG.md"), translations))};\n`;
+  },
+};
+
 export default defineConfig({
   // A lane's symlinked node_modules is shared: its Vite cache stays in the worktree (src/build/laneCache.ts).
   ...(viteCacheDir ? { cacheDir: viteCacheDir } : {}),
@@ -309,11 +331,13 @@ export default defineConfig({
   // (src/lib/runtimeCaches.ts): Workbox only cleans its precache.
   define: {
     __LUMEN_RUNTIME_CACHES__: JSON.stringify(RUNTIME_CACHES.map((c) => c.cacheName)),
+    __LUMEN_VERSION__: JSON.stringify(APP_VERSION),
   },
   // Worker bundles get only these plugins (plus Vite's own).
   worker: { plugins: () => [dictionaryEn] },
   plugins: [
     react(),
+    whatsNewNotes,
     cleanUrlAliases,
     dictionaryEn,
     dictionaryEnFiles,

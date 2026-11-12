@@ -197,6 +197,7 @@
   "cmd.help.open.hint": "התיעוד, במכשיר הזה: חיפוש וקריאה גם בלי רשת",
   "cmd.help.setup": "הגדרת Lumen…",
   "cmd.help.setup.hint": "שפה, מיקום הכספת, מראה וכספת דוגמה: הגדרת ההתחלה שוב",
+  "cmd.help.whatsNew": "מה חדש בגרסה הזאת",
   "cmd.highlights.all": "כל ההדגשות",
   "cmd.highlights.import": "ייבוא הדגשות (Kindle,‏ Kobo,‏ Readwise,‏ Zotero)…",
   "cmd.image.altText": "תמונות: טקסט חלופי מ-OCR / ראייה מקומית",

@@ -122,3 +122,16 @@ export function buildDesktopUpdateCommands(): Command[] {
     },
   ];
 }
+
+/** "What's new" (plan 14.6): this version's notes, in the interface's language. */
+export function buildWhatsNewCommands(): Command[] {
+  return [
+    {
+      id: "help.whatsNew",
+      label: t("cmd.help.whatsNew"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.file"),
+      action: () => void import("../../whatsNew/check").then((m) => m.openWhatsNew()),
+    },
+  ];
+}

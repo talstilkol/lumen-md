@@ -197,6 +197,7 @@
   "cmd.help.open.hint": "la documentation, sur cet appareil : chercher et lire hors ligne",
   "cmd.help.setup": "Configurer Lumen…",
   "cmd.help.setup.hint": "Langue, emplacement du coffre, apparence et coffre d'exemple : la configuration initiale à nouveau",
+  "cmd.help.whatsNew": "Nouveautés de cette version",
   "cmd.highlights.all": "Tous les surlignages",
   "cmd.highlights.import": "Importer des surlignages (Kindle, Kobo, Readwise, Zotero)…",
   "cmd.image.altText": "Images : texte alternatif par OCR / vision locale",
