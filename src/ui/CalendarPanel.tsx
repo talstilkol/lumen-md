@@ -17,6 +17,8 @@ import { dayOf, dayOfPath, isIsrael, isoOf, isolatedHebrewDate, isValidDailyPatt
 import { calendarOfRange, gregorianOf, type Holiday } from "../daily/hebrewCalendar";
 import { holidayLabel, nameLang, readingName } from "../daily/hebrewCalendarNames";
 import "./calendarPanelStrings";
+import { dayStatus, defaultWorkWeek, type WorkWeek } from "../daily/israeliTime";
+import { showHebrewDates } from "../daily/defaults";
 
 /** Holidays that get a mark on their day (the rest are in the day's label only). */
 const MARKED = new Set<Holiday["kind"]>(["major", "modern", "fast", "minor"]);
@@ -110,6 +112,7 @@ export function CalendarPanel() {
   const title = new Intl.DateTimeFormat(locale, { month: "long", year: "numeric", timeZone: "UTC" }).format(utcNoon({ ...month, d: 1 }));
   const heMonths = useMemo(() => hebrewMonthsOf(month.y, month.m).join(" – "), [month]);
   const israel = isIsrael(settings, locale);
+  const workWeek: WorkWeek = settings.workWeek ?? defaultWorkWeek(israel);
   const lang = nameLang(locale);
   // The month's holidays and Shabbat readings, by ISO day.
   const { holidaysByDay, readingByDay, monthHolidays } = useMemo(() => {
@@ -174,6 +177,8 @@ export function CalendarPanel() {
           const extra = [...holidays.map((h) => holidayLabel(h, lang)), ...(reading && !holidays.some((h) => h.yomTov || h.cholHamoed) ? [t("calendar.parasha", { name: reading })] : [])];
           const label = `${dayLabel.format(utcNoon(day))} · ${isolatedHebrewDate(day)}${extra.length ? ` · ${extra.join(" · ")}` : ""}${has ? ` — ${t("calendar.hasNote")}` : ""}`;
           const mark = holidays.find((h) => MARKED.has(h.kind));
+          // Days off in the work week (plan W5.15): the weekend and the rest days, drawn muted.
+          const dayOff = !dayStatus(day, { israel, workWeek }).working;
           return (
             <button
               key={iso}
@@ -182,6 +187,7 @@ export function CalendarPanel() {
               data-date={iso}
               data-has-note={has || undefined}
               data-holiday={holidays.length ? holidays.map((h) => h.id).join(" ") : undefined}
+              data-day-off={dayOff || undefined}
               aria-label={label}
               title={label}
               aria-current={isToday ? "date" : undefined}
@@ -196,7 +202,7 @@ export function CalendarPanel() {
                 border: isToday ? "1px solid hsl(var(--accent))" : "1px solid transparent",
                 borderRadius: 5,
                 background: has ? "hsl(var(--accent) / 0.12)" : "transparent",
-                color: "hsl(var(--fg))",
+                color: dayOff ? "hsl(var(--fg-muted))" : "hsl(var(--fg))",
                 fontWeight: has ? 600 : 400,
                 cursor: "pointer",
                 fontSize: 11,
@@ -230,7 +236,17 @@ export function CalendarPanel() {
               return;
             }
             setPatternError(false);
-            setDailyNotes({ folder: String(f.get("folder") ?? ""), pattern, template: String(f.get("template") ?? ""), israel: f.get("israel") === "on" });
+            const week = f.get("workWeek");
+            const move = f.get("deadlineMove");
+            setDailyNotes({
+              folder: String(f.get("folder") ?? ""),
+              pattern,
+              template: String(f.get("template") ?? ""),
+              israel: f.get("israel") === "on",
+              workWeek: week === "mon-fri" ? "mon-fri" : "sun-thu",
+              hebrewDates: f.get("hebrewDates") === "on",
+              deadlineMove: move === "previous" || move === "off" ? move : "next",
+            });
             setEditing(false);
           }}
           style={{ display: "grid", gap: 4, marginBlockStart: 8 }}
@@ -256,6 +272,25 @@ export function CalendarPanel() {
           <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
             <input type="checkbox" name="israel" defaultChecked={israel} />
             <span>{t("calendar.israel")}</span>
+          </label>
+          <label style={{ display: "grid", gap: 2 }}>
+            <span>{t("calendar.workWeek")}</span>
+            <select name="workWeek" defaultValue={workWeek} style={input}>
+              <option value="sun-thu">{t("calendar.workWeek.sunThu")}</option>
+              <option value="mon-fri">{t("calendar.workWeek.monFri")}</option>
+            </select>
+          </label>
+          <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
+            <input type="checkbox" name="hebrewDates" defaultChecked={showHebrewDates(settings, locale)} />
+            <span>{t("calendar.hebrewDates")}</span>
+          </label>
+          <label style={{ display: "grid", gap: 2 }}>
+            <span>{t("calendar.deadlineMove")}</span>
+            <select name="deadlineMove" defaultValue={settings.deadlineMove ?? "next"} style={input}>
+              <option value="next">{t("calendar.deadlineMove.next")}</option>
+              <option value="previous">{t("calendar.deadlineMove.previous")}</option>
+              <option value="off">{t("calendar.deadlineMove.off")}</option>
+            </select>
           </label>
           <button type="submit" style={{ ...btn, justifySelf: "end", color: "hsl(var(--accent))", fontWeight: 600 }}>
             {t("calendar.save")}

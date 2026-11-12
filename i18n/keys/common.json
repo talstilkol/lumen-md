@@ -1018,6 +1018,26 @@
       "vars": []
     },
     {
+      "key": "calendar.deadlineMove",
+      "en": "A deadline on Shabbat or a chag",
+      "vars": []
+    },
+    {
+      "key": "calendar.deadlineMove.next",
+      "en": "Suggest the next working day",
+      "vars": []
+    },
+    {
+      "key": "calendar.deadlineMove.off",
+      "en": "Don't move it (only say why)",
+      "vars": []
+    },
+    {
+      "key": "calendar.deadlineMove.previous",
+      "en": "Suggest the previous working day",
+      "vars": []
+    },
+    {
       "key": "calendar.folder",
       "en": "Folder",
       "vars": []
@@ -1025,6 +1045,11 @@
     {
       "key": "calendar.hasNote",
       "en": "has a note",
+      "vars": []
+    },
+    {
+      "key": "calendar.hebrewDates",
+      "en": "Show the Hebrew date next to dates in properties and database views",
       "vars": []
     },
     {
@@ -1097,6 +1122,21 @@
     {
       "key": "calendar.today",
       "en": "Today",
+      "vars": []
+    },
+    {
+      "key": "calendar.workWeek",
+      "en": "Work week",
+      "vars": []
+    },
+    {
+      "key": "calendar.workWeek.monFri",
+      "en": "Monday–Friday",
+      "vars": []
+    },
+    {
+      "key": "calendar.workWeek.sunThu",
+      "en": "Sunday–Thursday (Israel)",
       "vars": []
     },
     {
@@ -4386,6 +4426,54 @@
       "key": "importWizard.warn.noDates",
       "en": "the export has no creation or edit dates",
       "vars": []
+    },
+    {
+      "key": "israeliTime.dayOff",
+      "en": "Falls on {reason}",
+      "vars": [
+        "reason"
+      ]
+    },
+    {
+      "key": "israeliTime.dueToday",
+      "en": "Due today",
+      "vars": []
+    },
+    {
+      "key": "israeliTime.left.one",
+      "en": "{n} working day left",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "israeliTime.left.other",
+      "en": "{n} working days left",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "israeliTime.moved",
+      "en": "Falls on {reason}: suggested {date}",
+      "vars": [
+        "reason",
+        "date"
+      ]
+    },
+    {
+      "key": "israeliTime.overdue.one",
+      "en": "{n} working day overdue",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "israeliTime.overdue.other",
+      "en": "{n} working days overdue",
+      "vars": [
+        "n"
+      ]
     },
     {
       "key": "legalCite.cancel",

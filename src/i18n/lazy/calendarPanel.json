@@ -12,5 +12,13 @@
   "calendar.settings": "Daily note settings",
   "calendar.template": "Template for new notes",
   "calendar.templateHint": "Placeholders: {{date}}, {{hebrewDate}}, {{weekday}}, {{title}}",
-  "calendar.today": "Today"
+  "calendar.today": "Today",
+  "calendar.deadlineMove": "A deadline on Shabbat or a chag",
+  "calendar.deadlineMove.next": "Suggest the next working day",
+  "calendar.deadlineMove.off": "Don't move it (only say why)",
+  "calendar.deadlineMove.previous": "Suggest the previous working day",
+  "calendar.hebrewDates": "Show the Hebrew date next to dates in properties and database views",
+  "calendar.workWeek": "Work week",
+  "calendar.workWeek.monFri": "Monday–Friday",
+  "calendar.workWeek.sunThu": "Sunday–Thursday (Israel)"
 }

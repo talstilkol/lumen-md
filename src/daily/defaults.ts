@@ -10,7 +10,16 @@ export interface DailySettings {
   israel?: boolean;
   /** "Your morning" block in today's note (plan W5.19): changes, tasks, reviews, the Hebrew date. Off by default. */
   morning?: boolean;
+  /** Working days (plan W5.15): Sunday–Thursday or Monday–Friday; unset: Sunday–Thursday for Israel. */
+  workWeek?: "sun-thu" | "mon-fri";
+  /** Show the Hebrew date next to dates in properties and database views; unset: on for a Hebrew UI. */
+  hebrewDates?: boolean;
+  /** A deadline on Shabbat or a chag: suggest the next working day, the previous one, or don't move it. Unset: next. */
+  deadlineMove?: "next" | "previous" | "off";
 }
+
+/** The Hebrew-date setting, with its default. */
+export const showHebrewDates = (s: Pick<DailySettings, "hebrewDates">, locale: string): boolean => s.hebrewDates ?? locale === "he";
 
 export const DEFAULT_DAILY: DailySettings = {
   folder: "journal",
