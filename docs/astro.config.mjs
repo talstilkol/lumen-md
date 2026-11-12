@@ -157,6 +157,8 @@ export default defineConfig({
             { label: "Translation drafts", translations: { he: "טיוטות תרגום" }, slug: "contributing/translation-drafts" },
             { label: "Visual regression", translations: { he: "רגרסיה חזותית" }, slug: "contributing/visual-regression" },
             { label: "Checks on every branch (Vercel)", translations: { he: "בדיקות בכל ענף (Vercel)" }, slug: "contributing/checks" },
+            { label: "Threat model", slug: "security/threat-model" },
+            { label: "Supply chain", slug: "security/supply-chain" },
           ],
         },
         {
