@@ -43,8 +43,9 @@ export async function safeMove(
 ): Promise<MoveResult | null> {
   if (from === to) return { path: to, linksUpdated: [], rewrite: (c) => c };
   let replaced: TrashItem | undefined;
-  // Short `[[Name]]` links resolve against the vault as it was.
-  const vault = (await listWorkspace()).map((f) => f.path).filter((p) => /\.(md|markdown)$/i.test(p));
+  // Short `[[Name]]` links — and `![[image.png]]` embeds — resolve against
+  // the vault as it was.
+  const vault = (await listWorkspace()).map((f) => f.path);
   if (await workspaceHasEntry(to)) {
     if (!opts.confirmReplace || !(await opts.confirmReplace(to))) return null;
     [replaced] = await moveToTrash([to]);

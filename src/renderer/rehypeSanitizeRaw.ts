@@ -47,7 +47,7 @@ export function safeUrl(value: string, tag: string, prop: string): boolean {
 /**
  * Classes the Markdown pipeline itself emits before this pass (GFM task lists
  * and footnotes, math, fenced-code languages, admonitions, columns, wiki
- * links). Any other class on raw HTML could only borrow host-app styling —
+ * links, `![[embeds]]`). Any other class on raw HTML could only borrow host-app styling —
  * e.g. `class="lumen-slash-menu"` or Tailwind's `fixed` restores
  * `position: fixed; z-index: 9999` and lets a note cover the app — so it is
  * dropped. Exported for tests.
@@ -57,6 +57,7 @@ const PIPELINE_CLASSES = new Set([
   "math-inline", "math-display",
   "admonition", "admonition-title", "note", "tip", "info", "warning", "danger",
   "lumen-columns", "lumen-column", "wiki-link",
+  "lumen-embed", "lumen-embed-title", "lumen-embed-body", "lumen-embed-notice", "lumen-embed-image",
 ]);
 export function safeClass(token: string): boolean {
   return PIPELINE_CLASSES.has(token) || /^language-[\w+#.-]+$/.test(token);

@@ -33,6 +33,8 @@ import {
   remarkColumns,
   remarkStripFrontmatter,
 } from "./remarkLumen";
+import { EMBEDS_DATA_KEY, remarkEmbeds } from "./remarkEmbeds";
+import type { EmbedContext } from "./embeds";
 
 const SPECIAL_LANGS = new Set([
   "mermaid",
@@ -155,7 +157,8 @@ function remarkLumenBlocks() {
 type LumenProcessor = Processor<MdastRoot, MdastRoot, HastRoot, HastRoot, ReactElement>;
 type RehypeKatex = typeof import("./katexPlugin").default;
 
-function buildBase() {
+/** Parse + the Lumen dialect transforms that run before embeds are expanded. */
+function buildDialect() {
   return unified()
     .use(remarkParse)
     .use(remarkFrontmatter, ["yaml"])
@@ -165,7 +168,24 @@ function buildBase() {
     .use(remarkMath)
     .use(remarkDirective)
     .use(remarkAdmonitions)
-    .use(remarkColumns)
+    .use(remarkColumns);
+}
+
+let embedParser: ReturnType<typeof buildDialect> | null = null;
+
+/**
+ * An embedded note's mdast (`![[note]]`, see ./embeds): the same parser
+ * and dialect transforms as the host, CriticMarkup prepared the same way;
+ * the host's remaining passes then run over the spliced-in nodes.
+ */
+function parseEmbeddedNote(markdown: string): MdastRoot {
+  embedParser ??= buildDialect();
+  return embedParser.runSync(embedParser.parse(prepareCriticMarkup(markdown))) as MdastRoot;
+}
+
+function buildBase() {
+  return buildDialect()
+    .use(remarkEmbeds, { parse: parseEmbeddedNote })
     .use(remarkWikiLinks)
     .use(remarkLumenBlocks)
     .use(remarkRehype, { allowDangerousHtml: true });
@@ -236,15 +256,38 @@ function hasMath(source: string): boolean {
   return source.includes("$");
 }
 
+export interface RenderOptions {
+  /**
+   * Workspace notes and files for `![[embeds]]` (./embeds, built by
+   * ./embedContext). Without it an embed renders as a plain wiki link to its
+   * target.
+   */
+  embeds?: EmbedContext;
+}
+
+/** The vfile input: the prepared source, plus the embed context for remarkEmbeds. */
+function input(markdownText: string, opts: RenderOptions) {
+  const data: Record<string, unknown> = {};
+  if (opts.embeds) data[EMBEDS_DATA_KEY] = opts.embeds;
+  return { value: prepareCriticMarkup(markdownText), data };
+}
+
 export async function renderMarkdown(
   markdownText: string,
   isDark: () => boolean,
+  opts: RenderOptions = {},
 ): Promise<ReactElement> {
+  // An embedded note's inline HTML / math needs the same passes the host
+  // would get for it: the sanitizer runs over embedded HTML exactly as over
+  // the host's own.
+  const sources = opts.embeds
+    ? [markdownText, ...(await import("./embeds")).embeddedTexts(markdownText, opts.embeds)]
+    : [markdownText];
   const proc = await getFullProcessor(isDark, {
-    raw: hasRawHtml(markdownText),
-    math: hasMath(markdownText),
+    raw: sources.some(hasRawHtml),
+    math: sources.some(hasMath),
   });
-  const file = await proc.process(prepareCriticMarkup(markdownText));
+  const file = await proc.process(input(markdownText, opts));
   return file.result as ReactElement;
 }
 
@@ -259,11 +302,11 @@ export async function renderMarkdown(
  * scrolls near the viewport and the browser is idle — so this pass never
  * triggers a vendor import.
  */
-export function renderMarkdownFast(markdownText: string): ReactElement {
+export function renderMarkdownFast(markdownText: string, opts: RenderOptions = {}): ReactElement {
   if (!fastProcessor) {
     fastProcessor = toReact(buildBase().use(rehypeCriticMarkup).use(rehypeSlug).use(rehypeDirAuto));
   }
-  return fastProcessor.processSync(prepareCriticMarkup(markdownText)).result as ReactElement;
+  return fastProcessor.processSync(input(markdownText, opts)).result as ReactElement;
 }
 
 /** Extract YAML frontmatter (parsed) from a markdown source, or null. */

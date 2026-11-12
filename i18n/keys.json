@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T03:18:44.238Z",
+  "generated_at": "2026-10-18T05:56:17.413Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1411,
+  "count": 1416,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -5829,6 +5829,41 @@
     {
       "key": "errorBoundary.renderDetail",
       "en": "One of the embedded visualizations crashed during render. The rest of the editor is kept safe.",
+      "vars": []
+    },
+    {
+      "key": "embed.notFound",
+      "en": "Can't embed {target}: not found in the workspace.",
+      "vars": [
+        "target"
+      ]
+    },
+    {
+      "key": "embed.sectionNotFound",
+      "en": "Can't embed {section}: there is no such section in {note}.",
+      "vars": [
+        "section",
+        "note"
+      ]
+    },
+    {
+      "key": "embed.cycle",
+      "en": "{target} is not embedded again: it would embed itself (circular embed).",
+      "vars": [
+        "target"
+      ]
+    },
+    {
+      "key": "embed.depth",
+      "en": "{target} is not embedded: embeds nest at most {max} levels deep.",
+      "vars": [
+        "target",
+        "max"
+      ]
+    },
+    {
+      "key": "embed.openPdf",
+      "en": "Open PDF",
       "vars": []
     },
     {

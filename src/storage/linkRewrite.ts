@@ -6,7 +6,9 @@
  *   target names the moved note (compared by `noteKey`, so case and niqqud
  *   don't matter), keeping the heading and label. A short `[[old]]` is only
  *   rewritten when it resolved to the moved note (another note may share
- *   the name);
+ *   the name). Embeds are wiki links behind a `!` — `![[old]]`,
+ *   `![[old#heading]]`, `![[image.png|300]]`, `![[file.pdf]]` — and are
+ *   rewritten the same way, the `!` kept;
  * - Markdown links `[text](old.md)`, `[text](<Old Note.md>)` and reference
  *   definitions `[ref]: old.md` that point at a moved path relative to the
  *   linking note — and, in a note that itself moved, its relative links to
@@ -45,7 +47,11 @@ export interface RewriteOptions {
   folder?: boolean;
   /** Where the linking note was before the move (when it moved itself). */
   notePrevPath?: string;
-  /** Every note path before the move, in listing order, to resolve short wiki links. */
+  /**
+   * Every note path before the move, in listing order, to resolve short wiki
+   * links. May list other files too (images, PDFs): a short `![[image.png]]`
+   * then resolves among them, while a note name only ever matches notes.
+   */
   vault?: readonly string[];
 }
 
@@ -100,10 +106,15 @@ function outsideSpans(text: string, fn: (t: string) => string): string {
   return out + fn(text.slice(last));
 }
 
-/** The note a short `[[name]]` opens: a root-level note of that name, else the first note with that base name. */
+/**
+ * The file a short `[[name]]` opens: a root-level file of that name, else the
+ * first with that base name. A name without an extension (or with `.md`)
+ * names a note; `image.png` names any file.
+ */
 function resolveShort(t: string, vault: readonly string[]): string | undefined {
   const key = noteKey(t);
-  return vault.find((p) => noteKey(p) === key) ?? vault.find((p) => noteKey(basename(p)) === key);
+  const pool = MD_EXT.test(t) || !/\.[A-Za-z0-9]+$/.test(t) ? vault.filter((p) => MD_EXT.test(p)) : vault;
+  return pool.find((p) => noteKey(p) === key) ?? pool.find((p) => noteKey(basename(p)) === key);
 }
 
 /** Rewrite the links in one note. Returns the new text (same string when nothing changed). */
