@@ -448,6 +448,13 @@ export async function searchHybrid(
     .slice(0, k);
 }
 
+/** Which embedding provider smart search uses here, and whether it bridges Hebrew and English (W5.28). */
+export async function embeddingStatus(): Promise<{ id: string; multilingual: boolean }> {
+  const { isMultilingualEmbedding } = await import("../search/crossLingual");
+  const p = await provider();
+  return { id: p.id, multilingual: isMultilingualEmbedding(p.id) };
+}
+
 export async function clearSemanticIndex(): Promise<void> {
   memIndex = null;
   await set(IDB_KEY, undefined).catch(() => { /* why: the in-memory index is already cleared; IndexedDB unavailable means nothing was stored */ });
