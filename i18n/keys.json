@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-10T03:21:45.424Z",
+  "generated_at": "2026-11-12T13:09:51.160Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1453,
+  "count": 1463,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -471,6 +471,11 @@
     {
       "key": "cmd.cite.syncZotero",
       "en": "Citations: copy the Zotero library into the vault",
+      "vars": []
+    },
+    {
+      "key": "cmd.cite.syncZoteroWeb",
+      "en": "Citations: sync the Zotero library from zotero.org (read-only)",
       "vars": []
     },
     {
@@ -7799,6 +7804,60 @@
     {
       "key": "cite.zotero.failed",
       "en": "Couldn't read the Zotero library: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "cite.web.keyTitle",
+      "en": "Zotero API key",
+      "vars": []
+    },
+    {
+      "key": "cite.web.keyBody",
+      "en": "Lumen reads your Zotero library from api.zotero.org with a key you create at zotero.org → Settings → Security → Applications (read-only library access is enough). The key stays in this device's secret store and is sent only to api.zotero.org; every request shows in the privacy ledger. Nothing is written to Zotero.",
+      "vars": []
+    },
+    {
+      "key": "cite.web.synced",
+      "en": "Zotero library synced from zotero.org: {n} sources ({changed} changed, {deleted} removed, {notes} notes).",
+      "vars": [
+        "n",
+        "changed",
+        "deleted",
+        "notes"
+      ]
+    },
+    {
+      "key": "cite.web.upToDate",
+      "en": "The Zotero library is up to date ({n} sources).",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "cite.web.forbidden",
+      "en": "Zotero refused the key. Run the sync again and enter a key from zotero.org → Settings → Security → Applications.",
+      "vars": []
+    },
+    {
+      "key": "cite.web.noAccess",
+      "en": "This key can't read your library: edit it on zotero.org and allow library access.",
+      "vars": []
+    },
+    {
+      "key": "cite.web.rateLimited",
+      "en": "Zotero asked to slow down; try again in a few minutes.",
+      "vars": []
+    },
+    {
+      "key": "cite.web.blocked",
+      "en": "The AI and privacy policy is local-only, so Lumen doesn't contact zotero.org.",
+      "vars": []
+    },
+    {
+      "key": "cite.web.failed",
+      "en": "Couldn't sync from zotero.org: {error}",
       "vars": [
         "error"
       ]

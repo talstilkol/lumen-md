@@ -58,6 +58,9 @@ const RULES: Rule[] = [
   { test: (h) => h === "generativelanguage.googleapis.com", category: "cloud-ai", reason: "Google Gemini" },
   { test: (h) => h === "api.mistral.ai", category: "cloud-ai", reason: "Mistral" },
   { test: (h) => h === "api.languagetool.org", category: "cloud-text", reason: "LanguageTool grammar check" },
+  // Plan W5.23: the Zotero Web API, read-only, with the user's own key. A
+  // cloud route: a local-only policy blocks it like the research service.
+  { test: (h) => h === "api.zotero.org", category: "research", reason: "Zotero Web API (your library, read-only)" },
   {
     test: (h) => h === "huggingface.co" || h.endsWith(".huggingface.co") || h.endsWith(".hf.co") || h === "hf.co",
     category: "model-download",
