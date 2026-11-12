@@ -11,13 +11,12 @@
  *     agrees; every use is in the privacy ledger.
  *   - **Memo mode** (when `aiKey` is set OR Privacy Mode is on):
  *     `MediaRecorder` captures the audio, on stop we Whisper-transcribe
- *     + AI-summarize and insert a `> 🎙 Voice memo` block at the cursor.
+ *     + AI-summarize (or, for a meeting, write meeting notes — plan 6.16)
+ *     and insert the block at the cursor.
  *
  * The memo flow follows the AI policy — by default Whisper runs on this
  * device through transformers.js (src/ai/transformersEngine.ts) and the
  * summary through the local model, so no audio bytes leave the browser.
- *
- * `startVoiceMemo()` wraps the memo flow.
  */
 
 import { createRoot } from "react-dom/client";
@@ -177,10 +176,10 @@ export function dictationSink(): DictationSink {
 }
 
 /**
- * Dictate into the open note (plan 1.3). Default: Whisper on this device, in
- * ~5-second segments. The browser speech service (which sends the audio to
- * the vendor) is used only when the policy is not local-only AND the user
- * agreed — never silently; each use is recorded in the privacy ledger.
+ * Dictate into the open note. The live engine first (plan 6.1: Hebrew
+ * streams on this device; the panel asks before any download); its
+ * fallbacks are the browser's speech service (only where the policy allows
+ * the cloud, after the panel's offer) and plan 1.3's recorded dictation.
  */
 export function startVoiceRecording(lang: string): void {
   if (lang.split(/[-_]/)[0].toLowerCase() !== "he") {

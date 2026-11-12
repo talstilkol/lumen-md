@@ -102,6 +102,7 @@ export const DIRECT_FS_ALLOWLIST = {
   "src/ai/piiNer.ts": "checks whether the converted NER model is cached in OPFS (plan 2.6): model files, not vault files",
   "src/ai/transformers.worker.ts": "the worker's model cache root for converted models (plan 6.0): model files, not vault files",
   "src/ai/imageSearchService.ts": "checks whether the converted image-search model is cached in OPFS (plan 6.7): model files, not vault files",
+  "src/ai/modelCache.ts": "the verified model cache of plan 6.0 (models/, outside the vault): downloaded ONNX files checked against their sha256, never notes",
 };
 
 /** Handle methods that read or change a file system directly. */

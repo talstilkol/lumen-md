@@ -1365,6 +1365,11 @@
       "vars": []
     },
     {
+      "key": "cmd.speakers.rename",
+      "en": "Rename a speaker in this note…",
+      "vars": []
+    },
+    {
       "key": "cmd.spell.hebrewDictionary",
       "en": "Hebrew spelling: dictionary (download / remove)",
       "vars": []
@@ -1953,6 +1958,11 @@
     {
       "key": "cmd.voice.meeting.hint",
       "en": "Record a meeting, transcribe it on this device, and insert its decisions, tasks with owner and date, and open questions",
+      "vars": []
+    },
+    {
+      "key": "cmd.voice.meetingFile",
+      "en": "🎙 Transcribe a meeting recording (who said what)…",
       "vars": []
     },
     {

@@ -141,6 +141,7 @@ export default defineConfig({
             { label: "Privacy and the AI policy", slug: "ai/privacy", translations: { he: "פרטיות ומדיניות ה-AI" } },
             { label: "Cloud only by choice", translations: { he: "ענן רק בבחירה" }, slug: "ai/cloud-routes" },
             { label: "DictaLM 3.0 (Hebrew)", translations: { he: "DictaLM 3.0 (עברית)" }, slug: "ai/dictalm3" },
+            { label: "Meeting transcripts with speakers", translations: { he: "תמלול פגישה עם דוברים" }, slug: "ai/meeting-speakers" },
             { label: "Hebrew Whisper on the desktop", translations: { he: "Whisper עברי בשולחן העבודה" }, slug: "ai/whisper-desktop" },
           ],
         },

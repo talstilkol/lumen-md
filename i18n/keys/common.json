@@ -5248,6 +5248,89 @@
       "vars": []
     },
     {
+      "key": "speakers.diarizing",
+      "en": "Finding who spoke when… {done}/{total}",
+      "vars": [
+        "done",
+        "total"
+      ]
+    },
+    {
+      "key": "speakers.done",
+      "en": "Meeting transcribed: {n} sentences, {speakers} speakers, in {seconds} s.",
+      "vars": [
+        "n",
+        "speakers",
+        "seconds"
+      ]
+    },
+    {
+      "key": "speakers.download",
+      "en": "Speaker identification needs {mb} MB of models from Hugging Face, downloaded once and kept on this device. Download them now?",
+      "vars": [
+        "mb"
+      ]
+    },
+    {
+      "key": "speakers.failed",
+      "en": "Couldn't tell the speakers apart: {error}. The transcript is inserted without speakers.",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "speakers.namePlaceholder",
+      "en": "Name (leave empty to keep {speaker})",
+      "vars": [
+        "speaker"
+      ]
+    },
+    {
+      "key": "speakers.namePrompt",
+      "en": "Who is {speaker}? They said: “{sample}”",
+      "vars": [
+        "speaker",
+        "sample"
+      ]
+    },
+    {
+      "key": "speakers.none",
+      "en": "This note has no speaker labels to rename.",
+      "vars": []
+    },
+    {
+      "key": "speakers.notesFailed",
+      "en": "The transcript is in the note; the meeting summary failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "speakers.pick",
+      "en": "Which speaker do you want to rename?",
+      "vars": []
+    },
+    {
+      "key": "speakers.renamePrompt",
+      "en": "New name for {speaker}",
+      "vars": [
+        "speaker"
+      ]
+    },
+    {
+      "key": "speakers.renamed",
+      "en": "Renamed {from} to {to} everywhere in this note.",
+      "vars": [
+        "from",
+        "to"
+      ]
+    },
+    {
+      "key": "speakers.unavailable",
+      "en": "Speaker identification isn't set up on this device yet, so the transcript has no speakers.",
+      "vars": []
+    },
+    {
       "key": "sr.aiDone",
       "en": "AI finished.",
       "vars": []

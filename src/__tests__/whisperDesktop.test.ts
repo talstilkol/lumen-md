@@ -166,7 +166,7 @@ describe("file transcription strings ship with their chunk (W1.17)", () => {
     expect(files.filter((f) => f.text.includes("i18n/lazy/transcribeFile.json")).map((f) => f.path)).toEqual(["ai/dictation/strings.ts"]);
     expect(files.filter((f) => /^import "[./]*(ai\/dictation\/)?strings";/m.test(f.text) && f.path !== "ai/dictation/strings.ts").map((f) => f.path)).toEqual(["ui/TranscribeFile.ts"]);
     for (const f of files) expect(/^import [^;]*from "[./]*(ui\/)?TranscribeFile";/m.test(f.text), f.path).toBe(false);
-    expect(files.find((f) => f.path === "commands/useCommands.ts")?.text).toContain(`import("../ui/TranscribeFile")`);
+    expect(files.some((f) => /^commands\//.test(f.path) && /import\("(\.\.\/)+ui\/TranscribeFile"\)/.test(f.text))).toBe(true);
   });
 
   it("t() resolves the lazy keys once the module is loaded", () => {
