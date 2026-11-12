@@ -19,10 +19,18 @@ note, before the image is stored in the vault or put inline:
 
 GIF, SVG, HEIC and AVIF images are stored as they are.
 
+**When a photo can't be read:** the cleaning fails closed. A JPEG, PNG or WebP
+whose structure Lumen can't parse is re-drawn through the browser's canvas,
+which keeps only the pixels. If that isn't possible either, the photo is not
+added (you see a message), and an export or a published site leaves it out.
+Anything stored after the image's end is removed too: a second image (MPF,
+used by some phones for depth or a preview) or the video of a motion photo.
+
 **On export too:** photos already in the vault (including ones added before
 this cleaning existed) are inlined clean into PDF and HTML exports, and
-photos inlined in the note as `data:` URLs are cleaned in every export. The
-file in the vault itself is not changed.
+photos inlined in the note as `data:` URLs are cleaned in every export.
+Publish site and `lumen publish` copy photos clean. The file in the vault
+itself is not changed.
 
 To keep the metadata (for example, for your own photo archive): **Settings →
 General →** "Keep photos' location, time and camera details". Importing a

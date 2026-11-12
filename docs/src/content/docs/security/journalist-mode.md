@@ -26,6 +26,9 @@ The rules fail closed:
 - Exports also leave out hidden text a reader of the file could find: HTML
   comments (`<!-- … -->`) and Obsidian comments (`%% … %%`).
 - **Print** (⌘P) of a note with redactions goes through the same export.
+- **Publish site** (GitHub Pages or a .zip) and the command line (`lumen publish`,
+  `lumen convert`) go through it too: the pages, their titles and the site's search
+  index never hold a redacted passage, and the photos they copy lose their metadata.
 
 What it does not do: the note itself keeps the text (that is the point), so
 syncing or sharing the *note* shares the text. Redact before you export, and

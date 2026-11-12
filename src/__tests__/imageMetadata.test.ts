@@ -5,7 +5,7 @@
  */
 import { afterEach, describe, expect, it } from "vitest";
 import fixtures from "./fixtures/gps-photos.json";
-import { cleanImageFile, hasGps, KEEP_METADATA_KEY, stripImageMetadata } from "../lib/imageMetadata";
+import { cleanImageBytes, cleanImageFile, hasGps, ImageMetadataError, KEEP_METADATA_KEY, stripImageMetadata } from "../lib/imageMetadata";
 
 const images = Object.entries((fixtures as { images: Record<string, string> }).images).map(
   ([name, b64]) => [name, Uint8Array.from(atob(b64), (c) => c.charCodeAt(0))] as const,
@@ -64,11 +64,37 @@ describe("stripImageMetadata", () => {
     if (vp8x >= 0) expect(out[vp8x + 8] & 0x0c).toBe(0);
   });
 
-  it("leaves other formats and damaged files unchanged", () => {
+  it("leaves other formats unchanged", () => {
     const gif = new TextEncoder().encode("GIF89a\x01\x00\x01\x00");
     expect(stripImageMetadata(gif)).toMatchObject({ format: null, removed: [] });
+  });
+
+  it("fails closed on a damaged file: it throws, and is never handed back as it was (review 12.11)", async () => {
     const cut = images[0][1].subarray(0, 40);
-    expect(Array.from(stripImageMetadata(cut).bytes)).toEqual(Array.from(cut));
+    expect(() => stripImageMetadata(cut)).toThrow(ImageMetadataError);
+    expect(hasGps(cut)).toBe(true); // it may carry one
+    // No canvas here (Node): nothing to re-encode with, so the bytes are refused.
+    expect(await cleanImageBytes(cut, "image/jpeg")).toBeNull();
+    await expect(cleanImageFile(new File([cut], "x.jpg", { type: "image/jpeg" }))).rejects.toBeInstanceOf(ImageMetadataError);
+  });
+
+  it("cuts what follows the image: a second image after EOI (MPF / motion photo), a PNG or WebP trailer", () => {
+    const jpeg = images.find(([n]) => n.endsWith(".jpg"))![1];
+    expect(hasGps(jpeg)).toBe(true);
+    const twice = new Uint8Array([...jpeg, ...jpeg]);
+    const r = stripImageMetadata(twice);
+    expect(r.removed).toContain("trailer");
+    expect(hasGps(r.bytes)).toBe(false);
+    expect(latin1(r.bytes).includes("Exif\0\0MM") || latin1(r.bytes).includes("Exif\0\0II")).toBe(false);
+    // A stray byte between two segments is skipped, as decoders do: the EXIF still goes.
+    const stray = new Uint8Array([0xff, 0xd8, 0x00, ...jpeg.subarray(2)]);
+    expect(hasGps(stripImageMetadata(stray).bytes)).toBe(false);
+    for (const ext of ["png", "webp"]) {
+      const img = images.find(([n]) => n.endsWith(`.${ext}`))![1];
+      const tail = stripImageMetadata(new Uint8Array([...img, ...jpeg]));
+      expect(tail.removed, ext).toContain("trailer");
+      expect(tail.bytes.length, ext).toBe(stripImageMetadata(img).bytes.length);
+    }
   });
 });
 

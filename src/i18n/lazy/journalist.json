@@ -18,5 +18,7 @@
   "notePw.remove": "Remove the password (save as plain text)",
   "notePw.removeConfirm": "The note will be saved as plain text again, readable by anyone who can open the vault. Continue?",
   "redact.empty": "Select the text to redact first.",
-  "settings.keepImageMetadata": "Keep photos' location, time and camera details (when adding photos and when exporting)"
+  "settings.keepImageMetadata": "Keep photos' location, time and camera details (when adding photos and when exporting)",
+  "photoMeta.refused": "{count} photo(s) were not added: their location, time and camera details could not be removed. Save a copy from an image editor and add that instead.",
+  "publish.withheld": "{count} photo(s) were left out of the site: their location, time and camera details could not be removed."
 }

@@ -143,20 +143,52 @@ export class LockedNoteOverwriteError extends Error {
   }
 }
 
+/** Only the envelope's shape is checked here; opening it checks the KDF against the key's own. */
+const STRUCTURE_ONLY: KdfPolicy = { minPbkdf2Iterations: 1 };
+
 /**
- * The workspace write hook. An unlocked locked note is sealed. Plain text is
- * never written over a locked note that is not open (the editor showing the
- * sealed text, a tool, an old tab): that write is refused.
+ * Is `text` exactly a sealed note as sealNote writes it (the magic line, the
+ * notice, the payload, nothing else)? Starting with the magic line is not
+ * enough: a plain note can start with it too (review 12.11).
+ */
+export function isEnvelopeText(text: string): boolean {
+  const lines = text.replace(/\r\n/g, "\n").replace(/\n$/, "").split("\n");
+  if (lines.length !== 4 || lines[0] !== LOCKED_NOTE_MAGIC || lines[1] !== NOTICE || lines[2] !== "") return false;
+  if (!/^lumen-locked:[A-Za-z0-9_-]+$/.test(lines[3])) return false;
+  try {
+    parse(text, STRUCTURE_ONLY);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * The workspace write hook. An unlocked locked note is always sealed, unless
+ * the text is already an envelope that opens with this note's key (which
+ * nobody without the key can forge). Plain text is never written over a
+ * locked note that is not open (the editor showing the sealed text, a tool,
+ * an old tab): that write is refused.
  */
 export function makeSealer(readCurrent: (path: string) => Promise<string | null>) {
   return async (path: string, content: string): Promise<string> => {
-    if (isSealedNote(content)) return content;
     const k = keyOf(path);
     if (k) {
+      if (isEnvelopeText(content)) {
+        try {
+          // The envelope's KDF must equal this key's (openWith), so the shape-only policy loosens nothing.
+          await openWith(parse(content, STRUCTURE_ONLY), k);
+          lockedNotes.set(path, content, k);
+          return content;
+        } catch {
+          /* why: an envelope under another key: sealed again below, never written as it is */
+        }
+      }
       const sealed = await sealNote(content, k);
       lockedNotes.set(path, sealed, k);
       return sealed;
     }
+    if (isEnvelopeText(content)) return content;
     if (allowPlain.delete(path)) return content;
     const current = await readCurrent(path);
     if (current !== null && isSealedNote(current)) throw new LockedNoteOverwriteError(path);

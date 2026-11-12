@@ -7,7 +7,9 @@ import {
   __resetLockedNotes,
   allowPlainWrite,
   forgetOpen,
+  isEnvelopeText,
   isSealedNote,
+  LOCKED_NOTE_MAGIC,
   lockNote,
   LockedNoteOverwriteError,
   makeSealer,
@@ -92,5 +94,29 @@ describe("the write hook", () => {
     allowPlainWrite("s.md");
     expect(await seal("s.md", "plain again")).toBe("plain again");
     await expect(seal("s.md", "and again")).rejects.toBeInstanceOf(LockedNoteOverwriteError);
+  });
+
+  it("seals an open note's text even when it starts with the magic line; only its own envelope passes (review 12.11)", async () => {
+    const { sealed, key } = await lockNote(SECRET, "correct horse", FAST);
+    const disk = new Map<string, string>([["s.md", sealed]]);
+    const seal = makeSealer(async (p) => disk.get(p) ?? null);
+    rememberOpen("s.md", key, sealed, async (p) => disk.get(p) ?? null);
+    // Plain text that begins with the magic line (a pasted sealed note, typed under).
+    const lookalike = `${LOCKED_NOTE_MAGIC}\nSource: ${SECRET}\n`;
+    expect(isSealedNote(lookalike)).toBe(true);
+    expect(isEnvelopeText(lookalike)).toBe(false);
+    const out = await seal("s.md", lookalike);
+    expect(out).not.toContain("054-1234567");
+    expect(await openSealed(out, key, POLICY)).toBe(lookalike);
+    // The note's own envelope passes as it is (no double sealing) …
+    expect(await seal("s.md", sealed)).toBe(sealed);
+    // … an envelope under another password is sealed again, not written as it is.
+    const other = (await lockNote("other text", "another password", FAST)).sealed;
+    const resealed = await seal("s.md", other);
+    expect(resealed).not.toBe(other);
+    expect(await openSealed(resealed, key, POLICY)).toBe(other);
+    // Closed again: a lookalike over the locked file is refused like any plain text.
+    forgetOpen("s.md");
+    await expect(seal("s.md", lookalike)).rejects.toBeInstanceOf(LockedNoteOverwriteError);
   });
 });

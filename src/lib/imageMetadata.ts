@@ -12,7 +12,17 @@
  *   - PNG: every chunk but eXIf, tEXt, zTXt, iTXt and tIME;
  *   - WebP: every chunk but EXIF and XMP (the VP8X flags are corrected).
  * Other formats (GIF, SVG, HEIC, AVIF) come back unchanged, with
- * `supported: false`.
+ * `format: null`.
+ *
+ * Fail closed (review 12.11): a JPEG, PNG or WebP that can't be parsed throws
+ * ImageMetadataError instead of coming back as it was. The async helpers
+ * (cleanImageBytes, cleanImageFile) then re-encode it through a canvas, which
+ * keeps only the pixels, or refuse it when no canvas is available. Data after
+ * the image's end (a JPEG's EOI, a PNG's IEND, a WebP's RIFF size) goes too:
+ * that is where an MPF second image or a Motion Photo video sits. In a JPEG,
+ * stray bytes between segments are skipped as decoders skip them, segments
+ * between scans are cleaned like the header's, and APP2 is kept only when it
+ * is an ICC profile (an MPF index is APP2 too).
  */
 
 export interface StripResult {
@@ -21,6 +31,14 @@ export interface StripResult {
   format: "jpeg" | "png" | "webp" | null;
   /** What was taken out, e.g. ["EXIF", "GPS", "XMP"]. Empty when nothing was there. */
   removed: string[];
+}
+
+/** A JPEG, PNG or WebP whose structure could not be read: its metadata can't be removed in place. */
+export class ImageMetadataError extends Error {
+  constructor(format: string, why: string) {
+    super(`This ${format.toUpperCase()} photo could not be read (${why}), so its metadata could not be removed.`);
+    this.name = "ImageMetadataError";
+  }
 }
 
 const ascii = (b: Uint8Array, at: number, n: number) => String.fromCharCode(...b.subarray(at, at + n));
@@ -60,53 +78,86 @@ function orientationSegment(orientation: number): Uint8Array {
   return new Uint8Array([0xff, 0xe1, len >> 8, len & 0xff, ...body]);
 }
 
+/** What to do with one marker segment (APPn, COM, DQT, DHT …): keep it, or drop it and say what it was. */
+function jpegSegment(marker: number, data: Uint8Array, removed: Set<string>, found: { orientation: number | null }): boolean {
+  if (marker === 0xe1) {
+    if (ascii(data, 0, 6) === "Exif\0\0") {
+      removed.add("EXIF");
+      const ex = readExif(data.subarray(6));
+      if (ex.gps) removed.add("GPS");
+      if (ex.orientation && ex.orientation !== 1 && found.orientation === null) found.orientation = ex.orientation;
+    } else if (ascii(data, 0, 28) === "http://ns.adobe.com/xap/1.0/") removed.add("XMP");
+    else removed.add("APP1");
+    return false;
+  }
+  if (marker === 0xe2) {
+    if (ascii(data, 0, 12) === "ICC_PROFILE\0") return true;
+    removed.add(ascii(data, 0, 4) === "MPF\0" ? "MPF" : "APP2"); // MPF: the index of a second image
+    return false;
+  }
+  if (marker === 0xed) {
+    removed.add("IPTC");
+    return false;
+  }
+  if (marker === 0xfe) {
+    removed.add("comment");
+    return false;
+  }
+  if (marker >= 0xe3 && marker <= 0xef && marker !== 0xee) {
+    removed.add(`APP${marker - 0xe0}`); // APP3–APP13, APP15: maker notes, Photoshop, FlashPix …
+    return false;
+  }
+  return true;
+}
+
 function stripJpeg(b: Uint8Array): StripResult | null {
   if (b.length < 4 || b[0] !== 0xff || b[1] !== 0xd8) return null;
   const parts: Uint8Array[] = [b.subarray(0, 2)];
   const removed = new Set<string>();
-  let orientation: number | null = null;
+  const found = { orientation: null as number | null };
   let i = 2;
-  while (i + 4 <= b.length) {
-    if (b[i] !== 0xff) return null; // not a well-formed marker: leave the file alone
+  let ended = false;
+  while (i < b.length) {
+    if (b[i] !== 0xff) {
+      // Stray bytes before a marker: decoders skip them ("extraneous bytes"), and so does this.
+      while (i < b.length && b[i] !== 0xff) i++;
+      continue;
+    }
+    if (i + 1 >= b.length) break;
     const marker = b[i + 1];
     if (marker === 0xff) {
       i++; // fill byte
       continue;
     }
-    if (marker === 0xda || marker === 0xd9) break; // start of scan / end: the rest is image data
-    if (marker >= 0xd0 && marker <= 0xd7) {
+    if (marker === 0xd9) {
+      parts.push(b.subarray(i, i + 2));
+      i += 2;
+      ended = true;
+      break;
+    }
+    if ((marker >= 0xd0 && marker <= 0xd7) || marker === 0x01) {
+      parts.push(b.subarray(i, i + 2));
       i += 2;
       continue;
     }
+    if (marker === 0xd8 || marker === 0x00) throw new ImageMetadataError("jpeg", "unexpected marker");
+    if (i + 4 > b.length) throw new ImageMetadataError("jpeg", "cut off");
     const len = (b[i + 2] << 8) | b[i + 3];
-    if (len < 2 || i + 2 + len > b.length) return null;
+    if (len < 2 || i + 2 + len > b.length) throw new ImageMetadataError("jpeg", "bad segment length");
     const seg = b.subarray(i, i + 2 + len);
-    const data = b.subarray(i + 4, i + 2 + len);
-    let keep = true;
-    if (marker === 0xe1) {
-      keep = false;
-      if (ascii(data, 0, 6) === "Exif\0\0") {
-        removed.add("EXIF");
-        const ex = readExif(data.subarray(6));
-        if (ex.gps) removed.add("GPS");
-        if (ex.orientation && ex.orientation !== 1) orientation = ex.orientation;
-      } else if (ascii(data, 0, 28) === "http://ns.adobe.com/xap/1.0/") removed.add("XMP");
-      else removed.add("APP1");
-    } else if (marker === 0xed) {
-      keep = false;
-      removed.add("IPTC");
-    } else if (marker === 0xfe) {
-      keep = false;
-      removed.add("comment");
-    } else if (marker >= 0xe3 && marker <= 0xef && marker !== 0xee) {
-      keep = false; // APP3–APP13, APP15: maker notes, Photoshop, FlashPix …
-      removed.add(`APP${marker - 0xe0}`);
-    }
-    if (keep) parts.push(seg);
+    if (jpegSegment(marker, b.subarray(i + 4, i + 2 + len), removed, found)) parts.push(seg);
     i += 2 + len;
+    if (marker === 0xda) {
+      // Entropy-coded data runs to the next marker that isn't a stuffed 0xFF00 or a restart marker.
+      const start = i;
+      while (i + 1 < b.length && !(b[i] === 0xff && b[i + 1] !== 0x00 && !(b[i + 1] >= 0xd0 && b[i + 1] <= 0xd7))) i++;
+      if (i + 1 >= b.length) i = b.length; // no end marker: a cut-off scan, kept as it is
+      parts.push(b.subarray(start, i));
+    }
   }
-  if (orientation) parts.splice(1, 0, orientationSegment(orientation));
-  parts.push(b.subarray(i));
+  // After EOI: an MPF second image, a Motion Photo video, anything appended. It goes.
+  if (ended && i < b.length) removed.add("trailer");
+  if (found.orientation) parts.splice(1, 0, orientationSegment(found.orientation));
   return { bytes: concat(parts), format: "jpeg", removed: [...removed] };
 }
 
@@ -122,7 +173,7 @@ function stripPng(b: Uint8Array): StripResult | null {
     const len = ((b[i] << 24) >>> 0) + ((b[i + 1] << 16) | (b[i + 2] << 8) | b[i + 3]);
     const type = ascii(b, i + 4, 4);
     const end = i + 12 + len;
-    if (end > b.length) return null;
+    if (end > b.length) throw new ImageMetadataError("png", "bad chunk length");
     const what = PNG_DROP[type];
     if (what) {
       removed.add(what);
@@ -130,7 +181,11 @@ function stripPng(b: Uint8Array): StripResult | null {
       if (type === "iTXt" && /XML:com\.adobe\.xmp/.test(ascii(b, i + 8, Math.min(len, 32)))) removed.add("XMP");
     } else parts.push(b.subarray(i, end));
     i = end;
-    if (type === "IEND") break;
+    if (type === "IEND") {
+      // After IEND: anything appended (another file, a video). It goes.
+      if (i < b.length) removed.add("trailer");
+      break;
+    }
   }
   return { bytes: concat(parts), format: "png", removed: [...removed] };
 }
@@ -140,12 +195,15 @@ function stripWebp(b: Uint8Array): StripResult | null {
   const parts: Uint8Array[] = [];
   const removed = new Set<string>();
   let vp8x: Uint8Array | null = null;
+  // The RIFF size bounds the file: bytes after it are appended data, and go.
+  const riffEnd = Math.min(b.length, 8 + ((b[4] | (b[5] << 8) | (b[6] << 16) | (b[7] << 24)) >>> 0));
+  if (riffEnd < b.length) removed.add("trailer");
   let i = 12;
-  while (i + 8 <= b.length) {
+  while (i + 8 <= riffEnd) {
     const type = ascii(b, i, 4);
     const len = (b[i + 4] | (b[i + 5] << 8) | (b[i + 6] << 16) | (b[i + 7] << 24)) >>> 0;
     const end = i + 8 + len + (len & 1);
-    if (end > b.length + 1) return null;
+    if (end > riffEnd + 1) throw new ImageMetadataError("webp", "bad chunk length");
     if (type === "EXIF") {
       removed.add("EXIF");
       const data = b.subarray(i + 8, i + 8 + len);
@@ -153,7 +211,7 @@ function stripWebp(b: Uint8Array): StripResult | null {
       if (readExif(tiff).gps) removed.add("GPS");
     } else if (type === "XMP ") removed.add("XMP");
     else {
-      const chunk = b.slice(i, Math.min(end, b.length));
+      const chunk = b.slice(i, Math.min(end, riffEnd));
       if (type === "VP8X") vp8x = chunk;
       parts.push(chunk);
     }
@@ -182,7 +240,10 @@ function concat(parts: Uint8Array[]): Uint8Array<ArrayBuffer> {
   return out;
 }
 
-/** Remove location, time, device and text metadata from a JPEG, PNG or WebP. */
+/**
+ * Remove location, time, device and text metadata from a JPEG, PNG or WebP.
+ * Throws ImageMetadataError when such a file can't be parsed (fail closed).
+ */
 export function stripImageMetadata(bytes: Uint8Array): StripResult {
   const r = stripJpeg(bytes) ?? stripPng(bytes) ?? stripWebp(bytes);
   if (r) return r;
@@ -191,9 +252,70 @@ export function stripImageMetadata(bytes: Uint8Array): StripResult {
   return { bytes: copy, format: null, removed: [] };
 }
 
-/** Does the image carry a GPS position? (JPEG, PNG and WebP EXIF.) */
+/** Does the image carry a GPS position? (JPEG, PNG and WebP EXIF.) One that can't be parsed may: true. */
 export function hasGps(bytes: Uint8Array): boolean {
-  return stripImageMetadata(bytes).removed.includes("GPS");
+  try {
+    return stripImageMetadata(bytes).removed.includes("GPS");
+  } catch {
+    return true;
+  }
+}
+
+const OUT_TYPE: Record<string, string> = { jpeg: "image/jpeg", png: "image/png", webp: "image/webp" };
+
+/**
+ * Re-encode through a canvas: only the pixels survive (orientation applied).
+ * Null when this engine has no canvas or can't decode the file.
+ */
+export async function reencodeImage(bytes: Uint8Array, type: string): Promise<{ bytes: Uint8Array<ArrayBuffer>; type: string } | null> {
+  if (typeof createImageBitmap !== "function") return null;
+  try {
+    const copy = new Uint8Array(bytes.length);
+    copy.set(bytes);
+    const bmp = await createImageBitmap(new Blob([copy], { type }));
+    let blob: Blob | null = null;
+    try {
+      if (typeof OffscreenCanvas !== "undefined") {
+        const c = new OffscreenCanvas(bmp.width, bmp.height);
+        c.getContext("2d")?.drawImage(bmp, 0, 0);
+        blob = await c.convertToBlob({ type, quality: 0.92 });
+      } else if (typeof document !== "undefined") {
+        const c = document.createElement("canvas");
+        c.width = bmp.width;
+        c.height = bmp.height;
+        c.getContext("2d")?.drawImage(bmp, 0, 0);
+        blob = await new Promise<Blob | null>((resolve) => c.toBlob(resolve, type, 0.92));
+      }
+    } finally {
+      bmp.close();
+    }
+    if (!blob || !/^image\/(jpeg|png|webp)$/.test(blob.type)) return null;
+    const out = new Uint8Array(await blob.arrayBuffer());
+    // The canvas's own output is plain; checked anyway, so this never returns metadata.
+    const again = stripImageMetadata(out);
+    return { bytes: again.bytes, type: blob.type };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Clean image bytes, failing closed: stripped in place when they parse,
+ * re-encoded through a canvas when they don't, null when neither works (the
+ * caller must then refuse the image). Formats this module doesn't clean
+ * (GIF, SVG, HEIC, AVIF) come back unchanged with `format: null`.
+ */
+export async function cleanImageBytes(bytes: Uint8Array, type: string): Promise<{ bytes: Uint8Array<ArrayBuffer>; type: string; format: StripResult["format"]; removed: string[] } | null> {
+  try {
+    const r = stripImageMetadata(bytes);
+    return { bytes: r.bytes, type: r.format ? OUT_TYPE[r.format] : type, format: r.format, removed: r.removed };
+  } catch (e) {
+    if (!(e instanceof ImageMetadataError)) throw e;
+    const re = await reencodeImage(bytes, type);
+    if (!re) return null;
+    const format = /png/.test(re.type) ? "png" : /webp/.test(re.type) ? "webp" : "jpeg";
+    return { bytes: re.bytes, type: re.type, format, removed: ["re-encoded"] };
+  }
 }
 
 /** localStorage key: "1" keeps photos' metadata (the default removes it). */
@@ -207,13 +329,20 @@ export function keepImageMetadata(): boolean {
   }
 }
 
+const EXT: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
+
 /**
  * The file to store for an image added to a note: the same image without
- * its metadata (unless the user chose to keep it), same name and type.
+ * its metadata (unless the user chose to keep it), same name and type. A file
+ * that can't be parsed is re-encoded through a canvas (its name then takes
+ * the new type's extension when the type changed); when that can't be done
+ * either, this throws ImageMetadataError and the caller must not store it.
  */
 export async function cleanImageFile(file: File): Promise<File> {
   if (keepImageMetadata() || !/^image\/(jpeg|png|webp)$/.test(file.type)) return file;
-  const r = stripImageMetadata(new Uint8Array(await file.arrayBuffer()));
+  const r = await cleanImageBytes(new Uint8Array(await file.arrayBuffer()), file.type);
+  if (!r) throw new ImageMetadataError(file.type.slice(6), "no canvas to re-encode it");
   if (!r.format || r.removed.length === 0) return file;
-  return new File([r.bytes], file.name, { type: file.type, lastModified: file.lastModified });
+  const name = r.type === file.type ? file.name : file.name.replace(/\.[^.]*$/, "") + "." + EXT[r.type];
+  return new File([r.bytes], name, { type: r.type, lastModified: file.lastModified });
 }

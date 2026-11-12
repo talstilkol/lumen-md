@@ -2608,6 +2608,13 @@
       "vars": []
     },
     {
+      "key": "photoMeta.refused",
+      "en": "{count} photo(s) were not added: their location, time and camera details could not be removed. Save a copy from an image editor and add that instead.",
+      "vars": [
+        "count"
+      ]
+    },
+    {
       "key": "pii.ledger.redacted",
       "en": "Hidden before sending: {n} in {requests} requests",
       "vars": [
@@ -3015,6 +3022,13 @@
       "key": "publish.token.hint",
       "en": "Kept on this device. Empty: the git sync token is used.",
       "vars": []
+    },
+    {
+      "key": "publish.withheld",
+      "en": "{count} photo(s) were left out of the site: their location, time and camera details could not be removed.",
+      "vars": [
+        "count"
+      ]
     },
     {
       "key": "pwa.dismiss",

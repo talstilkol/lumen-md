@@ -19,10 +19,12 @@
  *     comments (`%% … %%`), except inside code, where they are code.
  *   - Photos inlined as `data:` URLs lose their GPS, time and device
  *     metadata, unless the user keeps it (Settings, the same switch as for
- *     photos added to a note).
+ *     photos added to a note). A photo whose metadata can't be removed (it
+ *     can't be parsed, and there is no canvas to re-encode it) is replaced by
+ *     an empty image: it never leaves as it was (review 12.11).
  */
 
-import { keepImageMetadata, stripImageMetadata } from "./imageMetadata";
+import { cleanImageBytes, keepImageMetadata, stripImageMetadata } from "./imageMetadata";
 
 /** What replaces each redacted passage. Fixed length on purpose. */
 export const REDACTED = "█████";
@@ -205,9 +207,16 @@ function toBase64(bytes: Uint8Array): string {
   return btoa(bin);
 }
 
-/** Photos inlined in the note as data: URLs, without their metadata. */
-export function cleanInlineImages(markdown: string): { text: string; cleaned: number } {
+/** What a photo becomes when its metadata can't be removed: a 1×1 transparent GIF. */
+export const WITHHELD_IMAGE = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+
+/**
+ * Photos inlined in the note as data: URLs, without their metadata. One that
+ * can't be parsed (or decoded) is withheld: replaced by WITHHELD_IMAGE.
+ */
+export function cleanInlineImages(markdown: string): { text: string; cleaned: number; withheld: number } {
   let cleaned = 0;
+  let withheld = 0;
   const text = markdown.replace(DATA_IMAGE, (whole, type: string, b64: string) => {
     try {
       const r = stripImageMetadata(fromBase64(b64));
@@ -215,10 +224,44 @@ export function cleanInlineImages(markdown: string): { text: string; cleaned: nu
       cleaned++;
       return `data:image/${type.toLowerCase()};base64,${toBase64(r.bytes)}`;
     } catch {
-      return whole;
+      // why: fail closed: a photo we can't clean never goes out as it was
+      withheld++;
+      return WITHHELD_IMAGE;
     }
   });
-  return { text, cleaned };
+  return { text, cleaned, withheld };
+}
+
+/** The async form: a photo that can't be parsed is re-encoded through a canvas first, withheld only when that fails. */
+export async function cleanInlineImagesAsync(markdown: string): Promise<{ text: string; cleaned: number; withheld: number }> {
+  const found = [...markdown.matchAll(DATA_IMAGE)];
+  if (!found.length) return { text: markdown, cleaned: 0, withheld: 0 };
+  const out = new Map<string, string | null>();
+  let cleaned = 0;
+  let withheld = 0;
+  for (const m of found) {
+    if (out.has(m[0])) continue;
+    const type = m[1].toLowerCase() === "jpg" ? "image/jpeg" : `image/${m[1].toLowerCase()}`;
+    let bytes: Uint8Array;
+    try {
+      bytes = fromBase64(m[2]);
+    } catch {
+      out.set(m[0], null);
+      continue;
+    }
+    const r = await cleanImageBytes(bytes, type);
+    out.set(m[0], !r ? null : !r.format || r.removed.length === 0 ? m[0] : `data:${r.type};base64,${toBase64(r.bytes)}`);
+  }
+  const text = markdown.replace(DATA_IMAGE, (whole) => {
+    const url = out.get(whole);
+    if (url === null || url === undefined) {
+      withheld++;
+      return WITHHELD_IMAGE;
+    }
+    if (url !== whole) cleaned++;
+    return url;
+  });
+  return { text, cleaned, withheld };
 }
 
 /** `![alt](lumen-asset-…)` and `![[lumen-asset-…]]`: photos stored in the vault. */
@@ -232,20 +275,28 @@ const MIME: Record<string, string> = { jpg: "image/jpeg", jpeg: "image/jpeg", pn
  * JPEG into a PDF as it is, EXIF and all). A photo that can't be read is left
  * as a link.
  */
-export async function inlineVaultImages(markdown: string, read: (name: string) => Promise<Blob>): Promise<{ text: string; inlined: number }> {
+export async function inlineVaultImages(markdown: string, read: (name: string) => Promise<Blob>): Promise<{ text: string; inlined: number; withheld: number }> {
   const found = [...markdown.matchAll(ASSET_IMAGE)];
-  if (!found.length) return { text: markdown, inlined: 0 };
+  if (!found.length) return { text: markdown, inlined: 0, withheld: 0 };
   const urls = new Map<string, string | null>();
+  let withheld = 0;
   for (const m of found) {
     const name = m[2] ?? m[3];
     if (urls.has(name)) continue;
+    let bytes: Uint8Array;
     try {
-      const bytes = new Uint8Array(await (await read(name)).arrayBuffer());
-      const ext = name.slice(name.lastIndexOf(".") + 1).toLowerCase();
-      urls.set(name, `data:${MIME[ext]};base64,${toBase64(stripImageMetadata(bytes).bytes)}`);
+      bytes = new Uint8Array(await (await read(name)).arrayBuffer());
     } catch {
-      urls.set(name, null);
+      urls.set(name, null); // why: not in the vault: left as a link, nothing to leak
+      continue;
     }
+    const ext = name.slice(name.lastIndexOf(".") + 1).toLowerCase();
+    const r = await cleanImageBytes(bytes, MIME[ext]);
+    if (!r) {
+      // Fail closed: the renderer would otherwise load the original file into the PDF.
+      withheld++;
+      urls.set(name, WITHHELD_IMAGE);
+    } else urls.set(name, `data:${r.type};base64,${toBase64(r.bytes)}`);
   }
   let inlined = 0;
   const text = markdown.replace(ASSET_IMAGE, (whole, alt: string | undefined, a: string | undefined, b: string | undefined) => {
@@ -254,7 +305,7 @@ export async function inlineVaultImages(markdown: string, read: (name: string) =
     inlined++;
     return `![${alt ?? ""}](${url})`;
   });
-  return { text, inlined };
+  return { text, inlined, withheld };
 }
 
 export interface ExportPrepOptions {
@@ -269,6 +320,18 @@ export interface ExportPrepReport {
   redacted: number;
   /** Inline photos that lost metadata. */
   imagesCleaned: number;
+  /** Photos replaced by an empty image: their metadata could not be removed. */
+  imagesWithheld: number;
+}
+
+/**
+ * The same for a synchronous exporter (`lumen convert`, the API server):
+ * marked passages and hidden comments removed, inline photos cleaned in
+ * place or withheld (no canvas to re-encode with there).
+ */
+export function prepareForExportSync(markdown: string, opts: Pick<ExportPrepOptions, "keepImageMetadata"> = {}): string {
+  const text = removeHiddenComments(removeRedacted(markdown).text);
+  return (opts.keepImageMetadata ?? keepImageMetadata()) ? text : cleanInlineImages(text).text;
 }
 
 /**
@@ -280,16 +343,19 @@ export async function prepareForExport(markdown: string, opts: ExportPrepOptions
   const { text: removed, count } = removeRedacted(markdown);
   let text = removeHiddenComments(removed);
   let imagesCleaned = 0;
+  let imagesWithheld = 0;
   const keep = opts.keepImageMetadata ?? keepImageMetadata();
   if (!keep) {
     if (opts.readAsset) {
       const r = await inlineVaultImages(text, opts.readAsset);
       text = r.text;
-      imagesCleaned += r.inlined;
+      imagesCleaned += r.inlined - r.withheld;
+      imagesWithheld += r.withheld;
     }
-    const c = cleanInlineImages(text);
+    const c = await cleanInlineImagesAsync(text);
     text = c.text;
     imagesCleaned += c.cleaned;
+    imagesWithheld += c.withheld;
   }
-  return { text, report: { redacted: count, imagesCleaned } };
+  return { text, report: { redacted: count, imagesCleaned, imagesWithheld } };
 }

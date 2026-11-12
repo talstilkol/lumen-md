@@ -19,6 +19,8 @@ import {
 import { hasGps, KEEP_METADATA_KEY } from "../lib/imageMetadata";
 import { markdownToDocxBytes } from "../storage/exportDocx";
 import { markdownToRtf, markdownToLatex } from "../storage/exportFormats";
+import { buildSite } from "../publish/site";
+import { convert, convertBinary } from "../cli/convert";
 
 const photos = Object.values((fixtures as { images: Record<string, string> }).images);
 const bytesOf = (b64: string) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
@@ -173,5 +175,50 @@ describe("exports carry no redacted text", () => {
     const { text, report } = await prepareForExport(note());
     expect(report.redacted).toBe(10);
     for (const out of [text, markdownToRtf(text), markdownToLatex(text)]) for (const s of SECRETS) expect(out).not.toContain(s);
+  });
+});
+
+describe("every other door out (review 12.11)", () => {
+  // Any renderer shows the point; images become <img src> so the site copies them.
+  const render = async (md: string) => `<!doctype html><html dir="ltr"><body><main>${md.replace(/!\[[^\]]*\]\(([^)\s]+)\)/g, '<img src="$1">')}</main></body></html>`;
+  const gpsJpeg = () => bytesOf(photos.find((b64) => bytesOf(b64)[0] === 0xff)!);
+
+  it("Publish site: no secret in a page, a title or the search index; photos copied clean, an uncleanable one left out", async () => {
+    const md = `${note()}\n![a](a.jpg) ![b](b.jpg)\n`;
+    const broken = gpsJpeg().subarray(0, 40);
+    const site = await buildSite([{ path: "story.md", content: md }], {
+      title: "Notes",
+      lang: "en",
+      render,
+      readAsset: async (p) => (p === "a.jpg" ? gpsJpeg() : p === "b.jpg" ? broken : null),
+    });
+    const text = site.files.map((f) => (typeof f.data === "string" ? f.data : new TextDecoder("latin1").decode(f.data))).join("\n");
+    for (const s of SECRETS) expect(text).not.toContain(s);
+    expect(text).toContain("Public text stays.");
+    const a = site.files.find((f) => f.path === "a.jpg");
+    expect(a).toBeDefined();
+    expect(hasGps(a!.data as Uint8Array)).toBe(false);
+    expect(site.files.some((f) => f.path === "b.jpg")).toBe(false);
+    expect(site.withheld).toEqual(["b.jpg"]);
+  });
+
+  it("lumen convert (text and binary): 0 secrets; imports are not touched", async () => {
+    for (const to of ["tex", "rst", "org", "adoc", "rtf", "opml", "ipynb"]) {
+      const { outText } = convert("n.md", note(), to);
+      for (const s of SECRETS) expect(outText, to).not.toContain(s);
+    }
+    const { bytes } = await convertBinary("n.md", note(), "docx");
+    const xml = await unzipText(bytes);
+    for (const s of SECRETS) expect(xml).not.toContain(s);
+    expect(convert("n.csv", "a,b\n<redact>x</redact>,2\n").outText).toContain("<redact>x</redact>");
+  });
+
+  it("an inline photo that can't be parsed is withheld, never exported as it was", async () => {
+    const cut = gpsJpeg().subarray(0, 40);
+    const md = `![x](data:image/jpeg;base64,${btoa(String.fromCharCode(...cut))})`;
+    const { text, report } = await prepareForExport(md);
+    expect(text).not.toContain(btoa(String.fromCharCode(...cut)).slice(0, 30));
+    expect(report.imagesWithheld).toBe(1);
+    expect(cleanInlineImages(md).withheld).toBe(1);
   });
 });
