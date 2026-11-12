@@ -102,10 +102,15 @@ def read_vault(objects, passphrase=None, device=None):
             secret = agepy.decrypt(unb64u(wrap["wrap"]), identity=device["identity"])
         contents = json.loads(keyring_open(subkey(secret, vid, "keyring"), ring["sealed"], vid, epoch, "sealed"))
         older = {int(k): unb64u(v) for k, v in contents["older"].items()}
+        # Spec §5: the enrolled devices are the sealed list; a device must be on it.
+        if device is not None and "devices" in contents and contents["devices"].get(device["id"]) != wrap["recipient"]:
+            raise ValueError("the device is not on the sealed device list")
     secrets = dict(older)
     secrets[epoch] = secret
     names = subkey(secrets[0], vid, "names")
-    mname = object_name(names, "manifest")
+    # Spec §5: each re-keyed epoch names its own manifest object in the sealed part.
+    label = contents.get("manifest", "manifest") if ring is not None else "manifest"
+    mname = object_name(names, label)
     manifest = json.loads(unseal(subkey(secret, vid, "manifest"), vid, "manifest", mname, objects[mname]))
     files = {}
     for path, e in manifest["files"].items():

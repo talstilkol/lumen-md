@@ -55,6 +55,23 @@ export interface VaultKeys {
   olderBlobs: Map<number, CryptoKey>;
   /** Secrets of older epochs (re-sealed into the next keyring at a re-key). */
   olderSecrets: Map<number, Uint8Array>;
+  /** What the keyring's sealed part says about this epoch (absent at epoch 0). */
+  ring?: RingInfo;
+}
+
+/**
+ * The authenticated facts of a keyring epoch that the engine acts on
+ * (review 12.11). All of them come from the keyring's sealed part.
+ */
+export interface RingInfo {
+  /** The label of this epoch's manifest object: "manifest" (epoch 0 and older keyrings) or "manifest/<epoch>". */
+  manifest: string;
+  /** The frozen manifest of the previous epoch this epoch's manifest is re-sealed from. */
+  carry?: { label: string; epoch: number; digest: string };
+  /** SHA-256 hex of the vault header this epoch's passphrase wrap belongs to (a passphrase change). */
+  header?: string;
+  /** The keyring predates the sealed device list: re-seal it at the first unlock. */
+  legacyDevices?: boolean;
 }
 
 /** The blob key for a manifest entry's epoch (absent: 0). Throws when this device doesn't hold it. */
