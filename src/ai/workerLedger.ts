@@ -20,11 +20,37 @@
 
 export const LEDGER_CHANNEL = "lumen-privacy-ledger";
 
+/**
+ * Airplane mode (plan W5.9, src/privacy/airplane.ts): the worker asks the
+ * window whether the switch is on ("hello" → "state") and reports every
+ * attempt ("attempt"); while it is on, a request to another host fails here,
+ * before it leaves. The window answers at once; a worker that hears nothing
+ * within AIRPLANE_WAIT_MS proceeds (no airplane-mode window in this page).
+ */
+export const AIRPLANE_CHANNEL = "lumen-airplane";
+export const AIRPLANE_WAIT_MS = 3000;
+export type AirplaneMessage =
+  | { kind: "hello" }
+  | { kind: "state"; on: boolean }
+  | { kind: "attempt"; url: string; method: string; worker: string; blocked: boolean };
+
+/** blob:, data: and loopback never leave the device. */
+function stays(url: string, base: string | undefined): boolean {
+  try {
+    const u = new URL(url, base);
+    if (u.protocol === "blob:" || u.protocol === "data:") return true;
+    const h = u.hostname.replace(/^\[|\]$/g, "");
+    return h === "localhost" || h === "127.0.0.1" || h === "::1" || h.endsWith(".localhost");
+  } catch {
+    return false;
+  }
+}
+
 export type WorkerLedgerMessage =
   | { kind: "start"; id: string; url: string; method: string; bytesOut: number; worker: string }
   | { kind: "end"; id: string; status: number; bytesIn: number | null };
 
-type FetchScope = { fetch: typeof fetch; name?: string; location?: { pathname?: string } };
+type FetchScope = { fetch: typeof fetch; name?: string; location?: { pathname?: string; href?: string } };
 
 /** The channel and worker name `installWorkerLedger` set up, for `reportWorkerDownload`. */
 let installed: { post: (m: WorkerLedgerMessage) => void; worker: string; next: () => string } | null = null;
@@ -42,7 +68,11 @@ function bodySize(body: BodyInit | null | undefined): number {
  * Wrap `scope.fetch` so each request is reported. Returns false when it
  * could not (no BroadcastChannel, no fetch, or already installed).
  */
-export function installWorkerLedger(scope: FetchScope, channel?: Pick<BroadcastChannel, "postMessage">): boolean {
+export function installWorkerLedger(
+  scope: FetchScope,
+  channel?: Pick<BroadcastChannel, "postMessage">,
+  airChannel?: Pick<BroadcastChannel, "postMessage" | "addEventListener">,
+): boolean {
   const marker = scope as FetchScope & { __lumenLedger?: true };
   if (marker.__lumenLedger || typeof scope.fetch !== "function") return false;
   let ch = channel;
@@ -63,9 +93,37 @@ export function installWorkerLedger(scope: FetchScope, channel?: Pick<BroadcastC
   };
   const next = () => `${worker}:${++seq}:${Date.now().toString(36)}`;
   installed = { post, worker, next };
+  // Airplane mode: the window's answer, awaited once (see AIRPLANE_CHANNEL).
+  let airplane: boolean | null = null;
+  // An injected ledger channel (tests) without an airplane channel: no airplane check.
+  const air: Pick<BroadcastChannel, "postMessage" | "addEventListener"> | null =
+    airChannel ?? (!channel && typeof BroadcastChannel !== "undefined" ? new BroadcastChannel(AIRPLANE_CHANNEL) : null);
+  let heard: Promise<void> = Promise.resolve();
+  if (air) {
+    heard = new Promise<void>((resolve) => {
+      const timer = setTimeout(resolve, AIRPLANE_WAIT_MS);
+      air.addEventListener("message", ((e: MessageEvent<AirplaneMessage>) => {
+        if (e.data?.kind !== "state") return;
+        airplane = e.data.on;
+        clearTimeout(timer);
+        resolve();
+      }) as EventListener);
+    });
+    air.postMessage({ kind: "hello" } satisfies AirplaneMessage);
+  }
   scope.fetch = async function ledgerWorkerFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
     const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
     const method = (init?.method ?? (typeof Request !== "undefined" && input instanceof Request ? input.method : "GET")).toUpperCase();
+    if (air) {
+      if (airplane === null) await heard;
+      const blocked = airplane === true && !stays(url, scope.location?.href);
+      try {
+        air.postMessage({ kind: "attempt", url, method, worker, blocked } satisfies AirplaneMessage);
+      } catch {
+        /* why: a closed channel: the request is still decided here */
+      }
+      if (blocked) throw new TypeError(`Blocked: airplane mode is on (${new URL(url, scope.location?.href).host})`);
+    }
     const id = next();
     post({ kind: "start", id, url, method, bytesOut: bodySize(init?.body), worker });
     const res = await inner(input, init);

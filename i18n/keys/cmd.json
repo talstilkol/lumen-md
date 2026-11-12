@@ -354,6 +354,31 @@
       "vars": []
     },
     {
+      "key": "cmd.airplane.hint.off",
+      "en": "Off: stop every network request and list every attempt",
+      "vars": []
+    },
+    {
+      "key": "cmd.airplane.hint.on",
+      "en": "On since the switch: turning it off reloads the page",
+      "vars": []
+    },
+    {
+      "key": "cmd.airplane.monitor",
+      "en": "Network monitor…",
+      "vars": []
+    },
+    {
+      "key": "cmd.airplane.monitor.hint",
+      "en": "Every request the app tries, allowed or blocked, and where in the code it came from",
+      "vars": []
+    },
+    {
+      "key": "cmd.airplane.toggle",
+      "en": "Airplane mode (no network)…",
+      "vars": []
+    },
+    {
       "key": "cmd.app.checkUpdates",
       "en": "Check for updates…",
       "vars": []

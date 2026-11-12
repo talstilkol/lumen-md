@@ -323,6 +323,157 @@
       "vars": []
     },
     {
+      "key": "airplane.badge",
+      "en": "Airplane mode",
+      "vars": []
+    },
+    {
+      "key": "airplane.badge.hint",
+      "en": "No network: open the network monitor",
+      "vars": []
+    },
+    {
+      "key": "airplane.certificate",
+      "en": "Download certificate",
+      "vars": []
+    },
+    {
+      "key": "airplane.certificate.hint",
+      "en": "A file stating the time span and every attempt in it, with its SHA-256.",
+      "vars": []
+    },
+    {
+      "key": "airplane.certificate.unsigned",
+      "en": "Not signed yet: the certificate carries its SHA-256 only.",
+      "vars": []
+    },
+    {
+      "key": "airplane.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "airplane.col.decision",
+      "en": "Decision",
+      "vars": []
+    },
+    {
+      "key": "airplane.col.kind",
+      "en": "Kind",
+      "vars": []
+    },
+    {
+      "key": "airplane.col.origin",
+      "en": "From (code)",
+      "vars": []
+    },
+    {
+      "key": "airplane.col.target",
+      "en": "Destination",
+      "vars": []
+    },
+    {
+      "key": "airplane.col.time",
+      "en": "Time",
+      "vars": []
+    },
+    {
+      "key": "airplane.confirmOff.body",
+      "en": "The page reloads: the browser cannot lift the block from a page that is already open. Save your work first if it isn't saved yet.",
+      "vars": []
+    },
+    {
+      "key": "airplane.confirmOff.ok",
+      "en": "Turn off and reload",
+      "vars": []
+    },
+    {
+      "key": "airplane.confirmOff.title",
+      "en": "Turn airplane mode off?",
+      "vars": []
+    },
+    {
+      "key": "airplane.counts",
+      "en": "{attempts} attempts · {blocked} blocked · {left} reached the network",
+      "vars": [
+        "attempts",
+        "blocked",
+        "left"
+      ]
+    },
+    {
+      "key": "airplane.decision.allowed",
+      "en": "allowed",
+      "vars": []
+    },
+    {
+      "key": "airplane.decision.blocked",
+      "en": "blocked",
+      "vars": []
+    },
+    {
+      "key": "airplane.decision.cache-only",
+      "en": "cache only",
+      "vars": []
+    },
+    {
+      "key": "airplane.decision.local",
+      "en": "local",
+      "vars": []
+    },
+    {
+      "key": "airplane.empty",
+      "en": "No network attempts yet.",
+      "vars": []
+    },
+    {
+      "key": "airplane.limits",
+      "en": "Loopback (a local model on this computer) stays allowed. The app's own files load from the cache only; a script chunk that isn't cached would load from the app's server, and is then counted as reaching the network.",
+      "vars": []
+    },
+    {
+      "key": "airplane.state.off",
+      "en": "Airplane mode is off. Every network attempt the app makes is listed here as it happens.",
+      "vars": []
+    },
+    {
+      "key": "airplane.state.on",
+      "en": "Airplane mode is on since {time}: nothing leaves this device.",
+      "vars": [
+        "time"
+      ]
+    },
+    {
+      "key": "airplane.test",
+      "en": "Try a request",
+      "vars": []
+    },
+    {
+      "key": "airplane.test.hint",
+      "en": "Tries to reach example.com, so you can watch it appear here (blocked while airplane mode is on).",
+      "vars": []
+    },
+    {
+      "key": "airplane.title",
+      "en": "Network monitor",
+      "vars": []
+    },
+    {
+      "key": "airplane.toast.on",
+      "en": "Airplane mode is on: nothing leaves this device.",
+      "vars": []
+    },
+    {
+      "key": "airplane.turnOff",
+      "en": "Turn off (reloads)",
+      "vars": []
+    },
+    {
+      "key": "airplane.turnOn",
+      "en": "Turn airplane mode on",
+      "vars": []
+    },
+    {
       "key": "analyst.done",
       "en": "Answer: {answer} — checked by running the program twice",
       "vars": [
