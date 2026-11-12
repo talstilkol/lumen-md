@@ -570,6 +570,11 @@
       "vars": []
     },
     {
+      "key": "privacy.audit.on",
+      "en": "Audit mode: every request that leaves this device is listed, not only AI.",
+      "vars": []
+    },
+    {
       "key": "privacy.blocked",
       "en": "Blocked: {n}",
       "vars": [
@@ -599,6 +604,11 @@
     {
       "key": "privacy.cat.monitoring",
       "en": "Error report — only with your consent, content removed",
+      "vars": []
+    },
+    {
+      "key": "privacy.cat.network",
+      "en": "Other request (audit mode): listed, never blocked",
       "vars": []
     },
     {
@@ -734,6 +744,26 @@
       "key": "privacy.policyName.local-only",
       "en": "local only",
       "vars": []
+    },
+    {
+      "key": "privacy.report.done",
+      "en": "Saved the signed report ({n} requests, {left} left this device). Check it with node scripts/privacy/verify-report.mjs.",
+      "vars": [
+        "n",
+        "left"
+      ]
+    },
+    {
+      "key": "privacy.report.export",
+      "en": "Export signed report",
+      "vars": []
+    },
+    {
+      "key": "privacy.report.failed",
+      "en": "Couldn't export the report: {error}",
+      "vars": [
+        "error"
+      ]
     },
     {
       "key": "privacy.staticAssets",
