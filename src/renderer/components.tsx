@@ -32,6 +32,7 @@ const PluginBlockView = lazy(() => import("../plugins/runtime/PluginBlock"));
 const TasksBlock = lazy(() => import("../plugins/TasksBlock"));
 const DataBlock = lazy(() => import("../plugins/DataBlock"));
 const DatabaseBlock = lazy(() => import("../views/DatabaseBlock"));
+const BasesBlock = lazy(() => import("../views/bases/BasesBlock"));
 const LiveCssBlock = lazy(() => import("../plugins/LiveCssBlock"));
 const LiveJsBlock = lazy(() => import("../plugins/LiveJsBlock"));
 const LivePyBlock = lazy(() => import("../plugins/LivePyBlock"));
@@ -329,6 +330,12 @@ const Database = withSuspense<BlockProps>(
     <DatabaseBlock source={getText(props.children)} meta={props.meta} />
   ),
   "database",
+);
+
+// Obsidian Bases (plan W1.11): a ```base block, or `![[x.base]]` (meta names the file).
+const Base = withSuspense<BlockProps>(
+  (props) => <BasesBlock source={getText(props.children)} meta={props.meta} />,
+  "base",
 );
 
 const LiveCss = withSuspense<BlockProps>(
@@ -634,6 +641,7 @@ export const components: Record<string, LumenBlock> = {
   "lumen-tasks": Tasks as unknown as LumenBlock,
   "lumen-data": DataBlockComp as unknown as LumenBlock,
   "lumen-database": Database as unknown as LumenBlock,
+  "lumen-base": Base as unknown as LumenBlock,
   "lumen-livecss": LiveCss as unknown as LumenBlock,
   "lumen-livejs": LiveJs as unknown as LumenBlock,
   "lumen-livesvg": LiveSvg as unknown as LumenBlock,

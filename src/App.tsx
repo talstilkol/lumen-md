@@ -1,5 +1,6 @@
 import { useCommands, openNewDoc } from "./commands/useCommands";
 import type { NoteEditDetail } from "./views/databaseEdit";
+import { baseAsMarkdown } from "./views/bases/embed";
 import { lazy, Suspense, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import type { EditorHandle } from "./editor/Editor";
 import type { SettingsTab } from "./settings/schema";
@@ -789,8 +790,9 @@ export default function App() {
   // never pairs one document's markdown with another's identity.
   const currentDocKey = docIdentity(doc);
   const previewSource = useMemo(
-    () => ({ content: doc.content, docKey: currentDocKey }),
-    [doc.content, currentDocKey],
+    // A `.base` file (Obsidian Bases, plan W1.11) previews as its views.
+    () => ({ content: /\.base$/i.test(doc.name) ? baseAsMarkdown(doc.content) : doc.content, docKey: currentDocKey }),
+    [doc.content, doc.name, currentDocKey],
   );
   const deferredPreview = useDeferredValue(previewSource);
   const deferredContent = deferredPreview.content;

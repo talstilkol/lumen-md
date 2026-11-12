@@ -37,6 +37,7 @@ import {
 import { EMBEDS_DATA_KEY, remarkEmbeds } from "./remarkEmbeds";
 import { remarkBlockIds } from "./remarkBlockIds";
 import type { EmbedContext } from "./embeds";
+import { remarkBaseEmbeds } from "../views/bases/embed";
 
 const SPECIAL_LANGS = new Set([
   "mermaid",
@@ -69,6 +70,7 @@ const SPECIAL_LANGS = new Set([
   // obsidian-tasks queries over the vault (plan 4.13).
   "tasks",
   "database",
+  "base",
   // Single-language live previews — render the snippet inside a tiny
   // sandboxed iframe so users can experiment with HTML/CSS/JS/GLSL/SVG
   // without writing the full boilerplate of an `htmlpreview` block.
@@ -181,7 +183,9 @@ function buildDialect() {
     .use(remarkMath)
     .use(remarkDirective)
     .use(remarkAdmonitions)
-    .use(remarkColumns);
+    .use(remarkColumns)
+    // ![[x.base]] becomes a base block before note embeds are expanded (Obsidian Bases).
+    .use(remarkBaseEmbeds);
 }
 
 let embedParser: ReturnType<typeof buildDialect> | null = null;

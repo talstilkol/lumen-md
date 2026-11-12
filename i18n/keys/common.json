@@ -439,6 +439,47 @@
       ]
     },
     {
+      "key": "base.error",
+      "en": "Can't read this base: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "base.limited",
+      "en": "Showing {count} of {total}",
+      "vars": [
+        "count",
+        "total"
+      ]
+    },
+    {
+      "key": "base.notFound",
+      "en": "{path} is not in the workspace.",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "base.problems",
+      "en": "Some expressions could not run:",
+      "vars": []
+    },
+    {
+      "key": "base.saveSort",
+      "en": "Save this sort to {file}",
+      "vars": [
+        "file"
+      ]
+    },
+    {
+      "key": "base.saved",
+      "en": "Saved to {file}",
+      "vars": [
+        "file"
+      ]
+    },
+    {
       "key": "blockLink.copied",
       "en": "Copied {link}",
       "vars": [
