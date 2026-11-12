@@ -231,6 +231,16 @@
       "vars": []
     },
     {
+      "key": "cmd.ai.organize",
+      "en": "AI: Organize the vault",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.organize.hint",
+      "en": "Missing links, tags, duplicates and maps of content — each change waits for your approval",
+      "vars": []
+    },
+    {
       "key": "cmd.ai.outline",
       "en": "AI: Generate Outline",
       "vars": []

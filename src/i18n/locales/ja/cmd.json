@@ -44,6 +44,8 @@
   "cmd.ai.mode.hint": "小さなタスクを安価なモデルへ回し、ノートの関連部分だけを送信",
   "cmd.ai.ollama": "AI: Ollama モデル",
   "cmd.ai.ollama.hint": "ローカルの Ollama モデルに切り替えます",
+  "cmd.ai.organize": "AI: ボールトを整理",
+  "cmd.ai.organize.hint": "足りないリンク、タグ、重複、目次ノート — どの変更もあなたの承認を待ちます",
   "cmd.ai.outline": "AI: アウトラインを生成",
   "cmd.ai.outline.hint": "AI が提案する見出しを追加します",
   "cmd.ai.policy": "AI: ローカル / クラウドのポリシー",

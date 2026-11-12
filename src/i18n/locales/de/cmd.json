@@ -44,6 +44,8 @@
   "cmd.ai.mode.hint": "Kleine Aufgaben an günstigere Modelle leiten und nur relevante Teile der Notizen senden",
   "cmd.ai.ollama": "KI: Ollama-Modelle",
   "cmd.ai.ollama.hint": "Zu einem lokalen Ollama-Modell wechseln",
+  "cmd.ai.organize": "KI: Tresor ordnen",
+  "cmd.ai.organize.hint": "Fehlende Links, Tags, Duplikate und Übersichtsnotizen — jede Änderung wartet auf deine Freigabe",
   "cmd.ai.outline": "KI: Gliederung erstellen",
   "cmd.ai.outline.hint": "KI-vorgeschlagene Überschriften hinzufügen",
   "cmd.ai.policy": "KI: Lokal- oder Cloud-Richtlinie",

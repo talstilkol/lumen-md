@@ -43,6 +43,8 @@
   "cmd.ai.mode.hint": "Route small tasks to cheaper models and send only the relevant parts of your notes",
   "cmd.ai.ollama": "AI: Ollama Models",
   "cmd.ai.ollama.hint": "Switch to a local Ollama model",
+  "cmd.ai.organize": "AI: Organize the vault",
+  "cmd.ai.organize.hint": "Missing links, tags, duplicates and maps of content — each change waits for your approval",
   "cmd.ai.outline": "AI: Generate Outline",
   "cmd.ai.outline.hint": "Add AI-suggested headings",
   "cmd.ai.policy": "AI: Local or Cloud Policy",

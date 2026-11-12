@@ -104,6 +104,7 @@ export default defineConfig({
             { label: "On-device OCR (Hebrew, English, columns)", translations: { he: "זיהוי טקסט במכשיר (OCR)" }, slug: "ai/ocr" },
             { label: "AI cost: usage meter + answer cache", slug: "ai/cost" },
             { label: "Batch jobs: pause, resume, progress", translations: { he: "משימות אצווה: השהיה, המשך, התקדמות" }, slug: "ai/batch" },
+            { label: "Organize the vault", translations: { he: "סידור הכספת" }, slug: "ai/organizer" },
             { label: "Research + citation checks", slug: "ai/research" },
             { label: "MCP and the lumen CLI", translations: { he: "MCP וה-CLI של lumen" }, slug: "ai/mcp" },
             { label: "Local agents: tools, critic, suggestions", slug: "ai/local-agents", translations: { he: "סוכנים מקומיים: כלים, מבקר, הצעות" } },

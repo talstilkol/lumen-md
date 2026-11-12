@@ -44,6 +44,8 @@
   "cmd.ai.mode.hint": "ניתוב משימות קטנות למודלים זולים ושליחת החלקים הרלוונטיים בלבד מהפתקים",
   "cmd.ai.ollama": "AI: מודלי Ollama",
   "cmd.ai.ollama.hint": "מעבר למודל Ollama מקומי",
+  "cmd.ai.organize": "AI: סידור הכספת",
+  "cmd.ai.organize.hint": "קישורים חסרים, תגיות, כפילויות ופתקי מפתח — כל שינוי מחכה לאישורך",
   "cmd.ai.outline": "AI: יצירת מתאר",
   "cmd.ai.outline.hint": "הוספת כותרות מוצעות על ידי AI",
   "cmd.ai.policy": "AI: מדיניות מקומי או ענן",

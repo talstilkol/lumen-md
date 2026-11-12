@@ -44,6 +44,8 @@
   "cmd.ai.mode.hint": "将小任务交给更便宜的模型，只发送笔记中相关的部分",
   "cmd.ai.ollama": "AI:Ollama 模型",
   "cmd.ai.ollama.hint": "切换到本地 Ollama 模型",
+  "cmd.ai.organize": "AI：整理笔记库",
+  "cmd.ai.organize.hint": "缺失的链接、标签、重复笔记和索引笔记——每项更改都等待你的批准",
   "cmd.ai.outline": "AI:生成大纲",
   "cmd.ai.outline.hint": "添加 AI 推荐的标题",
   "cmd.ai.policy": "AI：本地或云端策略",

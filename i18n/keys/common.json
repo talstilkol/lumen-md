@@ -2378,6 +2378,158 @@
       "vars": []
     },
     {
+      "key": "organizer.analysing",
+      "en": "Looking for links, tags, duplicates and maps of content…",
+      "vars": []
+    },
+    {
+      "key": "organizer.cancel",
+      "en": "Cancel",
+      "vars": []
+    },
+    {
+      "key": "organizer.cancelled",
+      "en": "Cancelled. Nothing was written.",
+      "vars": []
+    },
+    {
+      "key": "organizer.failed",
+      "en": "Stopped: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "organizer.intro",
+      "en": "Suggestions only. Each goes to the review screen as a change; nothing is written until you approve it.",
+      "vars": []
+    },
+    {
+      "key": "organizer.kind.link",
+      "en": "Link",
+      "vars": []
+    },
+    {
+      "key": "organizer.kind.merge",
+      "en": "Merge",
+      "vars": []
+    },
+    {
+      "key": "organizer.kind.moc",
+      "en": "Map of content",
+      "vars": []
+    },
+    {
+      "key": "organizer.kind.tag",
+      "en": "Tags",
+      "vars": []
+    },
+    {
+      "key": "organizer.next",
+      "en": "Review the next {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "organizer.none",
+      "en": "No suggestions: the vault looks organized.",
+      "vars": []
+    },
+    {
+      "key": "organizer.openReview",
+      "en": "Open the review screen",
+      "vars": []
+    },
+    {
+      "key": "organizer.pause",
+      "en": "Pause",
+      "vars": []
+    },
+    {
+      "key": "organizer.paused",
+      "en": "Paused",
+      "vars": []
+    },
+    {
+      "key": "organizer.reading",
+      "en": "Reading notes: {read} of {total}",
+      "vars": [
+        "read",
+        "total"
+      ]
+    },
+    {
+      "key": "organizer.ready",
+      "en": "{count} suggestions: {link} links, {tag} tags, {merge} merges, {moc} maps of content",
+      "vars": [
+        "count",
+        "link",
+        "tag",
+        "merge",
+        "moc"
+      ]
+    },
+    {
+      "key": "organizer.reason.link",
+      "en": "“{title}” is mentioned in {note} but not linked",
+      "vars": [
+        "title",
+        "note"
+      ]
+    },
+    {
+      "key": "organizer.reason.merge",
+      "en": "{from} repeats {into} ({percent}% the same): merge it in",
+      "vars": [
+        "from",
+        "into",
+        "percent"
+      ]
+    },
+    {
+      "key": "organizer.reason.moc",
+      "en": "{count} notes tagged {tag}, and no note links them",
+      "vars": [
+        "count",
+        "tag"
+      ]
+    },
+    {
+      "key": "organizer.reason.tagNear",
+      "en": "Add {tag}: notes linked with it have it ({near})",
+      "vars": [
+        "tag",
+        "near"
+      ]
+    },
+    {
+      "key": "organizer.reason.tagWord",
+      "en": "Add {tag}: the word is in the note, and {count} notes use the tag",
+      "vars": [
+        "tag",
+        "count"
+      ]
+    },
+    {
+      "key": "organizer.resume",
+      "en": "Resume",
+      "vars": []
+    },
+    {
+      "key": "organizer.sent",
+      "en": "{staged} of {count} sent to the review screen",
+      "vars": [
+        "staged",
+        "count"
+      ]
+    },
+    {
+      "key": "organizer.title",
+      "en": "Organize the vault",
+      "vars": []
+    },
+    {
       "key": "pageView.jump",
       "en": "Jump to page",
       "vars": []

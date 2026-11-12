@@ -44,6 +44,8 @@
   "cmd.ai.mode.hint": "Envoyer les petites tâches à des modèles moins chers et seulement les parties utiles de vos notes",
   "cmd.ai.ollama": "IA : modèles Ollama",
   "cmd.ai.ollama.hint": "Passer à un modèle Ollama local",
+  "cmd.ai.organize": "IA : Organiser le coffre",
+  "cmd.ai.organize.hint": "Liens manquants, tags, doublons et notes de synthèse — chaque modification attend votre accord",
   "cmd.ai.outline": "IA : générer un plan",
   "cmd.ai.outline.hint": "Ajouter des titres suggérés par l'IA",
   "cmd.ai.policy": "IA : politique locale ou cloud",
