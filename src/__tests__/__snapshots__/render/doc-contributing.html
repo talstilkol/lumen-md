@@ -69,7 +69,7 @@ npx cap run ios   # or android
 <li dir="ltr"><strong>Local-first.</strong> All data stays in the browser (OPFS) by default. Cloud features are opt-in.</li>
 <li dir="ltr"><strong>No <code>any</code>.</strong> TypeScript strict mode is enforced. Use <code>unknown</code> + narrowing.</li>
 <li dir="ltr"><strong>No hardcoded English.</strong> Every user-facing string uses <code>t(&quot;key&quot;)</code> from <code>src/i18n/index.ts</code>.</li>
-<li dir="ltr"><strong>Lazy everything.</strong> Heavy libraries (Mermaid, ECharts, tldraw, Graphviz) are <code>lazy()</code> imports.</li>
+<li dir="ltr"><strong>Lazy everything.</strong> Heavy libraries (Mermaid, ECharts, Excalidraw, Graphviz) are <code>lazy()</code> imports.</li>
 <li dir="ltr"><strong>Plugin sandbox.</strong> Third-party plugins run in a sandboxed <code>&lt;iframe&gt;</code> with restricted CSP.</li>
 </ul>
 <h2 id="branches" dir="auto">Branches</h2>
@@ -142,6 +142,32 @@ the CI artifacts or regenerate locally, review it, and commit it.</p>
 baselines on Linux (or in CI) — macOS font rendering differs.</p>
 </li>
 </ul>
+<h3 id="visual-regression-suite-10-surfaces--he--en--light--dark" dir="auto">Visual regression suite (10 surfaces × he / en × light / dark)</h3>
+<p dir="auto"><code>visual/</code> holds a Playwright suite that compares ten surfaces (split,<br/>
+source, preview, WYSIWYG, palette, shortcuts, plugins, templates, theme<br/>
+settings, AI settings) in English (LTR) and Hebrew (RTL), light and dark —<br/>
+40 shots — with baselines in <code>visual/__baselines__/&lt;platform&gt;/</code>. It runs<br/>
+on the production build (<code>vite preview</code>) with a fixed note, clock, fonts,<br/>
+viewport (1280×800 at 1×) and with animations and the caret off.</p>
+<div class="code-block" dir="ltr"><div class="code-block-header"><span class="lang">bash</span><button class="icon-btn" data-copy="npx playwright install chromium        # once
+npm run test:visual:update             # first run on this machine: writes the baselines
+git add visual/__baselines__           # after looking at every PNG
+npm run test:visual                    # compare; a missing baseline fails
+" title="Copy" style="padding:2px 8px;font-size:11px;height:24px;width:auto">Copy</button></div><pre class="shiki shiki-themes github-light-default github-dark-default" style="background-color:#ffffff;--shiki-dark-bg:#0d1117;color:#1f2328;--shiki-dark:#e6edf3" tabindex="0"><code><span class="line"><span style="color:#953800;--shiki-dark:#FFA657">npx</span><span style="color:#0A3069;--shiki-dark:#A5D6FF"> playwright</span><span style="color:#0A3069;--shiki-dark:#A5D6FF"> install</span><span style="color:#0A3069;--shiki-dark:#A5D6FF"> chromium</span><span style="color:#6E7781;--shiki-dark:#8B949E">        # once</span></span>
+<span class="line"><span style="color:#953800;--shiki-dark:#FFA657">npm</span><span style="color:#0A3069;--shiki-dark:#A5D6FF"> run</span><span style="color:#0A3069;--shiki-dark:#A5D6FF"> test:visual:update</span><span style="color:#6E7781;--shiki-dark:#8B949E">             # first run on this machine: writes the baselines</span></span>
+<span class="line"><span style="color:#953800;--shiki-dark:#FFA657">git</span><span style="color:#0A3069;--shiki-dark:#A5D6FF"> add</span><span style="color:#0A3069;--shiki-dark:#A5D6FF"> visual/__baselines__</span><span style="color:#6E7781;--shiki-dark:#8B949E">           # after looking at every PNG</span></span>
+<span class="line"><span style="color:#953800;--shiki-dark:#FFA657">npm</span><span style="color:#0A3069;--shiki-dark:#A5D6FF"> run</span><span style="color:#0A3069;--shiki-dark:#A5D6FF"> test:visual</span><span style="color:#6E7781;--shiki-dark:#8B949E">                    # compare; a missing baseline fails</span></span>
+<span class="line"></span></code></pre></div>
+<ul dir="ltr">
+<li dir="ltr">An <strong>intentional</strong> change: run <code>npm run test:visual:update</code>, review the<br/>
+changed PNGs, commit them with the change.</li>
+<li dir="ltr">A failure leaves the expected / actual / diff images in<br/>
+<code>visual-results/</code> (HTML report: <code>visual-results/report/index.html</code>).</li>
+<li dir="ltr"><code>visual/selftest.visual.ts</code> proves the gate works: a 3 px shift of the<br/>
+toolbar must fail the comparison.</li>
+<li dir="ltr">Baselines are per platform: compare on the kind of machine that wrote<br/>
+them. <code>.github/workflows/visual.yml</code> can run it on Linux, by hand only.</li>
+</ul>
 <h3 id="guidelines" dir="auto">Guidelines</h3>
 <ul dir="ltr">
 <li dir="ltr">Add a test for any non-trivial change.</li>
@@ -154,17 +180,21 @@ baselines on Linux (or in CI) — macOS font rendering differs.</p>
 <ul dir="ltr">
 <li dir="ltr"><strong>Current:</strong> 131 test files, 1074 passing tests, 97% line coverage.</li>
 <li dir="ltr">The CI gate requires <code>npm run typecheck &amp;&amp; npm run test</code> to pass on every push.</li>
-<li dir="ltr">The i18n drift gate (<code>i18nDrift.test.ts</code>) ensures every key in the <code>en</code> bundle exists in all 8 locale files.</li>
+<li dir="ltr">The i18n drift gate (<code>i18nDrift.test.ts</code>) ensures every key in the <code>en</code> bundle exists in all 8 locales.</li>
 </ul>
 <h2 id="internationalization-i18n" dir="auto">Internationalization (i18n)</h2>
 <p dir="auto"><strong>Golden rule:</strong> Never write a user-visible English string directly in JSX or TypeScript. Always use <code>t(&quot;key&quot;)</code>.</p>
 <h3 id="adding-a-new-string" dir="auto">Adding a new string</h3>
+<p dir="auto">Strings live in one JSON file per language and domain: <code>src/i18n/locales/&lt;lang&gt;/&lt;domain&gt;.json</code><br/>
+(a key&#x27;s domain is its first segment; see <a href="src/i18n/locales/README.md"><code>src/i18n/locales/README.md</code></a>).</p>
 <ol dir="ltr">
-<li dir="ltr">Add the English key to the <code>en</code> object in <code>src/i18n/index.ts</code>.</li>
-<li dir="ltr">Add the Hebrew translation to the <code>he</code> object in the same file.</li>
-<li dir="ltr">Add the key (with English fallback) to all 6 lazy locale files in <code>src/i18n/locales/*.json</code>.</li>
-<li dir="ltr">Run <code>npm run test</code> — the <code>i18nDrift.test.ts</code> gate will fail if any locale is missing the key.</li>
+<li dir="ltr">Add the English key to <code>src/i18n/locales/en/&lt;domain&gt;.json</code> and the Hebrew to <code>src/i18n/locales/he/&lt;domain&gt;.json</code>.</li>
+<li dir="ltr">Run <code>npm run i18n:fix</code> (sorts the files, refreshes <code>i18n/keys/</code>) and <code>node scripts/generate-all-locales.mjs</code> for the other 6 locales.</li>
+<li dir="ltr">Run <code>npm run i18n:check</code> and <code>npm run test</code> — the <code>i18nDrift.test.ts</code> gate will fail if any locale is missing the key.</li>
 </ol>
+<p dir="auto"><code>npm run i18n:hardcoded</code> (part of <code>i18n:check</code>, and a CI step) scans <code>src/</code> and fails on English left in JSX text,<br/>
+user-visible props (<code>aria-label</code>, <code>title</code>, <code>placeholder</code>, <code>alt</code>, <code>label</code>…) or toast / dialog messages. A sentence<br/>
+with markup inside it uses <code>tRich()</code> from <code>src/i18n/rich.tsx</code>; a real exception gets <code>// i18n-allow: &lt;reason&gt;</code>.</p>
 <h3 id="rtl-support" dir="auto">RTL support</h3>
 <ul dir="ltr">
 <li dir="ltr">The app supports RTL (Hebrew, Arabic). The <code>&lt;html dir&gt;</code> attribute is set automatically.</li>
@@ -194,6 +224,7 @@ baselines on Linux (or in CI) — macOS font rendering differs.</p>
 <li dir="ltr"><strong><code>npm run typecheck</code></strong> — Zero TypeScript errors required.</li>
 <li dir="ltr"><strong><code>npm run test</code></strong> — All unit tests must pass (including the i18n drift gate).</li>
 <li dir="ltr"><strong><code>npm run build</code></strong> — Production bundle must build without errors.</li>
+<li dir="ltr"><strong><code>npm run lint</code></strong> — ESLint (typescript-eslint, react-hooks, jsx-a11y). Violations that predate it are recorded in <code>eslint-suppressions.json</code>; a new one fails. Notable rules: <code>react-hooks/rules-of-hooks</code>, <code>@typescript-eslint/no-floating-promises</code> (mark fire-and-forget calls with <code>void</code>), and <code>lumen/empty-catch-why</code> (an empty <code>catch</code>, or an empty <code>.catch(() =&gt; {})</code> handler, needs a <code>// why: …</code> comment — or log the error instead). That rule has no baseline at all; <code>src/__tests__/codeHealth.test.ts</code> checks it under <code>npm test</code> too. When you fix a recorded violation, run <code>npm run lint:prune</code> and commit the smaller baseline. Never add to the baseline with <code>--suppress-all</code>.</li>
 </ol>
 <h2 id="security" dir="auto">Security</h2>
 <p dir="auto">See <a href="SECURITY.md">SECURITY.md</a> for the vulnerability reporting process and the project&#x27;s security architecture.</p>
