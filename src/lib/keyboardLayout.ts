@@ -110,7 +110,9 @@ export function matchShortcut(e: KeyLike, combo: string): boolean {
   if (want.has("ctrl") && !e.ctrlKey) return false;
   if (want.has("shift") !== !!e.shiftKey) return false;
   if (want.has("alt") !== !!e.altKey) return false;
-  return shortcutKey(e) === key;
+  const got = shortcutKey(e);
+  // A named key (F1, Escape) compares without case: the combo is lower-cased above.
+  return got === key || (got.length > 1 && got.toLowerCase() === key);
 }
 
 /* ─── Which layout is active, for showing shortcuts ──────────────────── */

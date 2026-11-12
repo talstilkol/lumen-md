@@ -38,6 +38,8 @@ const RECORDERS: Record<string, (src: string) => string[]> = {
   "src/plugins/runtime/pluginHost.ts": () => [],
   // Network voices: the reason ("Read aloud (<lang>) …") is the ledger's own.
   "src/ai/tts.ts": () => [],
+  // Jewish sources (plan W5.1): ledgerFetch with the ledger's own sefaria.org rule.
+  "src/sources/sefaria/app.ts": () => [],
 };
 
 function walk(dir: string, out: string[] = []): string[] {

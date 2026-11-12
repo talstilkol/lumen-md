@@ -9,6 +9,7 @@ import { join } from "path";
 import { activeLayout, matchShortcut, noteTypedKey, resetLayoutMemory, shortcutKey, toHebrewLayout, toLatinLayout, wrongLayoutVariant } from "../lib/keyboardLayout";
 import { appShortcutFor, formatCombo, SHORTCUTS } from "../lib/shortcuts";
 import { mergeLayoutHits, rankCommands } from "../ui/paletteSearch";
+import { readLocale } from "../../scripts/lib/i18n-files.mjs";
 
 /** [typed with the wrong layout, what was meant, the command it should find]. */
 const GOLDEN: Array<[string, string, string]> = [
@@ -66,13 +67,11 @@ const GOLDEN: Array<[string, string, string]> = [
 
 /** The palette's commands in English and in Hebrew (labels from the i18n bundles). */
 function corpus(): Array<{ id: string; label: string; hint?: string; group?: string }> {
-  const root = join(__dirname, "..");
   const snap = JSON.parse(readFileSync(join(__dirname, "__snapshots__", "commandIds.snapshot.json"), "utf8")) as { minimal: Array<{ id: string; label: string; hint?: string; group?: string }> };
-  const src = readFileSync(join(root, "i18n", "index.ts"), "utf8");
-  const block = src.slice(src.indexOf("const en: Strings = {"), src.indexOf("\n};\n", src.indexOf("const en: Strings = {")));
+  // The English and Hebrew bundles, per domain (src/i18n/locales/<lang>/*.json).
   const byValue = new Map<string, string>();
-  for (const m of block.matchAll(/^\s*"([\w.-]+)"\s*:\s*"((?:[^"\\]|\\.)*)"/gm)) if (!byValue.has(m[2])) byValue.set(m[2], m[1]);
-  const he = JSON.parse(readFileSync(join(root, "i18n", "locales", "he.json"), "utf8")) as Record<string, string>;
+  for (const [k, v] of Object.entries(readLocale("en"))) if (!byValue.has(v)) byValue.set(v, k);
+  const he = readLocale("he");
   const tr = (s?: string) => (s === undefined ? undefined : (he[byValue.get(s) ?? ""] ?? s));
   return [...snap.minimal, ...snap.minimal.map((c) => ({ id: c.id, label: tr(c.label) ?? c.label, hint: tr(c.hint), group: tr(c.group) }))];
 }
@@ -119,6 +118,8 @@ describe("wrong keyboard layout (W2.8)", () => {
 function events(combo: string): Array<{ layout: string; e: Parameters<typeof matchShortcut>[0] }> {
   const parts = combo.split("+");
   const last = parts.pop()!;
+  // A function key (F1) is the same key in every layout.
+  if (/^F\d{1,2}$/.test(last)) return ["US", "Hebrew", "macOS ⌘"].map((layout) => ({ layout, e: { key: last, code: last, ctrlKey: false, shiftKey: false, altKey: false } }));
   const key = last === "Space" ? " " : last.toLowerCase();
   const code = key === " " ? "Space" : /[a-z]/.test(key) ? `Key${key.toUpperCase()}` : /[0-9]/.test(key) ? `Digit${key}` : key === "/" ? "Slash" : "";
   const mods = { ctrlKey: parts.includes("Mod") || parts.includes("Ctrl"), shiftKey: parts.includes("Shift"), altKey: parts.includes("Alt") };

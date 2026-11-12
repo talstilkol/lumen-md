@@ -14,7 +14,8 @@
 import { matchShortcut } from "./keyboardLayout";
 
 /** `browser`: left to the browser (print), listed so nothing else takes the key. */
-export type ShortcutScope = "app" | "tabs" | "editor" | "browser";
+/** `global`: bound by App's own key handler by the physical key (Option changes `e.key` on a Mac), not through `appShortcutFor`. */
+export type ShortcutScope = "app" | "global" | "tabs" | "editor" | "browser";
 
 export interface Shortcut {
   id: string;
@@ -38,6 +39,20 @@ export const SHORTCUTS: readonly Shortcut[] = [
   { id: "view.preview", combo: "Mod+3", scope: "app" },
   { id: "view.wysiwyg", combo: "Mod+4", scope: "app" },
   { id: "help.shortcuts", combo: "Mod+/", scope: "app" },
+  { id: "note.today", combo: "Mod+Alt+D", scope: "global" },
+  { id: "note.capture", combo: "Mod+Alt+N", scope: "global" },
+  { id: "cite.insert", combo: "Mod+Alt+C", scope: "global" },
+  { id: "help.open", combo: "F1", scope: "global" },
+  // The outline mode's keys (plan W2.x), bound by the editor's outline keymap (editor/outlineExtension.ts).
+  { id: "outline.moveUp", combo: "Alt+Shift+↑", scope: "editor" },
+  { id: "outline.moveDown", combo: "Alt+Shift+↓", scope: "editor" },
+  { id: "outline.indent", combo: "Ctrl+Alt+→", scope: "editor" },
+  { id: "outline.outdent", combo: "Ctrl+Alt+←", scope: "editor" },
+  { id: "outline.duplicate", combo: "Alt+Shift+D", scope: "editor" },
+  { id: "outline.delete", combo: "Alt+Shift+⌫", scope: "editor" },
+  { id: "outline.fold", combo: "Ctrl+Alt+↑", scope: "editor" },
+  { id: "outline.unfold", combo: "Ctrl+Alt+↓", scope: "editor" },
+  { id: "outline.zoomIn", combo: "Ctrl+Alt+↵", scope: "editor" },
   { id: "tab.close", combo: "Mod+W", scope: "tabs" },
   { id: "edit.undo", combo: "Mod+Z", scope: "editor" },
   { id: "edit.redo", combo: "Mod+Shift+Z", scope: "editor" },

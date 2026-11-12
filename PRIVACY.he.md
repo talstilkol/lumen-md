@@ -45,6 +45,10 @@ ledger) מופיע מסלול שלא מתועד כאן.
 | דיווח שגיאות | שם סוג השגיאה והמקום בקוד. **בלי** הודעת השגיאה, טקסט, כותרות, נתיבים או כתובת הדף | `Error report (Sentry / GlitchTip), content removed`, רק אם הפעלתם, **וגם** הבנייה הוגדרה עם `VITE_SENTRY_DSN` | לפי מי שמפעיל את Sentry / GlitchTip | `monitoring` |
 | תוספים | הבקשה שהתוסף שולח | `Plugin <מזהה>` | לפי היעד | `plugin` |
 | בדיקת עדכונים (אפליקציה למחשב) | גרסה ומערכת הפעלה בלבד | `Desktop update check (app version and platform only)` | יומני GitHub Releases | `static-asset` |
+| מקורות יהודיים | ההפניה שביקשתם ("ברכות ב ע״א"), ושום דבר מהפתקים | `Jewish sources (Sefaria): the reference only` (‏sefaria.org), כשאתם מחפשים מקור | לפי מדיניות ספריא | `cloud-text` |
+| ערכות נושא וקטעי CSS | בקשת קובץ מגיליון סגנון שהתקנתם (גופן או תמונה) | `A stylesheet (theme or CSS snippet) loaded it` | ביומני השרת. מופיע כדי שתראו אותו | `third-party` |
+| סנכרון מוצפן ברשת המקומית | הפתקים, מוצפנים מקצה לקצה, רק למכשיר השני שלכם | `Encrypted sync on the local network (no cloud)` | במכשיר השני. שום דבר לא עובר בשרת | `local-ai` |
+| כל בקשה אחרת (מצב ביקורת) | מה שהבקשה נושאת | `Other request (audit mode)`: כשמצב הביקורת פועל, כל בקשה שיוצאת מהמכשיר ושהכללים למעלה לא מזהים מופיעה גם היא | לפי היעד | `network` |
 
 שתי סיומות יכולות להופיע אחרי כל שם בפנקס: `(worker: <שם>)` לבקשה מתוך Web Worker,
 ו-`(redirected from <שרת>)` לבקשה שהופנתה.

@@ -793,6 +793,35 @@ export default function App() {
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       noteTypedKey(e.key);
+      // F1 → in-app help (W3.7), as the palette shows.
+      if (e.key === "F1" && !e.metaKey && !e.ctrlKey && !e.altKey && !e.shiftKey) {
+        e.preventDefault();
+        void import("./ui/HelpButton").then((m) => m.openHelp());
+        return;
+      }
+      if (!(e.metaKey || e.ctrlKey)) return;
+      // ⌘Z / Ctrl+Z outside the editor: restore the last delete (plan 3.1).
+      // In an editor or a text field it stays their own undo.
+      if (handleTrashUndoKey(e)) return;
+      // ⌥⌘D → today's daily note (e.code: Option changes e.key on a Mac).
+      if (e.altKey && e.code === "KeyD") {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent("lumen-open-today"));
+        return;
+      }
+      // ⌥⌘N → quick capture to inbox.md (plan 4.16).
+      // Not AltGr (reported as Ctrl+Alt on Windows / Linux): AltGr+N types a letter (ń).
+      if (e.altKey && e.code === "KeyN" && !e.getModifierState("AltGraph")) {
+        e.preventDefault();
+        setCaptureOpen(true);
+        return;
+      }
+      // ⌥⌘C → the cite dialog (plan W2.16).
+      if (e.altKey && e.code === "KeyC") {
+        e.preventDefault();
+        void import("./citations/CiteDialog").then((m) => m.openCiteDialog());
+        return;
+      }
       // Matched by the physical key, so the Hebrew layout works too (plan W2.8).
       const id = appShortcutFor(e);
       if (!id) return;
@@ -849,28 +878,6 @@ export default function App() {
             }
           })();
           return;
-      // ⌘Z / Ctrl+Z outside the editor: restore the last delete (plan 3.1).
-      // In an editor or a text field it stays their own undo.
-      if (handleTrashUndoKey(e)) return;
-      // ⌥⌘D → today's daily note (e.code: Option changes e.key on a Mac).
-      if (e.altKey && e.code === "KeyD") {
-        e.preventDefault();
-        window.dispatchEvent(new CustomEvent("lumen-open-today"));
-        return;
-      }
-      // ⌥⌘N → quick capture to inbox.md (plan 4.16).
-      // Not AltGr (reported as Ctrl+Alt on Windows / Linux): AltGr+N types a letter (ń).
-      if (e.altKey && e.code === "KeyN" && !e.getModifierState("AltGraph")) {
-      // ⌥⌘C → the cite dialog (plan W2.16).
-      if (e.altKey && e.code === "KeyC") {
-        e.preventDefault();
-        void import("./citations/CiteDialog").then((m) => m.openCiteDialog());
-        return;
-      }
-        e.preventDefault();
-        setCaptureOpen(true);
-        return;
-      }
       }
     }
     window.addEventListener("keydown", onKey);

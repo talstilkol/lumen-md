@@ -12,6 +12,7 @@ import { clock, sentencesOf, timedChunks, timeFragment, transcriptMarkdown } fro
 import { chooseEngine, type EngineContext, type EngineId } from "../ai/dictation/engines";
 import { attachmentName } from "../ui/TranscribeFile";
 import { t } from "../i18n";
+import { readLocale } from "../../scripts/lib/i18n-files.mjs";
 
 const PINNED: GgmlModel = {
   ...WHISPER_GGML,
@@ -77,8 +78,8 @@ describe("engine choice for files (W1.17)", () => {
   const ctx = (over: Partial<EngineContext>): EngineContext => ({ language: "he-IL", policy: "local-only", mode: "file", webgpu: true, f16: true, vramMB: 4000, webSpeech: false, downloaded: new Set<EngineId>(), ...over });
 
   it("Hebrew files go to whisper.cpp on the desktop when it is ready, then the browser engines", () => {
-    expect(chooseEngine(ctx({ desktopWhisper: true })).candidates).toEqual(["whisper-cpp-he", "whisper-turbo-he", "whisper-base"]);
-    expect(chooseEngine(ctx({ desktopWhisper: false })).candidates).toEqual(["whisper-turbo-he", "whisper-base"]);
+    expect(chooseEngine(ctx({ desktopWhisper: true })).candidates).toEqual(["whisper-cpp-he", "whisper-turbo-he", "ozen-he", "whisper-base"]);
+    expect(chooseEngine(ctx({ desktopWhisper: false })).candidates).toEqual(["whisper-turbo-he", "ozen-he", "whisper-base"]);
     expect(chooseEngine(ctx({ desktopWhisper: true, language: "en" })).candidates).toEqual(["whisper-base"]);
     expect(chooseEngine(ctx({ desktopWhisper: true })).needsDownload).toBeNull();
   });
@@ -155,16 +156,20 @@ describe("file transcription strings ship with their chunk (W1.17)", () => {
   };
   walk(SRC);
   const lazy = JSON.parse(readFileSync(join(SRC, "i18n", "lazy", "transcribeFile.json"), "utf8")) as Record<string, string>;
-  const index = readFileSync(join(SRC, "i18n", "index.ts"), "utf8");
+  // The startup English: every domain file of locales/en/ (plan 0.3).
+  const startup = readLocale("en");
 
   it("no lazy key is in the startup bundle; only the palette label is", () => {
-    for (const k of Object.keys(lazy)) expect(index.includes(`"${k}":`), k).toBe(false);
-    expect(index.includes(`"cmd.tools.transcribeFile":`)).toBe(true);
+    for (const k of Object.keys(lazy)) expect(k in startup, k).toBe(false);
+    expect("cmd.tools.transcribeFile" in startup).toBe(true);
   });
 
   it("only the strings module imports the JSON, only TranscribeFile imports that, and nothing imports TranscribeFile statically", () => {
     expect(files.filter((f) => f.text.includes("i18n/lazy/transcribeFile.json")).map((f) => f.path)).toEqual(["ai/dictation/strings.ts"]);
-    expect(files.filter((f) => /^import "[./]*(ai\/dictation\/)?strings";/m.test(f.text) && f.path !== "ai/dictation/strings.ts").map((f) => f.path)).toEqual(["ui/TranscribeFile.ts"]);
+    // Imports that resolve to ai/dictation/strings (other folders have a strings module of their own).
+    const importsStrings = (f: { path: string; text: string }) =>
+      [...f.text.matchAll(/^import "([./][^"]*)";/gm)].some((m) => relative(SRC, resolve(SRC, f.path, "..", m[1])).replace(/\\/g, "/") === "ai/dictation/strings");
+    expect(files.filter((f) => importsStrings(f) && f.path !== "ai/dictation/strings.ts").map((f) => f.path)).toEqual(["ui/TranscribeFile.ts"]);
     for (const f of files) expect(/^import [^;]*from "[./]*(ui\/)?TranscribeFile";/m.test(f.text), f.path).toBe(false);
     expect(files.some((f) => /^commands\//.test(f.path) && /import\("(\.\.\/)+ui\/TranscribeFile"\)/.test(f.text))).toBe(true);
   });

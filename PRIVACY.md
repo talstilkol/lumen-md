@@ -48,6 +48,10 @@ ledger panel shows. The `local-only` policy blocks every path that carries user 
 | Error reports | The error's class name and where in the code. **No** error message, text, titles, paths or page address | `Error report (Sentry / GlitchTip), content removed`, only if you turned it on **and** the build sets `VITE_SENTRY_DSN` | Per the Sentry / GlitchTip operator | `monitoring` |
 | Plugins | The plugin's request | `Plugin <id>` | Per the destination | `plugin` |
 | Update check (desktop app) | App version and platform only | `Desktop update check (app version and platform only)` | GitHub Releases' logs | `static-asset` |
+| Jewish sources | The reference you asked for ("Berakhot 2a"), nothing from your notes | `Jewish sources (Sefaria): the reference only` (sefaria.org), when you look one up | Sefaria's policy | `cloud-text` |
+| Themes and CSS snippets | A file request from a stylesheet you installed (a font or an image) | `A stylesheet (theme or CSS snippet) loaded it` | The host's logs. Listed so you can see it | `third-party` |
+| Encrypted sync on the local network | Your notes, end-to-end encrypted, to your other device only | `Encrypted sync on the local network (no cloud)` | On your other device. Nothing goes to a server | `local-ai` |
+| Any other request (audit mode) | Whatever that request carries | `Other request (audit mode)`: with audit mode on, every off-device request the rules above don't name is listed too | Per the destination | `network` |
 
 Two suffixes can follow any ledger name: `(worker: <name>)` for a request from a Web
 Worker, and `(redirected from <host>)` for a redirected one.
