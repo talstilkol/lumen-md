@@ -99,3 +99,4 @@ public/excalidraw/
 
 # Reports written by the scheduled scripts (plan 0.11 / 14.3) — artifacts, never committed
 reports/
+dist-frame/
