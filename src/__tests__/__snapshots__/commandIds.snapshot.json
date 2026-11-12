@@ -1776,6 +1776,27 @@
       "group": "Insert",
       "hint": "Every note that cites the verse under the cursor",
       "icon": "Link"
+    },
+    {
+      "id": "automations.new",
+      "label": "Automations: new rule (when… then…)…",
+      "group": "Tools",
+      "hint": "A rule in a few choices: note created, tag added, property changed or daily → move, tag, template or a line in the daily note",
+      "icon": "Workflow"
+    },
+    {
+      "id": "automations.dryRun",
+      "label": "Automations: dry run on this note",
+      "group": "Tools",
+      "hint": "What the rules would change for this note — nothing is written",
+      "icon": "Workflow"
+    },
+    {
+      "id": "automations.undo",
+      "label": "Automations: undo the last run",
+      "group": "Tools",
+      "hint": "Puts back every file the last automation run changed, byte for byte",
+      "icon": "Workflow"
     }
   ],
   "full": [
@@ -3704,6 +3725,27 @@
       "group": "Insert",
       "hint": "Every note that cites the verse under the cursor",
       "icon": "Link"
+    },
+    {
+      "id": "automations.new",
+      "label": "Automations: new rule (when… then…)…",
+      "group": "Tools",
+      "hint": "A rule in a few choices: note created, tag added, property changed or daily → move, tag, template or a line in the daily note",
+      "icon": "Workflow"
+    },
+    {
+      "id": "automations.dryRun",
+      "label": "Automations: dry run on this note",
+      "group": "Tools",
+      "hint": "What the rules would change for this note — nothing is written",
+      "icon": "Workflow"
+    },
+    {
+      "id": "automations.undo",
+      "label": "Automations: undo the last run",
+      "group": "Tools",
+      "hint": "Puts back every file the last automation run changed, byte for byte",
+      "icon": "Workflow"
     }
   ],
   "autoSaveOn": [
@@ -3971,6 +4013,9 @@
     "help.a11yReport",
     "sources.insertSefaria",
     "sources.saveOffline",
-    "sources.notesOnVerse"
+    "sources.notesOnVerse",
+    "automations.new",
+    "automations.dryRun",
+    "automations.undo"
   ]
 }
