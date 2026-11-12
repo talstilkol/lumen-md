@@ -111,7 +111,7 @@ export function checkMaxLines(counts, baseline, max = MAX_LINES) {
 export function shrinkBaseline(baseline, counts, max = MAX_LINES) {
   const recorded = baselineFiles(baseline);
   const files = {};
-  for (const file of Object.keys(recorded).sort()) {
+  for (const file of Object.keys(recorded).sort((a, b) => a.localeCompare(b))) {
     const b = recorded[file];
     const now = counts[file];
     if (now === undefined || now <= max) continue;

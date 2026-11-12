@@ -5,7 +5,6 @@
     "src/agents/runtime.ts": 922,
     "src/ai/batch.ts": 870,
     "src/ai/llm.ts": 878,
-    "src/App.tsx": 1622,
     "src/canvas/tldrawToExcalidraw.ts": 1462,
     "src/data/codeDoctor.ts": 991,
     "src/data/suggest.ts": 838,
