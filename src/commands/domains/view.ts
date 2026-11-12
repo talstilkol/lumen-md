@@ -50,6 +50,25 @@ export function buildViewCommands({ setSearchOpen, setRuntimeMetricsOpen, vimEna
       action: toggleOutline,
     },
     {
+      id: "mobile.customizeToolbar",
+      label: t("cmd.mobile.customizeToolbar"),
+      hint: t("cmd.mobile.customizeToolbar.hint"),
+      icon: cmdIcons.Pencil,
+      group: t("group.view"),
+      action: () => window.dispatchEvent(new CustomEvent("lumen-mobile-customize")),
+    },
+    {
+      id: "mobile.readLongNotes",
+      label: t("cmd.mobile.readLongNotes"),
+      hint: useAppStore.getState().readLongNotes ? t("cmd.mobile.readLongNotes.on") : t("cmd.mobile.readLongNotes.off"),
+      icon: cmdIcons.Eye,
+      group: t("group.view"),
+      action: () => {
+        const st = useAppStore.getState();
+        st.setReadLongNotes(!st.readLongNotes);
+      },
+    },
+    {
       id: "view.pageView",
       label: t("cmd.view.pageView"),
       hint: pageView ? t("cmd.view.pageView.on") : t("cmd.view.pageView.off"),

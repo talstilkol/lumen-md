@@ -1150,6 +1150,31 @@
       "vars": []
     },
     {
+      "key": "cmd.mobile.customizeToolbar",
+      "en": "Customize the mobile toolbar",
+      "vars": []
+    },
+    {
+      "key": "cmd.mobile.customizeToolbar.hint",
+      "en": "The actions above the on-screen keyboard",
+      "vars": []
+    },
+    {
+      "key": "cmd.mobile.readLongNotes",
+      "en": "Phone: open long notes for reading",
+      "vars": []
+    },
+    {
+      "key": "cmd.mobile.readLongNotes.off",
+      "en": "Currently OFF",
+      "vars": []
+    },
+    {
+      "key": "cmd.mobile.readLongNotes.on",
+      "en": "Currently ON (tap the text to edit)",
+      "vars": []
+    },
+    {
       "key": "cmd.new",
       "en": "New document",
       "vars": []

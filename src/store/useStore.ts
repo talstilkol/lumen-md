@@ -1,4 +1,6 @@
 import { DEFAULT_DAILY, isValidDailyPattern, type DailySettings } from "../daily/defaults";
+import { DEFAULT_TOOLBAR, sanitizeToolbar, type ToolbarActionId } from "../mobile/toolbarActions";
+import { DEFAULT_READING_WORDS } from "../mobile/gestures";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { vaultEncryptionState } from "../storage/vault";
@@ -120,6 +122,11 @@ export interface AppState {
   dailyNotes: DailySettings;
   /** The month calendar under the file tree. */
   showCalendar: boolean;
+  /** Phones (plan W1.25): the actions above the keyboard, in order. */
+  mobileToolbar: ToolbarActionId[];
+  /** Phones: a note of `readingWords` words or more opens in reading view; a tap on the text edits there. */
+  readLongNotes: boolean;
+  readingWords: number;
   /** Daily writing goal (words). 0 disables the banner. */
   writingGoalWords: number;
   /** Toggle LanguageTool-powered grammar/style checking in the editor. */
@@ -175,6 +182,8 @@ export interface AppState {
   setWritingGoal: (words: number) => void;
   setDailyNotes: (patch: Partial<DailySettings>) => void;
   toggleCalendar: () => void;
+  setMobileToolbar: (ids: ToolbarActionId[]) => void;
+  setReadLongNotes: (on: boolean) => void;
   /** Toggle the LanguageTool grammar checker. */
   toggleGrammarCheck: () => void;
   /** Toggle suggesting mode (track changes). */
@@ -303,6 +312,10 @@ const partializeAppState = (s: AppState) =>
     suggestingMode: s.suggestingMode,
     useFineTunedModel: s.useFineTunedModel,
     fineTunedModelId: s.fineTunedModelId,
+    enabledSnippets: s.enabledSnippets,
+    mobileToolbar: s.mobileToolbar,
+    readLongNotes: s.readLongNotes,
+    readingWords: s.readingWords,
     // aiKey intentionally excluded — session-only for security
     // An encrypted vault (plan 11.4): the open note and the tabs hold
     // note text, and localStorage is plain — they are not kept; after a
@@ -362,6 +375,9 @@ export const useAppStore = create<AppState>()(
       writingGoalWords: 0,
       dailyNotes: { ...DEFAULT_DAILY },
       showCalendar: false,
+      mobileToolbar: [...DEFAULT_TOOLBAR],
+      readLongNotes: true,
+      readingWords: DEFAULT_READING_WORDS,
       grammarCheck: false,
       suggestingMode: false,
       useFineTunedModel: false,
@@ -480,6 +496,8 @@ export const useAppStore = create<AppState>()(
           return { dailyNotes: next };
         }),
       // The calendar lives in the file sidebar: showing it shows the sidebar too.
+      setMobileToolbar: (ids) => set({ mobileToolbar: sanitizeToolbar(ids) }),
+      setReadLongNotes: (on) => set({ readLongNotes: on }),
       toggleCalendar: () => set((s) => (s.showCalendar && s.showWorkspace ? { showCalendar: false } : { showCalendar: true, showWorkspace: true })),
       toggleGrammarCheck: () => set((s) => ({ grammarCheck: !s.grammarCheck })),
       toggleSuggestingMode: () =>
@@ -628,7 +646,6 @@ export const useAppStore = create<AppState>()(
       // not on every keystroke (plan 8.4).
       storage: deferredJSONStorage<PersistedAppState>((v) => persistedTextLength(v.state) >= LARGE_PERSIST_CHARS),
       partialize: partializeAppState,
-        enabledSnippets: s.enabledSnippets,
       // Persisted theme settings may be stale or hand-edited — sanitise
       // field-by-field on rehydrate instead of trusting localStorage.
       merge: (persisted, current) => {
@@ -646,6 +663,9 @@ export const useAppStore = create<AppState>()(
             ...(typeof p.dailyNotes?.israel === "boolean" ? { israel: p.dailyNotes.israel } : {}),
           },
           showCalendar: p.showCalendar === true,
+          mobileToolbar: sanitizeToolbar(p.mobileToolbar),
+          readLongNotes: p.readLongNotes !== false,
+          readingWords: typeof p.readingWords === "number" && p.readingWords >= 50 && p.readingWords <= 100000 ? Math.round(p.readingWords) : DEFAULT_READING_WORDS,
         };
         // WYSIWYG and suggesting work together now: restore both as saved.
         return merged;

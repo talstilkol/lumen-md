@@ -3842,8 +3842,156 @@
       "vars": []
     },
     {
+      "key": "mobileBar.bold",
+      "en": "Bold",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.bullet",
+      "en": "Bulleted list",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.code",
+      "en": "Code",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.customize",
+      "en": "Customize toolbar",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.customize.add",
+      "en": "Add {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "mobileBar.customize.done",
+      "en": "Done",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.customize.down",
+      "en": "Move {name} later",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "mobileBar.customize.inRow",
+      "en": "In the toolbar",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.customize.intro",
+      "en": "Pick the actions above the keyboard and their order. The row scrolls sideways when it is longer than the screen.",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.customize.more",
+      "en": "More actions",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.customize.remove",
+      "en": "Remove {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "mobileBar.customize.reset",
+      "en": "Reset",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.customize.title",
+      "en": "Mobile toolbar",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.customize.up",
+      "en": "Move {name} earlier",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "mobileBar.heading",
+      "en": "Heading",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.hideKeyboard",
+      "en": "Hide keyboard",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.image",
+      "en": "Image",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.indent",
+      "en": "Indent",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.italic",
+      "en": "Italic",
+      "vars": []
+    },
+    {
       "key": "mobileBar.label",
-      "en": "Markdown shortcuts",
+      "en": "Editing toolbar",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.link",
+      "en": "Link",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.numbered",
+      "en": "Numbered list",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.outdent",
+      "en": "Outdent",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.quote",
+      "en": "Quote",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.redo",
+      "en": "Redo",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.tag",
+      "en": "Tag",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.task",
+      "en": "Task checkbox",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.undo",
+      "en": "Undo",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.wikilink",
+      "en": "Link to a note",
       "vars": []
     },
     {
