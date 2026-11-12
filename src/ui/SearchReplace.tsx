@@ -70,7 +70,7 @@ export function SearchReplace({ open, onClose, content, onChange }: Props) {
         background: "hsl(var(--bg))",
         border: "1px solid hsl(var(--border-strong))",
         borderRadius: 10,
-        boxShadow: "0 12px 40px -8px hsl(0 0% 0% / 0.4)",
+        boxShadow: "var(--shadow-lg)",
         padding: "10px 12px",
         display: "flex",
         flexDirection: "column",
@@ -78,7 +78,7 @@ export function SearchReplace({ open, onClose, content, onChange }: Props) {
         // Fits a 320 px window (400 % zoom, plan W1.23): never wider than the window less its margins.
         width: "min(320px, calc(100vw - 32px))",
         boxSizing: "border-box",
-        animation: "cmdSlideIn 120ms ease",
+        animation: "cmdSlideIn var(--duration-fast) var(--ease-out)",
       }}
     >
       {/* Search row */}

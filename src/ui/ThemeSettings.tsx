@@ -199,7 +199,7 @@ export function ThemeSettings({ open, onClose, embedded = false }: Props) {
               )}
             </div>
             {accentInvalid && (
-              <p role="alert" style={{ ...muted, color: "hsl(0 70% 50%)", marginTop: 6 }}>
+              <p role="alert" style={{ ...muted, color: "hsl(var(--danger))", marginTop: 6 }}>
                 {t("themeSettings.accent.invalid")}
               </p>
             )}
@@ -247,7 +247,7 @@ export function ThemeSettings({ open, onClose, embedded = false }: Props) {
                       aria-describedby={`${ids}-custom-font-help`}
                       style={{ ...textInput, width: "100%" }}
                     />
-                    <p id={`${ids}-custom-font-help`} style={{ ...muted, marginTop: 4, color: fontInvalid ? "hsl(0 70% 50%)" : undefined }}>
+                    <p id={`${ids}-custom-font-help`} style={{ ...muted, marginTop: 4, color: fontInvalid ? "hsl(var(--danger))" : undefined }}>
                       {t(fontInvalid ? "themeSettings.font.customInvalid" : "themeSettings.font.customHelp")}
                     </p>
                   </div>
@@ -287,9 +287,9 @@ export function ThemeSettings({ open, onClose, embedded = false }: Props) {
               {report.map((c) => (
                 <li key={c.id} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12 }}>
                   {c.pass ? (
-                    <Check size={13} aria-hidden="true" style={{ color: "hsl(150 60% 38%)" }} />
+                    <Check size={13} aria-hidden="true" style={{ color: "hsl(var(--success))" }} />
                   ) : (
-                    <AlertTriangle size={13} aria-hidden="true" style={{ color: "hsl(30 90% 45%)" }} />
+                    <AlertTriangle size={13} aria-hidden="true" style={{ color: "hsl(var(--warning))" }} />
                   )}
                   <span>{t(`themeSettings.contrast.${c.id}`)}</span>
                   <span dir="ltr" style={{ marginInlineStart: "auto", fontVariantNumeric: "tabular-nums" }}>
@@ -304,7 +304,7 @@ export function ThemeSettings({ open, onClose, embedded = false }: Props) {
           </fieldset>
 
           {importError && (
-            <p role="alert" style={{ ...muted, color: "hsl(0 70% 50%)" }} data-testid="theme-import-error">
+            <p role="alert" style={{ ...muted, color: "hsl(var(--danger))" }} data-testid="theme-import-error">
               {importError}
             </p>
           )}

@@ -115,7 +115,7 @@ export function AiSuggestionsPanel() {
         borderRadius: 12,
         background: "hsl(var(--bg-subtle))",
         border: "1px solid hsl(var(--border))",
-        boxShadow: "0 8px 30px hsl(0 0% 0% / 0.2)",
+        boxShadow: "var(--shadow-md)",
         color: "hsl(var(--fg))",
         fontSize: 13,
         display: "flex",

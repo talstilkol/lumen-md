@@ -73,7 +73,7 @@ function showRecordingPill(label: string, onStop: () => void): () => void {
           border: "1px solid hsl(var(--border-strong))",
           borderRadius: 12,
           padding: "10px 16px",
-          boxShadow: "0 8px 32px hsl(0 0% 0%/0.3)",
+          boxShadow: "var(--shadow-md)",
           fontSize: 13,
           color: "hsl(var(--fg))",
         }}
@@ -83,7 +83,7 @@ function showRecordingPill(label: string, onStop: () => void): () => void {
             width: 10,
             height: 10,
             borderRadius: "50%",
-            background: "#ef4444",
+            background: "hsl(var(--danger))",
             animation: "pulse 1s infinite",
           }}
         />
@@ -91,7 +91,7 @@ function showRecordingPill(label: string, onStop: () => void): () => void {
         <button
           onClick={onStop}
           style={{
-            background: "#ef4444",
+            background: "hsl(var(--danger))",
             color: "white",
             border: "none",
             borderRadius: 6,
@@ -609,7 +609,7 @@ export async function startVoiceMemo(opts: { language?: string; plain?: boolean;
         border: "1px solid hsl(var(--border-strong))",
         borderRadius: 12,
         padding: "10px 16px",
-        boxShadow: "0 8px 32px hsl(0 0% 0%/0.3)",
+        boxShadow: "var(--shadow-md)",
         fontSize: 13,
         color: "hsl(var(--fg))",
       }}
@@ -619,7 +619,7 @@ export async function startVoiceMemo(opts: { language?: string; plain?: boolean;
           width: 10,
           height: 10,
           borderRadius: "50%",
-          background: "#ef4444",
+          background: "hsl(var(--danger))",
           animation: "pulse 1s infinite",
         }}
       />
@@ -628,7 +628,7 @@ export async function startVoiceMemo(opts: { language?: string; plain?: boolean;
         type="button"
         onClick={() => recorder.stop()}
         style={{
-          background: "#ef4444",
+          background: "hsl(var(--danger))",
           color: "white",
           border: "none",
           borderRadius: 6,

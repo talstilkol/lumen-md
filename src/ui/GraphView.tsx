@@ -4,6 +4,7 @@ import { log } from "../lib/logger";
 import { t } from "../i18n";
 import { louvain, communityPalette } from "../views/louvain";
 import { EmptyState, runCommand } from "./EmptyState";
+import { resolvedColor, withAlpha } from "./tokens";
 
 interface Node {
   id: string;
@@ -152,11 +153,11 @@ export function GraphView({ onOpenFile }: { onOpenFile: (path: string, content: 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const isDark = document.documentElement.classList.contains("dark");
-    const bg = isDark ? "#1a1b26" : "#ffffff";
-    const fg = isDark ? "#c0caf5" : "#333333";
-    const accent = "#7c5cff";
-    const edge = isDark ? "rgba(192,202,245,0.15)" : "rgba(50,50,50,0.15)";
+    // A canvas cannot read var(): the theme's tokens, resolved now (dark mode and presets included).
+    const bg = resolvedColor("bg");
+    const fg = resolvedColor("fg");
+    const accent = resolvedColor("accent");
+    const edge = resolvedColor("fg", 0.15);
 
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -171,9 +172,7 @@ export function GraphView({ onOpenFile }: { onOpenFile: (path: string, content: 
         const sameCluster =
           node.community !== undefined && node.community === target.community;
         ctx.strokeStyle = sameCluster
-          ? palette[node.community ?? 0]
-              .replace("hsl(", "hsla(")
-              .replace(")", " / 0.35)")
+          ? withAlpha(palette[node.community ?? 0], 0.35)
           : edge;
         ctx.lineWidth = sameCluster ? 1.4 : 1;
         ctx.beginPath();

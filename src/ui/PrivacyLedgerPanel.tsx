@@ -55,8 +55,8 @@ export function PrivacyLedgerPanel({ open, onClose }: Props) {
           <span>{t("privacy.cloudRequests", { n: sum.cloudRequests, size: bytes(sum.cloudBytesOut) })}</span>
           <span>{t("privacy.localRequests", { n: sum.local })}</span>
           <span>{t("privacy.downloads", { n: sum.downloads })}</span>
+          <span style={{ color: sum.blocked ? "hsl(var(--danger))" : undefined }}>{t("privacy.blocked", { n: sum.blocked })}</span>
           {sum.staticAssets > 0 && <span>{t("privacy.staticAssets", { n: sum.staticAssets })}</span>}
-          <span style={{ color: sum.blocked ? "hsl(0 70% 55%)" : undefined }}>{t("privacy.blocked", { n: sum.blocked })}</span>
           <span data-testid="privacy-redacted">{t("pii.ledger.redacted", { n: redactionTotals(redactions).items, requests: redactionTotals(redactions).requests })}</span>
         </div>
         <div style={{ padding: "8px 16px", display: "flex", gap: 8, alignItems: "center", fontSize: 12 }}>
@@ -101,7 +101,7 @@ export function PrivacyLedgerPanel({ open, onClose }: Props) {
                     <td style={{ padding: "6px 10px" }}>{e.reason}</td>
                     <td style={{ padding: "6px 10px", whiteSpace: "nowrap" }}>{bytes(e.bytesOut)}</td>
                     <td style={{ padding: "6px 10px", whiteSpace: "nowrap" }}>{bytes(e.bytesIn)}</td>
-                    <td style={{ padding: "6px 10px", whiteSpace: "nowrap", color: e.decision === "blocked" ? "hsl(0 70% 55%)" : undefined }}>
+                    <td style={{ padding: "6px 10px", whiteSpace: "nowrap", color: e.decision === "blocked" ? "hsl(var(--danger))" : undefined }}>
                       {t(`privacy.decision.${e.decision}`)}
                     </td>
                   </tr>

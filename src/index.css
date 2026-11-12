@@ -87,12 +87,58 @@
     --warn: 35 90% 32%;
     --danger: 12 90% 42%;
 
+    /* ── Design tokens (plan W3.1; src/ui/tokens.ts, docs: design system) ── */
+    /* Status colours, HSL triplets like the palette: hsl(var(--danger) / 0.1). */
+    --danger: 0 72% 51%;
+    --success: 145 63% 36%;
+    --warning: 32 95% 44%;
+    --info: 217 80% 52%;
+    /* Brand gradients (decorative surfaces only: the logo, the AI button, progress). */
+    --gradient-brand: linear-gradient(135deg, hsl(252 100% 68%), hsl(188 86% 53%));
+    --gradient-ai: linear-gradient(135deg, hsl(270 95% 75%), hsl(25 95% 53%));
+    --gradient-success: linear-gradient(135deg, hsl(160 84% 39%), hsl(188 86% 53%));
+    /* What lies behind a modal, and the elevation scale. */
+    --overlay: hsl(0 0% 0% / 0.5);
+    --shadow-sm: 0 2px 8px hsl(0 0% 0% / 0.15);
+    --shadow-md: 0 8px 30px hsl(0 0% 0% / 0.2);
+    --shadow-lg: 0 12px 40px -8px hsl(0 0% 0% / 0.4);
+    --shadow-xl: 0 20px 60px -10px hsl(0 0% 0% / 0.45);
+    /* A glow in the accent colour, for the brand mark and the AI button. */
+    --shadow-accent: 0 6px 20px -6px hsl(var(--accent) / 0.45);
+    /* Space (4 px steps), radii, type sizes. */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 10px;
+    --radius-full: 999px;
+    --text-xs: 11px;
+    --text-sm: 12px;
+    --text-md: 13px;
+    --text-lg: 15px;
+    --text-xl: 18px;
+    /* Motion: three durations, two curves; only transform and opacity move. */
+    --duration-fast: 100ms;
+    --duration-base: 250ms;
+    --duration-slow: 350ms;
+    --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --ease-in-out: cubic-bezier(0.45, 0, 0.2, 1);
+
     /* z-index layer strategy */
     --z-dropdown: 100;
     --z-sticky: 200;
     --z-modal: 500;
     --z-overlay: 9999;
     --z-toast: 10000;
+  }
+
+  /* Progress bars scale from the inline start (plan W3.1). */
+  [dir="rtl"] {
+    --progress-origin: right;
   }
 
   .dark {
@@ -110,7 +156,12 @@
     --accent-fg: 224 24% 7%;
     --ok: 145 60% 45%;
     --warn: 35 90% 55%;
-    --danger: 12 90% 60%;
+    /* Status colours read on the dark background. */
+    --danger: 0 84% 66%;
+    --success: 145 55% 52%;
+    --warning: 38 92% 58%;
+    --info: 217 90% 68%;
+    --overlay: hsl(0 0% 0% / 0.6);
   }
 
   html,
@@ -167,18 +218,19 @@
     /* Physical left: inset-inline-start + translateX(-50%) pushed it off the
        screen in right-to-left layouts (reflow check, plan W1.23). */
     left: 50%;
-    top: -40px;
-    transform: translateX(-50%);
+    top: 0;
+    /* Off screen until focused; it slides in (transform, not top: plan W3.1). */
+    transform: translate(-50%, -110%);
     background: hsl(var(--accent));
     color: white;
     padding: 6px 14px;
     border-radius: 0 0 8px 8px;
     z-index: var(--z-modal);
     font-size: 13px;
-    transition: top 120ms ease;
+    transition: transform var(--duration-fast) var(--ease-out);
   }
   .skip-link:focus-visible {
-    top: 0;
+    transform: translate(-50%, 0);
     outline: none;
   }
 
@@ -270,7 +322,6 @@
   .cm-editor .cm-activeLineGutter {
     background-color: hsl(var(--accent) / 0.08);
     color: hsl(var(--accent));
-    transition: color 200ms ease;
   }
 
   /* Markdown syntax accents */
@@ -741,7 +792,7 @@
   .data-table thead {
     background: hsl(var(--bg-muted));
     position: sticky;
-    top: 0;
+    transform: translate(-50%, 0);
   }
   .data-table th {
     padding: 0.5rem 0.85rem;
@@ -811,9 +862,6 @@
     border-radius: 0.4rem;
     color: hsl(var(--fg-muted));
     cursor: pointer;
-    transition:
-      background 80ms,
-      color 80ms;
   }
   .icon-btn:hover {
     background: hsl(var(--bg-muted));
@@ -1146,6 +1194,7 @@
      Pulses the yellow background twice so the user gets a visible
      confirmation that the click was registered. The animation ends
      and the class is auto-removed (via animationend listener). */
+  /* design-allow: a CodeMirror mark has no element of its own to fade, so the text range's background flashes */
   @keyframes lumen-comment-flash {
     0%   { background: hsl(48 95% 60% / 0.20); }
     25%  { background: hsl(48 95% 60% / 0.65); }
@@ -1154,6 +1203,7 @@
     100% { background: hsl(48 95% 60% / 0.20); }
   }
   .cm-lumen-comment-flash {
+    /* design-allow: two beats of the flash above, ended by animationend */
     animation: lumen-comment-flash 720ms ease-in-out;
   }
   .milkdown-tooltip button {
@@ -1487,7 +1537,7 @@
   box-shadow: 0 12px 40px -8px hsl(0 0% 0% / 0.45);
   padding: 6px 0;
   font-family: Inter, ui-sans-serif, system-ui;
-  animation: slashSlideIn 110ms ease;
+  animation: slashSlideIn var(--duration-fast) var(--ease-out);
 }
 @keyframes slashSlideIn {
   from { opacity: 0; transform: translateY(-4px); }
@@ -1634,9 +1684,16 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* The motion tokens collapse too, so inline styles that use them stop. */
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --duration-slow: 0ms;
+  }
   *,
   *::before,
   *::after {
+    /* design-allow: the reduced-motion reset itself */
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;

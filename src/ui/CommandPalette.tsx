@@ -355,7 +355,6 @@ export function CommandPalette({ open, onClose, commands }: Props) {
                   fontWeight: tab === t.key ? 600 : 400,
                   background: tab === t.key ? "hsl(var(--accent) / 0.15)" : "transparent",
                   color: tab === t.key ? "hsl(var(--accent))" : "hsl(var(--fg-muted))",
-                  transition: "all 150ms ease",
                 }}
               >
                 {t.emoji} {t.label}

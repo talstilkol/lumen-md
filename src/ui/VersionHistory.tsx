@@ -104,7 +104,7 @@ export function VersionHistory({ fileName, currentContent, onRestore, onClose }:
         inset: 0,
         zIndex: 9999,
         display: "flex",
-        background: "hsl(0 0% 0% / 0.5)",
+        background: "var(--overlay)",
         backdropFilter: "blur(4px)",
       }}
     >

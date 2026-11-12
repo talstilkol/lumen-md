@@ -45,10 +45,16 @@ const ICONS: Record<ToastType, typeof Sparkles> = {
   error: AlertTriangle,
 };
 
+/** The status token of each toast type (src/index.css). */
+const TONE: Record<ToastType, "accent" | "success" | "danger"> = {
+  info: "accent",
+  success: "success",
+  error: "danger",
+};
 const COLORS: Record<ToastType, string> = {
   info: "hsl(var(--accent))",
-  success: "hsl(140 60% 50%)",
-  error: "hsl(0 70% 60%)",
+  success: "hsl(var(--success))",
+  error: "hsl(var(--danger))",
 };
 
 export function AiToastContainer() {
@@ -94,13 +100,13 @@ export function AiToastContainer() {
               padding: "10px 16px",
               borderRadius: 10,
               background: "hsl(var(--bg-subtle))",
-              border: `1px solid ${COLORS[t.type]}40`,
-              boxShadow: `0 4px 20px ${COLORS[t.type]}15, 0 1px 4px hsl(0 0% 0% / 0.15)`,
+              border: `1px solid hsl(var(--${TONE[t.type]}) / 0.25)`,
+              boxShadow: `0 4px 20px hsl(var(--${TONE[t.type]}) / 0.08), var(--shadow-sm)`,
               color: "hsl(var(--fg))",
               fontSize: 13,
               fontFamily: "inherit",
               maxWidth: 380,
-              animation: "toast-slide-in 0.3s ease-out",
+              animation: "toast-slide-in var(--duration-base) var(--ease-out)",
             }}
           >
             <Icon size={15} style={{ color: COLORS[t.type], flexShrink: 0 }} />

@@ -701,7 +701,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
                 {aiCitations && (
                   <div data-testid="vault-citations" style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: 8, marginTop: 4, fontSize: 11.5 }}>
                     {aiCitations.verifiedCount === 0 ? (
-                      <div role="alert" style={{ color: "hsl(35 90% 45%)", fontWeight: 600, marginBottom: 4 }}>{t("vaultCite.unsupported")}</div>
+                      <div role="alert" style={{ color: "hsl(var(--warning))", fontWeight: 600, marginBottom: 4 }}>{t("vaultCite.unsupported")}</div>
                     ) : (
                       <div style={{ color: "hsl(var(--fg-muted))", fontWeight: 600, marginBottom: 4 }}>
                         {t("vaultCite.summary", { ok: aiCitations.verifiedCount, total: aiCitations.citations.length })}
@@ -722,7 +722,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
                         }}
                         style={{ display: "flex", gap: 6, alignItems: "baseline", width: "100%", textAlign: "start", padding: "3px 0", background: "none", border: 0, color: "inherit", cursor: c.path ? "pointer" : "default" }}
                       >
-                        <span style={{ color: c.verified ? "hsl(145 60% 38%)" : "hsl(0 70% 55%)", fontWeight: 700 }} aria-label={c.verified ? t("vaultCite.verified") : t("vaultCite.notVerified")}>
+                        <span style={{ color: c.verified ? "hsl(var(--success))" : "hsl(var(--danger))", fontWeight: 700 }} aria-label={c.verified ? t("vaultCite.verified") : t("vaultCite.notVerified")}>
                           {c.verified ? "✓" : "✗"}
                         </span>
                         <span style={{ color: "hsl(var(--accent))", whiteSpace: "nowrap" }}>
