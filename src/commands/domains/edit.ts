@@ -42,7 +42,7 @@ export function buildEditCommands({ getEditorView, suggestingMode, toggleSuggest
     // ── Suggesting mode (track changes, CriticMarkup) ─────────────────
     ...buildSuggestingCommands({
       getView: () => getEditorView?.() ?? null,
-      getContent: () => useAppStore.getState().doc.content,
+      getContent: () => getEditorView?.()?.state.doc.toString() ?? useAppStore.getState().doc.content,
       setContent: (s: string) => useAppStore.getState().setContent(s),
       suggesting: suggestingMode,
       toggle: toggleSuggestingMode,

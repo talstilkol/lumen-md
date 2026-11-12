@@ -318,6 +318,8 @@
   "spell.he.installed": "המילון העברי הותקן ({n} מילים). הפעל את בדיקת הדקדוק כדי לראות אותו.",
   "spell.he.removeConfirm": "להסיר את המילון העברי מהמכשיר?",
   "spell.he.removed": "המילון העברי הוסר.",
+  "suggest.author.ai": "AI",
+  "suggest.author.unknown": "ללא מחבר",
   "suggest.needsSource": "עבור לתצוגת מקור או תצוגה מפוצלת כדי לעבוד עם הצעות במיקום הסמן",
   "suggest.none": "אין הצעות במסמך הזה",
   "suggest.noneAtCursor": "אין הצעה במיקום הסמן",

@@ -318,6 +318,8 @@
   "spell.he.installed": "ヘブライ語辞書をインストールしました（{n} 語）。",
   "spell.he.removeConfirm": "この端末からヘブライ語辞書を削除しますか？",
   "spell.he.removed": "ヘブライ語辞書を削除しました。",
+  "suggest.author.ai": "AI",
+  "suggest.author.unknown": "作成者なし",
   "suggest.needsSource": "カーソル位置の提案を扱うには、ソース表示または分割表示に切り替えてください",
   "suggest.none": "このドキュメントに提案はありません",
   "suggest.noneAtCursor": "カーソル位置に提案はありません",

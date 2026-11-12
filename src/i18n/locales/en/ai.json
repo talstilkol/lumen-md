@@ -279,6 +279,8 @@
   "spell.he.installed": "Hebrew dictionary installed ({n} words). Turn on the grammar check to see it.",
   "spell.he.removeConfirm": "Remove the Hebrew dictionary from this device?",
   "spell.he.removed": "Hebrew dictionary removed.",
+  "suggest.author.ai": "AI",
+  "suggest.author.unknown": "no author",
   "suggest.needsSource": "Switch to Source or Split view to work with suggestions at the cursor",
   "suggest.none": "This document has no suggestions",
   "suggest.noneAtCursor": "No suggestion at the cursor",

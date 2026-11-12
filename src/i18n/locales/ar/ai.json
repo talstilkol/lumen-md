@@ -318,6 +318,8 @@
   "spell.he.installed": "تم تثبيت القاموس العبري ({n} كلمة).",
   "spell.he.removeConfirm": "إزالة القاموس العبري من هذا الجهاز؟",
   "spell.he.removed": "تمت إزالة القاموس العبري.",
+  "suggest.author.ai": "AI",
+  "suggest.author.unknown": "بلا مؤلف",
   "suggest.needsSource": "انتقل إلى عرض المصدر أو العرض المقسوم للعمل مع الاقتراحات عند المؤشر",
   "suggest.none": "لا توجد اقتراحات في هذا المستند",
   "suggest.noneAtCursor": "لا يوجد اقتراح عند المؤشر",

@@ -7848,6 +7848,94 @@
       "vars": []
     },
     {
+      "key": "versions.by",
+      "en": "{author}, {date}",
+      "vars": [
+        "author",
+        "date"
+      ]
+    },
+    {
+      "key": "versions.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "versions.compare",
+      "en": "Compare",
+      "vars": []
+    },
+    {
+      "key": "versions.current",
+      "en": "Current text",
+      "vars": []
+    },
+    {
+      "key": "versions.editorsOnly",
+      "en": "Only editors can name versions. You can still compare them.",
+      "vars": []
+    },
+    {
+      "key": "versions.empty",
+      "en": "No named versions yet.",
+      "vars": []
+    },
+    {
+      "key": "versions.from",
+      "en": "From",
+      "vars": []
+    },
+    {
+      "key": "versions.name",
+      "en": "Version name",
+      "vars": []
+    },
+    {
+      "key": "versions.namePlaceholder",
+      "en": "Before submission",
+      "vars": []
+    },
+    {
+      "key": "versions.same",
+      "en": "No differences.",
+      "vars": []
+    },
+    {
+      "key": "versions.save",
+      "en": "Save this version",
+      "vars": []
+    },
+    {
+      "key": "versions.saved",
+      "en": "Saved \"{name}\".",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "versions.stats",
+      "en": "{added} words added, {removed} removed",
+      "vars": [
+        "added",
+        "removed"
+      ]
+    },
+    {
+      "key": "versions.title",
+      "en": "Named versions",
+      "vars": []
+    },
+    {
+      "key": "versions.to",
+      "en": "To",
+      "vars": []
+    },
+    {
+      "key": "versions.unknownAuthor",
+      "en": "someone",
+      "vars": []
+    },
+    {
       "key": "whatsNew.close",
       "en": "Got it",
       "vars": []

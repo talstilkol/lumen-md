@@ -501,6 +501,16 @@
       "vars": []
     },
     {
+      "key": "cmd.collab.namedVersions",
+      "en": "Named versions…",
+      "vars": []
+    },
+    {
+      "key": "cmd.collab.namedVersions.hint",
+      "en": "Name the current text (\"Before submission\") and compare versions word by word",
+      "vars": []
+    },
+    {
       "key": "cmd.collab.share",
       "en": "Share this note…",
       "vars": []
@@ -1505,6 +1515,19 @@
       "vars": []
     },
     {
+      "key": "cmd.suggest.acceptAuthor",
+      "en": "Accept all from {author} ({count})",
+      "vars": [
+        "author",
+        "count"
+      ]
+    },
+    {
+      "key": "cmd.suggest.byAuthor.hint",
+      "en": "Only this author's suggestions; everyone else's stay",
+      "vars": []
+    },
+    {
       "key": "cmd.suggest.next",
       "en": "Next suggestion",
       "vars": []
@@ -1528,6 +1551,14 @@
       "key": "cmd.suggest.rejectAll",
       "en": "Reject all suggestions",
       "vars": []
+    },
+    {
+      "key": "cmd.suggest.rejectAuthor",
+      "en": "Reject all from {author} ({count})",
+      "vars": [
+        "author",
+        "count"
+      ]
     },
     {
       "key": "cmd.suggest.toggle.hint",

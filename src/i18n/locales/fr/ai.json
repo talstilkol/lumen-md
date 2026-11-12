@@ -318,6 +318,8 @@
   "spell.he.installed": "Dictionnaire hébreu installé ({n} mots).",
   "spell.he.removeConfirm": "Supprimer le dictionnaire hébreu de cet appareil ?",
   "spell.he.removed": "Dictionnaire hébreu supprimé.",
+  "suggest.author.ai": "IA",
+  "suggest.author.unknown": "sans auteur",
   "suggest.needsSource": "Passez en vue Source ou Partagée pour traiter les suggestions sous le curseur",
   "suggest.none": "Ce document ne contient aucune suggestion",
   "suggest.noneAtCursor": "Aucune suggestion sous le curseur",

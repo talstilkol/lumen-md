@@ -318,6 +318,8 @@
   "spell.he.installed": "Hebräisches Wörterbuch installiert ({n} Wörter).",
   "spell.he.removeConfirm": "Hebräisches Wörterbuch von diesem Gerät entfernen?",
   "spell.he.removed": "Hebräisches Wörterbuch entfernt.",
+  "suggest.author.ai": "KI",
+  "suggest.author.unknown": "ohne Autor",
   "suggest.needsSource": "Wechsle in die Quelltext- oder geteilte Ansicht, um Vorschläge am Cursor zu bearbeiten",
   "suggest.none": "Dieses Dokument enthält keine Vorschläge",
   "suggest.noneAtCursor": "Kein Vorschlag am Cursor",

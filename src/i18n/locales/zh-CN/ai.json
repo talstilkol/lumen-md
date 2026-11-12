@@ -318,6 +318,8 @@
   "spell.he.installed": "已安装希伯来语词典（{n} 个词）。",
   "spell.he.removeConfirm": "从此设备删除希伯来语词典？",
   "spell.he.removed": "已删除希伯来语词典。",
+  "suggest.author.ai": "AI",
+  "suggest.author.unknown": "无作者",
   "suggest.needsSource": "请切换到源码或分屏视图以处理光标处的建议",
   "suggest.none": "此文档没有建议",
   "suggest.noneAtCursor": "光标处没有建议",

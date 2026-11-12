@@ -7,6 +7,7 @@
  * in one closure: state read at build time is the build-time value, and
  * actions that need the current note read it through `liveDoc()`.
  */
+import { suggestionAuthorsKey } from "../../editor/suggestAuthors";
 import type { RecentFile } from "../../storage/recent";
 import type { CollabSession } from "../../collab/yjs";
 import type { InstalledTemplate } from "../../storage/templateMarketplace";
@@ -80,6 +81,8 @@ export function useCommandStore() {
   const grammarCheck = useAppStore((s) => s.grammarCheck);
   const toggleGrammarCheck = useAppStore((s) => s.toggleGrammarCheck);
   const suggestingMode = useAppStore((s) => s.suggestingMode);
+  // W3.11 — the "accept / reject from <author>" commands follow the note's authors.
+  const suggestAuthorsKey = useAppStore((s) => suggestionAuthorsKey(s.doc.content));
   const toggleSuggestingMode = useAppStore((s) => s.toggleSuggestingMode);
   const setWritingGoal = useAppStore((s) => s.setWritingGoal);
   const toggleAutoSave = useAppStore((s) => s.toggleAutoSave);
@@ -88,6 +91,7 @@ export function useCommandStore() {
     typewriterMode, writingGoalWords, pageView, toggleRtl, setContent, setDoc, setLocale, toggleWorkspace,
     toggleBacklinks, toggleVim, toggleSpellCheck, toggleLocalAi, toggleTypewriter, tsChecks, toggleTsChecks,
     grammarCheck, toggleGrammarCheck, suggestingMode, toggleSuggestingMode, setWritingGoal, toggleAutoSave,
+    suggestAuthorsKey,
   };
 }
 

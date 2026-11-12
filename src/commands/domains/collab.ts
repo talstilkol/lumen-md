@@ -59,6 +59,19 @@ export function buildCollabCommands({ collab, handleStartCollab, handleStopColla
             action: async () => (await import("../../ui/ShareDialog")).openShareDialog({ session: collab }),
           },
           {
+            // W3.11 — named versions of the shared note, compared word by word.
+            id: "collab.namedVersions",
+            label: t("cmd.collab.namedVersions"),
+            hint: t("cmd.collab.namedVersions.hint"),
+            icon: cmdIcons.Link,
+            group: t("group.collab"),
+            action: async () => {
+              const [{ openNamedVersionsDialog }, { useAuth }] = await Promise.all([import("../../ui/NamedVersionsDialog"), import("../../auth/useAuth")]);
+              const user = useAuth.getState().user;
+              openNamedVersionsDialog({ session: collab, author: user?.name?.trim() || user?.email?.split("@")[0] || null });
+            },
+          },
+          {
             id: "collab.sharedWithMe",
             label: t("cmd.collab.sharedWithMe"),
             icon: cmdIcons.Link,
