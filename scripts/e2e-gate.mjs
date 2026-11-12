@@ -86,7 +86,7 @@ function main() {
     log(`chromium: ${E2E_SPECS.join(" ")} against ${BASE}, time box ${box} min`);
     const r = spawnSync(
       npx,
-      ["playwright", "test", ...E2E_SPECS, "--project=chromium", "--workers=2", "--reporter=line", `--global-timeout=${box * 60_000}`],
+      ["playwright", "test", ...E2E_SPECS, "--project=chromium", "--workers=2", "--reporter=line,./scripts/e2e-report.mjs", `--global-timeout=${box * 60_000}`],
       { stdio: "inherit", env, timeout: (box + 3) * 60_000 },
     );
     stop();

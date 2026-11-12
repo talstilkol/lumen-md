@@ -9,6 +9,8 @@ import { resolve } from "node:path";
 import { GATES, GATE_EXTRA, PREVIEW_GATES, PRODUCTION_GATES, gatesFor, vitestSummary } from "../../scripts/vercel-build.mjs";
 // @ts-expect-error — plain .mjs script without type declarations
 import { E2E_SPECS, boxMinutes } from "../../scripts/e2e-gate.mjs";
+// @ts-expect-error — plain .mjs script without type declarations
+import { failureLines } from "../../scripts/e2e-report.mjs";
 
 const ROOT = resolve(__dirname, "..", "..");
 const pkg = JSON.parse(readFileSync(resolve(ROOT, "package.json"), "utf8")) as { scripts: Record<string, string> };
@@ -20,6 +22,8 @@ describe("scripts/vercel-build.mjs", () => {
     // Not on Vercel: a local run reproduces a preview build.
     expect(gatesFor({})).toEqual(PREVIEW_GATES);
     expect(gatesFor({ VERCEL_ENV: "preview" }, ["--production"])).toEqual(PRODUCTION_GATES);
+    // A probe branch's e2e-only build: the specs without vitest.
+    expect(gatesFor({ VERCEL_ENV: "preview" }, ["--e2e-only"])).toEqual(["build", "e2e"]);
   });
 
   it("every gate is an npm script that exists", () => {
@@ -68,6 +72,22 @@ describe("scripts/vercel-build.mjs", () => {
     // The whole chromium project took 29.7 min on the build machine; the gate runs the specs that fit.
     expect(E2E_SPECS).toEqual(["e2e/smoke.spec.ts"]);
     expect(PREVIEW_GATES.indexOf("e2e")).toBe(PREVIEW_GATES.indexOf("vitest") + 1);
+  });
+
+  it("a failed e2e test ends the log as one block: place, title, error, page snapshot", () => {
+    const lines = failureLines([
+      { where: "e2e/a.spec.ts:9", title: "opens › and closes", status: "failed", error: "\u001b[31mError: expected\u001b[39m\nmore", context: "- button \"Save\"" },
+      { where: "e2e/b.spec.ts:3", title: "waits", status: "timedOut", error: "Test timeout of 30000ms exceeded.", context: "" },
+    ]) as string[];
+    expect(lines).toEqual([
+      "✗ e2e/a.spec.ts:9 › opens › and closes",
+      "    Error: expected",
+      "    more",
+      "    page:",
+      '      - button "Save"',
+      "✗ e2e/b.spec.ts:3 › waits (timed out)",
+      "    Test timeout of 30000ms exceeded.",
+    ]);
   });
 
   it("deploy/vercel.base.json builds through it", () => {
