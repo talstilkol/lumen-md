@@ -21,6 +21,7 @@ import { useCapability } from "../billing/gates";
 import { UpgradeNotice } from "./UpgradeNotice";
 import { rememberSearch, getSearchHistory, forgetSearch } from "../storage/searchHistory";
 import { flashSearchHighlight } from "../editor/searchHighlight";
+import { isSaved, removeSavedSearch, saveSearch } from "../search/savedSearches";
 
 // The Images tab (plan 6.7) and its model code load only when it is opened.
 const ImageSearchPanel = lazy(() => import("./ImageSearchPanel").then((m) => ({ default: m.ImageSearchPanel })));
@@ -38,6 +39,8 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
   // self-hosted setups always have it.
   const smartAllowed = useCapability("smartSearch");
   const [query, setQuery] = useState("");
+  // Re-render after saving / removing a saved search (its state lives in localStorage).
+  const [, setSavedTick] = useState(0);
   const [hits, setHits] = useState<SearchHit[]>([]);
   /** The other-layout reading of the query whose hits are shown too. */
   const [layoutVariant, setLayoutVariant] = useState<string | null>(null);
@@ -59,7 +62,10 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
 
   useEffect(() => {
     if (open) {
-      setQuery("");
+      // A saved search opens the dialog on its query (plan W2.12).
+      const preset = (window as unknown as { __lumenSearchQuery?: string }).__lumenSearchQuery;
+      (window as unknown as { __lumenSearchQuery?: string }).__lumenSearchQuery = undefined;
+      setQuery(preset ?? "");
       // Honour an optional `lumen-search-mode` event that lets command
       // palette entries open the dialog already on a specific tab.
       const requested = (window as unknown as { __lumenSearchMode?: "search" | "smart" | "ai" | "images" })
@@ -451,6 +457,33 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
             >
               {tPlural("search.results", resultCount)}
             </span>
+          )}
+          {mode === "search" && query.trim() && isOPFSAvailable() && (
+            // Plan W2.12: keep this search in the sidebar.
+            <button
+              type="button"
+              data-testid="search-save"
+              aria-pressed={isSaved(query)}
+              onClick={() => {
+                if (isSaved(query)) removeSavedSearch(query.trim());
+                else saveSearch(query);
+                setSavedTick((n) => n + 1);
+              }}
+              title={isSaved(query) ? t("search.unsave") : t("search.save")}
+              style={{
+                flexShrink: 0,
+                fontSize: 11,
+                padding: "2px 8px",
+                borderRadius: 999,
+                border: "1px solid hsl(var(--border))",
+                background: isSaved(query) ? "hsl(var(--accent) / 0.12)" : "hsl(var(--bg-subtle))",
+                color: isSaved(query) ? "hsl(var(--accent))" : "hsl(var(--fg-muted))",
+                cursor: "pointer",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {isSaved(query) ? `★ ${t("search.savedLabel")}` : `☆ ${t("search.save")}`}
+            </button>
           )}
         </div>
         {mode !== "smart" && isOPFSAvailable() && (

@@ -870,6 +870,16 @@ export default function App() {
     window.addEventListener("lumen-open-privacy-ledger", onOpen);
     return () => window.removeEventListener("lumen-open-privacy-ledger", onOpen);
   }, []);
+  // A saved search in the sidebar (plan W2.12) opens the dialog on its query.
+  useEffect(() => {
+    const onOpen = (e: Event) => {
+      const query = (e as CustomEvent<{ query?: string }>).detail?.query;
+      (window as unknown as { __lumenSearchQuery?: string }).__lumenSearchQuery = typeof query === "string" ? query : undefined;
+      setSearchOpen(true);
+    };
+    window.addEventListener("lumen-open-search", onOpen);
+    return () => window.removeEventListener("lumen-open-search", onOpen);
+  }, []);
   useEffect(() => {
     const onOpen = () => setPropertiesOpen((v) => !v);
     window.addEventListener("lumen-open-properties", onOpen);

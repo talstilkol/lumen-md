@@ -33,6 +33,7 @@ const TasksBlock = lazy(() => import("../plugins/TasksBlock"));
 const DataBlock = lazy(() => import("../plugins/DataBlock"));
 const DatabaseBlock = lazy(() => import("../views/DatabaseBlock"));
 const BasesBlock = lazy(() => import("../views/bases/BasesBlock"));
+const QueryBlock = lazy(() => import("../views/QueryBlock"));
 const LiveCssBlock = lazy(() => import("../plugins/LiveCssBlock"));
 const LiveJsBlock = lazy(() => import("../plugins/LiveJsBlock"));
 const LivePyBlock = lazy(() => import("../plugins/LivePyBlock"));
@@ -336,6 +337,11 @@ const Database = withSuspense<BlockProps>(
 const Base = withSuspense<BlockProps>(
   (props) => <BasesBlock source={getText(props.children)} meta={props.meta} />,
   "base",
+);
+
+const Query = withSuspense<BlockProps>(
+  (props) => <QueryBlock source={getText(props.children)} lang={props.lang ?? "query"} />,
+  "query",
 );
 
 const LiveCss = withSuspense<BlockProps>(
@@ -642,6 +648,8 @@ export const components: Record<string, LumenBlock> = {
   "lumen-data": DataBlockComp as unknown as LumenBlock,
   "lumen-database": Database as unknown as LumenBlock,
   "lumen-base": Base as unknown as LumenBlock,
+  "lumen-query": Query as unknown as LumenBlock,
+  "lumen-dataview": Query as unknown as LumenBlock,
   "lumen-livecss": LiveCss as unknown as LumenBlock,
   "lumen-livejs": LiveJs as unknown as LumenBlock,
   "lumen-livesvg": LiveSvg as unknown as LumenBlock,

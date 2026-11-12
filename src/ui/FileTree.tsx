@@ -28,6 +28,8 @@ import { FileContextMenu, buildFileActions } from "./FileContextMenu";
 import { useAppStore } from "../store/useStore";
 import { duplicateFile, movedPath, renamedFileName, safeMoveWithCompanion, undoTrash, withoutCompanions, type MoveResult } from "../storage/fileOps";
 import { flushActiveWorkspaceDoc, syncOpenDocsAfterMove, trashWithOpenEdits } from "../store/openDocs";
+// Saved searches (plan W2.12): a small chunk of its own, off the startup path.
+const SavedSearches = lazy(() => import("./SavedSearches"));
 import type { TrashItem } from "../storage/trash";
 import { toast, useToastStore } from "../store/useToastStore";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
@@ -518,6 +520,9 @@ export function FileTree({
           </button>
         </div>
       </div>
+      <Suspense fallback={null}>
+        <SavedSearches />
+      </Suspense>
       {tagFilter && (
         <div
           role="status"

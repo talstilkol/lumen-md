@@ -3272,6 +3272,72 @@
       "vars": []
     },
     {
+      "key": "query.badOptions",
+      "en": "Ignored: {options}",
+      "vars": [
+        "options"
+      ]
+    },
+    {
+      "key": "query.col.folder",
+      "en": "Folder",
+      "vars": []
+    },
+    {
+      "key": "query.col.modified",
+      "en": "Modified",
+      "vars": []
+    },
+    {
+      "key": "query.col.note",
+      "en": "Note",
+      "vars": []
+    },
+    {
+      "key": "query.col.tags",
+      "en": "Tags",
+      "vars": []
+    },
+    {
+      "key": "query.count",
+      "en": "{count} notes",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "query.dataviewTitle",
+      "en": "Dataview",
+      "vars": []
+    },
+    {
+      "key": "query.empty",
+      "en": "Write a search in the block: words, tag:, path:, \"…\", /regex/, -",
+      "vars": []
+    },
+    {
+      "key": "query.error",
+      "en": "Can't run this query: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "query.loading",
+      "en": "Running the query…",
+      "vars": []
+    },
+    {
+      "key": "query.none",
+      "en": "No notes match.",
+      "vars": []
+    },
+    {
+      "key": "query.title",
+      "en": "Query",
+      "vars": []
+    },
+    {
       "key": "remoteImage.allowHint",
       "en": "Load images from {host} in every note, in this browser.",
       "vars": [

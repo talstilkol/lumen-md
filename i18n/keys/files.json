@@ -675,6 +675,13 @@
       "vars": []
     },
     {
+      "key": "search.removeSaved",
+      "en": "Remove saved search {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
       "key": "search.results.one",
       "en": "{n} result",
       "vars": [
@@ -689,8 +696,28 @@
       ]
     },
     {
+      "key": "search.save",
+      "en": "Save search",
+      "vars": []
+    },
+    {
+      "key": "search.savedLabel",
+      "en": "Saved",
+      "vars": []
+    },
+    {
+      "key": "search.savedTitle",
+      "en": "Saved searches",
+      "vars": []
+    },
+    {
       "key": "search.unavailable",
       "en": "Workspace storage isn't available in this browser.",
+      "vars": []
+    },
+    {
+      "key": "search.unsave",
+      "en": "Remove from saved searches",
       "vars": []
     },
     {
