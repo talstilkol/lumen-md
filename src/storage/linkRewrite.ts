@@ -120,12 +120,14 @@ export function rewriteLinks(content: string, notePath: string, oldPath: string,
   const wiki = (text: string) =>
     text.replace(/\[\[([^\]\r\n|#]+)((?:#[^\]\r\n|]*)?)((?:\|[^\]\r\n]*)?)\]\]/g, (m, target: string, heading: string, label: string) => {
       const t = target.trim();
+      // `[[Note.md]]`: the extension stays written (W4.30, real vaults).
+      const ext = t.match(MD_EXT)?.[0] ?? "";
       if (t.includes("/")) {
         const parts = t.replace(MD_EXT, "").split("/");
         const n = oldParts.length;
         if (folder ? parts.length <= n : parts.length !== n) return m;
         if (!oldParts.every((k, i) => noteKey(parts[i]) === k)) return m;
-        return `[[${[newFull, ...parts.slice(n)].join("/")}${heading}${label}]]`;
+        return `[[${[newFull, ...parts.slice(n)].join("/")}${ext}${heading}${label}]]`;
       }
       if (folder || noteKey(t) !== oldKey) return m;
       // `[[Old]]` with two notes called Old: only the one it opens moved?
@@ -133,7 +135,7 @@ export function rewriteLinks(content: string, notePath: string, oldPath: string,
         const target = resolveShort(t, opts.vault);
         if (target && target !== oldPath) return m;
       }
-      return `[[${newStem}${heading}${label}]]`;
+      return `[[${newStem}${ext}${heading}${label}]]`;
     });
 
   /** New destination for `dest` (as written), or null to keep it. */
@@ -154,9 +156,13 @@ export function rewriteLinks(content: string, notePath: string, oldPath: string,
     const before = resolve(prevDir, decoded);
     const after = moved(before, oldPath, newPath, folder) ?? before;
     if (after === before && prevDir === nextDir) return null;
-    const rel = relative(nextDir, after);
+    let rel = relative(nextDir, after);
+    // Keep how the link was written (plan W4.30, real vaults): a leading
+    // `./` stays, and Hebrew (or any non-ASCII) names stay readable unless
+    // the link itself was percent-encoded beyond ASCII.
+    if (/^\.\//.test(decoded) && !rel.startsWith("../")) rel = `./${rel}`;
     if (rel === decoded) return null;
-    const written = angle ? rel : path.includes("%") ? encodeURI(rel) : rel.replace(/ /g, "%20");
+    const written = angle ? rel : /%[89a-f][0-9a-f]/i.test(path) ? encodeURI(rel) : rel.replace(/%/g, "%25").replace(/ /g, "%20");
     return angle ? `<${written}${suffix}>` : `${written}${suffix}`;
   };
 
