@@ -818,6 +818,20 @@
       "icon": "Sparkles"
     },
     {
+      "id": "privacy.airplane",
+      "label": "Airplane mode (no network)…",
+      "group": "Security",
+      "hint": "Off: stop every network request and list every attempt",
+      "icon": "Network"
+    },
+    {
+      "id": "privacy.networkMonitor",
+      "label": "Network monitor…",
+      "group": "Security",
+      "hint": "Every request the app tries, allowed or blocked, and where in the code it came from",
+      "icon": "Network"
+    },
+    {
       "id": "template.meeting-notes",
       "label": "Templates: Meeting Notes",
       "group": "Templates",
@@ -2143,6 +2157,20 @@
       "icon": "Link"
     },
     {
+      "id": "privacy.airplane",
+      "label": "Airplane mode (no network)…",
+      "group": "Security",
+      "hint": "Off: stop every network request and list every attempt",
+      "icon": "Network"
+    },
+    {
+      "id": "privacy.networkMonitor",
+      "label": "Network monitor…",
+      "group": "Security",
+      "hint": "Every request the app tries, allowed or blocked, and where in the code it came from",
+      "icon": "Network"
+    },
+    {
       "id": "collab.viewComments",
       "label": "💬 View comments panel",
       "group": "Collab",
@@ -2746,6 +2774,8 @@
     "view.canvas",
     "canvas.migrateToExcalidraw",
     "view.plugins",
+    "privacy.airplane",
+    "privacy.networkMonitor",
     "template.meeting-notes",
     "template.blog-post",
     "template.thesis",
