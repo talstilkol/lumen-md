@@ -175,6 +175,7 @@ export default defineConfig({
           items: [
             { label: "Public roadmap", slug: "project/roadmap", translations: { he: "מפת דרכים ציבורית" } },
             { label: "Owner sessions", slug: "project/owner-sessions", translations: { he: "ישיבות הבעלים" } },
+            { label: "Owner session command", slug: "project/owner-session-command", translations: { he: "פקודת ישיבת הבעלים" } },
           ],
         },
       ],
