@@ -7,7 +7,7 @@
  * itself.
  *
  * Loaded lazily (src/renderer/components.tsx, src/plugins/EmbedBlock.tsx),
- * with its strings (src/i18n/lazy/contentFrame.json).
+ * with its strings (./contentFrameStrings).
  */
 import "./contentFrameStrings";
 import { useSyncExternalStore, type CSSProperties } from "react";

@@ -8,9 +8,13 @@
  * A Gist is GitHub's embed script, run in an opaque-origin content frame. A
  * link to any other site stays a link.
  */
+import "../renderer/contentFrameStrings";
+import { lazy, Suspense } from "react";
 import { t } from "../i18n";
 import { remoteImageHost, remoteImagesUnavailable } from "../lib/remoteImages";
-import { RemoteFrameGate } from "../renderer/RemoteFrame";
+
+// The gate and the content frame load with the first embed that is a player.
+const RemoteFrameGate = lazy(() => import("../renderer/RemoteFrame").then((m) => ({ default: m.RemoteFrameGate })));
 
 interface Props {
   source: string;
@@ -304,13 +308,19 @@ function EmbedBody({ embed }: { embed: Embed }) {
   if (embed.gist) {
     // The desktop app's policy runs no script from gist.github.com.
     if (remoteImagesUnavailable()) return <div style={notice} dir="auto">{t("block.embed.gistDesktop")}</div>;
-    return <RemoteFrameGate gateUrl={embed.src} request={{ kind: "gist", ...embed.gist }} />;
+    return (
+      <Suspense fallback={null}>
+        <RemoteFrameGate gateUrl={embed.src} request={{ kind: "gist", ...embed.gist }} />
+      </Suspense>
+    );
   }
   return (
-    <RemoteFrameGate
-      gateUrl={embed.src}
-      request={{ kind: "embed", src: embed.src, title: embed.title, allow: embed.allow, referrerPolicy: "strict-origin-when-cross-origin" }}
-      box={{ position: "relative", width: "100%", aspectRatio: `100 / ${embed.paddingPct}`, overflow: "hidden" }}
-    />
+    <Suspense fallback={null}>
+      <RemoteFrameGate
+        gateUrl={embed.src}
+        request={{ kind: "embed", src: embed.src, title: embed.title, allow: embed.allow, referrerPolicy: "strict-origin-when-cross-origin" }}
+        box={{ position: "relative", width: "100%", aspectRatio: `100 / ${embed.paddingPct}`, overflow: "hidden" }}
+      />
+    </Suspense>
   );
 }
