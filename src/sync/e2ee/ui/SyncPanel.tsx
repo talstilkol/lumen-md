@@ -10,6 +10,7 @@ import { t } from "../../../i18n";
 import "../strings";
 import { PassphraseForm } from "./PassphraseForm";
 import { FreshnessBanner } from "./FreshnessBanner";
+import { e2eeErrorText } from "./errorText";
 import { syncSession, type SyncSession } from "./session";
 import { ProviderAuthError, ProviderUnreachableError, ProviderUnsupportedError } from "../providers/http";
 import { defaultSettings, hasProviderSecret, legacyStore, oauthAvailable, PROVIDER_KINDS, providerHosts, SECRET_NAMES, type ProviderKind, type ProviderSettings } from "../providers";
@@ -257,7 +258,16 @@ function Unlocked({ session }: { session: SyncSession }) {
   const s = useSyncExternalStore(session.subscribe, session.get);
   const engine = session.engine();
   const [code, setCode] = useState<string | null>(null);
+  const [request, setRequest] = useState("");
+  const [answer, setAnswer] = useState<string | null>(null);
+  const [pairError, setPairError] = useState<string | null>(null);
   const last = s.last;
+  const answerRequest = () => {
+    if (!engine) return;
+    setPairError(null);
+    setAnswer(null);
+    void engine.answerPairing(request).then(setAnswer, (e) => setPairError(e2eeErrorText(e, "answer")));
+  };
   return (
     <div style={{ display: "grid", gap: 10 }}>
       {engine && <FreshnessBanner sync={engine} />}
@@ -280,9 +290,31 @@ function Unlocked({ session }: { session: SyncSession }) {
           {s.error}
         </div>
       )}
+      {s.settings?.kind === "gdrive" && <div style={muted}>{t("e2ee.drive.syncOnly")}</div>}
       {engine && (
         <div style={{ display: "grid", gap: 4 }}>
-          <button type="button" style={{ justifySelf: "start" }} onClick={() => void engine.pairingCode().then(setCode, (e) => setCode(String((e as Error).message)))}>
+          <Field label={t("e2ee.pair.answerTitle")}>
+            <textarea value={request} onChange={(e) => setRequest(e.target.value)} dir="ltr" rows={2} spellCheck={false} style={{ ...field, fontFamily: "JetBrains Mono, ui-monospace, monospace", fontSize: 12 }} />
+          </Field>
+          <div style={muted}>{t("e2ee.pair.answerHint")}</div>
+          <button type="button" style={{ justifySelf: "start" }} disabled={!request.trim()} onClick={answerRequest}>
+            {t("e2ee.pair.answer")}
+          </button>
+          {answer && (
+            <code dir="ltr" data-testid="pair-answer" style={{ userSelect: "all", wordBreak: "break-all", fontSize: 12 }}>
+              {answer}
+            </code>
+          )}
+          {pairError && (
+            <div role="alert" style={errorStyle}>
+              {pairError}
+            </div>
+          )}
+        </div>
+      )}
+      {engine && (
+        <div style={{ display: "grid", gap: 4 }}>
+          <button type="button" style={{ justifySelf: "start" }} onClick={() => void engine.pairingCode().then(setCode, (e) => setCode(e2eeErrorText(e)))}>
             {t("e2ee.sync.pairCode")}
           </button>
           {code && (

@@ -14,6 +14,7 @@ import { idbStateStore, type SyncStateStore } from "../state";
 import { vaultLocalFiles, type LocalFiles } from "../localFiles";
 import { createSyncProvider, loadProviderSettings, saveProviderSecret, saveProviderSettings, type ConnectedProvider, type ProviderSettings } from "../providers";
 import type { FetchLike } from "../providers/http";
+import { e2eeErrorText } from "./errorText";
 
 export type Phase = "disconnected" | "connected" | "unlocked";
 
@@ -74,7 +75,7 @@ export function createSession(deps: SessionDeps = {}) {
       set({ syncing: false, last, lastAt: Date.now() });
       return last;
     } catch (e) {
-      set({ syncing: false, error: (e as Error).message ?? String(e) });
+      set({ syncing: false, error: e2eeErrorText(e) });
       throw e;
     }
   }

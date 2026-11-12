@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-12T17:04:56.330Z",
+  "generated_at": "2026-11-12T17:06:44.247Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1543,
+  "count": 1545,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -8213,7 +8213,7 @@
     },
     {
       "key": "e2ee.sync.pairCodeNote",
-      "en": "Enter it on the other device within 15 minutes. It proves to that device which state is current.",
+      "en": "Enter it on the other device within 2 minutes. It proves to that device which state is current; this device changes no keys meanwhile. Pairing from the new device's request (two-way) is safer.",
       "vars": []
     },
     {
@@ -8315,6 +8315,16 @@
     {
       "key": "e2ee.wrap.tampered",
       "en": "This device's key in the vault's keyring doesn't open it: the sync service changed it or put back an old one. Nothing on this device was changed. Try again later; if it stays like this, pair this device again from one you trust.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.pair.answerHint",
+      "en": "Paste the request the new device shows. This device checks it against the vault as it is now; enter the answer on the new device within 5 minutes.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.drive.syncOnly",
+      "en": "Google Drive can't refuse a second \"create\" of the same file atomically, so with Drive this vault syncs, but keys and devices can't be changed here (no re-key, no revocation, no new device key). Make those changes with another storage, or move the vault.",
       "vars": []
     }
   ]

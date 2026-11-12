@@ -1533,7 +1533,7 @@
   "e2ee.sync.choose": "Anbieter wechseln",
   "e2ee.sync.back": "Zurück",
   "e2ee.sync.pairCode": "Kopplungscode für ein anderes Gerät",
-  "e2ee.sync.pairCodeNote": "Geben Sie ihn innerhalb von 15 Minuten auf dem anderen Gerät ein. Er beweist dem Gerät, welcher Stand aktuell ist.",
+  "e2ee.sync.pairCodeNote": "Geben Sie ihn innerhalb von 2 Minuten auf dem anderen Gerät ein. Er beweist dem Gerät, welcher Stand aktuell ist; dieses Gerät ändert so lange keine Schlüssel. Sicherer ist das Koppeln über die Anfrage des neuen Geräts (in beide Richtungen).",
   "e2ee.sync.migrate.title": "Lesbare Notizen aus einer früheren Lumen-Version",
   "e2ee.sync.migrate.found": "In Ihrem {name}-Ordner liegen {n} unverschlüsselte Notizen. Importieren Sie sie in den verschlüsselten Tresor; die lesbaren Kopien werden bei {name} in einen Sicherungsordner verschoben, nicht gelöscht.",
   "e2ee.sync.migrate.clashes": "{n} davon weichen von Notizen hier ab; beide Fassungen bleiben erhalten.",
@@ -1541,5 +1541,7 @@
   "e2ee.sync.migrate.done": "{n} Notizen importiert. Die lesbaren Kopien liegen in „{folder}“ bei {name}; löschen Sie den Ordner selbst, wenn alles passt.",
   "e2ee.sync.migrate.revert": "Rückgängig: lesbare Kopien zurückverschieben",
   "e2ee.sync.migrate.reverted": "{n} Dateien zurückverschoben.",
+  "e2ee.pair.answerHint": "Füge die Anfrage ein, die das neue Gerät zeigt. Dieses Gerät prüft sie gegen den jetzigen Stand des Tresors; gib die Antwort innerhalb von 5 Minuten auf dem neuen Gerät ein.",
+  "e2ee.drive.syncOnly": "Google Drive kann ein zweites „Anlegen“ derselben Datei nicht atomar ablehnen. Mit Drive synchronisiert dieser Tresor daher, aber Schlüssel und Geräte lassen sich hier nicht ändern (kein Neuverschlüsseln, kein Entfernen, kein neuer Geräteschlüssel). Nimm solche Änderungen mit einem anderen Speicher vor oder zieh den Tresor um.",
   "cmd.sync.open": "Verschlüsselte Synchronisierung…"
 }

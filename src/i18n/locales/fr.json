@@ -1533,7 +1533,7 @@
   "e2ee.sync.choose": "Changer de fournisseur",
   "e2ee.sync.back": "Retour",
   "e2ee.sync.pairCode": "Code d’appairage pour un autre appareil",
-  "e2ee.sync.pairCodeNote": "Saisissez-le sur l’autre appareil dans les 15 minutes. Il prouve à cet appareil quel état est le plus récent.",
+  "e2ee.sync.pairCodeNote": "Saisissez-le sur l’autre appareil dans les 2 minutes. Il prouve à cet appareil quel état est le plus récent ; cet appareil ne change aucune clé entre-temps. L’appairage à partir de la demande du nouvel appareil (dans les deux sens) est plus sûr.",
   "e2ee.sync.migrate.title": "Notes lisibles d’une ancienne version de Lumen",
   "e2ee.sync.migrate.found": "Votre dossier {name} contient {n} notes non chiffrées. Importez-les dans le coffre chiffré ; les copies lisibles sont déplacées dans un dossier de sauvegarde chez {name}, pas supprimées.",
   "e2ee.sync.migrate.clashes": "{n} d’entre elles diffèrent de notes présentes ici ; les deux versions sont conservées.",
@@ -1541,5 +1541,7 @@
   "e2ee.sync.migrate.done": "{n} notes importées. Les copies lisibles sont dans « {folder} » chez {name} ; supprimez ce dossier vous-même quand vous êtes satisfait.",
   "e2ee.sync.migrate.revert": "Annuler : remettre les copies lisibles",
   "e2ee.sync.migrate.reverted": "{n} fichiers remis en place.",
+  "e2ee.pair.answerHint": "Collez la demande affichée par le nouvel appareil. Cet appareil la vérifie par rapport à l’état actuel du coffre ; saisissez la réponse sur le nouvel appareil dans les 5 minutes.",
+  "e2ee.drive.syncOnly": "Google Drive ne peut pas refuser de façon atomique une seconde « création » du même fichier : avec Drive, ce coffre se synchronise, mais les clés et les appareils ne peuvent pas être modifiés ici (pas de changement de clés, pas de retrait, pas de nouvelle clé d'appareil). Faites ces changements avec un autre stockage, ou déplacez le coffre.",
   "cmd.sync.open": "Synchronisation chiffrée…"
 }
