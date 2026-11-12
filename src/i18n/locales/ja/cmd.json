@@ -427,6 +427,8 @@
   "cmd.voice.meeting": "🎙 会議メモ（このデバイスで録音）",
   "cmd.voice.meeting.hint": "会議を録音し、このデバイスで文字起こしして、決定事項・担当者と期日付きのタスク・未解決の質問を挿入します",
   "cmd.voice.meetingFile": "🎙 会議の録音を文字起こし（誰が何を言ったか）…",
+  "cmd.window.new": "新しいウィンドウ",
+  "cmd.window.new.hint": "別の編集ウィンドウ。タブをウィンドウ間でドラッグできます",
   "desc.commandPalette": "検索 and run any command",
   "desc.copy": "コピー selection to clipboard",
   "desc.cut": "切り取り selection to clipboard",

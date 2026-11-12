@@ -2,9 +2,10 @@ import { DEFAULT_DAILY, isValidDailyPattern, type DailySettings } from "../daily
 import { DEFAULT_TOOLBAR, sanitizeToolbar, type ToolbarActionId } from "../mobile/toolbarActions";
 import { DEFAULT_READING_WORDS } from "../mobile/gestures";
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 import { vaultEncryptionState } from "../storage/vault";
 import { deferredJSONStorage, persistedTextLength } from "./deferredStorage";
+import { windowLabel, windowStorage } from "../desktop/shell";
 import type { Locale } from "../i18n";
 import { applyLocale, isLocaleLoaded, loadLocale } from "../i18n";
 import {
@@ -646,6 +647,9 @@ export const useAppStore = create<AppState>()(
       // not on every keystroke (plan 8.4).
       storage: deferredJSONStorage<PersistedAppState>((v) => persistedTextLength(v.state) >= LARGE_PERSIST_CHARS),
       partialize: partializeAppState,
+      // Desktop (plan W3.9): every window keeps its own tabs; a new window
+      // starts with the main window's settings and none of its notes.
+      storage: createJSONStorage(() => windowStorage(windowLabel(), localStorage)),
       // Persisted theme settings may be stale or hand-edited — sanitise
       // field-by-field on rehydrate instead of trusting localStorage.
       merge: (persisted, current) => {

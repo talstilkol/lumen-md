@@ -427,6 +427,8 @@
   "cmd.voice.meeting": "🎙 Протокол встречи (запись на этом устройстве)",
   "cmd.voice.meeting.hint": "Записать встречу, расшифровать её на этом устройстве и вставить решения, задачи с ответственным и сроком и открытые вопросы",
   "cmd.voice.meetingFile": "🎙 Расшифровать запись встречи (кто что сказал)…",
+  "cmd.window.new": "Новое окно",
+  "cmd.window.new.hint": "Ещё одно окно редактора; вкладки можно перетаскивать между окнами",
   "desc.commandPalette": "Поиск and run any command",
   "desc.copy": "Копировать selection to clipboard",
   "desc.cut": "Вырезать selection to clipboard",

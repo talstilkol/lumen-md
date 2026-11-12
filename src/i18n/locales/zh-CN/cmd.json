@@ -427,6 +427,8 @@
   "cmd.voice.meeting": "🎙 会议纪要（在本设备上录音）",
   "cmd.voice.meeting.hint": "录制会议，在本设备上转写，并插入决定、带负责人和日期的任务以及待解决的问题",
   "cmd.voice.meetingFile": "🎙 转写会议录音（谁说了什么）…",
+  "cmd.window.new": "新建窗口",
+  "cmd.window.new.hint": "另一个编辑窗口；可在窗口之间拖动标签页",
   "desc.commandPalette": "搜索 and run any command",
   "desc.copy": "复制 selection to clipboard",
   "desc.cut": "剪切 selection to clipboard",

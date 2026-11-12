@@ -427,6 +427,8 @@
   "cmd.voice.meeting": "🎙 Besprechungsnotizen (auf diesem Gerät aufnehmen)",
   "cmd.voice.meeting.hint": "Eine Besprechung aufnehmen, auf diesem Gerät transkribieren und ihre Beschlüsse, Aufgaben mit Verantwortlichen und Termin sowie offenen Fragen einfügen",
   "cmd.voice.meetingFile": "🎙 Besprechungsaufnahme transkribieren (wer hat was gesagt)…",
+  "cmd.window.new": "Neues Fenster",
+  "cmd.window.new.hint": "Ein weiteres Editorfenster; Tabs zwischen Fenstern ziehen",
   "desc.commandPalette": "Suchen and run any command",
   "desc.copy": "Kopieren selection to clipboard",
   "desc.cut": "Ausschneiden selection to clipboard",

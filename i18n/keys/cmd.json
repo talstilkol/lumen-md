@@ -2162,6 +2162,16 @@
       "vars": []
     },
     {
+      "key": "cmd.window.new",
+      "en": "New window",
+      "vars": []
+    },
+    {
+      "key": "cmd.window.new.hint",
+      "en": "Another editor window; drag tabs between windows",
+      "vars": []
+    },
+    {
       "key": "desc.commandPalette",
       "en": "Search and run any command",
       "vars": []

@@ -427,6 +427,8 @@
   "cmd.voice.meeting": "🎙 ملاحظات الاجتماع (التسجيل على هذا الجهاز)",
   "cmd.voice.meeting.hint": "سجّل اجتماعًا وفرّغه نصيًا على هذا الجهاز وأدرج قراراته ومهامه مع المسؤول والتاريخ والأسئلة المفتوحة",
   "cmd.voice.meetingFile": "🎙 تفريغ تسجيل اجتماع (من قال ماذا)…",
+  "cmd.window.new": "نافذة جديدة",
+  "cmd.window.new.hint": "نافذة تحرير أخرى؛ اسحب علامات التبويب بين النوافذ",
   "desc.commandPalette": "بحث and run any command",
   "desc.copy": "نسخ selection to clipboard",
   "desc.cut": "قص selection to clipboard",

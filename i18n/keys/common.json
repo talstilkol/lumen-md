@@ -1470,6 +1470,65 @@
       "vars": []
     },
     {
+      "key": "desktop.capture.failed",
+      "en": "Couldn't add it to the inbox. Is the vault open?",
+      "vars": []
+    },
+    {
+      "key": "desktop.capture.hint",
+      "en": "Enter adds it to {inbox} · Shift+Enter for a new line · Esc closes",
+      "vars": [
+        "inbox"
+      ]
+    },
+    {
+      "key": "desktop.capture.placeholder",
+      "en": "A thought, a task, a link…",
+      "vars": []
+    },
+    {
+      "key": "desktop.capture.title",
+      "en": "Quick capture",
+      "vars": []
+    },
+    {
+      "key": "desktop.captured",
+      "en": "Added to the inbox",
+      "vars": []
+    },
+    {
+      "key": "desktop.tray.capture",
+      "en": "Quick capture…",
+      "vars": []
+    },
+    {
+      "key": "desktop.tray.new",
+      "en": "New note",
+      "vars": []
+    },
+    {
+      "key": "desktop.tray.quit",
+      "en": "Quit Lumen",
+      "vars": []
+    },
+    {
+      "key": "desktop.tray.recent",
+      "en": "Recent notes",
+      "vars": []
+    },
+    {
+      "key": "desktop.tray.show",
+      "en": "Show Lumen",
+      "vars": []
+    },
+    {
+      "key": "desktop.unknownVault",
+      "en": "The link names the vault “{name}”, which you haven't opened in Lumen on this computer.",
+      "vars": [
+        "name"
+      ]
+    },
+    {
       "key": "diagnostics.failed",
       "en": "Couldn't build the diagnostics file.",
       "vars": []

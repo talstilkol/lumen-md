@@ -40,7 +40,37 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "createUpdaterArtifacts": false
+    "createUpdaterArtifacts": false,
+    "fileAssociations": [
+      {
+        "ext": [
+          "md",
+          "markdown"
+        ],
+        "name": "Markdown document",
+        "description": "Markdown note",
+        "role": "Editor",
+        "mimeType": "text/markdown"
+      },
+      {
+        "ext": [
+          "base"
+        ],
+        "name": "Lumen base",
+        "description": "Database view (Obsidian Bases)",
+        "role": "Editor",
+        "mimeType": "text/yaml"
+      },
+      {
+        "ext": [
+          "excalidraw"
+        ],
+        "name": "Excalidraw drawing",
+        "description": "Excalidraw canvas",
+        "role": "Editor",
+        "mimeType": "application/json"
+      }
+    ]
   },
   "plugins": {
     "deep-link": {
@@ -54,6 +84,13 @@
       "pubkey": "",
       "endpoints": [],
       "requireSignedVersion": true
+    },
+    "deep-link": {
+      "desktop": {
+        "schemes": [
+          "lumen"
+        ]
+      }
     }
   }
 }

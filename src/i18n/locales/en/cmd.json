@@ -426,6 +426,8 @@
   "cmd.voice.meeting": "🎙 Meeting notes (record on this device)",
   "cmd.voice.meeting.hint": "Record a meeting, transcribe it on this device, and insert its decisions, tasks with owner and date, and open questions",
   "cmd.voice.meetingFile": "🎙 Transcribe a meeting recording (who said what)…",
+  "cmd.window.new": "New window",
+  "cmd.window.new.hint": "Another editor window; drag tabs between windows",
   "desc.commandPalette": "Search and run any command",
   "desc.copy": "Copy selection to clipboard",
   "desc.cut": "Cut selection to clipboard",

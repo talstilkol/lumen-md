@@ -427,6 +427,8 @@
   "cmd.voice.meeting": "🎙 Notes de réunion (enregistrées sur cet appareil)",
   "cmd.voice.meeting.hint": "Enregistre une réunion, la transcrit sur cet appareil et insère ses décisions, ses tâches avec responsable et date, et ses questions ouvertes",
   "cmd.voice.meetingFile": "🎙 Transcrire l’enregistrement d’une réunion (qui a dit quoi)…",
+  "cmd.window.new": "Nouvelle fenêtre",
+  "cmd.window.new.hint": "Une autre fenêtre d'édition ; faites glisser les onglets entre fenêtres",
   "desc.commandPalette": "Rechercher and run any command",
   "desc.copy": "Copier selection to clipboard",
   "desc.cut": "Couper selection to clipboard",

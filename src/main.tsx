@@ -22,6 +22,7 @@ import { installAiEscape, onAiBusy } from "./ai/aiAbort";
 import { aiBusyAnnouncer, announce } from "./a11y/announce";
 import { adoptBootLocale } from "./store/useStore";
 import "./index.css";
+import { windowLabel } from "./desktop/shell";
 
 // Plan W2.17: this window is a presentation's presenter view (opened by the slides), not the editor.
 const IS_PRESENTER = typeof location !== "undefined" && location.hash === "#lumen-presenter";
@@ -110,6 +111,8 @@ const secretsReady = Promise.race([initSecretStore(), new Promise((r) => setTime
 // the first render, so nothing reads the wrong store; bounded like secrets.
 // Until it is known, the vault is closed (an unavailable backend), never the
 // default store by accident; the location module loads on demand.
+// Plan W3.9: the tray's quick-capture window is this app with a small UI.
+const QuickCaptureWindow = React.lazy(() => import("./ui/QuickCaptureWindow").then((m) => ({ default: m.QuickCaptureWindow })));
 const VaultFolderBanner = React.lazy(() => import("./ui/VaultFolderBanner").then((m) => ({ default: m.VaultFolderBanner })));
 const closedVault = createDirectoryHandleBackend({ id: "restoring", available: () => false, root: async () => Promise.reject(new Error("The vault is still opening.")) });
 setVaultBackend(closedVault);
@@ -195,7 +198,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           {t("boot.loading")}
         </div>
       }>
-        {IS_PRESENTER ? <PresenterView /> : <App />}
+        {IS_PRESENTER ? <PresenterView /> : windowLabel() === "capture" ? <QuickCaptureWindow /> : <App />}
       </Suspense>
     </ErrorBoundary>
     <UpdateBanner />
