@@ -396,6 +396,26 @@
       "vars": []
     },
     {
+      "key": "cmd.app.featureFlags",
+      "en": "Feature flags…",
+      "vars": []
+    },
+    {
+      "key": "cmd.app.featureFlags.hint",
+      "en": "Turn beta features on or off on this device",
+      "vars": []
+    },
+    {
+      "key": "cmd.app.updateChannel",
+      "en": "Update channel: switch between stable and beta",
+      "vars": []
+    },
+    {
+      "key": "cmd.app.updateChannel.hint",
+      "en": "Beta gets new features first; stable gets tested releases",
+      "vars": []
+    },
+    {
       "key": "cmd.audit.open",
       "en": "Audit log…",
       "vars": []

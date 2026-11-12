@@ -10,6 +10,7 @@ import type { ConfigHealthReport } from "../lib/configHealth";
 import { subscribeSyncStatus } from "../sync/syncStatus";
 import { secretStoreMode, subscribeSecretStoreMode } from "../lib/secretStore";
 import { parseSuggestions, mayContainCriticMarkup } from "../editor/suggesting";
+import { BetaBadge } from "./FeatureFlagsPanel";
 
 /** Number of CriticMarkup suggestions (cheap no-op for plain docs). */
 function countCriticMarkup(text: string): number {
@@ -87,6 +88,7 @@ export const StatusBar = React.memo(function StatusBar({
   return (
     <footer className="status-bar">
       <span className="sb-item" title={t("status.document")}>
+      <BetaBadge />
         {dirty ? "●" : "○"} {filename}
       </span>
       {syncState !== "idle" && (

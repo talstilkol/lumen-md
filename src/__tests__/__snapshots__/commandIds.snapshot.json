@@ -1266,6 +1266,20 @@
       "group": "File",
       "hint": "How accessible Lumen is (IS 5568, WCAG 2.2 AA), known gaps, and how to report a barrier",
       "icon": "FileText"
+    },
+    {
+      "id": "view.search",
+      "label": "Search workspace…",
+      "group": "View",
+      "shortcut": "⇧⌘F",
+      "icon": "PanelRightOpen"
+    },
+    {
+      "id": "app.featureFlags",
+      "label": "Feature flags…",
+      "group": "Tools",
+      "hint": "Turn beta features on or off on this device",
+      "icon": "Sparkles"
     }
   ],
   "full": [
@@ -2670,6 +2684,20 @@
       "group": "File",
       "hint": "How accessible Lumen is (IS 5568, WCAG 2.2 AA), known gaps, and how to report a barrier",
       "icon": "FileText"
+    },
+    {
+      "id": "view.search",
+      "label": "Search workspace…",
+      "group": "View",
+      "shortcut": "⇧⌘F",
+      "icon": "PanelRightOpen"
+    },
+    {
+      "id": "app.featureFlags",
+      "label": "Feature flags…",
+      "group": "Tools",
+      "hint": "Turn beta features on or off on this device",
+      "icon": "Sparkles"
     }
   ],
   "autoSaveOn": [
@@ -2862,6 +2890,7 @@
     "insert.wikilink",
     "a11y.srVerbosity",
     "a11y.whereAmI",
-    "help.a11yStatement"
+    "help.a11yStatement",
+    "app.featureFlags"
   ]
 }
