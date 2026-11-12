@@ -18,7 +18,6 @@ import type { CaptionFamily, Device, EmbedResult, TranscribeResult, WorkerIn, Wo
 import { detectHardware, vramBudgetMB, type Hardware } from "./modelManager";
 
 export type { TranscribeResult, EmbedResult, TimedSegment };
-export type { TimedSegment } from "./transformers.worker";
 
 export const WHISPER_MODELS = {
   tiny: "onnx-community/whisper-tiny",

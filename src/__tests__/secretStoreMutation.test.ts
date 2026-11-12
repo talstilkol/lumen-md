@@ -201,7 +201,7 @@ describe("secret store", () => {
 });
 
 describe("secret store in the OS keychain (desktop)", () => {
-  const w = globalThis as { window?: Record<string, unknown> };
+  const w = globalThis as unknown as { window?: Record<string, unknown> };
   let store: Map<string, string>;
   let calls: string[];
   let failGet: number;

@@ -2,7 +2,7 @@ import { DEFAULT_DAILY, isValidDailyPattern, type DailySettings } from "../daily
 import { DEFAULT_TOOLBAR, sanitizeToolbar, type ToolbarActionId } from "../mobile/toolbarRow";
 import { DEFAULT_READING_WORDS } from "../mobile/gestures";
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
+import { persist } from "zustand/middleware";
 import { vaultEncryptionState } from "../storage/vault";
 import { deferredJSONStorage, persistedTextLength } from "./deferredStorage";
 import { windowLabel, windowStorage } from "../desktop/window";
@@ -645,11 +645,13 @@ export const useAppStore = create<AppState>()(
       name: "lumen-md",
       // A long open document is saved to localStorage once typing pauses,
       // not on every keystroke (plan 8.4).
-      storage: deferredJSONStorage<PersistedAppState>((v) => persistedTextLength(v.state) >= LARGE_PERSIST_CHARS),
-      partialize: partializeAppState,
       // Desktop (plan W3.9): every window keeps its own tabs; a new window
-      // starts with the main window's settings and none of its notes.
-      storage: createJSONStorage(() => windowStorage(windowLabel(), localStorage)),
+      // starts with the main window's settings and none of its notes. The
+      // deferred writes (plan 8.4) go to that window's storage.
+      storage: deferredJSONStorage<PersistedAppState>((v) => persistedTextLength(v.state) >= LARGE_PERSIST_CHARS, {
+        storage: () => windowStorage(windowLabel(), localStorage),
+      }),
+      partialize: partializeAppState,
       // Persisted theme settings may be stale or hand-edited — sanitise
       // field-by-field on rehydrate instead of trusting localStorage.
       merge: (persisted, current) => {
