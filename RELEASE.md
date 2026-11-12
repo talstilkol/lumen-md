@@ -17,18 +17,55 @@ This document covers building and shipping Lumen across all targets:
 
 ---
 
-## Versioning
+## Versioning and the release pipeline (plan 13.4)
 
-Bump the version in three places, in lock-step:
+One script runs the whole release on your machine — GitHub Actions are not
+needed (`.github/workflows/release.yml` runs the same steps on a tag push when
+Actions are on):
 
-1. `package.json` → `"version"`
-2. `src-tauri/tauri.conf.json` → `"version"` and `src-tauri/Cargo.toml`
-3. iOS Xcode project (`MARKETING_VERSION` in `ios/App/App.xcodeproj/project.pbxproj`)
-4. Android Gradle (`android/app/build.gradle` → `versionName` / `versionCode`)
+```bash
+node scripts/release.mjs plan                    # next version from Conventional Commits + changelog preview
+node scripts/release.mjs prepare --commit --tag  # bump every manifest, write CHANGELOG.md, commit, tag vX.Y.Z
+git push origin HEAD vX.Y.Z
+node scripts/release.mjs build [--desktop]       # typecheck, tests, build, budget, no source maps → release/
+node scripts/release.mjs publish                 # GitHub release (gh CLI), notes from CHANGELOG.md, every file in release/
+node scripts/release.mjs verify release/         # anyone: check SHA256SUMS (and SHA256SUMS.asc)
+node scripts/release.mjs rollback 0.3.0 --to 0.2.1
+```
 
-Use [semver](https://semver.org/): `MAJOR.MINOR.PATCH` for the marketing
-string, monotonically increasing integer for App Store / Play Store
-internal codes.
+**Version.** `feat` → minor, `fix` / `perf` → patch, a breaking change
+(`feat!:` or `BREAKING CHANGE:`) → major (minor while the version is 0.x).
+`--version X.Y.Z` overrides. `prepare` bumps, in lock-step:
+
+1. `package.json` and `package-lock.json` (root entry only)
+2. `src-tauri/tauri.conf.json` and `src-tauri/Cargo.toml` (`[package]`)
+3. the iOS project: `MARKETING_VERSION`, and `CURRENT_PROJECT_VERSION` + 1
+4. Android (`android/app/build.gradle` → `versionName` / `versionCode`) once
+   the Android project exists (plan 13.3)
+
+and adds the version's section to `CHANGELOG.md` under `[Unreleased]`
+(Added / Fixed / Performance / Breaking, with commit links). `[skip ci]` is
+dropped from commit subjects.
+
+**Artifacts and signatures** (`build`, all into `release/`):
+
+| Artifact | Signed by | Key (owner, plan 15.7) |
+|---|---|---|
+| `lumen-web-vX.tgz` | `SHA256SUMS` + `SHA256SUMS.asc` | `LUMEN_RELEASE_GPG_KEY` (a GPG key id) |
+| desktop bundles (`--desktop`) | Apple / Authenticode + the updater's minisign `.sig` | see "Signing" below, `TAURI_SIGNING_PRIVATE_KEY` |
+| `latest.json` (Tauri updater) | built from the `.sig` files | — |
+| iOS `.ipa`, Android `.aab` (plan 13.3) | Xcode / Gradle, store signing | put them in `release/` before `build`'s checksum step |
+
+Every key is optional: without one, that signature is skipped with a warning
+and the release still builds.
+
+**Rollback.** `rollback <bad> --to <good>` makes the bad release a
+pre-release, so it is no longer "latest": download links and the desktop
+updater's `releases/latest/download/latest.json` fall back to the good release
+at once. Apps already on the bad version stay on it (the updater never
+downgrades), so ship the fix as the next patch (`prepare --version …`). The
+command prints how to redeploy the web app from the good tag (or
+`npx vercel rollback`).
 
 ---
 
