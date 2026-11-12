@@ -4400,8 +4400,30 @@
       "vars": []
     },
     {
+      "key": "onboard.lang.change",
+      "en": "Change",
+      "vars": []
+    },
+    {
+      "key": "onboard.lang.current",
+      "en": "Language: {language}.",
+      "vars": [
+        "language"
+      ]
+    },
+    {
       "key": "onboard.lang.title",
       "en": "Language",
+      "vars": []
+    },
+    {
+      "key": "onboard.lang.write",
+      "en": "Which language will you write in?",
+      "vars": []
+    },
+    {
+      "key": "onboard.lang.write.body",
+      "en": "The interface follows it, and so do the sample notes. Each note's direction still follows its own text. You can change this later in Settings.",
       "vars": []
     },
     {

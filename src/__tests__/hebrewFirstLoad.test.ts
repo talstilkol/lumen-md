@@ -39,7 +39,8 @@ function boot(opts: { saved?: unknown; languages?: string[]; language?: string; 
 const CASES: Array<[unknown, string[], string]> = [
   [null, ["he-IL", "en-US"], "he"],
   [null, ["iw"], "he"],
-  [null, ["en-US", "he-IL"], "en"],
+  [null, ["en-US", "he-IL"], "he"], // W4.35: Hebrew anywhere in the list
+  [null, ["en-US", "iw"], "he"],
   [null, ["ar-EG"], "ar"],
   [null, ["zh-TW", "zh-CN"], "zh-CN"],
   [null, ["zh-Hant-HK"], "en"],
@@ -48,12 +49,12 @@ const CASES: Array<[unknown, string[], string]> = [
   [null, ["xx"], "en"],
   [null, [], "en"],
   ["he", ["en-US"], "he"],
-  ["en", ["he-IL"], "en"],
+  ["en", ["he-IL"], "en"], // a saved choice always wins
   ["klingon", ["he-IL"], "he"],
 ];
 
 describe("the language at load", () => {
-  it("detectLocale: the saved choice, else the first supported system language, else English", () => {
+  it("detectLocale: the saved choice, else Hebrew if listed, else the first supported system language, else English", () => {
     for (const [saved, langs, want] of CASES) expect(detectLocale(saved, langs), `${saved} ${langs}`).toBe(want);
   });
 
