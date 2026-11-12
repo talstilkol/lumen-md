@@ -1318,6 +1318,8 @@
   "e2ee.revoked": "Dieses Gerät wurde aus dem Tresor entfernt und kann die aktuellen Schlüssel nicht öffnen. Die Notizen, die schon darauf sind, bleiben.",
   "e2ee.rekey.dropConfirm": "Dieses Gerät kann nicht prüfen, ob es die neuesten Schlüssel des Tresors hat; eine Schlüsseländerung von hier würde {devices} auslassen: Sie müssten erneut gekoppelt werden. Koppeln Sie zuerst dieses Gerät von einem vertrauenswürdigen, oder bestätigen Sie, dass sie ausgelassen werden.",
   "e2ee.rekey.busy": "Ein anderes Gerät ändert gerade die Schlüssel des Tresors. Synchronisieren Sie und versuchen Sie es erneut, wenn es fertig ist (höchstens 10 Minuten).",
+  "e2ee.pair.rekeying": "Dieses Gerät ändert gerade die Schlüssel des Tresors. Erstelle den Kopplungscode, sobald die Änderung abgeschlossen ist.",
+  "e2ee.revokedHere.reset": "Die eigene Liste dieses Geräts mit den von ihm entfernten Geräten ließ sich nicht prüfen und wurde beiseitegelegt. Es prüft jetzt gegen die versiegelte Liste entfernter Geräte des Tresors. Prüfe die Geräteliste auf einem Gerät, dem du vertraust.",
   "vault.import.what": "Importieren aus…",
   "vault.import.zip": "Einer .zip-Datei",
   "vault.import.folder": "Einem Ordner",

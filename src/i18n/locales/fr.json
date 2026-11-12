@@ -1318,6 +1318,8 @@
   "e2ee.revoked": "Cet appareil a été retiré du coffre : il ne peut pas ouvrir les clés actuelles. Les notes déjà présentes dessus restent.",
   "e2ee.rekey.dropConfirm": "Cet appareil ne peut pas vérifier qu'il a les dernières clés du coffre ; un changement de clés depuis celui-ci laisserait de côté {devices} : il faudrait les associer à nouveau. Associez d'abord cet appareil depuis un appareil de confiance, ou confirmez qu'ils seront laissés de côté.",
   "e2ee.rekey.busy": "Un autre appareil change les clés du coffre en ce moment. Synchronisez, puis réessayez quand il aura fini (10 minutes au plus).",
+  "e2ee.pair.rekeying": "Cet appareil est en train de changer les clés du coffre. Créez le code d'appairage une fois le changement terminé.",
+  "e2ee.revokedHere.reset": "La liste propre à cet appareil des appareils qu'il a retirés n'a pas pu être vérifiée ; elle a été mise de côté. Il vérifie désormais avec la liste scellée des appareils retirés du coffre. Vérifiez la liste des appareils sur un appareil de confiance.",
   "vault.import.what": "Importer depuis…",
   "vault.import.zip": "Un fichier .zip",
   "vault.import.folder": "Un dossier",

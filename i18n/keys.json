@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-12T19:17:31.761Z",
+  "generated_at": "2026-11-12T21:28:11.501Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1504,
+  "count": 1506,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -8094,6 +8094,16 @@
     {
       "key": "e2ee.rekey.busy",
       "en": "Another device is changing the vault's keys right now. Sync, and try again once it has finished (10 minutes at most).",
+      "vars": []
+    },
+    {
+      "key": "e2ee.pair.rekeying",
+      "en": "This device is changing the vault's keys right now. Make the pairing code once the change has finished.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.revokedHere.reset",
+      "en": "This device's own list of the devices it removed couldn't be verified, so it was set aside. It now checks against the vault's sealed list of removed devices. Check the device list on a device you trust.",
       "vars": []
     }
   ]
