@@ -775,6 +775,8 @@
   "pageView.of": "מתוך {total}",
   "pageView.page": "עמוד {n}",
   "pageView.prev": "העמוד הקודם",
+  "paste.clipboardDenied": "ל-Lumen אין גישה ללוח. אפשרו גישה ללוח, או הדביקו עם Ctrl+V.",
+  "paste.clipboardEmpty": "הלוח ריק.",
   "pdf.ask": "שאלה",
   "pdf.ask.cite": "עמוד {page}, שורה {line}",
   "pdf.ask.dropped": "הושמטו {n} ציטוטים שאינם מופיעים ב-PDF",

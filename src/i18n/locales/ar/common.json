@@ -775,6 +775,8 @@
   "pageView.of": "من {total}",
   "pageView.page": "صفحة {n}",
   "pageView.prev": "الصفحة السابقة",
+  "paste.clipboardDenied": "لا يستطيع Lumen قراءة الحافظة. اسمح بالوصول إلى الحافظة، أو الصق باستخدام Ctrl+V.",
+  "paste.clipboardEmpty": "الحافظة فارغة.",
   "pdf.ask": "اسأل",
   "pdf.ask.cite": "الصفحة {page}، السطر {line}",
   "pdf.ask.dropped": "حُذف {n} من الاقتباسات غير الموجودة في ملف PDF",

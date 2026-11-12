@@ -571,6 +571,26 @@
       "vars": []
     },
     {
+      "key": "cmd.edit.pasteFormatted",
+      "en": "Paste with formatting",
+      "vars": []
+    },
+    {
+      "key": "cmd.edit.pasteFormatted.hint",
+      "en": "Pastes HTML from Word, Google Docs or a website as clean Markdown: headings, lists, tables, links and emphasis, without styles",
+      "vars": []
+    },
+    {
+      "key": "cmd.edit.pastePlain",
+      "en": "Paste as plain text",
+      "vars": []
+    },
+    {
+      "key": "cmd.edit.pastePlain.hint",
+      "en": "Pastes the clipboard's text without any formatting",
+      "vars": []
+    },
+    {
       "key": "cmd.epub.open",
       "en": "Open an EPUB for reading…",
       "vars": []

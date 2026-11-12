@@ -775,6 +775,8 @@
   "pageView.of": "из {total}",
   "pageView.page": "Страница {n}",
   "pageView.prev": "Предыдущая страница",
+  "paste.clipboardDenied": "Lumen не может прочитать буфер обмена. Разрешите доступ или вставьте через Ctrl+V.",
+  "paste.clipboardEmpty": "Буфер обмена пуст.",
   "pdf.ask": "Спросить",
   "pdf.ask.cite": "Страница {page}, строка {line}",
   "pdf.ask.dropped": "Пропущено цитат, которых нет в PDF: {n}",

@@ -70,6 +70,7 @@ export default defineConfig({
             { label: "Markdown fidelity", slug: "editor/markdown-fidelity", translations: { he: "נאמנות ל-Markdown" } },
             { label: "Obsidian syntax", slug: "editor/obsidian-syntax", translations: { he: "תחביר Obsidian" } },
             { label: "Citations with [@key]", slug: "editor/citations", translations: { he: "ציטוטים עם ‎[@key]" } },
+            { label: "Pasting from Word and the web", slug: "editor/paste", translations: { he: "הדבקה מ-Word ומהרשת" } },
           ],
         },
         {

@@ -30,7 +30,9 @@ import { AiError } from "../ai/llm";
 import { showAiToast } from "../ui/AiToast";
 import { openAiPrompt } from "../ui/AiInlinePrompt";
 import { log } from "../lib/logger";
-import { getMarkdown } from "@milkdown/utils";
+import { getMarkdown, insert as insertMarkdown, $prose } from "@milkdown/utils";
+import { cleanPastedHtml, shouldConvertPaste } from "../paste/htmlPaste";
+import { setWysiwygPasteTarget, type PasteDetail } from "../paste/pasteCommands";
 import { wysiwygSourcePreserver } from "./wysiwygSource";
 import { wysiwygObsidianPlugins } from "./wysiwygObsidian";
 import {
@@ -622,6 +624,16 @@ export function splitFrontmatter(md: string): { fm: string; body: string } {
 }
 
 export default function WysiwygEditor({ value, onChange, spellCheck = true }: Props) {
+/** Word lists, Google Docs spans, inline styles and needless direction marks, cleaned on paste. */
+const pasteCleanPlugin = $prose(
+  () =>
+    new Plugin({
+      props: {
+        transformPastedHTML: (html: string) => (shouldConvertPaste(html, "") ? cleanPastedHtml(html) : html),
+      },
+    }),
+);
+
   const hostRef = useRef<HTMLDivElement | null>(null);
   const spellCheckRef = useRef(spellCheck);
   spellCheckRef.current = spellCheck;
@@ -945,6 +957,8 @@ export default function WysiwygEditor({ value, onChange, spellCheck = true }: Pr
         .use(listSpreadFix)
         // W1.3 — ==highlights==, callouts and %%comments%%.
         .use(wysiwygObsidianPlugins)
+        // W1.4 — clipboard HTML cleaned before ProseMirror parses it.
+        .use(pasteCleanPlugin)
         .use(history)
         .use(listener)
         .use(clipboard)
@@ -977,6 +991,32 @@ export default function WysiwygEditor({ value, onChange, spellCheck = true }: Pr
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
+
+  // W1.4 — "Paste as plain text" / "Paste with formatting" from the palette.
+  useEffect(() => {
+    setWysiwygPasteTarget(true);
+    const onPaste = (e: Event) => {
+      const ed = editorRef.current;
+      const detail = (e as CustomEvent<PasteDetail>).detail;
+      if (!ed || !detail) return;
+      try {
+        if (detail.mode === "plain") {
+          ed.action((ctx) => {
+            const view = ctx.get(editorViewCtx);
+            view.dispatch(view.state.tr.insertText(detail.text));
+            view.focus();
+          });
+        } else ed.action(insertMarkdown(detail.markdown));
+      } catch (err) {
+        log.warn("[wysiwyg] paste command failed", err);
+      }
+    };
+    window.addEventListener("lumen-paste", onPaste);
+    return () => {
+      setWysiwygPasteTarget(false);
+      window.removeEventListener("lumen-paste", onPaste);
+    };
+  }, []);
 
   // Final teardown — queued behind any in-flight build so the floating
   // menu DOM is only removed once no plugin view can still reference it.

@@ -775,6 +775,8 @@
   "pageView.of": "共 {total} 页",
   "pageView.page": "第 {n} 页",
   "pageView.prev": "上一页",
+  "paste.clipboardDenied": "Lumen 无法读取剪贴板。请允许访问剪贴板，或使用 Ctrl+V 粘贴。",
+  "paste.clipboardEmpty": "剪贴板为空。",
   "pdf.ask": "提问",
   "pdf.ask.cite": "第 {page} 页，第 {line} 行",
   "pdf.ask.dropped": "已省略 {n} 条不在 PDF 中的引文",

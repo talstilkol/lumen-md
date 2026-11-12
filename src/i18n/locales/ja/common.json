@@ -775,6 +775,8 @@
   "pageView.of": "/ {total}",
   "pageView.page": "{n} ページ",
   "pageView.prev": "前のページ",
+  "paste.clipboardDenied": "Lumen はクリップボードを読み取れません。アクセスを許可するか、Ctrl+V で貼り付けてください。",
+  "paste.clipboardEmpty": "クリップボードは空です。",
   "pdf.ask": "質問",
   "pdf.ask.cite": "{page} ページ、{line} 行目",
   "pdf.ask.dropped": "PDF にない引用 {n} 件を除外しました",

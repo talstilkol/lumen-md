@@ -4376,6 +4376,16 @@
       "vars": []
     },
     {
+      "key": "paste.clipboardDenied",
+      "en": "Lumen can't read the clipboard. Allow clipboard access, or paste with Ctrl+V.",
+      "vars": []
+    },
+    {
+      "key": "paste.clipboardEmpty",
+      "en": "The clipboard is empty.",
+      "vars": []
+    },
+    {
       "key": "pdf.ask",
       "en": "Ask",
       "vars": []

@@ -92,6 +92,19 @@ export function buildEditCommands({ getEditorView, suggestingMode, toggleSuggest
         action: () => window.dispatchEvent(new CustomEvent("lumen-outline", { detail: { cmd } })),
       }));
     })(),
+    // W1.4 — paste from Word, Google Docs and websites, as text or as Markdown (loaded on use).
+    ...(["plain", "formatted"] as const).map((mode) => ({
+      id: mode === "plain" ? "edit.pastePlain" : "edit.pasteFormatted",
+      label: t(mode === "plain" ? "cmd.edit.pastePlain" : "cmd.edit.pasteFormatted"),
+      hint: t(mode === "plain" ? "cmd.edit.pastePlain.hint" : "cmd.edit.pasteFormatted.hint"),
+      icon: cmdIcons.Pencil,
+      group: t("group.edit"),
+      action: () =>
+        void Promise.all([import("../../paste/pasteCommands"), import("../../store/useToastStore")]).then(async ([{ runPaste }, { useToastStore }]) => {
+          const msg = await runPaste(mode);
+          if (msg) useToastStore.getState().push({ kind: "warning", title: msg });
+        }),
+    })),
   ];
 }
 

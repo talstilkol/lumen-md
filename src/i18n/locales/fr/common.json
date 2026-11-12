@@ -775,6 +775,8 @@
   "pageView.of": "sur {total}",
   "pageView.page": "Page {n}",
   "pageView.prev": "Page précédente",
+  "paste.clipboardDenied": "Lumen ne peut pas lire le presse-papiers. Autorisez l'accès, ou collez avec Ctrl+V.",
+  "paste.clipboardEmpty": "Le presse-papiers est vide.",
   "pdf.ask": "Demander",
   "pdf.ask.cite": "Page {page}, ligne {line}",
   "pdf.ask.dropped": "{n} citations absentes du PDF ont été écartées",

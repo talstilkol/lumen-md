@@ -376,6 +376,8 @@
   "pageView.of": "of {total}",
   "pageView.page": "Page {n}",
   "pageView.prev": "Previous page",
+  "paste.clipboardDenied": "Lumen can't read the clipboard. Allow clipboard access, or paste with Ctrl+V.",
+  "paste.clipboardEmpty": "The clipboard is empty.",
   "pdf.ask": "Ask",
   "pdf.ask.cite": "Page {page}, line {line}",
   "pdf.ask.dropped": "{n} quotes that aren't in the PDF were left out",

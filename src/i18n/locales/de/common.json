@@ -775,6 +775,8 @@
   "pageView.of": "von {total}",
   "pageView.page": "Seite {n}",
   "pageView.prev": "Vorherige Seite",
+  "paste.clipboardDenied": "Lumen kann die Zwischenablage nicht lesen. Erlauben Sie den Zugriff oder fügen Sie mit Strg+V ein.",
+  "paste.clipboardEmpty": "Die Zwischenablage ist leer.",
   "pdf.ask": "Fragen",
   "pdf.ask.cite": "Seite {page}, Zeile {line}",
   "pdf.ask.dropped": "{n} Zitate, die nicht im PDF stehen, wurden weggelassen",
