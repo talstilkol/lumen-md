@@ -1,0 +1,2 @@
+# Real-vault corpus (plan W4.30): byte-for-byte copies, never converted.
+src/__tests__/fixtures/obsidian-corpus/** -text

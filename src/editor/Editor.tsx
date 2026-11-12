@@ -54,6 +54,7 @@ import { formatKeymap } from "./formatKeymap";
 import { setSuggesting, suggestingAuthor, suggestingExtension, suggestingSkip } from "./suggestingExtension";
 import { useAuth } from "../auth/useAuth";
 import type { CollabSession } from "../collab/yjs";
+import { joinTextEnvelope, splitTextEnvelope, type TextEnvelope } from "../storage/textCodec";
 
 const mdHighlight = HighlightStyle.define([
   { tag: t.heading1, class: "tok-heading tok-heading1" },
@@ -284,6 +285,10 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
   // When the parent pushes a new value into the editor (file open),
   // we want to suppress the resulting onChange notification.
   const syncingRef = useRef(false);
+  // The note's BOM and CRLF line breaks: hidden from CodeMirror (which shows
+  // LF), written back on every change so a save keeps the file's bytes (W4.30).
+  const envelopeRef = useRef<TextEnvelope>(splitTextEnvelope(value).envelope);
+  const lastEmittedRef = useRef<string>(value);
   // The line gutter was removed — instead, the current cursor line is shown
   // in a small overlay pill that fades in next to the scrollbar on hover or
   // while the user is actively editing.
@@ -359,7 +364,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     });
 
     // Local storage acts as truth for the document.
-    const initialDoc = value;
+    const initialDoc = splitTextEnvelope(value).body;
 
     const baseExtensions = [
       vimCompartment.of([]),
@@ -434,7 +439,9 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       ]),
       EditorView.updateListener.of((u) => {
         if (u.docChanged && !syncingRef.current) {
-          onChangeRef.current(u.state.doc.toString());
+          const next = joinTextEnvelope(u.state.doc.toString(), envelopeRef.current);
+          lastEmittedRef.current = next;
+          onChangeRef.current(next);
         }
         // Track the current line for the floating line-number badge.
         if (u.docChanged || u.selectionSet) {
@@ -509,11 +516,16 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     const view = viewRef.current;
     if (!view) return;
     const current = view.state.doc.toString();
-    if (current === value) return;
+    const { body, envelope } = splitTextEnvelope(value);
+    // A value from outside (file open, sync) brings its own BOM / line breaks;
+    // our own emission keeps the ones the note was opened with.
+    if (value !== lastEmittedRef.current) envelopeRef.current = envelope;
+    lastEmittedRef.current = value;
+    if (current === body) return;
     syncingRef.current = true;
     try {
       view.dispatch({
-        changes: { from: 0, to: current.length, insert: value },
+        changes: { from: 0, to: current.length, insert: body },
       });
     } finally {
       syncingRef.current = false;
