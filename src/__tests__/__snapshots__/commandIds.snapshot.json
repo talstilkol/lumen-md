@@ -473,6 +473,18 @@
       "icon": "Sparkles"
     },
     {
+      "id": "sync.setup",
+      "label": "Set up sync (two clicks)",
+      "group": "Tools",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "classroom.open",
+      "label": "Private classroom…",
+      "group": "Tools",
+      "icon": "Sparkles"
+    },
+    {
       "id": "ai.cancel",
       "label": "AI: Cancel",
       "group": "AI Prompts",
@@ -1554,6 +1566,18 @@
       "icon": "Sparkles"
     },
     {
+      "id": "sync.setup",
+      "label": "Set up sync (two clicks)",
+      "group": "Tools",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "classroom.open",
+      "label": "Private classroom…",
+      "group": "Tools",
+      "icon": "Sparkles"
+    },
+    {
       "id": "ai.cancel",
       "label": "AI: Cancel",
       "group": "AI Prompts",
@@ -2307,6 +2331,8 @@
     "vault.toBrowser",
     "file.trash",
     "sync.open",
+    "sync.setup",
+    "classroom.open",
     "ai.cancel",
     "note.read",
     "vault.digest",
