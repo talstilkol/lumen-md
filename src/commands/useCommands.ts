@@ -647,6 +647,21 @@ export function useCommands({
         action: toggleGrammarCheck,
       },
       {
+        id: "view.hebrewGrammarLevel",
+        label: t("cmd.view.hebrewGrammarLevel"),
+        hint: t("cmd.view.hebrewGrammarLevel.hint"),
+        icon: cmdIcons.Pencil,
+        group: t("group.view"),
+        action: async () => {
+          const { getGrammarLevel, setGrammarLevel } = await import("../ai/hebrewSpellService");
+          const { GRAMMAR_LEVELS } = await import("../ai/hebrewGrammar");
+          const next = GRAMMAR_LEVELS[(GRAMMAR_LEVELS.indexOf(getGrammarLevel()) + 1) % GRAMMAR_LEVELS.length];
+          setGrammarLevel(next);
+          const name = { everyday: t("grammar.he.level.everyday"), academic: t("grammar.he.level.academic"), legal: t("grammar.he.level.legal") }[next];
+          showAiToast(t("grammar.he.levelSet", { level: name }), "success");
+        },
+      },
+      {
         id: "tools.writingGoal",
         label: writingGoalWords > 0
           ? t("cmd.tools.writingGoal.set", { words: writingGoalWords })
