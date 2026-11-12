@@ -26,8 +26,10 @@
  *    (code blocks, markup and front matter not counted). Hebrew runs a bit
  *    shorter than English (prefixes join the word), but not by half.
  *
- *   node scripts/docs-parity.mjs            # report, exit 0 (a warning, for now)
- *   node scripts/docs-parity.mjs --strict   # exit 1 on any problem
+ *   node scripts/docs-parity.mjs            # report only, exit 0
+ *   node scripts/docs-parity.mjs --strict   # exit 1 on any problem: the gate
+ *                                           # (npm run docs:parity, and inside
+ *                                           # docs:complete, a Vercel preview gate, W6.28)
  *   node scripts/docs-parity.mjs --json     # the report as JSON
  */
 import { readFileSync, readdirSync, statSync } from "node:fs";
@@ -217,7 +219,7 @@ function main() {
   console.error(out.join("\n"));
   const n = (k) => report[k].length;
   console.error(
-    `\n${strict ? "✗" : "⚠"} docs-parity: ${n("missing")} missing, ${n("sections")} with other sections, ${n("anchors")} help anchors, ${n("links")} section links, ${n("short")} short (under ${Math.round(SHORT_RATIO * 100)}%)${strict ? "" : " — a warning for now; --strict fails"}`,
+    `\n${strict ? "✗" : "⚠"} docs-parity: ${n("missing")} missing, ${n("sections")} with other sections, ${n("anchors")} help anchors, ${n("links")} section links, ${n("short")} short (under ${Math.round(SHORT_RATIO * 100)}%)${strict ? "" : " — report only; --strict (npm run docs:complete) fails"}`,
   );
   if (strict) process.exit(1);
 }

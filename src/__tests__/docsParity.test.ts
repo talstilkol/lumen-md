@@ -3,8 +3,12 @@
  * pages (the real tree is checked by `npm run docs:parity`).
  */
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 // @ts-expect-error — plain .mjs script without types
 import { body, helpTopics, lines, outline, parity, sectionLinks, unmatched, wordCount } from "../../scripts/docs-parity.mjs";
+// @ts-expect-error — plain .mjs script without type declarations
+import { GATES, PREVIEW_GATES } from "../../scripts/vercel-build.mjs";
 
 type Heading = { level: number; heading: string; anchor: string };
 
@@ -108,5 +112,20 @@ describe("docs-parity", () => {
       ]),
     };
     expect(parity({ pages }).links).toEqual([{ slug: "ai/y", lang: "he", link: "/he/ai/x/#nope" }]);
+  });
+
+  it("is a gate (W6.28): docs:complete runs it with --strict, and every preview build runs docs:complete", () => {
+    const pkg = JSON.parse(readFileSync(resolve(__dirname, "..", "..", "package.json"), "utf8")) as { scripts: Record<string, string> };
+    expect(pkg.scripts["docs:complete"]).toMatch(/docs-parity\.mjs --strict/);
+    expect(pkg.scripts["docs:parity"]).toMatch(/--strict/);
+    expect(PREVIEW_GATES).toContain("docs:complete");
+    expect(GATES["docs:complete"]).toEqual(["run", "-s", "docs:complete"]);
+  });
+
+  it("a Hebrew page that lost one section of the English page's is a problem the gate fails on", () => {
+    const he = HE_FULL.replace("\n## כלים\n\nשמונה תשע עשר אחת עשרה.\n", "\n");
+    const report = parity({ pages: { en: new Map([["ai/x", page(EN)]]), he: new Map([["ai/x", page(he)]]) } });
+    expect(report.sections).toHaveLength(1);
+    expect(lines(report)[0]).toMatch(/^sections {2}ai\/x: English 3 sections, Hebrew 2 — lacks ## Tools$/);
   });
 });
