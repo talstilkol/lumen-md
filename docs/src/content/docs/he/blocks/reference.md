@@ -21,7 +21,7 @@ description: שפות בלוקי הקוד המגודרים ש-Lumen מציגה �
 | ` ```plantuml ` / ` ```puml ` | ‏PlantUML דרך kroki.io | יציאה לרשת; אפשר לבטל דרך מצב הפרטיות |
 | ` ```abc ` | תווי מוזיקה ב-ABC (פרטיטורה מעובדת) | ‏Abcjs |
 | ` ```model ` | מציג מודלים תלת-ממדיים (`<model-viewer>`) | ‏GLB / GLTF |
-| ` ```embed ` | הטמעה אוניברסלית (YouTube,‏ Vimeo,‏ Twitter,‏ Loom,‏ CodePen,‏ oembed) | הכתובת בשורת הגוף |
+| ` ```embed ` | הטמעה אוניברסלית (YouTube,‏ Vimeo,‏ Twitter,‏ Loom,‏ CodePen,‏ Spotify,‏ Gist ועוד) | הכתובת בשורת הגוף. שום דבר לא נטען עד שלוחצים **טעינה** (או **לאשר תמיד** את האתר): אז הנגן רץ בתוך מסגרת התוכן של Lumen. קישור לאתר ש-Lumen לא יכול להטמיע נשאר קישור |
 | ` ```html ` / ` ```html-preview ` | תצוגה מקדימה של HTML מנוקה | רשימת היתרים של DOMPurify; שום JS לא רץ בדף |
 | ` ```svg ` / ` ```live-svg ` | תצוגה מקדימה של SVG מנוקה בשורה | אותה הקשחה כמו HTML |
 | ` ```live-js ` | ארגז חול של JS ‏(Worker מבודד) עם פלט קונסולה | מצבי stdout/stderr/שגיאה; מוגן במגבלת זמן; `shared` = סשן REPL אחד למסמך (ראו בהמשך) |
