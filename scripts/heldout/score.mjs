@@ -134,7 +134,7 @@ export function scratch(prefix) {
 
 /** asr-he: the clips are fetched from the pinned FLEURS revision into a scratch folder, scored, and deleted. */
 export function scoreAsr(items, { revision, canary, asrModel }) {
-  if (!asrModel || !existsSync(asrModel)) return { status: "unavailable", reason: "no ASR model folder (--asr-model, as models:day's asr-zipformer step fetches it)" };
+  if (!asrModel || !existsSync(join(asrModel, "tokens.txt"))) return { status: "unavailable", reason: "no ASR model (--asr-model: the folder scripts/asr/fetch-model.sh fills)" };
   const dir = scratch("lumen-heldout-asr-");
   try {
     const py = spawnSync("python3", ["-I", join(ROOT, "scripts/heldout/fetch.py"), "fleurs-audio", "--revision", revision, "--out", dir, "--canary", canary], { input: JSON.stringify(items), encoding: "utf8", stdio: ["pipe", "ignore", "pipe"], maxBuffer: 1 << 26 });
