@@ -17,7 +17,11 @@
  *     envelopes of src/collab/e2e.ts closes the connection (4403) and is
  *     not stored. So a room is ciphertext the server cannot read.
  *   - Retention: a room nobody changed for RETENTION_DAYS (default 90) is
- *     deleted by its Durable Object's alarm.
+ *     deleted by its Durable Object's alarm. Only a change writes storage
+ *     (review 12.11): a connection that never authenticated with the room
+ *     token, or one that only read, writes nothing and doesn't refresh the
+ *     retention clock. (The relay applies no update before the token is
+ *     checked, so a change always comes from an authenticated peer.)
  *   - No IP addresses in logs: this code logs nothing about connections,
  *     and Workers Logs are off in wrangler.toml. Cloudflare's own edge
  *     sees addresses, as any host does.
@@ -97,6 +101,8 @@ export class CollabRoom {
     this.room = null;
     this.peers = new Map(); // WebSocket → relay peer
     this.saveTimer = null;
+    /** An authenticated peer changed the room since the last save. */
+    this.dirty = false;
   }
 
   async loadRoom(name) {
@@ -125,7 +131,10 @@ export class CollabRoom {
       maxBytes: num(this.env.MAX_ROOM_BYTES, 4_000_000),
       authorize: async (token, room) => verifyRoomToken(key, token, room) === null,
       onAuthenticated: (socket, address) => socket.ws.serializeAttachment({ ready: true, address, room: name }),
-      onChange: () => this.scheduleSave(name),
+      onChange: () => {
+        this.dirty = true;
+        this.scheduleSave(name);
+      },
     });
     // Sockets that were already in the room before the object hibernated.
     for (const ws of this.state.getWebSockets()) {
@@ -164,16 +173,23 @@ export class CollabRoom {
     }, SAVE_DEBOUNCE_MS);
   }
 
+  /** Store the room, only when it changed: nothing else writes storage or moves the alarm. */
   async save(name) {
-    if (!this.room) return;
+    if (!this.room || !this.dirty) return;
+    this.dirty = false;
     const state = this.room.state();
     const chunks = Math.max(1, Math.ceil(state.byteLength / CHUNK));
     const entries = { name, chunks, lastWrite: Date.now() };
     for (let i = 0; i < chunks; i++) entries[`s${i}`] = state.slice(i * CHUNK, (i + 1) * CHUNK);
-    const old = (await this.state.storage.get("chunks")) ?? 0;
-    await this.state.storage.put(entries);
-    if (old > chunks) await this.state.storage.delete(Array.from({ length: old - chunks }, (_, i) => `s${chunks + i}`));
-    await this.state.storage.setAlarm(Date.now() + num(this.env.RETENTION_DAYS, 90) * DAY_MS);
+    try {
+      const old = (await this.state.storage.get("chunks")) ?? 0;
+      await this.state.storage.put(entries);
+      if (old > chunks) await this.state.storage.delete(Array.from({ length: old - chunks }, (_, i) => `s${chunks + i}`));
+      await this.state.storage.setAlarm(Date.now() + num(this.env.RETENTION_DAYS, 90) * DAY_MS);
+    } catch (e) {
+      this.dirty = true; // why: not stored: the next save tries again
+      throw e;
+    }
   }
 
   async fetch(request) {
@@ -214,7 +230,8 @@ export class CollabRoom {
         this.saveTimer = null;
       }
       const a = ws.deserializeAttachment() ?? {};
-      if (a.room) await this.save(a.room);
+      // Only a pending change is stored: a socket that never sent the room token, or only read, writes nothing.
+      if (a.room && this.dirty) await this.save(a.room);
     }
   }
 

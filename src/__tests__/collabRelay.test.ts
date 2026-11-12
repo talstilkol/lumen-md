@@ -414,6 +414,36 @@ describe("edge-workers/collab: the public server on Cloudflare (simulated runtim
     expect(o.data.size).toBe(0);
   }, 30_000);
 
+  it("only an authenticated change writes storage: no token, a wrong token, or a reader write nothing (review 12.11)", async () => {
+    const { url, rooms } = await serveWorker();
+    const room = `quiet-${Date.now().toString(36)}`;
+    // No valid token: denied, closed, and nothing stored, no alarm armed.
+    const intruder = connect(url, room, "pw", async () => "not-a-token");
+    expect(await until(() => rooms.objs.has(room))).toBe(true);
+    const o = rooms.objs.get(room)!;
+    intruder.plain.getText("t").insert(0, "x");
+    intruder.provider.destroy();
+    expect(await until(() => o.state.getWebSockets().length === 0)).toBe(true);
+    expect(o.data.size).toBe(0);
+    expect(o.alarm).toBeNull();
+
+    // A real change is stored; then a reader comes and goes: the retention clock doesn't move.
+    const token = async () => (await requestRoomToken(url, room, null)).token;
+    const a = connect(url, room, "pw", token);
+    expect(await until(() => a.synced())).toBe(true);
+    a.plain.getText("t").insert(0, "kept");
+    a.provider.destroy();
+    expect(await until(() => o.data.has("lastWrite") && o.state.getWebSockets().length === 0)).toBe(true);
+    const lastWrite = o.data.get("lastWrite");
+    const alarm = o.alarm;
+    const reader = connect(url, room, "pw", token);
+    expect(await until(() => reader.synced() && reader.plain.getText("t").toString() === "kept")).toBe(true);
+    reader.provider.destroy();
+    expect(await until(() => o.state.getWebSockets().length === 0)).toBe(true);
+    expect(o.data.get("lastWrite")).toBe(lastWrite);
+    expect(o.alarm).toBe(alarm);
+  }, 30_000);
+
   it("refuses a plaintext room and stores nothing of it; answers /healthz; relays signaling", async () => {
     const { url, rooms, fetchWorker, env } = await serveWorker();
     const room = `plain-${Date.now().toString(36)}`;

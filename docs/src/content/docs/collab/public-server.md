@@ -16,7 +16,7 @@ Lumen's public server does both, free, and **never sees what you write**.
 |---|---|
 | The text of your note | **Never.** It accepts only rooms with a password ([end-to-end encryption](/collab/encryption/)). Every change is checked before it is applied. A change that is not an encrypted envelope closes the connection, and nothing of it is stored. |
 | The room's encrypted document | Stored, so a room survives everyone leaving. It is ciphertext. Without the room password nobody can read it, the server included. |
-| Rooms nobody uses | Deleted **90 days** after the last change. |
+| Rooms nobody uses | Deleted **90 days** after the last change. Only a change by someone with the room's token counts: connecting without it, or only reading, stores nothing. |
 | Your IP address | Not in any log. The server code logs nothing about connections, and request logging is off. Cloudflare, which hosts the server, sees addresses as any network provider does. |
 | Cursors and display names | Passed between the people in the room while they are connected. Never stored. The name is a random one ("Saffron", "Willow"), not yours. |
 | Room names, times and sizes | Visible to the server. Room names are random. |
