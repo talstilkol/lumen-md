@@ -1265,6 +1265,16 @@
       "vars": []
     },
     {
+      "key": "cmd.settings.trustedRepos",
+      "en": "Trusted repositories…",
+      "vars": []
+    },
+    {
+      "key": "cmd.settings.trustedRepos.hint",
+      "en": "Let agents write in a cloned repo without the extra question",
+      "vars": []
+    },
+    {
       "key": "cmd.shortcuts",
       "en": "Keyboard shortcuts",
       "vars": []

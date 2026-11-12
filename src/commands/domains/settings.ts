@@ -55,6 +55,14 @@ export function buildOptionalPanelCommands({ setTemplateGalleryOpen, setAuditLog
           },
         ]
       : []),
+    {
+      id: "settings.trustedRepos",
+      label: t("cmd.settings.trustedRepos"),
+      hint: t("cmd.settings.trustedRepos.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.security"),
+      action: async () => (await import("../../ui/TrustedReposDialog")).openTrustedReposDialog(),
+    },
     ...(setThemeSettingsOpen
       ? [
           {

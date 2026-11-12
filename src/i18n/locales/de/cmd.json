@@ -250,6 +250,8 @@
   "cmd.settings.theme.hint": "Akzentfarbe, Editor-Schrift, Größe, Zeilenhöhe, Inhaltsbreite und Vorlagen",
   "cmd.settings.trustedKeys": "Vertrauenswürdige Plugin-Signaturschlüssel…",
   "cmd.settings.trustedKeys.hint": "Ed25519-Schlüssel anzeigen, hinzufügen oder entfernen, mit denen Plugins signiert sein müssen",
+  "cmd.settings.trustedRepos": "Vertrauenswürdige Repositorys…",
+  "cmd.settings.trustedRepos.hint": "Agenten in einem geklonten Repo ohne Zusatzfrage schreiben lassen",
   "cmd.shortcuts": "Tastenkürzel",
   "cmd.source": "Nur Quelltext",
   "cmd.spell.hebrewDictionary": "Hebräische Rechtschreibung: Wörterbuch (laden / entfernen)",

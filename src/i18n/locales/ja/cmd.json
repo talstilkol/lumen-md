@@ -250,6 +250,8 @@
   "cmd.settings.theme.hint": "アクセントカラー、エディターのフォント、サイズ、行の高さ、本文の幅、プリセット",
   "cmd.settings.trustedKeys": "信頼するプラグイン署名鍵…",
   "cmd.settings.trustedKeys.hint": "プラグインの署名に使う Ed25519 鍵の一覧・追加・削除",
+  "cmd.settings.trustedRepos": "信頼するリポジトリ…",
+  "cmd.settings.trustedRepos.hint": "クローンしたリポジトリで追加の確認なしにエージェントが書き込めるようにする",
   "cmd.shortcuts": "キーボードショートカット",
   "cmd.source": "ソースのみ",
   "cmd.spell.hebrewDictionary": "ヘブライ語スペル: 辞書（ダウンロード／削除）",

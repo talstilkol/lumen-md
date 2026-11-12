@@ -167,6 +167,7 @@ export default defineConfig({
             { label: "Supply chain", slug: "security/supply-chain" },
             { label: "The e2e test surface", translations: { he: "ממשק הבדיקות של e2e" }, slug: "security/test-surface" },
             { label: "Allowed image hosts", slug: "security/image-hosts", translations: { he: "שרתי תמונות מותרים" } },
+            { label: "Trusted repositories", slug: "security/trusted-repos", translations: { he: "מאגרים מהימנים" } },
           ],
         },
         {

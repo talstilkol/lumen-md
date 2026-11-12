@@ -250,6 +250,8 @@
   "cmd.settings.theme.hint": "لون التمييز وخط المحرر والحجم وارتفاع السطر وعرض المحتوى والقوالب الجاهزة",
   "cmd.settings.trustedKeys": "مفاتيح توقيع الإضافات الموثوقة…",
   "cmd.settings.trustedKeys.hint": "عرض مفاتيح Ed25519 التي يجب توقيع الإضافات بها أو إضافتها أو إزالتها",
+  "cmd.settings.trustedRepos": "المستودعات الموثوقة…",
+  "cmd.settings.trustedRepos.hint": "السماح للوكلاء بالكتابة في مستودع مستنسخ دون السؤال الإضافي",
   "cmd.shortcuts": "اختصارات لوحة المفاتيح",
   "cmd.source": "المصدر فقط",
   "cmd.spell.hebrewDictionary": "التدقيق الإملائي العبري: القاموس (تنزيل / إزالة)",

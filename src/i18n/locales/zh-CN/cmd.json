@@ -250,6 +250,8 @@
   "cmd.settings.theme.hint": "强调色、编辑器字体、字号、行高、内容宽度和预设",
   "cmd.settings.trustedKeys": "受信任的插件签名密钥…",
   "cmd.settings.trustedKeys.hint": "查看、添加或移除插件必须使用的 Ed25519 签名密钥",
+  "cmd.settings.trustedRepos": "受信任的仓库…",
+  "cmd.settings.trustedRepos.hint": "允许代理在克隆的仓库中写入，无需额外确认",
   "cmd.shortcuts": "键盘快捷键",
   "cmd.source": "仅源码",
   "cmd.spell.hebrewDictionary": "希伯来语拼写：词典（下载／删除）",

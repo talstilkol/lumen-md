@@ -250,6 +250,8 @@
   "cmd.settings.theme.hint": "Couleur d’accent, police de l’éditeur, taille, interligne, largeur du contenu et préréglages",
   "cmd.settings.trustedKeys": "Clés de signature de plugins approuvées…",
   "cmd.settings.trustedKeys.hint": "Lister, ajouter ou retirer les clés Ed25519 avec lesquelles les plugins doivent être signés",
+  "cmd.settings.trustedRepos": "Dépôts de confiance…",
+  "cmd.settings.trustedRepos.hint": "Laisser les agents écrire dans un dépôt cloné sans la question supplémentaire",
   "cmd.shortcuts": "Raccourcis clavier",
   "cmd.source": "Source uniquement",
   "cmd.spell.hebrewDictionary": "Orthographe hébraïque : dictionnaire (télécharger / supprimer)",

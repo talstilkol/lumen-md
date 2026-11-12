@@ -250,6 +250,8 @@
   "cmd.settings.theme.hint": "צבע הדגשה, גופן העורך, גודל, גובה שורה, רוחב תוכן וערכות מוכנות",
   "cmd.settings.trustedKeys": "מפתחות חתימה מהימנים לתוספים…",
   "cmd.settings.trustedKeys.hint": "הצג, הוסף או הסר את מפתחות Ed25519 שבהם תוספים חייבים להיות חתומים",
+  "cmd.settings.trustedRepos": "מאגרים מהימנים…",
+  "cmd.settings.trustedRepos.hint": "לאפשר לסוכנים לכתוב בריפו משוכפל בלי השאלה הנוספת",
   "cmd.shortcuts": "קיצורי מקלדת",
   "cmd.source": "קוד בלבד",
   "cmd.spell.hebrewDictionary": "איות עברי: מילון (הורדה / הסרה)",

@@ -4378,6 +4378,86 @@
       "vars": []
     },
     {
+      "key": "trustedRepos.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "trustedRepos.confirm.body",
+      "en": "Agents that read notes from {repo} will propose changes without asking first. Anyone who can push to it can put text in front of your agents. Trust it only if you control who writes to it.",
+      "vars": [
+        "repo"
+      ]
+    },
+    {
+      "key": "trustedRepos.confirm.title",
+      "en": "Trust this repository?",
+      "vars": []
+    },
+    {
+      "key": "trustedRepos.empty",
+      "en": "No cloned repositories yet.",
+      "vars": []
+    },
+    {
+      "key": "trustedRepos.intro",
+      "en": "Notes from a cloned repo may be other people's, so an agent that reads them asks before it proposes a change. Trust a repo you own to skip that question. Changes still wait for your review, and web requests still ask. Saved on this device only.",
+      "vars": []
+    },
+    {
+      "key": "trustedRepos.loadFailed",
+      "en": "Couldn't list the cloned repositories.",
+      "vars": []
+    },
+    {
+      "key": "trustedRepos.loading",
+      "en": "Loading…",
+      "vars": []
+    },
+    {
+      "key": "trustedRepos.off",
+      "en": "{repo}: agents ask first again",
+      "vars": [
+        "repo"
+      ]
+    },
+    {
+      "key": "trustedRepos.on",
+      "en": "{repo} is trusted",
+      "vars": [
+        "repo"
+      ]
+    },
+    {
+      "key": "trustedRepos.saveFailed",
+      "en": "Couldn't save the setting: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "trustedRepos.state.off",
+      "en": "Asks first",
+      "vars": []
+    },
+    {
+      "key": "trustedRepos.state.on",
+      "en": "Trusted",
+      "vars": []
+    },
+    {
+      "key": "trustedRepos.title",
+      "en": "Trusted repositories",
+      "vars": []
+    },
+    {
+      "key": "trustedRepos.toggle.aria",
+      "en": "Trust {repo}",
+      "vars": [
+        "repo"
+      ]
+    },
+    {
       "key": "typo.applied",
       "en": "{count} typography changes applied",
       "vars": [

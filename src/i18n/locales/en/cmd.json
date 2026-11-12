@@ -249,6 +249,8 @@
   "cmd.settings.theme.hint": "Accent color, editor font, size, line height, content width and presets",
   "cmd.settings.trustedKeys": "Trusted plugin signing keys…",
   "cmd.settings.trustedKeys.hint": "List, add or remove the Ed25519 keys plugins must be signed with",
+  "cmd.settings.trustedRepos": "Trusted repositories…",
+  "cmd.settings.trustedRepos.hint": "Let agents write in a cloned repo without the extra question",
   "cmd.shortcuts": "Keyboard shortcuts",
   "cmd.source": "Source only",
   "cmd.spell.hebrewDictionary": "Hebrew spelling: dictionary (download / remove)",
