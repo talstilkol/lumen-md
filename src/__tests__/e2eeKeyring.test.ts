@@ -38,10 +38,12 @@ describe("re-key", () => {
     const b = await joinVault("B", p);
     await b.sync.sync();
     puts.length = 0;
+    const oldManifest = await manifestName(a.sync.keys());
     const r = await a.sync.rekey();
     expect(r.epoch).toBe(1);
-    // Only the keyring and the manifest were written: no blob.
-    expect(puts.sort()).toEqual([KEYRING_NAME, await manifestName(a.sync.keys())].sort());
+    // Only the frozen old manifest, the keyring and the new epoch's manifest were written: no blob.
+    expect(puts).toEqual([oldManifest, KEYRING_NAME, await manifestName(a.sync.keys())]);
+    expect(r.written).toEqual(puts);
     // B picks up the new epoch on its next round, through the passphrase.
     b.files.set("n/after.md", "after the re-key");
     await b.sync.sync();
@@ -90,9 +92,14 @@ describe("revoking a device", () => {
     // The lost phone: no wrap for it in the new keyring…
     await expect(lost.sync.sync()).rejects.toBeInstanceOf(RevokedError);
     await expect(unlockWithDevice(p, "phone", phone.identity)).rejects.toBeInstanceOf(RevokedError);
-    // …and its old keys don't open the new manifest.
-    const name = await manifestName(lostKeys);
+    // …and its old keys don't open the new manifest (each epoch has its own object since review 12.11)…
+    const name = await manifestName(a.sync.keys());
+    expect(name).not.toBe(await manifestName(lostKeys));
     await expect(openManifest(lostKeys, p.objects.get(name)!.data, name)).rejects.toBeInstanceOf(DecryptError);
+    // …while its own epoch's manifest is frozen at the state before the revocation.
+    const old = await openManifest(lostKeys, p.objects.get(await manifestName(lostKeys))!.data);
+    expect(old.manifest.frozen?.epoch).toBe(2);
+    expect(Object.keys(old.manifest.files)).toEqual(["a.md"]);
     expect(lost.files.text("a.md")).toBe("before");
 
     // The laptop carries on with its own key.
@@ -141,7 +148,8 @@ describe("re-key under load", () => {
         // Re-key (sometimes revoking a throwaway device) by either side, mid-flow.
         const id = await generateIdentity();
         const r = await who.sync.rekey(rand() < 0.5 ? { enroll: { [`d${round}`]: id.recipient } } : { revoke: [`d${round - 250}`] });
-        expect(r.written).toHaveLength(2);
+        expect(r.written).toHaveLength(3);
+        expect(r.written).toContain(KEYRING_NAME);
         rekeys++;
       }
       await who.sync.sync();
@@ -168,7 +176,9 @@ describe("re-key under load", () => {
     await a.sync.sync();
     puts.length = 0;
     await a.sync.rekey();
-    expect(puts).toHaveLength(2);
+    // The frozen manifest, the keyring, the new manifest: no blob.
+    expect(puts).toHaveLength(3);
+    expect(puts).toContain(KEYRING_NAME);
     const fresh = await joinVault("F", p);
     await fresh.sync.sync();
     expect(fresh.files.files.size).toBe(10_000);
