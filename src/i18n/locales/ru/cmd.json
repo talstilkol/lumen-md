@@ -221,6 +221,8 @@
   "cmd.help.whatsNew": "Что нового в этой версии",
   "cmd.highlights.all": "Все выделения",
   "cmd.highlights.import": "Импорт выделений (Kindle, Kobo, Readwise, Zotero)…",
+  "cmd.i18n.suggest": "Предложить перевод лучше",
+  "cmd.i18n.suggest.hint": "Открывает issue на GitHub со строкой, английским оригиналом и вашим вариантом; без учётной записи в Lumen",
   "cmd.image.altText": "Изображения: альт-текст через OCR / локальное зрение",
   "cmd.image.altText.hint": "Распознаёт текст на изображениях заметки на устройстве (иврит + английский); остальное описывает локальной моделью зрения Ollama",
   "cmd.insert.abc": "Вставка music notation (ABC)",

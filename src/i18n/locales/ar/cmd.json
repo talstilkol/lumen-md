@@ -221,6 +221,8 @@
   "cmd.help.whatsNew": "ما الجديد في هذه النسخة",
   "cmd.highlights.all": "كل التمييزات",
   "cmd.highlights.import": "استيراد التظليلات (Kindle وKobo وReadwise وZotero)…",
+  "cmd.i18n.suggest": "اقترح ترجمة أفضل",
+  "cmd.i18n.suggest.hint": "يفتح مشكلة في GitHub مملوءة بالنص والأصل الإنجليزي وصياغتك؛ دون حساب في Lumen",
   "cmd.image.altText": "الصور: نص بديل من OCR / رؤية محلية",
   "cmd.image.altText.hint": "يقرأ النص في صور هذه الملاحظة على الجهاز (العبرية والإنجليزية)، ويصف الباقي بنموذج رؤية محلي في Ollama",
   "cmd.insert.abc": "إدراج music notation (ABC)",

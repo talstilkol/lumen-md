@@ -220,6 +220,8 @@
   "cmd.help.whatsNew": "What's new in this version",
   "cmd.highlights.all": "All highlights",
   "cmd.highlights.import": "Import highlights (Kindle, Kobo, Readwise, Zotero)…",
+  "cmd.i18n.suggest": "Suggest a better translation",
+  "cmd.i18n.suggest.hint": "Opens a GitHub issue filled in with the string, its English and your wording; no account in Lumen",
   "cmd.image.altText": "Images: alt text from OCR / local vision",
   "cmd.image.altText.hint": "Reads text in this note's images on this device (Hebrew + English); describes the rest with a local Ollama vision model",
   "cmd.insert.abc": "Insert music notation (ABC)",

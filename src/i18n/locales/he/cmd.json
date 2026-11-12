@@ -221,6 +221,8 @@
   "cmd.help.whatsNew": "מה חדש בגרסה הזאת",
   "cmd.highlights.all": "כל ההדגשות",
   "cmd.highlights.import": "ייבוא הדגשות (Kindle,‏ Kobo,‏ Readwise,‏ Zotero)…",
+  "cmd.i18n.suggest": "הציעו תרגום טוב יותר",
+  "cmd.i18n.suggest.hint": "פותח issue ב-GitHub עם המחרוזת, המקור באנגלית והנוסח שלכם; בלי חשבון ב-Lumen",
   "cmd.image.altText": "תמונות: טקסט חלופי מ-OCR / ראייה מקומית",
   "cmd.image.altText.hint": "קורא את הטקסט שבתמונות הפתק במכשיר (עברית ואנגלית); מתאר את השאר עם מודל ראייה מקומי ב-Ollama",
   "cmd.insert.abc": "הוספת תווים מוזיקליים (ABC)",

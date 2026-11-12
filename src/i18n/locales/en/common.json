@@ -388,6 +388,8 @@
   "litReview.view.all": "All papers",
   "litReview.view.verifiedOnly": "Verified only",
   "loading.generic": "Loading…",
+  "locale.betaLabel": "{label} (beta)",
+  "locale.betaNote": "This translation was made by machine and is waiting for a native speaker's review.",
   "meeting.decisions": "Decisions",
   "meeting.empty": "There's no transcript in this note",
   "meeting.icsOffer": "Save the {n} dated tasks as a calendar file (.ics)?",

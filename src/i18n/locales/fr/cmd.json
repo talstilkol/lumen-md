@@ -221,6 +221,8 @@
   "cmd.help.whatsNew": "Nouveautés de cette version",
   "cmd.highlights.all": "Tous les surlignages",
   "cmd.highlights.import": "Importer des surlignages (Kindle, Kobo, Readwise, Zotero)…",
+  "cmd.i18n.suggest": "Proposer une meilleure traduction",
+  "cmd.i18n.suggest.hint": "Ouvre une issue GitHub avec la chaîne, l’anglais et votre formulation ; sans compte Lumen",
   "cmd.image.altText": "Images : texte alternatif par OCR / vision locale",
   "cmd.image.altText.hint": "Lit le texte des images de cette note sur l’appareil (hébreu + anglais) ; décrit le reste avec un modèle de vision Ollama local",
   "cmd.insert.abc": "Insertion music notation (ABC)",

@@ -53,6 +53,8 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "airplane.json": { module: "privacy/airplaneStrings.ts", users: ["privacy/NetworkMonitor.tsx"], prefixes: ["airplane."] },
   // The Hebrew lexicon (plan W5.26): its popover and palette actions, both loaded with a dynamic import.
   "lexicon.json": { module: "lexicon/strings.ts", users: ["lexicon/LexiconPopover.tsx", "lexicon/commands.ts"], prefixes: ["lexicon."] },
+  // "Suggest a better translation" (plan W4.18), a dialog opened with a dynamic import.
+  "translationSuggest.json": { module: "ui/translationSuggestStrings.ts", users: ["ui/TranslationSuggest.tsx"], prefixes: ["i18nSuggest."] },
 };
 
 function sources(dir: string): string[] {

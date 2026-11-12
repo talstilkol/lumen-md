@@ -221,6 +221,8 @@
   "cmd.help.whatsNew": "このバージョンの新機能",
   "cmd.highlights.all": "すべてのハイライト",
   "cmd.highlights.import": "ハイライトを読み込む（Kindle、Kobo、Readwise、Zotero）…",
+  "cmd.i18n.suggest": "より良い翻訳を提案",
+  "cmd.i18n.suggest.hint": "文字列・英語原文・あなたの訳を記入した GitHub の issue を開きます（Lumen のアカウント不要）",
   "cmd.image.altText": "画像: OCR / ローカル画像認識で代替テキスト",
   "cmd.image.altText.hint": "このノートの画像内の文字を端末上で読み取り（ヘブライ語・英語）、それ以外はローカルの Ollama 画像モデルで説明します",
   "cmd.insert.abc": "挿入 music notation (ABC)",
