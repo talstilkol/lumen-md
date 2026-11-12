@@ -41,6 +41,8 @@
     "budget": "node scripts/bundle-budget.mjs",
     "ci:local": "node scripts/ci-local.mjs",
     "ci:docker": "bash scripts/ci-docker.sh",
+    "factory:run": "node scripts/factory/run.mjs",
+    "factory:selftest": "bash scripts/factory/selftest.sh",
     "pages:check": "node scripts/pages-check.mjs",
     "pages:deploy": "bash scripts/pages-deploy.sh",
     "lighthouse": "lhci autorun --config=./lighthouserc.json",
