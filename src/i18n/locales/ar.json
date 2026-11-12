@@ -1431,5 +1431,8 @@
   "cmd.ai.cancel": "AI: إلغاء",
   "cmd.ai.cancel.hint": "يوقف كل طلبات الذكاء الاصطناعي الجارية (Esc يفعل ذلك أيضاً)",
   "toast.aiCancelled": "أُلغي طلب الذكاء الاصطناعي ({count})",
-  "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ"
+  "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ",
+  "searchDialog.localTranslation": "ترجمة محلية",
+  "searchDialog.noLocalTranslator": "لا يوجد مترجم على هذا الجهاز: يُعرض النص الأصلي.",
+  "searchDialog.monolingualEmbeddings": "نموذج التضمين هنا للإنجليزية فقط، لذا تجد الأسئلة العبرية الملاحظات الإنجليزية بالكلمات المفتاحية فقط. استخدم النموذج المدمج (multilingual-e5) للبحث عبر اللغات."
 }

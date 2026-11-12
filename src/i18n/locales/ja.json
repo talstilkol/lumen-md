@@ -1431,5 +1431,8 @@
   "cmd.ai.cancel": "AI: キャンセル",
   "cmd.ai.cancel.hint": "実行中の AI リクエストをすべて停止します（Esc でも可）",
   "toast.aiCancelled": "AI リクエストをキャンセルしました（{count}）",
-  "toast.aiNothingRunning": "実行中の AI リクエストはありません"
+  "toast.aiNothingRunning": "実行中の AI リクエストはありません",
+  "searchDialog.localTranslation": "ローカル翻訳",
+  "searchDialog.noLocalTranslator": "この端末に翻訳機能がありません。原文を表示しています。",
+  "searchDialog.monolingualEmbeddings": "ここの埋め込みモデルは英語専用のため、ヘブライ語の質問はキーワードでしか英語のノートを見つけられません。言語をまたぐ検索には内蔵モデル（multilingual-e5）を使ってください。"
 }

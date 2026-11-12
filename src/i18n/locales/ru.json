@@ -1431,5 +1431,8 @@
   "cmd.ai.cancel": "ИИ: отменить",
   "cmd.ai.cancel.hint": "Останавливает все запросы ИИ (то же делает Esc)",
   "toast.aiCancelled": "Запрос ИИ отменён ({count})",
-  "toast.aiNothingRunning": "Нет активных запросов ИИ"
+  "toast.aiNothingRunning": "Нет активных запросов ИИ",
+  "searchDialog.localTranslation": "Локальный перевод",
+  "searchDialog.noLocalTranslator": "На этом устройстве нет переводчика: показан оригинал.",
+  "searchDialog.monolingualEmbeddings": "Модель эмбеддингов здесь только английская, поэтому вопросы на иврите находят английские заметки только по ключевым словам. Для межъязыкового поиска используйте встроенную модель (multilingual-e5)."
 }
