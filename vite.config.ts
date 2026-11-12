@@ -85,6 +85,25 @@ const dictionaryEn = {
   },
 };
 /** Main build only (not the worker build), so each file is emitted once. */
+/**
+ * PROBE (verify/e2e-probe only, W1.36): print the 30 largest modules of each
+ * vendor-excalidraw-chunk-* chunk by rendered length, to see what fills the core.
+ */
+const excalidrawChunkReport: Plugin = {
+  name: "lumen:excalidraw-chunk-report",
+  apply: "build",
+  generateBundle(_options, bundle) {
+    if (!process.env.LUMEN_CHUNK_REPORT) return;
+    for (const out of Object.values(bundle)) {
+      if (out.type !== "chunk" || !/vendor-excalidraw-chunk-/.test(out.fileName)) continue;
+      const mods = Object.entries(out.modules).map(([id, m]) => ({ id: id.replace(/^.*node_modules\//, ""), len: m.renderedLength }));
+      const total = mods.reduce((n, m) => n + m.len, 0);
+      console.log(`\n[W1.36] ${out.fileName}: ${mods.length} modules, ${(total / 1024).toFixed(1)} KB rendered (code ${(out.code.length / 1024).toFixed(1)} KB)`);
+      for (const m of mods.sort((a, b) => b.len - a.len).slice(0, 30)) console.log(`[W1.36]   ${(m.len / 1024).toFixed(1).padStart(7)} KB  ${m.id}`);
+    }
+  },
+};
+
 const dictionaryEnFiles: Plugin = {
   name: "lumen-dictionary-en-files",
   configureServer(server) {
@@ -301,6 +320,7 @@ export default defineConfig({
   // Worker bundles get only these plugins (plus Vite's own).
   worker: { plugins: () => [dictionaryEn] },
   plugins: [
+    excalidrawChunkReport,
     react(),
     cleanUrlAliases,
     dictionaryEn,
