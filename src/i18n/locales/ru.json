@@ -1467,5 +1467,22 @@
   "pdf.ask.notFound": "Похоже, в этом PDF нет ответа на этот вопрос.",
   "pdf.ask.cite": "Страница {page}, строка {line}",
   "pdf.ask.failed": "Не удалось ответить: {error}",
-  "pdf.ask.dropped": "Пропущено цитат, которых нет в PDF: {n}"
+  "pdf.ask.dropped": "Пропущено цитат, которых нет в PDF: {n}",
+  "cmd.research.litReview": "Обзор литературы по PDF из хранилища",
+  "cmd.research.litReview.hint": "Таблица всех PDF: вопрос, метод, выборка, результаты, ограничения — каждое значение с цитатой, проверенной на её странице. Работает на этом устройстве.",
+  "litReview.started": "Создаётся обзор литературы…",
+  "litReview.progress": "Обзор литературы: {done} из {total} — {title}",
+  "litReview.done": "Обзор литературы: {papers} статей, {values} проверенных значений, в «{folder}».",
+  "litReview.failed": "Обзор литературы остановлен: {error}",
+  "litReview.field.question": "Вопрос",
+  "litReview.field.method": "Метод",
+  "litReview.field.sample": "Выборка",
+  "litReview.field.findings": "Результаты",
+  "litReview.field.limitations": "Ограничения",
+  "litReview.source": "Источник",
+  "litReview.noValue": "Нет значения с проверенной цитатой.",
+  "litReview.pageLine": "с. {page}, строка {line}",
+  "litReview.verifiedFields": "Проверенные поля",
+  "litReview.view.all": "Все статьи",
+  "litReview.view.verifiedOnly": "Только проверенные"
 }

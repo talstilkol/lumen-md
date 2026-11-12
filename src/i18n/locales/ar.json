@@ -1467,5 +1467,22 @@
   "pdf.ask.notFound": "يبدو أن ملف PDF هذا لا يجيب عن ذلك.",
   "pdf.ask.cite": "الصفحة {page}، السطر {line}",
   "pdf.ask.failed": "تعذّرت الإجابة: {error}",
-  "pdf.ask.dropped": "حُذف {n} من الاقتباسات غير الموجودة في ملف PDF"
+  "pdf.ask.dropped": "حُذف {n} من الاقتباسات غير الموجودة في ملف PDF",
+  "cmd.research.litReview": "مراجعة الأدبيات من ملفات PDF في الخزنة",
+  "cmd.research.litReview.hint": "جدول لكل ملف PDF: السؤال والطريقة والعينة والنتائج والقيود، وكل قيمة باقتباس تم التحقق منه في صفحته. يعمل على هذا الجهاز.",
+  "litReview.started": "جارٍ إنشاء مراجعة الأدبيات…",
+  "litReview.progress": "مراجعة الأدبيات: {done} من {total} — {title}",
+  "litReview.done": "مراجعة الأدبيات: {papers} أوراق، {values} قيم موثقة، في «{folder}».",
+  "litReview.failed": "توقفت مراجعة الأدبيات: {error}",
+  "litReview.field.question": "السؤال",
+  "litReview.field.method": "الطريقة",
+  "litReview.field.sample": "العينة",
+  "litReview.field.findings": "النتائج",
+  "litReview.field.limitations": "القيود",
+  "litReview.source": "المصدر",
+  "litReview.noValue": "لا توجد قيمة باقتباس موثق.",
+  "litReview.pageLine": "ص. {page}، السطر {line}",
+  "litReview.verifiedFields": "الحقول الموثقة",
+  "litReview.view.all": "كل الأوراق",
+  "litReview.view.verifiedOnly": "الموثقة فقط"
 }
