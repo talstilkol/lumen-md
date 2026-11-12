@@ -233,7 +233,8 @@ export default function App() {
     // module loads on the first call only.
     (window as unknown as { __lumen?: unknown }).__lumen = {
       htmlToMarkdown,
-      // `agentReview` (plan 5.11 e2e) is added by agents/reviewBridge once it loads.
+      // `agentReview` (plan 5.11 e2e) is added by agents/reviewBridge once it
+      // loads, in development and tests only (plan W1.31).
       // The vault index, for e2e/perf-vault.spec.ts (a lazy chunk).
       vaultIndex: () => import("./storage/vaultIndexProbe"),
       ocr: (image: Blob) => import("./ai/ocr").then((m) => m.ocrImage(image)),
