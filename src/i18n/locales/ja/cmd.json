@@ -88,6 +88,8 @@
   "cmd.app.updateChannel.hint": "ベータには新機能が先に届き、安定版にはテスト済みのリリースが届きます",
   "cmd.audit.open": "監査ログ…",
   "cmd.audit.open.hint": "記録されたすべての変更を確認し、コンプライアンス用に CSV をエクスポートします",
+  "cmd.beta": "ヘルプ: ベータプログラム",
+  "cmd.beta.hint": "このデバイスでベータに参加し、フィードバックを送信。週次レポートは希望した場合のみ",
   "cmd.billing.manage": "請求: サブスクリプションを管理",
   "cmd.billing.managePersonal": "請求: 個人のサブスクリプションを管理",
   "cmd.billing.upgradePro": "請求: Pro にアップグレード",

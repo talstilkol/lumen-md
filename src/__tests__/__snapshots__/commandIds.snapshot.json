@@ -883,6 +883,13 @@
       "icon": "Link"
     },
     {
+      "id": "help.beta",
+      "label": "Help: Beta programme",
+      "group": "Tools",
+      "hint": "Join the beta on this device, send feedback, and a weekly report only if you ask for it",
+      "icon": "Sparkles"
+    },
+    {
       "id": "ai.policy",
       "label": "AI: Local or Cloud Policy",
       "group": "Tools",
@@ -2695,6 +2702,13 @@
       "icon": "Link"
     },
     {
+      "id": "help.beta",
+      "label": "Help: Beta programme",
+      "group": "Tools",
+      "hint": "Join the beta on this device, send feedback, and a weekly report only if you ask for it",
+      "icon": "Sparkles"
+    },
+    {
       "id": "ai.policy",
       "label": "AI: Local or Cloud Policy",
       "group": "Tools",
@@ -3843,6 +3857,7 @@
     "help.open",
     "help.diagnostics",
     "help.usage",
+    "help.beta",
     "ai.policy",
     "ai.trace",
     "ai.cache",
