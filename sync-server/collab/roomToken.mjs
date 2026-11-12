@@ -6,7 +6,7 @@
  *
  * Format: base64url(JSON {r: room, e: expiry in unix seconds}) "." base64url(HMAC-SHA256)
  */
-import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 
 export const DEFAULT_TOKEN_TTL_S = 10 * 60;
 
@@ -22,10 +22,14 @@ function mac(key, payload) {
   return createHmac("sha256", key).update(payload).digest();
 }
 
-/** Issue a token for `room`, valid for `ttlS` seconds from `nowMs`. */
-export function issueRoomToken(key, room, { ttlS = DEFAULT_TOKEN_TTL_S, nowMs = Date.now() } = {}) {
+/**
+ * Issue a token for `room`, valid for `ttlS` seconds from `nowMs`. With
+ * `verifier` (review 2, 12.11) the token also names the room secret it was
+ * issued for: the hash of the client's room proof (`proofVerifier`).
+ */
+export function issueRoomToken(key, room, { ttlS = DEFAULT_TOKEN_TTL_S, nowMs = Date.now(), verifier } = {}) {
   const exp = Math.floor(nowMs / 1000) + ttlS;
-  const payload = b64url(JSON.stringify({ r: room, e: exp }));
+  const payload = b64url(JSON.stringify(verifier ? { r: room, e: exp, v: verifier } : { r: room, e: exp }));
   return { token: `${payload}.${b64url(mac(key, payload))}`, expiresAt: exp * 1000 };
 }
 
@@ -64,4 +68,50 @@ export function accessKeyOk(given, expected) {
   const a = Buffer.from(String(given ?? ""));
   const b = Buffer.from(expected);
   return a.length === b.length && timingSafeEqual(a, b);
+}
+
+/**
+ * The room proof (review 2, 12.11): the app derives it from the room's
+ * password in the share link, HMAC-SHA256(PBKDF2-SHA256(password,
+ * "lumen.collab.proof.v1|<room>", 200,000), "lumen-collab room v1|<room>"),
+ * as 43 base64url characters (src/collab/roomProof.ts). The server keeps
+ * only its SHA-256, the verifier, so it learns nothing it could open the
+ * room with, and guessing a password from it costs the same PBKDF2 as
+ * guessing it from the room's ciphertext.
+ */
+export const ROOM_PROOF = /^[A-Za-z0-9_-]{43}$/;
+
+/** The verifier of a room proof (hex SHA-256), or null for a malformed one. */
+export function proofVerifier(proof) {
+  if (typeof proof !== "string" || !ROOM_PROOF.test(proof)) return null;
+  return createHash("sha256").update(proof).digest("hex");
+}
+
+/** The verifier a (signature-checked) token was issued for, or null when it names none. */
+export function tokenVerifier(token) {
+  try {
+    const claims = JSON.parse(Buffer.from(String(token).split(".")[0], "base64url").toString("utf8"));
+    return typeof claims?.v === "string" ? claims.v : null;
+  } catch {
+    return null;
+  }
+}
+
+/** The most proof-of-work bits the app solves (src/collab/roomProof.ts MAX_ROOM_POW_BITS). */
+export const MAX_ROOM_POW_BITS = 24;
+
+/** Does `nonce` prove `bits` of work for `room` under `verifier`? SHA-256("lumen-collab pow v1|<room>|<verifier>|<nonce>"). */
+export function roomPowOk(room, verifier, nonce, bits) {
+  if (typeof nonce !== "string" || !/^[A-Za-z0-9_-]{1,64}$/.test(nonce)) return false;
+  const d = createHash("sha256").update(`lumen-collab pow v1|${room}|${verifier}|${nonce}`).digest();
+  let n = 0;
+  for (const b of d) {
+    if (b === 0) {
+      n += 8;
+      continue;
+    }
+    n += Math.clz32(b) - 24;
+    break;
+  }
+  return n >= bits;
 }

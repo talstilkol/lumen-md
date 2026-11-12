@@ -43,6 +43,8 @@ export async function createPersistentProvider(
   roomName: string,
   doc: Y.Doc,
   accessKey: string | null,
+  /** The room's password: the public server's token needs the room proof derived from it. */
+  password: string | null = null,
 ): Promise<PersistentProvider> {
   const mod = (await import("@hocuspocus/provider")) as unknown as {
     HocuspocusProvider: new (cfg: Record<string, unknown>) => HocuspocusLike;
@@ -56,7 +58,7 @@ export async function createPersistentProvider(
     name: roomName,
     document: doc,
     // Called on every connect, so a reconnect after expiry gets a new token.
-    token: async () => (await requestRoomToken(url, roomName, accessKey)).token,
+    token: async () => (await requestRoomToken(url, roomName, accessKey, { password })).token,
   });
   provider.on("synced", (data) => emit("sync", (data as { state?: boolean } | undefined)?.state !== false));
   provider.on("authenticationFailed", () => emit("connection-error", false));
