@@ -164,6 +164,29 @@ export const STEPS = [
     parse: (dir) => toolCallMetrics(dir),
   },
   {
+    id: "voice-commands",
+    title: "Voice commands — 200 recorded commands through the dictation model and the intent grammar",
+    plan: ["W5.20"],
+    requires: { script: "eval:voice-commands" },
+    providedBy: "plan W5.20 feat/voice-commands",
+    models: [],
+    needs: ["ffmpeg", "network"],
+    minutes: 4,
+    target: { metric: "share", min: 0.9, text: "≥ 90 % right on 200 recorded commands (plan W5.20)" },
+    blockedUnless: { option: "voiceDir", reason: "needs --voice-dir <folder with commands.json + recordings> (read aloud from `npm run eval:voice-commands -- --script`)" },
+    commands: (c) => {
+      const model = join(c.cache, "zipformer2-66m-streaming-he");
+      return [
+        { cmd: "bash", args: ["scripts/asr/fetch-model.sh", model], skipIf: () => existsSync(join(model, "encoder.int8.onnx")) },
+        npm("eval:voice-commands", ["--dir", c.voiceDir, "--out", join(c.dir, "voice-commands.json")], { LUMEN_ASR_MODEL_DIR: model }),
+      ];
+    },
+    parse: (dir) => {
+      const j = readJson(join(dir, "voice-commands.json"));
+      return j ? { ok: j.ok, total: j.total, share: j.share } : null;
+    },
+  },
+  {
     id: "meetings",
     title: "Meeting notes — tasks found in the owner's recordings",
     plan: ["6.16"],
@@ -272,6 +295,7 @@ export const COVERAGE = [
   ["W5.12", "lit-review", "dev probe only; 20 gold papers are the owner's"],
   ["W5.13", "asr-web", "Whisper on WebGPU; the 90-minute lecture timing is a hand check"],
   ["W5.28", "crosslingual", "e5 nDCG never measured"],
+  ["W5.20", "voice-commands", "the grammar's 200/200 is on its development set; the held-out score is the owner's recordings"],
 ].map(([task, step, note]) => ({ task, step, note }));
 
 // ── helpers that build commands ───────────────────────────────────────────

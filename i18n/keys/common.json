@@ -4122,6 +4122,40 @@
       "vars": []
     },
     {
+      "key": "voiceCmd.confirmDelete",
+      "en": "Move this note to the trash?",
+      "vars": []
+    },
+    {
+      "key": "voiceCmd.confirmOk",
+      "en": "Move to trash",
+      "vars": []
+    },
+    {
+      "key": "voiceCmd.heard",
+      "en": "Voice command: {command}",
+      "vars": [
+        "command"
+      ]
+    },
+    {
+      "key": "voiceCmd.listening",
+      "en": "Listening… say a command",
+      "vars": []
+    },
+    {
+      "key": "voiceCmd.needsModel",
+      "en": "Voice commands use the dictation model. Start dictation once to download it (74 MB).",
+      "vars": []
+    },
+    {
+      "key": "voiceCmd.unknown",
+      "en": "Not a command I know: “{text}”",
+      "vars": [
+        "text"
+      ]
+    },
+    {
       "key": "wikiComplete.aliasOf",
       "en": "alias of {name}",
       "vars": [

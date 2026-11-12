@@ -867,6 +867,13 @@
       "icon": "FileText"
     },
     {
+      "id": "voice.command",
+      "label": "Voice command",
+      "group": "Tools",
+      "hint": "Say one: new note, search…, add task…, daily note, read aloud — recognised on this device",
+      "icon": "Sparkles"
+    },
+    {
       "id": "voice.memo",
       "label": "🎙 Voice memo (transcribe + summarize)",
       "group": "Tools",
@@ -2213,6 +2220,13 @@
       "icon": "FileText"
     },
     {
+      "id": "voice.command",
+      "label": "Voice command",
+      "group": "Tools",
+      "hint": "Say one: new note, search…, add task…, daily note, read aloud — recognised on this device",
+      "icon": "Sparkles"
+    },
+    {
       "id": "voice.memo",
       "label": "🎙 Voice memo (transcribe + summarize)",
       "group": "Tools",
@@ -2753,6 +2767,7 @@
     "template.weekly-review",
     "template.changelog",
     "template.lesson-plan",
+    "voice.command",
     "voice.memo",
     "help.credits",
     "voice.meeting",
