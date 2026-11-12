@@ -95,6 +95,8 @@ export interface AppState {
   outlineSheet: boolean;
   showWorkspace: boolean;
   showBacklinks: boolean;
+  /** The local graph panel (plan W1.10). */
+  showLocalGraph: boolean;
   vimEnabled: boolean;
   rtl: boolean;
   autoSave: boolean;
@@ -153,6 +155,7 @@ export interface AppState {
   toggleOutline: () => void;
   toggleWorkspace: () => void;
   toggleBacklinks: () => void;
+  toggleLocalGraph: () => void;
   toggleVim: () => void;
   toggleRtl: () => void;
   toggleAutoSave: () => void;
@@ -278,6 +281,7 @@ const partializeAppState = (s: AppState) =>
     showOutline: s.showOutline,
     showWorkspace: s.showWorkspace,
     showBacklinks: s.showBacklinks,
+    showLocalGraph: s.showLocalGraph,
     vimEnabled: s.vimEnabled,
     rtl: s.rtl,
     autoSave: s.autoSave,
@@ -336,6 +340,7 @@ export const useAppStore = create<AppState>()(
       outlineSheet: false,
       showWorkspace: false,
       showBacklinks: false,
+      showLocalGraph: false,
       vimEnabled: false,
       rtl: false,
       autoSave: true,
@@ -441,6 +446,7 @@ export const useAppStore = create<AppState>()(
         set((s) => (isNarrowScreen() ? { outlineSheet: !s.outlineSheet } : { showOutline: !s.showOutline })),
       toggleWorkspace: () => set((s) => ({ showWorkspace: !s.showWorkspace })),
       toggleBacklinks: () => set((s) => ({ showBacklinks: !s.showBacklinks })),
+      toggleLocalGraph: () => set((s) => ({ showLocalGraph: !s.showLocalGraph })),
       toggleVim: () => set((s) => ({ vimEnabled: !s.vimEnabled })),
       toggleRtl: () => set((s) => {
         const next = !s.rtl;

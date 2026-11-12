@@ -1746,6 +1746,16 @@
       "vars": []
     },
     {
+      "key": "cmd.view.localGraph",
+      "en": "Show / hide the local graph",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.localGraph.hint",
+      "en": "the open note's links, 1–3 steps out",
+      "vars": []
+    },
+    {
       "key": "cmd.view.outline",
       "en": "Toggle outline",
       "vars": []

@@ -345,6 +345,8 @@
   "cmd.view.language": "שפה: {label}",
   "cmd.view.language.ltr": "שמאל-לימין",
   "cmd.view.language.rtl": "ימין-לשמאל",
+  "cmd.view.localGraph": "הצגה / הסתרה של הגרף המקומי",
+  "cmd.view.localGraph.hint": "הקישורים של הפתק הפתוח, 1–3 צעדים",
   "cmd.view.outline": "החלפת תוכן עניינים",
   "cmd.view.pageView": "📄 תצוגת עמוד (A4)",
   "cmd.view.pageView.off": "כבוי כעת",

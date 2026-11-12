@@ -345,6 +345,8 @@
   "cmd.view.language": "Langue : {label}",
   "cmd.view.language.ltr": "de gauche à droite",
   "cmd.view.language.rtl": "de droite à gauche",
+  "cmd.view.localGraph": "Afficher / masquer le graphe local",
+  "cmd.view.localGraph.hint": "les liens de la note ouverte, à 1–3 pas",
   "cmd.view.outline": "Basculer outline",
   "cmd.view.pageView": "📄 Page Affichage (A4)",
   "cmd.view.pageView.off": "Actuellement désactivé",

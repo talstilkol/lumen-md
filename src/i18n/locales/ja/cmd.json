@@ -345,6 +345,8 @@
   "cmd.view.language": "言語: {label}",
   "cmd.view.language.ltr": "左から右",
   "cmd.view.language.rtl": "右から左",
+  "cmd.view.localGraph": "ローカルグラフの表示 / 非表示",
+  "cmd.view.localGraph.hint": "開いているノートのリンク（1〜3 段階）",
   "cmd.view.outline": "切替 outline",
   "cmd.view.pageView": "📄 Page 表示 (A4)",
   "cmd.view.pageView.off": "現在オフ",

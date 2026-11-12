@@ -345,6 +345,8 @@
   "cmd.view.language": "Sprache: {label}",
   "cmd.view.language.ltr": "links nach rechts",
   "cmd.view.language.rtl": "rechts nach links",
+  "cmd.view.localGraph": "Lokalen Graphen ein- / ausblenden",
+  "cmd.view.localGraph.hint": "die Links der offenen Notiz, 1–3 Schritte weit",
   "cmd.view.outline": "Umschalten outline",
   "cmd.view.pageView": "📄 Page Ansicht (A4)",
   "cmd.view.pageView.off": "Derzeit AUS",

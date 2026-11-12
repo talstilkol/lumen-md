@@ -140,6 +140,14 @@ export function buildViewCommands({ setSearchOpen, setRuntimeMetricsOpen, vimEna
       action: toggleBacklinks,
     },
     {
+      id: "view.localGraph",
+      label: t("cmd.view.localGraph"),
+      hint: t("cmd.view.localGraph.hint"),
+      icon: cmdIcons.Link,
+      group: t("group.view"),
+      action: () => useAppStore.getState().toggleLocalGraph(),
+    },
+    {
       id: "view.search",
       label: t("cmd.view.search"),
       // No shortcut shown: ⇧⌘F is focus mode (App.tsx) — the palette promised

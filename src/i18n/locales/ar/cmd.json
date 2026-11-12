@@ -345,6 +345,8 @@
   "cmd.view.language": "اللغة: {label}",
   "cmd.view.language.ltr": "من اليسار إلى اليمين",
   "cmd.view.language.rtl": "من اليمين إلى اليسار",
+  "cmd.view.localGraph": "إظهار / إخفاء الرسم المحلي",
+  "cmd.view.localGraph.hint": "روابط الملاحظة المفتوحة، من 1 إلى 3 خطوات",
   "cmd.view.outline": "تبديل outline",
   "cmd.view.pageView": "📄 Page عرض (A4)",
   "cmd.view.pageView.off": "معطّل حاليًا",

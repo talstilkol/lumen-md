@@ -345,6 +345,8 @@
   "cmd.view.language": "语言:{label}",
   "cmd.view.language.ltr": "从左到右",
   "cmd.view.language.rtl": "从右到左",
+  "cmd.view.localGraph": "显示 / 隐藏局部图谱",
+  "cmd.view.localGraph.hint": "打开的笔记的链接，1–3 步",
   "cmd.view.outline": "切换 outline",
   "cmd.view.pageView": "📄 Page 视图 (A4)",
   "cmd.view.pageView.off": "当前已关闭",

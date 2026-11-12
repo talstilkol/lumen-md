@@ -98,6 +98,7 @@ export default defineConfig({
             { label: "All highlights", translations: { he: "כל ההדגשות" }, slug: "workspace/highlights" },
             { label: "Daily review (spaced repetition)", translations: { he: "חזרה יומית" }, slug: "workspace/review" },
             { label: "Daily notes and the Hebrew calendar", slug: "workspace/hebrew-calendar", translations: { he: "פתק יומי ולוח עברי" } },
+            { label: "Graph and local graph", slug: "workspace/graph", translations: { he: "גרף וגרף מקומי" } },
           ],
         },
         {

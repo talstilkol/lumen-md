@@ -345,6 +345,8 @@
   "cmd.view.language": "Язык: {label}",
   "cmd.view.language.ltr": "слева направо",
   "cmd.view.language.rtl": "справа налево",
+  "cmd.view.localGraph": "Показать / скрыть локальный граф",
+  "cmd.view.localGraph.hint": "связи открытой заметки на 1–3 шага",
   "cmd.view.outline": "Переключить outline",
   "cmd.view.pageView": "📄 Page Вид (A4)",
   "cmd.view.pageView.off": "Сейчас выключено",
