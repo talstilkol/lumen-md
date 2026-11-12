@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-10T03:21:45.424Z",
+  "generated_at": "2026-11-12T10:55:19.171Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1453,
+  "count": 1500,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -471,6 +471,31 @@
     {
       "key": "cmd.cite.syncZotero",
       "en": "Citations: copy the Zotero library into the vault",
+      "vars": []
+    },
+    {
+      "key": "cmd.cite.legal",
+      "en": "Citations: legal source (uniform citation rules)…",
+      "vars": []
+    },
+    {
+      "key": "cmd.cite.legal.hint",
+      "en": "A ruling, a law, regulations, a bill, a book or an article, written by the Israeli uniform citation rules (3rd edition, 2021)",
+      "vars": []
+    },
+    {
+      "key": "cmd.cite.legalFromCase",
+      "en": "Citations: legal citation from the case number at the cursor",
+      "vars": []
+    },
+    {
+      "key": "cmd.cite.legalFromCase.hint",
+      "en": "Finds ע\"א, בג\"ץ, ת\"א … numbers and fills the citation picker; the citation replaces the number",
+      "vars": []
+    },
+    {
+      "key": "toast.cite.noCaseNumber",
+      "en": "No case number at the cursor: fill in the citation by hand.",
       "vars": []
     },
     {
@@ -7802,6 +7827,216 @@
       "vars": [
         "error"
       ]
+    },
+    {
+      "key": "legalCite.title",
+      "en": "Legal citation",
+      "vars": []
+    },
+    {
+      "key": "legalCite.kind",
+      "en": "Source",
+      "vars": []
+    },
+    {
+      "key": "legalCite.kind.ruling",
+      "en": "Ruling",
+      "vars": []
+    },
+    {
+      "key": "legalCite.kind.law",
+      "en": "Law",
+      "vars": []
+    },
+    {
+      "key": "legalCite.kind.regulation",
+      "en": "Regulations",
+      "vars": []
+    },
+    {
+      "key": "legalCite.kind.bill",
+      "en": "Bill",
+      "vars": []
+    },
+    {
+      "key": "legalCite.kind.book",
+      "en": "Book",
+      "vars": []
+    },
+    {
+      "key": "legalCite.kind.article",
+      "en": "Article",
+      "vars": []
+    },
+    {
+      "key": "legalCite.f.proceeding",
+      "en": "Proceeding (ע\"א, בג\"ץ…)",
+      "vars": []
+    },
+    {
+      "key": "legalCite.f.court",
+      "en": "Court (not for the Supreme Court)",
+      "vars": []
+    },
+    {
+      "key": "legalCite.f.number",
+      "en": "Case number",
+      "vars": []
+    },
+    {
+      "key": "legalCite.f.partyA",
+      "en": "First party",
+      "vars": []
+    },
+    {
+      "key": "legalCite.f.partyB",
+      "en": "Second party",
+      "vars": []
+    },
+    {
+      "key": "legalCite.f.series",
+      "en": "Report (פ\"ד, פ\"מ)",
+      "vars": []
+    },
+    {
+      "key": "legalCite.f.volume",
+      "en": "Volume",
+      "vars": []
+    },
+    {
+      "key": "legalCite.f.page",
+      "en": "First page",
+      "vars": []
+    },
+    {
+      "key": "legalCite.f.year",
+      "en": "Year",
+      "vars": []
+    },
+    {
+      "key": "legalCite.f.database",
+      "en": "Database (נבו, אר\"ש)",
+      "vars": []
+    },
+    {
+      "key": "legalCite.f.date",
+      "en": "Date of the decision",
+      "vars": []
+    },
+    {
+      "key": "legalCite.f.paras",
+      "en": "Paragraphs",
+      "vars": []
+    },
+    {
+      "key": "legalCite.f.judge",
+      "en": "Whose opinion (השופטת ברק-ארז)",
+      "vars": []
+    },
+    {
+      "key": "legalCite.f.name",
+      "en": "Name",
+      "vars": []
+    },
+    {
+      "key": "legalCite.f.section",
+      "en": "Section",
+      "vars": []
+    },
+    {
+      "key": "legalCite.f.hebrewYear",
+      "en": "Hebrew year (התשנ\"ז)",
+      "vars": []
+    },
+    {
+      "key": "legalCite.f.collection",
+      "en": "Collection (ה\"ח הממשלה)",
+      "vars": []
+    },
+    {
+      "key": "legalCite.f.collectionYear",
+      "en": "Collection year, if not the law's",
+      "vars": []
+    },
+    {
+      "key": "legalCite.f.pinpointPage",
+      "en": "Page cited",
+      "vars": []
+    },
+    {
+      "key": "legalCite.f.authors",
+      "en": "Authors (separated by commas)",
+      "vars": []
+    },
+    {
+      "key": "legalCite.f.title",
+      "en": "Title",
+      "vars": []
+    },
+    {
+      "key": "legalCite.f.pinpoint",
+      "en": "Pinpoint",
+      "vars": []
+    },
+    {
+      "key": "legalCite.f.edition",
+      "en": "Edition",
+      "vars": []
+    },
+    {
+      "key": "legalCite.f.editor",
+      "en": "Editor",
+      "vars": []
+    },
+    {
+      "key": "legalCite.f.translator",
+      "en": "Translator",
+      "vars": []
+    },
+    {
+      "key": "legalCite.f.journal",
+      "en": "Journal",
+      "vars": []
+    },
+    {
+      "key": "legalCite.f.issue",
+      "en": "Issue (only if each issue starts at page 1)",
+      "vars": []
+    },
+    {
+      "key": "legalCite.hint.ruling",
+      "en": "Fill the report for a printed ruling; leave it empty and give the database and date for an unpublished one.",
+      "vars": []
+    },
+    {
+      "key": "legalCite.hint.law",
+      "en": "Type a date (1997-03-05) in Year to fill the Hebrew year. A Basic Law: give the collection year instead.",
+      "vars": []
+    },
+    {
+      "key": "legalCite.hint.book",
+      "en": "Authors' full names, as the rules write them.",
+      "vars": []
+    },
+    {
+      "key": "legalCite.hint.article",
+      "en": "The title is written in quotation marks.",
+      "vars": []
+    },
+    {
+      "key": "legalCite.rules",
+      "en": "כללי האזכור האחיד בכתיבה המשפטית, 3rd edition (Tel Aviv University, 2021).",
+      "vars": []
+    },
+    {
+      "key": "legalCite.cancel",
+      "en": "Cancel",
+      "vars": []
+    },
+    {
+      "key": "legalCite.insert",
+      "en": "Insert",
+      "vars": []
     }
   ]
 }

@@ -326,6 +326,37 @@ export function useCommands({
         action: () => void import("../citations/CiteDialog").then((m) => m.openCiteDialog()),
       },
       {
+        id: "cite.legal",
+        label: t("cmd.cite.legal"),
+        hint: t("cmd.cite.legal.hint"),
+        icon: cmdIcons.FileText,
+        group: t("group.tools"),
+        // Plan W5.2: rulings, laws, bills, books and articles by the uniform citation rules.
+        action: () => void import("../citations/LegalCiteDialog").then((m) => m.openLegalCiteDialog()),
+      },
+      {
+        id: "cite.legalFromCase",
+        label: t("cmd.cite.legalFromCase"),
+        hint: t("cmd.cite.legalFromCase.hint"),
+        icon: cmdIcons.FileText,
+        group: t("group.tools"),
+        action: async () => {
+          const view = getEditorView?.();
+          if (!view) return;
+          const [{ caseNumberAt, rulingFromMatch }, dialog] = await Promise.all([import("../citations/legal"), import("../citations/LegalCiteDialog")]);
+          const line = view.state.doc.lineAt(view.state.selection.main.head);
+          const m = caseNumberAt(line.text, view.state.selection.main.head - line.from);
+          if (!m) {
+            showAiToast(t("toast.cite.noCaseNumber"), "info");
+            dialog.openLegalCiteDialog();
+            return;
+          }
+          // why: the citation replaces the case number it was made from
+          view.dispatch({ selection: { anchor: line.from + m.from, head: line.from + m.to } });
+          dialog.openLegalCiteDialog(rulingFromMatch(m));
+        },
+      },
+      {
         id: "cite.syncZotero",
         label: t("cmd.cite.syncZotero"),
         icon: cmdIcons.FileText,
