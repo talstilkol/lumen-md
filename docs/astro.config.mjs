@@ -47,6 +47,7 @@ export default defineConfig({
             { label: "Screen reader protocol", slug: "editor/screen-reader-protocol", translations: { he: "פרוטוקול קוראי מסך" } },
             { label: "Hebrew keyboard layout", slug: "editor/hebrew-keyboard", translations: { he: "פריסת מקלדת עברית" } },
             { label: "Hebrew typography", slug: "editor/hebrew-typography", translations: { he: "טיפוגרפיה עברית" } },
+            { label: "Outline mode", slug: "editor/outline-mode", translations: { he: "מצב מתאר" } },
           ],
         },
         {

@@ -1871,8 +1871,23 @@
       "vars": []
     },
     {
+      "key": "outline.fold",
+      "en": "Fold",
+      "vars": []
+    },
+    {
       "key": "outline.title",
       "en": "Outline",
+      "vars": []
+    },
+    {
+      "key": "outline.unfold",
+      "en": "Unfold",
+      "vars": []
+    },
+    {
+      "key": "outline.zoomOut",
+      "en": "← Back to the whole note",
       "vars": []
     },
     {
