@@ -32,6 +32,7 @@ import { rankCommands } from "./paletteSearch";
 import "./CommandPalette.css";
 import { HelpButton } from "./HelpButton";
 import { announceCommand } from "../research/usability/commandEvents";
+import { countCommand } from "../metrics/count";
 
 export interface Command {
   id: string;
@@ -286,6 +287,7 @@ export function CommandPalette({ open, onClose, commands }: Props) {
           announceCommand(cmd.id);
           void cmd.action();
         }, 0);
+        countCommand(cmd.id);
       }
     } else if (e.key === "Backspace" && !query) {
       // When query is empty, Backspace collapses the last expanded sub-menu
@@ -432,6 +434,7 @@ export function CommandPalette({ open, onClose, commands }: Props) {
                         announceCommand(cmd.id);
                         void cmd.action();
                       }, 0);
+                      countCommand(cmd.id);
                     }}
                   >
                     <Icon size={15} style={{ opacity: 0.75, flexShrink: 0 }} />

@@ -1938,6 +1938,16 @@
       "vars": []
     },
     {
+      "key": "cmd.usage",
+      "en": "Help: Usage on this device",
+      "vars": []
+    },
+    {
+      "key": "cmd.usage.hint",
+      "en": "Counts on this device and a weekly report you can send — nothing leaves without your click",
+      "vars": []
+    },
+    {
       "key": "cmd.vault.backups",
       "en": "Backups…",
       "vars": []

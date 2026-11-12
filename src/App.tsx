@@ -116,6 +116,7 @@ import { useEdgeSwipes, useLongNotesOpenForReading } from "./mobile/useMobileGes
 import { FeatureFlagsHost } from "./ui/FeatureFlagsPanel";
 import { announceCommand } from "./research/usability/commandEvents";
 import { useDesktopShell } from "./desktop/useDesktopShell";
+import { countCommand } from "./metrics/count";
 
 export default function App() {
   const doc = useAppStore((s) => s.doc);
@@ -1008,11 +1009,28 @@ export default function App() {
       const cmd = id ? find(commandsRef.current) : undefined;
       if (cmd) {
         announceCommand(cmd.id);
+        countCommand(cmd.id);
         void cmd.action();
       }
     };
+    // The usage dialog (plan W4.26) needs every command id to name the unused ones.
+    const onUsage = () => {
+      const ids: string[] = [];
+      const walk = (list: typeof commands) => {
+        for (const c of list) {
+          ids.push(c.id);
+          if (c.children) walk(c.children as typeof commands);
+        }
+      };
+      walk(commandsRef.current);
+      void import("./ui/UsageDialog").then((m) => m.openUsage({ commandIds: ids }));
+    };
     window.addEventListener("lumen-run-command", onRun);
-    return () => window.removeEventListener("lumen-run-command", onRun);
+    window.addEventListener("lumen-open-usage", onUsage);
+    return () => {
+      window.removeEventListener("lumen-run-command", onRun);
+      window.removeEventListener("lumen-open-usage", onUsage);
+    };
   }, []);
   useEffect(() => {
     const onOpenAi = () => setSettingsTab("ai");

@@ -383,6 +383,8 @@
   "cmd.tools.writingGoal.hint": "شريط تقدّم خفيف فوق المحرر",
   "cmd.tools.writingGoal.set": "✍️ هدف الكتابة: {{words}} كلمة/يوم",
   "cmd.tools.writingGoal.unset": "✍️ تعيين هدف كتابة يومي",
+  "cmd.usage": "مساعدة: الاستخدام على هذا الجهاز",
+  "cmd.usage.hint": "عدّادات على هذا الجهاز وتقرير أسبوعي يمكنك إرساله — لا يخرج شيء دون نقرتك",
   "cmd.vault.backups": "النسخ الاحتياطية…",
   "cmd.vault.backups.hint": "نسخ يومي إلى قرص آخر، والاستعادة",
   "cmd.vault.check": "فحص سلامة الخزنة",

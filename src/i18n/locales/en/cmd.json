@@ -382,6 +382,8 @@
   "cmd.tools.writingGoal.hint": "A subtle progress banner above the editor",
   "cmd.tools.writingGoal.set": "✍️ Writing goal: {{words}} words/day",
   "cmd.tools.writingGoal.unset": "✍️ Set a daily writing goal",
+  "cmd.usage": "Help: Usage on this device",
+  "cmd.usage.hint": "Counts on this device and a weekly report you can send — nothing leaves without your click",
   "cmd.vault.backups": "Backups…",
   "cmd.vault.backups.hint": "Daily backups to another drive, and restore",
   "cmd.vault.check": "Check vault integrity",

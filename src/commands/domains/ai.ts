@@ -375,6 +375,17 @@ export function buildAiControlCommands({ getEditorView }: CommandContext): Comma
       action: () => void import("../../ui/diagnosticsActions").then((m) => m.saveDiagnostics()),
     },
     {
+      // W4.26: local usage counters and the weekly report the user sends by hand.
+      id: "help.usage",
+      label: t("cmd.usage"),
+      hint: t("cmd.usage.hint"),
+      icon: cmdIcons.Link,
+      group: t("group.tools"),
+      action: () => {
+        window.dispatchEvent(new CustomEvent("lumen-open-usage"));
+      },
+    },
+    {
       id: "ai.policy",
       label: t("cmd.ai.policy"),
       hint: t("cmd.ai.policy.hint"),

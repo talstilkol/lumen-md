@@ -14,6 +14,7 @@ import { ErrorActions } from "./ui/ErrorActions";
 import { showAiToast } from "./ui/AiToast";
 import { ToastContainer } from "./components/Toast";
 import { initTelemetry } from "./lib/telemetry";
+import { startUsageCounting } from "./metrics/count";
 import { initAuth } from "./auth/useAuth";
 import { startAutoBackup, startVaultSnapshots } from "./sync/autoBackup";
 import { requestPersistentStorage } from "./storage/persistentStorage";
@@ -61,6 +62,8 @@ try {
   /* storage blocked: no backups to schedule */
 }
 startVaultSnapshots();
+// Usage counters on this device only (plan W4.26), loaded after start-up; nothing is sent.
+setTimeout(startUsageCounting, 3000);
 // Task reminders (plan 4.13.4), only when the user turned them on; loaded after start-up.
 try {
   if (localStorage.getItem("lumen.tasks.reminders") === "1") setTimeout(() => void import("./tasks/reminders").then((m) => m.startReminders()), 5000);

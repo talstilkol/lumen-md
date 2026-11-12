@@ -383,6 +383,8 @@
   "cmd.tools.writingGoal.hint": "Une discrète bannière de progression au-dessus de l'éditeur",
   "cmd.tools.writingGoal.set": "✍️ Objectif d'écriture : {{words}} mots/jour",
   "cmd.tools.writingGoal.unset": "✍️ Définir un objectif d'écriture quotidien",
+  "cmd.usage": "Aide : utilisation sur cet appareil",
+  "cmd.usage.hint": "Des compteurs sur cet appareil et un rapport hebdomadaire que vous pouvez envoyer — rien ne sort sans votre clic",
   "cmd.vault.backups": "Sauvegardes…",
   "cmd.vault.backups.hint": "Sauvegardes quotidiennes sur un autre disque, et restauration",
   "cmd.vault.check": "Vérifier l'intégrité du coffre",
