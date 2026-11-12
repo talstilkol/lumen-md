@@ -43,6 +43,7 @@ export default defineConfig({
             { label: "Hebrew and right-to-left", slug: "editor/hebrew", translations: { he: "עברית ומימין לשמאל" } },
             { label: "Settings", translations: { he: "הגדרות" }, slug: "editor/settings" },
             { label: "Hebrew and right-to-left", translations: { he: "עברית וכתיבה מימין לשמאל" }, slug: "editor/hebrew-rtl" },
+            { label: "Arabic (beta)", translations: { he: "ערבית (בטא)" }, slug: "editor/arabic" },
           ],
         },
         {

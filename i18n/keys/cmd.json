@@ -364,6 +364,16 @@
       "vars": []
     },
     {
+      "key": "cmd.arabic.removeTashkeel",
+      "en": "Remove Arabic tashkeel (selection or note)",
+      "vars": []
+    },
+    {
+      "key": "cmd.arabic.toggleTashkeel",
+      "en": "Hide or show Arabic tashkeel",
+      "vars": []
+    },
+    {
       "key": "cmd.audit.open",
       "en": "Audit log…",
       "vars": []
@@ -1160,6 +1170,11 @@
     {
       "key": "cmd.source",
       "en": "Source only",
+      "vars": []
+    },
+    {
+      "key": "cmd.spell.arabicDictionary",
+      "en": "Arabic spelling: download or remove the word list",
       "vars": []
     },
     {
