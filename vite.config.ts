@@ -297,6 +297,9 @@ export default defineConfig({
   // (src/lib/runtimeCaches.ts): Workbox only cleans its precache.
   define: {
     __LUMEN_RUNTIME_CACHES__: JSON.stringify(RUNTIME_CACHES.map((c) => c.cacheName)),
+    // window.__lumenTest for Playwright (src/testing/e2eHooks.ts): a literal,
+    // so a build without VITE_E2E=1 drops the hook and its chunk entirely.
+    __LUMEN_E2E__: JSON.stringify(process.env.VITE_E2E === "1"),
   },
   // Worker bundles get only these plugins (plus Vite's own).
   worker: { plugins: () => [dictionaryEn] },

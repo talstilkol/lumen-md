@@ -19,8 +19,22 @@
 #   • Anything else (src/, public/, index.html, package*.json, vite/tsconfig,
 #     vercel.json, scripts/, …) triggers a build.
 #   • When history is unavailable (shallow clone, first commit), build.
+#   • First of all: a commit that is no longer its branch's head when its
+#     build starts is skipped. A newer push is queued behind it, and Vercel
+#     builds one deployment at a time, so the superseded one only delays it.
+#     When the branch head cannot be read (no network, a deleted branch),
+#     the other rules decide.
 set -u
 cd "$(dirname "$0")/.." || exit 1
+
+REMOTE="${LUMEN_IGNORE_REMOTE:-https://github.com/talstilkol/lumen-md}"
+if [ -n "${VERCEL_GIT_COMMIT_REF:-}" ] && [ -n "${VERCEL_GIT_COMMIT_SHA:-}" ]; then
+  H="$(timeout 20 git ls-remote "$REMOTE" "refs/heads/$VERCEL_GIT_COMMIT_REF" 2>/dev/null | cut -f1)"
+  if [ -n "$H" ] && [ "$H" != "$VERCEL_GIT_COMMIT_SHA" ]; then
+    echo "vercel-ignore: $VERCEL_GIT_COMMIT_SHA is no longer the head of $VERCEL_GIT_COMMIT_REF ($H): skipped"
+    exit 0
+  fi
+fi
 
 BASE="${1:-HEAD^}"
 HEAD_REF="${2:-HEAD}"

@@ -106,6 +106,9 @@ function main() {
   const failedGates = [];
   // The e2e gate sizes its time box from the build's start (scripts/e2e-gate.mjs).
   process.env.LUMEN_BUILD_STARTED ??= String(Date.now());
+  // A build the e2e gate tests carries window.__lumenTest (src/testing/e2eHooks.ts),
+  // through which specs reach the app's modules; production builds never do.
+  if (gates.includes("e2e")) process.env.VITE_E2E ??= "1";
   for (const gate of gates) {
     const started = Date.now();
     console.log(`\n▶ ${gate}`);

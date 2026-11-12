@@ -29,6 +29,10 @@ installPrivacyLedger((entry) => {
   lastBlockToast.set(entry.host, Date.now());
   showAiToast(t("toast.privacyBlocked", { reason: entry.reason }), "error");
 });
+// Playwright specs reach the app's modules through window.__lumenTest: on the
+// dev server, and in a build made with VITE_E2E=1 (a preview's e2e gate).
+// A production build drops this branch and src/testing/ (W4.2).
+if (import.meta.env.DEV || __LUMEN_E2E__) void import("./testing/e2eHooks").then((m) => m.installE2eHooks());
 // Esc cancels any running AI request (T55).
 installAiEscape((n) => showAiToast(t("toast.aiCancelled", { count: n }), "info"));
 // Error reports: only when the user turned them on AND the build has a DSN (12.4).
