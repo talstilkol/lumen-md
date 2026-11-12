@@ -50,6 +50,7 @@ export async function syncZoteroWebLibrary(): Promise<void> {
     } catch {
       /* why: first sync */
     }
+    // privacy-ledger: research — window.fetch (wrapped by the ledger) to api.zotero.org only
     const r = await web.syncZoteroWeb(prev, web.zoteroWebGet(key, (u, init) => fetch(u, init)));
     const csl = web.stateCsl(r.state);
     const text = JSON.stringify(csl, null, 1);
