@@ -359,6 +359,8 @@
   "cmd.view.pageView.on": "Actuellement activé",
   "cmd.view.plugins": "🔌 Galerie de plugins",
   "cmd.view.plugins.hint": "Parcourir et installer des plugins",
+  "cmd.view.present": "▶ Présenter cette note en diapositives",
+  "cmd.view.present.hint": "Les titres et les lignes --- commencent une diapositive ; les lignes Note: sont les notes de l’orateur",
   "cmd.view.preview": "Aperçu uniquement",
   "cmd.view.properties": "Propriétés : modifier le frontmatter de cette note",
   "cmd.view.properties.hint": "Champs texte, nombre, date, liste, case à cocher et lien ; seule la valeur modifiée change",

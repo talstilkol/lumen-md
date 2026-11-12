@@ -22,6 +22,10 @@ import { aiBusyAnnouncer, announce } from "./a11y/announce";
 import { adoptBootLocale } from "./store/useStore";
 import "./index.css";
 
+// Plan W2.17: this window is a presentation's presenter view (opened by the slides), not the editor.
+const IS_PRESENTER = typeof location !== "undefined" && location.hash === "#lumen-presenter";
+const PresenterView = React.lazy(() => import("./slides/PresenterView"));
+
 // Every AI network request is recorded; local-only blocks cloud ones (T37).
 const lastBlockToast = new Map<string, number>();
 installPrivacyLedger((entry) => {
@@ -50,6 +54,8 @@ try {
   if (localStorage.getItem("lumen.tasks.reminders") === "1") setTimeout(() => void import("./tasks/reminders").then((m) => m.startReminders()), 5000);
 } catch {
   /* why: storage blocked: no reminders */
+}
+if (!IS_PRESENTER) {
 }
 // The vault lives in OPFS/IndexedDB; without this the browser may evict it.
 // Safari grants persistence to installed apps only and deletes the rest after
@@ -186,7 +192,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           {t("boot.loading")}
         </div>
       }>
-        <App />
+        {IS_PRESENTER ? <PresenterView /> : <App />}
       </Suspense>
     </ErrorBoundary>
     <UpdateBanner />

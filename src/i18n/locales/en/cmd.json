@@ -358,6 +358,8 @@
   "cmd.view.pageView.on": "Currently ON",
   "cmd.view.plugins": "🔌 Plugin Gallery",
   "cmd.view.plugins.hint": "Browse & install plugins",
+  "cmd.view.present": "▶ Present this note as slides",
+  "cmd.view.present.hint": "Headings and --- lines start slides; Note: lines are speaker notes",
   "cmd.view.preview": "Preview only",
   "cmd.view.properties": "Properties: edit this note's frontmatter",
   "cmd.view.properties.hint": "Text, number, date, list, checkbox and link fields; only the edited value changes",

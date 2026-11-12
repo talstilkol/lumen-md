@@ -359,6 +359,21 @@ export function CanvasExcalidraw({ open, onClose }: Props) {
     }
   }, []);
 
+  /** The canvas's frames as slides, in arrow order (plan W2.17). */
+  const handlePresent = useCallback(async () => {
+    if (!scene) return;
+    const cur = latest.current;
+    const sceneNow = cur ?? { elements: (scene.file?.elements ?? []) as unknown as SceneElement[], appState: (scene.file?.appState ?? {}) as SceneAppState, files: scene.file?.files ?? {} };
+    try {
+      const { presentCanvas } = await import("../slides/present");
+      const n = await presentCanvas(sceneNow as never, scene.name, readNote);
+      if (n === 0) showAiToast(t("canvas.present.noFrames"), "info");
+    } catch (err) {
+      log.warn("canvas presentation failed", err);
+      showAiToast(t("canvas.present.failed", { error: (err as Error).message }), "error");
+    }
+  }, [scene]);
+
   /** PNG / SVG / PDF with note cards drawn and Hebrew kept (src/canvas/canvasExport.ts). */
   const handleImageExport = useCallback(
     async (kind: ExportKind) => {
@@ -444,6 +459,9 @@ export function CanvasExcalidraw({ open, onClose }: Props) {
         )}
         <button type="button" onClick={() => setDiagramOpen(true)} disabled={!scene} className="lumen-canvas-btn" data-testid="canvas-diagram">
           {t("canvas.diagram.open")}
+        </button>
+        <button type="button" onClick={() => void handlePresent()} disabled={!scene} className="lumen-canvas-btn" data-testid="canvas-present">
+          ▶ {t("canvas.present")}
         </button>
         <span className="lumen-canvas-export" role="group" aria-label={t("canvas.export.label")}>
           {(["png", "svg", "pdf"] as const).map((k) => (

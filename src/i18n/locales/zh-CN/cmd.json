@@ -359,6 +359,8 @@
   "cmd.view.pageView.on": "当前已开启",
   "cmd.view.plugins": "🔌 插件库",
   "cmd.view.plugins.hint": "浏览并安装插件",
+  "cmd.view.present": "▶ 将此笔记作为幻灯片演示",
+  "cmd.view.present.hint": "标题和 --- 行开始新幻灯片；Note: 行是演讲者备注",
   "cmd.view.preview": "仅预览",
   "cmd.view.properties": "属性：编辑此笔记的 frontmatter",
   "cmd.view.properties.hint": "文本、数字、日期、列表、复选框和链接字段；只有被编辑的值会改变",

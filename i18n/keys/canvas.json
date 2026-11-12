@@ -342,6 +342,23 @@
       "vars": []
     },
     {
+      "key": "canvas.present",
+      "en": "Present",
+      "vars": []
+    },
+    {
+      "key": "canvas.present.failed",
+      "en": "Couldn't start the presentation: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "canvas.present.noFrames",
+      "en": "Add frames to the canvas to present it: each frame is a slide, arrows between frames set the order.",
+      "vars": []
+    },
+    {
       "key": "canvas.saveFailed",
       "en": "Couldn't save the canvas “{name}”: {error}",
       "vars": [

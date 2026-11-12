@@ -5508,6 +5508,73 @@
       "vars": []
     },
     {
+      "key": "slides.close",
+      "en": "End",
+      "vars": []
+    },
+    {
+      "key": "slides.count",
+      "en": "{n} / {total}",
+      "vars": [
+        "n",
+        "total"
+      ]
+    },
+    {
+      "key": "slides.label",
+      "en": "Presentation: {title}",
+      "vars": [
+        "title"
+      ]
+    },
+    {
+      "key": "slides.last",
+      "en": "Last slide",
+      "vars": []
+    },
+    {
+      "key": "slides.next",
+      "en": "Next slide",
+      "vars": []
+    },
+    {
+      "key": "slides.nextUp",
+      "en": "Next: {title}",
+      "vars": [
+        "title"
+      ]
+    },
+    {
+      "key": "slides.noNotes",
+      "en": "No speaker notes for this slide.",
+      "vars": []
+    },
+    {
+      "key": "slides.pdf",
+      "en": "PDF",
+      "vars": []
+    },
+    {
+      "key": "slides.presenter",
+      "en": "Presenter view",
+      "vars": []
+    },
+    {
+      "key": "slides.presenterTitle",
+      "en": "Presenter view",
+      "vars": []
+    },
+    {
+      "key": "slides.presenterWaiting",
+      "en": "Waiting for the presentation… Start it from a note or the canvas.",
+      "vars": []
+    },
+    {
+      "key": "slides.prev",
+      "en": "Previous slide",
+      "vars": []
+    },
+    {
       "key": "snippets.createExample",
       "en": "Create an example snippet",
       "vars": []

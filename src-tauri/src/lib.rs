@@ -454,6 +454,54 @@ async fn whisper_transcribe(app: tauri::AppHandle, request: tauri::ipc::Request<
     .map_err(|e| e.to_string())?
 }
 
+/// Plan W2.17: the presenter view on its own window. With a second screen,
+/// the slides (the main window, full screen) go to the other screen and the
+/// presenter view opens where the app was; with one screen the presenter
+/// view opens beside it. The view is the app itself at `#lumen-presenter`,
+/// kept in step with the slides over a BroadcastChannel.
+#[cfg(desktop)]
+#[tauri::command]
+fn open_presenter_window(app: tauri::AppHandle) -> Result<bool, String> {
+    use tauri::{WebviewUrl, WebviewWindowBuilder};
+    if let Some(w) = app.get_webview_window("presenter") {
+        let _ = w.set_focus();
+        return Ok(false);
+    }
+    let main = app.get_webview_window("main").ok_or("no main window")?;
+    let here = main.current_monitor().map_err(|e| e.to_string())?;
+    let monitors = app.available_monitors().map_err(|e| e.to_string())?;
+    let other = here.as_ref().and_then(|h| monitors.iter().find(|m| m.position() != h.position()).cloned());
+    let mut builder = WebviewWindowBuilder::new(&app, "presenter", WebviewUrl::App("index.html#lumen-presenter".into()))
+        .title("Lumen — presenter")
+        .inner_size(1100.0, 720.0);
+    if let Some(h) = here.as_ref() {
+        let s = h.scale_factor();
+        builder = builder.position(h.position().x as f64 / s + 60.0, h.position().y as f64 / s + 60.0);
+    }
+    builder.build().map_err(|e| e.to_string())?;
+    if let Some(o) = other {
+        main.set_position(*o.position()).map_err(|e| e.to_string())?;
+        main.set_fullscreen(true).map_err(|e| e.to_string())?;
+        return Ok(true);
+    }
+    Ok(false)
+}
+
+/// The end of a presentation: the presenter window closes and the main window leaves full screen.
+#[cfg(desktop)]
+#[tauri::command]
+fn close_presenter_window(app: tauri::AppHandle) -> Result<(), String> {
+    if let Some(w) = app.get_webview_window("presenter") {
+        let _ = w.close();
+    }
+    if let Some(main) = app.get_webview_window("main") {
+        if main.is_fullscreen().unwrap_or(false) {
+            main.set_fullscreen(false).map_err(|e| e.to_string())?;
+        }
+    }
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let builder = tauri::Builder::default();
@@ -492,6 +540,11 @@ pub fn run() {
             updates::imp::update_check,
             #[cfg(desktop)]
             updates::imp::update_install,
+            // The presenter window (plan W2.17) is desktop-only.
+            #[cfg(desktop)]
+            open_presenter_window,
+            #[cfg(desktop)]
+            close_presenter_window,
         ])
         .setup(|app| {
             // The folder chosen on an earlier run (plan 4.3).

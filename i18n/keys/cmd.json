@@ -1816,6 +1816,16 @@
       "vars": []
     },
     {
+      "key": "cmd.view.present",
+      "en": "▶ Present this note as slides",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.present.hint",
+      "en": "Headings and --- lines start slides; Note: lines are speaker notes",
+      "vars": []
+    },
+    {
       "key": "cmd.view.preview",
       "en": "Preview only",
       "vars": []

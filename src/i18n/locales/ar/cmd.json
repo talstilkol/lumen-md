@@ -359,6 +359,8 @@
   "cmd.view.pageView.on": "مفعّل حاليًا",
   "cmd.view.plugins": "🔌 معرض الإضافات",
   "cmd.view.plugins.hint": "تصفّح الإضافات وثبّتها",
+  "cmd.view.present": "▶ عرض هذه الملاحظة كشرائح",
+  "cmd.view.present.hint": "العناوين وأسطر --- تبدأ شرائح؛ أسطر Note: ملاحظات للمتحدث",
   "cmd.view.preview": "المعاينة فقط",
   "cmd.view.properties": "الخصائص: تحرير الـ frontmatter لهذه الملاحظة",
   "cmd.view.properties.hint": "حقول نص ورقم وتاريخ وقائمة وخانة اختيار ورابط؛ تتغير القيمة المحرَّرة فقط",

@@ -359,6 +359,8 @@
   "cmd.view.pageView.on": "Derzeit AN",
   "cmd.view.plugins": "🔌 Plugin-Galerie",
   "cmd.view.plugins.hint": "Plugins durchsuchen und installieren",
+  "cmd.view.present": "▶ Diese Notiz als Folien präsentieren",
+  "cmd.view.present.hint": "Überschriften und ---Zeilen beginnen Folien; Note:-Zeilen sind Sprechernotizen",
   "cmd.view.preview": "Nur Vorschau",
   "cmd.view.properties": "Eigenschaften: Frontmatter dieser Notiz bearbeiten",
   "cmd.view.properties.hint": "Felder für Text, Zahl, Datum, Liste, Kontrollkästchen und Link; nur der bearbeitete Wert ändert sich",

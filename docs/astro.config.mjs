@@ -104,6 +104,7 @@ export default defineConfig({
             { label: "Note cards and image export", slug: "workspace/canvas-cards", translations: { he: "כרטיסי פתקים וייצוא תמונה" } },
             { label: "Backups to a second drive", slug: "workspace/backups", translations: { he: "גיבוי לכונן שני" } },
             { label: "Diagrams on the canvas (Mermaid, draw me)", slug: "workspace/canvas-diagrams", translations: { he: "תרשימים בקנבס (Mermaid,‏ צייר לי)" } },
+            { label: "Slides from notes and the canvas", slug: "workspace/slides", translations: { he: "מצגות מפתקים ומהקנבס" } },
           ],
         },
         {

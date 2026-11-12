@@ -359,6 +359,8 @@
   "cmd.view.pageView.on": "現在オン",
   "cmd.view.plugins": "🔌 プラグインギャラリー",
   "cmd.view.plugins.hint": "プラグインを閲覧してインストールします",
+  "cmd.view.present": "▶ このノートをスライドで発表",
+  "cmd.view.present.hint": "見出しと --- 行でスライドが始まり、Note: 行は発表者メモになります",
   "cmd.view.preview": "プレビューのみ",
   "cmd.view.properties": "プロパティ：このノートのフロントマターを編集",
   "cmd.view.properties.hint": "テキスト、数値、日付、リスト、チェックボックス、リンクの各フィールド。編集した値だけが変わります",

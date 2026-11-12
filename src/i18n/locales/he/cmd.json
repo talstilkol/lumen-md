@@ -359,6 +359,8 @@
   "cmd.view.pageView.on": "פעיל כעת",
   "cmd.view.plugins": "🔌 גלריית תוספים",
   "cmd.view.plugins.hint": "עיון והתקנת תוספים",
+  "cmd.view.present": "▶ הצגת הפתק כמצגת",
+  "cmd.view.present.hint": "כותרות ושורות --- פותחות שקפים; שורות הערות: הן הערות דובר",
   "cmd.view.preview": "תצוגה מקדימה בלבד",
   "cmd.view.properties": "מאפיינים: עריכת ה-frontmatter של הפתק",
   "cmd.view.properties.hint": "שדות טקסט, מספר, תאריך, רשימה, תיבת סימון וקישור; רק הערך שנערך משתנה",

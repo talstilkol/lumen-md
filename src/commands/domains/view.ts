@@ -306,6 +306,19 @@ export function buildPanelCommands({ setFindReplaceOpen, setGraphOpen, setHistor
       group: t("group.view"),
       action: () => setCanvasOpen(true),
     },
+    {
+      id: "view.present",
+      label: t("cmd.view.present"),
+      hint: t("cmd.view.present.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.view"),
+      // Plan W2.17: the note as slides (headings and --- lines), from the slide at the cursor.
+      action: async () => {
+        const doc = liveDoc();
+        const { presentNote, slideAtLine, cursorLine } = await import("../../slides/present");
+        await presentNote(doc.content, doc.name, slideAtLine(doc.content, await cursorLine()));
+      },
+    },
     // Plan 4.19: offered once the Excalidraw canvas lands (src/canvas/engine.ts).
     ...(EXCALIDRAW_CANVAS_ENABLED
       ? [
