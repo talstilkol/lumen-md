@@ -251,6 +251,7 @@ export default defineConfig({
             { label: "A privacy report you can prove", slug: "security/privacy-report", translations: { he: "דוח פרטיות שאפשר להוכיח" } },
             { label: "Mutation testing", slug: "security/mutation-testing", translations: { he: "בדיקות מוטציה" } },
             { label: "Nightly runs and receipts", translations: { he: "ריצות לילה וקבלות" }, slug: "contributing/nightly" },
+            { label: "The weekly train", translations: { he: "הרכבת השבועית" }, slug: "contributing/train" },
           ],
         },
         {
