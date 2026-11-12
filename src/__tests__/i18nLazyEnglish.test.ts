@@ -47,6 +47,8 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "contentFrame.json": { module: "renderer/contentFrameStrings.ts", users: ["renderer/RemoteFrame.tsx", "plugins/EmbedBlock.tsx"], prefixes: ["remoteFrame.", "block.embed.notEmbeddable", "block.embed.gistDesktop"] },
   // Reading aids (plan W5.6), a dialog opened with a dynamic import.
   "readingAids.json": { module: "reading/readingAidsStrings.ts", users: ["ui/ReadingAids.tsx"], prefixes: ["readingAids."] },
+  // The encrypted share link (plan W5.10): the dialog and the read-only viewer, both loaded with a dynamic import.
+  "shareLink.json": { module: "share/shareStrings.ts", users: ["share/ShareLinkDialog.tsx", "share/SharedNoteView.tsx"], prefixes: ["shareLink."] },
 };
 
 function sources(dir: string): string[] {

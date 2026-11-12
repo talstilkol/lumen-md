@@ -27,6 +27,20 @@ export function buildExportCommands({ handleExportHtml, liveDoc, getEditorView }
       },
     },
     {
+      // W5.10: a read-only copy of the open note inside an encrypted link (no server); the dialog loads on use.
+      id: "file.shareLink",
+      label: t("cmd.file.shareLink"),
+      hint: t("cmd.file.shareLink.hint"),
+      icon: cmdIcons.Link,
+      group: t("group.file"),
+      action: async () => {
+        // Snapshot before any await: a tab switch while the chunk loads must not share another note.
+        const doc = liveDoc();
+        const { openShareLink } = await import("../../share/ShareLinkDialog");
+        openShareLink({ title: doc.name, markdown: doc.content });
+      },
+    },
+    {
       id: "file.exportDocx",
       label: t("cmd.file.exportDocx"),
       hint: t("cmd.file.exportDocx.hint"),

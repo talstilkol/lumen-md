@@ -135,6 +135,7 @@ export default defineConfig({
             { label: "Sharing, roles and comment threads", slug: "collab/sharing", translations: { he: "שיתוף, תפקידים ותגובות" } },
             { label: "Encrypted live sharing", slug: "collab/e2ee-sharing", translations: { he: "שיתוף חי מוצפן" } },
             { label: "Suggestions and named versions", slug: "collab/suggestions-versions", translations: { he: "הצעות וגרסאות בשם" } },
+            { label: "Encrypted share link", slug: "collab/share-link", translations: { he: "קישור שיתוף מוצפן" } },
           ],
         },
         {
