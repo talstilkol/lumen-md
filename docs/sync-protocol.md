@@ -21,7 +21,8 @@ If-None-Match). It sees only:
 |---|---|---|
 | Header | `lumen-e2ee-vault` | JSON, in the clear but MACed (§2) |
 | Keyring | `lumen-e2ee-keyring` | JSON with encrypted fields (§5); absent at epoch 0 |
-| Manifest | `b64u(HMAC(names, "manifest"))` | a sealed object (§4) |
+| Previous keyring | `lumen-e2ee-keyring.prev` | only while a passphrase change writes its header (§5) |
+| Manifest | `b64u(HMAC(names, label))` | a sealed object (§4); `label` is `"manifest"` at epoch 0, else named by the keyring (§5) |
 | Blobs | `b64u(HMAC(names, "blob\0" + path + "\0" + rev))` | sealed objects |
 
 Every non-fixed name is 43 characters long, the same for every object.
@@ -84,6 +85,11 @@ Each entry is `{ver, rev, hash: sha256hex(plaintext), size, by, deleted?, e?}`.
 `counter` goes up by one on every write. A device refuses a lower counter,
 and an equal counter with a different digest (rollback / fork).
 
+A manifest with `"protocol":2` also has `frozen: {epoch, at, by}`: a re-key
+to `epoch` has frozen it (§5). A device writes over a frozen manifest only
+when the keyring still has not reached `epoch` and `at` (milliseconds) is
+more than 10 minutes old. Readers of protocol 1 alone refuse it.
+
 ## 5. The keyring (plan W1.7)
 
 ```json
@@ -96,19 +102,50 @@ and an equal counter with a different digest (rollback / fork).
 - `passphrase` is `AES-256-GCM(wrap, n, S_N, aad = "lumen-e2ee-keyring/1/<vaultId>/<N>/passphrase")`.
 - `devices[id].wrap` is an **age** v1 file (age-encryption.org/v1) to the
   device's X25519 recipient. Its plaintext is `S_N`.
-- `sealed` is `AES-256-GCM(keyring_N, n, JSON {older: {"<epoch>": b64u(S)}, revoked: [{device, epoch, at}]}, aad = "…/<N>/sealed")`.
-  `older` holds every earlier epoch's secret, `older["0"]` included, so
-  blobs of any epoch stay readable.
+- `sealed` is `AES-256-GCM(keyring_N, n, JSON contents, aad = "…/<N>/sealed")`, with
+  `contents = {older: {"<epoch>": b64u(S)}, revoked: [{device, epoch, at, recipient?}], devices: {"<id>": "age1…"}, manifest: "manifest/<N>", carry: {label, epoch, digest}, header?: sha256hex}`.
+  - `older` holds every earlier epoch's secret, `older["0"]` included, so
+    blobs of any epoch stay readable.
+  - `devices` is the **authenticated** list of enrolled devices. The
+    plaintext `devices` map only lets a device find its own wrap; a reader
+    opening with a device key checks that it is on the sealed list and not
+    in `revoked`.
+  - `manifest` is the label of this epoch's manifest object (§1).
+  - `carry` names the previous epoch's frozen manifest (its label, epoch and
+    plaintext SHA-256) that this epoch's manifest is re-sealed from.
+  - `header` is set by a passphrase change: the SHA-256 of the new header,
+    whose bytes the keyring carries as `"header": "<b64u>"` until written.
+- Keyrings written before review 12.11 have only `older` and `revoked`. Their
+  manifest label is `"manifest"`, and the first device that opens one with
+  the current secret seals the plaintext device list (minus revoked ids and
+  keys, minus entries that are not an age X25519 file) into `devices`.
 
-**Re-key**: write the keyring for epoch N+1 with compare-and-swap. The new
-`S` is random, and it is wrapped for the passphrase (the same one, or a new
-one with a new header) and for each device that had the last secret, except
-those revoked. Then re-seal the manifest under N+1 (`counter + 1`). No blob
-is rewritten.
+**Re-key** from epoch N, in this order. Each step is a single write, and
+any device can open the vault after each one.
+
+1. **Freeze**: write manifest N once more with `protocol: 2` and `frozen`,
+   with compare-and-swap.
+2. **Commit**: write the keyring for N+1 with compare-and-swap. The new `S` is
+   random, and it is wrapped for the passphrase (the same one, or a new one)
+   and for each device on the sealed `devices` list, except those revoked.
+   `carry` holds the frozen manifest's digest. If the freeze no longer stands,
+   or is more than 5 minutes old, the re-key stops before this step.
+3. **Header** (a passphrase change only): before step 2, the previous keyring
+   is copied to `lumen-e2ee-keyring.prev`; now the new header is written,
+   and that copy deleted. Until the header lands, the new passphrase opens
+   the header carried in the keyring, and the old passphrase opens epoch N
+   from the copy, never N+1.
+4. **Manifest**: write manifest N+1 (`label` = `manifest/<N+1>`), the
+   frozen one with `counter + 1`, create-only.
+
+Steps 3 and 4 are idempotent. A device at N+1 that finds them undone does
+them itself, and it re-seals only the exact frozen manifest named by
+`carry`. No blob is rewritten.
 
 **Revocation**: a device without a wrap at epoch N+1 can't learn `S_{N+1}`,
-so it can't open a manifest written after its revocation. If its user knows
-the passphrase, the passphrase changes in the same re-key.
+so it can't open a manifest written after its revocation. A revoked id or
+key is never wrapped for again, and can't be enrolled again. If its user
+knows the passphrase, the passphrase changes in the same re-key.
 
 **Rollback**: a device remembers the highest epoch it has seen, and refuses
 a keyring with a lower one.
@@ -165,3 +202,10 @@ and the provider's own access controls.
 Please review this. Findings go to the repository's Discussions (category
 *Security*) or, for anything exploitable, through SECURITY.md. Each version
 of the spec names its changes here.
+
+Changes:
+
+- Review 12.11: the device list is sealed in the keyring, and revoked
+  devices are never wrapped for. Each epoch has its own manifest object. A
+  re-key freezes, commits and then finishes, so a cut-off re-key leaves the
+  vault openable. Frozen manifests use protocol 2.
