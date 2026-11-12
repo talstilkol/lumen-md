@@ -225,6 +225,7 @@ export default defineConfig({
             { label: "Trusted repositories", slug: "security/trusted-repos", translations: { he: "מאגרים מהימנים" } },
             { label: "Design system", translations: { he: "מערכת העיצוב" }, slug: "contributing/design-system" },
             { label: "A privacy report you can prove", slug: "security/privacy-report", translations: { he: "דוח פרטיות שאפשר להוכיח" } },
+            { label: "Mutation testing", slug: "security/mutation-testing", translations: { he: "בדיקות מוטציה" } },
           ],
         },
         {
