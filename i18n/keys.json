@@ -1,7 +1,7 @@
 {
   "version": 1,
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1511,
+  "count": 1513,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -6634,13 +6634,25 @@
       ]
     },
     {
-      "key": "onboard.lang.title",
-      "en": "Language",
+      "key": "onboard.lang.write",
+      "en": "Which language will you write in?",
       "vars": []
     },
     {
-      "key": "onboard.lang.body",
-      "en": "The interface language. Hebrew and Arabic switch the layout to right-to-left.",
+      "key": "onboard.lang.write.body",
+      "en": "The interface follows it, and so do the sample notes. Each note's direction still follows its own text. You can change this later in Settings.",
+      "vars": []
+    },
+    {
+      "key": "onboard.lang.current",
+      "en": "Language: {language}.",
+      "vars": [
+        "language"
+      ]
+    },
+    {
+      "key": "onboard.lang.change",
+      "en": "Change",
       "vars": []
     },
     {
