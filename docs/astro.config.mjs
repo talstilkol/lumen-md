@@ -266,6 +266,7 @@ export default defineConfig({
           translations: { he: "הפרויקט" },
           items: [
             { label: "Issue triage", slug: "project/issue-triage", translations: { he: "מיון issues" } },
+            { label: "Open PR triage", slug: "project/pr-triage", translations: { he: "מיון ה-PR-ים הפתוחים" } },
           ],
         },
         {
