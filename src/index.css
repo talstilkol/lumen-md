@@ -1136,6 +1136,34 @@
     outline: none;
     min-height: 60vh;
   }
+  /* W5.4 — direction-control tags (the source editor styles its own). */
+  .wysiwyg-root .cm-bidi-tag {
+    display: inline-block;
+    direction: ltr;
+    unicode-bidi: isolate;
+    font: 600 0.62em/1.2 ui-monospace, SFMono-Regular, Menlo, monospace;
+    padding: 0 0.25em;
+    margin: 0 0.08em;
+    border-radius: 0.25em;
+    vertical-align: 0.18em;
+    user-select: none;
+    background: #e0e7ff;
+    color: #3730a3;
+  }
+  .wysiwyg-root .cm-bidi-tag-risk {
+    background: #fee2e2;
+    color: #991b1b;
+    outline: 1px solid #dc2626;
+  }
+  .dark .wysiwyg-root .cm-bidi-tag {
+    background: #312e81;
+    color: #e0e7ff;
+  }
+  .dark .wysiwyg-root .cm-bidi-tag-risk {
+    background: #7f1d1d;
+    color: #fee2e2;
+    outline-color: #f87171;
+  }
   .wysiwyg-root .ProseMirror p.is-editor-empty:first-child::before,
   .wysiwyg-root .ProseMirror p:empty::before {
     color: hsl(var(--fg-muted));

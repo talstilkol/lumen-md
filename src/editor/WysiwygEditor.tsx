@@ -20,6 +20,7 @@ import type { EditorView } from "@milkdown/prose/view";
 import { Plugin } from "@milkdown/prose/state";
 import { wysiwygBidiPlugin } from "./wysiwygBidi";
 import { remoteImagePlugin } from "./remoteImageView";
+import { wysiwygBidiMarksPlugin } from "./wysiwygBidiMarks";
 import { listSpreadFix } from "./milkdownListSpread";
 import { wrapInList } from "prosemirror-schema-list";
 import { dragHandlePlugin } from "./dragHandles";
@@ -804,6 +805,8 @@ const pasteCleanPlugin = $prose(
             remoteImagePlugin(),
             // 9.2 layer 1 — the browser / OS spellchecker, Hebrew included, no dictionary in the bundle.
             new Plugin({ props: { attributes: () => ({ spellcheck: spellCheckRef.current ? "true" : "false" }) } }),
+            // W5.4 — direction-control tags, the Trojan Source paste warning.
+            wysiwygBidiMarksPlugin(),
             new Plugin({
               appendTransaction: (trs) => {
                 if (trs.some((t) => t.docChanged || t.storedMarksSet)) pendingSinceRef.current = Date.now();

@@ -720,6 +720,111 @@
       ]
     },
     {
+      "key": "bidi.control.ALM",
+      "en": "Arabic letter mark",
+      "vars": []
+    },
+    {
+      "key": "bidi.control.FSI",
+      "en": "first strong isolate",
+      "vars": []
+    },
+    {
+      "key": "bidi.control.LRE",
+      "en": "left-to-right embedding",
+      "vars": []
+    },
+    {
+      "key": "bidi.control.LRI",
+      "en": "left-to-right isolate",
+      "vars": []
+    },
+    {
+      "key": "bidi.control.LRM",
+      "en": "left-to-right mark",
+      "vars": []
+    },
+    {
+      "key": "bidi.control.LRO",
+      "en": "left-to-right override",
+      "vars": []
+    },
+    {
+      "key": "bidi.control.PDF",
+      "en": "pop directional formatting",
+      "vars": []
+    },
+    {
+      "key": "bidi.control.PDI",
+      "en": "pop directional isolate",
+      "vars": []
+    },
+    {
+      "key": "bidi.control.RLE",
+      "en": "right-to-left embedding",
+      "vars": []
+    },
+    {
+      "key": "bidi.control.RLI",
+      "en": "right-to-left isolate",
+      "vars": []
+    },
+    {
+      "key": "bidi.control.RLM",
+      "en": "right-to-left mark",
+      "vars": []
+    },
+    {
+      "key": "bidi.control.RLO",
+      "en": "right-to-left override",
+      "vars": []
+    },
+    {
+      "key": "bidi.fix.counts",
+      "en": "Removed {removed} unneeded mark(s), fixed {swapped} bracket pair(s)",
+      "vars": [
+        "removed",
+        "swapped"
+      ]
+    },
+    {
+      "key": "bidi.fix.done",
+      "en": "Direction fixed",
+      "vars": []
+    },
+    {
+      "key": "bidi.fix.none",
+      "en": "No direction marks to clean and no reversed brackets",
+      "vars": []
+    },
+    {
+      "key": "bidi.fix.undo",
+      "en": "Undo",
+      "vars": []
+    },
+    {
+      "key": "bidi.paste.body",
+      "en": "{count} invisible direction control(s) make this text display in a different order than it is stored (the \"Trojan Source\" trick). What you read may not be what a search or a diff sees.",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "bidi.paste.remove",
+      "en": "Remove them",
+      "vars": []
+    },
+    {
+      "key": "bidi.paste.title",
+      "en": "The pasted text hides its real order",
+      "vars": []
+    },
+    {
+      "key": "bidi.risk",
+      "en": "risky: the text displays in a different order than it is stored",
+      "vars": []
+    },
+    {
       "key": "blockLink.copied",
       "en": "Copied {link}",
       "vars": [

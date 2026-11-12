@@ -571,6 +571,16 @@
       "vars": []
     },
     {
+      "key": "cmd.edit.bidiFix",
+      "en": "Clean direction marks and fix brackets",
+      "vars": []
+    },
+    {
+      "key": "cmd.edit.bidiFix.hint",
+      "en": "Remove marks that change nothing on screen and swap brackets typed backwards — one undo",
+      "vars": []
+    },
+    {
       "key": "cmd.edit.formatCodeBlock",
       "en": "Format code block at cursor",
       "vars": []
@@ -1862,6 +1872,21 @@
     {
       "key": "cmd.view.backlinks.hint",
       "en": "files linking here via [[wiki]]",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.bidiMarks.hint",
+      "en": "Tag the invisible characters that set text direction (RLM, LRM, isolates…)",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.bidiMarks.off",
+      "en": "Hide direction marks",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.bidiMarks.on",
+      "en": "Show direction marks",
       "vars": []
     },
     {

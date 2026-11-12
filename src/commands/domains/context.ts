@@ -7,6 +7,8 @@
  * in one closure: state read at build time is the build-time value, and
  * actions that need the current note read it through `liveDoc()`.
  */
+import { useSyncExternalStore } from "react";
+import { bidiMarksShown, onBidiMarksChange } from "../../editor/bidiMarksSetting";
 import { suggestionAuthorsKey } from "../../editor/suggestAuthors";
 import type { RecentFile } from "../../storage/recent";
 import type { CollabSession } from "../../collab/yjs";
@@ -81,6 +83,8 @@ export function useCommandStore() {
   const grammarCheck = useAppStore((s) => s.grammarCheck);
   const toggleGrammarCheck = useAppStore((s) => s.toggleGrammarCheck);
   const suggestingMode = useAppStore((s) => s.suggestingMode);
+  // The "show direction marks" label follows the switch (W5.4).
+  const bidiMarksOn = useSyncExternalStore(onBidiMarksChange, bidiMarksShown);
   // W3.11 — the "accept / reject from <author>" commands follow the note's authors.
   const suggestAuthorsKey = useAppStore((s) => suggestionAuthorsKey(s.doc.content));
   const toggleSuggestingMode = useAppStore((s) => s.toggleSuggestingMode);
@@ -92,6 +96,7 @@ export function useCommandStore() {
     toggleBacklinks, toggleVim, toggleSpellCheck, toggleLocalAi, toggleTypewriter, tsChecks, toggleTsChecks,
     grammarCheck, toggleGrammarCheck, suggestingMode, toggleSuggestingMode, setWritingGoal, toggleAutoSave,
     suggestAuthorsKey,
+    bidiMarksOn,
   };
 }
 

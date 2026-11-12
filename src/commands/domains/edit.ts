@@ -5,6 +5,7 @@ import { t } from "../../i18n";
 import { BLOCK_SNIPPETS } from "../../snippets";
 import { buildFormatCommands } from "../../editor/formatCommands";
 import { buildSuggestingCommands } from "../../editor/suggestingCommands";
+import { buildBidiMarksCommands } from "../../editor/bidiMarksCommands";
 import { detectIsMac } from "../../lib/detectIsMac";
 import { showAiToast } from "../../ui/AiToast";
 import type { CommandContext } from "./context";
@@ -46,6 +47,12 @@ export function buildEditCommands({ getEditorView, suggestingMode, toggleSuggest
       setContent: (s: string) => useAppStore.getState().setContent(s),
       suggesting: suggestingMode,
       toggle: toggleSuggestingMode,
+    }).map((c) => ({ ...c, icon: cmdIcons.Pencil })),
+    // ── Direction controls (W5.4) ─────────────────────────────────────
+    ...buildBidiMarksCommands({
+      getView: () => getEditorView?.() ?? null,
+      getContent: () => useAppStore.getState().doc.content,
+      setContent: (s: string) => useAppStore.getState().setContent(s),
     }).map((c) => ({ ...c, icon: cmdIcons.Pencil })),
     // ── Hebrew typography (plan W2.9, dialog loaded on use) ─────────────
     {

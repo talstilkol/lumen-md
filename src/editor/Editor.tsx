@@ -37,6 +37,7 @@ import {
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { bidiExtension } from "./bidi";
 import { hebrewTypographyExtension } from "./hebrewTypographyExtension";
+import { bidiMarksExtension } from "./bidiMarks";
 import { languages } from "@codemirror/language-data";
 import { tags as t } from "@lezer/highlight";
 import { StateField, StateEffect } from "@codemirror/state";
@@ -421,6 +422,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       bidiExtension(),
       // Hebrew typography as you type: ״ ׳ „” ־ – (plan W2.9).
       hebrewTypographyExtension(),
+      bidiMarksExtension(),
       // Accessible name for the contenteditable (role=textbox) surface —
       // without it, screen readers announce an unnamed input (axe:
       // aria-input-field-name).

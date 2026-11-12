@@ -67,6 +67,7 @@ export function useCommands(options: UseCommandsOptions) {
     store.suggestingMode,
     store.toggleSuggestingMode,
     store.suggestAuthorsKey,
+    store.bidiMarksOn,
     store.rtl,
     store.autoSave,
     store.autoSaveInterval,
