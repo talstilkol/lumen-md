@@ -19,6 +19,7 @@ ARG VITE_AUDIT_ENDPOINT
 ARG VITE_MARKETPLACE_URL
 ARG VITE_LANGUAGETOOL_URL
 ARG VITE_SUPABASE_URL
+ARG VITE_SYNC_RELAY_URL
 ARG VITE_SUPABASE_ANON_KEY
 # Collaboration servers of this stack (lumen-signal / lumen-collab). Without
 # them the SPA falls back to the public signaling servers and never uses

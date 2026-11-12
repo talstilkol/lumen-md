@@ -27,6 +27,8 @@ export const ENDPOINT_ENV_VARS = [
   "VITE_MARKETPLACE_URL",
   "VITE_LANGUAGETOOL_URL",
   "VITE_SUPABASE_URL",
+  // Plan W4.19: the encrypted vault relay (sync-server/vault-relay.js).
+  "VITE_SYNC_RELAY_URL",
 ] as const;
 
 /**

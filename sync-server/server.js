@@ -63,10 +63,12 @@ function createServer(opts = {}) {
   const trustProxy = opts.trustProxy ?? process.env.SIGNAL_TRUST_PROXY === "1";
   function clientIp(req) {
     if (trustProxy && req && req.headers) {
+      // Fly-Client-IP only on Fly, whose proxy sets it; behind any other proxy a client can send its own (review 4).
       const fly = req.headers["fly-client-ip"];
-      if (typeof fly === "string" && fly) return fly.trim();
+      if (process.env.FLY_APP_NAME && typeof fly === "string" && fly) return fly.trim();
+      // The hop the proxy in front appended is the last one; the ones before it are the client's own words.
       const xff = req.headers["x-forwarded-for"];
-      if (typeof xff === "string" && xff) return xff.split(",")[0].trim();
+      if (typeof xff === "string" && xff.trim()) return xff.split(",").pop().trim();
     }
     return (req && req.socket && req.socket.remoteAddress) || "unknown";
   }
@@ -140,7 +142,12 @@ function createServer(opts = {}) {
     uptime: (Date.now() - startedAt) / 1000,
   });
 
+  // Plan W4.19: the encrypted vault relay, when this server is asked to keep it. It counts its
+  // per-address limits under this server's own reading of the client address (review 2, 12.11).
+  const vaultRelay = opts.vaultRelay ?? (process.env.VAULT_RELAY === "1" || process.env.VAULT_RELAY_DIR ? require("./vault-relay").createVaultRelay({ clientAddress: clientIp }) : null);
+
   const server = http.createServer((req, res) => {
+    if (vaultRelay && vaultRelay.handle(req, res)) return;
     const pathname = (req.url || "/").split("?")[0];
     if (pathname === "/healthz" || pathname === "/health" || pathname === "/") {
       res.writeHead(200, { "Content-Type": "application/json" });
