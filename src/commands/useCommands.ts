@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 import type { Command } from "../ui/CommandPalette";
 import { cmdIcons } from "../ui/CommandPalette";
 import { tabIdOf, useAppStore } from "../store/useStore";
@@ -24,6 +24,8 @@ import { isOPFSAvailable, readWorkspaceFile } from "../storage/workspace";
 import { relativeTime } from "../lib/relativeTime";
 import { buildFormatCommands } from "../editor/formatCommands";
 import { buildSuggestingCommands } from "../editor/suggestingCommands";
+import { buildBidiMarksCommands } from "../editor/bidiMarksCommands";
+import { bidiMarksShown, onBidiMarksChange } from "../editor/bidiMarksSetting";
 import { withAiQuota } from "../billing/aiQuota";
 import { canPurchasePlans, manageBilling, upgradeTo } from "../billing/planActions";
 import { detectIsMac } from "../ui/KeyboardShortcuts";
@@ -207,6 +209,8 @@ export function useCommands({
   const spellCheck = useAppStore((s) => s.spellCheck);
   const useLocalAi = useAppStore((s) => s.useLocalAi);
   const typewriterMode = useAppStore((s) => s.typewriterMode);
+  // The "show direction marks" label follows the switch (W5.4).
+  const bidiMarksOn = useSyncExternalStore(onBidiMarksChange, bidiMarksShown);
   const writingGoalWords = useAppStore((s) => s.writingGoalWords);
   const pageView = useAppStore((s) => s.pageView);
   
@@ -2220,6 +2224,12 @@ export function useCommands({
         suggesting: suggestingMode,
         toggle: toggleSuggestingMode,
       }).map((c) => ({ ...c, icon: cmdIcons.Pencil })),
+      // ── Direction controls (W5.4) ─────────────────────────────────────
+      ...buildBidiMarksCommands({
+        getView: () => getEditorView?.() ?? null,
+        getContent: () => useAppStore.getState().doc.content,
+        setContent: (s: string) => useAppStore.getState().setContent(s),
+      }).map((c) => ({ ...c, icon: cmdIcons.Pencil })),
       // ── Plans (billing builds only) ─────────────────────────────────────
       ...(canPurchasePlans()
         ? [
@@ -2668,5 +2678,6 @@ export function useCommands({
     installedTemplates,
     suggestingMode,
     toggleSuggestingMode,
+    bidiMarksOn,
   ]);
 }
