@@ -188,6 +188,7 @@
   "cmd.help.setup": "Configurer Lumen…",
   "cmd.help.setup.hint": "Langue, emplacement du coffre, apparence et coffre d'exemple : la configuration initiale à nouveau",
   "cmd.highlights.all": "Tous les surlignages",
+  "cmd.highlights.import": "Importer des surlignages (Kindle, Kobo, Readwise, Zotero)…",
   "cmd.image.altText": "Images : texte alternatif par OCR / vision locale",
   "cmd.image.altText.hint": "Lit le texte des images de cette note sur l’appareil (hébreu + anglais) ; décrit le reste avec un modèle de vision Ollama local",
   "cmd.insert.abc": "Insertion music notation (ABC)",

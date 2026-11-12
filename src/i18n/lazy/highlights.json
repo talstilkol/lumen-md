@@ -20,5 +20,6 @@
   "hl.exportTitle": "Highlights — {date} ({n})",
   "hl.exportFailed": "Couldn't export the highlights: {error}",
   "hl.loadFailed": "Couldn't read the highlights: {error}",
-  "hl.tagFailed": "Couldn't save the tag: {error}"
+  "hl.tagFailed": "Couldn't save the tag: {error}",
+  "hl.kind.import": "Imported"
 }

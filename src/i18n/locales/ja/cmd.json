@@ -188,6 +188,7 @@
   "cmd.help.setup": "Lumen をセットアップ…",
   "cmd.help.setup.hint": "言語、保管場所、見た目、サンプルの保管庫: 初回セットアップをもう一度",
   "cmd.highlights.all": "すべてのハイライト",
+  "cmd.highlights.import": "ハイライトを読み込む（Kindle、Kobo、Readwise、Zotero）…",
   "cmd.image.altText": "画像: OCR / ローカル画像認識で代替テキスト",
   "cmd.image.altText.hint": "このノートの画像内の文字を端末上で読み取り（ヘブライ語・英語）、それ以外はローカルの Ollama 画像モデルで説明します",
   "cmd.insert.abc": "挿入 music notation (ABC)",

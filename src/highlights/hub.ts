@@ -14,8 +14,9 @@
  */
 import { describeAnnotation, encodeWikiPath, highlightLinkTarget, normalizeWithMap, readAnnotationsNote, type PdfAnnotation, type TextualBody } from "../pdf/annotations";
 import { describeEpubAnnotation, epubHighlightLink, readEpubNote, type EpubAnnotation } from "../epub/annotations";
+import { isImportNote, readImportNote } from "./import/notes";
 
-export type HighlightKind = "pdf" | "epub" | "clip";
+export type HighlightKind = "pdf" | "epub" | "clip" | "import";
 
 export interface HighlightItem {
   /** Stable within the index: kind + note path + annotation id (or position for clips). */
@@ -32,6 +33,8 @@ export interface HighlightItem {
   tags: string[];
   /** Page (PDF), chapter (EPUB) or null. */
   location: number | null;
+  /** Imported highlights (W2.15): where the source app put it ("p. 12 · loc. 180–182"). */
+  where?: string | null;
   /** Wiki-link target that opens the highlight. */
   link: string;
   created: string | null;
@@ -108,13 +111,20 @@ function clipItems(path: string, md: string): HighlightItem[] {
   return out;
 }
 
+/** Highlights imported from Kindle, Kobo, Readwise or Zotero (W2.15): one note per book. */
+function importItems(path: string, md: string): HighlightItem[] {
+  if (!isImportNote(md)) return [];
+  const { entries } = readImportNote(md);
+  return entries.map((e) => item({ key: `import:${path}:${e.id}`, kind: "import", source: path, notePath: path, id: e.id, text: e.text || e.note, note: e.text ? e.note : "", tags: e.tags, location: null, where: e.location, link: encodeWikiPath(path), created: e.created }));
+}
+
 /** The index of every highlight in `files` (vault-relative paths with their text). */
 export function buildIndex(files: Iterable<{ path: string; content: string }>): HighlightItem[] {
   const out: HighlightItem[] = [];
   for (const f of files) {
     if (/\.pdf\.md$/i.test(f.path)) out.push(...pdfItems(f.path, f.content));
     else if (/\.epub\.md$/i.test(f.path)) out.push(...epubItems(f.path, f.content));
-    else if (/\.(md|markdown)$/i.test(f.path)) out.push(...clipItems(f.path, f.content));
+    else if (/\.(md|markdown)$/i.test(f.path)) out.push(...(isImportNote(f.content) ? importItems(f.path, f.content) : clipItems(f.path, f.content)));
   }
   return out;
 }

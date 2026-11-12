@@ -23,6 +23,7 @@ const baseName = (p: string) => p.split("/").pop() ?? p;
 export function whereLabel(it: HighlightItem): string {
   if (it.kind === "pdf") return t("pdf.notePage", { n: it.location ?? 1 });
   if (it.kind === "epub") return t("epub.noteChapter", { n: it.location ?? 1 });
+  if (it.kind === "import") return it.where ?? baseName(it.source).replace(/\.(md|markdown)$/i, "");
   return baseName(it.source).replace(/\.(md|markdown)$/i, "");
 }
 
@@ -126,6 +127,7 @@ export function HighlightsPanel({ onClose, load = loadIndex }: { onClose: () => 
           <option value="pdf">PDF</option>
           <option value="epub">EPUB</option>
           <option value="clip">{t("hl.kind.clip")}</option>
+          <option value="import">{t("hl.kind.import")}</option>
         </select>
         <select value={source} onChange={(e) => setSource(e.target.value)} aria-label={t("hl.source")}>
           <option value="">{t("hl.source.all")}</option>
@@ -163,14 +165,14 @@ export function HighlightsPanel({ onClose, load = loadIndex }: { onClose: () => 
               {it.tags.map((x) => (
                 <span key={x} className="hl-tag">
                   #{x}
-                  {it.kind !== "clip" && (
+                  {(it.kind === "pdf" || it.kind === "epub") && (
                     <button type="button" aria-label={t("hl.tag.remove", { tag: x })} onClick={() => void setTags(it, it.tags.filter((y) => y !== x))}>
                       ×
                     </button>
                   )}
                 </span>
               ))}
-              {it.kind !== "clip" && (
+              {(it.kind === "pdf" || it.kind === "epub") && (
                 <input
                   className="hl-addtag"
                   dir="auto"

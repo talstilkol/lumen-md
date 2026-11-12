@@ -106,6 +106,7 @@ export default defineConfig({
             { label: "Backups to a second drive", slug: "workspace/backups", translations: { he: "גיבוי לכונן שני" } },
             { label: "Diagrams on the canvas (Mermaid, draw me)", slug: "workspace/canvas-diagrams", translations: { he: "תרשימים בקנבס (Mermaid,‏ צייר לי)" } },
             { label: "Slides from notes and the canvas", slug: "workspace/slides", translations: { he: "מצגות מפתקים ומהקנבס" } },
+            { label: "Import highlights (Kindle, Kobo, Readwise, Zotero)", translations: { he: "ייבוא הדגשות (Kindle,‏ Kobo,‏ Readwise,‏ Zotero)" }, slug: "workspace/highlight-import" },
           ],
         },
         {

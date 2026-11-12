@@ -502,6 +502,25 @@ fn close_presenter_window(app: tauri::AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+mod zotero_local;
+
+/// Zotero's answer for the web view (plan W2.15).
+#[derive(serde::Serialize)]
+struct ZoteroAnswer {
+    status: u16,
+    total: Option<u64>,
+    body: String,
+}
+
+/// GET from Zotero's local API on this computer (127.0.0.1:23119, /api/ only).
+#[tauri::command]
+async fn zotero_local_get(path: String) -> Result<ZoteroAnswer, String> {
+    let r = tauri::async_runtime::spawn_blocking(move || zotero_local::get(zotero_local::ZOTERO_PORT, &path))
+        .await
+        .map_err(|e| e.to_string())??;
+    Ok(ZoteroAnswer { status: r.status, total: r.total, body: r.body })
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let builder = tauri::Builder::default();
@@ -545,6 +564,7 @@ pub fn run() {
             open_presenter_window,
             #[cfg(desktop)]
             close_presenter_window,
+            zotero_local_get,
         ])
         .setup(|app| {
             // The folder chosen on an earlier run (plan 4.3).

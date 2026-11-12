@@ -124,6 +124,14 @@ export function buildViewCommands({ setSearchOpen, setRuntimeMetricsOpen, vimEna
       action: () => void import("../../srs/ReviewPanel").then((m) => m.openDailyReview()),
     },
     {
+      id: "highlights.import",
+      label: t("cmd.highlights.import"),
+      icon: cmdIcons.FileText,
+      group: t("group.file"),
+      // Plan W2.15: Kindle, Kobo, Readwise and Zotero highlights into one note per book.
+      action: () => void import("../../highlights/import/runImport").then((m) => m.importHighlights()),
+    },
+    {
       id: "view.calendar",
       label: t("cmd.view.calendar"),
       hint: t("cmd.view.calendar.hint"),
@@ -254,7 +262,7 @@ export function buildLanguageCommands({ rtl, toggleRtl, setLocale }: CommandCont
 }
 
 /** Find & replace, graph, history, table editor, autosave, canvas, plugins. */
-export function buildPanelCommands({ setFindReplaceOpen, setGraphOpen, setHistoryOpen, setTableEditorOpen, setCanvasOpen, setGalleryOpen, autoSave, autoSaveInterval, toggleAutoSave }: CommandContext): Command[] {
+export function buildPanelCommands({ setFindReplaceOpen, setGraphOpen, setHistoryOpen, setTableEditorOpen, setCanvasOpen, setGalleryOpen, autoSave, autoSaveInterval, toggleAutoSave, liveDoc }: CommandContext): Command[] {
   return [
     {
       id: "view.findReplace",

@@ -188,6 +188,7 @@
   "cmd.help.setup": "إعداد Lumen…",
   "cmd.help.setup.hint": "اللغة وموقع الخزنة والمظهر وخزنة نموذجية: إعداد البداية مرة أخرى",
   "cmd.highlights.all": "كل التمييزات",
+  "cmd.highlights.import": "استيراد التظليلات (Kindle وKobo وReadwise وZotero)…",
   "cmd.image.altText": "الصور: نص بديل من OCR / رؤية محلية",
   "cmd.image.altText.hint": "يقرأ النص في صور هذه الملاحظة على الجهاز (العبرية والإنجليزية)، ويصف الباقي بنموذج رؤية محلي في Ollama",
   "cmd.insert.abc": "إدراج music notation (ABC)",

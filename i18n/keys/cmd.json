@@ -955,6 +955,11 @@
       "vars": []
     },
     {
+      "key": "cmd.highlights.import",
+      "en": "Import highlights (Kindle, Kobo, Readwise, Zotero)…",
+      "vars": []
+    },
+    {
       "key": "cmd.image.altText",
       "en": "Images: alt text from OCR / local vision",
       "vars": []
