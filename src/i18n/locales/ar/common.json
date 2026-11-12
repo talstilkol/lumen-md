@@ -345,7 +345,6 @@
   "mailImport.done": "استُورد {messages} رسالة في {threads} سلسلة، و{keep} ملاحظة Keep، و{docs} مستندًا و{files} ملفًا ← {folders}",
   "mailImport.failed": "فشل استيراد البريد: {error}",
   "mailImport.label": "أي تصنيف من Gmail تريد استيراده؟",
-  "mailImport.labelCount": "{label} ({n})",
   "mailImport.missing": "(غير موجود في التصدير)",
   "mailImport.noSubject": "(بلا موضوع)",
   "mailImport.none": "لا يوجد بريد (.eml، .mbox) أو بيانات Google Takeout في هذه الملفات.",

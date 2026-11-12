@@ -345,7 +345,6 @@
   "mailImport.done": "{messages} messages importés en {threads} fils, {keep} notes Keep, {docs} documents et {files} fichiers → {folders}",
   "mailImport.failed": "Échec de l'import des e-mails : {error}",
   "mailImport.label": "Quel libellé Gmail importer ?",
-  "mailImport.labelCount": "{label} ({n})",
   "mailImport.missing": "(absent de l'export)",
   "mailImport.noSubject": "(sans objet)",
   "mailImport.none": "Aucun e-mail (.eml, .mbox) ni donnée Google Takeout dans ces fichiers.",

@@ -345,7 +345,6 @@
   "mailImport.done": "Импортировано сообщений: {messages} в {threads} переписках, заметок Keep: {keep}, документов: {docs}, файлов: {files} → {folders}",
   "mailImport.failed": "Не удалось импортировать почту: {error}",
   "mailImport.label": "Какой ярлык Gmail импортировать?",
-  "mailImport.labelCount": "{label} ({n})",
   "mailImport.missing": "(нет в экспорте)",
   "mailImport.noSubject": "(без темы)",
   "mailImport.none": "В этих файлах нет почты (.eml, .mbox) или данных Google Takeout.",

@@ -345,7 +345,6 @@
   "mailImport.done": "יובאו {messages} הודעות ב-{threads} שרשורים, {keep} פתקי Keep, {docs} מסמכים ו-{files} קבצים ← {folders}",
   "mailImport.failed": "ייבוא הדואר נכשל: {error}",
   "mailImport.label": "איזו תווית Gmail לייבא?",
-  "mailImport.labelCount": "{label} ({n})",
   "mailImport.missing": "(לא נכלל בייצוא)",
   "mailImport.noSubject": "(ללא נושא)",
   "mailImport.none": "אין בקבצים האלה דואר (.eml, .mbox) או נתוני Google Takeout.",

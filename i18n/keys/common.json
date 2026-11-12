@@ -1972,14 +1972,6 @@
       "vars": []
     },
     {
-      "key": "mailImport.labelCount",
-      "en": "{label} ({n})",
-      "vars": [
-        "label",
-        "n"
-      ]
-    },
-    {
       "key": "mailImport.missing",
       "en": "(not in the export)",
       "vars": []

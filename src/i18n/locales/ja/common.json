@@ -345,7 +345,6 @@
   "mailImport.done": "{messages} 件のメッセージを {threads} スレッドに、Keep メモ {keep} 件、ドキュメント {docs} 件、ファイル {files} 件をインポート → {folders}",
   "mailImport.failed": "メールのインポートに失敗しました: {error}",
   "mailImport.label": "インポートする Gmail のラベルは？",
-  "mailImport.labelCount": "{label} ({n})",
   "mailImport.missing": "（エクスポートに含まれていません）",
   "mailImport.noSubject": "（件名なし）",
   "mailImport.none": "これらのファイルにメール (.eml, .mbox) や Google Takeout のデータはありません。",

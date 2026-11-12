@@ -37,9 +37,10 @@ export async function runMailImport(): Promise<void> {
     let label: string | null = null;
     const labels = labelCounts(read.messages);
     if (labels.length > 1) {
+      const num = new Intl.NumberFormat(getLocale());
       const choice = await uiSelect({
         message: t("mailImport.label"),
-        choices: [{ value: "", label: t("mailImport.allLabels", { n: read.messages.length }) }, ...labels.map((l) => ({ value: l.label, label: t("mailImport.labelCount", { label: l.label, n: l.n }) }))],
+        choices: [{ value: "", label: t("mailImport.allLabels", { n: read.messages.length }) }, ...labels.map((l) => ({ value: l.label, label: `${l.label} (${num.format(l.n)})` }))],
       });
       if (choice === null) return;
       label = choice || null;
