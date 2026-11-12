@@ -149,7 +149,7 @@ export default defineConfig({
             { label: "Permissions and safety scan", slug: "plugins/permissions" },
             { label: "Plugin gallery", slug: "plugins/gallery" },
             { label: "Plugin signing keys", slug: "plugins/signing" },
-            { label: "Templates", slug: "plugins/templates", translations: { he: "תבניות" } },
+            { label: "Templates and sample vaults", slug: "plugins/templates", translations: { he: "תבניות וכספות לדוגמה" } },
             { label: "Web Clipper extension", slug: "plugins/web-clipper" },
           ],
         },

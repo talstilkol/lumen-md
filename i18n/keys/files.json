@@ -988,6 +988,61 @@
       ]
     },
     {
+      "key": "templates.category.Engineering",
+      "en": "Engineering",
+      "vars": []
+    },
+    {
+      "key": "templates.category.Home",
+      "en": "Home",
+      "vars": []
+    },
+    {
+      "key": "templates.category.Journaling",
+      "en": "Journaling",
+      "vars": []
+    },
+    {
+      "key": "templates.category.Personal",
+      "en": "Personal",
+      "vars": []
+    },
+    {
+      "key": "templates.category.Planning",
+      "en": "Planning",
+      "vars": []
+    },
+    {
+      "key": "templates.category.Reading",
+      "en": "Reading",
+      "vars": []
+    },
+    {
+      "key": "templates.category.Reflection",
+      "en": "Reflection",
+      "vars": []
+    },
+    {
+      "key": "templates.category.Research",
+      "en": "Research",
+      "vars": []
+    },
+    {
+      "key": "templates.category.Student",
+      "en": "Student",
+      "vars": []
+    },
+    {
+      "key": "templates.category.Work",
+      "en": "Work",
+      "vars": []
+    },
+    {
+      "key": "templates.category.Writing",
+      "en": "Writing",
+      "vars": []
+    },
+    {
       "key": "templates.clearFilter",
       "en": "Clear the filter",
       "vars": []
@@ -1027,6 +1082,30 @@
       ]
     },
     {
+      "key": "templates.importFailed",
+      "en": "Couldn't import the template: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "templates.importFromFile",
+      "en": "Import from file…",
+      "vars": []
+    },
+    {
+      "key": "templates.importNotMarkdown",
+      "en": "Pick a Markdown file (.md).",
+      "vars": []
+    },
+    {
+      "key": "templates.imported",
+      "en": "Imported “{name}”: it's in ⌘K → Templates.",
+      "vars": [
+        "name"
+      ]
+    },
+    {
       "key": "templates.install",
       "en": "Install",
       "vars": []
@@ -1050,6 +1129,15 @@
       "key": "templates.installed.button",
       "en": "Installed",
       "vars": []
+    },
+    {
+      "key": "templates.installedWithBase",
+      "en": "Installed “{name}” to {path}, with its table view in {base}.",
+      "vars": [
+        "name",
+        "path",
+        "base"
+      ]
     },
     {
       "key": "templates.installing",

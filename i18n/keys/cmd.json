@@ -765,6 +765,26 @@
       ]
     },
     {
+      "key": "cmd.file.sampleVault.hint",
+      "en": "notes made from the templates, with Bases views, in your language",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.sampleVault.researcher",
+      "en": "Open sample vault: researcher",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.sampleVault.student",
+      "en": "Open sample vault: student",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.sampleVault.writer",
+      "en": "Open sample vault: writer",
+      "vars": []
+    },
+    {
       "key": "cmd.file.save",
       "en": "Save",
       "vars": []
@@ -1407,6 +1427,16 @@
     {
       "key": "cmd.tasks.open.hint",
       "en": "Overdue, today and the next 7 days, from every note",
+      "vars": []
+    },
+    {
+      "key": "cmd.template.importFromFile",
+      "en": "Import template from file…",
+      "vars": []
+    },
+    {
+      "key": "cmd.template.importFromFile.hint",
+      "en": "copy a .md file into templates/, for ⌘K",
       "vars": []
     },
     {
