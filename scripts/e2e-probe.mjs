@@ -18,7 +18,7 @@ const log = (s) => console.log(`[e2e-probe ${mins()} min] ${s}`);
 function run(cmd, args, opts = {}) {
   const t = Date.now();
   log(`$ ${cmd} ${args.join(" ")}`);
-  const r = spawnSync(cmd, args, { stdio: "inherit", env, timeout: opts.timeoutMs, ...opts });
+  const r = spawnSync(cmd, args, { stdio: "inherit", env, ...opts, timeout: opts.timeoutMs ? Math.round(opts.timeoutMs) : undefined });
   log(`→ exit ${r.status ?? r.signal} in ${((Date.now() - t) / 1000).toFixed(0)} s`);
   return r.status === 0;
 }
@@ -60,13 +60,17 @@ if (!run("npm", ["run", "build"], { env: { ...env, LUMEN_CHUNK_REPORT: "1" } }))
 {
   const { createHash } = await import("node:crypto");
   const { mkdirSync, readFileSync: rf, copyFileSync, readdirSync: rd } = await import("node:fs");
-  run("npx", ["vitest", "run", "-u", "src/__tests__/renderSnapshotDocs.test.ts"], { timeoutMs: 8 * 60_000 });
+  // Run 3 lost the file filter: vitest 4's `-u [type]` took the path as its value and ran the whole suite.
+  run("npx", ["vitest", "run", "src/__tests__/renderSnapshotDocs.test.ts", "--update"], { timeoutMs: 8 * 60_000 });
   const dir = "src/__tests__/__snapshots__/render-docs";
   mkdirSync("dist/__render-docs", { recursive: true });
   for (const f of existsSync(dir) ? rd(dir) : []) {
     copyFileSync(join(dir, f), join("dist/__render-docs", f));
     const buf = rf(join(dir, f));
     log(`render-docs ${f}: ${buf.length} bytes, sha256 ${createHash("sha256").update(buf).digest("hex")}`);
+    // The bytes in the log too (a failed build serves no dist/): base64, 1000 characters a line.
+    const b64 = buf.toString("base64");
+    for (let i = 0; i < b64.length; i += 1000) console.log(`B64 ${f} ${String(i / 1000).padStart(4, "0")} ${b64.slice(i, i + 1000)}`);
   }
 }
 
@@ -86,8 +90,8 @@ const result = {};
 // Run 1: the build runs as root on Amazon Linux 2023 with dnf, and the headless shell lacked nss / nspr.
 run("dnf", ["-y", "-q", "install", "nss", "nspr"], { timeoutMs: 4 * 60_000 });
 // WebKit's Ubuntu build wants Ubuntu sonames (libjpeg.so.8, libavif.so.16, flite…): see what AL2023 can give.
-const webkitPkgs = [] && ["libsecret", "hyphen", "enchant2", "harfbuzz-icu", "libavif", "libjpeg-turbo", "woff2", "mesa-libGLES", "libmanette", "flite", "x264-libs", "gstreamer1-plugins-base", "libwpe", "wpebackend-fdo", "libxslt", "lcms2", "libwebp", "openjpeg2"];
-for (const pkg of webkitPkgs) log(`dnf ${pkg}: ${sh(`dnf -y -q install ${pkg} >/dev/null 2>&1 && echo installed || echo unavailable`)}`);
+const webkitPkgs = false && ["libsecret", "hyphen", "enchant2", "harfbuzz-icu", "libavif", "libjpeg-turbo", "woff2", "mesa-libGLES", "libmanette", "flite", "x264-libs", "gstreamer1-plugins-base", "libwpe", "wpebackend-fdo", "libxslt", "lcms2", "libwebp", "openjpeg2"];
+for (const pkg of webkitPkgs || []) log(`dnf ${pkg}: ${sh(`dnf -y -q install ${pkg} >/dev/null 2>&1 && echo installed || echo unavailable`)}`);
 for (const b of browsers) {
   const left = 42 - (Date.now() - T0) / 60000;
   if (left < 4) { log(`${b.name}: skipped, ${left.toFixed(1)} min left`); result[b.name] = "skipped (time)"; continue; }
