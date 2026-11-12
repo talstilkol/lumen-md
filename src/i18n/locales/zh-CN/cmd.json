@@ -226,6 +226,8 @@
   "cmd.insert.graphviz": "插入 Graphviz / DOT",
   "cmd.insert.htmlpreview": "插入 live HTML preview",
   "cmd.insert.htmlpreview.hint": "iframe 中沙盒化的 HTML/CSS/JS",
+  "cmd.insert.inlineMath": "插入行内公式",
+  "cmd.insert.inlineMath.hint": "句子中的公式 $…$（Ctrl/⌘+M）。在希伯来语文字中仍保持从左到右。",
   "cmd.insert.json": "插入 JSON table",
   "cmd.insert.map": "插入 map",
   "cmd.insert.math": "插入 math block",

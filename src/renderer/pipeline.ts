@@ -13,6 +13,7 @@ import remarkRehype from "remark-rehype";
 // dependency of the main chunk (A7 lever 1/3).
 import rehypeSlug from "rehype-slug";
 import { rehypeDirAuto } from "./rehypeDirAuto";
+import { rehypeMathIsolate } from "../lib/mathIsolate";
 import { rehypeSanitizeRaw } from "./rehypeSanitizeRaw";
 // rehype-raw is dynamically imported in getProcessorWithRaw() — it
 // pulls in parse5 (~275 KB raw / ~40 KB gzipped) and most docs don't
@@ -277,7 +278,8 @@ async function buildFullProcessor(
   p = p.use(rehypeCriticMarkup);
   p = blockSlugs ? p.use(blockSlugs) : p.use(rehypeSlug);
   p = p.use(rehypeDirAuto);
-  if (rehypeKatex) p = p.use(rehypeKatex);
+  // W5.14 — each formula an LTR isolate, so it keeps its order inside Hebrew.
+  if (rehypeKatex) p = p.use(rehypeKatex).use(rehypeMathIsolate);
   return toReact(p.use(rehypeShiki, { isDark }));
 }
 

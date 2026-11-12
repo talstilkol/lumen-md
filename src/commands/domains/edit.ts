@@ -125,7 +125,7 @@ export function buildEditCommands({ getEditorView, suggestingMode, toggleSuggest
 }
 
 /** Insert a block (chart, table, diagram, math, embed…). */
-export function buildInsertCommands({ insertSnippet }: CommandContext): Command[] {
+export function buildInsertCommands({ insertSnippet, getEditorView }: CommandContext): Command[] {
   return [
     {
       id: "insert.chart",
@@ -171,6 +171,22 @@ export function buildInsertCommands({ insertSnippet }: CommandContext): Command[
       icon: cmdIcons.Calculator,
       group: t("group.insert"),
       action: () => insertSnippet(BLOCK_SNIPPETS.math),
+    },
+    {
+      // W5.14 — a formula inside the sentence; Ctrl/⌘+M in the source editor.
+      id: "insert.inlineMath",
+      label: t("cmd.insert.inlineMath"),
+      hint: t("cmd.insert.inlineMath.hint"),
+      icon: cmdIcons.Calculator,
+      group: t("group.insert"),
+      action: () => {
+        const view = getEditorView?.();
+        if (!view) return insertSnippet("$x$");
+        void import("../../editor/mathBidi").then((m) => {
+          m.insertInlineMath(view);
+          view.focus();
+        });
+      },
     },
     {
       id: "insert.callout",

@@ -22,6 +22,25 @@ const AUTO = new Set(["p", "h1", "h2", "h3", "h4", "h5", "h6", "dd", "dt", "figc
 const CONTAINER = new Set(["ul", "ol", "dl", "li", "blockquote", "details"]);
 const LTR = new Set(["pre", "table", "math", "svg", "kbd", "samp"]);
 
+const isFormulaOrCode = (n: Element) => {
+  const c = n.properties?.className;
+  const classes = Array.isArray(c) ? c.map(String) : typeof c === "string" ? c.split(/\s+/) : [];
+  return n.tagName === "code" || classes.some((x) => x === "math-inline" || x === "math-display" || x.startsWith("katex"));
+};
+
+/**
+ * A container's text without its formulas and code (W5.14): "$x$ הוא" is a
+ * Hebrew item. When nothing else is left, the whole text decides as before.
+ */
+function proseText(node: Element): string {
+  let out = "";
+  for (const child of node.children) {
+    if (child.type === "text") out += child.value;
+    else if (child.type === "element" && !isFormulaOrCode(child)) out += proseText(child);
+  }
+  return out;
+}
+
 export function rehypeDirAuto() {
   return (tree: Root) => {
     visit(tree, "element", (node: Element) => {
@@ -35,9 +54,9 @@ export function rehypeDirAuto() {
         const content = node.children.find(
           (c) => c.type === "element" && Array.isArray(c.properties?.className) && c.properties.className.includes("callout-content"),
         );
-        props.dir = firstStrongDirection(toString(content ?? node)) ?? firstStrongDirection(toString(node)) ?? "auto";
+        props.dir = firstStrongDirection(proseText(content ?? node)) ?? firstStrongDirection(toString(node)) ?? "auto";
       } else if (CONTAINER.has(node.tagName) || cls.includes("callout-content"))
-        props.dir = firstStrongDirection(toString(node)) ?? "auto";
+        props.dir = firstStrongDirection(proseText(node)) ?? firstStrongDirection(toString(node)) ?? "auto";
       else if (AUTO.has(node.tagName) || cls.includes("callout-title")) props.dir = "auto";
     });
   };

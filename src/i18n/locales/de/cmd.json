@@ -226,6 +226,8 @@
   "cmd.insert.graphviz": "Einfügen Graphviz / DOT",
   "cmd.insert.htmlpreview": "Einfügen live HTML preview",
   "cmd.insert.htmlpreview.hint": "HTML/CSS/JS in einem iframe in der Sandbox",
+  "cmd.insert.inlineMath": "Formel im Text einfügen",
+  "cmd.insert.inlineMath.hint": "Eine Formel mitten im Satz, $…$ (Strg/⌘+M). Sie bleibt in hebräischem Text von links nach rechts.",
   "cmd.insert.json": "Einfügen JSON table",
   "cmd.insert.map": "Einfügen map",
   "cmd.insert.math": "Einfügen math block",

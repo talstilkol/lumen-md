@@ -226,6 +226,8 @@
   "cmd.insert.graphviz": "Вставка Graphviz / DOT",
   "cmd.insert.htmlpreview": "Вставка live HTML preview",
   "cmd.insert.htmlpreview.hint": "изолированный HTML/CSS/JS во фрейме iframe",
+  "cmd.insert.inlineMath": "Вставить формулу в строку",
+  "cmd.insert.inlineMath.hint": "Формула внутри предложения, $…$ (Ctrl/⌘+M). В тексте на иврите она остаётся слева направо.",
   "cmd.insert.json": "Вставка JSON table",
   "cmd.insert.map": "Вставка map",
   "cmd.insert.math": "Вставка math block",
