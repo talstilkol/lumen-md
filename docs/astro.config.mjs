@@ -164,6 +164,7 @@ export default defineConfig({
             { label: "Publish to your own site", slug: "sync/own-site", translations: { he: "פרסום לאתר משלך" } },
             { label: "Automatic merging", slug: "sync/merge" },
             { label: "Sync status, selective sync, time left", slug: "sync/status", translations: { he: "מצב הסנכרון וסנכרון סלקטיבי" } },
+            { label: "Sync on the local network", slug: "sync/lan", translations: { he: "סנכרון ברשת המקומית" } },
           ],
         },
         {

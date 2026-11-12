@@ -1366,6 +1366,178 @@
       "vars": []
     },
     {
+      "key": "e2ee.lan.addressHidden",
+      "en": "address hidden by the browser",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.authFailed",
+      "en": "The other device isn't part of this vault (a different passphrase).",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.copied",
+      "en": "Copied",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.copy",
+      "en": "Copy",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.error.bad-code",
+      "en": "That isn't a Lumen pairing code, or part of it is missing.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.error.closed",
+      "en": "The link closed.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.error.no-lan-address",
+      "en": "No local-network address on one of the devices. Are both on the same network?",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.error.no-webrtc",
+      "en": "This browser can't make a direct link (WebRTC is off).",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.error.not-lan",
+      "en": "The other end isn't on the local network, so the link was closed.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.error.timeout",
+      "en": "The other device didn't connect in time. Make a new code and try again.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.error.wrong-code",
+      "en": "That code is from the wrong step: the host shows the first code, the joining device the answer.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.hostNote",
+      "en": "Keep Lumen open on this device while the others sync. The vault stays on your local network.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.join.answer",
+      "en": "Answer",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.join.paste",
+      "en": "The code from the hosting device (Sync → Pair a device on this network)",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.join.showBack",
+      "en": "Show this code to the hosting device (or paste it there):",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.join.title",
+      "en": "Join a device on this network",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.noVault",
+      "en": "The hosting device has no vault yet. Create it there first, then join.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.notConnected",
+      "en": "Not connected to the hosting device. Pair the two devices again.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.note",
+      "en": "Devices connect directly. Nothing goes to the internet, so this works with none at all.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.pair",
+      "en": "Pair a device on this network",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.pair.connect",
+      "en": "Connect",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.pair.paste",
+      "en": "Its answer code",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.pair.show",
+      "en": "On the other device, choose Local network → Joins a device, and enter this code (scan it, or paste it):",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.pair.start",
+      "en": "Pair a device",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.peer.authed",
+      "en": "verified",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.peer.pending",
+      "en": "not verified yet",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.peers",
+      "en": "Devices on this network: {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "e2ee.lan.qr",
+      "en": "QR code of the pairing code",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.role",
+      "en": "This device",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.role.host",
+      "en": "Keeps the vault: other devices pair with it",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.role.peer",
+      "en": "Joins a device that keeps the vault",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.waiting",
+      "en": "Waiting for the other device…",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.where.host",
+      "en": "Local network: this device keeps the vault",
+      "vars": []
+    },
+    {
+      "key": "e2ee.lan.where.peer",
+      "en": "Local network: paired with a device here",
+      "vars": []
+    },
+    {
       "key": "e2ee.progress",
       "en": "{done} of {total} files · {bytesDone} of {bytes}",
       "vars": [
@@ -1592,6 +1764,11 @@
     {
       "key": "e2ee.sync.keepSecret",
       "en": "Leave empty to keep the saved one",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.kind.lan",
+      "en": "Local network: another device here, no cloud",
       "vars": []
     },
     {

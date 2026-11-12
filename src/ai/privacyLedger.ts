@@ -530,6 +530,19 @@ export function recordAppUpdateCheck(host: string, decision: "allowed" | "blocke
   return entries.find((x) => x.id === id) ?? null;
 }
 
+/**
+ * Record a LAN sync link (plan W2.19): the other device's address on the
+ * local network, never a server. "On this device / LAN" in the panel; the
+ * bytes are updated as the link carries them. Returns the entry's id.
+ */
+export function recordLanSync(host: string): number {
+  return record({ host, method: "LAN", bytesOut: 0, bytesIn: 0, category: "local-ai", reason: "Encrypted sync on the local network (no cloud)", policy: getAiPolicy(), decision: "allowed" });
+}
+
+export function setLanSyncBytes(id: number, bytesOut: number, bytesIn: number): void {
+  if (entries.some((x) => x.id === id)) patch(id, { bytesOut, bytesIn });
+}
+
 /** Install once at startup. `blocked` is called for every blocked request. */
 export function installPrivacyLedger(blocked?: (entry: LedgerEntry) => void): void {
   if (installed || typeof window === "undefined" || typeof window.fetch !== "function") return;

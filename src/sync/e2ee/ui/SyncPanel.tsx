@@ -3,6 +3,7 @@
  * (WebDAV, S3-compatible, Dropbox, Google Drive), connect, create or unlock
  * the vault, sync, and move plain-text notes an earlier Lumen left at
  * Dropbox / Drive into the vault. Lazy: opened from the command palette.
+ * Plan W2.19: or keep it on the local network only, paired device to device.
  */
 
 import { useEffect, useState, useSyncExternalStore, type FormEvent } from "react";
@@ -15,9 +16,13 @@ import { SyncRulesForm } from "./SyncRulesForm";
 import { syncSession, type SyncSession } from "./session";
 import { ProviderAuthError, ProviderUnreachableError, ProviderUnsupportedError } from "../providers/http";
 import { defaultSettings, hasProviderSecret, legacyStore, oauthAvailable, PROVIDER_KINDS, providerHosts, SECRET_NAMES, type ProviderKind, type ProviderSettings } from "../providers";
+import { LanHostPairing, LanJoin, lanError } from "./LanPairing";
+import { LanAuthError } from "../lan/rpc";
+import { LanLinkError } from "../lan/link";
+import { LanNoVaultError, LanNotConnectedError } from "../lan";
 import { loadMigrationRecord, migratePlaintext, planPlaintextMigration, revertPlaintextMigration, type MigrationPlan, type MigrationRecord } from "../providers/migrate";
 
-const NAMES: Record<ProviderKind, string> = { webdav: "WebDAV", s3: "S3", dropbox: "Dropbox", gdrive: "Google Drive" };
+const NAMES: Record<ProviderKind, string> = { webdav: "WebDAV", s3: "S3", dropbox: "Dropbox", gdrive: "Google Drive", lan: "LAN" };
 const PENDING_OAUTH = "lumen-sync-pending-oauth";
 
 const field: React.CSSProperties = {
@@ -35,6 +40,7 @@ const primary: React.CSSProperties = { padding: "6px 14px", border: "none", bord
 
 /** A human message for a failed connection. */
 export function connectError(e: unknown, settings: ProviderSettings): string {
+  if (e instanceof LanLinkError || e instanceof LanNoVaultError || e instanceof LanNotConnectedError || e instanceof LanAuthError) return lanError(e);
   if (e instanceof ProviderAuthError) return t("e2ee.sync.auth");
   if (e instanceof ProviderUnsupportedError) return t("e2ee.sync.unsupported", { detail: e.message });
   // fetch() rejects (a TypeError) when CORS or the page's CSP stops the request.
@@ -87,89 +93,117 @@ function ProviderForm({ session, initial, onDone }: { session: SyncSession; init
   }
 
   return (
-    <form onSubmit={submit} style={{ display: "grid", gap: 10 }} aria-label={t("e2ee.sync.provider")}>
-      <fieldset style={{ display: "grid", gap: 6, border: "none", padding: 0, margin: 0 }}>
-        <legend style={{ fontWeight: 600, marginBottom: 4 }}>{t("e2ee.sync.provider")}</legend>
-        {PROVIDER_KINDS.map((k) => {
-          const available = oauthAvailable(k);
-          return (
-            <label key={k} style={{ display: "flex", gap: 8, alignItems: "baseline", fontSize: 13, opacity: available ? 1 : 0.6 }}>
-              <input
-                type="radio"
-                name="sync-provider"
-                value={k}
-                checked={kind === k}
-                disabled={!available}
-                onChange={() => {
-                  setSettings(initial?.kind === k ? initial : defaultSettings(k));
-                  setSecret("");
-                  setError(null);
-                }}
-              />
-              <span>
-                {k === "webdav" ? t("e2ee.sync.kind.webdav") : k === "s3" ? t("e2ee.sync.kind.s3") : NAMES[k]}
-                {!available && <span style={{ ...muted, display: "block" }}>{t("e2ee.sync.oauthMissing", { name: NAMES[k] })}</span>}
-              </span>
-            </label>
-          );
-        })}
-      </fieldset>
+    <div style={{ display: "grid", gap: 10 }}>
+      <form onSubmit={submit} style={{ display: "grid", gap: 10 }} aria-label={t("e2ee.sync.provider")}>
+        <fieldset style={{ display: "grid", gap: 6, border: "none", padding: 0, margin: 0 }}>
+          <legend style={{ fontWeight: 600, marginBottom: 4 }}>{t("e2ee.sync.provider")}</legend>
+          {PROVIDER_KINDS.map((k) => {
+            const available = oauthAvailable(k);
+            return (
+              <label key={k} style={{ display: "flex", gap: 8, alignItems: "baseline", fontSize: 13, opacity: available ? 1 : 0.6 }}>
+                <input
+                  type="radio"
+                  name="sync-provider"
+                  value={k}
+                  checked={kind === k}
+                  disabled={!available}
+                  onChange={() => {
+                    setSettings(initial?.kind === k ? initial : defaultSettings(k));
+                    setSecret("");
+                    setError(null);
+                  }}
+                />
+                <span>
+                  {k === "webdav" ? t("e2ee.sync.kind.webdav") : k === "s3" ? t("e2ee.sync.kind.s3") : k === "lan" ? t("e2ee.sync.kind.lan") : NAMES[k]}
+                  {!available && <span style={{ ...muted, display: "block" }}>{t("e2ee.sync.oauthMissing", { name: NAMES[k] })}</span>}
+                </span>
+              </label>
+            );
+          })}
+        </fieldset>
 
-      {settings.kind === "webdav" && (
-        <>
-          <Field label={t("e2ee.sync.url")}>
-            <input dir="ltr" type="url" required placeholder="https://cloud.example.com/remote.php/dav/files/me/Lumen/" value={settings.url} onChange={(e) => patch({ url: e.target.value })} style={field} />
+        {settings.kind === "webdav" && (
+          <>
+            <Field label={t("e2ee.sync.url")}>
+              <input dir="ltr" type="url" required placeholder="https://cloud.example.com/remote.php/dav/files/me/Lumen/" value={settings.url} onChange={(e) => patch({ url: e.target.value })} style={field} />
+            </Field>
+            <Field label={t("e2ee.sync.username")}>
+              <input dir="ltr" autoComplete="username" value={settings.username} onChange={(e) => patch({ username: e.target.value })} style={field} />
+            </Field>
+          </>
+        )}
+        {settings.kind === "s3" && (
+          <>
+            <Field label={t("e2ee.sync.endpoint")}>
+              <input dir="ltr" type="url" required placeholder="https://s3.eu-central-1.amazonaws.com" value={settings.endpoint} onChange={(e) => patch({ endpoint: e.target.value })} style={field} />
+            </Field>
+            <Field label={t("e2ee.sync.region")}>
+              <input dir="ltr" required value={settings.region} onChange={(e) => patch({ region: e.target.value })} style={field} />
+            </Field>
+            <Field label={t("e2ee.sync.bucket")}>
+              <input dir="ltr" required value={settings.bucket} onChange={(e) => patch({ bucket: e.target.value })} style={field} />
+            </Field>
+            <Field label={t("e2ee.sync.prefix")}>
+              <input dir="ltr" value={settings.prefix} onChange={(e) => patch({ prefix: e.target.value })} style={field} />
+            </Field>
+            <Field label={t("e2ee.sync.accessKey")}>
+              <input dir="ltr" required autoComplete="off" value={settings.accessKeyId} onChange={(e) => patch({ accessKeyId: e.target.value })} style={field} />
+            </Field>
+            <label style={{ display: "flex", gap: 8, fontSize: 13 }}>
+              <input type="checkbox" checked={settings.pathStyle} onChange={(e) => patch({ pathStyle: e.target.checked })} />
+              {t("e2ee.sync.pathStyle")}
+            </label>
+          </>
+        )}
+        {settings.kind === "lan" && (
+          <fieldset style={{ display: "grid", gap: 6, border: "none", padding: 0, margin: 0 }}>
+            <legend style={{ fontSize: 13, marginBottom: 4 }}>{t("e2ee.lan.role")}</legend>
+            {(["host", "peer"] as const).map((role) => (
+              <label key={role} style={{ display: "flex", gap: 8, alignItems: "baseline", fontSize: 13 }}>
+                <input type="radio" name="lan-role" value={role} checked={settings.role === role} onChange={() => patch({ role })} />
+                {t(`e2ee.lan.role.${role}`)}
+              </label>
+            ))}
+            <div style={muted}>{t("e2ee.lan.note")}</div>
+          </fieldset>
+        )}
+        {secretName && (
+          <Field label={t(kind === "s3" ? "e2ee.sync.secretKey" : "e2ee.sync.password")}>
+            <input
+              dir="ltr"
+              type="password"
+              autoComplete={kind === "webdav" ? "current-password" : "off"}
+              placeholder={haveSecret ? t("e2ee.sync.keepSecret") : ""}
+              value={secret}
+              onChange={(e) => setSecret(e.target.value)}
+              style={field}
+            />
           </Field>
-          <Field label={t("e2ee.sync.username")}>
-            <input dir="ltr" autoComplete="username" value={settings.username} onChange={(e) => patch({ username: e.target.value })} style={field} />
-          </Field>
-        </>
+        )}
+        {error && (
+          <div role="alert" style={errorStyle}>
+            {error}
+          </div>
+        )}
+        {!(settings.kind === "lan" && settings.role === "peer") && (
+          <button type="submit" disabled={busy || !oauthAvailable(kind)} style={primary}>
+            {busy ? t("e2ee.sync.connecting") : oauth && !haveSecret ? t("e2ee.sync.signIn", { name: NAMES[kind] }) : t("e2ee.sync.connect")}
+          </button>
+        )}
+      </form>
+      {settings.kind === "lan" && settings.role === "peer" && (
+        <LanJoin
+          onLinked={async () => {
+            try {
+              await session.connect(settings, null);
+              onDone();
+            } catch (err) {
+              setError(connectError(err, settings));
+            }
+          }}
+        />
       )}
-      {settings.kind === "s3" && (
-        <>
-          <Field label={t("e2ee.sync.endpoint")}>
-            <input dir="ltr" type="url" required placeholder="https://s3.eu-central-1.amazonaws.com" value={settings.endpoint} onChange={(e) => patch({ endpoint: e.target.value })} style={field} />
-          </Field>
-          <Field label={t("e2ee.sync.region")}>
-            <input dir="ltr" required value={settings.region} onChange={(e) => patch({ region: e.target.value })} style={field} />
-          </Field>
-          <Field label={t("e2ee.sync.bucket")}>
-            <input dir="ltr" required value={settings.bucket} onChange={(e) => patch({ bucket: e.target.value })} style={field} />
-          </Field>
-          <Field label={t("e2ee.sync.prefix")}>
-            <input dir="ltr" value={settings.prefix} onChange={(e) => patch({ prefix: e.target.value })} style={field} />
-          </Field>
-          <Field label={t("e2ee.sync.accessKey")}>
-            <input dir="ltr" required autoComplete="off" value={settings.accessKeyId} onChange={(e) => patch({ accessKeyId: e.target.value })} style={field} />
-          </Field>
-          <label style={{ display: "flex", gap: 8, fontSize: 13 }}>
-            <input type="checkbox" checked={settings.pathStyle} onChange={(e) => patch({ pathStyle: e.target.checked })} />
-            {t("e2ee.sync.pathStyle")}
-          </label>
-        </>
-      )}
-      {secretName && (
-        <Field label={t(kind === "s3" ? "e2ee.sync.secretKey" : "e2ee.sync.password")}>
-          <input
-            dir="ltr"
-            type="password"
-            autoComplete={kind === "webdav" ? "current-password" : "off"}
-            placeholder={haveSecret ? t("e2ee.sync.keepSecret") : ""}
-            value={secret}
-            onChange={(e) => setSecret(e.target.value)}
-            style={field}
-          />
-        </Field>
-      )}
-      {error && (
-        <div role="alert" style={errorStyle}>
-          {error}
-        </div>
-      )}
-      <button type="submit" disabled={busy || !oauthAvailable(kind)} style={primary}>
-        {busy ? t("e2ee.sync.connecting") : oauth && !haveSecret ? t("e2ee.sync.signIn", { name: NAMES[kind] }) : t("e2ee.sync.connect")}
-      </button>
-    </form>
+    </div>
   );
 }
 
@@ -307,6 +341,7 @@ function Unlocked({ session }: { session: SyncSession }) {
           )}
         </div>
       )}
+      {s.settings?.kind === "lan" && s.settings.role === "host" && <LanHostPairing />}
       {s.settings && <Migration session={session} kind={s.settings.kind} />}
     </div>
   );
@@ -326,7 +361,7 @@ export function SyncPanel({ onClose, session = syncSession() }: { onClose: () =>
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const where = s.settings ? `${NAMES[s.settings.kind]} — ${providerHosts(s.settings)[0] ?? ""}` : "";
+  const where = !s.settings ? "" : s.settings.kind === "lan" ? t(`e2ee.lan.where.${s.settings.role}`) : `${NAMES[s.settings.kind]} — ${providerHosts(s.settings)[0] ?? ""}`;
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "hsl(0 0% 0% / 0.4)", display: "grid", placeItems: "center", zIndex: 1000 }} onMouseDown={(e) => e.target === e.currentTarget && onClose()}>

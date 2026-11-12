@@ -11,6 +11,9 @@
  * the file tree's badges), this device's selective-sync rules (read again
  * for every round; unreadable rules stop the round), and the background /
  * resume behaviour with its notice.
+ *
+ * A live provider (the local network, plan W2.19) also syncs right after a
+ * local edit and after the other device reports a change.
  */
 
 import { createVault, E2eeSync, unlockVault, type SyncResult } from "../engine";
@@ -26,6 +29,7 @@ import { compileRules, loadRules, saveRules, type SyncRules } from "../rules";
 import { folderStates, type ExcludeRule, type FileStatus, type FileSyncState } from "../status";
 import { installBackgroundSync, isNativeApp, type ResumeNotice } from "../background";
 import { applyTreeBadges, clearTreeBadges } from "./treeBadges";
+import { liveSync } from "../lan/rpc";
 
 export type Phase = "disconnected" | "connected" | "unlocked";
 
@@ -64,6 +68,10 @@ export interface SessionDeps {
   background?: boolean;
   /** The vault's change feed, to mark edits pending between rounds (default: the active vault's). */
   watch?: (listener: (e: { type: string; path: string; from?: string }) => void) => () => void;
+  /** Local edits, for live providers (default: the vault's own change feed). */
+  watchLocal?: (fn: () => void) => () => void;
+  /** Delay before a live round, after the last change (ms). */
+  liveDebounceMs?: number;
 }
 
 function safeRules(): SyncRules {
@@ -84,6 +92,7 @@ export function createSession(deps: SessionDeps = {}) {
   let provider: ConnectedProvider | null = null;
   let engine: E2eeSync | null = null;
   let timer: ReturnType<typeof setInterval> | null = null;
+  let stopLive: (() => void) | null = null;
   const listeners = new Set<(s: SessionState) => void>();
   const activity = new ActivityLog();
   const estimator = new RoundEstimator();
@@ -107,6 +116,8 @@ export function createSession(deps: SessionDeps = {}) {
   function stopTimer() {
     if (timer) clearInterval(timer);
     timer = null;
+    stopLive?.();
+    stopLive = null;
     if (typeof window !== "undefined") window.removeEventListener("online", onOnline);
     unwatch?.();
     unwatch = null;
@@ -177,6 +188,23 @@ export function createSession(deps: SessionDeps = {}) {
     }
   }
 
+  /** Live providers: a round shortly after a local edit or a change on the other side. */
+  async function startLive(p: ConnectedProvider): Promise<void> {
+    const live = liveSync(() => (engine ? syncNow() : Promise.resolve()), { debounceMs: deps.liveDebounceMs ?? 300 });
+    const offRemote = p.onRemoteChange?.(live.kick);
+    let offLocal: () => void;
+    if (deps.watchLocal) offLocal = deps.watchLocal(live.kick);
+    else {
+      const { watchVault } = await import("../../../storage/vault");
+      offLocal = watchVault(live.kick);
+    }
+    stopLive = () => {
+      live.stop();
+      offRemote?.();
+      offLocal();
+    };
+  }
+
   return {
     get: () => state,
     subscribe(l: (s: SessionState) => void): () => void {
@@ -226,6 +254,7 @@ export function createSession(deps: SessionDeps = {}) {
         created = await createVault(provider, passphrase, deps.pbkdf2Iterations ? { pbkdf2Iterations: deps.pbkdf2Iterations } : {});
         keys = created.keys;
       }
+      await provider.unlocked?.(keys);
       engine = new E2eeSync({
         provider,
         keys,
@@ -252,6 +281,7 @@ export function createSession(deps: SessionDeps = {}) {
           native: isNativeApp,
         });
       }
+      if (provider.live) await startLive(provider);
       return syncNow();
     },
 
@@ -280,6 +310,7 @@ export function createSession(deps: SessionDeps = {}) {
     lock(): void {
       engine = null;
       stopTimer();
+      provider?.locked?.();
       if (provider) set({ phase: "connected" });
     },
 
@@ -288,6 +319,7 @@ export function createSession(deps: SessionDeps = {}) {
       const kind = state.settings?.kind;
       stopTimer();
       engine = null;
+      provider?.locked?.();
       provider = null;
       await saveProviderSettings(null);
       if (kind) await saveProviderSecret(kind, null);
