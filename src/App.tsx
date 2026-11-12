@@ -51,7 +51,7 @@ const CommentsPanel = lazy(() =>
 );
 import { DocTabs, tabId } from "./ui/DocTabs";
 import { AiInlinePromptOverlay } from "./ui/AiInlinePrompt";
-import { RuntimeMetricsPanel } from "./ui/RuntimeMetricsPanel";
+const RuntimeMetricsPanel = lazy(() => import("./ui/RuntimeMetricsPanel").then(m => ({ default: m.RuntimeMetricsPanel })));
 import { useFileDragDrop } from "./hooks/useFileDragDrop";
 import { useCollab } from "./hooks/useCollab";
 import { useTauriMenu } from "./hooks/useTauriMenu";
@@ -80,9 +80,11 @@ import {
 } from "./storage/workspace";
 import { welcomeDoc } from "./welcomeDoc";
 import { ErrorBoundary } from "./ui/ErrorBoundary";
-import { KeyboardShortcuts } from "./ui/KeyboardShortcuts";
+const KeyboardShortcuts = lazy(() => import("./ui/KeyboardShortcuts").then(m => ({ default: m.KeyboardShortcuts })));
 import { FocusMode } from "./ui/FocusMode";
-import { OnboardingTour } from "./ui/OnboardingTour";
+const OnboardingTour = lazy(() => import("./ui/OnboardingTour").then(m => ({ default: m.OnboardingTour })));
+// First-run setup (plan 14.1): its own chunk, loaded only on a first visit or from ⌘K.
+const FirstRun = lazy(() => import("./onboarding/FirstRun"));
 import { scrollToHeadingWhenRendered } from "./renderer/wikiLinks";
 import { notifyWorkspaceChanged } from "./storage/workspaceEvents";
 
@@ -153,6 +155,7 @@ export default function App() {
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
+  const [setupOpen, setSetupOpen] = useState(false);
   const [recents, setRecents] = useState<RecentFile[]>([]);
 
   // ── Collaboration (extracted hook) ─────────────────────────────
@@ -248,18 +251,13 @@ export default function App() {
         workspaceName: doc.workspaceName ?? null,
       });
     }
-    // Show onboarding tour on first launch
-    let tourTimer: ReturnType<typeof setTimeout> | undefined;
+    // First launch: the setup (plan 14.1), then its short tour. The flag is
+    // the old tour's, so anyone who finished that never sees setup.
     try {
-      if (!localStorage.getItem("lumen-tour-done")) {
-        tourTimer = setTimeout(() => setTourOpen(true), 1200);
-      }
+      if (!localStorage.getItem("lumen-tour-done")) setSetupOpen(true);
     } catch {
-      /* storage may be denied in private browsing — onboarding silently skips */
+      /* storage may be denied in private browsing — setup silently skips */
     }
-    return () => {
-      if (tourTimer) clearTimeout(tourTimer);
-    };
     // run once
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -445,6 +443,27 @@ export default function App() {
     return () => window.removeEventListener("lumen-open-file", onOpen);
   }, [handleOpenFromWorkspace]);
 
+  // Today's daily note (plan 4.12): the command and ⌥⌘D. The daily-note code is its own chunk.
+  useEffect(() => {
+    const onToday = () => {
+      void import("./daily/dailyNote")
+        .then((m) => {
+          const s = useAppStore.getState();
+          return m.openDailyNote(m.dayOf(new Date()), s.dailyNotes, s.locale);
+        })
+        .catch((e: unknown) => showAiToast(t("daily.failed", { error: e instanceof Error ? e.message : String(e) }), "error"));
+    };
+    window.addEventListener("lumen-open-today", onToday);
+    return () => window.removeEventListener("lumen-open-today", onToday);
+  }, []);
+
+  // ⌘K → "Set up Lumen…" (plan 14.1) reopens the first-run setup.
+  useEffect(() => {
+    const onSetup = () => setSetupOpen(true);
+    window.addEventListener("lumen-open-setup", onSetup);
+    return () => window.removeEventListener("lumen-open-setup", onSetup);
+  }, []);
+
   // Workspace: when active file is renamed (in the tree), keep doc.name in sync.
   const handleActiveRenamed = useCallback(
     (newName: string) => {
@@ -534,6 +553,12 @@ export default function App() {
         } else {
           setFocusMode(true);
         }
+        return;
+      }
+      // ⌥⌘D → today's daily note (e.code: Option changes e.key on a Mac).
+      if (e.altKey && e.code === "KeyD") {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent("lumen-open-today"));
         return;
       }
       if (e.key === "k" || e.key === "K") {
@@ -1104,10 +1129,24 @@ export default function App() {
       <AiFab commands={commands} />
 
       {/* Keyboard Shortcuts Overlay */}
-      <KeyboardShortcuts open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
+      {shortcutsOpen && <Suspense fallback={null}><KeyboardShortcuts open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} /></Suspense>}
 
-      {/* Onboarding Tour */}
-      <OnboardingTour
+      {/* First-run setup, then the tour */}
+      {setupOpen && (
+        <Suspense fallback={null}>
+          <FirstRun
+            onDone={(r) => {
+              setSetupOpen(false);
+              if (!r) return;
+              const st = useAppStore.getState();
+              st.openTab({ name: r.note.path, content: r.note.content, workspaceName: r.note.path });
+              if (!st.showWorkspace) st.toggleWorkspace();
+              setTourOpen(true);
+            }}
+          />
+        </Suspense>
+      )}
+      {tourOpen && <Suspense fallback={null}><OnboardingTour
         open={tourOpen}
         onClose={() => {
           setTourOpen(false);
@@ -1125,9 +1164,9 @@ export default function App() {
             },
           },
         ]}
-      />
+      /></Suspense>}
       {runtimeMetricsOpen && (
-        <RuntimeMetricsPanel onClose={() => setRuntimeMetricsOpen(false)} />
+        <Suspense fallback={null}><RuntimeMetricsPanel onClose={() => setRuntimeMetricsOpen(false)} /></Suspense>
       )}
 
       {/* Focus Mode overlay */}

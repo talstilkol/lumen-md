@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import {
   ChevronDown,
   ChevronRight,
@@ -43,6 +43,9 @@ interface Props {
   /** Called after the active file is deleted. */
   onActiveDeleted: () => void;
 }
+
+// The month calendar of daily notes (plan 4.12): its own chunk, loaded when shown.
+const CalendarPanel = lazy(() => import("./CalendarPanel"));
 
 export function FileTree({
   activePath,
@@ -608,6 +611,7 @@ export function FileTree({
           })}
         />
       )}
+      <CalendarSlot />
     </aside>
   );
 }
@@ -801,4 +805,14 @@ function findNode(nodes: WorkspaceNode[], path: string): WorkspaceNode | undefin
     }
   }
   return undefined;
+}
+
+function CalendarSlot() {
+  const show = useAppStore((s) => s.showCalendar);
+  if (!show) return null;
+  return (
+    <Suspense fallback={null}>
+      <CalendarPanel />
+    </Suspense>
+  );
 }

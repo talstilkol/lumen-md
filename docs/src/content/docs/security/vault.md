@@ -1,43 +1,46 @@
 ---
-title: How Lumen stores your secrets
-description: API keys and tokens are encrypted at rest; in the macOS and Windows desktop apps they go to the OS keychain.
+title: Secrets and encryption
+description: How Lumen stores API keys and tokens, and how to encrypt a document.
 ---
 
-Lumen keeps the secrets it needs on your device: AI provider keys, cloud
-tokens (Dropbox, Google Drive, GitHub), the collaboration room password
-and the research search key. None of them is sent anywhere except to the
-service it belongs to.
+Lumen keeps the secrets it needs — AI provider keys, Git and cloud tokens,
+the collaboration room password, the research search key — out of plain
+browser storage. There is **no password-protected vault and no recovery
+phrase**; an earlier draft of these docs described one that was never shipped.
 
-## In the browser
+## Where secrets live
 
-Each secret is encrypted with **AES-GCM-256** under a key that WebCrypto
-generates as **non-extractable** and keeps in IndexedDB. The raw key bytes
-never exist in JavaScript, so a copied browser profile or a storage export
-does not reveal your secrets.
+| Where Lumen runs | How secrets are stored |
+|---|---|
+| Browser / installed web app | Each secret is encrypted with AES-GCM-256 under a WebCrypto key that is **non-extractable**: no script can read out the raw key bytes. The secrets no longer sit in localStorage as plain text, so a glance in DevTools, a localStorage dump or a synced settings export shows only ciphertext. |
+| Desktop app on macOS / Windows | The operating system's keychain (Keychain / Credential Manager). Lumen keeps only the secret names, so it knows what to load. |
+| Old engines without IndexedDB or WebCrypto | Plain localStorage, as before. Lumen reports this mode instead of hiding it. |
 
-What this does **not** protect against: code running inside Lumen's own
-origin can still ask WebCrypto to decrypt. That risk is handled by the
-Content-Security-Policy and the HTML sanitizer, not by the store.
+**Honest limits:**
 
-If the browser has no IndexedDB or WebCrypto (very old engines), Lumen
-falls back to plain local storage. The app does not show a warning for
-this yet.
+- The key is stored in the same IndexedDB database as the encrypted
+  secrets, and Lumen decrypts them at startup without asking for a
+  password. Someone who copies the whole browser profile and opens it in
+  Lumen can therefore use the stored key and read the secrets.
+  Non-extractable stops the key from being *exported*, not from being
+  *used*. Protecting against a copied profile needs a password you type
+  (planned with whole-vault encryption, task 11.4) or the desktop app's
+  OS keychain.
+- Code running inside Lumen's own origin could also ask WebCrypto to
+  decrypt. The Content Security Policy and the HTML sanitizer are what
+  keep foreign code out.
 
-## In the desktop app
+Plain-text secrets left by older versions are encrypted and moved at startup.
 
-On macOS and Windows the secrets go to the **OS keychain** (Keychain /
-Credential Manager). Lumen keeps only their names, so it knows what to
-load.
+## Encrypting a document
 
-## Not available yet
+`⌘K → 🔒 Encrypt Document` encrypts the open note with AES-256-GCM under a
+password you type. The note is replaced by an encrypted block; `Decrypt
+Document` restores it. Lumen does not keep the password — lose it and the
+note cannot be recovered.
 
-There is no master password, lock command or recovery phrase in the app
-today. The code for a password vault with a 12-word recovery phrase exists
-(`src/storage/vault.ts`) but is not connected to any screen. This page will
-describe it when it ships.
+## What is not encrypted
 
-## Per-document encryption
-
-Encrypting a single note is a separate feature: `⌘K → Encrypt document`
-(AES-GCM-256 with a per-document password, stored as a fenced block at
-the top of the file). See [End-to-end encryption](/collab/encryption/).
+Your notes themselves are plain Markdown files (in the browser's private
+file system, or a folder on desktop). Encrypting the whole vault at rest is
+planned as an option (plan task 11.4).

@@ -13,6 +13,8 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "hygiene": "node scripts/check-code-hygiene.mjs",
+    "licenses": "node scripts/licenses.mjs",
+    "golden": "node scripts/golden.mjs",
     "plan": "node scripts/plan/build.mjs",
     "plan:check": "node scripts/plan/build.mjs --check",
     "dod": "node scripts/dod.mjs",
