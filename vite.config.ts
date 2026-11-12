@@ -5,6 +5,7 @@ import { cspEndpointsPlugin } from "./src/build/cspEndpoints";
 import { laneCacheDir } from "./src/build/laneCache";
 import { webrManifestPlugin } from "./src/build/webrManifest";
 import { LOCALES, whatsNew } from "./scripts/lib/whats-new.mjs";
+import { viteEnvGatePlugin } from "./src/build/viteEnvGate";
 
 interface VitestConfig {
   test?: {
@@ -336,6 +337,8 @@ export default defineConfig({
   // Worker bundles get only these plugins (plus Vite's own).
   worker: { plugins: () => [dictionaryEn] },
   plugins: [
+    // W4.4: a VITE_* not on security/vite-env-allowlist.json fails the build.
+    viteEnvGatePlugin(),
     react(),
     whatsNewNotes,
     cleanUrlAliases,

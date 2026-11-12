@@ -38,6 +38,8 @@ export const GATES = {
   hygiene: ["run", "-s", "hygiene"],
   "docs:sync": ["run", "-s", "docs:sync"],
   licenses: ["run", "-s", "licenses"],
+  // W4.4: token shapes and VITE_* values not on the allowlist in dist/.
+  secrets: ["run", "-s", "secrets:dist"],
 };
 
 /**
@@ -77,7 +79,7 @@ export function vitestSummary(report, { maxFiles = 80 } = {}) {
 }
 
 export const PRODUCTION_GATES = ["build", "budget"];
-export const PREVIEW_GATES = ["build", "budget", "vitest", "e2e", "i18n:check", "hygiene", "docs:sync", "licenses"];
+export const PREVIEW_GATES = ["build", "budget", "secrets", "vitest", "e2e", "i18n:check", "hygiene", "docs:sync", "licenses"];
 
 /** Which gates a build runs: production only for VERCEL_ENV=production (or --production). */
 export function gatesFor(env = process.env, argv = []) {

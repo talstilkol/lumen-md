@@ -12,7 +12,7 @@ No GitHub Actions minutes are used.
 
 | Build | What runs, in order |
 |---|---|
-| Preview (every branch except `main`) | build, bundle budget, vitest, e2e (chromium smoke), `i18n:check`, hygiene, `docs:sync`, the licence gate |
+| Preview (every branch except `main`) | build, bundle budget, the secret scan of `dist/`, vitest, e2e (chromium smoke), `i18n:check`, hygiene, `docs:sync`, the licence gate |
 | Production (`main`) | build, bundle budget — as before |
 
 The gates stop at the first failure. The build log ends with the gate that
@@ -34,7 +34,8 @@ Outside Vercel (no `VERCEL_ENV`) the script runs the preview set, so a
 local run is what the branch's build will do. Each gate is also an npm
 script of its own: `npm run build`, `npm run budget`, `npm test`,
 `npm run e2e:gate` (after a build), `npm run i18n:check`, `npm run hygiene`, `npm run docs:sync`,
-`npm run licenses`.
+`npm run licenses`, `npm run secrets:dist` (see
+[Secret scan of the build](/security/secret-scan/)).
 
 ## What does not run in the build
 
