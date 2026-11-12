@@ -43,6 +43,7 @@
     "budget": "node scripts/bundle-budget.mjs",
     "ci:local": "node scripts/ci-local.mjs",
     "lighthouse": "lhci autorun --config=./lighthouserc.json",
+    "perf:gate": "node scripts/perf-gate.mjs",
     "lighthouse:a11y": "node scripts/lighthouse-a11y.mjs",
     "i18n:extract": "node scripts/extract-i18n-keys.mjs",
     "i18n:check": "node scripts/i18n-split.mjs --check && node scripts/extract-i18n-keys.mjs --check && node scripts/check-i18n-hardcoded.mjs",
