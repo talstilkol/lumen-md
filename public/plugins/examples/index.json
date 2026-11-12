@@ -1,0 +1,8 @@
+{
+  "about": "Sandboxed plugin registry (plan 11.2, W1.20): every version listed here is scanned (scripts/scan-plugins.mjs → scan.json); a version whose scan fails is not shown.",
+  "plugins": [
+    { "id": "lumen.example.word-stats", "versions": [{ "version": "1.0.0", "path": "word-stats" }] },
+    { "id": "lumen.example.callout", "versions": [{ "version": "1.0.0", "path": "callout" }] },
+    { "id": "lumen.example.daily-quote", "versions": [{ "version": "1.0.0", "path": "daily-quote" }] }
+  ]
+}

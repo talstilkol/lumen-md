@@ -2682,6 +2682,265 @@
       "vars": []
     },
     {
+      "key": "pluginTrust.cap.clipboard-write",
+      "en": "Copy text to your clipboard",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.cap.commands",
+      "en": "Add commands to the command palette",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.cap.document-read",
+      "en": "Read the note that is open",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.cap.document-write",
+      "en": "Change the note that is open",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.cap.network",
+      "en": "Connect to {origin} — and nowhere else",
+      "vars": [
+        "origin"
+      ]
+    },
+    {
+      "key": "pluginTrust.cap.notifications",
+      "en": "Show notifications",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.cap.panel",
+      "en": "Show a side panel",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.cap.renderer",
+      "en": "Draw code blocks of its own language in the preview",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.cap.settings",
+      "en": "Keep its own settings",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.cap.storage",
+      "en": "Store its own data on this device",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.cap.vault-read",
+      "en": "Read any note in your vault",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.cap.vault-write",
+      "en": "Create and change notes in your vault",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.card.clean",
+      "en": "Scan: nothing to note",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.card.grade",
+      "en": "Safety {grade} · {score}/100",
+      "vars": [
+        "grade",
+        "score"
+      ]
+    },
+    {
+      "key": "pluginTrust.card.notes",
+      "en": "Scan notes: {list}",
+      "vars": [
+        "list"
+      ]
+    },
+    {
+      "key": "pluginTrust.card.perms",
+      "en": "Asks for {n} permissions",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "pluginTrust.dialog.asks",
+      "en": "{name} {version} by {author} asks to:",
+      "vars": [
+        "name",
+        "version",
+        "author"
+      ]
+    },
+    {
+      "key": "pluginTrust.dialog.cancel",
+      "en": "Cancel",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.dialog.confirm",
+      "en": "Install and allow",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.dialog.none",
+      "en": "It asks for no permissions.",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.dialog.reason",
+      "en": "Why: {reason}",
+      "vars": [
+        "reason"
+      ]
+    },
+    {
+      "key": "pluginTrust.dialog.sandbox",
+      "en": "It runs in a sandbox: anything it did not ask for is refused, and every network request is listed in the privacy ledger.",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.dialog.sensitive",
+      "en": "sensitive",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.dialog.title",
+      "en": "Install “{name}”?",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "pluginTrust.install",
+      "en": "Install…",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.installFailed",
+      "en": "Could not install “{name}”: {error}",
+      "vars": [
+        "name",
+        "error"
+      ]
+    },
+    {
+      "key": "pluginTrust.installed",
+      "en": "“{name}” is installed.",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "pluginTrust.loadFailed",
+      "en": "Could not load the sandboxed plugin list.",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.loading",
+      "en": "Loading sandboxed plugins…",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.report",
+      "en": "Report a problem",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.rule.dynamic-import",
+      "en": "loads more code",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.rule.dynamic-network",
+      "en": "builds network addresses while it runs",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.rule.eval",
+      "en": "runs code made from text",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.rule.indirect-api",
+      "en": "calls the API indirectly",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.rule.manifest",
+      "en": "invalid manifest",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.rule.obfuscated-access",
+      "en": "hides what it calls",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.rule.signature",
+      "en": "signature does not match",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.rule.size",
+      "en": "too large",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.rule.syntax",
+      "en": "not valid JavaScript",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.rule.undeclared",
+      "en": "uses a permission it does not ask for",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.rule.undeclared-network",
+      "en": "connects to an address it does not ask for",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.rule.unsigned",
+      "en": "not signed",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.rule.untrusted-signer",
+      "en": "signed by an unknown key",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.rule.unused",
+      "en": "asks for a permission it does not use",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.scanFailed",
+      "en": "“{name}” failed the safety scan and cannot be installed.",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "pluginTrust.section.about",
+      "en": "They run in a sandbox with only the permissions you allow. Every version is scanned before it is listed; a version that fails is not shown.",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.section.title",
+      "en": "Sandboxed plugins",
+      "vars": []
+    },
+    {
       "key": "plugins.block.failed",
       "en": "The plugin could not render this block: {error}",
       "vars": [

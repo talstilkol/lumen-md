@@ -120,6 +120,7 @@ export default defineConfig({
             { label: "Plugin SDK", slug: "plugins/sdk" },
             { label: "Sandbox and permissions", slug: "plugins/sandbox" },
             { label: "Plugin API", slug: "plugins/api" },
+            { label: "Permissions and safety scan", slug: "plugins/permissions" },
             { label: "Plugin gallery", slug: "plugins/gallery" },
             { label: "Plugin signing keys", slug: "plugins/signing" },
             { label: "Templates", slug: "plugins/templates", translations: { he: "תבניות" } },
