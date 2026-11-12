@@ -102,6 +102,7 @@ export default defineConfig({
             { label: "Graph and local graph", slug: "workspace/graph", translations: { he: "גרף וגרף מקומי" } },
             { label: "Note cards and image export", slug: "workspace/canvas-cards", translations: { he: "כרטיסי פתקים וייצוא תמונה" } },
             { label: "Backups to a second drive", slug: "workspace/backups", translations: { he: "גיבוי לכונן שני" } },
+            { label: "Diagrams on the canvas (Mermaid, draw me)", slug: "workspace/canvas-diagrams", translations: { he: "תרשימים בקנבס (Mermaid,‏ צייר לי)" } },
           ],
         },
         {

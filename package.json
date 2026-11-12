@@ -86,7 +86,8 @@
     "whisper:desktop": "node scripts/whisper-desktop.mjs",
     "docs:search": "node scripts/docs-search.mjs",
     "perf:coldstart": "playwright test --project=coldstart --project=coldstart-phone",
-    "design:check": "node scripts/check-design.mjs && node scripts/design-audit.mjs"
+    "design:check": "node scripts/check-design.mjs && node scripts/design-audit.mjs",
+    "eval:canvas-draw": "node scripts/canvas-draw-eval.mjs"
   },
   "dependencies": {
     "@bjorn3/browser_wasi_shim": "0.4.2",
@@ -202,7 +203,8 @@
     "quickjs-emscripten-core": "0.32.0",
     "@mozilla/readability": "^0.6.0",
     "defuddle": "^0.19.6",
-    "turndown": "^7.2.4"
+    "turndown": "^7.2.4",
+    "@excalidraw/mermaid-to-excalidraw": "2.2.2"
   },
   "devDependencies": {
     "@hocuspocus/server": "4.7.0",

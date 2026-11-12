@@ -81,3 +81,82 @@
   display: inline-flex;
   gap: 4px;
 }
+
+/* The diagram dialog (plan W2.18). */
+.lumen-diagram-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 300;
+  display: grid;
+  place-items: center;
+  background: rgb(0 0 0 / 0.35);
+}
+
+.lumen-diagram {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  inline-size: min(640px, calc(100vw - 32px));
+  padding: 16px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  background: hsl(var(--bg));
+  color: hsl(var(--fg));
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.3);
+}
+
+.lumen-diagram-title {
+  margin: 0;
+  font-size: 15px;
+}
+
+.lumen-diagram-label {
+  font-size: 12px;
+  color: hsl(var(--fg-muted));
+}
+
+.lumen-diagram-row {
+  display: flex;
+  gap: 8px;
+}
+
+.lumen-diagram-input,
+.lumen-diagram-code {
+  flex: 1;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 4px;
+  background: hsl(var(--bg));
+  color: hsl(var(--fg));
+  font: inherit;
+  font-size: 13px;
+}
+
+.lumen-diagram-code {
+  min-block-size: 200px;
+  font-family: ui-monospace, "Cascadia Code", monospace;
+  resize: vertical;
+}
+
+.lumen-diagram-note {
+  margin: 0;
+  font-size: 11px;
+  color: hsl(var(--fg-muted));
+}
+
+.lumen-diagram-status {
+  margin: 0;
+  font-size: 12px;
+  white-space: pre-wrap;
+}
+
+.lumen-diagram-status.error {
+  color: hsl(var(--danger, 0 70% 50%));
+}
+
+.lumen-diagram-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

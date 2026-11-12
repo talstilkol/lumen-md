@@ -476,10 +476,14 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
   // A suggestion the user picked for this agent and this input (suggestions panel) applies once.
   const { peekNextRunExecutor, takeNextRunPatch, retryOfPending } = await import("./suggestions");
   const pendingExecutor = peekNextRunExecutor(def.id, run.inputKey);
+  // An agent that names its executors runs only on those: a forced one (option,
+  // suggestion or critic patch) outside the list is ignored (W2.18: the canvas
+  // "draw me" stays on this device's models).
+  const allowedExecutor = (id: ExecutorId | undefined) => (id && (!def.executorPreference || def.executorPreference.includes(id)) ? id : undefined);
+  let pick = await pickExecutor(preference, allowedExecutor(opts.executor ?? pendingExecutor));
   // "Not good" (5.6.3): this run re-does one the user rejected; the trace links them.
   const redo = retryOfPending(def.id, run.inputKey);
   if (redo) run.retryOf = redo;
-  let pick = await pickExecutor(preference, opts.executor ?? pendingExecutor);
   const pending = takeNextRunPatch(def.id, run.inputKey);
   if (!pick.executor) {
     const verdict = await review({ kind: "no-executor", attempt: 1, maxRetries, tier: def.tier ?? "small", executor: null, skipped: pick.skipped, inputChars, splittable: !!def.splittable });
@@ -602,7 +606,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
   let modelRetryUsed = false;
   for (let attempt = 1; attempt <= maxRetries + 1 + (modelRetryUsed ? 1 : 0); attempt++) {
     run.attempts = attempt;
-    if (patch.executor && patch.executor !== executor.id) {
+    if (patch.executor && patch.executor !== executor.id && allowedExecutor(patch.executor)) {
       const forced = getExecutor(patch.executor);
       if (forced && (await forced.available()).available) executor = forced;
     }
