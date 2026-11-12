@@ -80,7 +80,7 @@ describe("open → save, no edit (W4.30)", () => {
   it("the same notes saved by Windows (CRLF, BOM) keep their CRLF and BOM", async () => {
     let same = 0;
     for (const f of notes) {
-      const win = "﻿" + text(f).replace(/\r?\n/g, "\r\n");
+      const win = "\uFEFF" + text(f).replace(/\r?\n/g, "\r\n");
       const bytes = enc.encode(win);
       const read = await readText(new Blob([bytes as BlobPart]));
       if (sameBytes(enc.encode(throughEditor(read)), bytes)) same++;
@@ -102,7 +102,7 @@ describe("properties: writing a value that is already there changes nothing (W4.
     const dupNotes: string[] = [];
     for (const f of notes) {
       const t = text(f);
-      if (!/^﻿?---\r?\n/.test(t)) continue;
+      if (!/^\uFEFF?---\r?\n/.test(t)) continue;
       const ps = readProperties(t);
       const keys = ps.map((p) => p.key);
       if (new Set(keys).size !== keys.length) dupNotes.push(f.path);

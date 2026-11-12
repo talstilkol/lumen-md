@@ -13,7 +13,7 @@
  * mixed endings is left to the editor (LF), as before.
  */
 
-const BOM = "﻿";
+const BOM = "\uFEFF";
 
 /** UTF-8 text of a file, the byte-order mark kept. */
 export async function readText(blob: Blob): Promise<string> {
