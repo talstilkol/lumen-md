@@ -58,6 +58,7 @@ export default defineConfig({
             { label: "Settings", translations: { he: "הגדרות" }, slug: "editor/settings" },
             { label: "Hebrew and right-to-left", translations: { he: "עברית וכתיבה מימין לשמאל" }, slug: "editor/hebrew-rtl" },
             { label: "Accessibility statement", slug: "editor/accessibility-statement", translations: { he: "הצהרת נגישות" } },
+            { label: "Accessibility conformance report (WCAG 2.2)", slug: "editor/acr", translations: { he: "דוח תאימות נגישות (WCAG 2.2)" } },
             { label: "Screen reader protocol", slug: "editor/screen-reader-protocol", translations: { he: "פרוטוקול קוראי מסך" } },
             { label: "Hebrew keyboard layout", slug: "editor/hebrew-keyboard", translations: { he: "פריסת מקלדת עברית" } },
             { label: "Hebrew typography", slug: "editor/hebrew-typography", translations: { he: "טיפוגרפיה עברית" } },

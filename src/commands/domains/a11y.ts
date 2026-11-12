@@ -5,6 +5,9 @@ import { announce, nextVerbosity, setVerbosity, verbosity } from "../../a11y/ann
 import { docsUrl } from "../../lib/docsLinks";
 import type { CommandContext } from "./context";
 
+/** The accessibility issue form (.github/ISSUE_TEMPLATE/accessibility.yml). */
+export const A11Y_REPORT_URL = "https://github.com/talstilkol/lumen-md/issues/new?template=accessibility.yml&labels=accessibility";
+
 export function buildAccessibilityCommands({ getEditorView }: CommandContext): Command[] {
   return [
     {
@@ -40,6 +43,23 @@ export function buildAccessibilityCommands({ getEditorView }: CommandContext): C
       icon: cmdIcons.FileText,
       group: t("group.file"),
       action: () => window.open(docsUrl("a11yStatement", undefined, getLocale() === "he" ? "he" : undefined), "_blank", "noopener,noreferrer"),
+    },
+    {
+      id: "help.acr",
+      label: t("cmd.help.acr"),
+      hint: t("cmd.help.acr.hint"),
+      icon: cmdIcons.FileText,
+      group: t("group.file"),
+      action: () => window.open(docsUrl("acr", undefined, getLocale() === "he" ? "he" : undefined), "_blank", "noopener,noreferrer"),
+    },
+    {
+      // The accessibility contact channel (plan W3.8): a GitHub issue form, labelled and triaged first.
+      id: "help.a11yReport",
+      label: t("cmd.help.a11yReport"),
+      hint: t("cmd.help.a11yReport.hint"),
+      icon: cmdIcons.FileText,
+      group: t("group.file"),
+      action: () => window.open(A11Y_REPORT_URL, "_blank", "noopener,noreferrer"),
     },
   ];
 }

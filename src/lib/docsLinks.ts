@@ -22,6 +22,7 @@ export const DOCS_TOPICS = {
   localAgents: "ai/local-agents",
   a11yStatement: "editor/accessibility-statement",
   trustedRepos: "security/trusted-repos",
+  acr: "editor/acr",
 } as const;
 
 export type DocsTopic = keyof typeof DOCS_TOPICS;

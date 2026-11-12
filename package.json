@@ -87,7 +87,9 @@
     "docs:search": "node scripts/docs-search.mjs",
     "perf:coldstart": "playwright test --project=coldstart --project=coldstart-phone",
     "design:check": "node scripts/check-design.mjs && node scripts/design-audit.mjs",
-    "eval:canvas-draw": "node scripts/canvas-draw-eval.mjs"
+    "eval:canvas-draw": "node scripts/canvas-draw-eval.mjs",
+    "acr": "node scripts/acr.mjs",
+    "acr:check": "node scripts/acr.mjs --check"
   },
   "dependencies": {
     "@bjorn3/browser_wasi_shim": "0.4.2",

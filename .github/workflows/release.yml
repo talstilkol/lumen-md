@@ -32,15 +32,21 @@ jobs:
       - uses: actions/setup-node@v7
         with: { node-version: 22, cache: npm }
       - run: npm ci || npm install
+      # The accessibility conformance report is reviewed for every release (plan W3.8).
+      - name: ACR is complete and for this version
+        run: node scripts/acr.mjs --check
       # typecheck, tests, build, budget, no source maps, web .tgz, SHA256SUMS — the local script's own steps
       - run: node scripts/release.mjs build
       - name: Release notes from CHANGELOG.md
         run: node scripts/release.mjs notes "${{ github.ref_name }}" > release-notes.md || echo "Lumen ${{ github.ref_name }}" > release-notes.md
+      - name: Attach the ACR
+        run: cp docs/acr/wcag22.json release/lumen-acr-wcag22-${{ github.ref_name }}.json
       - uses: softprops/action-gh-release@v3
         with:
           files: |
             release/lumen-web-${{ github.ref_name }}.tgz
             release/SHA256SUMS
+            release/lumen-acr-wcag22-${{ github.ref_name }}.json
           fail_on_unmatched_files: true
           body_path: release-notes.md
 
