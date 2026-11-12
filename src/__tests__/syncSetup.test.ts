@@ -12,7 +12,7 @@ import type { Server } from "node:http";
 import { isMobileDevice, setupChoices } from "../sync/e2ee/setup/recommend";
 import { KEY_WORDS, newRecoveryWords, normalizeWord, parseRecoveryWords, relayToken, WORD_LIST } from "../sync/e2ee/setup/recoveryWords";
 import { folderProvider, FOLDER_SYNC_DIR } from "../sync/e2ee/providers/folder";
-import { relayOrigin, relayProvider } from "../sync/e2ee/providers/relay";
+import { relayOrigin, relayProvider, relaySpaceId, solveRelayPow } from "../sync/e2ee/providers/relay";
 import { PreconditionFailedError, type SyncProvider } from "../sync/e2ee/provider";
 import { createMemoryBackend } from "../storage/vault/memory";
 import { createSession } from "../sync/e2ee/ui/session";
@@ -25,8 +25,10 @@ import { TEST_ITERATIONS } from "./helpers/e2ee";
 
 const require = createRequire(import.meta.url);
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { createVaultRelay } = require("../../sync-server/vault-relay.js") as {
-  createVaultRelay: (o?: Record<string, unknown>) => { handle(req: unknown, res: unknown): boolean; close(): void };
+const { createVaultRelay, memoryStore, powOk } = require("../../sync-server/vault-relay.js") as {
+  createVaultRelay: (o?: Record<string, unknown>) => { handle(req: unknown, res: unknown): boolean; close(): void; sweep(): Promise<number> };
+  memoryStore: () => unknown;
+  powOk: (space: string, nonce: string, bits: number) => boolean;
 };
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const http = require("node:http") as typeof import("node:http");
@@ -261,5 +263,101 @@ describe("two devices, two clicks each", () => {
     const eb = new E2eeSync({ provider: pb, keys: kb, local: b.files, store: memoryStateStore(), resolver: keepBothResolver });
     expect((await eb.sync()).downloaded).toBe(1);
     expect(dec((await b.files.read("note.md"))!)).toBe("שלום");
+  });
+});
+
+describe("relay limits (review 12.11)", () => {
+  /** A relay on a real socket, for one test. */
+  async function serve(opts: Record<string, unknown>) {
+    const relay = createVaultRelay({ sweep: false, ratePerMinute: 100000, ...opts });
+    const server = http.createServer((req, res) => void relay.handle(req, res));
+    await new Promise<void>((r) => server.listen(0, "127.0.0.1", () => r()));
+    const origin = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+    return { relay, origin, close: () => (relay.close(), new Promise<void>((r) => server.close(() => r()))) };
+  }
+  const tok = (i: number) => `t${String(i).padStart(40, "0")}`;
+
+  it("a new token is not free: new spaces per address per day, bytes per address per day, and all spaces together are capped", async () => {
+    const r = await serve({ newSpacesPerDay: 2, maxSpaceBytes: 20_000, addressBytesPerDay: 100_000, maxTotalBytes: 25_000 });
+    try {
+      await relayProvider({ url: r.origin, token: tok(1) }).put("a", new Uint8Array(10_000));
+      await relayProvider({ url: r.origin, token: tok(2) }).put("a", new Uint8Array(10_000));
+      // A third space from the same address today: refused before anything is stored.
+      await expect(relayProvider({ url: r.origin, token: tok(3) }).put("a", new Uint8Array(1))).rejects.toThrow(/429/);
+      // The existing spaces still work, until the relay as a whole is full (each is under its own quota).
+      await relayProvider({ url: r.origin, token: tok(1) }).put("b", new Uint8Array(4_000));
+      await expect(relayProvider({ url: r.origin, token: tok(2) }).put("b", new Uint8Array(2_000))).rejects.toThrow(/507/);
+      // Deleting frees room in the total.
+      await relayProvider({ url: r.origin, token: tok(1) }).delete("b");
+      await relayProvider({ url: r.origin, token: tok(2) }).put("b", new Uint8Array(2_000));
+    } finally {
+      await r.close();
+    }
+    const b = await serve({ maxSpaceBytes: 10_000, addressBytesPerDay: 15_000 });
+    try {
+      await relayProvider({ url: b.origin, token: tok(1) }).put("a", new Uint8Array(10_000));
+      await expect(relayProvider({ url: b.origin, token: tok(2) }).put("a", new Uint8Array(10_000))).rejects.toThrow(/429/);
+    } finally {
+      await b.close();
+    }
+  });
+
+  it("an invite, when the operator sets one, is needed to open a space (not to use one)", async () => {
+    const r = await serve({ invite: "club-secret-1234" });
+    try {
+      await expect(relayProvider({ url: r.origin, token: tok(1) }).put("a", enc("x"))).rejects.toThrow(/403/);
+      const p = relayProvider({ url: r.origin, token: tok(1), invite: "club-secret-1234" });
+      await p.put("a", enc("x"));
+      expect(await p.list()).toEqual(["a"]);
+      expect(await relayProvider({ url: r.origin, token: tok(1) }).list()).toEqual(["a"]);
+    } finally {
+      await r.close();
+    }
+  });
+
+  it("a proof of work, when the operator asks for one: the app solves it once, bound to its own space", async () => {
+    const r = await serve({ powBits: 10 });
+    try {
+      const raw = await fetch(`${r.origin}/v1/vault/o/a`, { method: "PUT", headers: { Authorization: `Bearer ${tok(1)}` }, body: "x" });
+      expect(raw.status).toBe(428);
+      expect(await raw.json()).toEqual({ error: "pow", bits: 10 });
+      const p = relayProvider({ url: r.origin, token: tok(1) });
+      await p.put("a", enc("x"));
+      await p.put("b", enc("y")); // the space exists now: no more work
+      expect((await p.list()).sort()).toEqual(["a", "b"]);
+      // A nonce solved for one space proves nothing for another.
+      const nonce = await solveRelayPow(await relaySpaceId(tok(1)), 10);
+      expect(powOk(await relaySpaceId(tok(1)), nonce, 10)).toBe(true);
+      const other = await fetch(`${r.origin}/v1/vault/o/a`, { method: "PUT", headers: { Authorization: `Bearer ${tok(2)}`, "X-Lumen-Pow": nonce }, body: "x" });
+      expect(other.status).toBe(428);
+    } finally {
+      await r.close();
+    }
+  });
+
+  it("retention counts reads: a space read every day is kept; one nobody reads or writes goes", async () => {
+    const real = Date.now;
+    let now = Date.UTC(2026, 0, 1);
+    Date.now = () => now;
+    try {
+      const r = await serve({ store: memoryStore(), retentionDays: 180 });
+      try {
+        const read = relayProvider({ url: r.origin, token: tok(1) });
+        const idle = relayProvider({ url: r.origin, token: tok(2) });
+        await read.put("m", enc("sealed"));
+        await idle.put("m", enc("sealed"));
+        for (let d = 0; d < 200; d++) {
+          now += 86_400_000;
+          expect(await read.get("m")).not.toBeNull();
+        }
+        expect(await r.relay.sweep()).toBe(1);
+        expect(await read.get("m")).not.toBeNull();
+        expect(await idle.get("m")).toBeNull();
+      } finally {
+        await r.close();
+      }
+    } finally {
+      Date.now = real;
+    }
   });
 });

@@ -13,6 +13,11 @@
  *   GET    /v1/vault/o/<name>      → bytes, ETag            (404: none)
  *   PUT    /v1/vault/o/<name>      If-Match / If-None-Match: *   (412: lost race)
  *   DELETE /v1/vault/o/<name>
+ *
+ * A public relay may ask for more before it opens a new space (review 12.11,
+ * sync-server/vault-relay.js): an invite (`X-Lumen-Invite`, from the build's
+ * VITE_SYNC_RELAY_INVITE) or a proof of work (428 {"error":"pow","bits":n}),
+ * which this provider solves once and sends with its first write.
  */
 
 import { PreconditionFailedError, type PutCondition, type StoredObject, type SyncProvider } from "../provider";
@@ -23,6 +28,40 @@ export interface RelayConfig {
   url: string;
   /** The space token (secret store; derived from the recovery words). */
   token: string;
+  /** The relay's invite secret, when its operator requires one to open a space. */
+  invite?: string;
+}
+
+/** The most work this app will do for a relay (2^24 hashes: seconds on a phone). */
+export const MAX_POW_BITS = 24;
+
+const hex = (b: ArrayBuffer) => [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, "0")).join("");
+const sha256 = (text: string) => crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+
+/** The relay's name for this token's space (the same as the server computes). */
+export async function relaySpaceId(token: string): Promise<string> {
+  return hex(await sha256(`lumen-vault-relay v1|${token}`));
+}
+
+function zeroBits(d: Uint8Array): number {
+  let n = 0;
+  for (const b of d) {
+    if (b === 0) {
+      n += 8;
+      continue;
+    }
+    return n + Math.clz32(b) - 24;
+  }
+  return n;
+}
+
+/** A nonce whose SHA-256("lumen-vault-relay pow v1|<space>|<nonce>") starts with `bits` zero bits. */
+export async function solveRelayPow(space: string, bits: number): Promise<string> {
+  if (!Number.isInteger(bits) || bits < 1 || bits > MAX_POW_BITS) throw new Error(`relay: proof of work of ${bits} bits refused (at most ${MAX_POW_BITS})`);
+  for (let i = 0; ; i++) {
+    const nonce = i.toString(36);
+    if (zeroBits(new Uint8Array(await sha256(`lumen-vault-relay pow v1|${space}|${nonce}`))) >= bits) return nonce;
+  }
 }
 
 export interface RelayProvider extends SyncProvider {
@@ -47,7 +86,10 @@ export function relayOrigin(collabUrl: string | undefined | null): string | null
 export function relayProvider(cfg: RelayConfig, deps: { fetch?: FetchLike } = {}): RelayProvider {
   const fetchImpl = deps.fetch ?? defaultFetch;
   const base = `${cfg.url.replace(/\/+$/, "")}/v1/vault/o/`;
-  const headers = (extra: Record<string, string> = {}) => ({ Authorization: `Bearer ${cfg.token}`, ...extra });
+  const headers = (extra: Record<string, string> = {}): Record<string, string> => ({ Authorization: `Bearer ${cfg.token}`, ...(cfg.invite ? { "X-Lumen-Invite": cfg.invite } : {}), ...extra });
+  /** The proof of work for opening this space, solved once (concurrent first writes share it). */
+  let pow: Promise<string> | null = null;
+  const powFor = (bits: number) => (pow ??= relaySpaceId(cfg.token).then((space) => solveRelayPow(space, bits)));
   const url = (name: string) => {
     checkObjectName(name);
     return base + encodeURIComponent(name);
@@ -75,7 +117,14 @@ export function relayProvider(cfg: RelayConfig, deps: { fetch?: FetchLike } = {}
       const pre: Record<string, string> = {};
       if (cond && "ifMatch" in cond) pre["If-Match"] = cond.ifMatch;
       if (cond && "ifNoneMatch" in cond) pre["If-None-Match"] = "*";
-      const res = await go(url(name), { method: "PUT", headers: headers({ "Content-Type": "application/octet-stream", ...pre }), body: data as BodyInit });
+      let res = await go(url(name), { method: "PUT", headers: headers({ "Content-Type": "application/octet-stream", ...pre }), body: data as BodyInit });
+      if (res.status === 428) {
+        // The relay wants a proof of work before it opens this space.
+        const ask = (await res.json().catch(() => null)) as { error?: unknown; bits?: unknown } | null;
+        if (ask?.error !== "pow" || typeof ask.bits !== "number") throw await failed(res, "relay", name);
+        const nonce = await powFor(ask.bits);
+        res = await go(url(name), { method: "PUT", headers: headers({ "Content-Type": "application/octet-stream", "X-Lumen-Pow": nonce, ...pre }), body: data as BodyInit });
+      }
       if (res.status === 412) throw new PreconditionFailedError(name);
       if (!res.ok) throw await failed(res, "relay", name);
       return { etag: res.headers.get("ETag") ?? "" };

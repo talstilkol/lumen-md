@@ -47,9 +47,32 @@ extra spaces and final letters (ם or מ) don't matter.
 The relay sees a token that is a hash of your words, never the words, and
 stores only a hash of that token. Every object it keeps was encrypted on
 your device with keys it never sees (the [encrypted sync](/sync/e2ee/)
-format). It deletes a space nobody has touched for 180 days.
+format). It deletes a space nobody has read or written for 180 days: a vault
+you only read on your devices is kept.
 
 Running your own relay: `VAULT_RELAY=1 node sync-server/server.js` (or
 `node sync-server/vault-relay.js`), with `VAULT_RELAY_DIR` to keep the
 objects on disk, and build the app with `VITE_SYNC_RELAY_URL` set to its
 https address.
+
+A token costs nothing to make, so the relay also limits what one address and
+the whole server can hold:
+
+| Setting | Default | What it limits |
+|---|---|---|
+| `VAULT_RELAY_MAX_SPACE` | 1 GiB | one vault's space |
+| `VAULT_RELAY_MAX_TOTAL` | 20 GiB | all spaces together |
+| `VAULT_RELAY_NEW_SPACES_PER_DAY` | 5 | new spaces one address may open a day |
+| `VAULT_RELAY_ADDRESS_BYTES_PER_DAY` | the space size | bytes one address may write a day |
+
+Addresses are never stored: the relay counts them under a keyed hash whose
+key is random, kept in memory only and replaced every day.
+
+A public relay can also ask for more before it opens a new space (existing
+spaces are not affected):
+
+- `VAULT_RELAY_POW_BITS=18`: a proof of work. The app solves it by itself, in
+  a few seconds, the first time it writes to a new space.
+- `VAULT_RELAY_INVITE=<secret>`: an invite. Build the app with
+  `VITE_SYNC_RELAY_INVITE` set to the same secret. Anyone who has the build has
+  the invite, so use it for a relay whose app you don't publish.
