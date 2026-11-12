@@ -7,6 +7,7 @@ import { t } from "../i18n";
 import { showAiToast } from "../ui/AiToast";
 import { isOPFSAvailable, uniqueWorkspaceName, writeWorkspaceBlob } from "../storage/workspace";
 import { notifyWorkspaceChanged } from "../storage/workspaceEvents";
+import { explainError } from "../lib/userError";
 
 export function pickAndOpenEpub(): void {
   if (!isOPFSAvailable()) {
@@ -25,7 +26,7 @@ export function pickAndOpenEpub(): void {
       notifyWorkspaceChanged();
       window.dispatchEvent(new CustomEvent("lumen-open-file", { detail: { path } }));
     } catch (e) {
-      showAiToast(t("epub.failed", { error: e instanceof Error ? e.message : String(e) }), "error");
+      showAiToast(t("epub.failed", { error: explainError(e) }), "error");
     }
   };
   input.click();

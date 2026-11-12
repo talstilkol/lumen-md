@@ -14,18 +14,19 @@ import { hostOffer, joinOffer, LanLinkError, type LanLink } from "../lan/link";
 import { LanAuthError } from "../lan/rpc";
 import { adoptPeerLink, LanNoVaultError, LanNotConnectedError, thisHost } from "../lan";
 import type { LanPeerInfo } from "../lan/rpc";
+import { explainError } from "../../../lib/userError";
 
 const field: React.CSSProperties = { width: "100%", padding: "6px 8px", border: "1px solid hsl(var(--border))", borderRadius: 6, background: "transparent", color: "inherit", font: "inherit", fontSize: 12 };
 const muted: React.CSSProperties = { fontSize: 12, color: "hsl(var(--fg-muted))" };
 const errorStyle: React.CSSProperties = { fontSize: 12, color: "hsl(0 70% 50%)" };
 
-/** A human message for a LAN failure. */
-export function lanError(e: unknown): string {
+/** A human message for a LAN failure (never the error's own text: explainError). */
+export function describeLanError(e: unknown): string {
   if (e instanceof LanLinkError) return t(`e2ee.lan.error.${e.reason}`);
   if (e instanceof LanNoVaultError) return t("e2ee.lan.noVault");
   if (e instanceof LanNotConnectedError) return t("e2ee.lan.notConnected");
   if (e instanceof LanAuthError) return t("e2ee.lan.authFailed");
-  return String((e as Error)?.message ?? e);
+  return explainError(e, "lan");
 }
 
 /** The privacy ledger shows each link: the other device's LAN address and the bytes it carried. */
@@ -105,7 +106,7 @@ export function LanJoin({ onLinked }: { onLinked: () => Promise<void> }) {
       adoptPeerLink(link);
       await onLinked();
     } catch (err) {
-      setError(lanError(err));
+      setError(describeLanError(err));
     } finally {
       setBusy(false);
     }
@@ -164,7 +165,7 @@ export function LanHostPairing() {
       setOffer(o);
       setAnswer("");
     } catch (err) {
-      setError(lanError(err));
+      setError(describeLanError(err));
     } finally {
       setBusy(false);
     }
@@ -182,7 +183,7 @@ export function LanHostPairing() {
       thisHost().attach(link.channel, { address: link.remoteAddress });
       setOffer(null); // used up: the next pairing makes a new offer
     } catch (err) {
-      setError(lanError(err));
+      setError(describeLanError(err));
     } finally {
       setBusy(false);
     }

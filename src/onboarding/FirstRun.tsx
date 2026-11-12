@@ -13,6 +13,8 @@ import { createFirstNote, currentVault, importInto, languageOrder, languagePlan,
 import "./FirstRun.css";
 import { useFocusTrap } from "../ui/useFocusTrap";
 import "./firstRunStrings";
+import { HelpButton } from "../ui/HelpButton";
+import { explainError } from "../lib/userError";
 
 const ALL_STEPS = ["lang", "vault", "look", "start"] as const;
 const THEMES: Theme[] = ["light", "dark", "system"];
@@ -135,7 +137,7 @@ export default function FirstRun({ onDone }: Props) {
       window.dispatchEvent(new Event("lumen-workspace-changed"));
       setStatus(t("onboard.import.done", { notes: String(r.notes), folder: r.folder }));
     } catch (e) {
-      setStatus(t("onboard.import.failed", { error: (e as Error).message }));
+      setStatus(t("onboard.import.failed", { error: explainError(e) }));
     } finally {
       setBusy(false);
     }
@@ -158,7 +160,7 @@ export default function FirstRun({ onDone }: Props) {
       onDone({ note });
     } catch (e) {
       setBusy(false);
-      setStatus(t("onboard.failed", { error: (e as Error).message }));
+      setStatus(t("onboard.failed", { error: explainError(e) }));
     }
   };
 
@@ -171,6 +173,7 @@ export default function FirstRun({ onDone }: Props) {
       <div className="lumen-firstrun" ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="lumen-firstrun-title" aria-describedby="lumen-firstrun-sub" data-testid="first-run">
         <header className="lumen-firstrun-head">
           <h2 id="lumen-firstrun-title">{t("onboard.title")}</h2>
+          <HelpButton topic="getting-started/quickstart" />
           <p id="lumen-firstrun-sub">{t("onboard.subtitle")}</p>
           {!showLang && (
             <p className="lumen-firstrun-hint">
@@ -295,6 +298,7 @@ export default function FirstRun({ onDone }: Props) {
                 <label className="lumen-firstrun-choice wide" data-checked={start === "empty"}>
                   <input type="radio" name="fr-start" checked={start === "empty"} onChange={() => setStart("empty")} />
                   <span>
+                    {/* empty-allow: the "start empty" choice's label, not an empty state */}
                     <strong>{t("onboard.start.empty")}</strong>
                     <small>{t("onboard.start.empty.desc")}</small>
                   </span>

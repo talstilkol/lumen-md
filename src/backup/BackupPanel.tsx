@@ -16,6 +16,7 @@ import { listBackups, restore, targetInsideVault } from "./backup";
 import { loadBackupConfig, saveBackupConfig, type BackupConfig } from "./config";
 import { backupHealth, backupStatus, subscribeBackupStatus } from "./status";
 import { startBackups, targetFor } from "./start";
+import { HelpButton } from "../ui/HelpButton";
 
 const muted: React.CSSProperties = { fontSize: 12, color: "hsl(var(--fg-muted))", margin: 0 };
 const field: React.CSSProperties = { padding: "5px 8px", border: "1px solid hsl(var(--border))", borderRadius: 6, background: "transparent", color: "inherit", font: "inherit", fontSize: 13 };
@@ -116,6 +117,7 @@ function Panel({ onClose }: { onClose: () => void }) {
       <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 560, padding: 16, display: "grid", gap: 12 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <strong>{t("backup.title")}</strong>
+          <HelpButton topic="workspace/backups" />
           <button type="button" onClick={onClose} aria-label={t("backup.close")}>
             ×
           </button>
@@ -128,6 +130,7 @@ function Panel({ onClose }: { onClose: () => void }) {
               {config ? (
                 <bdi dir="auto">{t("backup.target", { name: config.label, mode: t(`backup.mode.${config.mode.kind}`) })}</bdi>
               ) : (
+                // empty-action: the two "choose a drive" buttons right below
                 t("backup.none")
               )}
             </div>

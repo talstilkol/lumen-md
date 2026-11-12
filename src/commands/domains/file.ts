@@ -186,7 +186,7 @@ export function buildTemplateCommands({ installedTemplates }: CommandContext): C
           const tpl = await importTemplateFile(file.name, await file.text());
           showAiToast(t("templates.imported", { name: tpl.name }), "success");
         } catch (e) {
-          showAiToast(t("templates.importFailed", { error: (e as Error).message }), "error");
+          showAiToast(t("templates.importFailed", { error: explainError(e) }), "error");
         }
       },
     },
@@ -265,7 +265,7 @@ export function buildWorkspaceFileCommands({ handleSaveToWorkspace, toggleWorksp
             "info",
           );
         } catch (e) {
-          await uiAlert({ message: t("sample.alert.failed", { error: (e as Error).message }) });
+          await uiAlert({ message: t("sample.alert.failed", { error: explainError(e) }) });
         }
       },
     })),

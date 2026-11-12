@@ -7,6 +7,7 @@ import { showAiToast } from "../../ui/AiToast";
 import type { CommandContext } from "./context";
 import { EXCALIDRAW_CANVAS_ENABLED } from "../../canvas/engine";
 import { log } from "../../lib/logger";
+import { explainError } from "../../lib/userError";
 
 /** Editor modes, side panels and the editor's on/off settings. */
 export function buildViewCommands({ setSearchOpen, setRuntimeMetricsOpen, vimEnabled, spellCheck, typewriterMode, pageView, toggleWorkspace, toggleBacklinks, toggleVim, toggleSpellCheck, toggleTypewriter, tsChecks, toggleTsChecks, grammarCheck, toggleGrammarCheck, setMode, toggleOutline }: CommandContext): Command[] {
@@ -176,7 +177,7 @@ export function buildViewCommands({ setSearchOpen, setRuntimeMetricsOpen, vimEna
           const values = papers.reduce((n, p) => n + p.fields.filter((f) => f.value).length, 0);
           showAiToast(t("litReview.done", { papers: papers.length, values, folder: REVIEW_FOLDER }), "success");
         } catch (e) {
-          showAiToast(t("litReview.failed", { error: e instanceof Error ? e.message : String(e) }), "error");
+          showAiToast(t("litReview.failed", { error: explainError(e) }), "error");
         }
       },
     },
@@ -204,7 +205,7 @@ export function buildViewCommands({ setSearchOpen, setRuntimeMetricsOpen, vimEna
           }
           showAiToast(t("morning.done", { ms: Math.round(performance.now() - t0) }), "success");
         } catch (e) {
-          showAiToast(t("morning.failed", { error: e instanceof Error ? e.message : String(e) }), "error");
+          showAiToast(t("morning.failed", { error: explainError(e) }), "error");
         }
       },
     },

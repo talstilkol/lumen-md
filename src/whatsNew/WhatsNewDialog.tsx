@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import "./strings";
 import "./WhatsNewDialog.css";
 import { t } from "../i18n";
+import { HelpButton } from "../ui/HelpButton";
 
 export interface ShownNotes {
   version: string;
@@ -30,9 +31,11 @@ export function WhatsNewDialog({ notes, version, render, onClose }: { notes: Sho
     <div className="wn-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div className="wn-dialog" role="dialog" aria-modal="true" aria-labelledby="wn-title" data-testid="whats-new" data-version={notes?.version ?? version}>
         <h2 id="wn-title">{t("whatsNew.title", { version: notes?.version ?? version })}</h2>
+        <HelpButton topic="getting-started/whats-new" />
         {notes?.date && <p className="wn-date">{notes.date}</p>}
         {notes && !notes.translated && <p className="wn-note">{t("whatsNew.untranslated")}</p>}
         <div className="wn-body markdown-body" dir="auto">
+          {/* empty-allow: no release notes for this version is a fact about the build, and Close follows */}
           {notes ? body ?? t("whatsNew.loading") : t("whatsNew.none")}
         </div>
         <div className="wn-actions">

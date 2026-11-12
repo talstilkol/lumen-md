@@ -235,7 +235,7 @@ export function buildDocumentAgentCommands({ setContent, liveDoc }: CommandConte
           if (isAbort(e)) return;
           if ((await import("../../agents/suggestions")).reportAgentFailure(e, "ai.analyse")) return;
           const reason = (e as { name?: string; reason?: string }).name === "AnalystError" ? (e as { reason: string }).reason : null;
-          showAiToast(reason ? t(`analyst.${reason}`, { error: (e as Error).message }) : t("analyst.failed", { error: (e as Error).message }), "error");
+          showAiToast(reason ? t(`analyst.${reason}`, { error: explainError(e) }) : t("analyst.failed", { error: explainError(e) }), "error");
         }
       },
     },

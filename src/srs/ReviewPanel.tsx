@@ -17,6 +17,9 @@ import { fsrs, type Rating } from "./fsrs";
 import { dailyQueue, emptyReviewFile, highlightCard, parseReviewFile, qaCards, rate, REVIEW_PATH, serializeReviewFile, syncSources, type Entry, type ReviewFile } from "./cards";
 import "../highlights/HighlightsPanel.css";
 import "./ReviewPanel.css";
+import { HelpButton } from "../ui/HelpButton";
+import { explainError } from "../lib/userError";
+import { EmptyState, learnHow } from "../ui/EmptyState";
 
 const scheduler = fsrs();
 
@@ -76,7 +79,7 @@ export function ReviewPanel({ onClose, opened = performance.now(), now = () => n
       file.current = synced;
       writes.current = writes.current.then(() => writeReviewFile(synced)).catch(() => undefined);
       setQueue((q) => (q && q.length ? q : dailyQueue(synced, now())));
-    })().catch((e: unknown) => showAiToast(t("srs.failed", { error: e instanceof Error ? e.message : String(e) }), "error"));
+    })().catch((e: unknown) => showAiToast(t("srs.failed", { error: explainError(e) }), "error"));
     return () => {
       cancelled = true;
     };
@@ -92,7 +95,7 @@ export function ReviewPanel({ onClose, opened = performance.now(), now = () => n
     if (!current || !file.current) return;
     const next = rate(file.current, current.id, g, now(), scheduler);
     file.current = next;
-    writes.current = writes.current.then(() => writeReviewFile(next)).catch((e: unknown) => showAiToast(t("srs.failed", { error: e instanceof Error ? e.message : String(e) }), "error"));
+    writes.current = writes.current.then(() => writeReviewFile(next)).catch((e: unknown) => showAiToast(t("srs.failed", { error: explainError(e) }), "error"));
     setShown(false);
     setPos((p) => p + 1);
   };
@@ -115,6 +118,7 @@ export function ReviewPanel({ onClose, opened = performance.now(), now = () => n
     <div ref={rootRef} className="hl-panel srs-panel" role="dialog" aria-label={t("srs.title")} tabIndex={-1} onKeyDown={onKey} data-testid="review-panel" data-open-ms={openMs === null ? undefined : Math.round(openMs)}>
       <div className="hl-head">
         <strong>{t("srs.title")}</strong>
+        <HelpButton topic="workspace/review#reviewing" />
         <span className="hl-count" data-testid="review-progress">
           {queue ? t("srs.progress", { n: Math.min(pos + 1, total), total }) : t("srs.loading")}
         </span>
@@ -124,7 +128,7 @@ export function ReviewPanel({ onClose, opened = performance.now(), now = () => n
         </button>
       </div>
       <div className="hl-list srs-body">
-        {queue && !current && <p className="hl-empty" data-testid="review-done">{total ? t("srs.done", { n: total }) : t("srs.empty")}</p>}
+        {queue && !current && (total ? <p className="hl-empty" data-testid="review-done">{t("srs.done", { n: total })}</p> : <EmptyState testId="review-done" message={t("srs.empty")} action={learnHow("workspace/review#what-becomes-a-card")} />)}
         {current && (
           <div className="srs-card" data-testid="review-card" data-card-id={current.id}>
             <p className="srs-front" dir="auto">

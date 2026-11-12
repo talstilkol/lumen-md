@@ -19,6 +19,7 @@ import { holidayLabel, nameLang, readingName } from "../daily/hebrewCalendarName
 import "./calendarPanelStrings";
 import { dayStatus, defaultWorkWeek, type WorkWeek } from "../daily/israeliTime";
 import { showHebrewDates } from "../daily/defaults";
+import { explainError } from "../lib/userError";
 
 /** Holidays that get a mark on their day (the rest are in the day's label only). */
 const MARKED = new Set<Holiday["kind"]>(["major", "modern", "fast", "minor"]);
@@ -193,7 +194,7 @@ export function CalendarPanel() {
               aria-current={isToday ? "date" : undefined}
               onClick={() =>
                 openDailyNote(day, settings, locale).catch((e: unknown) =>
-                  void import("../store/useToastStore").then(({ toast }) => toast.error(t("daily.failed", { error: e instanceof Error ? e.message : String(e) }))),
+                  void import("../store/useToastStore").then(({ toast }) => toast.error(t("daily.failed", { error: explainError(e) }))),
                 )
               }
               style={{

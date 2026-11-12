@@ -19,6 +19,7 @@ import { useAppStore } from "../store/useStore";
 import { MAX_LIMIT, parseEmbeddedQuery, rowsFor, type QueryNote, type QueryRow } from "../search/embeddedQuery";
 import { DataviewError, parseDataview, runDataview, show, type DvResult, type Value } from "../search/dataview";
 import "./queryBlockStrings";
+import { EmptyState, learnHow } from "../ui/EmptyState";
 
 interface Props {
   source: string;
@@ -130,7 +131,7 @@ export default function QueryBlock({ source, lang }: Props) {
             {t("query.error", { error: out.message })}
           </div>
         )}
-        {out && out.kind !== "error" && count === 0 && <div style={{ fontSize: 13, color: "hsl(var(--fg-muted))" }}>{t("query.none")}</div>}
+        {out && out.kind !== "error" && count === 0 && <EmptyState style={{ padding: 0, fontSize: 13 }} message={t("query.none")} action={learnHow("workspace/embedded-queries#query-blocks")} />}
         {out?.kind === "query" && count > 0 && out.view === "list" && (
           <ul className="lumen-query-list">
             {out.rows.map((r) => (

@@ -14,6 +14,7 @@ import { isBetaLocale } from "../i18n/review";
 import { findStrings, suggestionBody, suggestionLink, type StringMatch } from "../i18n/suggest";
 import { useFocusTrap } from "./useFocusTrap";
 import { version } from "../../package.json";
+import { HelpButton } from "./HelpButton";
 
 const input: CSSProperties = { inlineSize: "100%", padding: "4px 8px", border: "1px solid hsl(var(--border))", borderRadius: 6, background: "hsl(var(--bg))", color: "hsl(var(--fg))", fontSize: 13, boxSizing: "border-box" };
 const btn: CSSProperties = { border: "1px solid hsl(var(--border-strong))", borderRadius: 6, padding: "4px 12px", background: "transparent", color: "inherit", cursor: "pointer" };
@@ -42,6 +43,7 @@ export function TranslationSuggest({ onClose, open = (u) => window.open(u, "_bla
         <h2 id="ts-title" style={{ marginBlockStart: 0, fontSize: 16 }}>
           {t("i18nSuggest.title", { language: name })}
         </h2>
+        <HelpButton topic="contributing/translations#suggest-a-better-translation" />
         <p style={{ marginBlockStart: 0, color: "hsl(var(--fg-muted))" }}>{isBetaLocale(locale) ? t("i18nSuggest.introBeta") : t("i18nSuggest.intro")}</p>
         <label style={{ display: "grid", gap: 2 }}>
           <span>{t("i18nSuggest.find")}</span>
@@ -49,6 +51,7 @@ export function TranslationSuggest({ onClose, open = (u) => window.open(u, "_bla
         </label>
         {!picked && query.trim().length >= 2 && (
           <ul role="listbox" aria-label={t("i18nSuggest.matches")} style={{ listStyle: "none", padding: 0, margin: "6px 0", display: "grid", gap: 4 }}>
+            {/* empty-action: the search field above */}
             {matches.length === 0 && <li style={{ color: "hsl(var(--fg-muted))" }}>{strings ? t("i18nSuggest.none") : t("i18nSuggest.loading")}</li>}
             {matches.map((m) => (
               <li key={m.key}>

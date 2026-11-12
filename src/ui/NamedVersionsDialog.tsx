@@ -12,6 +12,7 @@ import { addVersion, compareVersions, listVersions, versionList, type NamedVersi
 import { getLocale, t } from "../i18n";
 import "../collab/versionStrings";
 import { toast } from "../store/useToastStore";
+import { HelpButton } from "./HelpButton";
 
 const CURRENT = "__current__";
 const field: React.CSSProperties = { padding: "6px 8px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--bg))", color: "inherit" };
@@ -102,6 +103,7 @@ export function NamedVersionsDialog({ session, author, onClose }: { session: Col
           <h2 id="versions-title" style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
             {t("versions.title")}
           </h2>
+          <HelpButton topic="collab/suggestions-versions#named-versions" />
           <button type="button" onClick={onClose} aria-label={t("versions.close")} style={{ marginInlineStart: "auto", border: "none", background: "transparent", color: "inherit", cursor: "pointer" }}>
             <X size={14} />
           </button>
@@ -127,6 +129,7 @@ export function NamedVersionsDialog({ session, author, onClose }: { session: Col
             <p style={{ margin: 0, fontSize: 13, opacity: 0.8 }}>{t("versions.editorsOnly")}</p>
           )}
           {versions.length === 0 ? (
+            // empty-action: the "name this version" field and Save above
             <p style={{ margin: 0, fontSize: 13, opacity: 0.8 }}>{t("versions.empty")}</p>
           ) : (
             <>

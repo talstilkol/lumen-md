@@ -500,6 +500,7 @@
   "embed.notFound": "{target} を埋め込めません：ワークスペースに見つかりません。",
   "embed.openPdf": "PDF を開く",
   "embed.sectionNotFound": "{section} を埋め込めません：{note} にそのセクションはありません。",
+  "empty.learnHow": "やり方を見る",
   "epub.chapterOf": "{total} 章中 {n} 章",
   "epub.close": "閉じる",
   "epub.external": "このリンクは本の外につながるため、ここでは開きません: {url}",

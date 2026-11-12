@@ -9,6 +9,7 @@ import { showAiToast } from "../../ui/AiToast";
 import { openTemplateDoc } from "../../commands/openDoc";
 import { getVaultBackend } from "./index";
 import { checkVault, repairVault, REPAIRABLE } from "./integrity";
+import { explainError } from "../../lib/userError";
 
 /**
  * The vault integrity check (plan W1.5): a report note, then — when
@@ -36,6 +37,6 @@ export async function runVaultCheck(): Promise<void> {
     showAiToast(t("vaultCheck.repaired", { n: r.repaired.length, folder: r.backup ?? folder }), r.skipped.length ? "info" : "success");
     if (r.skipped.length) showAiToast(t("vaultCheck.skipped", { n: r.skipped.length }), "info");
   } catch (e) {
-    showAiToast(t("vaultCheck.failed", { error: e instanceof Error ? e.message : String(e) }), "error");
+    showAiToast(t("vaultCheck.failed", { error: explainError(e) }), "error");
   }
 }

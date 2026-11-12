@@ -18,6 +18,7 @@ import { uiAlert, uiConfirm, uiPrompt, uiSelect } from "../../ui/PromptDialog";
 import { useToastStore } from "../../store/useToastStore";
 import { useAppStore } from "../../store/useStore";
 import type { CommandContext } from "./context";
+import { explainError } from "../../lib/userError";
 
 type Sefaria = typeof import("../../sources/sefaria/app");
 const sefaria = (): Promise<Sefaria> => import("../../sources/sefaria/app");
@@ -56,7 +57,7 @@ export function buildSourceCommands(ctx: CommandContext): Command[] {
         try {
           result = await s.lookup(ref, () => uiConfirm({ message: t("sources.confirmFetch", { ref: ref.tref }) }));
         } catch (e) {
-          useToastStore.getState().push({ kind: "error", title: t("sources.failed", { error: (e as Error).message }) });
+          useToastStore.getState().push({ kind: "error", title: t("sources.failed", { error: explainError(e) }) });
           return;
         }
         if (!result) return;
@@ -95,7 +96,7 @@ export function buildSourceCommands(ctx: CommandContext): Command[] {
           const path = await s.saveForOffline(r.passage);
           if (path) useToastStore.getState().push({ kind: "success", title: t("sources.saved", { path }) });
         } catch (e) {
-          useToastStore.getState().push({ kind: "error", title: t("sources.failed", { error: (e as Error).message }) });
+          useToastStore.getState().push({ kind: "error", title: t("sources.failed", { error: explainError(e) }) });
         }
       },
     },

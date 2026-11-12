@@ -24,6 +24,7 @@ import { SUPPORTED_LOCALES, t, type Locale } from "../i18n";
 import { isBetaLocale } from "../i18n/review";
 import { useFocusTrap } from "./useFocusTrap";
 import "./settingsScreenStrings";
+import { HelpButton } from "./HelpButton";
 
 const ThemeSettings = lazy(() => import("./ThemeSettings").then((m) => ({ default: m.ThemeSettings })));
 const AiSettingsPanel = lazy(() => import("./AiSettingsPanel").then((m) => ({ default: m.AiSettingsPanel })));
@@ -240,6 +241,7 @@ export function SettingsScreen({ tab: initialTab = "general", onClose, onOpenAud
   const panel = () => {
     switch (tab) {
       case "general":
+        // empty-action: the settings search field (clearing it shows every setting)
         return general.length ? <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>{general.map(control)}</div> : <p style={muted}>{t("settings.empty")}</p>;
       case "appearance":
         return <ThemeSettings open embedded onClose={onClose} />;
@@ -273,6 +275,7 @@ export function SettingsScreen({ tab: initialTab = "general", onClose, onOpenAud
           <h2 id={`${ids}-title`} style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
             {t("settings.title")}
           </h2>
+          <HelpButton topic="editor/settings" />
           <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 6, minWidth: 120 }}>
             <Search size={14} aria-hidden="true" style={{ color: "hsl(var(--fg-muted))" }} />
             <input
@@ -324,6 +327,7 @@ export function SettingsScreen({ tab: initialTab = "general", onClose, onOpenAud
                 {t(x.label)}
               </button>
             ))}
+            {/* empty-action: the settings search field above (clearing it shows every tab) */}
             {!visibleTabs.length && <p style={{ ...muted, padding: 8 }}>{t("settings.empty")}</p>}
           </nav>
           <section

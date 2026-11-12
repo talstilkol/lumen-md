@@ -12,6 +12,8 @@ import { createRoot } from "react-dom/client";
 import { Link2, X } from "lucide-react";
 import { t } from "../i18n";
 import { createShareLink, EXPIRY_DAYS, MAX_LINK_DATA, SHARE_FILE_EXTENSION, ShareLinkError, type ShareLink } from "./linkShare";
+import { HelpButton } from "../ui/HelpButton";
+import { explainError } from "../lib/userError";
 
 const muted: React.CSSProperties = { fontSize: 12, color: "hsl(var(--fg-muted))" };
 const field: React.CSSProperties = { padding: "6px 8px", fontSize: 13, borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--bg))", color: "inherit" };
@@ -82,7 +84,7 @@ export function ShareLinkDialog({ title, markdown, onClose }: { title: string; m
       const created = Date.now();
       setLink(await createShareLink({ title, markdown, created, ...(days ? { expires: created + days * DAY } : {}) }, appOrigin()));
     } catch (e) {
-      setError(e instanceof ShareLinkError && e.code === "unsupported" ? t("shareLink.unsupported") : t("shareLink.failed", { error: (e as Error).message }));
+      setError(e instanceof ShareLinkError && e.code === "unsupported" ? t("shareLink.unsupported") : t("shareLink.failed", { error: explainError(e) }));
     } finally {
       setBusy(false);
     }
@@ -96,6 +98,7 @@ export function ShareLinkDialog({ title, markdown, onClose }: { title: string; m
         <header style={{ padding: "14px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <Link2 size={18} style={{ color: "hsl(var(--accent))" }} />
           <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600, flex: 1 }}>{t("shareLink.title")}</h2>
+          <HelpButton topic="collab/share-link" />
           <button ref={closeRef} type="button" style={ghost} onClick={onClose} aria-label={t("shareLink.close")}>
             <X size={16} />
           </button>

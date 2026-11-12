@@ -14,7 +14,7 @@ import { explainError } from "../../lib/userError";
 const gitApi = () => import("../../sync/git");
 
 /** A failed clone / pull, with a hint when it looks like CORS (loaded on use). */
-const netError = async (e: unknown) => (await import("../../store/gitPullDocs")).netError(e);
+const describeNetError = async (e: unknown) => (await import("../../store/gitPullDocs")).describeNetError(e);
 
 /** Clone, commit & push, pull, status, watch, token, identity. */
 export function buildGitCommands({ showWorkspace, toggleWorkspace, liveDoc }: CommandContext): Command[] {
@@ -39,7 +39,7 @@ export function buildGitCommands({ showWorkspace, toggleWorkspace, liveDoc }: Co
           await uiAlert({ message: lines.join("\n\n") });
         } catch (e) {
           await uiAlert({
-            message: t("git.alert.cloneFailed", { error: await netError(e) }),
+            message: t("git.alert.cloneFailed", { error: await describeNetError(e) }),
           });
         }
       },
@@ -114,7 +114,7 @@ export function buildGitCommands({ showWorkspace, toggleWorkspace, liveDoc }: Co
           await reportPull(result);
         } catch (e) {
           await uiAlert({
-            message: t("git.alert.pullFailed", { error: await netError(e) }),
+            message: t("git.alert.pullFailed", { error: await describeNetError(e) }),
           });
         }
       },

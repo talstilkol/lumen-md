@@ -7,6 +7,8 @@
  * (`*.empty`, `*.none`, `*.noMatches`, …) is rendered outside <EmptyState>.
  */
 import type { CSSProperties, ReactNode } from "react";
+import { t } from "../i18n";
+import { openHelp, type HelpTopic } from "./HelpButton";
 
 export interface EmptyAction {
   label: string;
@@ -44,4 +46,12 @@ export function EmptyState({ message, action, testId, style }: Props) {
 /** Run a palette command by id (App listens for `lumen-run-command`). */
 export function runCommand(id: string): void {
   window.dispatchEvent(new CustomEvent("lumen-run-command", { detail: { id } }));
+}
+
+/**
+ * The way out of an empty state that fills as you work (highlights you make,
+ * cards you mark, notes you tag): the help section that says how.
+ */
+export function learnHow(topic: HelpTopic): EmptyAction {
+  return { label: t("empty.learnHow"), onClick: () => openHelp(topic) };
 }

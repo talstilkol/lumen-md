@@ -7,6 +7,7 @@ import { describe, it, expect } from "vitest";
 import { createElement, act } from "react";
 import { createRoot } from "react-dom/client";
 import { LectureRecorder, type RecorderDeps } from "../student/LectureRecorder";
+import { t } from "../i18n";
 
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -46,13 +47,14 @@ describe("lecture recorder", () => {
   });
 
   it("says why the microphone did not start", async () => {
-    const deps: RecorderDeps = { start: async () => Promise.reject(new Error("NotAllowedError")), process: async () => ({ path: "", cards: 0, important: 0 }), open: () => {}, now: () => 0 };
+    const deps: RecorderDeps = { start: async () => Promise.reject(new DOMException("Permission denied", "NotAllowedError")), process: async () => ({ path: "", cards: 0, important: 0 }), open: () => {}, now: () => 0 };
     const host = document.createElement("div");
     document.body.appendChild(host);
     const root = createRoot(host);
     await act(async () => root.render(createElement(LectureRecorder, { onClose: () => {}, deps })));
     await act(async () => host.querySelector<HTMLElement>('[data-testid="lecture-start"]')!.click());
-    expect(host.querySelector('[role="alert"]')!.textContent).toBe("The microphone could not start: NotAllowedError");
+    // The reason in words (explainError: the browser refused), not the DOMException's own text.
+    expect(host.querySelector('[role="alert"]')!.textContent).toBe(`The microphone could not start: ${t("error.permission")}`);
     await act(async () => root.unmount());
   });
 });

@@ -55,7 +55,7 @@ async function importFromFile(): Promise<void> {
     showAiToast(t("templates.imported", { name: tpl.name }), "success");
   } catch (e) {
     log.error("template import failed", e);
-    showAiToast(t("templates.importFailed", { error: (e as Error).message }), "error");
+    showAiToast(t("templates.importFailed", { error: explainError(e) }), "error");
   }
 }
 

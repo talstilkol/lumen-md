@@ -201,7 +201,7 @@ export function startVoiceRecording(lang: string): void {
     )
     .catch((err: unknown) => {
       log.error("dictation failed to start", err);
-      showAiToast(t("dictation.error", { error: (err as Error).message }), "error");
+      showAiToast(t("dictation.error", { error: explainError(err) }), "error");
     });
 }
 

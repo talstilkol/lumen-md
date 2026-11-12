@@ -30,6 +30,9 @@ import {
 import { chapterText, markOffsets, rangeToOffsets } from "./textRange";
 import { loadPrefs, savePrefs, THEMES, type ReaderPrefs, type ReaderTheme } from "./readerPrefs";
 import "./EpubReader.css";
+import { HelpButton } from "../ui/HelpButton";
+import { explainError } from "../lib/userError";
+import { EmptyState, learnHow } from "../ui/EmptyState";
 
 interface Props {
   path: string;
@@ -132,7 +135,7 @@ export function EpubReader({ path, fragment = null, openSeq = 0, onClose }: Prop
       setAnnotations(list ?? []);
       setBook(opened);
       setIndex(Math.min(saved.current.chapter, opened.spine.length - 1));
-    })().catch((e: unknown) => !cancelled && setError(e instanceof Error ? e.message : String(e)));
+    })().catch((e: unknown) => !cancelled && setError(explainError(e)));
     return () => {
       cancelled = true;
     };
@@ -159,7 +162,7 @@ export function EpubReader({ path, fragment = null, openSeq = 0, onClose }: Prop
     setChapter(null);
     loadChapter(book, index)
       .then((c) => !cancelled && setChapter(c))
-      .catch((e: unknown) => !cancelled && setError(e instanceof Error ? e.message : String(e)));
+      .catch((e: unknown) => !cancelled && setError(explainError(e)));
     savePrefs(path, { ...prefs, chapter: index });
     return () => {
       cancelled = true;
@@ -234,7 +237,7 @@ export function EpubReader({ path, fragment = null, openSeq = 0, onClose }: Prop
             return upsertEpubNote(existing, path, next, labels, (n) => chapterLabel(book.toc, n - 1));
           });
         })
-        .catch((e: unknown) => showAiToast(t("epub.saveFailed", { error: e instanceof Error ? e.message : String(e) }), "error"))
+        .catch((e: unknown) => showAiToast(t("epub.saveFailed", { error: explainError(e) }), "error"))
         .finally(() => {
           pending.current--;
         });
@@ -317,6 +320,7 @@ export function EpubReader({ path, fragment = null, openSeq = 0, onClose }: Prop
         <span className="epub-title" dir="auto">
           {book ? `${book.title}${book.author ? ` — ${book.author}` : ""}` : baseName(path)}
         </span>
+        <HelpButton topic="workspace/epub-reader" />
         <span className="epub-spacer" />
         {(["light", "sepia", "dark"] as ReaderTheme[]).map((th) => (
           <button key={th} type="button" aria-pressed={prefs.theme === th} onClick={() => setPrefs((p) => ({ ...p, theme: th }))}>
@@ -379,7 +383,7 @@ export function EpubReader({ path, fragment = null, openSeq = 0, onClose }: Prop
         </div>
         {listOpen && (
           <aside className="epub-list" aria-label={t("epub.highlights")}>
-            {mine.length === 0 && <p>{t("epub.highlights.empty")}</p>}
+            {mine.length === 0 && <EmptyState message={t("epub.highlights.empty")} action={learnHow("workspace/epub-reader#highlights")} />}
             {mine.map((a) => {
               const d = describeEpubAnnotation(a);
               return (

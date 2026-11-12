@@ -397,7 +397,7 @@ export default function App() {
     let stop: (() => void) | undefined;
     let cancelled = false;
     const save = (p: import("./research/clipV2").ClipPayload) =>
-      void import("./commands/useCommands").then(({ saveClipV2 }) => saveClipV2(p)).catch((e) => showAiToast(t("clip.failed", { message: (e as Error).message }), "error"));
+      void import("./commands/useCommands").then(({ saveClipV2 }) => saveClipV2(p)).catch((e) => showAiToast(t("clip.failed", { message: explainError(e) }), "error"));
     void import("./research/clipBridge").then(({ startClipBridge }) => {
       if (!cancelled) stop = startClipBridge(save);
     });
@@ -679,7 +679,7 @@ export default function App() {
           const s = useAppStore.getState();
           return m.openDailyNote(m.dayOf(new Date()), s.dailyNotes, s.locale);
         })
-        .catch((e: unknown) => showAiToast(t("daily.failed", { error: e instanceof Error ? e.message : String(e) }), "error"));
+        .catch((e: unknown) => showAiToast(t("daily.failed", { error: explainError(e) }), "error"));
     };
     window.addEventListener("lumen-open-today", onToday);
     return () => window.removeEventListener("lumen-open-today", onToday);

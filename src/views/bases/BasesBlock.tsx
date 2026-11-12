@@ -30,6 +30,8 @@ import { showAiToast } from "../../ui/AiToast";
 import { log } from "../../lib/logger";
 import { t } from "../../i18n";
 import "./basesBlockStrings";
+import { explainError } from "../../lib/userError";
+import { EmptyState, learnHow } from "../../ui/EmptyState";
 
 const DatabaseMapView = lazy(() => import("../DatabaseMapView"));
 
@@ -151,7 +153,7 @@ export default function BasesBlock({ source, meta }: { source: string; meta?: st
     load()
       .catch((e: Error) => {
         log.warn("base: load failed", e);
-        if (!cancelled) setLoadError(e.message);
+        if (!cancelled) setLoadError(explainError(e));
       })
       .finally(() => !cancelled && setLoading(false));
     const off = onWorkspaceChanged(() => void load().catch(() => undefined), { debounceMs: 500 });
@@ -213,7 +215,7 @@ export default function BasesBlock({ source, meta }: { source: string; meta?: st
       setSortOverride(null);
       showAiToast(t("base.saved", { file: embedded.path }));
     } catch (e) {
-      showAiToast(t("base.error", { error: (e as Error)?.message ?? String(e) }), "error");
+      showAiToast(t("base.error", { error: explainError(e) }), "error");
     }
   };
   const fileLabel = embedded?.path ?? (activePath?.toLowerCase().endsWith(".base") ? activePath : null);
@@ -275,7 +277,7 @@ export default function BasesBlock({ source, meta }: { source: string; meta?: st
         </div>
       )}
       <div style={{ padding: 8 }}>
-        {result.rows.length === 0 && !loading && <div style={{ padding: 24, textAlign: "center", color: muted, fontSize: 13 }}>{t("db.empty")}</div>}
+        {result.rows.length === 0 && !loading && <EmptyState style={{ padding: 24, alignItems: "center", fontSize: 13 }} message={t("db.empty")} action={learnHow("workspace/obsidian-bases#three-ways-to-show-a-base")} />}
         {result.rows.length > 0 && kind === "table" && <TableView result={result} files={files} sort={sortOverride ?? result.view.sort} onSort={clickSort} />}
         {result.rows.length > 0 && kind === "calendar" && <CalendarView result={result} files={files} />}
         {result.rows.length > 0 && kind === "timeline" && <TimelineView result={result} files={files} />}
@@ -488,7 +490,7 @@ async function importCsv(base: BaseModel, name: string, files: readonly BasesFil
     notifyWorkspaceChanged({ kind: "structure", paths: notes.map((n) => n.path) });
     showAiToast(t("base.csv.imported", { count: notes.length, folder }));
   } catch (e) {
-    showAiToast(t("base.csv.failed", { error: (e as Error)?.message ?? String(e) }), "error");
+    showAiToast(t("base.csv.failed", { error: explainError(e) }), "error");
   }
 }
 
@@ -512,7 +514,7 @@ async function moveRow(row: BaseRow, dateId: string, day: string, endId?: string
     });
     showAiToast(t("base.moved", { name: row.file.basename, date: day }));
   } catch (e) {
-    showAiToast(t("base.moveFailed", { error: (e as Error)?.message ?? String(e) }), "error");
+    showAiToast(t("base.moveFailed", { error: explainError(e) }), "error");
   }
 }
 
@@ -629,7 +631,7 @@ function TimelineView({ result, files }: ViewProps) {
   const { items, from, to } = useMemo(() => timelineItems(result.rows, startId, endId), [result, startId, endId]);
   const [drag, setDrag] = useState<{ path: string; x: number; days: number } | null>(null);
   const rtl = isRtl();
-  if (!from || !to) return <div style={{ padding: 12, fontSize: 12, color: muted }}>{t("base.timeline.empty", { property: startId })}</div>;
+  if (!from || !to) return <EmptyState style={{ padding: 12 }} message={t("base.timeline.empty", { property: startId })} action={learnHow("workspace/obsidian-bases#calendar-and-timeline-views-lumen")} />;
   const span = daysBetween(from, to) + 1;
   const months: Array<{ day: string; label: string }> = [];
   for (let d = from; d <= to; d = addDays(d, 1)) if (d.endsWith("-01") || d === from) months.push({ day: d, label: d.slice(0, 7) });

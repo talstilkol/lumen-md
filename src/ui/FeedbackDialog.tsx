@@ -31,6 +31,7 @@ import {
 } from "../feedback/feedback";
 import { getAiPolicy } from "../ai/policy";
 import { HelpButton } from "./HelpButton";
+import { explainError } from "../lib/userError";
 
 export interface FeedbackOptions {
   /** The AI doctor's report, when opened from the doctor (still included only if ticked). */
@@ -172,7 +173,7 @@ export function FeedbackDialog({ options, onClose }: { options: FeedbackOptions;
       setScreenshot(name);
       setNotice(t("feedback.screenshot.saved", { name }));
     } catch (e) {
-      setNotice(t("feedback.screenshot.failed", { error: (e as Error).message }));
+      setNotice(t("feedback.screenshot.failed", { error: explainError(e) }));
     }
   };
 

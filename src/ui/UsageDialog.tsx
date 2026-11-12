@@ -20,6 +20,8 @@ import { t } from "../i18n";
 import "../metrics/strings";
 import { countingEnabled, dayKey, loadUsage, markReported, reportIssueUrl, setCounting, setWeekly, summarize, unusedFeatures, weeklyReport, WEEKLY_KEY } from "../metrics/usage";
 import { recordUserShare } from "../ai/privacyLedger";
+import { HelpButton } from "./HelpButton";
+import { EmptyState, learnHow } from "./EmptyState";
 
 export interface UsageOptions {
   /** Every command id of the app, to count the unused ones. */
@@ -86,6 +88,7 @@ function UsageDialog({ options, onClose }: { options: UsageOptions; onClose: () 
         <header style={{ padding: "14px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <BarChart3 size={18} style={{ color: "hsl(var(--accent))" }} />
           <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600, flex: 1 }}>{t("usage.title")}</h2>
+          <HelpButton topic="security/usage-metrics#the-dashboard" />
           <button type="button" style={ghost} onClick={onClose} aria-label={t("usage.close")}>
             <X size={16} />
           </button>
@@ -121,7 +124,7 @@ function UsageDialog({ options, onClose }: { options: UsageOptions; onClose: () 
                 ))}
               </ol>
             ) : (
-              <div style={muted}>{t("usage.none")}</div>
+              <EmptyState style={{ padding: 0 }} message={t("usage.none")} action={learnHow("security/usage-metrics#what-is-counted")} />
             )}
             {ids.length > 0 && <div style={muted}>{t("usage.unused", { count: unused })}</div>}
           </div>

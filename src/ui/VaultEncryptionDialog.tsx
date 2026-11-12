@@ -21,13 +21,16 @@ import {
 import type { ConvertProgress, ConvertReport } from "../storage/vault/encrypted/convert";
 import { WrongPassphraseError, MIN_PASSPHRASE_LENGTH } from "../storage/vault/encrypted/format";
 import "../storage/vault/encrypted/strings";
+import { HelpButton } from "./HelpButton";
+import { explainError } from "../lib/userError";
 
 const field: React.CSSProperties = { width: "100%", padding: "6px 8px", border: "1px solid hsl(var(--border))", borderRadius: 6, background: "transparent", color: "inherit", font: "inherit" };
 const primary: React.CSSProperties = { padding: "6px 14px", border: "none", borderRadius: 6, background: "hsl(var(--accent))", color: "white", cursor: "pointer", justifySelf: "start" };
 const secondary: React.CSSProperties = { padding: "6px 14px", border: "1px solid hsl(var(--border))", borderRadius: 6, background: "transparent", color: "inherit", cursor: "pointer", justifySelf: "start" };
 const muted: React.CSSProperties = { fontSize: 12, color: "hsl(var(--fg-muted))" };
 
-const messageOf = (err: unknown) => (err instanceof WrongPassphraseError ? t("vaultEnc.wrong") : String((err as Error)?.message ?? err));
+/** A vault-lock failure in words (never the error's own text: explainError). */
+const describeVaultError = (err: unknown) => (err instanceof WrongPassphraseError ? t("vaultEnc.wrong") : explainError(err, "vault-encryption"));
 
 function Field({ label, value, onChange, autoComplete = "new-password" }: { label: string; value: string; onChange: (v: string) => void; autoComplete?: string }) {
   return (
@@ -84,7 +87,7 @@ function TurnOn({ onDone }: { onDone: () => void }) {
       setRecovery(null);
       if (r) setLines([t("vaultEnc.doneOn"), ...reportLines(r.report)]);
     } catch (err) {
-      setError(messageOf(err));
+      setError(describeVaultError(err));
     } finally {
       setBusy(false);
     }
@@ -168,7 +171,7 @@ function Manage({ onDone }: { onDone: () => void }) {
     try {
       setInfo(await job());
     } catch (err) {
-      setError(messageOf(err));
+      setError(describeVaultError(err));
     } finally {
       setBusy(false);
       setProgress(null);
@@ -301,6 +304,7 @@ export function VaultEncryptionDialog({ onClose }: { onClose: () => void }) {
           <strong id="vault-enc-title" style={{ flex: 1 }}>
             🔐 {t("vaultEnc.title")}
           </strong>
+          <HelpButton topic="security/vault-encryption" />
           <button type="button" onClick={onClose} aria-label={t("vaultEnc.close")} style={{ background: "none", border: 0, cursor: "pointer", color: "inherit" }}>
             ✕
           </button>

@@ -8,6 +8,8 @@ import { useEffect, useRef, useState } from "react";
 import "./diagramStrings";
 import { t } from "../i18n";
 import { precheck } from "./mermaidPrep";
+import { HelpButton } from "../ui/HelpButton";
+import { explainError } from "../lib/userError";
 
 export interface DiagramDialogProps {
   onInsert: (code: string) => Promise<{ missing: string[]; editable: boolean } | { error: string }>;
@@ -43,7 +45,7 @@ export function DiagramDialog({ onInsert, onClose }: DiagramDialogProps) {
         setStatus({ kind: "info", text: t("canvas.diagram.drawn") });
       } else setStatus({ kind: "error", text: r.code === "no-local-model" ? t("canvas.diagram.noLocalModel") : t("canvas.diagram.drawFailed", { error: r.error }) });
     } catch (e) {
-      if (!ac.signal.aborted) setStatus({ kind: "error", text: t("canvas.diagram.drawFailed", { error: (e as Error).message }) });
+      if (!ac.signal.aborted) setStatus({ kind: "error", text: t("canvas.diagram.drawFailed", { error: explainError(e) }) });
     } finally {
       if (abort.current === ac) setBusy(null);
     }
@@ -70,6 +72,7 @@ export function DiagramDialog({ onInsert, onClose }: DiagramDialogProps) {
         <h2 id="lumen-diagram-title" className="lumen-diagram-title">
           {t("canvas.diagram.title")}
         </h2>
+        <HelpButton topic="workspace/canvas-diagrams" />
         <label className="lumen-diagram-label" htmlFor="lumen-diagram-prompt">
           {t("canvas.diagram.describe")}
         </label>

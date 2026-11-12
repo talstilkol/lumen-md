@@ -95,6 +95,7 @@ export function GraphView({ onOpenFile }: { onOpenFile: (path: string, content: 
           <select value={groupBy} onChange={(e) => setGroupBy(e.target.value as GroupBy)} style={{ ...field, inlineSize: "auto" }}>
             <option value="folder">{t("graph.groupBy.folder")}</option>
             <option value="tag">{t("graph.groupBy.tag")}</option>
+            {/* empty-allow: a "group by: none" option */}
             <option value="none">{t("graph.groupBy.none")}</option>
           </select>
         </label>

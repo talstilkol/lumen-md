@@ -29,6 +29,7 @@ import { EmptyState } from "./EmptyState";
 import { uiConfirm } from "./PromptDialog";
 import { HelpButton } from "./HelpButton";
 import "./aiSettingsPanelStrings";
+import { explainError } from "../lib/userError";
 
 interface Props {
   open: boolean;
@@ -311,7 +312,7 @@ export function AiSettingsPanel({ open, onClose, embedded = false }: Props) {
       void refreshStatus();
     } catch (e) {
       if (!mounted.current || (e as Error)?.name === "AbortError") return;
-      setPullMsg({ ok: false, text: t("ai.settings.ollama.pullFailed", { error: (e as Error)?.message ?? String(e) }) });
+      setPullMsg({ ok: false, text: t("ai.settings.ollama.pullFailed", { error: explainError(e) }) });
     } finally {
       if (pullAbort.current === ctrl) pullAbort.current = null;
       if (mounted.current) setPull(null);
@@ -414,7 +415,7 @@ export function AiSettingsPanel({ open, onClose, embedded = false }: Props) {
               <X size={16} />
             </button>
           )}
-          <HelpButton topic="ai/local-agents#ai-settings" />
+          <HelpButton topic="ai/local-agents" />
         </header>
 
         <div style={{ padding: 18, display: "flex", flexDirection: "column", gap: 14, fontSize: 13, lineHeight: 1.5, overflowY: "auto" }}>

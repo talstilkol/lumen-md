@@ -16,6 +16,9 @@ import { showAiToast } from "../ui/AiToast";
 import { allSources, allTags, buildIndex, cleanTag, exportNote, isIndexed, quoteBlock, retagItem, search, type HighlightItem, type HighlightKind } from "./hub";
 import { retagSidecar, type RetagLabels } from "./retag";
 import "./HighlightsPanel.css";
+import { HelpButton } from "../ui/HelpButton";
+import { explainError } from "../lib/userError";
+import { EmptyState, runCommand } from "../ui/EmptyState";
 
 const SHOWN = 200;
 const baseName = (p: string) => p.split("/").pop() ?? p;
@@ -60,7 +63,7 @@ export function HighlightsPanel({ onClose, load = loadIndex }: { onClose: () => 
   const reload = () =>
     load()
       .then(setItems)
-      .catch((e: unknown) => showAiToast(t("hl.loadFailed", { error: e instanceof Error ? e.message : String(e) }), "error"));
+      .catch((e: unknown) => showAiToast(t("hl.loadFailed", { error: explainError(e) }), "error"));
   useEffect(() => {
     void reload();
   }, []);
@@ -80,7 +83,7 @@ export function HighlightsPanel({ onClose, load = loadIndex }: { onClose: () => 
       await writeSidecar(it.notePath, (existing) => retagSidecar(existing, it, next, retagLabels(it)));
       setItems((list) => list?.map((x) => (x.key === it.key ? retagItem(x, next) : x)) ?? list);
     } catch (e) {
-      showAiToast(t("hl.tagFailed", { error: e instanceof Error ? e.message : String(e) }), "error");
+      showAiToast(t("hl.tagFailed", { error: explainError(e) }), "error");
     }
   };
 
@@ -95,7 +98,7 @@ export function HighlightsPanel({ onClose, load = loadIndex }: { onClose: () => 
       onClose();
       window.dispatchEvent(new CustomEvent("lumen-open-file", { detail: { path } }));
     } catch (e) {
-      showAiToast(t("hl.exportFailed", { error: e instanceof Error ? e.message : String(e) }), "error");
+      showAiToast(t("hl.exportFailed", { error: explainError(e) }), "error");
     }
   };
 
@@ -108,6 +111,7 @@ export function HighlightsPanel({ onClose, load = loadIndex }: { onClose: () => 
     <div className="hl-panel" role="dialog" aria-label={t("hl.title")} data-testid="highlights-panel" onKeyDown={(e) => e.key === "Escape" && onClose()}>
       <div className="hl-head">
         <strong>{t("hl.title")}</strong>
+        <HelpButton topic="workspace/highlights" />
         <span className="hl-count" data-testid="highlights-count">
           {items ? t("hl.count", { n: results.length, total: items.length }) : t("hl.loading")}
           {ms !== null && items ? ` · ${ms < 1 ? "<1" : Math.round(ms)} ms` : ""}
@@ -147,7 +151,11 @@ export function HighlightsPanel({ onClose, load = loadIndex }: { onClose: () => 
         </select>
       </div>
       <ul className="hl-list">
-        {items && results.length === 0 && <li className="hl-empty">{items.length ? t("hl.noMatch") : t("hl.none")}</li>}
+        {items && results.length === 0 && (
+          <li className="hl-empty">
+            {items.length ? t("hl.noMatch") : <EmptyState message={t("hl.none")} action={{ label: t("cmd.highlights.import"), onClick: () => (onClose(), runCommand("highlights.import")) }} />}
+          </li>
+        )}
         {results.slice(0, limit).map((it) => (
           <li key={it.key} className="hl-item" draggable onDragStart={(e) => onDragStart(e, it)} data-testid="highlight-item">
             <button type="button" className="hl-quote" dir="auto" onClick={() => (onClose(), openHighlight(it))}>

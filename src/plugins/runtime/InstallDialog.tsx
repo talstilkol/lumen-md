@@ -9,6 +9,7 @@ import { t } from "../../i18n";
 import { describeCapability, describeFindings, isSensitive, reportUrl } from "./permissions";
 import type { PluginManifest } from "./manifest";
 import type { ScanResult } from "./scan";
+import { HelpButton } from "../../ui/HelpButton";
 
 export function InstallDialog(props: { manifest: PluginManifest; scan: ScanResult; busy?: boolean; onInstall: () => void; onCancel: () => void }) {
   const { manifest: m, scan } = props;
@@ -41,8 +42,10 @@ export function InstallDialog(props: { manifest: PluginManifest; scan: ScanResul
         <h2 id="plugin-install-title" style={{ margin: "0 0 8px", fontSize: 18 }}>
           {t("pluginTrust.dialog.title", { name: m.name })}
         </h2>
+        <HelpButton topic="plugins/permissions#the-install-screen" />
         <p style={{ margin: "0 0 12px", fontSize: 13, color: "hsl(var(--fg-muted))" }}>{t("pluginTrust.dialog.asks", { name: m.name, version: m.version, author: m.author })}</p>
         {m.capabilities.length === 0 ? (
+          // empty-allow: "asks for no permissions" is the scan's answer, not an empty state; Install / Cancel follow
           <p style={{ fontSize: 14 }}>{t("pluginTrust.dialog.none")}</p>
         ) : (
           <ul style={{ listStyle: "none", padding: 0, margin: "0 0 12px", display: "grid", gap: 8 }}>

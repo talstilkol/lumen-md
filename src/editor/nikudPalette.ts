@@ -9,6 +9,7 @@ import { aiOperation, isAbort } from "../ai/aiAbort";
 import { showAiToast } from "../ui/AiToast";
 import { uiConfirm } from "../ui/PromptDialog";
 import type { NikudMode } from "./nikudCommand";
+import { explainError } from "../lib/userError";
 
 export async function runNikudFromPalette(view: EditorView, mode: NikudMode, locale: string): Promise<void> {
   const op = aiOperation(); // Esc / "Cancel AI" stop it (T55)
@@ -31,7 +32,7 @@ export async function runNikudFromPalette(view: EditorView, mode: NikudMode, loc
   } catch (e) {
     if (isAbort(e)) return;
     const reason = (e as { name?: string; reason?: string }).name === "NikudUnavailableError" ? (e as { reason: string }).reason : null;
-    showAiToast(reason ? t(`toast.nikud.${reason}`) : t("toast.nikud.failed", { error: (e as Error).message }), reason ? "info" : "error");
+    showAiToast(reason ? t(`toast.nikud.${reason}`) : t("toast.nikud.failed", { error: explainError(e) }), reason ? "info" : "error");
   } finally {
     op.end();
   }

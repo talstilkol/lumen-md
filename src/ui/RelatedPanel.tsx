@@ -20,6 +20,8 @@ import { linkHints, titleEntries, type LinkHint, type RelatedHit, type TitleEntr
 import { acceptHint, currentHints, hasRelatedExtension, relatedExtension } from "../related/editorPlugin";
 import { offFolders, relatedOff } from "../related/prefs";
 import "./relatedPanelStrings";
+import { HelpButton } from "./HelpButton";
+import { EmptyState, learnHow } from "./EmptyState";
 
 /** Debounce after the last keystroke (the plan's budget: the panel is up to date < 150 ms after typing stops). */
 export const RELATED_DELAY_MS = 100;
@@ -60,6 +62,7 @@ function Panel({ getView, onClose, subscribe }: { getView: () => EditorView | nu
       <header style={{ display: "flex", alignItems: "center", gap: 6 }}>
         <Link2 size={14} />
         <strong style={{ flex: 1, fontSize: 13 }}>{t("related.title")}</strong>
+        <HelpButton topic="workspace/related" />
         <button type="button" style={btn} onClick={onClose} aria-label={t("related.close")}>
           <X size={12} />
         </button>
@@ -71,7 +74,7 @@ function Panel({ getView, onClose, subscribe }: { getView: () => EditorView | nu
       ) : (
         <>
           {snap.related.length === 0 ? (
-            <p style={{ ...muted, margin: 0 }}>{t("related.none")}</p>
+            <EmptyState style={{ padding: 0 }} message={t("related.none")} action={learnHow("workspace/related")} />
           ) : (
             <ul style={{ margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 4 }}>
               {snap.related.map((h) => (

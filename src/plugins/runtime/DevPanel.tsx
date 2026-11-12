@@ -9,6 +9,7 @@ import { t } from "../../i18n";
 import "./devStrings";
 import { DEFAULT_DEV_URL, type DevConnection, type DevStatus } from "./devPlugin";
 import type { PluginInstance } from "./pluginHost";
+import { explainError } from "../../lib/userError";
 
 const STATE_KEY = {
   connecting: "pluginDev.state.connecting",
@@ -46,7 +47,7 @@ export function DevPanel({ connect }: { connect?: (url: string) => Promise<DevCo
       c.onChange(setStatus);
       setStatus(c.status);
     } catch (e) {
-      setFailure(e instanceof Error ? e.message : String(e));
+      setFailure(explainError(e));
     }
   }
 

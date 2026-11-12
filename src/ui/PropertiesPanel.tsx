@@ -29,6 +29,8 @@ import {
   type PropertyValue,
 } from "../properties/frontmatter";
 import "./propertiesPanelStrings";
+import { HelpButton } from "./HelpButton";
+import { explainError } from "../lib/userError";
 
 interface Props {
   open: boolean;
@@ -388,7 +390,7 @@ export function PropertiesPanel({ open, onClose, text, applyEdit }: Props) {
       try {
         applyEdit(fn);
       } catch (e) {
-        toast.error(t("props.writeFailed", { error: e instanceof Error ? e.message : String(e) }));
+        toast.error(t("props.writeFailed", { error: explainError(e) }));
       }
     },
     [applyEdit],
@@ -450,6 +452,7 @@ export function PropertiesPanel({ open, onClose, text, applyEdit }: Props) {
       >
         <SlidersHorizontal size={14} aria-hidden />
         <span style={{ fontWeight: 600, fontSize: 13 }}>{t("props.title")}</span>
+        <HelpButton topic="workspace/properties" />
         <button type="button" onClick={onClose} aria-label={t("props.close")} title={t("props.close")} style={{ ...iconBtn, marginInlineStart: "auto" }}>
           <X size={14} />
         </button>
@@ -462,6 +465,7 @@ export function PropertiesPanel({ open, onClose, text, applyEdit }: Props) {
           </div>
         )}
         {parsed.status !== "invalid" && parsed.properties.length === 0 && (
+          // empty-action: the "Add property" row at the bottom of this panel
           <div style={{ fontSize: 12, color: "hsl(var(--fg-muted))", paddingBlockEnd: 8 }}>{t("props.empty")}</div>
         )}
         {parsed.properties.map((p) => {

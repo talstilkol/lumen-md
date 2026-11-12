@@ -259,7 +259,7 @@ export function buildBatchCommands(): Command[] {
           }
           await uiAlert({ title: t("cmd.ai.summarize"), message: `${res.sentences.map((s) => `• ${s}`).join("\n")}\n\n${t(res.engine === "extractive" ? "pdf.summary.extractive" : "pdf.summary.local")}` });
         } catch (e) {
-          if (!isAbort(e)) showAiToast(t("pdf.ask.failed", { error: (e as Error).message }), "error");
+          if (!isAbort(e)) showAiToast(t("pdf.ask.failed", { error: explainError(e) }), "error");
         } finally {
           op.end();
         }

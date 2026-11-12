@@ -12,6 +12,7 @@ import { memoryFiles } from "../sync/e2ee/localFiles";
 import { memoryStateStore } from "../sync/e2ee/state";
 import { keepBothResolver } from "../sync/e2ee/conflict";
 import { HEADER_NAME } from "../sync/e2ee/header";
+import { KEYRING_NAME } from "../sync/e2ee/keyring";
 import { utf8 } from "../sync/e2ee/bytes";
 import { chunk, decodeMessage, encodeMessage, memoryChannelPair, reassembler, CHUNK } from "../sync/e2ee/lan/channel";
 import { lanHost, liveSync, remoteLanProvider, LanAuthError } from "../sync/e2ee/lan/rpc";
@@ -150,7 +151,7 @@ describe("LAN sync between two devices", () => {
 /* ─── Who may use the host ─────────────────────────────────────────────── */
 
 describe("the host", () => {
-  it("serves only the header before a device proves it knows the passphrase", async () => {
+  it("serves only what unlocking needs (header, keyring) before a device proves it knows the passphrase", async () => {
     const bucket = memoryProvider();
     const { keys } = await createVault(bucket, PASSPHRASE, { pbkdf2Iterations: TEST_ITERATIONS });
     const host = lanHost({ bucket, keys: () => keys });
@@ -158,6 +159,11 @@ describe("the host", () => {
     host.attach(h);
     const remote = remoteLanProvider(p);
     expect(await remote.get(HEADER_NAME)).not.toBeNull();
+    // The keyring may be read (a new device unlocks with it); any other object may not.
+    await remote.get(KEYRING_NAME);
+    const other = (await bucket.list()).find((n) => n !== HEADER_NAME && n !== KEYRING_NAME);
+    expect(other).toBeDefined();
+    await expect(remote.get(other!)).rejects.toBeInstanceOf(LanAuthError);
     await expect(remote.list()).rejects.toBeInstanceOf(LanAuthError);
     await expect(remote.put("x", utf8("garbage"))).rejects.toBeInstanceOf(LanAuthError);
     await expect(remote.delete(HEADER_NAME)).rejects.toBeInstanceOf(LanAuthError);

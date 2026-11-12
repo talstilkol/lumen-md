@@ -10,6 +10,7 @@ import { t } from "../../../i18n";
 import "../strings";
 import { hasRules, parseRulesForm } from "../rules";
 import type { SyncSession } from "./session";
+import { explainError } from "../../../lib/userError";
 
 const field: React.CSSProperties = {
   width: "100%",
@@ -41,7 +42,7 @@ export function SyncRulesForm({ session }: { session: SyncSession }) {
       setMessage(t("e2ee.rules.saved"));
     } catch (err) {
       setMessage(null);
-      setError(String((err as Error)?.message ?? err));
+      setError(explainError(err));
     }
   }
 
@@ -62,6 +63,7 @@ export function SyncRulesForm({ session }: { session: SyncSession }) {
           {t("e2ee.rules.maxSize")}
           <input dir="ltr" inputMode="decimal" value={maxMb} onChange={(e) => setMaxMb(e.target.value)} style={field} />
         </label>
+        {/* empty-action: the rule fields above and Save below */}
         {!hasRules(r) && <div style={muted}>{t("e2ee.rules.none")}</div>}
         <button type="submit" style={{ justifySelf: "start" }}>
           {t("e2ee.rules.save")}

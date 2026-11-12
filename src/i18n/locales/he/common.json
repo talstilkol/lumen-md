@@ -500,6 +500,7 @@
   "embed.notFound": "לא ניתן להטמיע את {target}: הוא לא נמצא במרחב העבודה.",
   "embed.openPdf": "פתיחת ה-PDF",
   "embed.sectionNotFound": "לא ניתן להטמיע את {section}: אין קטע כזה בפתק {note}.",
+  "empty.learnHow": "להראות לי איך",
   "epub.chapterOf": "פרק {n} מתוך {total}",
   "epub.close": "סגירה",
   "epub.external": "הקישור הזה מוביל אל מחוץ לספר ולא נפתח כאן: {url}",

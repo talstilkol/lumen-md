@@ -12,6 +12,8 @@ import { addToImport, commitImport, prepareImport, readPicked, undoImport, type 
 import { linkPercent, reportMarkdown, skipText, warningText } from "./report";
 import type { ImportReport, ImportSourceId } from "./types";
 import { toast } from "../../store/useToastStore";
+import { HelpButton } from "../../ui/HelpButton";
+import { explainError } from "../../lib/userError";
 
 interface Props {
   open: boolean;
@@ -74,7 +76,7 @@ export function ImportWizard({ open, onClose }: Props) {
       }
       setStep({ kind: "review", prep, picked });
     } catch (e) {
-      setError(t("importWizard.error.failed", { error: (e as Error).message }));
+      setError(t("importWizard.error.failed", { error: explainError(e) }));
       setStep({ kind: "source" });
     }
   }, []);
@@ -96,7 +98,7 @@ export function ImportWizard({ open, onClose }: Props) {
       setSavedReport(null);
       setStep({ kind: "done", report, undo });
     } catch (e) {
-      setError(t("importWizard.error.failed", { error: (e as Error).message }));
+      setError(t("importWizard.error.failed", { error: explainError(e) }));
       setStep({ kind: "review", prep, picked });
     }
   };
@@ -263,6 +265,7 @@ export function ImportWizard({ open, onClose }: Props) {
         <header style={{ padding: "12px 16px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <Download size={16} />
           <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, flex: 1 }}>{t("importWizard.title")}</h2>
+          <HelpButton topic="workspace/import" />
           <button type="button" style={btn} onClick={onClose} disabled={step.kind === "busy"} aria-label={t("importWizard.close")}>
             <X size={14} />
           </button>

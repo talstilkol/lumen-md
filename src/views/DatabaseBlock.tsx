@@ -72,6 +72,8 @@ import "../daily/israeliTimeStrings";
 import { defaultIsrael, holidaysOn } from "../daily/hebrewCalendar";
 import { holidayLabel, nameLang } from "../daily/hebrewCalendarNames";
 import { dayOfValue } from "../daily/israeliTime";
+import { explainError } from "../lib/userError";
+import { EmptyState, learnHow } from "../ui/EmptyState";
 
 // Leaflet comes with the map view only, when it is first picked.
 const DatabaseMapView = lazy(() => import("./DatabaseMapView"));
@@ -197,7 +199,7 @@ export default function DatabaseBlock({ source, meta }: Props) {
       await writeCell(row.path, key, value);
     } catch (e) {
       setRows((rs) => rs.map((r) => (r.path === row.path ? { ...r, fm: put(r.fm, old, had) } : r)));
-      showAiToast(t("db.saveFailed", { note: titleOf(row), error: (e as Error)?.message ?? String(e) }), "error");
+      showAiToast(t("db.saveFailed", { note: titleOf(row), error: explainError(e) }), "error");
     }
   }, []);
 
@@ -244,11 +246,17 @@ export default function DatabaseBlock({ source, meta }: Props) {
       <div style={{ padding: 8 }}>
         {error && <div style={{ padding: 12, color: "hsl(0 80% 60%)" }}>{error}</div>}
         {!error && shown.length === 0 && !loading && (
-          <div style={{ padding: 24, textAlign: "center", color: "hsl(var(--fg-muted))", fontSize: 13 }}>
-            {t("db.empty")}
-            <br />
-            <span style={{ fontSize: 11, opacity: 0.7 }}>{t("db.emptyHint", { type: spec.type ?? "…", source: spec.source ?? t("db.workspaceRoot") })}</span>
-          </div>
+          <EmptyState
+            style={{ padding: 24, alignItems: "center", textAlign: "center", fontSize: 13 }}
+            message={
+              <>
+                {t("db.empty")}
+                <br />
+                <span style={{ fontSize: 11, opacity: 0.7 }}>{t("db.emptyHint", { type: spec.type ?? "…", source: spec.source ?? t("db.workspaceRoot") })}</span>
+              </>
+            }
+            action={learnHow("workspace/database-views#tag-your-notes")}
+          />
         )}
         {!error && shown.length > 0 && view === "table" && <TableView {...props} />}
         {!error && shown.length > 0 && view === "cards" && <CardsView {...props} />}
@@ -331,6 +339,7 @@ function Toolbar({
       <label style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
         <span>{t("db.sort.label")}</span>
         <select value={first?.key ?? ""} onChange={(e) => setSort(e.target.value ? [{ key: e.target.value, desc: first?.desc ?? false }] : [])} style={field} data-testid="database-sort">
+          {/* empty-allow: a "sort: none" option */}
           <option value="">{t("db.sort.none")}</option>
           {keys.map((k) => (
             <option key={k} value={k}>{k}</option>
@@ -345,6 +354,7 @@ function Toolbar({
       <label style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
         <span>{t("db.group.label")}</span>
         <select value={groupBy} onChange={(e) => setGroupBy(e.target.value)} style={field} data-testid="database-group">
+          {/* empty-allow: a "group: none" option */}
           <option value="">{t("db.group.none")}</option>
           {keys.map((k) => (
             <option key={k} value={k}>{k}</option>

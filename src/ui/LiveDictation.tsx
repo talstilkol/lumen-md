@@ -24,6 +24,8 @@ import { createDictationAudioContext, startDictationSession, type DictationSessi
 import { appendSegment } from "../ai/dictation/punctuate";
 import { log } from "../lib/logger";
 import "./liveDictationStrings";
+import { HelpButton } from "./HelpButton";
+import { explainError } from "../lib/userError";
 
 type Phase = { kind: "ask"; browserAllowed: boolean } | { kind: "downloading"; percent: number } | { kind: "loading" } | { kind: "listening"; speaking: boolean; interim: string };
 
@@ -111,7 +113,7 @@ function Panel({ initial, onBrowser, onClose, correction = null }: { initial: Ph
     } catch (e) {
       // A load that failed before the session took the context: close it here.
       void audioContext?.close().catch(() => undefined);
-      if ((e as Error).name !== "AbortError" && !ctl.signal.aborted) showAiToast(t("dictation.error", { error: (e as Error).message }), "error");
+      if ((e as Error).name !== "AbortError" && !ctl.signal.aborted) showAiToast(t("dictation.error", { error: explainError(e) }), "error");
       await stop();
     }
   };
@@ -135,6 +137,7 @@ function Panel({ initial, onBrowser, onClose, correction = null }: { initial: Ph
       {phase.kind === "ask" && (
         <>
           <strong>{t("dictation.download.title")}</strong>
+          <HelpButton topic="ai/hebrew-dictation" />
           <span>{t("dictation.download.body", { size })}</span>
           <span style={{ opacity: 0.7, fontSize: 11 }}>{t("dictation.download.credits")}</span>
           {!phase.browserAllowed && <span style={{ opacity: 0.7, fontSize: 11 }}>{t("dictation.localOnlyNoBrowser")}</span>}

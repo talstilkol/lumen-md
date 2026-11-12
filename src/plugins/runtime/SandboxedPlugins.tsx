@@ -13,6 +13,7 @@ import { InstallDialog } from "./InstallDialog";
 import type { PluginManifest } from "./manifest";
 import type { ScanResult } from "./scan";
 import "./devStrings";
+import { explainError } from "../../lib/userError";
 
 const DevPanel = lazy(() => import("./DevPanel").then((m) => ({ default: m.DevPanel })));
 
@@ -78,7 +79,7 @@ export function SandboxedPlugins() {
       showAiToast(t("pluginTrust.installed", { name: item.manifest.name }), "success");
       setAsking(null);
     } catch (e) {
-      showAiToast(t("pluginTrust.installFailed", { name: item.manifest.name, error: e instanceof Error ? e.message : String(e) }), "error");
+      showAiToast(t("pluginTrust.installFailed", { name: item.manifest.name, error: explainError(e) }), "error");
     } finally {
       setBusy(false);
     }

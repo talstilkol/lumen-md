@@ -500,6 +500,7 @@
   "embed.notFound": "Impossible d'intégrer {target} : introuvable dans l'espace de travail.",
   "embed.openPdf": "Ouvrir le PDF",
   "embed.sectionNotFound": "Impossible d'intégrer {section} : cette section n'existe pas dans {note}.",
+  "empty.learnHow": "Montrez-moi comment",
   "epub.chapterOf": "Chapitre {n} sur {total}",
   "epub.close": "Fermer",
   "epub.external": "Ce lien sort du livre et n’est pas ouvert ici : {url}",

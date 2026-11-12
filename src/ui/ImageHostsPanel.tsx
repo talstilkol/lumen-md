@@ -15,6 +15,8 @@ import { t } from "../i18n";
 import { showAiToast } from "./AiToast";
 import { allowedRemoteImageHosts, forgetAllRemoteImageHosts, forgetRemoteImageHost, remoteImagesVersion, subscribeRemoteImages } from "../lib/remoteImages";
 import "./imageHostsPanelStrings";
+import { HelpButton } from "./HelpButton";
+import { EmptyState, learnHow } from "./EmptyState";
 
 function useAllowedHosts(): string[] {
   useSyncExternalStore(subscribeRemoteImages, remoteImagesVersion, remoteImagesVersion);
@@ -25,9 +27,7 @@ export function ImageHostsList() {
   const hosts = useAllowedHosts();
   if (!hosts.length) {
     return (
-      <p data-testid="image-hosts-empty" style={{ margin: 0, fontSize: 13, color: "hsl(var(--fg-muted))" }}>
-        {t("imageHosts.empty")}
-      </p>
+      <EmptyState testId="image-hosts-empty" style={{ padding: 0 }} message={t("imageHosts.empty")} action={learnHow("security/image-hosts")} />
     );
   }
   return (
@@ -88,6 +88,7 @@ export function ImageHostsPanel({ open, onClose }: { open: boolean; onClose: () 
         <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "12px 14px", borderBottom: "1px solid hsl(var(--border))" }}>
           <ImageOff size={16} style={{ opacity: 0.7 }} />
           <span style={{ fontWeight: 600, flex: 1 }}>{t("imageHosts.title")}</span>
+          <HelpButton topic="security/image-hosts" />
           <button type="button" className="icon-btn" aria-label={t("imageHosts.close")} onClick={onClose} style={{ width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center" }}>
             <X size={14} />
           </button>

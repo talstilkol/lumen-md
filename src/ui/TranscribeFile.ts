@@ -23,6 +23,7 @@ import { appendSegment } from "../ai/dictation/punctuate";
 import { isOPFSAvailable, writeWorkspaceBlob } from "../storage/workspace";
 import { notifyWorkspaceChanged } from "../storage/workspaceEvents";
 import { log } from "../lib/logger";
+import { explainError } from "../lib/userError";
 
 const ENGINE_NAMES: Partial<Record<EngineId, string>> = {
   "whisper-cpp-he": "ivrit.ai Whisper (whisper.cpp)",
@@ -140,7 +141,7 @@ export async function transcribeAudioFile(file?: File | null): Promise<void> {
     if (audioPath) showAiToast(t("transcribeFile.audioSaved", { path: audioPath }), "info");
   } catch (e) {
     if ((e as Error).name === "AbortError") return;
-    showAiToast(t("transcribeFile.failed", { error: (e as Error).message }), "error");
+    showAiToast(t("transcribeFile.failed", { error: explainError(e) }), "error");
   }
 }
 

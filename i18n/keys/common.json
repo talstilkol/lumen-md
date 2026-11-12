@@ -2808,6 +2808,11 @@
       ]
     },
     {
+      "key": "empty.learnHow",
+      "en": "Show me how",
+      "vars": []
+    },
+    {
       "key": "epub.chapterOf",
       "en": "Chapter {n} of {total}",
       "vars": [

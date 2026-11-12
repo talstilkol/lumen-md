@@ -21,6 +21,8 @@ import {
   VaultMoveConflictError,
 } from "../storage/vault/location";
 import "./vaultFolderBannerStrings";
+import { HelpButton } from "./HelpButton";
+import { explainError } from "../lib/userError";
 
 export function VaultFolderBanner() {
   const [, setTick] = useState(0);
@@ -43,6 +45,7 @@ export function VaultFolderBanner() {
     return (
       <div className="vault-folder-banner" role="dialog" aria-label={t("vault.desktop.choose")}>
         <span>{t("vault.desktop.firstRunBody")}</span>
+        <HelpButton topic="workspace/mobile-vault-folder" />
         <button
           type="button"
           className="vault-folder-btn"
@@ -115,7 +118,7 @@ export function VaultFolderBanner() {
               showAiToast(t(pending.to.kind !== "opfs" ? "vault.folder.moved" : "vault.folder.movedBack", { folder: pending.to.kind !== "opfs" ? to : pending.from.kind !== "opfs" ? pending.from.name : "", n: String(r.files) }), "info");
             } catch (e) {
               if (e instanceof VaultMoveConflictError) showAiToast(t("vault.folder.conflict", { n: String(e.paths.length), folder: to, path: e.paths[0] }), "error");
-              else showAiToast(t("vault.folder.failed", { error: (e as Error).message }), "error");
+              else showAiToast(t("vault.folder.failed", { error: explainError(e) }), "error");
             } finally {
               setBusy(false);
             }

@@ -27,9 +27,13 @@
 
 import { fromB64u, randomBytes, toB64u, utf8 } from "../bytes";
 import { HEADER_NAME } from "../header";
+import { KEYRING_NAME } from "../keyring";
 import { hmac, verifyHmac, type VaultKeys } from "../keys";
 import { PreconditionFailedError, ProviderUnavailableError, type PutCondition, type StoredObject, type SyncProvider } from "../provider";
 import { messenger, type LanChannel, type Message } from "./channel";
+
+/** The objects a peer may read before it has proved it belongs to the vault: what unlocking reads. */
+const PRE_AUTH: ReadonlySet<string> = new Set([HEADER_NAME, KEYRING_NAME]);
 
 export const LAN_PROTOCOL = 1;
 export const REQUEST_TIMEOUT_MS = 15_000;
@@ -143,7 +147,10 @@ export function lanHost(opts: LanHostOptions): LanHost {
     }
     if (op === "get") {
       if (!isName(header.name)) return reply({ error: "bad-request" });
-      if (!c.authed && header.name !== HEADER_NAME) return reply({ error: "auth" });
+      // Before the proof, only what unlocking needs: the header and, since the keyring (W1.7, #399), the
+      // keyring, from whose current epoch the pairing key derives. Both are sealed for an untrusted bucket,
+      // and the header already lets anyone holding it test passphrases, so the keyring adds nothing to that.
+      if (!c.authed && !PRE_AUTH.has(header.name)) return reply({ error: "auth" });
       const o = await inner.get(header.name);
       return o ? reply({ etag: o.etag }, o.data) : reply({ missing: true });
     }

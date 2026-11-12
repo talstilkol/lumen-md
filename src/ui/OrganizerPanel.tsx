@@ -13,6 +13,8 @@ import { startOrganizer, workspaceSource, DEFAULT_BATCH, type OrganizerJob, type
 import { basenameOf } from "../agents/organizer/analyze";
 import { formatEta } from "./BatchPanel";
 import "./organizerPanelStrings";
+import { HelpButton } from "./HelpButton";
+import { EmptyState, learnHow } from "./EmptyState";
 
 const btn: React.CSSProperties = { padding: "4px 10px", fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer" };
 const primary: React.CSSProperties = { ...btn, background: "hsl(var(--accent))", color: "hsl(var(--accent-fg, 0 0% 100%))", borderColor: "transparent" };
@@ -34,7 +36,7 @@ function Status({ s }: { s: OrganizerState }) {
   if (s.phase === "analysing") return <span style={muted}>{s.paused ? t("organizer.paused") : t("organizer.analysing")}</span>;
   if (s.phase === "cancelled") return <span style={muted}>{t("organizer.cancelled")}</span>;
   if (s.phase === "failed") return <span style={{ ...muted, color: "hsl(var(--danger))" }}>{t("organizer.failed", { error: s.error ?? "" })}</span>;
-  if (!s.suggestions.length) return <span style={muted}>{t("organizer.none")}</span>;
+  if (!s.suggestions.length) return <EmptyState style={{ padding: 0 }} message={t("organizer.none")} action={learnHow("ai/organizer#how-it-decides")} />;
   return (
     <span data-testid="organizer-summary" style={{ fontSize: 13 }}>
       {t("organizer.ready", { count: s.suggestions.length, ...s.counts })}
@@ -70,6 +72,7 @@ export function OrganizerPanel({ job, onClose }: { job: OrganizerJob; onClose: (
         <header style={{ padding: "12px 16px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <Network size={16} />
           <strong style={{ flex: 1 }}>{t("organizer.title")}</strong>
+          <HelpButton topic="ai/organizer" />
           <button type="button" style={btn} onClick={onClose} aria-label={t("agentReview.close")}>
             <X size={14} />
           </button>

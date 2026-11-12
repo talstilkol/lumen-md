@@ -19,6 +19,8 @@ import { showAiToast } from "./AiToast";
 import { docsUrl } from "../lib/docsLinks";
 import { t } from "../i18n";
 import "./trustedReposDialogStrings";
+import { HelpButton } from "./HelpButton";
+import { explainError } from "../lib/userError";
 
 interface Props {
   onClose: () => void;
@@ -69,7 +71,7 @@ export function TrustedReposDialog({ onClose, loadRepos = clonedRepos }: Props) 
       try {
         setRepoTrusted(repo, next);
       } catch (e) {
-        showAiToast(t("trustedRepos.saveFailed", { error: (e as Error).message }), "error");
+        showAiToast(t("trustedRepos.saveFailed", { error: explainError(e) }), "error");
         return;
       }
       setRows((rs) => rs?.map((r) => (r.repo === repo ? { ...r, trusted: isRepoTrusted(repo) } : r)) ?? rs);
@@ -93,6 +95,7 @@ export function TrustedReposDialog({ onClose, loadRepos = clonedRepos }: Props) 
           <h2 id="trusted-repos-title" style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
             {t("trustedRepos.title")}
           </h2>
+          <HelpButton topic="security/trusted-repos" />
           <button type="button" onClick={onClose} aria-label={t("trustedRepos.close")} style={iconBtn}>
             <X size={14} />
           </button>

@@ -500,6 +500,7 @@
   "embed.notFound": "تعذّر تضمين {target}: غير موجود في مساحة العمل.",
   "embed.openPdf": "فتح ملف PDF",
   "embed.sectionNotFound": "تعذّر تضمين {section}: لا يوجد قسم بهذا الاسم في {note}.",
+  "empty.learnHow": "أرني كيف",
   "epub.chapterOf": "الفصل {n} من {total}",
   "epub.close": "إغلاق",
   "epub.external": "هذا الرابط يقود إلى خارج الكتاب ولا يُفتح هنا: {url}",

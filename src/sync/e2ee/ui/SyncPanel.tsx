@@ -16,11 +16,13 @@ import { SyncRulesForm } from "./SyncRulesForm";
 import { syncSession, type SyncSession } from "./session";
 import { ProviderAuthError, ProviderUnreachableError, ProviderUnsupportedError } from "../providers/http";
 import { defaultSettings, hasProviderSecret, legacyStore, oauthAvailable, PROVIDER_KINDS, providerHosts, SECRET_NAMES, type ProviderKind, type ProviderSettings } from "../providers";
-import { LanHostPairing, LanJoin, lanError } from "./LanPairing";
+import { LanHostPairing, LanJoin, describeLanError } from "./LanPairing";
 import { LanAuthError } from "../lan/rpc";
 import { LanLinkError } from "../lan/link";
 import { LanNoVaultError, LanNotConnectedError } from "../lan";
 import { loadMigrationRecord, migratePlaintext, planPlaintextMigration, revertPlaintextMigration, type MigrationPlan, type MigrationRecord } from "../providers/migrate";
+import { HelpButton } from "../../../ui/HelpButton";
+import { explainError } from "../../../lib/userError";
 
 const NAMES: Record<ProviderKind, string> = { webdav: "WebDAV", s3: "S3", dropbox: "Dropbox", gdrive: "Google Drive", lan: "LAN" };
 const PENDING_OAUTH = "lumen-sync-pending-oauth";
@@ -38,14 +40,14 @@ const muted: React.CSSProperties = { fontSize: 12, color: "hsl(var(--fg-muted))"
 const errorStyle: React.CSSProperties = { fontSize: 12, color: "hsl(0 70% 50%)" };
 const primary: React.CSSProperties = { padding: "6px 14px", border: "none", borderRadius: 6, background: "hsl(var(--accent))", color: "white", cursor: "pointer", justifySelf: "start" };
 
-/** A human message for a failed connection. */
-export function connectError(e: unknown, settings: ProviderSettings): string {
-  if (e instanceof LanLinkError || e instanceof LanNoVaultError || e instanceof LanNotConnectedError || e instanceof LanAuthError) return lanError(e);
+/** A human message for a failed connection (never the error's own text: explainError). */
+export function describeConnectError(e: unknown, settings: ProviderSettings): string {
+  if (e instanceof LanLinkError || e instanceof LanNoVaultError || e instanceof LanNotConnectedError || e instanceof LanAuthError) return describeLanError(e);
   if (e instanceof ProviderAuthError) return t("e2ee.sync.auth");
   if (e instanceof ProviderUnsupportedError) return t("e2ee.sync.unsupported", { detail: e.message });
   // fetch() rejects (a TypeError) when CORS or the page's CSP stops the request.
   if (e instanceof ProviderUnreachableError || e instanceof TypeError) return t("e2ee.sync.cors", { host: providerHosts(settings)[0] ?? "?" });
-  return String((e as Error)?.message ?? e);
+  return explainError(e, "sync");
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
@@ -86,7 +88,7 @@ function ProviderForm({ session, initial, onDone }: { session: SyncSession; init
       await session.connect(settings, secretName ? (secret || (haveSecret ? null : "")) : null);
       onDone();
     } catch (err) {
-      setError(connectError(err, settings));
+      setError(describeConnectError(err, settings));
     } finally {
       setBusy(false);
     }
@@ -198,7 +200,7 @@ function ProviderForm({ session, initial, onDone }: { session: SyncSession; init
               await session.connect(settings, null);
               onDone();
             } catch (err) {
-              setError(connectError(err, settings));
+              setError(describeConnectError(err, settings));
             }
           }}
         />
@@ -222,7 +224,7 @@ function Migration({ session, kind }: { session: SyncSession; kind: ProviderKind
       const files = await session.localFiles();
       const [p, r] = await Promise.all([planPlaintextMigration(store, files), loadMigrationRecord(store.name)]);
       if (live) (setPlan(p), setRecord(r));
-    })().catch((e) => live && setError(String((e as Error)?.message ?? e)));
+    })().catch((e) => live && setError(explainError(e)));
     return () => {
       live = false;
     };
@@ -241,7 +243,7 @@ function Migration({ session, kind }: { session: SyncSession; kind: ProviderKind
       setMessage(t("e2ee.sync.migrate.done", { n: r.moved.length, folder: r.backupFolder, name }));
       await session.syncNow().catch(() => undefined);
     } catch (e) {
-      setError(String((e as Error)?.message ?? e));
+      setError(explainError(e));
     } finally {
       setProgress(null);
     }
@@ -254,7 +256,7 @@ function Migration({ session, kind }: { session: SyncSession; kind: ProviderKind
       setRecord(null);
       setMessage(t("e2ee.sync.migrate.reverted", { n }));
     } catch (e) {
-      setError(String((e as Error)?.message ?? e));
+      setError(explainError(e));
     }
   }
 
@@ -375,6 +377,7 @@ export function SyncPanel({ onClose, session = syncSession() }: { onClose: () =>
           <h2 id="sync-panel-title" style={{ margin: 0, fontSize: 16 }}>
             {t("e2ee.sync.title")}
           </h2>
+          <HelpButton topic="sync/e2ee" />
           <button type="button" aria-label={t("e2ee.sync.close")} onClick={onClose} style={{ background: "none", border: "none", color: "inherit", cursor: "pointer", fontSize: 18 }}>
             ×
           </button>

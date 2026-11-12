@@ -500,6 +500,7 @@
   "embed.notFound": "Не удалось встроить {target}: не найдено в рабочей области.",
   "embed.openPdf": "Открыть PDF",
   "embed.sectionNotFound": "Не удалось встроить {section}: в {note} нет такого раздела.",
+  "empty.learnHow": "Показать, как",
   "epub.chapterOf": "Глава {n} из {total}",
   "epub.close": "Закрыть",
   "epub.external": "Эта ссылка ведёт за пределы книги и здесь не открывается: {url}",

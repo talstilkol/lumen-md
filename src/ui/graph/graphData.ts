@@ -8,6 +8,7 @@ import { buildGraph, degreeOf, type GraphData } from "../../graph/graphModel";
 import { ensureIndex, indexedFiles } from "../../storage/workspaceIndex";
 import { onWorkspaceChanged } from "../../storage/workspaceEvents";
 import { log } from "../../lib/logger";
+import { explainError } from "../../lib/userError";
 
 let cached: { key: string; graph: GraphData } | null = null;
 
@@ -39,7 +40,7 @@ export function useVaultGraph(): { graph: GraphData | null; error: string | null
         .then((g) => !cancelled && setGraph(g))
         .catch((e: unknown) => {
           log.warn("graph: load failed", e);
-          if (!cancelled) setError(e instanceof Error ? e.message : String(e));
+          if (!cancelled) setError(explainError(e));
         });
     void load();
     const off = onWorkspaceChanged(() => void load(), { debounceMs: 800 });

@@ -12,6 +12,7 @@ import { t } from "../i18n";
 import { showAiToast } from "./AiToast";
 import { applyEdits, loadTypographySettings, saveTypographySettings, typographyEdits, TYPO_RULES, type TypographySettings, type TypoEdit } from "../text/hebrewTypography";
 import "./typographyDialogStrings";
+import { HelpButton } from "./HelpButton";
 
 export interface TypographyTarget {
   getView: () => EditorView | null;
@@ -77,6 +78,7 @@ function TypographyDialogImpl({ target, onClose }: { target: TypographyTarget; o
         <h2 id="typo-title" style={{ margin: 0, fontSize: 16 }}>
           {t("typo.title")}
         </h2>
+        <HelpButton topic="editor/hebrew-typography" />
         <label style={{ display: "flex", gap: 8, alignItems: "center", fontWeight: 600 }}>
           <input type="checkbox" checked={settings.asYouType} onChange={(e) => update({ ...settings, asYouType: e.target.checked })} />
           {t("typo.asYouType")}
@@ -90,6 +92,7 @@ function TypographyDialogImpl({ target, onClose }: { target: TypographyTarget; o
           ))}
         </fieldset>
         <div role="status" style={{ fontSize: 13, fontWeight: 600 }} data-testid="typography-count">
+          {/* empty-action: the rule checkboxes above */}
           {edits.length ? t("typo.preview", { count: edits.length }) : t("typo.none")}
         </div>
         {edits.length > 0 && (

@@ -12,6 +12,7 @@ import { useAppStore } from "../store/useStore";
 import { showAiToast } from "../ui/AiToast";
 import { t } from "../i18n";
 import { noteCatalog, type CurrentNote, type NoteCatalog, type WikiSuggestion } from "./wikiComplete";
+import { explainError } from "../lib/userError";
 
 /**
  * The notes to complete. Once the index is built, answers from it at once
@@ -55,7 +56,7 @@ export async function createLinkedNote(path: string): Promise<boolean> {
     showAiToast(t("wikiComplete.created", { name }), "success");
     return true;
   } catch (e) {
-    showAiToast(t("wikiComplete.createFailed", { name, error: (e as Error)?.message ?? String(e) }), "error");
+    showAiToast(t("wikiComplete.createFailed", { name, error: explainError(e) }), "error");
     return false;
   }
 }

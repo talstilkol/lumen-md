@@ -10,6 +10,7 @@ import { uiConfirm } from "../ui/PromptDialog";
 import { showAiToast } from "../ui/AiToast";
 import { lexiconInstalled } from "./installed";
 import { downloadLexicon, lexiconManifest, removeLexicon } from "./store";
+import { explainError } from "../lib/userError";
 
 export async function runLexiconPackCommand(): Promise<void> {
   if (lexiconInstalled()) {
@@ -29,7 +30,7 @@ export async function runLexiconPackCommand(): Promise<void> {
     const n = await downloadLexicon();
     showAiToast(t("lexicon.installed", { count: n.toLocaleString() }), "info");
   } catch (e) {
-    showAiToast(t("lexicon.failed", { error: (e as Error).message }), "error");
+    showAiToast(t("lexicon.failed", { error: explainError(e) }), "error");
   }
 }
 

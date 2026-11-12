@@ -23,6 +23,7 @@ import { clock, sentencesOf, timeFragment, type Sentence } from "../ai/dictation
 import { assignSpeakers, renameSpeaker, speakersIn, type Turn } from "./diarize";
 import { DIARIZATION_MODELS, diarizationAvailable, diarize, type DiarizationModels, type ModelFile, type OrtLike } from "./diarizeModels";
 import { log } from "../lib/logger";
+import { explainError } from "../lib/userError";
 
 export const TURNS_FENCE = "json lumen-speaker-turns";
 
@@ -190,7 +191,7 @@ export async function transcribeMeeting(file?: File | null, models: DiarizationM
       } catch (e) {
         if (isAbort(e)) throw e;
         log.warn("diarization", e);
-        showAiToast(t("speakers.failed", { error: (e as Error).message }), "error");
+        showAiToast(t("speakers.failed", { error: explainError(e) }), "error");
       }
     }
     let spoken: SpokenSentence[] = turns.length ? assignSpeakers(sentences, turns) : sentences.map((s) => ({ ...s, speaker: null }));
@@ -214,7 +215,7 @@ export async function transcribeMeeting(file?: File | null, models: DiarizationM
       void offerIcs(res);
     } catch (e) {
       if (isAbort(e)) throw e;
-      showAiToast(t("speakers.notesFailed", { error: (e as Error).message }), "error");
+      showAiToast(t("speakers.notesFailed", { error: explainError(e) }), "error");
     }
     if (turns.length) body += `\n\n${turnsBlock(turns)}`;
     tf.insert(`\n\n${body}\n`);
@@ -224,7 +225,7 @@ export async function transcribeMeeting(file?: File | null, models: DiarizationM
     showAiToast(t("speakers.done", { n: spoken.length, speakers: new Set(spoken.map((s) => s.speaker).filter(Boolean)).size, seconds }), "success");
   } catch (e) {
     if (isAbort(e)) return;
-    showAiToast(t("transcribeFile.failed", { error: (e as Error).message }), "error");
+    showAiToast(t("transcribeFile.failed", { error: explainError(e) }), "error");
   } finally {
     op.end();
   }

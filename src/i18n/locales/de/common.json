@@ -500,6 +500,7 @@
   "embed.notFound": "{target} kann nicht eingebettet werden: nicht im Arbeitsbereich gefunden.",
   "embed.openPdf": "PDF öffnen",
   "embed.sectionNotFound": "{section} kann nicht eingebettet werden: In {note} gibt es keinen solchen Abschnitt.",
+  "empty.learnHow": "Zeig mir, wie",
   "epub.chapterOf": "Kapitel {n} von {total}",
   "epub.close": "Schließen",
   "epub.external": "Dieser Link führt aus dem Buch hinaus und wird hier nicht geöffnet: {url}",

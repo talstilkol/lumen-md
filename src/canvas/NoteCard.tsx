@@ -141,6 +141,7 @@ export function NoteCard({ path, active, onOpen }: { path: string; active: boole
             setEditing(true);
           }}
         >
+          {/* empty-action: the card itself — a click opens the note for editing */}
           {md === undefined ? "…" : noteExcerpt(md, 12, 900) || t("canvas.card.empty")}
           {active && md != null && <div className="lumen-note-card-hint">{t("canvas.card.editHint")}</div>}
         </div>

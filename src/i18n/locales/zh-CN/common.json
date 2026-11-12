@@ -500,6 +500,7 @@
   "embed.notFound": "无法嵌入 {target}：在工作区中未找到。",
   "embed.openPdf": "打开 PDF",
   "embed.sectionNotFound": "无法嵌入 {section}：{note} 中没有这个章节。",
+  "empty.learnHow": "告诉我怎么做",
   "epub.chapterOf": "第 {n} 章，共 {total} 章",
   "epub.close": "关闭",
   "epub.external": "此链接指向书外，不会在这里打开：{url}",

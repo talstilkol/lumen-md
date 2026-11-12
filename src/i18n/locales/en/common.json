@@ -74,6 +74,7 @@
   "dictation.error": "Dictation stopped: {error}",
   "dictation.localOnlyNoBrowser": "Local-only mode: the browser's speech service is not used. Download the on-device model to dictate.",
   "embed.openPdf": "Open PDF",
+  "empty.learnHow": "Show me how",
   "error.aiNoKey": "No AI key is set, so nothing was sent. Your text is unchanged; add a key in AI settings, or use a local model.",
   "error.aiPolicy": "Your AI privacy setting blocked this request, so nothing left the device. Allow the provider in AI settings, or use a local model.",
   "error.badFile": "The file could not be read: it is damaged or in another format. Nothing was changed; check the file and try again.",

@@ -14,6 +14,7 @@ import { Plane, X } from "lucide-react";
 import { t, getLocale } from "../i18n";
 import { airplaneModeOn, airplaneSince, disableAirplaneMode, egressAttempts, enableAirplaneMode, subscribeEgress, type EgressAttempt } from "./airplane";
 import { buildCertificate, reachedNetwork, sealCertificate } from "./airplaneCertificate";
+import { HelpButton } from "../ui/HelpButton";
 
 const muted: React.CSSProperties = { fontSize: 12, color: "hsl(var(--fg-muted))" };
 const ghost: React.CSSProperties = { padding: "5px 12px", fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer" };
@@ -83,6 +84,7 @@ export function NetworkMonitor({ onClose }: { onClose: () => void }) {
         <header style={{ padding: "14px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <Plane size={18} style={{ color: "hsl(var(--accent))" }} />
           <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600, flex: 1 }}>{t("airplane.title")}</h2>
+          <HelpButton topic="ai/airplane-mode#the-monitor-and-the-certificate" />
           <button ref={closeRef} type="button" style={ghost} onClick={onClose} aria-label={t("airplane.close")}>
             <X size={16} />
           </button>
@@ -126,6 +128,7 @@ export function NetworkMonitor({ onClose }: { onClose: () => void }) {
           {on && <p style={{ ...muted, margin: 0 }}>{t("airplane.certificate.unsigned")}</p>}
           <div style={{ overflow: "auto", border: "1px solid hsl(var(--border))", borderRadius: 6, minHeight: 120 }}>
             {shown.length === 0 ? (
+              // empty-action: the airplane-mode on / off buttons above
               <p style={{ ...muted, padding: 12, margin: 0 }}>{t("airplane.empty")}</p>
             ) : (
               <table style={{ borderCollapse: "collapse", width: "100%", fontSize: 12 }} data-testid="airplane-list">

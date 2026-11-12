@@ -24,6 +24,8 @@ import { toast } from "../store/useToastStore";
 import "./PromptDialog.css";
 import { tapReady } from "../mobile/nativeActions";
 import { log } from "../lib/logger";
+import { HelpButton } from "./HelpButton";
+import { explainError } from "../lib/userError";
 
 interface Props {
   open: boolean;
@@ -134,7 +136,7 @@ export function QuickCapture({ open, onClose, voice: voiceOnOpen }: Props) {
       toast.success(t("capture.saved", { path: (await captureMod()).INBOX_PATH }));
       onClose();
     } catch (e) {
-      toast.error(t("capture.failed", { error: e instanceof Error ? e.message : String(e) }));
+      toast.error(t("capture.failed", { error: explainError(e) }));
     } finally {
       setBusy(false);
     }
@@ -156,6 +158,7 @@ export function QuickCapture({ open, onClose, voice: voiceOnOpen }: Props) {
           <Inbox size={16} aria-hidden="true" />
           {t("capture.title")}
         </div>
+        <HelpButton topic="workspace/quick-capture" />
         <textarea
           ref={ref}
           className="prompt-input"
@@ -214,7 +217,7 @@ export function QuickCapture({ open, onClose, voice: voiceOnOpen }: Props) {
               onClose();
               void captureMod()
                 .then((m) => m.openInbox())
-                .catch((e: unknown) => toast.error(t("capture.failed", { error: e instanceof Error ? e.message : String(e) })));
+                .catch((e: unknown) => toast.error(t("capture.failed", { error: explainError(e) })));
             }}
           >
             {t("capture.openInbox")}

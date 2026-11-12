@@ -9,6 +9,7 @@
 import { cmdIcons, type Command } from "../../ui/CommandPalette";
 import { t } from "../../i18n";
 import { showAiToast } from "../../ui/AiToast";
+import { explainError } from "../../lib/userError";
 
 const actions = () => import("../../ui/vaultFolderActions");
 
@@ -139,7 +140,7 @@ export function buildDesktopUpdateCommands(): Command[] {
           const ok = await uiConfirm({ title: t("update.available.title", { version: r.version }), message: r.notes || t("update.available.body", { current: r.current, version: r.version }), okLabel: t("update.install") });
           if (ok) await installUpdate();
         } catch (e) {
-          showAiToast(t("update.failed", { message: (e as Error).message }), "error");
+          showAiToast(t("update.failed", { message: explainError(e) }), "error");
         }
       },
     },

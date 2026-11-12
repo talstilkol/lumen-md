@@ -5,6 +5,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 // @ts-expect-error — plain .mjs scripts without type declarations
 import { scan as scanRaw } from "../../scripts/check-raw-errors.mjs";
@@ -85,8 +86,19 @@ describe("destructive actions (scripts/check-destructive)", () => {
       "ai.styleProfile": "confirm/confirm",
       "git.pull": "confirm/confirm",
       "spell.hebrewDictionary": "confirm/confirm",
-      "tools.vaultDoctorFix": "confirm/confirm",
     });
+  });
+
+  it("a command whose body is loaded on use declares it, and the loaded body asks (tools.vaultDoctorFix)", () => {
+    // The vault commands load their bodies lazily (vaultDoctorActions.ts), so the scanner sees the
+    // destructive write there, not inside the command: check the declaration and the body together.
+    const commands = readFileSync(resolve(ROOT, "src/commands/domains/vault.ts"), "utf8");
+    expect(commands).toMatch(/id: "tools\.vaultDoctorFix",\s*destructive: "confirm",[\s\S]*?vaultDoctorActions"\)\)\.fixDoctorLinks\(\)/);
+    const body = readFileSync(resolve(ROOT, "src/commands/domains/vaultDoctorActions.ts"), "utf8");
+    const fix = body.slice(body.indexOf("export async function fixDoctorLinks"));
+    const ask = fix.indexOf("uiConfirm(");
+    expect(ask).toBeGreaterThan(0);
+    expect(ask).toBeLessThan(fix.indexOf("writeWorkspaceFile"));
   });
 
   it("every destructive action in src/ asks first or can be undone (the CI gate)", () => {

@@ -99,6 +99,7 @@ export default function PresenterView() {
         {nxt && <SlideHtml slide={nxt} />}
       </div>
       <div className="lumen-presenter-notes" dir="auto" data-testid="presenter-notes">
+        {/* empty-allow: the speaker-notes field of the current slide, shown while presenting */}
         {cur?.notes || t("slides.noNotes")}
       </div>
     </div>

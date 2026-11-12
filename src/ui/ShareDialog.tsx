@@ -33,6 +33,9 @@ import {
 import { RoomTokenError } from "../collab/roomToken";
 import { getLocale, t } from "../i18n";
 import "../collab/sharingStrings";
+import { HelpButton } from "./HelpButton";
+import { explainError } from "../lib/userError";
+import { EmptyState, learnHow } from "./EmptyState";
 
 type Tab = "share" | "shared";
 
@@ -49,10 +52,11 @@ const field: React.CSSProperties = { padding: "5px 8px", border: "1px solid hsl(
 const row: React.CSSProperties = { display: "flex", alignItems: "center", gap: 8, padding: "6px 8px", border: "1px solid hsl(var(--border))", borderRadius: 6, fontSize: 12, flexWrap: "wrap" };
 const list: React.CSSProperties = { listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 4 };
 
-function errorText(e: unknown): string {
+/** A sharing failure in words (never the error's own text: explainError). */
+function describeShareError(e: unknown): string {
   const reason = e instanceof RoomTokenError ? e.reason : "";
   const known = ["owner-required", "unauthorized", "unreachable", "timeout", "revoked", "expired", "no-share"];
-  return known.includes(reason) ? t(`share.error.${reason}`) : String((e as Error)?.message ?? e);
+  return known.includes(reason) ? t(`share.error.${reason}`) : explainError(e, "share");
 }
 
 const when = (ms: number | null) => (ms === null ? "—" : new Date(ms).toLocaleString(getLocale()));
@@ -72,7 +76,7 @@ function ShareTab({ session, server }: { session: CollabSession | null; server: 
     try {
       setShares(await listShares(server, room, collabAccessKey()));
     } catch (e) {
-      setError(errorText(e));
+      setError(describeShareError(e));
       setShares([]);
     }
   }, [server, room]);
@@ -100,7 +104,7 @@ function ShareTab({ session, server }: { session: CollabSession | null; server: 
       navigator.clipboard?.writeText(l).catch(() => undefined);
       await refresh();
     } catch (err) {
-      setError(errorText(err));
+      setError(describeShareError(err));
     } finally {
       setBusy(false);
     }
@@ -112,7 +116,7 @@ function ShareTab({ session, server }: { session: CollabSession | null; server: 
       await revokeShare(server!, session!.roomName, id, collabAccessKey());
       await refresh();
     } catch (err) {
-      setError(errorText(err));
+      setError(describeShareError(err));
     }
   }
 
@@ -173,6 +177,7 @@ function ShareTab({ session, server }: { session: CollabSession | null; server: 
         {shares === null ? (
           <p style={muted}>{t("share.loading")}</p>
         ) : shares.length === 0 ? (
+          // empty-action: the "create a link" form above
           <p style={muted}>{t("share.none")}</p>
         ) : (
           <ul style={list} data-testid="share-list">
@@ -205,7 +210,7 @@ function SharedTab({ server }: { server: string | null }) {
       live = false;
     };
   }, [server]);
-  if (items.length === 0) return <p style={muted}>{t("share.withMe.none")}</p>;
+  if (items.length === 0) return <EmptyState style={{ padding: 0 }} message={t("share.withMe.none")} action={learnHow("collab/sharing#shared-with-me")} />;
   return (
     <ul style={list} data-testid="shared-with-me">
       {items.map((x) => (
@@ -264,6 +269,7 @@ export function ShareDialog({ session, initialTab = "share", onClose, serverUrl 
           <h2 id="share-dialog-title" style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
             {t("share.title")}
           </h2>
+          <HelpButton topic="collab/sharing" />
           <button type="button" onClick={onClose} aria-label={t("share.close")} style={{ marginInlineStart: "auto", border: "none", background: "transparent", color: "inherit", cursor: "pointer" }}>
             <X size={14} />
           </button>

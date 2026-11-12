@@ -129,6 +129,7 @@ export function SyncActivity({ session }: { session: SyncSession }) {
       )}
       {s.files && <Attention files={s.files} />}
       {shown.length === 0 ? (
+        // empty-action: "Sync now" in this panel, above
         <div style={muted}>{t("e2ee.activity.empty")}</div>
       ) : (
         <ul style={list} data-testid="sync-activity" aria-live="polite">

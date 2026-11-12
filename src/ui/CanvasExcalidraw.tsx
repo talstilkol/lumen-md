@@ -53,6 +53,8 @@ import type { ExportKind } from "./canvasExport";
 // The Mermaid → diagram dialog loads when it opens (its own strings and the converter come with it).
 const DiagramDialog = lazy(() => import("../canvas/DiagramDialog").then((m) => ({ default: m.DiagramDialog })));
 import "./canvasExcalidrawStrings";
+import { HelpButton } from "./HelpButton";
+import { explainError } from "../lib/userError";
 
 // Fonts (and anything else Excalidraw fetches by relative path) come from
 // this origin. Without it Excalidraw falls back to esm.sh.
@@ -163,7 +165,7 @@ export function CanvasExcalidraw({ open, onClose }: Props) {
     const load = async () => {
       const file = store ? await readExcalidrawCanvas(store, canvasName).catch((err) => {
         log.warn("excalidraw read failed", err);
-        showAiToast(t("canvas.openFailed", { name: canvasName, error: (err as Error).message }), "error");
+        showAiToast(t("canvas.openFailed", { name: canvasName, error: explainError(err) }), "error");
         return null;
       }) : null;
       if (cancelled) return;
@@ -189,7 +191,7 @@ export function CanvasExcalidraw({ open, onClose }: Props) {
       savedStamp.current = stamp;
       void writeExcalidrawCanvas(store, name, sceneToFile(cur.elements, cur.appState, cur.files)).catch((err) => {
         log.warn("excalidraw save failed", err);
-        showAiToast(t("canvas.saveFailed", { name, error: (err as Error).message }), "error");
+        showAiToast(t("canvas.saveFailed", { name, error: explainError(err) }), "error");
       });
     }, 500);
     saverRef.current = saver;
@@ -215,7 +217,7 @@ export function CanvasExcalidraw({ open, onClose }: Props) {
       } catch (err) {
         // Already there: open it rather than replace it.
         if (!(err instanceof CanvasFileExistsError)) {
-          showAiToast(t("canvas.saveFailed", { name: trimmed, error: (err as Error).message }), "error");
+          showAiToast(t("canvas.saveFailed", { name: trimmed, error: explainError(err) }), "error");
           return;
         }
       }
@@ -245,7 +247,7 @@ export function CanvasExcalidraw({ open, onClose }: Props) {
           return;
         }
         log.error("canvas convert failed", err);
-        showAiToast(t("canvas.legacy.convertFailed", { error: (err as Error).message }), "error");
+        showAiToast(t("canvas.legacy.convertFailed", { error: explainError(err) }), "error");
       } finally {
         setConverting(null);
       }
@@ -276,7 +278,7 @@ export function CanvasExcalidraw({ open, onClose }: Props) {
         showAiToast(t("canvas.jsonCanvas.imported", { name, count: String(nodes) }), "success");
         if (result.warnings.length) log.warn("JSON Canvas import warnings", result.warnings);
       } catch (err) {
-        showAiToast(t("canvas.jsonCanvas.failed", { error: (err as Error).message }), "error");
+        showAiToast(t("canvas.jsonCanvas.failed", { error: explainError(err) }), "error");
       }
     },
     [store, refreshLists],
@@ -293,7 +295,7 @@ export function CanvasExcalidraw({ open, onClose }: Props) {
       showAiToast(t("canvas.jsonCanvas.exported", { name: scene.name, nodes: String(canvas.nodes.length), edges: String(canvas.edges.length) }), "success");
       if (warnings.length) showAiToast(t("canvas.jsonCanvas.skipped", { count: String(warnings.length) }), "info");
     } catch (err) {
-      showAiToast(t("canvas.saveFailed", { name: `${scene.name}${JSON_CANVAS_EXT}`, error: (err as Error).message }), "error");
+      showAiToast(t("canvas.saveFailed", { name: `${scene.name}${JSON_CANVAS_EXT}`, error: explainError(err) }), "error");
     }
   }, [store, scene]);
 
@@ -372,7 +374,7 @@ export function CanvasExcalidraw({ open, onClose }: Props) {
       if (n === 0) showAiToast(t("canvas.present.noFrames"), "info");
     } catch (err) {
       log.warn("canvas presentation failed", err);
-      showAiToast(t("canvas.present.failed", { error: (err as Error).message }), "error");
+      showAiToast(t("canvas.present.failed", { error: explainError(err) }), "error");
     }
   }, [scene]);
 
@@ -390,7 +392,7 @@ export function CanvasExcalidraw({ open, onClose }: Props) {
         else download(res);
       } catch (err) {
         log.warn("canvas export failed", err);
-        showAiToast(t("canvas.export.failed", { error: (err as Error).message }), "error");
+        showAiToast(t("canvas.export.failed", { error: explainError(err) }), "error");
       } finally {
         setExporting(null);
       }
@@ -409,6 +411,7 @@ export function CanvasExcalidraw({ open, onClose }: Props) {
     <div role="dialog" aria-modal="true" aria-label={t("canvas.dialogLabel")} className="lumen-canvas" data-testid="canvas">
       <div className="lumen-canvas-head">
         <strong style={{ fontSize: 13 }}>{t("canvas.title")}</strong>
+        <HelpButton topic="workspace/canvas" />
         <select value={canvasName} onChange={(e) => setCanvasName(e.target.value)} aria-label={t("canvas.picker")} className="lumen-canvas-pick">
           {!lists.saved.includes(canvasName) && <option value={canvasName}>{canvasName}</option>}
           {lists.saved.map((n) => (

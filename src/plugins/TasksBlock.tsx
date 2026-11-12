@@ -9,6 +9,7 @@ import { parseQuery, type QueryResult } from "../tasks/taskQuery";
 import { todayIso, toggleTaskInVault } from "../tasks/toggle";
 import type { Task } from "../tasks/taskParser";
 import "./tasksBlockStrings";
+import { explainError } from "../lib/userError";
 
 export default function TasksBlock({ source }: { source: string }) {
   const [result, setResult] = useState<QueryResult | null>(null);
@@ -22,7 +23,7 @@ export default function TasksBlock({ source }: { source: string }) {
     void import("../storage/workspaceIndex")
       .then((m) => m.queryVaultTasks(source))
       .then((r) => alive && (setResult(r), setError(null)))
-      .catch((e) => alive && setError((e as Error).message));
+      .catch((e) => alive && setError(explainError(e)));
     return () => {
       alive = false;
     };

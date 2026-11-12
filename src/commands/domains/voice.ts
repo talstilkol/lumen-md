@@ -5,6 +5,7 @@ import { t, getLocale } from "../../i18n";
 import { uiConfirm, uiPrompt, uiSelect } from "../../ui/PromptDialog";
 import { getAiPolicy } from "../../ai/policy";
 import { showAiToast } from "../../ui/AiToast";
+import { explainError } from "../../lib/userError";
 
 /** Read the note aloud (text to speech). */
 export function buildReadAloudCommands(): Command[] {
@@ -167,7 +168,7 @@ export function buildVoiceCommands(): Command[] {
           showAiToast(t("meeting.inserted", { n: res.notes.tasks.length }), "success");
           void offerIcs(res);
         } catch (e) {
-          if (!isAbort(e)) showAiToast((e as Error).message, "error");
+          if (!isAbort(e)) showAiToast(explainError(e), "error");
         } finally {
           op.end();
         }
