@@ -38,6 +38,8 @@ export interface ManifestEntry {
   deleted?: true;
   /** The device that wrote this version (a random id, not a name). */
   by: string;
+  /** The key epoch the blob was sealed in (plan W1.7); absent: 0. */
+  e?: number;
 }
 
 export interface Manifest {
@@ -112,7 +114,8 @@ function isEntry(e: unknown): e is ManifestEntry {
     typeof o.hash === "string" &&
     Number.isSafeInteger(o.size) &&
     typeof o.by === "string" &&
-    (o.deleted === undefined || o.deleted === true)
+    (o.deleted === undefined || o.deleted === true) &&
+    (o.e === undefined || (Number.isSafeInteger(o.e) && (o.e as number) >= 1))
   );
 }
 
