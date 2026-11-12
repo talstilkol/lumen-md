@@ -97,6 +97,7 @@ export default defineConfig({
             { label: "EPUB reader and reading mode", translations: { he: "קורא EPUB ומצב קריאה" }, slug: "workspace/epub-reader" },
             { label: "All highlights", translations: { he: "כל ההדגשות" }, slug: "workspace/highlights" },
             { label: "Daily review (spaced repetition)", translations: { he: "חזרה יומית" }, slug: "workspace/review" },
+            { label: "Daily notes and the Hebrew calendar", slug: "workspace/hebrew-calendar", translations: { he: "פתק יומי ולוח עברי" } },
           ],
         },
         {

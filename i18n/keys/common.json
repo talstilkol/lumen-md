@@ -539,9 +539,26 @@
       "vars": []
     },
     {
+      "key": "calendar.holidays",
+      "en": "Holidays this month",
+      "vars": []
+    },
+    {
+      "key": "calendar.israel",
+      "en": "Holidays and Torah portions as in Israel (unchecked: the diaspora)",
+      "vars": []
+    },
+    {
       "key": "calendar.next",
       "en": "Next month",
       "vars": []
+    },
+    {
+      "key": "calendar.parasha",
+      "en": "Torah portion: {name}",
+      "vars": [
+        "name"
+      ]
     },
     {
       "key": "calendar.pattern",
@@ -575,12 +592,14 @@
     },
     {
       "key": "calendar.templateHint",
-      "en": "Placeholders: {{date}}, {{hebrewDate}}, {{weekday}}, {{title}}",
+      "en": "Placeholders: {{date}}, {{hebrewDate}}, {{weekday}}, {{title}}, {{holiday}}, {{parasha}}",
       "vars": [
         "date",
         "hebrewDate",
         "weekday",
-        "title"
+        "title",
+        "holiday",
+        "parasha"
       ]
     },
     {
