@@ -11,8 +11,10 @@
  * our own TypeScript from W1.7, checked against the RFC vectors), with the
  * most memory this device opens within a second (../../../sync/e2ee/
  * kdfCalibrate.ts). Vaults made before it, with PBKDF2-SHA256 (≥ 600,000
- * iterations), still open, and move to Argon2id the first time the right
- * passphrase unlocks them: only the header is rewritten.
+ * iterations), still open and stay on PBKDF2 until the user moves them
+ * (`rewrapPassphrase` with `kdf: "argon2id"`, review 12.11): an older Lumen
+ * that opens the same folder can't read an Argon2id header, so the move is
+ * never made behind the user's back. Only the header is rewritten.
  * A new passphrase re-wraps the data key; no file is re-encrypted.
  *
  * From the data key, HKDF-SHA256 (salt = vault id) makes one key per job:
@@ -259,14 +261,17 @@ export async function unlockRestHeader(header: RestHeader, secret: string, opts:
 export async function rewrapPassphrase(
   header: RestHeader,
   secret: string,
-  opts: { recovery?: boolean; newPassphrase: string } & CreateOptions,
+  opts: { recovery?: boolean; newPassphrase: string; kdf?: "argon2id" } & CreateOptions,
 ): Promise<{ header: RestHeader; keys: RestKeys }> {
   // Check the header is genuine before writing a new one from it.
   await unlockRestHeader(header, secret, { recovery: opts.recovery });
   const dataKey = await dataKeyOf(header, secret, !!opts.recovery);
-  // Always the current KDF (Argon2id, plan W4.20): a re-wrap is also how an
-  // old PBKDF2 vault moves to it. PBKDF2 only when a test asks for it.
-  return headerFor(dataKey, header.vaultId, opts.newPassphrase, header.target, { pbkdf2Iterations: opts.pbkdf2Iterations, argon2: opts.argon2 });
+  // The vault keeps its KDF family (review 12.11): a PBKDF2 vault moves to
+  // Argon2id only when asked (`kdf: "argon2id"`), since older builds can't
+  // open an Argon2id header. Argon2id vaults get this device's cost.
+  const cur = header.passphrase.kdf;
+  const iterations = opts.pbkdf2Iterations ?? (opts.kdf !== "argon2id" && cur.alg === "pbkdf2-sha256" ? cur.iterations : undefined);
+  return headerFor(dataKey, header.vaultId, opts.newPassphrase, header.target, { pbkdf2Iterations: iterations, argon2: opts.argon2 });
 }
 
 /** The header pointing the other way (turning encryption off, or back on). */

@@ -41,9 +41,12 @@ results of batch AI jobs; what the learning critic remembers. A vault export
   46 MiB in one pass, or 19 MiB in two on a slower device (OWASP's
   options). It runs in Lumen's own code, with no extra library, and is
   checked against the RFC's test vectors. A vault made before this, with
-  PBKDF2-SHA256 (600,000 iterations), still opens, and moves to Argon2id
-  the next time you unlock it. Only the small header file is rewritten.
-  An older Lumen refuses an Argon2id vault rather than misreading it.
+  PBKDF2-SHA256 (600,000 iterations), still opens and stays on PBKDF2,
+  including when you change the passphrase. To move it, choose **Switch to
+  Argon2id** under Vault encryption. Update Lumen on every device that
+  opens the vault first: an older Lumen refuses an Argon2id vault (it
+  doesn't misread it), so Lumen never switches on its own. Only the small
+  header file is rewritten.
 - **Recovery key** — 30 characters (150 random bits), shown **once**, when
   you turn encryption on, before anything is encrypted. Lumen goes on only
   after you confirm you saved it. The vault's key is derived from it, so it

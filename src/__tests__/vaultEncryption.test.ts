@@ -198,27 +198,43 @@ describe("turning it on, locking, recovering, turning it off", () => {
     expect(read).toBe(NOTES["Projects/Home.md"]);
   });
 
-  it("a vault made with PBKDF2 moves to Argon2id at the next unlock: only the header changes, and it opens again (plan W4.20)", async () => {
+  it("a vault made with PBKDF2 stays on it at unlock and at a passphrase change; it moves to Argon2id only when asked (review 12.11)", async () => {
     await enable();
-    expect((await readHeader(inner, { minPbkdf2Iterations: ITER }))?.passphrase.kdf.alg).toBe("pbkdf2-sha256");
+    const alg = async () => (await readHeader(inner, { minPbkdf2Iterations: ITER, minArgon2CostKiB: 8 }))?.passphrase.kdf.alg;
+    expect(await alg()).toBe("pbkdf2-sha256");
+    const headerBytes = await raw(inner, HEADER_PATH);
+    // An older Lumen on another device opens this folder too: unlocking never moves it.
+    session.lock();
+    await session.unlock(PASS);
+    expect(await raw(inner, HEADER_PATH)).toEqual(headerBytes);
+    expect(session.kdfUpgradeAvailable()).toBe(true);
+    // Neither does a passphrase change.
+    await session.changePassphrase(PASS, "another long passphrase");
+    expect(await alg()).toBe("pbkdf2-sha256");
+    await session.changePassphrase("another long passphrase", PASS);
+    // The explicit switch: a wrong passphrase writes nothing…
+    await expect(session.upgradeKdf("wrong passphrase!!")).rejects.toBeInstanceOf(WrongPassphraseError);
+    expect(await alg()).toBe("pbkdf2-sha256");
+    // …the right one re-wraps the header (both copies), and no other file changes.
     const files = await allPaths(inner);
     const before = new Map<string, Uint8Array>();
     for (const p of files) if (p !== HEADER_PATH && p !== HEADER_BACKUP_PATH) before.set(p, await raw(inner, p));
-    session.lock();
-    await expect(session.unlock("wrong passphrase!!")).rejects.toBeInstanceOf(WrongPassphraseError);
-    expect((await readHeader(inner, { minPbkdf2Iterations: ITER }))?.passphrase.kdf.alg).toBe("pbkdf2-sha256");
-    await session.unlock(PASS);
+    await session.upgradeKdf(PASS);
     const policy = { minPbkdf2Iterations: ITER, minArgon2CostKiB: 8 };
     for (const path of [HEADER_PATH, HEADER_BACKUP_PATH]) {
       const h = decodeRestHeader(await raw(inner, path), policy);
       expect(h.passphrase.kdf).toMatchObject({ alg: "argon2id", ...ARGON2_TEST });
     }
+    expect(session.kdfUpgradeAvailable()).toBe(false);
     for (const [p, bytes] of before) expect(await raw(inner, p), p).toEqual(bytes);
     expect(await readWorkspaceFile("Projects/Home.md")).toBe(NOTES["Projects/Home.md"]);
     session.lock();
     await expect(session.unlock("wrong passphrase!!")).rejects.toBeInstanceOf(WrongPassphraseError);
     await session.unlock(PASS);
     expect(await readWorkspaceFile("Daily/2026-11-09.md")).toBe(NOTES["Daily/2026-11-09.md"]);
+    // An Argon2id vault keeps Argon2id at a passphrase change.
+    await session.changePassphrase(PASS, "another long passphrase");
+    expect(await alg()).toBe("argon2id");
   });
 
   it("a new vault gets Argon2id when no PBKDF2 is asked for (plan W4.20)", async () => {

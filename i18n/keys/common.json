@@ -3975,6 +3975,21 @@
       "vars": []
     },
     {
+      "key": "vaultEnc.kdfUpgrade",
+      "en": "Switch to Argon2id",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.kdfUpgradeNote",
+      "en": "This vault's passphrase is protected with PBKDF2. Argon2id makes guessing it much slower. Update Lumen first on every device that opens this vault: an older Lumen can't open it after the switch. Only the header changes; no note is rewritten.",
+      "vars": []
+    },
+    {
+      "key": "vaultEnc.kdfUpgraded",
+      "en": "The passphrase is now protected with Argon2id.",
+      "vars": []
+    },
+    {
       "key": "vaultEnc.lockNow",
       "en": "Lock now",
       "vars": []

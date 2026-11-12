@@ -131,28 +131,37 @@ export function encryptionStatus(): { locked: boolean; headerError: string | nul
   return { locked: !s?.keys, headerError: s?.headerError?.message ?? null, target: s?.header?.target ?? null };
 }
 
-/**
- * Unlock with the passphrase. Throws `WrongPassphraseError`, and then nothing
- * is written. A vault made before plan W4.20 (PBKDF2) moves to Argon2id
- * here: the right passphrase re-wraps the data key in a new header (both
- * copies, each checked), no file changes. If that write fails, the vault
- * stays on PBKDF2 and opens all the same.
- */
+/** Unlock with the passphrase. Throws `WrongPassphraseError`. Nothing is written either way. */
 export async function unlock(passphrase: string): Promise<void> {
   const s = await active();
   if (!s.header) throw s.headerError ?? new Error("The encryption header is missing");
-  const keys = await unlockRestHeader(s.header, passphrase);
-  if (s.header.passphrase.kdf.alg === "pbkdf2-sha256") {
-    try {
-      const next = await rewrapPassphrase(s.header, passphrase, { newPassphrase: passphrase, argon2: await argon2Cost() });
-      await writeHeader(s.inner, next.header, policy);
-      open(s, next.keys, next.header);
-      return;
-    } catch (err) {
-      log.warn("vault encryption: moving the header to Argon2id failed; it stays on PBKDF2", err);
-    }
-  }
-  open(s, keys, s.header);
+  open(s, await unlockRestHeader(s.header, passphrase), s.header);
+}
+
+/**
+ * The unlocked vault's passphrase is derived with PBKDF2 (a vault made
+ * before plan W4.20) and can move to Argon2id: the dialog offers it.
+ */
+export function kdfUpgradeAvailable(): boolean {
+  const s = sessions.get(unwrapVaultBackend(getVaultBackend()));
+  return !!s?.keys && s.header?.passphrase.kdf.alg === "pbkdf2-sha256";
+}
+
+/**
+ * Move a PBKDF2 vault to Argon2id, at the user's request only (review
+ * 12.11). An unlock never does it: a Lumen from before plan W4.20 that opens
+ * the same folder (a desktop app not yet updated, say) can't read an
+ * Argon2id header, and nothing records which builds read a vault folder,
+ * so only the user can tell when every device is ready. The data key is
+ * re-wrapped in a new header (both copies, each checked); no file changes.
+ */
+export async function upgradeKdf(passphrase: string): Promise<void> {
+  const s = await active();
+  if (!s.header) throw new Error("The encryption header is missing");
+  if (s.header.passphrase.kdf.alg !== "pbkdf2-sha256") return;
+  const next = await rewrapPassphrase(s.header, passphrase, { newPassphrase: passphrase, kdf: "argon2id", argon2: await argon2Cost() });
+  await writeHeader(s.inner, next.header, policy);
+  open(s, next.keys, next.header);
 }
 
 /**
