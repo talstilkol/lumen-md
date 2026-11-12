@@ -35,6 +35,7 @@
     "e2e:gate": "node scripts/e2e-gate.mjs",
     "e2e:flake": "node scripts/e2e-flake.mjs",
     "nightly": "node scripts/nightly/run.mjs",
+    "live:meta": "node scripts/live-meta.mjs",
     "preview:visual": "node scripts/preview-visual.mjs",
     "test:visual": "playwright test -c playwright.visual.config.ts",
     "test:visual:update": "playwright test -c playwright.visual.config.ts --update-snapshots",
