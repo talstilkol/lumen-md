@@ -55,10 +55,10 @@ export default defineConfig({
           label: "Workspace",
           items: [
             { label: "Database views", slug: "workspace/database-views" },
+            { label: "Search (BM25 + Smart)", translations: { he: "חיפוש (BM25 + חכם)" }, slug: "workspace/search" },
             { label: "Database formulas + map", slug: "workspace/database-formulas", translations: { he: "נוסחאות במסד נתונים ותצוגת מפה" } },
             { label: "Fill properties with AI", translations: { he: "מילוי מאפיינים ב-AI" }, slug: "workspace/ai-autofill" },
             { label: "Obsidian Bases (.base files)", slug: "workspace/obsidian-bases", translations: { he: "Obsidian Bases (קובצי ‎.base)" } },
-            { label: "Search (BM25 + Smart)", slug: "workspace/search" },
             { label: "Search operators and #tags", slug: "workspace/search-operators", translations: { he: "אופרטורי חיפוש ו-#תגיות" } },
             { label: "Vault Doctor", slug: "workspace/doctor" },
             { label: "Quick capture (inbox)", slug: "workspace/quick-capture", translations: { he: "לכידה מהירה (תיבת דואר נכנס)" } },
