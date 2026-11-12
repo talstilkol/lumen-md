@@ -207,12 +207,12 @@ export default defineConfig({
             { label: "Git sync", slug: "sync/git", translations: { he: "סנכרון Git" } },
             { label: "Sync providers (WebDAV, S3, Dropbox, Drive)", slug: "sync/cloud", translations: { he: "ספקי סנכרון (WebDAV, ‏S3, ‏Dropbox, ‏Drive)" } },
             { label: "Encrypted sync (E2EE)", slug: "sync/e2ee", translations: { he: "סנכרון מוצפן (E2EE)" } },
+            { label: "Keys, rotation and revocation", slug: "sync/e2ee-keys", translations: { he: "מפתחות, החלפה וביטול" } },
             { label: "Read-mode publishing", slug: "sync/publish", translations: { he: "פרסום לקריאה" } },
             { label: "Publish to your own site", slug: "sync/own-site", translations: { he: "פרסום לאתר משלך" } },
             { label: "Automatic merging", slug: "sync/merge" },
             { label: "Sync status, selective sync, time left", slug: "sync/status", translations: { he: "מצב הסנכרון וסנכרון סלקטיבי" } },
             { label: "Sync on the local network", slug: "sync/lan", translations: { he: "סנכרון ברשת המקומית" } },
-            { label: "Keys, rotation and revocation", slug: "sync/e2ee-keys", translations: { he: "מפתחות, החלפה וביטול" } },
           ],
         },
         {

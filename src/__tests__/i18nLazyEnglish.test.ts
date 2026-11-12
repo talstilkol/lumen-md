@@ -36,7 +36,7 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
     users: ["sync/e2ee/conflict.ts", "sync/e2ee/ui/FreshnessBanner.tsx", "sync/e2ee/ui/LanPairing.tsx", "sync/e2ee/ui/PassphraseForm.tsx", "sync/e2ee/ui/SyncActivity.tsx", "sync/e2ee/ui/SyncPanel.tsx", "sync/e2ee/ui/SyncRulesForm.tsx", "sync/e2ee/ui/treeBadges.ts"],
     prefixes: ["e2ee."],
     within: "sync/e2ee/",
-    shared: ["sync/e2ee/age.ts", "sync/e2ee/bytes.ts", "sync/e2ee/kdf.ts", "sync/e2ee/primitives/argon2.ts", "sync/e2ee/primitives/blake2b.ts", "sync/e2ee/primitives/chacha20poly1305.ts", "sync/e2ee/primitives/scrypt.ts"],
+    shared: ["sync/e2ee/age.ts", "sync/e2ee/bytes.ts", "sync/e2ee/kdf.ts", "sync/e2ee/kdfCalibrate.ts", "sync/e2ee/primitives/argon2.ts", "sync/e2ee/primitives/blake2b.ts", "sync/e2ee/primitives/chacha20poly1305.ts", "sync/e2ee/primitives/scrypt.ts"],
   },
   "feedback.json": { module: "feedback/strings.ts", users: ["ui/FeedbackDialog.tsx"], prefixes: ["feedback."] },
   // The encrypted vault's dialogs (plan 11.4), opened with a dynamic import.
