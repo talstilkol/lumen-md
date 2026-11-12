@@ -160,6 +160,7 @@ export default defineConfig({
             { label: "MCP and the lumen CLI", translations: { he: "MCP וה-CLI של lumen" }, slug: "ai/mcp" },
             { label: "Local agents: tools, critic, suggestions", slug: "ai/local-agents", translations: { he: "סוכנים מקומיים: כלים, מבקר, הצעות" } },
             { label: "Agent eval: 14 agents, HTML report", slug: "ai/agent-eval", translations: { he: "הערכת סוכנים: 14 סוכנים, דוח HTML" } },
+            { label: "Real models day: every eval in one command", slug: "ai/models-day", translations: { he: "יום מודלים אמיתיים: כל ההערכות בפקודה אחת" } },
             { label: "Personal data before the cloud", slug: "ai/pii-redaction", translations: { he: "מידע אישי לפני הענן" } },
             { label: "Grounded summaries", translations: { he: "סיכומים מעוגנים" }, slug: "ai/summarize" },
             { label: "Measuring the local models", slug: "ai/model-bench", translations: { he: "מדידת המודלים המקומיים" } },
