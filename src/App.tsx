@@ -40,7 +40,6 @@ const MarkdownTableEditor = lazy(() => import("./ui/MarkdownTableEditor").then(m
 // PDF reader (plan 4.14): pdf.js and the reader load only when a PDF is opened.
 const PdfReader = lazy(() => import("./pdf/PdfReader").then(m => ({ default: m.PdfReaderOverlay })));
 const EpubReader = lazy(() => import("./epub/EpubReader").then(m => ({ default: m.EpubReaderOverlay })));
-import { htmlToMarkdown } from "./storage/fileFormats";
 import { wirePluginAPI, registerPlugin, unregisterPlugin, wordCountPlugin } from "./plugins/pluginSystem";
 import { CommandPalette } from "./ui/CommandPalette";
 import { AiFab } from "./ui/AiFab";
@@ -99,7 +98,6 @@ import {
   writeWorkspaceBlob,
   writeWorkspaceFile,
 } from "./storage/workspace";
-import { welcomeDoc } from "./welcomeDoc";
 import { ErrorBoundary } from "./ui/ErrorBoundary";
 const KeyboardShortcuts = lazy(() => import("./ui/KeyboardShortcuts").then(m => ({ default: m.KeyboardShortcuts })));
 import { handleTrashUndoKey } from "./ui/trashUndoShortcut";
@@ -160,16 +158,6 @@ export default function App() {
   const mode = useAppStore((s) => s.mode);
   const theme = useAppStore((s) => s.theme);
   const showOutline = useAppStore((s) => s.showOutline);
-  const outlineSheet = useAppStore((s) => s.outlineSheet);
-  // Phone width (plan 10.2.4): the outline shows as a bottom sheet, opened on demand.
-  const [narrow, setNarrow] = useState(isNarrowScreen);
-  useEffect(() => {
-    if (typeof window.matchMedia !== "function") return;
-    const mq = window.matchMedia("(max-width: 760px)");
-    const on = () => setNarrow(mq.matches);
-    mq.addEventListener?.("change", on);
-    return () => mq.removeEventListener?.("change", on);
-  }, []);
   const outlineSheet = useAppStore((s) => s.outlineSheet);
   // Phone width (plan 10.2.4): the outline shows as a bottom sheet, opened on demand.
   const [narrow, setNarrow] = useState(isNarrowScreen);
@@ -344,7 +332,8 @@ export default function App() {
     // e2e/ocr-cer.spec.ts measures its CER on the production build); the
     // module loads on the first call only.
     (window as unknown as { __lumen?: unknown }).__lumen = {
-      htmlToMarkdown,
+      // Async: the converters load on first use (startup budget); page.evaluate awaits it.
+      htmlToMarkdown: (html: string) => import("./storage/fileFormats").then((m) => m.htmlToMarkdown(html)),
       // `agentReview` (plan 5.11 e2e) is added by agents/reviewBridge once it
       // loads, in development and tests only (plan W1.31).
       // The vault index, for e2e/perf-vault.spec.ts (a lazy chunk).
@@ -461,8 +450,13 @@ export default function App() {
   // Seed the Welcome document on first launch
   useEffect(() => {
     if (!doc.content) {
-      // Use openTab so the Welcome doc lands on the tab strip too.
-      openTabAction({ name: "Welcome.md", content: welcomeDoc(), workspaceName: null });
+      // Use openTab so the Welcome doc lands on the tab strip too. Its text
+      // (English and Hebrew) loads on demand, off the startup bundle; a note
+      // opened in the meantime wins.
+      void import("./welcomeDoc").then((m) => {
+        if (useAppStore.getState().doc.content) return;
+        openTabAction({ name: "Welcome.md", content: m.welcomeDoc(), workspaceName: null });
+      });
     } else if (openTabs.length === 0) {
       // Existing session before tabs existed — backfill a tab for the
       // currently active doc so the strip shows up immediately.
@@ -1213,9 +1207,10 @@ export default function App() {
         onFocusMode={() => setFocusMode(true)}
         onShortcuts={() => setShortcutsOpen(true)}
         onTour={() => setTourOpen(true)}
-        onShowWelcome={() => {
+        onShowWelcome={async () => {
           // Restore the bundled welcome document — handy when the user wants
           // to revisit the feature tour without scrubbing recents for it.
+          const { welcomeDoc } = await import("./welcomeDoc");
           setDoc({
             name: "Welcome.md",
             content: welcomeDoc(),
@@ -1249,7 +1244,7 @@ export default function App() {
             placeholder: t("toast.pasteText.placeholder"),
           });
           if (!text) return;
-          const md = text.trim().startsWith("<") ? htmlToMarkdown(text) : text;
+          const md = text.trim().startsWith("<") ? (await import("./storage/fileFormats")).htmlToMarkdown(text) : text;
           setContent(doc.content + "\n\n" + md);
           showAiToast(`✅ ${t("toast.pasteText.success")}`, "info");
         }}

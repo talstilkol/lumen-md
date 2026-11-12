@@ -40,8 +40,8 @@ function readDocsBase(): string {
 /** Absolute URL of a docs topic, optionally with an in-page anchor; `he` for the Hebrew page. */
 export function docsUrl(topic: DocsTopic, anchor?: string, locale?: "he"): string {
   const url = `${readDocsBase()}/${locale ? `${locale}/` : ""}${DOCS_TOPICS[topic]}/`;
-/** The docs site's base URL (VITE_DOCS_URL, else the default). */
-export const docsBaseUrl = (): string => readDocsBase();
-
   return anchor ? `${url}#${anchor}` : url;
 }
+
+/** The docs site's base URL (VITE_DOCS_URL, else the default). */
+export const docsBaseUrl = (): string => readDocsBase();
