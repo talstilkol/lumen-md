@@ -1516,6 +1516,7 @@
   "whatsNew.none": "אין הערות שחרור לגרסה הזאת.",
   "whatsNew.title": "מה חדש ב־Lumen {version}",
   "whatsNew.untranslated": "ההערות האלה עוד לא תורגמו, ולכן הן באנגלית.",
+  "widgets.captured": "נוסף לתיבת הלכידה מ-Siri / קיצורים",
   "wikiComplete.aliasOf": "כינוי של {name}",
   "wikiComplete.create": "יצירת פתק «{name}»",
   "wikiComplete.createFailed": "לא ניתן ליצור את הפתק «{name}»: {error}",

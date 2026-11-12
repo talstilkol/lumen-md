@@ -1516,6 +1516,7 @@
   "whatsNew.none": "لا توجد ملاحظات إصدار لهذه النسخة.",
   "whatsNew.title": "ما الجديد في Lumen {version}",
   "whatsNew.untranslated": "لم تُترجم هذه الملاحظات بعد، لذا هي بالإنجليزية.",
+  "widgets.captured": "أُضيف إلى صندوق الوارد من Siri / الاختصارات",
   "wikiComplete.aliasOf": "اسم بديل لـ {name}",
   "wikiComplete.create": "إنشاء ملاحظة «{name}»",
   "wikiComplete.createFailed": "تعذّر إنشاء الملاحظة «{name}»: {error}",

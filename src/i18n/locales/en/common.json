@@ -816,6 +816,7 @@
   "usability.taskRunning": "Task {n} running",
   "usability.title": "Usability study",
   "usability.toSus": "Tasks done: SUS questionnaire",
+  "widgets.captured": "Added to the inbox from Siri / Shortcuts",
   "wikiComplete.aliasOf": "alias of {name}",
   "wikiComplete.create": "Create note «{name}»",
   "wikiComplete.createFailed": "Couldn't create the note «{name}»: {error}",

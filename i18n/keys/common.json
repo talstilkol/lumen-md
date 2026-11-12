@@ -8450,6 +8450,11 @@
       "vars": []
     },
     {
+      "key": "widgets.captured",
+      "en": "Added to the inbox from Siri / Shortcuts",
+      "vars": []
+    },
+    {
       "key": "wikiComplete.aliasOf",
       "en": "alias of {name}",
       "vars": [

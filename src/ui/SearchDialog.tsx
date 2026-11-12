@@ -34,9 +34,11 @@ interface Props {
   onClose: () => void;
   /** Called with the workspace path + content when a file is selected. */
   onOpenFile: (path: string, content: string) => void;
+  /** Plan W3.4: a query to start with (a widget, Siri or Spotlight search). */
+  initialQuery?: string;
 }
 
-export function SearchDialog({ open, onClose, onOpenFile }: Props) {
+export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: Props) {
   const [mode, setMode] = useState<"search" | "smart" | "ai" | "images">("search");
   // Smart (embedding) search is a Pro capability when billing is enforced;
   // self-hosted setups always have it.
@@ -65,10 +67,10 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
 
   useEffect(() => {
     if (open) {
-      // A saved search opens the dialog on its query (plan W2.12).
+      // A saved search opens the dialog on its query (plan W2.12); a widget or shortcut passes its own (W3.4).
       const preset = (window as unknown as { __lumenSearchQuery?: string }).__lumenSearchQuery;
       (window as unknown as { __lumenSearchQuery?: string }).__lumenSearchQuery = undefined;
-      setQuery(preset ?? "");
+      setQuery(preset ?? initialQuery);
       // Honour an optional `lumen-search-mode` event that lets command
       // palette entries open the dialog already on a specific tab.
       const requested = (window as unknown as { __lumenSearchMode?: "search" | "smart" | "ai" | "images" })

@@ -1516,6 +1516,7 @@
   "whatsNew.none": "Il n’y a pas de notes de version pour cette version.",
   "whatsNew.title": "Nouveautés de Lumen {version}",
   "whatsNew.untranslated": "Ces notes ne sont pas encore traduites ; elles sont donc en anglais.",
+  "widgets.captured": "Ajouté à la boîte de réception depuis Siri / Raccourcis",
   "wikiComplete.aliasOf": "alias de {name}",
   "wikiComplete.create": "Créer la note « {name} »",
   "wikiComplete.createFailed": "Impossible de créer la note « {name} » : {error}",

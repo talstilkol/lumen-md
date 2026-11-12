@@ -1516,6 +1516,7 @@
   "whatsNew.none": "Для этой версии нет заметок о выпуске.",
   "whatsNew.title": "Что нового в Lumen {version}",
   "whatsNew.untranslated": "Эти заметки ещё не переведены, поэтому они на английском.",
+  "widgets.captured": "Добавлено во входящие из Siri / Быстрых команд",
   "wikiComplete.aliasOf": "псевдоним для {name}",
   "wikiComplete.create": "Создать заметку «{name}»",
   "wikiComplete.createFailed": "Не удалось создать заметку «{name}»: {error}",

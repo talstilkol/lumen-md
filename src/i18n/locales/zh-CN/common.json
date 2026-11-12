@@ -1516,6 +1516,7 @@
   "whatsNew.none": "此版本没有发布说明。",
   "whatsNew.title": "Lumen {version} 新功能",
   "whatsNew.untranslated": "这些说明尚未翻译，因此以英文显示。",
+  "widgets.captured": "已从 Siri / 快捷指令添加到收件箱",
   "wikiComplete.aliasOf": "{name} 的别名",
   "wikiComplete.create": "新建笔记“{name}”",
   "wikiComplete.createFailed": "无法新建笔记“{name}”：{error}",

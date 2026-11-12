@@ -75,6 +75,7 @@ export default defineConfig({
             { label: "Obsidian syntax", slug: "editor/obsidian-syntax", translations: { he: "תחביר Obsidian" } },
             { label: "Citations with [@key]", slug: "editor/citations", translations: { he: "ציטוטים עם ‎[@key]" } },
             { label: "Pasting from Word and the web", slug: "editor/paste", translations: { he: "הדבקה מ-Word ומהרשת" } },
+            { label: "Widgets, Shortcuts and Siri", slug: "editor/widgets", translations: { he: "ווידג'טים, קיצורים ו-Siri" } },
           ],
         },
         {
