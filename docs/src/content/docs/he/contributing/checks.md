@@ -12,7 +12,7 @@ description: השערים של Lumen רצים בבניית Vercel של כל ענ
 
 | בנייה | מה רץ, לפי הסדר |
 |---|---|
-| ‏Preview (רכבות `verify/…`) | build, תקציב החבילה, vitest, ‏e2e (smoke ב-chromium וב-firefox), ‏`i18n:check`, ‏hygiene, ‏`docs:sync`, שער הרישיונות |
+| ‏Preview (רכבות `verify/…`) | build, תקציב החבילה, סריקת הסודות של `dist/`, vitest, ‏e2e (smoke ב-chromium וב-firefox), ‏`i18n:check`, ‏hygiene, ‏`docs:sync`, שער הרישיונות |
 | ‏Production (`main`) | build, תקציב החבילה — כמו קודם |
 
 השערים נעצרים בכישלון הראשון. יומן הבנייה מסתיים בשער שנכשל ובאלה שעברו
@@ -50,7 +50,8 @@ node scripts/vercel-build.mjs --dry-run    # print the gates, run nothing
 מחוץ ל-Vercel (בלי `VERCEL_ENV`) הסקריפט מריץ את סט ה-preview, כך שהרצה
 מקומית היא מה שהבנייה של הענף תעשה. כל שער הוא גם סקריפט npm בפני עצמו:
 ‏`npm run build`, ‏`npm run budget`, ‏`npm test`, ‏`npm run e2e:gate` (אחרי `VITE_E2E=1 npm run build`: הבדיקות מגיעות למודולים של האפליקציה דרך `window.__lumenTest`, שקיים רק בבנייה כזו), ‏`npm run i18n:check`,
-‏`npm run hygiene`, ‏`npm run docs:sync`, ‏`npm run licenses`.
+‏`npm run hygiene`, ‏`npm run docs:sync`, ‏`npm run licenses`, ‏`npm run secrets:dist` (ראו
+[סריקת סודות בבנייה](/he/security/secret-scan/)).
 
 ## מה לא רץ בבנייה
 
