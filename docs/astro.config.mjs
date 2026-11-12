@@ -83,6 +83,7 @@ export default defineConfig({
             { label: "Hebrew pasted from a PDF", slug: "editor/pdf-paste", translations: { he: "הדבקת עברית מ-PDF" } },
             { label: "Legal citations (Israel)", slug: "editor/legal-citations", translations: { he: "אזכורים משפטיים (ישראל)" } },
             { label: "Screen readers, automated", translations: { he: "קוראי מסך, אוטומטית" }, slug: "editor/screen-reader-automation" },
+            { label: "Testing with screen reader users", translations: { he: "בדיקה עם משתמשי קוראי מסך" }, slug: "editor/screen-reader-testers" },
           ],
         },
         {
