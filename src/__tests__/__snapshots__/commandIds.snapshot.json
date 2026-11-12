@@ -1343,6 +1343,20 @@
       "group": "Insert",
       "hint": "Every note that cites the verse under the cursor",
       "icon": "Link"
+    },
+    {
+      "id": "lexicon.pack",
+      "label": "Hebrew dictionary and synonyms (download / remove)",
+      "group": "Tools",
+      "hint": "Definitions, synonyms and niqqud from Hebrew Wiktionary, on this device; right-click a Hebrew word to use them",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "lexicon.lookup",
+      "label": "Look up the Hebrew word at the cursor",
+      "group": "Tools",
+      "hint": "Synonyms, definition and niqqud of the word, from the offline dictionary",
+      "icon": "Sparkles"
     }
   ],
   "full": [
@@ -2824,6 +2838,20 @@
       "group": "Insert",
       "hint": "Every note that cites the verse under the cursor",
       "icon": "Link"
+    },
+    {
+      "id": "lexicon.pack",
+      "label": "Hebrew dictionary and synonyms (download / remove)",
+      "group": "Tools",
+      "hint": "Definitions, synonyms and niqqud from Hebrew Wiktionary, on this device; right-click a Hebrew word to use them",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "lexicon.lookup",
+      "label": "Look up the Hebrew word at the cursor",
+      "group": "Tools",
+      "hint": "Synonyms, definition and niqqud of the word, from the offline dictionary",
+      "icon": "Sparkles"
     }
   ],
   "autoSaveOn": [
@@ -3026,6 +3054,8 @@
     "app.featureFlags",
     "sources.insertSefaria",
     "sources.saveOffline",
-    "sources.notesOnVerse"
+    "sources.notesOnVerse",
+    "lexicon.pack",
+    "lexicon.lookup"
   ]
 }

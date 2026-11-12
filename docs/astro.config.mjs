@@ -62,6 +62,7 @@ export default defineConfig({
             { label: "Touch and phones", slug: "editor/touch", translations: { he: "מגע וטלפונים" } },
             { label: "Writing tools", slug: "editor/tools", translations: { he: "כלי כתיבה" } },
             { label: "Hebrew and right-to-left", slug: "editor/hebrew", translations: { he: "עברית ומימין לשמאל" } },
+            { label: "Hebrew dictionary and synonyms", slug: "editor/hebrew-dictionary", translations: { he: "מילון עברי ומילים נרדפות" } },
             { label: "Settings", translations: { he: "הגדרות" }, slug: "editor/settings" },
             { label: "Hebrew and right-to-left", translations: { he: "עברית וכתיבה מימין לשמאל" }, slug: "editor/hebrew-rtl" },
             { label: "Accessibility statement", slug: "editor/accessibility-statement", translations: { he: "הצהרת נגישות" } },

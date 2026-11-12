@@ -19,6 +19,7 @@
     "secrets:self-test": "node scripts/secrets-scan-live.mjs --self-test",
     "i18n:review": "node scripts/i18n-review.mjs",
     "licenses": "node scripts/licenses.mjs",
+    "lexicon:build": "node scripts/build-hebrew-lexicon.mjs",
     "golden": "node scripts/golden.mjs",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
