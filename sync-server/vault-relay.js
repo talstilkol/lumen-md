@@ -12,6 +12,24 @@
  *   PUT    /v1/vault/o/<name>      If-Match / If-None-Match: *   (412 lost race)
  *   DELETE /v1/vault/o/<name>
  *
+ * Drop boxes (plan W5.21, the private classroom): a space that many people
+ * may add to but nobody but its owner may change. The token says which:
+ *
+ *   Bearer <t>     a private space (sync): full rights, as above.
+ *   Bearer a.<d>   the drop box <d>, append-only: list, read, and create a
+ *                  new object (PUT with If-None-Match: *). Overwriting (403
+ *                  without If-None-Match, 412 on an existing name) and
+ *                  DELETE (403) are refused, so one link holder can neither
+ *                  replace nor remove what another one put there.
+ *   Bearer o.<o>   the owner of drop box d = base64url(HMAC-SHA256(o,
+ *                  "lumen-vault-relay v1|drop")): full rights on it. A
+ *                  holder of d cannot work out o.
+ *
+ * The relay keeps neither d nor o, only the SHA-256 that names the space.
+ * A drop box also has a smaller object cap (VAULT_RELAY_MAX_DROP_OBJECT,
+ * 2 MiB) and a cap on its number of objects (VAULT_RELAY_MAX_DROP_COUNT,
+ * 2,000), so a link holder cannot fill it for everyone else.
+ *
  * Limits (env or options): VAULT_RELAY_MAX_OBJECT (25 MiB), VAULT_RELAY_MAX_SPACE
  * (1 GiB), VAULT_RELAY_RATE (600 requests per minute per address),
  * VAULT_RELAY_RETENTION_DAYS (180: a space nobody read or wrote that long is
@@ -69,7 +87,8 @@ const http = require("http");
 
 const PREFIX = "/v1/vault/o/";
 const NAME = /^[A-Za-z0-9_.-]{1,64}$/;
-const TOKEN = /^[A-Za-z0-9_-]{32,128}$/;
+const TOKEN = /^(?:([ao])\.)?([A-Za-z0-9_-]{32,128})$/;
+const DROP_LABEL = "lumen-vault-relay v1|drop";
 
 /** What the disk holds for an object of n bytes: whole 4 KiB blocks, at least one. */
 const BLOCK = 4096;
@@ -77,6 +96,20 @@ const charge = (n) => Math.max(1, Math.ceil(n / BLOCK)) * BLOCK;
 
 const sha256 = (b) => crypto.createHash("sha256").update(b).digest("hex");
 const etagOf = (data) => `"${sha256(data).slice(0, 32)}"`;
+
+/** The drop box id that an owner token opens (the app derives the same with WebCrypto). */
+const dropIdOf = (ownerToken) => crypto.createHmac("sha256", ownerToken).update(DROP_LABEL).digest("base64url");
+
+/** Which space a bearer token names, and what it may do there; null for a malformed token. */
+function spaceOf(header) {
+  const auth = /^Bearer (\S+)$/.exec(header || "");
+  const m = auth && TOKEN.exec(auth[1]);
+  if (!m) return null;
+  const [, kind, token] = m;
+  if (!kind) return { id: sha256(`lumen-vault-relay v1|${token}`), append: false, drop: false };
+  const drop = kind === "a" ? token : dropIdOf(token);
+  return { id: sha256(`lumen-vault-relay v1|drop|${drop}`), append: kind === "a", drop: true };
+}
 
 function memoryStore() {
   const spaces = new Map();
@@ -361,6 +394,8 @@ function sketch(width = 1 << 16, depth = 4) {
 function createVaultRelay(opts = {}) {
   const env = process.env;
   const maxObject = num(opts.maxObjectBytes ?? env.VAULT_RELAY_MAX_OBJECT, 25 * 1024 * 1024);
+  const maxDropObject = num(opts.maxDropObjectBytes ?? env.VAULT_RELAY_MAX_DROP_OBJECT, 2 * 1024 * 1024);
+  const maxDropCount = num(opts.maxDropCount ?? env.VAULT_RELAY_MAX_DROP_COUNT, 2000);
   const maxSpace = num(opts.maxSpaceBytes ?? env.VAULT_RELAY_MAX_SPACE, 1024 * 1024 * 1024);
   const rate = num(opts.ratePerMinute ?? env.VAULT_RELAY_RATE, 600);
   const retentionDays = num(opts.retentionDays ?? env.VAULT_RELAY_RETENTION_DAYS, 180);
@@ -478,16 +513,15 @@ function createVaultRelay(opts = {}) {
     return new Promise((resolve, reject) => {
       const chunks = [];
       let n = 0;
+      const tooLarge = () => Object.assign(new Error("too large"), { status: 413 });
       req.on("data", (c) => {
         n += c.length;
-        if (n > limit) {
-          reject(Object.assign(new Error("too large"), { status: 413 }));
-          req.destroy();
-          return;
-        }
-        chunks.push(c);
+        // Past the limit the rest is read and dropped, so the client gets the 413 instead of a reset
+        // connection; past four times the limit the connection is cut.
+        if (n > 4 * limit) req.destroy();
+        else if (n <= limit) chunks.push(c);
       });
-      req.on("end", () => resolve(Buffer.concat(chunks)));
+      req.on("end", () => (n > limit ? reject(tooLarge()) : resolve(Buffer.concat(chunks))));
       req.on("error", reject);
     });
   }
@@ -503,22 +537,24 @@ function createVaultRelay(opts = {}) {
     const addr = addressId(req);
     const addr48 = prefixId(req);
     if (limited(req, addr)) return json(res, 429, { error: "slow down" });
-    const auth = /^Bearer (\S+)$/.exec(req.headers.authorization || "");
-    if (!auth || !TOKEN.test(auth[1])) return json(res, 401, { error: "token" });
-    const space = sha256(`lumen-vault-relay v1|${auth[1]}`);
+    const who = spaceOf(req.headers.authorization);
+    if (!who) return json(res, 401, { error: "token" });
+    const space = who.id;
     const name = decodeURIComponent(pathname.slice(PREFIX.length));
     if (name === "") {
       if (req.method !== "GET") return json(res, 405, { error: "method" });
-      await touchRead(space);
+      // Only the space's owner keeps it alive by reading (review 2): an append-only link holder does not.
+      if (!who.append) await touchRead(space);
       return json(res, 200, { names: await store.list(space) });
     }
     if (!NAME.test(name)) return json(res, 400, { error: "name" });
     if (req.method === "GET") {
       const o = await store.get(space, name);
-      if (o) await touchRead(space);
+      if (o && !who.append) await touchRead(space);
       return o ? send(res, 200, o.data, { "Content-Type": "application/octet-stream", ETag: o.etag }) : json(res, 404, { error: "none" });
     }
     if (req.method === "DELETE") {
+      if (who.append) return json(res, 403, { error: "append-only" });
       await exclusive(space, async () => {
         const old = await store.get(space, name);
         await store.delete(space, name);
@@ -527,8 +563,11 @@ function createVaultRelay(opts = {}) {
       return send(res, 204, "");
     }
     if (req.method !== "PUT") return json(res, 405, { error: "method" });
+    const createOnly = req.headers["if-none-match"] === "*";
+    // Refused before the body is read: an append-only token never replaces an object.
+    if (who.append && !createOnly) return json(res, 403, { error: "append-only" });
     // Read the body from the start: a listener attached after the awaits below could miss chunks.
-    const body = readBody(req, maxObject);
+    const body = readBody(req, who.drop ? Math.min(maxObject, maxDropObject) : maxObject);
     body.catch(() => undefined);
     // Opening a space: invite and proof of work (when the operator asks for them), and a daily count.
     // Every count is reserved in the same synchronous step as its check, before the next await,
@@ -573,7 +612,8 @@ function createVaultRelay(opts = {}) {
       verdict = await exclusive(space, async () => {
         const now = await store.get(space, name);
         const ifMatch = req.headers["if-match"];
-        if (req.headers["if-none-match"] === "*" && now) return [412, "exists"];
+        if (createOnly && now) return [412, "exists"];
+        if (who.drop && !now && (await store.list(space)).length >= maxDropCount) return [507, "drop box full"];
         if (ifMatch && (!now || now.etag !== ifMatch)) return [412, "changed"];
         const delta = cost - (now ? charge(now.data.length) : 0);
         if ((await store.bytes(space)) + delta > maxSpace) return [507, "space full"];
@@ -637,7 +677,7 @@ function createVaultRelay(opts = {}) {
   };
 }
 
-module.exports = { createVaultRelay, memoryStore, diskStore, powOk, zeroBits, addressKey, charge, MAX_POW_BITS };
+module.exports = { createVaultRelay, memoryStore, diskStore, dropIdOf, powOk, zeroBits, addressKey, charge, MAX_POW_BITS };
 
 if (require.main === module) {
   const relay = createVaultRelay();
