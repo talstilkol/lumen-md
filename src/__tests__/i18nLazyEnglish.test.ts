@@ -45,6 +45,8 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "webr.json": { module: "plugins/r/webrStrings.ts", users: ["plugins/LiveRBlock.tsx"], prefixes: ["block.liveR.install."] },
   // The content frame's click-to-load (plan W4.15): the raw-iframe gate and the embed block, both loaded lazily.
   "contentFrame.json": { module: "renderer/contentFrameStrings.ts", users: ["renderer/RemoteFrame.tsx", "plugins/EmbedBlock.tsx"], prefixes: ["remoteFrame.", "block.embed.notEmbeddable", "block.embed.gistDesktop"] },
+  // Reading aids (plan W5.6), a dialog opened with a dynamic import.
+  "readingAids.json": { module: "reading/readingAidsStrings.ts", users: ["ui/ReadingAids.tsx"], prefixes: ["readingAids."] },
 };
 
 function sources(dir: string): string[] {

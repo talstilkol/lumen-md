@@ -478,6 +478,9 @@ export default defineConfig({
           // Reading fonts (plan W3.5): downloaded only when the person picks
           // one in Reading options, then cached (runtime cache below).
           "fonts/reading/**",
+          // Reading fonts (plans W3.5, W5.6): downloaded only when the person
+          // picks one, then cached (runtime cache below).
+          "fonts/reading/**",
         ],
         runtimeCaching: [
           {
@@ -499,6 +502,13 @@ export default defineConfig({
           },
           {
             // Reading fonts (plan W3.5): same origin, fetched on first choice,
+            // then served from this cache — offline too.
+            urlPattern: ({ url }) => url.origin === self.location.origin && url.pathname.includes("/fonts/reading/"),
+            handler: "CacheFirst" as const,
+            options: { cacheName: "lumen-reading-fonts", cacheableResponse: { statuses: [200] } },
+          },
+          {
+            // Reading fonts (plans W3.5, W5.6): same origin, fetched on first choice,
             // then served from this cache — offline too.
             urlPattern: ({ url }) => url.origin === self.location.origin && url.pathname.includes("/fonts/reading/"),
             handler: "CacheFirst" as const,

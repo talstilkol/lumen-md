@@ -58,6 +58,7 @@ export default defineConfig({
             { label: "Hebrew grammar and style", slug: "editor/hebrew-grammar", translations: { he: "דקדוק וסגנון בעברית" } },
             { label: "Smart Insert", slug: "editor/smart-insert" },
             { label: "Accessibility", slug: "editor/accessibility", translations: { he: "נגישות" } },
+            { label: "Reading aids", slug: "editor/reading-aids", translations: { he: "עזרי קריאה" } },
             { label: "Touch and phones", slug: "editor/touch", translations: { he: "מגע וטלפונים" } },
             { label: "Writing tools", slug: "editor/tools", translations: { he: "כלי כתיבה" } },
             { label: "Hebrew and right-to-left", slug: "editor/hebrew", translations: { he: "עברית ומימין לשמאל" } },
