@@ -1,5 +1,7 @@
 // Must stay the first import: Trusted Types policies before any DOM sink.
 import "./lib/trustedTypesInit";
+// After a host move, before anything writes localStorage (plan W6.9; inert without VITE_MOVED_TO).
+import "./pwa/hostMoveBoot";
 import "./fonts";
 import React, { Suspense } from "react";
 import ReactDOM from "react-dom/client";
