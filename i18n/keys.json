@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-10T03:41:43.499Z",
+  "generated_at": "2026-11-12T12:41:13.708Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1586,
+  "count": 1590,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -8551,6 +8551,30 @@
       "key": "pluginTrust.rule.untrusted-signer",
       "en": "signed by an unknown key",
       "vars": []
+    },
+    {
+      "key": "pluginTrust.remove",
+      "en": "Remove",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.installedBadge",
+      "en": "Installed",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.removed",
+      "en": "“{name}” is removed, with the settings and data it kept.",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "pluginTrust.changed",
+      "en": "“{name}” was not installed: the code downloaded is not the code that was scanned.",
+      "vars": [
+        "name"
+      ]
     }
   ]
 }
