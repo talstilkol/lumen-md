@@ -10,7 +10,7 @@ import { t } from "../../../i18n";
 import "../strings";
 import { PassphraseForm } from "./PassphraseForm";
 import { FreshnessBanner } from "./FreshnessBanner";
-import { e2eeErrorText } from "./errorText";
+import { e2eeErrorText, e2eeResultNotices } from "./errorText";
 import { syncSession, type SyncSession } from "./session";
 import { ProviderAuthError, ProviderUnreachableError, ProviderUnsupportedError } from "../providers/http";
 import { defaultSettings, hasProviderSecret, legacyStore, oauthAvailable, PROVIDER_KINDS, providerCapabilities, providerHosts, SECRET_NAMES, type ProviderKind, type ProviderSettings } from "../providers";
@@ -296,6 +296,12 @@ function Unlocked({ session }: { session: SyncSession }) {
           {last.held.length > 0 && <> · {t("e2ee.sync.held", { n: last.held.length })}</>}
         </div>
       )}
+      {last &&
+        e2eeResultNotices(last).map((n) => (
+          <div key={n} role="alert" style={errorStyle} data-testid="sync-notice">
+            {n}
+          </div>
+        ))}
       {s.error && (
         <div role="alert" style={errorStyle}>
           {s.error}
