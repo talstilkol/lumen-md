@@ -100,6 +100,7 @@ export default defineConfig({
             { label: "Agent eval: 14 agents, HTML report", slug: "ai/agent-eval", translations: { he: "הערכת סוכנים: 14 סוכנים, דוח HTML" } },
             { label: "Real models day: every eval in one command", slug: "ai/models-day", translations: { he: "יום מודלים אמיתיים: כל ההערכות בפקודה אחת" } },
             { label: "Held-out sets: what the authors never see", slug: "ai/heldout", translations: { he: "סטים מוחזקים: מה שהכותבים לא רואים" } },
+            { label: "Models day on a free cloud GPU", slug: "ai/models-cloud", translations: { he: "יום מודלים על GPU חינמי בענן" } },
             { label: "Personal data before the cloud", slug: "ai/pii-redaction", translations: { he: "מידע אישי לפני הענן" } },
             { label: "Grounded summaries", translations: { he: "סיכומים מעוגנים" }, slug: "ai/summarize" },
             { label: "Search reranking, measured", translations: { he: "דירוג מחדש בחיפוש, במדידה" }, slug: "ai/reranker" },
