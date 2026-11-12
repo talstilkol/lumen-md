@@ -11,7 +11,7 @@ description: השערים של Lumen רצים בבניית Vercel של כל ענ
 
 | בנייה | מה רץ, לפי הסדר |
 |---|---|
-| ‏Preview (כל ענף חוץ מ-`main`) | build, תקציב החבילה, vitest, ‏`i18n:check`, ‏hygiene, ‏`docs:sync`, שער הרישיונות |
+| ‏Preview (כל ענף חוץ מ-`main`) | build, תקציב החבילה, vitest, ‏e2e (smoke ב-chromium), ‏`i18n:check`, ‏hygiene, ‏`docs:sync`, שער הרישיונות |
 | ‏Production (`main`) | build, תקציב החבילה — כמו קודם |
 
 השערים נעצרים בכישלון הראשון. יומן הבנייה מסתיים בשער שנכשל ובאלה שעברו
@@ -31,7 +31,7 @@ node scripts/vercel-build.mjs --dry-run    # print the gates, run nothing
 
 מחוץ ל-Vercel (בלי `VERCEL_ENV`) הסקריפט מריץ את סט ה-preview, כך שהרצה
 מקומית היא מה שהבנייה של הענף תעשה. כל שער הוא גם סקריפט npm בפני עצמו:
-‏`npm run build`, ‏`npm run budget`, ‏`npm test`, ‏`npm run i18n:check`,
+‏`npm run build`, ‏`npm run budget`, ‏`npm test`, ‏`npm run e2e:gate` (אחרי בנייה), ‏`npm run i18n:check`,
 ‏`npm run hygiene`, ‏`npm run docs:sync`, ‏`npm run licenses`.
 
 ## מה לא רץ בבנייה
@@ -45,7 +45,7 @@ node scripts/vercel-build.mjs --dry-run    # print the gates, run nothing
 | 0.19 שער PR ‏(Danger.js, ‏size-limit) | תגובת Danger ו-size-limit בכל PR | חלק הגודל הוא שער **תקציב החבילה** (לכל chunk ראשי יש תקציב, `scripts/bundle-budget.mjs`); קריאת רשת שלא רשומה מכשילה את **vitest** ‏(`src/__tests__/cloudRoutes.test.ts` בודק כל נתיב ענן); הפרש הרישיונות הוא **שער הרישיונות**. לתגובה עצמה ב-PR עוד אין תחליף |
 | 13.3 בניות Android ו-iOS | בניות מובייל ב-CI | `npm run android:sync` / `npm run ios:sync` במחשב עם ה-SDK (‏iOS דורש macOS); חלק הרשת שהן כוללות הוא מה שבניית ה-preview בודקת |
 | 13.4 צינור שחרור | workflow של שחרור | סקריפט שחרור מקומי, ארטיפקטים חתומים ו-rollback במחשב של מפתח; השחרור של אפליקציית הרשת הוא בניית ה-production |
-| e2e של Playwright | משימות e2e בכל PR | `npx playwright test` ב-Vercel Sandbox ‏(W1.1) |
+| e2e של Playwright | משימות e2e בכל PR | שער **e2e** מריץ את `e2e/smoke.spec.ts` ב-chromium בתוך הבנייה (`scripts/e2e-gate.mjs`); כל החבילה, firefox ו-webkit רצים ב-`npx playwright test` במחשב של מפתח או ב-Sandbox ‏(W1.1): במכונת הבנייה פרויקט chromium לבדו לוקח כ-30 דקות, ו-WebKit צריך glibc חדש מזה שיש בתמונת הבנייה |
 
 ## כששער אדום
 

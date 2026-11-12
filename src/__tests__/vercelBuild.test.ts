@@ -7,13 +7,15 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 // @ts-expect-error — plain .mjs script without type declarations
 import { GATES, GATE_EXTRA, PREVIEW_GATES, PRODUCTION_GATES, gatesFor, vitestSummary } from "../../scripts/vercel-build.mjs";
+// @ts-expect-error — plain .mjs script without type declarations
+import { E2E_SPECS, boxMinutes } from "../../scripts/e2e-gate.mjs";
 
 const ROOT = resolve(__dirname, "..", "..");
 const pkg = JSON.parse(readFileSync(resolve(ROOT, "package.json"), "utf8")) as { scripts: Record<string, string> };
 
 describe("scripts/vercel-build.mjs", () => {
   it("runs every gate on a preview, and only build + budget in production", () => {
-    expect(gatesFor({ VERCEL_ENV: "preview" })).toEqual(["build", "budget", "vitest", "i18n:check", "hygiene", "docs:sync", "licenses"]);
+    expect(gatesFor({ VERCEL_ENV: "preview" })).toEqual(["build", "budget", "vitest", "e2e", "i18n:check", "hygiene", "docs:sync", "licenses"]);
     expect(gatesFor({ VERCEL_ENV: "production" })).toEqual(["build", "budget"]);
     // Not on Vercel: a local run reproduces a preview build.
     expect(gatesFor({})).toEqual(PREVIEW_GATES);
@@ -53,6 +55,19 @@ describe("scripts/vercel-build.mjs", () => {
   it("the upload keeps what the gates read: e2e specs, docs, native configs (W1.1)", () => {
     const ignore = readFileSync(resolve(ROOT, ".vercelignore"), "utf8").split("\n").map((l) => l.trim()).filter((l) => l && !l.startsWith("#"));
     for (const tree of ["e2e", "docs", "src-tauri", "ios", "android"]) expect(ignore, tree).not.toContain(tree);
+  });
+
+  it("the e2e gate's time box ends by minute 38 of the build (Vercel stops at 45)", () => {
+    const t0 = 1_000_000_000_000;
+    const min = 60_000;
+    expect(boxMinutes({}, t0)).toBe(8); // not inside vercel-build: the default box
+    expect(boxMinutes({ LUMEN_BUILD_STARTED: String(t0) }, t0 + 5 * min)).toBe(8);
+    expect(boxMinutes({ LUMEN_BUILD_STARTED: String(t0) }, t0 + 32.5 * min)).toBe(5);
+    expect(boxMinutes({ LUMEN_BUILD_STARTED: String(t0) }, t0 + 40 * min)).toBe(0);
+    expect(GATES.e2e).toEqual(["run", "-s", "e2e:gate"]);
+    // The whole chromium project took 29.7 min on the build machine; the gate runs the specs that fit.
+    expect(E2E_SPECS).toEqual(["e2e/smoke.spec.ts"]);
+    expect(PREVIEW_GATES.indexOf("e2e")).toBe(PREVIEW_GATES.indexOf("vitest") + 1);
   });
 
   it("deploy/vercel.base.json builds through it", () => {

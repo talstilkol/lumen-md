@@ -8,16 +8,18 @@
  * a failing test gets a red status. Production (main) builds as before:
  * the app and its bundle budget, nothing else.
  *
- *   VERCEL_ENV=preview      build, budget, vitest, i18n:check, hygiene,
- *                           docs:sync, the licence gate
+ *   VERCEL_ENV=preview      build, budget, vitest, e2e, i18n:check,
+ *                           hygiene, docs:sync, the licence gate
  *   VERCEL_ENV=production   build, budget
  *   (not on Vercel)         the preview set, so `node scripts/vercel-build.mjs`
  *                           reproduces a preview build locally
  *
  * The gates run in that order; after the build, a failing gate no longer
  * stops the later ones, and the run exits at the end (exit code
- * 1), with one line per gate and its time. Playwright e2e does not run
- * here: it needs browsers and runs in the Vercel Sandbox (W1.1).
+ * 1), with one line per gate and its time. The e2e gate
+ * (scripts/e2e-gate.mjs) runs Playwright on chromium against `vite preview`
+ * of this build: the specs that fit (the smoke spec today), time-boxed so
+ * the build ends inside Vercel's 45 minutes.
  *
  * Usage: node scripts/vercel-build.mjs [--production | --preview] [--dry-run]
  */
@@ -31,6 +33,7 @@ export const GATES = {
   build: ["run", "build"],
   budget: ["run", "budget"],
   vitest: ["run", "test"],
+  e2e: ["run", "-s", "e2e:gate"],
   "i18n:check": ["run", "-s", "i18n:check"],
   hygiene: ["run", "-s", "hygiene"],
   "docs:sync": ["run", "-s", "docs:sync"],
@@ -74,7 +77,7 @@ export function vitestSummary(report, { maxFiles = 80 } = {}) {
 }
 
 export const PRODUCTION_GATES = ["build", "budget"];
-export const PREVIEW_GATES = ["build", "budget", "vitest", "i18n:check", "hygiene", "docs:sync", "licenses"];
+export const PREVIEW_GATES = ["build", "budget", "vitest", "e2e", "i18n:check", "hygiene", "docs:sync", "licenses"];
 
 /** Which gates a build runs: production only for VERCEL_ENV=production (or --production). */
 export function gatesFor(env = process.env, argv = []) {
@@ -94,6 +97,8 @@ function main() {
   // After build, every gate runs even if an earlier one failed, so one
   // deployment reports every gate (the daily deployment quota is small).
   const failedGates = [];
+  // The e2e gate sizes its time box from the build's start (scripts/e2e-gate.mjs).
+  process.env.LUMEN_BUILD_STARTED ??= String(Date.now());
   for (const gate of gates) {
     const started = Date.now();
     console.log(`\n▶ ${gate}`);

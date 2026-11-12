@@ -12,7 +12,7 @@ No GitHub Actions minutes are used.
 
 | Build | What runs, in order |
 |---|---|
-| Preview (every branch except `main`) | build, bundle budget, vitest, `i18n:check`, hygiene, `docs:sync`, the licence gate |
+| Preview (every branch except `main`) | build, bundle budget, vitest, e2e (chromium smoke), `i18n:check`, hygiene, `docs:sync`, the licence gate |
 | Production (`main`) | build, bundle budget — as before |
 
 The gates stop at the first failure. The build log ends with the gate that
@@ -33,7 +33,7 @@ node scripts/vercel-build.mjs --dry-run    # print the gates, run nothing
 Outside Vercel (no `VERCEL_ENV`) the script runs the preview set, so a
 local run is what the branch's build will do. Each gate is also an npm
 script of its own: `npm run build`, `npm run budget`, `npm test`,
-`npm run i18n:check`, `npm run hygiene`, `npm run docs:sync`,
+`npm run e2e:gate` (after a build), `npm run i18n:check`, `npm run hygiene`, `npm run docs:sync`,
 `npm run licenses`.
 
 ## What does not run in the build
@@ -47,7 +47,7 @@ build. They run in a Vercel Sandbox (W1.1) or on a developer machine:
 | 0.19 PR gate (Danger.js, size-limit) | a Danger comment and size-limit on every PR | the size part is the **bundle budget** gate (every main chunk has a budget, `scripts/bundle-budget.mjs`); an unlisted network call fails **vitest** (`src/__tests__/cloudRoutes.test.ts` audits every cloud route); the licence diff is the **licence gate**. The PR comment itself has no replacement yet |
 | 13.3 Android and iOS builds | mobile builds in CI | `npm run android:sync` / `npm run ios:sync` on a machine with the SDKs (iOS needs macOS); the web part they ship is what the preview build checks |
 | 13.4 Release pipeline | a release workflow | a local release script, signed artifacts and rollback on a developer machine; the web app's release is the production build |
-| Playwright e2e | e2e jobs on every PR | `npx playwright test` in the Vercel Sandbox (W1.1) |
+| Playwright e2e | e2e jobs on every PR | the **e2e** gate runs `e2e/smoke.spec.ts` on chromium in the build (`scripts/e2e-gate.mjs`); the whole suite, firefox and webkit run with `npx playwright test` on a developer machine or in the Sandbox (W1.1): on the build machine the chromium project alone takes about 30 minutes, and WebKit needs a newer glibc than the build image has |
 
 ## When a gate is red
 
