@@ -412,6 +412,8 @@ const en: Strings = {
   "cmd.file.trash.hint": "Restore deleted notes (kept 30 days)",
   "cmd.note.today": "Today's note",
   "cmd.note.today.hint": "Open or create the daily note for today (journal/YYYY-MM-DD.md)",
+  "cmd.student.lecture": "Student mode: record a lecture",
+  "cmd.student.lecture.hint": "Record, tap “Important!”, and get a transcript with ▶ for each sentence, a summary and review cards — on this device.",
   "cmd.view.calendar": "Show / hide the calendar",
   "cmd.view.calendar.hint": "Month calendar of daily notes under the file tree",
   "calendar.title": "Calendar",

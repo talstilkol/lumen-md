@@ -570,6 +570,15 @@ export function useCommands({
         action: () => window.dispatchEvent(new CustomEvent("lumen-open-today")),
       },
       {
+        id: "student.lecture",
+        label: t("cmd.student.lecture"),
+        hint: t("cmd.student.lecture.hint"),
+        icon: cmdIcons.FileText,
+        group: t("group.file"),
+        // Plan W5.13: record a lecture, mark the important moments, get a transcript, a summary and review cards.
+        action: () => void import("../student/LectureRecorder").then((m) => m.openLectureRecorder()),
+      },
+      {
         id: "note.capture",
         label: t("capture.title"),
         shortcut: "⌥⌘N",

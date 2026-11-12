@@ -18,6 +18,7 @@ import type { Device, EmbedResult, TranscribeResult, WorkerIn, WorkerOut } from 
 import { detectHardware, vramBudgetMB, type Hardware } from "./modelManager";
 
 export type { TranscribeResult, EmbedResult };
+export type { TimedSegment } from "./transformers.worker";
 
 export const WHISPER_MODELS = {
   tiny: "onnx-community/whisper-tiny",
@@ -152,13 +153,13 @@ export function whisperModelFor(hw: Hardware, device: Device = hw.webgpu ? "webg
 }
 
 /** Transcribe 16 kHz mono PCM. `language` is an ISO-639-1 code ("he", "en"); omitted = auto-detect. */
-export async function transcribeAudio(samples: Float32Array, opts: { language?: string; model?: string; signal?: AbortSignal } = {}): Promise<TranscribeResult> {
+export async function transcribeAudio(samples: Float32Array, opts: { language?: string; model?: string; signal?: AbortSignal; timestamps?: boolean } = {}): Promise<TranscribeResult> {
   if (opts.signal?.aborted) throw new DOMException("aborted", "AbortError");
   const hw = await detectHardware();
   const device = await transformersDevice(hw);
   const model = opts.model ?? whisperModelFor(hw, device);
   // The buffer is transferred, not copied; callers must not reuse it.
-  return call<TranscribeResult>({ type: "transcribe", model, device, audio: samples, language: opts.language, task: "transcribe" }, [samples.buffer], opts.signal);
+  return call<TranscribeResult>({ type: "transcribe", model, device, audio: samples, language: opts.language, task: "transcribe", ...(opts.timestamps ? { timestamps: true } : {}) }, [samples.buffer], opts.signal);
 }
 
 /** Normalised embeddings (mean pooled) for `texts`. */
