@@ -81,7 +81,8 @@
     "check:test-surface": "node scripts/check-test-surface.mjs",
     "bench:sync": "tsx scripts/bench/sync-first.ts",
     "dictalm3": "node scripts/dictalm3.mjs",
-    "whisper:desktop": "node scripts/whisper-desktop.mjs"
+    "whisper:desktop": "node scripts/whisper-desktop.mjs",
+    "docs:search": "node scripts/docs-search.mjs"
   },
   "dependencies": {
     "@bjorn3/browser_wasi_shim": "0.4.2",
