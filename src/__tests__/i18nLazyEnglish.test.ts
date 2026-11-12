@@ -49,6 +49,8 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "readingAids.json": { module: "reading/readingAidsStrings.ts", users: ["ui/ReadingAids.tsx"], prefixes: ["readingAids."] },
   // The encrypted share link (plan W5.10): the dialog and the read-only viewer, both loaded with a dynamic import.
   "shareLink.json": { module: "share/shareStrings.ts", users: ["share/ShareLinkDialog.tsx", "share/SharedNoteView.tsx"], prefixes: ["shareLink."] },
+  // Airplane mode's network monitor (plan W5.9), opened with a dynamic import.
+  "airplane.json": { module: "privacy/airplaneStrings.ts", users: ["privacy/NetworkMonitor.tsx"], prefixes: ["airplane."] },
 };
 
 function sources(dir: string): string[] {

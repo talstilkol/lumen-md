@@ -170,6 +170,7 @@ export default defineConfig({
             { label: "Search reranking, measured", translations: { he: "דירוג מחדש בחיפוש, במדידה" }, slug: "ai/reranker" },
             { label: "Meeting notes", translations: { he: "סיכום פגישה" }, slug: "ai/meeting-notes" },
             { label: "Privacy and the AI policy", slug: "ai/privacy", translations: { he: "פרטיות ומדיניות ה-AI" } },
+            { label: "Airplane mode and the network monitor", slug: "ai/airplane-mode", translations: { he: "מצב טיסה וצג הרשת" } },
             { label: "Cloud only by choice", translations: { he: "ענן רק בבחירה" }, slug: "ai/cloud-routes" },
             { label: "DictaLM 3.0 (Hebrew)", translations: { he: "DictaLM 3.0 (עברית)" }, slug: "ai/dictalm3" },
             { label: "Meeting transcripts with speakers", translations: { he: "תמלול פגישה עם דוברים" }, slug: "ai/meeting-speakers" },

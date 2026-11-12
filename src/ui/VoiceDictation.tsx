@@ -28,6 +28,7 @@ import { aiOperation, isAbort } from "../ai/aiAbort";
 import { log } from "../lib/logger";
 import { getAiPolicy, onAiPolicyChange, thirdPartyServicesAllowed } from "../ai/policy";
 import { recordBrowserService, recordSpeechRecognition } from "../ai/privacyLedger";
+import { airplaneFlagOn } from "../privacy/airplaneBoot";
 import { chooseDictationEngine, webSpeechOptedIn, WEB_SPEECH_KEY, Segmenter, SerialQueue } from "../ai/dictation";
 import { explainError } from "../lib/userError";
 import { HelpButton } from "./HelpButton";
@@ -278,7 +279,8 @@ async function offerWebSpeech(Ctor: SpeechCtor | null, lang: string): Promise<vo
 
 /** Read the policy now (it may have changed in another tab): under local-only, log the block and say so. */
 function refuseUnderLocalOnly(): boolean {
-  if (getAiPolicy() !== "local-only") return false;
+  // Airplane mode (plan W5.9) stops the browser's cloud speech service too.
+  if (getAiPolicy() !== "local-only" && !airplaneFlagOn()) return false;
   recordSpeechRecognition("blocked");
   showAiToast(t("toast.dictate.localOnlyBlocked"), "error");
   return true;

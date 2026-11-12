@@ -1,5 +1,7 @@
 // Must stay the first import: Trusted Types policies before any DOM sink.
 import "./lib/trustedTypesInit";
+// Airplane mode (plan W5.9): when it is on, the browser refuses other sites from here on.
+import "./privacy/airplaneBoot";
 import "./fonts";
 import React, { Suspense } from "react";
 import ReactDOM from "react-dom/client";
@@ -35,6 +37,14 @@ installPrivacyLedger((entry) => {
   if (Date.now() - (lastBlockToast.get(entry.host) ?? 0) < 30_000) return;
   lastBlockToast.set(entry.host, Date.now());
   showAiToast(t("toast.privacyBlocked", { reason: entry.reason }), "error");
+});
+// Airplane mode's wrappers and live list of every network attempt (plan W5.9),
+// outside the ledger so they see each request first; off the startup bundle.
+void import("./privacy/airplane").then((m) => {
+  m.installAirplaneMode();
+  if (m.airplaneModeOn()) void import("./privacy/NetworkMonitor").then((u) => u.showAirplaneBadge());
+}).catch(() => {
+  /* why: chunk failed to load — the CSP half (airplaneBoot) still holds when the switch is on */
 });
 // Esc cancels any running AI request (T55).
 installAiEscape((n) => showAiToast(t("toast.aiCancelled", { count: n }), "info"));

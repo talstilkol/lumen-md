@@ -19,6 +19,8 @@
  * image node (src/editor/remoteImageView.ts).
  */
 
+import { airplaneFlagOn } from "../privacy/airplaneBoot";
+
 export const ALLOWED_HOSTS_KEY = "lumen.remoteImages.allowedHosts";
 
 const baseHref = (): string | undefined => (typeof location !== "undefined" ? location.href : undefined);
@@ -192,6 +194,8 @@ export function remoteImageAllowed(src: string | null | undefined): boolean {
 export function remoteContentAllowed(src: string | null | undefined): boolean {
   const host = remoteImageHost(src);
   if (!host) return true;
+  // Airplane mode (plan W5.9): nothing from another site, whatever was allowed.
+  if (airplaneFlagOn()) return false;
   return allowedHosts().has(host) || loadedOnce.has(src!.trim());
 }
 
