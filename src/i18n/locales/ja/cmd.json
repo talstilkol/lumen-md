@@ -275,6 +275,8 @@
   "cmd.related.toggle.hint": "書いている段落に近いノートと、リンクなしで言及しているノート",
   "cmd.research.ask": "🔎 リサーチ：質問する…",
   "cmd.research.ask.hint": "ウェブを検索し、出典を読み、各主張に引用付き脚注を付けたノートを作成",
+  "cmd.research.litReview": "保管庫の PDF から文献レビュー",
+  "cmd.research.litReview.hint": "すべての PDF の表：研究課題・方法・標本・結果・限界。各値にはそのページで確認した引用が付きます。この端末で動作します。",
   "cmd.research.settings": "🔎 リサーチ：設定…",
   "cmd.research.settings.hint": "Claude のウェブ検索、または自分のキーで Brave / Tavily",
   "cmd.research.usability": "ユーザビリティ調査（司会者）…",

@@ -275,6 +275,8 @@
   "cmd.related.toggle.hint": "פתקים קרובים לפסקה שאת/ה כותב/ת, ופתקים שהיא מזכירה בלי קישור",
   "cmd.research.ask": "🔎 מחקר: שאלה…",
   "cmd.research.ask.hint": "מחפש ברשת, קורא מקורות וכותב פתק עם הערת שוליים מצוטטת לכל טענה",
+  "cmd.research.litReview": "סקירת ספרות מקובצי ה־PDF בכספת",
+  "cmd.research.litReview.hint": "טבלה של כל קובצי ה־PDF: שאלה, שיטה, מדגם, ממצאים ומגבלות, כל ערך עם ציטוט שאומת בעמוד שלו. רץ במכשיר הזה.",
   "cmd.research.settings": "🔎 מחקר: הגדרות…",
   "cmd.research.settings.hint": "חיפוש הרשת של Claude, או Brave / Tavily עם מפתח משלך",
   "cmd.research.usability": "בדיקת שימושיות (למנחה)…",

@@ -274,6 +274,8 @@
   "cmd.related.toggle.hint": "Notes close to the paragraph you are writing, and notes it mentions without a link",
   "cmd.research.ask": "🔎 Research: Ask a Question…",
   "cmd.research.ask.hint": "Searches the web, reads sources and writes a note with a quoted footnote for every claim",
+  "cmd.research.litReview": "Literature review from the vault's PDFs",
+  "cmd.research.litReview.hint": "A table of every PDF: question, method, sample, findings, limitations — each value with a quote verified on its page. Runs on this device.",
   "cmd.research.settings": "🔎 Research: Settings…",
   "cmd.research.settings.hint": "Claude web search, or Brave / Tavily with your own key",
   "cmd.research.usability": "Usability study (moderator)…",

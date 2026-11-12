@@ -275,6 +275,8 @@
   "cmd.related.toggle.hint": "Les notes proches du paragraphe que vous écrivez, et celles qu’il cite sans lien",
   "cmd.research.ask": "🔎 Recherche : poser une question…",
   "cmd.research.ask.hint": "Cherche sur le web, lit les sources et rédige une note avec une note de bas de page citée pour chaque affirmation",
+  "cmd.research.litReview": "Revue de littérature à partir des PDF du coffre",
+  "cmd.research.litReview.hint": "Un tableau de tous les PDF : question, méthode, échantillon, résultats, limites — chaque valeur avec une citation vérifiée sur sa page. Sur cet appareil.",
   "cmd.research.settings": "🔎 Recherche : réglages…",
   "cmd.research.settings.hint": "Recherche web de Claude, ou Brave / Tavily avec votre clé",
   "cmd.research.usability": "Étude d'utilisabilité (animateur)…",

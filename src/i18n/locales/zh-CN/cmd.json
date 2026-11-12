@@ -275,6 +275,8 @@
   "cmd.related.toggle.hint": "与你正在写的段落相近的笔记，以及它提到但未链接的笔记",
   "cmd.research.ask": "🔎 研究：提出问题…",
   "cmd.research.ask.hint": "搜索网络、阅读来源，并为每个论断写出带引文脚注的笔记",
+  "cmd.research.litReview": "根据库中的 PDF 生成文献综述",
+  "cmd.research.litReview.hint": "所有 PDF 的表格：研究问题、方法、样本、发现、局限——每个值都附有在其页面上核实过的引文。在此设备上运行。",
   "cmd.research.settings": "🔎 研究：设置…",
   "cmd.research.settings.hint": "Claude 网络搜索，或使用你自己的密钥的 Brave / Tavily",
   "cmd.research.usability": "可用性研究（主持人）…",

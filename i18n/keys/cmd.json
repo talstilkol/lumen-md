@@ -1390,6 +1390,16 @@
       "vars": []
     },
     {
+      "key": "cmd.research.litReview",
+      "en": "Literature review from the vault's PDFs",
+      "vars": []
+    },
+    {
+      "key": "cmd.research.litReview.hint",
+      "en": "A table of every PDF: question, method, sample, findings, limitations — each value with a quote verified on its page. Runs on this device.",
+      "vars": []
+    },
+    {
       "key": "cmd.research.settings",
       "en": "🔎 Research: Settings…",
       "vars": []

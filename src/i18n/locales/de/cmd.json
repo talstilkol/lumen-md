@@ -275,6 +275,8 @@
   "cmd.related.toggle.hint": "Notizen nah am Absatz, den du schreibst, und Notizen, die er ohne Link erwähnt",
   "cmd.research.ask": "🔎 Recherche: Frage stellen…",
   "cmd.research.ask.hint": "Sucht im Web, liest Quellen und schreibt eine Notiz mit zitierter Fußnote zu jeder Aussage",
+  "cmd.research.litReview": "Literaturübersicht aus den PDFs der Ablage",
+  "cmd.research.litReview.hint": "Eine Tabelle aller PDFs: Frage, Methode, Stichprobe, Ergebnisse, Einschränkungen — jeder Wert mit einem auf seiner Seite geprüften Zitat. Läuft auf diesem Gerät.",
   "cmd.research.settings": "🔎 Recherche: Einstellungen…",
   "cmd.research.settings.hint": "Claude-Websuche oder Brave / Tavily mit eigenem Schlüssel",
   "cmd.research.usability": "Usability-Studie (Moderation)…",
