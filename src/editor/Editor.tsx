@@ -28,6 +28,7 @@ import {
 } from "@codemirror/autocomplete";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { bidiExtension } from "./bidi";
+import { bidiMarksExtension } from "./bidiMarks";
 import { languages } from "@codemirror/language-data";
 import { tags as t } from "@lezer/highlight";
 import { StateField, StateEffect } from "@codemirror/state";
@@ -382,6 +383,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       EditorView.lineWrapping,
       // Hebrew and English lines each read in their own direction (T25).
       bidiExtension(),
+      bidiMarksExtension(),
       // Accessible name for the contenteditable (role=textbox) surface —
       // without it, screen readers announce an unnamed input (axe:
       // aria-input-field-name).
