@@ -1549,5 +1549,8 @@
   "e2ee.sync.migrate.reverted": "{n} Dateien zurückverschoben.",
   "e2ee.pair.answerHint": "Füge die Anfrage ein, die das neue Gerät zeigt. Dieses Gerät prüft sie gegen den jetzigen Stand des Tresors; gib die Antwort innerhalb von 5 Minuten auf dem neuen Gerät ein.",
   "e2ee.drive.syncOnly": "Google Drive kann ein zweites „Anlegen“ derselben Datei nicht atomar ablehnen. Mit Drive synchronisiert dieser Tresor daher, aber Schlüssel und Geräte lassen sich hier nicht ändern (kein Neuverschlüsseln, kein Entfernen, kein neuer Geräteschlüssel). Nimm solche Änderungen mit einem anderen Speicher vor oder zieh den Tresor um.",
+  "e2ee.drive.limits": "Mit Google Drive können Sie in diesem Tresor kein verlorenes Gerät entfernen und keine durchgesickerte Passphrase ändern. Verschieben Sie den Tresor dafür zuerst zu WebDAV, S3 oder Dropbox.",
+  "e2ee.pair.cancel": "Kopplung abbrechen",
+  "e2ee.pair.cancelled": "Kopplung abgebrochen: Dieses Gerät kann wieder Schlüssel ändern. Verwenden Sie diese Antwort oder diesen Code nicht auf dem anderen Gerät; koppeln Sie es nach der Schlüsseländerung erneut.",
   "cmd.sync.open": "Verschlüsselte Synchronisierung…"
 }

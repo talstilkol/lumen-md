@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-12T19:22:19.870Z",
+  "generated_at": "2026-11-12T19:23:52.527Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1551,
+  "count": 1554,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -8325,6 +8325,21 @@
     {
       "key": "e2ee.drive.syncOnly",
       "en": "Google Drive can't refuse a second \"create\" of the same file atomically, so with Drive this vault syncs, but keys and devices can't be changed here (no re-key, no revocation, no new device key). Make those changes with another storage, or move the vault.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.drive.limits",
+      "en": "With Google Drive, you can't remove a lost device or change a leaked passphrase in this vault. To do either, move the vault to WebDAV, S3 or Dropbox first.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.pair.cancel",
+      "en": "Cancel pairing",
+      "vars": []
+    },
+    {
+      "key": "e2ee.pair.cancelled",
+      "en": "Pairing cancelled: this device can change keys again. Don't use that answer or code on the other device; pair it again after the key change.",
       "vars": []
     },
     {

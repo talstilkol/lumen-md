@@ -1549,5 +1549,8 @@
   "e2ee.sync.migrate.reverted": "{n} fichiers remis en place.",
   "e2ee.pair.answerHint": "Collez la demande affichée par le nouvel appareil. Cet appareil la vérifie par rapport à l’état actuel du coffre ; saisissez la réponse sur le nouvel appareil dans les 5 minutes.",
   "e2ee.drive.syncOnly": "Google Drive ne peut pas refuser de façon atomique une seconde « création » du même fichier : avec Drive, ce coffre se synchronise, mais les clés et les appareils ne peuvent pas être modifiés ici (pas de changement de clés, pas de retrait, pas de nouvelle clé d'appareil). Faites ces changements avec un autre stockage, ou déplacez le coffre.",
+  "e2ee.drive.limits": "Avec Google Drive, vous ne pouvez ni retirer un appareil perdu ni changer une phrase secrète divulguée dans ce coffre. Pour cela, déplacez d'abord le coffre vers WebDAV, S3 ou Dropbox.",
+  "e2ee.pair.cancel": "Annuler l'association",
+  "e2ee.pair.cancelled": "Association annulée : cet appareil peut de nouveau changer les clés. N'utilisez pas cette réponse ni ce code sur l'autre appareil ; associez-le à nouveau après le changement de clés.",
   "cmd.sync.open": "Synchronisation chiffrée…"
 }
