@@ -11,7 +11,7 @@ import { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { Link2, X } from "lucide-react";
 import { t } from "../i18n";
-import { createShareLink, EXPIRY_DAYS, MAX_LINK_DATA, SHARE_FILE_EXTENSION, ShareLinkError, type ShareLink } from "./linkShare";
+import { createShareLink, EXPIRY_DAYS, MAX_LINK_DATA, SHARE_FILE_EXTENSION, ShareLinkError, shareOrigin, type ShareLink } from "./linkShare";
 
 const muted: React.CSSProperties = { fontSize: 12, color: "hsl(var(--fg-muted))" };
 const field: React.CSSProperties = { padding: "6px 8px", fontSize: 13, borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--bg))", color: "inherit" };
@@ -21,9 +21,9 @@ const row: React.CSSProperties = { display: "flex", gap: 8, alignItems: "center"
 
 const DAY = 24 * 60 * 60 * 1000;
 
-/** The app's own address: share links open the viewer there. */
+/** Where share links open the viewer: this page on a public https host, else the public app (review 12.11). */
 function appOrigin(): string {
-  return location.origin;
+  return shareOrigin();
 }
 
 function CopyField({ value, label, testId }: { value: string; label: string; testId: string }) {
