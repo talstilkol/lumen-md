@@ -109,6 +109,7 @@
     "bench:models": "node scripts/bench-models.mjs",
     "pr:check": "node scripts/pr-check.mjs",
     "launch:check": "node scripts/launch-check.mjs",
+    "obsidian:compare": "node --experimental-transform-types --import ./scripts/lib/ts-register.mjs scripts/obsidian-compare.mjs",
     "store:check": "node scripts/store.mjs check",
     "eval:crosslingual": "LUMEN_EVAL_XL=1 vitest run --config vitest.eval.config.ts src/agents/eval/crosslingual.eval.ts",
     "eval:lit-review": "LUMEN_EVAL_LIT=1 vitest run --config vitest.eval.config.ts src/agents/eval/litReview.eval.ts",
