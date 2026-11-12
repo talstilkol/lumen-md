@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-10T01:58:21.635Z",
+  "generated_at": "2026-11-12T10:29:38.530Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1435,
+  "count": 1450,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1810,6 +1810,94 @@
       "en": "Torah portion: {name}",
       "vars": [
         "name"
+      ]
+    },
+    {
+      "key": "calendar.workWeek",
+      "en": "Work week",
+      "vars": []
+    },
+    {
+      "key": "calendar.workWeek.sunThu",
+      "en": "Sunday–Thursday (Israel)",
+      "vars": []
+    },
+    {
+      "key": "calendar.workWeek.monFri",
+      "en": "Monday–Friday",
+      "vars": []
+    },
+    {
+      "key": "calendar.hebrewDates",
+      "en": "Show the Hebrew date next to dates in properties and database views",
+      "vars": []
+    },
+    {
+      "key": "calendar.deadlineMove",
+      "en": "A deadline on Shabbat or a chag",
+      "vars": []
+    },
+    {
+      "key": "calendar.deadlineMove.next",
+      "en": "Suggest the next working day",
+      "vars": []
+    },
+    {
+      "key": "calendar.deadlineMove.previous",
+      "en": "Suggest the previous working day",
+      "vars": []
+    },
+    {
+      "key": "calendar.deadlineMove.off",
+      "en": "Don't move it (only say why)",
+      "vars": []
+    },
+    {
+      "key": "israeliTime.moved",
+      "en": "Falls on {reason}: suggested {date}",
+      "vars": [
+        "reason",
+        "date"
+      ]
+    },
+    {
+      "key": "israeliTime.dayOff",
+      "en": "Falls on {reason}",
+      "vars": [
+        "reason"
+      ]
+    },
+    {
+      "key": "israeliTime.dueToday",
+      "en": "Due today",
+      "vars": []
+    },
+    {
+      "key": "israeliTime.left.one",
+      "en": "{n} working day left",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "israeliTime.left.other",
+      "en": "{n} working days left",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "israeliTime.overdue.one",
+      "en": "{n} working day overdue",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "israeliTime.overdue.other",
+      "en": "{n} working days overdue",
+      "vars": [
+        "n"
       ]
     },
     {

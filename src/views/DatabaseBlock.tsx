@@ -19,6 +19,12 @@ import {
 } from "./database";
 import { log } from "../lib/logger";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
+import { useAppStore } from "../store/useStore";
+import { dateCell, type DateCellOptions } from "../daily/dateCells";
+import { deadlineText } from "../daily/DateHint";
+import { defaultIsrael, holidaysOn } from "../daily/hebrewCalendar";
+import { holidayLabel, nameLang } from "../daily/hebrewCalendarNames";
+import { dayOfValue } from "../daily/israeliTime";
 
 interface Props {
   source: string;
@@ -108,7 +114,7 @@ export default function DatabaseBlock({ source, meta }: Props) {
             </span>
           </div>
         )}
-        {!error && rows.length > 0 && view === "table" && <TableView rows={rows} fields={fields} />}
+        {!error && rows.length > 0 && view === "table" && <TableView rows={rows} fields={fields} spec={spec} />}
         {!error && rows.length > 0 && view === "kanban" && <KanbanView rows={rows} spec={spec} fields={fields} />}
         {!error && rows.length > 0 && view === "gallery" && <GalleryView rows={rows} spec={spec} fields={fields} />}
         {!error && rows.length > 0 && view === "calendar" && <CalendarView rows={rows} spec={spec} />}
@@ -168,7 +174,45 @@ function rowLink(row: DatabaseRow): JSX.Element {
 
 /* ─── Table view ─────────────────────────────────────────────────────── */
 
-function TableView({ rows, fields }: { rows: DatabaseRow[]; fields: string[] }) {
+/** Options for the date cells of this block: the UI locale and the calendar settings (plan W5.15). */
+function useDateOptions(spec: DatabaseSpec): Omit<DateCellOptions, "deadline"> {
+  const locale = useAppStore((s) => s.locale) as string;
+  const settings = useAppStore((s) => s.dailyNotes);
+  return { locale, settings, hebrewDates: spec.hebrewDate };
+}
+
+/** A cell's value: dates with their Hebrew date; the deadline column with its suggested working day and the working days left. */
+function CellValue({ value, deadline, opts }: { value: unknown; deadline: boolean; opts: Omit<DateCellOptions, "deadline"> }) {
+  const cell = dateCell(value, { ...opts, deadline });
+  if (!cell) return <>{displayValue(value)}</>;
+  const d = cell.deadline && deadlineText(cell.deadline);
+  return (
+    <span style={{ display: "inline-flex", flexDirection: "column", gap: 1 }}>
+      <span>
+        {cell.iso}
+        {cell.hebrew && (
+          <span lang="he" dir={opts.locale === "he" ? "rtl" : "auto"} style={{ marginInlineStart: 6, color: "hsl(var(--fg-muted))", fontSize: 11 }}>
+            {cell.hebrew}
+          </span>
+        )}
+      </span>
+      {d?.moved && (
+        <span role="note" data-testid="db-deadline-moved" style={{ fontSize: 11, color: "hsl(var(--warning, 35 90% 40%))" }}>
+          ⚠ {d.moved}
+        </span>
+      )}
+      {d && (
+        <span data-testid="db-deadline-left" style={{ fontSize: 11, color: cell.deadline!.left < 0 ? "hsl(0 70% 50%)" : "hsl(var(--fg-muted))" }}>
+          {d.left}
+          {d.notes ? ` · ${d.notes}` : ""}
+        </span>
+      )}
+    </span>
+  );
+}
+
+function TableView({ rows, fields, spec }: { rows: DatabaseRow[]; fields: string[]; spec: DatabaseSpec }) {
+  const opts = useDateOptions(spec);
   return (
     <div style={{ overflowX: "auto" }}>
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
@@ -188,7 +232,7 @@ function TableView({ rows, fields }: { rows: DatabaseRow[]; fields: string[] }) 
               <td style={tdStyle}>{rowLink(r)}</td>
               {fields.map((f) => (
                 <td key={f} style={tdStyle}>
-                  {displayValue(r.fm[f])}
+                  <CellValue value={r.fm[f]} deadline={f === spec.deadline} opts={opts} />
                 </td>
               ))}
             </tr>
@@ -384,6 +428,7 @@ function GalleryView({
 /* ─── Calendar view ──────────────────────────────────────────────────── */
 
 function CalendarView({ rows, spec }: { rows: DatabaseRow[]; spec: DatabaseSpec }) {
+  const opts = useDateOptions(spec);
   const dateField = spec.dateField;
   if (!dateField) {
     return (
@@ -426,16 +471,48 @@ function CalendarView({ rows, spec }: { rows: DatabaseRow[]; spec: DatabaseSpec 
             background: "hsl(var(--bg-subtle))",
           }}
         >
-          <div style={{ fontSize: 11, color: "hsl(var(--fg-muted))", fontWeight: 600 }}>
-            {date}
-          </div>
+          <CalendarDayHeader iso={date} opts={opts} />
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
             {items.map((r) => (
-              <div key={r.path}>{rowLink(r)}</div>
+              <div key={r.path}>
+                {rowLink(r)}
+                {spec.deadline === dateField && <CalendarDeadline value={r.fm[dateField]} opts={opts} />}
+              </div>
             ))}
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+/** A day in the agenda: the date, its Hebrew date and the day's holidays (plan W5.15). */
+function CalendarDayHeader({ iso, opts }: { iso: string; opts: Omit<DateCellOptions, "deadline"> }) {
+  const cell = dateCell(iso, opts);
+  const day = dayOfValue(iso);
+  const israel = opts.settings.israel ?? defaultIsrael(opts.locale);
+  const holidays = day ? holidaysOn(day, { israel }).filter((h) => h.kind !== "roshChodesh") : [];
+  return (
+    <div style={{ fontSize: 11, color: "hsl(var(--fg-muted))", fontWeight: 600, display: "flex", flexDirection: "column", gap: 1 }}>
+      <span>{iso}</span>
+      {cell?.hebrew && (
+        <span lang="he" dir={opts.locale === "he" ? "rtl" : "auto"} style={{ fontWeight: 400 }}>
+          {cell.hebrew}
+        </span>
+      )}
+      {holidays.length > 0 && <span style={{ fontWeight: 400 }}>{holidays.map((h) => holidayLabel(h, nameLang(opts.locale))).join(" · ")}</span>}
+    </div>
+  );
+}
+
+/** Under an item whose deadline is a day off: the suggested working day (plan W5.15). */
+function CalendarDeadline({ value, opts }: { value: unknown; opts: Omit<DateCellOptions, "deadline"> }) {
+  const cell = dateCell(value, { ...opts, deadline: true });
+  const d = cell?.deadline && deadlineText(cell.deadline);
+  if (!d?.moved) return null;
+  return (
+    <div role="note" data-testid="db-deadline-moved" style={{ fontSize: 11, color: "hsl(var(--warning, 35 90% 40%))" }}>
+      ⚠ {d.moved} · {d.left}
     </div>
   );
 }

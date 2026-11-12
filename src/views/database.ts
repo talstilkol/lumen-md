@@ -13,6 +13,8 @@
  *     sortBy: rating         # column for sort (prefix '-' for descending)
  *     fields: [title, author, rating]   # which columns to show in table/gallery
  *     dateField: due         # which frontmatter key is the date for calendar
+ *     deadline: due          # a deadline column: moved off Shabbat / chag, working days left (W5.15)
+ *     hebrewDate: true       # Hebrew dates next to dates (default: the calendar setting)
  *     ```
  *
  * The query runs over OPFS — every .md / .markdown file under `source`
@@ -43,6 +45,10 @@ export interface DatabaseSpec {
   cover?: string;
   /** Optional custom title for the rendered block. */
   title?: string;
+  /** A deadline column (plan W5.15): a date on Shabbat or a chag gets the suggested working day, and the working days left. */
+  deadline?: string;
+  /** Hebrew dates next to dates; unset: the calendar setting (on for a Hebrew UI). */
+  hebrewDate?: boolean;
 }
 
 export interface DatabaseRow {
