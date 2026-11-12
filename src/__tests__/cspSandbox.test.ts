@@ -96,10 +96,14 @@ describe("Tauri CSP", () => {
       expect(open, d).toEqual([]);
     }
   });
-  it("connect-src is the page's explicit list plus the IPC protocol", () => {
+  it("connect-src is the page's explicit list, without webR's jsDelivr fallback, plus the IPC protocol", () => {
     const html = readFileSync(join(root, "index.html"), "utf8");
     const meta = /<meta\s+http-equiv="Content-Security-Policy"\s+content="([^"]+)"/.exec(html)![1];
-    expect(directive(csp, "connect-src")).toEqual([...directive(meta, "connect-src"), "ipc:", "http://ipc.localhost"]);
+    // The web page keeps https://cdn.jsdelivr.net for webR's packages; the desktop
+    // app never loads them from there (security/policy.json, review 13.5).
+    expect(directive(meta, "connect-src")).toContain("https://cdn.jsdelivr.net");
+    const expected = directive(meta, "connect-src").filter((s) => s !== "https://cdn.jsdelivr.net");
+    expect(directive(csp, "connect-src")).toEqual([...expected, "ipc:", "http://ipc.localhost"]);
   });
   it("img-src keeps the hosts the app itself loads images from", () => {
     expect(directive(csp, "img-src")).toEqual(
