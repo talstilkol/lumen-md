@@ -113,3 +113,7 @@ reports/
 # Signed release output and fuzzer findings (plan W1.27)
 /release/
 fuzz-findings/
+
+# Python bytecode (scripts/sync-protocol)
+__pycache__/
+*.pyc
