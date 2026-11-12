@@ -31,6 +31,10 @@ The rules fail closed:
   label, and so are photos embedded in an SVG: a JPEG, PNG or WebP loses its
   metadata, and one that can't be cleaned (HEIC, AVIF) is left out.
 - Marks count inside code blocks too.
+- A `</redact>` that the preview doesn't read as one (in code, in a link's
+  address, in a comment, or while a paragraph or table opened inside the
+  passage is still open) doesn't end the passage. Everything the preview
+  shades is gone from the export, and sometimes a little more.
 - Exports also leave out hidden text a reader of the file could find: HTML
   comments (`<!-- … -->`) and Obsidian comments (`%% … %%`).
 - **Print** (⌘P) of a note with redactions goes through the same export.

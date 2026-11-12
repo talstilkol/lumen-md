@@ -21,6 +21,13 @@
  *     as covered as it was (review F-9).
  *   - Marks count inside code blocks and code spans too: a secret in a code
  *     block is still a secret.
+ *   - A closing mark the preview doesn't read as one ends nothing, so the
+ *     export never keeps what the preview shades (review F-8, preview ⊆
+ *     export): one written as text (in code, math, a link's target, a
+ *     comment, another tag's attribute, a raw-text element such as
+ *     <textarea>) ends only a mark also written as text, and none ends a
+ *     passage while an element HTML doesn't close through (p, div, table…)
+ *     is open inside it (`markInertCloses`).
  *   - Hidden text that a reader of the file could find is removed too: HTML
  *     comments (`<!-- … -->`, an unclosed one runs to the end) and Obsidian
  *     comments (`%% … %%`), except inside code, where they are code.
@@ -47,6 +54,13 @@ export interface RedactMark {
   index: number;
   end: number;
   close: boolean;
+  /**
+   * A closing mark the preview does not read as one (review F-8, preview ⊆
+   * export): inside code, math, a link's target, a comment, another tag, a
+   * raw-text element, or above an element that HTML does not close through.
+   * It ends nothing: the passage goes on.
+   */
+  inert?: boolean;
 }
 
 /** The HTML tokenizer's whitespace (CR included: the input stream turns it into LF). */
@@ -65,6 +79,12 @@ const isSpace = (c: string) => c === " " || c === "\t" || c === "\n" || c === "\
  * comment), so the mark before it stays open.
  */
 export function redactMarks(text: string): RedactMark[] {
+  const marks = candidateMarks(text);
+  if (marks.some((m) => m.close)) markInertCloses(text, marks);
+  return marks;
+}
+
+function candidateMarks(text: string): RedactMark[] {
   const out: RedactMark[] = [];
   for (let i = text.indexOf("<"); i >= 0; i = text.indexOf("<", i + 1)) {
     const close = text[i + 1] === "/";
@@ -97,6 +117,223 @@ export function redactMarks(text: string): RedactMark[] {
   return out;
 }
 
+/* ─── Which closing marks close, as the preview reads them (review F-8) ─── */
+
+/** HTML's "special" elements: `</redact>` does not close through one (the tree builder ignores it). */
+const SPECIAL = new Set(
+  "address applet area article aside base basefont bgsound blockquote body br button caption center col colgroup dd details dialog dir div dl dt embed fieldset figcaption figure footer form frame frameset h1 h2 h3 h4 h5 h6 head header hgroup hr html iframe img input keygen li link listing main marquee menu meta nav noembed noframes noscript object ol p param plaintext pre script search section select source style summary table tbody td template textarea tfoot th thead title tr track ul wbr xmp".split(" "),
+);
+const VOID = new Set("area base basefont bgsound br col embed frame hr image img input keygen link meta param source track wbr".split(" "));
+/** Elements whose text is not markup: up to their own end tag. */
+const RAW_TEXT = new Set(["style", "textarea", "title", "xmp", "iframe", "noembed", "noframes"]);
+/** Inside a passage, these make the rest uncertain (script escapes, foreign content, noscript, plaintext): no close counts after them. */
+const UNCERTAIN = new Set(["script", "svg", "math", "noscript", "plaintext"]);
+
+/**
+ * Characters the Markdown layer shows as text, not HTML: fenced and
+ * indented code, inline code and math, link targets and titles, wiki links,
+ * reference definitions. Where unsure, a character counts as text: a closing
+ * mark there then ends nothing, so the export removes more, never less.
+ */
+function markdownTextMask(text: string): Uint8Array {
+  const mask = new Uint8Array(text.length);
+  const fill = (a: number, b: number) => mask.fill(1, a, b);
+  let at = 0;
+  let fence: { ch: string; len: number } | null = null;
+  let inMath = false;
+  for (const line of text.split("\n")) {
+    const end = at + line.length;
+    const f = /^ {0,3}(`{3,}|~{3,})(.*)$/.exec(line);
+    if (fence || inMath) {
+      fill(at, end);
+      if (fence && f && f[1][0] === fence.ch && f[1].length >= fence.len && f[2].trim() === "") fence = null;
+      if (inMath && /^\s*\$\$\s*$/.test(line)) inMath = false;
+    } else if (f && !(f[1][0] === "`" && f[2].includes("`"))) {
+      fence = { ch: f[1][0], len: f[1].length };
+      fill(at, end);
+    } else if (/^\s*\$\$\s*$/.test(line)) {
+      inMath = true;
+      fill(at, end);
+    } else if (/^( {4}|\t)/.test(line) || /^ {0,3}\[[^\]]+\]:/.test(line)) {
+      fill(at, end);
+    }
+    at = end + 1;
+  }
+  // Inline spans, within a paragraph (not across a blank line).
+  const spans = [/(`+)[\s\S]*?[^`]\1(?!`)/g, /\$\$[\s\S]*?\$\$/g, /\$[^$\n]+\$/g, /\]\((?:[^()]|\([^()]*\))*\)/g, /\[\[[\s\S]*?\]\]/g];
+  for (const para of text.matchAll(/(?:[^\n]|\n(?![ \t]*\n))+/g)) {
+    const base = para.index ?? 0;
+    for (const re of spans) for (const m of para[0].matchAll(re)) fill(base + (m.index ?? 0), base + (m.index ?? 0) + m[0].length);
+  }
+  return mask;
+}
+
+/** The end of the tag that starts at `i` (after its `>`), or -1 when the text ends inside it. */
+function tagEnd(text: string, from: number): number {
+  let quote: string | null = null;
+  let valueStart = false;
+  for (let j = from; j < text.length; j++) {
+    const c = text[j];
+    if (quote) {
+      if (c === quote) quote = null;
+      continue;
+    }
+    if (c === ">") return j + 1;
+    if (valueStart && (c === '"' || c === "'")) quote = c;
+    if (c === "=") valueStart = true;
+    else if (!isSpace(c)) valueStart = false;
+  }
+  return -1;
+}
+
+/**
+ * Mark the closing marks that close nothing in the preview (`inert`). A
+ * second pass over the text with the HTML tokenizer's states that matter
+ * (comments, bogus comments, tags and their attributes, raw-text elements)
+ * and, inside a passage, the elements opened since its `<redact>`: HTML's
+ * tree builder ignores `</redact>` when a "special" element (p, div, li,
+ * table, select…) is still open above it. Opening marks are never weakened.
+ */
+function markInertCloses(text: string, marks: RedactMark[]): void {
+  const mask = markdownTextMask(text);
+  const n = text.length;
+  let k = 0; // the next mark
+  let depth = 0;
+  let uncertain = false;
+  const stack: string[] = [];
+  // "redact" is a mark the preview reads as an element; "redact~" one written as text (in code, a
+  // comment, another tag…), which the export still removes from (fail closed).
+  const open = (asText = false) => {
+    depth++;
+    stack.push(asText ? "redact~" : "redact");
+  };
+  const innermost = () => Math.max(stack.lastIndexOf("redact"), stack.lastIndexOf("redact~"));
+  /**
+   * Marks before `to` that are not markup here. An opening mark still opens. A closing one
+   * closes only a mark that was also written as text: it can't end a passage the preview shades.
+   */
+  const asText = (to: number) => {
+    for (; k < marks.length && marks[k].index < to; k++) {
+      if (!marks[k].close) open(true);
+      else if (depth > 0) {
+        const r = innermost();
+        if (stack[r] === "redact~") close(marks[k]);
+        else marks[k].inert = true;
+      }
+    }
+  };
+  function close(m: RedactMark): void {
+    if (depth === 0) return; // a stray closing mark: dropped, as before
+    const r = innermost();
+    if (uncertain || r < 0 || stack.slice(r + 1).some((e) => SPECIAL.has(e))) {
+      m.inert = true;
+      return;
+    }
+    stack.length = r;
+    depth--;
+    if (depth === 0) {
+      stack.length = 0;
+      uncertain = false;
+    }
+  }
+  let i = 0;
+  while (k < marks.length) {
+    const lt = text.indexOf("<", i);
+    if (lt < 0) break;
+    asText(lt);
+    i = lt;
+    let bs = 0;
+    while (bs < i && text[i - 1 - bs] === "\\") bs++;
+    // Text in the Markdown layer (code, math, a link's target, `\<`): no tag here, but in an HTML
+    // block the same `<` starts one, so what that tag or comment would swallow is text too.
+    const literal = mask[i] === 1 || bs % 2 === 1;
+    if (text.startsWith("<!--", i)) {
+      // A comment: `<!-->` and `<!--->` end at once, otherwise at `-->` or `--!>`, or the end.
+      const rest = text.slice(i + 4);
+      const e = rest.startsWith(">") ? 1 : rest.startsWith("->") ? 2 : (() => {
+        const a = rest.indexOf("-->");
+        const b = rest.indexOf("--!>");
+        const x = a < 0 ? b : b < 0 ? a : Math.min(a, b);
+        return x < 0 ? rest.length : x + (x === b ? 4 : 3);
+      })();
+      asText(i + 4 + e);
+      i += 4 + e;
+      continue;
+    }
+    const c1 = text[i + 1] ?? "";
+    const isClose = c1 === "/";
+    const c2 = isClose ? (text[i + 2] ?? "") : c1;
+    if (c1 === "!" || c1 === "?" || (isClose && !/[A-Za-z]/.test(c2))) {
+      // A bogus comment (`<!…>`, `<?…>`, `</ …>`) up to the next `>`; CDATA in a passage is foreign content: unsure.
+      if (isClose && c2 === ">") {
+        i += 3;
+        continue;
+      }
+      if (depth > 0 && text.startsWith("<![CDATA[", i)) uncertain = true;
+      const gt = text.indexOf(">", i);
+      const e = gt < 0 ? n : gt + 1;
+      asText(e);
+      i = e;
+      continue;
+    }
+    if (!/[A-Za-z]/.test(c2)) {
+      i++;
+      continue;
+    }
+    const nameAt = i + (isClose ? 2 : 1);
+    let ne = nameAt;
+    while (ne < n && !isSpace(text[ne]) && text[ne] !== "/" && text[ne] !== ">") ne++;
+    const name = text.slice(nameAt, ne).toLowerCase();
+    const end = tagEnd(text, ne);
+    const m = !literal && marks[k]?.index === i ? marks[k] : null;
+    if (m) k++;
+    if (end < 0) {
+      // The text ends inside this tag: HTML drops it.
+      if (depth > 0) uncertain = true;
+      if (m && !m.close) open();
+      asText(n);
+      break;
+    }
+    asText(end); // marks inside this tag's attributes are text
+    if (literal) {
+      if (!isClose && (RAW_TEXT.has(name) || name === "script")) {
+        const re = new RegExp(`</${name}[\\t\\n\\f\\r />]`, "ig");
+        re.lastIndex = end;
+        const hit = re.exec(text);
+        asText(hit ? hit.index : n);
+        i = hit ? hit.index : n;
+      } else i = end;
+      continue;
+    }
+    if (name === "redact") {
+      if (!isClose) open();
+      else if (m) close(m);
+    } else if (!isClose) {
+      if (depth > 0) {
+        if (UNCERTAIN.has(name)) uncertain = true;
+        else if (!VOID.has(name)) stack.push(name);
+      }
+      if (RAW_TEXT.has(name) || name === "script") {
+        // Up to this element's own end tag: everything before it is text.
+        const re = new RegExp(`</${name}[\\t\\n\\f\\r />]`, "ig");
+        re.lastIndex = end;
+        const hit = re.exec(text);
+        asText(hit ? hit.index : n);
+        i = hit ? hit.index : n;
+        continue;
+      }
+      if (name === "plaintext") {
+        asText(n);
+        break;
+      }
+    } else if (depth > 0 && stack[stack.length - 1] === name) {
+      stack.pop();
+    }
+    i = end;
+  }
+  asText(n + 1);
+}
+
 /**
  * Wrap `text` in redaction marks (the editor's "Redact selection"). Marks
  * already in the selection merge into the new one, which covers all of it;
@@ -110,6 +347,7 @@ export function wrapRedaction(text: string): string {
   let closes = 0;
   let opens = 0;
   for (const m of redactMarks(text)) {
+    if (m.inert) continue; // text, not a mark: it stays in the selection as written
     inner += text.slice(last, m.index);
     last = m.end;
     if (!m.close) opens++;
@@ -131,6 +369,7 @@ export function redactedPassages(markdown: string): string[] {
   let depth = 0;
   let start = 0;
   for (const m of redactMarks(markdown)) {
+    if (m.inert) continue;
     if (!m.close) {
       if (depth === 0) start = m.end;
       depth++;
@@ -150,6 +389,7 @@ export function removeRedacted(markdown: string): { text: string; count: number 
   let last = 0;
   let count = 0;
   for (const m of redactMarks(markdown)) {
+    if (m.inert) continue; // inside the passage: removed with it
     if (!m.close) {
       if (depth === 0) {
         out += markdown.slice(last, m.index);
