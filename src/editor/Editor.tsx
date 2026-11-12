@@ -463,7 +463,15 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       extensions: baseExtensions,
     });
 
-    async function handleAssetFiles(view: EditorView, files: File[]) {
+    async function handleAssetFiles(view: EditorView, dropped: File[]) {
+      // Plan W5.11: a photo's GPS position, time and device are removed before
+      // it is stored or inlined (src/lib/imageMetadata.ts), unless kept.
+      const files = dropped.some((f) => /^image\/(jpeg|png|webp)$/.test(f.type))
+        ? await import("../lib/imageMetadata").then(
+            (m) => Promise.all(dropped.map((f) => m.cleanImageFile(f).catch(() => f))),
+            () => dropped,
+          )
+        : dropped;
       const onAsset = onAddAssetRef.current;
       const inserts: string[] = [];
       const placed: Array<{ file: File; url: string; alt: string }> = [];
