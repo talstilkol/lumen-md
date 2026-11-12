@@ -251,6 +251,11 @@ export default defineConfig({
             { label: "Performance gate", slug: "self-hosting/perf-gate", translations: { he: "שער הביצועים" } },
           ],
         },
+        {
+          label: "Contributing",
+          translations: { he: "תרומה לפרויקט" },
+          items: [{ label: "The PR check", slug: "contributing/pr-check", translations: { he: "בדיקת ה־PR" } }],
+        },
       ],
     }),
   ],
