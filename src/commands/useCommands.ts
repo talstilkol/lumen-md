@@ -2572,6 +2572,22 @@ export function useCommands({
         action: () => insertSnippet(BLOCK_SNIPPETS.math),
       },
       {
+        // W5.14 — a formula inside the sentence; Ctrl/⌘+M in the source editor.
+        id: "insert.inlineMath",
+        label: t("cmd.insert.inlineMath"),
+        hint: t("cmd.insert.inlineMath.hint"),
+        icon: cmdIcons.Calculator,
+        group: t("group.insert"),
+        action: () => {
+          const view = getEditorView?.();
+          if (!view) return insertSnippet("$x$");
+          void import("../editor/mathBidi").then((m) => {
+            m.insertInlineMath(view);
+            view.focus();
+          });
+        },
+      },
+      {
         id: "insert.callout",
         label: t("cmd.insert.callout"),
         hint: t("cmd.insert.callout.hint"),

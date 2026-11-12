@@ -310,6 +310,8 @@
   "cmd.insert.mermaid": "הוספת תרשים (Mermaid)",
   "cmd.insert.map": "הוספת מפה",
   "cmd.insert.math": "הוספת בלוק מתמטי",
+  "cmd.insert.inlineMath": "הוספת נוסחה בתוך השורה",
+  "cmd.insert.inlineMath.hint": "נוסחה בתוך המשפט, $…$ (Ctrl/⌘+M). היא נשארת משמאל לימין בתוך טקסט עברי.",
   "cmd.insert.callout": "הוספת callout",
   "cmd.insert.callout.hint": ":::note / :::tip / …",
   "cmd.insert.graphviz": "הוספת Graphviz / DOT",

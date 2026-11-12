@@ -712,6 +712,8 @@ const en: Strings = {
   "cmd.insert.mermaid": "Insert diagram (Mermaid)",
   "cmd.insert.map": "Insert map",
   "cmd.insert.math": "Insert math block",
+  "cmd.insert.inlineMath": "Insert inline formula",
+  "cmd.insert.inlineMath.hint": "A formula inside the sentence, $…$ (Ctrl/⌘+M). It stays left to right inside Hebrew text.",
   "cmd.insert.callout": "Insert callout",
   "cmd.insert.callout.hint": ":::note / :::tip / …",
   "cmd.insert.graphviz": "Insert Graphviz / DOT",
