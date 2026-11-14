@@ -56,6 +56,28 @@ describe("the comparison", () => {
     }
     expect(read("docs/astro.config.mjs")).toContain('slug: "project/compare"');
   });
+
+  it("a claim whose source was not checked is not built into the page (W10.B22)", () => {
+    const unchecked = data.claims.filter((c: { verified: string | null }) => !c.verified) as Array<{ en: string; he: string }>;
+    for (const [lang, p] of [["en", "docs/src/content/docs/project/compare.md"], ["he", "docs/src/content/docs/he/project/compare.md"]] as const) {
+      const md = read(p);
+      for (const c of unchecked) expect(md, c.en).not.toContain(c[lang]);
+    }
+    // The same rule on a made-up record: unverified text never reaches the page.
+    const copy = JSON.parse(JSON.stringify(data));
+    copy.claims[1].verified = null;
+    copy.claims[1].en = "An unchecked statement about a competitor.";
+    expect(renderCompare(copy, "en")).not.toContain("An unchecked statement about a competitor.");
+    copy.claims[1].verified = "2026-11-15";
+    expect(renderCompare(copy, "en")).toContain("An unchecked statement about a competitor.");
+  });
+
+  it("at least 16 of the 20 claims are checked against the maker's own page, with a date", () => {
+    const checked = data.claims.filter((c: { verified: string | null }) => c.verified);
+    expect(data.claims).toHaveLength(20);
+    expect(checked.length).toBeGreaterThanOrEqual(16);
+    for (const c of checked as Array<{ verified: string; source: string }>) expect(c.verified).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
 });
 
 describe("the beta page", () => {
