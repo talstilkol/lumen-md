@@ -1,0 +1,35 @@
+{
+  "id": "ner-bmc",
+  "task": "ner",
+  "title": "BMC — Ben-Mordecai Hebrew NER corpus, entity F1",
+  "dataset": {
+    "hub": "github",
+    "id": "BMC (repository to confirm)",
+    "url": "https://github.com/OnlpLab/NEMO-Corpus",
+    "revision": null,
+    "files": [
+      {
+        "path": "bmc/test.bmes",
+        "sha256": null
+      }
+    ]
+  },
+  "license": {
+    "id": "to confirm",
+    "redistribute": false
+  },
+  "split": "test",
+  "format": "conll-bioes",
+  "normalizer": "none",
+  "metrics": [
+    "precision",
+    "recall",
+    "f1"
+  ],
+  "owed": [
+    "pin: locate the BMC release (the HalleluBERT paper reports on it), its licence and its token-level test file; until then this manifest cannot run"
+  ],
+  "plan": [
+    "W11.H11"
+  ]
+}
