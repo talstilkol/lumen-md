@@ -356,6 +356,8 @@
   "cmd.review.daily": "今日の復習",
   "cmd.save": "保存",
   "cmd.saveAs": "保存 as…",
+  "cmd.screenshotToNote": "Screenshot to note…",
+  "cmd.screenshotToNote.hint": "The image on the clipboard (or a file) as text, read on this device, previewed before it is inserted",
   "cmd.search": "検索 workspace…",
   "cmd.security.decrypt": "🔓 ドキュメントを復号",
   "cmd.security.decrypt.hint": "パスワードを入力して復号します",
