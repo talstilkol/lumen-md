@@ -56,7 +56,7 @@
  */
 
 import { randomBytes, sha256Hex, toB64u } from "./bytes";
-import { conflictCopyPath } from "./conflict";
+import { conflictCopyPath, syncConflictPath } from "./conflict";
 import { seal } from "./keys";
 import { PreReleaseKeyringError } from "./keyring";
 import { isSyncedPath } from "./localFiles";
@@ -373,6 +373,24 @@ export class E2eeSync extends E2eeSyncPairing {
         case "content": {
           const data = decision.kind === "remote" ? remoteData : decision.data;
           if (!(await this.o.local.write(path, data, lh))) {
+            this.hold(held, path, "retry");
+            break;
+          }
+          res.downloaded++;
+          await this.setBase(path, r, remoteData);
+          this.emit({ kind: "download", at: this.o.now(), path, bytes: remoteData.length, direction: "down" });
+          break;
+        }
+        case "conflictFile": {
+          // Plan W11.S6: this device's version goes to a new conflict file (uploaded next round like any new
+          // file); the path takes the other device's version. The copy is written first, so nothing is lost.
+          const copy = syncConflictPath(path, this.o.now(), s.deviceId, (p) => p in remote.files || local.has(p) || p in s.base);
+          if (!(await this.o.local.write(copy, localData, null))) {
+            this.hold(held, path, "retry");
+            break;
+          }
+          local.set(copy, lh as string);
+          if (!(await this.o.local.write(path, remoteData, lh))) {
             this.hold(held, path, "retry");
             break;
           }

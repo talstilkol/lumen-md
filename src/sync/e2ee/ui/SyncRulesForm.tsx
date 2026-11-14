@@ -9,6 +9,7 @@ import { useState, useSyncExternalStore, type FormEvent } from "react";
 import { t } from "../../../i18n";
 import "../strings";
 import { hasRules, parseRulesForm } from "../rules";
+import { loadConflictMode, saveConflictMode, type ConflictMode } from "../conflictMode";
 import type { SyncSession } from "./session";
 import { explainError } from "../../../lib/userError";
 
@@ -29,6 +30,7 @@ export function SyncRulesForm({ session }: { session: SyncSession }) {
   const [folders, setFolders] = useState(r.folders.join("\n"));
   const [exts, setExts] = useState(r.extensions.join(", "));
   const [maxMb, setMaxMb] = useState(r.maxAttachmentBytes === null ? "" : String(Math.round((r.maxAttachmentBytes / 1024 / 1024) * 10) / 10));
+  const [mode, setMode] = useState<ConflictMode>(() => loadConflictMode());
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,6 +39,7 @@ export function SyncRulesForm({ session }: { session: SyncSession }) {
     setError(null);
     try {
       const saved = session.setRules(parseRulesForm(folders, exts, maxMb));
+      saveConflictMode(mode); // plan W11.S6: this device only, like the rules
       setFolders(saved.folders.join("\n"));
       setExts(saved.extensions.join(", "));
       setMessage(t("e2ee.rules.saved"));
@@ -62,6 +65,13 @@ export function SyncRulesForm({ session }: { session: SyncSession }) {
         <label style={{ display: "grid", gap: 4, fontSize: 13 }}>
           {t("e2ee.rules.maxSize")}
           <input dir="ltr" inputMode="decimal" value={maxMb} onChange={(e) => setMaxMb(e.target.value)} style={field} />
+        </label>
+        <label style={{ display: "grid", gap: 4, fontSize: 13 }}>
+          {t("e2ee.rules.conflictMode")}
+          <select data-testid="sync-conflict-mode" value={mode} onChange={(e) => setMode(e.target.value === "file" ? "file" : "merge")} style={field}>
+            <option value="merge">{t("e2ee.rules.conflictMode.merge")}</option>
+            <option value="file">{t("e2ee.rules.conflictMode.file")}</option>
+          </select>
         </label>
         {/* empty-action: the rule fields above and Save below */}
         {!hasRules(r) && <div style={muted}>{t("e2ee.rules.none")}</div>}

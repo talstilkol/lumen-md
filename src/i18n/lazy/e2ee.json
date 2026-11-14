@@ -324,5 +324,8 @@
   "e2ee.sas.w60": "Truck",
   "e2ee.sas.w61": "Headphones",
   "e2ee.sas.w62": "Kite",
-  "e2ee.sas.w63": "Rainbow"
+  "e2ee.sas.w63": "Rainbow",
+  "e2ee.rules.conflictMode": "When this device and another changed the same note",
+  "e2ee.rules.conflictMode.merge": "Merge, and ask only about what overlaps (default)",
+  "e2ee.rules.conflictMode.file": "Keep a conflict file (name.sync-conflict-…), no merge"
 }

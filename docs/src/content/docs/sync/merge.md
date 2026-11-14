@@ -46,3 +46,25 @@ In the test of 500 random pairs of concurrent edits to ordinary notes (a
 few word changes, new lines, deleted lines, new tags and changed fields on
 each side), 459 merge without a dialog (92%), every word either side added
 is in the result, and the front matter is valid YAML in every merge.
+
+## Conflict files instead of a merge
+
+If you'd rather not merge, choose **Keep a conflict file** under
+*What syncs on this device* in the encrypted sync panel. This is Syncthing's
+way, and Obsidian's since 1.9.7. When both devices changed the same note:
+
+- The note gets the other device's version.
+- This device's version is kept next to it as
+  `<name>.sync-conflict-<YYYYMMDD-HHMMSS>-<device>.md` (the time is UTC; the
+  device is the first 7 characters of its id). Ignore patterns such as
+  `*.sync-conflict-*` match it.
+- Both versions are also in the note's history.
+
+For any other text file the version already in the vault wins, and this
+device's version goes into the file's history. A binary file gets a
+conflict file too, because the history keeps text only. Nothing is dropped.
+
+The choice is this device's only. It is kept in this browser's storage,
+never in the vault, and it doesn't sync: a phone can keep conflict files
+while the laptop merges.
+
