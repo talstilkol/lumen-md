@@ -183,3 +183,7 @@ The next `task=test` run decrypts the bundle in the runner. `scripts/golden/owne
 - **Tatoeba drift.** The Tatoeba exports change every week. The dev build freezes the pool as sentence ids, and the test build reads those ids from the current export, so a sentence edited upstream shows up as a hash mismatch. Wikipedia pairs are frozen as revision ids, which never change.
 - **OCR rendering.** The dev images were rendered with Chromium 141 (the container's). CI renders the test split with Playwright's own Chromium, and its hashes are recorded from CI.
 - **Nikud set.** The Ben-Yehuda part is mostly medieval and liturgical poetry: that is where full pointing exists in the dump. It is reported separately from the modern Nakdimon part (6.3).
+
+## Origin
+
+Every part of every set here, and every test fixture under `src/__tests__/fixtures`, has an origin in `eval/origins.json`: `synthetic` (written or generated here, including real text with errors we injected), `real` (someone else's data, used as published) or `derived-from-docs` (real documents with items written here). Unknown provenance counts as synthetic. `src/__tests__/origins.test.ts` keeps the list complete (plan W10.B13).
