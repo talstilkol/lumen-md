@@ -54,36 +54,6 @@
       "task": "W11.I1",
       "reason": "a fake Pyodide worker for tests",
       "expires": "2027-05-14"
-    },
-    "registerLocalTranslator": {
-      "kind": "dead",
-      "task": "W11.I1",
-      "reason": "a local translator for cross-lingual passages: no engine registers one",
-      "expires": "2026-12-15"
-    },
-    "registerPluginSkill": {
-      "kind": "dead",
-      "task": "W11.I1",
-      "reason": "skills from plugins: the plugin host does not call it",
-      "expires": "2026-12-15"
-    },
-    "setPublishedSlug": {
-      "kind": "dead",
-      "task": "W11.I1",
-      "reason": "the publish dialog does not set a slug through it",
-      "expires": "2026-12-15"
-    },
-    "setSyncStatus": {
-      "kind": "dead",
-      "task": "W11.I1",
-      "reason": "the sync engines do not report through it",
-      "expires": "2026-12-15"
-    },
-    "setEncryptionPassword": {
-      "kind": "dead",
-      "task": "W11.I1",
-      "reason": "changing the at-rest password: no UI calls it",
-      "expires": "2026-12-15"
     }
   }
 }
