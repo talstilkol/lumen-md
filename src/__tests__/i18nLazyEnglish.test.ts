@@ -202,6 +202,10 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "standardSite.json": { module: "publish/standardSiteStrings.ts", users: ["publish/standardSiteActions.ts"], prefixes: ["atproto."] },
   // The host-move banner: pwa/hostMoveBoot.ts loads pwa/hostMove.ts with a dynamic import, and it holds its own strings.
   "hostmove.json": { module: "pwa/hostMove.ts", users: [], prefixes: ["pwa.move."] },
+  // Editor gaps against Obsidian 1.12 and Heptabase (plan W7.3): each with the lazily loaded module that shows it.
+  "attachmentCleanup.json": { module: "storage/attachmentCleanupStrings.ts", users: ["storage/attachmentCleanup.ts", "ui/TrashPanel.tsx"], prefixes: ["attachCleanup."] },
+  "imageCopy.json": { module: "editor/imageCopyStrings.ts", users: ["editor/imageCopy.ts"], prefixes: ["imageCopy."] },
+  "backlinksList.json": { module: "ui/backlinksListStrings.ts", users: ["ui/BacklinksList.tsx"], prefixes: ["backlinksList."] },
 };
 
 function sources(dir: string): string[] {
