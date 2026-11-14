@@ -1,0 +1,1417 @@
+{
+  "version": 1,
+  "generatedAt": "2026-11-12T17:44:59.512Z",
+  "method": "score = 10 × mean metric credit; credit from signed, dated receipts only (scripts/plan/areas.mjs)",
+  "sources": {
+    "counted": 0,
+    "rejected": [],
+    "trustedKeys": [],
+    "pinned": false,
+    "levels": null
+  },
+  "average": 0,
+  "metrics": 80,
+  "measured": 0,
+  "met": 0,
+  "areas": [
+    {
+      "id": 1,
+      "key": "editor",
+      "en": "Editor and Markdown fidelity",
+      "he": "עורך ונאמנות Markdown",
+      "leader": "Obsidian 9.5",
+      "score": 0,
+      "measured": 0,
+      "met": 0,
+      "metrics": [
+        {
+          "id": "editor.commonmark",
+          "en": "CommonMark 0.31.2 spec examples passing, 3 browsers",
+          "he": "דוגמאות CommonMark 0.31.2 עוברות, 3 דפדפנים",
+          "target": {
+            "op": ">=",
+            "value": 0.995
+          },
+          "unit": "ratio",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "editor.gfm",
+          "en": "GFM spec examples passing, 3 browsers",
+          "he": "דוגמאות GFM עוברות, 3 דפדפנים",
+          "target": {
+            "op": ">=",
+            "value": 0.99
+          },
+          "unit": "ratio",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "editor.paste-corpus",
+          "en": "Paste from the real corpus (W6.38) faithful",
+          "he": "הדבקה מהקורפוס האמיתי (W6.38) נאמנה",
+          "target": {
+            "op": ">=",
+            "value": 0.98
+          },
+          "unit": "ratio",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "editor.roundtrip-real",
+          "en": "Real notes round-tripped byte-identical",
+          "he": "פתקים אמיתיים זהים בבייט אחרי round-trip",
+          "target": {
+            "op": ">=",
+            "value": 333
+          },
+          "unit": "notes",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "editor.obsidian-checked",
+          "en": "Obsidian syntax checked in Obsidian itself (W6.34)",
+          "he": "תחביר Obsidian נבדק ב-Obsidian עצמו (W6.34)",
+          "target": {
+            "op": "true"
+          },
+          "unit": "",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        }
+      ],
+      "tasks": {
+        "count": 20,
+        "computed": null
+      }
+    },
+    {
+      "id": 2,
+      "key": "rtl",
+      "en": "RTL and Hebrew",
+      "he": "RTL ועברית",
+      "leader": "Word 9.0",
+      "score": 0,
+      "measured": 0,
+      "met": 0,
+      "metrics": [
+        {
+          "id": "rtl.matrix",
+          "en": "RTL matrix: 30 rows × 2 editors × 3 browsers × 2 real phones",
+          "he": "מטריצת RTL: ‏30 שורות × 2 עורכים × 3 דפדפנים × 2 טלפונים אמיתיים",
+          "target": {
+            "op": ">=",
+            "value": 1
+          },
+          "unit": "ratio",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "rtl.docx-word",
+          "en": "DOCX correct in real Word",
+          "he": "‏DOCX נכון ב-Word אמיתי",
+          "target": {
+            "op": "true"
+          },
+          "unit": "",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "rtl.safari",
+          "en": "Hebrew layout in real Safari (macOS and iOS)",
+          "he": "פריסה עברית ב-Safari אמיתי (macOS ו-iOS)",
+          "target": {
+            "op": "true"
+          },
+          "unit": "",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "rtl.speaker-issues",
+          "en": "Issues reported by the native-speaker panel",
+          "he": "בעיות שפאנל הדוברים מצא",
+          "target": {
+            "op": "<=",
+            "value": 0
+          },
+          "unit": "issues",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "rtl.arabic-matrix",
+          "en": "The same matrix in Arabic",
+          "he": "אותה מטריצה בערבית",
+          "target": {
+            "op": ">=",
+            "value": 1
+          },
+          "unit": "ratio",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        }
+      ],
+      "tasks": {
+        "count": 29,
+        "computed": null
+      }
+    },
+    {
+      "id": 3,
+      "key": "vault",
+      "en": "Files, vault and data safety",
+      "he": "קבצים, כספת ובטיחות נתונים",
+      "leader": "Obsidian 9.0",
+      "score": 0,
+      "measured": 0,
+      "met": 0,
+      "metrics": [
+        {
+          "id": "vault.drill",
+          "en": "Data-safety drill: 0 corrupt in every path, on the factory",
+          "he": "תרגיל בטיחות נתונים: ‏0 פגומים בכל נתיב, במפעל",
+          "target": {
+            "op": "true"
+          },
+          "unit": "",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "vault.drill-webkit-phones",
+          "en": "Drill corrupt notes in WebKit and on real phones",
+          "he": "פתקים פגומים בתרגיל ב-WebKit ובטלפונים אמיתיים",
+          "target": {
+            "op": "<=",
+            "value": 0
+          },
+          "unit": "notes",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "vault.sigkill-corrupt",
+          "en": "Corrupt notes after 1,000 SIGKILLs on 3 systems",
+          "he": "פתקים פגומים אחרי 1,000 SIGKILL ב-3 מערכות",
+          "target": {
+            "op": "<=",
+            "value": 0
+          },
+          "unit": "notes",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "vault.combined",
+          "en": "Combined scenario (edit + sync + pull + crash) passes",
+          "he": "התרחיש המשולב (עריכה + סנכרון + pull + קריסה) עובר",
+          "target": {
+            "op": "true"
+          },
+          "unit": "",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "vault.restore-drill",
+          "en": "Monthly backup-restore drill passed",
+          "he": "תרגיל שחזור גיבוי חודשי עבר",
+          "target": {
+            "op": "true"
+          },
+          "unit": "",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        }
+      ],
+      "tasks": {
+        "count": 20,
+        "computed": null
+      }
+    },
+    {
+      "id": 4,
+      "key": "sync",
+      "en": "Sync and E2EE",
+      "he": "סנכרון ו-E2EE",
+      "leader": "Obsidian Sync 9.0",
+      "score": 0,
+      "measured": 0,
+      "met": 0,
+      "metrics": [
+        {
+          "id": "sync.findings",
+          "en": "Open critical/high findings (independent + external review)",
+          "he": "ממצאים קריטיים/גבוהים פתוחים (ביקורת עצמאית וחיצונית)",
+          "target": {
+            "op": "<=",
+            "value": 0
+          },
+          "unit": "findings",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "sync.cas-providers",
+          "en": "Providers whose CAS was tested for real (WebDAV, S3, Drive)",
+          "he": "ספקים ש-CAS נבדק מולם באמת (WebDAV, ‏S3, ‏Drive)",
+          "target": {
+            "op": ">=",
+            "value": 3
+          },
+          "unit": "providers",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "sync.two-devices-days",
+          "en": "Days on two real devices without loss",
+          "he": "ימים על שני מכשירים אמיתיים בלי אובדן",
+          "target": {
+            "op": ">=",
+            "value": 30
+          },
+          "unit": "days",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "sync.10k-seconds",
+          "en": "10,000 notes + 1 GB first sync",
+          "he": "סנכרון ראשון של 10,000 פתקים + ‏1 GB",
+          "target": {
+            "op": "<=",
+            "value": 600
+          },
+          "unit": "s",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        }
+      ],
+      "tasks": {
+        "count": 11,
+        "computed": null
+      }
+    },
+    {
+      "id": 5,
+      "key": "search",
+      "en": "Search, links, graph",
+      "he": "חיפוש, קישורים, גרף",
+      "leader": "Obsidian 9.0",
+      "score": 0,
+      "measured": 0,
+      "met": 0,
+      "metrics": [
+        {
+          "id": "search.ndcg10-he",
+          "en": "Held-out Hebrew nDCG@10 with morphology",
+          "he": "‏nDCG@10 מוחזק בעברית עם מורפולוגיה",
+          "target": {
+            "op": ">=",
+            "value": 0.85
+          },
+          "unit": "nDCG",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "search.crosslingual-heldout",
+          "en": "Cross-lingual held-out set (Belebele) passes its target",
+          "he": "סט חוצה-שפות מוחזק (Belebele) עומד ביעד",
+          "target": {
+            "op": "true"
+          },
+          "unit": "",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "search.p95-100k-ms",
+          "en": "Search p95 in 100,000 notes",
+          "he": "‏p95 של חיפוש ב-100,000 פתקים",
+          "target": {
+            "op": "<=",
+            "value": 100
+          },
+          "unit": "ms",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        }
+      ],
+      "tasks": {
+        "count": 9,
+        "computed": null
+      }
+    },
+    {
+      "id": 6,
+      "key": "database",
+      "en": "Databases and properties",
+      "he": "מסדי נתונים ומאפיינים",
+      "leader": "Notion 9.5",
+      "score": 0,
+      "measured": 0,
+      "met": 0,
+      "metrics": [
+        {
+          "id": "db.base-identical",
+          "en": "Obsidian .base views identical to Obsidian",
+          "he": "תצוגות ‎.base זהות ל-Obsidian",
+          "target": {
+            "op": ">=",
+            "value": 44
+          },
+          "unit": "views",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "db.notion-scenarios",
+          "en": "Notion scenarios passing",
+          "he": "תרחישי Notion עוברים",
+          "target": {
+            "op": ">=",
+            "value": 18
+          },
+          "unit": "of 20",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "db.local-api",
+          "en": "Local API with consent works end to end",
+          "he": "‏API מקומי עם אישור עובד מקצה לקצה",
+          "target": {
+            "op": "true"
+          },
+          "unit": "",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        }
+      ],
+      "tasks": {
+        "count": 13,
+        "computed": null
+      }
+    },
+    {
+      "id": 7,
+      "key": "capture",
+      "en": "Capture",
+      "he": "לכידה",
+      "leader": "Obsidian 9.0",
+      "score": 0,
+      "measured": 0,
+      "met": 0,
+      "metrics": [
+        {
+          "id": "capture.share-sheet",
+          "en": "Share sheet on real devices",
+          "he": "‏share sheet במכשירים אמיתיים",
+          "target": {
+            "op": "true"
+          },
+          "unit": "",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "capture.record-start-ms",
+          "en": "Press → recording",
+          "he": "מלחיצה להקלטה",
+          "target": {
+            "op": "<=",
+            "value": 1000
+          },
+          "unit": "ms",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "capture.whatsapp-real",
+          "en": "Real WhatsApp exports imported correctly",
+          "he": "ייצואי WhatsApp אמיתיים מיובאים נכון",
+          "target": {
+            "op": ">=",
+            "value": 0.95
+          },
+          "unit": "ratio",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "capture.clipper-sites",
+          "en": "Clipper correct on real sites",
+          "he": "‏clipper נכון באתרים אמיתיים",
+          "target": {
+            "op": ">=",
+            "value": 50
+          },
+          "unit": "sites",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        }
+      ],
+      "tasks": {
+        "count": 8,
+        "computed": null
+      }
+    },
+    {
+      "id": 8,
+      "key": "pdf",
+      "en": "PDF and reading",
+      "he": "PDF וקריאה",
+      "leader": "Readwise Reader 9.5",
+      "score": 0,
+      "measured": 0,
+      "met": 0,
+      "metrics": [
+        {
+          "id": "pdf.w3c-annotations",
+          "en": "W3C annotations",
+          "he": "הערות W3C",
+          "target": {
+            "op": "true"
+          },
+          "unit": "",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "pdf.ocr-cer",
+          "en": "Scanned Hebrew OCR CER",
+          "he": "‏CER של OCR עברי סרוק",
+          "target": {
+            "op": "<=",
+            "value": 0.03
+          },
+          "unit": "CER",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "pdf.highlight-scanned",
+          "en": "Highlights work on scanned PDFs",
+          "he": "הדגשה עובדת ב-PDF סרוקים",
+          "target": {
+            "op": ">=",
+            "value": 18
+          },
+          "unit": "of 20",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "pdf.zotero-roundtrip",
+          "en": "Annotations round-trip to Zotero",
+          "he": "הערות חוזרות ל-Zotero",
+          "target": {
+            "op": "true"
+          },
+          "unit": "",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        }
+      ],
+      "tasks": {
+        "count": 17,
+        "computed": null
+      }
+    },
+    {
+      "id": 9,
+      "key": "canvas",
+      "en": "Canvas",
+      "he": "קנבס",
+      "leader": "tldraw / Excalidraw+ 9.0",
+      "score": 0,
+      "measured": 0,
+      "met": 0,
+      "metrics": [
+        {
+          "id": "canvas.fps-5000",
+          "en": "Frames per second with 5,000 shapes",
+          "he": "פריימים בשנייה עם 5,000 צורות",
+          "target": {
+            "op": ">=",
+            "value": 55
+          },
+          "unit": "fps",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "canvas.collab-p95-ms",
+          "en": "Live co-editing p95",
+          "he": "‏p95 של עריכה משותפת חיה",
+          "target": {
+            "op": "<=",
+            "value": 150
+          },
+          "unit": "ms",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "canvas.export-hebrew",
+          "en": "Hebrew export correct",
+          "he": "ייצוא עברי נכון",
+          "target": {
+            "op": "true"
+          },
+          "unit": "",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        }
+      ],
+      "tasks": {
+        "count": 9,
+        "computed": null
+      }
+    },
+    {
+      "id": 10,
+      "key": "ai",
+      "en": "Local AI and agents",
+      "he": "AI מקומי וסוכנים",
+      "leader": "Notion AI 9.5",
+      "score": 0,
+      "measured": 0,
+      "met": 0,
+      "metrics": [
+        {
+          "id": "ai.heldout-task",
+          "en": "Held-out task success, local 7B model",
+          "he": "הצלחת משימה מוחזקת, מודל 7B מקומי",
+          "target": {
+            "op": ">=",
+            "value": 0.9
+          },
+          "unit": "ratio",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "ai.tool-calls-real",
+          "en": "Valid tool calls against a real model",
+          "he": "קריאות כלים תקינות מול מודל אמיתי",
+          "target": {
+            "op": ">=",
+            "value": 0.95
+          },
+          "unit": "ratio",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "ai.cloud-without-consent",
+          "en": "Cloud requests without consent",
+          "he": "בקשות ענן בלי הסכמה",
+          "target": {
+            "op": "<=",
+            "value": 0
+          },
+          "unit": "requests",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        }
+      ],
+      "tasks": {
+        "count": 53,
+        "computed": null
+      }
+    },
+    {
+      "id": 11,
+      "key": "speech",
+      "en": "Speech, OCR, translation, niqqud",
+      "he": "דיבור, OCR, תרגום, ניקוד",
+      "leader": "Dicta 9.5",
+      "score": 0,
+      "measured": 0,
+      "met": 0,
+      "metrics": [
+        {
+          "id": "speech.wer-desktop",
+          "en": "Held-out Hebrew WER, desktop",
+          "he": "‏WER עברי מוחזק, שולחן עבודה",
+          "target": {
+            "op": "<=",
+            "value": 0.1
+          },
+          "unit": "WER",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "speech.wer-browser",
+          "en": "Held-out Hebrew WER, browser",
+          "he": "‏WER עברי מוחזק, דפדפן",
+          "target": {
+            "op": "<=",
+            "value": 0.15
+          },
+          "unit": "WER",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "speech.niqqud",
+          "en": "Held-out niqqud accuracy",
+          "he": "דיוק ניקוד מוחזק",
+          "target": {
+            "op": ">=",
+            "value": 0.95
+          },
+          "unit": "ratio",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "speech.mos",
+          "en": "Read-aloud MOS",
+          "he": "‏MOS של הקראה",
+          "target": {
+            "op": ">=",
+            "value": 4
+          },
+          "unit": "MOS",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        }
+      ],
+      "tasks": {
+        "count": 22,
+        "computed": null
+      }
+    },
+    {
+      "id": 12,
+      "key": "sharing",
+      "en": "Sharing",
+      "he": "שיתוף",
+      "leader": "Google Docs 9.5",
+      "score": 0,
+      "measured": 0,
+      "met": 0,
+      "metrics": [
+        {
+          "id": "share.server-deployed",
+          "en": "E2EE sharing server deployed",
+          "he": "שרת שיתוף E2EE פרוס",
+          "target": {
+            "op": "true"
+          },
+          "unit": "",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "share.p95-il-ms",
+          "en": "Sharing p95 from Israel",
+          "he": "‏p95 של שיתוף מישראל",
+          "target": {
+            "op": "<=",
+            "value": 150
+          },
+          "unit": "ms",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "share.uptime-30d",
+          "en": "Uptime over 30 days",
+          "he": "זמינות ב-30 יום",
+          "target": {
+            "op": ">=",
+            "value": 0.999
+          },
+          "unit": "ratio",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "share.permissions-e2e",
+          "en": "Permissions and comments pass in e2e",
+          "he": "הרשאות ותגובות עוברות ב-e2e",
+          "target": {
+            "op": "true"
+          },
+          "unit": "",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        }
+      ],
+      "tasks": {
+        "count": 10,
+        "computed": null
+      }
+    },
+    {
+      "id": 13,
+      "key": "plugins",
+      "en": "Plugins and their security",
+      "he": "תוספים ואבטחתם",
+      "leader": "VS Code 9.5",
+      "score": 0,
+      "measured": 0,
+      "met": 0,
+      "metrics": [
+        {
+          "id": "plugins.third-party",
+          "en": "Signed, scanned third-party plugins",
+          "he": "תוספים של צד שלישי, חתומים ונסרקים",
+          "target": {
+            "op": ">=",
+            "value": 50
+          },
+          "unit": "plugins",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "plugins.quickjs-ours",
+          "en": "Our plugins passing in real QuickJS",
+          "he": "התוספים שלנו עוברים ב-QuickJS אמיתי",
+          "target": {
+            "op": ">=",
+            "value": 10
+          },
+          "unit": "of 10",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        }
+      ],
+      "tasks": {
+        "count": 6,
+        "computed": null
+      }
+    },
+    {
+      "id": 14,
+      "key": "performance",
+      "en": "Performance",
+      "he": "ביצועים",
+      "leader": "Linear 9.5",
+      "score": 0,
+      "measured": 0,
+      "met": 0,
+      "metrics": [
+        {
+          "id": "perf.startup-kb",
+          "en": "Startup bundle",
+          "he": "חבילת ההפעלה",
+          "target": {
+            "op": "<=",
+            "value": 250
+          },
+          "unit": "KB gz",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "perf.fcp-mid-phone-ms",
+          "en": "FCP on a mid-range phone",
+          "he": "‏FCP בטלפון בינוני",
+          "target": {
+            "op": "<=",
+            "value": 1000
+          },
+          "unit": "ms",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "perf.inp-p75-ms",
+          "en": "INP p75",
+          "he": "‏INP ‏p75",
+          "target": {
+            "op": "<=",
+            "value": 100
+          },
+          "unit": "ms",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "perf.search-100k-ms",
+          "en": "Search in 100,000 notes",
+          "he": "חיפוש ב-100,000 פתקים",
+          "target": {
+            "op": "<=",
+            "value": 200
+          },
+          "unit": "ms",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "perf.budget-overruns",
+          "en": "Budget overruns",
+          "he": "חריגות תקציב",
+          "target": {
+            "op": "<=",
+            "value": 0
+          },
+          "unit": "overruns",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        }
+      ],
+      "tasks": {
+        "count": 13,
+        "computed": null
+      }
+    },
+    {
+      "id": 15,
+      "key": "a11y",
+      "en": "Accessibility",
+      "he": "נגישות",
+      "leader": "Google Docs 9.0",
+      "score": 0,
+      "measured": 0,
+      "met": 0,
+      "metrics": [
+        {
+          "id": "a11y.acr",
+          "en": "Full ACR for WCAG 2.2 AA",
+          "he": "‏ACR מלא ל-WCAG 2.2 AA",
+          "target": {
+            "op": "true"
+          },
+          "unit": "",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "a11y.axe",
+          "en": "axe violations",
+          "he": "הפרות axe",
+          "target": {
+            "op": "<=",
+            "value": 0
+          },
+          "unit": "violations",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "a11y.sr-journeys",
+          "en": "Screen-reader journeys passing (VoiceOver, NVDA, TalkBack)",
+          "he": "מסעות בקורא מסך עוברים (VoiceOver, ‏NVDA, ‏TalkBack)",
+          "target": {
+            "op": ">=",
+            "value": 3
+          },
+          "unit": "readers",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "a11y.sr-users",
+          "en": "Screen-reader users completing ≥ 8/10 tasks",
+          "he": "משתמשי קורא מסך שמשלימים ≥ 8/10 משימות",
+          "target": {
+            "op": ">=",
+            "value": 3
+          },
+          "unit": "users",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "a11y.statement-5568",
+          "en": "Accessibility statement per IS 5568",
+          "he": "הצהרת נגישות לפי ת״י 5568",
+          "target": {
+            "op": "true"
+          },
+          "unit": "",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        }
+      ],
+      "tasks": {
+        "count": 6,
+        "computed": null
+      }
+    },
+    {
+      "id": 16,
+      "key": "apps",
+      "en": "Mobile and desktop",
+      "he": "מובייל ושולחן עבודה",
+      "leader": "Bear / Craft 9.5",
+      "score": 0,
+      "measured": 0,
+      "met": 0,
+      "metrics": [
+        {
+          "id": "apps.signed-stores",
+          "en": "Signed apps live in the stores",
+          "he": "אפליקציות חתומות בחנויות",
+          "target": {
+            "op": ">=",
+            "value": 2
+          },
+          "unit": "stores",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "apps.crash-free",
+          "en": "Crash-free sessions",
+          "he": "סשנים בלי קריסה",
+          "target": {
+            "op": ">=",
+            "value": 0.995
+          },
+          "unit": "ratio",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "apps.auto-update-os",
+          "en": "Systems where auto-update works",
+          "he": "מערכות שהעדכון האוטומטי עובד בהן",
+          "target": {
+            "op": ">=",
+            "value": 3
+          },
+          "unit": "systems",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "apps.update-drill",
+          "en": "Update drill: install N, publish N+1, it updates",
+          "he": "תרגיל עדכון: מתקינים N, מפרסמים N+1, והוא מתעדכן",
+          "target": {
+            "op": "true"
+          },
+          "unit": "",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        }
+      ],
+      "tasks": {
+        "count": 17,
+        "computed": null
+      }
+    },
+    {
+      "id": 17,
+      "key": "ux",
+      "en": "Onboarding and UX polish",
+      "he": "התחלה וליטוש UX",
+      "leader": "Linear / Craft 9.5",
+      "score": 0,
+      "measured": 0,
+      "met": 0,
+      "metrics": [
+        {
+          "id": "ux.sus",
+          "en": "SUS with 12 Hebrew-speaking users",
+          "he": "‏SUS עם 12 משתמשים עבריים",
+          "target": {
+            "op": ">=",
+            "value": 80
+          },
+          "unit": "SUS",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "ux.first-note-s",
+          "en": "Time to the first note",
+          "he": "זמן עד הפתק הראשון",
+          "target": {
+            "op": "<=",
+            "value": 4
+          },
+          "unit": "s",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "ux.raw-errors",
+          "en": "Raw errors shown to users",
+          "he": "שגיאות גולמיות שמוצגות למשתמש",
+          "target": {
+            "op": "<=",
+            "value": 0
+          },
+          "unit": "errors",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "ux.empty-no-action",
+          "en": "Empty states without an action",
+          "he": "מצבים ריקים בלי פעולה",
+          "target": {
+            "op": "<=",
+            "value": 0
+          },
+          "unit": "states",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        }
+      ],
+      "tasks": {
+        "count": 16,
+        "computed": null
+      }
+    },
+    {
+      "id": 18,
+      "key": "privacy",
+      "en": "Privacy and security",
+      "he": "פרטיות ואבטחה",
+      "leader": "Standard Notes 9.5",
+      "score": 0,
+      "measured": 0,
+      "met": 0,
+      "metrics": [
+        {
+          "id": "privacy.findings",
+          "en": "Open critical/high findings",
+          "he": "ממצאים קריטיים/גבוהים פתוחים",
+          "target": {
+            "op": "<=",
+            "value": 0
+          },
+          "unit": "findings",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "privacy.external-audit",
+          "en": "External audit done",
+          "he": "ביקורת חיצונית בוצעה",
+          "target": {
+            "op": "true"
+          },
+          "unit": "",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "privacy.reproducible",
+          "en": "Reproducible build verified",
+          "he": "בנייה משוחזרת אומתה",
+          "target": {
+            "op": "true"
+          },
+          "unit": "",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "privacy.signed-report",
+          "en": "Signed privacy report",
+          "he": "דוח פרטיות חתום",
+          "target": {
+            "op": "true"
+          },
+          "unit": "",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "privacy.high-advisories",
+          "en": "High or critical advisories",
+          "he": "ייעוצים high ומעלה",
+          "target": {
+            "op": "<=",
+            "value": 0
+          },
+          "unit": "advisories",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "privacy.private-reporting",
+          "en": "Private vulnerability reporting on",
+          "he": "דיווח פגיעויות פרטי פעיל",
+          "target": {
+            "op": "true"
+          },
+          "unit": "",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "privacy.secret-scanning",
+          "en": "Secret scanning and push protection on",
+          "he": "סריקת סודות ו-push protection פעילים",
+          "target": {
+            "op": "true"
+          },
+          "unit": "",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        }
+      ],
+      "tasks": {
+        "count": 38,
+        "computed": null
+      }
+    },
+    {
+      "id": 19,
+      "key": "docs",
+      "en": "Docs, community and launch",
+      "he": "תיעוד, קהילה והשקה",
+      "leader": "Obsidian / Notion 9.5",
+      "score": 0,
+      "measured": 0,
+      "met": 0,
+      "metrics": [
+        {
+          "id": "docs.he-parity",
+          "en": "Hebrew length vs English, worst page",
+          "he": "אורך העברית מול האנגלית, העמוד הגרוע",
+          "target": {
+            "op": ">=",
+            "value": 0.9
+          },
+          "unit": "ratio",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "docs.pagefind",
+          "en": "Pagefind runs on a real build",
+          "he": "‏Pagefind רץ על בנייה אמיתית",
+          "target": {
+            "op": "true"
+          },
+          "unit": "",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "docs.gifs",
+          "en": "Feature GIFs",
+          "he": "‏GIF-ים של פיצ'רים",
+          "target": {
+            "op": ">=",
+            "value": 30
+          },
+          "unit": "GIFs",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "docs.beta-testers",
+          "en": "Beta testers",
+          "he": "בודקי בטא",
+          "target": {
+            "op": ">=",
+            "value": 50
+          },
+          "unit": "people",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "docs.discussions",
+          "en": "Discussions active",
+          "he": "‏Discussions פעיל",
+          "target": {
+            "op": "true"
+          },
+          "unit": "",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        },
+        {
+          "id": "docs.release-notes",
+          "en": "Monthly release notes",
+          "he": "הערות שחרור חודשיות",
+          "target": {
+            "op": "true"
+          },
+          "unit": "",
+          "status": "not measured",
+          "value": null,
+          "credit": 0,
+          "receipt": null
+        }
+      ],
+      "tasks": {
+        "count": 11,
+        "computed": null
+      }
+    }
+  ]
+}
