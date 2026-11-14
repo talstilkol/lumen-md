@@ -1,4 +1,5 @@
-import { test, expect, devices, type Page } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
+import { onPhones } from "./_phones";
 import { RTL_NOTE as NOTE } from "./rtl-note";
 
 /**
@@ -158,22 +159,13 @@ test("Hebrew interface: the chrome is mirrored and nothing overflows", async ({ 
 });
 
 // ── Phones ──────────────────────────────────────────────────────────────
-for (const name of ["iPhone 14", "Pixel 7"] as const) {
-  test.describe(name, () => {
-    // Device emulation (viewport, touch, mobile UA) on Chromium; WebKit's
-    // engine itself is covered by the desktop webkit project above.
-    const { defaultBrowserType: _engine, ...device } = devices[name];
-    test.use(device);
-    // skip-reason: Firefox has no mobile emulation (isMobile) in Playwright; WebKit's layout is covered by the desktop webkit project | task: 9.2 | until: 2027-05-12
-    test.skip(({ browserName }) => browserName !== "chromium", "phones are emulated on Chromium");
-
-    for (const locale of ["he", "en"] as const) {
-      test(`preview in ${locale}: the matrix holds and nothing overflows`, async ({ page }) => {
-        await open(page, locale, "preview");
-        await checkPreviewBlocks(page);
-        // A wide table scrolls inside its own box, not the page.
-        expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
-      });
-    }
-  });
-}
+onPhones(() => {
+  for (const locale of ["he", "en"] as const) {
+    test(`preview in ${locale}: the matrix holds and nothing overflows`, async ({ page }) => {
+      await open(page, locale, "preview");
+      await checkPreviewBlocks(page);
+      // A wide table scrolls inside its own box, not the page.
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
+    });
+  }
+});
