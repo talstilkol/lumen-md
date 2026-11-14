@@ -26,12 +26,15 @@ export interface EmbeddingProvider {
 }
 
 const OLLAMA_EMBED_MODELS = /^(nomic-embed-text|embeddinggemma|mxbai-embed-large|all-minilm|bge-m3|snowflake-arctic-embed)/i;
+/** The Ollama embedding models that put Hebrew and English in one space (src/search/crossLingual.ts). */
+const OLLAMA_MULTILINGUAL = /^(bge-m3|embeddinggemma)/i;
 
 async function ollamaEmbeddingModel(): Promise<string | null> {
   const { getBaseUrl, listOllamaModels, isOllamaAvailable } = await import("./ollamaProvider");
   if (!isLocalOrigin(getBaseUrl()) || !(await isOllamaAvailable())) return null;
-  const models = await listOllamaModels();
-  return models.find((m) => OLLAMA_EMBED_MODELS.test(m.name))?.name ?? null;
+  const models = (await listOllamaModels()).filter((m) => OLLAMA_EMBED_MODELS.test(m.name));
+  // A multilingual model first (W10.B6): with it, a Hebrew query reaches English notes; an English-only one can't.
+  return (models.find((m) => OLLAMA_MULTILINGUAL.test(m.name)) ?? models[0])?.name ?? null;
 }
 
 function ollamaProvider(model: string): EmbeddingProvider {
@@ -97,4 +100,4 @@ export async function pickEmbeddingProvider(): Promise<EmbeddingProvider> {
 }
 
 /** Tests. */
-export const __providers = { transformersProvider, openAiProvider, ollamaProvider };
+export const __providers = { transformersProvider, openAiProvider, ollamaProvider, ollamaEmbeddingModel };

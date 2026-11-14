@@ -41,7 +41,7 @@ import { useAppStore } from "../store/useStore";
 function setCaps(caps: typeof FREE_CAPS) {
   useEntitlement.setState({ capabilities: caps, entitlement: null, loading: false });
 }
-function openOn(mode: "smart" | "ai") {
+function openOn(mode: "search" | "smart" | "ai") {
   (window as unknown as { __lumenSearchMode?: string }).__lumenSearchMode = mode;
   render(<SearchDialog open onClose={() => {}} onOpenFile={() => {}} />);
 }
@@ -95,6 +95,18 @@ describe("Smart search gate", () => {
     fireEvent.change(screen.getByRole("textbox"), { target: { value: "quarterly plan" } });
     await waitFor(() => expect(searchHybrid).toHaveBeenCalled());
     expect(screen.queryByTestId("upgrade-notice")).toBeNull();
+  });
+});
+
+describe("Cross-lingual status (W10.B6)", () => {
+  it("a Hebrew keyword search that finds little says that reaching English notes needs a multilingual model", async () => {
+    openOn("search");
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "מתכון לעוגה" } });
+    const line = await screen.findByTestId("search-crosslingual-status");
+    expect(line.textContent).toMatch(/bge-m3/);
+    expect(line.textContent).toMatch(/EmbeddingGemma/);
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "cake recipe" } });
+    await waitFor(() => expect(screen.queryByTestId("search-crosslingual-status")).toBeNull());
   });
 });
 
