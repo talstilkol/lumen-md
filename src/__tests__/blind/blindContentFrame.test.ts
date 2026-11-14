@@ -24,9 +24,12 @@ import {
 const root = fileURLToPath(new URL("../../../", import.meta.url));
 type Csp = Record<string, string[]>;
 const policy = JSON.parse(readFileSync(`${root}security/policy.json`, "utf8")) as {
+  embedProviders: string[];
   routes: Record<string, { csp: Csp }>;
   hosts: Record<string, { csp?: Array<{ routes: string | string[]; add?: Csp; omit?: string[] }> }>;
 };
+/** A directive's sources as scripts/headers.mjs renders them: `@embedProviders` is the policy's list (plan W8.7). */
+const expand = (v: string[]): string[] => v.flatMap((s) => (s === "@embedProviders" ? policy.embedProviders : [s]));
 
 /** The app's policy as a host renders it: the route's directives plus the host's additions. */
 function appPolicyFor(host: string): Csp {
@@ -34,13 +37,13 @@ function appPolicyFor(host: string): Csp {
   for (const rule of policy.hosts[host]?.csp ?? []) {
     const applies = rule.routes === "*" || (Array.isArray(rule.routes) && rule.routes.includes("app"));
     if (!applies) continue;
-    for (const [k, v] of Object.entries(rule.add ?? {})) out[k] = [...(out[k] ?? []), ...v];
+    for (const [k, v] of Object.entries(rule.add ?? {})) out[k] = [...(out[k] ?? []), ...expand(v)];
     for (const k of rule.omit ?? []) delete out[k];
   }
   return out;
 }
 
-const PROVIDERS = policy.routes["content-frame"].csp["frame-src"];
+const PROVIDERS = expand(policy.routes["content-frame"].csp["frame-src"]);
 
 describe("the app policy (C1)", () => {
   for (const host of ["vercel", "meta", "tauri", "deploy-nginx", "cloudflare", "netlify"]) {
