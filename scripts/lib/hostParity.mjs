@@ -47,8 +47,6 @@ export const BUILT_FILES = [
   "index.html",
   "sw.js",
   "manifest.webmanifest",
-  "playground-runner.html",
-  "livejs-runner.html",
   "assets/index-AbC123.js",
   "assets/index-AbC123.css",
   "assets/graphviz.worker-AbC123.js",
@@ -77,6 +75,7 @@ export const PROBES = [
   ["/playground-runner.html", "the playground runner (Pages: 308 to /playground-runner)"],
   ["/livejs-runner.html", "the live-js runner (Pages: 308 to /livejs-runner)"],
   ["/playground/vue.esm-browser.js", "a playground vendor file (CORS)"],
+  ["/runners/livejs-runner.js", "a runner page's prebuilt script (CORS, plan W10.D1)"],
   ["/favicon.svg", "a static file"],
   ["/missing-image.png", "a missing top-level file"],
 ];

@@ -34,7 +34,8 @@ const read = (p: string) => readFileSync(join(ROOT, p), "utf8");
 const vercelBase = JSON.parse(read("deploy/vercel.base.json"));
 const headersText = read("public/_headers");
 const policy = loadPolicy(ROOT);
-const FILES: string[] = [...BUILT_FILES, "favicon.svg"];
+// The files of public/ the probes ask for (the runner pages and their bundles are public files since W10.D1).
+const FILES: string[] = [...BUILT_FILES, "favicon.svg", "playground-runner.html", "livejs-runner.html", "runners/livejs-runner.js", "runners/playground-runner.js"];
 
 type Probe = { path: string; same: boolean; accepted?: string; diffs: string[] };
 type Report = { ok: boolean; same: number; accepted: number; failed: number; results: Probe[] };

@@ -13,8 +13,8 @@
  *   netlify/edge-functions/runner-headers.ts  Netlify: the runner pages' own policy
  *   deploy/vercel.base.json              Vercel (read through vercel.ts)
  *   deploy/nginx.conf (+ runtime include) the one nginx image (Dockerfile: fly.toml and docker-compose.yml)
- *   index.html, livejs-runner.html,      <meta http-equiv> copies
- *   playground-runner.html
+ *   index.html, public/livejs-runner.html, <meta http-equiv> copies
+ *   public/playground-runner.html, public/content-frame.html
  *   src-tauri/tauri.conf.json            desktop app
  *
  *   node scripts/headers.mjs [--check]   exit 1 + a readable diff when a source differs
