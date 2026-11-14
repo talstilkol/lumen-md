@@ -27,6 +27,8 @@ export interface ConflictInput {
  *   local    — keep this device's version;
  *   remote   — take the other device's version;
  *   keepBoth — keep this device's version at the path and the other one as a conflict copy next to it;
+ *   conflictFile — Syncthing's way (plan W11.S6): the path gets the other device's version, and this
+ *              device's goes to `<name>.sync-conflict-<YYYYMMDD-HHMMSS>-<device>.<ext>` next to it;
  *   hold     — decide later: nothing changes on either side, and the next round asks again.
  */
 export type ConflictResolution =
@@ -34,6 +36,7 @@ export type ConflictResolution =
   | { kind: "local" }
   | { kind: "remote" }
   | { kind: "keepBoth" }
+  | { kind: "conflictFile" }
   | { kind: "hold" };
 
 export type ConflictResolver = (c: ConflictInput) => Promise<ConflictResolution>;
@@ -122,4 +125,63 @@ export function conflictCopyPath(path: string, tag: string, taken: (p: string) =
     const p = `${dir}${stem} (conflict ${tag}${i > 1 ? ` ${i}` : ""})${ext}`;
     if (!taken(p)) return p;
   }
+}
+
+/**
+ * Plan W11.S6: Syncthing's conflict-file name, `<stem>.sync-conflict-<YYYYMMDD-HHMMSS>-<device>.<ext>`
+ * (UTC; the device is the first 7 characters of its id), with "-2", "-3"…
+ * until `taken` says the name is free. Syncthing users' ignore patterns
+ * (`*.sync-conflict-*`) match it.
+ */
+export function syncConflictPath(path: string, at: number, device: string, taken: (p: string) => boolean): string {
+  const slash = path.lastIndexOf("/");
+  const dir = path.slice(0, slash + 1);
+  const file = path.slice(slash + 1);
+  const dot = file.lastIndexOf(".");
+  const stem = dot > 0 ? file.slice(0, dot) : file;
+  const ext = dot > 0 ? file.slice(dot) : "";
+  const iso = new Date(at).toISOString();
+  const stamp = `${iso.slice(0, 10).replace(/-/g, "")}-${iso.slice(11, 19).replace(/:/g, "")}`;
+  const id = (device.replace(/[^A-Za-z0-9]/g, "").slice(0, 7) || "device").toUpperCase();
+  for (let i = 1; ; i++) {
+    const p = `${dir}${stem}.sync-conflict-${stamp}-${id}${i > 1 ? `-${i}` : ""}${ext}`;
+    if (!taken(p)) return p;
+  }
+}
+
+const MARKDOWN = /\.(md|markdown|mdx)$/i;
+
+/**
+ * Plan W11.S6, "file" mode: no merge and no dialog.
+ *   • A Markdown note: both versions go into the note's history, the path gets
+ *     the other device's version, and this device's version becomes a
+ *     conflict file next to it (`conflictFile`).
+ *   • Any other text file: last writer wins — the version already in the
+ *     vault, which reached it last — and this device's version goes into
+ *     the file's history.
+ *   • A binary file: the history keeps text only, so it gets a conflict file
+ *     too; nothing is ever dropped.
+ */
+export function fileModeResolver(keep: (path: string, ours: string, theirs: string) => Promise<void> = keepBothVersions, keepOne: (path: string, text: string) => Promise<void> = keepLocalVersion): ConflictResolver {
+  return async (c) => {
+    const local = asText(c.local);
+    const remote = asText(c.remote);
+    if (local === null || remote === null) return { kind: "conflictFile" };
+    if (MARKDOWN.test(c.path)) {
+      await keep(c.path, local, remote);
+      return { kind: "conflictFile" };
+    }
+    await keepOne(c.path, local);
+    return { kind: "remote" };
+  };
+}
+
+async function keepLocalVersion(path: string, text: string): Promise<void> {
+  const { recordSnapshot } = await import("../../storage/history");
+  await recordSnapshot(path, text, "merge").catch(() => false);
+}
+
+/** The resolver for this device's mode (./conflictMode.ts), read at every conflict, so a change applies at once. */
+export function modeResolver(mode: () => "merge" | "file", merge: ConflictResolver = dialogResolver, file: ConflictResolver = fileModeResolver()): ConflictResolver {
+  return (c) => (mode() === "file" ? file(c) : merge(c));
 }

@@ -18,7 +18,8 @@
 
 import { createVault, E2eeSync, unlockVault, type SyncResult } from "../engine";
 import { HEADER_NAME } from "../header";
-import { dialogResolver, type ConflictResolver } from "../conflict";
+import { modeResolver, type ConflictResolver } from "../conflict";
+import { loadConflictMode } from "../conflictMode";
 import { idbStateStore, type SyncStateStore } from "../state";
 import { vaultLocalFiles, type LocalFiles } from "../localFiles";
 import { createSyncProvider, loadProviderSettings, saveProviderSecret, saveProviderSettings, type ConnectedProvider, type ProviderSettings } from "../providers";
@@ -262,7 +263,8 @@ export function createSession(deps: SessionDeps = {}) {
         keys,
         local: files,
         store: await makeStore(keys.vaultId),
-        resolver: deps.resolver ?? dialogResolver,
+        // Plan W11.S6: this device's conflict mode (merge, or Syncthing-style conflict files), read per conflict.
+        resolver: deps.resolver ?? modeResolver(() => loadConflictMode()),
         exclude: (path, size) => exclude(path, size),
         onEvent: onEngineEvent,
       });
