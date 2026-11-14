@@ -60,4 +60,6 @@ Each one is good at something. This page says what each does on five points that
 
 > A claim marked *not yet verified* has a source that hasn't been checked yet. It is checked before the launch.
 
+Measured on public Hebrew benchmarks, with the command behind every number: [Hebrew in notes, measured](/project/hebrew-benchmark/).
+
 This page is generated from `launch/comparison.json` by `node scripts/launch-check.mjs --write`. To correct a claim, change the JSON with a source, and the page follows.

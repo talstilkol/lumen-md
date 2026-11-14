@@ -50,6 +50,7 @@ const T = {
     gaps: "What Lumen still lacks",
     checked: "Checked",
     how: "This page is generated from `launch/comparison.json` by `node scripts/launch-check.mjs --write`. To correct a claim, change the JSON with a source, and the page follows.",
+    benchmark: "Measured on public Hebrew benchmarks, with the command behind every number: [Hebrew in notes, measured](/project/hebrew-benchmark/).",
     docs: "Lumen docs",
   },
   he: {
@@ -63,6 +64,7 @@ const T = {
     gaps: "מה עדיין חסר ב-Lumen",
     checked: "נבדק",
     how: "הדף נוצר מ-`launch/comparison.json` באמצעות `node scripts/launch-check.mjs --write`. כדי לתקן טענה, משנים את ה-JSON עם מקור, והדף מתעדכן.",
+    benchmark: "במדידה על מדדים ציבוריים לעברית, עם הפקודה שמאחורי כל מספר: [עברית בפתקים, במדידה](/he/project/hebrew-benchmark/).",
     docs: "התיעוד של Lumen",
   },
 };
@@ -89,6 +91,7 @@ export function renderCompare(data, lang) {
   for (const g of data.lumenGaps) L.push(`- ${g[lang]} (${link(g.source, lang)})`);
   L.push("");
   if (anyUnverified) L.push(`> ${t.unverifiedNote}`, "");
-  L.push(t.how, "");
+  // W11.H13: the measured page next to this one.
+  L.push(t.benchmark, "", t.how, "");
   return L.join("\n");
 }
