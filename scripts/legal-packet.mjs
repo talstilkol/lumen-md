@@ -39,6 +39,12 @@ export const DOCS = [
   ["public/lexicon/LICENSE.md", "רישיון המילון העברי (ויקימילון)", "Licence of the Hebrew dictionary (Wiktionary)"],
   ["LICENSE", "הרישיון של Lumen עצמו (MIT)", "Lumen's own licence (MIT)"],
   ["SECURITY.md", "איך מדווחים על חולשה ומה קורה אחר כך", "How a vulnerability is reported and handled"],
+  ["legal/consent-register.json", "רשומת הסכמה לכל מסלול בפנקס, לפי הנחיית ההסכמה של הרשות (25.2.2026)", "A consent record for every ledger route, under the PPA consent guidance (25 Feb 2026)"],
+  ["docs/legal/consent-records.md", "איך הרשומות עונות על ההנחיה, וכלל ההסכמה מחדש", "How the records meet the guidance, and the re-consent rule"],
+  ["docs/legal/ropa.md", "רישום פעולות עיבוד (סעיף 30 ל-GDPR): הממסר, שרת השיתוף והמשוב", "Records of processing (GDPR Art. 30): the relay, the share server and feedback"],
+  ["docs/legal/dpia-share-server.md", "הערכת השפעה קצרה לשרת השיתוף, מעודכנת לקוד", "A short impact assessment of the share server, updated to the code"],
+  ["docs/legal/eu-representative-dpo.md", "ההחלטה על נציג באיחוד ועל ממונה הגנת פרטיות", "The decision on an EU representative and a DPO"],
+  ["docs/legal/breach-runbook.he.md", "נוהל אירוע: 72 שעות, דיווח לרשות, תבנית", "Breach runbook: 72 hours, reporting to the authority, a template"],
   ["legal/review-packet/recommendations.md", "טבלת ההמלצות: כל המלצה הופכת למשימה, בוצעה או נדחתה עם סיבה", "The recommendations table: each one becomes a task, done or declined with a reason"],
 ];
 
