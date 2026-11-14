@@ -9,7 +9,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { memoryProvider } from "../sync/e2ee/provider";
-import { E2eeSync, unlockVault, unlockWithDevice } from "../sync/e2ee/engine";
+import { E2eeSync, unlockVault, unlockWithDevice, unlockWithRecoveryKey } from "../sync/e2ee/engine";
 import { memoryFiles } from "../sync/e2ee/localFiles";
 import { memoryStateStore } from "../sync/e2ee/state";
 import { ageDecrypt } from "../sync/e2ee/age";
@@ -29,6 +29,8 @@ interface Vault {
   frozen?: boolean;
   /** A passphrase change cut off before its header: the old passphrase still opens the epoch before. */
   pending?: { oldPassphrase: string; oldEpoch: number; oldFiles: string[] };
+  /** Plan W11.S8: the recovery key (hex) opens the vault alone; the device revoked since can't. */
+  recovery?: { key: string; revoked: { id: string; identity: string } };
 }
 const V = JSON.parse(readFileSync(join(root, "docs/sync-protocol-vectors.json"), "utf8")) as {
   vaults: Vault[];
@@ -62,7 +64,7 @@ async function readAll(v: Vault, keysOf: (p: ReturnType<typeof memoryProvider>) 
 
 describe("the sync protocol's test vectors", () => {
   for (const v of V.vaults) {
-    it(`opens "${v.name}" with the passphrase${v.device ? " and with the device key" : ""}`, async () => {
+    it(`opens "${v.name}" with the passphrase${v.device ? " and with the device key" : ""}${v.recovery ? " and with the recovery key alone" : ""}`, async () => {
       const got = await readAll(v, (p) => unlockVault(p, v.passphrase, { minPbkdf2Iterations: 1000 }));
       expect(got).toEqual(v.expect);
       if (v.frozen) {
@@ -77,6 +79,13 @@ describe("the sync protocol's test vectors", () => {
         expect(keys.epoch).toBe(v.pending.oldEpoch);
         const name = await manifestName(keys);
         expect(Object.keys((await openManifest(keys, p.objects.get(name)!.data, name)).manifest.files)).toEqual(v.pending.oldFiles);
+      }
+      if (v.recovery) {
+        const key = new Uint8Array(Buffer.from(v.recovery.key, "hex"));
+        expect(await readAll(v, (p) => unlockWithRecoveryKey(p, key))).toEqual(v.expect);
+        expect(JSON.parse(Buffer.from(v.objects["lumen-e2ee-keyring"], "base64").toString("utf8")).protocol).toBe(3);
+        await expect(unlockWithRecoveryKey(await load(v), new Uint8Array(32))).rejects.toThrow(/not a recovery key/);
+        await expect(unlockWithDevice(await load(v), v.recovery.revoked.id, v.recovery.revoked.identity)).rejects.toThrow();
       }
       if (v.device) {
         const d = v.device;

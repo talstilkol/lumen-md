@@ -11,6 +11,7 @@ import { DecryptError, type VaultKeys } from "./keys";
 import {
   checkDeviceEnrolled,
   decodeKeyring,
+  keyringContents,
   keyringDigest,
   keysFromKeyring,
   PreReleaseKeyringError,
@@ -22,7 +23,8 @@ import {
 import { emptyManifest, manifestName, openManifest, sealManifest, type FreshnessAnchor, type Manifest } from "./manifest";
 import { PreconditionFailedError, type SyncProvider } from "./provider";
 import type { DeviceState } from "./state";
-import { NoVaultError, VaultExistsError } from "./engineTypes";
+import { NoVaultError, VaultExistsError, type RekeyRequest, type RekeyResult } from "./engineTypes";
+import { newRecoveryKey, recoveryKeys, RecoveryKeyError } from "./recovery";
 
 /**
  * Create a vault at `provider`: the header (create-only) and the first,
@@ -182,3 +184,42 @@ export async function unlockWithDevice(provider: SyncProvider, device: string, i
   return { keys };
 }
 
+
+/**
+ * Set up a recovery key (plan W11.S8): a fresh 256-bit key, wrapped into a
+ * new epoch by a re-key (rotation and revocation then keep it wrapped).
+ * Returns the key, which the caller shows once (W11.S9) and must not store.
+ */
+export async function setUpRecovery(sync: { keys(): VaultKeys; rekey(r: RekeyRequest): Promise<RekeyResult> }): Promise<{ key: Uint8Array; result: RekeyResult }> {
+  const key = newRecoveryKey();
+  const rk = await recoveryKeys(key, sync.keys().vaultId);
+  const result = await sync.rekey({ recovery: { recipient: rk.age.recipient, mac: rk.mac } });
+  return { key, result };
+}
+
+/**
+ * Open the vault with only the recovery key (plan W11.S8): the passphrase is
+ * forgotten, or this is a clean profile. The keyring's recovery wrap must
+ * carry a check only the vault's members could make, and the sealed part
+ * must name this key's recipient and MAC key. The keys have no passphrase
+ * wrap: set a new passphrase next (`rekey({ newPassphrase })`).
+ * RecoveryKeyError for another key or a vault without recovery.
+ */
+export async function unlockWithRecoveryKey(provider: SyncProvider, key: Uint8Array, state?: Pick<DeviceState, "ring"> | null): Promise<{ keys: VaultKeys }> {
+  const ring = await readKeyring(provider);
+  if (!ring) throw new RecoveryKeyError("This vault has no recovery key set up");
+  const secret = await unwrapSecret(ring.file, { recovery: key });
+  const placeholder = await crypto.subtle.generateKey({ name: "HMAC", hash: "SHA-256", length: 256 }, false, ["sign", "verify"]);
+  let keys: VaultKeys;
+  try {
+    keys = await keysFromKeyring(ring.file, secret, { header: placeholder, wrap: null }, { digest: ring.digest });
+  } catch (e) {
+    if (e instanceof PreReleaseKeyringError) throw e;
+    throw new TamperedWrapError();
+  }
+  if (state?.ring) await verifyAnchor(keys, state.ring);
+  const rk = await recoveryKeys(key, ring.file.vaultId);
+  const sealed = (await keyringContents(ring.file, keys)).recovery;
+  if (!sealed || sealed.recipient !== rk.age.recipient || sealed.mac !== rk.mac) throw new TamperedWrapError();
+  return { keys };
+}

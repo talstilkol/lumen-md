@@ -292,6 +292,7 @@ export abstract class E2eeSyncKeys extends E2eeSyncCore {
       carry: { label: previous.ring?.manifest ?? "manifest", epoch: previous.epoch, digest: frozenDigest },
       dropDevices,
       excludeRecipients: mine.map((r) => r.recipient).filter((r): r is string => !!r),
+      ...(opts.recovery !== undefined ? { recovery: opts.recovery } : {}),
       now: this.o.now,
     });
     const keys = prepared.keys;
