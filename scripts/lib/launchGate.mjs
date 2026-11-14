@@ -13,7 +13,17 @@
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const SHA = /^[0-9a-f]{7,40}$/;
-export const RECEIPT_KINDS = ["test", "run", "owner"];
+export const RECEIPT_KINDS = ["test", "run", "owner", "metric"];
+/**
+ * Where a metric's value comes from:
+ *   - "beta-reports": aggregated by `launch:gate -- --beta-metrics <dir>` from
+ *     the weekly opt-in beta reports testers chose to send (W6.31, W11.P4);
+ *   - "owner": measured or counted by the owner (a test protocol, a store
+ *     console, a drill) and recorded with its evidence.
+ */
+export const METRIC_FROM = ["beta-reports", "owner"];
+/** The metrics `aggregateBetaReports` computes. */
+export const BETA_METRICS = ["optInUsers", "testersWeek1", "activationRate", "d7", "d30"];
 
 /** Problems with milestones.json itself (shape, ids, sources, order). */
 export function milestoneProblems(data) {
@@ -47,6 +57,17 @@ export function milestoneProblems(data) {
       if (r.kind === "test" && !(Array.isArray(r.tests) && r.tests.length)) out.push(`${cw}: a test receipt names the test files`);
       if (r.kind === "run" && !(Array.isArray(r.runs) && r.runs.length)) out.push(`${cw}: a run receipt names the runs it needs`);
       if (r.kind === "owner" && !(Array.isArray(r.facts) && r.facts.length)) out.push(`${cw}: an owner receipt names the facts to record`);
+      if (r.kind === "metric") {
+        if (!METRIC_FROM.includes(r.from)) out.push(`${cw}: a metric receipt says where its values come from (${METRIC_FROM.join(" or ")})`);
+        if (!(Array.isArray(r.metrics) && r.metrics.length)) out.push(`${cw}: a metric receipt names the metrics and their thresholds`);
+        for (const mt of Array.isArray(r.metrics) ? r.metrics : []) {
+          if (!/^[a-z][A-Za-z0-9]*$/.test(String(mt?.name))) out.push(`${cw}: a metric needs a camelCase name`);
+          const hasMin = typeof mt?.min === "number" && Number.isFinite(mt.min);
+          const hasMax = typeof mt?.max === "number" && Number.isFinite(mt.max);
+          if (!hasMin && !hasMax) out.push(`${cw}/${mt?.name}: a metric needs a numeric min or max`);
+          if (r.from === "beta-reports" && !BETA_METRICS.includes(mt?.name)) out.push(`${cw}/${mt?.name}: not a metric the beta reports give (${BETA_METRICS.join(", ")})`);
+        }
+      }
     }
   }
   return out;
@@ -97,6 +118,20 @@ export function receiptProblems(criterion, receipt, ctx = {}) {
       else if (!String(r.evidence ?? "").trim()) out.push(`the run ${name}: no evidence (a log, a report or an artifact path)`);
     }
   }
+  if (spec.kind === "metric") {
+    const values = receipt.metrics && typeof receipt.metrics === "object" && !Array.isArray(receipt.metrics) ? receipt.metrics : {};
+    for (const mt of spec.metrics ?? []) {
+      const v = values[mt.name];
+      if (typeof v !== "number" || !Number.isFinite(v)) {
+        out.push(`the metric ${mt.name} is not recorded as a number`);
+        continue;
+      }
+      if (typeof mt.min === "number" && v < mt.min) out.push(`${mt.name} = ${v}, below ${mt.min}`);
+      if (typeof mt.max === "number" && v > mt.max) out.push(`${mt.name} = ${v}, above ${mt.max}`);
+    }
+    if (!String(receipt.evidence ?? "").trim()) out.push("the metric receipt needs evidence (the reports folder, a protocol or a console export)");
+    if (spec.from === "beta-reports" && !(Number.isInteger(receipt.reports) && receipt.reports > 0)) out.push("the metric receipt needs `reports`: how many beta reports it was computed from");
+  }
   if (spec.kind === "owner") {
     const facts = receipt.facts && typeof receipt.facts === "object" ? receipt.facts : {};
     for (const f of spec.facts ?? []) {
@@ -140,6 +175,80 @@ export function gateText(r) {
     lines.push(`${c.pass ? "PASS" : "FAIL"}  ${c.id} [${c.kind}; ${c.source.task}] ${c.en}`);
     for (const p of c.problems) lines.push(`        - ${p}`);
   }
+  const open = r.criteria.filter((c) => !c.pass).map((c) => c.id);
+  if (open.length) lines.push(`open (${open.length}): ${open.join(", ")}`);
   lines.push(`${r.pass ? "PASS" : "FAIL"} ${r.id}: ${r.passed}/${r.total} criteria with a valid receipt${r.before && !r.before.pass ? `; ${r.before.id} is not green` : ""}`);
   return lines.join("\n") + "\n";
+}
+
+/**
+ * Plan W11.L2: the beta metrics, from the weekly opt-in beta reports
+ * (`kind: "lumen-beta-report"`, src/beta/programme.ts) that testers sent.
+ * One report per tester per week; the folder for a receipt holds one week.
+ * Reports carry no id, so a tester who sent two in the same folder counts
+ * twice: whoever collects them keeps the latest one per tester.
+ *
+ *   - optInUsers: reports in the folder (every report is an opt-in);
+ *   - testersWeek1: reports from testers at least one week into the beta;
+ *   - activationRate: activated / reports whose activation is decided
+ *     (W11.P4: own note or import, plus a second-day return within 7 days);
+ *   - d7 / d30: retained7 / retained30 true over the reports where it is
+ *     known (W4.26's retention: did they come back).
+ *
+ * A rate over 0 known reports is null, never 0 or 1.
+ */
+export function aggregateBetaReports(reports) {
+  const list = (Array.isArray(reports) ? reports : []).filter((r) => r && r.kind === "lumen-beta-report");
+  const rate = (pick) => {
+    const known = list.map(pick).filter((v) => v === true || v === false);
+    return known.length ? Math.round((known.filter(Boolean).length / known.length) * 1000) / 1000 : null;
+  };
+  const weeks = new Set(list.map((r) => r.week).filter(Boolean));
+  return {
+    reports: list.length,
+    weeks: [...weeks].sort(),
+    optInUsers: list.length,
+    testersWeek1: list.filter((r) => Number(r.weeksInBeta) >= 1).length,
+    activationRate: rate((r) => r.activation?.activated),
+    d7: rate((r) => r.retained7),
+    d30: rate((r) => r.retained30),
+  };
+}
+
+/** docs/launch/ga-checklist.md, built from milestones.json (W11.L2). */
+export function checklistMarkdown(data) {
+  const out = [
+    "<!-- Built from docs/launch/milestones.json by `npm run launch:gate -- --checklist`. Do not edit by hand: `--check` fails when this file differs. -->",
+    "",
+    "# Launch checklist: M1–M4 and 1.0 GA / רשימת השקה",
+    "",
+    "Each item is a criterion in `docs/launch/milestones.json`. It names the plan acceptance it maps to and the receipt that proves it (`docs/launch/receipts/<milestone>/<criterion>.json`). `npm run launch:gate -- <milestone>` prints every open item. A box is ticked only by a valid receipt, never by hand.",
+    "",
+    "כל פריט הוא קריטריון ב-`docs/launch/milestones.json`, עם קבלת התוכנית שהוא ממופה אליה והקבלה שמוכיחה אותו. `npm run launch:gate -- <אבן דרך>` מדפיס כל פריט פתוח.",
+    "",
+  ];
+  const proof = (r) => {
+    if (r.kind === "test") return `test: ${r.tests.map((t) => `\`${t}\``).join(", ")}`;
+    if (r.kind === "run") return `run: ${r.runs.map((t) => `\`${t}\``).join(", ")}`;
+    if (r.kind === "owner") return `owner facts: ${r.facts.map((t) => `\`${t}\``).join(", ")}`;
+    return `metric (${r.from}): ${r.metrics.map((m) => `\`${m.name}\` ${typeof m.min === "number" ? `≥ ${m.min}` : ""}${typeof m.min === "number" && typeof m.max === "number" ? ", " : ""}${typeof m.max === "number" ? `≤ ${m.max}` : ""}`).join("; ")}`;
+  };
+  for (const m of data.milestones) {
+    out.push(`## ${m.id}: ${m.title.en} / ${m.title.he}`, "");
+    const meta = [m.target ? `Target: ${m.target}.` : "", m.after ? `Opens after ${m.after} passes.` : ""].filter(Boolean).join(" ");
+    if (meta) out.push(meta, "");
+    let group = null;
+    for (const c of m.criteria) {
+      if (c.group && c.group !== group) {
+        group = c.group;
+        out.push(`**${group}**`, "");
+      }
+      out.push(`- [ ] **${c.id}**: ${c.en}`);
+      out.push(`  - ${c.he}`);
+      out.push(`  - Source: ${c.source.task}${c.source.research ? ` (${c.source.research})` : ""}: ${c.source.acceptance}`);
+      out.push(`  - Proof: ${proof(c.receipt)}`);
+    }
+    out.push("");
+  }
+  return out.join("\n");
 }
