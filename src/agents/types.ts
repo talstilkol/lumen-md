@@ -284,7 +284,7 @@ export interface ExecutorResponse {
   usage?: ExecutorUsage;
 }
 
-export type ExecutorId = "ollama" | "webllm" | "transformers" | "chat";
+export type ExecutorId = "ollama" | "lmstudio" | "webllm" | "transformers" | "chat";
 
 export interface Availability {
   available: boolean;
