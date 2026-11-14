@@ -1,0 +1,38 @@
+{
+  "id": "ner-nemo",
+  "task": "ner",
+  "title": "NEMO — Hebrew named entities (token level), entity F1",
+  "dataset": {
+    "hub": "github",
+    "id": "OnlpLab/NEMO-Corpus",
+    "url": "https://github.com/OnlpLab/NEMO-Corpus",
+    "revision": null,
+    "files": [
+      {
+        "path": "data/spmrl/gold/token-single_gold_test.bmes",
+        "sha256": null
+      }
+    ]
+  },
+  "license": {
+    "id": "to confirm",
+    "url": "https://github.com/OnlpLab/NEMO-Corpus",
+    "redistribute": false,
+    "note": "Built on the SPMRL Hebrew treebank; its terms decide whether HalleluBERT may be fine-tuned on it (W11.H11)."
+  },
+  "split": "test",
+  "format": "conll-bioes",
+  "normalizer": "none",
+  "metrics": [
+    "precision",
+    "recall",
+    "f1"
+  ],
+  "owed": [
+    "pin: set dataset.revision to a commit of OnlpLab/NEMO-Corpus and confirm the token-level test file's path (written here from the repository's layout as remembered, not read)",
+    "run DictaBERT-NER int8 in the browser and fp32: F1 ≥ 0.85 and int8 within 2 points (nerAccepted)"
+  ],
+  "plan": [
+    "W11.H11"
+  ]
+}

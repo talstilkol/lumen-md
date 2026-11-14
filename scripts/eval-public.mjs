@@ -32,6 +32,7 @@ import { freezePrompts, selectFrozen, scoreRoundTrip, voicePasses } from "../src
 import { parseNakdimonTest, scoreNikud } from "../src/eval/public/adapters/nikud.ts";
 import { parseMilimJsonl, scoreG2p } from "../src/eval/public/adapters/g2p.ts";
 import { parseImageJsonl, scoreHandwriting, handwritingExposed } from "../src/eval/public/adapters/handwriting.ts";
+import { parseConll, scoreNer } from "../src/eval/public/adapters/ner.ts";
 import { parseBidiCharacterTest, parseBidiTest, runCharacterTest, runClassTest, bidiJsEngine, BIDI_CONFORMANCE_MIN } from "../src/eval/public/adapters/bidi.ts";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -168,7 +169,8 @@ async function run(id) {
     const s = await scoreHandwriting(parseImageJsonl(text(m.export.output)).map(abs), engine);
     return writeResult(m, model, rev, engine.id, s, { exposed: handwritingExposed(s.metrics) });
   }
-  die(`no runner for task "${m.task}" here (NER, lemma, retrieval and LLM runners come with their plan tasks)`);
+  if (m.task === "ner") return writeResult(m, model, rev, engine.id, await scoreNer(parseConll(text(m.dataset.files[0].path), m.id), engine));
+  die(`no runner for task "${m.task}" here (lemma, retrieval and LLM runners come with their plan tasks)`);
 }
 
 async function runBidi(m) {

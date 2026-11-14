@@ -19,6 +19,24 @@
       "vars": []
     },
     {
+      "key": "backlinks.entities",
+      "en": "Names in this note",
+      "vars": []
+    },
+    {
+      "key": "backlinks.entityLinkAria",
+      "en": "Link “{text}” to the note {note}",
+      "vars": [
+        "text",
+        "note"
+      ]
+    },
+    {
+      "key": "backlinks.entityNoNote",
+      "en": "no note yet",
+      "vars": []
+    },
+    {
       "key": "backlinks.link",
       "en": "Link",
       "vars": []

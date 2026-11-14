@@ -1182,7 +1182,11 @@
       },
       "catalog": "CONVERTED_MODELS (src/ai/convertedModels.ts)",
       "verified": true,
-      "notes": "Converted to ONNX by .github/workflows/model-convert.yml (plan 6.0). Downloaded only with consent, size shown first, cached in OPFS; not downloadable until the host is chosen (15.9). CC BY 4.0: the attribution must be shown where the model is offered."
+      "notes": "Converted to ONNX by .github/workflows/model-convert.yml (plan 6.0). Downloaded only with consent, size shown first, cached in OPFS; not downloadable until the host is chosen (15.9). CC BY 4.0: the attribution must be shown where the model is offered.",
+      "benchmarks": [
+        "ner-nemo",
+        "ner-bmc"
+      ]
     },
     {
       "id": "siglip-base-patch16-256-multilingual",
@@ -1470,6 +1474,41 @@
         "asr-fleurs-yi"
       ],
       "notes": "Yiddish file transcription on the desktop (plan W11.H18, W7.9) through the whisper.cpp track of W1.17. Licence from the ivrit.ai organisation card (research R2 §1.2), not re-read at a pinned revision: verified false until W11.M13 pins the ggml file (repository, revision, size, sha256). Until then the engine is never offered."
+    },
+    {
+      "id": "HalleluBERT",
+      "kind": "other",
+      "source": "https://aclanthology.org/2026.lrec-1.236.pdf",
+      "license": "MIT",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "HalleluBERT © its authors (LREC 2026), licensed under the MIT License.",
+      "size": "base / large encoders; a NER fine-tune is not published",
+      "runs": "browser",
+      "delivery": "none",
+      "verified": false,
+      "decision": "W11.H11 (15.11): a candidate only. It is an encoder (NEMO F1 90.96 large / 87.06 base, BMC 93.2–93.3 per the paper); Lumen would fine-tune base on NEMO, which is allowed only if NEMO's licence permits training and redistributing the fine-tuned weights — checked first (W11.M3). Until then DictaBERT-NER is the model.",
+      "benchmarks": [
+        "ner-nemo",
+        "ner-bmc"
+      ],
+      "notes": "Not referenced by app code."
+    },
+    {
+      "id": "NeoDictaBERT",
+      "kind": "other",
+      "source": "https://huggingface.co/dicta-il/neodictabert",
+      "license": "CC-BY-SA-4.0",
+      "class": "conditional",
+      "commercial": "conditional",
+      "unmodified": false,
+      "attribution": "NeoDictaBERT © DICTA, licensed under CC BY-SA 4.0.",
+      "size": "28 layers × 768, 4,096 context",
+      "runs": "browser",
+      "delivery": "none",
+      "verified": false,
+      "decision": "W11.H11 (15.11): not used for NER. A fine-tune would be an adaptation under share-alike (CC BY-SA 4.0), so Lumen's weights would have to be CC BY-SA too; DictaBERT-NER (CC BY 4.0) and HalleluBERT (MIT) avoid that.",
+      "notes": "Listed so the licence gate sees it if someone adds it."
     }
   ]
 }
