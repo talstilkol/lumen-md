@@ -160,3 +160,25 @@ export function buildAirplaneCommands(): Command[] {
     },
   ];
 }
+
+/** Screenshot to note (plan W7.16, W10.C22): the image on the clipboard, or a file, read on this device and previewed. */
+export function buildScreenshotCommands(ctx: CommandContext): Command[] {
+  return [
+    {
+      id: "ai.screenshotToNote",
+      label: t("cmd.screenshotToNote"),
+      hint: t("cmd.screenshotToNote.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      action: () =>
+        void import("../../ai/ScreenshotNoteDialog").then(async (m) => {
+          const image = (await m.clipboardImage()) ?? (await m.pickImageFile());
+          if (!image) return;
+          const { getLocale } = await import("../../i18n");
+          const md = await m.previewScreenshotNote(image, getLocale());
+          if (md) ctx.insertSnippet(`\n${md}\n`);
+        }),
+    },
+  ];
+}
+
