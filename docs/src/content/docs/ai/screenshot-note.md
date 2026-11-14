@@ -47,5 +47,11 @@ node scripts/eval/screenshot-note/run.mjs measure /tmp/shots --engine ollama
 
 The targets: CER ≤ 5%, ≥ 80% of tables right, ≤ 6 seconds per screenshot on
 an M1 Mac, and 0 network requests. The OCR fallback alone reaches CER 17.84%
-(Hebrew) and 8.61% (English), with 0 of 18 tables right. That gap is the
-reason for the vision model.
+(Hebrew) and 8.61% (English), with 0 of 18 tables right (measured 2026-11-15,
+Tesseract 5.3.4 on the app's models, `--engine tesseract-cli`). That gap is
+the reason for the vision model. The vision model's own numbers are **not
+measured yet**: that run needs the owner's Mac with Ollama.
+
+The harness only reports an engine's output. It has no mode that scores the
+gold text against itself, and it refuses a run (exit 1, no report) when the
+engine did not run on every screenshot or every output equals its gold.

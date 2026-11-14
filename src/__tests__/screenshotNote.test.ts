@@ -61,7 +61,7 @@ describe("screenshot to note (W7.16)", () => {
     expect(screenshotPrompt("he")).toMatch(/^העתק/);
   });
 
-  it("the 50 fixtures: 25 Hebrew, 25 English; tables, dialogs, code and errors; gold measures as perfect", () => {
+  it("the 50 fixtures: 25 Hebrew, 25 English; tables, dialogs, code and errors; the scorer keeps the gold intact (a check of the scorer, not a measurement: W10.B11)", () => {
     const cs = cases();
     expect(cs.length).toBe(50);
     expect(cs.filter((c) => c.lang === "he").length).toBe(25);

@@ -5,14 +5,21 @@
  *   node scripts/eval/screenshot-note/run.mjs make <dir>
  *       Renders the 50 fixtures (cases.mjs) to <dir>/<id>.png in Chromium
  *       (Playwright), with the repo's Assistant font (OFL).
- *   node scripts/eval/screenshot-note/run.mjs measure <dir> [--engine ollama|tesseract-cli|gold] [--model qwen3-vl:2b] [--json out.json]
+ *   node scripts/eval/screenshot-note/run.mjs measure <dir> [--engine ollama|tesseract-cli] [--model qwen3-vl:2b] [--json out.json]
  *       Runs each screenshot through the engine and the app's own clean-up and
  *       guard (src/ai/screenshotNote.ts toNoteMarkdown), then reports CER per
  *       language (src/ai/ocrCer.ts on the text a reader sees), tables right,
  *       seconds per screenshot, and requests that left this machine.
  *       ollama: the real model (owner step: a Mac M1 with `ollama pull qwen3-vl:2b`).
  *       tesseract-cli: the fallback path's engine (Tesseract 5 on the app's models).
- *       gold: the gold text itself, to check the measuring (CER 0, tables 100%).
+ *       There is no "gold" engine (W10.B11): scoring the gold against itself
+ *       gives CER 0% and says nothing about recognition. A run is refused
+ *       (exit 1, no report) when the engine did not run on every screenshot
+ *       or every output equals its gold (measure.mjs refuseSelfMeasurement).
+ *
+ * Measured (W10.B11, 2026-11-15, this harness, Tesseract 5.3.4 on the app's
+ * heb+eng models): CER he 17.84%, en 8.61%, tables right 0/18. The vision
+ * model (ollama) is measured on the owner's Mac.
  *
  * Targets (plan): CER ≤ 5%, tables right ≥ 80%, ≤ 6 s per screenshot on an M1, 0 network requests.
  */
@@ -24,6 +31,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { gunzipSync } from "node:zlib";
 import { cases, page } from "./cases.mjs";
+import { measureCases, refuseSelfMeasurement, summarize } from "./measure.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const flag = (name, dflt) => {
@@ -74,37 +82,29 @@ function ollama(model, prompt) {
   };
 }
 
+const ENGINES = ["ollama", "tesseract-cli"];
+
 async function measure(dir) {
+  const engine = flag("--engine", "ollama");
+  if (!ENGINES.includes(engine)) {
+    console.error(`screenshot-note: --engine ${engine} is not an engine (${ENGINES.join(", ")}). ${engine === "gold" ? "Scoring the gold against itself measures nothing (W10.B11)." : ""}`.trim());
+    process.exit(2);
+  }
   const { tsImport } = await import("tsx/esm/api");
   const S = await tsImport("../../../src/ai/screenshotNote.ts", import.meta.url);
   const C = await tsImport("../../../src/ai/ocrCer.ts", import.meta.url);
   const items = JSON.parse(readFileSync(join(dir, "cases.json"), "utf8"));
-  const engine = flag("--engine", "ollama");
   const model = flag("--model", S.SCREENSHOT_MODEL);
-  const run = engine === "gold" ? null : engine === "tesseract-cli" ? tesseractCli() : ollama(model, S.screenshotPrompt);
-  const rows = [];
-  for (const it of items) {
-    const t0 = performance.now();
-    const raw = run ? await run(join(dir, `${it.id}.png`), it.lang) : it.gold;
-    // The clean-up the app runs; the injection guard (which needs the app's i18n) is tested in screenshotNote.test.ts.
-    const markdown = S.cleanScreenshotMarkdown(raw);
-    const findings = [];
-    const ms = performance.now() - t0;
-    const cer = C.measureItem(S.plainText(it.gold), S.plainText(markdown));
-    rows.push({ id: it.id, lang: it.lang, kind: it.kind, edits: cer.all.edits, length: cer.all.length, table: it.kind === "table" ? S.tableCorrect(markdown, it.gold) : null, codeBlock: it.kind === "error" || it.kind === "code" ? /```/.test(markdown) : null, findings: findings.length, ms: Math.round(ms) });
+  const run = engine === "tesseract-cli" ? tesseractCli() : ollama(model, S.screenshotPrompt);
+  const result = await measureCases(items, run, { S, C, fileOf: (it) => join(dir, `${it.id}.png`) });
+  const problems = refuseSelfMeasurement(items, result);
+  if (problems.length) {
+    for (const p of problems) console.error(`screenshot-note: REFUSED — ${p}`);
+    process.exit(1);
   }
-  const sum = (xs, f) => xs.reduce((n, x) => n + f(x), 0);
-  const report = { engine, model: run && engine === "ollama" ? model : null, date: new Date().toISOString().slice(0, 10), n: rows.length, perLang: {}, tables: null, codeBlocks: null, secondsMax: Math.max(...rows.map((r) => r.ms)) / 1000, secondsMean: sum(rows, (r) => r.ms) / rows.length / 1000, rows };
-  for (const lang of ["he", "en"]) {
-    const rs = rows.filter((r) => r.lang === lang);
-    report.perLang[lang] = { n: rs.length, cer: sum(rs, (r) => r.edits) / Math.max(1, sum(rs, (r) => r.length)) };
-  }
-  const t = rows.filter((r) => r.table !== null);
-  report.tables = { right: t.filter((r) => r.table).length, of: t.length };
-  const c = rows.filter((r) => r.codeBlock !== null);
-  report.codeBlocks = { fenced: c.filter((r) => r.codeBlock).length, of: c.length };
+  const report = summarize(result, { engine, model: engine === "ollama" ? model : null });
   const pct = (x) => `${(x * 100).toFixed(2)}%`;
-  console.log(`screenshot-note (${engine}${report.model ? " " + report.model : ""}): CER he ${pct(report.perLang.he.cer)}, en ${pct(report.perLang.en.cer)} (target ≤ 5%); tables right ${report.tables.right}/${report.tables.of} (target ≥ 80%); code fenced ${report.codeBlocks.fenced}/${report.codeBlocks.of}; ${report.secondsMean.toFixed(2)} s mean, ${report.secondsMax.toFixed(2)} s max (target ≤ 6 s on an M1)`);
+  console.log(`screenshot-note (${engine}${report.model ? " " + report.model : ""}): CER he ${pct(report.perLang.he.cer)}, en ${pct(report.perLang.en.cer)} (target ≤ 5%); tables right ${report.tables.right}/${report.tables.of} (target ≥ 80%); code fenced ${report.codeBlocks.fenced}/${report.codeBlocks.of}; ${report.secondsMean.toFixed(2)} s mean, ${report.secondsMax.toFixed(2)} s max (target ≤ 6 s on an M1); engine ran ${report.engineCalls}/${report.n}, ${report.identicalToGold} outputs identical to gold`);
   const out = flag("--json");
   if (out) writeFileSync(out, JSON.stringify(report, null, 1) + "\n");
 }
@@ -113,6 +113,6 @@ const [cmd, dir] = process.argv.slice(2);
 if (cmd === "make" && dir) await make(dir);
 else if (cmd === "measure" && dir) await measure(dir);
 else {
-  console.error("usage: run.mjs make <dir> | measure <dir> [--engine ollama|tesseract-cli|gold]");
+  console.error("usage: run.mjs make <dir> | measure <dir> [--engine ollama|tesseract-cli]");
   process.exit(2);
 }
