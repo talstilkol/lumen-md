@@ -9,6 +9,8 @@
  * modelManager.ts; its `multilingual` flag is used the same way.
  */
 
+import { MEASURED_SCORES } from "./defaults";
+
 export type HebrewSupport = "strong" | "good" | "basic" | "none";
 
 export interface OllamaCatalogEntry {
@@ -50,6 +52,9 @@ export const OLLAMA_CATALOG: OllamaCatalogEntry[] = [
 const recommendable = (e: OllamaCatalogEntry) => e.recommend !== false && e.licence?.class !== "conditional";
 
 const RANK: Record<HebrewSupport, number> = { strong: 3, good: 2, basic: 1, none: 0 };
+
+/** A model's measured score: a real eval run taken by `npm run eval:ingest` (./defaults.ts), else the entry's own. */
+export const measuredOf = (e: OllamaCatalogEntry): number | null => MEASURED_SCORES[e.name] ?? e.measured;
 
 export type LicenceClass = "allowed" | "conditional" | "forbidden";
 
@@ -162,7 +167,7 @@ export function recommendOllamaModel(opts: { hebrew: boolean; ramGB?: number | n
   const pool = fits.length ? fits : offer.filter((e) => !opts.tools || e.tools);
   if (!opts.hebrew) return pool.find((e) => e.name === "qwen2.5:7b") ?? pool[0];
   return [...pool].sort(
-    (a, b) => (b.measured ?? -1) - (a.measured ?? -1) || RANK[b.hebrew] - RANK[a.hebrew] || b.params - a.params,
+    (a, b) => (measuredOf(b) ?? -1) - (measuredOf(a) ?? -1) || RANK[b.hebrew] - RANK[a.hebrew] || b.params - a.params,
   )[0];
 }
 
