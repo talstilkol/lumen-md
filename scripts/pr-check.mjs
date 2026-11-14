@@ -14,6 +14,7 @@
  *     (src/ai/privacyLedger.ts) or carry `// privacy-ledger: <rule>`.
  *   - Production packages added or changed, with their licence.
  *   - Source changed with no test changed (a warning).
+ *   - A snapshot changed with nothing that produces it (a hand edit, W10.D20).
  *   - Added lines that name the project's domain (the owner's rule).
  *   - The max-lines baseline (plan W6.25) raises no count and adds no file.
  *   - Written by an AI agent → the PR wants the `ai-written` label.
@@ -48,7 +49,7 @@ import { existsSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSy
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
-import { addedLinesFromDiff, AI_LABEL, bodyProblems, domainMentions, licenceChanges, skipCiViolations, unregisteredNetworkCalls, untestedChanges, writtenByAi } from "./lib/prGate.mjs";
+import { addedLinesFromDiff, AI_LABEL, bodyProblems, domainMentions, handEditedSnapshots, licenceChanges, skipCiViolations, unregisteredNetworkCalls, untestedChanges, writtenByAi } from "./lib/prGate.mjs";
 import { bundleDiffMarkdown } from "./bundle-diff.mjs";
 import { BASELINE_PATH, baselineRaises } from "./lib/maxLines.mjs";
 import { HUMAN_REVIEW_LABEL, humanReviewVerdict, independentPatterns, parseCodeowners, sensitiveChanges } from "./lib/humanReview.mjs";
@@ -250,6 +251,9 @@ export function runChecks(opts) {
   }
 
   const untested = untestedChanges(changed);
+  // W10.D20 (W6.15 step 4): a snapshot changes only with what produces it.
+  const handEdited = handEditedSnapshots(changed, (f) => existsSync(join(cwd, f)));
+  add("Snapshots are regenerated, not edited", handEdited.length ? "fail" : "ok", handEdited.length ? [`Changed with nothing that produces them (no source, test, input document or package changed): ${handEdited.map((f) => `\`${f}\``).join(", ")}. Regenerate them with the test's update flag (\`npx vitest run <test> -u\`, \`npx playwright test <spec> --update-snapshots\`) in the PR that changes their output.`] : ["No snapshot changed without what produces it."]);
   add("Tests", untested.length ? "warn" : "ok", untested.length ? [`Source changed and no test changed: ${untested.slice(0, 10).map((f) => `\`${f}\``).join(", ")}${untested.length > 10 ? ` and ${untested.length - 10} more` : ""}.`] : ["Source changes come with test changes (or there are none)."]);
 
   // Licences

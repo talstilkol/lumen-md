@@ -10,6 +10,8 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
   addedLinesFromDiff,
+  handEditedSnapshots,
+  isSnapshot,
   licenceChanges,
   skipCiViolations,
   bodyProblems,
@@ -118,5 +120,32 @@ describe("the other rules", () => {
     const dom = ["lumen", "md"].join(".");
     const added = addedLinesFromDiff(diffOf("docs/x.md", [`See https://${dom}/docs`, "the file README.md", `src/lumen.mdx`]));
     expect(domainMentions(added).map((m: { line: number }) => m.line)).toEqual([2]);
+  });
+});
+
+describe("W10.D20: a snapshot changes only with what produces it", () => {
+  it("knows vitest's and Playwright's snapshots, and nothing else", () => {
+    for (const f of ["src/__tests__/__snapshots__/render/doc-a.html", "src/__tests__/__snapshots__/commandIds.snapshot.json", "src/storage/__snapshots__/x.test.ts.snap", "e2e/visual-smoke.spec.ts-snapshots/mermaid-flowchart-chromium-linux.png"]) expect(isSnapshot(f), f).toBe(true);
+    for (const f of ["src/renderer/snapshot.ts", "src/__tests__/renderSnapshot.test.ts", "e2e/visual-smoke.spec.ts", "docs/snapshots.md"]) expect(isSnapshot(f), f).toBe(false);
+  });
+
+  it("a vitest snapshot needs a source, test, Markdown input or package change; a Playwright image its spec or the app", () => {
+    const doc = "src/__tests__/__snapshots__/render/doc-privacy.html";
+    const png = "e2e/visual-smoke.spec.ts-snapshots/mermaid-flowchart-chromium-linux.png";
+    expect(handEditedSnapshots([doc])).toEqual([doc]);
+    expect(handEditedSnapshots([doc, "docs/other.json", "e2e/visual-smoke.spec.ts"])).toEqual([doc]);
+    expect(handEditedSnapshots([doc, "PRIVACY.md"])).toEqual([]);
+    expect(handEditedSnapshots([doc, "src/renderer/render.ts"])).toEqual([]);
+    expect(handEditedSnapshots([doc, "src/__tests__/renderSnapshot.test.ts"])).toEqual([]);
+    expect(handEditedSnapshots([doc, "package-lock.json"])).toEqual([]);
+    expect(handEditedSnapshots([png])).toEqual([png]);
+    expect(handEditedSnapshots([png, "PRIVACY.md", "src/__tests__/x.test.ts"])).toEqual([png]);
+    expect(handEditedSnapshots([png, "e2e/visual-smoke.spec.ts"])).toEqual([]);
+    expect(handEditedSnapshots([png, "e2e/other.spec.ts"])).toEqual([png]);
+    expect(handEditedSnapshots([png, "src/styles/app.css"])).toEqual([]);
+    expect(handEditedSnapshots([png, "public/fonts.css"])).toEqual([]);
+    // Two snapshots changing together don't vouch for each other; a deleted one isn't checked.
+    expect(handEditedSnapshots([doc, png])).toEqual([doc, png]);
+    expect(handEditedSnapshots([doc], () => false)).toEqual([]);
   });
 });
