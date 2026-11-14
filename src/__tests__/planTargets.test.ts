@@ -170,8 +170,13 @@ describe("npm run plan:targets on this tree", () => {
     const by = (id: string) => out.rows.find((x: { id: string }) => x.id === id);
     // Owner-only targets are never a pass here.
     for (const id of ["desktop.signed", "desktop.auto-update", "ai.doctor", "he.eval"]) expect(by(id).status).toBe(NOT);
-    // The startup gate is at 460 KB, the target 250: a real fail, not hidden.
-    expect(by("perf.startup-250kb").status).toBe(FAIL);
+    // The startup gate's ceiling (222 KB) is at or under the 250 KB target; whether
+    // the build fits it is `npm run budget`, which runs only with --run.
+    const startup = by("perf.startup-250kb");
+    expect(startup.evidence.find((e: { type: string }) => e.type === "json").status).toBe(PASS);
+    expect(startup.status).toBe(NOT);
+    // 0 empty catches without why:, also in worker and iframe code kept in strings.
+    expect(by("rel.no-empty-catch").status).toBe(PASS);
     expect(out.counts[PASS] + out.counts[FAIL] + out.counts[NOT]).toBe(49);
     expect(spawnSync(process.execPath, ["scripts/plan-targets.mjs", "--strict"], { encoding: "utf8" }).status).toBe(1);
     expect(audit([{ id: "x", area: "a", clause: 0, target: "t", evidence: [{ type: "none", reason: "r" }] }], { root: "." }).counts[NOT]).toBe(1);
