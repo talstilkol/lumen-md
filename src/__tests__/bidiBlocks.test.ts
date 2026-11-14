@@ -63,6 +63,11 @@ const schema = new Schema({
     heading: { group: "block", content: "text*", parseDOM: [{ tag: "h1" }], toDOM: () => ["h1", 0] },
     blockquote: { group: "block", content: "block+", parseDOM: [{ tag: "blockquote" }], toDOM: () => ["blockquote", 0] },
     code_block: { group: "block", content: "text*", code: true, parseDOM: [{ tag: "pre", preserveWhitespace: "full" }], toDOM: () => ["pre", ["code", 0]] },
+    // GFM tables as Milkdown names them: cells hold paragraphs.
+    table: { group: "block", content: "table_row+", parseDOM: [{ tag: "table" }], toDOM: () => ["table", ["tbody", 0]] },
+    table_row: { content: "(table_cell | table_header)+", parseDOM: [{ tag: "tr" }], toDOM: () => ["tr", 0] },
+    table_cell: { content: "paragraph+", parseDOM: [{ tag: "td" }], toDOM: () => ["td", 0] },
+    table_header: { content: "paragraph+", parseDOM: [{ tag: "th" }], toDOM: () => ["th", 0] },
     text: { group: "inline" },
   },
 });
@@ -94,6 +99,36 @@ describe("wysiwyg: wysiwygBidiPlugin", () => {
     expect(dirs()).toEqual(["p:ltr", "p:rtl", "pre:ltr"]);
     view.destroy();
     host.remove();
+  });
+});
+
+describe("wysiwyg: a table has a direction (plan 9.5: the matrix found a table without dir)", () => {
+  const row = (...cells: string[]) => `<tr>${cells.map((c) => `<td><p>${c}</p></td>`).join("")}</tr>`;
+  function rendered(html: string): string[] {
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+    const view = new EditorView(host, { state: stateFor(html) });
+    const out = Array.from(view.dom.querySelectorAll("p, table")).map((el) => `${el.tagName.toLowerCase()}:${el.getAttribute("dir")}`);
+    view.destroy();
+    host.remove();
+    return out;
+  }
+
+  it("takes the direction of its first cell", () => {
+    // A Hebrew first cell in an English note: the columns run right to left.
+    expect(rendered(`<p>Intro</p><table>${row("שם", "name")}${row("hi", "שלום")}</table>`)).toEqual(["p:ltr", "table:rtl", "p:rtl", "p:ltr", "p:ltr", "p:rtl"]);
+    // An English first cell in a Hebrew note: left to right; cells keep their own.
+    expect(rendered(`<p>פתק</p><table>${row("Fruit", "פרי")}</table>`)).toEqual(["p:rtl", "table:ltr", "p:ltr", "p:rtl"]);
+  });
+
+  it("falls back to the note's direction when the first cell has no strong character", () => {
+    expect(rendered(`<p>פתק בעברית</p><table>${row("42", "x")}</table>`)).toEqual(["p:rtl", "table:rtl", "p:rtl", "p:ltr"]);
+    expect(rendered(`<p>An English note</p><table>${row("10:30", "שלום")}</table>`)).toEqual(["p:ltr", "table:ltr", "p:ltr", "p:rtl"]);
+  });
+
+  it("every table gets one, also an empty one", () => {
+    const html = `<table>${row("", "")}</table><p>שלום</p>`;
+    expect(rendered(html).filter((d) => d.startsWith("table:"))).toEqual(["table:rtl"]);
   });
 });
 

@@ -109,6 +109,17 @@ for (const locale of ["he", "en"] as const) {
       expect(dirOf(blocks, "טבלאות")).toBe("rtl");
       expect(dirOf(blocks, "פסקה בעברית")).toBe("rtl");
       expect(dirOf(blocks, "An English")).toBe("ltr");
+      // The table itself has a dir (9.5 found it had none): its first cell
+      // "שם" is Hebrew, so the columns run right to left in either interface.
+      // preset-gfm's column resizing renders the node as div.tableWrapper >
+      // table, and a node decoration's attributes go on that outer element.
+      const table = pm.locator("table").first();
+      const [attr, computed] = await table.evaluate((el) => {
+        const wrap = el.parentElement?.classList.contains("tableWrapper") ? el.parentElement : null;
+        return [el.getAttribute("dir") ?? wrap?.getAttribute("dir") ?? "", getComputedStyle(el).direction];
+      });
+      expect(attr).toBe("rtl");
+      expect(computed).toBe("rtl");
       // Cells hold paragraphs, which take their own direction.
       expect(dirOf(blocks, "תפוחים")).toBe("rtl");
       expect(dirOf(blocks, "fresh")).toBe("ltr");
