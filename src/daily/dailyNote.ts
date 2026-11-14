@@ -143,7 +143,7 @@ export const isIsrael = (settings: Pick<DailySettings, "israel">, locale: string
  * " · " between them, or nothing) and {{parasha}} (this week's portion: the
  * Shabbat on or after the day, or the holiday read instead).
  */
-export function renderTemplate(template: string, day: Day, locale: string, opts: { israel?: boolean } = {}): string {
+export function renderTemplate(template: string, day: Day, locale: string, opts: { israel?: boolean; calendar?: string } = {}): string {
   const date = noonUtc(day);
   const israel = opts.israel ?? defaultIsrael(locale);
   const lang = nameLang(locale);
@@ -154,11 +154,23 @@ export function renderTemplate(template: string, day: Day, locale: string, opts:
     title: () => new Intl.DateTimeFormat(locale, { dateStyle: "full", timeZone: "UTC" }).format(date),
     holiday: () => holidaysOn(day, { israel }).map((h) => holidayLabel(h, lang)).join(" · "),
     parasha: () => readingName(weeklyReading(day, { israel }), lang),
+    // W10.C6: the day's events from the calendar subscriptions (read before rendering: calendarBlockFor).
+    calendar: () => opts.calendar ?? "",
   };
-  return template.replace(/\{\{\s*(date|hebrewDate|weekday|title|holiday|parasha)\s*\}\}/g, (_, k: string) => vars[k]());
+  return template.replace(/\{\{\s*(date|hebrewDate|weekday|title|holiday|parasha|calendar)\s*\}\}/g, (_, k: string) => vars[k]());
 }
 
 // ── Open or create ──────────────────────────────────────────────────────
+
+/** The calendar block for a new daily note; empty when it cannot be made (the note is still created). */
+export async function dailyCalendarBlock(day: string, deps: Partial<Pick<import("../calendar/app").CalendarBlockDeps, "feeds" | "fetch" | "timeZone">> = {}): Promise<string> {
+  try {
+    const { calendarBlockFor } = await import("../calendar/app");
+    return await calendarBlockFor(day, { ...deps, labels: { heading: t("daily.calendar.heading"), allDay: t("daily.calendar.allDay"), none: t("daily.calendar.none"), failed: (name) => t("daily.calendar.failed", { name }) } });
+  } catch {
+    return ""; // why: a calendar that cannot be read never stops the day's note from being created
+  }
+}
 
 const inflight = new Map<string, Promise<string>>();
 
@@ -174,7 +186,9 @@ export function ensureDailyNote(day: Day, settings: DailySettings, locale: strin
   const job = (async () => {
     const ws = await import("../storage/workspace");
     if (!(await ws.workspaceHasEntry(path))) {
-      await ws.writeWorkspaceFile(path, renderTemplate(settings.template, day, locale, { israel: isIsrael(settings, locale) }));
+      // {{calendar}}: the subscriptions' events for the day (nothing is fetched when there is none).
+      const calendar = /\{\{\s*calendar\s*\}\}/.test(settings.template) ? await dailyCalendarBlock(isoOf(day)) : undefined;
+      await ws.writeWorkspaceFile(path, renderTemplate(settings.template, day, locale, { israel: isIsrael(settings, locale), calendar }));
       const { notifyWorkspaceChanged } = await import("../storage/workspaceEvents");
       notifyWorkspaceChanged({ kind: "structure", paths: [path] });
     }
