@@ -136,6 +136,17 @@ npx -p @lumen-md/mcp-server lumen mcp enable claude-code --vault "$HOME/Document
    האישור של Lumen. אשר אותה; הפתק מופיע, ו-`lumen mcp log` מראה `proposed`
    ואחר כך `approved`.
 
+## Streamable HTTP
+
+‏`lumen mcp serve --http [port]` מגיש את אותם כלים ב-Streamable HTTP. הוא מאזין רק ב-`127.0.0.1`, בנתיב `/mcp`, ובפורט ברירת המחדל 3917. הוא פועל לפי MCP 2026-07-28:
+
+- **כותרות הבקשה.** כל בקשה חייבת לשאת את `MCP-Protocol-Version` ואת `Mcp-Method`, ובקשת `tools/call` גם את `Mcp-Name`. כל אחת מהן חייבת להתאים לגוף הבקשה. כותרת חסרה או כזו שלא מתאימה נדחית עם 400 ו-`HeaderMismatch` ‏(-32020). ערך Base64 בצורה `=?base64?…?=` מפוענח קודם.
+- **התראות על שינויים.** ‏`subscriptions/listen` פותח את הזרם, במקום זרם ה-GET הישן. הוא שולח קודם אישור, ואחר כך `notifications/tools/list_changed` כשאתה מפעיל או מכבה לקוח, או משנה את ההרשאות שלו. ‏GET ו-DELETE עונים 405.
+- **מקור (Origin).** מקור דפדפן שאינו מקומי (loopback) מקבל 403.
+- **לקוחות ישנים.** לקוח שמתחיל ב-`initialize` (‏2025-11-25 ומוקדם יותר) עדיין עובד.
+
+גם ב-stdio ‏`subscriptions/listen` עובד, וההודעות שלו נושאות את מזהה המינוי.
+
 ## Bases
 
 `bases_query` מחזיר את השורות של תצוגה בקובץ `.base` כ-JSON: ‏`{ view, columns,
