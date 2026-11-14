@@ -1,5 +1,5 @@
 /**
- * The model-convert workflow's helpers (plan 6.0): which files are published,
+ * The model conversion's helpers (plan 6.0, scripts/models/convert.mjs): which files are published,
  * their manifest, and registry edits that keep the file's formatting.
  */
 import { describe, it, expect } from "vitest";

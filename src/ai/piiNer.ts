@@ -1,6 +1,6 @@
 /**
  * Hebrew names for the PII redactor (plan 2.6): DictaBERT-NER (CC BY 4.0,
- * appendix 19), converted to ONNX by the model-convert workflow (plan 6.0).
+ * appendix 19), converted to ONNX by scripts/models/convert.mjs (plan 6.0).
  *
  * Only a model that is already on this device is used: a cloud request
  * never starts a download. Until the host of the converted models is

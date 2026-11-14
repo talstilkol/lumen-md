@@ -152,7 +152,7 @@ async function pin(opts) {
     for (const m of selectModels(reg.models, opts)) {
       const h = m.hosting;
       if (!h?.hf) {
-        console.log(`skip ${m.id}: no Hugging Face repo (converted models are pinned by model-convert.yml)`);
+        console.log(`skip ${m.id}: no Hugging Face repo (converted models are pinned by scripts/models/convert.mjs)`);
         continue;
       }
       const { body } = await getJson(`https://huggingface.co/api/models/${h.hf}/revision/${h.revision ?? "main"}`);

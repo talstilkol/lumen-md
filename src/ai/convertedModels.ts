@@ -1,6 +1,6 @@
 /**
  * Models Lumen converts to ONNX itself (plan 6.0):
- * .github/workflows/model-convert.yml exports and quantises them, and
+ * scripts/models/convert.mjs exports and quantises them, and
  * models/registry.json lists every published file with its sha256, size,
  * licence and attribution.
  *

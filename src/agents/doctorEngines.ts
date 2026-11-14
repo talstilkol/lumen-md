@@ -85,7 +85,7 @@ export async function engineFindings(probe?: Partial<EngineProbe>): Promise<Doct
       title: "ai.doctor.check.modelHost",
       status: "warn",
       detail: `${base} · ${missingFiles.join(", ")}`,
-      fix: { label: "ai.doctor.fix.modelChecksums", command: "gh workflow run model-convert.yml && npm run models:registry -- <run-id>" },
+      fix: { label: "ai.doctor.fix.modelChecksums", command: "npm run models:convert && npm run models:registry -- --dir out/models --smoke out/models/smoke-results.json" },
     });
   } else {
     out.push({ id: "engines.host", title: "ai.doctor.check.modelHost", status: "ok", detail: base });

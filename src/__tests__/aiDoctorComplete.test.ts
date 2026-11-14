@@ -123,7 +123,7 @@ describe("stage-6 engines", () => {
     const { engineFindings } = await import("../agents/doctorEngines");
     const f = await engineFindings({ ...EMPTY, convertedBase: () => "https://models.example.org" });
     expect(f.find((x) => x.id === "engines.host")).toMatchObject({ status: "warn", fix: { label: "ai.doctor.fix.modelChecksums" } });
-    expect(f.find((x) => x.id === "engines.host")?.fix?.command).toContain("model-convert.yml");
+    expect(f.find((x) => x.id === "engines.host")?.fix?.command).toContain("npm run models:convert");
   });
 
   it("is all green with a host, files, Chrome's translator and both dictionaries", async () => {
