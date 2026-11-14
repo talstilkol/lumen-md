@@ -168,6 +168,7 @@
     "ci:pipeline": "node scripts/buildkite/pipeline.mjs --check",
     "ci:selftest": "bash scripts/buildkite/selftest.sh",
     "fuzz:redaction": "node scripts/fuzz/redaction-nightly.mjs",
+    "skills:validate": "node --experimental-strip-types --no-warnings=ExperimentalWarning scripts/skills-validate.mjs",
     "eval:skills": "LUMEN_EVAL_SKILLS=1 vitest run --config vitest.eval.config.ts src/agents/eval/skills.eval.ts"
   },
   "dependencies": {
