@@ -121,6 +121,54 @@ export const JOBS = [
 ];
 
 /**
+ * Plan 7.2 / W10.E33: the real-model runs, as native Buildkite steps — not
+ * derived from .github/workflows (no Actions). Every model and image is
+ * pinned by digest in models/ci-models.json (scripts/lib/realModelPins.mjs);
+ * a pin that is not a real digest fails the step. The Ollama store is
+ * cached per model digest under the agent's cache.
+ *   real-model-pr        qwen3:0.6b, every agent once — on a build whose change touches src/agents/
+ *   real-model-nightly   qwen3:1.7b (multi-step) and the real LanguageTool and SearXNG — scheduled builds
+ *   real-model-hebrew    DictaLM 3.0 1.7B on short Hebrew prompts — scheduled builds
+ */
+export const REAL_MODEL_STEPS = [
+  { key: "real-model-pr", label: ":robot_face: real tiny model (qwen3:0.6b)", model: "qwen3:0.6b", ifChanged: "src/agents/**", timeout: 30 },
+  { key: "real-model-nightly", label: ":crescent_moon: real model, multi-step (qwen3:1.7b) + LanguageTool, SearXNG", model: "qwen3:1.7b", services: true, if: 'build.source == "schedule"', timeout: 45 },
+  { key: "real-model-hebrew", label: ":crescent_moon: Hebrew smoke (DictaLM 3.0 1.7B)", model: "hf.co/dicta-il/DictaLM-3.0-1.7B-Thinking-GGUF", hebrew: true, if: 'build.source == "schedule"', timeout: 45 },
+];
+
+/** The command of one real-model step: pinned containers on a job network, then the run through run.sh. */
+export function realModelCommand(step) {
+  const m = shq(step.model);
+  const images = ["ollama/ollama", ...(step.services ? ["erikvl87/languagetool", "searxng/searxng"] : [])];
+  const before = [
+    "set -euo pipefail",
+    "pins() { node scripts/real-model-pins.mjs \"$@\"; }",
+    `pins check --model ${m}${images.map((i) => ` --image ${i}`).join("")}`,
+    'NET="lumen-rm-${BUILDKITE_JOB_ID:-local}"',
+    `STORE="$(pins cache-dir ${m} "\${LUMEN_CI_CACHE:-$HOME/.cache/lumen-ci}")"`,
+    'mkdir -p "$STORE"',
+    'docker network create "$NET" > /dev/null',
+    'trap \'docker rm -f "$NET-ollama" "$NET-lt" "$NET-sx" > /dev/null 2>&1 || true; docker network rm "$NET" > /dev/null 2>&1 || true\' EXIT',
+    'docker run -d --rm --name "$NET-ollama" --network "$NET" --network-alias ollama -v "$STORE:/root/.ollama" "$(pins image ollama/ollama)" > /dev/null',
+    ...(step.services
+      ? [
+          'docker run -d --rm --name "$NET-lt" --network "$NET" --network-alias languagetool -e Java_Xms=512m -e Java_Xmx=1g "$(pins image erikvl87/languagetool)" > /dev/null',
+          'docker run -d --rm --name "$NET-sx" --network "$NET" --network-alias searxng -v "$PWD/docker/searxng/settings.yml:/etc/searxng/settings.yml:ro" "$(pins image searxng/searxng)" > /dev/null',
+        ]
+      : []),
+    'export LUMEN_CI_DOCKER_NET="$NET"',
+  ];
+  const run = step.hebrew ? `npm run -s ci:real-model -- --hebrew-smoke --model ${m} --digest "$(node scripts/real-model-pins.mjs digest ${m})"` : `npm run -s ci:real-model -- --model ${m} --digest "$(node scripts/real-model-pins.mjs digest ${m})"`;
+  const gates = [`gate ${shq(step.hebrew ? "Hebrew smoke test, at the pinned digest" : "Every agent against the real model, at the pinned digest")} LUMEN_REAL_MODEL_REQUIRED=1 LUMEN_REAL_OLLAMA_URL=http://ollama:11434 <<'LUMEN_STEP'\n${run}\nLUMEN_STEP`];
+  if (step.services)
+    gates.push(
+      "gate 'LanguageTool and SearXNG for real' LUMEN_REAL_LANGUAGETOOL_URL=http://languagetool:8010/v2/check LUMEN_REAL_SEARXNG_URL=http://searxng:8080 <<'LUMEN_STEP'\nfor i in $(seq 1 60); do curl -sf http://languagetool:8010/v2/languages > /dev/null && break; sleep 2; done\nnpx vitest run --config vitest.eval.config.ts --reporter dot src/agents/eval/services.eval.ts\nLUMEN_STEP",
+    );
+  gates.push("gates_done");
+  return command({ key: step.key }, gates.join("\n"), { before });
+}
+
+/**
  * ci.yml steps that the pipeline does not run as a gate, each with the reason.
  * Keys are `<job> › <step>`; a whole job is `<job> › *`.
  */
@@ -335,6 +383,21 @@ export function buildPipeline(ci, { jobs = JOBS, shards = VITEST_SHARDS } = {}) 
     };
     if (j.artifacts) s.artifact_paths = j.artifacts;
     if (j.if) s.if = j.if;
+    steps.push(s);
+  }
+  for (const r of REAL_MODEL_STEPS) {
+    const s = {
+      label: r.label,
+      key: r.key,
+      command: realModelCommand(r),
+      agents: at("linux"),
+      timeout_in_minutes: r.timeout,
+      notify: status(r.key),
+      retry: RETRY,
+      artifact_paths: ["eval/results/real-*"],
+    };
+    if (r.if) s.if = r.if;
+    if (r.ifChanged) s.if_changed = r.ifChanged;
     steps.push(s);
   }
   const gateKeys = steps.filter((s) => s.notify).map((s) => s.key);
