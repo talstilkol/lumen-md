@@ -10,7 +10,7 @@
  */
 import { createInterface } from "node:readline";
 import { normalizeClientId } from "./vault/config.js";
-import { ERR, McpEndpoint, SERVER_VERSION, type JsonRpcResponse } from "./protocol.js";
+import { ERR, McpEndpoint, SERVER_VERSION, type JsonRpcResponse, type NotifySink } from "./protocol.js";
 
 export { SERVER_VERSION };
 
@@ -24,7 +24,7 @@ export function clientIdFor(explicit: string | undefined, reported: string | und
 }
 
 /** Parse one stdin line; a line that is not JSON gets a parse error. */
-export async function handleLine(endpoint: McpEndpoint, line: string): Promise<JsonRpcResponse | null> {
+export async function handleLine(endpoint: McpEndpoint, line: string, sink?: NotifySink): Promise<JsonRpcResponse | null> {
   if (!line.trim()) return null;
   let msg: unknown;
   try {
@@ -32,7 +32,7 @@ export async function handleLine(endpoint: McpEndpoint, line: string): Promise<J
   } catch {
     return { jsonrpc: "2.0", id: null, error: { code: ERR.parse, message: "Parse error." } };
   }
-  return endpoint.handle(msg);
+  return endpoint.handle(msg, sink);
 }
 
 export async function serveStdio(vault: string, explicitClient?: string): Promise<void> {
@@ -41,9 +41,13 @@ export async function serveStdio(vault: string, explicitClient?: string): Promis
   const rl = createInterface({ input: process.stdin, crlfDelay: Infinity });
   log(`lumen-mcp ${SERVER_VERSION}: vault ${vault}; MCP 2026-07-28 and 2025-11-25; tools per .lumen/mcp.json (off until enabled)`);
   const inflight = new Set<Promise<void>>();
+  // subscriptions/listen (W11.I8): its messages share stdout, tagged with the subscription id.
+  const sink = { notify: (m: unknown) => void process.stdout.write(JSON.stringify(m) + "\n") };
+  const poll = setInterval(() => void endpoint.pollChanges(), 1000);
+  (poll as { unref?: () => void }).unref?.();
   rl.on("line", (line) => {
     // Requests are independent (stateless): answer each as soon as it is done.
-    const p = handleLine(endpoint, line).then((res) => {
+    const p = handleLine(endpoint, line, sink).then((res) => {
       if (res) process.stdout.write(JSON.stringify(res) + "\n");
     });
     inflight.add(p);
@@ -51,4 +55,6 @@ export async function serveStdio(vault: string, explicitClient?: string): Promis
   });
   await new Promise<void>((resolve) => rl.once("close", () => resolve()));
   await Promise.allSettled([...inflight]);
+  clearInterval(poll);
+  endpoint.closeSubscriptions();
 }

@@ -143,6 +143,17 @@ generation connect.
    and the proposal is in Lumen's review screen. Approve it; the note
    appears, and `lumen mcp log` shows `proposed` then `approved`.
 
+## Streamable HTTP
+
+`lumen mcp serve --http [port]` serves the same tools over Streamable HTTP. It listens on `127.0.0.1` only, at `/mcp`, and the default port is 3917. It follows MCP 2026-07-28:
+
+- **Request headers.** Every request must carry `MCP-Protocol-Version`, `Mcp-Method` and, for `tools/call`, `Mcp-Name`. Each has to match the request body. A missing header or one that doesn't match is refused with 400 and `HeaderMismatch` (-32020). A Base64 `=?base64?…?=` value is decoded first.
+- **Change notifications.** `subscriptions/listen` opens the stream, in place of the old GET stream. It acknowledges first, then sends `notifications/tools/list_changed` when you turn a client on or off, or change its scopes. GET and DELETE answer 405.
+- **Origin.** A browser origin other than a loopback one gets 403.
+- **Older clients.** A client that starts with `initialize` (2025-11-25 and earlier) still works.
+
+On stdio, `subscriptions/listen` works too, and its messages carry the subscription's id.
+
 ## Bases
 
 `bases_query` returns the rows of a `.base` view as JSON: `{ view, columns,

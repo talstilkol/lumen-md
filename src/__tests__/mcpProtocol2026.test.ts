@@ -77,7 +77,8 @@ describe("MCP 2026-07-28 client (20 scenarios)", () => {
     expect(r.resultType).toBe("complete");
     expect(r.supportedVersions).toEqual([...SUPPORTED_VERSIONS]);
     expect((r.supportedVersions as string[])[0]).toBe("2026-07-28");
-    expect(r.capabilities).toEqual({ tools: { listChanged: false } });
+    // W11.I8: subscriptions/listen delivers notifications/tools/list_changed.
+    expect(r.capabilities).toEqual({ tools: { listChanged: true } });
     expect((r.serverInfo as { name: string }).name).toBe("lumen-mcp");
     expect(typeof r.ttlMs).toBe("number");
     expect(r.cacheScope).toBe("private");
