@@ -66,6 +66,12 @@ node scripts/vercel-build.mjs --dry-run    # print the gates, run nothing
 | 13.4 צינור שחרור | workflow של שחרור | סקריפט שחרור מקומי, ארטיפקטים חתומים ו-rollback במחשב של מפתח; השחרור של אפליקציית הרשת הוא בניית ה-production |
 | e2e של Playwright | משימות e2e בכל PR | שער **e2e** מריץ את `e2e/smoke.spec.ts` ב-chromium וב-firefox בתוך הבנייה (`scripts/e2e-gate.mjs`); כל החבילה רצה ב-`npx playwright test` במחשב של מפתח או ב-Sandbox ‏(W1.1), כי במכונת הבנייה פרויקט chromium לבדו לוקח כ-30 דקות. WebKit לא יכול לרוץ בבנייה: ה-WebKit של Playwright צריך glibc 2.38, ובתמונת הבנייה (Amazon Linux 2023) יש 2.34. הכיסוי של Safari נעשה על Mac ‏(W4.22) |
 
+## כל חבילת ה-e2e לפני ש-main מתקדם
+
+השלב `e2e-shards` ב-Buildkite מריץ את כל פרויקט chromium ב-4 רסיסים במקביל (‏`node scripts/e2e-gate.mjs --full`). כל רסיס רץ על בניית הייצור עם `VITE_E2E=1`, בתוך תיבה של 10 דקות. השלב `e2e-receipt` מאחד את הרסיסים לקובץ `reports/e2e-<sha>.json`, חתום במפתח Ed25519 של המכונה. הוא אדום אם רסיס אחד לא עבר.
+
+‏main מתקדם רק דרך `npm run promote:main -- <commit> --push`. הפקודה מסרבת אם לאותו commit (או ל-commit עם אותו עץ) אין דוח חתום, אם החתימה לא מתאמתת במפתח מ-`security/e2e-receipt-keys/`, אם בדיקה אחת נכשלה, או אם רסיס חרג מהתיבה שלו. היא דוחפת רק fast-forward, אף פעם לא בכוח. ‏`npm run promote:check` (קבלות WebKit ו-Safari) היא בדיקה נפרדת, ושתיהן צריכות לעבור.
+
 ## כששער אדום
 
 פתחו את הפריסה של Vercel מהסטטוס של ה-commit וקראו את סוף יומן הבנייה: השער

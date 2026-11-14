@@ -12,6 +12,8 @@
  * carries it.
  */
 
+import { E2E_SHARDS, SHARD_MINUTES } from "../lib/e2eShards.mjs";
+
 export const REPO = "talstilkol/lumen-md";
 /** Agent queues: the Linux host runs every job in Playwright's image; the Mac runs WebKit on macOS itself. */
 export const QUEUES = ["linux", "mac"];
@@ -262,7 +264,7 @@ const RETRY = { automatic: [{ exit_status: -1, limit: 2 }, { exit_status: 255, l
  * merges them, checks that every planned file ran, and applies ci.yml's
  * coverage gate. `receipt` seals what every gate did (W4.36 format).
  */
-export function buildPipeline(ci, { jobs = JOBS, shards = VITEST_SHARDS } = {}) {
+export function buildPipeline(ci, { jobs = JOBS, shards = VITEST_SHARDS, e2eShards = E2E_SHARDS } = {}) {
   const cov = ciSteps(ci).find((s) => s.id === "check › Coverage gate (lines >= 65%)");
   if (!cov) throw new Error('ci.yml has no step "check › Coverage gate (lines >= 65%)"');
   const covLines = cov.run.split("\n");
@@ -337,6 +339,7 @@ export function buildPipeline(ci, { jobs = JOBS, shards = VITEST_SHARDS } = {}) 
     if (j.if) s.if = j.if;
     steps.push(s);
   }
+  steps.push(...e2eShardSteps(e2eShards));
   const gateKeys = steps.filter((s) => s.notify).map((s) => s.key);
   steps.push({
     label: ":lock_with_ink_pen: signed receipt",
@@ -355,6 +358,53 @@ export function buildPipeline(ci, { jobs = JOBS, shards = VITEST_SHARDS } = {}) 
     notify: [{ github_commit_status: { context: STATUS_PREFIX } }],
     steps,
   };
+}
+
+/**
+ * The whole chromium suite in shards (plan W4.2, W6.8; W10.E39), on the
+ * production build made with VITE_E2E=1, as scripts/e2e-gate.mjs runs it.
+ * `e2e-shards`: one job per shard, each inside SHARD_MINUTES, each leaving
+ * ci-out/e2e-shard-<k>-of-<n>.json. `e2e-receipt`: merges them into
+ * reports/e2e-<sha>.json, sealed with the host key (LUMEN_NIGHTLY_KEY, as the
+ * receipt), and fails unless every shard passed. scripts/promote-main.mjs
+ * moves main only with that report for the same hash.
+ */
+export function e2eShardSteps(n = E2E_SHARDS) {
+  const shards = {
+    label: `:playwright: e2e chromium, shard %n of ${n}`,
+    key: "e2e-shards",
+    parallelism: n,
+    command: command(
+      { key: "e2e-shards", browsers: ["chromium"] },
+      [
+        "gate 'Build the production bundle with the e2e surface (VITE_E2E=1)' VITE_E2E=1 <<'LUMEN_STEP'",
+        "npm run build",
+        "LUMEN_STEP",
+        `gate ${shq(`E2E shard (the whole chromium project, under ${SHARD_MINUTES} min)`)} <<'LUMEN_STEP'`,
+        "node scripts/e2e-gate.mjs --full",
+        "LUMEN_STEP",
+        "gates_done",
+      ].join("\n"),
+    ),
+    agents: { queue: "linux" },
+    artifact_paths: ["ci-out/e2e-shard-*.json"],
+    timeout_in_minutes: 35,
+    notify: status("e2e-shards"),
+    retry: RETRY,
+  };
+  const receipt = {
+    label: ":lock_with_ink_pen: e2e report for this hash",
+    key: "e2e-receipt",
+    depends_on: [{ step: "e2e-shards", allow_failure: true }],
+    // allow_failure lets the report record a red shard; the merge exits 1 unless all n passed.
+    command: escapeDollars(`buildkite-agent artifact download 'ci-out/e2e-shard-*.json' . || true\nnode scripts/e2e-gate.mjs merge --total ${n} --dir ci-out`),
+    agents: { queue: "linux" },
+    artifact_paths: ["reports/e2e-*.json"],
+    timeout_in_minutes: 5,
+    notify: status("e2e-receipt"),
+    retry: RETRY,
+  };
+  return [shards, receipt];
 }
 
 /** Keys of the jobs whose outcome the receipt records (every job with a commit status). */
@@ -435,6 +485,13 @@ export function pipelineRules(p) {
     if (webkit.agents?.queue !== "mac") problems.push("e2e-webkit must run on the Mac's queue (real WebKit on macOS)");
     if (webkit.if || webkit.skip) problems.push("e2e-webkit must run on every build (no if/skip)");
   }
+  const shards = (p.steps ?? []).find((s) => s.key === "e2e-shards");
+  if (!shards) problems.push("no e2e-shards job (the whole chromium suite, sharded: plan W4.2)");
+  else if (!(shards.parallelism >= 2)) problems.push("e2e-shards must run in parallel (parallelism ≥ 2)");
+  else if (shards.if || shards.skip) problems.push("e2e-shards must run on every build (no if/skip)");
+  const e2eReceipt = (p.steps ?? []).find((s) => s.key === "e2e-receipt");
+  if (!e2eReceipt) problems.push("no e2e-receipt job (reports/e2e-<sha>.json: plan W4.2)");
+  else if (!(e2eReceipt.depends_on ?? []).some((d) => d.step === "e2e-shards")) problems.push("e2e-receipt does not wait for e2e-shards");
   const receipt = (p.steps ?? []).find((s) => s.key === "receipt");
   const deps = new Set((receipt?.depends_on ?? []).map((d) => d.step));
   for (const k of gateKeys(p)) if (!deps.has(k)) problems.push(`receipt does not wait for ${k}`);

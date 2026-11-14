@@ -30,11 +30,24 @@
  * VITE_E2E=1; scripts/vercel-build.mjs sets it whenever the e2e gate runs.
  *
  *   VITE_E2E=1 npm run build && node scripts/e2e-gate.mjs
+ *
+ * The whole suite, sharded (plan W4.2, W6.8; W10.E39). The Buildkite step
+ * `e2e-shards` runs E2E_SHARDS jobs in parallel, each one shard of the whole
+ * chromium project inside a box under SHARD_MINUTES (scripts/lib/e2eShards.mjs):
+ *
+ *   VITE_E2E=1 npm run build && LUMEN_E2E_SHARD=2/4 node scripts/e2e-gate.mjs --full
+ *     → ci-out/e2e-shard-2-of-4.json   (the shard: from BUILDKITE_PARALLEL_JOB when LUMEN_E2E_SHARD is unset)
+ *   node scripts/e2e-gate.mjs merge --total 4 [--dir ci-out] [--sha <40 hex>]
+ *     → reports/e2e-<sha>.json, sealed with LUMEN_E2E_KEY (else the host key, LUMEN_NIGHTLY_KEY);
+ *       exit 0 only when every shard passed. scripts/promote-main.mjs reads it.
  */
 import { spawn, spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
-import { resolve } from "node:path";
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { availableParallelism } from "node:os";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { SHARD_MINUTES, isSha, mergeShards, reportPath, shardFile, shardFromEnv, shardResult } from "./lib/e2eShards.mjs";
+import { keyPath, loadOrCreateKey, seal } from "./nightly/receipt.mjs";
 
 const PORT = 4173;
 const BASE = `http://127.0.0.1:${PORT}`;
@@ -44,8 +57,12 @@ export const DEFAULT_E2E_SPECS = "e2e/smoke.spec.ts e2e/a11y-hebrew-gate.spec.ts
 export const E2E_SPECS = list(process.env.LUMEN_E2E_SPECS, DEFAULT_E2E_SPECS);
 /** Firefox runs too (LUMEN_E2E_FIREFOX_SPECS, default the smoke spec; empty turns it off). */
 export const FIREFOX_SPECS = list(process.env.LUMEN_E2E_FIREFOX_SPECS, "e2e/smoke.spec.ts");
-/** What the gate runs, in order: each project with its specs. */
-export function e2eRuns(chromium = E2E_SPECS, firefox = FIREFOX_SPECS) {
+/**
+ * What the gate runs, in order: each project with its specs. `full`: the
+ * whole chromium project (no spec list), as one shard when `shard` is given.
+ */
+export function e2eRuns(chromium = E2E_SPECS, firefox = FIREFOX_SPECS, { full = false, shard = null } = {}) {
+  if (full) return [{ project: "chromium", install: ["--only-shell", "chromium"], specs: [], shard, full: true }];
   return [
     { project: "chromium", install: ["--only-shell", "chromium"], specs: chromium },
     { project: "firefox", install: ["firefox"], specs: firefox },
@@ -62,11 +79,84 @@ export function boxMinutes(env = process.env, now = Date.now()) {
   return Math.max(0, Math.floor(Math.min(E2E_MINUTES, left)));
 }
 
-const env = { ...process.env, PLAYWRIGHT_BROWSERS_PATH: "0", PLAYWRIGHT_BASE_URL: BASE };
+/**
+ * The Playwright arguments of one run. A full shard's global timeout is the
+ * ceiling less half a minute, so a shard that would reach the ceiling stops
+ * as "timedout" and its result is not "passed".
+ */
+export function playwrightArgs(run, box) {
+  const minutes = run.full ? SHARD_MINUTES - 0.5 : box;
+  return [
+    "playwright",
+    "test",
+    ...run.specs,
+    `--project=${run.project}`,
+    ...(run.shard ? [`--shard=${run.shard.current}/${run.shard.total}`] : []),
+    "--workers=2",
+    "--reporter=line,./scripts/e2e-report.mjs",
+    `--global-timeout=${Math.round(minutes * 60_000)}`,
+  ];
+}
+
+/** The commit the run is for: BUILDKITE_COMMIT, else HEAD; `dirty` when the tree has uncommitted changes. */
+export function runCommit(env = process.env, cwd = process.cwd()) {
+  const git = (...a) => spawnSync("git", a, { cwd, encoding: "utf8" });
+  const sha = isSha(env.BUILDKITE_COMMIT) ? env.BUILDKITE_COMMIT : git("rev-parse", "HEAD").stdout?.trim();
+  const status = git("status", "--porcelain", "--untracked-files=no");
+  return { sha: isSha(sha) ? sha : null, dirty: status.status !== 0 || status.stdout.trim() !== "" };
+}
+
+/** `merge`: the shard files in `dir` → the sealed report at <root>/reports/e2e-<sha>.json. */
+export function mergeCommand({ dir, total, sha, root = process.cwd(), env = process.env, log = console.log }) {
+  const files = existsSync(dir) ? readdirSync(dir).filter((f) => /^e2e-shard-\d+-of-\d+\.json$/.test(f)) : [];
+  const results = [];
+  for (const f of files) {
+    try {
+      results.push(JSON.parse(readFileSync(join(dir, f), "utf8")));
+    } catch {
+      log(`[e2e] ${f}: not JSON, left out (its shard counts as missing)`);
+    }
+  }
+  const report = mergeShards(results, {
+    sha,
+    total,
+    build: env.BUILDKITE_BUILD_URL ? { system: "buildkite", number: Number(env.BUILDKITE_BUILD_NUMBER) || null, url: env.BUILDKITE_BUILD_URL } : null,
+    machine: { platform: process.platform, arch: process.arch, node: process.version, cpus: availableParallelism(), host: env.LUMEN_FACTORY_HOST || null },
+  });
+  const { privateKeyPem } = loadOrCreateKey(env.LUMEN_E2E_KEY || keyPath(env));
+  const sealed = seal(report, privateKeyPem);
+  const out = join(root, reportPath(isSha(sha) ? sha : "unknown"));
+  mkdirSync(dirname(out), { recursive: true });
+  writeFileSync(out, `${JSON.stringify(sealed, null, 2)}\n`);
+  log(`[e2e] ${report.ok ? "✓" : "✗"} ${report.totals.passed} passed, ${report.totals.failed} failed, ${report.totals.skipped} skipped in ${report.shards.length}/${total} shards (longest ${report.longestShardMinutes ?? "?"} min); sealed ${out} (sha256 ${sealed.receipt.sha256}, key ${sealed.receipt.key})`);
+  for (const p of report.problems) log(`[e2e]   ${p}`);
+  return { out, sealed };
+}
+
+// Playwright's Docker image (the Buildkite host) has its browsers at PLAYWRIGHT_BROWSERS_PATH; elsewhere they go into node_modules.
+const env = { ...process.env, PLAYWRIGHT_BROWSERS_PATH: process.env.PLAYWRIGHT_BROWSERS_PATH || "0", PLAYWRIGHT_BASE_URL: BASE };
 const log = (s) => console.log(`[e2e] ${s}`);
 const npx = process.platform === "win32" ? "npx.cmd" : "npx";
 
 function main() {
+  const argv = process.argv.slice(2);
+  const opt = (name) => {
+    const i = argv.indexOf(`--${name}`);
+    return i >= 0 ? argv[i + 1] : undefined;
+  };
+  if (argv[0] === "merge") {
+    const total = Number(opt("total"));
+    const sha = opt("sha") ?? runCommit().sha;
+    const { sealed } = mergeCommand({ dir: resolve(opt("dir") ?? "ci-out"), total, sha });
+    process.exit(sealed.ok ? 0 : 1);
+  }
+  const full = argv.includes("--full");
+  const shard = full ? shardFromEnv() : null;
+  const commit = full ? runCommit() : null;
+  if (full && !commit.sha) {
+    console.error("[e2e] --full: no commit sha (BUILDKITE_COMMIT or git HEAD)");
+    process.exit(2);
+  }
   if (!existsSync("dist/index.html")) {
     console.error("[e2e] no dist/: run the build first");
     process.exit(1);
@@ -76,7 +166,7 @@ function main() {
     const r = spawnSync("dnf", ["-y", "-q", "install", "nss", "nspr"], { stdio: "inherit" });
     log(`dnf install nss nspr: exit ${r.status}`);
   }
-  const runs = e2eRuns();
+  const runs = e2eRuns(E2E_SPECS, FIREFOX_SPECS, { full, shard });
   for (const run of runs) {
     if (spawnSync(npx, ["playwright", "install", ...run.install], { stdio: "inherit", env }).status !== 0) {
       console.error(`[e2e] could not install ${run.project}`);
@@ -105,20 +195,36 @@ function main() {
     let failed = 0;
     for (const run of runs) {
       const box = Math.floor((gateEnd - Date.now()) / 60_000);
-      if (box < 3) {
+      if (box < 3 && !run.full) {
         console.error(`[e2e] ${run.project}: only ${box} min left in the gate's box: the specs no longer fit`);
         failed++;
         continue;
       }
-      log(`${run.project}: ${run.specs.join(" ")} against ${BASE}, time box ${box} min`);
+      const args = playwrightArgs(run, box);
+      log(`${run.project}: ${run.full ? `the whole project${run.shard ? `, shard ${run.shard.current}/${run.shard.total}` : ""}` : run.specs.join(" ")} against ${BASE}, ${args.at(-1)}`);
       const report = env.LUMEN_E2E_REPORT_FILE?.replace(/(\.[a-z]+)?$/, `-${run.project}$1`);
-      const r = spawnSync(
-        npx,
-        ["playwright", "test", ...run.specs, `--project=${run.project}`, "--workers=2", "--reporter=line,./scripts/e2e-report.mjs", `--global-timeout=${box * 60_000}`],
-        { stdio: "inherit", env: { ...env, ...(report ? { LUMEN_E2E_REPORT_FILE: report } : {}) }, timeout: (box + 3) * 60_000 },
-      );
+      const json = run.full ? resolve("ci-out", run.shard ? shardFile(run.shard) : "e2e-shard-1-of-1.json") : null;
+      const startedAt = new Date().toISOString();
+      const r = spawnSync(npx, args, {
+        stdio: "inherit",
+        env: { ...env, ...(report ? { LUMEN_E2E_REPORT_FILE: report } : {}), ...(json ? { LUMEN_E2E_JSON_FILE: `${json}.run` } : {}) },
+        timeout: ((run.full ? SHARD_MINUTES : box) + 3) * 60_000,
+      });
       log(`${run.project}: exit ${r.status ?? r.signal}`);
       if (r.status !== 0) failed++;
+      if (json) {
+        let summary = null;
+        try {
+          summary = JSON.parse(readFileSync(`${json}.run`, "utf8"));
+        } catch {
+          /* the reporter never finished: the shard's status is "missing" */
+        }
+        const result = shardResult({ sha: commit.sha, dirty: commit.dirty, shard: run.shard ?? { current: 1, total: 1 }, summary, startedAt, finishedAt: new Date().toISOString(), exit: r.status });
+        mkdirSync(dirname(json), { recursive: true });
+        writeFileSync(json, `${JSON.stringify(result, null, 2)}\n`);
+        log(`${run.project}: ${result.counts.passed} passed, ${result.counts.failed} failed in ${result.minutes} min → ${json}`);
+        if (!(result.minutes < SHARD_MINUTES)) failed++;
+      }
     }
     stop();
     process.exit(failed ? 1 : 0);
