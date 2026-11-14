@@ -31,6 +31,7 @@ import {
   isAiPromptCommand,
   withAiQuota,
   chargeAiCommandDispatch,
+  __setHostedAiLimitForTesting,
 } from "../billing/aiQuota";
 import { showAiToast } from "../ui/AiToast";
 import { useAppStore } from "../store/useStore";
@@ -54,6 +55,7 @@ beforeEach(() => {
 });
 afterEach(() => {
   __setEntitlementEndpointForTesting(null);
+  __setHostedAiLimitForTesting(null);
   localStorage.clear();
 });
 
@@ -150,6 +152,28 @@ describe("billed mode (endpoint configured)", () => {
     expect(screen.queryByTestId("upgrade-notice")).toBeNull();
   });
 
+  it("never limits AI on any plan: no hosted AI service exists (W11.P12)", () => {
+    const now = new Date(2026, 9, 15);
+    localStorage.setItem(monthKey(now), String(FREE_CAPS.aiMonthlyPrompts));
+    expect(consumeAiPrompt(now)).toBe(true);
+    expect(aiQuotaStatus(now)).toMatchObject({ allowed: true, limit: Number.POSITIVE_INFINITY });
+    setCaps(PRO_CAPS);
+    expect(aiQuotaStatus(now).limit).toBe(Number.POSITIVE_INFINITY);
+    expect(showAiToast).not.toHaveBeenCalled();
+  });
+});
+
+/**
+ * The counting machinery, kept for a future hosted AI proxy: these run with
+ * `__setHostedAiLimitForTesting(100)` standing in for that proxy's gate.
+ * No plan sets a limit in production (see billingGatesHostedOnly.test.ts).
+ */
+describe("hosted AI limit (test seam) — billed mode", () => {
+  beforeEach(() => {
+    __setEntitlementEndpointForTesting(ENDPOINT);
+    __setHostedAiLimitForTesting(FREE_CAPS.aiMonthlyPrompts);
+  });
+
   it("doesn't spend a prompt when no AI provider is usable (no key)", () => {
     useAppStore.setState({ aiKey: null });
     const now = new Date(2026, 9, 15);
@@ -176,12 +200,9 @@ describe("billed mode (endpoint configured)", () => {
     expect(aiQuotaStatus(now)).toMatchObject({ allowed: false, used: 100, limit: 100, remaining: 0 });
   });
 
-  it("uses the Pro limit when entitled", () => {
+  it("the plan doesn't change the hosted limit", () => {
     setCaps(PRO_CAPS);
-    const now = new Date(2026, 9, 15);
-    localStorage.setItem(monthKey(now), "100");
-    expect(consumeAiPrompt(now)).toBe(true);
-    expect(aiQuotaStatus(now).limit).toBe(1000);
+    expect(aiQuotaStatus(new Date(2026, 9, 15)).limit).toBe(FREE_CAPS.aiMonthlyPrompts);
   });
 });
 
@@ -235,6 +256,7 @@ describe("aiQuota counter", () => {
 
   it("withAiQuota wraps only AI prompt commands", () => {
     __setEntitlementEndpointForTesting(ENDPOINT);
+    __setHostedAiLimitForTesting(FREE_CAPS.aiMonthlyPrompts);
     localStorage.setItem(monthKey(), "100");
     const aiAction = vi.fn();
     const saveAction = vi.fn();
@@ -250,6 +272,7 @@ describe("aiQuota counter", () => {
 
   it("charges a wrapped command only when it actually dispatches, once", async () => {
     __setEntitlementEndpointForTesting(ENDPOINT);
+    __setHostedAiLimitForTesting(FREE_CAPS.aiMonthlyPrompts);
     const now = new Date();
     // Cancelled dialog / failed prerequisite: no model call → not charged.
     const cancelled = withAiQuota([{ id: "ai.translate", action: async () => {} }]);
@@ -273,6 +296,7 @@ describe("aiQuota counter", () => {
 
   it("a prepaid request while a command waits leaves the command's own charge intact", async () => {
     __setEntitlementEndpointForTesting(ENDPOINT);
+    __setHostedAiLimitForTesting(FREE_CAPS.aiMonthlyPrompts);
     vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", { status: 500 })));
     const { chat } = await import("../ai/llm");
     const now = new Date();
@@ -299,6 +323,7 @@ describe("aiQuota counter", () => {
 
   it("two overlapping palette commands are charged two prompts", async () => {
     __setEntitlementEndpointForTesting(ENDPOINT);
+    __setHostedAiLimitForTesting(FREE_CAPS.aiMonthlyPrompts);
     const now = new Date();
     let resumeA!: () => void;
     const pauseA = new Promise<void>((r) => (resumeA = r));
@@ -321,6 +346,7 @@ describe("aiQuota counter", () => {
 
   it("a request that fails before it is sent (Ollama down, no fallback key) spends no prompt", async () => {
     __setEntitlementEndpointForTesting(ENDPOINT);
+    __setHostedAiLimitForTesting(FREE_CAPS.aiMonthlyPrompts);
     vi.stubGlobal("fetch", vi.fn(async () => { throw new TypeError("connection refused"); }));
     const { chat } = await import("../ai/llm");
     useAppStore.setState({ aiKey: null, useLocalAi: false });
@@ -335,6 +361,7 @@ describe("aiQuota counter", () => {
 
   it.each(["anthropic", "gemini", "mistral"])("a %s request without its key spends no prompt (chat and stream)", async (provider) => {
     __setEntitlementEndpointForTesting(ENDPOINT);
+    __setHostedAiLimitForTesting(FREE_CAPS.aiMonthlyPrompts);
     const fetchSpy = vi.fn(async () => new Response("{}", { status: 500 }));
     vi.stubGlobal("fetch", fetchSpy);
     const { chat, chatStream } = await import("../ai/llm");
@@ -356,6 +383,7 @@ describe("aiQuota counter", () => {
   describe("ownPrompt requests (Ctrl-Space, Ask Workspace, inline, …)", () => {
     it("are charged when sent, not when they fail before sending", async () => {
       __setEntitlementEndpointForTesting(ENDPOINT);
+      __setHostedAiLimitForTesting(FREE_CAPS.aiMonthlyPrompts);
       vi.stubGlobal("fetch", vi.fn(async () => { throw new TypeError("connection refused"); }));
       const { chat } = await import("../ai/llm");
       useAppStore.setState({ aiKey: null, useLocalAi: false });
@@ -369,6 +397,7 @@ describe("aiQuota counter", () => {
 
     it("pay for themselves, leaving a waiting palette command's charge intact", async () => {
       __setEntitlementEndpointForTesting(ENDPOINT);
+      __setHostedAiLimitForTesting(FREE_CAPS.aiMonthlyPrompts);
       vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", { status: 500 })));
       useAppStore.setState({ aiKey: "sk-test" });
       const { chat } = await import("../ai/llm");
@@ -387,6 +416,7 @@ describe("aiQuota counter", () => {
 
     it("are refused at the limit without a request; 'silent' shows no toast", async () => {
       __setEntitlementEndpointForTesting(ENDPOINT);
+      __setHostedAiLimitForTesting(FREE_CAPS.aiMonthlyPrompts);
       const fetchSpy = vi.fn(async () => new Response("{}", { status: 500 }));
       vi.stubGlobal("fetch", fetchSpy);
       useAppStore.setState({ aiKey: "sk-test" });
@@ -405,6 +435,7 @@ describe("aiQuota counter", () => {
 
   it("re-checks the quota when a waiting command finally dispatches", async () => {
     __setEntitlementEndpointForTesting(ENDPOINT);
+    __setHostedAiLimitForTesting(FREE_CAPS.aiMonthlyPrompts);
     const now = new Date();
     localStorage.setItem(monthKey(now), String(FREE_CAPS.aiMonthlyPrompts - 1)); // 99/100
     let resume!: () => void;
@@ -433,6 +464,7 @@ describe("aiQuota counter", () => {
 
   it("counts and enforces AI requests made outside the palette (commit message, voice memo, …)", () => {
     __setEntitlementEndpointForTesting(ENDPOINT);
+    __setHostedAiLimitForTesting(FREE_CAPS.aiMonthlyPrompts);
     const now = new Date();
     chargeAiCommandDispatch(now); // unarmed, not prepaid → its own prompt
     expect(getAiUsage(now)).toBe(1);
@@ -443,6 +475,7 @@ describe("aiQuota counter", () => {
 
   it("a background request counted by its caller doesn't also bill a command waiting in a dialog", async () => {
     __setEntitlementEndpointForTesting(ENDPOINT);
+    __setHostedAiLimitForTesting(FREE_CAPS.aiMonthlyPrompts);
     vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", { status: 500 })));
     const { chat } = await import("../ai/llm");
     let finishDialog!: () => void;

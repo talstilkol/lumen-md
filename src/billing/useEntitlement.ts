@@ -8,7 +8,7 @@
  *
  * Usage:
  *   const caps = useCapabilities();
- *   if (!caps.smartSearch) showUpgradePrompt();
+ *   if (!caps.cloudSync) showUpgradePrompt();  // hosted gates only (gates.ts)
  */
 
 import { create } from "zustand";

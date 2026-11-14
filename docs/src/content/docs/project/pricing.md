@@ -9,6 +9,7 @@ description: Lumen is free and MIT-licensed forever, with no account. The only p
 - **MIT licence.** The code is yours to read, run, change and share ([LICENSE](https://github.com/talstilkol/lumen-md/blob/main/LICENSE)).
 - **No account.** Your notes stay on your device as Markdown files.
 - **The free tier never shrinks.** No feature that is free today will become paid. This promise is also in the README.
+- **Only hosted services can be paid.** In the code, `src/billing/gates.ts` may gate only a service that runs on a server and costs money (the encrypted relay, hosted publish, the persistent collaboration server). Search, semantic search, AI with your own key or a local model, and the number of devices are never limited, even when an operator turns billing on. A test lists every gate and fails if a local feature is among them.
 
 Sync between your devices is free too, through your own relay (`node sync-server/vault-relay.js`), a folder you already sync, or Git.
 
