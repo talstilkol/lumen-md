@@ -7,6 +7,7 @@
  * host (pluginHost.ts) does, after its own capability check and through
  * the privacy ledger.
  */
+import "../../ai/workerLedgerInstall"; // first: what this worker fetches reaches the privacy ledger (plan 2.4, W10.D22)
 import type { HostToWorker, WorkerToHost } from "./protocol";
 import { createSandbox, type Sandbox } from "./sandbox";
 import { grantsFrom } from "./capabilities";

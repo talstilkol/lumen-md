@@ -5,6 +5,7 @@
  * for offline; ≈ 0.35 s to build, once) off the main thread and answers
  * check requests. Nothing is sent anywhere.
  */
+import "./workerLedgerInstall"; // first: what this worker fetches reaches the privacy ledger (plan 2.4, W10.D22)
 import nspell from "nspell";
 import { loadEnglishDictionary } from "./englishDictionary";
 import { englishSpelling } from "./englishSpell";

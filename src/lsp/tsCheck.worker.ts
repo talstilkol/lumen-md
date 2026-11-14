@@ -3,6 +3,7 @@
  * Heavy (the compiler + ES/DOM lib files, several MB): created only when
  * the user turns "TypeScript checks" on, and never precached by the PWA.
  */
+import "../ai/workerLedgerInstall"; // first: what this worker fetches reaches the privacy ledger (plan 2.4, W10.D22)
 import * as ts from "typescript";
 import { createTsService, type BlockInput } from "./tsService";
 

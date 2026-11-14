@@ -4,6 +4,7 @@
  * count and the edges; the worker sends back positions every few steps (so
  * the picture appears at once and settles), then the final ones.
  */
+import "../ai/workerLedgerInstall"; // first: what this worker fetches reaches the privacy ledger (plan 2.4, W10.D22)
 import { layoutGraph } from "./layout";
 import type { LayoutRequest, LayoutResponse } from "./layoutClient";
 
