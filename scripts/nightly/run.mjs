@@ -11,6 +11,9 @@
  *   perf     build + bundle budget, the @nightly perf project, Lighthouse (when installed)
  *   triage   review triage over the open PRs, the 0.14 count over the first 20 PRs, and live:meta (W6.2)
  *   weekly   dependency health (audit, outdated, licences) and mutation scores — Sundays
+ *   fuzz     the redaction fuzz with the night's seed, 20,000 cases (npm run fuzz:redaction,
+ *            plan W8.8) — every night; a leak fails the step and is saved to
+ *            tests/fuzz/redaction/regressions.json for a PR
  *   sr       the Hebrew screen-reader journey under VoiceOver (Guidepup, W6.30) — on a
  *            Mac with @guidepup/* installed, every night; `--only sr` runs it alone
  *
@@ -46,17 +49,23 @@ const REPO = "talstilkol/lumen-md";
  */
 export const SR_KIND = "sr";
 
+/**
+ * The redaction fuzz (W8.8). Not one of status.mjs's KINDS either (0.11
+ * counts those four), but due every night, on any host.
+ */
+export const FUZZ_KIND = "fuzz";
+
 /** Guidepup is installed (owner: `npm install -D @guidepup/guidepup @guidepup/playwright @guidepup/setup`). */
 export function srReady(dir = root, exists = existsSync) {
   return ["@guidepup/guidepup", "@guidepup/playwright", "@guidepup/setup"].every((p) => exists(join(dir, "node_modules", p, "package.json")));
 }
 
 /**
- * The kinds due on a date: every night flake, perf and triage; weekly on
- * Sundays (UTC); sr every night on a Mac where Guidepup is installed.
+ * The kinds due on a date: every night flake, perf, triage and fuzz; weekly
+ * on Sundays (UTC); sr every night on a Mac where Guidepup is installed.
  */
 export function kindsDue(date, only = null, host = { platform: "", sr: false }) {
-  const all = [...KINDS, SR_KIND];
+  const all = [...KINDS, FUZZ_KIND, SR_KIND];
   if (only?.length) return all.filter((k) => only.includes(k));
   return all.filter((k) => (k === "weekly" ? date.getUTCDay() === 0 : k === SR_KIND ? host.platform === "darwin" && host.sr : true));
 }
@@ -95,6 +104,10 @@ export function stepsFor(kind, has) {
         { id: "weekly-health", cmd: ["node", "scripts/nightly/weekly-health.mjs"], timeoutMin: 30 },
         ...(has("test:mutation") ? [{ id: "mutation", cmd: ["npm", "run", "test:mutation"], timeoutMin: 240 }] : []),
       ];
+    case FUZZ_KIND:
+      // No --commit here: that switches to a new branch, under the kinds after it.
+      // A leak is saved to regressions.json in the tree and fails this step.
+      return [{ id: "fuzz-redaction", cmd: ["npm", "run", "-s", "fuzz:redaction"], timeoutMin: 60 }];
     case SR_KIND:
       // VoiceOver needs a logged-in macOS session; setup --ci makes it scriptable
       // without prompts (it also writes the TCC grant; with SIP on, grant the
@@ -106,6 +119,13 @@ export function stepsFor(kind, has) {
     default:
       throw new Error(`unknown kind ${kind}`);
   }
+}
+
+/** reports/nightly/fuzz-redaction.json (scripts/fuzz/redaction-nightly.mjs) → what the sealed report keeps. */
+export function fuzzSummary(file) {
+  if (!existsSync(file)) return { error: "no reports/nightly/fuzz-redaction.json" };
+  const r = JSON.parse(readFileSync(file, "utf8"));
+  return { night: r.night ?? null, cases: r.cases ?? null, leaks: r.leaks?.length ?? null, saved: r.saved ?? null, threw: r.threw?.length ?? null };
 }
 
 /** flake-results/<browser>/summary.json → the shape status.mjs reads. */
@@ -288,6 +308,7 @@ function main() {
         report.sr = { journeys: [], error: "no sr-results/results.json" };
       }
     }
+    if (kind === FUZZ_KIND) report.fuzz = fuzzSummary(join(root, "reports", "nightly", "fuzz-redaction.json"));
     if (kind === "triage") {
       const f = join(root, "reports", "review-triage.json");
       if (existsSync(f)) {

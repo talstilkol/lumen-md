@@ -19,6 +19,7 @@ npm run nightly -- --dry-run     # print the plan, run nothing
 | `perf` | every night | build, bundle budget, the `@nightly` perf project, Lighthouse when it is installed |
 | `triage` | every night | review triage of the open PRs, the 0.14 count over the first 20 PRs since 12.11.2026, and `live:meta --self-test` (below) |
 | `weekly` | Sundays (UTC) | dependency health (audit, outdated, licences), and mutation scores when `test:mutation` is there |
+| `fuzz` | every night | `npm run fuzz:redaction`: the [redaction fuzz](/contributing/redaction-fuzz/) with the night's seed, 20,000 cases. A leak fails the step and is saved to `tests/fuzz/redaction/regressions.json`. The sealed report keeps the night, cases, leaks and saved counts. Not counted by 0.11. |
 | `sr` | every night, on a Mac with `@guidepup/*` installed | `npx @guidepup/setup --ci`, then the Hebrew journey under VoiceOver ([screen readers, automated](/editor/screen-reader-automation/)). Not counted by 0.11. |
 
 `--only flake,perf` picks kinds. The scheduler passes `--scheduled`, which
