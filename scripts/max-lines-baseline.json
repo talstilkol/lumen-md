@@ -4,7 +4,7 @@
   "files": {
     "src/agents/runtime.ts": 855,
     "src/canvas/tldrawToExcalidraw.ts": 1462,
-    "src/editor/Editor.tsx": 915,
+    "src/editor/Editor.tsx": 910,
     "src/editor/WysiwygEditor.tsx": 950,
     "src/search/dataview.ts": 833,
     "src/ui/SearchDialog.tsx": 853

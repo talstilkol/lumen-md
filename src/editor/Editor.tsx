@@ -16,6 +16,7 @@ import { Compartment, EditorState } from "@codemirror/state";
 import { lineSeparatorFor } from "./lineEndings";
 import { obsidianSourceExtension } from "./obsidianSource";
 import { cleanPastedText, pastedHtmlToMarkdown, shouldConvertPaste } from "../paste/htmlPaste";
+import { imageTextEnabled } from "./imageTextSetting";
 import { wysiwygTakesPaste, type PasteDetail } from "../paste/pasteCommands";
 import { FIX_PDF_HEBREW_EVENT, fixSourceSelection, offerInSourceEditor } from "../paste/pdfPaste";
 import { EditorView, keymap, highlightActiveLine } from "@codemirror/view";
@@ -108,15 +109,6 @@ interface EditorProps {
   collab?: CollabSession | null;
   /** Suggesting mode (track changes): record edits as CriticMarkup. */
   suggesting?: boolean;
-}
-
-/** Automatic alt text for pasted images (T31); `lumen.ai.imageText` = "off" disables it. */
-function imageTextEnabled(): boolean {
-  try {
-    return localStorage.getItem("lumen.ai.imageText") !== "off";
-  } catch {
-    return true;
-  }
 }
 
 export interface EditorHandle {
