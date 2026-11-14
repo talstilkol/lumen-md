@@ -4095,6 +4095,139 @@
       ]
     },
     {
+      "key": "e2ee.recovery.back",
+      "en": "Show the words again",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.check",
+      "en": "The words don't add up: one is wrong or out of order.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.count",
+      "en": "{n} words are needed; there are {got}.",
+      "vars": [
+        "n",
+        "got"
+      ]
+    },
+    {
+      "key": "e2ee.recovery.done",
+      "en": "The recovery key is on. Every key change keeps it.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.finish",
+      "en": "Turn on the recovery key",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.forgot",
+      "en": "Forgot the passphrase?",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.hasOne",
+      "en": "This vault has a recovery key. Making a new one replaces it, and the old words stop working.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.intro",
+      "en": "If you forget the passphrase, 24 words open the vault again. Without them, a forgotten passphrase loses the vault.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.newPassphrase",
+      "en": "New passphrase",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.next",
+      "en": "I wrote them down",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.pdf",
+      "en": "Download the printable kit (PDF)",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.pdfNote",
+      "en": "The PDF is made on this device and saved where you choose. It isn't added to the vault or sent anywhere.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.replace",
+      "en": "Make a new recovery key",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.restore",
+      "en": "Restore",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.restoreNote",
+      "en": "The 24 words open the vault, then you choose a new passphrase. Your other devices pair again afterwards.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.restoreTitle",
+      "en": "Restore with recovery words",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.start",
+      "en": "Set up a recovery key",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.title",
+      "en": "Recovery key",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.unknown",
+      "en": "Word {n} isn't on the recovery word list.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "e2ee.recovery.verify",
+      "en": "Type three of the words to show they're written down.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.verifyWrong",
+      "en": "Not the right word: {n}. Check what you wrote down.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "e2ee.recovery.wordN",
+      "en": "Word {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "e2ee.recovery.words",
+      "en": "The {n} recovery words",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "e2ee.recovery.writeDown",
+      "en": "Write these {n} words down, in order, and keep them offline. They appear only now.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
       "key": "e2ee.rekey.busy",
       "en": "Another device is changing the vault's keys right now. Sync, and try again once it has finished (10 minutes at most).",
       "vars": []

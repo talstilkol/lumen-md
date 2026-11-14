@@ -16,7 +16,8 @@
  * local edit and after the other device reports a change.
  */
 
-import { createVault, E2eeSync, unlockVault, type SyncResult } from "../engine";
+import { createVault, E2eeSync, unlockVault, unlockWithRecoveryKey, type SyncResult } from "../engine";
+import type { VaultKeys } from "../keys";
 import { HEADER_NAME } from "../header";
 import { dialogResolver, type ConflictResolver } from "../conflict";
 import { idbStateStore, type SyncStateStore } from "../state";
@@ -207,6 +208,42 @@ export function createSession(deps: SessionDeps = {}) {
     };
   }
 
+  /** Unlocked with `keys`: the engine, the timers and watchers, then a first round (unless `round` is false). */
+  async function start(keys: VaultKeys, created: Awaited<ReturnType<typeof createVault>> | null, round = true): Promise<SyncResult | null> {
+    if (!provider) throw new Error("No provider connected");
+    const files = await local();
+    const makeStore = deps.store ?? idbStateStore;
+    await provider.unlocked?.(keys);
+    engine = new E2eeSync({
+      provider,
+      keys,
+      local: files,
+      store: await makeStore(keys.vaultId),
+      resolver: deps.resolver ?? dialogResolver,
+      exclude: (path, size) => exclude(path, size),
+      onEvent: onEngineEvent,
+    });
+    if (created) await engine.markCreated(created.anchor);
+    set({ phase: "unlocked", vaultExists: true });
+    const minutes = deps.intervalMinutes ?? 5;
+    if (minutes > 0) {
+      timer = setInterval(() => void syncNow().catch(() => undefined), minutes * 60_000);
+      if (typeof window !== "undefined") window.addEventListener("online", onOnline);
+    }
+    await startWatching().catch(() => undefined);
+    if (deps.background !== false && typeof document !== "undefined") {
+      unbackground = installBackgroundSync({
+        unlocked: () => engine !== null,
+        lastAt: () => state.lastAt,
+        syncNow: () => (state.syncing ? Promise.resolve() : syncNow()),
+        notify: (notice) => set({ notice }),
+        native: isNativeApp,
+      });
+    }
+    if (provider.live) await startLive(provider);
+    return round ? syncNow() : null;
+  }
+
   return {
     get: () => state,
     subscribe(l: (s: SessionState) => void): () => void {
@@ -247,8 +284,6 @@ export function createSession(deps: SessionDeps = {}) {
     /** Create the vault (first device) or unlock it, then run a first round. */
     async open(passphrase: string): Promise<SyncResult> {
       if (!provider) throw new Error("No provider connected");
-      const files = await local();
-      const makeStore = deps.store ?? idbStateStore;
       let created: Awaited<ReturnType<typeof createVault>> | null = null;
       let keys;
       if (state.vaultExists) keys = (await unlockVault(provider, passphrase, deps.kdfPolicy)).keys;
@@ -256,34 +291,22 @@ export function createSession(deps: SessionDeps = {}) {
         created = await createVault(provider, passphrase, deps.pbkdf2Iterations ? { pbkdf2Iterations: deps.pbkdf2Iterations } : {});
         keys = created.keys;
       }
-      await provider.unlocked?.(keys);
-      engine = new E2eeSync({
-        provider,
-        keys,
-        local: files,
-        store: await makeStore(keys.vaultId),
-        resolver: deps.resolver ?? dialogResolver,
-        exclude: (path, size) => exclude(path, size),
-        onEvent: onEngineEvent,
-      });
-      if (created) await engine.markCreated(created.anchor);
-      set({ phase: "unlocked", vaultExists: true });
-      const minutes = deps.intervalMinutes ?? 5;
-      if (minutes > 0) {
-        timer = setInterval(() => void syncNow().catch(() => undefined), minutes * 60_000);
-        if (typeof window !== "undefined") window.addEventListener("online", onOnline);
-      }
-      await startWatching().catch(() => undefined);
-      if (deps.background !== false && typeof document !== "undefined") {
-        unbackground = installBackgroundSync({
-          unlocked: () => engine !== null,
-          lastAt: () => state.lastAt,
-          syncNow: () => (state.syncing ? Promise.resolve() : syncNow()),
-          notify: (notice) => set({ notice }),
-          native: isNativeApp,
-        });
-      }
-      if (provider.live) await startLive(provider);
+      return (await start(keys, created))!;
+    },
+
+    /**
+     * The passphrase is forgotten (plan W11.S9): open the vault with the
+     * recovery key alone, pull every note, then set `newPassphrase` with a
+     * key change. This profile can't vouch for the device list, so the
+     * other devices are left out and pair again (`dropDevices`); the
+     * recovery key stays wrapped for the new epoch.
+     */
+    async restore(recoveryKey: Uint8Array, newPassphrase: string): Promise<SyncResult> {
+      if (!provider) throw new Error("No provider connected");
+      const { keys } = await unlockWithRecoveryKey(provider, recoveryKey);
+      await start(keys, null, false);
+      // The old header's KDF can't be checked without the old passphrase: the new one gets Argon2id.
+      await engine!.rekey({ newPassphrase, dropDevices: true });
       return syncNow();
     },
 

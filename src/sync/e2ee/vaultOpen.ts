@@ -186,12 +186,13 @@ export async function unlockWithDevice(provider: SyncProvider, device: string, i
 
 
 /**
- * Set up a recovery key (plan W11.S8): a fresh 256-bit key, wrapped into a
- * new epoch by a re-key (rotation and revocation then keep it wrapped).
- * Returns the key, which the caller shows once (W11.S9) and must not store.
+ * Set up a recovery key (plan W11.S8): a fresh 256-bit key (or `key`, made
+ * and shown first: W11.S9 commits it only after the user typed three of its
+ * words back), wrapped into a new epoch by a re-key (rotation and
+ * revocation then keep it wrapped). Returns the key, which the caller shows
+ * once and must not store.
  */
-export async function setUpRecovery(sync: { keys(): VaultKeys; rekey(r: RekeyRequest): Promise<RekeyResult> }): Promise<{ key: Uint8Array; result: RekeyResult }> {
-  const key = newRecoveryKey();
+export async function setUpRecovery(sync: { keys(): VaultKeys; rekey(r: RekeyRequest): Promise<RekeyResult> }, key: Uint8Array = newRecoveryKey()): Promise<{ key: Uint8Array; result: RekeyResult }> {
   const rk = await recoveryKeys(key, sync.keys().vaultId);
   const result = await sync.rekey({ recovery: { recipient: rk.age.recipient, mac: rk.mac } });
   return { key, result };
