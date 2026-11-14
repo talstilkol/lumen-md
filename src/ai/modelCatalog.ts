@@ -9,6 +9,8 @@
  * modelManager.ts; its `multilingual` flag is used the same way.
  */
 
+import { measuredDefault } from "./defaultSelection";
+
 export type HebrewSupport = "strong" | "good" | "basic" | "none";
 
 export interface OllamaCatalogEntry {
@@ -160,7 +162,11 @@ export function recommendOllamaModel(opts: { hebrew: boolean; ramGB?: number | n
   const offer = OLLAMA_CATALOG.filter(recommendable);
   const fits = offer.filter((e) => e.ramGB <= Math.max(ram, 4) && (!opts.tools || e.tools));
   const pool = fits.length ? fits : offer.filter((e) => !opts.tools || e.tools);
-  if (!opts.hebrew) return pool.find((e) => e.name === "qwen2.5:7b") ?? pool[0];
+  if (!opts.hebrew) {
+    // W11.I12: the measured default of the device's RAM tier (models:select), qwen2.5:7b until one is measured.
+    const measured = measuredDefault(opts.ramGB)?.model;
+    return pool.find((e) => e.name === measured) ?? pool.find((e) => e.name === "qwen2.5:7b") ?? pool[0];
+  }
   return [...pool].sort(
     (a, b) => (b.measured ?? -1) - (a.measured ?? -1) || RANK[b.hebrew] - RANK[a.hebrew] || b.params - a.params,
   )[0];

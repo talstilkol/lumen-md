@@ -42,3 +42,23 @@ Every eval report carries a top-level `card` (built with `makeCard` in `scripts/
 
 - ‏`npm run eval:card [קובץ|תיקייה …]` נכשל על כל דוח ב-`eval/results` וב-`eval/cards` (או בנתיבים שניתנו) שחסר שדה בכרטיס שלו.
 - ‏plan:check מסרב ל-✅ מלא שנשען על כרטיס `dev`: השדה `evalCards` של משימה מונה קובצי כרטיס שנמצאים בריפו, ומשימה ב-✅ שה-`dod` שלה מריץ הערכה (`eval:*`, ‏`models:day`, ‏`heldout`, ‏`bench:*`) חייבת למנות אותם, וכל אחד מהם מתויג `public` או `heldout`. מספר dev משאיר את המשימה לכל היותר ב-✅*.
+
+## The measured default per RAM tier (plan W11.I12)
+
+`npm run models:select` reads the eval cards under `eval/cards` (add `--from eval/results` for a Mac run's reports) and writes `models/default-selection.json`. The app reads that file (`src/ai/defaultSelection.ts`).
+
+- **Inputs.** HeQ test F1, AlephBench macro and nikud, BFCL v4 simple and multiple (the raw run, without toolRepair), and tok/s and peak RAM. Quality counts only from `public` or `heldout` cards.
+- **Score.** composite = 0.30 HeQ + 0.30 AlephBench + 0.25 BFCL + 0.15 speed.
+- **Rule.** A tier's default is replaced only by a model with a higher composite, at least 5 more AlephBench macro points, and at most 3 nikud points lost.
+- **Tiers.** 4 GB and 8 GB. A model whose peak RAM is above the tier is never picked, and the app never uses a tier above the device's memory.
+- **Today.** No card has been measured yet, so qwen2.5:7b stays the 8 GB default and the 4 GB tier has none. `--check` fails when the committed file differs from what the cards give.
+
+## ברירת המחדל שנמדדה לכל דרגת RAM (משימה W11.I12)
+
+‏`npm run models:select` קורא את כרטיסי ההערכה שב-`eval/cards` (עם `--from eval/results` גם את הדוחות של הרצה ב-Mac) וכותב את `models/default-selection.json`. האפליקציה קוראת את הקובץ הזה (`src/ai/defaultSelection.ts`).
+
+- **קלט.** ‏F1 על HeQ test, ממוצע מאקרו וניקוד של AlephBench, ‏simple ו-multiple של BFCL v4 (ההרצה הגולמית, בלי toolRepair), ו-tok/s ו-RAM שיא. איכות נספרת רק מכרטיסים `public` או `heldout`.
+- **ציון.** ציון משוקלל = ‏0.30 HeQ + ‏0.30 AlephBench + ‏0.25 BFCL + ‏0.15 מהירות.
+- **כלל.** ברירת המחדל של דרגה מוחלפת רק במודל עם ציון משוקלל גבוה יותר, לפחות 5 נקודות יותר במאקרו של AlephBench, ולא יותר מ-3 נקודות פחות בניקוד.
+- **דרגות.** ‏4 GB ו-8 GB. מודל שה-RAM השיא שלו מעל הדרגה לא נבחר אף פעם, והאפליקציה לא משתמשת אף פעם בדרגה שמעל הזיכרון של המכשיר.
+- **היום.** עוד לא נמדד אף כרטיס, ולכן qwen2.5:7b נשאר ברירת המחדל של 8 GB, ולדרגת 4 GB אין ברירת מחדל. ‏`--check` נכשל כשהקובץ שבריפו שונה ממה שהכרטיסים נותנים.
