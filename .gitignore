@@ -4,6 +4,8 @@ node_modules_bad/
 dist/
 dist-registry/
 dist-legal-packet/
+# Converted models and their smoke results (npm run models:convert, plan 6.0): GBs, never committed
+/out/models/
 # The Cloudflare rebuild's manifest (plan W7.23, scripts/supply-chain/cf-build.sh)
 /.repro-out/
 

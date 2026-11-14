@@ -4,7 +4,7 @@
  * Runs the shipped code — addNikud() from src/text/nikudRun.ts through tsx —
  * with onnxruntime-node and a Nakdimon ONNX file:
  *   --model PATH, or NAKDIMON_ONNX, or models/nakdimon/Nakdimon.onnx
- * (the file model-convert.yml mirrors; sha256 in models/registry.json).
+ * (the file scripts/models/convert.mjs mirrors; sha256 in models/registry.json).
  *
  * Per part (benyehuda = classical, nakdimon = modern, the acceptance part):
  *   <part>_word_acc       Hebrew words whose points are all right

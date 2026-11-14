@@ -1134,7 +1134,7 @@
       },
       "catalog": "CONVERTED_MODELS (src/ai/convertedModels.ts)",
       "verified": true,
-      "notes": "Converted to ONNX by .github/workflows/model-convert.yml (plan 6.0). Downloaded only with consent, size shown first, cached in OPFS; not downloadable until the host is chosen (15.9)."
+      "notes": "Converted to ONNX by scripts/models/convert.mjs (plan 6.0). Downloaded only with consent, size shown first, cached in OPFS; not downloadable until the host is chosen (15.9)."
     },
     {
       "id": "opus-mt-tc-big-he-en",
@@ -1153,7 +1153,7 @@
       },
       "catalog": "CONVERTED_MODELS (src/ai/convertedModels.ts)",
       "verified": true,
-      "notes": "Converted to ONNX by .github/workflows/model-convert.yml (plan 6.0). Downloaded only with consent, size shown first, cached in OPFS; not downloadable until the host is chosen (15.9). CC BY 4.0: the attribution must be shown where the model is offered."
+      "notes": "Converted to ONNX by scripts/models/convert.mjs (plan 6.0). Downloaded only with consent, size shown first, cached in OPFS; not downloadable until the host is chosen (15.9). CC BY 4.0: the attribution must be shown where the model is offered."
     },
     {
       "id": "dictabert-ner",
@@ -1172,7 +1172,7 @@
       },
       "catalog": "CONVERTED_MODELS (src/ai/convertedModels.ts)",
       "verified": true,
-      "notes": "Converted to ONNX by .github/workflows/model-convert.yml (plan 6.0). Downloaded only with consent, size shown first, cached in OPFS; not downloadable until the host is chosen (15.9). CC BY 4.0: the attribution must be shown where the model is offered."
+      "notes": "Converted to ONNX by scripts/models/convert.mjs (plan 6.0). Downloaded only with consent, size shown first, cached in OPFS; not downloadable until the host is chosen (15.9). CC BY 4.0: the attribution must be shown where the model is offered."
     },
     {
       "id": "siglip-base-patch16-256-multilingual",
@@ -1191,7 +1191,7 @@
       },
       "catalog": "CONVERTED_MODELS (src/ai/convertedModels.ts)",
       "verified": true,
-      "notes": "Converted to ONNX by .github/workflows/model-convert.yml (plan 6.0). Downloaded only with consent, size shown first, cached in OPFS; not downloadable until the host is chosen (15.9)."
+      "notes": "Converted to ONNX by scripts/models/convert.mjs (plan 6.0). Downloaded only with consent, size shown first, cached in OPFS; not downloadable until the host is chosen (15.9)."
     },
     {
       "id": "Xenova/m2m100_418M",
@@ -1284,7 +1284,7 @@
       },
       "catalog": "CONVERTED_MODELS (src/ai/convertedModels.ts), NAKDIMON_ID (src/ai/nikudService.ts)",
       "verified": true,
-      "notes": "Stage 1 of Hebrew niqqud (plan 6.3). The ONNX file ships in the MIT-licensed repository (LICENSE: Copyright 2022, Elazar Gershuni); model-convert.yml mirrors it byte for byte at the pinned commit and checks this sha256. Served from CONVERTED_MODELS_BASE once Tal picks the host (15.9); downloaded only after the consent dialog.",
+      "notes": "Stage 1 of Hebrew niqqud (plan 6.3). The ONNX file ships in the MIT-licensed repository (LICENSE: Copyright 2022, Elazar Gershuni); scripts/models/convert.mjs mirrors it byte for byte at the pinned commit and checks this sha256. Served from CONVERTED_MODELS_BASE once Tal picks the host (15.9); downloaded only after the consent dialog.",
       "files": [
         {
           "path": "Nakdimon.onnx",
