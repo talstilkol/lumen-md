@@ -25,8 +25,9 @@
  * reports/vercel-build.json, also served as /__build/receipt.json.
  *
  * Vitest runs with one worker per CPU the build may use (the cgroup quota,
- * not the host's core count) and without the suites that run only nightly
- * (scripts/test-tiers.mjs). LUMEN_VITEST_SHARD=i/n runs one shard (probes). The e2e gate
+ * not the host's core count). A PR's preview leaves out the suites that run
+ * only nightly (scripts/test-tiers.mjs); a verify/* train runs them too
+ * (isTrainBuild). LUMEN_VITEST_SHARD=i/n runs one shard (probes). The e2e gate
  * (scripts/e2e-gate.mjs) runs Playwright on chromium against `vite preview`
  * of this build: the specs that fit (the smoke spec today), time-boxed so
  * the build ends inside Vercel's 45 minutes.
@@ -107,9 +108,20 @@ export function usableCpus(read = (f) => readFileSync(f, "utf8"), osCount = avai
   return { cpus: osCount, os: osCount, quota: null };
 }
 
-/** The vitest gate's arguments on top of GATE_EXTRA: workers, the nightly-only suites left out, a shard. */
+/**
+ * Is this the build of a verify/* integration train? Vercel names the branch
+ * in VERCEL_GIT_COMMIT_REF. A train's gate runs every vitest file, the
+ * nightly-only ones included (coordinator, W10.F2): moving them out of the
+ * gate is acceptable only for a PR's preview, never for the train that is
+ * promoted to main.
+ */
+export function isTrainBuild(env = process.env) {
+  return /^verify\//.test(env.VERCEL_GIT_COMMIT_REF ?? "");
+}
+
+/** The vitest gate's arguments on top of GATE_EXTRA: workers, the nightly-only suites left out (not on a train), a shard. */
 export function vitestArgs(env = process.env, cpus = usableCpus().cpus) {
-  const args = [`--maxWorkers=${Math.max(1, cpus)}`, ...VITEST_NIGHTLY_ONLY.map((f) => `--exclude=${f}`)];
+  const args = [`--maxWorkers=${Math.max(1, cpus)}`, ...(isTrainBuild(env) ? [] : VITEST_NIGHTLY_ONLY.map((f) => `--exclude=${f}`))];
   if (/^\d+\/\d+$/.test(env.LUMEN_VITEST_SHARD ?? "")) args.push(`--shard=${env.LUMEN_VITEST_SHARD}`);
   return args;
 }

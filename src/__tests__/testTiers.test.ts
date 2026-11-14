@@ -11,7 +11,9 @@ import { resolve } from "node:path";
 // @ts-expect-error — plain .mjs script without type declarations
 import { E2E_BROWSERS, E2E_COLLAB_PORT, E2E_COLLAB_WS, E2E_FAST, E2E_FIREFOX_FAST, E2E_SHARDS, GATE_BUDGET_MIN, VITEST_NIGHTLY_ONLY, VITEST_SHARDS } from "../../scripts/test-tiers.mjs";
 // @ts-expect-error — plain .mjs script without type declarations
-import { budgetVerdict, gateEnv, PREVIEW_GATES, PRODUCTION_GATES, quotaFromCpuMax, slowestFiles, usableCpus, vitestArgs } from "../../scripts/vercel-build.mjs";
+import { budgetVerdict, gateEnv, isTrainBuild, PREVIEW_GATES, PRODUCTION_GATES, quotaFromCpuMax, slowestFiles, usableCpus, vitestArgs } from "../../scripts/vercel-build.mjs";
+// @ts-expect-error — plain .mjs script without type declarations
+import { planSteps } from "../../scripts/lib/ciLocal.mjs";
 // @ts-expect-error — plain .mjs script without type declarations
 import { GROUPS, fullSteps, runPlan } from "../../scripts/nightly/plan.mjs";
 // @ts-expect-error — plain .mjs script without type declarations
@@ -46,7 +48,7 @@ describe("the gate's lists (scripts/test-tiers.mjs)", () => {
     expect(E2E_FIREFOX_FAST).toEqual(["e2e/smoke.spec.ts"]);
   });
 
-  it("the gate's vitest run leaves out exactly the nightly-only files, one worker per usable CPU", () => {
+  it("a PR preview's vitest run leaves out exactly the nightly-only files, one worker per usable CPU", () => {
     const args = vitestArgs({}, 2) as string[];
     expect(args[0]).toBe("--maxWorkers=2");
     expect(args.filter((a) => a.startsWith("--exclude=")).map((a) => a.slice("--exclude=".length))).toEqual(VITEST_NIGHTLY_ONLY);
@@ -211,5 +213,58 @@ describe("W6.10: the Ignored Build Step check (scripts/check-vercel-ignore.mjs)"
     expect("method" in calls[0].init).toBe(false); // GET: the check never changes the project
     const denied = async () => ({ ok: false, status: 403, json: async () => ({}) });
     await expect(readProject({ token: "x", fetchImpl: denied })).rejects.toThrow("HTTP 403");
+  });
+});
+
+/**
+ * Coordinator decision (W10.F2): the nightly-only files may leave a PR's
+ * preview gate only because every verify/* train gate and the full
+ * `npm run ci:local` still run them. The train's file set must be a
+ * superset of the preview set train 1's tiering replaced (every vitest file),
+ * so nothing that gated a train before stops gating it.
+ */
+describe("every train gate and the full ci:local run every vitest file (W10.F2)", () => {
+  /** The vitest include glob of vite.config.ts under src/: src/__tests__/**\/*.test.{ts,tsx}. */
+  const allTests = (readdirSync(resolve(ROOT, "src/__tests__"), { recursive: true }) as string[])
+    .map((f) => `src/__tests__/${String(f).split("\\").join("/")}`)
+    .filter((f) => /\.test\.tsx?$/.test(f))
+    .sort();
+  const runBy = (args: string[]) => {
+    const out = new Set(args.filter((a) => a.startsWith("--exclude=")).map((a) => a.slice("--exclude=".length)));
+    return allTests.filter((f) => !out.has(f));
+  };
+  // The preview set before train 1's tiering: no file left out.
+  const oldPreview = allTests;
+
+  it("finds the suite and every nightly-only file in it", () => {
+    expect(allTests.length).toBeGreaterThan(500);
+    for (const f of VITEST_NIGHTLY_ONLY as string[]) expect(allTests, f).toContain(f);
+  });
+
+  it("a verify/* train's gate runs a superset of the old preview set: the nightly-only files included", () => {
+    for (const ref of ["verify/train", "verify/train-5", "verify/train-6", "verify/e2e-probe"]) {
+      const env = { VERCEL_ENV: "preview", VERCEL_GIT_COMMIT_REF: ref };
+      expect(isTrainBuild(env), ref).toBe(true);
+      const train = new Set(runBy(vitestArgs(env, 2)));
+      for (const f of oldPreview) expect(train.has(f), `${ref}: ${f}`).toBe(true);
+      for (const f of VITEST_NIGHTLY_ONLY as string[]) expect(train.has(f), `${ref}: ${f}`).toBe(true);
+    }
+  });
+
+  it("only a PR's preview leaves them out; a branch that merely names a train does not count", () => {
+    for (const ref of ["w10/f1-train1-commits", "feat/verify/x", "main", "", undefined]) {
+      const env = { VERCEL_ENV: "preview", VERCEL_GIT_COMMIT_REF: ref };
+      expect(isTrainBuild(env), String(ref)).toBe(false);
+      expect(runBy(vitestArgs(env, 2))).toEqual(allTests.filter((f) => !(VITEST_NIGHTLY_ONLY as string[]).includes(f)));
+    }
+  });
+
+  it("the full ci:local runs `vitest run` with no file left out, and vite.config.ts excludes none of them", () => {
+    const pkg = JSON.parse(read("package.json"));
+    const steps = planSteps({ pkg, exists: () => true, changed: null, dynamicTargets: new Set(), flags: {} }) as Step[];
+    const test = steps.find((t) => t.id === "test");
+    expect(test?.cmd).toEqual(["npx", "vitest", "run"]);
+    const cfg = read("vite.config.ts");
+    for (const f of VITEST_NIGHTLY_ONLY as string[]) expect(cfg.includes(f.split("/").pop()!), f).toBe(false);
   });
 });

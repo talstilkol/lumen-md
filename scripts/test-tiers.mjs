@@ -16,11 +16,13 @@
 export const GATE_BUDGET_MIN = 38;
 
 /**
- * Vitest files that run only on the nightly host, not in the Vercel gate:
- * quality measurements over large golden sets, timing budgets, and suites
- * that load a whole language runtime or build a bundle. Each declares a long
- * timeout of its own (≥ 15 s). Correctness tests of the vault, sync,
- * encryption and history stay in the gate, however slow.
+ * Vitest files left out of a PR's preview gate: quality measurements over
+ * large golden sets, timing budgets, and suites that load a whole language
+ * runtime or build a bundle. Each declares a long timeout of its own (≥ 15 s).
+ * Every verify/* train's gate (scripts/vercel-build.mjs, isTrainBuild), the
+ * full `npm run ci:local` and the nightly host still run them (coordinator,
+ * W10.F2; pinned by testTiers.test.ts). Correctness tests of the vault, sync,
+ * encryption and history stay in every gate, however slow.
  */
 export const VITEST_NIGHTLY_ONLY = [
   // golden sets: a score over hundreds of cases (plan 7.3)
