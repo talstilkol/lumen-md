@@ -15,6 +15,7 @@ process.env.LUMEN_OLLAMA_REPRODUCIBLE = "1";
 const url = process.env.LUMEN_EVAL_OLLAMA_URL || "http://localhost:11434";
 const outDir = process.env.LUMEN_EVAL_OUT || "eval/results";
 try {
+  // privacy-ledger: local-ai — the eval's own Ollama on this machine (LUMEN_EVAL_OLLAMA_URL), its version only; eval setup, never built into the app.
   const r = await fetch(`${url}/api/version`, { signal: AbortSignal.timeout(2000) });
   const v = r.ok ? ((await r.json()) as { version?: string }).version : undefined;
   if (v) {
