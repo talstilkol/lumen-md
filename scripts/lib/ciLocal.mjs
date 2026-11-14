@@ -140,8 +140,22 @@ export function coverageGate(summaryText, min = COVERAGE_MIN) {
  * @returns {{ action: "write" | "refuse" | "backup", content: string }}
  */
 export const HOOK_MARK = "installed by `npm run ci:local -- --install-hook`";
+/**
+ * The pre-push hook. Before ci:local it:
+ *   - notes what this push sends, for the lane-state reference-transaction
+ *     hook to record once origin has it (W8.10; a no-op with no lane state set);
+ *   - fails on lockfile drift (W8.9): the installed tree against
+ *     package-lock.json, or package.json against it when there is no node_modules.
+ */
+export const HOOK_BODY = [
+  'refs=$(cat)',
+  'printf \'%s\\n\' "$refs" | node scripts/lane-state.mjs pending "$1" || true',
+  'if [ -d node_modules ]; then node scripts/lockfile-drift.mjs || exit 1; else node scripts/lockfile-drift.mjs --lock-only || exit 1; fi',
+  "exec npm run -s ci:local -- --changed --skip e2e --bail",
+];
+
 export function hookPlan(existing, { force = false } = {}) {
-  const content = `#!/bin/sh\n# ${HOOK_MARK} (plan 0.14); skip once with \`git push --no-verify\`\nexec npm run -s ci:local -- --changed --skip e2e --bail\n`;
+  const content = `#!/bin/sh\n# ${HOOK_MARK} (plan 0.14); skip once with \`git push --no-verify\`\n${HOOK_BODY.join("\n")}\n`;
   if (existing == null || existing.includes(HOOK_MARK)) return { action: "write", content };
   return { action: force ? "backup" : "refuse", content };
 }
