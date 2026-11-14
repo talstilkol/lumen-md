@@ -1,7 +1,11 @@
 /**
- * The desktop app's system-wide capture shortcut (plan 4.16): ⌥⌘N on macOS
- * brings Lumen to the front with the capture box open, even when another
- * app has the focus.
+ * The desktop app's system-wide capture shortcut (plan 4.16): meant to make
+ * ⌥⌘N on macOS bring Lumen to the front with the capture box open, even when
+ * another app has the focus.
+ *
+ * TODAY IT DOES NOTHING (plan W10.B23, audit 4.16): the global-shortcut
+ * plugin is not in this build (see below), so registerGlobalCapture()
+ * always resolves false and ⌥⌘N works only inside Lumen's window.
  *
  * macOS only. On Windows and Linux the same keys are Ctrl+Alt+N, which many
  * layouts produce with AltGr+N: a system-wide hook can't tell the two apart
