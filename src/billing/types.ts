@@ -7,6 +7,11 @@
  *   Pro   — $8/mo: unlimited devices, persistent collab, cloud sync,
  *           Smart search, 1000 AI prompts.
  *   Team  — $16/seat/mo: workspace sharing, admin, audit log.
+ *
+ * Only the hosted keys (cloudSync, persistentCollab, workspaceSharing,
+ * auditLog) are ever enforced — see HOSTED_GATES in gates.ts. The free tier
+ * never shrinks: smartSearch, aiMonthlyPrompts and unlimitedDevices describe
+ * local features and stay unlocked in every mode (W11.P12).
  */
 
 export type PlanTier = "free" | "pro" | "team";

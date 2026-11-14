@@ -75,18 +75,20 @@ describe("cost model", () => {
   it("per user, per plan and break-even, as the docs quote them in English and Hebrew", () => {
     const m = model();
     expect(m.perUser.total).toBe(0.0496);
-    expect(m.morFee).toEqual({ monthly: 0.695, yearly: 2.45 });
-    expect(m.net).toEqual({ monthly: 2.2554, yearly: 2.2462 });
+    // W11.P12: the relay is $4 a month or $40 a year (ten months), as on the pricing page.
+    expect(m.plans).toEqual({ monthly: 4, yearly: 40 });
+    expect(m.morFee).toEqual({ monthly: 0.76, yearly: 3.1 });
+    expect(m.net).toEqual({ monthly: 3.1904, yearly: 3.0254 });
     expect(m.fixed).toEqual({ cloudflarePages: 5.87, vercelPro: 25.87 });
-    expect(m.breakEven).toEqual({ cloudflarePages: 3, vercelPro: 12 });
+    expect(m.breakEven).toEqual({ cloudflarePages: 2, vercelPro: 9 });
     const atCap = perUserMonthly(PRICES, { ...USAGE, storedGb: 10 }).total;
     for (const doc of [docs.en, docs.he]) {
-      for (const v of ["$0.0496", "$0.0150", "$0.0135", "$0.0108", "$0.0099", "$0.0005", "$0.6950", "$2.45", "$2.26", "$2.25", "$5.87", "$25.87", `$${atCap.toFixed(2)}`]) expect(doc, v).toContain(v);
+      for (const v of ["$0.0496", "$0.0150", "$0.0135", "$0.0108", "$0.0099", "$0.0005", "$0.7600", "$3.10", "$3.19", "$3.03", "$5.87", "$25.87", `$${atCap.toFixed(2)}`]) expect(doc, v).toContain(v);
     }
-    expect(docs.en).toContain("**3 subscribers**");
-    expect(docs.en).toContain("**12 subscribers**");
-    expect(docs.he).toContain("**3 מנויים**");
-    expect(docs.he).toContain("**12 מנויים**");
+    expect(docs.en).toContain("**2 subscribers**");
+    expect(docs.en).toContain("**9 subscribers**");
+    expect(docs.he).toContain("**2 מנויים**");
+    expect(docs.he).toContain("**9 מנויים**");
   });
 
   it("break-even moves the right way when costs or prices move", () => {

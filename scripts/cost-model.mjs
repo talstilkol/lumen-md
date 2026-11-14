@@ -46,7 +46,7 @@ export const USAGE = {
 };
 
 /** The two prices offered (USD): monthly, and yearly at ten months. */
-export const PLANS = { monthly: 3, yearly: 30 };
+export const PLANS = { monthly: 4, yearly: 40 };
 
 const round = (n, d = 4) => Math.round(n * 10 ** d) / 10 ** d;
 

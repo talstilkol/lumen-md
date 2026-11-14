@@ -34,7 +34,7 @@ vi.mock("../ai/reranker", () => ({
 import { SearchDialog } from "../ui/SearchDialog";
 import { useEntitlement, __setEntitlementEndpointForTesting } from "../billing/useEntitlement";
 import { FREE_CAPS, PRO_CAPS } from "../billing/types";
-import { getAiUsage, recordAiPrompt, consumeAiPrompt } from "../billing/aiQuota";
+import { getAiUsage, recordAiPrompt, consumeAiPrompt, __setHostedAiLimitForTesting } from "../billing/aiQuota";
 import { showAiToast } from "../ui/AiToast";
 import { useAppStore } from "../store/useStore";
 
@@ -67,18 +67,17 @@ beforeEach(async () => {
 afterEach(() => {
   cleanup();
   __setEntitlementEndpointForTesting(null);
+  __setHostedAiLimitForTesting(null);
   localStorage.clear();
 });
 
 describe("Smart search gate", () => {
-  it("free plan with billing: shows an upgrade notice and never queries embeddings", async () => {
+  it("free plan with billing: smart search still runs — it is local, so never gated (W11.P12)", async () => {
     __setEntitlementEndpointForTesting("https://billing.lumen.test/entitlements");
     openOn("smart");
-    expect(await screen.findByTestId("upgrade-notice")).toBeTruthy();
     fireEvent.change(screen.getByRole("textbox"), { target: { value: "quarterly plan" } });
-    await new Promise((r) => setTimeout(r, 300));
-    expect(searchHybrid).not.toHaveBeenCalled();
-    expect(screen.queryByText(/Build index|Re-index/)).toBeNull();
+    await waitFor(() => expect(searchHybrid).toHaveBeenCalled());
+    expect(screen.queryByTestId("upgrade-notice")).toBeNull();
   });
 
   it("Pro plan with billing: smart search runs", async () => {
@@ -125,6 +124,7 @@ describe("Smart search rerank", () => {
 describe("Ask Workspace spends the AI quota", () => {
   it("charges the question itself — one prompt, when it is actually sent (the answerer agent's own prompt)", async () => {
     __setEntitlementEndpointForTesting("https://billing.lumen.test/entitlements");
+    __setHostedAiLimitForTesting(FREE_CAPS.aiMonthlyPrompts); // stand-in for a future hosted AI gate
     openOn("ai");
     const input = screen.getByRole("textbox");
     fireEvent.change(input, { target: { value: "what changed?" } });
@@ -165,6 +165,7 @@ describe("Ask Workspace: overlapping questions", () => {
 describe("silent quota checks for background callers", () => {
   it("returns false without a toast when exhausted", () => {
     __setEntitlementEndpointForTesting("https://billing.lumen.test/entitlements");
+    __setHostedAiLimitForTesting(FREE_CAPS.aiMonthlyPrompts); // stand-in for a future hosted AI gate
     for (let i = 0; i < FREE_CAPS.aiMonthlyPrompts; i++) recordAiPrompt();
     expect(consumeAiPrompt(new Date(), { silent: true })).toBe(false);
     expect(showAiToast).not.toHaveBeenCalled();
