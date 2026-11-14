@@ -8,12 +8,19 @@
  *
  *   LUMEN_EVAL_RERANK_DIRS   comma-separated split folders with heq.json (and
  *                            belebele.json when built — the cross-lingual part,
- *                            plan 15.9); default: the committed dev split
+ *                            plan 15.9), or dev.json / heldout.json (the hard
+ *                            set, eval/golden/retrieval-hard); default: the
+ *                            committed dev split
+ *
+ * The JSON report records the machine (platform, arch, CPU): it is the eval
+ * receipt `modelDefaultAllowed` (scripts/golden/evals/rerank.mjs) reads
+ * before the model may become the app's default (W10.B18).
  *   LUMEN_EVAL_OUT           report directory, default eval/results
  */
 import { describe, it, expect } from "vitest";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { arch, cpus, platform } from "node:os";
 
 import { Bm25Index } from "../../search/bm25";
 import { RERANK_MODEL } from "../../ai/transformersEngine";
@@ -44,7 +51,7 @@ describe.skipIf(!process.env.LUMEN_EVAL_RERANK)(`reranker eval — ${RERANK_MODE
 
     const rows: Array<{ split: string; part: string; items: number; bm25: number; reranked: number; gain: number }> = [];
     for (const dir of dirs) {
-      for (const part of ["heq", "belebele"]) {
+      for (const part of ["heq", "belebele", "dev", "heldout"]) {
         const file = join(dir, `${part}.json`);
         if (!existsSync(file)) continue;
         const set = JSON.parse(readFileSync(file, "utf8")) as { items: Array<{ query: string; relevant: string[]; sameArticle?: string[] }>; corpus: Array<{ id: string; title?: string; text: string }> };
@@ -70,7 +77,7 @@ describe.skipIf(!process.env.LUMEN_EVAL_RERANK)(`reranker eval — ${RERANK_MODE
       ...rows.map((r) => `| ${r.split} | ${r.part} | ${r.items} | ${r.bm25} | ${r.reranked} | ${r.gain} |`),
     ].join("\n");
     writeFileSync(join(outDir, `rerank-${date}.md`), md + "\n");
-    writeFileSync(join(outDir, `rerank-${date}.json`), JSON.stringify({ model: RERANK_MODEL, date, gain, decision, rows }, null, 2));
+    writeFileSync(join(outDir, `rerank-${date}.json`), JSON.stringify({ model: RERANK_MODEL, date, machine: { platform: platform(), arch: arch(), cpu: cpus()[0]?.model ?? "" }, gain, decision, rows }, null, 2));
     // hygiene-allow: tells the person running the eval where the report is
     console.log(`\nGain ${gain.toFixed(2)} points → ${decision}. Report: ${join(outDir, `rerank-${date}.md`)}`);
   }, 60 * 60 * 1000);

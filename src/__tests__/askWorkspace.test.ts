@@ -20,7 +20,8 @@ describe("reranker", () => {
     expect(lexicalScore("launch budget", "nothing related")).toBe(0);
   });
 
-  it("lexical mode puts the passage that covers the question first", async () => {
+  it("lexical mode (opt-in, W10.B18) puts the passage that covers the question first", async () => {
+    setRerankMode("lexical");
     const out = await rerank("when is the launch", [
       { id: "a", text: "budget notes" },
       { id: "b", text: "the launch is on Tuesday" },

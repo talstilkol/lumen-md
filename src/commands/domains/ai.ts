@@ -266,7 +266,8 @@ export function buildAiControlCommands({ getEditorView }: CommandContext): Comma
       group: t("group.ai", { defaultValue: "AI Copilot" }),
       action: async () => {
         const { getRerankMode, setRerankMode, modelRerankSupported, RERANK_MODEL_MB } = await import("../../ai/reranker");
-        const next = getRerankMode() === "model" ? "lexical" : "model";
+        // Off = BM25 order, the default (W10.B18); the lexical reranker stays an opt-in setting (lumen.ai.rerank = "lexical").
+        const next = getRerankMode() === "model" ? "off" : "model";
         // Plan 7.6: only on WebGPU / the desktop app, and only after the user agrees to the download.
         if (next === "model") {
           if (!modelRerankSupported()) {

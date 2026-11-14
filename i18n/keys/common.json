@@ -7374,7 +7374,7 @@
     },
     {
       "key": "rerank.consent",
-      "en": "Turn on the reranking model? It downloads about {mb} MB once (bge-reranker-v2-m3) and runs on this device. On Lumen's Hebrew retrieval test the built-in ranking already puts every answer first.",
+      "en": "Turn on the reranking model? It downloads about {mb} MB once (bge-reranker-v2-m3) and runs on this device. It has not been measured on Lumen's hard Hebrew retrieval set yet; there, BM25 alone beats the built-in word-matching reranker.",
       "vars": [
         "mb"
       ]

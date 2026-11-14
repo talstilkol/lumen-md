@@ -11,10 +11,34 @@
  * The plan's rule: a gain under 5 points → the model reranker is removed or
  * off by default; otherwise it runs only on WebGPU / the desktop app, after
  * the user agrees to its download.
+ *
+ *   modelDefaultAllowed(receipt) → { ok, why }
+ *     The app's default is BM25 only (src/ai/reranker.ts DEFAULT_RERANK_MODE,
+ *     W10.B18). The model reranker may become the default only with an eval
+ *     receipt (rerank.eval.ts → eval/results/rerank-<date>.json) measured on a
+ *     Mac, on eval/golden/retrieval-hard, that beats BM25 by at least
+ *     MODEL_DEFAULT_MIN_GAIN_POINTS on both the dev and the held-out split.
  */
 import { ndcgAt } from "./retrieval.mjs";
 
 export const MIN_GAIN_POINTS = 5;
+
+/** nDCG@10 points (×100) the model must add over BM25, on each hard split, to become the default. */
+export const MODEL_DEFAULT_MIN_GAIN_POINTS = 3;
+
+export function modelDefaultAllowed(receipt) {
+  if (!receipt || typeof receipt !== "object") return { ok: false, why: "no eval receipt" };
+  if (!/bge-reranker/i.test(String(receipt.model ?? ""))) return { ok: false, why: `the receipt is for ${receipt.model ?? "no model"}, not the bge reranker` };
+  if (receipt.machine?.platform !== "darwin") return { ok: false, why: "the receipt was not measured on a Mac" };
+  const rows = Array.isArray(receipt.rows) ? receipt.rows : [];
+  for (const part of ["dev", "heldout"]) {
+    const r = rows.find((x) => String(x.split ?? "").includes("retrieval-hard") && x.part === part);
+    if (!r) return { ok: false, why: `no retrieval-hard ${part} row` };
+    const gain = round((Number(r.reranked) - Number(r.bm25)) * 100, 2);
+    if (!(gain >= MODEL_DEFAULT_MIN_GAIN_POINTS)) return { ok: false, why: `retrieval-hard ${part}: gain ${gain} < ${MODEL_DEFAULT_MIN_GAIN_POINTS} points` };
+  }
+  return { ok: true, why: "" };
+}
 
 export async function compareRerank(Index, rerankFn, { items, documents, candidates = 20, k = 10 }) {
   const index = new Index();
