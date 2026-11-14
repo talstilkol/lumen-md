@@ -50,6 +50,7 @@ import { bumpManifests, changelogSection, insertChangelog, nextVersion, parseCom
 import { LOCALES, UNTRANSLATED, addUntranslated } from "./lib/whats-new.mjs";
 import { betaFlags } from "./lib/flags.mjs";
 import { latestJson } from "./lib/tauriSigning.mjs";
+import { publishRefusals } from "./lib/releaseRun.mjs";
 import { allPackages, flatpakManifest, packagingMeta, parseSums, wingetObjects } from "./lib/packaging.mjs";
 import { checkAur, checkCask, checkFlatpak, checkWinget } from "./lib/packagingCheck.mjs";
 import { createHash } from "node:crypto";
@@ -236,6 +237,10 @@ const commands = {
   },
 
   publish() {
+    // Plan W6.43 / W10.E68: never a release whose app carries the placeholder (or test) updater key.
+    const pubkey = (process.env.LUMEN_UPDATER_PUBKEY ?? "").trim() || (existsSync(path.join(ROOT, "security/updater-key.pub")) ? read("security/updater-key.pub").trim() : JSON.parse(read("src-tauri/tauri.conf.json")).plugins?.updater?.pubkey);
+    const refusals = publishRefusals({ pubkey, files: existsSync(OUT) ? readdirSync(OUT) : [] });
+    if (refusals.length) throw new Error(`refusing to publish:\n  - ${refusals.join("\n  - ")}`);
     const version = current();
     const tag = tagOf(version);
     const at = git("rev-list", "-n", "1", tag);
