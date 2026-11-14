@@ -10,6 +10,7 @@ import { describeCapability, describeFindings, isSensitive, reportUrl } from "./
 import type { PluginManifest } from "./manifest";
 import type { ScanResult } from "./scan";
 import { HelpButton } from "../../ui/HelpButton";
+import { Modal } from "../../ui/Modal";
 
 export function InstallDialog(props: { manifest: PluginManifest; scan: ScanResult; busy?: boolean; onInstall: () => void; onCancel: () => void }) {
   const { manifest: m, scan } = props;
@@ -27,9 +28,7 @@ export function InstallDialog(props: { manifest: PluginManifest; scan: ScanResul
   }, [props]);
   const notes = scan.findings.length ? t("pluginTrust.card.notes", { list: describeFindings(scan.findings) }) : t("pluginTrust.card.clean");
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
+    <Modal
       aria-labelledby="plugin-install-title"
       data-testid="plugin-install-dialog"
       style={{ position: "fixed", inset: 0, zIndex: 210, background: "var(--overlay)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
@@ -80,6 +79,6 @@ export function InstallDialog(props: { manifest: PluginManifest; scan: ScanResul
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

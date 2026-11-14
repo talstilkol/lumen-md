@@ -15,6 +15,7 @@ import { t, getLocale } from "../i18n";
 import { airplaneModeOn, airplaneSince, disableAirplaneMode, egressAttempts, egressTally, enableAirplaneMode, subscribeEgress, type EgressAttempt } from "./airplane";
 import { buildCertificate, reachedNetwork, sealCertificate } from "./airplaneCertificate";
 import { HelpButton } from "../ui/HelpButton";
+import { Modal } from "../ui/Modal";
 
 /**
  * The "Test" button's target: one GET with no data, made only when the user clicks.
@@ -86,8 +87,8 @@ export function NetworkMonitor({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="cmd-palette-backdrop">
-      <div className="cmd-palette" role="dialog" aria-modal="true" aria-label={t("airplane.title")} data-testid="network-monitor" style={{ maxWidth: 900, padding: 0, display: "flex", flexDirection: "column", maxHeight: "88vh" }}>
+    <Modal aria-label={t("airplane.title")} className="cmd-palette-backdrop">
+      <div className="cmd-palette" data-testid="network-monitor" style={{ maxWidth: 900, padding: 0, display: "flex", flexDirection: "column", maxHeight: "88vh" }}>
         <header style={{ padding: "14px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <Plane size={18} style={{ color: "hsl(var(--accent))" }} />
           <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600, flex: 1 }}>{t("airplane.title")}</h2>
@@ -170,7 +171,7 @@ export function NetworkMonitor({ onClose }: { onClose: () => void }) {
           <p style={{ ...muted, margin: 0 }}>{t("airplane.limits")}</p>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

@@ -8,7 +8,6 @@
  */
 
 import { useEffect, useId, useRef, useState } from "react";
-import { useFocusTrap } from "./useFocusTrap";
 import { Palette as PaletteIcon, X, Download, Upload, RotateCcw, Check, AlertTriangle } from "lucide-react";
 import { useAppStore } from "../store/useStore";
 import {
@@ -32,6 +31,7 @@ import { showAiToast } from "./AiToast";
 import { t } from "../i18n";
 import { SnippetSettings } from "./SnippetSettings";
 import { HelpButton } from "./HelpButton";
+import { Modal } from "./Modal";
 
 interface Props {
   open: boolean;
@@ -72,10 +72,6 @@ export function ThemeSettings({ open, onClose, embedded = false }: Props) {
     setAccentDraft("");
   }, [open]);
 
-  // Focus stays in the dialog while it is open and returns on close; Escape closes it (plan 10.1).
-  const trapRef = useRef<HTMLDivElement | null>(null);
-  useFocusTrap(trapRef, { active: open && !embedded, onEscape: onClose });
-
   if (!open) return null;
 
   const palette = effectivePalette(settings, dark);
@@ -115,13 +111,9 @@ export function ThemeSettings({ open, onClose, embedded = false }: Props) {
   };
 
   return (
-    <div className={embedded ? undefined : "cmd-palette-backdrop"} onClick={embedded ? undefined : onClose}>
+    <Modal aria-labelledby={`${ids}-title`} embedded={embedded} onClose={onClose} className={embedded ? undefined : "cmd-palette-backdrop"} onClick={embedded ? undefined : onClose}>
       <div
         className={embedded ? undefined : "cmd-palette"}
-        ref={trapRef}
-        role={embedded ? "region" : "dialog"}
-        aria-modal={embedded ? undefined : "true"}
-        aria-labelledby={`${ids}-title`}
         onClick={(e) => e.stopPropagation()}
         style={embedded ? { display: "flex", flexDirection: "column" } : { maxWidth: 600, maxHeight: "86vh", display: "flex", flexDirection: "column" }}
         data-testid="theme-settings"
@@ -343,7 +335,7 @@ export function ThemeSettings({ open, onClose, embedded = false }: Props) {
           </div>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

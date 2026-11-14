@@ -19,6 +19,7 @@ import { t } from "../i18n";
 import { slideForKey, type Dir } from "./deck";
 import { closePresenterWindow, openChannel, openPresenterWindow, type SharedSlide } from "./channel";
 import { HelpButton } from "../ui/HelpButton";
+import { Modal } from "../ui/Modal";
 
 export interface SlideView {
   title: string;
@@ -39,7 +40,7 @@ let deckSeq = 0;
 
 export function Presentation({ title, dir, slides, start = 0, onClose }: PresentationProps) {
   const [index, setIndex] = useState(Math.min(start, Math.max(0, slides.length - 1)));
-  const root = useRef<HTMLDivElement>(null);
+  const root = useRef<HTMLElement>(null);
   const pressedAt = useRef<number | null>(null);
   const deckId = useMemo(() => `deck-${Date.now().toString(36)}-${++deckSeq}`, []);
   const startedAt = useMemo(() => Date.now(), []);
@@ -125,11 +126,9 @@ export function Presentation({ title, dir, slides, start = 0, onClose }: Present
 
   const cur = slides[index];
   return createPortal(
-    <div
+    <Modal
       ref={root}
       className="lumen-slides-root"
-      role="dialog"
-      aria-modal="true"
       aria-label={t("slides.label", { title })}
       data-testid="slides"
       data-index={index}
@@ -168,7 +167,7 @@ export function Presentation({ title, dir, slides, start = 0, onClose }: Present
           {t("slides.close")}
         </button>
       </div>
-    </div>,
+    </Modal>,
     document.body,
   );
 }

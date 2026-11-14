@@ -13,6 +13,7 @@ import { showAiToast } from "./AiToast";
 import { applyEdits, loadTypographySettings, saveTypographySettings, typographyEdits, TYPO_RULES, type TypographySettings, type TypoEdit } from "../text/hebrewTypography";
 import "./typographyDialogStrings";
 import { HelpButton } from "./HelpButton";
+import { Modal } from "./Modal";
 
 export interface TypographyTarget {
   getView: () => EditorView | null;
@@ -61,9 +62,7 @@ function TypographyDialogImpl({ target, onClose }: { target: TypographyTarget; o
   };
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
+    <Modal
       aria-labelledby="typo-title"
       data-testid="typography-dialog"
       style={{ position: "fixed", inset: 0, background: "var(--overlay)", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingTop: "8vh", zIndex: 9999 }}
@@ -116,7 +115,7 @@ function TypographyDialogImpl({ target, onClose }: { target: TypographyTarget; o
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

@@ -61,6 +61,7 @@ const DiagramDialog = lazy(() => import("../canvas/DiagramDialog").then((m) => (
 import "./canvasExcalidrawStrings";
 import { HelpButton } from "./HelpButton";
 import { explainError } from "../lib/userError";
+import { Modal } from "./Modal";
 
 // Fonts (and anything else Excalidraw fetches by relative path) come from
 // this origin. Without it Excalidraw falls back to esm.sh.
@@ -433,7 +434,7 @@ export function CanvasExcalidraw({ open, onClose, collab = null }: Props) {
   ];
 
   return (
-    <div role="dialog" aria-modal="true" aria-label={t("canvas.dialogLabel")} className="lumen-canvas" data-testid="canvas">
+    <Modal aria-label={t("canvas.dialogLabel")} className="lumen-canvas" data-testid="canvas">
       <div className="lumen-canvas-head">
         <strong style={{ fontSize: 13 }}>{t("canvas.title")}</strong>
         <HelpButton topic="workspace/canvas" />
@@ -546,6 +547,6 @@ export function CanvasExcalidraw({ open, onClose, collab = null }: Props) {
           </Suspense>
         )}
       </div>
-    </div>
+    </Modal>
   );
 }

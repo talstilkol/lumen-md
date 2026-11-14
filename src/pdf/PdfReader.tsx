@@ -40,6 +40,7 @@ import { PdfPageView } from "./PdfPageView";
 import type { PageSize } from "./PdfPageView";
 import type { OcrPage } from "./ocrPages";
 import { positionAt, scrollTopFor, type PageBox, type PositionsIO } from "./readingPosition";
+import { Modal } from "../ui/Modal";
 
 /** "Ask this PDF" (plan 6.8): its own chunk, loaded on the first click of Ask. */
 const PdfChatPanel = lazy(() => import("./PdfChatPanel").then((m) => ({ default: m.PdfChatPanel })));
@@ -166,7 +167,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
   const searchRef = useRef<HTMLInputElement>(null);
   /** Bumped per search and per query edit: a slower, older search must not commit its results. */
   const searchSeq = useRef(0);
-  const rootRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLElement>(null);
 
   // Take focus from the editor underneath, so keys go to the reader.
   useEffect(() => {
@@ -633,7 +634,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
   const name = baseName(path);
 
   return (
-    <div
+    <Modal
       ref={rootRef}
       tabIndex={-1}
       className={reading ? "pdf-reader pdf-reader--reading" : "pdf-reader"}
@@ -642,8 +643,6 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
       data-current-page={current}
       data-page-count={sizes.length}
       data-ready={doc ? "true" : undefined}
-      role="dialog"
-      aria-modal="true"
       aria-label={name}
     >
       <div className="pdf-toolbar">
@@ -848,7 +847,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
           </ol>
         </aside>
       </div>
-    </div>
+    </Modal>
   );
 }
 

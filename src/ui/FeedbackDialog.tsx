@@ -32,6 +32,7 @@ import {
 import { getAiPolicy } from "../ai/policy";
 import { HelpButton } from "./HelpButton";
 import { explainError } from "../lib/userError";
+import { Modal } from "./Modal";
 
 export interface FeedbackOptions {
   /** The AI doctor's report, when opened from the doctor (still included only if ticked). */
@@ -180,8 +181,8 @@ export function FeedbackDialog({ options, onClose }: { options: FeedbackOptions;
   return (
     // Closes with Escape or the × button; the backdrop has no click handler, so a
     // stray click outside never throws away what the user wrote.
-    <div className="cmd-palette-backdrop">
-      <div className="cmd-palette" role="dialog" aria-modal="true" aria-label={t("feedback.title")} data-testid="feedback-dialog" style={{ maxWidth: 600, padding: 0, display: "flex", flexDirection: "column", maxHeight: "88vh" }}>
+    <Modal aria-label={t("feedback.title")} className="cmd-palette-backdrop">
+      <div className="cmd-palette" data-testid="feedback-dialog" style={{ maxWidth: 600, padding: 0, display: "flex", flexDirection: "column", maxHeight: "88vh" }}>
         <header style={{ padding: "14px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <MessageSquareWarning size={18} style={{ color: "hsl(var(--accent))" }} />
           <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600, flex: 1 }}>{t("feedback.title")}</h2>
@@ -261,7 +262,7 @@ export function FeedbackDialog({ options, onClose }: { options: FeedbackOptions;
           <span style={{ ...muted, textAlign: "end" }}>{t("feedback.openGithub.hint")}</span>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 
