@@ -1,0 +1,13 @@
+{
+  "about": "Plan 7.2 / W10.E33: what the Buildkite real-model steps run, pinned by digest. A model by its Ollama manifest digest (`ollama show <model> --modelfile` / the registry manifest), an image by its content digest (`docker buildx imagetools inspect <image>`), never a tag. A pin still reading PIN-ON-THE-MAC fails the step (npm run ci:real-model-pins -- check): fill it on the Mac, where the registry is reachable. The model cache is keyed by the digest, so a new build of a model is a new cache.",
+  "models": {
+    "qwen3:0.6b": { "digest": "sha256:PIN-ON-THE-MAC", "when": "every PR that changes src/agents/**" },
+    "qwen3:1.7b": { "digest": "sha256:PIN-ON-THE-MAC", "when": "nightly (multi-step scenarios)" },
+    "hf.co/dicta-il/DictaLM-3.0-1.7B-Thinking-GGUF": { "digest": "sha256:PIN-ON-THE-MAC", "when": "nightly (Hebrew smoke test)" }
+  },
+  "images": {
+    "ollama/ollama": "sha256:PIN-ON-THE-MAC",
+    "erikvl87/languagetool": "sha256:PIN-ON-THE-MAC",
+    "searxng/searxng": "sha256:PIN-ON-THE-MAC"
+  }
+}
