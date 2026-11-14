@@ -3,3 +3,8 @@
 "widget.search" = "Search";
 "widget.quickNote" = "Quick note";
 "widget.daily" = "Today";
+"control.capture" = "Capture to inbox";
+"control.capture.description" = "Opens a box to type a line for your Lumen inbox.";
+"lock.capture" = "Capture";
+"lock.capture.hint" = "To your Lumen inbox";
+"lock.capture.description" = "Type a line for your inbox from the Lock Screen.";

@@ -4,6 +4,10 @@
  * widget were not in project.pbxproj, so Siri's intents and the widget
  * never compiled. The project file is parsed (its OpenStep plist syntax),
  * not grepped. Compiling is the Mac's (10.M).
+ *
+ * W11.P8 / W11.P9 add the shared capture queue (App + LumenShare), the native
+ * capture sheet, the Control Center and Lock Screen widgets, and our own
+ * share extension (LumenShare).
  */
 import { describe, it, expect } from "vitest";
 import { readdirSync, readFileSync, statSync } from "node:fs";
@@ -119,25 +123,38 @@ describe("the iOS project (W10.C7)", () => {
     }
   });
 
-  it("0 Swift files outside a target: the app's in App, the widget's in LumenWidgets", () => {
-    const inTargets = new Set([...sourcesOf("App"), ...sourcesOf("LumenWidgets")]);
+  it("0 Swift files outside a target: the app's in App, the widgets' in LumenWidgets, the share sheet's in LumenShare", () => {
+    const inTargets = new Set([...sourcesOf("App"), ...sourcesOf("LumenWidgets"), ...sourcesOf("LumenShare")]);
     const all = swiftFiles(join(ROOT, "ios/App"));
     expect(all.filter((f) => !inTargets.has(f))).toEqual([]);
-    expect(sourcesOf("App").sort()).toEqual(["ios/App/App/AppDelegate.swift", "ios/App/App/LumenIntents.swift", "ios/App/App/LumenNative.swift", "ios/App/App/iCloudSync.swift"]);
-    expect(sourcesOf("LumenWidgets")).toEqual(["ios/App/LumenWidgets/LumenWidgets.swift"]);
+    expect(sourcesOf("App").sort()).toEqual([
+      "ios/App/App/AppDelegate.swift",
+      "ios/App/App/LumenIntents.swift",
+      "ios/App/App/LumenNative.swift",
+      "ios/App/App/NativeCapture.swift",
+      "ios/App/App/iCloudSync.swift",
+      "ios/App/Shared/CaptureQueue.swift",
+    ]);
+    expect(sourcesOf("LumenWidgets").sort()).toEqual(["ios/App/LumenWidgets/LumenControls.swift", "ios/App/LumenWidgets/LumenWidgets.swift"]);
+    expect(sourcesOf("LumenShare").sort()).toEqual(["ios/App/LumenShare/ShareViewController.swift", "ios/App/Shared/CaptureQueue.swift"]);
+    // The old, unbuilt ShareExtension (SLComposeServiceViewController) is gone.
+    expect(() => statSync(join(ROOT, "ios/ShareExtension"))).toThrow();
   });
 
-  it("the widget is an app extension the app builds first and embeds", () => {
-    const [wid, w] = target("LumenWidgets");
-    expect(w.productType).toBe("com.apple.product-type.app-extension");
-    expect(obj(w.productReference as string).path).toBe("LumenWidgets.appex");
+  it("the widgets and the share sheet are app extensions the app builds first and embeds", () => {
     const [, app] = target("App");
-    const dep = (app.dependencies as string[]).map(obj).find((d) => d.target === wid);
-    expect(dep).toBeTruthy();
+    for (const name of ["LumenWidgets", "LumenShare"]) {
+      const [wid, w] = target(name);
+      expect(w.productType).toBe("com.apple.product-type.app-extension");
+      expect(obj(w.productReference as string).path).toBe(`${name}.appex`);
+      const dep = (app.dependencies as string[]).map(obj).find((d) => d.target === wid);
+      expect(dep, name).toBeTruthy();
+      expect(obj(dep!.targetProxy as string).remoteGlobalIDString).toBe(wid);
+    }
     const embed = (app.buildPhases as string[]).map(obj).find((p) => p.isa === "PBXCopyFilesBuildPhase")!;
     expect(embed.dstSubfolderSpec).toBe("13"); // PlugIns
-    expect((embed.files as string[]).map((f) => obj(obj(f).fileRef as string).path)).toEqual(["LumenWidgets.appex"]);
-    expect((obj(project.rootObject as string).targets as string[]).map((t) => obj(t).name)).toEqual(["App", "LumenWidgets"]);
+    expect((embed.files as string[]).map((f) => obj(obj(f).fileRef as string).path)).toEqual(["LumenWidgets.appex", "LumenShare.appex"]);
+    expect((obj(project.rootObject as string).targets as string[]).map((t) => obj(t).name)).toEqual(["App", "LumenWidgets", "LumenShare"]);
   });
 
   it("each target has its Info.plist, entitlements with the App Group, bundle id and version in lock-step", () => {
@@ -147,14 +164,23 @@ describe("the iOS project (W10.C7)", () => {
       expect(s.INFOPLIST_FILE).toBe("LumenWidgets/Info.plist");
       expect(s.CODE_SIGN_ENTITLEMENTS).toBe("LumenWidgets/LumenWidgets.entitlements");
     }
+    for (const s of settings("LumenShare")) {
+      expect(s.PRODUCT_BUNDLE_IDENTIFIER).toBe("com.lumen.editor.LumenShare");
+      expect(s.INFOPLIST_FILE).toBe("LumenShare/Info.plist");
+      expect(s.CODE_SIGN_ENTITLEMENTS).toBe("LumenShare/LumenShare.entitlements");
+    }
     for (const s of settings("App")) expect(s.CODE_SIGN_ENTITLEMENTS).toBe("App/App.entitlements");
     // The extension's version must match the app's (App Store rule): the release bump changes all of them.
-    const versions = new Set([...settings("App"), ...settings("LumenWidgets")].map((s) => `${s.MARKETING_VERSION}/${s.CURRENT_PROJECT_VERSION}`));
+    const versions = new Set([...settings("App"), ...settings("LumenWidgets"), ...settings("LumenShare")].map((s) => `${s.MARKETING_VERSION}/${s.CURRENT_PROJECT_VERSION}`));
     expect(versions.size).toBe(1);
     const info = readFileSync(join(ROOT, "ios/App/LumenWidgets/Info.plist"), "utf8");
     expect(info).toMatch(/<key>NSExtensionPointIdentifier<\/key>\s*<string>com\.apple\.widgetkit-extension<\/string>/);
     expect(info).toMatch(/<key>CFBundleShortVersionString<\/key>\s*<string>\$\(MARKETING_VERSION\)<\/string>/);
-    for (const f of ["ios/App/App/App.entitlements", "ios/App/LumenWidgets/LumenWidgets.entitlements"]) {
+    const share = readFileSync(join(ROOT, "ios/App/LumenShare/Info.plist"), "utf8");
+    expect(share).toMatch(/<key>NSExtensionPointIdentifier<\/key>\s*<string>com\.apple\.share-services<\/string>/);
+    expect(share).toMatch(/<key>NSExtensionPrincipalClass<\/key>\s*<string>\$\(PRODUCT_MODULE_NAME\)\.ShareViewController<\/string>/);
+    for (const k of ["SupportsText", "SupportsWebURLWithMaxCount", "SupportsImageWithMaxCount", "SupportsFileWithMaxCount"]) expect(share, k).toContain(`<key>NSExtensionActivation${k}</key>`);
+    for (const f of ["ios/App/App/App.entitlements", "ios/App/LumenWidgets/LumenWidgets.entitlements", "ios/App/LumenShare/LumenShare.entitlements"]) {
       expect(readFileSync(join(ROOT, f), "utf8")).toMatch(/<key>com\.apple\.security\.application-groups<\/key>\s*<array>\s*<string>group\.com\.lumen\.editor<\/string>/);
     }
     // The group the app reads (AppDelegate's shared defaults) is the one granted.
@@ -169,6 +195,30 @@ describe("the iOS project (W10.C7)", () => {
       ["AppShortcuts.strings", ["en", "he"]],
     ]);
     expect(res("LumenWidgets").map((g) => [g.name, langs(g)])).toEqual([["Localizable.strings", ["en", "he"]]]);
+    expect(res("LumenShare").map((g) => [g.name, langs(g)])).toEqual([["Localizable.strings", ["en", "he"]]]);
     expect(obj(project.rootObject as string).knownRegions).toContain("he");
+  });
+
+  it("W11.P8: Control Center and Lock Screen capture open the native sheet, not the WebView", () => {
+    const controls = readFileSync(join(ROOT, "ios/App/LumenWidgets/LumenControls.swift"), "utf8");
+    expect(controls).toMatch(/@available\(iOS 18\.0, \*\)\s*struct LumenCaptureControl: ControlWidget/);
+    expect(controls).toContain("ControlWidgetButton(action: OpenCaptureSheetIntent())");
+    expect(controls).toContain('OpenURLIntent(CaptureLink.url("control"))');
+    expect(controls).toMatch(/supportedFamilies\(\[\.accessoryCircular, \.accessoryRectangular, \.accessoryInline\]\)/);
+    expect(controls).toContain('widgetURL(CaptureLink.url("lockscreen"))');
+    expect(controls).toContain('"lumen://capture?native=1&source=\\(source)"');
+    const bundle = readFileSync(join(ROOT, "ios/App/LumenWidgets/LumenWidgets.swift"), "utf8");
+    expect(bundle).toMatch(/@main\s*struct LumenWidgetBundle: WidgetBundle[\s\S]*LumenWidget\(\)[\s\S]*LumenLockScreenCapture\(\)[\s\S]*LumenCaptureControl\(\)/);
+    expect(bundle.match(/@main/g)).toHaveLength(1);
+    // The app answers that link with the native sheet before the WebView sees any link.
+    const delegate = readFileSync(join(ROOT, "ios/App/App/AppDelegate.swift"), "utf8");
+    expect(delegate.indexOf("NativeCapture.handles(url)")).toBeGreaterThan(0);
+    expect(delegate.indexOf("NativeCapture.handles(url)")).toBeLessThan(delegate.indexOf("LumenLaunch.deliver(url)"));
+    const sheet = readFileSync(join(ROOT, "ios/App/App/NativeCapture.swift"), "utf8");
+    expect(sheet).toContain("CaptureQueue.addText(text.text, source: source)");
+    expect(sheet).toContain("textAlignment = .natural");
+    // "Add to inbox" still runs without opening the app, now into the App Group queue.
+    const intents = readFileSync(join(ROOT, "ios/App/App/LumenIntents.swift"), "utf8");
+    expect(intents).toMatch(/struct AddToInboxIntent[\s\S]*?openAppWhenRun = false[\s\S]*?CaptureQueue\.addText\(text, source: "siri"\)/);
   });
 });

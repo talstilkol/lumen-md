@@ -13,3 +13,11 @@
 "Voice note" = "Voice note";
 "Search" = "Search";
 "Today's note" = "Today's note";
+"Capture to Lumen inbox" = "Capture to Lumen inbox";
+"Opens a box to type a line for inbox.md, before the rest of Lumen loads." = "Opens a box to type a line for inbox.md, before the rest of Lumen loads.";
+"Capture" = "Capture";
+"capture.title" = "Inbox";
+"capture.save" = "Save";
+"capture.cancel" = "Cancel";
+"capture.saved" = "Saved to your inbox";
+"capture.failed" = "Could not save. The text is still here.";

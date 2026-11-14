@@ -433,6 +433,11 @@ export default function App() {
           await captureToInbox(text, when);
           showAiToast(t("widgets.captured"), "success");
         },
+        // Plan W11.P9: an image or PDF from the share sheet, saved under attachments/.
+        captureFile: async (c, bytes, when) => {
+          await (await import("./mobile/captureQueue")).captureFileToInbox(c, bytes, when);
+          showAiToast(t("widgets.captured"), "success");
+        },
         newNote: () => openNewDoc(t("doc.untitled"), "", false),
         search: (query) => {
           setSearchQuery(query);

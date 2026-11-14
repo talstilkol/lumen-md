@@ -36,6 +36,29 @@ phone, and the next time Lumen opens it lands in `inbox.md` with the time
 you said it. Each line is added once, and nothing is lost if Lumen is
 closed again first.
 
+## From the Lock Screen and Control Center (iPhone)
+
+Capture a line before Lumen has even loaded:
+
+- **Lock Screen widget:** customise the Lock Screen → add **Lumen
+  Capture** (round, wide or one line).
+- **Control Center (iOS 18 and later):** edit Control Center, or the Lock
+  Screen's two buttons, → add **Capture to inbox**.
+- **Shortcuts:** "Capture to Lumen".
+
+Each opens a small text box at once, before the rest of Lumen loads. Type,
+tap **Save**, and the line lands at the end of `inbox.md` with the time you
+typed it. If the box can't save, it says so and keeps your text.
+
+## Share to Lumen (iPhone)
+
+In any app, tap **Share** → **Lumen**. Text, a link (with the page title),
+images and PDFs are saved without opening Lumen. The next time Lumen opens:
+
+- text and links are added to `inbox.md`;
+- images and PDFs are saved in `attachments/`, and a line in the inbox
+  links to them, with the file's name.
+
 ## App Shortcuts (Android)
 
 Long-press the Lumen icon: **Quick note**, **Voice note**, **Search** and
@@ -69,22 +92,32 @@ The Xcode project already holds everything (`ios/App/App.xcodeproj`,
 checked by `src/__tests__/iosProject.test.ts`):
 
 - the **App** target compiles `AppDelegate.swift`, `LumenNative.swift`,
-  `LumenIntents.swift` and `iCloudSync.swift`, with `en.lproj` / `he.lproj`
-  (`Localizable.strings`, `AppShortcuts.strings`); Hebrew is a project
-  localization;
+  `LumenIntents.swift`, `NativeCapture.swift` (the capture box),
+  `iCloudSync.swift` and `Shared/CaptureQueue.swift`, with `en.lproj` /
+  `he.lproj` (`Localizable.strings`, `AppShortcuts.strings`); Hebrew is a
+  project localization;
 - the **LumenWidgets** widget extension (`com.lumen.editor.LumenWidgets`)
-  compiles `LumenWidgets/LumenWidgets.swift` with its own strings,
-  `Info.plist` and entitlements, and the app embeds it;
-- both targets have the App Group `group.com.lumen.editor` in their
-  entitlements (the share extension's queue is read through it).
+  compiles `LumenWidgets/LumenWidgets.swift` (the home-screen widget and the
+  bundle) and `LumenControls.swift` (the Lock Screen widget and the Control
+  Center control), with its own strings, `Info.plist` and entitlements, and
+  the app embeds it. There is no need to add a Widget Extension target by
+  hand;
+- the **LumenShare** share extension (`com.lumen.editor.LumenShare`)
+  compiles `LumenShare/ShareViewController.swift` and
+  `Shared/CaptureQueue.swift`, and the app embeds it;
+- all three targets have the App Group `group.com.lumen.editor` in their
+  entitlements. The capture queue lives there: one file per capture, written
+  atomically, read by the app (`src/mobile/captureQueue.ts`, tested in
+  `src/__tests__/captureQueue.test.ts`).
 
 To build:
 
 1. `npm run build && npx cap sync ios`, then open `ios/App/App.xcworkspace`
    (or `App.xcodeproj` with Swift Package Manager).
-2. **Signing:** set the same team for the App and LumenWidgets targets
-   (the accounts are in plan 15.7), and register the App Group
-   `group.com.lumen.editor` for both bundle ids in the developer account.
+2. **Signing:** set the same team for the App, LumenWidgets and LumenShare
+   targets (the accounts are in plan 15.7), and register the App Group
+   `group.com.lumen.editor` for all three bundle ids in the developer
+   account.
 3. `Main.storyboard` already uses `MainViewController`, which registers the
    app's plugin. Check that its class shows *Module: App*.
 4. Build and run on a device. Long-press the home screen → **+** →
@@ -122,3 +155,9 @@ Android phone, with the phone in Hebrew and then in English:
    and the labels are in Hebrew. The same holds for the App Shortcuts.
 5. **Each link:** `lumen://search?q=test` from the browser opens search
    with "test".
+6. **Lock Screen and Control Center:** with the phone locked and Lumen
+   closed, tap the Lock Screen widget, then the control. The box opens, and
+   a saved line is in `inbox.md` once Lumen is open.
+7. **Share:** share a web page from Safari, a photo from Photos and a PDF
+   from Files, with Lumen closed. Open Lumen: each one is there, with its
+   link or file name.
