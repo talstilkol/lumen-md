@@ -32,6 +32,7 @@ import { applyTreeBadges, clearTreeBadges } from "./treeBadges";
 import { liveSync } from "../lan/rpc";
 import { e2eeErrorText } from "./errorText";
 import { explainError } from "../../../lib/userError";
+import { setSyncStatus } from "../../syncStatus";
 
 export type Phase = "disconnected" | "connected" | "unlocked";
 
@@ -174,6 +175,8 @@ export function createSession(deps: SessionDeps = {}) {
   async function syncNow(): Promise<SyncResult> {
     if (!engine) throw new Error("The vault is locked");
     set({ syncing: true, error: null });
+    // The status bar's sync indicator (sync/syncStatus.ts) follows every round.
+    setSyncStatus("syncing", null);
     try {
       // This device's rules, read for every round. Unreadable rules stop the
       // round (SyncRulesUnreadableError): an excluded file must not leave by accident.
@@ -182,10 +185,13 @@ export function createSession(deps: SessionDeps = {}) {
       if (JSON.stringify(rules) !== JSON.stringify(state.rules)) set({ rules });
       const last = await engine.sync();
       set({ syncing: false, last, lastAt: Date.now() });
+      setSyncStatus("idle", null);
       await refreshStates().catch(() => undefined);
       return last;
     } catch (e) {
-      set({ syncing: false, error: e2eeErrorText(e, "other", explainError) });
+      const error = e2eeErrorText(e, "other", explainError);
+      set({ syncing: false, error });
+      setSyncStatus(typeof navigator !== "undefined" && navigator.onLine === false ? "offline" : "error", null, error);
       throw e;
     }
   }
@@ -326,6 +332,7 @@ export function createSession(deps: SessionDeps = {}) {
       await saveProviderSettings(null);
       if (kind) await saveProviderSecret(kind, null);
       set(initial());
+      setSyncStatus("idle", null);
     },
   };
 }

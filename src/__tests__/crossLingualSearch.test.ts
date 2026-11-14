@@ -10,7 +10,9 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fuse, isMultilingualEmbedding, markCrossLingual, rankByCosine, scriptOf } from "../search/crossLingual";
-import { __resetTranslators, registerLocalTranslator, translatePassage } from "../search/passageTranslator";
+import { __resetTranslators, translatePassage } from "../search/passageTranslator";
+import { createM2m100Layer, createOpusLayer } from "../ai/mt/localModels";
+import type { MtLayer } from "../ai/mt/layers";
 import { Bm25Index } from "../search/bm25";
 // @ts-expect-error the harness is plain JavaScript
 import { scoreCrossLingual } from "../../scripts/search/crosslingual-eval.mjs";
@@ -69,10 +71,33 @@ describe("ranking", () => {
 describe("local translation next to the original", () => {
   beforeEach(() => __resetTranslators());
 
-  it("uses a registered local engine (6.4) first", async () => {
-    const off = registerLocalTranslator("opus-mt", async (t, from, to) => `[${from}>${to}] ${t}`);
-    expect(await translatePassage("Sleep and memory", "en", "he")).toEqual({ text: "[en>he] Sleep and memory", engine: "opus-mt" });
-    off();
+  // The real 6.4 layers (Opus-MT, M2M100) with a scripted model runner in place of transformers.js (no model files offline).
+  const asked: string[] = [];
+  const env = (ready: { opus: boolean; m2m: boolean }, translated: string[]) => ({
+    base: () => "https://models.example/",
+    registry: async () => new Map([["Helsinki-NLP/opus-mt-en-he", { files: [{ dtype: "q8" }] }]]) as never,
+    opfsRoot: async () => {
+      if (!ready.opus) throw new Error("no OPFS");
+      return {} as never;
+    },
+    device: async () => "wasm" as const,
+    translate: (async (model: string, texts: string[]) => (translated.push(model), texts.map((t) => `[${model}] ${t}`))) as never,
+    consent: { confirm: async () => (asked.push("consent"), true), t: (k: string) => k },
+    storage: { getItem: () => (ready.m2m ? "1" : null), setItem: () => undefined },
+  });
+
+  it("uses a 6.4 model that is already on the device; never asks, never downloads from a search", async () => {
+    const translated: string[] = [];
+    // M2M100 is marked ready on this device; Opus-MT's files are not cached (it would need a download).
+    const layers: MtLayer[] = [createOpusLayer(env({ opus: false, m2m: true }, translated).consent, env({ opus: false, m2m: true }, translated)), createM2m100Layer(env({ opus: false, m2m: true }, translated).consent, env({ opus: false, m2m: true }, translated))];
+    const r = await translatePassage("Sleep and memory", "en", "he", { layers, globals: {} });
+    expect(r).toEqual({ text: "[Xenova/m2m100_418M] Sleep and memory", engine: "m2m100" });
+    expect(asked).toEqual([]);
+    // Nothing ready: nothing translated, no consent asked (a search must not start a download).
+    const none: MtLayer[] = [createM2m100Layer(env({ opus: false, m2m: false }, translated).consent, env({ opus: false, m2m: false }, translated))];
+    expect(await translatePassage("Sleep", "en", "he", { layers: none, globals: {} })).toEqual({ text: null, engine: null });
+    expect(asked).toEqual([]);
+    expect(translated).toEqual(["Xenova/m2m100_418M"]);
   });
 
   it("uses the browser's on-device translator only for a pair already on the device", async () => {

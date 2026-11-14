@@ -345,25 +345,6 @@ export function getPublishedSlug(content: string): string | null {
   return m?.[1] ?? null;
 }
 
-/** Persist a slug into the note's frontmatter (idempotent). */
-export function setPublishedSlug(content: string, slug: string | null): string {
-  const fm = content.match(/^(---\r?\n)([\s\S]*?)(\r?\n---\r?\n)/);
-  if (!fm) {
-    return slug == null ? content : `---\npublished: ${slug}\n---\n\n${content}`;
-  }
-  const block = fm[2];
-  const has = /^published\s*:/m.test(block);
-  let newBlock: string;
-  if (slug == null) {
-    newBlock = block.replace(/^published\s*:.*$/m, "").replace(/\n{2,}/g, "\n").trim();
-  } else if (has) {
-    newBlock = block.replace(/^published\s*:.*$/m, `published: ${slug}`);
-  } else {
-    newBlock = `${block.replace(/\s*$/, "")}\npublished: ${slug}`;
-  }
-  return content.replace(fm[0], `${fm[1]}${newBlock}${fm[3]}`);
-}
-
 function readPublishResult(data: unknown): PublishResult {
   const payload = data as PublishResultPayload;
   const url = typeof payload?.url === "string" ? payload.url.trim() : "";

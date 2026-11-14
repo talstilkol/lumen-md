@@ -6,7 +6,10 @@
  *
  * The key is never persisted — it's re-derived on demand from the password,
  * with PBKDF2 (100k iterations, SHA-256). The salt is stored alongside the
- * ciphertext so a new password can be set without re-encrypting everything.
+ * ciphertext. There is no "change the password" entry point: the one that
+ * existed (`setEncryptionPassword`) had no caller and re-encrypted inside
+ * IndexedDB callbacks after their transaction closed, so it was removed
+ * (W10.C dead seams; the whole module is unused, scripts/unused-files.baseline.json).
  *
  * Non-encrypted stores (e.g. settings, UI state) can opt out with
  * `encrypt: false`.
@@ -142,97 +145,6 @@ export async function isEncryptionConfigured(): Promise<boolean> {
     });
   } catch {
     return false;
-  }
-}
-
-/** Set or change the encryption password. Re-encrypts all existing data.
- *  If `newPassword` is empty, removes encryption entirely. */
-export async function setEncryptionPassword(
-  newPassword: string,
-  oldPassword?: string,
-): Promise<void> {
-  const db = await openDb();
-  const stores = DEFAULT_STORES.filter((s) => s.encrypt).map((s) => s.name);
-
-  // If we're removing encryption, decrypt everything and store plaintext.
-  if (!newPassword) {
-    if (!oldPassword) {
-      // Just clear the salt marker to signal "unencrypted".
-      const tx = db.transaction("snapshots", "readwrite");
-      tx.objectStore("snapshots").delete("__salt");
-      tx.oncomplete = () => db.close();
-      return;
-    }
-
-    // Decrypt all stores.
-    for (const name of stores) {
-      const tx = db.transaction(name, "readwrite");
-      const store = tx.objectStore(name);
-      const keysReq = store.getAllKeys();
-      keysReq.onsuccess = async () => {
-        for (const key of keysReq.result) {
-          if (key === "__salt") continue;
-          const recReq = store.get(key);
-          recReq.onsuccess = async () => {
-            const rec: EncryptedRecord = recReq.result;
-            if (rec && rec.iv && rec.salt) {
-              try {
-                const plain = await decrypt(oldPassword, rec);
-                store.put(plain, key);
-              } catch (e) {
-                log.warn("cryptoStorage", "Failed to decrypt during password removal:", key, e);
-              }
-            }
-          };
-        }
-      };
-    }
-    db.close();
-    return;
-  }
-
-  // Set / change password.
-  const salt = randomBytes(SALT_LENGTH);
-  const tx = db.transaction("snapshots", "readwrite");
-  tx.objectStore("snapshots").put(salt, "__salt");
-  tx.oncomplete = () => db.close();
-
-  // Re-encrypt all stores with new password.
-  // This is fire-and-forget in the background — the user can keep editing.
-  for (const name of stores) {
-    const tx2 = db.transaction(name, "readwrite");
-    const store = tx2.objectStore(name);
-    const keysReq = store.getAllKeys();
-    keysReq.onsuccess = async () => {
-      for (const key of keysReq.result) {
-        if (key === "__salt") continue;
-        const recReq = store.get(key);
-        recReq.onsuccess = async () => {
-          const raw = recReq.result;
-          if (!raw) return;
-          let plain: string;
-          // Check if already encrypted (has iv/salt/ciphertext shape).
-          if (raw.iv && raw.salt && raw.ciphertext) {
-            if (!oldPassword) {
-              log.warn("cryptoStorage", "Cannot re-encrypt without old password");
-              return;
-            }
-            try {
-              plain = await decrypt(oldPassword, raw as EncryptedRecord);
-            } catch {
-              log.warn("cryptoStorage", "Failed to decrypt with old password:", key);
-              return;
-            }
-          } else if (typeof raw === "string") {
-            plain = raw;
-          } else {
-            return; // object store — skip
-          }
-          const enc = await encrypt(newPassword, plain);
-          store.put(enc, key);
-        };
-      }
-    };
   }
 }
 
