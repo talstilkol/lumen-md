@@ -12,9 +12,12 @@
  *   • An entry is "verified" only when it carries a `signature` and a
  *     `signedBy`, its bundle downloads, and `verifyPluginSignature`
  *     returns `true` for those bytes against a pinned trust root.
- *   • A remote entry is not installable from the gallery until the
- *     signed install path (W10.B3: sha256 + Ed25519 → QuickJS) exists.
- *     The gallery shows "Not available yet" instead of a fake success.
+ *   • A remote entry of this legacy registry.json is not installable from
+ *     the gallery: it names a bare script, not a sandboxed plugin with a
+ *     manifest. The signed install path (W10.B3: Ed25519 over index.json,
+ *     sha256 of manifest and code → QuickJS) is src/plugins/install.ts and
+ *     takes registries in the index.json format. The gallery shows
+ *     "Not available yet" instead of a fake success.
  */
 
 import { verifyPluginSignature } from "./signing";
@@ -58,9 +61,10 @@ export async function checkRegistryEntry(
 }
 
 /**
- * Whether the gallery may install a remote entry. There is no signed
- * install path yet (W10.B3), so the answer is always no: the gallery
- * must not pretend to install something it never downloaded or ran.
+ * Whether the gallery may install a legacy registry.json entry: no. These
+ * entries are bare scripts with no manifest or permissions, so the signed
+ * path (install.ts) cannot take them, and the gallery must not pretend to
+ * install something it never downloaded or ran.
  */
 export function isRemoteInstallable(_entry: RegistryEntryTrustInput): boolean {
   return false;

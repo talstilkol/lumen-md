@@ -16,6 +16,7 @@
 /src/lib/cryptoStorage.ts                @talstilkol
 /src/lib/secretStore.ts                  @talstilkol
 /src/plugins/signing.ts                  @talstilkol
+/src/plugins/install.ts                  @talstilkol
 /src-tauri/keychain/                     @talstilkol
 /scripts/tauri-signing.mjs               @talstilkol
 /scripts/lib/tauriSigning.mjs            @talstilkol
