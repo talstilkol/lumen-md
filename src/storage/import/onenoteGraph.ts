@@ -167,6 +167,7 @@ export class GraphClient {
     private readonly token: () => string | Promise<string>,
     private readonly opts: GraphOptions = {},
   ) {
+    // privacy-ledger: not tracked — Microsoft Graph, only after the user signs in to import their own OneNote (Notes.Read); request() sends nothing outside graph.microsoft.com (isGraphUrl). Airplane mode blocks and lists it.
     this.fetcher = opts.fetch ?? ((...a: Parameters<typeof fetch>) => fetch(...a));
     this.sleep = opts.sleep ?? ((ms) => new Promise((r) => setTimeout(r, ms)));
   }
