@@ -36,9 +36,12 @@ export function setRerankMode(mode: RerankMode): void {
 /**
  * Plan 7.6: the model reranker is offered only where it is fast enough —
  * a browser with WebGPU, or the desktop app — and after the user agreed to
- * its download. Measured on the retrieval golden set's HeQ dev split, BM25
- * alone already scores nDCG@10 1.0, so the model is off by default
- * (`npm run eval:rerank` measures it on the other parts).
+ * its download. It is off by default, PROVISIONALLY (plan W10.B18): HeQ dev
+ * is saturated (BM25 nDCG@10 1.0), so it could not show a gain, and on the
+ * hard set (eval/golden/retrieval-hard) the model has not been measured yet
+ * (`npm run eval:rerank`, Mac). There the built-in lexical reranker scores
+ * below BM25 alone (dev 0.918 vs 0.948, held-out 0.907 vs 0.952;
+ * src/__tests__/rerankHard.test.ts).
  */
 export function modelRerankSupported(): boolean {
   if (typeof window === "undefined") return false;

@@ -26,9 +26,23 @@ nDCG@10:
 | BM25 alone | 1.0000 |
 | BM25 + built-in reranker | 1.0000 |
 
-BM25 already puts every answer first on this split, so no reranker can add
-the 5 points the plan asks for: **the model reranker stays off by default**
-and is offered only where it runs fast, after consent. The cross-lingual
+BM25 already puts every answer first on this split, so no reranker can show
+a gain there. That makes this split no basis for the decision.
+
+On the **hard set** (`eval/golden/retrieval-hard`: real HeQ test questions
+changed by spelling, paraphrase and word order, over the same 238
+paragraphs) BM25 is below the ceiling, and the built-in reranker makes it
+**worse**:
+
+| | dev (210 questions) | held-out (90) |
+|---|---|---|
+| BM25 alone | 0.9479 | 0.9521 |
+| BM25 + built-in reranker | 0.9177 (−3.0) | 0.9072 (−4.5) |
+
+The model reranker (bge-reranker-v2-m3) **has not been measured** on this
+set yet; it needs the model. Until it is, **"off by default" is a
+provisional decision**. The model is offered only where it runs fast, after
+consent. The cross-lingual
 part (Belebele, an English question over Hebrew passages, where BM25 can't
 match and a reranker might help) and the held-out test split are measured
 with the model by:
