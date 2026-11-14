@@ -1,0 +1,27 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Plan 0.19 (W10.E25). Installing the Renovate app on the repository is the owner's step (W10.O). Every update is a PR into main that runs the same Buildkite gates; nothing is merged automatically, and pr:check's budget, licence and lockfile rules apply as to any PR.",
+  "extends": ["config:recommended", ":semanticCommits", ":timezone(Asia/Jerusalem)"],
+  "schedule": ["before 6am on monday"],
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2,
+  "labels": ["dependencies"],
+  "commitMessageSuffix": "[skip ci]",
+  "rangeStrategy": "pin",
+  "lockFileMaintenance": { "enabled": true, "schedule": ["before 6am on the first day of the month"] },
+  "vulnerabilityAlerts": { "enabled": true, "schedule": ["at any time"], "labels": ["security"] },
+  "automerge": false,
+  "packageRules": [
+    { "groupName": "editor: CodeMirror", "matchPackageNames": ["/^@codemirror\\//", "/^@lezer\\//"] },
+    { "groupName": "editor: Milkdown and ProseMirror", "matchPackageNames": ["/^@milkdown\\//", "/^prosemirror-/"] },
+    { "groupName": "markdown: unified, remark, rehype", "matchPackageNames": ["unified", "/^remark-/", "/^rehype-/", "/^mdast-/", "/^hast-/", "/^micromark/"] },
+    { "groupName": "react", "matchPackageNames": ["react", "react-dom", "@types/react", "@types/react-dom"] },
+    { "groupName": "test: vitest and Playwright", "matchPackageNames": ["vitest", "/^@vitest\\//", "@playwright/test", "playwright", "/^@testing-library\\//", "happy-dom", "jsdom"] },
+    { "groupName": "build: vite", "matchPackageNames": ["vite", "/^@vitejs\\//", "/^vite-plugin-/"] },
+    { "groupName": "lint and types", "matchPackageNames": ["eslint", "/^@eslint\\//", "/^eslint-plugin-/", "typescript", "/^typescript-eslint/", "/^@types\\//"] },
+    { "groupName": "tauri (npm and cargo)", "matchPackageNames": ["/^@tauri-apps\\//", "/^tauri/"] },
+    { "groupName": "local AI runtimes", "matchPackageNames": ["/^@huggingface\\//", "/^@mlc-ai\\//", "onnxruntime-web"], "schedule": ["before 6am on the first day of the month"] },
+    { "description": "Major versions one at a time, never grouped", "matchUpdateTypes": ["major"], "groupName": null, "labels": ["dependencies", "major"] },
+    { "description": "GitHub Actions are not used (plan: Buildkite); do not open PRs for workflow files", "matchManagers": ["github-actions"], "enabled": false }
+  ]
+}
