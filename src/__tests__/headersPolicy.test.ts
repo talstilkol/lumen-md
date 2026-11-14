@@ -203,7 +203,7 @@ describe("drift is caught", () => {
   /** A fresh copy of every source + the policy. */
   const copy = (name: string): string => {
     const dir = join(tmp, name);
-    for (const f of [...Object.keys(policy.sources), "security/policy.json", "playground-runner.html"]) {
+    for (const f of [...Object.keys(policy.sources), "security/policy.json"]) {
       mkdirSync(dirname(join(dir, f)), { recursive: true });
       cpSync(join(ROOT, f), join(dir, f));
     }

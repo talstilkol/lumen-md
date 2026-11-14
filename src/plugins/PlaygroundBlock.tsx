@@ -4,13 +4,16 @@
  * sandboxed iframe. Files are separated by `--- name.ext ---` lines; see
  * ../playground/files.ts. The iframe loads the app's own runner page
  * (`sandbox="allow-scripts"`, opaque origin: no access to the app's
- * storage), which transpiles with Sucrase and provides React / ReactDOM /
- * Vue from self-hosted copies. Each Run reloads the frame.
+ * storage). The block compiles the project (Sucrase, loop guards) and reads
+ * React / ReactDOM / Vue from the app's self-hosted copies
+ * (../playground/compile.ts); the runner links and runs it. Each Run
+ * reloads the frame.
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Code2, Play, RotateCcw, Terminal } from "lucide-react";
 import { t } from "../i18n";
 import { buildProject, type RunnerMessage, type RunnerRequest } from "../playground/files";
+import { buildForRunner } from "../playground/compile";
 import "./playgroundBlockStrings";
 import { airplaneFlagOn } from "../privacy/airplaneBoot";
 import "../privacy/airplaneStrings";
@@ -84,7 +87,19 @@ export default function PlaygroundBlock({ source, meta }: Props) {
         if (!runId) return;
         readyFor.current = runId;
         setStalled(false);
-        frame.contentWindow?.postMessage({ type: "run", runId, project: projectRef.current } satisfies RunnerRequest, "*");
+        const project = projectRef.current;
+        void buildForRunner(project).then(
+          (build) => {
+            // A newer run (or Reset) reloaded the frame meanwhile: drop this one.
+            if (runRef.current !== runId || frameRef.current !== frame) return;
+            frame.contentWindow?.postMessage({ type: "run", runId, project, build } satisfies RunnerRequest, "*");
+          },
+          (err: unknown) => {
+            if (runRef.current !== runId) return;
+            setLines((prev) => [...prev, { id: ++lineId.current, level: "error" as const, text: String(err).slice(0, 10_000) }]);
+            setState("error");
+          },
+        );
         return;
       }
       if (msg.runId !== runRef.current) return;

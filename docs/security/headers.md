@@ -41,8 +41,8 @@ which `headersPolicy.test.ts` checks.
 | Route | Kind | Paths | `_headers` (Cloudflare, Netlify) | Netlify edge function | `deploy/vercel.base.json` | `deploy/nginx.conf` (the one nginx image, 13.2) | meta | Tauri |
 |---|---|---|---|---|---|---|---|---|
 | `app` | document; also the other workers under `/assets/` and the service worker | everything else | `/*` | n/a | catch-all regex | `http` level, `location /assets/`, `location = /sw.js` (0.20) | `index.html` | `app.security.csp` |
-| `playground-runner` | document, framed by the app | `/playground-runner.html` | own block (Cloudflare detaches the catch-all; Netlify cannot) | own entry, drops `X-Frame-Options` (13.2) | own entry | own location | `playground-runner.html` (0.20) | n/a |
-| `livejs-runner` | document, framed by the app | `/livejs-runner.html` | own block | own entry (13.2) | own entry | own location (new) | `livejs-runner.html` | n/a |
+| `playground-runner` | document, framed by the app | `/playground-runner.html` | own block (Cloudflare detaches the catch-all; Netlify cannot) | own entry, drops `X-Frame-Options` (13.2) | own entry | own location | `public/playground-runner.html` (0.20) | n/a |
+| `livejs-runner` | document, framed by the app | `/livejs-runner.html` | own block | own entry (13.2) | own entry | own location (new) | `public/livejs-runner.html` | n/a |
 | `tesseract` | worker | `/tesseract/*` | own block | n/a | own entry | own location (new) | n/a | n/a |
 | `eval-workers` | worker | `/assets/{graphviz,ruby,tsCheck}.worker-*`, `/webr/*` | own blocks (`/webr/*` new) | n/a | own entries (`/webr/` new) | assets regex (new) + runtime include | n/a | n/a |
 
@@ -248,6 +248,42 @@ copy for the dev server and Capacitor.
   Changing the script means a new hash in `policy.json`; `contentFrame.test.ts`
   computes it from the page and fails until it matches.
 
+### The runner pages: a prebuilt bundle and its hash (plan W10.D1)
+
+The playground and live-js runner pages run in `sandbox="allow-scripts"` frames, so the
+same WebKit problem applied, and both pages used to carry that same public nonce. Their
+scripts were Vite chunks, whose bytes (and so whose hash) change with every build; a
+header policy is written before the build and cannot name them. Now:
+
+- **Each page's script is a committed file with a fixed name**:
+  `public/runners/livejs-runner.js` and `public/runners/playground-runner.js`, built by
+  `node scripts/build-runners.mjs` (esbuild at a pinned version, one classic IIFE each, not
+  minified, from this repository's code only — a runner that imports a package fails the
+  build). The pages are static files in `public/`, not Vite inputs, so what the policy
+  names is exactly what is served.
+- **`script-src` is that file's `sha256-…`, `blob:` and `'unsafe-eval'`** — no `'self'`,
+  no nonce, no `'strict-dynamic'`. The page loads it with
+  `<script src="runners/….js" integrity="sha256-…" crossorigin="anonymous">` (CSP3
+  matches an external script's hash through its `integrity`), so `/runners/*` is served
+  with `Access-Control-Allow-Origin: *` on every host, as `/assets/*` was for the old
+  module chunks.
+- **Live-js keeps "no network at all".** `'strict-dynamic'` would have let the worker
+  `importScripts()` any URL; there is no host or `'self'` source either, so the only
+  script the worker can be is the `blob:` the runner makes, and `connect-src` stays
+  `'none'`.
+- **The playground runner loads nothing by URL.** The block compiles the project in the
+  app (`src/playground/compile.ts`: Sucrase, the loop guards, the import specifiers) and
+  reads React / ReactDOM / Vue from the app's own `/playground/vendor/`; the runner gets
+  the compiled files and the libraries' text and runs them as `blob:` URLs. Compiling
+  runs none of the user's code; it still runs only in the frame.
+- **Staleness fails the gate.** `src/__tests__/runnerBundles.test.ts` checks that each
+  bundle's sha256 is the one in `policy.json`, in every rendered copy and in the page's
+  `integrity`, and that every source listed in the bundle's header still has the hash it
+  was built from (no esbuild needed). Where esbuild at the pinned version is installed it
+  also rebuilds the bundles and compares the bytes. After changing a runner's code, run
+  `node scripts/build-runners.mjs`: it rebuilds, pins the new hashes and re-renders every
+  copy (`headers.mjs --write`).
+
 ### Its own site (plan W6.40, review E52)
 
 Embeds kept `allow-same-origin`, so the content frame ran with the app's origin: any
@@ -389,6 +425,6 @@ their requests to those workers pass too. `vercel.ts` has no imports beyond Node
     scope cannot switch it off. `e2e/security.spec.ts` expects nothing to leave in all three
     engines, including imports built from strings.
 
-Done in 0.20: the playground runner's `<meta>` copy and WebKit nonce, the build-time
+Done in 0.20: the playground runner's `<meta>` copy and WebKit nonce (replaced by a hash in W10.D1), the build-time
 endpoint origins on Vercel, and the CSP of the other workers and `sw.js` on both nginx
 images (the app policy, as Cloudflare and Vercel already served them).

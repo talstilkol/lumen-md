@@ -14,8 +14,8 @@ export const COVERAGE_MIN = 65;
 
 /**
  * Paths that are app code for build / budget / e2e: sources, specs, scripts,
- * public/, every root HTML file (each is a Vite entry: index.html,
- * playground-runner.html, livejs-runner.html…) and the build configs.
+ * public/ (the runner pages and their prebuilt scripts among them), every
+ * root HTML file (each is a Vite entry: index.html…) and the build configs.
  */
 export const isAppCode = (f) => /^(src|e2e|scripts|public)\/|^[^/]+\.html$|^(vite\.config|tsconfig|package|playwright\.config|postcss\.config|tailwind\.config)/.test(f);
 

@@ -82,11 +82,20 @@
       ]
     },
     {
+      "source": "/runners/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        }
+      ]
+    },
+    {
       "source": "/playground-runner.html",
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'none'; script-src 'self' 'nonce-lumen-livejs-runner' blob: 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src * data: blob:; media-src * data: blob:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'"
+          "value": "default-src 'none'; script-src 'sha256-M34w8E1oHcID6a6aGAMZbL5pBYkJOW7dyTDGOaXW0nE=' blob: 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src * data: blob:; media-src * data: blob:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'"
         }
       ]
     },
@@ -95,7 +104,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'none'; script-src 'self' 'nonce-lumen-livejs-runner' blob: 'unsafe-eval'; worker-src blob:; connect-src 'none'; img-src 'none'; style-src 'none'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'"
+          "value": "default-src 'none'; script-src 'sha256-2QFLkbglvNjdo74IMN+gWcqVh5dFBpytZew3gxXwLA8=' blob: 'unsafe-eval'; worker-src blob:; connect-src 'none'; img-src 'none'; style-src 'none'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'"
         }
       ]
     },

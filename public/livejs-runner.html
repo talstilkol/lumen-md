@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <!-- Same policy as the deploy headers (rendered from security/policy.json
+         by `npm run headers:write`), but also in contexts that serve no header for
+         this page: Vite dev, Tauri, Capacitor. The user's code runs in a
+         blob: worker, which inherits it: no network at all (WebKit skips
+         script-src for a worker's import(); the worker refuses import itself).
+         The page's one script is public/runners/livejs-runner.js, allowed by
+         its sha256 alone (plan W10.D1): no 'self' (WebKit does not match it in
+         this sandboxed, opaque-origin frame), no nonce (a nonce in a public file
+         is no secret), no 'strict-dynamic' (it would let the worker
+         importScripts() a URL). The file is prebuilt and committed:
+         `node scripts/build-runners.mjs` rebuilds it and pins the hash here, in
+         the integrity attribute and in the policy. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-2QFLkbglvNjdo74IMN+gWcqVh5dFBpytZew3gxXwLA8=' blob: 'unsafe-eval'; worker-src blob:; connect-src 'none'; img-src 'none'; style-src 'none'; base-uri 'none'; form-action 'none'" />
+    <title>Lumen live-js runner</title>
+    <meta name="robots" content="noindex" />
+  </head>
+  <body>
+    <script src="runners/livejs-runner.js" integrity="sha256-2QFLkbglvNjdo74IMN+gWcqVh5dFBpytZew3gxXwLA8=" crossorigin="anonymous"></script>
+  </body>
+</html>

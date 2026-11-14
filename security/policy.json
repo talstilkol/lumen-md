@@ -121,7 +121,7 @@
     "playground-runner": {
       "kind": "document",
       "frameable": true,
-      "why": "Web Playground runner: the page inside the playground block's sandboxed iframe (sandbox=\"allow-scripts\", opaque origin). Runs the user's own project: blob: modules (the linked project files) and eval (Vue's template compiler); framed by the app only. The nonce is the build's one public nonce (vite.config.ts html.cspNonce, shared with the live-js runner), for WebKit, which does not match 'self' in an opaque-origin frame: the entry script carries it, modules it imports inherit it, and the runner sets it on the vendor scripts it adds (src/playground/runner.ts).",
+      "why": "Web Playground runner: the page inside the playground block's sandboxed iframe (sandbox=\"allow-scripts\", opaque origin). Runs the user's own project: blob: modules (the linked project files) and eval (Vue's template compiler); framed by the app only. script-src is one sha256 and blob: (plan W10.D1): the page's one script, public/runners/playground-runner.js, is prebuilt and committed (scripts/build-runners.mjs, src/__tests__/runnerBundles.test.ts) and allowed by its hash, with the same hash in the page's integrity attribute; no 'self' (WebKit does not match it in an opaque-origin frame) and no nonce (one in a public file is no secret). Everything else it runs is a blob: URL: the project's files, compiled by the block (src/playground/compile.ts), and React / ReactDOM / Vue, whose source text the block reads from the app's own /playground/vendor/ and sends.",
       "samples": [
         "/playground-runner.html"
       ],
@@ -130,8 +130,7 @@
           "'none'"
         ],
         "script-src": [
-          "'self'",
-          "'nonce-lumen-livejs-runner'",
+          "'sha256-M34w8E1oHcID6a6aGAMZbL5pBYkJOW7dyTDGOaXW0nE='",
           "blob:",
           "'unsafe-eval'"
         ],
@@ -170,7 +169,7 @@
     "livejs-runner": {
       "kind": "document",
       "frameable": true,
-      "why": "live-js runner (T48): hidden sandboxed iframe (opaque origin). The user's code runs in a blob: worker that inherits this policy: eval for the code itself and no network at all. WebKit does not apply script-src to a worker's dynamic import(), so the worker also refuses code containing the word import and removes eval / Function / string timers (open item 11). The fixed public nonce is for WebKit, which does not match 'self' in an opaque-origin frame (vite.config.ts html.cspNonce adds it to the page's script tags).",
+      "why": "live-js runner (T48): hidden sandboxed iframe (opaque origin). The user's code runs in a blob: worker that inherits this policy: eval for the code itself and no network at all. WebKit does not apply script-src to a worker's dynamic import(), so the worker also refuses code containing the word import and removes eval / Function / string timers (open item 11). script-src is one sha256, blob: and eval (plan W10.D1): the page's one script, public/runners/livejs-runner.js, is prebuilt and committed (scripts/build-runners.mjs, src/__tests__/runnerBundles.test.ts) and allowed by its hash, with the same hash in the page's integrity attribute; no 'self' (WebKit does not match it in an opaque-origin frame), no nonce (one in a public file is no secret) and no 'strict-dynamic', which would let the worker importScripts() any URL: the worker's only script is the blob: the runner makes.",
       "samples": [
         "/livejs-runner.html"
       ],
@@ -179,8 +178,7 @@
           "'none'"
         ],
         "script-src": [
-          "'self'",
-          "'nonce-lumen-livejs-runner'",
+          "'sha256-2QFLkbglvNjdo74IMN+gWcqVh5dFBpytZew3gxXwLA8='",
           "blob:",
           "'unsafe-eval'"
         ],
@@ -650,12 +648,12 @@
       "host": "meta",
       "route": "app"
     },
-    "livejs-runner.html": {
+    "public/livejs-runner.html": {
       "format": "meta",
       "host": "meta",
       "route": "livejs-runner"
     },
-    "playground-runner.html": {
+    "public/playground-runner.html": {
       "format": "meta",
       "host": "meta",
       "route": "playground-runner"
