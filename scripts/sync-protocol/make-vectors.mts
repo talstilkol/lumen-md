@@ -18,6 +18,7 @@ import { confirmTag, deriveSas, sasCommit, sasKeyPair, transcriptBytes, type Sas
 import type { VaultKeys } from "../../src/sync/e2ee/keys";
 import { HEADER_NAME } from "../../src/sync/e2ee/header";
 import { KEYRING_NAME } from "../../src/sync/e2ee/keyring";
+import { setUpRecovery } from "../../src/sync/e2ee/engine";
 
 const b64 = (b: Uint8Array) => Buffer.from(b).toString("base64");
 const NOTES: Record<string, string> = { "שלום.md": "# שלום עולם\n\nנִקּוּד וגרש׳ 123", "notes/a.md": "plain ASCII", "notes/empty.md": "", "big.md": "x".repeat(5000) };
@@ -50,7 +51,12 @@ async function vault(name: string, passphrase: string, kdf: { pbkdf2Iterations?:
  * file and make only the pairing and comparison vectors again (plan W8.5
  * changed those formats; the rest didn't change).
  */
-const OLD = process.argv.includes("--pairing-only") ? JSON.parse(readFileSync("docs/sync-protocol-vectors.json", "utf8")) : null;
+/*
+ * --recovery-only (plan W11.S8): keep everything in the committed file and
+ * (re)make only vault 5, the recovery vault (keyring protocol 3).
+ */
+const RECOVERY_ONLY = process.argv.includes("--recovery-only");
+const OLD = process.argv.includes("--pairing-only") || RECOVERY_ONLY ? JSON.parse(readFileSync("docs/sync-protocol-vectors.json", "utf8")) : null;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let vaults: any[] = [];
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -58,7 +64,7 @@ let argon: any[] = [];
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let ageVectors: any[] = [];
 if (OLD) {
-  vaults = OLD.vaults;
+  vaults = RECOVERY_ONLY ? OLD.vaults.filter((v: { recovery?: unknown }) => !v.recovery) : OLD.vaults;
   argon = OLD.argon2id;
   ageVectors = OLD.age;
 } else {
@@ -118,10 +124,30 @@ if (OLD) {
 
 }
 
+// Vault 5 (plan W11.S8): a recovery key set up at epoch 1, then a rotation and a revocation
+// (each wraps the recovery key again), then an enrollment (a same-epoch rewrite, keyring 3.1).
+if (RECOVERY_ONLY || !OLD) {
+  const phone = await generateIdentity();
+  vaults.push(await vault("pbkdf2, keyring protocol 3, recovery key; rotated and a device revoked since", "recovery vault passphrase 2026", { pbkdf2Iterations: 1000 }, async (s, f) => {
+    f.set("a.md", "written at epoch 0");
+    await s.sync();
+    const { key } = await setUpRecovery(s);
+    f.set("b.md", "after the recovery key — שלום");
+    await s.sync();
+    await s.enroll("phone", phone.recipient);
+    await s.rekey();
+    await s.rekey({ revoke: ["phone"] });
+    f.set("c.md", "after the revocation");
+    await s.sync();
+    await s.enroll("laptop", (await generateIdentity()).recipient);
+    return { recovery: { key: Buffer.from(key).toString("hex"), revoked: { id: "phone", identity: phone.identity } } };
+  }));
+}
+
 // 5. Pairing: one-way codes and two-way request/answer pairs (fifth review 12.11, F1: the
 //    kind is inside the MAC), for vault 1 (epoch 0) and vault 2 (epoch 2, the epoch's
 //    pairing key; the keyring anchor).
-const { pairing, pairingTwoWay, sas } = await pairingVectors(vaults);
+const { pairing, pairingTwoWay, sas } = RECOVERY_ONLY ? { pairing: OLD.pairing, pairingTwoWay: OLD.pairingTwoWay, sas: OLD.sas } : await pairingVectors(vaults);
 async function pairingVectors(vs: Array<{ objects: Record<string, string>; passphrase: string }>) {
   const pairing = [];
   const pairingTwoWay = [];

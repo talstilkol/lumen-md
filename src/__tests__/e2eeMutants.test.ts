@@ -22,7 +22,7 @@ describe("decodeKeyring refuses anything but a well-formed keyring", () => {
   const bad: [string, unknown][] = [
     ["not JSON", null],
     ["another format", { ...valid, format: "other" }],
-    ["another protocol", { ...valid, protocol: 3 }],
+    ["another protocol", { ...valid, protocol: 4 }],
     ["protocol 0", { ...valid, protocol: 0 }],
     ["no vault id", { ...valid, vaultId: 5 }],
     ["fractional epoch", { ...valid, epoch: 1.5 }],
