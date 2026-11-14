@@ -32,7 +32,9 @@ npm run release -- 0.2.0-beta.1 --publish     # הבעלים: commit, תג, בנ
    ב-GitHub Releases (יציב: `releases/latest/download/latest.json`; בטא: השחרור
    המתגלגל `beta-channel`), ומפעיל חבילות עדכון חתומות. הבנייה נעצרת אם
    המפתח ריק, אם עדיין כתוב בו ה-placeholder, או אם הוא לא מפתח minisign.
-   בסוף הקובץ חוזר ל-placeholder.
+   בסוף הקובץ חוזר ל-placeholder. גם `node scripts/release.mjs publish` הנפרד
+   מסרב: עם ה-placeholder, מפתח ריק, מפתח הבדיקה החד-פעמי או בנייה מדומה
+   ב-`release/`, הוא נעצר לפני כל פקודת `git` או `gh`.
 5. **בניית ווב שחוזרת על עצמה.** ‏`repro-check` בונה פעמיים עם
    `SOURCE_DATE_EPOCH` ומשווה כל קובץ. אחר כך רצות בדיקת תקציב החבילה ובדיקת
    ה-source maps. הקובץ `lumen-web-vX.tgz` יוצא זהה בייט-בבייט בכל מחשב: הקבצים
