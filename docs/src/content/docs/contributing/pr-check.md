@@ -39,6 +39,13 @@ with 1 when a check fails. Warnings do not fail it.
   lockfile has an allowed licence (no copyleft, no non-commercial, not
   missing).
 - **Domain.** No added line names the project's domain.
+- **Snapshots (plan W10.D20).** A changed snapshot (vitest's `__snapshots__/`,
+  a `.snap`, Playwright's `<spec>-snapshots/`) fails unless the diff also
+  changes something that produces it: the app's source, a test, an input
+  document (Markdown) or the packages; for a Playwright image, its spec or the
+  app. A snapshot edited by hand passes whatever the code does, so regenerate
+  it (`npx vitest run <test> -u`, `npx playwright test <spec> --update-snapshots`)
+  in the PR that changes its output.
 - **Human review (plan W4.28).** A change to a sensitive path — every path
   in `.github/CODEOWNERS`: cryptography, vault writes, the privacy ledger,
   CSP and security policy, native permissions — needs the `human-reviewed`

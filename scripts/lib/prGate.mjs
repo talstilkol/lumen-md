@@ -105,6 +105,46 @@ export function untestedChanges(changedFiles) {
 // ── Written by an AI agent ────────────────────────────────────────────────
 
 const AI_MARK = /Co-Authored-By:\s*(?:Claude|Codex|GitHub Copilot|ChatGPT)|Generated with \[Claude Code\]|chatgpt\.com\/codex|claude\.ai\/code\/session_/i;
+/**
+ * A snapshot: what a test writes and then compares against (W6.15 step 4,
+ * W10.D20) — vitest's `__snapshots__/` (`toMatchSnapshot`, `.snap`, and the
+ * `toMatchFileSnapshot` files such as the rendered docs), and Playwright's
+ * `<spec>-snapshots/` images.
+ */
+export function isSnapshot(file) {
+  return /(?:^|\/)__snapshots__\//.test(file) || /\.snap$/.test(file) || /^e2e\/.+-snapshots\//.test(file);
+}
+
+/**
+ * Could a change to `file` change what a snapshot of `snapshot`'s kind
+ * records? For a vitest snapshot under src/: the app's source (code, styles,
+ * locale JSON), a test (they write the snapshots), an input document
+ * (Markdown: the rendered docs), the packages. For a Playwright image: its
+ * own spec, the app's source, public/, index.html, the packages.
+ */
+function produces(file, snapshot) {
+  if (isSnapshot(file)) return false;
+  if (/^package(?:-lock)?\.json$/.test(file)) return true;
+  const e2e = /^e2e\/(.+)-snapshots\//.exec(snapshot);
+  if (e2e) return file === `e2e/${e2e[1]}` || /^src\/(?!__tests__\/)/.test(file) || /^public\//.test(file) || file === "index.html" || /^vite\.config\./.test(file);
+  return /^src\//.test(file) || /\.md$/i.test(file) || /^vite\.config\./.test(file);
+}
+
+/**
+ * Snapshots the diff changes with no change in anything that produces them
+ * (W10.D20): a snapshot edited by hand, which then "passes" whatever the code
+ * does. Regenerate it with the test's update flag (`vitest -u`,
+ * `playwright test --update-snapshots`) in the same PR as the change that
+ * moved it. A deleted snapshot is not checked (a removed test takes its
+ * snapshot with it).
+ * @param {string[]} changed every changed file of the diff
+ * @param {(file: string) => boolean} [exists] whether the file is still there
+ */
+export function handEditedSnapshots(changed, exists = () => true) {
+  const snaps = changed.filter((f) => isSnapshot(f) && exists(f));
+  return snaps.filter((s) => !changed.some((f) => produces(f, s)));
+}
+
 export const AI_LABEL = "ai-written";
 
 /** Does the PR body or any commit say an AI agent wrote it? */
