@@ -29,8 +29,11 @@
  *   - Budgets only go down (plan W6.26): no bundle budget, startup budget,
  *     exception date, perf-gate FCP/LCP limit or Lighthouse assertion loosened.
  *   - No stacks (plan W6.22): the base is the current train (the highest
- *     verify/train-N) or main, else a warning; commits behind the base warn;
- *     a merge base older than 7 days, or a criss-cross, fails.
+ *     verify/train-N) or main. An older verify/* base warns; any other base
+ *     fails, and so does a stack deeper than 1, worked out through the chain
+ *     of open PRs' bases (`--pr` reads them from GitHub, `--prs <file>`
+ *     takes them as JSON offline). Commits behind the base warn; a merge
+ *     base older than 7 days, or a criss-cross, fails.
  *   - Every sensitive file the PR adds or changes has an owner in
  *     CODEOWNERS or a dated exception (plan W8.6; sensitive is worked out
  *     from the code: scripts/lib/sensitivePaths.mjs). When the PR changes
@@ -54,7 +57,7 @@ import { BASELINE_PATH, baselineRaises } from "./lib/maxLines.mjs";
 import { HUMAN_REVIEW_LABEL, humanReviewVerdict, independentPatterns, parseCodeowners, sensitiveChanges } from "./lib/humanReview.mjs";
 import { extractReceipts, independentReviewVerdict } from "./lib/independentReview.mjs";
 import { RATCHET_FILES, raiseLine, raisesFor } from "./lib/budgetRatchet.mjs";
-import { MAX_AGE_DAYS, baseVerdict, branchName, currentTrain, driftVerdicts, worst } from "./lib/trainBase.mjs";
+import { MAX_AGE_DAYS, baseVerdict, branchName, currentTrain, depthVerdict, driftVerdicts, isRoot, stackDepth, worst } from "./lib/trainBase.mjs";
 import { EXCEPTIONS_FILE } from "./lib/sensitivePaths.mjs";
 import { coverageLines, treeCoverage } from "./codeowners-coverage.mjs";
 
@@ -72,6 +75,7 @@ export function parseArgs(argv) {
     now: opt("--now") != null ? Date.parse(opt("--now")) : Date.now(),
     noSize: argv.includes("--no-size"),
     pr: opt("--pr"),
+    prs: opt("--prs"),
     review: argv.flatMap((a, i) => (a === "--review" && argv[i + 1] ? [argv[i + 1]] : [])),
     repo: opt("--repo"),
     cwd: resolve(opt("--cwd") ?? process.cwd()),
@@ -131,6 +135,11 @@ export function loadPr(repo, n) {
   return { number: Number(n), labels: pull.labels.map((l) => l.name), events, reviews, comments, author: pull.user?.login, headSha: pull.head.sha, headDate: head.commit?.committer?.date ?? null };
 }
 
+/** The open pull requests as [{ number, head, base }], read with `gh api` (REST only). */
+export function loadOpenPrs(repo) {
+  return ghJson(["--paginate", `repos/${repo}/pulls?state=open&per_page=100`]).map((p) => ({ number: p.number, head: p.head?.ref, base: p.base?.ref }));
+}
+
 /** Every check → { sections: [{ title, status: "ok" | "warn" | "fail" | "skipped", lines }], failed }. */
 export function runChecks(opts) {
   const { cwd } = opts;
@@ -158,6 +167,11 @@ export function runChecks(opts) {
     const ageDays = (opts.now / 1000 - Number(git(cwd, "show", "-s", "--format=%ct", mergeBase).trim())) / 86400;
     const mergeBases = git(cwd, "merge-base", "--all", opts.base, "HEAD").split("\n").filter(Boolean).length;
     const rows = [v, ...driftVerdicts({ base: branchName(driftRef, remotes), behind, ageDays, mergeBases, maxAgeDays: opts.maxAgeDays, ageOf: base })];
+    // Stack depth through the chain of bases: only a base that is not main or verify/* can be deeper than 1.
+    if (!isRoot(base)) {
+      const prs = opts.prs ? JSON.parse(readFileSync(resolve(cwd, opts.prs), "utf8")) : opts.pr ? (opts.loadOpenPrs ?? loadOpenPrs)(opts.loadOpenPrs ? opts.repo : repoOf(cwd, opts.repo)) : [];
+      rows.push(depthVerdict(stackDepth(base, prs)));
+    }
     add("Based on the train head", worst(rows), rows.map((r) => `- ${r.line}`));
   }
 

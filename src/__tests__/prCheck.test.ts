@@ -231,7 +231,7 @@ describe("pr:check", () => {
     }
   });
 
-  it("no stacks (W6.22): a feature-branch base warns, an old merge base and a criss-cross fail", () => {
+  it("no stacks (W6.22): a feature-branch base fails with its stack depth, an old merge base and a criss-cross fail", () => {
     const r0 = repo();
     try {
       const env = (date: string) => ({ ...process.env, GIT_COMMITTER_DATE: date, GIT_AUTHOR_DATE: date });
@@ -252,6 +252,19 @@ describe("pr:check", () => {
       expect(gate.status).toBe("fail");
       expect(gate.lines[0]).toContain("- The base `feat/base` is not `verify/train-2` or `main`: a stacked PR.");
       expect(gate.lines[1]).toBe("- The merge base with `feat/base` is 42 days old (limit 7). Merge or restack onto the head of `feat/base`.");
+      expect(gate.lines.at(-1)).toBe("- Stack depth at least 2 (limit 1): this PR → `feat/base` → (no open PR has this branch as its head). Restack onto the train head.");
+      // A fresh stack (no age failure), with the open PRs given offline: the base rule and the depth fail on their own.
+      const prsFile = join(r0.dir, ".git", "prs.json");
+      writeFileSync(prsFile, JSON.stringify([{ number: 7, head: "feat/base", base: "main" }]));
+      const fresh = runChecks(parseArgs(["--cwd", r0.dir, "--base", "feat/base", "--train", "verify/train-2", "--max-age-days", "60", "--prs", prsFile, ...now]));
+      const freshGate = fresh.sections.find((s: { title: string }) => s.title === "Based on the train head");
+      expect(freshGate.status).toBe("fail");
+      expect(freshGate.lines).toEqual([
+        "- The base `feat/base` is not `verify/train-2` or `main`: a stacked PR. Restack it onto the train head: `node scripts/restack.mjs --branch <this branch> --base feat/base` prints the commands.",
+        "- Up to date with `feat/base`; the merge base with `feat/base` is 42 days old (limit 60).",
+        "- Stack depth 2 (limit 1): this PR → #7 `feat/base` → `main`. Restack onto the train head.",
+      ]);
+      expect(fresh.failed).toBe(true);
       // The same branch against main, with a 60-day limit: only the base warning is gone… and main has moved on.
       r0.git("switch", "-q", "main");
       writeFileSync(join(r0.dir, "src/m.ts"), "export const m = 1;\n");
