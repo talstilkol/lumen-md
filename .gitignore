@@ -75,8 +75,10 @@ bundle-sizes.json
 bundle-diff.md
 .bundle-base/
 
-# Live agent eval reports (npm run eval:agents)
-eval/results/
+# Live agent eval reports (npm run eval:agents). The JSON of a real run is
+# committed: npm run eval:ingest takes it into the registry (plan 7.9).
+eval/results/*
+!eval/results/agents-*.json
 flake-results/
 visual-results/
 # Review triage / reply state (scripts/review-triage.mjs, review-reply.mjs)

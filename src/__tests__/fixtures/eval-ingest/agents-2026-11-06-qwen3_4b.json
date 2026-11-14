@@ -1,0 +1,27 @@
+{
+  "model": "qwen3:4b",
+  "kind": "model",
+  "url": "http://localhost:11434",
+  "note": "SYNTHETIC sample results for src/__tests__/evalIngest.test.ts: made up to exercise the ingest, not a measurement of any model. No date: not taken.",
+  "results": [
+    {
+      "id": "tagger-he",
+      "agent": "tagger",
+      "status": "ok",
+      "executor": "ollama",
+      "model": "qwen3:4b",
+      "attempts": 1,
+      "ms": 1200,
+      "checks": [
+        {
+          "check": {
+            "type": "hebrew",
+            "min": 0.6
+          },
+          "ok": true,
+          "detail": "72% Hebrew letters"
+        }
+      ]
+    }
+  ]
+}
