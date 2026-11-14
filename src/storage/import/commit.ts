@@ -76,7 +76,9 @@ export async function prepareImport(picked: Map<string, Uint8Array>, name: strin
   const detected = detectImportSource([...opened.keys()]);
   const chosen = source ?? detected;
   const folder = await importFolderFor(name);
-  const vault = convertExport(chosen, opened, folder);
+  // Apple Notes' own database (W10.E48) needs an async read (gzip'd bodies); its HTML exports go the usual way.
+  const noteStore = chosen === "appleNotes" && [...opened.keys()].some((p) => /(^|\/)NoteStore\.sqlite$/i.test(p));
+  const vault = noteStore ? await (await import("./appleNotes")).convertAppleNotesStore(opened) : convertExport(chosen, opened, folder);
   for (const p of junk) vault.skipped.push({ path: p, reason: "appFolder" });
   return { source: chosen, detected, name, folder, vault, links: linkStats(vault) };
 }
