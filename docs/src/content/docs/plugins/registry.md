@@ -65,6 +65,35 @@ A new version goes in a folder of its own, for example `kanban@1.1.0`.
 When you install a plugin, the app scans the downloaded code again. It refuses
 the code if its SHA-256 differs from the hash in the registry scan.
 
+## The review of every version (W11.S14)
+
+Before a version is listed, `node scripts/plugins/review.mjs` reviews it and
+writes a scorecard (`public/plugins/examples/scorecards.json`, one entry per
+version). On top of the safety scan it checks:
+
+- **Open source only.** The licence must be an open-source SPDX id, and code
+  shipped minified must come with its readable source (`source/`).
+- **Dependencies.** Every package in the plugin's `package-lock.json` is
+  checked against `security/known-bad.json`, offline. A high or critical
+  advisory fails the version. `--npm-audit` also runs `npm audit` when the
+  registry can be reached.
+- **New permissions.** A capability the previous version did not ask for is a
+  warning, and a person approves it before the version is listed.
+- **Stylesheets.** A theme's or plugin's CSS may not `@import` or `url()`
+  anything but a relative path, a `data:` URI or an allowed origin. This
+  includes escaped forms, `image-set()` and `src()`. CSS can't be used to
+  send data out.
+
+A version with any error is not listed. A listed version that fails a later
+review gets a `delistBy` time 24 hours after the review, and comes off the list
+by then. A review takes milliseconds per version (the limit is 10 minutes).
+
+```bash
+node scripts/plugins/review.mjs                     # every version → scorecards.json
+node scripts/plugins/review.mjs --check             # stale or failing → exit 1
+node scripts/plugins/review.mjs --dir <version> --previous <older version> --json
+```
+
 ## A registry site of its own
 
 The same registry can be published as a static site of its own on Cloudflare

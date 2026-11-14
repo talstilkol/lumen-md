@@ -1,0 +1,859 @@
+{
+  "review": 1,
+  "cards": [
+    {
+      "scorecard": 1,
+      "id": "lumen.example.word-stats",
+      "version": "1.0.0",
+      "passed": true,
+      "score": 90,
+      "grade": "A",
+      "reviewedAt": "2026-01-01T00:00:00.000Z",
+      "delistBy": null,
+      "findings": [
+        {
+          "rule": "unsigned",
+          "severity": "warning",
+          "detail": "no signature"
+        }
+      ],
+      "permissions": {
+        "declared": [
+          "commands",
+          "document:read",
+          "panel",
+          "settings"
+        ],
+        "added": [],
+        "removed": []
+      },
+      "scan": {
+        "passed": true,
+        "score": 90,
+        "sha256": "e249d2e40943eaf4ae190f0653192bf8308823949793b1af9cf2bd6557001e5b",
+        "used": [
+          "commands",
+          "document:read",
+          "panel",
+          "settings"
+        ]
+      },
+      "checks": {
+        "static": "pass",
+        "license": "pass",
+        "minified": "pass",
+        "dependencies": "n/a",
+        "permissions": "n/a",
+        "css": "n/a"
+      },
+      "path": "word-stats"
+    },
+    {
+      "scorecard": 1,
+      "id": "lumen.example.callout",
+      "version": "1.0.0",
+      "passed": true,
+      "score": 90,
+      "grade": "A",
+      "reviewedAt": "2026-01-01T00:00:00.000Z",
+      "delistBy": null,
+      "findings": [
+        {
+          "rule": "unsigned",
+          "severity": "warning",
+          "detail": "no signature"
+        }
+      ],
+      "permissions": {
+        "declared": [
+          "renderer",
+          "storage"
+        ],
+        "added": [],
+        "removed": []
+      },
+      "scan": {
+        "passed": true,
+        "score": 90,
+        "sha256": "76b1af447d0dbad4880395b8b5bce98c03261dbc91f0994176446d403f7d23c3",
+        "used": [
+          "renderer",
+          "storage"
+        ]
+      },
+      "checks": {
+        "static": "pass",
+        "license": "pass",
+        "minified": "pass",
+        "dependencies": "n/a",
+        "permissions": "n/a",
+        "css": "n/a"
+      },
+      "path": "callout"
+    },
+    {
+      "scorecard": 1,
+      "id": "lumen.example.daily-quote",
+      "version": "1.0.0",
+      "passed": true,
+      "score": 90,
+      "grade": "A",
+      "reviewedAt": "2026-01-01T00:00:00.000Z",
+      "delistBy": null,
+      "findings": [
+        {
+          "rule": "unsigned",
+          "severity": "warning",
+          "detail": "no signature"
+        }
+      ],
+      "permissions": {
+        "declared": [
+          "commands",
+          "document:write",
+          "network:https://example.com",
+          "notifications"
+        ],
+        "added": [],
+        "removed": []
+      },
+      "scan": {
+        "passed": true,
+        "score": 90,
+        "sha256": "d7fcb0ab47cd437dcf2b5cdb700709395bd685058768eb595337c9c125c84e1c",
+        "used": [
+          "commands",
+          "document:write",
+          "network:https://example.com",
+          "notifications"
+        ]
+      },
+      "checks": {
+        "static": "pass",
+        "license": "pass",
+        "minified": "pass",
+        "dependencies": "n/a",
+        "permissions": "n/a",
+        "css": "n/a"
+      },
+      "path": "daily-quote"
+    },
+    {
+      "scorecard": 1,
+      "id": "lumen.example.toc",
+      "version": "1.0.0",
+      "passed": true,
+      "score": 90,
+      "grade": "A",
+      "reviewedAt": "2026-01-01T00:00:00.000Z",
+      "delistBy": null,
+      "findings": [
+        {
+          "rule": "unsigned",
+          "severity": "warning",
+          "detail": "no signature"
+        }
+      ],
+      "permissions": {
+        "declared": [
+          "commands",
+          "document:read",
+          "document:write",
+          "settings"
+        ],
+        "added": [],
+        "removed": []
+      },
+      "scan": {
+        "passed": true,
+        "score": 90,
+        "sha256": "5530d82a93715204ba7b2f2440e5363ca4f92c2c62f1a82d02121197f1fd8db7",
+        "used": [
+          "commands",
+          "document:read",
+          "document:write",
+          "settings"
+        ]
+      },
+      "checks": {
+        "static": "pass",
+        "license": "pass",
+        "minified": "pass",
+        "dependencies": "n/a",
+        "permissions": "n/a",
+        "css": "n/a"
+      },
+      "path": "toc"
+    },
+    {
+      "scorecard": 1,
+      "id": "lumen.example.hebrew-date",
+      "version": "1.0.0",
+      "passed": true,
+      "score": 90,
+      "grade": "A",
+      "reviewedAt": "2026-01-01T00:00:00.000Z",
+      "delistBy": null,
+      "findings": [
+        {
+          "rule": "unsigned",
+          "severity": "warning",
+          "detail": "no signature"
+        }
+      ],
+      "permissions": {
+        "declared": [
+          "commands",
+          "document:write",
+          "renderer"
+        ],
+        "added": [],
+        "removed": []
+      },
+      "scan": {
+        "passed": true,
+        "score": 90,
+        "sha256": "a1f352ee7dcaa5be525104c1e1ddd91c2e99a6e6a4de41327095d3e3742d9a9f",
+        "used": [
+          "commands",
+          "document:write",
+          "renderer"
+        ]
+      },
+      "checks": {
+        "static": "pass",
+        "license": "pass",
+        "minified": "pass",
+        "dependencies": "n/a",
+        "permissions": "n/a",
+        "css": "n/a"
+      },
+      "path": "hebrew-date"
+    },
+    {
+      "scorecard": 1,
+      "id": "lumen.example.tasks-overview",
+      "version": "1.0.0",
+      "passed": true,
+      "score": 90,
+      "grade": "A",
+      "reviewedAt": "2026-01-01T00:00:00.000Z",
+      "delistBy": null,
+      "findings": [
+        {
+          "rule": "unsigned",
+          "severity": "warning",
+          "detail": "no signature"
+        }
+      ],
+      "permissions": {
+        "declared": [
+          "commands",
+          "panel",
+          "vault:read"
+        ],
+        "added": [],
+        "removed": []
+      },
+      "scan": {
+        "passed": true,
+        "score": 90,
+        "sha256": "51ef8fb4dd5e63d5456e537fe736b23feaf74f8e791b4632f0758de6c981e418",
+        "used": [
+          "commands",
+          "panel",
+          "vault:read"
+        ]
+      },
+      "checks": {
+        "static": "pass",
+        "license": "pass",
+        "minified": "pass",
+        "dependencies": "n/a",
+        "permissions": "n/a",
+        "css": "n/a"
+      },
+      "path": "tasks-overview"
+    },
+    {
+      "scorecard": 1,
+      "id": "lumen.example.bidi-cleaner",
+      "version": "1.0.0",
+      "passed": true,
+      "score": 90,
+      "grade": "A",
+      "reviewedAt": "2026-01-01T00:00:00.000Z",
+      "delistBy": null,
+      "findings": [
+        {
+          "rule": "unsigned",
+          "severity": "warning",
+          "detail": "no signature"
+        }
+      ],
+      "permissions": {
+        "declared": [
+          "commands",
+          "document:read",
+          "document:write",
+          "notifications"
+        ],
+        "added": [],
+        "removed": []
+      },
+      "scan": {
+        "passed": true,
+        "score": 90,
+        "sha256": "4086260fcea7540f08bcb46136f7352162260b00156d0041b3d21b1928f18f3a",
+        "used": [
+          "commands",
+          "document:read",
+          "document:write",
+          "notifications"
+        ]
+      },
+      "checks": {
+        "static": "pass",
+        "license": "pass",
+        "minified": "pass",
+        "dependencies": "n/a",
+        "permissions": "n/a",
+        "css": "n/a"
+      },
+      "path": "bidi-cleaner"
+    },
+    {
+      "scorecard": 1,
+      "id": "lumen.example.text-format",
+      "version": "1.0.0",
+      "passed": true,
+      "score": 90,
+      "grade": "A",
+      "reviewedAt": "2026-01-01T00:00:00.000Z",
+      "delistBy": null,
+      "findings": [
+        {
+          "rule": "unsigned",
+          "severity": "warning",
+          "detail": "no signature"
+        }
+      ],
+      "permissions": {
+        "declared": [
+          "commands",
+          "document:read",
+          "document:write"
+        ],
+        "added": [],
+        "removed": []
+      },
+      "scan": {
+        "passed": true,
+        "score": 90,
+        "sha256": "ceeef72d9cde1334d6017505ba97d4a150a1e2f12b62e829b15e24b5ee00682f",
+        "used": [
+          "commands",
+          "document:read",
+          "document:write"
+        ]
+      },
+      "checks": {
+        "static": "pass",
+        "license": "pass",
+        "minified": "pass",
+        "dependencies": "n/a",
+        "permissions": "n/a",
+        "css": "n/a"
+      },
+      "path": "text-format"
+    },
+    {
+      "scorecard": 1,
+      "id": "lumen.calendar",
+      "version": "1.0.0",
+      "passed": true,
+      "score": 90,
+      "grade": "A",
+      "reviewedAt": "2026-01-01T00:00:00.000Z",
+      "delistBy": null,
+      "findings": [
+        {
+          "rule": "unsigned",
+          "severity": "warning",
+          "detail": "no signature"
+        }
+      ],
+      "permissions": {
+        "declared": [
+          "commands",
+          "panel",
+          "settings",
+          "vault:read"
+        ],
+        "added": [],
+        "removed": []
+      },
+      "scan": {
+        "passed": true,
+        "score": 90,
+        "sha256": "bf3fe19e3d5de5f95202ac9b087c92bd72426db0b001e72774e4160f3570cd5f",
+        "used": [
+          "commands",
+          "panel",
+          "settings",
+          "vault:read"
+        ]
+      },
+      "checks": {
+        "static": "pass",
+        "license": "pass",
+        "minified": "pass",
+        "dependencies": "n/a",
+        "permissions": "n/a",
+        "css": "n/a"
+      },
+      "path": "calendar"
+    },
+    {
+      "scorecard": 1,
+      "id": "lumen.flashcards",
+      "version": "1.0.0",
+      "passed": true,
+      "score": 90,
+      "grade": "A",
+      "reviewedAt": "2026-01-01T00:00:00.000Z",
+      "delistBy": null,
+      "findings": [
+        {
+          "rule": "unsigned",
+          "severity": "warning",
+          "detail": "no signature"
+        }
+      ],
+      "permissions": {
+        "declared": [
+          "commands",
+          "document:read",
+          "panel",
+          "storage"
+        ],
+        "added": [],
+        "removed": []
+      },
+      "scan": {
+        "passed": true,
+        "score": 90,
+        "sha256": "c777aa00184b89e9e6561636efc707eca675d0122b9526dcb072e26e9498fe59",
+        "used": [
+          "commands",
+          "document:read",
+          "panel",
+          "storage"
+        ]
+      },
+      "checks": {
+        "static": "pass",
+        "license": "pass",
+        "minified": "pass",
+        "dependencies": "n/a",
+        "permissions": "n/a",
+        "css": "n/a"
+      },
+      "path": "flashcards"
+    },
+    {
+      "scorecard": 1,
+      "id": "lumen.kanban",
+      "version": "1.0.0",
+      "passed": true,
+      "score": 90,
+      "grade": "A",
+      "reviewedAt": "2026-01-01T00:00:00.000Z",
+      "delistBy": null,
+      "findings": [
+        {
+          "rule": "unsigned",
+          "severity": "warning",
+          "detail": "no signature"
+        }
+      ],
+      "permissions": {
+        "declared": [
+          "clipboard:write",
+          "commands",
+          "document:read",
+          "document:write",
+          "notifications",
+          "renderer"
+        ],
+        "added": [],
+        "removed": []
+      },
+      "scan": {
+        "passed": true,
+        "score": 90,
+        "sha256": "24a8c57eb9059e58a5dabd831d0b27f820a4d6c8342f20d55f0425f841835739",
+        "used": [
+          "clipboard:write",
+          "commands",
+          "document:read",
+          "document:write",
+          "notifications",
+          "renderer"
+        ]
+      },
+      "checks": {
+        "static": "pass",
+        "license": "pass",
+        "minified": "pass",
+        "dependencies": "n/a",
+        "permissions": "n/a",
+        "css": "n/a"
+      },
+      "path": "kanban"
+    },
+    {
+      "scorecard": 1,
+      "id": "lumen.linter",
+      "version": "1.0.0",
+      "passed": true,
+      "score": 90,
+      "grade": "A",
+      "reviewedAt": "2026-01-01T00:00:00.000Z",
+      "delistBy": null,
+      "findings": [
+        {
+          "rule": "unsigned",
+          "severity": "warning",
+          "detail": "no signature"
+        }
+      ],
+      "permissions": {
+        "declared": [
+          "commands",
+          "document:read",
+          "document:write",
+          "notifications",
+          "settings"
+        ],
+        "added": [],
+        "removed": []
+      },
+      "scan": {
+        "passed": true,
+        "score": 90,
+        "sha256": "45d507f34f48fa7a73cbcaa02e9c0f2c4847b9d74f07970be20493289ea61619",
+        "used": [
+          "commands",
+          "document:read",
+          "document:write",
+          "notifications",
+          "settings"
+        ]
+      },
+      "checks": {
+        "static": "pass",
+        "license": "pass",
+        "minified": "pass",
+        "dependencies": "n/a",
+        "permissions": "n/a",
+        "css": "n/a"
+      },
+      "path": "linter"
+    },
+    {
+      "scorecard": 1,
+      "id": "lumen.natural-dates",
+      "version": "1.0.0",
+      "passed": true,
+      "score": 90,
+      "grade": "A",
+      "reviewedAt": "2026-01-01T00:00:00.000Z",
+      "delistBy": null,
+      "findings": [
+        {
+          "rule": "unsigned",
+          "severity": "warning",
+          "detail": "no signature"
+        }
+      ],
+      "permissions": {
+        "declared": [
+          "commands",
+          "document:read",
+          "document:write",
+          "notifications",
+          "settings"
+        ],
+        "added": [],
+        "removed": []
+      },
+      "scan": {
+        "passed": true,
+        "score": 90,
+        "sha256": "81f1b25d0396bb18d6c031f88f2d50190d1713d6ccc06aa417453f178b9ec411",
+        "used": [
+          "commands",
+          "document:read",
+          "document:write",
+          "notifications",
+          "settings"
+        ]
+      },
+      "checks": {
+        "static": "pass",
+        "license": "pass",
+        "minified": "pass",
+        "dependencies": "n/a",
+        "permissions": "n/a",
+        "css": "n/a"
+      },
+      "path": "natural-dates"
+    },
+    {
+      "scorecard": 1,
+      "id": "lumen.note-refactor",
+      "version": "1.0.0",
+      "passed": true,
+      "score": 90,
+      "grade": "A",
+      "reviewedAt": "2026-01-01T00:00:00.000Z",
+      "delistBy": null,
+      "findings": [
+        {
+          "rule": "unsigned",
+          "severity": "warning",
+          "detail": "no signature"
+        }
+      ],
+      "permissions": {
+        "declared": [
+          "commands",
+          "document:read",
+          "document:write",
+          "notifications",
+          "settings",
+          "vault:read",
+          "vault:write"
+        ],
+        "added": [],
+        "removed": []
+      },
+      "scan": {
+        "passed": true,
+        "score": 90,
+        "sha256": "1584f5fdffe749c0b5d900b0bdf03deaa5f0e1b996d4d8fa6aeb1f6e885413ea",
+        "used": [
+          "commands",
+          "document:read",
+          "document:write",
+          "notifications",
+          "settings",
+          "vault:read",
+          "vault:write"
+        ]
+      },
+      "checks": {
+        "static": "pass",
+        "license": "pass",
+        "minified": "pass",
+        "dependencies": "n/a",
+        "permissions": "n/a",
+        "css": "n/a"
+      },
+      "path": "note-refactor"
+    },
+    {
+      "scorecard": 1,
+      "id": "lumen.sort-lines",
+      "version": "1.0.0",
+      "passed": true,
+      "score": 90,
+      "grade": "A",
+      "reviewedAt": "2026-01-01T00:00:00.000Z",
+      "delistBy": null,
+      "findings": [
+        {
+          "rule": "unsigned",
+          "severity": "warning",
+          "detail": "no signature"
+        }
+      ],
+      "permissions": {
+        "declared": [
+          "commands",
+          "document:read",
+          "document:write",
+          "notifications"
+        ],
+        "added": [],
+        "removed": []
+      },
+      "scan": {
+        "passed": true,
+        "score": 90,
+        "sha256": "510f873e88ee6eba6d08063bf29e6044e4f5e27f33d2e2bb9f1519f5b4d297e4",
+        "used": [
+          "commands",
+          "document:read",
+          "document:write",
+          "notifications"
+        ]
+      },
+      "checks": {
+        "static": "pass",
+        "license": "pass",
+        "minified": "pass",
+        "dependencies": "n/a",
+        "permissions": "n/a",
+        "css": "n/a"
+      },
+      "path": "sort-lines"
+    },
+    {
+      "scorecard": 1,
+      "id": "lumen.table-format",
+      "version": "1.0.0",
+      "passed": true,
+      "score": 90,
+      "grade": "A",
+      "reviewedAt": "2026-01-01T00:00:00.000Z",
+      "delistBy": null,
+      "findings": [
+        {
+          "rule": "unsigned",
+          "severity": "warning",
+          "detail": "no signature"
+        }
+      ],
+      "permissions": {
+        "declared": [
+          "commands",
+          "document:read",
+          "document:write"
+        ],
+        "added": [],
+        "removed": []
+      },
+      "scan": {
+        "passed": true,
+        "score": 90,
+        "sha256": "d929d4756d24821fa76c81b038781d5b2d64d3c6b8ab9a97b2ee9041086b6849",
+        "used": [
+          "commands",
+          "document:read",
+          "document:write"
+        ]
+      },
+      "checks": {
+        "static": "pass",
+        "license": "pass",
+        "minified": "pass",
+        "dependencies": "n/a",
+        "permissions": "n/a",
+        "css": "n/a"
+      },
+      "path": "table-format"
+    },
+    {
+      "scorecard": 1,
+      "id": "lumen.tags",
+      "version": "1.0.0",
+      "passed": true,
+      "score": 90,
+      "grade": "A",
+      "reviewedAt": "2026-01-01T00:00:00.000Z",
+      "delistBy": null,
+      "findings": [
+        {
+          "rule": "unsigned",
+          "severity": "warning",
+          "detail": "no signature"
+        }
+      ],
+      "permissions": {
+        "declared": [
+          "commands",
+          "notifications",
+          "panel",
+          "vault:read",
+          "vault:write"
+        ],
+        "added": [],
+        "removed": []
+      },
+      "scan": {
+        "passed": true,
+        "score": 90,
+        "sha256": "a922d8b7541817cd80cb89f6bf101fdd387d2d24935b7d61f84a703ccbbac9cf",
+        "used": [
+          "commands",
+          "notifications",
+          "panel",
+          "vault:read",
+          "vault:write"
+        ]
+      },
+      "checks": {
+        "static": "pass",
+        "license": "pass",
+        "minified": "pass",
+        "dependencies": "n/a",
+        "permissions": "n/a",
+        "css": "n/a"
+      },
+      "path": "tags"
+    },
+    {
+      "scorecard": 1,
+      "id": "lumen.templates",
+      "version": "1.0.0",
+      "passed": true,
+      "score": 90,
+      "grade": "A",
+      "reviewedAt": "2026-01-01T00:00:00.000Z",
+      "delistBy": null,
+      "findings": [
+        {
+          "rule": "unsigned",
+          "severity": "warning",
+          "detail": "no signature"
+        }
+      ],
+      "permissions": {
+        "declared": [
+          "commands",
+          "document:read",
+          "document:write",
+          "panel",
+          "settings",
+          "vault:read"
+        ],
+        "added": [],
+        "removed": []
+      },
+      "scan": {
+        "passed": true,
+        "score": 90,
+        "sha256": "9b7bb8b978ccc758dc354403fe42a82180ab457c6c3c3e452dbf1c9b6160f0aa",
+        "used": [
+          "commands",
+          "document:read",
+          "document:write",
+          "panel",
+          "settings",
+          "vault:read"
+        ]
+      },
+      "checks": {
+        "static": "pass",
+        "license": "pass",
+        "minified": "pass",
+        "dependencies": "n/a",
+        "permissions": "n/a",
+        "css": "n/a"
+      },
+      "path": "templates"
+    }
+  ]
+}
