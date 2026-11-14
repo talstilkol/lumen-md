@@ -92,6 +92,7 @@
     "owner:models": "npm run models:mirror -- --pin && npm run models:mirror -- --upload && npm run models:mirror -- --verify --deep && npm run models:mirror -- --check",
     "dod": "node scripts/dod.mjs",
     "unused": "node scripts/check-unused-files.mjs",
+    "deadcode": "node scripts/knip-gate.mjs",
     "ci:real-model": "node scripts/real-tiny-model.mjs",
     "docs:complete": "node scripts/docs-complete.mjs && node scripts/docs-parity.mjs --strict",
     "docs:parity": "node scripts/docs-parity.mjs --strict",

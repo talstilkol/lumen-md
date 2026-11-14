@@ -505,6 +505,27 @@ steps:
         - exit_status: 255
           limit: 1
     if: "build.branch == \"main\" || build.pull_request.labels includes \"lighthouse\""
+  - label: ":wastebasket: knip: unused exports and dependencies"
+    key: "deadcode"
+    command: |-
+      LUMEN_CI_JOB=deadcode bash scripts/buildkite/run.sh <<'LUMEN_JOB'
+      gate 'knip: no new unused export or dependency (plan 0.16)' <<'LUMEN_STEP'
+      node scripts/knip-gate.mjs
+      LUMEN_STEP
+      gates_done
+      LUMEN_JOB
+    agents:
+      queue: "linux"
+    timeout_in_minutes: 15
+    notify:
+      - github_commit_status:
+          context: "lumen/buildkite: deadcode"
+    retry:
+      automatic:
+        - exit_status: -1
+          limit: 2
+        - exit_status: 255
+          limit: 1
   - label: ":lock_with_ink_pen: signed receipt"
     key: "receipt"
     depends_on:
@@ -536,9 +557,11 @@ steps:
         allow_failure: true
       - step: "lighthouse"
         allow_failure: true
+      - step: "deadcode"
+        allow_failure: true
     command: |-
       buildkite-agent artifact download 'ci-out/vitest-summary.json' . || true
-      node scripts/buildkite/receipt.mjs --gates vitest,vitest-merge,static,lint,licenses,build,e2e-chromium,e2e-firefox,e2e-webkit,e2e-prod,e2e-headers,local-ai,ocr-cer,lighthouse
+      node scripts/buildkite/receipt.mjs --gates vitest,vitest-merge,static,lint,licenses,build,e2e-chromium,e2e-firefox,e2e-webkit,e2e-prod,e2e-headers,local-ai,ocr-cer,lighthouse,deadcode
     agents:
       queue: "linux"
     artifact_paths:
