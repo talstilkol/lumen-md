@@ -354,9 +354,13 @@ export async function indexWorkspace(opts: { force?: boolean } = {}): Promise<Se
         delete index.files[file.path];
         continue;
       }
-      const chunks = chunkMarkdown(content);
+      // W11.I14: heading-aware chunks of 200-400 tokens, each embedded with its context prefix
+      // (title › headings · tags) and overlap. The hash covers that text, so a renamed heading re-embeds.
+      const { headingChunks, contextualText } = await import("./headingChunks");
+      const title = file.path.split("/").pop()?.replace(/\.(md|markdown|txt)$/i, "");
+      const chunks = headingChunks(content, { title }).map((c) => ({ ...c, embedText: contextualText(c) }));
       const existing = index.files[file.path]?.chunks ?? [];
-      const hashes = await Promise.all(chunks.map((c) => sha1(c.text)));
+      const hashes = await Promise.all(chunks.map((c) => sha1(c.embedText)));
       // Re-use vectors for chunks whose hash matches the previous run.
       const reusable = new Map(existing.map((c) => [c.hash, c]));
       const toEmbedIdx: number[] = [];
@@ -366,7 +370,7 @@ export async function indexWorkspace(opts: { force?: boolean } = {}): Promise<Se
         const cached = reusable.get(hash);
         if (cached) return cached;
         toEmbedIdx.push(i);
-        toEmbedTexts.push(c.text);
+        toEmbedTexts.push(c.embedText);
         return null;
       });
 
