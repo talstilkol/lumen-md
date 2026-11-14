@@ -132,6 +132,7 @@ async function fetchEntitlementFromBackend(): Promise<Entitlement | null> {
   const headers: Record<string, string> = { Accept: "application/json" };
   const token = await accessToken();
   if (token) headers.Authorization = `Bearer ${token}`;
+  // privacy-ledger: the deployment's own endpoint (VITE_ENTITLEMENT_ENDPOINT); not AI traffic: listed in audit mode (network)
   const res = await fetchWithRetry(
     endpoint,
     {

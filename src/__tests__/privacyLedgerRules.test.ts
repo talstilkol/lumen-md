@@ -12,6 +12,7 @@ import {
   addSpeechVoiceBytes,
   AUDIT_MODE_KEY,
   auditMode,
+  auditReason,
   classify,
   installPrivacyLedger,
   ledgerEntries,
@@ -99,6 +100,30 @@ describe("privacy ledger rules", () => {
       ["cdn.example.com", "POST", "network", null, 200],
     ]);
     expect((inner as unknown as { mock: { calls: unknown[] } }).mock.calls).toHaveLength(6);
+  });
+
+  it("audit mode names the sync storages the rules don't track, and never blocks them (W10.D17)", async () => {
+    localStorage.setItem(AUDIT_MODE_KEY, "1");
+    setAiPolicy("local-only");
+    const f = withLedger(ok());
+    await f("https://api.dropboxapi.com/oauth2/token", { method: "POST" });
+    await f("https://content.dropboxapi.com/2/files/download");
+    await f("https://oauth2.googleapis.com/token", { method: "POST" });
+    await f("https://www.googleapis.com/drive/v3/files");
+    await f("https://API.DROPBOXAPI.COM/2/files/list_folder");
+    await f("https://dropboxapi.com.evil.example/x");
+    await f("https://googleapis.com/x");
+    expect(ledgerEntries().map((e) => [e.host, e.category, e.decision, e.reason])).toEqual([
+      ["api.dropboxapi.com", "network", "allowed", "Sync storage: your Dropbox (audit mode)"],
+      ["content.dropboxapi.com", "network", "allowed", "Sync storage: your Dropbox (audit mode)"],
+      ["oauth2.googleapis.com", "network", "allowed", "Sync storage: your Google Drive (audit mode)"],
+      ["www.googleapis.com", "network", "allowed", "Sync storage: your Google Drive (audit mode)"],
+      ["api.dropboxapi.com", "network", "allowed", "Sync storage: your Dropbox (audit mode)"],
+      ["dropboxapi.com.evil.example", "network", "allowed", "Other request (audit mode)"],
+      ["googleapis.com", "network", "allowed", "Other request (audit mode)"],
+    ]);
+    expect(auditReason("CONTENT.dropboxapi.com")).toBe("Sync storage: your Dropbox (audit mode)");
+    expect(auditReason("www.googleapis.com.example")).toBe("Other request (audit mode)");
   });
 
   it("a request refused before it was made sent nothing", () => {

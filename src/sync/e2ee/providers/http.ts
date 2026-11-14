@@ -12,6 +12,7 @@ import { PreconditionFailedError, PROBE_RACE_ROUNDS, PROBE_RACE_WRITERS, PROBE_R
 
 export type FetchLike = (input: Request | string, init?: RequestInit) => Promise<Response>;
 
+// privacy-ledger: the user's own encrypted-sync storage (WebDAV/S3/relay): ciphertext only, listed in audit mode (network)
 export const defaultFetch: FetchLike = (input, init) => globalThis.fetch(input, init);
 
 /** The provider refused the credentials (401 / 403). */

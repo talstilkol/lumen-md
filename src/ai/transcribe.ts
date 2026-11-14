@@ -79,6 +79,7 @@ async function transcribeCloud(
   form.append("model", "whisper-1");
   if (opts.language) form.append("language", opts.language);
   form.append("response_format", "json");
+  // privacy-ledger: rule OpenAI: api.openai.com (OPENAI_TRANSCRIPTION_URL), cloud-ai
   const res = await fetchWithRetry(
     OPENAI_TRANSCRIPTION_URL,
     {

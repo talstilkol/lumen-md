@@ -69,6 +69,7 @@ export function webrCacheName(names: readonly string[] = typeof __LUMEN_RUNTIME_
   return names.find((n) => n.startsWith("lumen-runtime-webr-")) ?? null;
 }
 
+// privacy-ledger: webR: the deployment's /webr/ copy, or rule webR (webr.r-wasm.org, jsDelivr /npm/webr@), model-download
 export async function fetchWebRManifest(base = appBase(), fetchImpl: typeof fetch = (...a) => fetch(...a)): Promise<WebRManifest> {
   let res: Response;
   try {
@@ -161,6 +162,7 @@ async function fetchVerified(file: WebRManifestFile, sources: Array<(path: strin
  */
 export async function installWebR(opts: InstallOptions = {}): Promise<WebRManifest> {
   const base = (opts.base ?? appBase()).replace(/\/?$/, "/");
+  // privacy-ledger: webR: the deployment's /webr/ copy, or rule webR (webr.r-wasm.org, jsDelivr /npm/webr@), model-download
   const fetchImpl = opts.fetchImpl ?? ((...a) => fetch(...a));
   const storage = opts.cachesImpl ?? globalThis.caches;
   const cacheName = opts.cacheName === undefined ? webrCacheName() : opts.cacheName;
@@ -214,6 +216,7 @@ export async function webrAvailable(opts: { base?: string; fetchImpl?: typeof fe
     /* why: Cache Storage unavailable (private mode): fall back to asking the server */
   }
   try {
+    // privacy-ledger: webR: the deployment's /webr/ copy, or rule webR (webr.r-wasm.org, jsDelivr /npm/webr@), model-download
     const fetchImpl = opts.fetchImpl ?? ((...a) => fetch(...a));
     const res = await fetchImpl(`${root}webr.js`, { method: "GET", cache: "no-cache" });
     // A dev server or an SPA host may answer a missing file with index.html.

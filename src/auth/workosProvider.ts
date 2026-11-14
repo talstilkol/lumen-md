@@ -63,6 +63,7 @@ export async function signInWithSso(domain: string): Promise<string> {
   if (!cfg) throw new Error("WorkOS endpoint not configured (VITE_WORKOS_ENDPOINT)");
   warnIfCrossSite(cfg.endpoint);
   if (!domain.trim()) throw new Error("Org domain required");
+  // privacy-ledger: the deployment's own endpoint (VITE_WORKOS_ENDPOINT, sign-in); not AI traffic: listed in audit mode (network)
   const res = await fetchWithRetry(
     `${cfg.endpoint}/api/sso/authorize?domain=${encodeURIComponent(domain)}`,
     { credentials: "include" },
@@ -85,6 +86,7 @@ export async function loadSsoSession(): Promise<User | null> {
   const cfg = readConfig();
   if (!cfg) return null;
   try {
+    // privacy-ledger: the deployment's own endpoint (VITE_WORKOS_ENDPOINT, sign-in); not AI traffic: listed in audit mode (network)
     const res = await fetchWithRetry(
       `${cfg.endpoint}/api/sso/session`,
       {
@@ -115,6 +117,7 @@ export async function getSsoAccessToken(nowSec = Math.floor(Date.now() / 1000)):
   if (cachedToken && cachedToken.expiresAt - 30 > nowSec) return cachedToken.token;
   cachedToken = null;
   try {
+    // privacy-ledger: the deployment's own endpoint (VITE_WORKOS_ENDPOINT, sign-in); not AI traffic: listed in audit mode (network)
     const res = await fetchWithRetry(
       `${cfg.endpoint}/api/sso/token`,
       { credentials: "include" },
@@ -138,6 +141,7 @@ export async function signOutSso(): Promise<void> {
   // only the worker can end it. If that fails, say so: reporting "signed
   // out" while the cookie survives would silently restore the account on the
   // next load (bad on a shared device).
+  // privacy-ledger: the deployment's own endpoint (VITE_WORKOS_ENDPOINT, sign-in); not AI traffic: listed in audit mode (network)
   const res = await fetchWithRetry(
     `${cfg.endpoint}/api/sso/signout`,
     {

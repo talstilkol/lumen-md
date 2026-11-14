@@ -140,6 +140,7 @@ export async function checkGrammar(
     language,
     enabledOnly: "false",
   });
+  // privacy-ledger: the configured LanguageTool endpoint (classify: grammarEndpoint, cloud-text or local-ai)
   const res = await fetchWithRetry(
     endpoint(),
     {
