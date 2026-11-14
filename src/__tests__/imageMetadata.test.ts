@@ -137,8 +137,14 @@ describe("review 2: by content, and by an allow-list", () => {
     expect(await cleanImageBytes(heic, "image/jpeg")).toBeNull();
     await expect(cleanImageFile(new File([heic], "IMG_0001.jpg", { type: "image/jpeg" }))).rejects.toBeInstanceOf(ImageMetadataError);
     await expect(cleanImageFile(new File([heic], "IMG_0001.heic", { type: "image/heic" }))).rejects.toBeInstanceOf(ImageMetadataError);
-    // A GIF or a text file is not a photo this cleans: unchanged.
-    expect(stripImageMetadata(new Uint8Array(ascii("GIF89a")), "image/jpeg").format).toBeNull();
+    // X-BL-2 (W10.D19): a GIF declared as JPEG is refused too, never passed on under the wrong type;
+    // declared as itself (or undeclared) it comes back unchanged.
+    const gif = new Uint8Array(ascii("GIF89a"));
+    expect(() => stripImageMetadata(gif, "image/jpeg")).toThrow(ImageMetadataError);
+    expect(await cleanImageBytes(gif, "image/jpeg")).toBeNull();
+    expect(stripImageMetadata(gif, "image/gif").format).toBeNull();
+    expect([...stripImageMetadata(gif, "image/gif").bytes]).toEqual([...gif]);
+    expect(stripImageMetadata(gif).format).toBeNull();
   });
 
   it("drops JPEG segments and PNG chunks it does not know (reserved markers, C2PA)", () => {

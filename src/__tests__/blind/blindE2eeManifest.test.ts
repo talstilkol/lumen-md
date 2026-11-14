@@ -104,11 +104,11 @@ describe("blind: checkFreshness — the rollback guard (W10.D18)", () => {
     }
   });
 
-  // finding X-BL-1 (W10.D18, open): checkFreshness returns "unproven" instead of throwing a
-  // fork when a newer manifest's history covers the anchor's counter but leaves it out; the
-  // engine then accepts that branch as the new anchor and stays "verified" (E27). Spec:
-  // e2ee.md "Rollback and replay protection", sync-protocol.md §4. it.fails until fixed.
-  it.fails("M6 a newer manifest whose history covers the anchor's counter but leaves it out is a fork", () => {
+  // finding X-BL-1 (W10.D18, fixed on w10/blind-defect-fixes): checkFreshness returned
+  // "unproven" instead of throwing a fork when a newer manifest's history covers the anchor's
+  // counter but leaves it out (E27 is the engine side). Spec: e2ee.md "Rollback and replay
+  // protection", sync-protocol.md §4.
+  it("M6 a newer manifest whose history covers the anchor's counter but leaves it out is a fork", () => {
     const history: Array<[number, string]> = [
       [9, D(9)],
       [11, D(11)],

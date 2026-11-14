@@ -17,8 +17,9 @@
  *
  * Rollback guard (`checkFreshness`): a device remembers the highest counter
  * it has verified and the digest of that manifest. It refuses a manifest with
- * a lower counter (a replay of an old state) and one with the same counter
- * but different content (a fork).
+ * a lower counter (a replay of an old state), one with the same counter
+ * but different content (a fork), and a newer one whose history doesn't list
+ * it with that digest (another branch: a fork).
  */
 
 import { sha256Hex, utf8 } from "./bytes";
@@ -216,7 +217,9 @@ export class RollbackError extends Error {
     super(
       kind === "older"
         ? `The provider returned manifest ${got}, older than ${seen} seen before — refused (rollback/replay)`
-        : `The provider returned a different manifest with the same counter ${got} — refused (fork)`,
+        : got === seen
+          ? `The provider returned a different manifest with the same counter ${got} — refused (fork)`
+          : `The provider returned manifest ${got}, which doesn't descend from manifest ${seen} seen before — refused (fork)`,
     );
     this.name = "RollbackError";
   }
@@ -226,9 +229,17 @@ export class RollbackError extends Error {
  * Throws `RollbackError` unless `got` is at least as new as `anchor`, is the
  * anchored manifest itself when equally new, and — when newer — descends from
  * it: `history` (got's predecessors) must list the anchor's counter with the
- * anchor's digest. Returns "unproven" when the anchor is older than the
- * history reaches (or no history is given): the caller can no longer claim
- * the device is verified.
+ * anchor's digest.
+ *
+ * Every manifest lists its last `HISTORY_LENGTH` predecessors without gaps
+ * (`successor`), so a manifest at most `HISTORY_LENGTH` versions ahead must
+ * list the anchor's counter: a history that leaves it out, or lists it with
+ * another digest, is another branch (a fork; finding X-BL-1, W10.D18) — not
+ * "unproven". Only a manifest more than `HISTORY_LENGTH` versions ahead may
+ * return "unproven" (its history can't reach the anchor: the caller can no
+ * longer claim the device is verified), and so does a call that passes no
+ * history at all (the engine always passes one). A history that does list the
+ * anchor's counter is checked whatever the distance.
  */
 export function checkFreshness(
   anchor: FreshnessAnchor | null,
@@ -241,8 +252,12 @@ export function checkFreshness(
     if (got.digest !== anchor.digest) throw new RollbackError(anchor.counter, got.counter, "fork");
     return "ok";
   }
-  const at = history?.find(([c]) => c === anchor.counter);
-  if (!at) return "unproven";
-  if (at[1] !== anchor.digest) throw new RollbackError(anchor.counter, got.counter, "fork");
-  return "ok";
+  if (!history) return "unproven";
+  const at = history.find(([c]) => c === anchor.counter);
+  if (at) {
+    if (at[1] !== anchor.digest) throw new RollbackError(anchor.counter, got.counter, "fork");
+    return "ok";
+  }
+  if (got.counter - anchor.counter > HISTORY_LENGTH) return "unproven";
+  throw new RollbackError(anchor.counter, got.counter, "fork");
 }
