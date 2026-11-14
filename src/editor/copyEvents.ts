@@ -55,12 +55,3 @@ export function openImageEmbedMenu(event: MouseEvent, view: EditorView, notePath
   void import("./imageCopy").then(({ openImageMenu }) => openImageMenu(embed, notePath, at));
   return true;
 }
-
-/** Automatic alt text for pasted images (T31); `lumen.ai.imageText` = "off" disables it. Moved from Editor.tsx (max-lines). */
-export function imageTextEnabled(): boolean {
-  try {
-    return localStorage.getItem("lumen.ai.imageText") !== "off";
-  } catch {
-    return true;
-  }
-}
