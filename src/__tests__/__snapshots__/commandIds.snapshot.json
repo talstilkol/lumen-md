@@ -2002,6 +2002,20 @@
       "hint": "One search over Sefaria, the Knesset, data.gov.il and the Ben-Yehuda library, with each result's rights",
       "shortcut": "⌥⌘S",
       "icon": "Quote"
+    },
+    {
+      "id": "mcp.settings",
+      "label": "MCP servers…",
+      "group": "Tools",
+      "hint": "Add outside MCP servers and choose what their tools may do",
+      "icon": "Network"
+    },
+    {
+      "id": "mcp.ask",
+      "label": "Ask with my MCP servers…",
+      "group": "Tools",
+      "hint": "The local agent uses your MCP servers' tools, asking before each one that needs it",
+      "icon": "Network"
     }
   ],
   "full": [
@@ -4156,6 +4170,20 @@
       "hint": "One search over Sefaria, the Knesset, data.gov.il and the Ben-Yehuda library, with each result's rights",
       "shortcut": "⌥⌘S",
       "icon": "Quote"
+    },
+    {
+      "id": "mcp.settings",
+      "label": "MCP servers…",
+      "group": "Tools",
+      "hint": "Add outside MCP servers and choose what their tools may do",
+      "icon": "Network"
+    },
+    {
+      "id": "mcp.ask",
+      "label": "Ask with my MCP servers…",
+      "group": "Tools",
+      "hint": "The local agent uses your MCP servers' tools, asking before each one that needs it",
+      "icon": "Network"
     }
   ],
   "autoSaveOn": [
@@ -4444,6 +4472,8 @@
     "export.latexProject",
     "automations.new",
     "automations.dryRun",
-    "automations.undo"
+    "automations.undo",
+    "mcp.settings",
+    "mcp.ask"
   ]
 }

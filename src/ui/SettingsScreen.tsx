@@ -33,6 +33,7 @@ const AiSettingsPanel = lazy(() => import("./AiSettingsPanel").then((m) => ({ de
 const CollabSettings = lazy(() => import("./CollabSettings").then((m) => ({ default: m.CollabSettings })));
 const FineTuneSettings = lazy(() => import("./FineTuneSettings").then((m) => ({ default: m.FineTuneSettings })));
 const TrustedKeysSettings = lazy(() => import("./TrustedKeysSettings").then((m) => ({ default: m.TrustedKeysSettings })));
+const McpServers = lazy(() => import("./settings/McpServers").then((m) => ({ default: m.McpServers })));
 const OrgSettings = lazy(() => import("./OrgSettings").then((m) => ({ default: m.OrgSettings })));
 
 /** A settings file is a few KB; anything far larger isn't one. */
@@ -249,6 +250,8 @@ export function SettingsScreen({ tab: initialTab = "general", onClose, onOpenAud
         return <ThemeSettings open embedded onClose={onClose} />;
       case "ai":
         return <AiSettingsPanel open embedded onClose={onClose} />;
+      case "mcp":
+        return <McpServers />;
       case "sync":
         return <CollabSettings embedded onClose={onClose} />;
       case "fineTune":

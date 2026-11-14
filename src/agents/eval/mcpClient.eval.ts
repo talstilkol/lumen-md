@@ -9,7 +9,7 @@
  *   LUMEN_EVAL_MODEL       default qwen2.5:7b
  */
 import { describe, it, expect, vi } from "vitest";
-import { mkdtempSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import * as path from "node:path";
 
@@ -79,3 +79,56 @@ describe.skipIf(!process.env.LUMEN_EVAL_MCP)(`MCP client tool choice — ${model
     expect(right, misses.join("\n")).toBeGreaterThanOrEqual(9);
   }, 3_600_000);
 });
+
+/**
+ * Plan W10.C1/C2 (R4.6 acceptance): 10 tasks against servers shaped like
+ * server-everything and server-filesystem (SYNTHETIC fixtures with the real
+ * servers' tool names: src/__tests__/fixtures/mcp/referenceServers.mjs),
+ * through the real MCP agent definition (agents/mcp/agent.ts). Target: the
+ * first tool called is the expected one in ≥ 9 of 10. With the real servers
+ * installed, the same tasks run against them over stdio (owner step).
+ */
+const REFERENCE_TASKS: Array<[string, "everything" | "files", string]> = [
+  ["Echo back the words: shalom olam", "everything", "echo"],
+  ["What is 1234 plus 4321? Use the tool.", "everything", "add"],
+  ["חבר את 17 ו-25 בעזרת הכלי", "everything", "add"],
+  ["Show me the tiny test image", "everything", "getTinyImage"],
+  ["Read the file notes/plan.md", "files", "read_text_file"],
+  ["מה יש בתיקייה notes?", "files", "list_directory"],
+  ["Create a file notes/todo.md with the text: buy milk", "files", "write_file"],
+  ["Find every file whose name contains 'plan'", "files", "search_files"],
+  ["Which folders are you allowed to access?", "files", "list_allowed_directories"],
+  ["Rename notes/plan.md to notes/plan-2026.md", "files", "move_file"],
+];
+
+// skip-reason: an opt-in eval against a real local model (npm run eval:mcp-client), not a unit test | task: W10.C2 | until: 2027-05-14
+describe.skipIf(!process.env.LUMEN_EVAL_MCP)(`MCP client, reference-shaped servers — ${model} @ ${url}`, () => {
+  it("picks the expected tool in ≥ 9 of 10 tasks", async () => {
+    localStorage.setItem("lumen.ollama.baseUrl", url);
+    localStorage.setItem("lumen.ollama.model", model);
+    localStorage.setItem("lumen.ai.policy", "local-only");
+    const root = mkdtempSync(path.join(tmpdir(), "lumen-mcp-ref-"));
+    mkdirSync(path.join(root, "notes"));
+    writeFileSync(path.join(root, "notes", "plan.md"), "# Plan\n");
+    // @ts-expect-error — a plain-JS fixture
+    const { everythingServer, filesystemServer } = await import("../../__tests__/fixtures/mcp/referenceServers.mjs");
+    const mem = (srv: { handle(m: JsonRpcMessage): Promise<JsonRpcMessage | null> }): McpTransport => ({ reach: "local", send: async (m) => ({ message: await srv.handle(JSON.parse(JSON.stringify(m))) }) });
+    const cfg = (id: string): McpServerConfig => ({ id, label: id, transport: "http", url: "http://127.0.0.1/mcp", enabled: true, defaultPermission: "ask", tools: {} });
+    const { mcpAgentDef } = await import("../mcp/agent");
+    const { ToolApprovals } = await import("../mcp/approvals");
+    // The eval measures the choice of tool; every call is allowed once (the approval dialogs are tested elsewhere).
+    const o = { reach: () => ({ airplane: false, localOnly: true, desktop: true }), confirmCall: () => "once" as const, approvals: new ToolApprovals({ store: null }), onPin: () => {} };
+    const tools = [...(await serverAgentTools(cfg("everything"), () => mem(everythingServer()), o)), ...(await serverAgentTools(cfg("files"), () => mem(filesystemServer([root])), o))];
+    let right = 0;
+    const misses: string[] = [];
+    for (const [ask, server, tool] of REFERENCE_TASKS) {
+      const def = { ...mcpAgentDef(tools), maxSteps: 2, executorPreference: ["ollama" as const] };
+      const run = await runAgent(def, { text: ask });
+      const first = run.steps.find((s) => s.kind === "tool")?.label;
+      if (first === agentToolName(server, tool)) right++;
+      else misses.push(`${ask} → ${first ?? "no tool"}`);
+    }
+    expect(right, misses.join("\n")).toBeGreaterThanOrEqual(9);
+  }, 3_600_000);
+});
+

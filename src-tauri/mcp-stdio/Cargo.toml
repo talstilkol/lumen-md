@@ -1,0 +1,12 @@
+[package]
+name = "lumen-mcp-stdio"
+version = "0.1.0"
+edition = "2021"
+description = "MCP servers on stdio for the desktop app (plan W7.18, W10.C1): which commands may run, the process, newline-delimited JSON-RPC, stderr, shutdown. Plain std, no Tauri, no dependencies."
+license = "MIT"
+publish = false
+
+# No dependencies on purpose: `cargo test --offline --manifest-path src-tauri/mcp-stdio/Cargo.toml`
+# (or `rustc --edition 2021 --test src-tauri/mcp-stdio/src/lib.rs`) runs anywhere. The Tauri glue
+# in src-tauri/src/mcp_stdio.rs only calls these functions.
+[dependencies]
