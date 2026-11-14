@@ -32,14 +32,37 @@ export interface OllamaCatalogEntry {
   licence?: { class: "allowed" | "conditional"; name: string };
   /** false = offered in lists but never picked by recommendOllamaModel (e.g. untested). */
   recommend?: boolean;
+  /**
+   * W11.I10: a reasoning model whose "thinking" is on by default (Qwen3.5):
+   * false = Lumen sends `think: false` unless a request asks otherwise, so the
+   * UI is not kept waiting for hidden reasoning.
+   */
+  think?: false;
+  /** Superseded by a newer generation; kept so existing installs keep working (W11.I10). */
+  legacy?: boolean;
+  /** Desktop-class (16 GB+ RAM): listed for desktop machines, never suggested on a laptop budget. */
+  desktop?: boolean;
+  /** A capability Lumen does not use yet, recorded for a later task. */
+  future?: string;
 }
 
 export const OLLAMA_CATALOG: OllamaCatalogEntry[] = [
   { name: "qwen3:14b", label: "Qwen3 14B", params: 14.8, ramGB: 12, hebrew: "good", tools: true, measured: null, note: "119 languages, tool calling; best open-licence quality that fits 16 GB", licence: { class: "allowed", name: "Apache-2.0" } },
   { name: "qwen3:8b", label: "Qwen3 8B", params: 8, ramGB: 8, hebrew: "good", tools: true, measured: null, note: "119 languages, tool calling", licence: { class: "allowed", name: "Apache-2.0" } },
-  { name: "qwen2.5:7b", label: "Qwen2.5 7B", params: 7.6, ramGB: 8, hebrew: "good", tools: true, measured: null, note: "the default: tool calling, decent Hebrew", licence: { class: "allowed", name: "Apache-2.0" } },
+  // Legacy (W11.I10): two generations old. Still the default until W11.I12 picks one from measured results.
+  { name: "qwen2.5:7b", label: "Qwen2.5 7B (legacy)", params: 7.6, ramGB: 8, hebrew: "good", tools: true, measured: null, note: "legacy, superseded by Qwen3.5; the default until a measured one replaces it (W11.I12)", licence: { class: "allowed", name: "Apache-2.0" }, legacy: true },
   { name: "qwen3:4b", label: "Qwen3 4B", params: 4, ramGB: 4, hebrew: "good", tools: true, measured: null, note: "for 8 GB machines", licence: { class: "allowed", name: "Apache-2.0" } },
   { name: "hf.co/dicta-il/DictaLM-3.0-1.7B-Thinking-GGUF", label: "DictaLM 3.0 1.7B (Hebrew)", params: 1.7, ramGB: 2, hebrew: "strong", tools: false, measured: null, note: "Dicta's Hebrew model; a reasoning ('thinking') variant — not yet tested in Lumen", licence: { class: "allowed", name: "Apache-2.0" }, recommend: false },
+  // W11.I10: Qwen3.5 (2 Mar 2026, Apache-2.0, 201 languages, thinking on by default — sent off) and
+  // Gemma 4 (2 Apr 2026, Apache-2.0 instead of the Gemma Terms). Unmeasured, so never auto-picked
+  // until eval results exist (W11.I12). RAM is the q4 download plus room for the context.
+  { name: "qwen3.5:9b", label: "Qwen3.5 9B", params: 9, ramGB: 9, hebrew: "good", tools: true, measured: null, note: "201 languages, tool calling; thinking turned off; 6.6 GB download", licence: { class: "allowed", name: "Apache-2.0" }, recommend: false, think: false },
+  { name: "qwen3.5:4b", label: "Qwen3.5 4B", params: 4, ramGB: 5, hebrew: "good", tools: true, measured: null, note: "201 languages, tool calling; thinking turned off; 3.3 GB download", licence: { class: "allowed", name: "Apache-2.0" }, recommend: false, think: false },
+  { name: "gemma4:e4b", label: "Gemma 4 E4B", params: 4, ramGB: 8, hebrew: "strong", tools: true, measured: null, note: "140+ languages, native function calling; 6.6 GB download", licence: { class: "allowed", name: "Apache-2.0" }, recommend: false, future: "audio input: a later path for dictation correction" },
+  { name: "gemma4:e2b", label: "Gemma 4 E2B", params: 2, ramGB: 6, hebrew: "good", tools: true, measured: null, note: "140+ languages, native function calling; 4.6 GB download", licence: { class: "allowed", name: "Apache-2.0" }, recommend: false, future: "audio input: a later path for dictation correction" },
+  // Desktop pair (W11.I10, research R2.4): Dicta's 24B Hebrew reasoning model against Gemma 4's 26B MoE (3.8B active).
+  { name: "hf.co/dicta-il/DictaLM-3.0-24B-Thinking-GGUF", label: "DictaLM 3.0 24B Thinking (Hebrew)", params: 24, ramGB: 18, hebrew: "strong", tools: false, measured: null, note: "Dicta's Hebrew model on Mistral Small 3.1; 32K context; desktop only", licence: { class: "allowed", name: "Apache-2.0" }, recommend: false, desktop: true },
+  { name: "gemma4:26b", label: "Gemma 4 26B-A4B", params: 26, ramGB: 20, hebrew: "strong", tools: true, measured: null, note: "mixture of experts, 3.8B active; 16-19 GB download; desktop only", licence: { class: "allowed", name: "Apache-2.0" }, recommend: false, desktop: true },
   { name: "gemma3:12b", label: "Gemma 3 12B", params: 12, ramGB: 12, hebrew: "strong", tools: false, measured: null, note: "140+ languages", licence: { class: "conditional", name: "Gemma Terms of Use" } },
   { name: "gemma3:4b", label: "Gemma 3 4B", params: 4, ramGB: 5, hebrew: "good", tools: false, measured: null, licence: { class: "conditional", name: "Gemma Terms of Use" } },
   { name: "llama3.1:8b", label: "Llama 3.1 8B", params: 8, ramGB: 8, hebrew: "basic", tools: true, measured: null, licence: { class: "conditional", name: "Llama 3.1 Community License" } },
@@ -74,6 +97,10 @@ const QWEN_LICENSE: ModelLicence = { class: "forbidden", name: "Qwen License" };
  * count too ("Meta-Llama-3.1-8B-Instruct-GGUF", "dolphin-llama3"), but not
  * "tinyllama" (Apache-2.0).
  */
+/** Gemma 4 left the Gemma Terms for Apache-2.0 (Google Open Source Blog, 2026; W11.I10): matched before the Gemma family rule. */
+const GEMMA4: ModelLicence = { class: "allowed", name: "Apache-2.0" };
+const GEMMA4_NAME = /(^|[-_.\/])gemma-?4([-_.:]|$)/i;
+
 const FAMILY_LICENCE: Array<{ re: RegExp; licence: ModelLicence }> = [
   // Hermes is a fine-tune: Llama's licence only on a Llama base (Hermes-2-Pro-Mistral-7B is Apache-2.0).
   { re: /(^|[-_.])(llama|codellama|hermes(?!.*(mistral|mixtral|qwen|yi-)))/i, licence: LLAMA },
@@ -110,6 +137,7 @@ export function ollamaLicence(name: string): ModelLicence | null {
   if (size) return size.licence;
   const fam = OLLAMA_CATALOG.find((e) => e.name.split(":")[0] === family && e.licence);
   if (fam?.licence) return fam.licence;
+  if (GEMMA4_NAME.test(leaf) || GEMMA4_NAME.test(family)) return GEMMA4;
   return FAMILY_LICENCE.find((f) => f.re.test(leaf))?.licence ?? null;
 }
 
@@ -175,4 +203,12 @@ export function prefersHebrew(locale: string | null | undefined, sample: string 
   const letters = (sample ?? "").slice(0, 4000).match(/\p{L}/gu) ?? [];
   if (letters.length < 20) return false;
   return letters.filter((c) => /\p{Script=Hebrew}/u.test(c)).length / letters.length >= 0.3;
+}
+
+/** The `think` default for an installed model (W11.I10): false for catalog models whose thinking is on by default. */
+export function thinkDefaultFor(name: string | null | undefined): false | undefined {
+  if (!name) return undefined;
+  const base = name.replace(/:latest$/, "");
+  const e = OLLAMA_CATALOG.find((x) => x.name === base) ?? OLLAMA_CATALOG.find((x) => x.think === false && base.startsWith(`${x.name}-`));
+  return e?.think;
 }
