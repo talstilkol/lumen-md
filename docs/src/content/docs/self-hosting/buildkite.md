@@ -37,11 +37,11 @@ Three more jobs are Buildkite's own, with no ci.yml step (`NATIVE_JOBS` in
 
 | Job | What it runs | Queue |
 |---|---|---|
-| `pr-check` | `npm run pr:check` on the pull request (its base, its body, its comments); a build that isn't for a PR passes | linux |
+| `pr-check` | `npm run pr:check` on the pull request (its base, its body, its comments), then the report as one PR comment that every build edits, pass or fail (`scripts/buildkite/pr-comment.mjs`); a build that isn't for a PR passes | linux |
 | `security` | `scripts/security-scan.mjs`: gitleaks, npm audit (high and critical), cargo audit with audit-lock, semgrep with OSS rules (in place of CodeQL). A scanner missing from the agent fails the job | linux |
 | `security-nightly` | the scheduled build only: osv-scanner on every lockfile, cargo deny, OpenSSF Scorecard (needs `GITHUB_AUTH_TOKEN`, read-only) and a CycloneDX SBOM (syft) | linux |
 
-The agent needs `gh` with a read token for `pr-check`, and `gitleaks`,
+To post the comment, the host needs a fine-grained token with "Pull requests: write" on this repository, in the file `LUMEN_PR_COMMENT_TOKEN_FILE` names. Without it the report stays the job's artifact, and the job says so. The agent needs `gh` with a read token for `pr-check`, and `gitleaks`,
 `semgrep`, `cargo-audit` for `security` (`osv-scanner`, `cargo-deny`,
 `scorecard` and `syft` for the nightly run). `npm run ci:local` runs gitleaks,
 semgrep and cargo audit too, when they are installed.
