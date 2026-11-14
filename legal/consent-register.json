@@ -1,0 +1,648 @@
+{
+  "format": "lumen-consent-register/1",
+  "about": "Every route the privacy ledger can record, mapped to a consent record under the Israeli Privacy Protection Authority's consent guidance of 25 Feb 2026 (research R3.10): active opt-in, no pre-ticked box, named recipients, withdrawal in one click, re-consent when the purpose changes. Plan W11.S11. Checked by src/__tests__/privacyDoc.test.ts. Not legal advice: part of the legal review packet (W6.37).",
+  "guidance": {
+    "source": "https://www.gornitzky.com/israeli-privacy-protection-authority-publishes-new-guidance-on-obtaining-consent/",
+    "date": "2026-02-25",
+    "summary": "secondary source (a law firm's summary), not the guidance's own text"
+  },
+  "records": [
+    {
+      "id": "cloud-ai",
+      "routes": [
+        "OpenAI",
+        "Anthropic (Claude)",
+        "Google Gemini",
+        "Mistral"
+      ],
+      "category": "cloud-ai",
+      "purpose": "Answer the AI request the user made, with the user's own key",
+      "recipients": [
+        "OpenAI",
+        "Anthropic",
+        "Google (Gemini)",
+        "Mistral AI"
+      ],
+      "dataSent": "The prompt and the text the user chose to send",
+      "lawfulBasis": "consent",
+      "needsConsent": true,
+      "ppa2026": {
+        "activeOptIn": "The user enters their own API key, picks the provider, and picks the policy local-first or cloud (default: local-only).",
+        "preTicked": false,
+        "namedRecipients": [
+          "OpenAI",
+          "Anthropic",
+          "Google (Gemini)",
+          "Mistral AI"
+        ],
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy). Also: remove the key in Settings → AI.",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "ollama-local",
+      "routes": [
+        "Ollama (this machine / LAN)"
+      ],
+      "category": "local-ai",
+      "purpose": "Run the AI request on the user's own machine",
+      "recipients": [
+        "The user's own Ollama server"
+      ],
+      "dataSent": "The prompt and the text",
+      "lawfulBasis": "performance of the service the user set up",
+      "needsConsent": false,
+      "ppa2026": {
+        "activeOptIn": "The user sets up Ollama and selects it.",
+        "preTicked": false,
+        "namedRecipients": [
+          "The user's own Ollama server"
+        ],
+        "withdrawal": "Deselect Ollama in Settings → AI.",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "ollama-remote",
+      "routes": [
+        "Ollama on a remote server"
+      ],
+      "category": "cloud-ai",
+      "purpose": "Run the AI request on a server the user configured",
+      "recipients": [
+        "The operator of the server the user entered"
+      ],
+      "dataSent": "The prompt and the text",
+      "lawfulBasis": "consent",
+      "needsConsent": true,
+      "ppa2026": {
+        "activeOptIn": "The user enters the remote server's address.",
+        "preTicked": false,
+        "namedRecipients": [
+          "The operator of the server the user entered"
+        ],
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "grammar",
+      "routes": [
+        "LanguageTool grammar check"
+      ],
+      "category": "cloud-text",
+      "purpose": "Check the grammar of the paragraph",
+      "recipients": [
+        "LanguageTool GmbH (api.languagetool.org), or the server the user entered"
+      ],
+      "dataSent": "The paragraph being checked",
+      "lawfulBasis": "consent",
+      "needsConsent": true,
+      "ppa2026": {
+        "activeOptIn": "The user turns on the grammar check.",
+        "preTicked": false,
+        "namedRecipients": [
+          "LanguageTool GmbH (api.languagetool.org), or the server the user entered"
+        ],
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy). Also: the grammar check switch.",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "grammar-local",
+      "routes": [
+        "LanguageTool (this machine / LAN)"
+      ],
+      "category": "local-ai",
+      "purpose": "Check grammar on the user's own server",
+      "recipients": [
+        "The user's own LanguageTool server"
+      ],
+      "dataSent": "The paragraph being checked",
+      "lawfulBasis": "performance of the service the user set up",
+      "needsConsent": false,
+      "ppa2026": {
+        "activeOptIn": "The user enters a local server.",
+        "preTicked": false,
+        "namedRecipients": [
+          "The user's own LanguageTool server"
+        ],
+        "withdrawal": "Remove the server in settings.",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "plantuml",
+      "routes": [
+        "PlantUML rendering (kroki.io)"
+      ],
+      "category": "cloud-text",
+      "purpose": "Render the diagram",
+      "recipients": [
+        "kroki.io (Yuzutech)"
+      ],
+      "dataSent": "The diagram source",
+      "lawfulBasis": "consent",
+      "needsConsent": true,
+      "ppa2026": {
+        "activeOptIn": "A confirmation the first time a diagram would be sent (plugins/plantumlPolicy.ts).",
+        "preTicked": false,
+        "namedRecipients": [
+          "kroki.io (Yuzutech)"
+        ],
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "downloads",
+      "routes": [
+        "Model download (Hugging Face)",
+        "Model download (Lumen's mirror)",
+        "Dictionary / OCR model download (GitHub)",
+        "webR (R runtime) download"
+      ],
+      "category": "model-download",
+      "purpose": "Download a model, dictionary or runtime for a feature the user turned on",
+      "recipients": [
+        "Hugging Face",
+        "The project's model mirror (when the build sets VITE_MODEL_MIRROR_URL)",
+        "GitHub",
+        "webR's CDN"
+      ],
+      "dataSent": "A file request; no user content (the server sees the IP address)",
+      "lawfulBasis": "performance of the feature the user asked for",
+      "needsConsent": false,
+      "ppa2026": {
+        "activeOptIn": "The user turns on the feature that needs the file.",
+        "preTicked": false,
+        "namedRecipients": [
+          "Hugging Face",
+          "The project's model mirror (when the build sets VITE_MODEL_MIRROR_URL)",
+          "GitHub",
+          "webR's CDN"
+        ],
+        "withdrawal": "Turn the feature off; delete downloaded models in Settings → AI.",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "unexpected-cdn",
+      "routes": [
+        "jsDelivr CDN (only the webR download is expected)",
+        "Excalidraw font fallback CDN (not needed: fonts are served locally)"
+      ],
+      "category": "third-party",
+      "purpose": "None: these are alarms for a request that should not happen",
+      "recipients": [
+        "jsDelivr",
+        "the Excalidraw font CDN"
+      ],
+      "dataSent": "A file request",
+      "lawfulBasis": "none (should not occur)",
+      "needsConsent": true,
+      "ppa2026": {
+        "activeOptIn": "Not an opt-in. The ledger records them so a stray request is visible.",
+        "preTicked": false,
+        "namedRecipients": [
+          "jsDelivr",
+          "the Excalidraw font CDN"
+        ],
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "alarm",
+      "gap": "Not a consent route: any hit is a bug to fix, not something to consent to."
+    },
+    {
+      "id": "research",
+      "routes": [
+        "Research service",
+        "Research (local service)",
+        "Research (local SearXNG)"
+      ],
+      "category": "research",
+      "purpose": "Run the search the user asked for",
+      "recipients": [
+        "The research service the build or the user configured",
+        "the user's own service"
+      ],
+      "dataSent": "The search query and page addresses",
+      "lawfulBasis": "consent",
+      "needsConsent": true,
+      "ppa2026": {
+        "activeOptIn": "The user runs a research command.",
+        "preTicked": false,
+        "namedRecipients": [
+          "The research service the build or the user configured",
+          "the user's own service"
+        ],
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "agent-tools",
+      "routes": [
+        "Agent tool ",
+        "Agent tool run_python: the Python sandbox has no network"
+      ],
+      "category": "research",
+      "purpose": "Let an agent use a network tool the user allowed",
+      "recipients": [
+        "The tool's target, named in the approval dialog"
+      ],
+      "dataSent": "What the agent sends",
+      "lawfulBasis": "consent",
+      "needsConsent": true,
+      "ppa2026": {
+        "activeOptIn": "Per-call approval, or a tool the user configured.",
+        "preTicked": false,
+        "namedRecipients": [
+          "The tool's target, named in the approval dialog"
+        ],
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy). Also: deny in the agent's approval dialog.",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "clipper",
+      "routes": [
+        "Web clipper — fetches the page you clip"
+      ],
+      "category": "third-party",
+      "purpose": "Fetch the page the user clips",
+      "recipients": [
+        "The website being clipped"
+      ],
+      "dataSent": "A page request",
+      "lawfulBasis": "consent",
+      "needsConsent": true,
+      "ppa2026": {
+        "activeOptIn": "The user clips a page.",
+        "preTicked": false,
+        "namedRecipients": [
+          "The website being clipped"
+        ],
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "tts",
+      "routes": [
+        "Read aloud ("
+      ],
+      "category": "cloud-text",
+      "purpose": "Read the text aloud with a network voice",
+      "recipients": [
+        "The browser vendor's speech service"
+      ],
+      "dataSent": "The text read aloud",
+      "lawfulBasis": "consent",
+      "needsConsent": true,
+      "ppa2026": {
+        "activeOptIn": "The user picks a network voice.",
+        "preTicked": false,
+        "namedRecipients": [
+          "The browser vendor's speech service"
+        ],
+        "withdrawal": "Pick a local voice; Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "dictation",
+      "routes": [
+        "Dictation through the browser's speech service",
+        "Browser speech recognition (Web Speech API)"
+      ],
+      "category": "cloud-text",
+      "purpose": "Turn the user's speech into text",
+      "recipients": [
+        "The browser vendor's speech service (Google in Chrome)"
+      ],
+      "dataSent": "The user's voice",
+      "lawfulBasis": "consent",
+      "needsConsent": true,
+      "ppa2026": {
+        "activeOptIn": "Only under the cloud policy, after a confirmation.",
+        "preTicked": false,
+        "namedRecipients": [
+          "The browser vendor's speech service (Google in Chrome)"
+        ],
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "crash-reports",
+      "routes": [
+        "Error report (Sentry / GlitchTip), content removed"
+      ],
+      "category": "monitoring",
+      "purpose": "Find and fix crashes",
+      "recipients": [
+        "The Sentry or GlitchTip server the build sets with VITE_SENTRY_DSN"
+      ],
+      "dataSent": "The error type and code location, without message, text, headers, paths or the page address",
+      "lawfulBasis": "consent",
+      "needsConsent": true,
+      "ppa2026": {
+        "activeOptIn": "The user turns error reports on (off by default), and only in a build with a DSN.",
+        "preTicked": false,
+        "namedRecipients": [
+          "The Sentry or GlitchTip server the build sets with VITE_SENTRY_DSN"
+        ],
+        "withdrawal": "The error-report switch; consent is re-read for every event (lib/sentryMonitor.ts), so turning it off stops reports at once. Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "plugins",
+      "routes": [
+        "Plugin "
+      ],
+      "category": "plugin",
+      "purpose": "What the plugin the user installed does",
+      "recipients": [
+        "The origins the plugin declared in its manifest"
+      ],
+      "dataSent": "What the plugin sends",
+      "lawfulBasis": "consent",
+      "needsConsent": true,
+      "ppa2026": {
+        "activeOptIn": "The user installs the plugin, whose manifest names its origins.",
+        "preTicked": false,
+        "namedRecipients": [
+          "The origins the plugin declared in its manifest"
+        ],
+        "withdrawal": "Disable or remove the plugin. Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "update-check",
+      "routes": [
+        "Desktop update check (app version and platform only)"
+      ],
+      "category": "static-asset",
+      "purpose": "Tell the user whether an update exists",
+      "recipients": [
+        "GitHub Releases"
+      ],
+      "dataSent": "The app version and platform",
+      "lawfulBasis": "performance of the action the user asked for",
+      "needsConsent": false,
+      "ppa2026": {
+        "activeOptIn": "The user runs \"Check for updates\" (desktop).",
+        "preTicked": false,
+        "namedRecipients": [
+          "GitHub Releases"
+        ],
+        "withdrawal": "Don't run it; under local-only nothing is checked.",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "sefaria",
+      "routes": [
+        "Jewish sources (Sefaria): the reference only"
+      ],
+      "category": "cloud-text",
+      "purpose": "Fetch the source the user asked for",
+      "recipients": [
+        "Sefaria (sefaria.org)"
+      ],
+      "dataSent": "The reference only, nothing from notes",
+      "lawfulBasis": "consent",
+      "needsConsent": true,
+      "ppa2026": {
+        "activeOptIn": "The user searches for a source.",
+        "preTicked": false,
+        "namedRecipients": [
+          "Sefaria (sefaria.org)"
+        ],
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "knesset",
+      "routes": [
+        "Knesset records (OData): the law or bill name only"
+      ],
+      "category": "cloud-text",
+      "purpose": "Fetch the record the user asked for",
+      "recipients": [
+        "The Knesset (knesset.gov.il)"
+      ],
+      "dataSent": "The law or bill name only",
+      "lawfulBasis": "consent",
+      "needsConsent": true,
+      "ppa2026": {
+        "activeOptIn": "The user searches.",
+        "preTicked": false,
+        "namedRecipients": [
+          "The Knesset (knesset.gov.il)"
+        ],
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "gov-data",
+      "routes": [
+        "Government data (data.gov.il, CBS): the search words or dataset id only"
+      ],
+      "category": "cloud-text",
+      "purpose": "Fetch the dataset the user asked for",
+      "recipients": [
+        "data.gov.il",
+        "the Central Bureau of Statistics (apis.cbs.gov.il)"
+      ],
+      "dataSent": "The search words or dataset id only",
+      "lawfulBasis": "consent",
+      "needsConsent": true,
+      "ppa2026": {
+        "activeOptIn": "The user searches.",
+        "preTicked": false,
+        "namedRecipients": [
+          "data.gov.il",
+          "the Central Bureau of Statistics (apis.cbs.gov.il)"
+        ],
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "zotero",
+      "routes": [
+        "Zotero Web API (your library; writes only the PDF highlights you send)"
+      ],
+      "category": "research",
+      "purpose": "Read the user's library and write the highlights they send",
+      "recipients": [
+        "Zotero (api.zotero.org)"
+      ],
+      "dataSent": "Requests to the user's library with their key; the highlights they confirm",
+      "lawfulBasis": "consent",
+      "needsConsent": true,
+      "ppa2026": {
+        "activeOptIn": "The user connects Zotero with their own key.",
+        "preTicked": false,
+        "namedRecipients": [
+          "Zotero (api.zotero.org)"
+        ],
+        "withdrawal": "Disconnect Zotero; Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "bluesky",
+      "routes": [
+        "Publish to the AT Protocol (Standard.site), your PDS",
+        "AT Protocol identity lookup (plc.directory)"
+      ],
+      "category": "third-party",
+      "purpose": "Publish the note the user chose, publicly",
+      "recipients": [
+        "The user's AT Protocol PDS",
+        "plc.directory"
+      ],
+      "dataSent": "The published note and the login for this session",
+      "lawfulBasis": "consent",
+      "needsConsent": true,
+      "ppa2026": {
+        "activeOptIn": "A confirmation before each publish.",
+        "preTicked": false,
+        "namedRecipients": [
+          "The user's AT Protocol PDS",
+          "plc.directory"
+        ],
+        "withdrawal": "Don't publish; delete the record in the user's account. Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "calendar",
+      "routes": [
+        "CalDAV task sync (your calendar server)",
+        "Calendar subscription (ICS, read only)"
+      ],
+      "category": "third-party",
+      "purpose": "Sync the user's tasks; read the calendar they subscribed to",
+      "recipients": [
+        "The calendar server the user entered",
+        "the ICS address the user added"
+      ],
+      "dataSent": "Tasks and credentials (CalDAV); a read request (ICS)",
+      "lawfulBasis": "consent",
+      "needsConsent": true,
+      "ppa2026": {
+        "activeOptIn": "The user sets up the connection.",
+        "preTicked": false,
+        "namedRecipients": [
+          "The calendar server the user entered",
+          "the ICS address the user added"
+        ],
+        "withdrawal": "Remove the connection. Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "stylesheet",
+      "routes": [
+        "A stylesheet (theme or CSS snippet) loaded it"
+      ],
+      "category": "third-party",
+      "purpose": "Load a file a theme the user installed refers to",
+      "recipients": [
+        "The server the stylesheet names"
+      ],
+      "dataSent": "A file request",
+      "lawfulBasis": "consent",
+      "needsConsent": true,
+      "ppa2026": {
+        "activeOptIn": "The user installs the theme or snippet (themes are reviewed: W11.S14).",
+        "preTicked": false,
+        "namedRecipients": [
+          "The server the stylesheet names"
+        ],
+        "withdrawal": "Remove the theme. Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "lan-sync",
+      "routes": [
+        "Encrypted sync on the local network (no cloud)"
+      ],
+      "category": "local-ai",
+      "purpose": "Sync to the user's own other device",
+      "recipients": [
+        "The user's own device"
+      ],
+      "dataSent": "End-to-end encrypted notes",
+      "lawfulBasis": "performance of the service the user set up",
+      "needsConsent": false,
+      "ppa2026": {
+        "activeOptIn": "The user pairs the devices.",
+        "preTicked": false,
+        "namedRecipients": [
+          "The user's own device"
+        ],
+        "withdrawal": "Unpair, or stop LAN sync.",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "audit-mode",
+      "routes": [
+        "Other request (audit mode)"
+      ],
+      "category": "network",
+      "purpose": "Show the user every request the rules don't recognise",
+      "recipients": [
+        "Whatever the request names"
+      ],
+      "dataSent": "What the request carries",
+      "lawfulBasis": "none (a transparency record)",
+      "needsConsent": true,
+      "ppa2026": {
+        "activeOptIn": "Not an opt-in: audit mode makes otherwise unrecognised requests visible.",
+        "preTicked": false,
+        "namedRecipients": [
+          "Whatever the request names"
+        ],
+        "withdrawal": "Turn audit mode off.",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "alarm",
+      "gap": "Not a consent route: it lists requests no rule names, so each one is a route to classify or a bug."
+    }
+  ]
+}

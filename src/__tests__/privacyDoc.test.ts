@@ -92,6 +92,90 @@ describe("PRIVACY.he.md / PRIVACY.md map every privacy-ledger route (plan W4.29)
     });
   }
 
+  /*
+   * Plan W11.S11: every route has a consent record under the PPA's consent
+   * guidance (25 Feb 2026), and the legal documents for the routes that
+   * leave the device exist and say what the acceptance needs.
+   */
+  describe("consent records and the legal documents (plan W11.S11)", () => {
+    interface ConsentRecord {
+      id: string;
+      routes: string[];
+      category: string;
+      recipients: string[];
+      needsConsent: boolean;
+      status: string;
+      gap?: string;
+      ppa2026: { activeOptIn: string; preTicked: boolean; namedRecipients: string[]; withdrawal: string; reconsentOnChange: string };
+    }
+    const register = JSON.parse(read("legal/consent-register.json")) as { format: string; records: ConsentRecord[] };
+    const union = /export type LedgerCategory = ([^;]+);/.exec(read("src/ai/privacyLedger.ts"))![1];
+    const categories = [...union.matchAll(/"([\w-]+)"/g)].map((m) => m[1]);
+
+    it("100% of the ledger's routes map to a consent record, and every record names real routes", () => {
+      const mapped = register.records.flatMap((r) => r.routes);
+      expect(reasons.filter((r) => !mapped.includes(r)), "a ledger route has no consent record").toEqual([]);
+      expect(mapped.filter((r) => !reasons.includes(r)), "a record names a route the ledger doesn't have").toEqual([]);
+      expect(new Set(mapped).size).toBe(mapped.length);
+      expect(mapped.length).toBe(reasons.length);
+    });
+
+    it("each record answers the guidance: active opt-in, nothing pre-ticked, named recipients, one-click withdrawal, re-consent", () => {
+      expect(register.format).toBe("lumen-consent-register/1");
+      for (const r of register.records) {
+        expect(categories, r.id).toContain(r.category);
+        expect(r.ppa2026.preTicked, r.id).toBe(false);
+        expect(r.ppa2026.activeOptIn.length, r.id).toBeGreaterThan(10);
+        expect(r.ppa2026.withdrawal.length, r.id).toBeGreaterThan(10);
+        expect(r.ppa2026.reconsentOnChange.length, r.id).toBeGreaterThan(10);
+        expect(r.ppa2026.namedRecipients.length, r.id).toBeGreaterThan(0);
+        expect(r.ppa2026.namedRecipients, r.id).toEqual(r.recipients);
+        expect(["meets", "alarm", "gap"], r.id).toContain(r.status);
+        if (r.status !== "meets") expect(r.gap, r.id).toBeTruthy();
+      }
+    });
+
+    it("a route that carries user content can be withdrawn with the one local-only switch", () => {
+      const content = ["cloud-ai", "cloud-text", "research", "third-party", "monitoring", "plugin"];
+      // The switch the records point to is the ledger's own local-only rule.
+      expect(read("src/ai/privacyLedger.ts")).toMatch(/local-only/);
+      for (const r of register.records.filter((x) => content.includes(x.category) && x.status === "meets")) expect(r.ppa2026.withdrawal, r.id).toContain("Local only");
+    });
+
+    const LEGAL = {
+      ropa: read("docs/legal/ropa.md"),
+      runbook: read("docs/legal/breach-runbook.he.md"),
+      dpia: read("docs/legal/dpia-share-server.md"),
+      decisions: read("docs/legal/eu-representative-dpo.md"),
+      records: read("docs/legal/consent-records.md"),
+    };
+
+    it("ROPA (GDPR Art. 30): the relay, the share server and feedback, with the retention the code has", () => {
+      for (const s of ["Art. 30", "vault-relay", "collab-server", "Feedback", "Retention", "Recipients", "Transfers"]) expect(LEGAL.ropa).toContain(s);
+      // The retention it states is the code's default, so the record can't drift from it.
+      const relayDays = /VAULT_RELAY_RETENTION_DAYS, (\d+)\)/.exec(read("sync-server/vault-relay.js"))![1];
+      const collabDays = /retentionDays = (\d+),/.exec(read("sync-server/collab-server.mjs"))![1];
+      expect(LEGAL.ropa).toContain(`${relayDays} days`);
+      expect(LEGAL.ropa).toContain(`${collabDays} days`);
+      expect(LEGAL.dpia).toContain(`${collabDays} days`);
+    });
+
+    it("the breach runbook (Hebrew): 72 hours, the Privacy Protection Authority, Art. 33 and 34, and a template", () => {
+      for (const s of ["72 שעות", "הרשות להגנת הפרטיות", "סעיף 33", "סעיף 34", "תבנית דיווח", "זה לא ייעוץ משפטי"]) expect(LEGAL.runbook).toContain(s);
+    });
+
+    it("a DPIA for the share server and written decisions on an EU representative and a DPO", () => {
+      for (const s of ["Art. 35", "Necessity and proportionality", "Risks", "Measures still required"]) expect(LEGAL.dpia).toContain(s);
+      for (const s of ["Art. 27", "Decision:", "DPO", "Trigger to revisit", "Amendment 13"]) expect(LEGAL.decisions).toContain(s);
+      expect(LEGAL.records).toContain("Re-consent");
+    });
+
+    it("all of them are in the legal review packet (W6.37)", () => {
+      const packet = read("scripts/legal-packet.mjs");
+      for (const f of ["legal/consent-register.json", "docs/legal/consent-records.md", "docs/legal/ropa.md", "docs/legal/dpia-share-server.md", "docs/legal/eu-representative-dpo.md", "docs/legal/breach-runbook.he.md"]) expect(packet, f).toContain(`"${f}"`);
+    });
+  });
+
   it("the Hebrew policy says it is not legal advice and asks for a lawyer's review", () => {
     expect(DOCS["PRIVACY.he.md"]).toContain("זה לא ייעוץ משפטי");
     expect(DOCS["PRIVACY.he.md"]).toContain("טל צריך לבקש מעורך דין");

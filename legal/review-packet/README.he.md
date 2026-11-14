@@ -39,8 +39,14 @@
 | 12 | `public/lexicon/LICENSE.md` | רישיון המילון (ויקימילון) |
 | 13 | `LICENSE` | ‏MIT של Lumen |
 | 14 | `SECURITY.md` | דיווח על חולשות |
-| 15 | `legal/review-packet/recommendations.md` | טבלת ההמלצות |
-| 16 | `data-licences.md` (נוצר) | רשימת רישיונות הנתונים והמודלים |
+| 15 | `legal/consent-register.json` | רשומת הסכמה לכל מסלול בפנקס, לפי הנחיית ההסכמה של הרשות (25.2.2026) |
+| 16 | `docs/legal/consent-records.md` | איך הרשומות עונות על ההנחיה, וכלל ההסכמה מחדש |
+| 17 | `docs/legal/ropa.md` | רישום פעולות עיבוד (סעיף 30 ל-GDPR) |
+| 18 | `docs/legal/dpia-share-server.md` | הערכת השפעה קצרה לשרת השיתוף, מעודכנת לקוד |
+| 19 | `docs/legal/eu-representative-dpo.md` | ההחלטה על נציג באיחוד ועל ממונה |
+| 20 | `docs/legal/breach-runbook.he.md` | נוהל אירוע אבטחה: 72 שעות, דיווח לרשות, תבנית |
+| 21 | `legal/review-packet/recommendations.md` | טבלת ההמלצות |
+| 22 | `data-licences.md` (נוצר) | רשימת רישיונות הנתונים והמודלים |
 
 ## אחרי חוות הדעת
 
