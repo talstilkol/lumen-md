@@ -42,3 +42,19 @@ Every eval report carries a top-level `card` (built with `makeCard` in `scripts/
 
 - ‏`npm run eval:card [קובץ|תיקייה …]` נכשל על כל דוח ב-`eval/results` וב-`eval/cards` (או בנתיבים שניתנו) שחסר שדה בכרטיס שלו.
 - ‏plan:check מסרב ל-✅ מלא שנשען על כרטיס `dev`: השדה `evalCards` של משימה מונה קובצי כרטיס שנמצאים בריפו, ומשימה ב-✅ שה-`dod` שלה מריץ הערכה (`eval:*`, ‏`models:day`, ‏`heldout`, ‏`bench:*`) חייבת למנות אותם, וכל אחד מהם מתויג `public` או `heldout`. מספר dev משאיר את המשימה לכל היותר ב-✅*.
+
+## BFCL v4 (plan W11.I15)
+
+`eval/public/bfcl-v4/` holds BFCL v4's simple (Python, 400), multiple (200), parallel (200) and multi_turn_base (200) categories, their possible answers and the multi-turn function docs, unchanged from https://github.com/ShishirPatil/gorilla at the commit in `manifest.json` (Apache-2.0, `LICENSE`), each file with its sha256.
+
+- `src/agents/eval/bfcl.ts` ports BFCL's AST checker (`ast_checker.py`) and runs any engine with and without `toolRepair`, so the repair's share is reported separately. The W4.31 mock stays a unit test only.
+- `npm run eval:bfcl` runs Ollama models (default `gemma4:e4b,qwen3.5:4b,qwen2.5:7b`) and writes one carded report per model and mode to `eval/results/`.
+- `multi_turn_calls` is **not** BFCL's multi-turn accuracy. BFCL executes multi-turn calls against Python backends that are not ported. This harness compares the ordered calls of each turn, with stubbed tool results.
+
+## BFCL v4 (משימה W11.I15)
+
+ב-`eval/public/bfcl-v4/` נמצאות הקטגוריות simple (‏Python, ‏400), ‏multiple (200), ‏parallel (200) ו-multi_turn_base (200) של BFCL v4, עם התשובות האפשריות ותיעוד הפונקציות של ה-multi-turn. הן הועתקו בלי שינוי מ-https://github.com/ShishirPatil/gorilla בקומיט שב-`manifest.json` (‏Apache-2.0, ‏`LICENSE`), עם sha256 לכל קובץ.
+
+- ‏`src/agents/eval/bfcl.ts` מעביר את בודק ה-AST של BFCL (`ast_checker.py`) ומריץ כל מנוע עם `toolRepair` ובלעדיו, כך שהתרומה של התיקון מדווחת בנפרד. ה-mock של W4.31 נשאר בדיקת יחידה בלבד.
+- ‏`npm run eval:bfcl` מריץ מודלים ב-Ollama (ברירת מחדל `gemma4:e4b,qwen3.5:4b,qwen2.5:7b`) וכותב ל-`eval/results/` דוח עם כרטיס לכל מודל ולכל מצב.
+- ‏`multi_turn_calls` **אינו** דיוק ה-multi-turn של BFCL. ‏BFCL מריץ את הקריאות של multi-turn מול צדי שרת ב-Python שלא הועברו. הרתמה הזו משווה את הקריאות של כל תור לפי הסדר, עם תוצאות כלים מדומות.
