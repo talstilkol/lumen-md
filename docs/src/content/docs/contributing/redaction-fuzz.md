@@ -63,3 +63,19 @@ The nightly report goes to `reports/nightly/fuzz-redaction.json`. The second
 host (W6.5) runs the step and seals the report into its receipt. Exit codes:
 0 means no leak, 1 means leaks were found (and saved), and 2 means the run
 broke.
+
+## Scheduled
+
+Two schedulers run it, and neither is GitHub Actions:
+
+- **`npm run nightly`** has a `fuzz` kind that is due every night
+  ([nightly runs](/contributing/nightly/)), on the machine whose launchd or
+  cron starts the nightly. It runs without `--commit`, since that would
+  switch branches under the kinds after it.
+- **Buildkite's scheduled build.** `.buildkite/pipeline.yml` has a
+  `fuzz-redaction` step with `if: build.source == "schedule"`. It runs on the
+  Linux queue, reports the commit status `lumen/buildkite: fuzz-redaction`,
+  and keeps `reports/nightly/fuzz-redaction.json` and `regressions.json` as
+  artifacts. A PR build skips it, and it is not one of the receipt's gates.
+  The schedule itself is set once in Buildkite: Pipeline → Settings →
+  Schedules, cron `17 2 * * *` (UTC), branch = the current train.
