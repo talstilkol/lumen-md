@@ -36,29 +36,21 @@ extension Notification.Name {
     static let lumenAction = Notification.Name("lumen:action")
 }
 
-/// Captures from "Add to inbox" (Siri / Shortcuts), kept until the WebView adds them.
-/// App Intents defined in the app target run in the app's process, so the
-/// app's own UserDefaults is enough (no App Group).
+/// The queue the WebView drains: since W11.P8 it is CaptureQueue, in the App
+/// Group, so the share sheet and the native capture sheet write to the same
+/// place as "Add to inbox". The old UserDefaults list is moved over once.
 enum PendingCaptures {
-    static let key = "lumen.pendingCaptures"
-    static let maxItems = 200
-
-    static func all(_ d: UserDefaults = .standard) -> [[String: String]] {
-        d.array(forKey: key) as? [[String: String]] ?? []
+    static func all() -> [[String: String]] {
+        CaptureQueue.migrateLegacy()
+        return CaptureQueue.dictionaries()
     }
 
-    static func add(_ text: String, _ d: UserDefaults = .standard) {
-        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
-        var items = all(d)
-        let iso = ISO8601DateFormatter().string(from: Date())
-        items.append(["id": UUID().uuidString, "text": String(trimmed.prefix(8192)), "at": iso])
-        d.set(Array(items.suffix(maxItems)), forKey: key)
+    static func add(_ text: String, source: String = "siri") {
+        _ = try? CaptureQueue.addText(text, source: source)
     }
 
-    static func remove(_ ids: [String], _ d: UserDefaults = .standard) {
-        let drop = Set(ids)
-        d.set(all(d).filter { !drop.contains($0["id"] ?? "") }, forKey: key)
+    static func remove(_ ids: [String]) {
+        CaptureQueue.remove(ids)
     }
 }
 
@@ -71,11 +63,14 @@ public class LumenNativePlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "getLaunchUrl", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "pendingCaptures", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "removeCaptures", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "captureFile", returnType: CAPPluginReturnPromise),
     ]
 
     override public func load() {
         NotificationCenter.default.addObserver(self, selector: #selector(onAction(_:)), name: .lumenAction, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(onResume), name: UIApplication.didBecomeActiveNotification, object: nil)
+        // The native capture sheet saved while the app is open: drain now, not on the next resume.
+        NotificationCenter.default.addObserver(self, selector: #selector(onResume), name: CaptureQueue.changed, object: nil)
     }
 
     @objc func onAction(_ n: Notification) {
@@ -101,6 +96,15 @@ public class LumenNativePlugin: CAPPlugin, CAPBridgedPlugin {
     @objc func removeCaptures(_ call: CAPPluginCall) {
         PendingCaptures.remove(call.getArray("ids", String.self) ?? [])
         call.resolve()
+    }
+
+    /// A queued image or PDF, as base64 (`file` is the stored name from `pendingCaptures`).
+    @objc func captureFile(_ call: CAPPluginCall) {
+        guard let name = call.getString("file"), let data = CaptureQueue.fileData(name) else {
+            call.reject("no such capture file")
+            return
+        }
+        call.resolve(["data": data.base64EncodedString()])
     }
 }
 

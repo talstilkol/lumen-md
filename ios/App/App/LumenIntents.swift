@@ -1,8 +1,12 @@
 // Siri, Spotlight and the Shortcuts app (plan W3.4): App Intents.
 //
-// - "Add to inbox" runs without opening Lumen: the text is queued
-//   (PendingCaptures) and added to inbox.md the next time the app starts or
-//   comes to the front, with the time it was said.
+// - "Add to inbox" runs without opening Lumen and without the WebView: the
+//   text is queued in the App Group (CaptureQueue, plan W11.P8) and added to
+//   inbox.md the next time the app starts or comes to the front, with the
+//   time it was said.
+// - "Capture to inbox" opens the native capture sheet (NativeCapture.swift)
+//   at once, before the WebView has loaded; the Control Center button and the
+//   Lock Screen widget run it (LumenWidgets/LumenControls.swift).
 // - The others open the app on an action link (lumen://…), which the WebView
 //   handles like a widget tap.
 //
@@ -22,8 +26,22 @@ struct AddToInboxIntent: AppIntent {
     var text: String
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        PendingCaptures.add(text)
+        try CaptureQueue.addText(text, source: "siri")
         return .result(dialog: "Added to your Lumen inbox.")
+    }
+}
+
+/// Opens the native capture sheet: typing starts before the WebView has loaded.
+@available(iOS 16.0, *)
+struct CaptureSheetIntent: AppIntent {
+    static var title: LocalizedStringResource = "Capture to Lumen inbox"
+    static var description = IntentDescription("Opens a box to type a line for inbox.md, before the rest of Lumen loads.")
+    static var openAppWhenRun = true
+
+    @MainActor
+    func perform() async throws -> some IntentResult {
+        NativeCapture.present(source: "shortcut")
+        return .result()
     }
 }
 
@@ -85,6 +103,7 @@ struct LumenShortcuts: AppShortcutsProvider {
     // Every phrase must contain the app name (Apple's rule).
     static var appShortcuts: [AppShortcut] {
         AppShortcut(intent: AddToInboxIntent(), phrases: ["Add to \(.applicationName) inbox", "Add to my \(.applicationName) inbox"], shortTitle: "Add to inbox", systemImageName: "tray.and.arrow.down")
+        AppShortcut(intent: CaptureSheetIntent(), phrases: ["Capture to \(.applicationName)", "Capture to my \(.applicationName) inbox"], shortTitle: "Capture", systemImageName: "tray.and.arrow.down.fill")
         AppShortcut(intent: QuickNoteIntent(), phrases: ["Quick note in \(.applicationName)", "New \(.applicationName) note"], shortTitle: "Quick note", systemImageName: "square.and.pencil")
         AppShortcut(intent: VoiceNoteIntent(), phrases: ["Voice note in \(.applicationName)"], shortTitle: "Voice note", systemImageName: "mic")
         AppShortcut(intent: SearchNotesIntent(), phrases: ["Search \(.applicationName)"], shortTitle: "Search", systemImageName: "magnifyingglass")

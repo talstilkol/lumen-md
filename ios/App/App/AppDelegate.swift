@@ -58,6 +58,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the app was launched with a url. Feel free to add additional processing here,
         // but if you want the App API to support tracking app url opens, make sure to keep this call
         // Plan W3.4: lumen:// action links (widgets, App Shortcuts, other apps) go to the WebView.
+        // Plan W11.P8: the Control Center button and the Lock Screen widget open the native sheet.
+        if NativeCapture.handles(url) {
+            NativeCapture.present(source: NativeCapture.source(of: url))
+            return true
+        }
         if url.scheme == "lumen" {
             LumenLaunch.deliver(url)
             return true

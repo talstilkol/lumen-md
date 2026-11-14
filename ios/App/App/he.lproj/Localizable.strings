@@ -13,3 +13,11 @@
 "Voice note" = "פתק קולי";
 "Search" = "חיפוש";
 "Today's note" = "הפתק של היום";
+"Capture to Lumen inbox" = "לכידה לתיבה של Lumen";
+"Opens a box to type a line for inbox.md, before the rest of Lumen loads." = "פותח תיבה להקלדת שורה ל-inbox.md, לפני ששאר Lumen נטען.";
+"Capture" = "לכידה";
+"capture.title" = "תיבת הלכידה";
+"capture.save" = "שמירה";
+"capture.cancel" = "ביטול";
+"capture.saved" = "נשמר בתיבה";
+"capture.failed" = "השמירה נכשלה. הטקסט עדיין כאן.";

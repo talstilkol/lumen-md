@@ -6,3 +6,5 @@
 "Search ${applicationName}" = "Search ${applicationName}";
 "Today's ${applicationName} note" = "Today's ${applicationName} note";
 "Open today in ${applicationName}" = "Open today in ${applicationName}";
+"Capture to ${applicationName}" = "Capture to ${applicationName}";
+"Capture to my ${applicationName} inbox" = "Capture to my ${applicationName} inbox";

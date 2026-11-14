@@ -35,6 +35,29 @@ description: ווידג'ט של Lumen במסך הבית, Siri ו-Spotlight בא�
 ש-Lumen נפתח הוא נכנס ל-`inbox.md`, עם השעה שבה אמרתם אותו. כל שורה נוספת
 פעם אחת, ושום דבר לא הולך לאיבוד אם Lumen נסגר שוב לפני כן.
 
+## ממסך הנעילה וממרכז הבקרה (אייפון)
+
+לוכדים שורה עוד לפני ש-Lumen נטען:
+
+- **ווידג׳ט במסך הנעילה:** עורכים את מסך הנעילה ← מוסיפים את **לכידה**
+  של Lumen (עגול, רחב או בשורה אחת).
+- **מרכז הבקרה (iOS 18 ומעלה):** עורכים את מרכז הבקרה, או את שני הכפתורים
+  של מסך הנעילה, ← מוסיפים את **לכידה לתיבה**.
+- **קיצורים:** „לכידה ב-Lumen”.
+
+כל אחד מהם פותח מיד תיבת טקסט קטנה, לפני ששאר Lumen נטען. מקלידים, מקישים
+**שמירה**, והשורה נכנסת לסוף `inbox.md`, עם השעה שבה הקלדתם אותה. אם התיבה
+לא מצליחה לשמור, היא אומרת זאת ומשאירה את הטקסט.
+
+## שיתוף ל-Lumen (אייפון)
+
+בכל אפליקציה מקישים **שיתוף** ← **Lumen**. טקסט, קישור (עם כותרת הדף),
+תמונות ו-PDF נשמרים בלי לפתוח את Lumen. בפעם הבאה ש-Lumen נפתח:
+
+- טקסט וקישורים נכנסים ל-`inbox.md`;
+- תמונות ו-PDF נשמרים ב-`attachments/`, ושורה בתיבה מקשרת אליהם, עם שם
+  הקובץ.
+
 ## קיצורי אפליקציה (אנדרואיד)
 
 לחיצה ארוכה על הסמל של Lumen: **פתק מהיר**, **פתק קולי**, **חיפוש**
@@ -66,21 +89,30 @@ description: ווידג'ט של Lumen במסך הבית, Siri ו-Spotlight בא�
 פרויקט ה-Xcode כבר מכיל הכול (`ios/App/App.xcodeproj`, ונבדק ב-`src/__tests__/iosProject.test.ts`):
 
 - היעד **App** מקמפל את `AppDelegate.swift`, ‏`LumenNative.swift`,
-  ‏`LumenIntents.swift` ו-`iCloudSync.swift`, עם `en.lproj` / `he.lproj`
-  (`Localizable.strings`, ‏`AppShortcuts.strings`); עברית היא שפה של הפרויקט;
+  ‏`LumenIntents.swift`, ‏`NativeCapture.swift` (תיבת הלכידה),
+  ‏`iCloudSync.swift` ו-`Shared/CaptureQueue.swift`, עם `en.lproj` /
+  ‏`he.lproj` (`Localizable.strings`, ‏`AppShortcuts.strings`); עברית היא שפה
+  של הפרויקט;
 - הרחבת הווידג׳ט **LumenWidgets** ‏(`com.lumen.editor.LumenWidgets`)
-  מקמפלת את `LumenWidgets/LumenWidgets.swift` עם המחרוזות, ה-`Info.plist`
-  וה-entitlements שלה, והאפליקציה מטמיעה אותה;
-- לשני היעדים יש את ה-App Group ‏`group.com.lumen.editor` ב-entitlements
-  (התור של הרחבת השיתוף נקרא דרכו).
+  מקמפלת את `LumenWidgets/LumenWidgets.swift` (הווידג׳ט של מסך הבית
+  והחבילה) ואת `LumenControls.swift` (הווידג׳ט של מסך הנעילה והפקד של מרכז
+  הבקרה), עם המחרוזות, ה-`Info.plist` וה-entitlements שלה, והאפליקציה
+  מטמיעה אותה. אין צורך להוסיף יעד Widget Extension ביד;
+- הרחבת השיתוף **LumenShare** ‏(`com.lumen.editor.LumenShare`) מקמפלת את
+  ‏`LumenShare/ShareViewController.swift` ואת `Shared/CaptureQueue.swift`,
+  והאפליקציה מטמיעה אותה;
+- לשלושת היעדים יש את ה-App Group ‏`group.com.lumen.editor`
+  ב-entitlements. תור הלכידות נמצא שם: קובץ אחד לכל לכידה, שנכתב באופן
+  אטומי, והאפליקציה קוראת אותו (`src/mobile/captureQueue.ts`, נבדק
+  ב-`src/__tests__/captureQueue.test.ts`).
 
 כדי לבנות:
 
 1. ‏`npm run build && npx cap sync ios`, ואז פותחים את `ios/App/App.xcworkspace`
    (או את `App.xcodeproj` עם Swift Package Manager).
-2. **חתימה:** אותו צוות ליעדים App ו-LumenWidgets (החשבונות בתוכנית 15.7),
-   ורושמים את ה-App Group ‏`group.com.lumen.editor` לשני מזהי החבילה בחשבון
-   המפתחים.
+2. **חתימה:** אותו צוות ליעדים App, ‏LumenWidgets ו-LumenShare (החשבונות
+   בתוכנית 15.7), ורושמים את ה-App Group ‏`group.com.lumen.editor` לשלושת
+   מזהי החבילה בחשבון המפתחים.
 3. ‏`Main.storyboard` כבר משתמש ב-`MainViewController`, שרושם את התוסף של
    האפליקציה. בודקים שהמחלקה מציגה *Module: App*.
 4. בונים ומריצים במכשיר. לחיצה ארוכה על מסך הבית → **+** → **Lumen** כדי
@@ -116,3 +148,8 @@ description: ווידג'ט של Lumen במסך הבית, Siri ו-Spotlight בא�
 4. **‏RTL:** כשהטלפון בעברית, כפתורי הווידג'ט מסודרים מימין לשמאל
    והתוויות בעברית. אותו הדבר בקיצורי האפליקציה.
 5. **כל קישור:** ‏`lumen://search?q=test` מהדפדפן פותח חיפוש עם „test”.
+6. **מסך הנעילה ומרכז הבקרה:** כשהטלפון נעול ו-Lumen סגור, מקישים על
+   הווידג׳ט במסך הנעילה, ואז על הפקד. התיבה נפתחת, ושורה שנשמרה נמצאת
+   ב-`inbox.md` אחרי ש-Lumen נפתח.
+7. **שיתוף:** משתפים דף מ-Safari, תמונה מ-Photos ו-PDF מ-Files, כש-Lumen
+   סגור. פותחים את Lumen: כל אחד מהם נמצא שם, עם הקישור או שם הקובץ.

@@ -23,6 +23,13 @@
 		C7A000000000000000000011 /* LumenWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7A000000000000000000010 /* LumenWidgets.swift */; };
 		C7A000000000000000000017 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C7A000000000000000000014 /* Localizable.strings */; };
 		C7A000000000000000000019 /* LumenWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C7A000000000000000000018 /* LumenWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		C8A000000000000000000011 /* CaptureQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8A000000000000000000001 /* CaptureQueue.swift */; };
+		C8A000000000000000000012 /* CaptureQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8A000000000000000000001 /* CaptureQueue.swift */; };
+		C8A000000000000000000013 /* NativeCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8A000000000000000000002 /* NativeCapture.swift */; };
+		C8A000000000000000000014 /* LumenControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8A000000000000000000003 /* LumenControls.swift */; };
+		C8A000000000000000000015 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8A000000000000000000004 /* ShareViewController.swift */; };
+		C8A000000000000000000016 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C8A000000000000000000009 /* Localizable.strings */; };
+		C8A000000000000000000017 /* LumenShare.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C8A00000000000000000000A /* LumenShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -32,6 +39,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = C7A00000000000000000001B;
 			remoteInfo = LumenWidgets;
+		};
+		C8A000000000000000000027 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 504EC2FC1FED79650016851F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C8A000000000000000000020;
+			remoteInfo = LumenShare;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -43,6 +57,7 @@
 			dstSubfolderSpec = 13;
 			files = (
 				C7A000000000000000000019 /* LumenWidgets.appex in Embed Foundation Extensions */,
+				C8A000000000000000000017 /* LumenShare.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -74,6 +89,15 @@
 		C7A000000000000000000015 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C7A000000000000000000016 /* he */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = he; path = he.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C7A000000000000000000018 /* LumenWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = LumenWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		C8A000000000000000000001 /* CaptureQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureQueue.swift; sourceTree = "<group>"; };
+		C8A000000000000000000002 /* NativeCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeCapture.swift; sourceTree = "<group>"; };
+		C8A000000000000000000003 /* LumenControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LumenControls.swift; sourceTree = "<group>"; };
+		C8A000000000000000000004 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		C8A000000000000000000005 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C8A000000000000000000006 /* LumenShare.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LumenShare.entitlements; sourceTree = "<group>"; };
+		C8A000000000000000000007 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		C8A000000000000000000008 /* he */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = he; path = he.lproj/Localizable.strings; sourceTree = "<group>"; };
+		C8A00000000000000000000A /* LumenShare.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = LumenShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -92,6 +116,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C8A000000000000000000022 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -101,6 +132,8 @@
 				958DCC722DB07C7200EA8C5F /* debug.xcconfig */,
 				504EC3061FED79650016851F /* App */,
 				C7A00000000000000000001A /* LumenWidgets */,
+				C8A00000000000000000000C /* LumenShare */,
+				C8A00000000000000000000B /* Shared */,
 				504EC3051FED79650016851F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -110,6 +143,7 @@
 			children = (
 				504EC3041FED79650016851F /* App.app */,
 				C7A000000000000000000018 /* LumenWidgets.appex */,
+				C8A00000000000000000000A /* LumenShare.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -122,6 +156,7 @@
 				C7A000000000000000000001 /* LumenNative.swift */,
 				C7A000000000000000000003 /* LumenIntents.swift */,
 				C7A000000000000000000005 /* iCloudSync.swift */,
+				C8A000000000000000000002 /* NativeCapture.swift */,
 				C7A000000000000000000007 /* Localizable.strings */,
 				C7A00000000000000000000B /* AppShortcuts.strings */,
 				C7A00000000000000000000F /* App.entitlements */,
@@ -139,11 +174,31 @@
 			isa = PBXGroup;
 			children = (
 				C7A000000000000000000010 /* LumenWidgets.swift */,
+				C8A000000000000000000003 /* LumenControls.swift */,
 				C7A000000000000000000014 /* Localizable.strings */,
 				C7A000000000000000000012 /* Info.plist */,
 				C7A000000000000000000013 /* LumenWidgets.entitlements */,
 			);
 			path = LumenWidgets;
+			sourceTree = "<group>";
+		};
+		C8A00000000000000000000B /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				C8A000000000000000000001 /* CaptureQueue.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		C8A00000000000000000000C /* LumenShare */ = {
+			isa = PBXGroup;
+			children = (
+				C8A000000000000000000004 /* ShareViewController.swift */,
+				C8A000000000000000000009 /* Localizable.strings */,
+				C8A000000000000000000005 /* Info.plist */,
+				C8A000000000000000000006 /* LumenShare.entitlements */,
+			);
+			path = LumenShare;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -162,6 +217,7 @@
 			);
 			dependencies = (
 				C7A000000000000000000024 /* PBXTargetDependency */,
+				C8A000000000000000000028 /* PBXTargetDependency */,
 			);
 			name = App;
 			packageProductDependencies = (
@@ -188,6 +244,23 @@
 			productReference = C7A000000000000000000018 /* LumenWidgets.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		C8A000000000000000000020 /* LumenShare */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C8A000000000000000000024 /* Build configuration list for PBXNativeTarget "LumenShare" */;
+			buildPhases = (
+				C8A000000000000000000021 /* Sources */,
+				C8A000000000000000000022 /* Frameworks */,
+				C8A000000000000000000023 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LumenShare;
+			productName = LumenShare;
+			productReference = C8A00000000000000000000A /* LumenShare.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -204,6 +277,10 @@
 					};
 					C7A00000000000000000001B = {
 						CreatedOnToolsVersion = 15.0;
+						ProvisioningStyle = Automatic;
+					};
+					C8A000000000000000000020 = {
+						CreatedOnToolsVersion = 16.0;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -227,6 +304,7 @@
 			targets = (
 				504EC3031FED79650016851F /* App */,
 				C7A00000000000000000001B /* LumenWidgets */,
+				C8A000000000000000000020 /* LumenShare */,
 			);
 		};
 /* End PBXProject section */
@@ -255,6 +333,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C8A000000000000000000023 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C8A000000000000000000016 /* Localizable.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -266,6 +352,8 @@
 				C7A000000000000000000002 /* LumenNative.swift in Sources */,
 				C7A000000000000000000004 /* LumenIntents.swift in Sources */,
 				C7A000000000000000000006 /* iCloudSync.swift in Sources */,
+				C8A000000000000000000013 /* NativeCapture.swift in Sources */,
+				C8A000000000000000000011 /* CaptureQueue.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -274,6 +362,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				C7A000000000000000000011 /* LumenWidgets.swift in Sources */,
+				C8A000000000000000000014 /* LumenControls.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C8A000000000000000000021 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C8A000000000000000000015 /* ShareViewController.swift in Sources */,
+				C8A000000000000000000012 /* CaptureQueue.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -284,6 +382,11 @@
 			isa = PBXTargetDependency;
 			target = C7A00000000000000000001B /* LumenWidgets */;
 			targetProxy = C7A000000000000000000023 /* PBXContainerItemProxy */;
+		};
+		C8A000000000000000000028 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C8A000000000000000000020 /* LumenShare */;
+			targetProxy = C8A000000000000000000027 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -327,6 +430,15 @@
 			children = (
 				C7A000000000000000000015 /* en */,
 				C7A000000000000000000016 /* he */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		C8A000000000000000000009 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				C8A000000000000000000007 /* en */,
+				C8A000000000000000000008 /* he */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -539,6 +651,56 @@
 			};
 			name = Release;
 		};
+		C8A000000000000000000025 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = LumenShare/LumenShare.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = LumenShare/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lumen.editor.LumenShare;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		C8A000000000000000000026 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = LumenShare/LumenShare.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = LumenShare/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lumen.editor.LumenShare;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -565,6 +727,15 @@
 			buildConfigurations = (
 				C7A000000000000000000020 /* Debug */,
 				C7A000000000000000000021 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C8A000000000000000000024 /* Build configuration list for PBXNativeTarget "LumenShare" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C8A000000000000000000025 /* Debug */,
+				C8A000000000000000000026 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
