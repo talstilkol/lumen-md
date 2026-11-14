@@ -82,6 +82,7 @@ let lastProbe: { at: number; ok: boolean } | null = null;
 export async function isOllamaAvailable(): Promise<boolean> {
   let ok = false;
   try {
+    // privacy-ledger: Ollama at the configured base URL (classify: local-ai on this machine/LAN, cloud-ai when remote)
     const res = await fetch(`${getBaseUrl()}/api/tags`, {
       method: "GET",
       signal: AbortSignal.timeout(2000),
@@ -113,6 +114,7 @@ export function __resetOllamaProbe(): void {
  */
 export async function listOllamaModels(): Promise<OllamaModel[]> {
   try {
+    // privacy-ledger: Ollama at the configured base URL (classify: local-ai on this machine/LAN, cloud-ai when remote)
     const res = await fetch(`${getBaseUrl()}/api/tags`);
     if (!res.ok) return [];
     const data = await res.json();
@@ -135,6 +137,7 @@ export async function listOllamaModels(): Promise<OllamaModel[]> {
 export async function* pullOllamaModel(
   modelName: string,
 ): AsyncGenerator<{ status: string; completed?: number; total?: number }, void, undefined> {
+  // privacy-ledger: Ollama at the configured base URL (classify: local-ai on this machine/LAN, cloud-ai when remote)
   const res = await fetch(`${getBaseUrl()}/api/pull`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -175,6 +178,7 @@ export async function chatOllama(
   const baseUrl = getBaseUrl();
   const model = opts.model || getModel();
 
+  // privacy-ledger: Ollama at the configured base URL (classify: local-ai on this machine/LAN, cloud-ai when remote)
   const res = await fetch(`${baseUrl}/v1/chat/completions`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -207,6 +211,7 @@ export async function* chatOllamaStream(
   const baseUrl = getBaseUrl();
   const model = opts.model || getModel();
 
+  // privacy-ledger: Ollama at the configured base URL (classify: local-ai on this machine/LAN, cloud-ai when remote)
   const res = await fetch(`${baseUrl}/v1/chat/completions`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -259,6 +264,7 @@ export async function embedOllama(
   text: string,
   model = "nomic-embed-text",
 ): Promise<number[]> {
+  // privacy-ledger: Ollama at the configured base URL (classify: local-ai on this machine/LAN, cloud-ai when remote)
   const res = await fetch(`${getBaseUrl()}/api/embed`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

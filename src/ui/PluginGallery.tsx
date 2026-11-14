@@ -203,6 +203,7 @@ export function PluginGallery({ open, onClose }: Props) {
     // so we never `setState` on an unmounted component.
     const ac = new AbortController();
     let cancelled = false;
+    // privacy-ledger: this app's own origin (/plugins/registry.json): not off the device's app host, so not ledger traffic
     fetchWithRetry(
       "/plugins/registry.json",
       { signal: ac.signal },

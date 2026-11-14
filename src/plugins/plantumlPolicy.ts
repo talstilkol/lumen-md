@@ -87,6 +87,7 @@ export async function renderViaKroki(source: string): Promise<string> {
   }
   const init: RequestInit = { method: "POST", headers: { "Content-Type": "text/plain" }, body: source };
   const res = thirdPartyServicesAllowed(policy)
+    // privacy-ledger: rule PlantUML rendering: kroki.io (KROKI_URL), cloud-text, when the AI policy allows third-party services
     ? await fetchWithRetry(KROKI_URL, init, { label: "plantuml.render", maxRetries: 2, baseDelayMs: 500, maxDelayMs: 2000 })
     : await ledgerFetch({ force: { category: "cloud-text", reason: REASON }, consent: true })(KROKI_URL, init);
   if (!res.ok) {

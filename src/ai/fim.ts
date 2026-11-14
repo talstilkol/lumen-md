@@ -113,6 +113,7 @@ async function traceLatency(r: FimResult, startedAt: number, tokens: { input: nu
 
 async function viaOllama(model: string, prefix: string, suffix: string, signal?: AbortSignal): Promise<{ text: string; tokens: { input: number; output: number } }> {
   const { getBaseUrl } = await import("./ollamaProvider");
+  // privacy-ledger: Ollama at the configured base URL (classify: local-ai on this machine/LAN, cloud-ai when remote)
   const res = await fetch(`${getBaseUrl()}/api/generate`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

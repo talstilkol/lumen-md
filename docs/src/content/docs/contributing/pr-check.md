@@ -34,7 +34,10 @@ with 1 when a check fails. Warnings do not fail it.
 - **Network.** Every new call that sends a request (`fetch`, `WebSocket`,
   `EventSource`, `sendBeacon`, `importScripts`) goes to a host listed in
   the privacy ledger (`src/ai/privacyLedger.ts`). A call whose URL is
-  computed instead needs a `// privacy-ledger: <rule>` comment.
+  computed instead needs a `// privacy-ledger: <rule>` comment. The same
+  rule runs on every line of `src/` as `npm run privacy:ledger`, a gate of
+  its own in every Vercel build (preview and production), with no baseline:
+  every call in the app has its note.
 - **Licences.** Every production package added or changed in the
   lockfile has an allowed licence (no copyleft, no non-commercial, not
   missing).

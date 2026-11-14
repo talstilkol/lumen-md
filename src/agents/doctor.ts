@@ -117,6 +117,7 @@ type Probe = { status: number; json: unknown } | { error: string; status?: numbe
 
 async function probe(url: string, opts: { signal?: AbortSignal; timeoutMs: number }): Promise<Probe> {
   try {
+    // privacy-ledger: the doctor's probes of the configured services: Ollama by classify (Ollama); the LanguageTool /languages and research /healthz probes carry no text, audit mode (network)
     const res = await fetch(url, { signal: withTimeout(opts.signal, opts.timeoutMs) });
     let json: unknown = null;
     try {

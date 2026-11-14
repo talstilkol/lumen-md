@@ -85,6 +85,7 @@ export function useFetchSource(
     const controller = new AbortController();
     setLoading(true);
     setError(null);
+    // privacy-ledger: a block's src= URL that the note names: not classified, listed in audit mode (network)
     fetchWithRetry(
       url,
       { signal: controller.signal },

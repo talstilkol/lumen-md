@@ -104,6 +104,7 @@ export function recordAudit(
     const bearer = await bearerFor(cfg);
     if (!bearer) return; // not signed in — nothing the worker could attribute
     // Use fetch with keepalive so the row survives an unload race.
+    // privacy-ledger: the deployment's own endpoint (the organisation's audit endpoint, enterprise only); not AI traffic: listed in audit mode (network)
     await fetchWithRetry(`${endpoint.replace(/\/+$/, "")}/audit`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${bearer}` },
@@ -132,6 +133,7 @@ export async function listAudit(opts: {
   if (opts.before) params.set("before", String(opts.before));
   if (opts.action) params.set("action", opts.action);
   const headers: Record<string, string> = { Authorization: `Bearer ${bearer}` };
+  // privacy-ledger: the deployment's own endpoint (the organisation's audit endpoint, enterprise only); not AI traffic: listed in audit mode (network)
   const res = await fetchWithRetry(
     `${endpoint.replace(/\/+$/, "")}/audit?${params.toString()}`,
     { headers },

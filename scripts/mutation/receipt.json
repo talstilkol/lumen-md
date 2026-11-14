@@ -7,11 +7,11 @@
       "survived": 14,
       "invalid": 0,
       "sampled": 80,
-      "mutants": 246,
+      "mutants": 253,
       "max": 80,
       "runner": "shim",
-      "sha256": "d119e69bf4046333139cb9c728c64c335b27dc52ce6e334eb8a9403467f2e9fc",
-      "tests": "c73e3b95f5af296a419dae5fb42f080d80a9d14bd84f5738d61aa1e7fddd77e8",
+      "sha256": "78584d93cfc14628a3d0637a2682cf2f64e5acaf814665f9f040e91361a63034",
+      "tests": "ddbe8388fcf835b048abf433880325daa3193cd1ec2fed44b00333b3334dacda",
       "date": "2026-11-14"
     },
     "src/lib/secretStore.ts": {

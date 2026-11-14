@@ -112,6 +112,7 @@ export async function pluginFetch(plugin: Pick<PluginInstance, "id" | "grants">,
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), FETCH_TIMEOUT_MS);
   try {
+    // privacy-ledger: recordPluginRequest above records it (category plugin) and completeLedgerEntry closes it
     const res = await fetch(url, { method, headers, body, credentials: "omit", redirect: "error", referrerPolicy: "no-referrer", signal: ctl.signal });
     const len = Number(res.headers.get("content-length") ?? "0");
     if (len > MAX_RESPONSE_BYTES) throw new Error(`response larger than ${MAX_RESPONSE_BYTES} bytes`);

@@ -40,6 +40,7 @@ function ollamaProvider(model: string): EmbeddingProvider {
     dims: null,
     async embed(texts) {
       const { getBaseUrl } = await import("./ollamaProvider");
+      // privacy-ledger: Ollama at the configured base URL (classify: local-ai on this machine/LAN, cloud-ai when remote)
       const res = await fetch(`${getBaseUrl()}/api/embed`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -70,6 +71,7 @@ const openAiProvider: EmbeddingProvider = {
     assertCloudAllowed("OpenAI embeddings (smart search)");
     const key = useAppStore.getState().aiKey;
     if (!key) throw new Error("Configure your AI Key (⌘K → AI Settings) to use cloud embeddings.");
+    // privacy-ledger: rule OpenAI: api.openai.com (embeddings), cloud-ai
     const res = await fetchWithRetry(
       "https://api.openai.com/v1/embeddings",
       {
