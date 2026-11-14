@@ -2002,6 +2002,20 @@
       "hint": "One search over Sefaria, the Knesset, data.gov.il and the Ben-Yehuda library, with each result's rights",
       "shortcut": "⌥⌘S",
       "icon": "Quote"
+    },
+    {
+      "id": "text.transliterate",
+      "label": "Transliterate the selection (Yiddish, Ladino)",
+      "group": "Edit",
+      "hint": "Yiddish ↔ YIVO romanisation, Ladino Latin ↔ Hebrew letters",
+      "icon": "Pencil"
+    },
+    {
+      "id": "spell.yiddishDictionary",
+      "label": "Yiddish spelling: word list (download / remove)",
+      "group": "Tools",
+      "hint": "Offline Yiddish spell check (hunspell-yi, 2.4 MB, GPL)",
+      "icon": "Download"
     }
   ],
   "full": [
@@ -4156,6 +4170,20 @@
       "hint": "One search over Sefaria, the Knesset, data.gov.il and the Ben-Yehuda library, with each result's rights",
       "shortcut": "⌥⌘S",
       "icon": "Quote"
+    },
+    {
+      "id": "text.transliterate",
+      "label": "Transliterate the selection (Yiddish, Ladino)",
+      "group": "Edit",
+      "hint": "Yiddish ↔ YIVO romanisation, Ladino Latin ↔ Hebrew letters",
+      "icon": "Pencil"
+    },
+    {
+      "id": "spell.yiddishDictionary",
+      "label": "Yiddish spelling: word list (download / remove)",
+      "group": "Tools",
+      "hint": "Offline Yiddish spell check (hunspell-yi, 2.4 MB, GPL)",
+      "icon": "Download"
     }
   ],
   "autoSaveOn": [
@@ -4444,6 +4472,8 @@
     "export.latexProject",
     "automations.new",
     "automations.dryRun",
-    "automations.undo"
+    "automations.undo",
+    "text.transliterate",
+    "spell.yiddishDictionary"
   ]
 }
