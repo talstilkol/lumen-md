@@ -1,6 +1,8 @@
 /**
  * Plan W2.2 — related notes and suggested links while writing.
- *  - recall@5 ≥ 70% on the gold set (100 pairs, Hebrew and English);
+ *  - recall@5 ≥ 70% on the GENERATED gold set (100 pairs, Hebrew and English;
+ *    built so pairs share keywords — the real-links set is in
+ *    relatedRealLinks.test.ts, plan W10.B19);
  *  - the update after typing stops fits in 150 ms (debounce + ranking on
  *    10,000 notes);
  *  - nothing runs per keystroke (the plugin only resets a timer), and the

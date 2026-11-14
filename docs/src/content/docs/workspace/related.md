@@ -32,3 +32,14 @@ text changes only when you press **Link**.
 - For **a folder**: ⌘K → *Related notes: on / off for this folder* (for the
   folder of the open note; stored on this device).
 - Everywhere: close the panel.
+
+## How well it works
+
+On **real notes** it finds less than you may expect. The test takes the
+public Obsidian vaults in `src/__tests__/fixtures/obsidian-corpus`. For each
+link from one note to another in the same vault, it removes the link and
+asks whether the panel shows the linked note in its top five. That happens
+for **69 of 489** links (14.1%). On the generated set in
+`src/__tests__/fixtures/relatedGold.ts` it is 100/100, but that set is built
+so the two notes of a pair share their keywords.
+(`src/__tests__/relatedRealLinks.test.ts` reports both.)
