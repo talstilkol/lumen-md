@@ -98,6 +98,7 @@
     "docs:parity": "node scripts/docs-parity.mjs --strict",
     "bench:fim": "node --experimental-strip-types scripts/bench-fim.mjs",
     "models:day": "node scripts/models-day.mjs",
+    "models:select": "node scripts/models-select.mjs",
     "eval:asr-web": "node scripts/asr/web-eval.mjs",
     "eval:voice-commands": "node --experimental-strip-types scripts/voice-commands-eval.mjs",
     "eval:pdf-chat": "LUMEN_EVAL_PDF=1 vitest run --config vitest.eval.config.ts src/agents/eval/pdfChat.eval.ts",
