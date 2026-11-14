@@ -18,9 +18,9 @@ import { useEffect, useRef, useState } from "react";
 import { t } from "../i18n";
 import { actionById, DEFAULT_TOOLBAR, moveAction, sanitizeToolbar, toggleAction, TOOLBAR_ACTIONS, type ToolbarActionId } from "../mobile/toolbarActions";
 import { useAppStore } from "../store/useStore";
-import { useFocusTrap } from "./useFocusTrap";
 import "./mobileKeyboardBarStrings";
 import { HelpButton } from "./HelpButton";
+import { Modal } from "./Modal";
 
 export const MOBILE_ACTION_EVENT = "lumen-mobile-action";
 
@@ -164,16 +164,12 @@ export function MobileToolbarSheet({ onClose }: { onClose: () => void }) {
   const row = sanitizeToolbar(useAppStore((s) => s.mobileToolbar));
   const set = useAppStore((s) => s.setMobileToolbar);
   const ref = useRef<HTMLDivElement | null>(null);
-  useFocusTrap(ref, { onEscape: onClose });
   const off = TOOLBAR_ACTIONS.filter((a) => !row.includes(a.id));
   const item: React.CSSProperties = { display: "flex", alignItems: "center", gap: 8, minBlockSize: 44, borderBlockEnd: "1px solid hsl(var(--border))" };
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 60, background: "var(--overlay)", display: "flex", alignItems: "flex-end" }} onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <Modal aria-labelledby="mobile-toolbar-sheet-title" onClose={onClose} style={{ position: "fixed", inset: 0, zIndex: 60, background: "var(--overlay)", display: "flex", alignItems: "flex-end" }} onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div
         ref={ref}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="mobile-toolbar-sheet-title"
         data-testid="mobile-toolbar-sheet"
         style={{ inlineSize: "100%", maxBlockSize: "80vh", overflowY: "auto", background: "hsl(var(--bg))", borderStartStartRadius: 14, borderStartEndRadius: 14, padding: "12px 16px", paddingBlockEnd: "max(12px, env(safe-area-inset-bottom))" }}
       >
@@ -235,6 +231,6 @@ export function MobileToolbarSheet({ onClose }: { onClose: () => void }) {
           </>
         )}
       </div>
-    </div>
+    </Modal>
   );
 }

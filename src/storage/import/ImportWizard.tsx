@@ -14,6 +14,7 @@ import type { ImportReport, ImportSourceId } from "./types";
 import { toast } from "../../store/useToastStore";
 import { HelpButton } from "../../ui/HelpButton";
 import { explainError } from "../../lib/userError";
+import { Modal } from "../../ui/Modal";
 
 interface Props {
   open: boolean;
@@ -260,7 +261,7 @@ export function ImportWizard({ open, onClose }: Props) {
   };
 
   return (
-    <div className="cmd-palette-backdrop" onClick={() => step.kind !== "busy" && onClose()} role="dialog" aria-modal="true" aria-label={t("importWizard.title")} data-testid="import-wizard">
+    <Modal className="cmd-palette-backdrop" onClick={() => step.kind !== "busy" && onClose()} aria-label={t("importWizard.title")} data-testid="import-wizard">
       <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 620, padding: 0, display: "flex", flexDirection: "column", maxHeight: "85vh" }}>
         <header style={{ padding: "12px 16px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <Download size={16} />
@@ -279,6 +280,6 @@ export function ImportWizard({ open, onClose }: Props) {
           {body()}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

@@ -1,7 +1,6 @@
 import { headingSlugger } from "../lib/slug";
 import { countWords } from "../text/hebrew";
-import { lazy, Suspense, useEffect, useMemo, useState, useRef } from "react";
-import { useFocusTrap } from "./useFocusTrap";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { Search, Download, Trash2, ExternalLink, BadgeCheck } from "lucide-react";
 import { getRegisteredPlugins, registerPlugin, unregisterPlugin } from "../plugins/pluginSystem";
 import type { LumenPlugin } from "../plugins/pluginSystem";
@@ -12,6 +11,7 @@ import { fetchWithRetry } from "../lib/fetchRetry";
 const SandboxedPlugins = lazy(() => import("../plugins/runtime/SandboxedPlugins").then((m) => ({ default: m.SandboxedPlugins })));
 import { HelpButton } from "./HelpButton";
 import "./pluginGalleryStrings";
+import { Modal } from "./Modal";
 
 interface RemotePluginEntry {
   id: string;
@@ -259,10 +259,6 @@ export function PluginGallery({ open, onClose }: Props) {
     return map;
   }, [allAvailable.length, remoteRaw]);
 
-  // Focus stays in the dialog while it is open and returns on close; Escape closes it (plan 10.1).
-  const trapRef = useRef<HTMLDivElement | null>(null);
-  useFocusTrap(trapRef, { active: open, onEscape: onClose });
-
   if (!open) return null;
 
   const matchesCategory = (id: string): boolean => {
@@ -307,10 +303,8 @@ export function PluginGallery({ open, onClose }: Props) {
   ];
 
   return (
-    <div
-      ref={trapRef}
-      role="dialog"
-      aria-modal="true"
+    <Modal
+      onClose={onClose}
       aria-labelledby="plugin-gallery-title"
       style={{
         position: "fixed",
@@ -649,6 +643,6 @@ export function PluginGallery({ open, onClose }: Props) {
           </a>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

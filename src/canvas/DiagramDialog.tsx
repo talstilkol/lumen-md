@@ -10,6 +10,7 @@ import { t } from "../i18n";
 import { precheck } from "./mermaidPrep";
 import { HelpButton } from "../ui/HelpButton";
 import { explainError } from "../lib/userError";
+import { Modal } from "../ui/Modal";
 
 export interface DiagramDialogProps {
   onInsert: (code: string) => Promise<{ missing: string[]; editable: boolean } | { error: string }>;
@@ -67,7 +68,7 @@ export function DiagramDialog({ onInsert, onClose }: DiagramDialogProps) {
 
   const pre = code.trim() ? precheck(code) : null;
   return (
-    <div className="lumen-diagram-backdrop" role="dialog" aria-modal="true" aria-labelledby="lumen-diagram-title" data-testid="canvas-diagram-dialog" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+    <Modal onClose={onClose} className="lumen-diagram-backdrop" aria-labelledby="lumen-diagram-title" data-testid="canvas-diagram-dialog" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div className="lumen-diagram">
         <h2 id="lumen-diagram-title" className="lumen-diagram-title">
           {t("canvas.diagram.title")}
@@ -131,6 +132,6 @@ export function DiagramDialog({ onInsert, onClose }: DiagramDialogProps) {
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

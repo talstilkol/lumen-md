@@ -22,11 +22,11 @@ import { downloadText } from "../storage/exportFormats";
 import { showAiToast } from "./AiToast";
 import { SUPPORTED_LOCALES, t, type Locale } from "../i18n";
 import { isBetaLocale } from "../i18n/review";
-import { useFocusTrap } from "./useFocusTrap";
 import "./settingsScreenStrings";
 import { HelpButton } from "./HelpButton";
 // W5.11: the "keep photo metadata" switch's label ships with this lazy screen.
 import "../lib/journalistStrings";
+import { Modal } from "./Modal";
 
 const ThemeSettings = lazy(() => import("./ThemeSettings").then((m) => ({ default: m.ThemeSettings })));
 const AiSettingsPanel = lazy(() => import("./AiSettingsPanel").then((m) => ({ default: m.AiSettingsPanel })));
@@ -127,10 +127,6 @@ export function SettingsScreen({ tab: initialTab = "general", onClose, onOpenAud
   useEffect(() => {
     searchRef.current?.focus();
   }, []);
-
-  // One focus trap for every dialog (plan 10.1): focus stays in the screen, Escape closes it.
-  const trapRef = useRef<HTMLDivElement | null>(null);
-  useFocusTrap(trapRef, { onEscape: onClose });
 
   // A search that leaves the open tab out moves to the first tab it found.
   useEffect(() => {
@@ -261,13 +257,9 @@ export function SettingsScreen({ tab: initialTab = "general", onClose, onOpenAud
   };
 
   return (
-    <div className="cmd-palette-backdrop" onClick={onClose}>
+    <Modal aria-labelledby={`${ids}-title`} onClose={onClose} className="cmd-palette-backdrop" onClick={onClose}>
       <div
         className="cmd-palette"
-        ref={trapRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={`${ids}-title`}
         data-testid="settings-screen"
         onClick={(e) => e.stopPropagation()}
         style={{ width: "min(920px, 96vw)", maxWidth: 920, maxHeight: "90vh", height: "90vh", padding: 0, display: "flex", flexDirection: "column" }}
@@ -343,7 +335,7 @@ export function SettingsScreen({ tab: initialTab = "general", onClose, onOpenAud
           </section>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

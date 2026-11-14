@@ -25,6 +25,7 @@ import { LanNoVaultError, LanNotConnectedError } from "../lan";
 import { loadMigrationRecord, migratePlaintext, planPlaintextMigration, revertPlaintextMigration, type MigrationPlan, type MigrationRecord } from "../providers/migrate";
 import { HelpButton } from "../../../ui/HelpButton";
 import { explainError } from "../../../lib/userError";
+import { Modal } from "../../../ui/Modal";
 
 const NAMES: Record<ProviderKind, string> = { webdav: "WebDAV", s3: "S3", dropbox: "Dropbox", gdrive: "Google Drive", lan: "LAN", folder: "📁", relay: "Lumen relay" };
 const PENDING_OAUTH = "lumen-sync-pending-oauth";
@@ -454,11 +455,8 @@ export function SyncPanel({ onClose, session = syncSession() }: { onClose: () =>
   const where = !s.settings ? "" : s.settings.kind === "lan" ? t(`e2ee.lan.where.${s.settings.role}`) : s.settings.kind === "folder" ? `${NAMES.folder} ${s.settings.name}` : `${NAMES[s.settings.kind]} — ${providerHosts(s.settings)[0] ?? ""}`;
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "var(--overlay)", display: "grid", placeItems: "center", zIndex: 1000 }} onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+    <Modal aria-labelledby="sync-panel-title" style={{ position: "fixed", inset: 0, background: "var(--overlay)", display: "grid", placeItems: "center", zIndex: 1000 }} onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="sync-panel-title"
         style={{ width: "min(520px, calc(100vw - 32px))", maxHeight: "calc(100vh - 32px)", overflow: "auto", background: "hsl(var(--bg))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border))", borderRadius: 10, padding: 18, display: "grid", gap: 14 }}
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -508,7 +506,7 @@ export function SyncPanel({ onClose, session = syncSession() }: { onClose: () =>
           </button>
         )}
       </div>
-    </div>
+    </Modal>
   );
 }
 

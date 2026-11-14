@@ -11,6 +11,7 @@ import { renderMarkdownFast } from "../renderer/pipeline";
 import { loadHelp, type HelpIndex, type HelpPage } from "../help/helpSearch";
 import { docsBaseUrl } from "../lib/docsLinks";
 import "./helpPanelStrings";
+import { Modal } from "./Modal";
 
 export function HelpPanel({ topic, initialQuery = "", onClose }: { topic: string; initialQuery?: string; onClose: () => void }) {
   const lang = getLocale() === "he" ? "he" : "en";
@@ -89,11 +90,8 @@ export function HelpPanel({ topic, initialQuery = "", onClose }: { topic: string
   const webUrl = page ? `${docsBaseUrl()}/${lang === "he" ? "he/" : ""}${page.slug}${page.slug ? "/" : ""}${anchor ? `#${anchor}` : ""}` : docsBaseUrl();
 
   return (
-    <div className="cmd-palette-backdrop" onClick={onClose} data-testid="help-panel">
+    <Modal aria-labelledby="help-title" className="cmd-palette-backdrop" onClick={onClose} data-testid="help-panel">
       <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="help-title"
         onClick={(e) => e.stopPropagation()}
         style={{ inlineSize: "min(860px, 96vw)", blockSize: "min(82vh, 760px)", background: "hsl(var(--bg))", border: "1px solid hsl(var(--border))", borderRadius: 12, display: "flex", flexDirection: "column", overflow: "hidden" }}
       >
@@ -157,7 +155,7 @@ export function HelpPanel({ topic, initialQuery = "", onClose }: { topic: string
           </ul>
         )}
       </div>
-    </div>
+    </Modal>
   );
 }
 

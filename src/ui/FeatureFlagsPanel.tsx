@@ -9,6 +9,7 @@ import { t } from "../i18n";
 import { buildChannel, FLAGS, FLAGS_CHANGED, flagState, resetFlags, setFlag } from "../flags/flags";
 import "./featureFlagsPanelStrings";
 import { HelpButton } from "./HelpButton";
+import { Modal } from "./Modal";
 
 // The host, the event name and the Beta badge live in ./FeatureFlagsHost (startup);
 // this panel loads when it opens.
@@ -37,12 +38,9 @@ export function FeatureFlagsPanel({ onClose }: { onClose: () => void }) {
   }, [onClose]);
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 70, background: "var(--overlay)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }} onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <Modal aria-labelledby="feature-flags-title" style={{ position: "fixed", inset: 0, zIndex: 70, background: "var(--overlay)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }} onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div
         ref={ref}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="feature-flags-title"
         data-testid="feature-flags"
         style={{ inlineSize: "min(520px, 100%)", maxBlockSize: "80vh", overflowY: "auto", background: "hsl(var(--bg))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border))", borderRadius: 10, padding: 16 }}
       >
@@ -95,6 +93,6 @@ export function FeatureFlagsPanel({ onClose }: { onClose: () => void }) {
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

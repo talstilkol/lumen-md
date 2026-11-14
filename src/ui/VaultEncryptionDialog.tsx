@@ -25,6 +25,7 @@ import { WrongPassphraseError, MIN_PASSPHRASE_LENGTH } from "../storage/vault/en
 import "../storage/vault/encrypted/strings";
 import { HelpButton } from "./HelpButton";
 import { explainError } from "../lib/userError";
+import { Modal } from "./Modal";
 
 const field: React.CSSProperties = { width: "100%", padding: "6px 8px", border: "1px solid hsl(var(--border))", borderRadius: 6, background: "transparent", color: "inherit", font: "inherit" };
 const primary: React.CSSProperties = { padding: "6px 14px", border: "none", borderRadius: 6, background: "hsl(var(--accent))", color: "hsl(var(--accent-fg))", cursor: "pointer", justifySelf: "start" };
@@ -323,11 +324,8 @@ export function VaultEncryptionDialog({ onClose }: { onClose: () => void }) {
   }, [onClose]);
 
   return (
-    <div role="presentation" onClick={(e) => e.target === e.currentTarget && onClose()} style={{ position: "fixed", inset: 0, zIndex: 9000, background: "var(--overlay)", display: "grid", placeItems: "center", padding: 16 }}>
+    <Modal aria-labelledby="vault-enc-title" onClick={(e) => e.target === e.currentTarget && onClose()} style={{ position: "fixed", inset: 0, zIndex: 9000, background: "var(--overlay)", display: "grid", placeItems: "center", padding: 16 }}>
       <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="vault-enc-title"
         data-testid="vault-encryption"
         style={{ width: "min(480px, 100%)", maxHeight: "90vh", overflow: "auto", background: "hsl(var(--bg-elevated, var(--bg)))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border))", borderRadius: 10, padding: 16, display: "grid", gap: 12 }}
       >
@@ -343,7 +341,7 @@ export function VaultEncryptionDialog({ onClose }: { onClose: () => void }) {
         {state === "none" && <TurnOn onDone={onClose} />}
         {state === "encrypted" && <Manage onDone={onClose} />}
       </div>
-    </div>
+    </Modal>
   );
 }
 

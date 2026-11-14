@@ -21,6 +21,7 @@ import { t } from "../i18n";
 import "./trustedReposDialogStrings";
 import { HelpButton } from "./HelpButton";
 import { explainError } from "../lib/userError";
+import { Modal } from "./Modal";
 
 interface Props {
   onClose: () => void;
@@ -81,12 +82,9 @@ export function TrustedReposDialog({ onClose, loadRepos = clonedRepos }: Props) 
   );
 
   return (
-    <div className="cmd-palette-backdrop" onClick={onClose}>
+    <Modal aria-labelledby="trusted-repos-title" className="cmd-palette-backdrop" onClick={onClose}>
       <div
         className="cmd-palette"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="trusted-repos-title"
         onClick={(e) => e.stopPropagation()}
         style={{ maxWidth: 560, maxHeight: "82vh", display: "flex", flexDirection: "column" }}
       >
@@ -137,7 +135,7 @@ export function TrustedReposDialog({ onClose, loadRepos = clonedRepos }: Props) 
           )}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

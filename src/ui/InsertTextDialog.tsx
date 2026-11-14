@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useFocusTrap } from "./useFocusTrap";
 import { createRoot } from "react-dom/client";
 import { t } from "../i18n";
 import { smartDetect, renderAs, ALL_KINDS, type DetectedKind } from "../data/smartDetect";
 import { HelpButton } from "./HelpButton";
 import "./insertTextDialogStrings";
+import { Modal } from "./Modal";
 
 /**
  * Smart Insert dialog — single text area, the system figures out what to
@@ -58,15 +58,11 @@ function InsertTextDialogImpl({
   const [codeLang, setCodeLang] = useState("");
   const [mode, setMode] = useState<InsertMode>("atCursor");
 
-  const dialogRef = useRef<HTMLDivElement | null>(null);
   const taRef = useRef<HTMLTextAreaElement | null>(null);
 
   useEffect(() => {
     setTimeout(() => taRef.current?.focus(), 0);
   }, []);
-
-  // Focus stays in the dialog and returns on close; Escape cancels (plan 10.1).
-  useFocusTrap(dialogRef, { onEscape: () => onResolve(null) });
 
   // Auto-detect runs every time the input changes.
   const detection = useMemo(() => smartDetect(text), [text]);
@@ -103,9 +99,7 @@ function InsertTextDialogImpl({
       : ALL_KINDS.find((k) => k.kind === forceKind)?.label ?? "📝 Markdown";
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
+    <Modal onClose={() => onResolve(null)}
       aria-labelledby="insert-text-title"
       style={{
         position: "fixed",
@@ -123,7 +117,6 @@ function InsertTextDialogImpl({
       }}
     >
       <div
-        ref={dialogRef}
         style={{
           background: "hsl(var(--bg))",
           color: "hsl(var(--fg))",
@@ -303,7 +296,7 @@ function InsertTextDialogImpl({
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 
