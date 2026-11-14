@@ -505,6 +505,55 @@ steps:
         - exit_status: 255
           limit: 1
     if: "build.branch == \"main\" || build.pull_request.labels includes \"lighthouse\""
+  - label: ":playwright: e2e chromium, shard %n of 4"
+    key: "e2e-shards"
+    parallelism: 4
+    command: |-
+      LUMEN_CI_JOB=e2e-shards LUMEN_CI_BROWSERS=chromium bash scripts/buildkite/run.sh <<'LUMEN_JOB'
+      gate 'Build the production bundle with the e2e surface (VITE_E2E=1)' VITE_E2E=1 <<'LUMEN_STEP'
+      npm run build
+      LUMEN_STEP
+      gate 'E2E shard (the whole chromium project, under 10 min)' <<'LUMEN_STEP'
+      node scripts/e2e-gate.mjs --full
+      LUMEN_STEP
+      gates_done
+      LUMEN_JOB
+    agents:
+      queue: "linux"
+    artifact_paths:
+      - "ci-out/e2e-shard-*.json"
+    timeout_in_minutes: 35
+    notify:
+      - github_commit_status:
+          context: "lumen/buildkite: e2e-shards"
+    retry:
+      automatic:
+        - exit_status: -1
+          limit: 2
+        - exit_status: 255
+          limit: 1
+  - label: ":lock_with_ink_pen: e2e report for this hash"
+    key: "e2e-receipt"
+    depends_on:
+      - step: "e2e-shards"
+        allow_failure: true
+    command: |-
+      buildkite-agent artifact download 'ci-out/e2e-shard-*.json' . || true
+      node scripts/e2e-gate.mjs merge --total 4 --dir ci-out
+    agents:
+      queue: "linux"
+    artifact_paths:
+      - "reports/e2e-*.json"
+    timeout_in_minutes: 5
+    notify:
+      - github_commit_status:
+          context: "lumen/buildkite: e2e-receipt"
+    retry:
+      automatic:
+        - exit_status: -1
+          limit: 2
+        - exit_status: 255
+          limit: 1
   - label: ":lock_with_ink_pen: signed receipt"
     key: "receipt"
     depends_on:
@@ -536,9 +585,13 @@ steps:
         allow_failure: true
       - step: "lighthouse"
         allow_failure: true
+      - step: "e2e-shards"
+        allow_failure: true
+      - step: "e2e-receipt"
+        allow_failure: true
     command: |-
       buildkite-agent artifact download 'ci-out/vitest-summary.json' . || true
-      node scripts/buildkite/receipt.mjs --gates vitest,vitest-merge,static,lint,licenses,build,e2e-chromium,e2e-firefox,e2e-webkit,e2e-prod,e2e-headers,local-ai,ocr-cer,lighthouse
+      node scripts/buildkite/receipt.mjs --gates vitest,vitest-merge,static,lint,licenses,build,e2e-chromium,e2e-firefox,e2e-webkit,e2e-prod,e2e-headers,local-ai,ocr-cer,lighthouse,e2e-shards,e2e-receipt
     agents:
       queue: "linux"
     artifact_paths:
