@@ -14,6 +14,7 @@ import { FreshnessBanner } from "./FreshnessBanner";
 import { SyncActivity } from "./SyncActivity";
 import { SyncRulesForm } from "./SyncRulesForm";
 import { PairingCompare } from "./PairingCompare";
+import { RecoveryKitSetup, RecoveryRestore } from "./RecoveryKit";
 import { e2eeErrorText, e2eeResultNotices } from "./errorText";
 import { syncSession, type SyncSession } from "./session";
 import { ProviderAuthError, ProviderUnreachableError, ProviderUnsupportedError } from "../providers/http";
@@ -431,6 +432,7 @@ function Unlocked({ session }: { session: SyncSession }) {
           )}
         </div>
       )}
+      {engine && <RecoveryKitSetup engine={engine} />}
       {s.settings?.kind === "lan" && s.settings.role === "host" && <LanHostPairing />}
       {s.settings && <Migration session={session} kind={s.settings.kind} />}
     </div>
@@ -441,6 +443,7 @@ export function SyncPanel({ onClose, session = syncSession() }: { onClose: () =>
   const s = useSyncExternalStore(session.subscribe, session.get);
   const [saved, setSaved] = useState<ProviderSettings | null | undefined>(undefined);
   const [choosing, setChoosing] = useState(false);
+  const [restoring, setRestoring] = useState(false);
 
   useEffect(() => {
     void session.saved().then(setSaved, () => setSaved(null));
@@ -494,7 +497,21 @@ export function SyncPanel({ onClose, session = syncSession() }: { onClose: () =>
             {s.phase === "connected" && (
               <>
                 <div style={muted}>{t(s.vaultExists ? "e2ee.sync.existingVault" : "e2ee.sync.newVault")}</div>
-                <PassphraseForm mode={s.vaultExists ? "unlock" : "create"} onSubmit={async (pass) => void (await session.open(pass))} />
+                {!restoring && <PassphraseForm mode={s.vaultExists ? "unlock" : "create"} onSubmit={async (pass) => void (await session.open(pass))} />}
+                {/* Plan W11.S9: the passphrase is forgotten; the recovery words open the vault. */}
+                {s.vaultExists && !restoring && (
+                  <button type="button" style={{ justifySelf: "start" }} onClick={() => setRestoring(true)}>
+                    {t("e2ee.recovery.forgot")}
+                  </button>
+                )}
+                {s.vaultExists && restoring && (
+                  <>
+                    <RecoveryRestore onRestore={(key, pass) => session.restore(key, pass)} />
+                    <button type="button" style={{ justifySelf: "start" }} onClick={() => setRestoring(false)}>
+                      {t("e2ee.sync.back")}
+                    </button>
+                  </>
+                )}
                 {/* Before the first round: what this device leaves out (plan W1.8). */}
                 <SyncRulesForm session={session} />
               </>
