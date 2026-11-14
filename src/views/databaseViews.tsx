@@ -3,7 +3,7 @@
  * table, kanban, cards, list and calendar, with their cells. Loaded only with
  * DatabaseBlock, which registers their strings.
  */
-import { useCallback, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { AlertCircle, GripVertical } from "lucide-react";
 import { flexRender, getCoreRowModel, useReactTable, type ColumnDef } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -30,6 +30,17 @@ export const titleOf = (row: DatabaseRow) => (typeof row.fm.title === "string" &
 const editableValue = (v: unknown) =>
   v === null || v === undefined || ["string", "number", "boolean"].includes(typeof v) || (Array.isArray(v) && v.every((x) => x === null || ["string", "number", "boolean"].includes(typeof x)));
 
+/** Rows picked for a bulk edit, and how a click on a row's checkbox changes them (W7.4). */
+export interface Selection {
+  has: (path: string) => boolean;
+  /** A checkbox click: toggles; Shift extends from the last one clicked. */
+  click: (path: string, e: { shiftKey: boolean }) => void;
+  /** Every row the filter shows, or none when they all are already. */
+  toggleAll: () => void;
+  count: number;
+  total: number;
+}
+
 export interface ViewProps {
   rows: DatabaseRow[];
   /** Every loaded row, before the filter: column types come from all of them. */
@@ -42,6 +53,8 @@ export interface ViewProps {
   formulaNames: ReadonlySet<string>;
   /** path → formula → error message. */
   formulaErrors: ReadonlyMap<string, ReadonlyMap<string, string>>;
+  /** The rows picked for a bulk edit (table and kanban views). */
+  select?: Selection;
 }
 
 function RowLink({ row }: { row: DatabaseRow }) {
@@ -61,7 +74,7 @@ function RowLink({ row }: { row: DatabaseRow }) {
 }
 
 /** Rows in groups (by `groupBy`), in the order the rows come; no grouping: one unnamed group. */
-function sections(rows: DatabaseRow[], groupBy: string): Array<{ key: string | null; rows: DatabaseRow[] }> {
+export function sections(rows: DatabaseRow[], groupBy: string): Array<{ key: string | null; rows: DatabaseRow[] }> {
   if (!groupBy) return [{ key: null, rows }];
   const groups = groupRows(rows, groupBy);
   return [...groups.keys()].sort(columnOrder).map((key) => ({ key, rows: groups.get(key)! }));
@@ -210,6 +223,44 @@ function FormulaCell({ value, error }: { value: unknown; error?: string }) {
   );
 }
 
+/* ─── Selection for a bulk edit (W7.4) ───────────────────────────────── */
+
+function SelectBox({ row, select }: { row: DatabaseRow; select: Selection }) {
+  return (
+    <input
+      type="checkbox"
+      checked={select.has(row.path)}
+      onChange={() => undefined}
+      onClick={(e) => select.click(row.path, e)}
+      aria-label={t("db.select.row", { note: titleOf(row) })}
+      data-testid="database-select-row"
+      style={{ margin: 0, marginBlockStart: 2, cursor: "pointer" }}
+    />
+  );
+}
+
+function selectColumn(select: Selection): ColumnDef<DatabaseRow> {
+  return { id: "__select", header: () => <SelectAll select={select} />, cell: (c) => <SelectBox row={c.row.original} select={select} /> };
+}
+
+function SelectAll({ select }: { select: Selection }) {
+  const ref = useRef<HTMLInputElement | null>(null);
+  useEffect(() => {
+    if (ref.current) ref.current.indeterminate = select.count > 0 && select.count < select.total;
+  });
+  return (
+    <input
+      ref={ref}
+      type="checkbox"
+      checked={select.total > 0 && select.count === select.total}
+      onChange={() => select.toggleAll()}
+      aria-label={t("db.select.all", { n: String(select.total) })}
+      data-testid="database-select-all"
+      style={{ margin: 0, cursor: "pointer" }}
+    />
+  );
+}
+
 /* ─── Table view ─────────────────────────────────────────────────────── */
 
 type Item = { kind: "group"; key: string; count: number } | { kind: "row"; row: DatabaseRow };
@@ -217,11 +268,12 @@ type Item = { kind: "group"; key: string; count: number } | { kind: "row"; row: 
 /** Above this many lines the table renders only what is on screen. */
 const VIRTUAL_FROM = 60;
 
-export function TableView({ rows, allRows, spec, fields, groupBy, edit, formulaNames, formulaErrors }: ViewProps) {
+export function TableView({ rows, allRows, spec, fields, groupBy, edit, formulaNames, formulaErrors, select }: ViewProps) {
   const dateOpts = useDateOptions(spec);
   const types = useMemo(() => Object.fromEntries(fields.map((f) => [f, columnType(allRows.map((r) => r.fm[f]), f)])), [allRows, fields]);
   const columns = useMemo<ColumnDef<DatabaseRow>[]>(
     () => [
+      ...(select ? [selectColumn(select)] : []),
       { id: "__title", header: () => t("db.title"), cell: (c) => <RowLink row={c.row.original} /> },
       ...fields.map(
         (f): ColumnDef<DatabaseRow> => ({
@@ -236,7 +288,7 @@ export function TableView({ rows, allRows, spec, fields, groupBy, edit, formulaN
         }),
       ),
     ],
-    [fields, types, edit, formulaNames, formulaErrors, dateOpts, spec.deadline],
+    [fields, types, edit, formulaNames, formulaErrors, dateOpts, spec.deadline, select],
   );
   const table = useReactTable({ data: rows, columns, getCoreRowModel: getCoreRowModel(), getRowId: (r) => r.path });
   const byPath = new Map(table.getRowModel().rows.map((r) => [r.id, r]));
@@ -258,7 +310,7 @@ export function TableView({ rows, allRows, spec, fields, groupBy, edit, formulaN
   const visible = virtual ? virtualizer.getVirtualItems() : items.map((_, index) => ({ index, start: 0, end: 0 }));
   const padTop = virtual && visible.length ? visible[0].start : 0;
   const padBottom = virtual && visible.length ? virtualizer.getTotalSize() - visible[visible.length - 1].end : 0;
-  const span = fields.length + 1;
+  const span = fields.length + (select ? 2 : 1);
 
   return (
     <div ref={scrollRef} style={{ overflow: "auto", maxBlockSize: virtual ? 480 : undefined }}>
@@ -290,7 +342,7 @@ export function TableView({ rows, allRows, spec, fields, groupBy, edit, formulaN
             const r = byPath.get(item.row.path);
             if (!r) return null;
             return (
-              <tr key={r.id} data-note={r.id}>
+              <tr key={r.id} data-note={r.id} aria-selected={select ? select.has(r.id) : undefined}>
                 {r.getVisibleCells().map((cell) => (
                   <td key={cell.id} style={tdStyle}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -336,7 +388,7 @@ const cardStyle: CSSProperties = {
   alignItems: "flex-start",
 };
 
-export function KanbanView({ rows, allRows, spec, fields, groupBy, edit, formulaNames }: ViewProps) {
+export function KanbanView({ rows, allRows, spec, fields, groupBy, edit, formulaNames, select }: ViewProps) {
   const groups = useMemo(() => (groupBy ? groupRows(rows, groupBy) : new Map<string, DatabaseRow[]>()), [rows, groupBy]);
   // The spec's `columns:` come first and stay even when empty, so a card
   // can move into a status no note has yet.
@@ -422,7 +474,7 @@ export function KanbanView({ rows, allRows, spec, fields, groupBy, edit, formula
         {columns.map((col) => (
           <KanbanColumn key={col} id={col} count={groups.get(col)?.length ?? 0}>
             {(groups.get(col) ?? []).map((r) => (
-              <KanbanCard key={r.path} row={r} fields={fields.filter((f) => f !== "title" && f !== groupBy).slice(0, 3)} />
+              <KanbanCard key={r.path} row={r} fields={fields.filter((f) => f !== "title" && f !== groupBy).slice(0, 3)} select={select} />
             ))}
           </KanbanColumn>
         ))}
@@ -452,7 +504,7 @@ function KanbanColumn({ id, count, children }: { id: string; count: number; chil
   );
 }
 
-function KanbanCard({ row, fields }: { row: DatabaseRow; fields: string[] }) {
+function KanbanCard({ row, fields, select }: { row: DatabaseRow; fields: string[]; select?: Selection }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: row.path });
   return (
     <div ref={setNodeRef} data-note={row.path} style={{ ...cardStyle, transform: CSS.Translate.toString(transform), opacity: isDragging ? 0.85 : 1, position: "relative", zIndex: isDragging ? 2 : undefined }}>
@@ -466,6 +518,7 @@ function KanbanCard({ row, fields }: { row: DatabaseRow; fields: string[] }) {
       >
         <GripVertical size={14} aria-hidden />
       </button>
+      {select && <SelectBox row={row} select={select} />}
       <div style={{ minInlineSize: 0 }}>
         <RowLink row={row} />
         {fields.map((f) => (
