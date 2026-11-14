@@ -1470,6 +1470,45 @@
         "asr-fleurs-yi"
       ],
       "notes": "Yiddish file transcription on the desktop (plan W11.H18, W7.9) through the whisper.cpp track of W1.17. Licence from the ivrit.ai organisation card (research R2 §1.2), not re-read at a pinned revision: verified false until W11.M13 pins the ggml file (repository, revision, size, sha256). Until then the engine is never offered."
+    },
+    {
+      "id": "HebArabNlpProject/shoshan",
+      "kind": "other",
+      "source": "https://huggingface.co/HebArabNlpProject/shoshan",
+      "license": "MIT",
+      "class": "conditional",
+      "commercial": "conditional",
+      "attribution": "Shoshan lemmatizer © HebArabNlpProject, code and weights MIT (model card); its encoder is fine-tuned from DictaBERT © DICTA (CC BY 4.0), and its lemma bank comes from a public Hebrew lemma lexicon and the MILA morphological lexicon (docs/DATA_STATEMENT.md).",
+      "size": "set at the ONNX export (W11.M3): DictaBERT-base encoder + heads, a ~117.6k-lemma bank",
+      "runs": "browser",
+      "delivery": "none",
+      "verified": false,
+      "decision": "W11.H12 (15.11): conditional, not allowed, until the bank's terms are read — the card points to docs/DATA_STATEMENT.md for the terms of the MILA lexicon it derives from, which could not be read here. If the bank is free to redistribute: allowed; if not, the edit-script path (no bank) is the fallback to measure. Replaces the current search setup only with ≥ 92 % UD-IAHLT out-of-domain lemma accuracy and an nDCG@10 not lower than today's (pickLemmatizer).",
+      "benchmarks": [
+        "lemma-ud-iahltwiki",
+        "retrieval-heq",
+        "retrieval-mmteb-he"
+      ],
+      "notes": "Port of its lemma step: src/search/lemma/shoshan.ts. Not downloadable until W11.M3 exports and pins it."
+    },
+    {
+      "id": "dicta-il/dictabert-lex",
+      "kind": "other",
+      "source": "https://huggingface.co/dicta-il/dictabert-lex",
+      "license": "CC-BY-4.0",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "DictaBERT-lex © DICTA: The Israel Center for Text Analysis, licensed under CC BY 4.0.",
+      "size": "set at the ONNX export (W11.M3)",
+      "runs": "browser",
+      "delivery": "none",
+      "verified": false,
+      "benchmarks": [
+        "lemma-ud-iahltwiki",
+        "retrieval-heq",
+        "retrieval-mmteb-he"
+      ],
+      "notes": "The other side of the W11.H12 A/B (src/search/lemma/dictaLex.ts). Licence from the model card; verified false until re-read at the pinned revision."
     }
   ]
 }
