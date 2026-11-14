@@ -1,0 +1,34 @@
+{
+  "id": "lemma-ud-iahltwiki",
+  "task": "lemma",
+  "title": "UD Hebrew IAHLTwiki — lemma accuracy out of domain for Shoshan",
+  "dataset": {
+    "hub": "github",
+    "id": "UniversalDependencies/UD_Hebrew-IAHLTwiki",
+    "url": "https://github.com/UniversalDependencies/UD_Hebrew-IAHLTwiki",
+    "revision": null,
+    "files": [
+      {
+        "path": "he_iahltwiki-ud-test.conllu",
+        "sha256": null
+      }
+    ]
+  },
+  "license": {
+    "id": "CC-BY-SA-4.0 (as the UD release states; to confirm at pin)",
+    "redistribute": false
+  },
+  "split": "test",
+  "format": "conllu",
+  "normalizer": "none",
+  "metrics": [
+    "accuracy"
+  ],
+  "owed": [
+    "pin: set dataset.revision to a UD release commit and confirm the test file name",
+    "the out-of-domain split for Shoshan is the part it did not train on (Knesset and Wikipedia parts are its training data, per its card): confirm which IAHLT split that is before reading the number as out of domain"
+  ],
+  "plan": [
+    "W11.H12"
+  ]
+}
