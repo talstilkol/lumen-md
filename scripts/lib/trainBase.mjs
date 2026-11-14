@@ -14,10 +14,14 @@ export const TRUNKS = ["main"];
 /** Defaults: a PR's merge base older than this fails pr:check (plan W6.22 step 2). */
 export const MAX_AGE_DAYS = 7;
 
-/** Branch name without a remote prefix: origin/verify/train-2 → verify/train-2. */
+/**
+ * Branch name without a remote prefix or a revision suffix:
+ * origin/verify/train-2 → verify/train-2, main~1 → main.
+ */
 export const branchName = (ref, remotes = ["origin"]) => {
-  for (const r of remotes) if (ref.startsWith(`${r}/`)) return ref.slice(r.length + 1);
-  return ref.replace(/^refs\/(?:heads|remotes\/[^/]+)\//, "");
+  const name = ref.replace(/[~^][~^\d]*$/, "");
+  for (const r of remotes) if (name.startsWith(`${r}/`)) return name.slice(r.length + 1);
+  return name.replace(/^refs\/(?:heads|remotes\/[^/]+)\//, "");
 };
 
 /** The train number: verify/train → 1, verify/train-2 → 2; null for anything else. */
@@ -36,16 +40,65 @@ export function currentTrain(branches) {
   return best?.branch ?? null;
 }
 
+/** A base a stack can sit on: main, or any verify/* branch (the train, an older train). */
+export const isRoot = (b) => TRUNKS.includes(b) || b.startsWith("verify/");
+
 /**
- * The base rule → { status: "ok" | "warn", line }. A PR's base must be the
- * current train or main. Another branch (a feat/* under a stack, an older
- * train) warns, with how to fix it.
+ * The base rule → { status: "ok" | "warn" | "fail", line }. A PR's base must
+ * be the current train or main. An older train (or another verify/* branch)
+ * warns; any other branch — a feat/* under a stack — fails (plan W6.22
+ * step 2), with how to fix it.
  */
 export function baseVerdict(base, train) {
   const allowed = [...(train ? [train] : []), ...TRUNKS];
   if (allowed.includes(base)) return { status: "ok", line: `The base \`${base}\` is ${base === train ? "the current train" : "the trunk"}.` };
   const older = trainNumber(base) != null ? ` (an older train; the current one is \`${train}\`)` : "";
-  return { status: "warn", line: `The base \`${base}\`${older} is not ${allowed.map((b) => `\`${b}\``).join(" or ")}: a stacked PR. Restack it onto the train head: \`node scripts/restack.mjs --branch <this branch> --base ${base}\` prints the commands.` };
+  return { status: isRoot(base) ? "warn" : "fail", line: `The base \`${base}\`${older} is not ${allowed.map((b) => `\`${b}\``).join(" or ")}: a stacked PR. Restack it onto the train head: \`node scripts/restack.mjs --branch <this branch> --base ${base}\` prints the commands.` };
+}
+
+/** The deepest stack pr:check lets through: a PR straight on the train or main. */
+export const MAX_STACK_DEPTH = 1;
+
+/**
+ * Stack depth through the chain of bases (plan W6.22): a PR on main or a
+ * verify/* branch is depth 1; a PR on another PR's head branch is one more
+ * than that PR. `prs` is the open pull requests as [{ number, head, base }];
+ * when the chain reaches a branch that no open PR has as its head, the
+ * depth counts that branch as one more level and `known` is false (the
+ * real stack is at least that deep).
+ * → { depth, chain: [{ branch, pr }], known }
+ */
+export function stackDepth(base, prs = []) {
+  const byHead = new Map(prs.map((p) => [p.head, p]));
+  const chain = [];
+  const seen = new Set();
+  let b = base;
+  let depth = 1;
+  let known = true;
+  while (!isRoot(b)) {
+    if (seen.has(b)) {
+      known = false;
+      break;
+    }
+    seen.add(b);
+    const p = byHead.get(b);
+    chain.push({ branch: b, pr: p?.number ?? null });
+    depth += 1;
+    if (!p) {
+      known = false;
+      break;
+    }
+    b = p.base;
+  }
+  return { depth, chain, known, root: isRoot(b) ? b : null };
+}
+
+/** The depth rule → { status, line }: deeper than `max` fails. */
+export function depthVerdict({ depth, chain, known, root }, max = MAX_STACK_DEPTH) {
+  if (depth <= max) return { status: "ok", line: `Stack depth ${depth} (limit ${max}).` };
+  const hops = chain.map((c) => (c.pr ? `#${c.pr} \`${c.branch}\`` : `\`${c.branch}\``)).join(" → ");
+  const tail = known && root ? ` → \`${root}\`` : " → (no open PR has this branch as its head)";
+  return { status: "fail", line: `Stack depth ${known ? "" : "at least "}${depth} (limit ${max}): this PR → ${hops}${tail}. Restack onto the train head.` };
 }
 
 /**

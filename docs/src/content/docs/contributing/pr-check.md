@@ -77,8 +77,11 @@ It also warns:
 Every PR is based on the current train (the highest-numbered
 `verify/train-N` on the remote) or on `main`, not on another PR's branch.
 The check:
-- warns when the base is something else, and names the
-  `scripts/restack.mjs` command that prints how to move it;
+- fails when the base is something else, and names the
+  `scripts/restack.mjs` command that prints how to move it (an older
+  train or another `verify/*` base only warns);
+- fails when the stack is deeper than 1, following the open PRs' bases
+  (`--pr` reads them from GitHub, `--prs <file>` takes them as JSON);
 - warns when the branch is behind its base (the train head, for a
   stacked PR) and says by how many commits;
 - fails when the merge base is more than 7 days old
