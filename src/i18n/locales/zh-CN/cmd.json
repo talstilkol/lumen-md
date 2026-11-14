@@ -356,6 +356,8 @@
   "cmd.review.daily": "每日复习",
   "cmd.save": "保存",
   "cmd.saveAs": "保存 as…",
+  "cmd.screenshotToNote": "Screenshot to note…",
+  "cmd.screenshotToNote.hint": "The image on the clipboard (or a file) as text, read on this device, previewed before it is inserted",
   "cmd.search": "搜索 workspace…",
   "cmd.security.decrypt": "🔓 解密文档",
   "cmd.security.decrypt.hint": "输入密码以解密",

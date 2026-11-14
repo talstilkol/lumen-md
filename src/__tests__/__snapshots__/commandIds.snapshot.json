@@ -2002,6 +2002,13 @@
       "hint": "One search over Sefaria, the Knesset, data.gov.il and the Ben-Yehuda library, with each result's rights",
       "shortcut": "⌥⌘S",
       "icon": "Quote"
+    },
+    {
+      "id": "ai.screenshotToNote",
+      "label": "Screenshot to note…",
+      "group": "Tools",
+      "hint": "The image on the clipboard (or a file) as text, read on this device, previewed before it is inserted",
+      "icon": "Sparkles"
     }
   ],
   "full": [
@@ -4156,6 +4163,13 @@
       "hint": "One search over Sefaria, the Knesset, data.gov.il and the Ben-Yehuda library, with each result's rights",
       "shortcut": "⌥⌘S",
       "icon": "Quote"
+    },
+    {
+      "id": "ai.screenshotToNote",
+      "label": "Screenshot to note…",
+      "group": "Tools",
+      "hint": "The image on the clipboard (or a file) as text, read on this device, previewed before it is inserted",
+      "icon": "Sparkles"
     }
   ],
   "autoSaveOn": [
@@ -4444,6 +4458,7 @@
     "export.latexProject",
     "automations.new",
     "automations.dryRun",
-    "automations.undo"
+    "automations.undo",
+    "ai.screenshotToNote"
   ]
 }
