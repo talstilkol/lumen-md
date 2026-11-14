@@ -36,7 +36,7 @@ export const SOURCE_ACCEPT: Record<ImportSourceId, string> = {
   notion: ".zip",
   evernote: ".enex",
   bear: ".bearbk,.zip,.textbundle",
-  appleNotes: ".zip,.html,.htm,.txt,.md",
+  appleNotes: ".sqlite,.zip,.html,.htm,.txt,.md",
   keep: ".zip,.json",
   logseq: ".zip",
   onenote: ".mht,.mhtml,.zip",
@@ -95,6 +95,7 @@ export function stripWrapper(files: Map<string, Uint8Array>): Map<string, Uint8A
 
 /** Which tool wrote this export (the wizard preselects it; the person can change it). */
 export function detectImportSource(paths: string[]): ImportSourceId {
+  if (paths.some((p) => /(^|\/)NoteStore\.sqlite$/i.test(p))) return "appleNotes"; // the Notes database (W10.E48)
   if (paths.some((p) => /(^|\/)\.obsidian\//.test(p))) return "obsidian";
   if (paths.some((p) => /(^|\/)logseq\/config\.edn$/.test(p))) return "logseq";
   if (paths.some((p) => /\.enex$/i.test(p))) return "evernote";
