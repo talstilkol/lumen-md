@@ -59,7 +59,10 @@ the folder to the trash instead, so nothing of yours is lost.
 - Apple Notes has no export of its own, and reading its database needs the
   Mac app; the wizard imports what an exporter app saved.
 - OneNote's own `.one` files cannot be read; export pages or sections as
-  `.mht`.
+  `.mht`. A direct import through Microsoft Graph (sign in, read only:
+  `Notes.Read`) is built for deployments that register an app with Microsoft
+  (`VITE_ONENOTE_CLIENT_ID`); the sign-in token stays in memory and is sent
+  only to graph.microsoft.com.
 - Notion's links to a block (`#…` after a page) go to the page: the block
   ids do not survive the export.
 
