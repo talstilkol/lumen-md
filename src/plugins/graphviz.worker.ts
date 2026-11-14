@@ -7,6 +7,7 @@
  *
  *   → { id, dot, engine }   ← { id, svg } | { id, error }
  */
+import "../ai/workerLedgerInstall"; // first: what this worker fetches reaches the privacy ledger (plan 2.4, W10.D22)
 interface GraphvizInstance {
   layout(dot: string, format: string, engine: string): string;
 }
