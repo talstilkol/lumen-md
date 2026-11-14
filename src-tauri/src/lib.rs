@@ -570,6 +570,18 @@ fn close_presenter_window(app: tauri::AppHandle) -> Result<(), String> {
 
 mod zotero_local;
 
+/// The stdio MCP state (desktop); a unit on mobile, where no server process runs.
+#[cfg(desktop)]
+fn mcp_stdio_state() -> mcp_stdio::McpStdio {
+    mcp_stdio::McpStdio::default()
+}
+#[cfg(not(desktop))]
+fn mcp_stdio_state() {}
+
+// MCP servers on stdio (plan W7.18, W10.C1): desktop only.
+#[cfg(desktop)]
+mod mcp_stdio;
+
 /// Zotero's answer for the web view (plan W2.15).
 #[derive(serde::Serialize)]
 struct ZoteroAnswer {
@@ -610,6 +622,7 @@ pub fn run() {
         .manage(desktop_vault::VaultState::default())
         .manage(shell::Shell::default())
         .manage(lan_discovery::DiscoveryState::default())
+        .manage(mcp_stdio_state())
         .invoke_handler(tauri::generate_handler![
             secret_available,
             secret_get,
@@ -663,6 +676,20 @@ pub fn run() {
             lan_discovery::lan_discovery_browse,
             lan_discovery::lan_discovery_fetch_offer,
             lan_discovery::lan_discovery_send_answer,
+            #[cfg(desktop)]
+            mcp_stdio::mcp_stdio_approved,
+            #[cfg(desktop)]
+            mcp_stdio::mcp_stdio_approve,
+            #[cfg(desktop)]
+            mcp_stdio::mcp_stdio_revoke,
+            #[cfg(desktop)]
+            mcp_stdio::mcp_stdio_spawn,
+            #[cfg(desktop)]
+            mcp_stdio::mcp_stdio_write,
+            #[cfg(desktop)]
+            mcp_stdio::mcp_stdio_close,
+            #[cfg(desktop)]
+            mcp_stdio::mcp_open_url,
         ])
         .setup(|app| {
             // The folder chosen on an earlier run (plan 4.3).

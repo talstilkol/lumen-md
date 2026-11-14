@@ -16,6 +16,8 @@
  *     write or network call after it needs the user's approval.
  */
 
+import { formFromSuggestion, SUGGESTED } from "./suggested";
+
 export type ToolPermission = "read" | "ask" | "block";
 
 export interface McpServerConfig {
@@ -43,33 +45,12 @@ export interface McpServerConfig {
    * mcp/sefariaTools.ts). The same screen, permissions and airplane rules apply.
    */
   builtin?: boolean;
+  /** The definition hash the user approved for each tool (approvals.ts): a different hash asks again. */
+  pins?: Record<string, string>;
 }
 
-/** Suggested servers: off by default; the user adds one, then enables it. */
-export const SUGGESTED_SERVERS: readonly Omit<McpServerConfig, "enabled" | "tools">[] = [
-  {
-    // It calls the Knesset's API: remote (blocked in airplane mode). Set `cwd` to your Knessy checkout.
-    id: "knesset",
-    label: "Knesset (Knessy — bills, votes, committee protocols; MIT)",
-    transport: "stdio",
-    command: "python3",
-    args: ["-I", "-m", "mcp_server.server"],
-    defaultPermission: "ask",
-  },
-  { id: "data-gov-il", label: "data.gov.il (Israeli government open data)", transport: "http", url: "", defaultPermission: "ask" },
-  // W11.H17: built in (the four tools of Sivan22/mcp-sefaria-server, MIT, rewritten in TypeScript); remote: off in airplane mode.
-  {
-    id: "sefaria",
-    label: "Sefaria (Jewish texts: get_text, get_commentaries, search_texts, get_daily_learnings; tools ported from Sivan22/mcp-sefaria-server, MIT)",
-    transport: "http",
-    url: "https://www.sefaria.org",
-    builtin: true,
-    defaultPermission: "ask",
-  },
-  { id: "zotero", label: "Zotero (your library, on this computer)", transport: "http", url: "http://127.0.0.1:23119/mcp", defaultPermission: "ask" },
-  // Installed by the user (`npm i -g @modelcontextprotocol/server-filesystem@<version>`): Lumen never downloads and runs a package.
-  { id: "files", label: "Your files (the reference filesystem server)", transport: "stdio", command: "mcp-server-filesystem", args: [], defaultPermission: "ask" },
-];
+/** Suggested servers: off by default; the user adds one, then enables it (suggested.ts has licence and reach). */
+export const SUGGESTED_SERVERS: readonly Omit<McpServerConfig, "enabled" | "tools">[] = SUGGESTED.filter((x) => x.id !== "everything").map(formFromSuggestion);
 
 export const STORE_KEY = "lumen.mcp.servers";
 
@@ -105,6 +86,54 @@ export function addServer(cfg: Omit<McpServerConfig, "enabled" | "tools"> & Part
   const full: McpServerConfig = { enabled: false, tools: {}, ...cfg };
   saveServers([...readServers(store).filter((s) => s.id !== full.id), full], store);
   return full;
+}
+
+export function removeServer(serverId: string, store: Store | null = ls()): void {
+  saveServers(readServers(store).filter((s) => s.id !== serverId), store);
+}
+
+export function updateServer(serverId: string, patch: Partial<Omit<McpServerConfig, "id">>, store: Store | null = ls()): McpServerConfig | null {
+  let out: McpServerConfig | null = null;
+  saveServers(
+    readServers(store).map((s) => (s.id === serverId ? (out = { ...s, ...patch }) : s)),
+    store,
+  );
+  return out;
+}
+
+/** Record the definition the user approved for a tool. */
+export function setPin(serverId: string, tool: string, hash: string, store: Store | null = ls()): void {
+  saveServers(
+    readServers(store).map((s) => (s.id === serverId ? { ...s, pins: { ...(s.pins ?? {}), [tool]: hash } } : s)),
+    store,
+  );
+}
+
+/** Check a server the user typed in: an id, a label, and an address or a command. Returns the problem, or null. */
+export function serverFormError(cfg: Partial<McpServerConfig>): string | null {
+  if (!cfg.id || !/^[a-z0-9][a-z0-9-]{0,39}$/.test(cfg.id)) return "id";
+  if (!cfg.label?.trim()) return "label";
+  if (cfg.transport === "http") {
+    try {
+      const u = new URL(cfg.url ?? "");
+      if (u.protocol !== "https:" && !(u.protocol === "http:" && isLoopbackHost(u.hostname))) return "url";
+    } catch {
+      return "url";
+    }
+    return null;
+  }
+  if (cfg.transport === "stdio") {
+    const c = cfg.command ?? "";
+    if (!c.trim() || c !== c.trim() || /[\u0000-\u001f]/.test(c)) return "command";
+    if (/^(npx|pnpx|bunx)$/i.test(c.split(/[\\/]/).pop() ?? "") && (cfg.args ?? []).some((a) => a === "-y" || a === "--yes")) return "npx";
+    return null;
+  }
+  return "transport";
+}
+
+function isLoopbackHost(h: string): boolean {
+  const x = h.replace(/^\[|\]$/g, "");
+  return x === "localhost" || x === "::1" || /^127\.\d+\.\d+\.\d+$/.test(x);
 }
 
 export function setToolPermission(serverId: string, tool: string, p: ToolPermission, store: Store | null = ls()): void {

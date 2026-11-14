@@ -2117,6 +2117,7 @@ dependencies = [
  "lumen-desktop",
  "lumen-keychain",
  "lumen-lan-mdns",
+ "lumen-mcp-stdio",
  "lumen-vault",
  "minisign-verify",
  "reqwest",
@@ -2143,6 +2144,10 @@ dependencies = [
 
 [[package]]
 name = "lumen-lan-mdns"
+version = "0.1.0"
+
+[[package]]
+name = "lumen-mcp-stdio"
 version = "0.1.0"
 
 [[package]]

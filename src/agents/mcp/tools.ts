@@ -12,16 +12,41 @@
  *     later write or network call needs the user's approval.
  *   • Airplane mode is checked again on every call, not only when the
  *     tools were listed.
+ *   • Pinning (approvals.ts, W10.C2): each tool's definition is hashed when
+ *     it is listed. A tool never approved, or one whose definition changed
+ *     since its pin, asks before it runs — even a "read" tool — and the
+ *     answer's scope (once, session, vault) decides when it asks again.
+ *   • Elicitation: with `elicit`, a server's `input_required` reaches the
+ *     user through the dialog (elicitation.ts) and the call is retried.
  */
 import type { AgentTool, ToolContext } from "../types";
 import { ToolError } from "../tools/define";
 import { McpClient, type McpTool, type McpTransport } from "./client";
-import { blockedReason, effectivePermission, type McpServerConfig, type ReachContext } from "./servers";
+import { blockedReason, effectivePermission, setPin, type McpServerConfig, type ReachContext } from "./servers";
+import { callStatus, toolApprovals, toolHash, type ApprovalScope, type ToolApprovals } from "./approvals";
+import type { ElicitationHandler } from "./elicitation";
+
+export interface CallInfo {
+  /** Why the user is asked: "ask" (the tool's permission), "new" (never approved), "changed" (its definition changed since it was approved). */
+  status: "ask" | "new" | "changed";
+  hash: string;
+  /** The definition as listed now (the dialog shows what changed). */
+  tool: McpTool;
+}
+
+/** The user's answer: false or null refuses; true is "once"; a scope approves for that long. */
+export type CallAnswer = boolean | ApprovalScope | null;
 
 export interface BridgeOptions {
   reach: () => ReachContext;
-  /** The user's answer for an "ask" tool call. */
-  confirmCall: (server: McpServerConfig, tool: string, args: Record<string, unknown>) => boolean | Promise<boolean>;
+  /** The user's answer for a call that needs one. */
+  confirmCall: (server: McpServerConfig, tool: string, args: Record<string, unknown>, info: CallInfo) => CallAnswer | Promise<CallAnswer>;
+  /** Approvals by scope (default: the app's). */
+  approvals?: ToolApprovals;
+  /** Records the definition the user approved (default: in the server's settings). */
+  onPin?: (serverId: string, tool: string, hash: string) => void;
+  /** Shows a server's elicitation (form or URL) to the user. Without it, input_required is reported to the agent. */
+  elicit?: ElicitationHandler;
 }
 
 /**
@@ -64,7 +89,10 @@ export async function serverAgentTools(server: McpServerConfig, makeTransport: (
   const probe = makeTransport();
   const why = blockedReason(server, probe.reach, o.reach());
   if (why) return [];
-  const listed: McpTool[] = await new McpClient(probe).listTools();
+  const listed: McpTool[] = await new McpClient(probe, { elicit: o.elicit, serverLabel: server.label }).listTools();
+  const approvals = o.approvals ?? toolApprovals;
+  const pin = o.onPin ?? ((id: string, tool: string, hash: string) => setPin(id, tool, hash));
+  const pins = { ...(server.pins ?? {}) };
   const source = `${SOURCE_PREFIX}${server.label}`;
   // A server's own words (descriptions, schema text) are an instruction channel (review 21, C1): the model
   // gets them only for a server the user marked "trust its descriptions", and then cleaned and capped.
@@ -82,6 +110,7 @@ export async function serverAgentTools(server: McpServerConfig, makeTransport: (
     const name = agentToolName(server.id, t.name);
     if (seen.has(name) || !/^[A-Za-z0-9_.-]{1,128}$/.test(t.name)) continue; // duplicate or unprintable names are dropped
     seen.add(name);
+    const hash = await toolHash(t);
     const told = guard && t.description ? ` Its server says: ${guard(t.description).text.replace(/\s+/g, " ").slice(0, 300)}` : "";
     out.push({
       name,
@@ -95,8 +124,19 @@ export async function serverAgentTools(server: McpServerConfig, makeTransport: (
         const transport = makeTransport(ctx);
         const blocked = blockedReason(server, transport.reach, o.reach());
         if (blocked) throw new ToolError("denied", `MCP server "${server.label}": ${blocked}`);
-        if (perm === "ask" && !(await o.confirmCall(server, t.name, args))) throw new ToolError("denied", `the user did not allow ${t.name} on "${server.label}"`);
-        const r = await new McpClient(transport).callTool(t.name, args);
+        const status = callStatus(perm === "read" ? "read" : "ask", pins[t.name], hash, approvals, server.id, t.name);
+        if (status !== "approved") {
+          const answer = await o.confirmCall(server, t.name, args, { status, hash, tool: t });
+          if (!answer) throw new ToolError("denied", `the user did not allow ${t.name} on "${server.label}"${status === "changed" ? " (its definition changed since it was approved)" : ""}`);
+          const scope: ApprovalScope = answer === true ? "once" : answer;
+          approvals.grant(server.id, t.name, hash, scope);
+          // The first approval pins the definition; a changed one moves the pin only when accepted for the vault.
+          if (pins[t.name] === undefined || (status === "changed" && scope === "vault")) {
+            pins[t.name] = hash;
+            pin(server.id, t.name, hash);
+          }
+        }
+        const r = await new McpClient(transport, { elicit: o.elicit, serverLabel: server.label }).callTool(t.name, args);
         if (r.kind === "input_required") throw new ToolError("denied", r.text);
         if (r.isError) throw new ToolError("failed", r.text.slice(0, 500) || `${t.name} failed`);
         return r.text;
