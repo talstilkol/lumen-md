@@ -107,7 +107,7 @@ export async function runSkill(skill: Skill, input: SkillInput, opts: RunSkillOp
   }
   const outside = isOutside(skill.source);
   // The guard loads on demand, as in the runtime (agents/untrusted.ts carries its strings).
-  const guarded = outside ? (await import("../untrusted")).guardUntrusted(`${skill.description}\n\n${skill.body}`, [sourceLabel(skill.source)]).text : undefined;
+  const guarded = outside ? (await (await import("../untrusted")).guardUntrustedAsync(`${skill.description}\n\n${skill.body}`, [sourceLabel(skill.source)])).text : undefined;
   const def = skillAgent(skill, guarded);
   const { confirmFirstRun: _c, allowed: _a, ...run } = opts;
   void _c;

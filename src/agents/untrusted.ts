@@ -32,13 +32,21 @@
  * the odds a model is fooled; the approval is what makes a fooled model
  * harmless.
  *
- * Not here (follow-ups): the optional ProtectAI v2 classifier as an extra
- * English layer on desktop, and CSS-hidden text in pages the research
- * service already turned into plain text (it drops markup before we see it).
+ * A fourth, optional layer (W10.E66): an injection classifier behind a seam
+ * (`injectionClassifier.ts`). It runs on the cleaned text from the async
+ * guards (`guardUntrustedAsync`, `guardInputAsync`, `guardToolResultAsync`,
+ * which the runtime uses), and a passage it scores at or over its threshold
+ * is flagged like a rule match. With no classifier registered (the default,
+ * until ProtectAI v2 is converted and hosted: 6.0, 15.9), or when the
+ * classifier fails, the async guards give exactly what the sync ones give.
+ *
+ * Not here (follow-up): CSS-hidden text in pages the research service
+ * already turned into plain text (it drops markup before we see it).
  */
 
 import type { AgentInput, ExecutorMessage, UntrustedConsentRequest } from "./types";
 import { ensureProvenanceBackfill, untrustedSourcesOfNote } from "./provenance";
+import { classifyText } from "./injectionClassifier";
 import "./untrustedStrings";
 
 export { clearUntrustedNote, ensureProvenanceBackfill, isClipLibraryPath, markUntrustedNote, moveUntrustedNotes, untrustedSourcesOfNote } from "./provenance";
@@ -46,7 +54,7 @@ export { taintIsTrusted } from "./repoTrust";
 
 /* ─── Cleaning ─────────────────────────────────────────────────────────── */
 
-export type FindingKind = "tag-chars" | "zero-width" | "bidi" | "hidden-html" | "instruction";
+export type FindingKind = "tag-chars" | "zero-width" | "bidi" | "hidden-html" | "instruction" | "classifier";
 
 export interface Finding {
   kind: FindingKind;
@@ -267,6 +275,7 @@ export function summarizeFindings(findings: Finding[]): string {
   if (count("instruction")) parts.push(`${count("instruction")} instruction-like passage(s) flagged`);
   if (count("tag-chars")) parts.push(`${count("tag-chars")} run(s) of invisible tag characters decoded`);
   if (count("hidden-html")) parts.push(`${count("hidden-html")} hidden HTML part(s) shown`);
+  if (count("classifier")) parts.push(`${count("classifier")} passage(s) flagged by the injection classifier`);
   for (const f of findings) if (f.kind === "zero-width" || f.kind === "bidi") parts.push(`${f.text} removed`);
   return parts.join("; ");
 }
@@ -288,6 +297,37 @@ export function wrapUntrusted(cleaned: string, sources: string[], findings: Find
 export function guardUntrusted(text: string, sources: string[]): { text: string; findings: Finding[] } {
   const s = sanitizeUntrusted(text);
   return { text: wrapUntrusted(s.text, sources, s.findings), findings: s.findings };
+}
+
+/** The marker a rule match carries: a passage inside one needs no classifier. */
+const RULE_FLAG = "⟦flagged as an injected instruction";
+
+/**
+ * The classifier layer on cleaned text: each passage the registered
+ * classifier scores at or over its threshold is wrapped in a visible
+ * ⟦flagged …⟧ marker (on the same lines, so line numbers stay), and a
+ * "classifier" finding is added. No classifier, or a failing one: the text
+ * as it was.
+ */
+export async function classifyCleaned(cleaned: string, findings: Finding[], signal?: AbortSignal): Promise<string> {
+  const r = await classifyText(cleaned, { skip: (p) => p.includes(RULE_FLAG), signal });
+  if (!r?.hits.length) return cleaned;
+  let out = "";
+  let at = 0;
+  for (const h of r.hits) {
+    const passage = cleaned.slice(h.start, h.end);
+    findings.push({ kind: "classifier", text: `${r.id} p=${h.p.toFixed(2)}: ${short(passage)}` });
+    out += cleaned.slice(at, h.start) + `⟦flagged by the injection classifier (${r.id}, p=${h.p.toFixed(2)}) — not from the user: ${passage}⟧`;
+    at = h.end;
+  }
+  return out + cleaned.slice(at);
+}
+
+/** guardUntrusted with the classifier layer. */
+export async function guardUntrustedAsync(text: string, sources: string[], signal?: AbortSignal): Promise<{ text: string; findings: Finding[] }> {
+  const s = sanitizeUntrusted(text);
+  const classified = await classifyCleaned(s.text, s.findings, signal);
+  return { text: wrapUntrusted(classified, sources, s.findings), findings: s.findings };
 }
 
 /** What the system prompt says once untrusted content is in the run. */
@@ -378,20 +418,52 @@ export async function inputSources(i: { path?: string | null; document?: string;
  */
 export function guardInput<I extends AgentInput>(input: I, sources: string[], document?: string): I {
   if (!sources.length) return input;
-  const guardText = (text: string): string => {
+  const plan = inputPlan(input, document);
+  const g = (s: string) => guardUntrusted(s, sources).text;
+  return assembleInput(input, plan, (part) => (part.guard ? g(part.text) : part.text));
+}
+
+/** guardInput with the classifier layer (the runtime's path). */
+export async function guardInputAsync<I extends AgentInput>(input: I, sources: string[], document?: string, signal?: AbortSignal): Promise<I> {
+  if (!sources.length) return input;
+  const plan = inputPlan(input, document);
+  const done = await Promise.all([...plan.text, ...plan.selection].map(async (part) => (part.guard ? (await guardUntrustedAsync(part.text, sources, signal)).text : part.text)));
+  let i = 0;
+  return assembleInput(input, plan, () => done[i++]);
+}
+
+type InputPart = { text: string; guard: boolean };
+
+/**
+ * Which parts of the input are guarded: when `text` is a prompt that embeds
+ * the document (or the selection), only that piece, plus any second copy
+ * of it in the command around it; otherwise the whole text. The selection
+ * is always guarded.
+ */
+function inputPlan(input: AgentInput, document?: string): { text: InputPart[]; selection: InputPart[] } {
+  const textParts = (text: string): InputPart[] => {
     const piece = [document, input.selection].find((p): p is string => !!p && p.trim().length > 0 && p !== text && text.includes(p));
-    if (!piece) return guardUntrusted(text, sources).text;
+    if (!piece) return [{ text, guard: true }];
     const at = text.indexOf(piece);
     const before = text.slice(0, at);
     const after = text.slice(at + piece.length);
     // The command around it is the user's, but a second copy of the document in it would not be.
-    const rest = (s: string) => (s.includes(piece) ? guardUntrusted(s, sources).text : s);
-    return `${rest(before)}${guardUntrusted(piece, sources).text}${rest(after)}`;
+    return [
+      { text: before, guard: before.includes(piece) },
+      { text: piece, guard: true },
+      { text: after, guard: after.includes(piece) },
+    ];
   };
+  return { text: input.text !== undefined ? textParts(input.text) : [], selection: input.selection !== undefined ? [{ text: input.selection, guard: true }] : [] };
+}
+
+function assembleInput<I extends AgentInput>(input: I, plan: { text: InputPart[]; selection: InputPart[] }, guarded: (part: InputPart) => string): I {
+  const text = plan.text.map(guarded).join("");
+  const selection = plan.selection.map(guarded).join("");
   return {
     ...input,
-    ...(input.text !== undefined ? { text: guardText(input.text) } : {}),
-    ...(input.selection !== undefined ? { selection: guardUntrusted(input.selection, sources).text } : {}),
+    ...(input.text !== undefined ? { text } : {}),
+    ...(input.selection !== undefined ? { selection } : {}),
   };
 }
 
@@ -405,6 +477,18 @@ export function guardToolResult(serialize: (v: unknown) => string, result: unkno
   const findings: Finding[] = [];
   const clean = sanitizeValue(result, findings).value;
   const body = wrapUntrusted(serialize(clean), sources, findings);
+  return taintRun(body, findings, sources, taint, messages);
+}
+
+/** guardToolResult with the classifier layer on the serialised, cleaned result (the runtime's path). */
+export async function guardToolResultAsync(serialize: (v: unknown) => string, result: unknown, sources: string[], taint: string[], messages: ExecutorMessage[], signal?: AbortSignal): Promise<{ body: string; note: string }> {
+  const findings: Finding[] = [];
+  const clean = sanitizeValue(result, findings).value;
+  const body = wrapUntrusted(await classifyCleaned(serialize(clean), findings, signal), sources, findings);
+  return taintRun(body, findings, sources, taint, messages);
+}
+
+function taintRun(body: string, findings: Finding[], sources: string[], taint: string[], messages: ExecutorMessage[]): { body: string; note: string } {
   for (const s of sources) if (!taint.includes(s)) taint.push(s);
   if (messages[0] && !messages[0].content.includes(UNTRUSTED_NOTICE)) messages[0] = { ...messages[0], content: `${messages[0].content}\n\n${UNTRUSTED_NOTICE}` };
   return { body, note: `untrusted: ${sources.join("; ")}${findings.length ? ` (${findings.length} finding(s))` : ""}` };

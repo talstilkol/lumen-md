@@ -178,6 +178,15 @@ handles them like this:
   English and Hebrew ("ignore previous instructions", "התעלם מכל
   ההוראות", role tokens, "send this note to …") stay in the text inside
   a visible `⟦flagged …⟧` marker.
+- **A classifier, when one is installed.** On top of those rules, an
+  injection classifier can score each paragraph of the cleaned text
+  (`src/agents/injectionClassifier.ts`). A paragraph it scores at or over
+  its threshold is flagged the same way, as `⟦flagged by the injection
+  classifier (…, p=…) …⟧`. The planned one is ProtectAI's
+  deberta-v3-base-prompt-injection-v2 (English, on the desktop). It is not
+  installed yet, because its converted model has no host (15.9). With no
+  classifier, or when it fails or takes more than 4 seconds, the rules alone
+  apply. It never decides a tool call: the approval below does that.
 - **Approval.** Once a run has outside content in its context, every
   write tool and every network call asks you first. The prompt names the
   tool, what it would do and where the outside content came from. Under
