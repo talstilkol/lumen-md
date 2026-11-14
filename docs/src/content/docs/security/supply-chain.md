@@ -97,6 +97,18 @@ A CycloneDX 1.5 list of every npm package (`package-lock.json`) and every
 Rust crate (`src-tauri/Cargo.lock`): version, package URL, the lockfile's
 hash and the licence. Same lockfiles, same bytes.
 
+The nightly also writes a second SBOM with `syft`, together with
+Scorecard, OSV and cargo deny results, into a sealed receipt
+([nightly runs](/contributing/nightly/#supply-chain-checks-plan-w11s5)).
+
+**npm provenance.** `npm publish --provenance` (for `mcp-server`) works only
+from a CI provider that npm trusts to sign the build: GitHub-hosted runners,
+GitLab.com shared runners or CircleCI. Lumen uses none of these (no GitHub
+Actions, and Buildkite agents are self-hosted), so `mcp-server` is published
+without npm provenance. If provenance becomes necessary, the route is a
+GitLab.com mirror that publishes from GitLab's shared runners. That is a P2
+decision for the owner, not something that runs today.
+
 ## 4. Every release is signed — offline
 
 The signing key belongs to the release owner and never enters a CI system.
