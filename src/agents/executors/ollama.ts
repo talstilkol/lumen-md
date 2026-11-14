@@ -13,7 +13,7 @@
  * with a family list as the fallback for older servers.
  */
 
-import { autoPickable, hebrewSupportOf, prefersHebrew } from "../../ai/modelCatalog";
+import { autoPickable, hebrewSupportOf, prefersHebrew, thinkDefaultFor } from "../../ai/modelCatalog";
 import { useAppStore } from "../../store/useStore";
 import type { AgentTool, Availability, Executor, ExecutorMessage, ExecutorRequest, ExecutorResponse, ModelTier, ToolCall } from "../types";
 import { getBaseUrl } from "../../ai/ollamaProvider";
@@ -310,7 +310,9 @@ export const ollamaExecutor: Executor = {
         ...(req.seed !== undefined ? { seed: req.seed } : {}),
       },
     };
-    if (req.think !== undefined) body.think = req.think;
+    // W11.I10: a model whose thinking is on by default (Qwen3.5) gets think: false unless the request asks.
+    const think = req.think ?? thinkDefaultFor(model);
+    if (think !== undefined) body.think = think;
     if (useTools) body.tools = toOllamaTools(req.tools!);
     if (req.schema && this.supportsSchema()) body.format = req.schema;
     const res = await fetch(`${base}/api/chat`, {
