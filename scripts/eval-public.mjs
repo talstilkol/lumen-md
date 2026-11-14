@@ -13,6 +13,7 @@
  *   npm run eval:public -- verdicts                   eval/public/_verdicts.json from the results (the app's gates)
  *   npm run eval:public -- coverage                   Hebrew registry entries without a public result
  *   npm run eval:public -- parity                     the ivrit.ai normaliser port vs the Python original (W11.H6)
+ *   npm run eval:public -- page [--write]             the public page "Hebrew in notes, measured" (W11.H13), checked by `check`
  *
  * An engine module's default export is an async factory () => engine, where
  * the engine has the method the task needs (transcribe, synthesize + a
@@ -32,6 +33,7 @@ import { freezePrompts, selectFrozen, scoreRoundTrip, voicePasses } from "../src
 import { parseNakdimonTest, scoreNikud } from "../src/eval/public/adapters/nikud.ts";
 import { parseMilimJsonl, scoreG2p } from "../src/eval/public/adapters/g2p.ts";
 import { parseImageJsonl, scoreHandwriting, handwritingExposed } from "../src/eval/public/adapters/handwriting.ts";
+import { pageProblems, renderBenchmarkPage } from "../src/eval/public/page.ts";
 import { parseBidiCharacterTest, parseBidiTest, runCharacterTest, runClassTest, bidiJsEngine, BIDI_CONFORMANCE_MIN } from "../src/eval/public/adapters/bidi.ts";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -270,8 +272,29 @@ function trackedAndDist() {
   return [...tracked, ...walk(join(root, "dist")).map((f) => `dist/${f}`)];
 }
 
+/** W11.H13: the public page from eval/results and launch/hebrew-benchmark.json, in English and Hebrew. */
+const PAGES = { en: "docs/src/content/docs/project/hebrew-benchmark.md", he: "docs/src/content/docs/he/project/hebrew-benchmark.md" };
+function pageState() {
+  const comp = readJson(join(root, "launch/hebrew-benchmark.json"));
+  const res = results().map((r) => r.json).filter((r) => r.schema === 1);
+  const want = Object.fromEntries(Object.entries(PAGES).map(([lang, p]) => [p, renderBenchmarkPage(res, comp, lang)]));
+  const stale = Object.entries(want).filter(([p, text]) => !existsSync(join(root, p)) || readFileSync(join(root, p), "utf8") !== text).map(([p]) => p);
+  return { problems: pageProblems(res, comp), want, stale };
+}
+function page() {
+  const s = pageState();
+  for (const p of s.problems) console.error(`✗ ${p}`);
+  if (argv.includes("--write")) {
+    for (const [p, text] of Object.entries(s.want)) writeFileSync(join(root, p), text);
+    console.log(`wrote ${Object.keys(s.want).join(", ")}`);
+  } else for (const p of s.stale) console.error(`✗ ${p} is out of date: npm run eval:public -- page --write`);
+  if (s.problems.length || (!argv.includes("--write") && s.stale.length)) process.exit(1);
+}
+
 function check() {
   const probs = checkPublicEval({ manifests: manifests(), results: results().filter((r) => !r.path.endsWith("/report.json")), registry: registry(), files: trackedAndDist() });
+  const ps = pageState();
+  probs.push(...ps.problems, ...ps.stale.map((p) => `${p} is out of date: npm run eval:public -- page --write`));
   const unpinned = manifests().filter((m) => !validateManifest(m.json, m.stem).length && !isPinned(m.json));
   if (unpinned.length) console.log(`not pinned yet (a run refuses them): ${unpinned.map((m) => m.stem).join(", ")}`);
   if (probs.length) {
@@ -313,6 +336,7 @@ function parity() {
 
 if (cmd === "check") check();
 else if (cmd === "parity") parity();
+else if (cmd === "page") page();
 else if (cmd === "list") for (const m of manifests()) console.log(`${m.stem}\t${isPinned(m.json) ? "pinned" : "NOT pinned"}\t${(m.json.owed ?? []).join(" | ")}`);
 else if (cmd === "fetch") fetchSet(argv[1]);
 else if (cmd === "freeze") await freeze(argv[1]);
