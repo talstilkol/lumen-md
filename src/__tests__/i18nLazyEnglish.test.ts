@@ -202,6 +202,8 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "standardSite.json": { module: "publish/standardSiteStrings.ts", users: ["publish/standardSiteActions.ts"], prefixes: ["atproto."] },
   // The host-move banner: pwa/hostMoveBoot.ts loads pwa/hostMove.ts with a dynamic import, and it holds its own strings.
   "hostmove.json": { module: "pwa/hostMove.ts", users: [], prefixes: ["pwa.move."] },
+  // Scanning printed highlights (plan W7.2): the dialog the highlights panel opens with a dynamic import.
+  "scanHighlights.json": { module: "highlights/scan/strings.ts", users: ["highlights/scan/ScanHighlights.tsx"], prefixes: ["hlscan."] },
 };
 
 function sources(dir: string): string[] {
