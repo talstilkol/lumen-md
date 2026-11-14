@@ -14,6 +14,8 @@ import type { ImportReport, ImportSourceId } from "./types";
 import { toast } from "../../store/useToastStore";
 import { HelpButton } from "../../ui/HelpButton";
 import { explainError } from "../../lib/userError";
+import { oneNoteConfig } from "./onenoteGraph";
+import { prepareOneNoteGraphImport, startOneNoteSignIn, takeOneNoteHandoff } from "./onenoteSignIn";
 
 interface Props {
   open: boolean;
@@ -51,6 +53,8 @@ export function ImportWizard({ open, onClose }: Props) {
   const [savedReport, setSavedReport] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
   const folderRef = useRef<HTMLInputElement | null>(null);
+  // Plan W10.E49: offered only when the deployment has a Microsoft app registration.
+  const oneNote = oneNoteConfig();
 
   useEffect(() => {
     if (!open) return;
@@ -80,6 +84,42 @@ export function ImportWizard({ open, onClose }: Props) {
       setStep({ kind: "source" });
     }
   }, []);
+
+  // Back from Microsoft's sign-in (`/oauth/onenote`): read the account's OneNote, then review.
+  useEffect(() => {
+    if (!open) return;
+    const handoff = takeOneNoteHandoff();
+    if (!handoff) return;
+    setSource("onenote");
+    const cfg = oneNoteConfig();
+    if ("error" in handoff || !cfg) {
+      setError(t("importWizard.onenote.failed", { error: "error" in handoff ? handoff.error : "VITE_ONENOTE_CLIENT_ID" }));
+      return;
+    }
+    setError(null);
+    setStep({ kind: "busy", text: t("importWizard.onenote.reading") });
+    prepareOneNoteGraphImport(cfg, handoff.tokens, { onProgress: (done, total) => setStep({ kind: "busy", text: t("importWizard.onenote.pages", { done, total }) }) })
+      .then((prep) => {
+        if (!prep.vault.notes.size && !prep.vault.attachments.size) {
+          setError(t("importWizard.error.nothing", { source: SOURCE_NAMES.onenote }));
+          setStep({ kind: "source" });
+        } else setStep({ kind: "review", prep, picked: new Map() });
+      })
+      .catch((e: unknown) => {
+        setError(t("importWizard.onenote.failed", { error: explainError(e) }));
+        setStep({ kind: "source" });
+      });
+  }, [open]);
+
+  const signInOneNote = async () => {
+    if (!oneNote) return;
+    setError(null);
+    try {
+      await startOneNoteSignIn(oneNote);
+    } catch (e) {
+      setError(t("importWizard.onenote.failed", { error: explainError(e) }));
+    }
+  };
 
   const onPicked = useCallback(
     async (list: FileList | null) => {
@@ -180,6 +220,14 @@ export function ImportWizard({ open, onClose }: Props) {
                 onChange={(e) => void onPicked(e.currentTarget.files)}
               />
             </div>
+            {source === "onenote" && oneNote && (
+              <div data-testid="import-onenote-graph" style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                <button type="button" style={btn} data-testid="import-onenote-signin" onClick={() => void signInOneNote()}>
+                  {t("importWizard.onenote.signIn")}
+                </button>
+                <span style={muted}>{t("importWizard.onenote.signInNote")}</span>
+              </div>
+            )}
           </>
         );
       case "review": {
