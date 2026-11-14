@@ -20,7 +20,7 @@ npm run nightly -- --dry-run     # print the plan, run nothing
 | סוג | מתי | מה רץ |
 |---|---|---|
 | `flake` | כל לילה | `npm run e2e:flake -- --all --times 5` (chromium, firefox, webkit, חמש ריצות לכל אחד, בלי retries) |
-| `perf` | כל לילה | build, תקציב החבילה, פרויקט הביצועים `@nightly`, ו-Lighthouse כשהוא מותקן |
+| `perf` | כל לילה | build, תקציב החבילה, פרויקט הביצועים `@nightly`, ומגמת Lighthouse: מחשב ונייד, החציון של 3 ריצות לכל אחד, שנוסף ל-`reports/trend/lighthouse-history.json` ול-`lighthouse-trend.md`. רץ רק `lhci collect`, כך ששום דבר לא מועלה |
 | `triage` | כל לילה | מיון הביקורות של ה-PR-ים הפתוחים, הספירה של 0.14 על 20 ה-PR-ים הראשונים מאז 12.11.2026, ו-`live:meta --self-test` (למטה) |
 | `weekly` | בימי ראשון (UTC) | בריאות התלויות (audit, outdated, רישיונות), וציוני mutation כש-`test:mutation` קיים |
 | `sr` | כל לילה, ב-Mac שבו `@guidepup/*` מותקנים | ‏`npx @guidepup/setup --ci`, ואז המסע העברי עם VoiceOver ([קוראי מסך, אוטומטית](/he/editor/screen-reader-automation/)). לא נספר ב-0.11. |
@@ -76,7 +76,16 @@ git clone https://github.com/talstilkol/lumen-md ~/lumen-nightly
 cd ~/lumen-nightly && git switch -c nightly/receipts && npm ci && npx playwright install
 ```
 
-שומרים את `~/Library/LaunchAgents/dev.lumen-md.nightly.plist`:
+אחר כך מתקינים את המתזמן בפקודה אחת. ב-Mac היא כותבת וטוענת את משימת launchd, ובלינוקס היא מוסיפה שורת cron אחת בין שני סימונים:
+
+```bash
+npm run nightly:install                  # כל לילה ב-02:17
+npm run nightly:install -- --at 03:41    # שעה אחרת
+npm run nightly:install -- --print       # מה היא הייתה מתקינה
+npm run nightly:install -- --uninstall
+```
+
+התבניות הן `scripts/nightly/launchd.plist` ו-`scripts/nightly/crontab`. ב-Mac היא מתקינה את `~/Library/LaunchAgents/dev.lumen-md.nightly.plist`, כך:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -96,13 +105,12 @@ cd ~/lumen-nightly && git switch -c nightly/receipts && npm ci && npx playwright
 </plist>
 ```
 
-אחר כך טוענים אותו עם `launchctl load ~/Library/LaunchAgents/dev.lumen-md.nightly.plist`.
 launchd מריץ משימה שהוחמצה בזמן שה-Mac ישן ברגע שהוא מתעורר. כדי לפרסם את
 הקבלות, דוחפים את הענף (`git push origin nightly/receipts`) או פותחים ממנו
-PR. בלינוקס משתמשים ב-cron:
+PR. בלינוקס שורת ה-cron היא:
 
 ```text
-17 2 * * *  cd ~/lumen-nightly && git pull -q --rebase origin main && npm ci --silent && npm run nightly -- --scheduled --commit
+17 2 * * * cd ~/lumen-nightly && git pull -q --rebase origin main && npm ci --silent && npm run nightly -- --scheduled --commit
 ```
 
 ## למה לא Vercel Cron או משימה מתוזמנת בענן

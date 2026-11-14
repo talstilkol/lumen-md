@@ -16,7 +16,7 @@ npm run nightly -- --dry-run     # print the plan, run nothing
 | Kind | When | What runs |
 |---|---|---|
 | `flake` | every night | `npm run e2e:flake -- --all --times 5` (chromium, firefox, webkit, 5 runs each, no retries) |
-| `perf` | every night | build, bundle budget, the `@nightly` perf project, Lighthouse when it is installed |
+| `perf` | every night | build, bundle budget, the `@nightly` perf project, and the Lighthouse trend: desktop and mobile, the median of 3 runs each, added to `reports/trend/lighthouse-history.json` and `lighthouse-trend.md`. It runs `lhci collect` only, so nothing is uploaded |
 | `triage` | every night | review triage of the open PRs, the 0.14 count over the first 20 PRs since 12.11.2026, and `live:meta --self-test` (below) |
 | `weekly` | Sundays (UTC) | dependency health (audit, outdated, licences), and mutation scores when `test:mutation` is there |
 | `sr` | every night, on a Mac with `@guidepup/*` installed | `npx @guidepup/setup --ci`, then the Hebrew journey under VoiceOver ([screen readers, automated](/editor/screen-reader-automation/)). Not counted by 0.11. |
@@ -75,7 +75,19 @@ git clone https://github.com/talstilkol/lumen-md ~/lumen-nightly
 cd ~/lumen-nightly && git switch -c nightly/receipts && npm ci && npx playwright install
 ```
 
-Save `~/Library/LaunchAgents/dev.lumen-md.nightly.plist`:
+Then install the scheduler with one command. On a Mac it writes and loads
+the launchd job; on Linux it adds one cron line between two markers:
+
+```bash
+npm run nightly:install                  # 02:17 every night
+npm run nightly:install -- --at 03:41    # another time
+npm run nightly:install -- --print       # show what it would install
+npm run nightly:install -- --uninstall
+```
+
+The templates are `scripts/nightly/launchd.plist` and
+`scripts/nightly/crontab`. On a Mac it installs
+`~/Library/LaunchAgents/dev.lumen-md.nightly.plist`, like this:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -95,13 +107,12 @@ Save `~/Library/LaunchAgents/dev.lumen-md.nightly.plist`:
 </plist>
 ```
 
-Then load it with `launchctl load ~/Library/LaunchAgents/dev.lumen-md.nightly.plist`.
 launchd runs a job that was missed while the Mac slept as soon as it wakes.
 To publish the receipts, push the branch (`git push origin nightly/receipts`)
-or open a PR from it. Linux uses cron instead:
+or open a PR from it. On Linux the cron line is:
 
 ```text
-17 2 * * *  cd ~/lumen-nightly && git pull -q --rebase origin main && npm ci --silent && npm run nightly -- --scheduled --commit
+17 2 * * * cd ~/lumen-nightly && git pull -q --rebase origin main && npm ci --silent && npm run nightly -- --scheduled --commit
 ```
 
 ## Why not Vercel Cron or a cloud scheduled task

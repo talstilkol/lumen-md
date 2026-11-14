@@ -107,6 +107,8 @@ public/excalidraw/
 /reports/*
 # …except the sealed nightly reports (plan W4.36): committed receipts of what ran
 !/reports/nightly/
+# …and the Lighthouse trend (plan 0.11, W10.E11): the nightly perf run's history, committed with --commit
+!/reports/trend/
 
 # Signed release output and fuzzer findings (plan W1.27)
 /release/
@@ -114,7 +116,6 @@ fuzz-findings/
 
 # Plan 13.7: store screenshots are build output (node scripts/store-screenshots.mjs)
 store/screenshots/
-reports/
 
 # Signed release output and fuzzer findings (plan W1.27)
 /release/

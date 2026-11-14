@@ -160,8 +160,9 @@ describe("the nightly runner", () => {
   it("runs the flake hunt on all three browsers 5 times; Lighthouse and mutation only where their scripts exist", () => {
     const none = () => false;
     expect(stepsFor("flake", none).map((s: { cmd: string[] }) => s.cmd.join(" "))).toEqual(["npm run e2e:flake -- --all --times 5"]);
-    expect(stepsFor("perf", none).map((s: { id: string }) => s.id)).toEqual(["build", "budget", "perf-e2e"]);
-    expect(stepsFor("perf", (s: string) => s === "lighthouse").map((s: { id: string }) => s.id)).toContain("lighthouse");
+    // Plan 0.11 (W10.E11): the Lighthouse trend runs every night, not only when `npm run lighthouse` (lhci autorun, public upload) exists.
+    expect(stepsFor("perf", none).map((s: { id: string }) => s.id)).toEqual(["build", "budget", "perf-e2e", "lighthouse-trend"]);
+    expect(stepsFor("perf", (s: string) => s === "lighthouse").map((s: { id: string }) => s.id)).not.toContain("lighthouse");
     expect(stepsFor("weekly", (s: string) => s === "test:mutation").map((s: { id: string }) => s.id)).toEqual(["weekly-health", "mutation"]);
     expect(() => stepsFor("nope", none)).toThrow(/unknown kind/);
   });
