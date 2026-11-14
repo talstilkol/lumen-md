@@ -16,6 +16,7 @@
     "plan": "node scripts/plan/build.mjs",
     "plan:check": "node scripts/plan/build.mjs --check",
     "plan:receipts": "node scripts/plan/receipts.mjs",
+    "plan:areas": "node scripts/plan/areas.mjs",
     "dod": "node scripts/dod.mjs",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",

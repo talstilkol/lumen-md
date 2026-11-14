@@ -27,6 +27,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { checkDod } from "../dod.mjs";
+import { AREAS_FILE, checkAreas } from "./areas.mjs";
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 export const PLAN_FILE = "plan/plan.json";
@@ -394,6 +395,7 @@ export function renderBoard(M) {
   const { plan, lanes } = M;
   const B = Math.round(M.BUFFER * 100);
   const [W0, W1] = plan.ownerWindow;
+  if (M.AREAS_UNKNOWN?.length) console.warn(`plan: ${M.AREAS_UNKNOWN.length} id(s) in ${AREAS_FILE} are not in the plan (a branch with an older plan, or a removed task): ${M.AREAS_UNKNOWN.slice(0, 12).join(", ")}${M.AREAS_UNKNOWN.length > 12 ? " …" : ""}`);
   const P0 = M.agent.filter((t) => t.eff === "P0");
   const NEW_V5 = M.agent.filter((t) => !t.old).length;
   const NEW = M.agent.filter((t) => t.new).length;
@@ -664,11 +666,16 @@ export function run({ root = ROOT, check = false, strictStatus = false } = {}) {
   const receipts = existsSync(receiptsPath) ? JSON.parse(readFileSync(receiptsPath, "utf8")) : null;
   const realProblems = checkRealReceipts(plan, receipts);
   if (realProblems.length) throw new Error(`plan: "real" without a receipt (W6.7) —\n  ${realProblems.join("\n  ")}`);
+  // W6.44: every task maps to its areas, and each area has its bar for 10 as code.
+  const areasPath = join(root, AREAS_FILE);
+  const areaCheck = existsSync(areasPath) ? checkAreas(plan, JSON.parse(readFileSync(areasPath, "utf8"))) : { problems: [], unknown: [] };
+  if (areaCheck.problems.length) throw new Error(`plan: ${AREAS_FILE} (W6.44) —\n  ${areaCheck.problems.join("\n  ")}`);
   const long = longStatuses(plan);
   if (strictStatus && long.length) throw new Error(`plan: ${long.length} status(es) longer than ${STATUS_MAX} characters (W6.7): ${long.join(", ")}`);
   const M = buildModel(plan);
   M.RECEIPTS = receipts;
   M.LONG_STATUSES = long;
+  M.AREAS_UNKNOWN = areaCheck.unknown;
   const docPath = join(root, DOC_FILE);
   const htmlPath = join(root, HTML_FILE);
   const doc = readFileSync(docPath, "utf8");

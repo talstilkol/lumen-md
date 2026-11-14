@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Works-for-user board</title>
+<style>
+:root{--bg:#fbfaf7;--fg:#1d1b18;--muted:#6b665e;--line:#e4e0d8;--met:#1f7a4d;--short:#a66300;--none:#8a847a;--fill:#2f5fd0;--card:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15171a;--fg:#ecebe8;--muted:#a19d95;--line:#2c2f34;--met:#5cc48f;--short:#e3a24a;--none:#8d8a84;--fill:#7aa2ff;--card:#1c1f23}}
+:root[data-theme="dark"]{--bg:#15171a;--fg:#ecebe8;--muted:#a19d95;--line:#2c2f34;--met:#5cc48f;--short:#e3a24a;--none:#8d8a84;--fill:#7aa2ff;--card:#1c1f23}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,"Segoe UI",Arial,sans-serif;padding:24px 16px}
+main{max-inline-size:1100px;margin:0 auto}h1{font-size:1.5rem;margin:0 0 4px}h2{font-size:1.05rem;margin:0 0 6px}
+.lead{color:var(--muted);margin:0 0 20px}.en{color:var(--muted);font-size:.85em;font-weight:400}
+section{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin:0 0 14px}
+.score{display:inline-block;min-inline-size:2.6em;text-align:center;font-variant-numeric:tabular-nums}
+.bar{block-size:6px;background:var(--line);border-radius:3px;overflow:hidden;margin:4px 0 6px}.bar i{display:block;block-size:100%;background:var(--fill)}
+.meta{color:var(--muted);font-size:.85rem;margin:0 0 8px}.scroll{overflow-x:auto}
+table{border-collapse:collapse;inline-size:100%;font-size:.88rem}th,td{text-align:start;padding:6px 8px;border-block-start:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:500}.chip{font-size:.8rem;white-space:nowrap}
+tr.met .chip{color:var(--met)}tr.short .chip{color:var(--short)}tr.none .chip{color:var(--none)}code{font-size:.85em}
+</style></head><body><main>
+<h1>לוח ״עובד אצל משתמש״ — ממוצע 0.0</h1>
+<p class="lead">כל ציון מחושב מקבלות חתומות בלבד מול הרף ל-10 (W6.44). 0/80 מדדים עומדים ברף, 0 נמדדו. מדד בלי קבלה מוצג ״לא נמדד״ ולא מקבל נקודות. נוצר 2026-11-12T17:44 · 0 קבלות נספרו, 0 נדחו.</p>
+<section><h2><span class="score">0.0</span> 1. עורך ונאמנות Markdown <span class="en" dir="ltr">Editor and Markdown fidelity</span></h2>
+<div class="bar"><i style="inline-size:0%"></i></div>
+<p class="meta">0/5 מדדים עומדים ברף · 0 נמדדו · 20 משימות · המוביל: Obsidian 9.5</p>
+<div class="scroll"><table><thead><tr><th>מדד</th><th>רף ל-10</th><th>ערך אחרון</th><th>מצב</th><th>קבלה</th></tr></thead><tbody>
+<tr class="none"><td>דוגמאות CommonMark 0.31.2 עוברות, 3 דפדפנים<div class="en" dir="ltr">CommonMark 0.31.2 spec examples passing, 3 browsers</div></td><td dir="ltr">≥ 0.995 ratio</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>דוגמאות GFM עוברות, 3 דפדפנים<div class="en" dir="ltr">GFM spec examples passing, 3 browsers</div></td><td dir="ltr">≥ 0.99 ratio</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>הדבקה מהקורפוס האמיתי (W6.38) נאמנה<div class="en" dir="ltr">Paste from the real corpus (W6.38) faithful</div></td><td dir="ltr">≥ 0.98 ratio</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>פתקים אמיתיים זהים בבייט אחרי round-trip<div class="en" dir="ltr">Real notes round-tripped byte-identical</div></td><td dir="ltr">≥ 333 notes</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>תחביר Obsidian נבדק ב-Obsidian עצמו (W6.34)<div class="en" dir="ltr">Obsidian syntax checked in Obsidian itself (W6.34)</div></td><td dir="ltr">כן</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+</tbody></table></div></section>
+<section><h2><span class="score">0.0</span> 2. RTL ועברית <span class="en" dir="ltr">RTL and Hebrew</span></h2>
+<div class="bar"><i style="inline-size:0%"></i></div>
+<p class="meta">0/5 מדדים עומדים ברף · 0 נמדדו · 29 משימות · המוביל: Word 9.0</p>
+<div class="scroll"><table><thead><tr><th>מדד</th><th>רף ל-10</th><th>ערך אחרון</th><th>מצב</th><th>קבלה</th></tr></thead><tbody>
+<tr class="none"><td>מטריצת RTL: ‏30 שורות × 2 עורכים × 3 דפדפנים × 2 טלפונים אמיתיים<div class="en" dir="ltr">RTL matrix: 30 rows × 2 editors × 3 browsers × 2 real phones</div></td><td dir="ltr">≥ 1 ratio</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>‏DOCX נכון ב-Word אמיתי<div class="en" dir="ltr">DOCX correct in real Word</div></td><td dir="ltr">כן</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>פריסה עברית ב-Safari אמיתי (macOS ו-iOS)<div class="en" dir="ltr">Hebrew layout in real Safari (macOS and iOS)</div></td><td dir="ltr">כן</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>בעיות שפאנל הדוברים מצא<div class="en" dir="ltr">Issues reported by the native-speaker panel</div></td><td dir="ltr">≤ 0 issues</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>אותה מטריצה בערבית<div class="en" dir="ltr">The same matrix in Arabic</div></td><td dir="ltr">≥ 1 ratio</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+</tbody></table></div></section>
+<section><h2><span class="score">0.0</span> 3. קבצים, כספת ובטיחות נתונים <span class="en" dir="ltr">Files, vault and data safety</span></h2>
+<div class="bar"><i style="inline-size:0%"></i></div>
+<p class="meta">0/5 מדדים עומדים ברף · 0 נמדדו · 20 משימות · המוביל: Obsidian 9.0</p>
+<div class="scroll"><table><thead><tr><th>מדד</th><th>רף ל-10</th><th>ערך אחרון</th><th>מצב</th><th>קבלה</th></tr></thead><tbody>
+<tr class="none"><td>תרגיל בטיחות נתונים: ‏0 פגומים בכל נתיב, במפעל<div class="en" dir="ltr">Data-safety drill: 0 corrupt in every path, on the factory</div></td><td dir="ltr">כן</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>פתקים פגומים בתרגיל ב-WebKit ובטלפונים אמיתיים<div class="en" dir="ltr">Drill corrupt notes in WebKit and on real phones</div></td><td dir="ltr">≤ 0 notes</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>פתקים פגומים אחרי 1,000 SIGKILL ב-3 מערכות<div class="en" dir="ltr">Corrupt notes after 1,000 SIGKILLs on 3 systems</div></td><td dir="ltr">≤ 0 notes</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>התרחיש המשולב (עריכה + סנכרון + pull + קריסה) עובר<div class="en" dir="ltr">Combined scenario (edit + sync + pull + crash) passes</div></td><td dir="ltr">כן</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>תרגיל שחזור גיבוי חודשי עבר<div class="en" dir="ltr">Monthly backup-restore drill passed</div></td><td dir="ltr">כן</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+</tbody></table></div></section>
+<section><h2><span class="score">0.0</span> 4. סנכרון ו-E2EE <span class="en" dir="ltr">Sync and E2EE</span></h2>
+<div class="bar"><i style="inline-size:0%"></i></div>
+<p class="meta">0/4 מדדים עומדים ברף · 0 נמדדו · 11 משימות · המוביל: Obsidian Sync 9.0</p>
+<div class="scroll"><table><thead><tr><th>מדד</th><th>רף ל-10</th><th>ערך אחרון</th><th>מצב</th><th>קבלה</th></tr></thead><tbody>
+<tr class="none"><td>ממצאים קריטיים/גבוהים פתוחים (ביקורת עצמאית וחיצונית)<div class="en" dir="ltr">Open critical/high findings (independent + external review)</div></td><td dir="ltr">≤ 0 findings</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>ספקים ש-CAS נבדק מולם באמת (WebDAV, ‏S3, ‏Drive)<div class="en" dir="ltr">Providers whose CAS was tested for real (WebDAV, S3, Drive)</div></td><td dir="ltr">≥ 3 providers</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>ימים על שני מכשירים אמיתיים בלי אובדן<div class="en" dir="ltr">Days on two real devices without loss</div></td><td dir="ltr">≥ 30 days</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>סנכרון ראשון של 10,000 פתקים + ‏1 GB<div class="en" dir="ltr">10,000 notes + 1 GB first sync</div></td><td dir="ltr">≤ 600 s</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+</tbody></table></div></section>
+<section><h2><span class="score">0.0</span> 5. חיפוש, קישורים, גרף <span class="en" dir="ltr">Search, links, graph</span></h2>
+<div class="bar"><i style="inline-size:0%"></i></div>
+<p class="meta">0/3 מדדים עומדים ברף · 0 נמדדו · 9 משימות · המוביל: Obsidian 9.0</p>
+<div class="scroll"><table><thead><tr><th>מדד</th><th>רף ל-10</th><th>ערך אחרון</th><th>מצב</th><th>קבלה</th></tr></thead><tbody>
+<tr class="none"><td>‏nDCG@10 מוחזק בעברית עם מורפולוגיה<div class="en" dir="ltr">Held-out Hebrew nDCG@10 with morphology</div></td><td dir="ltr">≥ 0.85 nDCG</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>סט חוצה-שפות מוחזק (Belebele) עומד ביעד<div class="en" dir="ltr">Cross-lingual held-out set (Belebele) passes its target</div></td><td dir="ltr">כן</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>‏p95 של חיפוש ב-100,000 פתקים<div class="en" dir="ltr">Search p95 in 100,000 notes</div></td><td dir="ltr">≤ 100 ms</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+</tbody></table></div></section>
+<section><h2><span class="score">0.0</span> 6. מסדי נתונים ומאפיינים <span class="en" dir="ltr">Databases and properties</span></h2>
+<div class="bar"><i style="inline-size:0%"></i></div>
+<p class="meta">0/3 מדדים עומדים ברף · 0 נמדדו · 13 משימות · המוביל: Notion 9.5</p>
+<div class="scroll"><table><thead><tr><th>מדד</th><th>רף ל-10</th><th>ערך אחרון</th><th>מצב</th><th>קבלה</th></tr></thead><tbody>
+<tr class="none"><td>תצוגות ‎.base זהות ל-Obsidian<div class="en" dir="ltr">Obsidian .base views identical to Obsidian</div></td><td dir="ltr">≥ 44 views</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>תרחישי Notion עוברים<div class="en" dir="ltr">Notion scenarios passing</div></td><td dir="ltr">≥ 18 of 20</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>‏API מקומי עם אישור עובד מקצה לקצה<div class="en" dir="ltr">Local API with consent works end to end</div></td><td dir="ltr">כן</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+</tbody></table></div></section>
+<section><h2><span class="score">0.0</span> 7. לכידה <span class="en" dir="ltr">Capture</span></h2>
+<div class="bar"><i style="inline-size:0%"></i></div>
+<p class="meta">0/4 מדדים עומדים ברף · 0 נמדדו · 8 משימות · המוביל: Obsidian 9.0</p>
+<div class="scroll"><table><thead><tr><th>מדד</th><th>רף ל-10</th><th>ערך אחרון</th><th>מצב</th><th>קבלה</th></tr></thead><tbody>
+<tr class="none"><td>‏share sheet במכשירים אמיתיים<div class="en" dir="ltr">Share sheet on real devices</div></td><td dir="ltr">כן</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>מלחיצה להקלטה<div class="en" dir="ltr">Press → recording</div></td><td dir="ltr">≤ 1000 ms</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>ייצואי WhatsApp אמיתיים מיובאים נכון<div class="en" dir="ltr">Real WhatsApp exports imported correctly</div></td><td dir="ltr">≥ 0.95 ratio</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>‏clipper נכון באתרים אמיתיים<div class="en" dir="ltr">Clipper correct on real sites</div></td><td dir="ltr">≥ 50 sites</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+</tbody></table></div></section>
+<section><h2><span class="score">0.0</span> 8. PDF וקריאה <span class="en" dir="ltr">PDF and reading</span></h2>
+<div class="bar"><i style="inline-size:0%"></i></div>
+<p class="meta">0/4 מדדים עומדים ברף · 0 נמדדו · 17 משימות · המוביל: Readwise Reader 9.5</p>
+<div class="scroll"><table><thead><tr><th>מדד</th><th>רף ל-10</th><th>ערך אחרון</th><th>מצב</th><th>קבלה</th></tr></thead><tbody>
+<tr class="none"><td>הערות W3C<div class="en" dir="ltr">W3C annotations</div></td><td dir="ltr">כן</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>‏CER של OCR עברי סרוק<div class="en" dir="ltr">Scanned Hebrew OCR CER</div></td><td dir="ltr">≤ 0.03 CER</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>הדגשה עובדת ב-PDF סרוקים<div class="en" dir="ltr">Highlights work on scanned PDFs</div></td><td dir="ltr">≥ 18 of 20</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>הערות חוזרות ל-Zotero<div class="en" dir="ltr">Annotations round-trip to Zotero</div></td><td dir="ltr">כן</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+</tbody></table></div></section>
+<section><h2><span class="score">0.0</span> 9. קנבס <span class="en" dir="ltr">Canvas</span></h2>
+<div class="bar"><i style="inline-size:0%"></i></div>
+<p class="meta">0/3 מדדים עומדים ברף · 0 נמדדו · 9 משימות · המוביל: tldraw / Excalidraw+ 9.0</p>
+<div class="scroll"><table><thead><tr><th>מדד</th><th>רף ל-10</th><th>ערך אחרון</th><th>מצב</th><th>קבלה</th></tr></thead><tbody>
+<tr class="none"><td>פריימים בשנייה עם 5,000 צורות<div class="en" dir="ltr">Frames per second with 5,000 shapes</div></td><td dir="ltr">≥ 55 fps</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>‏p95 של עריכה משותפת חיה<div class="en" dir="ltr">Live co-editing p95</div></td><td dir="ltr">≤ 150 ms</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>ייצוא עברי נכון<div class="en" dir="ltr">Hebrew export correct</div></td><td dir="ltr">כן</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+</tbody></table></div></section>
+<section><h2><span class="score">0.0</span> 10. AI מקומי וסוכנים <span class="en" dir="ltr">Local AI and agents</span></h2>
+<div class="bar"><i style="inline-size:0%"></i></div>
+<p class="meta">0/3 מדדים עומדים ברף · 0 נמדדו · 53 משימות · המוביל: Notion AI 9.5</p>
+<div class="scroll"><table><thead><tr><th>מדד</th><th>רף ל-10</th><th>ערך אחרון</th><th>מצב</th><th>קבלה</th></tr></thead><tbody>
+<tr class="none"><td>הצלחת משימה מוחזקת, מודל 7B מקומי<div class="en" dir="ltr">Held-out task success, local 7B model</div></td><td dir="ltr">≥ 0.9 ratio</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>קריאות כלים תקינות מול מודל אמיתי<div class="en" dir="ltr">Valid tool calls against a real model</div></td><td dir="ltr">≥ 0.95 ratio</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>בקשות ענן בלי הסכמה<div class="en" dir="ltr">Cloud requests without consent</div></td><td dir="ltr">≤ 0 requests</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+</tbody></table></div></section>
+<section><h2><span class="score">0.0</span> 11. דיבור, OCR, תרגום, ניקוד <span class="en" dir="ltr">Speech, OCR, translation, niqqud</span></h2>
+<div class="bar"><i style="inline-size:0%"></i></div>
+<p class="meta">0/4 מדדים עומדים ברף · 0 נמדדו · 22 משימות · המוביל: Dicta 9.5</p>
+<div class="scroll"><table><thead><tr><th>מדד</th><th>רף ל-10</th><th>ערך אחרון</th><th>מצב</th><th>קבלה</th></tr></thead><tbody>
+<tr class="none"><td>‏WER עברי מוחזק, שולחן עבודה<div class="en" dir="ltr">Held-out Hebrew WER, desktop</div></td><td dir="ltr">≤ 0.1 WER</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>‏WER עברי מוחזק, דפדפן<div class="en" dir="ltr">Held-out Hebrew WER, browser</div></td><td dir="ltr">≤ 0.15 WER</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>דיוק ניקוד מוחזק<div class="en" dir="ltr">Held-out niqqud accuracy</div></td><td dir="ltr">≥ 0.95 ratio</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>‏MOS של הקראה<div class="en" dir="ltr">Read-aloud MOS</div></td><td dir="ltr">≥ 4 MOS</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+</tbody></table></div></section>
+<section><h2><span class="score">0.0</span> 12. שיתוף <span class="en" dir="ltr">Sharing</span></h2>
+<div class="bar"><i style="inline-size:0%"></i></div>
+<p class="meta">0/4 מדדים עומדים ברף · 0 נמדדו · 10 משימות · המוביל: Google Docs 9.5</p>
+<div class="scroll"><table><thead><tr><th>מדד</th><th>רף ל-10</th><th>ערך אחרון</th><th>מצב</th><th>קבלה</th></tr></thead><tbody>
+<tr class="none"><td>שרת שיתוף E2EE פרוס<div class="en" dir="ltr">E2EE sharing server deployed</div></td><td dir="ltr">כן</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>‏p95 של שיתוף מישראל<div class="en" dir="ltr">Sharing p95 from Israel</div></td><td dir="ltr">≤ 150 ms</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>זמינות ב-30 יום<div class="en" dir="ltr">Uptime over 30 days</div></td><td dir="ltr">≥ 0.999 ratio</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>הרשאות ותגובות עוברות ב-e2e<div class="en" dir="ltr">Permissions and comments pass in e2e</div></td><td dir="ltr">כן</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+</tbody></table></div></section>
+<section><h2><span class="score">0.0</span> 13. תוספים ואבטחתם <span class="en" dir="ltr">Plugins and their security</span></h2>
+<div class="bar"><i style="inline-size:0%"></i></div>
+<p class="meta">0/2 מדדים עומדים ברף · 0 נמדדו · 6 משימות · המוביל: VS Code 9.5</p>
+<div class="scroll"><table><thead><tr><th>מדד</th><th>רף ל-10</th><th>ערך אחרון</th><th>מצב</th><th>קבלה</th></tr></thead><tbody>
+<tr class="none"><td>תוספים של צד שלישי, חתומים ונסרקים<div class="en" dir="ltr">Signed, scanned third-party plugins</div></td><td dir="ltr">≥ 50 plugins</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>התוספים שלנו עוברים ב-QuickJS אמיתי<div class="en" dir="ltr">Our plugins passing in real QuickJS</div></td><td dir="ltr">≥ 10 of 10</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+</tbody></table></div></section>
+<section><h2><span class="score">0.0</span> 14. ביצועים <span class="en" dir="ltr">Performance</span></h2>
+<div class="bar"><i style="inline-size:0%"></i></div>
+<p class="meta">0/5 מדדים עומדים ברף · 0 נמדדו · 13 משימות · המוביל: Linear 9.5</p>
+<div class="scroll"><table><thead><tr><th>מדד</th><th>רף ל-10</th><th>ערך אחרון</th><th>מצב</th><th>קבלה</th></tr></thead><tbody>
+<tr class="none"><td>חבילת ההפעלה<div class="en" dir="ltr">Startup bundle</div></td><td dir="ltr">≤ 250 KB gz</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>‏FCP בטלפון בינוני<div class="en" dir="ltr">FCP on a mid-range phone</div></td><td dir="ltr">≤ 1000 ms</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>‏INP ‏p75<div class="en" dir="ltr">INP p75</div></td><td dir="ltr">≤ 100 ms</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>חיפוש ב-100,000 פתקים<div class="en" dir="ltr">Search in 100,000 notes</div></td><td dir="ltr">≤ 200 ms</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>חריגות תקציב<div class="en" dir="ltr">Budget overruns</div></td><td dir="ltr">≤ 0 overruns</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+</tbody></table></div></section>
+<section><h2><span class="score">0.0</span> 15. נגישות <span class="en" dir="ltr">Accessibility</span></h2>
+<div class="bar"><i style="inline-size:0%"></i></div>
+<p class="meta">0/5 מדדים עומדים ברף · 0 נמדדו · 6 משימות · המוביל: Google Docs 9.0</p>
+<div class="scroll"><table><thead><tr><th>מדד</th><th>רף ל-10</th><th>ערך אחרון</th><th>מצב</th><th>קבלה</th></tr></thead><tbody>
+<tr class="none"><td>‏ACR מלא ל-WCAG 2.2 AA<div class="en" dir="ltr">Full ACR for WCAG 2.2 AA</div></td><td dir="ltr">כן</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>הפרות axe<div class="en" dir="ltr">axe violations</div></td><td dir="ltr">≤ 0 violations</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>מסעות בקורא מסך עוברים (VoiceOver, ‏NVDA, ‏TalkBack)<div class="en" dir="ltr">Screen-reader journeys passing (VoiceOver, NVDA, TalkBack)</div></td><td dir="ltr">≥ 3 readers</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>משתמשי קורא מסך שמשלימים ≥ 8/10 משימות<div class="en" dir="ltr">Screen-reader users completing ≥ 8/10 tasks</div></td><td dir="ltr">≥ 3 users</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>הצהרת נגישות לפי ת״י 5568<div class="en" dir="ltr">Accessibility statement per IS 5568</div></td><td dir="ltr">כן</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+</tbody></table></div></section>
+<section><h2><span class="score">0.0</span> 16. מובייל ושולחן עבודה <span class="en" dir="ltr">Mobile and desktop</span></h2>
+<div class="bar"><i style="inline-size:0%"></i></div>
+<p class="meta">0/4 מדדים עומדים ברף · 0 נמדדו · 17 משימות · המוביל: Bear / Craft 9.5</p>
+<div class="scroll"><table><thead><tr><th>מדד</th><th>רף ל-10</th><th>ערך אחרון</th><th>מצב</th><th>קבלה</th></tr></thead><tbody>
+<tr class="none"><td>אפליקציות חתומות בחנויות<div class="en" dir="ltr">Signed apps live in the stores</div></td><td dir="ltr">≥ 2 stores</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>סשנים בלי קריסה<div class="en" dir="ltr">Crash-free sessions</div></td><td dir="ltr">≥ 0.995 ratio</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>מערכות שהעדכון האוטומטי עובד בהן<div class="en" dir="ltr">Systems where auto-update works</div></td><td dir="ltr">≥ 3 systems</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>תרגיל עדכון: מתקינים N, מפרסמים N+1, והוא מתעדכן<div class="en" dir="ltr">Update drill: install N, publish N+1, it updates</div></td><td dir="ltr">כן</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+</tbody></table></div></section>
+<section><h2><span class="score">0.0</span> 17. התחלה וליטוש UX <span class="en" dir="ltr">Onboarding and UX polish</span></h2>
+<div class="bar"><i style="inline-size:0%"></i></div>
+<p class="meta">0/4 מדדים עומדים ברף · 0 נמדדו · 16 משימות · המוביל: Linear / Craft 9.5</p>
+<div class="scroll"><table><thead><tr><th>מדד</th><th>רף ל-10</th><th>ערך אחרון</th><th>מצב</th><th>קבלה</th></tr></thead><tbody>
+<tr class="none"><td>‏SUS עם 12 משתמשים עבריים<div class="en" dir="ltr">SUS with 12 Hebrew-speaking users</div></td><td dir="ltr">≥ 80 SUS</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>זמן עד הפתק הראשון<div class="en" dir="ltr">Time to the first note</div></td><td dir="ltr">≤ 4 s</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>שגיאות גולמיות שמוצגות למשתמש<div class="en" dir="ltr">Raw errors shown to users</div></td><td dir="ltr">≤ 0 errors</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>מצבים ריקים בלי פעולה<div class="en" dir="ltr">Empty states without an action</div></td><td dir="ltr">≤ 0 states</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+</tbody></table></div></section>
+<section><h2><span class="score">0.0</span> 18. פרטיות ואבטחה <span class="en" dir="ltr">Privacy and security</span></h2>
+<div class="bar"><i style="inline-size:0%"></i></div>
+<p class="meta">0/7 מדדים עומדים ברף · 0 נמדדו · 38 משימות · המוביל: Standard Notes 9.5</p>
+<div class="scroll"><table><thead><tr><th>מדד</th><th>רף ל-10</th><th>ערך אחרון</th><th>מצב</th><th>קבלה</th></tr></thead><tbody>
+<tr class="none"><td>ממצאים קריטיים/גבוהים פתוחים<div class="en" dir="ltr">Open critical/high findings</div></td><td dir="ltr">≤ 0 findings</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>ביקורת חיצונית בוצעה<div class="en" dir="ltr">External audit done</div></td><td dir="ltr">כן</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>בנייה משוחזרת אומתה<div class="en" dir="ltr">Reproducible build verified</div></td><td dir="ltr">כן</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>דוח פרטיות חתום<div class="en" dir="ltr">Signed privacy report</div></td><td dir="ltr">כן</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>ייעוצים high ומעלה<div class="en" dir="ltr">High or critical advisories</div></td><td dir="ltr">≤ 0 advisories</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>דיווח פגיעויות פרטי פעיל<div class="en" dir="ltr">Private vulnerability reporting on</div></td><td dir="ltr">כן</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>סריקת סודות ו-push protection פעילים<div class="en" dir="ltr">Secret scanning and push protection on</div></td><td dir="ltr">כן</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+</tbody></table></div></section>
+<section><h2><span class="score">0.0</span> 19. תיעוד, קהילה והשקה <span class="en" dir="ltr">Docs, community and launch</span></h2>
+<div class="bar"><i style="inline-size:0%"></i></div>
+<p class="meta">0/6 מדדים עומדים ברף · 0 נמדדו · 11 משימות · המוביל: Obsidian / Notion 9.5</p>
+<div class="scroll"><table><thead><tr><th>מדד</th><th>רף ל-10</th><th>ערך אחרון</th><th>מצב</th><th>קבלה</th></tr></thead><tbody>
+<tr class="none"><td>אורך העברית מול האנגלית, העמוד הגרוע<div class="en" dir="ltr">Hebrew length vs English, worst page</div></td><td dir="ltr">≥ 0.9 ratio</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>‏Pagefind רץ על בנייה אמיתית<div class="en" dir="ltr">Pagefind runs on a real build</div></td><td dir="ltr">כן</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>‏GIF-ים של פיצ'רים<div class="en" dir="ltr">Feature GIFs</div></td><td dir="ltr">≥ 30 GIFs</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>בודקי בטא<div class="en" dir="ltr">Beta testers</div></td><td dir="ltr">≥ 50 people</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>‏Discussions פעיל<div class="en" dir="ltr">Discussions active</div></td><td dir="ltr">כן</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+<tr class="none"><td>הערות שחרור חודשיות<div class="en" dir="ltr">Monthly release notes</div></td><td dir="ltr">כן</td><td dir="ltr">—</td><td><span class="chip">לא נמדד</span></td><td dir="ltr">—</td></tr>
+</tbody></table></div></section>
+</main></body></html>
