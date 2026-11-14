@@ -6,6 +6,7 @@
  * user speaks and final text at each pause go out. Nothing here touches
  * the network: the model bytes are handed over by the main thread.
  */
+import "../workerLedgerInstall"; // first: what this worker fetches reaches the privacy ledger (plan 2.4, W10.D22)
 import * as ort from "onnxruntime-web/wasm";
 import { Silero } from "@ricky0123/vad-web/dist/models/silero";
 import { ZipformerModel, type ZipformerStream } from "./zipformer";

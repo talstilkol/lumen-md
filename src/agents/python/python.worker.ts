@@ -4,6 +4,7 @@
  * runtime the live-python block uses), seals itself, runs the code and is
  * terminated by the page. Pyodide only supports module workers.
  */
+import "../../ai/workerLedgerInstall"; // first: what this worker fetches reaches the privacy ledger (plan 2.4, W10.D22)
 import { createPythonHandler, type PyodideLike } from "./handler";
 import { sealPythonWorkerScope } from "./sandbox";
 
