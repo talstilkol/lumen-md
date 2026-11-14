@@ -53,7 +53,8 @@ from them.
 Hybrid retrieval that fuses BM25 with cosine similarity over embedding
 vectors via Reciprocal Rank Fusion (RRF, k = 60). The vectors come from the
 first model available, local first: an Ollama embedding model
-(`nomic-embed-text` or another one you installed), then the built-in
+(bge-m3 or EmbeddingGemma first, since they are multilingual, then
+`nomic-embed-text` or another one you installed), then the built-in
 `multilingual-e5-small` in the browser (384 dimensions, about 100 languages,
 Hebrew included), and OpenAI `text-embedding-3-small` only under the
 *cloud* AI policy. Vectors from different models don't mix, so a change of
@@ -74,11 +75,23 @@ tokens (≈ $0.004 with `text-embedding-3-small`).
 
 ## Cross-language: ask in Hebrew, find English sources
 
-With the built-in embedding model (multilingual-e5-small, MIT, runs on this
-device), **Smart** search finds English notes, papers and clippings for a
-Hebrew question. Hebrew and English land in the same vector space, and BM25
-adds its Hebrew→English word list. Each hit in another language than the
-question shows a local translation under the original:
+**Status: cross-language search needs a multilingual embedding model,
+bge-m3 or EmbeddingGemma (through Ollama).** Keyword search alone doesn't
+cross languages: on the held-out probe of 30 Hebrew queries over English
+notes, it finds **0/30**. The search dialog says so under a Hebrew keyword
+search that finds little.
+
+When bge-m3 or EmbeddingGemma is installed, Smart search embeds with it, even
+if an English-only model is installed too. A Hebrew question then takes the
+embedding path once the index has been built with that model, and the dialog
+tells you when the index has to be rebuilt. The built-in
+`multilingual-e5-small` is multilingual as well, but its Hebrew → English
+result hasn't been measured yet (`npm run eval:crosslingual`).
+
+With such a model, **Smart** search looks for English notes, papers and
+clippings for a Hebrew question: Hebrew and English land in the same vector
+space. Each hit in another language than the question shows a local
+translation under the original:
 
 - from the local translation engine, when one is installed;
 - otherwise from the browser's own on-device translator (Chrome), and only
@@ -89,8 +102,8 @@ question shows a local translation under the original:
 
 Two limits:
 - The Ollama embedding model `nomic-embed-text` is English-only. With it,
-  Hebrew questions reach English notes only through keywords, and the dialog
-  says so.
+  Hebrew questions have only keywords, which don't reach English notes, and
+  the dialog says so.
 - On a 10,000-note vault, ranking takes about 15 ms. Embedding the question
   comes on top of that.
 

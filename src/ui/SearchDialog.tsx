@@ -59,7 +59,8 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
   const [smartHits, setSmartHits] = useState<SemanticHit[]>([]);
   // W5.28: local translations of the hits in another language than the query, and whether the embeddings bridge languages.
   const [translations, setTranslations] = useState<Record<string, string | null>>({});
-  const [monolingual, setMonolingual] = useState(false);
+  // W10.B6: which path a Hebrew query takes to English notes (embedding, or keyword only and why).
+  const [crossPath, setCrossPath] = useState<import("../search/crossLingual").CrossLingualPath | null>(null);
   const [smartIndexing, setSmartIndexing] = useState(false);
   const [smartIndexedAt, setSmartIndexedAt] = useState<number | null>(null);
   const [active, setActive] = useState(0);
@@ -217,12 +218,12 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
     const ac = new AbortController();
     setTranslations({});
     void (async () => {
-      const [{ markCrossLingual, scriptOf }, { translatePassage }, { embeddingStatus }] = await Promise.all([import("../search/crossLingual"), import("../search/passageTranslator"), import("../ai/semanticSearch")]);
+      const [{ markCrossLingual, scriptOf, crossLingualPath }, { translatePassage }, { embeddingStatus, semanticIndexEmbedding }] = await Promise.all([import("../search/crossLingual"), import("../search/passageTranslator"), import("../ai/semanticSearch")]);
       const marked = markCrossLingual(query, smartHits).slice(0, 8).filter((h) => h.crossLingual);
       if (scriptOf(query) === "he") {
-        const st = await embeddingStatus().catch(() => null);
-        if (!ac.signal.aborted) setMonolingual(st ? !st.multilingual : false);
-      }
+        const [st, built] = await Promise.all([embeddingStatus().catch(() => null), semanticIndexEmbedding().catch(() => null)]);
+        if (!ac.signal.aborted) setCrossPath(crossLingualPath(query, st, built));
+      } else setCrossPath(null);
       const to = scriptOf(query) === "he" ? "he" : "en";
       for (const h of marked) {
         const r = await translatePassage(h.snippet, h.lang, to, { signal: ac.signal });
@@ -461,6 +462,12 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
             </button>
           )}
         </div>
+        {mode === "search" && /[\u05d0-\u05ea]{2}/.test(query) && hits.length < 3 && (
+          // W10.B6: keyword search does not reach English notes (held-out 0/30); say so where a Hebrew query finds little, and where it works.
+          <div role="status" data-testid="search-crosslingual-status" style={{ padding: "4px 14px", fontSize: 11.5, color: "hsl(var(--fg-muted))" }}>
+            {t("searchDialog.crossLingual.keyword")}
+          </div>
+        )}
         {mode === "search" && layoutVariant && query.trim() && (
           <div role="status" data-testid="search-layout-hint" dir="auto" style={{ padding: "6px 14px", fontSize: 12, color: "hsl(var(--fg-muted))" }}>
             {t("palette.layoutHint", { text: layoutVariant })}
@@ -736,9 +743,9 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
               </div>
             );
           })}
-          {mode === "smart" && monolingual && smartHits.length > 0 && (
-            <div role="note" data-testid="smart-monolingual" style={{ padding: "6px 12px", fontSize: 11.5, color: "hsl(var(--fg-muted))" }}>
-              {t("searchDialog.monolingualEmbeddings")}
+          {mode === "smart" && crossPath?.path === "keyword-only" && smartHits.length > 0 && (
+            <div role="note" data-testid="smart-monolingual" data-reason={crossPath.reason} style={{ padding: "6px 12px", fontSize: 11.5, color: "hsl(var(--fg-muted))" }}>
+              {crossPath.reason === "reindex" ? t("searchDialog.crossLingual.reindex") : t("searchDialog.monolingualEmbeddings")}
             </div>
           )}
         </div>
