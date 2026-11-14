@@ -71,3 +71,50 @@ describe("resumeAction", () => {
     expect(resumeAction(pushed, { local: A, remote: null, prs: [], ahead: null, behind: null }).action).toBe("look");
   });
 });
+
+// @ts-expect-error — plain .mjs helper without types
+import { confirmedPushes, pushedRefs, recordPush, stateFor, touchUpdated, txnHookPlan, TXN_HOOK_MARK } from "../../scripts/lib/lane-state.mjs";
+
+describe("written without a person (W8.10 step 2, W10.E57)", () => {
+  const Z = "0".repeat(40);
+  it("pre-push stdin → the branches this push sends; a delete is not a push", () => {
+    expect(pushedRefs(`refs/heads/x ${A} refs/heads/x ${Z}\nrefs/heads/y ${Z} refs/heads/y ${B}\nrefs/tags/v1 ${B} refs/tags/v1 ${Z}\n`)).toEqual([{ branch: "x", sha: A }]);
+  });
+
+  it("only a remote-tracking ref moved to the noted sha confirms a push", () => {
+    const pending = [{ branch: "x", sha: A, remote: "origin" }, { branch: "y", sha: B, remote: "origin" }];
+    const r = confirmedPushes(`${Z} ${A} refs/remotes/origin/x\n${Z} ${A} refs/remotes/origin/y\n${Z} ${B} refs/heads/y\n`, pending);
+    expect(r.confirmed).toEqual([{ branch: "x", sha: A }]);
+    expect(r.pending).toEqual([{ branch: "y", sha: B, remote: "origin" }]);
+  });
+
+  it("recordPush: Updated, the pushed cell, one Pushes line; the same sha twice adds nothing", () => {
+    const md = STATE.replace("# Lane V state\n", "# Lane V state\n\nUpdated: old · session s\n") + "\n## Pushes\n\nearlier line\n";
+    const once = recordPush(md, { branch: "docs/lane-state", sha: B, at: "2026-11-15T10:00Z" });
+    expect(parseBranches(once).find((r: Row) => r.branch === "docs/lane-state").pushed).toBe(B.slice(0, 10));
+    expect(once).toContain("Updated: 2026-11-15T10:00Z · session s");
+    expect(once).toContain(`earlier line\n2026-11-15T10:00Z docs/lane-state ${B.slice(0, 10)} (recorded by the reference-transaction hook)`);
+    const twice = recordPush(once, { branch: "docs/lane-state", sha: B, at: "2026-11-15T11:00Z" });
+    expect(twice.match(/reference-transaction hook/g)).toHaveLength(1);
+    expect(twice).toContain("Updated: 2026-11-15T11:00Z · session s");
+    // A branch the table lacks gets a row.
+    const added = recordPush(md, { branch: "w10/new", sha: A, at: "t" });
+    expect(parseBranches(added).at(-1)).toEqual({ branch: "w10/new", worktree: "—", base: "—", pushed: A.slice(0, 10), pr: null });
+  });
+
+  it("touchUpdated keeps the session part, or adds the line; stateFor picks the lane that lists the branch", () => {
+    expect(touchUpdated("# L\n\nUpdated: x (y) · session z\n", "T")).toBe("# L\n\nUpdated: T · session z\n");
+    expect(touchUpdated("# L\n\n## Branches\n", "T")).toBe("# L\n\nUpdated: T\n\n## Branches\n");
+    expect(stateFor("docs/lane-state", [["a.md", "# none\n"], ["b.md", STATE]])).toBe("b.md");
+    expect(stateFor("nope", [["b.md", STATE]])).toBeNull();
+  });
+
+  it("the reference-transaction hook never fails a transaction and is not installed over someone else's", () => {
+    const { content } = txnHookPlan(null);
+    expect(content).toContain(TXN_HOOK_MARK);
+    expect(content).toMatch(/\|\| true\nexit 0\n$/);
+    expect(txnHookPlan(content).action).toBe("write");
+    expect(txnHookPlan("#!/bin/sh\necho mine\n").action).toBe("refuse");
+    expect(txnHookPlan("#!/bin/sh\necho mine\n", { force: true }).action).toBe("backup");
+  });
+});
