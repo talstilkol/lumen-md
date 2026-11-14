@@ -168,7 +168,7 @@ describe("the native files", () => {
     // Every Siri phrase in the code has a localization.
     const intents = read("ios/App/App/LumenIntents.swift");
     const phrases = [...intents.matchAll(/"([^"]*\\\(\.applicationName\)[^"]*)"/g)].map((m) => m[1].replace("\\(.applicationName)", "${applicationName}"));
-    expect(phrases.length).toBe(8);
+    expect(phrases.length).toBe(10); // W10.C31 added "Record to … inbox" and "Record a … voice note"
     const he = read("ios/App/App/he.lproj/AppShortcuts.strings");
     for (const p of phrases) expect(he, p).toContain(`"${p}" = `);
   });

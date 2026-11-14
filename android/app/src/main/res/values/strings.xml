@@ -17,4 +17,6 @@
     <string name="shortcut_search_long">Search your notes</string>
     <string name="shortcut_daily_short">Today</string>
     <string name="shortcut_daily_long">Open today\'s note</string>
+    <string name="tile_voice">Lumen voice note</string>
+    <string name="tile_voice_subtitle">Record into the inbox</string>
 </resources>
