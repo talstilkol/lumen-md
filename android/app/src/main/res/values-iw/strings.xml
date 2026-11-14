@@ -13,4 +13,6 @@
     <string name="shortcut_search_long">חיפוש בפתקים</string>
     <string name="shortcut_daily_short">היום</string>
     <string name="shortcut_daily_long">פתיחת הפתק של היום</string>
+    <string name="tile_voice">פתק קולי ב-Lumen</string>
+    <string name="tile_voice_subtitle">הקלטה לתיבה</string>
 </resources>
