@@ -89,6 +89,18 @@ npm run sbom          # → release/sbom.cdx.json
 ‏(`src-tauri/Cargo.lock`): גרסה, כתובת חבילה, ה-hash מקובץ הנעילה והרישיון.
 אותם קובצי נעילה — אותם בתים.
 
+ריצת הלילה כותבת גם SBOM שני עם `syft`, יחד עם התוצאות של Scorecard, ‏OSV
+ו-cargo deny, לתוך קבלה חתומה
+([ריצות הלילה](/he/contributing/nightly/#בדיקות-שרשרת-האספקה-משימה-w11s5)).
+
+**‏provenance של npm.** ‏`npm publish --provenance` (בשביל `mcp-server`) עובד
+רק מספק CI ש-npm סומך עליו לחתום על הבנייה: מריצים מתארחים של GitHub, מריצים
+משותפים של GitLab.com או CircleCI. ‏Lumen לא משתמש באף אחד מהם (אין GitHub
+Actions, וסוכני Buildkite מתארחים אצלנו), ולכן `mcp-server` מתפרסם בלי
+provenance של npm. אם יהיה צורך ב-provenance, הדרך היא מראה ב-GitLab.com
+שמפרסמת מהמריצים המשותפים של GitLab. זו החלטה של הבעלים בעדיפות P2, ולא משהו
+שרץ היום.
+
 ## ‏4. כל שחרור נחתם — מחוץ לרשת
 
 מפתח החתימה שייך לבעלים של השחרור ואף פעם לא נכנס למערכת CI.

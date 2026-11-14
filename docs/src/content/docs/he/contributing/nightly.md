@@ -24,6 +24,7 @@ npm run nightly -- --dry-run     # print the plan, run nothing
 | `triage` | כל לילה | מיון הביקורות של ה-PR-ים הפתוחים, הספירה של 0.14 על 20 ה-PR-ים הראשונים מאז 12.11.2026, ו-`live:meta --self-test` (למטה) |
 | `weekly` | בימי ראשון (UTC) | בריאות התלויות (audit, outdated, רישיונות), וציוני mutation כש-`test:mutation` קיים |
 | `sr` | כל לילה, ב-Mac שבו `@guidepup/*` מותקנים | ‏`npx @guidepup/setup --ci`, ואז המסע העברי עם VoiceOver ([קוראי מסך, אוטומטית](/he/editor/screen-reader-automation/)). לא נספר ב-0.11. |
+| `supply` | כל לילה, במחשב שמותקנים בו `scorecard`, ‏`osv-scanner`, ‏`cargo-deny` או `syft` | בדיקות שרשרת האספקה ([בהמשך](#בדיקות-שרשרת-האספקה-משימה-w11s5)). לא נספר ב-0.11. |
 
 `--only flake,perf` בוחר סוגים. המתזמן מעביר `--scheduled`, שמסמן את הדוחות
 כמתוזמנים. משימה 0.11 סופרת רק אותם.
@@ -114,6 +115,49 @@ PR. בלינוקס משתמשים ב-cron:
   דפדפנים ואי אפשר להתקין חבילות, אז הוא יכול להריץ רק את הסוג `triage`
   (REST API של GitHub) ולקרוא את הקבלות ששמורות בריפו. זה שימושי לסיכום
   בוקר, לא למדידות עצמן.
+
+## בדיקות שרשרת האספקה (משימה W11.S5)
+
+‏Scorecard ו-CodeQL קיימים בריפו רק כקובצי YAML של GitHub Actions, ולכן אף
+אחד מהם לא רץ אף פעם. ‏`scripts/supply/nightly.mjs` מריץ את בדיקות שרשרת
+האספקה במחשב של ריצת הלילה במקומם:
+
+| בדיקה | פקודה | צריך |
+|---|---|---|
+| ‏Scorecard | `scorecard --repo=github.com/talstilkol/lumen-md --format json` | רשת ו-`GITHUB_AUTH_TOKEN`, טוקן fine-grained עם הרשאת קריאה בלבד |
+| ‏OSV | `osv-scanner scan source` על `package-lock.json`, ‏`mcp-server/package-lock.json` ו-`src-tauri/Cargo.lock` | רשת |
+| ‏cargo deny | `cargo-deny check advisories bans` ב-`src-tauri` | רשת (מאגר RustSec) |
+| ‏SBOM | `syft dir:. -o cyclonedx-json` | כלום |
+
+```bash
+npm run supply:nightly                 # מה שמותקן; קבלה חתומה → reports/nightly/<date>-supply.json
+npm run supply:nightly -- --dry-run    # שום דבר לא רץ, בלי רשת; הקבלה אומרת למה כל בדיקה דולגה
+npm run supply:nightly -- --open-tasks # וגם issue ב-GitHub לכל משימה חדשה
+```
+
+בתוך `npm run nightly`, הסוג `supply` מריץ את הסקריפט וחותם את התוצאות בדוח
+של אותו לילה, תחת `supply`.
+
+בקבלה נמצאים השערים של W11.M8. בדיקה שדולגה משאירה את השערים שלה **לא
+נמדדים**, ואף פעם לא עוברים:
+
+- הציון הכולל של Scorecard הוא לפחות 7.0;
+- ‏Branch-Protection לפחות 8, ‏Code-Review לפחות 8, ו-Dangerous-Workflow
+  הוא 10;
+- ‏OSV מוצא 0 פגיעויות critical.
+
+**משימה** נרשמת בקבלה, ונפתחת כ-issue עם `--open-tasks`, כאשר:
+
+- הציון הכולל של Scorecard נמוך מזה שבקבלה הקודמת;
+- בדיקה עם שער נמצאת מתחת לרף שלה;
+- ‏OSV מוצא פגיעות critical או high;
+- ‏cargo deny מדווח על שגיאה.
+
+לכל משימה יש מפתח קבוע, כך שממצא שעדיין קיים בלילה הבא לא פותח issue שני.
+
+השחרור כבר כולל SBOM משלו בפורמט CycloneDX ‏(`release/sbom.cdx.json`,
+[שרשרת אספקה](/he/security/supply-chain/)). ה-SBOM של `syft` בריצת הלילה הוא
+רשימה שנייה ובלתי תלויה של אותו עץ.
 
 ## בדיקת המטא-דאטה החיה (משימה W6.2)
 
