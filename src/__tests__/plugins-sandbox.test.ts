@@ -56,8 +56,8 @@ describe("plugin sandbox — isolation", () => {
   it("cannot redefine the lumen API or reach the call bridge after boot", async () => {
     const { h } = await boot(`
       let changed = false;
-      try { globalThis.lumen = {}; changed = globalThis.lumen !== lumen; } catch {}
-      try { lumen.document.getText = () => "x"; } catch {}
+      try { globalThis.lumen = {}; changed = globalThis.lumen !== lumen; } catch { /* why: a throw is the expected outcome; the log below reports whether the write took */ }
+      try { lumen.document.getText = () => "x"; } catch { /* why: as above — the frozen check below is the assertion */ }
       console.log(JSON.stringify({ changed, bridge: typeof __lumen_methods, frozen: Object.isFrozen(lumen.document) }));
     `);
     expect(JSON.parse(h.logs[0].slice(4))).toEqual({ changed: false, bridge: "undefined", frozen: true });
@@ -108,7 +108,7 @@ describe("plugin sandbox — default deny", () => {
       lumen.on("burst", async (n) => {
         for (let i = 0; i < n; i++) {
           await lumen.document.getText();
-          await lumen.vault.read("x").catch(() => {});
+          await lumen.vault.read("x").catch(() => { /* why: the burst counts calls; a refused read is fine */ });
         }
         console.log("done " + n);
       });

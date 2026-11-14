@@ -39,30 +39,89 @@ function commentsBetween(text: string, start: number, end: number): string[] {
   return out;
 }
 
+/**
+ * The code a template literal ships as a string (a worker or iframe source
+ * such as liveJsWorkerSource.ts or sandbox.ts's boot page), with each `${…}`
+ * replaced by a placeholder identifier, or null when it holds no `catch`.
+ */
+function shippedCode(n: ts.Node): string | null {
+  let code: string;
+  if (ts.isNoSubstitutionTemplateLiteral(n)) code = n.text;
+  else if (ts.isTemplateExpression(n)) code = n.head.text + n.templateSpans.map((s) => "__x" + s.literal.text).join("");
+  else return null;
+  if (/<script\b/i.test(code)) {
+    // An HTML page: only its inline scripts are code. Everything else becomes
+    // its line breaks, so line numbers still match.
+    const lines = (s: string) => s.replace(/[^\n]/g, "");
+    let scripts = "";
+    let last = 0;
+    for (const m of code.matchAll(/(<script\b[^>]*>)([\s\S]*?)(<\/script>|$)/gi)) {
+      scripts += lines(code.slice(last, m.index + m[1].length)) + m[2];
+      last = m.index + m[0].length;
+    }
+    code = scripts;
+  }
+  // `catch` alone is often prose ("we catch it later"); code has a `try` or a `.catch(` call.
+  return /\btry\b/.test(code) || /\.catch\s*\(/.test(code) ? code : null;
+}
+
+/**
+ * Empty catch blocks / `.catch()` handlers without a `why:` comment in one
+ * piece of source. `label(line)` names a 1-based line of `text`. Template
+ * literals that ship code as a string are scanned the same way, so a worker
+ * kept in a string is held to the same rule as the module around it.
+ */
+function swallowedIn(text: string, label: (line: number) => string, kind: ts.ScriptKind = ts.ScriptKind.TS): string[] {
+  const out: string[] = [];
+  const sf = ts.createSourceFile("scan." + (kind === ts.ScriptKind.TSX ? "tsx" : "ts"), text, ts.ScriptTarget.Latest, true, kind);
+  const line = (n: ts.Node) => sf.getLineAndCharacterOfPosition(n.getStart(sf)).line + 1;
+  const empty = (b: ts.Block) => b.statements.length === 0 && !commentsBetween(text, b.getStart(sf) + 1, b.end - 1).some((c) => WHY.test(c));
+  const visit = (n: ts.Node): void => {
+    if (ts.isCatchClause(n) && empty(n.block)) out.push(`${label(line(n))} catch`);
+    if (ts.isCallExpression(n) && ts.isPropertyAccessExpression(n.expression) && n.expression.name.text === "catch") {
+      const h = n.arguments[0];
+      if (h && (ts.isArrowFunction(h) || ts.isFunctionExpression(h)) && ts.isBlock(h.body) && empty(h.body)) out.push(`${label(line(h))} .catch()`);
+    }
+    const code = shippedCode(n);
+    if (code !== null) {
+      // The literal's text starts on the line of its opening backtick; the
+      // cooked text keeps the line breaks, so inner line k is outer line + k - 1.
+      const at = line(n);
+      out.push(...swallowedIn(code, (k) => label(at + k - 1), ts.ScriptKind.JS));
+    }
+    ts.forEachChild(n, visit);
+  };
+  visit(sf);
+  return out;
+}
+
 function swallowedWithoutWhy(): string[] {
   const out: string[] = [];
   for (const file of files(SRC)) {
     const text = readFileSync(file, "utf8");
     if (!text.includes("catch")) continue;
-    const sf = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, file.endsWith("x") ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
-    const where = (n: ts.Node) => `${relative(SRC, file)}:${sf.getLineAndCharacterOfPosition(n.getStart(sf)).line + 1}`;
-    const empty = (b: ts.Block) => b.statements.length === 0 && !commentsBetween(text, b.getStart(sf) + 1, b.end - 1).some((c) => WHY.test(c));
-    const visit = (n: ts.Node): void => {
-      if (ts.isCatchClause(n) && empty(n.block)) out.push(`${where(n)} catch`);
-      if (ts.isCallExpression(n) && ts.isPropertyAccessExpression(n.expression) && n.expression.name.text === "catch") {
-        const h = n.arguments[0];
-        if (h && (ts.isArrowFunction(h) || ts.isFunctionExpression(h)) && ts.isBlock(h.body) && empty(h.body)) out.push(`${where(h)} .catch()`);
-      }
-      ts.forEachChild(n, visit);
-    };
-    visit(sf);
+    out.push(...swallowedIn(text, (l) => `${relative(SRC, file)}:${l}`, file.endsWith("x") ? ts.ScriptKind.TSX : ts.ScriptKind.TS));
   }
   return out;
 }
 
 describe("code health (12.1)", () => {
-  it("every empty catch and empty .catch() handler says why", () => {
+  it("every empty catch and empty .catch() handler says why, also in code shipped as a string", () => {
     expect(swallowedWithoutWhy()).toEqual([]);
+  });
+
+  it("scans worker and iframe sources kept in template literals", () => {
+    const at = (l: number) => `f.ts:${l}`;
+    // A worker in a plain template literal, and one with a substitution.
+    const plain = "export const W = `\nself.onmessage = function() {\n  try { go(); } catch (e) {}\n};\n`;\n";
+    expect(swallowedIn(plain, at)).toEqual(["f.ts:3 catch"]);
+    const withSub = "const u = 1;\nexport const H = `<script>\nimport(${u}).catch(function() {});\ntry { x(); } catch {}\n</script>`;\n";
+    expect(swallowedIn(withSub, at)).toEqual(["f.ts:3 .catch()", "f.ts:4 catch"]);
+    // A `why:` comment inside the string counts, as it does in a module.
+    const why = "export const W = `try { go(); } catch (e) { /* why: the worker is closing */ }`;\n";
+    expect(swallowedIn(why, at)).toEqual([]);
+    // Prose that mentions catch is not code.
+    expect(swallowedIn("export const T = `we catch it later`;\n", at)).toEqual([]);
   });
 
   describe(`no production file is longer than ${MAX_LINES} lines (W6.25 ratchet)`, () => {
