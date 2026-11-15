@@ -13626,6 +13626,140 @@
       "vars": []
     },
     {
+      "key": "viz.chart",
+      "en": "chart",
+      "vars": []
+    },
+    {
+      "key": "viz.chartFailed",
+      "en": "The chart couldn't be drawn here; its data is in the table.",
+      "vars": []
+    },
+    {
+      "key": "viz.count",
+      "en": "Count",
+      "vars": []
+    },
+    {
+      "key": "viz.date",
+      "en": "Date",
+      "vars": []
+    },
+    {
+      "key": "viz.empty",
+      "en": "Nothing to show: no row has a value for {field}.",
+      "vars": [
+        "field"
+      ]
+    },
+    {
+      "key": "viz.kind.bar",
+      "en": "Bar chart",
+      "vars": []
+    },
+    {
+      "key": "viz.kind.calendar",
+      "en": "Calendar heatmap",
+      "vars": []
+    },
+    {
+      "key": "viz.kind.heatmap",
+      "en": "Heatmap",
+      "vars": []
+    },
+    {
+      "key": "viz.kind.line",
+      "en": "Line chart",
+      "vars": []
+    },
+    {
+      "key": "viz.kind.pie",
+      "en": "Pie chart",
+      "vars": []
+    },
+    {
+      "key": "viz.kind.scatter",
+      "en": "Scatter chart",
+      "vars": []
+    },
+    {
+      "key": "viz.navHint",
+      "en": "{title}. Arrow keys move between the {count} points; Home and End go to the first and last.",
+      "vars": [
+        "title",
+        "count"
+      ]
+    },
+    {
+      "key": "viz.point",
+      "en": "{label}: {value}",
+      "vars": [
+        "label",
+        "value"
+      ]
+    },
+    {
+      "key": "viz.point.name",
+      "en": "Note",
+      "vars": []
+    },
+    {
+      "key": "viz.pointSeries",
+      "en": "{series}, {label}: {value}",
+      "vars": [
+        "series",
+        "label",
+        "value"
+      ]
+    },
+    {
+      "key": "viz.showChart",
+      "en": "Show the chart",
+      "vars": []
+    },
+    {
+      "key": "viz.showTable",
+      "en": "Show the table",
+      "vars": []
+    },
+    {
+      "key": "viz.skipped",
+      "en": "{count} rows without a value are not shown",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "viz.summary",
+      "en": "{kind}: {count} points",
+      "vars": [
+        "kind",
+        "count"
+      ]
+    },
+    {
+      "key": "viz.tableCaption",
+      "en": "{title}: data",
+      "vars": [
+        "title"
+      ]
+    },
+    {
+      "key": "viz.truncated",
+      "en": "{count} more are left out",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "viz.unknownKind",
+      "en": "Unknown chart type {kind}; use one of {kinds}.",
+      "vars": [
+        "kind",
+        "kinds"
+      ]
+    },
+    {
       "key": "voiceCmd.confirmDelete",
       "en": "Move this note to the trash?",
       "vars": []

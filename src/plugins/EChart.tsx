@@ -5,12 +5,16 @@ interface Props {
   option: Record<string, unknown>;
   height?: number | string;
   isDark?: boolean;
+  /** The chart once it exists (W12.V1: keyboard navigation drives its tooltip). */
+  onReady?: (chart: echarts.ECharts | null) => void;
 }
 
-export function EChart({ option, height = 360, isDark = true }: Props) {
+export function EChart({ option, height = 360, isDark = true, onReady }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const chartRef = useRef<echarts.ECharts | null>(null);
   const latestOptionRef = useRef<Record<string, unknown>>(option);
+  const onReadyRef = useRef(onReady);
+  onReadyRef.current = onReady;
   // Defer chart init until the element enters viewport.
   const [inView, setInView] = useState(false);
 
@@ -50,6 +54,7 @@ export function EChart({ option, height = 360, isDark = true }: Props) {
       chartRef.current = chart;
       // Apply the most recent option immediately on init.
       chart.setOption(latestOptionRef.current, { notMerge: true });
+      onReadyRef.current?.(chart);
       return chart;
     };
     ensureChart();
@@ -65,6 +70,7 @@ export function EChart({ option, height = 360, isDark = true }: Props) {
       window.removeEventListener("resize", onResize);
       ro.disconnect();
       chartRef.current?.dispose();
+      if (chartRef.current) onReadyRef.current?.(null);
       chartRef.current = null;
     };
   }, [isDark, inView]);
