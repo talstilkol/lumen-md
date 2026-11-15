@@ -30,4 +30,12 @@ highlights show the clip's own `tags:` from its front matter.
 `Highlights <date>.md`: a section per document, each highlight as a quote with
 its note, its tags and a link that opens it again.
 
-Drag a highlight into a note or a canvas: it drops as a quote with that link.
+Drag a highlight into a note: it drops as a quote with that link. Drag a PDF
+highlight onto a canvas and it becomes a **highlight card**: the quote and
+its page, linked to the exact place in the PDF. Opening the card's link
+opens the reader at that page and flashes the highlight, found again by its
+text even after the PDF's text layer changed or it was run through OCR. In
+a `.canvas` (JSON Canvas) file the card is a file node with the highlight as
+its subpath, as Obsidian Canvas keeps one. If you delete the highlight
+later, the card stays on the canvas, dashed, and says the source was
+deleted.
