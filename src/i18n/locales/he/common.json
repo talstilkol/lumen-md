@@ -1,6 +1,10 @@
 {
   "a11y.sidebarResizer": "שינוי רוחב סרגל הצד",
   "a11y.skipToContent": "דילוג לתוכן הראשי",
+  "about.a11yStatement": "הצהרת נגישות",
+  "about.a11yStatement.hint": "הצהרת הנגישות של Lumen: התקן, מה עובד, פערים ידועים ואיך לדווח על חסם",
+  "about.acr": "דוח תאימות נגישות",
+  "about.version": "Lumen, גרסה {version}",
   "academic.close": "סגירה",
   "academic.cover": "עמוד שער",
   "academic.done": "יוצא {name}. פתחו אותו ב-Word ולחצו F9 על תוכן העניינים כדי למלא את מספרי העמודים.",

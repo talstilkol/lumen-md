@@ -11,6 +11,7 @@ import { subscribeSyncStatus } from "../sync/syncStatus";
 import { secretStoreMode, subscribeSecretStoreMode } from "../lib/secretStore";
 import { parseSuggestions, mayContainCriticMarkup } from "../editor/suggesting";
 import { BetaBadge } from "./FeatureFlagsHost";
+import { StatusBarA11yLink } from "./AccessibilityLinks";
 
 /** Number of CriticMarkup suggestions (cheap no-op for plain docs). */
 function countCriticMarkup(text: string): number {
@@ -332,6 +333,7 @@ export const StatusBar = React.memo(function StatusBar({
       >
         {t("status.roadmap")}
       </a>
+      <StatusBarA11yLink />
       <span className="sb-item sb-accent">Lumen</span>
     </footer>
   );

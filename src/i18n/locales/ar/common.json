@@ -1,6 +1,10 @@
 {
   "a11y.sidebarResizer": "تغيير عرض الشريط الجانبي",
   "a11y.skipToContent": "تخطَّ إلى المحتوى",
+  "about.a11yStatement": "بيان إمكانية الوصول",
+  "about.a11yStatement.hint": "بيان إمكانية الوصول في Lumen: المعيار، وما يعمل، والفجوات المعروفة، وكيفية الإبلاغ عن عائق",
+  "about.acr": "تقرير المطابقة لإمكانية الوصول",
+  "about.version": "Lumen، الإصدار {version}",
   "academic.close": "إغلاق",
   "academic.cover": "صفحة العنوان",
   "academic.done": "تم تصدير {name}. افتحه في Word واضغط F9 على الفهرس لملء أرقام الصفحات.",

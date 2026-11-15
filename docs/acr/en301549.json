@@ -1,0 +1,344 @@
+{
+  "standard": "EN 301 549 V4.1.1 (2026-09)",
+  "format": "VPAT 2.5 INT",
+  "source": {
+    "en": "Clause lists checked on 2026-11-15 against the criteria for apps published by the Austrian accessibility monitoring body (digitalbarrierefrei.at, 'Kriterien für Apps (ab Ende 2026)', EN 301 549 V4.1.1) and the Deque summary of V4.1.1. Clause 11.8 (authoring tools) is listed from the standard's structure; check the row numbers against the ETSI PDF before signing the report.",
+    "he": "רשימות הסעיפים נבדקו ב-15.11.2026 מול רשימת הקריטריונים לאפליקציות שפרסם גוף הפיקוח האוסטרי על נגישות (digitalbarrierefrei.at, ‏EN 301 549 V4.1.1) ומול הסיכום של Deque לגרסה 4.1.1. סעיף 11.8 (כלי כתיבה) רשום לפי מבנה התקן; יש לבדוק את מספרי השורות מול ה-PDF של ETSI לפני חתימה על הדוח."
+  },
+  "chapter9": {
+    "en": "Lumen's web app is web content: each clause 9 row is the WCAG 2.2 criterion of the same number, with the same status and remarks as in the tables above.",
+    "he": "אפליקציית הרשת של Lumen היא תוכן רשת: כל שורה בסעיף 9 היא קריטריון WCAG 2.2 באותו מספר, עם אותו סטטוס ואותן הערות כמו בטבלאות שלמעלה."
+  },
+  "chapter10": {
+    "status": "not-applicable",
+    "en": "Lumen ships no non-web documents: its help and these reports are web pages (clause 9). Documents people write and export with Lumen are their own content; how Lumen helps make them accessible is clause 11.8.",
+    "he": "Lumen לא מפיץ מסמכים שאינם רשת: העזרה והדוחות האלה הם דפי רשת (סעיף 9). מסמכים שאנשים כותבים ומייצאים ב-Lumen הם התוכן שלהם; האופן שבו Lumen עוזר להנגיש אותם הוא סעיף 11.8."
+  },
+  "chapter11": {
+    "en": "The desktop app (Tauri) and the mobile apps (Capacitor) are the same interface in the platform's web view (WebView2, WKWebView, WebKitGTK, Android WebView), so each clause 11 row that comes from WCAG has the status of that criterion. Lumen has no closed functionality: every feature works with the platform's assistive technology. V4.1.1 does not apply WCAG 1.2.4, 2.4.1, 2.4.5, 3.1.2, 3.2.3 and 3.2.6 to non-web software.",
+    "he": "אפליקציית המחשב (Tauri) ואפליקציות הנייד (Capacitor) הן אותו ממשק בתוך רכיב הדפדפן של מערכת ההפעלה (WebView2, ‏WKWebView, ‏WebKitGTK, ‏Android WebView), ולכן כל שורה בסעיף 11 שמקורה ב-WCAG מקבלת את הסטטוס של אותו קריטריון. ל-Lumen אין פונקציונליות סגורה: כל יכולת עובדת עם הטכנולוגיה המסייעת של מערכת ההפעלה. גרסה 4.1.1 לא מחילה את WCAG 1.2.4, ‏2.4.1, ‏2.4.5, ‏3.1.2, ‏3.2.3 ו-3.2.6 על תוכנה שאינה רשת."
+  },
+  "softwareExcluded": [
+    "1.2.4",
+    "2.4.1",
+    "2.4.5",
+    "3.1.2",
+    "3.2.3",
+    "3.2.6"
+  ],
+  "softwareNames": {
+    "2.4.2": "Non-web software titled",
+    "3.1.1": "Language of non-web software"
+  },
+  "rows": [
+    {
+      "id": "11.5.2.1",
+      "name": "Platform interoperability with assistive technologies",
+      "status": "partially-supports",
+      "mirrors": "4.1.2",
+      "remarks": {
+        "en": "The web view exposes Lumen's HTML and ARIA through the platform accessibility API (UIA, NSAccessibility, AT-SPI, Android accessibility). On the web this is tested with axe and the screen-reader protocol; the packaged desktop and mobile builds have not yet been run under VoiceOver, NVDA or TalkBack.",
+        "he": "רכיב הדפדפן חושף את ה-HTML וה-ARIA של Lumen דרך ממשק הנגישות של מערכת ההפעלה (UIA, ‏NSAccessibility, ‏AT-SPI, נגישות של Android). ברשת זה נבדק עם axe ועם פרוטוקול קוראי המסך; הגרסאות הארוזות למחשב ולנייד עוד לא הורצו עם VoiceOver, ‏NVDA או TalkBack."
+      },
+      "evidence": [
+        "e2e/a11y.spec.ts",
+        "e2e/aria-hebrew.spec.ts"
+      ],
+      "plan": {
+        "en": "Run the screen-reader journeys on the signed desktop and mobile builds.",
+        "he": "להריץ את מסעות קוראי המסך על הגרסאות החתומות למחשב ולנייד.",
+        "target": "0.2.0"
+      }
+    },
+    {
+      "id": "11.5.2.4",
+      "name": "Assistive technology",
+      "status": "not-applicable",
+      "remarks": {
+        "en": "Lumen is not assistive technology.",
+        "he": "Lumen אינו טכנולוגיה מסייעת."
+      }
+    },
+    {
+      "id": "11.5.2.5",
+      "name": "Object information",
+      "status": "partially-supports",
+      "mirrors": "4.1.2",
+      "remarks": {
+        "en": "Role, name and state come from HTML and ARIA through the web view; see 4.1.2 for what is still partial.",
+        "he": "תפקיד, שם ומצב מגיעים מ-HTML ו-ARIA דרך רכיב הדפדפן; ראו 4.1.2 למה שעדיין חלקי."
+      },
+      "plan": {
+        "en": "As 4.1.2.",
+        "he": "כמו 4.1.2.",
+        "target": "0.2.0"
+      }
+    },
+    {
+      "id": "11.5.2.6",
+      "name": "Row, column, and headers",
+      "status": "supports",
+      "mirrors": "1.3.1",
+      "remarks": {
+        "en": "Tables in the preview and in WYSIWYG are HTML tables with header cells, as for 1.3.1.",
+        "he": "טבלאות בתצוגה המקדימה וב-WYSIWYG הן טבלאות HTML עם תאי כותרת, כמו ב-1.3.1."
+      }
+    },
+    {
+      "id": "11.5.2.7",
+      "name": "Values",
+      "status": "partially-supports",
+      "mirrors": "4.1.2",
+      "remarks": {
+        "en": "Inputs, sliders and checkboxes expose their values through HTML; see 4.1.2.",
+        "he": "שדות, מחוונים ותיבות סימון חושפים את הערך שלהם דרך HTML; ראו 4.1.2."
+      },
+      "plan": {
+        "en": "As 4.1.2.",
+        "he": "כמו 4.1.2.",
+        "target": "0.2.0"
+      }
+    },
+    {
+      "id": "11.5.2.8",
+      "name": "Label relationships",
+      "status": "supports",
+      "mirrors": "1.3.1",
+      "remarks": {
+        "en": "Labels are tied to their fields with <label> and aria-labelledby, as for 1.3.1.",
+        "he": "תוויות מקושרות לשדות שלהן עם <label> ו-aria-labelledby, כמו ב-1.3.1."
+      }
+    },
+    {
+      "id": "11.5.2.9",
+      "name": "Parent-child relationships",
+      "status": "supports",
+      "mirrors": "1.3.1",
+      "remarks": {
+        "en": "The file tree is an ARIA tree with nested groups; lists and headings are HTML, as for 1.3.1.",
+        "he": "עץ הקבצים הוא עץ ARIA עם קבוצות מקוננות; רשימות וכותרות הן HTML, כמו ב-1.3.1."
+      }
+    },
+    {
+      "id": "11.5.2.10",
+      "name": "Text",
+      "status": "supports",
+      "remarks": {
+        "en": "Note text is real DOM text in both editors (CodeMirror and Milkdown), so the platform API reads it, including the caret and the selection.",
+        "he": "טקסט הפתק הוא טקסט DOM אמיתי בשני העורכים (CodeMirror ו-Milkdown), ולכן ממשק הפלטפורמה קורא אותו, כולל הסמן והבחירה."
+      },
+      "evidence": [
+        "e2e/sr-announce.spec.ts"
+      ]
+    },
+    {
+      "id": "11.5.2.11",
+      "name": "List of available actions",
+      "status": "partially-supports",
+      "mirrors": "2.1.1",
+      "remarks": {
+        "en": "Actions are buttons, links and menu items, which the platform lists; every action is also a command in the palette. Drawing new shapes on the canvas needs a pointer (2.1.1).",
+        "he": "הפעולות הן כפתורים, קישורים ופריטי תפריט, שמערכת ההפעלה מציגה; כל פעולה היא גם פקודה בפלטת הפקודות. ציור צורות חדשות בקנבס דורש מצביע (2.1.1)."
+      },
+      "evidence": [
+        "e2e/a11y.spec.ts"
+      ],
+      "plan": {
+        "en": "As 2.1.1.",
+        "he": "כמו 2.1.1.",
+        "target": "0.2.0"
+      }
+    },
+    {
+      "id": "11.5.2.12",
+      "name": "Execution of available actions",
+      "status": "partially-supports",
+      "mirrors": "2.1.1",
+      "remarks": {
+        "en": "Assistive technology activates the same HTML controls a keyboard does. Drawing new shapes on the canvas needs a pointer (2.1.1).",
+        "he": "טכנולוגיה מסייעת מפעילה את אותם רכיבי HTML שהמקלדת מפעילה. ציור צורות חדשות בקנבס דורש מצביע (2.1.1)."
+      },
+      "evidence": [
+        "e2e/a11y.spec.ts"
+      ],
+      "plan": {
+        "en": "As 2.1.1.",
+        "he": "כמו 2.1.1.",
+        "target": "0.2.0"
+      }
+    },
+    {
+      "id": "11.5.2.13",
+      "name": "Tracking of focus and selection attributes",
+      "status": "supports",
+      "mirrors": "2.4.7",
+      "remarks": {
+        "en": "Focus is real DOM focus (no fake focus), and the editors keep the DOM selection in step with the caret.",
+        "he": "המיקוד הוא מיקוד DOM אמיתי (בלי מיקוד מדומה), והעורכים שומרים את בחירת ה-DOM תואמת לסמן."
+      },
+      "evidence": [
+        "e2e/a11y.spec.ts"
+      ]
+    },
+    {
+      "id": "11.5.2.14",
+      "name": "Modification of focus and selection attributes",
+      "status": "supports",
+      "mirrors": "2.4.7",
+      "remarks": {
+        "en": "Moving focus or the selection from assistive technology moves it in Lumen too, because both are the DOM's.",
+        "he": "הזזת המיקוד או הבחירה מהטכנולוגיה המסייעת מזיזה אותם גם ב-Lumen, כי שניהם של ה-DOM."
+      }
+    },
+    {
+      "id": "11.5.2.15",
+      "name": "Change notification",
+      "status": "supports",
+      "mirrors": "4.1.3",
+      "remarks": {
+        "en": "Changes are announced through live regions (status messages, the editor's structure announcements), as for 4.1.3.",
+        "he": "שינויים מוכרזים דרך אזורים חיים (הודעות סטטוס, הכרזות המבנה של העורך), כמו ב-4.1.3."
+      },
+      "evidence": [
+        "e2e/sr-announce.spec.ts"
+      ]
+    },
+    {
+      "id": "11.5.2.16",
+      "name": "Modifications of states and properties",
+      "status": "partially-supports",
+      "mirrors": "4.1.2",
+      "remarks": {
+        "en": "States that a user may change (checked, expanded, selected) are changed through the same HTML controls assistive technology operates. The canvas and the map are third-party widgets with partial roles (4.1.2).",
+        "he": "מצבים שהמשתמש רשאי לשנות (מסומן, מורחב, נבחר) משתנים דרך אותם רכיבי HTML שהטכנולוגיה המסייעת מפעילה. הקנבס והמפה הם רכיבים של צד שלישי עם תפקידים חלקיים (4.1.2)."
+      },
+      "plan": {
+        "en": "As 4.1.2.",
+        "he": "כמו 4.1.2.",
+        "target": "0.2.0"
+      }
+    },
+    {
+      "id": "11.5.2.17",
+      "name": "Modifications of values and text",
+      "status": "partially-supports",
+      "mirrors": "4.1.2",
+      "remarks": {
+        "en": "Text and values are edited in contenteditable and input elements, which the platform's text interfaces write to. The canvas and the map are third-party widgets with partial roles (4.1.2).",
+        "he": "טקסט וערכים נערכים ברכיבי contenteditable ו-input, שממשקי הטקסט של מערכת ההפעלה כותבים אליהם. הקנבס והמפה הם רכיבים של צד שלישי עם תפקידים חלקיים (4.1.2)."
+      },
+      "plan": {
+        "en": "As 4.1.2.",
+        "he": "כמו 4.1.2.",
+        "target": "0.2.0"
+      }
+    },
+    {
+      "id": "11.6.1",
+      "name": "User control of accessibility features",
+      "status": "not-applicable",
+      "remarks": {
+        "en": "Lumen is not platform software and has no platform accessibility features.",
+        "he": "Lumen אינו תוכנת פלטפורמה ואין לו יכולות נגישות של פלטפורמה."
+      }
+    },
+    {
+      "id": "11.6.2",
+      "name": "No disruption of accessibility features",
+      "status": "supports",
+      "remarks": {
+        "en": "Lumen does not turn off or override the platform's features: forced colours, reduced motion, zoom and text size, screen readers and switch access keep working.",
+        "he": "Lumen לא מכבה ולא עוקף יכולות של מערכת ההפעלה: צבעים כפויים, הפחתת תנועה, הגדלה וגודל טקסט, קוראי מסך וגישה במתגים ממשיכים לעבוד."
+      },
+      "evidence": [
+        "e2e/reflow.spec.ts"
+      ]
+    },
+    {
+      "id": "11.7",
+      "name": "User preferences",
+      "status": "partially-supports",
+      "remarks": {
+        "en": "Lumen follows the system's light or dark scheme, forced colours, reduced motion and the browser's zoom and text size. The desktop app does not yet follow the system text size by itself, and V4.1.1 reworked this clause, so its new sub-requirements have not all been checked.",
+        "he": "Lumen עוקב אחרי הבהיר או הכהה של המערכת, צבעים כפויים, הפחתת תנועה, וההגדלה וגודל הטקסט של הדפדפן. אפליקציית המחשב עוד לא עוקבת בעצמה אחרי גודל הטקסט של המערכת, וגרסה 4.1.1 כתבה את הסעיף הזה מחדש, ולכן לא כל דרישות המשנה החדשות שלו נבדקו."
+      },
+      "evidence": [
+        "e2e/reflow.spec.ts"
+      ],
+      "plan": {
+        "en": "Follow the system text size in the desktop and mobile apps, and check each V4.1.1 sub-requirement of 11.7.",
+        "he": "לעקוב אחרי גודל הטקסט של המערכת באפליקציות המחשב והנייד, ולבדוק כל דרישת משנה של 11.7 בגרסה 4.1.1.",
+        "target": "0.2.0"
+      }
+    },
+    {
+      "id": "11.8.1",
+      "name": "Content technology",
+      "status": "supports",
+      "remarks": {
+        "en": "Lumen writes Markdown and exports HTML, both formats that can express accessible content (headings, lists, tables, alternative text, language).",
+        "he": "Lumen כותב Markdown ומייצא HTML, שני פורמטים שיכולים לבטא תוכן נגיש (כותרות, רשימות, טבלאות, טקסט חלופי, שפה)."
+      },
+      "evidence": [
+        "src/storage/exportHtml.ts"
+      ]
+    },
+    {
+      "id": "11.8.2",
+      "name": "Accessible content creation",
+      "status": "partially-supports",
+      "remarks": {
+        "en": "Headings, lists, tables, links and image alternative text are first-class in both editors. Marking the language of a passage (a Hebrew quote in an English note) has no command yet.",
+        "he": "כותרות, רשימות, טבלאות, קישורים וטקסט חלופי לתמונות הם חלק מרכזי בשני העורכים. לסימון שפה של קטע (ציטוט בעברית בפתק באנגלית) עוד אין פקודה."
+      },
+      "plan": {
+        "en": "A command to mark a passage's language, kept as lang in the exported HTML.",
+        "he": "פקודה לסימון השפה של קטע, שנשמרת כ-lang ב-HTML המיוצא.",
+        "target": "0.2.0"
+      }
+    },
+    {
+      "id": "11.8.3",
+      "name": "Preservation of accessibility information in transformations",
+      "status": "partially-supports",
+      "remarks": {
+        "en": "HTML export keeps headings, lists, tables, alternative text and the note's direction. Word, PDF and EPUB exports have not been checked for tags and reading order.",
+        "he": "ייצוא ל-HTML שומר כותרות, רשימות, טבלאות, טקסט חלופי ואת כיוון הפתק. הייצוא ל-Word, ‏PDF ו-EPUB עוד לא נבדק לתגיות ולסדר קריאה."
+      },
+      "evidence": [
+        "src/storage/exportHtml.ts"
+      ],
+      "plan": {
+        "en": "Check tagged PDF, Word and EPUB exports with PAC and Ace, in Hebrew and English.",
+        "he": "לבדוק את הייצוא ל-PDF מתויג, ‏Word ו-EPUB עם PAC ו-Ace, בעברית ובאנגלית.",
+        "target": "0.2.0"
+      }
+    },
+    {
+      "id": "11.8.4",
+      "name": "Repair assistance",
+      "status": "supports",
+      "remarks": {
+        "en": "Vault Doctor lists images without alternative text, and the alt-text helper can suggest a description to review.",
+        "he": "רופא הכספת מציג תמונות בלי טקסט חלופי, והעוזר לטקסט חלופי יכול להציע תיאור לבדיקה."
+      },
+      "evidence": [
+        "src/lint/vaultDoctor.ts"
+      ]
+    },
+    {
+      "id": "11.8.5",
+      "name": "Templates",
+      "status": "partially-supports",
+      "remarks": {
+        "en": "Note templates use real headings and lists. They have not been reviewed one by one against WCAG.",
+        "he": "תבניות הפתקים משתמשות בכותרות וברשימות אמיתיות. הן עוד לא נבדקו אחת-אחת מול WCAG."
+      },
+      "plan": {
+        "en": "Review every built-in template and mark the accessible ones.",
+        "he": "לבדוק כל תבנית מובנית ולסמן את הנגישות.",
+        "target": "0.2.0"
+      }
+    }
+  ]
+}
