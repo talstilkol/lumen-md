@@ -21,6 +21,8 @@ interface Props {
 export function PageView({ markdownText, docKey = null }: Props) {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  // The ready marker (plan W7.25): the page count comes from a real measurement, not the initial 1.
+  const [measured, setMeasured] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const measuringRef = useRef<HTMLDivElement>(null);
 
@@ -30,6 +32,7 @@ export function PageView({ markdownText, docKey = null }: Props) {
     const observer = new ResizeObserver(() => {
       const height = measuringRef.current?.scrollHeight ?? 0;
       setTotalPages(Math.max(1, Math.ceil(height / CONTENT_HEIGHT)));
+      setMeasured(true);
     });
     observer.observe(measuringRef.current);
     return () => observer.disconnect();
@@ -57,6 +60,8 @@ export function PageView({ markdownText, docKey = null }: Props) {
 
   return (
     <div
+      data-testid="page-view"
+      data-ready={String(measured)}
       style={{
         display: "flex",
         flexDirection: "column",

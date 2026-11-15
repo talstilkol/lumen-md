@@ -74,9 +74,14 @@ interface Props {
 export function VersionHistory({ fileName, currentContent, onRestore, onClose }: Props) {
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const [selected, setSelected] = useState<Snapshot | null>(null);
+  // The ready marker (plan W7.25): the snapshot list for this file has loaded (or failed to).
+  const [loadedFor, setLoadedFor] = useState<string | null>(null);
 
   useEffect(() => {
-    loadSnapshots(fileName).then(setSnapshots).catch(() => setSnapshots([]));
+    loadSnapshots(fileName)
+      .then(setSnapshots)
+      .catch(() => setSnapshots([]))
+      .finally(() => setLoadedFor(fileName));
   }, [fileName]);
 
   const handleRestore = useCallback(async () => {
@@ -101,6 +106,8 @@ export function VersionHistory({ fileName, currentContent, onRestore, onClose }:
       role="dialog"
       aria-modal="true"
       aria-label={t("versionHistory.title")}
+      data-testid="version-history"
+      data-ready={String(loadedFor === fileName)}
       style={{
         position: "fixed",
         inset: 0,

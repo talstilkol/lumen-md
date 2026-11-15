@@ -25,7 +25,7 @@ for (const v of VARIANTS) {
         await prepare(page, v, s.id === "rtl-matrix" ? RTL_NOTE : undefined);
         await s.open(page);
         await page.locator(s.ready).first().waitFor({ state: "visible", timeout: 20_000 });
-        if (s.ready === "body") await domSettled(page);
+        await domSettled(page);
         await s.settled?.(page);
         await settle(page);
         const ok = await percySnapshot(page, `${s.id} — ${v.id}`, { widths: [1280], minHeight: 800, ...(canary ? { percyCSS: RTL_CANARY_CSS } : {}) });
