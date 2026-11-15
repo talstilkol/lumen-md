@@ -453,6 +453,32 @@ jobs:
           name: playwright-report-${{ matrix.browser }}
           path: playwright-report/
 
+  visual:
+    # Plan 10.3: every surface of visual/harness.ts × en / he × light / dark
+    # against the baselines committed in visual/__baselines__/<platform>/
+    # (Chromium). Run by Buildkite on the Mac's queue (scripts/buildkite/lib.mjs,
+    # JOBS "visual"), where the baselines are approved. A missing baseline or
+    # one from another Chromium fails (scripts/visual-stamp.mjs --check), and
+    # so does any pixel change (updateSnapshots "none" on the gate, W10.B16).
+    name: visual regression (chromium)
+    runs-on: ubuntu-24.04 # pinned: ubuntu-latest becomes Ubuntu 26 from 19.10.2026 (actions/runner-images#14748)
+    timeout-minutes: 30
+    needs: check
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: 22, cache: npm }
+      - run: npm ci || npm install
+      - name: Install Playwright browser (chromium)
+        run: npx playwright install --with-deps chromium
+      - name: Baselines exist for this platform and Chromium
+        run: node scripts/visual-stamp.mjs --check
+      - name: Visual regression (plan 10.3)
+        # playwright.visual.config.ts builds and serves dist/ itself (vite preview).
+        run: npm run test:visual
+
   e2e-prod:
     name: e2e against production build
     runs-on: ubuntu-24.04 # pinned: ubuntu-latest becomes Ubuntu 26 from 19.10.2026 (actions/runner-images#14748)

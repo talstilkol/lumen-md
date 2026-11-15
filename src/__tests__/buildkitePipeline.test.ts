@@ -83,6 +83,25 @@ describe("Buildkite pipeline against ci.yml (plan W7.21)", () => {
     expect(problems).toContain("receipt does not wait for static");
   });
 
+  it("runs the visual gate on the Mac, on every build: baselines checked, then npm run test:visual (plan 10.3, W10.E23)", () => {
+    const v = committed().steps.find((s: Step) => s.key === "visual") as Step & { command: string; if?: string; agents: { queue: string } };
+    expect(v).toBeTruthy();
+    expect(v.agents.queue).toBe("mac");
+    expect(v.if).toBeUndefined();
+    // The stamp check comes first, so a run without baselines fails with the reason.
+    expect(v.command.indexOf("node scripts/visual-stamp.mjs --check")).toBeGreaterThan(-1);
+    expect(v.command.indexOf("node scripts/visual-stamp.mjs --check")).toBeLessThan(v.command.indexOf("npm run test:visual"));
+    // run.sh exports CI=1, so playwright.visual.config.ts compares and never writes (W10.B16).
+    expect(readFileSync("scripts/buildkite/run.sh", "utf8")).toMatch(/^export CI=1\b/m);
+    const p = buildPipeline(ci());
+    const by = (k: string) => p.steps.find((s: Step) => s.key === k);
+    by("visual").agents = { queue: "linux" };
+    by("visual").if = 'build.branch == "main"';
+    expect(pipelineRules(p).join("\n")).toMatch(/visual must run on the Mac[\s\S]*visual must run on every build/);
+    p.steps = p.steps.filter((s: Step) => s.key !== "visual");
+    expect(pipelineRules(p)).toContain("no visual job (plan 10.3: npm run test:visual)");
+  });
+
   it("copies ci.yml's run text, with matrix values, env overrides and escaped $", () => {
     const job = JOBS.find((j: { key: string }) => j.key === "e2e-firefox");
     const script = jobScript(job, ci());

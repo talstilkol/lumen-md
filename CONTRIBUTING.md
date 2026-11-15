@@ -188,6 +188,11 @@ npm run test:visual                    # compare; a missing baseline fails
   toolbar must fail the comparison.
 - Baselines are per platform: compare on the kind of machine that wrote
   them. `.github/workflows/visual.yml` can run it on Linux, by hand only.
+- **The gate** is Buildkite's `visual` step, on the Mac's queue (plan 10.3).
+  It first runs `node scripts/visual-stamp.mjs --check`, which fails when
+  `visual/__baselines__/<platform>/` has no PNGs, no `ENVIRONMENT.json`, or
+  one written by another Chromium. Then it runs `npm run test:visual`.
+  `npm run test:visual:update` writes that stamp after a successful run.
 
 ### Guidelines
 
