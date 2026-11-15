@@ -53,13 +53,33 @@ const seen = new Map<string, string>();
 /** Text this module just wrote: the change event it causes is ours, not the user's. */
 const ours = new Map<string, string>();
 
-async function contextFor() {
-  let lastDaily: Record<string, string> = {};
+/** A rule's event that waited over Shabbat or a yom tov (W12.U2), replayed on `until`. */
+export interface Postponed {
+  rule: string;
+  until: string;
+  event: VaultEvent;
+}
+
+interface State {
+  lastDaily?: Record<string, string>;
+  postponed?: Postponed[];
+}
+
+async function readState(): Promise<State> {
   try {
-    lastDaily = (JSON.parse((await readOrNull(STATE_PATH)) ?? "{}") as { lastDaily?: Record<string, string> }).lastDaily ?? {};
+    return JSON.parse((await readOrNull(STATE_PATH)) ?? "{}") as State;
   } catch {
-    lastDaily = {};
+    return {};
   }
+}
+
+const writeState = (st: State) => writeWorkspaceFile(STATE_PATH, JSON.stringify(st) + "\n");
+
+/** Holidays as in Israel unless the daily-notes setting says diaspora. */
+const israel = () => (useAppStore.getState().dailyNotes as { israel?: boolean } | undefined)?.israel ?? true;
+
+async function contextFor() {
+  const lastDaily: Record<string, string> = (await readState()).lastDaily ?? {};
   const files = new Map<string, string | null>();
   for (const f of await listWorkspace()) files.set(f.path, null);
   const vault = {
@@ -70,24 +90,32 @@ async function contextFor() {
 }
 
 /** The plan for `event` — the dry run. Nothing is written. */
-export async function dryRun(event: VaultEvent): Promise<Plan> {
+export async function dryRun(event: VaultEvent, only?: Rule[]): Promise<Plan> {
   const rules = await loadRules();
   const { vault, files, lastDaily } = await contextFor();
   // Templates and the daily note are read on demand.
   const read = (p: string) => vault.read(p);
   const pending = new Set<string>();
   const view = { read: (p: string) => read(p) ?? (pending.add(p), null), exists: vault.exists };
-  let p = plan(rules, event, { vault: view, dailyPath, today: isoToday(), lastDaily });
+  let p = plan(only ?? rules, event, { vault: view, dailyPath, today: isoToday(), lastDaily, israel: israel() });
   if (pending.size) {
     for (const path of pending) files.set(path, await readOrNull(path));
-    p = plan(rules, event, { vault: { read: (x) => files.get(x) ?? seen.get(x) ?? null, exists: vault.exists }, dailyPath, today: isoToday(), lastDaily });
+    p = plan(only ?? rules, event, { vault: { read: (x) => files.get(x) ?? seen.get(x) ?? null, exists: vault.exists }, dailyPath, today: isoToday(), lastDaily, israel: israel() });
   }
   return p;
 }
 
 /** Run the rules for `event` and log the run. Returns null when no rule fired. */
-export async function runFor(event: VaultEvent): Promise<RunLogEntry | null> {
-  const p = await dryRun(event);
+export async function runFor(event: VaultEvent, only?: Rule[]): Promise<RunLogEntry | null> {
+  const p = await dryRun(event, only);
+  // W12.U2: an event a rule may not handle on Shabbat or a yom tov waits for the next weekday.
+  const waiting = p.postponed.filter((x) => x.event);
+  if (waiting.length) {
+    const st = await readState();
+    const list = st.postponed ?? [];
+    for (const w of waiting) if (!list.some((x) => x.rule === w.rule && JSON.stringify(x.event) === JSON.stringify(w.event))) list.push({ rule: w.rule, until: w.until, event: w.event! });
+    await writeState({ ...st, postponed: list });
+  }
   if (!p.changes.length && !Object.keys(p.dailyRan).length) return null;
   for (const c of p.changes) if (c.kind === "write") ours.set(c.path, c.after);
   const entry = await applyPlan(p, fs, `${Date.now().toString(36)}`, event.kind === "daily" ? `daily ${event.date}` : `${event.kind} ${event.path}`, new Date());
@@ -95,10 +123,26 @@ export async function runFor(event: VaultEvent): Promise<RunLogEntry | null> {
   const log = [entry, ...(await readLog())].slice(0, 50);
   await writeWorkspaceFile(LOG_PATH, JSON.stringify(log, null, 1) + "\n");
   if (Object.keys(p.dailyRan).length) {
-    const prev = await contextFor();
-    await writeWorkspaceFile(STATE_PATH, JSON.stringify({ lastDaily: { ...prev.lastDaily, ...p.dailyRan } }) + "\n");
+    const st = await readState();
+    await writeState({ ...st, lastDaily: { ...st.lastDaily, ...p.dailyRan } });
   }
   return entry;
+}
+
+/** W12.U2: run the events that waited over Shabbat or a yom tov, once their day has come. */
+export async function replayPostponed(): Promise<number> {
+  const st = await readState();
+  const today = isoToday();
+  const due = (st.postponed ?? []).filter((x) => x.until <= today);
+  if (!due.length) return 0;
+  await writeState({ ...st, postponed: (st.postponed ?? []).filter((x) => x.until > today) });
+  const rules = await loadRules();
+  let ran = 0;
+  for (const x of due) {
+    const rule = rules.find((r) => r.id === x.rule);
+    if (rule && (await runFor(x.event, [rule]).catch(() => null))) ran++;
+  }
+  return ran;
 }
 
 /** Undo the newest run that is not undone yet. */
@@ -147,7 +191,12 @@ export async function startAutomationsIfConfigured(): Promise<boolean> {
     },
     { debounceMs: 800 },
   );
-  const daily = () => void (queue = queue.then(() => runFor({ kind: "daily", date: isoToday() }).then(() => undefined, () => undefined)));
+  const daily = () =>
+    void (queue = queue.then(() =>
+      replayPostponed()
+        .then(() => runFor({ kind: "daily", date: isoToday() }))
+        .then(() => undefined, () => undefined),
+    ));
   daily();
   window.setInterval(daily, 30 * 60 * 1000);
   return true;

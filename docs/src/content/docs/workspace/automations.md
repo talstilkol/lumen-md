@@ -32,6 +32,33 @@ through the table, the property panel or a plugin's `bases.update` all
 count. The filters see the note alone, so a filter that looks at other notes
 (backlinks, a linked note's property) can't match here.
 
+### When an object of a type is created, or its field changes
+
+**An object of a type is created** fires when a note gets a type: a new
+note with `type: person` in its frontmatter, or an existing note that is
+given the type. A note that already had the type and is only edited does
+not count. **A field of a type changes** fires when a field of an object of
+that type changes: one field, one field to a given value, or any field.
+The type is matched by its id or name in `type:`, which can be one value or
+a list.
+
+### Not on Shabbat or a holiday
+
+Every new rule asks what to do on Shabbat and holidays. With **wait: not on
+Shabbat or a holiday**, the rule does not run on Shabbat or on a yom tov:
+Rosh Hashana, Yom Kippur, the first and last days of Sukkot and Pesach, and
+Shavuot. Outside Israel, the second days count too, following the daily-notes
+setting.
+
+- A daily rule that falls on such a day runs on the next weekday.
+- A rule that a change would set off keeps the change and runs it on the
+  next weekday.
+
+Days are civil dates, so a rule that waits over Shabbat runs after midnight
+on Saturday night, or in the morning. The dry run lists every rule that
+waits, with the day it will run (`⏸ rule: today is Shabbat; it runs on
+2026-11-15`). The log, undo and the loop guard work as for any rule.
+
 ## Dry run
 
 **Automations: dry run on this note** shows what the rules would do to the
