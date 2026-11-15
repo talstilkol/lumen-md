@@ -45,7 +45,8 @@ export function searchUrl(name: string, lang: "he" | "en", limit = 7): string {
   return `${WIKIDATA_API}?${q}`;
 }
 
-/** Search in Hebrew and in English; one row per item, Hebrew first. `fetchImpl` is the ledger-wrapped fetch in the app. */
+/** Search in Hebrew and in English; one row per item, Hebrew first. `fetchImpl` is the consented ledger fetch in the app (ui/WikidataLink.tsx). */
+// privacy-ledger: cloud-text — "Wikidata search: the entity name only" (www.wikidata.org, in RULES), only after the user consents.
 export async function searchWikidata(name: string, fetchImpl: typeof fetch = (...a) => fetch(...a)): Promise<WikidataHit[]> {
   const out = new Map<string, WikidataHit>();
   for (const lang of ["he", "en"] as const) {
