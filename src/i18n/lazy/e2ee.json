@@ -337,5 +337,8 @@
   "e2ee.unaudited.body": "Lumen's encryption was written in this project and has not been reviewed by an outside security firm. Keep your own backup of anything you can't afford to lose.",
   "e2ee.gate.title": "Turn on encrypted sync?",
   "e2ee.gate.enable": "Turn on (experimental)",
-  "e2ee.gate.cancel": "Not now"
+  "e2ee.gate.cancel": "Not now",
+  "e2ee.rules.conflictMode.merge": "Merge, and ask only about what overlaps (default)",
+  "e2ee.rules.conflictMode.file": "Keep a conflict file (name.sync-conflict-…), no merge",
+  "e2ee.rules.conflictMode": "When this device and another changed the same note"
 }

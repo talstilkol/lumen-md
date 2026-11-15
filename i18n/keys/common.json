@@ -4239,6 +4239,21 @@
       ]
     },
     {
+      "key": "e2ee.rules.conflictMode",
+      "en": "When this device and another changed the same note",
+      "vars": []
+    },
+    {
+      "key": "e2ee.rules.conflictMode.file",
+      "en": "Keep a conflict file (name.sync-conflict-…), no merge",
+      "vars": []
+    },
+    {
+      "key": "e2ee.rules.conflictMode.merge",
+      "en": "Merge, and ask only about what overlaps (default)",
+      "vars": []
+    },
+    {
       "key": "e2ee.rules.extensions",
       "en": "File types to leave out (e.g. mp4, mov)",
       "vars": []
