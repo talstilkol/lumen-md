@@ -31,6 +31,7 @@ import { evaluateBases, parseBases, type BasesEvalOptions, type BasesScope, type
 import type { BasesNode } from "./expr";
 import { equalValues, fromYaml, isEmptyValue, isTagged, parseWikiLink, sortCompare, toText, truthy, type BasesFile, type BValue } from "./values";
 import { builtinSummary, compileFilter, sortDate } from "./fastFilters";
+import { workdaysUntil } from "../workdays";
 export { builtinSummary, compileFilter } from "./fastFilters";
 
 export type BasesFilter = string | { and: BasesFilter[] } | { or: BasesFilter[] } | { not: BasesFilter[] };
@@ -79,7 +80,8 @@ export interface BasesRelation {
   incoming: boolean;
 }
 
-export const ROLLUP_FUNCTIONS = ["count", "sum", "avg", "min", "max", "earliest", "latest"] as const;
+/** "workdays": working days from today until the earliest date of `property` among the related notes (W10.C26). */
+export const ROLLUP_FUNCTIONS = ["count", "sum", "avg", "min", "max", "earliest", "latest", "workdays"] as const;
 export type RollupFunction = (typeof ROLLUP_FUNCTIONS)[number];
 
 /** A rollup: `function` over `property` of the notes of `relation`. */
@@ -571,6 +573,10 @@ export function runBase(base: BaseModel, files: readonly BasesFile[], opts: RunO
     try {
       const values = targets.map((f) => value(r.property!, scopeFor(f)));
       const flat = values.flatMap((v) => (Array.isArray(v) ? v : [v]));
+      if (r.function === "workdays") {
+        const first = builtinSummary("Earliest", flat);
+        return first === undefined || first === null ? null : workdaysUntil(first, evalOpts.now);
+      }
       const summary = { sum: "Sum", avg: "Average", min: "Min", max: "Max", earliest: "Earliest", latest: "Latest" }[r.function];
       const out = builtinSummary(summary, flat);
       return out === undefined ? null : out;
