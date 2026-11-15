@@ -20,7 +20,7 @@ const SRC = resolve(__dirname, "..");
  * statically); the users may import each other statically inside it.
  */
 const DOMAINS: Record<string, { module: string; users: string[]; prefixes: string[]; within?: string; shared?: string[] }> = {
-  "entityGraph.json": { module: "ui/entityGraphStrings.ts", users: ["ui/EntityReviewPanel.tsx", "ui/EntityGraphView.tsx", "ui/EntityPage.tsx"], prefixes: ["entityGraph."] },
+  "entityGraph.json": { module: "ui/entityGraphStrings.ts", users: ["ui/EntityReviewPanel.tsx", "ui/EntityGraphView.tsx", "ui/EntityPage.tsx", "ui/EntityGraphScreen.tsx"], prefixes: ["entityGraph."] },
   // The OpenAlex switch in Settings → Privacy and its consent question (plan W12.X3); openAlexLookup.ts loads the strings with a dynamic import.
   "openAlex.json": { module: "citations/openAlexStrings.ts", users: ["citations/OpenAlexSwitch.tsx"], prefixes: ["openAlex."] },
   "caption.json": { module: "ai/captionStrings.ts", users: ["ai/caption.ts"], prefixes: ["caption."] },
@@ -121,6 +121,8 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "network.json": { module: "agents/networkStrings.ts", users: ["agents/network.ts"], prefixes: ["agents.netConsent.body", "agents.netConsent.credential", "agents.netConsent.exact", "agents.netConsent.ok", "agents.netConsent.perCall", "agents.netConsent.title", "agents.netConsent.untrusted", "agents.netConsent.visits", "agents.netConsent.what.page-address", "agents.netConsent.what.search-query", "agents.netConsent.what.tool-args"] },
   "basesBlock.json": { module: "views/bases/basesBlockStrings.ts", users: ["views/bases/BasesBlock.tsx"], prefixes: ["base."] },
   "typedObjects.json": { module: "types/typedObjectsStrings.ts", users: ["types/TypePage.tsx"], prefixes: ["types."] },
+  // The reading list's commands (plan W12.X2), loaded on first use.
+  "readingList.json": { module: "reading/readingListStrings.ts", users: ["commands/domains/readingActions.ts"], prefixes: ["readingList."] },
   "templateGallery.json": { module: "ui/templateGalleryStrings.ts", users: ["ui/TemplateGallery.tsx"], prefixes: ["templates.allCategories", "templates.byAuthor", "templates.clearFilter", "templates.close", "templates.contribute", "templates.contributeLink", "templates.downloads", "templates.empty", "templates.error", "templates.installFailed", "templates.installed", "templates.installing", "templates.loading", "templates.rating", "templates.searchPlaceholder", "templates.sort", "templates.sort.downloads", "templates.sort.rating", "templates.title"] },
   "onboardingTour.json": { module: "ui/onboardingTourStrings.ts", users: ["ui/OnboardingTour.tsx"], prefixes: ["onboard.tour.skip", "tour.done", "tour.next", "tour.step.editor.body", "tour.step.editor.title", "tour.step.menu.body", "tour.step.menu.title", "tour.step.statusBar.body", "tour.step.statusBar.title", "tour.step.viewModes.body", "tour.step.viewModes.title", "tour.step.workspace.body", "tour.step.workspace.title"] },
   "useGit.json": { module: "hooks/useGitStrings.ts", users: ["hooks/useGit.ts"], prefixes: ["git.alert.noRepo", "git.alert.pushFailed", "git.alert.statusFailed", "git.defaultCommitMessage", "git.placeholder.name", "git.prompt.cloneUrl", "git.prompt.email", "git.prompt.name", "toast.clonedFilesIntoWorkspace", "toast.cloningRepository", "toast.generatingCommitMessage", "toast.gitIdentitySet", "toast.pulledChangedFiles", "toast.pulling", "toast.pushedToRemote", "toast.pushing"] },

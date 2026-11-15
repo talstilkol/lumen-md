@@ -93,6 +93,7 @@ import { explainError } from "./lib/userError";
 import { useEdgeSwipes, useLongNotesOpenForReading } from "./mobile/useMobileGestures";
 import { FeatureFlagsHost } from "./ui/FeatureFlagsHost";
 import { TypePageHost } from "./types/TypePageHost";
+import { EntityGraphHost } from "./ui/EntityGraphHost";
 import { useDesktopShell } from "./desktop/useDesktopShell";
 // W6.25: App.tsx split into hooks and components, behaviour unchanged.
 import { useAppBootEffects } from "./hooks/useAppBootEffects";
@@ -606,6 +607,7 @@ export default function App() {
       <HelpHost />
       <FeatureFlagsHost />
       <TypePageHost />
+      <EntityGraphHost />
       <AiSuggestionsPanel />
       <AiInlinePromptOverlay />
       <MobileKeyboardBarHost />

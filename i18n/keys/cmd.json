@@ -786,6 +786,21 @@
       "vars": []
     },
     {
+      "key": "cmd.entities.graph",
+      "en": "Entity graph",
+      "vars": []
+    },
+    {
+      "key": "cmd.entities.graph.hint",
+      "en": "Every entity and who cites whom, as a graph or a table",
+      "vars": []
+    },
+    {
+      "key": "cmd.entities.review",
+      "en": "Entity graph: proposals to review",
+      "vars": []
+    },
+    {
       "key": "cmd.epub.open",
       "en": "Open an EPUB for reading…",
       "vars": []
@@ -1702,6 +1717,26 @@
     {
       "key": "cmd.reading.mode",
       "en": "Reading mode",
+      "vars": []
+    },
+    {
+      "key": "cmd.reading.newFromCapture",
+      "en": "Reading list: new source from a captured page…",
+      "vars": []
+    },
+    {
+      "key": "cmd.reading.newFromCapture.hint",
+      "en": "The clipped page open now, or a link you type",
+      "vars": []
+    },
+    {
+      "key": "cmd.reading.newFromLibrary",
+      "en": "Reading list: new source from the citation library…",
+      "vars": []
+    },
+    {
+      "key": "cmd.reading.newFromLibrary.hint",
+      "en": "A Zotero, BibTeX or CSL-JSON item becomes a source note",
       "vars": []
     },
     {

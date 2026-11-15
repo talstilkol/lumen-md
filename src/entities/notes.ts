@@ -19,7 +19,8 @@ export interface EntityNote {
 
 /** The note for `e`, with its outgoing approved relations as properties. */
 export function entityNote(e: Entity, outgoing: readonly Edge[] = [], nameOf: (id: string) => string | undefined = () => undefined): EntityNote {
-  const props: Record<string, unknown> = { [TYPE_PROP]: e.type };
+  // `type:` is what the typed-object registry and its Bases read (W12.T3, entities/types.ts).
+  const props: Record<string, unknown> = { type: e.type, [TYPE_PROP]: e.type };
   if (e.aliases.length) props.aliases = [...e.aliases];
   if (e.qid) props.wikidata = e.qid;
   const rel = new Map<string, string[]>();

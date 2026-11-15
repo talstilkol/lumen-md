@@ -38,13 +38,28 @@ is left as it is.
 
 ## The reading list
 
-Command palette (⌘K) → **All Source** (in Hebrew, **כל המקור**) opens the type's Base. Its
+Command palette (⌘K) → **All Sources** (in Hebrew, **כל המקורות**) opens the type's Base. Its
 **By status** view is a kanban with the columns to read, reading and done.
 **Save as .base** keeps it as a file that Obsidian opens too.
 
 ## New sources
 
-Make a note with `type: source` (or the `#source` tag), `status: to-read`
-and a `file:` link, and fill in what you know. Making a source
-straight from a Zotero item or from a page captured in the browser is coming:
-the conversion is written and tested, the command for it is not there yet.
+From the command palette (⌘K):
+
+- **Reading list: new source from the citation library…** searches the
+  library the cite dialog uses (the vault's `.bib` and CSL-JSON files and
+  the Zotero copy the desktop app syncs) by cite key, author, title or
+  year. The item you pick becomes a source in `Sources/` with its
+  `citekey`, `author`, `year` and link (its DOI when it has one).
+- **Reading list: new source from a captured page…** makes a `website`
+  source from the clip open now (a page saved with the web clipper: its
+  `source:` link, title, author and year), with a link back to the clip.
+  On any other note it asks for the page's link.
+
+If the vault already has a source with that cite key or link, it opens
+that one instead of making a second. Nothing is fetched: both read what is
+already in the vault. Without an open vault the new source opens as an
+unsaved note.
+
+You can also make one by hand: a note with `type: source` (or the
+`#source` tag), `status: to-read` and a `file:` link.
