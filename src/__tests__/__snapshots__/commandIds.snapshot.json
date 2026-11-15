@@ -2118,6 +2118,11 @@
       "id": "entities.review",
       "label": "Entity graph: proposals to review",
       "icon": "FileText"
+    },
+    {
+      "id": "entities.wikidata",
+      "label": "Entity: link to Wikidata…",
+      "icon": "FileText"
     }
   ],
   "full": [
@@ -4388,6 +4393,11 @@
       "id": "entities.review",
       "label": "Entity graph: proposals to review",
       "icon": "FileText"
+    },
+    {
+      "id": "entities.wikidata",
+      "label": "Entity: link to Wikidata…",
+      "icon": "FileText"
     }
   ],
   "autoSaveOn": [
@@ -4693,6 +4703,7 @@
     "automations.new",
     "automations.dryRun",
     "automations.undo",
-    "entities.review"
+    "entities.review",
+    "entities.wikidata"
   ]
 }

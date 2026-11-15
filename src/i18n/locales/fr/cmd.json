@@ -160,6 +160,8 @@
   "cmd.edit.toggleDirection": "Changer le sens du paragraphe (droite à gauche ↔ gauche à droite)",
   "cmd.edit.toggleDirection.hint": "Enregistré dans la note sous forme de marque de direction invisible en début de paragraphe ; dir: rtl | ltr | auto dans le frontmatter règle toute la note",
   "cmd.entities.review": "Graphe des entités : propositions à examiner",
+  "cmd.entities.wikidata": "Entité : lier à Wikidata…",
+  "cmd.entities.wikidata.notEntity": "Ouvrez d'abord une note d'entité (sous ישויות/).",
   "cmd.epub.open": "Ouvrir un EPUB pour le lire…",
   "cmd.export.latexProject": "Exporter un projet LaTeX (académique, hébreu)…",
   "cmd.export.latexProject.hint": "main.tex pour LuaLaTeX / XeLaTeX avec l’hébreu de droite à gauche, les maths, les citations [@key] des .bib du coffre et les images, en ZIP",

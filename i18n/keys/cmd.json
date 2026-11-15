@@ -821,6 +821,16 @@
       "vars": []
     },
     {
+      "key": "cmd.entities.wikidata",
+      "en": "Entity: link to Wikidata…",
+      "vars": []
+    },
+    {
+      "key": "cmd.entities.wikidata.notEntity",
+      "en": "Open an entity note first (a note under ישויות/).",
+      "vars": []
+    },
+    {
       "key": "cmd.epub.open",
       "en": "Open an EPUB for reading…",
       "vars": []
