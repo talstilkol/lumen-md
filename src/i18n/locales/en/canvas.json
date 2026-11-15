@@ -1,6 +1,8 @@
 {
   "canvas.autoSaved": "Canvas · auto-saved",
   "canvas.close": "Close",
+  "canvas.hl.deleted": "Source deleted",
+  "canvas.hl.page": "p. {n}",
   "canvas.migrate.done": "Canvases converted: {converted}, skipped: {skipped}, failed: {failed}, warnings: {warnings}",
   "canvas.migrate.none": "No tldraw canvases to convert",
   "canvas.new": "New",
