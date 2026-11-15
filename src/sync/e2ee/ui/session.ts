@@ -16,7 +16,9 @@
  * local edit and after the other device reports a change.
  */
 
-import { createVault, E2eeSync, unlockVault, unlockWithRecoveryKey, type SyncResult } from "../engine";
+import { createVault, E2eeSync, unlockVault, unlockWithPasskey, unlockWithRecoveryKey, type SyncResult } from "../engine";
+import { readKeyring, type KeyAccess } from "../keyring";
+import { passkeyPrf, type WebAuthnApi } from "../passkey";
 import type { VaultKeys } from "../keys";
 import { HEADER_NAME } from "../header";
 import { dialogResolver, type ConflictResolver } from "../conflict";
@@ -209,7 +211,7 @@ export function createSession(deps: SessionDeps = {}) {
   }
 
   /** Unlocked with `keys`: the engine, the timers and watchers, then a first round (unless `round` is false). */
-  async function start(keys: VaultKeys, created: Awaited<ReturnType<typeof createVault>> | null, round = true): Promise<SyncResult | null> {
+  async function start(keys: VaultKeys, created: Awaited<ReturnType<typeof createVault>> | null, round = true, access?: KeyAccess): Promise<SyncResult | null> {
     if (!provider) throw new Error("No provider connected");
     const files = await local();
     const makeStore = deps.store ?? idbStateStore;
@@ -222,6 +224,7 @@ export function createSession(deps: SessionDeps = {}) {
       resolver: deps.resolver ?? dialogResolver,
       exclude: (path, size) => exclude(path, size),
       onEvent: onEngineEvent,
+      ...(access ? { access } : {}),
     });
     if (created) await engine.markCreated(created.anchor);
     set({ phase: "unlocked", vaultExists: true });
@@ -301,6 +304,20 @@ export function createSession(deps: SessionDeps = {}) {
      * other devices are left out and pair again (`dropDevices`); the
      * recovery key stays wrapped for the new epoch.
      */
+    /**
+     * Unlock with a passkey (plan W11.S10): the user picks one of the vault's
+     * passkeys, its PRF output opens the keyring, and this session keeps the
+     * output in memory (never stored) to follow later key changes.
+     */
+    async openWithPasskey(api: WebAuthnApi): Promise<SyncResult> {
+      if (!provider) throw new Error("No provider connected");
+      const ring = await readKeyring(provider);
+      if (!ring) throw new Error("This vault has no passkeys");
+      const { id, prf } = await passkeyPrf(ring.file.vaultId, { api });
+      const { keys } = await unlockWithPasskey(provider, id, prf);
+      return (await start(keys, null, true, { passkey: { id, prf } }))!;
+    },
+
     async restore(recoveryKey: Uint8Array, newPassphrase: string): Promise<SyncResult> {
       if (!provider) throw new Error("No provider connected");
       const { keys } = await unlockWithRecoveryKey(provider, recoveryKey);

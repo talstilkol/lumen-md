@@ -348,5 +348,11 @@
   "e2ee.recovery.count": "{n} words are needed; there are {got}.",
   "e2ee.recovery.unknown": "Word {n} isn't on the recovery word list.",
   "e2ee.recovery.check": "The words don't add up: one is wrong or out of order.",
-  "e2ee.recovery.restore": "Restore"
+  "e2ee.recovery.restore": "Restore",
+  "e2ee.passkey.title": "Passkeys",
+  "e2ee.passkey.note": "A passkey on this device (or one your password manager syncs) can unlock the vault instead of the passphrase. Lumen uses the passkey's PRF extension, so no password is stored.",
+  "e2ee.passkey.item": "Passkey {n}",
+  "e2ee.passkey.remove": "Remove",
+  "e2ee.passkey.add": "Add a passkey",
+  "e2ee.passkey.unlock": "Unlock with a passkey"
 }

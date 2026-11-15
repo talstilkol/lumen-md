@@ -4085,6 +4085,38 @@
       "vars": []
     },
     {
+      "key": "e2ee.passkey.add",
+      "en": "Add a passkey",
+      "vars": []
+    },
+    {
+      "key": "e2ee.passkey.item",
+      "en": "Passkey {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "e2ee.passkey.note",
+      "en": "A passkey on this device (or one your password manager syncs) can unlock the vault instead of the passphrase. Lumen uses the passkey's PRF extension, so no password is stored.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.passkey.remove",
+      "en": "Remove",
+      "vars": []
+    },
+    {
+      "key": "e2ee.passkey.title",
+      "en": "Passkeys",
+      "vars": []
+    },
+    {
+      "key": "e2ee.passkey.unlock",
+      "en": "Unlock with a passkey",
+      "vars": []
+    },
+    {
       "key": "e2ee.progress",
       "en": "{done} of {total} files · {bytesDone} of {bytes}",
       "vars": [

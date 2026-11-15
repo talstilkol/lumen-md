@@ -224,3 +224,44 @@ export async function unlockWithRecoveryKey(provider: SyncProvider, key: Uint8Ar
   if (!sealed || sealed.recipient !== rk.age.recipient || sealed.mac !== rk.mac) throw new TamperedWrapError();
   return { keys };
 }
+
+/**
+ * Plan W11.S10: let a passkey open the vault. `prf` is the passkey's 32-byte
+ * WebAuthn PRF output for this vault's salt (passkey.ts); `id` its credential
+ * id (b64u). A key change wraps the epoch secret for it, and every later key
+ * change keeps it, like the recovery key.
+ */
+export async function addPasskey(sync: { keys(): VaultKeys; rekey(r: RekeyRequest): Promise<RekeyResult> }, id: string, prf: Uint8Array): Promise<RekeyResult> {
+  const pk = await recoveryKeys(prf, sync.keys().vaultId, "passkey");
+  return sync.rekey({ passkeys: { add: { [id]: { recipient: pk.age.recipient, mac: pk.mac } } } });
+}
+
+/** Revoke a passkey: a key change without it, so it can't open the new epoch (or any later one). */
+export function removePasskey(sync: { rekey(r: RekeyRequest): Promise<RekeyResult> }, id: string): Promise<RekeyResult> {
+  return sync.rekey({ passkeys: { remove: [id] } });
+}
+
+/**
+ * Open the vault with a passkey alone (plan W11.S10). The same checks as the
+ * recovery key: the wrap's check under the MAC key the PRF output gives, the
+ * age wrap, and the sealed list naming this passkey with that recipient and
+ * MAC key. RecoveryKeyError for a passkey the vault doesn't list.
+ */
+export async function unlockWithPasskey(provider: SyncProvider, id: string, prf: Uint8Array, state?: Pick<DeviceState, "ring"> | null): Promise<{ keys: VaultKeys }> {
+  const ring = await readKeyring(provider);
+  if (!ring) throw new RecoveryKeyError("This passkey doesn't open this vault");
+  const secret = await unwrapSecret(ring.file, { passkey: { id, prf } });
+  const placeholder = await crypto.subtle.generateKey({ name: "HMAC", hash: "SHA-256", length: 256 }, false, ["sign", "verify"]);
+  let keys: VaultKeys;
+  try {
+    keys = await keysFromKeyring(ring.file, secret, { header: placeholder, wrap: null }, { digest: ring.digest });
+  } catch (e) {
+    if (e instanceof PreReleaseKeyringError) throw e;
+    throw new TamperedWrapError();
+  }
+  if (state?.ring) await verifyAnchor(keys, state.ring);
+  const pk = await recoveryKeys(prf, ring.file.vaultId, "passkey");
+  const sealed = (await keyringContents(ring.file, keys)).passkeys?.[id];
+  if (!sealed || sealed.recipient !== pk.age.recipient || sealed.mac !== pk.mac) throw new TamperedWrapError();
+  return { keys };
+}
