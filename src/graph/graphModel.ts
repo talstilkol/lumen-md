@@ -15,6 +15,8 @@ export interface GraphNoteInput {
   content?: string;
   /** Tags and properties read already (`noteMeta`), instead of the text. */
   meta?: { tags: string[]; props: Record<string, string> };
+  /** The node's label, when it is not the file name (a verse node: its Hebrew name, nodes.ts). */
+  label?: string;
 }
 
 export interface GraphData {
@@ -117,7 +119,7 @@ export function buildGraph(notes: readonly GraphNoteInput[]): GraphData {
   const metas = notes.map((x) => x.meta ?? noteMeta(x.content));
   return {
     paths: notes.map((x) => x.path),
-    labels: notes.map((x) => basename(x.path)),
+    labels: notes.map((x) => x.label ?? basename(x.path)),
     folders: notes.map((x) => folderOf(x.path)),
     tags: metas.map((m) => m.tags),
     props: metas.map((m) => m.props),
