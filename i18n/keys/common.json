@@ -7937,6 +7937,58 @@
       "vars": []
     },
     {
+      "key": "library.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "library.count",
+      "en": "{count} clips in the library",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "library.empty",
+      "en": "No clips yet. Clip a web page and it appears here.",
+      "vars": []
+    },
+    {
+      "key": "library.indexing",
+      "en": "Indexing the library… {done} of {total}",
+      "vars": [
+        "done",
+        "total"
+      ]
+    },
+    {
+      "key": "library.noResults",
+      "en": "No clip matches that.",
+      "vars": []
+    },
+    {
+      "key": "library.noVault",
+      "en": "The library needs a vault on this device.",
+      "vars": []
+    },
+    {
+      "key": "library.search",
+      "en": "Search the library by meaning",
+      "vars": []
+    },
+    {
+      "key": "library.title",
+      "en": "Reading library",
+      "vars": []
+    },
+    {
+      "key": "library.unavailable",
+      "en": "Search by meaning is not available: {message}",
+      "vars": [
+        "message"
+      ]
+    },
+    {
       "key": "litReview.done",
       "en": "Literature review: {papers} papers, {values} verified values, in “{folder}”.",
       "vars": [

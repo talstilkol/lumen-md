@@ -35,6 +35,8 @@ export async function saveClipV2(payload: import("../../research/clipV2").ClipPa
   await writeWorkspaceFile(path, clip.markdown);
   const { markUntrustedNote } = await import("../../agents/untrusted");
   markUntrustedNote(path, `clipped from ${clip.source}`);
+  // Plan 7.6 (W10.E36): the library's own index takes the clip as it is saved.
+  void import("../../research/library/clipIndex").then((m) => m.indexClipOnSave(path, clip.markdown));
   window.dispatchEvent(new Event("lumen-workspace-changed"));
   useAppStore.getState().openTab({ name: path.split("/").pop()!, content: clip.markdown, workspaceName: path });
   showAiToast(t("clip.saved", { path }), "success");
@@ -88,6 +90,15 @@ export function buildResearchCommands({ liveDoc }: CommandContext): Command[] {
       icon: cmdIcons.Sparkles,
       group: t("group.tools"),
       action: () => import("./researchActions").then((m) => m.clipClipboard()),
+    },
+    {
+      id: "research.library",
+      label: t("cmd.research.library"),
+      hint: t("cmd.research.library.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      // Plan 7.6 (W10.E36): the clips, searched by meaning with the library's own index.
+      action: () => import("../../research/library/LibraryPanel").then((m) => m.toggleLibraryPanel()),
     },
     {
       id: "research.verify",

@@ -198,6 +198,8 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "benyehuda.json": { module: "sources/benyehuda/strings.ts", users: ["sources/benyehuda/app.ts"], prefixes: ["benyehuda."] },
   "knesset.json": { module: "sources/knesset/strings.ts", users: ["sources/knesset/app.ts"], prefixes: ["knesset."] },
   "datagov.json": { module: "sources/datagov/strings.ts", users: ["plugins/DatasetBlock.tsx", "sources/datagov/app.ts"], prefixes: ["datagov."] },
+  // The reading library panel (plan 7.6, W10.E36), opened from the palette.
+  "library.json": { module: "research/library/libraryStrings.ts", users: ["research/library/LibraryPanel.tsx"], prefixes: ["library."] },
   // Standard.site publishing (W7.19): the palette's publish and unpublish actions.
   "standardSite.json": { module: "publish/standardSiteStrings.ts", users: ["publish/standardSiteActions.ts"], prefixes: ["atproto."] },
   // The host-move banner: pwa/hostMoveBoot.ts loads pwa/hostMove.ts with a dynamic import, and it holds its own strings.

@@ -1740,6 +1740,16 @@
       "vars": []
     },
     {
+      "key": "cmd.research.library",
+      "en": "🔎 Research: Search the Library by Meaning",
+      "vars": []
+    },
+    {
+      "key": "cmd.research.library.hint",
+      "en": "Finds clips you saved by what they are about, not only their words. Clips are indexed on this device",
+      "vars": []
+    },
+    {
       "key": "cmd.research.litReview",
       "en": "Literature review from the vault's PDFs",
       "vars": []
