@@ -247,16 +247,8 @@ export function ShareDialog({ session, initialTab = "share", onClose, serverUrl 
   const [tab, setTab] = useState<Tab>(initialTab);
   const server = serverUrl === undefined ? collabServerUrl() : serverUrl;
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
-
   return (
-    <Modal aria-labelledby="share-dialog-title" className="cmd-palette-backdrop" onClick={onClose}>
+    <Modal onClose={onClose} aria-labelledby="share-dialog-title" className="cmd-palette-backdrop" onClick={onClose}>
       <div
         className="cmd-palette"
         onClick={(e) => e.stopPropagation()}

@@ -13,6 +13,7 @@
  */
 import { gzipSync } from "node:zlib";
 import { compareVersions, isBeta, parseVersion, tagOf } from "./release.mjs";
+import { stampManifest } from "./tauriSigning.mjs";
 import { formatPublicKey, parsePublicKey, rawPublicKey, readSecretKey, signData, verifyData } from "../supply-chain/minisign.mjs";
 
 /** What the committed tauri.conf.json carries until a release fills it. */
@@ -215,8 +216,8 @@ export function mergeLatest(a, b) {
  * updater key: the signature must verify the file the URL names. Returns
  * problems (empty = OK). `files` maps file name → bytes.
  */
-export function checkLatest(latest, files, pubkeyB64) {
-  const problems = [];
+export function checkLatest(latest, files, pubkeyB64, { now = new Date() } = {}) {
+  const problems = [...bindingProblems(latest, { now })];
   const platforms = Object.entries(latest?.platforms ?? {});
   if (!platforms.length) problems.push("latest.json has no platforms");
   for (const [p, { url, signature }] of platforms) {
@@ -233,6 +234,44 @@ export function checkLatest(latest, files, pubkeyB64) {
     }
   }
   return problems;
+}
+
+/** T6-I2: a manifest names its channel and an expiry in the future, or the app refuses it. */
+export function bindingProblems(latest, { channel = null, now = new Date() } = {}) {
+  const out = [];
+  if (!["stable", "beta"].includes(latest?.channel)) out.push(`latest.json names no channel ("stable" or "beta"): the app refuses it`);
+  else if (channel && latest.channel !== channel) out.push(`latest.json is for the ${latest.channel} channel, not ${channel}`);
+  const exp = Date.parse(latest?.expires ?? "");
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,9})?Z$/.test(String(latest?.expires ?? "")) || Number.isNaN(exp)) out.push("latest.json has no expiry (an ISO UTC time): the app refuses it");
+  else if (exp <= now.getTime()) out.push(`latest.json expired at ${latest.expires}`);
+  return out;
+}
+
+/**
+ * The beta channel's next latest.json (plan 14.4, T6-L4). `downloaded`: the
+ * channel's current latest.json and latest.json.sig as bytes ({ manifest,
+ * sig }), or null when there is none. It is verified with the updater key
+ * before anything in it is used; one that does not verify is not merged and
+ * not re-signed: the channel is rebuilt from this release alone.
+ * → { action: "keep" | "publish", next, notes: string[] }
+ */
+export function betaChannelPlan({ downloaded, latest, version, pubkey, now = new Date() }) {
+  const notes = [];
+  let have = null;
+  if (downloaded?.manifest) {
+    const problems = manifestProblems(new Map([[MANIFEST, downloaded.manifest], ...(downloaded.sig ? [[MANIFEST_SIG, downloaded.sig]] : [])]), pubkey);
+    if (problems.length) notes.push(`the beta channel's latest.json does not verify (${problems.join("; ")}): not merged; the channel is rebuilt from ${version} alone`);
+    else {
+      try {
+        have = JSON.parse(Buffer.from(downloaded.manifest).toString("utf8"));
+      } catch (e) {
+        notes.push(`the beta channel's latest.json is not JSON (${e.message}): rebuilt from ${version} alone`);
+      }
+    }
+  }
+  if (have && compareVersions(version, have.version) < 0) return { action: "keep", next: have, notes: [...notes, `beta channel stays on ${have.version} (newer than ${version})`] };
+  const merged = have && have.version === version ? mergeLatest(have, latest) : latest;
+  return { action: "publish", next: stampManifest(merged, { channel: "beta", now }), notes };
 }
 
 /* ---------- changelog from merged pull requests ---------- */

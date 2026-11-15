@@ -37,14 +37,6 @@ function TypographyDialogImpl({ target, onClose }: { target: TypographyTarget; o
 
   useEffect(() => {
     ref.current?.querySelector<HTMLElement>("input, button")?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        onClose();
-      }
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
 
   const update = (next: TypographySettings) => {
@@ -63,6 +55,7 @@ function TypographyDialogImpl({ target, onClose }: { target: TypographyTarget; o
 
   return (
     <Modal
+      onClose={onClose}
       aria-labelledby="typo-title"
       data-testid="typography-dialog"
       style={{ position: "fixed", inset: 0, background: "var(--overlay)", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingTop: "8vh", zIndex: 9999 }}

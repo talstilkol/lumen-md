@@ -34,11 +34,12 @@ import { execFileSync, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { bumpManifests, compareVersions, insertChangelog, isBeta, sha256sums, tagOf, verifySums } from "./lib/release.mjs";
+import { bumpManifests, insertChangelog, isBeta, sha256sums, tagOf, verifySums } from "./lib/release.mjs";
 import { LOCALES, addUntranslated } from "./lib/whats-new.mjs";
 import { latestJson } from "./lib/tauriSigning.mjs";
 import {
   bilingualNotes,
+  betaChannelPlan,
   checkLatest,
   fillUpdater,
   isBundleOf,
@@ -46,7 +47,6 @@ import {
   macUpdateName,
   MANIFEST_SIG,
   manifestProblems,
-  mergeLatest,
   mergedPrs,
   normalizeUpdaterPubkey,
   notesFiles,
@@ -439,17 +439,18 @@ function tauriSigner(file) {
 /** Point the rolling beta-channel release at this version when it is newer (plan 14.4); merge platforms uploaded from another machine. */
 function betaChannel(repo, version, latest, updater) {
   const dir = mkdtempSync(path.join(tmpdir(), "lumen-beta-"));
-  let have = null;
+  let downloaded = null;
   try {
-    execFileSync("gh", ["release", "download", "beta-channel", "--repo", repo, "--pattern", "latest.json", "--dir", dir], { stdio: "ignore" });
-    have = JSON.parse(readFileSync(path.join(dir, "latest.json"), "utf8"));
+    // T6-L4: the manifest and its signature, so what is on the release host is verified before it is merged and re-signed.
+    execFileSync("gh", ["release", "download", "beta-channel", "--repo", repo, "--pattern", "latest.json", "--pattern", MANIFEST_SIG, "--dir", dir], { stdio: "ignore" });
   } catch {
     if (!tryRun("gh", ["release", "view", "beta-channel", "--repo", repo])) run("gh", ["release", "create", "beta-channel", "--repo", repo, "--prerelease", "--latest=false", "--title", "Beta channel", "--notes", "Rolling pointer for the desktop beta update channel (plan 14.4). Not a release: its latest.json names the newest beta or stable release."]);
   }
-  if (have && compareVersions(version, have.version) < 0) {
-    console.log(`beta channel stays on ${have.version} (newer than ${version})`);
-  } else {
-    const next = have && have.version === version ? mergeLatest(have, latest) : latest;
+  if (existsSync(path.join(dir, "latest.json"))) downloaded = { manifest: readFileSync(path.join(dir, "latest.json")), sig: existsSync(path.join(dir, MANIFEST_SIG)) ? readFileSync(path.join(dir, MANIFEST_SIG)) : null };
+  const plan = betaChannelPlan({ downloaded, latest, version, pubkey: updater.pubkey });
+  for (const n of plan.notes) console.log(n);
+  if (plan.action === "publish") {
+    const next = plan.next;
     writeFileSync(path.join(dir, "latest.json"), JSON.stringify(next, null, 2) + "\n");
     // W11.S3: the merged manifest is new bytes, so it is signed again and checked before upload.
     const bytes = readFileSync(path.join(dir, "latest.json"));

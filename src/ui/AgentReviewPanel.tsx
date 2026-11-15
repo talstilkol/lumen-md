@@ -189,18 +189,6 @@ export function AgentReviewPanel({ open, onClose }: Props) {
   }, []);
   const model = useMemo(() => reviewModel(list), [list]);
 
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.stopPropagation();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
-
   const run = useCallback(async (work: () => Promise<unknown> | unknown) => {
     setBusy(true);
     try {
@@ -214,7 +202,7 @@ export function AgentReviewPanel({ open, onClose }: Props) {
   const pendingChanges = model.pending.flatMap((g) => g.changes);
 
   return (
-    <Modal className="cmd-palette-backdrop" onClick={onClose} aria-label={t("agentReview.title")} data-testid="agent-review-panel">
+    <Modal onClose={onClose} className="cmd-palette-backdrop" onClick={onClose} aria-label={t("agentReview.title")} data-testid="agent-review-panel">
       <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 720, padding: 0, display: "flex", flexDirection: "column", maxHeight: "85vh" }}>
         <header style={{ padding: "14px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <FileDiff size={18} style={{ color: "hsl(var(--accent))" }} />

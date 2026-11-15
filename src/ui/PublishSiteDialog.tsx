@@ -80,14 +80,6 @@ export function PublishSiteDialog({ onClose }: { onClose: () => void }) {
 
   useEffect(() => {
     closeRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.stopPropagation();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
   useEffect(() => {
@@ -186,7 +178,7 @@ export function PublishSiteDialog({ onClose }: { onClose: () => void }) {
     });
 
   return (
-    <Modal aria-label={t("publish.title")} className="cmd-palette-backdrop">
+    <Modal onClose={onClose} aria-label={t("publish.title")} className="cmd-palette-backdrop">
       <div className="cmd-palette" data-testid="publish-site" style={{ maxWidth: 640, padding: 0, display: "flex", flexDirection: "column", maxHeight: "88vh" }}>
         <header style={{ padding: "14px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <Globe size={18} style={{ color: "hsl(var(--accent))" }} />

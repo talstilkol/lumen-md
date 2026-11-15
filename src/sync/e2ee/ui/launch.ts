@@ -14,14 +14,19 @@ export function openSyncSetup(): Promise<void> {
   return import("./unaudited").then((g) => g.whenE2eeOn(() => import("./open").then((m) => m.openSyncSetup())));
 }
 
-/** `/oauth/dropbox` or `/oauth/gdrive` with `?code=`: finish the sign-in once secrets and vault are ready. */
+/**
+ * `/oauth/dropbox` or `/oauth/gdrive` with `?code=`: finish the sign-in once
+ * secrets and vault are ready. T6-L5: through the same gate as the
+ * launchers, so a link to the return path neither opens the sync panel nor
+ * connects the encrypted sync while `sync.e2ee` is off.
+ */
 export async function oauthReturn(ready: Promise<unknown>): Promise<void> {
   const kind = /^\/oauth\/(dropbox|gdrive)$/.exec(location.pathname)?.[1] as "dropbox" | "gdrive" | undefined;
   const code = new URLSearchParams(location.search).get("code");
   if (!kind || !code) return;
   try {
     await ready;
-    await (await import("./open")).finishOAuthReturn(kind, code);
+    await (await import("./unaudited")).whenE2eeOn(async () => (await import("./open")).finishOAuthReturn(kind, code));
   } catch (err) {
     const { log } = await import("../../../lib/logger");
     log.warn("sync sign-in failed", err);

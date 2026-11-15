@@ -16,6 +16,8 @@ import {
   parseReviewers,
   commentReceipts,
   excludedIdentities,
+  isCatchAll,
+  reviewerExcluded,
   // @ts-expect-error -- plain .mjs script, no types
 } from "../../scripts/lib/independentReview.mjs";
 // @ts-expect-error -- plain .mjs script, no types
@@ -24,6 +26,7 @@ import { keygen, registryEntry, signReceipt } from "../../scripts/review-sign.mj
 import { parseCodeowners, sensitiveChanges } from "../../scripts/lib/humanReview.mjs";
 
 const HEAD = "3f80047a28d66e086ff2b50459353fc66e82b31d";
+const BASE = "1d2c3b4a5f60718293a4b5c6d7e8f90a1b2c3d4e";
 const entries = parseCodeowners(readFileSync(join(__dirname, "../../.github/CODEOWNERS"), "utf8"));
 const sensitive = sensitiveChanges(["src/sync/e2ee/lan/rpc.ts", "src/__tests__/lanPreAuthAttack.test.ts", "src/storage/vault/atomic.ts"], entries);
 
@@ -31,6 +34,7 @@ const receipt = (o: Record<string, unknown> = {}) => ({
   format: "lumen-review",
   version: 1,
   pr: 495,
+  base: BASE,
   head: HEAD,
   author: "train-2",
   reviewer: "S",
@@ -46,7 +50,10 @@ const receipt = (o: Record<string, unknown> = {}) => ({
 // W10.D3: only a signed receipt counts, so the receipts here are signed with
 // S's key and checked against a registry that lists it.
 const sKey = keygen();
-const registry = parseReviewers(JSON.stringify({ reviewers: registryEntry("S", sKey.privatePem) }));
+const S_ID = { login: "s-reviewer", emails: ["s@example.org"] };
+const registry = parseReviewers(JSON.stringify({ reviewers: registryEntry("S", sKey.privatePem, S_ID) }));
+/** T6-L2: what pr:check binds a receipt to — the PR being checked and its merge base. */
+const BIND = { pr: 495, base: BASE };
 const signed = (o: Record<string, unknown> = {}) => signReceipt(receipt(o), sKey.privatePem);
 
 describe("review receipts", () => {
@@ -56,14 +63,14 @@ describe("review receipts", () => {
 
   it("a well-formed receipt for the head counts", () => {
     expect(receiptProblems(receipt())).toEqual([]);
-    expect(receiptFor(signed(), HEAD, sensitive, registry)).toEqual([]);
-    const v = independentReviewVerdict(sensitive, [{ source: "file", receipt: signed() }], { head: HEAD, strict: true, reviewers: registry });
+    expect(receiptFor(signed(), HEAD, sensitive, registry, null, BIND)).toEqual([]);
+    const v = independentReviewVerdict(sensitive, [{ source: "file", receipt: signed() }], { head: HEAD, strict: true, reviewers: registry, ...BIND });
     expect(v.status).toBe("ok");
     expect(v.lines[0]).toMatch(/by S \(author train-2, read-only\).*1 attack test, findings 1 medium/);
   });
 
   it("each rule that makes a review independent and complete", () => {
-    const why = (o: Record<string, unknown>) => receiptFor(signed(o), HEAD, sensitive, registry).join(" | ");
+    const why = (o: Record<string, unknown>) => receiptFor(signed(o), HEAD, sensitive, registry, null, BIND).join(" | ");
     expect(why({ reviewer: "Train-2" })).toMatch(/reviewer is the author/);
     expect(why({ access: "write" })).toMatch(/read-only/);
     expect(why({ head: HEAD.slice(0, 9) })).toMatch(/40-character/);
@@ -101,11 +108,11 @@ describe("review receipts", () => {
         { source: "comment 1", receipt: signed({ head: "a".repeat(40) }) },
         { source: "comment 2", receipt: signed() },
       ],
-      { head: HEAD, strict: true, reviewers: registry },
+      { head: HEAD, strict: true, reviewers: registry, ...BIND },
     );
     expect(v.status).toBe("ok");
     expect(v.lines.join("\n")).toMatch(/comment 1: not counted — it is for `aaaaaaaaa`/);
-    const stale = independentReviewVerdict(sensitive, [{ source: "comment 1", receipt: signed({ head: "a".repeat(40) }) }], { head: HEAD, strict: true, reviewers: registry });
+    const stale = independentReviewVerdict(sensitive, [{ source: "comment 1", receipt: signed({ head: "a".repeat(40) }) }], { head: HEAD, strict: true, reviewers: registry, ...BIND });
     expect(stale.status).toBe("fail");
   });
 });
@@ -117,13 +124,13 @@ describe("review receipts", () => {
  * its commits, counts.
  */
 describe("W10.D3: who may approve", () => {
-  const regWithIds = parseReviewers(JSON.stringify({ reviewers: { S: { ...registryEntry("S", sKey.privatePem).S, login: "s-reviewer", email: "s@example.org" } } }));
-  const ctx = (o: Record<string, unknown> = {}) => ({ head: HEAD, strict: true, reviewers: regWithIds, ...o });
+  const regWithIds = registry;
+  const ctx = (o: Record<string, unknown> = {}) => ({ head: HEAD, strict: true, reviewers: regWithIds, ...BIND, ...o });
   const comment = (user: string, association: string, r: object) => ({ id: 1, user, association, body: receiptComment(r) });
   const verdict = (receipts: unknown[], o: Record<string, unknown> = {}) => independentReviewVerdict(sensitive, receipts, ctx(o));
 
   it("1. a valid signed receipt from a collaborator counts", () => {
-    const v = verdict(commentReceipts([comment("s-reviewer", "COLLABORATOR", signed())], { prAuthor: "talstilkol" }));
+    const v = verdict(commentReceipts([comment("s-reviewer", "COLLABORATOR", signed())]));
     expect(v.status).toBe("ok");
     expect(v.lines[0]).toMatch(/signature verified/);
   });
@@ -136,9 +143,9 @@ describe("W10.D3: who may approve", () => {
     }
   });
 
-  it("3. the PR author's own receipt is refused, as a comment and by identity", () => {
-    expect(verdict(commentReceipts([comment("s-reviewer", "OWNER", signed())], { prAuthor: "s-reviewer" })).lines.join("\n")).toMatch(/is the PR's author/);
+  it("3. the PR author's own receipt is refused by identity (the registry's login), whoever posted it", () => {
     const ex = excludedIdentities({ prAuthor: "s-reviewer" });
+    expect(verdict(commentReceipts([comment("talstilkol", "OWNER", signed())]), { excluded: ex }).lines.join("\n")).toMatch(/S is the PR's author or wrote or committed a commit in its range/);
     expect(verdict([{ source: "file", receipt: signed() }], { excluded: ex }).lines.join("\n")).toMatch(/S is the PR's author or wrote or committed a commit in its range/);
   });
 
@@ -177,3 +184,65 @@ describe("W10.D3: who may approve", () => {
   });
 });
 
+/**
+ * The T6 review's attacks on the gate ($S/rev-t6/tests/gateUnit.mjs), kept as
+ * permanent tests. Each failed on verify/train-6 (f4ed3b4a8f) before this fix.
+ */
+describe("T6 review: attacks on the review gate", () => {
+  const ctx = (o: Record<string, unknown> = {}) => ({ head: HEAD, strict: true, reviewers: registry, ...BIND, ...o });
+  const sens = [{ file: "src/sync/e2ee/keyring.ts" }, { file: "security/reviewers.json" }, { file: "src-tauri/src/updates.rs" }];
+  const broad = ["/src/", "/security/", "/src-tauri/"];
+
+  it("T6-L1: every spelling of a catch-all is refused by what it matches", () => {
+    for (const pat of ["**/**", "/**/", "**/", "*/", "/*/", "**/*.*", "?*/", "/**/**", "*", "**", "/", "/**", "**/*"]) {
+      expect(isCatchAll(pat), pat).toBe(true);
+      expect(receiptFor(signed({ files: [pat] }), HEAD, sens, registry, null, BIND).join(), pat).toMatch(/covers the whole repository/);
+    }
+    for (const pat of ["/src/sync/e2ee/", "src/sync/e2ee/keyring.ts", "/security/", "/src-tauri/", "**/keyring.ts", "/src/**"]) expect(isCatchAll(pat), pat).toBe(false);
+    expect(receiptFor(signed({ files: broad }), HEAD, sens, registry, null, BIND)).toEqual([]);
+  });
+
+  it("T6-M1: a receipt posted from the shared owner account counts when its signature and identity hold", () => {
+    const body = "```lumen-review\n" + JSON.stringify(signed({ files: broad })) + "\n```";
+    const got = commentReceipts([{ id: 1, user: "talstilkol", association: "OWNER", body }]);
+    expect(got[0].rejected).toBeUndefined();
+    const v = independentReviewVerdict(sens, got, ctx({ excluded: excludedIdentities({ prAuthor: "talstilkol", commits: [{ authorName: "lane-A", authorEmail: "a@x" }] }) }));
+    expect(v.status).toBe("ok");
+    // …and still not from an account without write access.
+    expect(commentReceipts([{ id: 2, user: "x", association: "NONE", body }])[0].rejected).toMatch(/no write access/);
+  });
+
+  it("T6-L2: a receipt replayed on another PR, or against another base with the same head, does not count", () => {
+    const r = signed({ files: broad });
+    expect(receiptFor(r, HEAD, sens, registry, null, { pr: 2, base: BASE }).join()).toMatch(/it is for PR #495, not #2/);
+    expect(receiptFor(r, HEAD, sens, registry, null, { pr: 495, base: "e".repeat(40) }).join()).toMatch(/reviewed against the base `1d2c3b4a5`, not this PR's merge base `eeeeeeeee`/);
+    expect(receiptFor(r, HEAD, sens, registry, null, {}).join()).toMatch(/can't be checked here \(run with --pr/);
+    // Both are signed: changing them after signing breaks the signature.
+    expect(receiptFor({ ...r, pr: 2 }, HEAD, sens, registry, null, { pr: 2, base: BASE }).join()).toMatch(/does not verify/);
+    // And a receipt must name them.
+    const { pr: _p, base: _b, ...bare } = receipt({ files: broad });
+    void _p;
+    void _b;
+    expect(receiptProblems(bare).join()).toMatch(/pr must be.*base must be/);
+  });
+
+  it("T6-H1: a registry entry must name the reviewer's login and emails, so the exclusion always matches", () => {
+    const k = keygen();
+    const bare = parseReviewers(JSON.stringify({ reviewers: { "independent-bot": { publicKey: registryEntry("x", k.privatePem, S_ID).x.publicKey } } }));
+    expect(bare.keys.size).toBe(0);
+    expect(bare.problems.join()).toMatch(/independent-bot: unusable entry \("login"/);
+    const noMail = parseReviewers(JSON.stringify({ reviewers: { b: { publicKey: registryEntry("x", k.privatePem, S_ID).x.publicKey, login: "b" } } }));
+    expect(noMail.problems.join()).toMatch(/"emails"/);
+    expect(() => registryEntry("b", k.privatePem)).toThrow(/login/);
+    // With login and emails, a committer in the range is matched by email even under another name.
+    const rp = signed({ files: broad });
+    expect(reviewerExcluded(rp, registry, excludedIdentities({ commits: [{ authorName: "Tal", authorEmail: "S@example.org" }] }))).toBe(true);
+    expect(reviewerExcluded(rp, registry, excludedIdentities({ prAuthor: "S-Reviewer" }))).toBe(true);
+    expect(reviewerExcluded(rp, registry, excludedIdentities({ prAuthor: "talstilkol", commits: [{ authorName: "lane-A", authorEmail: "a@x" }] }))).toBe(false);
+  });
+
+  it("tamper: a finding changed after signing does not verify", () => {
+    const t = { ...signed({ files: broad }), findings: [{ id: "x", severity: "high", status: "fixed" }] };
+    expect(receiptFor(t, HEAD, sens, registry, null, BIND).join()).toMatch(/does not verify/);
+  });
+});

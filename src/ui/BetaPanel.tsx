@@ -99,7 +99,7 @@ function BetaPanel({ options, onClose }: { options: BetaOptions; onClose: () => 
   };
 
   return (
-    <Modal aria-label={t("beta.title")} className="cmd-palette-backdrop" onKeyDown={(e) => e.key === "Escape" && onClose()}>
+    <Modal aria-label={t("beta.title")} className="cmd-palette-backdrop" onClose={onClose}>
       <div className="cmd-palette" data-testid="beta-panel" style={{ maxWidth: 560, padding: 0, display: "flex", flexDirection: "column", maxHeight: "88vh" }}>
         <header style={{ padding: "14px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <FlaskConical size={18} style={{ color: "hsl(var(--accent))" }} />

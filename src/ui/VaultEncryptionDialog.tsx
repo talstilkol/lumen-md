@@ -318,13 +318,10 @@ export function VaultEncryptionDialog({ onClose }: { onClose: () => void }) {
   const [state, setState] = useState<"loading" | "none" | "encrypted">("loading");
   useEffect(() => {
     void vaultEncryptionReady().then((s) => setState(s === "locked" || s === "unlocked" ? "encrypted" : "none"));
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
   return (
-    <Modal aria-labelledby="vault-enc-title" onClick={(e) => e.target === e.currentTarget && onClose()} style={{ position: "fixed", inset: 0, zIndex: 9000, background: "var(--overlay)", display: "grid", placeItems: "center", padding: 16 }}>
+    <Modal onClose={onClose} aria-labelledby="vault-enc-title" onClick={(e) => e.target === e.currentTarget && onClose()} style={{ position: "fixed", inset: 0, zIndex: 9000, background: "var(--overlay)", display: "grid", placeItems: "center", padding: 16 }}>
       <div
         data-testid="vault-encryption"
         style={{ width: "min(480px, 100%)", maxHeight: "90vh", overflow: "auto", background: "hsl(var(--bg-elevated, var(--bg)))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border))", borderRadius: 10, padding: 16, display: "grid", gap: 12 }}

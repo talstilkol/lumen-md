@@ -8,9 +8,10 @@
  */
 import { describe, expect, it } from "vitest";
 import { execFileSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
+import { spawnSync } from "node:child_process";
 import {
   canonicalJson,
   commentReceipts,
@@ -29,10 +30,14 @@ import { coverageMarkdown, coverageOf, prsOfSubject, trainContents } from "../..
 import { parseCodeowners } from "../../scripts/lib/humanReview.mjs";
 
 const HEAD = "3f80047a28d66e086ff2b50459353fc66e82b31d";
+const BASE = "1d2c3b4a5f60718293a4b5c6d7e8f90a1b2c3d4e";
+const BIND = { pr: 7, base: BASE };
 const sensitive = [{ file: "src/sync/e2ee/lan/rpc.ts", pattern: "/src/sync/e2ee/" }];
 const receipt = (o: Record<string, unknown> = {}) => ({
   format: "lumen-review",
   version: 1,
+  pr: 7,
+  base: BASE,
   head: HEAD,
   author: "train-2",
   reviewer: "R",
@@ -47,7 +52,8 @@ const receipt = (o: Record<string, unknown> = {}) => ({
 
 const r = keygen();
 const other = keygen();
-const registry = parseReviewers(JSON.stringify({ reviewers: { ...registryEntry("R", r.privatePem), ...registryEntry("S", other.privatePem) } }));
+const R_ID = { login: "r-rev", emails: ["r@example.org"] };
+const registry = parseReviewers(JSON.stringify({ reviewers: { ...registryEntry("R", r.privatePem, R_ID), ...registryEntry("S", other.privatePem, { login: "s-rev", emails: ["s@example.org"] }) } }));
 
 describe("signed receipts", () => {
   it("canonical JSON sorts keys at every level, so key order can't change what is signed", () => {
@@ -58,10 +64,10 @@ describe("signed receipts", () => {
     expect(registry.problems).toEqual([]);
     const signed = signReceipt(receipt(), r.privatePem);
     expect(signatureProblems(signed, registry)).toEqual([]);
-    expect(receiptFor(signed, HEAD, sensitive, registry)).toEqual([]);
+    expect(receiptFor(signed, HEAD, sensitive, registry, null, BIND)).toEqual([]);
     expect(receiptFor(receipt(), HEAD, sensitive, null).join()).toMatch(/security\/reviewers.json is missing/);
     expect(receiptFor(signed, HEAD, sensitive, null).join()).toMatch(/security\/reviewers.json is missing/);
-    const v = independentReviewVerdict(sensitive, [{ source: "c", receipt: signed }], { head: HEAD, strict: true, reviewers: registry });
+    const v = independentReviewVerdict(sensitive, [{ source: "c", receipt: signed }], { head: HEAD, strict: true, reviewers: registry, ...BIND });
     expect(v.status).toBe("ok");
     expect(v.lines[0]).toMatch(/signature verified/);
   });
@@ -77,7 +83,7 @@ describe("signed receipts", () => {
   });
 
   it("a registry entry that isn't an Ed25519 public key is reported", () => {
-    expect(parseReviewers(JSON.stringify({ reviewers: { R: { publicKey: "bm90IGEga2V5" } } })).problems[0]).toMatch(/reviewer R: unusable public key/);
+    expect(parseReviewers(JSON.stringify({ reviewers: { R: { publicKey: "bm90IGEga2V5", ...R_ID } } })).problems[0]).toMatch(/reviewer R: unusable entry/);
     expect(parseReviewers("{").problems[0]).toMatch(/not JSON/);
   });
 });
@@ -128,7 +134,7 @@ describe("a train's coverage (scripts/review-coverage.mjs)", () => {
       g("config", "user.name", "T");
       put(".github/CODEOWNERS", "/src/sync/e2ee/ @talstilkol\n");
       put("src/a.ts", "export const a = 1;\n");
-      commit("base");
+      const base = commit("base");
       g("checkout", "-q", "-b", "pr10");
       put("src/sync/e2ee/kdf.ts", "export const n = 1;\n");
       const h10 = commit("feat: kdf");
@@ -147,24 +153,89 @@ describe("a train's coverage (scripts/review-coverage.mjs)", () => {
       expect(contents.prs.map((p: { number: number }) => p.number).sort()).toEqual([10, 11, 12]);
       expect(contents.own).toHaveLength(1);
       const entries = parseCodeowners("/src/sync/e2ee/ @talstilkol\n");
-      const at = (head: string, o: Record<string, unknown> = {}) => ({ source: "file", receipt: signReceipt(receipt({ head, author: "K", ...o }), r.privatePem) });
+      expect(contents.prs.every((p: { base: string }) => p.base === base)).toBe(true);
+      expect(contents.base).toBe(base);
+      const at = (head: string, o: Record<string, unknown> = {}) => ({ source: "file", receipt: signReceipt(receipt({ head, base, author: "K", ...o }), r.privatePem) });
 
       const none = coverageOf(contents, entries, { reviewers: registry });
       expect(none.sensitiveCount).toBe(3); // #10, #12 and the train's own fix; #11 isn't sensitive
       expect(none.percent).toBe(0);
 
       // A receipt for #10's head and #12's head, none for the train's own fix: 2 of 3.
-      const two = coverageOf(contents, entries, { reviewers: registry, files: [at(h10, { pr: 10 }), at(h12)] });
+      const two = coverageOf(contents, entries, { reviewers: registry, files: [at(h10, { pr: 10 }), at(h12, { pr: 12 })] });
       expect(two.covered).toBe(2);
       expect(two.percent).toBe(66.7);
       // A receipt for an older head of #12 does not count.
       expect(coverageOf(contents, entries, { reviewers: registry, files: [at(h10, { pr: 10 }), at("e".repeat(40), { pr: 12 })] }).covered).toBe(1);
       // The train's own commits: a receipt on the train head (through the train PR's comments).
-      const all = coverageOf(contents, entries, { reviewers: registry, files: [at(h10, { pr: 10 }), at(h12)], trainPr: 99, receiptsFor: (n: number) => (n === 99 ? [at(trainHead)] : []) });
+      const all = coverageOf(contents, entries, { reviewers: registry, files: [at(h10, { pr: 10 }), at(h12, { pr: 12 })], trainPr: 99, receiptsFor: (n: number) => (n === 99 ? [at(trainHead, { pr: 99 })] : []) });
       expect(all.percent).toBe(100);
       const md = coverageMarkdown(all, "train");
       expect(md).toContain("3 of 3 sensitive change sets");
       expect(md).toContain("| train's own commits (#99) |");
+      // T6-L2: a receipt for #10's head that names another PR does not count for #10.
+      expect(coverageOf(contents, entries, { reviewers: registry, files: [at(h10, { pr: 11 })] }).covered).toBe(0);
+      // T6-L3: the same author and committer exclusion as pr:check. Every commit here is by
+      // git user T (t@example.org); a reviewer registered with that email is refused…
+      const asT = parseReviewers(JSON.stringify({ reviewers: registryEntry("R", r.privatePem, { login: "r-rev", emails: ["t@example.org"] }) }));
+      const byT = coverageOf(contents, entries, { reviewers: asT, files: [at(h10, { pr: 10 })] });
+      expect(byT.covered).toBe(0);
+      expect(byT.rows[0].line).toMatch(/#10|sensitive file/);
+      // …and so is the PR's author by login (--live gives prAuthorOf).
+      expect(coverageOf(contents, entries, { reviewers: registry, prAuthorOf: () => "r-rev", files: [at(h10, { pr: 10 })] }).covered).toBe(0);
+      expect(coverageOf(contents, entries, { reviewers: registry, prAuthorOf: () => "talstilkol", files: [at(h10, { pr: 10 })] }).covered).toBe(1);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+/**
+ * T6-H1 through the real CLI: review-coverage reads each change's reviewer keys
+ * from that change's merge base. On verify/train-6 it read them from the train
+ * head, so a PR that added its own key covered itself.
+ */
+describe("review-coverage reads the reviewer keys from each change's merge base (T6-H1)", () => {
+  it("a key a PR adds does not cover that PR; a key in the base does", () => {
+    const dir = mkdtempSync(join(tmpdir(), "lumen-revcov-h1-"));
+    const g = (...a: string[]) => execFileSync("git", ["-c", "user.name=T", "-c", "user.email=t@example.org", ...a], { cwd: dir, encoding: "utf8" }).trim();
+    const put = (p: string, t: string) => {
+      mkdirSync(dirname(join(dir, p)), { recursive: true });
+      writeFileSync(join(dir, p), t);
+    };
+    try {
+      g("init", "-q", "-b", "main");
+      const honest = keygen();
+      put(".github/CODEOWNERS", "/src/sync/e2ee/ @talstilkol\n/security/ @talstilkol\n");
+      put("security/reviewers.json", JSON.stringify({ reviewers: registryEntry("R", honest.privatePem, R_ID) }));
+      put("src/a.ts", "export const a = 1;\n");
+      g("add", "-A");
+      g("commit", "-q", "-m", "base");
+      const base = g("rev-parse", "HEAD");
+      g("checkout", "-q", "-b", "pr20");
+      const bot = keygen();
+      const reg = JSON.parse(readFileSync(join(dir, "security/reviewers.json"), "utf8"));
+      Object.assign(reg.reviewers, registryEntry("bot", bot.privatePem, { login: "bot", emails: ["bot@example.org"] }));
+      put("security/reviewers.json", JSON.stringify(reg));
+      put("src/sync/e2ee/keyring.ts", "// backdoor\n");
+      g("add", "-A");
+      g("commit", "-q", "-m", "feat: x");
+      const h20 = g("rev-parse", "HEAD");
+      g("checkout", "-q", "-b", "train", "main");
+      g("merge", "-q", "--no-ff", "-m", "Merge #20 pr20 [skip ci]", "pr20");
+      const recs = join(dir, "receipts");
+      mkdirSync(recs);
+      const rcpt = (reviewer: string, pem: string) => signReceipt(receipt({ pr: 20, base, head: h20, author: "lane-A", reviewer, files: ["/src/sync/", "/security/"] }), pem);
+      const cov = (file: object) => {
+        writeFileSync(join(recs, "r.json"), JSON.stringify(file));
+        return spawnSync(process.execPath, [resolve(__dirname, "../../scripts/review-coverage.mjs"), "--cwd", dir, "--train", "train", "--base", "main", "--receipts", recs], { encoding: "utf8" });
+      };
+      const self = cov(rcpt("bot", bot.privatePem));
+      expect(self.status).toBe(1);
+      expect(self.stdout).toMatch(/0 of 1 sensitive change sets/);
+      const good = cov(rcpt("R", honest.privatePem));
+      expect(good.stdout).toMatch(/1 of 1 sensitive change sets/);
+      expect(good.status).toBe(0);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

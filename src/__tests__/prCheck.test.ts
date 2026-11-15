@@ -121,7 +121,7 @@ describe("pr:check", () => {
       // W10.D3: only receipts signed with a key in security/reviewers.json count.
       const sKey = keygen();
       mkdirSync(join(r0.dir, "security"));
-      writeFileSync(join(r0.dir, "security/reviewers.json"), JSON.stringify({ reviewers: registryEntry("S", sKey.privatePem) }));
+      writeFileSync(join(r0.dir, "security/reviewers.json"), JSON.stringify({ reviewers: registryEntry("S", sKey.privatePem, { login: "s-rev", emails: ["s@example.org"] }) }));
       r0.git("add", "-A");
       r0.git("commit", "-q", "-m", "chore: owners [skip ci]");
       mkdirSync(join(r0.dir, "src/sync/e2ee"), { recursive: true });
@@ -209,26 +209,28 @@ describe("pr:check", () => {
     try {
       mkdirSync(join(r0.dir, ".github"));
       writeFileSync(join(r0.dir, ".github/CODEOWNERS"), "/src/sync/e2ee/ @talstilkol\n");
-      // W10.D3: only receipts signed with a key in security/reviewers.json count.
+      // W10.D3: only receipts signed with a key in security/reviewers.json count; T6-H1: the merge base's copy.
       const sKey = keygen();
+      const tKey = keygen();
       mkdirSync(join(r0.dir, "security"));
-      writeFileSync(join(r0.dir, "security/reviewers.json"), JSON.stringify({ reviewers: registryEntry("S", sKey.privatePem) }));
+      writeFileSync(join(r0.dir, "security/reviewers.json"), JSON.stringify({ reviewers: { ...registryEntry("S", sKey.privatePem, { login: "s-rev", emails: ["s@example.org"] }), ...registryEntry("T", tKey.privatePem, { login: "t-rev", emails: ["t@example.org"] }) } }));
       r0.git("add", "-A");
       r0.git("commit", "-q", "-m", "chore: owners [skip ci]");
+      const base = r0.git("rev-parse", "HEAD").trim();
       mkdirSync(join(r0.dir, "src/sync/e2ee"), { recursive: true });
       writeFileSync(join(r0.dir, "src/sync/e2ee/kdf.ts"), "export const iterations = 600000;\n");
       r0.git("add", "-A");
       r0.git("commit", "-q", "-m", "feat: kdf [skip ci]");
       const head = r0.git("rev-parse", "HEAD").trim();
       const unsigned = (o: Record<string, unknown> = {}) => ({
-        format: "lumen-review", version: 1, head, author: "K", reviewer: "S", access: "read-only", date: "2026-11-12T18:00:00Z",
+        format: "lumen-review", version: 1, pr: 9, base, head, author: "K", reviewer: "S", access: "read-only", date: "2026-11-12T18:00:00Z",
         files: ["/src/sync/e2ee/"], attackTests: [{ path: "src/__tests__/kdfAttack.test.ts", result: "4/4 pass" }], findings: [], verdict: "approve", ...o,
       });
       const receipt = (o: Record<string, unknown> = {}) => signReceipt(unsigned(o), sKey.privatePem);
       const comment = (r: object) => "Review\n\n```lumen-review\n" + JSON.stringify(r) + "\n```\n";
       const pr = (bodies: string[]) => () => ({ number: 9, labels: [], author: "a", headSha: head, headDate: "2026-11-12T09:00:00Z", reviews: [], events: [], comments: bodies.map((body, i) => ({ id: i + 1, user: "rev", association: "OWNER", body })) });
       const section = (o: Record<string, unknown>, extra: string[] = []) =>
-        runChecks({ ...parseArgs(["--cwd", r0.dir, "--base", "main~1", "--no-size", ...(o.pr ? ["--pr", "9"] : []), ...extra]), ...o }).sections.find((s: { title: string }) => s.title === "Independent review of sensitive paths");
+        runChecks({ ...parseArgs(["--cwd", r0.dir, "--base", base, "--no-size", ...(o.pr ? ["--pr", "9"] : []), ...extra]), ...o }).sections.find((s: { title: string }) => s.title === "Independent review of sensitive paths");
       expect(section({}).status).toBe("warn");
       expect(section({ pr: "9", loadPr: pr([]) }).status).toBe("fail");
       expect(section({ pr: "9", loadPr: pr([comment(receipt())]) }).status).toBe("ok");
@@ -244,22 +246,81 @@ describe("pr:check", () => {
       // The author reviewing itself, or an open high finding, does not count.
       expect(section({ pr: "9", loadPr: pr([comment(receipt({ reviewer: "k" }))]) }).status).toBe("fail");
       expect(section({ pr: "9", loadPr: pr([comment(receipt({ findings: [{ id: "F1", severity: "high", status: "open" }] }))]) }).status).toBe("fail");
-      // W10.D3: unsigned does not count; the PR author's own comment does not count; nor does a
-      // reviewer who wrote or committed a commit in the range (here git user "T").
+      // W10.D3: unsigned does not count; T6-M1: the comment's account (every lane posts as the
+      // owner's) is no reason — but a reviewer who opened the PR, or wrote or committed a
+      // commit in the range (here git user "T"), does not count.
       expect(section({ pr: "9", loadPr: pr([comment(unsigned())]) }).lines.join("\n")).toMatch(/not signed/);
       const own = () => ({ ...pr([])(), comments: [{ id: 8, user: "a", association: "OWNER", body: comment(receipt()) }] });
-      expect(section({ pr: "9", loadPr: own }).lines.join("\n")).toMatch(/@a is the PR's author/);
-      const tKey = keygen();
-      writeFileSync(join(r0.dir, "security/reviewers.json"), JSON.stringify({ reviewers: { ...registryEntry("S", sKey.privatePem), ...registryEntry("T", tKey.privatePem) } }));
+      expect(section({ pr: "9", loadPr: own }).status).toBe("ok");
+      const byAuthor = () => ({ ...pr([comment(receipt())])(), author: "s-rev" });
+      expect(section({ pr: "9", loadPr: byAuthor }).lines.join("\n")).toMatch(/S is the PR's author or wrote or committed a commit in its range/);
+      // T6-L2: bound to this PR and this merge base.
+      expect(section({ pr: "9", loadPr: pr([comment(receipt({ pr: 8 }))]) }).lines.join("\n")).toMatch(/it is for PR #8, not #9/);
+      expect(section({ pr: "9", loadPr: pr([comment(receipt({ base: "c".repeat(40) }))]) }).lines.join("\n")).toMatch(/not this PR's merge base/);
       const byCommitter = signReceipt(unsigned({ reviewer: "T" }), tKey.privatePem);
       const ct = section({ pr: "9", loadPr: pr([comment(byCommitter)]) });
       expect(ct.status).toBe("fail");
       expect(ct.lines.join("\n")).toMatch(/T is the PR's author or wrote or committed a commit in its range/);
-      // Offline: a receipt file for this checkout's HEAD.
+      // Offline: a receipt file for this checkout's HEAD, with the PR named (--pr with a stub loader).
       writeFileSync(join(r0.dir, "review.json"), JSON.stringify(receipt()));
-      expect(section({}, ["--review", "review.json"]).status).toBe("ok");
+      expect(section({ pr: "9", loadPr: pr([]) }, ["--review", "review.json"]).status).toBe("ok");
+      // Without --pr the PR it is for can't be checked, so it does not count.
+      expect(section({}, ["--review", "review.json"]).lines.join("\n")).toMatch(/can't be checked here \(run with --pr/);
       writeFileSync(join(r0.dir, "review.json"), JSON.stringify(receipt({ files: ["src/other.ts"] })));
-      expect(section({}, ["--review", "review.json"]).status).toBe("fail");
+      expect(section({ pr: "9", loadPr: pr([]) }, ["--review", "review.json"]).status).toBe("fail");
+    } finally {
+      r0.done();
+    }
+  });
+
+  /**
+   * T6-H1, the review's end-to-end attack ($S/rev-t6/tests/gateE2E.mjs), kept as a
+   * permanent test: a PR adds its own reviewer key to security/reviewers.json, changes a
+   * sensitive file and signs its own receipt. On verify/train-6 (f4ed3b4a8f) the gate
+   * passed it; the registry now comes from the merge base, so it fails.
+   */
+  it("T6-H1: a PR that adds its own reviewer key and signs its own receipt is refused", () => {
+    const r0 = repo();
+    try {
+      mkdirSync(join(r0.dir, ".github"));
+      writeFileSync(join(r0.dir, ".github/CODEOWNERS"), "/src/sync/e2ee/ @talstilkol\n/security/ @talstilkol\n");
+      mkdirSync(join(r0.dir, "security"));
+      const honest = keygen();
+      writeFileSync(join(r0.dir, "security/reviewers.json"), JSON.stringify({ reviewers: registryEntry("S", honest.privatePem, { login: "s-rev", emails: ["s@example.org"] }) }));
+      mkdirSync(join(r0.dir, "src/sync/e2ee"), { recursive: true });
+      writeFileSync(join(r0.dir, "src/sync/e2ee/keyring.ts"), "export const k = 1;\n");
+      r0.git("add", "-A");
+      r0.git("commit", "-q", "-m", "chore: base [skip ci]");
+      const base = r0.git("rev-parse", "HEAD").trim();
+      // The attack commit, by lane-A: its own key under a fresh name, and a backdoor.
+      const bot = keygen();
+      const reg = JSON.parse(readFileSync(join(r0.dir, "security/reviewers.json"), "utf8"));
+      reg.reviewers["independent-bot"] = registryEntry("independent-bot", bot.privatePem, { login: "independent-bot", emails: ["bot@example.org"] })["independent-bot"];
+      writeFileSync(join(r0.dir, "security/reviewers.json"), JSON.stringify(reg, null, 2));
+      writeFileSync(join(r0.dir, "src/sync/e2ee/keyring.ts"), "export const k = 1;\n// backdoor\n");
+      execFileSync("git", ["-c", "user.name=lane-A", "-c", "user.email=a@x", "commit", "-qam", "feat: x [skip ci]"], { cwd: r0.dir });
+      const head = r0.git("rev-parse", "HEAD").trim();
+      const self = signReceipt(
+        { format: "lumen-review", version: 1, pr: 9, base, head, author: "lane-A", reviewer: "independent-bot", access: "read-only", date: "2026-11-15T04:00:00Z", files: ["/security/", "/src/sync/"], attackTests: [{ path: "x", result: "1/1" }], findings: [], verdict: "approve" },
+        bot.privatePem,
+      );
+      writeFileSync(join(r0.dir, "self.json"), JSON.stringify(self));
+      const loadPr = () => ({ number: 9, labels: [], author: "talstilkol", headSha: head, headDate: "2026-11-15T04:00:00Z", reviews: [], events: [], comments: [] });
+      const out = runChecks({ ...parseArgs(["--cwd", r0.dir, "--base", base, "--no-size", "--pr", "9", "--review", join(r0.dir, "self.json")]), loadPr });
+      const s = out.sections.find((x: { title: string }) => x.title === "Independent review of sensitive paths");
+      expect(s.status).toBe("fail");
+      expect(s.lines.join("\n")).toMatch(/reviewer independent-bot is not in security\/reviewers.json/);
+      expect(s.lines.join("\n")).toMatch(/This PR changes security\/reviewers.json: receipts are checked against the merge base's registry/);
+      // The same receipt signed by a reviewer the base already trusts does count.
+      const good = signReceipt({ ...self, reviewer: "S", signature: undefined }, honest.privatePem);
+      writeFileSync(join(r0.dir, "good.json"), JSON.stringify(good));
+      const ok = runChecks({ ...parseArgs(["--cwd", r0.dir, "--base", base, "--no-size", "--pr", "9", "--review", join(r0.dir, "good.json")]), loadPr });
+      expect(ok.sections.find((x: { title: string }) => x.title === "Independent review of sensitive paths").status).toBe("ok");
+      // Nor can the PR make a path non-sensitive by dropping it from CODEOWNERS: the base's entries still apply.
+      writeFileSync(join(r0.dir, ".github/CODEOWNERS"), "/docs/ @talstilkol\n");
+      execFileSync("git", ["-c", "user.name=lane-A", "-c", "user.email=a@x", "commit", "-qam", "chore: owners [skip ci]"], { cwd: r0.dir });
+      const dropped = runChecks({ ...parseArgs(["--cwd", r0.dir, "--base", base, "--no-size", "--pr", "9"]), loadPr: () => ({ ...loadPr(), headSha: r0.git("rev-parse", "HEAD").trim() }) });
+      expect(dropped.sections.find((x: { title: string }) => x.title === "Independent review of sensitive paths").status).toBe("fail");
     } finally {
       r0.done();
     }

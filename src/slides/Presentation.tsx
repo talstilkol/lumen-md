@@ -20,6 +20,7 @@ import { slideForKey, type Dir } from "./deck";
 import { closePresenterWindow, openChannel, openPresenterWindow, type SharedSlide } from "./channel";
 import { HelpButton } from "../ui/HelpButton";
 import { Modal } from "../ui/Modal";
+import { isTopDialog } from "../ui/useFocusTrap";
 
 export interface SlideView {
   title: string;
@@ -64,6 +65,8 @@ export function Presentation({ title, dir, slides, start = 0, onClose }: Present
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      // T6-L8: a dialog over the presentation (a prompt) has the keys, Escape included.
+      if (!isTopDialog(root.current)) return;
       if (e.key === "Escape") {
         e.preventDefault();
         onClose();

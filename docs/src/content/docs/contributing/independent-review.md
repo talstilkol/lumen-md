@@ -44,6 +44,7 @@ Post it as a PR comment with a fenced block whose language is
   "format": "lumen-review",
   "version": 1,
   "pr": 495,
+  "base": "<40-character sha of the merge base the diff was read against>",
   "head": "<40-character sha of the reviewed head>",
   "author": "train-2",
   "reviewer": "S",
@@ -63,6 +64,8 @@ Post it as a PR comment with a fenced block whose language is
 
 | Field | Meaning |
 |---|---|
+| `pr` | The PR reviewed. A receipt counts only on that PR |
+| `base` | The merge base the diff was read against. Must be the PR's merge base when the check runs: the same head against another base is another diff |
 | `head` | The commit reviewed. Must be the PR's head when the check runs |
 | `author`, `reviewer` | Who wrote the change and who reviewed it. Must differ |
 | `access` | Always `read-only` |
@@ -87,25 +90,31 @@ Post it as a PR comment with a fenced block whose language is
 Only a comment by an account with write access to the repository counts:
 GitHub's `OWNER`, `MEMBER` or `COLLABORATOR`. On a public repository anyone
 can comment, and a stranger's receipt doesn't open the gate. `pr:check`
-lists it with the reason. A receipt's `files` must name what was read. An
-entry such as `*`, `**` or `/` that covers the whole repository doesn't count.
+lists it with the reason. Which of those accounts posted it doesn't matter:
+every lane posts as the owner's account, so the signature is what shows who
+reviewed. A receipt's `files` must name what was read. An entry that matches
+files under three or more unrelated top-level folders (`*`, `**`, `/`,
+`**/**`, `*/`, `**/*.*` …) covers the whole repository and doesn't count.
 
 The PR's author can't review it, and neither can anyone who wrote or
-committed a commit in its range. `pr:check` refuses a receipt posted by the
-PR's author, and a receipt whose reviewer matches the author, or any
-commit's author or committer, by GitHub login, git name or email. The
-registry entry may list the reviewer's `login` and `emails` for this.
+committed a commit in its range. `pr:check` refuses a receipt whose
+reviewer matches the PR's author, or any commit's author or committer, by
+GitHub login, git name or email. That is why every registry entry must list
+the reviewer's `login` and `emails`; an entry without them is unusable.
 
 ## Signed receipts
 
 Every agent lane posts as the same GitHub account, so the account can't show
 that the reviewer isn't the author. A receipt counts only when it is signed
 with the Ed25519 key that `security/reviewers.json` lists for the reviewer it
-names. An unsigned receipt never counts:
+names. An unsigned receipt never counts. `pr:check` reads the registry from
+the PR's merge base, never from the PR itself, so a key that a PR adds or
+changes counts only after that PR is merged (by a review signed with a key
+the base already has):
 
 ```bash
 # once per reviewer; the private key never goes into a repository
-node scripts/review-sign.mjs keygen R --out ~/.lumen-review-keys
+node scripts/review-sign.mjs keygen R --login <github login> --email <git email> --out ~/.lumen-review-keys
 #   → add the printed entry under "reviewers" in security/reviewers.json
 # for each review
 node scripts/review-sign.mjs sign receipt.json --key ~/.lumen-review-keys/R.key.pem --comment
@@ -124,8 +133,9 @@ so.
 lists every sensitive PR merged into the train (merge subjects
 `Merge #N …`, trains merged into the train included) and the train's own
 integration commits. For each, it says whether a receipt counts for the head
-the train holds. The train's own commits need a receipt for the train's head
-(`--train-pr <n>`). Receipts come from the PRs' comments (`--live`) and/or a
+the train holds, under the same rules as `pr:check`: keys from each change's
+merge base, and the same author and committer exclusion. The train's own
+commits need a receipt for the train's head (`--train-pr <n>`). Receipts come from the PRs' comments (`--live`) and/or a
 folder of receipt files (`--receipts <dir>`). The command exits with 1 below
 100%. `--codeowners <file>` reads the sensitive list from a file, for a train
 that doesn't carry `.github/CODEOWNERS` yet.

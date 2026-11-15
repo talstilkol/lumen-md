@@ -23,13 +23,8 @@ export function WhatsNewDialog({ notes, version, render, onClose }: { notes: Sho
       live = false;
     };
   }, [notes, render]);
-  useEffect(() => {
-    const k = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", k);
-    return () => window.removeEventListener("keydown", k);
-  }, [onClose]);
   return (
-    <Modal aria-labelledby="wn-title" className="wn-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+    <Modal onClose={onClose} aria-labelledby="wn-title" className="wn-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div className="wn-dialog" data-testid="whats-new" data-version={notes?.version ?? version}>
         <h2 id="wn-title">{t("whatsNew.title", { version: notes?.version ?? version })}</h2>
         <HelpButton topic="getting-started/whats-new" />

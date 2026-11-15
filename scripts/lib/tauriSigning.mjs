@@ -38,7 +38,19 @@ export function platformOf(file) {
 }
 
 /** latest.json for the release, from its .sig files ({ name, signature }). */
-export function latestJson({ tag, repo, sigs, notes = "", date = new Date() }) {
+/** How long a signed update manifest is good for (T6-I2): past it the app refuses it, so an old manifest replayed by the release host can't freeze updates for longer. */
+export const MANIFEST_TTL_DAYS = 90;
+/** Which feed a manifest is for: the beta-channel release, or a stable release's own latest.json. */
+export const MANIFEST_CHANNELS = ["stable", "beta"];
+
+/**
+ * latest.json for a release. T6-I2: it also names its `channel` (a beta
+ * version's own manifest is "beta", every other "stable"; the beta-channel
+ * copy is stamped "beta" by release-run) and `expires` (ISO time), both under
+ * latest.json.sig, and the app refuses a manifest for another channel or one
+ * past its expiry (src-tauri/src/manifest_sig.rs).
+ */
+export function latestJson({ tag, repo, sigs, notes = "", date = new Date(), channel = null, now = new Date(), ttlDays = MANIFEST_TTL_DAYS }) {
   const platforms = {};
   for (const { name, signature } of sigs) {
     const p = platformOf(name);
@@ -47,5 +59,12 @@ export function latestJson({ tag, repo, sigs, notes = "", date = new Date() }) {
     if (platforms[p] && p.startsWith("windows") && !name.toLowerCase().includes(".exe")) continue;
     platforms[p] = { signature: signature.trim(), url: `https://github.com/${repo}/releases/download/${tag}/${encodeURIComponent(name.replace(/\.sig$/, ""))}` };
   }
-  return { version: tag.replace(/^v/, ""), notes, pub_date: date.toISOString(), platforms };
+  const version = tag.replace(/^v/, "");
+  return stampManifest({ version, notes, pub_date: date.toISOString(), platforms }, { channel: channel ?? (/-beta\.\d+$/.test(version) ? "beta" : "stable"), now, ttlDays });
+}
+
+/** The manifest with its channel and a fresh expiry (T6-I2): for a feed that re-signs a manifest, such as the beta channel. */
+export function stampManifest(latest, { channel, now = new Date(), ttlDays = MANIFEST_TTL_DAYS }) {
+  if (!MANIFEST_CHANNELS.includes(channel)) throw new Error(`a manifest's channel is "stable" or "beta", not ${JSON.stringify(channel)}`);
+  return { ...latest, channel, expires: new Date(now.getTime() + ttlDays * 86_400_000).toISOString() };
 }

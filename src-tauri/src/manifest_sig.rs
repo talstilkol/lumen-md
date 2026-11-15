@@ -13,7 +13,11 @@
 //!      version that isn't newer than the running one and the highest ever
 //!      installed here (update_guard.rs, W10.D9);
 //!   4. lets the plugin fetch the manifest again for the install, and
-//!      refuses unless what the plugin got is the manifest it verified.
+//!      refuses unless what the plugin got is the manifest it verified;
+//!   5. (T6-I2) refuses a signed manifest for another channel than the
+//!      endpoint it came from, or one past its signed `expires`: the beta
+//!      and stable feeds share the key, and a replayed old manifest would
+//!      otherwise freeze updates ("up to date") for as long as it is served.
 //!
 //! The signature is Tauri's format: base64 of a minisign signature file, the
 //! same as the `.sig` next to each bundle; the key is the updater key in
@@ -33,6 +37,10 @@ pub enum Refusal {
     BadSignature,
     /// The manifest is bigger than any real one.
     TooLarge,
+    /// The signed manifest is for another channel, or names none (T6-I2).
+    WrongChannel,
+    /// The signed manifest is past its `expires`, or names no valid one (T6-I2).
+    Expired,
 }
 
 impl Refusal {
@@ -42,6 +50,8 @@ impl Refusal {
             Refusal::Malformed => "the update manifest's signature or the updater key is malformed: update refused",
             Refusal::BadSignature => "the update manifest's signature does not verify with this build's updater key: update refused",
             Refusal::TooLarge => "the update manifest is too large: update refused",
+            Refusal::WrongChannel => "the update manifest is for another update channel (or names none): update refused",
+            Refusal::Expired => "the update manifest has expired (or names no expiry), so it may be an old one replayed: update check failed",
         }
     }
 }
@@ -112,6 +122,56 @@ pub fn verify_manifest(manifest: &[u8], sig_b64: Option<&[u8]>, pubkey_b64: &str
         Ok(())
     } else {
         Err(Refusal::BadSignature)
+    }
+}
+
+/// Seconds since 1970 of a UTC time "YYYY-MM-DDTHH:MM:SS[.fraction]Z" (the
+/// form JavaScript's toISOString writes), or None for anything else.
+pub fn parse_utc(s: &str) -> Option<u64> {
+    let b = s.as_bytes();
+    if b.len() < 20 || *b.last()? != b'Z' {
+        return None;
+    }
+    let num = |r: std::ops::Range<usize>| -> Option<u64> {
+        let t = s.get(r)?;
+        if !t.bytes().all(|c| c.is_ascii_digit()) {
+            return None;
+        }
+        t.parse().ok()
+    };
+    if b[4] != b'-' || b[7] != b'-' || b[10] != b'T' || b[13] != b':' || b[16] != b':' {
+        return None;
+    }
+    let rest = &s[19..s.len() - 1];
+    if !rest.is_empty() && !(rest.starts_with('.') && rest.len() > 1 && rest[1..].bytes().all(|c| c.is_ascii_digit())) {
+        return None;
+    }
+    let (y, mo, d, h, mi, se) = (num(0..4)?, num(5..7)?, num(8..10)?, num(11..13)?, num(14..16)?, num(17..19)?);
+    let leap = (y % 4 == 0 && y % 100 != 0) || y % 400 == 0;
+    let dim = [31, if leap { 29 } else { 28 }, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    if y < 1970 || !(1..=12).contains(&mo) || d < 1 || d > dim[(mo - 1) as usize] || h > 23 || mi > 59 || se > 59 {
+        return None;
+    }
+    // Days from 1970-01-01 (Howard Hinnant's days_from_civil).
+    let (yy, m) = if mo <= 2 { (y - 1, mo + 9) } else { (y, mo - 3) };
+    let era = yy / 400;
+    let yoe = yy - era * 400;
+    let doy = (153 * m + 2) / 5 + d - 1;
+    let doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
+    let days = era * 146_097 + doe - 719_468;
+    Some(days * 86_400 + h * 3_600 + mi * 60 + se)
+}
+
+/// T6-I2: the verified manifest's `channel` must be the one its endpoint
+/// serves (`want`: "stable" or "beta"), and `now` (seconds since 1970) must
+/// be before its `expires`. Run on the verified bytes only.
+pub fn check_binding(channel: Option<&str>, expires: Option<&str>, want: &str, now: u64) -> Result<(), Refusal> {
+    if channel != Some(want) {
+        return Err(Refusal::WrongChannel);
+    }
+    match expires.and_then(parse_utc) {
+        Some(t) if now < t => Ok(()),
+        _ => Err(Refusal::Expired),
     }
 }
 
@@ -195,6 +255,36 @@ mod tests {
     fn nothing_is_read_from_an_oversized_manifest() {
         let big = vec![b' '; MAX_MANIFEST_BYTES + 1];
         assert_eq!(verify_manifest(&big, Some(b"x"), KEY, |_, _, _| true), Err(Refusal::TooLarge));
+    }
+
+    #[test]
+    fn utc_times_parse_like_javascript_writes_them() {
+        assert_eq!(parse_utc("1970-01-01T00:00:00Z"), Some(0));
+        assert_eq!(parse_utc("1970-01-01T00:00:00.000Z"), Some(0));
+        assert_eq!(parse_utc("2000-03-01T00:00:00.000Z"), Some(951_868_800));
+        assert_eq!(parse_utc("2026-11-15T12:34:56.789Z"), Some(1_794_746_096));
+        assert_eq!(parse_utc("2024-02-29T23:59:59Z"), Some(1_709_251_199));
+        for bad in ["", "2026-11-15", "2026-11-15T12:34:56", "2026-11-15T12:34:56+00:00", "2026-13-01T00:00:00Z", "2026-02-29T00:00:00Z", "2026-11-15T24:00:00Z", "2026-11-15T12:34:56.Z", "+026-11-15T12:34:56Z", "1969-12-31T23:59:59Z", "2026-11-15T12:34:5xZ"] {
+            assert_eq!(parse_utc(bad), None, "{bad}");
+        }
+    }
+
+    #[test]
+    fn a_manifest_for_another_channel_or_past_its_expiry_is_refused() {
+        let now = parse_utc("2026-11-15T00:00:00Z").unwrap();
+        let later = Some("2027-02-13T00:00:00.000Z");
+        assert_eq!(check_binding(Some("stable"), later, "stable", now), Ok(()));
+        assert_eq!(check_binding(Some("beta"), later, "beta", now), Ok(()));
+        // A beta manifest served on the stable feed, and the other way round (one key signs both).
+        assert_eq!(check_binding(Some("beta"), later, "stable", now), Err(Refusal::WrongChannel));
+        assert_eq!(check_binding(Some("stable"), later, "beta", now), Err(Refusal::WrongChannel));
+        // An old manifest from before channels were signed names none.
+        assert_eq!(check_binding(None, later, "stable", now), Err(Refusal::WrongChannel));
+        // Replayed after it ran out, at the second it runs out, or with no or a junk expiry.
+        assert_eq!(check_binding(Some("stable"), Some("2026-11-14T23:59:59Z"), "stable", now), Err(Refusal::Expired));
+        assert_eq!(check_binding(Some("stable"), Some("2026-11-15T00:00:00Z"), "stable", now), Err(Refusal::Expired));
+        assert_eq!(check_binding(Some("stable"), None, "stable", now), Err(Refusal::Expired));
+        assert_eq!(check_binding(Some("stable"), Some("never"), "stable", now), Err(Refusal::Expired));
     }
 
     #[test]

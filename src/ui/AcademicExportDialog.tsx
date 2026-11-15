@@ -78,14 +78,6 @@ export function AcademicExportDialog({ content, name, onClose }: AcademicExportP
 
   useEffect(() => {
     closeRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
   const pick = (id: AcademicTemplateId) => {
@@ -117,7 +109,7 @@ export function AcademicExportDialog({ content, name, onClose }: AcademicExportP
   });
 
   return (
-    <Modal aria-label={t("academic.title")} className="cmd-palette-backdrop">
+    <Modal onClose={onClose} aria-label={t("academic.title")} className="cmd-palette-backdrop">
       <div className="cmd-palette" data-testid="academic-export" style={{ maxWidth: 600, padding: 0, display: "flex", flexDirection: "column", maxHeight: "88vh" }}>
         <header style={{ padding: "14px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <GraduationCap size={18} style={{ color: "hsl(var(--accent))" }} aria-hidden="true" />

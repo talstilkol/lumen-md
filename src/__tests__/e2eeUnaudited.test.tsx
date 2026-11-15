@@ -11,6 +11,8 @@ import { join, resolve } from "node:path";
 import { buildChannel, FLAGS, flagState, isEnabled, readOverrides, type Channel } from "../flags/flags";
 import { applyLocale, loadLocale } from "../i18n";
 import { E2eeGate, UnauditedNotice, whenE2eeOn } from "../sync/e2ee/ui/unaudited";
+import { oauthReturn } from "../sync/e2ee/ui/launch";
+import { ClassroomPanel } from "../sync/e2ee/classroom/ClassroomPanel";
 // @ts-expect-error — plain .mjs module without types
 import { checkFlags, auditPublished } from "../../scripts/lib/flags.mjs";
 // @ts-expect-error — plain .mjs module without types
@@ -115,9 +117,40 @@ describe("the activation screen says it is unaudited, in Hebrew and English", ()
     expect(isEnabled("sync.e2ee", { overrides: readOverrides(localStorage) })).toBe(false);
   });
 
-  it("the sync and classroom launchers go through the gate", () => {
-    expect(readFileSync(join(ROOT, "src/sync/e2ee/ui/launch.ts"), "utf8").match(/whenE2eeOn\(/g)).toHaveLength(2);
+  it("the sync and classroom launchers go through the gate, and so does the OAuth return (T6-L5)", () => {
+    expect(readFileSync(join(ROOT, "src/sync/e2ee/ui/launch.ts"), "utf8").match(/whenE2eeOn\(/g)).toHaveLength(3);
     expect(readFileSync(join(ROOT, "src/sync/e2ee/classroom/launch.ts"), "utf8").match(/whenE2eeOn\(/g)).toHaveLength(2);
+  });
+});
+
+describe("T6-L5/L6: no way into the encrypted sync around the gate, and the label where it seals", () => {
+  const at = (path: string) => history.replaceState(null, "", path);
+  afterEach(() => at("/"));
+
+  it("a link to /oauth/dropbox?code=… with sync.e2ee off opens no sync panel and finishes nothing; the gate asks", async () => {
+    at("/oauth/dropbox?code=attacker-code");
+    const done = oauthReturn(Promise.resolve());
+    await waitFor(() => screen.getByTestId("e2ee-gate"));
+    expect(document.querySelector("[data-lumen-sync-panel]")).toBeNull();
+    fireEvent.click(screen.getByTestId("e2ee-gate-cancel"));
+    await done;
+    expect(document.querySelector("[data-lumen-sync-panel]")).toBeNull();
+    expect(isEnabled("sync.e2ee", { overrides: readOverrides(localStorage) })).toBe(false);
+    // The address still carries the code: nothing consumed it.
+    expect(location.search).toBe("?code=attacker-code");
+  });
+
+  it("finishOAuthReturn itself does nothing while the flag is off", async () => {
+    const { finishOAuthReturn } = await import("../sync/e2ee/ui/open");
+    at("/oauth/gdrive?code=x");
+    await finishOAuthReturn("gdrive", "x");
+    expect(document.querySelector("[data-lumen-sync-panel]")).toBeNull();
+    expect(location.pathname).toBe("/oauth/gdrive");
+  });
+
+  it("the classroom panel shows the unaudited label (it seals with the same cryptography)", () => {
+    render(<ClassroomPanel onClose={() => undefined} relay={null} />);
+    expect(screen.getByTestId("classroom").querySelector('[data-testid="e2ee-unaudited"]')?.textContent).toContain("Experimental — not externally security-audited");
   });
 });
 
@@ -132,6 +165,22 @@ describe("no user-facing text calls the cryptography audited without a published
     ]) {
       expect(auditClaims(s), s).toHaveLength(1);
     }
+  });
+
+  // T6-L7: the review's samples ($S/rev-t6/tests/auditClaims.mjs). A negation elsewhere in the
+  // sentence hid each of these on verify/train-6; it must sit at the audit word itself.
+  it("a negation elsewhere in the sentence does not hide a claim (the T6 review's samples)", () => {
+    for (const s of [
+      "Lumen's encryption was audited by Cure53, so you need no other backup.",
+      "Our end-to-end encryption is independently audited and you never have to worry.",
+      "Encryption audited by Trail of Bits until 2027.",
+      "ההצפנה עברה ביקורת אבטחה חיצונית, אין מה לדאוג.",
+      "Lumen's E2EE has been reviewed by an outside security firm.",
+    ]) {
+      expect(auditClaims(s), s).toHaveLength(1);
+    }
+    expect(auditClaims("Lumen's encryption is not audited.")).toEqual([]);
+    expect(auditClaims("Lumen's encryption hasn't been audited by anyone, and has yet to be reviewed by an outside firm.")).toEqual([]);
   });
 
   it("lets honest statements through", () => {

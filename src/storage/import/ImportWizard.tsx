@@ -3,7 +3,7 @@
  * its export, see what will come in and what will not, import into a new
  * folder, and undo it in one click.
  */
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Download, X } from "lucide-react";
 import "./strings";
 import { t } from "../../i18n";
@@ -52,18 +52,6 @@ export function ImportWizard({ open, onClose }: Props) {
   const [savedReport, setSavedReport] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
   const folderRef = useRef<HTMLInputElement | null>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && step.kind !== "busy") {
-        e.stopPropagation();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose, step.kind]);
 
   const prepare = useCallback(async (picked: Map<string, Uint8Array>, name: string, as: ImportSourceId) => {
     setError(null);
@@ -261,7 +249,7 @@ export function ImportWizard({ open, onClose }: Props) {
   };
 
   return (
-    <Modal className="cmd-palette-backdrop" onClick={() => step.kind !== "busy" && onClose()} aria-label={t("importWizard.title")} data-testid="import-wizard">
+    <Modal onClose={step.kind !== "busy" ? onClose : undefined} className="cmd-palette-backdrop" onClick={() => step.kind !== "busy" && onClose()} aria-label={t("importWizard.title")} data-testid="import-wizard">
       <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 620, padding: 0, display: "flex", flexDirection: "column", maxHeight: "85vh" }}>
         <header style={{ padding: "12px 16px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <Download size={16} />

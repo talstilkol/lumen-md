@@ -6,8 +6,11 @@
  * It accepts the candidate only with reports/e2e-<sha>.json (the sealed
  * report of the `e2e-receipt` Buildkite step, scripts/e2e-gate.mjs merge)
  * that:
- *   - verifies with a trusted Ed25519 public key (--key <pem> or the
- *     *.pem files in --keys <dir>, default security/e2e-receipt-keys)
+ *   - verifies with a trusted Ed25519 public key: the *.pem files under
+ *     security/e2e-receipt-keys/ in <remote>/main's tree (read with git, so
+ *     the candidate's checkout can't bring its own key: T6-H1), or an
+ *     explicit --key <pem> / --keys <dir> / LUMEN_E2E_RECEIPT_KEY that lies
+ *     outside this checkout (one inside it is refused)
  *   - is for the candidate's sha, or a commit with the very same tree
  *   - says ok, with 0 failed, more than 0 passed, every shard present and
  *     each shard under 10 minutes (scripts/lib/e2eShards.mjs re-checks them)
@@ -27,8 +30,8 @@
  * owner runs both (docs: contributing/checks).
  */
 import { spawnSync } from "node:child_process";
-import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { existsSync, readdirSync, readFileSync, realpathSync } from "node:fs";
+import { join, relative, resolve, isAbsolute } from "node:path";
 import { fileURLToPath } from "node:url";
 import { e2eVerdict, reportPath } from "./lib/e2eShards.mjs";
 import { check, sha256 } from "./nightly/receipt.mjs";
@@ -49,6 +52,35 @@ export function trustedKeys({ files = [], dir = null } = {}) {
   for (const f of files) add(f);
   if (dir && existsSync(dir)) for (const f of readdirSync(dir).filter((x) => x.endsWith(".pem"))) add(join(dir, f));
   return keys;
+}
+
+/**
+ * T6-H1: the trusted keys as <ref>'s tree has them (git, not the working
+ * tree): fingerprint → PEM. `git(...args)` → { status, stdout }.
+ */
+export function keysAtRef(git, ref, dir = KEYS_DIR) {
+  const keys = new Map();
+  const ls = git("ls-tree", "-r", "--name-only", ref, "--", `${dir}/`);
+  if (ls.status !== 0) return keys;
+  for (const f of ls.stdout.split("\n").filter((x) => x.endsWith(".pem"))) {
+    const shown = git("show", `${ref}:${f}`);
+    if (shown.status === 0) keys.set(fingerprint(shown.stdout), shown.stdout);
+  }
+  return keys;
+}
+
+/** Is `path` inside the checkout `top`? (An explicit key there is the candidate's own: refused.) */
+export function insideCheckout(path, top) {
+  if (!top) return false;
+  const real = (p) => {
+    try {
+      return realpathSync(p);
+    } catch {
+      return resolve(p);
+    }
+  };
+  const rel = relative(real(top), real(path));
+  return rel === "" || (!rel.startsWith("..") && !isAbsolute(rel));
 }
 
 /** The report for `candidate`: an explicit file, reports/e2e-<sha>.json, or one in `dir` for a commit with the same tree. */
@@ -108,10 +140,23 @@ function main() {
     console.error(`✗ promote:main: ${rev} is not a commit here (fetch it first)`);
     process.exit(2);
   }
-  const keyFiles = [opt("key"), ...(process.env.LUMEN_E2E_RECEIPT_KEY ? [process.env.LUMEN_E2E_RECEIPT_KEY] : [])].filter(Boolean);
-  const keys = trustedKeys({ files: keyFiles, dir: resolve(opt("keys") ?? KEYS_DIR) });
+  const remote = opt("remote") ?? "origin";
+  const keyFiles = [opt("key"), ...(process.env.LUMEN_E2E_RECEIPT_KEY ? [process.env.LUMEN_E2E_RECEIPT_KEY] : [])].filter(Boolean).map((f) => resolve(f));
+  const keyDir = opt("keys") ? resolve(opt("keys")) : null;
+  // T6-H1: never a key from the candidate's checkout; the default is main's tree, read with git.
+  const top = out(git("rev-parse", "--show-toplevel"));
+  const inside = [...keyFiles, ...(keyDir ? [keyDir] : [])].filter((f) => insideCheckout(f, top));
+  if (inside.length) {
+    console.error(`✗ promote:main: ${inside.join(", ")} is inside this checkout, the commit being promoted: a trusted key must come from ${remote}/main or from outside the checkout`);
+    process.exit(2);
+  }
+  if (argv.includes("--push") && git("fetch", "-q", remote, "main").status !== 0) {
+    console.error(`✗ promote:main: could not fetch ${remote} main`);
+    process.exit(2);
+  }
+  const keys = keyFiles.length || keyDir ? trustedKeys({ files: keyFiles, dir: keyDir }) : keysAtRef(git, `refs/remotes/${remote}/main`);
   if (!keys.size) {
-    console.error(`✗ promote:main: no trusted public key (--key <pem>, LUMEN_E2E_RECEIPT_KEY or ${opt("keys") ?? KEYS_DIR}/*.pem)`);
+    console.error(`✗ promote:main: no trusted public key (--key <pem>, LUMEN_E2E_RECEIPT_KEY or --keys <dir> outside this checkout, or ${KEYS_DIR}/*.pem in ${remote}/main)`);
     process.exit(2);
   }
   const treeOf = (sha) => out(git("rev-parse", "--verify", "-q", `${sha}^{tree}`));
@@ -121,7 +166,6 @@ function main() {
   };
   const found = findReport({ candidate, file: opt("report") ? resolve(opt("report")) : null, dir: opt("reports") ? resolve(opt("reports")) : null, treeOf });
   const v = promoteVerdict({ candidate, found, keys, sameTree });
-  const remote = opt("remote") ?? "origin";
   if (argv.includes("--json")) console.log(JSON.stringify(v, null, 2));
   else {
     console.log(`promote:main ${candidate.slice(0, 12)}${found.path ? ` (${found.path})` : ""}`);

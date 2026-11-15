@@ -23,7 +23,9 @@ import { mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 // @ts-expect-error — plain .mjs helpers without types
-import { MANIFEST_SIG, manifestProblems, signManifest, testUpdaterKey, verifyTauriSig } from "../../scripts/lib/releaseRun.mjs";
+import { betaChannelPlan, bindingProblems, checkLatest, MANIFEST_SIG, manifestProblems, signManifest, testUpdaterKey, verifyTauriSig } from "../../scripts/lib/releaseRun.mjs";
+// @ts-expect-error — plain .mjs helpers without types
+import { latestJson, MANIFEST_TTL_DAYS, stampManifest } from "../../scripts/lib/tauriSigning.mjs";
 // @ts-expect-error — plain .mjs helpers without types
 import { generateKeys } from "../../scripts/supply-chain/minisign.mjs";
 // @ts-expect-error — plain .mjs helpers without types
@@ -194,5 +196,82 @@ describe("the Rust rules, compiled and run (rustc --test, no dependencies)", () 
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
+  });
+});
+
+/**
+ * T6-I2: the signed manifest names its channel and an expiry, so a beta
+ * manifest served on the stable feed, or an old one replayed to freeze
+ * updates, is refused (the Rust side: manifest_sig.rs check_binding, run
+ * above). T6-L4: the beta channel verifies what it downloads before it merges
+ * and re-signs it.
+ */
+describe("channel and expiry under the signature (T6-I2), and the beta channel's download (T6-L4)", () => {
+  const NOW = new Date("2026-11-15T00:00:00Z");
+  const sigs = [{ name: "Lumen_0.3.0_amd64.AppImage.sig", signature: "s1" }];
+
+  it("latest.json names its channel and an expiry MANIFEST_TTL_DAYS ahead", () => {
+    const stable = latestJson({ tag: "v0.3.0", repo: "o/r", sigs, now: NOW });
+    expect(stable.channel).toBe("stable");
+    expect(stable.expires).toBe(new Date(NOW.getTime() + MANIFEST_TTL_DAYS * 86_400_000).toISOString());
+    expect(latestJson({ tag: "v0.3.0-beta.2", repo: "o/r", sigs, now: NOW }).channel).toBe("beta");
+    expect(bindingProblems(stable, { now: NOW })).toEqual([]);
+    expect(() => stampManifest(stable, { channel: "nightly" })).toThrow(/stable" or "beta/);
+  });
+
+  it("a manifest without them, for another channel, or past its expiry is a problem", () => {
+    const stable = latestJson({ tag: "v0.3.0", repo: "o/r", sigs, now: NOW });
+    const { channel: _c, expires: _e, ...old } = stable;
+    void _c;
+    void _e;
+    expect(bindingProblems(old, { now: NOW }).join()).toMatch(/names no channel.*no expiry/);
+    expect(bindingProblems(stable, { channel: "beta", now: NOW }).join()).toMatch(/for the stable channel, not beta/);
+    expect(bindingProblems(stable, { now: new Date(Date.parse(stable.expires) + 1000) }).join()).toMatch(/expired at/);
+    // checkLatest (the release's own check before signing) carries it.
+    expect(checkLatest(old, new Map(), "x", { now: NOW }).join()).toMatch(/names no channel/);
+  });
+
+  it("the beta channel merges a download only when its signature verifies, and stamps the result beta", () => {
+    const k = key();
+    const latest = latestJson({ tag: "v0.3.0", repo: "o/r", sigs, now: NOW });
+    const host = (m: object, signWith = k) => {
+      const bytes = Buffer.from(JSON.stringify(m, null, 2) + "\n");
+      return { manifest: bytes, sig: Buffer.from(signManifest(bytes, signWith, { timestamp: 1 })) };
+    };
+    const other = { ...latest, platforms: { "darwin-aarch64": { url: "u", signature: "s2" } } };
+    // Signed by the release: merged (another machine's platform), re-stamped for the beta feed.
+    const merged = betaChannelPlan({ downloaded: host(other), latest, version: "0.3.0", pubkey: k.pubkey, now: NOW });
+    expect(merged.action).toBe("publish");
+    expect(Object.keys(merged.next.platforms).sort()).toEqual(["darwin-aarch64", "linux-x86_64"]);
+    expect(merged.next.channel).toBe("beta");
+    expect(merged.notes).toEqual([]);
+    // Tampered on the host after signing: not merged, the channel is rebuilt from this release alone.
+    const tampered = host(other);
+    tampered.manifest = Buffer.from(tampered.manifest.toString().replace('"u"', '"https://evil.example/x"'));
+    const t = betaChannelPlan({ downloaded: tampered, latest, version: "0.3.0", pubkey: k.pubkey, now: NOW });
+    expect(t.action).toBe("publish");
+    expect(Object.keys(t.next.platforms)).toEqual(["linux-x86_64"]);
+    expect(JSON.stringify(t.next)).not.toContain("evil.example");
+    expect(t.notes.join()).toMatch(/does not verify.*rebuilt from 0\.3\.0 alone/);
+    // Signed with another key, or not signed at all: the same.
+    expect(betaChannelPlan({ downloaded: host(other, key()), latest, version: "0.3.0", pubkey: k.pubkey, now: NOW }).next.platforms).toEqual(latest.platforms);
+    // A forged "newer" pointer can't hold the channel back.
+    const forged = { manifest: Buffer.from(JSON.stringify({ ...latest, version: "99.0.0" })), sig: null };
+    const f = betaChannelPlan({ downloaded: forged, latest, version: "0.3.0", pubkey: k.pubkey, now: NOW });
+    expect(f.action).toBe("publish");
+    expect(f.next.version).toBe("0.3.0");
+    // A genuinely newer, signed one keeps the channel where it is.
+    expect(betaChannelPlan({ downloaded: host({ ...latest, version: "0.4.0" }), latest, version: "0.3.0", pubkey: k.pubkey, now: NOW }).action).toBe("keep");
+    // No download (a first beta): this release, stamped beta.
+    expect(betaChannelPlan({ downloaded: null, latest, version: "0.3.0", pubkey: k.pubkey, now: NOW }).next.channel).toBe("beta");
+  });
+
+  it("the app checks channel and expiry on the verified bytes, before the version", () => {
+    const rs = read("src-tauri/src/updates.rs");
+    const bind = rs.indexOf("manifest_sig::check_binding(");
+    expect(bind).toBeGreaterThan(rs.indexOf("manifest_sig::verify_manifest("));
+    expect(bind).toBeLessThan(rs.indexOf('verified.get("version")'));
+    expect(rs).toMatch(/configured\(channel\(&app\)\) else/);
+    expect(read("scripts/release-run.mjs")).toMatch(/"--pattern", MANIFEST_SIG/);
   });
 });

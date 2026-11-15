@@ -90,7 +90,7 @@ node scripts/vercel-build.mjs --dry-run    # print the gates, run nothing
 
 השלב `e2e-shards` ב-Buildkite מריץ את כל פרויקט chromium ב-4 רסיסים במקביל (‏`node scripts/e2e-gate.mjs --full`). כל רסיס רץ על בניית הייצור עם `VITE_E2E=1`, בתוך תיבה של 10 דקות. השלב `e2e-receipt` מאחד את הרסיסים לקובץ `reports/e2e-<sha>.json`, חתום במפתח Ed25519 של המכונה. הוא אדום אם רסיס אחד לא עבר.
 
-‏main מתקדם רק דרך `npm run promote:main -- <commit> --push`. הפקודה מסרבת אם לאותו commit (או ל-commit עם אותו עץ) אין דוח חתום, אם החתימה לא מתאמתת במפתח מ-`security/e2e-receipt-keys/`, אם בדיקה אחת נכשלה, או אם רסיס חרג מהתיבה שלו. היא דוחפת רק fast-forward, אף פעם לא בכוח. ‏`npm run promote:check` (קבלות WebKit ו-Safari) היא בדיקה נפרדת, ושתיהן צריכות לעבור.
+‏main מתקדם רק דרך `npm run promote:main -- <commit> --push`. הפקודה מסרבת אם לאותו commit (או ל-commit עם אותו עץ) אין דוח חתום, אם החתימה לא מתאמתת במפתח מ-`security/e2e-receipt-keys/` כפי שהוא ב-`origin/main` (נקרא דרך git, אף פעם לא מה-commit שמקודם; ‏`--key` או `--keys` בתוך העותק נדחים), אם בדיקה אחת נכשלה, או אם רסיס חרג מהתיבה שלו. היא דוחפת רק fast-forward, אף פעם לא בכוח. ‏`npm run promote:check` (קבלות WebKit ו-Safari) היא בדיקה נפרדת, ושתיהן צריכות לעבור.
 
 ## כששער אדום
 
