@@ -1,0 +1,127 @@
+{
+  "schema": 1,
+  "plan": "W11.I15",
+  "name": "BFCL v4 (Berkeley Function Calling Leaderboard)",
+  "about": "The simple (Python), multiple, parallel and multi_turn_base categories with their possible answers and the function docs of the multi-turn classes, copied unchanged from the upstream repository at the pinned commit.",
+  "source": "https://github.com/ShishirPatil/gorilla",
+  "commit": "6ea57973c7a6097fd7c5915698c54c17c5b1b6c8",
+  "commitDate": "2026-03-23",
+  "license": "Apache-2.0",
+  "licenseFile": "LICENSE",
+  "leaderboard": "https://gorilla.cs.berkeley.edu/leaderboard.html",
+  "origin": "real",
+  "files": [
+    {
+      "path": "data/BFCL_v4_multi_turn_base.json",
+      "upstream": "berkeley-function-call-leaderboard/bfcl_eval/data/BFCL_v4_multi_turn_base.json",
+      "sha256": "1a21a995d06fd6f20ba55de7bced30ef953ec35e998f502ec2ecf4d66ef1c43a",
+      "lines": 200,
+      "bytes": 390425
+    },
+    {
+      "path": "data/BFCL_v4_multiple.json",
+      "upstream": "berkeley-function-call-leaderboard/bfcl_eval/data/BFCL_v4_multiple.json",
+      "sha256": "aef168155ebd74b7ac2401198b201343bc7d16d7a3d7e0d4e6d8ee82c6969b2a",
+      "lines": 199,
+      "bytes": 316583
+    },
+    {
+      "path": "data/BFCL_v4_parallel.json",
+      "upstream": "berkeley-function-call-leaderboard/bfcl_eval/data/BFCL_v4_parallel.json",
+      "sha256": "19f51a82eff42e5d62541aa500115a056eb78f437c2ba1f10415fd7c8e5dda84",
+      "lines": 199,
+      "bytes": 171896
+    },
+    {
+      "path": "data/BFCL_v4_simple_python.json",
+      "upstream": "berkeley-function-call-leaderboard/bfcl_eval/data/BFCL_v4_simple_python.json",
+      "sha256": "82dd63ba502eb2520c6b5d1d9a5c4b590e03ff261565175561f6228a367d1991",
+      "lines": 399,
+      "bytes": 283274
+    },
+    {
+      "path": "possible_answer/BFCL_v4_multi_turn_base.json",
+      "upstream": "berkeley-function-call-leaderboard/bfcl_eval/data/possible_answer/BFCL_v4_multi_turn_base.json",
+      "sha256": "1fee67823b317571649177dd89d63969feaae4e810cc7448ee55ba797fb7c8fc",
+      "lines": 200,
+      "bytes": 78931
+    },
+    {
+      "path": "possible_answer/BFCL_v4_multiple.json",
+      "upstream": "berkeley-function-call-leaderboard/bfcl_eval/data/possible_answer/BFCL_v4_multiple.json",
+      "sha256": "244e00ce9395df948bcafc7bee64e8f9c87ef70887587d83cae45b13699f3047",
+      "lines": 199,
+      "bytes": 32254
+    },
+    {
+      "path": "possible_answer/BFCL_v4_parallel.json",
+      "upstream": "berkeley-function-call-leaderboard/bfcl_eval/data/possible_answer/BFCL_v4_parallel.json",
+      "sha256": "8a6aa19c1adddc6a5a2f7e40f9dbf30cc7e95815e7b830c90589ab318229e0f0",
+      "lines": 199,
+      "bytes": 66005
+    },
+    {
+      "path": "possible_answer/BFCL_v4_simple_python.json",
+      "upstream": "berkeley-function-call-leaderboard/bfcl_eval/data/possible_answer/BFCL_v4_simple_python.json",
+      "sha256": "90cd5bc653690ee8e459b5b3f3fc9458606f7f3fcbf795bb51b7dc581f8c86dc",
+      "lines": 399,
+      "bytes": 63627
+    },
+    {
+      "path": "multi_turn_func_doc/gorilla_file_system.json",
+      "upstream": "berkeley-function-call-leaderboard/bfcl_eval/data/multi_turn_func_doc/gorilla_file_system.json",
+      "sha256": "c4c1b741c71e2a17c97a5dc9c4a91d89978c4eaece56494d14272d5df6c650e9",
+      "lines": 18,
+      "bytes": 13953
+    },
+    {
+      "path": "multi_turn_func_doc/math_api.json",
+      "upstream": "berkeley-function-call-leaderboard/bfcl_eval/data/multi_turn_func_doc/math_api.json",
+      "sha256": "83fa31708c89442bdcf12ac4dfbe3be8663ec9183a1b1524a9fda98164bc7e0b",
+      "lines": 17,
+      "bytes": 9158
+    },
+    {
+      "path": "multi_turn_func_doc/message_api.json",
+      "upstream": "berkeley-function-call-leaderboard/bfcl_eval/data/multi_turn_func_doc/message_api.json",
+      "sha256": "4d58ea933a5d2b280d7a52366617fb47fecd333d7b0e08e724db6fa12fb5f847",
+      "lines": 10,
+      "bytes": 6027
+    },
+    {
+      "path": "multi_turn_func_doc/posting_api.json",
+      "upstream": "berkeley-function-call-leaderboard/bfcl_eval/data/multi_turn_func_doc/posting_api.json",
+      "sha256": "87f9fc404a06e4107d7c366f1399c596440e84c16cb119faf374b2f532d86e8b",
+      "lines": 14,
+      "bytes": 10573
+    },
+    {
+      "path": "multi_turn_func_doc/ticket_api.json",
+      "upstream": "berkeley-function-call-leaderboard/bfcl_eval/data/multi_turn_func_doc/ticket_api.json",
+      "sha256": "31324e0380782664fe82ba05bd23517808ad55692b45a5fe7c3d4d395fe4f0f8",
+      "lines": 9,
+      "bytes": 6648
+    },
+    {
+      "path": "multi_turn_func_doc/trading_bot.json",
+      "upstream": "berkeley-function-call-leaderboard/bfcl_eval/data/multi_turn_func_doc/trading_bot.json",
+      "sha256": "1a7933fd8f0cb8fbec38aeae05cb8c24132747cad4904fe1c13ac3d01fc22c2d",
+      "lines": 20,
+      "bytes": 12608
+    },
+    {
+      "path": "multi_turn_func_doc/travel_booking.json",
+      "upstream": "berkeley-function-call-leaderboard/bfcl_eval/data/multi_turn_func_doc/travel_booking.json",
+      "sha256": "f17b950c13adddf41d0848077df58788252e4c2e7cad5cfa71c8c4bf04f57b26",
+      "lines": 18,
+      "bytes": 16979
+    },
+    {
+      "path": "multi_turn_func_doc/vehicle_control.json",
+      "upstream": "berkeley-function-call-leaderboard/bfcl_eval/data/multi_turn_func_doc/vehicle_control.json",
+      "sha256": "0c8a66292844874ef7b168f343bc394d8615d2d9e1f4387999a9ee23011eac78",
+      "lines": 22,
+      "bytes": 17545
+    }
+  ]
+}
