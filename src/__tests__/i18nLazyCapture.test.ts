@@ -42,7 +42,8 @@ const DOMAINS = [
     file: "capture.json",
     prefix: "capture.",
     module: "capture/strings.ts",
-    users: ["capture/quickCapture.ts", "ui/QuickCapture.tsx"],
+    // triageActions (W10.C21): the "sort the inbox" command, imported dynamically by the command palette.
+    users: ["capture/quickCapture.ts", "capture/triageActions.ts", "ui/QuickCapture.tsx"],
     // Loaded with the capture box (QuickCapture.tsx imports it dynamically).
     sameChunk: ["capture/voiceCapture.ts"],
     min: 15,
