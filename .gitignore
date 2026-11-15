@@ -156,3 +156,4 @@ dist-frame/
 .cache/obsidian-help/
 # W11.I13: public retrieval sets fetched by scripts/retrieval/fetch.py (never committed)
 eval/public-data/
+scripts/drill/tauri-writer/target/

@@ -30,20 +30,20 @@
  *              over a Node `MobileFs` that writes the way the native side
  *              does (Android `openOutputStream(uri, "wt")`, iOS
  *              `Data.write(to:)`: truncate, then write in place);
- *   opfs-sync  the OPFS worker of src/storage/vault/opfsSyncWrite.ts
- *              (Safari before 26): `truncate(0)`, `write`, `flush`, ported
- *              line for line onto a Node file handle;
+ *   opfs-sync  the app's OPFS backend (opfs.ts → handleBackend.ts →
+ *              opfsSyncWrite.ts, Safari before 26), main side and worker
+ *              source as shipped; only OPFS and Worker are stood in for, at
+ *              the API level, over a real folder (scripts/drill/opfs.mjs);
  *   atomic     src/storage/vault/atomic.ts (plan W1.5), when this checkout
  *              has it: temporary file, fsync, rename, and `recoverDir`;
- *   tauri      the algorithm of `Vault::write` in src-tauri/vault/src/lib.rs
- *              (temporary sibling, `sync_all`, rename), ported to Node —
- *              the Rust code itself is checked by `cargo test`.
+ *   tauri      `Vault::write` of src-tauri/vault/src/lib.rs itself, in the
+ *              small binary scripts/drill/tauri-writer (scripts/drill/tauri.mjs).
  *
  * The File System Access path (`createWritable`) is atomic by the browser's
  * own design (a swap file replaced on close) and is not something Node can
  * drive; the e2e matrix (e2e/data-safety.spec.ts) covers it.
  *
- * Writes `<out>/data-safety-drill-<commit>.json` and `.md`. Exit code 0 when
+ * Writes `<out>/drill-<commit>.json` and `.md`. Exit code 0 when
  * no note on a path that claims to be safe was damaged or lost.
  */
 import { spawn, execFileSync } from "node:child_process";
@@ -53,6 +53,12 @@ import * as fsp from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, dirname, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { opfsSyncPath } from "./drill/opfs.mjs";
+import { tauriPath } from "./drill/tauri.mjs";
+import { drillCombined, pullChild } from "./drill/combined.mjs";
+
+/** Save paths that could not be loaded on this machine (a missing toolchain), with why. */
+const unavailable = [];
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(here, "..");
@@ -226,101 +232,16 @@ async function loadPaths(work) {
       };
     },
   });
-  const worker = readFileSync(join(repo, "src/storage/vault/opfsSyncWrite.ts"), "utf8");
-  if (/\.move\(/.test(worker)) {
-    paths.push({
-      name: "opfs-sync",
-      source: "src/storage/vault/opfsSyncWrite.ts worker (temporary file, move old aside, move new in), ported",
-      open(root) {
-        const { at } = nodeFolder(root);
-        const put = async (file, bytes) => {
-          const fh = await fsp.open(file, existsSync(file) ? "r+" : "w+");
-          try {
-            await fh.truncate(0);
-            for (let off = 0; off < bytes.byteLength; off += 8192) await fh.write(bytes, off, Math.min(8192, bytes.byteLength - off), off);
-            await fh.sync();
-            if ((await fh.stat()).size !== bytes.byteLength) throw new Error("the write was cut short");
-          } finally {
-            await fh.close();
-          }
-        };
-        return {
-          async save(p, bytes) {
-            const name = at(p);
-            const sid = `${process.pid}${Math.floor(Math.random() * 1e9).toString(36)}`;
-            const d = dirname(name);
-            const base = name.slice(d.length + 1);
-            const tmp = join(d, `.lumen-tmp~${base}~${sid}`);
-            const old = join(d, `.lumen-old~${base}~${sid}`);
-            if (!existsSync(name)) await fsp.writeFile(name, new Uint8Array(0)); // getFileHandle(name, { create: true })
-            await put(tmp, bytes);
-            await fsp.rename(name, old); // probe.move(old)
-            await fsp.rename(tmp, name); // file.move(name)
-            await fsp.rm(old); // dir.removeEntry(old)
-          },
-          async recover() {
-            if (!atomicMod) return [];
-            const fs = atomicDiskFs(root);
-            const out = [];
-            for (const d of DIRS) out.push(...(await atomicMod.recoverDir(fs, d)));
-            return out;
-          },
-          isTemp: (name) => (atomicMod ? atomicMod.isTempName(name) : false),
-        };
-      },
-    });
-  } else
-  paths.push({
-    name: "opfs-sync",
-    source: "src/storage/vault/opfsSyncWrite.ts worker (truncate, write, flush), ported",
-    open(root) {
-      const { at } = nodeFolder(root);
-      return {
-        async save(p, bytes) {
-          const fh = await fsp.open(at(p), existsSync(at(p)) ? "r+" : "w+");
-          try {
-            await fh.truncate(0); // handle.truncate(0)
-            for (let off = 0; off < bytes.byteLength; off += 8192) await fh.write(bytes, off, Math.min(8192, bytes.byteLength - off), off); // handle.write(bytes, { at: 0 })
-            await fh.sync(); // handle.flush()
-          } finally {
-            await fh.close();
-          }
-        },
-        recover: async () => [],
-      };
-    },
-  });
-  paths.push({
-    name: "tauri",
-    source: "src-tauri/vault/src/lib.rs Vault::write (temporary sibling, sync_all, rename), ported",
-    open(root) {
-      const { at } = nodeFolder(root);
-      return {
-        async save(p, bytes) {
-          const target = at(p);
-          const tmp = join(dirname(target), `.lumen-tmp-${process.pid}-${Math.floor(Math.random() * 1e9)}`);
-          const fh = await fsp.open(tmp, "wx");
-          try {
-            // write_all, sync_all, drop, rename; on any error the temporary file is removed.
-            try {
-              for (let off = 0; off < bytes.byteLength; off += 8192) await fh.write(bytes, off, Math.min(8192, bytes.byteLength - off), off);
-              await fh.sync();
-            } finally {
-              await fh.close();
-            }
-            await fsp.rename(tmp, target);
-          } catch (e) {
-            await fsp.rm(tmp, { force: true });
-            throw e;
-          }
-        },
-        // The Rust vault leaves `.lumen-tmp-*` behind after a crash and lists
-        // past them; the drill counts them separately (not as damage).
-        recover: async () => [],
-        tempPrefix: ".lumen-tmp-",
-      };
-    },
-  });
+  // W10.E40: the OPFS and desktop paths run the shipped modules, not ports (scripts/drill/).
+  if (atomicMod) {
+    const opfs = await import(pathToFileURL(await bundle("src/storage/vault/opfs.ts", join(work, "opfs.mjs"))).href);
+    paths.push(opfsSyncPath(opfs, atomicMod));
+  }
+  try {
+    paths.push(tauriPath(args[0] === "--child" ? null : work));
+  } catch (e) {
+    unavailable.push({ name: "tauri", reason: String(e.message).split("\n")[0] });
+  }
   if (atomicMod) {
     const atomic = atomicMod;
     paths.push({
@@ -367,6 +288,16 @@ if (args[0] === "--child") {
   }
 }
 
+if (args[0] === "--pull") {
+  // The app's git pull (combined scenario): ready, pull, then wait to be killed.
+  const [, work, root, theirs] = args;
+  const atomic = await import(pathToFileURL(join(work, "atomic.mjs")).href);
+  const gitPull = await import(pathToFileURL(join(work, "gitPull.mjs")).href);
+  process.stdout.write("ready\n");
+  await pullChild({ root, theirs, gitPull, atomic, atomicFs: atomicDiskFs });
+  await new Promise(() => {});
+}
+
 if (args[0] === "--external") {
   // Another program (an editor, a sync client) saving the same notes the way
   // most editors do: a temporary file, then rename over the note.
@@ -397,8 +328,18 @@ const work = mkdtempSync(join(tmpdir(), "lumen-drill-"));
 chmodSync(work, 0o755);
 const paths = await loadPaths(work);
 
+/** SIGKILL to the child's whole process group. */
+function killGroup(child) {
+  try {
+    process.kill(-child.pid, "SIGKILL");
+  } catch {
+    child.kill("SIGKILL");
+  }
+}
+
 function startChild(argv, opts = {}) {
-  const child = spawn(process.execPath, [SELF, ...argv], { stdio: ["ignore", "pipe", "pipe"], ...opts });
+  // Its own process group: a kill takes the saver and anything it runs (the tauri writer) at the same moment.
+  const child = spawn(process.execPath, [SELF, ...argv], { stdio: ["ignore", "pipe", "pipe"], detached: true, ...opts });
   let err = "";
   child.stderr.on("data", (d) => (err += d));
   const ready = new Promise((res, rej) => {
@@ -478,7 +419,7 @@ async function drillKill(p) {
     const c = startChild(["--child", work, p.name, root, String(next), "strict"]);
     await c.ready;
     await new Promise((r) => setTimeout(r, 5 + Math.floor(Math.random() * 60)));
-    c.child.kill("SIGKILL");
+    killGroup(c.child);
     const end = await c.exited;
     if (end.signal !== "SIGKILL") throw new Error(`${p.name}: the saving process ended by itself (${end.code}): ${end.err.slice(0, 400)}`);
     await audit(root, store, state, t);
@@ -549,7 +490,7 @@ async function drillPermission(p) {
     await new Promise((r) => setTimeout(r, 10 + Math.floor(Math.random() * 40)));
     own("ro");
     await new Promise((r) => setTimeout(r, 30));
-    c.child.kill("SIGKILL");
+    killGroup(c.child);
     await c.exited;
     own("rw");
     await audit(root, store, state, t);
@@ -571,8 +512,8 @@ async function drillExternal(p) {
     const ext = startChild(["--external", root, String((round + 1) * 1_000_000 + 500_000)]);
     await Promise.all([app.ready, ext.ready]);
     await new Promise((r) => setTimeout(r, 20 + Math.floor(Math.random() * 60)));
-    ext.child.kill("SIGKILL");
-    app.child.kill("SIGKILL");
+    killGroup(ext.child);
+    killGroup(app.child);
     await Promise.all([app.exited, ext.exited]);
     // The external writer's own leftovers are not the app's to judge.
     for (const d of DIRS) for (const name of readdirSync(join(root, d))) if (name.includes(".ext~")) rmSync(join(root, d, name));
@@ -596,7 +537,12 @@ const commit = (() => {
 })();
 
 const results = [];
+let combined = null;
 try {
+  await bundle("src/sync/gitPull.ts", join(work, "gitPull.mjs"));
+  const listAll = (root) => DIRS.flatMap((dd) => readdirSync(join(root, dd)).map((n) => join(root, dd, n)));
+  combined = await drillCombined({ paths, startChild, killGroup, newFolder, seed, audit, newTally, version, check, work, listAll }, Number(arg("--combined", "20")));
+  if (!json) console.log(`combined ${combined.rounds} rounds: damaged ${combined.damaged}, missing ${combined.missing}, leftovers ${combined.leftovers}; pulled notes damaged ${combined.trackedDamaged}, missing ${combined.trackedMissing}, other ${combined.trackedOther}${combined.pullSkipped ? ` (git pull skipped: ${combined.pullSkipped})` : `, pulled ${combined.pulls}`}`);
   for (const p of paths) {
     const r = { path: p.name, source: p.source, kill9: await drillKill(p), fullDisk: await drillFullDisk(p), permission: await drillPermission(p), external: await drillExternal(p) };
     results.push(r);
@@ -615,6 +561,7 @@ try {
 
 const bad = (x) => x.damaged + x.missing + x.older + x.leftovers;
 const verdict = results.map((r) => ({ path: r.path, lost: bad(r.kill9) + bad(r.fullDisk) + bad(r.permission) + bad(r.external) }));
+const combinedLost = combined ? combined.damaged + combined.missing + combined.leftovers + combined.trackedDamaged + combined.trackedMissing + combined.trackedOther : 0;
 const report = {
   plan: "W4.33",
   commit,
@@ -624,10 +571,13 @@ const report = {
   fullDisk: fullDiskDir ? "a real small file system" : "skipped (no --full-disk)",
   permissions: isRoot ? "saving process as uid 65534" : "current user",
   results: results.map((r) => ({ ...r, kill9: { ...r.kill9, damagedSizes: r.kill9.damagedSizes.slice(0, 10) } })),
+  // W10.E40: every save path is the shipped module (no port); one that could not run here says why.
+  unavailable,
+  combined: combined && { ...combined, damagedSizes: combined.damagedSizes.slice(0, 10), lost: combinedLost },
   verdict,
 };
 mkdirSync(outDir, { recursive: true });
-const base = join(outDir, `data-safety-drill-${commit.slice(0, 12)}`);
+const base = join(outDir, `drill-${commit.slice(0, 12)}`);
 writeFileSync(`${base}.json`, `${JSON.stringify(report, null, 2)}\n`);
 const md = [
   `# Data-safety drill (plan W4.33) — ${commit.slice(0, 12)}`,
@@ -639,9 +589,12 @@ const md = [
   ...results.map((r) => `| ${r.path} | ${bad(r.kill9)} | ${bad(r.fullDisk)} | ${bad(r.permission)} | ${bad(r.external)} | **${verdict.find((v) => v.path === r.path).lost}** |`),
   "",
   ...results.map((r) => `- **${r.path}**: ${r.source}`),
+  ...unavailable.map((u) => `- **${u.name}**: not run here: ${u.reason}`),
+  "",
+  combined ? `Combined (two app windows + a sync client + the app's git pull, then SIGKILL), ${combined.rounds} rounds: **${combinedLost}** notes lost or damaged${combined.pullSkipped ? ` (git pull skipped: ${combined.pullSkipped})` : `; ${combined.pulls} pulled notes landed`}.` : "",
   "",
 ].join("\n");
 writeFileSync(`${base}.md`, md);
 if (json) console.log(JSON.stringify(report));
 else console.log(`report: ${base}.md`);
-process.exit(verdict.some((v) => v.lost > 0) ? 1 : 0);
+process.exit(verdict.some((v) => v.lost > 0) || combinedLost > 0 ? 1 : 0);
