@@ -1,77 +1,45 @@
 /**
- * OPFS write fallback for engines without `FileSystemFileHandle.createWritable`
- * on the main thread (Safari before 26, Playwright WebKit). There the only
- * way to write an OPFS file is a sync access handle, which exists only inside
- * a dedicated worker — so this module keeps one small blob: worker and sends
- * it (path, bytes) pairs to write. Part of the OPFS vault backend (./opfs.ts),
- * which calls it when a file handle has no `createWritable`.
+ * The main-thread side of the OPFS write worker (./vault-io.worker.ts,
+ * W11.Q10): every OPFS note write is sent there and saved with sync access
+ * handles, atomically (./vaultIoFs.ts). Part of the OPFS vault backend
+ * (./opfs.ts), loaded on the first write.
+ *
+ * When the engine has no sync access handles (or no `move()` for the atomic
+ * rename) the worker says so once; `syncWriteOpfs` then throws
+ * SyncWriteUnsupported and the backend keeps using `createWritable` on the
+ * main thread. Engines without `createWritable` (Safari before 26) still
+ * write through the worker, in place if they cannot rename.
+ *
+ * The #856 follow-up: reads go to the same worker. `readOpfsBatched` gathers
+ * the reads asked for in the same turn (up to READ_BATCH) into one message,
+ * and the worker answers with all their bytes in one transferred buffer.
  */
+import { errorFromAnswer, splitRead, SyncWriteUnsupported, type ReadAnswer, type ReadRequest, type WriteAnswer, type WriteRequest } from "./vaultIoFs";
 
-import { journalBytes, journalNameFor, oldNameFor, saveId, tempNameFor } from "./atomic";
-
-const WORKER_SOURCE = `
-async function put(dir, name, bytes) {
-  var file = await dir.getFileHandle(name, { create: true });
-  var handle = await file.createSyncAccessHandle();
-  try {
-    handle.truncate(0);
-    handle.write(bytes, { at: 0 });
-    handle.flush();
-    if (handle.getSize() !== bytes.byteLength) throw new Error("the write was cut short");
-  } finally {
-    handle.close();
-  }
-  return file;
-}
-self.onmessage = async function (e) {
-  var msg = e.data || {};
-  try {
-    var dir = await navigator.storage.getDirectory();
-    var parts = msg.parts || [];
-    for (var i = 0; i < parts.length - 1; i++) dir = await dir.getDirectoryHandle(parts[i], { create: true });
-    var name = parts[parts.length - 1];
-    var bytes = new Uint8Array(msg.bytes);
-    var probe = await dir.getFileHandle(name, { create: true });
-    if (typeof probe.move !== "function") {
-      await put(dir, name, bytes);
-    } else {
-      // Atomic save (src/storage/vault/atomic.ts): new version complete in a
-      // temporary file first, then it takes the name.
-      // The names come from atomic.ts; a long note name gets short ones and
-      // a journal that names the note, written first and removed last.
-      var tmp = msg.names.tmp, old = msg.names.old, journal = msg.names.journal;
-      if (journal) await put(dir, journal, new Uint8Array(msg.names.journalBytes));
-      var file = await put(dir, tmp, bytes);
-      await probe.move(old);
-      await file.move(name);
-      await dir.removeEntry(old);
-      if (journal) await dir.removeEntry(journal);
-    }
-    self.postMessage({ id: msg.id, ok: true });
-  } catch (err) {
-    self.postMessage({ id: msg.id, ok: false, error: String((err && err.message) || err) });
-  }
-};
-`;
+export { SyncWriteUnsupported };
 
 let worker: Worker | null = null;
+/** Has this worker ever answered? A worker that fails before its first answer could not start (blocked, unsupported). */
+let answered = false;
 let nextId = 0;
-const pending = new Map<number, { resolve: () => void; reject: (e: Error) => void }>();
+const pending = new Map<number, { resolve: (a: WriteAnswer | ReadAnswer) => void; reject: (e: Error) => void }>();
 
 function getWorker(): Worker {
   if (worker) return worker;
-  const url = URL.createObjectURL(new Blob([WORKER_SOURCE], { type: "application/javascript" }));
-  const w = new Worker(url);
-  w.onmessage = (e: MessageEvent<{ id: number; ok: boolean; error?: string }>) => {
+  const w = new Worker(new URL("./vault-io.worker.ts", import.meta.url), { type: "module", name: "lumen-vault-io" });
+  w.onmessage = (e: MessageEvent<WriteAnswer | ReadAnswer>) => {
+    answered = true;
     const p = pending.get(e.data.id);
     if (!p) return;
     pending.delete(e.data.id);
-    if (e.data.ok) p.resolve();
-    else p.reject(new Error(e.data.error || "OPFS write failed"));
+    if (e.data.ok) p.resolve(e.data);
+    else p.reject(e.data.unsupported ? new SyncWriteUnsupported(e.data.message) : errorFromAnswer(e.data));
   };
   w.onerror = (e) => {
     e.preventDefault();
-    for (const p of pending.values()) p.reject(new Error(e.message || "OPFS write worker failed"));
+    // A worker that never started (its script blocked or not loadable) is "unsupported": the main thread writes instead.
+    const err = answered ? new Error(e.message || "OPFS write worker failed") : new SyncWriteUnsupported(`the worker did not start (${e.message || "error"})`);
+    for (const p of pending.values()) p.reject(err);
     pending.clear();
     worker = null;
   };
@@ -79,25 +47,67 @@ function getWorker(): Worker {
   return w;
 }
 
-/** Write `data` to the OPFS file at `parts` (relative to the OPFS root). */
-export async function syncWriteOpfs(parts: string[], data: string | Blob | ArrayBuffer | Uint8Array): Promise<void> {
-  if (typeof Worker === "undefined") throw new Error("OPFS writes are not supported in this browser.");
-  let bytes: ArrayBuffer;
-  if (typeof data === "string") bytes = new TextEncoder().encode(data).buffer as ArrayBuffer;
-  else if (data instanceof Blob) bytes = await data.arrayBuffer();
-  else if (data instanceof Uint8Array) bytes = data.slice().buffer as ArrayBuffer;
-  else bytes = data.slice(0);
-  const name = parts[parts.length - 1] ?? "";
-  const sid = saveId();
-  const journal = journalNameFor(name, sid);
-  const names = {
-    tmp: tempNameFor(name, sid),
-    old: oldNameFor(name, sid),
-    journal,
-    journalBytes: journal === null ? null : (journalBytes(name).buffer as ArrayBuffer),
-  };
+/** The bytes of a note, as an ArrayBuffer the worker can take over. */
+export async function toBytes(data: string | Blob | ArrayBuffer | Uint8Array): Promise<ArrayBuffer> {
+  if (typeof data === "string") return new TextEncoder().encode(data).buffer as ArrayBuffer;
+  if (data instanceof Blob) return await data.arrayBuffer();
+  if (data instanceof Uint8Array) return data.slice().buffer as ArrayBuffer;
+  return data.slice(0);
+}
+
+/** Write `data` to the OPFS file at `parts` (relative to the OPFS root), in the worker. */
+export async function syncWriteOpfs(parts: string[], data: string | Blob | ArrayBuffer | Uint8Array, opts: { inPlaceIfNoMove?: boolean } = {}): Promise<void> {
+  if (typeof Worker === "undefined") throw new SyncWriteUnsupported("Worker");
+  const bytes = await toBytes(data);
   const id = ++nextId;
-  const done = new Promise<void>((resolve, reject) => pending.set(id, { resolve, reject }));
-  getWorker().postMessage({ id, names, parts, bytes }, [bytes]);
+  const done = new Promise<void>((resolve, reject) => pending.set(id, { resolve: () => resolve(), reject }));
+  const msg: WriteRequest = { id, op: "write", parts, bytes, inPlaceIfNoMove: opts.inPlaceIfNoMove };
+  getWorker().postMessage(msg, [bytes]);
   return done;
+}
+
+/** Read the OPFS files at `paths` in the worker, in one message. null: not read there (the caller reads it itself). */
+export async function syncReadOpfs(paths: string[][]): Promise<Array<Uint8Array | null>> {
+  if (typeof Worker === "undefined") throw new SyncWriteUnsupported("Worker");
+  const id = ++nextId;
+  const done = new Promise<WriteAnswer | ReadAnswer>((resolve, reject) => pending.set(id, { resolve, reject }));
+  const msg: ReadRequest = { id, op: "read", paths };
+  getWorker().postMessage(msg);
+  const a = await done;
+  if (!a.ok || !("op" in a) || a.op !== "read") throw new Error("the OPFS worker gave no read answer");
+  return splitRead(a.data, a.lengths);
+}
+
+/** At most this many files in one read message. */
+export const READ_BATCH = 256;
+let queued: Array<{ parts: string[]; resolve: (b: Uint8Array | null) => void; reject: (e: Error) => void }> = [];
+let flushScheduled = false;
+
+function flushReads(): void {
+  flushScheduled = false;
+  const all = queued;
+  queued = [];
+  for (let i = 0; i < all.length; i += READ_BATCH) {
+    const batch = all.slice(i, i + READ_BATCH);
+    syncReadOpfs(batch.map((q) => q.parts)).then(
+      (out) => batch.forEach((q, k) => q.resolve(out[k])),
+      (e: Error) => batch.forEach((q) => q.reject(e)),
+    );
+  }
+}
+
+/**
+ * One file's bytes through the worker, batched with the other reads asked
+ * for before the next task (a folder opened, the search index built). Rejects
+ * with SyncWriteUnsupported when the worker cannot run here.
+ */
+export function readOpfsBatched(parts: string[]): Promise<Uint8Array | null> {
+  return new Promise((resolve, reject) => {
+    queued.push({ parts, resolve, reject });
+    if (queued.length >= READ_BATCH) flushReads();
+    else if (!flushScheduled) {
+      flushScheduled = true;
+      setTimeout(flushReads, 0);
+    }
+  });
 }
