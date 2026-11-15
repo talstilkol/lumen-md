@@ -3,7 +3,7 @@
  * source note in the vault (Sources/<register>/…), and the note that asked
  * for it gets a link. Loaded with the open-sources dialog, on use.
  *
- * The lookup itself runs inside the dialog's gated fetch (sources/open/app):
+ * The lookup itself runs inside the dialog's gated fetch, in sources/open/app:
  * the user confirms, and the request is consented traffic in the privacy
  * ledger under REGISTERS_REASON (./ckanRegister).
  */
