@@ -14,13 +14,15 @@ import { attackFiles, green, parseCounts } from "../../scripts/train-offline.mjs
 const files = attackFiles();
 
 describe("security/attacks is a gate", () => {
-  it("holds the re-review and seventh-review attack suites", () => {
+  it("holds the re-review, seventh-review and role-vault attack suites", () => {
     for (const t of ["t1-legacy-downgrade", "t3-preplant-manifest", "t4-thaw-race", "t5-fresh-rollback", "t6-prev-after-change", "t8-cas-fork"]) {
       expect(files).toContain(`security/attacks/rr12-${t}.test.ts`);
     }
     for (const n of ["1-freeze-lockout", "2-dropped-marker-replay", "3-pairing-downgrade", "4-pairing-races", "5-consent-kdf-sticky"]) {
       expect(files).toContain(`security/attacks/rr7-${n}.test.ts`);
     }
+    // W12.S4: role vaults (reader writes, revoked device, replay, forged signatures) on both relays.
+    expect(files).toContain("security/attacks/w12-s4-role-vault.test.ts");
   });
 
   it("imports only this checkout (no absolute worktree, no scratchpad)", () => {
