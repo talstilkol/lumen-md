@@ -1877,6 +1877,13 @@
       "icon": "Link"
     },
     {
+      "id": "sources.havruta",
+      "label": "Study with a partner (havruta)…",
+      "group": "Insert",
+      "hint": "A shared, encrypted study room on this reference: notes and highlights travel, the text stays on each device",
+      "icon": "Link"
+    },
+    {
       "id": "book.open",
       "label": "Book: chapters, goals and export",
       "group": "View",
@@ -4031,6 +4038,13 @@
       "icon": "Link"
     },
     {
+      "id": "sources.havruta",
+      "label": "Study with a partner (havruta)…",
+      "group": "Insert",
+      "hint": "A shared, encrypted study room on this reference: notes and highlights travel, the text stays on each device",
+      "icon": "Link"
+    },
+    {
       "id": "book.open",
       "label": "Book: chapters, goals and export",
       "group": "View",
@@ -4439,6 +4453,7 @@
     "sources.insertSefaria",
     "sources.saveOffline",
     "sources.notesOnVerse",
+    "sources.havruta",
     "book.open",
     "book.addChapter",
     "export.latexProject",
