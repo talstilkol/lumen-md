@@ -10272,6 +10272,61 @@
       "vars": []
     },
     {
+      "key": "readingList.captureUrl",
+      "en": "The link of the page to add to the reading list",
+      "vars": []
+    },
+    {
+      "key": "readingList.created",
+      "en": "New source: {path}",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "readingList.exists",
+      "en": "This is already a source: {path}",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "readingList.noLibrary",
+      "en": "The citation library is empty. Add a .bib or CSL-JSON file to the vault, or sync Zotero from the desktop app.",
+      "vars": []
+    },
+    {
+      "key": "readingList.noMatch",
+      "en": "Nothing in the library matches “{query}”.",
+      "vars": [
+        "query"
+      ]
+    },
+    {
+      "key": "readingList.notAUrl",
+      "en": "“{text}” is not a web link (http or https).",
+      "vars": [
+        "text"
+      ]
+    },
+    {
+      "key": "readingList.pick",
+      "en": "Which item? ({count} found)",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "readingList.refused",
+      "en": "The source type refused this item. Check .lumen/types/source.yaml.",
+      "vars": []
+    },
+    {
+      "key": "readingList.search",
+      "en": "Search the library: cite key, author, title or year (empty for all)",
+      "vars": []
+    },
+    {
       "key": "redact.empty",
       "en": "Select the text to redact first.",
       "vars": []
