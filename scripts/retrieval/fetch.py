@@ -48,4 +48,12 @@ for n, r in [("beir-scifact", "BeIR/scifact"), ("beir-nfcorpus", "BeIR/nfcorpus"
 beir("webfaq-heb", "mteb/WebFAQRetrieval", "mteb/WebFAQRetrieval", "test", "CC-BY-4.0", config="heb")
 belebele("belebele-heb", "heb_Hebr", "heb_Hebr")
 belebele("belebele-he-en", "heb_Hebr", "eng_Latn")
+# W12.A3: HeQ v1.1 test in its upstream form, at the commit the golden sets pin (scripts/golden/defs.mjs).
+import hashlib, urllib.request
+HEQ_COMMIT = "f46d2ff1b796a95e897530f167ae0d5bed123fe1"
+HEQ_SHA256 = "aa3c8107919bb04a95c8fc572121d07c38b23f35ac33630dea32a384d6aea5db"
+heq_dir = os.path.join(os.path.dirname(OUT.rstrip("/")) or ".", "heq"); os.makedirs(heq_dir, exist_ok=True)
+raw = urllib.request.urlopen(f"https://raw.githubusercontent.com/NNLP-IL/Hebrew-Question-Answering-Dataset/{HEQ_COMMIT}/data/data%20v1.1/test%20v1.1.json").read()
+assert hashlib.sha256(raw).hexdigest() == HEQ_SHA256, "HeQ test v1.1: sha256 differs from the pinned file"
+open(os.path.join(heq_dir, "test v1.1.json"), "wb").write(raw)
 print("fetched into", OUT)
