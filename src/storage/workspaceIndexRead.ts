@@ -3,6 +3,7 @@
  * vault's id — and its diff of a listing against the index (plan W6.25:
  * moved out of workspaceIndex.ts unchanged).
  */
+import { isIndexableTextPath } from "../lib/textPaths";
 import { isAssetName, listWorkspace, readWorkspaceFile, type WorkspaceEntry, type WorkspaceNode } from "./workspace";
 import { getVaultBackend, unwrapVaultBackend, vaultEncryptionReady, VaultNotFoundError } from "./vault";
 import type { IndexInput } from "./vaultIndexCore";
@@ -61,9 +62,14 @@ export async function mapLimit<T>(items: T[], limit: number, fn: (x: T) => Promi
 
 export const nameOf = (path: string) => path.split("/").pop() ?? path;
 
-/** Hidden from the tree, search and the index: dot entries at any depth (T46) and pasted assets. */
+/**
+ * Hidden from search and the index: dot entries at any depth (T46), pasted
+ * assets, and anything that is not a note or plain text: a PDF or another
+ * binary read as text would put megabytes of gibberish into the index
+ * (review #272, step 2.17).
+ */
 export function indexable(path: string): boolean {
-  return !!path && !path.split("/").some((s) => s.startsWith(".")) && !isAssetName(path);
+  return !!path && !path.split("/").some((s) => s.startsWith(".")) && !isAssetName(path) && isIndexableTextPath(path);
 }
 
 function flatten(nodes: WorkspaceNode[], out: WorkspaceEntry[] = []): WorkspaceEntry[] {
@@ -85,7 +91,8 @@ export async function listNotes(reuseTree: boolean): Promise<WorkspaceEntry[]> {
   cache.listing = null;
   const list =
     reuseTree && l && l.generation === cache.generation ? flatten(l.tree) : await listWorkspace({ includeAssets: false });
-  return list.filter((e) => !isAssetName(e.path));
+  // Notes and plain text only (review #272, step 2.17).
+  return list.filter((e) => !isAssetName(e.path) && isIndexableTextPath(e.path));
 }
 
 /** Where a vault keeps its own random id (Y2): in its `.lumen` app data, hidden from the index and the tree. */
