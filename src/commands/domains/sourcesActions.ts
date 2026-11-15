@@ -5,6 +5,7 @@ import { useToastStore } from "../../store/useToastStore";
 import { useAppStore } from "../../store/useStore";
 import type { CommandContext } from "./context";
 import { explainError } from "../../lib/userError";
+import "./commandBodiesStrings";
 
 type Sefaria = typeof import("../../sources/sefaria/app");
 const sefaria = (): Promise<Sefaria> => import("../../sources/sefaria/app");

@@ -6,6 +6,7 @@ import { t } from "../../i18n";
 import { uiConfirm } from "../../ui/PromptDialog";
 import { showAiToast } from "../../ui/AiToast";
 import { explainError } from "../../lib/userError";
+import "./commandBodiesStrings";
 
 /** `view.hebrewGrammarLevel` (moved from tools.ts, which loads this module when the command runs; W4.9). */
 export const cycleHebrewGrammarLevel = async (): Promise<void> => {

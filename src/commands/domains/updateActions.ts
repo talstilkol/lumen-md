@@ -5,6 +5,7 @@
 import { t } from "../../i18n";
 import { showAiToast } from "../../ui/AiToast";
 import { explainError } from "../../lib/userError";
+import "./commandBodiesStrings";
 
 /** `app.checkUpdates` (moved from vaultLocation.ts, which loads this module when the command runs; W4.9). */
 export const checkUpdates = async (): Promise<void> => {

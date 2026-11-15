@@ -39,7 +39,6 @@
   "toast.refactoringDocument": "Refactoring document...",
   "toast.region": "Notifications",
   "toast.summarising": "✨ Summarising…",
-  "toast.switchedToOllama": "✅ Switched to Ollama: {model}",
   "toast.templateCreated": "Template \"{path}\" created!",
   "toast.templateFailed": "Template failed: {msg}",
   "toast.useTheFloatingMenuOr": "Use the floating (/) menu or text selection tooltip for media insertions."
