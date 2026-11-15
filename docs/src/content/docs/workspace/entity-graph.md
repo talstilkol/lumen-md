@@ -47,3 +47,25 @@ the relations between them ("born in", "member of", "cites", …).
   neighbours, and Enter centres the view.
 - Export to JSON-LD (schema.org), GraphML, RDF/Turtle with PROV-O, or
   Neo4j `neo4j-admin import` CSV. Every relation keeps its source.
+
+## Citations
+
+Sources ([reading list](/workspace/reading-list/)) cite each other, and the
+graph shows that as **cites** relations:
+
+- a `[@key]` citation in a source note's text (pandoc syntax; the source's
+  own key is its `citekey:`);
+- a link from one source note to another (`[[Other source]]`);
+- `references:` of an item in your citation library (CSL-JSON, by cite key or
+  DOI).
+
+Plain notes that cite are not sources, so they draw no edge. Each relation
+keeps where it was seen: the note and paragraph, or the library file.
+**Citations only** in the toolbar shows just these relations between
+sources and laws; press it again to show everything. The table lists who
+cites whom.
+
+Filling `references:` from OpenAlex (by DOI) is optional and off by default:
+nothing is sent unless you turn it on, and then only the DOIs go to
+api.openalex.org, which the privacy ledger lists. The switch for it is not
+in Settings yet.

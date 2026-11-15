@@ -5253,6 +5253,11 @@
       "vars": []
     },
     {
+      "key": "entityGraph.view.citationsOnly",
+      "en": "Citations only",
+      "vars": []
+    },
+    {
       "key": "entityGraph.view.confidence",
       "en": "Min. confidence",
       "vars": []

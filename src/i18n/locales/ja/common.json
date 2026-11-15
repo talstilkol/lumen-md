@@ -952,6 +952,7 @@
   "entityGraph.type.source": "出典 / 聖句",
   "entityGraph.view.aria": "{nodes} 件のエンティティのグラフ",
   "entityGraph.view.around": "中心",
+  "entityGraph.view.citationsOnly": "引用のみ",
   "entityGraph.view.confidence": "最小信頼度",
   "entityGraph.view.date": "日付",
   "entityGraph.view.depth": "ホップ数",

@@ -952,6 +952,7 @@
   "entityGraph.type.source": "Source / verset",
   "entityGraph.view.aria": "Graphe de {nodes} entités",
   "entityGraph.view.around": "Autour de",
+  "entityGraph.view.citationsOnly": "Citations seulement",
   "entityGraph.view.confidence": "Confiance min.",
   "entityGraph.view.date": "Date",
   "entityGraph.view.depth": "Sauts",

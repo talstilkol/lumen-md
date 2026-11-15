@@ -952,6 +952,7 @@
   "entityGraph.type.source": "مصدر / آية",
   "entityGraph.view.aria": "رسم بياني لـ {nodes} كيانًا",
   "entityGraph.view.around": "حول",
+  "entityGraph.view.citationsOnly": "الاستشهادات فقط",
   "entityGraph.view.confidence": "أدنى ثقة",
   "entityGraph.view.date": "التاريخ",
   "entityGraph.view.depth": "القفزات",

@@ -952,6 +952,7 @@
   "entityGraph.type.source": "Источник / стих",
   "entityGraph.view.aria": "Граф сущностей: {nodes}",
   "entityGraph.view.around": "Вокруг",
+  "entityGraph.view.citationsOnly": "Только цитирования",
   "entityGraph.view.confidence": "Мин. уверенность",
   "entityGraph.view.date": "Дата",
   "entityGraph.view.depth": "Шаги",

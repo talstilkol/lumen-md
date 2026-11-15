@@ -952,6 +952,7 @@
   "entityGraph.type.source": "Quelle / Vers",
   "entityGraph.view.aria": "Entitätsgraph mit {nodes} Entitäten",
   "entityGraph.view.around": "Rund um",
+  "entityGraph.view.citationsOnly": "Nur Zitate",
   "entityGraph.view.confidence": "Min. Konfidenz",
   "entityGraph.view.date": "Datum",
   "entityGraph.view.depth": "Schritte",

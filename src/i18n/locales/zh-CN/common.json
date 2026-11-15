@@ -952,6 +952,7 @@
   "entityGraph.type.source": "来源 / 经文",
   "entityGraph.view.aria": "包含 {nodes} 个实体的实体图谱",
   "entityGraph.view.around": "围绕",
+  "entityGraph.view.citationsOnly": "仅引用",
   "entityGraph.view.confidence": "最低置信度",
   "entityGraph.view.date": "日期",
   "entityGraph.view.depth": "跳数",

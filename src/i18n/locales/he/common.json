@@ -952,6 +952,7 @@
   "entityGraph.type.source": "מקור/פסוק",
   "entityGraph.view.aria": "גרף ישויות של {nodes} ישויות",
   "entityGraph.view.around": "סביב",
+  "entityGraph.view.citationsOnly": "ציטוטים בלבד",
   "entityGraph.view.confidence": "ביטחון מינימלי",
   "entityGraph.view.date": "תאריך",
   "entityGraph.view.depth": "צעדים",
