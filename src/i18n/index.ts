@@ -227,7 +227,7 @@ export async function initLocale(storageKey = "lumen-md"): Promise<Locale> {
   } catch {
     /* why: corrupt storage — go by the system's languages */
   }
-  // Plan W4.10: no saved choice → the system's language (as public/locale-boot.js
+  // Plan W4.10: no saved choice → the system's language (as public/boot.js
   // already set lang/dir before the first paint), so a Hebrew system starts in Hebrew.
   let locale: Locale = isLocale(persisted) ? persisted : detectLocale(null, systemLanguages());
   if (locale !== "en") {

@@ -4,7 +4,7 @@
   "startup": {
     "budgetKb": 222,
     "targetKb": 250,
-    "note": "C2: the SUM of what index.html loads before the app can run (its entry script + every modulepreload), not each file alone. Measured 448 KB (18.10); goal 250 KB (W4.9: 460 → 380 → 300 → 250). 460 → 222 (W10.E13 follow-up, plan:targets audit of #749): measured 222,374 B gz = 217.2 KB, plus the 2 % / 1 KB margin = 222 KB, below the 250 KB target, so the lower of the two."
+    "note": "C2: the SUM of what index.html loads before the app can run (its entry script + every modulepreload), not each file alone. Measured 448 KB (18.10); goal 250 KB (W4.9: 460 → 380 → 300 → 250). 460 → 222 (W10.E13 follow-up, plan:targets audit of #749): measured 222,374 B gz = 217.2 KB, plus the 2 % / 1 KB margin = 222 KB, below the 250 KB target, so the lower of the two. W10.E19 (#814, 8.2) set 380 on its own branch (command bodies and English on use, one boot script, hidden dialogs and panels lazy); merged on train 6 the lower number, 222, stays."
   },
   "rules": [
     { "name": "main bundle", "pattern": "^app-", "budgetKb": 195, "note": "The eager Lumen runtime (App + side panels + i18n table). With Vite 8 the startup code shared by the HTML entries lives in app-*. History: 222 → 225 (round 16), 225 → 230 (round 25), 230 → 195 (audit M12-followup-2, rehype-raw lazy)." },

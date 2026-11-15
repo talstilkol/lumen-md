@@ -1,5 +1,6 @@
 /** Editing: formatting, suggesting mode and inserting blocks. */
-import { cmdIcons, type Command } from "../../ui/CommandPalette";
+import { cmdIcons } from "../../ui/cmdIcons";
+import type { Command } from "../../ui/CommandPalette";
 import { useAppStore } from "../../store/useStore";
 import { t } from "../../i18n";
 import { BLOCK_SNIPPETS } from "../../snippets";

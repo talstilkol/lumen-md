@@ -1,6 +1,6 @@
 /**
  * W4.10 — Hebrew first: the page is written lang="he" dir="rtl"; before the
- * first paint public/locale-boot.js sets the saved or the system language
+ * first paint public/boot.js sets the saved or the system language
  * (so a Hebrew system paints right to left, with no flip), and initLocale()
  * agrees with it; og:locale is he_IL; the READMEs open in Hebrew and name no
  * cloud provider as a default.
@@ -17,12 +17,12 @@ import { readmeProblems } from "../../scripts/docs-sync.mjs";
 const root = process.cwd();
 const read = (p: string) => readFileSync(join(root, p), "utf8");
 
-/** Run public/locale-boot.js as the browser would, and return what it set. */
+/** Run public/boot.js as the browser would (its locale part), and return what it set. */
 function boot(opts: { saved?: unknown; languages?: string[]; language?: string; storageThrows?: boolean }) {
-  const el = { lang: "he", dir: "rtl" };
+  const el = { lang: "he", dir: "rtl", classList: { toggle: () => true } };
   const win: Record<string, unknown> = {};
   const ctx = {
-    window: win,
+    window: Object.assign(win, { matchMedia: () => ({ matches: true }) }),
     document: { documentElement: el },
     navigator: { languages: opts.languages ?? [], language: opts.language ?? "" },
     localStorage: {
@@ -32,7 +32,7 @@ function boot(opts: { saved?: unknown; languages?: string[]; language?: string; 
       },
     },
   };
-  vm.runInNewContext(read("public/locale-boot.js"), ctx);
+  vm.runInNewContext(read("public/boot.js"), ctx);
   return { lang: el.lang, dir: el.dir, pick: win.__lumenPickLocale as (s: unknown, l: string[]) => string, boot: win.__lumenBootLocale };
 }
 
@@ -80,11 +80,13 @@ describe("index.html", () => {
 
   it("is written Hebrew first, with the boot scripts before the app and no inline script", () => {
     expect(html).toMatch(/<html lang="he" dir="rtl"/);
-    const localeAt = html.indexOf('<script src="/locale-boot.js"></script>');
-    const themeAt = html.indexOf('<script src="/theme-boot.js"></script>');
+    const bootAt = html.indexOf('<script src="/boot.js"></script>');
     const appAt = html.indexOf('<script type="module" src="/src/main.tsx">');
-    expect(localeAt).toBeGreaterThan(0);
-    expect(localeAt < themeAt && themeAt < appAt).toBe(true);
+    expect(bootAt).toBeGreaterThan(0);
+    expect(bootAt < html.indexOf("</head>") && bootAt < appAt).toBe(true);
+    // One boot script (W10.E19): the language comes before the theme inside it.
+    const boot = read("public/boot.js");
+    expect(boot.indexOf("__lumenBootLocale")).toBeLessThan(boot.indexOf('classList.toggle("dark"'));
     // Every <script> is external or JSON-LD data (the CSP allows no inline script).
     for (const m of html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/g)) {
       if (/type="application\/ld\+json"/.test(m[1])) continue;

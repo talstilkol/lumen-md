@@ -3,7 +3,7 @@
  * choice; else Hebrew when the system lists Hebrew at all (a Hebrew-first
  * product: someone with "en-US, he-IL" reads Hebrew); else the first
  * supported language in the system's list (navigator.languages); else
- * English. public/locale-boot.js does the same
+ * English. public/boot.js does the same
  * before the first paint, so the app never flips direction on start.
  */
 import type { Locale } from "./index";

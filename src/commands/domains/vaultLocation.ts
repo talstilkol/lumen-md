@@ -6,7 +6,8 @@
  * without `showDirectoryPicker` (Firefox, Safari) get a clear message that
  * the vault stays in browser storage.
  */
-import { cmdIcons, type Command } from "../../ui/CommandPalette";
+import { cmdIcons } from "../../ui/cmdIcons";
+import type { Command } from "../../ui/CommandPalette";
 import { t } from "../../i18n";
 
 const actions = () => import("../../ui/vaultFolderActions");

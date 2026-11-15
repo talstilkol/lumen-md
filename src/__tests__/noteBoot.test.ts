@@ -1,10 +1,10 @@
-/** Plan W2.21: the boot shell shows the last note before the bundle loads (public/note-boot.js). */
+/** Plan W2.21: the boot shell shows the last note before the bundle loads (public/boot.js, W10.E19). */
 import { describe, it, expect, beforeEach } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const root = join(__dirname, "../..");
-const script = readFileSync(join(root, "public/note-boot.js"), "utf8");
+const script = readFileSync(join(root, "public/boot.js"), "utf8");
 const html = readFileSync(join(root, "index.html"), "utf8");
 const boot = () => new Function(script)();
 const SHELL = '<div class="boot-shell"><div class="boot-bar"></div><div class="boot-page"><div class="boot-line"></div></div></div>';
@@ -18,10 +18,28 @@ describe("note boot script", () => {
     document.documentElement.removeAttribute("data-boot-note");
   });
 
-  it("runs after the boot shell and before the app module", () => {
-    const at = html.indexOf('<script src="/note-boot.js"></script>');
-    expect(at).toBeGreaterThan(html.indexOf('class="boot-shell"'));
+  it("is the one boot script, in <head> before the boot shell and the app module", () => {
+    const at = html.indexOf('<script src="/boot.js"></script>');
+    expect(at).toBeGreaterThan(0);
+    expect(at).toBeLessThan(html.indexOf("</head>"));
+    expect(at).toBeLessThan(html.indexOf('class="boot-shell"'));
     expect(at).toBeLessThan(html.indexOf('<script type="module"'));
+    // W10.E19: one file, not three.
+    expect(html).not.toMatch(/(theme|locale|note)-boot\.js/);
+    expect((html.match(/<script src="\/[^"]+\.js"><\/script>/g) ?? []).length).toBe(1);
+    // Skeleton bars the parser adds after the note was painted stay hidden.
+    expect(html).toContain("[data-boot-note] .boot-line{display:none}");
+  });
+
+  it("run in <head>, it fills the shell as soon as the parser inserts it", async () => {
+    saved({ doc: { content: "פתק אחרון" } });
+    document.body.innerHTML = "";
+    boot();
+    expect(document.documentElement.hasAttribute("data-boot-note")).toBe(false);
+    document.body.innerHTML = SHELL;
+    await new Promise((r) => setTimeout(r, 0));
+    expect(page().querySelector("pre.boot-note")!.textContent).toBe("פתק אחרון");
+    expect(document.documentElement.hasAttribute("data-boot-note")).toBe(true);
   });
 
   it("shows the persisted note as text, never as HTML", () => {

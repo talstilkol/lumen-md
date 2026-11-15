@@ -12,7 +12,7 @@
 
 import { useEffect, useState } from "react";
 import type { Command } from "../ui/CommandPalette";
-import { cmdIcons } from "../ui/CommandPalette";
+import { cmdIcons } from "../ui/cmdIcons";
 import {
   listInstalledTemplates,
   readInstalledTemplate,

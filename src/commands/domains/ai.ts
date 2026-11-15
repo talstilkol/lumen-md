@@ -1,5 +1,6 @@
 /** AI settings and controls: Privacy Mode, providers and models, policy, cache, cancel. */
-import { cmdIcons, type Command } from "../../ui/CommandPalette";
+import { cmdIcons } from "../../ui/cmdIcons";
+import type { Command } from "../../ui/CommandPalette";
 import { useAppStore } from "../../store/useStore";
 import { t } from "../../i18n";
 import { buildAiSettingsCommand, buildAiOutlineCommand } from "../../ai/commands";

@@ -1,29 +1,7 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   Search,
-  FileText,
-  FolderOpen,
-  Save,
-  Sun,
-  Moon,
-  Eye,
-  Pencil,
-  Columns2,
   Sparkles,
-  BarChart3,
-  Map,
-  Network,
-  Table,
-  Calculator,
-  Quote,
-  Download,
-  PanelRightOpen,
-  Printer,
-  Music2,
-  Box,
-  Workflow,
-  Link,
-  SquarePlay as Youtube,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { t } from "../i18n";
@@ -485,29 +463,5 @@ export function CommandPalette({ open, onClose, commands }: Props) {
   );
 }
 
-// Icons re-exported so App.tsx can build a command list without re-importing
-export const cmdIcons = {
-  FileText,
-  FolderOpen,
-  Save,
-  Sun,
-  Moon,
-  Eye,
-  Pencil,
-  Columns2,
-  Sparkles,
-  BarChart3,
-  Map,
-  Network,
-  Table,
-  Calculator,
-  Quote,
-  Download,
-  PanelRightOpen,
-  Printer,
-  Music2,
-  Box,
-  Workflow,
-  Link,
-  Youtube,
-};
+// The command icons live in ./cmdIcons, so building the command list does not load the palette (W10.E19).
+export { cmdIcons } from "./cmdIcons";

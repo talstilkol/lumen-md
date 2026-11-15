@@ -12,7 +12,8 @@
  * first use asks to turn it on.
  */
 import { t } from "../../i18n";
-import { cmdIcons, type Command } from "../../ui/CommandPalette";
+import { cmdIcons } from "../../ui/cmdIcons";
+import type { Command } from "../../ui/CommandPalette";
 import type { CommandContext } from "./context";
 
 // The command bodies load on first use (datagovActions.ts): the palette lists these commands at start-up (W4.9).

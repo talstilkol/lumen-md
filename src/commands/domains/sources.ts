@@ -13,7 +13,8 @@
  *  - "My notes on this verse": every note that cites the same verse.
  */
 import { t } from "../../i18n";
-import { cmdIcons, type Command } from "../../ui/CommandPalette";
+import { cmdIcons } from "../../ui/cmdIcons";
+import type { Command } from "../../ui/CommandPalette";
 import type { CommandContext } from "./context";
 
 // The command bodies load on first use (sourcesActions.ts): the palette lists these commands at start-up (W4.9).

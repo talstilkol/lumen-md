@@ -1,10 +1,10 @@
-/** The boot shell paints in the saved theme: public/theme-boot.js runs before it (C1). */
+/** The boot shell paints in the saved theme: public/boot.js runs before it (C1; one boot script since W10.E19). */
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const root = join(__dirname, "../..");
-const script = readFileSync(join(root, "public/theme-boot.js"), "utf8");
+const script = readFileSync(join(root, "public/boot.js"), "utf8");
 const boot = () => new Function(script)();
 const saved = (theme: string) => localStorage.setItem("lumen-md", JSON.stringify({ state: { theme }, version: 0 }));
 function osDark(dark: boolean) {
@@ -20,7 +20,7 @@ describe("theme boot script", () => {
 
   it("is loaded in <head>, before the boot shell", () => {
     const html = readFileSync(join(root, "index.html"), "utf8");
-    const at = html.indexOf('<script src="/theme-boot.js"></script>');
+    const at = html.indexOf('<script src="/boot.js"></script>');
     expect(at).toBeGreaterThan(0);
     expect(at).toBeLessThan(html.indexOf("</head>"));
   });

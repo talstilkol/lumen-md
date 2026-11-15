@@ -36,7 +36,8 @@ const MarkdownTableEditor = lazy(() => import("./ui/MarkdownTableEditor").then(m
 // PDF reader (plan 4.14): pdf.js and the reader load only when a PDF is opened.
 const PdfReader = lazy(() => import("./pdf/PdfReader").then(m => ({ default: m.PdfReaderOverlay })));
 const EpubReader = lazy(() => import("./epub/EpubReader").then(m => ({ default: m.EpubReaderOverlay })));
-import { CommandPalette } from "./ui/CommandPalette";
+// W10.E19 (8.2): every dialog and panel that is hidden at start loads on first open.
+const CommandPalette = lazy(() => import("./ui/CommandPalette").then((m) => ({ default: m.CommandPalette })));
 import { AiFab } from "./ui/AiFab";
 import { FileTree } from "./ui/FileTree";
 import { SidebarResizer } from "./ui/SidebarResizer";
@@ -44,7 +45,7 @@ import { uiAlert, uiPrompt } from "./ui/PromptDialog";
 // The Insert-text dialog loads on first use, off the startup path (4.14); train 5: so does the flow
 // around it (the startup budget after the W6.25 split).
 const insertTextFromDialog = (...a: Parameters<typeof import("./ui/insertTextFromDialog").insertTextFromDialog>) => import("./ui/insertTextFromDialog").then((m) => m.insertTextFromDialog(...a));
-import { BacklinksPanel } from "./ui/BacklinksPanel";
+const BacklinksPanel = lazy(() => import("./ui/BacklinksPanel").then((m) => ({ default: m.BacklinksPanel })));
 // SearchDialog imports the CodeMirror search-highlight extension; lazy so
 // the boot path stays CodeMirror-free (the dialog opens on ⌘⇧F).
 const SearchDialog = lazy(() =>
@@ -54,7 +55,7 @@ import { AiToastContainer, showAiToast } from "./ui/AiToast";
 import { HelpHost } from "./ui/HelpHost";
 import { AiSuggestionsPanel } from "./ui/AiSuggestionsPanel";
 import { MobileKeyboardBarHost } from "./ui/MobileKeyboardBarHost";
-import { TagsPanel } from "./ui/TagsPanel";
+const TagsPanel = lazy(() => import("./ui/TagsPanel").then((m) => ({ default: m.TagsPanel })));
 // CommentsPanel pulls collab/comments.ts → yjs; comments only exist inside a
 // collab session, so the panel is lazy and addCommentFromSelection is
 // imported at the call site to keep yjs off the boot path.
@@ -81,7 +82,7 @@ import { historyKey } from "./storage/history";
 import { isOPFSAvailable, readWorkspaceFile } from "./storage/workspace";
 import { ErrorBoundary } from "./ui/ErrorBoundary";
 const KeyboardShortcuts = lazy(() => import("./ui/KeyboardShortcuts").then(m => ({ default: m.KeyboardShortcuts })));
-import { FocusMode } from "./ui/FocusMode";
+const FocusMode = lazy(() => import("./ui/FocusMode").then((m) => ({ default: m.FocusMode })));
 const OnboardingTour = lazy(() => import("./ui/OnboardingTour").then(m => ({ default: m.OnboardingTour })));
 // First-run setup (plan 14.1): its own chunk, loaded only on a first visit or from ⌘K.
 const FirstRun = lazy(() => import("./onboarding/FirstRun"));
@@ -103,7 +104,8 @@ import { useLaunchActions } from "./hooks/useLaunchActions";
 import { useOpenFileEvent } from "./hooks/useOpenFileEvent";
 import { usePropertiesEdit } from "./hooks/usePropertiesEdit";
 import { useWindowEvent } from "./hooks/useWindowEvent";
-import { GraphOverlay } from "./ui/GraphOverlay";
+import { useOpenedOnce } from "./hooks/useOpenedOnce";
+const GraphOverlay = lazy(() => import("./ui/GraphOverlay").then((m) => ({ default: m.GraphOverlay })));
 import { DropHint } from "./ui/DropHint";
 
 export default function App() {
@@ -174,9 +176,6 @@ export default function App() {
   useWindowEvent("lumen-open-usability-self", () => setUsabilityOpen("unmoderated"));
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  useEffect(() => {
-    if (searchOpen) setSearchMounted(true);
-  }, [searchOpen]);
   const [findReplaceOpen, setFindReplaceOpen] = useState(false);
   const [graphOpen, setGraphOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -201,11 +200,12 @@ export default function App() {
   const [propertiesOpen, setPropertiesOpen] = useState(false);
   const [captureOpen, setCaptureOpen] = useState(false);
   const [captureVoice, setCaptureVoice] = useState(false);
-  // The search dialog loads on first open and then stays mounted, so an
-  // Ask Workspace conversation survives closing it (perf: not at startup).
-  const [searchMounted, setSearchMounted] = useState(false);
   const [privacyOpen, setPrivacyOpen] = useState(false);
   const [tagsPanelOpen, setTagsPanelOpen] = useState(false);
+  // Lazy dialogs mount on first open and stay (an Ask Workspace conversation, the palette's tab survive a close).
+  const searchMounted = useOpenedOnce(searchOpen);
+  const paletteMounted = useOpenedOnce(paletteOpen);
+  const tagsMounted = useOpenedOnce(tagsPanelOpen);
   const [commentsPanelOpen, setCommentsPanelOpen] = useState(false);
   const [runtimeMetricsOpen, setRuntimeMetricsOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
@@ -541,6 +541,7 @@ export default function App() {
         </div>
         {(narrow ? outlineSheet : showOutline) && <Outline markdownText={doc.content} sheet={narrow} />}
         {showBacklinks && (
+          <Suspense fallback={null}>
           <BacklinksPanel
             filePath={doc.workspaceName ?? null}
             onOpen={async (fromPath) => {
@@ -559,6 +560,7 @@ export default function App() {
               }
             }}
           />
+          </Suspense>
         )}
         {showLocalGraph && (
           <Suspense fallback={null}>
@@ -596,11 +598,13 @@ export default function App() {
         }
       />
       <ScrollProgress />
+      {paletteMounted && <Suspense fallback={null}>
       <CommandPalette
         open={paletteOpen}
         onClose={() => setPaletteOpen(false)}
         commands={commands}
       />
+      </Suspense>}
       {searchMounted && <Suspense fallback={null}>
       <SearchDialog
         open={searchOpen}
@@ -632,7 +636,7 @@ export default function App() {
           {usabilityOpen === "unmoderated" ? <UsabilitySelfPanel onClose={() => setUsabilityOpen(null)} /> : <UsabilitySessionPanel onClose={() => setUsabilityOpen(null)} />}
         </Suspense>
       )}
-      <TagsPanel open={tagsPanelOpen} onClose={() => setTagsPanelOpen(false)} />
+      {tagsMounted && <Suspense fallback={null}><TagsPanel open={tagsPanelOpen} onClose={() => setTagsPanelOpen(false)} /></Suspense>}
       {collab && (
         <Suspense fallback={null}>
         <CommentsPanel
@@ -670,6 +674,7 @@ export default function App() {
 
       {/* Graph View overlay */}
       {graphOpen && (
+        <Suspense fallback={null}>
         <GraphOverlay
           onClose={() => setGraphOpen(false)}
           onOpenFile={(path, content) => {
@@ -677,6 +682,7 @@ export default function App() {
             setGraphOpen(false);
           }}
         />
+        </Suspense>
       )}
 
       {/* Canvas Whiteboard overlay */}
@@ -780,6 +786,7 @@ export default function App() {
 
       {/* Focus Mode overlay */}
       {focusMode && (
+        <Suspense fallback={null}>
         <FocusMode active={focusMode} onExit={() => setFocusMode(false)}>
           <EditorLayout
             mode={mode}
@@ -799,6 +806,7 @@ export default function App() {
             handleAddAsset={handleAddAsset}
           />
         </FocusMode>
+        </Suspense>
       )}
     </div>
   );

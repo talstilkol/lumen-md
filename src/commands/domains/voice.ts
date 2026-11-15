@@ -1,5 +1,6 @@
 /** Voice: read aloud, voice memo, dictation. */
-import { cmdIcons, type Command } from "../../ui/CommandPalette";
+import { cmdIcons } from "../../ui/cmdIcons";
+import type { Command } from "../../ui/CommandPalette";
 import { t } from "../../i18n";
 import { diarizationAvailable } from "../../meetings/diarizePins";
 
