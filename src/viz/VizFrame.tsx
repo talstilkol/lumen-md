@@ -37,6 +37,8 @@ interface Props {
   alternative: (id: string, hidden: boolean) => ReactNode;
   points: readonly VizPointLabel[];
   onPoint?: (index: number | null) => void;
+  /** Enter on a point (R12.8: a Sankey band opens its claim). */
+  onActivate?: (index: number) => void;
   notes?: readonly string[];
   initial?: "picture" | "alternative";
   /** The switch's labels (default: chart / table). */
@@ -93,6 +95,11 @@ export function VizFrame(props: Props) {
 
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (!points.length) return;
+    if (e.key === "Enter" && active !== null && props.onActivate) {
+      e.preventDefault();
+      props.onActivate(active);
+      return;
+    }
     const step = stepFor(e.key, dir);
     if (step === null) {
       if (e.key === "Escape" && active !== null) move(null);

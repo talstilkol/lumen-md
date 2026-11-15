@@ -63,3 +63,18 @@
   text-align: end;
   font-variant-numeric: tabular-nums;
 }
+.lumen-viz-arg-list ul {
+  margin-block: 2px;
+  padding-inline-start: 18px;
+}
+.lumen-viz-arg-link {
+  all: unset;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.lumen-viz-arg-link:focus-visible {
+  outline: 2px solid hsl(var(--accent));
+}
+.lumen-viz-claim-missing {
+  color: hsl(var(--danger));
+}
