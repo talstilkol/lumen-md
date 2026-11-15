@@ -26,6 +26,7 @@ import {
 import { markdownToDocxBytes } from "../storage/exportDocx";
 import { markdownToOdtBytes } from "../storage/exportOdt";
 import { markdownToPptxBytes } from "../storage/exportPptx";
+import { markdownToTypst } from "../storage/exportTypst";
 import {
   latexToMarkdown,
   rstToMarkdown,
@@ -46,6 +47,7 @@ const EXPORTERS: Record<string, (md: string) => string> = {
   rtf: markdownToRtf,
   opml: (md) => markdownToOpml(md),
   ipynb: (md) => markdownToIpynb(md),
+  typ: (md) => markdownToTypst(md),
 };
 
 const IMPORTERS: Record<string, (text: string) => string> = {
