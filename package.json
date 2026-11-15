@@ -61,7 +61,7 @@
     "perf:vault100k": "node --expose-gc --max-old-space-size=4096 --import tsx scripts/perf/vault-100k.ts",
     "review:coverage": "node scripts/review-coverage.mjs",
     "review:sign": "node scripts/review-sign.mjs",
-    "lighthouse": "lhci autorun --config=./lighthouserc.json",
+    "lighthouse": "npx -y @lhci/cli@0.16.1 autorun --config=./lighthouserc.json && npx -y @lhci/cli@0.16.1 autorun --config=./lighthouserc.mobile.json",
     "perf:gate": "node scripts/perf-gate.mjs",
     "lighthouse:a11y": "node scripts/lighthouse-a11y.mjs",
     "i18n:extract": "node scripts/extract-i18n-keys.mjs",
