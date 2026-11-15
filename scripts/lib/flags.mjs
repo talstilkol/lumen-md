@@ -23,6 +23,7 @@ export function checkFlags(registry, { keys = null, he = null } = {}) {
     if (seen.has(f.id)) out.push(`${where}: listed twice`);
     seen.add(f.id);
     if (f.stage !== "beta" && f.stage !== "stable") out.push(`${where}: stage must be "beta" or "stable"`);
+    if ("design" in f && typeof f.design !== "boolean") out.push(`${where}: design must be true or false`);
     const beta = f.since?.beta;
     const stable = f.since?.stable;
     const valid = (v) => {
