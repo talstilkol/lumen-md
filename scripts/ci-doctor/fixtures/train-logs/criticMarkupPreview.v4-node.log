@@ -1,0 +1,25 @@
+FAIL CriticMarkup preview rendering > renders all kinds as ins / del / mark with classes 
+    stubbed package remark-frontmatter: remark-frontmatter.call()
+FAIL CriticMarkup preview rendering > keeps inline markdown inside a suggestion 
+    stubbed package remark-gfm: remark-gfm.call()
+FAIL CriticMarkup preview rendering > substitutions are not eaten by GFM strikethrough 
+    stubbed package remark-math: remark-math.call()
+FAIL CriticMarkup preview rendering > leaves markup in inline code and fenced code literal 
+    stubbed package remark-directive: remark-directive.call()
+FAIL CriticMarkup preview rendering > markup spanning paragraphs falls back to literal delimiters 
+    stubbed package remark-rehype: remark-rehype.call()
+FAIL CriticMarkup preview rendering > works inside headings, lists and tables 
+    stubbed package rehype-slug: rehype-slug.call()
+FAIL CriticMarkup preview rendering > the full async pipeline renders it too 
+    stubbed package remark-frontmatter: remark-frontmatter.call()
+FAIL CriticMarkup preview rendering > documents without CriticMarkup are passed through unchanged 
+    stubbed package rehype-react: rehype-react.call()
+FAIL CriticMarkup preview rendering > output survives the HTML sanitizer allowlist 
+    Cannot `processSync` without `compiler`
+FAIL CriticMarkup preview rendering > raw HTML inside a suggestion still goes through the normal pipeline 
+    stubbed package remark-frontmatter: remark-frontmatter.call()
+FAIL user-authored private-use characters > are preserved when the document has no suggestions 
+    Cannot `processSync` without `compiler`
+FAIL user-authored private-use characters > are preserved next to real suggestions 
+    Cannot `processSync` without `compiler`
+pass 2 fail 12

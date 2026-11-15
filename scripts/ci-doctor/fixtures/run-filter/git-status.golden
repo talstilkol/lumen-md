@@ -1,0 +1,9 @@
+git-status
+120 לא במעקב
+---
+On branch main
+Changes not staged for commit:
+  modified:   big.js
+  modified:   small.md
+Untracked files:
+  gen_*.tmp  [×120]

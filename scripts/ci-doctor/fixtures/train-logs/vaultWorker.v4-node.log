@@ -1,0 +1,6 @@
+[lumen] vault index worker failed; indexing on the main thread Error: boom
+    at FakeWorker.worker.onerror (/home/u/w-P-e2e/src/storage/vaultIndexProtocol.ts:129:10)
+    at file:///home/u/w-P-e2e/src/__tests__/vaultWorker.test.ts:34:23
+FAIL the block-by-block preview > renders what the full pipeline renders, then only the changed block 
+    stubbed package remark-frontmatter: remark-frontmatter.call()
+pass 28 fail 1

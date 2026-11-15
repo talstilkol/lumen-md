@@ -1,0 +1,3 @@
+FAIL regressions vs #232 restored in the worker core (S1 review on #306) > (b) an unchanged re-upsert re-tokenises nothing 
+    Cannot assign to read only property 'documentTerms' of object '[object Module]'
+pass 39 fail 1

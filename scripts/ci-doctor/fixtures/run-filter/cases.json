@@ -1,0 +1,129 @@
+[
+ {
+  "file": "node-test.txt",
+  "cmd": "node",
+  "args": [
+   "--test",
+   "a.test.js"
+  ],
+  "cwd": "/work/nt",
+  "code": 1,
+  "family": "tap",
+  "source": "node 22 --test, 30 עוברות + 2 נכשלות"
+ },
+ {
+  "file": "tsc.txt",
+  "cmd": "tsc",
+  "args": [
+   "-p",
+   "."
+  ],
+  "cwd": "/work/ts",
+  "code": 2,
+  "family": "passthrough",
+  "source": "tsc, 5 שגיאות ב-2 קבצים (קצר → עובר כמו שהוא)"
+ },
+ {
+  "file": "eslint.txt",
+  "cmd": "eslint",
+  "args": [
+   "x.js",
+   "y.js"
+  ],
+  "cwd": "/work/es",
+  "code": 1,
+  "family": "passthrough",
+  "source": "eslint 10 stylish"
+ },
+ {
+  "file": "pytest.txt",
+  "cmd": "pytest",
+  "args": [
+   "-q"
+  ],
+  "cwd": "/work/py",
+  "code": 1,
+  "family": "passthrough",
+  "source": "pytest, 20 עוברות + 2 נכשלות"
+ },
+ {
+  "file": "git-diff.txt",
+  "cmd": "git",
+  "args": [
+   "diff"
+  ],
+  "cwd": "/work/g",
+  "code": 0,
+  "family": "git-diff",
+  "source": "git diff, 300 שורות שהשתנו"
+ },
+ {
+  "file": "git-status.txt",
+  "cmd": "git",
+  "args": [
+   "status"
+  ],
+  "cwd": "/work/g",
+  "code": 0,
+  "family": "git-status",
+  "source": "git status, 120 קבצים לא במעקב"
+ },
+ {
+  "file": "npm-ci.txt",
+  "cmd": "npm",
+  "args": [
+   "ci"
+  ],
+  "cwd": "/work/npm",
+  "code": 1,
+  "family": "passthrough",
+  "source": "npm ci, lock לא מסונכרן"
+ },
+ {
+  "file": "go-build.txt",
+  "cmd": "go",
+  "args": [
+   "build",
+   "./..."
+  ],
+  "cwd": "/work/gob",
+  "code": 1,
+  "family": "passthrough",
+  "source": "go build, 2 שגיאות"
+ },
+ {
+  "file": "noisy-log.txt",
+  "cmd": "python3",
+  "args": [
+   "build.py"
+  ],
+  "cwd": "/work",
+  "code": 1,
+  "family": "generic",
+  "source": "לוג build רועש עם ERROR ו-Traceback באמצע"
+ },
+ {
+  "file": "mypy.txt",
+  "cmd": "mypy",
+  "args": [
+   "m.py"
+  ],
+  "cwd": "/work/mp",
+  "code": 1,
+  "family": "passthrough",
+  "source": "mypy, 2 שגיאות"
+ },
+ {
+  "file": "jest-synthetic.txt",
+  "cmd": "npx",
+  "args": [
+   "vitest",
+   "run"
+  ],
+  "cwd": "/work/app",
+  "code": 1,
+  "family": "passthrough",
+  "source": "סינתטי (vitest לא הורץ) — UNVERIFIED מול פלט אמיתי",
+  "synthetic": true
+ }
+]
