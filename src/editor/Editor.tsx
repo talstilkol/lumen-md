@@ -16,6 +16,7 @@ import { Compartment, EditorState } from "@codemirror/state";
 import { lineSeparatorFor } from "./lineEndings";
 import { obsidianSourceExtension } from "./obsidianSource";
 import { cleanPastedText, pastedHtmlToMarkdown, shouldConvertPaste } from "../paste/htmlPaste";
+import { imageTextEnabled } from "./imageTextSetting";
 import { wysiwygTakesPaste, type PasteDetail } from "../paste/pasteCommands";
 import { FIX_PDF_HEBREW_EVENT, fixSourceSelection, offerInSourceEditor } from "../paste/pdfPaste";
 import { EditorView, keymap, highlightActiveLine } from "@codemirror/view";
@@ -67,6 +68,7 @@ import { setSuggesting, suggestingAuthor, suggestingExtension, suggestingSkip } 
 import { useAuth } from "../auth/useAuth";
 import type { CollabSession } from "../collab/yjs";
 import { joinTextEnvelope, splitTextEnvelope, type TextEnvelope } from "../storage/textCodec";
+import { copyCutHandlers, openImageEmbedMenu } from "./copyEvents";
 
 const mdHighlight = HighlightStyle.define([
   { tag: t.heading1, class: "tok-heading tok-heading1" },
@@ -107,15 +109,6 @@ interface EditorProps {
   collab?: CollabSession | null;
   /** Suggesting mode (track changes): record edits as CriticMarkup. */
   suggesting?: boolean;
-}
-
-/** Automatic alt text for pasted images (T31); `lumen.ai.imageText` = "off" disables it. */
-function imageTextEnabled(): boolean {
-  try {
-    return localStorage.getItem("lumen.ai.imageText") !== "off";
-  } catch {
-    return true;
-  }
 }
 
 export interface EditorHandle {
@@ -265,10 +258,13 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
         void handleAssetFiles(view, files);
         return true;
       },
+      ...copyCutHandlers, // W7.3: a copy carries the Markdown and an HTML rendering (Word and Google Docs keep formatting and direction).
       // Right-click on a Hebrew word (plan W5.26): synonyms, definition and niqqud from the offline
       // lexicon — only once its pack is installed; Shift+right-click keeps the browser's menu.
       contextmenu(event, view) {
-        if (event.shiftKey || !lexiconInstalled()) return false;
+        if (event.shiftKey) return false;
+        if (openImageEmbedMenu(event, view, useAppStore.getState().doc.workspaceName ?? "")) return true; // W7.3: "Copy image" on an image embed.
+        if (!lexiconInstalled()) return false;
         const pos = view.posAtCoords({ x: event.clientX, y: event.clientY });
         if (pos === null || !wordAt(view, pos)) return false;
         event.preventDefault();
