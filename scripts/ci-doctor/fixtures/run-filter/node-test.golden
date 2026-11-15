@@ -1,0 +1,27 @@
+tap
+30 עברו · 2 נכשלו
+---
+not ok 31 - booking total includes tax
+  location: 'a.test.js:3:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    117 !== 118
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 118
+  actual: 117
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file://a.test.js:3:51)
+not ok 32 - parses ISO date
+  location: 'a.test.js:4:1'
+  failureType: 'testCodeFailure'
+  error: 'Invalid time value at parseDate (src/date.js:14:9)'
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    TestContext.<anonymous> (file://a.test.js:4:39)
+tests 32 · pass 30 · fail 2 · cancelled 0 · skipped 0 · todo 0

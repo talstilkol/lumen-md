@@ -1,0 +1,61 @@
+FAIL settings schema (plan 11.1) > finds the keys it is meant to find (the scan itself works) 
+    lumen-md
+    expect(received).toBe(expected) // Object.is equality
+    
+    Expected: true
+    Received: false
+FAIL settings schema (plan 11.1) > holds 100% of the stored keys 
+    expect(received).toEqual(expected) // deep equality
+    
+    - Expected  -  1
+    + Received  + 50
+    
+    - Array []
+    + Array [
+    +   "lumen-reading (src/App.tsx)",
+    +   "lumen-usability-session (src/App.tsx)",
+    +   "lumen-sr-verbosity (src/a11y/announce.ts)",
+    +   "lumen.mcp.servers (src/agents/mcp/servers.ts)",
+    +   "lumen.agents.trustedRepos (src/agents/repoTrust.ts)",
+    +   "lumen.skills.allowed (src/agents/skills/library.ts)",
+    +   "lumen.dict.ar.v1 (src/ai/arabicSpellService.ts)",
+    +   "lumen.grammar.he.level (src/ai/hebrewSpellService.ts)",
+    +   "lumen.nikud.quality (src/ai/nikudService.ts)",
+    +   "lumen.privacy.audit (src/ai/privacyLedger.ts)",
+    +   "lumen.tts.settings (src/ai/tts.ts)",
+    +   "lumen.backup.enabled (src/backup/config.ts)",
+    +   "lumen.backup.status.v1 (src/backup/status.ts)",
+    +   "lumen.beta.v1 (src/beta/programme.ts)",
+    +   "lumen.calendar.caldav (src/calendar/config.ts)",
+    +   "lumen.calendar.caldav.password (src/calendar/config.ts)",
+    +   "lumen.calendar.subscriptions (src/calendar/config.ts)",
+FAIL settings schema (plan 11.1) > holds 100% of the persisted store fields 
+    expect(received).toEqual(expected) // deep equality
+    
+    - Expected  - 1
+    + Received  + 7
+    
+    - Array []
+    + Array [
+    +   "showLocalGraph",
+    +   "enabledSnippets",
+    +   "mobileToolbar",
+    +   "readLongNotes",
+    +   "readingWords",
+    + ]
+FAIL settings schema (plan 11.1) > has no entry that matches nothing in the sources (no stale keys) 
+    expect(received).toEqual(expected) // deep equality
+    
+    - Expected  - 1
+    + Received  + 3
+    
+    - Array []
+    + Array [
+    +   "lumen-md",
+    + ]
+FAIL settings schema (plan 11.1) > never lets a secret be a setting, and gives every shown entry a real label 
+    fineTune.useToggle
+    expect(received).not.toBe(expected) // Object.is equality
+    
+    Expected: not "fineTune.useToggle"
+pass 1 fail 5

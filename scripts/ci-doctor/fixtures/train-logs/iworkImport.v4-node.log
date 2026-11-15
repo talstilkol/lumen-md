@@ -1,0 +1,25 @@
+FAIL iworkXmlToMarkdown > extracts paragraphs and tabular-model grids 
+    expect(received).toContain(expected) // indexOf
+    
+    Expected substring: "Hello from Pages '09"
+    Received string:    ""
+FAIL iworkXmlToMarkdown > renders Keynote '09 slides as sections 
+    expect(received).toContain(expected) // indexOf
+    
+    Expected substring: "## Slide 1: Intro"
+    Received string:    ""
+FAIL iworkToMarkdown / fileToMarkdown > imports a legacy .key (gzipped index.apxl) 
+    expect(received).toContain(expected) // indexOf
+    
+    Expected substring: "## Slide 2: Roadmap"
+    Received string:    "> ℹ️ Imported from Apple Keynote (iWork '09 XML format). Text and tables were kept; styles, images and layout were not.·
+    > ⚠️ No text found in this document.
+    "
+FAIL iworkToMarkdown / fileToMarkdown > imports a legacy .numbers (index.xml) table 
+    expect(received).toContain(expected) // indexOf
+    
+    Expected substring: "| Apple | 5 |"
+    Received string:    "> ℹ️ Imported from Apple Numbers (iWork '09 XML format). Text and tables were kept; styles, images and layout were not.·
+    > ⚠️ No text found in this document.
+    "
+pass 20 fail 4

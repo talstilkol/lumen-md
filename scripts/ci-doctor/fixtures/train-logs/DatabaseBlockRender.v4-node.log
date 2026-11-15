@@ -1,0 +1,131 @@
+Error: stubbed package @tanstack/react-table: @tanstack/react-table.getCoreRowModel()
+    at Object.apply (file:///tmp/scratch/shim-v4/node/__stub__/%2540tanstack%252Freact-table?stub=%40tanstack%2Freact-table&from=file%3A%2F%2F%2Fhome%2Fu%2Fw-P-e2e%2Fsrc%2Fviews%2FDatabaseBlock.tsx:1:226)
+    at TableView (file:///home/u/w-P-e2e/src/views/DatabaseBlock.tsx:501:71)
+    at Object.react_stack_bottom_frame (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:25904:20)
+    at renderWithHooks (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:7662:22)
+    at updateFunctionComponent (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:10166:19)
+    at beginWork (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:11778:18)
+    at runWithFiberInDEV (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:871:30)
+    at performUnitOfWork (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+    at workLoopSync (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:17469:41)
+    at renderRootSync (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:17450:11)
+An error occurred in the <TableView> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+FAIL DatabaseBlock > edits a table cell: only that value changes in the file 
+    Unable to find role="link"
+    
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div />[39m
+    [36m</body>[39m
+    
+    Ignored nodes: comments, script, style
+    [36m<html>[39m
+      [36m<head />[39m
+      [36m<body>[39m
+        [36m<div />[39m
+      [36m</body>[39m
+    [36m</html>[39m
+Error: stubbed package @tanstack/react-table: @tanstack/react-table.getCoreRowModel()
+    at Object.apply (file:///tmp/scratch/shim-v4/node/__stub__/%2540tanstack%252Freact-table?stub=%40tanstack%2Freact-table&from=file%3A%2F%2F%2Fhome%2Fu%2Fw-P-e2e%2Fsrc%2Fviews%2FDatabaseBlock.tsx:1:226)
+    at TableView (file:///home/u/w-P-e2e/src/views/DatabaseBlock.tsx:501:71)
+    at Object.react_stack_bottom_frame (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:25904:20)
+    at renderWithHooks (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:7662:22)
+    at updateFunctionComponent (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:10166:19)
+    at beginWork (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:11778:18)
+    at runWithFiberInDEV (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:871:30)
+    at performUnitOfWork (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+    at workLoopSync (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:17469:41)
+    at renderRootSync (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:17450:11)
+An error occurred in the <TableView> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+FAIL DatabaseBlock > filters (AND/OR), shows a filter error, sorts and groups 
+    Unable to find role="link"
+    
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div />[39m
+    [36m</body>[39m
+    
+    Ignored nodes: comments, script, style
+    [36m<html>[39m
+      [36m<head />[39m
+      [36m<body>[39m
+        [36m<div />[39m
+      [36m</body>[39m
+    [36m</html>[39m
+Error: stubbed package @tanstack/react-table: @tanstack/react-table.getCoreRowModel()
+    at Object.apply (file:///tmp/scratch/shim-v4/node/__stub__/%2540tanstack%252Freact-table?stub=%40tanstack%2Freact-table&from=file%3A%2F%2F%2Fhome%2Fu%2Fw-P-e2e%2Fsrc%2Fviews%2FDatabaseBlock.tsx:1:226)
+    at TableView (file:///home/u/w-P-e2e/src/views/DatabaseBlock.tsx:501:71)
+    at Object.react_stack_bottom_frame (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:25904:20)
+    at renderWithHooks (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:7662:22)
+    at updateFunctionComponent (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:10166:19)
+    at beginWork (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:11778:18)
+    at runWithFiberInDEV (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:871:30)
+    at performUnitOfWork (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+    at workLoopSync (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:17469:41)
+    at renderRootSync (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:17450:11)
+An error occurred in the <TableView> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+FAIL DatabaseBlock > a broken filter never shows more: a bad where: shows nothing, a bad edit keeps the last good filter 
+    Unable to find role="link"
+    
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div />[39m
+      [36m<div />[39m
+    [36m</body>[39m
+    
+    Ignored nodes: comments, script, style
+    [36m<html>[39m
+      [36m<head />[39m
+      [36m<body>[39m
+        [36m<div />[39m
+        [36m<div />[39m
+      [36m</body>[39m
+    [36m</html>[39m
+Error: stubbed package @tanstack/react-table: @tanstack/react-table.getCoreRowModel()
+    at Object.apply (file:///tmp/scratch/shim-v4/node/__stub__/%2540tanstack%252Freact-table?stub=%40tanstack%2Freact-table&from=file%3A%2F%2F%2Fhome%2Fu%2Fw-P-e2e%2Fsrc%2Fviews%2FDatabaseBlock.tsx:1:226)
+    at TableView (file:///home/u/w-P-e2e/src/views/DatabaseBlock.tsx:501:71)
+    at Object.react_stack_bottom_frame (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:25904:20)
+    at renderWithHooks (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:7662:22)
+    at updateFunctionComponent (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:10166:19)
+    at beginWork (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:11778:18)
+    at runWithFiberInDEV (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:871:30)
+    at performUnitOfWork (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+    at workLoopSync (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:17469:41)
+    at renderRootSync (/opt/npm-tools/node_modules/react-dom/cjs/react-dom-client.development.js:17450:11)
+An error occurred in the <TableView> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+FAIL DatabaseBlock > a column's type comes from every note, not just the ones the filter shows 
+    Unable to find role="link"
+    
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div />[39m
+    [36m</body>[39m
+    
+    Ignored nodes: comments, script, style
+    [36m<html>[39m
+      [36m<head />[39m
+      [36m<body>[39m
+        [36m<div />[39m
+      [36m</body>[39m
+    [36m</html>[39m
+FAIL DatabaseBlock > kanban: a real `_` value is its own column, apart from the notes without one 
+    stubbed package @dnd-kit/core: @dnd-kit/core.useSensor()
+FAIL DatabaseBlock > kanban: a column per value and per listed column, a move handle per card 
+    stubbed package @dnd-kit/core: @dnd-kit/core.useSensor()
+pass 0 fail 6

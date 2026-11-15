@@ -1,0 +1,10 @@
+miss pdf-075 "2 דומעב תויחנה ואר - ביבא לת ,12 לצרה בוחר :תבותכ" → null
+miss pdf-084 "(הבוח הדש) dana@example.com :ינורטקלא ראוד תבותכ" → null
+miss pdf-097 "2 דומעב תויחנה ואר - ביבא לת ,12 לצרה בוחר :תבותכ" → null
+miss pdf-098 "(הבוח הדש) ביבא לת ,12 לצרה בוחר :תבותכ" → null
+reversed lines fixed: 96/100
+swapped finals fixed: 46/47
+regular-letter finals offered and fixed: 31/47
+FAIL correct Hebrew is never changed > every Hebrew string of the app's interface: 0 suggestions 
+    ENOENT: no such file or directory, open '/home/u/w-P-t4/src/i18n/locales/he.json'
+pass 11 fail 1

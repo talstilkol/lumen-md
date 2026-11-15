@@ -1,0 +1,33 @@
+pytest
+20 עברו · 2 נכשלו
+---
+=================================== FAILURES ===================================
+__________________________________ test_total __________________________________
+
+>   def test_total(): assert total([{"price": 10, "qty": 3}]) == 31
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: assert 30 == 31
+E    +  where 30 = total([{'price': 10, 'qty': 3}])
+
+test_calc.py:5: AssertionError
+_______________________________ test_missing_key _______________________________
+
+>   def test_missing_key(): total([{"price": 10}])
+                            ^^^^^^^^^^^^^^^^^^^^^^
+
+test_calc.py:6: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+test_calc.py:2: in total
+    def total(items): return sum(i["price"] * i["qty"] for i in items)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+  [×2]
+>   def total(items): return sum(i["price"] * i["qty"] for i in items)
+                                              ^^^^^^^^
+E   KeyError: 'qty'
+
+test_calc.py:2: KeyError
+=========================== short test summary info ============================
+FAILED test_calc.py::test_total - AssertionError: assert 30 == 31
+FAILED test_calc.py::test_missing_key - KeyError: 'qty'
+2 failed, 20 passed in 0.05s
