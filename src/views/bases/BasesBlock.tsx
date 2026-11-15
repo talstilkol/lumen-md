@@ -17,7 +17,9 @@
 
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, type JSX, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
 import { AlertCircle } from "lucide-react";
-import { basesFileFromText, basesLatLng, parseBase, runBase, setViewSort, viewKind, type BaseModel, type BaseResult, type BaseRow, type BasesSort } from "./base";
+import { basesFileFromText, basesLatLng, moveFilter, parseBase, runBase, setViewSort, viewKind, type BaseModel, type BaseResult, type BaseRow, type BasesSort, type FilterScope } from "./base";
+import { applyKanbanSet, coverOf, coverStyle, kanbanColumns, kanbanGrouping, kanbanKeyTarget, planKanbanMove, type KanbanColumn } from "./kanban";
+import { filterKeyTarget, filterRows, type FilterRow } from "./filterRows";
 import { parseBaseEmbedMeta } from "./embed";
 import { isTagged, toText, type BasesFile, type BValue } from "./values";
 import type { DatabaseRow } from "../database";
@@ -224,6 +226,23 @@ export default function BasesBlock({ source, meta, select }: { source: string; m
     }
   };
   const fileLabel = embedded?.path ?? (activePath?.toLowerCase().endsWith(".base") ? activePath : null);
+  // W12.T5: the filter order is written to the .base file: the embedded file, or the .base open in the editor.
+  const filterFile = embedded?.path ?? (!embed && !select && activePath?.toLowerCase().endsWith(".base") ? activePath : null);
+  const filtersEditable = !!filterFile && text !== null;
+  const reorderFilters = async (from: FilterScope & { index: number }, to: FilterScope & { index: number }) => {
+    if (!filterFile || text === null) return;
+    const w = moveFilter(text, from, to);
+    if (!w.ok) return showAiToast(t("base.error", { error: w.error }), "error");
+    try {
+      if (embedded) {
+        await writeWorkspaceFile(embedded.path, w.text);
+        setEmbedded({ path: embedded.path, text: w.text });
+      } else await editNote(filterFile, () => w.text);
+      showAiToast(t("base.filters.saved", { file: filterFile }));
+    } catch (e) {
+      showAiToast(t("base.error", { error: explainError(e) }), "error");
+    }
+  };
 
   return (
     <div className="chart-block lumen-base" data-testid="base-block" data-view-kind={kind}>
@@ -274,6 +293,7 @@ export default function BasesBlock({ source, meta, select }: { source: string; m
           ))}
         </div>
       )}
+      {filtersEditable && <FiltersPanel base={base} view={current} onMove={(from, to) => void reorderFilters(from, to)} />}
       {canSave && (
         <div style={{ paddingInline: 8, paddingBlockStart: 4 }}>
           <button type="button" onClick={() => void save()} style={{ fontSize: 11 }}>
@@ -296,6 +316,68 @@ export default function BasesBlock({ source, meta, select }: { source: string; m
         )}
       </div>
     </div>
+  );
+}
+
+/**
+ * The filter rows of the file (W12.T5, Obsidian 1.15): drag a row to
+ * reorder it, Alt+ArrowUp/Down to move it, and a button moves it between
+ * All views and This view. Every move is written into the `.base` with
+ * `moveFilter`, which keeps the rest of the file as written.
+ */
+export function FiltersPanel({ base, view, onMove }: { base: BaseModel; view: number; onMove: (from: FilterScope & { index: number }, to: FilterScope & { index: number }) => void }) {
+  const rows = filterRows(base, view);
+  const [drag, setDrag] = useState<FilterRow | null>(null);
+  if (!rows.all.length && !rows.view.length) return null;
+  const list = (title: string, items: FilterRow[], scope: FilterScope, other: FilterScope, otherLabel: string) => (
+    <div>
+      <div style={{ fontSize: 11, fontWeight: 600, marginBlock: 4 }}>{title}</div>
+      <ol style={{ margin: 0, paddingInlineStart: 18 }} onDragOver={(e) => e.preventDefault()} onDrop={(e) => {
+        e.preventDefault();
+        if (drag && (drag.scope.view !== scope.view)) onMove({ ...drag.scope, index: drag.index }, { ...scope, index: items.length });
+        setDrag(null);
+      }} data-scope={scope.view === null ? "all" : "view"}>
+        {items.map((r) => (
+          <li
+            key={`${r.index}-${r.text}`}
+            draggable
+            tabIndex={0}
+            data-filter={r.index}
+            aria-description={t("base.filters.drag")}
+            onDragStart={(e) => {
+              e.dataTransfer.effectAllowed = "move";
+              setDrag(r);
+            }}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (drag && !(drag.scope.view === r.scope.view && drag.index === r.index)) onMove({ ...drag.scope, index: drag.index }, { ...r.scope, index: r.index });
+              setDrag(null);
+            }}
+            onKeyDown={(e) => {
+              const to = filterKeyTarget(e.key, e.altKey, r, items.length);
+              if (to === null) return;
+              e.preventDefault();
+              onMove({ ...r.scope, index: r.index }, { ...r.scope, index: to });
+            }}
+            style={{ fontSize: 11, cursor: "grab", paddingBlock: 2 }}
+          >
+            <code dir="ltr">{r.text}</code>{" "}
+            <button type="button" style={{ fontSize: 10 }} onClick={() => onMove({ ...r.scope, index: r.index }, { ...other, index: other.view === null ? rows.all.length : rows.view.length })}>
+              {otherLabel}
+            </button>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+  return (
+    <details style={{ paddingInline: 8, fontSize: 11 }} data-testid="base-filters">
+      <summary>{t("base.filters.title")}</summary>
+      {list(t("base.filters.all"), rows.all, { view: null }, { view }, t("base.filters.moveToView"))}
+      {list(t("base.filters.view"), rows.view, { view }, { view: null }, t("base.filters.moveToAll"))}
+    </details>
   );
 }
 
@@ -415,22 +497,19 @@ export function TableView({ result, files, sort, onSort }: ViewProps & { sort: B
   );
 }
 
-function CardsView({ result, files }: ViewProps) {
+export function CardsView({ result, files }: ViewProps) {
   const image = result.view.image;
+  const size = result.view.cardSize ?? 160;
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 8 }}>
-      {result.rows.map((r) => {
-        const img = image ? r.cells[image] : null;
-        const src = typeof img === "string" ? img : isTagged(img) && img.$ === "image" ? img.src : null;
-        return (
-          <div key={r.file.path} data-path={r.file.path} style={{ border: "1px solid hsl(var(--border))", borderRadius: 6, padding: 8, fontSize: 12 }}>
-            {src && /^https:\/\//i.test(src) && <img src={src} alt="" loading="lazy" style={{ inlineSize: "100%", maxBlockSize: 120, objectFit: "cover" }} />}
-            {result.columns.map((c) => (
-              <div key={c.id}>{nameCell(r, c.id, files)}</div>
-            ))}
-          </div>
-        );
-      })}
+    <div style={{ display: "grid", gridTemplateColumns: `repeat(auto-fill, minmax(${size}px, 1fr))`, gap: 8 }} data-testid="base-cards">
+      {result.rows.map((r) => (
+        <div key={r.file.path} data-path={r.file.path} style={{ border: "1px solid hsl(var(--border))", borderRadius: 6, padding: 8, fontSize: 12 }}>
+          {image && <Cover value={r.cells[image] ?? null} view={result.view} files={files} />}
+          {result.columns.map((c) => (
+            <div key={c.id}>{nameCell(r, c.id, files)}</div>
+          ))}
+        </div>
+      ))}
     </div>
   );
 }
@@ -454,17 +533,108 @@ function ListView({ result, files }: ViewProps) {
   );
 }
 
-function KanbanView({ result, files }: ViewProps) {
-  if (!result.groups) return <div style={{ padding: 12, fontSize: 12, color: muted }}>{t("db.kanban.needGroup")}</div>;
+/** A cover image (W12.T5): Obsidian's Image property, Image fit and Image aspect ratio. */
+function Cover({ value, view, files }: { value: BValue; view: BaseResult["view"]; files: readonly BasesFile[] }) {
+  const c = coverOf(value);
+  if (!c) return null;
+  const st = coverStyle(view);
+  const box = { inlineSize: "100%", display: "block", ...(st.ratio ? { aspectRatio: `1 / ${st.ratio}` } : { maxBlockSize: 120 }), borderRadius: 4, marginBlockEnd: 4 } as const;
+  if ("color" in c) return <div data-testid="base-cover" data-fit={st.fit} style={{ ...box, blockSize: st.ratio ? undefined : 60, background: c.color }} />;
+  if ("link" in c) {
+    // A vault image: shown by name until the attachment loader resolves it (W12.T5 owes vault image covers).
+    const f = files.find((x) => x.path === c.link || x.name === c.link || x.basename === c.link);
+    return f ? <div data-testid="base-cover" data-fit={st.fit} data-link={f.path} style={{ ...box, blockSize: st.ratio ? undefined : 60, background: "hsl(var(--bg-subtle))" }} aria-label={f.name} /> : null;
+  }
+  return <img data-testid="base-cover" data-fit={st.fit} src={c.src} alt="" loading="lazy" style={{ ...box, objectFit: st.fit }} />;
+}
+
+/** Drop a card on a column (W12.T5): writes the grouped property, or moves the file for file.folder. */
+async function dropCard(row: BaseRow, property: string, column: KanbanColumn) {
+  const move = planKanbanMove(row, property, column);
+  const label = column.key ?? t("base.kanban.none");
+  if (move.kind === "refuse") {
+    if (move.reason === "same") return;
+    return showAiToast(move.reason === "notMarkdown" ? t("base.kanban.notMarkdown") : t("base.kanban.readOnly", { property }), "error");
+  }
+  try {
+    if (move.kind === "set") await editNote(move.path, (text) => applyKanbanSet(text, move));
+    else {
+      const { safeMove } = await import("../../storage/fileOps");
+      if (!(await safeMove(move.from, move.to))) return;
+      const { notifyWorkspaceChanged } = await import("../../storage/workspaceEvents");
+      notifyWorkspaceChanged({ kind: "structure", paths: [move.from, move.to] });
+    }
+    showAiToast(t("base.kanban.moved", { name: row.file.basename, column: label }));
+  } catch (e) {
+    showAiToast(t("base.moveFailed", { error: explainError(e) }), "error");
+  }
+}
+
+export function KanbanView({ result, files, onDrop = dropCard }: ViewProps & { onDrop?: (row: BaseRow, property: string, column: KanbanColumn) => void | Promise<void> }) {
+  const [dragging, setDragging] = useState<string | null>(null);
+  if (!result.groups || !result.view.groupBy) return <div style={{ padding: 12, fontSize: 12, color: muted }}>{t("db.kanban.needGroup")}</div>;
+  const property = result.view.groupBy.property;
+  const grouping = kanbanGrouping(property);
+  const movable = grouping.kind !== "readOnly";
+  const columns = kanbanColumns(result);
+  const width = result.view.cardSize ?? 180;
+  const byPath = new Map(columns.flatMap((c) => c.rows.map((r) => [r.file.path, r] as const)));
   return (
-    <div style={{ display: "flex", gap: 8, overflowX: "auto" }}>
-      {result.groups.map((g, i) => (
-        <section key={i} aria-label={groupLabel(g.key)} style={{ minInlineSize: 180, flex: "1 0 180px", background: "hsl(var(--bg-subtle))", borderRadius: 6, padding: 6 }}>
+    <div style={{ display: "flex", gap: 8, overflowX: "auto" }} data-testid="base-kanban" data-movable={movable || undefined}>
+      {!movable && (
+        <p role="note" style={{ fontSize: 11, color: muted, margin: 0 }} dir="auto">
+          {t("base.kanban.readOnly", { property })}
+        </p>
+      )}
+      {columns.map((col, ci) => (
+        <section
+          key={`${ci}-${col.key ?? "∅"}`}
+          aria-label={col.key ?? t("base.kanban.none")}
+          data-column={col.key ?? ""}
+          onDragOver={movable ? (e) => e.preventDefault() : undefined}
+          onDrop={
+            movable
+              ? (e) => {
+                  e.preventDefault();
+                  const row = byPath.get(e.dataTransfer.getData("text/x-lumen-path") || dragging || "");
+                  setDragging(null);
+                  if (row) void onDrop(row, property, col);
+                }
+              : undefined
+          }
+          style={{ minInlineSize: width, flex: `1 0 ${width}px`, background: "hsl(var(--bg-subtle))", borderRadius: 6, padding: 6 }}
+        >
           <h4 style={{ margin: "0 0 6px", fontSize: 12 }} dir="auto">
-            {groupLabel(g.key)} <span style={{ fontWeight: 400, color: muted }}>{g.rows.length}</span>
+            {col.key ?? t("base.kanban.none")} <span style={{ fontWeight: 400, color: muted }}>{col.rows.length}</span>
           </h4>
-          {g.rows.map((r) => (
-            <div key={r.file.path} data-path={r.file.path} style={{ background: "hsl(var(--bg))", border: "1px solid hsl(var(--border))", borderRadius: 4, padding: 6, marginBlockEnd: 6, fontSize: 12 }}>
+          {col.rows.map((r) => (
+            <div
+              key={r.file.path}
+              data-path={r.file.path}
+              draggable={movable}
+              tabIndex={0}
+              aria-roledescription={movable ? t("base.kanban.card") : undefined}
+              aria-description={movable ? t("base.kanban.cardHint") : undefined}
+              onDragStart={
+                movable
+                  ? (e) => {
+                      e.dataTransfer.setData("text/x-lumen-path", r.file.path);
+                      e.dataTransfer.effectAllowed = "move";
+                      setDragging(r.file.path);
+                    }
+                  : undefined
+              }
+              onKeyDown={(e) => {
+                if (!movable) return;
+                const rtl = getComputedStyle(e.currentTarget).direction === "rtl" || isRtl();
+                const to = kanbanKeyTarget(e.key, { alt: e.altKey, rtl }, ci, columns.length);
+                if (to === null) return;
+                e.preventDefault();
+                void onDrop(r, property, columns[to]);
+              }}
+              style={{ background: "hsl(var(--bg))", border: "1px solid hsl(var(--border))", borderRadius: 4, padding: 6, marginBlockEnd: 6, fontSize: 12, cursor: movable ? "grab" : undefined }}
+            >
+              {result.view.image && <Cover value={r.cells[result.view.image] ?? null} view={result.view} files={files} />}
               {result.columns.map((c) => (
                 <div key={c.id}>{nameCell(r, c.id, files)}</div>
               ))}

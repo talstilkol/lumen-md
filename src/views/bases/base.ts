@@ -60,8 +60,14 @@ export interface BasesView {
   groupOrder?: Array<string | null>;
   /** Property → summary name (`Sum`, `Average`, or one of the file's own `summaries:`). */
   summaries: Record<string, string>;
-  /** Cards: the property with the cover image. */
+  /** Cards and kanban: the property with the cover image. */
   image?: string;
+  /** W12.T5, Obsidian's "Image fit": `cover` (fill and crop) or `contain` (no crop). */
+  imageFit?: "cover" | "contain";
+  /** W12.T5, Obsidian's "Image aspect ratio": the cover's height ÷ width. */
+  imageAspectRatio?: number;
+  /** W12.T5: cards' (and kanban columns') width in pixels, Obsidian's `cardSize`. */
+  cardSize?: number;
   /** Map: the property with the coordinates. */
   coordinates?: string;
   /** Calendar and timeline (W1.12): the date property (default `note.date`). */
@@ -180,7 +186,10 @@ export function parseBase(text: string): BaseParse {
         // A groupOrder that is not a list is ignored (Obsidian 1.14.4 fixed a base that failed to load over it).
         groupOrder: Array.isArray(rv.groupOrder) ? rv.groupOrder.map((x) => (x === null || x === undefined || x === "" ? null : x instanceof Date ? x.toISOString().slice(0, 10) : String(x))) : undefined,
         summaries: viewSummaries,
-        image: typeof rv.image === "string" ? propertyId(rv.image) : undefined,
+        image: typeof rv.image === "string" && rv.image.trim() ? propertyId(rv.image) : undefined,
+        imageFit: rv.imageFit === "contain" || rv.imageFit === "cover" ? rv.imageFit : undefined,
+        imageAspectRatio: typeof rv.imageAspectRatio === "number" && rv.imageAspectRatio > 0 ? rv.imageAspectRatio : undefined,
+        cardSize: typeof rv.cardSize === "number" && rv.cardSize > 0 ? rv.cardSize : undefined,
         coordinates: typeof rv.coordinates === "string" ? propertyId(rv.coordinates) : undefined,
         date: typeof rv.date === "string" ? propertyId(rv.date) : undefined,
         end: typeof rv.end === "string" ? propertyId(rv.end) : undefined,
@@ -600,7 +609,7 @@ export function runBase(base: BaseModel, files: readonly BasesFile[], opts: RunO
       const flat = values.flatMap((v) => (Array.isArray(v) ? v : [v]));
       if (r.function === "workdays") {
         const first = builtinSummary("Earliest", flat);
-        return first === undefined || first === null ? null : workdaysUntil(first, evalOpts.now);
+        return first === undefined || first === null ? null : workdaysUntil(first, evalOpts.now ?? new Date());
       }
       const summary = { sum: "Sum", avg: "Average", min: "Min", max: "Max", earliest: "Earliest", latest: "Latest" }[r.function];
       const out = builtinSummary(summary, flat);
