@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-11-14",
+  "updated": "2026-11-15",
   "about": "Every model or data file Lumen can download or ships, with its licence. Checked by `npm run licenses` (scripts/licenses.mjs). class: allowed = may be a default; conditional = may be offered with a licence notice in the UI, never as a default; forbidden = must not be referenced by app code; unknown = licence not established yet (warns). `verified: false` marks a classification read from the model card by us, not from the verified licence research. Deny-list entries (delivery: none) exist so the gate catches the model if someone adds it. Runtime code (webR, ruby.wasm, ONNX Runtime, tesseract core) comes from npm and is checked by the npm part of the gate; Pyodide is listed here as well because it is shipped as a data bundle.",
   "hosting": {
     "about": "Where downloadable models come from (plan W4.14), tried in this order and every file checked against its sha256 and size below: 1. Hugging Face at hosting.revision; 2. Lumen's mirror: one GitHub release per model on talstilkol/lumen-md (tag hosting.tag or models-<slug of id>, assets flattened: a/b.onnx → a__b.onnx, ≤ 2 GiB each), read in the browser through the CORS proxy edge-workers/model-mirror (VITE_MODEL_MIRROR_URL), because GitHub's release downloads send no Access-Control-Allow-Origin; 3. the user's own URL (same layout as the release) or files picked on the device. A file with no sha256 is taken only from Hugging Face at a pinned commit. `npm run models:mirror -- --check` lists what is not pinned yet; `--pin` fills revision and files from Hugging Face, `--upload` publishes the release (owner).",
@@ -408,7 +408,7 @@
       "delivery": "ollama-pull",
       "catalog": "OLLAMA_CATALOG (src/ai/modelCatalog.ts); RECOMMENDED_OLLAMA_MODEL (src/agents/executors/ollama.ts)",
       "verified": true,
-      "notes": "The default Ollama model."
+      "notes": "The default Ollama model. Legacy (W11.I10): superseded by Qwen3.5; it stays the default until W11.I12 picks one from measured results."
     },
     {
       "id": "llama3.1:8b",
@@ -1370,21 +1370,6 @@
       "notes": "DictaLM 3.0 12B, adapted from NVIDIA Nemotron Nano V2 (arXiv 2602.02104). The weights' licence and the exact repository were not verified (Hugging Face unreachable from the build environment; the paper states no licence). Until the owner check in models/dictalm3.json is done it stays unknown and out of every catalog; `npm run dictalm3 -- eval` refuses it."
     },
     {
-      "id": "DictaLM-3.0-24B",
-      "kind": "llm",
-      "source": "https://huggingface.co/dicta-il/DictaLM-3.0-24B-Thinking",
-      "license": "Apache-2.0",
-      "class": "allowed",
-      "commercial": "yes",
-      "attribution": "DictaLM 3.0 © Dicta, licensed under the Apache License 2.0.",
-      "size": "~14 GB (q4), approximate",
-      "runs": "ollama",
-      "delivery": "none",
-      "catalog": "not in a catalog: owner checks open in models/dictalm3.json (plan W2.4)",
-      "verified": true,
-      "notes": "DictaLM 3.0 24B, adapted from Mistral-Small-3.1 (arXiv 2602.02104). Licence verified on the model card of dicta-il/DictaLM-3.0-24B-Thinking (\"License: apache-2.0\", tool calling stated), read 14.11.2026 (plan W10.B20). The repository Lumen evaluates and its revision are still owner checks in models/dictalm3.json, so it stays out of every catalog and `npm run dictalm3 -- eval` refuses it."
-    },
-    {
       "id": "ivrit-ai/whisper-large-v3-turbo",
       "kind": "asr",
       "source": "https://huggingface.co/ivrit-ai/whisper-large-v3-turbo",
@@ -1567,6 +1552,126 @@
         "retrieval-mmteb-he"
       ],
       "notes": "The other side of the W11.H12 A/B (src/search/lemma/dictaLex.ts). Licence from the model card; verified false until re-read at the pinned revision."
+    },
+    {
+      "id": "gemma4:e2b",
+      "kind": "llm",
+      "source": "https://ollama.com/library/gemma4 ; licence: https://opensource.googleblog.com/2026/03/gemma-4-expanding-the-gemmaverse-with-apache-20.html",
+      "license": "Apache-2.0",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "Gemma 4 © Google LLC, licensed under the Apache License 2.0.",
+      "size": "~4.6 GB (q4_K_M)",
+      "runs": "ollama",
+      "delivery": "user-pull",
+      "catalog": "OLLAMA_CATALOG (src/ai/modelCatalog.ts)",
+      "verified": true,
+      "notes": "W11.I10. Gemma 4 left the Gemma Terms for Apache-2.0 (2 Apr 2026). Not auto-picked until measured (W11.I12). Audio input on E2B/E4B is recorded as a later path for dictation correction."
+    },
+    {
+      "id": "gemma4:e4b",
+      "kind": "llm",
+      "source": "https://ollama.com/library/gemma4 ; licence: https://opensource.googleblog.com/2026/03/gemma-4-expanding-the-gemmaverse-with-apache-20.html",
+      "license": "Apache-2.0",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "Gemma 4 © Google LLC, licensed under the Apache License 2.0.",
+      "size": "~6.6 GB (q4_K_M)",
+      "runs": "ollama",
+      "delivery": "user-pull",
+      "catalog": "OLLAMA_CATALOG (src/ai/modelCatalog.ts)",
+      "verified": true,
+      "notes": "W11.I10. As gemma4:e2b."
+    },
+    {
+      "id": "gemma4:26b",
+      "kind": "llm",
+      "source": "https://ollama.com/library/gemma4 ; licence: https://opensource.googleblog.com/2026/03/gemma-4-expanding-the-gemmaverse-with-apache-20.html",
+      "license": "Apache-2.0",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "Gemma 4 © Google LLC, licensed under the Apache License 2.0.",
+      "size": "~16-19 GB (a4b q4)",
+      "runs": "ollama",
+      "delivery": "user-pull",
+      "catalog": "OLLAMA_CATALOG (src/ai/modelCatalog.ts)",
+      "verified": true,
+      "notes": "W11.I10. 26B-A4B mixture of experts (3.8B active); desktop only, compared with DictaLM-3.0-24B-Thinking (research R2.4)."
+    },
+    {
+      "id": "qwen3.5:4b",
+      "kind": "llm",
+      "source": "https://ollama.com/library/qwen3.5 ; licence: https://huggingface.co/Qwen/Qwen3.5-4B (apache-2.0)",
+      "license": "Apache-2.0",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "Qwen3.5 © Alibaba Cloud (Qwen team), licensed under the Apache License 2.0.",
+      "size": "~3.3 GB (q4_K_M)",
+      "runs": "ollama",
+      "delivery": "user-pull",
+      "catalog": "OLLAMA_CATALOG (src/ai/modelCatalog.ts)",
+      "verified": true,
+      "notes": "W11.I10. Thinking is on by default; Lumen sends think: false (OLLAMA_CATALOG think). Not auto-picked until measured (W11.I12)."
+    },
+    {
+      "id": "qwen3.5:9b",
+      "kind": "llm",
+      "source": "https://ollama.com/library/qwen3.5 ; licence: https://huggingface.co/Qwen/Qwen3.5-4B (apache-2.0)",
+      "license": "Apache-2.0",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "Qwen3.5 © Alibaba Cloud (Qwen team), licensed under the Apache License 2.0.",
+      "size": "~6.6 GB (q4_K_M)",
+      "runs": "ollama",
+      "delivery": "user-pull",
+      "catalog": "OLLAMA_CATALOG (src/ai/modelCatalog.ts)",
+      "verified": true,
+      "notes": "W11.I10. As qwen3.5:4b."
+    },
+    {
+      "id": "gemma-4-E2B-it-q4f16_1-MLC",
+      "kind": "llm",
+      "source": "https://huggingface.co/mlc-ai/gemma-4-E2B-it-q4f16_1-MLC ; prebuilt in @mlc-ai/web-llm 0.2.86 (https://github.com/mlc-ai/web-llm/releases)",
+      "license": "Apache-2.0",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "Gemma 4 © Google LLC, licensed under the Apache License 2.0.",
+      "size": "not measured here (web-llm 0.2.86 prebuilt; q4f32_1 variant needs no shader-f16)",
+      "runs": "browser",
+      "delivery": "none",
+      "catalog": "not in WEBLLM_CATALOG yet: needs @mlc-ai/web-llm 0.2.86 (this tree pins ^0.2.82)",
+      "verified": true,
+      "notes": "W11.I10. Added to WEBLLM_CATALOG once the web-llm bump lands (owner, with the registry online)."
+    },
+    {
+      "id": "onnx-community/gemma-4-E2B-it-ONNX",
+      "kind": "llm",
+      "source": "https://huggingface.co/onnx-community/gemma-4-E2B-it-ONNX (transformers.js 4, WebGPU)",
+      "license": "Apache-2.0",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "Gemma 4 © Google LLC, licensed under the Apache License 2.0.",
+      "size": "not measured here",
+      "runs": "browser",
+      "delivery": "none",
+      "catalog": "not in a catalog yet: Lumen's in-browser chat runs on web-llm",
+      "verified": true,
+      "notes": "W11.I10. The transformers.js route for Gemma 4 E2B (research R2.4); offered once a transformers.js chat executor exists."
+    },
+    {
+      "id": "hf.co/dicta-il/DictaLM-3.0-24B-Thinking-GGUF",
+      "kind": "llm",
+      "source": "https://huggingface.co/dicta-il/DictaLM-3.0-24B-Thinking-GGUF (cardData license: apache-2.0) ; https://huggingface.co/dicta-il/DictaLM-3.0-24B-Thinking",
+      "license": "Apache-2.0",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "DictaLM 3.0 © Dicta, licensed under the Apache License 2.0.",
+      "size": "~14 GB (Q4_K_M), approximate",
+      "runs": "ollama",
+      "delivery": "user-pull",
+      "catalog": "OLLAMA_CATALOG (src/ai/modelCatalog.ts), desktop only",
+      "verified": true,
+      "notes": "W11.I10: licence verified on 15.11.2026 from the Hugging Face model API of dicta-il/DictaLM-3.0-24B-Thinking-GGUF (apache-2.0) and the model card (32K context; from Mistral-Small-3.1, arXiv 2602.02104). Revisions are not pinned yet (models/dictalm3.json), so `npm run dictalm3 -- eval` still waits on that owner check. Not auto-picked."
     }
   ]
 }

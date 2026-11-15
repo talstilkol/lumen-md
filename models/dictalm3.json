@@ -61,27 +61,25 @@
     {
       "size": "24B",
       "base": "Mistral-Small-3.1",
-      "repo": null,
+      "repo": "dicta-il/DictaLM-3.0-24B-Thinking",
       "revision": null,
-      "ollama": null,
+      "ollama": "hf.co/dicta-il/DictaLM-3.0-24B-Thinking-GGUF",
       "ollamaRevision": null,
       "licence": {
         "name": "Apache-2.0",
         "class": "allowed",
         "verified": true,
-        "source": "Model card of dicta-il/DictaLM-3.0-24B-Thinking on Hugging Face, read 14.11.2026 (plan W10.B20, the plan's correction of 12.11): \"License: apache-2.0\", \"The model supports tool-calling, enabling integration with external tools and APIs\", initialised from Mistral-Small-3.1-24B-Base-2503. The repository id and revision stay owner checks: this records the licence of the 24B Thinking model, not which build Lumen evaluates."
+        "source": "W11.I10, checked 15.11.2026: the Hugging Face model API of dicta-il/DictaLM-3.0-24B-Thinking-GGUF gives cardData license apache-2.0 (GGUF files from Q4_K_M to BF16, published by dicta-il), and the model card of dicta-il/DictaLM-3.0-24B-Thinking says apache-2.0 with a 32K context."
       },
       "ramGB": 16,
       "compareWith": "qwen3:14b",
       "tools": false,
       "runtimes": {
-        "ollama": "GGUF — official or converted: owner check. Tool calling is stated on the model card; `tools` stays false until the agent eval shows the Ollama build answering tool calls",
+        "ollama": "GGUF published by dicta-il (hf.co/dicta-il/DictaLM-3.0-24B-Thinking-GGUF)",
         "web-llm": "too large for the browser tier",
         "transformers.js": "too large for the browser tier"
       },
       "ownerChecks": [
-        "repo: the exact dicta-il repository id of the 24B chat model Lumen evaluates (the Thinking card above is Apache-2.0 with tool calling; a different 24B repository needs its own licence check)",
-        "ollama: an Ollama-pullable GGUF name (hf.co/<owner>/<repo>) and who publishes it",
         "revision and ollamaRevision: the commit shas evaluated"
       ]
     }

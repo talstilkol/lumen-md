@@ -50,33 +50,27 @@ describe("DictaLM 3.0 manifest (W2.4)", () => {
     expect(manifest.minGainPoints).toBe(5);
   });
 
-  it("nothing unverified is filled in: 12B and 24B have no repo and stay blocked", () => {
-    for (const v of manifest.variants.slice(1)) {
-      expect(v.repo).toBeNull();
-      expect(v.ollama).toBeNull();
-    }
+  it("nothing unverified is filled in: 12B has no repo, no licence and stays blocked; 24B only waits for its revisions", () => {
     const [, v12, v24] = manifest.variants;
+    expect(v12.repo).toBeNull();
+    expect(v12.ollama).toBeNull();
     expect(v12.licence).toMatchObject({ name: null, class: "unknown", verified: false });
     expect(openChecks(v12)).toEqual(["repo", "revision", "ollama", "ollamaRevision", "licence"]);
-    // W10.B20: the plan's correction (24B Thinking is Apache-2.0 with tool
-    // calling, from its model card) is in the data; repo and revisions stay open.
-    expect(v24.licence).toMatchObject({ name: "Apache-2.0", class: "allowed", verified: true });
-    expect(v24.licence.source).toMatch(/dicta-il\/DictaLM-3\.0-24B-Thinking/);
-    expect(v24.licence.source).toMatch(/tool-calling/);
-    expect(v24.tools).toBe(false); // stated on the card, not yet measured in Lumen
-    expect(openChecks(v24)).toEqual(["repo", "revision", "ollama", "ollamaRevision"]);
+    // W11.I10: the 24B Thinking model's repo, GGUF and licence were verified (Hugging Face API, 15.11.2026).
+    expect(v24).toMatchObject({ repo: "dicta-il/DictaLM-3.0-24B-Thinking", ollama: "hf.co/dicta-il/DictaLM-3.0-24B-Thinking-GGUF", licence: { name: "Apache-2.0", class: "allowed", verified: true } });
+    expect(openChecks(v24)).toEqual(["revision", "ollamaRevision"]);
     // 1.7B: the licence is the registry's verified one; only the revisions are open.
     expect(openChecks(manifest.variants[0])).toEqual(["revision", "ollamaRevision"]);
   });
 
-  it("matches the licence gate: 1.7B as registered, 12B unknown, 24B allowed, both in no catalog", () => {
+  it("matches the licence gate: 1.7B and 24B as registered, 12B unknown and in no catalog", () => {
     const byId = new Map(registry.models.map((m) => [m.id, m]));
-    const gguf = byId.get(manifest.variants[0].ollama);
-    expect(gguf).toMatchObject({ license: "Apache-2.0", class: "allowed", verified: true });
+    for (const v of [manifest.variants[0], manifest.variants[2]]) expect(byId.get(v.ollama), v.size).toMatchObject({ license: "Apache-2.0", class: "allowed", verified: true });
     expect(byId.get("DictaLM-3.0-12B")).toMatchObject({ class: "unknown", verified: false, delivery: "none" });
-    expect(byId.get("DictaLM-3.0-24B")).toMatchObject({ license: "Apache-2.0", class: "allowed", verified: true, delivery: "none" });
     const catalog = readFileSync(join(ROOT, "src", "ai", "modelCatalog.ts"), "utf8");
-    expect(catalog).not.toMatch(/DictaLM-3\.0-(12|24)B/);
+    expect(catalog).not.toMatch(/DictaLM-3\.0-12B/);
+    // The 24B is listed for desktops only, never auto-picked until measured.
+    expect(catalog).toMatch(/name: "hf\.co\/dicta-il\/DictaLM-3\.0-24B-Thinking-GGUF".*recommend: false, desktop: true/);
   });
 
   it("rejects a gain below 5 points, a short sha, a non-Dicta repo and a verified licence without a name", () => {
