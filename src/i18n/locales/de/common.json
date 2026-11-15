@@ -1205,6 +1205,8 @@
   "ink.title": "Handschrift",
   "ink.undo": "Rückgängig",
   "ink.updated": "Handschrift aktualisiert.",
+  "israeliTime.academic.inBreak": "In den Semesterferien ({name}): vorgeschlagen {date}",
+  "israeliTime.academic.inExams": "In der Prüfungszeit: {exams}",
   "israeliTime.dayOff": "Fällt auf {reason}",
   "israeliTime.dueToday": "Heute fällig",
   "israeliTime.left.one": "Noch {n} Arbeitstag",

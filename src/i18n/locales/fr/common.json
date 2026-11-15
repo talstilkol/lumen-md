@@ -1205,6 +1205,8 @@
   "ink.title": "Écriture manuscrite",
   "ink.undo": "Défaire",
   "ink.updated": "Écriture manuscrite mise à jour.",
+  "israeliTime.academic.inBreak": "Pendant les vacances universitaires ({name}) : proposé le {date}",
+  "israeliTime.academic.inExams": "Pendant les examens : {exams}",
   "israeliTime.dayOff": "Tombe un jour de {reason}",
   "israeliTime.dueToday": "Pour aujourd’hui",
   "israeliTime.left.one": "{n} jour ouvré restant",

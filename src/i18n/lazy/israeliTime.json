@@ -1,4 +1,6 @@
 {
+  "israeliTime.academic.inBreak": "In the academic break ({name}): suggested {date}",
+  "israeliTime.academic.inExams": "During the exams: {exams}",
   "israeliTime.dayOff": "Falls on {reason}",
   "israeliTime.dueToday": "Due today",
   "israeliTime.left.one": "{n} working day left",
