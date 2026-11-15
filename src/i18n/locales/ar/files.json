@@ -301,6 +301,8 @@
   "vault.folder.useBrowser": "استخدام تخزين المتصفح",
   "vault.prompt.decryptPassword": "أدخل كلمة مرور فك التشفير:",
   "vault.prompt.encryptPassword": "أدخل كلمة مرور التشفير:",
+  "vault.watch.unreadable.body": "لن تُلاحَظ التغييرات التي تُجرى خارج Lumen في “{folder}” حتى تمكن قراءته مجددًا.",
+  "vault.watch.unreadable.title": "تعذّرت قراءة مجلد",
   "versionHistory.by": "بواسطة {author}",
   "versionHistory.close": "إغلاق",
   "versionHistory.diffChars": "Δ فرق {n} حرفًا",

@@ -301,6 +301,8 @@
   "vault.folder.useBrowser": "ブラウザーストレージを使う",
   "vault.prompt.decryptPassword": "復号パスワードを入力してください:",
   "vault.prompt.encryptPassword": "暗号化パスワードを入力してください:",
+  "vault.watch.unreadable.body": "「{folder}」で Lumen の外で行われた変更は、再び読み取れるようになるまで検出されません。",
+  "vault.watch.unreadable.title": "フォルダーを読み取れません",
   "versionHistory.by": "作成者 {author}",
   "versionHistory.close": "閉じる",
   "versionHistory.diffChars": "Δ {n} 文字の差分",

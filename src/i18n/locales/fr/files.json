@@ -301,6 +301,8 @@
   "vault.folder.useBrowser": "Utiliser le stockage du navigateur",
   "vault.prompt.decryptPassword": "Saisissez le mot de passe de déchiffrement :",
   "vault.prompt.encryptPassword": "Saisissez le mot de passe de chiffrement :",
+  "vault.watch.unreadable.body": "Les modifications faites hors de Lumen dans « {folder} » ne sont pas détectées tant qu’il ne peut pas être lu.",
+  "vault.watch.unreadable.title": "Un dossier est illisible",
   "versionHistory.by": "par {author}",
   "versionHistory.close": "Fermer",
   "versionHistory.diffChars": "Δ {n} caractères de différence",

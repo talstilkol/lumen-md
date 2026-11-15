@@ -141,5 +141,7 @@
   "vault.folder.reconnect": "Reconnect folder",
   "vault.folder.reconnectBody": "Your vault is the folder “{folder}”. Lumen needs your permission to open it again.",
   "vault.folder.restoring": "Opening the vault…",
-  "vault.folder.unsupported": "This browser can't open a folder on your computer, so your notes stay in the browser's private storage (OPFS). To keep the vault in a folder, use Chrome or Edge, or the desktop app."
+  "vault.folder.unsupported": "This browser can't open a folder on your computer, so your notes stay in the browser's private storage (OPFS). To keep the vault in a folder, use Chrome or Edge, or the desktop app.",
+  "vault.watch.unreadable.body": "Changes made outside Lumen in “{folder}” are not noticed until it can be read again.",
+  "vault.watch.unreadable.title": "A folder can't be read"
 }

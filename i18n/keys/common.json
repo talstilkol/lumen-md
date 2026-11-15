@@ -3604,6 +3604,21 @@
       "vars": []
     },
     {
+      "key": "e2ee.gate.cancel",
+      "en": "Not now",
+      "vars": []
+    },
+    {
+      "key": "e2ee.gate.enable",
+      "en": "Turn on (experimental)",
+      "vars": []
+    },
+    {
+      "key": "e2ee.gate.title",
+      "en": "Turn on encrypted sync?",
+      "vars": []
+    },
+    {
       "key": "e2ee.guide.advanced",
       "en": "Advanced: S3, Dropbox, Google Drive and every detail",
       "vars": []
@@ -4875,6 +4890,16 @@
       "vars": []
     },
     {
+      "key": "e2ee.unaudited.badge",
+      "en": "Experimental — not externally security-audited",
+      "vars": []
+    },
+    {
+      "key": "e2ee.unaudited.body",
+      "en": "Lumen's encryption was written in this project and has not been reviewed by an outside security firm. Keep your own backup of anything you can't afford to lose.",
+      "vars": []
+    },
+    {
       "key": "e2ee.wrap.tampered",
       "en": "This device's key in the vault's keyring doesn't open it: the sync service changed it or put back an old one. Nothing on this device was changed. Try again later; if it stays like this, pair this device again from one you trust.",
       "vars": []
@@ -5470,6 +5495,16 @@
       "vars": []
     },
     {
+      "key": "flag.sync.e2ee.desc",
+      "en": "End-to-end encrypted sync to a folder, WebDAV, S3 or the relay. Off by default in every build: its cryptography has not had an external security audit yet.",
+      "vars": []
+    },
+    {
+      "key": "flag.sync.e2ee.name",
+      "en": "Encrypted sync (experimental)",
+      "vars": []
+    },
+    {
       "key": "flag.update.checkOnLaunch.desc",
       "en": "Desktop app: look for a new version once a day when Lumen starts, so beta fixes arrive quickly. Never in local-only mode; every check is in the privacy log.",
       "vars": []
@@ -5534,6 +5569,11 @@
     {
       "key": "flags.stage.beta",
       "en": "Beta",
+      "vars": []
+    },
+    {
+      "key": "flags.stage.experimental",
+      "en": "Experimental",
       "vars": []
     },
     {

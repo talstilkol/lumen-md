@@ -352,13 +352,6 @@
       ]
     },
     {
-      "key": "toast.loadedFromRemoteModule",
-      "en": "✅ Loaded {name} from remote module",
-      "vars": [
-        "name"
-      ]
-    },
-    {
       "key": "toast.localMtUnavailable",
       "en": "Local translation was not available ({why}); the AI model translated instead.",
       "vars": [
@@ -523,7 +516,7 @@
     },
     {
       "key": "toast.productCreatedFilesGenerated",
-      "en": "✅ Product created! Files generated: {count}",
+      "en": "✅ Product ready: {count} files are waiting for your approval in the review screen",
       "vars": [
         "count"
       ]

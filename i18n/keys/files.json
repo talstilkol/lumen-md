@@ -1727,6 +1727,18 @@
       "vars": []
     },
     {
+      "key": "vault.watch.unreadable.body",
+      "en": "Changes made outside Lumen in “{folder}” are not noticed until it can be read again.",
+      "vars": [
+        "folder"
+      ]
+    },
+    {
+      "key": "vault.watch.unreadable.title",
+      "en": "A folder can't be read",
+      "vars": []
+    },
+    {
       "key": "versionHistory.by",
       "en": "by {author}",
       "vars": [

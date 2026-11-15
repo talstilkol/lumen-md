@@ -301,6 +301,8 @@
   "vault.folder.useBrowser": "Использовать память браузера",
   "vault.prompt.decryptPassword": "Введите пароль для расшифровки:",
   "vault.prompt.encryptPassword": "Введите пароль для шифрования:",
+  "vault.watch.unreadable.body": "Изменения в «{folder}», сделанные вне Lumen, не будут замечены, пока папку снова не удастся прочитать.",
+  "vault.watch.unreadable.title": "Не удаётся прочитать папку",
   "versionHistory.by": "автор: {author}",
   "versionHistory.close": "Закрыть",
   "versionHistory.diffChars": "Δ {n} символов разницы",

@@ -301,6 +301,8 @@
   "vault.folder.useBrowser": "שימוש באחסון הדפדפן",
   "vault.prompt.decryptPassword": "הזינו סיסמת פענוח:",
   "vault.prompt.encryptPassword": "הזינו סיסמת הצפנה:",
+  "vault.watch.unreadable.body": "שינויים שנעשים מחוץ ל-Lumen בתיקייה “{folder}” לא ייקלטו עד שאפשר יהיה לקרוא אותה שוב.",
+  "vault.watch.unreadable.title": "לא ניתן לקרוא תיקייה",
   "versionHistory.by": "מאת {author}",
   "versionHistory.close": "סגירה",
   "versionHistory.diffChars": "Δ {n} תווים הבדל",
