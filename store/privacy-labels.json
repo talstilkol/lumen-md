@@ -76,7 +76,8 @@
       "routes": [
         "Research service",
         "Agent tool ",
-        "Zotero Web API (your library; writes only the PDF highlights you send)"
+        "Zotero Web API (your library; writes only the PDF highlights you send)",
+        "OpenAlex: the references of a DOI (citation graph, only when you turn it on)"
       ]
     },
     {
@@ -171,14 +172,15 @@
       ]
     },
     {
-      "feature": "Public sources (Sefaria, the Knesset, government data)",
+      "feature": "Public sources (Sefaria, the Knesset, government data, Wikidata)",
       "ledgerCategory": "cloud-text",
       "sends": "Only the reference, name or search words you asked for; nothing from your notes",
       "turnedOnBy": "Searching one of these sources; refused under local-only",
       "routes": [
         "Jewish sources (Sefaria): the reference only",
         "Knesset records (OData): the law or bill name only",
-        "Government data (data.gov.il, CBS): the search words or dataset id only"
+        "Government data (data.gov.il, CBS): the search words or dataset id only",
+        "Wikidata search: the entity name only"
       ]
     },
     {

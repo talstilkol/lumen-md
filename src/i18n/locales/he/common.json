@@ -1206,7 +1206,7 @@
   "entityGraph.page.source.changed": "המקור השתנה",
   "entityGraph.page.source.missing-note": "פתק המקור חסר",
   "entityGraph.page.source.missing-paragraph": "פסקת המקור חסרה",
-  "entityGraph.page.source.ok": "",
+  "entityGraph.page.source.ok": "המקור לא השתנה",
   "entityGraph.page.wikidata": "Wikidata",
   "entityGraph.predicate.amends": "מתקן את",
   "entityGraph.predicate.author": "נכתב על ידי",

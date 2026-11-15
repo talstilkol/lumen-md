@@ -13,6 +13,7 @@
 | Data type | Optional | Only when |
 |---|---|---|
 | App info and performance: Crash logs | Yes | Only in a build made with a crash-reporting key (VITE_SENTRY_DSN), and only after the user turns error reports on (off by default, refused under the local-only policy). |
+| App info and performance: Diagnostics | Yes | Only with an error tracker and only after the user turns performance reports on (off by default, separate from error reports): counts of web-vitals ratings per session, no timings. |
 
 ## To confirm at submission
 
@@ -31,7 +32,7 @@ Play counts data the app sends off the device. The routes below are each started
 | Encrypted sync (WebDAV, S3, Dropbox, Google Drive) | Ciphertext only, to the storage you chose | Connecting a sync provider |
 | Diagrams (PlantUML, rendered by kroki.io) | The diagram's source | Confirming the first time a diagram would be sent; refused under local-only |
 | Read aloud and dictation with the browser's speech service | The text read aloud, or your voice | Choosing a network voice, or dictation under the cloud policy after a confirmation; refused under local-only |
-| Public sources (Sefaria, the Knesset, government data) | Only the reference, name or search words you asked for; nothing from your notes | Searching one of these sources; refused under local-only |
+| Public sources (Sefaria, the Knesset, government data, Wikidata) | Only the reference, name or search words you asked for; nothing from your notes | Searching one of these sources; refused under local-only |
 | Web clipper | A request for the page you clip | Clipping a page; refused under local-only |
 | Publishing to Bluesky (Standard.site) | The note you publish, publicly, and your login for that session | Confirming a publish; refused under local-only |
 | Calendar connections (CalDAV, ICS) | Your tasks and credentials to your calendar server; a read request for a subscription | Setting up a connection; refused under local-only |

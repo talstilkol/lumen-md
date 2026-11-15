@@ -32,6 +32,8 @@ export const RECORDERS = {
   "src/publish/standardSite.ts": (src) => [/export const ATPROTO_REASON = "([^"]+)"/.exec(src)[1]],
   "src/sources/open/app.ts": (src) => [...src.matchAll(/reason: "([^"]+)"/g)].map((m) => m[1]),
   "src/sources/open/gate.ts": () => [],
+  // Wikidata entity linking (W12.E10): ledgerFetch with the ledger's own www.wikidata.org rule.
+  "src/ui/WikidataLink.tsx": () => [],
 };
 
 /** A call that records into the ledger (or fetches through it). */
