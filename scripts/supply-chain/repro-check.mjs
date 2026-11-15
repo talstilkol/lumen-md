@@ -16,12 +16,20 @@
  * LUMEN_SOURCEMAP=1 (local investigation only) and, for each map that
  * differs, says which of its fields do (sources, sourcesContent, mappings…),
  * to find what is not deterministic there.
+ *
+ * W10.D21: with `--sourcemap`, every map is normalised after each build
+ * (./normalize-maps.mjs: relative posix sources, sorted sources and names
+ * with the mappings rewritten, fixed key order; vite.config.ts does the same
+ * at the end of a LUMEN_SOURCEMAP=1 build), and the maps are then compared
+ * byte for byte like every other file: the run passes only when every file,
+ * `.map` included, has the same SHA-256.
  */
 import { execSync } from "node:child_process";
 import { cpSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { filesUnder, opts, sha256File } from "./lib.mjs";
+import { normalizeMapsIn } from "./normalize-maps.mjs";
 import { sourceDate } from "./sbom.mjs";
 
 const o = opts(process.argv);
@@ -35,6 +43,7 @@ for (const n of [1, 2]) {
   rmSync(join(root, "dist"), { recursive: true, force: true });
   console.log(`build ${n}: ${build}`);
   execSync(build, { cwd: root, env, stdio: "inherit" });
+  if (withMaps) console.log(`  normalised ${normalizeMapsIn(join(root, "dist"), root).length} source map(s)`);
   const copy = join(work, `dist-${n}`);
   cpSync(join(root, "dist"), copy, { recursive: true });
   snapshots.push(new Map(filesUnder(copy).map((p) => [p, sha256File(join(copy, p))])));
@@ -56,6 +65,7 @@ const mapFields = (p) => {
 };
 const maps = [...a.keys()].filter((p) => p.endsWith(".map"));
 if (withMaps) {
+  console.log(`${maps.length} source map(s) compared byte for byte`);
   for (const d of diff) {
     const p = d.replace(/^differs: /, "");
     if (d.startsWith("differs: ") && p.endsWith(".map")) console.log(`  ${p}: differs in ${mapFields(p).join(", ")}`);

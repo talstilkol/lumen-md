@@ -6,6 +6,7 @@ import { laneCacheDir } from "./src/build/laneCache";
 import { webrManifestPlugin } from "./src/build/webrManifest";
 import { LOCALES, whatsNew } from "./scripts/lib/whats-new.mjs";
 import { viteEnvGatePlugin } from "./src/build/viteEnvGate";
+import { deterministicMapsPlugin } from "./src/build/deterministicMaps";
 
 interface VitestConfig {
   test?: {
@@ -353,6 +354,8 @@ export default defineConfig({
     // Adds the deployment's own worker origins (VITE_*_ENDPOINT …) to the
     // CSP connect-src of index.html, dist/_headers and the nginx image.
     cspEndpointsPlugin(),
+    // W10.D21: with LUMEN_SOURCEMAP=1, every .map is rewritten deterministically once the bundle is written.
+    deterministicMapsPlugin(process.env.LUMEN_SOURCEMAP === "1", __dirname),
     VitePWA({
       registerType: "prompt",
       includeAssets: ["favicon.svg", "icons/*.png"],
