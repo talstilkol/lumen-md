@@ -379,6 +379,7 @@
   "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face، رخصة Apache 2.0.",
   "caption.purpose": "وصف الصور على هذا الجهاز (نص بديل)",
   "capture.failed": "تعذّرت الإضافة إلى الوارد: {error}",
+  "capture.globalShortcut.taken": "⌥⌘N محجوز لتطبيق آخر، لذلك لا يفتح Lumen من التطبيقات الأخرى. داخل Lumen، لا يزال ⌥⌘N وملف ▸ التقاط سريع يعملان.",
   "capture.hint": "Enter: إضافة · ‏Shift+Enter: سطر جديد · ‏Esc: إغلاق",
   "capture.inboxHeading": "الوارد",
   "capture.noWorkspace": "الالتقاط السريع يحتاج إلى مساحة العمل، وهذا المتصفح لا يوفّرها.",

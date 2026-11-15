@@ -379,6 +379,7 @@
   "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face, licence Apache 2.0.",
   "caption.purpose": "Décrire les images sur cet appareil (texte alternatif)",
   "capture.failed": "Impossible d'ajouter à la boîte : {error}",
+  "capture.globalShortcut.taken": "⌥⌘N est déjà pris par une autre app : il n’ouvre donc pas Lumen depuis les autres apps. Dans Lumen, ⌥⌘N et Fichier ▸ Capture rapide fonctionnent toujours.",
   "capture.hint": "Entrée : ajouter · Maj+Entrée : nouvelle ligne · Échap : fermer",
   "capture.inboxHeading": "Boîte de réception",
   "capture.noWorkspace": "La capture rapide a besoin de l'espace de travail, que ce navigateur ne fournit pas.",

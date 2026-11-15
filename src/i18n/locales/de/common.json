@@ -379,6 +379,7 @@
   "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face, Apache-Lizenz 2.0.",
   "caption.purpose": "Bilder auf diesem Gerät beschreiben (Alternativtext)",
   "capture.failed": "Konnte nicht zum Eingang hinzugefügt werden: {error}",
+  "capture.globalShortcut.taken": "⌥⌘N ist von einer anderen App belegt und öffnet Lumen daher nicht aus anderen Apps. In Lumen funktionieren ⌥⌘N und Datei ▸ Schnellerfassung weiterhin.",
   "capture.hint": "Enter: hinzufügen · Umschalt+Enter: neue Zeile · Esc: schließen",
   "capture.inboxHeading": "Eingang",
   "capture.noWorkspace": "Die Schnellerfassung braucht den Arbeitsbereich, den dieser Browser nicht bietet.",

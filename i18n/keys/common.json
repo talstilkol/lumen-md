@@ -2127,6 +2127,11 @@
       ]
     },
     {
+      "key": "capture.globalShortcut.taken",
+      "en": "⌥⌘N is taken by another app, so it does not open Lumen from other apps. Inside Lumen, ⌥⌘N and File ▸ Quick capture still work.",
+      "vars": []
+    },
+    {
       "key": "capture.hint",
       "en": "Enter: add · Shift+Enter: new line · Esc: close",
       "vars": []

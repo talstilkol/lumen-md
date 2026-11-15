@@ -379,6 +379,7 @@
   "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face，Apache 2.0 许可证。",
   "caption.purpose": "在本设备上描述图片（替代文本）",
   "capture.failed": "无法添加到收件箱：{error}",
+  "capture.globalShortcut.taken": "⌥⌘N 已被其他应用占用，因此无法从其他应用打开 Lumen。在 Lumen 内，⌥⌘N 和“文件 ▸ 快速记录”仍可使用。",
   "capture.hint": "Enter：添加 · Shift+Enter：换行 · Esc：关闭",
   "capture.inboxHeading": "收件箱",
   "capture.noWorkspace": "快速记录需要工作区，但此浏览器不支持。",

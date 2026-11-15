@@ -379,6 +379,7 @@
   "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face, Apache License 2.0.",
   "caption.purpose": "Describe images on this device (alt text)",
   "capture.failed": "Couldn't add to the inbox: {error}",
+  "capture.globalShortcut.taken": "⌥⌘N is taken by another app, so it does not open Lumen from other apps. Inside Lumen, ⌥⌘N and File ▸ Quick capture still work.",
   "capture.hint": "Enter: add · Shift+Enter: new line · Esc: close",
   "capture.inboxHeading": "Inbox",
   "capture.noWorkspace": "Quick capture needs the workspace, which this browser can't provide.",

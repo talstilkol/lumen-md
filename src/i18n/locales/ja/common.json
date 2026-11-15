@@ -379,6 +379,7 @@
   "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face、Apache License 2.0。",
   "caption.purpose": "このデバイスで画像を説明（代替テキスト）",
   "capture.failed": "受信箱に追加できませんでした：{error}",
+  "capture.globalShortcut.taken": "⌥⌘N は別のアプリが使用中のため、他のアプリから Lumen を開けません。Lumen の中では ⌥⌘N と「ファイル ▸ クイックキャプチャ」が引き続き使えます。",
   "capture.hint": "Enter：追加 · Shift+Enter：改行 · Esc：閉じる",
   "capture.inboxHeading": "受信箱",
   "capture.noWorkspace": "クイックキャプチャにはワークスペースが必要ですが、このブラウザでは使えません。",

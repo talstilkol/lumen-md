@@ -379,6 +379,7 @@
   "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face, רישיון Apache 2.0.",
   "caption.purpose": "תיאור תמונות במכשיר (טקסט חלופי)",
   "capture.failed": "לא ניתן להוסיף לתיבה: {error}",
+  "capture.globalShortcut.taken": "⌥⌘N תפוס על ידי אפליקציה אחרת, ולכן הוא לא פותח את Lumen מאפליקציות אחרות. בתוך Lumen, ‏⌥⌘N וקובץ ▸ לכידה מהירה עדיין עובדים.",
   "capture.hint": "Enter: הוספה · ‏Shift+Enter: שורה חדשה · ‏Esc: סגירה",
   "capture.inboxHeading": "תיבת הנכנסים",
   "capture.noWorkspace": "לכידה מהירה צריכה את מרחב העבודה, והדפדפן הזה לא תומך בו.",
