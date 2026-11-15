@@ -12,6 +12,7 @@ import type { EditorView } from "@milkdown/prose/view";
 import { Plugin } from "@milkdown/prose/state";
 import { wysiwygBidiPlugin } from "./wysiwygBidi";
 import { wysiwygAiAuthorshipPlugin } from "./wysiwygAiAuthorship";
+import { saveWysiwygAiSpans } from "./wysiwygAiSave";
 import { remoteImagePlugin } from "./remoteImageView";
 import { wysiwygBidiMarksPlugin } from "./wysiwygBidiMarks";
 import { listSpreadFix } from "./milkdownListSpread";
@@ -166,6 +167,7 @@ const pasteCleanPlugin = $prose(
     serializedRef.current = md;
     const full = frontmatterRef.current + restoreSource(md);
     if (full !== lastEmittedRef.current) {
+      saveWysiwygAiSpans(ed, lastEmittedRef.current, full, frontmatterRef.current, md);
       lastEmittedRef.current = full;
       onChangeRef.current(full);
     }
@@ -239,6 +241,8 @@ const pasteCleanPlugin = $prose(
             if (md === serializedRef.current) return; // already flushed
             serializedRef.current = md;
             const full = frontmatterRef.current + restoreSource(md);
+            // W10.E37: the AI ranges go into the note's saved spans, for the source view and the export.
+            if (editorRef.current) saveWysiwygAiSpans(editorRef.current, lastEmittedRef.current, full, frontmatterRef.current, md);
             lastEmittedRef.current = full;
             onChangeRef.current(full);
           });

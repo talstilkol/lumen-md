@@ -96,3 +96,36 @@ export function aiRanges(state: EditorState): Array<[number, number]> {
 export function aiTexts(state: EditorState): string[] {
   return aiRanges(state).map(([a, b]) => state.doc.textBetween(a, b, "\n"));
 }
+
+const OPEN = "";
+const CLOSE = "";
+
+/**
+ * The AI ranges as offsets into the note's Markdown (for the saved spans,
+ * the source view and the export, W10.E37): the ranges are bracketed with
+ * two private-use characters in a copy of the document, the copy is
+ * serialized with the editor's own serializer, and the brackets' places in
+ * that Markdown are the spans. A range whose brackets do not both come out
+ * (one fell inside a link's URL, say) is left out rather than guessed.
+ */
+export function markdownAiSpans(state: EditorState, serialize: (doc: EditorState["doc"]) => string): { markdown: string; spans: Array<[number, number]> } {
+  const ranges = aiRanges(state);
+  const plain = () => ({ markdown: serialize(state.doc), spans: [] as Array<[number, number]> });
+  if (!ranges.length) return plain();
+  const tr = state.tr;
+  // From the end, so the earlier positions stay valid.
+  for (const [a, b] of [...ranges].reverse()) tr.insertText(CLOSE, b).insertText(OPEN, a);
+  const marked = serialize(tr.doc);
+  let markdown = "";
+  const spans: Array<[number, number]> = [];
+  let open: number | null = null;
+  for (const ch of marked) {
+    if (ch === OPEN) open = markdown.length;
+    else if (ch === CLOSE) {
+      if (open !== null && markdown.length > open) spans.push([open, markdown.length]);
+      open = null;
+    } else markdown += ch;
+  }
+  // A serializer that escaped or dropped a bracket would leave a different text: then nothing is claimed.
+  return markdown === serialize(state.doc) ? { markdown, spans } : plain();
+}

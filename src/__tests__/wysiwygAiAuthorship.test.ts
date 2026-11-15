@@ -11,7 +11,8 @@ import { join } from "node:path";
 import { EditorState, TextSelection } from "prosemirror-state";
 import { Schema } from "prosemirror-model";
 import { EditorView } from "prosemirror-view";
-import { aiRanges, aiTexts, markAiInsert, wysiwygAiAuthorshipPlugin } from "../editor/wysiwygAiAuthorship";
+import { aiRanges, aiTexts, markAiInsert, markdownAiSpans, wysiwygAiAuthorshipPlugin } from "../editor/wysiwygAiAuthorship";
+import { spansForEmission } from "../editor/wysiwygAiSave";
 
 const schema = new Schema({
   nodes: {
@@ -118,5 +119,41 @@ describe("the editor's agent insertions", () => {
     host.remove();
     const css = readFileSync(join(__dirname, "..", "index.css"), "utf8");
     expect(css).toMatch(/html\[data-ai-marks-hidden\] \.milkdown \.ai-authored \{\s*color: inherit;/);
+  });
+});
+
+describe("the AI ranges as Markdown offsets (saved spans, source view, export)", () => {
+  // A test serializer for the test schema (paragraphs as Markdown paragraphs); the app uses Milkdown's.
+  const serialize = (doc: EditorState["doc"]) => {
+    const out: string[] = [];
+    doc.forEach((p) => out.push(p.textContent));
+    return out.join("\n\n");
+  };
+
+  it("bracketed in a copy, serialized, read back: the spans point at the AI text in the Markdown", () => {
+    let s = EditorState.create({ doc: schema.node("doc", null, [schema.node("paragraph", null, [schema.text("כותרת")]), schema.node("paragraph", null, [schema.text("גוף ")])]), plugins: [wysiwygAiAuthorshipPlugin()] });
+    const end = s.doc.content.size - 1;
+    s = s.apply(markAiInsert(s.tr.insertText("מה שהסוכן כתב", end)));
+    const { markdown, spans } = markdownAiSpans(s, serialize);
+    expect(markdown).toBe(serialize(s.doc));
+    expect(spans.map(([a, b]) => markdown.slice(a, b))).toEqual(["מה שהסוכן כתב"]);
+    // The real document is untouched.
+    expect(s.doc.textContent).not.toMatch(/[]/);
+  });
+
+  it("a serializer that changes the brackets: nothing is claimed", () => {
+    let s = stateWith("abc ");
+    s = s.apply(markAiInsert(s.tr.insertText("xyz", s.doc.content.size - 1)));
+    const lossy = (doc: EditorState["doc"]) => serialize(doc).replace(//g, "");
+    expect(markdownAiSpans(s, lossy).spans).toEqual([]);
+  });
+
+  it("an emission: the saved spans of the unchanged parts stay, the editor's own are added after the frontmatter", () => {
+    const fm = "---\ntitle: x\n---\n";
+    const prev = `${fm}old AI text. user`;
+    const md = "old AI text. user and new AI";
+    const full = fm + md;
+    const out = spansForEmission(prev, full, [[fm.length, fm.length + 11]], fm, md, md, [[md.length - 6, md.length]]);
+    expect(out.map(([a, b]) => full.slice(a, b))).toEqual(["old AI text", "new AI"]);
   });
 });
