@@ -15,6 +15,7 @@ import { t } from "../i18n";
 import { plainTitle } from "../data/citationStyles";
 import { searchLibrary, type LibraryItem } from "./library";
 import { HelpButton } from "../ui/HelpButton";
+import { Modal } from "../ui/Modal";
 
 const RECENT = "lumen.cite.recent";
 const SHOWN = 8;
@@ -94,8 +95,8 @@ export function CiteDialog({ load, onInsert, onClose, onSyncZotero }: CiteDialog
   };
 
   return (
-    <div className="cite-backdrop" role="presentation" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="cite-dialog" role="dialog" aria-modal="true" aria-label={t("cite.title")} data-testid="cite-dialog" onKeyDown={onKey}>
+    <Modal aria-label={t("cite.title")} className="cite-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="cite-dialog" data-testid="cite-dialog" onKeyDown={onKey}>
         <div className="cite-fields">
           <input ref={queryRef} dir="auto" type="search" value={query} placeholder={t("cite.search")} aria-label={t("cite.search")} onChange={(e) => setQuery(e.target.value)} data-testid="cite-search" />
           <input dir="auto" className="cite-locator" value={locator} placeholder={t("cite.locator")} aria-label={t("cite.locator")} onChange={(e) => setLocator(e.target.value)} data-testid="cite-locator" />
@@ -144,7 +145,7 @@ export function CiteDialog({ load, onInsert, onClose, onSyncZotero }: CiteDialog
           )}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

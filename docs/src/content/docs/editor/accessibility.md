@@ -14,7 +14,9 @@ or English, in light or dark mode.
   and Shift+Tab stay inside it, **Escape** closes it, and focus returns to
   where it was before (for example the editor). This holds for every modal
   dialog: the palette, search, settings, prompts, setup, version history,
-  sign-in, sync conflicts and the rest.
+  sign-in, sync conflicts and the rest. While a dialog is open the page
+  behind it cannot be clicked or reached with Tab, and a screen reader
+  does not read it: every dialog is a native `<dialog>` opened as a modal.
 - **The sidebar's edge** is a separator you can reach with Tab. **←/→**
   resize the sidebar by 16 px (**Shift**: 48 px), **Home** / **End** make it
   narrowest / widest. In right-to-left layouts the arrows follow the edge's
@@ -24,8 +26,9 @@ or English, in light or dark mode.
 
 ## Screen readers
 
-Dialogs are announced with their names (`role="dialog"`, `aria-modal`, a
-label). The editor has a label, the palette is a combobox with a listbox,
+Dialogs are announced with their names (a native modal `<dialog>` with a
+label); the rest of the page is hidden from the screen reader while one is
+open. The editor has a label, the palette is a combobox with a listbox,
 and the sidebar edge reports its width (`aria-valuenow`).
 
 In the editor, moving the cursor onto a heading, a task, a code fence or a
@@ -61,4 +64,14 @@ typewriter mode, page view) jumps instead of gliding.
   dark. Any *serious* or *critical* finding fails the build.
 - The same file walks a keyboard-only path: palette, a dialog that keeps
   focus for 25 Tab presses and gives it back, and the sidebar edge.
-- `src/__tests__/useFocusTrap.test.tsx` covers the shared focus trap.
+- `src/__tests__/useFocusTrap.test.tsx` covers the shared focus trap, and
+  `src/__tests__/modal.test.tsx` the dialog every modal is built on
+  (`src/ui/Modal.tsx`).
+- `e2e/a11y-dialogs.spec.ts` opens every modal dialog (the list is
+  `e2e/dialogs.registry.mjs`) in English and Hebrew and checks each one: it
+  is modal, 30 Tab and 30 Shift+Tab presses stay inside, the page behind
+  is covered, the focused control is not hidden, axe finds no serious or
+  critical problem, and Escape closes it and gives focus back.
+- `src/__tests__/modalTraps.test.ts` and the `lumen/modal-only` lint rule
+  fail on any element that sets `aria-modal` outside `src/ui/Modal.tsx`, so a
+  hand-made dialog cannot come back.

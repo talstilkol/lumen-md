@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import { useFocusTrap } from "./useFocusTrap";
+import { useState, useEffect, useCallback } from "react";
 import { t, getLocale } from "../i18n";
 
 /**
@@ -51,6 +50,7 @@ function StorageStatus() {
 import { EmptyState } from "./EmptyState";
 import { HelpButton } from "./HelpButton";
 import "./versionHistoryStrings";
+import { Modal } from "./Modal";
 
 /** Save a snapshot (kept for callers of the old API). */
 export async function saveSnapshot(name: string, content: string): Promise<void> {
@@ -93,19 +93,13 @@ export function VersionHistory({ fileName, currentContent, onRestore, onClose }:
     onClose();
   }, [selected, onRestore, onClose, fileName, currentContent]);
 
-  // Focus stays in the dialog and returns on close; Escape closes it (plan 10.1).
-  const trapRef = useRef<HTMLDivElement | null>(null);
-  useFocusTrap(trapRef, { onEscape: onClose });
-
   const diffChars = selected
     ? Math.abs(selected.content.length - currentContent.length)
     : 0;
 
   return (
-    <div
-      ref={trapRef}
-      role="dialog"
-      aria-modal="true"
+    <Modal
+      onClose={onClose}
       aria-label={t("versionHistory.title")}
       style={{
         position: "fixed",
@@ -219,6 +213,6 @@ export function VersionHistory({ fileName, currentContent, onRestore, onClose }:
           {selected?.content ?? ""}
         </pre>
       </div>
-    </div>
+    </Modal>
   );
 }

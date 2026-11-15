@@ -11,10 +11,10 @@ import { useAppStore, type Theme } from "../store/useStore";
 import { PRESET_IDS, type PresetId } from "../lib/themeSettings";
 import { createFirstNote, currentVault, importInto, languageOrder, languagePlan, markSetupDone, openBrowserVault, openFolderVault, reconnectFolderVault, setupDue, type StartChoice } from "./setup";
 import "./FirstRun.css";
-import { useFocusTrap } from "../ui/useFocusTrap";
 import "./firstRunStrings";
 import { HelpButton } from "../ui/HelpButton";
 import { explainError } from "../lib/userError";
+import { Modal } from "../ui/Modal";
 
 const ALL_STEPS = ["lang", "vault", "look", "start"] as const;
 const THEMES: Theme[] = ["light", "dark", "system"];
@@ -79,10 +79,6 @@ export default function FirstRun({ onDone }: Props) {
     markSetupDone();
     onDone(null);
   };
-
-  // Focus stays in the setup while it is open (plan 10.1); Escape skips it unless it is busy.
-  const dialogRef = useRef<HTMLDivElement>(null);
-  useFocusTrap(dialogRef, { onEscape: () => !busy && skip() });
 
   const chooseFolder = async () => {
     const picker = (window as unknown as { showDirectoryPicker?: (o: object) => Promise<FileSystemDirectoryHandle> }).showDirectoryPicker;
@@ -169,8 +165,8 @@ export default function FirstRun({ onDone }: Props) {
   const langLabel = SUPPORTED_LOCALES.find((l) => l.code === (locale === "he" ? "he" : "en"))?.label ?? "English";
 
   return (
-    <div className="lumen-firstrun-backdrop">
-      <div className="lumen-firstrun" ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="lumen-firstrun-title" aria-describedby="lumen-firstrun-sub" data-testid="first-run">
+    <Modal aria-labelledby="lumen-firstrun-title" aria-describedby="lumen-firstrun-sub" onClose={() => !busy && skip()} className="lumen-firstrun-backdrop">
+      <div className="lumen-firstrun" data-testid="first-run">
         <header className="lumen-firstrun-head">
           <h2 id="lumen-firstrun-title">{t("onboard.title")}</h2>
           <HelpButton topic="getting-started/quickstart" />
@@ -339,6 +335,6 @@ export default function FirstRun({ onDone }: Props) {
           </button>
         </footer>
       </div>
-    </div>
+    </Modal>
   );
 }

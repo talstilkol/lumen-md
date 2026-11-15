@@ -1,5 +1,4 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { useFocusTrap } from "./useFocusTrap";
 import type { ReactElement } from "react";
 import { Search, FileText, Sparkles, Loader2, FileCode2, Wand2, Image as ImageIcon } from "lucide-react";
 import { t, tPlural } from "../i18n";
@@ -29,6 +28,7 @@ import { explainError } from "../lib/userError";
 import { EmptyState, runCommand } from "./EmptyState";
 import { HelpButton } from "./HelpButton";
 import "./searchDialogStrings";
+import { Modal } from "./Modal";
 
 interface Props {
   open: boolean;
@@ -73,7 +73,6 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
     inputRef.current?.focus();
   };
   const listRef = useRef<HTMLDivElement | null>(null);
-  const dialogRef = useRef<HTMLDivElement | null>(null);
 
   const [aiAnswer, setAiAnswer] = useState<string | null>(null);
   const [aiRendered, setAiRendered] = useState<ReactElement | null>(null);
@@ -103,9 +102,6 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
       setTimeout(() => inputRef.current?.focus(), 0);
     }
   }, [open]);
-
-  // Focus trap while open; focus returns to the opener; Escape closes from anywhere in the dialog (plan 10.1).
-  useFocusTrap(dialogRef, { active: open, onEscape: onClose });
 
   useEffect(() => {
     if (!open) return;
@@ -424,8 +420,8 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
   if (!open) return null;
 
   return (
-    <div className="cmd-palette-backdrop" onClick={onClose} role="dialog" aria-modal>
-      <div ref={dialogRef} className="cmd-palette" style={{ minHeight: "350px", display: "flex", flexDirection: "column" }} onClick={(e) => e.stopPropagation()}>
+    <Modal aria-label={t("search.placeholder")} onClose={onClose} className="cmd-palette-backdrop" onClick={onClose}>
+      <div className="cmd-palette" style={{ minHeight: "350px", display: "flex", flexDirection: "column" }} onClick={(e) => e.stopPropagation()}>
         <div style={{ display: "flex", borderBottom: "1px solid hsl(var(--border))", padding: "0 10px", alignItems: "center" }}>
           <button className={`chart-block-tab ${mode === "search" ? "active" : ""}`} style={{ fontSize: 13, background: "transparent" }} onClick={() => pickMode("search")}>
              {t("searchDialog.mode.search")}
@@ -834,7 +830,7 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
           <span><kbd>Esc</kbd> {t("palette.close")}</span>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

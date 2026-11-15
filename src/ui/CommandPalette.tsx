@@ -1,5 +1,4 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { useFocusTrap } from "./useFocusTrap";
 import {
   Search,
   FileText,
@@ -33,6 +32,7 @@ import "./CommandPalette.css";
 import { HelpButton } from "./HelpButton";
 import { announceCommand } from "../research/usability/commandEvents";
 import { countCommand } from "../metrics/count";
+import { Modal } from "./Modal";
 
 export interface Command {
   id: string;
@@ -65,8 +65,7 @@ export function CommandPalette({ open, onClose, commands }: Props) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const inputRef = useRef<HTMLInputElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
-  const dialogRef = useRef<HTMLDivElement | null>(null);
-  /** What had focus before the palette opened: it gets focus back on close (see the focus trap below). */
+  /** What had focus before the palette opened: it gets focus back on close (the Modal's focus trap does not, restoreFocus={false}). */
   const previousFocusRef = useRef<Element | null>(null);
 
   // Items the toolbar menus already expose. The palette de-duplicates those
@@ -198,11 +197,10 @@ export function CommandPalette({ open, onClose, commands }: Props) {
     }
   }, [open]);
 
-  // Focus trap while open. Escape at document level closes it even when
-  // focus drifted out of the input (e.g. after a child sub-menu expansion).
-  // The layout effect above already moved focus to the input when the trap
-  // starts, so the palette restores focus itself (to what opened it).
-  useFocusTrap(dialogRef, { active: open, onEscape: onClose, restoreFocus: false });
+  // The focus trap is the Modal's (plan 10.1): Escape at document level closes
+  // the palette even when focus drifted out of the input (e.g. after a child
+  // sub-menu expansion). The layout effect above already moved focus to the
+  // input, so the palette restores focus itself (to what opened it).
 
   // Flatten commands with children for searching
   const flatAll = useMemo(() => {
@@ -329,15 +327,13 @@ export function CommandPalette({ open, onClose, commands }: Props) {
   ];
 
   return (
-    <div
+    <Modal
+      onClose={onClose} restoreFocus={false}
       className="cmd-palette-backdrop"
       onClick={onClose}
-      role="dialog"
-      aria-modal="true"
       aria-label={t("palette.placeholder")}
     >
       <div
-        ref={dialogRef}
         className="cmd-palette"
         onClick={(e) => e.stopPropagation()}
       >
@@ -485,7 +481,7 @@ export function CommandPalette({ open, onClose, commands }: Props) {
           </span>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

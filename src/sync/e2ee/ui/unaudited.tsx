@@ -17,6 +17,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { getLocale, t } from "../../../i18n";
 import "../strings";
 import { isEnabled, setFlag } from "../../../flags/flags";
+import { Modal } from "../../../ui/Modal";
 
 export const E2EE_FLAG = "sync.e2ee";
 
@@ -33,11 +34,8 @@ const button: React.CSSProperties = { padding: "8px 14px", borderRadius: 8, curs
 
 export function E2eeGate({ onEnable, onCancel }: { onEnable: () => void; onCancel: () => void }) {
   return (
-    <div style={{ position: "fixed", inset: 0, background: "var(--overlay)", display: "grid", placeItems: "center", zIndex: 1000 }} onMouseDown={(e) => e.target === e.currentTarget && onCancel()}>
+    <Modal aria-labelledby="e2ee-gate-title" onClose={onCancel} style={{ position: "fixed", inset: 0, background: "var(--overlay)", display: "grid", placeItems: "center", zIndex: 1000 }} onMouseDown={(e) => e.target === e.currentTarget && onCancel()}>
       <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="e2ee-gate-title"
         dir={getLocale() === "he" || getLocale() === "ar" ? "rtl" : "ltr"}
         data-testid="e2ee-gate"
         style={{ width: "min(480px, calc(100vw - 32px))", background: "hsl(var(--bg))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border))", borderRadius: 12, padding: 20, display: "grid", gap: 14 }}
@@ -55,7 +53,7 @@ export function E2eeGate({ onEnable, onCancel }: { onEnable: () => void; onCance
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

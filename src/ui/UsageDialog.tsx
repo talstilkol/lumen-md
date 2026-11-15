@@ -22,6 +22,7 @@ import { countingEnabled, dayKey, loadUsage, markReported, reportIssueUrl, setCo
 import { recordUserShare } from "../ai/privacyLedger";
 import { HelpButton } from "./HelpButton";
 import { EmptyState, learnHow } from "./EmptyState";
+import { Modal } from "./Modal";
 
 export interface UsageOptions {
   /** Every command id of the app, to count the unused ones. */
@@ -83,8 +84,8 @@ function UsageDialog({ options, onClose }: { options: UsageOptions; onClose: () 
   };
 
   return (
-    <div className="cmd-palette-backdrop" onKeyDown={(e) => e.key === "Escape" && onClose()}>
-      <div className="cmd-palette" role="dialog" aria-modal="true" aria-label={t("usage.title")} data-testid="usage-dialog" style={{ maxWidth: 560, padding: 0, display: "flex", flexDirection: "column", maxHeight: "88vh" }}>
+    <Modal aria-label={t("usage.title")} className="cmd-palette-backdrop" onKeyDown={(e) => e.key === "Escape" && onClose()}>
+      <div className="cmd-palette" data-testid="usage-dialog" style={{ maxWidth: 560, padding: 0, display: "flex", flexDirection: "column", maxHeight: "88vh" }}>
         <header style={{ padding: "14px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <BarChart3 size={18} style={{ color: "hsl(var(--accent))" }} />
           <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600, flex: 1 }}>{t("usage.title")}</h2>
@@ -165,7 +166,7 @@ function UsageDialog({ options, onClose }: { options: UsageOptions; onClose: () 
           <span style={{ ...muted, textAlign: "end" }}>{t("usage.send.hint")}</span>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 
