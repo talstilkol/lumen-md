@@ -33,6 +33,8 @@ import { parseNakdimonTest, scoreNikud } from "../src/eval/public/adapters/nikud
 import { parseMilimJsonl, scoreG2p } from "../src/eval/public/adapters/g2p.ts";
 import { parseImageJsonl, scoreHandwriting, handwritingExposed } from "../src/eval/public/adapters/handwriting.ts";
 import { parseConll, scoreNer } from "../src/eval/public/adapters/ner.ts";
+import { parseConllu, lemmaAccuracy } from "../src/eval/public/adapters/lemma.ts";
+import { abTest, heqRetrieval } from "../src/search/lemma/abTest.ts";
 import { parseBidiCharacterTest, parseBidiTest, runCharacterTest, runClassTest, bidiJsEngine, BIDI_CONFORMANCE_MIN } from "../src/eval/public/adapters/bidi.ts";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -170,7 +172,13 @@ async function run(id) {
     return writeResult(m, model, rev, engine.id, s, { exposed: handwritingExposed(s.metrics) });
   }
   if (m.task === "ner") return writeResult(m, model, rev, engine.id, await scoreNer(parseConll(text(m.dataset.files[0].path), m.id), engine));
-  die(`no runner for task "${m.task}" here (lemma, retrieval and LLM runners come with their plan tasks)`);
+  // W11.H12: the engine module returns { id, lemmatize } (one lemmatizer), or { lemmatizers: [...] } for the A/B.
+  if (m.task === "lemma") return writeResult(m, model, rev, engine.id, await lemmaAccuracy(parseConllu(text(m.dataset.files[0].path)), engine));
+  if (m.task === "retrieval" && m.format === "heq-squad") {
+    const ab = await abTest(m.id, heqRetrieval(JSON.parse(text(m.dataset.files[0].path))), engine.lemmatizers ?? [engine]);
+    return writeResult(m, model, rev, (engine.lemmatizers ?? [engine]).map((l) => l.id).join(" vs "), { n: 0, metrics: Object.fromEntries(Object.entries(ab.ndcg10).map(([k, v]) => [`ndcg10.${k}`, v])) });
+  }
+  die(`no runner for task "${m.task}" (format ${m.format}) here (LLM and BEIR runners come with their plan tasks)`);
 }
 
 async function runBidi(m) {

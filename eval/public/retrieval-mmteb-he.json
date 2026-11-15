@@ -1,0 +1,41 @@
+{
+  "id": "retrieval-mmteb-he",
+  "task": "retrieval",
+  "title": "MMTEB Hebrew retrieval — nDCG@10 (lemmatizer A/B)",
+  "dataset": {
+    "hub": "huggingface",
+    "id": "mteb (Hebrew retrieval task, to choose)",
+    "url": "https://huggingface.co/mteb",
+    "revision": null,
+    "files": [
+      {
+        "path": "corpus.jsonl",
+        "sha256": null
+      },
+      {
+        "path": "queries.jsonl",
+        "sha256": null
+      },
+      {
+        "path": "qrels/test.tsv",
+        "sha256": null
+      }
+    ]
+  },
+  "license": {
+    "id": "per task",
+    "redistribute": false
+  },
+  "split": "test",
+  "format": "beir",
+  "normalizer": "none",
+  "metrics": [
+    "ndcg@10"
+  ],
+  "owed": [
+    "pin: pick the MMTEB Hebrew retrieval task (research R2 §1.6), its dataset id and revision; the BEIR layout (corpus, queries, qrels) is MTEB's usual one"
+  ],
+  "plan": [
+    "W11.H12"
+  ]
+}

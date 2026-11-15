@@ -1,0 +1,34 @@
+{
+  "id": "retrieval-heq",
+  "task": "retrieval",
+  "title": "HeQ — Hebrew questions to their paragraph, nDCG@10 (lemmatizer A/B)",
+  "dataset": {
+    "hub": "github",
+    "id": "NNLP-IL/Hebrew-Question-Answering-Dataset",
+    "url": "https://github.com/NNLP-IL/Hebrew-Question-Answering-Dataset",
+    "revision": null,
+    "files": [
+      {
+        "path": "data/test.json",
+        "sha256": null
+      }
+    ]
+  },
+  "license": {
+    "id": "CC-BY-4.0 (to confirm at pin)",
+    "redistribute": false
+  },
+  "split": "test",
+  "format": "heq-squad",
+  "normalizer": "none",
+  "metrics": [
+    "ndcg@10"
+  ],
+  "owed": [
+    "pin: the repository's commit and the test file's path (written from its SQuAD-style layout, not read)",
+    "run: npm run eval:public -- run retrieval-heq --engine <lemmatizers module> --model shoshan --rev <rev>"
+  ],
+  "plan": [
+    "W11.H12"
+  ]
+}
