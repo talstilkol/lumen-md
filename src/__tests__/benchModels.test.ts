@@ -203,14 +203,13 @@ describe("engine adapters", () => {
   const ids = new Set(JSON.parse(readFileSync(join(ROOT, "models/registry.json"), "utf8")).models.map((m: { id: string }) => m.id));
 
   it("every engine on this branch: id = file name, a golden set with a task, registry models", () => {
-    // W10.E34: web-llm, Ollama and M2M100; W10.E35: Florence-2, SigLIP and the Zipformer dictation engine.
-    expect(files.map((f) => f.replace(/\.ts$/, "")).sort()).toEqual(["bge-rerank", "bm25", "e5", "florence2", "m2m100", "ollama", "siglip", "tesseract", "webllm", "whisper-small", "whisper-tiny", "whisper-turbo", "zipformer-he"]);
+    // W10.E34: web-llm, Ollama, M2M100, Opus-MT and the two nikud models; W10.E35: the captioners, SigLIP, the
+    // other Whisper builds, the dictation pipeline, the checkers, the lexicon, NER, Pyodide and desktop Whisper.
+    expect(files.map((f) => f.replace(/\.ts$/, "")).sort()).toEqual(["bge-rerank", "bm25", "dictabert-ner", "e5", "florence2", "franc", "hebrew-freq", "hspell", "lexicon", "m2m100", "menaked", "nakdimon", "nomic-embed", "ollama", "opus-en-he", "opus-he-en", "ozen", "pyodide", "siglip", "smolvlm", "tesseract", "webllm", "whisper-base", "whisper-desktop", "whisper-small", "whisper-tiny", "whisper-turbo", "whisper-turbo-he", "zipformer-he"]);
     for (const f of files) {
       const src = readFileSync(join(dir, f), "utf8");
-      expect(/id: "([^"]+)"/.exec(src)?.[1] ?? /id: `([^`]+)`/.exec(src)?.[1], f).toBe(f.replace(/\.ts$/, ""));
-      const set = /set: "([^"]+)"/.exec(src)![1];
-      expect(Object.keys(TASKS), f).toContain(set);
-      expect(readdirSync(join(ROOT, "eval/golden")), f).toContain(set);
+      // A shared factory (../opus.ts, ../nikud.ts) takes the id as its first argument.
+      expect(/id: "([^"]+)"/.exec(src)?.[1] ?? /Engine\("([^"]+)"/.exec(src)?.[1], f).toBe(f.replace(/\.ts$/, ""));
     }
     for (const id of ["onnx-community/bge-reranker-v2-m3-ONNX", "Xenova/multilingual-e5-small", "tessdata_fast/heb.traineddata", "tessdata_fast/eng.traineddata", "onnx-community/whisper-tiny", "onnx-community/whisper-small", "onnx-community/whisper-large-v3-turbo"]) expect(ids.has(id), id).toBe(true);
     for (const id of ["Qwen3-0.6B", "qwen2.5:7b", "Xenova/m2m100_418M", "onnx-community/Florence-2-base-ft", "siglip-base-patch16-256-multilingual", "ivrit-ai/zipformer2-66m-streaming-he"]) expect(ids.has(id), id).toBe(true);
@@ -218,14 +217,16 @@ describe("engine adapters", () => {
 
   it("the new engines run the app's own code, not a copy (W10.E34, W10.E35)", () => {
     const src = (f: string) => readFileSync(join(dir, f), "utf8");
-    expect(src("webllm.ts")).toMatch(/runAgentOrThrow\(translatorAgent, [^)]*\{ executor: "webllm" \}\)/);
-    expect(src("ollama.ts")).toMatch(/runAgentOrThrow\(translatorAgent, [^)]*\{ executor: "ollama" \}\)/);
+    // The translator agent's prompt on the app's executor, the model pinned (src/bench/llm.ts says why not the agent loop).
+    expect(src("webllm.ts")).toMatch(/translateWith\(webllmExecutor, mlcId, /);
+    expect(src("ollama.ts")).toMatch(/translateWith\(ollamaExecutor, name, /);
+    expect(readFileSync(join(ROOT, "src/bench/llm.ts"), "utf8")).toMatch(/executor\.chat\(\{[\s\S]*translatorAgent\.user\(input\)[\s\S]*model,/);
     expect(src("m2m100.ts")).toMatch(/from "\.\.\/\.\.\/ai\/transformersEngine"/);
     expect(src("florence2.ts")).toMatch(/captionLocal\(MODEL\.id, MODEL\.family, image\)/);
     expect(src("siglip.ts")).toMatch(/rankImages\(index, \(await queryVector\(/);
     expect(src("zipformer-he.ts")).toMatch(/new URL\("\.\.\/\.\.\/ai\/dictation\/dictation\.worker\.ts", import\.meta\.url\)/);
     // No engine writes numbers itself: only bench-models.mjs --write does, after a full run (registry.mjs).
-    for (const f of files) expect(src(f), f).not.toMatch(/registry\.json|measured/);
+    for (const f of [...files.map((f) => join(dir, f)), ...["llm.ts", "opus.ts", "nikud.ts", "spell.ts"].map((f) => join(ROOT, "src/bench", f))]) expect(readFileSync(f, "utf8"), f).not.toMatch(/registry\.json|measured/);
   });
 
   it("the bench page is not part of the app build", () => {

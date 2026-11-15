@@ -146,15 +146,7 @@ export function toNoteBlocks(r: AnalystResult): string {
   return parts.join("\n");
 }
 
-/** Numeric / exact scoring against a golden answer (the data-analysis set's rule). */
-export function matchesGolden(got: number | string, want: number | string, tolerance?: number): boolean {
-  if (typeof want === "number") {
-    const n = typeof got === "number" ? got : Number(String(got).replace(/[,%\s]/g, ""));
-    if (!Number.isFinite(n)) return false;
-    return tolerance !== undefined ? Math.abs(n - want) <= tolerance + 1e-9 : n === want;
-  }
-  return String(got).trim() === want;
-}
+export { matchesGolden } from "./analystScore";
 
 /** The palette command's pipeline: the note's first table, the agent, two sandbox runs, the blocks. */
 export async function analyseNote(markdown: string, question: string, signal?: AbortSignal): Promise<{ result: AnalystResult; blocks: string }> {

@@ -4,7 +4,9 @@
  * recording is fed in the app's 1024-sample blocks, then a second and a
  * half of silence (the worker's tail) flushes the last segment; the
  * transcript is the worker's final segments joined, before the app's
- * punctuation pass (the set scores words).
+ * punctuation pass (the set scores words). The numbers are the live
+ * pipeline's, so they belong to Silero VAD v5 too: a worker that fell back
+ * to its energy VAD is an error, never a number.
  */
 import { loadDictationFiles } from "../../ai/dictation/modelStore";
 import { ZIPFORMER_REPO } from "../../ai/dictation/models";
@@ -30,10 +32,15 @@ function onMessage(w: Worker, until: (m: DictationOut) => boolean, collect?: (m:
 async function start(): Promise<Worker> {
   const files = await loadDictationFiles();
   const w = new Worker(new URL("../../ai/dictation/dictation.worker.ts", import.meta.url), { type: "module" });
-  const ready = onMessage(w, (m) => m.type === "ready");
+  let vad: string | null = null;
+  const ready = onMessage(w, (m) => m.type === "ready", (m) => m.type === "ready" && (vad = m.vad));
   const msg: DictationIn = { type: "load", ortBase: ortBaseUrl(), encoder: files.encoder.slice(), decoder: files.decoder.slice(), joiner: files.joiner.slice(), tokens: files.tokens, vad: files.vad?.slice() ?? null };
   w.postMessage(msg);
   await ready;
+  if (vad !== "silero") {
+    w.terminate();
+    throw new Error(`the dictation worker ran without Silero VAD (${vad ?? "none"})`);
+  }
   return w;
 }
 
@@ -41,7 +48,7 @@ export const engine: BenchEngine = {
   id: "zipformer-he",
   label: "Zipformer2 66M streaming (live dictation)",
   set: "asr-he",
-  models: [ZIPFORMER_REPO],
+  models: [ZIPFORMER_REPO, "silero-vad-v5"],
   async load() {
     worker = await start();
     // The worker runs ONNX Runtime Web on wasm.
