@@ -7,6 +7,8 @@
  *
  * Backups: `backup()` writes a consistent copy with `VACUUM INTO` into
  * `<dir>/backups/collab-<timestamp>.sqlite` and keeps the newest `keep`.
+ * `purgeBackups(room)` takes a room deleted on request out of every backup
+ * too (plan W12.H3), so "End session" does not leave its ciphertext there.
  *
  * Sharing (plan W1.19): `room_owners` holds a SHA-256 of each claimed room's
  * owner secret (the secret itself stays on the owner's devices); `shares`
@@ -139,6 +141,48 @@ export function openStore(dir, { keepBackups = 24 } = {}) {
       deleteOwner.run(room);
       deleteShares.run(room);
       return n > 0;
+    },
+    /**
+     * W12.H3: take `room` (its document, its comments document, its owner and
+     * its share links) out of every backup in `<dir>/backups`, as deleteRoom
+     * does in the live database. Each backup is rewritten with VACUUM under
+     * secure_delete, so the deleted rows' bytes are not left in free pages.
+     * The sealed flag stays, as it does in the live database. A backup that
+     * can't be rewritten is removed rather than kept with the room in it.
+     * Returns how many backups held the room and how many were removed.
+     */
+    purgeBackups(room) {
+      const dirBackups = join(dir, "backups");
+      const files = readdirSync(dirBackups).filter((f) => /^collab-.*\.sqlite$/.test(f));
+      let purged = 0;
+      let removed = 0;
+      for (const f of files) {
+        const file = join(dirBackups, f);
+        let b = null;
+        try {
+          b = new DatabaseSync(file);
+          b.exec("PRAGMA journal_mode = DELETE; PRAGMA secure_delete = ON;");
+          const n =
+            Number(b.prepare("DELETE FROM documents WHERE name = ? OR name = ?").run(room, `${room}~comments`).changes) +
+            Number(b.prepare("DELETE FROM room_owners WHERE room = ?").run(room).changes) +
+            Number(b.prepare("DELETE FROM shares WHERE room = ?").run(room).changes);
+          if (n > 0) {
+            b.exec("VACUUM");
+            purged++;
+          }
+          b.close();
+          b = null;
+        } catch {
+          try {
+            b?.close();
+          } catch {
+            /* already closed */
+          }
+          for (const x of [file, `${file}-journal`, `${file}-wal`, `${file}-shm`]) rmSync(x, { force: true });
+          removed++;
+        }
+      }
+      return { purged, removed };
     },
     /** W12.H3: retention for one kind of room (names starting with `prefix`): delete those not changed since `cutoffMs`. */
     sweepPrefix(prefix, cutoffMs) {

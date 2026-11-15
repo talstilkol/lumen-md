@@ -10,11 +10,15 @@
  *    session ended. Both relays: the self-hosted Node server (real, over
  *    sockets) and the public Worker (its code, on a small fake of the
  *    Durable Object storage).
+ *  - "End session" also takes the room out of the Node relay's backups
+ *    (coordinator decision): no backup holds its rows or its ciphertext
+ *    bytes afterwards, while other rooms stay in them.
  *  - Retention: a study room nobody touched for 30 days is deleted, while
  *    other rooms keep the server's own retention.
  */
 import { afterEach, describe, expect, it } from "vitest";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
+import { DatabaseSync } from "node:sqlite";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import * as Y from "yjs";
@@ -29,6 +33,8 @@ import { deleteRoomOnRelay, roomStatusOnRelay } from "../havruta/relayAdmin";
 import { createCollabServer, HAVRUTA_RETENTION_DAYS } from "../../sync-server/collab-server.mjs";
 // @ts-expect-error -- plain ESM server module, no types
 import { CollabRoom, retentionMs, roomAdmin } from "../../edge-workers/collab/worker.mjs";
+// @ts-expect-error -- plain ESM server module, no types
+import { roomOf } from "../../sync-server/collab/sharing.mjs";
 
 const DAY = 24 * 60 * 60 * 1000;
 const cleanups: Array<() => unknown> = [];
@@ -50,7 +56,7 @@ async function server() {
   const app = createCollabServer({ port: 0, host: "127.0.0.1", dataDir: dir, tokenSecret: "y".repeat(40), debounceMs: 10, maxDebounceMs: 30, backupIntervalMs: 0, e2eeOnly: true });
   const url = `ws://127.0.0.1:${await app.listen()}`;
   cleanups.push(() => app.close());
-  return { app, url };
+  return { app, url, dir };
 }
 
 /** The device's store (IndexedDB in the app): a Map here, kept across "reloads". */
@@ -124,6 +130,55 @@ describe("end session: the relay deletes the room", () => {
     await new Promise((r) => setTimeout(r, 200));
     expect(await roomStatusOnRelay(target)).toBe(404);
     expect(pa.data.has(room)).toBe(false);
+  }, 60_000);
+
+  it("Node relay: End session takes the room out of every backup, not only the live database", async () => {
+    const { app, url, dir } = await server();
+    const room = newHavrutaRoomName();
+    const pw = "backup pw";
+    const target = { serverUrl: url, room, password: pw };
+    // The relay stores the room under the committed name's base.
+    const serverRoom = roomOf(await committedRoomName(room, pw)) as string;
+    const a = await openHavruta({ room, password: pw, ref: { key: "Berakhot.2a", he: "ברכות ב׳ א׳" }, connect: relay(url, room, pw, () => false), deleteOnRelay: () => deleteRoomOnRelay(target) });
+    cleanups.push(() => a.leave());
+    addNote(a.doc, { segment: 0, text: "הערה שתימחק", name: "A", sourceSegments: [] });
+    expect(await until(async () => (await roomStatusOnRelay(target)) === 200)).toBe(true);
+    // Another room, which the purge must leave alone.
+    app.store.save("lumen-keep", Y.encodeStateAsUpdate(new Y.Doc()), Date.now());
+    const stored = app.store.load(serverRoom) as Uint8Array;
+    expect(stored.length).toBeGreaterThan(64);
+    // The room's ciphertext, as bytes the backups are searched for.
+    const probe = Buffer.from(stored.subarray(stored.length - 48));
+    const backups = [app.backup(), app.backup(), app.backup()] as string[];
+    const inFile = (f: string) => readFileSync(f).includes(probe);
+    const rows = (f: string) => {
+      const db = new DatabaseSync(f, { readOnly: true });
+      try {
+        const n = (sql: string, ...args: string[]) => Number((db.prepare(sql).get(...args) as { n: number }).n);
+        return {
+          room: n("SELECT count(*) AS n FROM documents WHERE name = ? OR name = ?", serverRoom, `${serverRoom}~comments`) + n("SELECT count(*) AS n FROM room_owners WHERE room = ?", serverRoom) + n("SELECT count(*) AS n FROM shares WHERE room = ?", serverRoom),
+          keep: n("SELECT count(*) AS n FROM documents WHERE name = ?", "lumen-keep"),
+        };
+      } finally {
+        db.close();
+      }
+    };
+    // Before: every backup holds the room, rows and ciphertext.
+    for (const f of backups) {
+      expect(inFile(f), `${f} before`).toBe(true);
+      expect(rows(f).room).toBeGreaterThan(0);
+    }
+    await a.end();
+    expect(await roomStatusOnRelay(target)).toBe(404);
+    const after = readdirSync(join(dir, "backups")).filter((f: string) => f.endsWith(".sqlite")).map((f: string) => join(dir, "backups", f));
+    expect(after.sort()).toEqual([...backups].sort());
+    for (const f of after) {
+      expect(inFile(f), `${f} still has the room's ciphertext`).toBe(false);
+      expect(rows(f)).toEqual({ room: 0, keep: 1 });
+    }
+    // A backup taken afterwards doesn't have it either.
+    const next = app.backup() as string;
+    expect([inFile(next), rows(next)]).toEqual([false, { room: 0, keep: 1 }]);
   }, 60_000);
 
   it("Node relay: a delete without a valid room token is refused", async () => {
