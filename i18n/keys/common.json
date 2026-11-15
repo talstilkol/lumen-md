@@ -6520,6 +6520,36 @@
       ]
     },
     {
+      "key": "importWizard.onenote.failed",
+      "en": "The OneNote sign-in did not finish: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "importWizard.onenote.pages",
+      "en": "Reading OneNote pages: {done} of {total}",
+      "vars": [
+        "done",
+        "total"
+      ]
+    },
+    {
+      "key": "importWizard.onenote.reading",
+      "en": "Reading your OneNote…",
+      "vars": []
+    },
+    {
+      "key": "importWizard.onenote.signIn",
+      "en": "Sign in to Microsoft and import from OneNote",
+      "vars": []
+    },
+    {
+      "key": "importWizard.onenote.signInNote",
+      "en": "Read only (Notes.Read). The sign-in is used for this import and not kept.",
+      "vars": []
+    },
+    {
       "key": "importWizard.pickFile",
       "en": "Choose files…",
       "vars": []

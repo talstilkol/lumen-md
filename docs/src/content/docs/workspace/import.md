@@ -64,7 +64,10 @@ the folder to the trash instead, so nothing of yours is lost.
   `.mht`. A direct import through Microsoft Graph (sign in, read only:
   `Notes.Read`) is built for deployments that register an app with Microsoft
   (`VITE_ONENOTE_CLIENT_ID`); the sign-in token stays in memory and is sent
-  only to graph.microsoft.com.
+  only to graph.microsoft.com. On such a deployment, picking OneNote shows
+  **Sign in to Microsoft and import from OneNote**: after the sign-in the
+  wizard reads every notebook, section group and page, and shows the usual
+  review before anything is written.
 - Notion's links to a block (`#…` after a page) go to the page: the block
   ids do not survive the export.
 
