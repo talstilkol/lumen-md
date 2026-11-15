@@ -260,7 +260,8 @@ export async function writeWorkspaceFileIf(path: string, content: string, expect
  */
 export async function writeWorkspaceFilesIf(items: ReadonlyArray<{ path: string; content: string; expect: FileStamp }>): Promise<Map<string, boolean | Error>> {
   const backend = vault();
-  if (backend.writeMany) return backend.writeMany(items.map((i) => ({ path: i.path, data: i.content, expect: i.expect })), withPathLock);
+  const batch = backend.writeMany ? await backend.writeMany(items.map((i) => ({ path: i.path, data: i.content, expect: i.expect })), withPathLock) : null;
+  if (batch) return batch;
   const out = new Map<string, boolean | Error>();
   let next = 0;
   const worker = async () => {
