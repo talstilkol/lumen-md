@@ -18,13 +18,18 @@ import { Modal } from "../../ui/Modal";
 import { oneNoteConfig } from "./onenoteGraph";
 import { prepareOneNoteGraphImport, startOneNoteSignIn, takeOneNoteHandoff } from "./onenoteSignIn";
 import { markActivation } from "../../metrics/count";
+import { runSampleSearch, sampleSearchQuery } from "../../onboarding/importFirst";
 
 interface Props {
   open: boolean;
   onClose: () => void;
+  /** W11.P6: start on this source (the first run's "Bring your notes"). */
+  initialSource?: ImportSourceId;
+  /** W11.P6: opened from the first run (the done step says so). */
+  firstRun?: boolean;
 }
 
-type Step = { kind: "source" } | { kind: "busy"; text: string } | { kind: "review"; prep: PreparedImport; picked: Map<string, Uint8Array> } | { kind: "done"; report: ImportReport; undo: UndoRecord };
+type Step = { kind: "source" } | { kind: "busy"; text: string } | { kind: "review"; prep: PreparedImport; picked: Map<string, Uint8Array> } | { kind: "done"; report: ImportReport; undo: UndoRecord; query: string | null };
 
 const btn: React.CSSProperties = { padding: "6px 12px", fontSize: 13, borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer" };
 const primary: React.CSSProperties = { ...btn, background: "hsl(var(--accent))", color: "hsl(var(--accent-fg))", borderColor: "transparent" };
@@ -48,8 +53,8 @@ function Issues<T>({ title, items, line, testId }: { title: string; items: T[]; 
   );
 }
 
-export function ImportWizard({ open, onClose }: Props) {
-  const [source, setSource] = useState<ImportSourceId>("obsidian");
+export function ImportWizard({ open, onClose, initialSource, firstRun = false }: Props) {
+  const [source, setSource] = useState<ImportSourceId>(initialSource ?? "obsidian");
   const [step, setStep] = useState<Step>({ kind: "source" });
   const [error, setError] = useState<string | null>(null);
   const [savedReport, setSavedReport] = useState<string | null>(null);
@@ -139,7 +144,8 @@ export function ImportWizard({ open, onClose }: Props) {
       window.dispatchEvent(new Event("lumen-workspace-changed"));
       markActivation("import.complete", report.notes); // W11.P4, local only
       setSavedReport(null);
-      setStep({ kind: "done", report, undo });
+      // W11.P6: a search over the notes just imported, to find them at once.
+      setStep({ kind: "done", report, undo, query: report.notes ? sampleSearchQuery(prep.vault.notes) : null });
     } catch (e) {
       setError(t("importWizard.error.failed", { error: explainError(e) }));
       setStep({ kind: "review", prep, picked });
@@ -275,7 +281,7 @@ export function ImportWizard({ open, onClose }: Props) {
         );
       }
       case "done": {
-        const { report, undo: u } = step;
+        const { report, undo: u, query } = step;
         return (
           <>
             <p data-testid="import-done" style={{ margin: 0, fontSize: 14, fontWeight: 600 }} dir="auto">
@@ -291,6 +297,24 @@ export function ImportWizard({ open, onClose }: Props) {
               </p>
             )}
             <p style={muted}>{t("importWizard.done.dates")}</p>
+            {query && (
+              <div data-testid="import-sample-search" style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                <span style={{ fontSize: 13 }} dir="auto">
+                  {t(firstRun ? "importWizard.search.firstRun" : "importWizard.search.hint")}
+                </span>
+                <button
+                  type="button"
+                  style={primary}
+                  data-testid="import-search"
+                  onClick={() => {
+                    onClose();
+                    runSampleSearch(query);
+                  }}
+                >
+                  <bdi>{t("importWizard.search.button", { query })}</bdi>
+                </button>
+              </div>
+            )}
             <Issues testId="import-skipped" title={t("importWizard.review.skipped", { n: report.skipped.length })} items={report.skipped} line={(i) => `${i.path} — ${skipText(i)}`} />
             <Issues testId="import-warnings" title={t("importWizard.review.warnings", { n: report.warnings.length })} items={report.warnings} line={(i) => `${i.path} — ${warningText(i)}`} />
             <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", flexWrap: "wrap" }}>
