@@ -72,6 +72,15 @@ export function buildVoiceCommands(): Command[] {
       },
     },
     {
+      // Plan W7.10 step 2 (W10.E52): the open Hebrew voice's recording corpus, recorded and checked in the app.
+      id: "voice.corpusRecorder",
+      label: t("cmd.voice.corpusRecorder"),
+      hint: t("cmd.voice.corpusRecorder.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      action: async () => (await import("../../voice-corpus/Recorder")).openCorpusRecorder(),
+    },
+    {
       id: "voice.transcribeFile",
       label: t("cmd.tools.transcribeFile"),
       icon: cmdIcons.Sparkles,

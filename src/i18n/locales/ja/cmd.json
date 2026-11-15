@@ -549,6 +549,8 @@
   "cmd.view.wysiwyg.hint": "リッチテキスト編集",
   "cmd.voice.command": "音声コマンド",
   "cmd.voice.command.hint": "次のいずれかを話してください：新規ノート、検索…、タスクを追加…、デイリーノート、読み上げ — この端末で認識します",
+  "cmd.voice.corpusRecorder": "音声コーパス：オープンなヘブライ語音声のために文を録音",
+  "cmd.voice.corpusRecorder.hint": "この端末で CC0 の音声コーパスを録音・確認・エクスポート（アップロードなし）",
   "cmd.voice.meeting": "🎙 会議メモ（このデバイスで録音）",
   "cmd.voice.meeting.hint": "会議を録音し、このデバイスで文字起こしして、決定事項・担当者と期日付きのタスク・未解決の質問を挿入します",
   "cmd.voice.meetingFile": "🎙 会議の録音を文字起こし（誰が何を言ったか）…",

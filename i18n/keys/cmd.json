@@ -2772,6 +2772,16 @@
       "vars": []
     },
     {
+      "key": "cmd.voice.corpusRecorder",
+      "en": "Voice corpus: record sentences for an open Hebrew voice",
+      "vars": []
+    },
+    {
+      "key": "cmd.voice.corpusRecorder.hint",
+      "en": "Record, check and export a CC0 speech corpus on this device (no upload)",
+      "vars": []
+    },
+    {
       "key": "cmd.voice.meeting",
       "en": "🎙 Meeting notes (record on this device)",
       "vars": []

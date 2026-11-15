@@ -210,6 +210,8 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "backlinksList.json": { module: "ui/backlinksListStrings.ts", users: ["ui/BacklinksList.tsx"], prefixes: ["backlinksList."] },
   // Bulk property editing (plan W7.4): the bar a database view loads on the first selection.
   "bulkEdit.json": { module: "views/bulkEditStrings.ts", users: ["views/BulkEditBar.tsx"], prefixes: ["bulkEdit."] },
+  // The voice corpus recorder (W7.10, W10.E52): the palette loads Recorder.tsx with a dynamic import.
+  "voiceCorpus.json": { module: "voice-corpus/recorderStrings.ts", users: ["voice-corpus/Recorder.tsx"], prefixes: ["voiceCorpus."] },
 };
 
 function sources(dir: string): string[] {

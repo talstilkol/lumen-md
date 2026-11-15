@@ -549,6 +549,8 @@
   "cmd.view.wysiwyg.hint": "富文本编辑",
   "cmd.voice.command": "语音命令",
   "cmd.voice.command.hint": "说出其一：新建笔记、搜索…、添加任务…、每日笔记、朗读 — 在本设备上识别",
+  "cmd.voice.corpusRecorder": "语音语料：为开放希伯来语语音录制句子",
+  "cmd.voice.corpusRecorder.hint": "在此设备上录制、检查并导出 CC0 语音语料（不上传）",
   "cmd.voice.meeting": "🎙 会议纪要（在本设备上录音）",
   "cmd.voice.meeting.hint": "录制会议，在本设备上转写，并插入决定、带负责人和日期的任务以及待解决的问题",
   "cmd.voice.meetingFile": "🎙 转写会议录音（谁说了什么）…",

@@ -1298,6 +1298,13 @@
       "icon": "Sparkles"
     },
     {
+      "id": "voice.corpusRecorder",
+      "label": "Voice corpus: record sentences for an open Hebrew voice",
+      "group": "Tools",
+      "hint": "Record, check and export a CC0 speech corpus on this device (no upload)",
+      "icon": "Sparkles"
+    },
+    {
       "id": "voice.transcribeFile",
       "label": "🎙 Transcribe an audio file (with timestamps)",
       "group": "Tools",
@@ -3436,6 +3443,13 @@
       "icon": "Sparkles"
     },
     {
+      "id": "voice.corpusRecorder",
+      "label": "Voice corpus: record sentences for an open Hebrew voice",
+      "group": "Tools",
+      "hint": "Record, check and export a CC0 speech corpus on this device (no upload)",
+      "icon": "Sparkles"
+    },
+    {
       "id": "voice.transcribeFile",
       "label": "🎙 Transcribe an audio file (with timestamps)",
       "group": "Tools",
@@ -4415,6 +4429,7 @@
     "template.importFromFile",
     "voice.command",
     "voice.memo",
+    "voice.corpusRecorder",
     "voice.transcribeFile",
     "voice.meeting",
     "voice.meetingFile",
