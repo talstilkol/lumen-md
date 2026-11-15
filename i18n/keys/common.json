@@ -8825,6 +8825,16 @@
       "vars": []
     },
     {
+      "key": "organizer.model",
+      "en": "Re-score with the local model",
+      "vars": []
+    },
+    {
+      "key": "organizer.model.about",
+      "en": "Ollama or the in-browser model rates each suggestion on this device, from the next run. Nothing is sent anywhere, and every change still waits for your approval.",
+      "vars": []
+    },
+    {
       "key": "organizer.next",
       "en": "Review the next {n}",
       "vars": [
@@ -12001,6 +12011,16 @@
     {
       "key": "student.summary",
       "en": "Summary",
+      "vars": []
+    },
+    {
+      "key": "student.summary.checked",
+      "en": "Checked summary: every sentence is copied from the lecture (a local model picked them).",
+      "vars": []
+    },
+    {
+      "key": "student.summary.extractive",
+      "en": "Extractive summary: the marked and most central sentences (no local model, or its summary did not pass the check).",
       "vars": []
     },
     {
