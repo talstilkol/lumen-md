@@ -6,6 +6,12 @@
  * link and the scroll sync all land on the heading — including Hebrew
  * ones, which the four old ASCII-only copies turned into an empty id.
  *
+ * Release tags: `releaseTagSlug`, ASCII only, because a git tag and a GitHub
+ * release URL carry it (plan 12.2: the one slug module; it was
+ * ai/modelHosting.ts's own `slug`). lib/utils.ts's ASCII `slugify` (it
+ * dropped every Hebrew letter) and renderer/remarkLumen.ts's `slug` (a copy
+ * of headingSlug) are gone.
+ *
  * Notes: a name compares by `noteKey` — case-, niqqud-, final-letter- and
  * whitespace-insensitive, `.md` dropped — never by slug, so `[[שלום עולם]]`
  * finds `שלום עולם.md` and no longer matches every other Hebrew note.
@@ -52,4 +58,17 @@ export function pageFileSlug(title: string, fallback: string): string {
     .replace(/-{2,}/g, "-")
     .replace(/^-+|-+$/g, "");
   return Array.from(s).slice(0, 80).join("").replace(/-+$/, "") || fallback;
+}
+
+/**
+ * A release-tag segment for a model id: "onnx-community/whisper-base" →
+ * "onnx-community-whisper-base". ASCII letters, digits, `.`, `_` and `-`;
+ * anything else becomes one `-`; no leading or trailing `-`. Published tags
+ * (`models-<slug>`) depend on it, so its output must never change.
+ */
+export function releaseTagSlug(id: string): string {
+  return id
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }

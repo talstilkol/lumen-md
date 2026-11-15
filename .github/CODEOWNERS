@@ -13,7 +13,6 @@
 /src/storage/vault/encrypted/            @talstilkol
 /src/storage/snapshotSeal.ts             @talstilkol
 /src/lib/cryptoRandom.ts                 @talstilkol
-/src/lib/cryptoStorage.ts                @talstilkol
 /src/lib/secretStore.ts                  @talstilkol
 /src/plugins/signing.ts                  @talstilkol
 /src-tauri/keychain/                     @talstilkol
@@ -102,7 +101,6 @@
 /src/renderer/Preview.tsx                @talstilkol
 /src/renderer/embeds.ts                  @talstilkol
 #   Frame sandboxes and sinks
-/src/plugins/sandbox.ts                  @talstilkol
 /src/lib/trustedTypes.ts                 @talstilkol
 /src/playground/runner.ts                @talstilkol
 /src/plugins/liveJsRunner.ts             @talstilkol
@@ -157,7 +155,6 @@
 /src/plugins/PlaygroundBlock.tsx         @talstilkol
 /src/plugins/liveJsSandbox.ts            @talstilkol
 /src/plugins/runtime/                    @talstilkol
-/src/plugins/sandbox.ts                  @talstilkol
 /src/renderer/components.tsx             @talstilkol
 #   CSP and security headers
 /index.html                              @talstilkol

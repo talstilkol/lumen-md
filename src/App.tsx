@@ -9,10 +9,9 @@ import { Outline } from "./ui/Outline";
 import { StatusBar } from "./ui/StatusBar";
 import { ScrollProgress } from "./ui/ScrollProgress";
 import { SearchReplace } from "./ui/SearchReplace";
-// Canvas on Excalidraw (plan 4.19; γ.2 had it on tldraw). The legacy custom-canvas component
 const LocalGraphPanel = lazy(() => import("./ui/LocalGraphPanel").then(m => ({ default: m.LocalGraphPanel })));
-// `CanvasWhiteboard.tsx` remains in tree as a fallback in case we ever
-// need to surface old `.canvas.json` files; it's intentionally unused.
+// Canvas on Excalidraw (plan 4.19; γ.2 had it on tldraw). The legacy custom
+// canvas (CanvasWhiteboard.tsx) was removed in W10.E27 (plan 12.2).
 const CanvasWhiteboard = lazy(() => import("./ui/CanvasExcalidraw").then(m => ({ default: m.CanvasExcalidraw })));
 const PluginGallery = lazy(() => import("./ui/PluginGallery").then(m => ({ default: m.PluginGallery })));
 const TemplateGallery = lazy(() => import("./ui/TemplateGallery").then(m => ({ default: m.TemplateGallery })));

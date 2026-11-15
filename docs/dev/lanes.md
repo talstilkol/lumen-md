@@ -76,7 +76,7 @@ hold the same group.
 | --- | --- |
 | **editor** | `src/editor/**` (CodeMirror + Milkdown: keymaps, extensions, WYSIWYG, suggesting) |
 | **render** | `src/renderer/**`, `src/plugins/**` (blocks), `src/lib/markupSanitizer.ts`, `src/lib/urlSanitizer.ts` |
-| **csp** | `vercel.json`, `netlify.toml`, `public/_headers`, `index.html` (CSP meta), `src/build/cspEndpoints.ts`, `src/lib/cspConnect.ts`, `src/lib/trustedTypes*.ts`, `src/plugins/sandbox.ts` |
+| **csp** | `vercel.json`, `netlify.toml`, `public/_headers`, `index.html` (CSP meta), `src/build/cspEndpoints.ts`, `src/lib/cspConnect.ts`, `src/lib/trustedTypes*.ts` |
 | **store** | `src/store/**` (`useStore.ts`, `openDocs.ts`, toasts) |
 | **search** | `src/ui/SearchDialog.tsx`, `src/ui/SearchReplace.tsx`, `src/ai/semanticSearch.ts`, `src/ai/neuralSearch.ts`, `src/ai/search.worker.ts`, `src/storage/workspaceIndex.ts`, `src/storage/searchHistory.ts`, `src/editor/searchHighlight.ts` |
 | **settings** | `src/ui/*Settings*.tsx`, `src/ui/AiSettingsPanel.tsx`, `src/lib/themeSettings.ts`, `src/lib/orgSettings.ts`, `src/lib/configHealth.ts` |
