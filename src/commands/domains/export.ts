@@ -237,6 +237,8 @@ export function buildExportCommands({ handleExportHtml, liveDoc, getEditorView }
       group: t("group.file"),
       // Snapshot first: a tab switch while the chunk loads must not export another note.
       action: () => exportAs(liveDoc(), "odt"),
+    },
+    {
       id: "file.importVcard",
       label: t("cmd.file.importVcard"),
       hint: t("cmd.file.importVcard.hint"),

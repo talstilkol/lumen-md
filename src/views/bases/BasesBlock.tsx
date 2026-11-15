@@ -49,6 +49,7 @@ const BaseChartView = lazy(() => import("../../viz/BaseChartView"));
 const BaseHebrewCalendarView = lazy(() => import("../../viz/BaseHebrewCalendarView"));
 
 const muted = "hsl(var(--fg-muted))";
+const isRtl = () => typeof document !== "undefined" && document.documentElement.dir === "rtl";
 const danger = "hsl(var(--danger))";
 
 /** Every file of the workspace, as Bases sees it (notes with their text, attachments without). */

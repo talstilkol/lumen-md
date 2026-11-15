@@ -88,6 +88,7 @@
 .lumen-viz-treevalue {
   color: hsl(var(--fg-muted));
   font-size: 11px;
+}
 .lumen-viz-hcal-head {
   display: flex;
   align-items: center;
@@ -145,6 +146,7 @@
 .lumen-viz-hcal-item {
   cursor: pointer;
   text-decoration: underline;
+}
 .lumen-viz-matrix-table td {
   min-inline-size: 18px;
   text-align: center;
@@ -176,6 +178,7 @@
 }
 .lumen-viz-claim dd {
   margin: 0;
+}
 .lumen-viz-arg-list ul {
   margin-block: 2px;
   padding-inline-start: 18px;
