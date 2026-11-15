@@ -128,3 +128,26 @@ test("cold start: the last note is editable within budget, without layout shifts
     expect(big.editableMs, "10,000 notes open within 15 % of 100").toBeLessThan(hundred.editableMs * 1.15);
   }
 });
+
+test("cold start: typing in the boot shell before the bundle loads reaches the editor (W10.E20)", { tag: "@coldstart" }, async ({ page }) => {
+  test.setTimeout(120_000);
+  // Hold every module script but boot.js until the note has been typed in: the bundle has not loaded yet.
+  let release!: () => void;
+  const held = new Promise<void>((r) => (release = r));
+  await page.route(/\/(src\/main\.tsx|assets\/index-[^/]+\.js)(\?|$)/, async (route) => {
+    await held;
+    await route.continue();
+  });
+  await page.reload({ waitUntil: "commit" });
+  const boot = page.locator("textarea.boot-note");
+  await expect(boot).toBeVisible({ timeout: 30_000 });
+  await boot.click();
+  await page.keyboard.press("End");
+  await page.keyboard.type(" Typed before the app loaded.");
+  release();
+  await expect(page.locator(".cm-content").first()).toContainText("Typed before the app loaded.", { timeout: 60_000 });
+  const cls = await page.evaluate(() => (window as unknown as { __cls: number }).__cls);
+  report("CLS of the start, typing in the boot shell", cls, "");
+  expect(cls).toBeLessThan(0.05);
+  await page.unroute(/\/(src\/main\.tsx|assets\/index-[^/]+\.js)(\?|$)/);
+});
