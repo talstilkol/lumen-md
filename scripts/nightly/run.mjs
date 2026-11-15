@@ -16,6 +16,9 @@
  *   weekly   dependency health (audit, outdated, licences) and mutation scores — Sundays:
  *            the critical modules under real vitest with a receipt (W6.16) where the
  *            branch has scripts/mutation/check.mjs, else npm run test:mutation
+ *   fuzz     the redaction fuzz with the night's seed, 20,000 cases (npm run fuzz:redaction,
+ *            plan W8.8) — every night; a leak fails the step and is saved to
+ *            tests/fuzz/redaction/regressions.json for a PR
  *   sr       the Hebrew screen-reader journey under VoiceOver (Guidepup, W6.30) — on a
  *            Mac with @guidepup/* installed, every night; `--only sr` runs it alone
  *   supply   Scorecard, osv-scanner, cargo deny and a syft SBOM (W11.S5,
@@ -68,18 +71,24 @@ export const SR_KIND = "sr";
 export const SUPPLY_KIND = "supply";
 export const SUPPLY_SUMMARY = join("reports", "supply", "summary.json");
 
+/**
+ * The redaction fuzz (W8.8). Not one of status.mjs's KINDS either (0.11
+ * counts those four), but due every night, on any host.
+ */
+export const FUZZ_KIND = "fuzz";
+
 /** Guidepup is installed (owner: `npm install -D @guidepup/guidepup @guidepup/playwright @guidepup/setup`). */
 export function srReady(dir = root, exists = existsSync) {
   return ["@guidepup/guidepup", "@guidepup/playwright", "@guidepup/setup"].every((p) => exists(join(dir, "node_modules", p, "package.json")));
 }
 
 /**
- * The kinds due on a date: every night flake, perf and triage; weekly on
- * Sundays (UTC); sr every night on a Mac where Guidepup is installed;
+ * The kinds due on a date: every night flake, perf, triage and fuzz; weekly
+ * on Sundays (UTC); sr every night on a Mac where Guidepup is installed;
  * supply every night where a supply-chain scanner is installed.
  */
 export function kindsDue(date, only = null, host = { platform: "", sr: false, supply: false }) {
-  const all = [...KINDS, SR_KIND, SUPPLY_KIND];
+  const all = [...KINDS, FUZZ_KIND, SR_KIND, SUPPLY_KIND];
   if (only?.length) return all.filter((k) => only.includes(k));
   return all.filter((k) => (k === "weekly" ? date.getUTCDay() === 0 : k === SR_KIND ? host.platform === "darwin" && host.sr : k === SUPPLY_KIND ? Boolean(host.supply) : true));
 }
@@ -149,6 +158,10 @@ export function stepsFor(kind, has, exists = (f) => existsSync(join(root, f))) {
             ? [{ id: "mutation", cmd: ["npm", "run", "test:mutation"], timeoutMin: 240 }]
             : []),
       ];
+    case FUZZ_KIND:
+      // No --commit here: that switches to a new branch, under the kinds after it.
+      // A leak is saved to regressions.json in the tree and fails this step.
+      return [{ id: "fuzz-redaction", cmd: ["npm", "run", "-s", "fuzz:redaction"], timeoutMin: 60 }];
     case SR_KIND:
       // VoiceOver needs a logged-in macOS session; setup --ci makes it scriptable
       // without prompts (it also writes the TCC grant; with SIP on, grant the
@@ -176,6 +189,13 @@ export function receiptForReport(receipt, min = MUTATION_MIN) {
     min,
     modules: Object.entries(receipt.modules).map(([module, m]) => ({ module, score: m.score ?? null, runner: m.runner ?? null, sha256: m.sha256 ?? null, tests: m.tests ?? null })),
   };
+}
+
+/** reports/nightly/fuzz-redaction.json (scripts/fuzz/redaction-nightly.mjs) → what the sealed report keeps. */
+export function fuzzSummary(file) {
+  if (!existsSync(file)) return { error: "no reports/nightly/fuzz-redaction.json" };
+  const r = JSON.parse(readFileSync(file, "utf8"));
+  return { night: r.night ?? null, cases: r.cases ?? null, leaks: r.leaks?.length ?? null, saved: r.saved ?? null, threw: r.threw?.length ?? null };
 }
 
 /** flake-results/<browser>/summary.json → the shape status.mjs reads. */
@@ -381,6 +401,7 @@ function main() {
         report.supply = { error: `no ${SUPPLY_SUMMARY}` };
       }
     }
+    if (kind === FUZZ_KIND) report.fuzz = fuzzSummary(join(root, "reports", "nightly", "fuzz-redaction.json"));
     if (kind === "triage") {
       const f = join(root, "reports", "review-triage.json");
       if (existsSync(f)) {

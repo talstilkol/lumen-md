@@ -19,6 +19,7 @@ npm run nightly -- --dry-run     # print the plan, run nothing
 | `perf` | every night | build, bundle budget, the `@nightly` perf project, and the Lighthouse trend: desktop and mobile, the median of 3 runs each, added to `reports/trend/lighthouse-history.json` and `lighthouse-trend.md`. It runs `lhci collect` only, so nothing is uploaded |
 | `triage` | every night | review triage of the open PRs, the 0.14 count over the first 20 PRs since 12.11.2026, `live:meta --self-test` and the ruleset drift check (both below) |
 | `weekly` | Sundays (UTC) | dependency health (audit, outdated, licences), and mutation scores: on a branch with `scripts/mutation/check.mjs`, the critical modules under real vitest (`run.mjs --critical --receipt --min 80`, then `mutation:check`), otherwise `test:mutation` |
+| `fuzz` | every night | `npm run fuzz:redaction`: the [redaction fuzz](/contributing/redaction-fuzz/) with the night's seed, 20,000 cases. A leak fails the step and is saved to `tests/fuzz/redaction/regressions.json`. The sealed report keeps the night, cases, leaks and saved counts. Not counted by 0.11. |
 | `sr` | every night, on a Mac with `@guidepup/*` installed | `npx @guidepup/setup --ci`, then the Hebrew journey under VoiceOver ([screen readers, automated](/editor/screen-reader-automation/)). Not counted by 0.11. |
 | `supply` | every night, on a host where `scorecard`, `osv-scanner`, `cargo-deny` or `syft` is installed | the supply-chain checks ([below](#supply-chain-checks-plan-w11s5)). Not counted by 0.11. |
 

@@ -249,6 +249,25 @@ export function realModelCommand(step) {
 }
 
 /**
+ * Plan W8.8 / W10.E58: native Buildkite steps that run only on the
+ * pipeline's scheduled build (Buildkite → Pipeline settings → Schedules,
+ * docs contributing/nightly). Not derived from .github/workflows.
+ *   fuzz-redaction   the redaction fuzz with the night's seed (UTC date), 20,000 cases;
+ *                    a leak fails the step, and the minimised case is kept as an
+ *                    artifact (tests/fuzz/redaction/regressions.json) for a PR
+ */
+export const SCHEDULED_STEPS = [
+  {
+    key: "fuzz-redaction",
+    label: ":crescent_moon: redaction fuzz (nightly seed, 20,000 cases)",
+    gates: ["gate 'Redaction fuzz with the night seed' <<'LUMEN_STEP'\nnpm run -s fuzz:redaction\nLUMEN_STEP"],
+    artifacts: ["reports/nightly/fuzz-redaction.json", "tests/fuzz/redaction/regressions.json"],
+    timeout: 45,
+  },
+];
+export const SCHEDULE_IF = 'build.source == "schedule"';
+
+/**
  * ci.yml steps that the pipeline does not run as a gate, each with the reason.
  * Keys are `<job> › <step>`; a whole job is `<job> › *`.
  */
@@ -465,6 +484,19 @@ export function buildPipeline(ci, { jobs = JOBS, shards = VITEST_SHARDS, native 
     retry: RETRY,
   };
   steps.push(vitestPlan, vitest, merge);
+  for (const n of SCHEDULED_STEPS) {
+    steps.push({
+      label: n.label,
+      key: n.key,
+      command: command({ key: n.key }, [...n.gates, "gates_done"].join("\n")),
+      agents: at("linux"),
+      timeout_in_minutes: n.timeout,
+      notify: status(n.key),
+      retry: RETRY,
+      artifact_paths: n.artifacts,
+      if: SCHEDULE_IF,
+    });
+  }
   for (const j of [...jobs, ...native]) {
     const s = {
       label: j.label,
@@ -495,7 +527,7 @@ export function buildPipeline(ci, { jobs = JOBS, shards = VITEST_SHARDS, native 
     if (r.ifChanged) s.if_changed = r.ifChanged;
     steps.push(s);
   }
-  const gateKeys = steps.filter((s) => s.notify).map((s) => s.key);
+  const gateKeys = steps.filter((s) => s.notify && s.if !== SCHEDULE_IF).map((s) => s.key);
   steps.push({
     label: ":lock_with_ink_pen: signed receipt",
     key: "receipt",
@@ -563,7 +595,13 @@ export function e2eShardSteps(n = E2E_SHARDS) {
 }
 
 /** Keys of the jobs whose outcome the receipt records (every job with a commit status). */
-export const gateKeys = (pipeline) => pipeline.steps.filter((s) => s.notify && s.key !== "receipt").map((s) => s.key);
+/**
+ * The keys the receipt waits for and seals: every step with a commit status
+ * but the receipt and the scheduled-only steps (a PR build skips those, and
+ * the receipt would count a skipped step as failed; the scheduled build's
+ * fuzz result is its own commit status and artifact).
+ */
+export const gateKeys = (pipeline) => pipeline.steps.filter((s) => s.notify && s.key !== "receipt" && s.if !== SCHEDULE_IF).map((s) => s.key);
 
 // ── YAML ─────────────────────────────────────────────────────────────────
 

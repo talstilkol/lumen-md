@@ -96,6 +96,31 @@ steps:
           limit: 2
         - exit_status: 255
           limit: 1
+  - label: ":crescent_moon: redaction fuzz (nightly seed, 20,000 cases)"
+    key: "fuzz-redaction"
+    command: |-
+      LUMEN_CI_JOB=fuzz-redaction bash scripts/buildkite/run.sh <<'LUMEN_JOB'
+      gate 'Redaction fuzz with the night seed' <<'LUMEN_STEP'
+      npm run -s fuzz:redaction
+      LUMEN_STEP
+      gates_done
+      LUMEN_JOB
+    agents:
+      queue: "linux"
+    timeout_in_minutes: 45
+    notify:
+      - github_commit_status:
+          context: "lumen/buildkite: fuzz-redaction"
+    retry:
+      automatic:
+        - exit_status: -1
+          limit: 2
+        - exit_status: 255
+          limit: 1
+    artifact_paths:
+      - "reports/nightly/fuzz-redaction.json"
+      - "tests/fuzz/redaction/regressions.json"
+    if: "build.source == \"schedule\""
   - label: ":white_check_mark: static gates"
     key: "static"
     command: |-
@@ -827,21 +852,15 @@ steps:
         allow_failure: true
       - step: "security"
         allow_failure: true
-      - step: "security-nightly"
-        allow_failure: true
       - step: "e2e-shards"
         allow_failure: true
       - step: "e2e-receipt"
         allow_failure: true
       - step: "real-model-pr"
         allow_failure: true
-      - step: "real-model-nightly"
-        allow_failure: true
-      - step: "real-model-hebrew"
-        allow_failure: true
     command: |-
       buildkite-agent artifact download 'ci-out/vitest-summary.json' . || true
-      node scripts/buildkite/receipt.mjs --gates vitest,vitest-merge,static,lint,licenses,build,e2e-chromium,e2e-firefox,e2e-webkit,e2e-prod,e2e-headers,local-ai,ocr-cer,visual,lighthouse,pr-check,security,security-nightly,e2e-shards,e2e-receipt,real-model-pr,real-model-nightly,real-model-hebrew
+      node scripts/buildkite/receipt.mjs --gates vitest,vitest-merge,static,lint,licenses,build,e2e-chromium,e2e-firefox,e2e-webkit,e2e-prod,e2e-headers,local-ai,ocr-cer,visual,lighthouse,pr-check,security,e2e-shards,e2e-receipt,real-model-pr
     agents:
       queue: "linux"
     artifact_paths:

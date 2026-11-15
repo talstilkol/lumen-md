@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, it, expect } from "vitest";
 import { generateKeyPairSync } from "node:crypto";
-import { mkdtempSync, mkdirSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 // @ts-expect-error — plain .mjs module without type declarations
@@ -9,7 +9,7 @@ import { canonical, check, loadOrCreateKey, seal } from "../../scripts/nightly/r
 // @ts-expect-error — plain .mjs module without type declarations
 import { ciLocalMetric, cleanMutationWeek, cleanNight, flakeStreak, mutationStreak, planStatus, scheduledKinds, weekOf } from "../../scripts/nightly/status.mjs";
 // @ts-expect-error — plain .mjs script without type declarations
-import { collectFlake, collectSr, fetchMetricInputs, kindsDue, perfAnnotations, receiptForReport, reportName, srReady, stepsFor } from "../../scripts/nightly/run.mjs";
+import { collectFlake, collectSr, fetchMetricInputs, fuzzSummary, kindsDue, perfAnnotations, receiptForReport, reportName, srReady, stepsFor } from "../../scripts/nightly/run.mjs";
 
 type Report = Record<string, unknown> & { receipt?: Record<string, string> };
 const keys = () => {
@@ -124,17 +124,35 @@ describe("plan status from the reports (0.5, 0.11, 0.14)", () => {
 });
 
 describe("the nightly runner", () => {
-  it("runs flake, perf and triage every night, weekly on Sundays, or what --only names", () => {
-    expect(kindsDue(new Date("2026-11-14T02:00:00Z"))).toEqual(["flake", "perf", "triage"]);
-    expect(kindsDue(new Date("2026-11-15T02:00:00Z"))).toEqual(["flake", "perf", "triage", "weekly"]);
+  it("runs flake, perf, triage and the redaction fuzz every night, weekly on Sundays, or what --only names", () => {
+    expect(kindsDue(new Date("2026-11-14T02:00:00Z"))).toEqual(["flake", "perf", "triage", "fuzz"]);
+    expect(kindsDue(new Date("2026-11-15T02:00:00Z"))).toEqual(["flake", "perf", "triage", "weekly", "fuzz"]);
     expect(kindsDue(new Date("2026-11-14T02:00:00Z"), ["weekly", "triage"])).toEqual(["triage", "weekly"]);
+  });
+
+  it("W8.8: the redaction fuzz is a nightly kind — the npm script, no --commit (it would switch branches under later kinds); its report is summarised", () => {
+    expect(kindsDue(new Date("2026-11-14T02:00:00Z"), ["fuzz"])).toEqual(["fuzz"]);
+    const steps = stepsFor("fuzz", () => true);
+    expect(steps.map((s: { cmd: string[] }) => s.cmd.join(" "))).toEqual(["npm run -s fuzz:redaction"]);
+    expect(steps[0].cmd).not.toContain("--commit");
+    const pkg = JSON.parse(readFileSync("package.json", "utf8"));
+    expect(pkg.scripts["fuzz:redaction"]).toBe("node scripts/fuzz/redaction-nightly.mjs");
+    const dir = mkdtempSync(join(tmpdir(), "lumen-fuzz-"));
+    try {
+      const f = join(dir, "fuzz-redaction.json");
+      expect(fuzzSummary(f)).toEqual({ error: "no reports/nightly/fuzz-redaction.json" });
+      writeFileSync(f, JSON.stringify({ night: 20261114, cases: 20000, shaded: 9, leaks: [{ a: 1 }], saved: 1, threw: [] }));
+      expect(fuzzSummary(f)).toEqual({ night: 20261114, cases: 20000, leaks: 1, saved: 1, threw: 0 });
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   it("W6.30: adds the VoiceOver journey on a Mac with Guidepup installed, and only there", () => {
     const sat = new Date("2026-11-14T02:00:00Z");
-    expect(kindsDue(sat, null, { platform: "darwin", sr: true })).toEqual(["flake", "perf", "triage", "sr"]);
-    expect(kindsDue(sat, null, { platform: "darwin", sr: false })).toEqual(["flake", "perf", "triage"]);
-    expect(kindsDue(sat, null, { platform: "linux", sr: true })).toEqual(["flake", "perf", "triage"]);
+    expect(kindsDue(sat, null, { platform: "darwin", sr: true })).toEqual(["flake", "perf", "triage", "fuzz", "sr"]);
+    expect(kindsDue(sat, null, { platform: "darwin", sr: false })).toEqual(["flake", "perf", "triage", "fuzz"]);
+    expect(kindsDue(sat, null, { platform: "linux", sr: true })).toEqual(["flake", "perf", "triage", "fuzz"]);
     expect(kindsDue(sat, ["sr"])).toEqual(["sr"]);
     expect(stepsFor("sr", () => false).map((s: { cmd: string[] }) => s.cmd.join(" "))).toEqual(["npx --no-install @guidepup/setup --ci", "npm run test:sr -- --project=voiceover"]);
     const have = new Set(["/r/node_modules/@guidepup/guidepup/package.json", "/r/node_modules/@guidepup/playwright/package.json"]);

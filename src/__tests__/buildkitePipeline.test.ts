@@ -182,6 +182,27 @@ describe("triggering builds through the API", () => {
   });
 });
 
+describe("scheduled-only steps (plan W8.8, W10.E58)", () => {
+  it("the redaction fuzz runs on the scheduled build only, with a status and its artifacts, outside the receipt's gates", () => {
+    const steps = committed().steps;
+    const fuzz = steps.find((s) => s.key === "fuzz-redaction") as Step & { artifact_paths?: string[] };
+    expect(fuzz).toBeDefined();
+    expect(fuzz.if).toBe('build.source == "schedule"');
+    expect(fuzz.command).toContain("npm run -s fuzz:redaction");
+    expect(fuzz.command).not.toContain("--commit");
+    expect(fuzz.agents.queue).toBe("linux");
+    expect(fuzz.artifact_paths).toEqual(["reports/nightly/fuzz-redaction.json", "tests/fuzz/redaction/regressions.json"]);
+    expect(fuzz.notify).toEqual([{ github_commit_status: { context: `${STATUS_PREFIX}: fuzz-redaction` } }]);
+    // A PR build skips it, and the receipt would seal a skipped step as a failure: not one of its gates.
+    expect(gateKeys(committed())).not.toContain("fuzz-redaction");
+    const receipt = steps.find((s) => s.key === "receipt") as Step & { depends_on: { step: string }[] };
+    expect(receipt.depends_on.map((d) => d.step)).not.toContain("fuzz-redaction");
+    expect(receipt.command).not.toContain("fuzz-redaction");
+    // Each gate title is one shell word in single quotes (no stray apostrophe).
+    for (const line of fuzz.command.split("\n").filter((l) => l.startsWith("gate "))) expect(line).toMatch(/^gate '[^']*' <</);
+  });
+});
+
 describe("the receipt", () => {
   it("is a factory-shaped full receipt; an unknown outcome is never a pass", () => {
     const r = receiptReport({
