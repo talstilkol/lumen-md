@@ -155,6 +155,8 @@
   "cmd.edit.pastePlain.hint": "クリップボードのテキストを書式なしで貼り付けます",
   "cmd.edit.redact": "選択範囲を黒塗り",
   "cmd.edit.redact.hint": "すべてのエクスポートから削除",
+  "cmd.edit.toggleDirection": "段落の方向を切り替え（右から左 ↔ 左から右）",
+  "cmd.edit.toggleDirection.hint": "段落の先頭に見えない方向マークとしてノートに保存されます。frontmatter の dir: rtl | ltr | auto はノート全体に適用されます",
   "cmd.epub.open": "EPUB を開いて読む…",
   "cmd.export.latexProject": "LaTeX プロジェクトを書き出す（学術、ヘブライ語）…",
   "cmd.export.latexProject.hint": "右から左のヘブライ語、数式、保管庫の .bib からの [@key] 引用、画像を含む LuaLaTeX / XeLaTeX 用 main.tex を ZIP で",

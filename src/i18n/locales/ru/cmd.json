@@ -155,6 +155,8 @@
   "cmd.edit.pastePlain.hint": "Вставляет текст из буфера обмена без форматирования",
   "cmd.edit.redact": "Скрыть выделенное",
   "cmd.edit.redact.hint": "удаляется из любого экспорта",
+  "cmd.edit.toggleDirection": "Сменить направление абзаца (справа налево ↔ слева направо)",
+  "cmd.edit.toggleDirection.hint": "Сохраняется в заметке как невидимый знак направления в начале абзаца; dir: rtl | ltr | auto во frontmatter задаёт всю заметку",
   "cmd.epub.open": "Открыть EPUB для чтения…",
   "cmd.export.latexProject": "Экспорт проекта LaTeX (научный, иврит)…",
   "cmd.export.latexProject.hint": "main.tex для LuaLaTeX / XeLaTeX с ивритом справа налево, формулами, ссылками [@key] из .bib хранилища и изображениями, в ZIP",

@@ -155,6 +155,8 @@
   "cmd.edit.pastePlain.hint": "מדביק את הטקסט שבלוח בלי שום עיצוב",
   "cmd.edit.redact": "השחרת הבחירה",
   "cmd.edit.redact.hint": "נמחק מכל ייצוא",
+  "cmd.edit.toggleDirection": "החלפת כיוון הפסקה (ימין לשמאל ↔ שמאל לימין)",
+  "cmd.edit.toggleDirection.hint": "נשמר בפתק כסימן כיוון בלתי נראה בתחילת הפסקה; dir: rtl | ltr | auto ב-frontmatter קובע את כל הפתק",
   "cmd.epub.open": "פתיחת ספר EPUB לקריאה…",
   "cmd.export.latexProject": "ייצוא פרויקט LaTeX (אקדמי, עברית)…",
   "cmd.export.latexProject.hint": "main.tex ל-LuaLaTeX / XeLaTeX עם עברית מימין לשמאל, מתמטיקה, ציטוטי [@key] מקובצי ה-.bib בכספת, והתמונות, ב-ZIP",

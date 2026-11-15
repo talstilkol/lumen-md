@@ -155,6 +155,8 @@
   "cmd.edit.pastePlain.hint": "يلصق نص الحافظة دون أي تنسيق",
   "cmd.edit.redact": "حجب التحديد",
   "cmd.edit.redact.hint": "يُحذف من كل تصدير",
+  "cmd.edit.toggleDirection": "تبديل اتجاه الفقرة (من اليمين إلى اليسار ↔ من اليسار إلى اليمين)",
+  "cmd.edit.toggleDirection.hint": "يُحفظ في الملاحظة كعلامة اتجاه غير مرئية في بداية الفقرة؛ ‏dir: rtl | ltr | auto في الـ frontmatter يحدد الملاحظة كلها",
   "cmd.epub.open": "فتح كتاب EPUB للقراءة…",
   "cmd.export.latexProject": "تصدير مشروع LaTeX (أكاديمي، عبرية)…",
   "cmd.export.latexProject.hint": "main.tex لـ LuaLaTeX / XeLaTeX مع العبرية من اليمين إلى اليسار والرياضيات واستشهادات [@key] من ملفات ‎.bib والصور، في ZIP",
