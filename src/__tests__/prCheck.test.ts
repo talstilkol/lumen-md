@@ -86,26 +86,22 @@ describe("pr:check", () => {
     }
   });
 
-  it("fails a diff that raises a max-lines baseline count or adds a file to it (W6.25), and passes one that lowers it", () => {
+  it("fails a diff that brings a max-lines baseline back (W6.25; W10.E31: the gate has none)", () => {
     const r0 = repo();
     try {
-      const write = (files: Record<string, number>) => writeFileSync(join(r0.dir, "scripts/max-lines-baseline.json"), JSON.stringify({ max: 800, files }));
-      write({ "src/big.ts": 900, "src/other.ts": 850 });
+      writeFileSync(join(r0.dir, "src/a.ts"), "export const a = 2;\n");
+      r0.git("add", "-A");
+      r0.git("commit", "-q", "-m", "fix: a [skip ci]");
+      const clean = runChecks(parseArgs(["--cwd", r0.dir, "--base", "main~1", "--no-size"]));
+      expect(clean.sections.find((s: { title: string }) => s.title === "Max-lines has no baseline").status).toBe("ok");
+      writeFileSync(join(r0.dir, "scripts/max-lines-baseline.json"), JSON.stringify({ max: 800, files: { "src/big.ts": 900 } }));
       r0.git("add", "-A");
       r0.git("commit", "-q", "-m", "chore: baseline [skip ci]");
-      write({ "src/big.ts": 950, "src/other.ts": 820, "src/new.ts": 801 });
-      r0.git("add", "-A");
-      r0.git("commit", "-q", "-m", "chore: raise [skip ci]");
-      const up = runChecks(parseArgs(["--cwd", r0.dir, "--base", "main~1", "--no-size"]));
-      const gate = up.sections.find((s: { title: string }) => s.title === "Max-lines baseline only goes down");
+      const back = runChecks(parseArgs(["--cwd", r0.dir, "--base", "main~1", "--no-size"]));
+      const gate = back.sections.find((s: { title: string }) => s.title === "Max-lines has no baseline");
       expect(gate.status).toBe("fail");
-      expect(gate.lines).toEqual(["- `src/big.ts`: 900 → 950. Split the file instead.", "- `src/new.ts`: added → 801. Split the file instead."]);
-      expect(up.failed).toBe(true);
-      write({ "src/big.ts": 899 });
-      r0.git("add", "-A");
-      r0.git("commit", "-q", "-m", "chore: lower [skip ci]");
-      const down = runChecks(parseArgs(["--cwd", r0.dir, "--base", "main~1", "--no-size"]));
-      expect(down.sections.find((s: { title: string }) => s.title === "Max-lines baseline only goes down").status).toBe("ok");
+      expect(gate.lines).toEqual(["- `scripts/max-lines-baseline.json` exists. The gate allows no exceptions: split the file instead."]);
+      expect(back.failed).toBe(true);
     } finally {
       r0.done();
     }
