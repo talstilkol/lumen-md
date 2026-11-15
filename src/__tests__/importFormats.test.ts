@@ -39,7 +39,7 @@ describe("latexToMarkdown", () => {
     const md = latexToMarkdown(tex);
     expect(md).not.toContain("\\documentclass");
     expect(md).not.toContain("\\begin{document}");
-    expect(md).toContain("## Hi");
+    expect(md.split("\n")[0]).toBe("# Hi");
     expect(md).toContain("body");
   });
   it("converts \\textbf and \\textit to markdown emphasis", () => {
@@ -47,11 +47,17 @@ describe("latexToMarkdown", () => {
     expect(md).toContain("**bold**");
     expect(md).toContain("*em*");
   });
-  it("converts \\section/subsection/subsubsection to # / ## / ###", () => {
-    const md = latexToMarkdown("\\section{S}\n\\subsection{SS}\n\\subsubsection{SSS}");
-    expect(md).toContain("## S");
-    expect(md).toContain("### SS");
-    expect(md).toContain("#### SSS");
+  it("article: converts \\section/subsection/subsubsection/paragraph to # / ## / ### / ####", () => {
+    const md = latexToMarkdown("\\section{S}\n\\subsection{SS}\n\\subsubsection{SSS}\n\\paragraph{P}");
+    expect(md.split("\n")).toEqual(["# S", "## SS", "### SSS", "#### P"]);
+  });
+  it("a file with \\chapter keeps \\chapter as # and \\section as ##", () => {
+    const md = latexToMarkdown("\\chapter{C}\n\\section{S}\n\\subsection{SS}");
+    expect(md.split("\n")).toEqual(["# C", "## S", "### SS"]);
+  });
+  it("reads nested braces, escapes and enumerate", () => {
+    const md = latexToMarkdown("\\section{\\textbf{A} \\& B\\_c}\n\\begin{enumerate}\n\\setcounter{enumi}{2}\n\\item x\n\\item y\n\\end{enumerate}");
+    expect(md.split("\n")).toEqual(["# **A** & B_c", "3. x", "4. y"]);
   });
 });
 

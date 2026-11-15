@@ -26,12 +26,12 @@
   "epub": {
    "headings": 100,
    "paragraphs": 100,
-   "bold": 95.8,
+   "bold": 100,
    "italic": 100,
    "links": 100,
-   "list items": 39.2,
-   "list kind": 39.2,
-   "table cells": 0,
+   "list items": 100,
+   "list kind": 100,
+   "table cells": 100,
    "footnotes": 100
   },
   "docx_corpus_unstable": 0
