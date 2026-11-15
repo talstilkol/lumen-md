@@ -2728,6 +2728,8 @@
   "speakers.pick": "Quel intervenant voulez-vous renommer ?",
   "speakers.renamePrompt": "Nouveau nom pour {speaker}",
   "speakers.renamed": "{from} a été renommé en {to} dans toute la note.",
+  "speakers.tracks.inReview": "Les pistes de transcription attendent dans le panneau de révision. Approuvez-les pour enregistrer {path} à côté de l’enregistrement.",
+  "speakers.tracks.summary": "Piste de transcription : {path}",
   "speakers.unavailable": "L’identification des intervenants n’est pas encore configurée sur cet appareil : la transcription n’a pas d’intervenants.",
   "sr.aiDone": "L’IA a terminé.",
   "sr.aiWorking": "L’IA travaille…",

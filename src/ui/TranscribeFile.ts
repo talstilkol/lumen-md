@@ -20,7 +20,7 @@ import { chooseEngine, type EngineId } from "../ai/dictation/engines";
 import { clock, sentencesOf, transcriptMarkdown } from "../ai/dictation/longform";
 import type { TimedSegment } from "../ai/transformersEngine";
 import { appendSegment } from "../ai/dictation/punctuate";
-import { isOPFSAvailable, writeWorkspaceBlob } from "../storage/workspace";
+import { isOPFSAvailable, vault } from "../storage/workspace";
 import { notifyWorkspaceChanged } from "../storage/workspaceEvents";
 import { log } from "../lib/logger";
 import { explainError } from "../lib/userError";
@@ -110,13 +110,26 @@ export async function transcribeFileAudio(picked: Blob & { name?: string }, opts
 }
 
 /** Keep the audio in attachments/ (the transcript's times link to it), or null when the vault can't. */
+/** `attachments/x.m4a` → `attachments/x-2.m4a` (the n-th free name). */
+export const numberedName = (path: string, n: number) => (n < 2 ? path : path.replace(/(\.[A-Za-z0-9]{1,5})?$/, (ext) => `-${n}${ext}`));
+
+/**
+ * Keep the picked audio under attachments/, under a name nothing has yet (review Z7-M5): a second recording with
+ * the same name on the same day is kept as `-2`, not written over the first one, whose transcript links to it.
+ */
 export async function keepAudio(picked: Blob & { name?: string }): Promise<string | null> {
   if (!isOPFSAvailable()) return null;
   try {
-    const path = attachmentName(picked.name ?? "audio");
-    await writeWorkspaceBlob(path, picked);
-    notifyWorkspaceChanged();
-    return path;
+    const base = attachmentName(picked.name ?? "audio");
+    for (let n = 1; n <= 99; n++) {
+      const path = numberedName(base, n);
+      // Create-only, checked and written under the path's lock (writeIf with null: only while nothing is there).
+      if (await vault().writeIf(path, picked, null)) {
+        notifyWorkspaceChanged();
+        return path;
+      }
+    }
+    return null;
   } catch (e) {
     log.warn("transcribe file: could not keep the audio", e);
     return null;

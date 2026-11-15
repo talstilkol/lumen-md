@@ -2728,6 +2728,8 @@
   "speakers.pick": "Welchen Sprecher möchtest du umbenennen?",
   "speakers.renamePrompt": "Neuer Name für {speaker}",
   "speakers.renamed": "{from} wurde in der ganzen Notiz in {to} umbenannt.",
+  "speakers.tracks.inReview": "Die Transkriptspuren warten im Prüfbereich. Bestätige sie, um {path} neben der Aufnahme zu speichern.",
+  "speakers.tracks.summary": "Transkriptspur: {path}",
   "speakers.unavailable": "Die Sprechererkennung ist auf diesem Gerät noch nicht eingerichtet, daher hat das Transkript keine Sprecher.",
   "sr.aiDone": "Die KI ist fertig.",
   "sr.aiWorking": "Die KI arbeitet…",

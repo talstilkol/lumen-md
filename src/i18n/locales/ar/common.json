@@ -2728,6 +2728,8 @@
   "speakers.pick": "أي متحدث تريد إعادة تسميته؟",
   "speakers.renamePrompt": "اسم جديد لـ {speaker}",
   "speakers.renamed": "أُعيدت تسمية {from} إلى {to} في كل الملاحظة.",
+  "speakers.tracks.inReview": "مسارات النص المفرّغ تنتظر في لوحة المراجعة. وافق عليها لحفظ {path} بجانب التسجيل.",
+  "speakers.tracks.summary": "مسار النص المفرّغ: {path}",
   "speakers.unavailable": "لم يُعدّ تمييز المتحدثين على هذا الجهاز بعد، لذا لا يتضمن النص متحدثين.",
   "sr.aiDone": "انتهى الذكاء الاصطناعي.",
   "sr.aiWorking": "الذكاء الاصطناعي يعمل…",

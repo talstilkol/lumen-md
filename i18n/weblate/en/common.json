@@ -2728,6 +2728,8 @@
   "speakers.pick": "Which speaker do you want to rename?",
   "speakers.renamePrompt": "New name for {speaker}",
   "speakers.renamed": "Renamed {from} to {to} everywhere in this note.",
+  "speakers.tracks.inReview": "The transcript tracks wait in the review panel. Approve them to save {path} beside the audio.",
+  "speakers.tracks.summary": "Transcript track: {path}",
   "speakers.unavailable": "Speaker identification isn't set up on this device yet, so the transcript has no speakers.",
   "sr.aiDone": "AI finished.",
   "sr.aiWorking": "AI is working…",

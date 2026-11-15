@@ -9,7 +9,12 @@
  * reaches a note until the user approves it in the panel.
  *
  * - Incremental: the paragraph hashes already scanned are kept for the
- *   session, so a second opening scans only changed paragraphs.
+ *   session, so a second opening scans only changed paragraphs. Review
+ *   Z7-L2: they are kept per vault (the active vault backend, which a vault
+ *   switch replaces), so another vault with the same paths and paragraphs
+ *   is scanned in full, and with the extractor that scanned them: when a
+ *   NER model is cached after a rules-only scan, the next opening scans
+ *   every paragraph again with the model.
  * - A rejected proposal is not proposed again (decisions.jsonl), and a
  *   mention of an approved entity that adds no new spelling is not proposed
  *   either: approving it would change nothing.
@@ -21,6 +26,7 @@ import { ENTITY_ROOT } from "../model";
 import { DECISIONS_PATH, PROPOSALS_PATH, mergeProposals, parseJsonl, toJsonl, type Decision, type Proposal } from "../store";
 import type { Files, OpResult } from "../review";
 import type { ExtractReply, ExtractRequest } from "./protocol";
+import { getVaultBackend } from "../../storage/vault";
 
 export type ExtractRun = (req: Omit<ExtractRequest, "id">) => Promise<ExtractReply>;
 
@@ -36,12 +42,20 @@ export function addsNothing(p: Proposal, known: readonly Entity[]): boolean {
   return [...p.mentions.map((m) => m.text), ...p.aliases].every((s) => have.has(s.trim()));
 }
 
-let seen: Record<string, string[]> = {};
-
-/** Forget the session's scanned paragraphs (tests; a vault switch). */
-export function resetScan(): void {
-  seen = {};
+/** The paragraphs scanned in one vault, and by which extractor (Z7-L2). */
+interface ScanScope {
+  mode: ExtractReply["mode"];
+  seen: Record<string, string[]>;
 }
+/** Keyed by the vault (the active backend, or the vault a caller passes): a switched vault starts empty. */
+let scopes = new WeakMap<object, ScanScope>();
+
+/** Forget the session's scanned paragraphs (tests). A vault switch needs no call: the new vault has no scope. */
+export function resetScan(): void {
+  scopes = new WeakMap();
+}
+
+const activeVault = (): object => getVaultBackend();
 
 export interface ScanResult {
   mode: ExtractReply["mode"];
@@ -49,18 +63,26 @@ export interface ScanResult {
   incoming: Proposal[];
   /** The paragraphs this run scanned: pass to `rememberScanned` once its proposals are in the queue. */
   seen: Record<string, string[]>;
+  /** The vault they belong to. */
+  vault?: object;
 }
 
-/** Run the extractor over the notes in `files`; `known` are the approved entities. */
-export async function scanNotes(files: Files, known: readonly Entity[], run: ExtractRun): Promise<ScanResult> {
+/** Run the extractor over the notes in `files`; `known` are the approved entities; `vault` scopes what was seen. */
+export async function scanNotes(files: Files, known: readonly Entity[], run: ExtractRun, vault: object = activeVault()): Promise<ScanResult> {
   const notes = [...files].filter(([p]) => isScannedNote(p)).map(([path, content]) => ({ path, content }));
-  const reply = await run({ notes, seen, known: [...known], useModel: true });
-  return { mode: reply.mode, incoming: reply.proposals.filter((p) => !addsNothing(p, known)), seen: reply.seen };
+  const scope = scopes.get(vault);
+  let reply = await run({ notes, seen: scope?.seen ?? {}, known: [...known], useModel: true });
+  // Z7-L2: the model is here now, and these paragraphs were skipped because the rules alone had seen them.
+  if (scope && scope.mode === "rules-only" && reply.mode !== "rules-only") reply = await run({ notes, seen: {}, known: [...known], useModel: true });
+  return { mode: reply.mode, incoming: reply.proposals.filter((p) => !addsNothing(p, known)), seen: reply.seen, vault };
 }
 
-/** A run's proposals reached the queue: the next run skips the paragraphs it scanned. */
-export function rememberScanned(result: Pick<ScanResult, "seen">): void {
-  seen = { ...seen, ...result.seen };
+/** A run's proposals reached the queue: the next run in that vault, by that extractor, skips what it scanned. */
+export function rememberScanned(result: Pick<ScanResult, "seen"> & Partial<Pick<ScanResult, "mode" | "vault">>): void {
+  const vault = result.vault ?? activeVault();
+  const mode = result.mode ?? "rules-only";
+  const scope = scopes.get(vault);
+  scopes.set(vault, { mode, seen: scope && scope.mode === mode ? { ...scope.seen, ...result.seen } : { ...result.seen } });
 }
 
 /** The queue with `incoming` merged in, as a review operation; null when nothing is added. */

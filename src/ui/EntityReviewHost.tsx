@@ -54,7 +54,7 @@ export function EntityReviewHost({ vault, extract = workerRun }: EntityReviewHos
       try {
         const { entitiesOf } = await import("../entities/review");
         const { queueWith, rememberScanned, scanNotes } = await import("../entities/extract/scanVault");
-        const res = await scanNotes(f, entitiesOf(f), extract);
+        const res = await scanNotes(f, entitiesOf(f), extract, vault);
         if (cancelled) return;
         const basis = current.current ?? f;
         const op = queueWith(basis, res.incoming);

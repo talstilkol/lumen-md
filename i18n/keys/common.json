@@ -15126,6 +15126,20 @@
       ]
     },
     {
+      "key": "speakers.tracks.inReview",
+      "en": "The transcript tracks wait in the review panel. Approve them to save {path} beside the audio.",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "speakers.tracks.summary",
+      "en": "Transcript track: {path}",
+      "vars": [
+        "path"
+      ]
+    },
+    {
       "key": "speakers.unavailable",
       "en": "Speaker identification isn't set up on this device yet, so the transcript has no speakers.",
       "vars": []
