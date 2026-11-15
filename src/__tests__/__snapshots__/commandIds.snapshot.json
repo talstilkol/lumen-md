@@ -1123,6 +1123,13 @@
       "icon": "PanelRightOpen"
     },
     {
+      "id": "view.asOf",
+      "label": "What I knew then",
+      "group": "View",
+      "hint": "search the vault as it was on a past date",
+      "icon": "PanelRightOpen"
+    },
+    {
       "id": "insert.table",
       "label": "Insert Table (Editor)",
       "group": "Insert",
@@ -3161,6 +3168,13 @@
       "icon": "PanelRightOpen"
     },
     {
+      "id": "view.asOf",
+      "label": "What I knew then",
+      "group": "View",
+      "hint": "search the vault as it was on a past date",
+      "icon": "PanelRightOpen"
+    },
+    {
       "id": "insert.table",
       "label": "Insert Table (Editor)",
       "group": "Insert",
@@ -4330,6 +4344,7 @@
     "view.findReplace",
     "view.graphView",
     "view.versionHistory",
+    "view.asOf",
     "insert.table",
     "view.autoSave",
     "view.canvas",

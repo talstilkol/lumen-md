@@ -2368,6 +2368,16 @@
       "vars": []
     },
     {
+      "key": "cmd.view.asOf",
+      "en": "What I knew then",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.asOf.hint",
+      "en": "search the vault as it was on a past date",
+      "vars": []
+    },
+    {
       "key": "cmd.view.autoSave.hint",
       "en": "every {interval}s",
       "vars": [
