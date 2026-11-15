@@ -176,6 +176,13 @@
       "icon": "Download"
     },
     {
+      "id": "file.exportOdt",
+      "label": "Export to OpenDocument (ODT)",
+      "group": "File",
+      "hint": "LibreOffice text document, right-to-left paragraphs kept",
+      "icon": "Download"
+    },
+    {
       "id": "file.importVcard",
       "label": "Import contacts (vCard)…",
       "group": "File",
@@ -2388,6 +2395,13 @@
       "icon": "Download"
     },
     {
+      "id": "file.exportOdt",
+      "label": "Export to OpenDocument (ODT)",
+      "group": "File",
+      "hint": "LibreOffice text document, right-to-left paragraphs kept",
+      "icon": "Download"
+    },
+    {
       "id": "file.importVcard",
       "label": "Import contacts (vCard)…",
       "group": "File",
@@ -4556,6 +4570,7 @@
     "file.exportAdoc",
     "file.exportOrg",
     "file.exportOpml",
+    "file.exportOdt",
     "file.importVcard",
     "file.exportVcard",
     "file.exportReveal",
