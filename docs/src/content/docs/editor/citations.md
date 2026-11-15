@@ -57,6 +57,19 @@ The sync itself never writes to Zotero; the one write is
 after you confirm it, with a key that has write access. If Zotero asks the app to slow down
 (`Backoff`, `429`), Lumen waits.
 
+## From a DOI
+
+**Cite from a DOI (CrossRef)…** in the command palette takes a DOI (`10.…`,
+`doi:…` or a `doi.org` link). After you approve the request, it fills the
+reference from CrossRef's public API: authors, year, title, journal or book,
+volume, issue, pages and publisher. The reference is inserted at the cursor in
+APA 7. Only the DOI is sent, to `api.crossref.org`, and the request appears in
+the privacy ledger. Under the local-only policy it is blocked, like the other
+research services.
+
+Research answers (**Research: …**) now end with a **References** list in APA 7:
+each web page the answer cites, once. The footnotes with their quotes stay.
+
 ## Pandoc syntax
 
 | You write | APA 7 shows |

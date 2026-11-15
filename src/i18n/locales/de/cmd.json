@@ -111,6 +111,7 @@
   "cmd.chat.import": "WhatsApp- oder Telegram-Chat importieren…",
   "cmd.chat.import.hint": "Exportierter Chat → eine Notiz pro Tag, mit Medien; nur auf diesem Gerät",
   "cmd.cite.insert": "Zitat einfügen [@key]…",
+  "cmd.cite.fromDoi": "Aus einer DOI zitieren (CrossRef)…",
   "cmd.cite.legal": "Zitate: Rechtsquelle (einheitliche Zitierregeln)…",
   "cmd.cite.legal.hint": "Ein Urteil, ein Gesetz, eine Verordnung, ein Gesetzentwurf, ein Buch oder ein Artikel nach den israelischen einheitlichen Zitierregeln (3. Aufl., 2021)",
   "cmd.cite.legalFromCase": "Zitate: Rechtszitat aus dem Aktenzeichen am Cursor",

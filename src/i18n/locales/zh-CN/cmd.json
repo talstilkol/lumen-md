@@ -111,6 +111,7 @@
   "cmd.chat.import": "导入 WhatsApp 或 Telegram 聊天…",
   "cmd.chat.import.hint": "导出的聊天 → 每天一篇笔记，含媒体；仅在此设备上处理",
   "cmd.cite.insert": "插入引用 [@key]…",
+  "cmd.cite.fromDoi": "从 DOI 引用（CrossRef）…",
   "cmd.cite.legal": "引用：法律来源（统一引用规则）…",
   "cmd.cite.legal.hint": "判决、法律、条例、法案、书籍或文章，按以色列统一引用规则（第三版，2021）书写",
   "cmd.cite.legalFromCase": "引用：根据光标处的案件编号生成法律引用",
