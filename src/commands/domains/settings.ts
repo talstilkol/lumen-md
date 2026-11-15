@@ -1,5 +1,6 @@
 /** Optional panels (security, theme, fine-tuning, tags) and plan / billing commands. */
-import { cmdIcons, type Command } from "../../ui/CommandPalette";
+import { cmdIcons } from "../../ui/cmdIcons";
+import type { Command } from "../../ui/CommandPalette";
 import { t } from "../../i18n";
 import { canPurchasePlans, manageBilling, upgradeTo } from "../../billing/planActions";
 import type { CommandContext } from "./context";

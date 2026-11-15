@@ -1,6 +1,7 @@
 /** The open-sources dialog (plan W7.24) in the palette, on ⌥⌘S / Ctrl+Alt+S. */
 import { t } from "../../i18n";
-import { cmdIcons, type Command } from "../../ui/CommandPalette";
+import { cmdIcons } from "../../ui/cmdIcons";
+import type { Command } from "../../ui/CommandPalette";
 
 export function buildOpenSourceCommands(): Command[] {
   return [

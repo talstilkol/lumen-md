@@ -1,5 +1,6 @@
 /** Research agent, web clipper and citation check. */
-import { cmdIcons, type Command } from "../../ui/CommandPalette";
+import { cmdIcons } from "../../ui/cmdIcons";
+import type { Command } from "../../ui/CommandPalette";
 import { useAppStore } from "../../store/useStore";
 import { t, getLocale } from "../../i18n";
 import { uiConfirm, uiPrompt } from "../../ui/PromptDialog";

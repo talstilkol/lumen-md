@@ -2,7 +2,8 @@
  * AI batch jobs over a folder of notes. The palette's list carries only the
  * names; the bodies (./batchActions.ts) load when a command runs.
  */
-import { cmdIcons, type Command } from "../../ui/CommandPalette";
+import { cmdIcons } from "../../ui/cmdIcons";
+import type { Command } from "../../ui/CommandPalette";
 import { t } from "../../i18n";
 
 const run = (id: string) => async () => {

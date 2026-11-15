@@ -4,7 +4,8 @@
  * citations from Pandoc [@key]), the cited BibTeX entries and the images.
  */
 import { t } from "../../i18n";
-import { cmdIcons, type Command } from "../../ui/CommandPalette";
+import { cmdIcons } from "../../ui/cmdIcons";
+import type { Command } from "../../ui/CommandPalette";
 import type { CommandContext } from "./context";
 
 export function buildLatexCommands({ liveDoc }: CommandContext): Command[] {

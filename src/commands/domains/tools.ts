@@ -1,5 +1,6 @@
 /** Tools: the writing goal, the Hebrew dictionary and plugin commands. */
-import { cmdIcons, type Command } from "../../ui/CommandPalette";
+import { cmdIcons } from "../../ui/cmdIcons";
+import type { Command } from "../../ui/CommandPalette";
 import { t } from "../../i18n";
 import { uiPrompt } from "../../ui/PromptDialog";
 import { getPluginCommands } from "../../plugins/pluginSystem";

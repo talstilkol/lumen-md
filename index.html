@@ -7,12 +7,12 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="color-scheme" content="dark light" />
-    <!-- The interface language and direction (plan W4.10: the saved choice,
-         else the system's language) and the saved theme, applied before the
-         boot shell paints (no inline script: the CSP forbids it). The page is
+    <!-- One boot script (W10.E19): the interface language and direction (plan
+         W4.10: the saved choice, else the system's language), the saved
+         theme, and the last note in the boot shell (W2.21), all before the
+         first paint (no inline script: the CSP forbids it). The page is
          written Hebrew-first, so it is right even without JavaScript. -->
-    <script src="/locale-boot.js"></script>
-    <script src="/theme-boot.js"></script>
+    <script src="/boot.js"></script>
     <meta name="description" content="Lumen — עורך Markdown מקומי ופרטי שנבנה לעברית. A local, private Markdown editor built for Hebrew." />
     <title>Lumen — עורך פתקים בעברית</title>
     <!-- SEO & Social -->
@@ -63,6 +63,7 @@
       .boot-line.w60{width:60%;height:22px}.boot-line.w80{width:80%}.boot-line.w70{width:70%}
       @media (prefers-reduced-motion:no-preference){.boot-line{animation:boot 1.2s ease-in-out infinite alternate}}
       @keyframes boot{to{opacity:.5}}
+      [data-boot-note] .boot-line{display:none}
       .boot-note{margin:0;white-space:pre-wrap;word-break:break-word;font:15px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;opacity:.85}
     </style>
   </head>
@@ -70,15 +71,12 @@
     <div id="root">
       <!-- Boot shell (C1): painted before any JavaScript runs; React replaces
            it on first render. Colours follow the saved theme via the class
-           set by /theme-boot.js in <head>, falling back to dark. -->
+           set by /boot.js in <head>, falling back to dark. -->
       <div class="boot-shell" aria-hidden="true">
         <div class="boot-bar"><span class="boot-logo">Lumen</span></div>
         <div class="boot-page"><div class="boot-line w60"></div><div class="boot-line"></div><div class="boot-line w80"></div><div class="boot-line w70"></div></div>
       </div>
     </div>
-    <!-- The last note in the shell, before the bundle (plan W2.21); after the
-         shell so it can fill it, before the module so it paints first. -->
-    <script src="/note-boot.js"></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

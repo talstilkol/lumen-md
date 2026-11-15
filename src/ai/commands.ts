@@ -4,7 +4,7 @@
  */
 
 import type { Command } from "../ui/CommandPalette";
-import { cmdIcons } from "../ui/CommandPalette";
+import { cmdIcons } from "../ui/cmdIcons";
 import { useAppStore } from "../store/useStore";
 import { uiPrompt, uiAlert } from "../ui/PromptDialog";
 import { t } from "../i18n";

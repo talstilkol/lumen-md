@@ -1,5 +1,6 @@
 /** Export commands: the open note to each format, each exporter loaded on first use. */
-import { cmdIcons, type Command } from "../../ui/CommandPalette";
+import { cmdIcons } from "../../ui/cmdIcons";
+import type { Command } from "../../ui/CommandPalette";
 import { useAppStore } from "../../store/useStore";
 import { t } from "../../i18n";
 import type { CommandContext } from "./context";

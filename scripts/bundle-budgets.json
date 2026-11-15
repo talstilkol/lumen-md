@@ -2,9 +2,9 @@
   "about": "Bundle budgets in KB gzipped, read by scripts/bundle-budget.mjs (npm run budget). Plan W6.26: they only go down. After each train `npm run budget:ratchet` lowers every budget to the measured size plus the margin when that is lower, never higher; `npm run pr:check` fails a diff that raises one, and `npm run budget:history` checks every commit of this file. A rule with `expires` is an exception: it names its task, and the budget fails once the date has passed. The first matching rule wins, so narrower patterns come first.",
   "margin": { "pct": 2, "minKb": 1 },
   "startup": {
-    "budgetKb": 460,
+    "budgetKb": 380,
     "targetKb": 250,
-    "note": "C2: the SUM of what index.html loads before the app can run (its entry script + every modulepreload), not each file alone. Measured 448 KB (18.10); goal 250 KB (W4.9: 460 → 380 → 300 → 250)."
+    "note": "C2: the SUM of what index.html loads before the app can run (its entry script + every modulepreload), not each file alone. Measured 448 KB (18.10); goal 250 KB (W4.9: 460 → 380 → 300 → 250). 460 → 380 in W10.E19 (8.2): #605's command bodies and English strings on use (first-party startup 218,633 B gz on its branch), one boot script, and the hidden dialogs and panels lazy. The size of a vite build on this branch is owed (Mac)."
   },
   "rules": [
     { "name": "main bundle", "pattern": "^app-", "budgetKb": 195, "note": "The eager Lumen runtime (App + side panels + i18n table). With Vite 8 the startup code shared by the HTML entries lives in app-*. History: 222 → 225 (round 16), 225 → 230 (round 25), 230 → 195 (audit M12-followup-2, rehype-raw lazy)." },
