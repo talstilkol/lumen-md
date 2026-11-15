@@ -32,6 +32,8 @@
   "canvas.export.failed": "Не удалось экспортировать: {error}",
   "canvas.export.label": "Экспорт изображения",
   "canvas.export.working": "Экспорт…",
+  "canvas.hl.deleted": "Источник удалён",
+  "canvas.hl.page": "с. {n}",
   "canvas.jsonCanvas.export": "Экспорт в .canvas",
   "canvas.jsonCanvas.exported": "Сохранено {name}.canvas: узлов {nodes}, связей {edges}",
   "canvas.jsonCanvas.failed": "Не удалось импортировать JSON Canvas: {error}",

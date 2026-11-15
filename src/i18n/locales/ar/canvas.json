@@ -32,6 +32,8 @@
   "canvas.export.failed": "فشل التصدير: {error}",
   "canvas.export.label": "تصدير صورة",
   "canvas.export.working": "جارٍ التصدير…",
+  "canvas.hl.deleted": "حُذف المصدر",
+  "canvas.hl.page": "ص. {n}",
   "canvas.jsonCanvas.export": "تصدير ‎.canvas",
   "canvas.jsonCanvas.exported": "تم حفظ {name}.canvas: {nodes} عقدة، {edges} وصلة",
   "canvas.jsonCanvas.failed": "تعذّر استيراد JSON Canvas: {error}",

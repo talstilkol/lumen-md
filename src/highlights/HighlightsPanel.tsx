@@ -15,6 +15,7 @@ import { t } from "../i18n";
 import { showAiToast } from "../ui/AiToast";
 import { allSources, allTags, cleanTag, exportNote, quoteBlock, retagItem, search, type HighlightItem, type HighlightKind } from "./hub";
 import { retagSidecar, type RetagLabels } from "./retag";
+import { HIGHLIGHT_MIME } from "../canvas/highlightCards";
 import "./HighlightsPanel.css";
 import { HelpButton } from "../ui/HelpButton";
 import { explainError } from "../lib/userError";
@@ -101,6 +102,8 @@ export function HighlightsPanel({ onClose, load = loadIndex }: { onClose: () => 
 
   const onDragStart = (e: DragEvent, it: HighlightItem) => {
     e.dataTransfer.setData("text/plain", quoteBlock(it, whereLabel(it)));
+    // W12.R1: onto a canvas, a PDF highlight becomes a card linked to its place in the PDF.
+    if (it.kind === "pdf" && it.id && it.location) e.dataTransfer.setData(HIGHLIGHT_MIME, JSON.stringify({ pdf: it.source, id: it.id, page: it.location, quote: it.text }));
     e.dataTransfer.effectAllowed = "copy";
   };
 

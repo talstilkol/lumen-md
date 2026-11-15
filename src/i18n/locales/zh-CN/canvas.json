@@ -32,6 +32,8 @@
   "canvas.export.failed": "导出失败：{error}",
   "canvas.export.label": "导出图片",
   "canvas.export.working": "正在导出…",
+  "canvas.hl.deleted": "来源已删除",
+  "canvas.hl.page": "第 {n} 页",
   "canvas.jsonCanvas.export": "导出为 .canvas",
   "canvas.jsonCanvas.exported": "已保存 {name}.canvas：{nodes} 个节点，{edges} 条连线",
   "canvas.jsonCanvas.failed": "无法导入 JSON Canvas：{error}",
