@@ -60,3 +60,18 @@ prints chrF per layer and direction on the dev split of `mt-he-en`;
 `--write-quality` records the numbers that decide the automatic choice. A
 layer the harness cannot run where it is executed is reported as
 "not measured", with the reason, never as a number.
+
+## Side by side
+
+`⌘K → Side-by-side translation` opens the current note and its translation
+in two columns, one row per paragraph, so they scroll together. A Hebrew
+note is translated to English; any other note to Hebrew. The note has to be
+in the vault, because the translation is saved next to it as
+`<note>.<lang>.md` (`notes/a.md` → `notes/a.en.md`), with a fingerprint of
+each source paragraph.
+
+When you edit a paragraph, its translation is marked **out of date**.
+**Translate** sends only the paragraphs that are out of date or missing,
+on the same local layers as above. Where Chrome's built-in translator is
+not available (phones, other browsers), the view says so and the next
+layer is used.
