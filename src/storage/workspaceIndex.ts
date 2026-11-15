@@ -42,7 +42,7 @@ import { diffListing, fillingEncrypted, indexable, indexFile, listNotes, mapLimi
 import { CheckTimeoutError, wakeBuilds, wakeOnUnlockOrMove, withDeadline } from "./workspaceIndexWait";
 export type { IndexedFile } from "./workspaceIndexState";
 export { VAULT_ID_PATH } from "./workspaceIndexRead";
-export { findBacklinks, indexChecked, indexedFiles, indexedNotes, indexedNoteText, indexStats, indexVersion, queryVaultTasks, relatedInIndex, searchWorkspace, workspaceTree } from "./workspaceIndexQueries";
+export { findBacklinks, indexChecked, indexedFiles, indexedNotes, indexedHighlights, indexedNoteText, indexStats, indexVersion, queryVaultTasks, relatedInIndex, searchWorkspace, workspaceTree } from "./workspaceIndexQueries";
 
 /** Bumped by a reset (tests): work of an earlier index must not touch the new one. */
 let epoch = 0;
