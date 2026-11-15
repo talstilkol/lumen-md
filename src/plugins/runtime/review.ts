@@ -23,7 +23,7 @@
 import { scanPluginVersion, type ScanFinding, type ScanResult } from "./scan";
 import { parseManifest } from "./manifest";
 
-export type ReviewRule = ScanFinding["rule"] | "closed-source" | "vulnerable-dependency" | "permission-added" | "permission-removed" | "css-remote" | "css-syntax";
+export type ReviewRule = ScanFinding["rule"] | "closed-source" | "vulnerable-dependency" | "permission-added" | "permission-removed" | "css-remote" | "css-syntax" | "rtl-physical-css" | "rtl-contrast";
 
 export interface ReviewFinding {
   rule: ReviewRule;
@@ -75,7 +75,10 @@ export interface Scorecard {
   findings: ReviewFinding[];
   permissions: { declared: string[]; added: string[]; removed: string[] };
   scan: Pick<ScanResult, "passed" | "score" | "sha256" | "used">;
-  checks: Record<"static" | "license" | "minified" | "dependencies" | "permissions" | "css", "pass" | "fail" | "warn" | "n/a">;
+  checks: Record<"static" | "license" | "minified" | "dependencies" | "permissions" | "css", "pass" | "fail" | "warn" | "n/a"> & {
+    /** A theme's RTL check (W12.S6, src/theme/rtlCheck.ts); absent for plugins. */
+    rtl?: "pass" | "warn" | "n/a";
+  };
 }
 
 /** OSI-approved licences a listed plugin may use (SPDX ids). */

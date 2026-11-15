@@ -1,0 +1,7 @@
+{
+  "themes": [
+    { "id": "lumen.theme.sepia", "name": "Sepia", "version": "1.0.0", "path": "sepia", "license": "MIT", "author": "Lumen", "description": "Warm paper for long reading, light and dark." },
+    { "id": "lumen.theme.night-ink", "name": "Night ink", "version": "1.0.0", "path": "night-ink", "license": "MIT", "author": "Lumen", "description": "A dark theme with a cool accent and calm callouts." },
+    { "id": "lumen.theme.high-contrast", "name": "High contrast", "version": "1.0.0", "path": "high-contrast", "license": "MIT", "author": "Lumen", "description": "Black on white and white on black, with a strong focus ring." }
+  ]
+}
