@@ -8,7 +8,8 @@
  * blocks (lists, quotes, list items) get the direction of their own text,
  * because `auto` skips children that carry a `dir` of their own. Code
  * blocks stay `dir="ltr"`, and so does every inline formula, which the
- * direction rule leaves out like inline code (W5.14).
+ * direction rule leaves out like inline code (W5.14). A table takes the
+ * direction of its first cell, else the note's (plan 9.5).
  *
  * Arrow keys move in logical order inside a block (plan 9.7): the key that
  * points toward the end of the block — Left in a right-to-left block,
@@ -67,6 +68,14 @@ function decorate(state: EditorState): DecorationSet {
     if (isInlineMath(node)) {
       decos.push(Decoration.node(pos, pos + node.nodeSize, { dir: "ltr" }));
       return false;
+    }
+    if (node.type.name === "table") {
+      // Plan 9.5: the column order follows the first cell (its first strong
+      // character), else the note's direction. Each cell's paragraphs still
+      // take their own direction below.
+      const firstCell = node.firstChild?.firstChild;
+      decos.push(Decoration.node(pos, pos + node.nodeSize, { dir: firstCell ? dirOf(firstCell) : (base ??= documentDirection(state)) }));
+      return true;
     }
     if (CONTAINER.has(node.type.name) || node.isTextblock) {
       decos.push(Decoration.node(pos, pos + node.nodeSize, { dir: dirOf(node) }));

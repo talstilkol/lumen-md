@@ -11,9 +11,9 @@ import { RTL_NOTE as NOTE } from "./rtl-note";
  * The rules under test (renderer/rehypeDirAuto.ts, editor/wysiwygBidi.ts):
  * a leaf block (paragraph, heading, cell) takes the direction of its own
  * first strong character (`dir="auto"`); a container (list, item, quote)
- * gets the direction of its text; code is always left-to-right; in the
- * preview and the export a table as a whole is left-to-right while each
- * cell resolves on its own.
+ * gets the direction of its text; code is always left-to-right; a table
+ * as a whole takes the direction of its first cell, else the note's, on
+ * all three surfaces (#771), while each cell resolves on its own.
  *
  * Every check is on the real browser's computed direction or on the
  * exported HTML. The desktop part runs in all three browser projects; the
@@ -57,9 +57,11 @@ async function checkPreviewBlocks(page: Page) {
   expect(dirOf(blocks, "פסקה בעברית")).toBe("rtl");
   expect(dirOf(blocks, "An English")).toBe("ltr");
 
-  // Tables: the table itself left-to-right, each cell by its own text.
+  // Tables: the table takes its first cell's direction ("שם", so right to
+  // left, as in the WYSIWYG editor), each cell by its own text.
   const table = preview.locator("table").first();
-  await expect(table).toHaveAttribute("dir", "ltr");
+  await expect(table).toHaveAttribute("dir", "rtl");
+  expect(await table.evaluate((el) => getComputedStyle(el).direction)).toBe("rtl");
   const cells = await dirs(page, root, "th, td");
   expect(dirOf(cells, "שם")).toBe("rtl");
   expect(dirOf(cells, "Note")).toBe("ltr");
@@ -109,6 +111,17 @@ for (const locale of ["he", "en"] as const) {
       expect(dirOf(blocks, "טבלאות")).toBe("rtl");
       expect(dirOf(blocks, "פסקה בעברית")).toBe("rtl");
       expect(dirOf(blocks, "An English")).toBe("ltr");
+      // The table itself has a dir (9.5 found it had none): its first cell
+      // "שם" is Hebrew, so the columns run right to left in either interface.
+      // preset-gfm's column resizing renders the node as div.tableWrapper >
+      // table, and a node decoration's attributes go on that outer element.
+      const table = pm.locator("table").first();
+      const [attr, computed] = await table.evaluate((el) => {
+        const wrap = el.parentElement?.classList.contains("tableWrapper") ? el.parentElement : null;
+        return [el.getAttribute("dir") ?? wrap?.getAttribute("dir") ?? "", getComputedStyle(el).direction];
+      });
+      expect(attr).toBe("rtl");
+      expect(computed).toBe("rtl");
       // Cells hold paragraphs, which take their own direction.
       expect(dirOf(blocks, "תפוחים")).toBe("rtl");
       expect(dirOf(blocks, "fresh")).toBe("ltr");
@@ -138,7 +151,7 @@ for (const locale of ["he", "en"] as const) {
       });
       // The note's first strong character is Hebrew.
       expect(html).toMatch(/<html lang="he" dir="rtl"/);
-      expect(html).toMatch(/<table[^>]*dir="ltr"/);
+      expect(html).toMatch(/<table[^>]*dir="rtl"/);
       expect(html).toMatch(/<td[^>]*dir="auto"[^>]*>תפוחים/);
       expect(html).toMatch(/<ul[^>]*dir="rtl"[^>]*>\s*<li[^>]*>\s*(<p[^>]*>)?פריט ראשון/);
       expect(html).toMatch(/<ul[^>]*dir="ltr"[^>]*>\s*<li[^>]*>\s*(<p[^>]*>)?First English/);
