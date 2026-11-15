@@ -1,0 +1,796 @@
+{
+  "$comment": "Plan 13.6 (W10.E13): every target of MASTER_PLAN.md appendix 14, clause by clause, with what measures it. npm run plan:targets reads it; --check fails when a clause of the appendix has no entry here. Status: pass only when every evidence passed; fail when one failed; otherwise 'not measured'. Never edit a status in: there is none here, it is computed.",
+  "source": "MASTER_PLAN.md · נספח 14",
+  "targets": [
+    {
+      "id": "he.eval",
+      "area": "עברית",
+      "clause": 0,
+      "target": "eval מקומי ≥ 90% על `gemma3:12b` ו-≥ 80% על `qwen2.5:7b`",
+      "evidence": [
+        {
+          "type": "none",
+          "reason": "needs Ollama with gemma3:12b and qwen2.5:7b on the owner's machine (npm run eval:agents); no result file is committed"
+        }
+      ]
+    },
+    {
+      "id": "he.rtl-e2e",
+      "area": "עברית",
+      "clause": 1,
+      "target": "e2e RTL ירוק ב-Chromium, Firefox ו-WebKit (שורה עברית → `direction: rtl` מחושב בעורך, ב-WYSIWYG ובתצוגה המקדימה)",
+      "evidence": [
+        {
+          "type": "e2e",
+          "spec": "e2e/rtl.spec.ts",
+          "project": "chromium",
+          "browsers": [
+            "chromium",
+            "firefox",
+            "webkit"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "he.logical-css",
+      "area": "עברית",
+      "clause": 2,
+      "target": "0 מאפייני CSS פיזיים (`left/right`) בכללי `.prose-lumen` ו-`.cm-*`",
+      "evidence": [
+        {
+          "type": "vitest",
+          "file": "src/__tests__/logicalCss.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "he.slug",
+      "area": "עברית",
+      "clause": 3,
+      "target": "`slug(\"שלום עולם\")` = `\"שלום-עולם\"` ותואם ל-rehype-slug",
+      "evidence": [
+        {
+          "type": "vitest",
+          "file": "src/__tests__/wikiLinks.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "he.exports-rtl",
+      "area": "עברית",
+      "clause": 4,
+      "target": "DOCX/HTML/EPUB נפתחים ב-RTL",
+      "evidence": [
+        {
+          "type": "vitest",
+          "file": "src/__tests__/exportBidi.test.ts"
+        },
+        {
+          "type": "vitest",
+          "file": "src/__tests__/exportDocxRtlTables.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "data.persist",
+      "area": "בטיחות נתונים",
+      "clause": 0,
+      "target": "0 מסלולי איבוד נתונים מהרשימה (G1–G11): `persist()` מבוקש ומצבו מוצג",
+      "evidence": [
+        {
+          "type": "e2e",
+          "spec": "e2e/data-safety.spec.ts",
+          "project": "chromium",
+          "browsers": [
+            "chromium"
+          ]
+        },
+        {
+          "type": "vitest",
+          "file": "src/__tests__/dataSafetyMatrix.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "data.save-is-version",
+      "area": "בטיחות נתונים",
+      "clause": 1,
+      "target": "כל שמירה = גרסה בהיסטוריה",
+      "evidence": [
+        {
+          "type": "e2e",
+          "spec": "e2e/data-safety.spec.ts",
+          "project": "chromium",
+          "browsers": [
+            "chromium"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "data.snapshot-10min",
+      "area": "בטיחות נתונים",
+      "clause": 2,
+      "target": "תמונת מצב כל 10 דק׳",
+      "evidence": [
+        {
+          "type": "e2e",
+          "spec": "e2e/data-safety.spec.ts",
+          "project": "chromium",
+          "browsers": [
+            "chromium"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "data.git-pull-never-overwrites",
+      "area": "בטיחות נתונים",
+      "clause": 3,
+      "target": "`git pull` אף פעם לא דורס (מיזוג או קונפליקט)",
+      "evidence": [
+        {
+          "type": "e2e",
+          "spec": "e2e/data-safety.spec.ts",
+          "project": "chromium",
+          "browsers": [
+            "chromium"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "data.rename-never-overwrites",
+      "area": "בטיחות נתונים",
+      "clause": 4,
+      "target": "שינוי שם לא דורס",
+      "evidence": [
+        {
+          "type": "e2e",
+          "spec": "e2e/data-safety.spec.ts",
+          "project": "chromium",
+          "browsers": [
+            "chromium"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "data.delete-to-trash",
+      "area": "בטיחות נתונים",
+      "clause": 5,
+      "target": "מחיקה = סל מחזור",
+      "evidence": [
+        {
+          "type": "e2e",
+          "spec": "e2e/data-safety.spec.ts",
+          "project": "chromium",
+          "browsers": [
+            "chromium"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "data.export-all",
+      "area": "בטיחות נתונים",
+      "clause": 6,
+      "target": "ייצוא הכול בלחיצה",
+      "evidence": [
+        {
+          "type": "e2e",
+          "spec": "e2e/data-safety.spec.ts",
+          "project": "chromium",
+          "browsers": [
+            "chromium"
+          ]
+        },
+        {
+          "type": "vitest",
+          "file": "src/__tests__/exportAll.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "data.failed-write-tells",
+      "area": "בטיחות נתונים",
+      "clause": 7,
+      "target": "כתיבה שנכשלה = הודעה",
+      "evidence": [
+        {
+          "type": "e2e",
+          "spec": "e2e/data-safety.spec.ts",
+          "project": "chromium",
+          "browsers": [
+            "chromium"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec.live-js-sandbox",
+      "area": "אבטחה",
+      "clause": 0,
+      "target": "live-js רק בלחיצה ובתוך sandbox בלי אחסון/רשת",
+      "evidence": [
+        {
+          "type": "e2e",
+          "spec": "e2e/security.spec.ts",
+          "project": "chromium",
+          "browsers": [
+            "chromium"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec.raw-html-allowlist",
+      "area": "אבטחה",
+      "clause": 1,
+      "target": "HTML גולמי עובר allowlist",
+      "evidence": [
+        {
+          "type": "e2e",
+          "spec": "e2e/security.spec.ts",
+          "project": "chromium",
+          "browsers": [
+            "chromium"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec.no-plaintext-secrets",
+      "area": "אבטחה",
+      "clause": 2,
+      "target": "0 סודות בטקסט גלוי (בדיקה שסורקת localStorage/IndexedDB אחרי הגדרת מפתח)",
+      "evidence": [
+        {
+          "type": "e2e",
+          "spec": "e2e/security.spec.ts",
+          "project": "chromium",
+          "browsers": [
+            "chromium"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec.csp-no-unsafe-eval",
+      "area": "אבטחה",
+      "clause": 3,
+      "target": "CSP ברשת וב-Tauri בלי `unsafe-eval`",
+      "evidence": [
+        {
+          "type": "e2e",
+          "spec": "e2e/csp-violations.spec.ts",
+          "project": "chromium",
+          "browsers": [
+            "chromium"
+          ]
+        },
+        {
+          "type": "none",
+          "reason": "the Tauri half: the desktop app's CSP in a real Tauri build (owner, macOS/Windows)"
+        }
+      ]
+    },
+    {
+      "id": "sec.share-rooms-password",
+      "area": "אבטחה",
+      "clause": 4,
+      "target": "חדרי שיתוף עם סיסמה כברירת מחדל",
+      "evidence": [
+        {
+          "type": "e2e",
+          "spec": "e2e/share-link.spec.ts",
+          "project": "chromium",
+          "browsers": [
+            "chromium"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec.research-worker-token",
+      "area": "אבטחה",
+      "clause": 5,
+      "target": "worker המחקר דורש טוקן",
+      "evidence": [
+        {
+          "type": "vitest",
+          "file": "src/__tests__/researchWorker.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "perf.lighthouse",
+      "area": "ביצועים",
+      "clause": 0,
+      "target": "Lighthouse ≥ 90 desktop / ≥ 80 mobile על בנייה אמיתית, LCP < 2.5s, TTI < 3.5s",
+      "evidence": [
+        {
+          "type": "json",
+          "file": "reports/trend/lighthouse-history.json",
+          "path": "-1.desktop.scores.performance",
+          "op": ">=",
+          "value": 90
+        },
+        {
+          "type": "json",
+          "file": "reports/trend/lighthouse-history.json",
+          "path": "-1.mobile.scores.performance",
+          "op": ">=",
+          "value": 80
+        },
+        {
+          "type": "json",
+          "file": "reports/trend/lighthouse-history.json",
+          "path": "-1.mobile.metrics.largest-contentful-paint",
+          "op": "<",
+          "value": 2500
+        },
+        {
+          "type": "none",
+          "reason": "TTI < 3.5 s: the trend does not record `interactive` (Lighthouse 10+ dropped TTI from the score)"
+        }
+      ]
+    },
+    {
+      "id": "perf.startup-250kb",
+      "area": "ביצועים",
+      "clause": 1,
+      "target": "קוד הפעלה ≤ 250KB gzip (סכום)",
+      "evidence": [
+        {
+          "type": "json",
+          "file": "scripts/bundle-budgets.json",
+          "path": "startup.budgetKb",
+          "op": "<=",
+          "value": 250,
+          "note": "the startup gate's ceiling must be at the target, not only measured under it"
+        },
+        {
+          "type": "command",
+          "cmd": "npm run budget"
+        }
+      ]
+    },
+    {
+      "id": "perf.vault-10k",
+      "area": "ביצועים",
+      "clause": 2,
+      "target": "כספת של 10,000 פתקים: פתיחה < 1s, שמירה → עדכון אינדקס < 50ms, חיפוש < 100ms",
+      "evidence": [
+        {
+          "type": "e2e",
+          "spec": "e2e/perf-vault.spec.ts",
+          "project": "perf",
+          "browsers": [
+            "chromium"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "perf.typing-2mb",
+      "area": "ביצועים",
+      "clause": 3,
+      "target": "מסמך של 2MB: הקלדה בלי lag (< 16ms לפריים)",
+      "evidence": [
+        {
+          "type": "e2e",
+          "spec": "e2e/perf-vault.spec.ts",
+          "project": "perf",
+          "browsers": [
+            "chromium"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rel.retries-0-20-runs",
+      "area": "אמינות",
+      "clause": 0,
+      "target": "`retries: 0` ב-CI עם 0 כישלונות ב-20 ריצות רצופות",
+      "evidence": [
+        {
+          "type": "grep",
+          "pattern": "retries:\\s*[1-9]",
+          "paths": [
+            "playwright.config.ts"
+          ],
+          "max": 0,
+          "note": "the config never retries"
+        },
+        {
+          "type": "none",
+          "reason": "20 consecutive green runs: the nightly flake receipts run 5 per browser; nothing records 20 in a row"
+        }
+      ]
+    },
+    {
+      "id": "rel.no-expect-true",
+      "area": "אמינות",
+      "clause": 1,
+      "target": "0 `expect(true)`",
+      "evidence": [
+        {
+          "type": "grep",
+          "pattern": "expect\\(\\s*true\\s*\\)",
+          "paths": [
+            "src",
+            "e2e"
+          ],
+          "max": 0,
+          "note": "outside comments"
+        }
+      ]
+    },
+    {
+      "id": "rel.no-wait-for-timeout",
+      "area": "אמינות",
+      "clause": 2,
+      "target": "0 `waitForTimeout`",
+      "evidence": [
+        {
+          "type": "grep",
+          "pattern": "waitForTimeout\\(",
+          "paths": [
+            "e2e"
+          ],
+          "max": 0
+        }
+      ]
+    },
+    {
+      "id": "rel.coverage-60",
+      "area": "אמינות",
+      "clause": 3,
+      "target": "כיסוי ≥ 60% כולל `ui/` ו-`editor/`",
+      "evidence": [
+        {
+          "type": "json",
+          "file": "coverage/coverage-summary.json",
+          "path": "total.lines.pct",
+          "op": ">=",
+          "value": 60,
+          "note": "written by npm run test:coverage; ui/ and editor/ are inside the total"
+        }
+      ]
+    },
+    {
+      "id": "rel.eslint-clean",
+      "area": "אמינות",
+      "clause": 4,
+      "target": "ESLint נקי כולל `rules-of-hooks`",
+      "evidence": [
+        {
+          "type": "command",
+          "cmd": "npm run lint"
+        }
+      ]
+    },
+    {
+      "id": "rel.no-empty-catch",
+      "area": "אמינות",
+      "clause": 5,
+      "target": "0 `catch` ריק בלי `// why:`",
+      "evidence": [
+        {
+          "type": "grep",
+          "pattern": "catch\\s*(\\([^)]*\\))?\\s*\\{\\s*\\}",
+          "paths": [
+            "src"
+          ],
+          "exclude": [
+            "src/__tests__"
+          ],
+          "max": 0,
+          "note": "an empty catch block, also in worker and sandbox code kept in strings; one with a `// why:` comment inside is not empty. src/__tests__ is left out: the lint rule's own test holds empty catches on purpose"
+        }
+      ]
+    },
+    {
+      "id": "a11y.axe-every-surface",
+      "area": "נגישות",
+      "clause": 0,
+      "target": "0 ממצאי axe ברמת serious/critical על כל משטח (LTR ו-RTL, בהיר וכהה)",
+      "evidence": [
+        {
+          "type": "e2e",
+          "spec": "e2e/a11y.spec.ts",
+          "project": "chromium",
+          "browsers": [
+            "chromium"
+          ]
+        },
+        {
+          "type": "e2e",
+          "spec": "e2e/a11y-hebrew-gate.spec.ts",
+          "project": "chromium",
+          "browsers": [
+            "chromium"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "a11y.dialogs-trap-focus",
+      "area": "נגישות",
+      "clause": 1,
+      "target": "כל 18 הדיאלוגים לוכדים ומחזירים פוקוס",
+      "evidence": [
+        {
+          "type": "e2e",
+          "spec": "e2e/a11y.spec.ts",
+          "project": "chromium",
+          "browsers": [
+            "chromium"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "a11y.keyboard-journey",
+      "area": "נגישות",
+      "clause": 2,
+      "target": "מסע מקלדת בלבד עובר (פתיחה → כתיבה → חיפוש → שמירה → הגדרות)",
+      "evidence": [
+        {
+          "type": "e2e",
+          "spec": "e2e/a11y.spec.ts",
+          "project": "chromium",
+          "browsers": [
+            "chromium"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "a11y.contrast-4.5",
+      "area": "נגישות",
+      "clause": 3,
+      "target": "ניגודיות ≥ 4.5 לכל טקסט",
+      "evidence": [
+        {
+          "type": "e2e",
+          "spec": "e2e/a11y.spec.ts",
+          "project": "chromium",
+          "browsers": [
+            "chromium"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "a11y.reduced-motion",
+      "area": "נגישות",
+      "clause": 4,
+      "target": "`prefers-reduced-motion` מכובד",
+      "evidence": [
+        {
+          "type": "vitest",
+          "file": "src/__tests__/designSystem.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "mobile.devices-journey",
+      "area": "מובייל ו-offline",
+      "clause": 0,
+      "target": "e2e ב-iPhone 14 ו-Pixel 7 (Playwright devices, `hasTouch`) עובר מסע מלא",
+      "evidence": [
+        {
+          "type": "e2e",
+          "spec": "e2e/touch.spec.ts",
+          "project": "mobile",
+          "browsers": [
+            "chromium"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mobile.pwa-share-target",
+      "area": "מובייל ו-offline",
+      "clause": 1,
+      "target": "PWA מותקן ו-`share_target` מקבל טקסט",
+      "evidence": [
+        {
+          "type": "e2e",
+          "spec": "e2e/pwa.spec.ts",
+          "project": "chromium",
+          "browsers": [
+            "chromium"
+          ]
+        },
+        {
+          "type": "e2e",
+          "spec": "e2e/pwa-offline.spec.ts",
+          "project": "chromium",
+          "browsers": [
+            "chromium"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mobile.offline-full",
+      "area": "מובייל ו-offline",
+      "clause": 2,
+      "target": "offline מלא (כולל הדגשת קוד ו-AI מקומי אחרי הורדת מודל) ב-e2e על בנייה אמיתית",
+      "evidence": [
+        {
+          "type": "e2e",
+          "spec": "e2e/pwa-offline.spec.ts",
+          "project": "chromium",
+          "browsers": [
+            "chromium"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "i18n.untranslated",
+      "area": "i18n",
+      "clause": 0,
+      "target": "0 ערכים לא מתורגמים בעברית, ≤ 5% ב-7 השפות האחרות",
+      "evidence": [
+        {
+          "type": "command",
+          "cmd": "npm run i18n:check"
+        }
+      ]
+    },
+    {
+      "id": "i18n.hardcoded",
+      "area": "i18n",
+      "clause": 1,
+      "target": "0 מחרוזות קשיחות באנגלית בממשק (סריקה)",
+      "evidence": [
+        {
+          "type": "command",
+          "cmd": "npm run i18n:hardcoded"
+        }
+      ]
+    },
+    {
+      "id": "plugins.api-documented",
+      "area": "תוספים",
+      "clause": 0,
+      "target": "API מתועד עם הגדרות, פאנל, הרחבות עורך",
+      "evidence": [
+        {
+          "type": "e2e",
+          "spec": "e2e/plugin-dev.spec.ts",
+          "project": "chromium",
+          "browsers": [
+            "chromium"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plugins.three-samples-sandboxed",
+      "area": "תוספים",
+      "clause": 1,
+      "target": "3 תוספים לדוגמה רצים מתוך sandbox",
+      "evidence": [
+        {
+          "type": "e2e",
+          "spec": "e2e/plugin-ecosystem.spec.ts",
+          "project": "chromium",
+          "browsers": [
+            "chromium"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plugins.gallery-real-registry",
+      "area": "תוספים",
+      "clause": 2,
+      "target": "גלריה שקוראת רישום אמיתי",
+      "evidence": [
+        {
+          "type": "e2e",
+          "spec": "e2e/plugin-install.spec.ts",
+          "project": "chromium",
+          "browsers": [
+            "chromium"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plugins.verified-only-signed",
+      "area": "תוספים",
+      "clause": 3,
+      "target": "\"מאומת\" רק עם חתימה",
+      "evidence": [
+        {
+          "type": "vitest",
+          "file": "src/__tests__/pluginSigning.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "desktop.real-folder",
+      "area": "שולחן עבודה",
+      "clause": 0,
+      "target": "ב-Tauri הכספת היא תיקייה אמיתית (נפתחת ב-Obsidian באותו רגע)",
+      "evidence": [
+        {
+          "type": "none",
+          "reason": "a real Tauri build opening a vault that Obsidian opens at the same time (owner)"
+        }
+      ]
+    },
+    {
+      "id": "desktop.auto-update",
+      "area": "שולחן עבודה",
+      "clause": 1,
+      "target": "עדכון אוטומטי",
+      "evidence": [
+        {
+          "type": "none",
+          "reason": "a real signed update from one release to the next (owner; W4.5)"
+        }
+      ]
+    },
+    {
+      "id": "desktop.signed",
+      "area": "שולחן עבודה",
+      "clause": 2,
+      "target": "Windows ו-macOS חתומים",
+      "evidence": [
+        {
+          "type": "none",
+          "reason": "signed Windows and macOS builds (owner: certificates)"
+        }
+      ]
+    },
+    {
+      "id": "ai.agents-eval",
+      "area": "AI מקומי",
+      "clause": 0,
+      "target": "כל 14 הסוכנים עוברים את ה-eval על מודל מקומי אחד לפחות",
+      "evidence": [
+        {
+          "type": "none",
+          "reason": "npm run eval:agents on a local model (owner's machine); no result file is committed"
+        }
+      ]
+    },
+    {
+      "id": "ai.doctor",
+      "area": "AI מקומי",
+      "clause": 1,
+      "target": "`ai.doctor` ירוק על המחשב של טל",
+      "evidence": [
+        {
+          "type": "none",
+          "reason": "ai.doctor on Tal's machine (owner)"
+        }
+      ]
+    },
+    {
+      "id": "ai.privacy-local-only",
+      "area": "AI מקומי",
+      "clause": 2,
+      "target": "יומן הפרטיות מראה 0 בקשות למארח לא מקומי תחת `local-only` במסע e2e מלא",
+      "evidence": [
+        {
+          "type": "e2e",
+          "spec": "e2e/privacy.spec.ts",
+          "project": "chromium",
+          "browsers": [
+            "chromium"
+          ]
+        }
+      ]
+    }
+  ]
+}
