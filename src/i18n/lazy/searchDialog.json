@@ -21,7 +21,7 @@
   "searchDialog.mode.ai": "Ask Workspace",
   "searchDialog.mode.search": "Search",
   "searchDialog.mode.smart": "Smart",
-  "searchDialog.monolingualEmbeddings": "The embedding model here is English-only, so Hebrew questions find English notes by keywords only. Use the built-in model (multilingual-e5) for cross-language search.",
+  "searchDialog.monolingualEmbeddings": "Cross-language search needs a multilingual embedding model (bge-m3 or EmbeddingGemma); the one here is English-only, so these results come from keywords, and keywords don't lead from a Hebrew question to English notes.",
   "searchDialog.noLocalTranslator": "No translator on this device: the original is shown.",
   "searchDialog.noRelevant": "No relevant files found in workspace.",
   "searchDialog.rebuildIndex": "Rebuild the embedding index",
@@ -38,5 +38,7 @@
   "toast.aiWorkspaceSearchFailed": "AI workspace search failed",
   "toast.buildingSemanticIndex": "🧠 Building semantic index…",
   "toast.indexedFiles": "✅ Files indexed: {count}",
-  "toast.indexingFailed": "Indexing failed: {error}"
+  "toast.indexingFailed": "Indexing failed: {error}",
+  "searchDialog.crossLingual.keyword": "A Hebrew question over English notes: keyword search doesn't cross languages. That needs Smart search with a multilingual embedding model (bge-m3 or EmbeddingGemma).",
+  "searchDialog.crossLingual.reindex": "A multilingual embedding model is ready, but the index was built with another model: rebuild the index so Hebrew questions reach English notes."
 }

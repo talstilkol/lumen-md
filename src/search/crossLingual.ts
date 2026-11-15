@@ -9,6 +9,14 @@
  * Only embedding models that map Hebrew and English into one space are
  * used for it: an English-only model (nomic-embed-text) would put a Hebrew
  * question nowhere near an English paragraph.
+ *
+ * Status (W10.B6, coordinator decision): keyword search alone does not
+ * cross languages — a Hebrew query finds 0 of 30 English notes on the
+ * held-out probe (eval/probes/crosslingual-heldout-he-en.json). Cross-lingual
+ * search needs a multilingual embedding model (bge-m3 or EmbeddingGemma,
+ * through Ollama), and `crossLingualPath` says whether a Hebrew query takes
+ * the embedding path here, or why not. The UI and the docs say so instead
+ * of claiming the feature works without the model.
  */
 
 export type Script = "he" | "en" | "other";
@@ -30,7 +38,33 @@ export function scriptOf(text: string): Script {
  * Embedding providers (EmbeddingProvider.id) whose vectors are multilingual,
  * Hebrew included. multilingual-e5 is MIT, allowed in models/registry.json.
  */
-const MULTILINGUAL = [/multilingual-e5/i, /bge-m3/i, /paraphrase-multilingual/i, /LaBSE/i];
+const MULTILINGUAL = [/multilingual-e5/i, /bge-m3/i, /embeddinggemma/i, /paraphrase-multilingual/i, /LaBSE/i];
+
+/** The multilingual models the status line names (Ollama tags). */
+export const CROSS_LINGUAL_MODELS = ["bge-m3", "embeddinggemma"] as const;
+
+export type CrossLingualPath =
+  /** The query is not Hebrew→English, or there is nothing to decide. */
+  | { path: "same-language" }
+  /** A multilingual model is in use and the index was built with it: the embedding path answers. */
+  | { path: "embedding"; model: string }
+  /** No multilingual model: keyword search only, which does not reach English notes. */
+  | { path: "keyword-only"; reason: "needs-model" }
+  /** A multilingual model is in use, but the index was built with another one (or not at all). */
+  | { path: "keyword-only"; reason: "reindex"; model: string };
+
+/**
+ * Which path a query takes across languages. `embedding` is the provider
+ * smart search uses (`embeddingStatus`), `indexEmbedding` the provider the
+ * stored index was built with (`semanticIndexEmbedding`): vectors of two
+ * models are not comparable, so a mismatch means the embeddings answer nothing.
+ */
+export function crossLingualPath(query: string, embedding: { id: string; multilingual: boolean } | null, indexEmbedding: string | null): CrossLingualPath {
+  if (scriptOf(query) !== "he") return { path: "same-language" };
+  if (!embedding?.multilingual) return { path: "keyword-only", reason: "needs-model" };
+  if (indexEmbedding !== embedding.id) return { path: "keyword-only", reason: "reindex", model: embedding.id };
+  return { path: "embedding", model: embedding.id };
+}
 
 export function isMultilingualEmbedding(providerId: string): boolean {
   return MULTILINGUAL.some((re) => re.test(providerId));

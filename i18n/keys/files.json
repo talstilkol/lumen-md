@@ -724,6 +724,16 @@
       "vars": []
     },
     {
+      "key": "searchDialog.crossLingual.keyword",
+      "en": "A Hebrew question over English notes: keyword search doesn't cross languages. That needs Smart search with a multilingual embedding model (bge-m3 or EmbeddingGemma).",
+      "vars": []
+    },
+    {
+      "key": "searchDialog.crossLingual.reindex",
+      "en": "A multilingual embedding model is ready, but the index was built with another model: rebuild the index so Hebrew questions reach English notes.",
+      "vars": []
+    },
+    {
       "key": "searchDialog.forget",
       "en": "Forget search \"{q}\"",
       "vars": [
@@ -765,7 +775,7 @@
     },
     {
       "key": "searchDialog.monolingualEmbeddings",
-      "en": "The embedding model here is English-only, so Hebrew questions find English notes by keywords only. Use the built-in model (multilingual-e5) for cross-language search.",
+      "en": "Cross-language search needs a multilingual embedding model (bge-m3 or EmbeddingGemma); the one here is English-only, so these results come from keywords, and keywords don't lead from a Hebrew question to English notes.",
       "vars": []
     },
     {
