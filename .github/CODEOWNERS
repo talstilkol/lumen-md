@@ -34,6 +34,8 @@
 /src/ai/workerLedgerInstall.ts           @talstilkol
 /src/ai/policy.ts                        @talstilkol
 /src/lib/telemetry.ts                    @talstilkol
+/src/lib/monitoringScrub.ts              @talstilkol
+/src/lib/sentryMonitor.ts                @talstilkol
 
 # ── CSP, headers and security policy ──
 /src/build/cspEndpoints.ts               @talstilkol
