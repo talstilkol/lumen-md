@@ -47,6 +47,11 @@ describe("SettingsScreen", () => {
     expect(screen.getByRole("tab", { name: "General" }).getAttribute("aria-selected")).toBe("true");
   });
 
+  it("W10.A10: no tab shows a raw i18n key, before any lazy panel has loaded", () => {
+    render(<SettingsScreen onClose={() => {}} />);
+    for (const tab of screen.getAllByRole("tab")) expect(tab.textContent ?? "").not.toMatch(/^[a-z][\w-]*(\.[\w-]+)+$/);
+  });
+
   it("search narrows the settings, and a change writes the store", () => {
     const { container } = render(<SettingsScreen onClose={() => {}} />);
     fireEvent.change(screen.getByTestId("settings-search"), { target: { value: "vim" } });

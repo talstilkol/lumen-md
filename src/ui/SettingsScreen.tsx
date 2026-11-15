@@ -23,6 +23,9 @@ import { showAiToast } from "./AiToast";
 import { SUPPORTED_LOCALES, t, type Locale } from "../i18n";
 import { isBetaLocale } from "../i18n/review";
 import "./settingsScreenStrings";
+// W10.A10: the tab list names the "Train AI on my style" tab (fineTune.title) before its panel loads,
+// so that panel's English travels with this chunk too (FineTuneSettings is only ever opened from here).
+import "./fineTuneStrings";
 import { HelpButton } from "./HelpButton";
 import { SettingsAbout } from "./AccessibilityLinks";
 // W5.11: the "keep photo metadata" switch's label ships with this lazy screen.
