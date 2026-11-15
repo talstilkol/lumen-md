@@ -96,6 +96,8 @@ export function FileTree({
   onActiveDeleted,
 }: Props) {
   const [tree, setTree] = useState<WorkspaceNode[]>([]);
+  // The ready marker (plan W7.25): true once the first listing has landed (an empty vault included).
+  const [listed, setListed] = useState(false);
   const [editingPath, setEditingPath] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
@@ -274,6 +276,7 @@ export function FileTree({
       } catch {
         setTree([]);
       }
+      setListed(true);
     },
     [available],
   );
@@ -441,7 +444,7 @@ export function FileTree({
 
   if (!available) {
     return (
-      <aside className="file-tree" aria-label={t("tree.title")}>
+      <aside className="file-tree" aria-label={t("tree.title")} data-testid="file-tree" data-ready="true">
         <div className="file-tree-header">
           {t("tree.title")}
           <HelpButton topic="workspace/panels#file-tree" />
@@ -460,7 +463,7 @@ export function FileTree({
   }
 
   return (
-    <aside className="file-tree" aria-label={t("tree.title")}>
+    <aside className="file-tree" aria-label={t("tree.title")} data-testid="file-tree" data-ready={String(listed)}>
       <div className="file-tree-header">
         <span style={{ fontWeight: 600 }}>{t("tree.title")}</span>
         <div style={{ display: "flex", gap: 6 }}>

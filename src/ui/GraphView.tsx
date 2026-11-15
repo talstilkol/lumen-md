@@ -28,6 +28,8 @@ export function GraphView({ onOpenFile }: { onOpenFile: (path: string, content: 
   const [laying, setLaying] = useState(false);
   // The text alternative (W10.E60): the same nodes and links as a table.
   const [asTable, setAsTable] = useState(false);
+  // The ready marker (plan W7.25): the layout of the graph on screen has finished (or failed).
+  const [laidOut, setLaidOut] = useState<object | null>(null);
 
   const sub = useMemo(() => (graph ? filteredGraph(graph, filter) : null), [graph, filter]);
   const groups = useMemo(() => (graph ? groupsOf(graph, groupBy) : null), [graph, groupBy]);
@@ -52,7 +54,11 @@ export function GraphView({ onOpenFile }: { onOpenFile: (path: string, content: 
     runLayout(sub.nodes.length, sub.edges, (p) => !cancelled && setPositions(p))
       .then((p) => !cancelled && setPositions(p))
       .catch((e: unknown) => log.warn("graph: layout failed", e))
-      .finally(() => !cancelled && setLaying(false));
+      .finally(() => {
+        if (cancelled) return;
+        setLaying(false);
+        setLaidOut(sub);
+      });
     return () => {
       cancelled = true;
     };
@@ -76,6 +82,7 @@ export function GraphView({ onOpenFile }: { onOpenFile: (path: string, content: 
     return (
       <EmptyState
         style={{ blockSize: "100%", alignItems: "center", justifyContent: "center", fontSize: 13 }}
+        testId="graph-empty"
         message={t("graphView.empty")}
         action={{ label: t("graphView.openWorkspace"), onClick: () => runCommand("view.workspace") }}
       />
@@ -84,7 +91,7 @@ export function GraphView({ onOpenFile }: { onOpenFile: (path: string, content: 
 
   const set = (k: keyof GraphFilter) => (e: { target: { value: string } }) => setFilter((f) => ({ ...f, [k]: e.target.value.trim() || undefined }));
   return (
-    <div style={{ inlineSize: "100%", blockSize: "100%", position: "relative", display: "flex", flexDirection: "column" }} data-testid="graph-view">
+    <div style={{ inlineSize: "100%", blockSize: "100%", position: "relative", display: "flex", flexDirection: "column" }} data-testid="graph-view" data-ready={String(sub !== null && laidOut === sub)}>
       <div role="toolbar" aria-label={t("graph.filters")} style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", padding: "6px 12px", borderBlockEnd: "1px solid hsl(var(--border))", fontSize: 12 }}>
         <span data-testid="graph-stats" style={{ color: "hsl(var(--fg-muted))" }}>
           {t("graphView.stats", { nodes: String(sub?.nodes.length ?? 0), edges: String((sub?.edges.length ?? 0) / 2) })}

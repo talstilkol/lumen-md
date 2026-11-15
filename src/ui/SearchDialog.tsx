@@ -375,7 +375,7 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
 
   return (
     <Modal aria-label={t("search.placeholder")} onClose={onClose} className="cmd-palette-backdrop" onClick={onClose}>
-      <div className="cmd-palette" style={{ minHeight: "350px", display: "flex", flexDirection: "column" }} onClick={(e) => e.stopPropagation()}>
+      <div className="cmd-palette" data-testid="search-dialog" style={{ minHeight: "350px", display: "flex", flexDirection: "column" }} onClick={(e) => e.stopPropagation()}>
         <div style={{ display: "flex", borderBottom: "1px solid hsl(var(--border))", padding: "0 10px", alignItems: "center" }}>
           <button className={`chart-block-tab ${mode === "search" ? "active" : ""}`} style={{ fontSize: 13, background: "transparent" }} onClick={() => pickMode("search")}>
              {t("searchDialog.mode.search")}

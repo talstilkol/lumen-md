@@ -148,6 +148,12 @@ export const JOBS = [
  *              with OSS rules in place of CodeQL. A missing binary fails here.
  *   security-nightly  the scheduled build only (research R3.7): OSV,
  *              cargo deny, OpenSSF Scorecard and a CycloneDX SBOM.
+ *   percy      the 30 screens × 4 variants as Percy snapshots (plan W7.25,
+ *              W10.E55), rendered by Percy in Chrome, Firefox and Safari.
+ *              PERCY_TOKEN comes from the agent's secret store; without it
+ *              percy-run.mjs exits non-zero, so the step never passes silently.
+ *              Main pushes and PRs labelled `percy` only (the free plan's
+ *              screenshot allowance does not cover every PR build).
  */
 export const NATIVE_JOBS = [
   {
@@ -198,6 +204,14 @@ export const NATIVE_JOBS = [
       { name: "CycloneDX SBOM", run: "node scripts/security-scan.mjs sbom" },
     ],
     artifacts: ["reports/security/*.json"],
+  },  {
+    key: "percy",
+    label: ":camera_with_flash: Percy (30 screens, Chrome / Firefox / Safari)",
+    timeout: 40,
+    keepGoing: false,
+    browsers: ["chromium"],
+    if: 'build.branch == "main" || build.pull_request.labels includes "percy"',
+    steps: [{ name: "Percy snapshots of the 30 screens", run: "npm run -s visual:percy" }],
   },
 ];
 

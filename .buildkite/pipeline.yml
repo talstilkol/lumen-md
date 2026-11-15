@@ -647,6 +647,28 @@ steps:
     artifact_paths:
       - "reports/security/*.json"
     if: "build.source == \"schedule\""
+  - label: ":camera_with_flash: Percy (30 screens, Chrome / Firefox / Safari)"
+    key: "percy"
+    command: |-
+      LUMEN_CI_JOB=percy LUMEN_CI_BROWSERS=chromium bash scripts/buildkite/run.sh <<'LUMEN_JOB'
+      gate 'Percy snapshots of the 30 screens' <<'LUMEN_STEP'
+      npm run -s visual:percy
+      LUMEN_STEP
+      gates_done
+      LUMEN_JOB
+    agents:
+      queue: "linux"
+    timeout_in_minutes: 40
+    notify:
+      - github_commit_status:
+          context: "lumen/buildkite: percy"
+    retry:
+      automatic:
+        - exit_status: -1
+          limit: 2
+        - exit_status: 255
+          limit: 1
+    if: "build.branch == \"main\" || build.pull_request.labels includes \"percy\""
   - label: ":playwright: e2e chromium, shard %n of 4"
     key: "e2e-shards"
     parallelism: 4
@@ -862,6 +884,8 @@ steps:
         allow_failure: true
       - step: "security"
         allow_failure: true
+      - step: "percy"
+        allow_failure: true
       - step: "e2e-shards"
         allow_failure: true
       - step: "e2e-receipt"
@@ -876,7 +900,7 @@ steps:
         allow_failure: true
     command: |-
       buildkite-agent artifact download 'ci-out/vitest-summary.json' . || true
-      node scripts/buildkite/receipt.mjs --gates vitest,vitest-merge,static,lint,licenses,build,e2e-chromium,e2e-firefox,e2e-webkit,e2e-prod,e2e-headers,local-ai,ocr-cer,visual,lighthouse,pr-check,security,e2e-shards,e2e-receipt,real-model-pr,real-model-nightly,real-model-hebrew,deadcode
+      node scripts/buildkite/receipt.mjs --gates vitest,vitest-merge,static,lint,licenses,build,e2e-chromium,e2e-firefox,e2e-webkit,e2e-prod,e2e-headers,local-ai,ocr-cer,visual,lighthouse,pr-check,security,percy,e2e-shards,e2e-receipt,real-model-pr,real-model-nightly,real-model-hebrew,deadcode
     agents:
       queue: "linux"
     artifact_paths:

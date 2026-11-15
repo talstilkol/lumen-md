@@ -434,7 +434,7 @@ export function CanvasExcalidraw({ open, onClose, collab = null }: Props) {
   ];
 
   return (
-    <Modal aria-label={t("canvas.dialogLabel")} className="lumen-canvas" data-testid="canvas">
+    <Modal aria-label={t("canvas.dialogLabel")} className="lumen-canvas" data-testid="canvas" data-ready={String(scene !== null)}>
       <div className="lumen-canvas-head">
         <strong style={{ fontSize: 13 }}>{t("canvas.title")}</strong>
         <HelpButton topic="workspace/canvas" />
