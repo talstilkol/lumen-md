@@ -45,6 +45,7 @@ import { usePdfInk } from "./usePdfInk";
 import type { PageSize } from "./PdfPageView";
 import type { OcrPage } from "./ocrPages";
 import { positionAt, scrollTopFor } from "./readingPosition";
+import { SpreadControls, SpreadRows, useSpread } from "./PdfSpread";
 import { annotationsByPage, baseName, byPosition, EMPTY, isMissing, MAX_SCALE, MIN_SCALE, newUuid, pageBoxes, POSITION_SAVE_MS, positionsIO, ROOT_MARGIN, type Props } from "./pdfReaderParts";
 import { Modal } from "../ui/Modal";
 import { isTopDialog } from "../ui/useFocusTrap";
@@ -84,6 +85,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
   const scrollRef = useRef<HTMLDivElement>(null);
   const pageEls = useRef(new Map<number, HTMLDivElement>());
   const pageTexts = useRef(new Map<number, string>());
+  const spread = useSpread(doc, path, scrollRef, pageEls); // W12.R2: two-page spreads, right to left for a Hebrew book
   const writeQueue = useRef<Promise<void>>(Promise.resolve());
   /** The last note write failed: the highlights in the reader are not saved. */
   const writeFailed = useRef(false);
@@ -616,6 +618,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
           <button type="button" className="icon-btn pdf-text-btn" onClick={fitWidth}>
             {t("pdf.zoomFit")}
           </button>
+          <SpreadControls spread={spread} />
         </div>
         <form
           className="pdf-group pdf-search"
@@ -702,7 +705,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
             </p>
           )}
           {!doc && !error && <p className="pdf-message">{t("loading.generic")}</p>}
-          {doc &&
+          {doc && (<SpreadRows spread={spread}>{
             sizes.map((size, i) => (
               <PdfPageView
                 key={i + 1}
@@ -723,7 +726,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
                 onOcr={onOcr}
                 onAnchored={onAnchored}
               />
-            ))}
+            ))}</SpreadRows>)}
           <div className="pdf-tail" aria-hidden="true" />
         </div>
         {askOpen && (
