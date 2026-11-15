@@ -45,8 +45,8 @@ npx -p @lumen-md/mcp-server lumen mcp status
 | Scope | Tools |
 |---|---|
 | `search` | `search_notes` — BM25 over Hebrew and English (prefix letters ו ה ב ל מ ש כ and niqqud are handled) |
-| `read` | `read_note`, `list_notes`, `list_tags`, `get_backlinks`, `bases_query` |
-| `propose` | `create_note`, `append_note`, `write_note`, `update_frontmatter`, `bases_update` — proposals only |
+| `read` | `read_note`, `list_notes`, `list_tags`, `get_backlinks`, `list_types`, `get_type`, `bases_query` |
+| `propose` | `create_note`, `append_note`, `write_note`, `update_frontmatter`, `create_object`, `bases_update` — proposals only |
 
 `lumen mcp enable <client>` without `--scopes` grants `search,read`. Add
 `propose` only for a client you want suggestions from. `lumen mcp disable
@@ -85,6 +85,22 @@ npx -p @lumen-md/mcp-server lumen mcp enable claude-code --vault "$HOME/Document
 `servers`) and **Zed** (`context_servers`) take the same command and
 arguments: `npx -y @lumen-md/mcp-server --client cursor` (or `vscode`,
 `zed`) with `LUMEN_VAULT` in `env`.
+
+## What a client may see
+
+`.lumen/mcp.json` can limit, for every client (`scope`) or for one (`clients.<id>.scope`), which notes the MCP tools see at all:
+
+```json
+{ "scope": { "deny": { "folders": ["journal"], "tags": ["private"] } },
+  "clients": { "cursor": { "enabled": true, "scopes": ["search", "read"],
+                           "scope": { "allow": { "folders": ["work"] } } } } }
+```
+
+- **How a note is judged.** A note is visible when no allow list is set or it matches one (a folder or a tag), and it matches no deny entry. Deny always wins. Both the vault's rules and the client's rules must pass.
+- **Tags.** Tags are the frontmatter `tags` and inline `#tags`, outside code. `private` also covers `private/health`.
+- **Where it applies.** The rules apply to every tool: search, read, list, tags, backlinks and Bases. They also apply to every proposed change, so a client can't write into a hidden note, or tag a note to hide it.
+- **Hidden notes.** A hidden note answers exactly like a missing one, and the refusal is logged.
+- **Citations.** Every answer from a note carries an anchor: `[[note#Heading]]`, or `[[note#L12]]` above the first heading. It appears as a fourth column in search hits, and as `_meta["io.lumen/anchors"]` on read_note, search_notes and get_backlinks. A note's text is never changed.
 
 ## Approving changes
 
@@ -169,6 +185,33 @@ lumen bases update --edits edits.json --approve   # each diff at the terminal; t
 
 Bases need the engine bundle: build the server with `npm ci` in the
 repository root first, then `npm run build` in `mcp-server/`.
+
+## Types
+
+A type is a file in the vault, `.lumen/types/<id>.yaml`. It has labels, an
+activating tag, one `extends` parent and typed fields. The notes stay plain
+frontmatter.
+
+- `list_types` lists the types.
+- `get_type` gives one type's fields, inherited ones first, with their
+  kinds, options and relation targets.
+- `create_object` proposes a new note of a type. Its values are checked
+  against the schema first. An unknown field, a value of the wrong kind, an
+  option that is not in the list, or a relation to a note of another type is
+  an error. When there is an error nothing is proposed, and the ledger
+  records `denied` with the reason `schema: <fields>`. A valid object is one
+  proposal in the approval queue, inside the client's folder and tag scope.
+
+From a terminal:
+
+```bash
+lumen types                                   # the types
+lumen types show book                         # its fields; --json for JSON
+lumen new "Dune" --type book --set pages=412 --set 'author=[[Frank Herbert]]'
+```
+
+Like `lumen new`, `lumen new --type` writes directly, because you are at
+your terminal. A value that does not fit the type writes nothing.
 
 ## Lumen as a client: outside servers for the local agents
 

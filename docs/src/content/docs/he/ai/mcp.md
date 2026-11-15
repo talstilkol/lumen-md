@@ -44,8 +44,8 @@ npx -p @lumen-md/mcp-server lumen mcp status
 | הרשאה | כלים |
 |---|---|
 | `search` | `search_notes` — BM25 בעברית ובאנגלית (אותיות השימוש ו ה ב ל מ ש כ וניקוד מטופלים) |
-| `read` | `read_note`, `list_notes`, `list_tags`, `get_backlinks`, `bases_query` |
-| `propose` | `create_note`, `append_note`, `write_note`, `update_frontmatter`, `bases_update` — הצעות בלבד |
+| `read` | `read_note`, `list_notes`, `list_tags`, `get_backlinks`, `list_types`, `get_type`, `bases_query` |
+| `propose` | `create_note`, `append_note`, `write_note`, `update_frontmatter`, `create_object`, `bases_update` — הצעות בלבד |
 
 `lumen mcp enable <client>` בלי `--scopes` נותן `search,read`. מוסיפים
 `propose` רק ללקוח שרוצים ממנו הצעות. `lumen mcp disable <client>` חל מהקריאה
@@ -83,6 +83,22 @@ npx -p @lumen-md/mcp-server lumen mcp enable claude-code --vault "$HOME/Document
 `servers`) ו-**Zed** (`context_servers`) מקבלים אותה פקודה ואותם ארגומנטים:
 `npx -y @lumen-md/mcp-server --client cursor` (או `vscode`, `zed`) עם
 `LUMEN_VAULT` ב-`env`.
+
+## מה לקוח יכול לראות
+
+ב-`.lumen/mcp.json` אפשר להגביל, לכל הלקוחות (`scope`) או ללקוח אחד (`clients.<id>.scope`), אילו פתקים כלי ה-MCP רואים בכלל:
+
+```json
+{ "scope": { "deny": { "folders": ["journal"], "tags": ["private"] } },
+  "clients": { "cursor": { "enabled": true, "scopes": ["search", "read"],
+                           "scope": { "allow": { "folders": ["work"] } } } } }
+```
+
+- **איך פתק נבדק.** פתק גלוי כשלא הוגדרה רשימת היתר, או כשהוא מתאים לאחת מהן (תיקייה או תגית), ובתנאי שהוא לא מתאים לאף רשומת חסימה. חסימה תמיד גוברת. הפתק צריך לעבור גם את הכללים של הכספת וגם את הכללים של הלקוח.
+- **תגיות.** התגיות הן ה-`tags` שב-frontmatter ותגיות `#` בתוך הטקסט, מחוץ לקוד. ‏`private` חלה גם על `private/health`.
+- **איפה זה חל.** הכללים חלים על כל כלי: חיפוש, קריאה, רשימה, תגיות, קישורים חוזרים ו-Bases. הם חלים גם על כל שינוי מוצע, כך שלקוח לא יכול לכתוב לתוך פתק מוסתר, או לתייג פתק כדי להסתיר אותו.
+- **פתקים מוסתרים.** פתק מוסתר עונה בדיוק כמו פתק שלא קיים, והסירוב נרשם ביומן.
+- **ציטוטים.** לכל תשובה מפתק יש עוגן: `[[note#Heading]]`, או `[[note#L12]]` לפני הכותרת הראשונה. העוגן מופיע כעמודה רביעית בתוצאות החיפוש, וכ-`_meta["io.lumen/anchors"]` ב-read_note, ‏search_notes ו-get_backlinks. הטקסט של הפתק לא משתנה אף פעם.
 
 ## אישור שינויים
 
@@ -160,6 +176,31 @@ lumen bases update --edits edits.json --approve   # כל diff בטרמינל; מ
 
 Bases דורשים את חבילת המנוע: בנה את השרת אחרי `npm ci` בשורש המאגר, ואז
 `npm run build` בתיקייה `mcp-server/`.
+
+## סוגים
+
+סוג הוא קובץ בכספת, `.lumen/types/<id>.yaml`. יש לו שמות, תגית שמפעילה אותו,
+הורה אחד ב-`extends` ושדות מוקלדים. הפתקים עצמם נשארים frontmatter רגיל.
+
+- `list_types` מחזיר את רשימת הסוגים.
+- `get_type` מחזיר את השדות של סוג אחד, עם הנורשים ראשונים, ולכל שדה את
+  סוג הערך, האפשרויות ויעד הקשר.
+- `create_object` מציע פתק חדש מסוג מסוים. קודם הערכים נבדקים מול הסכמה.
+  שגיאה היא שדה שלא קיים בסוג, ערך מסוג לא נכון, אפשרות שלא ברשימה, או קשר
+  לפתק מסוג אחר. כשיש שגיאה לא מוצע כלום, והיומן רושם `denied` עם הסיבה
+  `schema: <השדות>`. אובייקט תקין הופך להצעה אחת בתור האישורים, בתוך היקף
+  התיקיות והתגיות של הלקוח.
+
+מהטרמינל:
+
+```bash
+lumen types                                   # הסוגים
+lumen types show book                         # השדות; ‏--json ל-JSON
+lumen new "Dune" --type book --set pages=412 --set 'author=[[Frank Herbert]]'
+```
+
+כמו `lumen new`, גם `lumen new --type` כותב ישירות, כי אתה זה שנמצא
+בטרמינל. ערך שלא מתאים לסוג לא כותב כלום.
 
 ## Lumen כלקוח: שרתים חיצוניים לסוכנים המקומיים
 
