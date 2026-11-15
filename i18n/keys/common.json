@@ -2401,6 +2401,62 @@
       "vars": []
     },
     {
+      "key": "contradictions.candidates",
+      "en": "{n} candidates. Each is two exact quotes for you to compare; nothing was decided or changed.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "contradictions.kind.correction",
+      "en": "A correction",
+      "vars": []
+    },
+    {
+      "key": "contradictions.kind.date",
+      "en": "Different dates",
+      "vars": []
+    },
+    {
+      "key": "contradictions.kind.denial",
+      "en": "A denial",
+      "vars": []
+    },
+    {
+      "key": "contradictions.kind.direction",
+      "en": "Opposite direction",
+      "vars": []
+    },
+    {
+      "key": "contradictions.kind.value",
+      "en": "Different values",
+      "vars": []
+    },
+    {
+      "key": "contradictions.none",
+      "en": "No disagreements found between your notes.",
+      "vars": []
+    },
+    {
+      "key": "contradictions.summary",
+      "en": "Where my notes disagree: {n} candidates",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "contradictions.title",
+      "en": "Where my notes disagree",
+      "vars": []
+    },
+    {
+      "key": "contradictions.untrusted",
+      "en": "Outside content, given no weight: {why}",
+      "vars": [
+        "why"
+      ]
+    },
+    {
       "key": "credits.close",
       "en": "Close",
       "vars": []
