@@ -6221,6 +6221,26 @@
       "vars": []
     },
     {
+      "key": "flag.retention.onThisDay.desc",
+      "en": "Today's daily note lists your notes from this day in earlier years. Built on this device.",
+      "vars": []
+    },
+    {
+      "key": "flag.retention.onThisDay.name",
+      "en": "On this day",
+      "vars": []
+    },
+    {
+      "key": "flag.retention.weeklySummary.desc",
+      "en": "On the first day of the week, today's daily note sums up the past week: notes edited, tasks done, tags. Built on this device.",
+      "vars": []
+    },
+    {
+      "key": "flag.retention.weeklySummary.name",
+      "en": "Weekly summary",
+      "vars": []
+    },
+    {
       "key": "flag.sync.e2ee.desc",
       "en": "End-to-end encrypted sync to a folder, WebDAV, S3 or the relay. Off by default in every build: its cryptography has not had an external security audit yet.",
       "vars": []
@@ -6248,6 +6268,16 @@
     {
       "key": "flags.badge.title",
       "en": "Beta build: open the feature flags",
+      "vars": []
+    },
+    {
+      "key": "flags.classic",
+      "en": "Keep the classic look",
+      "vars": []
+    },
+    {
+      "key": "flags.classic.desc",
+      "en": "Turns off every design change that ships behind a flag. New features stay as they are.",
       "vars": []
     },
     {
@@ -6283,6 +6313,11 @@
     {
       "key": "flags.source.channel",
       "en": "Default for this build",
+      "vars": []
+    },
+    {
+      "key": "flags.source.classic",
+      "en": "Off: you kept the classic look",
       "vars": []
     },
     {
@@ -11849,6 +11884,67 @@
       "en": "Turn on the reranking model? It downloads about {mb} MB once (bge-reranker-v2-m3) and runs on this device. On Lumen's Hebrew retrieval test the built-in ranking already puts every answer first.",
       "vars": [
         "mb"
+      ]
+    },
+    {
+      "key": "retention.created",
+      "en": "created that day",
+      "vars": []
+    },
+    {
+      "key": "retention.done",
+      "en": "{n} tasks done",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "retention.edited",
+      "en": "{n} notes edited",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "retention.more",
+      "en": "…and {n} more",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "retention.nothingEdited",
+      "en": "No notes were edited this week.",
+      "vars": []
+    },
+    {
+      "key": "retention.onThisDay",
+      "en": "On this day",
+      "vars": []
+    },
+    {
+      "key": "retention.tags",
+      "en": "Tags",
+      "vars": []
+    },
+    {
+      "key": "retention.turnOff",
+      "en": "Built on this device. Turn it off in Feature flags.",
+      "vars": []
+    },
+    {
+      "key": "retention.week",
+      "en": "The week {from} – {to}",
+      "vars": [
+        "from",
+        "to"
+      ]
+    },
+    {
+      "key": "retention.words",
+      "en": "{n} words",
+      "vars": [
+        "n"
       ]
     },
     {

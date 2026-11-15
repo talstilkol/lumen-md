@@ -202,6 +202,10 @@ export async function openDailyNote(day: Day, settings: DailySettings, locale: s
   if (settings.morning && isoOf(day) === isoOf(dayOf(new Date())) && open.doc.workspaceName !== path && !open.openTabs.some((x) => x.workspaceName === path)) {
     await import("./morning").then((m) => m.refreshMorningFile(day, settings, locale)).catch(() => undefined);
   }
+  // Plan W11.P15: "On this day" and, on the week's first day, the week's summary — each behind its own flag.
+  if (isoOf(day) === isoOf(dayOf(new Date())) && open.doc.workspaceName !== path && !open.openTabs.some((x) => x.workspaceName === path)) {
+    await import("../retention/retention").then((m) => m.refreshRetentionFile(day, settings, locale)).catch(() => undefined);
+  }
   const store = useAppStore.getState();
   if (store.doc.workspaceName === path) return path;
   const tab = store.openTabs.find((x) => x.workspaceName === path);

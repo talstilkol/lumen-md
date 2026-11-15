@@ -27,12 +27,15 @@ export interface FlagDef {
   since: { beta: string; stable?: string };
   /** The flag may leave "experimental" only after this kind of external audit is published (security/crypto-audit.json). */
   requiresAudit?: "crypto";
+  /** A change to how Lumen looks: off while "Keep the classic look" is on (plan W11.P15). */
+  design?: boolean;
 }
 
 export const FLAGS: readonly FlagDef[] = (registry as { flags: FlagDef[] }).flags;
 const BY_ID = new Map(FLAGS.map((f) => [f.id, f]));
 
 const STORAGE_KEY = "lumen-flags";
+const CLASSIC_KEY = "lumen-classic-look";
 export const FLAGS_CHANGED = "lumen-flags-changed";
 
 /** The build's channel. Anything but "beta" is stable. */
@@ -71,23 +74,47 @@ function safeStorage(): Storage | null {
 export interface FlagState {
   flag: FlagDef;
   enabled: boolean;
-  /** Where the value comes from: the user's own choice, or the channel's default. */
-  source: "override" | "channel";
+  /** Where the value comes from: the user's own choice, the channel's default, or "Keep the classic look". */
+  source: "override" | "channel" | "classic";
   channelDefault: boolean;
 }
 
-export function flagState(id: string, opts: { channel?: Channel; overrides?: Overrides } = {}): FlagState | null {
-  const flag = BY_ID.get(id);
-  if (!flag) return null;
-  const channel = opts.channel ?? buildChannel();
-  const overrides = opts.overrides ?? readOverrides();
+/** "Keep the classic look": every design flag off, whatever the channel or the flag's own switch says. */
+export function classicLook(storage: Pick<Storage, "getItem"> | null = safeStorage()): boolean {
+  try {
+    return storage?.getItem(CLASSIC_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function setClassicLook(on: boolean, storage: Pick<Storage, "setItem" | "removeItem"> | null = safeStorage()): void {
+  try {
+    if (on) storage?.setItem(CLASSIC_KEY, "1");
+    else storage?.removeItem(CLASSIC_KEY);
+  } catch {
+    // why: storage is blocked or full (private mode, quota): the setting holds for this session only
+    /* storage blocked */
+  }
+  if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent(FLAGS_CHANGED, { detail: { id: null } }));
+}
+
+/** A flag's state from its definition (pure: the registry, the channel, the user's choices and the classic look are inputs). */
+export function stateOf(flag: FlagDef, channel: Channel, overrides: Overrides, classic: boolean): FlagState {
   const channelDefault = defaultFor(flag, channel);
-  if (id in overrides) return { flag, enabled: overrides[id], source: "override", channelDefault };
+  if (flag.design && classic) return { flag, enabled: false, source: "classic", channelDefault };
+  if (flag.id in overrides) return { flag, enabled: overrides[flag.id], source: "override", channelDefault };
   return { flag, enabled: channelDefault, source: "channel", channelDefault };
 }
 
+export function flagState(id: string, opts: { channel?: Channel; overrides?: Overrides; classic?: boolean } = {}): FlagState | null {
+  const flag = BY_ID.get(id);
+  if (!flag) return null;
+  return stateOf(flag, opts.channel ?? buildChannel(), opts.overrides ?? readOverrides(), opts.classic ?? classicLook());
+}
+
 /** Is a feature on? Unknown ids are off, so a removed flag can't switch anything on. */
-export function isEnabled(id: string, opts: { channel?: Channel; overrides?: Overrides } = {}): boolean {
+export function isEnabled(id: string, opts: { channel?: Channel; overrides?: Overrides; classic?: boolean } = {}): boolean {
   return flagState(id, opts)?.enabled ?? false;
 }
 

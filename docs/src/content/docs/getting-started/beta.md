@@ -39,6 +39,15 @@ Features in beta now:
 | Flag | What it does |
 |---|---|
 | Check for updates at launch | Desktop app: looks for a new version once a day when Lumen starts, so beta fixes arrive quickly. Never in *local only* mode; every check is in the privacy log. |
+| On this day | Today's daily note lists your notes from this day in earlier years (up to 10): that day's daily note, and notes whose `created:` date is that day. |
+| Weekly summary | On the first day of the week (Sunday in Israel, Monday elsewhere), today's daily note sums up the past 7 days: the notes you edited and their words, the tasks done (`✅ date`), the tags you used most. |
+
+Both are built from the notes on this device, and nothing is sent. Turn
+one off and its block leaves today's note the next time the note opens.
+
+**Keep the classic look.** The switch at the top of the list turns off
+every design change that ships behind a flag, whatever the build or the
+flag's own switch says. New features stay as they are.
 
 ## How a feature graduates
 
