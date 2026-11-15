@@ -814,6 +814,55 @@
       "vars": []
     },
     {
+      "key": "searchDialog.matchedAs",
+      "en": "Matched as {how}",
+      "vars": [
+        "how"
+      ]
+    },
+    {
+      "key": "searchDialog.matchedAs.english",
+      "en": "the English word",
+      "vars": []
+    },
+    {
+      "key": "searchDialog.matchedAs.finals",
+      "en": "a final letter",
+      "vars": []
+    },
+    {
+      "key": "searchDialog.matchedAs.ktiv",
+      "en": "another spelling (full / defective)",
+      "vars": []
+    },
+    {
+      "key": "searchDialog.matchedAs.lemma",
+      "en": "another form of the word",
+      "vars": []
+    },
+    {
+      "key": "searchDialog.matchedAs.niqqud",
+      "en": "without niqqud",
+      "vars": []
+    },
+    {
+      "key": "searchDialog.matchedAs.prefix",
+      "en": "without the prefix ({prefix})",
+      "vars": [
+        "prefix"
+      ]
+    },
+    {
+      "key": "searchDialog.matchedAs.synonym",
+      "en": "a synonym",
+      "vars": []
+    },
+    {
+      "key": "searchDialog.matchedAs.translit",
+      "en": "transliteration",
+      "vars": []
+    },
+    {
       "key": "searchDialog.mode.ai",
       "en": "Ask Workspace",
       "vars": []

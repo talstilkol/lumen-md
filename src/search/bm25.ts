@@ -13,7 +13,8 @@
  * nothing here is in the startup bundle.
  */
 
-import { documentTerms, queryTerms, STEM, type QueryTerm } from "../text/searchTokens";
+import { documentTerms, queryTerms, STEM, TRANSLIT_WEIGHT, type QueryTerm } from "../text/searchTokens";
+import { phoneticKeys, translitScript } from "../text/translit";
 
 export const K1 = 1.2;
 export const B = 0.75;
@@ -30,6 +31,12 @@ export const PREFIX_WEIGHT = 0.5;
  * (W1.32, Codex on #232; it used to keep the 30 most frequent terms).
  */
 export const MAX_PREFIX_POSTINGS = 50_000;
+
+/** At most this many words in the other script stand for one query word (R12.16). */
+export const MAX_TRANSLIT_TERMS = 8;
+
+/** A word's length without Latin vowels (Hebrew writes few vowels: "kohen" is as long as "כהנ"). */
+const consonants = (w: string) => w.replace(/[aeiouy]/g, "").length;
 
 interface Doc {
   id: string;
@@ -59,6 +66,12 @@ export class Bm25Index {
   private postings = new Map<string, Map<number, number>>();
   private totalLength = 0;
   private nextNum = 0;
+  /**
+   * Phonetic key → the index's words with that key (R12.16). Built the first
+   * time a query needs it, then kept up to date by set / remove, so an index
+   * nobody searches across scripts never pays for it.
+   */
+  private translit: Map<string, Set<string>> | null = null;
 
   get size(): number {
     return this.docs.size;
@@ -95,9 +108,57 @@ export class Bm25Index {
     this.totalLength += length;
     for (const [t, tf] of counts) {
       let p = this.postings.get(t);
-      if (!p) this.postings.set(t, (p = new Map()));
+      if (!p) {
+        this.postings.set(t, (p = new Map()));
+        if (this.translit) this.addTranslit(t);
+      }
       p.set(num, tf);
     }
+  }
+
+  private addTranslit(term: string): void {
+    const map = this.translit;
+    if (!map || !translitScript(term)) return;
+    for (const k of phoneticKeys(term)) {
+      let s = map.get(k);
+      if (!s) map.set(k, (s = new Set()));
+      s.add(term);
+    }
+  }
+
+  private dropTranslit(term: string): void {
+    const map = this.translit;
+    if (!map || !translitScript(term)) return;
+    for (const k of phoneticKeys(term)) {
+      const s = map.get(k);
+      if (!s) continue;
+      s.delete(term);
+      if (!s.size) map.delete(k);
+    }
+  }
+
+  /**
+   * For each query word, the index's words in the other script that share a
+   * phonetic key with it ("Kohen" → "כהנ"), as weaker forms of that word.
+   */
+  private transliterations(terms: QueryTerm[]): QueryTerm[] {
+    const exact = terms.filter((t) => t.weight === 1 && translitScript(t.term) && t.term.replace(/['"]/g, "").length >= 3);
+    if (!exact.length) return [];
+    if (!this.translit) {
+      this.translit = new Map();
+      for (const term of this.postings.keys()) this.addTranslit(term);
+    }
+    const out: QueryTerm[] = [];
+    for (const { term, group } of exact) {
+      const script = translitScript(term);
+      const found = new Set<string>();
+      for (const k of phoneticKeys(term)) for (const w of this.translit.get(k) ?? []) if (translitScript(w) !== script) found.add(w);
+      // The closest in consonants first (a name, not a longer word that happens to share its sounds).
+      const len = consonants(term);
+      const best = [...found].sort((a, b) => Math.abs(consonants(a) - len) - Math.abs(consonants(b) - len) || (a < b ? -1 : 1)).slice(0, MAX_TRANSLIT_TERMS);
+      for (const w of best) out.push({ term: w, weight: TRANSLIT_WEIGHT, group });
+    }
+    return out;
   }
 
   remove(id: string): void {
@@ -110,7 +171,10 @@ export class Bm25Index {
       const p = this.postings.get(t);
       if (!p) continue;
       p.delete(d.num);
-      if (!p.size) this.postings.delete(t);
+      if (!p.size) {
+        this.postings.delete(t);
+        this.dropTranslit(t);
+      }
     }
   }
 
@@ -152,7 +216,8 @@ export class Bm25Index {
     const base = typeof query === "string" ? queryTerms(query) : query;
     const n = this.docs.size;
     if (!n || !base.length) return [];
-    const terms = opts.prefix ? [...base, ...this.completions(base)] : base;
+    const withTranslit = typeof query === "string" ? [...base, ...this.transliterations(base)] : base;
+    const terms = opts.prefix ? [...withTranslit, ...this.completions(base)] : withTranslit;
     const groups = new Set(base.map((t) => t.group)).size;
     const avg = this.totalLength / n || 1;
     // Per document, per query word: the best of its forms (see QueryTerm.group).

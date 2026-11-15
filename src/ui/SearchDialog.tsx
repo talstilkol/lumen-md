@@ -30,7 +30,7 @@ import "./searchDialogStrings";
 import { Modal } from "./Modal";
 import { buildAskContext, retrieveForQuestion } from "./searchDialogParts";
 import { AskScopePicker, VaultCitationList } from "./askVaultViews";
-import { renderSnippet } from "./searchSnippet";
+import { MatchedAsLine, renderSnippet, SNIPPET_STYLE } from "./searchSnippet";
 import { regexNoteText } from "./searchRegexNote";
 
 interface Props {
@@ -661,20 +661,8 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
                     </span>
                   )}
                 </div>
-                {hit.snippet && (
-                  <div
-                    style={{
-                      color: "hsl(var(--fg-muted))",
-                      fontSize: 11.5,
-                      marginTop: 2,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {renderSnippet(hit)}
-                  </div>
-                )}
+                {hit.snippet && <div style={SNIPPET_STYLE}>{renderSnippet(hit)}</div>}
+                {mode === "search" && <MatchedAsLine query={query} hit={hit} />}
               </div>
             </div>
           ))}

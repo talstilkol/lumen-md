@@ -55,5 +55,14 @@
   "vaultCite.pinned": "Link pinned and copied: {link}",
   "askScope.tag": "One tag",
   "vaultCite.claimsUnsupported": "{n} of {total} claims have no verified quote — they are marked in the answer.",
-  "vaultCite.pinGone": "That paragraph has changed since the answer; ask again."
+  "vaultCite.pinGone": "That paragraph has changed since the answer; ask again.",
+  "searchDialog.matchedAs.synonym": "a synonym",
+  "searchDialog.matchedAs.translit": "transliteration",
+  "searchDialog.matchedAs.finals": "a final letter",
+  "searchDialog.matchedAs": "Matched as {how}",
+  "searchDialog.matchedAs.prefix": "without the prefix ({prefix})",
+  "searchDialog.matchedAs.niqqud": "without niqqud",
+  "searchDialog.matchedAs.ktiv": "another spelling (full / defective)",
+  "searchDialog.matchedAs.lemma": "another form of the word",
+  "searchDialog.matchedAs.english": "the English word"
 }
