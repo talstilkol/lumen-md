@@ -49,6 +49,8 @@ const RECORDERS: Record<string, (src: string) => string[]> = {
   // Open sources (W7.24): each host under its source's reason; the gate itself records its callers' reasons.
   "src/sources/open/app.ts": (src) => [...src.matchAll(/reason: "([^"]+)"/g)].map((m) => m[1]),
   "src/sources/open/gate.ts": () => [],
+  // Wikidata entity linking (W12.E10): ledgerFetch with the ledger's own www.wikidata.org rule.
+  "src/ui/WikidataLink.tsx": () => [],
   // Signed plugin install (W10.B3): every registry download under its one fixed reason.
   "src/plugins/install.ts": (src) => [/const LEDGER_REASON = "([^"]+)"/.exec(src)![1]],
 };

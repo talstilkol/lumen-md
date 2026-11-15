@@ -766,6 +766,54 @@
       },
       "status": "alarm",
       "gap": "Not a consent route: it lists requests no rule names, so each one is a route to classify or a bug."
+    },
+    {
+      "id": "wikidata",
+      "routes": [
+        "Wikidata search: the entity name only"
+      ],
+      "category": "cloud-text",
+      "purpose": "Find the Wikidata item of an entity the user asked to link (W12.E10)",
+      "recipients": [
+        "Wikimedia Foundation (www.wikidata.org)"
+      ],
+      "dataSent": "The name of the one entity, nothing from notes",
+      "lawfulBasis": "consent",
+      "needsConsent": true,
+      "ppa2026": {
+        "activeOptIn": "The user runs \"Entity: link to Wikidata…\" and agrees (this once, or always for the vault) before any request.",
+        "preTicked": false,
+        "namedRecipients": [
+          "Wikimedia Foundation (www.wikidata.org)"
+        ],
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "openalex",
+      "routes": [
+        "OpenAlex: the references of a DOI (citation graph, only when you turn it on)"
+      ],
+      "category": "research",
+      "purpose": "Fill the references of a library item for the citation graph (W12.X3)",
+      "recipients": [
+        "OurResearch (api.openalex.org)"
+      ],
+      "dataSent": "The DOIs of the items, nothing from notes",
+      "lawfulBasis": "consent",
+      "needsConsent": true,
+      "ppa2026": {
+        "activeOptIn": "The user turns on the OpenAlex lookup and runs \"fill references\"; off by default.",
+        "preTicked": false,
+        "namedRecipients": [
+          "OurResearch (api.openalex.org)"
+        ],
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
     }
   ]
 }
