@@ -12,6 +12,7 @@ import { log } from "../lib/logger";
 import { t } from "../i18n";
 import { explainError } from "../lib/userError";
 import { AiError } from "../ai/llm";
+import { markAiInsert } from "./wysiwygAiAuthorship";
 
 export interface SlashItem {
   label: string;
@@ -262,7 +263,8 @@ export function buildSlashItems(): SlashItem[] {
             const tr = v.state.tr;
             const endOfText = insertPos + accumulated.length - chunk.length;
             tr.insertText(chunk, endOfText);
-            v.dispatch(tr);
+            // 5.9 / W10.E37: the agent's text, marked as it goes in.
+            v.dispatch(markAiInsert(tr));
           }
         } catch (e) {
           const docText = v.state.doc.textBetween(insertPos, Math.min(insertPos + placeholder.length, v.state.doc.content.size));

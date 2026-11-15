@@ -11,6 +11,7 @@ import { tooltipFactory, TooltipProvider } from "@milkdown/plugin-tooltip";
 import type { EditorView } from "@milkdown/prose/view";
 import { Plugin } from "@milkdown/prose/state";
 import { wysiwygBidiPlugin } from "./wysiwygBidi";
+import { wysiwygAiAuthorshipPlugin } from "./wysiwygAiAuthorship";
 import { remoteImagePlugin } from "./remoteImageView";
 import { wysiwygBidiMarksPlugin } from "./wysiwygBidiMarks";
 import { listSpreadFix } from "./milkdownListSpread";
@@ -253,6 +254,8 @@ const pasteCleanPlugin = $prose(
             dragHandlePlugin,
             // T25 — every block reads in the direction of its own text.
             wysiwygBidiPlugin(),
+            // 5.9 / W10.E37 — what an agent inserted is marked when it is inserted.
+            wysiwygAiAuthorshipPlugin(),
             // Plan 2.2 — images from other sites wait for the user.
             remoteImagePlugin(),
             // 9.2 layer 1 — the browser / OS spellchecker, Hebrew included, no dictionary in the bundle.

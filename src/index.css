@@ -1247,6 +1247,13 @@
   .milkdown .ProseMirror > * {
     position: relative;
   }
+  /* 5.9 / W10.E37 — text an agent inserted, lighter until it is edited (as .cm-ai-authored in the source editor). */
+  .milkdown .ai-authored {
+    color: hsl(var(--fg-muted));
+  }
+  html[data-ai-marks-hidden] .milkdown .ai-authored {
+    color: inherit;
+  }
   /* γ.1.c — Columns directive rendered by remarkColumns. Each direct
      child becomes a `.lumen-column` wrapper inside a CSS grid. */
   .lumen-columns {
