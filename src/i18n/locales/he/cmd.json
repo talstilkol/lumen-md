@@ -60,7 +60,7 @@
   "cmd.ai.provider": "AI: החלף ספק",
   "cmd.ai.provider.hint": "החלפת ספק AI: OpenAI, Claude, Gemini, Mistral, Ollama או WebGPU מקומי",
   "cmd.ai.rerankModel": "AI: דירוג חיפוש עם המודל המקומי",
-  "cmd.ai.rerankModel.hint": "פעיל: bge-reranker-v2-m3 במכשיר (הורדה חד-פעמית של ‎~570MB). כבוי: התאמת מילים מהירה.",
+  "cmd.ai.rerankModel.hint": "פעיל: bge-reranker-v2-m3 במכשיר (הורדה חד-פעמית של ‎~570MB). כבוי: סדר BM25, ברירת המחדל.",
   "cmd.ai.reviewChanges": "AI: סקירת שינויים שסוכנים הציעו",
   "cmd.ai.reviewChanges.hint": "כל שינוי שסוכן הציע, כ-diff, לאישור או לדחייה",
   "cmd.ai.settings": "הגדרות AI…",

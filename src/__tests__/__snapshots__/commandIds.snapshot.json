@@ -922,7 +922,7 @@
       "id": "ai.rerankModel",
       "label": "AI: Rerank search with the local model",
       "group": "AI Prompts",
-      "hint": "On: bge-reranker-v2-m3 on this device (one-time ~570 MB download). Off: fast word matching.",
+      "hint": "On: bge-reranker-v2-m3 on this device (one-time ~570 MB download). Off: the BM25 order, the default.",
       "icon": "Sparkles"
     },
     {
@@ -3011,7 +3011,7 @@
       "id": "ai.rerankModel",
       "label": "AI: Rerank search with the local model",
       "group": "AI Prompts",
-      "hint": "On: bge-reranker-v2-m3 on this device (one-time ~570 MB download). Off: fast word matching.",
+      "hint": "On: bge-reranker-v2-m3 on this device (one-time ~570 MB download). Off: the BM25 order, the default.",
       "icon": "Sparkles"
     },
     {

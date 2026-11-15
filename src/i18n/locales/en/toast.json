@@ -38,6 +38,8 @@
   "toast.refactorFailed": "Refactor failed: {msg}",
   "toast.refactoringDocument": "Refactoring document...",
   "toast.region": "Notifications",
+  "toast.rerankModelOff": "Search reranking: off (BM25 order)",
+  "toast.rerankUnsupported": "The search reranking model needs WebGPU or the desktop app; this browser keeps the BM25 order.",
   "toast.summarising": "✨ Summarising…",
   "toast.switchedToOllama": "✅ Switched to Ollama: {model}",
   "toast.templateCreated": "Template \"{path}\" created!",

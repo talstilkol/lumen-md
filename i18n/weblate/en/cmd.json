@@ -60,7 +60,7 @@
   "cmd.ai.provider": "AI: Switch Provider",
   "cmd.ai.provider.hint": "Switch AI provider: OpenAI, Claude, Gemini, Mistral, Ollama, or local WebGPU",
   "cmd.ai.rerankModel": "AI: Rerank search with the local model",
-  "cmd.ai.rerankModel.hint": "On: bge-reranker-v2-m3 on this device (one-time ~570 MB download). Off: fast word matching.",
+  "cmd.ai.rerankModel.hint": "On: bge-reranker-v2-m3 on this device (one-time ~570 MB download). Off: the BM25 order, the default.",
   "cmd.ai.reviewChanges": "AI: Review changes proposed by agents",
   "cmd.ai.reviewChanges.hint": "Each change an agent proposed, as a diff, to approve or reject",
   "cmd.ai.settings": "AI Settings…",
