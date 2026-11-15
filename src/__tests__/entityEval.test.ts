@@ -10,6 +10,7 @@ import { parseConll } from "../eval/public/adapters/ner";
 import { bootstrapCi, evalCard, goldPrefix, HERE_REFERENCE, mapNemoTags, mentionNames, parseHere, parseSegmented, pipelineEngine, scoreBinary, scoreHere, scorePipelineNer, scorePrefixes, verifyTriple } from "../eval/public/adapters/entityGraph";
 import { ruleHits } from "../entities/extract/rules";
 import type { Executor } from "../agents/types";
+import { DATAMARK, unmarkData } from "../agents/untrusted";
 
 // SYNTHETIC: two sentences in UD CoNLL-U shape (ID FORM … ), with multiword tokens.
 const CONLLU = [
@@ -84,11 +85,13 @@ describe("W12.E9 HeRE (synthetic rows in the gold fields)", () => {
       supportsTools: () => false,
       supportsSchema: () => true,
       modelFor: () => "m",
-      chat: async (req: { messages: Array<{ content: string }> }) => ({ content: answers[Object.keys(answers).find((k) => req.messages[1].content.includes(k))!] ?? "{}", toolCalls: [], model: "m" }),
+      // A model reads through the datamarks the passage carries (W11.I3), so the fake matches the unmarked text.
+      chat: async (req: { messages: Array<{ content: string }> }) => ({ content: answers[Object.keys(answers).find((k) => unmarkData(req.messages[1].content).includes(k))!] ?? "{}", toolCalls: [], model: "m" }),
     }) as unknown as Executor;
   it("supported only with a verified quote; F1 of the positive class", async () => {
     const ex = local({
-      "זמרת ישראלית": '{"supported": true, "quote": "דנה היא זמרת"}',
+      // The quote comes back with the passage's datamarks, as a model copies it: still verified.
+      "זמרת ישראלית": `{"supported": true, "quote": "${["דנה", "היא", "זמרת"].join(DATAMARK)}"}`,
       "גרה בעיר": '{"supported": true, "quote": "דנה היא זמרת"}', // quote not in this passage → no
       "גובל בעמק": '{"supported": true}', // no quote → no
     });

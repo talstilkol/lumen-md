@@ -126,7 +126,9 @@ export async function extractRelations(p: ParagraphInput, executor: Executor | n
     think: false,
   });
   dropped["tool-call"] += res.toolCalls?.length ?? 0;
-  const rows = parseRelations(res.content);
+  // The paragraph went out datamarked (agents/untrusted, W11.I3); a quote copied from it may carry the marks.
+  const { unmarkData } = await import("../agents/untrusted");
+  const rows = parseRelations(unmarkData(res.content));
   if (!rows) {
     dropped["bad-json"]++;
     return { status: "ok", proposals: [], dropped };

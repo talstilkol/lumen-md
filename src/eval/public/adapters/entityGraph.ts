@@ -230,7 +230,7 @@ export const HERE_SYSTEM = [
 export async function verifyTriple(executor: Executor, row: HereRow, model?: string): Promise<boolean> {
   if (!LOCAL_EXECUTORS.has(executor.id)) throw new Error("HeRE runs on a local engine only");
   // A dynamic import: agents/untrusted brings its lazy strings (i18nLazyEnglish).
-  const { guardUntrusted } = await import("../../../agents/untrusted");
+  const { guardUntrusted, unmarkData } = await import("../../../agents/untrusted");
   const passage = guardUntrusted(row.text, ["dataset:HeRE"]).text;
   const res = await executor.chat({
     messages: [
@@ -244,7 +244,9 @@ export async function verifyTriple(executor: Executor, row: HereRow, model?: str
     think: false,
   });
   try {
-    const body = /```(?:json)?\s*([\s\S]*?)```/.exec(res.content)?.[1] ?? res.content;
+    // The passage went out datamarked (W11.I3): a quote copied from it may carry the marks.
+    const content = unmarkData(res.content);
+    const body = /```(?:json)?\s*([\s\S]*?)```/.exec(content)?.[1] ?? content;
     const v = JSON.parse(body.trim()) as { supported?: unknown; quote?: unknown };
     return v.supported === true && typeof v.quote === "string" && quoteInParagraph(v.quote, row.text);
   } catch {
