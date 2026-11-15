@@ -75,3 +75,7 @@ When you edit a paragraph, its translation is marked **out of date**.
 on the same local layers as above. Where Chrome's built-in translator is
 not available (phones, other browsers), the view says so and the next
 layer is used.
+
+The translation is not written straight away. It waits in the review
+panel, like every change an AI feature proposes, and it is saved to the
+vault only when you approve it there.

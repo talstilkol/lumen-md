@@ -28,5 +28,7 @@
   "mt.sideBySide.missing": "not translated yet",
   "mt.sideBySide.close": "Close",
   "mt.sideBySide.needVault": "Save the note in the vault first: the translation is saved next to it.",
-  "mt.sideBySide.sidecar": "Saved as {path}"
+  "mt.sideBySide.sidecar": "Saved as {path}",
+  "mt.sideBySide.summary": "Translation: {path}",
+  "mt.sideBySide.inReview": "The translation is waiting in the review panel. Approve it to save {path}."
 }

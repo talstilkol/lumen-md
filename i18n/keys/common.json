@@ -11290,6 +11290,13 @@
       ]
     },
     {
+      "key": "mt.sideBySide.inReview",
+      "en": "The translation is waiting in the review panel. Approve it to save {path}.",
+      "vars": [
+        "path"
+      ]
+    },
+    {
       "key": "mt.sideBySide.layer",
       "en": "Translated with {layer}",
       "vars": [
@@ -11322,6 +11329,13 @@
       "key": "mt.sideBySide.stale",
       "en": "out of date",
       "vars": []
+    },
+    {
+      "key": "mt.sideBySide.summary",
+      "en": "Translation: {path}",
+      "vars": [
+        "path"
+      ]
     },
     {
       "key": "mt.sideBySide.title",

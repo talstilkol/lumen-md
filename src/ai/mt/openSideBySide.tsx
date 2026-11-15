@@ -2,8 +2,10 @@
  * "Side-by-side translation" from the palette (plan W12.H6): opens the
  * current note and its translation in two columns (ui/SideBySideTranslation)
  * in a dialog. A Hebrew note is translated to English, any other to Hebrew.
- * The sidecar `<note>.<lang>.md` is read from the vault when it exists and
- * written there on "Translate". Translation runs on the existing local
+ * The sidecar `<note>.<lang>.md` is read from the vault when it exists. On
+ * "Translate" it is not written here: the translation is proposed to the
+ * review panel (agents/staging, as every agent and AI change is, W10.C12),
+ * and only the user's approval writes it. Translation runs on the existing local
  * layers (Chrome's Translator API, then Opus-MT, then M2M100); a model
  * download asks first, as everywhere else.
  */
@@ -43,7 +45,7 @@ export async function openSideBySide(deps: { translate?: TranslateTexts } = {}):
   const pair = pairFor(doc.content);
   const sidecarFile = sidecarPath(path, pair.target);
   const translate = deps.translate ?? viaLocalLayers(pair, { confirm: uiConfirm, t, locale: getLocale() });
-  let sidecar = await ws.readWorkspaceFile(sidecarFile).catch(() => null);
+  const sidecar = await ws.readWorkspaceFile(sidecarFile).catch(() => null);
 
   closeSideBySide();
   const host = document.createElement("div");
@@ -61,10 +63,12 @@ export async function openSideBySide(deps: { translate?: TranslateTexts } = {}):
           translate={translate}
           chromeAvailable={chromeTranslatorApi() !== null}
           onSave={async (md) => {
-            await ws.writeWorkspaceFile(sidecarFile, md);
-            sidecar = md;
-            window.dispatchEvent(new CustomEvent("lumen-workspace-changed"));
-            render();
+            // A proposal, not a write: approval checks the sidecar still holds what was read here.
+            const { stageChange } = await import("../../agents/staging");
+            stageChange({ kind: "file", path: sidecarFile, before: sidecar, after: md, summary: t("mt.sideBySide.summary", { path: sidecarFile }) }, { tool: "translate_sidecar", agentId: "translator" });
+            closeSideBySide();
+            useToastStore.getState().push({ kind: "info", title: t("mt.sideBySide.inReview", { path: sidecarFile }) });
+            window.dispatchEvent(new Event("lumen-open-agent-review"));
           }}
         />
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBlockStart: 8, gap: 8 }}>
