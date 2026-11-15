@@ -155,6 +155,8 @@ export const NATIVE_JOBS = [
       },
     ],
     artifacts: ["ci-out/pr-check.md"],
+    // W10.E25 (plan 0.19): the report as one PR comment, edited on every build, pass or fail.
+    always: ["node scripts/buildkite/pr-comment.mjs ci-out/pr-check.md"],
   },
   {
     key: "security",
@@ -364,10 +366,17 @@ export function jobScript(job, ci) {
 export const escapeDollars = (s) => String(s).replace(/\$/g, "$$$$");
 
 /** The command of a job: run.sh reads the job's script from a quoted heredoc (nothing in it is expanded early). */
-function command(job, script, { before = [], after = [] } = {}) {
+/**
+ * `always`: host commands that run after the job's script whether it passed
+ * or failed (Buildkite's shell is `bash -e`), before the job exits with the
+ * script's own code, so they can never turn a red job green.
+ */
+function command(job, script, { before = [], after = [], always = [] } = {}) {
   const d = delimiter(script, "LUMEN_JOB");
   const envs = [`LUMEN_CI_JOB=${job.key}`, job.install ? `LUMEN_CI_INSTALL=${shq(job.install)}` : null, job.browsers ? `LUMEN_CI_BROWSERS=${job.browsers.join(",")}` : null, job.keepGoing ? "LUMEN_CI_KEEP_GOING=1" : null].filter(Boolean);
-  return escapeDollars([...before, `${envs.join(" ")} bash scripts/buildkite/run.sh <<'${d}'\n${script}\n${d}`, ...after].join("\n"));
+  const run = `${envs.join(" ")} bash scripts/buildkite/run.sh <<'${d}'${always.length ? " || lumen_code=$?" : ""}\n${script}\n${d}`;
+  const keep = always.length ? ["lumen_code=0", run, ...always.map((c) => `${c} || true`), 'exit "$lumen_code"'] : [run];
+  return escapeDollars([...before, ...keep, ...after].join("\n"));
 }
 
 const status = (key) => [{ github_commit_status: { context: `${STATUS_PREFIX}: ${key}` } }];
@@ -446,7 +455,7 @@ export function buildPipeline(ci, { jobs = JOBS, shards = VITEST_SHARDS, native 
     const s = {
       label: j.label,
       key: j.key,
-      command: command(j, jobScript(j, ci)),
+      command: command(j, jobScript(j, ci), { always: j.always ?? [] }),
       agents: at(j.queue ?? "linux"),
       timeout_in_minutes: j.timeout,
       notify: status(j.key),
@@ -617,6 +626,9 @@ export function pipelineRules(p) {
     if (webkit.agents?.queue !== "mac") problems.push("e2e-webkit must run on the Mac's queue (real WebKit on macOS)");
     if (webkit.if || webkit.skip) problems.push("e2e-webkit must run on every build (no if/skip)");
   }
+  // W10.E25: the pr:check report is posted on the PR after pr:check, whatever its result.
+  const prCheck = (p.steps ?? []).find((x) => x.key === "pr-check");
+  if (prCheck && !/pr-comment\.mjs ci-out\/pr-check\.md \|\| true\nexit "\$\$lumen_code"/.test(prCheck.command ?? "")) problems.push("pr-check does not post its report on the PR after pr:check, pass or fail (scripts/buildkite/pr-comment.mjs)");
   // W10.D4 / W10.D14: pr:check and the scanners run on every build, PRs included.
   for (const key of ["pr-check", "security"]) {
     const s = (p.steps ?? []).find((x) => x.key === key);

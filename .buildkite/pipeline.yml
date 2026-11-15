@@ -510,7 +510,8 @@ steps:
   - label: ":mag: pr:check"
     key: "pr-check"
     command: |-
-      LUMEN_CI_JOB=pr-check bash scripts/buildkite/run.sh <<'LUMEN_JOB'
+      lumen_code=0
+      LUMEN_CI_JOB=pr-check bash scripts/buildkite/run.sh <<'LUMEN_JOB' || lumen_code=$$?
       gate 'pr:check on the pull request' <<'LUMEN_STEP'
       if [ "$${BUILDKITE_PULL_REQUEST:-false}" = "false" ]; then echo "pr:check: not a pull-request build; it runs on every PR build"; exit 0; fi
       base="$${BUILDKITE_PULL_REQUEST_BASE_BRANCH:-main}"
@@ -521,6 +522,8 @@ steps:
       LUMEN_STEP
       gates_done
       LUMEN_JOB
+      node scripts/buildkite/pr-comment.mjs ci-out/pr-check.md || true
+      exit "$$lumen_code"
     agents:
       queue: "linux"
     timeout_in_minutes: 20
