@@ -141,3 +141,6 @@ ci-docker-out/
 /ci-out/
 /.vitest/
 dist-frame/
+
+# Plan W11.P3: the obsidian-help corpus, downloaded (not redistributed; scripts/obsidian-help-corpus.mjs)
+.cache/obsidian-help/

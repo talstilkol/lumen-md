@@ -1,0 +1,3829 @@
+{
+ "format": "lumen-obsidian-help-corpus/1",
+ "plan": "W11.P3 (R1.8)",
+ "repo": "https://github.com/obsidianmd/obsidian-help",
+ "commit": "0a01159d5b613a8afc55ce02b9c0ea8a0cd44ef1",
+ "committed": "2026-11-12T19:05:15Z",
+ "licence": "none stated: no LICENSE file at this commit and no licence in its README",
+ "redistributed": false,
+ "why": "Not copied into this repository: without a licence the files can be read but not redistributed. The test runs over a local download (node scripts/obsidian-help-corpus.mjs --fetch).",
+ "sets": [
+  "en",
+  "he",
+  "Release notes",
+  "Sandbox",
+  "/*.md"
+ ],
+ "files": [
+  {
+   "path": "AGENTS.md",
+   "sha256": "dbb4d7c033876433e021d592e23be5f43d2bf081ccb30b9395dddf219b556e02",
+   "bytes": 3367
+  },
+  {
+   "path": "README.md",
+   "sha256": "b990cfffe426fa58e9b03602e65896fa506d42d6b7efb507b19fb863d628402b",
+   "bytes": 5628
+  },
+  {
+   "path": "Release notes/Mobile/v0.0.11.md",
+   "sha256": "5c429113a6c59a58cc8a9c45d822693de12cb45b0cc13f9c54d6fce44ee9a27f",
+   "bytes": 825
+  },
+  {
+   "path": "Release notes/Mobile/v0.0.12.md",
+   "sha256": "3ea60656358bf78c49eefb5917b55eb615776fb8946aaa96754acf119a335ad6",
+   "bytes": 771
+  },
+  {
+   "path": "Release notes/Mobile/v0.0.13.md",
+   "sha256": "7ba4ee55e673fdbbbb45ea619a104535d0a4c6ee298a342e16826d544ebfe7e5",
+   "bytes": 388
+  },
+  {
+   "path": "Release notes/Mobile/v0.0.14.md",
+   "sha256": "aecf2150f6158e156a118b5082e3958c235b352d81f90973d2a5546b6efab8dc",
+   "bytes": 190
+  },
+  {
+   "path": "Release notes/Mobile/v0.0.15.md",
+   "sha256": "2612c0c6e97a6e929c9189800227a8a0c60190d50296e279f58834bfbb28d59a",
+   "bytes": 274
+  },
+  {
+   "path": "Release notes/Mobile/v0.0.16.md",
+   "sha256": "3ab56d2e0ec63b54f1766899cc0341af55b3f07116bdca81830690b3e04f5085",
+   "bytes": 791
+  },
+  {
+   "path": "Release notes/Mobile/v0.0.17.md",
+   "sha256": "8921b3b59822c6c4bb5c9d604c556add8b5c2a8ae7dfc137cbba4bb983615673",
+   "bytes": 505
+  },
+  {
+   "path": "Release notes/Mobile/v0.0.18.md",
+   "sha256": "70d605bc431ded045bd1d6b7c7b5122d728f448aa60a5921d79b683d65052b9c",
+   "bytes": 2602
+  },
+  {
+   "path": "Release notes/Mobile/v0.0.19.md",
+   "sha256": "8f8fc51328c15f8b704a5ad8af78f8f2c12d360d5161b5ad09b1f7ad25b5df06",
+   "bytes": 292
+  },
+  {
+   "path": "Release notes/Mobile/v0.1.0.md",
+   "sha256": "fecbff850d39ee4df16de5662739a75c1b672ba2aaf8c6083cb81a02024a03fd",
+   "bytes": 852
+  },
+  {
+   "path": "Release notes/Mobile/v0.1.1.md",
+   "sha256": "72fec06a2fb36be2a54a586ecadc2e9578cf7a737f67fa4c6b76071c782fe9aa",
+   "bytes": 381
+  },
+  {
+   "path": "Release notes/Mobile/v0.1.4.md",
+   "sha256": "b491f5db85e516ad207c8d09173c5f4fda46965c0617cde3ae44c2382beded2d",
+   "bytes": 777
+  },
+  {
+   "path": "Release notes/Mobile/v1.0.0.md",
+   "sha256": "9cd034bb0956fc4a53e60551cea3b07ca698d4b11556a1a9f74ac07a9221c7b0",
+   "bytes": 905
+  },
+  {
+   "path": "Release notes/Mobile/v1.0.2.md",
+   "sha256": "2dd3cb86477a6a633fa34ab2489ff033c606427521c979bb77d5d2bc2e2c1e87",
+   "bytes": 246
+  },
+  {
+   "path": "Release notes/Mobile/v1.0.3.md",
+   "sha256": "7f6e7c0344d41e8efed679596e9e54395be60a1bcd1e51295088badb2b919c56",
+   "bytes": 217
+  },
+  {
+   "path": "Release notes/Mobile/v1.0.4.md",
+   "sha256": "5f08a0e69f96136d377f3a8ab3156481ed8685062ddda2de8ff0b189d27a1348",
+   "bytes": 292
+  },
+  {
+   "path": "Release notes/Mobile/v1.0.5.md",
+   "sha256": "b6d2cb6f5eb9f5b847afd97b09a06412b8a641c8a2e770ef22c863c79faaf016",
+   "bytes": 1339
+  },
+  {
+   "path": "Release notes/Mobile/v1.1.0.md",
+   "sha256": "7066f0280912f1c6a90da62f118f4d1f5fcdb88f200a86d0cc207acd11687509",
+   "bytes": 1017
+  },
+  {
+   "path": "Release notes/Mobile/v1.1.1.md",
+   "sha256": "b5047f49a7142bc2fd34bf7283583bb4ebcd9f5db61944199c1232a62c8c9915",
+   "bytes": 553
+  },
+  {
+   "path": "Release notes/Mobile/v1.2.0.md",
+   "sha256": "826ef6560a45c71319d84d587d2f259bd49aa6a1ad0526f4adc0d446a29f64d6",
+   "bytes": 196
+  },
+  {
+   "path": "Release notes/Mobile/v1.2.1.md",
+   "sha256": "c087c7b1d7ef50a1b7726e1b86e976064aaea764f0298432dbebbe8c1cf2215f",
+   "bytes": 668
+  },
+  {
+   "path": "Release notes/Mobile/v1.2.2.md",
+   "sha256": "e7b68d91f81f8d6e8e0e56136152983b68758d05cf4456cb78202cf1ff801798",
+   "bytes": 442
+  },
+  {
+   "path": "Release notes/Mobile/v1.3.0.md",
+   "sha256": "bddd06d7bb8042dc3ef29addd998df8ed1a318d05bf4f17581102a4073c5fbd1",
+   "bytes": 218
+  },
+  {
+   "path": "Release notes/Mobile/v1.3.1.md",
+   "sha256": "a3b309280c1e28b15f1973cd00e97ccefc405269931760729a7144e81200a855",
+   "bytes": 206
+  },
+  {
+   "path": "Release notes/Mobile/v1.4.0.md",
+   "sha256": "594724aa0344a761dd09a7f937764edfca84482b984decd32432db923c5a7237",
+   "bytes": 461
+  },
+  {
+   "path": "Release notes/Mobile/v1.4.1.md",
+   "sha256": "f2120909ee3f7127cb0501353f6ba8ec82459d3144754ee0d629bd26204f71ad",
+   "bytes": 915
+  },
+  {
+   "path": "Release notes/Mobile/v1.4.2.md",
+   "sha256": "5e3307a50bead27871a2fb7640a6a2cc88ffdf16a21e04c93386652e95d61a8b",
+   "bytes": 808
+  },
+  {
+   "path": "Release notes/Mobile/v1.4.4.md",
+   "sha256": "0aedeb411fa6fbfa3064b70f322de1a16becd04f81add1acf3e46fee48a2defe",
+   "bytes": 407
+  },
+  {
+   "path": "Release notes/Mobile/v1.4.5.md",
+   "sha256": "3d59a1860bb113389b7e7a9470f69c4d3ccba35295b46e060e524a6c5902dfcc",
+   "bytes": 593
+  },
+  {
+   "path": "Release notes/v0.0.1.md",
+   "sha256": "2ec3e4606ad952d1262eb8d9e3198e21c8fc89deb08bc5d22e7b8de145a47691",
+   "bytes": 279
+  },
+  {
+   "path": "Release notes/v0.0.2.md",
+   "sha256": "d23c6811cca4aeab5375b1ff0730b4fb31ef79e9fc142ee0f0bad030ff3469aa",
+   "bytes": 738
+  },
+  {
+   "path": "Release notes/v0.0.3.md",
+   "sha256": "951c1d6d0f26495789bd93253b1919959090e14905368e4e3fe8fa3bdd68467f",
+   "bytes": 552
+  },
+  {
+   "path": "Release notes/v0.1.0.md",
+   "sha256": "2b6d2e8f17ea9e0527bbd418ba5d2a2a07ed596b3f12d509c08c91c87a8ef5cf",
+   "bytes": 883
+  },
+  {
+   "path": "Release notes/v0.10.0.md",
+   "sha256": "f3e48ff99ff5efc3a20eae3552e394c39238a7dedb70a10a6a1f88e9b8e61b6b",
+   "bytes": 3796
+  },
+  {
+   "path": "Release notes/v0.10.1.md",
+   "sha256": "83897fc39aa072d57d706172fe2d774d6779d802e129803decbc8ebb06174604",
+   "bytes": 1334
+  },
+  {
+   "path": "Release notes/v0.10.10.md",
+   "sha256": "105fb7dda67e25f0b78de6e6e9f11d21a374b05f2f5163c5c33ad79632575ef7",
+   "bytes": 1186
+  },
+  {
+   "path": "Release notes/v0.10.11.md",
+   "sha256": "d742fb76594b045465c22fe4bc245507eb89d815e8d7148fdf579bccd2a1b9d5",
+   "bytes": 142
+  },
+  {
+   "path": "Release notes/v0.10.12.md",
+   "sha256": "bc7c696630d5670e28b970c21ce6e731bb6cffa6cd573ce0b15159604832c968",
+   "bytes": 2621
+  },
+  {
+   "path": "Release notes/v0.10.13.md",
+   "sha256": "396157facc41c1877b90cf57e9adc56292bc8fcea170bbdcd19839c857230ca3",
+   "bytes": 555
+  },
+  {
+   "path": "Release notes/v0.10.2.md",
+   "sha256": "bb12c2f8e10a45cbbcef664a4b62131825665b0aa5131ce1469469eba4e4112f",
+   "bytes": 2255
+  },
+  {
+   "path": "Release notes/v0.10.3.md",
+   "sha256": "721753b347ba08a36785b0b44e8b50c8459c7464a878289745258908dab29843",
+   "bytes": 2477
+  },
+  {
+   "path": "Release notes/v0.10.4.md",
+   "sha256": "0e6882070acac17f8a145296bdd09eade766ea55b072fb029ced5bc21863b59c",
+   "bytes": 555
+  },
+  {
+   "path": "Release notes/v0.10.5.md",
+   "sha256": "498874582b222725405607ed1ca419d23ec1156d232eed1a85701aa18f754283",
+   "bytes": 785
+  },
+  {
+   "path": "Release notes/v0.10.6.md",
+   "sha256": "ba472bd0293417c675a9fa205b6e7e1257d57947ca18a6137fffbd0b3fe3a028",
+   "bytes": 523
+  },
+  {
+   "path": "Release notes/v0.10.7.md",
+   "sha256": "0d27a6e80a0732273630974dce8c7f92307e5251a6a04d26c4272c68917d7d74",
+   "bytes": 791
+  },
+  {
+   "path": "Release notes/v0.10.8.md",
+   "sha256": "4396ff084cbafedc738d70b8a658fdfe173ceafd0ad5ec46e052e0d43f20101d",
+   "bytes": 1848
+  },
+  {
+   "path": "Release notes/v0.10.9.md",
+   "sha256": "87eaaa3513f8e5579ced9f8c58f9805e46a33d08156183f3008dca5c59d6ca27",
+   "bytes": 1582
+  },
+  {
+   "path": "Release notes/v0.11.0.md",
+   "sha256": "0e054153b0a4eca799af0a1e26c00aafbda92f52fa1317875d33fe902058fe0d",
+   "bytes": 2510
+  },
+  {
+   "path": "Release notes/v0.11.1.md",
+   "sha256": "ffa5dd930fdd5f8ce33cdacf64d58a0d8d6baa1bedace8d74333774f5cd9f2d2",
+   "bytes": 1879
+  },
+  {
+   "path": "Release notes/v0.11.10.md",
+   "sha256": "43ab71877a0758df273592fbdcf19c0cb4673a607b142dc805cd638f15a417ef",
+   "bytes": 1678
+  },
+  {
+   "path": "Release notes/v0.11.11.md",
+   "sha256": "47bcd47b32cf902d7258aac18b4e0b1905e1822bae3827433cfc877c76bd5d21",
+   "bytes": 1922
+  },
+  {
+   "path": "Release notes/v0.11.12.md",
+   "sha256": "997f3ebf1a888fdd11e7bd23c8795a9db12676766994546635c78a4d19a586a5",
+   "bytes": 84
+  },
+  {
+   "path": "Release notes/v0.11.13.md",
+   "sha256": "bbe15ee46273c19a729abf246dc30acff574b52f3871b26761ee08b2a4658531",
+   "bytes": 714
+  },
+  {
+   "path": "Release notes/v0.11.2.md",
+   "sha256": "39293f1e43fe8ca8e203ffcceaa1b21515ea0714ccb41d89409fca476b2fbead",
+   "bytes": 825
+  },
+  {
+   "path": "Release notes/v0.11.3.md",
+   "sha256": "2527a0607b09eea9eaf5402f97246c012403952f9b1d80ef5101370418db5226",
+   "bytes": 361
+  },
+  {
+   "path": "Release notes/v0.11.4.md",
+   "sha256": "39a2caf386640ba5b8615bd08277168d67d73734217555ca4588bbc7641bf448",
+   "bytes": 1221
+  },
+  {
+   "path": "Release notes/v0.11.5.md",
+   "sha256": "491ec953eccc6c1eb8d45c30c0b2cfe303957ef494bffd1450fb3fe85bee9aa6",
+   "bytes": 337
+  },
+  {
+   "path": "Release notes/v0.11.6.md",
+   "sha256": "0531c25c9214e5f1bfb90bf609953b716a28514caf77577dc610466be56202e1",
+   "bytes": 1027
+  },
+  {
+   "path": "Release notes/v0.11.7.md",
+   "sha256": "028987b618fadabaf106c7df40378e9381baf1dfb9af0caeeb91f4c968df20e7",
+   "bytes": 1289
+  },
+  {
+   "path": "Release notes/v0.11.8.md",
+   "sha256": "6bf140fd16bad15e977a11143b6da8c36c26c1ec5168560df2c17761aa81a648",
+   "bytes": 643
+  },
+  {
+   "path": "Release notes/v0.11.9.md",
+   "sha256": "ef1550ff4f7c0d4c2d1ebc413fd9ad779bd0c863a5aff8b29ed345b0029ed6cd",
+   "bytes": 136
+  },
+  {
+   "path": "Release notes/v0.12.0.md",
+   "sha256": "fcd31dd035a36af199daac4b55f8fedab28133cb4c5e4a95c3b997be2646ad57",
+   "bytes": 4754
+  },
+  {
+   "path": "Release notes/v0.12.1.md",
+   "sha256": "422f57827af5e801d46d32e5ed8fccb209ddbc7062b04d6540d1efd077268a70",
+   "bytes": 759
+  },
+  {
+   "path": "Release notes/v0.12.10.md",
+   "sha256": "2d954e9b53894d47cce6fb8dcb69a8485390b87d341987848bfa09993c71fa3d",
+   "bytes": 959
+  },
+  {
+   "path": "Release notes/v0.12.11.md",
+   "sha256": "020ff8a2ec1c84ea84978187375e4304a088e820649cfa7acb270b508062c31b",
+   "bytes": 730
+  },
+  {
+   "path": "Release notes/v0.12.12.md",
+   "sha256": "52fb741cfe24b5c6c020a0d42d5c487335f3f5d28e654b5a5399723a10b3bb8d",
+   "bytes": 1820
+  },
+  {
+   "path": "Release notes/v0.12.13.md",
+   "sha256": "778318f6127ad46406f86dcb743cc48ad8a52eb656841275d3f2418dc6a4059b",
+   "bytes": 557
+  },
+  {
+   "path": "Release notes/v0.12.14.md",
+   "sha256": "a24016b3b4987cdeb65300a9b02e0c50ca0e400cf47e09795f1bbcf945d6c21e",
+   "bytes": 735
+  },
+  {
+   "path": "Release notes/v0.12.15.md",
+   "sha256": "acba3cede822da6130726a5a6cd30d68cff274eafa1057315272f33a97697e0b",
+   "bytes": 214
+  },
+  {
+   "path": "Release notes/v0.12.16.md",
+   "sha256": "2fd21883713f029f2e8e9cdd700fd2d20c7c993211f2beed1dd0b8cc1c0c331a",
+   "bytes": 1247
+  },
+  {
+   "path": "Release notes/v0.12.17.md",
+   "sha256": "f4558314340750594fc83401f3522e2824b7fdc1dbb5ec2cbdbebe72d572f315",
+   "bytes": 1937
+  },
+  {
+   "path": "Release notes/v0.12.18.md",
+   "sha256": "9f90adcd7930b51471c9c0ac31ed4e081a74b07af6051bad58eafb4fdda463f2",
+   "bytes": 305
+  },
+  {
+   "path": "Release notes/v0.12.19.md",
+   "sha256": "e882899aec17129db6a7d90297161cb3528416f31974949eefea5a666e5dae5b",
+   "bytes": 348
+  },
+  {
+   "path": "Release notes/v0.12.2.md",
+   "sha256": "4ce16789bf5323aa67f4fbb580bce8828c9eb1a84566a456d67ab054adbc71e1",
+   "bytes": 2069
+  },
+  {
+   "path": "Release notes/v0.12.3.md",
+   "sha256": "aae1ac863918e1e2ae10ba8bc1cf1be6164e1d2dd5c589e486b54782957d6ecf",
+   "bytes": 72
+  },
+  {
+   "path": "Release notes/v0.12.4.md",
+   "sha256": "05a7937c478f363679c6df7d0cc0df06a29daef6c30079f97af89d87c4dad208",
+   "bytes": 1694
+  },
+  {
+   "path": "Release notes/v0.12.5.md",
+   "sha256": "1f9a0fb7e55f51ba6bd384d628cfe7f0f79e95065097729159c556358fa482c9",
+   "bytes": 1774
+  },
+  {
+   "path": "Release notes/v0.12.6.md",
+   "sha256": "4f8dd6fb4543e09ea577d9bbccef29a767d1e69a90025838095e2f26c8fb4bad",
+   "bytes": 1708
+  },
+  {
+   "path": "Release notes/v0.12.7.md",
+   "sha256": "dadad27b5add4202f262c46434a32f13c8b4b4b09f4e57165bff714f15cc64c2",
+   "bytes": 1127
+  },
+  {
+   "path": "Release notes/v0.12.8.md",
+   "sha256": "31a7f030d7358cae1189a1577d0faec2a8986d9cbb88a17f825377a6dffb1986",
+   "bytes": 887
+  },
+  {
+   "path": "Release notes/v0.12.9.md",
+   "sha256": "7e4f7a52d053fdb1fac67703c9ed0c54c51e47698937115b392edfa4c20d6bc8",
+   "bytes": 222
+  },
+  {
+   "path": "Release notes/v0.13.0.md",
+   "sha256": "d9fc04b1f0dd1b26cb40bd0f6a7c7b2c1e1a31eef802a7ba6525fee93ebd1f9a",
+   "bytes": 2918
+  },
+  {
+   "path": "Release notes/v0.13.1.md",
+   "sha256": "d0d75feaf1f46ad0c68d3e80bba7445ba43831fd7a65fa2bb65def834c852d1c",
+   "bytes": 768
+  },
+  {
+   "path": "Release notes/v0.13.10.md",
+   "sha256": "b0aac17f7a26257b97f7b57d1e4d64d71ea3b31aac8e52cee171411184f4621d",
+   "bytes": 1573
+  },
+  {
+   "path": "Release notes/v0.13.11.md",
+   "sha256": "03f1e368dbe7d623f5fa904e02ba7aea631480a982b246a7fbf4315741e144cc",
+   "bytes": 1536
+  },
+  {
+   "path": "Release notes/v0.13.12.md",
+   "sha256": "53de96785b4025dcc3cdcd2ee12572833d9051d716db6e41db4a6dcc9e2d0bb8",
+   "bytes": 190
+  },
+  {
+   "path": "Release notes/v0.13.13.md",
+   "sha256": "cec7ea5582b9efcc703c13702de9b984d1f39d4f72cf17db2891b3d19f8edb9a",
+   "bytes": 739
+  },
+  {
+   "path": "Release notes/v0.13.14.md",
+   "sha256": "e47be9f332316016390a60b82b1bdae4c753ffdc1061748fcee9648fd1482599",
+   "bytes": 267
+  },
+  {
+   "path": "Release notes/v0.13.15.md",
+   "sha256": "1ff580528ca579300bda714aafa257e9a21b6ffc41a897b5ab16709817bc30f7",
+   "bytes": 1461
+  },
+  {
+   "path": "Release notes/v0.13.16.md",
+   "sha256": "fa2c597311af29b3091a96d84a0fe9c63f6293d1888ea029293d96e3b1b3990c",
+   "bytes": 737
+  },
+  {
+   "path": "Release notes/v0.13.17.md",
+   "sha256": "6525c3c7c37d7fdfa816e0cc1f0881aa14425d2116aba03a265cfa450b893783",
+   "bytes": 662
+  },
+  {
+   "path": "Release notes/v0.13.18.md",
+   "sha256": "c0dae6772b31646aa34425b2ae52c6877e1c67ee11a674e9393299179b007860",
+   "bytes": 1390
+  },
+  {
+   "path": "Release notes/v0.13.19.md",
+   "sha256": "b05ef4b1e4607ec1adc137b5f48388baeee78c18d1cdfd8ca7654822d700e0db",
+   "bytes": 464
+  },
+  {
+   "path": "Release notes/v0.13.2.md",
+   "sha256": "2073fb78ef41601dfcffc36d929838b694c0103c2426899eefb9b8af5610f0db",
+   "bytes": 567
+  },
+  {
+   "path": "Release notes/v0.13.20.md",
+   "sha256": "82bec6432095373557f366dc4edd8f55851cf2017fad5a0ec5b069bce6cc226e",
+   "bytes": 2599
+  },
+  {
+   "path": "Release notes/v0.13.21.md",
+   "sha256": "2389a200a22ea669df2cb2cad36edbd5aedb732654e819841c336fbe79d55e1c",
+   "bytes": 503
+  },
+  {
+   "path": "Release notes/v0.13.22.md",
+   "sha256": "4b031553b5cd0a07239f7656e68809233027ea432dc3d123d8ce61a6f6c41747",
+   "bytes": 1072
+  },
+  {
+   "path": "Release notes/v0.13.23.md",
+   "sha256": "a3a923ae932aa9dd0120d81e0035f7915e81fbde06899c4f434cd71892e7ad6c",
+   "bytes": 373
+  },
+  {
+   "path": "Release notes/v0.13.24.md",
+   "sha256": "b521da262c1b19fdda1f244a31ce85d4293d0ba68c67de79e855b0698dab7f2f",
+   "bytes": 749
+  },
+  {
+   "path": "Release notes/v0.13.25.md",
+   "sha256": "eeb9cf24558783e3702d27b82065fba9b5ccaca0de012bbee554356e5804a7bf",
+   "bytes": 2321
+  },
+  {
+   "path": "Release notes/v0.13.26.md",
+   "sha256": "4255f1fa90f482117b178cb2f1006e430c31246338b016e1ec7aa16beca26977",
+   "bytes": 230
+  },
+  {
+   "path": "Release notes/v0.13.27.md",
+   "sha256": "cc49afd33ff7f588eda4d50a70b756246f022d5814568119401b6563a2dfd3fd",
+   "bytes": 2442
+  },
+  {
+   "path": "Release notes/v0.13.28.md",
+   "sha256": "b4cbe72f924ba8ed5c546b0f807ca71aa3ffd43924547a57785161dc65ddc261",
+   "bytes": 396
+  },
+  {
+   "path": "Release notes/v0.13.29.md",
+   "sha256": "33995a287c8d0eb5b94f6e17c8fbb093d3b6c9e57b555a6aeba761a49fe15643",
+   "bytes": 550
+  },
+  {
+   "path": "Release notes/v0.13.3.md",
+   "sha256": "31044b70b248be5c3123ff066b4daa526fbe53613c83fb41c1540b9077d6a078",
+   "bytes": 1667
+  },
+  {
+   "path": "Release notes/v0.13.30.md",
+   "sha256": "612ba3c9b9a86f234b3de22765500ede869c3f397c416f7f31a06934105364ef",
+   "bytes": 430
+  },
+  {
+   "path": "Release notes/v0.13.31.md",
+   "sha256": "34dfdf2f79c97f92be4314ed6c45e90ff5d4ff26c88e8be63f76c01c38b9fd02",
+   "bytes": 380
+  },
+  {
+   "path": "Release notes/v0.13.32.md",
+   "sha256": "7089305fa6d9fd1f68af1b5a67e6d67c4d5a1e07b1f3f5af696f6f1248f94b58",
+   "bytes": 258
+  },
+  {
+   "path": "Release notes/v0.13.33.md",
+   "sha256": "2b74eae377935e33cfd5553750235d7644528ad67bcade37898f16b1dc587b6d",
+   "bytes": 86
+  },
+  {
+   "path": "Release notes/v0.13.4.md",
+   "sha256": "ff3f71bcf31838c3f9e4211e12049a159b6510335f0cc7e7a0e9742bbf09e233",
+   "bytes": 564
+  },
+  {
+   "path": "Release notes/v0.13.5.md",
+   "sha256": "5c9834e3fd3ee85023def07b37d18152f9302d5ebbb3fef94679e11fd7bb77df",
+   "bytes": 966
+  },
+  {
+   "path": "Release notes/v0.13.6.md",
+   "sha256": "133aa5d7dddaeeddeba0276ed0fbc0be84a09d41f25b20945792a3d236e116e2",
+   "bytes": 1043
+  },
+  {
+   "path": "Release notes/v0.13.7.md",
+   "sha256": "b2a3900bb38fcc6f5b1c6375d6dbcb434239adc2d1af58cec3f6af1ee460dceb",
+   "bytes": 1456
+  },
+  {
+   "path": "Release notes/v0.13.8.md",
+   "sha256": "3c7729d3aca6fddd310054255c0b068abe3b901f49c1ba8253efed563c96b92e",
+   "bytes": 1897
+  },
+  {
+   "path": "Release notes/v0.13.9.md",
+   "sha256": "c1159045ab6282140d1f9effe2c65ec62410c27849bb800112ff212ae13c2d75",
+   "bytes": 1636
+  },
+  {
+   "path": "Release notes/v0.14.0.md",
+   "sha256": "fd5d88db66232e03bfc49f4f1b498e792759b5065e25dfb0075c3f4962e43a10",
+   "bytes": 2924
+  },
+  {
+   "path": "Release notes/v0.14.1.md",
+   "sha256": "a1901f20af86056fd3928dd8b4cda184348fba92774c918e157c71869347c3bb",
+   "bytes": 949
+  },
+  {
+   "path": "Release notes/v0.14.10.md",
+   "sha256": "3754a164f70cb73d5d131e88ea11c04d788680505365df267fe059d20f6cdde6",
+   "bytes": 818
+  },
+  {
+   "path": "Release notes/v0.14.11.md",
+   "sha256": "bf5cc63a1cd1fb44c999d1ebfea1b59d387948d625043f7c842d367258c6b8ba",
+   "bytes": 623
+  },
+  {
+   "path": "Release notes/v0.14.12.md",
+   "sha256": "1d3d5aa85755111fb818f02e662c8e83a8bb3eb8a0ce7440788f8fa627851ada",
+   "bytes": 262
+  },
+  {
+   "path": "Release notes/v0.14.13.md",
+   "sha256": "36b897045026f13d001f4bb490d42102e96099be738d7baf8d8a2ae4a73ff1f2",
+   "bytes": 1038
+  },
+  {
+   "path": "Release notes/v0.14.14.md",
+   "sha256": "c20a3e0c0f2351792a6fee79595aa0e30bb8c5c6a6fb43598fb8d51d38ba1a9d",
+   "bytes": 561
+  },
+  {
+   "path": "Release notes/v0.14.15.md",
+   "sha256": "1939aec8647f9f98ac2c5c0fca9e8361937b900fe610e6c3b06d9c305455c20e",
+   "bytes": 118
+  },
+  {
+   "path": "Release notes/v0.14.2.md",
+   "sha256": "9e6112afbcd7d7dbd0842fa1e4345fbb8beffd9da6ff2cdd0304fd64892298cd",
+   "bytes": 223
+  },
+  {
+   "path": "Release notes/v0.14.3.md",
+   "sha256": "243f576a25356944cc0e5caf8b7b75d288f669bc233364dcc7d8377f1cd30299",
+   "bytes": 2827
+  },
+  {
+   "path": "Release notes/v0.14.4.md",
+   "sha256": "253a87ce811eed9a1b048908618a6abdedd07f743ae83db2a9e8d7eaed688312",
+   "bytes": 2027
+  },
+  {
+   "path": "Release notes/v0.14.5.md",
+   "sha256": "b71c1105387e3c7bed26519ddbc3fa427a1ab01dbb9ba5b332562633cf40208d",
+   "bytes": 715
+  },
+  {
+   "path": "Release notes/v0.14.6.md",
+   "sha256": "8c0980215fa554c7ebf0191a10d4469a9e17ec048880136386bda556c68e4e77",
+   "bytes": 1016
+  },
+  {
+   "path": "Release notes/v0.14.7.md",
+   "sha256": "5b8e352ac4695ff8c80ead1c39b56ce8f0cf732b544f3b42d29778b25154d7b7",
+   "bytes": 1067
+  },
+  {
+   "path": "Release notes/v0.14.8.md",
+   "sha256": "a3bb9e0a4ec9cbb7f4e50d4d540553917b544e16dde29980a300bbee8695b94c",
+   "bytes": 2475
+  },
+  {
+   "path": "Release notes/v0.14.9.md",
+   "sha256": "a4adb8b72b65c5e0826206558bad9f43d23f7508b6b0fdf476e20315d0082fab",
+   "bytes": 112
+  },
+  {
+   "path": "Release notes/v0.15.0.md",
+   "sha256": "300ae5422c8184f0f1a4014307010b321b3983d82f64afb13fc91823aebfb13c",
+   "bytes": 1985
+  },
+  {
+   "path": "Release notes/v0.15.1.md",
+   "sha256": "c100126adb5e5ed395ff81e6218f2358a6c132d6ae0c6ab02ed1cb16fda37526",
+   "bytes": 1249
+  },
+  {
+   "path": "Release notes/v0.15.2.md",
+   "sha256": "9014fe08fec5790f90e19432296a3ac631d71d8d75ed30e15e1e3c7eaae9462d",
+   "bytes": 736
+  },
+  {
+   "path": "Release notes/v0.15.3.md",
+   "sha256": "64ab3fbdde8365dafa40561b2937f39592e5eeceef00edf225060869bcb33ddf",
+   "bytes": 3403
+  },
+  {
+   "path": "Release notes/v0.15.4.md",
+   "sha256": "405496b0f6aedb35569e89efeb817fbce06638f852b5c8343191a5b30b97533e",
+   "bytes": 2287
+  },
+  {
+   "path": "Release notes/v0.15.5.md",
+   "sha256": "6daf56de3d5806ab426db0228e57000df49bb0b51b8015334ac33ee0e5229bb8",
+   "bytes": 1166
+  },
+  {
+   "path": "Release notes/v0.15.6.md",
+   "sha256": "f1e0e48a32504ebfa0f2ac4ecb4024d32e5a9182177be5ea69bfb9a11c921096",
+   "bytes": 508
+  },
+  {
+   "path": "Release notes/v0.15.7.md",
+   "sha256": "8fcf50643440776f6b9d773077ec893fc93f2a2d796fd2e8d32224f918c20166",
+   "bytes": 631
+  },
+  {
+   "path": "Release notes/v0.15.8.md",
+   "sha256": "a6f9d5f16524a947a56f72974c2f881bfa321cf035d1c07332dfb446a60f6093",
+   "bytes": 154
+  },
+  {
+   "path": "Release notes/v0.15.9.md",
+   "sha256": "be19555c38abaa71dbd15d7633f323e8226c399b1f2f8c6e73af5e12f8db94e4",
+   "bytes": 98
+  },
+  {
+   "path": "Release notes/v0.16.0.md",
+   "sha256": "f6bee9a28dbc16a1880f11e64cd7f9e630c094712e1a65da816b822bb72237bd",
+   "bytes": 5367
+  },
+  {
+   "path": "Release notes/v0.16.1.md",
+   "sha256": "c69e05212ae5972c229302e5ba6252026461d38abf2b45a9c9fc0ed0fd30ef42",
+   "bytes": 1225
+  },
+  {
+   "path": "Release notes/v0.16.2.md",
+   "sha256": "d05a906c4dac038cb1821f849eb1291c4a513864caacdf348267564e462e0ce5",
+   "bytes": 916
+  },
+  {
+   "path": "Release notes/v0.16.3.md",
+   "sha256": "dffb6ce764fb7d8bdd5170c6da77e38a517abeb56fcee7456cb999fc3eccdc5a",
+   "bytes": 1590
+  },
+  {
+   "path": "Release notes/v0.16.4.md",
+   "sha256": "2b82e54e9388ca1ae75838b1036b353ad740d559fa19747b04609f471f60df78",
+   "bytes": 463
+  },
+  {
+   "path": "Release notes/v0.16.5.md",
+   "sha256": "af6e22f4dca9d513e710a87b77a5a1a6f13cbbde2d7823766de457a0539026ce",
+   "bytes": 174
+  },
+  {
+   "path": "Release notes/v0.2.0.md",
+   "sha256": "6f50784a6445a9d36011118de0a5486f92d8c0d46e5979eef6a566dc0a539057",
+   "bytes": 469
+  },
+  {
+   "path": "Release notes/v0.3.0.md",
+   "sha256": "7e2277cd7034a4de70a053ac370e3cc086ccbe3024ea218466a1c3f9951ba869",
+   "bytes": 741
+  },
+  {
+   "path": "Release notes/v0.4.0.md",
+   "sha256": "8da2f494d2a0a42c0f43194e72d33fc34630cc017e88375cff101104b092997d",
+   "bytes": 1578
+  },
+  {
+   "path": "Release notes/v0.4.1.md",
+   "sha256": "c8b97e43ab1c5f3eb9de0a0e302f3fe8bb99fad9ca98babfce8b62b20005270c",
+   "bytes": 1346
+  },
+  {
+   "path": "Release notes/v0.5.0.md",
+   "sha256": "16dca4fc85be3975bc253b1868546111cd4a8f0a11401e39b226f56550cd5932",
+   "bytes": 2725
+  },
+  {
+   "path": "Release notes/v0.5.1.md",
+   "sha256": "4bf5becf6663e63fd3e91f1dd481a922a5a77e0089a606205104fb1ad6e44f8d",
+   "bytes": 2036
+  },
+  {
+   "path": "Release notes/v0.5.2.md",
+   "sha256": "eb4a10274ac7099a352d64d7d9a2d9cc20303543c2629171a367f1e57dd502ef",
+   "bytes": 1046
+  },
+  {
+   "path": "Release notes/v0.5.3.md",
+   "sha256": "ec1471c2154e50bbef296e233ce7489bbd48cde578ef52262d6f47b1341328d1",
+   "bytes": 444
+  },
+  {
+   "path": "Release notes/v0.6.0.md",
+   "sha256": "52fecaee9f56c4d12c366aba1af131901d218d5983c05801a92e237bcae28713",
+   "bytes": 2503
+  },
+  {
+   "path": "Release notes/v0.6.1.md",
+   "sha256": "2f6560bfc4092c1659e7b115b94a1809665c5a9c568e2d33db2d65418c9f7edf",
+   "bytes": 1109
+  },
+  {
+   "path": "Release notes/v0.6.2.md",
+   "sha256": "46bda698f99b80296a356b34849b5f8569551e185bbf037dd33d1d0118b189a5",
+   "bytes": 530
+  },
+  {
+   "path": "Release notes/v0.6.3.md",
+   "sha256": "4a5144d10f7cc3bb06ce1532f5f78d1ef5e51b9b761191408e228f654f79dd12",
+   "bytes": 760
+  },
+  {
+   "path": "Release notes/v0.6.4.md",
+   "sha256": "726d39cb2f31d6f1f6afe4c033c052fd3f5ceb80304e0dc1fc23e4a6c1671dc6",
+   "bytes": 1386
+  },
+  {
+   "path": "Release notes/v0.6.5.md",
+   "sha256": "e527062bdfb75b31a0a302d43af09e0a2b3b548c72b3b337b4bb8ca53d6b71f4",
+   "bytes": 3120
+  },
+  {
+   "path": "Release notes/v0.6.6.md",
+   "sha256": "0a08fab0c8aefbefb2e463af39433412c104b8c59fc626a6e1ef60443a37e470",
+   "bytes": 2072
+  },
+  {
+   "path": "Release notes/v0.6.7.md",
+   "sha256": "39ea03c42163059a1e2d4222fb2f62ea0f241b6846d268a4c8d17bcaa22e2221",
+   "bytes": 878
+  },
+  {
+   "path": "Release notes/v0.7.0.md",
+   "sha256": "c523bb6f03ef4cea8aa55dd702081fbb36eaa2930e2e2399841e7a7cf54d5658",
+   "bytes": 2846
+  },
+  {
+   "path": "Release notes/v0.7.1.md",
+   "sha256": "4b00060514e2e6a38a50cab7b97ba8e030a2036b44f5fdc8b88186a3ab916579",
+   "bytes": 851
+  },
+  {
+   "path": "Release notes/v0.7.2.md",
+   "sha256": "7cfe066bbaf6ab9313fcbb0a31a2327c2c3d2ce3320b28d72fc08e59524b2b65",
+   "bytes": 759
+  },
+  {
+   "path": "Release notes/v0.7.3.md",
+   "sha256": "9c6d5d29af757622dc7a44b0a748e695feb33922e6d96e53930181bcb6e07281",
+   "bytes": 146
+  },
+  {
+   "path": "Release notes/v0.7.4.md",
+   "sha256": "6d4fdfee75fa54683a2ab219b7d2322b72f8a8569312f62e39b952736804f399",
+   "bytes": 1880
+  },
+  {
+   "path": "Release notes/v0.7.5.md",
+   "sha256": "b766c99fc43edb96f9ed747db968aaa547a6528a5935f154b4b5c32b3b54c0ef",
+   "bytes": 1515
+  },
+  {
+   "path": "Release notes/v0.7.6.md",
+   "sha256": "373c30446abac7a335f5bc588775109dc99d05492c45bf7a684e13cec68e412a",
+   "bytes": 1639
+  },
+  {
+   "path": "Release notes/v0.8.0.md",
+   "sha256": "cc23137c028c6947166b70cf8395711345b42b81b5b3ad981e52319447d34b87",
+   "bytes": 3119
+  },
+  {
+   "path": "Release notes/v0.8.1.md",
+   "sha256": "3d0a720bfb2ea73b5126f5e44c5a79fbecda54493a806f12a27e1ad32f846ddd",
+   "bytes": 2790
+  },
+  {
+   "path": "Release notes/v0.8.10.md",
+   "sha256": "16c8880fe113ee78fa24e97c63b72470aa8c29570c753089430cd4ca08f05c00",
+   "bytes": 1764
+  },
+  {
+   "path": "Release notes/v0.8.11.md",
+   "sha256": "1abdcdcdb1717fe328c3165a078f97475028cbbedb5b5635bd7193084a284364",
+   "bytes": 814
+  },
+  {
+   "path": "Release notes/v0.8.12.md",
+   "sha256": "af211c3a55df7a7cf4bcb629d5d15df45a6ee4970e145994f796dad92ff664ea",
+   "bytes": 355
+  },
+  {
+   "path": "Release notes/v0.8.13.md",
+   "sha256": "d058f891f9530eb07d6b96f73301f11ccce3c52b8d1ef531b2577f3fdfc06344",
+   "bytes": 1887
+  },
+  {
+   "path": "Release notes/v0.8.14.md",
+   "sha256": "d5e0abd4e1e29f11d01e2bfad04cfd21c4e4a293db35faeccb4b2421b60f7e3f",
+   "bytes": 925
+  },
+  {
+   "path": "Release notes/v0.8.15.md",
+   "sha256": "9eb88324d092a5867f2146948219ca6a5147a66d4be8e3d8652092ade11af307",
+   "bytes": 2275
+  },
+  {
+   "path": "Release notes/v0.8.2.md",
+   "sha256": "874ce57738cd43c24cacb457aa952e7d350a653108ced6b29ff2b031423aa14c",
+   "bytes": 2480
+  },
+  {
+   "path": "Release notes/v0.8.3.md",
+   "sha256": "9106b26698f465fded04be760a0685b791397e0c8747fce717788156a60e4a0b",
+   "bytes": 1934
+  },
+  {
+   "path": "Release notes/v0.8.4.md",
+   "sha256": "b0ee26bad99b81571de63b9aca3e872cdf23d2fd962d4a2af99a12994c317480",
+   "bytes": 1953
+  },
+  {
+   "path": "Release notes/v0.8.5.md",
+   "sha256": "d76b3295a6f3e65bae8e51974ac78bf1aec00aa5e8e054137c39574ba9f50151",
+   "bytes": 2331
+  },
+  {
+   "path": "Release notes/v0.8.6.md",
+   "sha256": "edbb43c878db6c7346b356fe8f01d1d000bbb01e9efc497f60d3d0b16039640f",
+   "bytes": 1472
+  },
+  {
+   "path": "Release notes/v0.8.7.md",
+   "sha256": "c24812120f472610ec12c6aba8d7b603145aaed3e3097935a7fca6ce69002f49",
+   "bytes": 578
+  },
+  {
+   "path": "Release notes/v0.8.8.md",
+   "sha256": "13978935c2ebb9e01dfbbfd3e64393a672ab0eaf532eef11716542f043430fbf",
+   "bytes": 334
+  },
+  {
+   "path": "Release notes/v0.8.9.md",
+   "sha256": "87e02af5dfa50fe17d600b18a51c0e9dd3ce206d922fe066dcd9627b15b83cb2",
+   "bytes": 311
+  },
+  {
+   "path": "Release notes/v0.9.0.md",
+   "sha256": "bc7fc014fc2a43d3bee49acd0f978e2be6f8f25777604adcc06c26d6275766ca",
+   "bytes": 4078
+  },
+  {
+   "path": "Release notes/v0.9.1.md",
+   "sha256": "d969125462cd374f19fdadb80897c2c3d36f1e642cfc62cf0334e67ace1ab320",
+   "bytes": 998
+  },
+  {
+   "path": "Release notes/v0.9.10.md",
+   "sha256": "e54b5f67dbb955e8c683ea50e6c8ef2e929171674dc65edf38115e63bbac9401",
+   "bytes": 560
+  },
+  {
+   "path": "Release notes/v0.9.11.md",
+   "sha256": "96462d53fe13b7ad0cac33b735acade770c514d75bab914a2b14fa8765220ac7",
+   "bytes": 772
+  },
+  {
+   "path": "Release notes/v0.9.12.md",
+   "sha256": "18c5d69e3eda4d40ecb6a72993ed480dc291548a14121a91b7e606a2bf197804",
+   "bytes": 1465
+  },
+  {
+   "path": "Release notes/v0.9.13.md",
+   "sha256": "a6a86674b96bbea7c6a3130be4c948f851652f6952e625f8376c6cec40719026",
+   "bytes": 1060
+  },
+  {
+   "path": "Release notes/v0.9.14.md",
+   "sha256": "3bfaa97273fc4e607c15c0e62fba68ec39c0e0953835fd000354f4ad1a34b8bd",
+   "bytes": 478
+  },
+  {
+   "path": "Release notes/v0.9.15.md",
+   "sha256": "23c24a25d8af06b619b37c84a50e7c803ac4577ef0ad701ef762fd2b49c0b175",
+   "bytes": 431
+  },
+  {
+   "path": "Release notes/v0.9.16.md",
+   "sha256": "36747faa33fc6a20c9ae3786dbd9e1e9c9a3e9da0c4f34c5c65cf3a68bfacaeb",
+   "bytes": 1509
+  },
+  {
+   "path": "Release notes/v0.9.17.md",
+   "sha256": "3fedda50e4905f3a13f998b316618c18db23584ae7926cc41ff2a6034d1c246b",
+   "bytes": 526
+  },
+  {
+   "path": "Release notes/v0.9.18.md",
+   "sha256": "1e1cf140516a8528f074956fccefffdaad76e812db5b906837aa99f7085e5505",
+   "bytes": 2225
+  },
+  {
+   "path": "Release notes/v0.9.19.md",
+   "sha256": "7f39d2973fe4c9b931110a8b73054503d5ab391550000f9663b7be74dc51363f",
+   "bytes": 495
+  },
+  {
+   "path": "Release notes/v0.9.2.md",
+   "sha256": "f5fa67fed411a1372739bb3b20ae91d645fd75fd17460232404f815394112d24",
+   "bytes": 1812
+  },
+  {
+   "path": "Release notes/v0.9.20.md",
+   "sha256": "299f2ff152c0a332d2eda495eaf2db1d0e290c0c93c05bfda7d32f3beb153099",
+   "bytes": 818
+  },
+  {
+   "path": "Release notes/v0.9.21.md",
+   "sha256": "df1310cf543dd504564c0f959811f26ebdaa9f3973c2ff58a8a47c2347555c24",
+   "bytes": 1654
+  },
+  {
+   "path": "Release notes/v0.9.22.md",
+   "sha256": "de6c0418d275876e80d2cd5fca47d49c5131764dbed51a3107e1ac93260a9bfb",
+   "bytes": 215
+  },
+  {
+   "path": "Release notes/v0.9.3.md",
+   "sha256": "4796e657411f85132fa090b8ea08c4a836cfabb961e6763cda8d290f192f85e9",
+   "bytes": 1117
+  },
+  {
+   "path": "Release notes/v0.9.4.md",
+   "sha256": "807ae453e40e8ff3fb0425f7c63dcae2f5d824f5841de3f48829493329000e1e",
+   "bytes": 1978
+  },
+  {
+   "path": "Release notes/v0.9.5.md",
+   "sha256": "3af57ec0aac6cd7d65ff0e726a7caa7e330c7a848fcb12556f3d3fb9e77eb78b",
+   "bytes": 1885
+  },
+  {
+   "path": "Release notes/v0.9.6.md",
+   "sha256": "5c1bc0f1bef3ad558c2245e50ea46442fdf568d48f84e9afc99b246b15659d0f",
+   "bytes": 1116
+  },
+  {
+   "path": "Release notes/v0.9.7.md",
+   "sha256": "7d43ccd5ab8eb942062db73c3052a15a084ff9c1ed4c157e7b2802bb329824cf",
+   "bytes": 1407
+  },
+  {
+   "path": "Release notes/v0.9.8.md",
+   "sha256": "a2a2b8c607974060313f647fc737c1dd7ffacf5027bc26b61903d34cf238d1b6",
+   "bytes": 1004
+  },
+  {
+   "path": "Release notes/v0.9.9.md",
+   "sha256": "f79cc5f8b849b222757b88a69cbb297e23db76cea6f9d21040008f547071bf47",
+   "bytes": 292
+  },
+  {
+   "path": "Release notes/v1.0.0.md",
+   "sha256": "5d820cb2bbd0b6b6e2a0313cf64e4d9a6de9a2abccc9047367a0fe4b3f9b3923",
+   "bytes": 8314
+  },
+  {
+   "path": "Release notes/v1.0.1.md",
+   "sha256": "8058c46403799e23a099b05d00b805a84ca007ad1d72b17ab9360d806ded12d6",
+   "bytes": 1676
+  },
+  {
+   "path": "Release notes/v1.0.2.md",
+   "sha256": "c5ddbd8a5d22e7b4848dbd2eb42f363372b69c2ed9db0f0197a65f6b2b23fd88",
+   "bytes": 112
+  },
+  {
+   "path": "Release notes/v1.0.3.md",
+   "sha256": "16d02469da7450f9baa2147e69885be47cee786cf2e326f6df1a387b7486c26b",
+   "bytes": 384
+  },
+  {
+   "path": "Release notes/v1.1.0.md",
+   "sha256": "cf7f94b60835e010116005aebc2f0adade2d5db2608a75231e161fab42f57d28",
+   "bytes": 2247
+  },
+  {
+   "path": "Release notes/v1.1.1.md",
+   "sha256": "9d7241783773e7d26774bbb7049545c10002a294b1c94071e336893aee0fa98f",
+   "bytes": 1672
+  },
+  {
+   "path": "Release notes/v1.1.10.md",
+   "sha256": "bbc7f793f2c0eaf17478f42cdfb9873d438a040fd88af5c4ae15ea5d87c457bb",
+   "bytes": 2048
+  },
+  {
+   "path": "Release notes/v1.1.11.md",
+   "sha256": "0832922c671c26257d680b2e013c1140ffe8b17e375b10f7a83104b3a61d1d10",
+   "bytes": 241
+  },
+  {
+   "path": "Release notes/v1.1.12.md",
+   "sha256": "44f94557009ec9cf70a2520e6f11bd67bdb4cae828678579e33c297975f218a5",
+   "bytes": 180
+  },
+  {
+   "path": "Release notes/v1.1.13.md",
+   "sha256": "b3383ded42935db9c41e85a0ce472d25d1eb7dd82efe56905189fdb1bd3241a6",
+   "bytes": 2692
+  },
+  {
+   "path": "Release notes/v1.1.14.md",
+   "sha256": "b3c9664f9515f2fe78e1af3a8ba04fd9efa80b02720db55c82d12df849cd0920",
+   "bytes": 1478
+  },
+  {
+   "path": "Release notes/v1.1.15.md",
+   "sha256": "c606cd5955e0ce9f9b8e08a12187de2fefdcbc907f569606b2f4a1a0874cf3dd",
+   "bytes": 464
+  },
+  {
+   "path": "Release notes/v1.1.16.md",
+   "sha256": "146c8d6a3336e3e277edc5ff263afb6a2b77074103c08cbf2a7b3598f84b291a",
+   "bytes": 733
+  },
+  {
+   "path": "Release notes/v1.1.2.md",
+   "sha256": "ea6d2874dd63ae910329c308523828cc39205f65f82f31d4abaaff00c02c7fe6",
+   "bytes": 135
+  },
+  {
+   "path": "Release notes/v1.1.3.md",
+   "sha256": "69b7b66a556ef7a0cc46f70277026371faff54e9e2f5d6111c79522bd2558872",
+   "bytes": 1432
+  },
+  {
+   "path": "Release notes/v1.1.4.md",
+   "sha256": "bf423affce97b71465071c2295a593bb3dbbb2145c3ffb7bf54d4ae0a0be4e59",
+   "bytes": 1633
+  },
+  {
+   "path": "Release notes/v1.1.5.md",
+   "sha256": "d35659b293750b174e7d9eb98b0e2820012410bf865739c9d4b844e0d9cbe54f",
+   "bytes": 1814
+  },
+  {
+   "path": "Release notes/v1.1.6.md",
+   "sha256": "5794da58779735651a7437d816c15bf33ab9214d3c67eb2542abc0a76274c553",
+   "bytes": 1010
+  },
+  {
+   "path": "Release notes/v1.1.7.md",
+   "sha256": "1b065d60d175de11fa9a77a3f1437a30aca3c974fd5729f4b119c21fe668a1d2",
+   "bytes": 762
+  },
+  {
+   "path": "Release notes/v1.1.8.md",
+   "sha256": "77cf48e40650ef9c4fa04292c834fb22055dd71b0a8aab46747c3abd184fc1fc",
+   "bytes": 706
+  },
+  {
+   "path": "Release notes/v1.1.9.md",
+   "sha256": "b974bc978bc17ff36fc876f56e2f3a212a946059b3b37df8be396eeaa5b1062c",
+   "bytes": 515
+  },
+  {
+   "path": "Release notes/v1.1.md",
+   "sha256": "c654cad4d7f2fffa734816a53f47d7e3e16555dc4b014fe92ba31cf4806e6a5c",
+   "bytes": 4001
+  },
+  {
+   "path": "Release notes/v1.10.0.md",
+   "sha256": "8b78928cbefc8f58438fc5700ed45101069d2b45743bc76da1338f0edc6da425",
+   "bytes": 4208
+  },
+  {
+   "path": "Release notes/v1.10.1.md",
+   "sha256": "617bc441ce78993b40ac3c9498fc6c2b660d5b52620c94b3043707017976efa6",
+   "bytes": 571
+  },
+  {
+   "path": "Release notes/v1.10.2.md",
+   "sha256": "9738eb9b9f265ab489e92edf591905dcfe57f12edc47ce99737d9aec952123e7",
+   "bytes": 1428
+  },
+  {
+   "path": "Release notes/v1.10.3.md",
+   "sha256": "7c547941197b8b170ab92b7d1fdc96b665875da1a48422c1af4b3cd7785e4fbb",
+   "bytes": 143
+  },
+  {
+   "path": "Release notes/v1.10.4.md",
+   "sha256": "7f86298b3163d0b4a50220801eca8f06673bf5931ee8df1d89c46192b8712622",
+   "bytes": 1008
+  },
+  {
+   "path": "Release notes/v1.10.5.md",
+   "sha256": "a0d794f755f97d470c98c43d8c690e73bbe56dbb2f5823a6aed14356909aa1e4",
+   "bytes": 459
+  },
+  {
+   "path": "Release notes/v1.10.6.md",
+   "sha256": "98d5a869e1f7a1ad818c48d0a3f0e563a1c493c16cd8e5a3f9ab52615e526c03",
+   "bytes": 1385
+  },
+  {
+   "path": "Release notes/v1.10.md",
+   "sha256": "3c05d52cf27575de9c27fa21cc5439c62157250a1bc67946577ae20c24566841",
+   "bytes": 6930
+  },
+  {
+   "path": "Release notes/v1.11.0.md",
+   "sha256": "35713368b77c233baa9fe7aeb314c2fc8333fd31ea1520896c80ea02966eefab",
+   "bytes": 1819
+  },
+  {
+   "path": "Release notes/v1.11.1.md",
+   "sha256": "a0548fcf3fa1caedf76fffd66a4750032b2b06a299ddfd486828edd4e6572dc3",
+   "bytes": 599
+  },
+  {
+   "path": "Release notes/v1.11.2.md",
+   "sha256": "57a5bacaf3fcd1f8e23f8d48c4224270f489ae97178b5baa1048c680c91c44d3",
+   "bytes": 1006
+  },
+  {
+   "path": "Release notes/v1.11.3.md",
+   "sha256": "fdbe997ee5f2220a08cbf81c9885ba489ebdc13a7e226daf59162efe74baec2a",
+   "bytes": 337
+  },
+  {
+   "path": "Release notes/v1.11.4.md",
+   "sha256": "b34c1dca270d46295c59f8069e7ea6b1a0b6c04a1b4183fa0958663982eab003",
+   "bytes": 699
+  },
+  {
+   "path": "Release notes/v1.11.5.md",
+   "sha256": "324469e21101c77b2eeeea15c77cb6cad40662cdd0ea9db588eec8d21a5c6d2c",
+   "bytes": 896
+  },
+  {
+   "path": "Release notes/v1.11.6.md",
+   "sha256": "80d1e27fdd604c5830338ccfcaccd3651545eaf819324f7945b1885043e294af",
+   "bytes": 617
+  },
+  {
+   "path": "Release notes/v1.11.7.md",
+   "sha256": "ae144c38d02d031b767174a196e896a634855f15ccf71b67dae9dda6980c1329",
+   "bytes": 733
+  },
+  {
+   "path": "Release notes/v1.11.md",
+   "sha256": "7b592e126c440b2a55a50a5c693a94ee67bfefda5084cf5424eaa23a643be547",
+   "bytes": 3984
+  },
+  {
+   "path": "Release notes/v1.12.0.md",
+   "sha256": "227c137c51e987bd609d3650e7e8e5ff771f9136496c3e05071958ab3ca5f83e",
+   "bytes": 3179
+  },
+  {
+   "path": "Release notes/v1.12.1.md",
+   "sha256": "4741b4b3f6cf6578eb0c94442da30d487da66faf635905b4749cc665d31cdc84",
+   "bytes": 555
+  },
+  {
+   "path": "Release notes/v1.12.2.md",
+   "sha256": "a8dbb5214d9e69ab2446a8932926c3a8426ea530a8b1df06d6262203aa3637f3",
+   "bytes": 2796
+  },
+  {
+   "path": "Release notes/v1.12.3.md",
+   "sha256": "d687b2529771fd99fa2f38b5f0ffc0a9205a89ee15571ac7d293db6f0127b523",
+   "bytes": 542
+  },
+  {
+   "path": "Release notes/v1.12.4.md",
+   "sha256": "6ffb601830c079a99f367ce745f20069a2b2a14bafbb598b796e263aeb37f886",
+   "bytes": 372
+  },
+  {
+   "path": "Release notes/v1.12.5.md",
+   "sha256": "d4314399c66dc3c53967197c0c1e83843afb099ea462c2ff2777bc81c2cec6ea",
+   "bytes": 620
+  },
+  {
+   "path": "Release notes/v1.12.6.md",
+   "sha256": "d4c866f74d2ec93ca79bfbb6df3e41f558a642ccc6d55f4efbc01acb06707b0f",
+   "bytes": 477
+  },
+  {
+   "path": "Release notes/v1.12.7.md",
+   "sha256": "f59f1e52ad10a2f2653fd1fa50ed140ea7d83957dc33c976bea212881fe4f09c",
+   "bytes": 1384
+  },
+  {
+   "path": "Release notes/v1.12.md",
+   "sha256": "b91a08fb5c4ffa3bdc332b8711ebd765aef1a62c7170765d1dc724888d8a462d",
+   "bytes": 4911
+  },
+  {
+   "path": "Release notes/v1.13.0.md",
+   "sha256": "284f6225c59611ce375a574c261496f7d9302571a800d54cd608bbcdf65cbe93",
+   "bytes": 4775
+  },
+  {
+   "path": "Release notes/v1.13.1.md",
+   "sha256": "d51d2d15efedc0b1611b7341d47b09140a468b5780573e57b23ca6c9cf87bf94",
+   "bytes": 2236
+  },
+  {
+   "path": "Release notes/v1.13.2.md",
+   "sha256": "9505aa9be04dd9e280007e18993706ec0184de74841d0517d77c9acd8abe7cf1",
+   "bytes": 2962
+  },
+  {
+   "path": "Release notes/v1.13.3.md",
+   "sha256": "25c850ffea87616b3d1a8bf9d54ea510d1f75faf1e957ec8b92fe95f38979e3d",
+   "bytes": 805
+  },
+  {
+   "path": "Release notes/v1.13.4.md",
+   "sha256": "f58588229fb4926bf79721be9f6c12b4e4d6b9d19f47c8904e4060b5c9f4b976",
+   "bytes": 942
+  },
+  {
+   "path": "Release notes/v1.13.5.md",
+   "sha256": "2be1365ea73400bd058081754fa4b5e1db74f83efc56f134ff99e99253972a6e",
+   "bytes": 2101
+  },
+  {
+   "path": "Release notes/v1.13.6.md",
+   "sha256": "66993ada0819ca4f5f67384a80431faf997c8241e4c761c1c591dd8762967d71",
+   "bytes": 777
+  },
+  {
+   "path": "Release notes/v1.13.7.md",
+   "sha256": "31a7416d6a5e55d48cffcc0f60ec9aa8e31804da7660372c1a6e4a0e22cce160",
+   "bytes": 533
+  },
+  {
+   "path": "Release notes/v1.13.8.md",
+   "sha256": "6c32850dba6d9f7a78c318b5cdaabbf4a5a0e019ba2a9f0ff5d2bdd6cf1e065c",
+   "bytes": 211
+  },
+  {
+   "path": "Release notes/v1.13.md",
+   "sha256": "ef6084e13f94f02af5d26fc65e16bb6e89d30e6853ab0d60d1bb790f6baf79ec",
+   "bytes": 10366
+  },
+  {
+   "path": "Release notes/v1.14.0.md",
+   "sha256": "f215fe57dc3f3505471e448206f171908b934797c01d41aba1200021f6281442",
+   "bytes": 2897
+  },
+  {
+   "path": "Release notes/v1.14.1.md",
+   "sha256": "6a8618b2a6bc00fdbcaa42609bc6952a58cdd17928deae623527fc5d1517cf82",
+   "bytes": 651
+  },
+  {
+   "path": "Release notes/v1.14.2.md",
+   "sha256": "cbe33c51af245936644bbab87ce774abed62edd6af50b04b53ee87046d0d55ad",
+   "bytes": 1831
+  },
+  {
+   "path": "Release notes/v1.14.3.md",
+   "sha256": "78a60344761526c1709f3ca454c5e41f504bbdb2bb62c2b719064be622cbd27c",
+   "bytes": 2543
+  },
+  {
+   "path": "Release notes/v1.14.md",
+   "sha256": "cf0107a2c682d2334003bb6c26466a263d53c6ecb29d2b0cae4d9a037dd2b1ee",
+   "bytes": 2879
+  },
+  {
+   "path": "Release notes/v1.2.0.md",
+   "sha256": "7f31f242ba4dc672d1a3145272c63236dd29f7f41a5e5fc1ffc4f0c008f52ea4",
+   "bytes": 1368
+  },
+  {
+   "path": "Release notes/v1.2.1.md",
+   "sha256": "8189f5dc7fd13852f2fc81fc820f2796b23aad02bf5a1a1b995682db8d238b20",
+   "bytes": 1488
+  },
+  {
+   "path": "Release notes/v1.2.2.md",
+   "sha256": "3ad836a317e89c7064c35520c123a655d3a9b1cb4eae26a3c394097603b48d5a",
+   "bytes": 714
+  },
+  {
+   "path": "Release notes/v1.2.3.md",
+   "sha256": "798a4cfa51b8befa7904b01ae5827deeb4862d1ec93b101ef6df097f361a41ee",
+   "bytes": 1674
+  },
+  {
+   "path": "Release notes/v1.2.4.md",
+   "sha256": "0189ab3caf66d47efebec16d21766b96e85b8cce2104dede4fa215d4ea7abd55",
+   "bytes": 1002
+  },
+  {
+   "path": "Release notes/v1.2.5.md",
+   "sha256": "3656290424b8a6380b0978cef6636458914451e1e5bbc7da2195412537974035",
+   "bytes": 959
+  },
+  {
+   "path": "Release notes/v1.2.6.md",
+   "sha256": "653dd63c3d33a6bffdacb560ba0e0086e4be8671f6b17d1e2a9fb4c062311987",
+   "bytes": 858
+  },
+  {
+   "path": "Release notes/v1.2.7.md",
+   "sha256": "47fd35842222251ca2a19fb8e430d349e691efe16ad33aebd9ff11eb3a51ba27",
+   "bytes": 452
+  },
+  {
+   "path": "Release notes/v1.2.8.md",
+   "sha256": "d3b82d25648f01a360651e65178af38c61dc1c52cbacea58da739736227fadba",
+   "bytes": 866
+  },
+  {
+   "path": "Release notes/v1.2.md",
+   "sha256": "9e2791eaf3afd15118feb92ca8ee3df78475feb8eed46c80ce24f6cf30455d2e",
+   "bytes": 4812
+  },
+  {
+   "path": "Release notes/v1.3.0.md",
+   "sha256": "6574042344e87fa31b5b6c9a489aea6703ffda1c644bf017828ba8a1910b06f4",
+   "bytes": 1008
+  },
+  {
+   "path": "Release notes/v1.3.1.md",
+   "sha256": "d5dec74deedb515b4cc5786bb2eb0a5eb6d1db308efd4193b8eea3a0b3ca4c69",
+   "bytes": 1540
+  },
+  {
+   "path": "Release notes/v1.3.2.md",
+   "sha256": "53df60b1f2d94d444c2a35832ca95a07ffdea026093aabc1f7edc27f1db954b2",
+   "bytes": 1703
+  },
+  {
+   "path": "Release notes/v1.3.3.md",
+   "sha256": "d2fcd0a9e59aa19682ad80f6f146126aa71c2abc8a9dfe00b0f7304a088a8b90",
+   "bytes": 260
+  },
+  {
+   "path": "Release notes/v1.3.4.md",
+   "sha256": "0b078cf17f245a473a32b5cab66528efb50cd61b3cb3fd7878869d444d8a2bb4",
+   "bytes": 747
+  },
+  {
+   "path": "Release notes/v1.3.5.md",
+   "sha256": "3097e2210dcbf15778f03eca9a9f2a1be0fb683f76ff159520041a4c7d27aad2",
+   "bytes": 852
+  },
+  {
+   "path": "Release notes/v1.3.6.md",
+   "sha256": "313c834177b11a3d3f58a6738ad16c2734c900c9c219d523c4b967c4b1db659c",
+   "bytes": 2051
+  },
+  {
+   "path": "Release notes/v1.3.7.md",
+   "sha256": "f200f8d7ddcee5fb9af73bd8d4ad608b3e8046307a17a16d529a7fa279067910",
+   "bytes": 229
+  },
+  {
+   "path": "Release notes/v1.3.md",
+   "sha256": "196778a61133b7f911ea3ad0a6707ee1b22acc987758ca2ab17739e4f1fd2dd5",
+   "bytes": 2725
+  },
+  {
+   "path": "Release notes/v1.4.0.md",
+   "sha256": "1754e7a43d14742dd7010913d655533c140b0c8f8e633f6b97c3a2513b768367",
+   "bytes": 3236
+  },
+  {
+   "path": "Release notes/v1.4.1.md",
+   "sha256": "96683918001ed8a94e9ec3ce20ab58cfa27ac7ee7630d4ea6b8651693c3646a7",
+   "bytes": 906
+  },
+  {
+   "path": "Release notes/v1.4.10.md",
+   "sha256": "ecdc7aa4491e15af5a3e5ba3237d892b6e5d98b92d437c72b8dd7d1a3a7364f0",
+   "bytes": 3362
+  },
+  {
+   "path": "Release notes/v1.4.11.md",
+   "sha256": "c0532ad221d7a666bbb2230cfe4ca07989d5654fcfcabce4eb3e06ac7d8769c0",
+   "bytes": 150
+  },
+  {
+   "path": "Release notes/v1.4.12.md",
+   "sha256": "a869085211975547bf97c65dcbda5221e681b4c1a27e923723855a8269bf4f19",
+   "bytes": 165
+  },
+  {
+   "path": "Release notes/v1.4.13.md",
+   "sha256": "d2e9e818f063eeb4abd742a42ff49e6cc45473d5dbeee965234813adf90a49d4",
+   "bytes": 266
+  },
+  {
+   "path": "Release notes/v1.4.14.md",
+   "sha256": "98dbcc7cc1c714962fdb0429ee7317a09a9a2b27389ca610144f4b744895366a",
+   "bytes": 889
+  },
+  {
+   "path": "Release notes/v1.4.15.md",
+   "sha256": "66c0c1db6ce51fd4e3ae5c861baa6555dd4378b245a18781243c524f4083833e",
+   "bytes": 1172
+  },
+  {
+   "path": "Release notes/v1.4.16.md",
+   "sha256": "f08db3b924c3e384c117759bf44ba7afd478ad152f14d53959cc45d9d29cdbd3",
+   "bytes": 1160
+  },
+  {
+   "path": "Release notes/v1.4.2.md",
+   "sha256": "a37399056784c78eb62adb79b4673d0414da3269deaae4295c6da60170f1577a",
+   "bytes": 2057
+  },
+  {
+   "path": "Release notes/v1.4.3.md",
+   "sha256": "2aabcf44cadb963ca0e30df45befaf1d33a47eddf3d67c9f96084d1ae98bedea",
+   "bytes": 2408
+  },
+  {
+   "path": "Release notes/v1.4.4.md",
+   "sha256": "0795894471be295490c27c3246587afe3e40c1e4c4788f56c6fe2eaf49469a41",
+   "bytes": 1808
+  },
+  {
+   "path": "Release notes/v1.4.5.md",
+   "sha256": "c2e7b66f7eec0ee3160897d692d744289cd48516d02c95fc01854375ade19d40",
+   "bytes": 1471
+  },
+  {
+   "path": "Release notes/v1.4.6.md",
+   "sha256": "6dd07e546ec032ceea12b25e6a7815cc984d0c52f2c4b406456ed15b61cb8d14",
+   "bytes": 1146
+  },
+  {
+   "path": "Release notes/v1.4.7.md",
+   "sha256": "fd168863d572efc8e62ed3c1c2736d11cd2cc96de39dd90cac6015c8684e3a6d",
+   "bytes": 92
+  },
+  {
+   "path": "Release notes/v1.4.8.md",
+   "sha256": "a1a0f4933a7c5a579414bec788ad5775b48f3a8ecbbaa9e851642616daa9e738",
+   "bytes": 1030
+  },
+  {
+   "path": "Release notes/v1.4.9.md",
+   "sha256": "2d4734a163238fd6bbda229ca12d45e687dc1a6f6bd3750f7bc314c4d3ed62d1",
+   "bytes": 1338
+  },
+  {
+   "path": "Release notes/v1.4.md",
+   "sha256": "1b956c3e041c1609c848869af636546c5eb740293523f409cc1078307d7a1b0e",
+   "bytes": 5589
+  },
+  {
+   "path": "Release notes/v1.5.0.md",
+   "sha256": "514d48d87d389e326e8b1d3e2fd871c9cd351f06f6047a7d1b3489f2e8595325",
+   "bytes": 4821
+  },
+  {
+   "path": "Release notes/v1.5.1.md",
+   "sha256": "5a146606982192fec247a5c4fbb3dd8507ec221ce6314f4b799c2de38d387abe",
+   "bytes": 1094
+  },
+  {
+   "path": "Release notes/v1.5.10.md",
+   "sha256": "97eb9bdac3a29ded00c778778b341ac0119f78ae876917cf9e664bd747fede1b",
+   "bytes": 275
+  },
+  {
+   "path": "Release notes/v1.5.11.md",
+   "sha256": "492d96259b2b6a4465618bf6c55005db704c745fa13c1a5cf5619658151a2b2c",
+   "bytes": 1290
+  },
+  {
+   "path": "Release notes/v1.5.12.md",
+   "sha256": "4864ebc7441e958e0ea74ed2767c02dbdca190f7d7b0a27b43c6a01cdcacbfd3",
+   "bytes": 149
+  },
+  {
+   "path": "Release notes/v1.5.2.md",
+   "sha256": "d6ab94db6d12879bac0862576d7cfa00a4e9e03a6d1f2c40832a79ab1ad47408",
+   "bytes": 2462
+  },
+  {
+   "path": "Release notes/v1.5.3.md",
+   "sha256": "591a3e2d52df51a42d30e7024b64b5cabc52950c366f4c613f7ae3771ed06551",
+   "bytes": 1325
+  },
+  {
+   "path": "Release notes/v1.5.4.md",
+   "sha256": "101f9babc73ec1851e929df52dce3dde9878665c83acbd48673c7d905b68cfb1",
+   "bytes": 2929
+  },
+  {
+   "path": "Release notes/v1.5.5.md",
+   "sha256": "a6cf698ec5e496d787dd23705785f16a100d16b28d81504c7ee1dc29df7a9d91",
+   "bytes": 987
+  },
+  {
+   "path": "Release notes/v1.5.6.md",
+   "sha256": "b7ef6aaa88728a13cdddc3f31f07868734d440b820a170c4863dfe3a68962ea3",
+   "bytes": 586
+  },
+  {
+   "path": "Release notes/v1.5.7.md",
+   "sha256": "26227943f67da42de81f5a375186b2df1f738891092629d9cb8012dc775c8ec4",
+   "bytes": 450
+  },
+  {
+   "path": "Release notes/v1.5.8.md",
+   "sha256": "9f44f08ffc51593014b8859af9ceccafc6b4d17b217761e0473075fee46fc917",
+   "bytes": 269
+  },
+  {
+   "path": "Release notes/v1.5.9.md",
+   "sha256": "607b2257985f52005b6e899ab979ec10740b795f92e89a8e4f3e50b65e246f32",
+   "bytes": 820
+  },
+  {
+   "path": "Release notes/v1.5.md",
+   "sha256": "3acf3142d3e73183423c6d7d4bb5ce4202a55ace758baea680a03d77d0b2936e",
+   "bytes": 2464
+  },
+  {
+   "path": "Release notes/v1.6.0.md",
+   "sha256": "ecb0ef646eb6a82920287755186fbc7b885fa5328a04c0f112aaecdd570354e2",
+   "bytes": 6241
+  },
+  {
+   "path": "Release notes/v1.6.1.md",
+   "sha256": "f3ef3d7d218a2f433a73be37f055b175779579049a1ef0fe5391a74f36993e30",
+   "bytes": 2048
+  },
+  {
+   "path": "Release notes/v1.6.2.md",
+   "sha256": "3cf12d2cabeeb2744502e2d5cbab2e65c9cc13046297c74caaedf122fb6f566c",
+   "bytes": 1323
+  },
+  {
+   "path": "Release notes/v1.6.3.md",
+   "sha256": "831da99bf5606d21fc19134712cea82b2b252eacdfdd5a706ac8c668d674b342",
+   "bytes": 234
+  },
+  {
+   "path": "Release notes/v1.6.4.md",
+   "sha256": "8571fca25083b5c3b877170645f4964907e7212756ae669034f24a033176446d",
+   "bytes": 3197
+  },
+  {
+   "path": "Release notes/v1.6.5.md",
+   "sha256": "79241e31c0249be1fe0ae8332ae4641a2b093adac3e0748216a7a24a70ababaf",
+   "bytes": 650
+  },
+  {
+   "path": "Release notes/v1.6.6.md",
+   "sha256": "0e6461bbcbe85a30a86459ecc197e163cef507eedb87d93e44c39f33f3900909",
+   "bytes": 341
+  },
+  {
+   "path": "Release notes/v1.6.7.md",
+   "sha256": "737c1c7b448c0c186a168a3ad646d126d09ca44de929dd86b1cde9386ed38146",
+   "bytes": 515
+  },
+  {
+   "path": "Release notes/v1.6.md",
+   "sha256": "f2c7d09da2e0194e10e67417ba8277aa1603c00e5513bfde07b573c51c9c96b9",
+   "bytes": 8840
+  },
+  {
+   "path": "Release notes/v1.7.0.md",
+   "sha256": "03fc87f8a5a7365ba0e4ffa6fb5313d14ec25b58852d92f151b5d1919f6c50a1",
+   "bytes": 3932
+  },
+  {
+   "path": "Release notes/v1.7.1.md",
+   "sha256": "fa5600e892a3898195669907a2f012a3e169795e3bbc681d17c7ee9fc648aee5",
+   "bytes": 2101
+  },
+  {
+   "path": "Release notes/v1.7.2.md",
+   "sha256": "6c96a8fa7db0b01497f81f9ddcb3c98e3a68733af585deb8aa58a85405b95176",
+   "bytes": 1964
+  },
+  {
+   "path": "Release notes/v1.7.3.md",
+   "sha256": "d7fa5de46707ab425abf0d779b9ed13a0d1d05b4b30d607af74fb6b9c68a676b",
+   "bytes": 570
+  },
+  {
+   "path": "Release notes/v1.7.4.md",
+   "sha256": "b9074ff24097a78e93749cdd821b992618b3c03a067bc33c4fad44b0e9077d97",
+   "bytes": 914
+  },
+  {
+   "path": "Release notes/v1.7.5.md",
+   "sha256": "f3f729232346dd7b0720fc8032563fb29fa767fd82b6aeeaeebd7dec8828676d",
+   "bytes": 1628
+  },
+  {
+   "path": "Release notes/v1.7.6.md",
+   "sha256": "72d80013e00a649a500b72f87e894b7e7257fdb374165d64d7deaa648e01d6f5",
+   "bytes": 642
+  },
+  {
+   "path": "Release notes/v1.7.7.md",
+   "sha256": "ca5274ac2e028e1c209f60336143227a94d8dd8d52448adf33767a0bf1645c84",
+   "bytes": 133
+  },
+  {
+   "path": "Release notes/v1.7.md",
+   "sha256": "c46dc2c0b25f8ec4d54b5081adf1ed447710e56a811dd61c19c6daf6abcee27c",
+   "bytes": 8269
+  },
+  {
+   "path": "Release notes/v1.8.0.md",
+   "sha256": "2fbb3dc37fc4438daf89935be8ad063cb2359b20c6c27f0b3f3f18cc8c99917c",
+   "bytes": 3764
+  },
+  {
+   "path": "Release notes/v1.8.1.md",
+   "sha256": "3e8ccfdd1368c7721f4a37094b2d475f86b9881553058cc892c9e4fe0cbd98db",
+   "bytes": 2284
+  },
+  {
+   "path": "Release notes/v1.8.10.md",
+   "sha256": "f166910fd4f76295f92967eaaa2eadf8097137e5172c84b2e5d7a3d6b84e1051",
+   "bytes": 317
+  },
+  {
+   "path": "Release notes/v1.8.2.md",
+   "sha256": "527749c25c12ad70260172a79aa5f5a3c0006102c6c73510d50897339b19c0b2",
+   "bytes": 2402
+  },
+  {
+   "path": "Release notes/v1.8.3.md",
+   "sha256": "facdaa8a9bb62a77dd26691e37f772c0ba0a3b73a5a16acc9fc75df0882060cf",
+   "bytes": 1947
+  },
+  {
+   "path": "Release notes/v1.8.4.md",
+   "sha256": "e3febcbe6dcc4e47d5558df870e52a53a0fa995626e6ba61c0b723ed9bfb402d",
+   "bytes": 346
+  },
+  {
+   "path": "Release notes/v1.8.5.md",
+   "sha256": "bd875404db013036c60041f19ce3d3e9faa5420f09b0bfc721cac6cd6b6d877c",
+   "bytes": 1145
+  },
+  {
+   "path": "Release notes/v1.8.6.md",
+   "sha256": "5a147162105f5a687f1ce2dd177122ea69be17b9d7bc7e305ba1e048c0387745",
+   "bytes": 1423
+  },
+  {
+   "path": "Release notes/v1.8.7.md",
+   "sha256": "665ee2098327197c8480dee7194798fa7f97058c4134286567a8dbbd7c7e3391",
+   "bytes": 361
+  },
+  {
+   "path": "Release notes/v1.8.8.md",
+   "sha256": "d66add761f9c06635954729f7c33481ca81f762911c8e2461605a98a4a8ec678",
+   "bytes": 1347
+  },
+  {
+   "path": "Release notes/v1.8.9.md",
+   "sha256": "3f3e49e15895b6707d55109fa176cf462db8dca40913f1bf0633defc0a41a960",
+   "bytes": 347
+  },
+  {
+   "path": "Release notes/v1.8.md",
+   "sha256": "326ca708b6c9a8c249ac1a09c9abe42c7223000547885362a40e33e0c7de2a7c",
+   "bytes": 7790
+  },
+  {
+   "path": "Release notes/v1.9.0.md",
+   "sha256": "24c1d8d850dc3e443693a5e91bce3ec2d0ec9540c5384908ff33e7cf6b2e33cc",
+   "bytes": 4662
+  },
+  {
+   "path": "Release notes/v1.9.1.md",
+   "sha256": "a1252b22c35d6e3205b1083755b63db423661fbe3a72ea805adc5f393e64ff15",
+   "bytes": 2248
+  },
+  {
+   "path": "Release notes/v1.9.10.md",
+   "sha256": "c2b5790e907a01dffa79a3e8b9ba063cfccc4c6cd5a3e4db064d014b4f948771",
+   "bytes": 283
+  },
+  {
+   "path": "Release notes/v1.9.11.md",
+   "sha256": "4b4379b4718850cb6a1c6e2d4f0b08c4e550da1c9ede19f5de645fd622873375",
+   "bytes": 852
+  },
+  {
+   "path": "Release notes/v1.9.12.md",
+   "sha256": "6ff646c7995fee300faf51e02e64ef3288a4eeb731e822fe3427c09caf325953",
+   "bytes": 400
+  },
+  {
+   "path": "Release notes/v1.9.13.md",
+   "sha256": "e5e405159ce5feb74d2a1a40f5ab9862d6291a5d28b94bdeba2a94bb36a1df35",
+   "bytes": 412
+  },
+  {
+   "path": "Release notes/v1.9.14.md",
+   "sha256": "212a9b252de001c5f40cf2ef006b4f31ffcae7792453cf2a0a326ab93e091349",
+   "bytes": 911
+  },
+  {
+   "path": "Release notes/v1.9.2.md",
+   "sha256": "a7dc892d39d18a0ceea624ce21dda4657c1f13a0d8360370fa6355adde233544",
+   "bytes": 2380
+  },
+  {
+   "path": "Release notes/v1.9.3.md",
+   "sha256": "ea9dcfbad302c9abf9c4babc9da37fa79205184ad4a8e7e9ad535fc77f3abf09",
+   "bytes": 3236
+  },
+  {
+   "path": "Release notes/v1.9.4.md",
+   "sha256": "1f93b8121be3c74f8438c42c924abc5ee4de29755cf2bf579668d5c23bce59f0",
+   "bytes": 1639
+  },
+  {
+   "path": "Release notes/v1.9.5.md",
+   "sha256": "c05d3d2f3675cfe944ab32f9e366dc68b41139b32045ad2137f48fb1db701495",
+   "bytes": 2177
+  },
+  {
+   "path": "Release notes/v1.9.6.md",
+   "sha256": "e0a0d25745a66aec470d244ec114efbc8c810d407eedc03695343a6077a135a7",
+   "bytes": 940
+  },
+  {
+   "path": "Release notes/v1.9.7.md",
+   "sha256": "af76523e9786b5f3ad756d28d64eba641f1c3b2eeeaa8df15993e08716be9ab1",
+   "bytes": 2253
+  },
+  {
+   "path": "Release notes/v1.9.8.md",
+   "sha256": "b4050d9ef940c83ab4d6d97a10669279de38edf7c0ef30641a9a34f3dee47891",
+   "bytes": 1982
+  },
+  {
+   "path": "Release notes/v1.9.9.md",
+   "sha256": "6357cfdcdd3734982781a5a4b54c36ce9523b1bafbc72c8d4284438b122d0a3b",
+   "bytes": 523
+  },
+  {
+   "path": "Release notes/v1.9.md",
+   "sha256": "f113fc0997bdf66f2c763970f91d0dbf1114aa40d9b53bc57e2d0cce0e79d192",
+   "bytes": 6886
+  },
+  {
+   "path": "Sandbox/Adventurer/From plain-text note-taking.md",
+   "sha256": "9b12dec82ce5221eb00bd35da14de85b29ba23ee13447211c54249ff133377f0",
+   "bytes": 539
+  },
+  {
+   "path": "Sandbox/Adventurer/From standard note-taking.md",
+   "sha256": "ba238890dce675fe849de8b2a66b2ea7b38f538f88db4c75239b85bf6ea84d91",
+   "bytes": 629
+  },
+  {
+   "path": "Sandbox/Adventurer/No prior experience.md",
+   "sha256": "1dca8398bb52c47bf051e3f2de63678439bfc4e281b7ecc09e926ccb3a7269d2",
+   "bytes": 725
+  },
+  {
+   "path": "Sandbox/Formatting/Blockquote.md",
+   "sha256": "a14331ae13f3fe85f31a8c7b19ece8e561f47041160fb11813614129825fc1af",
+   "bytes": 450
+  },
+  {
+   "path": "Sandbox/Formatting/Callout.md",
+   "sha256": "47a92d6fe03c1dbb01185a467b317321116864175150a0646e8be13fcdf62052",
+   "bytes": 2410
+  },
+  {
+   "path": "Sandbox/Formatting/Code block.md",
+   "sha256": "140d6d6a4b3cae8ff1d490c965f6ccae7ad64720790516b960ce4a6c10b3542b",
+   "bytes": 648
+  },
+  {
+   "path": "Sandbox/Formatting/Comment.md",
+   "sha256": "b6675d30946bfbf16b5bb2519fb7ca87030119d3964e62ee7653c768637d2cd3",
+   "bytes": 543
+  },
+  {
+   "path": "Sandbox/Formatting/Diagram.md",
+   "sha256": "ae63d3debf5b8b853cd3520e9a331d202a784ef46ad60ad7e543623a995f870b",
+   "bytes": 1349
+  },
+  {
+   "path": "Sandbox/Formatting/Embeds.md",
+   "sha256": "dcf078d86ca61f8e14a3744c4022868fe99561ae85b1165a4ae6f8c1c0c3fccb",
+   "bytes": 175
+  },
+  {
+   "path": "Sandbox/Formatting/Emphasis.md",
+   "sha256": "b3d4c77faaddc35be7928422aebcd38d8ecdbb5e4b0a267f67d689a120788b65",
+   "bytes": 304
+  },
+  {
+   "path": "Sandbox/Formatting/Footnote.md",
+   "sha256": "b3d31043c50db127dd8101e24480276927f49c2a6d13669f456ba247d0b177e2",
+   "bytes": 745
+  },
+  {
+   "path": "Sandbox/Formatting/Format your notes.md",
+   "sha256": "8582f2b25a11a7be36910ff8461fdf668c72cb7d3bd0e28ddca29126b7596b23",
+   "bytes": 414
+  },
+  {
+   "path": "Sandbox/Formatting/Heading.md",
+   "sha256": "13eda6c9c67bdd759a13021c2a80c7ba0c4c06e6be809330a69858aef93debff",
+   "bytes": 306
+  },
+  {
+   "path": "Sandbox/Formatting/Highlighting.md",
+   "sha256": "4008ec65e19f548cd0a03db474ee48f9be634393d5884a0b4ce781f8287908cd",
+   "bytes": 96
+  },
+  {
+   "path": "Sandbox/Formatting/Horizontal divider.md",
+   "sha256": "4ad04c4aaf10b575e7397aaba308e4714d6a72757aad7cb4435963fa56f14452",
+   "bytes": 111
+  },
+  {
+   "path": "Sandbox/Formatting/Images.md",
+   "sha256": "e639ef2fd5830d733c1c2992cb78466cce8e16627ea25d06cc7add8a40f61d43",
+   "bytes": 314
+  },
+  {
+   "path": "Sandbox/Formatting/Inline code.md",
+   "sha256": "09386f42d5d1af162ab965e7af81f9e8fa7b1ce19ba47ac63e7db22b26ea04bd",
+   "bytes": 137
+  },
+  {
+   "path": "Sandbox/Formatting/Internal link.md",
+   "sha256": "10022bda6a144ba086d3583fdbc904d8f866a115d3497773dd32b77904d94220",
+   "bytes": 66
+  },
+  {
+   "path": "Sandbox/Formatting/Links.md",
+   "sha256": "61e08806721662cbf37ae3780f74c8a4060fb8ea2cdfb1228d6bebe78f1c51d0",
+   "bytes": 1219
+  },
+  {
+   "path": "Sandbox/Formatting/Lists.md",
+   "sha256": "cbb5f1f177b899ba3d3b6e1fb8a0a1ad865bab1b0b1884f57e42b61720b94236",
+   "bytes": 212
+  },
+  {
+   "path": "Sandbox/Formatting/Math.md",
+   "sha256": "5439cf3ab8cd987afa3660e9009b35aa6c7e49d870667a7524cbd8d10a2d8130",
+   "bytes": 377
+  },
+  {
+   "path": "Sandbox/Formatting/Strikethrough.md",
+   "sha256": "8cd3e4ef711824c0090de96686eb38380f524208fb1484b19c172065ee3ac7d2",
+   "bytes": 158
+  },
+  {
+   "path": "Sandbox/Formatting/Table.md",
+   "sha256": "7e5a8ad59b29610842272e3a530cf05acd5b835bd4c8d3241ce0d4242b3e0e00",
+   "bytes": 1203
+  },
+  {
+   "path": "Sandbox/Formatting/Task.md",
+   "sha256": "e86302b1b7c8e7d47ec980aae99bdd4792bdee88d5bbf9378c8cc8101ab737dc",
+   "bytes": 612
+  },
+  {
+   "path": "Sandbox/Guides/Create a vault.md",
+   "sha256": "4db48e0dcec725d61b9c2bf15e79830166471b8dc1c2fcf587bafa4f23e2b669",
+   "bytes": 809
+  },
+  {
+   "path": "Sandbox/Guides/Create your first note.md",
+   "sha256": "bf351af6a87bfee71d1330102822f35c9438fada630c4bdd88dcd89133412221",
+   "bytes": 1177
+  },
+  {
+   "path": "Sandbox/Guides/Get started with Obsidian.md",
+   "sha256": "9870cb1fe6ba0b705a54650249aab07dedf702bf0aa3df6902594c0e8dabf13c",
+   "bytes": 598
+  },
+  {
+   "path": "Sandbox/Guides/Link notes.md",
+   "sha256": "d0d6e12e5eca2f19343efdc1c67f0545918929aadc1056f6b1ae29e1c958e05e",
+   "bytes": 2674
+  },
+  {
+   "path": "Sandbox/Plugins make Obsidian special for you.md",
+   "sha256": "d9877be748e310a7dd52dc32bc0637d29ceab6bf307b85104adc5076aa239243",
+   "bytes": 1138
+  },
+  {
+   "path": "Sandbox/Start here.md",
+   "sha256": "3f2fb48d06aebeda7271800868345b58a6a59cc74c27e234e9dc5160cb7073a3",
+   "bytes": 965
+  },
+  {
+   "path": "Sandbox/Vault is just a local folder.md",
+   "sha256": "b499dd3e0001f33f9356f74ccf0283d0f0e5d84bfb576a02ce37bd7c01153107",
+   "bytes": 1645
+  },
+  {
+   "path": "en/Bases/Bases syntax.md",
+   "sha256": "bacb5c96516390c9f200f607037003da97f8cf4152b2959cbad0e29dfba8c152",
+   "bytes": 18390
+  },
+  {
+   "path": "en/Bases/Create a base.md",
+   "sha256": "47ff0babc48ca4aebbca0b9aaf2b47e85ef88d493e9d3ad13754fba01f82111b",
+   "bytes": 1092
+  },
+  {
+   "path": "en/Bases/Formulas.md",
+   "sha256": "414637e862fb1767a76759b0d952b96f4de370e24fc87c510cbc5eafbd7000b6",
+   "bytes": 7262
+  },
+  {
+   "path": "en/Bases/Functions.md",
+   "sha256": "76f69464ce96a359fcc81a7806f68f555705d6f8e75c023183851d5b4651f14c",
+   "bytes": 19144
+  },
+  {
+   "path": "en/Bases/Introduction to Bases.md",
+   "sha256": "e6da456c090f943781198012497ab179bb95928c051aa1748eebd56cb591953f",
+   "bytes": 2030
+  },
+  {
+   "path": "en/Bases/Layouts/Cards view.md",
+   "sha256": "14369cb49d9f1dee8e586e94855da5bcd48ac52e2bb1a42fbcfbf4c2d7330908",
+   "bytes": 1352
+  },
+  {
+   "path": "en/Bases/Layouts/Kanban view.md",
+   "sha256": "bf0779d1fd86760ae599107668a68692e9532cad08c635606d8ee4657cf5b541",
+   "bytes": 2668
+  },
+  {
+   "path": "en/Bases/Layouts/List view.md",
+   "sha256": "466d3157480948e4fc310cf2b005688cdc2fe4d6889094f30586a5358ce26830",
+   "bytes": 1005
+  },
+  {
+   "path": "en/Bases/Layouts/Map view.md",
+   "sha256": "631101c8fceae2854bad0416aa816df5b21c82b7e949435fda0ab64aeefb0314",
+   "bytes": 6013
+  },
+  {
+   "path": "en/Bases/Layouts/Table view.md",
+   "sha256": "4fd012f8979649a92b11c122eb41f36901fa28992154877c19fcd24a72f48c94",
+   "bytes": 5889
+  },
+  {
+   "path": "en/Bases/Views.md",
+   "sha256": "0cbc2e02315c98a0952ee9d295872550f44033bccabfb82822a428ac28ef044f",
+   "bytes": 8565
+  },
+  {
+   "path": "en/Contributing to Obsidian/Developers.md",
+   "sha256": "3727be9af83b4341b206825e4bb4f5725af3639abeb4cad1ece34965ff1c1a5a",
+   "bytes": 2019
+  },
+  {
+   "path": "en/Contributing to Obsidian/Financial contributions.md",
+   "sha256": "9e8e6ea0a37430f36a04a70c166ae91b6d60588c66c23acc4710d5a99a574d54",
+   "bytes": 816
+  },
+  {
+   "path": "en/Contributing to Obsidian/Style guide.md",
+   "sha256": "840cebb976b2718a1f66de2d5de91e41e9a95942d786bb6a71d4f71ac2e92965",
+   "bytes": 17104
+  },
+  {
+   "path": "en/Contributing to Obsidian/Translations.md",
+   "sha256": "c6a962ba9497f64891b8201fa99bef879f8a83bf08beabef5d9cce1c538609b7",
+   "bytes": 584
+  },
+  {
+   "path": "en/Editing and formatting/Advanced formatting syntax.md",
+   "sha256": "15ed1c714c0e8a4dd48ac05ce53df787d1eda241c78d8b27a091f142cbe26307",
+   "bytes": 5545
+  },
+  {
+   "path": "en/Editing and formatting/Attachments.md",
+   "sha256": "7e3ec7096b7f7a4c4c523cc93b1d8de1a98c15141e862a243098387b8f112493",
+   "bytes": 1774
+  },
+  {
+   "path": "en/Editing and formatting/Basic formatting syntax.md",
+   "sha256": "38db5d30f637adfcbe212fd8b5616412b93bd8c0387845e5ff5355f5195235bd",
+   "bytes": 16149
+  },
+  {
+   "path": "en/Editing and formatting/Callouts.md",
+   "sha256": "5d12e34b9fb68c6b7ad0ea39d80fb11267b0406cd204f61d4c00f2d5dea9bab6",
+   "bytes": 6176
+  },
+  {
+   "path": "en/Editing and formatting/Editing shortcuts.md",
+   "sha256": "c20886bb62cf1e7461a7015ff747ebacb9914ea0e3b812ff40a1a85f971d8ed6",
+   "bytes": 5080
+  },
+  {
+   "path": "en/Editing and formatting/Embed web pages.md",
+   "sha256": "73184d63fd9299e3515c86af06ac7f3831dafe817fa301e6d47ef63ac4c56a54",
+   "bytes": 1435
+  },
+  {
+   "path": "en/Editing and formatting/Find and replace.md",
+   "sha256": "5b039191c0572c1ca6c023c1f0b0816c72fa09263710dac69e465caecdba806c",
+   "bytes": 1586
+  },
+  {
+   "path": "en/Editing and formatting/Folding.md",
+   "sha256": "93a40178450e9705b402535905b841f9ba6a5cc1727151c74a496445b05fbd1c",
+   "bytes": 1349
+  },
+  {
+   "path": "en/Editing and formatting/HTML content.md",
+   "sha256": "e83bd7192d72c4ef9e2d60d7406879dcb49c60caa09e903639037b629652f95c",
+   "bytes": 3145
+  },
+  {
+   "path": "en/Editing and formatting/Multiple cursors.md",
+   "sha256": "a0f004c0648347753e6bb8dd9c7c239683b63646c729b8f33a62629586ac80f4",
+   "bytes": 706
+  },
+  {
+   "path": "en/Editing and formatting/Obsidian Flavored Markdown.md",
+   "sha256": "da08d3873a6b5a2334d57c1c943a9a1ca6d74991573638b466d3f6ecf9c9cda4",
+   "bytes": 2564
+  },
+  {
+   "path": "en/Editing and formatting/Properties.md",
+   "sha256": "75c85e422f5e2b17c9c8fe9125b6c9b4159fd6635cefbbef6b72c3272b623db6",
+   "bytes": 10453
+  },
+  {
+   "path": "en/Editing and formatting/Tags.md",
+   "sha256": "20214764032cb166d6e13cc39605b654d691f5a17ad70437d6df81e28fc149dc",
+   "bytes": 2209
+  },
+  {
+   "path": "en/Editing and formatting/Views and editing mode.md",
+   "sha256": "beb41de19ce45a9e077b93b1bee05d57f203fdb8f347f384ac39cfa47f360797",
+   "bytes": 3498
+  },
+  {
+   "path": "en/Extending Obsidian/CSS snippets.md",
+   "sha256": "76f06be1182f2381ba0df6c0aa9ce444fbd71241f1303b28a7e4c4fe2e47a018",
+   "bytes": 4593
+  },
+  {
+   "path": "en/Extending Obsidian/Community directory.md",
+   "sha256": "425f7172f9633ab6217f5961643c03c37002768c69219037898c0455acc5387a",
+   "bytes": 4569
+  },
+  {
+   "path": "en/Extending Obsidian/Community plugins.md",
+   "sha256": "7093086daa5a14a814307b113f435eff2a80e90e836a728fec681e33c236e9a1",
+   "bytes": 3632
+  },
+  {
+   "path": "en/Extending Obsidian/Obsidian CLI.md",
+   "sha256": "4d93112c99394fdc7c0fcd2b8b7f91c6c5dc31cd28986bee5664d1c2ba990172",
+   "bytes": 32762
+  },
+  {
+   "path": "en/Extending Obsidian/Obsidian Headless.md",
+   "sha256": "48e063d9f46deb199213ac6f57f099cd9e0dde67c2b78546755ca838e1914cbb",
+   "bytes": 1928
+  },
+  {
+   "path": "en/Extending Obsidian/Obsidian URI.md",
+   "sha256": "bbc6221db3ebe662c67f963dbbf6b3149e93bedb4db694cb1c646f468196f916",
+   "bytes": 10576
+  },
+  {
+   "path": "en/Extending Obsidian/Plugin security.md",
+   "sha256": "e28e17269c28d3665a012cfe6cd2a830c4632ed7ebdde26d2cc1d2d5b336ba3a",
+   "bytes": 2378
+  },
+  {
+   "path": "en/Extending Obsidian/Themes.md",
+   "sha256": "6eebd565dc60b01a4354e7c4054da6cbc344d330580fd136ee8546746541c937",
+   "bytes": 1719
+  },
+  {
+   "path": "en/Files and folders/Accepted file formats.md",
+   "sha256": "95ede78937600de68ad15ade8cf5044f05261eac9f72187c2880f6a7c71b517e",
+   "bytes": 1083
+  },
+  {
+   "path": "en/Files and folders/Configuration folder.md",
+   "sha256": "ab6b05840f1508b621210f2fb74a68199b22a80d0370ecccbb480b5b98a4e9d6",
+   "bytes": 2017
+  },
+  {
+   "path": "en/Files and folders/How Obsidian stores data.md",
+   "sha256": "add03088da7be4ab2fd364918c17b006d646eafedffada5440db83217f6942e6",
+   "bytes": 3473
+  },
+  {
+   "path": "en/Files and folders/Manage notes.md",
+   "sha256": "8f0510b45a78489ac4b0e3cf3f35f0c2abc8d6bcba201da9a23a2ae0af36d789",
+   "bytes": 3220
+  },
+  {
+   "path": "en/Files and folders/Manage vaults.md",
+   "sha256": "c57c9d0d93ce60b805a0419584ff3aa7ecd2a35315e6c79c81207aab60585ee3",
+   "bytes": 4366
+  },
+  {
+   "path": "en/Files and folders/Symbolic links and junctions.md",
+   "sha256": "d4c5c736ff4028d307d0608791f8c8e5ff797046057766dd2361036b5677118f",
+   "bytes": 2563
+  },
+  {
+   "path": "en/Getting started/Back up your Obsidian files.md",
+   "sha256": "37f908c4578772d387abfa09a523f6ecd95d8c302904ae84af9474c009306fe0",
+   "bytes": 6452
+  },
+  {
+   "path": "en/Getting started/Create a vault.md",
+   "sha256": "21ac1c3c3dc50a20d01cc128d86929badfc80ecc1cf50750115d04a11b1aef9b",
+   "bytes": 1055
+  },
+  {
+   "path": "en/Getting started/Create your first note.md",
+   "sha256": "0e4dbb65d6522c375041dc6522f0ea3a96328e1ed8bc8d71f54bb5ca33aa133a",
+   "bytes": 1398
+  },
+  {
+   "path": "en/Getting started/Download and install Obsidian.md",
+   "sha256": "eedf87a3579466939828d972206d79c363fc60ee125a6f97b43f504508a096d4",
+   "bytes": 3242
+  },
+  {
+   "path": "en/Getting started/Glossary.md",
+   "sha256": "a33713905fb7cfac3e1231bd9cbe6bf9362abe9f22f369dbb37a7432483b86f7",
+   "bytes": 4887
+  },
+  {
+   "path": "en/Getting started/Import notes.md",
+   "sha256": "5cf956f3e78b47a25e8dc89a00e649132fc6ecdb766dd939822c77667b5983f2",
+   "bytes": 2845
+  },
+  {
+   "path": "en/Getting started/Link notes.md",
+   "sha256": "e40dd9be9851d2f0c3a0df5847baae45bc928fb2ec0a5e8b5ac3eecf531f44d9",
+   "bytes": 2963
+  },
+  {
+   "path": "en/Getting started/Mobile app.md",
+   "sha256": "05446e93744e037dc9248072c3fa02177adb8976af5de7fc8b8ed4c60aab20be",
+   "bytes": 3841
+  },
+  {
+   "path": "en/Getting started/Sandbox vault.md",
+   "sha256": "f60decc353992abb4eb8ac0517e85210c0b4d02065b718e8542a905b7b85d2fe",
+   "bytes": 1222
+  },
+  {
+   "path": "en/Getting started/Sync your notes across devices.md",
+   "sha256": "7ab268aa4d6820a888515d8cab5ad9658e88783e002c6acd74023472ab63acbe",
+   "bytes": 12796
+  },
+  {
+   "path": "en/Getting started/Update Obsidian.md",
+   "sha256": "d5090ee8f8b71fcd80faed1a328b86f7f7d37b657277d9b322922bb04cc83838",
+   "bytes": 2213
+  },
+  {
+   "path": "en/Help and support.md",
+   "sha256": "bbcab225848d7bfbcf9ab4ec0f2ee2a0884c28159464138929247dc783485036",
+   "bytes": 5679
+  },
+  {
+   "path": "en/Home.md",
+   "sha256": "406152da3e87c25a3d6037a4d0cc6046ed63fed6488b08d5c72e2a0de70977dc",
+   "bytes": 2055
+  },
+  {
+   "path": "en/Import notes/Import CSV files.md",
+   "sha256": "5b06e9c9397ee3d04923aebfe1f78f9c3a695236f9e8cd7bb5cef52b4e32be5f",
+   "bytes": 2037
+  },
+  {
+   "path": "en/Import notes/Import HTML files.md",
+   "sha256": "b12637975173c1388e3b7fc3e7a86007231b7c7edf9bd6596d0eb3c1fdf6d77e",
+   "bytes": 2384
+  },
+  {
+   "path": "en/Import notes/Import Markdown files.md",
+   "sha256": "d95f42bc9f6512d29d0cf520f565142c4c1081ccddf7604c74e97d40ee761a71",
+   "bytes": 1491
+  },
+  {
+   "path": "en/Import notes/Import Textbundle files.md",
+   "sha256": "778f5c7765d809a04e424817cc75f11d5f64b33e6049b3a258242f6d986de73f",
+   "bytes": 2099
+  },
+  {
+   "path": "en/Import notes/Import from Airtable.md",
+   "sha256": "982b42a0d88f155653fe161ca99baab20778b61531d5e455dd872ed605861d9e",
+   "bytes": 5827
+  },
+  {
+   "path": "en/Import notes/Import from Apple Journal.md",
+   "sha256": "d6b76378cace6cd4f62df358c03568f0699314cba51f63ece43533c43cb17cc5",
+   "bytes": 2386
+  },
+  {
+   "path": "en/Import notes/Import from Apple Notes.md",
+   "sha256": "9d2bf7768cdf425feede5d7b079ef72e655a3dd32fd8ae9c989b23c8d10edec0",
+   "bytes": 2541
+  },
+  {
+   "path": "en/Import notes/Import from Bear.md",
+   "sha256": "1994a39b85f6288ee79c9394750a4569003e9b82851f7f98bf6bc590eff3bdc8",
+   "bytes": 1598
+  },
+  {
+   "path": "en/Import notes/Import from Craft.md",
+   "sha256": "650cbf1d9bbe7250eda421612ba7e0df05422ede97041b73ef8341b5d17b7201",
+   "bytes": 819
+  },
+  {
+   "path": "en/Import notes/Import from Evernote.md",
+   "sha256": "8438f80aced276fea4d7aeec5f5c695522e3aebd6b283006d416a6df614017d2",
+   "bytes": 2566
+  },
+  {
+   "path": "en/Import notes/Import from Google Keep.md",
+   "sha256": "e46110acc672cfebb3ade53ad0fd18eb9a4980b0d8006adf57358660d4d04d00",
+   "bytes": 2704
+  },
+  {
+   "path": "en/Import notes/Import from Logseq.md",
+   "sha256": "69c01b3d61bcafd16645628930290021d4dae3ff7878744999f3b70308f76227",
+   "bytes": 4162
+  },
+  {
+   "path": "en/Import notes/Import from Microsoft OneNote.md",
+   "sha256": "5f1ce3dddda80287c9dbbb0165e33bcd1b599e8f0e2faed6b0cccc624f35b15b",
+   "bytes": 7686
+  },
+  {
+   "path": "en/Import notes/Import from Notion.md",
+   "sha256": "32096dafba5c36d794aacb7b2686a0bab6c273df6e8cad5871df80c760f2fe9e",
+   "bytes": 7737
+  },
+  {
+   "path": "en/Import notes/Import from Roam Research.md",
+   "sha256": "699dcac53037a95b9a43d7ae9f7830e328f1709f6e41c85eddd5bd42d5fa69c0",
+   "bytes": 1580
+  },
+  {
+   "path": "en/Import notes/Import from Samsung Notes.md",
+   "sha256": "5216dd1757576464458d6ae577dfbcae08a60fc7c424cfcf7d35732f387a6c79",
+   "bytes": 2330
+  },
+  {
+   "path": "en/Import notes/Import from Tomboy and Gnote.md",
+   "sha256": "bc76ecc058c8c56b00e088b01e5a1325774eef9709c68d29ce8c27d2b349b084",
+   "bytes": 1235
+  },
+  {
+   "path": "en/Import notes/Importer templates.md",
+   "sha256": "0a01fa2d24b67be96c77a235ece12ae0b905d56ff459f557056c9c8146548d0b",
+   "bytes": 4753
+  },
+  {
+   "path": "en/Import notes/Importer.md",
+   "sha256": "71bb7d70d5d40616982e2771efbb2046c21618382179cbbdd1d40690308c6179",
+   "bytes": 1404
+  },
+  {
+   "path": "en/Licenses and payment/Catalyst license.md",
+   "sha256": "ad4071f4ccd358059629240c2ab78efc0fccf62aecacd05ef4f88e66f0a19906",
+   "bytes": 3069
+  },
+  {
+   "path": "en/Licenses and payment/Education and non-profit discount.md",
+   "sha256": "5fe6acd78c3da6ec27c639c7f278674a2520077da1baaad58a93fb5aac6128c6",
+   "bytes": 3121
+  },
+  {
+   "path": "en/Licenses and payment/Introduction to licenses and payment.md",
+   "sha256": "48906d06e7d466070b6ed7ea0bf9640f15bcfbc486138c2a63eafad00f472fa7",
+   "bytes": 2649
+  },
+  {
+   "path": "en/Licenses and payment/Obsidian Credit.md",
+   "sha256": "888cda1942d8808de354918632aee5fcf7d2ee1859856293f425875f7add2bf0",
+   "bytes": 2935
+  },
+  {
+   "path": "en/Licenses and payment/Refund policy.md",
+   "sha256": "1284d2bee00db72a69d0f67e6ff06ca7200d9396a9316dd0634d4e7254275aca",
+   "bytes": 2674
+  },
+  {
+   "path": "en/Licenses and payment/Sales tax.md",
+   "sha256": "d2a167e85f72fd2b0757dae3ca2a679df3394d59ec554a300db90b71a3d38bb6",
+   "bytes": 2248
+  },
+  {
+   "path": "en/Linking notes and files/Aliases.md",
+   "sha256": "c108b0e8d90888a49ea34092b2d2dc375fb027d2b7599268b20fe48283470909",
+   "bytes": 1777
+  },
+  {
+   "path": "en/Linking notes and files/Embed files.md",
+   "sha256": "5757a6269949f507f3b5f1605ab9bfe81f247738d5b44c3bf096efc6215fbc54",
+   "bytes": 3125
+  },
+  {
+   "path": "en/Linking notes and files/Internal links.md",
+   "sha256": "4ebf7be1cce4bf31e104b60c8eb2a175f134a79a29e29a16822033cfb5088ce1",
+   "bytes": 8992
+  },
+  {
+   "path": "en/Linking notes and files/PDFs.md",
+   "sha256": "6b3a56175de9f4f32ca3075cedc97d68b95ad4ade486f7ed5bd302dca5ab78a9",
+   "bytes": 5846
+  },
+  {
+   "path": "en/Obsidian Publish/Analytics.md",
+   "sha256": "ccbee42e4af70e16bdd46a73342a490649baafa12ad452742a6e03b61ef4feb6",
+   "bytes": 2182
+  },
+  {
+   "path": "en/Obsidian Publish/Collaborate on a Publish site.md",
+   "sha256": "0e706d5f1f6eea7c07879cdf42bd28592e94fd98b12689f827c95986143d1aa3",
+   "bytes": 2679
+  },
+  {
+   "path": "en/Obsidian Publish/Custom domains.md",
+   "sha256": "880a4bfd603d71a9d9d9f451ce1297482ae19e8a7ea8628dd1ab1971d3be9d99",
+   "bytes": 7212
+  },
+  {
+   "path": "en/Obsidian Publish/Customize your site.md",
+   "sha256": "35f099dc6f241b2c60ffdb46efa2244463edcab6d1b6319525f35a85ffccae20",
+   "bytes": 5412
+  },
+  {
+   "path": "en/Obsidian Publish/Headless Publish.md",
+   "sha256": "8cb3d0a08dc8602291c5357f3651df00c767c9ca7cc8ebbe38cc87b3e1b4f415",
+   "bytes": 3944
+  },
+  {
+   "path": "en/Obsidian Publish/Introduction to Obsidian Publish.md",
+   "sha256": "0cdb8768b1cd6d92030b77efbe60e9057afde09f82c4959bbd3f81795e59124d",
+   "bytes": 1222
+  },
+  {
+   "path": "en/Obsidian Publish/Manage sites.md",
+   "sha256": "8e0d20b80d1959a16786c7c8ca6fabf7b81c9c81a8830296327796f7ee2309c3",
+   "bytes": 6698
+  },
+  {
+   "path": "en/Obsidian Publish/Media files.md",
+   "sha256": "c1225eb2f454acb240088c88a09dd359709dfac0b6aea3bd5a17a8b8de0f6615",
+   "bytes": 1662
+  },
+  {
+   "path": "en/Obsidian Publish/Permalinks.md",
+   "sha256": "9d07a8cfecec84472c3a04d307dbcbd5f41570c5cbfd476969ac48c72090c132",
+   "bytes": 1975
+  },
+  {
+   "path": "en/Obsidian Publish/Publish limitations.md",
+   "sha256": "a258f3bf03225145f9abf3916e133c3d028cfc927a8c0a84d66d463f1b0f4ecf",
+   "bytes": 2506
+  },
+  {
+   "path": "en/Obsidian Publish/Publish your content.md",
+   "sha256": "307e85d5c3a21581824db5322911cd41553f80d06d955e27afdf8cc7e051670f",
+   "bytes": 3867
+  },
+  {
+   "path": "en/Obsidian Publish/SEO.md",
+   "sha256": "275244632b650586006981621116a875b9caabb233a666a8b5febfeb4320c138",
+   "bytes": 2075
+  },
+  {
+   "path": "en/Obsidian Publish/Security and privacy.md",
+   "sha256": "05e1e48320da3f0798c63348f6fe29e70bde89211d909a35fc00e32ec62c7384",
+   "bytes": 2793
+  },
+  {
+   "path": "en/Obsidian Publish/Set up Obsidian Publish.md",
+   "sha256": "d0ed3cdd215f71dc911a0250f379ab71377226e227e700e7e36ddd0e3515a3ec",
+   "bytes": 3604
+  },
+  {
+   "path": "en/Obsidian Publish/Social media link previews.md",
+   "sha256": "8e17d019d4faf8a0748ff295d1d0f27654cde8e7dba461ec350e3bf605da0db2",
+   "bytes": 1632
+  },
+  {
+   "path": "en/Obsidian Publish/Troubleshoot Obsidian Publish.md",
+   "sha256": "78929be4607445d3bc3566f3f6e50b6ba6925e7bbdb9e1cf7722bf03254d9c62",
+   "bytes": 1712
+  },
+  {
+   "path": "en/Obsidian Sync/Collaborate on a shared vault.md",
+   "sha256": "05cb5c9f2e99b8767f7824acd63bbe09322e2ac41da3ebe8052772a622b19068",
+   "bytes": 2544
+  },
+  {
+   "path": "en/Obsidian Sync/Frequently asked questions.md",
+   "sha256": "6778b1a9fd40568ba4de73b49aee3326c0dda43b3ef02b91f37456a639859e08",
+   "bytes": 4566
+  },
+  {
+   "path": "en/Obsidian Sync/Headless Sync.md",
+   "sha256": "633bda169c0488c0d64e8b7f128cb427d30f92fd5bdaf20fb4c0246a127046a4",
+   "bytes": 6545
+  },
+  {
+   "path": "en/Obsidian Sync/Introduction to Obsidian Sync.md",
+   "sha256": "a48cb81454c74ee909e9578e92c09828f66779da665302eb28f6f107440427b4",
+   "bytes": 2112
+  },
+  {
+   "path": "en/Obsidian Sync/Local and remote vaults.md",
+   "sha256": "af5beb85a02d5aee41cd24351f9d7634a849197c804389da9b3cd27d514cbe6c",
+   "bytes": 5734
+  },
+  {
+   "path": "en/Obsidian Sync/Plans and storage limits.md",
+   "sha256": "c80d502823ec05b0bdea200c38a0b2a6299cf29897f27abc286f4aee9eaa3db2",
+   "bytes": 5169
+  },
+  {
+   "path": "en/Obsidian Sync/Security and privacy.md",
+   "sha256": "a3d3cc16006f10769793ee512f4f4ec0cc26dfa39dd9e3cdfd9a7e692c194337",
+   "bytes": 8503
+  },
+  {
+   "path": "en/Obsidian Sync/Set up Obsidian Sync.md",
+   "sha256": "ddc1095caa5ee333785f255a66ef5e097a8f4c3d1dd07a1d2f513b61bde7bd52",
+   "bytes": 10899
+  },
+  {
+   "path": "en/Obsidian Sync/Status icon and messages.md",
+   "sha256": "67e61262206b81f90f372b6881ece911a3720a5d7a352fc0742dca5d43eeb6aa",
+   "bytes": 8090
+  },
+  {
+   "path": "en/Obsidian Sync/Switch to Obsidian Sync.md",
+   "sha256": "f59a520319220f657205fa66c820dee59849ed914febc7c9cf0c70353ddd49f4",
+   "bytes": 4162
+  },
+  {
+   "path": "en/Obsidian Sync/Sync regions.md",
+   "sha256": "a818f7713a997e734f667e0665e29d88b9301fda4a414e8c11d9fb01527235a7",
+   "bytes": 3238
+  },
+  {
+   "path": "en/Obsidian Sync/Sync settings and selective syncing.md",
+   "sha256": "040d233c7ba6e3f674aed22bbfaddd18c7af783a1e74be5dd7b79301cf83dac4",
+   "bytes": 7831
+  },
+  {
+   "path": "en/Obsidian Sync/Troubleshoot Obsidian Sync.md",
+   "sha256": "6e03611b4dedb8206413b3d8673e9496e8636662761bc98a6f8322496a80fa52",
+   "bytes": 6019
+  },
+  {
+   "path": "en/Obsidian Sync/Upgrade Sync encryption.md",
+   "sha256": "7e866a11a2ea07086f313e940babea2c7cd10688be4970983d97de296e7fef69",
+   "bytes": 2953
+  },
+  {
+   "path": "en/Obsidian Sync/Version history.md",
+   "sha256": "576f78aea26ab031e4749b3898073d97de77577ce48be201ba13e0ac95e13d6b",
+   "bytes": 7009
+  },
+  {
+   "path": "en/Obsidian Web Clipper/Clip web pages.md",
+   "sha256": "4810cf31c509b02e735cb215b768f8440a915c6f60508a6be9c41f3205a1a080",
+   "bytes": 3711
+  },
+  {
+   "path": "en/Obsidian Web Clipper/Filters.md",
+   "sha256": "9d1e629fa9dc87730f25da8a44888c9e73be599be5e9c73f01f3fbcb64f14907",
+   "bytes": 16685
+  },
+  {
+   "path": "en/Obsidian Web Clipper/Highlighter.md",
+   "sha256": "8dd9e72109789fec0e5d325e2088fef25fd5f81b020f560939f2976bbe178d1c",
+   "bytes": 2462
+  },
+  {
+   "path": "en/Obsidian Web Clipper/Interpreter.md",
+   "sha256": "ab2d217009e0de0a5fd38fcc47288dfe20d27363c77ed916b0d7d0e601673126",
+   "bytes": 9594
+  },
+  {
+   "path": "en/Obsidian Web Clipper/Introduction to Obsidian Web Clipper.md",
+   "sha256": "3dcc88bf04f3b270ffdd132226627f988e2fd476a19c5c1c0c74ef7c99b541a4",
+   "bytes": 2009
+  },
+  {
+   "path": "en/Obsidian Web Clipper/Logic.md",
+   "sha256": "9e02f1c2e692f266d70cc869afb81fa6c657f853a2baa3c84ba800f67b6b0cfb",
+   "bytes": 6271
+  },
+  {
+   "path": "en/Obsidian Web Clipper/Reader.md",
+   "sha256": "e2b5a6595351aa67ef84efc08b3acbf3037b3ca8e0d847a6f365f4d8e6c3d943",
+   "bytes": 1973
+  },
+  {
+   "path": "en/Obsidian Web Clipper/Templates.md",
+   "sha256": "69f8925b8d45e2f0e70b813564f00d5f5457952d57225e5c3809e7e8a950128b",
+   "bytes": 3732
+  },
+  {
+   "path": "en/Obsidian Web Clipper/Troubleshoot Web Clipper.md",
+   "sha256": "0db3befd66c225450149bcebe98bd843b1fe5200f26603112db6696abade760c",
+   "bytes": 3906
+  },
+  {
+   "path": "en/Obsidian Web Clipper/Variables.md",
+   "sha256": "9e2139061d699f99808c893523a0e8c1f97ccba23e5550eb3cd0c66abe9dd2dc",
+   "bytes": 9698
+  },
+  {
+   "path": "en/Obsidian/2-factor authentication.md",
+   "sha256": "899c051c91663287bc4a0d14350057e6a72968eaa3cf3d4f908de2f9055d2378",
+   "bytes": 4165
+  },
+  {
+   "path": "en/Obsidian/About Obsidian.md",
+   "sha256": "77434f5f8726a4baad5f56f3964ebce5f6441684c5e3f53b7a8eed90e9d5ebc4",
+   "bytes": 3557
+  },
+  {
+   "path": "en/Obsidian/Community code of conduct.md",
+   "sha256": "dcf3cdd5a5dc86184b942970b2565fe2f7ca27c6155e2560b35f0a9ceae2437e",
+   "bytes": 10791
+  },
+  {
+   "path": "en/Obsidian/Credits.md",
+   "sha256": "24a51e0c59450992b53e0653c4e083c61d8e4a9f3a36fac95339299a3437dc8a",
+   "bytes": 8101
+  },
+  {
+   "path": "en/Obsidian/Early access versions.md",
+   "sha256": "922f87327fcdcbad0fa8bdb2c348a3a36474f40169287d6b1bc0254de02bf54e",
+   "bytes": 3404
+  },
+  {
+   "path": "en/Obsidian/Obsidian for Android.md",
+   "sha256": "141a38ef96d82e099666293783bd1e0a65e51aab752bd1f9dc0de461bc4e9066",
+   "bytes": 5345
+  },
+  {
+   "path": "en/Obsidian/Obsidian for iOS and iPadOS.md",
+   "sha256": "b57df3b2ec65ef6974c8d04d807a8b48da0198e72f36c25e66d14d4f4727a256",
+   "bytes": 11487
+  },
+  {
+   "path": "en/Obsidian/Official website.md",
+   "sha256": "378e0812b758555032676ad360c01d94ac1eaa68ebe26fbfb5b00a50d7bfcde0",
+   "bytes": 470
+  },
+  {
+   "path": "en/Plugins/Audio recorder.md",
+   "sha256": "8ab29cf0552ebb1937ef581d6cec69e1e19284d5d5a847e7acc50c450d12f793",
+   "bytes": 987
+  },
+  {
+   "path": "en/Plugins/Backlinks.md",
+   "sha256": "d6f71bc20352f1af0338cad780095d0c32c65af6bfffd0065f315b3a8685d928",
+   "bytes": 3045
+  },
+  {
+   "path": "en/Plugins/Bookmarks.md",
+   "sha256": "230e8848ab27b4c8af1c710319f53f83940c601d7e6b2e71b27241ca4f729da6",
+   "bytes": 3955
+  },
+  {
+   "path": "en/Plugins/Canvas.md",
+   "sha256": "090e2c0e69cfb1c9147171e5f52178f269d7f191b2020ab858be04cf564a2f94",
+   "bytes": 17335
+  },
+  {
+   "path": "en/Plugins/Command palette.md",
+   "sha256": "ea73d9ea05ad2b431adf61b192d12128b985286de12dd72d51ed60a4566cd4a5",
+   "bytes": 1694
+  },
+  {
+   "path": "en/Plugins/Core plugins.md",
+   "sha256": "d9d06a9f8d344d0f19da90ab16953db55ad88c301703daea56ef9daa36951e0f",
+   "bytes": 3261
+  },
+  {
+   "path": "en/Plugins/Daily notes.md",
+   "sha256": "cc8892e0443faafa1a12412fc3d96891fd8cd9d2075814378ddca17021eb15bc",
+   "bytes": 2249
+  },
+  {
+   "path": "en/Plugins/File explorer.md",
+   "sha256": "d0d70aebc6539f0fae3fd6be263f977c0eb798ebf420fcb815abbf4e69f90abb",
+   "bytes": 6489
+  },
+  {
+   "path": "en/Plugins/File recovery.md",
+   "sha256": "57ae93fa2bd4d0729663d61367a3c7a3fa9c424fa275166f579b081d6d1aeefd",
+   "bytes": 3486
+  },
+  {
+   "path": "en/Plugins/Footnotes view.md",
+   "sha256": "67533690be9a4ac0f50befeb72ce03ea6b86690f3863304d375de7f15446bc02",
+   "bytes": 260
+  },
+  {
+   "path": "en/Plugins/Format converter.md",
+   "sha256": "c7f62ed2b6397b1b56cfe7ee0403b3ef0cdc5d6dc543a8a1a29a7ad8e2548c1a",
+   "bytes": 988
+  },
+  {
+   "path": "en/Plugins/Graph view.md",
+   "sha256": "b6e2ea91d67b4cbdd09f45c42dfa97547614bc51ace09761fa7df4fd19e0161c",
+   "bytes": 4001
+  },
+  {
+   "path": "en/Plugins/Note composer.md",
+   "sha256": "60887c72c551cf24c83272b1fdc700e434e55e0e5a8be28b71403fa4ed4048b0",
+   "bytes": 3661
+  },
+  {
+   "path": "en/Plugins/Outgoing links.md",
+   "sha256": "eb19e4331f43b70b2f33c35cd8e8ea6ea73b8f2e7f37c5f185068fa0e315ae07",
+   "bytes": 1444
+  },
+  {
+   "path": "en/Plugins/Outline.md",
+   "sha256": "ac779b3ebc6ad8861a4fc2fb420daf1ca1232d9121b39e104b81454e235919bd",
+   "bytes": 282
+  },
+  {
+   "path": "en/Plugins/Page preview.md",
+   "sha256": "06e580bf7034d979e414ae5d9079a8a00a2854bdc33f8ca779657602786d0c27",
+   "bytes": 703
+  },
+  {
+   "path": "en/Plugins/Properties view.md",
+   "sha256": "61f6a209a4f8c4c50e18e7209355c227f1368973da91ec649faf5d744c02ed65",
+   "bytes": 780
+  },
+  {
+   "path": "en/Plugins/Quick switcher.md",
+   "sha256": "4f30e487954b0f751d6d3fa507d5f4df849e7fc3c07db0e274b30a74f980699a",
+   "bytes": 1605
+  },
+  {
+   "path": "en/Plugins/Random note.md",
+   "sha256": "8c26a0d7e0d72fc13c155ab46a99e0e538a71e6643453f4903ca8a689df90bbb",
+   "bytes": 295
+  },
+  {
+   "path": "en/Plugins/Search.md",
+   "sha256": "1d7cd531ea24dff744f3a307daea7aa236bb756ff0320f4c7bfe4b1aef82cdfa",
+   "bytes": 12207
+  },
+  {
+   "path": "en/Plugins/Slash commands.md",
+   "sha256": "d429b6c6846eca55bfc1b3d07788fdce20a32c682f8cbf7cc6292d341119ae44",
+   "bytes": 794
+  },
+  {
+   "path": "en/Plugins/Slides.md",
+   "sha256": "4a78e5caccc67e8fc8efdf0818fa2a819c9882667ab4c5d43d4a173774ebf26a",
+   "bytes": 1160
+  },
+  {
+   "path": "en/Plugins/Tags view.md",
+   "sha256": "93a995b5351a30e559f8fe3b9eb182da6ab86477af10dbdf2377d8b288ff8608",
+   "bytes": 734
+  },
+  {
+   "path": "en/Plugins/Templates.md",
+   "sha256": "6fec28dd49714ea11a6592aba9b8531dbfc17260c8dd8478a17879ce4b116fb7",
+   "bytes": 3908
+  },
+  {
+   "path": "en/Plugins/Unique note creator.md",
+   "sha256": "7cddb3a4027fd0633aae9c5776313d30c9c9b4547775a3b358f036531ff70c41",
+   "bytes": 997
+  },
+  {
+   "path": "en/Plugins/Web viewer.md",
+   "sha256": "3d6b83a7f33991d59892958c855c054d6f93245175c501bd887193dad763b56d",
+   "bytes": 1978
+  },
+  {
+   "path": "en/Plugins/Word count.md",
+   "sha256": "f3f352fabf15b2b8b07b9f980d8d3ffeaa12465b0c0cee52c8a3abee17896122",
+   "bytes": 431
+  },
+  {
+   "path": "en/Plugins/Workspaces.md",
+   "sha256": "c97470228e659f246b16681dd30472ed0010e0373a41c20571828516c78f53ee",
+   "bytes": 1208
+  },
+  {
+   "path": "en/Teams/Commercial license.md",
+   "sha256": "f1b4f858ebd8724ff2f027c45a319c7f29b0c19da2316ca8251128ff0393b7c2",
+   "bytes": 4424
+  },
+  {
+   "path": "en/Teams/Deploy Obsidian across your team.md",
+   "sha256": "0836c91972b7830bc29a7709afe6a744bce458b0e261590ec780328299dd226b",
+   "bytes": 3901
+  },
+  {
+   "path": "en/Teams/Obsidian for teams.md",
+   "sha256": "8108d6150e2b72f2084f3a57cc9bcbeb3ebd572af3ff2dfb7b00ee608c1f36d7",
+   "bytes": 1287
+  },
+  {
+   "path": "en/Teams/Publishing for teams.md",
+   "sha256": "ce9ab3fbdfc7577d2ff66e4cc4fe28585077e20d4a3880ff61730ef9f8be319d",
+   "bytes": 2020
+  },
+  {
+   "path": "en/Teams/Security considerations for teams.md",
+   "sha256": "c56ef98562a456e3633b2cef77bed7419027afdb78399aaf5f7c25f2b330ff01",
+   "bytes": 5528
+  },
+  {
+   "path": "en/Teams/Syncing for teams.md",
+   "sha256": "b2b4e55943bbad218ecb13e159ec19475126d1fcdbc9d5cc6aeeb9b6c6ed2fdd",
+   "bytes": 2476
+  },
+  {
+   "path": "en/User interface/Appearance.md",
+   "sha256": "2f0f2a5a53dfbd4706d8d842b4103e3c084720e55e739b8703edc98bf4d954cf",
+   "bytes": 2187
+  },
+  {
+   "path": "en/User interface/Drag and drop.md",
+   "sha256": "10ea1871a65dcdcf3bcb1150863763bd011341c87156b59a44e2136025442d9d",
+   "bytes": 1603
+  },
+  {
+   "path": "en/User interface/Hotkeys.md",
+   "sha256": "9669b61322a5ed72a8cc9591526f9211ab7bae16962ba7303f90cdbec40e1ba5",
+   "bytes": 1883
+  },
+  {
+   "path": "en/User interface/Language settings.md",
+   "sha256": "3b23db4b7f66730bb76c85176e533a459a7dc69cdb6828aaa1df03520cacc90b",
+   "bytes": 489
+  },
+  {
+   "path": "en/User interface/More options menu.md",
+   "sha256": "e34f9cc788642ea187ae318914d0b464bf13a320650fa787b298390fac31fd26",
+   "bytes": 4208
+  },
+  {
+   "path": "en/User interface/Pop-out windows.md",
+   "sha256": "df128eb34fe246415579492d26d689776b6cebebd29d8e65854a3a9b9c573352",
+   "bytes": 1350
+  },
+  {
+   "path": "en/User interface/Ribbon.md",
+   "sha256": "90a1bff9cad1ed2c2bbdb841bcc9fea97a405a00c4429ca64bc7e26a9762a27e",
+   "bytes": 3645
+  },
+  {
+   "path": "en/User interface/Settings.md",
+   "sha256": "ebaaa4b9bbdb2decf59b84b949874ec9727b44b2b6d81c0de7f7bc1d2ff4a3d0",
+   "bytes": 15502
+  },
+  {
+   "path": "en/User interface/Sidebar.md",
+   "sha256": "8484681603763e05598f6b2d457e0319193809f417ac46394f129611d3787ada",
+   "bytes": 3898
+  },
+  {
+   "path": "en/User interface/Status bar.md",
+   "sha256": "d4e69a1fd8f47a06590b6333e39c9980a7f9c2cc87019f8e2487cf5a69de58fa",
+   "bytes": 978
+  },
+  {
+   "path": "en/User interface/Tabs.md",
+   "sha256": "1b79b32f48a04ade5aa04e9eb515a6ae45afa7f61d70eda9704c9ff6cb6a8fe5",
+   "bytes": 4893
+  },
+  {
+   "path": "en/User interface/Workspace.md",
+   "sha256": "d544c734e6df8c74f330c1b7751d84bf62ddd15ea693a228f516a70a5012baa6",
+   "bytes": 1510
+  },
+  {
+   "path": "he/Bases/יצירת base.md",
+   "sha256": "b7bcf979685eade01df0fe80c2c87d2bf0eb2ab6d00e199e3cce4e17a3f0149e",
+   "bytes": 1462
+  },
+  {
+   "path": "he/Bases/מבוא ל-Bases.md",
+   "sha256": "103ce4edeba2f2e498d6c6fbdf8f72b73ca3d87df31676098a0fc6b30dd01778",
+   "bytes": 2824
+  },
+  {
+   "path": "he/Bases/נוסחאות.md",
+   "sha256": "5eb6fa063e4e1206b9732dad424e327b9324074593f9c6390355e6fd14903bd2",
+   "bytes": 9609
+  },
+  {
+   "path": "he/Bases/פונקציות.md",
+   "sha256": "0ed45aefa50ae6c96fdd66421da21860e70cb945d2b7835868d075c825696afa",
+   "bytes": 23143
+  },
+  {
+   "path": "he/Bases/פריסה/תצוגת Kanban.md",
+   "sha256": "7007faa124c61f146ecc8bc445ef7f29f434b79347e450f5bff08273f5b514ba",
+   "bytes": 3808
+  },
+  {
+   "path": "he/Bases/פריסה/תצוגת טבלה.md",
+   "sha256": "e28e011c9dd7d3ac94f266de4dcef47af8ab3f9c1f63001268f17b644dddf533",
+   "bytes": 7373
+  },
+  {
+   "path": "he/Bases/פריסה/תצוגת כרטיסים.md",
+   "sha256": "6e8c304170b17063f296e4a04cf14025877e2b896626e8b0d68b7225ad155b46",
+   "bytes": 1986
+  },
+  {
+   "path": "he/Bases/פריסה/תצוגת מפה.md",
+   "sha256": "e9a30ad2bff66481a084458a6748449eb043d8ae8c5a1afa8f15f4e1154caa3a",
+   "bytes": 7673
+  },
+  {
+   "path": "he/Bases/פריסה/תצוגת רשימה.md",
+   "sha256": "cd782f80ad16b8564b0ec510a2f0dba0172d6480bbf6ed72c3664d26dde9e452",
+   "bytes": 1430
+  },
+  {
+   "path": "he/Bases/תחביר Bases.md",
+   "sha256": "01f6fd7160c958bdab989f450577b069b0ec087a4f170d7523e175043e32b62f",
+   "bytes": 22754
+  },
+  {
+   "path": "he/Bases/תצוגות.md",
+   "sha256": "fb7289f2bd2c6a842d67e2b38895fb6dfc55e14440ec04e547138d1753fe3687",
+   "bytes": 11980
+  },
+  {
+   "path": "he/Obsidian Publish/Publish ללא ממשק.md",
+   "sha256": "64d4c44c89bcf0c0f0780dcd88722e8a24d466aa3bb519bb019ac465fc826662",
+   "bytes": 5106
+  },
+  {
+   "path": "he/Obsidian Publish/SEO.md",
+   "sha256": "e4c31c3a04af89e72d81b9b39219cf1be0c77fa59c4fc8f6f53835a277d1a371",
+   "bytes": 2875
+  },
+  {
+   "path": "he/Obsidian Publish/אבטחה ופרטיות.md",
+   "sha256": "bb042d61f788a40b3e24b3f7db5140cd1d00b43486edc420872c5909e514daf2",
+   "bytes": 3626
+  },
+  {
+   "path": "he/Obsidian Publish/אנליטיקה.md",
+   "sha256": "0f1376c203a50aa1abf794e896b2745cae677ec4cf2915042e0ba0c4bab1d854",
+   "bytes": 2782
+  },
+  {
+   "path": "he/Obsidian Publish/הגדרת Obsidian Publish.md",
+   "sha256": "0f2ae2bbed35f46d4c57c747b40a27a923f58b712ef5ac63d9c38b488f6ece2a",
+   "bytes": 5241
+  },
+  {
+   "path": "he/Obsidian Publish/התאמה אישית של האתר.md",
+   "sha256": "08409fe9f13bf22faaa62e2544ada775d5aed8cd4245cb00ab82262ea65e9e7e",
+   "bytes": 7519
+  },
+  {
+   "path": "he/Obsidian Publish/מבוא ל-Obsidian Publish.md",
+   "sha256": "cdf5cd4547344a131bb7849635838d4caa7f3e1c2cc8d82163a9f0ff1f80d75a",
+   "bytes": 1647
+  },
+  {
+   "path": "he/Obsidian Publish/מגבלות Publish.md",
+   "sha256": "d0a1f1b75c9fbe9e9576254578bd2d1f2891af1bf52fb83c70d4e98901ea4688",
+   "bytes": 3331
+  },
+  {
+   "path": "he/Obsidian Publish/ניהול אתרים.md",
+   "sha256": "23afe726dfc8d967775692dfd01a75e384c6beb93181b7117868a400895aaf6f",
+   "bytes": 8538
+  },
+  {
+   "path": "he/Obsidian Publish/פרסום התוכן שלך.md",
+   "sha256": "fbace90d478e456c1ab424d2491c827ec4559e2ce1e896a6d6cba7ab51b648cf",
+   "bytes": 5423
+  },
+  {
+   "path": "he/Obsidian Publish/פתרון בעיות ב-Obsidian Publish.md",
+   "sha256": "b5024b004d18f736f997ce3305db41889e4f42818dc1f42c9a02b5a8f83be0d1",
+   "bytes": 2108
+  },
+  {
+   "path": "he/Obsidian Publish/קבצי מדיה.md",
+   "sha256": "6e092fd93f22a03ccfc1fb87dab9163c347fe6d16f8e485bdaf134dbf69a3f96",
+   "bytes": 2154
+  },
+  {
+   "path": "he/Obsidian Publish/קישורים קבועים.md",
+   "sha256": "498450d250efaffdac806e11e65bf8a06f5ac18a4de5d9370cfe4c83072f6dee",
+   "bytes": 2459
+  },
+  {
+   "path": "he/Obsidian Publish/שיתוף פעולה באתר Publish.md",
+   "sha256": "8588509913bb51e4b7b34dd288ab0e15ab8937bfed9874d938a167b15c4c2503",
+   "bytes": 3788
+  },
+  {
+   "path": "he/Obsidian Publish/תחומים מותאמים אישית.md",
+   "sha256": "2de725c39817996a3efdcea9240bdac5c4469f8fc49040b8f92dab28681161df",
+   "bytes": 8873
+  },
+  {
+   "path": "he/Obsidian Publish/תצוגות מקדימות של קישורים ברשתות חברתיות.md",
+   "sha256": "f02b41808bb292c6f75214770506ea91b3010e5260f0dd62f62820e78ac0f214",
+   "bytes": 2164
+  },
+  {
+   "path": "he/Obsidian Sync/Headless Sync.md",
+   "sha256": "a748920f2e8acd862e7e062c8aaf2c20569a8711e9eb817c600668444a7ee70e",
+   "bytes": 8331
+  },
+  {
+   "path": "he/Obsidian Sync/אבטחה ופרטיות.md",
+   "sha256": "57f8f0bdd23023401a5dc097a33f17f2cc2b30d0fab00485ef2c084b5d66e3ac",
+   "bytes": 11587
+  },
+  {
+   "path": "he/Obsidian Sync/אזורי סנכרון.md",
+   "sha256": "4514919120f66fb1c18cec744ed14dc7c24bc6ddbc4bfbc4ca25d0edd4b73a26",
+   "bytes": 4515
+  },
+  {
+   "path": "he/Obsidian Sync/הגדרות סנכרון וסנכרון סלקטיבי.md",
+   "sha256": "af315f54c99477a15f0ae5eba07da5873ed66d68368dfd0ec01ca30d7e59f08e",
+   "bytes": 10914
+  },
+  {
+   "path": "he/Obsidian Sync/הגדרת Obsidian Sync.md",
+   "sha256": "14d54116e892f0c8c821efd064c25968cd354b0d111dda4c161d34e63ef713da",
+   "bytes": 14241
+  },
+  {
+   "path": "he/Obsidian Sync/היסטוריית גרסאות.md",
+   "sha256": "e752113bf8a926d79b2c1e93cf99c0bd60097fe95b6cbf1890265a1797098d8d",
+   "bytes": 9388
+  },
+  {
+   "path": "he/Obsidian Sync/כספות מקומיות ומרוחקות.md",
+   "sha256": "8085c06a17accbfca92c835d8b5dbfd30214260ca57e654c556eaace207250c4",
+   "bytes": 7891
+  },
+  {
+   "path": "he/Obsidian Sync/מבוא ל-Obsidian Sync.md",
+   "sha256": "d46435f4e382a59e95bf171e8f211eb6e6c1ece066a32f5d2a0a9821d61f63ed",
+   "bytes": 2884
+  },
+  {
+   "path": "he/Obsidian Sync/מסלולים ומגבלות אחסון.md",
+   "sha256": "46cf833db349fa3833368c0c29d443bff3d585c16409e689fb88e3dd87f3faf3",
+   "bytes": 6891
+  },
+  {
+   "path": "he/Obsidian Sync/מעבר ל-Obsidian Sync.md",
+   "sha256": "d8f26254c20a3a43f1d02e8e292a3cbf02a252599b617bd896c29a0cdf9fb29f",
+   "bytes": 5359
+  },
+  {
+   "path": "he/Obsidian Sync/סמל סטטוס והודעות.md",
+   "sha256": "5744f2db0d0bda79745e23da1273615d62cd431510e7cf3d5e314f3c61f60dc7",
+   "bytes": 10327
+  },
+  {
+   "path": "he/Obsidian Sync/פתרון בעיות ב-Obsidian Sync.md",
+   "sha256": "8a5694d662beafaa6cd22eb9674b3eec4446c3378ff48221bd7064b42689bb66",
+   "bytes": 8512
+  },
+  {
+   "path": "he/Obsidian Sync/שאלות נפוצות.md",
+   "sha256": "f84a4ff5beab227e6ff50072403172209e5e8b3207340d5ffc1313f6423ad65c",
+   "bytes": 6349
+  },
+  {
+   "path": "he/Obsidian Sync/שדרוג הצפנת סנכרון.md",
+   "sha256": "221743f61984d9bc5bbf0a74c1e6027eff7be1b3e9bd5e6cbe4f540612328365",
+   "bytes": 3750
+  },
+  {
+   "path": "he/Obsidian Sync/שיתוף פעולה בכספת משותפת.md",
+   "sha256": "a29f08500484d5e80caca613b17b3e02df9c013a9af47d8354e552ac78e940a3",
+   "bytes": 3267
+  },
+  {
+   "path": "he/Obsidian Web Clipper/גזירת דפי אינטרנט.md",
+   "sha256": "1bd60c2cae7a0e4fbcc831e0d2c507bf9ba0e7fb44c8cacbe2d293174f85e808",
+   "bytes": 4829
+  },
+  {
+   "path": "he/Obsidian Web Clipper/לוגיקה.md",
+   "sha256": "cfc5af3722f87d3e1fac765b8c0afdfdc08a8963e87b6143e1c9c8d08575f5c4",
+   "bytes": 7719
+  },
+  {
+   "path": "he/Obsidian Web Clipper/מבוא ל-Obsidian Web Clipper.md",
+   "sha256": "9b55600145c841b2229bc7ee70dd71cba8c7fe800d3a9db6eb7d60129f30d249",
+   "bytes": 2480
+  },
+  {
+   "path": "he/Obsidian Web Clipper/מסמן.md",
+   "sha256": "20308d7be7aa05d1fcfe39c234b8e4dc9f7713d19b6a72c0fad52ffc985be0fe",
+   "bytes": 2960
+  },
+  {
+   "path": "he/Obsidian Web Clipper/מסננים.md",
+   "sha256": "e17d7c205f6e381ae03a8c79558dd9aa3e89430ca7173723f4324f0f618d2cf2",
+   "bytes": 20571
+  },
+  {
+   "path": "he/Obsidian Web Clipper/משתנים.md",
+   "sha256": "b5e08899bb6abef477f8aa50a6a9eba9e99bc502eb40d0d97c401a1d7635c076",
+   "bytes": 11950
+  },
+  {
+   "path": "he/Obsidian Web Clipper/מתרגם.md",
+   "sha256": "63aec47ac6f80e8850206f0602bfebb1843d2beccf8aafbba5bb5267840449d2",
+   "bytes": 11929
+  },
+  {
+   "path": "he/Obsidian Web Clipper/פתרון בעיות ב-Web Clipper.md",
+   "sha256": "bbd196f89547e2c45317386dd619f04bb097f203f0e00a66493f5f415209e252",
+   "bytes": 5010
+  },
+  {
+   "path": "he/Obsidian Web Clipper/קורא.md",
+   "sha256": "4acb4ccc241578c3e126351f8fe93bad20ba6e3f7d02b91a9084ab91163e6ec2",
+   "bytes": 2645
+  },
+  {
+   "path": "he/Obsidian Web Clipper/תבניות.md",
+   "sha256": "759b21f1045fe4515f37d31134c69edba4f7916e09cf8ded900ab01eac659b4d",
+   "bytes": 4863
+  },
+  {
+   "path": "he/Obsidian/Obsidian ל-iOS ו-iPadOS.md",
+   "sha256": "93ec69bda1e0d0f263c5b29b691a3f848c01d749be03012aa616ffb593408e5f",
+   "bytes": 15784
+  },
+  {
+   "path": "he/Obsidian/Obsidian לאנדרואיד.md",
+   "sha256": "94f844719f5abfd8ee5e103d0e03cc562a0d5abe1bd5559c94cb583eb09fc2b3",
+   "bytes": 7766
+  },
+  {
+   "path": "he/Obsidian/אודות Obsidian.md",
+   "sha256": "b6e6ed55e97d614378fd908b352696fba926ddcc2075cdb636c2fda4459bf780",
+   "bytes": 5048
+  },
+  {
+   "path": "he/Obsidian/אימות דו-שלבי.md",
+   "sha256": "9c2d6d1cc97df7ac0408d8d8c2305e137554b785344aaaee0e43fab50af73bcd",
+   "bytes": 5278
+  },
+  {
+   "path": "he/Obsidian/אתר רשמי.md",
+   "sha256": "4789c1d7c6eb3dfde22989a475ed1e8c1df689cde6a66c7ccb547fd40c1ada70",
+   "bytes": 587
+  },
+  {
+   "path": "he/Obsidian/גרסאות גישה מוקדמת.md",
+   "sha256": "833944f77d103ea9bcabc21352afe2dbebf6eff41780b570aaa16c1e57299928",
+   "bytes": 4611
+  },
+  {
+   "path": "he/Obsidian/כללי התנהגות קהילתיים.md",
+   "sha256": "70c9c07bde0821249668200920e884fcd0a4bfb980b602bfd044b97bf642b4e4",
+   "bytes": 14245
+  },
+  {
+   "path": "he/Obsidian/קרדיטים.md",
+   "sha256": "f4e85d4798545392b689a577b46d3972ec5b3690d6c3ca02a2293baf0bd4e8f3",
+   "bytes": 8918
+  },
+  {
+   "path": "he/Teams/Obsidian לצוותים.md",
+   "sha256": "10374327bdac0cdcbde99022bffc72f3960dd58b03965fcd0efdd12efa69c829",
+   "bytes": 1692
+  },
+  {
+   "path": "he/Teams/Publish לצוותים.md",
+   "sha256": "22c1b8174c2b0bd00cae1906a8c16ae60c2eef08b7277bc1da4d092a49df15df",
+   "bytes": 2514
+  },
+  {
+   "path": "he/Teams/Sync לצוותים.md",
+   "sha256": "a0ec1867f2b37224289ea46bfbcf1772379869d2bb18b6ebb0af71ea200798b4",
+   "bytes": 3297
+  },
+  {
+   "path": "he/Teams/פריסת Obsidian עבור הצוות שלך.md",
+   "sha256": "01b58e0c4dfc9c116ed45b0d18211393a8ec5fd36c0b351bab7f90e9342fc859",
+   "bytes": 5193
+  },
+  {
+   "path": "he/Teams/רישיון פרסומי.md",
+   "sha256": "cbc9207866ee1b589900172706022d33d61fb83571a5b339d3f854ae7d4be133",
+   "bytes": 5831
+  },
+  {
+   "path": "he/Teams/שיקולי אבטחה לצוותים.md",
+   "sha256": "c54e00cdf1e5fab9c0c5f9d9eacc6494d6296f8df46d20016b7dd9c5d6ee4c8c",
+   "bytes": 7069
+  },
+  {
+   "path": "he/דף הבית.md",
+   "sha256": "85007eb7c1f8376d03943fbb15d489a9efa76f8f4dd03cfb97db8e8575f7b52b",
+   "bytes": 2640
+  },
+  {
+   "path": "he/הרחבת Obsidian/Obsidian CLI.md",
+   "sha256": "01b0171ae3de1e8b40e723a21d2a12c405c568abb2d60146b6c1137a9cb18743",
+   "bytes": 42070
+  },
+  {
+   "path": "he/הרחבת Obsidian/Obsidian Headless.md",
+   "sha256": "83dfa50392f1fc32c83f8216cc76d07a21030d258639a4aa43cba1fd41dc6c3a",
+   "bytes": 2631
+  },
+  {
+   "path": "he/הרחבת Obsidian/Obsidian URI.md",
+   "sha256": "964476ca9f3996aeb14d3ed0df274abc23948a7835c2cb7d0b8a2713a3d029e1",
+   "bytes": 13214
+  },
+  {
+   "path": "he/הרחבת Obsidian/אבטחת תוספים.md",
+   "sha256": "63895c5565368bc33a291a11462c9ffb22f7fdd6da4ddefa21db0bd4aec93be4",
+   "bytes": 3365
+  },
+  {
+   "path": "he/הרחבת Obsidian/ספריית קהילה.md",
+   "sha256": "6ee426472795fde60bf98a8651d089b85f4fa4ff5907df75b174d72d2080b8ae",
+   "bytes": 6010
+  },
+  {
+   "path": "he/הרחבת Obsidian/ערכות נושא.md",
+   "sha256": "ab6b132b38920e5db9933ea08e72c9321aecf5bfcfb2a81a666772c8c652d189",
+   "bytes": 2477
+  },
+  {
+   "path": "he/הרחבת Obsidian/קטעי CSS.md",
+   "sha256": "77def899a118e15661761f5503fa7cf6e457032456b179aedb9195cd6b855707",
+   "bytes": 5714
+  },
+  {
+   "path": "he/הרחבת Obsidian/תוספים קהילתיים.md",
+   "sha256": "4c2ec84009f270be70951ca962e0cf19406958ee9cc7bc528b730e004d1365cd",
+   "bytes": 4897
+  },
+  {
+   "path": "he/ייבוא הערות/ייבא מ-Apple Journal.md",
+   "sha256": "cb40a0bbbb6a6b53dc6075a3ade2c33aac37e142b832aa5ee66e7f881811580c",
+   "bytes": 3184
+  },
+  {
+   "path": "he/ייבוא הערות/ייבא מ-Apple Notes.md",
+   "sha256": "45670718e0e3964c853ab29f17a387877f9c727be3b871f989945603f2576c96",
+   "bytes": 3376
+  },
+  {
+   "path": "he/ייבוא הערות/ייבא מ-Bear.md",
+   "sha256": "92e77f260712984f17058968809d80ff3027dd58af2f94ea1614b4316ebb3c57",
+   "bytes": 2140
+  },
+  {
+   "path": "he/ייבוא הערות/ייבא מ-Craft.md",
+   "sha256": "47f6d93c9675f9269623affcba90f3d3fccb1123790b415e0ec64e54161f0519",
+   "bytes": 1117
+  },
+  {
+   "path": "he/ייבוא הערות/ייבא מ-Evernote.md",
+   "sha256": "77ce81e08f27972ba6b48bc148e2835c0936e163880e6e4b9d041582580bcb56",
+   "bytes": 3483
+  },
+  {
+   "path": "he/ייבוא הערות/ייבא מ-Google Keep.md",
+   "sha256": "194bb9e7b6bad49b36006b1d0709d216854e6ecb810a04f7cd198feef83e6a0a",
+   "bytes": 3525
+  },
+  {
+   "path": "he/ייבוא הערות/ייבא מ-Microsoft OneNote.md",
+   "sha256": "a1e1999b028511a233e4ab382877b25ba11f303c47d8e4c951ee3ee43b5bd820",
+   "bytes": 10188
+  },
+  {
+   "path": "he/ייבוא הערות/ייבא מ-Notion.md",
+   "sha256": "c3d9b16c64013fd21247636cc7b0bb169741e52f4ff414e463f4c6e2e27e1e10",
+   "bytes": 10048
+  },
+  {
+   "path": "he/ייבוא הערות/ייבא מ-Roam Research.md",
+   "sha256": "4120b98456dc49c7a5dc7b981b677b6919ec99d801c3b023bd99aebf053bdbe9",
+   "bytes": 2146
+  },
+  {
+   "path": "he/ייבוא הערות/ייבא קבצי CSV.md",
+   "sha256": "e09c65f3d8e7def01aff96095f256fec5f20211b4cbd871cafe096aedf509a55",
+   "bytes": 2709
+  },
+  {
+   "path": "he/ייבוא הערות/ייבא קבצי HTML.md",
+   "sha256": "cd5d32131a9e00a4cc3c140b93af5d4ebdfc5bf8b00099499867ee7b36c08e8a",
+   "bytes": 3167
+  },
+  {
+   "path": "he/ייבוא הערות/ייבא קבצי Markdown.md",
+   "sha256": "9658db82c6a24f5fb661a66d44ad70a5f94013c034391474bb995d5537a47cf8",
+   "bytes": 2068
+  },
+  {
+   "path": "he/ייבוא הערות/ייבא קבצי Textbundle.md",
+   "sha256": "425d095c6cc1c37794012470216d2eeb95799bce03480d9703acab257e252aa8",
+   "bytes": 2759
+  },
+  {
+   "path": "he/ייבוא הערות/ייבוא מ-Airtable.md",
+   "sha256": "1fd985cbc7c3f3a56ae5d46a741fec96d13890972c76e4a881948eb44b231d95",
+   "bytes": 7930
+  },
+  {
+   "path": "he/ייבוא הערות/ייבוא מ-Logseq.md",
+   "sha256": "f2786c60ea623a77e96c2eee14932ddf21113e72b1911099039ca7cf40b2c3b7",
+   "bytes": 5855
+  },
+  {
+   "path": "he/ייבוא הערות/ייבוא מ-Samsung Notes.md",
+   "sha256": "89c15b3b1383499adbf0c79facbc48c8a6736260acd5e7c900baa05f0c9e2f44",
+   "bytes": 3204
+  },
+  {
+   "path": "he/ייבוא הערות/ייבוא מ-Tomboy ו-Gnote.md",
+   "sha256": "ded885d7cf6e0ad816144125d399c7bc8523e8dca278f3fcd14c64b96169a9bc",
+   "bytes": 1706
+  },
+  {
+   "path": "he/ייבוא הערות/ייבוא.md",
+   "sha256": "480aa8cc361d857c493512aede338e0ada5e3c25be91df2eede85af498495f44",
+   "bytes": 1796
+  },
+  {
+   "path": "he/ייבוא הערות/תבניות ייבוא.md",
+   "sha256": "1b19c824d54a9b972220cf58ad3ff0efd5aa4cfc04228ff0a6576b646d0889ba",
+   "bytes": 6299
+  },
+  {
+   "path": "he/ממשק משתמש/גרור ושחרר.md",
+   "sha256": "abffb907ff09708cd81d9fb48bfb06d43142bcbde1f497df4adfaf0d6fe918d7",
+   "bytes": 2349
+  },
+  {
+   "path": "he/ממשק משתמש/הגדרות שפה.md",
+   "sha256": "6786d0362374ccb33337b1e8bc48e9f2a1186f2292b8fd1d6bf2a29a18881247",
+   "bytes": 513
+  },
+  {
+   "path": "he/ממשק משתמש/הגדרות.md",
+   "sha256": "1ea9446c574330a49723839f25ca65329adb42e25c009a8396aeaed1c674c15d",
+   "bytes": 20820
+  },
+  {
+   "path": "he/ממשק משתמש/חלונות צפים.md",
+   "sha256": "9fb9a5089f043f6ccfaf3a25ea1db25f0f61aa36640dd33f5695c516cc5d4142",
+   "bytes": 1874
+  },
+  {
+   "path": "he/ממשק משתמש/חלל עבודה.md",
+   "sha256": "c4cadd9b1be4236bdce003686eabf88820cb768be295f06ecbfe8b0bf139a3d3",
+   "bytes": 2207
+  },
+  {
+   "path": "he/ממשק משתמש/לשוניות.md",
+   "sha256": "23eb24f3431256f2fdc2d4ce292c2842b11fd1b04c57e22ae8e3a2c7e86adf3f",
+   "bytes": 7162
+  },
+  {
+   "path": "he/ממשק משתמש/מקשי קיצור.md",
+   "sha256": "da50be65d8fc409c28ca878a0ddf8f46f517f000be883594c99f56ddb8039b1f",
+   "bytes": 2611
+  },
+  {
+   "path": "he/ממשק משתמש/מראה חיצוני.md",
+   "sha256": "0a427239fc624cb6ade216099461c7fc5f22ae6198e5eca4c0a2dcd65ed7e9d4",
+   "bytes": 3293
+  },
+  {
+   "path": "he/ממשק משתמש/סרגל כלים.md",
+   "sha256": "44e22db98cdf712926beaafc2c77370798c00853414b3bd9892478425d497fbd",
+   "bytes": 5000
+  },
+  {
+   "path": "he/ממשק משתמש/סרגל צד.md",
+   "sha256": "8988e85ad93100873ebdd22c14d653fad33ab028799e379bf1b0ea46fbeebd05",
+   "bytes": 6185
+  },
+  {
+   "path": "he/ממשק משתמש/שורת מצב.md",
+   "sha256": "d3f280f3ba5f3aa18d80c8ec5257356052e358014ff7a27b6a91af0a44490548",
+   "bytes": 1230
+  },
+  {
+   "path": "he/ממשק משתמש/תפריט אפשרויות נוספות.md",
+   "sha256": "6b8ac3dcf860c396fa9170adabaddb00b80b3a3df27d35c1e7e0c981d37bf250",
+   "bytes": 6130
+  },
+  {
+   "path": "he/עזרה ותמיכה.md",
+   "sha256": "733149053f7ae45c0e33eaacde816361a571b34b1369366536538ce71989cb87",
+   "bytes": 7685
+  },
+  {
+   "path": "he/עריכה ועיצוב/Obsidian Flavored Markdown.md",
+   "sha256": "141a5911d3ea1e95b4a7ab077eaa271a7cb5739dc4e20b5f38453ec31c6bfa7b",
+   "bytes": 3065
+  },
+  {
+   "path": "he/עריכה ועיצוב/הטמעת דפי אינטרנט.md",
+   "sha256": "9820cca9f9bdd754bcb33140c882c60dc76024bb08f8ea3194e531a1960c7738",
+   "bytes": 1743
+  },
+  {
+   "path": "he/עריכה ועיצוב/מאפיינים.md",
+   "sha256": "bbc0ce8b652e8a112d21d4e6df1da9cf974838a1924e7e2d8a9ee3cbdb5fbd7c",
+   "bytes": 13884
+  },
+  {
+   "path": "he/עריכה ועיצוב/מצא והחלף.md",
+   "sha256": "76efba4c25fa1ff5b07e9208162b9df2feed61f97a65c3662e7651145b16ba26",
+   "bytes": 1972
+  },
+  {
+   "path": "he/עריכה ועיצוב/מתקפל.md",
+   "sha256": "c71abdf255bfb91fc09e8e505f17b4db3035f7163d8d094b493988d1e9bea094",
+   "bytes": 1853
+  },
+  {
+   "path": "he/עריכה ועיצוב/סמנים מרובים.md",
+   "sha256": "00ad4e5168387b643ebde2c068cb9b41c5c055a032e3365b9ab2a02803cab262",
+   "bytes": 908
+  },
+  {
+   "path": "he/עריכה ועיצוב/ציטוטים.md",
+   "sha256": "d21db481a17bd35b99d3c909799c7549b23963c85bf2e0cd4a8f612c03c1b092",
+   "bytes": 8266
+  },
+  {
+   "path": "he/עריכה ועיצוב/קבצים מצורפים.md",
+   "sha256": "b19d3bf34262b44aa9c2c66fb9785796be475e85f642d34531cbff160b739a0e",
+   "bytes": 2754
+  },
+  {
+   "path": "he/עריכה ועיצוב/קיצורי עריכה.md",
+   "sha256": "c26d72abb870abd8441d1b749f28f3876766b695f01ec10b7f4d53ce7873d252",
+   "bytes": 5749
+  },
+  {
+   "path": "he/עריכה ועיצוב/תגים.md",
+   "sha256": "46ae7e6d95d354d84e088fd7fd592389c87d5fe689e7aa849505da9aeab2924d",
+   "bytes": 2886
+  },
+  {
+   "path": "he/עריכה ועיצוב/תוכן HTML.md",
+   "sha256": "96dde93c16707fcc0f44431fbd89c73aa8916420b342bf93d496c816c1ff9ff9",
+   "bytes": 4027
+  },
+  {
+   "path": "he/עריכה ועיצוב/תחביר עיצוב בסיסי.md",
+   "sha256": "c445b06a13ab0b0a20ed0a58d698793d5cdc41c9d6ce704a22614d781619e4a6",
+   "bytes": 21652
+  },
+  {
+   "path": "he/עריכה ועיצוב/תחביר עיצוב מתקדם.md",
+   "sha256": "1674b711c186be496e51801bd38795aa82b33e802aa40dcabfcaca627990f006",
+   "bytes": 6804
+  },
+  {
+   "path": "he/עריכה ועיצוב/תצוגות ומצב עריכה.md",
+   "sha256": "adda3df7b6bdd97a4afe7eb8b42ded1a68e006ab1f60efc019635844fd774138",
+   "bytes": 4642
+  },
+  {
+   "path": "he/קבצים ותיקיות/כיצד Obsidian מאחסן נתונים.md",
+   "sha256": "f3f50f05f5dc67b4ecc24a96fcfcc64068c452f47d2a4460e4dcf891772ede06",
+   "bytes": 4628
+  },
+  {
+   "path": "he/קבצים ותיקיות/נהל כספות.md",
+   "sha256": "12529ef5dd934f3622bab6d282029cc0ac6887743afc8d33317ff4af2f824099",
+   "bytes": 5764
+  },
+  {
+   "path": "he/קבצים ותיקיות/ניהול הערות.md",
+   "sha256": "e9beba30ce2032d03aea16bb3fc3d246183c837ba188e16e1978ca3a55b3ccda",
+   "bytes": 4576
+  },
+  {
+   "path": "he/קבצים ותיקיות/פורמטי קבצים נתמכים.md",
+   "sha256": "31005851644faa9188acc4d8f0722e83eb57f27324d99533306591ae5ba6a667",
+   "bytes": 1415
+  },
+  {
+   "path": "he/קבצים ותיקיות/קישורים סמליים וצמתים.md",
+   "sha256": "d7e49f103ca2066800668bcf1dcda1bb671d7e979f87a02f32bac6ffed23e2d8",
+   "bytes": 3813
+  },
+  {
+   "path": "he/קבצים ותיקיות/תיקיית תצורה.md",
+   "sha256": "af906d478e693bd70a2ffe2459323ee068bb37d3a8119f4d366d026db91039ed",
+   "bytes": 2726
+  },
+  {
+   "path": "he/קישור הערות וקבצים/הטמעת קבצים.md",
+   "sha256": "048f4c8555e65f2cd0a52423d5d913f4926e1e0d633748fc1d525377628ca615",
+   "bytes": 3850
+  },
+  {
+   "path": "he/קישור הערות וקבצים/כינויים.md",
+   "sha256": "7061d60effdeb133a9740e21eee2919f54d779de3fd13f1465f1be03b1aa2859",
+   "bytes": 2377
+  },
+  {
+   "path": "he/קישור הערות וקבצים/קבצי PDF.md",
+   "sha256": "7c6b16b24addb5b5790466cdcfe1f86f27656f4d13be2ef1ac0013d28cd30ab5",
+   "bytes": 8189
+  },
+  {
+   "path": "he/קישור הערות וקבצים/קישורים פנימיים.md",
+   "sha256": "358246286b69cdadd62433981287723c4a6b981b0e64397ff67c9a71de615e21",
+   "bytes": 11978
+  },
+  {
+   "path": "he/רישיונות ותשלום/הנחות לחינוך ולמלכ״רים.md",
+   "sha256": "437d9ee2501a8fabe60ac130fdf829cf56d3a16619668e87a6ca5b2876894b72",
+   "bytes": 3756
+  },
+  {
+   "path": "he/רישיונות ותשלום/מבוא לרישיונות ותשלום.md",
+   "sha256": "be5bacf3e323d78236bc613e7e448a044516c6e37756e4ef5c8ed3a5819d3c2a",
+   "bytes": 3234
+  },
+  {
+   "path": "he/רישיונות ותשלום/מדיניות החזרים.md",
+   "sha256": "397444a1de59730759863469822f26cd6a80e9c2df8eca071b4808c66762ca78",
+   "bytes": 3366
+  },
+  {
+   "path": "he/רישיונות ותשלום/מס מכירות.md",
+   "sha256": "df952c9851a6b2a42a25e57dc7dd2cf84bf1b502e6cec6268c92919066f309da",
+   "bytes": 2747
+  },
+  {
+   "path": "he/רישיונות ותשלום/קרדיט Obsidian.md",
+   "sha256": "406005fa5f8d8873bb75c04d8357bad07d8e034a965e8cfe465e2e4a5cca8b63",
+   "bytes": 3668
+  },
+  {
+   "path": "he/רישיונות ותשלום/רישיון Catalyst.md",
+   "sha256": "1b1ffd367635e78f31d663a0ed0bc2637d7f1161211f382fbf44feea6261205d",
+   "bytes": 3726
+  },
+  {
+   "path": "he/תוספים/הערה אקראית.md",
+   "sha256": "403a0a6b3a5ba4c6d401f0e8a6793f1bb0aff6adfa2aafed9d9b03d66a204d5e",
+   "bytes": 442
+  },
+  {
+   "path": "he/תוספים/הערות יומיות.md",
+   "sha256": "090a2c8d77b344e82777425c78fbce727b3d4351d1e1af6b2f8d6fb259e9ad04",
+   "bytes": 3340
+  },
+  {
+   "path": "he/תוספים/חיפוש.md",
+   "sha256": "214d5d192708d0b25e4a2b0cf29bde129cdc31fe6020cc48eebe93f5930b4e1b",
+   "bytes": 15015
+  },
+  {
+   "path": "he/תוספים/חלונית תגים.md",
+   "sha256": "97fdde0b30a3cb35d9d9c281548974f079229ef36c355fdead2781c0b2460953",
+   "bytes": 994
+  },
+  {
+   "path": "he/תוספים/חללי עבודה.md",
+   "sha256": "c92b1cc6e861662f75172ccd93efeeb7a8de694a4846f9ed0673c85a38522368",
+   "bytes": 2516
+  },
+  {
+   "path": "he/תוספים/יבואן פורמט Markdown.md",
+   "sha256": "6ccd64fe147dd117f113aabfa492c527d26fbd030e9208bfcda137758e71a848",
+   "bytes": 1327
+  },
+  {
+   "path": "he/תוספים/יוצר פתק ייחודי.md",
+   "sha256": "49b99a19bd63b6fe26c57a4804ab38c3ba51f9d46e0715738cb05fd0bdc60a6e",
+   "bytes": 1488
+  },
+  {
+   "path": "he/תוספים/לוח פקודות.md",
+   "sha256": "d6ec8a65502738603816ec341814a0af44dc19de3cce3601f984c278c07e1933",
+   "bytes": 2529
+  },
+  {
+   "path": "he/תוספים/מחבר הערות.md",
+   "sha256": "6871a1b6176fba4c92fbb993660abff7f61d6df0d802aaf92afe7cda224a17c0",
+   "bytes": 4605
+  },
+  {
+   "path": "he/תוספים/מחליף מהיר.md",
+   "sha256": "dfab0074375743ee2a1d15ea2e98b58eefc74872a8115809942cac7259763a04",
+   "bytes": 2339
+  },
+  {
+   "path": "he/תוספים/מציג אינטרנט.md",
+   "sha256": "01bf2756edf68bfd63e696e4c54bdf516d33ef906ff0b4ca097e1a51a99e175e",
+   "bytes": 2915
+  },
+  {
+   "path": "he/תוספים/מקליט אודיו.md",
+   "sha256": "c178f30c7a404d0f050a9fa7dd8e4ff3072e10d3b0d08443feeeda855dedb9e8",
+   "bytes": 1405
+  },
+  {
+   "path": "he/תוספים/מתווה.md",
+   "sha256": "ce1d25bccf0f0ab4b08c8a478def6e2ba6998220c9170b9412fb2d52e0ccbd84",
+   "bytes": 347
+  },
+  {
+   "path": "he/תוספים/סייר קבצים.md",
+   "sha256": "be2abe2c6da29a14c2c878a34349f8ee47b8331b9f666773dcdfe271d9a3d04c",
+   "bytes": 9239
+  },
+  {
+   "path": "he/תוספים/סימניות.md",
+   "sha256": "505bede73c5d834bf19089d6b59d1df4ca1e37e1ae7856400bf9c87cc15990f6",
+   "bytes": 5915
+  },
+  {
+   "path": "he/תוספים/ספירת מילים.md",
+   "sha256": "51b7f21cfa687d134c4a7fd6f4a71b859de67d0cc1673939a9d08ebe00920168",
+   "bytes": 626
+  },
+  {
+   "path": "he/תוספים/פקודות סלאש.md",
+   "sha256": "47682c9bf27539cd27eb8a227ea169f06f311720de59f438004690aa8d7744e5",
+   "bytes": 1052
+  },
+  {
+   "path": "he/תוספים/קישורים יוצאים.md",
+   "sha256": "72285de7409472bbf7701fc12a86a1d408ae67e04efb5f13d2a75c12dbb831c3",
+   "bytes": 2089
+  },
+  {
+   "path": "he/תוספים/קישורים נכנסים.md",
+   "sha256": "d645ebe708bfe5f9ae8ae62586935d2593eee1236c31684ee7ac51d4f3bf8a42",
+   "bytes": 4760
+  },
+  {
+   "path": "he/תוספים/קנבס.md",
+   "sha256": "9db2de51e0dc997c67e53d4ae213dbf230b2041a6a3c5a394ead4b5f2a2a2c36",
+   "bytes": 24784
+  },
+  {
+   "path": "he/תוספים/שחזור קובץ.md",
+   "sha256": "68758f830f7bc2bb42edff767cbeca0f59a8534aeedcb65a09ffff109a89de82",
+   "bytes": 4810
+  },
+  {
+   "path": "he/תוספים/שקופיות.md",
+   "sha256": "b4ba07a74b8341533ff3b020c45c1bff09cd1d1eeaad7159d7102eb15caecfe3",
+   "bytes": 1649
+  },
+  {
+   "path": "he/תוספים/תבניות.md",
+   "sha256": "5c5486009a4079ffd815c3222a70c6dacbfe5239bcf9be9a77b41c0dca674c91",
+   "bytes": 5187
+  },
+  {
+   "path": "he/תוספים/תוספי ליבה.md",
+   "sha256": "e86d1d876efe8ed0d6145795b47ed2230372d71fa66fc043398179bb0d4e7b40",
+   "bytes": 4452
+  },
+  {
+   "path": "he/תוספים/תצוגה מקדימה של הדף.md",
+   "sha256": "a43842bd9909012e2b2f7b14dcaf9a0cc6ce5aede0051f1e2d487a22961ad244",
+   "bytes": 1100
+  },
+  {
+   "path": "he/תוספים/תצוגת גרף.md",
+   "sha256": "f811cd4329ef6904598302190b9f4a2cf2c358c6248dc8d9d29e8e01d0e6846f",
+   "bytes": 5486
+  },
+  {
+   "path": "he/תוספים/תצוגת הערות שוליים.md",
+   "sha256": "e8ba2296860f0c5a71e81739cfce5727b2addb1f4e3b543cb3774ddb460278ba",
+   "bytes": 374
+  },
+  {
+   "path": "he/תוספים/תצוגת מאפיינים.md",
+   "sha256": "fd98d72cbc7645a7cac37d42d2b848522d5e67124859849b225971f620ab7ab7",
+   "bytes": 1189
+  },
+  {
+   "path": "he/תחילת העבודה/אפליקציה לנייד.md",
+   "sha256": "3e8af24cb2f6bdba642038408827cb93b4c0c52532d2b0fcaec8fd22c67598d0",
+   "bytes": 5503
+  },
+  {
+   "path": "he/תחילת העבודה/גיבוי קבצי Obsidian.md",
+   "sha256": "6d9693278b5575507f6eba7cb5533e548ff0d3e1dff0c34a142c526ef62ae0b8",
+   "bytes": 8951
+  },
+  {
+   "path": "he/תחילת העבודה/הורדה והתקנה של Obsidian.md",
+   "sha256": "fca2a2f94bf5555903ec11863f0cc091327d869ceca3f6d42b87a5b65afdd3f4",
+   "bytes": 4080
+  },
+  {
+   "path": "he/תחילת העבודה/ייבוא הערות.md",
+   "sha256": "bfd22f1769d871f18fe50dace7a7e4af99e68ad276fa8e8fc385f713532a0695",
+   "bytes": 3148
+  },
+  {
+   "path": "he/תחילת העבודה/כספת ארגז חול.md",
+   "sha256": "292291a50cfaa192d7fc93fa5185ff675a1f38619e67a2514b4d82c2c5c02c56",
+   "bytes": 1603
+  },
+  {
+   "path": "he/תחילת העבודה/מילון מונחים.md",
+   "sha256": "4e6a03c63691dc9baa1df32a54a7bdb1786bd1243eeecb8e46669f33fce6460a",
+   "bytes": 6649
+  },
+  {
+   "path": "he/תחילת העבודה/סנכרון ההערות שלך בין מכשירים.md",
+   "sha256": "5fe9bca6753fd3cf89871e1e8fbba1b32fb19b759362ddcf63f03144bf2e5ac9",
+   "bytes": 16700
+  },
+  {
+   "path": "he/תחילת העבודה/עדכון Obsidian.md",
+   "sha256": "6317d900c45f561aa82f1652dcc3810b9ef863252d3144a56364e59380e760b2",
+   "bytes": 3125
+  },
+  {
+   "path": "he/תחילת העבודה/צור את ההערה הראשונה שלך.md",
+   "sha256": "e696aef82f6d6ece69f5cfdf997f890557f6d119937c0fffa4c55e97726ebcfb",
+   "bytes": 1838
+  },
+  {
+   "path": "he/תחילת העבודה/צור כספת.md",
+   "sha256": "085f8db297334016011bfcb1f708e2b2190d827eeff038a8392447075ab139e5",
+   "bytes": 1478
+  },
+  {
+   "path": "he/תחילת העבודה/קישור הערות.md",
+   "sha256": "8f45aa9f589b20b3fb21a1d481f867849ad3055fee86acc0db38cc9bb5d93216",
+   "bytes": 3990
+  },
+  {
+   "path": "he/תרומה ל-Obsidian/מדריך סגנון.md",
+   "sha256": "a382de5946c630e45eb79a025b40394179f380b15f39f430496caeca190cb101",
+   "bytes": 23020
+  },
+  {
+   "path": "he/תרומה ל-Obsidian/מפתחים.md",
+   "sha256": "43bae446a01ffee5b3a70faabfc78d685ccc6871b5cea395cafa46a22a67ecaf",
+   "bytes": 2286
+  },
+  {
+   "path": "he/תרומה ל-Obsidian/תרגומים.md",
+   "sha256": "8e036e91563d7908e13024e71e11c6917d37791f39249919865615b586f72486",
+   "bytes": 650
+  },
+  {
+   "path": "he/תרומה ל-Obsidian/תרומות כספיות.md",
+   "sha256": "26967806353457feb251dc1fcda4fdab3ac96e2a05eaa7c51d033b3e1c0192b1",
+   "bytes": 1087
+  }
+ ]
+}
