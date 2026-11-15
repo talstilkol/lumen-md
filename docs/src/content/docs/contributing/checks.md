@@ -121,8 +121,10 @@ the host's Ed25519 key, and is red unless every shard passed.
 
 main moves only through `npm run promote:main -- <commit> --push`. It
 refuses unless that commit (or one with the same tree) has the signed
-report, the report verifies with a key in `security/e2e-receipt-keys/`,
-0 tests failed and every shard finished inside its box. It pushes only as a
+report, the report verifies with a key in `security/e2e-receipt-keys/`
+as `origin/main` has it (read with git, never from the commit being
+promoted; a `--key` or `--keys` inside the checkout is refused), 0 tests
+failed and every shard finished inside its box. It pushes only as a
 fast-forward, never with force. `npm run promote:check` (the WebKit and
 Safari receipts) is a separate check, and both must pass.
 

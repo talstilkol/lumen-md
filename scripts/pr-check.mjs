@@ -26,7 +26,10 @@
  *     commit (plan W6.11): a `lumen-review` block in a PR comment (read with
  *     `--pr`) or a JSON file (`--review <file>`, repeatable), by a reviewer
  *     that is not the author, with attack tests and no critical or high
- *     finding open. A new push makes older receipts stale.
+ *     finding open. A new push makes older receipts stale. The receipt names
+ *     the PR, its merge base and its head; it is signed with a key from the
+ *     merge base's security/reviewers.json (never the PR's own copy, T6-H1),
+ *     and CODEOWNERS is the union of the base's and the PR's.
  *   - Budgets only go down (plan W6.26): no bundle budget, startup budget,
  *     exception date, perf-gate FCP/LCP limit or Lighthouse assertion loosened.
  *   - No stacks (plan W6.22): the base is the current train (the highest
@@ -213,8 +216,17 @@ export function runChecks(opts) {
 
   // Human review of sensitive paths (plan W4.28)
   const ownersFile = join(cwd, ".github", "CODEOWNERS");
-  if (existsSync(ownersFile)) {
-    const ownersText = readFileSync(ownersFile, "utf8");
+  const atBase = (f) => {
+    try {
+      return git(cwd, "show", `${mergeBase}:${f}`);
+    } catch {
+      return null; // why: the base has no such file
+    }
+  };
+  const baseOwners = atBase(".github/CODEOWNERS");
+  if (existsSync(ownersFile) || baseOwners != null) {
+    // T6-H1: a PR can't make a path non-sensitive by editing CODEOWNERS: the base's entries apply too.
+    const ownersText = [baseOwners, existsSync(ownersFile) ? readFileSync(ownersFile, "utf8") : null].filter((x) => x != null).join("\n");
     const sensitive = sensitiveChanges(changed, parseCodeowners(ownersText));
     let pr = null;
     let mismatch = null;
@@ -236,7 +248,7 @@ export function runChecks(opts) {
     add("Human review of sensitive paths", mismatch ? "fail" : v.status, mismatch ? [mismatch, "", ...v.lines] : v.lines);
 
     // Independent review receipt for the head (plan W6.11)
-    const receipts = commentReceipts(pr?.comments, { prAuthor: pr?.author ?? null });
+    const receipts = commentReceipts(pr?.comments);
     for (const f of opts.review ?? []) {
       let receipt;
       try {
@@ -247,8 +259,10 @@ export function runChecks(opts) {
       receipts.push({ source: `\`${f}\``, receipt });
     }
     const head = pr?.headSha ?? git(cwd, "rev-parse", "HEAD").trim();
-    const reviewersFile = join(cwd, "security", "reviewers.json");
-    const reviewers = existsSync(reviewersFile) ? parseReviewers(readFileSync(reviewersFile, "utf8")) : null;
+    // T6-H1: the trust anchor comes from the merge base, never from the change under review,
+    // so a key the PR adds (or changes) is not trusted until the PR is merged.
+    const baseRegistry = atBase("security/reviewers.json");
+    const reviewers = baseRegistry != null ? parseReviewers(baseRegistry) : null;
     // W10.D3: neither the PR's author nor anyone who wrote or committed a commit in the range may review it.
     const commits = git(cwd, "log", "--format=%an%x1f%ae%x1f%cn%x1f%ce", range)
       .split("\n")
@@ -258,8 +272,10 @@ export function runChecks(opts) {
         return { authorName, authorEmail, committerName, committerEmail };
       });
     const excluded = excludedIdentities({ prAuthor: pr?.author ?? null, commits });
-    const iv = independentReviewVerdict(sensitive, receipts, { head, strict: !!opts.pr || (opts.review ?? []).length > 0, reviewers, excluded });
-    if (!reviewers) iv.lines.push("", "- security/reviewers.json is missing: no receipt can be verified, so none counts.");
+    const prNumber = pr?.number ?? (opts.pr != null ? Number(opts.pr) : null);
+    const iv = independentReviewVerdict(sensitive, receipts, { head, strict: !!opts.pr || (opts.review ?? []).length > 0, reviewers, excluded, pr: prNumber, base: mergeBase });
+    if (!reviewers) iv.lines.push("", `- security/reviewers.json is missing at the merge base \`${mergeBase.slice(0, 9)}\`: no receipt can be verified, so none counts.`);
+    if (changed.includes("security/reviewers.json")) iv.lines.push("", "- This PR changes security/reviewers.json: receipts are checked against the merge base's registry, so a key it adds or changes counts only after it is merged.");
     if (reviewers?.problems.length) iv.lines.push("", ...reviewers.problems.map((x) => `- ${x}`));
     add("Independent review of sensitive paths", mismatch ? "fail" : iv.status, mismatch ? [mismatch, "", ...iv.lines] : iv.lines);
   } else {

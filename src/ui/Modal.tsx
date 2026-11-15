@@ -61,14 +61,23 @@ export const Modal = forwardRef(function Modal(
   useLayoutEffect(() => {
     const d = ref.current;
     if (embedded || !d) return;
-    if (typeof d.showModal === "function") {
-      try {
-        if (!d.open) d.showModal();
-      } catch {
-        // why: not connected yet, or already open without being modal: open it plainly, the trap still holds focus
-        d.setAttribute("open", "");
-      }
-    } else d.setAttribute("open", "");
+    const open = () => {
+      if (!d.isConnected) return;
+      if (typeof d.showModal === "function") {
+        try {
+          if (!d.open) d.showModal();
+        } catch {
+          // why: not connected yet, or already open without being modal: open it plainly, the trap still holds focus
+          d.setAttribute("open", "");
+        }
+      } else d.setAttribute("open", "");
+    };
+    // T6-L8: a dialog mounted inside another in one render runs this before its
+    // parent does; it opens after the parent (still before paint), so the top
+    // layer puts it above the dialog that contains it.
+    const outer = d.parentElement?.closest("dialog");
+    if (outer && !outer.open) queueMicrotask(open);
+    else open();
     return () => {
       if (typeof d.close === "function" && d.open) d.close();
       else d.removeAttribute("open");

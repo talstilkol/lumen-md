@@ -71,11 +71,6 @@ export function NetworkMonitor({ onClose }: { onClose: () => void }) {
   const closeRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     closeRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
   const shown = on && since !== null ? list.filter((a) => a.ts >= since) : list;
@@ -88,7 +83,7 @@ export function NetworkMonitor({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <Modal aria-label={t("airplane.title")} className="cmd-palette-backdrop">
+    <Modal onClose={onClose} aria-label={t("airplane.title")} className="cmd-palette-backdrop">
       <div className="cmd-palette" data-testid="network-monitor" style={{ maxWidth: 900, padding: 0, display: "flex", flexDirection: "column", maxHeight: "88vh" }}>
         <header style={{ padding: "14px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <Plane size={18} style={{ color: "hsl(var(--accent))" }} />

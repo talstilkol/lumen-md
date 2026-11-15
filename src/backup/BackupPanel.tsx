@@ -59,9 +59,6 @@ function Panel({ onClose }: { onClose: () => void }) {
       setConfig(c);
       void refresh(c);
     });
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
   const fail = (e: unknown) => setError(String((e as Error)?.message ?? e));
@@ -114,7 +111,7 @@ function Panel({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <Modal className="cmd-palette-backdrop" onClick={onClose} aria-label={t("backup.title")}>
+    <Modal onClose={onClose} className="cmd-palette-backdrop" onClick={onClose} aria-label={t("backup.title")}>
       <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 560, padding: 16, display: "grid", gap: 12 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <strong>{t("backup.title")}</strong>

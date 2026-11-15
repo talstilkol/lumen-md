@@ -48,16 +48,6 @@ function Status({ s }: { s: OrganizerState }) {
 export function OrganizerPanel({ job, onClose }: { job: OrganizerJob; onClose: () => void }) {
   const [s, setS] = useState<OrganizerState>(job.state);
   useEffect(() => job.subscribe(setS), [job]);
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.stopPropagation();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
   const running = s.phase === "reading" || s.phase === "analysing";
   const left = s.suggestions.length - s.staged;
   const shown = s.suggestions.slice(s.staged, s.staged + DEFAULT_BATCH);
@@ -68,7 +58,7 @@ export function OrganizerPanel({ job, onClose }: { job: OrganizerJob; onClose: (
   };
 
   return (
-    <Modal className="cmd-palette-backdrop" onClick={onClose} aria-label={t("organizer.title")} data-testid="organizer-panel" data-phase={s.phase}>
+    <Modal onClose={onClose} className="cmd-palette-backdrop" onClick={onClose} aria-label={t("organizer.title")} data-testid="organizer-panel" data-phase={s.phase}>
       <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 680, padding: 0, display: "flex", flexDirection: "column", maxHeight: "84vh" }}>
         <header style={{ padding: "12px 16px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <Network size={16} />

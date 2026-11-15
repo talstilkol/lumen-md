@@ -57,14 +57,6 @@ export function TrustedReposDialog({ onClose, loadRepos = clonedRepos }: Props) 
     void refresh();
   }, [refresh]);
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
-
   const toggle = useCallback(
     async (repo: string, next: boolean) => {
       // Turning trust on is the risky direction: ask, and say what it means.
@@ -82,7 +74,7 @@ export function TrustedReposDialog({ onClose, loadRepos = clonedRepos }: Props) 
   );
 
   return (
-    <Modal aria-labelledby="trusted-repos-title" className="cmd-palette-backdrop" onClick={onClose}>
+    <Modal onClose={onClose} aria-labelledby="trusted-repos-title" className="cmd-palette-backdrop" onClick={onClose}>
       <div
         className="cmd-palette"
         onClick={(e) => e.stopPropagation()}

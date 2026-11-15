@@ -8,6 +8,8 @@ import { SyncPanel, takePendingOAuth, describeConnectError } from "./SyncPanel";
 import { syncSession } from "./session";
 import { SetupWizard } from "./SetupWizard";
 import { syncFolderSupported } from "../setup/folderHandle";
+import { isEnabled } from "../../../flags/flags";
+import { E2EE_FLAG } from "./unaudited";
 
 let root: Root | null = null;
 let host: HTMLElement | null = null;
@@ -51,9 +53,11 @@ export function openSyncSetup(): void {
  * The OAuth redirect (`/oauth/dropbox`, `/oauth/gdrive`): finish the sign-in,
  * restore the address, reopen the panel and connect the provider chosen
  * before leaving. Untested against the real services until Lumen has
- * Dropbox / Google client ids (plan 15.5).
+ * Dropbox / Google client ids (plan 15.5). T6-L5: does nothing while
+ * `sync.e2ee` is off (oauthReturn asks through the gate first).
  */
 export async function finishOAuthReturn(kind: "dropbox" | "gdrive", code: string): Promise<void> {
+  if (!isEnabled(E2EE_FLAG)) return;
   const cloud = await import("../../cloud");
   history.replaceState(null, "", "/");
   try {

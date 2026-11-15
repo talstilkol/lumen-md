@@ -6,9 +6,11 @@
  * tree, pr:check counts a receipt only when it is signed with the Ed25519
  * key of the reviewer it names.
  *
- *   node scripts/review-sign.mjs keygen <reviewer> --out <dir>
+ *   node scripts/review-sign.mjs keygen <reviewer> --login <github login> --email <git email> [--email …] --out <dir>
  *       a new key: <dir>/<reviewer>.key.pem (private, mode 600, keep it out
  *       of every repository) and the entry to add to security/reviewers.json
+ *       (login and emails are required: T6-H1; the entry counts once the
+ *       change that adds it is merged, since pr:check reads the base's registry)
  *   node scripts/review-sign.mjs sign <receipt.json> --key <dir>/<reviewer>.key.pem [--comment]
  *       adds `signature` to the receipt file; --comment prints the PR comment
  *   node scripts/review-sign.mjs verify <receipt.json> [--reviewers security/reviewers.json]
@@ -34,24 +36,29 @@ export function signReceipt(receipt, pem) {
   return { ...rest, signature: sign(null, signedBytes(rest), key).toString("base64") };
 }
 
-/** The registry entry for a private key's public half. */
-export function registryEntry(reviewer, pem) {
+/** The registry entry for a private key's public half, with who the reviewer is on GitHub and in git (T6-H1: both required). */
+export function registryEntry(reviewer, pem, { login, emails } = {}) {
+  if (typeof login !== "string" || !login.trim()) throw new Error("a registry entry needs the reviewer's GitHub login (--login)");
+  if (!Array.isArray(emails) || !emails.length || !emails.every((e) => typeof e === "string" && e.includes("@"))) throw new Error("a registry entry needs the reviewer's git emails (--email, repeatable)");
   const pub = createPublicKey(createPrivateKey(pem)).export({ type: "spki", format: "der" }).toString("base64");
-  return { [reviewer]: { publicKey: pub } };
+  return { [reviewer]: { publicKey: pub, login: login.trim(), emails: emails.map((e) => e.trim()) } };
 }
 
 function main(argv) {
   const [cmd, arg] = argv;
   const opt = (n) => (argv.includes(n) ? argv[argv.indexOf(n) + 1] : undefined);
   if (cmd === "keygen" && arg) {
+    const login = opt("--login");
+    const emails = argv.flatMap((a, i) => (a === "--email" && argv[i + 1] ? [argv[i + 1]] : []));
     const dir = resolve(opt("--out") ?? ".");
     mkdirSync(dir, { recursive: true });
     const k = keygen();
+    const entry = registryEntry(arg, k.privatePem, { login, emails });
     const file = join(dir, `${arg}.key.pem`);
     writeFileSync(file, k.privatePem, { mode: 0o600 });
     chmodSync(file, 0o600);
     console.error(`private key: ${file} (keep it out of every repository)`);
-    console.log(JSON.stringify({ [arg]: { publicKey: k.publicKey } }, null, 2));
+    console.log(JSON.stringify(entry, null, 2));
     return 0;
   }
   if (cmd === "sign" && arg && opt("--key")) {
@@ -70,11 +77,12 @@ function main(argv) {
   if (cmd === "verify" && arg) {
     const r = JSON.parse(readFileSync(arg, "utf8"));
     const reviewers = parseReviewers(readFileSync(opt("--reviewers") ?? "security/reviewers.json", "utf8"));
+    // Only the signature and the registry here; the PR, base and head binding is pr:check's.
     const p = [...receiptProblems(r), ...signatureProblems(r, reviewers), ...reviewers.problems];
     console.log(p.length ? p.map((x) => `✖ ${x}`).join("\n") : `✓ signed by ${r.reviewer}`);
     return p.length ? 1 : 0;
   }
-  console.error("usage: review-sign.mjs keygen <reviewer> --out <dir> | sign <receipt.json> --key <pem> [--comment] | verify <receipt.json> [--reviewers <file>]");
+  console.error("usage: review-sign.mjs keygen <reviewer> --login <github login> --email <git email> --out <dir> | sign <receipt.json> --key <pem> [--comment] | verify <receipt.json> [--reviewers <file>]");
   return 2;
 }
 

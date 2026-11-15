@@ -47,6 +47,7 @@ import type { OcrPage } from "./ocrPages";
 import { positionAt, scrollTopFor } from "./readingPosition";
 import { annotationsByPage, baseName, byPosition, EMPTY, isMissing, MAX_SCALE, MIN_SCALE, newUuid, pageBoxes, POSITION_SAVE_MS, positionsIO, ROOT_MARGIN, type Props } from "./pdfReaderParts";
 import { Modal } from "../ui/Modal";
+import { isTopDialog } from "../ui/useFocusTrap";
 
 export { drainQueue };
 
@@ -497,6 +498,8 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
   // The reader is modal: the keys it handles don't reach the app underneath.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      // T6-L8: a dialog over the reader (a prompt) has the keys, Escape included.
+      if (!isTopDialog(rootRef.current)) return;
       const el = e.target instanceof HTMLElement ? e.target : null;
       const typing = !!el && (el.closest("input, textarea") !== null || el.isContentEditable);
       const handled = () => {

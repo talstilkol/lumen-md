@@ -84,11 +84,6 @@ export function SetupWizard({
   useEffect(() => {
     void newRecoveryWords().then(setWords);
   }, []);
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
 
   const label = (b: SetupBackend) => t(`e2ee.guide.where.${b}`);
 
@@ -166,7 +161,7 @@ export function SetupWizard({
   const attention = files.filter(([, f]) => f.state === "conflict" || f.state === "error" || f.state === "pending").slice(0, 50);
 
   return (
-    <Modal aria-labelledby="sync-setup-title" style={{ position: "fixed", inset: 0, background: "var(--overlay)", display: "grid", placeItems: "center", zIndex: 1000 }} onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+    <Modal onClose={onClose} aria-labelledby="sync-setup-title" style={{ position: "fixed", inset: 0, background: "var(--overlay)", display: "grid", placeItems: "center", zIndex: 1000 }} onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div
         dir={getLocale() === "he" || getLocale() === "ar" ? "rtl" : "ltr"}
         data-testid="sync-setup"

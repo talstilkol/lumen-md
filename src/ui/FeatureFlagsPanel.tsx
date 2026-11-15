@@ -21,24 +21,16 @@ export function FeatureFlagsPanel({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     const before = document.activeElement as HTMLElement | null;
     ref.current?.querySelector<HTMLElement>("[data-autofocus]")?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.stopPropagation();
-        onClose();
-      }
-    };
     const onChange = () => setTick((n) => n + 1);
-    document.addEventListener("keydown", onKey, true);
     window.addEventListener(FLAGS_CHANGED, onChange);
     return () => {
-      document.removeEventListener("keydown", onKey, true);
       window.removeEventListener(FLAGS_CHANGED, onChange);
       before?.focus?.();
     };
   }, [onClose]);
 
   return (
-    <Modal aria-labelledby="feature-flags-title" style={{ position: "fixed", inset: 0, zIndex: 70, background: "var(--overlay)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }} onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <Modal onClose={onClose} aria-labelledby="feature-flags-title" style={{ position: "fixed", inset: 0, zIndex: 70, background: "var(--overlay)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }} onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div
         ref={ref}
         data-testid="feature-flags"

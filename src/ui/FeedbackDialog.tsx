@@ -95,14 +95,6 @@ export function FeedbackDialog({ options, onClose }: { options: FeedbackOptions;
 
   useEffect(() => {
     titleRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.stopPropagation();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
   // The doctor runs only after the user ticks the box (its probes stay on this device).
@@ -181,7 +173,7 @@ export function FeedbackDialog({ options, onClose }: { options: FeedbackOptions;
   return (
     // Closes with Escape or the × button; the backdrop has no click handler, so a
     // stray click outside never throws away what the user wrote.
-    <Modal aria-label={t("feedback.title")} className="cmd-palette-backdrop">
+    <Modal onClose={onClose} aria-label={t("feedback.title")} className="cmd-palette-backdrop">
       <div className="cmd-palette" data-testid="feedback-dialog" style={{ maxWidth: 600, padding: 0, display: "flex", flexDirection: "column", maxHeight: "88vh" }}>
         <header style={{ padding: "14px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <MessageSquareWarning size={18} style={{ color: "hsl(var(--accent))" }} />

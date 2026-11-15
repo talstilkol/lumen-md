@@ -34,20 +34,36 @@ impl Channel {
     }
 }
 
+impl Channel {
+    /// The `channel` a manifest on this feed must name (T6-I2).
+    pub fn name(self) -> &'static str {
+        match self {
+            Channel::Stable => "stable",
+            Channel::Beta => "beta",
+        }
+    }
+}
+
 /// The endpoint for a channel, from the build's settings: beta uses its own
 /// endpoint when the build has one, and the stable one otherwise.
 pub fn endpoint_for(channel: Channel, stable: &'static str, beta: &'static str) -> Option<&'static str> {
-    let pick = match channel {
-        Channel::Beta if valid_endpoint(beta.trim()) => beta.trim(),
-        _ => stable.trim(),
-    };
-    valid_endpoint(pick).then_some(pick)
+    served_endpoint(channel, stable, beta).map(|(url, _)| url)
 }
 
-/// The build's update settings for a channel, if it has them.
-pub fn configured(channel: Channel) -> Option<(&'static str, &'static str)> {
+/// The endpoint for a channel and the feed it is (T6-I2): a beta user on a
+/// build without a beta endpoint reads the stable feed, so expects "stable".
+pub fn served_endpoint(channel: Channel, stable: &'static str, beta: &'static str) -> Option<(&'static str, Channel)> {
+    let (pick, feed) = match channel {
+        Channel::Beta if valid_endpoint(beta.trim()) => (beta.trim(), Channel::Beta),
+        _ => (stable.trim(), Channel::Stable),
+    };
+    valid_endpoint(pick).then_some((pick, feed))
+}
+
+/// The build's update settings for a channel, if it has them: (key, url, the feed the url serves).
+pub fn configured(channel: Channel) -> Option<(&'static str, &'static str, Channel)> {
     let key = option_env!("LUMEN_UPDATER_PUBKEY").unwrap_or("").trim();
-    let url = endpoint_for(
+    let (url, feed) = served_endpoint(
         channel,
         option_env!("LUMEN_UPDATER_ENDPOINT").unwrap_or(""),
         option_env!("LUMEN_UPDATER_ENDPOINT_BETA").unwrap_or(""),
@@ -55,7 +71,7 @@ pub fn configured(channel: Channel) -> Option<(&'static str, &'static str)> {
     if key.is_empty() {
         return None;
     }
-    Some((key, url))
+    Some((key, url, feed))
 }
 
 /// Only https, and only GitHub Releases or our own release host.
@@ -151,12 +167,15 @@ pub mod imp {
     pub async fn lumen_check_update(app: tauri::AppHandle, pending: tauri::State<'_, PendingUpdate>) -> Result<UpdateStatus, String> {
         *pending.0.lock().map_err(|e| e.to_string())? = None;
         let current = app.package_info().version.to_string();
-        let Some((key, url)) = configured(channel(&app)) else { return Ok(UpdateStatus::NotConfigured) };
+        let Some((key, url, feed)) = configured(channel(&app)) else { return Ok(UpdateStatus::NotConfigured) };
         let Some(manifest) = fetch(url).await? else { return Err("the update manifest (latest.json) was not found".into()) };
         let sig = fetch(&manifest_sig::sig_url(url)).await?;
         manifest_sig::verify_manifest(&manifest, sig.as_deref(), key, minisign_check).map_err(|r| r.message().to_string())?;
         // Read only from the verified bytes.
         let verified: serde_json::Value = serde_json::from_slice(&manifest).map_err(|e| format!("the signed update manifest is not JSON: {e}"))?;
+        // T6-I2: the signed channel must be this feed's, and the manifest must not have expired.
+        let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(u64::MAX);
+        manifest_sig::check_binding(verified.get("channel").and_then(|v| v.as_str()), verified.get("expires").and_then(|v| v.as_str()), feed.name(), now).map_err(|r| r.message().to_string())?;
         let Some(version) = verified.get("version").and_then(|v| v.as_str()) else { return Err("the signed update manifest has no version".into()) };
         let recorded = highest_installed(&app);
         if !update_guard::accept(&current, version, recorded.as_deref()) {
@@ -247,6 +266,11 @@ mod tests {
         // A beta endpoint off the release hosts is ignored, never used.
         assert_eq!(endpoint_for(Channel::Beta, stable, "https://evil.example/latest.json"), Some(stable));
         assert_eq!(endpoint_for(Channel::Stable, "", beta), None);
+        // T6-I2: the feed a channel reads, so the manifest's signed channel can be checked.
+        assert_eq!(served_endpoint(Channel::Beta, stable, beta), Some((beta, Channel::Beta)));
+        assert_eq!(served_endpoint(Channel::Beta, stable, ""), Some((stable, Channel::Stable)));
+        assert_eq!(served_endpoint(Channel::Stable, stable, beta), Some((stable, Channel::Stable)));
+        assert_eq!(Channel::Beta.name(), "beta");
         assert_eq!(Channel::parse(Some("beta")), Channel::Beta);
         assert_eq!(Channel::parse(Some("nightly")), Channel::Stable);
         assert_eq!(Channel::parse(None), Channel::Stable);
@@ -273,6 +297,8 @@ mod tests {
                 Err(crate::manifest_sig::Refusal::Malformed) => "malformed",
                 Err(crate::manifest_sig::Refusal::BadSignature) => "bad-signature",
                 Err(crate::manifest_sig::Refusal::TooLarge) => "too-large",
+                Err(crate::manifest_sig::Refusal::WrongChannel) => "wrong-channel",
+                Err(crate::manifest_sig::Refusal::Expired) => "expired",
             };
             assert_eq!(got, want, "{}", field("name").unwrap_or("?"));
         }

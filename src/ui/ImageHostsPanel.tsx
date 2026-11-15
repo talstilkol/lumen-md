@@ -10,7 +10,7 @@
  * `ImageHostsPanel` is the dialog the palette opens. Lazy-loaded.
  */
 
-import { useEffect, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 import { ImageOff, X } from "lucide-react";
 import { t } from "../i18n";
 import { showAiToast } from "./AiToast";
@@ -84,20 +84,9 @@ export function ImageHostsSection() {
 }
 
 export function ImageHostsPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
   if (!open) return null;
   return (
-    <Modal className="cmd-palette-backdrop" onClick={onClose} aria-label={t("imageHosts.title")}>
+    <Modal onClose={onClose} className="cmd-palette-backdrop" onClick={onClose} aria-label={t("imageHosts.title")}>
       <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 520, padding: 0, display: "flex", flexDirection: "column", maxHeight: "80vh" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "12px 14px", borderBottom: "1px solid hsl(var(--border))" }}>
           <ImageOff size={16} style={{ opacity: 0.7 }} />

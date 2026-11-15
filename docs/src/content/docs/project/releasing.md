@@ -55,6 +55,15 @@ exact commands `--publish` would run.
    manifest, and refuses a version that isn't newer than the running one and
    the highest ever installed (W11.S2/S3). With the owner's key the signing
    is `tauri signer sign` on the file.
+   Under that signature `latest.json` also names its `channel` (`stable`, or
+   `beta` for the `beta-channel` copy) and an `expires` time 90 days ahead.
+   The app refuses a manifest for another channel than the feed it read, and
+   one past its expiry, so an old manifest served again can't hold updates
+   back for longer than that: release (or re-run the beta channel) at least
+   every 90 days. Before the beta channel merges and re-signs the
+   `latest.json` already on the `beta-channel` release, it checks that file's
+   own `latest.json.sig`; one that doesn't verify is not merged, and the
+   channel is rebuilt from this release alone.
 7. **SBOM.** `sbom.cdx.json` (CycloneDX 1.5) lists every package in
    `package-lock.json` and every crate in `Cargo.lock`. It is built offline.
 8. **Release notes.** Hebrew first, then English, from

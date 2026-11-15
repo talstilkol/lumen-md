@@ -17,6 +17,7 @@ import { getLocale, t } from "../../../i18n";
 import "../strings";
 import { useAppStore } from "../../../store/useStore";
 import { relayOrigin } from "../providers/relay";
+import { UnauditedNotice } from "../ui/unaudited";
 import {
   closeAssignment,
   createAssignment,
@@ -287,6 +288,8 @@ export function ClassroomPanel({ onClose, joining = null, deps = {}, relay = bui
           </button>
         </div>
         <div style={muted}>{t("e2ee.class.intro")}</div>
+        {/* T6-L6: the classroom seals work with the same unaudited cryptography as the sync (plan W11.S1). */}
+        <UnauditedNotice />
 
         {invite && (
           <section style={card} data-testid="class-join">

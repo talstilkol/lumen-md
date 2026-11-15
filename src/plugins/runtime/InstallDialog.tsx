@@ -17,18 +17,11 @@ export function InstallDialog(props: { manifest: PluginManifest; scan: ScanResul
   const cancelRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     cancelRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.stopPropagation();
-        props.onCancel();
-      }
-    };
-    window.addEventListener("keydown", onKey, true);
-    return () => window.removeEventListener("keydown", onKey, true);
   }, [props]);
   const notes = scan.findings.length ? t("pluginTrust.card.notes", { list: describeFindings(scan.findings) }) : t("pluginTrust.card.clean");
   return (
     <Modal
+      onClose={props.onCancel}
       aria-labelledby="plugin-install-title"
       data-testid="plugin-install-dialog"
       style={{ position: "fixed", inset: 0, zIndex: 210, background: "var(--overlay)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}

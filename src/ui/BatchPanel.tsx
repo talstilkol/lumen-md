@@ -120,16 +120,8 @@ export function BatchPanel({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     refresh();
     const off = subscribeBatch(refresh);
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.stopPropagation();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", onKey);
     return () => {
       off();
-      window.removeEventListener("keydown", onKey);
     };
   }, [refresh, onClose]);
 
@@ -144,7 +136,7 @@ export function BatchPanel({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <Modal className="cmd-palette-backdrop" onClick={onClose} aria-label={t("batch.panel.title")}>
+    <Modal onClose={onClose} className="cmd-palette-backdrop" onClick={onClose} aria-label={t("batch.panel.title")}>
       <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 620, padding: 0, display: "flex", flexDirection: "column", maxHeight: "82vh" }}>
         <header style={{ padding: "12px 16px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <Layers size={16} />

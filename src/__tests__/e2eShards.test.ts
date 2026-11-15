@@ -263,6 +263,39 @@ describe("the signed report and promote-main", () => {
     expect(e2eVerdict(R.second, null, yes).ok).toBe(false);
   });
 
+  it("T6-H1: a key from the candidate's own checkout is never trusted; one in main's tree is", () => {
+    const inTree = join(R.work, "security/e2e-receipt-keys");
+    mkdirSync(inTree, { recursive: true });
+    writeFileSync(join(inTree, "planted.pem"), readFileSync(trusted.pub, "utf8"));
+    try {
+      const byFile = promote(R.work, R.second, "--key", join(inTree, "planted.pem"));
+      expect(byFile.status).toBe(2);
+      expect(byFile.stderr).toContain("is inside this checkout");
+      expect(promote(R.work, R.second, "--keys", inTree).status).toBe(2);
+      // The default reads origin/main's tree with git, never the working tree: main has no key yet.
+      const none = promote(R.work, R.second);
+      expect(none.status).toBe(2);
+      expect(none.stderr).toContain("security/e2e-receipt-keys/*.pem in origin/main");
+      // A main whose tree holds the key: trusted without --key.
+      const blob = R.g(R.work, "hash-object", "-w", trusted.pub);
+      const keyDir = spawnSync("git", ["mktree"], { cwd: R.work, input: `100644 blob ${blob}\ttrusted.pem\n`, encoding: "utf8" }).stdout.trim();
+      const sec = spawnSync("git", ["mktree"], { cwd: R.work, input: `040000 tree ${keyDir}\te2e-receipt-keys\n`, encoding: "utf8" }).stdout.trim();
+      const root = spawnSync("git", ["mktree"], { cwd: R.work, input: `040000 tree ${sec}\tsecurity\n`, encoding: "utf8" }).stdout.trim();
+      const mainWithKey = R.g(R.work, "commit-tree", root, "-m", "keys");
+      const before = R.g(R.work, "rev-parse", "refs/remotes/origin/main");
+      R.g(R.work, "update-ref", "refs/remotes/origin/main", mainWithKey);
+      try {
+        const ok = promote(R.work, R.second);
+        expect(ok.stdout + ok.stderr).toContain("✓ promote:main");
+        expect(ok.status).toBe(0);
+      } finally {
+        R.g(R.work, "update-ref", "refs/remotes/origin/main", before);
+      }
+    } finally {
+      rmSync(join(R.work, "security"), { recursive: true, force: true });
+    }
+  });
+
   it("--push moves the remote's main by fast-forward only", () => {
     const pushed = promote(R.work, R.second, "--key", trusted.pub, "--push");
     expect(pushed.stdout + pushed.stderr).toContain("→");

@@ -71,11 +71,6 @@ export function ShareLinkDialog({ title, markdown, onClose }: { title: string; m
 
   useEffect(() => {
     closeRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
   const create = async () => {
@@ -94,7 +89,7 @@ export function ShareLinkDialog({ title, markdown, onClose }: { title: string; m
   const fileName = `${(title.replace(/\.[^.]+$/, "") || "note").replace(/[^\p{L}\p{N}._-]+/gu, "-")}${SHARE_FILE_EXTENSION}`;
 
   return (
-    <Modal aria-label={t("shareLink.title")} className="cmd-palette-backdrop">
+    <Modal onClose={onClose} aria-label={t("shareLink.title")} className="cmd-palette-backdrop">
       <div className="cmd-palette" data-testid="share-link" style={{ maxWidth: 600, padding: 0, display: "flex", flexDirection: "column", maxHeight: "88vh" }}>
         <header style={{ padding: "14px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <Link2 size={18} style={{ color: "hsl(var(--accent))" }} />

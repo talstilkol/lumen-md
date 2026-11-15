@@ -56,14 +56,6 @@ export function NamedVersionsDialog({ session, author, onClose }: { session: Col
   const fmt = useMemo(() => new Intl.DateTimeFormat(getLocale(), { dateStyle: "medium", timeStyle: "short" }), []);
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
-
-  useEffect(() => {
     if (!from && versions[0]) setFrom(versions[0].id);
   }, [versions, from]);
 
@@ -90,7 +82,7 @@ export function NamedVersionsDialog({ session, author, onClose }: { session: Col
   ];
 
   return (
-    <Modal aria-labelledby="versions-title" className="cmd-palette-backdrop" onClick={onClose}>
+    <Modal onClose={onClose} aria-labelledby="versions-title" className="cmd-palette-backdrop" onClick={onClose}>
       <div
         className="cmd-palette"
         onClick={(e) => e.stopPropagation()}

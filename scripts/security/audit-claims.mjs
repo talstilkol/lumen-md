@@ -7,8 +7,11 @@
  * security audit (security/crypto-audit.json). A sentence that puts an audit
  * word ("audited", "security audit", "Cure53", "מבוקר", "ביקורת אבטחה" …)
  * next to a crypto word ("encrypt", "E2EE", "crypto", "הצפנה" …) fails,
- * unless the sentence says the opposite ("not audited", "unaudited",
- * "לא עבר ביקורת") or security/crypto-audit.json names a published report.
+ * unless that audit word itself is negated ("not audited", "hasn't been
+ * externally audited", "unaudited", "לא עבר ביקורת") or
+ * security/crypto-audit.json names a published report. T6-L7: the negation
+ * must sit just before the audit word, in the same clause; a "no", "never",
+ * "until" or "אין" elsewhere in the sentence does not hide the claim.
  *
  *   node scripts/security/audit-claims.mjs [--json]
  */
@@ -34,17 +37,28 @@ const EXT = /\.(md|mdx|html|json|txt)$/i;
 /** Not user-facing: generated help (built from the docs scanned here) and data files. */
 const SKIP = [/^src\/help\/generated\//, /^public\/dict\//, /^public\/plugins\//, /^public\/models?\//, /\.min\./];
 
-const AUDIT_EN = /\b(audited|audit(?:s|ed)? (?:by|from)|security[- ]audit(?:ed)?|external(?:ly)? (?:audit|review)(?:ed)?|independent(?:ly)? (?:audit|review)(?:ed)?|third[- ]party (?:audit|review)(?:ed)?|cure53|trail of bits|pen(?:etration)?[- ]?test(?:ed)?)\b/i;
-const AUDIT_HE = /(מבוקר|מבוקרת|עבר(?:ה)? ביקורת|ביקורת אבטחה|ביקורת חיצונית|נבדק(?:ה)? על ידי|נבדק(?:ה)? ע״י|מבדק חדירה)/;
+const AUDIT_EN = /\b(audited|audit(?:s|ed)? (?:by|from)|security[- ]audit(?:ed)?|external(?:ly)? (?:audit|review)(?:ed)?|independent(?:ly)? (?:audit|review)(?:ed)?|third[- ]party (?:audit|review)(?:ed)?|reviewed by an? (?:outside|external|independent|third[- ]party)\b|cure53|trail of bits|pen(?:etration)?[- ]?test(?:ed)?)\b/gi;
+const AUDIT_HE = /(מבוקר|מבוקרת|עבר(?:ה)? ביקורת|ביקורת אבטחה|ביקורת חיצונית|נבדק(?:ה)? על ידי|נבדק(?:ה)? ע״י|מבדק חדירה)/g;
 const CRYPTO = /(\bencrypt\w*|\bcrypto\w*|\bcipher\w*|\be2ee\b|end[- ]to[- ]end|\bargon2\w*|\bchacha\w*|\bkeyring\b|הצפנ\w*|מוצפ\w*|קריפטו\w*|צופן)/i;
-const NEGATION = /(\bnot\b|\bno\b|\bunaudited\b|\bnever\b|\bwithout\b|\buntil\b|\bnor\b|\bhasn'?t\b|\bisn'?t\b|\byet to\b|(?:^|[\s״"(])(?:לא|טרם|ללא|בלי|אין|עד ש)(?=[\s,.;:)]|$))/i;
+/** One word that negates what follows it: "not", "never", "hasn't", "לא", "שטרם", … */
+const NEGATOR = /^(not|no|never|without|nor|cannot|n['’]t|\w+n['’]t|[ושכ]?(?:לא|טרם|ללא|בלי|אין))$/i;
+/** How many words before an audit word a negation may sit ("has not been externally audited"). */
+const NEGATION_WINDOW = 4;
 
 /** The sentences of a text. */
 const sentences = (text) => text.split(/(?<=[.!?:;])\s+|\n+/).map((s) => s.trim()).filter(Boolean);
 
-/** Sentences of `text` that call the cryptography audited. */
+/** Is the audit word at `index` of sentence `s` negated, by a negation just before it in the same clause? */
+function negatedAt(s, index) {
+  const clause = s.slice(0, index).split(/[,;(—–]|\s-\s/).pop() ?? "";
+  if (/\byet to(?: be)?\s*$/i.test(clause) || /\byet to\b/i.test(clause.split(/\s+/).slice(-NEGATION_WINDOW - 1).join(" "))) return true;
+  const words = clause.split(/\s+/).map((w) => w.replace(/^[^\p{L}\p{N}'’]+|[^\p{L}\p{N}'’]+$/gu, "")).filter(Boolean);
+  return words.slice(-NEGATION_WINDOW).some((w) => NEGATOR.test(w));
+}
+
+/** Sentences of `text` that call the cryptography audited: a crypto word, and an audit word that is not negated where it stands. */
 export function auditClaims(text) {
-  return sentences(text).filter((s) => (AUDIT_EN.test(s) || AUDIT_HE.test(s)) && CRYPTO.test(s) && !NEGATION.test(s));
+  return sentences(text).filter((s) => CRYPTO.test(s) && [...s.matchAll(AUDIT_EN), ...s.matchAll(AUDIT_HE)].some((m) => !negatedAt(s, m.index)));
 }
 
 function* walk(root, dir) {

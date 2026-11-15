@@ -74,16 +74,8 @@ export function AutofillPanel({ onClose }: { onClose: () => void }) {
 
   useEffect(() => {
     const off = q.subscribe(() => setItems(q.list()));
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.stopPropagation();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", onKey);
     return () => {
       off();
-      window.removeEventListener("keydown", onKey);
     };
   }, [q, onClose]);
 
@@ -107,7 +99,7 @@ export function AutofillPanel({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <Modal className="cmd-palette-backdrop" onClick={onClose} aria-label={t("autofill.title")}>
+    <Modal onClose={onClose} className="cmd-palette-backdrop" onClick={onClose} aria-label={t("autofill.title")}>
       <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 680, padding: 0, display: "flex", flexDirection: "column", maxHeight: "82vh" }}>
         <header style={{ padding: "12px 16px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <strong style={{ flex: 1 }}>{t("autofill.title")}</strong>
