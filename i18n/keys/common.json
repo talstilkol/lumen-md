@@ -5007,6 +5007,11 @@
       "vars": []
     },
     {
+      "key": "entityGraph.page.wikidata",
+      "en": "Wikidata",
+      "vars": []
+    },
+    {
       "key": "entityGraph.predicate.amends",
       "en": "amends",
       "vars": []
@@ -5373,6 +5378,72 @@
     {
       "key": "entityGraph.view.until",
       "en": "Up to",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.wikidata.always",
+      "en": "Always for this vault",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.wikidata.ask",
+      "en": "Search Wikidata for “{name}”? Only the name is sent, to www.wikidata.org, and the request is listed in the privacy ledger.",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "entityGraph.wikidata.cancel",
+      "en": "Cancel",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.wikidata.changed",
+      "en": "The note changed since this dialog read it; open it again.",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.wikidata.licence",
+      "en": "Wikidata's data is {licence} (public domain).",
+      "vars": [
+        "licence"
+      ]
+    },
+    {
+      "key": "entityGraph.wikidata.linked",
+      "en": "Linked: wikidata: {qid}.",
+      "vars": [
+        "qid"
+      ]
+    },
+    {
+      "key": "entityGraph.wikidata.none",
+      "en": "No Wikidata item found for this name.",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.wikidata.once",
+      "en": "Search this once",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.wikidata.privacy",
+      "en": "Nothing is sent before you choose. Airplane mode hides this.",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.wikidata.results",
+      "en": "Wikidata items",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.wikidata.searching",
+      "en": "Searching Wikidata…",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.wikidata.title",
+      "en": "Link to Wikidata",
       "vars": []
     },
     {

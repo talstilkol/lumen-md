@@ -8,6 +8,7 @@ import { useMemo } from "react";
 import { t } from "../i18n";
 import type { Edge, Entity } from "../entities/model";
 import { entityPage, type PageEdge } from "../entities/pages";
+import { WIKIDATA_LICENCE } from "../entities/wikidata";
 import "./entityGraphStrings";
 
 export interface EntityPageProps {
@@ -51,6 +52,14 @@ export function EntityPage({ entity, edges, notes, names, onOpenBlock }: EntityP
       <dl>
         <dt>{t("entityGraph.view.type")}</dt>
         <dd>{t(`entityGraph.type.${entity.type}`)}</dd>
+        {entity.qid && (
+          <>
+            <dt>{t("entityGraph.page.wikidata")}</dt>
+            <dd>
+              <code>{entity.qid}</code> · {t("entityGraph.wikidata.licence", { licence: WIKIDATA_LICENCE })}
+            </dd>
+          </>
+        )}
         {entity.aliases.length > 0 && (
           <>
             <dt>{t("entityGraph.page.aliases")}</dt>

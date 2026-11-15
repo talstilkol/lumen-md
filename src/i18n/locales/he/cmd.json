@@ -156,6 +156,8 @@
   "cmd.edit.redact": "השחרת הבחירה",
   "cmd.edit.redact.hint": "נמחק מכל ייצוא",
   "cmd.entities.review": "גרף ישויות: הצעות לסקירה",
+  "cmd.entities.wikidata": "ישות: קישור ל-Wikidata…",
+  "cmd.entities.wikidata.notEntity": "פתחו קודם פתק ישות (פתק תחת ישויות/).",
   "cmd.epub.open": "פתיחת ספר EPUB לקריאה…",
   "cmd.export.latexProject": "ייצוא פרויקט LaTeX (אקדמי, עברית)…",
   "cmd.export.latexProject.hint": "main.tex ל-LuaLaTeX / XeLaTeX עם עברית מימין לשמאל, מתמטיקה, ציטוטי [@key] מקובצי ה-.bib בכספת, והתמונות, ב-ZIP",

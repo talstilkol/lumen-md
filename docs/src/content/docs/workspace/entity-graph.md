@@ -47,3 +47,19 @@ the relations between them ("born in", "member of", "cites", …).
   neighbours, and Enter centres the view.
 - Export to JSON-LD (schema.org), GraphML, RDF/Turtle with PROV-O, or
   Neo4j `neo4j-admin import` CSV. Every relation keeps its source.
+
+## Reviewing and finding entities
+
+- The graph's proposals appear at the top of the review panel (⌘K
+  "Entity graph: proposals to review"), above the changes agents proposed.
+- Each entity type is a type of its own: ⌘K "All People", "All Laws",
+  "All Sources", … open its table, with its Base and its fields.
+
+## Linking to Wikidata (optional)
+
+Open an entity note and choose ⌘K "Entity: link to Wikidata…". Nothing is
+sent until you choose "Search this once" or "Always for this vault". Then
+only the entity's name goes to www.wikidata.org, in Hebrew and in English,
+and the request is listed in the privacy ledger. The item you pick is
+saved as the note's `wikidata` property. Wikidata's data is CC0 (public
+domain). In airplane mode the command is not shown.
