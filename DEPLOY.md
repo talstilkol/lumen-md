@@ -416,8 +416,8 @@ spctl -a -t exec -vv      src-tauri/target/release/bundle/macos/Lumen.app
 # Both should report "accepted" with "Notarized".
 ```
 
-Upload `Lumen_*.dmg` to the GitHub Release that `release.yml` already
-created from your tag push.
+Upload `Lumen_*.dmg` to the GitHub Release that `node scripts/release.mjs publish`
+created for your tag.
 
 ---
 
@@ -469,7 +469,7 @@ Every step is independently reversible:
 | Publish | Remove `VITE_PUBLISH_ENDPOINT` → publish command throws "offline" |
 | Dropbox | Remove `VITE_DROPBOX_APP_KEY` → cloud sync UI hidden |
 | Mobile | App Store / Play "Take down" controls |
-| macOS DMG | Re-upload signed binary via `release.yml` |
+| macOS DMG | Re-upload the signed binary to the release (`gh release upload`) |
 | Chrome | Disable in Web Store dashboard |
 
 The web app survives every backend going down — local-first by design.
