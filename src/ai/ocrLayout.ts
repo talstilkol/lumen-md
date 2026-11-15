@@ -43,8 +43,14 @@ export interface PlacedLine {
 export interface LayoutOptions {
   /** Read columns right to left. Default: decided from the lines' letters (`isRtlPage`). */
   rtl?: boolean;
-  /** Narrowest gutter that separates two columns, in pixels. Default: 1.5 × the median line height. */
+  /** A gap at least this wide separates two columns on its own, in pixels. Default: 1.5 × the median line height. */
   minGutter?: number;
+  /**
+   * A narrower gap, down to this, separates two columns too when lines sit
+   * side by side across it on at least two rows (W10.E41: real gutters are
+   * often about one line height). Default: 0.6 × the median line height.
+   */
+  minGap?: number;
 }
 
 const HEB = /[א-ת]/g;
@@ -124,14 +130,46 @@ function rowsOf(items: Item[]): Item[][] {
 /** One row's items in reading order: right to left on a Hebrew page. */
 const sortRow = (row: Item[], rtl: boolean) => [...row].sort((a, b) => (rtl ? b.bbox.x1 - a.bbox.x1 : a.bbox.x0 - b.bbox.x0));
 
+const overlapY = (a: Box, b: Box) => Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0) > 0.3 * Math.min(a.y1 - a.y0, b.y1 - b.y0);
+
+/** Distinct rows (by vertical overlap) on which an item of `a` sits beside an item of `b`. */
+function sideBySide(a: Item[], b: Item[]): number {
+  const rows: Box[] = [];
+  for (const x of a) {
+    if (!b.some((y) => overlapY(x.bbox, y.bbox))) continue;
+    if (!rows.some((r) => overlapY(r, x.bbox))) rows.push(x.bbox);
+  }
+  return rows.length;
+}
+
+/**
+ * The region's columns, left to right: split at every vertical gap that no
+ * item crosses and that is either at least `minGutter` wide, or at least
+ * `minGap` wide with items side by side across it on two rows or more (a
+ * narrow gutter; a line tesseract cut in two leaves its gap on one row only).
+ */
+function columnsOf(items: Item[], minGutter: number, minGap: number): Item[][] {
+  const groups = splitAlong(items, "x", Math.min(minGap, minGutter));
+  if (groups.length < 2) return groups;
+  const out: Item[][] = [groups[0]];
+  for (const g of groups.slice(1)) {
+    const prev = out[out.length - 1];
+    const gap = Math.min(...g.map((x) => x.bbox.x0)) - Math.max(...prev.map((x) => x.bbox.x1));
+    if (gap >= minGutter || sideBySide(prev, g) >= 2) out.push(g);
+    else prev.push(...g);
+  }
+  return out;
+}
+
 /**
  * Rows (any vertical gap at all) grouped into bands: consecutive rows stay
  * together while they share a gutter (a band of columns) or while none of
  * them has one (a single-column band); a heading or a footer across the
  * columns is its own band.
  */
-function bandsOf(items: Item[], minGutter: number): Item[][] {
-  const hasGutter = (xs: Item[]) => splitAlong(xs, "x", minGutter).length > 1;
+function bandsOf(items: Item[], minGutter: number, minGap = minGutter): Item[][] {
+  // Within one row a gap of minGap is enough: two lines side by side there are two columns' lines.
+  const hasGutter = (xs: Item[]) => splitAlong(xs, "x", Math.min(minGap, minGutter)).length > 1;
   const bands: Item[][] = [];
   let cur: Item[] = [];
   let curGutter = false;
@@ -153,19 +191,20 @@ function bandsOf(items: Item[], minGutter: number): Item[][] {
  * Reading order of boxes by recursive XY cut. Returns indices into `boxes`,
  * each with the column it was read in.
  */
-export function readingOrder(boxes: readonly Box[], opts: { rtl: boolean; minGutter: number }): Array<{ index: number; column: number }> {
+export function readingOrder(boxes: readonly Box[], opts: { rtl: boolean; minGutter: number; minGap?: number }): Array<{ index: number; column: number }> {
+  const minGap = opts.minGap ?? opts.minGutter;
   const out: Array<{ index: number; column: number }> = [];
   const visit = (items: Item[], column: number, depth: number): void => {
     if (items.length <= 1 || depth > 32) {
       for (const row of rowsOf(items)) for (const it of sortRow(row, opts.rtl)) out.push({ index: it.index, column });
       return;
     }
-    const cols = splitAlong(items, "x", opts.minGutter);
+    const cols = columnsOf(items, opts.minGutter, minGap);
     if (cols.length > 1) {
       (opts.rtl ? cols.reverse() : cols).forEach((c, k) => visit(c, k, depth + 1));
       return;
     }
-    const bands = bandsOf(items, opts.minGutter);
+    const bands = bandsOf(items, opts.minGutter, minGap);
     if (bands.length > 1) {
       for (const band of bands) visit(band, 0, depth + 1);
       return;
@@ -180,10 +219,16 @@ export function readingOrder(boxes: readonly Box[], opts: { rtl: boolean; minGut
   return out;
 }
 
-/** The narrowest gap taken for a gutter: 1.5 × the median line height, at least 8 px. */
+/** The narrowest gap taken for a gutter on its own: 1.5 × the median line height, at least 8 px. */
 export function defaultGutter(lines: readonly LayoutLine[]): number {
   const hs = lines.map(lineBox).filter((b): b is Box => !!b).map((b) => b.y1 - b.y0);
   return Math.max(8, 1.5 * median(hs));
+}
+
+/** The narrowest gap taken for a gutter when lines sit side by side across it: 0.6 × the median line height, at least 6 px. */
+export function defaultGap(lines: readonly LayoutLine[]): number {
+  const hs = lines.map(lineBox).filter((b): b is Box => !!b).map((b) => b.y1 - b.y0);
+  return Math.max(6, 0.6 * median(hs));
 }
 
 /**
@@ -193,9 +238,26 @@ export function defaultGutter(lines: readonly LayoutLine[]): number {
  * their text right to left (./ocrMixed rebuilds mixed pieces anyway). Lines
  * without such a gap are returned as they are.
  */
-export function splitAtGutters(lines: readonly LayoutLine[], minGutter: number, rtl: boolean): LayoutLine[] {
+export function splitAtGutters(lines: readonly LayoutLine[], minGutter: number, rtl: boolean, minGap = minGutter): LayoutLine[] {
+  const boxes = lines.map(lineBox);
+  /**
+   * A narrower gap is a gutter too when the page has one there: at least two
+   * other lines end on each side of it and almost none crosses it (W10.E41).
+   */
+  const pageGutterAt = (self: number, x0: number, x1: number) => {
+    let left = 0;
+    let right = 0;
+    let across = 0;
+    boxes.forEach((b, i) => {
+      if (!b || i === self) return;
+      if (b.x1 <= x0 + 2) left++;
+      else if (b.x0 >= x1 - 2) right++;
+      else across++;
+    });
+    return left >= 2 && right >= 2 && across <= Math.max(1, Math.floor(0.1 * (left + right + across)));
+  };
   const out: LayoutLine[] = [];
-  for (const l of lines) {
+  for (const [li, l] of lines.entries()) {
     if (l.words.length < 2) {
       out.push(l);
       continue;
@@ -204,7 +266,8 @@ export function splitAtGutters(lines: readonly LayoutLine[], minGutter: number, 
     const groups: (typeof byX)[] = [[byX[0]]];
     let right = byX[0].bbox.x1;
     for (const w of byX.slice(1)) {
-      if (w.bbox.x0 - right >= minGutter) groups.push([]);
+      const gap = w.bbox.x0 - right;
+      if (gap >= minGutter || (gap >= minGap && pageGutterAt(li, right, w.bbox.x0))) groups.push([]);
       groups[groups.length - 1].push(w);
       right = Math.max(right, w.bbox.x1);
     }
@@ -240,9 +303,10 @@ export function layoutLines(lines: readonly LayoutLine[], texts: readonly string
   if (!kept.length) return [];
   const rtl = opts.rtl ?? isRtlPage(kept.map((k) => k.text));
   const minGutter = opts.minGutter ?? defaultGutter(lines);
+  const minGap = Math.min(opts.minGap ?? defaultGap(lines), minGutter);
   const ordered = readingOrder(
     kept.map((k) => k.bbox),
-    { rtl, minGutter },
+    { rtl, minGutter, minGap },
   ).map(({ index, column }) => ({ ...kept[index], column }));
   // tesseract sometimes cuts one printed line in two (even inside a word): pieces of one row and one column,
   // next to each other, become one line again, joined in reading order.

@@ -155,7 +155,7 @@ export async function recognizeWithMixedFix(main: TesseractWorker, heb: WorkerRe
   const hebrewPage = L.isRtlPage(found.map((l) => l.text));
   // Lines tesseract ran across a column gutter are cut there (./ocrLayout).
   const minGutter = L.defaultGutter(found);
-  const lines: Line[] = L.splitAtGutters(found, minGutter, hebrewPage).filter((l) => L.lineBox(l));
+  const lines: Line[] = L.splitAtGutters(found, minGutter, hebrewPage, L.defaultGap(found)).filter((l) => L.lineBox(l));
   const fix = !!heb && lines.some((l) => needsFix(l, { hebrewPage }));
   let texts = lines.map((l) => l.text.replace(/\n$/, ""));
   if (heb && fix) {
