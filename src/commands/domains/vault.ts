@@ -66,6 +66,17 @@ export function buildVaultTransferCommands(): Command[] {
       },
     },
     {
+      // Plan W11.P13: <install>, navigator.install() or the kept prompt; otherwise this browser's steps.
+      id: "app.install",
+      label: t("cmd.app.install"),
+      hint: t("cmd.app.install.hint"),
+      icon: cmdIcons.Save,
+      group: t("group.file"),
+      action: () => {
+        window.dispatchEvent(new Event("lumen-open-install"));
+      },
+    },
+    {
       id: "vault.importUndo",
       label: t("cmd.vault.importUndo"),
       hint: t("cmd.vault.importUndo.hint"),

@@ -84,6 +84,8 @@
   "cmd.app.checkUpdates.hint": "Desktop app: asks the release server for a newer, signed version",
   "cmd.app.featureFlags": "Feature flags…",
   "cmd.app.featureFlags.hint": "Turn beta features on or off on this device",
+  "cmd.app.install": "Install Lumen as an app…",
+  "cmd.app.install.hint": "Its own window and icon; works offline",
   "cmd.app.updateChannel": "Update channel: switch between stable and beta",
   "cmd.app.updateChannel.hint": "Beta gets new features first; stable gets tested releases",
   "cmd.arabic.removeTashkeel": "Remove Arabic tashkeel (selection or note)",

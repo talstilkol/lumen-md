@@ -84,6 +84,8 @@
   "cmd.app.checkUpdates.hint": "تطبيق سطح المكتب: يسأل خادم الإصدارات عن إصدار أحدث موقّع",
   "cmd.app.featureFlags": "مفاتيح الميزات…",
   "cmd.app.featureFlags.hint": "تفعيل الميزات التجريبية أو إيقافها على هذا الجهاز",
+  "cmd.app.install": "تثبيت Lumen كتطبيق…",
+  "cmd.app.install.hint": "نافذة وأيقونة خاصة؛ يعمل دون اتصال",
   "cmd.app.updateChannel": "قناة التحديث: التبديل بين المستقر والتجريبي",
   "cmd.app.updateChannel.hint": "تصل الميزات الجديدة إلى التجريبي أولًا؛ ويحصل المستقر على إصدارات مختبرة",
   "cmd.arabic.removeTashkeel": "إزالة التشكيل (التحديد أو الملاحظة)",

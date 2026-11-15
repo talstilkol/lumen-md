@@ -84,6 +84,8 @@
   "cmd.app.checkUpdates.hint": "אפליקציית שולחן העבודה: שואלת את שרת הגרסאות אם יש גרסה חתומה חדשה יותר",
   "cmd.app.featureFlags": "דגלי פיצ'רים…",
   "cmd.app.featureFlags.hint": "הפעלה או כיבוי של פיצ'רים בבטא במכשיר הזה",
+  "cmd.app.install": "התקנת Lumen כאפליקציה…",
+  "cmd.app.install.hint": "חלון וסמל משלה; עובדת בלי אינטרנט",
   "cmd.app.updateChannel": "ערוץ עדכונים: מעבר בין יציב לבטא",
   "cmd.app.updateChannel.hint": "בבטא פיצ'רים חדשים מגיעים קודם; ביציב מגיעות גרסאות שנבדקו",
   "cmd.arabic.removeTashkeel": "הסרת תשכיל ערבי (בחירה או פתק)",

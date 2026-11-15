@@ -29,10 +29,14 @@ import { adoptBootLocale, useAppStore } from "./store/useStore";
 import { applyBootEdit, takeBootEdit } from "./boot/bootNote";
 import "./index.css";
 import { windowLabel } from "./desktop/window";
+import { keepInstallPrompt } from "./pwa/installPrompt";
 
 // Plan W2.17: this window is a presentation's presenter view (opened by the slides), not the editor.
 const IS_PRESENTER = typeof location !== "undefined" && location.hash === "#lumen-presenter";
 const PresenterView = React.lazy(() => import("./slides/PresenterView"));
+
+// Plan W11.P13: Chromium offers its install prompt once, early; keep it for the install dialog.
+if (typeof window !== "undefined") keepInstallPrompt();
 
 // Every AI network request is recorded; local-only blocks cloud ones (T37).
 const lastBlockToast = new Map<string, number>();

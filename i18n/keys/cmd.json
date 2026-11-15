@@ -431,6 +431,16 @@
       "vars": []
     },
     {
+      "key": "cmd.app.install",
+      "en": "Install Lumen as an app…",
+      "vars": []
+    },
+    {
+      "key": "cmd.app.install.hint",
+      "en": "Its own window and icon; works offline",
+      "vars": []
+    },
+    {
       "key": "cmd.app.updateChannel",
       "en": "Update channel: switch between stable and beta",
       "vars": []

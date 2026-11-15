@@ -7589,6 +7589,123 @@
       "vars": []
     },
     {
+      "key": "install.already",
+      "en": "Lumen is already running as an installed app.",
+      "vars": []
+    },
+    {
+      "key": "install.button",
+      "en": "Install",
+      "vars": []
+    },
+    {
+      "key": "install.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "install.count",
+      "en": "Installed from this browser {n} times (counted here only, never sent).",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "install.dismissed",
+      "en": "Not installed. You can install it any time from here.",
+      "vars": []
+    },
+    {
+      "key": "install.done",
+      "en": "Installed. Open Lumen from its icon.",
+      "vars": []
+    },
+    {
+      "key": "install.guide.firefoxAndroid.1",
+      "en": "Open the menu (⋮).",
+      "vars": []
+    },
+    {
+      "key": "install.guide.firefoxAndroid.2",
+      "en": "Choose Install, or Add to Home screen.",
+      "vars": []
+    },
+    {
+      "key": "install.guide.firefoxAndroid.title",
+      "en": "In Firefox on Android",
+      "vars": []
+    },
+    {
+      "key": "install.guide.firefoxDesktop.1",
+      "en": "Firefox can't install web apps. Use the Lumen desktop app, or open Lumen in Chrome or Edge and install it there.",
+      "vars": []
+    },
+    {
+      "key": "install.guide.firefoxDesktop.title",
+      "en": "In Firefox on a computer",
+      "vars": []
+    },
+    {
+      "key": "install.guide.ios.1",
+      "en": "Tap the Share button.",
+      "vars": []
+    },
+    {
+      "key": "install.guide.ios.2",
+      "en": "Choose Add to Home Screen.",
+      "vars": []
+    },
+    {
+      "key": "install.guide.ios.3",
+      "en": "On iOS 26, leave Open as Web App on.",
+      "vars": []
+    },
+    {
+      "key": "install.guide.ios.4",
+      "en": "Tap Add. Lumen opens from the Home Screen as an app.",
+      "vars": []
+    },
+    {
+      "key": "install.guide.ios.title",
+      "en": "On iPhone and iPad (Safari)",
+      "vars": []
+    },
+    {
+      "key": "install.guide.macSafari.1",
+      "en": "Choose File → Add to Dock.",
+      "vars": []
+    },
+    {
+      "key": "install.guide.macSafari.2",
+      "en": "Click Add. Lumen opens from the Dock as an app.",
+      "vars": []
+    },
+    {
+      "key": "install.guide.macSafari.title",
+      "en": "In Safari on the Mac",
+      "vars": []
+    },
+    {
+      "key": "install.guide.other.1",
+      "en": "Look for Install in the address bar or the browser's menu. If there is none, use the Lumen desktop app.",
+      "vars": []
+    },
+    {
+      "key": "install.guide.other.title",
+      "en": "In this browser",
+      "vars": []
+    },
+    {
+      "key": "install.intro",
+      "en": "An installed Lumen opens in its own window, from its own icon, and works offline.",
+      "vars": []
+    },
+    {
+      "key": "install.title",
+      "en": "Install Lumen",
+      "vars": []
+    },
+    {
       "key": "israeliTime.dayOff",
       "en": "Falls on {reason}",
       "vars": [
