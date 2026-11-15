@@ -24,7 +24,7 @@ Most note apps treat Hebrew as an afterthought. Lumen starts from it: direction 
 
 ## What to say about security
 
-- Lumen has **not** had an external security audit.[^no-external-audit] Please don't describe its cryptography as audited or certified.[^no-external-audit]
+- Lumen has **not** had an external security audit.[^no-external-audit] Please describe its cryptography as not audited and not certified.[^no-external-audit]
 - Every open security finding is listed in public.[^findings-public]
 
 ## Name and logo

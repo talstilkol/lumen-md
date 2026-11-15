@@ -9,9 +9,9 @@ This page is written from the repository itself: the findings register (`securit
 
 ## External audit
 
-Lumen has not had an external security audit. One is to be commissioned (plan W11.O6) for the sync protocol and the keyring. Until a report is published in full, nothing may call Lumen's cryptography audited, and encrypted sync (E2EE) stays off by default, labelled as not externally audited (plan W11.S1; security/crypto-audit.json records the audit state).
+Lumen has not had an external security audit. One is to be commissioned (plan W11.O6) for the sync protocol and the keyring. Until a report is published in full, Lumen's cryptography is not audited and no text may say otherwise, and encrypted sync (E2EE) stays off by default, labelled as not externally audited (plan W11.S1; security/crypto-audit.json records the audit state).
 
-**Encrypted sync is experimental.** Until an external audit is published, encrypted sync (E2EE) is behind an experimental flag that is off in every channel, beta included, and its setup screen says it has not had an external security audit (plan W11.S1). No text in the app may call this cryptography audited, and a check enforces that. The audit covers `src/sync/e2ee/`, `src/collab/encryption.ts`, `src/storage/vault/encrypted/`, `src/storage/lockedNote.ts`.
+**Encrypted sync is experimental.** While no external audit is published, encrypted sync (E2EE) is behind an experimental flag that is off in every channel, beta included, and its setup screen says it has not had an external security audit (plan W11.S1). This cryptography is not audited, no text in the app may say it is, and a check enforces that. The audit covers `src/sync/e2ee/`, `src/collab/encryption.ts`, `src/storage/vault/encrypted/`, `src/storage/lockedNote.ts`.
 
 ## Threat model
 
