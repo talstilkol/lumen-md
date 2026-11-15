@@ -73,6 +73,7 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "highlightImport.json": { module: "highlights/import/strings.ts", users: ["highlights/import/runImport.ts"], prefixes: ["hlimport."] },
   "highlights.json": { module: "highlights/strings.ts", users: ["highlights/HighlightsPanel.tsx"], prefixes: ["hl."] },
   "importWizard.json": { module: "storage/import/strings.ts", users: ["storage/import/ImportWizard.tsx", "storage/import/report.ts"], prefixes: ["importWizard."], within: "storage/import/" },
+  "media.json": { module: "media/strings.ts", users: ["media/MediaEmbed.tsx"], prefixes: ["media."] },
   "meetingSpeakers.json": { module: "meetings/speakerStrings.ts", users: ["meetings/meetingTranscribe.ts"], prefixes: ["speakers."] },
   // W11.I19: the meeting recorder and its flow (both loaded on use).
   "meetingFlow.json": { module: "meetings/meetingFlowStrings.ts", users: ["meetings/meetingFlow.ts", "meetings/MeetingRecorder.tsx"], prefixes: ["meetingFlow."] },

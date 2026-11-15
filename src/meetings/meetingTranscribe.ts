@@ -180,6 +180,19 @@ export async function diarizeRecording(samples: Float32Array, signal?: AbortSign
   return runDiarization(samples, models, signal);
 }
 
+/** `rec.vtt` and `rec.srt` next to `rec.m4a`, from the sentences already transcribed (nothing is transcribed again). */
+export async function writeTranscriptTracks(audioPath: string, sentences: readonly SpokenSentence[], write?: (path: string, text: string) => Promise<void>): Promise<string[]> {
+  const { cuesFromSentences, sidecarPath, toSrt, toWebVtt } = await import("../media/webvtt");
+  const put = write ?? (async (p: string, text: string) => (await import("../storage/workspace")).writeWorkspaceFile(p, text));
+  const cues = cuesFromSentences(sentences);
+  const lang = /[\u0590-\u05FF]/.test(sentences.map((s) => s.text).join(" ")) ? "he" : undefined;
+  const vtt = sidecarPath(audioPath, "vtt");
+  const srt = sidecarPath(audioPath, "srt");
+  await put(vtt, toWebVtt(cues, { language: lang }));
+  await put(srt, toSrt(cues));
+  return [vtt, srt];
+}
+
 /* ─── The command ──────────────────────────────────────────────────── */
 
 export async function transcribeMeeting(file?: File | null, models: DiarizationModels = DIARIZATION_MODELS): Promise<void> {
@@ -218,6 +231,8 @@ export async function transcribeMeeting(file?: File | null, models: DiarizationM
     }
 
     const audioPath = await tf.keepAudio(picked);
+    // W12.F8: the same timed transcript as WebVTT and SubRip beside the audio, for the player and other apps.
+    if (audioPath) await writeTranscriptTracks(audioPath, spoken).catch((e) => log.warn("transcript tracks", e));
     const linked = speakerTranscript(spoken, audioPath);
     const plain = plainTranscript(spoken);
     let body = `### ${picked.name}\n\n${linked}`;

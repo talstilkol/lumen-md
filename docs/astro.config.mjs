@@ -157,6 +157,7 @@ export default defineConfig({
             { label: "Text formats: what survives a round trip", slug: "workspace/format-roundtrip", translations: { he: "פורמטי טקסט: מה שורד הלוך-חזור" } },
             { label: "Typst export (Hebrew)", slug: "workspace/typst-export", translations: { he: "ייצוא Typst (עברית)" } },
             { label: "Notebooks, data files and maps", slug: "workspace/file-viewers", translations: { he: "מחברות, קובצי נתונים ומפות" } },
+            { label: "Audio and video with a transcript", slug: "workspace/media-transcripts", translations: { he: "אודיו ווידאו עם תמלול" } },
             { label: "Automations (when… then…)", slug: "workspace/automations", translations: { he: "אוטומציות (כש… אז…)" } },
           ],
         },

@@ -33,6 +33,7 @@ const HtmlPreviewBlock = lazy(() => import("../plugins/HtmlPreviewBlock"));
 const BibtexBlock = lazy(() => import("../plugins/BibtexBlock"));
 const PluginBlockView = lazy(() => import("../plugins/runtime/PluginBlock"));
 const TasksBlock = lazy(() => import("../plugins/TasksBlock"));
+const MediaEmbedBlock = lazy(() => import("../media/MediaEmbed"));
 const DataBlock = lazy(() => import("../plugins/DataBlock"));
 const DatabaseBlock = lazy(() => import("../views/DatabaseBlock"));
 const BasesBlock = lazy(() => import("../views/bases/BasesBlock"));
@@ -324,6 +325,8 @@ const Bibtex = withSuspense<BlockProps>(
 );
 
 const Tasks = withSuspense<BlockProps>((props) => <TasksBlock source={getText(props.children)} />, "tasks");
+// `![[rec.m4a]]` / `![[talk.mp4]]` (W12.F8): the player and its transcript track.
+const MediaEmbedComp = withSuspense<BlockProps & { target?: string }>((props) => <MediaEmbedBlock target={String(props.target ?? "")} />, "media");
 
 const Ach = withSuspense<BlockProps>((props) => <AchBlock source={getText(props.children)} />, "competing hypotheses");
 
@@ -696,6 +699,7 @@ export const components: Record<string, LumenBlock> = {
   "lumen-bibtex": Bibtex as unknown as LumenBlock,
   "lumen-pluginblock": PluginBlockComp as unknown as LumenBlock,
   "lumen-tasks": Tasks as unknown as LumenBlock,
+  "lumen-mediaembed": MediaEmbedComp as unknown as LumenBlock,
   "lumen-data": DataBlockComp as unknown as LumenBlock,
   "lumen-database": Database as unknown as LumenBlock,
   "lumen-dataset": Dataset as unknown as LumenBlock,
