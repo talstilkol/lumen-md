@@ -135,8 +135,22 @@ describe("checkFreshness", () => {
   it("a newer manifest must list the anchor with its digest among its predecessors", () => {
     expect(checkFreshness(A, { counter: 7, digest: "d7" }, [[4, "d4"], [5, "d5"], [6, "d6"]])).toBe("ok");
     expect(() => checkFreshness(A, { counter: 7, digest: "d7" }, [[5, "forked"], [6, "d6"]])).toThrow(RollbackError);
-    expect(checkFreshness(A, { counter: 7, digest: "d7" }, [[6, "d6"]])).toBe("unproven");
+    // X-BL-1: a manifest at most HISTORY_LENGTH ahead whose history leaves the anchor out is a fork.
+    expect(() => checkFreshness(A, { counter: 7, digest: "d7" }, [[6, "d6"]])).toThrow(/doesn't descend from manifest 5/);
+    expect(() => checkFreshness(A, { counter: 6, digest: "d6" }, [])).toThrow(RollbackError);
     expect(checkFreshness(A, { counter: 7, digest: "d7" })).toBe("unproven");
-    expect(checkFreshness(A, { counter: 6, digest: "d6" }, [])).toBe("unproven");
+  });
+
+  it("only a manifest more than HISTORY_LENGTH ahead is 'unproven' when its history leaves the anchor out (X-BL-1)", () => {
+    const tail = (to: number): Array<[number, string]> => Array.from({ length: HISTORY_LENGTH }, (_, i) => [to - HISTORY_LENGTH + i, `d${to - HISTORY_LENGTH + i}`] as [number, string]);
+    // Exactly HISTORY_LENGTH ahead: the honest history still starts at the anchor.
+    const exact = A.counter + HISTORY_LENGTH;
+    expect(checkFreshness(A, { counter: exact, digest: "x" }, tail(exact))).toBe("ok");
+    expect(() => checkFreshness(A, { counter: exact, digest: "x" }, tail(exact).slice(1))).toThrow(RollbackError);
+    // One further: the history can't reach the anchor.
+    const beyond = exact + 1;
+    expect(checkFreshness(A, { counter: beyond, digest: "x" }, tail(beyond))).toBe("unproven");
+    // A far-ahead history that does list the anchor's counter is still checked.
+    expect(() => checkFreshness(A, { counter: beyond, digest: "x" }, [[5, "forked"], ...tail(beyond).slice(1)])).toThrow(RollbackError);
   });
 });
