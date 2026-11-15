@@ -264,7 +264,7 @@ export function CanvasWhiteboard({ open, onClose }: Props) {
   if (!open) return null;
 
   return (
-    <div style={{
+    <div data-testid="canvas-whiteboard" data-ready={String(hasLoaded)} style={{
       position: "fixed", inset: 0, zIndex: 200,
       background: "hsl(var(--bg))",
       display: "flex", flexDirection: "column",

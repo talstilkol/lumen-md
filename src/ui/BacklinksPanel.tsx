@@ -58,7 +58,7 @@ export function BacklinksPanel({ filePath, onOpen }: Props) {
   }, [filePath]);
 
   return (
-    <aside className="backlinks-panel" aria-label={t("backlinks.title")}>
+    <aside className="backlinks-panel" aria-label={t("backlinks.title")} data-testid="backlinks-panel" data-ready={String(!filePath || (!loading && hits !== null))}>
       <div className="file-tree-header">
         <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
           <Link2 size={12} />

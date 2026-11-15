@@ -10,12 +10,20 @@ import type { Surface } from "./harness";
 const runCommand = (page: Page, id: string) =>
   page.evaluate((cmd) => window.dispatchEvent(new CustomEvent("lumen-run-command", { detail: { id: cmd } })), id);
 
-/** A view opened by a palette command; ready once the DOM stops changing after it (no fixed wait). */
-export function commandSurface(id: string, command: string): Surface & { command: string } {
-  return { id, command, open: (p) => runCommand(p, command), ready: "body" };
+/**
+ * A view opened by a palette command. `ready` is that view's own marker (plan
+ * W7.25): a `data-testid` on the view's root, with `data-ready="true"` where the
+ * view loads something first (a listing, a layout, a measurement). Never
+ * "body": a body is visible before the view has rendered anything.
+ */
+export function commandSurface(id: string, command: string, ready: string): Surface & { command: string } {
+  return { id, command, open: (p) => runCommand(p, command), ready };
 }
 
-/** Waits until the page's DOM size is the same on two animation frames in a row (a command's view has rendered). */
+/** The selector of a view's ready marker: its test id, and data-ready="true" when the view loads first. */
+export const readyMarker = (testId: string, loads = false) => `[data-testid="${testId}"]${loads ? '[data-ready="true"]' : ""}`;
+
+/** After the ready marker: waits until the page's DOM size is the same on two animation frames in a row (late paints settle). */
 export async function domSettled(page: Page): Promise<void> {
   await page.waitForFunction(
     () =>
@@ -30,25 +38,25 @@ export async function domSettled(page: Page): Promise<void> {
 }
 
 export const COMMAND_SURFACES = [
-  commandSurface("settings", "settings.open"),
-  commandSurface("organization", "settings.organization"),
-  commandSurface("backlinks", "view.backlinks"),
-  commandSurface("calendar", "view.calendar"),
-  commandSurface("canvas", "view.canvas"),
-  commandSurface("find-replace", "view.findReplace"),
-  commandSurface("graph", "view.graphView"),
-  commandSurface("local-graph", "view.localGraph"),
-  commandSurface("highlights", "view.highlights"),
-  commandSurface("outline", "view.outline"),
-  commandSurface("page-view", "view.pageView"),
-  commandSurface("properties", "view.properties"),
-  commandSurface("reading", "view.reading"),
-  commandSurface("reading-options", "view.readingOptions"),
-  commandSurface("review", "view.review"),
-  commandSurface("search", "view.search"),
-  commandSurface("tags", "view.tags"),
-  commandSurface("version-history", "view.versionHistory"),
-  commandSurface("workspace", "view.workspace"),
+  commandSurface("settings", "settings.open", readyMarker("settings-screen")),
+  commandSurface("organization", "settings.organization", '[data-testid="settings-screen"] :is([data-testid="org-members"], [data-testid="org-members-empty"], [data-testid="org-local-only"])'),
+  commandSurface("backlinks", "view.backlinks", readyMarker("backlinks-panel", true)),
+  commandSurface("calendar", "view.calendar", readyMarker("calendar")),
+  commandSurface("canvas", "view.canvas", readyMarker("canvas-whiteboard", true)),
+  commandSurface("find-replace", "view.findReplace", readyMarker("find-replace")),
+  commandSurface("graph", "view.graphView", `:is(${readyMarker("graph-view", true)}, ${readyMarker("graph-empty")})`),
+  commandSurface("local-graph", "view.localGraph", readyMarker("local-graph")),
+  commandSurface("highlights", "view.highlights", readyMarker("highlights-panel")),
+  commandSurface("outline", "view.outline", readyMarker("outline", true)),
+  commandSurface("page-view", "view.pageView", readyMarker("page-view", true)),
+  commandSurface("properties", "view.properties", readyMarker("properties-panel")),
+  commandSurface("reading", "view.reading", readyMarker("reading-mode", true)),
+  commandSurface("reading-options", "view.readingOptions", readyMarker("reading-settings")),
+  commandSurface("review", "view.review", `${readyMarker("review-panel")}[data-open-ms]`),
+  commandSurface("search", "view.search", readyMarker("search-dialog")),
+  commandSurface("tags", "view.tags", readyMarker("tags-panel", true)),
+  commandSurface("version-history", "view.versionHistory", readyMarker("version-history", true)),
+  commandSurface("workspace", "view.workspace", readyMarker("file-tree", true)),
 ];
 
 /** The RTL matrix note in the preview (9.5): the screen where RTL regressions show first. */

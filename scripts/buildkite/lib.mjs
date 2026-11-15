@@ -256,13 +256,34 @@ const status = (key) => [{ github_commit_status: { context: `${STATUS_PREFIX}: $
 const RETRY = { automatic: [{ exit_status: -1, limit: 2 }, { exit_status: 255, limit: 1 }] };
 
 /**
+ * Jobs that are not in ci.yml and run only here (Buildkite-native, plan W7.21).
+ * `gates` is the job's script, run through run.sh like a ci.yml job's steps.
+ *   percy   the 30 screens × 4 variants as Percy snapshots (plan W7.25, W10.E55):
+ *           Percy renders them in Chrome, Firefox and Safari. PERCY_TOKEN comes
+ *           from the agent's secret store (docs: self-hosting/buildkite); without
+ *           it percy-run.mjs exits non-zero, so the step can never pass silently.
+ *           Main pushes and PRs labelled `percy` only: the free plan's monthly
+ *           screenshot allowance does not cover every PR build.
+ */
+export const NATIVE_JOBS = [
+  {
+    key: "percy",
+    label: ":camera_with_flash: Percy (30 screens, Chrome / Firefox / Safari)",
+    gates: ["gate 'Percy snapshots of the 30 screens' <<'LUMEN_STEP'\nnpm run -s visual:percy\nLUMEN_STEP"],
+    browsers: ["chromium"],
+    if: 'build.branch == "main" || build.pull_request.labels includes "percy"',
+    timeout: 40,
+  },
+];
+
+/**
  * The pipeline object (.buildkite/pipeline.yml is its YAML). The vitest gate
  * is sharded: `vitest-plan` splits the files by their last run time,
  * `vitest` runs the shards in parallel with blob reports, `vitest-merge`
  * merges them, checks that every planned file ran, and applies ci.yml's
  * coverage gate. `receipt` seals what every gate did (W4.36 format).
  */
-export function buildPipeline(ci, { jobs = JOBS, shards = VITEST_SHARDS } = {}) {
+export function buildPipeline(ci, { jobs = [...JOBS, ...NATIVE_JOBS], shards = VITEST_SHARDS } = {}) {
   const cov = ciSteps(ci).find((s) => s.id === "check › Coverage gate (lines >= 65%)");
   if (!cov) throw new Error('ci.yml has no step "check › Coverage gate (lines >= 65%)"');
   const covLines = cov.run.split("\n");
@@ -327,7 +348,7 @@ export function buildPipeline(ci, { jobs = JOBS, shards = VITEST_SHARDS } = {}) 
     const s = {
       label: j.label,
       key: j.key,
-      command: command(j, jobScript(j, ci)),
+      command: command(j, j.gates ? [...j.gates, "gates_done"].join("\n") : jobScript(j, ci)),
       agents: at(j.queue ?? "linux"),
       timeout_in_minutes: j.timeout,
       notify: status(j.key),

@@ -35,12 +35,16 @@ export const Outline = React.memo(function Outline({ markdownText, sheet = false
       if (cancelled) return;
       const inc = (incrementalRef.current ??= new m.IncrementalToc());
       setLargeToc(inc.update(debounced));
+      setLargeFor(debounced);
     });
     return () => {
       cancelled = true;
     };
   }, [debounced, large]);
   const toc = smallToc ?? largeToc;
+  // The ready marker (plan W7.25): the list is built from the text on screen, not a stale or pending parse.
+  const [largeFor, setLargeFor] = useState<string | null>(null);
+  const ready = debounced === markdownText && (!large || largeFor === debounced);
 
   // Scroll-spy: track which heading is currently in view within the preview pane.
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -101,7 +105,8 @@ export const Outline = React.memo(function Outline({ markdownText, sheet = false
       `
       }
       aria-label={sheet ? t("outline.title") : undefined}
-      data-testid={sheet ? "outline-sheet" : undefined}
+      data-testid={sheet ? "outline-sheet" : "outline"}
+      data-ready={String(ready)}
     >
       {sheet && <div className="outline-sheet-grip" aria-hidden="true" />}
       <div className="px-2 mb-2 text-[11px] uppercase tracking-wider text-fg-muted font-semibold outline-sheet-head">
