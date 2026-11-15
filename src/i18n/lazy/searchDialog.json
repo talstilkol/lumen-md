@@ -8,6 +8,8 @@
   "search.empty": "Workspace is empty.",
   "search.newNote": "New note",
   "search.operatorsHint": "Operators: tag:name  path:folder  \"exact phrase\"  /regex/  -exclude",
+  "search.regexSkipped": "/regex/ skipped {count} very long notes (over {limit} characters).",
+  "search.regexTimedOut": "The /regex/ took too long and was stopped. Try a simpler pattern.",
   "search.save": "Save search",
   "search.savedLabel": "Saved",
   "search.unsave": "Remove from saved searches",

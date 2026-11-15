@@ -117,6 +117,8 @@
   "search.noMatches": "אין התאמות.",
   "search.operatorsHint": "אופרטורים: tag:שם  path:תיקייה  \"ביטוי מדויק\"  /regex/  -להחריג",
   "search.placeholder": "חיפוש בקבצים ובתוכן של מרחב העבודה…",
+  "search.regexSkipped": "/regex/ דילג על {count} פתקים ארוכים מאוד (מעל {limit} תווים).",
+  "search.regexTimedOut": "ה־/regex/ רץ זמן רב מדי ונעצר. נסו תבנית פשוטה יותר.",
   "search.removeSaved": "הסרת החיפוש השמור {name}",
   "search.results.one": "{n} תוצאה",
   "search.results.other": "{n} תוצאות",
