@@ -69,6 +69,7 @@
   "ai.doctor.check.ollamaVersion": "Ollama version (0.5+ for structured output)",
   "ai.doctor.check.policy": "AI policy and preferred executor",
   "ai.doctor.check.research": "Research service (web search and page extraction)",
+  "ai.doctor.check.speculative": "Speculative decoding (Ollama 0.34+)",
   "ai.doctor.check.spellEn": "English spelling on this device",
   "ai.doctor.check.spellHe": "Hebrew spelling dictionary",
   "ai.doctor.check.storage": "Vault storage: quota and durability",
