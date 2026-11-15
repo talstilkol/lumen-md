@@ -12418,6 +12418,44 @@
       ]
     },
     {
+      "key": "types.form.computed",
+      "en": "Computed in the type's base",
+      "vars": []
+    },
+    {
+      "key": "types.form.mismatch",
+      "en": "Does not fit the field: {reason}. Kept as it is.",
+      "vars": [
+        "reason"
+      ]
+    },
+    {
+      "key": "types.form.none",
+      "en": "(none)",
+      "vars": []
+    },
+    {
+      "key": "types.form.notAnOption",
+      "en": "{value} (not an option)",
+      "vars": [
+        "value"
+      ]
+    },
+    {
+      "key": "types.form.title",
+      "en": "Fields of {type}",
+      "vars": [
+        "type"
+      ]
+    },
+    {
+      "key": "types.form.unknownType",
+      "en": "No type named {type} (deleted or misspelled); its fields are kept as plain properties.",
+      "vars": [
+        "type"
+      ]
+    },
+    {
       "key": "types.page.all",
       "en": "All {type}",
       "vars": [
@@ -12443,6 +12481,193 @@
       "key": "types.page.title",
       "en": "Types",
       "vars": []
+    },
+    {
+      "key": "types.studio.add",
+      "en": "Add field",
+      "vars": []
+    },
+    {
+      "key": "types.studio.addField",
+      "en": "Add a field",
+      "vars": []
+    },
+    {
+      "key": "types.studio.create",
+      "en": "Create type",
+      "vars": []
+    },
+    {
+      "key": "types.studio.createNote",
+      "en": "Create note",
+      "vars": []
+    },
+    {
+      "key": "types.studio.created",
+      "en": "Type {type} created",
+      "vars": [
+        "type"
+      ]
+    },
+    {
+      "key": "types.studio.exists",
+      "en": "A type named {id} already exists",
+      "vars": [
+        "id"
+      ]
+    },
+    {
+      "key": "types.studio.failed",
+      "en": "Object Studio: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "types.studio.fieldAdded",
+      "en": "Field {field} added",
+      "vars": [
+        "field"
+      ]
+    },
+    {
+      "key": "types.studio.fieldName",
+      "en": "Field name",
+      "vars": []
+    },
+    {
+      "key": "types.studio.from",
+      "en": "Field…",
+      "vars": []
+    },
+    {
+      "key": "types.studio.id",
+      "en": "Id (file name)",
+      "vars": []
+    },
+    {
+      "key": "types.studio.inReview",
+      "en": "{count} note changes are waiting in the review screen",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "types.studio.kind",
+      "en": "Kind of value",
+      "vars": []
+    },
+    {
+      "key": "types.studio.labelEn",
+      "en": "English name",
+      "vars": []
+    },
+    {
+      "key": "types.studio.labelHe",
+      "en": "Hebrew name",
+      "vars": []
+    },
+    {
+      "key": "types.studio.newNote",
+      "en": "New note of a type",
+      "vars": []
+    },
+    {
+      "key": "types.studio.newType",
+      "en": "New type",
+      "vars": []
+    },
+    {
+      "key": "types.studio.noFile",
+      "en": "No type file at {file}",
+      "vars": [
+        "file"
+      ]
+    },
+    {
+      "key": "types.studio.noteTitle",
+      "en": "Title",
+      "vars": []
+    },
+    {
+      "key": "types.studio.options",
+      "en": "Options, comma-separated",
+      "vars": []
+    },
+    {
+      "key": "types.studio.pickType",
+      "en": "Type…",
+      "vars": []
+    },
+    {
+      "key": "types.studio.relationTo",
+      "en": "Links to type…",
+      "vars": []
+    },
+    {
+      "key": "types.studio.rename",
+      "en": "Rename (through the review screen)",
+      "vars": []
+    },
+    {
+      "key": "types.studio.renameField",
+      "en": "Rename a field in every note",
+      "vars": []
+    },
+    {
+      "key": "types.studio.renamePartial",
+      "en": "Not every change was approved: the type file was left as it was",
+      "vars": []
+    },
+    {
+      "key": "types.studio.renameSummary",
+      "en": "Rename the field {from} to {to}",
+      "vars": [
+        "from",
+        "to"
+      ]
+    },
+    {
+      "key": "types.studio.renamed",
+      "en": "Field renamed in {count} notes and in the type",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "types.studio.tag",
+      "en": "Tag that makes a note this type",
+      "vars": []
+    },
+    {
+      "key": "types.studio.title",
+      "en": "Object Studio",
+      "vars": []
+    },
+    {
+      "key": "types.studio.to",
+      "en": "New name",
+      "vars": []
+    },
+    {
+      "key": "types.studio.undo",
+      "en": "Undo the rename (Ctrl+Z)",
+      "vars": []
+    },
+    {
+      "key": "types.studio.undoPartial",
+      "en": "Undone in {count} files; {left} changed since and were left alone",
+      "vars": [
+        "count",
+        "left"
+      ]
+    },
+    {
+      "key": "types.studio.undone",
+      "en": "Rename undone in {count} files",
+      "vars": [
+        "count"
+      ]
     },
     {
       "key": "typo.applied",

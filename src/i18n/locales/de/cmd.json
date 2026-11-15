@@ -450,6 +450,7 @@
   "cmd.tools.writingGoal.unset": "✍️ Tägliches Schreibziel festlegen",
   "cmd.typesAll": "Alle {type}",
   "cmd.typesPage": "Typen: alle Objekte nach Typ",
+  "cmd.typesStudio": "Typen: Objektstudio (neuer Typ, Felder, Umbenennen)",
   "cmd.usage": "Hilfe: Nutzung auf diesem Gerät",
   "cmd.usage.hint": "Zähler auf diesem Gerät und ein Wochenbericht, den du senden kannst — nichts geht ohne deinen Klick hinaus",
   "cmd.vault.backups": "Backups…",

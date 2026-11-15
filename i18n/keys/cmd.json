@@ -2275,6 +2275,11 @@
       "vars": []
     },
     {
+      "key": "cmd.typesStudio",
+      "en": "Types: Object Studio (new type, fields, rename)",
+      "vars": []
+    },
+    {
       "key": "cmd.usage",
       "en": "Help: Usage on this device",
       "vars": []

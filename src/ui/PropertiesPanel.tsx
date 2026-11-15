@@ -10,7 +10,7 @@
  * mirrors correctly in Hebrew / Arabic.
  */
 
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { ExternalLink, Plus, SlidersHorizontal, X } from "lucide-react";
 import { t } from "../i18n";
 import { toast } from "../store/useToastStore";
@@ -31,6 +31,14 @@ import {
 import "./propertiesPanelStrings";
 import { HelpButton } from "./HelpButton";
 import { explainError } from "../lib/userError";
+import { useAppStore } from "../store/useStore";
+import type { TypedNote } from "../types/TypedFields";
+import { useTypeRegistry } from "../types/vaultTypes";
+import { fieldsOfNote } from "../types/typeRegistry";
+import { basesFileFromText } from "../views/bases/base";
+
+// W12.T2: the typed-object form, loaded with its strings only when a panel opens.
+const TypedFields = lazy(() => import("../types/TypedFields"));
 
 interface Props {
   open: boolean;
@@ -344,7 +352,10 @@ async function openNote(target: string) {
 export function PropertiesPanel({ open, onClose, text, applyEdit }: Props) {
   const parsed = useMemo(() => parseProperties(text), [text]);
   const [types, setTypes] = useState<Record<string, PropertyType>>(loadTypes);
-  const [vault, setVault] = useState<{ suggestions: PropertySuggestions; notes: string[] } | null>(null);
+  const [vault, setVault] = useState<{ suggestions: PropertySuggestions; notes: string[]; typed: TypedNote[] } | null>(null);
+  const typeReg = useTypeRegistry();
+  const notePath = useAppStore((s) => s.doc.workspaceName ?? s.doc.name ?? "");
+  const locale = useAppStore((s) => s.locale) as string;
   const [newKey, setNewKey] = useState("");
   const [newType, setNewType] = useState<PropertyType>("text");
   const keyListId = useId();
@@ -363,6 +374,7 @@ export function PropertiesPanel({ open, onClose, text, applyEdit }: Props) {
           // W2.22: the frontmatter block the index keeps is all the suggestions read.
           suggestions: collectPropertySuggestions(files.map((f) => ({ path: f.path, content: f.frontmatter ?? "" }))),
           notes: files.filter((f) => /\.(md|markdown)$/i.test(f.path)).map((f) => f.name.replace(/\.(md|markdown)$/i, "")),
+          typed: (await import("../types/TypedFields")).typedNotesFromIndex(files),
         });
       } catch {
         /* why: no workspace: no suggestions */
@@ -406,6 +418,9 @@ export function PropertiesPanel({ open, onClose, text, applyEdit }: Props) {
     edit((cur) => setProperty(cur, p.key, convertValue(p.value, to)));
   };
   const present = new Set(parsed.properties.map((p) => p.key));
+  // Keys the typed form shows are not listed twice (W12.T2); `type` stays in the list, so it can be changed.
+  const typedKeys = new Set<string>();
+  if (typeReg && typeReg.types.size) for (const f of fieldsOfNote(typeReg, basesFileFromText(notePath || "note.md", text)).fields) typedKeys.add(f.name.normalize("NFC").toLowerCase());
   const addProperty = () => {
     const key = newKey.trim();
     if (!key) return;
@@ -468,7 +483,12 @@ export function PropertiesPanel({ open, onClose, text, applyEdit }: Props) {
           // empty-action: the "Add property" row at the bottom of this panel
           <div style={{ fontSize: 12, color: "hsl(var(--fg-muted))", paddingBlockEnd: 8 }}>{t("props.empty")}</div>
         )}
-        {parsed.properties.map((p) => {
+        {typeReg && typeReg.types.size > 0 && parsed.status !== "invalid" && (
+          <Suspense fallback={null}>
+            <TypedFields reg={typeReg} text={text} path={notePath} notes={vault?.typed ?? []} locale={locale} applyEdit={edit} />
+          </Suspense>
+        )}
+        {parsed.properties.filter((p) => !typedKeys.has(p.key.normalize("NFC").toLowerCase())).map((p) => {
           const type = typeOf(p);
           return (
             <div
