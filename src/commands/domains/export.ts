@@ -145,6 +145,15 @@ export function buildExportCommands({ handleExportHtml, liveDoc, getEditorView }
       action: () => void import("../../citations/run").then((m) => m.syncZoteroWebLibrary()),
     },
     {
+      // Plan W12.X3: the gated OpenAlex lookup for the open source note's DOI; the result waits in the review queue.
+      id: "cite.fillReferencesOpenAlex",
+      label: t("cmd.cite.fillReferencesOpenAlex"),
+      hint: t("cmd.cite.fillReferencesOpenAlex.hint"),
+      icon: cmdIcons.FileText,
+      group: t("group.tools"),
+      action: () => void import("../../citations/fillReferencesAction").then((m) => m.fillReferencesForOpenNote()),
+    },
+    {
       id: "file.exportRtf",
       label: t("cmd.file.exportRtf"),
       hint: t("cmd.file.exportRtf.hint"),

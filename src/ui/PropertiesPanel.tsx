@@ -11,7 +11,7 @@
  */
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
-import { ExternalLink, Plus, SlidersHorizontal, X } from "lucide-react";
+import { BookOpen, ExternalLink, Plus, SlidersHorizontal, X } from "lucide-react";
 import { t } from "../i18n";
 import { toast } from "../store/useToastStore";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
@@ -29,6 +29,8 @@ import {
   type PropertyValue,
 } from "../properties/frontmatter";
 import "./propertiesPanelStrings";
+import "../citations/openAlexStrings";
+import { sourceDoi } from "../citations/fillReferences";
 import { HelpButton } from "./HelpButton";
 import { explainError } from "../lib/userError";
 
@@ -343,6 +345,8 @@ async function openNote(target: string) {
 
 export function PropertiesPanel({ open, onClose, text, applyEdit }: Props) {
   const parsed = useMemo(() => parseProperties(text), [text]);
+  // Plan W12.X3: a source note with a DOI offers "Fill references from OpenAlex" (gated, reviewed).
+  const hasDoi = useMemo(() => sourceDoi(text) !== null, [text]);
   const [types, setTypes] = useState<Record<string, PropertyType>>(loadTypes);
   const [vault, setVault] = useState<{ suggestions: PropertySuggestions; notes: string[] } | null>(null);
   const [newKey, setNewKey] = useState("");
@@ -522,6 +526,17 @@ export function PropertiesPanel({ open, onClose, text, applyEdit }: Props) {
             </div>
           );
         })}
+        {hasDoi && (
+          <button
+            type="button"
+            data-testid="props-fill-references"
+            onClick={() => void import("../citations/fillReferencesAction").then((m) => m.fillReferencesForOpenNote())}
+            style={{ ...iconBtn, color: "hsl(var(--accent))", fontSize: 12, gap: 6, alignItems: "center", marginBlockStart: 8 }}
+          >
+            <BookOpen size={12} aria-hidden />
+            {t("openAlex.fill.button")}
+          </button>
+        )}
       </div>
 
       {parsed.status !== "invalid" && (

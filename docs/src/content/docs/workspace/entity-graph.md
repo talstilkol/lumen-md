@@ -71,3 +71,11 @@ OpenAlex**. While it is off, nothing is sent and nothing is asked. While it
 is on, each lookup still asks you first, and then only the DOI goes to
 api.openalex.org, which the privacy ledger lists. A settings file you import
 never turns it on.
+
+To look one up, open a source note (`type: source`) that has a `doi:` (or a
+doi.org `url:`) and run **Citations: fill references from OpenAlex…** in ⌘K,
+or press **Fill references from OpenAlex** in its properties panel. Save the
+note first. The DOIs OpenAlex returns wait in **Property proposals** as a
+`references:` change, before → after; nothing is written until you approve
+it, and a rejected proposal writes nothing. References the note already has
+are kept and not added twice.

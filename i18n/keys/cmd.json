@@ -561,6 +561,16 @@
       "vars": []
     },
     {
+      "key": "cmd.cite.fillReferencesOpenAlex",
+      "en": "Citations: fill references from OpenAlex…",
+      "vars": []
+    },
+    {
+      "key": "cmd.cite.fillReferencesOpenAlex.hint",
+      "en": "For a source note with a DOI: asks first, sends only the DOI, and writes nothing until you approve",
+      "vars": []
+    },
+    {
       "key": "cmd.cite.insert",
       "en": "Insert a citation [@key]…",
       "vars": []
