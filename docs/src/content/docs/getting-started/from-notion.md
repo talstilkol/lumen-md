@@ -73,8 +73,12 @@ becomes a type in `.lumen/types/`, and its rows get `type: <database>`:
   `note["Price"]`) and a rollup becomes a rollup field.
 - The import report has a table per database: every column, kept,
   converted (and how) or lost (and why).
-- A type with the same id already in the vault is never replaced. Undo
-  takes the new types back along with the notes.
+- A type with the same id already in the vault is never replaced: the
+  database gets the next free id instead (`books-2` when the vault has its
+  own `books`), and its rows are marked with that one. A relation is typed
+  only when one database has a row for every link in the column, so a row
+  name two databases share does not decide it alone. Undo takes the new
+  types back along with the notes.
 
 ## Hebrew
 

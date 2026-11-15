@@ -143,6 +143,12 @@ export interface NotionOptions {
    * column (kept / converted / lost).
    */
   types?: boolean;
+  /**
+   * Review Z7-L3: the type ids the vault already has (`.lumen/types/<id>.yaml`). A database is never given one of
+   * them: "Books" becomes `books-2` when the vault has a `books` type of its own, so its rows are not marked with a
+   * type whose schema is someone else's.
+   */
+  existingTypeIds?: Iterable<string>;
 }
 
 /** API database objects in the export (`"object": "database"`), by title: the formulas and rollups Notion's own export leaves out. */
@@ -218,17 +224,22 @@ export function convertNotion(files: Map<string, Uint8Array>, opts: NotionOption
     dbs.push({ base, folder: md.replace(/\.md$/, ""), title: stemOf(md), columns, rows, computed });
   }
   const notesByPath = new Map([...finalOf.entries()].filter(([, t]) => t.endsWith(".md")).map(([s, t]) => [t.normalize("NFC").toLowerCase(), s]));
-  // W12.T7: a type id per database, and which database each row name belongs to (for relations).
+  // W12.T7: a type id per database, and which databases have a row of each name (for relations).
   const typeIds = new Map<Database, string>();
-  const typeOfRowName = new Map<string, string>();
+  // Review Z7-L4: every database a row name is in, not the last one: two databases can both have a row "Intro".
+  const typesOfRowName = new Map<string, Set<string>>();
   const schemas = opts.types ? notionSchemas(files, dec) : new Map<string, NotionSchema>();
   if (opts.types) {
-    const takenIds = new Set<string>();
+    // Z7-L3: the vault's own type ids are taken too.
+    const takenIds = new Set<string>([...(opts.existingTypeIds ?? [])].map((x) => x.normalize("NFC").toLowerCase()));
     for (const db of dbs) {
       const id = databaseTypeId(db.title, takenIds);
       takenIds.add(id);
       typeIds.set(db, id);
-      for (const r of db.rows) typeOfRowName.set(((r[0] ?? "").trim() || "Untitled").normalize("NFC").toLowerCase(), id);
+      for (const r of db.rows) {
+        const key = ((r[0] ?? "").trim() || "Untitled").normalize("NFC").toLowerCase();
+        typesOfRowName.set(key, (typesOfRowName.get(key) ?? new Set()).add(id));
+      }
     }
     vault.types = new Map();
     vault.typeReport = [];
@@ -252,7 +263,7 @@ export function convertNotion(files: Map<string, Uint8Array>, opts: NotionOption
     if (typeId) {
       const typedCols = cols.flatMap((_, i) => (rangeEnd[i].some((v) => v !== null) ? [typed[i], rangeEnd[i]] : [typed[i]]));
       const t = databaseType({ title: db.title, folder: db.folder, columns: db.columns, typed: typedCols, computed: db.computed, schema: schemas.get(db.title.normalize("NFC").toLowerCase()) }, typeId, {
-        typeOfRow: (name) => typeOfRowName.get(name.normalize("NFC").toLowerCase()) ?? null,
+        typesOfRow: (name) => [...(typesOfRowName.get(name.normalize("NFC").toLowerCase()) ?? [])],
       });
       if (t.yaml) vault.types!.set(typeId, t.yaml);
       vault.typeReport!.push(...reportLines(db.title, typeId, t.report), "");
