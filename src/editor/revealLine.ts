@@ -16,3 +16,19 @@ export function readyToReveal(
   const want = expected.replace(/\r\n?/g, "\n");
   return doc.length === want.length && doc.toString() === want;
 }
+
+/**
+ * The selection a reveal makes (W12.A1): line `line` through the end of
+ * `endLine` (a cited paragraph), clamped to the document; with
+ * `select: false` only the cursor, at the end of the range.
+ */
+export function revealSelection(
+  doc: { lines: number; line(n: number): { from: number; to: number } },
+  line: number,
+  endLine?: number,
+  select = true,
+): { anchor: number; head?: number } {
+  const first = doc.line(Math.min(Math.max(1, line), doc.lines));
+  const last = doc.line(Math.min(Math.max(endLine ?? line, line), doc.lines));
+  return select ? { anchor: first.from, head: last.to } : { anchor: last.to };
+}

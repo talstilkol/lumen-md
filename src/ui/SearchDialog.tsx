@@ -6,7 +6,7 @@ import "../ai/imageSearchStrings";
 import { searchWorkspace, type SearchHit } from "../storage/workspaceIndex";
 import { wrongLayoutVariant } from "../lib/keyboardLayout";
 import { mergeLayoutHits } from "./paletteSearch";
-import { isOPFSAvailable, readWorkspaceFile } from "../storage/workspace";
+import { isOPFSAvailable, readWorkspaceFile, writeWorkspaceFile } from "../storage/workspace";
 import { AiError } from "../ai/llm";
 import type { ChatMessage } from "../ai/llm";
 import { renderMarkdown } from "../renderer/pipeline";
@@ -15,7 +15,9 @@ import { showAiToast } from "../ui/AiToast";
 import { semanticSearch, type RagResult } from "../ai/embeddings";
 import { indexWorkspace, searchHybrid, type SemanticHit } from "../ai/semanticSearch";
 import { rerank } from "../ai/reranker";
-import { CITE_INSTRUCTIONS, verifyVaultCitations, type VaultCitation } from "../ai/vaultCitations";
+import { CITE_INSTRUCTIONS, claimSupport, markUnsupportedClaims, verifyVaultCitations, type ClaimSupport, type VaultCitation } from "../ai/vaultCitations";
+import { keepInScope, loadVaultScope, scopeFilter, type AskScopeChoice } from "../ai/askScope";
+import { buildAskContext } from "../ai/askVault";
 import { useCapability } from "../billing/gates";
 import { UpgradeNotice } from "./UpgradeNotice";
 import { rememberSearch, getSearchHistory, forgetSearch } from "../storage/searchHistory";
@@ -79,7 +81,9 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
   const [aiRendered, setAiRendered] = useState<ReactElement | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiSources, setAiSources] = useState<RagResult[]>([]);
-  const [aiCitations, setAiCitations] = useState<{ citations: VaultCitation[]; verifiedCount: number } | null>(null);
+  const [aiCitations, setAiCitations] = useState<{ citations: VaultCitation[]; verifiedCount: number; claims: ClaimSupport[] } | null>(null);
+  // W12.A2: what "Ask" may read — the vault (minus what .lumen/mcp.json denies), one folder, or one tag.
+  const [askScope, setAskScope] = useState<AskScopeChoice>({ kind: "vault" });
   const [conversation, setConversation] = useState<ChatMessage[]>([]);
 
   useEffect(() => {
@@ -324,8 +328,11 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
             .catch(() => h.snippet),
         })),
       );
+      // W12.A2: the same scope as the MCP server (.lumen/mcp.json), narrowed by the picker; locked notes never.
+      // A note out of scope is dropped before reranking, so it reaches neither the prompt nor a citation.
+      const inScope = scopeFilter(await loadVaultScope(readWorkspaceFile), askScope);
       // T29: rerank the candidates against the question, keep the best 8.
-      const pool = hybridResults.length > 0 ? hybridResults : fallback;
+      const pool = keepInScope(hybridResults.length > 0 ? hybridResults : fallback, inScope);
       const results: RagResult[] = (
         await rerank(query, pool.map((r) => ({ ...r, text: `${r.snippet ?? ""}\n${r.content.slice(0, 1500)}` })))
       )
@@ -336,27 +343,16 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
       setAiCitations(null);
 
       // Build context from semantic results: only the parts relevant to the
-      // question, within the AI mode's token budget (context packer).
-      const { packContext, CONTEXT_BUDGET, getAiMode } = await import("../ai/contextPacker");
-      const packed = packContext(
-        query,
-        results.map((r) => ({ path: r.path, content: r.content })),
-        CONTEXT_BUDGET[getAiMode()],
-      );
+      // question, within the AI mode's token budget (context packer), in scope (W12.A2).
       // Plan 2.7: a note from outside (clipped, imported, pulled) goes to the model cleaned and delimited, and taints the run.
+      const { CONTEXT_BUDGET, getAiMode } = await import("../ai/contextPacker");
       const { ensureProvenanceBackfill, guardUntrusted, untrustedSourcesOfNote } = await import("../agents/untrusted");
       await ensureProvenanceBackfill();
-      const untrusted: string[] = [];
-      const contextStr = results.length > 0
-        ? packed
-            .map((r, i) => {
-              const entry = `📄 [${i + 1}] ${r.path}\n${r.text}`;
-              const from = untrustedSourcesOfNote(r.path, results.find((x) => x.path === r.path)?.content);
-              untrusted.push(...from);
-              return `---\n${from.length ? guardUntrusted(entry, from).text : entry}`;
-            })
-            .join("\n")
-        : t("searchDialog.noRelevant");
+      const { context: contextStr, untrusted } = buildAskContext(query, results, CONTEXT_BUDGET[getAiMode()], inScope, {
+        untrustedOf: untrustedSourcesOfNote,
+        guard: guardUntrusted,
+        noRelevant: t("searchDialog.noRelevant"),
+      });
 
       setAiAnswer(t("searchDialog.thinking"));
 
@@ -369,8 +365,11 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
       );
       if (local.signal.aborted) throw local.signal.reason;
       setAiAnswer(answer);
-      // Check every citation against the note it names (T29).
-      setAiCitations(verifyVaultCitations(answer, results.map((r) => ({ path: r.path, content: r.content }))));
+      // Check every citation against the note it names (T29), down to the paragraph (W12.A1),
+      // and flag each claim no verified citation backs.
+      const checked = verifyVaultCitations(answer, results.map((r) => ({ path: r.path, content: r.content })));
+      const claims = claimSupport(answer, checked.citations);
+      setAiCitations({ ...checked, claims });
 
       // Save to conversation history
       setConversation((prev) => [
@@ -380,7 +379,7 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
       ]);
 
       const isDark = () => document.documentElement.classList.contains("dark");
-      const rendered = await renderMarkdown(answer, isDark);
+      const rendered = await renderMarkdown(markUnsupportedClaims(answer, claims, t("vaultCite.unsupportedClaim")), isDark);
       setAiRendered(rendered);
     } catch (e) {
       if (isAbort(e) || local.signal.aborted) {
@@ -749,6 +748,31 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
         
         {mode === "ai" && (
           <div style={{ flex: 1, padding: "12px 16px", overflowY: "auto", fontSize: 13, color: "hsl(var(--fg))", borderTop: "1px solid hsl(var(--border))", background: "hsl(var(--bg-subtle))", display: "flex", flexDirection: "column", gap: 10 }}>
+            <div data-testid="ask-scope" role="group" aria-label={t("askScope.label")} style={{ display: "flex", gap: 6, alignItems: "center", fontSize: 11.5, color: "hsl(var(--fg-muted))" }}>
+              <label htmlFor="ask-scope-kind">{t("askScope.label")}</label>
+              <select
+                id="ask-scope-kind"
+                value={askScope.kind}
+                onChange={(e) => {
+                  const kind = e.target.value as AskScopeChoice["kind"];
+                  setAskScope(kind === "folder" ? { kind, folder: "" } : kind === "tag" ? { kind, tag: "" } : { kind: "vault" });
+                }}
+              >
+                <option value="vault">{t("askScope.vault")}</option>
+                <option value="folder">{t("askScope.folder")}</option>
+                <option value="tag">{t("askScope.tag")}</option>
+              </select>
+              {askScope.kind !== "vault" && (
+                <input
+                  aria-label={askScope.kind === "folder" ? t("askScope.folder") : t("askScope.tag")}
+                  dir="auto"
+                  value={askScope.kind === "folder" ? askScope.folder : askScope.tag}
+                  placeholder={askScope.kind === "folder" ? "work/" : "#project"}
+                  onChange={(e) => setAskScope(askScope.kind === "folder" ? { kind: "folder", folder: e.target.value } : { kind: "tag", tag: e.target.value })}
+                  style={{ flex: 1, minWidth: 0, fontSize: 11.5 }}
+                />
+              )}
+            </div>
             {aiLoading ? (
               <div style={{ display: "flex", alignItems: "center", gap: 8, color: "hsl(var(--accent))" }}>
                 <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} />
@@ -779,7 +803,10 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
                           if (!src) return;
                           onClose();
                           onOpenFile(src.path, src.content);
-                          if (c.line) window.dispatchEvent(new CustomEvent("lumen-reveal-line", { detail: { line: c.line, content: src.content } }));
+                          // W12.A1: the whole cited paragraph is selected (the highlight), not just a line.
+                          const p = c.paragraph;
+                          if (p) window.dispatchEvent(new CustomEvent("lumen-reveal-line", { detail: { line: p.startLine, endLine: p.endLine, content: src.content } }));
+                          else if (c.line) window.dispatchEvent(new CustomEvent("lumen-reveal-line", { detail: { line: c.line, content: src.content } }));
                         }}
                         style={{ display: "flex", gap: 6, alignItems: "baseline", width: "100%", textAlign: "start", padding: "3px 0", background: "none", border: 0, color: "inherit", cursor: c.path ? "pointer" : "default" }}
                       >
@@ -787,11 +814,48 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
                           {c.verified ? "✓" : "✗"}
                         </span>
                         <span style={{ color: "hsl(var(--accent))", whiteSpace: "nowrap" }}>
-                          [{c.n}] <bdi>{c.path ?? t("vaultCite.noSource")}</bdi>{c.line ? `:${c.line}` : ""}
+                          [{c.n}] <bdi>{c.path ?? t("vaultCite.noSource")}</bdi>
+                          {c.paragraph ? ` ¶${c.paragraph.index + 1}` : c.line ? `:${c.line}` : ""}
                         </span>
                         {c.quote && <span dir="auto" style={{ color: "hsl(var(--fg-muted))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>“{c.quote}”</span>}
                       </button>
                     ))}
+                    {aiCitations.citations.some((c) => c.verified && c.paragraph && !c.paragraph.blockId) && (
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
+                        {aiCitations.citations.map((c, i) =>
+                          c.verified && c.paragraph && !c.paragraph.blockId ? (
+                            <button
+                              type="button"
+                              key={`pin-${c.n}-${i}`}
+                              data-testid="vault-cite-pin"
+                              className="chart-block-tab"
+                              style={{ fontSize: 11 }}
+                              onClick={async () => {
+                                // W12.A1 "Pin link": only now is a real ^id written into the note.
+                                const src = aiSources[c.n - 1];
+                                if (!src || !c.paragraph) return;
+                                const { pinParagraphAnchor } = await import("../ai/paragraphPin");
+                                const { paragraphLink } = await import("../ai/paragraphAnchors");
+                                const current = await readWorkspaceFile(src.path).catch(() => src.content);
+                                const pinned = pinParagraphAnchor(current, c.paragraph.anchor);
+                                if (!pinned) return showAiToast(t("vaultCite.pinGone"), "error");
+                                if (pinned.content !== current) await writeWorkspaceFile(src.path, pinned.content);
+                                const link = paragraphLink(src.path, { blockId: pinned.id }) ?? "";
+                                await navigator.clipboard?.writeText(link).catch(() => undefined);
+                                showAiToast(t("vaultCite.pinned", { link }), "success");
+                              }}
+                            >
+                              {t("vaultCite.pin", { n: c.n })}
+                            </button>
+                          ) : null,
+                        )}
+                      </div>
+                    )}
+                    {aiCitations.claims.some((c) => !c.supported) && (
+                      <div data-testid="vault-claims-unsupported" style={{ color: "hsl(var(--warn))", marginTop: 4 }}>
+                        {t("vaultCite.claimsUnsupported", { n: aiCitations.claims.filter((c) => !c.supported).length, total: aiCitations.claims.length })}
+                      </div>
+                    )}
                   </div>
                 )}
                 {aiSources.length > 0 && (
