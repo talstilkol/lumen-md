@@ -122,7 +122,7 @@ export function buildAltTextCommands(): Command[] {
 
 /** Niqqud on the selection or the note (plans 6.3, W2.5): the whole flow is loaded on use. */
 export function buildNikudCommands({ getEditorView, locale }: CommandContext): Command[] {
-  const runNikud = async (mode: "add" | "partial" | "remove") => {
+  const runNikud = async (mode: "add" | "partial" | "nouns" | "verbs" | "remove") => {
     const view = getEditorView?.();
     if (view) await (await import("../../editor/nikudPalette")).runNikudFromPalette(view, mode, locale);
   };
@@ -142,6 +142,22 @@ export function buildNikudCommands({ getEditorView, locale }: CommandContext): C
       icon: cmdIcons.Sparkles,
       group: t("group.tools"),
       action: () => runNikud("partial"),
+    },
+    {
+      id: "nikud.nouns",
+      label: t("cmd.nikud.nouns"),
+      hint: t("cmd.nikud.nouns.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      action: () => runNikud("nouns"),
+    },
+    {
+      id: "nikud.verbs",
+      label: t("cmd.nikud.verbs"),
+      hint: t("cmd.nikud.verbs.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      action: () => runNikud("verbs"),
     },
     {
       id: "nikud.remove",

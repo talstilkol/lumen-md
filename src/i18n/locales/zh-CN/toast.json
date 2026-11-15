@@ -68,6 +68,7 @@
   "toast.nikud.done": "已在本设备上添加元音符号。带下划线的词有多种读法：点击查看（任意词可用 Alt+点击）。",
   "toast.nikud.doneHigh": "已使用 DictaBERT-char-menaked（高质量）在本设备上添加元音符号。带下划线的词有多种读法：点击查看。",
   "toast.nikud.failed": "添加元音符号失败：{error}",
+  "toast.nikud.lexicon": "仅为名词或动词加元音符号需要离线希伯来语词典：请在 “希伯来语词典和同义词（下载 / 删除）” 中下载。未做任何更改。",
   "toast.nikud.noHost": "元音符号模型尚不可下载（其托管尚未设置）。",
   "toast.nikud.nothing": "没有可更改的希伯来语文本。",
   "toast.nikud.working": "正在本设备上添加元音符号…",

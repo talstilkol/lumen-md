@@ -1525,6 +1525,16 @@
       "vars": []
     },
     {
+      "key": "cmd.nikud.nouns",
+      "en": "Hebrew: niqqud on nouns only",
+      "vars": []
+    },
+    {
+      "key": "cmd.nikud.nouns.hint",
+      "en": "Point only the nouns (needs the Hebrew dictionary, “Hebrew dictionary and synonyms (download / remove)”)",
+      "vars": []
+    },
+    {
       "key": "cmd.nikud.partial",
       "en": "Hebrew: add partial niqqud",
       "vars": []
@@ -1542,6 +1552,16 @@
     {
       "key": "cmd.nikud.remove.hint",
       "en": "Strip the vowel points from the selection (or the whole note)",
+      "vars": []
+    },
+    {
+      "key": "cmd.nikud.verbs",
+      "en": "Hebrew: niqqud on verbs only",
+      "vars": []
+    },
+    {
+      "key": "cmd.nikud.verbs.hint",
+      "en": "Point only the verbs (needs the Hebrew dictionary, “Hebrew dictionary and synonyms (download / remove)”)",
       "vars": []
     },
     {
