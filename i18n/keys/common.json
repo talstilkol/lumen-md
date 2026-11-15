@@ -17700,6 +17700,21 @@
       "vars": []
     },
     {
+      "key": "viz.kind.sunburst",
+      "en": "Sunburst",
+      "vars": []
+    },
+    {
+      "key": "viz.kind.tree",
+      "en": "Tree",
+      "vars": []
+    },
+    {
+      "key": "viz.loading",
+      "en": "Loading…",
+      "vars": []
+    },
+    {
       "key": "viz.navHint",
       "en": "{title}. Arrow keys move between the {count} points; Home and End go to the first and last.",
       "vars": [
@@ -17740,11 +17755,53 @@
       "vars": []
     },
     {
+      "key": "viz.showTree",
+      "en": "Show as a tree",
+      "vars": []
+    },
+    {
       "key": "viz.skipped",
       "en": "{count} rows without a value are not shown",
       "vars": [
         "count"
       ]
+    },
+    {
+      "key": "viz.structure.badOptions",
+      "en": "Not understood: {options}. The options are source:, view: and root:.",
+      "vars": [
+        "options"
+      ]
+    },
+    {
+      "key": "viz.structure.tags",
+      "en": "Tags",
+      "vars": []
+    },
+    {
+      "key": "viz.structure.thisNote",
+      "en": "This note",
+      "vars": []
+    },
+    {
+      "key": "viz.structure.title.folders",
+      "en": "Folders of the vault",
+      "vars": []
+    },
+    {
+      "key": "viz.structure.title.headings",
+      "en": "Headings of the note",
+      "vars": []
+    },
+    {
+      "key": "viz.structure.title.tags",
+      "en": "Tag hierarchy",
+      "vars": []
+    },
+    {
+      "key": "viz.structure.vault",
+      "en": "Vault",
+      "vars": []
     },
     {
       "key": "viz.summary",
@@ -17757,6 +17814,13 @@
     {
       "key": "viz.tableCaption",
       "en": "{title}: data",
+      "vars": [
+        "title"
+      ]
+    },
+    {
+      "key": "viz.treeLabel",
+      "en": "{title}: tree",
       "vars": [
         "title"
       ]
