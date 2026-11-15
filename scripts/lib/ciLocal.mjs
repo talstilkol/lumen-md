@@ -130,6 +130,11 @@ export function planSteps({ pkg, exists, changed, flags, dynamicTargets, hasBin 
     { id: "typecheck", title: "TypeScript", cmd: ["npx", "tsc", "--noEmit", "-p", "."] },
     has(pkg, "hygiene") ? { id: "hygiene", title: "Code hygiene", cmd: ["npm", "run", "-s", "hygiene"] } : { id: "hygiene", title: "Code hygiene", cmd: [], skipReason: "not here" },
     has(pkg, "lint") ? { id: "lint", title: "ESLint", cmd: ["npm", "run", "-s", "lint"] } : { id: "lint", title: "ESLint", cmd: [], skipReason: "not here (plan 0.4)" },
+    // Plan 0.16 (W10.E24): unused files everywhere; knip's unused exports and dependencies where knip is installed.
+    has(pkg, "unused") ? { id: "unused", title: "Unused files (plan 0.16)", cmd: ["npm", "run", "-s", "unused"] } : { id: "unused", title: "Unused files (plan 0.16)", cmd: [], skipReason: "not here" },
+    exists("node_modules/knip/package.json")
+      ? { id: "knip", title: "knip: unused exports and dependencies (baseline only goes down)", cmd: ["node", "scripts/knip-gate.mjs"], needs: ["scripts/knip-gate.mjs"] }
+      : { id: "knip", title: "knip: unused exports and dependencies", cmd: [], skipReason: "knip is not installed (owner: W10.E24)" },
     { id: "i18n", title: "i18n keys + drift", cmd: ["node", "scripts/extract-i18n-keys.mjs", "--check"], needs: ["scripts/extract-i18n-keys.mjs"] },
     has(pkg, "licenses") ? { id: "licenses", title: "Licence gate", cmd: ["npm", "run", "-s", "licenses"] } : { id: "licenses", title: "Licence gate", cmd: [], skipReason: "not here (plan 0.10)" },
     exists("scripts/headers.mjs") ? { id: "headers", title: "Security headers", cmd: ["node", "scripts/headers.mjs", "--check"] } : { id: "headers", title: "Security headers", cmd: [], skipReason: "not here (plan 0.17)" },
@@ -241,7 +246,7 @@ export function buildState(results) {
 }
 
 /** Step ids, for --only / --skip. */
-export const STEP_IDS = ["typecheck", "hygiene", "lint", "i18n", "licenses", "headers", "pr-check", "gitleaks", "semgrep", "cargo-audit", "test", "build", "budget", "ocr", "public-eval", "bidi-conformance", "e2e"];
+export const STEP_IDS = ["typecheck", "hygiene", "lint", "unused", "knip", "i18n", "licenses", "headers", "pr-check", "gitleaks", "semgrep", "cargo-audit", "test", "build", "budget", "ocr", "public-eval", "bidi-conformance", "e2e"];
 const BOOL_FLAGS = ["--help", "--h", "-h", "--changed", "--coverage", "--bail", "--install-hook", "--force"];
 const VALUE_FLAGS = ["--base", "--body", "--skip", "--only"];
 

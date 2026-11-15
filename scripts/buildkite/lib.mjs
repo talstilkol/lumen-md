@@ -527,6 +527,7 @@ export function buildPipeline(ci, { jobs = JOBS, shards = VITEST_SHARDS, native 
     if (r.ifChanged) s.if_changed = r.ifChanged;
     steps.push(s);
   }
+  steps.push(deadcodeStep());
   const gateKeys = steps.filter((s) => s.notify && s.if !== SCHEDULE_IF).map((s) => s.key);
   steps.push({
     label: ":lock_with_ink_pen: signed receipt",
@@ -592,6 +593,23 @@ export function e2eShardSteps(n = E2E_SHARDS) {
     retry: RETRY,
   };
   return [shards, receipt];
+}
+
+/**
+ * Plan 0.16 (W10.E24): knip's unused exports, types and dependencies
+ * against scripts/knip-baseline.json, which only goes down. Unused files
+ * are ci.yml's "Unused files" step, in `static`.
+ */
+export function deadcodeStep() {
+  return {
+    label: ":wastebasket: knip: unused exports and dependencies",
+    key: "deadcode",
+    command: command({ key: "deadcode" }, ["gate 'knip: no new unused export or dependency (plan 0.16)' <<'LUMEN_STEP'", "node scripts/knip-gate.mjs", "LUMEN_STEP", "gates_done"].join("\n")),
+    agents: { queue: "linux" },
+    timeout_in_minutes: 15,
+    notify: status("deadcode"),
+    retry: RETRY,
+  };
 }
 
 /** Keys of the jobs whose outcome the receipt records (every job with a commit status). */
@@ -704,6 +722,9 @@ export function pipelineRules(p) {
     if (!/visual-stamp\.mjs --check/.test(visual.command ?? "")) problems.push("visual must check its baselines first (scripts/visual-stamp.mjs --check)");
     if (!/npm run test:visual\b/.test(visual.command ?? "")) problems.push("visual must run npm run test:visual");
   }
+  const deadcode = (p.steps ?? []).find((s) => s.key === "deadcode");
+  if (!deadcode) problems.push("no deadcode job (knip: plan 0.16)");
+  else if (deadcode.if || deadcode.skip || !/node scripts\/knip-gate\.mjs/.test(deadcode.command ?? "")) problems.push("deadcode must run scripts/knip-gate.mjs on every build");
   const receipt = (p.steps ?? []).find((s) => s.key === "receipt");
   const deps = new Set((receipt?.depends_on ?? []).map((d) => d.step));
   for (const k of gateKeys(p)) if (!deps.has(k)) problems.push(`receipt does not wait for ${k}`);

@@ -60,6 +60,8 @@ export const GATES = {
   e2e: ["run", "-s", "e2e:gate"],
   "i18n:check": ["run", "-s", "i18n:check"],
   hygiene: ["run", "-s", "hygiene"],
+  // Plan 0.16 (W10.E24): a new src/ file that nothing imports fails the build (scripts/check-unused-files.mjs).
+  unused: ["run", "-s", "unused"],
   "docs:sync": ["run", "-s", "docs:sync"],
   // W6.28: every page in English and Hebrew, and each Hebrew page with its English page's sections (docs-parity --strict).
   "docs:complete": ["run", "-s", "docs:complete"],
@@ -200,7 +202,7 @@ export function gateEnv(gate, env, gates) {
 }
 
 export const PRODUCTION_GATES = ["build", "live:meta", "budget", "manifest", "attacks", "privacy:ledger"];
-export const PREVIEW_GATES = ["lockfile", "build", "live:meta", "budget", "secrets", "manifest", "attacks", "vitest", "e2e", "perf:gate", "i18n:check", "hygiene", "docs:sync", "docs:complete", "licenses", "mutation", "privacy:ledger"];
+export const PREVIEW_GATES = ["lockfile", "build", "live:meta", "budget", "secrets", "manifest", "attacks", "vitest", "e2e", "perf:gate", "i18n:check", "hygiene", "unused", "docs:sync", "docs:complete", "licenses", "mutation", "privacy:ledger"];
 /**
  * `--e2e-only`: build and the e2e gate, nothing else. For a probe branch
  * that runs Playwright specs (LUMEN_E2E_SPECS, a longer LUMEN_E2E_MINUTES)
