@@ -25,7 +25,8 @@ import { initSecretStore } from "./lib/secretStore";
 import { installPrivacyLedger } from "./ai/privacyLedger";
 import { installAiEscape, onAiBusy } from "./ai/aiAbort";
 import { aiBusyAnnouncer, announce } from "./a11y/announce";
-import { adoptBootLocale } from "./store/useStore";
+import { adoptBootLocale, useAppStore } from "./store/useStore";
+import { applyBootEdit, takeBootEdit } from "./boot/bootNote";
 import "./index.css";
 import { windowLabel } from "./desktop/window";
 
@@ -204,6 +205,9 @@ window.addEventListener("hashchange", () => {
 });
 
 function renderApp() {
+// W10.E20: what was typed in the boot shell's note goes into the open note before React replaces the shell.
+const bootEdit = IS_PRESENTER || showShare || windowLabel() === "capture" ? null : takeBootEdit();
+if (bootEdit) applyBootEdit(bootEdit, useAppStore);
 ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
       <ErrorBoundary fallback={

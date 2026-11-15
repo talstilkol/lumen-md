@@ -6,6 +6,7 @@ import { laneCacheDir } from "./src/build/laneCache";
 import { webrManifestPlugin } from "./src/build/webrManifest";
 import { LOCALES, whatsNew } from "./scripts/lib/whats-new.mjs";
 import { viteEnvGatePlugin } from "./src/build/viteEnvGate";
+import { bootPreloadPlugin } from "./src/build/bootPreload";
 
 interface VitestConfig {
   test?: {
@@ -340,6 +341,8 @@ export default defineConfig({
     // Adds the deployment's own worker origins (VITE_*_ENDPOINT …) to the
     // CSP connect-src of index.html, dist/_headers and the nginx image.
     cspEndpointsPlugin(),
+    // W10.E20: the start's lazy chunks listed for public/boot.js, which preloads them in parallel.
+    bootPreloadPlugin(),
     VitePWA({
       registerType: "prompt",
       includeAssets: ["favicon.svg", "icons/*.png"],
