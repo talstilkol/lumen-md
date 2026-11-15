@@ -228,7 +228,7 @@ describe("W12.E1 approved entities are plain notes", () => {
     expect(n.path).toBe("ישויות/אנשים/דוד כהן.md");
     const { props, body, broken } = splitFrontmatter(n.content);
     expect(broken).toBe(false);
-    expect(props).toEqual({ "entity-type": "person", aliases: ["D. Cohen", "דוד"], born_in: ["[[חיפה]]"] });
+    expect(props).toEqual({ type: "person", "entity-type": "person", aliases: ["D. Cohen", "דוד"], born_in: ["[[חיפה]]"] });
     expect(body.trim()).toBe("# דוד כהן");
     expect(parseEntityNote(n.path, n.content)).toEqual(e);
     expect(relationProps(n.content)).toEqual({ born_in: ["חיפה"] });

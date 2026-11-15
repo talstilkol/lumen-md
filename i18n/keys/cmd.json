@@ -786,6 +786,11 @@
       "vars": []
     },
     {
+      "key": "cmd.entities.review",
+      "en": "Entity graph: proposals to review",
+      "vars": []
+    },
+    {
       "key": "cmd.epub.open",
       "en": "Open an EPUB for reading…",
       "vars": []
@@ -2260,6 +2265,18 @@
     {
       "key": "cmd.tools.writingGoal.unset",
       "en": "✍️ Set a daily writing goal",
+      "vars": []
+    },
+    {
+      "key": "cmd.typesAll",
+      "en": "All {type}",
+      "vars": [
+        "type"
+      ]
+    },
+    {
+      "key": "cmd.typesPage",
+      "en": "Types: all objects by type",
       "vars": []
     },
     {

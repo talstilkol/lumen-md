@@ -95,7 +95,7 @@ describe("W12.E5 review: 20 proposals, approve, reject, merge, split, undo", () 
     const d = split(c.files, david, "דוד כהן (השכן)", { aliases: ["ד. כהן"], edges: [memberEdge.id] });
     const fresh = entityId("person", "דוד כהן (השכן)");
     expect(edgesOf(d.files).find((e) => e.predicate === "member_of" && e.subject === fresh)).toBeTruthy();
-    expect(splitFrontmatter(d.files.get("ישויות/אנשים/דוד כהן.md")!).props).toEqual({ "entity-type": "person", born_in: ["[[חיפה]]"] });
+    expect(splitFrontmatter(d.files.get("ישויות/אנשים/דוד כהן.md")!).props).toEqual({ type: "person", "entity-type": "person", born_in: ["[[חיפה]]"] });
     // Undo each step in one step: bytes as before.
     for (const [before, op] of [[c.files, d], [b.files, c], [a.files, b], [v0, a]] as const) {
       const back = undoOp(op.files, op.undo);

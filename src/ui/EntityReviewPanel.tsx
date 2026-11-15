@@ -78,10 +78,13 @@ export function EntityReviewPanel({ files, onApply, notices = [] }: EntityReview
   const doUndo = async () => {
     const last = history[history.length - 1];
     if (!last) return;
-    const r = undoOp(files, last);
-    await onApply(r);
-    setHistory((h) => h.slice(0, -1));
-    setStatus(t("entityGraph.review.undone"));
+    try {
+      await onApply(undoOp(files, last));
+      setHistory((h) => h.slice(0, -1));
+      setStatus(t("entityGraph.review.undone"));
+    } catch (e) {
+      setStatus(e instanceof Error ? e.message : String(e));
+    }
   };
 
   const onKey = (e: KeyboardEvent<HTMLUListElement>) => {
@@ -142,10 +145,13 @@ export function EntityReviewPanel({ files, onApply, notices = [] }: EntityReview
             const paragraph = pv ? (splitParagraphs(files.get(pv.note) ?? "").find((x) => x.anchor === pv.anchor || x.hash === pv.paragraphHash)?.text ?? quote) : p.kind === "entity" ? (p.mentions[0]?.text ?? "") : "";
             return (
               <li key={p.id} id={`ep-${i}`} role="option" aria-selected={selected.has(p.id)} data-focused={i === focus || undefined} onClick={() => setFocus(i)} style={{ ...box, outline: i === focus ? "2px solid hsl(var(--accent))" : undefined }}>
-                <label style={{ display: "flex", gap: 6, alignItems: "baseline" }}>
-                  <input type="checkbox" tabIndex={-1} checked={selected.has(p.id)} onChange={() => setSelected((s) => (s.has(p.id) ? new Set([...s].filter((x) => x !== p.id)) : new Set([...s, p.id])))} aria-label={t("entityGraph.review.select")} />
+                {/* The option's aria-selected carries the selection (Space toggles it); the box is only its mouse target, so no control nests inside the option (axe nested-interactive). */}
+                <div style={{ display: "flex", gap: 6, alignItems: "baseline" }}>
+                  <span aria-hidden="true" title={t("entityGraph.review.select")} data-testid="entity-review-select" onClick={(e) => (e.stopPropagation(), setFocus(i), setSelected((s) => (s.has(p.id) ? new Set([...s].filter((x) => x !== p.id)) : new Set([...s, p.id]))))} style={{ cursor: "pointer", userSelect: "none" }}>
+                    {selected.has(p.id) ? "☑" : "☐"}
+                  </span>
                   <strong dir="auto">{label(p, names)}</strong>
-                </label>
+                </div>
                 <div style={{ marginBlockStart: 4 }}>
                   <Quote text={paragraph} quote={quote} />
                 </div>
