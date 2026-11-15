@@ -98,6 +98,8 @@ const RULES: Rule[] = [
   { test: (h) => h === "api.zotero.org", category: "research", reason: "Zotero Web API (your library; writes only the PDF highlights you send)" },
   // Knesset records (plan W7.5): the law or bill name the user asked for.
   { test: (h) => h === "knesset.gov.il" || h === "main.knesset.gov.il", category: "cloud-text", reason: "Knesset records (OData): the law or bill name only" },
+  // Wikidata (plan W12.E10): an entity's name, after the user's consent, to link the entity to its item.
+  { test: (h) => h === "www.wikidata.org", category: "cloud-text", reason: "Wikidata search: the entity name only" },
   // Government data (plan W7.6): search words, a dataset id or a series id.
   { test: (h) => h === "data.gov.il" || h === "apis.cbs.gov.il", category: "cloud-text", reason: "Government data (data.gov.il, CBS): the search words or dataset id only" },
   {

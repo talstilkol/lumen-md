@@ -130,7 +130,7 @@ describe("W12.E5 graph proposals inside the review panel", () => {
 describe("W12.E6 ⌘K entries", () => {
   it("the review entry", () => {
     const cmds = buildEntityCommands({} as CommandContext);
-    expect(cmds.map((c) => c.id)).toEqual(["entities.review"]);
+    expect(cmds.map((c) => c.id)).toEqual(["entities.review", "entities.wikidata"]); // the second: W12.E10, not in airplane mode
     for (const c of cmds) expect(c.label).not.toMatch(/^cmd\./);
   });
 
