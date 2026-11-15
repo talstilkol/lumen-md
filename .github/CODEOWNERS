@@ -279,3 +279,6 @@
 /scripts/review-coverage.mjs             @talstilkol
 /security/reviewers.json                 @talstilkol
 /src/agents/eval/reproducible.ts         @talstilkol
+# P1 round (train 6): sensitive files the merges added (codeowners-coverage)
+/src/agents/defs/piiNames.ts             @talstilkol
+/src/agents/executors/lmstudio.ts        @talstilkol

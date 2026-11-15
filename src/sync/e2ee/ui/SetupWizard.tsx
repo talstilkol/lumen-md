@@ -313,7 +313,9 @@ function KeyQr({ text }: { text: string }) {
   const n = qr.size + 8;
   return (
     <figure style={{ margin: 0, display: "grid", gap: 6 }} data-testid="sync-setup-qr">
+      {/* design-allow: a QR code is black on white in both themes, so every scanner reads it */}
       <svg role="img" aria-label={t("e2ee.guide.qr")} viewBox={`0 0 ${n} ${n}`} width={Math.min(240, n * 4)} height={Math.min(240, n * 4)} shapeRendering="crispEdges" style={{ background: "#fff", borderRadius: 4, justifySelf: "start" }}>
+        {/* design-allow: the QR modules are black (see above) */}
         <path d={qrPath(qr)} fill="#000" />
       </svg>
       <figcaption style={{ fontSize: 13, color: "hsl(var(--fg-muted))" }}>{t("e2ee.guide.qrHint")}</figcaption>

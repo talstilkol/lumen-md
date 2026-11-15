@@ -268,7 +268,7 @@ export default defineConfig({
         {
           label: "Security",
           items: [
-            { label: "Security status, findings and plugin scorecards", slug: "security", translations: { he: "מצב האבטחה, ממצאים וכרטיסי ניקוד" } },
+            { label: "Security status, findings and plugin scorecards", slug: "security/index", translations: { he: "מצב האבטחה, ממצאים וכרטיסי ניקוד" } },
             { label: "Transparency report", slug: "security/transparency", translations: { he: "דוח שקיפות" } },
             { label: "Secrets and encryption", slug: "security/vault" },
             { label: "Monitoring and web vitals", slug: "security/monitoring", translations: { he: "ניטור ומדדי ביצועים" } },

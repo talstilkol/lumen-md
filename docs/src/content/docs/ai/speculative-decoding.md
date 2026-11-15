@@ -18,7 +18,7 @@ What Lumen does:
   Lumen turns it off for that model. So the automatic choice is never slower than off.
 - **Shows the numbers** in the AI doctor (⌘K → *AI doctor*), under
   *Speculative decoding*, for example `qwen3.6:27b: 48 → 115 tok/s (×2.4, on)`.
-- **Turns it off for evals.** `npm run eval:*` and `npm run models:day` send
+- **Turns it off for evals.** the `eval:…` scripts (`npm run eval:agents` and the others) and `npm run models:day` send
   `draft_num_predict 0` on every request and record the Ollama version with the
   results, so a score can be reproduced.
 - **Never suggests an external draft model.** A mismatched one made
