@@ -11,7 +11,8 @@
  *
  *   npm run plan             regenerate both
  *   npm run plan:check       exit 1 when either differs from plan.json (CI),
- *                            or a ✅ task has no `dod` (plan 0.7, scripts/dod.mjs);
+ *                            or a ✅ task has no `dod` (plan 0.7, scripts/dod.mjs),
+ *                            or a ✅ task has no green `evidence` (plan R12.14, claimGuard.mjs);
  *                            warns when a wave is over its work-in-progress limit
  *                            while the next wave has started (plan W6.39, below)
  *   npm run plan:check -- --wip-strict      the WIP warning fails the check
@@ -34,6 +35,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { checkDod } from "../dod.mjs";
 import { checkEvalClaims } from "../lib/evalCard.mjs";
+import { claimGuard } from "./claimGuard.mjs";
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 export const PLAN_FILE = "plan/plan.json";
@@ -804,6 +806,9 @@ export function run({ root = ROOT, check = false, wipLimit } = {}) {
   if (dodProblems.length) throw new Error(`plan: definition of done —\n  ${dodProblems.join("\n  ")}`);
   const verifiedProblems = checkVerified(plan);
   if (verifiedProblems.length) throw new Error(`plan: verified / pr (W4.24) —\n  ${verifiedProblems.join("\n  ")}`);
+  // Plan R12.14: and no ✅ without recorded evidence that a check went green.
+  const claimProblems = claimGuard(plan);
+  if (claimProblems.length) throw new Error(`plan: ✅ without evidence (scripts/plan/claimGuard.mjs) —\n  ${claimProblems.join("\n  ")}`);
   const M = buildModel(plan);
   M.velocity = planVelocity(historyFromGit(root), countPlan(plan));
   const docPath = join(root, DOC_FILE);
