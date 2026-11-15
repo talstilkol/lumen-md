@@ -490,6 +490,28 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
               {isSaved(query) ? `★ ${t("search.savedLabel")}` : `☆ ${t("search.save")}`}
             </button>
           )}
+          {mode === "search" && query.trim() && isOPFSAvailable() && (
+            // W12.A4: a query of tag:/path: operators only becomes an Obsidian .base (a table, embeddable in a dashboard note).
+            <button
+              type="button"
+              data-testid="search-save-base"
+              title={t("search.saveAsBaseHint")}
+              onClick={async () => {
+                const { queryToBase } = await import("../search/queryToBase");
+                const name = query.trim();
+                const b = queryToBase(name, name);
+                if (!b.ok) return showAiToast(t("search.saveAsBaseNo", { parts: b.unsupported.join(" ") }), "error");
+                const { uniqueWorkspaceName, writeWorkspaceFile } = await import("../storage/workspace");
+                const path = await uniqueWorkspaceName(`Searches/${name.replace(/[\\/:*?"<>|#^[\]]+/g, " ").replace(/\s+/g, " ").trim() || "search"}.base`);
+                await writeWorkspaceFile(path, b.text);
+                window.dispatchEvent(new Event("lumen-workspace-changed"));
+                showAiToast(t("search.saveAsBaseDone", { path }), "success");
+              }}
+              style={{ flexShrink: 0, fontSize: 11, padding: "2px 8px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--bg-subtle))", color: "hsl(var(--fg-muted))", cursor: "pointer", whiteSpace: "nowrap" }}
+            >
+              {t("search.saveAsBase")}
+            </button>
+          )}
         </div>
         {mode !== "smart" && isOPFSAvailable() && (
           // Plan 11.3: the operators, shown under the input (LTR syntax inside an RTL UI stays readable).

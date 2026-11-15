@@ -720,6 +720,30 @@
       "vars": []
     },
     {
+      "key": "search.saveAsBase",
+      "en": "Save as Base",
+      "vars": []
+    },
+    {
+      "key": "search.saveAsBaseDone",
+      "en": "Saved as {path}",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "search.saveAsBaseHint",
+      "en": "An Obsidian .base table of this search's tag: and path: operators; embed it in any note with ![[name.base]]",
+      "vars": []
+    },
+    {
+      "key": "search.saveAsBaseNo",
+      "en": "Bases can't search note text, so this part can't go into a Base: {parts}",
+      "vars": [
+        "parts"
+      ]
+    },
+    {
       "key": "search.savedLabel",
       "en": "Saved",
       "vars": []

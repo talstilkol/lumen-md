@@ -71,5 +71,16 @@ vault of 1,000 notes, re-running after a save takes well under 100 ms.
 
 In the search dialog, **☆ Save search** keeps the search. Saved searches are
 listed at the top of the file sidebar; a click opens the dialog on that
-search again, and × removes it. They are kept in this browser, not in the
-vault.
+search again, and × removes it.
+
+Saved searches are kept in the vault, in `.lumen/searches.json`, so they
+sync to your other devices with the rest of the vault. If two devices change
+the list before they sync, both changes are kept: per search, the newest
+save or removal wins. Searches saved in this browser before this change move
+into the vault once, the first time you open it.
+
+**Save as Base** turns a search made only of `tag:` and `path:` operators
+(with `-` for "not") into an Obsidian `.base` file in `Searches/`. It is a
+table you can embed in any note, such as a dashboard, with `![[name.base]]`.
+Bases don't search the text of notes, so a search with words, "phrases" or
+/regexes/ stays a saved search.

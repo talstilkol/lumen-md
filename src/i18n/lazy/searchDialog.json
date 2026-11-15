@@ -42,5 +42,9 @@
   "toast.indexedFiles": "✅ Files indexed: {count}",
   "toast.indexingFailed": "Indexing failed: {error}",
   "searchDialog.crossLingual.keyword": "A Hebrew question over English notes: keyword search doesn't cross languages. That needs Smart search with a multilingual embedding model (bge-m3 or EmbeddingGemma).",
-  "searchDialog.crossLingual.reindex": "A multilingual embedding model is ready, but the index was built with another model: rebuild the index so Hebrew questions reach English notes."
+  "searchDialog.crossLingual.reindex": "A multilingual embedding model is ready, but the index was built with another model: rebuild the index so Hebrew questions reach English notes.",
+  "search.saveAsBase": "Save as Base",
+  "search.saveAsBaseHint": "An Obsidian .base table of this search's tag: and path: operators; embed it in any note with ![[name.base]]",
+  "search.saveAsBaseDone": "Saved as {path}",
+  "search.saveAsBaseNo": "Bases can't search note text, so this part can't go into a Base: {parts}"
 }
