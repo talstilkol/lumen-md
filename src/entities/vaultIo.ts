@@ -25,9 +25,12 @@ export interface EntityVault {
   deleteWorkspaceFile(path: string): Promise<void>;
   workspaceHasFile(path: string): Promise<boolean>;
   workspaceHasEntry(path: string): Promise<boolean>;
+  /** Review Z7-L1: compare-and-swap by text under the path's lock (null: only while nothing is there). */
+  writeWorkspaceTextIf?(path: string, content: string, expect: string | null): Promise<boolean>;
+  removeWorkspaceTextIf?(path: string, expect: string): Promise<boolean>;
 }
 
-const realVault = async (): Promise<EntityVault> => (await import("../storage/workspace")) as unknown as EntityVault;
+const realVault = async (): Promise<EntityVault> => ({ ...(await import("../storage/workspace")), ...(await import("../storage/workspaceBulk")) }) as unknown as EntityVault;
 
 const wanted = (p: string) => (p.startsWith(`${ENTITY_DIR}/`) && p.endsWith(".jsonl")) || (p.endsWith(".md") && !p.startsWith("."));
 
@@ -62,16 +65,56 @@ export class EntityWriteConflict extends Error {
 /**
  * Write one operation's result. `basis` is the file set the operation was
  * computed from. Every touched path is checked against it first (missing
- * counts as null), then the changes are written and removed files deleted.
+ * counts as null). Then each file is written (or removed) by compare-and-swap
+ * against that same text, under the path's lock (review Z7-L1), so an
+ * autosave that lands after the check is never replaced. On the first
+ * refusal the files already written go back to what they were, each only
+ * while it still holds what this operation wrote, and the operation fails
+ * with EntityWriteConflict.
  */
 export async function applyEntityOp(basis: Files, result: OpResult, vault?: EntityVault): Promise<void> {
   const ws = vault ?? (await realVault());
+  const current = async (p: string) => ((await ws.workspaceHasFile(p)) ? await ws.readWorkspaceFile(p) : null);
+  // A vault without the locked calls (a test double) still compares right before each write.
+  const writeIf =
+    ws.writeWorkspaceTextIf?.bind(ws) ??
+    (async (p: string, content: string, expect: string | null) => {
+      if ((await current(p)) !== expect) return false;
+      await ws.writeWorkspaceFile(p, content);
+      return true;
+    });
+  const removeIf =
+    ws.removeWorkspaceTextIf?.bind(ws) ??
+    (async (p: string, expect: string) => {
+      if ((await current(p)) !== expect) return false;
+      await ws.deleteWorkspaceFile(p);
+      return true;
+    });
+  const before = (p: string) => basis.get(p) ?? null;
   const touched = [...result.written, ...result.removed];
-  for (const p of touched) {
-    const expected = basis.get(p) ?? null;
-    const current = (await ws.workspaceHasFile(p)) ? await ws.readWorkspaceFile(p) : null;
-    if (current !== expected) throw new EntityWriteConflict(p);
+  for (const p of touched) if ((await current(p)) !== before(p)) throw new EntityWriteConflict(p);
+  const done: Array<{ path: string; now: string | null }> = [];
+  const steps = [...result.written.map((p) => ({ path: p, now: result.files.get(p) ?? null })), ...result.removed.map((p) => ({ path: p, now: null }))];
+  for (const step of steps) {
+    const was = before(step.path);
+    const ok = step.now === null ? was === null || (await removeIf(step.path, was)) : await writeIf(step.path, step.now, was);
+    if (!ok) {
+      await rollBack(done);
+      throw new EntityWriteConflict(step.path);
+    }
+    done.push(step);
   }
-  for (const p of result.written) await ws.writeWorkspaceFile(p, result.files.get(p)!);
-  for (const p of result.removed) await ws.deleteWorkspaceFile(p);
+
+  async function rollBack(written: typeof done): Promise<void> {
+    for (const { path, now } of written.reverse()) {
+      const was = before(path);
+      try {
+        if (was === null) {
+          if (now !== null) await removeIf(path, now);
+        } else await writeIf(path, was, now);
+      } catch {
+        /* why: a file that cannot be put back stays as written; the review panel reloads and shows the vault as it is */
+      }
+    }
+  }
 }

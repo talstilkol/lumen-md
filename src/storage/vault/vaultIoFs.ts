@@ -121,20 +121,40 @@ export function syncAtomicFs(dir: DirLike): AtomicFs {
  * Save `bytes` at `parts` (relative to `root`) atomically with sync access
  * handles. Folders are created as needed. Refuses up front, before touching
  * the note, when this engine lacks either call the atomic save needs.
+ *
+ * Review Z7-M2: the save runs in the note's path order (inPathOrder), so a
+ * worker read of the note sent after it waits until the note has its name
+ * back. Review Z7-L7: a refusal leaves nothing behind. A note that was not
+ * there is created only to ask its handle what it can do; when the answer is
+ * "unsupported" that empty entry is removed again before the refusal.
  */
-export async function writeViaSyncHandles(root: DirLike, parts: string[], bytes: Uint8Array, opts: { id?: string; inPlaceIfNoMove?: boolean } = {}): Promise<void> {
-  let dir = root;
-  for (const p of parts.slice(0, -1)) dir = await dir.getDirectoryHandle(p, { create: true });
-  const name = parts[parts.length - 1];
-  const probe = await dir.getFileHandle(name, { create: true });
-  if (typeof probe.createSyncAccessHandle !== "function") throw new SyncWriteUnsupported("createSyncAccessHandle");
-  if (typeof probe.move !== "function") {
-    // No rename: only when the main thread cannot write at all (no createWritable) is an in-place write better than none.
-    if (!opts.inPlaceIfNoMove) throw new SyncWriteUnsupported("FileSystemHandle.move");
-    await putSync(probe, bytes);
-    return;
-  }
-  await atomicWrite(syncAtomicFs(dir), name, bytes, opts.id ?? saveId());
+export function writeViaSyncHandles(root: DirLike, parts: string[], bytes: Uint8Array, opts: { id?: string; inPlaceIfNoMove?: boolean } = {}): Promise<void> {
+  return inPathOrder(parts.join("/"), async () => {
+    let dir = root;
+    for (const p of parts.slice(0, -1)) dir = await dir.getDirectoryHandle(p, { create: true });
+    const name = parts[parts.length - 1];
+    let created = false;
+    let probe: FileLike;
+    try {
+      probe = await dir.getFileHandle(name);
+    } catch (e) {
+      if (!isMissing(e)) throw e;
+      probe = await dir.getFileHandle(name, { create: true });
+      created = true;
+    }
+    const refuse = async (what: string): Promise<never> => {
+      if (created) await dir.removeEntry(name).catch(() => undefined); // why: only the empty entry made above for the probe
+      throw new SyncWriteUnsupported(what);
+    };
+    if (typeof probe.createSyncAccessHandle !== "function") return refuse("createSyncAccessHandle");
+    if (typeof probe.move !== "function") {
+      // No rename: only when the main thread cannot write at all (no createWritable) is an in-place write better than none.
+      if (!opts.inPlaceIfNoMove) return refuse("FileSystemHandle.move");
+      await putSync(probe, bytes);
+      return;
+    }
+    await atomicWrite(syncAtomicFs(dir), name, bytes, opts.id ?? saveId());
+  });
 }
 
 /**
@@ -207,6 +227,8 @@ export async function readViaSyncHandles(root: DirLike, paths: string[][], opts:
     if (!d) {
       d = dirAt(parts.slice(0, -1)).then((parent) => parent.getDirectoryHandle(parts[parts.length - 1]));
       dirs.set(key, d);
+      // A folder missing now may be made by a save that a later read in this batch waits for: do not remember the miss.
+      d.catch(() => dirs.delete(key));
     }
     return d;
   };
@@ -218,9 +240,11 @@ export async function readViaSyncHandles(root: DirLike, paths: string[][], opts:
       const parts = paths[i];
       if (!parts.length) continue;
       try {
-        const dir = await dirAt(parts.slice(0, -1));
-        const file = await dir.getFileHandle(parts[parts.length - 1]);
-        chunks[i] = await inPathOrder(parts.join("/"), () => readOne(file));
+        // Review Z7-M2: the lookup is in the note's path order too, so it never falls between a save's two renames.
+        chunks[i] = await inPathOrder(parts.join("/"), async () => {
+          const dir = await dirAt(parts.slice(0, -1));
+          return readOne(await dir.getFileHandle(parts[parts.length - 1]));
+        });
       } catch {
         chunks[i] = null; // why: missing or unreadable here; the main thread's own read decides (not-found, recovery, the real error)
       }
@@ -283,7 +307,7 @@ export async function handleWrite(msg: WriteRequest, root: () => Promise<DirLike
   try {
     const bytes = new Uint8Array(msg.bytes);
     const r = await root();
-    await inPathOrder(msg.parts.join("/"), () => writeViaSyncHandles(r, msg.parts, bytes, { inPlaceIfNoMove: msg.inPlaceIfNoMove }));
+    await writeViaSyncHandles(r, msg.parts, bytes, { inPlaceIfNoMove: msg.inPlaceIfNoMove }); // in path order (Z7-M2)
     return { id: msg.id, ok: true };
   } catch (e) {
     const err = e as { name?: string; message?: string };
