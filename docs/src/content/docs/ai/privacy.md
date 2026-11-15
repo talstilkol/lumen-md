@@ -38,6 +38,10 @@ research and model downloads, including the OCR language models fetched
 from a worker. Fonts, sync and the app's own files are not AI traffic and
 aren't listed.
 
+### MCP clients
+
+The **MCP clients** tab shows what outside agents (Claude Code, Cursor and others) did through Lumen's MCP server. It is read from the vault's own ledger, `.lumen/mcp/ledger.jsonl`. Each row shows the time, the client, the tool, the note, how much of the vault went to the client, and the decision: read, refused, change proposed, approved, rejected or written. You can filter by client. Like the rest of the ledger, it holds no note text.
+
 ## Everything else
 
 | Data | Where it lives | Leaves the device? |
