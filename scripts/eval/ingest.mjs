@@ -18,6 +18,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 
 import { dirname, join, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { defaultsModule, failuresReport, pickDefaults, selectRuns, withMeasured } from "../lib/evalIngest.mjs";
+import { upsertEntries } from "../models/registry-edit.mjs";
 
 const ROOT = resolve(import.meta.dirname ?? new URL(".", import.meta.url).pathname, "../..");
 
@@ -34,7 +35,8 @@ export function parseArgs(argv) {
 }
 
 export function ingest(o) {
-  const registry = JSON.parse(readFileSync(o.registry, "utf8"));
+  const registrySource = readFileSync(o.registry, "utf8");
+  const registry = JSON.parse(registrySource);
   const acceptance = JSON.parse(readFileSync(o.acceptance, "utf8"));
   const known = new Set(registry.models.map((m) => m.id));
   const files = (existsSync(o.results) ? readdirSync(o.results) : [])
@@ -55,7 +57,13 @@ export function ingest(o) {
     rejected,
     defaults,
     failed,
-    registryText: JSON.stringify(withMeasured(registry, accepted), null, 2) + "\n",
+    // In the file's own format (scripts/models/registry-edit.mjs), so the conversion tooling's in-place
+    // edits and this ingest agree on the text (W10.E62 #752 + plan 7.9 #727 on train 6).
+    registryText: (() => {
+      const next = withMeasured(registry, accepted);
+      const text = upsertEntries(registrySource, next.models, undefined);
+      return JSON.stringify(JSON.parse(text)) === JSON.stringify(next) ? text : JSON.stringify(next, null, 2) + "\n";
+    })(),
     defaultsText: defaultsModule(defaults, accepted),
     reportText: failuresReport(failed, rejected, accepted),
   };
