@@ -212,6 +212,8 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "bulkEdit.json": { module: "views/bulkEditStrings.ts", users: ["views/BulkEditBar.tsx"], prefixes: ["bulkEdit."] },
   // The voice corpus recorder (W7.10, W10.E52): the palette loads Recorder.tsx with a dynamic import.
   "voiceCorpus.json": { module: "voice-corpus/recorderStrings.ts", users: ["voice-corpus/Recorder.tsx"], prefixes: ["voiceCorpus."] },
+  // The clip templates editor (4.15, W10.E67): the palette loads ClipTemplatesEditor.tsx with a dynamic import.
+  "clipTemplates.json": { module: "research/clipTemplatesStrings.ts", users: ["research/ClipTemplatesEditor.tsx"], prefixes: ["clipTemplates."] },
 };
 
 function sources(dir: string): string[] {

@@ -349,6 +349,8 @@
   "cmd.related.toggle.hint": "Notizen nah am Absatz, den du schreibst, und Notizen, die er ohne Link erwähnt",
   "cmd.research.ask": "🔎 Recherche: Frage stellen…",
   "cmd.research.ask.hint": "Sucht im Web, liest Quellen und schreibt eine Notiz mit zitierter Fußnote zu jeder Aussage",
+  "cmd.research.clipTemplates": "Web-Clipper: Vorlagen und Auslöser",
+  "cmd.research.clipTemplates.hint": "Die Vorlagen bearbeiten, mit denen Clips gespeichert werden, und welche Seite welche bekommt",
   "cmd.research.library": "🔎 Recherche: Bibliothek nach Bedeutung durchsuchen",
   "cmd.research.library.hint": "Findet gespeicherte Ausschnitte nach ihrem Inhalt, nicht nur nach Wörtern. Indexiert auf diesem Gerät",
   "cmd.research.litReview": "Literaturübersicht aus den PDFs der Ablage",

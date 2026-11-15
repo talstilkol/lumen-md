@@ -349,6 +349,8 @@
   "cmd.related.toggle.hint": "与你正在写的段落相近的笔记，以及它提到但未链接的笔记",
   "cmd.research.ask": "🔎 研究：提出问题…",
   "cmd.research.ask.hint": "搜索网络、阅读来源，并为每个论断写出带引文脚注的笔记",
+  "cmd.research.clipTemplates": "网页剪藏：模板与触发器",
+  "cmd.research.clipTemplates.hint": "编辑保存剪藏所用的模板，以及哪个网站用哪个模板",
   "cmd.research.library": "🔎 研究：按含义搜索资料库",
   "cmd.research.library.hint": "按内容而非仅按字词查找已保存的剪藏。索引在本设备上生成",
   "cmd.research.litReview": "根据库中的 PDF 生成文献综述",

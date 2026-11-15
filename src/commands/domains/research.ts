@@ -23,7 +23,9 @@ export async function saveClip(clip: { title: string; markdown: string }): Promi
 export async function saveClipV2(payload: import("../../research/clipV2").ClipPayload): Promise<string | null> {
   const { buildClip } = await import("../../research/clipV2");
   const { libraryDir } = await import("../../research/clipper");
-  const clip = await buildClip(payload, { library: libraryDir(getLocale()) });
+  const { loadUserTemplates } = await import("../../research/clipTemplateStore");
+  // The user's templates (W10.E67) win over the built-in site ones; a broken file gives none, never a failed clip.
+  const clip = await buildClip(payload, { library: libraryDir(getLocale()), templates: await loadUserTemplates().catch(() => []) });
   const { writeWorkspaceFile, workspaceHasEntry, isOPFSAvailable } = await import("../../storage/workspace");
   if (!isOPFSAvailable()) {
     openTemplateDoc(clip.fileName.replace(/\.md$/, ""), clip.markdown);
@@ -107,6 +109,15 @@ export function buildResearchCommands({ liveDoc }: CommandContext): Command[] {
       icon: cmdIcons.Sparkles,
       group: t("group.ai"),
       action: () => import("./researchActions").then((m) => m.researchVerify({ liveDoc })),
+    },
+    {
+      // Plan 4.15 (W10.E67): the user's clip templates and per-site triggers.
+      id: "research.clipTemplates",
+      label: t("cmd.research.clipTemplates"),
+      hint: t("cmd.research.clipTemplates.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.ai"),
+      action: () => void import("../../research/ClipTemplatesEditor").then((m) => m.openClipTemplatesEditor()),
     },
     {
       id: "research.settings",

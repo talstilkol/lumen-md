@@ -591,6 +591,13 @@
       "icon": "Sparkles"
     },
     {
+      "id": "research.clipTemplates",
+      "label": "Web clipper: templates and triggers",
+      "group": "AI Prompts",
+      "hint": "Edit the templates clips are saved with, and which site gets which",
+      "icon": "Sparkles"
+    },
+    {
       "id": "research.settings",
       "label": "🔎 Research: Settings…",
       "group": "AI Prompts",
@@ -2666,6 +2673,13 @@
       "icon": "Sparkles"
     },
     {
+      "id": "research.clipTemplates",
+      "label": "Web clipper: templates and triggers",
+      "group": "AI Prompts",
+      "hint": "Edit the templates clips are saved with, and which site gets which",
+      "icon": "Sparkles"
+    },
+    {
       "id": "research.settings",
       "label": "🔎 Research: Settings…",
       "group": "AI Prompts",
@@ -4327,6 +4341,7 @@
     "clip.clipboard",
     "research.library",
     "research.verify",
+    "research.clipTemplates",
     "research.settings",
     "ai.batch",
     "ai.batchCheck",
