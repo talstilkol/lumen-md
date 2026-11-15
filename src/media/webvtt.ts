@@ -152,7 +152,12 @@ export function cueAt(cues: readonly Cue[], time: number): number {
   return found;
 }
 
-/** The transcript file beside a media file: `rec.m4a` → `rec.vtt` (and `.srt`). */
+/** The transcript file beside a media file by its stem: `rec.m4a` → `rec.vtt` (and `.srt`), as other apps name it. */
 export const sidecarPath = (media: string, ext: "vtt" | "srt" = "vtt") => media.replace(/\.[^./]+$/, "") + `.${ext}`;
+/**
+ * The track the app writes for a media file, by its full name: `rec.m4a` → `rec.m4a.vtt` (review Z7-M5). Two
+ * recordings with one stem (`rec.m4a`, `rec.wav`) get two tracks. The player reads this one first, then the stem's.
+ */
+export const trackPath = (media: string, ext: "vtt" | "srt" = "vtt") => `${media}.${ext}`;
 
 export { MEDIA_EXT, VIDEO_EXT } from "./mediaExt";

@@ -2729,6 +2729,8 @@
   "speakers.pick": "איזה דובר לשנות?",
   "speakers.renamePrompt": "שם חדש עבור {speaker}",
   "speakers.renamed": "{from} שונה ל־{to} בכל הפתק.",
+  "speakers.tracks.inReview": "רצועות התמליל ממתינות בחלונית הסקירה. אשרו אותן כדי לשמור את {path} ליד ההקלטה.",
+  "speakers.tracks.summary": "רצועת תמליל: {path}",
   "speakers.unavailable": "זיהוי דוברים עוד לא הוגדר במכשיר הזה, ולכן בתמליל אין דוברים.",
   "sr.aiDone": "ה-AI סיים.",
   "sr.aiWorking": "ה-AI עובד…",

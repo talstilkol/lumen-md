@@ -12,7 +12,7 @@
 import "./strings";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { t } from "../i18n";
-import { cueAt, parseTrack, sidecarPath, toWebVtt, VIDEO_EXT, type Cue } from "./webvtt";
+import { cueAt, parseTrack, sidecarPath, toWebVtt, trackPath, VIDEO_EXT, type Cue } from "./webvtt";
 
 export interface MediaIo {
   /** The vault path for an embed target (`rec.m4a` may be in any folder), or null. */
@@ -65,8 +65,15 @@ export function MediaEmbed({ target, io = workspaceIo }: { target: string; io?: 
       const blob = await io.readBlob(path);
       url = URL.createObjectURL(blob);
       if (live) setSrc(url);
-      const vtt = await io.readText(sidecarPath(path, "vtt"));
-      const track = vtt !== null ? parseTrack(vtt, "vtt") : await io.readText(sidecarPath(path, "srt")).then((s) => (s === null ? null : parseTrack(s, "srt")));
+      // The app's own track (`rec.m4a.vtt`, Z7-M5) first, then one named by the stem (`rec.vtt`, other apps, older builds).
+      let track: ReturnType<typeof parseTrack> | null = null;
+      for (const [p, kind] of [[trackPath(path, "vtt"), "vtt"], [trackPath(path, "srt"), "srt"], [sidecarPath(path, "vtt"), "vtt"], [sidecarPath(path, "srt"), "srt"]] as const) {
+        const text = await io.readText(p);
+        if (text !== null) {
+          track = parseTrack(text, kind);
+          break;
+        }
+      }
       if (live && track) setCues(track.cues);
     })().catch(() => live && setMissing(true));
     return () => {

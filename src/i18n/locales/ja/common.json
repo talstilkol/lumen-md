@@ -2729,6 +2729,8 @@
   "speakers.pick": "どの話者の名前を変更しますか？",
   "speakers.renamePrompt": "{speaker} の新しい名前",
   "speakers.renamed": "ノート全体で {from} を {to} に変更しました。",
+  "speakers.tracks.inReview": "文字起こしトラックはレビューパネルで待機しています。承認すると、録音の横に {path} が保存されます。",
+  "speakers.tracks.summary": "文字起こしトラック: {path}",
   "speakers.unavailable": "このデバイスでは話者識別がまだ設定されていないため、文字起こしに話者は付きません。",
   "sr.aiDone": "AI が完了しました。",
   "sr.aiWorking": "AI が処理中…",

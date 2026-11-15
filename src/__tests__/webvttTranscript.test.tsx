@@ -68,12 +68,12 @@ describe("writing WebVTT and SRT", () => {
     expect(cueAt(cues, 7.1)).toBe(2);
   });
 
-  it("the meeting flow writes rec.vtt and rec.srt beside the audio, from its own sentences", async () => {
+  it("the meeting flow proposes rec.m4a.vtt and rec.m4a.srt beside the audio, from its own sentences (Z7-M5)", async () => {
     const written = new Map<string, string>();
-    const paths = await writeTranscriptTracks("attachments/פגישה.m4a", SENTENCES, async (p, t) => void written.set(p, t));
-    expect(paths).toEqual(["attachments/פגישה.vtt", "attachments/פגישה.srt"]);
-    expect(parseTrack(written.get("attachments/פגישה.vtt")!).errors).toEqual([]);
-    expect(written.get("attachments/פגישה.vtt")).toContain("Language: he");
+    const paths = await writeTranscriptTracks("attachments/פגישה.m4a", SENTENCES, { read: async () => null, propose: (c) => void written.set(c.path, c.after) });
+    expect(paths).toEqual(["attachments/פגישה.m4a.vtt", "attachments/פגישה.m4a.srt"]);
+    expect(parseTrack(written.get("attachments/פגישה.m4a.vtt")!).errors).toEqual([]);
+    expect(written.get("attachments/פגישה.m4a.vtt")).toContain("Language: he");
     expect(sidecarPath("a/b.c/talk.mp4", "srt")).toBe("a/b.c/talk.srt");
   });
 });
