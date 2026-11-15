@@ -81,6 +81,8 @@ bundle-diff.md
 # committed: npm run eval:ingest takes it into the registry (plan 7.9).
 eval/results/*
 !eval/results/agents-*.json
+# …except the Markdown conformance numbers (W11.Q8), which are committed with their exceptions
+!eval/results/md-conformance.json
 # Public-benchmark results (eval/results/<task>/<model>@<rev>.json, plan W11.H5) are committed.
 !eval/results/*/
 eval/results/*/report.json
