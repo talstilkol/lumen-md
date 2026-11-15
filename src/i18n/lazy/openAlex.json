@@ -1,0 +1,6 @@
+{
+  "openAlex.confirm": "Send the DOI {doi} to OpenAlex (api.openalex.org) to find the works it cites?",
+  "openAlex.note": "Off by default. While it is on, each lookup still asks first, and only the DOI is sent, to api.openalex.org. The privacy ledger lists every request.",
+  "openAlex.switch": "Look up the references of a DOI in OpenAlex",
+  "openAlex.title": "OpenAlex (citation graph)"
+}

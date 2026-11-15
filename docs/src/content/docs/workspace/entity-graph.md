@@ -65,7 +65,9 @@ keeps where it was seen: the note and paragraph, or the library file.
 sources and laws; press it again to show everything. The table lists who
 cites whom.
 
-Filling `references:` from OpenAlex (by DOI) is optional and off by default:
-nothing is sent unless you turn it on, and then only the DOIs go to
-api.openalex.org, which the privacy ledger lists. The switch for it is not
-in Settings yet.
+Looking up references in OpenAlex (by DOI) is optional and off by default.
+The switch is **Settings → Privacy → Look up the references of a DOI in
+OpenAlex**. While it is off, nothing is sent and nothing is asked. While it
+is on, each lookup still asks you first, and then only the DOI goes to
+api.openalex.org, which the privacy ledger lists. A settings file you import
+never turns it on.

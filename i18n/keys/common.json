@@ -8712,6 +8712,28 @@
       "vars": []
     },
     {
+      "key": "openAlex.confirm",
+      "en": "Send the DOI {doi} to OpenAlex (api.openalex.org) to find the works it cites?",
+      "vars": [
+        "doi"
+      ]
+    },
+    {
+      "key": "openAlex.note",
+      "en": "Off by default. While it is on, each lookup still asks first, and only the DOI is sent, to api.openalex.org. The privacy ledger lists every request.",
+      "vars": []
+    },
+    {
+      "key": "openAlex.switch",
+      "en": "Look up the references of a DOI in OpenAlex",
+      "vars": []
+    },
+    {
+      "key": "openAlex.title",
+      "en": "OpenAlex (citation graph)",
+      "vars": []
+    },
+    {
       "key": "openSources.confirm",
       "en": "Search online for “{query}”? Only these words go to the sources you turned on (the Knesset, data.gov.il), nothing from your notes.",
       "vars": [

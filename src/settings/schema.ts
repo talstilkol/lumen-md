@@ -267,6 +267,8 @@ export const SETTINGS: readonly SettingEntry[] = [
   data("lumen.skills.allowed"),
   data("lumen.openSources"),
   data("lumen.airplane"),
+  // W12.X3: the OpenAlex reference lookup, off by default; shown in the Privacy tab (so search finds it), never imported.
+  local("lumen.openAlex.enabled", { kind: "data", tab: "privacy", label: "openAlex.switch", type: "boolean", values: ["", "1"] }),
   data("lumen.usage.counting"),
   data("lumen.backup.enabled"),
   data("lumen.beta.v1"),
