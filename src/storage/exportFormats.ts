@@ -370,52 +370,150 @@ function mdInlineToHtml(s: string): string {
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
 }
 
-/** Minimal, well-formed XHTML body conversion for EPUB chapters. */
+const isRtlText = (s: string): boolean => (s.match(/[\u0590-\u08FF]/g)?.length ?? 0) > (s.match(/[A-Za-z]/g)?.length ?? 0);
+
+/** The cells of a pipe-table row (escaped pipes kept). */
+function tableCells(row: string): string[] {
+  return row.trim().replace(/^\|/, "").replace(/(?<!\\)\|$/, "").split(/(?<!\\)\|/).map((c) => c.trim().replace(/\\\|/g, "|"));
+}
+
+const TABLE_SEP = /^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$/;
+const LIST_ITEM = /^( *)([-*+]|\d{1,9}[.)])\s+(.*)$/;
+const FOOTNOTE_DEF = /^\[\^[^\]]+\]:/;
+const EPUB_BLOCK = /^\s*(#{1,6}\s|>|```|~~~|\||[-*+]\s|\d{1,9}[.)]\s|\[\^[^\]]+\]:)|^\s{0,3}([-*_])(\s*\2){2,}\s*$/;
+
+/** A paragraph's lines: soft wraps join with a space, a hard break (two spaces or \) is <br/>. */
+function xhtmlLines(lines: string[]): string {
+  return lines
+    .map((l, i) => {
+      const last = i === lines.length - 1;
+      const hard = !last && (/ {2,}$/.test(l) || /\\$/.test(l));
+      const text = mdInlineToHtml(l.replace(/\\$/, "").trim());
+      return hard ? `${text}<br/>` : text;
+    })
+    .join(" ")
+    .replace(/<br\/> /g, "<br/>");
+}
+
+/**
+ * Well-formed XHTML body for an EPUB chapter: headings, paragraphs (soft
+ * wraps joined), bullet and numbered lists (nested by indent, with their start
+ * number), pipe tables (a mostly-Hebrew table is dir="rtl"), block quotes,
+ * rules and fenced code with its language.
+ */
 function mdToXhtml(md: string): string {
+  const lines = md.replace(/\r\n?/g, "\n").split("\n");
   const out: string[] = [];
-  let inList = false;
-  let inCode = false;
-  const closeList = () => {
-    if (inList) {
-      out.push("</ul>");
-      inList = false;
+  const lists: Array<{ tag: "ul" | "ol"; indent: number }> = [];
+  let item: string[] | null = null; // lines of the open <li>
+  const flushItem = (): void => {
+    if (item) out.push(`<li>${xhtmlLines(item)}`);
+    item = null;
+  };
+  const closeLists = (indent: number): void => {
+    flushItem();
+    while (lists.length && lists[lists.length - 1].indent >= indent) {
+      out.push(`</li></${lists.pop()!.tag}>`);
     }
   };
-  for (const line of md.split(/\r?\n/)) {
-    if (/^```/.test(line.trim())) {
-      closeList();
-      out.push(inCode ? "</code></pre>" : "<pre><code>");
-      inCode = !inCode;
-      continue;
-    }
-    if (inCode) {
-      out.push(escapeHtml(line));
-      continue;
-    }
-    const h = /^(#{1,6})\s+(.+)$/.exec(line);
-    if (h) {
-      closeList();
-      out.push(`<h${h[1].length}>${mdInlineToHtml(h[2])}</h${h[1].length}>`);
-      continue;
-    }
-    const li = /^[-*+]\s+(.+)$/.exec(line);
-    if (li) {
-      if (!inList) {
-        out.push("<ul>");
-        inList = true;
-      }
-      out.push(`<li>${mdInlineToHtml(li[1])}</li>`);
+  let para: string[] = [];
+  const flushPara = (): void => {
+    if (para.length) out.push(`<p>${xhtmlLines(para)}</p>`);
+    para = [];
+  };
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const fence = /^ {0,3}(`{3,}|~{3,})\s*([\w+#.-]*)/.exec(line);
+    if (fence) {
+      flushPara();
+      closeLists(0);
+      const body: string[] = [];
+      let j = i + 1;
+      for (; j < lines.length && !new RegExp(`^ {0,3}${fence[1][0]}{${fence[1].length},}\\s*$`).test(lines[j]); j++) body.push(lines[j]);
+      const cls = fence[2] ? ` class="language-${escapeHtml(fence[2])}"` : "";
+      out.push(`<pre><code${cls}>${escapeHtml(body.join("\n"))}</code></pre>`);
+      i = j;
       continue;
     }
     if (!line.trim()) {
-      closeList();
+      flushPara();
+      flushItem();
       continue;
     }
-    closeList();
-    out.push(`<p>${mdInlineToHtml(line)}</p>`);
+    const li = LIST_ITEM.exec(line);
+    if (li && (lists.length || !para.length || !/^\d/.test(li[2]) || li[2].startsWith("1"))) {
+      flushPara();
+      const indent = li[1].length;
+      const tag = /\d/.test(li[2]) ? "ol" : "ul";
+      flushItem();
+      while (lists.length && (lists[lists.length - 1].indent > indent || (lists[lists.length - 1].indent === indent && lists[lists.length - 1].tag !== tag))) {
+        out.push(`</li></${lists.pop()!.tag}>`);
+      }
+      const top = lists[lists.length - 1];
+      if (!top || indent > top.indent) {
+        const start = tag === "ol" ? parseInt(li[2], 10) : 1;
+        out.push(start !== 1 ? `<ol start="${start}">` : `<${tag}>`);
+        lists.push({ tag, indent });
+      } else out.push("</li>");
+      item = [li[3]];
+      continue;
+    }
+    // A continuation line of a list item (indented, or a lazy one right after it).
+    if (item && !EPUB_BLOCK.test(line)) {
+      (item as string[]).push(line);
+      continue;
+    }
+    if (lists.length && !/^\s/.test(line)) closeLists(0);
+    const h = /^ {0,3}(#{1,6})\s+(.+?)(?:\s+#+)?\s*$/.exec(line);
+    if (h) {
+      flushPara();
+      closeLists(0);
+      out.push(`<h${h[1].length}>${mdInlineToHtml(h[2])}</h${h[1].length}>`);
+      continue;
+    }
+    if (/^\s{0,3}([-*_])(\s*\1){2,}\s*$/.test(line) && !para.length) {
+      closeLists(0);
+      out.push("<hr/>");
+      continue;
+    }
+    if (/^\s*\|/.test(line) && lines[i + 1] !== undefined && TABLE_SEP.test(lines[i + 1])) {
+      flushPara();
+      closeLists(0);
+      const head = tableCells(line);
+      const rows: string[][] = [];
+      let j = i + 2;
+      for (; j < lines.length && /^\s*\|/.test(lines[j]); j++) rows.push(tableCells(lines[j]));
+      // Direction from the cells' words (link targets and markup are not text).
+      const words = [head, ...rows].flat().join(" ").replace(/\]\([^)]*\)|`[^`]*`|<[^>]*>/g, " ");
+      const dir = isRtlText(words) ? ' dir="rtl"' : "";
+      out.push(
+        `<table${dir}><thead><tr>${head.map((c) => `<th>${mdInlineToHtml(c)}</th>`).join("")}</tr></thead><tbody>` +
+          rows.map((r) => `<tr>${head.map((_, k) => `<td>${mdInlineToHtml(r[k] ?? "")}</td>`).join("")}</tr>`).join("") +
+          "</tbody></table>",
+      );
+      i = j - 1;
+      continue;
+    }
+    if (FOOTNOTE_DEF.test(line)) {
+      // A footnote stays a paragraph of its own: "[^1]: text" (EPUB has no notes here).
+      flushPara();
+      closeLists(0);
+      out.push(`<p>${mdInlineToHtml(line)}</p>`);
+      continue;
+    }
+    const quote = /^ {0,3}>\s?(.*)$/.exec(line);
+    if (quote) {
+      flushPara();
+      closeLists(0);
+      const body = [quote[1]];
+      while (i + 1 < lines.length && /^ {0,3}>/.test(lines[i + 1])) body.push(lines[++i].replace(/^ {0,3}>\s?/, ""));
+      out.push(`<blockquote>${mdToXhtml(body.join("\n"))}</blockquote>`);
+      continue;
+    }
+    para.push(line);
   }
-  closeList();
-  if (inCode) out.push("</code></pre>");
+  flushPara();
+  closeLists(0);
   return out.join("\n");
 }
 

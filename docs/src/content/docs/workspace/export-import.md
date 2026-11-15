@@ -46,10 +46,10 @@ these docs and 6 synthetic Hebrew notes (Markdown → format → Markdown):
 | Feature | ODT | Word (.docx) | EPUB |
 |---|---|---|---|
 | Headings, paragraphs, italic | 100% | 100% | 100% |
-| Bold | 100% | 90% | 96% |
+| Bold | 100% | 90% | 100% |
 | Links | 100% | 50% (links to a heading in the same note are dropped) | 100% |
-| Lists (items and bullet/numbered) | 100% | 100% | 39% (numbered and wrapped items are lost) |
-| Tables | 100% | 100% | 0% (written as text, not a table) |
+| Lists (items and bullet/numbered) | 100% | 100% | 100% (nested, numbered from their start) |
+| Tables | 100% | 100% | 100% (a Hebrew table is `dir="rtl"`) |
 | Footnotes | 100% | 100% | kept as text |
 
 A Hebrew table stays right-to-left through Word and back. The 30 real

@@ -60,8 +60,9 @@ function htmlNodeToMd(node: Node, depth = 0): string {
         .join("\n") + "\n";
     }
     case "ol": {
+      const start = parseInt(el.getAttribute("start") ?? "1", 10) || 1;
       return "\n" + Array.from(el.children)
-        .map((li, i) => `${"  ".repeat(depth)}${i + 1}. ${htmlNodeToMd(li, depth + 1).trim()}`)
+        .map((li, i) => `${"  ".repeat(depth)}${start + i}. ${htmlNodeToMd(li, depth + 1).trim()}`)
         .join("\n") + "\n";
     }
     case "li": return children();
@@ -93,8 +94,9 @@ function tableToMd(table: HTMLTableElement): string {
   const rows = Array.from(table.rows);
   if (rows.length === 0) return "";
 
+  // A cell keeps its inline Markdown (bold, links, code); a | in it is escaped.
   const getRowCells = (row: HTMLTableRowElement) =>
-    Array.from(row.cells).map((c) => c.textContent?.trim() ?? "");
+    Array.from(row.cells).map((c) => htmlNodeToMd(c).replace(/\s+/g, " ").trim().replace(/\|/g, "\\|"));
 
   const headers = getRowCells(rows[0]);
   const sep = headers.map(() => "---");
