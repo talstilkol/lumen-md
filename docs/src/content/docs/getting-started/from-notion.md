@@ -57,6 +57,25 @@ Twenty kinds of Notion database content, each checked after import (`src/__tests
 | 19 | A view's CSV next to `_all.csv` | every row from `_all.csv`; the view's copy listed as a duplicate |
 | 20 | A number column with an odd cell (`N/A`) | kept as text, and the report names the column and the cell |
 
+## Databases as types
+
+With "Make each database a type too" (on by default), each database also
+becomes a type in `.lumen/types/`, and its rows get `type: <database>`:
+
+- Each column becomes a field, its kind read from the values: checkbox,
+  number, date, URL, select (a short list of repeated values) or text. A
+  relation to the rows of another imported database becomes a relation to
+  that database's type.
+- Formulas and rollups: Notion's own export has only their values, so they
+  come across as numbers or text and the report says so. When the export
+  also holds Notion API database objects (some backup tools write them), a
+  formula goes through Notion's functions in Bases (`prop("Price")` becomes
+  `note["Price"]`) and a rollup becomes a rollup field.
+- The import report has a table per database: every column, kept,
+  converted (and how) or lost (and why).
+- A type with the same id already in the vault is never replaced. Undo
+  takes the new types back along with the notes.
+
 ## Hebrew
 
 Notion keeps Hebrew page titles in file names; Lumen keeps them as they

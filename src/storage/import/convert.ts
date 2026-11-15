@@ -129,7 +129,7 @@ function convertVault(files: Map<string, Uint8Array>): ConvertedVault {
 }
 
 /** Run `source`'s converter. `folder` is the vault folder the import will go into. */
-export function convertExport(source: ImportSourceId, files: Map<string, Uint8Array>, folder: string): ConvertedVault {
+export function convertExport(source: ImportSourceId, files: Map<string, Uint8Array>, folder: string, opts: { notionTypes?: boolean } = {}): ConvertedVault {
   // Keep's Takeout puts the notes under Takeout/Keep/: that folder is the export.
   if (source === "keep") {
     const keep = [...files.keys()].find((p) => /(^|\/)Keep\/[^/]+\.json$/.test(p));
@@ -146,7 +146,7 @@ export function convertExport(source: ImportSourceId, files: Map<string, Uint8Ar
   }
   switch (source) {
     case "notion":
-      return convertNotion(files, { folder });
+      return convertNotion(files, { folder, types: opts.notionTypes });
     case "evernote":
       return convertEvernote(files);
     case "bear":

@@ -6376,6 +6376,11 @@
       ]
     },
     {
+      "key": "importWizard.notionTypes",
+      "en": "Make each database a type too (its columns become the type's fields)",
+      "vars": []
+    },
+    {
       "key": "importWizard.pickFile",
       "en": "Choose files…",
       "vars": []
@@ -6484,6 +6489,11 @@
       ]
     },
     {
+      "key": "importWizard.review.types",
+      "en": "Types made from the databases",
+      "vars": []
+    },
+    {
       "key": "importWizard.review.unresolved",
       "en": "Links that point at nothing ({n})",
       "vars": [
@@ -6550,6 +6560,16 @@
       "vars": []
     },
     {
+      "key": "importWizard.warn.notionColumnConverted",
+      "en": "a Notion column became a type field of another kind",
+      "vars": []
+    },
+    {
+      "key": "importWizard.warn.notionColumnLost",
+      "en": "a Notion column did not become a type field",
+      "vars": []
+    },
+    {
       "key": "importWizard.warn.notionComputed",
       "en": "a Notion formula or rollup column: its values came across, the formula did not (add it as a formula column in the base)",
       "vars": []
@@ -6557,6 +6577,11 @@
     {
       "key": "importWizard.warn.notionUnparsed",
       "en": "a Notion value that does not fit its column's type was kept as text",
+      "vars": []
+    },
+    {
+      "key": "importWizard.warn.typeExists",
+      "en": "a type with this id is already in the vault; it was left as it is",
       "vars": []
     },
     {

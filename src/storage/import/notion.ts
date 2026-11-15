@@ -12,6 +12,7 @@ import { claimPath, dirOf, mdDest, mdEmbed, relativeTo, resolveRel, safePath, st
 import { decodeEntities, htmlToNote } from "./html";
 import { splitFrontmatter, withFrontmatter, type Props } from "./frontmatter";
 import { emptyVault, type ConvertedVault } from "./types";
+import { databaseType, databaseTypeId, reportLines, type NotionSchema } from "./notionTypes";
 
 /* ─── CSV ────────────────────────────────────────────────────────────── */
 
@@ -143,6 +144,29 @@ export function databaseBase(db: Pick<Database, "title" | "columns">, vaultFolde
 export interface NotionOptions {
   /** The vault folder the import goes into (`Imported/<name>`), for the bases' folder filters. */
   folder: string;
+  /**
+   * W12.T7: also make each database a type (`.lumen/types/<id>.yaml`, in
+   * `vault.types`), with its rows marked `type: <id>`, and report every
+   * column (kept / converted / lost).
+   */
+  types?: boolean;
+}
+
+/** API database objects in the export (`"object": "database"`), by title: the formulas and rollups Notion's own export leaves out. */
+function notionSchemas(files: Map<string, Uint8Array>, dec: TextDecoder): Map<string, NotionSchema> {
+  const out = new Map<string, NotionSchema>();
+  for (const [p, data] of files) {
+    if (!/\.json$/i.test(p) || data.length > 2_000_000) continue;
+    try {
+      const o = JSON.parse(dec.decode(data)) as { object?: string; title?: Array<{ plain_text?: string }>; properties?: NotionSchema["properties"] };
+      if (o.object !== "database" || !o.properties) continue;
+      const title = (o.title ?? []).map((x) => x.plain_text ?? "").join("").trim();
+      if (title) out.set(title.normalize("NFC").toLowerCase(), { properties: o.properties });
+    } catch {
+      /* why: not JSON, or not an API object: an ordinary attachment */
+    }
+  }
+  return out;
 }
 
 export function convertNotion(files: Map<string, Uint8Array>, opts: NotionOptions): ConvertedVault {
@@ -201,6 +225,21 @@ export function convertNotion(files: Map<string, Uint8Array>, opts: NotionOption
     dbs.push({ base, folder: md.replace(/\.md$/, ""), title: stemOf(md), columns, rows, computed });
   }
   const notesByPath = new Map([...finalOf.entries()].filter(([, t]) => t.endsWith(".md")).map(([s, t]) => [t.normalize("NFC").toLowerCase(), s]));
+  // W12.T7: a type id per database, and which database each row name belongs to (for relations).
+  const typeIds = new Map<Database, string>();
+  const typeOfRowName = new Map<string, string>();
+  const schemas = opts.types ? notionSchemas(files, dec) : new Map<string, NotionSchema>();
+  if (opts.types) {
+    const takenIds = new Set<string>();
+    for (const db of dbs) {
+      const id = databaseTypeId(db.title, takenIds);
+      takenIds.add(id);
+      typeIds.set(db, id);
+      for (const r of db.rows) typeOfRowName.set(((r[0] ?? "").trim() || "Untitled").normalize("NFC").toLowerCase(), id);
+    }
+    vault.types = new Map();
+    vault.typeReport = [];
+  }
   for (const db of dbs) {
     const typed = db.columns.map((_, i) => typeColumn(db.rows.map((r) => r[i] ?? "")));
     for (const c of db.computed ?? []) vault.warnings.push({ path: db.base, reason: "notionComputed", detail: c });
@@ -216,9 +255,20 @@ export function convertNotion(files: Map<string, Uint8Array>, opts: NotionOption
     const cols = db.columns;
     const rangeEnd = cols.map((_, i) => db.rows.map((r) => notionRange(r[i] ?? "")?.[1] ?? null));
     db.columns = cols.flatMap((c, i) => (rangeEnd[i].some((v) => v !== null) ? [c, `${c} end`] : [c]));
+    const typeId = typeIds.get(db);
+    if (typeId) {
+      const typedCols = cols.flatMap((_, i) => (rangeEnd[i].some((v) => v !== null) ? [typed[i], rangeEnd[i]] : [typed[i]]));
+      const t = databaseType({ title: db.title, folder: db.folder, columns: db.columns, typed: typedCols, computed: db.computed, schema: schemas.get(db.title.normalize("NFC").toLowerCase()) }, typeId, {
+        typeOfRow: (name) => typeOfRowName.get(name.normalize("NFC").toLowerCase()) ?? null,
+      });
+      if (t.yaml) vault.types!.set(typeId, t.yaml);
+      vault.typeReport!.push(...reportLines(db.title, typeId, t.report), "");
+      for (const r of t.report) if (r.status !== "kept") vault.warnings.push({ path: db.base, reason: r.status === "lost" ? "notionColumnLost" : "notionColumnConverted", detail: `${r.column}: ${r.note}` });
+    }
     db.rows.forEach((r, ri) => {
       const title = (r[0] ?? "").trim() || "Untitled";
-      const props: Props = {};
+      // W12.T7: the row is a note of its database's type.
+      const props: Props = typeId ? { type: typeId } : {};
       cols.slice(1).forEach((c, ci) => {
         const v = typed[ci + 1][ri];
         if (v !== null) props[c] = v;

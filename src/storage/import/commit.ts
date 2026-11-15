@@ -18,6 +18,7 @@ import { moveToTrash } from "../trash";
 import { convertExport, detectImportSource, expandArchives, stripWrapper } from "./convert";
 import { linkStats } from "./links";
 import { safeName } from "./names";
+import { typeFilePath } from "../../types/typeSchema";
 import type { ConvertedVault, ImportReport, ImportSourceId, LinkStats } from "./types";
 
 export const IMPORT_ROOT = "Imported";
@@ -39,6 +40,8 @@ export interface UndoRecord {
   /** SHA-256 per file written (path inside the folder → hex), to see if anything changed since. */
   digests: Record<string, string>;
   at: number;
+  /** W12.T7: type files written outside the folder (vault path → SHA-256); undo removes those still unchanged. */
+  typeFiles?: Record<string, string>;
 }
 
 async function sha256(data: Uint8Array | string): Promise<string> {
@@ -69,14 +72,14 @@ export async function readPicked(list: ArrayLike<File>): Promise<{ files: Map<st
 }
 
 /** Convert without writing. `source` null: detect it. */
-export async function prepareImport(picked: Map<string, Uint8Array>, name: string, source: ImportSourceId | null): Promise<PreparedImport> {
+export async function prepareImport(picked: Map<string, Uint8Array>, name: string, source: ImportSourceId | null, opts: { notionTypes?: boolean } = {}): Promise<PreparedImport> {
   const opened = stripWrapper(await expandArchives(picked));
   const junk = [...opened.keys()].filter((p) => /(^|\/)__MACOSX(\/|$)|(^|\/)\.DS_Store$/.test(p));
   for (const p of junk) opened.delete(p);
   const detected = detectImportSource([...opened.keys()]);
   const chosen = source ?? detected;
   const folder = await importFolderFor(name);
-  const vault = convertExport(chosen, opened, folder);
+  const vault = convertExport(chosen, opened, folder, opts);
   for (const p of junk) vault.skipped.push({ path: p, reason: "appFolder" });
   return { source: chosen, detected, name, folder, vault, links: linkStats(vault) };
 }
@@ -98,6 +101,16 @@ export async function commitImport(prep: PreparedImport, now = Date.now()): Prom
       await writeWorkspaceBlob(`${folder}/${path}`, new Blob([data as unknown as BlobPart]));
       digests[path] = await sha256(data);
     }
+    // W12.T7: a database's type, at the vault's types folder; an existing type of that id is never replaced.
+    for (const [id, yaml] of prep.vault.types ?? []) {
+      const path = typeFilePath(id);
+      if (await workspaceHasEntry(path)) {
+        prep.vault.warnings.push({ path, reason: "typeExists", detail: id });
+        continue;
+      }
+      await writeWorkspaceFile(path, yaml);
+      (undo.typeFiles ??= {})[path] = await sha256(yaml);
+    }
   } catch (e) {
     // Half an import is worse than none: take back what was written.
     await undoImport(undo, { force: true }).catch(() => undefined);
@@ -115,6 +128,7 @@ export async function commitImport(prep: PreparedImport, now = Date.now()): Prom
     warnings: prep.vault.warnings,
     links: prep.links,
     attachmentsLost: Math.max(lost, prep.vault.sourceAttachments - prep.vault.attachments.size, 0),
+    ...(prep.vault.typeReport?.length ? { typeReport: prep.vault.typeReport } : {}),
     at: now,
   };
   saveUndo(undo);
@@ -182,6 +196,12 @@ export async function undoImport(u: UndoRecord, opts: { force?: boolean } = {}):
     await moveToTrash([u.folder], { [u.folder]: "directory" });
     result = "trashed";
   } else await deleteWorkspaceFile(u.folder);
+  // W12.T7: the type files it added, unless they were edited since.
+  for (const [path, digest] of Object.entries(u.typeFiles ?? {})) {
+    if (!(await workspaceHasEntry(path))) continue;
+    const now = await sha256(new Uint8Array(await (await readWorkspaceBlob(path)).arrayBuffer()));
+    if (opts.force || now === digest) await deleteWorkspaceFile(path);
+  }
   if (u.createdRoot && (await workspaceHasEntry(IMPORT_ROOT))) {
     const left = (await listWorkspace({ includeAssets: true })).some((f) => f.path.startsWith(`${IMPORT_ROOT}/`));
     if (!left && (await isEmptyFolder(IMPORT_ROOT))) await deleteWorkspaceFile(IMPORT_ROOT);

@@ -46,6 +46,8 @@ function Issues<T>({ title, items, line, testId }: { title: string; items: T[]; 
 
 export function ImportWizard({ open, onClose }: Props) {
   const [source, setSource] = useState<ImportSourceId>("obsidian");
+  // W12.T7: a Notion database becomes a type as well as a .base.
+  const [notionTypes, setNotionTypes] = useState(true);
   const [step, setStep] = useState<Step>({ kind: "source" });
   const [error, setError] = useState<string | null>(null);
   const [savedReport, setSavedReport] = useState<string | null>(null);
@@ -68,7 +70,7 @@ export function ImportWizard({ open, onClose }: Props) {
     setError(null);
     setStep({ kind: "busy", text: t("importWizard.reading", { n: picked.size }) });
     try {
-      const prep = await prepareImport(picked, name, as);
+      const prep = await prepareImport(picked, name, as, { notionTypes: as === "notion" && notionTypes });
       if (!prep.vault.notes.size && !prep.vault.attachments.size) {
         setError(t("importWizard.error.nothing", { source: SOURCE_NAMES[as] }));
         setStep({ kind: "source" });
@@ -79,7 +81,7 @@ export function ImportWizard({ open, onClose }: Props) {
       setError(t("importWizard.error.failed", { error: explainError(e) }));
       setStep({ kind: "source" });
     }
-  }, []);
+  }, [notionTypes]);
 
   const onPicked = useCallback(
     async (list: FileList | null) => {
@@ -152,6 +154,12 @@ export function ImportWizard({ open, onClose }: Props) {
             <p data-testid="import-how" style={{ margin: 0, fontSize: 13 }}>
               {t(`importWizard.how.${source}`)}
             </p>
+            {source === "notion" && (
+              <label style={{ display: "flex", gap: 6, alignItems: "center", fontSize: 13 }}>
+                <input type="checkbox" checked={notionTypes} onChange={(e) => setNotionTypes(e.currentTarget.checked)} data-testid="import-notion-types" />
+                {t("importWizard.notionTypes")}
+              </label>
+            )}
             <div
               data-testid="import-drop"
               onDragOver={(e) => e.preventDefault()}

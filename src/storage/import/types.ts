@@ -25,7 +25,10 @@ export type WarningReason =
   | "encryptedPart" // part of the note was encrypted and is left out
   | "noDates" // the export carries no creation / modification dates
   | "notionComputed" // a Notion formula or rollup column: its values came across, not the formula (plan W8.2)
-  | "notionUnparsed"; // a Notion value that did not fit its column's type; kept as text (plan W8.2)
+  | "notionUnparsed" // a Notion value that did not fit its column's type; kept as text (plan W8.2)
+  | "notionColumnConverted" // W12.T7: a column became a type field of another kind (the detail says how)
+  | "notionColumnLost" // W12.T7: a column did not become a type field (the detail says why)
+  | "typeExists"; // W12.T7: a type file of that id is already in the vault; it was left as it is
 
 export interface ImportIssue<R extends string> {
   path: string;
@@ -42,6 +45,10 @@ export interface ConvertedVault {
   warnings: ImportIssue<WarningReason>[];
   /** Attachments the export held (the denominator of "0 lost"). */
   sourceAttachments: number;
+  /** W12.T7: types to add to the vault (`.lumen/types/<id>.yaml`): id → YAML. */
+  types?: Map<string, string>;
+  /** W12.T7: the per-column report, Markdown lines. */
+  typeReport?: string[];
 }
 
 export function emptyVault(): ConvertedVault {
@@ -70,6 +77,8 @@ export interface ImportReport {
   links: LinkStats;
   /** Attachments of the export that are not in the vault after the import. */
   attachmentsLost: number;
+  /** W12.T7: what became of each Notion column in its type (Markdown lines). */
+  typeReport?: string[];
   /** When the import finished (ms). */
   at: number;
 }
