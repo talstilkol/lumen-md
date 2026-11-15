@@ -1,0 +1,8 @@
+npm
+4 שורות שגיאה
+---
+npm error code EUSAGE
+npm error `npm ci` can only install packages when your package.json and package-lock.json or npm-shrinkwrap.json are in sync. Please update your lock file with `npm install` before continuing.
+npm error Missing: left-pad@1.3.0 from lock file
+npm error A complete log of this run can be found in: ~/.npm/_logs/2026-10-16T20_20_33_404Z-debug-0.log
+(הושמטו 17 שורות טקסט עזרה קבוע של npm)

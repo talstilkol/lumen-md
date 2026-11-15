@@ -1,0 +1,5 @@
+{
+ "schema": 1,
+ "note": "Flaky-test quarantine (R12.12, for W10.M12). Entries are added only by `node scripts/ci-doctor/flake.mjs add`, which needs a flaky verdict from the run history; each expires within 14 days. No gate reads this file yet.",
+ "entries": []
+}

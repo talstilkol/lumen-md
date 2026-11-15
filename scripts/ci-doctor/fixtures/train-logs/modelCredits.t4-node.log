@@ -1,0 +1,22 @@
+FAIL model credits > every bundled or downloadable model that is not forbidden has a complete entry 
+    expect(received).toEqual(expected) // deep equality
+    
+    - Expected  -  1
+    + Received  + 14
+    
+    - Array []
+    + Array [
+    +   Array [
+    +     "frequencywords-he-50k",
+    +     Array [
+    +       "no licence requirement known for \"CC-BY-SA-4.0\"",
+    +     ],
+    +   ],
+    +   Array [
+    +     "hewiktionary-lexicon",
+    +     Array [
+    +       "no licence requirement known for \"CC-BY-SA-4.0\"",
+    +     ],
+    +   ],
+    + ]
+pass 4 fail 1

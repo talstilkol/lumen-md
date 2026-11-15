@@ -1,0 +1,17 @@
+eslint
+6 שגיאות · 4 אזהרות
+---
+x.js
+ 1:7 error 'unused' is assigned a value but never used no-unused-vars
+ 1:17 warning Missing semicolon semi
+ 2:5 error 'a' is not defined no-undef
+ 2:7 error Expected '===' and instead saw '==' eqeqeq
+ 2:15 error 'console' is not defined no-undef
+ 2:27 error 'b' is not defined no-undef
+ 2:29 warning Missing semicolon semi
+y.js
+ 1:20 warning Missing semicolon semi
+ 2:5 error 'z' is assigned a value but never used no-unused-vars
+ 2:10 warning Missing semicolon semi
+✖ 10 problems (6 errors, 4 warnings)
+ 0 errors and 4 warnings potentially fixable with the `--fix` option.

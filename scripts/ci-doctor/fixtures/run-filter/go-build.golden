@@ -1,0 +1,6 @@
+generic
+2 שורות עם שגיאה
+---
+# x
+./main.go:6:2: declared and not used: x
+./main.go:7:14: undefined: y
