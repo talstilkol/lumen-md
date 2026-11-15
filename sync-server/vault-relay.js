@@ -10,7 +10,7 @@
  *   GET    /v1/vault/o/            → {"names": [...]}
  *   GET    /v1/vault/o/<name>      → bytes + ETag            (404 when none)
  *   PUT    /v1/vault/o/<name>      If-Match / If-None-Match: *   (412 lost race)
- *   DELETE /v1/vault/o/<name>
+ *   DELETE /v1/vault/o/<name>      If-Match                      (412 lost race)
  *
  * Drop boxes (plan W5.21, the private classroom): a space that many people
  * may add to but nobody but its owner may change. The token says which:
@@ -580,9 +580,13 @@ function createVaultRelay(opts = {}) {
         // A role space: only a member's signed request (vault-relay-roles.js), checked under the lock.
         const gate = who.role ? await roles.authorize(space, "DELETE", name, req.headers, null) : null;
         if (gate?.verdict) return gate.verdict;
+        const old = await store.get(space, name);
+        // Review Z7-L5: If-Match is enforced here as on PUT (a role envelope signs it as a condition), checked
+        // under the space's lock and before the signer's counter is spent; a stale delete removes nothing.
+        const ifMatch = req.headers["if-match"];
+        if (ifMatch && (!old || old.etag !== ifMatch)) return [412, "changed"];
         const extra = (await gate?.commit()) ?? 0;
         if (total !== null) total += extra;
-        const old = await store.get(space, name);
         await store.delete(space, name);
         if (old && total !== null) total = Math.max(0, total - charge(old.data.length));
         return null;

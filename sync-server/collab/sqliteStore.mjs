@@ -18,7 +18,7 @@
  * Sealed rooms (plan W2.20): `meta` holds `sealed:<room>` for each room the
  * server holds to ciphertext only (collab/sealed.mjs). Sealing is never undone.
  */
-import { mkdirSync, readdirSync, rmSync } from "node:fs";
+import { mkdirSync, readdirSync, rmSync, statSync, statfsSync } from "node:fs";
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 
@@ -147,42 +147,63 @@ export function openStore(dir, { keepBackups = 24 } = {}) {
      * its share links) out of every backup in `<dir>/backups`, as deleteRoom
      * does in the live database. Each backup is rewritten with VACUUM under
      * secure_delete, so the deleted rows' bytes are not left in free pages.
-     * The sealed flag stays, as it does in the live database. A backup that
-     * can't be rewritten is removed rather than kept with the room in it.
-     * Returns how many backups held the room and how many were removed.
+     * The sealed flag stays, as it does in the live database.
+     *
+     * Review Z7-M4: a backup holds every room, so one that fails here is
+     * never deleted for that. Only a file SQLite says is not a database or
+     * is corrupt (SQLITE_NOTADB, SQLITE_CORRUPT) is removed; any other
+     * failure (SQLITE_BUSY from an operator's sqlite3 or a copy job,
+     * SQLITE_FULL, a read-only mount) leaves the file as it was and names it
+     * in `failed`, for the caller to try again later. The deleted rows are
+     * overwritten in place (secure_delete); VACUUM, which needs about the
+     * file's size again in free space, only runs when that space is there,
+     * and a backup purged without it is counted in `unvacuumed`.
+     * Returns { purged, removed, failed: [file names], unvacuumed }.
      */
-    purgeBackups(room) {
+    purgeBackups(room, opts = {}) {
       const dirBackups = join(dir, "backups");
       const files = readdirSync(dirBackups).filter((f) => /^collab-.*\.sqlite$/.test(f));
+      const freeBytes = opts.freeBytes ?? ((p) => {
+        const s = statfsSync(p);
+        return Number(s.bavail) * Number(s.bsize);
+      });
       let purged = 0;
       let removed = 0;
+      let unvacuumed = 0;
+      const failed = [];
       for (const f of files) {
         const file = join(dirBackups, f);
         let b = null;
         try {
-          b = new DatabaseSync(file);
+          b = (opts.open ?? ((x) => new DatabaseSync(x)))(file);
           b.exec("PRAGMA journal_mode = DELETE; PRAGMA secure_delete = ON;");
           const n =
             Number(b.prepare("DELETE FROM documents WHERE name = ? OR name = ?").run(room, `${room}~comments`).changes) +
             Number(b.prepare("DELETE FROM room_owners WHERE room = ?").run(room).changes) +
             Number(b.prepare("DELETE FROM shares WHERE room = ?").run(room).changes);
           if (n > 0) {
-            b.exec("VACUUM");
+            // VACUUM writes a copy of the database (and a journal): about twice its size, with a margin.
+            if (freeBytes(dirBackups) >= 2 * statSync(file).size + 1024 * 1024) b.exec("VACUUM");
+            else unvacuumed++;
             purged++;
           }
           b.close();
           b = null;
-        } catch {
+        } catch (e) {
           try {
             b?.close();
           } catch {
             /* already closed */
           }
-          for (const x of [file, `${file}-journal`, `${file}-wal`, `${file}-shm`]) rmSync(x, { force: true });
-          removed++;
+          // errcode may be an extended code: its low byte is the primary one (11 SQLITE_CORRUPT, 26 SQLITE_NOTADB).
+          const primary = Number(e?.errcode) & 0xff;
+          if (primary === 11 || primary === 26) {
+            for (const x of [file, `${file}-journal`, `${file}-wal`, `${file}-shm`]) rmSync(x, { force: true });
+            removed++;
+          } else failed.push(f);
         }
       }
-      return { purged, removed };
+      return { purged, removed, failed, unvacuumed };
     },
     /** W12.H3: retention for one kind of room (names starting with `prefix`): delete those not changed since `cutoffMs`. */
     sweepPrefix(prefix, cutoffMs) {

@@ -3,11 +3,14 @@
  * delete the study room, and ask whether it is still stored.
  *
  * Both go over the token socket (the app's CSP allows ws:/wss: to any host,
- * not https:). The request carries what each server checks before it
- * deletes anything: a room token for the room (the self-hosted Node server,
- * sync-server/collab-server.mjs) and the room proof that the committed name
- * commits to (the public Worker, edge-workers/collab/worker.mjs). Both come
- * from the room's password, so only a participant can delete the room.
+ * not https:). The request carries the room proof that the committed name
+ * commits to, which comes from the room's password, and both servers check
+ * it before they delete anything (the public Worker,
+ * edge-workers/collab/worker.mjs, and, since review Z7-L6, the self-hosted
+ * Node server, sync-server/collab-server.mjs, which also wants an edit token
+ * for the room and refuses a name committing to another proof than the
+ * room's first). The token alone does not show the password: on the Node
+ * server anyone with the access key and the room's name can get one.
  */
 import { committedRoomName, roomProof } from "../collab/roomProof";
 import { requestRoomToken } from "../collab/roomToken";

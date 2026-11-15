@@ -61,4 +61,9 @@ relay, and to measure the delay from where you are, see
 
 To run your own Node server with the same rules, start
 `sync-server/collab-server.mjs` with `COLLAB_E2EE_ONLY=1`. Rooms unchanged
-for `COLLAB_RETENTION_DAYS` days (90 by default) are deleted.
+for `COLLAB_RETENTION_DAYS` days (90 by default) are deleted. **End session**
+works there too, with the same check: the request carries the value derived
+from the room password that the room's name commits to. The room is then
+taken out of the server's backups as well. A backup the server cannot
+rewrite at that moment (another program has it open, or the disk is full) is
+kept as it was, and the room is taken out of it with the next backup round.
