@@ -73,6 +73,18 @@ changed (a re-saved file, a newer PDF engine), the highlight still lands on
 the right words. If the text is gone, the highlight stays in the list with
 a note that its text wasn't found.
 
+## Ink
+
+**Ink** in the toolbar turns the pen on. Draw on the page with a pen, a finger
+or the mouse. A pen's pressure is kept. **Undo stroke** removes the last
+stroke on the current page. The strokes are saved in the same companion note
+as the highlights, in a block of their own (`lumen-pdf-ink`), as W3C Web
+Annotations: the page, plus an SVG of the strokes in page units, so they stay
+in place at any zoom. Saving highlights never touches the ink block, and
+saving ink never touches the highlights. If you move the PDF together with its
+note, the ink stays its own. If the ink block can't be read, the reader says
+so and changes nothing.
+
 ## Search
 
 Type in **Search in this PDF** and press Enter; Enter again goes to the
