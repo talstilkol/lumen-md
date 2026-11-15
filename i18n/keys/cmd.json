@@ -816,6 +816,11 @@
       "vars": []
     },
     {
+      "key": "cmd.entities.review",
+      "en": "Entity graph: proposals to review",
+      "vars": []
+    },
+    {
       "key": "cmd.epub.open",
       "en": "Open an EPUB for reading…",
       "vars": []

@@ -159,6 +159,7 @@
   "cmd.edit.redact.hint": "wird aus jedem Export entfernt",
   "cmd.edit.toggleDirection": "Absatzrichtung umschalten (rechts nach links ↔ links nach rechts)",
   "cmd.edit.toggleDirection.hint": "Wird als unsichtbares Richtungszeichen am Absatzanfang in der Notiz gespeichert; dir: rtl | ltr | auto im Frontmatter gilt für die ganze Notiz",
+  "cmd.entities.review": "Entitätsgraph: Vorschläge prüfen",
   "cmd.epub.open": "EPUB zum Lesen öffnen…",
   "cmd.export.latexProject": "LaTeX-Projekt exportieren (akademisch, Hebräisch)…",
   "cmd.export.latexProject.hint": "main.tex für LuaLaTeX / XeLaTeX mit Hebräisch von rechts nach links, Mathematik, [@key]-Zitaten aus den .bib-Dateien und den Bildern, als ZIP",
