@@ -23,7 +23,7 @@
  * through `withReviewWarnings`, which costs them what any review warning
  * costs, and the card carries `rtl` and `rtlTested`.
  */
-import { withReviewWarnings, type ReviewFinding, type Scorecard } from "../plugins/runtime/review";
+import { withReviewWarnings, type ReviewFinding, type Scorecard } from "./review";
 
 export const RTL_SCREENS = ["editor", "preview", "table", "lists", "callouts", "code-in-hebrew", "bases", "settings"] as const;
 

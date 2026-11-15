@@ -4,7 +4,7 @@
  * W11.S14 review (#701's design, src/plugins/runtime/review.ts): each theme
  * is reviewed as a CSS-only version (licence, public source, no remote CSS),
  * then checked for physical left/right CSS and WCAG 2.2 contrast in light and
- * dark (src/theme/rtlCheck.ts). Like the plugins' scorecards
+ * dark (src/plugins/runtime/rtlCheck.ts). Like the plugins' scorecards
  * (scripts/review-plugins.mjs), one file per version goes to
  * public/themes/examples/scorecards/<id>@<version>.json.
  *
@@ -29,7 +29,7 @@ if (!process.execArgv.includes("--import")) {
 }
 
 const { reviewPluginVersion } = await import(pathToFileURL(join(ROOT, "src/plugins/runtime/review.ts")).href);
-const { rtlThemeCard, themeTokens, withRtl } = await import(pathToFileURL(join(ROOT, "src/theme/rtlCheck.ts")).href);
+const { rtlThemeCard, themeTokens, withRtl } = await import(pathToFileURL(join(ROOT, "src/plugins/runtime/rtlCheck.ts")).href);
 
 const args = process.argv.slice(2);
 const opt = (name) => (args.includes(name) ? args[args.indexOf(name) + 1] : undefined);

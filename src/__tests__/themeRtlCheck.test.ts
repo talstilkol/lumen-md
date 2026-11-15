@@ -8,7 +8,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync, readdirSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { join, resolve } from "node:path";
-import { contrastRatio, parseColour, physicalCssFindings, RTL_SCREENS, rtlThemeCard, themeContrast, themeTokens, withRtl } from "../theme/rtlCheck";
+import { contrastRatio, parseColour, physicalCssFindings, RTL_SCREENS, rtlThemeCard, themeContrast, themeTokens, withRtl } from "../plugins/runtime/rtlCheck";
 import { reviewPluginVersion } from "../plugins/runtime/review";
 
 const ROOT = resolve(__dirname, "../..");
