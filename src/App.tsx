@@ -31,6 +31,7 @@ const ImageHostsPanel = lazy(() => import("./ui/ImageHostsPanel").then(m => ({ d
 const AiDoctorPanel = lazy(() => import("./ui/AiDoctorPanel").then(m => ({ default: m.AiDoctorPanel })));
 const AgentReviewPanel = lazy(() => import("./ui/AgentReviewPanel").then(m => ({ default: m.AgentReviewPanel })));
 const ImportWizard = lazy(() => import("./storage/import/ImportWizard").then(m => ({ default: m.ImportWizard })));
+const InstallDialog = lazy(() => import("./pwa/InstallDialog").then((m) => ({ default: m.InstallDialog })));
 const VersionHistory = lazy(() => import("./ui/VersionHistory").then(m => ({ default: m.VersionHistory })));
 const MarkdownTableEditor = lazy(() => import("./ui/MarkdownTableEditor").then(m => ({ default: m.MarkdownTableEditor })));
 // PDF reader (plan 4.14): pdf.js and the reader load only when a PDF is opened.
@@ -192,6 +193,7 @@ export default function App() {
   const [agentReviewOpen, setAgentReviewOpen] = useState(false);
   const openAgentReview = useCallback(() => setAgentReviewOpen(true), []);
   const [importOpen, setImportOpen] = useState(false);
+  const [installOpen, setInstallOpen] = useState(false);
   const [trashOpen, setTrashOpen] = useState(false);
   const [propertiesOpen, setPropertiesOpen] = useState(false);
   const [captureOpen, setCaptureOpen] = useState(false);
@@ -371,6 +373,7 @@ export default function App() {
   const agentReviewPending = useAgentReview(editorRef, openAgentReview);
   useWindowEvent("lumen-open-agent-review", openAgentReview);
   useWindowEvent("lumen-open-import", () => setImportOpen(true));
+  useWindowEvent("lumen-open-install", () => setInstallOpen(true));
 
   // Comment-anchor click in the editor → window event from
   // commentDecorations.ts. Open the side panel + jump the panel
@@ -678,6 +681,7 @@ export default function App() {
           {privacyOpen && <PrivacyLedgerPanel open={privacyOpen} onClose={() => setPrivacyOpen(false)} />}
           {trashOpen && <TrashPanel open={trashOpen} onClose={() => setTrashOpen(false)} />}
           {importOpen && <ImportWizard open={importOpen} onClose={() => setImportOpen(false)} />}
+          {installOpen && <InstallDialog open={installOpen} onClose={() => setInstallOpen(false)} />}
           {propertiesOpen && <PropertiesPanel open={propertiesOpen} onClose={() => setPropertiesOpen(false)} text={doc.content} applyEdit={applyPropertiesEdit} />}
           {captureOpen && <QuickCapture open={captureOpen} voice={captureVoice} onClose={() => { setCaptureOpen(false); setCaptureVoice(false); }} />}
           {imageHostsOpen && <ImageHostsPanel open={imageHostsOpen} onClose={() => setImageHostsOpen(false)} />}
