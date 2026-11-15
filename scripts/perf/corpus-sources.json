@@ -1,0 +1,29 @@
+{
+  "_comment": "W11.Q1: the dumps scripts/perf/corpus-vault.mjs downloads. None of them is committed. sha256 is null until the owner's first run with --record-pins (the cloud sandbox cannot reach dumps.wikimedia.org or GitHub archives); after that a changed file is refused. To move to a newer dump, change url and file and set sha256 back to null in the same commit.",
+  "sources": [
+    {
+      "id": "hewiki",
+      "url": "https://dumps.wikimedia.org/hewiki/20261101/hewiki-20261101-pages-articles.xml.bz2",
+      "file": "hewiki-20261101-pages-articles.xml.bz2",
+      "sha256": null,
+      "license": "CC-BY-SA-4.0",
+      "attribution": "Hebrew Wikipedia contributors, https://he.wikipedia.org (dump of 2026-11-01)"
+    },
+    {
+      "id": "enwiki",
+      "url": "https://dumps.wikimedia.org/enwiki/20261101/enwiki-20261101-pages-articles1.xml-p1p41242.bz2",
+      "file": "enwiki-20261101-pages-articles1.xml-p1p41242.bz2",
+      "sha256": null,
+      "license": "CC-BY-SA-4.0",
+      "attribution": "English Wikipedia contributors, https://en.wikipedia.org (dump of 2026-11-01, part 1)"
+    },
+    {
+      "id": "benyehuda",
+      "url": "https://codeload.github.com/projectbenyehuda/public_domain_dump/tar.gz/5e4277fead7b565f32cc4b352abd3565023a77d8",
+      "file": "benyehuda-public_domain_dump-5e4277f.tar.gz",
+      "sha256": null,
+      "license": "public-domain",
+      "attribution": "Project Ben-Yehuda, public_domain_dump VERSION 2026-03, commit 5e4277f"
+    }
+  ]
+}

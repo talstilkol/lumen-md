@@ -1,0 +1,52 @@
+[
+  {
+    "vault": "/tmp/vault-docs-1k",
+    "notes": 1000,
+    "bytes": 2987108,
+    "origin": "derived-from-docs",
+    "coldCache": "no",
+    "coldOpenMs": 1365,
+    "warmOpenMs": 1747,
+    "search": {
+      "queries": 50,
+      "p50Ms": 23.2,
+      "p95Ms": 251.2,
+      "found": 50
+    },
+    "saveToIndexMs": 3,
+    "saveFound": true,
+    "backlinks": {
+      "p50Ms": 0,
+      "p95Ms": 0.1,
+      "hits": 1
+    },
+    "idle": {
+      "seconds": 60,
+      "cpuPct": 0.8,
+      "maxStallMs": 137.8
+    },
+    "peakRssMB": 477,
+    "machine": {
+      "platform": "linux",
+      "release": "6.18.44-fc-v470",
+      "arch": "x64",
+      "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+      "cores": 2,
+      "memGB": 8,
+      "node": "v22.22.0"
+    },
+    "date": "2026-11-15T01:02:03.992Z",
+    "targets": {
+      "warmOpenMs": 2000,
+      "coldOpenMs": 8000,
+      "searchP95Ms": 200,
+      "saveToIndexMs": 50,
+      "idleCpuPct": 2,
+      "idleMaxStallMs": 50
+    },
+    "missed": [
+      "search p95 251.2 ms > 200",
+      "idle stall 137.8 ms > 50"
+    ]
+  }
+]
