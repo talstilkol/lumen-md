@@ -344,9 +344,7 @@
       "runs": "ollama",
       "delivery": "ollama-pull",
       "catalog": "OLLAMA_CATALOG (src/ai/modelCatalog.ts)",
-      "match": [
-        "aya-expanse"
-      ],
+      "match": ["aya-expanse"],
       "verified": true,
       "notes": "Non-commercial. Currently in OLLAMA_CATALOG, and recommendOllamaModel() picks it for Hebrew notes on 8-11 GB machines (the AI doctor offers a one-click pull). Removal is task 1.7."
     },
@@ -422,9 +420,7 @@
       "runs": "ollama",
       "delivery": "ollama-pull",
       "catalog": "OLLAMA_CATALOG (src/ai/modelCatalog.ts); 'ollama pull llama3.1' hint (src/commands/useCommands.ts)",
-      "match": [
-        "llama3.1"
-      ],
+      "match": ["llama3.1"],
       "verified": true,
       "notes": "Not a default."
     },
@@ -600,9 +596,7 @@
       "runs": "browser",
       "delivery": "bundled",
       "catalog": "LANGS / langPath() (src/ai/ocr.ts)",
-      "match": [
-        "tessdata_fast"
-      ],
+      "match": ["tessdata_fast"],
       "verified": true,
       "notes": "Shipped same-origin as public/tesseract/lang/heb.traineddata.gz (gzip -n -9 of the upstream file at commit 87416418657359cb625c412a48b6e1d6d41c29bd; upstream sha256 11f9e43ab227f786352a50f75c94c2e9906f1baba86d93276da19da7ce0904db, checked by src/__tests__/ocrLangData.test.ts). Apache-2.0 text beside it in public/tesseract/lang/LICENSE. Plan 7.5."
     },
@@ -618,9 +612,7 @@
       "runs": "browser",
       "delivery": "bundled",
       "catalog": "LANGS / langPath() (src/ai/ocr.ts)",
-      "match": [
-        "tessdata_fast"
-      ],
+      "match": ["tessdata_fast"],
       "verified": true,
       "notes": "Shipped same-origin as public/tesseract/lang/eng.traineddata.gz (gzip -n -9 of the upstream file at commit 87416418657359cb625c412a48b6e1d6d41c29bd; upstream sha256 7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2, checked by src/__tests__/ocrLangData.test.ts). Apache-2.0 text beside it in public/tesseract/lang/LICENSE. Plan 7.5."
     },
@@ -636,9 +628,7 @@
       "runs": "browser",
       "delivery": "bundled",
       "catalog": "scripts/copy-pyodide.mjs → public/pyodide/ (src/plugins/LivePyBlock.tsx)",
-      "match": [
-        "pyodide"
-      ],
+      "match": ["pyodide"],
       "verified": true,
       "notes": "Shipped unmodified, so MPL-2.0's file-level copyleft only asks us to keep its notices and point to its source."
     },
@@ -654,9 +644,7 @@
       "runs": "browser",
       "delivery": "user-download",
       "catalog": "HEBREW_DICT_URL (src/ai/hebrewSpell.ts)",
-      "match": [
-        "wooorm/dictionaries"
-      ],
+      "match": ["wooorm/dictionaries"],
       "verified": true,
       "notes": "Must never be bundled. The app downloads it from upstream only after an explicit user action and shows its licence first (HEBREW_DICT_LICENSE); that exception is recorded in licenses.allow.json."
     },
@@ -672,11 +660,7 @@
       "runs": "browser",
       "delivery": "bundled",
       "catalog": "HEBREW_FREQ_PATH (src/ai/hebrewFreq.ts) → public/dict/he_50k.txt, fetched lazily by src/ai/hebrewSpell.worker.ts",
-      "match": [
-        "he_50k",
-        "FrequencyWords",
-        "dict/he_50k.txt"
-      ],
+      "match": ["he_50k", "FrequencyWords", "dict/he_50k.txt"],
       "verified": true,
       "notes": "Plan 9.2. Shipped unmodified next to its licence (public/dict/LICENSE.md), so ShareAlike binds only the list itself, not the app; every spelling hint names the list and its licence (HEBREW_FREQ_CREDIT). Suggestion-only: the list comes from subtitles and has typos of its own. Content licence from the repo README (\"CC-by-sa-4.0 for content\"; code is MIT), checked 2026-10-19 at commit 525f9b5.",
       "unmodified": true,
@@ -694,10 +678,7 @@
       "runs": "browser",
       "delivery": "user-download",
       "catalog": "LEXICON_PACK_PATH (src/lexicon/store.ts) → public/lexicon/he-wiktionary.json, downloaded on request into Cache Storage",
-      "match": [
-        "hewiktionary",
-        "lexicon/he-wiktionary.json"
-      ],
+      "match": ["hewiktionary", "lexicon/he-wiktionary.json"],
       "verified": true,
       "notes": "Plan W5.26. Built from the hewiktionary pages-articles dump; the pack is a separate file next to its licence (public/lexicon/LICENSE.md), so ShareAlike binds the pack, not the app (same as frequencywords-he-50k). Chosen over Hspell-derived lists, which are AGPL-3.0 and cannot ship inside the MIT app. Text licence: Wikimedia projects are CC BY-SA 4.0 since 2023 (Terms of Use §7).",
       "unmodified": false
@@ -729,10 +710,7 @@
       "runs": "browser",
       "delivery": "none",
       "catalog": "deny-list",
-      "match": [
-        "Qwen2.5-3B",
-        "qwen2.5:3b"
-      ],
+      "match": ["Qwen2.5-3B", "qwen2.5:3b"],
       "verified": true,
       "notes": "Unlike the 0.5B/1.5B/7B sizes, 3B is research-only."
     },
@@ -748,10 +726,7 @@
       "runs": "ollama",
       "delivery": "none",
       "catalog": "deny-list",
-      "match": [
-        "Qwen2.5-72B",
-        "qwen2.5:72b"
-      ],
+      "match": ["Qwen2.5-72B", "qwen2.5:72b"],
       "verified": true,
       "notes": "Not Apache-2.0; forbidden by project policy."
     },
@@ -767,10 +742,7 @@
       "runs": "browser",
       "delivery": "none",
       "catalog": "deny-list",
-      "match": [
-        "Qwen2.5-Coder-3B",
-        "qwen2.5-coder:3b"
-      ],
+      "match": ["Qwen2.5-Coder-3B", "qwen2.5-coder:3b"],
       "verified": true,
       "notes": ""
     },
@@ -786,10 +758,7 @@
       "runs": "browser",
       "delivery": "none",
       "catalog": "deny-list",
-      "match": [
-        "nllb-200",
-        "nllb"
-      ],
+      "match": ["nllb-200", "nllb"],
       "verified": true,
       "notes": "All NLLB-200 checkpoints."
     },
@@ -850,9 +819,7 @@
       "runs": "browser",
       "delivery": "none",
       "catalog": "deny-list",
-      "match": [
-        "saspeech"
-      ],
+      "match": ["saspeech"],
       "verified": true,
       "notes": "Any voice trained on SASPEECH, whatever the model code's own licence."
     },
@@ -970,33 +937,11 @@
       "verified": true,
       "notes": "Live dictation (plan 6.1). Pinned revision ee769a2a13b887f91572eec349458bfb0fe79e7a, sha256 per file; downloaded only when the user starts it. CC BY: credited in the dictation dialog and in Credits.",
       "files": [
-        {
-          "path": "sherpa-onnx/encoder.int8.onnx",
-          "sha256": "6c6febcb74a09435315a1d872a6539f6e7fc2c333533f14c74edc0e85c49ffcd",
-          "bytes": 70478964,
-          "license": "CC-BY-4.0",
-          "attribution": "Hebrew speech recognition: ivrit.ai Zipformer2 streaming model © ivrit.ai, licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Based on k2-fsa/icefall (Apache-2.0)."
-        },
-        {
-          "path": "sherpa-onnx/decoder.int8.onnx",
-          "sha256": "feb03e7c8aa761593a9284a6fa1e91259be3702de75f630062256c1a59c5a906",
-          "bytes": 1049105,
-          "license": "CC-BY-4.0",
-          "attribution": "Hebrew speech recognition: ivrit.ai Zipformer2 streaming model © ivrit.ai, licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Based on k2-fsa/icefall (Apache-2.0)."
-        },
-        {
-          "path": "sherpa-onnx/joiner.int8.onnx",
-          "sha256": "1d2c6d8e6dabc5eb52de52e95718e9bdfbffbfe7ead3808fb5ffd74e83bd9cae",
-          "bytes": 771805,
-          "license": "CC-BY-4.0",
-          "attribution": "Hebrew speech recognition: ivrit.ai Zipformer2 streaming model © ivrit.ai, licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Based on k2-fsa/icefall (Apache-2.0)."
-        }
+        {"path":"sherpa-onnx/encoder.int8.onnx","sha256":"6c6febcb74a09435315a1d872a6539f6e7fc2c333533f14c74edc0e85c49ffcd","bytes":70478964,"license":"CC-BY-4.0","attribution":"Hebrew speech recognition: ivrit.ai Zipformer2 streaming model © ivrit.ai, licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Based on k2-fsa/icefall (Apache-2.0)."},
+        {"path":"sherpa-onnx/decoder.int8.onnx","sha256":"feb03e7c8aa761593a9284a6fa1e91259be3702de75f630062256c1a59c5a906","bytes":1049105,"license":"CC-BY-4.0","attribution":"Hebrew speech recognition: ivrit.ai Zipformer2 streaming model © ivrit.ai, licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Based on k2-fsa/icefall (Apache-2.0)."},
+        {"path":"sherpa-onnx/joiner.int8.onnx","sha256":"1d2c6d8e6dabc5eb52de52e95718e9bdfbffbfe7ead3808fb5ffd74e83bd9cae","bytes":771805,"license":"CC-BY-4.0","attribution":"Hebrew speech recognition: ivrit.ai Zipformer2 streaming model © ivrit.ai, licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Based on k2-fsa/icefall (Apache-2.0)."}
       ],
-      "benchmarks": [
-        "asr-ivrit-eval-d1",
-        "asr-ivrit-eval-whatsapp",
-        "asr-fleurs-he"
-      ]
+      "benchmarks": ["asr-ivrit-eval-d1", "asr-ivrit-eval-whatsapp", "asr-fleurs-he"]
     },
     {
       "id": "silero-vad-v5",
@@ -1061,11 +1006,7 @@
       "catalog": "WHISPER_MODELS.turboHe (src/ai/transformersEngine.ts)",
       "verified": false,
       "notes": "Hebrew files on WebGPU with f16 and >= 1.2 GB VRAM budget (plan 6.1). The ONNX repo's card declares no licence; the source model ivrit-ai/whisper-large-v3-turbo is apache-2.0 (HF API, 2026-10-19). Load/latency measured by the owner (15.3).",
-      "benchmarks": [
-        "asr-ivrit-eval-d1",
-        "asr-ivrit-eval-whatsapp",
-        "asr-fleurs-he"
-      ]
+      "benchmarks": ["asr-ivrit-eval-d1", "asr-ivrit-eval-whatsapp", "asr-fleurs-he"]
     },
     {
       "id": "itayinbar/Ozen-v1",
@@ -1103,9 +1044,7 @@
       "runs": "browser",
       "delivery": "bundled",
       "catalog": "src/text/langId.ts (lazy chunk; plan 6.5)",
-      "match": [
-        "franc-min"
-      ],
+      "match": ["franc-min"],
       "verified": true,
       "notes": "Local language identification for translation, grammar, OCR and read-aloud. Loaded on demand, never in the startup chunk. Also checked by the npm part of the gate (MIT, with its MIT dependencies trigram-utils, n-gram and collapse-white-space)."
     },
@@ -1121,9 +1060,7 @@
       "runs": "browser",
       "delivery": "none",
       "catalog": "not shipped (plan 6.5: noted as the more accurate fallback for short texts)",
-      "match": [
-        "eld/"
-      ],
+      "match": ["eld/"],
       "verified": true,
       "notes": "Apache-2.0 per the repository's LICENSE (nitotm/efficient-language-detector-js, main, checked 19.10.2026) and the npm metadata. Not a dependency: ~9 MB is too large for the gain on Lumen's eight UI languages; the noted fallback if franc-min falls short on Tatoeba (plan 6.5)."
     },
@@ -1144,7 +1081,7 @@
       },
       "catalog": "CONVERTED_MODELS (src/ai/convertedModels.ts)",
       "verified": true,
-      "notes": "Converted to ONNX by .github/workflows/model-convert.yml (plan 6.0). Downloaded only with consent, size shown first, cached in OPFS; not downloadable until the host is chosen (15.9)."
+      "notes": "Converted to ONNX by scripts/models/convert.mjs (plan 6.0). Downloaded only with consent, size shown first, cached in OPFS; not downloadable until the host is chosen (15.9)."
     },
     {
       "id": "opus-mt-tc-big-he-en",
@@ -1163,7 +1100,7 @@
       },
       "catalog": "CONVERTED_MODELS (src/ai/convertedModels.ts)",
       "verified": true,
-      "notes": "Converted to ONNX by .github/workflows/model-convert.yml (plan 6.0). Downloaded only with consent, size shown first, cached in OPFS; not downloadable until the host is chosen (15.9). CC BY 4.0: the attribution must be shown where the model is offered."
+      "notes": "Converted to ONNX by scripts/models/convert.mjs (plan 6.0). Downloaded only with consent, size shown first, cached in OPFS; not downloadable until the host is chosen (15.9). CC BY 4.0: the attribution must be shown where the model is offered."
     },
     {
       "id": "dictabert-ner",
@@ -1182,11 +1119,8 @@
       },
       "catalog": "CONVERTED_MODELS (src/ai/convertedModels.ts)",
       "verified": true,
-      "notes": "Converted to ONNX by .github/workflows/model-convert.yml (plan 6.0). Downloaded only with consent, size shown first, cached in OPFS; not downloadable until the host is chosen (15.9). CC BY 4.0: the attribution must be shown where the model is offered.",
-      "benchmarks": [
-        "ner-nemo",
-        "ner-bmc"
-      ]
+      "notes": "Converted to ONNX by scripts/models/convert.mjs (plan 6.0). Downloaded only with consent, size shown first, cached in OPFS; not downloadable until the host is chosen (15.9). CC BY 4.0: the attribution must be shown where the model is offered.",
+      "benchmarks": ["ner-nemo", "ner-bmc"]
     },
     {
       "id": "bert-base-ner",
@@ -1224,7 +1158,7 @@
       },
       "catalog": "CONVERTED_MODELS (src/ai/convertedModels.ts)",
       "verified": true,
-      "notes": "Converted to ONNX by .github/workflows/model-convert.yml (plan 6.0). Downloaded only with consent, size shown first, cached in OPFS; not downloadable until the host is chosen (15.9)."
+      "notes": "Converted to ONNX by scripts/models/convert.mjs (plan 6.0). Downloaded only with consent, size shown first, cached in OPFS; not downloadable until the host is chosen (15.9)."
     },
     {
       "id": "Xenova/m2m100_418M",
@@ -1317,20 +1251,11 @@
       },
       "catalog": "CONVERTED_MODELS (src/ai/convertedModels.ts), NAKDIMON_ID (src/ai/nikudService.ts)",
       "verified": true,
-      "notes": "Stage 1 of Hebrew niqqud (plan 6.3). The ONNX file ships in the MIT-licensed repository (LICENSE: Copyright 2022, Elazar Gershuni); model-convert.yml mirrors it byte for byte at the pinned commit and checks this sha256. Served from CONVERTED_MODELS_BASE once Tal picks the host (15.9); downloaded only after the consent dialog.",
+      "notes": "Stage 1 of Hebrew niqqud (plan 6.3). The ONNX file ships in the MIT-licensed repository (LICENSE: Copyright 2022, Elazar Gershuni); scripts/models/convert.mjs mirrors it byte for byte at the pinned commit and checks this sha256. Served from CONVERTED_MODELS_BASE once Tal picks the host (15.9); downloaded only after the consent dialog.",
       "files": [
-        {
-          "path": "Nakdimon.onnx",
-          "sha256": "ab08a8c47daf33886c224859347fa5420c2bfe7ecf4afd2d3387f32b0af12c67",
-          "bytes": 21312852,
-          "dtype": "fp32",
-          "license": "MIT",
-          "attribution": "Nakdimon © 2022 Elazar Gershuni (Gershuni & Pinter, “Restoring Hebrew Diacritics Without a Dictionary”, NAACL Findings 2022), licensed under the MIT License; mirrored unchanged by Lumen."
-        }
+        {"path":"Nakdimon.onnx","sha256":"ab08a8c47daf33886c224859347fa5420c2bfe7ecf4afd2d3387f32b0af12c67","bytes":21312852,"dtype":"fp32","license":"MIT","attribution":"Nakdimon © 2022 Elazar Gershuni (Gershuni & Pinter, “Restoring Hebrew Diacritics Without a Dictionary”, NAACL Findings 2022), licensed under the MIT License; mirrored unchanged by Lumen."}
       ],
-      "benchmarks": [
-        "nikud-nakdimon-test"
-      ]
+      "benchmarks": ["nikud-nakdimon-test"]
     },
     {
       "id": "dictabert-char-menaked",
@@ -1350,9 +1275,7 @@
       "catalog": "CONVERTED_MODELS (src/ai/convertedModels.ts), MENAKED_ID (src/ai/nikudService.ts)",
       "verified": false,
       "notes": "Plan W2.5: the high-quality niqqud layer above Nakdimon. Custom architecture (trust_remote_code), so it is not an optimum export: scripts/models/export-menaked.py exports it to ONNX, quantises it to int8 and writes menaked.json (vocabulary, class lists, tensor names) at a pinned revision; then scripts/models/registry-edit.mjs records the files here. Until then (no files) the app uses Nakdimon. CC BY 4.0: the attribution is shown in the consent dialog.",
-      "benchmarks": [
-        "nikud-nakdimon-test"
-      ]
+      "benchmarks": ["nikud-nakdimon-test"]
     },
     {
       "id": "DictaLM-3.0-12B",
@@ -1383,11 +1306,7 @@
       "catalog": "WHISPER_GGML (src/ai/dictation/whisperDesktop.ts)",
       "verified": true,
       "notes": "Desktop file transcription through whisper.cpp (plan W1.17). The source model is apache-2.0 (HF API, 2026-10-19, see the -onnx entry). The ggml file's repository, revision, size and sha256 are owner checks (Hugging Face unreachable where this was written): until WHISPER_GGML is pinned the engine is never offered, and the app checks size + sha256 before every use.",
-      "benchmarks": [
-        "asr-ivrit-eval-d1",
-        "asr-ivrit-eval-whatsapp",
-        "asr-fleurs-he"
-      ]
+      "benchmarks": ["asr-ivrit-eval-d1", "asr-ivrit-eval-whatsapp", "asr-fleurs-he"]
     },
     {
       "id": "whisper.cpp",
@@ -1418,9 +1337,7 @@
       "catalog": "NEURAL_VOICE_CANDIDATES (src/ai/publicGates.ts)",
       "verified": false,
       "decision": "W11.H8 (14.11): the weights are MIT, but a voice is licensed by its weights AND its training data (decision 15.10), and Resemble has not published the training data's terms. Class stays unknown, delivery none, until (1) Resemble answers in writing (W11.O2) and (2) the ASR round trip on the 200 frozen FLEURS-he prompts passes (W11.H9: CER ≤ 6 %, or within 2 points of natural speech). Only then: class allowed, verified true, files pinned. Desktop first; the browser only if the q4 export fits. Watermark (PerTh) disclosed to the user in the voice picker.",
-      "benchmarks": [
-        "tts-insva-fleurs-he"
-      ],
+      "benchmarks": ["tts-insva-fleurs-he"],
       "notes": "Candidate only: hidden in the UI by exposedNeuralVoices() until the decision's two conditions hold. Pipeline: niqqud (W2.5) → Chatterbox ONNX (src/ai/tts/chatterbox.ts)."
     },
     {
@@ -1436,10 +1353,7 @@
       "delivery": "none",
       "verified": false,
       "decision": "W11.H10 (14.11): the model card says MIT (research R2 §1.3), which settles the plan's MIT-vs-CC-BY question for the weights; the Dicta CC BY credit stays because the model is built on DictaBERT-char-menaked. verified: false until the card is re-read at a pinned revision (W11.M3). Not the SASPEECH-trained phonikud TTS voices, which stay forbidden (entry phonikud-tts).",
-      "benchmarks": [
-        "nikud-nakdimon-test",
-        "g2p-milim"
-      ],
+      "benchmarks": ["nikud-nakdimon-test", "g2p-milim"],
       "notes": "Niqqud + stress + vocal shva (G2P front end). Not referenced by app code yet; measured on the Nakdimon test set and MILIM first."
     },
     {
@@ -1455,10 +1369,7 @@
       "delivery": "none",
       "verified": false,
       "decision": "W11.H10 (14.11): weights released without a licence (arXiv 2606.20179, June 2026). Blocked until a licence is published; even then it voices read-aloud only if MILIM WER ≤ 0.8 × Phonikud's (renikudAllowed in src/eval/public/adapters/g2p.ts).",
-      "benchmarks": [
-        "g2p-milim",
-        "nikud-nakdimon-test"
-      ],
+      "benchmarks": ["g2p-milim", "nikud-nakdimon-test"],
       "notes": "G2P trained with ASR weak supervision on ~1.7k h of Knesset audio. MILIM WER/CER 24.3 / 6.6 vs Phonikud 35.6 / 10.6 per the paper."
     },
     {
@@ -1474,9 +1385,7 @@
       "delivery": "user-install",
       "catalog": "WHISPER_GGML_YI (src/ai/dictation/whisperDesktop.ts)",
       "verified": false,
-      "benchmarks": [
-        "asr-fleurs-yi"
-      ],
+      "benchmarks": ["asr-fleurs-yi"],
       "notes": "Yiddish file transcription on the desktop (plan W11.H18, W7.9) through the whisper.cpp track of W1.17. Licence from the ivrit.ai organisation card (research R2 §1.2), not re-read at a pinned revision: verified false until W11.M13 pins the ggml file (repository, revision, size, sha256). Until then the engine is never offered."
     },
     {
@@ -1492,10 +1401,7 @@
       "delivery": "none",
       "verified": false,
       "decision": "W11.H11 (15.11): a candidate only. It is an encoder (NEMO F1 90.96 large / 87.06 base, BMC 93.2–93.3 per the paper); Lumen would fine-tune base on NEMO, which is allowed only if NEMO's licence permits training and redistributing the fine-tuned weights — checked first (W11.M3). Until then DictaBERT-NER is the model.",
-      "benchmarks": [
-        "ner-nemo",
-        "ner-bmc"
-      ],
+      "benchmarks": ["ner-nemo", "ner-bmc"],
       "notes": "Not referenced by app code."
     },
     {
@@ -1527,11 +1433,7 @@
       "delivery": "none",
       "verified": false,
       "decision": "W11.H12 (15.11): conditional, not allowed, until the bank's terms are read — the card points to docs/DATA_STATEMENT.md for the terms of the MILA lexicon it derives from, which could not be read here. If the bank is free to redistribute: allowed; if not, the edit-script path (no bank) is the fallback to measure. Replaces the current search setup only with ≥ 92 % UD-IAHLT out-of-domain lemma accuracy and an nDCG@10 not lower than today's (pickLemmatizer).",
-      "benchmarks": [
-        "lemma-ud-iahltwiki",
-        "retrieval-heq",
-        "retrieval-mmteb-he"
-      ],
+      "benchmarks": ["lemma-ud-iahltwiki", "retrieval-heq", "retrieval-mmteb-he"],
       "notes": "Port of its lemma step: src/search/lemma/shoshan.ts. Not downloadable until W11.M3 exports and pins it."
     },
     {
@@ -1546,11 +1448,7 @@
       "runs": "browser",
       "delivery": "none",
       "verified": false,
-      "benchmarks": [
-        "lemma-ud-iahltwiki",
-        "retrieval-heq",
-        "retrieval-mmteb-he"
-      ],
+      "benchmarks": ["lemma-ud-iahltwiki", "retrieval-heq", "retrieval-mmteb-he"],
       "notes": "The other side of the W11.H12 A/B (src/search/lemma/dictaLex.ts). Licence from the model card; verified false until re-read at the pinned revision."
     },
     {

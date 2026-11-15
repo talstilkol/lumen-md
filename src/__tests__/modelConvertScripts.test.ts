@@ -1,5 +1,5 @@
 /**
- * The model-convert workflow's helpers (plan 6.0): which files are published,
+ * The model conversion's helpers (plan 6.0, scripts/models/convert.mjs): which files are published,
  * their manifest, and registry edits that keep the file's formatting.
  */
 import { describe, it, expect } from "vitest";
@@ -46,7 +46,8 @@ describe("published files", () => {
 
   it("every target has an expected licence and attribution, and a smoke test", () => {
     for (const t of TARGETS.models) {
-      expect(t.license, t.id).toMatch(/^(Apache-2\.0|CC-BY-4\.0)$/);
+      // MIT: bert-base-ner, the name finder of #678 (W10.C23), licence class "allowed" in models/registry.json.
+      expect(t.license, t.id).toMatch(/^(Apache-2\.0|CC-BY-4\.0|MIT)$/);
       expect(t.attribution.length, t.id).toBeGreaterThan(40);
       expect(t.smoke, t.id).toBeTruthy();
     }

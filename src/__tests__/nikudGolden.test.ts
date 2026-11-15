@@ -2,7 +2,7 @@
 /**
  * Plan 6.3 acceptance on the nikud dev split, with the real Nakdimon model —
  * when its file is on this machine (NAKDIMON_ONNX, or models/nakdimon/
- * Nakdimon.onnx from a model-convert run). The file is not in the repo, so
+ * Nakdimon.onnx from `npm run models:convert`). The file is not in the repo, so
  * without it this is skipped and the PR says "not measured".
  */
 import { describe, it, expect } from "vitest";

@@ -5,7 +5,7 @@
  * niqqud, add partial niqqud, remove niqqud.
  *
  * Stage 1 is Nakdimon (MIT): ≈ 21 MB, wasm, any device. It is mirrored by
- * .github/workflows/model-convert.yml and served from CONVERTED_MODELS_BASE;
+ * scripts/models/convert.mjs and served from CONVERTED_MODELS_BASE;
  * until Tal picks that host (15.9) adding niqqud reports "unavailable".
  * Removing niqqud needs no model.
  *

@@ -7,7 +7,7 @@
  *   node scripts/golden/evals/image-search.mjs --dev [--models DIR] [--out scores.json]
  *
  * Model: SigLIP base multilingual (Apache-2.0), the converted ONNX from
- * model-convert.yml (plan 6.0), loaded from --models DIR (one folder per
+ * scripts/models/convert.mjs (plan 6.0), loaded from --models DIR (one folder per
  * model id, as the workflow's artifact) or IMAGE_SEARCH_MODELS_DIR. Not
  * downloadable from this machine or the CI runner until Tal's 15.9(0) /
  * 15.9: without a folder the eval says "not runnable" and exits 0.

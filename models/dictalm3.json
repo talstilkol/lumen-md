@@ -23,7 +23,7 @@
       "runtimes": {
         "ollama": "official GGUF (Thinking variant only)",
         "web-llm": "needs an MLC conversion (q4f16_1) — not hosted anywhere Lumen can use yet",
-        "transformers.js": "needs an ONNX export through the 6.0 pipeline (ci/model-convert)"
+        "transformers.js": "needs an ONNX export through the 6.0 pipeline (scripts/models/convert.mjs)"
       },
       "ownerChecks": [
         "revision: the commit sha of dicta-il/DictaLM-3.0-1.7B-Instruct the eval ran on",
