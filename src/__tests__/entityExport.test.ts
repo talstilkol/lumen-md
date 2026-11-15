@@ -151,6 +151,20 @@ describe("W12.E8 Neo4j neo4j-admin import CSV", () => {
   });
 });
 
+describe("W12.E8 an export door: redacted text never leaves", () => {
+  it("a <redact> passage and a hidden comment inside a quote are removed in every format", () => {
+    const para = "רחל לוי <redact>מספר הטלפון 050-0000000</redact> חברה בוועד %%הערה נסתרת%% השכונה";
+    const e = mk(people[1], "member_of", orgs[0], para, para, "r.md", "r1");
+    const g: EntityGraph = { entities: graph.entities, edges: [e] };
+    for (const f of ["jsonld", "graphml", "turtle", "neo4j"] as const) {
+      const out = Object.values(exportGraph(g, f)).join("\n");
+      expect(out, f).not.toContain("050-0000000");
+      expect(out, f).not.toContain("הערה נסתרת");
+      expect(out, f).toContain("רחל לוי");
+    }
+  });
+});
+
 describe("W12.E8 file names", () => {
   it("gives one file per format, two for Neo4j", () => {
     expect(Object.keys(exportGraph(graph, "jsonld"))).toEqual(["entities.jsonld"]);
