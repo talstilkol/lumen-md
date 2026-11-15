@@ -40,6 +40,7 @@ const TrustedKeysSettings = lazy(() => import("./TrustedKeysSettings").then((m) 
 const OrgSettings = lazy(() => import("./OrgSettings").then((m) => ({ default: m.OrgSettings })));
 const ImageHostsSection = lazy(() => import("./ImageHostsPanel").then((m) => ({ default: m.ImageHostsSection })));
 const MonitoringSettings = lazy(() => import("./MonitoringSettings").then((m) => ({ default: m.MonitoringSettings })));
+const OpenAlexSwitch = lazy(() => import("../citations/OpenAlexSwitch").then((m) => ({ default: m.OpenAlexSwitch })));
 
 /** A settings file is a few KB; anything far larger isn't one. */
 const IMPORT_MAX_BYTES = 256 * 1024;
@@ -263,7 +264,12 @@ export function SettingsScreen({ tab: initialTab = "general", onClose, onOpenAud
       case "fineTune":
         return <FineTuneSettings open embedded onClose={onClose} />;
       case "privacy":
-        return <ImageHostsSection />;
+        return (
+          <>
+            <ImageHostsSection />
+            <OpenAlexSwitch />
+          </>
+        );
       case "security":
         return (
           <>

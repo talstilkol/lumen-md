@@ -287,6 +287,7 @@
 /src/ai/screenshotNote.ts                @talstilkol
 /src/book/app.ts                         @talstilkol
 /src/citations/run.ts                    @talstilkol
+/src/citations/openAlexLookup.ts         @talstilkol
 /src/commands/domains/exportActions.ts   @talstilkol
 /src/commands/domains/journalistActions.ts @talstilkol
 /src/pdf/zoteroSend.ts                   @talstilkol

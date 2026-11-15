@@ -21,6 +21,8 @@ const SRC = resolve(__dirname, "..");
  */
 const DOMAINS: Record<string, { module: string; users: string[]; prefixes: string[]; within?: string; shared?: string[] }> = {
   "entityGraph.json": { module: "ui/entityGraphStrings.ts", users: ["ui/EntityReviewPanel.tsx", "ui/EntityGraphView.tsx", "ui/EntityPage.tsx", "ui/WikidataLink.tsx"], prefixes: ["entityGraph."] },
+  // The OpenAlex switch in Settings → Privacy, its consent question and the "fill references" action (plan W12.X3); openAlexLookup.ts loads the strings with a dynamic import.
+  "openAlex.json": { module: "citations/openAlexStrings.ts", users: ["citations/OpenAlexSwitch.tsx", "citations/fillReferencesAction.ts", "ui/PropertiesPanel.tsx"], prefixes: ["openAlex."] },
   "caption.json": { module: "ai/captionStrings.ts", users: ["ai/caption.ts"], prefixes: ["caption."] },
   "nikud.json": { module: "ai/nikudStrings.ts", users: ["ai/nikudService.ts"], prefixes: ["toast.nikud.", "models.purpose.nikud", "nikud.alt."] },
   "eviction.json": { module: "storage/evictionStrings.ts", users: ["storage/evictionReminder.ts"], prefixes: ["storage.eviction."] },

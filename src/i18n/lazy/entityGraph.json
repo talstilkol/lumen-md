@@ -85,6 +85,7 @@
   "entityGraph.view.play": "Play",
   "entityGraph.view.relation": "Relation",
   "entityGraph.view.relations": "Relations",
+  "entityGraph.view.citationsOnly": "Citations only",
   "entityGraph.view.showGraph": "Show as graph",
   "entityGraph.view.showTable": "Show as table",
   "entityGraph.view.source": "Source",

@@ -98,3 +98,40 @@ notes state it and whether any rejects it). Under them: the quote with its
 note and paragraph, and the chain note → paragraph → quote → line, with
 the tool that proposed it and whether you confirmed it. A claim with no
 quote is marked and can't be copied out.
+## Citations
+
+Sources ([reading list](/workspace/reading-list/)) cite each other, and the
+graph shows that as **cites** relations:
+
+- a `[@key]` citation in a source note's text (pandoc syntax; the source's
+  own key is its `citekey:`);
+- a link from one source note to another (`[[Other source]]`);
+- `references:` of an item in your citation library (CSL-JSON, by cite key or
+  DOI);
+- `references:` of a source note (by cite key or DOI), for example the ones
+  filled from OpenAlex. Such a relation names the note and its `references`
+  property. A source note with the same cite key or DOI as a library item is
+  that item, and a pair the library already gives is shown once.
+
+Plain notes that cite are not sources, so they draw no edge. Each relation
+keeps where it was seen: the note and paragraph, or the library file.
+**Citations only** in the toolbar shows just these relations between
+sources and laws; press it again to show everything. The table lists who
+cites whom.
+
+Looking up references in OpenAlex (by DOI) is optional and off by default.
+The switch is **Settings → Privacy → Look up the references of a DOI in
+OpenAlex**. While it is off, nothing is sent and nothing is asked. While it
+is on, each lookup still asks you first, and then only the DOI goes to
+api.openalex.org, which the privacy ledger lists. A settings file you import
+never turns it on.
+
+To look one up, open a source note (`type: source`) that has a `doi:` (or a
+doi.org `url:`) and run **Citations: fill references from OpenAlex…** in ⌘K,
+or press **Fill references from OpenAlex** in its properties panel. Save the
+note first. The DOIs OpenAlex returns wait in **Property proposals** as a
+`references:` change, before → after; nothing is written until you approve
+it, and a rejected proposal writes nothing. References the note already has
+are kept and not added twice. Once approved, each reference to a source in
+your vault is a **cites** relation in the graph; the others are listed as
+unresolved.
