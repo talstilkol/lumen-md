@@ -60,6 +60,19 @@ describe("text/hebrew", () => {
     expect(hebrewFind("one ביתtwo", "ובית two")).toBe(null);
   });
 
+  it("strips up to three prefix letters, one at a time (W10.E26: the loop's start)", () => {
+    // ו + ב + ה in front of בית: all three come off, longest form first.
+    expect(prefixVariants("ובהבית")).toEqual(["ובהבית", "בהבית", "הבית", "בית"]);
+    // A fourth prefix letter stays: at most three.
+    expect(prefixVariants("וכשהבית")).toEqual(["וכשהבית", "כשהבית", "שהבית", "הבית"]);
+  });
+
+  it("finds a match at the very start of the text (offset 0)", () => {
+    expect(hebrewFind("בית גדול", "בית")).toEqual({ start: 0, end: 3 });
+    expect(hebrewFind("ביתנו", "והבית")).toEqual({ start: 0, end: 3 });
+    expect(hebrewFind("a", "a")).toEqual({ start: 0, end: 1 });
+  });
+
   it("measures the Hebrew share of the letters", () => {
     expect(hebrewRatio("שלום abcd")).toBe(0.5);
     expect(hebrewRatio("123 !")).toBe(0);

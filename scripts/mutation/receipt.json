@@ -92,6 +92,19 @@
       "tests": "a9c4aa2ea6a94ae7bb7340297d212d157a8118b010aee6760432fa39f91ddbfe",
       "date": "2026-11-12"
     },
+    "src/storage/zip.ts": {
+      "score": 90,
+      "caught": 72,
+      "survived": 8,
+      "invalid": 0,
+      "sampled": 80,
+      "mutants": 211,
+      "max": 80,
+      "runner": "shim",
+      "sha256": "7b10564f716e17c3627fab2aa45f64eed779b7aeb6416931fb8b00b3d8d27ff1",
+      "tests": "55edca3c0dbf6c62988947c9db94827b9c4e65ae53dc49dc1f1ea0d969b9d21a",
+      "date": "2026-11-15"
+    },
     "src/sync/e2ee/age.ts": {
       "score": 93.8,
       "caught": 75,
@@ -208,6 +221,19 @@
       "sha256": "8f4abb2fb9467cf98a75fe08a3523bc8e9afbaf82fa8d10ef55ef1d64a6c3e7b",
       "tests": "c852faf78c61d4abb6f2957f48065d723f8c100b450c90ca17ec712fbf5b55e2",
       "date": "2026-11-12"
+    },
+    "src/text/hebrew.ts": {
+      "score": 80.6,
+      "caught": 25,
+      "survived": 6,
+      "invalid": 0,
+      "sampled": 31,
+      "mutants": 31,
+      "max": 80,
+      "runner": "shim",
+      "sha256": "c66123455bbaee344127c2fde57c05a57ab850dee5a77a98b7a11fcb7a25c904",
+      "tests": "7d7221e6f0151959af2535fa4d38a25c55e1793d1b74ea141d611047b1547dde",
+      "date": "2026-11-15"
     }
   }
 }
