@@ -159,6 +159,17 @@
       "label": "Export to OpenDocument (ODT)",
       "group": "File",
       "hint": "LibreOffice text document, right-to-left paragraphs kept",
+      "id": "file.importVcard",
+      "label": "Import contacts (vCard)…",
+      "group": "File",
+      "hint": "A .vcf from your phone or Google becomes person notes; people already in the vault are merged",
+      "icon": "Download"
+    },
+    {
+      "id": "file.exportVcard",
+      "label": "Export people as vCard",
+      "group": "File",
+      "hint": "Every person note as one vCard 4.0 file, downloaded on this device",
       "icon": "Download"
     },
     {
@@ -2283,6 +2294,17 @@
       "label": "Export to OpenDocument (ODT)",
       "group": "File",
       "hint": "LibreOffice text document, right-to-left paragraphs kept",
+      "id": "file.importVcard",
+      "label": "Import contacts (vCard)…",
+      "group": "File",
+      "hint": "A .vcf from your phone or Google becomes person notes; people already in the vault are merged",
+      "icon": "Download"
+    },
+    {
+      "id": "file.exportVcard",
+      "label": "Export people as vCard",
+      "group": "File",
+      "hint": "Every person note as one vCard 4.0 file, downloaded on this device",
       "icon": "Download"
     },
     {
@@ -4378,6 +4400,8 @@
     "file.exportOrg",
     "file.exportOpml",
     "file.exportOdt",
+    "file.importVcard",
+    "file.exportVcard",
     "file.exportReveal",
     "file.exportEpub",
     "file.exportIpynb",

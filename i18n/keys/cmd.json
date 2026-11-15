@@ -1021,6 +1021,26 @@
       "vars": []
     },
     {
+      "key": "cmd.file.exportVcard",
+      "en": "Export people as vCard",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportVcard.hint",
+      "en": "Every person note as one vCard 4.0 file, downloaded on this device",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.importVcard",
+      "en": "Import contacts (vCard)…",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.importVcard.hint",
+      "en": "A .vcf from your phone or Google becomes person notes; people already in the vault are merged",
+      "vars": []
+    },
+    {
       "key": "cmd.file.new",
       "en": "New document",
       "vars": []

@@ -158,6 +158,7 @@ export default defineConfig({
             { label: "Typst export (Hebrew)", slug: "workspace/typst-export", translations: { he: "ייצוא Typst (עברית)" } },
             { label: "Notebooks, data files and maps", slug: "workspace/file-viewers", translations: { he: "מחברות, קובצי נתונים ומפות" } },
             { label: "Audio and video with a transcript", slug: "workspace/media-transcripts", translations: { he: "אודיו ווידאו עם תמלול" } },
+            { label: "Contacts (vCard)", slug: "workspace/contacts", translations: { he: "אנשי קשר (vCard)" } },
             { label: "Automations (when… then…)", slug: "workspace/automations", translations: { he: "אוטומציות (כש… אז…)" } },
           ],
         },

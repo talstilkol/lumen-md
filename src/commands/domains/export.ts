@@ -228,6 +228,20 @@ export function buildExportCommands({ handleExportHtml, liveDoc, getEditorView }
       group: t("group.file"),
       // Snapshot first: a tab switch while the chunk loads must not export another note.
       action: () => exportAs(liveDoc(), "odt"),
+      id: "file.importVcard",
+      label: t("cmd.file.importVcard"),
+      hint: t("cmd.file.importVcard.hint"),
+      icon: cmdIcons.Download,
+      group: t("group.file"),
+      action: async () => (await import("../../contacts/vcardActions")).importVcard(),
+    },
+    {
+      id: "file.exportVcard",
+      label: t("cmd.file.exportVcard"),
+      hint: t("cmd.file.exportVcard.hint"),
+      icon: cmdIcons.Download,
+      group: t("group.file"),
+      action: async () => (await import("../../contacts/vcardActions")).exportVcard(),
     },
     {
       id: "file.exportReveal",
