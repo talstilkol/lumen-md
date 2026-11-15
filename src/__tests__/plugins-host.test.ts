@@ -113,7 +113,7 @@ describe("plugin host", () => {
   it("keeps what the developer panel shows: calls, capability use, sandbox stats (W3.10)", async () => {
     const activity = vi.fn();
     const p = await load(
-      `lumen.on("go", async () => { await lumen.document.getText(); await lumen.document.getText(); await lumen.panel.open({ title: "x" }).catch(() => {}); });`,
+      `lumen.on("go", async () => { await lumen.document.getText(); await lumen.document.getText(); await lumen.panel.open({ title: "x" }).catch(() => { /* why: only the call count matters here */ }); });`,
       ["document:read"],
       { "document.getText": async () => "t" },
     );

@@ -78,7 +78,14 @@ window.addEventListener("message", (e) => {
     return;
   }
   if (msg.type === "shutdown") {
-    if (window.__lumenCleanup) try { window.__lumenCleanup(); } catch {}
+    if (window.__lumenCleanup) {
+      try {
+        window.__lumenCleanup();
+      } catch (err) {
+        // The plugin is unloaded either way; the host logs why its cleanup failed.
+        parent.postMessage({ type: "error", message: "plugin cleanup failed: " + String(err) }, "*");
+      }
+    }
     parent.postMessage({ type: "shutdown-ack" }, "*");
   }
 });
@@ -114,6 +121,8 @@ export function spawnPluginSandbox(opts: SandboxOptions): Promise<PluginHandle> 
     iframe.style.cssText = "position:fixed;left:-9999px;width:0;height:0;border:0";
     setSandboxedSrcdoc(iframe, bootHtml(opts.url));
     let ready = false;
+    // After destroy(): only the plugin's errors and its ack are still heard.
+    let closing = false;
 
     const onMessage = async (e: MessageEvent) => {
       if (e.source !== iframe.contentWindow) return; // foreign frames
@@ -126,10 +135,14 @@ export function spawnPluginSandbox(opts: SandboxOptions): Promise<PluginHandle> 
           id: opts.id,
           iframe,
           destroy() {
+            closing = true;
             iframe.contentWindow?.postMessage({ type: "shutdown" }, "*");
-            window.removeEventListener("message", onMessage);
-            // Give the plugin one tick to clean up before yanking the frame.
-            setTimeout(() => iframe.remove(), 50);
+            // Give the plugin one tick to clean up before yanking the frame,
+            // and keep listening until then, so a failed cleanup is logged.
+            setTimeout(() => {
+              window.removeEventListener("message", onMessage);
+              iframe.remove();
+            }, 50);
           },
         });
         return;
@@ -139,6 +152,7 @@ export function spawnPluginSandbox(opts: SandboxOptions): Promise<PluginHandle> 
         if (!ready) reject(new Error(msg.message ?? "plugin failed to load"));
         return;
       }
+      if (closing) return;
       if (msg.type === "call" && typeof msg.id === "number" && typeof msg.method === "string") {
         if (!opts.allowedMethods.includes(msg.method)) {
           iframe.contentWindow?.postMessage(
