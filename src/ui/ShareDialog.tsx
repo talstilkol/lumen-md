@@ -36,6 +36,7 @@ import "../collab/sharingStrings";
 import { HelpButton } from "./HelpButton";
 import { explainError } from "../lib/userError";
 import { EmptyState, learnHow } from "./EmptyState";
+import { Modal } from "./Modal";
 
 type Tab = "share" | "shared";
 
@@ -255,12 +256,9 @@ export function ShareDialog({ session, initialTab = "share", onClose, serverUrl 
   }, [onClose]);
 
   return (
-    <div className="cmd-palette-backdrop" onClick={onClose}>
+    <Modal aria-labelledby="share-dialog-title" className="cmd-palette-backdrop" onClick={onClose}>
       <div
         className="cmd-palette"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="share-dialog-title"
         onClick={(e) => e.stopPropagation()}
         style={{ maxWidth: 620, maxHeight: "82vh", display: "flex", flexDirection: "column" }}
       >
@@ -285,7 +283,7 @@ export function ShareDialog({ session, initialTab = "share", onClose, serverUrl 
           {tab === "share" ? <ShareTab session={session} server={server} /> : <SharedTab server={server} />}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

@@ -12,16 +12,15 @@ import "./translationSuggestStrings";
 import { SUPPORTED_LOCALES, getLocale, loadLocale, t } from "../i18n";
 import { isBetaLocale } from "../i18n/review";
 import { findStrings, suggestionBody, suggestionLink, type StringMatch } from "../i18n/suggest";
-import { useFocusTrap } from "./useFocusTrap";
 import { version } from "../../package.json";
 import { HelpButton } from "./HelpButton";
+import { Modal } from "./Modal";
 
 const input: CSSProperties = { inlineSize: "100%", padding: "4px 8px", border: "1px solid hsl(var(--border))", borderRadius: 6, background: "hsl(var(--bg))", color: "hsl(var(--fg))", fontSize: 13, boxSizing: "border-box" };
 const btn: CSSProperties = { border: "1px solid hsl(var(--border-strong))", borderRadius: 6, padding: "4px 12px", background: "transparent", color: "inherit", cursor: "pointer" };
 
 export function TranslationSuggest({ onClose, open = (u) => window.open(u, "_blank", "noopener,noreferrer") }: { onClose: () => void; open?: (url: string) => void }) {
   const ref = useRef<HTMLDivElement>(null);
-  useFocusTrap(ref, { onEscape: onClose });
   const locale = getLocale();
   const [strings, setStrings] = useState<{ cur: Record<string, string>; en: Record<string, string> } | null>(null);
   const [query, setQuery] = useState("");
@@ -38,8 +37,8 @@ export function TranslationSuggest({ onClose, open = (u) => window.open(u, "_bla
   const link = input0 ? suggestionLink(input0) : null;
   const dir = SUPPORTED_LOCALES.find((l) => l.code === locale)?.dir ?? "ltr";
   return (
-    <div role="presentation" onMouseDown={(e) => e.target === e.currentTarget && onClose()} style={{ position: "fixed", inset: 0, zIndex: 9999, background: "var(--overlay)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
-      <div ref={ref} role="dialog" aria-modal="true" aria-labelledby="ts-title" data-testid="translation-suggest" tabIndex={-1} style={{ background: "hsl(var(--bg))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border-strong))", borderRadius: 12, padding: 16, inlineSize: "min(560px, 100%)", maxBlockSize: "85vh", overflow: "auto", fontSize: 13 }}>
+    <Modal aria-labelledby="ts-title" onClose={onClose} onMouseDown={(e) => e.target === e.currentTarget && onClose()} style={{ position: "fixed", inset: 0, zIndex: 9999, background: "var(--overlay)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+      <div ref={ref} data-testid="translation-suggest" tabIndex={-1} style={{ background: "hsl(var(--bg))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border-strong))", borderRadius: 12, padding: 16, inlineSize: "min(560px, 100%)", maxBlockSize: "85vh", overflow: "auto", fontSize: 13 }}>
         <h2 id="ts-title" style={{ marginBlockStart: 0, fontSize: 16 }}>
           {t("i18nSuggest.title", { language: name })}
         </h2>
@@ -104,7 +103,7 @@ export function TranslationSuggest({ onClose, open = (u) => window.open(u, "_bla
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

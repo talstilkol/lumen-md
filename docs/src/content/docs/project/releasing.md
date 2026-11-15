@@ -34,6 +34,9 @@ exact commands `--publish` would run.
    a beta: the rolling `beta-channel` release). It also turns on signed update
    bundles. The build stops if the key is empty, is still the placeholder or
    is not a minisign key. Afterwards the file goes back to the placeholder.
+   The separate `node scripts/release.mjs publish` refuses as well: with the
+   placeholder, an empty key, the throwaway test key or a fake build in
+   `release/`, it stops before any `git` or `gh` command.
 5. **A reproducible web build.** `repro-check` builds twice with
    `SOURCE_DATE_EPOCH` and compares every file, then the bundle budget and the
    source-map check run. `lumen-web-vX.tgz` is the same bytes on every machine:
@@ -44,6 +47,14 @@ exact commands `--publish` would run.
    `latest.json` is built from the `.sig` files. Every signature is checked
    against the updater key, and the same check must refuse a copy with one
    byte changed.
+   `latest.json` itself is then signed with the same updater key
+   (`latest.json.sig`, the same format as a bundle's `.sig`). The run checks
+   that signature, and a copy with one byte changed must be refused. **The
+   run refuses to publish without it**: the app downloads `latest.json` and
+   `latest.json.sig`, verifies the signature before it reads anything in the
+   manifest, and refuses a version that isn't newer than the running one and
+   the highest ever installed (W11.S2/S3). With the owner's key the signing
+   is `tauri signer sign` on the file.
 7. **SBOM.** `sbom.cdx.json` (CycloneDX 1.5) lists every package in
    `package-lock.json` and every crate in `Cargo.lock`. It is built offline.
 8. **Release notes.** Hebrew first, then English, from

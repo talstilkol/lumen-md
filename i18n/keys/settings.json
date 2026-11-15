@@ -500,6 +500,11 @@
       "vars": []
     },
     {
+      "key": "pluginGallery.builtIn",
+      "en": "Built into Lumen",
+      "vars": []
+    },
+    {
       "key": "pluginGallery.categories",
       "en": "Categories",
       "vars": []
@@ -545,6 +550,16 @@
       "vars": []
     },
     {
+      "key": "pluginGallery.notAvailable",
+      "en": "Not available yet",
+      "vars": []
+    },
+    {
+      "key": "pluginGallery.notAvailableHint",
+      "en": "Remote plugins install only from a signed bundle, and signed installs are not ready yet. Nothing is downloaded or run.",
+      "vars": []
+    },
+    {
       "key": "pluginGallery.search",
       "en": "Search plugins…",
       "vars": []
@@ -562,6 +577,11 @@
     {
       "key": "pluginGallery.uninstall",
       "en": "Uninstall",
+      "vars": []
+    },
+    {
+      "key": "pluginGallery.unverified",
+      "en": "Not verified",
       "vars": []
     },
     {

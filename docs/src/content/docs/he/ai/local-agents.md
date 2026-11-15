@@ -380,8 +380,14 @@ npm run eval:agents -- --model llama3.1:8b --only tagger-he,tasker-he
 הסקריפט מוצא את Ollama, או מפעיל `ollama serve` אם הקובץ מותקן, ומוריד את
 המודל אם הוא חסר. אם אחד מהם בלתי אפשרי (אין Ollama, אין גישה לרשת אל מאגר
 המודלים), הוא כותב את `eval/results/real-skipped.md` עם הסיבה ויוצא עם קוד 0.
-ה-workflow הלילי (`.github/workflows/real-model.yml`) שומר את המודל במטמון
-ומגדיר `LUMEN_REAL_MODEL_REQUIRED=1`, כך ששם דילוג נחשב לכישלון. הוא בודק גם
+ב-Buildkite (בלי GitHub Actions) שלושה שלבים מריצים אותו: `qwen3:0.6b` בכל
+בנייה שהשינוי שלה נוגע ב-`src/agents/`, ו-`qwen3:1.7b` ו-DictaLM בבנייה
+המתוזמנת (הלילית). הם מגדירים `LUMEN_REAL_MODEL_REQUIRED=1`, כך ששם דילוג
+נחשב לכישלון. כל מודל וכל תמונת קונטיינר (Ollama, ‏LanguageTool, ‏SearXNG) רצים
+ב-digest שמקובע ב-`models/ci-models.json`, אף פעם לא לפי תגית; `npm run
+ci:real-model-pins -- check` נכשל על קיבוע שאינו digest מסוג sha256, ומאגר
+Ollama נשמר במטמון לפי ה-digest של המודל, כך שגרסה חדשה של מודל לא נמדדת
+מול מטמון ישן. הוא בודק גם
 את LanguageTool (באנגלית בלבד; אין לו עברית) ואת SearXNG כשירותים אמיתיים.
 לתרחישים מרובי שלבים השתמשו ב-`--model qwen3:1.7b`.
 

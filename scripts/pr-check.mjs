@@ -52,7 +52,8 @@ import { addedLinesFromDiff, AI_LABEL, bodyProblems, domainMentions, licenceChan
 import { bundleDiffMarkdown } from "./bundle-diff.mjs";
 import { BASELINE_PATH, baselineRaises } from "./lib/maxLines.mjs";
 import { HUMAN_REVIEW_LABEL, humanReviewVerdict, independentPatterns, parseCodeowners, sensitiveChanges } from "./lib/humanReview.mjs";
-import { extractReceipts, independentReviewVerdict } from "./lib/independentReview.mjs";
+import { commentReceipts, excludedIdentities, independentReviewVerdict, parseReviewers } from "./lib/independentReview.mjs";
+import { check as auditLockCheck, readVersions } from "./audit-lock.mjs";
 import { RATCHET_FILES, raiseLine, raisesFor } from "./lib/budgetRatchet.mjs";
 import { MAX_AGE_DAYS, baseVerdict, branchName, currentTrain, driftVerdicts, worst } from "./lib/trainBase.mjs";
 import { EXCEPTIONS_FILE } from "./lib/sensitivePaths.mjs";
@@ -126,7 +127,7 @@ export function loadPr(repo, n) {
   const pull = ghJson([`repos/${repo}/pulls/${n}`]);
   const events = ghJson(["--paginate", `repos/${repo}/issues/${n}/events?per_page=100`]).map((e) => ({ event: e.event, label: e.label?.name, created_at: e.created_at, actor: e.actor?.login }));
   const reviews = ghJson(["--paginate", `repos/${repo}/pulls/${n}/reviews?per_page=100`]).map((r) => ({ user: r.user?.login, state: r.state, submitted_at: r.submitted_at, commit_id: r.commit_id }));
-  const comments = ghJson(["--paginate", `repos/${repo}/issues/${n}/comments?per_page=100`]).map((c) => ({ id: c.id, user: c.user?.login, created_at: c.created_at, body: c.body ?? "" }));
+  const comments = ghJson(["--paginate", `repos/${repo}/issues/${n}/comments?per_page=100`]).map((c) => ({ id: c.id, user: c.user?.login, association: c.author_association, created_at: c.created_at, body: c.body ?? "" }));
   const head = ghJson([`repos/${repo}/commits/${pull.head.sha}`]);
   return { number: Number(n), labels: pull.labels.map((l) => l.name), events, reviews, comments, author: pull.user?.login, headSha: pull.head.sha, headDate: head.commit?.committer?.date ?? null };
 }
@@ -220,8 +221,7 @@ export function runChecks(opts) {
     add("Human review of sensitive paths", mismatch ? "fail" : v.status, mismatch ? [mismatch, "", ...v.lines] : v.lines);
 
     // Independent review receipt for the head (plan W6.11)
-    const receipts = [];
-    for (const c of pr?.comments ?? []) for (const receipt of extractReceipts(c.body)) receipts.push({ source: `comment${c.id ? ` ${c.id}` : ""} by @${c.user ?? "?"}`, receipt });
+    const receipts = commentReceipts(pr?.comments, { prAuthor: pr?.author ?? null });
     for (const f of opts.review ?? []) {
       let receipt;
       try {
@@ -232,7 +232,20 @@ export function runChecks(opts) {
       receipts.push({ source: `\`${f}\``, receipt });
     }
     const head = pr?.headSha ?? git(cwd, "rev-parse", "HEAD").trim();
-    const iv = independentReviewVerdict(sensitive, receipts, { head, strict: !!opts.pr || (opts.review ?? []).length > 0 });
+    const reviewersFile = join(cwd, "security", "reviewers.json");
+    const reviewers = existsSync(reviewersFile) ? parseReviewers(readFileSync(reviewersFile, "utf8")) : null;
+    // W10.D3: neither the PR's author nor anyone who wrote or committed a commit in the range may review it.
+    const commits = git(cwd, "log", "--format=%an%x1f%ae%x1f%cn%x1f%ce", range)
+      .split("\n")
+      .filter(Boolean)
+      .map((l) => {
+        const [authorName, authorEmail, committerName, committerEmail] = l.split("\x1f");
+        return { authorName, authorEmail, committerName, committerEmail };
+      });
+    const excluded = excludedIdentities({ prAuthor: pr?.author ?? null, commits });
+    const iv = independentReviewVerdict(sensitive, receipts, { head, strict: !!opts.pr || (opts.review ?? []).length > 0, reviewers, excluded });
+    if (!reviewers) iv.lines.push("", "- security/reviewers.json is missing: no receipt can be verified, so none counts.");
+    if (reviewers?.problems.length) iv.lines.push("", ...reviewers.problems.map((x) => `- ${x}`));
     add("Independent review of sensitive paths", mismatch ? "fail" : iv.status, mismatch ? [mismatch, "", ...iv.lines] : iv.lines);
   } else {
     add("Human review of sensitive paths", "skipped", [".github/CODEOWNERS is not on this branch."]);
@@ -260,6 +273,25 @@ export function runChecks(opts) {
     const bad = rows.filter((r) => r.level === "fail");
     add("Licences of production packages", bad.length ? "fail" : rows.some((r) => r.level === "warn") ? "warn" : "ok", rows.length ? ["| Package | Version | Licence | Before | |", "|---|---|---|---|---|", ...rows.map((r) => `| ${r.name} | ${r.version} | ${r.license} | ${r.previous ?? "new"} | ${r.level} |`)] : ["The lockfile changed, no production package did."]);
   } else add("Licences of production packages", "ok", ["package-lock.json is unchanged."]);
+
+  // Dependency review (W10.D14, in place of GitHub's dependency-review action): a
+  // changed lockfile or manifest is checked against the known-bad list offline
+  // (scripts/audit-lock.mjs); npm audit and cargo audit run in Buildkite's security job.
+  {
+    const deps = changed.filter((f) => /(^|\/)(package-lock\.json|package\.json|Cargo\.lock|Cargo\.toml)$/.test(f) || f === "security/known-bad.json");
+    if (!deps.length) add("Dependency review", "ok", ["No lockfile, manifest or known-bad entry changed."]);
+    else if (!existsSync(join(cwd, "security/known-bad.json"))) add("Dependency review", "skipped", ["security/known-bad.json is not on this branch."]);
+    else {
+      const { entries } = JSON.parse(readFileSync(join(cwd, "security/known-bad.json"), "utf8"));
+      const r = auditLockCheck(entries, (f) => (existsSync(join(cwd, f)) ? readVersions(cwd, f) : null), opts.today ?? new Date().toISOString().slice(0, 10));
+      add("Dependency review", r.errors.length ? "fail" : r.open.length ? "warn" : "ok", [
+        `Changed: ${deps.map((f) => `\`${f}\``).join(", ")}.`,
+        ...(r.errors.length ? ["", ...r.errors.map((e) => `- ${e}`)] : []),
+        ...(r.open.length ? ["", "Open (waiting for an owner step):", ...r.open.map((o) => `- ${o}`)] : []),
+        ...(!r.errors.length && !r.open.length ? ["", "No known-bad version in any checked file."] : []),
+      ]);
+    }
+  }
 
   // Budgets only go down (W6.26): every ratchet file the diff changes, against the merge base.
   {

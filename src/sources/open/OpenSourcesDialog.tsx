@@ -18,6 +18,7 @@ import { enabledSources, setSourceEnabled, type OpenSourceId } from "./gate";
 import { KINDS, merge, type Kind, type LocalSources, type OpenResult } from "./search";
 import { explainError } from "../../lib/userError";
 import { HelpButton } from "../../ui/HelpButton";
+import { Modal } from "../../ui/Modal";
 
 export interface DialogDeps {
   /** Saved laws and the downloaded library (read from the vault once). */
@@ -118,8 +119,8 @@ export function OpenSourcesDialog(d: DialogDeps) {
 
   const active = results[sel] ? `os-opt-${sel}` : undefined;
   return (
-    <div className="cite-backdrop" role="presentation" onMouseDown={(e) => e.target === e.currentTarget && d.onClose()}>
-      <div className="cite-dialog os-dialog" role="dialog" aria-modal="true" aria-labelledby="os-title" data-testid="open-sources" onKeyDown={onKey}>
+    <Modal aria-labelledby="os-title" className="cite-backdrop" onMouseDown={(e) => e.target === e.currentTarget && d.onClose()}>
+      <div className="cite-dialog os-dialog" data-testid="open-sources" onKeyDown={onKey}>
         <h2 id="os-title" className="os-title">
           {t("openSources.title")} <HelpButton topic="workspace/open-sources" />
         </h2>
@@ -194,7 +195,7 @@ export function OpenSourcesDialog(d: DialogDeps) {
           <span>{t("openSources.keys")}</span>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

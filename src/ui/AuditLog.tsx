@@ -12,8 +12,7 @@
  * still enforces the bearer-token + org-id constraints server-side.
  */
 
-import { useEffect, useMemo, useState, useCallback, useRef } from "react";
-import { useFocusTrap } from "./useFocusTrap";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { Download, RefreshCcw, X, Filter, Loader2 } from "lucide-react";
 import { listAudit, type AuditRow } from "../lib/audit";
 import { showAiToast } from "./AiToast";
@@ -25,6 +24,7 @@ import { explainError } from "../lib/userError";
 import { EmptyState } from "./EmptyState";
 import { HelpButton } from "./HelpButton";
 import "./auditLogStrings";
+import { Modal } from "./Modal";
 
 interface Props {
   open: boolean;
@@ -130,20 +130,14 @@ export function AuditLog({ open, onClose, orgId }: Props) {
     showAiToast(t("audit.exportDone", { count: String(visible.length) }), "success");
   }, [visible, orgId]);
 
-  // Focus stays in the dialog while it is open and returns on close; Escape closes it (plan 10.1).
-  const trapRef = useRef<HTMLDivElement | null>(null);
-  useFocusTrap(trapRef, { active: open, onEscape: onClose });
-
   if (!open) return null;
 
   if (!entitled) {
     return (
-      <div
+      <Modal
+        onClose={onClose}
         className="cmd-palette-backdrop"
         onClick={onClose}
-        ref={trapRef}
-        role="dialog"
-        aria-modal="true"
         aria-label={t("audit.title")}
       >
         <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 480 }}>
@@ -154,17 +148,15 @@ export function AuditLog({ open, onClose, orgId }: Props) {
             onClose={onClose}
           />
         </div>
-      </div>
+      </Modal>
     );
   }
 
   return (
-    <div
+    <Modal
+      onClose={onClose}
       className="cmd-palette-backdrop"
       onClick={onClose}
-      ref={trapRef}
-      role="dialog"
-      aria-modal="true"
       aria-label={t("audit.title")}
     >
       <div
@@ -311,7 +303,7 @@ export function AuditLog({ open, onClose, orgId }: Props) {
           )}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

@@ -82,6 +82,16 @@ export function tierOf(params: number | null): ModelTier {
   return "large";
 }
 
+/** The installed Ollama models, as last listed (refreshOllama). */
+export function installedOllamaModels(): string[] {
+  return state.models.map((m) => m.name);
+}
+
+/** The model the user picked (`lumen.ollama.model`), or null. */
+export function configuredOllamaModel(): string | null {
+  return configuredModel();
+}
+
 function configuredModel(): string | null {
   try {
     return localStorage.getItem("lumen.ollama.model");

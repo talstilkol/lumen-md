@@ -1,0 +1,28 @@
+{
+  "model": "fake-ollama",
+  "kind": "wiring",
+  "url": "http://127.0.0.1:11999",
+  "date": "2026-11-04",
+  "note": "SYNTHETIC sample results for src/__tests__/evalIngest.test.ts: made up to exercise the ingest, not a measurement of any model.",
+  "results": [
+    {
+      "id": "tagger-he",
+      "agent": "tagger",
+      "status": "ok",
+      "executor": "ollama",
+      "model": "fake-ollama",
+      "attempts": 1,
+      "ms": 1200,
+      "checks": [
+        {
+          "check": {
+            "type": "hebrew",
+            "min": 0.6
+          },
+          "ok": true,
+          "detail": "72% Hebrew letters"
+        }
+      ]
+    }
+  ]
+}

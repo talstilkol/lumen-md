@@ -6,13 +6,13 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useFocusTrap } from "./useFocusTrap";
 import { Stethoscope, X } from "lucide-react";
 import { t } from "../i18n";
 import "../agents/doctorStrings";
 import type { DoctorFinding, DoctorReport, DoctorStatus } from "../agents/doctor";
 import { HelpButton } from "./HelpButton";
 import "./aiDoctorPanelStrings";
+import { Modal } from "./Modal";
 
 interface Props {
   open: boolean;
@@ -69,10 +69,6 @@ export function AiDoctorPanel({ open, onClose }: Props) {
     void run(false);
     return () => abort.current?.abort();
   }, [open, run]);
-
-  // Focus stays in the dialog while it is open and returns on close; Escape closes it (plan 10.1).
-  const trapRef = useRef<HTMLDivElement | null>(null);
-  useFocusTrap(trapRef, { active: open, onEscape: onClose });
 
   if (!open) return null;
 
@@ -156,7 +152,7 @@ export function AiDoctorPanel({ open, onClose }: Props) {
   const checks = findings.filter((f) => !f.id.startsWith("golden."));
 
   return (
-    <div className="cmd-palette-backdrop" onClick={onClose} ref={trapRef} role="dialog" aria-modal="true" aria-label={t("ai.doctor.title")}>
+    <Modal onClose={onClose} className="cmd-palette-backdrop" onClick={onClose} aria-label={t("ai.doctor.title")}>
       <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 640, padding: 0, display: "flex", flexDirection: "column", maxHeight: "85vh" }}>
         <header style={{ padding: "14px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <Stethoscope size={18} style={{ color: "hsl(var(--accent))" }} />
@@ -243,6 +239,6 @@ export function AiDoctorPanel({ open, onClose }: Props) {
           </div>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

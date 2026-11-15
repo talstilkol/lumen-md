@@ -7,6 +7,10 @@
  *
  * LUMEN_E2E_REPORT_FILE, when set, also gets the whole block (a probe build
  * writes it under dist/ so it can be read after the build).
+ *
+ * LUMEN_E2E_JSON_FILE, when set, gets the run as JSON (plan W4.2, W10.E39):
+ * the status, the counts, every test with its outcome and time, and the
+ * failures. scripts/e2e-gate.mjs --full turns it into one shard's result.
  */
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, relative } from "node:path";
@@ -28,12 +32,19 @@ export function failureLines(failures, { errorLines = 20, contextLines = 40 } = 
   return out;
 }
 
+/** The run as JSON (LUMEN_E2E_JSON_FILE). Exported for the test. */
+export function summaryJson(status, counts, tests, failures) {
+  return { status, counts: { ...counts }, tests, failures: failures.map((f) => ({ where: f.where, title: f.title, status: f.status })) };
+}
+
 export default class CompactFailures {
   constructor() {
     this.failures = [];
     this.counts = { passed: 0, failed: 0, skipped: 0, flaky: 0 };
+    this.tests = [];
   }
   onTestEnd(test, result) {
+    this.tests.push({ id: `${relative(process.cwd(), test.location.file)}:${test.location.line} › ${test.titlePath().slice(2).join(" › ")}`, status: result.status, ms: result.duration });
     if (result.status === "skipped") this.counts.skipped++;
     else if (result.status === "passed") this.counts.passed++;
     if (result.status !== "failed" && result.status !== "timedOut") return;
@@ -63,6 +74,11 @@ export default class CompactFailures {
     if (file) {
       mkdirSync(dirname(file), { recursive: true });
       writeFileSync(file, `${lines.join("\n")}\n`);
+    }
+    const json = process.env.LUMEN_E2E_JSON_FILE;
+    if (json) {
+      mkdirSync(dirname(json), { recursive: true });
+      writeFileSync(json, `${JSON.stringify(summaryJson(result.status, this.counts, this.tests, this.failures), null, 2)}\n`);
     }
   }
   printsToStdio() {

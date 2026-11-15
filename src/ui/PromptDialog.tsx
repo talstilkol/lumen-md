@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { t } from "../i18n";
 import "./PromptDialog.css";
-import { useFocusTrap } from "./useFocusTrap";
 import { HelpButton } from "./HelpButton";
+import { Modal } from "./Modal";
 
 /**
  * Lightweight, themed replacement for native window.prompt / confirm / alert.
@@ -63,7 +63,6 @@ function PromptDialogImpl({
   const inputRef = useRef<HTMLInputElement | null>(null);
   const selectRef = useRef<HTMLSelectElement | null>(null);
   const okRef = useRef<HTMLButtonElement | null>(null);
-  const dialogRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     // Initial focus: input for prompt, OK for confirm/alert.
@@ -91,20 +90,16 @@ function PromptDialogImpl({
     else onResolve(null);
   }
 
-  // Focus stays in the dialog (Tab cycles, focus returns on close); Escape cancels.
-  useFocusTrap(dialogRef, { onEscape: cancel });
-
   return (
-    <div
+    <Modal
+      onClose={cancel}
       className="prompt-backdrop"
-      role="dialog"
-      aria-modal="true"
       aria-labelledby="prompt-dialog-title"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) cancel();
       }}
     >
-      <div className="prompt-dialog" ref={dialogRef}>
+      <div className="prompt-dialog">
         <div id="prompt-dialog-title" className="prompt-title">
           {title ?? message}
         </div>
@@ -177,7 +172,7 @@ function PromptDialogImpl({
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

@@ -12,6 +12,8 @@
  * carries it.
  */
 
+import { E2E_SHARDS, SHARD_MINUTES } from "../lib/e2eShards.mjs";
+
 export const REPO = "talstilkol/lumen-md";
 /** Agent queues: the Linux host runs every job in Playwright's image; the Mac runs WebKit on macOS itself. */
 export const QUEUES = ["linux", "mac"];
@@ -114,11 +116,122 @@ export const JOBS = [
     steps: ["run: npm run build", "Lighthouse CI"],
     env: { LHCI_GITHUB_APP_TOKEN: "" },
     browsers: ["chromium"],
-    // ci.yml: main pushes and PRs labelled `lighthouse` only. The same condition in Buildkite's syntax.
-    if: 'build.branch == "main" || build.pull_request.labels includes "lighthouse"',
+    // The reports stay with the build (upload.target "filesystem"): nothing goes to public storage.
+    artifacts: ["reports/lh/**/*"],
+    // Every PR and every push (W10.E10): no condition.
     timeout: 35,
   },
 ];
+
+/**
+ * Buildkite-only jobs (W10.D4, W10.D14): gates that have no ci.yml step, so
+ * their scripts live here. Each step is `{ name, run }`; the job runs on every
+ * build (no `if`), and posts its own commit status like every other gate.
+ *   pr-check   `npm run pr:check` on the PR itself (W10.D4): every PR gets it
+ *              without anyone running it. A build that isn't for a PR passes.
+ *   security   the scanners that replace GitHub's (W10.D14, plan 2.8):
+ *              gitleaks, npm audit, cargo audit (with audit-lock) and semgrep
+ *              with OSS rules in place of CodeQL. A missing binary fails here.
+ *   security-nightly  the scheduled build only (research R3.7): OSV,
+ *              cargo deny, OpenSSF Scorecard and a CycloneDX SBOM.
+ */
+export const NATIVE_JOBS = [
+  {
+    key: "pr-check",
+    label: ":mag: pr:check",
+    timeout: 20,
+    keepGoing: false,
+    steps: [
+      {
+        name: "pr:check on the pull request",
+        run: [
+          'if [ "${BUILDKITE_PULL_REQUEST:-false}" = "false" ]; then echo "pr:check: not a pull-request build; it runs on every PR build"; exit 0; fi',
+          'base="${BUILDKITE_PULL_REQUEST_BASE_BRANCH:-main}"',
+          'git fetch --no-tags origin "+refs/heads/$base:refs/remotes/origin/$base"',
+          "mkdir -p ci-out",
+          `gh api "repos/${REPO}/pulls/$BUILDKITE_PULL_REQUEST" --jq .body > ci-out/pr-body.md`,
+          'npm run -s pr:check -- --base "origin/$base" --pr "$BUILDKITE_PULL_REQUEST" --body ci-out/pr-body.md --no-size --out ci-out/pr-check.md',
+        ].join("\n"),
+      },
+    ],
+    artifacts: ["ci-out/pr-check.md"],
+  },
+  {
+    key: "security",
+    label: ":shield: security scanners",
+    timeout: 25,
+    keepGoing: true,
+    steps: [
+      { name: "gitleaks (secrets in the history)", run: "node scripts/security-scan.mjs gitleaks" },
+      { name: "npm audit (high and critical)", run: "node scripts/security-scan.mjs npm-audit" },
+      { name: "cargo audit (with audit-lock)", run: "node scripts/security-scan.mjs cargo-audit" },
+      { name: "semgrep (OSS rules, in place of CodeQL)", run: "node scripts/security-scan.mjs semgrep" },
+    ],
+    artifacts: ["reports/security/*.json"],
+  },
+  {
+    key: "security-nightly",
+    label: ":crescent_moon: supply chain (nightly)",
+    timeout: 40,
+    keepGoing: true,
+    if: 'build.source == "schedule"',
+    steps: [
+      { name: "osv-scanner (every lockfile)", run: "node scripts/security-scan.mjs osv" },
+      { name: "cargo deny (advisories, bans)", run: "node scripts/security-scan.mjs cargo-deny" },
+      { name: "OpenSSF Scorecard", run: "node scripts/security-scan.mjs scorecard" },
+      { name: "CycloneDX SBOM", run: "node scripts/security-scan.mjs sbom" },
+    ],
+    artifacts: ["reports/security/*.json"],
+  },
+];
+
+/**
+ * Plan 7.2 / W10.E33: the real-model runs, as native Buildkite steps — not
+ * derived from .github/workflows (no Actions). Every model and image is
+ * pinned by digest in models/ci-models.json (scripts/lib/realModelPins.mjs);
+ * a pin that is not a real digest fails the step. The Ollama store is
+ * cached per model digest under the agent's cache.
+ *   real-model-pr        qwen3:0.6b, every agent once — on a build whose change touches src/agents/
+ *   real-model-nightly   qwen3:1.7b (multi-step) and the real LanguageTool and SearXNG — scheduled builds
+ *   real-model-hebrew    DictaLM 3.0 1.7B on short Hebrew prompts — scheduled builds
+ */
+export const REAL_MODEL_STEPS = [
+  { key: "real-model-pr", label: ":robot_face: real tiny model (qwen3:0.6b)", model: "qwen3:0.6b", ifChanged: "src/agents/**", timeout: 30 },
+  { key: "real-model-nightly", label: ":crescent_moon: real model, multi-step (qwen3:1.7b) + LanguageTool, SearXNG", model: "qwen3:1.7b", services: true, if: 'build.source == "schedule"', timeout: 45 },
+  { key: "real-model-hebrew", label: ":crescent_moon: Hebrew smoke (DictaLM 3.0 1.7B)", model: "hf.co/dicta-il/DictaLM-3.0-1.7B-Thinking-GGUF", hebrew: true, if: 'build.source == "schedule"', timeout: 45 },
+];
+
+/** The command of one real-model step: pinned containers on a job network, then the run through run.sh. */
+export function realModelCommand(step) {
+  const m = shq(step.model);
+  const images = ["ollama/ollama", ...(step.services ? ["erikvl87/languagetool", "searxng/searxng"] : [])];
+  const before = [
+    "set -euo pipefail",
+    "pins() { node scripts/real-model-pins.mjs \"$@\"; }",
+    `pins check --model ${m}${images.map((i) => ` --image ${i}`).join("")}`,
+    'NET="lumen-rm-${BUILDKITE_JOB_ID:-local}"',
+    `STORE="$(pins cache-dir ${m} "\${LUMEN_CI_CACHE:-$HOME/.cache/lumen-ci}")"`,
+    'mkdir -p "$STORE"',
+    'docker network create "$NET" > /dev/null',
+    'trap \'docker rm -f "$NET-ollama" "$NET-lt" "$NET-sx" > /dev/null 2>&1 || true; docker network rm "$NET" > /dev/null 2>&1 || true\' EXIT',
+    'docker run -d --rm --name "$NET-ollama" --network "$NET" --network-alias ollama -v "$STORE:/root/.ollama" "$(pins image ollama/ollama)" > /dev/null',
+    ...(step.services
+      ? [
+          'docker run -d --rm --name "$NET-lt" --network "$NET" --network-alias languagetool -e Java_Xms=512m -e Java_Xmx=1g "$(pins image erikvl87/languagetool)" > /dev/null',
+          'docker run -d --rm --name "$NET-sx" --network "$NET" --network-alias searxng -v "$PWD/docker/searxng/settings.yml:/etc/searxng/settings.yml:ro" "$(pins image searxng/searxng)" > /dev/null',
+        ]
+      : []),
+    'export LUMEN_CI_DOCKER_NET="$NET"',
+  ];
+  const run = step.hebrew ? `npm run -s ci:real-model -- --hebrew-smoke --model ${m} --digest "$(node scripts/real-model-pins.mjs digest ${m})"` : `npm run -s ci:real-model -- --model ${m} --digest "$(node scripts/real-model-pins.mjs digest ${m})"`;
+  const gates = [`gate ${shq(step.hebrew ? "Hebrew smoke test, at the pinned digest" : "Every agent against the real model, at the pinned digest")} LUMEN_REAL_MODEL_REQUIRED=1 LUMEN_REAL_OLLAMA_URL=http://ollama:11434 <<'LUMEN_STEP'\n${run}\nLUMEN_STEP`];
+  if (step.services)
+    gates.push(
+      "gate 'LanguageTool and SearXNG for real' LUMEN_REAL_LANGUAGETOOL_URL=http://languagetool:8010/v2/check LUMEN_REAL_SEARXNG_URL=http://searxng:8080 <<'LUMEN_STEP'\nfor i in $(seq 1 60); do curl -sf http://languagetool:8010/v2/languages > /dev/null && break; sleep 2; done\nnpx vitest run --config vitest.eval.config.ts --reporter dot src/agents/eval/services.eval.ts\nLUMEN_STEP",
+    );
+  gates.push("gates_done");
+  return command({ key: step.key }, gates.join("\n"), { before });
+}
 
 /**
  * ci.yml steps that the pipeline does not run as a gate, each with the reason.
@@ -227,6 +340,12 @@ export function jobScript(job, ci) {
   const steps = ciSteps(ci);
   const parts = [];
   for (const name of job.steps) {
+    if (typeof name === "object") {
+      // A Buildkite-only step (NATIVE_JOBS): its script is here, not in ci.yml.
+      const d = delimiter(name.run, "LUMEN_STEP");
+      parts.push(`gate ${shq(name.name)} <<'${d}'\n${name.run.replace(/\s+$/, "")}\n${d}`);
+      continue;
+    }
     const s = steps.find((x) => x.job === job.job && x.name === name);
     if (!s) throw new Error(`${job.key}: ci.yml's ${job.job} job has no step "${name}"`);
     const env = { ...s.env };
@@ -262,7 +381,7 @@ const RETRY = { automatic: [{ exit_status: -1, limit: 2 }, { exit_status: 255, l
  * merges them, checks that every planned file ran, and applies ci.yml's
  * coverage gate. `receipt` seals what every gate did (W4.36 format).
  */
-export function buildPipeline(ci, { jobs = JOBS, shards = VITEST_SHARDS } = {}) {
+export function buildPipeline(ci, { jobs = JOBS, shards = VITEST_SHARDS, native = NATIVE_JOBS, e2eShards = E2E_SHARDS } = {}) {
   const cov = ciSteps(ci).find((s) => s.id === "check › Coverage gate (lines >= 65%)");
   if (!cov) throw new Error('ci.yml has no step "check › Coverage gate (lines >= 65%)"');
   const covLines = cov.run.split("\n");
@@ -323,7 +442,7 @@ export function buildPipeline(ci, { jobs = JOBS, shards = VITEST_SHARDS } = {}) 
     retry: RETRY,
   };
   steps.push(vitestPlan, vitest, merge);
-  for (const j of jobs) {
+  for (const j of [...jobs, ...native]) {
     const s = {
       label: j.label,
       key: j.key,
@@ -335,6 +454,22 @@ export function buildPipeline(ci, { jobs = JOBS, shards = VITEST_SHARDS } = {}) 
     };
     if (j.artifacts) s.artifact_paths = j.artifacts;
     if (j.if) s.if = j.if;
+    steps.push(s);
+  }
+  steps.push(...e2eShardSteps(e2eShards));
+  for (const r of REAL_MODEL_STEPS) {
+    const s = {
+      label: r.label,
+      key: r.key,
+      command: realModelCommand(r),
+      agents: at("linux"),
+      timeout_in_minutes: r.timeout,
+      notify: status(r.key),
+      retry: RETRY,
+      artifact_paths: ["eval/results/real-*"],
+    };
+    if (r.if) s.if = r.if;
+    if (r.ifChanged) s.if_changed = r.ifChanged;
     steps.push(s);
   }
   const gateKeys = steps.filter((s) => s.notify).map((s) => s.key);
@@ -355,6 +490,53 @@ export function buildPipeline(ci, { jobs = JOBS, shards = VITEST_SHARDS } = {}) 
     notify: [{ github_commit_status: { context: STATUS_PREFIX } }],
     steps,
   };
+}
+
+/**
+ * The whole chromium suite in shards (plan W4.2, W6.8; W10.E39), on the
+ * production build made with VITE_E2E=1, as scripts/e2e-gate.mjs runs it.
+ * `e2e-shards`: one job per shard, each inside SHARD_MINUTES, each leaving
+ * ci-out/e2e-shard-<k>-of-<n>.json. `e2e-receipt`: merges them into
+ * reports/e2e-<sha>.json, sealed with the host key (LUMEN_NIGHTLY_KEY, as the
+ * receipt), and fails unless every shard passed. scripts/promote-main.mjs
+ * moves main only with that report for the same hash.
+ */
+export function e2eShardSteps(n = E2E_SHARDS) {
+  const shards = {
+    label: `:playwright: e2e chromium, shard %n of ${n}`,
+    key: "e2e-shards",
+    parallelism: n,
+    command: command(
+      { key: "e2e-shards", browsers: ["chromium"] },
+      [
+        "gate 'Build the production bundle with the e2e surface (VITE_E2E=1)' VITE_E2E=1 <<'LUMEN_STEP'",
+        "npm run build",
+        "LUMEN_STEP",
+        `gate ${shq(`E2E shard (the whole chromium project, under ${SHARD_MINUTES} min)`)} <<'LUMEN_STEP'`,
+        "node scripts/e2e-gate.mjs --full",
+        "LUMEN_STEP",
+        "gates_done",
+      ].join("\n"),
+    ),
+    agents: { queue: "linux" },
+    artifact_paths: ["ci-out/e2e-shard-*.json"],
+    timeout_in_minutes: 35,
+    notify: status("e2e-shards"),
+    retry: RETRY,
+  };
+  const receipt = {
+    label: ":lock_with_ink_pen: e2e report for this hash",
+    key: "e2e-receipt",
+    depends_on: [{ step: "e2e-shards", allow_failure: true }],
+    // allow_failure lets the report record a red shard; the merge exits 1 unless all n passed.
+    command: escapeDollars(`buildkite-agent artifact download 'ci-out/e2e-shard-*.json' . || true\nnode scripts/e2e-gate.mjs merge --total ${n} --dir ci-out`),
+    agents: { queue: "linux" },
+    artifact_paths: ["reports/e2e-*.json"],
+    timeout_in_minutes: 5,
+    notify: status("e2e-receipt"),
+    retry: RETRY,
+  };
+  return [shards, receipt];
 }
 
 /** Keys of the jobs whose outcome the receipt records (every job with a commit status). */
@@ -435,6 +617,19 @@ export function pipelineRules(p) {
     if (webkit.agents?.queue !== "mac") problems.push("e2e-webkit must run on the Mac's queue (real WebKit on macOS)");
     if (webkit.if || webkit.skip) problems.push("e2e-webkit must run on every build (no if/skip)");
   }
+  // W10.D4 / W10.D14: pr:check and the scanners run on every build, PRs included.
+  for (const key of ["pr-check", "security"]) {
+    const s = (p.steps ?? []).find((x) => x.key === key);
+    if (!s) problems.push(`no ${key} job`);
+    else if (s.if || s.skip || s.branches) problems.push(`${key} must run on every build (no if/skip/branches)`);
+  }
+  const shards = (p.steps ?? []).find((s) => s.key === "e2e-shards");
+  if (!shards) problems.push("no e2e-shards job (the whole chromium suite, sharded: plan W4.2)");
+  else if (!(shards.parallelism >= 2)) problems.push("e2e-shards must run in parallel (parallelism ≥ 2)");
+  else if (shards.if || shards.skip) problems.push("e2e-shards must run on every build (no if/skip)");
+  const e2eReceipt = (p.steps ?? []).find((s) => s.key === "e2e-receipt");
+  if (!e2eReceipt) problems.push("no e2e-receipt job (reports/e2e-<sha>.json: plan W4.2)");
+  else if (!(e2eReceipt.depends_on ?? []).some((d) => d.step === "e2e-shards")) problems.push("e2e-receipt does not wait for e2e-shards");
   const receipt = (p.steps ?? []).find((s) => s.key === "receipt");
   const deps = new Set((receipt?.depends_on ?? []).map((d) => d.step));
   for (const k of gateKeys(p)) if (!deps.has(k)) problems.push(`receipt does not wait for ${k}`);

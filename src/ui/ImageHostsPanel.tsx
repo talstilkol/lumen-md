@@ -5,8 +5,9 @@
  * the preview and the WYSIWYG editor show the placeholder, and nothing is
  * requested from it until the user allows it again.
  *
- * `ImageHostsList` is the list alone, for a Privacy section of the settings
- * screen; `ImageHostsPanel` is the dialog the palette opens. Lazy-loaded.
+ * `ImageHostsList` is the list alone; `ImageHostsSection` is it under its
+ * heading, the Privacy tab of the settings screen (decision 2.41);
+ * `ImageHostsPanel` is the dialog the palette opens. Lazy-loaded.
  */
 
 import { useEffect, useSyncExternalStore } from "react";
@@ -17,6 +18,7 @@ import { allowedRemoteImageHosts, forgetAllRemoteImageHosts, forgetRemoteImageHo
 import "./imageHostsPanelStrings";
 import { HelpButton } from "./HelpButton";
 import { EmptyState, learnHow } from "./EmptyState";
+import { Modal } from "./Modal";
 
 function useAllowedHosts(): string[] {
   useSyncExternalStore(subscribeRemoteImages, remoteImagesVersion, remoteImagesVersion);
@@ -69,6 +71,18 @@ export function ImageHostsList() {
   );
 }
 
+/** The settings screen's Privacy tab: the allowed image hosts under their heading. */
+export function ImageHostsSection() {
+  return (
+    <section aria-labelledby="settings-image-hosts" data-testid="settings-image-hosts">
+      <h3 id="settings-image-hosts" style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 600 }}>
+        {t("imageHosts.title")}
+      </h3>
+      <ImageHostsList />
+    </section>
+  );
+}
+
 export function ImageHostsPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
   useEffect(() => {
     if (!open) return;
@@ -83,7 +97,7 @@ export function ImageHostsPanel({ open, onClose }: { open: boolean; onClose: () 
   }, [open, onClose]);
   if (!open) return null;
   return (
-    <div className="cmd-palette-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-label={t("imageHosts.title")}>
+    <Modal className="cmd-palette-backdrop" onClick={onClose} aria-label={t("imageHosts.title")}>
       <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 520, padding: 0, display: "flex", flexDirection: "column", maxHeight: "80vh" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "12px 14px", borderBottom: "1px solid hsl(var(--border))" }}>
           <ImageOff size={16} style={{ opacity: 0.7 }} />
@@ -98,6 +112,6 @@ export function ImageHostsPanel({ open, onClose }: { open: boolean; onClose: () 
           <ImageHostsList />
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
