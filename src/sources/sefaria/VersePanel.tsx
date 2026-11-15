@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { t } from "../../i18n";
 import { onCursorVerse } from "../../editor/refTrigger";
+import { EmptyState, learnHow } from "../../ui/EmptyState";
 import type { SourceRef } from "./refs";
 
 export interface VersePanelProps {
@@ -63,9 +64,7 @@ export function VersePanel({ initial, notesFor, onOpen, onClose, follow = onCurs
       {!verse && <p style={{ fontSize: 13, opacity: 0.8 }}>{t("sources.panel.hint")}</p>}
       {verse && notes === null && <p style={{ fontSize: 13, opacity: 0.8 }}>…</p>}
       {verse && notes?.length === 0 && (
-        <p style={{ fontSize: 13, opacity: 0.8 }} data-testid="verse-panel-empty">
-          {t("sources.noNotes", { ref: verse.he })}
-        </p>
+        <EmptyState testId="verse-panel-empty" style={{ padding: 0, fontSize: 13 }} message={t("sources.noNotes", { ref: verse.he })} action={learnHow("workspace/jewish-sources#my-notes-on-this-verse")} />
       )}
       {verse && !!notes?.length && (
         <p style={{ fontSize: 13 }}>{t("sources.notesTitle", { ref: verse.he, count: notes.length })}</p>

@@ -10,7 +10,7 @@ import "../privacy/strings";
 import { getAiPolicy } from "../ai/policy";
 import { redactionLog, redactionTotals, subscribeRedactionLog } from "../ai/piiRedactor";
 import { guardLog, guardTotals, subscribeGuardLog } from "../agents/guardLog";
-import { EmptyState } from "./EmptyState";
+import { EmptyState, learnHow } from "./EmptyState";
 import { HelpButton } from "./HelpButton";
 import "./privacyLedgerPanelStrings";
 import { Modal } from "./Modal";
@@ -190,7 +190,7 @@ export function PrivacyLedgerPanel({ open, onClose, mcpLedger = readVaultMcpLedg
 function McpLedgerView({ state, client, onClient }: { state: { rows: McpLedgerRow[]; error?: string } | null; client: string; onClient: (c: string) => void }) {
   if (!state) return <div style={{ padding: 16, fontSize: 12.5 }}>…</div>;
   if (state.error) return <div role="alert" style={{ padding: 16, fontSize: 12.5 }}>{t("privacy.mcp.unavailable", { error: state.error })}</div>;
-  if (!state.rows.length) return <p style={{ padding: 16, fontSize: 13, color: "hsl(var(--fg-muted))" }}>{t("privacy.mcp.empty")}</p>;
+  if (!state.rows.length) return <EmptyState testId="privacy-mcp-empty" message={t("privacy.mcp.empty")} action={learnHow("ai/mcp#turn-a-client-on")} />;
   const clients = mcpClients(state.rows);
   const shown = [...state.rows].reverse().filter((r) => !client || r.client === client);
   const sent = mcpBytesByClient(state.rows);
