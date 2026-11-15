@@ -1998,6 +1998,14 @@
       "vars": []
     },
     {
+      "key": "vaultCite.claimsUnsupported",
+      "en": "{n} of {total} claims have no verified quote — they are marked in the answer.",
+      "vars": [
+        "n",
+        "total"
+      ]
+    },
+    {
       "key": "vaultCite.noSource",
       "en": "no such source",
       "vars": []
@@ -2006,6 +2014,25 @@
       "key": "vaultCite.notVerified",
       "en": "Quote not found in the note",
       "vars": []
+    },
+    {
+      "key": "vaultCite.pin",
+      "en": "Pin link [{n}]",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "vaultCite.pinGone",
+      "en": "That paragraph has changed since the answer; ask again.",
+      "vars": []
+    },
+    {
+      "key": "vaultCite.pinned",
+      "en": "Link pinned and copied: {link}",
+      "vars": [
+        "link"
+      ]
     },
     {
       "key": "vaultCite.summary",
@@ -2018,6 +2045,11 @@
     {
       "key": "vaultCite.unsupported",
       "en": "No verified citation — check this answer against your notes.",
+      "vars": []
+    },
+    {
+      "key": "vaultCite.unsupportedClaim",
+      "en": "not supported by a verified quote",
       "vars": []
     },
     {

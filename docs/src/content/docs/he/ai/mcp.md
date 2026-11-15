@@ -84,6 +84,22 @@ npx -p @lumen-md/mcp-server lumen mcp enable claude-code --vault "$HOME/Document
 `npx -y @lumen-md/mcp-server --client cursor` (או `vscode`, `zed`) עם
 `LUMEN_VAULT` ב-`env`.
 
+## מה לקוח יכול לראות
+
+ב-`.lumen/mcp.json` אפשר להגביל, לכל הלקוחות (`scope`) או ללקוח אחד (`clients.<id>.scope`), אילו פתקים כלי ה-MCP רואים בכלל:
+
+```json
+{ "scope": { "deny": { "folders": ["journal"], "tags": ["private"] } },
+  "clients": { "cursor": { "enabled": true, "scopes": ["search", "read"],
+                           "scope": { "allow": { "folders": ["work"] } } } } }
+```
+
+- **איך פתק נבדק.** פתק גלוי כשלא הוגדרה רשימת היתר, או כשהוא מתאים לאחת מהן (תיקייה או תגית), ובתנאי שהוא לא מתאים לאף רשומת חסימה. חסימה תמיד גוברת. הפתק צריך לעבור גם את הכללים של הכספת וגם את הכללים של הלקוח.
+- **תגיות.** התגיות הן ה-`tags` שב-frontmatter ותגיות `#` בתוך הטקסט, מחוץ לקוד. ‏`private` חלה גם על `private/health`.
+- **איפה זה חל.** הכללים חלים על כל כלי: חיפוש, קריאה, רשימה, תגיות, קישורים חוזרים ו-Bases. הם חלים גם על כל שינוי מוצע, כך שלקוח לא יכול לכתוב לתוך פתק מוסתר, או לתייג פתק כדי להסתיר אותו.
+- **פתקים מוסתרים.** פתק מוסתר עונה בדיוק כמו פתק שלא קיים, והסירוב נרשם ביומן.
+- **ציטוטים.** לכל תשובה מפתק יש עוגן: `[[note#Heading]]`, או `[[note#L12]]` לפני הכותרת הראשונה. העוגן מופיע כעמודה רביעית בתוצאות החיפוש, וכ-`_meta["io.lumen/anchors"]` ב-read_note, ‏search_notes ו-get_backlinks. הטקסט של הפתק לא משתנה אף פעם.
+
 ## אישור שינויים
 
 `create_note` / `append_note` / `write_note` / `update_frontmatter` של לקוח
