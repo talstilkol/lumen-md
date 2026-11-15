@@ -78,3 +78,24 @@ Every eval report carries a top-level `card` (built with `makeCard` in `scripts/
 - **כלל.** ברירת המחדל של דרגה מוחלפת רק במודל עם ציון משוקלל גבוה יותר, לפחות 5 נקודות יותר במאקרו של AlephBench, ולא יותר מ-3 נקודות פחות בניקוד.
 - **דרגות.** ‏4 GB ו-8 GB. מודל שה-RAM השיא שלו מעל הדרגה לא נבחר אף פעם, והאפליקציה לא משתמשת אף פעם בדרגה שמעל הזיכרון של המכשיר.
 - **היום.** עוד לא נמדד אף כרטיס, ולכן qwen2.5:7b נשאר ברירת המחדל של 8 GB, ולדרגת 4 GB אין ברירת מחדל. ‏`--check` נכשל כשהקובץ שבריפו שונה ממה שהכרטיסים נותנים.
+## Public retrieval sets (plan W11.I13)
+
+`src/agents/eval/retrievalPublic.ts` measures retrieval on published sets instead of the saturated HeQ dev.
+
+- **Loaders.** It reads the BEIR / MTEB file format (BEIR SciFact, NFCorpus, FiQA, and MTEB WebFAQRetrieval `heb`) and Belebele rows (`heb_Hebr`, and he→en: Hebrew questions over English passages).
+- **Metrics.** nDCG@10 and Recall@100 per query, with bootstrap 95% intervals in an eval card, p95 query latency, and the index size.
+- **Retrievers.** Lumen's BM25 here, and RRF over any retrievers. Embedding models and rerankers join on the Mac (W11.M5). jina-reranker-v3 is excluded for its non-commercial licence.
+- **Decision rules.** The default switches only at ≥ +3 nDCG points on WebFAQ-heb with intervals that don't overlap. A reranker is turned on only at ≥ +2 points and ≤ 150 ms p95.
+- **Running it.** `python3 scripts/retrieval/fetch.py` (network) writes the sets with their pinned revision to `eval/public-data/` (gitignored). Then `npm run eval:retrieval-public` writes one public card per set.
+- **MAFAT HSRC** waits for its registration (W11.O4).
+
+## סטים ציבוריים לאחזור (משימה W11.I13)
+
+‏`src/agents/eval/retrievalPublic.ts` מודד אחזור על סטים שפורסמו, במקום HeQ dev שכבר רווי.
+
+- **טוענים.** הוא קורא את פורמט הקבצים של BEIR / MTEB (‏BEIR SciFact, ‏NFCorpus, ‏FiQA ו-MTEB WebFAQRetrieval ‏`heb`) ושורות של Belebele (‏`heb_Hebr`, וגם he→en: שאלות בעברית על קטעים באנגלית).
+- **מדדים.** ‏nDCG@10 ו-Recall@100 לכל שאילתה, עם רווח סמך bootstrap של 95% בכרטיס הערכה, ‏p95 של זמן שאילתה וגודל האינדקס.
+- **מאחזרים.** כאן ה-BM25 של Lumen, ו-RRF מעל כל מאחזר. מודלי embedding ו-rerankers מצטרפים ב-Mac ‏(W11.M5). ‏jina-reranker-v3 נפסל בגלל רישיון לא מסחרי.
+- **כללי החלטה.** ברירת המחדל מוחלפת רק ב-+3 נקודות nDCG לפחות על WebFAQ-heb, עם רווחי סמך שלא חופפים. ‏reranker מופעל רק ב-+2 נקודות לפחות וב-p95 של 150 ms לכל היותר.
+- **הרצה.** ‏`python3 scripts/retrieval/fetch.py` (דורש רשת) כותב את הסטים, עם הגרסה הנעוצה שלהם, ל-`eval/public-data/` (מחוץ ל-git). אחר כך `npm run eval:retrieval-public` כותב כרטיס public לכל סט.
+- **‏MAFAT HSRC** מחכה להרשמה (W11.O4).

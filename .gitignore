@@ -152,3 +152,5 @@ dist-frame/
 
 # Plan W11.P3: the obsidian-help corpus, downloaded (not redistributed; scripts/obsidian-help-corpus.mjs)
 .cache/obsidian-help/
+# W11.I13: public retrieval sets fetched by scripts/retrieval/fetch.py (never committed)
+eval/public-data/
