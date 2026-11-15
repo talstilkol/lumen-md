@@ -68,9 +68,14 @@
   "entityGraph.view.date": "Date",
   "entityGraph.view.depth": "Hops",
   "entityGraph.view.edges": "Relations",
+  "entityGraph.view.egoOf": "Around {name}: {shown} of {total} entities",
   "entityGraph.view.everything": "Everything",
   "entityGraph.view.filters": "Entity graph filters",
   "entityGraph.view.folder": "Source folder",
+  "entityGraph.view.mode": "View",
+  "entityGraph.view.mode.flows": "Flows, one band per relation",
+  "entityGraph.view.mode.matrix": "Adjacency matrix",
+  "entityGraph.view.mode.sankey": "Relations between types (Sankey)",
   "entityGraph.view.name": "Name",
   "entityGraph.view.neighbours": "Neighbours",
   "entityGraph.view.nodes": "Entities",
@@ -87,5 +92,8 @@
   "entityGraph.view.tag": "Source tag",
   "entityGraph.view.type": "Type",
   "entityGraph.view.types": "Entity types",
-  "entityGraph.view.until": "Up to"
+  "entityGraph.view.until": "Up to",
+  "entityGraph.view.whole": "Show the whole graph",
+  "entityGraph.view.why": "Why",
+  "entityGraph.view.whyOpen": "Why is this here?"
 }

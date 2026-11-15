@@ -11,27 +11,44 @@
  * ↑/↓ move between rows, ←/→ (logical: next/previous) jump to the focused
  * entity's neighbours, Enter centres the neighbourhood on it.
  */
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
-import { t } from "../i18n";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { isRTL, t } from "../i18n";
 import { ENTITY_TYPES, PREDICATES, type Edge, type Entity, type EntityType } from "../entities/model";
 import { edgeDay, neighbours, timeDomain, toRenderEdges, visibleGraph, type EntityGraphFilter, type NoteInfo } from "../entities/view";
 import { runLayout } from "../graph/layoutClient";
 import { GraphCanvas } from "./graph/GraphCanvas";
 import { groupColor, resolveColor } from "./graph/graphData";
 import "./entityGraphStrings";
+import { egoDefault } from "../views/graph/ego";
+import { countedSankey, type FlowInput } from "../views/graph/flows";
+import type { SourceMeta } from "../views/graph/claims";
+
+// R12.8 / W12.V2: the Sankey, the matrix and the claim inspector load only when asked for.
+const SankeyView = lazy(() => import("../viz/graph/SankeyView"));
+const AdjacencyMatrixView = lazy(() => import("../viz/graph/AdjacencyMatrixView"));
+const EdgeInspector = lazy(() => import("../viz/graph/EdgeInspector"));
+
+/** Above this many entities the view opens as an ego graph (R12.8), never as a hairball. */
+export const EGO_MAX = 50;
+
+export type EntityGraphMode = "graph" | "table" | "sankey" | "flows" | "matrix";
 
 export interface EntityGraphViewProps {
   entities: readonly Entity[];
   edges: readonly Edge[];
   notes: ReadonlyMap<string, NoteInfo>;
   onOpenEntity?: (id: string) => void;
-  /** Start in the table (also the choice when WebGL is missing). */
-  initialMode?: "graph" | "table";
+  /** Start in the table (also the choice when WebGL is missing), or in one of the R12.8 / W12.V2 views. */
+  initialMode?: EntityGraphMode;
+  /** Open around this entity (R12.8: the ego graph of the entity being opened). */
+  start?: string;
+  /** Open a note at a paragraph (the claim card's source link). */
+  onOpenSource?: (note: string, anchor: string) => void;
 }
 
 const field: React.CSSProperties = { fontSize: 12, padding: "2px 6px", borderRadius: 4, border: "1px solid hsl(var(--border))", background: "hsl(var(--bg))", color: "hsl(var(--fg))" };
 
-export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialMode = "graph" }: EntityGraphViewProps) {
+export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialMode = "graph", start, onOpenSource }: EntityGraphViewProps) {
   const [types, setTypes] = useState<Set<EntityType>>(new Set(ENTITY_TYPES));
   const [preds, setPreds] = useState<Set<string>>(new Set(PREDICATES.map((p) => p.id)));
   const [folder, setFolder] = useState("");
@@ -40,9 +57,12 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
   const domain = useMemo(() => timeDomain(edges, notes), [edges, notes]);
   const [until, setUntil] = useState(domain.length - 1);
   const [playing, setPlaying] = useState(false);
-  const [center, setCenter] = useState("");
-  const [depth, setDepth] = useState<1 | 2 | 3>(1);
-  const [mode, setMode] = useState(initialMode);
+  // R12.8: a big graph opens as the ego graph of `start`, else of the most connected entity.
+  const ego = useMemo(() => egoDefault(entities.map((e) => e.id), edges, { max: EGO_MAX, start: start ?? null }), [entities, edges, start]);
+  const [center, setCenter] = useState(ego.center ?? "");
+  const [depth, setDepth] = useState<1 | 2 | 3>(ego.center ? ego.depth : 1);
+  const [mode, setMode] = useState<EntityGraphMode>(initialMode);
+  const [inspect, setInspect] = useState<readonly string[] | null>(null);
   const [rowState, setRow] = useState(0);
   const table = useRef<HTMLTableSectionElement>(null);
 
@@ -69,6 +89,22 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
   const visible = useMemo(() => visibleGraph(entities, edges, notes, filter), [entities, edges, notes, filter]);
   const render = useMemo(() => toRenderEdges(visible), [visible]);
   const nameOf = useMemo(() => new Map(entities.map((e) => [e.id, e.name])), [entities]);
+  const byId = useMemo(() => new Map(entities.map((e) => [e.id, e])), [entities]);
+  const rtl = isRTL();
+  // W12.V2: relations counted from entity type to entity type; R12.8: one band per relation (flows).
+  const typeBands = useMemo(
+    () => countedSankey(visible.edges.map((e) => ({ from: t(`entityGraph.type.${byId.get(e.subject)?.type}`), to: t(`entityGraph.type.${byId.get(e.object)?.type}`), id: e.id }))),
+    [visible, byId],
+  );
+  const flows: FlowInput[] = useMemo(
+    () => visible.edges.map((e) => ({ id: e.id, from: nameOf.get(e.subject) ?? e.subject, to: nameOf.get(e.object) ?? e.object, label: t(`entityGraph.predicate.${e.predicate}`), amount: null, day: e.when ?? null })),
+    [visible, nameOf],
+  );
+  const sourceOf = (note: string): SourceMeta | undefined => {
+    const n = notes.get(note);
+    return n ? { reliability: n.reliability, sourceClass: n.sourceClass } : undefined;
+  };
+  const egoShown = !!ego.center && center === ego.center;
 
   const [positions, setPositions] = useState<Float32Array | null>(null);
   useEffect(() => {
@@ -183,12 +219,51 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
             ))}
           </select>
         </label>
-        <button type="button" style={field} aria-pressed={mode === "table"} onClick={() => setMode((m) => (m === "graph" ? "table" : "graph"))}>
-          {mode === "graph" ? t("entityGraph.view.showTable") : t("entityGraph.view.showGraph")}
-        </button>
+        <label>
+          {t("entityGraph.view.mode")}{" "}
+          <select style={field} value={mode} onChange={(e) => setMode(e.target.value as EntityGraphMode)} data-testid="entity-graph-mode">
+            <option value="graph">{t("entityGraph.view.showGraph")}</option>
+            <option value="table">{t("entityGraph.view.showTable")}</option>
+            <option value="sankey">{t("entityGraph.view.mode.sankey")}</option>
+            <option value="flows">{t("entityGraph.view.mode.flows")}</option>
+            <option value="matrix">{t("entityGraph.view.mode.matrix")}</option>
+          </select>
+        </label>
+        {egoShown && (
+          <span data-testid="entity-graph-ego">
+            {t("entityGraph.view.egoOf", { name: nameOf.get(ego.center!) ?? "", shown: String(visible.nodes.length), total: String(ego.total) })}{" "}
+            <button type="button" style={field} onClick={() => setCenter("")}>
+              {t("entityGraph.view.whole")}
+            </button>
+          </span>
+        )}
       </div>
+      {inspect && (
+        <Suspense fallback={null}>
+          <EdgeInspector ids={inspect} edges={edges} entities={byId} sourceOf={sourceOf} onClose={() => setInspect(null)} onOpenSource={onOpenSource} />
+        </Suspense>
+      )}
       <div style={{ flex: 1, minBlockSize: 0, position: "relative", overflow: "auto" }}>
-        {mode === "graph" ? (
+        {mode === "sankey" || mode === "flows" || mode === "matrix" ? (
+          <Suspense fallback={null}>
+            {mode === "matrix" ? (
+              <AdjacencyMatrixView
+                title={t("entityGraph.view.mode.matrix")}
+                dir={rtl ? "rtl" : "ltr"}
+                nodes={visible.nodes.map((n) => ({ id: n.id, label: n.name }))}
+                edges={visible.edges.map((e) => ({ source: e.subject, target: e.object }))}
+              />
+            ) : (
+              <SankeyView
+                title={mode === "sankey" ? t("entityGraph.view.mode.sankey") : t("entityGraph.view.mode.flows")}
+                dir={rtl ? "rtl" : "ltr"}
+                data={mode === "sankey" ? typeBands : undefined}
+                flows={mode === "flows" ? flows : undefined}
+                onBand={(ids) => setInspect(ids)}
+              />
+            )}
+          </Suspense>
+        ) : mode === "graph" ? (
           <GraphCanvas
             labels={visible.nodes.map((n) => n.name)}
             edges={render.pairs}
@@ -233,6 +308,7 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
                   <th scope="col">{t("entityGraph.view.object")}</th>
                   <th scope="col">{t("entityGraph.view.date")}</th>
                   <th scope="col">{t("entityGraph.view.source")}</th>
+                  <th scope="col">{t("entityGraph.view.why")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -244,6 +320,11 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
                     <td>{edgeDay(e, notes)}</td>
                     <td dir="auto">
                       <q>{e.provenance.quote}</q> — {e.provenance.note}#^{e.provenance.anchor}
+                    </td>
+                    <td>
+                      <button type="button" onClick={() => setInspect([e.id])} data-edge-why-open={e.id}>
+                        {t("entityGraph.view.whyOpen")}
+                      </button>
                     </td>
                   </tr>
                 ))}

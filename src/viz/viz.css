@@ -63,3 +63,42 @@
   text-align: end;
   font-variant-numeric: tabular-nums;
 }
+.lumen-viz-matrix-table td {
+  min-inline-size: 18px;
+  text-align: center;
+  padding-inline: 2px;
+}
+.lumen-viz-m1 {
+  background: hsl(var(--accent) / 0.15);
+}
+.lumen-viz-m2 {
+  background: hsl(var(--accent) / 0.3);
+}
+.lumen-viz-m3 {
+  background: hsl(var(--accent) / 0.5);
+}
+.lumen-viz-m4 {
+  background: hsl(var(--accent) / 0.7);
+}
+.lumen-viz-inspector {
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  padding: 8px;
+  margin: 8px;
+}
+.lumen-viz-claim {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 12px;
+  margin: 0;
+}
+.lumen-viz-claim dd {
+  margin: 0;
+}
+.lumen-viz-claim-missing {
+  color: hsl(var(--danger));
+}
+.lumen-viz-why {
+  margin-block: 4px;
+  padding-inline-start: 20px;
+}
