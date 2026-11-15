@@ -133,6 +133,7 @@
     "whisper:desktop": "node scripts/whisper-desktop.mjs",
     "docs:search": "node scripts/docs-search.mjs",
     "perf:coldstart": "playwright test --project=coldstart --project=coldstart-phone",
+    "perf:ttfv": "playwright test --project=ttfv-chromium --project=ttfv-firefox --project=ttfv-webkit",
     "design:check": "node scripts/check-design.mjs && node scripts/design-audit.mjs",
     "eval:canvas-draw": "node scripts/canvas-draw-eval.mjs",
     "acr": "node scripts/acr.mjs",

@@ -22,7 +22,9 @@ const INP = /@inp/;
 const COLD = /@coldstart/;
 /** Plan W6.45: INP and keypress → paint per environment (e2e/inp-devices.spec.ts), only in the inp-* projects. */
 const RESPONSIVENESS = /@responsiveness/;
-const NOT_IN_PR_RUNS = /@nightly|@inp|@coldstart|@responsiveness/;
+/** Plan W11.P5: TTFV on a production build with no network (e2e/ttfv.spec.ts), only in the ttfv-* projects. */
+const TTFV = /@ttfv/;
+const NOT_IN_PR_RUNS = /@nightly|@inp|@coldstart|@responsiveness|@ttfv/;
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${PORT}`;
 /** A Chromium executable to use when Playwright's own is not installed (docs/dev/ci-local.md). */
 const CHROMIUM = process.env.PW_CHROMIUM;
@@ -74,6 +76,10 @@ export default defineConfig({
     // `npm run perf:coldstart` against a production build (PLAYWRIGHT_BASE_URL): the desktop and a phone profile.
     { name: "coldstart", grep: COLD, use: { ...devices["Desktop Chrome"] } },
     { name: "coldstart-phone", grep: COLD, use: { ...devices["Pixel 7"] } },
+    // `npm run perf:ttfv` against a production build (PLAYWRIGHT_BASE_URL): 10 runs per browser (plan W11.P5).
+    { name: "ttfv-chromium", grep: TTFV, use: { ...devices["Desktop Chrome"], ...(CHROMIUM ? { launchOptions: { executablePath: CHROMIUM } } : {}) } },
+    { name: "ttfv-firefox", grep: TTFV, use: { ...devices["Desktop Firefox"] } },
+    { name: "ttfv-webkit", grep: TTFV, use: { ...devices["Desktop Safari"] } },
     // `npm run perf:responsiveness` (plan W6.45): both editors on a 10,000-note vault, desktop and a
     // mid-range phone. `metadata` names the environment for the report, the baseline and the receipt.
     {
