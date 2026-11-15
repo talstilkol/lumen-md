@@ -8,6 +8,8 @@
 
 # ── Cryptography: end-to-end sync, collaboration, the encrypted vault, secrets ──
 /src/sync/e2ee/                          @talstilkol
+/src/sync/e2ee/roles/                    @talstilkol
+/security/attacks/w12-s4-role-vault.test.ts @talstilkol
 /src/collab/encryption.ts                @talstilkol
 /src/storage/encryption.ts               @talstilkol
 /src/storage/vault/encrypted/            @talstilkol
@@ -56,6 +58,7 @@
 
 # ── Relays, sharing, privacy and redaction (reviews 4 and 6: the receipt gate's sensitive list) ──
 /sync-server/                            @talstilkol
+/sync-server/vault-relay-roles.js        @talstilkol
 /edge-workers/                           @talstilkol
 /src/collab/roomProof.ts                 @talstilkol
 /src/collab/roomToken.ts                 @talstilkol

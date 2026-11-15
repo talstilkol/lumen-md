@@ -25,6 +25,11 @@
  *                  "lumen-vault-relay v1|drop")): full rights on it. A
  *                  holder of d cannot work out o.
  *
+ *   Bearer r.<t>   the role space of t (plan W12.S4, family and classroom
+ *                  vaults): every write is checked against the space's
+ *                  admin-signed access list and must carry a current member's
+ *                  Ed25519 signature (vault-relay-roles.js has the rules).
+ *
  * The relay keeps neither d nor o, only the SHA-256 that names the space.
  * A drop box also has a smaller object cap (VAULT_RELAY_MAX_DROP_OBJECT,
  * 2 MiB) and a cap on its number of objects (VAULT_RELAY_MAX_DROP_COUNT,
@@ -84,10 +89,11 @@ const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 const http = require("http");
+const { roleGate, listable } = require("./vault-relay-roles.js");
 
 const PREFIX = "/v1/vault/o/";
 const NAME = /^[A-Za-z0-9_.-]{1,64}$/;
-const TOKEN = /^(?:([ao])\.)?([A-Za-z0-9_-]{32,128})$/;
+const TOKEN = /^(?:([aor])\.)?([A-Za-z0-9_-]{32,128})$/;
 const DROP_LABEL = "lumen-vault-relay v1|drop";
 
 /** What the disk holds for an object of n bytes: whole 4 KiB blocks, at least one. */
@@ -114,6 +120,7 @@ function spaceOf(header) {
   if (!m) return null;
   const [, kind, token] = m;
   if (!kind) return { id: sha256(`lumen-vault-relay v1|${token}`), append: false, drop: false };
+  if (kind === "r") return { id: sha256(`lumen-vault-relay v1|role|${token}`), append: false, drop: false, role: true };
   const drop = kind === "a" ? token : dropIdOf(token);
   return { id: sha256(`lumen-vault-relay v1|drop|${drop}`), append: kind === "a", drop: true };
 }
@@ -408,6 +415,8 @@ function createVaultRelay(opts = {}) {
   const retentionDays = num(opts.retentionDays ?? env.VAULT_RELAY_RETENTION_DAYS, 180);
   const dir = opts.dir ?? env.VAULT_RELAY_DIR;
   const store = opts.store ?? (dir ? diskStore(dir) : memoryStore());
+  /** Role spaces (W12.S4): the writer-signature gate. */
+  const roles = roleGate(store);
   const maxTotal = num(opts.maxTotalBytes ?? env.VAULT_RELAY_MAX_TOTAL, 20 * 1024 * 1024 * 1024);
   const newSpacesPerDay = num(opts.newSpacesPerDay ?? env.VAULT_RELAY_NEW_SPACES_PER_DAY, 5);
   const addressBytesPerDay = num(opts.addressBytesPerDay ?? env.VAULT_RELAY_ADDRESS_BYTES_PER_DAY, maxSpace);
@@ -542,7 +551,7 @@ function createVaultRelay(opts = {}) {
     if (req.method === "OPTIONS") {
       return send(res, 204, "", {
         "Access-Control-Allow-Methods": "GET, PUT, DELETE, OPTIONS",
-        "Access-Control-Allow-Headers": "Authorization, Content-Type, If-Match, If-None-Match, X-Lumen-Invite, X-Lumen-Pow",
+        "Access-Control-Allow-Headers": "Authorization, Content-Type, If-Match, If-None-Match, X-Lumen-Invite, X-Lumen-Pow, X-Lumen-Role",
         "Access-Control-Max-Age": "600",
       });
     }
@@ -557,7 +566,7 @@ function createVaultRelay(opts = {}) {
       if (req.method !== "GET") return json(res, 405, { error: "method" });
       // Only the space's owner keeps it alive by reading (review 2): an append-only link holder does not.
       if (!who.append) await touchRead(space);
-      return json(res, 200, { names: await store.list(space) });
+      return json(res, 200, { names: (await store.list(space)).filter(listable) });
     }
     if (!NAME.test(name)) return json(res, 400, { error: "name" });
     if (req.method === "GET") {
@@ -567,12 +576,18 @@ function createVaultRelay(opts = {}) {
     }
     if (req.method === "DELETE") {
       if (who.append) return json(res, 403, { error: "append-only" });
-      await exclusive(space, async () => {
+      const refused = await exclusive(space, async () => {
+        // A role space: only a member's signed request (vault-relay-roles.js), checked under the lock.
+        const gate = who.role ? await roles.authorize(space, "DELETE", name, req.headers, null) : null;
+        if (gate?.verdict) return gate.verdict;
+        const extra = (await gate?.commit()) ?? 0;
+        if (total !== null) total += extra;
         const old = await store.get(space, name);
         await store.delete(space, name);
         if (old && total !== null) total = Math.max(0, total - charge(old.data.length));
+        return null;
       });
-      return send(res, 204, "");
+      return refused ? json(res, refused[0], { error: refused[1], ...refused[2] }) : send(res, 204, "");
     }
     if (req.method !== "PUT") return json(res, 405, { error: "method" });
     const createOnly = req.headers["if-none-match"] === "*";
@@ -627,6 +642,9 @@ function createVaultRelay(opts = {}) {
         if (createOnly && now) return [412, "exists"];
         if (who.drop && !now && (await store.list(space)).length >= maxDropCount) return [507, "drop box full"];
         if (ifMatch && (!now || now.etag !== ifMatch)) return [412, "changed"];
+        // A role space: the ACL's rules and a current member's signature (vault-relay-roles.js).
+        const gate = who.role ? await roles.authorize(space, "PUT", name, req.headers, data) : null;
+        if (gate?.verdict) return gate.verdict;
         const delta = cost - (now ? charge(now.data.length) : 0);
         if ((await store.bytes(space)) + delta > maxSpace) return [507, "space full"];
         if (overToday) return [429, "bytes today"];
@@ -637,6 +655,8 @@ function createVaultRelay(opts = {}) {
         total += delta;
         pending += delta;
         try {
+          const extra = (await gate?.commit()) ?? 0;
+          if (total !== null) total += extra;
           await store.put(space, name, data);
         } catch (e) {
           if (total !== null) total -= delta;
@@ -656,7 +676,7 @@ function createVaultRelay(opts = {}) {
     } finally {
       release();
     }
-    if (verdict) return json(res, verdict[0], { error: verdict[1] });
+    if (verdict) return json(res, verdict[0], { error: verdict[1], ...verdict[2] });
     return send(res, 201, "", { ETag: etagOf(data) });
   }
 

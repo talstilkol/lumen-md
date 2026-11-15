@@ -250,6 +250,7 @@ export default defineConfig({
             { label: "Publish to Bluesky and the fediverse", slug: "sync/standard-site", translations: { he: "פרסום ל-Bluesky ולפדיברס" } },
             { label: "Automatic merging", slug: "sync/merge" },
             { label: "Private classroom", slug: "sync/classroom", translations: { he: "כיתה פרטית" } },
+            { label: "Family and classroom vaults (roles)", slug: "sync/role-vaults", translations: { he: "כספת משפחה או כיתה (תפקידים)" } },
             { label: "Sync status, selective sync, time left", slug: "sync/status", translations: { he: "מצב הסנכרון וסנכרון סלקטיבי" } },
             { label: "Sync on the local network", slug: "sync/lan", translations: { he: "סנכרון ברשת המקומית" } },
             { label: "Real servers and conditional writes", slug: "sync/real-servers", translations: { he: "שרתים אמיתיים וכתיבות מותנות" } },
