@@ -7,7 +7,7 @@
  */
 import { VaultIndex } from "./vaultIndexCore";
 import { handleIndexRequest } from "./vaultIndexLocal";
-import type { IndexRequest } from "./vaultIndexProtocol";
+import type { IndexProgress, IndexRequest } from "./vaultIndexProtocol";
 
 const index = new VaultIndex();
 
@@ -21,7 +21,9 @@ self.onmessage = (e: MessageEvent<IndexRequest>) => {
     .then(async () => {
       // W6.36: work a request hands back runs after its answer, before the next request.
       const later: Array<() => Promise<void>> = [];
-      (self as unknown as Worker).postMessage(await handleIndexRequest(index, req, (w) => later.push(w)));
+      // 2.39 (Z6-H1/M4): said right before the regex runs, from the parse that runs it; the main thread's time limit starts here.
+      const onRegexStart = () => (self as unknown as Worker).postMessage({ id: req.id, progress: "regexStart" } satisfies IndexProgress);
+      (self as unknown as Worker).postMessage(await handleIndexRequest(index, req, (w) => later.push(w), { onRegexStart }));
       for (const w of later) await w().catch(() => {
         // why: follow-up work of an answered request (the snapshot save) is best effort; the answer was sent
       });

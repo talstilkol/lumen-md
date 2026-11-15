@@ -4,8 +4,8 @@
  * there is no Worker (or after it died). A lazy chunk of the page.
  */
 
-import { VaultIndex, type IndexInput } from "./vaultIndexCore";
-import { engineOver, type IndexEngine, type IndexRequest, type IndexRequestBody, type IndexResponse, type RestoredNote } from "./vaultIndexProtocol";
+import { VaultIndex, type IndexInput, type QueryHooks } from "./vaultIndexCore";
+import { engineOver, type CallHooks, type IndexAnswer, type IndexEngine, type IndexRequest, type IndexRequestBody, type RestoredNote } from "./vaultIndexProtocol";
 import { dropSnapshot, loadSnapshot, readSnapshotBody, readSnapshotManifest, sameNote, saveSnapshot, snapshotRaw } from "./indexSnapshot";
 import { summarize } from "./noteSummary";
 import type { SnapshotKeys } from "./snapshotSeal";
@@ -82,9 +82,10 @@ export { VaultIndex };
 /**
  * Apply one request to `index`. Never throws: a failure is an `ok: false`
  * answer. `defer` (the worker passes one): work to run after the answer is
- * posted and before the next request (W6.36).
+ * posted and before the next request (W6.36). `hooks`: what a search tells
+ * about its /regex/ while it runs (2.39; the worker posts `regexStart`).
  */
-export function handleIndexRequest(index: VaultIndex, req: IndexRequest, defer?: (work: () => Promise<void>) => void): IndexResponse | Promise<IndexResponse> {
+export function handleIndexRequest(index: VaultIndex, req: IndexRequest, defer?: (work: () => Promise<void>) => void, hooks?: QueryHooks): IndexAnswer | Promise<IndexAnswer> {
   try {
     switch (req.op) {
       case "upsert":
@@ -99,9 +100,9 @@ export function handleIndexRequest(index: VaultIndex, req: IndexRequest, defer?:
         index.clear();
         return { id: req.id, ok: true, result: 0 };
       case "search":
-        return { id: req.id, ok: true, result: index.search(req.query, req.opts) };
+        return { id: req.id, ok: true, result: index.search(req.query, req.opts, hooks) };
       case "query":
-        return { id: req.id, ok: true, result: index.query(req.query, req.opts) };
+        return { id: req.id, ok: true, result: index.query(req.query, req.opts, hooks) };
       case "backlinks":
         return { id: req.id, ok: true, result: index.backlinks(req.target) };
       case "stats":
@@ -146,6 +147,13 @@ export const LOCAL_SLICE_MS = 30;
  * LOCAL_SLICE_MS it yields to the event loop (typing and paint go on), as
  * #232's first BM25 sync did. Requests still run one after another, in
  * order: a search sent after an upsert waits for all of it.
+ *
+ * A /regex/ cannot be stopped in this thread (no worker to terminate), so a
+ * search here keeps its own budget (2.39, review Z6-H1): from the moment the
+ * parse that runs the regex starts it (`onRegexStart`), the search checks
+ * the caller's `regexTimeLimitMs` between notes and stops with
+ * `regexTimedOut`. One note's match is still one synchronous step; the size
+ * cap (REGEX_MAX_CHARS) bounds it.
  */
 export function localEngine(index: VaultIndex, opts: { sliceMs?: number; now?: () => number } = {}): IndexEngine {
   const sliceMs = opts.sliceMs ?? LOCAL_SLICE_MS;
@@ -163,16 +171,27 @@ export function localEngine(index: VaultIndex, opts: { sliceMs?: number; now?: (
     }
     return files.length;
   };
-  const run = async (body: IndexRequestBody) => {
+  const budget = (hooks?: CallHooks): QueryHooks => {
+    const limit = hooks?.regexTimeLimitMs;
+    let started = 0;
+    return {
+      onRegexStart: () => {
+        started = now();
+        hooks?.onRegexStart?.();
+      },
+      ...(limit === undefined ? {} : { regexOverdue: () => now() - started > limit }),
+    };
+  };
+  const run = async (body: IndexRequestBody, hooks?: CallHooks) => {
     if (body.op === "upsert") return upsertSliced(body.files);
-    const res = await handleIndexRequest(index, { ...body, id: ++id } as IndexRequest);
+    const res = await handleIndexRequest(index, { ...body, id: ++id } as IndexRequest, undefined, body.op === "query" || body.op === "search" ? budget(hooks) : undefined);
     if (!res.ok) throw new Error(res.error);
     return res.result;
   };
   return engineOver(
     "local",
-    (body) => {
-      const next = queue.then(() => run(body));
+    (body, hooks) => {
+      const next = queue.then(() => run(body, hooks));
       queue = next.catch(() => undefined);
       return next;
     },
