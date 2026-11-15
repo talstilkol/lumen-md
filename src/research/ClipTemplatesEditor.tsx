@@ -11,6 +11,7 @@ import { useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./clipTemplatesStrings";
 import { t } from "../i18n";
+import { explainError } from "../lib/userError";
 import { useFocusTrap } from "../ui/useFocusTrap";
 import { DEFAULT_TEMPLATE, SITE_TEMPLATES, renderClip, type ClipTemplate, type ClipVars } from "./clipTemplates";
 import { importObsidianTemplate, loadUserTemplates, saveUserTemplates, slugId, templateProblems, whichTemplate, type TemplateIo } from "./clipTemplateStore";
@@ -81,7 +82,7 @@ export function ClipTemplatesEditor({ onClose, initial, io }: { onClose: () => v
       await saveUserTemplates(mine, io);
       setStatus({ kind: "ok", text: t("clipTemplates.saved") });
     } catch (e) {
-      setStatus({ kind: "error", text: (e as Error).message });
+      setStatus({ kind: "error", text: explainError(e, "clipTemplates") });
     }
   };
   const importFile = async (f: File) => {
@@ -91,7 +92,7 @@ export function ClipTemplatesEditor({ onClose, initial, io }: { onClose: () => v
       setSelected(got[0]?.id ?? selected);
       setStatus({ kind: "ok", text: t("clipTemplates.imported", { count: String(got.length) }) });
     } catch (e) {
-      setStatus({ kind: "error", text: t("clipTemplates.importFailed", { error: (e as Error).message }) });
+      setStatus({ kind: "error", text: t("clipTemplates.importFailed", { error: explainError(e, "clipTemplates") }) });
     }
   };
 

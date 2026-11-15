@@ -16,6 +16,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./recorderStrings";
 import { t } from "../i18n";
+import { explainError } from "../lib/userError";
 import { useFocusTrap } from "../ui/useFocusTrap";
 import { CONSENT_VERSION, CORPUS_RATE, addTake, exportZip, newSession, nextSentence, parseScript, sessionSummary, type Session, type Take } from "./session";
 
@@ -112,7 +113,7 @@ export function CorpusRecorder({ onClose, deps = DEFAULT_DEPS }: { onClose: () =
     try {
       setCapture(await deps.startCapture());
     } catch (e) {
-      setError(t("voiceCorpus.micFailed", { error: (e as Error).message ?? String(e) }));
+      setError(t("voiceCorpus.micFailed", { error: explainError(e, "voiceCorpus") }));
     }
   };
   const stop = async () => {
@@ -124,7 +125,7 @@ export function CorpusRecorder({ onClose, deps = DEFAULT_DEPS }: { onClose: () =
       setLast(addTake(session, line.id, samples, rate));
       bump((n) => n + 1);
     } catch (e) {
-      setError(t("voiceCorpus.micFailed", { error: (e as Error).message ?? String(e) }));
+      setError(t("voiceCorpus.micFailed", { error: explainError(e, "voiceCorpus") }));
     }
   };
   const next = () => {
