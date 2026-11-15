@@ -46,3 +46,21 @@ In the test of 500 random pairs of concurrent edits to ordinary notes (a
 few word changes, new lines, deleted lines, new tags and changed fields on
 each side), 459 merge without a dialog (92%), every word either side added
 is in the result, and the front matter is valid YAML in every merge.
+
+Those pairs are ones we generated. On **public editing traces** (plan
+W11.S7: `npm run bench:merge-traces`, numbers in
+`bench/merge-traces/results.json`):
+
+- **Two people really typing at the same time** (josephg/editing-traces,
+  `concurrent_traces`): of the 5,886 moments where their concurrent edits
+  met, 5,874 merge without a dialog (99.8%). No character is lost, and every
+  one of those merges is exactly the text the two ended up with.
+- **One author's history cut into two halves**, as if typed on two devices
+  (the sequential traces and crdt-benchmarks B4, 200 keystrokes per side):
+  10% merge without a dialog. Both halves almost always touch the same
+  paragraph, often the same sentence, so the merge asks. That is the hard
+  case, not the usual one, and this number is reported, not a target.
+- **No character may be lost in any of them.** In 4 of the 2,700 split
+  pairs (all at 200 and 1,000 keystrokes per side), a merge without a dialog
+  did lose characters: 59 in all, a newline in one of them. That is a bug in
+  the merge engine, and it is being fixed (W1.9).
