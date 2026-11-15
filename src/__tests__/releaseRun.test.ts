@@ -252,12 +252,14 @@ describe("the whole dry run (W4.5)", () => {
       expect(r.stdout).toMatch(/a changed SHA256SUMS is refused/);
       // W11.S3: latest.json is signed with the updater key, and a changed byte is refused.
       expect(r.stdout).toMatch(/latest\.json\.sig: latest\.json signed with the updater key; a changed version byte is refused/);
+      // W7.22: SLSA provenance and a Sigstore bundle per file (TEST keys, the local Sigstore stand-in), checked by verify.mjs.
+      expect(r.stdout).toMatch(/provenance gate: \d+ files, each built by a trusted host and signed by a TEST identity/);
       const out = readdirSync(join(dir, "release"));
       expect(out).toContain("latest.json.sig");
       const pub = readFileSync(join(dir, "release/.updater-key.pub"), "utf8").trim();
       expect(R.manifestProblems(new Map(["latest.json", "latest.json.sig"].map((n) => [n, readFileSync(join(dir, "release", n))])), pub)).toEqual([]);
       expect(readFileSync(join(dir, "release/SHA256SUMS"), "utf8")).toMatch(/ {1,2}latest\.json\.sig$/m);
-      for (const f of ["SHA256SUMS", "SHA256SUMS.minisig", "sbom.cdx.json", "sbom.cdx.json.minisig", "latest.json", "RELEASE_NOTES.md", "lumen-web-v0.2.0-beta.1.tgz", "release-key.pub", "DRY-RUN.md", ".FAKE-BUILD"]) expect(out).toContain(f);
+      for (const f of ["SHA256SUMS", "SHA256SUMS.minisig", "sbom.cdx.json", "sbom.cdx.json.minisig", "latest.json", "RELEASE_NOTES.md", "lumen-web-v0.2.0-beta.1.tgz", "release-key.pub", "DRY-RUN.md", ".FAKE-BUILD", "provenance.intoto.jsonl", "provenance.intoto.jsonl.sigstore.json", "SHA256SUMS.sigstore.json", "lumen-web-v0.2.0-beta.1.tgz.sigstore.json"]) expect(out).toContain(f);
       expect(out.filter((n) => /\.(AppImage|dmg|exe|deb|app\.tar\.gz)$/.test(n)).length).toBeGreaterThanOrEqual(3);
       expect(readFileSync(join(dir, "release/DRY-RUN.md"), "utf8")).toMatch(/gh release create v0\.2\.0-beta\.1/);
       const v = spawnSync(process.execPath, ["scripts/supply-chain/verify-release.mjs", "release", "--pub", "release/release-key.pub"], { cwd: dir, encoding: "utf8" });
