@@ -1,0 +1,159 @@
+{
+  "kind": "lumen-plugin-scorecard",
+  "v": 1,
+  "reviewer": "lumen-review/1",
+  "id": "lumen.theme.night-ink",
+  "version": "1.0.0",
+  "reviewedAt": "2026-11-15T05:16:52.345Z",
+  "passed": true,
+  "score": 90,
+  "grade": "A",
+  "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "source": {
+    "repository": null,
+    "inRepo": true
+  },
+  "permissions": {
+    "declared": [],
+    "added": [],
+    "removed": []
+  },
+  "audit": "none",
+  "findings": [
+    {
+      "rule": "unsigned",
+      "severity": "warning",
+      "detail": "no signature"
+    }
+  ],
+  "durationMs": 1,
+  "rtl": {
+    "rtl": 1,
+    "id": "lumen.theme.night-ink",
+    "version": "1.0.0",
+    "checks": {
+      "physical": "pass",
+      "contrast": "pass",
+      "screens": "owed"
+    },
+    "physical": [],
+    "contrast": [
+      {
+        "mode": "light",
+        "fg": "--fg",
+        "bg": "--bg",
+        "ratio": 17.52,
+        "min": 4.5,
+        "pass": true
+      },
+      {
+        "mode": "light",
+        "fg": "--fg",
+        "bg": "--bg-muted",
+        "ratio": 15.6,
+        "min": 4.5,
+        "pass": true
+      },
+      {
+        "mode": "light",
+        "fg": "--fg-subtle",
+        "bg": "--bg",
+        "ratio": 8.2,
+        "min": 4.5,
+        "pass": true
+      },
+      {
+        "mode": "light",
+        "fg": "--fg-muted",
+        "bg": "--bg",
+        "ratio": 5.58,
+        "min": 4.5,
+        "pass": true
+      },
+      {
+        "mode": "light",
+        "fg": "--fg-muted",
+        "bg": "--bg-muted",
+        "ratio": 4.96,
+        "min": 4.5,
+        "pass": true
+      },
+      {
+        "mode": "light",
+        "fg": "--accent",
+        "bg": "--bg",
+        "ratio": 6.55,
+        "min": 4.5,
+        "pass": true
+      },
+      {
+        "mode": "light",
+        "fg": "--accent-fg",
+        "bg": "--accent",
+        "ratio": 6.55,
+        "min": 4.5,
+        "pass": true
+      },
+      {
+        "mode": "dark",
+        "fg": "--fg",
+        "bg": "--bg",
+        "ratio": 15.56,
+        "min": 4.5,
+        "pass": true
+      },
+      {
+        "mode": "dark",
+        "fg": "--fg",
+        "bg": "--bg-muted",
+        "ratio": 13.86,
+        "min": 4.5,
+        "pass": true
+      },
+      {
+        "mode": "dark",
+        "fg": "--fg-subtle",
+        "bg": "--bg",
+        "ratio": 10.22,
+        "min": 4.5,
+        "pass": true
+      },
+      {
+        "mode": "dark",
+        "fg": "--fg-muted",
+        "bg": "--bg",
+        "ratio": 7.2,
+        "min": 4.5,
+        "pass": true
+      },
+      {
+        "mode": "dark",
+        "fg": "--fg-muted",
+        "bg": "--bg-muted",
+        "ratio": 6.42,
+        "min": 4.5,
+        "pass": true
+      },
+      {
+        "mode": "dark",
+        "fg": "--accent",
+        "bg": "--bg",
+        "ratio": 10.27,
+        "min": 4.5,
+        "pass": true
+      },
+      {
+        "mode": "dark",
+        "fg": "--accent-fg",
+        "bg": "--accent",
+        "ratio": 10.27,
+        "min": 4.5,
+        "pass": true
+      }
+    ],
+    "screens": {},
+    "rtlTested": false
+  },
+  "rtlTested": false,
+  "path": "night-ink"
+}

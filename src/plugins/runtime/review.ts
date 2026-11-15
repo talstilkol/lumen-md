@@ -46,7 +46,7 @@ export const TAKEDOWN_MS = 24 * 60 * 60 * 1000;
 /** Origins a stylesheet may load from (none by default: fonts and images go in as data: or relative files). */
 export const CSS_ALLOWED_ORIGINS: readonly string[] = [];
 
-export type ReviewRule = "obfuscated" | "minified-only" | "closed-source" | "new-permission" | "css-import" | "css-remote-url" | "audit-owed" | "vulnerable-dependency";
+export type ReviewRule = "obfuscated" | "minified-only" | "closed-source" | "new-permission" | "css-import" | "css-remote-url" | "audit-owed" | "vulnerable-dependency" | "rtl-physical-css" | "rtl-contrast";
 export const REVIEW_ERRORS: ReadonlySet<ReviewRule> = new Set<ReviewRule>(["obfuscated", "minified-only", "closed-source", "css-import", "css-remote-url"]);
 
 /** One security/known-bad.json entry for npm (`file` ends in package-lock.json). */
@@ -114,6 +114,10 @@ export interface Scorecard {
   /** How long the review took here (ms). */
   durationMs: number;
 }
+
+/** What one review warning costs: what a scan warning costs (10 points). */
+export const REVIEW_WARNING_COST = 10;
+const gradeOf = (passed: boolean, score: number): Scorecard["grade"] => (!passed ? "F" : score >= 90 ? "A" : score >= 75 ? "B" : "C");
 
 const capIds = (caps: readonly CapabilityRequest[]): string[] => [...new Set(caps.map((c): string => c.id))].sort();
 
@@ -265,8 +269,8 @@ export async function reviewPluginVersion(input: ReviewInput): Promise<Scorecard
   const passed = scan.passed && errors === 0;
   // Each warning the review adds costs what a scan warning costs (10 points).
   const reviewWarnings = findings.slice(scan.findings.length).filter((f) => f.severity === "warning").length;
-  const score = passed ? Math.max(0, scan.score - 10 * reviewWarnings) : 0;
-  const grade: Scorecard["grade"] = !passed ? "F" : score >= 90 ? "A" : score >= 75 ? "B" : "C";
+  const score = passed ? Math.max(0, scan.score - REVIEW_WARNING_COST * reviewWarnings) : 0;
+  const grade = gradeOf(passed, score);
   const ended = typeof performance !== "undefined" ? performance.now() : Date.now();
   return {
     kind: "lumen-plugin-scorecard",
@@ -285,6 +289,18 @@ export async function reviewPluginVersion(input: ReviewInput): Promise<Scorecard
     findings,
     durationMs: Math.round(ended - started),
   };
+}
+
+/**
+ * More review warnings for a scorecard from a later check (a theme's RTL
+ * check, W12.S6): each costs what a review warning costs, the grade follows,
+ * and `passed` never changes (a warning is not a delisting).
+ */
+export function withReviewWarnings<C extends Scorecard>(card: C, extra: readonly ReviewFinding[]): C {
+  const warnings = extra.filter((f) => f.severity === "warning");
+  if (warnings.length !== extra.length) throw new Error("withReviewWarnings takes warnings only");
+  const score = card.passed ? Math.max(0, card.score - REVIEW_WARNING_COST * warnings.length) : 0;
+  return { ...card, findings: [...card.findings, ...warnings], score, grade: gradeOf(card.passed, score) };
 }
 
 /** Listed versions whose review failed more than 24 hours ago: they must already be down. */
