@@ -116,6 +116,7 @@
     "eval:mcp-client": "LUMEN_EVAL_MCP=1 vitest run --config vitest.eval.config.ts src/agents/eval/mcpClient.eval.ts",
     "eval:retrieval-public": "LUMEN_EVAL_RETRIEVAL=1 vitest run --config vitest.eval.config.ts src/agents/eval/retrievalPublic.eval.ts",
     "eval:rerank": "LUMEN_EVAL_RERANK=1 vitest run --config vitest.eval.config.ts src/agents/eval/rerank.eval.ts",
+    "eval:ask-vault": "LUMEN_EVAL_ASK=1 vitest run --config vitest.eval.config.ts src/agents/eval/askVault.eval.ts",
     "eval:meetings": "LUMEN_EVAL_MEETINGS=1 vitest run --config vitest.eval.config.ts src/agents/eval/meetings.eval.ts",
     "release": "node scripts/release.mjs",
     "fuzz": "node scripts/fuzz/run.mjs --runs 1000000",
