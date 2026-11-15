@@ -25,7 +25,9 @@ Lumen compares each version with the last one both sides had:
    one fixed a typo, the other added a word — both edits are kept.
 4. **What is left asks.** Only when both sides changed the *same words*
    differently (or one deleted what the other edited) does the conflict
-   dialog open, showing just those places.
+   dialog open, showing just those places. Both sides typing the same new
+   text at the same place asks too, since keeping it once would drop one
+   side's typing. The same deletion on both sides merges.
 
 Nothing is lost: both versions go into the note's **history** (marked *kept
 at a merge*), so any merge can be undone from the version list.
@@ -60,7 +62,8 @@ W11.S7: `npm run bench:merge-traces`, numbers in
   10% merge without a dialog. Both halves almost always touch the same
   paragraph, often the same sentence, so the merge asks. That is the hard
   case, not the usual one, and this number is reported, not a target.
-- **No character may be lost in any of them.** In 4 of the 2,700 split
-  pairs (all at 200 and 1,000 keystrokes per side), a merge without a dialog
-  did lose characters: 59 in all, a newline in one of them. That is a bug in
-  the merge engine, and it is being fixed (W1.9).
+- **No character is lost in any of them.** Before a fix (W1.9), 4 of the
+  2,700 split pairs did lose characters in a merge without a dialog: 59 in
+  all, a newline in one of them. In each, both sides had written the same
+  new text at the same place, and the merge kept it once. Now that place
+  asks, like any other place both sides wrote.

@@ -16,10 +16,10 @@
     "lost": {
       "real": 0,
       "splitIndependent": 0,
-      "splitDependent": 59
+      "splitDependent": 0
     },
-    "pairsWithLoss": 4,
-    "met": false
+    "pairsWithLoss": 0,
+    "met": true
   },
   "real": {
     "method": "concurrent_traces: each transaction with two parents; base = meet of the parents' versions, expected = their join",
@@ -78,8 +78,8 @@
     "primaryWindow": 200,
     "primary": {
       "pairs": 800,
-      "merged": 83,
-      "dialog": 717,
+      "merged": 80,
+      "dialog": 720,
       "lostChars": 0,
       "extraChars": 0,
       "pairsWithLoss": 0,
@@ -87,9 +87,9 @@
       "reanchored": 2420,
       "droppedDeletes": 23310,
       "dependentPairs": 767,
-      "dependentLostChars": 54,
-      "dependentPairsWithLoss": 3,
-      "mergedRate": 0.10375
+      "dependentLostChars": 0,
+      "dependentPairsWithLoss": 0,
+      "mergedRate": 0.1
     },
     "gated": false,
     "accepted": false,
@@ -158,8 +158,8 @@
           },
           "editing-traces/json-crdt-patch": {
             "pairs": 100,
-            "merged": 31,
-            "dialog": 69,
+            "merged": 30,
+            "dialog": 70,
             "lostChars": 0,
             "extraChars": 0,
             "pairsWithLoss": 0,
@@ -167,9 +167,9 @@
             "reanchored": 286,
             "droppedDeletes": 4219,
             "dependentPairs": 96,
-            "dependentLostChars": 1,
-            "dependentPairsWithLoss": 1,
-            "mergedRate": 0.31
+            "dependentLostChars": 0,
+            "dependentPairsWithLoss": 0,
+            "mergedRate": 0.3
           },
           "editing-traces/rustcode": {
             "pairs": 100,
@@ -203,8 +203,8 @@
           },
           "editing-traces/sveltecomponent": {
             "pairs": 100,
-            "merged": 7,
-            "dialog": 93,
+            "merged": 5,
+            "dialog": 95,
             "lostChars": 0,
             "extraChars": 0,
             "pairsWithLoss": 0,
@@ -212,9 +212,9 @@
             "reanchored": 604,
             "droppedDeletes": 5838,
             "dependentPairs": 100,
-            "dependentLostChars": 53,
-            "dependentPairsWithLoss": 2,
-            "mergedRate": 0.07
+            "dependentLostChars": 0,
+            "dependentPairsWithLoss": 0,
+            "mergedRate": 0.05
           },
           "crdt-benchmarks-b4/b4:b4-editing-trace": {
             "pairs": 100,
@@ -235,8 +235,8 @@
         "bySet": {
           "editing-traces": {
             "pairs": 800,
-            "merged": 83,
-            "dialog": 717,
+            "merged": 80,
+            "dialog": 720,
             "lostChars": 0,
             "extraChars": 0,
             "pairsWithLoss": 0,
@@ -244,9 +244,9 @@
             "reanchored": 2420,
             "droppedDeletes": 23310,
             "dependentPairs": 767,
-            "dependentLostChars": 54,
-            "dependentPairsWithLoss": 3,
-            "mergedRate": 0.10375
+            "dependentLostChars": 0,
+            "dependentPairsWithLoss": 0,
+            "mergedRate": 0.1
           },
           "crdt-benchmarks-b4": {
             "pairs": 100,
@@ -500,8 +500,8 @@
           },
           "editing-traces/json-crdt-patch": {
             "pairs": 100,
-            "merged": 22,
-            "dialog": 78,
+            "merged": 21,
+            "dialog": 79,
             "lostChars": 0,
             "extraChars": 0,
             "pairsWithLoss": 0,
@@ -509,9 +509,9 @@
             "reanchored": 842,
             "droppedDeletes": 30168,
             "dependentPairs": 100,
-            "dependentLostChars": 5,
-            "dependentPairsWithLoss": 1,
-            "mergedRate": 0.22
+            "dependentLostChars": 0,
+            "dependentPairsWithLoss": 0,
+            "mergedRate": 0.21
           },
           "editing-traces/rustcode": {
             "pairs": 100,
@@ -577,8 +577,8 @@
         "bySet": {
           "editing-traces": {
             "pairs": 800,
-            "merged": 68,
-            "dialog": 732,
+            "merged": 67,
+            "dialog": 733,
             "lostChars": 0,
             "extraChars": 0,
             "pairsWithLoss": 0,
@@ -586,9 +586,9 @@
             "reanchored": 7541,
             "droppedDeletes": 229848,
             "dependentPairs": 781,
-            "dependentLostChars": 5,
-            "dependentPairsWithLoss": 1,
-            "mergedRate": 0.085
+            "dependentLostChars": 0,
+            "dependentPairsWithLoss": 0,
+            "mergedRate": 0.08375
           },
           "crdt-benchmarks-b4": {
             "pairs": 100,

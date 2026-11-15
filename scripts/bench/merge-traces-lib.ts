@@ -161,7 +161,7 @@ export interface Pair {
   droppedDeletes: number;
 }
 
-interface Item {
+export interface Item {
   ch: string;
   /** 0 base, 1 ours (first window), 2 theirs (second window). */
   o: 0 | 1 | 2;
@@ -169,8 +169,12 @@ interface Item {
   delTheirs: boolean;
 }
 
-/** One pair from `base` (array of chars) and the two windows of transactions. */
-export function makePair(trace: string, at: number, window: number, base: readonly string[], first: readonly Patch[][], second: readonly Patch[][]): Pair {
+/**
+ * Every character of a pair in one list (base's, and what each window
+ * inserted), with who inserted and who deleted it; base, ours, theirs and
+ * expected are all projections of it (projectItems).
+ */
+export function pairItems(base: readonly string[], first: readonly Patch[][], second: readonly Patch[][]): { items: Item[]; reanchored: number; droppedDeletes: number } {
   const all: Item[] = base.map((ch) => ({ ch, o: 0, delOurs: false, delTheirs: false }));
   // What the author saw while typing: the sequence's document (a dropped delete is still gone here).
   const seen: Item[] = all.slice();
@@ -195,18 +199,64 @@ export function makePair(trace: string, at: number, window: number, base: readon
   };
   for (const t of first) apply(1, t);
   for (const t of second) apply(2, t);
-  const text = (keep: (it: Item) => boolean) => all.filter(keep).map((it) => it.ch).join("");
+  return { items: all, reanchored, droppedDeletes };
+}
+
+/** The four texts of a pair's item list (or of any subset of it, in order). */
+export function projectItems(items: readonly Item[]): Pick<Pair, "base" | "ours" | "theirs" | "expected"> {
+  const text = (keep: (it: Item) => boolean) => items.filter(keep).map((it) => it.ch).join("");
   return {
-    trace,
-    at,
-    window,
-    base: base.join(""),
+    base: text((it) => it.o === 0),
     ours: text((it) => it.o !== 2 && !it.delOurs),
     theirs: text((it) => it.o !== 1 && !it.delTheirs),
     expected: text((it) => !it.delOurs && !it.delTheirs),
-    reanchored,
-    droppedDeletes,
   };
+}
+
+/** One pair from `base` (array of chars) and the two windows of transactions. */
+export function makePair(trace: string, at: number, window: number, base: readonly string[], first: readonly Patch[][], second: readonly Patch[][]): Pair {
+  const { items, reanchored, droppedDeletes } = pairItems(base, first, second);
+  return { trace, at, window, ...projectItems(items), reanchored, droppedDeletes };
+}
+
+/**
+ * The smallest subset of a pair's items (whole lines dropped first, then
+ * single characters) on which a clean merge still loses characters, with
+ * the three versions still different (a real three-way merge). Every text
+ * of the result is a projection of the same subset, so its expected text is
+ * exact. Used to derive the committed regression fixtures from the real
+ * traces (scripts/bench/merge-traces-shrink.ts); null when nothing is lost.
+ */
+export function shrinkLoss(items: readonly Item[], merge: MergeFn): Item[] | null {
+  const lostOf = (xs: readonly Item[]) => {
+    const c = projectItems(xs);
+    if (c.ours === c.theirs || c.ours === c.base || c.theirs === c.base) return 0;
+    return classify({ trace: "", at: 0, window: 0, ...c, reanchored: 0, droppedDeletes: 0 }, merge).lost;
+  };
+  if (lostOf(items) === 0) return null;
+  let cur: Item[][] = [];
+  let g: Item[] = [];
+  for (const it of items) {
+    g.push(it);
+    if (it.ch === "\n") {
+      cur.push(g);
+      g = [];
+    }
+  }
+  if (g.length) cur.push(g);
+  const pass = () => {
+    for (let size = Math.ceil(cur.length / 2); size >= 1; size = size === 1 ? 0 : Math.ceil(size / 2)) {
+      for (let s = 0; s < cur.length; ) {
+        const next = [...cur.slice(0, s), ...cur.slice(s + size)];
+        if (next.length && lostOf(next.flat()) > 0) cur = next;
+        else s += size;
+      }
+    }
+  };
+  pass();
+  cur = cur.flat().map((it) => [it]);
+  pass();
+  return cur.flat();
 }
 
 /**

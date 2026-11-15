@@ -261,4 +261,13 @@ describe("the manifest and the committed results", () => {
     expect(Object.keys(r.split.byWindow)).toEqual([`W${PRIMARY_WINDOW}`, "W50", "W1000"]);
     expect(r.verdict).toEqual(verdict(r.real.total, splits));
   });
+
+  it("W11.S7's gate is met on the committed run: real pairs ≥ 90 % merged, 0 characters lost on every pair kind", () => {
+    const r = JSON.parse(readFileSync("bench/merge-traces/results.json", "utf8"));
+    expect(r.engine).toBe("src/sync/merge/textMerge.ts mergeText");
+    expect(r.verdict.realMergedRate).toBeGreaterThanOrEqual(GATE.realMergedRate);
+    expect(r.verdict.lost).toEqual({ real: 0, splitIndependent: 0, splitDependent: 0 });
+    expect(r.verdict.pairsWithLoss).toBe(0);
+    expect(r.verdict.met).toBe(true);
+  });
 });
