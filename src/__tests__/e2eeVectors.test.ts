@@ -9,7 +9,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { memoryProvider } from "../sync/e2ee/provider";
-import { E2eeSync, unlockVault, unlockWithDevice, unlockWithRecoveryKey } from "../sync/e2ee/engine";
+import { E2eeSync, unlockVault, unlockWithDevice, unlockWithPasskey, unlockWithRecoveryKey } from "../sync/e2ee/engine";
 import { memoryFiles } from "../sync/e2ee/localFiles";
 import { memoryStateStore } from "../sync/e2ee/state";
 import { ageDecrypt } from "../sync/e2ee/age";
@@ -31,6 +31,8 @@ interface Vault {
   pending?: { oldPassphrase: string; oldEpoch: number; oldFiles: string[] };
   /** Plan W11.S8: the recovery key (hex) opens the vault alone; the device revoked since can't. */
   recovery?: { key: string; revoked: { id: string; identity: string } };
+  /** Plan W11.S10: a passkey's credential id and PRF output (hex) open the vault alone. */
+  passkey?: { id: string; prf: string };
 }
 const V = JSON.parse(readFileSync(join(root, "docs/sync-protocol-vectors.json"), "utf8")) as {
   vaults: Vault[];
@@ -86,6 +88,11 @@ describe("the sync protocol's test vectors", () => {
         expect(JSON.parse(Buffer.from(v.objects["lumen-e2ee-keyring"], "base64").toString("utf8")).protocol).toBe(3);
         await expect(unlockWithRecoveryKey(await load(v), new Uint8Array(32))).rejects.toThrow(/not a recovery key/);
         await expect(unlockWithDevice(await load(v), v.recovery.revoked.id, v.recovery.revoked.identity)).rejects.toThrow();
+      }
+      if (v.passkey) {
+        const { id, prf } = v.passkey;
+        expect(await readAll(v, (p) => unlockWithPasskey(p, id, new Uint8Array(Buffer.from(prf, "hex"))))).toEqual(v.expect);
+        await expect(unlockWithPasskey(await load(v), id, new Uint8Array(32))).rejects.toThrow(/doesn't open this vault/);
       }
       if (v.device) {
         const d = v.device;

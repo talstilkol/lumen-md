@@ -18,7 +18,7 @@ import { confirmTag, deriveSas, sasCommit, sasKeyPair, transcriptBytes, type Sas
 import type { VaultKeys } from "../../src/sync/e2ee/keys";
 import { HEADER_NAME } from "../../src/sync/e2ee/header";
 import { KEYRING_NAME } from "../../src/sync/e2ee/keyring";
-import { setUpRecovery } from "../../src/sync/e2ee/engine";
+import { addPasskey, setUpRecovery } from "../../src/sync/e2ee/engine";
 
 const b64 = (b: Uint8Array) => Buffer.from(b).toString("base64");
 const NOTES: Record<string, string> = { "שלום.md": "# שלום עולם\n\nנִקּוּד וגרש׳ 123", "notes/a.md": "plain ASCII", "notes/empty.md": "", "big.md": "x".repeat(5000) };
@@ -64,7 +64,7 @@ let argon: any[] = [];
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let ageVectors: any[] = [];
 if (OLD) {
-  vaults = RECOVERY_ONLY ? OLD.vaults.filter((v: { recovery?: unknown }) => !v.recovery) : OLD.vaults;
+  vaults = RECOVERY_ONLY ? OLD.vaults.filter((v: { recovery?: unknown; passkey?: unknown }) => !v.recovery && !v.passkey) : OLD.vaults;
   argon = OLD.argon2id;
   ageVectors = OLD.age;
 } else {
@@ -141,6 +141,15 @@ if (RECOVERY_ONLY || !OLD) {
     await s.sync();
     await s.enroll("laptop", (await generateIdentity()).recipient);
     return { recovery: { key: Buffer.from(key).toString("hex"), revoked: { id: "phone", identity: phone.identity } } };
+  }));
+  // Vault 6 (plan W11.S10): one passkey, as its credential id and PRF output (an authenticator's, given here as bytes).
+  vaults.push(await vault("pbkdf2, keyring protocol 3, one passkey (WebAuthn PRF)", "passkey vault passphrase 2026", { pbkdf2Iterations: 1000 }, async (s, f) => {
+    f.set("a.md", "opened with a passkey");
+    await s.sync();
+    const id = Buffer.from(crypto.getRandomValues(new Uint8Array(32))).toString("base64url");
+    const prf = crypto.getRandomValues(new Uint8Array(32));
+    await addPasskey(s, id, prf);
+    return { passkey: { id, prf: Buffer.from(prf).toString("hex") } };
   }));
 }
 
