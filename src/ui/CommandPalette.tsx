@@ -11,6 +11,8 @@ import { HelpButton } from "./HelpButton";
 import { announceCommand } from "../research/usability/commandEvents";
 import { countCommand } from "../metrics/count";
 import { Modal } from "./Modal";
+import { shownHint } from "../commands/hints";
+import "../commands/cmdHintStrings";
 
 export interface Command {
   id: string;
@@ -431,7 +433,7 @@ export function CommandPalette({ open, onClose, commands }: Props) {
                     <Icon size={15} style={{ opacity: 0.75, flexShrink: 0 }} />
                     <span className="cmd-palette-label">{cmd.label}</span>
                     {cmd.hint && (
-                      <span className="cmd-palette-hint">{cmd.hint}</span>
+                      <span className="cmd-palette-hint">{shownHint(cmd.hint)}</span>
                     )}
                     {cmd.shortcut && (
                       <span className="cmd-palette-shortcut">{cmd.shortcut}</span>

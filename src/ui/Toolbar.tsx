@@ -36,6 +36,7 @@ import { useAppStore } from "../store/useStore";
 import type { ViewMode } from "../store/useStore";
 import { t } from "../i18n";
 import type { Command } from "./CommandPalette";
+import { shownHint, useCommandHints } from "../commands/hints";
 import { AuthButton } from "../components/AuthButton";
 
 interface Props {
@@ -133,6 +134,7 @@ export function Toolbar({
   const isDark = theme === "dark";
 
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  useCommandHints(openMenu !== null);
   const menuBarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -249,7 +251,7 @@ export function Toolbar({
             <MenuItem icon={<Download size={14} />} label={t("toolbar.exportPdf")} description={t("desc.exportPdf")} onClick={() => exec(exportPdfCmd.action)} />
           )}
           {exportPptxCmd && (
-            <MenuItem icon={<Download size={14} />} label={exportPptxCmd.label} description={exportPptxCmd.hint} onClick={() => exec(exportPptxCmd.action)} />
+            <MenuItem icon={<Download size={14} />} label={exportPptxCmd.label} description={shownHint(exportPptxCmd.hint)} onClick={() => exec(exportPptxCmd.action)} />
           )}
           {printCmd && (
             <MenuItem icon={<Printer size={14} />} label={t("toolbar.print")} description={t("desc.print")} hint="⌘P" onClick={() => exec(printCmd.action)} />
@@ -299,7 +301,7 @@ export function Toolbar({
           <MenuItem icon={<CheckSquare size={14} />} label={t("toolbar.selectAll")} description={t("desc.selectAll")} hint="⌘A" onClick={() => exec(() => document.execCommand("selectAll"))} />
           <MenuItem icon={<Trash2 size={14} />} label={t("toolbar.delete")} description={t("desc.delete")} onClick={() => exec(() => document.execCommand("delete"))} />
           {toggleDirectionCmd && (
-            <MenuItem icon={<ArrowRightLeft size={14} />} label={toggleDirectionCmd.label} description={toggleDirectionCmd.hint} hint={toggleDirectionCmd.shortcut} onClick={() => exec(() => void toggleDirectionCmd.action())} />
+            <MenuItem icon={<ArrowRightLeft size={14} />} label={toggleDirectionCmd.label} description={shownHint(toggleDirectionCmd.hint)} hint={toggleDirectionCmd.shortcut} onClick={() => exec(() => void toggleDirectionCmd.action())} />
           )}
         </MenuBarItem>
 
@@ -348,7 +350,7 @@ export function Toolbar({
                         key={cmd.id}
                         icon={Icon ? <Icon size={14} /> : <Plus size={14} />}
                         label={cmd.label}
-                        description={cmd.hint}
+                        description={shownHint(cmd.hint)}
                         onClick={() => exec(cmd.action)}
                       />
                     );
@@ -366,7 +368,7 @@ export function Toolbar({
                         key={cmd.id}
                         icon={Icon ? <Icon size={14} /> : <Plus size={14} />}
                         label={cmd.label}
-                        description={cmd.hint}
+                        description={shownHint(cmd.hint)}
                         onClick={() => exec(cmd.action)}
                       />
                     );

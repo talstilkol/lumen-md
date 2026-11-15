@@ -11,6 +11,7 @@
  */
 
 import { wrongLayoutVariant } from "../lib/keyboardLayout";
+import { shownHint } from "../commands/hints";
 
 interface Searchable {
   label: string;
@@ -28,7 +29,7 @@ export function matchScore(c: Searchable, q: string): number {
   if (label.startsWith(q)) return 4;
   if (new RegExp(`(^|[^\\p{L}\\p{N}])${escape(q)}`, "u").test(label)) return 3;
   if (label.includes(q)) return 2;
-  if (`${c.hint ?? ""} ${c.group ?? ""}`.toLowerCase().includes(q)) return 1;
+  if (`${shownHint(c.hint) ?? ""} ${c.group ?? ""}`.toLowerCase().includes(q)) return 1;
   return 0;
 }
 

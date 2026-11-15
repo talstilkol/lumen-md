@@ -16,6 +16,7 @@ import { installFakeOpfs } from "./helpers/fakeOpfs";
 import { readWorkspaceFile, writeWorkspaceFile } from "../storage/workspace";
 import { useAppStore } from "../store/useStore";
 import { buildExportCommands } from "../commands/domains/export";
+import { loadCommandHints, shownHint } from "../commands/hints";
 import type { CommandContext } from "../commands/domains/context";
 import { PropertiesPanel } from "../ui/PropertiesPanel";
 import { autofillQueue } from "../ui/AutofillPanel";
@@ -99,10 +100,12 @@ const proposalRow = () =>
   });
 
 describe("where the action is", () => {
-  it("is in ⌘K, with its strings, and in the panel only for a source note with a DOI", () => {
+  it("is in ⌘K, with its strings, and in the panel only for a source note with a DOI", async () => {
     const cmd = paletteCommand();
     expect(cmd.label).toBe("Citations: fill references from OpenAlex…");
-    expect(cmd.hint).not.toMatch(/^cmd\./);
+    // The hint as the palette shows it: its English is the commands' lazy hints chunk (commands/hints.ts).
+    await loadCommandHints();
+    expect(shownHint(cmd.hint)).not.toMatch(/^cmd\./);
     expect(panelButton().textContent).toBe("Fill references from OpenAlex");
     cleanup();
     render(<PropertiesPanel open onClose={() => {}} text={"---\ntitle: plain\ndoi: 10.5555/x.1\n---\nA plain note.\n"} applyEdit={() => {}} />);

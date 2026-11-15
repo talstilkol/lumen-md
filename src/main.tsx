@@ -30,6 +30,7 @@ import { applyBootEdit, takeBootEdit } from "./boot/bootNote";
 import "./index.css";
 import { windowLabel } from "./desktop/window";
 import { keepInstallPrompt } from "./pwa/installPrompt";
+import { loadCommandHints } from "./commands/hints";
 
 // Plan W2.17: this window is a presentation's presenter view (opened by the slides), not the editor.
 const IS_PRESENTER = typeof location !== "undefined" && location.hash === "#lumen-presenter";
@@ -76,6 +77,8 @@ try {
 startVaultSnapshots();
 // Usage counters on this device only (plan W4.26), loaded after start-up; nothing is sent.
 setTimeout(startUsageCounting, 3000);
+// The commands' hints: their English is a lazy chunk (commands/cmdHintStrings.ts), loaded once the app is idle.
+setTimeout(() => void loadCommandHints(), 2000);
 // Task reminders (plan 4.13.4), only when the user turned them on; loaded after start-up.
 try {
   if (localStorage.getItem("lumen.tasks.reminders") === "1") setTimeout(() => void import("./tasks/reminders").then((m) => m.startReminders()), 5000);

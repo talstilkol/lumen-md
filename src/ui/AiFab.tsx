@@ -3,6 +3,7 @@ import { Sparkles, X, Search } from "lucide-react";
 import type { Command } from "./CommandPalette";
 import { t } from "../i18n";
 import { countCommand } from "../metrics/count";
+import { shownHint, useCommandHints } from "../commands/hints";
 
 /**
  * Floating "AI Prompts" button anchored beside the document body.
@@ -19,6 +20,7 @@ interface Props {
 export function AiFab({ commands }: Props) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  useCommandHints(open);
   const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -53,7 +55,7 @@ export function AiFab({ commands }: Props) {
     const q = query.trim().toLowerCase();
     if (!q) return aiCommands;
     return aiCommands.filter((c) =>
-      `${c.label} ${c.hint ?? ""}`.toLowerCase().includes(q),
+      `${c.label} ${shownHint(c.hint) ?? ""}`.toLowerCase().includes(q),
     );
   }, [aiCommands, query]);
 
@@ -180,7 +182,7 @@ export function AiFab({ commands }: Props) {
                   type="button"
                   role="menuitem"
                   onClick={() => run(cmd)}
-                  title={cmd.hint ?? cmd.label}
+                  title={shownHint(cmd.hint) ?? cmd.label}
                   style={{
                     display: "flex",
                     alignItems: "flex-start",
@@ -206,7 +208,7 @@ export function AiFab({ commands }: Props) {
                     <span style={{ fontWeight: 500 }}>{cmd.label}</span>
                     {cmd.hint && (
                       <span style={{ display: "block", fontSize: 11, color: "hsl(var(--fg-muted))" }}>
-                        {cmd.hint}
+                        {shownHint(cmd.hint)}
                       </span>
                     )}
                   </span>
