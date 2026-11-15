@@ -1,0 +1,18 @@
+{
+  "$schema": "https://raw.githubusercontent.com/stryker-mutator/stryker-js/master/packages/core/schema/stryker-schema.json",
+  "_comment": "W11.Q9 (R5.9): calibrate the home-grown mutation runner (scripts/mutation/run.mjs) against StrykerJS 10 on three modules. Their tests are the files targets.json lists for each module (stryker/vitest.calibrate.config.mts). Then `node scripts/mutation/calibrate.mjs` compares the two scores; a difference of more than 5 points marks ours 'unverified'. Run: npx stryker run stryker/stryker.calibrate.json (first: --dryRunOnly).",
+  "testRunner": "vitest",
+  "vitest": { "configFile": "stryker/vitest.calibrate.config.mts" },
+  "plugins": ["@stryker-mutator/vitest-runner"],
+  "mutate": ["src/sync/gitMerge.ts", "src/sync/e2ee/keyring.ts", "src/storage/zip.ts"],
+  "coverageAnalysis": "perTest",
+  "incremental": true,
+  "incrementalFile": "reports/mutation/stryker-calibrate-incremental.json",
+  "concurrency": 2,
+  "timeoutMS": 60000,
+  "tempDirName": ".stryker-tmp",
+  "reporters": ["clear-text", "progress", "json", "html"],
+  "jsonReporter": { "fileName": "reports/mutation/stryker-calibration.json" },
+  "htmlReporter": { "fileName": "reports/mutation/stryker-calibration.html" },
+  "thresholds": { "high": 80, "low": 60, "break": null }
+}
