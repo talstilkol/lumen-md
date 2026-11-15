@@ -214,6 +214,43 @@ what it uploads. The banner says so.
   refuses a keyring that doesn't follow from the last one it checked, and
   says so, instead of quietly using different keys.
 
+## The recovery key
+
+A forgotten passphrase would lose the vault. A **recovery key** prevents
+that: 24 words that open the vault on their own.
+
+**Setting it up:** Encrypted sync → **Recovery key** → **Set up a recovery key**.
+
+1. Lumen shows 24 English words (the standard BIP-39 list). They appear
+   only now. Write them down in order, or download the **printable kit
+   (PDF)** and print it.
+2. Type three of the words back. The key is turned on only then, with a
+   key change, so a key you didn't write down is never the one that counts.
+
+What happens to the key:
+
+- The words aren't stored anywhere: not in the vault, not on this device and
+  not at the storage. The storage keeps the vault's secret wrapped for the
+  key, and only the words open that wrap.
+- The PDF is made on this device and saved where you choose. Lumen doesn't
+  add it to the vault or send it.
+- Every key change wraps the vault's secret for the recovery key again: a
+  rotation, removing a device, a new passphrase. A removed device can't use
+  the recovery key.
+- **Make a new recovery key** replaces it, and the old words stop working.
+
+**Restoring:** on the unlock screen, choose **Forgot the passphrase?**.
+
+1. Type the 24 words. The first four letters of each are enough, and case,
+   commas and numbering don't matter. Lumen says which word is wrong, or
+   that one is out of order.
+2. Choose a new passphrase. Lumen opens the vault, pulls every note and
+   changes the keys to the new passphrase.
+
+A profile restored this way can't vouch for the device list, so your other
+devices pair again afterwards. Restore on a device you trust: see the spec's
+§5a for what a restore on a fresh profile can and can't check.
+
 ## Removing a lost device
 
 A device can be enrolled with its own key (an age X25519 key pair), so it
