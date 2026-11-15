@@ -386,6 +386,8 @@
   "cmd.sources.datagovInsert.hint": "Search datasets; the rows are saved as a CSV in your vault, shown as a table or chart, with the attribution",
   "cmd.sources.datasetRefresh": "Refresh this dataset",
   "cmd.sources.datasetRefresh.hint": "Fetch the dataset under the cursor again and see what changed before switching to the new snapshot",
+  "cmd.sources.havruta": "Study with a partner (havruta)…",
+  "cmd.sources.havruta.hint": "A shared, encrypted study room on this reference: notes and highlights travel, the text stays on each device",
   "cmd.sources.insert": "Insert a source from Sefaria…",
   "cmd.sources.insert.hint": "The Hebrew and a translation of a verse, mishnah or folio (בראשית א:א, ב״ר א, א, Berakhot 2a), with each text's licence",
   "cmd.sources.knessetBill": "Cite a bill (Knesset)…",

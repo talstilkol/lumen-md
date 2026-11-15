@@ -5848,6 +5848,159 @@
       "vars": []
     },
     {
+      "key": "havruta.add",
+      "en": "Add note",
+      "vars": []
+    },
+    {
+      "key": "havruta.copyInvite",
+      "en": "Copy invite link",
+      "vars": []
+    },
+    {
+      "key": "havruta.declined",
+      "en": "The text wasn't fetched.",
+      "vars": []
+    },
+    {
+      "key": "havruta.defaultName",
+      "en": "Me",
+      "vars": []
+    },
+    {
+      "key": "havruta.emptyNote",
+      "en": "Write something first.",
+      "vars": []
+    },
+    {
+      "key": "havruta.end",
+      "en": "End session",
+      "vars": []
+    },
+    {
+      "key": "havruta.follow",
+      "en": "Follow my partner",
+      "vars": []
+    },
+    {
+      "key": "havruta.hideNikud",
+      "en": "Hide niqqud",
+      "vars": []
+    },
+    {
+      "key": "havruta.highlight",
+      "en": "Highlight the selection",
+      "vars": []
+    },
+    {
+      "key": "havruta.join",
+      "en": "Join the study room (havruta) from this link? Your notes will be shared with your partner, encrypted.",
+      "vars": []
+    },
+    {
+      "key": "havruta.linkOnly",
+      "en": "Versions you can read on Sefaria (their licence doesn't allow copying)",
+      "vars": []
+    },
+    {
+      "key": "havruta.mine",
+      "en": "My notes",
+      "vars": []
+    },
+    {
+      "key": "havruta.noCopy",
+      "en": "That note repeats the text itself. Point at the segment instead — the text is not shared in the room.",
+      "vars": []
+    },
+    {
+      "key": "havruta.noRef",
+      "en": "The room's reference hasn't arrived yet: your partner needs to be online once.",
+      "vars": []
+    },
+    {
+      "key": "havruta.noteOn",
+      "en": "Note on segment {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "havruta.offlineNoText",
+      "en": "This text isn't saved for offline use, and the app is offline.",
+      "vars": []
+    },
+    {
+      "key": "havruta.partnerAway",
+      "en": "Your partner isn't here yet",
+      "vars": []
+    },
+    {
+      "key": "havruta.partnerHere",
+      "en": "{name} is at segment {n}",
+      "vars": [
+        "name",
+        "n"
+      ]
+    },
+    {
+      "key": "havruta.qr",
+      "en": "Invite QR code",
+      "vars": []
+    },
+    {
+      "key": "havruta.readOnSefaria",
+      "en": "Read on Sefaria",
+      "vars": []
+    },
+    {
+      "key": "havruta.save",
+      "en": "Save to vault",
+      "vars": []
+    },
+    {
+      "key": "havruta.saved",
+      "en": "Saved: {path}",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "havruta.segment",
+      "en": "Segment {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "havruta.segments",
+      "en": "The passage, segment by segment",
+      "vars": []
+    },
+    {
+      "key": "havruta.showNikud",
+      "en": "Show niqqud",
+      "vars": []
+    },
+    {
+      "key": "havruta.theirs",
+      "en": "My partner's notes",
+      "vars": []
+    },
+    {
+      "key": "havruta.theirsNamed",
+      "en": "{name}'s notes",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "havruta.title",
+      "en": "Havruta — {ref}",
+      "vars": [
+        "ref"
+      ]
+    },
+    {
       "key": "help.back",
       "en": "Back to the contents",
       "vars": []

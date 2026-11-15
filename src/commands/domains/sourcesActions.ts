@@ -91,3 +91,17 @@ export async function notesOnVerse(ctx: CommandContext): Promise<void> {
     },
   });
 }
+
+/** W12.H2: a shared, encrypted study room on the reference here (havruta). */
+export async function studyHavruta(ctx: CommandContext): Promise<void> {
+  const s = await sefaria();
+  const here = selectionOrLine(ctx);
+  const ref = (here && (s.sourceRefsIn(here.text)[0] ?? s.parseSourceRef(here.text.trim()))) || s.refOfSourceNote(ctx.liveDoc().content) || s.parseSourceRef((await uiPrompt({ message: t("sources.prompt"), defaultValue: "" })) ?? "");
+  if (!ref) return;
+  try {
+    const { openStudyScreen } = await import("../../havruta/open");
+    await openStudyScreen({ ref });
+  } catch (e) {
+    useToastStore.getState().push({ kind: "error", title: t("sources.failed", { error: explainError(e) }) });
+  }
+}
