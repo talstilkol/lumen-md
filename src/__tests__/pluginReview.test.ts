@@ -11,9 +11,11 @@ import { spawnSync } from "node:child_process";
 import { cpSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { CSS_ALLOWED_ORIGINS, TAKEDOWN_MS, cssFindings, overdueTakedowns, reviewPluginVersion, type Scorecard } from "../plugins/runtime/review";
+import { CSS_ALLOWED_ORIGINS, TAKEDOWN_MS, cssFindings, decodeCssEscapes, isOpenSourceLicense, overdueTakedowns, reviewPluginVersion, type KnownBad, type Scorecard } from "../plugins/runtime/review";
 // @ts-expect-error — plain .mjs helpers without types
 import { findingsProblems, privacyLabel, renderSecurityPage } from "../../scripts/lib/securityPage.mjs";
+// @ts-expect-error — plain .mjs without types
+import { inRange } from "../../scripts/audit-lock.mjs";
 
 const REPO = { repository: "https://github.com/example/plugin" };
 const manifest = (caps: string[], extra: Record<string, unknown> = REPO) =>
@@ -84,6 +86,50 @@ describe("permissions against the previous version, the lockfile, the scorecard"
     expect(overdueTakedowns(listed, cards, now).map((c) => c.version)).toEqual(["1.0.25"]);
     expect(overdueTakedowns([], cards, now)).toEqual([]);
     expect(TAKEDOWN_MS).toBe(24 * 3600_000);
+  });
+});
+
+describe("#714's checks, ported onto this design (W10 port, train 6; the samples are synthetic)", () => {
+  const knownBad = (JSON.parse(readFileSync("security/known-bad.json", "utf8")) as { entries: Array<KnownBad & { file: string }> }).entries.filter((e) => e.file.endsWith("package-lock.json"));
+  const lock = (pkgs: Record<string, string>) => JSON.stringify({ lockfileVersion: 3, packages: { "": {}, ...Object.fromEntries(Object.entries(pkgs).map(([n, v]) => [`node_modules/${n}`, { version: v }])) } });
+  const base = { manifest: manifest(["document:read", "commands"]), main: GOOD };
+  const bad: Array<[string, Parameters<typeof reviewPluginVersion>[0], string]> = [
+    ["closed licence", { ...base, manifest: manifest(["document:read", "commands"], { ...REPO, license: "Proprietary" }) }, "closed-source"],
+    ["licence expression with a non-open id", { ...base, manifest: manifest(["document:read", "commands"], { ...REPO, license: "MIT AND LicenseRef-Commercial" }) }, "closed-source"],
+    ["known-bad dependency (high, security/known-bad.json)", { ...base, lockfile: lock({ nanoid: "3.3.3" }), knownBad, inRange }, "vulnerable-dependency"],
+    ["lockfile that is not JSON", { ...base, lockfile: "{nope", knownBad, inRange }, "vulnerable-dependency"],
+    ["CSS url() hidden with escapes", { ...base, css: `a { background: u\\72l(ht\\74ps://collect.example/p); }` }, "css-remote-url"],
+    ["CSS @import hidden with escapes", { ...base, css: `@\\69mport "https://collect.example/x.css";` }, "css-import"],
+    ["CSS image-set() to another origin", { ...base, css: `a { background-image: image-set("https://collect.example/a.png" 1x); }` }, "css-remote-url"],
+    ["CSS src() string to another origin", { ...base, css: `@font-face { font-family: x; src("https://collect.example/f.woff2"); }` }, "css-remote-url"],
+    // ~250-character lines with no whitespace: under this design's one-long-line and 300-average rules, caught by #714's whitespace share.
+    ["minified over many short lines, no source", { ...base, main: Array.from({ length: 24 }, (_, l) => Array.from({ length: 8 }, (_, i) => `function f${l}_${i}(x){return x+${i}}`).join(";")).join("\n") }, "minified-only"],
+  ];
+  it.each(bad)("%s → rejected", async (_name: string, input: Parameters<typeof reviewPluginVersion>[0], rule: string) => {
+    const c = await reviewPluginVersion(input);
+    expect(c.passed).toBe(false);
+    expect(c.score).toBe(0);
+    expect(rules(c)).toContain(rule);
+  });
+  it("a lower-severity known-bad version is a warning, and npm audit stays owed", async () => {
+    const low = [{ name: "left-pad", versions: ["1.0.0"], severity: "moderate", advisories: ["GHSA-test-only"] }];
+    const c = await reviewPluginVersion({ ...base, lockfile: lock({ "left-pad": "1.0.0" }), knownBad: low, inRange });
+    expect(c.passed).toBe(true);
+    expect(c.findings).toContainEqual({ rule: "vulnerable-dependency", severity: "warning", detail: "left-pad@1.0.0 (moderate: GHSA-test-only)" });
+    expect(c.audit).toBe("owed");
+    // A fixed version of the same package is clean.
+    expect((await reviewPluginVersion({ ...base, lockfile: lock({ nanoid: "3.3.16" }), knownBad, inRange })).findings.map((f) => f.rule)).not.toContain("vulnerable-dependency");
+  });
+  it("licences: open-source SPDX ids and expressions", () => {
+    expect(isOpenSourceLicense("MIT")).toBe(true);
+    expect(isOpenSourceLicense("(MIT OR Apache-2.0)")).toBe(true);
+    expect(isOpenSourceLicense("GPL-2.0-or-later WITH Classpath-exception-2.0")).toBe(true);
+    expect(isOpenSourceLicense("Proprietary")).toBe(false);
+    expect(isOpenSourceLicense("")).toBe(false);
+  });
+  it("relative, data: and fragment targets stay allowed once escapes are decoded", () => {
+    expect(cssFindings(`@font-face { src: url("fonts/a.woff2") } a { background: image-set("./a.png" 1x) } b { background: url(data:image/png;base64,AAAA) } c { fill: url(#g) }`)).toEqual([]);
+    expect(decodeCssEscapes("u\\72l(ht\\74ps:")).toBe("url(https:");
   });
 });
 

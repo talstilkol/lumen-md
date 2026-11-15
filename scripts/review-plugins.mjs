@@ -9,7 +9,9 @@
  *   … --dir <registry dir> --out <scorecards dir>   # another registry (the tests use this)
  *
  * Runs offline: `npm audit` is not run (a version with a lockfile is marked
- * "audit owed"). Each version's previous version is the one before it in
+ * "audit owed"). A version's package-lock.json is checked against
+ * security/known-bad.json, as `npm run audit:lock` checks the app's (from
+ * #714). Each version's previous version is the one before it in
  * index.json, for the permission diff.
  */
 import { spawnSync } from "node:child_process";
@@ -27,6 +29,8 @@ if (!process.execArgv.includes("--import")) {
 const args = process.argv.slice(2);
 const opt = (f) => (args.indexOf(f) >= 0 ? args[args.indexOf(f) + 1] : undefined);
 const { reviewPluginVersion, overdueTakedowns } = await import(pathToFileURL(join(ROOT, "src/plugins/runtime/review.ts")).href);
+const { inRange } = await import(pathToFileURL(join(ROOT, "scripts/audit-lock.mjs")).href);
+const knownBad = JSON.parse(readFileSync(join(ROOT, "security/known-bad.json"), "utf8")).entries.filter((e) => String(e.file).endsWith("package-lock.json"));
 const DIR = resolve(opt("--dir") ?? join(ROOT, "public/plugins/examples"));
 const OUT = resolve(opt("--out") ?? join(DIR, "scorecards"));
 const inRepo = !opt("--dir") || args.includes("--in-repo");
@@ -52,6 +56,7 @@ for (const p of index.plugins) {
       ...(v.signature ? { signature: v.signature } : {}),
       ...(previous !== undefined ? { previousManifest: previous } : {}),
       hasLockfile: existsSync(join(at, "package-lock.json")) || existsSync(join(at, "pnpm-lock.yaml")),
+      ...(read(join(at, "package-lock.json")) !== undefined ? { lockfile: read(join(at, "package-lock.json")), knownBad, inRange } : {}),
       inRepo,
     });
     previous = manifest;

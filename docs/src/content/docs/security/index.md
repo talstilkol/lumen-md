@@ -41,7 +41,7 @@ Every finding that is still open or accepted, with its severity. A finding leave
 
 ## Plugin review scorecards
 
-Every version of every plugin in the registry goes through an automated review before it is listed (plan W11.S14): static analysis (eval, Function, obfuscation, minified-only bundles, undeclared network origins), its permissions against the previous version, its stylesheet (no remote `@import` or `url()`), and a public source. A version that fails is not listed; a listed version whose review failed is taken down within 24 hours. The privacy label comes from the permissions the manifest declares.
+Every version of every plugin in the registry goes through an automated review before it is listed (plan W11.S14): static analysis (eval, Function, obfuscation, minified-only bundles, undeclared network origins), its permissions against the previous version, its stylesheet (no remote `@import`, `url()`, `image-set()` or `src()`, escaped forms included), a public source and an open-source licence, and the packages in its lockfile against the known-bad list (`security/known-bad.json`; high or critical fails it). A version that fails is not listed; a listed version whose review failed is taken down within 24 hours. The privacy label comes from the permissions the manifest declares.
 
 | plugin | version | grade | score | privacy label |
 |---|---|---|---|---|
