@@ -7,7 +7,7 @@ import type { EditorView } from "@codemirror/view";
 import { exportReadyText } from "../../storage/exportReady";
 
 /** The formats exported as one file from the open note's text. */
-export type ExportKind = "rtf" | "latex" | "rst" | "adoc" | "org" | "opml" | "reveal" | "epub" | "ipynb" | "site" | "pptx";
+export type ExportKind = "rtf" | "latex" | "typst" | "rst" | "adoc" | "org" | "opml" | "reveal" | "epub" | "ipynb" | "site" | "pptx";
 
 /** Export `doc` (read by the command before any await) as `kind`. */
 export async function exportAs(doc: { name: string; content: string }, kind: ExportKind): Promise<void> {
@@ -19,6 +19,10 @@ export async function exportAs(doc: { name: string; content: string }, kind: Exp
       return f.downloadText(`${baseName}.rtf`, f.markdownToRtf(content), "application/rtf");
     case "latex":
       return f.downloadText(`${baseName}.tex`, f.markdownToLatex(content), "application/x-latex");
+    case "typst": {
+      const { markdownToTypst } = await import("../../storage/exportTypst");
+      return f.downloadText(`${baseName}.typ`, markdownToTypst(content, { title: baseName }), "text/vnd.typst");
+    }
     case "rst":
       return f.downloadText(`${baseName}.rst`, f.markdownToRst(content), "text/x-rst");
     case "adoc":
