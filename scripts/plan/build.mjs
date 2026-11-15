@@ -32,6 +32,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { checkDod } from "../dod.mjs";
+import { checkEvalClaims } from "../lib/evalCard.mjs";
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 export const PLAN_FILE = "plan/plan.json";
@@ -795,7 +796,8 @@ export function formatWip(w) {
 export function run({ root = ROOT, check = false, wipLimit } = {}) {
   const plan = JSON.parse(readFileSync(join(root, PLAN_FILE), "utf8"));
   // Plan 0.7: no ✅ without the commands that prove it.
-  const dodProblems = checkDod(plan);
+  // W11.I18: a ✅ that rests on an eval cites a complete public or held-out card.
+  const dodProblems = [...checkDod(plan), ...checkEvalClaims(plan, (p) => JSON.parse(readFileSync(join(root, p), "utf8")))];
   if (dodProblems.length) throw new Error(`plan: definition of done —\n  ${dodProblems.join("\n  ")}`);
   const verifiedProblems = checkVerified(plan);
   if (verifiedProblems.length) throw new Error(`plan: verified / pr (W4.24) —\n  ${verifiedProblems.join("\n  ")}`);
