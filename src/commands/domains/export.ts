@@ -212,6 +212,15 @@ export function buildExportCommands({ handleExportHtml, liveDoc, getEditorView }
       action: () => exportAs(liveDoc(), "opml"),
     },
     {
+      id: "file.exportOdt",
+      label: t("cmd.file.exportOdt"),
+      hint: t("cmd.file.exportOdt.hint"),
+      icon: cmdIcons.Download,
+      group: t("group.file"),
+      // Snapshot first: a tab switch while the chunk loads must not export another note.
+      action: () => exportAs(liveDoc(), "odt"),
+    },
+    {
       id: "file.exportReveal",
       label: t("cmd.file.exportReveal"),
       hint: t("cmd.file.exportReveal.hint"),

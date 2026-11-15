@@ -77,6 +77,7 @@
 # ── Every other door an export leaves by: each must call prepareForExport (review 8, RR8-481-1) ──
 /src/storage/exportDocx.ts               @talstilkol
 /src/storage/exportHtml.ts               @talstilkol
+/src/storage/exportOdt.ts                @talstilkol
 /src/ui/PrintExport.tsx                  @talstilkol
 /src/commands/domains/export.ts          @talstilkol
 /src/publish/site.ts                     @talstilkol
@@ -155,6 +156,7 @@
 /src/storage/exportDocx.ts               @talstilkol
 /src/storage/exportFormats.ts            @talstilkol
 /src/storage/exportHtml.ts               @talstilkol
+/src/storage/exportOdt.ts                @talstilkol
 /src/storage/exportPptx.ts               @talstilkol
 /src/ui/PrintExport.tsx                  @talstilkol
 /src/ui/PublishSiteDialog.tsx            @talstilkol

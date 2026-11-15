@@ -148,6 +148,13 @@
       "icon": "Download"
     },
     {
+      "id": "file.exportOdt",
+      "label": "Export to OpenDocument (ODT)",
+      "group": "File",
+      "hint": "LibreOffice text document, right-to-left paragraphs kept",
+      "icon": "Download"
+    },
+    {
       "id": "file.exportReveal",
       "label": "Export to Slides (Reveal.js)",
       "group": "File",
@@ -2230,6 +2237,13 @@
       "icon": "Download"
     },
     {
+      "id": "file.exportOdt",
+      "label": "Export to OpenDocument (ODT)",
+      "group": "File",
+      "hint": "LibreOffice text document, right-to-left paragraphs kept",
+      "icon": "Download"
+    },
+    {
       "id": "file.exportReveal",
       "label": "Export to Slides (Reveal.js)",
       "group": "File",
@@ -4292,6 +4306,7 @@
     "file.exportAdoc",
     "file.exportOrg",
     "file.exportOpml",
+    "file.exportOdt",
     "file.exportReveal",
     "file.exportEpub",
     "file.exportIpynb",

@@ -7,7 +7,7 @@ import type { EditorView } from "@codemirror/view";
 import { exportReadyText } from "../../storage/exportReady";
 
 /** The formats exported as one file from the open note's text. */
-export type ExportKind = "rtf" | "latex" | "rst" | "adoc" | "org" | "opml" | "reveal" | "epub" | "ipynb" | "site" | "pptx";
+export type ExportKind = "rtf" | "latex" | "rst" | "adoc" | "org" | "opml" | "odt" | "reveal" | "epub" | "ipynb" | "site" | "pptx";
 
 /** Export `doc` (read by the command before any await) as `kind`. */
 export async function exportAs(doc: { name: string; content: string }, kind: ExportKind): Promise<void> {
@@ -27,6 +27,10 @@ export async function exportAs(doc: { name: string; content: string }, kind: Exp
       return f.downloadText(`${baseName}.org`, f.markdownToOrg(content), "text/x-org");
     case "opml":
       return f.downloadText(`${baseName}.opml`, f.markdownToOpml(content, baseName), "text/x-opml");
+    case "odt": {
+      const { markdownToOdtBytes, ODT_MIME } = await import("../../storage/exportOdt");
+      return f.downloadBytes(`${baseName}.odt`, await markdownToOdtBytes(content, { title: baseName }), ODT_MIME);
+    }
     case "reveal":
       return f.downloadText(`${baseName}.slides.html`, f.markdownToRevealHtml(content, baseName), "text/html");
     case "epub":

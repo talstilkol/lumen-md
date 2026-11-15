@@ -515,6 +515,9 @@ function markdownToBody(md: string, ctx: DocxCtx): string {
           text: lm[3],
         });
         i++;
+        // A soft-wrapped item continues on the next lines (CommonMark lazy
+        // continuation); they belong to the item, not to a paragraph after it (W12.F3).
+        while (i < lines.length && continuesBlock(lines, i)) items[items.length - 1].text += " " + lines[i++].trim();
       }
       out.push(listBlockXml(items, ctx));
       continue;
@@ -533,11 +536,25 @@ function markdownToBody(md: string, ctx: DocxCtx): string {
       continue;
     }
 
-    out.push(bodyParaXml(parseInline(line), ctx));
+    // A paragraph is every line up to a blank line or the next block: soft-wrapped
+    // lines join with a space (W12.F3). A hard break (two trailing spaces or a
+    // backslash) still ends the Word paragraph, as before.
+    let text = line.trim();
     i++;
+    while (!/( {2,}|\\)$/.test(lines[i - 1]) && i < lines.length && continuesBlock(lines, i)) text += " " + lines[i++].trim();
+    out.push(bodyParaXml(parseInline(text.replace(/\\$/, "")), ctx));
   }
 
   return out.join("");
+}
+
+/** Line `i` is a soft-wrapped continuation: not blank and not the start of another block. */
+function continuesBlock(lines: string[], i: number): boolean {
+  const l = lines[i];
+  if (!l.trim()) return false;
+  if (/^\s*(```|~~~|\$\$\s*$|#{1,6}\s|>)/.test(l) || listMarker.test(l) || /^\s*([-*_])\1{2,}\s*$/.test(l)) return false;
+  if (/\|/.test(l) && (isTableSep(l) || (i + 1 < lines.length && isTableSep(lines[i + 1])))) return false;
+  return true;
 }
 
 /** A centred line of the title page; an empty value is left out. */
