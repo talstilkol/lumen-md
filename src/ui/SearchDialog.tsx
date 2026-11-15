@@ -29,7 +29,7 @@ import { EmptyState, runCommand } from "./EmptyState";
 import { HelpButton } from "./HelpButton";
 import "./searchDialogStrings";
 import { Modal } from "./Modal";
-import { renderSnippet } from "./searchSnippet";
+import { MatchedAsLine, renderSnippet, SNIPPET_STYLE } from "./searchSnippet";
 
 interface Props {
   open: boolean;
@@ -668,20 +668,8 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
                     </span>
                   )}
                 </div>
-                {hit.snippet && (
-                  <div
-                    style={{
-                      color: "hsl(var(--fg-muted))",
-                      fontSize: 11.5,
-                      marginTop: 2,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {renderSnippet(hit)}
-                  </div>
-                )}
+                {hit.snippet && <div style={SNIPPET_STYLE}>{renderSnippet(hit)}</div>}
+                {mode === "search" && <MatchedAsLine query={query} hit={hit} />}
               </div>
             </div>
           ))}

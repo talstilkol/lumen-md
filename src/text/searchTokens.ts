@@ -166,6 +166,12 @@ export const LEMMA_WEIGHT = 0.45;
 export const SYNONYM_WEIGHT = 0.5;
 /** An English equivalent of a Hebrew query word (W2.11): an English note on the topic comes after the Hebrew ones. */
 export const ENGLISH_WEIGHT = 0.2;
+/**
+ * A word in the other script with the same phonetic key (R12.16, text/translit):
+ * "Kohen" for "כהן". Weaker than a spelling variant, since a key also joins
+ * names that only sound alike.
+ */
+export const TRANSLIT_WEIGHT = 0.5;
 
 /**
  * The terms of a query with their weights. Function words are dropped
