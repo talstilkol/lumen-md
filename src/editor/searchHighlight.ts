@@ -11,7 +11,9 @@
  *   1. Remembers the query (case-insensitive).
  *   2. Paints a yellow mark on each match in the visible ranges only
  *      (W11.Q3: a long note is never decorated as a whole).
- *   3. Scrolls the first match into view and centers it.
+ *   3. Unfolds whatever fold hides the first match (a folded list, heading or
+ *      code block: plan W7.3 step 4b, W10.E50), then scrolls it into view and
+ *      centers it.
  *   4. Fades the decorations after 4 seconds so the editor returns to
  *      its baseline look.
  *
@@ -20,7 +22,8 @@
 
 import { Decoration, EditorView, ViewPlugin } from "@codemirror/view";
 import type { DecorationSet, ViewUpdate } from "@codemirror/view";
-import { StateEffect, StateField, type Range } from "@codemirror/state";
+import { StateEffect, StateField, type EditorState, type Range, type RangeSet, type RangeValue } from "@codemirror/state";
+import { foldedRanges, unfoldEffect } from "@codemirror/language";
 import type { Extension } from "@codemirror/state";
 
 const setHighlight = StateEffect.define<{ query: string } | null>();
@@ -86,6 +89,20 @@ const highlightPlugin = ViewPlugin.fromClass(
   { decorations: (v) => v.decorations },
 );
 
+/** The folds that cover any of [from, to): a match inside one would be scrolled to but stay hidden. */
+export function foldsHiding(state: EditorState, from: number, to: number): Array<{ from: number; to: number }> {
+  return rangesOver(foldedRanges(state), from, to);
+}
+
+/** The ranges of a set (the folded ranges) that overlap [from, to). */
+export function rangesOver(set: Pick<RangeSet<RangeValue>, "between">, from: number, to: number): Array<{ from: number; to: number }> {
+  const out: Array<{ from: number; to: number }> = [];
+  set.between(from, to, (a, b) => {
+    if (a < to && b > from) out.push({ from: a, to: b });
+  });
+  return out;
+}
+
 interface SearchTargetEventDetail {
   /** The query the user searched for. */
   query: string;
@@ -112,7 +129,7 @@ function bridgePlugin() {
           const idx = docText.toLowerCase().indexOf(detail.query.trim().toLowerCase());
           if (idx >= 0) {
             view.dispatch({
-              effects: EditorView.scrollIntoView(idx, { y: "center" }),
+              effects: [...foldsHiding(view.state, idx, idx + detail.query.trim().length).map((f) => unfoldEffect.of(f)), EditorView.scrollIntoView(idx, { y: "center" })],
             });
           }
           // Auto-clear after 4 seconds so the editor returns to normal.
