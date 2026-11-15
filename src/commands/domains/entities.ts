@@ -6,6 +6,8 @@
  *  - "Entity: link to Wikidata…" (W12.E10), for the open entity note: asks
  *    for consent, then searches Wikidata for its name (ui/WikidataHost.tsx).
  *    Not listed in airplane mode.
+ *  - "Entity graph" (W12.E7, W12.X3) opens the graph view of every entity
+ *    and citation.
  *
  * The entity types themselves ("All People", "All Laws", …, each with its
  * Base and its field form) come from the typed-object registry (W12.T3):
@@ -16,6 +18,7 @@ import { cmdIcons, type Command } from "../../ui/CommandPalette";
 import { showAiToast } from "../../ui/AiToast";
 import { airplaneFlagOn } from "../../privacy/airplaneBoot";
 import type { CommandContext } from "./context";
+import { openEntityGraph } from "../../entities/graphEvents";
 
 export const WIKIDATA_EVENT = "lumen-wikidata-link";
 
@@ -32,7 +35,10 @@ async function linkOpenEntity(ctx: CommandContext): Promise<void> {
 }
 
 export function buildEntityCommands(ctx: CommandContext): Command[] {
-  const out: Command[] = [{ id: "entities.review", label: t("cmd.entities.review"), icon: cmdIcons.FileText, action: () => window.dispatchEvent(new Event("lumen-open-agent-review")) }];
+  const out: Command[] = [
+    { id: "entities.review", label: t("cmd.entities.review"), icon: cmdIcons.FileText, action: () => window.dispatchEvent(new Event("lumen-open-agent-review")) },
+    { id: "entities.graph", label: t("cmd.entities.graph"), hint: t("cmd.entities.graph.hint"), icon: cmdIcons.Network, action: openEntityGraph },
+  ];
   if (!airplaneFlagOn()) out.push({ id: "entities.wikidata", label: t("cmd.entities.wikidata"), icon: cmdIcons.FileText, action: () => void linkOpenEntity(ctx) });
   return out;
 }

@@ -161,6 +161,8 @@
   "cmd.edit.redact.hint": "wird aus jedem Export entfernt",
   "cmd.edit.toggleDirection": "Absatzrichtung umschalten (rechts nach links ↔ links nach rechts)",
   "cmd.edit.toggleDirection.hint": "Wird als unsichtbares Richtungszeichen am Absatzanfang in der Notiz gespeichert; dir: rtl | ltr | auto im Frontmatter gilt für die ganze Notiz",
+  "cmd.entities.graph": "Entitätsgraph",
+  "cmd.entities.graph.hint": "Alle Entitäten und wer wen zitiert, als Graph oder Tabelle",
   "cmd.entities.review": "Entitätsgraph: Vorschläge prüfen",
   "cmd.entities.wikidata": "Entität: mit Wikidata verknüpfen…",
   "cmd.entities.wikidata.notEntity": "Öffne zuerst eine Entitätsnotiz (unter ישויות/).",

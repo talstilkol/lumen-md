@@ -161,6 +161,8 @@
   "cmd.edit.redact.hint": "удаляется из любого экспорта",
   "cmd.edit.toggleDirection": "Сменить направление абзаца (справа налево ↔ слева направо)",
   "cmd.edit.toggleDirection.hint": "Сохраняется в заметке как невидимый знак направления в начале абзаца; dir: rtl | ltr | auto во frontmatter задаёт всю заметку",
+  "cmd.entities.graph": "Граф сущностей",
+  "cmd.entities.graph.hint": "Все сущности и кто кого цитирует — графом или таблицей",
   "cmd.entities.review": "Граф сущностей: предложения на проверку",
   "cmd.entities.wikidata": "Сущность: связать с Wikidata…",
   "cmd.entities.wikidata.notEntity": "Сначала откройте заметку сущности (в ישויות/).",

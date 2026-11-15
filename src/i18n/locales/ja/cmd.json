@@ -161,6 +161,8 @@
   "cmd.edit.redact.hint": "すべてのエクスポートから削除",
   "cmd.edit.toggleDirection": "段落の方向を切り替え（右から左 ↔ 左から右）",
   "cmd.edit.toggleDirection.hint": "段落の先頭に見えない方向マークとしてノートに保存されます。frontmatter の dir: rtl | ltr | auto はノート全体に適用されます",
+  "cmd.entities.graph": "エンティティグラフ",
+  "cmd.entities.graph.hint": "すべてのエンティティと引用関係を、グラフまたは表で",
   "cmd.entities.review": "エンティティグラフ: 確認待ちの提案",
   "cmd.entities.wikidata": "エンティティ: Wikidata にリンク…",
   "cmd.entities.wikidata.notEntity": "先にエンティティのノート（ישויות/ の下）を開いてください。",

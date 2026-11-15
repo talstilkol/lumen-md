@@ -6860,6 +6860,41 @@
       "vars": []
     },
     {
+      "key": "entityGraph.screen.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.screen.counts",
+      "en": "{entities} entities · {edges} relations",
+      "vars": [
+        "entities",
+        "edges"
+      ]
+    },
+    {
+      "key": "entityGraph.screen.empty",
+      "en": "No entities or citations yet. Approve proposals in the review panel, or add sources that cite each other ([@key]).",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.screen.failed",
+      "en": "The graph could not be read: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "entityGraph.screen.loading",
+      "en": "Reading the vault…",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.screen.title",
+      "en": "Entity graph",
+      "vars": []
+    },
+    {
       "key": "entityGraph.split.action",
       "en": "Split",
       "vars": []

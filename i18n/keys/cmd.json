@@ -826,6 +826,16 @@
       "vars": []
     },
     {
+      "key": "cmd.entities.graph",
+      "en": "Entity graph",
+      "vars": []
+    },
+    {
+      "key": "cmd.entities.graph.hint",
+      "en": "Every entity and who cites whom, as a graph or a table",
+      "vars": []
+    },
+    {
       "key": "cmd.entities.review",
       "en": "Entity graph: proposals to review",
       "vars": []

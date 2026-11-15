@@ -161,6 +161,8 @@
   "cmd.edit.redact.hint": "يُحذف من كل تصدير",
   "cmd.edit.toggleDirection": "تبديل اتجاه الفقرة (من اليمين إلى اليسار ↔ من اليسار إلى اليمين)",
   "cmd.edit.toggleDirection.hint": "يُحفظ في الملاحظة كعلامة اتجاه غير مرئية في بداية الفقرة؛ ‏dir: rtl | ltr | auto في الـ frontmatter يحدد الملاحظة كلها",
+  "cmd.entities.graph": "رسم الكيانات",
+  "cmd.entities.graph.hint": "كل الكيانات ومن يستشهد بمن، كرسم أو كجدول",
   "cmd.entities.review": "مخطط الكيانات: مقترحات للمراجعة",
   "cmd.entities.wikidata": "كيان: ربط بـ Wikidata…",
   "cmd.entities.wikidata.notEntity": "افتح أولاً ملاحظة كيان (ملاحظة تحت ישויות/).",

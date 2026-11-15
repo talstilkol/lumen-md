@@ -40,6 +40,10 @@ the relations between them ("born in", "member of", "cites", …).
 - Each entity has a page: its relations grouped by type, each linking to
   the paragraph it came from, and every mention with its context.
 - Each type has a Bases file (`ישויות/אנשים.base`, …).
+- Command palette (⌘K) → **Entity graph** opens the graph view over the
+  workspace: the approved entities and relations and the citations
+  (below), together. Double-click an entity in the table to open its note;
+  Esc closes the view.
 - The entity graph view filters by type, relation, source folder or tag,
   and confidence. It has a time slider (right to left in Hebrew) with
   play, a 1–3 step neighbourhood, and a table that shows exactly what the
