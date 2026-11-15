@@ -258,11 +258,16 @@ export function markdownToRst(md: string): string {
  * stays close enough that a paste into Asciidoctor will Just Work.
  */
 export function markdownToAdoc(md: string): string {
+  // Bold is parked behind a control character while italic is rewritten, so a
+  // bold that has just become `*x*` (AsciiDoc bold) is not read again as italic.
+  // Neither may span a line (W12.F1 round-trip finding).
   return md
     .replace(/^(#{1,6})\s+(.+)$/gm, (_m, hashes: string, t: string) => `${"=".repeat(hashes.length)} ${t}`)
     .replace(/^[-*+]\s/gm, "* ")
     .replace(/`([^`]+)`/g, "``$1``")
-    .replace(/\*\*([^*]+)\*\*/g, "*$1*"); // adoc bold
+    .replace(/\*\*([^*\n]+)\*\*/g, "\u0001$1\u0001")
+    .replace(/(?<![*\w])\*(?=\S)([^*\n]+?)\*(?![*\w])/g, "_$1_")
+    .replace(/\u0001([^\u0001]*)\u0001/g, "*$1*"); // adoc bold
 }
 
 /**
@@ -273,8 +278,11 @@ export function markdownToOrg(md: string): string {
   return md
     .replace(/^(#{1,6})\s+(.+)$/gm, (_m, hashes: string, t: string) => `${"*".repeat(hashes.length)} ${t}`)
     .replace(/```(\w*)\n([\s\S]*?)```/g, "#+BEGIN_SRC $1\n$2#+END_SRC")
-    .replace(/\*\*([^*]+)\*\*/g, "*$1*")
+    // Bold waits behind a control character while italic is rewritten, so the
+    // `*x*` it becomes is not turned into /x/ (W12.F1 round-trip finding).
+    .replace(/\*\*([^*\n]+)\*\*/g, "\u0001$1\u0001")
     .replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, "/$1/")
+    .replace(/\u0001([^\u0001]*)\u0001/g, "*$1*")
     .replace(/`([^`]+)`/g, "=$1=");
 }
 
