@@ -11467,6 +11467,28 @@
       ]
     },
     {
+      "key": "sources.panel.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "sources.panel.hint",
+      "en": "Put the cursor on a verse reference: the notes that cite it show here.",
+      "vars": []
+    },
+    {
+      "key": "sources.panel.title",
+      "en": "My notes on {ref}",
+      "vars": [
+        "ref"
+      ]
+    },
+    {
+      "key": "sources.panel.titleNone",
+      "en": "My notes on this verse",
+      "vars": []
+    },
+    {
       "key": "sources.prompt",
       "en": "Which source? For example בראשית א:א, שמות כ׳ ג׳, ב״ר א, א or Berakhot 2a",
       "vars": []
@@ -11481,6 +11503,35 @@
       "en": "Saved to {path}",
       "vars": [
         "path"
+      ]
+    },
+    {
+      "key": "sources.trigger.changed",
+      "en": "The text around {ref} changed while it loaded: nothing was inserted.",
+      "vars": [
+        "ref"
+      ]
+    },
+    {
+      "key": "sources.trigger.dismiss",
+      "en": "Not now",
+      "vars": []
+    },
+    {
+      "key": "sources.trigger.insert",
+      "en": "Insert",
+      "vars": []
+    },
+    {
+      "key": "sources.trigger.label",
+      "en": "Quote from Sefaria",
+      "vars": []
+    },
+    {
+      "key": "sources.trigger.suggest",
+      "en": "Quote {ref} from Sefaria? Only the reference is sent.",
+      "vars": [
+        "ref"
       ]
     },
     {

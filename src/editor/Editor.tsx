@@ -39,6 +39,7 @@ import { bidiExtension } from "./bidi";
 import { paragraphDirectionKeymap } from "./paragraphDirection";
 import { hebrewTypographyExtension } from "./hebrewTypographyExtension";
 import { bidiMarksExtension } from "./bidiMarks";
+import { sefariaRefTrigger } from "./refTrigger";
 import { mathBidiExtension } from "./mathBidi";
 import { inlineIsolatesPlugin } from "./bidiIsolates";
 import { languages } from "@codemirror/language-data";
@@ -321,8 +322,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
         // completion UI now on (for `[[` links) it would pop up on every `<`.
         completeHTMLTags: false,
       }),
-      // `[[` → notes, `[[Note#` → headings, `[[Note#^` → blocks (4.5); the
-      // source itself loads on the first `[[`.
+      // `[[` → notes, `[[Note#` → headings, `[[Note#^` → blocks (4.5); the source itself loads on the first `[[`.
       wikiLinkAutocomplete(),
       // Hover over [[Note]] previews it (4.6).
       wikiHover,
@@ -334,6 +334,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       // Hebrew typography as you type: ״ ׳ „” ־ – (plan W2.9).
       hebrewTypographyExtension(),
       bidiMarksExtension(),
+      sefariaRefTrigger(), // W5.1: a typed source reference offers its text; nothing is sent before Insert
       // W5.14 — inline formulas as LTR isolates, Ctrl/⌘+M, Hebrew layout inside math.
       mathBidiExtension(),
       // W11.H2 — inline code, URLs, link targets, footnotes (LTR), wiki links and tags (auto) as bidi
