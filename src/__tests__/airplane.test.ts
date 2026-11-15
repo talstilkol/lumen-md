@@ -544,7 +544,7 @@ describe("review 2 fixes", () => {
     expect(guardedSandbox("allow-scripts allow-same-origin allow-popups", "https://www.youtube.com/embed/x", base, false)).toBe("allow-scripts allow-same-origin allow-popups");
     expect(guardedSandbox("allow-scripts allow-same-origin allow-popups", "https://example.com/widget", base, false)).toBe("allow-scripts allow-popups");
     // The embed block's providers are the known ones.
-    const src = readFileSync(resolve(process.cwd(), "src/plugins/EmbedBlock.tsx"), "utf8");
+    const src = readFileSync(resolve(process.cwd(), "src/plugins/embedUrl.ts"), "utf8");
     // A Gist is a link (W10.D2, src/lib/contentFrame.ts), never framed from gist.github.com,
     // so it needs no place in EMBED_ORIGINS.
     const origins = new Set([...src.matchAll(/src: `(https:\/\/[^/`$]+)/g)].map((m) => m[1]).filter((o) => o !== "https://gist.github.com"));

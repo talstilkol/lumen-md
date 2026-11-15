@@ -93,6 +93,12 @@ to it as well. So the effective policy is always the intersection of the two.
   - The embed block frames `data:text/html` (gist) and only the listed embed origins
     (`src/plugins/EmbedBlock.tsx`). Nothing frames `blob:`, so the explicit list replaces
     the blanket `https:`.
+    Plan W8.7: that list is `embedProviders` in security/policy.json. Since W6.40 the
+    content frame's frame-src (and Tauri's rule) says `@embedProviders`, and the app's
+    frame-src names only the content frame's own site. `src/lib/embedProviders.ts`
+    gives the same list to the block's link logic (`src/plugins/embedUrl.ts`) and the
+    airplane switch. `npm run headers` refuses an https site named beside the list, a
+    provider copied into another frame-src, and one a host rule adds.
 - **D2 · docker's app headers never reached the page.** They sat at server level, but
   `location /` has its own `add_header Cache-Control`. A location with any `add_header`
   inherits none from the server. Checked with nginx 1.24: `/` and every SPA route were

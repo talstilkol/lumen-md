@@ -7,6 +7,8 @@
 
 import { contentFrameOrigin } from "../lib/contentFrame";
 
+import { EMBED_PROVIDER_ORIGINS } from "../lib/embedProviders";
+
 /** Origin + path only. */
 export function egressTarget(url: string, base: string = typeof location !== "undefined" ? location.href : "http://localhost/"): string {
   try {
@@ -20,9 +22,10 @@ export function egressTarget(url: string, base: string = typeof location !== "un
 
 /**
  * The sites whose embeds keep `allow-same-origin`: the https origins of
- * public/_headers' frame-src, which are the providers of
- * src/plugins/EmbedBlock.tsx and the embed codes they hand out (review 8,
- * RR8-451-2: one list; a test keeps them equal). A frame from any other site
+ * public/_headers' frame-src and script-src, which are the providers of
+ * src/plugins/embedUrl.ts and the embed codes they hand out (review 8,
+ * RR8-451-2: one list, security/policy.json's embedProviders, plan W8.7;
+ * a test keeps them equal). A frame from any other site
  * loses it, so it has no storage and no service worker of its own (review 6,
  * RR6-451-2). W6.40: the content frame's own site (src/lib/contentFrame.ts),
  * another site by design, in whose frame an embed player keeps an origin
@@ -30,26 +33,11 @@ export function egressTarget(url: string, base: string = typeof location !== "un
  * gist.github.com (W10.D2): a Gist is a link, never framed or scripted.
  */
 export const EMBED_ORIGINS: ReadonlySet<string> = new Set([
-  "https://codepen.io",
-  "https://codesandbox.io",
+  // security/policy.json's embedProviders: the content frame's frame-src (plan W8.7).
+  ...EMBED_PROVIDER_ORIGINS,
+  // No gist.github.com: a Gist is a link (W10.D2), not a script in the content frame.
+  // The content frame's own site, the app policy's frame-src entry (W6.40).
   "https://lumen-md-frame.pages.dev",
-  "https://maps.google.com",
-  "https://open.spotify.com",
-  "https://platform.twitter.com",
-  "https://player.vimeo.com",
-  "https://w.soundcloud.com",
-  "https://www.facebook.com",
-  "https://www.figma.com",
-  "https://www.google.com",
-  "https://www.instagram.com",
-  "https://www.linkedin.com",
-  "https://www.loom.com",
-  "https://www.openstreetmap.org",
-  "https://www.reddit.com",
-  "https://www.redditmedia.com",
-  "https://www.tiktok.com",
-  "https://www.youtube.com",
-  "https://www.youtube-nocookie.com",
 ]);
 
 /**
