@@ -6810,13 +6810,32 @@
       ]
     },
     {
+      "key": "knesset.answerLabel",
+      "en": "Answer (local model)",
+      "vars": []
+    },
+    {
+      "key": "knesset.answerNotVerified",
+      "en": "Not verified: the critic could not confirm this answer from section {section}. Rely on the quote.",
+      "vars": [
+        "section"
+      ]
+    },
+    {
+      "key": "knesset.answerVerified",
+      "en": "Checked by the critic: section {section} supports this answer.",
+      "vars": [
+        "section"
+      ]
+    },
+    {
       "key": "knesset.askNone",
       "en": "No saved law answers that. The search reads only laws saved for offline, with their text.",
       "vars": []
     },
     {
-      "key": "knesset.askPick",
-      "en": "Sections that answer it",
+      "key": "knesset.askPickQuote",
+      "en": "Sections to quote — quotes from the law, not verified answers",
       "vars": []
     },
     {
@@ -6897,6 +6916,16 @@
       "vars": []
     },
     {
+      "key": "knesset.quoteNotAnswer",
+      "en": "Quote from the law, not a verified answer.",
+      "vars": []
+    },
+    {
+      "key": "knesset.quoteNotInCopy",
+      "en": "quote not found in the saved copy",
+      "vars": []
+    },
+    {
       "key": "knesset.saveOffline",
       "en": "Save for offline",
       "vars": []
@@ -6907,11 +6936,6 @@
       "vars": [
         "path"
       ]
-    },
-    {
-      "key": "knesset.unverified",
-      "en": "not verified",
-      "vars": []
     },
     {
       "key": "latex.exported",
