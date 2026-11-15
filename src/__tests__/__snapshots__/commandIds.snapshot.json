@@ -100,6 +100,13 @@
       "icon": "FileText"
     },
     {
+      "id": "cite.fillReferencesOpenAlex",
+      "label": "Citations: fill references from OpenAlex…",
+      "group": "Tools",
+      "hint": "For a source note with a DOI: asks first, sends only the DOI, and writes nothing until you approve",
+      "icon": "FileText"
+    },
+    {
       "id": "file.exportRtf",
       "label": "Export to RTF",
       "group": "File",
@@ -2128,6 +2135,13 @@
       "id": "cite.syncZoteroWeb",
       "label": "Citations: sync the Zotero library from zotero.org (read-only)",
       "group": "Tools",
+      "icon": "FileText"
+    },
+    {
+      "id": "cite.fillReferencesOpenAlex",
+      "label": "Citations: fill references from OpenAlex…",
+      "group": "Tools",
+      "hint": "For a source note with a DOI: asks first, sends only the DOI, and writes nothing until you approve",
       "icon": "FileText"
     },
     {
@@ -4183,6 +4197,7 @@
     "cite.syncZotero",
     "file.exportAcademic",
     "cite.syncZoteroWeb",
+    "cite.fillReferencesOpenAlex",
     "file.exportRtf",
     "file.exportMarkdownAiMarks",
     "file.exportLatex",

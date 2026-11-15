@@ -96,6 +96,8 @@ const RULES: Rule[] = [
   // a local-only policy blocks it like the research service. W6.47: it also
   // writes — only the PDF highlights the user sends and confirms.
   { test: (h) => h === "api.zotero.org", category: "research", reason: "Zotero Web API (your library; writes only the PDF highlights you send)" },
+  // Plan W12.X3: the citation graph's optional reference lookup, off by default; only DOIs go out.
+  { test: (h) => h === "api.openalex.org", category: "research", reason: "OpenAlex: the references of a DOI (citation graph, only when you turn it on)" },
   // Knesset records (plan W7.5): the law or bill name the user asked for.
   { test: (h) => h === "knesset.gov.il" || h === "main.knesset.gov.il", category: "cloud-text", reason: "Knesset records (OData): the law or bill name only" },
   // Government data (plan W7.6): search words, a dataset id or a series id.

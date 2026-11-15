@@ -137,6 +137,10 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
             </label>
           ))}
         </fieldset>
+        {/* W12.X3: the citation graph — "cites" edges between sources (and laws) only. */}
+        <button type="button" aria-pressed={preds.size === 1 && preds.has("cites")} onClick={() => (preds.size === 1 && preds.has("cites") ? (setPreds(new Set(PREDICATES.map((p) => p.id))), setTypes(new Set(ENTITY_TYPES))) : (setPreds(new Set(["cites"])), setTypes(new Set<EntityType>(["source", "law"]))))}>
+          {t("entityGraph.view.citationsOnly")}
+        </button>
         <details>
           <summary>{t("entityGraph.view.relations")}</summary>
           <div role="group" aria-label={t("entityGraph.view.relations")} style={{ display: "grid", gridTemplateColumns: "repeat(2, auto)", gap: 2 }}>

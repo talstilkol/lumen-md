@@ -164,6 +164,8 @@ export function EpubReader({ path, fragment = null, openSeq = 0, onClose }: Prop
       .then((c) => !cancelled && setChapter(c))
       .catch((e: unknown) => !cancelled && setError(explainError(e)));
     savePrefs(path, { ...prefs, chapter: index });
+    // W12.X2: the chapter is the reading progress of the source note that names this book.
+    void import("../reading/progress").then((m) => m.noteReaderProgress(path, { page: index + 1, pages: book.spine.length })).catch(() => undefined);
     return () => {
       cancelled = true;
     };

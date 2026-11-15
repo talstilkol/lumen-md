@@ -99,6 +99,20 @@ export function noteOwnWrite(path: string, content: string): void {
   noteDisk(path, content);
 }
 
+/**
+ * Lumen wrote `content` to `path` on the user's approval (the property review
+ * queue, plan 5.10 / W12.X3). An open copy without unsaved edits shows the new
+ * text, which becomes its base. An open copy with unsaved edits is left as it
+ * is: its next save finds the file changed and becomes the usual conflict,
+ * with the written version kept, so neither side is lost.
+ */
+export function showOwnWrite(path: string, content: string): void {
+  const open = openPaths().get(path);
+  if (!open || open.dirty) return;
+  noteDisk(path, content);
+  showFromDisk(path, content);
+}
+
 /** Forget (or move) what is known about `prefix` and everything under it. */
 function forgetDisk(prefix: string, movedTo?: string): void {
   const h = diskHashes();

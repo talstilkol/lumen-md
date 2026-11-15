@@ -14,6 +14,7 @@
 
 import { FormulaError, type FormulaLimits } from "../formula/ast";
 import { utcDate } from "../formula/values";
+import { workdaysBetween } from "../workdays";
 import { type BasesNode } from "./expr";
 import { callNotion, type NotionHost } from "./notion";
 import {
@@ -404,6 +405,10 @@ class Interpreter extends InterpreterBase {
         arity(1, 1);
         return toNumberOrNull(args[0]);
       }
+      // W10.C26: working days, Sunday–Thursday and Israel's holidays unless "mon-fri" is given.
+      case "workdays":
+        arity(2, 3);
+        return workdaysBetween(args[0], args[1], args[2]);
       case "random":
         arity(0, 0);
         return this.random();
