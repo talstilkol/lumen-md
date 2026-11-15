@@ -27,6 +27,7 @@ import { InviteScreen } from "./InviteScreen";
 import { MemberList } from "./MemberList";
 import { JoinScreen, MemberView } from "./MemberView";
 import { card, errorStyle, field, ghost, list, muted, primary, row } from "./styles";
+import { EmptyState, learnHow } from "../../../../ui/EmptyState";
 
 type View = { v: "list" } | { v: "new" } | { v: "admin"; record: Extract<RoleRecord, { kind: "admin" }> } | { v: "member"; record: Extract<RoleRecord, { kind: "member" }> };
 
@@ -146,7 +147,7 @@ export function RoleVaultPanel({ onClose, deps, relay, origin, joining = null }:
         {view.v === "list" && (
           <section style={{ display: "grid", gap: 8 }} data-testid="role-list">
             {records.length === 0 ? (
-              <div style={muted}>{t("e2ee.roles.empty")}</div>
+              <EmptyState style={{ padding: 0 }} message={t("e2ee.roles.empty")} action={learnHow("sync/role-vaults")} />
             ) : (
               <ul style={list}>
                 {records.map((r) => (

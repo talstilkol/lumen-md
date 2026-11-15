@@ -129,6 +129,7 @@ export function AsOfDialog({ onClose, activeName = null, applyRestore, now: nowP
               </label>
               {query.trim() !== "" && (
                 <p role="status" style={{ margin: 0, fontSize: 12 }}>
+                  {/* empty-action: the search field right above */}
                   {hits.length ? t("asOf.results", { count: hits.length }) : t("asOf.none")}
                 </p>
               )}

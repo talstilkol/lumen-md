@@ -10,6 +10,7 @@ import type { Edge, Entity } from "../entities/model";
 import { entityPage, type PageEdge } from "../entities/pages";
 import { WIKIDATA_LICENCE } from "../entities/wikidata";
 import "./entityGraphStrings";
+import { EmptyState, learnHow } from "./EmptyState";
 
 export interface EntityPageProps {
   entity: Entity;
@@ -68,9 +69,9 @@ export function EntityPage({ entity, edges, notes, names, onOpenBlock }: EntityP
         )}
       </dl>
       <h3>{t("entityGraph.page.outgoing")}</h3>
-      {page.outgoing.length ? groups("outgoing") : <p>{t("entityGraph.page.none")}</p>}
+      {page.outgoing.length ? groups("outgoing") : <EmptyState style={{ padding: 0 }} message={t("entityGraph.page.none")} action={learnHow("workspace/entity-graph")} />}
       <h3>{t("entityGraph.page.incoming")}</h3>
-      {page.incoming.length ? groups("incoming") : <p>{t("entityGraph.page.none")}</p>}
+      {page.incoming.length ? groups("incoming") : <EmptyState style={{ padding: 0 }} message={t("entityGraph.page.none")} action={learnHow("workspace/entity-graph")} />}
       <h3>
         {t("entityGraph.page.mentions")} ({page.mentions.length})
       </h3>

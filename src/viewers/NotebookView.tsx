@@ -12,6 +12,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { t } from "../i18n";
 import { toTrustedHTML } from "../lib/trustedTypes";
 import type { Notebook, NotebookCell, NotebookOutput } from "./notebook";
+import { EmptyState, learnHow } from "../ui/EmptyState";
 
 type Render = (markdown: string) => Promise<ReactNode>;
 
@@ -107,7 +108,7 @@ function Cell({ cell, language, render }: { cell: NotebookCell; language: string
 export function NotebookView({ notebook, render = defaultRender }: { notebook: Notebook; render?: Render }) {
   return (
     <div className="nb-view" data-testid="notebook-view">
-      {notebook.cells.length === 0 && <p>{t("fileViewer.nb.empty")}</p>}
+      {notebook.cells.length === 0 && <EmptyState message={t("fileViewer.nb.empty")} action={learnHow("workspace/file-viewers")} />}
       {notebook.cells.map((c, i) => (
         <Cell key={i} cell={c} language={notebook.language} render={render} />
       ))}

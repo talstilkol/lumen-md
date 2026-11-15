@@ -13,6 +13,7 @@ import { useAppStore } from "../store/useStore";
 import { Modal } from "./Modal";
 import { explainError } from "../lib/userError";
 import "./entityGraphStrings";
+import { EmptyState, learnHow } from "./EmptyState";
 
 export interface EntityGraphScreenProps {
   onClose: () => void;
@@ -71,7 +72,7 @@ export function EntityGraphScreen({ onClose, vault, initialMode }: EntityGraphSc
         ) : !data ? (
           <p style={muted}>{t("entityGraph.screen.loading")}</p>
         ) : !data.entities.length ? (
-          <p data-testid="entity-graph-empty" style={muted}>{t("entityGraph.screen.empty")}</p>
+          <EmptyState testId="entity-graph-empty" message={t("entityGraph.screen.empty")} action={learnHow("workspace/entity-graph")} />
         ) : (
           <Suspense fallback={<p style={muted}>{t("entityGraph.screen.loading")}</p>}>
             <EntityGraphView entities={data.entities} edges={data.edges} notes={data.notes} onOpenEntity={(id) => void open(id)} initialMode={initialMode} />

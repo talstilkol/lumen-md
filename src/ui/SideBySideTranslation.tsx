@@ -13,6 +13,7 @@ import { useMemo, useState } from "react";
 import { t } from "../i18n";
 import "../ai/mt/strings";
 import { align, parseSidecar, serializeSidecar, updateSidecar, type TranslateTexts } from "../ai/mt/sideBySide";
+import { explainError } from "../lib/userError";
 
 export interface SideBySideProps {
   sourcePath: string;
@@ -41,7 +42,7 @@ export function SideBySideTranslation({ sourcePath, sourceMd, sidecarMd, lang, t
       const r = await updateSidecar(sourcePath, sourceMd, sidecar, lang, translate);
       await onSave(serializeSidecar(r.sidecar));
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(explainError(e));
     } finally {
       setBusy(false);
     }

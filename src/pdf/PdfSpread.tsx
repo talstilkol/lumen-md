@@ -122,6 +122,7 @@ export function SpreadControls({ spread }: { spread: Spread }) {
   return (
     <>
       <select aria-label={t("pdf.spread.label")} value={spread.mode} onChange={(e) => spread.setMode(e.target.value as SpreadMode)} data-testid="pdf-spread-mode">
+        {/* empty-allow: the "single pages" option of the spread picker */}
         <option value="none">{t("pdf.spread.none")}</option>
         <option value="odd">{t("pdf.spread.odd")}</option>
         <option value="even">{t("pdf.spread.even")}</option>

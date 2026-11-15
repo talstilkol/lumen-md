@@ -12,6 +12,7 @@ import "./syllabusStrings";
 import { defaultIsrael } from "../daily/hebrewCalendar";
 import { defaultWorkWeek, type WorkWeek } from "../daily/israeliTime";
 import { semesterFor, syllabusTemplate, teachingWeeks, type TeachingWeek } from "./syllabus";
+import { explainError } from "../lib/userError";
 
 export const SYLLABUS_FOLDER = "Syllabus";
 
@@ -67,6 +68,6 @@ export async function createSyllabus(now = new Date()): Promise<void> {
     store.openTab({ name: path.split("/").pop()!, content: d.md, workspaceName: path });
     useToastStore.getState().push({ kind: "success", title: t("syllabus.created", { weeks: d.weeks.length, from: d.weeks[0].from, to: d.weeks.at(-1)!.to }) });
   } catch (e) {
-    useToastStore.getState().push({ kind: "error", title: t("syllabus.failed", { error: e instanceof Error ? e.message : String(e) }) });
+    useToastStore.getState().push({ kind: "error", title: t("syllabus.failed", { error: explainError(e) }) });
   }
 }

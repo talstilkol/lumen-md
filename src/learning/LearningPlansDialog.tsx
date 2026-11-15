@@ -14,6 +14,7 @@ import "./learningStrings";
 import { Modal } from "../ui/Modal";
 import type { GDay } from "../daily/hebrewCalendar";
 import { CYCLES, follow, iso, markDone, markForReview, progress, readingOf, unfollow, type CycleId, type LearningFile } from "./plans";
+import { explainError } from "../lib/userError";
 
 export interface LearningPlansProps {
   file: LearningFile;
@@ -34,7 +35,7 @@ export function LearningPlansDialog({ file: initial, today, lang, onChange, onCl
     try {
       await onChange(next);
     } catch (e) {
-      setError(t("learning.saveFailed", { error: e instanceof Error ? e.message : String(e) }));
+      setError(t("learning.saveFailed", { error: explainError(e) }));
     }
   };
 
@@ -80,6 +81,7 @@ function CycleRow({ cycle, file, today, day, lang, apply }: { cycle: CycleId; fi
             </a>
           </>
         ) : (
+          /* empty-allow: a cycle with no reading on this day, shown in its row */
           t("learning.none")
         )}
       </div>

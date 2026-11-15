@@ -12,6 +12,7 @@ import { ledgerFetch } from "../ai/privacyLedger";
 import { CONSENT_PATH, LEDGER_REASON, WIKIDATA_LICENCE, consentFile, consentFromFile, searchWikidata, withQid, type WikidataHit } from "../entities/wikidata";
 import "./entityGraphStrings";
 import { Modal } from "./Modal";
+import { EmptyState, learnHow } from "./EmptyState";
 
 export interface WikidataVault {
   readWorkspaceFile(path: string): Promise<string>;
@@ -131,7 +132,7 @@ export function WikidataLink({ name, path, onClose, vault, fetchImpl }: Wikidata
               ))}
             </ul>
           ) : (
-            <p>{t("entityGraph.wikidata.none")}</p>
+            <EmptyState style={{ padding: 0 }} message={t("entityGraph.wikidata.none")} action={learnHow("workspace/entity-graph")} />
           ))}
         {phase.at === "linked" && (
           <p role="status">

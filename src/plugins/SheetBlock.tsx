@@ -14,6 +14,7 @@ import { firstStrongDirection } from "../lib/textDirection";
 import { columnName, displayResult, evaluateSheet, parseSheet, refName } from "./sheet/sheet";
 import "./sheetBlockStrings";
 import "./SheetBlock.css";
+import { EmptyState, learnHow } from "../ui/EmptyState";
 
 export default function SheetBlock({ source }: { source: string }) {
   const grid = useMemo(() => parseSheet(source), [source]);
@@ -23,7 +24,7 @@ export default function SheetBlock({ source }: { source: string }) {
   const [active, setActive] = useState<{ r: number; c: number }>({ r: 0, c: 0 });
   const table = useRef<HTMLTableElement | null>(null);
 
-  if (!grid.length) return <p className="sheet-empty">{t("sheet.empty")}</p>;
+  if (!grid.length) return <EmptyState testId="sheet-empty" message={t("sheet.empty")} action={learnHow("blocks/sheet")} />;
 
   const focusCell = (r: number, c: number) => {
     const nr = Math.max(0, Math.min(grid.length - 1, r));

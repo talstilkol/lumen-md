@@ -44,6 +44,7 @@ function FieldInput({ f, id, describedBy, locale, candidates, onWrite }: { f: Fo
       const off = text && !opts.includes(text);
       return (
         <select {...common} value={text} onChange={(e) => onWrite(e.target.value)}>
+          {/* empty-allow: the "no type" option of the type picker */}
           <option value="">{t("types.form.none")}</option>
           {off && <option value={text}>{t("types.form.notAnOption", { value: text })}</option>}
           {opts.map((o) => (

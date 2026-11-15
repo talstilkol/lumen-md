@@ -112,9 +112,10 @@ export function DataKanbanView({ table, groupBy }: { table: DataTable; groupBy: 
   const title = (row: string[]) => row.find((v, j) => j !== k && v.trim()) ?? "";
   return (
     <div className="df-kanban" dir="auto">
-      {groups.map(([key, rows]) => (
+      {groups.map(([key, rows]) => ( // empty-allow: the lane of rows without a value (its label)
         <section key={key} className="df-lane" aria-label={`${key || t("fileViewer.data.none")} (${rows.length})`}>
           <h3 dir="auto">
+            {/* empty-allow: the lane of rows without a value (its heading) */}
             {key || t("fileViewer.data.none")} <span className="df-count">{rows.length}</span>
           </h3>
           <ul>

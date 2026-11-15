@@ -618,6 +618,7 @@ export function KanbanView({ result, files, onDrop = dropCard }: ViewProps & { o
       {columns.map((col, ci) => (
         <section
           key={`${ci}-${col.key ?? "∅"}`}
+          /* empty-allow: the column of notes without a value (its label) */
           aria-label={col.key ?? t("base.kanban.none")}
           data-column={col.key ?? ""}
           onDragOver={movable ? (e) => e.preventDefault() : undefined}
@@ -634,6 +635,7 @@ export function KanbanView({ result, files, onDrop = dropCard }: ViewProps & { o
           style={{ minInlineSize: width, flex: `1 0 ${width}px`, background: "hsl(var(--bg-subtle))", borderRadius: 6, padding: 6 }}
         >
           <h4 style={{ margin: "0 0 6px", fontSize: 12 }} dir="auto">
+            {/* empty-allow: the column of notes without a value (its heading) */}
             {col.key ?? t("base.kanban.none")} <span style={{ fontWeight: 400, color: muted }}>{col.rows.length}</span>
           </h4>
           {col.rows.map((r) => (

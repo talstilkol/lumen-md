@@ -40,6 +40,7 @@ import {
   type ArgumentGraph,
   type ArgumentRelation,
 } from "../argument/argumentMap";
+import { EmptyState, learnHow } from "../ui/EmptyState";
 
 const FM = /^---\r?\n([\s\S]*?)\r?\n(?:---|\.\.\.)\s*(?:\r?\n|$)/;
 
@@ -228,7 +229,7 @@ export default function ArgumentMapBlock({ source }: { source: string }) {
   return (
     <div className="chart-block lumen-argument-map-block" lang={getLocale()}>
       {!g && <p className="lumen-viz-note">{t("viz.loading")}</p>}
-      {g && g.nodes.length === 0 && <p className="lumen-viz-note">{t("viz.arg.empty")}</p>}
+      {g && g.nodes.length === 0 && <EmptyState message={t("viz.arg.empty")} action={learnHow("workspace/literature-review")} />}
       {g && g.nodes.length > 0 && <ArgumentMapView g={g} dir={dir} title={title} onOpen={(p) => void openNote(p).catch(() => undefined)} onSave={() => void save().catch(() => undefined)} />}
       {saved && (
         <p className="lumen-viz-note" role="status">

@@ -16,6 +16,7 @@ import { useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { getLocale, t } from "../../i18n";
 import { buildTimeline, checkTimeline, knownOn, spanWords, type TimelineClaim } from "../../entities/temporal";
 import "./timelineStrings";
+import { EmptyState, learnHow } from "../../ui/EmptyState";
 
 export interface TimelineViewProps {
   claims: readonly TimelineClaim[];
@@ -78,7 +79,7 @@ export function TimelineView({ claims, names, onOpenSource }: TimelineViewProps)
         </p>
       )}
       {line.rows.length === 0 && line.undated.length === 0 ? (
-        <p style={{ margin: 0 }}>{t("timeline.empty")}</p>
+        <EmptyState style={{ padding: 0 }} message={t("timeline.empty")} action={learnHow("workspace/hebrew-calendar")} />
       ) : (
         <ol aria-label={t("timeline.list")} onKeyDown={onKey} data-testid="timeline-rows" style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
           {line.rows.map(({ claim: c }, i) => (
@@ -118,6 +119,7 @@ export function TimelineView({ claims, names, onOpenSource }: TimelineViewProps)
         <h3 id="timeline-gaps" style={{ fontSize: 13, margin: "4px 0" }}>
           {t("timeline.gaps", { n: String(gaps.length) })}
         </h3>
+        {/* empty-allow: the result of the gap check, not an empty view */}
         <p style={{ margin: 0, color: "hsl(var(--fg-muted))" }}>{gaps.length ? t("timeline.gaps.note") : t("timeline.gaps.none")}</p>
         {gaps.length > 0 && (
           <ul>

@@ -82,6 +82,7 @@ export function MemberList({ session, deps, onError, onChanged }: { session: Adm
         {pending &&
           (pending.length === 0 ? (
             <div role="status" style={muted}>
+              {/* empty-action: the "check for requests" button right above */}
               {t("e2ee.roles.pending.none")}
             </div>
           ) : (

@@ -9,6 +9,7 @@ import { t } from "../i18n";
 import { getLeaflet } from "../plugins/map/leaflet";
 import { addBaseTiles } from "../plugins/map/tiles";
 import { featureRows, type GeoCollection } from "./geoFile";
+import { EmptyState, learnHow } from "../ui/EmptyState";
 
 export function GeoFileView({ geo }: { geo: GeoCollection }) {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -52,7 +53,7 @@ export function GeoFileView({ geo }: { geo: GeoCollection }) {
       {geo.features.length > 0 ? (
         <div ref={ref} className="geo-map" role="img" aria-label={t("fileViewer.geo.mapLabel", { n: geo.features.length })} />
       ) : (
-        <p>{t("fileViewer.geo.empty")}</p>
+        <EmptyState message={t("fileViewer.geo.empty")} action={learnHow("workspace/file-viewers")} />
       )}
       {tiles === false && <p className="geo-note">{t("fileViewer.geo.noTiles")}</p>}
       <table className="geo-table">

@@ -327,6 +327,7 @@ export function CalendarPanel() {
           <label style={{ display: "grid", gap: 2 }}>
             <span>{t("calendar.city")}</span>
             <select name="city" defaultValue={settings.city ?? ""} style={input}>
+              {/* empty-allow: the "no city" option of the city picker */}
               <option value="">{t("calendar.city.none")}</option>
               {CITIES.map((c) => (
                 <option key={c.id} value={c.id}>

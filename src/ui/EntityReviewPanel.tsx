@@ -16,6 +16,8 @@ import { splitParagraphs } from "../entities/paragraphs";
 import type { Proposal } from "../entities/store";
 import { approve, edgesOf, entitiesOf, merge, proposalsOf, reject, split, undoOp, type Files, type OpResult, type Undo } from "../entities/review";
 import "./entityGraphStrings";
+import { explainError } from "../lib/userError";
+import { EmptyState, learnHow } from "./EmptyState";
 
 export interface EntityReviewPanelProps {
   files: Files;
@@ -69,7 +71,7 @@ export function EntityReviewPanel({ files, onApply, notices = [] }: EntityReview
       setSelected(new Set());
       setStatus(done);
     } catch (e) {
-      setStatus(e instanceof Error ? e.message : String(e));
+      setStatus(explainError(e));
     }
   };
   const targets = () => (selected.size ? [...selected] : proposals[focus] ? [proposals[focus].id] : []);
@@ -83,7 +85,7 @@ export function EntityReviewPanel({ files, onApply, notices = [] }: EntityReview
       setHistory((h) => h.slice(0, -1));
       setStatus(t("entityGraph.review.undone"));
     } catch (e) {
-      setStatus(e instanceof Error ? e.message : String(e));
+      setStatus(explainError(e));
     }
   };
 
@@ -136,7 +138,7 @@ export function EntityReviewPanel({ files, onApply, notices = [] }: EntityReview
         {status}
       </p>
       {proposals.length === 0 ? (
-        <p style={{ margin: 0 }}>{t("entityGraph.review.empty")}</p>
+        <EmptyState style={{ padding: 0 }} message={t("entityGraph.review.empty")} action={learnHow("workspace/entity-graph")} />
       ) : (
         <ul ref={list} role="listbox" aria-multiselectable="true" aria-label={t("entityGraph.review.list")} aria-activedescendant={proposals[focus] ? `ep-${focus}` : undefined} tabIndex={0} onKeyDown={onKey} style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 6 }}>
           {proposals.map((p, i) => {
