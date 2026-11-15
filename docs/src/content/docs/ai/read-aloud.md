@@ -36,6 +36,18 @@ with a licence that allows it exists, it is listed in the licence gate,
 downloads once with your consent, and Hebrew notes are read with it. After
 that download, reading needs no network.
 
+## A neural English voice
+
+English is read with your system's voice too. Lumen has a place for an
+on-device neural English voice, Kokoro (Apache-2.0 weights), in its own
+worker. It does not use kokoro-js, which bundles eSpeak NG (GPL). It is
+**not active yet**: the model files aren't pinned, and the English
+pronunciation step and decision 15.10 are still open.
+
+Once they are, Lumen asks before the download and shows its size. The files
+are checked against their checksums, and English notes are read on the
+device with no further requests. Until then nothing is downloaded.
+
 ## Listening test (developers)
 
 The read-aloud quality target is an average score (MOS) of at least 3.8 out
