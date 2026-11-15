@@ -98,6 +98,21 @@ build. They run in a Vercel Sandbox (W1.1) or on a developer machine:
 | 13.4 Release pipeline | a release workflow | a local release script, signed artifacts and rollback on a developer machine; the web app's release is the production build |
 | Playwright e2e | e2e jobs on every PR | the **e2e** gate runs the fast set (`E2E_FAST` in `scripts/test-tiers.mjs`) on chromium and the smoke spec on firefox in the build (`scripts/e2e-gate.mjs`); the whole suite runs every night in shards (`npm run nightly:full`), since on the build machine the chromium project alone takes about 30 minutes. WebKit cannot run in the build: Playwright's WebKit needs glibc 2.38 and the build image (Amazon Linux 2023) has 2.34. Safari is covered on a Mac (W4.22) |
 
+## The whole e2e suite before main moves
+
+The Buildkite step `e2e-shards` runs the whole chromium project in 4 shards
+in parallel (`node scripts/e2e-gate.mjs --full`), each on the production
+build made with `VITE_E2E=1` and each inside a 10-minute box. The step
+`e2e-receipt` merges the shards into `reports/e2e-<sha>.json`, signed with
+the host's Ed25519 key, and is red unless every shard passed.
+
+main moves only through `npm run promote:main -- <commit> --push`. It
+refuses unless that commit (or one with the same tree) has the signed
+report, the report verifies with a key in `security/e2e-receipt-keys/`,
+0 tests failed and every shard finished inside its box. It pushes only as a
+fast-forward, never with force. `npm run promote:check` (the WebKit and
+Safari receipts) is a separate check, and both must pass.
+
 ## When a gate is red
 
 Open the Vercel deployment from the commit's status and read the end of
