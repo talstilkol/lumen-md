@@ -33,6 +33,7 @@ export const DIALOGS = [
   { file: "src/student/LectureRecorder.tsx", command: "student.lecture" },
   { file: "src/sync/cloud/ConflictDialog.tsx", fixme: "shown when a sync or git pull finds a conflict" },
   { file: "src/sync/e2ee/classroom/ClassroomPanel.tsx", command: "classroom.open" },
+  { file: "src/sync/e2ee/roles/ui/RoleVaultPanel.tsx", command: "roleVault.open", fixme: "W12.S4: behind the sync.e2ee flag (off by default), like ClassroomPanel above: the spec must set the flag first (owed on the Mac e2e run)" },
   { file: "src/sync/e2ee/ui/SetupWizard.tsx", command: "sync.setup" },
   { file: "src/sync/e2ee/ui/SyncPanel.tsx", command: "sync.open" },
   { file: "src/sync/e2ee/ui/unaudited.tsx", command: "sync.open", fixme: "E2eeGate (W11.S1): the gate sync.open shows while the sync.e2ee flag is off, the default; with the flag off the SyncPanel, SetupWizard and ClassroomPanel entries above open this gate instead, so the spec must set the flag per entry (owed on the Mac e2e run)" },
