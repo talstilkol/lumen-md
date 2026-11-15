@@ -2263,6 +2263,23 @@
       "vars": []
     },
     {
+      "key": "cmd.typesAll",
+      "en": "All {type}",
+      "vars": [
+        "type"
+      ]
+    },
+    {
+      "key": "cmd.typesPage",
+      "en": "Types: all objects by type",
+      "vars": []
+    },
+    {
+      "key": "cmd.typesStudio",
+      "en": "Types: Object Studio (new type, fields, rename)",
+      "vars": []
+    },
+    {
       "key": "cmd.usage",
       "en": "Help: Usage on this device",
       "vars": []

@@ -236,3 +236,35 @@ export function pinnedProperties(filter: unknown): Record<string, string> {
   visit(filter);
   return out;
 }
+
+/**
+ * Table keyboard navigation (W12.T3, as Obsidian 1.14's Bases table): the
+ * arrow keys move between cells, left and right as the text runs (in RTL,
+ * ArrowLeft goes to the next column); Home / End go to the row's first /
+ * last cell, Ctrl+Home / Ctrl+End to the table's; PageUp / PageDown move
+ * 10 rows. Returns the new cell, or null when the key is not a move.
+ */
+export function tableKeyMove(key: string, mods: { ctrl?: boolean; rtl?: boolean }, at: { row: number; col: number }, size: { rows: number; cols: number }): { row: number; col: number } | null {
+  if (size.rows <= 0 || size.cols <= 0) return null;
+  const clamp = (r: number, c: number) => ({ row: Math.max(0, Math.min(size.rows - 1, r)), col: Math.max(0, Math.min(size.cols - 1, c)) });
+  const fwd = mods.rtl ? -1 : 1;
+  switch (key) {
+    case "ArrowDown":
+      return clamp(at.row + 1, at.col);
+    case "ArrowUp":
+      return clamp(at.row - 1, at.col);
+    case "ArrowRight":
+      return clamp(at.row, at.col + fwd);
+    case "ArrowLeft":
+      return clamp(at.row, at.col - fwd);
+    case "Home":
+      return mods.ctrl ? clamp(0, 0) : clamp(at.row, 0);
+    case "End":
+      return mods.ctrl ? clamp(size.rows - 1, size.cols - 1) : clamp(at.row, size.cols - 1);
+    case "PageDown":
+      return clamp(at.row + 10, at.col);
+    case "PageUp":
+      return clamp(at.row - 10, at.col);
+  }
+  return null;
+}
