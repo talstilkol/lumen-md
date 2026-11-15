@@ -30,20 +30,25 @@ async function checker() {
 
 export async function score({ items }) {
   const check = await checker();
+  return scoreChecks(items, (it) => check(it.text), (it) => check(it.clean));
+}
+
+/** The set's numbers from each item's findings on its text and on its clean side (the bench passes the page's). */
+export function scoreChecks(items, hitsOf, cleanHitsOf) {
   let errors = 0;
   let found = 0;
   let tokens = 0;
   let fp = 0;
   let fpSentences = 0;
   for (const it of items) {
-    const hits = check(it.text);
+    const hits = hitsOf(it);
     for (const e of it.errors ?? []) {
       if (!e.nonword) continue;
       errors++;
       if (hits.some((m) => m.offset < e.end && e.start < m.offset + m.length)) found++;
     }
     if (typeof it.clean === "string") {
-      const clean = check(it.clean);
+      const clean = cleanHitsOf(it);
       fp += clean.length;
       if (clean.length) fpSentences++;
       tokens += [...it.clean.matchAll(WORD)].length;

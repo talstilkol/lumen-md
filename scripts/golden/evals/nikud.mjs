@@ -31,6 +31,7 @@ import { createRequire } from "node:module";
 import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { tsImport } from "tsx/esm/api";
+import { scoreNikud } from "./nikud-score.mjs";
 
 const ROOT = fileURLToPath(new URL("../../../", import.meta.url));
 const require = createRequire(import.meta.url);
@@ -78,87 +79,24 @@ async function infer(path) {
   return session;
 }
 
-const LETTER = /[א-ת]/;
-// What a reference may carry that the model never writes: cantillation, meteg, rafe.
-const NOT_MODELLED = /[֑-ֽֿׅ֯ׄ]/g;
-
-function normalizeRef(s) {
-  return s.normalize("NFD").replace(NOT_MODELLED, "").replace(/ׇ/g, "ָ");
-}
-
-/** Nakdimon's vocalize(): vowels as pronounced. */
-function voc(marks, letter) {
-  return [...marks]
-    .map((m) => {
-      if (m === "ּ") return "בכפ".includes(letter) || letter === "ו" ? m : "";
-      if ("ֲַָ".includes(m)) return "ַ";
-      if ("ֳֹ".includes(m)) return "ֹ";
-      if (m === "ֻ") return "ֻ";
-      if ("ֱֵֶ".includes(m)) return "ֶ";
-      if (m === "ְ") return "";
-      return m;
-    })
-    .join("");
-}
-
-/** [letter, sorted marks] for every Hebrew letter of a word. */
-function letters(word, canon) {
-  const out = [];
-  for (const m of canon(word).matchAll(/([א-ת])([ְ-ׇ]*)/g)) out.push([m[1], [...m[2]].sort().join("")]);
-  return out;
-}
-
 export async function score({ items }, path = modelPath(), menaked = menakedDir()) {
   if (menaked ? !existsSync(join(menaked, "menaked.json")) : !existsSync(path)) return { models_measured: 0 };
   const run = menaked ? await menakedEngine(menaked) : await infer(path);
   let ms = 0;
   let words20 = 0;
   const { addNikud } = await tsImport("../../../src/text/nikudRun.ts", import.meta.url);
-  const { canonicalMarks, removeNikud, sameSkeleton } = await tsImport("../../../src/text/nikud.ts", import.meta.url);
-  const canon = (s) => canonicalMarks(normalizeRef(s));
-  const tally = {};
-  let skeletonOk = 0;
+  const nikud = await tsImport("../../../src/text/nikud.ts", import.meta.url);
+  const inputs = [];
+  const hyps = [];
   for (const it of items) {
-    const part = it.part ?? String(it.id ?? "").split("-")[0];
-    const t = (tally[part] ??= { words: 0, exact: 0, voc: 0, letters: 0, wrong: 0 });
-    const ref = String(it.text ?? "");
-    const input = it.plain ?? removeNikud(ref);
+    const input = it.plain ?? nikud.removeNikud(String(it.text ?? ""));
     const t0 = performance.now();
-    const hyp = await addNikud(input, run);
+    hyps.push(await addNikud(input, run));
     ms += performance.now() - t0;
     words20 += input.split(/\s+/).filter(Boolean).length / 20;
-    if (sameSkeleton(hyp, input)) skeletonOk++;
-    const rw = ref.split(/\s+/).filter((w) => LETTER.test(w));
-    const hw = hyp.split(/\s+/).filter((w) => LETTER.test(w));
-    if (rw.length !== hw.length) {
-      t.words += rw.length; // misaligned: every word counts as wrong
-      continue;
-    }
-    rw.forEach((r, k) => {
-      const a = letters(r, canon);
-      const b = letters(hw[k], canon);
-      t.words++;
-      let exact = a.length === b.length;
-      let vocOk = exact;
-      for (let i = 0; i < Math.min(a.length, b.length); i++) {
-        t.letters++;
-        if (a[i][1] !== b[i][1]) {
-          t.wrong++;
-          exact = false;
-        }
-        if (voc(a[i][1], a[i][0]) !== voc(b[i][1], b[i][0])) vocOk = false;
-      }
-      if (exact) t.exact++;
-      if (vocOk) t.voc++;
-    });
+    inputs.push(input);
   }
-  const out = { models_measured: 1, engine: menaked ? "menaked" : "nakdimon", skeleton_ok: items.length ? skeletonOk / items.length : NaN, ms_per_20_words: words20 ? Math.round(ms / words20) : NaN };
-  for (const [part, t] of Object.entries(tally)) {
-    out[`${part}_word_acc`] = t.words ? t.exact / t.words : NaN;
-    out[`${part}_word_acc_voc`] = t.words ? t.voc / t.words : NaN;
-    out[`${part}_der`] = t.letters ? t.wrong / t.letters : NaN;
-  }
-  return out;
+  return { models_measured: 1, engine: menaked ? "menaked" : "nakdimon", ms_per_20_words: words20 ? Math.round(ms / words20) : NaN, ...scoreNikud(items, inputs, hyps, nikud) };
 }
 
 /** The dev items: benyehuda (committed) and nakdimon (local/, fetched by hf_build.py fetch-local). */
