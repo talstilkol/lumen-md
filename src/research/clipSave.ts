@@ -21,6 +21,8 @@ export async function saveClipToLibrary(clip: { title: string; markdown: string 
   let path = `${dir}/${name}`;
   for (let i = 2; await workspaceHasEntry(path); i++) path = `${dir}/${name.replace(/\.md$/, "")} (${i}).md`;
   await writeWorkspaceFile(path, clip.markdown);
+  // Plan 7.6 (W10.E36): the library's own index takes the clip as it is saved.
+  void import("./library/clipIndex").then((m) => m.indexClipOnSave(path, clip.markdown));
   window.dispatchEvent(new Event("lumen-workspace-changed"));
   useAppStore.getState().openTab({ name: path.split("/").pop()!, content: clip.markdown, workspaceName: path });
   showAiToast(t("clip.saved", { path }), "success");

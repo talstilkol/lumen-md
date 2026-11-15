@@ -54,6 +54,29 @@ footnotes that link to web pages and checks each one:
 Footnotes can be written as `[^1]: [Title](url) — “quote”`, as
 `[^1]: url "quote"`, or as just a link.
 
+## Research: Search the Library by Meaning
+
+Command: `🔎 Research: Search the Library by Meaning`.
+
+The library panel searches your clips by what they are about, not only by
+their words. "Cranes resting in the valley" finds a clip about bird
+migration over the Hula even when it never uses those words.
+
+- **Clips only.** A note is a clip when it is in the library folder
+  (`Library/`, `ספרייה/`) or its frontmatter has `clipped:`, which every
+  clip template writes. Your other notes are not in this index; smart search
+  covers them.
+- **Indexed on this device**, with the same embedding model as smart search:
+  Ollama if it has an embedding model, otherwise the built-in multilingual
+  model. A cloud model is used only under the cloud AI policy.
+- **When it is built.** The first time you open the panel, it indexes the
+  clips already in the vault. The first build may download the embedding
+  model, so it happens only when you ask. After that, a clip is indexed when
+  you save it. If smart search has already built its index on this device,
+  new clips are indexed from the start.
+- Opening the panel also catches up with clips you changed or deleted.
+- In an encrypted vault the index is stored encrypted, like smart search's.
+
 ## The research service
 
 Reading pages and Brave / Tavily searches go through a small worker that

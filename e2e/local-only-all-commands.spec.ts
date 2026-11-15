@@ -33,6 +33,7 @@ const AI_COMMANDS = [
   "ai.fineTune",
   "research.ask",
   "research.verify",
+  "research.library",
   "image.altText",
   "vault.digest",
   "note.read",

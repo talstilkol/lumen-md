@@ -570,6 +570,13 @@
       "icon": "Sparkles"
     },
     {
+      "id": "research.library",
+      "label": "🔎 Research: Search the Library by Meaning",
+      "group": "Tools",
+      "hint": "Finds clips you saved by what they are about, not only their words. Clips are indexed on this device",
+      "icon": "Sparkles"
+    },
+    {
       "id": "research.verify",
       "label": "🔎 Research: Verify Citations in This Note",
       "group": "AI Prompts",
@@ -2608,6 +2615,13 @@
       "icon": "Sparkles"
     },
     {
+      "id": "research.library",
+      "label": "🔎 Research: Search the Library by Meaning",
+      "group": "Tools",
+      "hint": "Finds clips you saved by what they are about, not only their words. Clips are indexed on this device",
+      "icon": "Sparkles"
+    },
+    {
       "id": "research.verify",
       "label": "🔎 Research: Verify Citations in This Note",
       "group": "AI Prompts",
@@ -4250,6 +4264,7 @@
     "research.ask",
     "clip.url",
     "clip.clipboard",
+    "research.library",
     "research.verify",
     "research.settings",
     "ai.batch",

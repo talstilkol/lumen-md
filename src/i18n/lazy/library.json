@@ -1,0 +1,11 @@
+{
+  "library.close": "Close",
+  "library.count": "{count} clips in the library",
+  "library.empty": "No clips yet. Clip a web page and it appears here.",
+  "library.indexing": "Indexing the library… {done} of {total}",
+  "library.noResults": "No clip matches that.",
+  "library.noVault": "The library needs a vault on this device.",
+  "library.search": "Search the library by meaning",
+  "library.title": "Reading library",
+  "library.unavailable": "Search by meaning is not available: {message}"
+}
