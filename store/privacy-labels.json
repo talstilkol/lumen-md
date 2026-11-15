@@ -43,7 +43,8 @@
         "Anthropic (Claude)",
         "Google Gemini",
         "Mistral",
-        "Ollama on a remote server"
+        "Ollama on a remote server",
+        "LM Studio on a remote server"
       ]
     },
     {
@@ -107,7 +108,8 @@
       "sends": "Whatever the plugin's request carries, to the destination the plugin names",
       "turnedOnBy": "Installing a plugin and granting it network access; refused under local-only",
       "routes": [
-        "Plugin "
+        "Plugin ",
+        "Plugin registry download (signed index, manifest, code); no user data"
       ]
     },
     {
@@ -124,7 +126,10 @@
       "ledgerCategory": null,
       "sends": "Ciphertext only, to the storage you chose",
       "turnedOnBy": "Connecting a sync provider",
-      "routes": []
+      "routes": [
+        "Sync storage: your Dropbox (audit mode)",
+        "Sync storage: your Google Drive (audit mode)"
+      ]
     },
     {
       "feature": "Live collaboration",
@@ -230,7 +235,9 @@
       "Research (local service)",
       "Research (local SearXNG)",
       "Encrypted sync on the local network (no cloud)",
-      "Agent tool run_python: the Python sandbox has no network"
+      "Agent tool run_python: the Python sandbox has no network",
+      "LM Studio (this machine / LAN)",
+      "Runs on this device; nothing is sent"
     ]
   }
 }

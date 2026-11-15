@@ -11,9 +11,13 @@ import { join, relative } from "node:path";
 export const RECORDERS = {
   "src/ai/privacyLedger.ts": (src) => [
     ...[...src.matchAll(/reason: "([^"]+)"/g)].map((m) => m[1]),
+    // auditReason()'s fallback for a host no audit rule names.
+    ...[...src.matchAll(/\?\? "([^"]+ \(audit mode\))"/g)].map((m) => m[1]),
     ...[...src.matchAll(/reason: `([^`$]+)\$\{/g)].map((m) => m[1]).filter((p) => !/^\s*$/.test(p)),
     /export const MONITORING_REASON = "([^"]+)"/.exec(src)[1],
   ],
+  // W11.S1 / #739: the signed plugin registry's downloads (index, manifest, code).
+  "src/plugins/install.ts": (src) => [/const LEDGER_REASON = "([^"]+)"/.exec(src)[1]],
   "src/research/clipper.ts": (src) => [/reason: "([^"]+)"/.exec(src)[1]],
   "src/agents/python/runner.ts": (src) => [/export const LEDGER_REASON = "([^"]+)"/.exec(src)[1]],
   "src/agents/network.ts": (src) => [/const reason = `([^`$]+)\$\{/.exec(src)[1]],

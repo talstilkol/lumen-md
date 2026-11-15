@@ -20,15 +20,16 @@ Everything under optionalFeatures is sent by the user's own choice to the servic
 
 | Feature | Sends | Turned on by | Ledger routes |
 |---|---|---|---|
-| Cloud AI (OpenAI, Anthropic, Google Gemini, Mistral) | The text you send to the AI | Your own API key and the cloud or local-first AI policy; refused under local-only | `OpenAI`, `Anthropic (Claude)`, `Google Gemini`, `Mistral`, `Ollama on a remote server` |
+| Cloud AI (OpenAI, Anthropic, Google Gemini, Mistral) | The text you send to the AI | Your own API key and the cloud or local-first AI policy; refused under local-only | `OpenAI`, `Anthropic (Claude)`, `Google Gemini`, `Mistral`, `Ollama on a remote server`, `LM Studio on a remote server` |
 | Cloud grammar check (LanguageTool) | The text being checked | A policy other than local-only; refused under local-only | `LanguageTool grammar check` |
 | Research service | Your search query | Running a research command with a research service configured; refused under local-only | `Research service`, `Agent tool`, `Zotero Web API (your library; writes only the PDF highlights you send)` |
 | Canvas (tldraw) licence check | The page address | Opening a canvas in a production build; refused under local-only | — |
 | Model and dictionary downloads (Hugging Face, GitHub) | Nothing of yours (a download) | Choosing a local model or a dictionary | `Model download (Hugging Face)`, `Model download (Lumen's mirror)`, `Dictionary / OCR model download (GitHub)`, `webR (R runtime) download` |
 | Canvas fonts, icons and translations | Nothing of yours (static files) | Opening a canvas | — |
 | Error reports (Sentry / GlitchTip) | The error's class name and where in the code it happened; no error message, note text, titles, paths or page address | Turning error reports on in Settings (off by default), in a build made with VITE_SENTRY_DSN; refused under local-only | `Error report (Sentry / GlitchTip), content removed` |
-| Plugins' network requests | Whatever the plugin's request carries, to the destination the plugin names | Installing a plugin and granting it network access; refused under local-only | `Plugin` |
+| Plugins' network requests | Whatever the plugin's request carries, to the destination the plugin names | Installing a plugin and granting it network access; refused under local-only | `Plugin`, `Plugin registry download (signed index, manifest, code); no user data` |
 | Other requests in audit mode | Whatever that request carries; listed so an audit can compare | Audit mode only (lumen.privacy.audit) | `Other request (audit mode)` |
+| Encrypted sync (WebDAV, S3, Dropbox, Google Drive) | Ciphertext only, to the storage you chose | Connecting a sync provider | `Sync storage: your Dropbox (audit mode)`, `Sync storage: your Google Drive (audit mode)` |
 | Diagrams (PlantUML, rendered by kroki.io) | The diagram's source | Confirming the first time a diagram would be sent; refused under local-only | `PlantUML rendering (kroki.io)` |
 | Read aloud and dictation with the browser's speech service | The text read aloud, or your voice | Choosing a network voice, or dictation under the cloud policy after a confirmation; refused under local-only | `Read aloud (`, `Dictation through the browser's speech service`, `Browser speech recognition (Web Speech API)` |
 | Public sources (Sefaria, the Knesset, government data) | Only the reference, name or search words you asked for; nothing from your notes | Searching one of these sources; refused under local-only | `Jewish sources (Sefaria): the reference only`, `Knesset records (OData): the law or bill name only`, `Government data (data.gov.il, CBS): the search words or dataset id only` |
