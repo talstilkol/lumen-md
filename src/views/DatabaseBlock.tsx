@@ -34,11 +34,14 @@ import "./databaseBlockStrings";
 import "../daily/israeliTimeStrings";
 import { explainError } from "../lib/userError";
 import { EmptyState, learnHow } from "../ui/EmptyState";
-import { TableView, KanbanView, CardsView, ListView, CalendarView, titleOf } from "./databaseViews";
-import type { ViewProps } from "./databaseViews";
+import { TableView, KanbanView, CardsView, ListView, CalendarView, sections, titleOf } from "./databaseViews";
+import type { Selection, ViewProps } from "./databaseViews";
+import { selectRows } from "./bulkEdit";
 
 // Leaflet comes with the map view only, when it is first picked.
 const DatabaseMapView = lazy(() => import("./DatabaseMapView"));
+// Bulk property editing (W7.4): the bar and its strings load on the first selection.
+const BulkEditBar = lazy(() => import("./BulkEditBar"));
 
 interface Props {
   source: string;
@@ -57,6 +60,9 @@ export default function DatabaseBlock({ source, meta }: Props) {
   const [groupBy, setGroupBy] = useState(spec?.groupBy ?? "");
   /** Formula columns tried out in the formula box (this session; the spec's `formulas:` keeps them). */
   const [extraFormulas, setExtraFormulas] = useState<Record<string, string>>({});
+  /** Paths selected for a bulk edit (W7.4). */
+  const [selected, setSelected] = useState<ReadonlySet<string>>(() => new Set());
+  const anchorRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!spec) return;
@@ -169,7 +175,21 @@ export default function DatabaseBlock({ source, meta }: Props) {
   }
 
   const titleLabel = spec.title ?? `${spec.type ?? t("db.all")} · ${t("db.count", { count: shown.length })}`;
-  const props: ViewProps = { rows: shown, allRows: computed.rows, spec, fields, groupBy, edit, formulaNames, formulaErrors: computed.errors };
+  // The order a Shift+click range follows: the rows as the views show them (grouped, then sorted).
+  const order = sections(shown, groupBy).flatMap((x) => x.rows.map((r) => r.path));
+  const shownSelected = shown.filter((r) => selected.has(r.path));
+  const select: Selection = {
+    has: (p) => selected.has(p),
+    click: (p, e) => {
+      const next = selectRows(order, selected, anchorRef.current, p, { shift: e.shiftKey, toggle: true });
+      anchorRef.current = next.anchor;
+      setSelected(next.selected);
+    },
+    toggleAll: () => setSelected(shownSelected.length === shown.length ? new Set() : new Set(order)),
+    count: shownSelected.length,
+    total: shown.length,
+  };
+  const props: ViewProps = { rows: shown, allRows: computed.rows, spec, fields, groupBy, edit, formulaNames, formulaErrors: computed.errors, select };
   const badFormulas = formulas.filter((f) => f.error);
 
   return (
@@ -196,6 +216,16 @@ export default function DatabaseBlock({ source, meta }: Props) {
             <div key={f.name} dir="auto">{t("db.formula.specError", { name: f.name, error: f.error?.message ?? "", at: (f.error?.at ?? 0) + 1 })}</div>
           ))}
         </div>
+      )}
+      {shownSelected.length > 0 && (
+        <Suspense fallback={null}>
+          <BulkEditBar
+            selected={shownSelected.map((r) => ({ path: r.path, fm: rows.find((x) => x.path === r.path)?.fm ?? r.fm }))}
+            allRows={rows}
+            fields={fields.filter((f) => !formulaNames.has(f))}
+            onClear={() => setSelected(new Set())}
+          />
+        </Suspense>
       )}
       <div style={{ padding: 8 }}>
         {error && <div style={{ padding: 12, color: "hsl(var(--danger))" }}>{error}</div>}

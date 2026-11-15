@@ -121,6 +121,20 @@ export interface VaultBackend {
    * with `origin: "external"`.
    */
   notifyExternal(event: Omit<VaultEvent, "origin">): void;
+  /**
+   * Optional, for many files at once (a bulk edit, plan W7.4): the files at
+   * `paths`, each folder looked up and listed once. A path that is missing
+   * from the result was not found that way; the caller reads it with `read`.
+   */
+  readMany?(paths: readonly string[]): Promise<Map<string, File>>;
+  /**
+   * Optional: write each item only if its file still has the `expect`ed size
+   * and time, each under `lock(path, …)`, folders looked up once. Per path:
+   * true written, false changed since (nothing written), or the error.
+   * null: this backend cannot batch right now (the encryption gate over an
+   * encrypted vault); the caller writes the items one by one.
+   */
+  writeMany?(items: ReadonlyArray<{ path: string; data: VaultData; expect: { size: number; mtime: number } }>, lock: <T>(path: string, fn: () => Promise<T>) => Promise<T>): Promise<Map<string, boolean | Error> | null>;
 }
 
 export type VaultErrorCode =
