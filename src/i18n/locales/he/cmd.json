@@ -407,6 +407,8 @@
   "cmd.sources.datagovInsert.hint": "חיפוש מאגרים; השורות נשמרות כ-CSV בכספת, ומוצגות כטבלה או גרף עם שורת ייחוס",
   "cmd.sources.datasetRefresh": "רענון המאגר הזה",
   "cmd.sources.datasetRefresh.hint": "שליפה מחדש של המאגר שתחת הסמן, והצגת השינויים לפני המעבר ל-snapshot החדש",
+  "cmd.sources.havruta": "ללמוד עם חבר (חברותא)…",
+  "cmd.sources.havruta.hint": "חדר לימוד משותף ומוצפן על ההפניה הזאת: ההערות וההדגשות עוברות, הטקסט נשאר בכל מכשיר",
   "cmd.sources.insert": "הוספת מקור מספריא…",
   "cmd.sources.insert.hint": "הטקסט העברי ותרגום של פסוק, משנה או דף (בראשית א:א, ב״ר א, א, ברכות ב.), עם הרישיון של כל טקסט",
   "cmd.sources.knessetBill": "ציטוט הצעת חוק (הכנסת)…",
