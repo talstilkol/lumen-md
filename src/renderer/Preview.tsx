@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { renderMarkdown, renderMarkdownFast, extractFrontmatter, RenderSuperseded } from "./pipeline";
+import { dashboardLayout, dashboardProps } from "./dashboard";
 import { nextVersion, renderWorkerWarm } from "./renderClient";
 import { subscribePluginLangs } from "../plugins/runtime/rendererRegistry";
 import { LARGE_DOC_CHARS, PreviewDocKeyContext } from "./previewDoc";
@@ -267,6 +268,8 @@ export function Preview({ markdownText, docKey = null, onSourceEdit, focusOffset
     () => extractFrontmatter(markdownText),
     [markdownText],
   );
+  // W12.V6: `layout: dashboard` lays the note's embeds out as a grid.
+  const layout = useMemo(() => dashboardProps(dashboardLayout(frontmatter)), [frontmatter]);
 
   return (
     // `contain: layout` isolates the preview's content growth from
@@ -337,7 +340,7 @@ export function Preview({ markdownText, docKey = null, onSourceEdit, focusOffset
           {t("block.renderError", { error })}
         </div>
       )}
-      <div className="prose-lumen">
+      <div {...layout}>
         <Frontmatter data={frontmatter} />
         <ErrorBoundary fallback={
           <div style={{ padding: "16px", color: "hsl(0 80% 60%)", border: "1px solid currentColor", borderRadius: "8px", margin: "16px" }}>

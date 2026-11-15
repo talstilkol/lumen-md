@@ -10,6 +10,7 @@ import { todayIso, toggleTaskInVault } from "../tasks/toggle";
 import type { Task } from "../tasks/taskParser";
 import "./tasksBlockStrings";
 import { explainError } from "../lib/userError";
+import { useVisibleRefresh } from "../lib/visibleRefresh";
 
 export default function TasksBlock({ source }: { source: string }) {
   const [result, setResult] = useState<QueryResult | null>(null);
@@ -17,6 +18,8 @@ export default function TasksBlock({ source }: { source: string }) {
   const [tick, setTick] = useState(0);
   const today = todayIso();
   const hide = parseQuery(source).hide;
+  // W12.V6: off screen (a long dashboard), a vault change waits until the block is seen again.
+  const [rootRef, schedule] = useVisibleRefresh();
 
   useEffect(() => {
     let alive = true;
@@ -30,10 +33,10 @@ export default function TasksBlock({ source }: { source: string }) {
   }, [source, tick]);
 
   useEffect(() => {
-    const again = () => setTick((n) => n + 1);
+    const again = () => schedule(() => setTick((n) => n + 1));
     window.addEventListener("lumen-workspace-changed", again);
     return () => window.removeEventListener("lumen-workspace-changed", again);
-  }, []);
+  }, [schedule]);
 
   const onToggle = useCallback(async (task: Task) => {
     if (!(await toggleTaskInVault(task))) setError(t("tasks.changed"));
@@ -41,7 +44,7 @@ export default function TasksBlock({ source }: { source: string }) {
   }, []);
 
   return (
-    <div className="chart-block lumen-tasks-block" data-testid="tasks-block">
+    <div ref={rootRef} className="chart-block lumen-tasks-block" data-testid="tasks-block">
       <div className="chart-block-header">
         <span>{result ? t("tasks.count", { n: result.total }) : t("tasks.loading")}</span>
       </div>
