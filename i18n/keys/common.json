@@ -15488,6 +15488,121 @@
       ]
     },
     {
+      "key": "timeline.asOf",
+      "en": "What did I know on",
+      "vars": []
+    },
+    {
+      "key": "timeline.asOf.clear",
+      "en": "Show everything",
+      "vars": []
+    },
+    {
+      "key": "timeline.asOf.note",
+      "en": "Only what was recorded by {day}; a later record of the same thing replaces an earlier one.",
+      "vars": [
+        "day"
+      ]
+    },
+    {
+      "key": "timeline.certainty.certain",
+      "en": "certain",
+      "vars": []
+    },
+    {
+      "key": "timeline.certainty.possible",
+      "en": "possible, given the dates' uncertainty",
+      "vars": []
+    },
+    {
+      "key": "timeline.empty",
+      "en": "No claims yet.",
+      "vars": []
+    },
+    {
+      "key": "timeline.gap.after-death",
+      "en": "After the death date",
+      "vars": []
+    },
+    {
+      "key": "timeline.gap.before-birth",
+      "en": "Before the birth date",
+      "vars": []
+    },
+    {
+      "key": "timeline.gap.end-before-start",
+      "en": "Ends before it starts",
+      "vars": []
+    },
+    {
+      "key": "timeline.gap.invalid-date",
+      "en": "A date that does not exist",
+      "vars": []
+    },
+    {
+      "key": "timeline.gap.order",
+      "en": "Said to come after something that ends before it",
+      "vars": []
+    },
+    {
+      "key": "timeline.gap.role-overlap",
+      "en": "Two holders at the same time",
+      "vars": []
+    },
+    {
+      "key": "timeline.gaps",
+      "en": "Gaps to check ({n})",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "timeline.gaps.none",
+      "en": "No gaps found.",
+      "vars": []
+    },
+    {
+      "key": "timeline.gaps.note",
+      "en": "These are questions for you, not findings: nothing in your notes is changed.",
+      "vars": []
+    },
+    {
+      "key": "timeline.list",
+      "en": "Timeline, earliest first",
+      "vars": []
+    },
+    {
+      "key": "timeline.open",
+      "en": "Open the source paragraph in {note}",
+      "vars": [
+        "note"
+      ]
+    },
+    {
+      "key": "timeline.recorded",
+      "en": "recorded {day}",
+      "vars": [
+        "day"
+      ]
+    },
+    {
+      "key": "timeline.title",
+      "en": "Timeline",
+      "vars": []
+    },
+    {
+      "key": "timeline.undated",
+      "en": "Undated ({n})",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "timeline.undated.note",
+      "en": "These claims have no date and are not placed on the line.",
+      "vars": []
+    },
+    {
       "key": "toolbar.appearance",
       "en": "Appearance",
       "vars": []

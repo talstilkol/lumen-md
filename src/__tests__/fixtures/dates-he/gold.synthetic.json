@@ -1,0 +1,565 @@
+{
+ "_note": "Synthetic gold for plan R12.6, written for lumen-md: every sentence is invented (no press text, no real people). Rows with anchor=true are Hebrew-calendar holiday anchors, shared with W10.E76. Dates computed by hand from the Hebrew calendar and checked against published calendars.",
+ "reference_default": null,
+ "cases": [
+  {
+   "text": "אנחנו נפגשים בערב פסח התשפ״ד אצל סבתא.",
+   "anchor": true,
+   "expect": [
+    {
+     "from": "2024-04-22",
+     "to": "2024-04-22",
+     "precision": "day",
+     "holiday": "erev-pesach"
+    }
+   ]
+  },
+  {
+   "text": "החופשה תהיה בפסח התשפ״ד, כל השבוע.",
+   "anchor": true,
+   "expect": [
+    {
+     "from": "2024-04-23",
+     "to": "2024-04-29",
+     "precision": "day",
+     "holiday": "pesach-1"
+    }
+   ]
+  },
+  {
+   "text": "ראש השנה התשפ״ה נופל השנה בחמישי.",
+   "anchor": true,
+   "expect": [
+    {
+     "from": "2024-10-03",
+     "to": "2024-10-04",
+     "precision": "day",
+     "holiday": "rosh-hashana-1"
+    }
+   ]
+  },
+  {
+   "text": "ביום כיפור התשפ״ד לא נסענו.",
+   "anchor": true,
+   "expect": [
+    {
+     "from": "2023-09-25",
+     "to": "2023-09-25",
+     "precision": "day",
+     "holiday": "yom-kippur"
+    }
+   ]
+  },
+  {
+   "text": "נדליק נרות בחנוכה התשפ״ד בבית הספר.",
+   "anchor": true,
+   "expect": [
+    {
+     "from": "2023-12-08",
+     "to": "2023-12-15",
+     "precision": "day",
+     "holiday": "chanukah-1"
+    }
+   ]
+  },
+  {
+   "text": "התחפושת מוכנה לפורים 2024.",
+   "anchor": true,
+   "expect": [
+    {
+     "from": "2024-03-24",
+     "to": "2024-03-24",
+     "precision": "day",
+     "holiday": "purim"
+    }
+   ]
+  },
+  {
+   "text": "הטקס נערך ביום העצמאות 2023 בפארק.",
+   "anchor": true,
+   "expect": [
+    {
+     "from": "2023-04-26",
+     "to": "2023-04-26",
+     "precision": "day",
+     "holiday": "yom-haatzmaut"
+    }
+   ]
+  },
+  {
+   "text": "ביום הזיכרון 2023 עמדנו בצפירה.",
+   "anchor": true,
+   "expect": [
+    {
+     "from": "2023-04-25",
+     "to": "2023-04-25",
+     "precision": "day",
+     "holiday": "yom-hazikaron"
+    }
+   ]
+  },
+  {
+   "text": "ביום השואה 2023 הקראנו שמות.",
+   "anchor": true,
+   "expect": [
+    {
+     "from": "2023-04-18",
+     "to": "2023-04-18",
+     "precision": "day",
+     "holiday": "yom-hashoah"
+    }
+   ]
+  },
+  {
+   "text": "עלינו לכותל בשבועות התשפ״ג.",
+   "anchor": true,
+   "expect": [
+    {
+     "from": "2023-05-26",
+     "to": "2023-05-26",
+     "precision": "day",
+     "holiday": "shavuot-1"
+    }
+   ]
+  },
+  {
+   "text": "המדורה של ל״ג בעומר 2024 הייתה ליד הים.",
+   "anchor": true,
+   "expect": [
+    {
+     "from": "2024-05-26",
+     "to": "2024-05-26",
+     "precision": "day",
+     "holiday": "lag-baomer"
+    }
+   ]
+  },
+  {
+   "text": "בתשעה באב התשפ״ג קראנו את מגילת איכה.",
+   "anchor": true,
+   "expect": [
+    {
+     "from": "2023-07-27",
+     "to": "2023-07-27",
+     "precision": "day",
+     "holiday": "tisha-bav"
+    }
+   ]
+  },
+  {
+   "text": "שתלנו עצים בט״ו בשבט התשפ״ד.",
+   "anchor": true,
+   "expect": [
+    {
+     "from": "2024-01-25",
+     "to": "2024-01-25",
+     "precision": "day",
+     "holiday": "tu-bishvat"
+    }
+   ]
+  },
+  {
+   "text": "ישנו בסוכה בסוכות 2023.",
+   "anchor": true,
+   "expect": [
+    {
+     "from": "2023-09-30",
+     "to": "2023-10-06",
+     "precision": "day",
+     "holiday": "sukkot-1"
+    }
+   ]
+  },
+  {
+   "text": "המצעד ביום ירושלים 2024 עבר ליד הבית.",
+   "anchor": true,
+   "expect": [
+    {
+     "from": "2024-06-05",
+     "to": "2024-06-05",
+     "precision": "day",
+     "holiday": "yom-yerushalayim"
+    }
+   ]
+  },
+  {
+   "text": "הפגישה נקבעה לא׳ בתמוז התשפ״ג.",
+   "expect": [
+    {
+     "from": "2023-06-20",
+     "to": "2023-06-20",
+     "precision": "day"
+    }
+   ]
+  },
+  {
+   "text": "נולדה בי״ז בשבט תשפ״ד בבוקר.",
+   "expect": [
+    {
+     "from": "2024-01-27",
+     "to": "2024-01-27",
+     "precision": "day"
+    }
+   ]
+  },
+  {
+   "text": "כ״ט בכסלו התשפ״ד היה יום שלישי.",
+   "expect": [
+    {
+     "from": "2023-12-12",
+     "to": "2023-12-12",
+     "precision": "day"
+    }
+   ]
+  },
+  {
+   "text": "הצום של י׳ בטבת התשפ״ד.",
+   "expect": [
+    {
+     "from": "2023-12-22",
+     "to": "2023-12-22",
+     "precision": "day"
+    }
+   ]
+  },
+  {
+   "text": "ל׳ בטבת התשפ״ד אינו קיים.",
+   "expect": []
+  },
+  {
+   "text": "י״ד באדר ב׳ התשפ״ד הוא פורים.",
+   "expect": [
+    {
+     "from": "2024-03-24",
+     "to": "2024-03-24",
+     "precision": "day"
+    }
+   ]
+  },
+  {
+   "text": "א׳ באדר א׳ התשפ״ג לא היה, השנה פשוטה.",
+   "expect": []
+  },
+  {
+   "text": "המדינה הוכרזה בה׳ באייר התש״ח.",
+   "expect": [
+    {
+     "from": "1948-05-14",
+     "to": "1948-05-14",
+     "precision": "day"
+    }
+   ]
+  },
+  {
+   "text": "כל חודש תמוז התשפ״ג עבדנו על הפרויקט.",
+   "expect": [
+    {
+     "from": "2023-06-20",
+     "to": "2023-07-18",
+     "precision": "month"
+    }
+   ]
+  },
+  {
+   "text": "נדבר בא׳ בתמוז.",
+   "expect": []
+  },
+  {
+   "text": "המסמך נחתם ב-10 ביולי 2023 במשרד.",
+   "expect": [
+    {
+     "from": "2023-07-10",
+     "to": "2023-07-10",
+     "precision": "day"
+    }
+   ]
+  },
+  {
+   "text": "תאריך:10ביולי2023 חתימה",
+   "expect": [
+    {
+     "from": "2023-07-10",
+     "to": "2023-07-10",
+     "precision": "day"
+    }
+   ]
+  },
+  {
+   "text": "ה-3 במרץ 2021 היה יום רביעי.",
+   "expect": [
+    {
+     "from": "2021-03-03",
+     "to": "2021-03-03",
+     "precision": "day"
+    }
+   ]
+  },
+  {
+   "text": "31 בפברואר 2023 אינו תאריך.",
+   "expect": []
+  },
+  {
+   "text": "נפגשנו ב-10.7.2023 בתל אביב.",
+   "expect": [
+    {
+     "from": "2023-07-10",
+     "to": "2023-07-10",
+     "precision": "day"
+    }
+   ]
+  },
+  {
+   "text": "ההגשה עד 1/2/2024.",
+   "expect": [
+    {
+     "from": "2024-02-01",
+     "to": "2024-02-01",
+     "precision": "day"
+    }
+   ]
+  },
+  {
+   "text": "שולם ב-10.7.23 במזומן.",
+   "expect": [
+    {
+     "from": "2023-07-10",
+     "to": "2023-07-10",
+     "precision": "day"
+    }
+   ]
+  },
+  {
+   "text": "השרת בכתובת 192.168.1.1 לא עונה.",
+   "expect": []
+  },
+  {
+   "text": "גרסה 2.10.4 יצאה.",
+   "expect": []
+  },
+  {
+   "text": "ביולי 2023 עברנו דירה.",
+   "expect": [
+    {
+     "from": "2023-07-01",
+     "to": "2023-07-31",
+     "precision": "month"
+    }
+   ]
+  },
+  {
+   "text": "התחלנו בחודש מרץ 2020.",
+   "expect": [
+    {
+     "from": "2020-03-01",
+     "to": "2020-03-31",
+     "precision": "month"
+    }
+   ]
+  },
+  {
+   "text": "The meeting was on July 10, 2023 in Haifa.",
+   "expect": [
+    {
+     "from": "2023-07-10",
+     "to": "2023-07-10",
+     "precision": "day"
+    }
+   ]
+  },
+  {
+   "text": "Signed 10 July 2023.",
+   "expect": [
+    {
+     "from": "2023-07-10",
+     "to": "2023-07-10",
+     "precision": "day"
+    }
+   ]
+  },
+  {
+   "text": "נשמר בקובץ 2023-07-10 בבוקר.",
+   "expect": [
+    {
+     "from": "2023-07-10",
+     "to": "2023-07-10",
+     "precision": "day"
+    }
+   ]
+  },
+  {
+   "text": "נדבר ב-10 ביולי.",
+   "expect": []
+  },
+  {
+   "text": "ב-14 בפברואר 2024 ו-1 במרץ 2024 נפגשנו.",
+   "expect": [
+    {
+     "from": "2024-02-14",
+     "to": "2024-02-14",
+     "precision": "day"
+    },
+    {
+     "from": "2024-03-01",
+     "to": "2024-03-01",
+     "precision": "day"
+    }
+   ]
+  },
+  {
+   "text": "בשנת 2023 התחלנו ללמוד.",
+   "expect": [
+    {
+     "from": "2023-01-01",
+     "to": "2023-12-31",
+     "precision": "year"
+    }
+   ]
+  },
+  {
+   "text": "ב-2019 עברנו לחיפה.",
+   "expect": [
+    {
+     "from": "2019-01-01",
+     "to": "2019-12-31",
+     "precision": "year"
+    }
+   ]
+  },
+  {
+   "text": "מאז 2015 הוא גר שם.",
+   "expect": [
+    {
+     "from": "2015-01-01",
+     "to": "2015-12-31",
+     "precision": "year"
+    }
+   ]
+  },
+  {
+   "text": "קיבלנו 2023 תשובות לסקר.",
+   "expect": []
+  },
+  {
+   "text": "2023",
+   "expect": []
+  },
+  {
+   "text": "העלות הייתה ב-2023 ש״ח בלבד.",
+   "expect": []
+  },
+  {
+   "text": "since 2018 we keep notes.",
+   "expect": [
+    {
+     "from": "2018-01-01",
+     "to": "2018-12-31",
+     "precision": "year"
+    }
+   ]
+  },
+  {
+   "text": "בשנים 2019–2021 לא נסענו.",
+   "expect": [
+    {
+     "from": "2019-01-01",
+     "to": "2021-12-31",
+     "precision": "year"
+    }
+   ]
+  },
+  {
+   "text": "בין 2019 ל-2021 היה סגר.",
+   "expect": [
+    {
+     "from": "2019-01-01",
+     "to": "2021-12-31",
+     "precision": "year"
+    }
+   ]
+  },
+  {
+   "text": "מ-2010 עד 2012 גרנו בירושלים.",
+   "expect": [
+    {
+     "from": "2010-01-01",
+     "to": "2012-12-31",
+     "precision": "year"
+    }
+   ]
+  },
+  {
+   "text": "אתמול סיימנו את הפרק.",
+   "reference": "2026-11-15",
+   "expect": [
+    {
+     "from": "2026-11-14",
+     "to": "2026-11-14",
+     "precision": "day"
+    }
+   ]
+  },
+  {
+   "text": "שלשום ירד גשם.",
+   "reference": "2026-11-15",
+   "expect": [
+    {
+     "from": "2026-11-13",
+     "to": "2026-11-13",
+     "precision": "day"
+    }
+   ]
+  },
+  {
+   "text": "אמש דיברנו בטלפון.",
+   "reference": "2026-11-15",
+   "expect": [
+    {
+     "from": "2026-11-14",
+     "to": "2026-11-14",
+     "precision": "day"
+    }
+   ]
+  },
+  {
+   "text": "מחר יש מבחן.",
+   "reference": "2026-11-15",
+   "expect": [
+    {
+     "from": "2026-11-16",
+     "to": "2026-11-16",
+     "precision": "day"
+    }
+   ]
+  },
+  {
+   "text": "ומחרתיים נצא לטיול.",
+   "reference": "2026-11-15",
+   "expect": [
+    {
+     "from": "2026-11-17",
+     "to": "2026-11-17",
+     "precision": "day"
+    }
+   ]
+  },
+  {
+   "text": "היום הגשתי את העבודה.",
+   "reference": "2026-11-15",
+   "expect": [
+    {
+     "from": "2026-11-15",
+     "to": "2026-11-15",
+     "precision": "day"
+    }
+   ]
+  },
+  {
+   "text": "אתמול סיימנו את הפרק.",
+   "expect": []
+  },
+  {
+   "text": "ראש השנה בלי שנה לא נקרא.",
+   "expect": []
+  }
+ ]
+}
