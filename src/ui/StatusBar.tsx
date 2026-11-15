@@ -7,10 +7,11 @@ import { t, getLocale } from "../i18n";
 import { useAppStore } from "../store/useStore";
 import { getMonitoringConsent, setMonitoringConsent } from "../lib/telemetry";
 import type { ConfigHealthReport } from "../lib/configHealth";
-import { subscribeSyncStatus } from "../sync/syncStatus";
+import { getSyncStatus, subscribeSyncStatus } from "../sync/syncStatus";
 import { secretStoreMode, subscribeSecretStoreMode } from "../lib/secretStore";
 import { parseSuggestions, mayContainCriticMarkup } from "../editor/suggesting";
 import { BetaBadge } from "./FeatureFlagsHost";
+import { StatusBarA11yLink } from "./AccessibilityLinks";
 
 /** Number of CriticMarkup suggestions (cheap no-op for plain docs). */
 function countCriticMarkup(text: string): number {
@@ -51,11 +52,8 @@ export const StatusBar = React.memo(function StatusBar({
   // A long document is counted once typing pauses (plan 8.4).
   const settledText = useSettledText(text);
   const stats = useMemo(() => computeStats(settledText), [settledText]);
-  const syncState = useSyncExternalStore(
-    subscribeSyncStatus,
-    () => "idle" as const,
-    () => "idle" as const,
-  );
+  // The sync session reports every round (sync/e2ee/ui/session.ts); the snapshot is the current state, not a constant.
+  const syncState = useSyncExternalStore(subscribeSyncStatus, () => getSyncStatus().status, () => "idle" as const);
   // No silent plain mode (plan 2.5): unencrypted secrets are always visible here.
   const secretsMode = useSyncExternalStore(subscribeSecretStoreMode, secretStoreMode, secretStoreMode);
   const aiKey = useAppStore((s) => s.aiKey);
@@ -332,6 +330,7 @@ export const StatusBar = React.memo(function StatusBar({
       >
         {t("status.roadmap")}
       </a>
+      <StatusBarA11yLink />
       <span className="sb-item sb-accent">Lumen</span>
     </footer>
   );

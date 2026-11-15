@@ -13,6 +13,7 @@ import { getLocale, t } from "../i18n";
 import "../collab/versionStrings";
 import { toast } from "../store/useToastStore";
 import { HelpButton } from "./HelpButton";
+import { Modal } from "./Modal";
 
 const CURRENT = "__current__";
 const field: React.CSSProperties = { padding: "6px 8px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--bg))", color: "inherit" };
@@ -55,14 +56,6 @@ export function NamedVersionsDialog({ session, author, onClose }: { session: Col
   const fmt = useMemo(() => new Intl.DateTimeFormat(getLocale(), { dateStyle: "medium", timeStyle: "short" }), []);
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
-
-  useEffect(() => {
     if (!from && versions[0]) setFrom(versions[0].id);
   }, [versions, from]);
 
@@ -89,12 +82,9 @@ export function NamedVersionsDialog({ session, author, onClose }: { session: Col
   ];
 
   return (
-    <div className="cmd-palette-backdrop" onClick={onClose}>
+    <Modal onClose={onClose} aria-labelledby="versions-title" className="cmd-palette-backdrop" onClick={onClose}>
       <div
         className="cmd-palette"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="versions-title"
         onClick={(e) => e.stopPropagation()}
         style={{ maxWidth: 720, maxHeight: "86vh", display: "flex", flexDirection: "column" }}
       >
@@ -177,7 +167,7 @@ export function NamedVersionsDialog({ session, author, onClose }: { session: Col
           )}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

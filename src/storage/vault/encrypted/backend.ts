@@ -18,7 +18,7 @@
  * hidden from `list()` and `watch()`, refused as targets.
  */
 
-import { VaultError, type VaultBackend, type VaultEntry, type VaultEvent } from "../types";
+import { VaultError, VaultNotFoundError, type VaultBackend, type VaultEntry, type VaultEvent } from "../types";
 import { toBytes } from "../shared";
 import { decryptFile, encryptFile, FILE_OVERHEAD, isEncryptedFile, type RestKeys, type RestTarget } from "./format";
 import { isLayerPath } from "./paths";
@@ -41,6 +41,32 @@ export function createEncryptedBackend(inner: VaultBackend, keys: RestKeys, opts
     const raw = new Uint8Array(await (await inner.read(path)).arrayBuffer());
     return isEncryptedFile(raw) ? decryptFile(keys, raw, path) : raw;
   }
+
+  /**
+   * The file as stored now, for a compare-and-swap (2.28, #275): its raw
+   * bytes (null: nothing there), or "directory". Callers compare the note's
+   * plaintext hash, then swap against the raw bytes' hash in `inner`, so a
+   * change by anyone in between makes `inner` refuse.
+   */
+  async function stored(path: string): Promise<Uint8Array | null | "directory"> {
+    const st = await inner.stat(path);
+    if (!st) return null;
+    if (st.kind === "directory") return "directory";
+    try {
+      return new Uint8Array(await (await inner.read(path)).arrayBuffer());
+    } catch (e) {
+      if (e instanceof VaultNotFoundError) return null; // deleted in between
+      throw e;
+    }
+  }
+  /** Is `raw` (as `stored` gave it) the note whose plaintext hashes to `expect`? */
+  async function isNote(raw: Uint8Array | null, expect: string | null, path: string): Promise<boolean> {
+    if (raw === null) return expect === null;
+    if (expect === null) return false;
+    const plain = isEncryptedFile(raw) ? await decryptFile(keys, raw, path) : raw;
+    return (await (await import("../cas")).sha256Hex(plain)) === expect;
+  }
+  const rawHash = async (raw: Uint8Array) => (await import("../cas")).sha256Hex(raw);
 
   return {
     id: inner.id,
@@ -75,6 +101,22 @@ export function createEncryptedBackend(inner: VaultBackend, keys: RestKeys, opts
       if (opts.target() === "plain") return inner.write(path, data);
       const plain = await toBytes(data);
       return inner.write(path, await encryptFile(keys, plain));
+    },
+
+    async writeIf(path, data, expect) {
+      if (isLayerPath(path)) refuse(path);
+      const raw = await stored(path);
+      if (raw === "directory" || !(await isNote(raw, expect, path))) return false;
+      const plain = await toBytes(data);
+      const out = opts.target() === "plain" ? plain : await encryptFile(keys, plain);
+      return inner.writeIf(path, out, raw === null ? null : await rawHash(raw));
+    },
+
+    async removeIf(path, expect) {
+      if (isLayerPath(path)) refuse(path);
+      const raw = await stored(path);
+      if (raw === null || raw === "directory" || !(await isNote(raw, expect, path))) return false;
+      return inner.removeIf(path, await rawHash(raw));
     },
 
     mkdir: (path) => (isLayerPath(path) ? Promise.reject(new VaultError("EINVAL", path)) : inner.mkdir(path)),
@@ -126,6 +168,8 @@ export function createLockedBackend(inner: VaultBackend, unlocked: () => Promise
     read: later((b, path: string) => b.read(path)),
     readText: later((b, path: string) => b.readText(path)),
     write: later((b, path: string, data: Parameters<VaultBackend["write"]>[1]) => b.write(path, data)),
+    writeIf: later((b, path: string, data: Parameters<VaultBackend["write"]>[1], expect: string | null) => b.writeIf(path, data, expect)),
+    removeIf: later((b, path: string, expect: string) => b.removeIf(path, expect)),
     mkdir: later((b, path: string) => b.mkdir(path)),
     rename: later((b, from: string, to: string, o?: { overwrite?: boolean }) => b.rename(from, to, o)),
     remove: later((b, path: string) => b.remove(path)),

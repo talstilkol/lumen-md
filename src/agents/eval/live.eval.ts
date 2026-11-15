@@ -31,6 +31,7 @@ const outDir = process.env.LUMEN_EVAL_OUT || "eval/results";
 
 describe(`agent eval — ${model} @ ${url}`, () => {
   it("runs every case and writes the report", async () => {
+    // privacy-ledger: Ollama/SearXNG of the eval harness: runs in Node (npm run eval), where no ledger is installed
     const tags = await fetch(`${url}/api/tags`, { signal: AbortSignal.timeout(3000) }).catch((e: Error) => e);
     expect(tags instanceof Error ? `Ollama unreachable at ${url}: ${tags.message}` : "ok").toBe("ok");
     const names = (((await (tags as Response).json()) as { models?: Array<{ name: string }> }).models ?? []).map((m) => m.name);
@@ -38,6 +39,7 @@ describe(`agent eval — ${model} @ ${url}`, () => {
 
     // The fake server (scripts/fake-ollama.mjs) only proves the wiring; label the report so
     // it can never be read, or compared, as a model score.
+    // privacy-ledger: Ollama/SearXNG of the eval harness: runs in Node (npm run eval), where no ledger is installed
     const ver = (await fetch(`${url}/api/version`).then((r) => r.json()).catch(() => ({}))) as { lumen_fake?: boolean };
     const kind = ver.lumen_fake ? "wiring" : "model";
     const label = ver.lumen_fake ? "fake-ollama" : model;

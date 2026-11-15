@@ -5,6 +5,7 @@ import { parse } from "yaml";
 import {
   JOBS,
   NOT_GATES,
+  OVERRIDES,
   STATUS_PREFIX,
   VITEST_INCLUDE,
   buildPipeline,
@@ -29,7 +30,7 @@ type Ci = { jobs: Record<string, { steps: { name?: string; run?: string }[]; str
 type Step = { key: string; command: string; agents: { queue: string }; notify?: unknown[]; if?: string; parallelism?: number; soft_fail?: boolean; retry?: unknown; depends_on?: unknown };
 type Shard = { index: number; files: string[]; ms: number };
 
-const ci = (): Ci => parse(readFileSync(".github/workflows/ci.yml", "utf8"), { uniqueKeys: false }) as Ci;
+const ci = (): Ci => parse(readFileSync("docs/archive/workflows/ci.yml", "utf8"), { uniqueKeys: false }) as Ci;
 const committed = () => parse(readFileSync(".buildkite/pipeline.yml", "utf8")) as { steps: Step[]; notify: unknown[] };
 const sha = (c: string) => c.repeat(40);
 
@@ -83,6 +84,25 @@ describe("Buildkite pipeline against ci.yml (plan W7.21)", () => {
     expect(problems).toContain("receipt does not wait for static");
   });
 
+  it("runs the visual gate on the Mac, on every build: baselines checked, then npm run test:visual (plan 10.3, W10.E23)", () => {
+    const v = committed().steps.find((s: Step) => s.key === "visual") as Step & { command: string; if?: string; agents: { queue: string } };
+    expect(v).toBeTruthy();
+    expect(v.agents.queue).toBe("mac");
+    expect(v.if).toBeUndefined();
+    // The stamp check comes first, so a run without baselines fails with the reason.
+    expect(v.command.indexOf("node scripts/visual-stamp.mjs --check")).toBeGreaterThan(-1);
+    expect(v.command.indexOf("node scripts/visual-stamp.mjs --check")).toBeLessThan(v.command.indexOf("npm run test:visual"));
+    // run.sh exports CI=1, so playwright.visual.config.ts compares and never writes (W10.B16).
+    expect(readFileSync("scripts/buildkite/run.sh", "utf8")).toMatch(/^export CI=1\b/m);
+    const p = buildPipeline(ci());
+    const by = (k: string) => p.steps.find((s: Step) => s.key === k);
+    by("visual").agents = { queue: "linux" };
+    by("visual").if = 'build.branch == "main"';
+    expect(pipelineRules(p).join("\n")).toMatch(/visual must run on the Mac[\s\S]*visual must run on every build/);
+    p.steps = p.steps.filter((s: Step) => s.key !== "visual");
+    expect(pipelineRules(p)).toContain("no visual job (plan 10.3: npm run test:visual)");
+  });
+
   it("copies ci.yml's run text, with matrix values, env overrides and escaped $", () => {
     const job = JOBS.find((j: { key: string }) => j.key === "e2e-firefox");
     const script = jobScript(job, ci());
@@ -102,6 +122,18 @@ describe("Buildkite pipeline against ci.yml (plan W7.21)", () => {
     for (const k of ["static", "lint", "licenses", "build", "vitest", "vitest-merge", "e2e-chromium", "e2e-firefox", "e2e-webkit"]) expect(keys).toContain(k);
     const receipt = p.steps.find((s: Step) => s.key === "receipt");
     expect(receipt.depends_on.map((d: { step: string }) => d.step).sort()).toEqual([...keys].sort());
+  });
+
+  it("the drift step runs scripts/i18n-drift.mjs (counts the lazy English), pinned to the ci.yml text it replaces", () => {
+    const script = jobScript(JOBS.find((j: { key: string }) => j.key === "static"), ci());
+    expect(script).toContain("node scripts/i18n-drift.mjs");
+    expect(script).toContain("node scripts/i18n-split.mjs --check");
+    expect(script).not.toContain("count() {");
+    expect(OVERRIDES["check › i18n drift gate"].reason).toMatch(/stricter/);
+    const changed = ci();
+    const step = changed.jobs.check.steps.find((s) => s.name === "i18n drift gate");
+    if (step) step.run = `${step.run}\necho more`;
+    expect(() => jobScript(JOBS.find((j: { key: string }) => j.key === "static"), changed)).toThrow(/changed this step since its override was reviewed/);
   });
 
   it("NOT_GATES has a reason for each entry", () => {
@@ -160,6 +192,27 @@ describe("triggering builds through the API", () => {
     expect(todo.map((p: { number: number }) => p.number)).toEqual([4, 2]);
     expect(planTriggers(prs, { since: "2026-11-10", max: 1 }).todo.map((p: { number: number }) => p.number)).toEqual([5]);
     expect(planTriggers(prs, { since: "2026-11-10", backfill: 1, max: 9 }).todo.map((p: { number: number }) => p.number)).toEqual([5, 4, 2, 1]);
+  });
+});
+
+describe("scheduled-only steps (plan W8.8, W10.E58)", () => {
+  it("the redaction fuzz runs on the scheduled build only, with a status and its artifacts, outside the receipt's gates", () => {
+    const steps = committed().steps;
+    const fuzz = steps.find((s) => s.key === "fuzz-redaction") as Step & { artifact_paths?: string[] };
+    expect(fuzz).toBeDefined();
+    expect(fuzz.if).toBe('build.source == "schedule"');
+    expect(fuzz.command).toContain("npm run -s fuzz:redaction");
+    expect(fuzz.command).not.toContain("--commit");
+    expect(fuzz.agents.queue).toBe("linux");
+    expect(fuzz.artifact_paths).toEqual(["reports/nightly/fuzz-redaction.json", "tests/fuzz/redaction/regressions.json"]);
+    expect(fuzz.notify).toEqual([{ github_commit_status: { context: `${STATUS_PREFIX}: fuzz-redaction` } }]);
+    // A PR build skips it, and the receipt would seal a skipped step as a failure: not one of its gates.
+    expect(gateKeys(committed())).not.toContain("fuzz-redaction");
+    const receipt = steps.find((s) => s.key === "receipt") as Step & { depends_on: { step: string }[] };
+    expect(receipt.depends_on.map((d) => d.step)).not.toContain("fuzz-redaction");
+    expect(receipt.command).not.toContain("fuzz-redaction");
+    // Each gate title is one shell word in single quotes (no stray apostrophe).
+    for (const line of fuzz.command.split("\n").filter((l) => l.startsWith("gate "))) expect(line).toMatch(/^gate '[^']*' <</);
   });
 });
 

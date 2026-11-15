@@ -14,6 +14,8 @@ import { FreshnessBanner } from "./FreshnessBanner";
 import { SyncActivity } from "./SyncActivity";
 import { SyncRulesForm } from "./SyncRulesForm";
 import { PairingCompare } from "./PairingCompare";
+import { RecoveryKitSetup, RecoveryRestore } from "./RecoveryKit";
+import { PasskeySetup, PasskeyUnlockButton } from "./PasskeyUnlock";
 import { e2eeErrorText, e2eeResultNotices } from "./errorText";
 import { syncSession, type SyncSession } from "./session";
 import { ProviderAuthError, ProviderUnreachableError, ProviderUnsupportedError } from "../providers/http";
@@ -24,7 +26,9 @@ import { LanLinkError } from "../lan/link";
 import { LanNoVaultError, LanNotConnectedError } from "../lan";
 import { loadMigrationRecord, migratePlaintext, planPlaintextMigration, revertPlaintextMigration, type MigrationPlan, type MigrationRecord } from "../providers/migrate";
 import { HelpButton } from "../../../ui/HelpButton";
+import { UnauditedNotice } from "./unaudited";
 import { explainError } from "../../../lib/userError";
+import { Modal } from "../../../ui/Modal";
 
 const NAMES: Record<ProviderKind, string> = { webdav: "WebDAV", s3: "S3", dropbox: "Dropbox", gdrive: "Google Drive", lan: "LAN", folder: "📁", relay: "Lumen relay" };
 const PENDING_OAUTH = "lumen-sync-pending-oauth";
@@ -431,6 +435,8 @@ function Unlocked({ session }: { session: SyncSession }) {
           )}
         </div>
       )}
+      {engine && <RecoveryKitSetup engine={engine} />}
+      {engine && <PasskeySetup engine={engine} />}
       {s.settings?.kind === "lan" && s.settings.role === "host" && <LanHostPairing />}
       {s.settings && <Migration session={session} kind={s.settings.kind} />}
     </div>
@@ -441,24 +447,17 @@ export function SyncPanel({ onClose, session = syncSession() }: { onClose: () =>
   const s = useSyncExternalStore(session.subscribe, session.get);
   const [saved, setSaved] = useState<ProviderSettings | null | undefined>(undefined);
   const [choosing, setChoosing] = useState(false);
+  const [restoring, setRestoring] = useState(false);
 
   useEffect(() => {
     void session.saved().then(setSaved, () => setSaved(null));
   }, [session]);
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
 
   const where = !s.settings ? "" : s.settings.kind === "lan" ? t(`e2ee.lan.where.${s.settings.role}`) : s.settings.kind === "folder" ? `${NAMES.folder} ${s.settings.name}` : `${NAMES[s.settings.kind]} — ${providerHosts(s.settings)[0] ?? ""}`;
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "var(--overlay)", display: "grid", placeItems: "center", zIndex: 1000 }} onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+    <Modal onClose={onClose} aria-labelledby="sync-panel-title" style={{ position: "fixed", inset: 0, background: "var(--overlay)", display: "grid", placeItems: "center", zIndex: 1000 }} onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="sync-panel-title"
         style={{ width: "min(520px, calc(100vw - 32px))", maxHeight: "calc(100vh - 32px)", overflow: "auto", background: "hsl(var(--bg))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border))", borderRadius: 10, padding: 18, display: "grid", gap: 14 }}
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -470,6 +469,7 @@ export function SyncPanel({ onClose, session = syncSession() }: { onClose: () =>
             ×
           </button>
         </div>
+        <UnauditedNotice />
 
         {s.phase === "disconnected" && s.error && (
           <div role="alert" style={errorStyle}>
@@ -494,7 +494,23 @@ export function SyncPanel({ onClose, session = syncSession() }: { onClose: () =>
             {s.phase === "connected" && (
               <>
                 <div style={muted}>{t(s.vaultExists ? "e2ee.sync.existingVault" : "e2ee.sync.newVault")}</div>
-                <PassphraseForm mode={s.vaultExists ? "unlock" : "create"} onSubmit={async (pass) => void (await session.open(pass))} />
+                {!restoring && <PassphraseForm mode={s.vaultExists ? "unlock" : "create"} onSubmit={async (pass) => void (await session.open(pass))} />}
+                {/* Plan W11.S10: a passkey, only where the browser reports PRF support. */}
+                {s.vaultExists && !restoring && <PasskeyUnlockButton onUnlock={(api) => session.openWithPasskey(api)} />}
+                {/* Plan W11.S9: the passphrase is forgotten; the recovery words open the vault. */}
+                {s.vaultExists && !restoring && (
+                  <button type="button" style={{ justifySelf: "start" }} onClick={() => setRestoring(true)}>
+                    {t("e2ee.recovery.forgot")}
+                  </button>
+                )}
+                {s.vaultExists && restoring && (
+                  <>
+                    <RecoveryRestore onRestore={(key, pass) => session.restore(key, pass)} />
+                    <button type="button" style={{ justifySelf: "start" }} onClick={() => setRestoring(false)}>
+                      {t("e2ee.sync.back")}
+                    </button>
+                  </>
+                )}
                 {/* Before the first round: what this device leaves out (plan W1.8). */}
                 <SyncRulesForm session={session} />
               </>
@@ -508,8 +524,17 @@ export function SyncPanel({ onClose, session = syncSession() }: { onClose: () =>
           </button>
         )}
       </div>
-    </div>
+    </Modal>
   );
+}
+
+/** Before an OAuth sign-in leaves the page: the provider to connect on return (the guided setup uses it too). */
+export function savePendingOAuth(settings: ProviderSettings): void {
+  try {
+    sessionStorage.setItem(PENDING_OAUTH, JSON.stringify(settings));
+  } catch {
+    /* why: private mode: the user connects again after signing in */
+  }
 }
 
 /** After an OAuth sign-in returns: the provider the user chose before leaving. */

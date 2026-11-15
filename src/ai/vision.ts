@@ -31,6 +31,7 @@ const VISION_RE = /(vl\b|vl:|llava|vision|gemma3|minicpm-v|moondream|bakllava|qw
 
 export async function visionModel(): Promise<string | null> {
   try {
+    // privacy-ledger: Ollama at the configured base URL (classify: local-ai on this machine/LAN, cloud-ai when remote)
     const res = await fetch(`${getBaseUrl()}/api/tags`, { signal: AbortSignal.timeout(2000) });
     if (!res.ok) return null;
     const json = (await res.json()) as { models?: Array<{ name: string }> };
@@ -56,6 +57,7 @@ export async function describeImage(blob: Blob, lang: string, model?: string | n
       ? "תאר את התמונה במשפט אחד קצר, בעברית, כטקסט חלופי לנגישות. בלי הקדמה."
       : "Describe this image in one short sentence, as alt text for accessibility. No preamble.";
   try {
+    // privacy-ledger: Ollama at the configured base URL (classify: local-ai on this machine/LAN, cloud-ai when remote)
     const res = await fetch(`${getBaseUrl()}/api/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

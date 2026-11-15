@@ -26,7 +26,7 @@
  * and returns the response (or null for a notification), so tests drive
  * exactly what stdio carries.
  */
-import { normalizeClientId } from "./vault/config.js";
+import { normalizeClientId, readConfig } from "./vault/config.js";
 import { approvalOutcome, argsDigest, BATCH_PREFIX, signState, StateError, verifyState } from "./vault/approval.js";
 import { VaultIndex } from "./vault/search.js";
 import { callTool, listToolsFor, toolDef, type ToolResult } from "./vault/tools.js";
@@ -44,6 +44,7 @@ export const ERR = {
   methodNotFound: -32601,
   invalidParams: -32602,
   internal: -32603,
+  headerMismatch: -32020,
   missingClientCapability: -32021,
   unsupportedVersion: -32022,
 } as const;
@@ -53,7 +54,23 @@ export const META = {
   clientInfo: "io.modelcontextprotocol/clientInfo",
   clientCapabilities: "io.modelcontextprotocol/clientCapabilities",
   serverInfo: "io.modelcontextprotocol/serverInfo",
+  subscriptionId: "io.modelcontextprotocol/subscriptionId",
 } as const;
+
+/** Where a `subscriptions/listen` stream's messages go: a stdio line, or an SSE event (http.ts). */
+export interface NotifySink {
+  notify(msg: JsonRpcResponse | JsonRpcNotification): void;
+}
+export interface JsonRpcNotification {
+  jsonrpc: "2.0";
+  method: string;
+  params: Record<string, unknown>;
+}
+interface Subscription {
+  id: JsonRpcId;
+  toolsListChanged: boolean;
+  sink: NotifySink;
+}
 
 /** Freshness hint for `tools/list`: short, because `lumen mcp enable/disable` changes it. */
 export const TOOLS_TTL_MS = 10_000;
@@ -100,6 +117,10 @@ export class McpEndpoint {
   private readonly now: () => number;
   /** Set by a legacy `initialize`: the legacy session of this process. */
   private legacy: { version: string; clientName?: string } | null = null;
+  /** Open `subscriptions/listen` streams (W11.I8), by request id. */
+  private readonly subs = new Map<JsonRpcId, Subscription>();
+  /** The grants file as last seen, to tell a tools/list change. */
+  private lastConfig: string | null = null;
 
   constructor(o: EndpointOptions) {
     this.vault = o.vault;
@@ -110,7 +131,7 @@ export class McpEndpoint {
   }
 
   /** One message in, its response out (null for notifications). Never throws. */
-  async handle(raw: unknown): Promise<JsonRpcResponse | null> {
+  async handle(raw: unknown, sink?: NotifySink): Promise<JsonRpcResponse | null> {
     if (Array.isArray(raw)) return fail(null, ERR.invalidRequest, "JSON-RPC batches are not supported.");
     if (!isObj(raw) || raw.jsonrpc !== "2.0" || typeof raw.method !== "string") {
       const id = isObj(raw) && (typeof raw.id === "string" || typeof raw.id === "number") ? raw.id : null;
@@ -121,9 +142,15 @@ export class McpEndpoint {
     const req = raw as unknown as JsonRpcRequest;
     const isNotification = req.id === undefined;
     if (!isNotification && typeof req.id !== "string" && typeof req.id !== "number") return fail(null, ERR.invalidRequest, "Request id must be a string or a number.");
-    if (isNotification) return null; // notifications/initialized, notifications/cancelled …: nothing to do.
+    if (isNotification) {
+      // stdio cancellation of a subscription: the stream ends without a response (spec: Subscriptions, Cancellation).
+      const p = isObj(req.params) ? req.params : {};
+      if (req.method === "notifications/cancelled" && (typeof p.requestId === "string" || typeof p.requestId === "number")) this.subs.delete(p.requestId);
+      return null; // notifications/initialized and the rest: nothing to do.
+    }
     const id = req.id as JsonRpcId;
     try {
+      if (req.method === "subscriptions/listen") return await this.listen(id, isObj(req.params) ? req.params : {}, sink);
       return await this.dispatch(id, req.method, isObj(req.params) ? req.params : {});
     } catch (e) {
       this.log(`lumen-mcp: ${req.method} failed: ${(e as Error)?.stack ?? String(e)}`);
@@ -180,6 +207,67 @@ export class McpEndpoint {
     }
   }
 
+  /**
+   * `subscriptions/listen` (2026-07-28, replaces the HTTP GET stream): the
+   * acknowledgment first, then `notifications/tools/list_changed` whenever the
+   * user changes this vault's grants (`lumen mcp enable/disable`). The only
+   * list this server has is tools; other filters are left out of the
+   * acknowledgment. No response until the server closes the stream.
+   */
+  private async listen(id: JsonRpcId, params: Record<string, unknown>, sink?: NotifySink): Promise<JsonRpcResponse | null> {
+    const era = this.era(params);
+    if ("error" in era) return fail(id, era.error[0], era.error[1], era.error[2]);
+    if (era.kind !== "modern") return fail(id, ERR.methodNotFound, "subscriptions/listen is a 2026-07-28 method.");
+    if (!sink) return fail(id, ERR.internal, "This transport cannot hold a subscription stream.");
+    const want = isObj(params.notifications) ? params.notifications : {};
+    const toolsListChanged = want.toolsListChanged === true;
+    if (this.lastConfig === null) this.lastConfig = await this.configText();
+    this.subs.set(id, { id, toolsListChanged, sink });
+    sink.notify({ jsonrpc: "2.0", method: "notifications/subscriptions/acknowledged", params: { _meta: { [META.subscriptionId]: id }, notifications: toolsListChanged ? { toolsListChanged: true } : {} } });
+    return null;
+  }
+
+  private async configText(): Promise<string> {
+    try {
+      return JSON.stringify(await readConfig(this.vault));
+    } catch {
+      return "";
+    }
+  }
+
+  /** Looks at the grants again; tells each subscription that asked when the tool lists changed. Returns how many were told. */
+  async pollChanges(): Promise<number> {
+    if (!this.subs.size) return 0;
+    const now = await this.configText();
+    if (this.lastConfig === null || now === this.lastConfig) {
+      this.lastConfig = now;
+      return 0;
+    }
+    this.lastConfig = now;
+    let n = 0;
+    for (const s of this.subs.values()) {
+      if (!s.toolsListChanged) continue;
+      s.sink.notify({ jsonrpc: "2.0", method: "notifications/tools/list_changed", params: { _meta: { [META.subscriptionId]: s.id } } });
+      n++;
+    }
+    return n;
+  }
+
+  /** Ends every subscription gracefully (shutdown): its completion result, then the stream closes. */
+  closeSubscriptions(): void {
+    for (const s of this.subs.values()) s.sink.notify(ok(s.id, { resultType: "complete", _meta: { [META.subscriptionId]: s.id } }));
+    this.subs.clear();
+  }
+
+  /** Drops one subscription without a response (the HTTP stream was closed by the client). */
+  dropSubscription(id: JsonRpcId): void {
+    this.subs.delete(id);
+  }
+
+  get subscriptionCount(): number {
+    return this.subs.size;
+  }
+
   private initialize(id: JsonRpcId, params: Record<string, unknown>): JsonRpcResponse {
     const asked = typeof params.protocolVersion === "string" ? params.protocolVersion : "";
     const version = LEGACY_VERSIONS.includes(asked) ? asked : LEGACY_VERSIONS[0]!;
@@ -199,7 +287,7 @@ export class McpEndpoint {
     return ok(id, {
       resultType: "complete",
       supportedVersions: [...SUPPORTED_VERSIONS],
-      capabilities: { tools: { listChanged: false } },
+      capabilities: { tools: { listChanged: true } },
       serverInfo: serverInfo(),
       instructions: INSTRUCTIONS,
       ttlMs: DISCOVER_TTL_MS,
@@ -230,7 +318,10 @@ export class McpEndpoint {
       return ok(id, toolBody(res));
     }
 
-    const complete = (res: ToolResult) => ok(id, { resultType: "complete", ...toolBody(res), _meta: { [META.serverInfo]: serverInfo() } });
+    const complete = (res: ToolResult) => {
+      const body = toolBody(res);
+      return ok(id, { resultType: "complete", ...body, _meta: { ...((body._meta as Record<string, unknown>) ?? {}), [META.serverInfo]: serverInfo() } });
+    };
 
     // A retry of a write that waited for the user (MRTR).
     if (params.requestState !== undefined) {
@@ -296,7 +387,8 @@ export class McpEndpoint {
 }
 
 function toolBody(res: ToolResult): Record<string, unknown> {
-  return { content: res.content, ...(res.isError ? { isError: true } : {}) };
+  // W11.I7: the answer's anchors travel in _meta, so a note's text is never altered.
+  return { content: res.content, ...(res.isError ? { isError: true } : {}), ...(res.anchors?.length ? { _meta: { "io.lumen/anchors": res.anchors } } : {}) };
 }
 
 function ok(id: JsonRpcId, result: Record<string, unknown>): JsonRpcResponse {

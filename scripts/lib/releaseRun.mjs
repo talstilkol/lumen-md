@@ -13,6 +13,7 @@
  */
 import { gzipSync } from "node:zlib";
 import { compareVersions, isBeta, parseVersion, tagOf } from "./release.mjs";
+import { stampManifest } from "./tauriSigning.mjs";
 import { formatPublicKey, parsePublicKey, rawPublicKey, readSecretKey, signData, verifyData } from "../supply-chain/minisign.mjs";
 
 /** What the committed tauri.conf.json carries until a release fills it. */
@@ -87,6 +88,25 @@ export function updaterBuildEnv({ pubkey, repo }) {
   return { LUMEN_UPDATER_PUBKEY: normalizeUpdaterPubkey(pubkey), LUMEN_UPDATER_ENDPOINT: ends.stable, LUMEN_UPDATER_ENDPOINT_BETA: ends.beta };
 }
 
+/**
+ * Why a GitHub release must not be published (plan W6.43, W10.E68): the
+ * updater key the app is built with is the committed placeholder, empty,
+ * not a key, or the throwaway test key; or release/ holds a fake build.
+ * `pubkey` is the key the release uses (LUMEN_UPDATER_PUBKEY, else
+ * security/updater-key.pub, else tauri.conf.json's). [] = publish.
+ */
+export function publishRefusals({ pubkey, files = [] }) {
+  const out = [];
+  try {
+    const key = normalizeUpdaterPubkey(pubkey);
+    if (isTestKey(key)) out.push("the updater public key is the throwaway TEST key: an app built with it can never be updated by a real release");
+  } catch (e) {
+    out.push(`${e.message} (${PUBKEY_PLACEHOLDER}): an app built with it accepts no update — set LUMEN_UPDATER_PUBKEY or commit security/updater-key.pub`);
+  }
+  if (files.includes(".FAKE-BUILD")) out.push("release/ holds a fake build (.FAKE-BUILD): never publish stand-in bundles");
+  return out;
+}
+
 /** A throwaway key pair in Tauri's formats, for dry runs and tests only — never for a publish. */
 export function testUpdaterKey(generate) {
   const { pem, publicKey } = generate();
@@ -113,6 +133,52 @@ export function verifyTauriSig(data, sigB64, pubkeyB64) {
   const minisig = Buffer.from(String(sigB64).trim(), "base64").toString("utf8");
   const pubText = Buffer.from(normalizeUpdaterPubkey(pubkeyB64), "base64").toString("utf8");
   return verifyData(data, minisig, pubText);
+}
+
+/* ---------- the update manifest's own signature (W11.S3) ---------- */
+
+/**
+ * tauri-plugin-updater checks each bundle's signature but trusts latest.json
+ * itself (CVE-2026-95625). So the release also signs latest.json, with the
+ * same updater key and in the same format as a bundle's .sig: base64 of a
+ * minisign signature of the file's exact bytes. The app verifies it before it
+ * reads the manifest (src-tauri/src/manifest_sig.rs, W11.S2).
+ */
+export const MANIFEST = "latest.json";
+export const MANIFEST_SIG = "latest.json.sig";
+
+/**
+ * Sign the bytes of latest.json. A throwaway key (dry runs, tests) has its
+ * PEM and is signed here; the owner's key lives only in
+ * TAURI_SIGNING_PRIVATE_KEY, so `tauriSigner(file)` runs `tauri signer sign`
+ * on the file and returns the .sig it wrote. Either way the result is
+ * checked against the updater public key before it is returned.
+ */
+export function signManifest(data, updater, { file, tauriSigner, timestamp = 0 } = {}) {
+  let sig;
+  if (updater?.pem) sig = tauriSign(data, updater.pem, MANIFEST, { timestamp });
+  else if (tauriSigner) sig = String(tauriSigner(file)).trim();
+  else throw new Error("latest.json cannot be signed: no updater secret key (TAURI_SIGNING_PRIVATE_KEY)");
+  verifyTauriSig(data, sig, updater.pubkey);
+  return sig;
+}
+
+/**
+ * What stops a publish: `files` maps asset name → bytes (or is missing a
+ * name). With a latest.json, its latest.json.sig must be there, non-empty,
+ * and verify those exact bytes with the updater key. Empty = publishable.
+ */
+export function manifestProblems(files, pubkeyB64) {
+  const data = files.get(MANIFEST);
+  if (!data) return [];
+  const sig = files.get(MANIFEST_SIG);
+  if (!sig || !String(sig).trim()) return [`${MANIFEST_SIG} is missing: the app refuses an unsigned update manifest, so the release is not published`];
+  try {
+    verifyTauriSig(data, String(sig), pubkeyB64);
+  } catch (e) {
+    return [`${MANIFEST_SIG} does not verify ${MANIFEST} with the updater key: ${e.message}`];
+  }
+  return [];
 }
 
 /** The public key (base64, Tauri form) of a PEM secret key. */
@@ -150,8 +216,8 @@ export function mergeLatest(a, b) {
  * updater key: the signature must verify the file the URL names. Returns
  * problems (empty = OK). `files` maps file name → bytes.
  */
-export function checkLatest(latest, files, pubkeyB64) {
-  const problems = [];
+export function checkLatest(latest, files, pubkeyB64, { now = new Date() } = {}) {
+  const problems = [...bindingProblems(latest, { now })];
   const platforms = Object.entries(latest?.platforms ?? {});
   if (!platforms.length) problems.push("latest.json has no platforms");
   for (const [p, { url, signature }] of platforms) {
@@ -168,6 +234,44 @@ export function checkLatest(latest, files, pubkeyB64) {
     }
   }
   return problems;
+}
+
+/** T6-I2: a manifest names its channel and an expiry in the future, or the app refuses it. */
+export function bindingProblems(latest, { channel = null, now = new Date() } = {}) {
+  const out = [];
+  if (!["stable", "beta"].includes(latest?.channel)) out.push(`latest.json names no channel ("stable" or "beta"): the app refuses it`);
+  else if (channel && latest.channel !== channel) out.push(`latest.json is for the ${latest.channel} channel, not ${channel}`);
+  const exp = Date.parse(latest?.expires ?? "");
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,9})?Z$/.test(String(latest?.expires ?? "")) || Number.isNaN(exp)) out.push("latest.json has no expiry (an ISO UTC time): the app refuses it");
+  else if (exp <= now.getTime()) out.push(`latest.json expired at ${latest.expires}`);
+  return out;
+}
+
+/**
+ * The beta channel's next latest.json (plan 14.4, T6-L4). `downloaded`: the
+ * channel's current latest.json and latest.json.sig as bytes ({ manifest,
+ * sig }), or null when there is none. It is verified with the updater key
+ * before anything in it is used; one that does not verify is not merged and
+ * not re-signed: the channel is rebuilt from this release alone.
+ * → { action: "keep" | "publish", next, notes: string[] }
+ */
+export function betaChannelPlan({ downloaded, latest, version, pubkey, now = new Date() }) {
+  const notes = [];
+  let have = null;
+  if (downloaded?.manifest) {
+    const problems = manifestProblems(new Map([[MANIFEST, downloaded.manifest], ...(downloaded.sig ? [[MANIFEST_SIG, downloaded.sig]] : [])]), pubkey);
+    if (problems.length) notes.push(`the beta channel's latest.json does not verify (${problems.join("; ")}): not merged; the channel is rebuilt from ${version} alone`);
+    else {
+      try {
+        have = JSON.parse(Buffer.from(downloaded.manifest).toString("utf8"));
+      } catch (e) {
+        notes.push(`the beta channel's latest.json is not JSON (${e.message}): rebuilt from ${version} alone`);
+      }
+    }
+  }
+  if (have && compareVersions(version, have.version) < 0) return { action: "keep", next: have, notes: [...notes, `beta channel stays on ${have.version} (newer than ${version})`] };
+  const merged = have && have.version === version ? mergeLatest(have, latest) : latest;
+  return { action: "publish", next: stampManifest(merged, { channel: "beta", now }), notes };
 }
 
 /* ---------- changelog from merged pull requests ---------- */
@@ -382,6 +486,8 @@ export function preflight(o, f) {
     add(f.updaterPub && !f.updaterPubIsTest, "the updater public key (LUMEN_UPDATER_PUBKEY or security/updater-key.pub) is a real key", "cp ~/.tauri/lumen-updater.key.pub security/updater-key.pub && git add security/updater-key.pub && git commit -m 'chore(release): the updater public key'");
     add(f.releaseKey, "the release signing key (LUMEN_RELEASE_KEY, plan W1.27) opens with LUMEN_RELEASE_PASSPHRASE", "export LUMEN_RELEASE_KEY=~/.lumen-release/lumen-release.key LUMEN_RELEASE_PASSPHRASE=… (made once: node scripts/supply-chain/keys.mjs)");
     add(f.releasePub, "security/release-key.pub is committed and matches LUMEN_RELEASE_KEY", "cp ~/.lumen-release/lumen-release.pub security/release-key.pub && git add security/release-key.pub && git commit -m 'chore(release): the release public key'");
+    // W11.S15: without SignPath the release goes out with an unsigned Windows installer, and says so.
+    add(f.signPath, "SignPath is set up for Windows (SIGNPATH_API_TOKEN, SIGNPATH_ORGANIZATION_ID, SIGNPATH_PROJECT_SLUG, SIGNPATH_SIGNING_POLICY_SLUG)", "apply to SignPath Foundation (W11.O1), then export the four SIGNPATH_* values; without them the Windows installer is released unsigned and marked so", false);
   } else {
     add(f.updaterKey && f.updaterPub, "updater key (else this dry run signs with a throwaway test key)", "nothing to do for a dry run", false);
     add(f.releaseKey, "release key (else this dry run signs with a throwaway test key)", "nothing to do for a dry run", false);
@@ -395,6 +501,6 @@ export function publishCommands({ version, repo, assets }) {
   return [
     `git push origin HEAD ${tag}`,
     `gh release create ${tag} --repo ${repo} --title "Lumen ${version}" --notes-file release/RELEASE_NOTES.md --verify-tag${isBeta(version) ? " --prerelease --latest=false" : ""} ${assets.map((a) => `release/${a}`).join(" ")}`,
-    `gh release upload beta-channel --repo ${repo} release/latest.json --clobber   # the desktop beta channel (plan 14.4): every beta, and a stable release newer than the last beta`,
+    `gh release upload beta-channel --repo ${repo} release/latest.json release/latest.json.sig --clobber   # the desktop beta channel (plan 14.4): every beta, and a stable release newer than the last beta; the manifest is re-signed when merged (W11.S3)`,
   ];
 }

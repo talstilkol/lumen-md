@@ -69,6 +69,7 @@
   "ai.doctor.check.ollamaVersion": "Ollama 版本（结构化输出需要 0.5+）",
   "ai.doctor.check.policy": "AI 策略和首选执行器",
   "ai.doctor.check.research": "研究服务（网页搜索与页面提取）",
+  "ai.doctor.check.speculative": "推测解码（Ollama 0.34 及以上）",
   "ai.doctor.check.spellEn": "本设备上的英文拼写检查",
   "ai.doctor.check.spellHe": "希伯来语拼写词典",
   "ai.doctor.check.storage": "保险库存储：配额与持久性",

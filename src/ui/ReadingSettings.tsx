@@ -4,13 +4,14 @@
  * face for Latin text and spaced Hebrew. A face is downloaded (from this
  * app, not a font service) only when it is chosen.
  */
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { BookOpen, X } from "lucide-react";
 import "../reading/strings";
 import { t } from "../i18n";
 import { DYSLEXIA_FONT, HEBREW_FONTS, downloadBytes, type ReadingFontId } from "../reading/fonts";
 import { DEFAULT_READING, READING_LIMITS, applyReading, effectiveReading, globalReading, noteReading, saveGlobalReading, saveNoteReading, type ReadingSettings as Settings } from "../reading/settings";
 import { HelpButton } from "./HelpButton";
+import { Modal } from "./Modal";
 
 interface Props {
   open: boolean;
@@ -35,18 +36,6 @@ export function ReadingSettings({ open, onClose, notePath }: Props) {
   const [s, setS] = useState<Settings>(() => effectiveReading(notePath));
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.stopPropagation();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
 
   if (!open) return null;
 
@@ -96,7 +85,7 @@ export function ReadingSettings({ open, onClose, notePath }: Props) {
   );
 
   return (
-    <div className="cmd-palette-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-label={t("reading.title")} data-testid="reading-settings">
+    <Modal onClose={onClose} className="cmd-palette-backdrop" onClick={onClose} aria-label={t("reading.title")} data-testid="reading-settings">
       <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 560, padding: 0, display: "flex", flexDirection: "column", maxHeight: "85vh" }}>
         <header style={{ padding: "12px 16px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <BookOpen size={16} />
@@ -174,6 +163,6 @@ export function ReadingSettings({ open, onClose, notePath }: Props) {
           <p style={muted}>{t("reading.license")}</p>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

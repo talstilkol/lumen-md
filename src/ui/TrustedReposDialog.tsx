@@ -21,6 +21,7 @@ import { t } from "../i18n";
 import "./trustedReposDialogStrings";
 import { HelpButton } from "./HelpButton";
 import { explainError } from "../lib/userError";
+import { Modal } from "./Modal";
 
 interface Props {
   onClose: () => void;
@@ -56,14 +57,6 @@ export function TrustedReposDialog({ onClose, loadRepos = clonedRepos }: Props) 
     void refresh();
   }, [refresh]);
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
-
   const toggle = useCallback(
     async (repo: string, next: boolean) => {
       // Turning trust on is the risky direction: ask, and say what it means.
@@ -81,12 +74,9 @@ export function TrustedReposDialog({ onClose, loadRepos = clonedRepos }: Props) 
   );
 
   return (
-    <div className="cmd-palette-backdrop" onClick={onClose}>
+    <Modal onClose={onClose} aria-labelledby="trusted-repos-title" className="cmd-palette-backdrop" onClick={onClose}>
       <div
         className="cmd-palette"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="trusted-repos-title"
         onClick={(e) => e.stopPropagation()}
         style={{ maxWidth: 560, maxHeight: "82vh", display: "flex", flexDirection: "column" }}
       >
@@ -137,7 +127,7 @@ export function TrustedReposDialog({ onClose, loadRepos = clonedRepos }: Props) 
           )}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

@@ -36,6 +36,38 @@ phone, and the next time Lumen opens it lands in `inbox.md` with the time
 you said it. Each line is added once, and nothing is lost if Lumen is
 closed again first.
 
+## From the Lock Screen and Control Center (iPhone)
+
+Capture a line before Lumen has even loaded:
+
+- **Lock Screen widget:** customise the Lock Screen → add **Lumen
+  Capture** (round, wide or one line).
+- **Control Center (iOS 18 and later):** edit Control Center, or the Lock
+  Screen's two buttons, → add **Capture to inbox**.
+- **Shortcuts:** "Capture to Lumen".
+
+Each opens a small text box at once, before the rest of Lumen loads. Type,
+tap **Save**, and the line lands at the end of `inbox.md` with the time you
+typed it. If the box can't save, it says so and keeps your text.
+
+## Share to Lumen (iPhone)
+
+In any app, tap **Share** → **Lumen**. Text, a link (with the page title),
+images and PDFs are saved without opening Lumen. The next time Lumen opens:
+
+- text and links are added to `inbox.md`;
+- images and PDFs are saved in `attachments/`, and a line in the inbox
+  links to them, with the file's name.
+
+## Share and Quick Settings (Android)
+
+- **Share → Lumen** from any app: text, a link, images and PDFs (one or
+  several) are saved without opening Lumen. A message shared from WhatsApp
+  or Telegram keeps its app, author and time.
+- **Quick Settings tile:** pull down the shade, edit the tiles, and add
+  **Capture**. A tap opens a small box. Type a line and tap **Save**; it
+  goes to `inbox.md` the next time Lumen opens.
+
 ## App Shortcuts (Android)
 
 Long-press the Lumen icon: **Quick note**, **Voice note**, **Search** and
@@ -65,41 +97,56 @@ line to the app. What a link means is decided in
 
 ### iOS (Xcode)
 
-The repository has the sources. These steps add them to the Xcode project
-once:
+The Xcode project already holds everything (`ios/App/App.xcodeproj`,
+checked by `src/__tests__/iosProject.test.ts`):
+
+- the **App** target compiles `AppDelegate.swift`, `LumenNative.swift`,
+  `LumenIntents.swift`, `NativeCapture.swift` (the capture box),
+  `iCloudSync.swift` and `Shared/CaptureQueue.swift`, with `en.lproj` /
+  `he.lproj` (`Localizable.strings`, `AppShortcuts.strings`); Hebrew is a
+  project localization;
+- the **LumenWidgets** widget extension (`com.lumen.editor.LumenWidgets`)
+  compiles `LumenWidgets/LumenWidgets.swift` (the home-screen widget and the
+  bundle) and `LumenControls.swift` (the Lock Screen widget and the Control
+  Center control), with its own strings, `Info.plist` and entitlements, and
+  the app embeds it. There is no need to add a Widget Extension target by
+  hand;
+- the **LumenShare** share extension (`com.lumen.editor.LumenShare`)
+  compiles `LumenShare/ShareViewController.swift` and
+  `Shared/CaptureQueue.swift`, and the app embeds it;
+- all three targets have the App Group `group.com.lumen.editor` in their
+  entitlements. The capture queue lives there: one file per capture, written
+  atomically, read by the app (`src/mobile/captureQueue.ts`, tested in
+  `src/__tests__/captureQueue.test.ts`).
+
+To build:
 
 1. `npm run build && npx cap sync ios`, then open `ios/App/App.xcworkspace`
    (or `App.xcodeproj` with Swift Package Manager).
-2. **App target, new files:** File → Add Files to "App"… and select:
-   - `App/LumenNative.swift` and `App/LumenIntents.swift`, with *Target:
-     App* ticked;
-   - `App/en.lproj` and `App/he.lproj` (`Localizable.strings`,
-     `AppShortcuts.strings`).
-3. **Localizations:** Project → Info → Localizations, add **Hebrew**.
-4. **The widget extension:**
-   - File → New → Target → **Widget Extension**. Name it `LumenWidgets`,
-     untick *Include Configuration App Intent* and *Include Live Activity*,
-     and choose *Activate* when asked.
-   - Delete the Swift file Xcode generated. Add
-     `LumenWidgets/LumenWidgets.swift` and
-     `LumenWidgets/en.lproj` / `he.lproj` to the **LumenWidgets** target.
-   - Set its deployment target to iOS 16 or later, and its bundle id to
-     `com.lumen.editor.LumenWidgets`.
-5. **Signing:** set the same team for the App and LumenWidgets targets
-   (the accounts are in plan 15.7). No App Group or new capability is
-   needed: the widget only opens links, and Siri's *Add to inbox* runs in
-   the app's own process.
-6. `Main.storyboard` already uses `MainViewController`, which registers the
+2. **Signing:** set the same team for the App, LumenWidgets and LumenShare
+   targets (the accounts are in plan 15.7), and register the App Group
+   `group.com.lumen.editor` for all three bundle ids in the developer
+   account.
+3. `Main.storyboard` already uses `MainViewController`, which registers the
    app's plugin. Check that its class shows *Module: App*.
-7. Build and run on a device. Long-press the home screen → **+** →
+4. Build and run on a device. Long-press the home screen → **+** →
    **Lumen** to add the widget.
 
 ### Android (Android Studio)
 
 Everything is in the project already: the widget (`LumenWidgetProvider`,
 `res/layout/widget_lumen.xml`, `res/xml/widget_lumen_info.xml`), App
-Shortcuts (`res/xml/shortcuts.xml`), the `lumen://` intent filter, and the
-plugin, which `MainActivity` registers.
+Shortcuts (`res/xml/shortcuts.xml`), the `lumen://` intent filter, the
+plugin, which `MainActivity` registers, the share sheet (`ShareActivity`),
+and the Quick Settings tile (`CaptureTileService`) with its capture box
+(`CaptureActivity`). The queue they write is `CaptureQueue.java`, in the
+app's own files folder.
+
+Without the SDK, `tools/native-check/check-android.sh .` compiles the Java
+against stubs and checks every resource reference, and
+`tools/native-check/test-android.sh .` runs the queue's JUnit tests. With
+the SDK, `cd android && ./gradlew test lint` runs the same tests and Android
+lint.
 
 1. `npm run build && npx cap sync android`, then open `android/` in
    Android Studio.
@@ -126,3 +173,13 @@ Android phone, with the phone in Hebrew and then in English:
    and the labels are in Hebrew. The same holds for the App Shortcuts.
 5. **Each link:** `lumen://search?q=test` from the browser opens search
    with "test".
+6. **Lock Screen and Control Center:** with the phone locked and Lumen
+   closed, tap the Lock Screen widget, then the control. The box opens, and
+   a saved line is in `inbox.md` once Lumen is open.
+7. **Share:** share a web page from Safari, a photo from Photos and a PDF
+   from Files, with Lumen closed. Open Lumen: each one is there, with its
+   link or file name.
+8. **Android share and tile:** share a page from Chrome, two photos at once,
+   and a WhatsApp message, then add a line from the Quick Settings tile.
+   Open Lumen: all of them are in `inbox.md` (the photos in
+   `attachments/`), and the WhatsApp line names the app and the author.

@@ -8,8 +8,9 @@
  *     --update    make the latest run the new baseline (reports/perf/inp-baseline.json)
  *
  * Fails (exit 1) when a metric is 10 % or more slower than the baseline:
- * INP p75 over the 20 interactions, and keypress → paint p95 in the 50 KB
- * and the 2 MB note. Lower is better for all three. The absolute budgets
+ * INP p75 over the 20 interactions, keypress → paint p95 in the 50 KB
+ * and the 2 MB note, and (W11.Q5) in Moby-Dick and 2 MB of Ben-Yehuda in the
+ * source editor and Moby-Dick in WYSIWYG. Lower is better for all three. The absolute budgets
  * (p75 < 100 ms, p95 < 16 / 33 ms) are asserted by e2e/inp-budget.spec.ts
  * itself.
  */
@@ -25,6 +26,10 @@ export function gatedMetrics(run) {
     "INP p75": run?.inpP75,
     "keypress→paint p95 (50KB)": run?.keyToPaintP95?.["50KB"],
     "keypress→paint p95 (2MB)": run?.keyToPaintP95?.["2MB"],
+    // W11.Q5: real text. A WYSIWYG run that fell back to the source editor is "fallback", not a number, and is not compared.
+    "keypress→paint p95 (Moby-Dick, source)": run?.realText?.mobyDick,
+    "keypress→paint p95 (Ben-Yehuda 2MB, source)": run?.realText?.benYehuda2MB,
+    "keypress→paint p95 (Moby-Dick, WYSIWYG)": run?.realText?.wysiwyg?.mobyDick,
   };
 }
 

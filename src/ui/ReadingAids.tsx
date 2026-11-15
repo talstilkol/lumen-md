@@ -8,12 +8,12 @@ import { useRef, useState, type CSSProperties } from "react";
 import { createRoot } from "react-dom/client";
 import "../reading/readingAidsStrings";
 import { getLocale, t } from "../i18n";
-import { useFocusTrap } from "./useFocusTrap";
 import { uiConfirm } from "./PromptDialog";
 import { showAiToast } from "./AiToast";
 import { AIDS_FONTS, AIDS_LIMITS, AIDS_TINTS, applyAids, loadAids, saveAids, type ReadingAids } from "../reading/readingAids";
 import { watchDisplayNikud, type PointMany } from "../reading/displayNikud";
 import { HelpButton } from "./HelpButton";
+import { Modal } from "./Modal";
 
 let nikudWatch: { stop: () => void } | null = null;
 
@@ -56,7 +56,6 @@ const control: CSSProperties = { border: "1px solid hsl(var(--border-strong))", 
 
 function Panel({ close }: { close: () => void }) {
   const ref = useRef<HTMLDivElement>(null);
-  useFocusTrap(ref, { onEscape: close });
   const [aids, setAids] = useState<ReadingAids>(loadAids);
   const [nikud, setNikud] = useState(displayNikudOn());
   const [busy, setBusy] = useState(false);
@@ -83,8 +82,8 @@ function Panel({ close }: { close: () => void }) {
     );
   };
   return (
-    <div onClick={(e) => e.target === e.currentTarget && close()} style={{ position: "fixed", inset: 0, zIndex: 9999, background: "var(--overlay)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
-      <div ref={ref} role="dialog" aria-modal="true" aria-labelledby="ra-title" tabIndex={-1} style={{ background: "hsl(var(--bg))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border-strong))", borderRadius: 12, padding: 20, maxWidth: 520, width: "100%", maxHeight: "85vh", overflow: "auto", fontSize: 14 }}>
+    <Modal aria-labelledby="ra-title" onClose={close} onClick={(e) => e.target === e.currentTarget && close()} style={{ position: "fixed", inset: 0, zIndex: 9999, background: "var(--overlay)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+      <div ref={ref} tabIndex={-1} style={{ background: "hsl(var(--bg))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border-strong))", borderRadius: 12, padding: 20, maxWidth: 520, width: "100%", maxHeight: "85vh", overflow: "auto", fontSize: 14 }}>
         <h2 id="ra-title" style={{ marginTop: 0 }}>
           {t("readingAids.title")}
         </h2>
@@ -157,7 +156,7 @@ function Panel({ close }: { close: () => void }) {
           {t("readingAids.close")}
         </button>
       </div>
-    </div>
+    </Modal>
   );
 }
 

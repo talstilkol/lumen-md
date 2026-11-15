@@ -473,11 +473,36 @@ export abstract class E2eeSyncCore {
     if (this.state) await this.o.store.save(this.state);
   }
 
-  /** Serialise calls: one round (or pairing) at a time per device. @internal */
+  /** Serialise calls: one round (or pairing) at a time per device. Listeners hear when each one ends (2.31). @internal */
   protected exclusive<T>(fn: () => Promise<T>): Promise<T> {
     const next = this.running.then(fn, fn);
+    const notify = () => {
+      for (const l of [...this.changeListeners]) {
+        try {
+          l();
+        } catch {
+          // why: a listener's failure is its own; the round's result stands
+        }
+      }
+    };
+    void next.then(notify, notify);
     this.running = next.catch(() => undefined);
     return next;
+  }
+
+  private readonly changeListeners = new Set<() => void>();
+
+  /**
+   * Called after every call that runs exclusively — a round, pairing, its
+   * confirmation, a key change, `markCreated` — whether it succeeded or not
+   * (2.31, #275): what `freshness()` says may have changed, and a round can
+   * revoke a verification. Returns the unsubscribe.
+   */
+  onChange(listener: () => void): () => void {
+    this.changeListeners.add(listener);
+    return () => {
+      this.changeListeners.delete(listener);
+    };
   }
 
   /** @internal */

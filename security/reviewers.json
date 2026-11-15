@@ -1,0 +1,4 @@
+{
+  "$comment": "Review signing keys (plan W6.11, W10.D3). pr:check counts a review receipt only when it is signed with the Ed25519 key listed here for the reviewer it names; with no key here, no receipt counts. Add a reviewer with `node scripts/review-sign.mjs keygen <name> --login <github login> --email <git email> --out <dir outside every repo>` and paste the printed entry under reviewers; \"login\" and \"emails\" are required, so a reviewer who opened the PR or authored or committed in its range is refused (T6-H1). pr:check and review:coverage read this file from the merge base, never from the change under review, so a key added here counts only after the change that adds it is merged. Changing this file is a sensitive change (.github/CODEOWNERS).",
+  "reviewers": {}
+}

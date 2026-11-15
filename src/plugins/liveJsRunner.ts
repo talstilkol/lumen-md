@@ -8,9 +8,13 @@
  * messages both ways. The user's code runs in that worker — never in this
  * page — so it can only talk to this relay, and the app validates every
  * relayed message (shape and run id) before showing it.
+ *
+ * Not a Vite entry: scripts/build-runners.mjs bundles it into
+ * public/runners/livejs-runner.js, a classic script whose sha256 is the only
+ * script source the page's CSP allows (plan W10.D1). Rebuild after a change.
  */
 import { WORKER_SOURCE } from "./liveJsWorkerSource";
-import { RUNNER_CHANNEL, type RunnerToApp } from "./liveJsSandbox";
+import { RUNNER_CHANNEL, type RunnerToApp } from "./liveJsChannel";
 
 const post = (msg: RunnerToApp) => parent.postMessage(msg, "*");
 

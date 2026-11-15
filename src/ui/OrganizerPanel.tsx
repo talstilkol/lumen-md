@@ -15,6 +15,7 @@ import { formatEta } from "./BatchPanel";
 import "./organizerPanelStrings";
 import { HelpButton } from "./HelpButton";
 import { EmptyState, learnHow } from "./EmptyState";
+import { Modal } from "./Modal";
 
 const btn: React.CSSProperties = { padding: "4px 10px", fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer" };
 const primary: React.CSSProperties = { ...btn, background: "hsl(var(--accent))", color: "hsl(var(--accent-fg, 0 0% 100%))", borderColor: "transparent" };
@@ -47,16 +48,6 @@ function Status({ s }: { s: OrganizerState }) {
 export function OrganizerPanel({ job, onClose }: { job: OrganizerJob; onClose: () => void }) {
   const [s, setS] = useState<OrganizerState>(job.state);
   useEffect(() => job.subscribe(setS), [job]);
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.stopPropagation();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
   const running = s.phase === "reading" || s.phase === "analysing";
   const left = s.suggestions.length - s.staged;
   const shown = s.suggestions.slice(s.staged, s.staged + DEFAULT_BATCH);
@@ -67,11 +58,12 @@ export function OrganizerPanel({ job, onClose }: { job: OrganizerJob; onClose: (
   };
 
   return (
-    <div className="cmd-palette-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-label={t("organizer.title")} data-testid="organizer-panel" data-phase={s.phase}>
+    <Modal onClose={onClose} className="cmd-palette-backdrop" onClick={onClose} aria-label={t("organizer.title")} data-testid="organizer-panel" data-phase={s.phase}>
       <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 680, padding: 0, display: "flex", flexDirection: "column", maxHeight: "84vh" }}>
         <header style={{ padding: "12px 16px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <Network size={16} />
           <strong style={{ flex: 1 }}>{t("organizer.title")}</strong>
+          <ModelSwitch />
           <HelpButton topic="ai/organizer" />
           <button type="button" style={btn} onClick={onClose} aria-label={t("agentReview.close")}>
             <X size={14} />
@@ -141,7 +133,7 @@ export function OrganizerPanel({ job, onClose }: { job: OrganizerJob; onClose: (
           ))}
         </ul>
       </div>
-    </div>
+    </Modal>
   );
 }
 
@@ -161,6 +153,8 @@ export async function openOrganizerPanel(): Promise<void> {
   const reuse = job && (job.state.phase === "reading" || job.state.phase === "analysing" || (job.state.phase === "ready" && job.state.staged < job.state.suggestions.length));
   if (!reuse) {
     lastJob?.dispose();
+    // W10.C16: the local model re-scores the suggestions when the user turned it on (the panel's switch).
+    (await import("../agents/organizer/model")).registerOrganizerModel();
     job = lastJob = startOrganizer(await workspaceSource());
   }
   const close = () => {
@@ -175,3 +169,27 @@ export async function openOrganizerPanel(): Promise<void> {
 }
 
 let lastJob: OrganizerJob | null = null;
+
+/** "Re-score with the local model" (W10.C16): consent for the next run; on this device only. */
+function ModelSwitch() {
+  const [on, setOn] = useState(false);
+  useEffect(() => {
+    void import("../agents/organizer/model").then((m) => setOn(m.organizerModelConsent()));
+  }, []);
+  return (
+    <label style={{ display: "inline-flex", gap: 4, alignItems: "center", fontSize: 12 }} title={t("organizer.model.about")}>
+      <input
+        type="checkbox"
+        checked={on}
+        data-testid="organizer-model"
+        onChange={(e) => {
+          const next = e.target.checked;
+          setOn(next);
+          void import("../agents/organizer/model").then((m) => m.setOrganizerModelConsent(next));
+        }}
+      />
+      {t("organizer.model")}
+    </label>
+  );
+}
+

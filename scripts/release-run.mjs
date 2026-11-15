@@ -19,10 +19,17 @@
  *   5. web build twice with SOURCE_DATE_EPOCH, compared file by file (repro-check), budget, no maps,
  *      lumen-web-vX.tgz byte-reproducible
  *   6. desktop: tauri build with TAURI_SIGNING_PRIVATE_KEY → bundles + .sig; latest.json; every
- *      signature checked against the updater key, and a changed byte must fail the check
+ *      signature checked against the updater key, and a changed byte must fail the check;
+ *      latest.json.sig: latest.json itself signed with the updater key (W11.S3), verified, and a
+ *      changed byte refused. No publish without it: the app refuses an unsigned manifest (W11.S2).
+ *      Windows (plan W11.S15): with the SignPath details, Tauri signs through SignPath
+ *      (bundle.windows.signCommand); every Windows installer is then checked, and
+ *      release/signing.json says "signed" only when SignPath was set up and each one verified
  *   7. sbom.cdx.json (CycloneDX, offline from package-lock.json + Cargo.lock)
  *   8. RELEASE_NOTES.md: Hebrew, then English (release-notes/<version>.{he,en}.md), then every change
  *   9. SHA256SUMS of every asset, SHA256SUMS.minisig + sbom.cdx.json.minisig (plan W1.27's key), verified
+ *  9b. W7.22: SLSA provenance + a keyless Sigstore bundle per file, checked by verify.mjs (scripts/supply-chain/release-gate.mjs);
+ *      a dry run uses TEST keys and the local Sigstore stand-in, --publish the real ones (nothing is pushed unless it passes)
  *  10. --publish: git push, gh release create (a beta is a pre-release), the beta channel's latest.json
  *
  * A dry run without the owner's keys signs with throwaway test keys (made in a temp folder, named TEST
@@ -32,17 +39,19 @@ import { execFileSync, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { bumpManifests, compareVersions, insertChangelog, isBeta, sha256sums, tagOf, verifySums } from "./lib/release.mjs";
+import { bumpManifests, insertChangelog, isBeta, sha256sums, tagOf, verifySums } from "./lib/release.mjs";
 import { LOCALES, addUntranslated } from "./lib/whats-new.mjs";
 import { latestJson } from "./lib/tauriSigning.mjs";
 import {
   bilingualNotes,
+  betaChannelPlan,
   checkLatest,
   fillUpdater,
   isBundleOf,
   isTestKey,
   macUpdateName,
-  mergeLatest,
+  MANIFEST_SIG,
+  manifestProblems,
   mergedPrs,
   normalizeUpdaterPubkey,
   notesFiles,
@@ -53,15 +62,19 @@ import {
   publishCommands,
   reproducibleTgz,
   shortNotes,
+  signManifest,
   testUpdaterKey,
   updaterBuildEnv,
   verifyTauriSig,
 } from "./lib/releaseRun.mjs";
 import { fakeDesktop } from "./lib/releaseFake.mjs";
+import { SIGN_COMMAND, peSignature, windowsSigningPlan, windowsSigningRecord } from "./lib/windowsSigning.mjs";
+import { verifyFile } from "./windows/verify-signature.mjs";
 import { filesUnder } from "./supply-chain/lib.mjs";
 import { formatPublicKey, generateKeys, parsePublicKey, rawPublicKey, readSecretKey, signData, verifyData } from "./supply-chain/minisign.mjs";
 import { buildSbom, sourceDate } from "./supply-chain/sbom.mjs";
 import { verifyRelease } from "./supply-chain/verify-release.mjs";
+import { ENGINE_ENV, provenanceGate, releaseEngine, witnessProblems, witnessRefusal } from "./supply-chain/release-gate.mjs";
 
 const ROOT = process.cwd();
 const OUT = path.join(ROOT, "release");
@@ -171,6 +184,7 @@ function facts(o, repo) {
     updaterPubIsTest: !!pub && isTestKey(pub),
     releaseKey: !!releaseKey,
     releasePub,
+    signPath: windowsSigningPlan().configured,
   };
 }
 
@@ -205,6 +219,14 @@ export async function main(argv) {
   for (const i of items) console.log(`${i.ok ? "✓" : i.blocking ? "✗" : "·"} ${i.what}${i.ok ? "" : `\n    → ${i.fix}`}`);
   const blocking = items.filter((i) => i.blocking);
   if (blocking.length) throw new Error(`${blocking.length} preflight item(s) missing — fix the ✗ lines above and run again`);
+  // W7.22 (W10.E54): before anything is built or tagged, Witness must be ready, unless the Node attester is asked for by name.
+  if (o.publish) {
+    if (releaseEngine(process.env) === "witness") {
+      const missing = witnessProblems({ root: ROOT });
+      if (missing.length) throw new Error(witnessRefusal(missing));
+      console.log("✓ provenance: Witness");
+    } else console.log(`· provenance: ${ENGINE_ENV}=node, the Node attester without Witness (the explicit fallback)`);
+  }
 
   const original = new Map();
   const write = (p, text) => {
@@ -300,12 +322,22 @@ export async function main(argv) {
       else {
         const override = path.join(temp, "tauri.release.json");
         // dist/ is already built (and checked) above: tauri must not rebuild it.
-        writeFileSync(override, JSON.stringify({ build: { beforeBuildCommand: "" } }));
+        // W11.S15: with the SignPath details, Tauri signs each Windows binary through SignPath.
+        const winSign = process.platform === "win32" && windowsSigningPlan().configured ? { bundle: { windows: { signCommand: SIGN_COMMAND } } } : {};
+        writeFileSync(override, JSON.stringify({ build: { beforeBuildCommand: "" }, ...winSign }));
         const extra = ["--config", override, ...(isBeta(v) && process.platform === "win32" ? ["--bundles", "nsis"] : [])];
         run("npm", ["run", "tauri:build", "--", ...extra], { ...channelEnv, ...updaterBuildEnv({ pubkey: updater.pubkey, repo }) });
         bundles = bundlesFromTarget(v);
       }
       for (const b of bundles) writeFileSync(path.join(OUT, b.name), b.data);
+      // W11.S15: never call the Windows installer signed unless SignPath signed it and it verifies.
+      const plan = windowsSigningPlan();
+      const installers = bundles.filter((b) => /\.(exe|msi)$/i.test(b.name));
+      const verified = installers.map((b) => (process.platform === "win32" ? verifyFile(path.join(OUT, b.name)) : { name: b.name, ...(({ signed, why }) => ({ signed, why }))(peSignature(b.data)) }));
+      const winRecord = windowsSigningRecord(plan, verified);
+      writeFileSync(path.join(OUT, "signing.json"), JSON.stringify({ windows: winRecord }, null, 2) + "\n");
+      console.log(`Windows: ${winRecord.signed ? "signed" : "NOT signed"} — ${winRecord.reason}`);
+      if (plan.configured && installers.length && !winRecord.signed) throw new Error(`SignPath is set up but a Windows installer is not signed: ${winRecord.reason}`);
       const sigs = bundles.filter((b) => b.name.endsWith(".sig")).map((b) => ({ name: b.name, signature: b.data.toString("utf8") }));
       if (!sigs.length) throw new Error("tauri build made no .sig files: is TAURI_SIGNING_PRIVATE_KEY set and createUpdaterArtifacts on?");
       const he = exists(notesFiles(v).he) ? read(notesFiles(v).he) : "";
@@ -315,6 +347,13 @@ export async function main(argv) {
       const problems = checkLatest(latest, byName, updater.pubkey);
       if (problems.length) throw new Error(`latest.json does not verify:\n  ${problems.join("\n  ")}`);
       writeFileSync(path.join(OUT, "latest.json"), JSON.stringify(latest, null, 2) + "\n");
+      // W11.S3: latest.json.sig, with the updater key; the app verifies it before reading the manifest.
+      const manifestBytes = readFileSync(path.join(OUT, "latest.json"));
+      writeFileSync(path.join(OUT, MANIFEST_SIG), signManifest(manifestBytes, updater, { file: path.join(OUT, "latest.json"), tauriSigner, timestamp: epoch }) + "\n");
+      const changedManifest = Buffer.from(manifestBytes);
+      changedManifest[changedManifest.indexOf(Buffer.from(latest.version))] ^= 1;
+      if (manifestProblems(new Map([["latest.json", changedManifest], [MANIFEST_SIG, readFileSync(path.join(OUT, MANIFEST_SIG))]]), updater.pubkey).length === 0) throw new Error("tamper check: a changed latest.json still verified");
+      console.log(`${MANIFEST_SIG}: latest.json signed with the updater key; a changed version byte is refused`);
       // The same check the app makes must refuse a changed file.
       const [p0, e0] = Object.entries(latest.platforms)[0];
       const name0 = decodeURIComponent(e0.url.split("/").pop());
@@ -366,14 +405,26 @@ export async function main(argv) {
     if (!sumsRefused || verifySums(sums, [{ name: assets[0], data: Buffer.from("changed") }]).length === 0) throw new Error("tamper check on SHA256SUMS failed");
     console.log(`verified: ${r.checked} files match SHA256SUMS; SHA256SUMS and sbom.cdx.json signed by ${release.test ? "a TEST" : "the release"} key ${r.keyId}; a changed SHA256SUMS is refused`);
 
+    // W7.22: how it was built (SLSA provenance, the build key) and who released it (keyless Sigstore).
+    // On --publish the tree must be exactly the tagged commit first: the policy refuses a dirty tree.
+    step("9b", `build provenance and Sigstore bundles${o.publish ? "" : " (TEST keys and the local Sigstore stand-in)"}`);
+    if (o.publish) putBack([CONF]);
+    const gate = provenanceGate({ out: OUT, root: ROOT, commit, publish: o.publish });
+    if (gate.ok) console.log(`provenance gate: ${gate.files} files, each built by a trusted host and signed by ${gate.test ? "a TEST identity" : "the release identity"}\n${gate.log}`);
+    else if (!o.publish && gate.unavailable) warn(`provenance gate not checked here (no Sigstore verifier on this machine): ${gate.log}`);
+    else throw new Error(`provenance gate: ${gate.log}`);
+
     const uploads = readdirSync(OUT).filter((n) => !n.startsWith(".") && n !== "RELEASE_NOTES.md" && n !== "DRY-RUN.md").sort();
     const commands = publishCommands({ version: v, repo, assets: uploads });
+    // W11.S3: never publish a manifest the app would refuse.
+    const unsigned = manifestProblems(new Map(uploads.filter((n) => n.startsWith("latest.json")).map((n) => [n, readFileSync(path.join(OUT, n))])), updater.pubkey);
+    if (unsigned.length) throw new Error(unsigned.join("; "));
     if (o.publish) {
       step(10, "publish");
       putBack([CONF]);
       run("git", ["push", "origin", "HEAD", tag]);
       run("gh", ["release", "create", tag, "--repo", repo, "--title", `Lumen ${v}`, "--notes-file", path.join(OUT, "RELEASE_NOTES.md"), "--verify-tag", ...(isBeta(v) ? ["--prerelease", "--latest=false"] : []), ...uploads.map((a) => path.join(OUT, a))]);
-      if (latest) betaChannel(repo, v, latest);
+      if (latest) betaChannel(repo, v, latest, updater);
       console.log(`\nPublished ${tag}: https://github.com/${repo}/releases/tag/${tag}\nAnyone can check it: node scripts/supply-chain/verify-release.mjs <download dir> --pub security/release-key.pub`);
     } else {
       step(10, "publish — not run (dry run); --publish would run:");
@@ -410,22 +461,39 @@ export async function main(argv) {
   }
 }
 
+/**
+ * Sign a file with the owner's updater key, which exists only as
+ * TAURI_SIGNING_PRIVATE_KEY (+ _PASSWORD): `tauri signer sign` writes
+ * <file>.sig (W11.S3). Returns its text.
+ */
+function tauriSigner(file) {
+  rmSync(`${file}.sig`, { force: true });
+  run("npm", ["run", "tauri", "--", "signer", "sign", file]);
+  return readFileSync(`${file}.sig`, "utf8");
+}
+
 /** Point the rolling beta-channel release at this version when it is newer (plan 14.4); merge platforms uploaded from another machine. */
-function betaChannel(repo, version, latest) {
+function betaChannel(repo, version, latest, updater) {
   const dir = mkdtempSync(path.join(tmpdir(), "lumen-beta-"));
-  let have = null;
+  let downloaded = null;
   try {
-    execFileSync("gh", ["release", "download", "beta-channel", "--repo", repo, "--pattern", "latest.json", "--dir", dir], { stdio: "ignore" });
-    have = JSON.parse(readFileSync(path.join(dir, "latest.json"), "utf8"));
+    // T6-L4: the manifest and its signature, so what is on the release host is verified before it is merged and re-signed.
+    execFileSync("gh", ["release", "download", "beta-channel", "--repo", repo, "--pattern", "latest.json", "--pattern", MANIFEST_SIG, "--dir", dir], { stdio: "ignore" });
   } catch {
     if (!tryRun("gh", ["release", "view", "beta-channel", "--repo", repo])) run("gh", ["release", "create", "beta-channel", "--repo", repo, "--prerelease", "--latest=false", "--title", "Beta channel", "--notes", "Rolling pointer for the desktop beta update channel (plan 14.4). Not a release: its latest.json names the newest beta or stable release."]);
   }
-  if (have && compareVersions(version, have.version) < 0) {
-    console.log(`beta channel stays on ${have.version} (newer than ${version})`);
-  } else {
-    const next = have && have.version === version ? mergeLatest(have, latest) : latest;
+  if (existsSync(path.join(dir, "latest.json"))) downloaded = { manifest: readFileSync(path.join(dir, "latest.json")), sig: existsSync(path.join(dir, MANIFEST_SIG)) ? readFileSync(path.join(dir, MANIFEST_SIG)) : null };
+  const plan = betaChannelPlan({ downloaded, latest, version, pubkey: updater.pubkey });
+  for (const n of plan.notes) console.log(n);
+  if (plan.action === "publish") {
+    const next = plan.next;
     writeFileSync(path.join(dir, "latest.json"), JSON.stringify(next, null, 2) + "\n");
-    run("gh", ["release", "upload", "beta-channel", "--repo", repo, path.join(dir, "latest.json"), "--clobber"]);
+    // W11.S3: the merged manifest is new bytes, so it is signed again and checked before upload.
+    const bytes = readFileSync(path.join(dir, "latest.json"));
+    writeFileSync(path.join(dir, MANIFEST_SIG), signManifest(bytes, updater, { file: path.join(dir, "latest.json"), tauriSigner }) + "\n");
+    const problems = manifestProblems(new Map([["latest.json", bytes], [MANIFEST_SIG, readFileSync(path.join(dir, MANIFEST_SIG))]]), updater.pubkey);
+    if (problems.length) throw new Error(problems.join("; "));
+    run("gh", ["release", "upload", "beta-channel", "--repo", repo, path.join(dir, "latest.json"), path.join(dir, MANIFEST_SIG), "--clobber"]);
     console.log(`beta channel → ${version} (${Object.keys(next.platforms).join(", ")})`);
   }
   rmSync(dir, { recursive: true, force: true });

@@ -11,6 +11,7 @@ import { useToastStore } from "../store/useToastStore";
 import type { BookState } from "./app";
 import { explainError } from "../lib/userError";
 import { HelpButton } from "../ui/HelpButton";
+import { Modal } from "../ui/Modal";
 
 type App = typeof import("./app");
 
@@ -139,10 +140,10 @@ export function openBookDialog(app: App, indexPath: string): void {
     host.remove();
   };
   root.render(
-    <div role="dialog" aria-modal="true" aria-label={t("book.title")} onClick={(e) => e.target === e.currentTarget && close()} onKeyDown={(e) => e.key === "Escape" && close()} style={{ position: "fixed", inset: 0, zIndex: 9999, background: "hsl(0 0% 0%/0.4)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+    <Modal aria-label={t("book.title")} onClick={(e) => e.target === e.currentTarget && close()} onClose={close} style={{ position: "fixed", inset: 0, zIndex: 9999, background: "hsl(0 0% 0%/0.4)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
       <div data-testid="book-dialog" style={{ background: "hsl(var(--bg))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border-strong))", borderRadius: 12, padding: 20, maxWidth: 640, width: "100%", maxHeight: "85vh", overflow: "auto", fontSize: 14 }}>
         <BookPanel app={app} indexPath={indexPath} close={close} />
       </div>
-    </div>,
+    </Modal>,
   );
 }

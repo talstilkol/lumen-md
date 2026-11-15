@@ -3,7 +3,7 @@ title: Sustainability
 description: How Lumen pays for itself without ads, accounts or locked features. Donations through GitHub Sponsors and Open Collective, an optional paid relay that sees only ciphertext, and every cost in the open.
 ---
 
-Lumen is open source and mostly built by one person. This page is the plan for keeping it running. The live, script-free summary is the [support page](https://lumen-md.vercel.app/support.html).
+Lumen is open source and mostly built by one person. This page is the plan for keeping it running. The live, script-free summary is the [support page](https://lumen-md.vercel.app/support.html). The prices themselves are on the [pricing page](/project/pricing/): the relay is $4 a month or $40 a year (plan W11.P12).
 
 ## Principles
 
@@ -85,15 +85,15 @@ From `node scripts/cost-model.mjs`, with list prices checked on 12.11.2026: [Wor
 | Durable Object requests | $0.0005 |
 | **Infrastructure total** | **$0.0496** |
 
-| | Monthly plan, $3 | Yearly plan, $30 |
+| | Monthly plan, $4 | Yearly plan, $40 |
 | --- | --- | --- |
-| Payment fee per payment (Polar Starter, 5% + $0.50, +1.5% for a non-US card) | $0.6950 | $2.45 |
-| Left per subscriber per month | $2.26 | $2.25 |
+| Payment fee per payment (Polar Starter, 5% + $0.50, +1.5% for a non-US card) | $0.7600 | $3.10 |
+| Left per subscriber per month | $3.19 | $3.03 |
 
 | Fixed per month | USD | Break-even |
 | --- | --- | --- |
-| Workers Paid ($5) + a domain (about $10.44 a year), app on a free host | $5.87 | **3 subscribers** |
-| The same, app on Vercel Pro ($20) | $25.87 | **12 subscribers** |
+| Workers Paid ($5) + a domain (about $10.44 a year), app on a free host | $5.87 | **2 subscribers** |
+| The same, app on Vercel Pro ($20) | $25.87 | **9 subscribers** |
 
 The model does not count the owner's time or an accountant's fee. Those depend on the owner's choices (see below). Storage dominates only for very large vaults: at the 10 GB cap, a user costs about $0.18 a month.
 
@@ -121,7 +121,7 @@ A merchant of record is the legal seller to each subscriber. It charges and remi
 2. **Open Collective.** Create the collective `lumen-md` and apply to Open Source Collective (verify through GitHub). Once it is accepted, uncomment `open_collective:` in `.github/FUNDING.yml`.
 3. **Accountant.** Choose between osek patur and osek murshe, get the section 30(a)(5) question answered for a merchant of record, and set up bookkeeping.
 4. **Hosting (W4.27).** Before the first sale, move the app off Vercel Hobby, to a host that allows commercial use or to Vercel Pro.
-5. **Polar.** Create the organisation and one product, "Lumen sync relay", at $3 a month or $30 a year, with licence keys. Connect the payout account (Stripe Connect Express, Israel). The Polar API token becomes a Worker secret.
+5. **Polar.** Create the organisation and one product, "Lumen sync relay", at $4 a month or $40 a year, with licence keys. Connect the payout account (Stripe Connect Express, Israel). The Polar API token becomes a Worker secret.
 6. **Cloudflare.** Turn on Workers Paid ($5), create the R2 bucket, and deploy the vault relay Worker (a follow-up to this plan; the code seam is described above).
 7. **Privacy policy and terms.** Update the privacy policy (#456) for what the provider and the relay keep, and add short terms for the paid relay.
 8. **Every month.** Update the support page's cost table and the cost model's prices from the real invoices, and post the same numbers on Open Collective.

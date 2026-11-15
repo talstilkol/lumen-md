@@ -11,7 +11,8 @@
  *
  *   {
  *     "format": "lumen-review", "version": 1,
- *     "pr": 495,                                  (optional)
+ *     "pr": 495,                                  (the PR it reviews)
+ *     "base": "<40-hex sha of the merge base the diff was read against>",
  *     "head": "<40-hex sha of the reviewed head commit>",
  *     "author": "<lane or agent that wrote the change>",
  *     "reviewer": "<lane or agent that reviewed it; not the author>",
@@ -23,16 +24,37 @@
  *     "verdict": "approve"                        (or "changes-requested")
  *   }
  *
- * Valid for a PR only when: the head is the PR's head now (a new push makes
- * every older receipt stale), reviewer ≠ author, access is read-only, every
+ * Valid for a PR only when: the receipt names this PR, its merge base and
+ * its head now (a new push makes every older receipt stale, and the same
+ * head on another PR or against another base is a different diff: T6-L2),
+ * reviewer ≠ author, access is read-only, every
  * sensitive file is covered, at least one attack test is listed, no finding
  * of severity critical or high is still open, and the verdict is approve.
+ *
+ * Who may post a receipt (review 14.11): only a comment by an account with
+ * write access to the repository (GitHub's author_association OWNER,
+ * MEMBER or COLLABORATOR) counts. On a public repository anyone can
+ * comment, and a stranger's `lumen-review` block must not open the gate.
+ * Which of those accounts posted it is not checked (T6-M1): every lane
+ * posts as the owner's account, so the signature is the identity proof.
+ *
+ * Signed receipts (review 14.11): `security/reviewers.json` lists each
+ * reviewer's Ed25519 public key, GitHub `login` and git `emails`, and a
+ * receipt counts only when its `signature` (base64, over the receipt without
+ * `signature`, keys sorted: canonicalJson) verifies with the key of the
+ * reviewer it names, and that reviewer (by name, login or email) is neither
+ * the PR's author nor an author or committer of a commit in its range.
+ * The registry is read from the merge base, never from the change under
+ * review (T6-H1): a key a PR adds counts only once it is merged. Keys are
+ * made and receipts signed with scripts/review-sign.mjs; the private key
+ * stays with the reviewer.
  *
  * This is the agents' gate; the person's gate is the `human-reviewed` label
  * (./humanReview.mjs). Both apply. Pure functions; pr-check.mjs reads git,
  * files and `gh api`.
  */
 
+import { createPublicKey, verify } from "node:crypto";
 import { codeownersMatch } from "./humanReview.mjs";
 
 export const REVIEW_FORMAT = "lumen-review";
@@ -40,6 +62,25 @@ export const REVIEW_VERSION = 1;
 export const SEVERITIES = ["critical", "high", "medium", "low", "info"];
 export const FINDING_STATUSES = ["open", "fixed", "accepted"];
 const BLOCKING = new Set(["critical", "high"]);
+
+/** Comment authors whose receipts count: accounts with write access (GitHub author_association). */
+export const TRUSTED_ASSOCIATIONS = ["OWNER", "MEMBER", "COLLABORATOR"];
+/** `files` entries that name the whole repository instead of what was read. */
+const CATCH_ALL = new Set(["*", "**", "/", "/*", "/**", "**/*", "/**/*", "."]);
+/** T6-L1: unrelated top-level folders, each with files of different shapes. */
+const CANARY_DIRS = ["src", "security", "src-tauri", "scripts", ".github", "zz-canary"];
+const CANARY_FILES = ["a.ts", "b.json", "CODEOWNERS", ".hidden", "deep/x/y/z.rs"];
+
+// Does a `files` entry stand for (nearly) the whole repository? Judged by
+// what it matches, not by how it is spelled (T6-L1: "**/**", "*/", "/**/",
+// "**/*.*", "?*/", …): one that matches files under three or more unrelated
+// top-level folders is a catch-all. A receipt names what was read.
+export function isCatchAll(pattern) {
+  const p = String(pattern ?? "").trim();
+  if (CATCH_ALL.has(p)) return true;
+  const hit = CANARY_DIRS.filter((d) => CANARY_FILES.some((f) => p === `${d}/${f}` || codeownersMatch(p, `${d}/${f}`)));
+  return hit.length >= 3;
+}
 
 const isSha = (s) => typeof s === "string" && /^[0-9a-f]{40}$/.test(s);
 const nonEmpty = (s) => typeof s === "string" && s.trim().length > 0;
@@ -65,6 +106,8 @@ export function receiptProblems(r) {
   const p = [];
   if (r.format !== REVIEW_FORMAT) p.push(`format must be "${REVIEW_FORMAT}"`);
   if (r.version !== REVIEW_VERSION) p.push(`version must be ${REVIEW_VERSION}`);
+  if (!Number.isSafeInteger(r.pr) || r.pr < 1) p.push("pr must be the number of the reviewed pull request");
+  if (!isSha(r.base)) p.push("base must be the full 40-character sha of the merge base the diff was read against");
   if (!isSha(r.head)) p.push("head must be a full 40-character commit sha");
   if (!nonEmpty(r.author)) p.push("author is missing");
   if (!nonEmpty(r.reviewer)) p.push("reviewer is missing");
@@ -72,6 +115,10 @@ export function receiptProblems(r) {
   if (r.access !== "read-only") p.push('access must be "read-only" (the reviewer may not push to the branch)');
   if (!nonEmpty(r.date) || Number.isNaN(Date.parse(r.date))) p.push("date must be an ISO time");
   if (!Array.isArray(r.files) || !r.files.length || !r.files.every(nonEmpty)) p.push("files must list the reviewed paths");
+  else {
+    const all = r.files.filter(isCatchAll);
+    if (all.length) p.push(`files must name what was read: ${all.map((f) => `"${f}"`).join(", ")} covers the whole repository`);
+  }
   if (!Array.isArray(r.attackTests) || !r.attackTests.length || !r.attackTests.every((t) => t && nonEmpty(t.path) && nonEmpty(t.result))) p.push("attackTests must list at least one attack test, each with path and result");
   if (!Array.isArray(r.findings)) p.push("findings must be a list (empty when there are none)");
   else
@@ -84,15 +131,140 @@ export function receiptProblems(r) {
   return p;
 }
 
+/** JSON with object keys sorted at every level: the bytes a receipt's signature covers. */
+export function canonicalJson(v) {
+  if (Array.isArray(v)) return `[${v.map(canonicalJson).join(",")}]`;
+  if (v && typeof v === "object") {
+    return `{${Object.keys(v)
+      .filter((k) => v[k] !== undefined)
+      .sort()
+      .map((k) => `${JSON.stringify(k)}:${canonicalJson(v[k])}`)
+      .join(",")}}`;
+  }
+  return JSON.stringify(v);
+}
+
+/** The bytes a reviewer signs: the receipt without its `signature`. */
+export function signedBytes(r) {
+  const { signature: _omit, ...rest } = r;
+  void _omit;
+  return Buffer.from(canonicalJson(rest), "utf8");
+}
+
+/**
+ * `security/reviewers.json` text → { keys: Map(reviewer lower-case → KeyObject), identities, problems }.
+ * Shape: { "reviewers": { "<name>": { "publicKey": "<PEM or base64 SPKI DER, Ed25519>", "login": "<GitHub login>", "emails": ["<git email>", …] } } }.
+ * T6-H1: `login` and `emails` are required, so the author and committer
+ * exclusion can always match the reviewer; an entry without them is unusable.
+ */
+export function parseReviewers(text) {
+  const keys = new Map();
+  const identities = new Map();
+  const problems = [];
+  let doc;
+  try {
+    doc = JSON.parse(text);
+  } catch (e) {
+    return { keys, identities, problems: [`security/reviewers.json is not JSON (${e.message})`] };
+  }
+  for (const [name, entry] of Object.entries(doc?.reviewers ?? {})) {
+    try {
+      if (!nonEmpty(entry?.login)) throw new Error('"login" (the reviewer\'s GitHub login) is missing');
+      if (!Array.isArray(entry?.emails) || !entry.emails.length || !entry.emails.every((e) => nonEmpty(e) && e.includes("@"))) throw new Error('"emails" (the reviewer\'s git emails, a non-empty list) is missing');
+      const pk = String(entry?.publicKey ?? "");
+      const key = pk.includes("BEGIN") ? createPublicKey(pk) : createPublicKey({ key: Buffer.from(pk, "base64"), format: "der", type: "spki" });
+      if (key.asymmetricKeyType !== "ed25519") throw new Error(`a ${key.asymmetricKeyType} key, not Ed25519`);
+      keys.set(name.trim().toLowerCase(), key);
+      // W10.D3: who the reviewer is on GitHub and in git, so a receipt by the
+      // PR's author or by anyone who wrote a commit in the range is refused.
+      const ids = [name, entry.login, ...entry.emails].map((x) => x.trim().toLowerCase());
+      identities.set(name.trim().toLowerCase(), ids);
+    } catch (e) {
+      problems.push(`reviewer ${name}: unusable entry (${e.message})`);
+    }
+  }
+  return { keys, identities, problems };
+}
+
+/**
+ * W10.D3 (research R3.3): the people who may not review a PR — its author and
+ * every author and committer of a commit in its range, by GitHub login, git
+ * name and email (lower-case). → Set
+ */
+export function excludedIdentities({ prAuthor = null, commits = [] } = {}) {
+  const out = new Set();
+  const add = (x) => typeof x === "string" && x.trim() && out.add(x.trim().toLowerCase());
+  add(prAuthor);
+  for (const c of commits) for (const k of ["authorName", "authorEmail", "committerName", "committerEmail", "authorLogin", "committerLogin"]) add(c?.[k]);
+  return out;
+}
+
+/** Is the receipt's reviewer (its name, or a login or email the registry lists for it) one of `excluded`? */
+export function reviewerExcluded(r, reviewers, excluded) {
+  if (!excluded || excluded.size === 0) return false;
+  const name = String(r.reviewer ?? "").trim().toLowerCase();
+  const ids = new Set([name, ...(reviewers?.identities?.get(name) ?? [])]);
+  return [...ids].some((x) => x && excluded.has(x));
+}
+
+/** Does the receipt carry a valid signature by the reviewer it names? → problems (empty: signed). */
+export function signatureProblems(r, reviewers) {
+  const key = reviewers.keys.get(String(r.reviewer ?? "").trim().toLowerCase());
+  if (!key) return [`reviewer ${r.reviewer} is not in security/reviewers.json`];
+  if (typeof r.signature !== "string" || !r.signature) return ["it is not signed (scripts/review-sign.mjs sign)"];
+  let ok = false;
+  try {
+    ok = verify(null, signedBytes(r), key, Buffer.from(r.signature, "base64"));
+  } catch {
+    ok = false;
+  }
+  return ok ? [] : [`its signature does not verify with ${r.reviewer}'s key (changed after signing, or signed by someone else)`];
+}
+
+/**
+ * PR comments → receipts the gate considers. A comment by an account without
+ * write access is listed with the reason it doesn't count. Which account with
+ * write access posted it is not a reason (T6-M1): every lane posts as the
+ * owner's account; the signature and the registry identities decide.
+ *   comments: [{ id, user, association, body }]
+ * → [{ source, receipt, rejected? }]
+ */
+export function commentReceipts(comments) {
+  const out = [];
+  for (const c of comments ?? []) {
+    for (const receipt of extractReceipts(c.body)) {
+      const source = `comment${c.id ? ` ${c.id}` : ""} by @${c.user ?? "?"}`;
+      const trusted = TRUSTED_ASSOCIATIONS.includes(String(c.association ?? "").toUpperCase());
+      if (!trusted) out.push({ source, receipt, rejected: `@${c.user ?? "?"} has no write access to the repository (${c.association ?? "unknown"}), so its receipt does not count` });
+      else out.push({ source, receipt });
+    }
+  }
+  return out;
+}
+
 /** Sensitive files the receipt does not cover (its `files` are paths or CODEOWNERS patterns). */
 export function uncovered(sensitive, files) {
   return sensitive.map((s) => s.file).filter((file) => !files.some((f) => f === file || codeownersMatch(f, file)));
 }
 
-/** One receipt against the PR's head and its sensitive files → problems (empty: it counts). */
-export function receiptFor(r, head, sensitive) {
+/**
+ * One receipt against the PR's head and its sensitive files → problems (empty: it counts).
+ * `reviewers`: parseReviewers(...) of the merge base's registry, or null. W10.D3: a receipt counts only when
+ * it is signed with the key security/reviewers.json lists for its reviewer;
+ * with no registry nothing counts. `excluded`: excludedIdentities(...).
+ * `bind`: { pr, base } — the PR number and merge base being checked (T6-L2);
+ * a receipt for another PR or base, or a check that can't say which, does not count.
+ */
+export function receiptFor(r, head, sensitive, reviewers = null, excluded = null, bind = {}) {
   const p = receiptProblems(r);
   if (p.length) return p;
+  if (reviewers) p.push(...signatureProblems(r, reviewers));
+  else p.push("it can't be verified: security/reviewers.json is missing, and an unsigned receipt does not count");
+  if (reviewerExcluded(r, reviewers, excluded)) p.push(`${r.reviewer} is the PR's author or wrote or committed a commit in its range, so can't review it`);
+  if (bind?.pr == null) p.push("the PR it is for can't be checked here (run with --pr <number>)");
+  else if (r.pr !== Number(bind.pr)) p.push(`it is for PR #${r.pr}, not #${bind.pr}`);
+  if (!isSha(bind?.base)) p.push("the merge base it was reviewed against can't be checked here");
+  else if (r.base !== bind.base) p.push(`it was reviewed against the base \`${r.base.slice(0, 9)}\`, not this PR's merge base \`${bind.base.slice(0, 9)}\`: a different diff`);
   if (head && r.head !== head) p.push(`it is for \`${r.head.slice(0, 9)}\`, not the head \`${head.slice(0, 9)}\`: the commits after it were not reviewed`);
   const missing = uncovered(sensitive, r.files);
   if (missing.length) p.push(`it does not cover ${missing.length} sensitive file${missing.length === 1 ? "" : "s"}: ${missing.slice(0, 5).map((f) => `\`${f}\``).join(", ")}${missing.length > 5 ? " …" : ""}`);
@@ -105,8 +277,8 @@ export function receiptFor(r, head, sensitive) {
 /**
  * The verdict for one PR (or one local checkout).
  *   sensitive: sensitiveChanges(...)
- *   receipts: [{ source: string, receipt: object }] (PR comments and --review files)
- *   ctx: { head: sha (the PR's head, or this checkout's HEAD), strict: boolean (--pr given, or receipts given) }
+ *   receipts: [{ source: string, receipt: object, rejected?: string }] (PR comments and --review files)
+ *   ctx: { head: sha (the PR's head, or this checkout's HEAD), strict: boolean (--pr given, or receipts given), reviewers?: parseReviewers(...) | null, excluded?: excludedIdentities(...), pr?: number, base?: merge-base sha }
  * → { status: "ok" | "warn" | "fail", lines: string[] }
  */
 export function independentReviewVerdict(sensitive, receipts, ctx) {
@@ -118,8 +290,12 @@ export function independentReviewVerdict(sensitive, receipts, ctx) {
   }
   const lines = [];
   let good = null;
-  for (const { source, receipt } of receipts) {
-    const p = receiptFor(receipt, ctx.head, sensitive);
+  for (const { source, receipt, rejected } of receipts) {
+    if (rejected) {
+      lines.push(`- ${source}: not counted — ${rejected}.`);
+      continue;
+    }
+    const p = receiptFor(receipt, ctx.head, sensitive, ctx.reviewers ?? null, ctx.excluded ?? null, { pr: ctx.pr ?? null, base: ctx.base ?? null });
     if (!p.length) {
       good ??= { source, receipt };
       continue;
@@ -132,7 +308,7 @@ export function independentReviewVerdict(sensitive, receipts, ctx) {
     return {
       status: "ok",
       lines: [
-        `Reviewed at \`${r.head.slice(0, 9)}\` by ${r.reviewer} (author ${r.author}, read-only), ${r.date}: ${r.attackTests.length} attack test${r.attackTests.length === 1 ? "" : "s"}, findings ${counts.length ? counts.join(", ") : "none"}, none critical or high open.`,
+        `Reviewed at \`${r.head.slice(0, 9)}\` (PR #${r.pr}, base \`${r.base.slice(0, 9)}\`) by ${r.reviewer} (author ${r.author}, read-only), ${r.date}: ${r.attackTests.length} attack test${r.attackTests.length === 1 ? "" : "s"}, findings ${counts.length ? counts.join(", ") : "none"}, none critical or high open; signature verified.`,
         ...(lines.length ? ["", "Other receipts:", ...lines] : []),
       ],
     };

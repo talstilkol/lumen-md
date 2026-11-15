@@ -1,6 +1,6 @@
 # Lumen encrypted sync: protocol specification
 
-Version 1, with the keyring of plan W1.7. Status: **open for public review**
+Version 1, with the keyring of plan W1.7 (keyring protocol 3: the recovery key, plan W11.S8). Status: **open for public review**
 (see the last section). This document is normative: a reader written only
 from it must open every vault in [`sync-protocol-vectors.json`](sync-protocol-vectors.json).
 `scripts/sync-protocol/check_vectors.py` is such a reader. It is about 250
@@ -100,7 +100,11 @@ The **manifest** plaintext is JSON:
 Each entry is `{ver, rev, hash: sha256hex(plaintext), size, by, deleted?, e?}`.
 `e` is the epoch the blob was sealed in; it is absent for epoch 0.
 `counter` goes up by one on every write. A device refuses a lower counter,
-and an equal counter with a different digest (rollback / fork).
+and an equal counter with a different digest (rollback / fork). `history`
+lists the last 100 predecessors without gaps, so a higher counter at most 100
+ahead of the device's anchor must list the anchor's counter with its digest;
+leaving it out or listing another digest is a fork. Only a manifest more than
+100 ahead is "unproven" (§5, Anchors).
 
 A manifest with `"protocol":2` also has `frozen: {epoch, at, by}`, and only
 then: a re-key to `epoch` has frozen it (§5). Its files are its
@@ -112,20 +116,25 @@ a frozen manifest only once the keyring lists the frozen manifest's digest in
 ## 5. The keyring (plan W1.7)
 
 ```json
-{"format":"lumen-e2ee-keyring","protocol":2,"vaultId":"…","epoch":N,
+{"format":"lumen-e2ee-keyring","protocol":3,"vaultId":"…","epoch":N,
  "passphrase":{"n":"<b64u 12>","c":"<b64u>"},
  "devices":{"<id>":{"recipient":"age1…","wrap":"<b64u age file of S_N>"}},
  "sealed":{"n":"…","c":"…"},
  "header":"<b64u>", "prev":"<b64u>",
- "dropped":[{"epoch":N,"at":ms,"devices":["<id>",…],"mac":"<b64u>"}]}
+ "dropped":[{"epoch":N,"at":ms,"devices":["<id>",…],"mac":"<b64u>"}],
+ "recovery":{"recipient":"age1…","wrap":"<b64u age file of S_N>","check":"<b64u>"},
+ "passkeys":{"<credential id>":{"recipient":"age1…","wrap":"…","check":"…"}}}
 ```
 
-- `passphrase` is `AES-256-GCM(wrap, n, S_N, aad = "lumen-e2ee-keyring/2/<vaultId>/<N>/passphrase")`.
+`protocol` is 3, or 2 for a keyring written before the recovery key
+(§5a). In every AES-GCM below, `<p>` is the keyring's own `protocol`.
+
+- `passphrase` is `AES-256-GCM(wrap, n, S_N, aad = "lumen-e2ee-keyring/<p>/<vaultId>/<N>/passphrase")`.
 - `devices[id].wrap` is an **age** v1 file (age-encryption.org/v1) to the
   device's X25519 recipient. Its plaintext is `S_N`. Nothing in this map is
   trusted: it only lets a device find its own wrap.
-- `sealed` is `AES-256-GCM(keyring_N, n, JSON contents, aad = "…/2/<vaultId>/<N>/sealed")`, with
-  `contents = {older, revoked, devices, manifest, rev, parent, chain, carry?, header?, aborted?}`:
+- `sealed` is `AES-256-GCM(keyring_N, n, JSON contents, aad = "…/<p>/<vaultId>/<N>/sealed")`, with
+  `contents = {older, revoked, devices, manifest, rev, parent, chain, carry?, header?, aborted?, recovery?}`:
   - `older`: `{"<epoch>": b64u(S)}`, every earlier epoch's secret, `"0"`
     included, so blobs of any epoch stay readable.
   - `revoked`: `[{device, epoch, at, recipient?}]`.
@@ -148,6 +157,10 @@ a frozen manifest only once the keyring lists the frozen manifest's digest in
     finished (`rev + 1`).
   - `aborted`: digests of this epoch's frozen manifests whose re-key was
     called off (at most 16).
+  - `recovery` (protocol 3 only): `{recipient, mac}`, the recovery key's age
+    recipient and its MAC key, b64u (§5a).
+  - `passkeys` (protocol 3 only): `{"<credential id>": {recipient, mac}}`,
+    at most 16 (§5b).
 - The keyring's **digest** is
   `sha256hex(JSON.stringify([format, protocol, vaultId, epoch, passphrase.n, passphrase.c, sealed.n, sealed.c, header ?? null, prev ?? null]))`:
   every checkable field, never the plaintext wraps.
@@ -169,6 +182,85 @@ a frozen manifest only once the keyring lists the frozen manifest's digest in
   pre-release build. It is refused. The passphrase may reset it: a re-key
   wrapped for the passphrase (and devices it enrolls) only, starting a new
   chain (`chain = [[N, 0, digest]]`).
+
+### 5a. The recovery key (protocol 3, plan W11.S8)
+
+A forgotten passphrase must not lose the vault. At setup the user's device
+makes a **recovery key** `R`, 32 random bytes, and shows it once (as 24
+BIP-39 words). `R` is never stored or sent. Two keys derive from it:
+
+- `x = HKDF(R, vaultId, "lumen-e2ee/1/recovery-x25519")`, an X25519 private
+  key. Its age identity is `bech32("age-secret-key-", x)` in upper case, and
+  its recipient `bech32("age", X25519(x))`.
+- `m = HKDF(R, vaultId, "lumen-e2ee/1/recovery-mac")`, an HMAC-SHA256 key.
+
+Setting it up is a re-key (§5, *Re-key*) whose new keyring holds:
+
+- in the sealed part, `recovery = {recipient, mac: b64u(m)}`;
+- in the file, `recovery = {recipient, wrap, check}`, where
+  - `wrap` is an age file of `S_N` to `recipient`, and
+  - `check = b64u(HMAC(m, JSON ["lumen-e2ee-recovery/1", vaultId, N, digest, recipient, wrap]))`,
+    with `digest` the keyring's digest (§5).
+
+**Every keyring after it carries it.** A re-key (a rotation, a revocation,
+a passphrase change) takes `recovery` from the sealed part of the keyring
+it replaces, wraps the new `S_{N+1}` for the recipient and makes `check`
+again with `m`. A same-epoch rewrite makes the wrap and `check` again for
+its new digest. The device doing this never holds `R`. A re-key may also
+replace it (a new `R`) or remove it.
+
+**Opening with `R` alone:**
+
+1. Derive `x` and `m`, and check that `recovery.recipient` is `x`'s
+   recipient.
+2. Verify `check` with `m`.
+3. Open `wrap` with `x` to get `S_N`, then open the sealed part with
+   `keyring_N`.
+4. Check that its `recovery` is `{recipient, mac: b64u(m)}`.
+
+The result has no passphrase wrap, so the device sets a new passphrase next
+(a re-key with a new header).
+
+Why it holds:
+
+- `recipient` is a public key, so the storage could wrap a secret of its own
+  to it. `check` is what it can't make: only holders of a sealed part (the
+  vault's devices and passphrase) and of `R` know `m`.
+- A device revoked later still knows `m` (and `recipient`), but never `x`, so
+  it can't open a later wrap. Together with the storage it could make a
+  keyring that `R` accepts, and a restore in a clean profile has no anchor to
+  catch that (§9).
+
+### 5b. Passkeys (protocol 3, plan W11.S10)
+
+A passkey can open the vault in place of the passphrase, through the
+WebAuthn PRF extension. The design follows typage. It is offered only where
+`PublicKeyCredential.getClientCapabilities()` reports `"extension:prf"`.
+
+- The page asks the passkey for its PRF output on the salt
+  `salt = SHA-256("lumen-e2ee/1/passkey-prf-salt/" ‖ vaultId)`. The browser
+  hashes the salt again before the authenticator sees it (WebAuthn L3), and
+  the 32-byte output `P` exists only inside a ceremony the user confirmed.
+- `P` stands in for `R` (§5a), with the labels `passkey-x25519` and
+  `passkey-mac`: `x = HKDF(P, vaultId, "lumen-e2ee/1/passkey-x25519")` and
+  `m = HKDF(P, vaultId, "lumen-e2ee/1/passkey-mac")`.
+- Each passkey is one entry, keyed by its WebAuthn credential id (b64u),
+  in the sealed `passkeys` and in the file's `passkeys`. Each entry's
+  `check` is
+  `HMAC(m, JSON ["lumen-e2ee-passkey/1", vaultId, N, digest, credentialId, recipient, wrap])`,
+  so a wrap can't move from one passkey to another.
+- Every re-key and rewrite wraps every listed passkey again, as for `R`.
+  **Revoking** a passkey is a re-key without it: it opens no later epoch.
+- Opening with a passkey runs the same four checks as `R`, on that
+  credential's entry.
+
+The same caveat as §5a applies: a clean profile has no anchor (§9).
+
+Why a new protocol: a build that knows only protocol 2 would re-key without
+`recovery` and silently drop it. Such a build refuses protocol 3. A protocol 2
+keyring is still read, and rewritten at the same epoch as protocol 2 (its
+passphrase wrap is bound to it). Only a re-key writes protocol 3, so a
+recovery key always comes with one.
 
 **Descent.** A device remembers the keyring it verified last, `(epoch, rev,
 digest)`, and accepts a keyring only if it descends from it:
@@ -511,13 +603,23 @@ scrypt file.
   what each says; the request relabelled as an answer or a code must not
   verify. Since §6a the code carries the issuer's commitment, the request
   the joiner's, and the answer the issuer's comparison key.
+- Vault 5 (`recovery`, plan W11.S8): keyring protocol 3. The recovery key is
+  set up at epoch 1, the vault is then re-keyed, a device is revoked in a
+  second re-key, and another device is enrolled (keyring 3.1). The recovery
+  key (hex) alone opens epoch 3 and every file; another key is refused, a
+  wrap the storage makes to the public recipient fails the check, and the
+  revoked device can't open it.
+- Vault 6 (`passkey`, plan W11.S10): keyring protocol 3 with one passkey,
+  given as its credential id and its PRF output `P` (hex; from a real
+  authenticator in use). `P` alone opens the vault, and another `P` is
+  refused.
 - `sas[]` (§6a): for each of those sessions and both flows, the two fixed
   X25519 private keys (hex), the transcript, the commitment(s), the five
   symbols and both confirmations. `make-vectors.mts --pairing-only` remakes
   the pairing vectors and these without touching the rest.
 
 ```sh
-python3 scripts/sync-protocol/check_vectors.py      # the independent reader: 39/39
+python3 scripts/sync-protocol/check_vectors.py      # the independent reader: 51/51
 npx vitest run src/__tests__/e2eeVectors.test.ts    # Lumen's own reader, same file
 ```
 
@@ -533,6 +635,12 @@ the epoch's secret (§5 *Anchors*), so a provider that makes a whole keyring
 for a device's public key (a device opened with its own age key) can't move
 that device into a vault of its own. It can't read, forge or reorder the
 content of a device that has an anchor.
+
+A restore with the recovery key (§5a) in a clean profile has no anchor. The
+provider alone can't make a keyring the recovery key accepts (the `check`),
+but a provider working with a device that was a member once (and so knows
+the sealed MAC key) could. Restore on a device you trust, and pair it from
+an existing device afterwards if there is one.
 
 **Inherent limits:**
 
@@ -610,6 +718,12 @@ Changes:
   devices don't upload, and their re-keys wrap for no device (N6, RR-5). A
   wrap that doesn't open the keyring is reported as tampered, not as a
   revocation, and every rewrite makes all wraps again (N5).
+- Recovery key and passkeys (W11.S8, W11.S10): keyring protocol 3. A
+  keyring may carry `recovery` and `passkeys` (§5a, §5b), and `<p>` in
+  every AES-GCM is 3. A re-key writes protocol 3; a protocol 2 keyring is
+  still read, and rewritten at its own epoch as protocol 2. A build that
+  knows only protocol 2 refuses protocol 3, so it can't drop a recovery
+  key by re-keying without it. Vaults 5 and 6 of the vectors are protocol 3.
 - Fifth review 12.11: pairing messages are domain-separated — the kind is in
   the MAC and the body, each kind has its own fields, and the answer names the
   request's hash; versions request 2, answer 2, code 3 (F1). A re-key waits

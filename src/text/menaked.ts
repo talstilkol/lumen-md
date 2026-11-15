@@ -58,9 +58,17 @@ export function parseMenakedSpec(raw: unknown): MenakedSpec {
   return s as MenakedSpec;
 }
 
-/** Token ids and attention mask for a batch of chunks, [CLS] … [SEP], padded to the longest (int64, as BERT exports take). */
+/**
+ * Token ids and attention mask for a batch of chunks, [CLS] … [SEP], padded
+ * to the longest (int64, as BERT exports take). A chunk that does not fit
+ * in maxTokens with [CLS] and [SEP] throws here, with the numbers, instead
+ * of as a shape error inside onnxruntime (the worker's chunks are at most
+ * maxTokens - 2 characters: chunks(text, maxTokens - 1)).
+ */
 export function encodeMenaked(batch: readonly string[], spec: MenakedSpec): { ids: BigInt64Array; mask: BigInt64Array; length: number } {
+  if (!batch.length) throw new Error("menaked: an empty batch");
   const length = Math.max(...batch.map((s) => s.length)) + 2;
+  if (length > spec.maxTokens) throw new Error(`menaked: a chunk of ${length - 2} characters is ${length} tokens; the model reads at most ${spec.maxTokens}`);
   const ids = new BigInt64Array(batch.length * length).fill(BigInt(spec.pad));
   const mask = new BigInt64Array(batch.length * length);
   batch.forEach((s, r) => {

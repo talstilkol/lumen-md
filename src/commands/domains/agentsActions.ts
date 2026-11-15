@@ -6,6 +6,7 @@ import { showAiToast } from "../../ui/AiToast";
 import { isAbort } from "../../ai/aiAbort";
 import { cancellable, type CommandContext } from "./context";
 import { explainError } from "../../lib/userError";
+import { writeAiContent } from "../../ai/aiWrites";
 import "./commandBodiesStrings";
 
 type Ctx = Pick<CommandContext, "setContent" | "liveDoc">;
@@ -30,7 +31,7 @@ export async function autoTag({ setContent, liveDoc }: Ctx): Promise<void> {
       .map((s) => s.trim().toLowerCase())
       .filter((s) => s.length > 1);
     if (final.length === 0) return;
-    setContent(mergeTagsIntoFrontmatter(liveDoc().content, final));
+    writeAiContent(liveDoc(), mergeTagsIntoFrontmatter(liveDoc().content, final), setContent);
     showAiToast(t("toast.addedTag", { count: final.length }), "success");
   } catch (e) {
     if (isAbort(e)) return;
@@ -72,7 +73,7 @@ export async function suggestLinksFlow({ setContent, liveDoc }: Ctx): Promise<vo
         next = updated;
       }
     }
-    setContent(next);
+    writeAiContent(liveDoc(), next, setContent);
     showAiToast(t("toast.appliedLink", { count: applied }), "success");
   } catch (e) {
     if (isAbort(e)) return;
@@ -81,8 +82,12 @@ export async function suggestLinksFlow({ setContent, liveDoc }: Ctx): Promise<vo
   }
 }
 
-/** Make a whole project from a description (the product agent). */
-export async function productAgentFlow({ setContent }: Pick<Ctx, "setContent">): Promise<void> {
+/**
+ * Make a whole project from a description (the product agent). The files
+ * are proposed, not written: they wait in the review screen with their
+ * diffs, and the open note is left as it is (audit W10.C12).
+ */
+export async function productAgentFlow(): Promise<void> {
   const idea = await uiPrompt({
     message: t("agent.product.prompt"),
   });
@@ -100,9 +105,7 @@ export async function productAgentFlow({ setContent }: Pick<Ctx, "setContent">):
       ),
     );
     if (result.success) {
-      showAiToast(t("toast.productCreatedFilesGenerated", { count: result.files.size }), "success");
-      const summary = `# Product Created\n\n${result.files.size} files generated:\n\n${[...result.files.keys()].map((f) => `- \`${f}\``).join("\n")}`;
-      setContent(summary);
+      showAiToast(t("toast.productCreatedFilesGenerated", { count: result.staged.length }), "success");
     } else {
       showAiToast(t("toast.productCreationFailed", { error: result.error ?? "" }), "error");
     }
@@ -119,7 +122,7 @@ export async function diagramFlow({ setContent, liveDoc }: Ctx): Promise<void> {
     showAiToast(t("toast.generatingDiagram"), "info");
     const { generateDiagram } = await import("../../agents/commands");
     const block = await cancellable((signal) => generateDiagram(liveDoc().content, signal));
-    setContent(`${liveDoc().content.trimEnd()}\n\n${block}\n`);
+    writeAiContent(liveDoc(), `${liveDoc().content.trimEnd()}\n\n${block}\n`, setContent);
     showAiToast(t("toast.diagramInserted"), "success");
   } catch (e) {
     if (isAbort(e)) return;
@@ -134,7 +137,7 @@ export async function actionItemsFlow({ setContent, liveDoc }: Ctx): Promise<voi
     showAiToast(t("toast.extractingActionItems"), "info");
     const { extractActionItems } = await import("../../agents/commands");
     const list = await cancellable((signal) => extractActionItems(liveDoc().content, signal));
-    setContent(`${liveDoc().content.trimEnd()}\n\n## Action Items\n\n${list}\n`);
+    writeAiContent(liveDoc(), `${liveDoc().content.trimEnd()}\n\n## Action Items\n\n${list}\n`, setContent);
     showAiToast(t("toast.actionItemsAdded"), "success");
   } catch (e) {
     if (isAbort(e)) return;
@@ -154,7 +157,7 @@ export async function translateFlow({ setContent, liveDoc }: Ctx): Promise<void>
     showAiToast(t("toast.translatingTo", { target }), "info");
     const { translateMarkdownDetailed, translationToasts } = await import("../../agents/commands");
     const r = await cancellable((signal) => translateMarkdownDetailed(liveDoc().content, target.trim(), signal));
-    setContent(r.text);
+    writeAiContent(liveDoc(), r.text, setContent);
     for (const [msg, kind] of translationToasts(r, t)) showAiToast(msg, kind);
   } catch (e) {
     if (isAbort(e)) return;
@@ -189,6 +192,6 @@ for (const m of targets) {
   next = withImageText(next, m.url, m.alt, res);
   done++;
 }
-if (next !== useAppStore.getState().doc.content && useAppStore.getState().doc.content === doc) useAppStore.getState().setContent(next);
+if (next !== useAppStore.getState().doc.content && useAppStore.getState().doc.content === doc) writeAiContent(useAppStore.getState().doc, next, useAppStore.getState().setContent);
 showAiToast(t("toast.imageAlt.done", { done, count: targets.length }), done ? "success" : "info");
 };

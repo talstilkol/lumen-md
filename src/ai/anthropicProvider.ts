@@ -114,6 +114,7 @@ export async function chatAnthropic(
   opts: ChatOptions = {},
 ): Promise<string> {
   assertCloudAllowed("Anthropic (Claude)");
+  // privacy-ledger: rule Anthropic (Claude): api.anthropic.com (API_URL), cloud-ai
   const res = await fetch(API_URL, {
     method: "POST",
     headers: headers(),
@@ -140,6 +141,7 @@ export async function* chatAnthropicStream(
   opts: ChatOptions = {},
 ): AsyncGenerator<string, void, undefined> {
   assertCloudAllowed("Anthropic (Claude)");
+  // privacy-ledger: rule Anthropic (Claude): api.anthropic.com (API_URL), cloud-ai
   const res = await fetch(API_URL, {
     method: "POST",
     headers: headers(),
@@ -224,6 +226,7 @@ export async function anthropicWebResearch(
   let stopReason: string | undefined;
   for (let turn = 0; turn < MAX_RESEARCH_TURNS; turn++) {
     const data = await withRequestLimit(async () => {
+      // privacy-ledger: rule Anthropic (Claude): api.anthropic.com (API_URL), cloud-ai
       const res = await fetch(API_URL, { method: "POST", headers: headers(), body: JSON.stringify(body), signal: opts.signal });
       if (!res.ok) {
         const b = await res.text().catch(() => "");

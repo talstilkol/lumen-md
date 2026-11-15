@@ -19,6 +19,24 @@
       "vars": []
     },
     {
+      "key": "backlinks.entities",
+      "en": "Names in this note",
+      "vars": []
+    },
+    {
+      "key": "backlinks.entityLinkAria",
+      "en": "Link “{text}” to the note {note}",
+      "vars": [
+        "text",
+        "note"
+      ]
+    },
+    {
+      "key": "backlinks.entityNoNote",
+      "en": "no note yet",
+      "vars": []
+    },
+    {
       "key": "backlinks.link",
       "en": "Link",
       "vars": []
@@ -371,11 +389,6 @@
       "vars": []
     },
     {
-      "key": "git.alert.noRepo",
-      "en": "This workspace isn't a Git repo. Run `git clone` first or use `Init repository`.",
-      "vars": []
-    },
-    {
       "key": "git.alert.pullFailed",
       "en": "Pull failed: {error}",
       "vars": [
@@ -390,23 +403,9 @@
       ]
     },
     {
-      "key": "git.alert.pushFailed",
-      "en": "Push failed: {error}",
-      "vars": [
-        "error"
-      ]
-    },
-    {
       "key": "git.alert.pushed",
       "en": "Pushed.",
       "vars": []
-    },
-    {
-      "key": "git.alert.statusFailed",
-      "en": "Status failed: {error}",
-      "vars": [
-        "error"
-      ]
     },
     {
       "key": "git.alert.tokenCleared",
@@ -508,26 +507,11 @@
       ]
     },
     {
-      "key": "git.defaultCommitMessage",
-      "en": "Update files",
-      "vars": []
-    },
-    {
       "key": "git.lfs.unsupported",
       "en": "Git LFS is not supported; these are LFS pointers: {files}",
       "vars": [
         "files"
       ]
-    },
-    {
-      "key": "git.placeholder.name",
-      "en": "Your name",
-      "vars": []
-    },
-    {
-      "key": "git.prompt.cloneUrl",
-      "en": "Repository URL (https://… or git@…):",
-      "vars": []
     },
     {
       "key": "git.prompt.commitMessage",
@@ -545,11 +529,6 @@
       "vars": []
     },
     {
-      "key": "git.prompt.email",
-      "en": "Git email:",
-      "vars": []
-    },
-    {
       "key": "git.prompt.identityEmail",
       "en": "Email:",
       "vars": []
@@ -562,11 +541,6 @@
     {
       "key": "git.prompt.message",
       "en": "Commit message:",
-      "vars": []
-    },
-    {
-      "key": "git.prompt.name",
-      "en": "Git name:",
       "vars": []
     },
     {
@@ -707,6 +681,19 @@
       "vars": []
     },
     {
+      "key": "search.regexSkipped",
+      "en": "/regex/ skipped {count} very long notes (over {limit} characters).",
+      "vars": [
+        "count",
+        "limit"
+      ]
+    },
+    {
+      "key": "search.regexTimedOut",
+      "en": "The /regex/ took too long and was stopped. Try a simpler pattern.",
+      "vars": []
+    },
+    {
       "key": "search.removeSaved",
       "en": "Remove saved search {name}",
       "vars": [
@@ -768,6 +755,16 @@
       "vars": []
     },
     {
+      "key": "searchDialog.crossLingual.keyword",
+      "en": "A Hebrew question over English notes: keyword search doesn't cross languages. That needs Smart search with a multilingual embedding model (bge-m3 or EmbeddingGemma).",
+      "vars": []
+    },
+    {
+      "key": "searchDialog.crossLingual.reindex",
+      "en": "A multilingual embedding model is ready, but the index was built with another model: rebuild the index so Hebrew questions reach English notes.",
+      "vars": []
+    },
+    {
       "key": "searchDialog.forget",
       "en": "Forget search \"{q}\"",
       "vars": [
@@ -809,7 +806,7 @@
     },
     {
       "key": "searchDialog.monolingualEmbeddings",
-      "en": "The embedding model here is English-only, so Hebrew questions find English notes by keywords only. Use the built-in model (multilingual-e5) for cross-language search.",
+      "en": "Cross-language search needs a multilingual embedding model (bge-m3 or EmbeddingGemma); the one here is English-only, so these results come from keywords, and keywords don't lead from a Hebrew question to English notes.",
       "vars": []
     },
     {
@@ -1639,6 +1636,14 @@
       ]
     },
     {
+      "key": "vault.folder.lateCopies",
+      "en": "{n} note(s) were saved in the previous location while the move was finishing. Their newer text is in the vault now, as a conflict copy next to the note where needed (first: “{path}”).",
+      "vars": [
+        "n",
+        "path"
+      ]
+    },
+    {
       "key": "vault.folder.moved",
       "en": "The vault is now in the folder “{folder}”: {n} files copied and checked. Your notes in browser storage were not deleted.",
       "vars": [
@@ -1716,6 +1721,18 @@
     {
       "key": "vault.prompt.encryptPassword",
       "en": "Enter encryption password:",
+      "vars": []
+    },
+    {
+      "key": "vault.watch.unreadable.body",
+      "en": "Changes made outside Lumen in “{folder}” are not noticed until it can be read again.",
+      "vars": [
+        "folder"
+      ]
+    },
+    {
+      "key": "vault.watch.unreadable.title",
+      "en": "A folder can't be read",
       "vars": []
     },
     {

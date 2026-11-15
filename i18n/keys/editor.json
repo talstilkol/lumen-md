@@ -1650,6 +1650,40 @@
       "vars": []
     },
     {
+      "key": "editor.wysiwygAriaLabel",
+      "en": "WYSIWYG editor",
+      "vars": []
+    },
+    {
+      "key": "editor.wysiwygCeiling.backToSource",
+      "en": "Back to Source view",
+      "vars": []
+    },
+    {
+      "key": "editor.wysiwygCeiling.blocks",
+      "en": "This note has many blocks ({blocks}), so it opened in Source view: WYSIWYG draws the whole note at once and would make typing slow.",
+      "vars": [
+        "blocks"
+      ]
+    },
+    {
+      "key": "editor.wysiwygCeiling.bytes",
+      "en": "This note is large ({kb} KB), so it opened in Source view: WYSIWYG draws the whole note at once and would make typing slow.",
+      "vars": [
+        "kb"
+      ]
+    },
+    {
+      "key": "editor.wysiwygCeiling.openAnyway",
+      "en": "Open in WYSIWYG anyway",
+      "vars": []
+    },
+    {
+      "key": "editor.wysiwygCeiling.warning",
+      "en": "This note is over the WYSIWYG size limit. Typing may lag or the editor may freeze.",
+      "vars": []
+    },
+    {
       "key": "editor.wysiwygFailed",
       "en": "WYSIWYG editor failed",
       "vars": []

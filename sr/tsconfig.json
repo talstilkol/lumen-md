@@ -1,0 +1,6 @@
+{
+  "//": "W11.Q6: the screen-reader specs are outside the app's tsconfig (include: src, tests). Typecheck them with `npx tsc -p sr/tsconfig.json` once @guidepup/playwright is installed (W10.M2).",
+  "extends": "../tsconfig.json",
+  "compilerOptions": { "noEmit": true, "types": ["node"] },
+  "include": ["./*.ts"]
+}

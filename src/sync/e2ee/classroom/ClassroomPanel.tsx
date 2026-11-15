@@ -17,6 +17,7 @@ import { getLocale, t } from "../../../i18n";
 import "../strings";
 import { useAppStore } from "../../../store/useStore";
 import { relayOrigin } from "../providers/relay";
+import { UnauditedNotice } from "../ui/unaudited";
 import {
   closeAssignment,
   createAssignment,
@@ -36,6 +37,7 @@ import {
 import { classLinkHash, ClassLinkError, type ClassLink } from "./link";
 import { listAssignments, removeAssignment, saveAssignment } from "./store";
 import { HelpButton } from "../../../ui/HelpButton";
+import { Modal } from "../../../ui/Modal";
 
 const muted: React.CSSProperties = { fontSize: 13, color: "hsl(var(--fg-muted))" };
 const errorStyle: React.CSSProperties = { fontSize: 13, color: "hsl(var(--danger))" };
@@ -269,11 +271,8 @@ export function ClassroomPanel({ onClose, joining = null, deps = {}, relay = bui
   const otherRelay = invite !== null && invite.relay !== relay;
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "var(--overlay)", display: "grid", placeItems: "center", zIndex: 1000 }} onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+    <Modal aria-labelledby="classroom-title" onClose={onClose} style={{ position: "fixed", inset: 0, background: "var(--overlay)", display: "grid", placeItems: "center", zIndex: 1000 }} onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="classroom-title"
         dir={getLocale() === "he" || getLocale() === "ar" ? "rtl" : "ltr"}
         data-testid="classroom"
         style={{ width: "min(620px, calc(100vw - 32px))", maxHeight: "calc(100vh - 32px)", overflow: "auto", background: "hsl(var(--bg))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border))", borderRadius: 12, padding: 20, display: "grid", gap: 14 }}
@@ -289,6 +288,8 @@ export function ClassroomPanel({ onClose, joining = null, deps = {}, relay = bui
           </button>
         </div>
         <div style={muted}>{t("e2ee.class.intro")}</div>
+        {/* T6-L6: the classroom seals work with the same unaudited cryptography as the sync (plan W11.S1). */}
+        <UnauditedNotice />
 
         {invite && (
           <section style={card} data-testid="class-join">
@@ -350,6 +351,6 @@ export function ClassroomPanel({ onClose, joining = null, deps = {}, relay = bui
           </div>
         )}
       </div>
-    </div>
+    </Modal>
   );
 }

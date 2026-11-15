@@ -112,6 +112,41 @@ describe("tasks", () => {
   });
 });
 
+describe("tasks for the new engines (W10.E34, W10.E35)", () => {
+  it("mt-he-en: chrF per part and overall, from the committed dev set", async () => {
+    // @ts-expect-error — plain .mjs module without type declarations
+    const { loadSet } = await import("../../scripts/lib/golden.mjs");
+    const { items } = loadSet(join(ROOT, "eval/golden"), "mt-he-en", { split: "dev" });
+    expect(items.length).toBeGreaterThan(0);
+    const p = TASKS["mt-he-en"].payload({ items });
+    expect(p.items[0].input).toEqual({ text: items[0].he });
+    const perfect = Object.fromEntries(items.map((it: { id: string; en: string }) => [it.id, it.en]));
+    const q = TASKS["mt-he-en"].score(items, perfect);
+    expect(q.chrf).toBe(100);
+    expect(q["chrf.ntrex"]).toBe(100);
+    expect(TASKS["mt-he-en"].score(items, {}).chrf).toBe(0);
+  });
+
+  it("image-search: recall@1 and nDCG@10 per query language from the engine's top 10", () => {
+    // Synthetic ids and rankings, made up for this test.
+    const items = [{ id: "a", part: "p" }, { id: "b", part: "p" }];
+    const q = TASKS["image-search"].score(items, { a: { en: ["a", "b"], he: ["b", "a"] }, b: { en: ["a"], he: ["b"] } });
+    expect(q["recall@1.en"]).toBe(0.5);
+    expect(q["recall@1.he"]).toBe(0.5);
+    expect(q["ndcg@10.he"]).toBeCloseTo((1 / Math.log2(3) + 1) / 2, 4);
+  });
+
+  it("caption and image-search name a missing image instead of sending nothing", async () => {
+    // @ts-expect-error — plain .mjs module without type declarations
+    const { loadSet } = await import("../../scripts/lib/golden.mjs");
+    const { items } = loadSet(join(ROOT, "eval/golden"), "caption", { split: "dev" });
+    expect(items.length).toBeGreaterThan(0);
+    // The images come from the xm3600-images workflow, not the repository.
+    expect(() => TASKS.caption.payload({ items })).toThrow(/asset not here|no media type/);
+    expect(TASKS.caption.score([{ id: "x", part: "p", refs_en: ["A beach at night"] }], { x: "A beach at night" }).chrf).toBe(100);
+  });
+});
+
 describe("registry", () => {
   const registry = () => JSON.parse(readFileSync(join(ROOT, "models/registry.json"), "utf8")) as { models: Array<{ id: string; measured?: Record<string, Record<string, unknown>> }> };
 
@@ -168,7 +203,8 @@ describe("engine adapters", () => {
   const ids = new Set(JSON.parse(readFileSync(join(ROOT, "models/registry.json"), "utf8")).models.map((m: { id: string }) => m.id));
 
   it("every engine on this branch: id = file name, a golden set with a task, registry models", () => {
-    expect(files.map((f) => f.replace(/\.ts$/, "")).sort()).toEqual(["bge-rerank", "bm25", "e5", "tesseract", "whisper-small", "whisper-tiny", "whisper-turbo"]);
+    // W10.E34: web-llm, Ollama and M2M100; W10.E35: Florence-2, SigLIP and the Zipformer dictation engine.
+    expect(files.map((f) => f.replace(/\.ts$/, "")).sort()).toEqual(["bge-rerank", "bm25", "e5", "florence2", "m2m100", "ollama", "siglip", "tesseract", "webllm", "whisper-small", "whisper-tiny", "whisper-turbo", "zipformer-he"]);
     for (const f of files) {
       const src = readFileSync(join(dir, f), "utf8");
       expect(/id: "([^"]+)"/.exec(src)?.[1] ?? /id: `([^`]+)`/.exec(src)?.[1], f).toBe(f.replace(/\.ts$/, ""));
@@ -177,6 +213,19 @@ describe("engine adapters", () => {
       expect(readdirSync(join(ROOT, "eval/golden")), f).toContain(set);
     }
     for (const id of ["onnx-community/bge-reranker-v2-m3-ONNX", "Xenova/multilingual-e5-small", "tessdata_fast/heb.traineddata", "tessdata_fast/eng.traineddata", "onnx-community/whisper-tiny", "onnx-community/whisper-small", "onnx-community/whisper-large-v3-turbo"]) expect(ids.has(id), id).toBe(true);
+    for (const id of ["Qwen3-0.6B", "qwen2.5:7b", "Xenova/m2m100_418M", "onnx-community/Florence-2-base-ft", "siglip-base-patch16-256-multilingual", "ivrit-ai/zipformer2-66m-streaming-he"]) expect(ids.has(id), id).toBe(true);
+  });
+
+  it("the new engines run the app's own code, not a copy (W10.E34, W10.E35)", () => {
+    const src = (f: string) => readFileSync(join(dir, f), "utf8");
+    expect(src("webllm.ts")).toMatch(/runAgentOrThrow\(translatorAgent, [^)]*\{ executor: "webllm" \}\)/);
+    expect(src("ollama.ts")).toMatch(/runAgentOrThrow\(translatorAgent, [^)]*\{ executor: "ollama" \}\)/);
+    expect(src("m2m100.ts")).toMatch(/from "\.\.\/\.\.\/ai\/transformersEngine"/);
+    expect(src("florence2.ts")).toMatch(/captionLocal\(MODEL\.id, MODEL\.family, image\)/);
+    expect(src("siglip.ts")).toMatch(/rankImages\(index, \(await queryVector\(/);
+    expect(src("zipformer-he.ts")).toMatch(/new URL\("\.\.\/\.\.\/ai\/dictation\/dictation\.worker\.ts", import\.meta\.url\)/);
+    // No engine writes numbers itself: only bench-models.mjs --write does, after a full run (registry.mjs).
+    for (const f of files) expect(src(f), f).not.toMatch(/registry\.json|measured/);
   });
 
   it("the bench page is not part of the app build", () => {

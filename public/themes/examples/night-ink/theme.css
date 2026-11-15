@@ -1,0 +1,21 @@
+/* Night ink — a dark theme with a cool accent. */
+.dark {
+  --bg: 230 28% 8%;
+  --bg-subtle: 230 24% 10%;
+  --bg-muted: 230 20% 13%;
+  --fg: 220 20% 92%;
+  --fg-subtle: 220 14% 76%;
+  --fg-muted: 220 10% 64%;
+  --accent: 190 80% 60%;
+  --accent-fg: 230 28% 8%;
+}
+.callout {
+  border-inline-start: 4px solid hsl(var(--accent));
+  padding-block: 0.5em;
+  padding-inline: 1em 0.75em;
+  border-start-end-radius: 6px;
+  border-end-end-radius: 6px;
+}
+.cm-gutters {
+  border-inline-end: 1px solid hsl(var(--border));
+}

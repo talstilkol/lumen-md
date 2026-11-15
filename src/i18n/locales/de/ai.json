@@ -69,6 +69,7 @@
   "ai.doctor.check.ollamaVersion": "Ollama-Version (0.5+ für strukturierte Ausgabe)",
   "ai.doctor.check.policy": "KI-Richtlinie und bevorzugter Executor",
   "ai.doctor.check.research": "Recherchedienst (Websuche und Seitenextraktion)",
+  "ai.doctor.check.speculative": "Spekulatives Dekodieren (Ollama 0.34+)",
   "ai.doctor.check.spellEn": "Englische Rechtschreibprüfung auf diesem Gerät",
   "ai.doctor.check.spellHe": "Hebräisches Rechtschreibwörterbuch",
   "ai.doctor.check.storage": "Tresor-Speicher: Kontingent und Dauerhaftigkeit",

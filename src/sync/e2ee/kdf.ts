@@ -19,7 +19,7 @@
  */
 
 import { bs, randomBytes, toB64u, fromB64u, utf8 } from "./bytes";
-import { argon2id, type Argon2Input } from "./primitives/argon2";
+import { argon2id, type Argon2Input } from "./primitives";
 
 /** OWASP 2023 minimum for PBKDF2-HMAC-SHA256. */
 export const PBKDF2_MIN_ITERATIONS = 600_000;
@@ -63,9 +63,13 @@ export class WeakKdfError extends Error {
 /** What a new vault gets: OWASP 2023's first Argon2id option. */
 export const ARGON2_DEFAULT = { memoryKiB: 47_104, iterations: 1, parallelism: 1 } as const;
 /**
- * The floor when opening a vault: OWASP's options trade memory for passes
- * (46 MiB × 1, 19 MiB × 2, 12 MiB × 3, 9 MiB × 4, 7 MiB × 5), so at least
- * 7 MiB, and memory × passes at least 37 MiB.
+ * The floor when opening a vault (spec §2): memory at least 7 MiB, and
+ * memory × passes at least 37 MiB. OWASP's Argon2id options trade memory for
+ * passes; the ones at or above this floor are 46 MiB × 1 and 19 MiB × 2
+ * (kdfCalibrate.ts's ARGON2_OPTIONS). OWASP's cheaper options come to 35–36
+ * MiB × passes, below the floor, so they are not options here (finding
+ * X-BL-3, W10.D18). The 7 MiB memory floor stays as the spec sets it: below
+ * it, no number of passes makes the cost count.
  */
 export const ARGON2_MIN_MEMORY_KIB = 7_168;
 export const ARGON2_MIN_COST_KIB = 37_888;

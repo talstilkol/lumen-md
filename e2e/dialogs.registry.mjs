@@ -1,0 +1,85 @@
+/**
+ * Every modal dialog of the app and how to open it (plan 10.1, W10.E8).
+ *
+ * Read by e2e/a11y-dialogs.spec.ts, which opens each one and checks it, and
+ * by src/__tests__/modalTraps.test.ts, which fails when a file renders
+ * <Modal> and is not listed here.
+ *
+ *   command   a palette command id, run through the `lumen-run-command` event
+ *   keys      a shortcut (src/lib/shortcuts.ts), pressed in the editor
+ *   then      what to click after the command (a test id), for a dialog inside another
+ *   firstRun  the dialog shows on a first visit
+ *   embedded  the file's dialog is a tab of the settings screen: the check runs on that screen
+ *   fixme     the dialog needs a state the spec cannot make yet (said why); it is listed, not skipped silently
+ */
+export const DIALOGS = [
+  { file: "src/backup/BackupPanel.tsx", command: "vault.backups" },
+  { file: "src/book/BookDialog.tsx", command: "book.open" },
+  { file: "src/canvas/DiagramDialog.tsx", command: "view.canvas", then: "canvas-diagram", fixme: "the diagram button needs a loaded Excalidraw scene" },
+  { file: "src/citations/CiteDialog.tsx", command: "cite.insert" },
+  { file: "src/citations/LegalCiteDialog.tsx", command: "cite.legal" },
+  { file: "src/components/AuthDialog.tsx", fixme: "shown only with a sign-in provider configured (VITE_ auth settings)" },
+  { file: "src/ink/InkPad.tsx", command: "insert.ink" },
+  { file: "src/lexicon/LexiconPopover.tsx", command: "lexicon.lookup", fixme: "needs the Hebrew lexicon pack and a Hebrew word at the cursor" },
+  { file: "src/onboarding/FirstRun.tsx", firstRun: true, guarded: false },
+  { file: "src/meetings/MeetingRecorder.tsx", command: "voice.meeting" },
+  { file: "src/pdf/PdfReader.tsx", command: "pdf.open", fixme: "needs a PDF in the vault" },
+  { file: "src/plugins/runtime/InstallDialog.tsx", fixme: "shown when a sandboxed plugin is installed from a file" },
+  { file: "src/privacy/NetworkMonitor.tsx", command: "privacy.networkMonitor" },
+  { file: "src/research/ClipTemplatesEditor.tsx", command: "research.clipTemplates" },
+  { file: "src/share/ShareLinkDialog.tsx", command: "file.shareLink" },
+  { file: "src/slides/Presentation.tsx", command: "view.present" },
+  { file: "src/sources/open/OpenSourcesDialog.tsx", command: "sources.open" },
+  { file: "src/storage/import/ImportWizard.tsx", command: "vault.import" },
+  { file: "src/student/LectureRecorder.tsx", command: "student.lecture" },
+  { file: "src/sync/cloud/ConflictDialog.tsx", fixme: "shown when a sync or git pull finds a conflict" },
+  { file: "src/sync/e2ee/classroom/ClassroomPanel.tsx", command: "classroom.open" },
+  { file: "src/sync/e2ee/ui/SetupWizard.tsx", command: "sync.setup" },
+  { file: "src/sync/e2ee/ui/SyncPanel.tsx", command: "sync.open" },
+  { file: "src/sync/e2ee/ui/unaudited.tsx", command: "sync.open", fixme: "E2eeGate (W11.S1): the gate sync.open shows while the sync.e2ee flag is off, the default; with the flag off the SyncPanel, SetupWizard and ClassroomPanel entries above open this gate instead, so the spec must set the flag per entry (owed on the Mac e2e run)" },
+  { file: "src/ui/AcademicExportDialog.tsx", command: "file.exportAcademic" },
+  { file: "src/ui/AgentReviewPanel.tsx", command: "ai.reviewChanges" },
+  { file: "src/ui/AiDoctorPanel.tsx", command: "ai.doctor" },
+  { file: "src/ui/AiSettingsPanel.tsx", command: "ai.settings", embedded: true },
+  { file: "src/ui/AuditLog.tsx", command: "audit.open" },
+  { file: "src/ui/AutofillPanel.tsx", command: "ai.autofill" },
+  { file: "src/ui/BatchPanel.tsx", command: "ai.batchJobs" },
+  { file: "src/ui/BetaPanel.tsx", command: "help.beta" },
+  { file: "src/ui/CanvasExcalidraw.tsx", command: "view.canvas" },
+  { file: "src/ui/CommandPalette.tsx", keys: "ControlOrMeta+K" },
+  { file: "src/ui/CreditsDialog.tsx", command: "help.credits" },
+  { file: "src/ui/FeatureFlagsPanel.tsx", command: "app.featureFlags" },
+  { file: "src/ui/FeedbackDialog.tsx", command: "help.feedback" },
+  { file: "src/ui/FineTuneSettings.tsx", command: "ai.fineTune", embedded: true },
+  { file: "src/ui/HelpPanel.tsx", command: "help.open" },
+  { file: "src/ui/ImageHostsPanel.tsx", command: "privacy.imageHosts" },
+  { file: "src/ui/InsertTextDialog.tsx", keys: "ControlOrMeta+Shift+V" },
+  { file: "src/ui/KeyboardShortcuts.tsx", keys: "ControlOrMeta+/" },
+  { file: "src/ui/MobileKeyboardBar.tsx", command: "mobile.customizeToolbar" },
+  { file: "src/ui/NamedVersionsDialog.tsx", command: "collab.namedVersions" },
+  { file: "src/ui/OrgSettings.tsx", command: "settings.organization", embedded: true },
+  { file: "src/ui/OrganizerPanel.tsx", command: "ai.organize" },
+  { file: "src/ui/PluginGallery.tsx", command: "view.plugins" },
+  { file: "src/ui/PrivacyLedgerPanel.tsx", command: "ai.privacyLedger" },
+  { file: "src/ui/PromptDialog.tsx", command: "tools.writingGoal" },
+  { file: "src/ui/PublishSiteDialog.tsx", command: "file.publishSite" },
+  { file: "src/ui/QuickCapture.tsx", command: "note.capture" },
+  { file: "src/ui/ReadingAids.tsx", command: "reading.aids" },
+  { file: "src/ui/ReadingSettings.tsx", command: "view.readingOptions" },
+  { file: "src/ui/SearchDialog.tsx", command: "view.search" },
+  { file: "src/ui/SettingsScreen.tsx", command: "settings.open" },
+  { file: "src/ui/ShareDialog.tsx", command: "collab.share" },
+  { file: "src/ui/TemplateGallery.tsx", command: "templates.open" },
+  { file: "src/ui/ThemeSettings.tsx", command: "settings.theme", embedded: true },
+  { file: "src/ui/TranslationSuggest.tsx", command: "i18n.suggest" },
+  { file: "src/ui/TrashPanel.tsx", command: "file.trash" },
+  { file: "src/ui/TrustedKeysSettings.tsx", command: "settings.trustedKeys", embedded: true },
+  { file: "src/ui/TrustedReposDialog.tsx", command: "settings.trustedRepos" },
+  { file: "src/ui/TypographyDialog.tsx", command: "edit.hebrewTypography" },
+  { file: "src/ui/UsageDialog.tsx", command: "help.usage" },
+  { file: "src/ui/VaultEncryptionDialog.tsx", command: "vault.encryptAtRest" },
+  { file: "src/ui/VaultUnlock.tsx", guarded: true, fixme: "shown only for a locked encrypted vault" },
+  { file: "src/ui/VersionHistory.tsx", command: "view.versionHistory" },
+  { file: "src/voice-corpus/Recorder.tsx", command: "voice.corpusRecorder" },
+  { file: "src/whatsNew/WhatsNewDialog.tsx", command: "help.whatsNew" },
+];

@@ -16,9 +16,13 @@
  * local edit and after the other device reports a change.
  */
 
-import { createVault, E2eeSync, unlockVault, type SyncResult } from "../engine";
+import { createVault, E2eeSync, unlockVault, unlockWithPasskey, unlockWithRecoveryKey, type SyncResult } from "../engine";
+import { readKeyring, type KeyAccess } from "../keyring";
+import { passkeyPrf, type WebAuthnApi } from "../passkey";
+import type { VaultKeys } from "../keys";
 import { HEADER_NAME } from "../header";
-import { dialogResolver, type ConflictResolver } from "../conflict";
+import { modeResolver, type ConflictResolver } from "../conflict";
+import { loadConflictMode } from "../conflictMode";
 import { idbStateStore, type SyncStateStore } from "../state";
 import { vaultLocalFiles, type LocalFiles } from "../localFiles";
 import { createSyncProvider, loadProviderSettings, saveProviderSecret, saveProviderSettings, type ConnectedProvider, type ProviderSettings } from "../providers";
@@ -32,6 +36,7 @@ import { applyTreeBadges, clearTreeBadges } from "./treeBadges";
 import { liveSync } from "../lan/rpc";
 import { e2eeErrorText } from "./errorText";
 import { explainError } from "../../../lib/userError";
+import { setSyncStatus } from "../../syncStatus";
 
 export type Phase = "disconnected" | "connected" | "unlocked";
 
@@ -174,6 +179,8 @@ export function createSession(deps: SessionDeps = {}) {
   async function syncNow(): Promise<SyncResult> {
     if (!engine) throw new Error("The vault is locked");
     set({ syncing: true, error: null });
+    // The status bar's sync indicator (sync/syncStatus.ts) follows every round.
+    setSyncStatus("syncing", null);
     try {
       // This device's rules, read for every round. Unreadable rules stop the
       // round (SyncRulesUnreadableError): an excluded file must not leave by accident.
@@ -182,10 +189,13 @@ export function createSession(deps: SessionDeps = {}) {
       if (JSON.stringify(rules) !== JSON.stringify(state.rules)) set({ rules });
       const last = await engine.sync();
       set({ syncing: false, last, lastAt: Date.now() });
+      setSyncStatus("idle", null);
       await refreshStates().catch(() => undefined);
       return last;
     } catch (e) {
-      set({ syncing: false, error: e2eeErrorText(e, "other", explainError) });
+      const error = e2eeErrorText(e, "other", explainError);
+      set({ syncing: false, error });
+      setSyncStatus(typeof navigator !== "undefined" && navigator.onLine === false ? "offline" : "error", null, error);
       throw e;
     }
   }
@@ -205,6 +215,44 @@ export function createSession(deps: SessionDeps = {}) {
       offRemote?.();
       offLocal();
     };
+  }
+
+  /** Unlocked with `keys`: the engine, the timers and watchers, then a first round (unless `round` is false). */
+  async function start(keys: VaultKeys, created: Awaited<ReturnType<typeof createVault>> | null, round = true, access?: KeyAccess): Promise<SyncResult | null> {
+    if (!provider) throw new Error("No provider connected");
+    const files = await local();
+    const makeStore = deps.store ?? idbStateStore;
+    await provider.unlocked?.(keys);
+    engine = new E2eeSync({
+      provider,
+      keys,
+      local: files,
+      store: await makeStore(keys.vaultId),
+      // Plan W11.S6: this device's conflict mode (merge, or Syncthing-style conflict files), read per conflict.
+      resolver: deps.resolver ?? modeResolver(() => loadConflictMode()),
+      exclude: (path, size) => exclude(path, size),
+      onEvent: onEngineEvent,
+      ...(access ? { access } : {}),
+    });
+    if (created) await engine.markCreated(created.anchor);
+    set({ phase: "unlocked", vaultExists: true });
+    const minutes = deps.intervalMinutes ?? 5;
+    if (minutes > 0) {
+      timer = setInterval(() => void syncNow().catch(() => undefined), minutes * 60_000);
+      if (typeof window !== "undefined") window.addEventListener("online", onOnline);
+    }
+    await startWatching().catch(() => undefined);
+    if (deps.background !== false && typeof document !== "undefined") {
+      unbackground = installBackgroundSync({
+        unlocked: () => engine !== null,
+        lastAt: () => state.lastAt,
+        syncNow: () => (state.syncing ? Promise.resolve() : syncNow()),
+        notify: (notice) => set({ notice }),
+        native: isNativeApp,
+      });
+    }
+    if (provider.live) await startLive(provider);
+    return round ? syncNow() : null;
   }
 
   return {
@@ -247,8 +295,6 @@ export function createSession(deps: SessionDeps = {}) {
     /** Create the vault (first device) or unlock it, then run a first round. */
     async open(passphrase: string): Promise<SyncResult> {
       if (!provider) throw new Error("No provider connected");
-      const files = await local();
-      const makeStore = deps.store ?? idbStateStore;
       let created: Awaited<ReturnType<typeof createVault>> | null = null;
       let keys;
       if (state.vaultExists) keys = (await unlockVault(provider, passphrase, deps.kdfPolicy)).keys;
@@ -256,34 +302,36 @@ export function createSession(deps: SessionDeps = {}) {
         created = await createVault(provider, passphrase, deps.pbkdf2Iterations ? { pbkdf2Iterations: deps.pbkdf2Iterations } : {});
         keys = created.keys;
       }
-      await provider.unlocked?.(keys);
-      engine = new E2eeSync({
-        provider,
-        keys,
-        local: files,
-        store: await makeStore(keys.vaultId),
-        resolver: deps.resolver ?? dialogResolver,
-        exclude: (path, size) => exclude(path, size),
-        onEvent: onEngineEvent,
-      });
-      if (created) await engine.markCreated(created.anchor);
-      set({ phase: "unlocked", vaultExists: true });
-      const minutes = deps.intervalMinutes ?? 5;
-      if (minutes > 0) {
-        timer = setInterval(() => void syncNow().catch(() => undefined), minutes * 60_000);
-        if (typeof window !== "undefined") window.addEventListener("online", onOnline);
-      }
-      await startWatching().catch(() => undefined);
-      if (deps.background !== false && typeof document !== "undefined") {
-        unbackground = installBackgroundSync({
-          unlocked: () => engine !== null,
-          lastAt: () => state.lastAt,
-          syncNow: () => (state.syncing ? Promise.resolve() : syncNow()),
-          notify: (notice) => set({ notice }),
-          native: isNativeApp,
-        });
-      }
-      if (provider.live) await startLive(provider);
+      return (await start(keys, created))!;
+    },
+
+    /**
+     * The passphrase is forgotten (plan W11.S9): open the vault with the
+     * recovery key alone, pull every note, then set `newPassphrase` with a
+     * key change. This profile can't vouch for the device list, so the
+     * other devices are left out and pair again (`dropDevices`); the
+     * recovery key stays wrapped for the new epoch.
+     */
+    /**
+     * Unlock with a passkey (plan W11.S10): the user picks one of the vault's
+     * passkeys, its PRF output opens the keyring, and this session keeps the
+     * output in memory (never stored) to follow later key changes.
+     */
+    async openWithPasskey(api: WebAuthnApi): Promise<SyncResult> {
+      if (!provider) throw new Error("No provider connected");
+      const ring = await readKeyring(provider);
+      if (!ring) throw new Error("This vault has no passkeys");
+      const { id, prf } = await passkeyPrf(ring.file.vaultId, { api });
+      const { keys } = await unlockWithPasskey(provider, id, prf);
+      return (await start(keys, null, true, { passkey: { id, prf } }))!;
+    },
+
+    async restore(recoveryKey: Uint8Array, newPassphrase: string): Promise<SyncResult> {
+      if (!provider) throw new Error("No provider connected");
+      const { keys } = await unlockWithRecoveryKey(provider, recoveryKey);
+      await start(keys, null, false);
+      // The old header's KDF can't be checked without the old passphrase: the new one gets Argon2id.
+      await engine!.rekey({ newPassphrase, dropDevices: true });
       return syncNow();
     },
 
@@ -326,6 +374,7 @@ export function createSession(deps: SessionDeps = {}) {
       await saveProviderSettings(null);
       if (kind) await saveProviderSecret(kind, null);
       set(initial());
+      setSyncStatus("idle", null);
     },
   };
 }

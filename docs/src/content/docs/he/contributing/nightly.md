@@ -20,10 +20,12 @@ npm run nightly -- --dry-run     # print the plan, run nothing
 | סוג | מתי | מה רץ |
 |---|---|---|
 | `flake` | כל לילה | `npm run e2e:flake -- --all --times 5` (chromium, firefox, webkit, חמש ריצות לכל אחד, בלי retries) |
-| `perf` | כל לילה | build, תקציב החבילה, פרויקט הביצועים `@nightly`, ו-Lighthouse כשהוא מותקן |
-| `triage` | כל לילה | מיון הביקורות של ה-PR-ים הפתוחים, הספירה של 0.14 על 20 ה-PR-ים הראשונים מאז 12.11.2026, ו-`live:meta --self-test` (למטה) |
-| `weekly` | בימי ראשון (UTC) | בריאות התלויות (audit, outdated, רישיונות), וציוני mutation כש-`test:mutation` קיים |
+| `perf` | כל לילה | build, תקציב החבילה, פרויקט הביצועים `@nightly`, ומגמת Lighthouse: מחשב ונייד, החציון של 3 ריצות לכל אחד, שנוסף ל-`reports/trend/lighthouse-history.json` ול-`lighthouse-trend.md`. רץ רק `lhci collect`, כך ששום דבר לא מועלה |
+| `triage` | כל לילה | מיון הביקורות של ה-PR-ים הפתוחים, הספירה של 0.14 על 20 ה-PR-ים הראשונים מאז 12.11.2026, ‏`live:meta --self-test` ובדיקת הסחיפה של ה-rulesets (שניהם למטה) |
+| `weekly` | בימי ראשון (UTC) | בריאות התלויות (audit, outdated, רישיונות), וציוני mutation: בענף שיש בו `scripts/mutation/check.mjs`, המודולים הקריטיים ב-vitest אמיתי (`run.mjs --critical --receipt --min 80`, ואחריו `mutation:check`), ואחרת `test:mutation` |
+| `fuzz` | כל לילה | ‏`npm run fuzz:redaction`: [ה-fuzz של ההשחרה](/he/contributing/redaction-fuzz/) עם הזרע של הלילה, 20,000 מקרים. דליפה מכשילה את הצעד ונשמרת ב-`tests/fuzz/redaction/regressions.json`. הדוח החתום שומר את הלילה ואת מספרי המקרים, הדליפות והשמורות. לא נספר ב-0.11. |
 | `sr` | כל לילה, ב-Mac שבו `@guidepup/*` מותקנים | ‏`npx @guidepup/setup --ci`, ואז המסע העברי עם VoiceOver ([קוראי מסך, אוטומטית](/he/editor/screen-reader-automation/)). לא נספר ב-0.11. |
+| `supply` | כל לילה, במחשב שמותקנים בו `scorecard`, ‏`osv-scanner`, ‏`cargo-deny` או `syft` | בדיקות שרשרת האספקה ([בהמשך](#בדיקות-שרשרת-האספקה-משימה-w11s5)). לא נספר ב-0.11. |
 
 `--only flake,perf` בוחר סוגים. המתזמן מעביר `--scheduled`, שמסמן את הדוחות
 כמתוזמנים. משימה 0.11 סופרת רק אותם.
@@ -61,6 +63,11 @@ npm run nightly -- --verify reports/nightly/2026-11-13-flake.json
   מ-`ci:local`, אז כל כישלון כזה הוא כישלון ש-`ci:local` היה תופס, חוץ
   מ-`docs:sync`, ש-`ci:local` לא מריץ. ענפי האינטגרציה `verify/*` לא
   נספרים.
+- **W6.16**: כמה שבועות רצופים הייתה ריצה שבועית מתוזמנת שבה כל מודול קריטי
+  קיבל לפחות 80 ב-vitest אמיתי (לא ב-shim הלא מקוון), ובדיקת הקבלה עברה (צריך
+  4). הדוח השבועי כולל לכל מודול את הציון ואת ה-sha256 של המקור ושל הבדיקות,
+  כך שהדוח החתום הוא הקבלה. אחרי הריצה הקובץ `scripts/mutation/receipt.json`
+  חוזר לגרסה שבקומיט, כדי שאפשר יהיה למשוך לעותק בלי תקלות.
 
 `--commit` שומר את `reports/nightly/` בקומיט עם הודעה שכוללת `[skip ci]`. הוא
 אף פעם לא דוחף. קומיט שמשנה רק את `reports/` לא מתחיל build ב-Vercel
@@ -76,7 +83,16 @@ git clone https://github.com/talstilkol/lumen-md ~/lumen-nightly
 cd ~/lumen-nightly && git switch -c nightly/receipts && npm ci && npx playwright install
 ```
 
-שומרים את `~/Library/LaunchAgents/dev.lumen-md.nightly.plist`:
+אחר כך מתקינים את המתזמן בפקודה אחת. ב-Mac היא כותבת וטוענת את משימת launchd, ובלינוקס היא מוסיפה שורת cron אחת בין שני סימונים:
+
+```bash
+npm run nightly:install                  # כל לילה ב-02:17
+npm run nightly:install -- --at 03:41    # שעה אחרת
+npm run nightly:install -- --print       # מה היא הייתה מתקינה
+npm run nightly:install -- --uninstall
+```
+
+התבניות הן `scripts/nightly/launchd.plist` ו-`scripts/nightly/crontab`. ב-Mac היא מתקינה את `~/Library/LaunchAgents/dev.lumen-md.nightly.plist`, כך:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -96,13 +112,12 @@ cd ~/lumen-nightly && git switch -c nightly/receipts && npm ci && npx playwright
 </plist>
 ```
 
-אחר כך טוענים אותו עם `launchctl load ~/Library/LaunchAgents/dev.lumen-md.nightly.plist`.
 launchd מריץ משימה שהוחמצה בזמן שה-Mac ישן ברגע שהוא מתעורר. כדי לפרסם את
 הקבלות, דוחפים את הענף (`git push origin nightly/receipts`) או פותחים ממנו
-PR. בלינוקס משתמשים ב-cron:
+PR. בלינוקס שורת ה-cron היא:
 
 ```text
-17 2 * * *  cd ~/lumen-nightly && git pull -q --rebase origin main && npm ci --silent && npm run nightly -- --scheduled --commit
+17 2 * * * cd ~/lumen-nightly && git pull -q --rebase origin main && npm ci --silent && npm run nightly -- --scheduled --commit
 ```
 
 ## למה לא Vercel Cron או משימה מתוזמנת בענן
@@ -114,6 +129,49 @@ PR. בלינוקס משתמשים ב-cron:
   דפדפנים ואי אפשר להתקין חבילות, אז הוא יכול להריץ רק את הסוג `triage`
   (REST API של GitHub) ולקרוא את הקבלות ששמורות בריפו. זה שימושי לסיכום
   בוקר, לא למדידות עצמן.
+
+## בדיקות שרשרת האספקה (משימה W11.S5)
+
+‏Scorecard ו-CodeQL קיימים בריפו רק כקובצי YAML של GitHub Actions, ולכן אף
+אחד מהם לא רץ אף פעם. ‏`scripts/supply/nightly.mjs` מריץ את בדיקות שרשרת
+האספקה במחשב של ריצת הלילה במקומם:
+
+| בדיקה | פקודה | צריך |
+|---|---|---|
+| ‏Scorecard | `scorecard --repo=github.com/talstilkol/lumen-md --format json` | רשת ו-`GITHUB_AUTH_TOKEN`, טוקן fine-grained עם הרשאת קריאה בלבד |
+| ‏OSV | `osv-scanner scan source` על `package-lock.json`, ‏`mcp-server/package-lock.json` ו-`src-tauri/Cargo.lock` | רשת |
+| ‏cargo deny | `cargo-deny check advisories bans` ב-`src-tauri` | רשת (מאגר RustSec) |
+| ‏SBOM | `syft dir:. -o cyclonedx-json` | כלום |
+
+```bash
+npm run supply:nightly                 # מה שמותקן; קבלה חתומה → reports/nightly/<date>-supply.json
+npm run supply:nightly -- --dry-run    # שום דבר לא רץ, בלי רשת; הקבלה אומרת למה כל בדיקה דולגה
+npm run supply:nightly -- --open-tasks # וגם issue ב-GitHub לכל משימה חדשה
+```
+
+בתוך `npm run nightly`, הסוג `supply` מריץ את הסקריפט וחותם את התוצאות בדוח
+של אותו לילה, תחת `supply`.
+
+בקבלה נמצאים השערים של W11.M8. בדיקה שדולגה משאירה את השערים שלה **לא
+נמדדים**, ואף פעם לא עוברים:
+
+- הציון הכולל של Scorecard הוא לפחות 7.0;
+- ‏Branch-Protection לפחות 8, ‏Code-Review לפחות 8, ו-Dangerous-Workflow
+  הוא 10;
+- ‏OSV מוצא 0 פגיעויות critical.
+
+**משימה** נרשמת בקבלה, ונפתחת כ-issue עם `--open-tasks`, כאשר:
+
+- הציון הכולל של Scorecard נמוך מזה שבקבלה הקודמת;
+- בדיקה עם שער נמצאת מתחת לרף שלה;
+- ‏OSV מוצא פגיעות critical או high;
+- ‏cargo deny מדווח על שגיאה.
+
+לכל משימה יש מפתח קבוע, כך שממצא שעדיין קיים בלילה הבא לא פותח issue שני.
+
+השחרור כבר כולל SBOM משלו בפורמט CycloneDX ‏(`release/sbom.cdx.json`,
+[שרשרת אספקה](/he/security/supply-chain/)). ה-SBOM של `syft` בריצת הלילה הוא
+רשימה שנייה ובלתי תלויה של אותו עץ.
 
 ## בדיקת המטא-דאטה החיה (משימה W6.2)
 
@@ -139,3 +197,27 @@ npm run live:meta -- --self-test --json live-meta.json
 אחרי הקידום. בכל לילה הסוג `triage` מריץ אותה גם כן, כך שסטייה מתגלה תוך
 יום. הפקודה יוצאת עם 1 על כל בעיה. היא מורידה עם Node, ואם זה לא עובד עוברת
 ל-`curl`, שמכבד את `HTTPS_PROXY`.
+
+## ה-rulesets של GitHub‏ (W11.S4)
+
+אין כאן GitHub Actions, ולכן רק GitHub עצמו יכול לעצור דחיפה ל-`main` או מיזוג
+בלי ביקורת. הכללים ל-`main` ול-`verify/*` הם קוד, בקובץ
+`security/github-ruleset.json`:
+
+- PR עם אישור אחד, כולל אישור של הדחיפה האחרונה;
+- אישורים ישנים מבוטלים, ובעלי הקוד חייבים לבדוק;
+- אין force push ואין מחיקה;
+- קומיטים חתומים;
+- הסטטוסים `Vercel` ו-`lumen/buildkite`.
+
+תפקיד ה-admin יכול לעקוף רק דרך PR, כך שכל עקיפה נרשמת.
+
+```bash
+npm run security:ruleset-drift                         # השוואה ל-gh api repos/talstilkol/lumen-md/rulesets
+node scripts/security/ruleset-drift.mjs --print-apply  # פקודות ה-gh של הבעלים שיוצרות אותם (W10.O1)
+```
+
+הסקריפט בודק את הקובץ מול `security/github-ruleset.schema.json` (גוף ה-REST של
+GitHub ל-ruleset) ומול המדיניות שלמעלה, ואז מדווח על כל הבדל ממה שיש ב-GitHub.
+הוא יוצא עם 1 כשיש סחיפה, ועם 2 כשאי אפשר לקרוא את ה-API, וזה אף פעם לא נחשב
+התאמה. הסוג `triage` מריץ אותו בכל לילה.

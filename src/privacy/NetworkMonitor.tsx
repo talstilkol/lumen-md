@@ -13,8 +13,9 @@ import { createRoot } from "react-dom/client";
 import { Plane, X } from "lucide-react";
 import { t, getLocale } from "../i18n";
 import { airplaneModeOn, airplaneSince, disableAirplaneMode, egressAttempts, egressTally, enableAirplaneMode, subscribeEgress, type EgressAttempt } from "./airplane";
-import { buildCertificate, reachedNetwork, sealCertificate } from "./airplaneCertificate";
+import { buildCertificate, reachedNetwork, signedCertificateFile } from "./airplaneCertificate";
 import { HelpButton } from "../ui/HelpButton";
+import { Modal } from "../ui/Modal";
 
 /**
  * The "Test" button's target: one GET with no data, made only when the user clicks.
@@ -70,24 +71,20 @@ export function NetworkMonitor({ onClose }: { onClose: () => void }) {
   const closeRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     closeRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
   const shown = on && since !== null ? list.filter((a) => a.ts >= since) : list;
   const certificate = async () => {
     if (since === null) return;
     const to = Date.now();
-    const sealed = await sealCertificate(buildCertificate(list, since, to, undefined, egressTally()));
-    download(JSON.stringify({ certificate: sealed.text, sha256: sealed.sha256 }, null, 2) + "\n", `lumen-airplane-${new Date(since).toISOString().replace(/[:.]/g, "-")}.json`);
+    // Signed with this device's key (W10.C11): a changed byte fails the minisign check.
+    const file = await signedCertificateFile(buildCertificate(list, since, to, undefined, egressTally()));
+    download(JSON.stringify(file, null, 2) + "\n", `lumen-airplane-${new Date(since).toISOString().replace(/[:.]/g, "-")}.json`);
   };
 
   return (
-    <div className="cmd-palette-backdrop">
-      <div className="cmd-palette" role="dialog" aria-modal="true" aria-label={t("airplane.title")} data-testid="network-monitor" style={{ maxWidth: 900, padding: 0, display: "flex", flexDirection: "column", maxHeight: "88vh" }}>
+    <Modal onClose={onClose} aria-label={t("airplane.title")} className="cmd-palette-backdrop">
+      <div className="cmd-palette" data-testid="network-monitor" style={{ maxWidth: 900, padding: 0, display: "flex", flexDirection: "column", maxHeight: "88vh" }}>
         <header style={{ padding: "14px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <Plane size={18} style={{ color: "hsl(var(--accent))" }} />
           <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600, flex: 1 }}>{t("airplane.title")}</h2>
@@ -170,7 +167,7 @@ export function NetworkMonitor({ onClose }: { onClose: () => void }) {
           <p style={{ ...muted, margin: 0 }}>{t("airplane.limits")}</p>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

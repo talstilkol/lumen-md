@@ -2,27 +2,30 @@
  * Web Playground runner — the page inside the block's sandboxed iframe
  * (`sandbox="allow-scripts"`, no same-origin: an opaque origin with no
  * access to the app's storage, cookies or DOM). It receives one project per
- * load, transpiles JSX / TypeScript with Sucrase, links the files as blob
- * ES modules, provides react / react-dom / vue from self-hosted copies
- * (/playground/vendor/, no CDN), runs the entry module, and reports console
- * output and errors back to the page.
+ * load, already compiled by the block (./compile.ts: JSX / TypeScript through
+ * Sucrase, loop guards, import specifiers), links the files as blob ES
+ * modules, provides react / react-dom / vue from the source text the block
+ * read from the app's own copies (/playground/vendor/, no CDN), runs the
+ * entry module, and reports console output and errors back to the page.
+ *
+ * Not a Vite entry: scripts/build-runners.mjs bundles it into
+ * public/runners/playground-runner.js, a classic script whose sha256 is the
+ * only script source the page's CSP allows besides blob: and eval (plan
+ * W10.D1). Every script this page runs after it is a blob: URL. Rebuild
+ * after a change (the freshness test fails until you do).
  */
-import { transform } from "sucrase";
 import {
   IMPORT_ATTRS_RE,
   circularImportMessage,
   formatValue,
   LOOP_GUARD,
-  guardLoops,
-  importSpecifiers,
   resolveImport,
+  type PlaygroundBuild,
   type PlaygroundProject,
   type RunnerMessage,
   type RunnerRequest,
-} from "./files";
+} from "./runtime";
 
-// Beneath Vite's base (a subpath deployment serves them at /app/playground/…).
-const vendor = (file: string) => new URL(`${import.meta.env.BASE_URL}playground/vendor/${file}`, location.href).href;
 let runId = 0;
 const post = (msg: RunnerMessage) => parent.postMessage(msg, "*");
 
@@ -67,26 +70,20 @@ const postError = (message: string) => {
 addEventListener("error", (e) => postError(e.error ? show(e.error) : e.message));
 addEventListener("unhandledrejection", (e) => postError(show(e.reason)));
 
-// The page's CSP nonce (security/policy.json, route playground-runner). A
-// script element created here does not inherit it the way imported modules
-// do, and WebKit does not match 'self' in this opaque-origin frame, so the
-// vendor scripts carry it explicitly. The browser hides the attribute; the
-// property keeps the value.
-const NONCE = document.querySelector<HTMLScriptElement>("script[nonce]")?.nonce ?? "";
+const IDENT_RE = /^[A-Za-z_$][\w$]*$/;
+const blob = (code: string) => URL.createObjectURL(new Blob([code], { type: "text/javascript" }));
 
-function loadScript(src: string): Promise<void> {
+/** A classic script from source text, as a blob: URL (the page's CSP allows blob:, not 'self'). */
+function loadScript(name: string, code: string | undefined): Promise<void> {
+  if (code === undefined) return Promise.reject(new Error(`${name} didn't load (playground/vendor/ on this site)`));
   return new Promise((resolve, reject) => {
     const s = document.createElement("script");
-    if (NONCE) s.nonce = NONCE;
-    s.src = src;
+    s.src = blob(code);
     s.onload = () => resolve();
-    s.onerror = () => reject(new Error(`Failed to load ${src}`));
+    s.onerror = () => reject(new Error(`Failed to load ${name}`));
     document.head.appendChild(s);
   });
 }
-
-const IDENT_RE = /^[A-Za-z_$][\w$]*$/;
-const blob = (code: string) => URL.createObjectURL(new Blob([code], { type: "text/javascript" }));
 
 /** An ES module re-exporting a global (React / ReactDOM). */
 function globalModule(name: string, extra = ""): string {
@@ -96,11 +93,11 @@ function globalModule(name: string, extra = ""): string {
   return `const G = window.${name};\nexport default G;\n${keys.length ? `export const { ${keys.join(", ")} } = G;\n` : ""}${extra}`;
 }
 
-async function providedModules(framework: PlaygroundProject["framework"]): Promise<Record<string, string>> {
+async function providedModules(framework: PlaygroundProject["framework"], vendor: PlaygroundBuild["vendor"]): Promise<Record<string, string>> {
   const out: Record<string, string> = {};
   if (framework === "react") {
-    await loadScript(vendor("react.production.min.js"));
-    await loadScript(vendor("react-dom.production.min.js"));
+    await loadScript("React", vendor.react);
+    await loadScript("ReactDOM", vendor.reactDom);
     out.react = blob(globalModule("React"));
     out["react-dom"] = blob(globalModule("ReactDOM"));
     out["react-dom/client"] = out["react-dom"];
@@ -121,14 +118,13 @@ async function providedModules(framework: PlaygroundProject["framework"]): Promi
       ].join("\n"),
     );
   }
-  out.vue = vendor("vue.esm-browser.prod.js");
+  if (vendor.vue !== undefined) out.vue = blob(vendor.vue);
   return out;
 }
 
-
-async function link(project: PlaygroundProject): Promise<string> {
-  const provided = await providedModules(project.framework);
-  const names = project.files.map((f) => f.name);
+async function link(project: PlaygroundProject, compiled: PlaygroundBuild): Promise<string> {
+  const provided = await providedModules(project.framework, compiled.vendor);
+  const names = compiled.files.map((f) => f.name);
   const urls = new Map<string, string>();
   /** The files being linked, outermost first (to name a cycle). */
   const visiting: string[] = [];
@@ -137,24 +133,12 @@ async function link(project: PlaygroundProject): Promise<string> {
     if (done) return done;
     if (visiting.includes(name)) throw new Error(circularImportMessage(visiting, name));
     visiting.push(name);
-    const file = project.files.find((f) => f.name === name)!;
+    const file = compiled.files.find((f) => f.name === name)!;
+    if ("error" in file) throw new Error(file.error);
     let code = file.code;
-    if (/\.css$/i.test(name)) code = `export default ${JSON.stringify(file.code)};`;
-    else if (/\.json$/i.test(name)) code = `export default ${file.code};`;
-    else {
-      const ts = /\.tsx?$/i.test(name);
-      const jsx = /\.(jsx|tsx)$/i.test(name) || (project.framework === "react" && /\.js$/i.test(name));
-      code = transform(code, {
-        transforms: [...(ts ? (["typescript"] as const) : []), ...(jsx ? (["jsx"] as const) : [])],
-        jsxRuntime: project.framework === "react" ? "automatic" : "classic",
-        production: true,
-        filePath: name,
-      }).code;
-      code = guardLoops(code);
-    }
     // Only real import / re-export specifiers (not text in comments or
-    // strings), replaced from the end so offsets stay valid.
-    for (const { start, end, spec } of importSpecifiers(code).reverse()) {
+    // strings, found by the block), replaced from the end so offsets stay valid.
+    for (const { start, end, spec } of [...file.specs].reverse()) {
       let url: string;
       let rest = code.slice(end);
       if (spec in provided) url = provided[spec];
@@ -165,6 +149,7 @@ async function link(project: PlaygroundProject): Promise<string> {
         if (target && /\.(json|css)$/i.test(target)) rest = rest.replace(IMPORT_ATTRS_RE, "");
         if (target) url = build(target);
         else if (/^(\.|\/)/.test(spec)) throw new Error(`${name}: can't find "${spec}"`);
+        else if (spec === "vue") throw new Error(`${name}: "${spec}" didn't load (playground/vendor/ on this site)`);
         else throw new Error(`${name}: package "${spec}" isn't available here (react, react-dom, vue are)`);
       }
       code = code.slice(0, start) + JSON.stringify(url) + rest;
@@ -196,7 +181,7 @@ let loopCalls = 0;
   return true;
 };
 
-async function run(project: PlaygroundProject): Promise<void> {
+async function run(project: PlaygroundProject, compiled: PlaygroundBuild): Promise<void> {
   const started = performance.now();
   for (const css of project.css) {
     const style = document.createElement("style");
@@ -209,7 +194,7 @@ async function run(project: PlaygroundProject): Promise<void> {
   tpl.content.querySelectorAll("script").forEach((s) => s.remove());
   document.body.replaceChildren(tpl.content);
   try {
-    const entry = await link(project);
+    const entry = await link(project, compiled);
     await import(/* @vite-ignore */ entry);
   } catch (err) {
     post({ type: "error", runId, message: show(err) });
@@ -223,8 +208,12 @@ addEventListener("message", (e: MessageEvent<RunnerRequest>) => {
   if (e.source !== parent || started || e.data?.type !== "run") return;
   started = true; // one project per load: the page reloads the frame to re-run
   runId = e.data.runId;
-  if (!e.data.project?.files?.every((f) => typeof f.code === "string" && typeof f.name === "string")) return;
-  void run(e.data.project);
+  const { project, build } = e.data;
+  if (!project?.files?.every((f) => typeof f.code === "string" && typeof f.name === "string")) return;
+  const fileOk = (f: PlaygroundBuild["files"][number]) =>
+    typeof f?.name === "string" && ("error" in f ? typeof f.error === "string" : typeof f.code === "string" && Array.isArray(f.specs));
+  if (!Array.isArray(build?.files) || !build.files.every(fileOk) || typeof build.vendor !== "object" || !build.vendor) return;
+  void run(project, build);
 });
 post({ type: "ready" });
 

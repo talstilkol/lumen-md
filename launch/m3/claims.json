@@ -1,0 +1,106 @@
+{
+ "$comment": "Plan W11.L3: every claim the M3 launch kit makes, with its receipt. `source` is a file in this repository and `quote` is text that file contains (whitespace aside), so a claim can't outlive what it rests on: `npm run launch:kit` (scripts/launch-kit.mjs) fails when a quote is gone. The kit's files mark each claim with [^id].",
+ "format": "lumen-launch-claims/1",
+ "claims": {
+  "mit": {
+   "en": "Open source under the MIT licence.",
+   "source": "LICENSE",
+   "quote": "MIT License"
+  },
+  "no-account": {
+   "en": "No account; with the default settings nothing leaves the device.",
+   "source": "docs/src/content/docs/security/privacy-report.md",
+   "quote": "With default settings nothing leaves the device, which is what the local-only audit shows."
+  },
+  "offline": {
+   "en": "Works offline as an installed web app.",
+   "source": "docs/src/content/docs/getting-started/install.md",
+   "quote": "| Installed web app (PWA) | the browser's **Install** button on the hosted app | the same OPFS; works offline |"
+  },
+  "md-files": {
+   "en": "Notes are plain Markdown; the whole vault exports as a .zip or a folder.",
+   "source": "docs/src/content/docs/workspace/export-import.md",
+   "quote": "Take the whole vault out as a .zip or a folder"
+  },
+  "rtl-per-line": {
+   "en": "Direction is set per line, from its first strong letter.",
+   "source": "docs/src/content/docs/editor/hebrew.md",
+   "quote": "In the source editor each line takes its direction from its first strong letter"
+  },
+  "hebrew-search": {
+   "en": "Search folds niqqud, final letters and the prefix letters.",
+   "source": "docs/src/content/docs/editor/hebrew.md",
+   "quote": "Workspace search folds niqqud, final letters (ם/מ, ן/נ…) and the prefix letters ו ה ב כ ל מ ש"
+  },
+  "ui-languages": {
+   "en": "The interface is in 8 languages; Hebrew and Arabic mirror the layout.",
+   "source": "docs/src/content/docs/editor/hebrew.md",
+   "quote": "The interface is in 8 languages: English, Hebrew, Arabic, Russian, French, German, Japanese and Chinese."
+  },
+  "plugin-no-access": {
+   "en": "Every plugin runs with no access by default.",
+   "source": "docs/src/content/docs/plugins/sandbox.md",
+   "quote": "Lumen runs every plugin with **no access by default**."
+  },
+  "plugin-quickjs": {
+   "en": "Plugin logic runs in QuickJS, a separate engine in its own Web Worker, with no fetch, DOM or storage.",
+   "source": "docs/src/content/docs/plugins/sandbox.md",
+   "quote": "There is no `fetch`, `XMLHttpRequest`, `WebSocket`, `importScripts`, DOM or storage"
+  },
+  "plugin-ui-data": {
+   "en": "A plugin's interface is a tree of known elements, not HTML.",
+   "source": "docs/src/content/docs/plugins/sandbox.md",
+   "quote": "The plugin sends a **tree of known elements**"
+  },
+  "plugin-scorecards": {
+   "en": "Each listed plugin has a public review scorecard with a privacy label.",
+   "source": "docs/src/content/docs/security/index.md",
+   "quote": "a review scorecard with a privacy label for each plugin"
+  },
+  "local-ai": {
+   "en": "AI can run entirely on the device (WebGPU), with no per-token cost.",
+   "source": "docs/src/content/docs/ai/local-llm.md",
+   "quote": "Run AI prompts entirely on your device — private, offline-capable, no per-token cost."
+  },
+  "vault-encryption": {
+   "en": "Optional vault encryption at rest, with AES-256-GCM.",
+   "source": "docs/src/content/docs/security/vault-encryption.md",
+   "quote": "AES-256-GCM, one random nonce per write"
+  },
+  "argon2id": {
+   "en": "The passphrase key is derived with Argon2id.",
+   "source": "docs/src/content/docs/security/vault-encryption.md",
+   "quote": "**Argon2id** (RFC 9106)"
+  },
+  "no-external-audit": {
+   "en": "Lumen has not had an external security audit, so its cryptography must not be called audited.",
+   "source": "docs/src/content/docs/security/index.md",
+   "quote": "Lumen has not had an external security audit."
+  },
+  "importers": {
+   "en": "Imports from Obsidian, Notion, Evernote, Bear, Apple Notes, Google Keep, Logseq and OneNote.",
+   "source": "docs/src/content/docs/workspace/import.md",
+   "quote": "Bring notes from Obsidian, Notion, Evernote, Bear, Apple Notes, Google Keep, Logseq or OneNote"
+  },
+  "obsidian-corpus": {
+   "en": "Real public Obsidian vaults are opened and saved byte-identical in the test suite.",
+   "source": "src/__tests__/obsidianCorpus.test.ts",
+   "quote": "every note is read and written back byte-identical"
+  },
+  "compare": {
+   "en": "An honest comparison with Obsidian, Notion and Google Docs, with a source for every claim and what Lumen still lacks.",
+   "source": "docs/src/content/docs/project/compare.md",
+   "quote": "An honest comparison for people who write in Hebrew: what each one does, with a source for every claim, and what Lumen still lacks."
+  },
+  "desktop": {
+   "en": "There is a desktop app for macOS, Windows and Linux.",
+   "source": "docs/src/content/docs/getting-started/desktop-app.md",
+   "quote": "The desktop app (macOS, Windows, Linux) works like a native one."
+  },
+  "findings-public": {
+   "en": "Every open security finding is listed in public.",
+   "source": "docs/src/content/docs/security/index.md",
+   "quote": "every open finding"
+  }
+ }
+}

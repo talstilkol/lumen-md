@@ -25,7 +25,7 @@ import type { VaultBackend, VaultEvent, VaultListener } from "./types";
 import { ENCRYPTED_PREFIX, ENCRYPTED_TEXT_PREFIX, HEADER_BACKUP_PATH, HEADER_PATH, isLayerPath } from "./encrypted/paths";
 
 export * from "./types";
-export { checkRename, compareVaultEntries, toBytes, VaultEmitter, vaultSegments } from "./shared";
+export { checkRename, compareVaultEntries, PathLock, toBytes, VaultEmitter, vaultSegments } from "./shared";
 export { createDirectoryHandleBackend, type DirectoryHandleBackendOptions } from "./handleBackend";
 export { createMemoryBackend } from "./memory";
 export { createOpfsBackend, isOpfsSupported } from "./opfs";
@@ -138,6 +138,32 @@ function gate(inner: VaultBackend): Gate {
       return checked(b, path, text, text.startsWith(ENCRYPTED_TEXT_PREFIX), (n) => n.readText(path));
     }),
     write: via((b, path: string, data: Parameters<VaultBackend["write"]>[1]) => b.write(path, data)),
+    // 2.28 (#275): the compare-and-swap of whichever backend is active (plain, or the encrypted layer, which compares the note's plaintext).
+    writeIf: via((b, path: string, data: Parameters<VaultBackend["write"]>[1], expect: string | null) => b.writeIf(path, data, expect)),
+    removeIf: via((b, path: string, expect: string) => b.removeIf(path, expect)),
+    // Plan W7.4 (W10.E51): the store's batch read and write, which the gate used not to pass on, so
+    // every bulk edit fell back to a read, a stat and a write per note. Only over a vault that is not
+    // encrypted (the encrypted layer reads and writes one file at a time); otherwise nothing is batched
+    // and the caller goes file by file, through read() and write() above.
+    readMany: async (paths: readonly string[]) => {
+      const b = await resolve();
+      if (b !== inner || !inner.readMany) return new Map<string, File>();
+      const files = await inner.readMany(paths);
+      // As read() does: plain bytes that are ciphertext are never returned as a note. Left out, the
+      // caller reads them with read(), which looks for the header again and says what is wrong.
+      // The first bytes of every file in one joined read: a read per file is a trip to storage each (~1 ms on OPFS).
+      const n = ENCRYPTED_PREFIX.length;
+      const list = [...files].filter(([, f]) => f.size >= n);
+      const heads = new Uint8Array(await new Blob(list.map(([, f]) => f.slice(0, n))).arrayBuffer());
+      list.forEach(([p], i) => {
+        if (startsEncrypted(heads.subarray(i * n, i * n + n))) files.delete(p);
+      });
+      return files;
+    },
+    writeMany: async (items, lock) => {
+      const b = await resolve();
+      return b === inner && inner.writeMany ? inner.writeMany(items, lock) : null;
+    },
     mkdir: via((b, path: string) => b.mkdir(path)),
     rename: via((b, from: string, to: string, o?: { overwrite?: boolean }) => b.rename(from, to, o)),
     remove: via((b, path: string) => b.remove(path)),

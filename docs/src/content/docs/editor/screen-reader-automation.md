@@ -68,6 +68,22 @@ Settings → Privacy & Security, give the terminal that runs the nightly
 **Accessibility** and **Automation → VoiceOver**, and in VoiceOver Utility
 turn on **Allow VoiceOver to be controlled with AppleScript**.
 
+### The product journey, in Hebrew and English
+
+Next to the ten protocol tasks, the same specs run a ten-step **product
+journey** (`sr/productJourney.ts`, W11.Q6) once in Hebrew and once in
+English: open the vault (the first note in the file tree), a new note, a
+heading, the command palette, search, Settings opened and closed with
+Escape, WYSIWYG, a `[[` link to the other note, and export. Every phrase the
+reader must say is the app's own string in that language, so a renamed
+string moves the test with it.
+
+For the Hebrew run, set VoiceOver's Hebrew voice once: VoiceOver Utility →
+Speech → Voices → add **Hebrew → Carmit**, and run with `LUMEN_SR_VOICE=Carmit`
+so the receipt records it. The Hebrew run fails if VoiceOver spoke no Hebrew
+at all. The nightly receipt keeps, per setup and language, the phrases spoken
+at every step.
+
 ### Results
 
 Each run prints a row for the protocol's results table, for example

@@ -1,5 +1,6 @@
 /** Research agent, web clipper and citation check. */
-import { cmdIcons, type Command } from "../../ui/CommandPalette";
+import { cmdIcons } from "../../ui/cmdIcons";
+import type { Command } from "../../ui/CommandPalette";
 import { useAppStore } from "../../store/useStore";
 import { t, getLocale } from "../../i18n";
 import { uiConfirm, uiPrompt } from "../../ui/PromptDialog";
@@ -22,7 +23,9 @@ export async function saveClip(clip: { title: string; markdown: string }): Promi
 export async function saveClipV2(payload: import("../../research/clipV2").ClipPayload): Promise<string | null> {
   const { buildClip } = await import("../../research/clipV2");
   const { libraryDir } = await import("../../research/clipper");
-  const clip = await buildClip(payload, { library: libraryDir(getLocale()) });
+  const { loadUserTemplates } = await import("../../research/clipTemplateStore");
+  // The user's templates (W10.E67) win over the built-in site ones; a broken file gives none, never a failed clip.
+  const clip = await buildClip(payload, { library: libraryDir(getLocale()), templates: await loadUserTemplates().catch(() => []) });
   const { writeWorkspaceFile, workspaceHasEntry, isOPFSAvailable } = await import("../../storage/workspace");
   if (!isOPFSAvailable()) {
     openTemplateDoc(clip.fileName.replace(/\.md$/, ""), clip.markdown);
@@ -34,6 +37,8 @@ export async function saveClipV2(payload: import("../../research/clipV2").ClipPa
   await writeWorkspaceFile(path, clip.markdown);
   const { markUntrustedNote } = await import("../../agents/untrusted");
   markUntrustedNote(path, `clipped from ${clip.source}`);
+  // Plan 7.6 (W10.E36): the library's own index takes the clip as it is saved.
+  void import("../../research/library/clipIndex").then((m) => m.indexClipOnSave(path, clip.markdown));
   window.dispatchEvent(new Event("lumen-workspace-changed"));
   useAppStore.getState().openTab({ name: path.split("/").pop()!, content: clip.markdown, workspaceName: path });
   showAiToast(t("clip.saved", { path }), "success");
@@ -89,12 +94,30 @@ export function buildResearchCommands({ liveDoc }: CommandContext): Command[] {
       action: () => import("./researchActions").then((m) => m.clipClipboard()),
     },
     {
+      id: "research.library",
+      label: t("cmd.research.library"),
+      hint: t("cmd.research.library.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      // Plan 7.6 (W10.E36): the clips, searched by meaning with the library's own index.
+      action: () => import("../../research/library/LibraryPanel").then((m) => m.toggleLibraryPanel()),
+    },
+    {
       id: "research.verify",
       label: t("cmd.research.verify"),
       hint: t("cmd.research.verify.hint"),
       icon: cmdIcons.Sparkles,
       group: t("group.ai"),
       action: () => import("./researchActions").then((m) => m.researchVerify({ liveDoc })),
+    },
+    {
+      // Plan 4.15 (W10.E67): the user's clip templates and per-site triggers.
+      id: "research.clipTemplates",
+      label: t("cmd.research.clipTemplates"),
+      hint: t("cmd.research.clipTemplates.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.ai"),
+      action: () => void import("../../research/ClipTemplatesEditor").then((m) => m.openClipTemplatesEditor()),
     },
     {
       id: "research.settings",

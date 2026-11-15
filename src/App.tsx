@@ -9,34 +9,16 @@ import { Outline } from "./ui/Outline";
 import { StatusBar } from "./ui/StatusBar";
 import { ScrollProgress } from "./ui/ScrollProgress";
 import { SearchReplace } from "./ui/SearchReplace";
-// Canvas on Excalidraw (plan 4.19; γ.2 had it on tldraw). The legacy custom-canvas component
-const LocalGraphPanel = lazy(() => import("./ui/LocalGraphPanel").then(m => ({ default: m.LocalGraphPanel })));
-// `CanvasWhiteboard.tsx` remains in tree as a fallback in case we ever
-// need to surface old `.canvas.json` files; it's intentionally unused.
-const CanvasWhiteboard = lazy(() => import("./ui/CanvasExcalidraw").then(m => ({ default: m.CanvasExcalidraw })));
-const PluginGallery = lazy(() => import("./ui/PluginGallery").then(m => ({ default: m.PluginGallery })));
-const TemplateGallery = lazy(() => import("./ui/TemplateGallery").then(m => ({ default: m.TemplateGallery })));
-const AuditLog = lazy(() => import("./ui/AuditLog").then(m => ({ default: m.AuditLog })));
-// One settings screen (plan 11.1); the theme, AI, training, trusted-key and
-// organization dialogs are its tabs.
-const SettingsScreen = lazy(() => import("./ui/SettingsScreen").then(m => ({ default: m.SettingsScreen })));
-const ReadingSettings = lazy(() => import("./ui/ReadingSettings").then(m => ({ default: m.ReadingSettings })));
-const PrivacyLedgerPanel = lazy(() => import("./ui/PrivacyLedgerPanel").then(m => ({ default: m.PrivacyLedgerPanel })));
-const TrashPanel = lazy(() => import("./ui/TrashPanel").then(m => ({ default: m.TrashPanel })));
-// Properties editor (plan 4.9) — lazy: the yaml-editing code is not in the startup bundle.
-const PropertiesPanel = lazy(() => import("./ui/PropertiesPanel").then(m => ({ default: m.PropertiesPanel })));
-// Quick capture to inbox.md (plan 4.16): its own chunk, loaded on first open.
-const QuickCapture = lazy(() => import("./ui/QuickCapture").then(m => ({ default: m.QuickCapture })));
-const ImageHostsPanel = lazy(() => import("./ui/ImageHostsPanel").then(m => ({ default: m.ImageHostsPanel })));
-const AiDoctorPanel = lazy(() => import("./ui/AiDoctorPanel").then(m => ({ default: m.AiDoctorPanel })));
-const AgentReviewPanel = lazy(() => import("./ui/AgentReviewPanel").then(m => ({ default: m.AgentReviewPanel })));
+import { LocalGraphPanel, CanvasWhiteboard, PluginGallery, TemplateGallery, AuditLog, SettingsScreen, ReadingSettings, PrivacyLedgerPanel, TrashPanel, PropertiesPanel, QuickCapture, ImageHostsPanel, AiDoctorPanel, AgentReviewPanel } from "./appPanels";
+import { FIRST_RUN_SOURCES, OPEN_IMPORT_EVENT, importFromSearch, readOpenImport, type OpenImportDetail } from "./onboarding/importEvent";
 const ImportWizard = lazy(() => import("./storage/import/ImportWizard").then(m => ({ default: m.ImportWizard })));
 const VersionHistory = lazy(() => import("./ui/VersionHistory").then(m => ({ default: m.VersionHistory })));
 const MarkdownTableEditor = lazy(() => import("./ui/MarkdownTableEditor").then(m => ({ default: m.MarkdownTableEditor })));
 // PDF reader (plan 4.14): pdf.js and the reader load only when a PDF is opened.
-const PdfReader = lazy(() => import("./pdf/PdfReader").then(m => ({ default: m.PdfReaderOverlay })));
+const PdfReader = lazy(() => import("./pdf/PdfReaderOverlay").then(m => ({ default: m.PdfReaderOverlay })));
 const EpubReader = lazy(() => import("./epub/EpubReader").then(m => ({ default: m.EpubReaderOverlay })));
-import { CommandPalette } from "./ui/CommandPalette";
+// W10.E19 (8.2): every dialog and panel that is hidden at start loads on first open.
+const CommandPalette = lazy(() => import("./ui/CommandPalette").then((m) => ({ default: m.CommandPalette })));
 import { AiFab } from "./ui/AiFab";
 import { FileTree } from "./ui/FileTree";
 import { SidebarResizer } from "./ui/SidebarResizer";
@@ -44,7 +26,7 @@ import { uiAlert, uiPrompt } from "./ui/PromptDialog";
 // The Insert-text dialog loads on first use, off the startup path (4.14); train 5: so does the flow
 // around it (the startup budget after the W6.25 split).
 const insertTextFromDialog = (...a: Parameters<typeof import("./ui/insertTextFromDialog").insertTextFromDialog>) => import("./ui/insertTextFromDialog").then((m) => m.insertTextFromDialog(...a));
-import { BacklinksPanel } from "./ui/BacklinksPanel";
+const BacklinksPanel = lazy(() => import("./ui/BacklinksPanel").then((m) => ({ default: m.BacklinksPanel })));
 // SearchDialog imports the CodeMirror search-highlight extension; lazy so
 // the boot path stays CodeMirror-free (the dialog opens on ⌘⇧F).
 const SearchDialog = lazy(() =>
@@ -54,7 +36,7 @@ import { AiToastContainer, showAiToast } from "./ui/AiToast";
 import { HelpHost } from "./ui/HelpHost";
 import { AiSuggestionsPanel } from "./ui/AiSuggestionsPanel";
 import { MobileKeyboardBarHost } from "./ui/MobileKeyboardBarHost";
-import { TagsPanel } from "./ui/TagsPanel";
+const TagsPanel = lazy(() => import("./ui/TagsPanel").then((m) => ({ default: m.TagsPanel })));
 // CommentsPanel pulls collab/comments.ts → yjs; comments only exist inside a
 // collab session, so the panel is lazy and addCommentFromSelection is
 // imported at the call site to keep yjs off the boot path.
@@ -81,7 +63,7 @@ import { historyKey } from "./storage/history";
 import { isOPFSAvailable, readWorkspaceFile } from "./storage/workspace";
 import { ErrorBoundary } from "./ui/ErrorBoundary";
 const KeyboardShortcuts = lazy(() => import("./ui/KeyboardShortcuts").then(m => ({ default: m.KeyboardShortcuts })));
-import { FocusMode } from "./ui/FocusMode";
+const FocusMode = lazy(() => import("./ui/FocusMode").then((m) => ({ default: m.FocusMode })));
 const OnboardingTour = lazy(() => import("./ui/OnboardingTour").then(m => ({ default: m.OnboardingTour })));
 // First-run setup (plan 14.1): its own chunk, loaded only on a first visit or from ⌘K.
 const FirstRun = lazy(() => import("./onboarding/FirstRun"));
@@ -103,7 +85,8 @@ import { useLaunchActions } from "./hooks/useLaunchActions";
 import { useOpenFileEvent } from "./hooks/useOpenFileEvent";
 import { usePropertiesEdit } from "./hooks/usePropertiesEdit";
 import { useWindowEvent } from "./hooks/useWindowEvent";
-import { GraphOverlay } from "./ui/GraphOverlay";
+import { useOpenedOnce } from "./hooks/useOpenedOnce";
+const GraphOverlay = lazy(() => import("./ui/GraphOverlay").then((m) => ({ default: m.GraphOverlay })));
 import { DropHint } from "./ui/DropHint";
 
 export default function App() {
@@ -121,6 +104,11 @@ export default function App() {
   const outlineSheet = useAppStore((s) => s.outlineSheet);
   // Phone width (plan 10.2.4): the outline shows as a bottom sheet, opened on demand.
   const [narrow, setNarrow] = useState(isNarrowScreen);
+  // Plan W10.B9: the local grammar model, registered only when the user turned it on
+  // (view.hebrewGrammarModel). Off: no request, no ranker, nothing added to typing.
+  useEffect(() => {
+    void import("./ai/grammarModel").then((m) => m.setupGrammarRanker());
+  }, []);
   useEffect(() => {
     if (typeof window.matchMedia !== "function") return;
     const mq = window.matchMedia("(max-width: 760px)");
@@ -169,9 +157,6 @@ export default function App() {
   useWindowEvent("lumen-open-usability-self", () => setUsabilityOpen("unmoderated"));
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  useEffect(() => {
-    if (searchOpen) setSearchMounted(true);
-  }, [searchOpen]);
   const [findReplaceOpen, setFindReplaceOpen] = useState(false);
   const [graphOpen, setGraphOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -196,11 +181,12 @@ export default function App() {
   const [propertiesOpen, setPropertiesOpen] = useState(false);
   const [captureOpen, setCaptureOpen] = useState(false);
   const [captureVoice, setCaptureVoice] = useState(false);
-  // The search dialog loads on first open and then stays mounted, so an
-  // Ask Workspace conversation survives closing it (perf: not at startup).
-  const [searchMounted, setSearchMounted] = useState(false);
   const [privacyOpen, setPrivacyOpen] = useState(false);
   const [tagsPanelOpen, setTagsPanelOpen] = useState(false);
+  // Lazy dialogs mount on first open and stay (an Ask Workspace conversation, the palette's tab survive a close).
+  const searchMounted = useOpenedOnce(searchOpen);
+  const paletteMounted = useOpenedOnce(paletteOpen);
+  const tagsMounted = useOpenedOnce(tagsPanelOpen);
   const [commentsPanelOpen, setCommentsPanelOpen] = useState(false);
   const [runtimeMetricsOpen, setRuntimeMetricsOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
@@ -370,7 +356,22 @@ export default function App() {
   // the status bar counts the waiting ones, a toast announces new ones.
   const agentReviewPending = useAgentReview(editorRef, openAgentReview);
   useWindowEvent("lumen-open-agent-review", openAgentReview);
-  useWindowEvent("lumen-open-import", () => setImportOpen(true));
+  // W11.P6: the first run's "Bring your notes" opens the wizard on the source picked there.
+  const [importPreset, setImportPreset] = useState<OpenImportDetail>({});
+  useWindowEvent(OPEN_IMPORT_EVENT, (e) => {
+    setImportPreset(readOpenImport(e, FIRST_RUN_SOURCES));
+    setImportOpen(true);
+  });
+  // W11.P7: a `?import=<source>` link (the "Leaving Evernote or Notion?" page) opens the wizard on that source, once.
+  useEffect(() => {
+    const source = importFromSearch(window.location.search);
+    if (!source) return;
+    const url = new URL(window.location.href);
+    url.searchParams.delete("import");
+    window.history.replaceState(window.history.state, "", url.pathname + url.search + url.hash);
+    setImportPreset({ source });
+    setImportOpen(true);
+  }, []);
 
   // Comment-anchor click in the editor → window event from
   // commentDecorations.ts. Open the side panel + jump the panel
@@ -521,6 +522,7 @@ export default function App() {
         </div>
         {(narrow ? outlineSheet : showOutline) && <Outline markdownText={doc.content} sheet={narrow} />}
         {showBacklinks && (
+          <Suspense fallback={null}>
           <BacklinksPanel
             filePath={doc.workspaceName ?? null}
             onOpen={async (fromPath) => {
@@ -539,6 +541,7 @@ export default function App() {
               }
             }}
           />
+          </Suspense>
         )}
         {showLocalGraph && (
           <Suspense fallback={null}>
@@ -576,11 +579,13 @@ export default function App() {
         }
       />
       <ScrollProgress />
+      {paletteMounted && <Suspense fallback={null}>
       <CommandPalette
         open={paletteOpen}
         onClose={() => setPaletteOpen(false)}
         commands={commands}
       />
+      </Suspense>}
       {searchMounted && <Suspense fallback={null}>
       <SearchDialog
         open={searchOpen}
@@ -612,7 +617,7 @@ export default function App() {
           {usabilityOpen === "unmoderated" ? <UsabilitySelfPanel onClose={() => setUsabilityOpen(null)} /> : <UsabilitySessionPanel onClose={() => setUsabilityOpen(null)} />}
         </Suspense>
       )}
-      <TagsPanel open={tagsPanelOpen} onClose={() => setTagsPanelOpen(false)} />
+      {tagsMounted && <Suspense fallback={null}><TagsPanel open={tagsPanelOpen} onClose={() => setTagsPanelOpen(false)} /></Suspense>}
       {collab && (
         <Suspense fallback={null}>
         <CommentsPanel
@@ -650,6 +655,7 @@ export default function App() {
 
       {/* Graph View overlay */}
       {graphOpen && (
+        <Suspense fallback={null}>
         <GraphOverlay
           onClose={() => setGraphOpen(false)}
           onOpenFile={(path, content) => {
@@ -657,6 +663,7 @@ export default function App() {
             setGraphOpen(false);
           }}
         />
+        </Suspense>
       )}
 
       {/* Canvas Whiteboard overlay */}
@@ -677,7 +684,7 @@ export default function App() {
           {agentReviewOpen && <AgentReviewPanel open={agentReviewOpen} onClose={() => setAgentReviewOpen(false)} />}
           {privacyOpen && <PrivacyLedgerPanel open={privacyOpen} onClose={() => setPrivacyOpen(false)} />}
           {trashOpen && <TrashPanel open={trashOpen} onClose={() => setTrashOpen(false)} />}
-          {importOpen && <ImportWizard open={importOpen} onClose={() => setImportOpen(false)} />}
+          {importOpen && <ImportWizard open={importOpen} initialSource={importPreset.source} firstRun={importPreset.firstRun} onClose={() => setImportOpen(false)} />}
           {propertiesOpen && <PropertiesPanel open={propertiesOpen} onClose={() => setPropertiesOpen(false)} text={doc.content} applyEdit={applyPropertiesEdit} />}
           {captureOpen && <QuickCapture open={captureOpen} voice={captureVoice} onClose={() => { setCaptureOpen(false); setCaptureVoice(false); }} />}
           {imageHostsOpen && <ImageHostsPanel open={imageHostsOpen} onClose={() => setImageHostsOpen(false)} />}
@@ -760,6 +767,7 @@ export default function App() {
 
       {/* Focus Mode overlay */}
       {focusMode && (
+        <Suspense fallback={null}>
         <FocusMode active={focusMode} onExit={() => setFocusMode(false)}>
           <EditorLayout
             mode={mode}
@@ -779,6 +787,7 @@ export default function App() {
             handleAddAsset={handleAddAsset}
           />
         </FocusMode>
+        </Suspense>
       )}
     </div>
   );

@@ -9,6 +9,7 @@
  */
 
 import type { DoctorFinding } from "./doctor";
+import { bounded } from "../lib/bounded";
 
 /** What the checks read; tests replace any of it. */
 export interface EngineProbe {
@@ -64,13 +65,16 @@ const getFlag = (s: EngineProbe["storage"], k: string) => {
 };
 
 /** The stage-6 findings, in the order a user would meet the engines. */
-export async function engineFindings(probe?: Partial<EngineProbe>): Promise<DoctorFinding[]> {
+export async function engineFindings(probe?: Partial<EngineProbe>, opts: { timeoutMs?: number } = {}): Promise<DoctorFinding[]> {
+  // Each probe gets its own limit: a stuck one (a worker that never answers)
+  // shows as its own row and the others still report (W4.2).
+  const ms = opts.timeoutMs ?? 5000;
   const p: EngineProbe = { ...(await defaultProbe()), ...probe };
   const out: DoctorFinding[] = [];
   const base = p.convertedBase();
   let registry = new Map<string, { files?: Array<{ dtype?: string }> }>();
   try {
-    registry = await p.registry();
+    registry = await bounded(() => p.registry(), ms);
   } catch {
     /* why: an unreadable registry: every converted model reads as "no files" */
   }
@@ -85,7 +89,7 @@ export async function engineFindings(probe?: Partial<EngineProbe>): Promise<Doct
       title: "ai.doctor.check.modelHost",
       status: "warn",
       detail: `${base} · ${missingFiles.join(", ")}`,
-      fix: { label: "ai.doctor.fix.modelChecksums", command: "gh workflow run model-convert.yml && npm run models:registry -- <run-id>" },
+      fix: { label: "ai.doctor.fix.modelChecksums", command: "npm run models:convert && npm run models:registry -- --dir out/models --smoke out/models/smoke-results.json" },
     });
   } else {
     out.push({ id: "engines.host", title: "ai.doctor.check.modelHost", status: "ok", detail: base });
@@ -97,7 +101,7 @@ export async function engineFindings(probe?: Partial<EngineProbe>): Promise<Doct
     let chrome: string = "absent";
     if (api) {
       try {
-        chrome = await api.availability({ sourceLanguage: "en", targetLanguage: "he" });
+        chrome = await bounded(() => api.availability({ sourceLanguage: "en", targetLanguage: "he" }), ms);
       } catch {
         chrome = "unavailable";
       }
@@ -118,7 +122,7 @@ export async function engineFindings(probe?: Partial<EngineProbe>): Promise<Doct
 
   // English spelling (6.10): the dictionary ships with the app.
   try {
-    const ok = await p.englishSpell();
+    const ok = await bounded(() => p.englishSpell(), ms);
     out.push({ id: "engines.spellEn", title: "ai.doctor.check.spellEn", status: ok ? "ok" : "fail", detail: ok ? "nspell + dictionary-en" : undefined, fix: ok ? undefined : { label: "ai.doctor.fix.reload", action: "retry" } });
   } catch (e) {
     out.push({ id: "engines.spellEn", title: "ai.doctor.check.spellEn", status: "fail", detail: (e as Error).message, fix: { label: "ai.doctor.fix.reload", action: "retry" } });
@@ -126,7 +130,7 @@ export async function engineFindings(probe?: Partial<EngineProbe>): Promise<Doct
 
   // Hebrew spelling: Hspell's list, downloaded only from the user's own command.
   try {
-    const ok = await p.hebrewDictionary();
+    const ok = await bounded(() => p.hebrewDictionary(), ms);
     out.push({ id: "engines.spellHe", title: "ai.doctor.check.spellHe", status: ok ? "ok" : "warn", fix: ok ? undefined : { label: "ai.doctor.fix.spellHe", action: "downloadHebrewDictionary" } });
   } catch (e) {
     out.push({ id: "engines.spellHe", title: "ai.doctor.check.spellHe", status: "skip", detail: (e as Error).message });
@@ -142,6 +146,20 @@ export async function engineFindings(probe?: Partial<EngineProbe>): Promise<Doct
   {
     const ready = CAPTION_READY.filter((k) => getFlag(p.storage, k));
     out.push({ id: "engines.caption", title: "ai.doctor.check.caption", status: "ok", detail: ready.length ? ready.map((k) => k.split(".").pop()).join(", ") : "on first use (consent)" });
+  }
+
+  // Speculative decoding in Ollama ≥ 0.34 (W7.15): the measured tok/s with and without, per model.
+  {
+    const { readMeasurements } = await import("../ai/speculative");
+    const { describeMeasurement } = await import("../ai/speculativeMeasure");
+    const all = Object.values(readMeasurements(p.storage));
+    out.push({
+      id: "engines.speculative",
+      title: "ai.doctor.check.speculative",
+      // Information, not a problem: a model that has not answered yet is simply not measured yet.
+      status: "ok",
+      detail: all.length ? all.map(describeMeasurement).join("; ") : "measured after a model first answers on Ollama 0.34+",
+    });
   }
 
   return out;

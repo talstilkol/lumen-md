@@ -5,6 +5,9 @@
  * which scans the version again before anything is granted, and refuses
  * code that is not byte for byte the code the registry scanned (W4.32).
  * An installed plugin can be removed here, with what it stored.
+ *
+ * W10.B3: when the folder carries index.json.sig, Install goes through the
+ * signed path only (src/plugins/install.ts).
  */
 import { lazy, Suspense, useEffect, useState } from "react";
 import { t } from "../../i18n";
@@ -85,6 +88,18 @@ export function SandboxedPlugins() {
   async function install(item: Listed): Promise<void> {
     setBusy(true);
     try {
+      // W10.B3: a signed registry (index.json.sig) installs only through the signed path —
+      // ledger download, Ed25519 over index.json, SHA-256 of manifest and code, scan, QuickJS.
+      const { installFromRegistry, InstallRefused } = await import("../install");
+      try {
+        await installFromRegistry(BASE, item.manifest.id, item.manifest.version);
+        installed_(item);
+        return;
+      } catch (e) {
+        // Only "no signature at all" falls through, and only for this app's own folder
+        // (same origin as the app's code): the bytes must still equal the scanned ones.
+        if (!(e instanceof InstallRefused) || e.reason !== "registry-unsigned") throw e;
+      }
       // privacy-ledger: not tracked — the app's own files (/plugins/examples, this origin).
       const code = await (await fetch(`${BASE}/${item.path}/${item.manifest.main}`)).text();
       const [{ scanPluginVersion }, { startPlugin }] = await Promise.all([import("./scan"), import("./manager")]);
@@ -99,9 +114,7 @@ export function SandboxedPlugins() {
         return;
       }
       await startPlugin({ manifest: item.manifest, code, grants: new Set(item.manifest.capabilities.map((c) => c.id)) });
-      showAiToast(t("pluginTrust.installed", { name: item.manifest.name }), "success");
-      setInstalled((cur) => new Set([...cur, item.manifest.id]));
-      setAsking(null);
+      installed_(item);
     } catch (e) {
       showAiToast(t("pluginTrust.installFailed", { name: item.manifest.name, error: explainError(e) }), "error");
     } finally {
@@ -109,12 +122,18 @@ export function SandboxedPlugins() {
     }
   }
 
+  function installed_(item: Listed): void {
+    showAiToast(t("pluginTrust.installed", { name: item.manifest.name }), "success");
+    setInstalled((cur) => new Set([...cur, item.manifest.id]));
+    setAsking(null);
+  }
+
   async function remove(item: Listed): Promise<void> {
     setBusy(true);
     try {
-      const { stopPlugin, clearPluginData } = await import("./manager");
-      await stopPlugin(item.manifest.id);
-      await clearPluginData(item.manifest.id);
+      // Stops the sandbox, removes what it stored, and deletes its install record and permissions.
+      const { uninstallPlugin } = await import("../install");
+      await uninstallPlugin(item.manifest.id);
       setInstalled((cur) => new Set([...cur].filter((id) => id !== item.manifest.id)));
       showAiToast(t("pluginTrust.removed", { name: item.manifest.name }), "success");
     } finally {

@@ -17,6 +17,7 @@ import { loadBackupConfig, saveBackupConfig, type BackupConfig } from "./config"
 import { backupHealth, backupStatus, subscribeBackupStatus } from "./status";
 import { startBackups, targetFor } from "./start";
 import { HelpButton } from "../ui/HelpButton";
+import { Modal } from "../ui/Modal";
 
 const muted: React.CSSProperties = { fontSize: 12, color: "hsl(var(--fg-muted))", margin: 0 };
 const field: React.CSSProperties = { padding: "5px 8px", border: "1px solid hsl(var(--border))", borderRadius: 6, background: "transparent", color: "inherit", font: "inherit", fontSize: 13 };
@@ -58,9 +59,6 @@ function Panel({ onClose }: { onClose: () => void }) {
       setConfig(c);
       void refresh(c);
     });
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
   const fail = (e: unknown) => setError(String((e as Error)?.message ?? e));
@@ -113,7 +111,7 @@ function Panel({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className="cmd-palette-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-label={t("backup.title")}>
+    <Modal onClose={onClose} className="cmd-palette-backdrop" onClick={onClose} aria-label={t("backup.title")}>
       <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 560, padding: 16, display: "grid", gap: 12 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <strong>{t("backup.title")}</strong>
@@ -200,7 +198,7 @@ function Panel({ onClose }: { onClose: () => void }) {
           </p>
         )}
       </div>
-    </div>
+    </Modal>
   );
 }
 

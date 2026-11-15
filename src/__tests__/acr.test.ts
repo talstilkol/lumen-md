@@ -17,8 +17,23 @@ async function acr() {
     loadReport(root?: string): { version: string; criteria: Array<{ id: string; level: string; status: string; plan?: unknown }> };
     checkReport(report: unknown, root?: string): string[];
     summary(report: unknown): Record<"A" | "AA", Record<string, number>>;
-    renderPage(report: unknown, lang: "en" | "he"): string;
+    renderPage(report: unknown, lang: "en" | "he", en?: unknown): string;
+    loadEn(root?: string): EnSource;
+    enRows(report: unknown, en: unknown): EnRow[];
+    checkEn(report: unknown, en: unknown, root?: string): string[];
   };
+}
+
+interface EnRow {
+  clause: number;
+  id: string;
+  wcag: string | null;
+  status: string | null;
+  mirrors?: string | null;
+}
+interface EnSource {
+  softwareExcluded: string[];
+  rows: Array<{ id: string; status: string; mirrors?: string; plan?: unknown; remarks: { en: string; he: string } }>;
 }
 
 describe("the ACR (WCAG 2.2)", () => {
@@ -60,7 +75,7 @@ describe("the ACR (WCAG 2.2)", () => {
     const report = m.loadReport(ROOT);
     for (const lang of ["en", "he"] as const) {
       const page = readFileSync(join(ROOT, m.PAGES[lang]), "utf8");
-      expect(page).toBe(m.renderPage(report, lang));
+      expect(page).toBe(m.renderPage(report, lang, m.loadEn(ROOT)));
       for (const id of [...m.WCAG22.A, ...m.WCAG22.AA]) expect(page).toContain(`[${id} `);
       expect(page).toContain("issues/new?template=accessibility.yml");
     }
@@ -73,5 +88,59 @@ describe("the ACR (WCAG 2.2)", () => {
     const cmds = readFileSync(join(ROOT, "src/commands/domains/a11y.ts"), "utf8");
     expect(cmds).toMatch(/help\.a11yReport/);
     expect(cmds).toMatch(/template=accessibility\.yml/);
+  });
+});
+
+describe("the ACR, EN 301 549 V4.1.1 clauses 9–11 (W11.Q7)", () => {
+  it("has a status for every row of clauses 9, 10 and 11: no row is left not evaluated", async () => {
+    const m = await acr();
+    const rows = m.enRows(m.loadReport(ROOT), m.loadEn(ROOT));
+    expect(m.checkEn(m.loadReport(ROOT), m.loadEn(ROOT), ROOT)).toEqual([]);
+    for (const r of rows) expect(["supports", "partially-supports", "does-not-support", "not-applicable"], r.id).toContain(r.status);
+    expect(rows.filter((r) => r.clause === 9)).toHaveLength(55);
+    expect(rows.filter((r) => r.clause === 10)).toHaveLength(1);
+  });
+
+  it("clause 9 is every WCAG 2.2 A / AA criterion, with its status", async () => {
+    const m = await acr();
+    const report = m.loadReport(ROOT);
+    const rows = m.enRows(report, m.loadEn(ROOT));
+    for (const c of report.criteria) expect(rows.find((r) => r.id === `9.${c.id}`)?.status, c.id).toBe(c.status);
+  });
+
+  it("clause 11 leaves out the WCAG criteria V4.1.1 does not apply to software, and has 11.5–11.8", async () => {
+    const m = await acr();
+    const rows = m.enRows(m.loadReport(ROOT), m.loadEn(ROOT)).filter((r) => r.clause === 11);
+    for (const id of ["1.2.4", "2.4.1", "2.4.5", "3.1.2", "3.2.3", "3.2.6"]) expect(rows.some((r) => r.wcag === id), id).toBe(false);
+    for (const id of ["11.2.4.2", "11.2.4.11", "11.2.5.8", "11.3.3.8", "11.4.1.2", "11.4.1.3"]) expect(rows.some((r) => r.id === id), id).toBe(true);
+    const own = ["11.5.2.1", ...Array.from({ length: 14 }, (_, i) => `11.5.2.${i + 4}`), "11.6.1", "11.6.2", "11.7", "11.8.1", "11.8.2", "11.8.3", "11.8.4", "11.8.5"];
+    expect(rows.filter((r) => !r.wcag).map((r) => r.id)).toEqual(own);
+    expect(rows).toHaveLength(49 + own.length);
+  });
+
+  it("refuses a row without a status, a mirror that disagrees, and a partial row without a plan", async () => {
+    const m = await acr();
+    const report = m.loadReport(ROOT);
+    const en = JSON.parse(JSON.stringify(m.loadEn(ROOT))) as EnSource;
+    const row = (id: string) => en.rows.find((r) => r.id === id)!;
+    row("11.6.2").status = "not-evaluated";
+    row("11.5.2.6").status = "partially-supports";
+    delete row("11.8.2").plan;
+    const problems = m.checkEn(report, en, ROOT).join("\n");
+    expect(problems).toMatch(/EN 11\.6\.2: status "not-evaluated"/);
+    expect(problems).toMatch(/EN 11\.5\.2\.6: mirrors 1\.3\.1 \(supports\) but says partially-supports/);
+    expect(problems).toMatch(/EN 11\.8\.2: partially-supports needs a plan/);
+  });
+
+  it("is on both pages, and the statement points to it", async () => {
+    const m = await acr();
+    for (const lang of ["en", "he"] as const) {
+      const page = readFileSync(join(ROOT, m.PAGES[lang]), "utf8");
+      expect(page).toContain("## EN 301 549 V4.1.1");
+      expect(page).toContain("| 11.8.4 Repair assistance |");
+      expect(page).toContain("| 10 Non-web documents |");
+    }
+    expect(readFileSync(join(ROOT, "docs/src/content/docs/editor/accessibility-statement.md"), "utf8")).toMatch(/EN 301 549 V4\.1\.1[\s\S]*\(\/editor\/acr\/\)/);
+    expect(readFileSync(join(ROOT, "docs/src/content/docs/he/editor/accessibility-statement.md"), "utf8")).toMatch(/EN 301 549 V4\.1\.1[\s\S]*\(\/he\/editor\/acr\/\)/);
   });
 });

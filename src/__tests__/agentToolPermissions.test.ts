@@ -66,8 +66,9 @@ const reply = (content: string): ExecutorResponse => ({ content, toolCalls: [], 
 const call = (tool: string, args: Record<string, unknown>) => reply(JSON.stringify({ tool, args }));
 const final = (answer: string) => reply(JSON.stringify({ final: answer }));
 /** The last tool result; an untrusted one (plan 2.7) arrives between ⟪untrusted⟫ delimiters around the JSON. */
+// W11.I3: an untrusted tool result reaches the model data-marked (spaces as ˆ); read it back as text.
 const lastToolResult = (req: ExecutorRequest) => {
-  const c = req.messages[req.messages.length - 1].content;
+  const c = req.messages[req.messages.length - 1].content.replace(/\u02C6/g, " ");
   return JSON.parse(c.slice(c.indexOf("{"), c.lastIndexOf("}") + 1)) as { tool: string; result?: unknown; error?: string };
 };
 
@@ -166,7 +167,8 @@ describe("argument schemas", () => {
     );
     const def: AgentDefinition = { id: "p", description: "", system: "s", user: () => "u", tools: [tool], language: "any" };
     await runAgent(def, {});
-    expect(results[0].error).toMatch(/^bad-args: \$\.n must be integer/);
+    // The first invalid call gets toolRepair's retry message around the runtime's bad-args error (one retry).
+    expect(results[0].error).toMatch(/^Invalid tool call: bad-args: \$\.n must be integer/);
     expect(spy).toHaveBeenCalledTimes(1);
     expect(spy.mock.calls[0][0]).toEqual({ n: 3 });
   });

@@ -445,6 +445,13 @@
       "icon": "Pencil"
     },
     {
+      "id": "view.hebrewGrammarModel",
+      "label": "Hebrew grammar: check suggestions with a local model (on / off)",
+      "group": "View",
+      "hint": "Ollama on this computer (DictaLM first) drops the grammar suggestions it rejects. Off by default; nothing leaves this computer.",
+      "icon": "Pencil"
+    },
+    {
       "id": "tools.writingGoal",
       "label": "✍️ Set a daily writing goal",
       "group": "Tools",
@@ -570,10 +577,24 @@
       "icon": "Sparkles"
     },
     {
+      "id": "research.library",
+      "label": "🔎 Research: Search the Library by Meaning",
+      "group": "Tools",
+      "hint": "Finds clips you saved by what they are about, not only their words. Clips are indexed on this device",
+      "icon": "Sparkles"
+    },
+    {
       "id": "research.verify",
       "label": "🔎 Research: Verify Citations in This Note",
       "group": "AI Prompts",
       "hint": "Checks every footnote link is alive and its quote really appears on the page",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "research.clipTemplates",
+      "label": "Web clipper: templates and triggers",
+      "group": "AI Prompts",
+      "hint": "Edit the templates clips are saved with, and which site gets which",
       "icon": "Sparkles"
     },
     {
@@ -961,6 +982,12 @@
       "icon": "FileText"
     },
     {
+      "id": "help.credits",
+      "label": "Credits & model licences",
+      "group": "Tools",
+      "icon": "Sparkles"
+    },
+    {
       "id": "help.usage",
       "label": "Help: Usage on this device",
       "group": "Tools",
@@ -1014,6 +1041,20 @@
       "label": "Hebrew: add partial niqqud",
       "group": "Tools",
       "hint": "Point only the words that could be read more than one way",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "nikud.nouns",
+      "label": "Hebrew: niqqud on nouns only",
+      "group": "Tools",
+      "hint": "Point only the nouns (needs the Hebrew dictionary, “Hebrew dictionary and synonyms (download / remove)”)",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "nikud.verbs",
+      "label": "Hebrew: niqqud on verbs only",
+      "group": "Tools",
+      "hint": "Point only the verbs (needs the Hebrew dictionary, “Hebrew dictionary and synonyms (download / remove)”)",
       "icon": "Sparkles"
     },
     {
@@ -1264,14 +1305,15 @@
       "icon": "Sparkles"
     },
     {
-      "id": "voice.transcribeFile",
-      "label": "🎙 Transcribe an audio file (with timestamps)",
+      "id": "voice.corpusRecorder",
+      "label": "Voice corpus: record sentences for an open Hebrew voice",
       "group": "Tools",
+      "hint": "Record, check and export a CC0 speech corpus on this device (no upload)",
       "icon": "Sparkles"
     },
     {
-      "id": "help.credits",
-      "label": "Credits & model licences",
+      "id": "voice.transcribeFile",
+      "label": "🎙 Transcribe an audio file (with timestamps)",
       "group": "Tools",
       "icon": "Sparkles"
     },
@@ -1285,12 +1327,6 @@
     {
       "id": "voice.meetingFile",
       "label": "🎙 Transcribe a meeting recording (who said what)…",
-      "group": "Tools",
-      "icon": "Sparkles"
-    },
-    {
-      "id": "speakers.rename",
-      "label": "Rename a speaker in this note…",
       "group": "Tools",
       "icon": "Sparkles"
     },
@@ -1744,6 +1780,14 @@
       "label": "Insert math block",
       "group": "Insert",
       "icon": "Calculator"
+    },
+    {
+      "id": "edit.toggleDirection",
+      "label": "Switch paragraph direction (right-to-left ↔ left-to-right)",
+      "group": "Edit",
+      "hint": "Saved in the note as an invisible direction mark at the paragraph's start; frontmatter dir: rtl | ltr | auto sets the whole note",
+      "shortcut": "⇧⌘X",
+      "icon": "Pencil"
     },
     {
       "id": "insert.inlineMath",
@@ -2483,6 +2527,13 @@
       "icon": "Pencil"
     },
     {
+      "id": "view.hebrewGrammarModel",
+      "label": "Hebrew grammar: check suggestions with a local model (on / off)",
+      "group": "View",
+      "hint": "Ollama on this computer (DictaLM first) drops the grammar suggestions it rejects. Off by default; nothing leaves this computer.",
+      "icon": "Pencil"
+    },
+    {
       "id": "tools.writingGoal",
       "label": "✍️ Writing goal: 750 words/day",
       "group": "Tools",
@@ -2608,10 +2659,24 @@
       "icon": "Sparkles"
     },
     {
+      "id": "research.library",
+      "label": "🔎 Research: Search the Library by Meaning",
+      "group": "Tools",
+      "hint": "Finds clips you saved by what they are about, not only their words. Clips are indexed on this device",
+      "icon": "Sparkles"
+    },
+    {
       "id": "research.verify",
       "label": "🔎 Research: Verify Citations in This Note",
       "group": "AI Prompts",
       "hint": "Checks every footnote link is alive and its quote really appears on the page",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "research.clipTemplates",
+      "label": "Web clipper: templates and triggers",
+      "group": "AI Prompts",
+      "hint": "Edit the templates clips are saved with, and which site gets which",
       "icon": "Sparkles"
     },
     {
@@ -2999,6 +3064,12 @@
       "icon": "FileText"
     },
     {
+      "id": "help.credits",
+      "label": "Credits & model licences",
+      "group": "Tools",
+      "icon": "Sparkles"
+    },
+    {
       "id": "help.usage",
       "label": "Help: Usage on this device",
       "group": "Tools",
@@ -3052,6 +3123,20 @@
       "label": "Hebrew: add partial niqqud",
       "group": "Tools",
       "hint": "Point only the words that could be read more than one way",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "nikud.nouns",
+      "label": "Hebrew: niqqud on nouns only",
+      "group": "Tools",
+      "hint": "Point only the nouns (needs the Hebrew dictionary, “Hebrew dictionary and synonyms (download / remove)”)",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "nikud.verbs",
+      "label": "Hebrew: niqqud on verbs only",
+      "group": "Tools",
+      "hint": "Point only the verbs (needs the Hebrew dictionary, “Hebrew dictionary and synonyms (download / remove)”)",
       "icon": "Sparkles"
     },
     {
@@ -3372,14 +3457,15 @@
       "icon": "Sparkles"
     },
     {
-      "id": "voice.transcribeFile",
-      "label": "🎙 Transcribe an audio file (with timestamps)",
+      "id": "voice.corpusRecorder",
+      "label": "Voice corpus: record sentences for an open Hebrew voice",
       "group": "Tools",
+      "hint": "Record, check and export a CC0 speech corpus on this device (no upload)",
       "icon": "Sparkles"
     },
     {
-      "id": "help.credits",
-      "label": "Credits & model licences",
+      "id": "voice.transcribeFile",
+      "label": "🎙 Transcribe an audio file (with timestamps)",
       "group": "Tools",
       "icon": "Sparkles"
     },
@@ -3393,12 +3479,6 @@
     {
       "id": "voice.meetingFile",
       "label": "🎙 Transcribe a meeting recording (who said what)…",
-      "group": "Tools",
-      "icon": "Sparkles"
-    },
-    {
-      "id": "speakers.rename",
-      "label": "Rename a speaker in this note…",
       "group": "Tools",
       "icon": "Sparkles"
     },
@@ -3900,6 +3980,14 @@
       "icon": "Calculator"
     },
     {
+      "id": "edit.toggleDirection",
+      "label": "Switch paragraph direction (right-to-left ↔ left-to-right)",
+      "group": "Edit",
+      "hint": "Saved in the note as an invisible direction mark at the paragraph's start; frontmatter dir: rtl | ltr | auto sets the whole note",
+      "shortcut": "⇧⌘X",
+      "icon": "Pencil"
+    },
+    {
       "id": "insert.inlineMath",
       "label": "Insert inline formula",
       "group": "Insert",
@@ -4232,6 +4320,7 @@
     "view.tsChecks",
     "view.grammarCheck",
     "view.hebrewGrammarLevel",
+    "view.hebrewGrammarModel",
     "tools.writingGoal",
     "ai.localToggle",
     "tools.vaultDoctor",
@@ -4250,7 +4339,9 @@
     "research.ask",
     "clip.url",
     "clip.clipboard",
+    "research.library",
     "research.verify",
+    "research.clipTemplates",
     "research.settings",
     "ai.batch",
     "ai.batchCheck",
@@ -4307,6 +4398,7 @@
     "help.feedback",
     "help.open",
     "help.diagnostics",
+    "help.credits",
     "help.usage",
     "help.beta",
     "ai.policy",
@@ -4315,6 +4407,8 @@
     "ai.switchProvider",
     "nikud.add",
     "nikud.partial",
+    "nikud.nouns",
+    "nikud.verbs",
     "nikud.remove",
     "tools.checkGrammar",
     "view.rtl",
@@ -4350,11 +4444,10 @@
     "template.importFromFile",
     "voice.command",
     "voice.memo",
+    "voice.corpusRecorder",
     "voice.transcribeFile",
-    "help.credits",
     "voice.meeting",
     "voice.meetingFile",
-    "speakers.rename",
     "ai.meetingNotes",
     "voice.dictate",
     "vault.encrypt",
@@ -4420,6 +4513,7 @@
     "insert.mermaid",
     "insert.map",
     "insert.math",
+    "edit.toggleDirection",
     "insert.inlineMath",
     "insert.callout",
     "insert.graphviz",

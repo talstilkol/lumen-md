@@ -87,6 +87,7 @@ export async function chatGemini(
   assertCloudAllowed("Google Gemini");
   const key = getProviderKey("gemini");
   const url = `${BASE}/${getGeminiModel(opts)}:generateContent?key=${encodeURIComponent(key)}`;
+  // privacy-ledger: rule Google Gemini: generativelanguage.googleapis.com (BASE), cloud-ai
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -112,6 +113,7 @@ export async function* chatGeminiStream(
   assertCloudAllowed("Google Gemini");
   const key = getProviderKey("gemini");
   const url = `${BASE}/${getGeminiModel(opts)}:streamGenerateContent?alt=sse&key=${encodeURIComponent(key)}`;
+  // privacy-ledger: rule Google Gemini: generativelanguage.googleapis.com (BASE), cloud-ai
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

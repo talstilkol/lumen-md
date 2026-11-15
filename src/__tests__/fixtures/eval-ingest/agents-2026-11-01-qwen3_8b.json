@@ -1,0 +1,104 @@
+{
+  "model": "qwen3:8b",
+  "kind": "model",
+  "url": "http://localhost:11434",
+  "date": "2026-11-01",
+  "note": "SYNTHETIC sample results for src/__tests__/evalIngest.test.ts: made up to exercise the ingest, not a measurement of any model.",
+  "results": [
+    {
+      "id": "tagger-he",
+      "agent": "tagger",
+      "status": "ok",
+      "executor": "ollama",
+      "model": "qwen3:8b",
+      "attempts": 1,
+      "ms": 1200,
+      "checks": [
+        {
+          "check": {
+            "type": "hebrew",
+            "min": 0.6
+          },
+          "ok": true,
+          "detail": "72% Hebrew letters"
+        }
+      ]
+    },
+    {
+      "id": "tagger-en",
+      "agent": "tagger",
+      "status": "ok",
+      "executor": "ollama",
+      "model": "qwen3:8b",
+      "attempts": 1,
+      "ms": 1200,
+      "checks": [
+        {
+          "check": {
+            "type": "hebrew",
+            "min": 0.6
+          },
+          "ok": true,
+          "detail": "72% Hebrew letters"
+        }
+      ]
+    },
+    {
+      "id": "outliner-he",
+      "agent": "outliner",
+      "status": "ok",
+      "executor": "ollama",
+      "model": "qwen3:8b",
+      "attempts": 1,
+      "ms": 1200,
+      "checks": [
+        {
+          "check": {
+            "type": "hebrew",
+            "min": 0.6
+          },
+          "ok": true,
+          "detail": "72% Hebrew letters"
+        }
+      ]
+    },
+    {
+      "id": "proofreader-he",
+      "agent": "proofreader",
+      "status": "ok",
+      "executor": "ollama",
+      "model": "qwen3:8b",
+      "attempts": 1,
+      "ms": 1200,
+      "checks": [
+        {
+          "check": {
+            "type": "hebrew",
+            "min": 0.6
+          },
+          "ok": false,
+          "detail": "missing: תיקון"
+        }
+      ]
+    },
+    {
+      "id": "charter-he",
+      "agent": "charter",
+      "status": "skipped",
+      "executor": "ollama",
+      "model": "qwen3:8b",
+      "attempts": 1,
+      "ms": 1200,
+      "checks": [
+        {
+          "check": {
+            "type": "hebrew",
+            "min": 0.6
+          },
+          "ok": false,
+          "detail": "12% Hebrew letters"
+        }
+      ]
+    }
+  ]
+}

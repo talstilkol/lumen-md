@@ -14,6 +14,28 @@
       "vars": []
     },
     {
+      "key": "about.a11yStatement",
+      "en": "Accessibility statement",
+      "vars": []
+    },
+    {
+      "key": "about.a11yStatement.hint",
+      "en": "Lumen's accessibility statement: the standard, what works, known gaps and how to report a barrier",
+      "vars": []
+    },
+    {
+      "key": "about.acr",
+      "en": "Accessibility conformance report",
+      "vars": []
+    },
+    {
+      "key": "about.version",
+      "en": "Lumen version {version}",
+      "vars": [
+        "version"
+      ]
+    },
+    {
       "key": "academic.close",
       "en": "Close",
       "vars": []
@@ -765,6 +787,59 @@
       ]
     },
     {
+      "key": "attachCleanup.ask.always",
+      "en": "Yes, and don't ask again",
+      "vars": []
+    },
+    {
+      "key": "attachCleanup.ask.keep",
+      "en": "No, keep them",
+      "vars": []
+    },
+    {
+      "key": "attachCleanup.ask.message",
+      "en": "{n} attachments are linked only from what you are deleting:\n{list}\nMove them to the trash too? Ctrl+Z brings everything back.",
+      "vars": [
+        "n",
+        "list"
+      ]
+    },
+    {
+      "key": "attachCleanup.ask.never",
+      "en": "No, and don't ask again",
+      "vars": []
+    },
+    {
+      "key": "attachCleanup.ask.title",
+      "en": "Delete the attachments too?",
+      "vars": []
+    },
+    {
+      "key": "attachCleanup.ask.trash",
+      "en": "Yes, move them to the trash too",
+      "vars": []
+    },
+    {
+      "key": "attachCleanup.setting",
+      "en": "When a deleted note leaves attachments no other note links to",
+      "vars": []
+    },
+    {
+      "key": "attachCleanup.setting.always",
+      "en": "Move them to the trash too",
+      "vars": []
+    },
+    {
+      "key": "attachCleanup.setting.ask",
+      "en": "Ask each time",
+      "vars": []
+    },
+    {
+      "key": "attachCleanup.setting.never",
+      "en": "Keep them",
+      "vars": []
+    },
+    {
       "key": "autofill.approve",
       "en": "Approve",
       "vars": []
@@ -1000,6 +1075,50 @@
       "vars": [
         "event"
       ]
+    },
+    {
+      "key": "backlinksList.collapseAll",
+      "en": "Collapse all",
+      "vars": []
+    },
+    {
+      "key": "backlinksList.count",
+      "en": "{n} links",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "backlinksList.expandAll",
+      "en": "Expand all",
+      "vars": []
+    },
+    {
+      "key": "backlinksList.noMatch",
+      "en": "No backlink matches “{q}”.",
+      "vars": [
+        "q"
+      ]
+    },
+    {
+      "key": "backlinksList.search",
+      "en": "Search backlinks",
+      "vars": []
+    },
+    {
+      "key": "backlinksList.sort",
+      "en": "Sort",
+      "vars": []
+    },
+    {
+      "key": "backlinksList.sort.modified",
+      "en": "Modified (newest first)",
+      "vars": []
+    },
+    {
+      "key": "backlinksList.sort.name",
+      "en": "Name",
+      "vars": []
     },
     {
       "key": "backup.choose.age",
@@ -1266,6 +1385,20 @@
       "en": "Saved to {file}",
       "vars": [
         "file"
+      ]
+    },
+    {
+      "key": "base.select.all",
+      "en": "Select all {n} notes in this view",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "base.select.row",
+      "en": "Select {note}",
+      "vars": [
+        "note"
       ]
     },
     {
@@ -1896,6 +2029,176 @@
       "vars": []
     },
     {
+      "key": "bulkEdit.apply",
+      "en": "Change {n} notes",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "bulkEdit.applying",
+      "en": "Changing {done} of {n}…",
+      "vars": [
+        "done",
+        "n"
+      ]
+    },
+    {
+      "key": "bulkEdit.clearSelection",
+      "en": "Clear selection",
+      "vars": []
+    },
+    {
+      "key": "bulkEdit.done",
+      "en": "Changed {n} notes in {s} s",
+      "vars": [
+        "n",
+        "s"
+      ]
+    },
+    {
+      "key": "bulkEdit.field",
+      "en": "Field",
+      "vars": []
+    },
+    {
+      "key": "bulkEdit.op",
+      "en": "Action",
+      "vars": []
+    },
+    {
+      "key": "bulkEdit.op.addTag",
+      "en": "Add a tag",
+      "vars": []
+    },
+    {
+      "key": "bulkEdit.op.clear",
+      "en": "Clear the field",
+      "vars": []
+    },
+    {
+      "key": "bulkEdit.op.convert",
+      "en": "Change the type",
+      "vars": []
+    },
+    {
+      "key": "bulkEdit.op.removeTag",
+      "en": "Remove a tag",
+      "vars": []
+    },
+    {
+      "key": "bulkEdit.op.set",
+      "en": "Set a value",
+      "vars": []
+    },
+    {
+      "key": "bulkEdit.preview",
+      "en": "{n} of {total} selected notes will change",
+      "vars": [
+        "n",
+        "total"
+      ]
+    },
+    {
+      "key": "bulkEdit.selected",
+      "en": "{n} selected",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "bulkEdit.skipped",
+      "en": "{n} notes left as they were: {why}",
+      "vars": [
+        "n",
+        "why"
+      ]
+    },
+    {
+      "key": "bulkEdit.title",
+      "en": "Edit the selected notes",
+      "vars": []
+    },
+    {
+      "key": "bulkEdit.toType",
+      "en": "New type",
+      "vars": []
+    },
+    {
+      "key": "bulkEdit.type.checkbox",
+      "en": "Checkbox",
+      "vars": []
+    },
+    {
+      "key": "bulkEdit.type.date",
+      "en": "Date",
+      "vars": []
+    },
+    {
+      "key": "bulkEdit.type.link",
+      "en": "Link",
+      "vars": []
+    },
+    {
+      "key": "bulkEdit.type.list",
+      "en": "List",
+      "vars": []
+    },
+    {
+      "key": "bulkEdit.type.number",
+      "en": "Number",
+      "vars": []
+    },
+    {
+      "key": "bulkEdit.type.text",
+      "en": "Text",
+      "vars": []
+    },
+    {
+      "key": "bulkEdit.undo",
+      "en": "Undo",
+      "vars": []
+    },
+    {
+      "key": "bulkEdit.undoConflicts",
+      "en": "{n} notes changed again since, and were left as they are",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "bulkEdit.undone",
+      "en": "Put {n} notes back",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "bulkEdit.value",
+      "en": "Value",
+      "vars": []
+    },
+    {
+      "key": "bulkEdit.why.failed",
+      "en": "could not be written",
+      "vars": []
+    },
+    {
+      "key": "bulkEdit.why.invalid",
+      "en": "the frontmatter does not parse",
+      "vars": []
+    },
+    {
+      "key": "bulkEdit.why.lossy",
+      "en": "the value can't be converted without losing it",
+      "vars": []
+    },
+    {
+      "key": "bulkEdit.why.unchanged",
+      "en": "already so",
+      "vars": []
+    },
+    {
       "key": "calendar.deadlineMove",
       "en": "A deadline on Shabbat or a chag",
       "vars": []
@@ -2105,6 +2408,11 @@
       ]
     },
     {
+      "key": "capture.globalShortcut.taken",
+      "en": "⌥⌘N is taken by another app, so it does not open Lumen from other apps. Inside Lumen, ⌥⌘N and File ▸ Quick capture still work.",
+      "vars": []
+    },
+    {
       "key": "capture.hint",
       "en": "Enter: add · Shift+Enter: new line · Esc: close",
       "vars": []
@@ -2112,6 +2420,11 @@
     {
       "key": "capture.inboxHeading",
       "en": "Inbox",
+      "vars": []
+    },
+    {
+      "key": "capture.meeting",
+      "en": "Meeting",
       "vars": []
     },
     {
@@ -2144,6 +2457,11 @@
     {
       "key": "capture.title",
       "en": "Quick capture",
+      "vars": []
+    },
+    {
+      "key": "capture.voice.afterStop",
+      "en": "No live transcription (the dictation model is not installed, or the language is not Hebrew): the recording is transcribed on this device when you stop.",
       "vars": []
     },
     {
@@ -2398,6 +2716,178 @@
     {
       "key": "cite.zotero.notRunning",
       "en": "Zotero isn't running on this computer. Open Zotero 7 and try again.",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.builtIn",
+      "en": "Built in",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.content",
+      "en": "Note body (Markdown, with {{variables}})",
+      "vars": [
+        "variables"
+      ]
+    },
+    {
+      "key": "clipTemplates.copy",
+      "en": "copy",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.delete",
+      "en": "Delete",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.duplicate",
+      "en": "Duplicate",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.import",
+      "en": "Import (Obsidian Web Clipper JSON)",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.importFailed",
+      "en": "Could not import: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "clipTemplates.imported",
+      "en": "Imported {count} template(s). Save to keep them.",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "clipTemplates.name",
+      "en": "Name",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.new",
+      "en": "New template",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.noteName",
+      "en": "Note name",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.path",
+      "en": "Folder (in the vault)",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.preview",
+      "en": "Preview with sample values",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.problem.duplicate",
+      "en": "Two templates have the id {detail}.",
+      "vars": [
+        "detail"
+      ]
+    },
+    {
+      "key": "clipTemplates.problem.name",
+      "en": "A template needs a name.",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.problem.noteName",
+      "en": "A template needs a note name.",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.problem.property",
+      "en": "Not a property name: {detail}",
+      "vars": [
+        "detail"
+      ]
+    },
+    {
+      "key": "clipTemplates.problem.regex",
+      "en": "Not a valid regular expression: {detail}",
+      "vars": [
+        "detail"
+      ]
+    },
+    {
+      "key": "clipTemplates.problem.trigger",
+      "en": "Not a trigger: {detail} (an address starting with https://, /regex/ or schema:@Type)",
+      "vars": [
+        "detail"
+      ]
+    },
+    {
+      "key": "clipTemplates.properties",
+      "en": "Properties, one per line: name: value",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.readOnly",
+      "en": "Built in: duplicate it to change it.",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.save",
+      "en": "Save",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.saved",
+      "en": "Saved to .lumen/clip-templates.json.",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.test",
+      "en": "Test an address",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.testDefault",
+      "en": "No trigger matches: the default template",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.testResult",
+      "en": "{name}, by the trigger {trigger}",
+      "vars": [
+        "name",
+        "trigger"
+      ]
+    },
+    {
+      "key": "clipTemplates.title",
+      "en": "Clip templates and triggers",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.triggers",
+      "en": "Triggers, one per line: an address prefix (https://…), /regex/ or schema:@Type",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.untitled",
+      "en": "New template",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.yours",
+      "en": "Your templates",
       "vars": []
     },
     {
@@ -2862,6 +3352,20 @@
       "vars": [
         "note",
         "error"
+      ]
+    },
+    {
+      "key": "db.select.all",
+      "en": "Select all {n} notes the filter shows",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "db.select.row",
+      "en": "Select {note}",
+      "vars": [
+        "note"
       ]
     },
     {
@@ -3604,6 +4108,21 @@
       "vars": []
     },
     {
+      "key": "e2ee.gate.cancel",
+      "en": "Not now",
+      "vars": []
+    },
+    {
+      "key": "e2ee.gate.enable",
+      "en": "Turn on (experimental)",
+      "vars": []
+    },
+    {
+      "key": "e2ee.gate.title",
+      "en": "Turn on encrypted sync?",
+      "vars": []
+    },
+    {
       "key": "e2ee.guide.advanced",
       "en": "Advanced: S3, Dropbox, Google Drive and every detail",
       "vars": []
@@ -3653,6 +4172,11 @@
       "vars": []
     },
     {
+      "key": "e2ee.guide.hideQr",
+      "en": "Hide the QR code",
+      "vars": []
+    },
+    {
       "key": "e2ee.guide.join",
       "en": "Connect this device",
       "vars": []
@@ -3683,6 +4207,16 @@
       "vars": []
     },
     {
+      "key": "e2ee.guide.qr",
+      "en": "QR code of the key's words",
+      "vars": []
+    },
+    {
+      "key": "e2ee.guide.qrHint",
+      "en": "Scan it with the other device's camera, then paste the words into “I already have a key from another device”. Anyone who sees this code can read your notes: show it only to your own device.",
+      "vars": []
+    },
+    {
       "key": "e2ee.guide.recommended",
       "en": "recommended",
       "vars": []
@@ -3690,6 +4224,11 @@
     {
       "key": "e2ee.guide.secondDevice",
       "en": "On your next device: open Lumen, run “Set up sync”, choose the same place and paste the 13 words.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.guide.showQr",
+      "en": "Show as a QR code",
       "vars": []
     },
     {
@@ -3719,7 +4258,7 @@
     },
     {
       "key": "e2ee.guide.where.dropbox.about",
-      "en": "Sign in to Dropbox.",
+      "en": "Sign in to Dropbox. Lumen keeps only encrypted files in its app folder; Dropbox can't read them.",
       "vars": []
     },
     {
@@ -3739,8 +4278,15 @@
     },
     {
       "key": "e2ee.guide.where.gdrive.about",
-      "en": "Sign in to Google.",
+      "en": "Sign in to Google. Lumen keeps only encrypted files in a “Lumen Vault” folder of your Drive; Google can't read them.",
       "vars": []
+    },
+    {
+      "key": "e2ee.guide.where.notInBuild",
+      "en": "Not in this build yet: {name} needs Lumen's sign-in app, which isn't registered. Until then, choose your {name} folder on a computer, or the relay.",
+      "vars": [
+        "name"
+      ]
     },
     {
       "key": "e2ee.guide.where.relay",
@@ -4085,6 +4631,38 @@
       "vars": []
     },
     {
+      "key": "e2ee.passkey.add",
+      "en": "Add a passkey",
+      "vars": []
+    },
+    {
+      "key": "e2ee.passkey.item",
+      "en": "Passkey {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "e2ee.passkey.note",
+      "en": "A passkey on this device (or one your password manager syncs) can unlock the vault instead of the passphrase. Lumen uses the passkey's PRF extension, so no password is stored.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.passkey.remove",
+      "en": "Remove",
+      "vars": []
+    },
+    {
+      "key": "e2ee.passkey.title",
+      "en": "Passkeys",
+      "vars": []
+    },
+    {
+      "key": "e2ee.passkey.unlock",
+      "en": "Unlock with a passkey",
+      "vars": []
+    },
+    {
       "key": "e2ee.progress",
       "en": "{done} of {total} files · {bytesDone} of {bytes}",
       "vars": [
@@ -4092,6 +4670,139 @@
         "total",
         "bytesDone",
         "bytes"
+      ]
+    },
+    {
+      "key": "e2ee.recovery.back",
+      "en": "Show the words again",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.check",
+      "en": "The words don't add up: one is wrong or out of order.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.count",
+      "en": "{n} words are needed; there are {got}.",
+      "vars": [
+        "n",
+        "got"
+      ]
+    },
+    {
+      "key": "e2ee.recovery.done",
+      "en": "The recovery key is on. Every key change keeps it.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.finish",
+      "en": "Turn on the recovery key",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.forgot",
+      "en": "Forgot the passphrase?",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.hasOne",
+      "en": "This vault has a recovery key. Making a new one replaces it, and the old words stop working.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.intro",
+      "en": "If you forget the passphrase, 24 words open the vault again. Without them, a forgotten passphrase loses the vault.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.newPassphrase",
+      "en": "New passphrase",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.next",
+      "en": "I wrote them down",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.pdf",
+      "en": "Download the printable kit (PDF)",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.pdfNote",
+      "en": "The PDF is made on this device and saved where you choose. It isn't added to the vault or sent anywhere.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.replace",
+      "en": "Make a new recovery key",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.restore",
+      "en": "Restore",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.restoreNote",
+      "en": "The 24 words open the vault, then you choose a new passphrase. Your other devices pair again afterwards.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.restoreTitle",
+      "en": "Restore with recovery words",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.start",
+      "en": "Set up a recovery key",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.title",
+      "en": "Recovery key",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.unknown",
+      "en": "Word {n} isn't on the recovery word list.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "e2ee.recovery.verify",
+      "en": "Type three of the words to show they're written down.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.recovery.verifyWrong",
+      "en": "Not the right word: {n}. Check what you wrote down.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "e2ee.recovery.wordN",
+      "en": "Word {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "e2ee.recovery.words",
+      "en": "The {n} recovery words",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "e2ee.recovery.writeDown",
+      "en": "Write these {n} words down, in order, and keep them offline. They appear only now.",
+      "vars": [
+        "n"
       ]
     },
     {
@@ -4129,6 +4840,21 @@
       "vars": []
     },
     {
+      "key": "e2ee.rollback.fork",
+      "en": "The sync service returned another version of the vault in place of the one this device saw: another device's changes replaced it, so the service didn't keep a conditional write. This device stopped and wrote nothing; the notes on it are unchanged. Don't make changes here for now: sync your other devices and see which one has the latest notes. If this happens again, don't use this service for this vault.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.rollback.keyring",
+      "en": "The sync service returned older keys than this device has already seen (a rollback). This device stopped and wrote nothing; the notes on it are unchanged. Sync your other devices; if this stays, don't trust this service.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.rollback.older",
+      "en": "The sync service returned an older version of the vault than this device has already seen, as if changes had been undone (a rollback or a replay). This device stopped and wrote nothing; the notes on it are unchanged. Sync your other devices and check that their latest changes are there; if this stays, don't trust this service.",
+      "vars": []
+    },
+    {
       "key": "e2ee.rule.folder",
       "en": "folder {value}",
       "vars": [
@@ -4148,6 +4874,21 @@
       "vars": [
         "value"
       ]
+    },
+    {
+      "key": "e2ee.rules.conflictMode",
+      "en": "When this device and another changed the same note",
+      "vars": []
+    },
+    {
+      "key": "e2ee.rules.conflictMode.file",
+      "en": "Keep a conflict file (name.sync-conflict-…), no merge",
+      "vars": []
+    },
+    {
+      "key": "e2ee.rules.conflictMode.merge",
+      "en": "Merge, and ask only about what overlaps (default)",
+      "vars": []
     },
     {
       "key": "e2ee.rules.extensions",
@@ -4875,6 +5616,16 @@
       "vars": []
     },
     {
+      "key": "e2ee.unaudited.badge",
+      "en": "Experimental — not externally security-audited",
+      "vars": []
+    },
+    {
+      "key": "e2ee.unaudited.body",
+      "en": "Lumen's encryption was written in this project and has not been reviewed by an outside security firm. Keep your own backup of anything you can't afford to lose.",
+      "vars": []
+    },
+    {
       "key": "e2ee.wrap.tampered",
       "en": "This device's key in the vault's keyring doesn't open it: the sync service changed it or put back an old one. Nothing on this device was changed. Try again later; if it stays like this, pair this device again from one you trust.",
       "vars": []
@@ -5470,6 +6221,16 @@
       "vars": []
     },
     {
+      "key": "flag.sync.e2ee.desc",
+      "en": "End-to-end encrypted sync to a folder, WebDAV, S3 or the relay. Off by default in every build: its cryptography has not had an external security audit yet.",
+      "vars": []
+    },
+    {
+      "key": "flag.sync.e2ee.name",
+      "en": "Encrypted sync (experimental)",
+      "vars": []
+    },
+    {
       "key": "flag.update.checkOnLaunch.desc",
       "en": "Desktop app: look for a new version once a day when Lumen starts, so beta fixes arrive quickly. Never in local-only mode; every check is in the privacy log.",
       "vars": []
@@ -5534,6 +6295,11 @@
     {
       "key": "flags.stage.beta",
       "en": "Beta",
+      "vars": []
+    },
+    {
+      "key": "flags.stage.experimental",
+      "en": "Experimental",
       "vars": []
     },
     {
@@ -5703,6 +6469,33 @@
       ]
     },
     {
+      "key": "grammar.he.model.noHebrewModel",
+      "en": "Ollama has no Hebrew model. Pull one (DictaLM 3.0, for example), then turn this on again.",
+      "vars": []
+    },
+    {
+      "key": "grammar.he.model.noOllama",
+      "en": "Ollama does not answer on this computer, so the rules' suggestions are shown as they are.",
+      "vars": []
+    },
+    {
+      "key": "grammar.he.model.notLocal",
+      "en": "The grammar model runs on this computer only, and the Ollama address is not local.",
+      "vars": []
+    },
+    {
+      "key": "grammar.he.model.off",
+      "en": "The local grammar model is off: the suggestions come from the rules only.",
+      "vars": []
+    },
+    {
+      "key": "grammar.he.model.on",
+      "en": "Hebrew grammar suggestions are now checked by {model} on this computer.",
+      "vars": [
+        "model"
+      ]
+    },
+    {
       "key": "graph.ariaLabel",
       "en": "Knowledge graph of {nodes} notes",
       "vars": [
@@ -5805,6 +6598,46 @@
     {
       "key": "graph.search",
       "en": "Find a note",
+      "vars": []
+    },
+    {
+      "key": "graph.table.caption",
+      "en": "Notes and their links: {shown} of {nodes} notes, most linked first",
+      "vars": [
+        "shown",
+        "nodes"
+      ]
+    },
+    {
+      "key": "graph.table.linkedTo",
+      "en": "Linked notes",
+      "vars": []
+    },
+    {
+      "key": "graph.table.links",
+      "en": "Links",
+      "vars": []
+    },
+    {
+      "key": "graph.table.more",
+      "en": "and {n} more",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "graph.table.none",
+      "en": "no links",
+      "vars": []
+    },
+    {
+      "key": "graph.table.note",
+      "en": "Note",
+      "vars": []
+    },
+    {
+      "key": "graph.table.toggle",
+      "en": "Show as a table",
       "vars": []
     },
     {
@@ -6148,6 +6981,35 @@
       ]
     },
     {
+      "key": "imageCopy.copied",
+      "en": "Image copied",
+      "vars": []
+    },
+    {
+      "key": "imageCopy.copy",
+      "en": "Copy image",
+      "vars": []
+    },
+    {
+      "key": "imageCopy.failed",
+      "en": "Could not copy the image: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "imageCopy.menu",
+      "en": "Image",
+      "vars": []
+    },
+    {
+      "key": "imageCopy.notFound",
+      "en": "“{name}” is not in this vault",
+      "vars": [
+        "name"
+      ]
+    },
+    {
       "key": "imageHosts.close",
       "en": "Close",
       "vars": []
@@ -6376,6 +7238,36 @@
       ]
     },
     {
+      "key": "importWizard.onenote.failed",
+      "en": "The OneNote sign-in did not finish: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "importWizard.onenote.pages",
+      "en": "Reading OneNote pages: {done} of {total}",
+      "vars": [
+        "done",
+        "total"
+      ]
+    },
+    {
+      "key": "importWizard.onenote.reading",
+      "en": "Reading your OneNote…",
+      "vars": []
+    },
+    {
+      "key": "importWizard.onenote.signIn",
+      "en": "Sign in to Microsoft and import from OneNote",
+      "vars": []
+    },
+    {
+      "key": "importWizard.onenote.signInNote",
+      "en": "Read only (Notes.Read). The sign-in is used for this import and not kept.",
+      "vars": []
+    },
+    {
       "key": "importWizard.pickFile",
       "en": "Choose files…",
       "vars": []
@@ -6496,6 +7388,23 @@
       "vars": [
         "n"
       ]
+    },
+    {
+      "key": "importWizard.search.button",
+      "en": "Search for “{query}”",
+      "vars": [
+        "query"
+      ]
+    },
+    {
+      "key": "importWizard.search.firstRun",
+      "en": "Your notes are here. Try a search:",
+      "vars": []
+    },
+    {
+      "key": "importWizard.search.hint",
+      "en": "Find the imported notes:",
+      "vars": []
     },
     {
       "key": "importWizard.start",
@@ -6728,13 +7637,32 @@
       ]
     },
     {
+      "key": "knesset.answerLabel",
+      "en": "Answer (local model)",
+      "vars": []
+    },
+    {
+      "key": "knesset.answerNotVerified",
+      "en": "Not verified: the critic could not confirm this answer from section {section}. Rely on the quote.",
+      "vars": [
+        "section"
+      ]
+    },
+    {
+      "key": "knesset.answerVerified",
+      "en": "Checked by the critic: section {section} supports this answer.",
+      "vars": [
+        "section"
+      ]
+    },
+    {
       "key": "knesset.askNone",
       "en": "No saved law answers that. The search reads only laws saved for offline, with their text.",
       "vars": []
     },
     {
-      "key": "knesset.askPick",
-      "en": "Sections that answer it",
+      "key": "knesset.askPickQuote",
+      "en": "Sections to quote — quotes from the law, not verified answers",
       "vars": []
     },
     {
@@ -6815,6 +7743,16 @@
       "vars": []
     },
     {
+      "key": "knesset.quoteNotAnswer",
+      "en": "Quote from the law, not a verified answer.",
+      "vars": []
+    },
+    {
+      "key": "knesset.quoteNotInCopy",
+      "en": "quote not found in the saved copy",
+      "vars": []
+    },
+    {
       "key": "knesset.saveOffline",
       "en": "Save for offline",
       "vars": []
@@ -6825,11 +7763,6 @@
       "vars": [
         "path"
       ]
-    },
-    {
-      "key": "knesset.unverified",
-      "en": "not verified",
-      "vars": []
     },
     {
       "key": "latex.exported",
@@ -7176,6 +8109,58 @@
       "vars": []
     },
     {
+      "key": "library.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "library.count",
+      "en": "{count} clips in the library",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "library.empty",
+      "en": "No clips yet. Clip a web page and it appears here.",
+      "vars": []
+    },
+    {
+      "key": "library.indexing",
+      "en": "Indexing the library… {done} of {total}",
+      "vars": [
+        "done",
+        "total"
+      ]
+    },
+    {
+      "key": "library.noResults",
+      "en": "No clip matches that.",
+      "vars": []
+    },
+    {
+      "key": "library.noVault",
+      "en": "The library needs a vault on this device.",
+      "vars": []
+    },
+    {
+      "key": "library.search",
+      "en": "Search the library by meaning",
+      "vars": []
+    },
+    {
+      "key": "library.title",
+      "en": "Reading library",
+      "vars": []
+    },
+    {
+      "key": "library.unavailable",
+      "en": "Search by meaning is not available: {message}",
+      "vars": [
+        "message"
+      ]
+    },
+    {
       "key": "litReview.done",
       "en": "Literature review: {papers} papers, {values} verified values, in “{folder}”.",
       "vars": [
@@ -7452,6 +8437,175 @@
     {
       "key": "meeting.transcript",
       "en": "Transcript",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.about",
+      "en": "Record a meeting on this device. The transcript, summary, tasks and decisions are made here, and nothing is sent anywhere.",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.checking",
+      "en": "Checking which models are on this device…",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.declined",
+      "en": "Not saved: you declined. The note is below, to copy.",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.done",
+      "en": "Meeting note saved: {sentences} sentences, {tasks} tasks.",
+      "vars": [
+        "sentences",
+        "tasks"
+      ]
+    },
+    {
+      "key": "meetingFlow.empty",
+      "en": "Nothing was heard in the recording.",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.failed",
+      "en": "The meeting note could not be made: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "meetingFlow.liveOff",
+      "en": "No live transcript: the recording is transcribed on this device after it stops.",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.liveOn",
+      "en": "Live transcript on this device.",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.micFailed",
+      "en": "The microphone could not start: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "meetingFlow.name",
+      "en": "Meeting name",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.note.decisions",
+      "en": "Decisions",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.note.noModel",
+      "en": "No local model was available to find these.",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.note.none",
+      "en": "None.",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.note.questions",
+      "en": "Open questions",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.note.recording",
+      "en": "Recording",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.note.rejected",
+      "en": "{n} items the model wrote had no source in the transcript and were left out.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "meetingFlow.note.summary",
+      "en": "Summary",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.note.summaryChecked",
+      "en": "Checked summary: every sentence is copied from the transcript (a local model picked them).",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.note.summaryExtractive",
+      "en": "Extractive summary: the most central sentences (no local model, or its summary did not pass the check).",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.note.tasks",
+      "en": "Tasks",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.note.transcript",
+      "en": "Transcript",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.saving",
+      "en": "The note comes from the transcript, so it is saved only after you approve it…",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.speakersOff",
+      "en": "Speakers are not identified: no diarization model is set up on this device.",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.speakersOn",
+      "en": "Speakers are identified on this device.",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.start",
+      "en": "Start recording",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.stop",
+      "en": "Stop and write the note",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.summarizing",
+      "en": "Writing the summary, tasks and decisions…",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.title",
+      "en": "Meeting",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.transcribing",
+      "en": "Transcribing on this device…",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.unavailable",
+      "en": "Unavailable: no transcription model is on this device. Download the Hebrew dictation model or a Whisper model under Settings → Models, then open this again. Nothing was recorded.",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.untitled",
+      "en": "Meeting",
       "vars": []
     },
     {
@@ -7735,6 +8889,11 @@
     {
       "key": "models.purpose.imageSearch",
       "en": "Searching images by text",
+      "vars": []
+    },
+    {
+      "key": "models.purpose.nerEn",
+      "en": "Finding names, places and organisations in English text",
       "vars": []
     },
     {
@@ -8045,6 +9204,16 @@
       "vars": []
     },
     {
+      "key": "onboard.finish.folder",
+      "en": "Open the folder",
+      "vars": []
+    },
+    {
+      "key": "onboard.finish.import",
+      "en": "Choose the export",
+      "vars": []
+    },
+    {
       "key": "onboard.firstNote.body",
       "en": "# My first note\n\nStart writing here. Type [[ to link to another note.",
       "vars": []
@@ -8070,6 +9239,11 @@
       ]
     },
     {
+      "key": "onboard.import.from",
+      "en": "Where are your notes now?",
+      "vars": []
+    },
+    {
       "key": "onboard.import.notion",
       "en": "Import a Notion export (.zip)",
       "vars": []
@@ -8077,6 +9251,36 @@
     {
       "key": "onboard.import.obsidian",
       "en": "Import an Obsidian vault (folder)",
+      "vars": []
+    },
+    {
+      "key": "onboard.import.source.appleNotes",
+      "en": "Apple Notes",
+      "vars": []
+    },
+    {
+      "key": "onboard.import.source.evernote",
+      "en": "Evernote",
+      "vars": []
+    },
+    {
+      "key": "onboard.import.source.keep",
+      "en": "Google Keep",
+      "vars": []
+    },
+    {
+      "key": "onboard.import.source.notion",
+      "en": "Notion",
+      "vars": []
+    },
+    {
+      "key": "onboard.import.source.obsidian",
+      "en": "Obsidian",
+      "vars": []
+    },
+    {
+      "key": "onboard.import.source.onenote",
+      "en": "OneNote",
       "vars": []
     },
     {
@@ -8134,6 +9338,33 @@
     {
       "key": "onboard.start.empty.desc",
       "en": "Just your first note.",
+      "vars": []
+    },
+    {
+      "key": "onboard.start.folder",
+      "en": "Open an Obsidian folder",
+      "vars": []
+    },
+    {
+      "key": "onboard.start.folder.current",
+      "en": "“{folder}”, the folder you chose, opens as it is.",
+      "vars": [
+        "folder"
+      ]
+    },
+    {
+      "key": "onboard.start.folder.desc",
+      "en": "Use an Obsidian vault where it already is. Nothing is copied, and no note is added to it.",
+      "vars": []
+    },
+    {
+      "key": "onboard.start.import",
+      "en": "Bring your notes",
+      "vars": []
+    },
+    {
+      "key": "onboard.start.import.desc",
+      "en": "From Notion, Evernote, Apple Notes, Google Keep, OneNote or Obsidian, into a new folder. Nothing you have changes, and one click takes it back.",
       "vars": []
     },
     {
@@ -8496,6 +9727,16 @@
       "vars": []
     },
     {
+      "key": "organizer.model",
+      "en": "Re-score with the local model",
+      "vars": []
+    },
+    {
+      "key": "organizer.model.about",
+      "en": "Ollama or the in-browser model rates each suggestion on this device, from the next run. Nothing is sent anywhere, and every change still waits for your approval.",
+      "vars": []
+    },
+    {
       "key": "organizer.next",
       "en": "Review the next {n}",
       "vars": [
@@ -8733,6 +9974,35 @@
       "key": "pdf.highlights.empty",
       "en": "Select text and press Highlight.",
       "vars": []
+    },
+    {
+      "key": "pdf.ink",
+      "en": "Ink",
+      "vars": []
+    },
+    {
+      "key": "pdf.ink.hint",
+      "en": "Draw on the page with a pen, a finger or the mouse; the strokes are saved with the highlights",
+      "vars": []
+    },
+    {
+      "key": "pdf.ink.layer",
+      "en": "Ink on page {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "pdf.ink.undo",
+      "en": "Undo stroke",
+      "vars": []
+    },
+    {
+      "key": "pdf.inkUnreadable",
+      "en": "The ink in {name} can't be read, so it isn't changed. Fix or remove its lumen-pdf-ink block first.",
+      "vars": [
+        "name"
+      ]
     },
     {
       "key": "pdf.noWorkspace",
@@ -9027,6 +10297,11 @@
       ]
     },
     {
+      "key": "pii.preview.noNames",
+      "en": "Names are not hidden: no name finder on this device (no name model, and Ollama is not running).",
+      "vars": []
+    },
+    {
       "key": "pii.preview.none",
       "en": "No personal data was found.",
       "vars": []
@@ -9043,7 +10318,7 @@
     },
     {
       "key": "pii.settings.hint",
-      "en": "E-mails, phone numbers, ID numbers, cards, IBANs, plates and birth dates are replaced with tokens such as ⟨EMAIL_1⟩ on this device, and put back in the answer. Names too when the Hebrew name model is downloaded.",
+      "en": "E-mails, phone numbers, ID numbers, cards, IBANs, plates and birth dates are replaced with tokens such as ⟨EMAIL_1⟩ on this device, and put back in the answer. Names too, but only when a name finder is on this device (a downloaded name model, or Ollama running here); otherwise the preview says that names are not hidden.",
       "vars": []
     },
     {
@@ -9603,7 +10878,7 @@
     },
     {
       "key": "preview.imageResize.hint",
-      "en": "Drag the edge to resize. The width is saved in the note.",
+      "en": "Drag the edge to resize; double-click it to reset. The width is saved in the note.",
       "vars": []
     },
     {
@@ -10456,6 +11731,11 @@
       "vars": []
     },
     {
+      "key": "settings.privacy",
+      "en": "Privacy",
+      "vars": []
+    },
+    {
       "key": "settings.search",
       "en": "Search settings",
       "vars": []
@@ -10753,6 +12033,11 @@
     {
       "key": "shareLink.keyHint",
       "en": "Send the key another way (another app, in person). The link alone can't open the note.",
+      "vars": []
+    },
+    {
+      "key": "shareLink.noExportDoor",
+      "en": "This build can't make share links: the part that removes redacted text and hidden comments from what leaves the device is missing, so nothing is shared.",
       "vars": []
     },
     {
@@ -11103,6 +12388,28 @@
       ]
     },
     {
+      "key": "sources.panel.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "sources.panel.hint",
+      "en": "Put the cursor on a verse reference: the notes that cite it show here.",
+      "vars": []
+    },
+    {
+      "key": "sources.panel.title",
+      "en": "My notes on {ref}",
+      "vars": [
+        "ref"
+      ]
+    },
+    {
+      "key": "sources.panel.titleNone",
+      "en": "My notes on this verse",
+      "vars": []
+    },
+    {
       "key": "sources.prompt",
       "en": "Which source? For example בראשית א:א, שמות כ׳ ג׳, ב״ר א, א or Berakhot 2a",
       "vars": []
@@ -11117,6 +12424,35 @@
       "en": "Saved to {path}",
       "vars": [
         "path"
+      ]
+    },
+    {
+      "key": "sources.trigger.changed",
+      "en": "The text around {ref} changed while it loaded: nothing was inserted.",
+      "vars": [
+        "ref"
+      ]
+    },
+    {
+      "key": "sources.trigger.dismiss",
+      "en": "Not now",
+      "vars": []
+    },
+    {
+      "key": "sources.trigger.insert",
+      "en": "Insert",
+      "vars": []
+    },
+    {
+      "key": "sources.trigger.label",
+      "en": "Quote from Sefaria",
+      "vars": []
+    },
+    {
+      "key": "sources.trigger.suggest",
+      "en": "Quote {ref} from Sefaria? Only the reference is sent.",
+      "vars": [
+        "ref"
       ]
     },
     {
@@ -11662,6 +12998,16 @@
     {
       "key": "student.summary",
       "en": "Summary",
+      "vars": []
+    },
+    {
+      "key": "student.summary.checked",
+      "en": "Checked summary: every sentence is copied from the lecture (a local model picked them).",
+      "vars": []
+    },
+    {
+      "key": "student.summary.extractive",
+      "en": "Extractive summary: the marked and most central sentences (no local model, or its summary did not pass the check).",
       "vars": []
     },
     {
@@ -13613,6 +14959,159 @@
       "vars": [
         "text"
       ]
+    },
+    {
+      "key": "voiceCorpus.agree",
+      "en": "I have read this and I agree",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.allDone",
+      "en": "Every sentence has a good take. Export the corpus.",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.consentDraft",
+      "en": "This consent text is a draft awaiting legal review (plan 10.O). Do not publish a corpus recorded under it until the reviewed text replaces it.",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.consentOk",
+      "en": "Agree and start",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.consentText",
+      "en": "I am the speaker, I am 18 or older, and I agree that the recordings I make here are released under CC0 1.0 (a public-domain dedication): anyone may use them for any purpose, including training and publishing a synthetic voice that sounds like me, without credit. I can stop at any time; takes I do not export never leave this device.",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.consentTitle",
+      "en": "Consent",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.export",
+      "en": "Export the corpus (ZIP)",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.levels",
+      "en": "speech {speech}, background {noise}, signal to noise {snr}",
+      "vars": [
+        "speech",
+        "noise",
+        "snr"
+      ]
+    },
+    {
+      "key": "voiceCorpus.loadScript",
+      "en": "Load the recording script (script.tsv from the voice kit)",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.micFailed",
+      "en": "The microphone could not record: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "voiceCorpus.next",
+      "en": "Next sentence",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.problem.clipping",
+      "en": "clipping",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.problem.no-lead",
+      "en": "no pause before speaking",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.problem.no-tail",
+      "en": "no pause after speaking",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.problem.noisy",
+      "en": "background noise",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.problem.too-long",
+      "en": "over 15 seconds",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.problem.too-loud",
+      "en": "too loud",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.problem.too-quiet",
+      "en": "too quiet",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.record",
+      "en": "Record",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.retake",
+      "en": "Record again",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.scriptEmpty",
+      "en": "The script has no sentences (one per line: id, tab, text, tab, source).",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.speaker",
+      "en": "Your name or pseudonym, as you want to be credited:",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.stop",
+      "en": "Stop",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.summary",
+      "en": "{ok} good takes of {takes} recorded, {sentences} sentences in the script, {minutes} minutes of good audio",
+      "vars": [
+        "ok",
+        "takes",
+        "sentences",
+        "minutes"
+      ]
+    },
+    {
+      "key": "voiceCorpus.takeBad",
+      "en": "Record this one again: {problems}",
+      "vars": [
+        "problems"
+      ]
+    },
+    {
+      "key": "voiceCorpus.takeOk",
+      "en": "Good take.",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.title",
+      "en": "Voice corpus recorder (open Hebrew voice)",
+      "vars": []
     },
     {
       "key": "whatsNew.close",

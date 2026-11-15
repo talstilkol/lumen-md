@@ -25,7 +25,8 @@ import { initSecretStore } from "./lib/secretStore";
 import { installPrivacyLedger } from "./ai/privacyLedger";
 import { installAiEscape, onAiBusy } from "./ai/aiAbort";
 import { aiBusyAnnouncer, announce } from "./a11y/announce";
-import { adoptBootLocale } from "./store/useStore";
+import { adoptBootLocale, useAppStore } from "./store/useStore";
+import { applyBootEdit, takeBootEdit } from "./boot/bootNote";
 import "./index.css";
 import { windowLabel } from "./desktop/window";
 
@@ -179,7 +180,9 @@ const vaultReady = Promise.race([
   new Promise((r) => setTimeout(r, 4000)),
 ]);
 // The Dropbox / Google sign-in of the encrypted sync returns here (plan 3.5).
-if (location.pathname.startsWith("/oauth/")) void import("./sync/e2ee/ui/launch").then((m) => m.oauthReturn(Promise.all([secretsReady, vaultReady])));
+// The OneNote import sign-in returns here (plan W10.E49); the tokens stay in memory.
+if (location.pathname === "/oauth/onenote") void import("./storage/import/onenoteReturn").then((m) => m.oneNoteReturn(Promise.all([secretsReady, vaultReady])));
+else if (location.pathname.startsWith("/oauth/")) void import("./sync/e2ee/ui/launch").then((m) => m.oauthReturn(Promise.all([secretsReady, vaultReady])));
 // Plan W5.21: a classroom link (`#class=…`, never sent to any server) offers to join once the app is up.
 if (location.hash.startsWith("#class=")) void import("./sync/e2ee/classroom/launch").then((m) => m.classLinkReturn(Promise.all([secretsReady, vaultReady])));
 void Promise.all([initLocale(), secretsReady, vaultReady])
@@ -204,6 +207,9 @@ window.addEventListener("hashchange", () => {
 });
 
 function renderApp() {
+// W10.E20: what was typed in the boot shell's note goes into the open note before React replaces the shell.
+const bootEdit = IS_PRESENTER || showShare || windowLabel() === "capture" ? null : takeBootEdit();
+if (bootEdit) applyBootEdit(bootEdit, useAppStore);
 ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
       <ErrorBoundary fallback={

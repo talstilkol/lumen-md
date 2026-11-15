@@ -1,12 +1,5 @@
 import { useEffect, useRef } from "react";
-import {
-  Editor as MilkdownEditor,
-  rootCtx,
-  defaultValueCtx,
-  editorViewCtx,
-  prosePluginsCtx,
-  remarkStringifyOptionsCtx,
-} from "@milkdown/core";
+import { Editor as MilkdownEditor, rootCtx, defaultValueCtx, editorViewCtx, prosePluginsCtx, remarkStringifyOptionsCtx } from "@milkdown/core";
 import { commonmark } from "@milkdown/preset-commonmark";
 import { gfm } from "@milkdown/preset-gfm";
 import { history } from "@milkdown/plugin-history";
@@ -15,22 +8,21 @@ import { clipboard } from "@milkdown/plugin-clipboard";
 import { math } from "@milkdown/plugin-math";
 import { slashFactory, SlashProvider } from "@milkdown/plugin-slash";
 import { tooltipFactory, TooltipProvider } from "@milkdown/plugin-tooltip";
-import { setBlockType, wrapIn } from "@milkdown/prose/commands";
 import type { EditorView } from "@milkdown/prose/view";
 import { Plugin } from "@milkdown/prose/state";
 import { wysiwygBidiPlugin } from "./wysiwygBidi";
+import { frontmatterDir } from "../lib/paragraphDirection";
+import { wysiwygAiAuthorshipPlugin } from "./wysiwygAiAuthorship";
+import { saveWysiwygAiSpans } from "./wysiwygAiSave";
+import { restoreWysiwygAiSpans } from "./wysiwygAiRestore";
 import { remoteImagePlugin } from "./remoteImageView";
 import { wysiwygBidiMarksPlugin } from "./wysiwygBidiMarks";
 import { listSpreadFix } from "./milkdownListSpread";
-import { wrapInList } from "prosemirror-schema-list";
 import { dragHandlePlugin } from "./dragHandles";
 import { buildIndentKeymap } from "./keymapExtra";
 import { wysiwygOutlineKeymap, wysiwygOutlinePlugin } from "./wysiwygOutline";
 import { buildTooltip } from "./wysiwygTooltip";
 import "katex/dist/katex.css";
-import { AiError } from "../ai/llm";
-import { showAiToast } from "../ui/AiToast";
-import { openAiPrompt } from "../ui/AiInlinePrompt";
 import { log } from "../lib/logger";
 import { getMarkdown, insert as insertMarkdown, $prose } from "@milkdown/utils";
 import { cleanPastedHtml, cleanPastedText, shouldConvertPaste } from "../paste/htmlPaste";
@@ -38,19 +30,14 @@ import { setWysiwygPasteTarget, type PasteDetail } from "../paste/pasteCommands"
 import { wysiwygPdfPastePlugin } from "../paste/wysiwygPdfPaste";
 import { wysiwygSourcePreserver } from "./wysiwygSource";
 import { wysiwygObsidianPlugins } from "./wysiwygObsidian";
-import {
-  configureWysiwygSuggest,
-  encodeCriticForWysiwyg,
-  registerWysiwygView,
-  unregisterWysiwygView,
-  wysiwygSuggestPlugins,
-} from "./wysiwygSuggest";
+import { configureWysiwygSuggest, encodeCriticForWysiwyg, registerWysiwygView, unregisterWysiwygView, wysiwygSuggestPlugins } from "./wysiwygSuggest";
 import { keepWikiLinks, protectEscapedWikiLinks } from "./wysiwygWikiLinks";
+import { roundTripSafe } from "./markdownSerialize.mjs";
+import type { Options as ToMarkdownOptions } from "mdast-util-to-markdown";
 import { wysiwygWikiComplete } from "./wysiwygWikiComplete";
 import { registerPendingEdits, useAppStore } from "../store/useStore";
 import { useAuth } from "../auth/useAuth";
-import { t } from "../i18n";
-import { explainError } from "../lib/userError";
+import { type SlashMenuRoot, buildSlashMenu } from "./wysiwygSlashMenu";
 
 // Suggesting mode (track changes) works in WYSIWYG too: CriticMarkup ↔
 // marks, edits tracked while the store's suggestingMode is on.
@@ -72,433 +59,6 @@ interface Props {
 const slash = slashFactory("wysiwyg-slash");
 const tooltip = tooltipFactory("wysiwyg-tooltip");
 
-interface SlashItem {
-  label: string;
-  icon: string;
-  /** Search keywords beyond label — typing any of these still surfaces it. */
-  keywords?: string[];
-  /** Category header used by the renderer for grouping. */
-  group: "Headings" | "Lists" | "Blocks" | "Media" | "Data" | "AI";
-  run: (view: EditorView) => void;
-}
-
-/**
- * Insert a verbatim markdown source block at the current selection. Used
- * for blocks that aren't part of the Milkdown schema (charts, csv-tables,
- * mermaid). The text is inserted as a code-block node with the matching
- * `language` so the round-trip to source preserves it.
- */
-function insertCodeFence(v: EditorView, lang: string, body: string): void {
-  const node = v.state.schema.nodes.code_block;
-  if (!node) return;
-  const tr = v.state.tr.replaceSelectionWith(
-    node.create({ language: lang }, v.state.schema.text(body)),
-  );
-  v.dispatch(tr);
-}
-
-function buildSlashItems(): SlashItem[] {
-  const heading = (level: number): SlashItem => ({
-    label: `Heading ${level}`,
-    icon: `H${level}`,
-    keywords: ["title", `h${level}`],
-    group: "Headings",
-    run: (v) => {
-      const node = v.state.schema.nodes.heading;
-      if (node) setBlockType(node, { level })(v.state, v.dispatch);
-    },
-  });
-  return [
-    heading(1),
-    heading(2),
-    heading(3),
-    heading(4),
-    {
-      label: "Bullet list",
-      icon: "•",
-      keywords: ["ul", "unordered"],
-      group: "Lists",
-      run: (v) => {
-        const node = v.state.schema.nodes.bullet_list;
-        if (node) wrapInList(node)(v.state, v.dispatch);
-      },
-    },
-    {
-      label: "Ordered list",
-      icon: "1.",
-      keywords: ["ol", "numbered"],
-      group: "Lists",
-      run: (v) => {
-        const node = v.state.schema.nodes.ordered_list;
-        if (node) wrapInList(node)(v.state, v.dispatch);
-      },
-    },
-    {
-      label: "Task list",
-      icon: "☐",
-      keywords: ["todo", "checkbox", "checklist"],
-      group: "Lists",
-      run: (v) => {
-        const node = v.state.schema.nodes.bullet_list;
-        if (!node) return;
-        const before = v.state.doc;
-        wrapInList(node)(v.state, v.dispatch);
-        // Wrapping can be refused (suggesting mode): then add no marker.
-        if (v.state.doc === before) return;
-        // Inject a leading checkbox marker so the round-trip to markdown
-        // produces `- [ ] ...` on the new line.
-        const tr = v.state.tr.insertText("[ ] ", v.state.selection.from);
-        v.dispatch(tr);
-      },
-    },
-    {
-      label: "Blockquote",
-      icon: "❝",
-      keywords: ["quote", "cite"],
-      group: "Blocks",
-      run: (v) => {
-        const node = v.state.schema.nodes.blockquote;
-        if (node) wrapIn(node)(v.state, v.dispatch);
-      },
-    },
-    {
-      label: "Code block",
-      icon: "</>",
-      keywords: ["code", "snippet", "fence"],
-      group: "Blocks",
-      run: (v) => {
-        const node = v.state.schema.nodes.code_block;
-        if (node) setBlockType(node)(v.state, v.dispatch);
-      },
-    },
-    {
-      label: "Math block",
-      icon: "∑",
-      keywords: ["latex", "tex", "equation", "formula"],
-      group: "Blocks",
-      run: (v) => {
-        const node = v.state.schema.nodes.math_block;
-        if (node) setBlockType(node)(v.state, v.dispatch);
-      },
-    },
-    {
-      label: "Callout",
-      icon: "💡",
-      keywords: ["note", "tip", "warning", "info", "admonition"],
-      group: "Blocks",
-      run: (v) => {
-        const tr = v.state.tr.insertText(
-          ":::note\nWrite your callout here.\n:::\n",
-          v.state.selection.from,
-        );
-        v.dispatch(tr);
-      },
-    },
-    {
-      label: "Columns",
-      icon: "▥",
-      keywords: ["columns", "two-column", "side-by-side", "layout"],
-      group: "Blocks",
-      run: (v) => {
-        const tr = v.state.tr.insertText(
-          ":::columns{cols=2}\nLeft column.\n:::\nRight column.\n:::\n",
-          v.state.selection.from,
-        );
-        v.dispatch(tr);
-      },
-    },
-    {
-      label: "Divider",
-      icon: "—",
-      keywords: ["hr", "rule", "separator"],
-      group: "Blocks",
-      run: (v) => {
-        const hr = v.state.schema.nodes.hr;
-        if (!hr) return;
-        v.dispatch(v.state.tr.replaceSelectionWith(hr.create()));
-      },
-    },
-    {
-      label: "Table",
-      icon: "▦",
-      keywords: ["grid", "rows", "cols"],
-      group: "Data",
-      run: (v) => {
-        const tr = v.state.tr.insertText(
-          "| Col 1 | Col 2 | Col 3 |\n| :--- | :---: | ---: |\n| L | C | R |\n| Data | Data | Data |\n",
-          v.state.selection.from,
-        );
-        v.dispatch(tr);
-      },
-    },
-    {
-      label: "CSV table",
-      icon: "📊",
-      keywords: ["data", "csv", "spreadsheet"],
-      group: "Data",
-      run: (v) =>
-        insertCodeFence(
-          v,
-          "csv",
-          "month,revenue\nJan,4200\nFeb,4800\nMar,5100",
-        ),
-    },
-    {
-      label: "Chart",
-      icon: "📈",
-      keywords: ["echarts", "plot", "graph", "visualisation"],
-      group: "Data",
-      run: (v) =>
-        insertCodeFence(
-          v,
-          "chart",
-          'title:\n  text: My chart\nxAxis:\n  type: category\n  data: [Jan, Feb, Mar]\nyAxis:\n  type: value\nseries:\n  - name: Sales\n    type: bar\n    data: [12, 19, 8]',
-        ),
-    },
-    {
-      label: "Mermaid diagram",
-      icon: "🧩",
-      keywords: ["flowchart", "sequence", "graph", "diagram"],
-      group: "Data",
-      run: (v) =>
-        insertCodeFence(
-          v,
-          "mermaid",
-          "flowchart LR\n  A[Start] --> B{Decision}\n  B -->|Yes| C[Path A]\n  B -->|No| D[Path B]",
-        ),
-    },
-    {
-      label: "Image",
-      icon: "🖼",
-      keywords: ["picture", "img", "photo"],
-      group: "Media",
-      run: (v) => {
-        const tr = v.state.tr.insertText(
-          "![alt text](https://example.com/image.png)",
-          v.state.selection.from,
-        );
-        v.dispatch(tr);
-      },
-    },
-    {
-      label: "Embed (YouTube / Tweet / Map…)",
-      icon: "🌐",
-      keywords: ["video", "youtube", "twitter", "x", "vimeo", "embed", "map"],
-      group: "Media",
-      run: (v) =>
-        insertCodeFence(v, "embed", "https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
-    },
-    {
-      label: "AI Ghostwriter",
-      icon: "✨",
-      keywords: ["ai", "write", "complete", "draft"],
-      group: "AI",
-      run: async (v) => {
-        const promptStr = await openAiPrompt("What do you want the AI to write about?");
-        if (!promptStr) return;
-
-        const placeholder = "🤖 Thinking...";
-        const { state } = v;
-        const insertPos = state.selection.from;
-        v.dispatch(state.tr.insertText(placeholder, insertPos));
-
-        const { aiOperation, isAbort } = await import("../ai/aiAbort");
-        const op = aiOperation(); // Esc / "AI: Cancel" stops the ghostwriter mid-stream
-        try {
-          let accumulated = "";
-          const { streamAgent } = await import("../agents/runtime");
-          const { writerAgent } = await import("../agents/defs");
-          const stream = streamAgent(writerAgent, { text: promptStr }, { ownPrompt: true, signal: op.signal });
-          // Remove placeholder before streaming
-          const removeTr = v.state.tr;
-          removeTr.delete(insertPos, insertPos + placeholder.length);
-          v.dispatch(removeTr);
-
-          for await (const chunk of stream) {
-            if (op.signal.aborted) break; // why: nothing more goes into the note after a cancel
-            accumulated += chunk;
-            // Replace accumulated text at insert position
-            const tr = v.state.tr;
-            const endOfText = insertPos + accumulated.length - chunk.length;
-            tr.insertText(chunk, endOfText);
-            v.dispatch(tr);
-          }
-        } catch (e) {
-          const docText = v.state.doc.textBetween(insertPos, Math.min(insertPos + placeholder.length, v.state.doc.content.size));
-          if (isAbort(e)) {
-            // Cancelled before the first chunk: take the placeholder out and stop quietly.
-            if (docText === placeholder) v.dispatch(v.state.tr.delete(insertPos, insertPos + placeholder.length));
-            return;
-          }
-          log.error("WYSIWYG AI stream failed", e);
-          // 5.6.4: an agent failure opens the suggestions panel (the placeholder is still replaced below).
-          void import("../agents/suggestions").then((m) => m.reportAgentFailure(e, "wysiwyg.aiWrite"));
-          // If placeholder is still there, replace it
-          if (docText === placeholder) {
-            const errTr = v.state.tr;
-            errTr.delete(insertPos, insertPos + placeholder.length);
-            errTr.insertText(e instanceof AiError && e.code === "NO_KEY" ? "⚠️ Configure AI Key (⌘K)" : "❌ AI Failed", insertPos);
-            v.dispatch(errTr);
-          }
-          showAiToast(
-            e instanceof AiError && e.code === "NO_KEY"
-              ? t("toast.pleaseConfigureYourAiKey")
-              : t("ai.ghostwriter.failed", { error: explainError(e) }),
-            "error",
-          );
-        } finally {
-          op.end();
-        }
-      },
-    },
-  ];
-}
-
-/**
- * Filter slash items by a free-text query (matches label + keywords).
- * Empty query returns the full list.
- */
-function filterSlashItems(items: SlashItem[], query: string): SlashItem[] {
-  const q = query.trim().toLowerCase();
-  if (!q) return items;
-  return items.filter((it) => {
-    if (it.label.toLowerCase().includes(q)) return true;
-    return it.keywords?.some((k) => k.toLowerCase().includes(q)) ?? false;
-  });
-}
-
-/**
- * Render the slash menu as DOM. Supports:
- *   - category headers (Headings / Lists / Blocks / Data / Media / AI)
- *   - keyboard navigation via ↑/↓/Enter (driven by the EditorView's keymap)
- *   - live filter via `setQuery(q)` exposed on the returned element
- *   - selection highlight via `data-selected="true"` attribute
- *
- * The function returns the root `<div>` extended with helpers so the
- * Milkdown SlashProvider can drive it.
- */
-interface SlashMenuRoot extends HTMLDivElement {
-  setQuery(q: string): void;
-  moveSelection(delta: number): void;
-  runSelected(): void;
-}
-
-function buildSlashMenu(getView: () => EditorView | null): SlashMenuRoot {
-  const el = document.createElement("div") as SlashMenuRoot;
-  el.className = "milkdown-slash-menu";
-  el.dataset.show = "false";
-
-  const all = buildSlashItems();
-  let visible: SlashItem[] = all;
-  let selectedIndex = 0;
-
-  function commit(item: SlashItem) {
-    const view = getView();
-    if (!view) return;
-    // Strip the `/` trigger plus any query the user typed after it.
-    const { state } = view;
-    const { $from } = state.selection;
-    const text = $from.parent.textBetween(
-      0,
-      $from.parentOffset,
-      undefined,
-      "\u00A0",
-    );
-    const slashIdx = text.lastIndexOf("/");
-    if (slashIdx >= 0) {
-      const from = $from.start() + slashIdx;
-      view.dispatch(state.tr.delete(from, $from.pos));
-    }
-    item.run(view);
-    view.focus();
-  }
-
-  function render(): void {
-    el.replaceChildren();
-    if (visible.length === 0) {
-      const empty = document.createElement("div");
-      empty.className = "milkdown-slash-empty";
-      empty.textContent = "No matches";
-      empty.style.padding = "10px 14px";
-      empty.style.fontSize = "11.5px";
-      empty.style.color = "hsl(var(--fg-muted))";
-      el.appendChild(empty);
-      return;
-    }
-    let prevGroup: string | null = null;
-    for (let i = 0; i < visible.length; i++) {
-      const item = visible[i];
-      if (item.group !== prevGroup) {
-        const head = document.createElement("div");
-        head.className = "milkdown-slash-group";
-        head.textContent = item.group;
-        head.style.padding = "6px 12px 2px";
-        head.style.fontSize = "10px";
-        head.style.fontWeight = "700";
-        head.style.letterSpacing = "0.05em";
-        head.style.textTransform = "uppercase";
-        head.style.color = "hsl(var(--fg-muted))";
-        el.appendChild(head);
-        prevGroup = item.group;
-      }
-      const row = document.createElement("div");
-      row.className = "milkdown-slash-item";
-      row.tabIndex = -1;
-      row.dataset.index = String(i);
-      if (i === selectedIndex) row.dataset.selected = "true";
-
-      const icon = document.createElement("span");
-      icon.className = "slash-icon";
-      icon.textContent = item.icon;
-
-      const label = document.createElement("span");
-      label.className = "slash-label";
-      label.textContent = item.label;
-
-      row.appendChild(icon);
-      row.appendChild(label);
-      row.addEventListener("mouseenter", () => {
-        selectedIndex = i;
-        for (const r of el.querySelectorAll<HTMLElement>(".milkdown-slash-item")) {
-          delete r.dataset.selected;
-        }
-        row.dataset.selected = "true";
-      });
-      // pointerdown (plan 10.2.1): a tap picks the item like a click. Its
-      // preventDefault also suppresses the compatibility mousedown, so the
-      // editor keeps focus; mousedown is still cancelled for older engines.
-      row.addEventListener("pointerdown", (e) => {
-        e.preventDefault();
-        commit(item);
-      });
-      row.addEventListener("mousedown", (e) => e.preventDefault());
-      el.appendChild(row);
-    }
-  }
-
-  el.setQuery = (q: string) => {
-    visible = filterSlashItems(all, q);
-    selectedIndex = 0;
-    render();
-  };
-  el.moveSelection = (delta: number) => {
-    if (visible.length === 0) return;
-    selectedIndex =
-      (selectedIndex + delta + visible.length) % visible.length;
-    render();
-    const sel = el.querySelector<HTMLElement>(
-      `[data-index="${selectedIndex}"]`,
-    );
-    sel?.scrollIntoView({ block: "nearest" });
-  };
-  el.runSelected = () => {
-    const it = visible[selectedIndex];
-    if (it) commit(it);
-  };
-
-  render();
-  return el;
-}
 
 /**
  * WYSIWYG editor powered by Milkdown (ProseMirror under the hood).
@@ -611,6 +171,7 @@ const pasteCleanPlugin = $prose(
     serializedRef.current = md;
     const full = frontmatterRef.current + restoreSource(md);
     if (full !== lastEmittedRef.current) {
+      saveWysiwygAiSpans(ed, lastEmittedRef.current, full, frontmatterRef.current, md);
       lastEmittedRef.current = full;
       onChangeRef.current(full);
     }
@@ -673,8 +234,11 @@ const pasteCleanPlugin = $prose(
           ctx.set(rootCtx, host);
           // An escaped `\[\[x]]` stays escaped (not a wiki link) on the way out.
           ctx.set(defaultValueCtx, encodeCriticForWysiwyg(protectEscapedWikiLinks(body)));
-          // `[[Note]]` is written back as is, not as `\[\[Note]]`.
-          ctx.update(remarkStringifyOptionsCtx, keepWikiLinks);
+          // `[[Note]]` is written back as is, not as `\[\[Note]]`. And an
+          // edited block keeps its meaning when it is saved through the AST:
+          // nested emphasis stays emphasis (CommonMark 461/463), and an
+          // indented HTML block after a list stays out of the list (#847).
+          ctx.update(remarkStringifyOptionsCtx, (o: ToMarkdownOptions) => roundTripSafe(keepWikiLinks(o)));
           ctx.get(listenerCtx).markdownUpdated((_, md) => {
             // The listener plugin debounces emissions by 200ms and
             // nothing cancels that timer on destroy, so a torn-down (or
@@ -684,6 +248,8 @@ const pasteCleanPlugin = $prose(
             if (md === serializedRef.current) return; // already flushed
             serializedRef.current = md;
             const full = frontmatterRef.current + restoreSource(md);
+            // W10.E37: the AI ranges go into the note's saved spans, for the source view and the export.
+            if (editorRef.current) saveWysiwygAiSpans(editorRef.current, lastEmittedRef.current, full, frontmatterRef.current, md);
             lastEmittedRef.current = full;
             onChangeRef.current(full);
           });
@@ -698,11 +264,14 @@ const pasteCleanPlugin = $prose(
             wysiwygWikiComplete(),
             dragHandlePlugin,
             // T25 — every block reads in the direction of its own text.
-            wysiwygBidiPlugin(),
+            wysiwygBidiPlugin({ pinned: () => frontmatterDir(frontmatterRef.current) }),
+            // 5.9 / W10.E37 — what an agent inserted is marked when it is inserted.
+            wysiwygAiAuthorshipPlugin(),
             // Plan 2.2 — images from other sites wait for the user.
             remoteImagePlugin(),
             // 9.2 layer 1 — the browser / OS spellchecker, Hebrew included, no dictionary in the bundle.
-            new Plugin({ props: { attributes: () => ({ spellcheck: spellCheckRef.current ? "true" : "false" }) } }),
+            // W11.Q6 — the editable area has a name and a role for screen readers, like the source editor's (editor.ariaLabel).
+            new Plugin({ props: { attributes: () => ({ spellcheck: spellCheckRef.current ? "true" : "false", role: "textbox", "aria-multiline": "true", "aria-label": t("editor.wysiwygAriaLabel") }) } }),
             // W5.4 — direction-control tags, the Trojan Source paste warning.
             wysiwygBidiMarksPlugin(),
             // W5.5 — "Looks reversed — fix?" after pasting Hebrew from a PDF.
@@ -884,6 +453,8 @@ const pasteCleanPlugin = $prose(
       lastEmittedRef.current = value;
       registeredViewRef.current = editor.action((ctx) => ctx.get(editorViewCtx));
       registerWysiwygView(registeredViewRef.current);
+      // W10.E37: the note's saved AI spans (source view, AI commands, the last emission) drawn here too.
+      restoreWysiwygAiSpans(editor, value, fm, (md) => encodeCriticForWysiwyg(protectEscapedWikiLinks(md)));
       serializedRef.current = editor.action(getMarkdown());
       try {
         preserveRef.current = wysiwygSourcePreserver(body, serializedRef.current).restore;

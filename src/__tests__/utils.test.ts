@@ -1,42 +1,9 @@
 /**
- * utils — tests for debounce, slugify, and cn utility functions.
+ * utils — tests for debounce and cn utility functions. (slugify moved out:
+ * lib/slug.ts is the one slug module, plan 12.2; see slugUnified.test.ts.)
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { debounce, slugify } from "../lib/utils";
-
-describe("slugify", () => {
-  it("lowercases and hyphenates", () => {
-    expect(slugify("Hello World")).toBe("hello-world");
-  });
-
-  it("strips special characters", () => {
-    expect(slugify("What's this? (test)")).toBe("whats-this-test");
-  });
-
-  it("collapses multiple hyphens", () => {
-    expect(slugify("a  -  b")).toBe("a-b");
-  });
-
-  it("handles empty string", () => {
-    expect(slugify("")).toBe("");
-  });
-
-  it("trims whitespace", () => {
-    expect(slugify("  hello world  ")).toBe("hello-world");
-  });
-
-  it("preserves hyphens in text", () => {
-    expect(slugify("well-known")).toBe("well-known");
-  });
-
-  it("handles numbers", () => {
-    expect(slugify("Chapter 3 Section 1")).toBe("chapter-3-section-1");
-  });
-
-  it("handles mixed case and symbols", () => {
-    expect(slugify("FAQ: How to Do X?")).toBe("faq-how-to-do-x");
-  });
-});
+import { debounce } from "../lib/utils";
 
 describe("debounce", () => {
   beforeEach(() => vi.useFakeTimers());

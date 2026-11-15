@@ -1,6 +1,6 @@
 /**
  * Models Lumen converts to ONNX itself (plan 6.0):
- * .github/workflows/model-convert.yml exports and quantises them, and
+ * scripts/models/convert.mjs exports and quantises them, and
  * models/registry.json lists every published file with its sha256, size,
  * licence and attribution.
  *
@@ -24,6 +24,8 @@ export const CONVERTED_MODELS: ConvertedModel[] = [
   { id: "opus-mt-en-he", task: "translation", purposeKey: "models.purpose.translateEnHe" },
   { id: "opus-mt-tc-big-he-en", task: "translation", purposeKey: "models.purpose.translateHeEn" },
   { id: "dictabert-ner", task: "token-classification", purposeKey: "models.purpose.nerHe" },
+  // W10.C23: English names for the PII redactor (MIT).
+  { id: "bert-base-ner", task: "token-classification", purposeKey: "models.purpose.nerEn" },
   { id: "siglip-base-patch16-256-multilingual", task: "zero-shot-image-classification", purposeKey: "models.purpose.imageSearch" },
   { id: "nakdimon", task: "nikud", purposeKey: "models.purpose.nikud" },
   // Plan W2.5: the "high quality" niqqud layer above Nakdimon (CC BY 4.0, attribution in the registry).

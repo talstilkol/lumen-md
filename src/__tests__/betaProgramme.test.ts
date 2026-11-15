@@ -108,13 +108,14 @@ describe("the weekly report: a second opt-in, counts only", () => {
     expect(setBetaWeekly(true, mem())).toBeNull();
   });
 
-  it("is W4.26's report plus cohort, weeks in the beta and channel — nothing else", () => {
+  it("is W4.26's report plus cohort, weeks in the beta, channel and the activation summary (W11.P4) — nothing else", () => {
     const e = { v: 1 as const, joined: "2026-11-04", weeklyReport: true, lastReport: null };
     const r = betaReport(counted(), e, "2026-11-12", ids, "beta", "0.2.0-beta.1");
     expect(Object.keys(r).sort()).toEqual(
-      ["activatedWeeksAgo", "app", "channel", "cohort", "daysActive30", "daysActive7", "errors7", "kind", "opens7", "retained30", "retained7", "topFeatures", "unusedFeatures", "v", "week", "weeksInBeta"].sort(),
+      ["activatedWeeksAgo", "activation", "app", "channel", "cohort", "daysActive30", "daysActive7", "errors7", "kind", "opens7", "retained30", "retained7", "topFeatures", "unusedFeatures", "v", "week", "weeksInBeta"].sort(),
     );
     expect(r).toMatchObject({ kind: "lumen-beta-report", cohort: "2026-11-02", weeksInBeta: 1, channel: "beta", week: "2026-11-09", daysActive7: 3, opens7: 3, app: "0.2.0-beta.1" });
+    expect(r.activation).toBeNull(); // none given
     // The app's own command ids only; a template file name never appears.
     expect(r.topFeatures).toEqual({ "file.new": 5, "template.apply": 1 });
     expect(JSON.stringify(r)).not.toContain("secret");
@@ -165,9 +166,11 @@ describe("no request, and the wiring", () => {
 
   it("the palette command opens the panel with every command id; the reminder is lazy", () => {
     expect(read("src/commands/domains/ai.ts")).toMatch(/id: "help\.beta"[\s\S]{0,300}lumen-open-beta/);
-    const app = read("src/App.tsx");
-    expect(app).toContain('window.addEventListener("lumen-open-beta", onBeta)');
-    expect(app).toContain('import("./ui/BetaPanel").then((m) => m.openBeta({ commandIds: commandIds() }))');
+    // App.tsx's command events live in useCommandEvents since the max-lines split (#500, train 5); App mounts it.
+    expect(read("src/App.tsx")).toContain("useCommandEvents(commands);");
+    const events = read("src/hooks/useCommandEvents.ts");
+    expect(events).toContain('window.addEventListener("lumen-open-beta", onBeta)');
+    expect(events).toContain('import("../ui/BetaPanel").then((m) => m.openBeta({ commandIds: commandIds() }))');
     expect(read("src/metrics/count.ts")).toMatch(/import\("\.\.\/beta\/programme"\)[\s\S]{0,200}import\("\.\.\/beta\/reminder"\)/);
   });
 });

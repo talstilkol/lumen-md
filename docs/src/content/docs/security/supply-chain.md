@@ -84,6 +84,9 @@ npm run repro:compare -- <A> <B>
   appends the verdict to `reports/repro/ledger.jsonl`, and runs diffoscope on any
   file that differs. When the build is identical, it writes an in-toto statement
   ("built identically on two infrastructures") for the release attestation to sign.
+- A manifest always names its commit and the SHA-256 of `package-lock.json`: a
+  build without a lockfile gets no manifest, and a comparison in which only one
+  side names its commit or lockfile is an error, never "identical".
 - The target is 0 differing files, `.map` files included, on 10 commits in a row,
   with the Cloudflare build under 15 minutes.
 
@@ -96,6 +99,18 @@ npm run sbom          # → release/sbom.cdx.json
 A CycloneDX 1.5 list of every npm package (`package-lock.json`) and every
 Rust crate (`src-tauri/Cargo.lock`): version, package URL, the lockfile's
 hash and the licence. Same lockfiles, same bytes.
+
+The nightly also writes a second SBOM with `syft`, together with
+Scorecard, OSV and cargo deny results, into a sealed receipt
+([nightly runs](/contributing/nightly/#supply-chain-checks-plan-w11s5)).
+
+**npm provenance.** `npm publish --provenance` (for `mcp-server`) works only
+from a CI provider that npm trusts to sign the build: GitHub-hosted runners,
+GitLab.com shared runners or CircleCI. Lumen uses none of these (no GitHub
+Actions, and Buildkite agents are self-hosted), so `mcp-server` is published
+without npm provenance. If provenance becomes necessary, the route is a
+GitLab.com mirror that publishes from GitLab's shared runners. That is a P2
+decision for the owner, not something that runs today.
 
 ## 4. Every release is signed — offline
 

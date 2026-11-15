@@ -1,5 +1,6 @@
 /** Tools: the writing goal, the Hebrew dictionary and plugin commands. */
-import { cmdIcons, type Command } from "../../ui/CommandPalette";
+import { cmdIcons } from "../../ui/cmdIcons";
+import type { Command } from "../../ui/CommandPalette";
 import { t } from "../../i18n";
 import { uiPrompt } from "../../ui/PromptDialog";
 import { getPluginCommands } from "../../plugins/pluginSystem";
@@ -15,6 +16,15 @@ export function buildWritingGoalCommands({ writingGoalWords, setWritingGoal }: C
       icon: cmdIcons.Pencil,
       group: t("group.view"),
       action: () => import("./toolsActions").then((m) => m.cycleHebrewGrammarLevel()),
+    },
+    {
+      // Plan W10.B9: the local model step of the grammar checker, off by default.
+      id: "view.hebrewGrammarModel",
+      label: t("cmd.view.hebrewGrammarModel"),
+      hint: t("cmd.view.hebrewGrammarModel.hint"),
+      icon: cmdIcons.Pencil,
+      group: t("group.view"),
+      action: () => import("./toolsActions").then((m) => m.toggleHebrewGrammarModel()),
     },
     {
       id: "tools.writingGoal",

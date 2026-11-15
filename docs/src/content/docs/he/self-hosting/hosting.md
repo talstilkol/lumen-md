@@ -60,6 +60,17 @@ Netlify מחיל את `dist/_headers` על כל תגובה ולא יכול לנ�
 מחרוזות המדיניות שבו מיוצרות מ-`security/policy.json`: `npm run headers`
 נכשל כשהן סוטות.
 
+## ספקי הטמעה
+
+האתרים שבלוק `embed` רשאי להציג במסגרת הם רשימה אחת: `embedProviders`
+ב-`security/policy.json`. הנגנים שלהם נטענים בתוך מסגרת התוכן, וה-`frame-src`
+של מסגרת התוכן בכל מארח נוצר מהרשימה (`@embedProviders` במדיניות). ה-`frame-src`
+של האפליקציה עצמה מציין רק את האתר של מסגרת התוכן. בלוק ההטמעה מציג במסגרת רק
+את האתרים האלה: קישור אחר מציג ״{host} אינו אחד האתרים ש-Lumen יכול להטמיע״
+ומשאיר את הקישור. מצב טיסה קורא את אותה רשימה. כדי להתיר ספק נוסף, מוסיפים שם
+את ה-origin שלו ומריצים `npm run headers:write`. `npm run headers` נכשל כש-`frame-src`
+מציין ספק בעצמו ולא דרך הרשימה.
+
 ## ‏R חי (webR)
 
 הקבצים הבינאריים של webR ‏(R, ‏libgfortran) מופצים תחת GPL-3.0, ולכן אף
@@ -95,7 +106,8 @@ VITE_CONTENT_FRAME_URL=https://lumen-md-frame.pages.dev/ npm run build
 אם אתם מארחים אתר מסגרת משלכם, הוסיפו את ה-origin שלו ל-`frame-src` בקובץ
 ‏`security/policy.json` (הנתיב `app`), ואת ה-origin של האפליקציה שלכם
 ל-`frame-ancestors` של אתר המסגרת (המארח `content-frame-site`). אחר כך
-הריצו `npm run headers:write`.
+הריצו `npm run headers:write`. במגן המסגרות של האפליקציה עצמה אין צורך לשנות
+דבר: הוא סומך על ה-origin של `VITE_CONTENT_FRAME_URL` שאיתו נבנתה האפליקציה.
 
 בנייה בלי `VITE_CONTENT_FRAME_URL` עדיין מציגה תמונות, וידאו, שמע ו-Gist
 במסגרת שאין לה origin בכלל, כך ששום דבר בתוכה לא מגיע לאפליקציה. הטמעות כמו

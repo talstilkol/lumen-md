@@ -1,5 +1,6 @@
 /** Accessibility commands (plan W1.23): what the editor announces, "where am I", the accessibility statement. */
-import { cmdIcons, type Command } from "../../ui/CommandPalette";
+import { cmdIcons } from "../../ui/cmdIcons";
+import type { Command } from "../../ui/CommandPalette";
 import { getLocale, t } from "../../i18n";
 import { announce, nextVerbosity, setVerbosity, verbosity } from "../../a11y/announce";
 import { docsUrl } from "../../lib/docsLinks";

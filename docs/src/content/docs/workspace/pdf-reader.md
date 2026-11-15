@@ -56,8 +56,14 @@ before and after it) and a `TextPositionSelector`. Other annotation tools
 can read them.
 
 Lumen only rewrites the part of the note between the
-`lumen:pdf-annotations` markers. Anything you write above or below them is
-kept.
+`lumen:pdf-annotations` markers that enclose that block. Anything you write
+above or below them is kept, even text that quotes one of the markers. If
+the block can't be read (for example after a hand edit broke its JSON), the
+reader says so and saves nothing over it.
+
+The highlights note belongs to its PDF: renaming or moving the PDF takes the
+note along, and a PDF can't be renamed to its own note's name (or the note
+to the PDF's).
 
 ### When the PDF's text changes
 
@@ -67,12 +73,27 @@ changed (a re-saved file, a newer PDF engine), the highlight still lands on
 the right words. If the text is gone, the highlight stays in the list with
 a note that its text wasn't found.
 
+## Ink
+
+**Ink** in the toolbar turns the pen on. Draw on the page with a pen, a finger
+or the mouse. A pen's pressure is kept. **Undo stroke** removes the last
+stroke on the current page. The strokes are saved in the same companion note
+as the highlights, in a block of their own (`lumen-pdf-ink`), as W3C Web
+Annotations: the page, plus an SVG of the strokes in page units, so they stay
+in place at any zoom. Saving highlights never touches the ink block, and
+saving ink never touches the highlights. If you move the PDF together with its
+note, the ink stays its own. If the ink block can't be read, the reader says
+so and changes nothing.
+
 ## Search
 
 Type in **Search in this PDF** and press Enter; Enter again goes to the
 next match, Shift+Enter to the previous one. Search ignores case, extra
 spaces and Hebrew vowel marks (niqqud). ⌘F / Ctrl+F jumps to the search box
 while the reader is open, and Esc closes the reader.
+
+Vault search and the AI's workspace search read notes and plain-text files
+only: the text of a PDF isn't in them, but its highlights note is.
 
 ## Scanned pages
 
@@ -132,6 +153,11 @@ reader shows them in place.
 - The PDF is matched to its Zotero attachment by file name. If that is not
   unique, add `zotero-attachment: KEY` (the attachment's 8-character key) to
   the front matter of the highlights note.
+
+## On a phone
+
+On a narrow screen the highlights list sits under the pages instead of
+beside them, so you can still read, annotate and delete highlights there.
 
 ## Limits
 

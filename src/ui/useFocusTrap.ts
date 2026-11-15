@@ -9,6 +9,15 @@
  * Dialogs stack (a prompt over a settings panel): only the top one traps and
  * handles Escape. Focus the dialog moves itself (a search box on open) is
  * kept.
+ *
+ * T6-L8: the stack follows the DOM, not effect order — React runs a child's
+ * effects before its parent's, so a dialog that contains another is put
+ * below it even when both mount in one render. And Escape reaches only the
+ * top dialog: one document listener, added when this module loads (before
+ * any dialog's own), handles it for the top dialog and stops it there, so a
+ * dialog underneath never sees it. A dialog closes on Escape through
+ * the Modal's `onClose`, never through a keydown listener of its own; one that
+ * must listen for other keys in the capture phase asks `isTopDialog` first.
  */
 import { useEffect, useRef, type RefObject } from "react";
 
@@ -47,8 +56,47 @@ export interface FocusTrapOptions {
   restoreFocus?: boolean;
 }
 
-const stack: HTMLElement[] = [];
-const isTop = (el: HTMLElement) => stack[stack.length - 1] === el;
+interface Entry {
+  root: HTMLElement;
+  onKeyDown: (e: KeyboardEvent) => void;
+  /** Does this dialog close on Escape? */
+  escapes: () => boolean;
+}
+
+const stack: Entry[] = [];
+const top = (): Entry | undefined => stack[stack.length - 1];
+const isTop = (el: HTMLElement) => top()?.root === el;
+
+/** Is `el` in the top dialog (or is there no dialog)? For a dialog's own capture-phase key handler. */
+export function isTopDialog(el: Element | null | undefined): boolean {
+  const t = top();
+  return !t || (!!el && t.root.contains(el));
+}
+
+/** Put a dialog on the stack: above everything, but below any dialog it contains (mounted with it, effects first). */
+function push(entry: Entry): void {
+  const i = stack.findIndex((e) => entry.root !== e.root && entry.root.contains(e.root));
+  if (i >= 0) stack.splice(i, 0, entry);
+  else stack.push(entry);
+}
+
+/**
+ * The one keydown listener of every dialog. Escape goes to the top dialog
+ * only and stops there (stopImmediatePropagation), so no listener of a
+ * dialog underneath, on document or window, sees it. A lone dialog that does
+ * not close on Escape lets it through.
+ */
+function dispatchKey(e: KeyboardEvent): void {
+  const t = top();
+  if (!t) return;
+  if (e.key === "Escape" && (t.escapes() || stack.length > 1)) e.stopImmediatePropagation();
+  t.onKeyDown(e);
+}
+if (typeof document !== "undefined") {
+  document.addEventListener("keydown", dispatchKey);
+  // A key event sent to the window itself never passes the document.
+  window.addEventListener("keydown", (e) => !(e.target instanceof Node) && dispatchKey(e));
+}
 
 /**
  * The last element focused outside every modal dialog. A dialog whose own
@@ -78,7 +126,6 @@ export function useFocusTrap<T extends HTMLElement>(ref: RefObject<T | null>, op
     if (!active || !root) return;
     let before = document.activeElement as HTMLElement | null;
     if (before && root.contains(before)) before = lastOutside;
-    stack.push(root);
 
     const enter = () => {
       if (root.contains(document.activeElement)) return; // the dialog focused something itself
@@ -94,7 +141,6 @@ export function useFocusTrap<T extends HTMLElement>(ref: RefObject<T | null>, op
     const timer = setTimeout(enter, 0);
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (!isTop(root)) return;
       // Bubble phase: a widget inside the dialog that handles Escape itself
       // (and calls preventDefault) keeps it.
       if (e.key === "Escape" && onEscape.current && !e.defaultPrevented) {
@@ -128,19 +174,19 @@ export function useFocusTrap<T extends HTMLElement>(ref: RefObject<T | null>, op
       const target = e.target as Node | null;
       if (target && !root.contains(target) && document.contains(root)) enter();
     };
-    document.addEventListener("keydown", onKeyDown);
+    const entry: Entry = { root, onKeyDown, escapes: () => !!onEscape.current };
+    push(entry);
     document.addEventListener("focusin", onFocusIn);
 
     return () => {
       clearTimeout(timer);
-      document.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("focusin", onFocusIn);
-      const i = stack.lastIndexOf(root);
+      const i = stack.indexOf(entry);
       if (i >= 0) stack.splice(i, 1);
       if (restoreFocus && before && before !== document.body && document.contains(before)) {
         // After React has removed the dialog.
         setTimeout(() => {
-          if (!stack.length || !stack[stack.length - 1].contains(document.activeElement)) before.focus();
+          if (!stack.length || !stack[stack.length - 1].root.contains(document.activeElement)) before.focus();
         }, 0);
       }
     };

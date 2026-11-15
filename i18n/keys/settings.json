@@ -500,6 +500,11 @@
       "vars": []
     },
     {
+      "key": "pluginGallery.builtIn",
+      "en": "Built into Lumen",
+      "vars": []
+    },
+    {
       "key": "pluginGallery.categories",
       "en": "Categories",
       "vars": []
@@ -545,6 +550,16 @@
       "vars": []
     },
     {
+      "key": "pluginGallery.notAvailable",
+      "en": "Not available yet",
+      "vars": []
+    },
+    {
+      "key": "pluginGallery.notAvailableHint",
+      "en": "Remote plugins install only from a signed bundle, and signed installs are not ready yet. Nothing is downloaded or run.",
+      "vars": []
+    },
+    {
       "key": "pluginGallery.search",
       "en": "Search plugins…",
       "vars": []
@@ -562,6 +577,11 @@
     {
       "key": "pluginGallery.uninstall",
       "en": "Uninstall",
+      "vars": []
+    },
+    {
+      "key": "pluginGallery.unverified",
+      "en": "Not verified",
       "vars": []
     },
     {
@@ -707,10 +727,121 @@
       "vars": []
     },
     {
+      "key": "privacy.guard.approved",
+      "en": "{time} · approved: {what} by {tool} (outside content: {sources})",
+      "vars": [
+        "time",
+        "what",
+        "tool",
+        "sources"
+      ]
+    },
+    {
+      "key": "privacy.guard.declined",
+      "en": "{time} · declined: {what} by {tool} (outside content: {sources})",
+      "vars": [
+        "time",
+        "what",
+        "tool",
+        "sources"
+      ]
+    },
+    {
+      "key": "privacy.guard.scope.network",
+      "en": "a network call",
+      "vars": []
+    },
+    {
+      "key": "privacy.guard.scope.write",
+      "en": "a change",
+      "vars": []
+    },
+    {
+      "key": "privacy.guard.summary",
+      "en": "Agent runs with outside content: {tainted}; approvals asked: {asked}, declined: {declined}",
+      "vars": [
+        "tainted",
+        "asked",
+        "declined"
+      ]
+    },
+    {
+      "key": "privacy.guard.title",
+      "en": "Approvals in agent runs with outside content",
+      "vars": []
+    },
+    {
       "key": "privacy.localRequests",
       "en": "Local: {n}",
       "vars": [
         "n"
+      ]
+    },
+    {
+      "key": "privacy.mcp.allClients",
+      "en": "All clients",
+      "vars": []
+    },
+    {
+      "key": "privacy.mcp.client",
+      "en": "Client",
+      "vars": []
+    },
+    {
+      "key": "privacy.mcp.col.path",
+      "en": "Note",
+      "vars": []
+    },
+    {
+      "key": "privacy.mcp.col.tool",
+      "en": "Tool",
+      "vars": []
+    },
+    {
+      "key": "privacy.mcp.decision.allowed",
+      "en": "Read",
+      "vars": []
+    },
+    {
+      "key": "privacy.mcp.decision.approved",
+      "en": "Approved",
+      "vars": []
+    },
+    {
+      "key": "privacy.mcp.decision.conflict",
+      "en": "Not written (note changed)",
+      "vars": []
+    },
+    {
+      "key": "privacy.mcp.decision.denied",
+      "en": "Refused",
+      "vars": []
+    },
+    {
+      "key": "privacy.mcp.decision.proposed",
+      "en": "Change proposed",
+      "vars": []
+    },
+    {
+      "key": "privacy.mcp.decision.rejected",
+      "en": "Rejected",
+      "vars": []
+    },
+    {
+      "key": "privacy.mcp.decision.written",
+      "en": "Written",
+      "vars": []
+    },
+    {
+      "key": "privacy.mcp.empty",
+      "en": "No MCP client has used this vault yet.",
+      "vars": []
+    },
+    {
+      "key": "privacy.mcp.unavailable",
+      "en": "The MCP ledger could not be read: {error}",
+      "vars": [
+        "error"
       ]
     },
     {
@@ -771,6 +902,16 @@
       "vars": [
         "n"
       ]
+    },
+    {
+      "key": "privacy.tab.mcp",
+      "en": "MCP clients",
+      "vars": []
+    },
+    {
+      "key": "privacy.tab.requests",
+      "en": "Network requests",
+      "vars": []
     },
     {
       "key": "privacy.title",

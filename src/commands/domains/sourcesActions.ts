@@ -1,6 +1,6 @@
 /** The sources commands' bodies, loaded on first use (split out of sources.ts for the startup budget, W4.9). */
 import { t } from "../../i18n";
-import { uiAlert, uiConfirm, uiPrompt, uiSelect } from "../../ui/PromptDialog";
+import { uiAlert, uiConfirm, uiPrompt } from "../../ui/PromptDialog";
 import { useToastStore } from "../../store/useToastStore";
 import { useAppStore } from "../../store/useStore";
 import type { CommandContext } from "./context";
@@ -80,13 +80,14 @@ export async function notesOnVerse(ctx: CommandContext): Promise<void> {
     await uiAlert({ message: t("sources.noVerseHere") });
     return;
   }
-  const paths = await s.notesOnVerse(ref);
-  if (!paths.length) {
-    await uiAlert({ message: t("sources.noNotes", { ref: ref.he }) });
-    return;
-  }
-  const pick = await uiSelect({ message: t("sources.notesTitle", { ref: ref.he, count: paths.length }), choices: paths.map((p) => ({ value: p, label: p })) });
-  if (!pick) return;
-  const { readWorkspaceFile } = await import("../../storage/workspace");
-  useAppStore.getState().openTab({ name: pick.split("/").pop()!, content: await readWorkspaceFile(pick), workspaceName: pick });
+  // W10.C24: a side panel that stays open and follows the verse under the cursor (read locally, nothing is sent).
+  const { openVersePanel } = await import("../../sources/sefaria/VersePanel");
+  openVersePanel({
+    initial: ref,
+    notesFor: (r) => s.notesOnVerse(r),
+    onOpen: async (pick) => {
+      const { readWorkspaceFile } = await import("../../storage/workspace");
+      useAppStore.getState().openTab({ name: pick.split("/").pop()!, content: await readWorkspaceFile(pick), workspaceName: pick });
+    },
+  });
 }

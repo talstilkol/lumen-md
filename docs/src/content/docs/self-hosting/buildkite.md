@@ -32,6 +32,26 @@ ci.yml's steps.
 | `lighthouse` | main and PRs labelled `lighthouse` only, as in ci.yml | linux |
 | `receipt` | the signed receipt, after every gate (pass or fail) | linux |
 
+Three more jobs are Buildkite's own, with no ci.yml step (`NATIVE_JOBS` in
+`scripts/buildkite/lib.mjs`). They run on every build, without a condition:
+
+| Job | What it runs | Queue |
+|---|---|---|
+| `pr-check` | `npm run pr:check` on the pull request (its base, its body, its comments), then the report as one PR comment that every build edits, pass or fail (`scripts/buildkite/pr-comment.mjs`); a build that isn't for a PR passes | linux |
+| `security` | `scripts/security-scan.mjs`: gitleaks, npm audit (high and critical), cargo audit with audit-lock, semgrep with OSS rules (in place of CodeQL). A scanner missing from the agent fails the job | linux |
+| `security-nightly` | the scheduled build only: osv-scanner on every lockfile, cargo deny, OpenSSF Scorecard (needs `GITHUB_AUTH_TOKEN`, read-only) and a CycloneDX SBOM (syft) | linux |
+
+To post the comment, the host needs a fine-grained token with "Pull requests: write" on this repository, in the file `LUMEN_PR_COMMENT_TOKEN_FILE` names. Without it the report stays the job's artifact, and the job says so. The agent needs `gh` with a read token for `pr-check`, and `gitleaks`,
+`semgrep`, `cargo-audit` for `security` (`osv-scanner`, `cargo-deny`,
+`scorecard` and `syft` for the nightly run). `npm run ci:local` runs gitleaks,
+semgrep and cargo audit too, when they are installed.
+
+`pr-check` and `npm run ci:local` are where a pull request gets `pr:check`:
+`ci:local` runs it on every run, against the current train (or `--base`), with
+`--body <file>` for the body's sections. Vercel builds only `main` and
+`verify/*` (`scripts/vercel-ignore.sh`): the free plan allows 100 builds a day,
+and a PR's app is verified through the train.
+
 The steps ci.yml has that are not gates (installs, PR comments, the
 main-only size cache, diagnostics) are listed with a reason in
 `NOT_GATES` in `scripts/buildkite/lib.mjs`.
@@ -46,6 +66,20 @@ main-only size cache, diagnostics) are listed with a reason in
 - a gate posts no status, or the receipt doesn't wait for it
 
 After changing ci.yml: `npm run ci:pipeline -- --write` and commit the file.
+
+**One documented override.** ci.yml's i18n drift step counts English only in
+`src/i18n/locales/en/`. The English of the lazily loaded domains
+(`src/i18n/lazy/*.json`, kept out of the startup bundle) therefore looked like
+drift: en 2270 vs he 2493, with no string missing. The pipeline runs
+`npm run i18n:drift` in its place:
+
+- English is counted as `locales/en` plus the lazy files
+- ci.yml's 10-key limit applies to every locale, not only Hebrew
+- a key with no English string fails
+
+The step is equal to ci.yml's or stricter. `OVERRIDES` in
+`scripts/buildkite/lib.mjs` pins the sha256 of the ci.yml text it replaces, so
+a change to that step stops the generator until the override is reviewed again.
 
 ### Shards by time
 

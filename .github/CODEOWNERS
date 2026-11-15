@@ -13,9 +13,9 @@
 /src/storage/vault/encrypted/            @talstilkol
 /src/storage/snapshotSeal.ts             @talstilkol
 /src/lib/cryptoRandom.ts                 @talstilkol
-/src/lib/cryptoStorage.ts                @talstilkol
 /src/lib/secretStore.ts                  @talstilkol
 /src/plugins/signing.ts                  @talstilkol
+/src/plugins/install.ts                  @talstilkol
 /src-tauri/keychain/                     @talstilkol
 /scripts/tauri-signing.mjs               @talstilkol
 /scripts/lib/tauriSigning.mjs            @talstilkol
@@ -84,6 +84,10 @@
 # ── What the preview parses, which redaction must read the same way (RR8-473-1, -2) ──
 /src/renderer/criticMarkup.ts            @talstilkol
 /src/renderer/pipeline.ts                @talstilkol
+/src/renderer/renderCore.ts              @talstilkol
+/src/renderer/renderWorkerCore.ts        @talstilkol
+/src/renderer/render.worker.ts           @talstilkol
+/src/renderer/renderClient.ts            @talstilkol
 
 # ── Frame sandboxes, and where the frame guard is installed (RR8-451) ──
 /src/plugins/EmbedBlock.tsx              @talstilkol
@@ -102,6 +106,18 @@
 /src/renderer/Preview.tsx                @talstilkol
 /src/renderer/embeds.ts                  @talstilkol
 #   Frame sandboxes and sinks
+/src/lib/trustedTypes.ts                 @talstilkol
+/src/playground/runner.ts                @talstilkol
+/src/playground/runtime.ts               @talstilkol
+/src/playground/compile.ts               @talstilkol
+/src/plugins/liveJsRunner.ts             @talstilkol
+/src/plugins/liveJsChannel.ts            @talstilkol
+#   CSPs outside /deploy/ and public/_headers (index.html's frame-src must equal EMBED_ORIGINS)
+/index.html                              @talstilkol
+/public/playground-runner.html           @talstilkol
+/public/livejs-runner.html               @talstilkol
+/public/runners/                         @talstilkol
+/scripts/build-runners.mjs               @talstilkol
 /src/plugins/sandbox.ts                  @talstilkol
 /src/lib/trustedTypes.ts                 @talstilkol
 /src/playground/runner.ts                @talstilkol
@@ -148,7 +164,6 @@
 /src/plugins/r/                          @talstilkol
 /src/theme/cssSanitizer.ts               @talstilkol
 #   Frame sandboxes
-/public/content-frame.js                 @talstilkol
 /src/agents/python/sandbox.ts            @talstilkol
 /src/lib/contentFrame.ts                 @talstilkol
 /src/plugins/EmbedBlock.tsx              @talstilkol
@@ -157,13 +172,12 @@
 /src/plugins/PlaygroundBlock.tsx         @talstilkol
 /src/plugins/liveJsSandbox.ts            @talstilkol
 /src/plugins/runtime/                    @talstilkol
-/src/plugins/sandbox.ts                  @talstilkol
 /src/renderer/components.tsx             @talstilkol
 #   CSP and security headers
 /index.html                              @talstilkol
-/livejs-runner.html                      @talstilkol
+/public/livejs-runner.html               @talstilkol
 /packages/vscode-lumen/src/render.ts     @talstilkol
-/playground-runner.html                  @talstilkol
+/public/playground-runner.html           @talstilkol
 /src/ai/ollamaProvider.ts                @talstilkol
 /src/storage/templateMarketplace.ts      @talstilkol
 /src/ui/RuntimeMetricsPanel.tsx          @talstilkol
@@ -202,6 +216,8 @@
 /src/research/client.ts                  @talstilkol
 /src/research/clipper.ts                 @talstilkol
 /src/slides/present.tsx                  @talstilkol
+/src/storage/import/onenoteGraph.ts      @talstilkol
+/src/storage/import/onenoteSignIn.ts     @talstilkol
 /src/sync/cloud/                         @talstilkol
 /src/ui/PluginGallery.tsx                @talstilkol
 #   Redaction and PII
@@ -259,3 +275,10 @@
 /src/commands/domains/journalistActions.ts @talstilkol
 /src/pdf/zoteroSend.ts                   @talstilkol
 /src/ui/AcademicExportDialog.tsx         @talstilkol
+/scripts/review-sign.mjs                 @talstilkol
+/scripts/review-coverage.mjs             @talstilkol
+/security/reviewers.json                 @talstilkol
+/src/agents/eval/reproducible.ts         @talstilkol
+# P1 round (train 6): sensitive files the merges added (codeowners-coverage)
+/src/agents/defs/piiNames.ts             @talstilkol
+/src/agents/executors/lmstudio.ts        @talstilkol

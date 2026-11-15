@@ -7,6 +7,8 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createElement } from "react";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QuickCapture } from "../ui/QuickCapture";
 import { installFakeOpfs } from "./helpers/fakeOpfs";
@@ -14,7 +16,7 @@ import { useAppStore } from "../store/useStore";
 import { listWorkspace, readWorkspaceFile, writeWorkspaceFile } from "../storage/workspace";
 import { DEFAULT_DAILY } from "../daily/dailyNote";
 import { appendEntry, captureShared, captureToInbox, formatEntry, INBOX_PATH, openInbox, sharedText } from "../capture/quickCapture";
-import { parseLaunch, sharedItem } from "../pwa/launch";
+import { parseLaunch, sharedChat, sharedItem } from "../pwa/launch";
 import { registerGlobalCapture } from "../capture/desktopShortcut";
 
 const at = new Date(2026, 9, 20, 9, 5); // 20 Oct 2026, 09:05 local time
@@ -216,6 +218,25 @@ describe("share target → inbox", () => {
     expect(useAppStore.getState().doc.workspaceName).toBe(INBOX_PATH);
   });
 
+  // The share sheet's text, as WhatsApp's "copy" and share send a message (synthetic, in the parser's documented formats).
+  const WA = "[14:03, 12.11.2026] טל: לקנות חלב ולחם";
+  const TG = "Dana Levi, [12.11.2026 09:30]\nThe meeting moved to Thursday";
+
+  it("a WhatsApp or Telegram message shared to the app lands in the inbox with its author and source (W10.C10)", async () => {
+    await writeWorkspaceFile(INBOX_PATH, "# Inbox\n");
+    for (const msg of [WA, TG]) expect(await captureShared(sharedItem("?text=" + encodeURIComponent(msg))!)).toBe(INBOX_PATH);
+    const text = await readWorkspaceFile(INBOX_PATH);
+    expect(text).toMatch(/\d{2}:\d{2} WhatsApp · טל · 2026-11-12 14:03\n {2}לקנות חלב ולחם\n/);
+    expect(text).toMatch(/\d{2}:\d{2} Telegram · Dana Levi · 2026-11-12 09:30\n {2}The meeting moved to Thursday\n/);
+  });
+
+  it("where the vault can't be written, the shared message's note keeps its author and source too (W10.C10)", () => {
+    expect(parseLaunch("?text=" + encodeURIComponent(WA))).toEqual({ kind: "share", title: "WhatsApp · טל", body: "# WhatsApp · טל\n\nWhatsApp · טל · 2026-11-12 14:03\nלקנות חלב ולחם\n" });
+    // Not a chat message, or a link: as before.
+    expect(parseLaunch("?text=" + encodeURIComponent("just a thought"))).toMatchObject({ kind: "share", title: "just a thought" });
+    expect(sharedChat({ title: "", text: WA, link: "https://ex.com" })).toBeNull();
+  });
+
   it("?capture=1 and ?action=capture open the capture box", () => {
     expect(parseLaunch("?capture=1")).toEqual({ kind: "action", action: "capture" });
     expect(parseLaunch("?action=capture")).toEqual({ kind: "action", action: "capture" });
@@ -265,6 +286,46 @@ describe("desktop global shortcut (feature check)", () => {
       vi.doUnmock("@tauri-apps/api/core");
       vi.doUnmock("@tauri-apps/api/window");
     }
+  });
+
+  it("a shortcut another app holds is reported to the user, not swallowed (W10.C13)", async () => {
+    vi.doMock("@tauri-apps/api/core", () => ({
+      Channel: class {},
+      invoke: async (cmd: string) => {
+        if (cmd === "plugin:global-shortcut|register") throw new Error("HotKey already registered: HotKey { mods: Modifiers(ALT | SUPER), key: KeyN }");
+        return null;
+      },
+    }));
+    (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__ = {};
+    try {
+      vi.resetModules();
+      vi.spyOn(navigator, "platform", "get").mockReturnValue("MacIntel");
+      const m = await import("../capture/desktopShortcut");
+      const why: string[] = [];
+      expect(await m.registerGlobalCapture(() => {}, (w) => void why.push(w))).toBe(false);
+      expect(why).toEqual(["taken"]);
+      const { toast } = await import("../store/useToastStore");
+      const warn = vi.spyOn(toast, "warn");
+      await m.reportGlobalCaptureFailure("taken");
+      expect(warn).toHaveBeenCalledWith(expect.stringMatching(/⌥⌘N is taken by another app/));
+      expect(m.failureOf(new Error("plugin global-shortcut not found"))).toBe("no-plugin");
+      expect(m.failureOf(new Error("global-shortcut.register not allowed. Permissions associated with this command: global-shortcut:allow-register"))).toBe("no-plugin");
+      expect(m.failureOf(new Error("Failed to register hotkey"))).toBe("taken");
+    } finally {
+      delete (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__;
+      vi.restoreAllMocks();
+      vi.doUnmock("@tauri-apps/api/core");
+    }
+  });
+
+  it("the desktop shell declares and registers the plugin, and grants exactly register/unregister (W10.C13)", () => {
+    const cargo = readFileSync(resolve(process.cwd(), "src-tauri/Cargo.toml"), "utf8");
+    const desktopDeps = cargo.slice(cargo.indexOf("[target.'cfg(any(target_os = \"macos\""));
+    expect(desktopDeps.split(/\n\[/)[0]).toMatch(/^tauri-plugin-global-shortcut = "2"$/m);
+    const lib = readFileSync(resolve(process.cwd(), "src-tauri/src/lib.rs"), "utf8");
+    expect(lib).toMatch(/#\[cfg\(desktop\)\]\s*let builder = builder\.plugin\(tauri_plugin_global_shortcut::Builder::new\(\)\.build\(\)\);/);
+    const caps = JSON.parse(readFileSync(resolve(process.cwd(), "src-tauri/capabilities/default.json"), "utf8")) as { permissions: string[] };
+    expect(caps.permissions.filter((p) => p.startsWith("global-shortcut:")).sort()).toEqual(["global-shortcut:allow-register", "global-shortcut:allow-unregister"]);
   });
 
   it("registers nothing on Windows / Linux, where Ctrl+Alt+N is also AltGr+N (review #268)", async () => {

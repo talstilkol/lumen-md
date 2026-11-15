@@ -1,4 +1,5 @@
 import { test, expect, type BrowserContext, type Page, type Request } from "@playwright/test";
+import { chromiumOnly } from "./_engines";
 
 /**
  * Plan W2.19: two devices on one local network, no cloud. Two browser
@@ -49,6 +50,8 @@ function writeNote(page: Page, name: string, text: string) {
 async function open(context: BrowserContext): Promise<Page> {
   const page = await context.newPage();
   await page.addInitScript(() => localStorage.setItem("lumen-tour-done", "1"));
+  // Plan W11.S1: encrypted sync is an experimental flag, off by default; the user turns it on.
+  await page.addInitScript(() => localStorage.setItem("lumen-flags", JSON.stringify({ "sync.e2ee": true })));
   await page.goto("/");
   await expect(page.locator(".cm-content").first()).toContainText("Welcome to", { timeout: 15_000 });
   return page;
@@ -67,8 +70,8 @@ async function lanPanel(page: Page, role: "host" | "peer") {
 const result = (page: Page) => page.getByTestId("sync-result");
 
 test("two devices on the local network pair, sync both ways on their own, and reach nothing else", async ({ browser, browserName, baseURL }) => {
-  // skip-reason: the spec turns off Chromium's mDNS host-candidate hiding with a Chromium flag (above) to see LAN addresses; Firefox needs its own pref, not wired yet | task: W2.19 | until: 2027-05-12
-  test.skip(browserName !== "chromium", "real LAN addresses need the Chromium flag above");
+  // Real LAN addresses need the Chromium flag above; Firefox needs its own pref, not wired yet (W2.19).
+  chromiumOnly(browserName, "the mDNS flag");
   test.setTimeout(120_000);
   const appHost = new URL(baseURL ?? "http://localhost:5173").host;
   const ctxA = await browser.newContext();

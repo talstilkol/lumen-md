@@ -1,4 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
+// @ts-expect-error — plain .mjs script without type declarations
+import { E2E_COLLAB_WS } from "./scripts/test-tiers.mjs";
+import { snapshotUpdateMode } from "./scripts/lib/visualGate.mjs";
 
 /**
  * Playwright configuration for Lumen end-to-end tests.
@@ -20,13 +23,18 @@ const INP = /@inp/;
 const COLD = /@coldstart/;
 /** Plan W6.45: INP and keypress → paint per environment (e2e/inp-devices.spec.ts), only in the inp-* projects. */
 const RESPONSIVENESS = /@responsiveness/;
-const NOT_IN_PR_RUNS = /@nightly|@inp|@coldstart|@responsiveness/;
+/** Plan W11.P5: TTFV on a production build with no network (e2e/ttfv.spec.ts), only in the ttfv-* projects. */
+const TTFV = /@ttfv/;
+const NOT_IN_PR_RUNS = /@nightly|@inp|@coldstart|@responsiveness|@ttfv/;
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${PORT}`;
 /** A Chromium executable to use when Playwright's own is not installed (docs/dev/ci-local.md). */
 const CHROMIUM = process.env.PW_CHROMIUM;
 
 export default defineConfig({
   testDir: "./e2e",
+  // Plan W10.B16: a missing visual baseline fails; no run approves itself.
+  // Only `npm run visual:approve` writes baselines (scripts/lib/visualGate.mjs).
+  updateSnapshots: snapshotUpdateMode(process.env),
   // Compiles the app on the dev server before the first test (e2e/_warmup.ts).
   globalSetup: "./e2e/_warmup.ts",
   timeout: 30_000,
@@ -72,6 +80,10 @@ export default defineConfig({
     // `npm run perf:coldstart` against a production build (PLAYWRIGHT_BASE_URL): the desktop and a phone profile.
     { name: "coldstart", grep: COLD, use: { ...devices["Desktop Chrome"] } },
     { name: "coldstart-phone", grep: COLD, use: { ...devices["Pixel 7"] } },
+    // `npm run perf:ttfv` against a production build (PLAYWRIGHT_BASE_URL): 10 runs per browser (plan W11.P5).
+    { name: "ttfv-chromium", grep: TTFV, use: { ...devices["Desktop Chrome"], ...(CHROMIUM ? { launchOptions: { executablePath: CHROMIUM } } : {}) } },
+    { name: "ttfv-firefox", grep: TTFV, use: { ...devices["Desktop Firefox"] } },
+    { name: "ttfv-webkit", grep: TTFV, use: { ...devices["Desktop Safari"] } },
     // `npm run perf:responsiveness` (plan W6.45): both editors on a 10,000-note vault, desktop and a
     // mid-range phone. `metadata` names the environment for the report, the baseline and the receipt.
     {
@@ -97,7 +109,12 @@ export default defineConfig({
         // server by its other loopback name, so e2e frames it cross-origin
         // as production does (src/lib/contentFrame.ts).
         command: "npm run webr:local && npm run dev -- --host 127.0.0.1",
-        env: { VITE_CONTENT_FRAME_URL: `http://127.0.0.1:${PORT}/content-frame.html` },
+        // The page may reach the loopback collab server of e2e/collab-persist.spec.ts
+        // (an e2e build adds the same origin: scripts/vercel-build.mjs).
+        env: {
+          VITE_CONTENT_FRAME_URL: `http://127.0.0.1:${PORT}/content-frame.html`,
+          VITE_CSP_CONNECT_EXTRA: [process.env.VITE_CSP_CONNECT_EXTRA, E2E_COLLAB_WS].filter(Boolean).join(" "),
+        },
         url: BASE_URL,
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,

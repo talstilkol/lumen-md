@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- The nightly runs on a Mac (plan 0.11, W10.E11). `npm run nightly:install` fills the
+     {{…}} fields and loads it as ~/Library/LaunchAgents/dev.lumen-md.nightly.plist. -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>dev.lumen-md.nightly</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/zsh</string><string>-lc</string>
+    <string>{{COMMAND}}</string>
+  </array>
+  <key>StartCalendarInterval</key><dict><key>Hour</key><integer>{{HOUR}}</integer><key>Minute</key><integer>{{MINUTE}}</integer></dict>
+  <key>StandardOutPath</key><string>{{LOG}}</string>
+  <key>StandardErrorPath</key><string>{{LOG}}</string>
+</dict>
+</plist>

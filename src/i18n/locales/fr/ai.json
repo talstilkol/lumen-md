@@ -69,6 +69,7 @@
   "ai.doctor.check.ollamaVersion": "Version d'Ollama (0.5+ pour la sortie structurée)",
   "ai.doctor.check.policy": "Politique IA et exécuteur préféré",
   "ai.doctor.check.research": "Service de recherche (web et extraction de pages)",
+  "ai.doctor.check.speculative": "Décodage spéculatif (Ollama 0.34+)",
   "ai.doctor.check.spellEn": "Orthographe anglaise sur cet appareil",
   "ai.doctor.check.spellHe": "Dictionnaire orthographique hébreu",
   "ai.doctor.check.storage": "Stockage du coffre : quota et durabilité",

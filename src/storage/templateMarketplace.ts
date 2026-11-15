@@ -20,6 +20,7 @@ import { connectAllowedByCsp } from "../lib/cspConnect";
 import { isOPFSAvailable, listWorkspace, readWorkspaceFile, workspaceHasFile, writeWorkspaceFile } from "./workspace";
 import { fetchWithRetry } from "../lib/fetchRetry";
 import { getLocale } from "../i18n";
+import { TEMPLATES_CHANGED_EVENT } from "./templateEvents";
 
 export interface MarketplaceTemplate {
   id: string;
@@ -75,6 +76,7 @@ let cache: Registry | null = null;
 
 export async function fetchTemplateRegistry(force = false): Promise<MarketplaceTemplate[]> {
   if (cache && !force) return mergeLocalDownloads(cache.templates).map((tpl) => localizeTemplate(tpl));
+  // privacy-ledger: this app's own origin (/templates/registry.json): not off the device's app host, so not ledger traffic
   const res = await fetchWithRetry("/templates/registry.json", { cache: "no-cache" }, { label: "templates.registry", maxRetries: 2, baseDelayMs: 600 });
   if (!res.ok) throw new Error(`Registry ${res.status}`);
   cache = (await res.json()) as Registry;
@@ -163,8 +165,8 @@ export async function importTemplateFile(fileName: string, text: string): Promis
 
 /** Folder in the workspace where `installTemplate()` writes bodies. */
 export const INSTALLED_TEMPLATES_DIR = "templates";
-/** Window event fired after an install so listeners (⌘K) can refresh. */
-export const TEMPLATES_CHANGED_EVENT = "lumen:templates-changed";
+/** Window event fired after an install so listeners (⌘K) can refresh (./templateEvents.ts). */
+export { TEMPLATES_CHANGED_EVENT };
 const INSTALLED_NAMES_KEY = "lumen.templates.installedNames";
 
 export interface InstalledTemplate {
@@ -331,6 +333,7 @@ export async function fetchMarketplaceItems(
   if (opts.type) params.set("type", opts.type);
   if (opts.query) params.set("q", opts.query);
   const qs = params.toString();
+  // privacy-ledger: the deployment's own endpoint (the template marketplace backend); not AI traffic: listed in audit mode (network)
   const res = await fetchWithRetry(
     `${backend}/items${qs ? `?${qs}` : ""}`,
     { cache: "no-cache" },
@@ -345,6 +348,7 @@ export async function recordRemoteInstall(id: string): Promise<void> {
   const backend = getMarketplaceBackendUrl();
   if (!backend) return;
   try {
+    // privacy-ledger: the deployment's own endpoint (the template marketplace backend); not AI traffic: listed in audit mode (network)
     await fetch(`${backend}/items/${encodeURIComponent(id)}/install`, { method: "POST" });
   } catch {
     /* why: the install counter is best effort; the template is installed either way */
@@ -360,6 +364,7 @@ export async function publishToMarketplace(item: {
 }): Promise<MarketplaceTemplate> {
   const backend = getMarketplaceBackendUrl();
   if (!backend) throw new Error("No marketplace backend configured");
+  // privacy-ledger: the deployment's own endpoint (the template marketplace backend); not AI traffic: listed in audit mode (network)
   const res = await fetch(`${backend}/items`, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -373,6 +378,7 @@ export async function publishToMarketplace(item: {
 export async function rateMarketplaceItem(id: string, rating: number): Promise<number> {
   const backend = getMarketplaceBackendUrl();
   if (!backend) throw new Error("No marketplace backend configured");
+  // privacy-ledger: the deployment's own endpoint (the template marketplace backend); not AI traffic: listed in audit mode (network)
   const res = await fetch(`${backend}/items/${encodeURIComponent(id)}/rate`, {
     method: "POST",
     headers: { "content-type": "application/json" },

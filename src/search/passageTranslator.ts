@@ -2,25 +2,38 @@
  * Local translation of a search hit (plan W5.28): the original paragraph is
  * shown, and next to it a translation made on this device. Never a cloud
  * call. In order:
- *   1. the translator a local engine registered (plan 6.4's Opus-MT /
- *      M2M100 in transformers.js calls registerLocalTranslator when it
- *      loads), or
+ *   1. a local translation model of plan 6.4 (Opus-MT, then M2M100, in
+ *      transformers.js; src/ai/mt) that is already on this device for the
+ *      pair: a search never starts a download or asks to (W10.C seams: the
+ *      `registerLocalTranslator` hook no engine called is gone; the layers
+ *      are asked directly), or
  *   2. Chrome's built-in Translator API, which runs on the device
  *      (the global `Translator`, Chrome 138+), when it reports the language
  *      pair as available, or
  *   3. nothing: the dialog shows the original only and says why.
  */
+import type { MtLayer } from "../ai/mt/layers";
 
-export type Translate = (text: string, from: string, to: string, signal?: AbortSignal) => Promise<string>;
+/** The 6.4 model layers, built so they can never ask or download (a search must not). */
+async function localLayers(): Promise<MtLayer[]> {
+  const { createOpusLayer, createM2m100Layer } = await import("../ai/mt/localModels");
+  const never = { confirm: async () => false, t: (k: string) => k };
+  return [createOpusLayer(never), createM2m100Layer(never)];
+}
 
-let registered: { name: string; translate: Translate } | null = null;
-
-/** A local engine (6.4) offers itself here. */
-export function registerLocalTranslator(name: string, translate: Translate): () => void {
-  registered = { name, translate };
-  return () => {
-    if (registered?.translate === translate) registered = null;
-  };
+/** A layer that has the pair on this device now ("ready"), or null. */
+async function readyLayer(layers: MtLayer[], from: string, to: string): Promise<MtLayer | null> {
+  const pair = { source: from, target: to };
+  for (const l of layers) {
+    if (!l.supports(pair)) continue;
+    try {
+      if ((await l.availability(pair)).state === "ready") return l;
+    } catch {
+      // why: a layer that cannot tell (no model host, no OPFS) is skipped; the next one is asked
+      /* next layer */
+    }
+  }
+  return null;
 }
 
 interface ChromeTranslator {
@@ -57,13 +70,20 @@ export interface TranslationResult {
   engine: string | null;
 }
 
-export async function translatePassage(text: string, from: string, to: string, opts: { signal?: AbortSignal; globals?: { Translator?: ChromeTranslatorFactory } } = {}): Promise<TranslationResult> {
+export async function translatePassage(
+  text: string,
+  from: string,
+  to: string,
+  opts: { signal?: AbortSignal; globals?: { Translator?: ChromeTranslatorFactory }; layers?: MtLayer[] } = {},
+): Promise<TranslationResult> {
   const clipped = text.slice(0, 1500);
-  if (registered) {
+  const local = await readyLayer(opts.layers ?? (await localLayers().catch(() => [])), from, to);
+  if (local) {
     try {
-      return { text: await registered.translate(clipped, from, to, opts.signal), engine: registered.name };
+      const [out] = await local.translate([clipped], { source: from, target: to }, { signal: opts.signal });
+      if (typeof out === "string") return { text: out, engine: local.id };
     } catch {
-      // why: the registered engine failed: the browser's translator is tried next
+      // why: the local model failed: the browser's translator is tried next
       /* fall through to the browser's translator */
     }
   }
@@ -81,6 +101,5 @@ export async function translatePassage(text: string, from: string, to: string, o
 
 /** Tests. */
 export function __resetTranslators(): void {
-  registered = null;
   chromeCache.clear();
 }

@@ -77,7 +77,8 @@ function isEscaped(s: string, i: number): boolean {
   return n % 2 === 1;
 }
 
-function codeSpanRanges(line: string): Span[] {
+/** Code spans of one line (CommonMark backtick runs), as [from, to) offsets including the backticks. */
+export function codeSpanRanges(line: string): Span[] {
   const out: Span[] = [];
   let i = 0;
   const runAt = (k: number) => {
@@ -162,7 +163,8 @@ interface HastNode {
   children?: HastNode[];
 }
 
-const MATH_CLASSES = ["katex", "katex-display", "katex-error", "math-inline", "math-display"];
+// "temml": Temml's wrapper (src/renderer/temmlCore.ts, W10.E77), so a Temml formula is an LTR isolate as a KaTeX one is.
+const MATH_CLASSES = ["katex", "katex-display", "katex-error", "temml", "math-inline", "math-display"];
 
 function classesOf(node: HastNode): string[] {
   const c = node.properties?.className;
@@ -173,7 +175,7 @@ function classesOf(node: HastNode): string[] {
 
 /**
  * rehype plugin: every rendered formula (KaTeX's `.katex`, `.katex-display`,
- * `.katex-error`, and remark-math's `.math-inline` / `.math-display` when
+ * `.katex-error`, Temml's `.temml`, and remark-math's `.math-inline` / `.math-display` when
  * KaTeX did not run) gets `dir="ltr"`, which makes it an LTR isolate. Runs
  * after rehype-katex. Formulas inside a formula are not visited twice.
  */

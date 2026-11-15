@@ -1,6 +1,6 @@
 # Lumen Privacy Policy
 
-**Last updated:** 2026-11-12 · [עברית](PRIVACY.he.md) (the Hebrew version also covers Israel's Privacy Protection Law, Amendment 13, and the impact assessment of the share server)
+**Last updated:** 2026-11-14 · [עברית](PRIVACY.he.md) (the Hebrew version also covers Israel's Privacy Protection Law, Amendment 13, and the impact assessment of the share server)
 
 > **Not legal advice.** This document is written from the code and from public summaries
 > of the law. Tal should have a privacy lawyer review it before anyone relies on it.
@@ -36,6 +36,8 @@ ledger panel shows. The `local-only` policy blocks every path that carries user 
 |---|---|---|---|---|
 | Cloud AI | The prompt and the text you chose to send, with your own key | The provider you picked: `OpenAI`, `Anthropic (Claude)`, `Google Gemini`, `Mistral` | The provider's policy. Lumen keeps no copy and runs no proxy | `cloud-ai` |
 | Ollama | The prompt and text | `Ollama (this machine / LAN)`, or `Ollama on a remote server` if you set one | On your machine, or per that server's operator | `local-ai` / `cloud-ai` |
+| LM Studio | The prompt and text | `LM Studio (this machine / LAN)` at the address you set (default localhost:1234), or `LM Studio on a remote server` if that address is not on your machine or local network | On your machine, or per that server's operator | `local-ai` / `cloud-ai` |
+| The browser's built-in model | **Nothing leaves.** Listed so you can see the model ran | `Runs on this device; nothing is sent` (Chrome's built-in model, for structured output) | Nowhere | `local-ai` |
 | Grammar check | The paragraph being checked | `LanguageTool grammar check` (api.languagetool.org or a server you set), or `LanguageTool (this machine / LAN)` | LanguageTool's policy | `cloud-text` / `local-ai` |
 | PlantUML diagrams | The diagram source | `PlantUML rendering (kroki.io)`, after you allow it | kroki.io's policy | `cloud-text` |
 | Model and dictionary downloads | A file request, no content of yours (the server sees your IP address) | `Model download (Hugging Face)`, `Model download (Lumen's mirror)` (when the build sets `VITE_MODEL_MIRROR_URL`; every file is checked by sha256), `Dictionary / OCR model download (GitHub)`, `webR (R runtime) download` | The host's server logs | `model-download` |
@@ -47,6 +49,7 @@ ledger panel shows. The `local-only` policy blocks every path that carries user 
 | Dictation through the browser's service | Your voice | `Dictation through the browser's speech service`, `Browser speech recognition (Web Speech API)` (in Chrome, Google), only under the `cloud` policy and after you confirm | The browser vendor's policy | `cloud-text` / `cloud-ai` |
 | Error reports | The error's class name and where in the code. **No** error message, text, titles, paths or page address | `Error report (Sentry / GlitchTip), content removed`, only if you turned it on **and** the build sets `VITE_SENTRY_DSN` | Per the Sentry / GlitchTip operator | `monitoring` |
 | Plugins | The plugin's request | `Plugin <id>` | Per the destination | `plugin` |
+| Plugin install | A file request for the signed registry index, the plugin's manifest and its code. No user data | `Plugin registry download (signed index, manifest, code); no user data` (the app's own host, /plugins/examples), when you press Install | The host's logs | `static-asset` |
 | Update check (desktop app) | App version and platform only | `Desktop update check (app version and platform only)` | GitHub Releases' logs | `static-asset` |
 | Jewish sources | The reference you asked for ("Berakhot 2a"), nothing from your notes | `Jewish sources (Sefaria): the reference only` (sefaria.org), when you look one up | Sefaria's policy | `cloud-text` |
 | Knesset records | The law or bill name you asked for, nothing from your notes | `Knesset records (OData): the law or bill name only` (knesset.gov.il), when you look one up | The Knesset's policy | `cloud-text` |
@@ -56,6 +59,7 @@ ledger panel shows. The `local-only` policy blocks every path that carries user 
 | Calendar connections | For CalDAV: your tasks, to the calendar server you set, with your user name and password. For a subscription: a read-only request to the ICS address you added | `CalDAV task sync (your calendar server)`, `Calendar subscription (ICS, read only)`, only once you set one up | On your calendar server, per its operator; the ICS host's logs | `third-party` |
 | Themes and CSS snippets | A file request from a stylesheet you installed (a font or an image) | `A stylesheet (theme or CSS snippet) loaded it` | The host's logs. Listed so you can see it | `third-party` |
 | Encrypted sync on the local network | Your notes, end-to-end encrypted, to your other device only | `Encrypted sync on the local network (no cloud)` | On your other device. Nothing goes to a server | `local-ai` |
+| Encrypted sync storage, as audit mode names it | The vault, end-to-end encrypted (see "Encrypted sync" below) | `Sync storage: your Dropbox (audit mode)`, `Sync storage: your Google Drive (audit mode)`: listed only with audit mode on; no rule blocks your own sync | At your provider until you delete it | `network` |
 | Any other request (audit mode) | Whatever that request carries | `Other request (audit mode)`: with audit mode on, every off-device request the rules above don't name is listed too | Per the destination | `network` |
 
 Two suffixes can follow any ledger name: `(worker: <name>)` for a request from a Web
@@ -66,7 +70,7 @@ Worker, and `(redirected from <host>)` for a redirected one.
 | Path | What leaves | Where to | When | What is kept there |
 |---|---|---|---|---|
 | Loading the app | Requests for the app's files. The host sees IP, browser, time and path. **No** notes | The host (lumen-md.vercel.app is hosted on Vercel) | Every load | Vercel's logs, per Vercel's policy |
-| Encrypted sync | The vault, end-to-end encrypted: the provider sees ciphertext files, sizes and times | Your Google Drive, Dropbox, WebDAV or S3 account | Only once you set it up | At your provider until you delete it. Notes an older version synced as plain text are moved aside at the provider into `lumen-plaintext-backup-<date>` (readable) until you delete it |
+| Encrypted sync | The vault, end-to-end encrypted: the provider sees ciphertext files, sizes and times | Your Google Drive, Dropbox, WebDAV or S3 account (audit mode lists Dropbox and Google Drive by name, above, and WebDAV or S3 as `Other request (audit mode)`) | Only once you set it up | At your provider until you delete it. Notes an older version synced as plain text are moved aside at the provider into `lumen-plaintext-backup-<date>` (readable) until you delete it |
 | Git | Your notes as they are (not encrypted), as you choose | Your repository, through the build's CORS proxy | Only once you set it up | In your repository |
 | Publish site | The notes you picked, as public HTML | GitHub Pages in your account, or a zip on your disk | Only on click | Public, until you delete it |
 | Live sharing (WebRTC) | Document updates, encrypted in a password room (every new room). The signaling server sees the room name (128 random bits), IP addresses and times | Between the participants; a signaling server only if the build sets one, or if you opt into the public servers | Only while in a room | The signaling server stores no content |
@@ -77,8 +81,11 @@ Worker, and `(redirected from <host>)` for a redirected one.
 | Embeds (YouTube, Vimeo, …) and `<iframe>` in a note | In this version they load when the note is shown | The provider | When a note with an embed opens | The provider's policy |
 | Map tiles and profile pictures | A tile or image request | OpenStreetMap; GitHub / Google | In a map block; after sign-in | The host's logs |
 
-**Not in this version yet:** a weekly usage report (task W4.26), the encrypted share link
-(W5.10) and a public share server (W4.8). They join these tables when they land.
+**Not in this version yet:** a weekly usage report (task W4.26) and the encrypted share
+link (W5.10). They join these tables when they land. The public share server (W4.8) has
+code but isn't running yet. Its impact assessment in [PRIVACY.he.md](PRIVACY.he.md)
+covers what it keeps: encrypted rooms only, deleted 90 days after the last change, and no
+IP addresses in logs.
 
 ## Your rights
 

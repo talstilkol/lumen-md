@@ -7,17 +7,18 @@
  *
  * The steps below remain for running one part at a time.
  *
- * The release pipeline (plan 13.4), runnable on a developer machine — no
- * GitHub Actions needed. .github/workflows/release.yml runs the same steps
- * on a tag push when Actions are on; every step here works without them.
+ * The release pipeline (plan 13.4), run on the release machine. No GitHub
+ * Actions are in the release path (plan W1.24): release.yml, tauri.yml,
+ * mobile.yml and deploy.yml were removed once these steps covered them (W10.E61).
  *
  *   node scripts/release.mjs plan [--beta]         next version + changelog preview (changes nothing)
  *   node scripts/release.mjs prepare [--beta] [--version X] [--commit] [--tag]
  *                                                  bump every manifest, write CHANGELOG.md
  *                                                  (--beta: the next x.y.z-beta.n; --commit: commit it; --tag: and tag vX)
- *   node scripts/release.mjs build [--desktop] [--skip-checks]
+ *   node scripts/release.mjs build [--desktop] [--mobile] [--skip-checks]
  *                                                  typecheck, tests, web build, budget, no source maps,
- *                                                  web .tgz, desktop bundles (with --desktop), SHA256SUMS,
+ *                                                  web .tgz, desktop bundles (with --desktop), Android AAB/APK
+ *                                                  and, on a Mac, the iOS IPA (with --mobile: scripts/mobile-build.mjs), SHA256SUMS,
  *                                                  SHA256SUMS.asc (when LUMEN_RELEASE_GPG_KEY is set),
  *                                                  latest.json (when the updater signed the bundles) → release/
  *                                                  A beta version builds the web app with VITE_LUMEN_CHANNEL=beta
@@ -28,13 +29,20 @@
  *                                                  its latest.json — and a stable one's, when newer — also goes
  *                                                  to the rolling "beta-channel" release the beta updater reads.
  *   node scripts/release.mjs deploy-beta           the beta web app: a Vercel preview deployment of dist/,
+ *                                                  checked with live:meta on its URL (W10.C29) before any alias,
  *                                                  aliased to $LUMEN_BETA_HOST when set (stable stays on --prod)
+ *   node scripts/release.mjs deploy-fly            the self-hosted web app on Fly.io (what deploy.yml did on a tag):
+ *                                                  flyctl deploy --remote-only --app $FLY_APP_NAME, then a healthcheck
  *   node scripts/release.mjs verify [dir]          check SHA256SUMS (and its signature) in release/ or dir
  *   node scripts/release.mjs rollback <bad> [--to <good>]
  *                                                  take a bad release back: it stops being "latest" (desktop
  *                                                  updates and download links fall back), and the commands to
  *                                                  redeploy the web app from the good tag are printed
  *   node scripts/release.mjs notes <version>       the version's notes, from CHANGELOG.md
+ *   node scripts/release.mjs downloads [--dir release] [--out docs/src/data/downloads.json]
+ *                                                  the downloads page's manifest (every file, its platform, size,
+ *                                                  SHA-256 from SHA256SUMS and signatures; plan W1.24). `build`
+ *                                                  writes release/downloads.json too.
  *   node scripts/release.mjs packages [--dir release] [--version X] [--repo owner/name]
  *                                                  Homebrew cask, winget, Flathub and AUR manifests from
  *                                                  release/SHA256SUMS → release/packages/, checked offline
@@ -50,9 +58,13 @@ import { bumpManifests, changelogSection, insertChangelog, nextVersion, parseCom
 import { LOCALES, UNTRANSLATED, addUntranslated } from "./lib/whats-new.mjs";
 import { betaFlags } from "./lib/flags.mjs";
 import { latestJson } from "./lib/tauriSigning.mjs";
+import { publishRefusals } from "./lib/releaseRun.mjs";
 import { allPackages, flatpakManifest, packagingMeta, parseSums, wingetObjects } from "./lib/packaging.mjs";
 import { checkAur, checkCask, checkFlatpak, checkWinget } from "./lib/packagingCheck.mjs";
 import { createHash } from "node:crypto";
+import { deploymentUrlFrom } from "./lib/liveMeta.mjs";
+import { liveMetaAlert, liveMetaReport } from "./live-meta.mjs";
+import { downloadsManifest } from "./lib/downloads.mjs";
 
 const ROOT = process.cwd();
 const OUT = path.join(ROOT, "release");
@@ -114,6 +126,18 @@ function registry() {
   } catch {
     return { flags: [] };
   }
+}
+
+/** The downloads page's manifest from a release directory (its SHA256SUMS is the only source of hashes). */
+function writeDownloads(dir, out) {
+  const sumsFile = path.join(dir, "SHA256SUMS");
+  if (!existsSync(sumsFile)) throw new Error(`${path.relative(ROOT, sumsFile)} is missing: run \`node scripts/release.mjs build\` first`);
+  const version = opt("--version") ?? current();
+  const files = readdirSync(dir).filter((n) => statSync(path.join(dir, n)).isFile()).map((name) => ({ name, size: statSync(path.join(dir, name)).size }));
+  const m = downloadsManifest({ version, tag: tagOf(version), repo: opt("--repo") ?? repoSlug(), files, sums: readFileSync(sumsFile, "utf8"), gpgSigned: existsSync(path.join(dir, "SHA256SUMS.asc")) });
+  mkdirSync(path.dirname(out), { recursive: true });
+  writeFileSync(out, JSON.stringify(m, null, 2) + "\n");
+  return m;
 }
 
 function filesIn(dir) {
@@ -211,6 +235,11 @@ const commands = {
     if (flag("--desktop")) {
       if (!process.env.TAURI_SIGNING_PRIVATE_KEY) warn("TAURI_SIGNING_PRIVATE_KEY not set — no signed update artifacts, auto-update stays off (plan 15.7)");
       if (process.platform === "darwin" && !process.env.APPLE_SIGNING_IDENTITY) warn("Apple signing not set — the macOS build is ad-hoc signed, not notarised (plan 15.7)");
+      // Windows code signing (plan 11.5.2): the certificate is in the release machine's store; its thumbprint goes to tauri.
+      if (process.platform === "win32") {
+        if (process.env.WINDOWS_CERTIFICATE_THUMBPRINT) run("node", ["scripts/tauri-signing.mjs", "windows-thumbprint", process.env.WINDOWS_CERTIFICATE_THUMBPRINT]);
+        else warn("WINDOWS_CERTIFICATE_THUMBPRINT not set — the Windows installer is NOT signed (plan 15.7)");
+      }
       run("node", ["scripts/tauri-signing.mjs", "updater-config"]);
       // Windows MSI takes only numeric pre-release versions: a beta ships the NSIS installer alone.
       run("npm", ["run", "tauri:build", ...(isBeta(version) && process.platform === "win32" ? ["--", "--bundles", "nsis"] : [])], channelEnv);
@@ -223,8 +252,19 @@ const commands = {
         writeFileSync(path.join(OUT, "latest.json"), JSON.stringify(manifest, null, 2) + "\n");
       } else if (!sigs.length) warn("no .sig files — no latest.json");
     }
-    // Mobile (plan 13.3): the .ipa / .aab are built and signed in Xcode / Android Studio
-    // (RELEASE.md §3–4); drop them into release/ before this step to include them in the sums.
+    // Mobile (plan 13.3, W1.24): what mobile.yml did, by the local mobile build (plan W4.22) on this
+    // machine's web build (--skip-web), then into release/ so SHA256SUMS and the downloads page cover it.
+    if (flag("--mobile")) {
+      const targets = [process.env.ANDROID_HOME || process.env.ANDROID_SDK_ROOT ? "android" : null, process.platform === "darwin" ? "ios" : null].filter(Boolean);
+      if (!targets.includes("android")) warn("mobile: ANDROID_HOME is not set — no Android build on this machine");
+      if (!targets.includes("ios")) warn("mobile: the iOS build needs macOS with Xcode — skipped");
+      for (const t of targets) run("node", ["scripts/mobile-build.mjs", t, "--version", version, "--skip-web", ...(t === "ios" ? ["--no-upload"] : [])], channelEnv);
+      const mobile = path.join(OUT, "mobile");
+      if (existsSync(mobile)) {
+        for (const n of readdirSync(mobile).filter((n) => /\.(aab|apk|ipa)$/.test(n))) copyFileSync(path.join(mobile, n), path.join(OUT, n));
+        rmSync(mobile, { recursive: true, force: true });
+      }
+    }
     const entries = readdirSync(OUT)
       .filter((n) => n !== "SHA256SUMS" && n !== "SHA256SUMS.asc")
       .map((name) => ({ name, data: readFileSync(path.join(OUT, name)) }));
@@ -232,10 +272,22 @@ const commands = {
     const key = process.env.LUMEN_RELEASE_GPG_KEY;
     if (key) run("gpg", ["--batch", "--yes", "--local-user", key, "--armor", "--detach-sign", "--output", path.join(OUT, "SHA256SUMS.asc"), path.join(OUT, "SHA256SUMS")]);
     else warn("LUMEN_RELEASE_GPG_KEY not set — SHA256SUMS is not signed (plan 15.7)");
+    writeDownloads(OUT, path.join(OUT, "downloads.json"));
     console.log(`release/: ${readdirSync(OUT).join(", ")}`);
   },
 
+  downloads() {
+    const dir = path.resolve(ROOT, opt("--dir") ?? "release");
+    const out = path.resolve(ROOT, opt("--out") ?? "docs/src/data/downloads.json");
+    const m = writeDownloads(dir, out);
+    console.log(`${path.relative(ROOT, out)}: ${m.files.length} downloads for ${m.tag}${m.sums.signature ? " (SHA256SUMS signed)" : " (SHA256SUMS not signed)"}`);
+  },
+
   publish() {
+    // Plan W6.43 / W10.E68: never a release whose app carries the placeholder (or test) updater key.
+    const pubkey = (process.env.LUMEN_UPDATER_PUBKEY ?? "").trim() || (existsSync(path.join(ROOT, "security/updater-key.pub")) ? read("security/updater-key.pub").trim() : JSON.parse(read("src-tauri/tauri.conf.json")).plugins?.updater?.pubkey);
+    const refusals = publishRefusals({ pubkey, files: existsSync(OUT) ? readdirSync(OUT) : [] });
+    if (refusals.length) throw new Error(`refusing to publish:\n  - ${refusals.join("\n  - ")}`);
     const version = current();
     const tag = tagOf(version);
     const at = git("rev-list", "-n", "1", tag);
@@ -252,16 +304,40 @@ const commands = {
     if (!flag("--draft") && existsSync(path.join(OUT, "latest.json"))) updateBetaChannel(version);
   },
 
-  "deploy-beta"() {
+  "deploy-fly"() {
+    const app = process.env.FLY_APP_NAME;
+    if (!app) throw new Error("FLY_APP_NAME is not set (the Fly.io app to deploy; flyctl reads FLY_API_TOKEN or your `fly auth login`)");
+    run("flyctl", ["deploy", "--remote-only", "--app", app]);
+    const url = `https://${app}.fly.dev/favicon.svg`;
+    const r = spawnSync("curl", ["-s", "-o", "/dev/null", "-w", "%{http_code}", "-m", "10", url], { encoding: "utf8" });
+    if (r.stdout === "200") console.log(`deploy healthy (${url} → HTTP 200)`);
+    else warn(`post-deploy healthcheck failed (${url} → HTTP ${r.stdout || r.status}); check the Fly.io logs`);
+  },
+
+  async "deploy-beta"() {
     // The beta web app (plan 14.4): a separate deployment from the same build pipeline, never production.
     if (!isBeta(current())) throw new Error(`${current()} is not a beta: run \`release.mjs prepare --beta\` first`);
     if (!existsSync(path.join(ROOT, "dist", "index.html"))) throw new Error("no dist/: run `node scripts/release.mjs build` first");
     const out = execFileSync("npx", ["vercel", "deploy", "dist", "--yes"], { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "inherit"] }).trim();
-    const url = out.split("\n").pop();
+    const url = deploymentUrlFrom(out) ?? out.split("\n").pop();
     console.log(`beta deployed: ${url}`);
+    // Audit W10.C29: every deploy checks the deployed metadata (live:meta) before it gets an alias.
+    const meta = await liveMetaReport({ url, selfTest: false });
+    console.log(meta.lines.join("\n"));
+    if (!meta.ok) {
+      console.error(liveMetaAlert(url, meta.problems));
+      throw new Error(`live:meta failed on ${url}: the beta keeps no alias`);
+    }
     const host = (process.env.LUMEN_BETA_HOST ?? "").trim();
-    if (host) run("npx", ["vercel", "alias", "set", url, host]);
-    else warn("LUMEN_BETA_HOST not set — the beta is only at its deployment URL");
+    if (host) {
+      run("npx", ["vercel", "alias", "set", url, host]);
+      const aliased = await liveMetaReport({ url: `https://${host.replace(/^https?:\/\//, "").replace(/\/+$/, "")}`, selfTest: false });
+      console.log(aliased.lines.join("\n"));
+      if (!aliased.ok) {
+        console.error(liveMetaAlert(host, aliased.problems));
+        throw new Error(`live:meta failed on ${host}`);
+      }
+    } else warn("LUMEN_BETA_HOST not set — the beta is only at its deployment URL");
   },
 
   verify() {
@@ -343,11 +419,11 @@ if (/^v?\d+\.\d+\.\d+/.test(cmd ?? "")) {
   }
 }
 if (!commands[cmd]) {
-  console.error("usage: node scripts/release.mjs <version> --dry-run | --publish  (the whole release, plan W4.5)\n       node scripts/release.mjs plan | prepare | build | publish | deploy-beta | verify | rollback <bad> | notes <version> | packages");
+  console.error("usage: node scripts/release.mjs <version> --dry-run | --publish  (the whole release, plan W4.5)\n       node scripts/release.mjs plan | prepare | build | publish | deploy-beta | deploy-fly | verify | rollback <bad> | notes <version> | packages | downloads");
   process.exit(2);
 }
 try {
-  commands[cmd]();
+  await commands[cmd]();
 } catch (e) {
   console.error(`release: ${e.message}`);
   process.exit(1);

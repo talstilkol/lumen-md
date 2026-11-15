@@ -69,8 +69,32 @@ export function getOllamaConfigModel(): string {
   return getModel();
 }
 
+/**
+ * The Ollama address as it would be stored, or `null` when this page can't use
+ * it: not an http(s) URL, or not in this deployment's CSP connect-src. An empty
+ * address is `""` (back to the default). A blocked address is never stored,
+ * because getBaseUrl() would then quietly talk to localhost while the settings
+ * show the saved host, and a multi-GB pull would go to a host nobody chose.
+ */
+export function usableOllamaUrl(url: string): string | null {
+  const clean = url.trim().replace(/\/+$/, "");
+  if (!clean) return "";
+  try {
+    const u = new URL(clean);
+    if (u.protocol !== "http:" && u.protocol !== "https:") return null;
+  } catch {
+    return null;
+  }
+  return connectAllowedByCsp(clean) ? clean : null;
+}
+
 export function setOllamaConfig(config: Partial<OllamaConfig>): void {
-  if (config.baseUrl) localStorage.setItem("lumen.ollama.baseUrl", config.baseUrl);
+  if (config.baseUrl) {
+    const usable = usableOllamaUrl(config.baseUrl);
+    if (usable === null) {
+      log.warn(`Ollama URL ${config.baseUrl} isn't usable here (not http(s), or not in this deployment's CSP connect-src); not saved. Add its origin with VITE_CSP_CONNECT_EXTRA at build time.`);
+    } else if (usable) localStorage.setItem("lumen.ollama.baseUrl", usable);
+  }
   if (config.model) localStorage.setItem("lumen.ollama.model", config.model);
 }
 
@@ -82,6 +106,7 @@ let lastProbe: { at: number; ok: boolean } | null = null;
 export async function isOllamaAvailable(): Promise<boolean> {
   let ok = false;
   try {
+    // privacy-ledger: Ollama at the configured base URL (classify: local-ai on this machine/LAN, cloud-ai when remote)
     const res = await fetch(`${getBaseUrl()}/api/tags`, {
       method: "GET",
       signal: AbortSignal.timeout(2000),
@@ -113,6 +138,7 @@ export function __resetOllamaProbe(): void {
  */
 export async function listOllamaModels(): Promise<OllamaModel[]> {
   try {
+    // privacy-ledger: Ollama at the configured base URL (classify: local-ai on this machine/LAN, cloud-ai when remote)
     const res = await fetch(`${getBaseUrl()}/api/tags`);
     if (!res.ok) return [];
     const data = await res.json();
@@ -135,6 +161,7 @@ export async function listOllamaModels(): Promise<OllamaModel[]> {
 export async function* pullOllamaModel(
   modelName: string,
 ): AsyncGenerator<{ status: string; completed?: number; total?: number }, void, undefined> {
+  // privacy-ledger: Ollama at the configured base URL (classify: local-ai on this machine/LAN, cloud-ai when remote)
   const res = await fetch(`${getBaseUrl()}/api/pull`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -175,6 +202,7 @@ export async function chatOllama(
   const baseUrl = getBaseUrl();
   const model = opts.model || getModel();
 
+  // privacy-ledger: Ollama at the configured base URL (classify: local-ai on this machine/LAN, cloud-ai when remote)
   const res = await fetch(`${baseUrl}/v1/chat/completions`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -207,6 +235,7 @@ export async function* chatOllamaStream(
   const baseUrl = getBaseUrl();
   const model = opts.model || getModel();
 
+  // privacy-ledger: Ollama at the configured base URL (classify: local-ai on this machine/LAN, cloud-ai when remote)
   const res = await fetch(`${baseUrl}/v1/chat/completions`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -259,6 +288,7 @@ export async function embedOllama(
   text: string,
   model = "nomic-embed-text",
 ): Promise<number[]> {
+  // privacy-ledger: Ollama at the configured base URL (classify: local-ai on this machine/LAN, cloud-ai when remote)
   const res = await fetch(`${getBaseUrl()}/api/embed`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

@@ -22,11 +22,15 @@ import { downloadText } from "../storage/exportFormats";
 import { showAiToast } from "./AiToast";
 import { SUPPORTED_LOCALES, t, type Locale } from "../i18n";
 import { isBetaLocale } from "../i18n/review";
-import { useFocusTrap } from "./useFocusTrap";
 import "./settingsScreenStrings";
+// W10.A10: the tab list names the "Train AI on my style" tab (fineTune.title) before its panel loads,
+// so that panel's English travels with this chunk too (FineTuneSettings is only ever opened from here).
+import "./fineTuneStrings";
 import { HelpButton } from "./HelpButton";
+import { SettingsAbout } from "./AccessibilityLinks";
 // W5.11: the "keep photo metadata" switch's label ships with this lazy screen.
 import "../lib/journalistStrings";
+import { Modal } from "./Modal";
 
 const ThemeSettings = lazy(() => import("./ThemeSettings").then((m) => ({ default: m.ThemeSettings })));
 const AiSettingsPanel = lazy(() => import("./AiSettingsPanel").then((m) => ({ default: m.AiSettingsPanel })));
@@ -34,6 +38,7 @@ const CollabSettings = lazy(() => import("./CollabSettings").then((m) => ({ defa
 const FineTuneSettings = lazy(() => import("./FineTuneSettings").then((m) => ({ default: m.FineTuneSettings })));
 const TrustedKeysSettings = lazy(() => import("./TrustedKeysSettings").then((m) => ({ default: m.TrustedKeysSettings })));
 const OrgSettings = lazy(() => import("./OrgSettings").then((m) => ({ default: m.OrgSettings })));
+const ImageHostsSection = lazy(() => import("./ImageHostsPanel").then((m) => ({ default: m.ImageHostsSection })));
 
 /** A settings file is a few KB; anything far larger isn't one. */
 const IMPORT_MAX_BYTES = 256 * 1024;
@@ -69,6 +74,13 @@ function applyAppPatch(patch: Record<string, unknown>): void {
       }
       case "writingGoalWords":
         s.setWritingGoal(value as number);
+        break;
+      case "mobileToolbar":
+        // Unknown or repeated action ids go, as when the store loads (review t5, L2).
+        s.setMobileToolbar(value as AppState["mobileToolbar"]);
+        break;
+      case "enabledSnippets":
+        rest.enabledSnippets = [...new Set(value as string[])];
         break;
       case "rtl":
         if (s.rtl !== value) s.toggleRtl();
@@ -128,10 +140,6 @@ export function SettingsScreen({ tab: initialTab = "general", onClose, onOpenAud
     searchRef.current?.focus();
   }, []);
 
-  // One focus trap for every dialog (plan 10.1): focus stays in the screen, Escape closes it.
-  const trapRef = useRef<HTMLDivElement | null>(null);
-  useFocusTrap(trapRef, { onEscape: onClose });
-
   // A search that leaves the open tab out moves to the first tab it found.
   useEffect(() => {
     if (!tabs.has(tab) && visibleTabs[0]) setTab(visibleTabs[0].id);
@@ -156,7 +164,7 @@ export function SettingsScreen({ tab: initialTab = "general", onClose, onOpenAud
     downloadText("lumen-settings.json", `${JSON.stringify(file, null, 2)}\n`, "application/json");
   };
 
-  const general = entries.filter((e) => e.tab === "general" && e.label && e.type !== "json" && e.type !== "text");
+  const general = entries.filter((e) => e.tab === "general" && e.label && e.type !== "json" && e.type !== "list" && e.type !== "text");
 
   const setEntry = (entry: SettingEntry, value: unknown) => {
     if (entry.store === "app") applyAppPatch({ [entry.id]: value });
@@ -253,6 +261,8 @@ export function SettingsScreen({ tab: initialTab = "general", onClose, onOpenAud
         return <CollabSettings embedded onClose={onClose} />;
       case "fineTune":
         return <FineTuneSettings open embedded onClose={onClose} />;
+      case "privacy":
+        return <ImageHostsSection />;
       case "security":
         return <TrustedKeysSettings open embedded onClose={onClose} />;
       case "org":
@@ -261,13 +271,9 @@ export function SettingsScreen({ tab: initialTab = "general", onClose, onOpenAud
   };
 
   return (
-    <div className="cmd-palette-backdrop" onClick={onClose}>
+    <Modal aria-labelledby={`${ids}-title`} onClose={onClose} className="cmd-palette-backdrop" onClick={onClose}>
       <div
         className="cmd-palette"
-        ref={trapRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={`${ids}-title`}
         data-testid="settings-screen"
         onClick={(e) => e.stopPropagation()}
         style={{ width: "min(920px, 96vw)", maxWidth: 920, maxHeight: "90vh", height: "90vh", padding: 0, display: "flex", flexDirection: "column" }}
@@ -342,8 +348,9 @@ export function SettingsScreen({ tab: initialTab = "general", onClose, onOpenAud
             {visibleTabs.length > 0 && <Suspense fallback={<p style={muted}>…</p>}>{panel()}</Suspense>}
           </section>
         </div>
+        <SettingsAbout />
       </div>
-    </div>
+    </Modal>
   );
 }
 

@@ -5,7 +5,10 @@ import { describe, expect, it } from "vitest";
 import { readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { CLIENT_INFO, percyEnabled, percySnapshot, snapshotPayload } from "../../visual/percy";
-import { BASE_SURFACE_IDS, COMMAND_SURFACES, PERCY_SCREEN_IDS, RTL_CANARY_CSS, percySurfaces } from "../../visual/percy-surfaces";
+import { BASE_SURFACE_IDS, COMMAND_SURFACES, PERCY_SCREEN_IDS, RTL_CANARY_CSS, percySurfaces, readyMarker } from "../../visual/percy-surfaces";
+// @ts-expect-error — plain .mjs module without type declarations
+import { NATIVE_JOBS, buildPipeline, gateKeys, pipelineRules } from "../../scripts/buildkite/lib.mjs";
+import { parse } from "yaml";
 import { PERCY_CLI, percyCommand } from "../../scripts/visual/percy-run.mjs";
 
 const ROOT = resolve(__dirname, "..", "..");
@@ -36,6 +39,47 @@ describe("Percy visual regression (W7.25)", () => {
   it("every command a screen opens is a registered palette command", () => {
     const src = sources(join(ROOT, "src/commands")).join("\n");
     for (const s of COMMAND_SURFACES) expect(src, s.command).toContain(`id: "${s.command}"`);
+  });
+
+  it("every command screen waits for its own view's ready marker, never `body` (W10.E55)", () => {
+    const files = new Map<string, string>();
+    (function walk(dir: string) {
+      for (const e of readdirSync(dir, { withFileTypes: true })) {
+        const p = join(dir, e.name);
+        if (e.isDirectory()) walk(p);
+        else if (/\.tsx$/.test(e.name) && !p.includes("__tests__")) files.set(p, readFileSync(p, "utf8"));
+      }
+    })(join(ROOT, "src"));
+    for (const s of COMMAND_SURFACES) {
+      expect(s.ready, s.id).not.toBe("body");
+      const ids = [...s.ready.matchAll(/\[data-testid="([^"]+)"\]/g)].map((m) => m[1]);
+      expect(ids.length, s.id).toBeGreaterThan(0);
+      for (const id of ids) {
+        const owners = [...files].filter(([, src]) => src.includes(`data-testid="${id}"`) || src.includes(`testId="${id}"`) || src.includes(`"${id}"`) && src.includes("data-testid={"));
+        expect(owners.length, `${s.id}: no component renders data-testid="${id}"`).toBeGreaterThan(0);
+        // A marker that waits for data-ready must sit on a root that sets data-ready.
+        if (s.ready.includes(`${readyMarker(id, true)}`)) expect(owners.some(([, src]) => /data-ready=\{String\(/.test(src)), `${s.id}: ${id} has no data-ready`).toBe(true);
+      }
+    }
+    expect(COMMAND_SURFACES.filter((s) => s.ready.includes('[data-ready="true"]')).map((s) => s.id)).toEqual(["backlinks", "canvas", "graph", "outline", "page-view", "reading", "tags", "version-history", "workspace"]);
+  });
+
+  it("Percy runs from the Buildkite pipeline: its own gated step, a commit status, and the receipt waits for it (W10.E55)", () => {
+    const steps = (parse(readFileSync(join(ROOT, ".buildkite/pipeline.yml"), "utf8")) as { steps: Array<{ key: string; command: string; if?: string; notify?: unknown[] }> }).steps;
+    const percy = steps.find((s) => s.key === "percy");
+    expect(percy?.command).toContain("npm run -s visual:percy");
+    // Main and the `percy` label only, decided inside the step: a skipped step would fail the receipt.
+    expect(percy?.if).toBeUndefined();
+    expect(percy?.command).toContain('*,percy,*)');
+    expect(percy?.command).toContain('BUILDKITE_BRANCH:-}" != "main"');
+    expect(percy?.notify).toEqual([{ github_commit_status: { context: "lumen/buildkite: percy" } }]);
+    const pkg = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")) as { scripts: Record<string, string> };
+    expect(pkg.scripts["visual:percy"]).toBe("node scripts/visual/percy-run.mjs");
+    const ci = parse(readFileSync(join(ROOT, "docs/archive/workflows/ci.yml"), "utf8"), { uniqueKeys: false });
+    const p = buildPipeline(ci);
+    expect(gateKeys(p)).toContain("percy");
+    expect(pipelineRules(p)).toEqual([]);
+    expect(NATIVE_JOBS.map((j: { key: string }) => j.key)).toContain("percy");
   });
 
   it("the canary moves RTL preview text by 2px and nothing else", () => {

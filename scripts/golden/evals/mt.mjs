@@ -12,7 +12,7 @@
  *
  * Layers and where they can run:
  *   opus     the converted Opus-MT models, from --models DIR (one folder per
- *            model id, as model-convert.yml's artifacts) or MT_MODELS_DIR.
+ *            model id, as scripts/models/convert.mjs writes them) or MT_MODELS_DIR.
  *            Not downloadable from this machine or the CI runner until Tal's
  *            15.9(0) / 15.9: without a folder the layer is "not runnable".
  *   m2m100   Xenova/m2m100_418M from Hugging Face, only with MT_ALLOW_REMOTE=1

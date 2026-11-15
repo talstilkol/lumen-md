@@ -13,11 +13,12 @@
  * with a family list as the fallback for older servers.
  */
 
-import { autoPickable, hebrewSupportOf, prefersHebrew } from "../../ai/modelCatalog";
+import { autoPickable, hebrewSupportOf, prefersHebrew, thinkDefaultFor } from "../../ai/modelCatalog";
 import { useAppStore } from "../../store/useStore";
 import type { AgentTool, Availability, Executor, ExecutorMessage, ExecutorRequest, ExecutorResponse, ModelTier, ToolCall } from "../types";
 import { getBaseUrl } from "../../ai/ollamaProvider";
 import { AiPolicyError, getAiPolicy, isLocalOrigin } from "../../ai/policy";
+import { draftOptions } from "../../ai/speculative";
 
 /** Under local-only, an Ollama on another machine is a third party: the prompt must not go there. */
 function remoteRefused(): boolean {
@@ -80,6 +81,16 @@ export function tierOf(params: number | null): ModelTier {
   if (params <= TIER_MAX_PARAMS.small) return "small";
   if (params <= TIER_MAX_PARAMS.medium) return "medium";
   return "large";
+}
+
+/** The installed Ollama models, as last listed (refreshOllama). */
+export function installedOllamaModels(): string[] {
+  return state.models.map((m) => m.name);
+}
+
+/** The model the user picked (`lumen.ollama.model`), or null. */
+export function configuredOllamaModel(): string | null {
+  return configuredModel();
 }
 
 function configuredModel(): string | null {
@@ -156,6 +167,7 @@ export function versionAtLeast(version: string | null, min: readonly [number, nu
 }
 
 async function fetchJson(url: string, init: RequestInit = {}, timeoutMs = PROBE_TIMEOUT_MS): Promise<{ ok: boolean; status: number; data: unknown }> {
+  // privacy-ledger: Ollama at the configured base URL (classify: local-ai on this machine/LAN, cloud-ai when remote)
   const res = await fetch(url, { ...init, signal: init.signal ?? AbortSignal.timeout(timeoutMs) });
   const data = res.ok ? await res.json().catch(() => null) : null;
   return { ok: res.ok, status: res.status, data };
@@ -308,11 +320,16 @@ export const ollamaExecutor: Executor = {
         ...(req.temperature !== undefined ? { temperature: req.temperature } : {}),
         ...(req.maxTokens ? { num_predict: req.maxTokens } : {}),
         ...(req.seed !== undefined ? { seed: req.seed } : {}),
+        // Speculative decoding (plan W7.15): pinned off for reproducible runs and for models it slows down.
+        ...draftOptions(model, state.version),
       },
     };
-    if (req.think !== undefined) body.think = req.think;
+    // W11.I10: a model whose thinking is on by default (Qwen3.5) gets think: false unless the request asks.
+    const think = req.think ?? thinkDefaultFor(model);
+    if (think !== undefined) body.think = think;
     if (useTools) body.tools = toOllamaTools(req.tools!);
     if (req.schema && this.supportsSchema()) body.format = req.schema;
+    // privacy-ledger: Ollama at the configured base URL (classify: local-ai on this machine/LAN, cloud-ai when remote)
     const res = await fetch(`${base}/api/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -332,6 +349,7 @@ export const ollamaExecutor: Executor = {
       const data = (await res.json()) as Record<string, unknown>;
       if (typeof data.error === "string") throw new Error(`Ollama API error: ${data.error}`);
       const msg = (data.message ?? {}) as Record<string, unknown>;
+      afterAnswer(model, base);
       return {
         content: String(msg.content ?? "").trim(),
         toolCalls: parseToolCalls(msg.tool_calls),
@@ -387,9 +405,17 @@ export const ollamaExecutor: Executor = {
     // A stream that ends without its terminal `done` record was cut off
     // (server, proxy, network): a prefix is not an answer.
     if (!sawDone) throw new Error("Ollama API error: stream ended before the final record");
+    afterAnswer(model, base);
     return { content: content.trim(), toolCalls, model: answeredModel, usage };
   },
 };
+
+/** Once a model has answered: measure speculative decoding for it in the background, if not yet done (W7.15). */
+function afterAnswer(model: string, base: string): void {
+  if (!state.version) return;
+  const version = state.version;
+  void import("../../ai/speculativeMeasure").then((m) => m.scheduleMeasurement(model, version, base)).catch(() => undefined);
+}
 
 /** Tests. */
 export function __resetOllamaState(): void {

@@ -248,6 +248,7 @@ export const SEARCH_JS = `(() => {
   const root = document.querySelector('meta[name="lumen-site-root"]')?.getAttribute("content") || "";
   const norm = (s) => s.normalize("NFKD").replace(/[\\u0300-\\u036f\\u0591-\\u05c7]/g, "").toLowerCase();
   let data = null;
+  // privacy-ledger: runs on the published static site, not in the app: its own search-index.json
   const load = () => data || (data = fetch(root + "search-index.json").then((r) => r.json()).then((d) => d.map((e) => ({ ...e, n: norm(e.t + " " + e.x) }))));
   const show = async () => {
     const words = norm(q.value).split(/\\s+/).filter(Boolean);

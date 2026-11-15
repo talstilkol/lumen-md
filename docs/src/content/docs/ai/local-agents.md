@@ -178,6 +178,15 @@ handles them like this:
   English and Hebrew ("ignore previous instructions", "התעלם מכל
   ההוראות", role tokens, "send this note to …") stay in the text inside
   a visible `⟦flagged …⟧` marker.
+- **A classifier, when one is installed.** On top of those rules, an
+  injection classifier can score each paragraph of the cleaned text
+  (`src/agents/injectionClassifier.ts`). A paragraph it scores at or over
+  its threshold is flagged the same way, as `⟦flagged by the injection
+  classifier (…, p=…) …⟧`. The planned one is ProtectAI's
+  deberta-v3-base-prompt-injection-v2 (English, on the desktop). It is not
+  installed yet, because its converted model has no host (15.9). With no
+  classifier, or when it fails or takes more than 4 seconds, the rules alone
+  apply. It never decides a tool call: the approval below does that.
 - **Approval.** Once a run has outside content in its context, every
   write tool and every network call asks you first. The prompt names the
   tool, what it would do and where the outside content came from. Under
@@ -402,7 +411,7 @@ and validators, so a broken fixture is caught before a long GPU run.
 - a tool call names one of the agent's tools, and its arguments pass the tool's JSON Schema;
 - a final answer starts in the agent's format (JSON where the agent has a schema).
 
-It finds Ollama, or starts `ollama serve` if the binary is installed, and pulls the model when it is missing. If either is impossible (no Ollama, no network to the model registry), it writes `eval/results/real-skipped.md` with the reason and exits 0. The nightly workflow (`.github/workflows/real-model.yml`) caches the model and sets `LUMEN_REAL_MODEL_REQUIRED=1`, so there a skip fails. It also checks LanguageTool (English only; it has no Hebrew) and SearXNG as real services. Use `--model qwen3:1.7b` for the multi-step scenarios.
+It finds Ollama, or starts `ollama serve` if the binary is installed, and pulls the model when it is missing. If either is impossible (no Ollama, no network to the model registry), it writes `eval/results/real-skipped.md` with the reason and exits 0. On Buildkite (no GitHub Actions) three steps run it: `qwen3:0.6b` on every build whose change touches `src/agents/`, and `qwen3:1.7b` and DictaLM on the scheduled (nightly) build. They set `LUMEN_REAL_MODEL_REQUIRED=1`, so there a skip fails. Every model and every container image (Ollama, LanguageTool, SearXNG) runs at a digest pinned in `models/ci-models.json`, never a tag; `npm run ci:real-model-pins -- check` fails on a pin that is not a sha256 digest, and the Ollama store is cached per model digest, so a new build of a model is never measured under an old cache. It also checks LanguageTool (English only; it has no Hebrew) and SearXNG as real services. Use `--model qwen3:1.7b` for the multi-step scenarios.
 
 The run prints the **digest** of the model it used (Ollama keeps each model by its content digest) and writes it into the report. To pin a build, pass `--digest sha256:…` or set `LUMEN_REAL_MODEL_DIGEST`: if the local model has another digest, the run stops with exit 1 instead of measuring a different build under the same name.
 

@@ -41,7 +41,7 @@ export interface WorkspaceNode {
   children?: WorkspaceNode[];
 }
 
-const vault = () => getVaultBackend();
+export const vault = () => getVaultBackend();
 
 // ── Recursive tree ───────────────────────────────────────────────────────
 
@@ -139,7 +139,7 @@ export async function readWorkspaceFile(path: string): Promise<string> {
  */
 const localLocks = new Map<string, Promise<unknown>>();
 
-function withPathLock<T>(path: string, fn: () => Promise<T>): Promise<T> {
+export function withPathLock<T>(path: string, fn: () => Promise<T>): Promise<T> {
   const name = `lumen-workspace:${splitPath(path).join("/")}`;
   const locks = typeof navigator !== "undefined" ? (navigator as Navigator & { locks?: LockManager }).locks : undefined;
   if (locks?.request) return locks.request(name, () => fn()) as Promise<T>;
@@ -153,7 +153,7 @@ function withPathLock<T>(path: string, fn: () => Promise<T>): Promise<T> {
   return run;
 }
 
-async function writeUnlocked(path: string, data: VaultData): Promise<void> {
+export async function writeUnlocked(path: string, data: VaultData): Promise<void> {
   await vault().write(path, data);
 }
 

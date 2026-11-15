@@ -5,7 +5,7 @@
  * Phonikud's checkpoints and ILSpeech are all non-commercial, so W2.6's
  * read-aloud sleeps. This kit makes a corpus we can release as CC0 ourselves: about two
  * hours from one volunteer speaker, read from a script of public-domain and
- * CC0 sentences, recorded in the app with a noise and level check, exported
+ * CC0 sentences, recorded in the app (Recorder.tsx, palette: voice.corpusRecorder) with a noise and level check, exported
  * in the LJSpeech layout Piper's trainer reads. Training is an owner / GPU
  * step (scripts/voice-corpus/piper-train.sh).
  *

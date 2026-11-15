@@ -22,8 +22,12 @@
  * WebP are cleaned whatever they are called. HEIC, AVIF, TIFF and JPEG XL
  * can't be cleaned in place: the async helpers re-encode them through a
  * canvas (only the pixels survive) or refuse them. A file declared as JPEG,
- * PNG or WebP that is none of them throws ImageMetadataError. GIF, SVG, BMP
- * and ICO come back unchanged, with `format: null`.
+ * PNG or WebP whose bytes are none of them throws ImageMetadataError — a GIF,
+ * SVG, BMP or ICO too (finding X-BL-2, W10.D19: unexpected bytes never go out
+ * under a type that doesn't match them; the async helpers re-encode them as
+ * the declared type or refuse them). GIF, SVG, BMP and ICO declared as
+ * themselves, or with no declared type, come back unchanged, with
+ * `format: null`.
  *
  * Fail closed (review 12.11): a JPEG, PNG or WebP that can't be parsed throws
  * ImageMetadataError instead of coming back as it was. The async helpers
@@ -319,7 +323,7 @@ export function stripImageMetadata(bytes: Uint8Array, declared?: string): StripR
   if (r) return r;
   const kind = sniffMedia(bytes);
   if (kind && REENCODE.has(kind)) throw new ImageMetadataError(kind, "it can only be cleaned by re-encoding");
-  if (declared && /^image\/(jpe?g|png|webp)$/i.test(declared) && !(kind && PLAIN.has(kind))) {
+  if (declared && /^image\/(jpe?g|png|webp)$/i.test(declared)) {
     throw new ImageMetadataError(declared.slice(6), "its bytes are not that format");
   }
   const copy = new Uint8Array(bytes.length);
@@ -377,8 +381,9 @@ export async function reencodeImage(bytes: Uint8Array, type: string, outType: st
 /**
  * Clean image bytes, failing closed: stripped in place when they parse,
  * re-encoded through a canvas when they don't, null when neither works (the
- * caller must then refuse the image). Formats this module doesn't clean
- * (GIF, SVG, HEIC, AVIF) come back unchanged with `format: null`.
+ * caller must then refuse the image). GIF, SVG, BMP and ICO under their own
+ * type come back unchanged with `format: null`; under a JPEG, PNG or WebP
+ * type they are re-encoded as that type or refused (X-BL-2).
  */
 export async function cleanImageBytes(bytes: Uint8Array, type: string): Promise<{ bytes: Uint8Array<ArrayBuffer>; type: string; format: StripResult["format"]; removed: string[] } | null> {
   try {

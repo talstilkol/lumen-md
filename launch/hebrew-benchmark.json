@@ -1,0 +1,10 @@
+{
+  "$comment": "Plan W11.H13: what the other apps were measured at on the same public Hebrew benchmarks. Only a measurement someone actually ran goes here, with its source (where the run and its output are) and the date; anything else shows as 'not tested'. Lumen's own numbers never go here: they come from eval/results. `npm run eval:public -- page --check` refuses a claim without a source or a date.",
+  "competitors": ["obsidian", "notion", "apple-notes"],
+  "names": {
+    "obsidian": { "en": "Obsidian", "he": "Obsidian" },
+    "notion": { "en": "Notion", "he": "Notion" },
+    "apple-notes": { "en": "Apple Notes", "he": "Apple Notes" }
+  },
+  "claims": []
+}

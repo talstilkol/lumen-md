@@ -77,6 +77,8 @@ export function TagsPanel({ open, onClose }: Props) {
     <aside
       role="complementary"
       aria-label={t("tagsPanel.title")}
+      data-testid="tags-panel"
+      data-ready={String(!loading && index !== null)}
       style={{
         position: "fixed",
         insetInlineEnd: 0,

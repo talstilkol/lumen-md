@@ -1,0 +1,26 @@
+/* High contrast — black on white and white on black, for low vision. */
+:root {
+  --bg: 0 0% 100%;
+  --bg-muted: 0 0% 96%;
+  --fg: 0 0% 0%;
+  --fg-subtle: 0 0% 15%;
+  --fg-muted: 0 0% 25%;
+  --accent: 230 100% 32%;
+  --accent-fg: 0 0% 100%;
+}
+.dark {
+  --bg: 0 0% 0%;
+  --bg-muted: 0 0% 8%;
+  --fg: 0 0% 100%;
+  --fg-subtle: 0 0% 88%;
+  --fg-muted: 0 0% 80%;
+  --accent: 55 100% 60%;
+  --accent-fg: 0 0% 0%;
+}
+:focus-visible {
+  outline: 3px solid hsl(var(--accent));
+  outline-offset: 2px;
+}
+table th {
+  text-align: start;
+}

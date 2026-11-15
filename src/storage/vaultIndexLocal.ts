@@ -9,6 +9,7 @@ import { engineOver, type IndexEngine, type IndexRequest, type IndexRequestBody,
 import { dropSnapshot, loadSnapshot, readSnapshotBody, readSnapshotManifest, sameNote, saveSnapshot, snapshotRaw } from "./indexSnapshot";
 import { summarize } from "./noteSummary";
 import type { SnapshotKeys } from "./snapshotSeal";
+import { buildIndex, isIndexed } from "../highlights/hub";
 
 /**
  * Index the listed notes the snapshot holds unchanged; their summaries for
@@ -99,6 +100,8 @@ export function handleIndexRequest(index: VaultIndex, req: IndexRequest, defer?:
         return { id: req.id, ok: true, result: 0 };
       case "search":
         return { id: req.id, ok: true, result: index.search(req.query, req.opts) };
+      case "query":
+        return { id: req.id, ok: true, result: index.query(req.query, req.opts) };
       case "backlinks":
         return { id: req.id, ok: true, result: index.backlinks(req.target) };
       case "stats":
@@ -114,6 +117,8 @@ export function handleIndexRequest(index: VaultIndex, req: IndexRequest, defer?:
         return { id: req.id, ok: true, result: index.texts(req.paths) };
       case "related":
         return { id: req.id, ok: true, result: index.related(req.query.paragraph, req.query) };
+      case "highlights":
+        return { id: req.id, ok: true, result: buildIndex(index.texts().filter((n) => isIndexed(n.path))) };
       case "snapshotSave":
         return saveSnapshot(req.vault, index.notes(), req.keys).then(
           () => ({ id: req.id, ok: true as const, result: index.size }),

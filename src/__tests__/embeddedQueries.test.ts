@@ -204,7 +204,7 @@ describe("live update after a save", () => {
 
 describe("0 eval", () => {
   it("no eval, Function or string timers in the query code", () => {
-    for (const f of ["src/search/dataview.ts", "src/search/embeddedQuery.ts", "src/search/savedSearches.ts", "src/views/QueryBlock.tsx"]) {
+    for (const f of ["src/search/dataview.ts", "src/search/dataviewParse.ts", "src/search/embeddedQuery.ts", "src/search/savedSearches.ts", "src/views/QueryBlock.tsx"]) {
       const src = readFileSync(join(process.cwd(), f), "utf8").replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, "");
       expect(src, f).not.toMatch(/\beval\s*\(/);
       expect(src, f).not.toMatch(/\bnew\s+Function\b|\bFunction\s*\(/);

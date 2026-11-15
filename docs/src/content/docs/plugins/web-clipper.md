@@ -1,20 +1,48 @@
 ---
 title: Web Clipper
-description: Clip a page, a selection or your highlights into the vault as Markdown, with its source and date. No server involved.
+description: Save a web page as a clean Markdown note, from inside Lumen or with the browser extension, which hands the clip to the app. No clip server.
 ---
+
+## Clip from inside Lumen
+
+Two commands save a page into your vault as a clean note, with its source
+and the date in the front matter:
+
+- `⌘K → Clip a web page…` — paste a URL; Lumen fetches the page and keeps
+  the article (`<article>` / `<main>`), without navigation, ads, forms and
+  scripts. Fetching an arbitrary site needs the research service
+  ([Research](/ai/research/)); without it, only sites the app's security
+  policy already allows can be clipped, and Lumen says so. Under the
+  local-only AI policy, Lumen fetches no web pages at all; use
+  **Clip from clipboard** instead.
+- `⌘K → Clip from clipboard` — copy something on a page first; the copied
+  HTML (or text) becomes the note.
+
+Clips go into the **Library** folder (**ספרייה** with the interface in
+Hebrew), get a number when the name is taken, and open in a new tab.
+
+```yaml
+---
+title: "How CRDTs Work"
+source: "https://martin.kleppmann.com/2020/07/06/crdt-hard-parts.html"
+clipped: 2026-04-26
+---
+```
+
+## The browser extension
 
 The Lumen Web Clipper is a Chrome / Edge extension (Manifest V3). It sends
 the page to Lumen, and **Lumen** turns it into a note. The extraction
 happens in the app, so a clip comes out the same whichever way it arrives.
 
-## Install (developer mode)
+### Install (developer mode)
 
 1. `chrome://extensions/` → turn on **Developer mode**
 2. **Load unpacked** → pick the `extension/` folder of the repository
 3. Open the extension's **Settings**: set the address of your Lumen (default
    `http://localhost:5173`), or choose **The Lumen desktop app**.
 
-## Use
+### Use
 
 - **Save full page**: the toolbar button, or right-click → **Clip to Lumen**.
 - **Save selection only**: select text first. Only the selection becomes the note.
@@ -22,7 +50,7 @@ happens in the app, so a clip comes out the same whichever way it arrives.
   the page. They are kept per address, marked again when you come back,
   and put at the top of the note (as `==highlight==` quotes) on the next clip.
 
-## How a clip reaches Lumen
+### How a clip reaches Lumen
 
 | Where Lumen runs | How |
 |---|---|
@@ -71,6 +99,17 @@ the page with `{{meta:name}}` (a `<meta>` tag, by name, property or itemprop;
 several tags of one name are joined) and `{{selector:css}}` (the text of the
 elements a CSS selector picks).
 
+### Your own templates
+
+Run **Web clipper: templates and triggers** from the palette. Your templates
+come first, before the built-in ones above, and are saved in the vault at
+`.lumen/clip-templates.json`, so they sync with your notes. A built-in
+template is read-only: *Duplicate* it to change it. *Test an address* shows
+which template a page would get, and by which trigger. The preview shows the
+note it makes from sample values. A trigger that is not an address, a valid
+`/regex/` or `schema:@Type` is named before you can save. Templates exported
+from the Obsidian Web Clipper (its JSON *Export*) can be imported as they are.
+
 ## Interpreter: fields a local model fills in
 
 A template can ask questions about the page: `{{"a one-sentence summary"}}`,
@@ -105,3 +144,13 @@ On the clipper golden set (plan 7.10: 20 pages with ads, cookie banners,
 share bars, comments and footers around a public-domain article), the clip
 must have the exact title, every paragraph in order and no noise on at least
 90 % of pages. This is checked on every change (`clipperGolden.test.ts`).
+
+## Privacy
+
+The in-app commands fetch only the page you ask for (through the research
+service when one is set up). The extension sends nothing over the network:
+it reads the page you clip and hands it to your Lumen tab (`postMessage`) or
+to the desktop app (a `lumen://clip` link). Its only request is opening your
+Lumen address when no Lumen tab is open. No tracking and no telemetry. Its
+manifest is
+[`extension/manifest.json`](https://github.com/talstilkol/lumen-md/blob/main/extension/manifest.json).

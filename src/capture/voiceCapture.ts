@@ -6,11 +6,16 @@
  *
  * Recording is the browser's MediaRecorder; the microphone is opened when
  * the user presses the button and released when recording stops.
- * Transcription goes through a seam (`setVoiceTranscriber`): the live
- * streaming dictation of plan 6.1 (#255) registers itself there; without
- * it, the recording is transcribed after it stops with local Whisper
- * (transformers.js, on this device under every policy). If no
- * transcript can be made, the note is kept as audio with a placeholder.
+ * Transcription: when a live engine is registered (`setVoiceTranscriber`,
+ * ./liveDictation.ts registers plan 6.1's Zipformer dictation at startup
+ * once its model is on this device), it listens alongside the recording and
+ * its partial text shows while the user speaks. Without one — or when it
+ * cannot start, or hears nothing — the recording is transcribed after it
+ * stops: a Hebrew recording through the live-dictation model (ivrit.ai
+ * Zipformer2 int8, W11.H7) when it is already on this device, anything else
+ * — or a failure — with local Whisper (transformers.js, on this device under
+ * every policy), and the capture box says so. If no transcript can be made, the
+ * note is kept as audio with a placeholder.
  *
  * Loaded with the capture box; nothing here is in the startup bundle.
  */
@@ -20,13 +25,48 @@ import { notifyWorkspaceChanged } from "../storage/workspaceEvents";
 export const ATTACHMENTS_DIR = "attachments";
 export const TITLE_MAX = 80;
 
-/** Turns a recording into text (null: none could be made). `onPartial` gets live text when the engine streams. */
-export type VoiceTranscriber = (audio: Blob, opts: { language?: string; signal?: AbortSignal }) => Promise<string | null>;
+/** A live transcript that runs alongside a recording. */
+export interface LiveTranscript {
+  /** Stop listening; resolves to the whole transcript (null: nothing was heard). */
+  stop(): Promise<string | null>;
+  /** Stop and drop it. */
+  cancel(): void;
+}
+
+/**
+ * A live engine: starts listening with the recording and reports partial
+ * text through `onPartial` while the user speaks (plan 6.1). Rejects when
+ * it cannot start (no model, a language it does not know, no microphone).
+ */
+export type VoiceTranscriber = (opts: LiveOptions) => Promise<LiveTranscript>;
+
+export interface LiveOptions {
+  language?: string;
+  onPartial: (text: string) => void;
+  /** Each finished sentence as the engine closes it (the meeting recorder times them, W11.I19). */
+  onFinal?: (text: string) => void;
+  signal?: AbortSignal;
+}
 
 let transcriber: VoiceTranscriber | null = null;
-/** Plan 6.1's live dictation (or a test) plugs in here. */
+/** The live dictation (./liveDictation.ts) plugs in here; null unregisters it. */
 export function setVoiceTranscriber(fn: VoiceTranscriber | null): void {
   transcriber = fn;
+}
+
+/** Whether a live engine is registered (the capture box says when it is not). */
+export function hasLiveTranscriber(): boolean {
+  return transcriber !== null;
+}
+
+/** Start the live transcript, or null when no engine is registered or it cannot start (then: Whisper after the recording). */
+export async function startLiveTranscript(opts: LiveOptions): Promise<LiveTranscript | null> {
+  if (!transcriber) return null;
+  try {
+    return await transcriber(opts);
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -36,16 +76,35 @@ export function setVoiceTranscriber(fn: VoiceTranscriber | null): void {
  * voice capture must not take, and which the startup bundle already holds.)
  */
 async function defaultTranscriber(audio: Blob, opts: { language?: string; signal?: AbortSignal }): Promise<string | null> {
-  const { decodeAudioTo16k, transcribeAudio } = await import("../ai/transformersEngine");
+  const { decodeAudioTo16k, transcribeAudio, ortBaseUrl } = await import("../ai/transformersEngine");
   const samples = await decodeAudioTo16k(audio);
   if (!samples.length) return null;
+  // Hebrew with the live-dictation model already on this device (W11.H7):
+  // ivrit.ai Zipformer2 int8, the same files and worker as live dictation.
+  // Whisper stays the fallback (another language, no model yet, or a failure).
+  const he = await import("../ai/dictation/fileTranscriber");
+  if (he.isHebrew(opts.language)) {
+    const store = await import("../ai/dictation/modelStore");
+    if (await store.isDictationModelDownloaded().catch(() => false)) {
+      try {
+        const files = await store.loadDictationFiles(undefined, opts.signal);
+        const worker = new Worker(new URL("../ai/dictation/dictation.worker.ts", import.meta.url), { type: "module" });
+        const text = await he.transcribeSamples(samples, files, { worker, ortBase: ortBaseUrl(), signal: opts.signal });
+        if (text) return text;
+      } catch (e) {
+        if ((e as Error)?.name === "AbortError") throw e;
+        /* why: fall through to Whisper, which can still make a transcript */
+      }
+    }
+  }
   const language = opts.language ? opts.language.split(/[-_]/)[0].toLowerCase() : undefined;
   const out = await transcribeAudio(samples, { language, signal: opts.signal });
   return typeof out.text === "string" ? out.text.trim() || null : null;
 }
 
+/** The recording, transcribed after it stopped (local Whisper). */
 export function transcribeVoice(audio: Blob, opts: { language?: string; signal?: AbortSignal } = {}): Promise<string | null> {
-  return (transcriber ?? defaultTranscriber)(audio, opts);
+  return defaultTranscriber(audio, opts);
 }
 
 /** The first `max` characters of the transcript, cut at a word, without a trailing period. */

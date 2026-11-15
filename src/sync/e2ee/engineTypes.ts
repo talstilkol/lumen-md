@@ -176,6 +176,14 @@ export interface RekeyRequest {
    * (fifth review 12.11, F3). Without it such a re-key is refused.
    */
   dropDevices?: boolean;
+  /**
+   * Plan W11.S8: set up (or replace) the recovery key for the new epoch and
+   * every later one — its recipient and MAC key from `recoveryKeys` — or
+   * remove it (null). Left out, the vault's recovery key is wrapped again.
+   */
+  recovery?: { recipient: string; mac: string } | null;
+  /** Plan W11.S10: passkeys to add (credential id → recipient and MAC key) or remove. */
+  passkeys?: { add?: Record<string, { recipient: string; mac: string }>; remove?: string[] };
 }
 
 export interface RekeyResult {

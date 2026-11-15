@@ -15,17 +15,21 @@
  *    each name no cloud AI provider, and no line says one is the default —
  *    Lumen is local and private by default; no GitHub Actions badge (the
  *    project runs its checks locally).
+ * 5. The contributing guide is Hebrew first (plan W4.28): CONTRIBUTING.he.md
+ *    exists, opens in Hebrew and links CONTRIBUTING.md; CONTRIBUTING.md
+ *    links it in its first lines; neither has hand-typed counts, and every
+ *    `npm run` they name exists.
  *
  * Exits 1 with one line per problem. Run: `npm run docs:sync`.
  */
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 
 /** Every markdown file the docs site or the repo root publishes. */
 function docFiles(ROOT) {
-  const out = [join(ROOT, "README.md"), join(ROOT, "README.en.md")];
+  const out = [join(ROOT, "README.md"), join(ROOT, "README.en.md"), ...CONTRIBUTING.map((f) => join(ROOT, f)).filter((f) => existsSync(f))];
   const walk = (dir) => {
     for (const name of readdirSync(dir)) {
       const p = join(dir, name);
@@ -152,6 +156,31 @@ export function readmeProblems(text, file) {
   return out;
 }
 
+/** The contributing guides, Hebrew first (plan W4.28). */
+export const CONTRIBUTING = ["CONTRIBUTING.he.md", "CONTRIBUTING.md"];
+
+/**
+ * Plan W4.28: CONTRIBUTING.he.md is the main guide and CONTRIBUTING.md the
+ * second. `texts` maps each file name to its text, or null when it is missing.
+ */
+export function contributingProblems(texts) {
+  const out = [];
+  const he = texts["CONTRIBUTING.he.md"];
+  const en = texts["CONTRIBUTING.md"];
+  if (he == null) {
+    out.push("CONTRIBUTING.he.md: missing — the Hebrew guide is the main one (plan W4.28)");
+  } else {
+    const head = he.split("\n").filter((l) => l.trim()).slice(0, 3).join(" ");
+    if (!/[\u0590-\u05FF]/.test(head)) out.push("CONTRIBUTING.he.md: must open in Hebrew");
+    if (!he.includes("](CONTRIBUTING.md)")) out.push("CONTRIBUTING.he.md: no link to CONTRIBUTING.md");
+  }
+  if (en != null) {
+    const head = en.split("\n").filter((l) => l.trim()).slice(0, 4).join(" ");
+    if (!head.includes("](CONTRIBUTING.he.md)")) out.push("CONTRIBUTING.md: must link CONTRIBUTING.he.md in its first lines (the Hebrew guide is the main one)");
+  }
+  return out;
+}
+
 export function staleCounts(line) {
   const out = [];
   const COUNT = /\b\d[\d,]*\+?(?:\s+|-)(?:unit |e2e |starter )?(?:tests?|test files|specs?|commands|keys?|templates)\b|\b(?:tests|e2e)-\d+/gi;
@@ -207,9 +236,10 @@ function main() {
         const ok = scripts.root.includes(s) || (inDocs && scripts.docs.includes(s));
         if (!ok) problems.push(`${at}: \`npm run ${s}\` — no such script in ${inDocs ? "package.json or docs/package.json" : "package.json"}`);
       }
-      if (rel === "README.md" || rel === "README.en.md") for (const c of staleCounts(line)) problems.push(`${at}: hand-typed count “${c}” — let the test runner report it instead`);
+      if (rel === "README.md" || rel === "README.en.md" || CONTRIBUTING.includes(rel)) for (const c of staleCounts(line)) problems.push(`${at}: hand-typed count “${c}” — let the test runner report it instead`);
     });
   }
+  problems.push(...contributingProblems(Object.fromEntries(CONTRIBUTING.map((f) => [f, existsSync(join(ROOT, f)) ? readFileSync(join(ROOT, f), "utf8") : null]))));
   if (problems.length) {
     console.error(problems.join("\n"));
     console.error(`\n✗ docs-sync: ${problems.length} problem(s)`);

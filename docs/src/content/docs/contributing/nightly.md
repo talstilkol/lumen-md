@@ -16,10 +16,12 @@ npm run nightly -- --dry-run     # print the plan, run nothing
 | Kind | When | What runs |
 |---|---|---|
 | `flake` | every night | `npm run e2e:flake -- --all --times 5` (chromium, firefox, webkit, 5 runs each, no retries) |
-| `perf` | every night | build, bundle budget, the `@nightly` perf project, Lighthouse when it is installed |
-| `triage` | every night | review triage of the open PRs, the 0.14 count over the first 20 PRs since 12.11.2026, and `live:meta --self-test` (below) |
-| `weekly` | Sundays (UTC) | dependency health (audit, outdated, licences), and mutation scores when `test:mutation` is there |
+| `perf` | every night | build, bundle budget, the `@nightly` perf project, and the Lighthouse trend: desktop and mobile, the median of 3 runs each, added to `reports/trend/lighthouse-history.json` and `lighthouse-trend.md`. It runs `lhci collect` only, so nothing is uploaded |
+| `triage` | every night | review triage of the open PRs, the 0.14 count over the first 20 PRs since 12.11.2026, `live:meta --self-test` and the ruleset drift check (both below) |
+| `weekly` | Sundays (UTC) | dependency health (audit, outdated, licences), and mutation scores: on a branch with `scripts/mutation/check.mjs`, the critical modules under real vitest (`run.mjs --critical --receipt --min 80`, then `mutation:check`), otherwise `test:mutation` |
+| `fuzz` | every night | `npm run fuzz:redaction`: the [redaction fuzz](/contributing/redaction-fuzz/) with the night's seed, 20,000 cases. A leak fails the step and is saved to `tests/fuzz/redaction/regressions.json`. The sealed report keeps the night, cases, leaks and saved counts. Not counted by 0.11. |
 | `sr` | every night, on a Mac with `@guidepup/*` installed | `npx @guidepup/setup --ci`, then the Hebrew journey under VoiceOver ([screen readers, automated](/editor/screen-reader-automation/)). Not counted by 0.11. |
+| `supply` | every night, on a host where `scorecard`, `osv-scanner`, `cargo-deny` or `syft` is installed | the supply-chain checks ([below](#supply-chain-checks-plan-w11s5)). Not counted by 0.11. |
 
 `--only flake,perf` picks kinds. The scheduler passes `--scheduled`, which
 marks the reports as scheduled. Plan 0.11 counts only those.
@@ -60,6 +62,13 @@ signature fail.
   `ci:local`, so each such failure is one `ci:local` would have caught,
   except `docs:sync`, which `ci:local` doesn't run. `verify/*` integration
   branches aren't counted.
+- **W6.16**: how many consecutive weeks had a scheduled weekly run in which
+  every critical module scored at least 80 under real vitest (not the
+  offline shim), and the receipt check passed (4 are needed). The weekly
+  report carries each module's score with the sha256 of its source and
+  tests, so the signed report is the receipt. The run then puts
+  `scripts/mutation/receipt.json` back to the committed version, so the
+  clone still pulls cleanly.
 
 `--commit` commits `reports/nightly/` with a `[skip ci]` message. It never
 pushes. A commit that changes only `reports/` doesn't start a Vercel build
@@ -75,7 +84,19 @@ git clone https://github.com/talstilkol/lumen-md ~/lumen-nightly
 cd ~/lumen-nightly && git switch -c nightly/receipts && npm ci && npx playwright install
 ```
 
-Save `~/Library/LaunchAgents/dev.lumen-md.nightly.plist`:
+Then install the scheduler with one command. On a Mac it writes and loads
+the launchd job; on Linux it adds one cron line between two markers:
+
+```bash
+npm run nightly:install                  # 02:17 every night
+npm run nightly:install -- --at 03:41    # another time
+npm run nightly:install -- --print       # show what it would install
+npm run nightly:install -- --uninstall
+```
+
+The templates are `scripts/nightly/launchd.plist` and
+`scripts/nightly/crontab`. On a Mac it installs
+`~/Library/LaunchAgents/dev.lumen-md.nightly.plist`, like this:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -95,13 +116,12 @@ Save `~/Library/LaunchAgents/dev.lumen-md.nightly.plist`:
 </plist>
 ```
 
-Then load it with `launchctl load ~/Library/LaunchAgents/dev.lumen-md.nightly.plist`.
 launchd runs a job that was missed while the Mac slept as soon as it wakes.
 To publish the receipts, push the branch (`git push origin nightly/receipts`)
-or open a PR from it. Linux uses cron instead:
+or open a PR from it. On Linux the cron line is:
 
 ```text
-17 2 * * *  cd ~/lumen-nightly && git pull -q --rebase origin main && npm ci --silent && npm run nightly -- --scheduled --commit
+17 2 * * * cd ~/lumen-nightly && git pull -q --rebase origin main && npm ci --silent && npm run nightly -- --scheduled --commit
 ```
 
 ## Why not Vercel Cron or a cloud scheduled task
@@ -113,6 +133,51 @@ or open a PR from it. Linux uses cron instead:
   has no browsers and can't install packages, so it can run only the
   `triage` kind (GitHub's REST API) and read the committed receipts. That is
   useful for a morning summary, not for the measurements themselves.
+
+## Supply-chain checks (plan W11.S5)
+
+Scorecard and CodeQL exist in this repository only as GitHub Actions YAML,
+so neither has ever run. `scripts/supply/nightly.mjs` runs the
+supply-chain checks on the nightly host instead:
+
+| Check | Command | Needs |
+|---|---|---|
+| Scorecard | `scorecard --repo=github.com/talstilkol/lumen-md --format json` | the network and `GITHUB_AUTH_TOKEN`, a fine-grained token with read-only access |
+| OSV | `osv-scanner scan source` on `package-lock.json`, `mcp-server/package-lock.json` and `src-tauri/Cargo.lock` | the network |
+| cargo deny | `cargo-deny check advisories bans` in `src-tauri` | the network (the RustSec database) |
+| SBOM | `syft dir:. -o cyclonedx-json` | nothing |
+
+```bash
+npm run supply:nightly                 # what is installed; sealed receipt → reports/nightly/<date>-supply.json
+npm run supply:nightly -- --dry-run    # nothing runs, no network; the receipt gives each skip reason
+npm run supply:nightly -- --open-tasks # also open a GitHub issue for each new task
+```
+
+Inside `npm run nightly`, the `supply` kind runs the script and seals its
+results into that night's report, under `supply`.
+
+The receipt holds the gates of W11.M8. A check that was skipped leaves its
+gates **unmeasured**, never passed:
+
+- the Scorecard aggregate is at least 7.0;
+- Branch-Protection is at least 8, Code-Review at least 8, and
+  Dangerous-Workflow is 10;
+- OSV finds 0 critical vulnerabilities.
+
+A **task** is listed in the receipt, and opened as an issue with
+`--open-tasks`, when:
+
+- the Scorecard aggregate is lower than in the previous receipt;
+- a gated check is below its floor;
+- OSV finds a critical or high vulnerability;
+- cargo deny reports an error.
+
+Each task has a stable key, so a finding that is still there the next night
+doesn't open a second issue.
+
+The release already ships its own CycloneDX SBOM (`release/sbom.cdx.json`,
+[supply chain](/security/supply-chain/)). The nightly's `syft` SBOM is a
+second, independent inventory of the same tree.
 
 ## Live metadata check (plan W6.2)
 
@@ -140,3 +205,29 @@ Run it **after every production deploy**: the owner's merge session runs it
 right after promoting. Every night the `triage` kind runs it too, so drift
 shows up within a day. The command exits 1 on any problem. It fetches with
 Node and falls back to `curl`, which follows `HTTPS_PROXY`.
+
+## The GitHub rulesets (W11.S4)
+
+No GitHub Actions run here, so only GitHub itself can stop a push to `main`
+or a merge without review. The rules for `main` and `verify/*` are code, in
+`security/github-ruleset.json`:
+
+- a pull request with one approval, including approval of the most recent push;
+- stale approvals are dismissed, and code owners must review;
+- no force push and no deletion;
+- signed commits;
+- the `Vercel` and `lumen/buildkite` statuses.
+
+The admin role may bypass only through a pull request, so every bypass is
+recorded.
+
+```bash
+npm run security:ruleset-drift                         # compare with gh api repos/talstilkol/lumen-md/rulesets
+node scripts/security/ruleset-drift.mjs --print-apply  # the owner's gh commands that create them (W10.O1)
+```
+
+The script checks the file against `security/github-ruleset.schema.json`
+(GitHub's REST body for a ruleset) and the policy above, then reports every
+difference from what GitHub has. It exits 1 on drift, and 2 when the API
+can't be read, which never counts as a match. The `triage` kind runs it every
+night.

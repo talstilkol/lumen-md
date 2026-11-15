@@ -13,6 +13,8 @@ import { execFileSync } from "node:child_process";
 import { parseArgs, report, runChecks } from "../../scripts/pr-check.mjs";
 // @ts-expect-error — plain .mjs module without type declarations
 import { REQUIRED_SECTIONS } from "../../scripts/lib/prGate.mjs";
+// @ts-expect-error — plain .mjs script without type declarations
+import { keygen, registryEntry, signReceipt } from "../../scripts/review-sign.mjs";
 
 const ROOT = resolve(__dirname, "../..");
 
@@ -86,26 +88,50 @@ describe("pr:check", () => {
     }
   });
 
-  it("fails a diff that raises a max-lines baseline count or adds a file to it (W6.25), and passes one that lowers it", () => {
+  it("W10.D20: a snapshot edited with nothing that produces it fails; regenerated with its source, it passes", () => {
     const r0 = repo();
     try {
-      const write = (files: Record<string, number>) => writeFileSync(join(r0.dir, "scripts/max-lines-baseline.json"), JSON.stringify({ max: 800, files }));
-      write({ "src/big.ts": 900, "src/other.ts": 850 });
+      mkdirSync(join(r0.dir, "src/__tests__/__snapshots__/render"), { recursive: true });
+      writeFileSync(join(r0.dir, "src/__tests__/__snapshots__/render/doc-a.html"), "<p>a</p>\n");
+      writeFileSync(join(r0.dir, "README.md"), "# A\n");
+      r0.git("add", "-A");
+      r0.git("commit", "-q", "-m", "test: snapshot [skip ci]");
+      // A hand edit: the snapshot moves, nothing that renders it does.
+      writeFileSync(join(r0.dir, "src/__tests__/__snapshots__/render/doc-a.html"), "<p>whatever passes</p>\n");
+      r0.git("add", "-A");
+      r0.git("commit", "-q", "-m", "test: snapshot edit [skip ci]");
+      const edited = runChecks(parseArgs(["--cwd", r0.dir, "--base", "main~1", "--no-size"]));
+      const gate = edited.sections.find((s: { title: string }) => s.title === "Snapshots are regenerated, not edited");
+      expect(gate.status).toBe("fail");
+      expect(gate.lines[0]).toContain("src/__tests__/__snapshots__/render/doc-a.html");
+      expect(edited.failed).toBe(true);
+      // The same snapshot with the document it renders: regenerated, fine.
+      writeFileSync(join(r0.dir, "README.md"), "# A, changed\n");
+      r0.git("add", "-A");
+      r0.git("commit", "-q", "-m", "docs: a [skip ci]");
+      const regenerated = runChecks(parseArgs(["--cwd", r0.dir, "--base", "main~2", "--no-size"]));
+      expect(regenerated.sections.find((s: { title: string }) => s.title === "Snapshots are regenerated, not edited").status).toBe("ok");
+    } finally {
+      r0.done();
+    }
+  });
+
+  it("fails a diff that brings a max-lines baseline back (W6.25; W10.E31: the gate has none)", () => {
+    const r0 = repo();
+    try {
+      writeFileSync(join(r0.dir, "src/a.ts"), "export const a = 2;\n");
+      r0.git("add", "-A");
+      r0.git("commit", "-q", "-m", "fix: a [skip ci]");
+      const clean = runChecks(parseArgs(["--cwd", r0.dir, "--base", "main~1", "--no-size"]));
+      expect(clean.sections.find((s: { title: string }) => s.title === "Max-lines has no baseline").status).toBe("ok");
+      writeFileSync(join(r0.dir, "scripts/max-lines-baseline.json"), JSON.stringify({ max: 800, files: { "src/big.ts": 900 } }));
       r0.git("add", "-A");
       r0.git("commit", "-q", "-m", "chore: baseline [skip ci]");
-      write({ "src/big.ts": 950, "src/other.ts": 820, "src/new.ts": 801 });
-      r0.git("add", "-A");
-      r0.git("commit", "-q", "-m", "chore: raise [skip ci]");
-      const up = runChecks(parseArgs(["--cwd", r0.dir, "--base", "main~1", "--no-size"]));
-      const gate = up.sections.find((s: { title: string }) => s.title === "Max-lines baseline only goes down");
+      const back = runChecks(parseArgs(["--cwd", r0.dir, "--base", "main~1", "--no-size"]));
+      const gate = back.sections.find((s: { title: string }) => s.title === "Max-lines has no baseline");
       expect(gate.status).toBe("fail");
-      expect(gate.lines).toEqual(["- `src/big.ts`: 900 → 950. Split the file instead.", "- `src/new.ts`: added → 801. Split the file instead."]);
-      expect(up.failed).toBe(true);
-      write({ "src/big.ts": 899 });
-      r0.git("add", "-A");
-      r0.git("commit", "-q", "-m", "chore: lower [skip ci]");
-      const down = runChecks(parseArgs(["--cwd", r0.dir, "--base", "main~1", "--no-size"]));
-      expect(down.sections.find((s: { title: string }) => s.title === "Max-lines baseline only goes down").status).toBe("ok");
+      expect(gate.lines).toEqual(["- `scripts/max-lines-baseline.json` exists. The gate allows no exceptions: split the file instead."]);
+      expect(back.failed).toBe(true);
     } finally {
       r0.done();
     }
@@ -116,6 +142,10 @@ describe("pr:check", () => {
     try {
       mkdirSync(join(r0.dir, ".github"));
       writeFileSync(join(r0.dir, ".github/CODEOWNERS"), "/src/sync/e2ee/ @talstilkol\n");
+      // W10.D3: only receipts signed with a key in security/reviewers.json count.
+      const sKey = keygen();
+      mkdirSync(join(r0.dir, "security"));
+      writeFileSync(join(r0.dir, "security/reviewers.json"), JSON.stringify({ reviewers: registryEntry("S", sKey.privatePem, { login: "s-rev", emails: ["s@example.org"] }) }));
       r0.git("add", "-A");
       r0.git("commit", "-q", "-m", "chore: owners [skip ci]");
       mkdirSync(join(r0.dir, "src/sync/e2ee"), { recursive: true });
@@ -175,29 +205,64 @@ describe("pr:check", () => {
     }
   });
 
+  it("W10.D14: dependency review — a changed lockfile at a known-bad version fails", () => {
+    const r0 = repo();
+    try {
+      mkdirSync(join(r0.dir, "security"));
+      writeFileSync(join(r0.dir, "security/known-bad.json"), JSON.stringify({ entries: [{ file: "package-lock.json", name: "nanoid", range: "<3.3.16", severity: "high", advisories: ["GHSA-28wg-ghj8-5hjv"], status: "fixed" }] }));
+      r0.git("add", "-A");
+      r0.git("commit", "-q", "-m", "chore: known-bad [skip ci]");
+      const section = () => runChecks({ ...parseArgs(["--cwd", r0.dir, "--base", "main~1", "--no-size"]) }).sections.find((x: { title: string }) => x.title === "Dependency review");
+      expect(section().status).toBe("ok"); // only known-bad.json changed, nothing is at a bad version
+      const lock = (v: string) => JSON.stringify({ packages: { "node_modules/ok": { version: "1.0.0", license: "MIT" }, "node_modules/nanoid": { version: v, license: "MIT" } } });
+      writeFileSync(join(r0.dir, "package-lock.json"), lock("3.3.3"));
+      r0.git("commit", "-qam", "deps: nanoid [skip ci]");
+      const bad = section();
+      expect(bad.status).toBe("fail");
+      expect(bad.lines.join("\n")).toMatch(/nanoid is back at a known-bad version: 3\.3\.3/);
+      writeFileSync(join(r0.dir, "package-lock.json"), lock("3.3.20"));
+      r0.git("commit", "-qam", "deps: nanoid fixed [skip ci]");
+      expect(section().status).toBe("ok");
+    } finally {
+      r0.done();
+    }
+  });
+
   it("plan W6.11: a sensitive path fails with --pr or --review until an independent receipt for the head is there", () => {
     const r0 = repo();
     try {
       mkdirSync(join(r0.dir, ".github"));
       writeFileSync(join(r0.dir, ".github/CODEOWNERS"), "/src/sync/e2ee/ @talstilkol\n");
+      // W10.D3: only receipts signed with a key in security/reviewers.json count; T6-H1: the merge base's copy.
+      const sKey = keygen();
+      const tKey = keygen();
+      mkdirSync(join(r0.dir, "security"));
+      writeFileSync(join(r0.dir, "security/reviewers.json"), JSON.stringify({ reviewers: { ...registryEntry("S", sKey.privatePem, { login: "s-rev", emails: ["s@example.org"] }), ...registryEntry("T", tKey.privatePem, { login: "t-rev", emails: ["t@example.org"] }) } }));
       r0.git("add", "-A");
       r0.git("commit", "-q", "-m", "chore: owners [skip ci]");
+      const base = r0.git("rev-parse", "HEAD").trim();
       mkdirSync(join(r0.dir, "src/sync/e2ee"), { recursive: true });
       writeFileSync(join(r0.dir, "src/sync/e2ee/kdf.ts"), "export const iterations = 600000;\n");
       r0.git("add", "-A");
       r0.git("commit", "-q", "-m", "feat: kdf [skip ci]");
       const head = r0.git("rev-parse", "HEAD").trim();
-      const receipt = (o: Record<string, unknown> = {}) => ({
-        format: "lumen-review", version: 1, head, author: "K", reviewer: "S", access: "read-only", date: "2026-11-12T18:00:00Z",
+      const unsigned = (o: Record<string, unknown> = {}) => ({
+        format: "lumen-review", version: 1, pr: 9, base, head, author: "K", reviewer: "S", access: "read-only", date: "2026-11-12T18:00:00Z",
         files: ["/src/sync/e2ee/"], attackTests: [{ path: "src/__tests__/kdfAttack.test.ts", result: "4/4 pass" }], findings: [], verdict: "approve", ...o,
       });
+      const receipt = (o: Record<string, unknown> = {}) => signReceipt(unsigned(o), sKey.privatePem);
       const comment = (r: object) => "Review\n\n```lumen-review\n" + JSON.stringify(r) + "\n```\n";
-      const pr = (bodies: string[]) => () => ({ number: 9, labels: [], author: "a", headSha: head, headDate: "2026-11-12T09:00:00Z", reviews: [], events: [], comments: bodies.map((body, i) => ({ id: i + 1, user: "a", body })) });
+      const pr = (bodies: string[]) => () => ({ number: 9, labels: [], author: "a", headSha: head, headDate: "2026-11-12T09:00:00Z", reviews: [], events: [], comments: bodies.map((body, i) => ({ id: i + 1, user: "rev", association: "OWNER", body })) });
       const section = (o: Record<string, unknown>, extra: string[] = []) =>
-        runChecks({ ...parseArgs(["--cwd", r0.dir, "--base", "main~1", "--no-size", ...(o.pr ? ["--pr", "9"] : []), ...extra]), ...o }).sections.find((s: { title: string }) => s.title === "Independent review of sensitive paths");
+        runChecks({ ...parseArgs(["--cwd", r0.dir, "--base", base, "--no-size", ...(o.pr ? ["--pr", "9"] : []), ...extra]), loadOpenPrs: () => [], ...o }).sections.find((s: { title: string }) => s.title === "Independent review of sensitive paths");
       expect(section({}).status).toBe("warn");
       expect(section({ pr: "9", loadPr: pr([]) }).status).toBe("fail");
       expect(section({ pr: "9", loadPr: pr([comment(receipt())]) }).status).toBe("ok");
+      // Review 14.11: a comment by an account without write access (anyone, on a public repository) does not count.
+      const stranger = () => ({ ...pr([])(), comments: [{ id: 7, user: "someone", association: "NONE", body: comment(receipt()) }] });
+      const st = section({ pr: "9", loadPr: stranger });
+      expect(st.status).toBe("fail");
+      expect(st.lines.join("\n")).toMatch(/@someone has no write access/);
       // A push after the review: the receipt is for an older head.
       const stale = section({ pr: "9", loadPr: pr([comment(receipt({ head: "a".repeat(40) }))]) });
       expect(stale.status).toBe("fail");
@@ -205,11 +270,81 @@ describe("pr:check", () => {
       // The author reviewing itself, or an open high finding, does not count.
       expect(section({ pr: "9", loadPr: pr([comment(receipt({ reviewer: "k" }))]) }).status).toBe("fail");
       expect(section({ pr: "9", loadPr: pr([comment(receipt({ findings: [{ id: "F1", severity: "high", status: "open" }] }))]) }).status).toBe("fail");
-      // Offline: a receipt file for this checkout's HEAD.
+      // W10.D3: unsigned does not count; T6-M1: the comment's account (every lane posts as the
+      // owner's) is no reason — but a reviewer who opened the PR, or wrote or committed a
+      // commit in the range (here git user "T"), does not count.
+      expect(section({ pr: "9", loadPr: pr([comment(unsigned())]) }).lines.join("\n")).toMatch(/not signed/);
+      const own = () => ({ ...pr([])(), comments: [{ id: 8, user: "a", association: "OWNER", body: comment(receipt()) }] });
+      expect(section({ pr: "9", loadPr: own }).status).toBe("ok");
+      const byAuthor = () => ({ ...pr([comment(receipt())])(), author: "s-rev" });
+      expect(section({ pr: "9", loadPr: byAuthor }).lines.join("\n")).toMatch(/S is the PR's author or wrote or committed a commit in its range/);
+      // T6-L2: bound to this PR and this merge base.
+      expect(section({ pr: "9", loadPr: pr([comment(receipt({ pr: 8 }))]) }).lines.join("\n")).toMatch(/it is for PR #8, not #9/);
+      expect(section({ pr: "9", loadPr: pr([comment(receipt({ base: "c".repeat(40) }))]) }).lines.join("\n")).toMatch(/not this PR's merge base/);
+      const byCommitter = signReceipt(unsigned({ reviewer: "T" }), tKey.privatePem);
+      const ct = section({ pr: "9", loadPr: pr([comment(byCommitter)]) });
+      expect(ct.status).toBe("fail");
+      expect(ct.lines.join("\n")).toMatch(/T is the PR's author or wrote or committed a commit in its range/);
+      // Offline: a receipt file for this checkout's HEAD, with the PR named (--pr with a stub loader).
       writeFileSync(join(r0.dir, "review.json"), JSON.stringify(receipt()));
-      expect(section({}, ["--review", "review.json"]).status).toBe("ok");
+      expect(section({ pr: "9", loadPr: pr([]) }, ["--review", "review.json"]).status).toBe("ok");
+      // Without --pr the PR it is for can't be checked, so it does not count.
+      expect(section({}, ["--review", "review.json"]).lines.join("\n")).toMatch(/can't be checked here \(run with --pr/);
       writeFileSync(join(r0.dir, "review.json"), JSON.stringify(receipt({ files: ["src/other.ts"] })));
-      expect(section({}, ["--review", "review.json"]).status).toBe("fail");
+      expect(section({ pr: "9", loadPr: pr([]) }, ["--review", "review.json"]).status).toBe("fail");
+    } finally {
+      r0.done();
+    }
+  });
+
+  /**
+   * T6-H1, the review's end-to-end attack ($S/rev-t6/tests/gateE2E.mjs), kept as a
+   * permanent test: a PR adds its own reviewer key to security/reviewers.json, changes a
+   * sensitive file and signs its own receipt. On verify/train-6 (f4ed3b4a8f) the gate
+   * passed it; the registry now comes from the merge base, so it fails.
+   */
+  it("T6-H1: a PR that adds its own reviewer key and signs its own receipt is refused", () => {
+    const r0 = repo();
+    try {
+      mkdirSync(join(r0.dir, ".github"));
+      writeFileSync(join(r0.dir, ".github/CODEOWNERS"), "/src/sync/e2ee/ @talstilkol\n/security/ @talstilkol\n");
+      mkdirSync(join(r0.dir, "security"));
+      const honest = keygen();
+      writeFileSync(join(r0.dir, "security/reviewers.json"), JSON.stringify({ reviewers: registryEntry("S", honest.privatePem, { login: "s-rev", emails: ["s@example.org"] }) }));
+      mkdirSync(join(r0.dir, "src/sync/e2ee"), { recursive: true });
+      writeFileSync(join(r0.dir, "src/sync/e2ee/keyring.ts"), "export const k = 1;\n");
+      r0.git("add", "-A");
+      r0.git("commit", "-q", "-m", "chore: base [skip ci]");
+      const base = r0.git("rev-parse", "HEAD").trim();
+      // The attack commit, by lane-A: its own key under a fresh name, and a backdoor.
+      const bot = keygen();
+      const reg = JSON.parse(readFileSync(join(r0.dir, "security/reviewers.json"), "utf8"));
+      reg.reviewers["independent-bot"] = registryEntry("independent-bot", bot.privatePem, { login: "independent-bot", emails: ["bot@example.org"] })["independent-bot"];
+      writeFileSync(join(r0.dir, "security/reviewers.json"), JSON.stringify(reg, null, 2));
+      writeFileSync(join(r0.dir, "src/sync/e2ee/keyring.ts"), "export const k = 1;\n// backdoor\n");
+      execFileSync("git", ["-c", "user.name=lane-A", "-c", "user.email=a@x", "commit", "-qam", "feat: x [skip ci]"], { cwd: r0.dir });
+      const head = r0.git("rev-parse", "HEAD").trim();
+      const self = signReceipt(
+        { format: "lumen-review", version: 1, pr: 9, base, head, author: "lane-A", reviewer: "independent-bot", access: "read-only", date: "2026-11-15T04:00:00Z", files: ["/security/", "/src/sync/"], attackTests: [{ path: "x", result: "1/1" }], findings: [], verdict: "approve" },
+        bot.privatePem,
+      );
+      writeFileSync(join(r0.dir, "self.json"), JSON.stringify(self));
+      const loadPr = () => ({ number: 9, labels: [], author: "talstilkol", headSha: head, headDate: "2026-11-15T04:00:00Z", reviews: [], events: [], comments: [] });
+      const out = runChecks({ ...parseArgs(["--cwd", r0.dir, "--base", base, "--no-size", "--pr", "9", "--review", join(r0.dir, "self.json")]), loadOpenPrs: () => [], loadPr });
+      const s = out.sections.find((x: { title: string }) => x.title === "Independent review of sensitive paths");
+      expect(s.status).toBe("fail");
+      expect(s.lines.join("\n")).toMatch(/reviewer independent-bot is not in security\/reviewers.json/);
+      expect(s.lines.join("\n")).toMatch(/This PR changes security\/reviewers.json: receipts are checked against the merge base's registry/);
+      // The same receipt signed by a reviewer the base already trusts does count.
+      const good = signReceipt({ ...self, reviewer: "S", signature: undefined }, honest.privatePem);
+      writeFileSync(join(r0.dir, "good.json"), JSON.stringify(good));
+      const ok = runChecks({ ...parseArgs(["--cwd", r0.dir, "--base", base, "--no-size", "--pr", "9", "--review", join(r0.dir, "good.json")]), loadOpenPrs: () => [], loadPr });
+      expect(ok.sections.find((x: { title: string }) => x.title === "Independent review of sensitive paths").status).toBe("ok");
+      // Nor can the PR make a path non-sensitive by dropping it from CODEOWNERS: the base's entries still apply.
+      writeFileSync(join(r0.dir, ".github/CODEOWNERS"), "/docs/ @talstilkol\n");
+      execFileSync("git", ["-c", "user.name=lane-A", "-c", "user.email=a@x", "commit", "-qam", "chore: owners [skip ci]"], { cwd: r0.dir });
+      const dropped = runChecks({ ...parseArgs(["--cwd", r0.dir, "--base", base, "--no-size", "--pr", "9"]), loadOpenPrs: () => [], loadPr: () => ({ ...loadPr(), headSha: r0.git("rev-parse", "HEAD").trim() }) });
+      expect(dropped.sections.find((x: { title: string }) => x.title === "Independent review of sensitive paths").status).toBe("fail");
     } finally {
       r0.done();
     }
@@ -231,7 +366,7 @@ describe("pr:check", () => {
     }
   });
 
-  it("no stacks (W6.22): a feature-branch base warns, an old merge base and a criss-cross fail", () => {
+  it("no stacks (W6.22): a feature-branch base fails with its stack depth, an old merge base and a criss-cross fail", () => {
     const r0 = repo();
     try {
       const env = (date: string) => ({ ...process.env, GIT_COMMITTER_DATE: date, GIT_AUTHOR_DATE: date });
@@ -252,6 +387,19 @@ describe("pr:check", () => {
       expect(gate.status).toBe("fail");
       expect(gate.lines[0]).toContain("- The base `feat/base` is not `verify/train-2` or `main`: a stacked PR.");
       expect(gate.lines[1]).toBe("- The merge base with `feat/base` is 42 days old (limit 7). Merge or restack onto the head of `feat/base`.");
+      expect(gate.lines.at(-1)).toBe("- Stack depth at least 2 (limit 1): this PR → `feat/base` → (no open PR has this branch as its head). Restack onto the train head.");
+      // A fresh stack (no age failure), with the open PRs given offline: the base rule and the depth fail on their own.
+      const prsFile = join(r0.dir, ".git", "prs.json");
+      writeFileSync(prsFile, JSON.stringify([{ number: 7, head: "feat/base", base: "main" }]));
+      const fresh = runChecks(parseArgs(["--cwd", r0.dir, "--base", "feat/base", "--train", "verify/train-2", "--max-age-days", "60", "--prs", prsFile, ...now]));
+      const freshGate = fresh.sections.find((s: { title: string }) => s.title === "Based on the train head");
+      expect(freshGate.status).toBe("fail");
+      expect(freshGate.lines).toEqual([
+        "- The base `feat/base` is not `verify/train-2` or `main`: a stacked PR. Restack it onto the train head: `node scripts/restack.mjs --branch <this branch> --base feat/base` prints the commands.",
+        "- Up to date with `feat/base`; the merge base with `feat/base` is 42 days old (limit 60).",
+        "- Stack depth 2 (limit 1): this PR → #7 `feat/base` → `main`. Restack onto the train head.",
+      ]);
+      expect(fresh.failed).toBe(true);
       // The same branch against main, with a 60-day limit: only the base warning is gone… and main has moved on.
       r0.git("switch", "-q", "main");
       writeFileSync(join(r0.dir, "src/m.ts"), "export const m = 1;\n");

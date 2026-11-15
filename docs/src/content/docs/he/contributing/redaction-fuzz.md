@@ -58,3 +58,19 @@ npm run fuzz:redaction -- --night 20261114
 הדוח הלילי נכתב ל-`reports/nightly/fuzz-redaction.json`. המארח השני (W6.5)
 מריץ את השלב וחותם את הדוח בקבלה שלו. קודי יציאה: 0 אין דליפה, 1 נמצאו
 דליפות (ונשמרו), 2 ההרצה נשברה.
+
+## מתוזמן
+
+שני מתזמנים מריצים אותו, ואף אחד מהם אינו GitHub Actions:
+
+- **`npm run nightly`**: יש בו סוג `fuzz` שרץ כל לילה
+  ([ריצות לילה](/he/contributing/nightly/)), במחשב שה-launchd או ה-cron שלו
+  מפעילים את ריצת הלילה. הוא רץ בלי `--commit`, כי זה היה מחליף ענף מתחת
+  לסוגים שאחריו.
+- **ה-build המתוזמן של Buildkite.** ב-`.buildkite/pipeline.yml` יש צעד
+  `fuzz-redaction` עם `if: build.source == "schedule"`. הוא רץ בתור ה-Linux,
+  מדווח סטטוס `lumen/buildkite: fuzz-redaction`, ושומר כ-artifacts את
+  `reports/nightly/fuzz-redaction.json` ואת `regressions.json`. ‏build של PR
+  מדלג עליו, והוא לא אחד השערים של הקבלה. את התזמון עצמו מגדירים פעם אחת
+  ב-Buildkite: ‏Pipeline ← Settings ← Schedules, ‏cron `17 2 * * *` (UTC),
+  הענף = הרכבת הנוכחית.

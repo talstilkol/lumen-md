@@ -25,7 +25,9 @@ import {
   applyTestHashes,
   completeTestPart,
   freezeSet,
+  hashFiles,
   incompleteParts,
+  listSetFiles,
   publicHarnessError,
   loadSet,
   newCanary,
@@ -67,6 +69,14 @@ const TARGETS_7_1: Record<string, number> = { "asr-he": 80, "mt-he-en": 250, nik
 /** The twelve small sets of plan 7.10 (11 built here, the meetings slot waits for the owner). */
 const TARGETS_7_10: Record<string, number> = { "spell-en": 100, "image-search": 30, clipper: 20, "pdf-qa": 30, "data-analysis": 20, summarize: 20, formulas: 30, unlinked: 30, bidi: 30, "hebrew-dates": 20, citations: 20, meetings: 5 };
 const TARGETS: Record<string, number> = { ...TARGETS_7_1, ...TARGETS_7_10 };
+/**
+ * Synthetic sets live in eval/synthetic, never here: W7.13's retrieval-hard
+ * (297 of 300 questions rewritten by rule, a cross-lingual part written for
+ * this repo, its held-out file committed) was moved there (coordinator, W7.13).
+ * The golden-set rules above stay as they are; a set that cannot meet them
+ * is not golden.
+ */
+const synthetic = join(repo, "eval", "synthetic");
 
 const hashItems = (items: Item[]) => contentHash({ id: "", items });
 
@@ -92,6 +102,29 @@ describe("eval/golden — the committed sets", () => {
         expect(p.dev / p.items).toBeLessThanOrEqual(0.35);
         if (p.status === "owner-pending") expect(p.dev).toBe(0);
       }
+  });
+
+  it("holds no synthetic set: retrieval-hard is under eval/synthetic, and no eval/synthetic set is also here (W7.13)", () => {
+    expect(existsSync(join(golden, "retrieval-hard"))).toBe(false);
+    expect(existsSync(join(synthetic, "retrieval-hard", "manifest.json"))).toBe(true);
+    const sets = readdirSync(synthetic, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name);
+    expect(sets).toContain("retrieval-hard");
+    for (const name of sets) expect(existsSync(join(golden, name)), name).toBe(false);
+  });
+
+  it("each eval/synthetic set says it is synthetic, is frozen (sha256 of every file) and passes the licence gate", () => {
+    const sets = readdirSync(synthetic, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name);
+    for (const name of sets) {
+      const dir = join(synthetic, name);
+      const m = JSON.parse(readFileSync(join(dir, "manifest.json"), "utf8"));
+      expect(m.origin, name).toBe("synthetic");
+      expect(m.frozen, name).toBe(true);
+      expect(hashFiles(dir, listSetFiles(dir)), name).toEqual(m.files);
+      const files = readdirSync(dir);
+      const [f] = checkDatasets([{ name, root: "eval/synthetic", files, sources: readFileSync(join(dir, "SOURCES.md"), "utf8"), license: readFileSync(join(dir, "LICENSE"), "utf8") }]);
+      expect(f.name).toBe(`eval/synthetic/${name}`);
+      expect([name, f.level]).not.toEqual([name, "fail"]);
+    }
   });
 
   it("has no test split in the repo: no test/ folder, no committed file with a test canary", () => {

@@ -93,6 +93,24 @@ export interface VaultBackend {
    * file is where a parent folder should be.
    */
   write(path: string, data: VaultData): Promise<void>;
+  /**
+   * Compare-and-swap write (2.28): create or replace the file at `path`
+   * only while its bytes still hash (SHA-256, lower-case hex) to `expect`
+   * — `null`: only while nothing is at `path`. Resolves false, writing
+   * nothing, when the file is no longer that one or a folder is there.
+   *
+   * Atomic against every write, writeIf, remove and removeIf made through
+   * the same backend (they wait for each other, per path). Against other
+   * writers, per backend: memory — atomic; directory handle (OPFS, a picked
+   * folder) — the new bytes go to the swap file first, and the file is
+   * compared again right before the swap replaces it, so only a write by
+   * another program in that last step is missed (and on engines without
+   * `createWritable`, the fallback writes right after the check); desktop
+   * — compare and replace run in one Rust command (`vault_write_if`).
+   */
+  writeIf(path: string, data: VaultData, expect: string | null): Promise<boolean>;
+  /** Compare-and-swap delete of a file: only while its bytes hash to `expect` (as `writeIf`). False otherwise. */
+  removeIf(path: string, expect: string): Promise<boolean>;
   /** Create the folder at `path` and any missing parents; a no-op when it exists. "EKIND" when a file is in the way. */
   mkdir(path: string): Promise<void>;
   /**
@@ -121,6 +139,20 @@ export interface VaultBackend {
    * with `origin: "external"`.
    */
   notifyExternal(event: Omit<VaultEvent, "origin">): void;
+  /**
+   * Optional, for many files at once (a bulk edit, plan W7.4): the files at
+   * `paths`, each folder looked up and listed once. A path that is missing
+   * from the result was not found that way; the caller reads it with `read`.
+   */
+  readMany?(paths: readonly string[]): Promise<Map<string, File>>;
+  /**
+   * Optional: write each item only if its file still has the `expect`ed size
+   * and time, each under `lock(path, …)`, folders looked up once. Per path:
+   * true written, false changed since (nothing written), or the error.
+   * null: this backend cannot batch right now (the encryption gate over an
+   * encrypted vault); the caller writes the items one by one.
+   */
+  writeMany?(items: ReadonlyArray<{ path: string; data: VaultData; expect: { size: number; mtime: number } }>, lock: <T>(path: string, fn: () => Promise<T>) => Promise<T>): Promise<Map<string, boolean | Error> | null>;
 }
 
 export type VaultErrorCode =

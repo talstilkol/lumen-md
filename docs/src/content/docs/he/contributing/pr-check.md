@@ -33,10 +33,18 @@ npm run pr:check -- --base origin/main --body pr-body.md --build-base --out pr-c
 - **רשת.** כל קריאה חדשה ששולחת בקשה (`fetch`,‏ `WebSocket`,‏ `EventSource`,‏
   `sendBeacon`,‏ `importScripts`) הולכת לשרת שרשום ביומן הפרטיות
   (`src/ai/privacyLedger.ts`). קריאה שהכתובת שלה מחושבת צריכה במקום זה
-  הערה `// privacy-ledger: <rule>`.
+  הערה `// privacy-ledger: <rule>`. אותו כלל רץ על כל שורה ב־`src/` בתור
+  `npm run privacy:ledger`, שער נפרד בכל בנייה של Vercel (preview ו־production),
+  בלי רשימת חריגים: לכל קריאה באפליקציה יש הערה.
 - **רישיונות.** לכל חבילת production שנוספה או השתנתה ב־lockfile יש רישיון
   מותר (לא copyleft, לא לא־מסחרי, ולא חסר).
 - **דומיין.** אף שורה שנוספה לא מזכירה את הדומיין של הפרויקט.
+- **snapshots (משימה W10.D20).** snapshot שהשתנה (`__snapshots__/` של vitest,‏
+  קובץ `.snap`,‏ `<spec>-snapshots/` של Playwright) נכשל, אלא אם השינוי משנה גם
+  את מה שמייצר אותו: קוד המקור של האפליקציה, בדיקה, מסמך קלט (Markdown) או
+  החבילות; לתמונה של Playwright — ה־spec שלה או האפליקציה. snapshot שנערך ביד
+  עובר מה שלא יהיה הקוד, ולכן מייצרים אותו מחדש (`npx vitest run <test> -u`,‏
+  `npx playwright test <spec> --update-snapshots`) באותו PR שמשנה את הפלט.
 - **סקירה אנושית (משימה W4.28).** שינוי בנתיב רגיש — כל נתיב
   ב־`.github/CODEOWNERS`: הצפנה, כתיבה לכספת, יומן הפרטיות, CSP ומדיניות
   אבטחה, הרשאות native — צריך את התווית `human-reviewed`, שאדם הוסיף אחרי
@@ -68,8 +76,10 @@ npm run pr:check -- --base origin/main --body pr-body.md --build-base --out pr-c
 
 כל PR מבוסס על הרכבת הנוכחית (ה־`verify/train-N` עם המספר הגבוה ביותר
 בשרת) או על `main`, ולא על ענף של PR אחר. הבדיקה:
-- מזהירה כשהבסיס הוא משהו אחר, ומציינת את פקודת `scripts/restack.mjs`
-  שמדפיסה איך להעביר אותו;
+- נכשלת כשהבסיס הוא משהו אחר, ומציינת את פקודת `scripts/restack.mjs`
+  שמדפיסה איך להעביר אותו (רכבת ישנה או בסיס `verify/*` אחר רק מזהירים);
+- נכשלת כשהערימה עמוקה מ־1, לפי הבסיסים של ה־PRים הפתוחים (`--pr` קורא
+  אותם מ־GitHub, `--prs <file>` מקבל אותם כ־JSON);
 - מזהירה כשהענף מאחורי הבסיס שלו (ראש הרכבת, ל־PR מוערם) ואומרת בכמה
   קומיטים;
 - נכשלת כשבסיס המיזוג בן יותר מ־7 ימים (`--max-age-days`), או כשיש יותר

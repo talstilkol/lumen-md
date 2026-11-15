@@ -562,12 +562,21 @@ describe("tldraw → Excalidraw: no network, no outside imports", () => {
       (m) => m[1] ?? m[2] ?? m[3],
     );
 
-  it("the converter imports nothing and names no network API", () => {
-    const code = readFileSync(join(canvasDir, "tldrawToExcalidraw.ts"), "utf8");
-    expect(importsOf(code)).toEqual([]);
-    const body = code.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
-    for (const api of ["fetch(", "XMLHttpRequest", "WebSocket", "sendBeacon", "EventSource", "new Image", "importScripts"]) {
-      expect(body.includes(api), api).toBe(false);
+  it("the converter imports nothing but its own split-out parts, and names no network API", () => {
+    // W10.E29: split verbatim into three files for the 800-line limit; the
+    // three import only each other, and the types file imports nothing.
+    const parts: Record<string, string[]> = {
+      "tldrawToExcalidraw.ts": ["./excalidrawTypes", "./tldrawConvertHelpers"],
+      "tldrawConvertHelpers.ts": ["./excalidrawTypes"],
+      "excalidrawTypes.ts": [],
+    };
+    for (const [file, allowed] of Object.entries(parts)) {
+      const code = readFileSync(join(canvasDir, file), "utf8");
+      expect([...new Set(importsOf(code))].sort(), file).toEqual(allowed);
+      const body = code.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
+      for (const api of ["fetch(", "XMLHttpRequest", "WebSocket", "sendBeacon", "EventSource", "new Image", "importScripts"]) {
+        expect(body.includes(api), `${file}: ${api}`).toBe(false);
+      }
     }
   });
 

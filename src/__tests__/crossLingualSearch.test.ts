@@ -10,7 +10,9 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fuse, isMultilingualEmbedding, markCrossLingual, rankByCosine, scriptOf } from "../search/crossLingual";
-import { __resetTranslators, registerLocalTranslator, translatePassage } from "../search/passageTranslator";
+import { __resetTranslators, translatePassage } from "../search/passageTranslator";
+import { createM2m100Layer, createOpusLayer } from "../ai/mt/localModels";
+import type { MtLayer } from "../ai/mt/layers";
 import { Bm25Index } from "../search/bm25";
 // @ts-expect-error the harness is plain JavaScript
 import { scoreCrossLingual } from "../../scripts/search/crosslingual-eval.mjs";
@@ -69,10 +71,33 @@ describe("ranking", () => {
 describe("local translation next to the original", () => {
   beforeEach(() => __resetTranslators());
 
-  it("uses a registered local engine (6.4) first", async () => {
-    const off = registerLocalTranslator("opus-mt", async (t, from, to) => `[${from}>${to}] ${t}`);
-    expect(await translatePassage("Sleep and memory", "en", "he")).toEqual({ text: "[en>he] Sleep and memory", engine: "opus-mt" });
-    off();
+  // The real 6.4 layers (Opus-MT, M2M100) with a scripted model runner in place of transformers.js (no model files offline).
+  const asked: string[] = [];
+  const env = (ready: { opus: boolean; m2m: boolean }, translated: string[]) => ({
+    base: () => "https://models.example/",
+    registry: async () => new Map([["Helsinki-NLP/opus-mt-en-he", { files: [{ dtype: "q8" }] }]]) as never,
+    opfsRoot: async () => {
+      if (!ready.opus) throw new Error("no OPFS");
+      return {} as never;
+    },
+    device: async () => "wasm" as const,
+    translate: (async (model: string, texts: string[]) => (translated.push(model), texts.map((t) => `[${model}] ${t}`))) as never,
+    consent: { confirm: async () => (asked.push("consent"), true), t: (k: string) => k },
+    storage: { getItem: () => (ready.m2m ? "1" : null), setItem: () => undefined },
+  });
+
+  it("uses a 6.4 model that is already on the device; never asks, never downloads from a search", async () => {
+    const translated: string[] = [];
+    // M2M100 is marked ready on this device; Opus-MT's files are not cached (it would need a download).
+    const layers: MtLayer[] = [createOpusLayer(env({ opus: false, m2m: true }, translated).consent, env({ opus: false, m2m: true }, translated)), createM2m100Layer(env({ opus: false, m2m: true }, translated).consent, env({ opus: false, m2m: true }, translated))];
+    const r = await translatePassage("Sleep and memory", "en", "he", { layers, globals: {} });
+    expect(r).toEqual({ text: "[Xenova/m2m100_418M] Sleep and memory", engine: "m2m100" });
+    expect(asked).toEqual([]);
+    // Nothing ready: nothing translated, no consent asked (a search must not start a download).
+    const none: MtLayer[] = [createM2m100Layer(env({ opus: false, m2m: false }, translated).consent, env({ opus: false, m2m: false }, translated))];
+    expect(await translatePassage("Sleep", "en", "he", { layers: none, globals: {} })).toEqual({ text: null, engine: null });
+    expect(asked).toEqual([]);
+    expect(translated).toEqual(["Xenova/m2m100_418M"]);
   });
 
   it("uses the browser's on-device translator only for a pair already on the device", async () => {
@@ -100,10 +125,15 @@ describe("local translation next to the original", () => {
   });
 });
 
-describe("dev probe: 50 Hebrew questions over English abstracts", () => {
-  it("is well-formed: 50 questions, one relevant abstract each, all in the corpus", () => {
-    expect(probe.items).toHaveLength(50);
-    expect(probe.corpus).toHaveLength(50);
+describe("dev probe: 100 Hebrew questions over English abstracts (W5.28 + 2.78)", () => {
+  it("is well-formed: 100 questions, one relevant abstract each, all in the corpus, no repeats", () => {
+    expect(probe.items).toHaveLength(100);
+    expect(probe.corpus).toHaveLength(100);
+    expect(new Set(probe.items.map((it) => it.id)).size).toBe(100);
+    expect(new Set(probe.items.map((it) => it.query)).size).toBe(100);
+    expect(new Set(probe.corpus.map((d) => d.id)).size).toBe(100);
+    // Each abstract is the answer to exactly one question.
+    expect(new Set(probe.items.flatMap((it) => it.relevant)).size).toBe(100);
     const ids = new Set(probe.corpus.map((d) => d.id));
     for (const it of probe.items) {
       expect(scriptOf(it.query), it.id).toBe("he");
@@ -117,9 +147,18 @@ describe("dev probe: 50 Hebrew questions over English abstracts", () => {
     for (const d of probe.corpus) index.set(d.id, d.text, "");
     const r = await scoreCrossLingual((q: string) => index.search(q, { limit: 10 }).map((h) => h.id), probe);
     // A lexicon of common words reaches only a few research questions: this is why W5.28 needs embeddings.
-    expect(r.items).toBe(50);
+    expect(r.items).toBe(100);
     expect(r.ndcg10).toBeLessThan(0.8);
     // Recorded for the PR: the number this run measured.
     expect(typeof r.ndcg10).toBe("number");
+  });
+});
+
+describe("the retrieval-hard copy of the probe (W7.13)", () => {
+  it("eval/synthetic/retrieval-hard/crosslingual.json holds the same 100 questions and abstracts", () => {
+    const hard = JSON.parse(readFileSync(join(__dirname, "../../eval/synthetic/retrieval-hard/crosslingual.json"), "utf8")) as typeof probe & { note: string };
+    expect(hard.items).toEqual(probe.items);
+    expect(hard.corpus).toEqual(probe.corpus);
+    expect(hard.note).toMatch(/^100 cross-lingual questions/);
   });
 });

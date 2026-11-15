@@ -34,11 +34,21 @@ with 1 when a check fails. Warnings do not fail it.
 - **Network.** Every new call that sends a request (`fetch`, `WebSocket`,
   `EventSource`, `sendBeacon`, `importScripts`) goes to a host listed in
   the privacy ledger (`src/ai/privacyLedger.ts`). A call whose URL is
-  computed instead needs a `// privacy-ledger: <rule>` comment.
+  computed instead needs a `// privacy-ledger: <rule>` comment. The same
+  rule runs on every line of `src/` as `npm run privacy:ledger`, a gate of
+  its own in every Vercel build (preview and production), with no baseline:
+  every call in the app has its note.
 - **Licences.** Every production package added or changed in the
   lockfile has an allowed licence (no copyleft, no non-commercial, not
   missing).
 - **Domain.** No added line names the project's domain.
+- **Snapshots (plan W10.D20).** A changed snapshot (vitest's `__snapshots__/`,
+  a `.snap`, Playwright's `<spec>-snapshots/`) fails unless the diff also
+  changes something that produces it: the app's source, a test, an input
+  document (Markdown) or the packages; for a Playwright image, its spec or the
+  app. A snapshot edited by hand passes whatever the code does, so regenerate
+  it (`npx vitest run <test> -u`, `npx playwright test <spec> --update-snapshots`)
+  in the PR that changes its output.
 - **Human review (plan W4.28).** A change to a sensitive path — every path
   in `.github/CODEOWNERS`: cryptography, vault writes, the privacy ledger,
   CSP and security policy, native permissions — needs the `human-reviewed`
@@ -77,8 +87,11 @@ It also warns:
 Every PR is based on the current train (the highest-numbered
 `verify/train-N` on the remote) or on `main`, not on another PR's branch.
 The check:
-- warns when the base is something else, and names the
-  `scripts/restack.mjs` command that prints how to move it;
+- fails when the base is something else, and names the
+  `scripts/restack.mjs` command that prints how to move it (an older
+  train or another `verify/*` base only warns);
+- fails when the stack is deeper than 1, following the open PRs' bases
+  (`--pr` reads them from GitHub, `--prs <file>` takes them as JSON);
 - warns when the branch is behind its base (the train head, for a
   stacked PR) and says by how many commits;
 - fails when the merge base is more than 7 days old

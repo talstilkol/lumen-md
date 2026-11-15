@@ -65,12 +65,25 @@ describe("EmbedBlock", () => {
     ["https://www.reddit.com/r/typescript/comments/abc12/title", "Reddit", "https://www.redditmedia.com/r/typescript/comments/abc12/?embed=true&theme=dark"],
     ["https://www.linkedin.com/embed/feed/update/urn:li:share:123", "LinkedIn", "https://www.linkedin.com/embed/feed/update/urn:li:share:123"],
     ["https://www.linkedin.com/posts/dana_some-slug-activity-7123456789-abcd", "LinkedIn", "https://www.linkedin.com/embed/feed/update/urn:li:activity:7123456789"],
+    ["https://www.youtube.com/embed/dQw4w9WgXcQ", "YouTube", "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ"],
   ])("%s → %s player", async (url, title, src) => {
     const el = await frame(url);
     expect(playerSrc(el.req)).toBe(src);
     expect(el.req.kind === "embed" && el.req.title).toBe(title);
     expect(el.getAttribute("title")).toBe(title);
     expect(screen.getByText(title).tagName).toBe("SPAN");
+  });
+
+  // Plan W8.7: a provider pattern that yields a URL off security/policy.json's embedProviders
+  // (the content frame's frame-src) would ask to load that host and then show a CSP-blocked box.
+  it.each([
+    ["https://www.google.co.il/maps/embed?pb=1", "www.google.co.il"],
+    ["https://evil.example/www.google.com/maps/embed?pb=1", "evil.example"],
+  ])("%s, off the embed providers' list, stays a link", (url, host) => {
+    const { container } = render(<EmbedBlock source={url} />);
+    expect(container.querySelector("iframe")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Load" })).toBeNull();
+    expect(container.textContent).toContain(`${host} is not one of the sites Lumen can embed`);
   });
 
   it("a link to a site no policy frames stays a link", () => {
@@ -112,11 +125,18 @@ describe("EmbedBlock", () => {
     );
   });
 
-  it("a GitHub gist runs its embed script in an opaque-origin content frame", async () => {
-    const el = await frame("https://gist.github.com/someone/abc123");
-    expect(el.req).toEqual({ kind: "gist", user: "someone", id: "abc123" });
-    expect(el.getAttribute("sandbox")?.split(" ")).not.toContain("allow-same-origin");
-    expect(el.getAttribute("sandbox")?.split(" ")).toContain("allow-scripts");
+  it("W10.D2: a GitHub gist is a link: no frame, no script, nothing to approve", async () => {
+    const { container } = render(<EmbedBlock source={"https://gist.github.com/someone/abc123"} />);
+    const link = await waitFor(() => {
+      const a = container.querySelector<HTMLAnchorElement>("a[data-gist-link]");
+      if (!a) throw new Error("no gist link yet");
+      return a;
+    });
+    expect(link.getAttribute("href")).toBe("https://gist.github.com/someone/abc123");
+    expect(link.getAttribute("rel")).toBe("noopener noreferrer");
+    expect(container.querySelector("iframe")).toBeNull();
+    expect(container.querySelector("script")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Load" })).toBeNull();
   });
 
   it("SoundCloud gets the audio-only permissions, delegated through the content frame", async () => {

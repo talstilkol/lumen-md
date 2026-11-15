@@ -1,17 +1,19 @@
 import { headingSlugger } from "../lib/slug";
 import { countWords } from "../text/hebrew";
-import { lazy, Suspense, useEffect, useMemo, useState, useRef } from "react";
-import { useFocusTrap } from "./useFocusTrap";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { Search, Download, Trash2, ExternalLink, BadgeCheck } from "lucide-react";
 import { getRegisteredPlugins, registerPlugin, unregisterPlugin } from "../plugins/pluginSystem";
 import type { LumenPlugin } from "../plugins/pluginSystem";
 import { log } from "../lib/logger";
 import { t } from "../i18n";
 import { fetchWithRetry } from "../lib/fetchRetry";
+import { checkRegistryEntry, hasSignedBundle, isRemoteInstallable } from "../plugins/registryTrust";
+import type { RegistryTrust } from "../plugins/registryTrust";
 // The sandboxed-plugin list loads with its section (it brings the trust and developer strings).
 const SandboxedPlugins = lazy(() => import("../plugins/runtime/SandboxedPlugins").then((m) => ({ default: m.SandboxedPlugins })));
 import { HelpButton } from "./HelpButton";
 import "./pluginGalleryStrings";
+import { Modal } from "./Modal";
 
 interface RemotePluginEntry {
   id: string;
@@ -23,8 +25,15 @@ interface RemotePluginEntry {
   url?: string;
   category?: string;
   homepage?: string;
-  /** When true, the plugin is verified by the Lumen team. */
+  /**
+   * Self-declared by the registry and ignored (W10.B2): the badge comes
+   * only from a signature check (see plugins/registryTrust.ts).
+   */
   verified?: boolean;
+  /** Base64 Ed25519 signature over the bundle bytes. */
+  signature?: string;
+  /** Hex SHA-256 fingerprint of the signing key. */
+  signedBy?: string;
 }
 
 /**
@@ -192,6 +201,8 @@ export function PluginGallery({ open, onClose }: Props) {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [remotePlugins, setRemotePlugins] = useState<LumenPlugin[]>([]);
   const [remoteRaw, setRemoteRaw] = useState<RemotePluginEntry[]>([]);
+  // Per-entry signature result. Missing = not checked = no badge.
+  const [trustById, setTrustById] = useState<Record<string, RegistryTrust>>({});
 
   // Lazy-load the registry.json once when the gallery first opens. Hooks must
   // live at the top level — the previous `import("react").then(useEffect)`
@@ -203,6 +214,7 @@ export function PluginGallery({ open, onClose }: Props) {
     // so we never `setState` on an unmounted component.
     const ac = new AbortController();
     let cancelled = false;
+    // privacy-ledger: this app's own origin (/plugins/registry.json): not off the device's app host, so not ledger traffic
     fetchWithRetry(
       "/plugins/registry.json",
       { signal: ac.signal },
@@ -219,14 +231,26 @@ export function PluginGallery({ open, onClose }: Props) {
           version: p.version,
           description: p.description,
           author: p.author,
-          activate: async (api) => {
-            // Sandbox + script injection comes in a follow-up — for now we
-            // simulate the install/activation flow so the UX exists.
-            await new Promise((resolve) => setTimeout(resolve, 400));
-            api.showToast(t("toast.loadedFromRemoteModule", { name: p.name }));
+          // There is no signed install path yet (W10.B3). The gallery never
+          // calls this for a remote entry; if anything does, it fails loudly
+          // instead of reporting an install that did not happen.
+          activate: () => {
+            throw new Error(`remote plugin ${p.id} has no verified bundle to run`);
           },
         }));
         setRemotePlugins(mapped);
+        // Only signed entries are checked, so an unsigned registry
+        // downloads nothing here.
+        for (const entry of entries.filter(hasSignedBundle)) {
+          void checkRegistryEntry(entry, async (url) => {
+            // privacy-ledger: static-asset — the bundle a signed registry entry names, fetched only to check its signature; no user data is sent.
+            const res = await fetchWithRetry(url, { signal: ac.signal }, { label: "plugins.bundle", maxRetries: 1 });
+            if (!res.ok) throw new Error(`bundle ${res.status}`);
+            return new Uint8Array(await res.arrayBuffer());
+          }).then((trust) => {
+            if (!cancelled) setTrustById((prev) => ({ ...prev, [entry.id]: trust }));
+          });
+        }
       })
       .catch((err: Error) => {
         if (err.name === "AbortError") return;
@@ -259,10 +283,6 @@ export function PluginGallery({ open, onClose }: Props) {
     return map;
   }, [allAvailable.length, remoteRaw]);
 
-  // Focus stays in the dialog while it is open and returns on close; Escape closes it (plan 10.1).
-  const trapRef = useRef<HTMLDivElement | null>(null);
-  useFocusTrap(trapRef, { active: open, onEscape: onClose });
-
   if (!open) return null;
 
   const matchesCategory = (id: string): boolean => {
@@ -272,7 +292,7 @@ export function PluginGallery({ open, onClose }: Props) {
     return (remote?.category ?? "featured") === activeCategory;
   };
 
-  const verifiedById = new Map(remoteRaw.map((r) => [r.id, r.verified ?? true]));
+  const remoteById = new Map(remoteRaw.map((r) => [r.id, r]));
 
   const filtered = allAvailable.filter((p) => {
     if (!matchesCategory(p.id)) return false;
@@ -286,6 +306,8 @@ export function PluginGallery({ open, onClose }: Props) {
   });
 
   const handleInstall = async (plugin: LumenPlugin) => {
+    const remote = remoteById.get(plugin.id);
+    if (remote && !isRemoteInstallable(remote)) return;
     await registerPlugin(plugin);
     setInstalled(new Set([...installed, plugin.id]));
   };
@@ -307,10 +329,8 @@ export function PluginGallery({ open, onClose }: Props) {
   ];
 
   return (
-    <div
-      ref={trapRef}
-      role="dialog"
-      aria-modal="true"
+    <Modal
+      onClose={onClose}
       aria-labelledby="plugin-gallery-title"
       style={{
         position: "fixed",
@@ -494,7 +514,11 @@ export function PluginGallery({ open, onClose }: Props) {
             ) : (
               filtered.map((plugin) => {
                 const isInstalled = installed.has(plugin.id);
-                const verified = verifiedById.get(plugin.id) ?? plugin.id.startsWith("community.");
+                const remote = remoteById.get(plugin.id);
+                const builtIn = !remote;
+                // The badge needs a signature that verified against a pinned key.
+                const verified = remote ? trustById[remote.id] === "verified" : false;
+                const unavailable = remote ? !isRemoteInstallable(remote) : false;
                 return (
                   <div
                     key={plugin.id}
@@ -543,12 +567,21 @@ export function PluginGallery({ open, onClose }: Props) {
                             <BadgeCheck
                               size={14}
                               aria-label={t("pluginGallery.verified")}
+                              data-testid="plugin-verified-badge"
                               style={{ color: "hsl(var(--accent))", flexShrink: 0 }}
                             />
                           )}
                         </div>
                         <div style={{ fontSize: 11, color: "hsl(var(--fg-muted))" }}>
                           v{plugin.version} · {plugin.author}
+                          {" · "}
+                          <span data-testid="plugin-trust">
+                            {builtIn
+                              ? t("pluginGallery.builtIn")
+                              : verified
+                                ? t("pluginGallery.verified")
+                                : t("pluginGallery.unverified")}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -562,7 +595,36 @@ export function PluginGallery({ open, onClose }: Props) {
                     >
                       {plugin.description}
                     </div>
+                    {unavailable && !isInstalled && (
+                      <div
+                        data-testid="plugin-unavailable-hint"
+                        style={{ fontSize: 11, color: "hsl(var(--fg-muted))", lineHeight: 1.4 }}
+                      >
+                        {t("pluginGallery.notAvailableHint")}
+                      </div>
+                    )}
                     <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+                      {unavailable && !isInstalled ? (
+                      <button
+                        type="button"
+                        disabled
+                        aria-disabled="true"
+                        data-testid="plugin-unavailable"
+                        style={{
+                          flex: 1,
+                          padding: "7px 10px",
+                          borderRadius: 8,
+                          border: "1px solid hsl(var(--border))",
+                          cursor: "not-allowed",
+                          fontSize: 12,
+                          fontWeight: 600,
+                          background: "transparent",
+                          color: "hsl(var(--fg-muted))",
+                        }}
+                      >
+                        {t("pluginGallery.notAvailable")}
+                      </button>
+                      ) : (
                       <button
                         type="button"
                         onClick={() =>
@@ -589,8 +651,8 @@ export function PluginGallery({ open, onClose }: Props) {
                         {isInstalled ? <Trash2 size={12} /> : <Download size={12} />}
                         {isInstalled ? t("pluginGallery.uninstall") : t("pluginGallery.install")}
                       </button>
+                      )}
                       {(() => {
-                        const remote = remoteRaw.find((r) => r.id === plugin.id);
                         const homepage = remote?.homepage;
                         if (!homepage) return null;
                         return (
@@ -649,6 +711,6 @@ export function PluginGallery({ open, onClose }: Props) {
           </a>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

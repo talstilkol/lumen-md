@@ -76,7 +76,7 @@ hold the same group.
 | --- | --- |
 | **editor** | `src/editor/**` (CodeMirror + Milkdown: keymaps, extensions, WYSIWYG, suggesting) |
 | **render** | `src/renderer/**`, `src/plugins/**` (blocks), `src/lib/markupSanitizer.ts`, `src/lib/urlSanitizer.ts` |
-| **csp** | `vercel.json`, `netlify.toml`, `public/_headers`, `index.html` (CSP meta), `src/build/cspEndpoints.ts`, `src/lib/cspConnect.ts`, `src/lib/trustedTypes*.ts`, `src/plugins/sandbox.ts` |
+| **csp** | `vercel.json`, `netlify.toml`, `public/_headers`, `index.html` (CSP meta), `src/build/cspEndpoints.ts`, `src/lib/cspConnect.ts`, `src/lib/trustedTypes*.ts` |
 | **store** | `src/store/**` (`useStore.ts`, `openDocs.ts`, toasts) |
 | **search** | `src/ui/SearchDialog.tsx`, `src/ui/SearchReplace.tsx`, `src/ai/semanticSearch.ts`, `src/ai/neuralSearch.ts`, `src/ai/search.worker.ts`, `src/storage/workspaceIndex.ts`, `src/storage/searchHistory.ts`, `src/editor/searchHighlight.ts` |
 | **settings** | `src/ui/*Settings*.tsx`, `src/ui/AiSettingsPanel.tsx`, `src/lib/themeSettings.ts`, `src/lib/orgSettings.ts`, `src/lib/configHealth.ts` |
@@ -188,3 +188,11 @@ threads are answered and left open for the reviewer.
 Run it at the end of every PR. The file is gitignored on purpose: every lane would otherwise conflict on it. The coordinator copies it to the claude.ai project doc so the next session reads it there.
 
 `--stdout` prints the file instead of writing it. `--no-github` skips the GitHub calls (no PRs).
+
+## Stopping and resuming
+
+A session can stop at any point. Each lane keeps a `STATE.md` (branches and
+the heads origin has, tasks, pushes, what it waits on, the next step), and a
+resumed lane starts with `node scripts/lane-state.mjs resume <STATE.md>`,
+which says per branch whether to push, open a PR, or push nothing. The
+template and the resume steps are in [lane-state.md](lane-state.md).

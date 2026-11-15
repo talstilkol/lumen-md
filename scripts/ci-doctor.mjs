@@ -14,14 +14,31 @@
  *   unknown no comparable run
  *
  * and prints the failing test names with a suggested next action.
- * Read-only, REST through the `gh` CLI.
+ * Read-only.
+ *
+ * Runs come from --source (plan 0.9, W10.E32): `buildkite` (the default: the
+ * gates run there since GitHub Actions stopped on 9.11), `vercel` (the gates
+ * of scripts/vercel-build.mjs in each deployment), or `github` (the Actions
+ * history). Buildkite and Vercel give no check-run annotations, so the steps
+ * and the failing tests are read from the job's log
+ * (scripts/lib/ci-doctor-sources.mjs). Commits, PRs and compares always come
+ * from GitHub's REST API through the `gh` CLI.
  *
  * Usage:
  *   node scripts/ci-doctor.mjs feat/pwa-real
  *   node scripts/ci-doctor.mjs 190                 # PR number → its head branch
  *   node scripts/ci-doctor.mjs 190 --peers 30 --max-distance 50 --json
  *   node scripts/ci-doctor.mjs --run 39085293928   # one particular run, not the latest
- *   node scripts/ci-doctor.mjs 190 --workflow tauri.yml
+ *   node scripts/ci-doctor.mjs 190 --workflow ci.yml
+ *   node scripts/ci-doctor.mjs --around 39082608120   # that run, peers from the hours around it
+ *   node scripts/ci-doctor.mjs 189 --around latest --window 24
+ *
+ * By default the peers are the newest ~60 completed runs of the workflow,
+ * which says nothing about an old failure: weeks later, the runs that ran
+ * the same code are no longer among them. --around takes the peers from a
+ * time window around the failing run instead (±--window hours, default 48),
+ * every page of them, nearest in time first. `--around <run id>` also
+ * diagnoses that run; `--around latest` keeps the branch's latest run.
  *
  * Exit codes: 0 done (with --json: no real failure), 1 a real failure (--json)
  * or a lookup error, 2 usage, 3 the diagnosed run's jobs could not be read.
@@ -34,9 +51,12 @@
  */
 import { execFile, execFileSync } from "node:child_process";
 import { promisify } from "node:util";
+import { readFileSync } from "node:fs";
 import { classify, failureItems, isFailed, nextAction, observe, parseAnnotations, sameTestSetup } from "./lib/ci-doctor.mjs";
+import { annotationsFromLog, bkJobs, bkRun, stepsFromLog, vercelJobs, vercelLog, vercelRun } from "./lib/ci-doctor-sources.mjs";
 
-const usage = "usage: node scripts/ci-doctor.mjs <branch|pr-number> [--run ID] [--workflow ci.yml] [--peers N] [--max-distance N] [--json]";
+const usage = "usage: node scripts/ci-doctor.mjs <branch|pr-number> [--source buildkite|vercel|github] [--run ID] [--around RUN_ID|latest] [--window HOURS] [--workflow ci.yml] [--peers N] [--max-distance N] [--json]";
+const SOURCES = ["buildkite", "vercel", "github"];
 const argv = process.argv.slice(2);
 let target = null;
 let peersWanted = 20;
@@ -44,6 +64,9 @@ let maxDistance = 30;
 let asJson = false;
 let runId = null;
 let workflow = "ci.yml";
+let around = false;
+let windowHours = 48;
+let source = "buildkite";
 for (let i = 0; i < argv.length; i++) {
   const a = argv[i];
   if (a === "--peers") peersWanted = Number(argv[++i]);
@@ -51,13 +74,20 @@ for (let i = 0; i < argv.length; i++) {
   else if (a === "--json") asJson = true;
   else if (a === "--run") runId = argv[++i];
   else if (a === "--workflow") workflow = argv[++i];
+  else if (a === "--around") {
+    around = true;
+    const v = argv[++i];
+    if (v !== "latest") runId = v;
+  } else if (a === "--window") windowHours = Number(argv[++i]);
+  else if (a === "--source") source = argv[++i];
   else if (!a.startsWith("--") && !target) target = a;
   else {
     console.error(`unknown argument: ${a}\n${usage}`);
     process.exit(2);
   }
 }
-if ((!target && !runId) || !(peersWanted > 0) || !(maxDistance >= 0) || (runId && !/^\d+$/.test(runId)) || !workflow) {
+const RUN_ID = source === "vercel" ? /^(dpl_)?\w+$/ : /^\d+$/;
+if ((!target && !runId) || !(peersWanted > 0) || !(maxDistance >= 0) || (runId && !RUN_ID.test(runId)) || !workflow || !(windowHours > 0) || !SOURCES.includes(source)) {
   console.error(usage);
   process.exit(2);
 }
@@ -98,24 +128,23 @@ async function mapLimit(items, n, fn) {
   await Promise.all(Array.from({ length: Math.min(n, items.length) }, worker));
   return out;
 }
-const memo = (fn) => {
+const memo = (fn, keyOf = (k) => k) => {
   const cache = new Map();
   return (k) => {
-    if (!cache.has(k)) cache.set(k, fn(k));
-    return cache.get(k);
+    const key = keyOf(k);
+    if (!cache.has(key)) cache.set(key, fn(k));
+    return cache.get(key);
   };
 };
-// Paginated: a big e2e job (retries included) can emit more than 100.
-const annotationsOf = memo((jobId) =>
-  apiAll(`repos/${repo}/check-runs/${jobId}/annotations`)
-    .then(parseAnnotations)
-    .catch(() => null),
-);
-const jobsOf = memo((runId) =>
-  api(`repos/${repo}/actions/runs/${runId}/jobs?per_page=100`)
-    .then((r) => r.jobs ?? [])
-    .catch(() => null),
-);
+const src = source === "github" ? githubSource() : source === "vercel" ? vercelSource() : buildkiteSource();
+/** A job's failures (annotations on GitHub; parsed from its log on Buildkite and Vercel), or null. */
+const annotationsOf = memo((job) => src.annotations(job).then(parseAnnotations).catch(() => null), (job) => job.id);
+const jobsOf = memo((id) => src.jobs(id).catch(() => null));
+/** Fills a job's steps where they come from its log (Buildkite, Vercel); GitHub's jobs list them already. */
+const withSteps = memo(async (job) => {
+  if (src.stepsFromLog) job.steps = stepsFromLog(await src.log(job).catch(() => ""), job.conclusion);
+  return job;
+}, (job) => job.id);
 const when = (iso) => String(iso ?? "").replace("T", " ").slice(0, 16) + " UTC";
 const short = (sha) => String(sha ?? "").slice(0, 8);
 
@@ -132,14 +161,14 @@ if (/^\d+$/.test(target)) {
   branch = pr.head.ref;
 }
 const runs = runId
-  ? [await api(`repos/${repo}/actions/runs/${runId}`)]
-  : (await api(`repos/${repo}/actions/workflows/${encodeURIComponent(workflow)}/runs?branch=${encodeURIComponent(branch)}&per_page=10`).catch((e) => {
-      console.error(`ci-doctor: no workflow ${workflow} in ${repo}: ${String(e.stderr || e.message).split("\n")[0]}`);
+  ? [await src.run(runId)]
+  : await src.branchRuns(branch).catch((e) => {
+      console.error(`ci-doctor: ${src.what}: ${String(e.stderr || e.message).split("\n")[0]}`);
       process.exit(1);
-    })).workflow_runs ?? [];
+    });
 if (runId) branch = runs[0].head_branch;
 if (!runs.length) {
-  console.log(`ci-doctor: no ${workflow} runs for ${branch}${pr ? ` (PR #${pr.number})` : ""}.`);
+  console.log(`ci-doctor: no ${src.what} runs for ${branch}${pr ? ` (PR #${pr.number})` : ""}.`);
   process.exit(0);
 }
 const notes = [];
@@ -171,22 +200,39 @@ if (run.conclusion === "success") {
 
 // The diagnosed run's own data must load: "no failed jobs" for a red run
 // because the API failed would be a false all-clear. (Peer data may degrade.)
-const jobs = await api(`repos/${repo}/actions/runs/${run.id}/jobs?per_page=100`)
-  .then((r) => r.jobs ?? [])
+const jobs = await src
+  .jobs(run.id)
   .catch((e) => {
     console.error(`ci-doctor: could not read the jobs of run ${run.id}: ${String(e.stderr || e.message).split("\n")[0]}`);
     process.exit(3);
   });
 const failedJobs = jobs.filter((j) => isFailed(j.conclusion));
-const parsedByJob = new Map(await Promise.all(failedJobs.map(async (j) => [j.id, await annotationsOf(j.id)])));
+await Promise.all(failedJobs.map(withSteps));
+const parsedByJob = new Map(await Promise.all(failedJobs.map(async (j) => [j.id, await annotationsOf(j)])));
 for (const j of failedJobs) if (parsedByJob.get(j.id) === null) notes.push(`could not read the annotations of "${j.name}": its failed steps are listed instead of its tests`);
 if (run.conclusion !== "success" && !failedJobs.length) notes.push(`run ${run.conclusion} but none of its ${jobs.length} job(s) failed (cancelled or skipped?)`);
 const items = failedJobs.flatMap((j) => failureItems(j, parsedByJob.get(j.id)));
 const retried = failedJobs.flatMap((j) => (parsedByJob.get(j.id)?.flaky ?? []).map((t) => ({ job: j.name, test: t })));
 
 // ── the same jobs on other branches ───────────────────────────────────
-const recent = (await api(`repos/${repo}/actions/workflows/${run.workflow_id}/runs?status=completed&per_page=60`)).workflow_runs ?? [];
-const peers = recent.filter((r) => r.head_branch !== branch && r.id !== run.id).slice(0, peersWanted);
+const peers = (around ? await runsAround(run, windowHours) : await src.recent(run))
+  .filter((r) => r.head_branch !== branch && r.id !== run.id)
+  .slice(0, peersWanted);
+if (around) notes.push(`peers: runs of this workflow from ${when(windowOf(run, windowHours).from)} to ${when(windowOf(run, windowHours).to)}, nearest in time first`);
+
+/** The ±hours window around a run. */
+function windowOf(r, hours) {
+  const t = Date.parse(r.created_at);
+  const iso = (ms) => new Date(ms).toISOString().replace(/\.\d{3}Z$/, "Z");
+  return { from: iso(t - hours * 3600e3), to: iso(t + hours * 3600e3) };
+}
+/** Every completed run of the workflow created in the window (all pages), nearest in time to `r` first. */
+async function runsAround(r, hours) {
+  const { from, to } = windowOf(r, hours);
+  const all = await src.between(r, from, to);
+  const t = Date.parse(r.created_at);
+  return all.sort((a, b) => Math.abs(Date.parse(a.created_at) - t) - Math.abs(Date.parse(b.created_at) - t));
+}
 /** `base...head`: commits apart and the files head changed since the merge base. */
 const compare = memo((basehead) =>
   api(`repos/${repo}/compare/${basehead}`, "{a: .ahead_by, b: .behind_by, n: ((.files // []) | length), files: [(.files // [])[] | .filename, (.previous_filename // empty)]}").catch(() => null),
@@ -209,7 +255,7 @@ const testJobs = new Set(items.filter((i) => i.kind === "test").map((i) => i.job
 await mapLimit(
   peerData.flatMap((p) => (p.jobs ?? []).filter((j) => testJobs.has(j.name) && j.status === "completed" && j.conclusion !== "skipped")),
   6,
-  (j) => annotationsOf(j.id),
+  (j) => withSteps(j).then(annotationsOf),
 );
 
 const results = [];
@@ -217,7 +263,8 @@ for (const item of items) {
   const observations = [];
   for (const p of peerData) {
     const peerJob = (p.jobs ?? []).find((j) => j.name === item.job);
-    const peerParsed = peerJob && item.kind === "test" ? await annotationsOf(peerJob.id) : null;
+    if (peerJob && item.kind !== "job") await withSteps(peerJob);
+    const peerParsed = peerJob && item.kind === "test" ? await annotationsOf(peerJob) : null;
     let outcome = observe(item, peerJob, peerParsed);
     let unproven = false;
     if (item.kind === "test" && outcome === "passed" && !(await sameTestFile(item.path, p.run.head_sha))) {
@@ -269,4 +316,117 @@ console.log(out.join("\n"));
 
 function pick(r) {
   return { id: r.id, name: r.name, conclusion: r.conclusion, sha: r.head_sha, created_at: r.created_at, url: r.html_url };
+}
+
+// ── run sources ────────────────────────────────────────────────────────
+// Each gives the runs of a branch, one run, a run's jobs, recent runs and the
+// runs in a time window, in the GitHub shapes scripts/lib/ci-doctor.mjs reads.
+
+/** GitHub Actions (ci.yml and the other workflows): the history before 9.11. */
+function githubSource() {
+  return {
+    what: `workflow ${workflow} in ${repo}`,
+    branchRuns: async (b) => (await api(`repos/${repo}/actions/workflows/${encodeURIComponent(workflow)}/runs?branch=${encodeURIComponent(b)}&per_page=10`)).workflow_runs ?? [],
+    run: (id) => api(`repos/${repo}/actions/runs/${id}`),
+    jobs: async (id) => (await api(`repos/${repo}/actions/runs/${id}/jobs?per_page=100`)).jobs ?? [],
+    // Paginated: a big e2e job (retries included) can emit more than 100.
+    annotations: (job) => apiAll(`repos/${repo}/check-runs/${job.id}/annotations`),
+    recent: async (r) => (await api(`repos/${repo}/actions/workflows/${r.workflow_id}/runs?status=completed&per_page=60`)).workflow_runs ?? [],
+    between: async (r, from, to) => {
+      const route = `repos/${repo}/actions/workflows/${r.workflow_id}/runs?status=completed&created=${encodeURIComponent(`${from}..${to}`)}`;
+      const all = [];
+      for (let page = 1; page <= 10; page++) {
+        const items = (await api(`${route}&per_page=100&page=${page}`)).workflow_runs ?? [];
+        all.push(...items);
+        if (items.length < 100) break;
+      }
+      return all;
+    },
+  };
+}
+
+function secretFile(f) {
+  try {
+    return f ? readFileSync(f, "utf8").trim() : "";
+  } catch {
+    return ""; // why: no token file: the request goes out without one and the API says what is missing
+  }
+}
+async function getJson(url, token) {
+  const r = await fetch(url, { headers: { Accept: "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) } });
+  const text = await r.text();
+  if (!r.ok) throw new Error(`GET ${url.replace(/\?.*/, "")}: HTTP ${r.status} ${text.slice(0, 200)}`);
+  return text ? JSON.parse(text) : null;
+}
+
+/**
+ * Buildkite (the gates since 9.11, .buildkite/pipeline.yml). Environment, as
+ * scripts/buildkite/trigger.mjs: LUMEN_BUILDKITE_ORG, LUMEN_BUILDKITE_PIPELINE
+ * (default lumen-md), LUMEN_BUILDKITE_TOKEN_FILE (read_builds +
+ * read_build_logs), LUMEN_BUILDKITE_API. A run is a build (its number), a job
+ * is a step key; steps and failing tests come from the job's log.
+ */
+function buildkiteSource() {
+  const env = process.env;
+  const base = `${env.LUMEN_BUILDKITE_API || "https://api.buildkite.com"}/v2/organizations/${encodeURIComponent(env.LUMEN_BUILDKITE_ORG || "")}/pipelines/${encodeURIComponent(env.LUMEN_BUILDKITE_PIPELINE || "lumen-md")}`;
+  const token = secretFile(env.LUMEN_BUILDKITE_TOKEN_FILE);
+  if (!env.LUMEN_BUILDKITE_ORG) {
+    console.error("ci-doctor: set LUMEN_BUILDKITE_ORG (the organization slug), or pass --source github for the Actions history");
+    process.exit(2);
+  }
+  const builds = memo((n) => getJson(`${base}/builds/${n}`, token));
+  const list = async (q, pages = 1) => {
+    const all = [];
+    for (let page = 1; page <= pages; page++) {
+      const items = await getJson(`${base}/builds?${q}&per_page=100&page=${page}`, token);
+      all.push(...items);
+      if (items.length < 100) break;
+    }
+    return all;
+  };
+  const finished = (b) => bkRun(b).status === "completed";
+  const log = memo((job) => getJson(`${base}/builds/${job.build}/jobs/${job.id}/log`, token).then((l) => l?.content ?? ""), (job) => job.id);
+  return {
+    what: `pipeline ${env.LUMEN_BUILDKITE_PIPELINE || "lumen-md"} in ${env.LUMEN_BUILDKITE_ORG}`,
+    branchRuns: async (b) => (await list(`branch=${encodeURIComponent(b)}`)).slice(0, 10).map(bkRun),
+    run: async (n) => bkRun(await builds(n)),
+    jobs: async (n) => bkJobs(await builds(n)).map((j) => ({ ...j, build: n })),
+    stepsFromLog: true,
+    log,
+    annotations: async (job) => annotationsFromLog(await log(job)),
+    recent: async () => (await list("state%5B%5D=passed&state%5B%5D=failed&state%5B%5D=canceled")).filter(finished).slice(0, 60).map(bkRun),
+    between: async (_r, from, to) => (await list(`created_from=${encodeURIComponent(from)}&created_to=${encodeURIComponent(to)}`, 10)).filter(finished).map(bkRun),
+  };
+}
+
+/**
+ * Vercel (scripts/vercel-build.mjs runs gates in every deployment's build).
+ * LUMEN_VERCEL_PROJECT (id or name), LUMEN_VERCEL_TEAM (optional),
+ * LUMEN_VERCEL_TOKEN_FILE, LUMEN_VERCEL_API. A run is a deployment, with one
+ * job ("vercel-build") whose steps are its gates.
+ */
+function vercelSource() {
+  const env = process.env;
+  const api0 = env.LUMEN_VERCEL_API || "https://api.vercel.com";
+  const token = secretFile(env.LUMEN_VERCEL_TOKEN_FILE);
+  const team = env.LUMEN_VERCEL_TEAM ? `&teamId=${encodeURIComponent(env.LUMEN_VERCEL_TEAM)}` : "";
+  if (!env.LUMEN_VERCEL_PROJECT) {
+    console.error("ci-doctor: set LUMEN_VERCEL_PROJECT (the project id or name)");
+    process.exit(2);
+  }
+  const project = encodeURIComponent(env.LUMEN_VERCEL_PROJECT);
+  const deployments = async (q) => ((await getJson(`${api0}/v6/deployments?projectId=${project}&limit=100${q}${team}`, token))?.deployments ?? []).map(vercelRun);
+  const one = memo(async (id) => vercelRun(await getJson(`${api0}/v13/deployments/${encodeURIComponent(id)}?${team.slice(1)}`, token)));
+  const log = memo((job) => getJson(`${api0}/v3/deployments/${encodeURIComponent(job.id)}/events?limit=-1${team}`, token).then(vercelLog), (job) => job.id);
+  return {
+    what: `Vercel project ${env.LUMEN_VERCEL_PROJECT}`,
+    branchRuns: async (b) => (await deployments("")).filter((d) => d.head_branch === b).slice(0, 10),
+    run: (id) => one(id),
+    jobs: async (id) => vercelJobs(await one(id)),
+    stepsFromLog: true,
+    log,
+    annotations: async (job) => annotationsFromLog(await log(job)),
+    recent: async () => (await deployments("&state=READY,ERROR")).slice(0, 60),
+    between: async (_r, from, to) => deployments(`&since=${Date.parse(from)}&until=${Date.parse(to)}&state=READY,ERROR`),
+  };
 }

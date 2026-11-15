@@ -1,6 +1,8 @@
 /** Voice: read aloud, voice memo, dictation. */
-import { cmdIcons, type Command } from "../../ui/CommandPalette";
+import { cmdIcons } from "../../ui/cmdIcons";
+import type { Command } from "../../ui/CommandPalette";
 import { t } from "../../i18n";
+import { diarizationAvailable } from "../../meetings/diarizePins";
 
 /** Read the note aloud (text to speech). */
 export function buildReadAloudCommands(): Command[] {
@@ -70,6 +72,15 @@ export function buildVoiceCommands(): Command[] {
       },
     },
     {
+      // Plan W7.10 step 2 (W10.E52): the open Hebrew voice's recording corpus, recorded and checked in the app.
+      id: "voice.corpusRecorder",
+      label: t("cmd.voice.corpusRecorder"),
+      hint: t("cmd.voice.corpusRecorder.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      action: async () => (await import("../../voice-corpus/Recorder")).openCorpusRecorder(),
+    },
+    {
       id: "voice.transcribeFile",
       label: t("cmd.tools.transcribeFile"),
       icon: cmdIcons.Sparkles,
@@ -77,26 +88,14 @@ export function buildVoiceCommands(): Command[] {
       action: async () => (await import("../../ui/TranscribeFile")).transcribeAudioFile(),
     },
     {
-      id: "help.credits",
-      label: t("cmd.help.credits"),
-      icon: cmdIcons.Sparkles,
-      group: t("group.tools"),
-      action: async () => {
-        const { openCredits } = await import("../../ui/CreditsDialog");
-        openCredits();
-      },
-    },
-    {
       id: "voice.meeting",
       label: t("cmd.voice.meeting"),
       hint: t("cmd.voice.meeting.hint"),
       icon: cmdIcons.Sparkles,
       group: t("group.tools"),
-      action: async () => {
-        // Plan 6.16: record, transcribe on this device, then meeting notes.
-        const { startVoiceMemo } = await import("../../ui/VoiceDictation");
-        await startVoiceMemo({ meeting: true });
-      },
+      // W11.I19: the meeting recorder: record, transcribe on this device (live, then the final pass),
+      // then a checked summary, tasks and decisions; "unavailable" when no model is on this device.
+      action: () => void import("../../meetings/MeetingRecorder").then((m) => m.openMeetingRecorder()),
     },
     {
       id: "voice.meetingFile",
@@ -106,13 +105,18 @@ export function buildVoiceCommands(): Command[] {
       // Plan W2.7: a recording → transcript with speakers (W1.17 + diarization) → meeting notes.
       action: async () => (await import("../../meetings/meetingTranscribe")).transcribeMeeting(),
     },
-    {
-      id: "speakers.rename",
-      label: t("cmd.speakers.rename"),
-      icon: cmdIcons.Sparkles,
-      group: t("group.tools"),
-      action: async () => (await import("../../meetings/meetingTranscribe")).renameSpeakerInNote(),
-    },
+    // W11.I21: speaker commands only when real diarization models are pinned (no labels without them).
+    ...(diarizationAvailable()
+      ? [
+          {
+            id: "speakers.rename",
+            label: t("cmd.speakers.rename"),
+            icon: cmdIcons.Sparkles,
+            group: t("group.tools"),
+            action: async () => (await import("../../meetings/meetingTranscribe")).renameSpeakerInNote(),
+          },
+        ]
+      : []),
     {
       id: "ai.meetingNotes",
       label: t("cmd.ai.meetingNotes"),

@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import { useFocusTrap } from "./useFocusTrap";
+import { useState, useEffect, useCallback } from "react";
 import { t, getLocale } from "../i18n";
 
 /**
@@ -7,7 +6,7 @@ import { t, getLocale } from "../i18n";
  * that every save path writes to (T35).
  */
 
-import { listSnapshots, recordSnapshot, type Snapshot } from "../storage/history";
+import { getHistoryVault, listSnapshots, recordSnapshot, type Snapshot } from "../storage/history";
 import { requestPersistentStorage, storageState, type StorageState } from "../storage/persistentStorage";
 
 function formatBytes(n: number): string {
@@ -51,6 +50,7 @@ function StorageStatus() {
 import { EmptyState } from "./EmptyState";
 import { HelpButton } from "./HelpButton";
 import "./versionHistoryStrings";
+import { Modal } from "./Modal";
 
 /** Save a snapshot (kept for callers of the old API). */
 export async function saveSnapshot(name: string, content: string): Promise<void> {
@@ -74,33 +74,40 @@ interface Props {
 export function VersionHistory({ fileName, currentContent, onRestore, onClose }: Props) {
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const [selected, setSelected] = useState<Snapshot | null>(null);
+  // The ready marker (plan W7.25): the snapshot list for this file has loaded (or failed to).
+  const [loadedFor, setLoadedFor] = useState<string | null>(null);
 
   useEffect(() => {
-    loadSnapshots(fileName).then(setSnapshots).catch(() => setSnapshots([]));
+    loadSnapshots(fileName)
+      .then(setSnapshots)
+      .catch(() => setSnapshots([]))
+      .finally(() => setLoadedFor(fileName));
   }, [fileName]);
 
   const handleRestore = useCallback(async () => {
     if (!selected) return;
+    // Listed from another vault (the vault switched while this was open):
+    // never write its text into this one (2.80).
+    if (selected.vault !== undefined && selected.vault !== getHistoryVault()) {
+      onClose();
+      return;
+    }
     // Keep what is being replaced, so a restore can itself be undone.
     await recordSnapshot(fileName, currentContent, "restore").catch(() => false);
     onRestore(selected.content);
     onClose();
   }, [selected, onRestore, onClose, fileName, currentContent]);
 
-  // Focus stays in the dialog and returns on close; Escape closes it (plan 10.1).
-  const trapRef = useRef<HTMLDivElement | null>(null);
-  useFocusTrap(trapRef, { onEscape: onClose });
-
   const diffChars = selected
     ? Math.abs(selected.content.length - currentContent.length)
     : 0;
 
   return (
-    <div
-      ref={trapRef}
-      role="dialog"
-      aria-modal="true"
+    <Modal
+      onClose={onClose}
       aria-label={t("versionHistory.title")}
+      data-testid="version-history"
+      data-ready={String(loadedFor === fileName)}
       style={{
         position: "fixed",
         inset: 0,
@@ -213,6 +220,6 @@ export function VersionHistory({ fileName, currentContent, onRestore, onClose }:
           {selected?.content ?? ""}
         </pre>
       </div>
-    </div>
+    </Modal>
   );
 }

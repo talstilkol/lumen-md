@@ -40,7 +40,8 @@ does not tell a plugin which language the app is in.
 
 ```
 public/plugins/examples/
-  index.json          ← built: every plugin, its versions, the SHA-256 of each version's code
+  index.json          ← built: every plugin, its versions, the SHA-256 of each version's code and manifest
+  index.json.sig      ← the owner's Ed25519 signature over index.json (written by --sign)
   scan.json           ← built: the safety scan of every version
   kanban/             ← one folder per version
     lumen-plugin.json
@@ -49,7 +50,7 @@ public/plugins/examples/
 
 ```sh
 node scripts/build-plugin-registry.mjs           # rebuild index.json and scan.json
-node scripts/build-plugin-registry.mjs --check   # fail if either is out of date or a version fails
+node scripts/build-plugin-registry.mjs --check   # fail if either is out of date, a version fails, or index.json.sig no longer matches
 ```
 
 The build does the following:
@@ -64,6 +65,70 @@ A new version goes in a folder of its own, for example `kanban@1.1.0`.
 
 When you install a plugin, the app scans the downloaded code again. It refuses
 the code if its SHA-256 differs from the hash in the registry scan.
+
+## The signed registry
+
+The owner signs the exact bytes of `index.json` with an Ed25519 key that stays
+on the owner's machine. Because `index.json` lists the SHA-256 of every
+version's code and manifest, that one signature covers every file a user can
+install.
+
+```sh
+node scripts/build-plugin-registry.mjs --keygen ~/keys      # once: a new key; prints the VITE_PLUGIN_TRUSTED_KEYS value
+LUMEN_PLUGIN_SIGNING_KEY=~/keys/lumen-plugin-registry.pem node scripts/build-plugin-registry.mjs --sign
+```
+
+Set the printed `VITE_PLUGIN_TRUSTED_KEYS` in the build's environment. The app
+trusts only that key, or a key you trusted yourself under Settings. The public
+key written in `index.json.sig` is never trusted on its own.
+
+When a folder has `index.json.sig`, **Install** takes the signed path
+(`src/plugins/install.ts`), and each step can refuse the install:
+
+1. `index.json` and `index.json.sig` are downloaded. The downloads are listed
+   in the privacy ledger.
+2. The signature over `index.json` must verify against a trusted key. One
+   changed byte anywhere in `index.json` fails here.
+3. The manifest and the code are downloaded, and each SHA-256 must match the
+   signed `index.json`.
+4. The code is scanned. Then it runs in its QuickJS sandbox with the
+   permissions the manifest declares, as listed on the permission screen.
+
+**Remove** stops the sandbox, deletes what the plugin stored and deletes its
+install record and permissions.
+
+A registry from another site is installed only through this path, and an
+unsigned one is refused. Only the folder that ships with the app
+(`/plugins/examples`), served from the app's own origin, falls back to the
+SHA-256 check against its scan when it has no `index.json.sig`.
+
+## Themes tested in RTL (W12.S6)
+
+Every theme in the gallery (`public/themes/examples/`) is reviewed like a
+plugin version with only a stylesheet (the review on the
+[Security](/security/) page: licence, public source, no remote CSS), and then
+checked for right-to-left use. `node scripts/themes/rtl-check.mjs` writes its
+scorecard to `public/themes/examples/scorecards/<id>@<version>.json`;
+`--check` fails when one is stale, and `--css <file>` checks one stylesheet.
+
+- **Physical CSS.** `margin-left`, `padding-right`, `left:`/`right:`,
+  one-sided borders and corners, `float`, `clear` and `text-align` with
+  `left`/`right` break a Hebrew layout. Each one is reported with the
+  logical property to use instead (`margin-inline-start`, `text-align:
+  start`, …). A rule scoped to one direction (`[dir="rtl"] …`, `:dir(ltr)`)
+  is allowed.
+- **Contrast** (WCAG 2.2, 1.4.3): the theme's text colours against its
+  backgrounds, 4.5:1, in light and in dark. The app's own colours fill in
+  whatever the theme leaves unset.
+- **Screens.** Eight screens (editor, preview, table, lists, callouts, code
+  inside Hebrew, Bases, settings) are captured in RTL and in LTR by a
+  browser run, merged with `--screens <results.json>`.
+
+A failing RTL check is a warning on the scorecard, not a delisting: each
+finding costs the score what any review warning costs (10 points). The
+**Tested in RTL** badge is given only when all three pass, so it waits for
+the browser run. There are no user ratings: ratings need accounts and
+moderation, and the scorecard and the badge do that job.
 
 ## A registry site of its own
 
@@ -100,5 +165,8 @@ address.
 
 ## Not yet
 
-- The plugins are **unsigned**, so their cards show the “unsigned” note.
-  Signing them needs the owner's key; see [Plugin signing keys](/plugins/signing/).
+- The registry that ships with the app is **not signed yet**: signing it needs
+  the owner's key (`--keygen`, then `--sign`, above), so its cards still show
+  the “unsigned” note. See also [Plugin signing keys](/plugins/signing/).
+- The registry site (`npm run registry:site`) does not publish `index.json.sig`
+  yet, and the app does not read that site yet.

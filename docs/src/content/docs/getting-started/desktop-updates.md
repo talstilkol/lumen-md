@@ -31,6 +31,30 @@ Release installers are code-signed once the project's signing certificates
 are in place (Windows Authenticode, Apple Developer ID). Until then Windows
 SmartScreen and macOS Gatekeeper show a warning on first launch.
 
+**Windows: SignPath Foundation (plan W11.S15).** Smart App Control blocks
+unsigned apps, and Microsoft's own Artifact Signing isn't open to an
+individual in Israel. SignPath Foundation signs OSI-licensed open-source
+projects for free, with its certificate. Lumen is MIT, which is
+OSI-approved. No EV certificate is needed. The application is an owner step
+(W11.O1).
+
+- `npm run release` passes SignPath to Tauri as the Windows `signCommand`
+  (`scripts/windows/signpath-sign.mjs`) when the four `SIGNPATH_*` values are
+  set. Each signing request then waits for its approval at SignPath.
+- After the build, every Windows installer is checked
+  (`scripts/windows/verify-signature.mjs`): it must carry an Authenticode
+  signature, and on Windows `signtool verify /pa` must accept it.
+- `release/signing.json` says "Windows: signed" only when both hold.
+  Without the SignPath details the release goes out with an unsigned
+  installer, and the record says so.
+
+Anyone can check an installer:
+
+```bash
+node scripts/windows/verify-signature.mjs Lumen_<version>_x64-setup.exe   # exit 1 when unsigned
+signtool verify /pa /v Lumen_<version>_x64-setup.exe                      # on Windows
+```
+
 ## What the app is allowed to do
 
 The window has no general file-system permission. It reaches only the vault

@@ -8,8 +8,9 @@
  *     and edit the notes in place.
  *   • Android — a folder the user picks with the Storage Access Framework
  *     (`ACTION_OPEN_DOCUMENT_TREE`, permission kept across restarts), through
- *     Lumen's small native plugin `LumenVaultFolder` (mobile/android/, see
- *     its README). Without the plugin (or if the user picks nothing), the
+ *     Lumen's small native plugin `LumenVaultFolder`
+ *     (android/app/src/main/java/com/lumen/editor/, registered in
+ *     MainActivity; see mobile/README.md). Without the plugin (or if the user picks nothing), the
  *     app's own folder on the device (Capacitor `Directory.External`).
  *
  * Both are a `MobileFs`: a handful of calls over paths relative to the
@@ -132,6 +133,37 @@ export function createMobileBackend(fs: MobileFs, opts: { id?: string; available
     return fs.stat(p);
   }
 
+  /**
+   * Run `fn` as the next step on `p`, after every save of `p` that started
+   * before it (2.28, #275): writeIf, removeIf and remove wait for the saves
+   * and for each other, so a compare-and-swap is never split by this
+   * backend's own writes. While it runs, reads of `p` wait, as for a save.
+   */
+  async function inChain<T>(p: string, fn: () => Promise<T>): Promise<T> {
+    const previous = saving.get(p);
+    let out!: T;
+    const run = (async () => {
+      await previous?.catch(() => undefined);
+      out = await fn();
+    })();
+    saving.set(p, run);
+    try {
+      await run;
+    } finally {
+      if (saving.get(p) === run) saving.delete(p);
+    }
+    return out;
+  }
+
+  /** The file at `p` is the `expect` one (null: nothing there and nothing expected). Inside `inChain` only. */
+  async function isExpected(p: string, expect: string | null): Promise<boolean> {
+    const s = await statRecovered(p, false);
+    if (s?.type === "directory") return false;
+    if (!s) return expect === null;
+    if (expect === null) return false;
+    return (await (await import("./cas")).sha256Hex(await fs.readFile(p))) === expect;
+  }
+
   /** Every folder from the root down to `parts` must be a folder (or missing). */
   async function checkParents(parts: string[], path: string): Promise<void> {
     for (let i = 1; i < parts.length; i++) {
@@ -205,6 +237,40 @@ export function createMobileBackend(fs: MobileFs, opts: { id?: string; available
       emit({ type: "write", path: p });
     },
 
+    async writeIf(path, data, expect) {
+      const parts = vaultSegments(path);
+      if (!parts.length) throw new VaultError("EKIND", path, "Cannot write to the vault root");
+      const p = join(parts);
+      const bytes = await toBytes(data);
+      await checkParents(parts, path);
+      const id = saveId();
+      const ok = await inChain(p, async () => {
+        if (!(await isExpected(p, expect))) return false;
+        busy.add(id);
+        try {
+          await atomicWrite(afs, p, bytes, id);
+        } finally {
+          busy.delete(id);
+        }
+        return true;
+      });
+      if (ok) emit({ type: "write", path: p });
+      return ok;
+    },
+
+    async removeIf(path, expect) {
+      const parts = vaultSegments(path);
+      if (!parts.length) return false;
+      const p = join(parts);
+      const ok = await inChain(p, async () => {
+        if (!(await isExpected(p, expect))) return false;
+        await fs.remove(p);
+        return true;
+      });
+      if (ok) emit({ type: "delete", path: p });
+      return ok;
+    },
+
     async mkdir(path) {
       const parts = vaultSegments(path);
       if (!parts.length) return;
@@ -236,9 +302,12 @@ export function createMobileBackend(fs: MobileFs, opts: { id?: string; available
       const parts = vaultSegments(path);
       if (!parts.length) throw new VaultError("EINVAL", path, "Cannot delete the workspace root");
       const p = join(parts);
-      await settled([...saving.keys()].filter((k) => k === p || k.startsWith(p + "/")));
-      if (!(await statRecovered(p))) throw new VaultNotFoundError(path);
-      await fs.remove(p);
+      await settled([...saving.keys()].filter((k) => k.startsWith(p + "/")));
+      // In the path's chain (2.28): never between a writeIf's check and its save.
+      await inChain(p, async () => {
+        if (!(await statRecovered(p, false))) throw new VaultNotFoundError(path);
+        await fs.remove(p);
+      });
       emit({ type: "delete", path: p });
     },
 
@@ -261,7 +330,7 @@ export interface CapacitorFilesystemPlugin {
   rmdir(o: { path: string; directory: string; recursive: boolean }): Promise<void>;
 }
 
-/** Lumen's Android plugin over a Storage Access Framework tree (mobile/android/LumenVaultFolderPlugin.java). */
+/** Lumen's Android plugin over a Storage Access Framework tree (android/app/src/main/java/com/lumen/editor/LumenVaultFolderPlugin.java). */
 export interface LumenVaultFolderPlugin {
   /** The folder picker; null `uri` when the user cancelled. Keeps the read/write permission. */
   pickFolder(): Promise<{ uri: string | null; name: string }>;

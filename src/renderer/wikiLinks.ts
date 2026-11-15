@@ -26,17 +26,23 @@ export function splitWikiTarget(target: string): { note: string; heading: string
  * companion note `paper.pdf.md` (plan 4.14).
  */
 export function resolveWikiTarget(target: string, paths: readonly string[]): string | null {
-  const found = resolveExact(target, paths);
   // Generated links percent-encode the characters that are wiki syntax
-  // (`draft%232.pdf` for `draft#2.pdf`, plan 4.14).
-  const decoded = decodeWikiPath(target);
-  return found ?? (decoded === target ? null : resolveExact(decoded, paths));
+  // (`draft%232.pdf` for `draft#2.pdf`) and whitespace at either end
+  // (`%20paper.pdf`, plan 4.14). Such a target is most likely a generated
+  // link, so the file it was made for (decoded) wins over a file literally
+  // named with the escape (review #272, step 2.24). The decoded name is not
+  // trimmed again: its edge whitespace was encoded on purpose (step 2.20).
+  const written = target.trim();
+  const decoded = decodeWikiPath(written);
+  if (decoded !== written) return resolveExact(decoded, paths) ?? resolveExact(written, paths);
+  return resolveExact(written, paths);
 }
 
+/** `target` is already trimmed (or deliberately keeps its decoded edge whitespace). */
 function resolveExact(target: string, paths: readonly string[]): string | null {
-  const raw = target.trim().toLowerCase();
+  const raw = target.toLowerCase();
   const want = raw.replace(/\.(md|markdown)$/, "");
-  if (!want) return null;
+  if (!want.trim()) return null;
   const strip = (p: string) => p.toLowerCase().replace(/\.(md|markdown)$/, "");
   const name = (p: string) => p.split("/").pop() ?? p;
   return (
@@ -85,7 +91,13 @@ export function handleWikiLinkClick(
   // carried through so the opened note can scroll to it. `[[#Heading]]`
   // is same-note only — nothing to open.
   const { note, heading } = splitWikiTarget(el.getAttribute("data-wiki-target") ?? "");
-  if (!note) return false;
+  if (!note) {
+    // A long note still rendering its blocks (plan 8.1 step 3): the heading may be in one of them.
+    if (!root.hasAttribute("data-preview-pending") || !targetId) return false;
+    e.preventDefault();
+    scrollToHeadingWhenRendered(targetId, { doc: root.ownerDocument, docKey: root.getAttribute("data-preview-doc") ?? undefined });
+    return true;
+  }
   e.preventDefault();
   void listPaths()
     .then((paths) => {
@@ -126,7 +138,9 @@ export function scrollToHeadingWhenRendered(
       el.scrollIntoView({ block: "start" });
       return;
     }
-    if (Date.now() - started < timeoutMs) setTimeout(tick, intervalMs);
+    // A preview still rendering the blocks of a long note keeps the wait going (plan 8.1 step 3).
+    const rendering = roots.some((r) => r.hasAttribute("data-preview-pending"));
+    if (Date.now() - started < (rendering ? Math.max(timeoutMs, 60_000) : timeoutMs)) setTimeout(tick, intervalMs);
   };
   // First look after a beat, so the previous note's DOM is gone.
   setTimeout(tick, intervalMs);

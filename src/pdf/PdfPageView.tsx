@@ -3,7 +3,7 @@
  * canvas, the text layer and the highlight rectangles drawn on it. Loaded only
  * with PdfReader, which registers its strings.
  */
-import { memo, useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { memo, useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { t } from "../i18n";
 import { showAiToast } from "../ui/AiToast";
 import { anchorAnnotation, findAll, shortId, type PageRect, type PdfAnnotation } from "./annotations";
@@ -16,6 +16,15 @@ import { OcrTextLayer } from "./OcrTextLayer";
 export interface PageSize {
   w: number;
   h: number;
+}
+
+/** `sizes` with page `page` (1-based) at its real `size`; the same array when nothing changed (step 2.18). */
+export function withPageSize(sizes: PageSize[], page: number, size: PageSize): PageSize[] {
+  const cur = sizes[page - 1];
+  if (!cur || (cur.w === size.w && cur.h === size.h)) return sizes;
+  const next = sizes.slice();
+  next[page - 1] = size;
+  return next;
 }
 
 interface PageProps {
@@ -33,9 +42,13 @@ interface PageProps {
   query: string;
   occurrence: number;
   registerEl: (page: number, el: HTMLDivElement | null) => void;
+  /** The page's real size at scale 1, once it is loaded. */
+  onSize: (page: number, size: PageSize) => void;
   onText: (page: number, text: string) => void;
   onOcr: (page: number, value: OcrPage) => void;
   onAnchored: (missing: string[], all: string[]) => void;
+  /** Drawn over the page, under the scanned-page notice (W10.E64: the ink layer). */
+  overlay?: ReactNode;
 }
 
 interface DrawnRect {
@@ -58,9 +71,11 @@ export const PdfPageView = memo(function PdfPageView({
   query,
   occurrence,
   registerEl,
+  onSize,
   onText,
   onOcr,
   onAnchored,
+  overlay,
 }: PageProps) {
   const boxRef = useRef<HTMLDivElement | null>(null);
   const canvasHost = useRef<HTMLDivElement>(null);
@@ -83,6 +98,8 @@ export const PdfPageView = memo(function PdfPageView({
     (async () => {
       const [pdfjs, p] = await Promise.all([loadPdfjs(), doc.getPage(page)]);
       if (cancelled) return;
+      const base = p.getViewport({ scale: 1 });
+      onSize(page, { w: base.width, h: base.height });
       const viewport = p.getViewport({ scale });
       const dpr = Math.min(window.devicePixelRatio || 1, 3);
       const canvas = document.createElement("canvas");
@@ -116,7 +133,7 @@ export const PdfPageView = memo(function PdfPageView({
       layer.replaceChildren();
       setDrawn([]);
     };
-  }, [active, doc, page, scale, onText]);
+  }, [active, doc, page, scale, onSize, onText]);
 
   // Where this page's highlights (and the current search hit) are.
   useEffect(() => {
@@ -234,6 +251,7 @@ export const PdfPageView = memo(function PdfPageView({
         <div ref={canvasHost} className="pdf-canvas" />
         <div className="pdf-hl-layer">{marks(false)}</div>
         <div ref={textRef} className="textLayer" data-pdf-text="page" />
+        {overlay}
         {ocr?.spans && (
           // W6.47: the recognised lines where they are on the image — transparent, selectable, in reading order.
           <OcrTextLayer ref={ocrLayerRef} spans={ocr.spans} pageHeightPx={size.h * scale} />

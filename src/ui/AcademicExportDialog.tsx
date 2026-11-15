@@ -17,6 +17,7 @@ import { t, getLocale } from "../i18n";
 import { ACADEMIC_TEMPLATES, COVER_KEYS, academicTemplate, splitCover, type AcademicTemplateId, type CoverFields, type PageNumberFormat } from "../storage/academicTemplates";
 import { explainError } from "../lib/userError";
 import { HelpButton } from "./HelpButton";
+import { Modal } from "./Modal";
 
 const SETTINGS_KEY = "lumen.academicExport.v1";
 
@@ -77,14 +78,6 @@ export function AcademicExportDialog({ content, name, onClose }: AcademicExportP
 
   useEffect(() => {
     closeRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
   const pick = (id: AcademicTemplateId) => {
@@ -116,8 +109,8 @@ export function AcademicExportDialog({ content, name, onClose }: AcademicExportP
   });
 
   return (
-    <div className="cmd-palette-backdrop">
-      <div className="cmd-palette" role="dialog" aria-modal="true" aria-label={t("academic.title")} data-testid="academic-export" style={{ maxWidth: 600, padding: 0, display: "flex", flexDirection: "column", maxHeight: "88vh" }}>
+    <Modal onClose={onClose} aria-label={t("academic.title")} className="cmd-palette-backdrop">
+      <div className="cmd-palette" data-testid="academic-export" style={{ maxWidth: 600, padding: 0, display: "flex", flexDirection: "column", maxHeight: "88vh" }}>
         <header style={{ padding: "14px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <GraduationCap size={18} style={{ color: "hsl(var(--accent))" }} aria-hidden="true" />
           <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600, flex: 1 }}>{t("academic.title")}</h2>
@@ -185,7 +178,7 @@ export function AcademicExportDialog({ content, name, onClose }: AcademicExportP
           </div>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

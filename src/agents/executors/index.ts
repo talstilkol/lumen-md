@@ -8,12 +8,23 @@
 import type { Availability, Executor, ExecutorId } from "../types";
 import { getAiPolicy } from "../../ai/policy";
 import { chatExecutor } from "./chatExecutor";
-import { ollamaExecutor } from "./ollama";
+import { configuredOllamaModel, installedOllamaModels, ollamaExecutor } from "./ollama";
+import { measuredModelFor } from "../../ai/defaults";
+import { lmstudioExecutor } from "./lmstudio";
 import { webllmExecutor } from "./webllm";
 
 const registry = new Map<ExecutorId, Executor>();
 
-export const DEFAULT_EXECUTOR_ORDER: ExecutorId[] = ["ollama", "webllm", "chat"];
+/**
+ * Plan 7.9: an agent's measured default (src/ai/defaults.ts, from real eval
+ * runs) when the executor is Ollama, that model is installed and the user
+ * picked none; otherwise null (runAgent then asks the executor).
+ */
+export function measuredModel(agentId: string, executorId: ExecutorId): string | null {
+  return executorId === "ollama" ? measuredModelFor(agentId, installedOllamaModels(), configuredOllamaModel()) : null;
+}
+// W11.I16: the native servers first (Ollama, then LM Studio once set up), then the browser, then the chat adapter.
+export const DEFAULT_EXECUTOR_ORDER: ExecutorId[] = ["ollama", "lmstudio", "webllm", "chat"];
 
 export function registerExecutor(executor: Executor): void {
   registry.set(executor.id, executor);
@@ -31,6 +42,7 @@ export function listExecutors(): Executor[] {
 export function resetExecutors(): void {
   registry.clear();
   registerExecutor(ollamaExecutor);
+  registerExecutor(lmstudioExecutor);
   registerExecutor(webllmExecutor);
   registerExecutor(chatExecutor);
 }
@@ -41,7 +53,7 @@ export const EXECUTOR_PREF_KEY = "lumen.ai.executor";
 export function preferredExecutor(): ExecutorId | null {
   try {
     const v = localStorage.getItem(EXECUTOR_PREF_KEY);
-    return v === "ollama" || v === "webllm" || v === "chat" ? v : null;
+    return v === "ollama" || v === "lmstudio" || v === "webllm" || v === "chat" ? v : null;
   } catch {
     return null;
   }

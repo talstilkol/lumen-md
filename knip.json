@@ -1,0 +1,7 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": ["src/main.tsx", "index.html", "scripts/**/*.mjs", "e2e/**/*.ts", "src/__tests__/**/*.{ts,tsx}"],
+  "project": ["src/**/*.{ts,tsx}", "scripts/**/*.mjs"],
+  "ignore": ["src/__tests__/fixtures/**", "public/**", "dist/**"],
+  "ignoreWorkspaces": ["packages/*"]
+}

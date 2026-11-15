@@ -4,6 +4,8 @@ node_modules_bad/
 dist/
 dist-registry/
 dist-legal-packet/
+# Converted models and their smoke results (npm run models:convert, plan 6.0): GBs, never committed
+/out/models/
 # The Cloudflare rebuild's manifest (plan W7.23, scripts/supply-chain/cf-build.sh)
 /.repro-out/
 
@@ -75,8 +77,17 @@ bundle-sizes.json
 bundle-diff.md
 .bundle-base/
 
-# Live agent eval reports (npm run eval:agents)
-eval/results/
+# Live agent eval reports (npm run eval:agents). The JSON of a real run is
+# committed: npm run eval:ingest takes it into the registry (plan 7.9).
+eval/results/*
+!eval/results/agents-*.json
+# …except the Markdown conformance numbers (W11.Q8), which are committed with their exceptions
+!eval/results/md-conformance.json
+# Public-benchmark results (eval/results/<task>/<model>@<rev>.json, plan W11.H5) are committed.
+!eval/results/*/
+eval/results/*/report.json
+# Downloaded public benchmark data (npm run eval:public -- fetch): never committed.
+eval/public/.data/
 flake-results/
 visual-results/
 # Review triage / reply state (scripts/review-triage.mjs, review-reply.mjs)
@@ -107,6 +118,8 @@ public/excalidraw/
 /reports/*
 # …except the sealed nightly reports (plan W4.36): committed receipts of what ran
 !/reports/nightly/
+# …and the Lighthouse trend (plan 0.11, W10.E11): the nightly perf run's history, committed with --commit
+!/reports/trend/
 
 # Signed release output and fuzzer findings (plan W1.27)
 /release/
@@ -114,7 +127,6 @@ fuzz-findings/
 
 # Plan 13.7: store screenshots are build output (node scripts/store-screenshots.mjs)
 store/screenshots/
-reports/
 
 # Signed release output and fuzzer findings (plan W1.27)
 /release/
@@ -135,7 +147,15 @@ ci-docker-out/
 !/reports/perf/
 /reports/perf/*
 !/reports/perf/baselines/
+# …and W1.22's gate baseline (W11.Q5): `npm run perf:inp:gate` compares every run against it
+!/reports/perf/inp-baseline.json
 # Buildkite job output (plan W7.21): shard plans, blob reports, receipts — build artifacts
 /ci-out/
 /.vitest/
 dist-frame/
+
+# Plan W11.P3: the obsidian-help corpus, downloaded (not redistributed; scripts/obsidian-help-corpus.mjs)
+.cache/obsidian-help/
+# W11.I13: public retrieval sets fetched by scripts/retrieval/fetch.py (never committed)
+eval/public-data/
+scripts/drill/tauri-writer/target/

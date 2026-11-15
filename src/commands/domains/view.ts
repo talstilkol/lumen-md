@@ -1,6 +1,7 @@
 /** View commands: editor modes, panels, editor settings, language and theme. */
 import { isBetaLocale } from "../../i18n/review";
-import { cmdIcons, type Command } from "../../ui/CommandPalette";
+import { cmdIcons } from "../../ui/cmdIcons";
+import type { Command } from "../../ui/CommandPalette";
 import { useAppStore } from "../../store/useStore";
 import { t, SUPPORTED_LOCALES } from "../../i18n";
 import type { CommandContext } from "./context";

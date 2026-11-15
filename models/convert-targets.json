@@ -1,5 +1,5 @@
 {
-  "about": "Models Lumen converts to ONNX itself (plan 6.0), read by .github/workflows/model-convert.yml, scripts/models/*.mjs and src/ai/convertedModels.ts. `hf` is the source checkpoint, `cardLicense` the licence its model card must declare (the workflow refuses a mismatch), `keep` the quantisations published. `mirrors`: existing third-party ONNX builds that are used instead of converting when they load and pass the smoke test.",
+  "about": "Models Lumen converts to ONNX itself (plan 6.0), read by scripts/models/convert.mjs, scripts/models/*.mjs and src/ai/convertedModels.ts. `hf` is the source checkpoint, `cardLicense` the licence its model card must declare (the workflow refuses a mismatch), `keep` the quantisations published. `mirrors`: existing third-party ONNX builds that are used instead of converting when they load and pass the smoke test.",
   "transformersJsScripts": ["3.8.1", "3.8.0", "3.7.6", "3.7.5", "3.7.1", "3.6.3", "3.5.2"],
   "keep": ["q8", "q4f16"],
   "models": [
@@ -35,6 +35,17 @@
       "cardLicense": "cc-by-4.0",
       "attribution": "DictaBERT-NER © DICTA: The Israel Center for Text Analysis (Shmidman et al., “DictaBERT: A State-of-the-Art BERT Suite for Modern Hebrew”, 2023), licensed under CC BY 4.0. Converted to ONNX and quantised by Lumen.",
       "smoke": { "text": "דוד בן גוריון נולד בפולין ועלה לארץ ישראל.", "expect": "entities" }
+    },
+    {
+      "id": "bert-base-ner",
+      "hf": "dslim/bert-base-NER",
+      "task": "token-classification",
+      "pipeline": "token-classification",
+      "kind": "other",
+      "license": "MIT",
+      "cardLicense": "mit",
+      "attribution": "bert-base-NER by David S. Lim (dslim), fine-tuned BERT on CoNLL-2003, MIT licence. Converted to ONNX and quantised by Lumen.",
+      "smoke": { "text": "Ada Lovelace met Charles Babbage in London.", "expect": "entities" }
     },
     {
       "id": "siglip-base-patch16-256-multilingual",

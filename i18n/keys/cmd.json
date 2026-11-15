@@ -786,6 +786,16 @@
       "vars": []
     },
     {
+      "key": "cmd.edit.toggleDirection",
+      "en": "Switch paragraph direction (right-to-left ↔ left-to-right)",
+      "vars": []
+    },
+    {
+      "key": "cmd.edit.toggleDirection.hint",
+      "en": "Saved in the note as an invisible direction mark at the paragraph's start; frontmatter dir: rtl | ltr | auto sets the whole note",
+      "vars": []
+    },
+    {
       "key": "cmd.epub.open",
       "en": "Open an EPUB for reading…",
       "vars": []
@@ -1525,6 +1535,16 @@
       "vars": []
     },
     {
+      "key": "cmd.nikud.nouns",
+      "en": "Hebrew: niqqud on nouns only",
+      "vars": []
+    },
+    {
+      "key": "cmd.nikud.nouns.hint",
+      "en": "Point only the nouns (needs the Hebrew dictionary, “Hebrew dictionary and synonyms (download / remove)”)",
+      "vars": []
+    },
+    {
       "key": "cmd.nikud.partial",
       "en": "Hebrew: add partial niqqud",
       "vars": []
@@ -1542,6 +1562,16 @@
     {
       "key": "cmd.nikud.remove.hint",
       "en": "Strip the vowel points from the selection (or the whole note)",
+      "vars": []
+    },
+    {
+      "key": "cmd.nikud.verbs",
+      "en": "Hebrew: niqqud on verbs only",
+      "vars": []
+    },
+    {
+      "key": "cmd.nikud.verbs.hint",
+      "en": "Point only the verbs (needs the Hebrew dictionary, “Hebrew dictionary and synonyms (download / remove)”)",
       "vars": []
     },
     {
@@ -1727,6 +1757,26 @@
     {
       "key": "cmd.research.ask.hint",
       "en": "Searches the web, reads sources and writes a note with a quoted footnote for every claim",
+      "vars": []
+    },
+    {
+      "key": "cmd.research.clipTemplates",
+      "en": "Web clipper: templates and triggers",
+      "vars": []
+    },
+    {
+      "key": "cmd.research.clipTemplates.hint",
+      "en": "Edit the templates clips are saved with, and which site gets which",
+      "vars": []
+    },
+    {
+      "key": "cmd.research.library",
+      "en": "🔎 Research: Search the Library by Meaning",
+      "vars": []
+    },
+    {
+      "key": "cmd.research.library.hint",
+      "en": "Finds clips you saved by what they are about, not only their words. Clips are indexed on this device",
       "vars": []
     },
     {
@@ -2470,6 +2520,16 @@
       "vars": []
     },
     {
+      "key": "cmd.view.hebrewGrammarModel",
+      "en": "Hebrew grammar: check suggestions with a local model (on / off)",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.hebrewGrammarModel.hint",
+      "en": "Ollama on this computer (DictaLM first) drops the grammar suggestions it rejects. Off by default; nothing leaves this computer.",
+      "vars": []
+    },
+    {
       "key": "cmd.view.language",
       "en": "Language: {label}",
       "vars": [
@@ -2719,6 +2779,16 @@
     {
       "key": "cmd.voice.command.hint",
       "en": "Say one: new note, search…, add task…, daily note, read aloud — recognised on this device",
+      "vars": []
+    },
+    {
+      "key": "cmd.voice.corpusRecorder",
+      "en": "Voice corpus: record sentences for an open Hebrew voice",
+      "vars": []
+    },
+    {
+      "key": "cmd.voice.corpusRecorder.hint",
+      "en": "Record, check and export a CC0 speech corpus on this device (no upload)",
       "vars": []
     },
     {

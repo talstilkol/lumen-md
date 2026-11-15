@@ -21,6 +21,7 @@ describe(`prompt eval — ${model} @ ${url}`, () => {
     for (const c of PROMPT_CASES) {
       const started = Date.now();
       try {
+        // privacy-ledger: Ollama/SearXNG of the eval harness: runs in Node (npm run eval), where no ledger is installed
         const res = await fetch(`${url}/api/chat`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -37,6 +38,7 @@ describe(`prompt eval — ${model} @ ${url}`, () => {
       console.log(`${r.status === "ok" && r.checks.every((k) => k.ok) ? "pass" : "FAIL"}  ${c.id}  ${r.checks.filter((k) => !k.ok).map((k) => k.name).join(", ")}`);
     }
     const date = new Date().toISOString().slice(0, 10);
+    // privacy-ledger: Ollama/SearXNG of the eval harness: runs in Node (npm run eval), where no ledger is installed
     const ver = (await fetch(`${url}/api/version`).then((r) => r.json()).catch(() => ({}))) as { lumen_fake?: boolean };
     const kind = wiring || ver.lumen_fake ? "wiring" : "model";
     const label = ver.lumen_fake ? "fake-ollama" : model;

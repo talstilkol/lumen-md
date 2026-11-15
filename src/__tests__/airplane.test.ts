@@ -31,7 +31,10 @@ import {
   verdict,
 } from "../privacy/airplane";
 import { AIRPLANE_CSP, AIRPLANE_KEY, AIRPLANE_TAB, airplaneFlagOn, airplaneWorkerName, answerWorkers, followOtherTab, __setAirplaneFlag } from "../privacy/airplaneBoot";
-import { buildCertificate, canonicalJson, CERTIFICATE_FORMAT, CERTIFICATE_FORMAT_V2, reachedNetwork, sealCertificate, verifyCertificate } from "../privacy/airplaneCertificate";
+import { buildCertificate, canonicalJson, CERTIFICATE_FORMAT, CERTIFICATE_FORMAT_V2, reachedNetwork, sealCertificate, signedCertificateFile, verifyCertificate } from "../privacy/airplaneCertificate";
+import { newSigningKey, publicKeyText } from "../privacy/report";
+// @ts-expect-error — plain .mjs script without type declarations
+import { verifyData } from "../../scripts/supply-chain/minisign.mjs";
 import { AIRPLANE_WAIT_MS, installWorkerLedger, type AirplaneMessage } from "../ai/workerLedger";
 
 const BASE = "https://lumen-md.vercel.app/notes/x";
@@ -292,6 +295,34 @@ describe("certificate", () => {
     expect(signed.signature).toBe(`sig:${sealed.text.length}`);
   });
 
+  it("every certificate the monitor exports is signed with the device's minisign key, and a changed byte is rejected (W10.C11)", async () => {
+    enableAirplaneMode();
+    const from = Date.now();
+    await fake.win.fetch("https://evil.example.com/a").catch(() => {
+      // why: the request is blocked by design; the certificate reads the attempt log
+    });
+    const cert = buildCertificate(egressAttempts(), from, Date.now() + 1, "test");
+    const key = await newSigningKey();
+    const file = await signedCertificateFile(cert, key);
+    expect(file.publicKey).toBe(await publicKeyText(key.publicRaw));
+    // minisign's own check (scripts/supply-chain/minisign.mjs, Node's Ed25519), independent of the signer.
+    expect(verifyData(Buffer.from(file.certificate, "utf8"), file.minisig, file.publicKey)).toMatch(/^lumen-md airplane certificate test .* sha256:[0-9a-f]{64}$/);
+    expect(verifyData(Buffer.from(file.certificate, "utf8"), file.minisig, file.publicKey)).toContain(`sha256:${file.sha256}`);
+    const changed = file.certificate.replace('"blocked":1', '"blocked":2');
+    expect(changed).not.toBe(file.certificate);
+    expect(() => verifyData(Buffer.from(changed, "utf8"), file.minisig, file.publicKey)).toThrow(/does not match/);
+    expect((await verifyCertificate({ text: file.certificate, sha256: file.sha256 })).ok).toBe(true);
+    // Another device's key does not verify it.
+    const otherKey = await publicKeyText((await newSigningKey()).publicRaw);
+    expect(() => verifyData(Buffer.from(file.certificate, "utf8"), file.minisig, otherKey)).toThrow();
+  });
+
+  it("the monitor's download goes through the signer (W10.C11)", () => {
+    const src = readFileSync(resolve(process.cwd(), "src/privacy/NetworkMonitor.tsx"), "utf8");
+    expect(src).toMatch(/signedCertificateFile\(buildCertificate\(/);
+    expect(src).not.toMatch(/sealCertificate\(/);
+  });
+
   it("10,000 blocked attempts after one real leak: the leak is still listed, and every attempt is counted (review 14)", async () => {
     enableAirplaneMode();
     const from = Date.now();
@@ -515,14 +546,14 @@ describe("review 2 fixes", () => {
     expect(guardedSandbox("allow-scripts allow-same-origin allow-popups", "https://www.youtube.com/embed/x", base, false)).toBe("allow-scripts allow-same-origin allow-popups");
     expect(guardedSandbox("allow-scripts allow-same-origin allow-popups", "https://example.com/widget", base, false)).toBe("allow-scripts allow-popups");
     // The embed block's providers are the known ones.
-    const src = readFileSync(resolve(process.cwd(), "src/plugins/EmbedBlock.tsx"), "utf8");
-    // On the train a Gist is shown by the content frame with an opaque origin (src/lib/contentFrame.ts),
-    // never framed from gist.github.com with same-origin powers, so it needs no place in EMBED_ORIGINS.
+    const src = readFileSync(resolve(process.cwd(), "src/plugins/embedUrl.ts"), "utf8");
+    // A Gist is a link (W10.D2, src/lib/contentFrame.ts), never framed from gist.github.com,
+    // so it needs no place in EMBED_ORIGINS.
     const origins = new Set([...src.matchAll(/src: `(https:\/\/[^/`$]+)/g)].map((m) => m[1]).filter((o) => o !== "https://gist.github.com"));
     expect(origins.size).toBeGreaterThan(10);
     for (const o of origins) expect(EMBED_ORIGINS.has(o), o).toBe(true);
     // One list (RR8-451-2): the known embeds are exactly the https origins public/_headers lets the content
-    // frame (W4.15) load: its frame-src providers, and the Gist script.
+    // frame (W4.15) load: its frame-src providers (no Gist script since W10.D2).
     const headers = readFileSync(resolve(process.cwd(), "public/_headers"), "utf8");
     const allowed = new Set<string>();
     for (const m of headers.matchAll(/(?:frame-src|script-src) ([^;]+);/g)) for (const t of m[1].split(" ")) if (t.startsWith("https://")) allowed.add(t);

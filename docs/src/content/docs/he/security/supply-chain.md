@@ -76,6 +76,9 @@ npm run repro:compare -- <A> <B>
   hash לכל קובץ שב-manifest כפי ש-Vercel מגיש אותו לאותו קומיט, מוסיף את התוצאה
   ל-`reports/repro/ledger.jsonl`, ומריץ diffoscope על כל קובץ שונה. כשהבנייה זהה,
   הוא כותב הצהרת in-toto ("נבנה זהה בשתי תשתיות") שחתימת השחרור חותמת עליה.
+- ‏manifest תמיד נוקב בקומיט וב-SHA-256 של `package-lock.json`: בנייה בלי
+  lockfile לא מקבלת manifest, והשוואה שבה רק צד אחד נוקב בקומיט או ב-lockfile
+  היא שגיאה, אף פעם לא "זהה".
 - היעד: 0 קבצים שונים, כולל קובצי `.map`, ב-10 קומיטים ברצף, ובניית Cloudflare
   מתחת ל-15 דקות.
 
@@ -88,6 +91,18 @@ npm run sbom          # → release/sbom.cdx.json
 רשימת CycloneDX 1.5 של כל חבילת npm ‏(`package-lock.json`) וכל crate של Rust
 ‏(`src-tauri/Cargo.lock`): גרסה, כתובת חבילה, ה-hash מקובץ הנעילה והרישיון.
 אותם קובצי נעילה — אותם בתים.
+
+ריצת הלילה כותבת גם SBOM שני עם `syft`, יחד עם התוצאות של Scorecard, ‏OSV
+ו-cargo deny, לתוך קבלה חתומה
+([ריצות הלילה](/he/contributing/nightly/#בדיקות-שרשרת-האספקה-משימה-w11s5)).
+
+**‏provenance של npm.** ‏`npm publish --provenance` (בשביל `mcp-server`) עובד
+רק מספק CI ש-npm סומך עליו לחתום על הבנייה: מריצים מתארחים של GitHub, מריצים
+משותפים של GitLab.com או CircleCI. ‏Lumen לא משתמש באף אחד מהם (אין GitHub
+Actions, וסוכני Buildkite מתארחים אצלנו), ולכן `mcp-server` מתפרסם בלי
+provenance של npm. אם יהיה צורך ב-provenance, הדרך היא מראה ב-GitLab.com
+שמפרסמת מהמריצים המשותפים של GitLab. זו החלטה של הבעלים בעדיפות P2, ולא משהו
+שרץ היום.
 
 ## ‏4. כל שחרור נחתם — מחוץ לרשת
 

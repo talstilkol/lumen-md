@@ -161,6 +161,7 @@ export class ResearchUnavailableError extends Error {
  * consent gate opened (recorded in the privacy ledger); everyone else uses
  * the page's fetch, which the ledger wraps at startup.
  */
+// privacy-ledger: the configured research endpoint (classify: researchEndpoint /extract, /search), research
 export async function extractPage(url: string, signal?: AbortSignal, endpoint = researchEndpoint(), fetchImpl: typeof fetch = (i, o) => fetch(i, o)): Promise<ExtractedPage> {
   if (!endpoint) throw new ResearchUnavailableError();
   try {
@@ -180,6 +181,7 @@ export async function searchWeb(
   count = 5,
   signal?: AbortSignal,
   endpoint = researchEndpoint(),
+  // privacy-ledger: the configured research endpoint (classify: researchEndpoint /extract, /search), research
   fetchImpl: typeof fetch = (i, o) => fetch(i, o),
 ): Promise<SearchHit[]> {
   if (!endpoint) throw new ResearchUnavailableError();

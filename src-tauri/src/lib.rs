@@ -5,6 +5,8 @@ use tauri::{Emitter, Manager};
 
 mod shell;
 mod updates;
+mod update_guard;
+mod manifest_sig;
 
 mod whisper_core;
 
@@ -300,6 +302,44 @@ mod desktop_vault {
         with(&state, &root, |v| v.write(&path, data))
     }
 
+    /// Compare-and-swap write (2.28): the raw body is the expected bytes, then
+    /// the new ones; `x-vault-expect` is the length of the first part, or
+    /// "none" (only while nothing is there). False when the file differs.
+    #[tauri::command]
+    pub fn vault_write_if(state: State<VaultState>, request: tauri::ipc::Request) -> Result<bool, String> {
+        let tauri::ipc::InvokeBody::Raw(body) = request.body() else {
+            return Err("EINVAL: vault_write_if expects raw bytes".into());
+        };
+        let root = header(&request, "x-vault-root")?;
+        let path = header(&request, "x-vault-path")?;
+        let expect = header(&request, "x-vault-expect")?;
+        let split = if expect == "none" {
+            None
+        } else {
+            let n: usize = expect.parse().map_err(|_| "EINVAL: bad x-vault-expect".to_string())?;
+            if n > body.len() {
+                return Err("EINVAL: bad x-vault-expect".into());
+            }
+            Some(n)
+        };
+        let (want, data) = match split {
+            Some(n) => (Some(&body[..n]), &body[n..]),
+            None => (None, &body[..]),
+        };
+        with(&state, &root, |v| v.write_if(&path, want, data))
+    }
+
+    /// Compare-and-swap delete: the raw body is the bytes the file must still have.
+    #[tauri::command]
+    pub fn vault_remove_if(state: State<VaultState>, request: tauri::ipc::Request) -> Result<bool, String> {
+        let tauri::ipc::InvokeBody::Raw(body) = request.body() else {
+            return Err("EINVAL: vault_remove_if expects raw bytes".into());
+        };
+        let root = header(&request, "x-vault-root")?;
+        let path = header(&request, "x-vault-path")?;
+        with(&state, &root, |v| v.remove_if(&path, body))
+    }
+
     /// Every file with size and mtime, for change polling (plan 4.4).
     #[tauri::command]
     pub fn vault_snapshot(state: State<VaultState>, root: String) -> Result<Vec<lumen_vault::SnapEntry>, String> {
@@ -560,7 +600,10 @@ pub fn run() {
         shell::handle_args(app, argv.into_iter().skip(1).collect(), std::path::Path::new(&cwd));
     }));
     #[cfg(desktop)]
-    let builder = builder.plugin(tauri_plugin_updater::Builder::new().build());
+    let builder = builder.plugin(tauri_plugin_updater::Builder::new().build()).manage(updates::imp::PendingUpdate::default());
+    // The system-wide capture shortcut (plan 4.16, W10.C13): the frontend registers ⌥⌘N through it.
+    #[cfg(desktop)]
+    let builder = builder.plugin(tauri_plugin_global_shortcut::Builder::new().build());
     builder
         .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_dialog::init())
@@ -579,6 +622,8 @@ pub fn run() {
             desktop_vault::vault_stat,
             desktop_vault::vault_read,
             desktop_vault::vault_write,
+            desktop_vault::vault_write_if,
+            desktop_vault::vault_remove_if,
             desktop_vault::vault_snapshot,
             desktop_vault::vault_mkdir,
             desktop_vault::vault_rename,
@@ -599,10 +644,13 @@ pub fn run() {
             shell::tab_cancel,
             shell::tray_set_menu,
             shell::capture_format,
+            // W11.S2: no parameters; the manifest is verified before it is read.
             #[cfg(desktop)]
-            updates::imp::update_check,
+            updates::imp::lumen_check_update,
             #[cfg(desktop)]
-            updates::imp::update_install,
+            updates::imp::lumen_install_update,
+            #[cfg(desktop)]
+            updates::imp::lumen_set_update_channel,
             // The presenter window (plan W2.17) is desktop-only.
             #[cfg(desktop)]
             open_presenter_window,

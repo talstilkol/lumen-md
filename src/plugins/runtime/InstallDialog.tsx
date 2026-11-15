@@ -10,26 +10,18 @@ import { describeCapability, describeFindings, isSensitive, reportUrl } from "./
 import type { PluginManifest } from "./manifest";
 import type { ScanResult } from "./scan";
 import { HelpButton } from "../../ui/HelpButton";
+import { Modal } from "../../ui/Modal";
 
 export function InstallDialog(props: { manifest: PluginManifest; scan: ScanResult; busy?: boolean; onInstall: () => void; onCancel: () => void }) {
   const { manifest: m, scan } = props;
   const cancelRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     cancelRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.stopPropagation();
-        props.onCancel();
-      }
-    };
-    window.addEventListener("keydown", onKey, true);
-    return () => window.removeEventListener("keydown", onKey, true);
   }, [props]);
   const notes = scan.findings.length ? t("pluginTrust.card.notes", { list: describeFindings(scan.findings) }) : t("pluginTrust.card.clean");
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
+    <Modal
+      onClose={props.onCancel}
       aria-labelledby="plugin-install-title"
       data-testid="plugin-install-dialog"
       style={{ position: "fixed", inset: 0, zIndex: 210, background: "var(--overlay)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
@@ -80,6 +72,6 @@ export function InstallDialog(props: { manifest: PluginManifest; scan: ScanResul
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

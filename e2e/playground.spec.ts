@@ -139,8 +139,10 @@ test("the runner runs under its own CSP with no script blocked (WebKit: by nonce
   for (const frame of runners) {
     // The policy is enforced here (the meta copy in dev, plus the header in production) ...
     const csp = await frame.evaluate(() => document.querySelector('meta[http-equiv="Content-Security-Policy"]')?.getAttribute("content") ?? "");
-    expect(csp).toContain("'nonce-lumen-livejs-runner'");
-    // ... and no script (entry, chunks, vendor React, Vue, blob: modules) was blocked by it.
+    // Plan W10.D1: one sha256 (the prebuilt bundle), blob: and eval; no 'self', no nonce.
+    expect(csp).toMatch(/script-src 'sha256-[A-Za-z0-9+/=]+' blob: 'unsafe-eval';/);
+    expect(csp).not.toContain("nonce-");
+    // ... and no script (the bundle, vendor React, Vue, blob: modules) was blocked by it.
     // Other directives are not asserted: the dev server's HMR socket is outside connect-src.
     const blocked = await frame.evaluate(() => (window as unknown as { __cspv?: string[] }).__cspv ?? []);
     expect(blocked.filter((v) => v.startsWith("script-src"))).toEqual([]);

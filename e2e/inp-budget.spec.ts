@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 /**
@@ -14,6 +14,13 @@ import { join } from "node:path";
  *   - keypress → paint: 100 keystrokes at the end of a 50 KB and of a 2 MB
  *     note, each timed from the key event to the frame after it. Budget:
  *     p95 < 16 ms (50 KB) and < 33 ms (2 MB).
+ *   - keypress → paint on real text (W11.Q5, R5.6): Moby-Dick (Project
+ *     Gutenberg #2701, ≈ 1.2 MB) and 2 MB of Hebrew from Project Ben-Yehuda,
+ *     made by `npm run perf:editor-corpus` into reports/perf/corpus/. In the
+ *     source editor (CodeMirror) p95 < 33 ms for both; in WYSIWYG (Milkdown)
+ *     Moby-Dick must either type at p95 < 33 ms or open in the source editor
+ *     by itself (the W11.Q4 ceiling), which is recorded as "fallback".
+ *     Without the corpus these tests are skipped and say why.
  *
  * The numbers go to reports/perf/inp-latest.json; `npm run perf:inp:gate`
  * (scripts/perf/inp-gate.mjs) compares them with the committed baseline and
@@ -28,6 +35,8 @@ interface Metrics {
   inpP75: number;
   interactions: Array<{ name: string; ms: number }>;
   keyToPaintP95: { "50KB": number; "2MB": number };
+  /** W11.Q5: real text. A WYSIWYG entry is "fallback" when the note opened in the source editor by itself. */
+  realText: Partial<Record<"mobyDick" | "benYehuda2MB", number>> & { wysiwyg?: { mobyDick?: number | "fallback" } };
 }
 const metrics: Partial<Metrics> = {};
 
@@ -157,6 +166,36 @@ test("INP p75 < 100 ms over 20 interactions (CPU 4× slower)", { tag: "@inp" }, 
   expect(p75, `INP p75 (slowest: ${[...interactions].sort((a, b) => b.ms - a.ms).slice(0, 3).map((i) => `${i.name} ${Math.round(i.ms)} ms`).join(", ")})`).toBeLessThan(100);
 });
 
+/** Time `n` keystrokes from the key event to the frame after it, with the CPU slowed. */
+async function keyToPaint(page: Page, n = 100): Promise<number[]> {
+  await page.evaluate(() => {
+    const times: number[] = [];
+    (window as unknown as { __k2p: number[] }).__k2p = times;
+    // From the key event to the frame after it: rAF runs before the paint,
+    // the message after it lands once that frame is painted.
+    document.addEventListener(
+      "keydown",
+      (e) => {
+        const t0 = e.timeStamp;
+        requestAnimationFrame(() => {
+          const ch = new MessageChannel();
+          ch.port1.onmessage = () => times.push(performance.now() - t0);
+          ch.port2.postMessage(0);
+        });
+      },
+      { capture: true },
+    );
+  });
+  await slowDown(page);
+  for (let i = 0; i < n; i++) {
+    await page.keyboard.press(i % 10 === 9 ? "Enter" : "a");
+    await settle(page);
+  }
+  const times = await page.evaluate(() => (window as unknown as { __k2p: number[] }).__k2p);
+  expect(times.length).toBeGreaterThanOrEqual(Math.floor(n * 0.95));
+  return times;
+}
+
 for (const [label, bytes, budget] of [
   ["50KB", 50 * 1024, 16],
   ["2MB", 2 * 1024 * 1024, 33],
@@ -167,40 +206,76 @@ for (const [label, bytes, budget] of [
     const editor = page.locator(".cm-content").first();
     await editor.click();
     await page.keyboard.press("ControlOrMeta+End");
-    await page.evaluate(() => {
-      const times: number[] = [];
-      (window as unknown as { __k2p: number[] }).__k2p = times;
-      // From the key event to the frame after it: rAF runs before the paint,
-      // the message after it lands once that frame is painted.
-      document.addEventListener(
-        "keydown",
-        (e) => {
-          const t0 = e.timeStamp;
-          requestAnimationFrame(() => {
-            const ch = new MessageChannel();
-            ch.port1.onmessage = () => times.push(performance.now() - t0);
-            ch.port2.postMessage(0);
-          });
-        },
-        { capture: true },
-      );
-    });
-    await slowDown(page);
-    for (let i = 0; i < 100; i++) {
-      await page.keyboard.press(i % 10 === 9 ? "Enter" : "a");
-      await settle(page);
-    }
-    const times = await page.evaluate(() => (window as unknown as { __k2p: number[] }).__k2p);
-    expect(times.length).toBeGreaterThanOrEqual(95);
-    const p95 = quantile(times, 0.95);
+    const p95 = quantile(await keyToPaint(page), 0.95);
     report(`keypress → paint p95 (${label})`, p95);
     metrics.keyToPaintP95 = { ...(metrics.keyToPaintP95 ?? { "50KB": 0, "2MB": 0 }), [label]: p95 };
     expect(p95).toBeLessThan(budget);
   });
 }
 
+// ── W11.Q5: real long texts ─────────────────────────────────────────────
+const CORPUS = process.env.LUMEN_EDITOR_CORPUS ?? join(__dirname, "..", "reports", "perf", "corpus");
+const REAL = [
+  { key: "mobyDick", file: "moby-dick.md", title: "Moby-Dick", shows: "Moby-Dick; or, The Whale" },
+  { key: "benYehuda2MB", file: "benyehuda-2mb.md", title: "Ben-Yehuda 2 MB", shows: "בן-יהודה" },
+] as const;
+const REAL_BUDGET = 33;
+const corpusText = (file: string) => (existsSync(join(CORPUS, file)) ? readFileSync(join(CORPUS, file), "utf8") : null);
+const NO_CORPUS = `no ${CORPUS}/{moby-dick,benyehuda-2mb}.md: run \`npm run perf:editor-corpus -- --benyehuda <checkout>\` first`;
+
+for (const doc of REAL) {
+  test(`keypress → paint p95 < ${REAL_BUDGET} ms in ${doc.title}, source editor (CPU 4× slower)`, { tag: "@inp" }, async ({ page }) => {
+    const text = corpusText(doc.file);
+    test.skip(text === null, NO_CORPUS);
+    test.setTimeout(300_000);
+    await page.keyboard.press("ControlOrMeta+1");
+    await openNote(page, `inp-${doc.file}`, text!, doc.shows);
+    await page.locator(".cm-content").first().click();
+    await page.keyboard.press("ControlOrMeta+End");
+    const p95 = quantile(await keyToPaint(page), 0.95);
+    report(`keypress → paint p95 (${doc.title}, source)`, p95);
+    metrics.realText = { ...(metrics.realText ?? {}), [doc.key]: p95 };
+    expect(p95).toBeLessThan(REAL_BUDGET);
+  });
+}
+
+test(`Moby-Dick in WYSIWYG: keypress → paint p95 < ${REAL_BUDGET} ms, or it opens in the source editor by itself`, { tag: "@inp" }, async ({ page }) => {
+  const text = corpusText("moby-dick.md");
+  test.skip(text === null, NO_CORPUS);
+  test.setTimeout(300_000);
+  await page.keyboard.press("ControlOrMeta+4");
+  await page.evaluate(
+    async ({ text }) => {
+      const root = await navigator.storage.getDirectory();
+      const fh = await root.getFileHandle("inp-moby-wysiwyg.md", { create: true });
+      const w = await (fh as unknown as { createWritable(): Promise<FileSystemWritableFileStream> }).createWritable();
+      await w.write(text);
+      await w.close();
+      window.dispatchEvent(new CustomEvent("lumen-open-file", { detail: { path: "inp-moby-wysiwyg.md" } }));
+    },
+    { text: text! },
+  );
+  const notice = page.getByTestId("wysiwyg-ceiling-notice");
+  const prose = page.locator(".ProseMirror").first();
+  await expect(notice.or(prose)).toBeVisible({ timeout: 120_000 });
+  if (await notice.isVisible()) {
+    // The W11.Q4 ceiling: the note is in the source editor, which the test above measures.
+    await expect(page.locator(".cm-content").first()).toBeVisible();
+    report("keypress → paint (Moby-Dick, WYSIWYG)", 0);
+    metrics.realText = { ...(metrics.realText ?? {}), wysiwyg: { mobyDick: "fallback" } };
+    return;
+  }
+  await expect(prose).toContainText("Moby-Dick", { timeout: 120_000 });
+  await prose.click();
+  await page.keyboard.press("ControlOrMeta+End");
+  const p95 = quantile(await keyToPaint(page), 0.95);
+  report("keypress → paint p95 (Moby-Dick, WYSIWYG)", p95);
+  metrics.realText = { ...(metrics.realText ?? {}), wysiwyg: { mobyDick: p95 } };
+  expect(p95).toBeLessThan(REAL_BUDGET);
+});
+
 test.afterAll(() => {
-  if (metrics.inpP75 === undefined && metrics.keyToPaintP95 === undefined) return;
+  if (metrics.inpP75 === undefined && metrics.keyToPaintP95 === undefined && metrics.realText === undefined) return;
   mkdirSync(REPORT_DIR, { recursive: true });
   const out = { at: new Date().toISOString(), cpuSlowdown: CPU_SLOWDOWN, ...metrics };
   writeFileSync(join(REPORT_DIR, "inp-latest.json"), JSON.stringify(out, null, 2) + "\n");

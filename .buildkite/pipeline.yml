@@ -1,4 +1,4 @@
-# GENERATED from .github/workflows/ci.yml by scripts/buildkite/pipeline.mjs (plan W7.21). Do not edit by hand:
+# GENERATED from docs/archive/workflows/ci.yml by scripts/buildkite/pipeline.mjs (plan W7.21). Do not edit by hand:
 #   npm run ci:pipeline -- --write     regenerate after a change to ci.yml or scripts/buildkite/lib.mjs
 #   npm run ci:pipeline -- --check     fails when this file is stale or a ci.yml gate is missing
 # Buildkite's pipeline settings upload it with `buildkite-agent pipeline upload` (docs: self-hosting/buildkite).
@@ -96,6 +96,31 @@ steps:
           limit: 2
         - exit_status: 255
           limit: 1
+  - label: ":crescent_moon: redaction fuzz (nightly seed, 20,000 cases)"
+    key: "fuzz-redaction"
+    command: |-
+      LUMEN_CI_JOB=fuzz-redaction bash scripts/buildkite/run.sh <<'LUMEN_JOB'
+      gate 'Redaction fuzz with the night seed' <<'LUMEN_STEP'
+      npm run -s fuzz:redaction
+      LUMEN_STEP
+      gates_done
+      LUMEN_JOB
+    agents:
+      queue: "linux"
+    timeout_in_minutes: 45
+    notify:
+      - github_commit_status:
+          context: "lumen/buildkite: fuzz-redaction"
+    retry:
+      automatic:
+        - exit_status: -1
+          limit: 2
+        - exit_status: 255
+          limit: 1
+    artifact_paths:
+      - "reports/nightly/fuzz-redaction.json"
+      - "tests/fuzz/redaction/regressions.json"
+    if: "build.source == \"schedule\""
   - label: ":white_check_mark: static gates"
     key: "static"
     command: |-
@@ -128,20 +153,9 @@ steps:
       npm run -s docs:complete
       LUMEN_STEP
       gate 'i18n drift gate' <<'LUMEN_STEP'
-      # Every string in its sorted domain file (plan 0.3), and the
-      # committed manifest (i18n/keys/) that feeds translation tooling.
       node scripts/i18n-split.mjs --check
       node scripts/extract-i18n-keys.mjs --check
-      count() { node --input-type=module -e "import { readLocale } from './scripts/lib/i18n-files.mjs'; console.log(Object.keys(readLocale('$$1')).length)"; }
-      en_count=$$(count en)
-      # Hebrew ships as lazy JSON chunks like the other locales.
-      he_count=$$(count he)
-      diff=$$(( en_count > he_count ? en_count - he_count : he_count - en_count ))
-      echo "i18n keys — en: $$en_count, he: $$he_count, diff: $$diff"
-      if [ "$$diff" -gt 10 ]; then
-        echo "::error::i18n drift > 10 keys; run `node scripts/print-missing-i18n-keys.mjs` and fix."
-        exit 1
-      fi
+      node scripts/i18n-drift.mjs
       LUMEN_STEP
       gates_done
       LUMEN_JOB
@@ -380,8 +394,12 @@ steps:
         grep -q "https://publish.lumen-test.dev" <<<"$$c" || { echo "::error::$$path: endpoint origin missing from connect-src"; exit 1; }
         ! grep -q "__CSP_CONNECT_EXTRA__" <<<"$$c" || { echo "::error::$$path: placeholder left"; exit 1; }
       done
-      grep -q "'nonce-lumen-livejs-runner'" <<<"$$(csp /playground-runner.html)" || { echo "::error::playground runner: no nonce"; exit 1; }
-      grep -q 'nonce="lumen-livejs-runner"' dist/playground-runner.html || { echo "::error::playground runner script has no nonce"; exit 1; }
+      # Plan W10.D1: each runner page's CSP pins its served bundle's sha256, with no nonce.
+      for r in playground-runner livejs-runner; do
+        c=$$(csp "/$$r.html"); h=$$(openssl dgst -sha256 -binary "dist/runners/$$r.js" | base64)
+        grep -qF "'sha256-$$h'" <<<"$$c" || { echo "::error::$$r: the CSP does not pin dist/runners/$$r.js (sha256-$$h)"; exit 1; }
+        ! grep -q "nonce-" <<<"$$c" || { echo "::error::$$r: a nonce in the policy"; exit 1; }
+      done
       grep -q "'unsafe-eval'" <<<"$$(csp /webr/webr-worker.js)" || { echo "::error::webR worker: no eval policy"; exit 1; }
       LUMEN_STEP
       gate 'Run E2E under the headers' PLAYWRIGHT_BASE_URL=http://localhost:8088 <<'LUMEN_STEP'
@@ -480,6 +498,32 @@ steps:
           limit: 1
     artifact_paths:
       - "reports/ocr-cer.json"
+  - label: ":camera_with_flash: visual regression (Mac)"
+    key: "visual"
+    command: |-
+      LUMEN_CI_JOB=visual LUMEN_CI_BROWSERS=chromium bash scripts/buildkite/run.sh <<'LUMEN_JOB'
+      gate 'Baselines exist for this platform and Chromium' <<'LUMEN_STEP'
+      node scripts/visual-stamp.mjs --check
+      LUMEN_STEP
+      gate 'Visual regression (plan 10.3)' <<'LUMEN_STEP'
+      npm run test:visual
+      LUMEN_STEP
+      gates_done
+      LUMEN_JOB
+    agents:
+      queue: "mac"
+    timeout_in_minutes: 30
+    notify:
+      - github_commit_status:
+          context: "lumen/buildkite: visual"
+    retry:
+      automatic:
+        - exit_status: -1
+          limit: 2
+        - exit_status: 255
+          limit: 1
+    artifact_paths:
+      - "visual-results/**/*"
   - label: ":lighthouse: Lighthouse CI"
     key: "lighthouse"
     command: |-
@@ -488,7 +532,8 @@ steps:
       npm run build
       LUMEN_STEP
       gate 'Lighthouse CI' LHCI_GITHUB_APP_TOKEN='' <<'LUMEN_STEP'
-      npx -y @lhci/cli@0.13.x autorun --config=./lighthouserc.json
+      npx -y @lhci/cli@0.16.1 autorun --config=./lighthouserc.json
+      npx -y @lhci/cli@0.16.1 autorun --config=./lighthouserc.mobile.json
       LUMEN_STEP
       gates_done
       LUMEN_JOB
@@ -504,7 +549,304 @@ steps:
           limit: 2
         - exit_status: 255
           limit: 1
-    if: "build.branch == \"main\" || build.pull_request.labels includes \"lighthouse\""
+    artifact_paths:
+      - "reports/lh/**/*"
+  - label: ":mag: pr:check"
+    key: "pr-check"
+    command: |-
+      lumen_code=0
+      LUMEN_CI_JOB=pr-check bash scripts/buildkite/run.sh <<'LUMEN_JOB' || lumen_code=$$?
+      gate 'pr:check on the pull request' <<'LUMEN_STEP'
+      if [ "$${BUILDKITE_PULL_REQUEST:-false}" = "false" ]; then echo "pr:check: not a pull-request build; it runs on every PR build"; exit 0; fi
+      base="$${BUILDKITE_PULL_REQUEST_BASE_BRANCH:-main}"
+      git fetch --no-tags origin "+refs/heads/$$base:refs/remotes/origin/$$base"
+      mkdir -p ci-out
+      gh api "repos/talstilkol/lumen-md/pulls/$$BUILDKITE_PULL_REQUEST" --jq .body > ci-out/pr-body.md
+      npm run -s pr:check -- --base "origin/$$base" --pr "$$BUILDKITE_PULL_REQUEST" --body ci-out/pr-body.md --no-size --out ci-out/pr-check.md
+      LUMEN_STEP
+      gates_done
+      LUMEN_JOB
+      node scripts/buildkite/pr-comment.mjs ci-out/pr-check.md || true
+      exit "$$lumen_code"
+    agents:
+      queue: "linux"
+    timeout_in_minutes: 20
+    notify:
+      - github_commit_status:
+          context: "lumen/buildkite: pr-check"
+    retry:
+      automatic:
+        - exit_status: -1
+          limit: 2
+        - exit_status: 255
+          limit: 1
+    artifact_paths:
+      - "ci-out/pr-check.md"
+  - label: ":shield: security scanners"
+    key: "security"
+    command: |-
+      LUMEN_CI_JOB=security LUMEN_CI_KEEP_GOING=1 bash scripts/buildkite/run.sh <<'LUMEN_JOB'
+      gate 'gitleaks (secrets in the history)' <<'LUMEN_STEP'
+      node scripts/security-scan.mjs gitleaks
+      LUMEN_STEP
+      gate 'npm audit (high and critical)' <<'LUMEN_STEP'
+      node scripts/security-scan.mjs npm-audit
+      LUMEN_STEP
+      gate 'cargo audit (with audit-lock)' <<'LUMEN_STEP'
+      node scripts/security-scan.mjs cargo-audit
+      LUMEN_STEP
+      gate 'semgrep (OSS rules, in place of CodeQL)' <<'LUMEN_STEP'
+      node scripts/security-scan.mjs semgrep
+      LUMEN_STEP
+      gates_done
+      LUMEN_JOB
+    agents:
+      queue: "linux"
+    timeout_in_minutes: 25
+    notify:
+      - github_commit_status:
+          context: "lumen/buildkite: security"
+    retry:
+      automatic:
+        - exit_status: -1
+          limit: 2
+        - exit_status: 255
+          limit: 1
+    artifact_paths:
+      - "reports/security/*.json"
+  - label: ":crescent_moon: supply chain (nightly)"
+    key: "security-nightly"
+    command: |-
+      LUMEN_CI_JOB=security-nightly LUMEN_CI_KEEP_GOING=1 bash scripts/buildkite/run.sh <<'LUMEN_JOB'
+      gate 'osv-scanner (every lockfile)' <<'LUMEN_STEP'
+      node scripts/security-scan.mjs osv
+      LUMEN_STEP
+      gate 'cargo deny (advisories, bans)' <<'LUMEN_STEP'
+      node scripts/security-scan.mjs cargo-deny
+      LUMEN_STEP
+      gate 'OpenSSF Scorecard' <<'LUMEN_STEP'
+      node scripts/security-scan.mjs scorecard
+      LUMEN_STEP
+      gate 'CycloneDX SBOM' <<'LUMEN_STEP'
+      node scripts/security-scan.mjs sbom
+      LUMEN_STEP
+      gates_done
+      LUMEN_JOB
+    agents:
+      queue: "linux"
+    timeout_in_minutes: 40
+    notify:
+      - github_commit_status:
+          context: "lumen/buildkite: security-nightly"
+    retry:
+      automatic:
+        - exit_status: -1
+          limit: 2
+        - exit_status: 255
+          limit: 1
+    artifact_paths:
+      - "reports/security/*.json"
+    if: "build.source == \"schedule\""
+  - label: ":camera_with_flash: Percy (30 screens, Chrome / Firefox / Safari)"
+    key: "percy"
+    command: |-
+      LUMEN_CI_JOB=percy LUMEN_CI_BROWSERS=chromium bash scripts/buildkite/run.sh <<'LUMEN_JOB'
+      gate 'Percy snapshots of the 30 screens' <<'LUMEN_STEP'
+      case ",$${BUILDKITE_PULL_REQUEST_LABELS:-}," in *,percy,*) ;; *) if [ "$${BUILDKITE_BRANCH:-}" != "main" ]; then echo "percy: runs on main and on PRs labelled percy"; exit 0; fi ;; esac
+      npm run -s visual:percy
+      LUMEN_STEP
+      gates_done
+      LUMEN_JOB
+    agents:
+      queue: "linux"
+    timeout_in_minutes: 40
+    notify:
+      - github_commit_status:
+          context: "lumen/buildkite: percy"
+    retry:
+      automatic:
+        - exit_status: -1
+          limit: 2
+        - exit_status: 255
+          limit: 1
+  - label: ":playwright: e2e chromium, shard %n of 4"
+    key: "e2e-shards"
+    parallelism: 4
+    command: |-
+      LUMEN_CI_JOB=e2e-shards LUMEN_CI_BROWSERS=chromium bash scripts/buildkite/run.sh <<'LUMEN_JOB'
+      gate 'Build the production bundle with the e2e surface (VITE_E2E=1)' VITE_E2E=1 <<'LUMEN_STEP'
+      npm run build
+      LUMEN_STEP
+      gate 'E2E shard (the whole chromium project, under 10 min)' <<'LUMEN_STEP'
+      node scripts/e2e-gate.mjs --full
+      LUMEN_STEP
+      gates_done
+      LUMEN_JOB
+    agents:
+      queue: "linux"
+    artifact_paths:
+      - "ci-out/e2e-shard-*.json"
+    timeout_in_minutes: 35
+    notify:
+      - github_commit_status:
+          context: "lumen/buildkite: e2e-shards"
+    retry:
+      automatic:
+        - exit_status: -1
+          limit: 2
+        - exit_status: 255
+          limit: 1
+  - label: ":lock_with_ink_pen: e2e report for this hash"
+    key: "e2e-receipt"
+    depends_on:
+      - step: "e2e-shards"
+        allow_failure: true
+    command: |-
+      buildkite-agent artifact download 'ci-out/e2e-shard-*.json' . || true
+      node scripts/e2e-gate.mjs merge --total 4 --dir ci-out
+    agents:
+      queue: "linux"
+    artifact_paths:
+      - "reports/e2e-*.json"
+    timeout_in_minutes: 5
+    notify:
+      - github_commit_status:
+          context: "lumen/buildkite: e2e-receipt"
+    retry:
+      automatic:
+        - exit_status: -1
+          limit: 2
+        - exit_status: 255
+          limit: 1
+  - label: ":robot_face: real tiny model (qwen3:0.6b)"
+    key: "real-model-pr"
+    command: |-
+      set -euo pipefail
+      pins() { node scripts/real-model-pins.mjs "$$@"; }
+      pins check --model qwen3:0.6b --image ollama/ollama
+      NET="lumen-rm-$${BUILDKITE_JOB_ID:-local}"
+      STORE="$$(pins cache-dir qwen3:0.6b "$${LUMEN_CI_CACHE:-$$HOME/.cache/lumen-ci}")"
+      mkdir -p "$$STORE"
+      docker network create "$$NET" > /dev/null
+      trap 'docker rm -f "$$NET-ollama" "$$NET-lt" "$$NET-sx" > /dev/null 2>&1 || true; docker network rm "$$NET" > /dev/null 2>&1 || true' EXIT
+      docker run -d --rm --name "$$NET-ollama" --network "$$NET" --network-alias ollama -v "$$STORE:/root/.ollama" "$$(pins image ollama/ollama)" > /dev/null
+      export LUMEN_CI_DOCKER_NET="$$NET"
+      LUMEN_CI_JOB=real-model-pr bash scripts/buildkite/run.sh <<'LUMEN_JOB'
+      gate 'Every agent against the real model, at the pinned digest' LUMEN_REAL_MODEL_REQUIRED=1 LUMEN_REAL_OLLAMA_URL=http://ollama:11434 <<'LUMEN_STEP'
+      npm run -s ci:real-model -- --model qwen3:0.6b --digest "$$(node scripts/real-model-pins.mjs digest qwen3:0.6b)"
+      LUMEN_STEP
+      gates_done
+      LUMEN_JOB
+    agents:
+      queue: "linux"
+    timeout_in_minutes: 30
+    notify:
+      - github_commit_status:
+          context: "lumen/buildkite: real-model-pr"
+    retry:
+      automatic:
+        - exit_status: -1
+          limit: 2
+        - exit_status: 255
+          limit: 1
+    artifact_paths:
+      - "eval/results/real-*"
+    if_changed: "src/agents/**"
+  - label: ":crescent_moon: real model, multi-step (qwen3:1.7b) + LanguageTool, SearXNG"
+    key: "real-model-nightly"
+    command: |-
+      set -euo pipefail
+      pins() { node scripts/real-model-pins.mjs "$$@"; }
+      pins check --model qwen3:1.7b --image ollama/ollama --image erikvl87/languagetool --image searxng/searxng
+      NET="lumen-rm-$${BUILDKITE_JOB_ID:-local}"
+      STORE="$$(pins cache-dir qwen3:1.7b "$${LUMEN_CI_CACHE:-$$HOME/.cache/lumen-ci}")"
+      mkdir -p "$$STORE"
+      docker network create "$$NET" > /dev/null
+      trap 'docker rm -f "$$NET-ollama" "$$NET-lt" "$$NET-sx" > /dev/null 2>&1 || true; docker network rm "$$NET" > /dev/null 2>&1 || true' EXIT
+      docker run -d --rm --name "$$NET-ollama" --network "$$NET" --network-alias ollama -v "$$STORE:/root/.ollama" "$$(pins image ollama/ollama)" > /dev/null
+      docker run -d --rm --name "$$NET-lt" --network "$$NET" --network-alias languagetool -e Java_Xms=512m -e Java_Xmx=1g "$$(pins image erikvl87/languagetool)" > /dev/null
+      docker run -d --rm --name "$$NET-sx" --network "$$NET" --network-alias searxng -v "$$PWD/docker/searxng/settings.yml:/etc/searxng/settings.yml:ro" "$$(pins image searxng/searxng)" > /dev/null
+      export LUMEN_CI_DOCKER_NET="$$NET"
+      LUMEN_CI_JOB=real-model-nightly bash scripts/buildkite/run.sh <<'LUMEN_JOB'
+      gate 'Every agent against the real model, at the pinned digest' LUMEN_REAL_MODEL_REQUIRED=1 LUMEN_REAL_OLLAMA_URL=http://ollama:11434 <<'LUMEN_STEP'
+      npm run -s ci:real-model -- --model qwen3:1.7b --digest "$$(node scripts/real-model-pins.mjs digest qwen3:1.7b)"
+      LUMEN_STEP
+      gate 'LanguageTool and SearXNG for real' LUMEN_REAL_LANGUAGETOOL_URL=http://languagetool:8010/v2/check LUMEN_REAL_SEARXNG_URL=http://searxng:8080 <<'LUMEN_STEP'
+      for i in $$(seq 1 60); do curl -sf http://languagetool:8010/v2/languages > /dev/null && break; sleep 2; done
+      npx vitest run --config vitest.eval.config.ts --reporter dot src/agents/eval/services.eval.ts
+      LUMEN_STEP
+      gates_done
+      LUMEN_JOB
+    agents:
+      queue: "linux"
+    timeout_in_minutes: 45
+    notify:
+      - github_commit_status:
+          context: "lumen/buildkite: real-model-nightly"
+    retry:
+      automatic:
+        - exit_status: -1
+          limit: 2
+        - exit_status: 255
+          limit: 1
+    artifact_paths:
+      - "eval/results/real-*"
+    if: "build.source == \"schedule\""
+  - label: ":crescent_moon: Hebrew smoke (DictaLM 3.0 1.7B)"
+    key: "real-model-hebrew"
+    command: |-
+      set -euo pipefail
+      pins() { node scripts/real-model-pins.mjs "$$@"; }
+      pins check --model hf.co/dicta-il/DictaLM-3.0-1.7B-Thinking-GGUF --image ollama/ollama
+      NET="lumen-rm-$${BUILDKITE_JOB_ID:-local}"
+      STORE="$$(pins cache-dir hf.co/dicta-il/DictaLM-3.0-1.7B-Thinking-GGUF "$${LUMEN_CI_CACHE:-$$HOME/.cache/lumen-ci}")"
+      mkdir -p "$$STORE"
+      docker network create "$$NET" > /dev/null
+      trap 'docker rm -f "$$NET-ollama" "$$NET-lt" "$$NET-sx" > /dev/null 2>&1 || true; docker network rm "$$NET" > /dev/null 2>&1 || true' EXIT
+      docker run -d --rm --name "$$NET-ollama" --network "$$NET" --network-alias ollama -v "$$STORE:/root/.ollama" "$$(pins image ollama/ollama)" > /dev/null
+      export LUMEN_CI_DOCKER_NET="$$NET"
+      LUMEN_CI_JOB=real-model-hebrew bash scripts/buildkite/run.sh <<'LUMEN_JOB'
+      gate 'Hebrew smoke test, at the pinned digest' LUMEN_REAL_MODEL_REQUIRED=1 LUMEN_REAL_OLLAMA_URL=http://ollama:11434 <<'LUMEN_STEP'
+      npm run -s ci:real-model -- --hebrew-smoke --model hf.co/dicta-il/DictaLM-3.0-1.7B-Thinking-GGUF --digest "$$(node scripts/real-model-pins.mjs digest hf.co/dicta-il/DictaLM-3.0-1.7B-Thinking-GGUF)"
+      LUMEN_STEP
+      gates_done
+      LUMEN_JOB
+    agents:
+      queue: "linux"
+    timeout_in_minutes: 45
+    notify:
+      - github_commit_status:
+          context: "lumen/buildkite: real-model-hebrew"
+    retry:
+      automatic:
+        - exit_status: -1
+          limit: 2
+        - exit_status: 255
+          limit: 1
+    artifact_paths:
+      - "eval/results/real-*"
+    if: "build.source == \"schedule\""
+  - label: ":wastebasket: knip: unused exports and dependencies"
+    key: "deadcode"
+    command: |-
+      LUMEN_CI_JOB=deadcode bash scripts/buildkite/run.sh <<'LUMEN_JOB'
+      gate 'knip: no new unused export or dependency (plan 0.16)' <<'LUMEN_STEP'
+      node scripts/knip-gate.mjs
+      LUMEN_STEP
+      gates_done
+      LUMEN_JOB
+    agents:
+      queue: "linux"
+    timeout_in_minutes: 15
+    notify:
+      - github_commit_status:
+          context: "lumen/buildkite: deadcode"
+    retry:
+      automatic:
+        - exit_status: -1
+          limit: 2
+        - exit_status: 255
+          limit: 1
   - label: ":lock_with_ink_pen: signed receipt"
     key: "receipt"
     depends_on:
@@ -534,11 +876,31 @@ steps:
         allow_failure: true
       - step: "ocr-cer"
         allow_failure: true
+      - step: "visual"
+        allow_failure: true
       - step: "lighthouse"
+        allow_failure: true
+      - step: "pr-check"
+        allow_failure: true
+      - step: "security"
+        allow_failure: true
+      - step: "percy"
+        allow_failure: true
+      - step: "e2e-shards"
+        allow_failure: true
+      - step: "e2e-receipt"
+        allow_failure: true
+      - step: "real-model-pr"
+        allow_failure: true
+      - step: "real-model-nightly"
+        allow_failure: true
+      - step: "real-model-hebrew"
+        allow_failure: true
+      - step: "deadcode"
         allow_failure: true
     command: |-
       buildkite-agent artifact download 'ci-out/vitest-summary.json' . || true
-      node scripts/buildkite/receipt.mjs --gates vitest,vitest-merge,static,lint,licenses,build,e2e-chromium,e2e-firefox,e2e-webkit,e2e-prod,e2e-headers,local-ai,ocr-cer,lighthouse
+      node scripts/buildkite/receipt.mjs --gates vitest,vitest-merge,static,lint,licenses,build,e2e-chromium,e2e-firefox,e2e-webkit,e2e-prod,e2e-headers,local-ai,ocr-cer,visual,lighthouse,pr-check,security,percy,e2e-shards,e2e-receipt,real-model-pr,real-model-nightly,real-model-hebrew,deadcode
     agents:
       queue: "linux"
     artifact_paths:

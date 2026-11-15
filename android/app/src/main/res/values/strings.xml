@@ -17,4 +17,14 @@
     <string name="shortcut_search_long">Search your notes</string>
     <string name="shortcut_daily_short">Today</string>
     <string name="shortcut_daily_long">Open today\'s note</string>
+    <!-- Plans W11.P8 / W11.P10: the share sheet, the capture box and the Quick Settings tile -->
+    <string name="share_saved">Saved to your Lumen inbox</string>
+    <string name="share_failed">Some items could not be saved</string>
+    <string name="share_nothing">Nothing here Lumen can save</string>
+    <string name="capture_hint">A line for your inbox</string>
+    <string name="capture_save">Save</string>
+    <string name="capture_cancel">Cancel</string>
+    <string name="capture_saved">Saved to your inbox</string>
+    <string name="capture_failed">Could not save. The text is still here.</string>
+    <string name="tile_capture">Capture</string>
 </resources>

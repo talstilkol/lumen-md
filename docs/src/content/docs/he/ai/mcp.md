@@ -84,6 +84,22 @@ npx -p @lumen-md/mcp-server lumen mcp enable claude-code --vault "$HOME/Document
 `npx -y @lumen-md/mcp-server --client cursor` (או `vscode`, `zed`) עם
 `LUMEN_VAULT` ב-`env`.
 
+## מה לקוח יכול לראות
+
+ב-`.lumen/mcp.json` אפשר להגביל, לכל הלקוחות (`scope`) או ללקוח אחד (`clients.<id>.scope`), אילו פתקים כלי ה-MCP רואים בכלל:
+
+```json
+{ "scope": { "deny": { "folders": ["journal"], "tags": ["private"] } },
+  "clients": { "cursor": { "enabled": true, "scopes": ["search", "read"],
+                           "scope": { "allow": { "folders": ["work"] } } } } }
+```
+
+- **איך פתק נבדק.** פתק גלוי כשלא הוגדרה רשימת היתר, או כשהוא מתאים לאחת מהן (תיקייה או תגית), ובתנאי שהוא לא מתאים לאף רשומת חסימה. חסימה תמיד גוברת. הפתק צריך לעבור גם את הכללים של הכספת וגם את הכללים של הלקוח.
+- **תגיות.** התגיות הן ה-`tags` שב-frontmatter ותגיות `#` בתוך הטקסט, מחוץ לקוד. ‏`private` חלה גם על `private/health`.
+- **איפה זה חל.** הכללים חלים על כל כלי: חיפוש, קריאה, רשימה, תגיות, קישורים חוזרים ו-Bases. הם חלים גם על כל שינוי מוצע, כך שלקוח לא יכול לכתוב לתוך פתק מוסתר, או לתייג פתק כדי להסתיר אותו.
+- **פתקים מוסתרים.** פתק מוסתר עונה בדיוק כמו פתק שלא קיים, והסירוב נרשם ביומן.
+- **ציטוטים.** לכל תשובה מפתק יש עוגן: `[[note#Heading]]`, או `[[note#L12]]` לפני הכותרת הראשונה. העוגן מופיע כעמודה רביעית בתוצאות החיפוש, וכ-`_meta["io.lumen/anchors"]` ב-read_note, ‏search_notes ו-get_backlinks. הטקסט של הפתק לא משתנה אף פעם.
+
 ## אישור שינויים
 
 `create_note` / `append_note` / `write_note` / `update_frontmatter` של לקוח
@@ -135,6 +151,17 @@ npx -p @lumen-md/mcp-server lumen mcp enable claude-code --vault "$HOME/Document
 3. בקש ממנו *ליצור פתק*: הלקוח אומר שהוא מחכה לאישור, וההצעה נמצאת במסך
    האישור של Lumen. אשר אותה; הפתק מופיע, ו-`lumen mcp log` מראה `proposed`
    ואחר כך `approved`.
+
+## Streamable HTTP
+
+‏`lumen mcp serve --http [port]` מגיש את אותם כלים ב-Streamable HTTP. הוא מאזין רק ב-`127.0.0.1`, בנתיב `/mcp`, ובפורט ברירת המחדל 3917. הוא פועל לפי MCP 2026-07-28:
+
+- **כותרות הבקשה.** כל בקשה חייבת לשאת את `MCP-Protocol-Version` ואת `Mcp-Method`, ובקשת `tools/call` גם את `Mcp-Name`. כל אחת מהן חייבת להתאים לגוף הבקשה. כותרת חסרה או כזו שלא מתאימה נדחית עם 400 ו-`HeaderMismatch` ‏(-32020). ערך Base64 בצורה `=?base64?…?=` מפוענח קודם.
+- **התראות על שינויים.** ‏`subscriptions/listen` פותח את הזרם, במקום זרם ה-GET הישן. הוא שולח קודם אישור, ואחר כך `notifications/tools/list_changed` כשאתה מפעיל או מכבה לקוח, או משנה את ההרשאות שלו. ‏GET ו-DELETE עונים 405.
+- **מקור (Origin).** מקור דפדפן שאינו מקומי (loopback) מקבל 403.
+- **לקוחות ישנים.** לקוח שמתחיל ב-`initialize` (‏2025-11-25 ומוקדם יותר) עדיין עובד.
+
+גם ב-stdio ‏`subscriptions/listen` עובד, וההודעות שלו נושאות את מזהה המינוי.
 
 ## Bases
 

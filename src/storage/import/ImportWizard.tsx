@@ -14,13 +14,22 @@ import type { ImportReport, ImportSourceId } from "./types";
 import { toast } from "../../store/useToastStore";
 import { HelpButton } from "../../ui/HelpButton";
 import { explainError } from "../../lib/userError";
+import { Modal } from "../../ui/Modal";
+import { oneNoteConfig } from "./onenoteGraph";
+import { prepareOneNoteGraphImport, startOneNoteSignIn, takeOneNoteHandoff } from "./onenoteSignIn";
+import { markActivation } from "../../metrics/count";
+import { runSampleSearch, sampleSearchQuery } from "../../onboarding/importFirst";
 
 interface Props {
   open: boolean;
   onClose: () => void;
+  /** W11.P6: start on this source (the first run's "Bring your notes"). */
+  initialSource?: ImportSourceId;
+  /** W11.P6: opened from the first run (the done step says so). */
+  firstRun?: boolean;
 }
 
-type Step = { kind: "source" } | { kind: "busy"; text: string } | { kind: "review"; prep: PreparedImport; picked: Map<string, Uint8Array> } | { kind: "done"; report: ImportReport; undo: UndoRecord };
+type Step = { kind: "source" } | { kind: "busy"; text: string } | { kind: "review"; prep: PreparedImport; picked: Map<string, Uint8Array> } | { kind: "done"; report: ImportReport; undo: UndoRecord; query: string | null };
 
 const btn: React.CSSProperties = { padding: "6px 12px", fontSize: 13, borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer" };
 const primary: React.CSSProperties = { ...btn, background: "hsl(var(--accent))", color: "hsl(var(--accent-fg))", borderColor: "transparent" };
@@ -44,25 +53,15 @@ function Issues<T>({ title, items, line, testId }: { title: string; items: T[]; 
   );
 }
 
-export function ImportWizard({ open, onClose }: Props) {
-  const [source, setSource] = useState<ImportSourceId>("obsidian");
+export function ImportWizard({ open, onClose, initialSource, firstRun = false }: Props) {
+  const [source, setSource] = useState<ImportSourceId>(initialSource ?? "obsidian");
   const [step, setStep] = useState<Step>({ kind: "source" });
   const [error, setError] = useState<string | null>(null);
   const [savedReport, setSavedReport] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
   const folderRef = useRef<HTMLInputElement | null>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && step.kind !== "busy") {
-        e.stopPropagation();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose, step.kind]);
+  // Plan W10.E49: offered only when the deployment has a Microsoft app registration.
+  const oneNote = oneNoteConfig();
 
   const prepare = useCallback(async (picked: Map<string, Uint8Array>, name: string, as: ImportSourceId) => {
     setError(null);
@@ -81,6 +80,42 @@ export function ImportWizard({ open, onClose }: Props) {
     }
   }, []);
 
+  // Back from Microsoft's sign-in (`/oauth/onenote`): read the account's OneNote, then review.
+  useEffect(() => {
+    if (!open) return;
+    const handoff = takeOneNoteHandoff();
+    if (!handoff) return;
+    setSource("onenote");
+    const cfg = oneNoteConfig();
+    if ("error" in handoff || !cfg) {
+      setError(t("importWizard.onenote.failed", { error: "error" in handoff ? handoff.error : "VITE_ONENOTE_CLIENT_ID" }));
+      return;
+    }
+    setError(null);
+    setStep({ kind: "busy", text: t("importWizard.onenote.reading") });
+    prepareOneNoteGraphImport(cfg, handoff.tokens, { onProgress: (done, total) => setStep({ kind: "busy", text: t("importWizard.onenote.pages", { done, total }) }) })
+      .then((prep) => {
+        if (!prep.vault.notes.size && !prep.vault.attachments.size) {
+          setError(t("importWizard.error.nothing", { source: SOURCE_NAMES.onenote }));
+          setStep({ kind: "source" });
+        } else setStep({ kind: "review", prep, picked: new Map() });
+      })
+      .catch((e: unknown) => {
+        setError(t("importWizard.onenote.failed", { error: explainError(e) }));
+        setStep({ kind: "source" });
+      });
+  }, [open]);
+
+  const signInOneNote = async () => {
+    if (!oneNote) return;
+    setError(null);
+    try {
+      await startOneNoteSignIn(oneNote);
+    } catch (e) {
+      setError(t("importWizard.onenote.failed", { error: explainError(e) }));
+    }
+  };
+
   const onPicked = useCallback(
     async (list: FileList | null) => {
       if (!list?.length) return;
@@ -95,8 +130,10 @@ export function ImportWizard({ open, onClose }: Props) {
     try {
       const { report, undo } = await commitImport(prep);
       window.dispatchEvent(new Event("lumen-workspace-changed"));
+      markActivation("import.complete", report.notes); // W11.P4, local only
       setSavedReport(null);
-      setStep({ kind: "done", report, undo });
+      // W11.P6: a search over the notes just imported, to find them at once.
+      setStep({ kind: "done", report, undo, query: report.notes ? sampleSearchQuery(prep.vault.notes) : null });
     } catch (e) {
       setError(t("importWizard.error.failed", { error: explainError(e) }));
       setStep({ kind: "review", prep, picked });
@@ -180,6 +217,14 @@ export function ImportWizard({ open, onClose }: Props) {
                 onChange={(e) => void onPicked(e.currentTarget.files)}
               />
             </div>
+            {source === "onenote" && oneNote && (
+              <div data-testid="import-onenote-graph" style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                <button type="button" style={btn} data-testid="import-onenote-signin" onClick={() => void signInOneNote()}>
+                  {t("importWizard.onenote.signIn")}
+                </button>
+                <span style={muted}>{t("importWizard.onenote.signInNote")}</span>
+              </div>
+            )}
           </>
         );
       case "review": {
@@ -224,7 +269,7 @@ export function ImportWizard({ open, onClose }: Props) {
         );
       }
       case "done": {
-        const { report, undo: u } = step;
+        const { report, undo: u, query } = step;
         return (
           <>
             <p data-testid="import-done" style={{ margin: 0, fontSize: 14, fontWeight: 600 }} dir="auto">
@@ -240,6 +285,24 @@ export function ImportWizard({ open, onClose }: Props) {
               </p>
             )}
             <p style={muted}>{t("importWizard.done.dates")}</p>
+            {query && (
+              <div data-testid="import-sample-search" style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                <span style={{ fontSize: 13 }} dir="auto">
+                  {t(firstRun ? "importWizard.search.firstRun" : "importWizard.search.hint")}
+                </span>
+                <button
+                  type="button"
+                  style={primary}
+                  data-testid="import-search"
+                  onClick={() => {
+                    onClose();
+                    runSampleSearch(query);
+                  }}
+                >
+                  <bdi>{t("importWizard.search.button", { query })}</bdi>
+                </button>
+              </div>
+            )}
             <Issues testId="import-skipped" title={t("importWizard.review.skipped", { n: report.skipped.length })} items={report.skipped} line={(i) => `${i.path} — ${skipText(i)}`} />
             <Issues testId="import-warnings" title={t("importWizard.review.warnings", { n: report.warnings.length })} items={report.warnings} line={(i) => `${i.path} — ${warningText(i)}`} />
             <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", flexWrap: "wrap" }}>
@@ -260,7 +323,7 @@ export function ImportWizard({ open, onClose }: Props) {
   };
 
   return (
-    <div className="cmd-palette-backdrop" onClick={() => step.kind !== "busy" && onClose()} role="dialog" aria-modal="true" aria-label={t("importWizard.title")} data-testid="import-wizard">
+    <Modal onClose={step.kind !== "busy" ? onClose : undefined} className="cmd-palette-backdrop" onClick={() => step.kind !== "busy" && onClose()} aria-label={t("importWizard.title")} data-testid="import-wizard">
       <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 620, padding: 0, display: "flex", flexDirection: "column", maxHeight: "85vh" }}>
         <header style={{ padding: "12px 16px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <Download size={16} />
@@ -279,6 +342,6 @@ export function ImportWizard({ open, onClose }: Props) {
           {body()}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

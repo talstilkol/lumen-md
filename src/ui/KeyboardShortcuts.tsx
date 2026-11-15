@@ -1,5 +1,4 @@
 import { useMemo, useRef } from "react";
-import { useFocusTrap } from "./useFocusTrap";
 import { getLocale, t } from "../i18n";
 import { detectIsMac } from "../lib/detectIsMac";
 import { activeLayout, hebrewOnKey } from "../lib/keyboardLayout";
@@ -17,12 +16,12 @@ export function withLayout(keys: string, layout: "he" | "latin" = activeLayout(g
   return he ? `${keys} (${he})` : keys;
 }
 import { HelpButton } from "./HelpButton";
+import { Modal } from "./Modal";
 
 interface Props {
   open: boolean;
   onClose: () => void;
 }
-
 
 function buildSections(mod: string) {
   return [
@@ -48,6 +47,7 @@ function buildSections(mod: string) {
         { keys: `${mod}+A`, label: () => "Select All" },
         { keys: `${mod}+F`, label: () => t("cmd.search") },
         { keys: mod === "⌘" ? "⇧⌥F" : "Shift+Alt+F", label: () => t("cmd.edit.formatDocument") },
+        { keys: `${mod}+Shift+X`, label: () => t("cmd.edit.toggleDirection") },
       ],
     },
     {
@@ -81,19 +81,13 @@ export function KeyboardShortcuts({ open, onClose }: Props) {
     [],
   );
 
-  // Focus stays in the dialog while it is open and returns on close; Escape closes it (plan 10.1).
-  const trapRef = useRef<HTMLDivElement | null>(null);
-  useFocusTrap(trapRef, { active: open, onEscape: onClose });
-
   if (!open) return null;
 
   return (
-    <div
+    <Modal
+      onClose={onClose}
       className="cmd-palette-backdrop"
       onClick={onClose}
-      ref={trapRef}
-      role="dialog"
-      aria-modal="true"
       aria-label={t("toolbar.shortcuts")}
     >
       <div
@@ -193,6 +187,6 @@ export function KeyboardShortcuts({ open, onClose }: Props) {
           ))}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

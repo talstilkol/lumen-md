@@ -55,6 +55,7 @@ export function shouldRetryError(err: unknown): boolean {
   return message.includes("network") || message.includes("failed to fetch") || message.includes("econn") || message.includes("timeout");
 }
 
+// privacy-ledger: the wrapper's definition, not a request: each caller carries its own note
 export async function fetchWithRetry(
   input: RequestInfo | URL,
   init: RequestInit,
@@ -92,6 +93,7 @@ export async function fetchWithRetry(
         ...init,
         ...(requestSignal ? { signal: requestSignal } : {}),
       };
+      // privacy-ledger: window.fetch, the ledger's wrapped one: every caller of fetchWithRetry carries its own note
       const response = await fetch(input, mergedInit);
       timeoutSignalRef.current?.cleanup();
       if (response.ok) {

@@ -6,6 +6,7 @@ import { laneCacheDir } from "./src/build/laneCache";
 import { webrManifestPlugin } from "./src/build/webrManifest";
 import { LOCALES, whatsNew } from "./scripts/lib/whats-new.mjs";
 import { viteEnvGatePlugin } from "./src/build/viteEnvGate";
+import { bootPreloadPlugin } from "./src/build/bootPreload";
 
 interface VitestConfig {
   test?: {
@@ -56,6 +57,11 @@ const yWebsocketInstalled = existsSync(
   path.resolve(__dirname, "node_modules/y-websocket"),
 );
 
+// Plan W1.3 (W10.E77): Temml renders math when it is installed (it comes as an
+// optional dependency); otherwise `temml` is a null stub, and KaTeX renders it
+// (src/renderer/temmlCore.ts).
+const temmlInstalled = existsSync(path.resolve(__dirname, "node_modules/temml/package.json"));
+
 /**
  * The en-US Hunspell files of dictionary-en, for the English spelling
  * checker (plan 6.10). The package's own entry reads them with node:fs and
@@ -84,6 +90,19 @@ const dictionaryEn = {
     const aff = readDictionaryEn("index.aff");
     const dic = readDictionaryEn("index.dic");
     return `export const inline = { aff: ${JSON.stringify(aff)}, dic: ${JSON.stringify(dic)} };\n`;
+  },
+};
+/**
+ * Worker builds: hast-util-from-html-isomorphic's "browser" entry parses
+ * with DOMParser, which a worker does not have; the render worker
+ * (src/renderer/render.worker.ts) runs rehype-katex, which uses it, so
+ * workers get the package's DOM-free entry (its "worker" export, parse5).
+ */
+const htmlIsomorphicInWorkers: Plugin = {
+  name: "lumen-html-isomorphic-in-workers",
+  enforce: "pre",
+  resolveId(id: string) {
+    return id === "hast-util-from-html-isomorphic" ? path.resolve(__dirname, "node_modules/hast-util-from-html-isomorphic/index.js") : null;
   },
 };
 /** Main build only (not the worker build), so each file is emitted once. */
@@ -326,7 +345,7 @@ export default defineConfig({
     __LUMEN_E2E__: JSON.stringify(process.env.VITE_E2E === "1"),
   },
   // Worker bundles get only these plugins (plus Vite's own).
-  worker: { plugins: () => [dictionaryEn] },
+  worker: { plugins: () => [dictionaryEn, htmlIsomorphicInWorkers] },
   plugins: [
     // W4.4: a VITE_* not on security/vite-env-allowlist.json fails the build.
     viteEnvGatePlugin(),
@@ -340,6 +359,8 @@ export default defineConfig({
     // Adds the deployment's own worker origins (VITE_*_ENDPOINT …) to the
     // CSP connect-src of index.html, dist/_headers and the nginx image.
     cspEndpointsPlugin(),
+    // W10.E20: the start's lazy chunks listed for public/boot.js, which preloads them in parallel.
+    bootPreloadPlugin(),
     VitePWA({
       registerType: "prompt",
       includeAssets: ["favicon.svg", "icons/*.png"],
@@ -577,6 +598,7 @@ export default defineConfig({
       // bare `npm install` (most users, all CI runs) doesn't crash on
       // the unresolved import. In test mode the test-level vi.mock
       // overrides whichever resolution wins here.
+      ...(temmlInstalled ? {} : { temml: path.resolve(__dirname, "src/__tests__/stubs/temml.ts") }),
       ...(yWebsocketInstalled
         ? {}
         : {
@@ -592,8 +614,9 @@ export default defineConfig({
     port: 5173,
     host: true,
     fs: { allow: devFsAllow },
-    // The Web Playground runner (sandboxed iframe, origin "null") loads its
-    // module scripts with CORS; allow it and local pages, nothing else.
+    // The runner pages (sandboxed iframes, origin "null") load their script
+    // (public/runners/, with an integrity hash) with CORS; allow them and
+    // local pages, nothing else.
     cors: { origin: playgroundCorsOrigin },
   },
   // y-websocket is an optional peer-dep (see src/collab/yjs.ts). The
@@ -620,7 +643,7 @@ export default defineConfig({
     // 0.5). Scanning the worker files too finds those deps before the first
     // page loads. Setting `entries` replaces the default (the HTML inputs),
     // so they are listed here as well.
-    entries: ["index.html", "playground-runner.html", "livejs-runner.html", "src/**/*.worker.ts"],
+    entries: ["index.html", "src/**/*.worker.ts"],
   },
   // ε.4.3 — clean-URL aliases for the auxiliary HTML pages so dev links
   // like `/roadmap` and `/landing` work without the `.html` suffix.
@@ -630,10 +653,6 @@ export default defineConfig({
     port: 5173,
     cors: { origin: playgroundCorsOrigin },
   },
-  // The live-js runner's CSP allows its scripts by this nonce (WebKit doesn't match
-  // 'self' inside an opaque-origin sandboxed frame). Vite stamps it on every script
-  // and modulepreload tag it writes; other pages' policies simply ignore it.
-  html: { cspNonce: "lumen-livejs-runner" },
   build: {
     target: "es2022",
     // No source maps in what ships (plan 11.5, F7): they publish the whole
@@ -656,10 +675,9 @@ export default defineConfig({
         landing: path.resolve(__dirname, "public/landing.html"),
         roadmap: path.resolve(__dirname, "public/roadmap.html"),
         benchmarks: path.resolve(__dirname, "public/benchmarks.html"),
-        // Web Playground runner: the page inside the block's sandboxed iframe.
-        playground: path.resolve(__dirname, "playground-runner.html"),
-        // live-js runner: the hidden sandboxed iframe live-js code runs in (T48).
-        livejs: path.resolve(__dirname, "livejs-runner.html"),
+        // The two runner pages (playground, live-js) are not Vite inputs: they are
+        // static files in public/ with a prebuilt script whose sha256 their CSP
+        // pins (scripts/build-runners.mjs, plan W10.D1).
       },
       // `y-websocket` is an OPTIONAL runtime dep (see comments in
       // src/collab/yjs.ts). It's not in package.json — users opt in by
@@ -713,7 +731,8 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     // The VS Code extension's pure helpers are tested from the root suite too.
-    include: ["src/__tests__/**/*.test.{ts,tsx}", "packages/vscode-lumen/test/**/*.test.ts"],
+    // W10.D6: the crypto attack tests (security/attacks) are part of the suite.
+    include: ["src/__tests__/**/*.test.{ts,tsx}", "packages/vscode-lumen/test/**/*.test.ts", "security/attacks/**/*.test.ts"],
     globals: true,
     css: false,
     setupFiles: ["src/__tests__/setup.ts"],

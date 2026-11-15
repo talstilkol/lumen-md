@@ -2,8 +2,7 @@
  * Trash panel (T46): what was deleted in the last 30 days, with Restore
  * and Delete forever.
  */
-import { useCallback, useEffect, useState, useRef } from "react";
-import { useFocusTrap } from "./useFocusTrap";
+import { useCallback, useEffect, useState } from "react";
 import { Trash2, X } from "lucide-react";
 import { t, getLocale } from "../i18n";
 import { emptyTrash, listTrash, restoreFromTrashIfPresent, TRASH_KEEP_MS, type TrashItem } from "../storage/trash";
@@ -13,6 +12,9 @@ import { EmptyState } from "./EmptyState";
 import { uiConfirm } from "./PromptDialog";
 import { HelpButton } from "./HelpButton";
 import "./trashPanelStrings";
+import { Modal } from "./Modal";
+import "../storage/attachmentCleanupStrings";
+import { attachmentPolicy, setAttachmentPolicy, type AttachmentPolicy } from "../storage/attachmentPolicy";
 
 interface Props {
   open: boolean;
@@ -24,6 +26,7 @@ const btn: React.CSSProperties = { padding: "4px 10px", fontSize: 12, borderRadi
 export function TrashPanel({ open, onClose }: Props) {
   const [items, setItems] = useState<TrashItem[] | null>(null);
   const reload = useCallback(async () => setItems(await listTrash()), []);
+  const [policy, setPolicy] = useState<AttachmentPolicy>(attachmentPolicy);
 
   useEffect(() => {
     if (open) void reload();
@@ -37,10 +40,6 @@ export function TrashPanel({ open, onClose }: Props) {
       if (c.kind === "structure") void reload();
     }, { debounceMs: 100 });
   }, [open, reload]);
-
-  // Focus stays in the dialog while it is open and returns on close; Escape closes it (plan 10.1).
-  const trapRef = useRef<HTMLDivElement | null>(null);
-  useFocusTrap(trapRef, { active: open, onEscape: onClose });
 
   if (!open) return null;
 
@@ -66,7 +65,7 @@ export function TrashPanel({ open, onClose }: Props) {
   const daysLeft = (i: TrashItem) => Math.max(0, Math.ceil((i.trashedAt + TRASH_KEEP_MS - Date.now()) / 86_400_000));
 
   return (
-    <div className="cmd-palette-backdrop" onClick={onClose} ref={trapRef} role="dialog" aria-modal="true" aria-label={t("trash.title")}>
+    <Modal onClose={onClose} className="cmd-palette-backdrop" onClick={onClose} aria-label={t("trash.title")}>
       <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 560, padding: 0, display: "flex", flexDirection: "column", maxHeight: "80vh" }}>
         <header style={{ padding: "12px 16px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <Trash2 size={16} />
@@ -96,7 +95,24 @@ export function TrashPanel({ open, onClose }: Props) {
             </div>
           ))}
         </div>
+        <footer style={{ padding: "8px 16px", borderTop: "1px solid hsl(var(--border))", display: "flex", gap: 8, alignItems: "center", fontSize: 12 }}>
+          <label htmlFor="trash-attachment-policy" style={{ flex: 1 }}>{t("attachCleanup.setting")}</label>
+          <select
+            id="trash-attachment-policy"
+            data-testid="attachment-policy"
+            value={policy}
+            onChange={(e) => {
+              const next = e.target.value as AttachmentPolicy;
+              setAttachmentPolicy(next);
+              setPolicy(next);
+            }}
+          >
+            <option value="ask">{t("attachCleanup.setting.ask")}</option>
+            <option value="always">{t("attachCleanup.setting.always")}</option>
+            <option value="never">{t("attachCleanup.setting.never")}</option>
+          </select>
+        </footer>
       </div>
-    </div>
+    </Modal>
   );
 }

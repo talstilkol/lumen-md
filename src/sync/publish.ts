@@ -240,6 +240,7 @@ export async function publishNote(
   }
   const endpoint = publishEndpoint();
   if (!endpoint) throw new Error("Publish endpoint unavailable.");
+  // privacy-ledger: the deployment's own endpoint (VITE_PUBLISH_ENDPOINT, only when the user publishes); not AI traffic: listed in audit mode (network)
   const res = await fetchWithRetry(endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeader() },
@@ -323,6 +324,7 @@ export async function unpublishNote(slug: string): Promise<void> {
   }
   const endpoint = publishEndpoint();
   if (!endpoint) throw new Error("Publish endpoint unavailable.");
+  // privacy-ledger: the deployment's own endpoint (VITE_PUBLISH_ENDPOINT, only when the user publishes); not AI traffic: listed in audit mode (network)
   const res = await fetchWithRetry(`${endpoint}/${encodeURIComponent(slug)}`, {
     method: "DELETE",
     credentials: "include",
@@ -343,25 +345,6 @@ export function getPublishedSlug(content: string): string | null {
   if (!fm) return null;
   const m = fm[1].match(/^published\s*:\s*([\w/-]+)/m);
   return m?.[1] ?? null;
-}
-
-/** Persist a slug into the note's frontmatter (idempotent). */
-export function setPublishedSlug(content: string, slug: string | null): string {
-  const fm = content.match(/^(---\r?\n)([\s\S]*?)(\r?\n---\r?\n)/);
-  if (!fm) {
-    return slug == null ? content : `---\npublished: ${slug}\n---\n\n${content}`;
-  }
-  const block = fm[2];
-  const has = /^published\s*:/m.test(block);
-  let newBlock: string;
-  if (slug == null) {
-    newBlock = block.replace(/^published\s*:.*$/m, "").replace(/\n{2,}/g, "\n").trim();
-  } else if (has) {
-    newBlock = block.replace(/^published\s*:.*$/m, `published: ${slug}`);
-  } else {
-    newBlock = `${block.replace(/\s*$/, "")}\npublished: ${slug}`;
-  }
-  return content.replace(fm[0], `${fm[1]}${newBlock}${fm[3]}`);
 }
 
 function readPublishResult(data: unknown): PublishResult {

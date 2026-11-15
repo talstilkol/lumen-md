@@ -56,7 +56,19 @@ struct LumenWidgetView: View {
     }
 }
 
+/// The extension's widgets (plan W11.P8 adds the Lock Screen and Control Center ones, LumenControls.swift).
 @main
+struct LumenWidgetBundle: WidgetBundle {
+    @WidgetBundleBuilder
+    var body: some Widget {
+        LumenWidget()
+        LumenLockScreenCapture()
+        if #available(iOS 18.0, *) {
+            LumenCaptureControl()
+        }
+    }
+}
+
 struct LumenWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "LumenWidget", provider: LumenProvider()) { entry in

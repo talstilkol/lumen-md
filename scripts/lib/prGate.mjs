@@ -7,6 +7,7 @@
  * the commit messages, two package-lock.json objects — so the rules run the
  * same from the command line and in a test.
  */
+import { TAKEN_DOMAIN } from "./takenDomain.mjs";
 
 // ── Network calls must be registered in the privacy ledger ────────────────
 
@@ -16,6 +17,8 @@ const NETWORK_CALL = /\b(?:fetch|fetchWithRetry)\s*\(|\bnew\s+(?:WebSocket|Event
 const URL_LITERAL = /\b(?:https?|wss?):\/\/([A-Za-z0-9.-]+)(?::\d+)?/g;
 /** The annotation for a call whose URL is not a literal: says which ledger rule covers it. */
 export const LEDGER_NOTE = /privacy-ledger:\s*\S/;
+/** A line inside a block comment: it starts with `/*` or `*` (and is not `*\/ code`). */
+const BLOCK_COMMENT_LINE = /^\s*(?:\/\*|\*(?!\/))/;
 
 /** Hosts the app may reach without a ledger rule: the page's own origin and the local machine. */
 const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "0.0.0.0", "[::1]"]);
@@ -43,7 +46,11 @@ export function unregisteredNetworkCalls(added, ledgerSource) {
   for (const [file, lines] of Object.entries(added)) {
     if (!isProductionSource(file)) continue;
     for (const { line, text, before = [] } of lines) {
-      const code = text.replace(/\/\/.*$/, "");
+      // Closed `/* … */` comments go; a line still inside a block comment
+      // (JSDoc ` * …`, an unclosed `/* …`) is prose, not a call (W10.D17).
+      const open = text.replace(/\/\*.*?\*\//g, "");
+      if (BLOCK_COMMENT_LINE.test(open)) continue;
+      const code = open.replace(/\/\/.*$/, "");
       if (!NETWORK_CALL.test(code)) continue;
       const hosts = [...text.matchAll(URL_LITERAL)].map((m) => m[1].toLowerCase());
       if (hosts.length) {
@@ -105,6 +112,46 @@ export function untestedChanges(changedFiles) {
 // ── Written by an AI agent ────────────────────────────────────────────────
 
 const AI_MARK = /Co-Authored-By:\s*(?:Claude|Codex|GitHub Copilot|ChatGPT)|Generated with \[Claude Code\]|chatgpt\.com\/codex|claude\.ai\/code\/session_/i;
+/**
+ * A snapshot: what a test writes and then compares against (W6.15 step 4,
+ * W10.D20) — vitest's `__snapshots__/` (`toMatchSnapshot`, `.snap`, and the
+ * `toMatchFileSnapshot` files such as the rendered docs), and Playwright's
+ * `<spec>-snapshots/` images.
+ */
+export function isSnapshot(file) {
+  return /(?:^|\/)__snapshots__\//.test(file) || /\.snap$/.test(file) || /^e2e\/.+-snapshots\//.test(file);
+}
+
+/**
+ * Could a change to `file` change what a snapshot of `snapshot`'s kind
+ * records? For a vitest snapshot under src/: the app's source (code, styles,
+ * locale JSON), a test (they write the snapshots), an input document
+ * (Markdown: the rendered docs), the packages. For a Playwright image: its
+ * own spec, the app's source, public/, index.html, the packages.
+ */
+function produces(file, snapshot) {
+  if (isSnapshot(file)) return false;
+  if (/^package(?:-lock)?\.json$/.test(file)) return true;
+  const e2e = /^e2e\/(.+)-snapshots\//.exec(snapshot);
+  if (e2e) return file === `e2e/${e2e[1]}` || /^src\/(?!__tests__\/)/.test(file) || /^public\//.test(file) || file === "index.html" || /^vite\.config\./.test(file);
+  return /^src\//.test(file) || /\.md$/i.test(file) || /^vite\.config\./.test(file);
+}
+
+/**
+ * Snapshots the diff changes with no change in anything that produces them
+ * (W10.D20): a snapshot edited by hand, which then "passes" whatever the code
+ * does. Regenerate it with the test's update flag (`vitest -u`,
+ * `playwright test --update-snapshots`) in the same PR as the change that
+ * moved it. A deleted snapshot is not checked (a removed test takes its
+ * snapshot with it).
+ * @param {string[]} changed every changed file of the diff
+ * @param {(file: string) => boolean} [exists] whether the file is still there
+ */
+export function handEditedSnapshots(changed, exists = () => true) {
+  const snaps = changed.filter((f) => isSnapshot(f) && exists(f));
+  return snaps.filter((s) => !changed.some((f) => produces(f, s)));
+}
+
 export const AI_LABEL = "ai-written";
 
 /** Does the PR body or any commit say an AI agent wrote it? */
@@ -170,8 +217,11 @@ export function bodyProblems(body, required = REQUIRED_SECTIONS) {
 
 // ── The project's domain ──────────────────────────────────────────────────
 
-/** Added lines that name the domain the project never writes (the owner's rule): lumen + .md as a host. */
-const DOMAIN = new RegExp(`${["lumen", "md"].join("\\.")}\\b`, "i");
+/**
+ * Added lines that name the domain the project never writes (the owner's rule): lumen + .md as a host.
+ * The whole tree is checked too, by `npm run hygiene` (./takenDomain.mjs).
+ */
+const DOMAIN = TAKEN_DOMAIN;
 export function domainMentions(added) {
   const out = [];
   for (const [file, lines] of Object.entries(added)) for (const { line, text } of lines) if (DOMAIN.test(text)) out.push({ file, line, text: text.trim().slice(0, 160) });

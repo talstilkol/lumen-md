@@ -14,6 +14,7 @@ import { t } from "../i18n";
 import { createShareLink, EXPIRY_DAYS, MAX_LINK_DATA, SHARE_FILE_EXTENSION, ShareLinkError, shareOrigin, type ShareLink } from "./linkShare";
 import { HelpButton } from "../ui/HelpButton";
 import { explainError } from "../lib/userError";
+import { Modal } from "../ui/Modal";
 
 const muted: React.CSSProperties = { fontSize: 12, color: "hsl(var(--fg-muted))" };
 const field: React.CSSProperties = { padding: "6px 8px", fontSize: 13, borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--bg))", color: "inherit" };
@@ -70,11 +71,6 @@ export function ShareLinkDialog({ title, markdown, onClose }: { title: string; m
 
   useEffect(() => {
     closeRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
   const create = async () => {
@@ -93,8 +89,8 @@ export function ShareLinkDialog({ title, markdown, onClose }: { title: string; m
   const fileName = `${(title.replace(/\.[^.]+$/, "") || "note").replace(/[^\p{L}\p{N}._-]+/gu, "-")}${SHARE_FILE_EXTENSION}`;
 
   return (
-    <div className="cmd-palette-backdrop">
-      <div className="cmd-palette" role="dialog" aria-modal="true" aria-label={t("shareLink.title")} data-testid="share-link" style={{ maxWidth: 600, padding: 0, display: "flex", flexDirection: "column", maxHeight: "88vh" }}>
+    <Modal onClose={onClose} aria-label={t("shareLink.title")} className="cmd-palette-backdrop">
+      <div className="cmd-palette" data-testid="share-link" style={{ maxWidth: 600, padding: 0, display: "flex", flexDirection: "column", maxHeight: "88vh" }}>
         <header style={{ padding: "14px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <Link2 size={18} style={{ color: "hsl(var(--accent))" }} />
           <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600, flex: 1 }}>{t("shareLink.title")}</h2>
@@ -159,7 +155,7 @@ export function ShareLinkDialog({ title, markdown, onClose }: { title: string; m
           )}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

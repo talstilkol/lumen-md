@@ -195,6 +195,13 @@ export function createCollabServer(opts = {}) {
       for (const c of shared) if (c.connection === connection) shared.delete(c);
     },
     async beforeHandleMessage({ context, update, documentName, document }) {
+      // Second guard after the read-only flag: a change sent by hand on a
+      // connection that may not write ends that connection. First, so a
+      // viewer's message never reaches the E2EE check (review of train 5, H2).
+      if (context && context.writable === false && update && isDocumentWrite(update)) {
+        log(`write refused (${context.role} on ${context.kind})`);
+        throw new Error("read-only");
+      }
       // COLLAB_E2EE_ONLY (plan W4.8): nothing but encrypted envelopes is ever applied.
       if (e2eeOnly && update) {
         const yjsUpdate = updateInMessage(update);
@@ -204,12 +211,6 @@ export function createCollabServer(opts = {}) {
           // A CloseEvent-like object: Hocuspocus closes the connection with it.
           throw { code: 4403, reason: `e2ee-only: ${why}` };
         }
-      }
-      // Second guard after the read-only flag: a change sent by hand on a
-      // connection that may not write ends that connection.
-      if (context && context.writable === false && update && isDocumentWrite(update)) {
-        log(`write refused (${context.role} on ${context.kind})`);
-        throw new Error("read-only");
       }
       // A sealed room takes ciphertext only (checked per message: a room
       // can be sealed while a connection is open).

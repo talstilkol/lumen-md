@@ -1,18 +1,11 @@
 /**
- * Max-lines ratchet (plan W6.25, closes E26 of the 12.11 evening report).
+ * Max-lines gate (plan W6.25; W10.E31: no baseline).
  *
- * No production file under src/ may be longer than MAX_LINES (800). The
- * files that already were when the gate came in are listed, with their line
- * count, in scripts/max-lines-baseline.json. The baseline can only go down:
- *
- *   - a file that is not in the baseline fails once it passes MAX_LINES;
- *   - a file in the baseline fails once it grows past its recorded count;
- *   - a file in the baseline that shrank (or was split, renamed or deleted)
- *     fails too, until the baseline is lowered to match:
- *     `node scripts/check-max-lines.mjs --shrink` (only ever lowers counts
- *     and drops entries; it never raises one or adds a file);
- *   - `npm run pr:check` fails a diff that raises an entry or adds a file to
- *     the baseline (baselineRaises below, against the merge base).
+ * No production file under src/ may be longer than MAX_LINES (800). There
+ * is no baseline and no exception: the six files that were grandfathered in
+ * scripts/max-lines-baseline.json were split (W10.E29, W10.E30) and the
+ * baseline deleted. `npm run pr:check` fails a diff that brings a baseline
+ * file back (RETIRED_BASELINE_PATH).
  *
  * Lines are counted the way ESLint's `max-lines` counts them (blank lines
  * and comments included; a final newline does not open a line), so this is
@@ -24,8 +17,8 @@ import { join, relative } from "node:path";
 
 export const MAX_LINES = 800;
 
-/** The committed baseline, relative to the repo root. */
-export const BASELINE_PATH = "scripts/max-lines-baseline.json";
+/** Where the old baseline lived; a file there fails pr:check (W10.E31). */
+export const RETIRED_BASELINE_PATH = "scripts/max-lines-baseline.json";
 
 /** Production = src/**\/*.{ts,tsx}, without __tests__/, *.test.* / *.spec.* and *.d.ts (as check-code-hygiene.mjs). */
 export function isProductionFile(path) {
@@ -64,85 +57,19 @@ export function countLines(text) {
   return lines.length;
 }
 
-/** The `files` map of a parsed baseline (`{ files: { path: count } }`). */
-export function baselineFiles(baseline) {
-  const files = baseline && typeof baseline === "object" ? baseline.files : undefined;
-  return files && typeof files === "object" ? files : {};
-}
-
 /**
- * Check line counts against the baseline.
- * `counts`: repo-relative path → current line count, for every production file.
- * Returns `{ grown, tooLong, shrunk, invalid }`:
- *   grown    — in the baseline and longer than recorded:  { file, lines, baseline }
- *   tooLong  — not in the baseline and over MAX_LINES:     { file, lines }
- *   shrunk   — in the baseline and shorter than recorded, or gone: { file, lines | null, baseline }
- *   invalid  — a baseline entry at or under MAX_LINES, or not a positive integer: { file, baseline }
+ * Check line counts. `counts`: repo-relative path → current line count, for
+ * every production file. Returns `{ tooLong }`: every file over `max`, as
+ * `{ file, lines }`, sorted by path.
  */
-export function checkMaxLines(counts, baseline, max = MAX_LINES) {
-  const recorded = baselineFiles(baseline);
-  const grown = [];
-  const tooLong = [];
-  const shrunk = [];
-  const invalid = [];
-  for (const [file, n] of Object.entries(recorded)) {
-    if (!Number.isInteger(n) || n <= max) invalid.push({ file, baseline: n });
-  }
-  for (const [file, lines] of Object.entries(counts)) {
-    if (Object.hasOwn(recorded, file)) {
-      const b = recorded[file];
-      if (lines > b) grown.push({ file, lines, baseline: b });
-      else if (lines < b) shrunk.push({ file, lines, baseline: b });
-    } else if (lines > max) tooLong.push({ file, lines });
-  }
-  for (const [file, b] of Object.entries(recorded)) {
-    if (!Object.hasOwn(counts, file)) shrunk.push({ file, lines: null, baseline: b });
-  }
-  const byFile = (a, b) => a.file.localeCompare(b.file);
-  return { grown: grown.sort(byFile), tooLong: tooLong.sort(byFile), shrunk: shrunk.sort(byFile), invalid: invalid.sort(byFile) };
-}
-
-/**
- * The baseline lowered to the current counts: an entry whose file shrank
- * takes the new count, an entry whose file is at or under `max` (or gone) is
- * dropped. An entry is never raised and no file is ever added, so a file that
- * grew keeps its old count (and keeps failing). Returns a new object.
- */
-export function shrinkBaseline(baseline, counts, max = MAX_LINES) {
-  const recorded = baselineFiles(baseline);
-  const files = {};
-  for (const file of Object.keys(recorded).sort((a, b) => a.localeCompare(b))) {
-    const b = recorded[file];
-    const now = counts[file];
-    if (now === undefined || now <= max) continue;
-    files[file] = Math.min(b, now);
-  }
-  return { ...baseline, files };
-}
-
-/**
- * Entries that `after` raises or adds compared with `before` (both parsed
- * baselines): `{ file, before: number | null, after }`. pr:check fails when
- * this is not empty — the one way left to let a file grow is to edit the
- * baseline, and that is what this catches.
- */
-export function baselineRaises(before, after) {
-  const a = baselineFiles(before);
-  const b = baselineFiles(after);
-  const out = [];
-  for (const [file, n] of Object.entries(b)) {
-    if (!Object.hasOwn(a, file)) out.push({ file, before: null, after: n });
-    else if (!(n <= a[file])) out.push({ file, before: a[file], after: n });
-  }
-  return out.sort((x, y) => x.file.localeCompare(y.file));
+export function checkMaxLines(counts, max = MAX_LINES) {
+  const tooLong = Object.entries(counts)
+    .filter(([, lines]) => lines > max)
+    .map(([file, lines]) => ({ file, lines }));
+  return { tooLong: tooLong.sort((a, b) => a.file.localeCompare(b.file)) };
 }
 
 /** One line per problem, for the terminal and the test's failure message. */
-export function describeProblems({ grown, tooLong, shrunk, invalid }, max = MAX_LINES) {
-  return [
-    ...grown.map((g) => `${g.file}: ${g.lines} lines, grew past its baseline of ${g.baseline} (split it; the baseline never goes up)`),
-    ...tooLong.map((t) => `${t.file}: ${t.lines} lines, over ${max} (split it into smaller modules)`),
-    ...shrunk.map((s) => `${s.file}: ${s.lines === null ? "gone" : `${s.lines} lines`}, baseline still says ${s.baseline} (lower it: node scripts/check-max-lines.mjs --shrink)`),
-    ...invalid.map((i) => `${i.file}: baseline entry ${JSON.stringify(i.baseline)} is not a count over ${max} (remove it)`),
-  ];
+export function describeProblems({ tooLong }, max = MAX_LINES) {
+  return tooLong.map((t) => `${t.file}: ${t.lines} lines, over ${max} (split it into smaller modules)`);
 }

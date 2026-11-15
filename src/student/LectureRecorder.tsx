@@ -10,18 +10,21 @@ import { t } from "../i18n";
 import { clock } from "./lectureCore";
 import { HelpButton } from "../ui/HelpButton";
 import { explainError } from "../lib/userError";
+import { Modal } from "../ui/Modal";
 
 type Phase = "idle" | "recording" | "processing" | "done" | "error";
 
 export interface RecorderDeps {
   start: () => Promise<{ stop(): Promise<{ audio: Blob; durationMs: number }>; cancel(): void }>;
-  process: (audio: Blob, o: { durationMs: number; markers: number[]; title: string }) => Promise<{ path: string; cards: number; important: number }>;
+  process: (audio: Blob, o: { durationMs: number; markers: number[]; title: string }) => Promise<{ path: string; cards: number; important: number; summary?: "checked" | "extractive" }>;
   open: (path: string) => void;
   now: () => number;
 }
 
 async function defaultDeps(): Promise<RecorderDeps> {
-  const [{ startRecording }, { processLecture }] = await Promise.all([import("../capture/voiceCapture"), import("./lecture")]);
+  const [{ startRecording }, { processLecture }, { registerLectureSummarizer }] = await Promise.all([import("../capture/voiceCapture"), import("./lecture"), import("./lectureSummarizer")]);
+  // Plan 6.11 (W10.C9): the checked local summary; without a local model the extractive one, and the note says which.
+  await registerLectureSummarizer(undefined, document.documentElement.lang || undefined);
   return {
     start: () => startRecording(),
     process: (audio, o) => processLecture(audio, o),
@@ -85,7 +88,8 @@ export function LectureRecorder({ onClose, deps }: { onClose: () => void; deps?:
       const { audio, durationMs } = await r.stop();
       const res = await d.current!.process(audio, { durationMs, markers, title: title.trim() || t("student.untitled") });
       setPhase("done");
-      setMessage(t("student.done", { cards: res.cards, important: res.important }));
+      const kind = res.summary === "checked" ? t("student.summary.checked") : res.summary === "extractive" ? t("student.summary.extractive") : "";
+      setMessage([t("student.done", { cards: res.cards, important: res.important }), kind].filter(Boolean).join(" "));
       d.current!.open(res.path);
     } catch (e) {
       setPhase("error");
@@ -94,7 +98,7 @@ export function LectureRecorder({ onClose, deps }: { onClose: () => void; deps?:
   }
 
   return (
-    <div role="dialog" aria-modal="true" aria-labelledby="lecture-title" data-testid="lecture-recorder" style={{ position: "fixed", inset: 0, zIndex: 9999, background: "var(--overlay)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+    <Modal onClose={onClose} aria-labelledby="lecture-title" data-testid="lecture-recorder" style={{ position: "fixed", inset: 0, zIndex: 9999, background: "var(--overlay)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
       <div style={{ background: "hsl(var(--bg))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border-strong))", borderRadius: 12, padding: 20, width: "min(440px, 100%)", display: "grid", gap: 12 }}>
         <h2 id="lecture-title" style={{ margin: 0, fontSize: 17 }}>{t("student.title")}</h2>
         <HelpButton topic="workspace/student-mode#the-lecture-note" />
@@ -135,7 +139,7 @@ export function LectureRecorder({ onClose, deps }: { onClose: () => void; deps?:
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

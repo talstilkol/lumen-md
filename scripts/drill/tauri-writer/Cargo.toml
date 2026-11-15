@@ -1,0 +1,14 @@
+# The desktop save path for the data-safety drill (plan W4.33, W10.E40):
+# the shipped `lumen_vault::Vault::write`, driven over stdin by
+# scripts/drill/tauri.mjs. Not part of the app build.
+[package]
+name = "lumen-drill-tauri-writer"
+version = "0.0.0"
+edition = "2021"
+publish = false
+license = "MIT"
+
+[dependencies]
+lumen-vault = { path = "../../../src-tauri/vault" }
+
+[workspace]

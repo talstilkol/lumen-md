@@ -13,4 +13,14 @@
     <string name="shortcut_search_long">חיפוש בפתקים</string>
     <string name="shortcut_daily_short">היום</string>
     <string name="shortcut_daily_long">פתיחת הפתק של היום</string>
+    <!-- Plans W11.P8 / W11.P10 -->
+    <string name="share_saved">נשמר בתיבה ב-Lumen</string>
+    <string name="share_failed">חלק מהפריטים לא נשמרו</string>
+    <string name="share_nothing">אין כאן משהו ש-Lumen יכול לשמור</string>
+    <string name="capture_hint">שורה לתיבת הלכידה</string>
+    <string name="capture_save">שמירה</string>
+    <string name="capture_cancel">ביטול</string>
+    <string name="capture_saved">נשמר בתיבה</string>
+    <string name="capture_failed">השמירה נכשלה. הטקסט עדיין כאן.</string>
+    <string name="tile_capture">לכידה</string>
 </resources>

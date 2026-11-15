@@ -2,22 +2,33 @@
 /**
  * The nightly runs without GitHub Actions (plan W4.36; 0.5, 0.11, 0.14).
  *
- * One command a scheduler on the owner's machine starts (launchd or cron:
- * docs/dev/nightly.md). Each kind of run writes one sealed report to
+ * One command a scheduler on the owner's machine starts (launchd or cron, which
+ * `npm run nightly:install` sets up: scripts/nightly/scheduler.mjs; docs:
+ * docs/src/content/docs/contributing/nightly.md). Each kind of run writes one sealed report to
  * reports/nightly/<date>-<kind>.json (scripts/nightly/receipt.mjs) and
  * reports/nightly/status.json says where 0.5, 0.11 and 0.14 stand.
  *
  *   flake    e2e ×5 on chromium, firefox and webkit (npm run e2e:flake -- --all --times 5)
- *   perf     build + bundle budget, the @nightly perf project, Lighthouse (when installed)
- *   triage   review triage over the open PRs, the 0.14 count over the first 20 PRs, and live:meta (W6.2)
- *   weekly   dependency health (audit, outdated, licences) and mutation scores — Sundays
+ *   perf     build + bundle budget, the @nightly perf project, the Lighthouse trend
+ *            (desktop + mobile, median of 3 → reports/trend/; collect only, nothing uploaded)
+ *   triage   review triage over the open PRs, the 0.14 count over the first 20 PRs, live:meta (W6.2)
+ *            and the GitHub ruleset drift check (W11.S4)
+ *   weekly   dependency health (audit, outdated, licences) and mutation scores — Sundays:
+ *            the critical modules under real vitest with a receipt (W6.16) where the
+ *            branch has scripts/mutation/check.mjs, else npm run test:mutation
+ *   fuzz     the redaction fuzz with the night's seed, 20,000 cases (npm run fuzz:redaction,
+ *            plan W8.8) — every night; a leak fails the step and is saved to
+ *            tests/fuzz/redaction/regressions.json for a PR
  *   sr       the Hebrew screen-reader journey under VoiceOver (Guidepup, W6.30) — on a
  *            Mac with @guidepup/* installed, every night; `--only sr` runs it alone
+ *   supply   Scorecard, osv-scanner, cargo deny and a syft SBOM (W11.S5,
+ *            scripts/supply/nightly.mjs) — every night on a host where at least one
+ *            of those binaries is installed; `--only supply` runs it anyway
  *
  *   npm run nightly                          # what is due today: flake, perf, triage (+ weekly on Sunday)
  *   npm run nightly -- --only triage,weekly  # these kinds only
  *   npm run nightly -- --scheduled           # set by the scheduler: trigger "schedule" (0.11 counts these)
- *   npm run nightly -- --commit              # then commit reports/nightly/ ("[skip ci]"; never pushes)
+ *   npm run nightly -- --commit              # then commit reports/nightly/ and reports/trend/ ("[skip ci]"; never pushes)
  *   npm run nightly -- --status              # recompute status.json from the reports there
  *   npm run nightly -- --verify <file>…      # check each report's digest and signature
  *   npm run nightly -- --dry-run             # print the plan, run nothing
@@ -32,10 +43,16 @@ import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { check, keyPath, loadOrCreateKey, seal, sha256 } from "./receipt.mjs";
 import { BROWSERS, ciLocalMetric, FLAKE_TIMES, KINDS, planStatus, PROBE } from "./status.mjs";
+import { CHECKS as SUPPLY_CHECKS, onPath } from "../supply/nightly.mjs";
 
 const root = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 export const NIGHTLY_DIR = join(root, "reports", "nightly");
 export const PUBLIC_KEY = join(NIGHTLY_DIR, "PUBLIC_KEY.pem");
+/** What --commit commits: the sealed reports and the Lighthouse trend (both re-included in .gitignore). */
+export const COMMITTED = ["reports/nightly", "reports/trend"];
+/** Commands that would send a report off the machine (public storage, a server). The nightly runs none of them. */
+export const UPLOADS = [/\blhci\b.*\b(autorun|upload)\b/, /\bnpm run lighthouse\b/, /temporary-public-storage/];
+export const uploadsIn = (steps) => steps.filter((s) => UPLOADS.some((re) => re.test(s.cmd.join(" "))));
 /** 0.14 counts the PRs opened from this day (when the nightly receipts started). */
 export const METRIC_SINCE = "2026-11-12";
 const REPO = "talstilkol/lumen-md";
@@ -46,19 +63,34 @@ const REPO = "talstilkol/lumen-md";
  */
 export const SR_KIND = "sr";
 
+/**
+ * The supply-chain kind (W11.S5). Not one of status.mjs's KINDS either: 0.11
+ * counts the four scheduled kinds. Its numbers and gates go into the sealed
+ * report under `supply`.
+ */
+export const SUPPLY_KIND = "supply";
+export const SUPPLY_SUMMARY = join("reports", "supply", "summary.json");
+
+/**
+ * The redaction fuzz (W8.8). Not one of status.mjs's KINDS either (0.11
+ * counts those four), but due every night, on any host.
+ */
+export const FUZZ_KIND = "fuzz";
+
 /** Guidepup is installed (owner: `npm install -D @guidepup/guidepup @guidepup/playwright @guidepup/setup`). */
 export function srReady(dir = root, exists = existsSync) {
   return ["@guidepup/guidepup", "@guidepup/playwright", "@guidepup/setup"].every((p) => exists(join(dir, "node_modules", p, "package.json")));
 }
 
 /**
- * The kinds due on a date: every night flake, perf and triage; weekly on
- * Sundays (UTC); sr every night on a Mac where Guidepup is installed.
+ * The kinds due on a date: every night flake, perf, triage and fuzz; weekly
+ * on Sundays (UTC); sr every night on a Mac where Guidepup is installed;
+ * supply every night where a supply-chain scanner is installed.
  */
-export function kindsDue(date, only = null, host = { platform: "", sr: false }) {
-  const all = [...KINDS, SR_KIND];
+export function kindsDue(date, only = null, host = { platform: "", sr: false, supply: false }) {
+  const all = [...KINDS, FUZZ_KIND, SR_KIND, SUPPLY_KIND];
   if (only?.length) return all.filter((k) => only.includes(k));
-  return all.filter((k) => (k === "weekly" ? date.getUTCDay() === 0 : k === SR_KIND ? host.platform === "darwin" && host.sr : true));
+  return all.filter((k) => (k === "weekly" ? date.getUTCDay() === 0 : k === SR_KIND ? host.platform === "darwin" && host.sr : k === SUPPLY_KIND ? Boolean(host.supply) : true));
 }
 
 /** reports/nightly/<YYYY-MM-DD>-<kind>.json, or -2, -3… when that name is taken. */
@@ -70,8 +102,26 @@ export function reportName(dir, date, kind, exists = existsSync) {
   }
 }
 
-/** The steps of one kind, as { id, cmd, timeoutMin, optional? }. `has` says whether an npm script exists. */
-export function stepsFor(kind, has) {
+/** W6.16: the floor every critical module must reach in the weekly real run (targets.json critical.min). */
+export const MUTATION_MIN = 80;
+export const MUTATION_RECEIPT = "scripts/mutation/receipt.json";
+/** This night's Lighthouse trend entry (written after `since`), so the sealed perf report carries the numbers; null when none. */
+export function lighthouseEntry(file, since) {
+  try {
+    const h = JSON.parse(readFileSync(file, "utf8"));
+    const e = Array.isArray(h) ? h[h.length - 1] : null;
+    return e && Date.parse(e.date) >= Date.parse(since) ? e : null;
+  } catch {
+    return null;
+  }
+}
+
+
+/**
+ * The steps of one kind, as { id, cmd, timeoutMin, optional? }. `has` says
+ * whether an npm script exists, `exists` whether a file of the checkout does.
+ */
+export function stepsFor(kind, has, exists = (f) => existsSync(join(root, f))) {
   switch (kind) {
     case "flake":
       return [{ id: "e2e-flake", cmd: ["npm", "run", "e2e:flake", "--", "--all", "--times", String(FLAKE_TIMES)], timeoutMin: 300 }];
@@ -82,30 +132,70 @@ export function stepsFor(kind, has) {
         { id: "perf-e2e", cmd: ["npx", "playwright", "test", "--project=perf", "--reporter=json"], timeoutMin: 30, json: "perf" },
         // Plan W6.45: INP and keypress → paint in both editors on 10,000 notes, gated per environment (+10 %), sealed receipt.
         ...(has("perf:responsiveness") ? [{ id: "perf-responsiveness", cmd: ["npm", "run", "perf:responsiveness", "--", "--seal"], timeoutMin: 45 }] : []),
-        ...(has("lighthouse") ? [{ id: "lighthouse", cmd: ["npm", "run", "lighthouse"], timeoutMin: 20 }] : []),
+        // Plan 0.11: desktop and mobile, median of 3, appended to reports/trend/. Not `npm run lighthouse`:
+        // that is `lhci autorun`, desktop only, and uploads to temporary-public-storage.
+        { id: "lighthouse-trend", cmd: ["node", "scripts/nightly/lighthouse-trend.mjs"], timeoutMin: 30 },
       ];
     case "triage":
       return [
         { id: "review-triage", cmd: ["node", "scripts/nightly/review-triage.mjs", REPO], timeoutMin: 15 },
         // Plan W6.2: production's metadata names only lumen-md.vercel.app, and the check still catches a planted foreign one.
         { id: "live-meta", cmd: ["node", "scripts/live-meta.mjs", "--self-test"], timeoutMin: 5 },
+        // Plan W11.S4: the rulesets on GitHub are the ones in security/github-ruleset.json (exit 1 drift, 2 API unreadable).
+        { id: "ruleset-drift", cmd: ["node", "scripts/security/ruleset-drift.mjs"], timeoutMin: 5 },
       ];
     case "weekly":
       return [
         { id: "weekly-health", cmd: ["node", "scripts/nightly/weekly-health.mjs"], timeoutMin: 30 },
-        ...(has("test:mutation") ? [{ id: "mutation", cmd: ["npm", "run", "test:mutation"], timeoutMin: 240 }] : []),
+        // W6.16: the critical set under real vitest (the default runner), its receipt
+        // rewritten, then the preview build's own check of that receipt.
+        ...(exists("scripts/mutation/check.mjs")
+          ? [
+              { id: "mutation-critical", cmd: ["node", "scripts/mutation/run.mjs", "--critical", "--receipt", "--min", String(MUTATION_MIN)], timeoutMin: 240 },
+              { id: "mutation-check", cmd: ["node", "scripts/mutation/check.mjs"], timeoutMin: 5 },
+            ]
+          : has("test:mutation")
+            ? [{ id: "mutation", cmd: ["npm", "run", "test:mutation"], timeoutMin: 240 }]
+            : []),
       ];
+    case FUZZ_KIND:
+      // No --commit here: that switches to a new branch, under the kinds after it.
+      // A leak is saved to regressions.json in the tree and fails this step.
+      return [{ id: "fuzz-redaction", cmd: ["npm", "run", "-s", "fuzz:redaction"], timeoutMin: 60 }];
     case SR_KIND:
       // VoiceOver needs a logged-in macOS session; setup --ci makes it scriptable
       // without prompts (it also writes the TCC grant; with SIP on, grant the
-      // terminal Accessibility and Automation once by hand: docs dev/nightly).
+      // terminal Accessibility and Automation once by hand: contributing/nightly.md).
       return [
         { id: "sr-setup", cmd: ["npx", "--no-install", "@guidepup/setup", "--ci"], timeoutMin: 10 },
         { id: "sr-voiceover", cmd: ["npm", "run", "test:sr", "--", "--project=voiceover"], timeoutMin: 30 },
       ];
+    case SUPPLY_KIND:
+      // The script writes its unsealed summary; this report seals it (one receipt, not two).
+      return [{ id: "supply-chain", cmd: ["node", "scripts/supply/nightly.mjs", "--no-seal", "--out", SUPPLY_SUMMARY], timeoutMin: 60 }];
     default:
       throw new Error(`unknown kind ${kind}`);
   }
+}
+
+/**
+ * The mutation receipt as a weekly report carries it (W6.16): per critical
+ * module its score, the runner, and the sha256 of the source and the tests it
+ * was measured on. The sealed report is the signed copy.
+ */
+export function receiptForReport(receipt, min = MUTATION_MIN) {
+  if (!receipt?.modules) return null;
+  return {
+    min,
+    modules: Object.entries(receipt.modules).map(([module, m]) => ({ module, score: m.score ?? null, runner: m.runner ?? null, sha256: m.sha256 ?? null, tests: m.tests ?? null })),
+  };
+}
+
+/** reports/nightly/fuzz-redaction.json (scripts/fuzz/redaction-nightly.mjs) → what the sealed report keeps. */
+export function fuzzSummary(file) {
+  if (!existsSync(file)) return { error: "no reports/nightly/fuzz-redaction.json" };
+  const r = JSON.parse(readFileSync(file, "utf8"));
+  return { night: r.night ?? null, cases: r.cases ?? null, leaks: r.leaks?.length ?? null, saved: r.saved ?? null, threw: r.threw?.length ?? null };
 }
 
 /** flake-results/<browser>/summary.json → the shape status.mjs reads. */
@@ -123,8 +213,10 @@ export function collectFlake(dir) {
 /**
  * What the screen-reader run said, from sr-results/results.json (Playwright's
  * JSON report): each journey attaches `<setup>.json` = { setup, row, results }
- * (sr/runJourney.ts). Per setup: tasks passed of all, the blockers, the
- * protocol row for docs editor/screen-reader-protocol.
+ * (sr/runJourney.ts, and W11.Q6's product journey, sr/runProductJourney.ts,
+ * with journey, locale and voice). Per setup: tasks passed of all, the
+ * blockers, the protocol row for docs editor/screen-reader-protocol, and the
+ * spoken-phrase log of every step.
  */
 export function collectSr(report) {
   const out = [];
@@ -138,7 +230,18 @@ export function collectSr(report) {
               const j = JSON.parse(Buffer.from(a.body, "base64").toString("utf8"));
               if (!Array.isArray(j.results)) continue;
               const blockers = j.results.filter((x) => x.missing?.length).map((x) => `${x.id}: ${x.missing.join(", ")}`);
-              out.push({ setup: j.setup, passed: j.results.length - blockers.length, of: j.results.length, blockers, row: j.row });
+              // W11.Q6: the receipt keeps what the reader spoke at each step, and which journey, language and voice it was.
+              out.push({
+                setup: j.setup,
+                journey: j.journey ?? "protocol",
+                locale: j.locale ?? "he",
+                voice: j.voice ?? null,
+                passed: j.results.length - blockers.length,
+                of: j.results.length,
+                blockers,
+                row: j.row,
+                log: j.results.map((x) => ({ id: x.id, spoken: Array.isArray(x.spoken) ? x.spoken : [] })),
+              });
             } catch {
               /* not a journey attachment */
             }
@@ -219,7 +322,7 @@ function writeStatus(privateKeyPem) {
   const status = seal({ kind: "status", writtenAt: new Date().toISOString(), commit: git(["rev-parse", "HEAD"]), plan: planStatus(reports, triage?.metric ?? null) }, privateKeyPem);
   writeFileSync(join(NIGHTLY_DIR, "status.json"), JSON.stringify(status, null, 2) + "\n");
   const p = status.plan;
-  console.log(`status: 0.5 ${p["0.5"].nights}/${p["0.5"].needed} clean nights · 0.11 ${p["0.11"].ran}/${p["0.11"].needed} scheduled kinds · 0.14 ${p["0.14"] ? `${p["0.14"].remoteFailures} preview failures in ${p["0.14"].prs}/${p["0.14"].of} PRs` : "not counted yet"}`);
+  console.log(`status: 0.5 ${p["0.5"].nights}/${p["0.5"].needed} clean nights · 0.11 ${p["0.11"].ran}/${p["0.11"].needed} scheduled kinds · 0.14 ${p["0.14"] ? `${p["0.14"].remoteFailures} preview failures in ${p["0.14"].prs}/${p["0.14"].of} PRs` : "not counted yet"} · W6.16 ${p["W6.16"].weeks}/${p["W6.16"].needed} clean mutation weeks`);
 }
 
 function main() {
@@ -241,7 +344,7 @@ function main() {
   }
   const now = new Date();
   const only = opt("only")?.split(",").filter(Boolean) ?? null;
-  const kinds = argv.includes("--status") ? [] : kindsDue(now, only, { platform: process.platform, sr: srReady() });
+  const kinds = argv.includes("--status") ? [] : kindsDue(now, only, { platform: process.platform, sr: srReady(), supply: SUPPLY_CHECKS.some((c) => onPath(c.bin)) });
   const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
   const has = (s) => Boolean(pkg.scripts?.[s]);
   if (argv.includes("--dry-run")) {
@@ -279,6 +382,7 @@ function main() {
       } catch {
         report.perf = { annotations: [], error: "no Playwright JSON report" };
       }
+      report.lighthouse = lighthouseEntry(join(root, "reports/trend/lighthouse-history.json"), startedAt);
     }
     if (kind === SR_KIND) {
       const f = join(root, "sr-results", "results.json");
@@ -288,6 +392,16 @@ function main() {
         report.sr = { journeys: [], error: "no sr-results/results.json" };
       }
     }
+    if (kind === SUPPLY_KIND) {
+      try {
+        const { version: _v, kind: _k, ...supply } = JSON.parse(readFileSync(join(root, SUPPLY_SUMMARY), "utf8"));
+        // A summary left over from an earlier run is not this night's.
+        report.supply = supply.startedAt >= startedAt ? supply : { error: `${SUPPLY_SUMMARY} is older than this run` };
+      } catch {
+        report.supply = { error: `no ${SUPPLY_SUMMARY}` };
+      }
+    }
+    if (kind === FUZZ_KIND) report.fuzz = fuzzSummary(join(root, "reports", "nightly", "fuzz-redaction.json"));
     if (kind === "triage") {
       const f = join(root, "reports", "review-triage.json");
       if (existsSync(f)) {
@@ -309,6 +423,12 @@ function main() {
       }
       const m = join(root, "reports", "mutation", "report.json");
       if (existsSync(m)) report.mutation = JSON.parse(readFileSync(m, "utf8")).map((r) => ({ module: r.module, score: r.score ?? null, error: r.error }));
+      if (steps.some((s) => s.id === "mutation-critical")) {
+        const rf = join(root, MUTATION_RECEIPT);
+        report.mutationReceipt = existsSync(rf) ? receiptForReport(JSON.parse(readFileSync(rf, "utf8"))) : null;
+        // The signed report keeps the receipt; the clone goes back to the committed one so the next pull applies.
+        if (git(["status", "--porcelain", "--", MUTATION_RECEIPT])) git(["checkout", "--", MUTATION_RECEIPT]);
+      }
     }
     const name = reportName(NIGHTLY_DIR, new Date(startedAt), kind);
     writeFileSync(join(NIGHTLY_DIR, name), JSON.stringify(seal(report, privateKeyPem), null, 2) + "\n");
@@ -318,9 +438,10 @@ function main() {
   }
   writeStatus(privateKeyPem);
   if (argv.includes("--commit")) {
-    git(["add", "reports/nightly"]);
+    const paths = COMMITTED.filter((p) => existsSync(join(root, p)));
+    git(["add", ...paths]);
     const msg = `chore(nightly): ${kinds.join(", ") || "status"} reports ${now.toISOString().slice(0, 10)} [skip ci]`;
-    const r = spawnSync("git", ["-c", "core.hooksPath=/dev/null", "commit", "-m", msg, "--", "reports/nightly"], { cwd: root, stdio: "inherit" });
+    const r = spawnSync("git", ["-c", "core.hooksPath=/dev/null", "commit", "-m", msg, "--", ...paths], { cwd: root, stdio: "inherit" });
     if (r.status !== 0) console.error("nothing committed");
   }
   process.exit(failed ? 1 : 0);

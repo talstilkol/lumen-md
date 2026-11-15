@@ -5,5 +5,8 @@
   "backlinks.linkFailed": "Couldn't link in {note}: {error}",
   "backlinks.linked": "Linked in {note}",
   "backlinks.unlinked": "Unlinked mentions",
-  "backlinks.unlinkedEmpty": "No unlinked mentions."
+  "backlinks.unlinkedEmpty": "No unlinked mentions.",
+  "backlinks.entities": "Names in this note",
+  "backlinks.entityNoNote": "no note yet",
+  "backlinks.entityLinkAria": "Link “{text}” to the note {note}"
 }

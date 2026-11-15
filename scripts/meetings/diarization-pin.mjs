@@ -7,7 +7,7 @@
  *        file, size and sha256 on Hugging Face, and the licence to check
  *   node scripts/meetings/diarization-pin.mjs --model segmentation|embedding --repo <owner/name> --revision <40-hex> --file <path.onnx> --bytes <n> --sha256 <64-hex> --license <spdx>
  *        checks the values and prints the block to paste into
- *        DIARIZATION_MODELS in src/meetings/diarizeModels.ts
+ *        DIARIZATION_MODELS in src/meetings/diarizePins.ts
  *
  * Nothing is downloaded from here and nothing is guessed: until both blocks
  * are pasted, meeting transcripts have no speakers.
@@ -63,7 +63,7 @@ export function main() {
     for (const e of errors) console.error(`✗ ${e}`);
     process.exit(1);
   }
-  console.log(`Paste into DIARIZATION_MODELS.${v.model} (src/meetings/diarizeModels.ts), keeping its input/output fields:
+  console.log(`Paste into DIARIZATION_MODELS.${v.model} (src/meetings/diarizePins.ts), keeping its input/output fields:
 
     repo: ${JSON.stringify(v.repo)}, revision: ${JSON.stringify(v.revision)}, file: ${JSON.stringify(v.file)}, bytes: ${Number(v.bytes)}, sha256: ${JSON.stringify(v.sha256)}, license: ${JSON.stringify(v.license)},`);
 }

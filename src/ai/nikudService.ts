@@ -5,7 +5,7 @@
  * niqqud, add partial niqqud, remove niqqud.
  *
  * Stage 1 is Nakdimon (MIT): ≈ 21 MB, wasm, any device. It is mirrored by
- * .github/workflows/model-convert.yml and served from CONVERTED_MODELS_BASE;
+ * scripts/models/convert.mjs and served from CONVERTED_MODELS_BASE;
  * until Tal picks that host (15.9) adding niqqud reports "unavailable".
  * Removing niqqud needs no model.
  *
@@ -20,6 +20,7 @@ import "./nikudStrings";
 import { CONVERTED_MODELS_BASE, fileUrl, loadConvertedRegistry, requestConvertedModel, type ConsentDeps } from "./convertedModels";
 import { removeNikud } from "../text/nikud";
 import type { DetailedNikud } from "../text/nikudRun";
+import type { PartialMode, PosTagger } from "../text/nikudPos";
 
 export const NAKDIMON_ID = "nakdimon";
 export const NAKDIMON_FILE = "Nakdimon.onnx";
@@ -32,7 +33,7 @@ export const NIKUD_QUALITY_KEY = "lumen.nikud.quality";
 export type NikudEngineId = "nakdimon" | "menaked";
 
 export class NikudUnavailableError extends Error {
-  constructor(readonly reason: "noHost" | "declined") {
+  constructor(readonly reason: "noHost" | "declined" | "lexicon") {
     super(`niqqud model ${reason}`);
     this.name = "NikudUnavailableError";
   }
@@ -63,6 +64,7 @@ async function defaultLoadModel(url: string, base: string): Promise<ArrayBuffer>
   const cache = createModelCache({ base, registry, root: opfsRoot, fallback: async () => caches.open("transformers-cache") });
   const hit = await cache.match(url);
   if (hit) return hit.arrayBuffer();
+  // privacy-ledger: rule Model download (Lumen's mirror): CONVERTED_MODELS_BASE is VITE_MODEL_MIRROR_URL, model-download, sha256-checked
   const res = await fetch(url);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   await cache.put(url, res.clone()); // throws on a size or checksum mismatch
@@ -162,16 +164,38 @@ async function ready(deps: NikudDeps): Promise<Worker> {
   return worker!;
 }
 
-/** `text` with niqqud (all words, or with `partial` only the ones the model finds ambiguous). */
-export async function pointHebrew(text: string, deps: NikudDeps, opts: { partial?: boolean } = {}): Promise<string> {
+/** Which words keep their points: all (no `partial`), the ambiguous ones (`true` / `"ambiguous"`), or one part of speech (`"nouns"` / `"verbs"`, W10.E42). */
+export interface PointOptions {
+  partial?: boolean | PartialMode;
+  /** The part-of-speech tagger for nouns / verbs; by default the offline Hebrew lexicon's (text/nikudPos.ts). */
+  tagger?: () => Promise<PosTagger>;
+}
+
+/** The lexicon tagger, or NikudUnavailableError("lexicon") when the dictionary is not installed (nothing is pointed first). */
+async function lexiconPosTagger(): Promise<PosTagger> {
+  const [{ loadLexicon }, { lexiconTagger }] = await Promise.all([import("../lexicon/store"), import("../text/nikudPos")]);
+  try {
+    return lexiconTagger(await loadLexicon());
+  } catch {
+    throw new NikudUnavailableError("lexicon");
+  }
+}
+
+/** `text` with niqqud (all words, or with `partial` only some: see PointOptions). */
+export async function pointHebrew(text: string, deps: NikudDeps, opts: PointOptions = {}): Promise<string> {
   return (await pointHebrewDetailed(text, deps, opts)).text;
 }
 
 /** Niqqud and, per pointed word, its alternatives (plan W2.5); `engine` says which model pointed it. */
-export async function pointHebrewDetailed(text: string, deps: NikudDeps, opts: { partial?: boolean } = {}): Promise<DetailedNikud & { engine: NikudEngineId }> {
+export async function pointHebrewDetailed(text: string, deps: NikudDeps, opts: PointOptions = {}): Promise<DetailedNikud & { engine: NikudEngineId }> {
+  const byPos = opts.partial === "nouns" || opts.partial === "verbs" ? opts.partial : null;
+  // The tagger first: a missing dictionary should not cost a model download.
+  const tagger = byPos ? await (opts.tagger ?? lexiconPosTagger)() : null;
   const w = await ready(deps);
-  const r = await call<DetailedNikud>(w, { type: "point", text, partial: opts.partial }, [], deps.signal);
-  return { ...r, engine: loadedEngine ?? "nakdimon" };
+  const partial = byPos ? false : opts.partial === true || opts.partial === "ambiguous";
+  const r = await call<DetailedNikud>(w, { type: "point", text, partial }, [], deps.signal);
+  const out = byPos && tagger ? await (await import("../text/nikudPos")).keepWordsOfClass(r, byPos, tagger) : r;
+  return { ...out, engine: loadedEngine ?? "nakdimon" };
 }
 
 /** Niqqud off — no model needed. */

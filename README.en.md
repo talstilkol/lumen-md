@@ -290,6 +290,10 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for dev setup, architecture, testing patt
 
 See [SECURITY.md](SECURITY.md) for the vulnerability reporting process and the project's security architecture.
 
+## 💸 Free forever
+
+Lumen is free and MIT-licensed, with no account. **Commitment: the free tier never shrinks** — no feature that is free today will become paid. The only paid thing is optional: an encrypted sync relay ($4 a month). Details: [Pricing](docs/src/content/docs/project/pricing.md).
+
 ## 📜 License
 
 [MIT](LICENSE) © 2026 Lumen contributors

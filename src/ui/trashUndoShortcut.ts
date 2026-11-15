@@ -5,14 +5,17 @@
  * focus is elsewhere: the file tree, a panel, the page itself.
  */
 import { t } from "../i18n";
-import { trashUndoDepth, undoLastTrash } from "../storage/fileOps";
+import { lastTrashUndoAt, trashUndoDepth, undoLastTrash } from "../storage/fileOps";
+import { newestAppUndo } from "../storage/appUndo";
 import { toast } from "../store/useToastStore";
 
 /**
  * Places with their own undo: CodeMirror, the WYSIWYG editor (ProseMirror),
- * text fields, anything contenteditable, the tldraw canvas.
+ * text fields, anything contenteditable, and the canvas: Excalidraw's root
+ * (`.excalidraw`) and the canvas dialog around it (`.lumen-canvas`, plan
+ * 4.19), so undoing a stroke never brings back a deleted file (W10.C17).
  */
-const EDITING = 'input, textarea, select, [contenteditable]:not([contenteditable="false"]), .cm-editor, .ProseMirror, .wysiwyg-root, .tl-container';
+const EDITING = 'input, textarea, select, [contenteditable]:not([contenteditable="false"]), .cm-editor, .ProseMirror, .wysiwyg-root, .excalidraw, .lumen-canvas';
 
 /** Is focus somewhere that owns Ctrl+Z? */
 export function isEditingTarget(target: EventTarget | null): boolean {
@@ -42,6 +45,13 @@ export function isUndoKey(e: KeyboardEvent): boolean {
  */
 export function handleTrashUndoKey(e: KeyboardEvent): boolean {
   if (!isUndoKey(e) || e.defaultPrevented || isEditingTarget(e.target)) return false;
+  // A newer vault-wide action (a bulk property edit, plan W7.4) is undone first.
+  const other = newestAppUndo(trashUndoDepth() ? lastTrashUndoAt() : 0);
+  if (other) {
+    e.preventDefault();
+    other.undo();
+    return true;
+  }
   if (trashUndoDepth() === 0) return false;
   e.preventDefault();
   void undoLastTrash().then(

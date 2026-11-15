@@ -13,8 +13,9 @@ import { contentDirection } from "../src/print/printLayout";
  * are then:
  *
  * - compared visually, in print media, with an approved baseline (under 1%
- *   of pixels may differ). The first run writes the baselines
- *   (`--update-snapshots`); a person looks at them once and commits them;
+ *   of pixels may differ). A missing baseline fails (plan W10.B16); a
+ *   person writes them with `npm run visual:approve -- print`, looks at
+ *   them and commits them;
  * - printed to PDF (Chromium, the engine behind "Save as PDF"), and the PDF's
  *   text layer is read back with pdftotext: the Hebrew must come out in
  *   reading order, the page numbers must be there (Hebrew numerals where the
@@ -74,6 +75,11 @@ for (const name of docs) {
     );
     expect(html).not.toContain("Exported from Lumen");
     expect(html).toContain(`dir="${contentDirection(md)}"`);
+    if (/\[\^\w+\]:/.test(md)) {
+      // W2.23 step 2: footnotes at the bottom of their page, none left as endnotes.
+      expect(html).not.toMatch(/<section[^>]*data-footnotes/);
+      expect(html).toContain('class="page-footnotes"');
+    }
 
     const printPage = await context.newPage();
     // Same origin as the app, so the embedded fonts load.
@@ -103,6 +109,12 @@ for (const name of docs) {
     else expect(text).toMatch(/\b1\s*\/\s*\d+|\d+\s*\/\s*1\b/);
     const pages = Number(execFileSync("pdfinfo", [file]).toString().match(/Pages:\s+(\d+)/)?.[1] ?? "0");
     if (PAGES[name]) expect(pages).toBe(PAGES[name]);
+    if (name === "04-footnotes.md") {
+      // Both references are on page 1, so both notes print on page 1.
+      const first = plain(execFileSync("pdftotext", ["-f", "1", "-l", "1", file, "-"]).toString());
+      expect(first).toContain("מקור ראשון");
+      expect(first).toContain("Second source");
+    }
     const fonts = execFileSync("pdffonts", [file]).toString().split("\n").slice(2).filter(Boolean);
     expect(fonts.length).toBeGreaterThan(0);
     // Columns end with: emb sub uni object ID.

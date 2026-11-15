@@ -1,0 +1,148 @@
+{
+  "schema": 1,
+  "generator": "scripts/md-conformance.mjs",
+  "origin": "real",
+  "source": "src/__tests__/fixtures/md-spec/commonmark-0.31.2.txt (commonmark/commonmark-spec 0.31.2, CC BY-SA 4.0)",
+  "versions": {
+    "micromark": "4.0.2",
+    "mdast-util-from-markdown": "2.0.3",
+    "mdast-util-to-markdown": "2.1.2"
+  },
+  "card": {
+    "schema": 1,
+    "tag": "dev",
+    "model": {
+      "name": "mdast round trip with src/editor/markdownSerialize.mjs",
+      "digest": "npm:mdast-util-from-markdown@2.0.3+mdast-util-to-markdown@2.1.2+micromark@4.0.2"
+    },
+    "seed": 1,
+    "temperature": 0,
+    "dataset": {
+      "name": "commonmark-spec",
+      "version": "0.31.2",
+      "license": "CC-BY-SA-4.0",
+      "source": "https://spec.commonmark.org/0.31.2/",
+      "split": "all examples of the published spec; dev, because the round-trip handlers were fixed on these examples"
+    },
+    "n": 652,
+    "metrics": {
+      "html_kept": {
+        "value": 0.992331,
+        "ci95": [
+          0.984663,
+          0.998466
+        ],
+        "method": "bootstrap",
+        "resamples": 1000
+      }
+    }
+  },
+  "cards": {
+    "parser": {
+      "schema": 1,
+      "tag": "public",
+      "model": {
+        "name": "micromark 4.0.2",
+        "digest": "npm:micromark@4.0.2"
+      },
+      "seed": 1,
+      "temperature": 0,
+      "dataset": {
+        "name": "commonmark-spec",
+        "version": "0.31.2",
+        "license": "CC-BY-SA-4.0",
+        "source": "https://spec.commonmark.org/0.31.2/",
+        "split": "all examples of the published spec; micromark is not tuned on it"
+      },
+      "n": 652,
+      "metrics": {
+        "html_exact": {
+          "value": 1,
+          "ci95": [
+            1,
+            1
+          ],
+          "method": "bootstrap",
+          "resamples": 1000
+        }
+      }
+    },
+    "round-trip": {
+      "schema": 1,
+      "tag": "dev",
+      "model": {
+        "name": "mdast round trip with src/editor/markdownSerialize.mjs",
+        "digest": "npm:mdast-util-from-markdown@2.0.3+mdast-util-to-markdown@2.1.2+micromark@4.0.2"
+      },
+      "seed": 1,
+      "temperature": 0,
+      "dataset": {
+        "name": "commonmark-spec",
+        "version": "0.31.2",
+        "license": "CC-BY-SA-4.0",
+        "source": "https://spec.commonmark.org/0.31.2/",
+        "split": "all examples of the published spec; dev, because the round-trip handlers were fixed on these examples"
+      },
+      "n": 652,
+      "metrics": {
+        "html_kept": {
+          "value": 0.992331,
+          "ci95": [
+            0.984663,
+            0.998466
+          ],
+          "method": "bootstrap",
+          "resamples": 1000
+        }
+      }
+    }
+  },
+  "rows": [
+    {
+      "kind": "parser",
+      "what": "micromark 4.0.2 to HTML, byte for byte",
+      "spec": "CommonMark 0.31.2",
+      "total": 652,
+      "passed": 652,
+      "rate": 1,
+      "target": 0.99,
+      "exceptions": []
+    },
+    {
+      "kind": "round-trip",
+      "what": "mdast-util-from-markdown 2.0.3 → mdast-util-to-markdown 2.1.2 with src/editor/markdownSerialize.mjs → micromark, HTML compared with the parser's",
+      "spec": "CommonMark 0.31.2",
+      "total": 652,
+      "passed": 647,
+      "rate": 0.9923,
+      "target": 0.99,
+      "exceptions": [
+        {
+          "example": 20,
+          "section": "Backslash escapes",
+          "reason": "a backslash inside an autolink is escaped again, so the link's URL changes (%5C → %5C%5C)"
+        },
+        {
+          "example": 39,
+          "section": "Entity and numeric character references",
+          "reason": "&#10; is decoded to a newline and written raw, so two blank-separated lines become two paragraphs"
+        },
+        {
+          "example": 148,
+          "section": "HTML blocks",
+          "reason": "a line ending inside raw HTML is written as a space"
+        },
+        {
+          "example": 187,
+          "section": "HTML blocks",
+          "reason": "a soft line break before inline raw HTML is written as a space"
+        },
+        {
+          "example": 603,
+          "section": "Autolinks",
+          "reason": "a backslash inside an autolink is escaped again, so the link's URL changes"
+        }
+      ]
+    }
+  ]
+}

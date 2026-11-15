@@ -28,6 +28,7 @@ describe.skipIf(!lt)("LanguageTool (real)", () => {
 // skip-reason: needs a running SearXNG (LUMEN_REAL_SEARXNG_URL, AGPL, never shipped); the unit suite uses its mock | task: 7.2 | until: 2027-05-12
 describe.skipIf(!sx)("SearXNG (real)", () => {
   it("answers a JSON search (search.formats: json, limiter: false)", async () => {
+    // privacy-ledger: Ollama/SearXNG of the eval harness: runs in Node (npm run eval), where no ledger is installed
     const r = await fetch(`${sx}/search?q=lumen+markdown&format=json`, { signal: AbortSignal.timeout(30_000) });
     expect(r.status).toBe(200);
     const body = (await r.json()) as { results?: unknown[] };

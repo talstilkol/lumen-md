@@ -7,11 +7,12 @@
  * Both answer through `handleIndexRequest`, so they answer the same.
  */
 
-import type { BacklinkHit, IndexInput, IndexStats, NoteText, SearchHit, SearchOptions } from "./vaultIndexCore";
+import type { BacklinkHit, IndexInput, IndexStats, NoteText, SearchHit, SearchOptions, SearchResult } from "./vaultIndexCore";
 import type { QueryResult } from "../tasks/taskQuery";
 import type { RelatedHit } from "../related/related";
 import type { NoteSummary } from "./noteSummary";
 import type { SnapshotKeys } from "./snapshotSeal";
+import type { HighlightItem } from "../highlights/hub";
 
 /** A note restored from the snapshot, as the main thread keeps it. */
 export interface RestoredNote extends NoteSummary {
@@ -36,6 +37,7 @@ export type IndexRequestBody =
   | { op: "remove"; paths: string[] }
   | { op: "clear" }
   | { op: "search"; query: string; opts: SearchOptions }
+  | { op: "query"; query: string; opts: SearchOptions }
   | { op: "backlinks"; target: string }
   | { op: "stats" }
   | { op: "tasks"; query: string; today: string }
@@ -43,6 +45,8 @@ export type IndexRequestBody =
   | { op: "move"; moves: { from: string; to: string; name: string }[] }
   | { op: "texts"; paths?: string[] }
   | { op: "related"; query: RelatedQuery }
+  // W10.C25: the highlights hub's index, built from the notes the index holds.
+  | { op: "highlights" }
   // W6.36: `keys` (an encrypted vault) seals / opens the snapshot in the worker.
   | { op: "snapshotSave"; vault: string; keys?: SnapshotKeys }
   | { op: "snapshotBody" }
@@ -59,6 +63,8 @@ export interface IndexEngine {
   remove(paths: string[]): Promise<void>;
   clear(): Promise<void>;
   search(query: string, opts: SearchOptions): Promise<SearchHit[]>;
+  /** `search`, with what a /regex/ could not check (2.39). */
+  query(query: string, opts: SearchOptions): Promise<SearchResult>;
   backlinks(target: string): Promise<BacklinkHit[]>;
   stats(): Promise<IndexStats>;
   /** Run a ```tasks``` query (plan 4.13); `today` is YYYY-MM-DD in the user's time zone. */
@@ -67,6 +73,8 @@ export interface IndexEngine {
   move(moves: { from: string; to: string; name: string }[]): Promise<void>;
   /** The text of these notes (all when omitted), read from the index (W2.22). */
   texts(paths?: string[]): Promise<NoteText[]>;
+  /** Every highlight in the indexed notes (plan W1.15), built here, not on the main thread (W10.C25). */
+  highlights(): Promise<HighlightItem[]>;
   /** Notes related to a paragraph, ranked in the index (plan W2.2). */
   related(query: RelatedQuery): Promise<RelatedHit[]>;
   /** Save the indexed notes for the next session (indexSnapshot.ts); sealed with `keys` in an encrypted vault (W6.36). */
@@ -95,12 +103,14 @@ export function engineOver(kind: IndexEngine["kind"], send: (req: IndexRequestBo
     remove: async (paths) => void (await send({ op: "remove", paths })),
     clear: async () => void (await send({ op: "clear" })),
     search: (query, opts) => send({ op: "search", query, opts }) as Promise<SearchHit[]>,
+    query: (query, opts) => send({ op: "query", query, opts }) as Promise<SearchResult>,
     backlinks: (target) => send({ op: "backlinks", target }) as Promise<BacklinkHit[]>,
     stats: () => send({ op: "stats" }) as Promise<IndexStats>,
     tasks: (query, today) => send({ op: "tasks", query, today }) as Promise<QueryResult>,
     move: async (moves) => void (await send({ op: "move", moves })),
     texts: (paths) => send({ op: "texts", paths }) as Promise<NoteText[]>,
     related: (query) => send({ op: "related", query }) as Promise<RelatedHit[]>,
+    highlights: () => send({ op: "highlights" }) as Promise<HighlightItem[]>,
     saveSnapshot: async (vault, keys) => void (await send(keys ? { op: "snapshotSave", vault, keys } : { op: "snapshotSave", vault })),
     restoreSnapshot: (vault, listing, keys) => send(keys ? { op: "snapshotRestore", vault, listing, keys } : { op: "snapshotRestore", vault, listing }) as Promise<RestoredNote[]>,
     snapshotBody: () => send({ op: "snapshotBody" }) as Promise<{ refused: boolean }>,

@@ -6,6 +6,8 @@
  * - Add toolbar buttons
  * - Hook into document lifecycle events (open, save, change)
  * - Register custom markdown block renderers
+ * - Add Agent Skills (a SKILL.md from the plugin's package): always
+ *   untrusted, so they run guarded and ask before their first run (W7.1)
  *
  * PLUGIN AUTHORS — initialization lifecycle (ADR-001):
  *   Block plugins that imperatively render into a ref-attached DOM
@@ -62,6 +64,13 @@ export interface LumenPluginAPI {
   onSave: (handler: (content: string) => void) => () => void;
   /** Show a toast notification */
   showToast: (message: string, type?: "info" | "success" | "error") => void;
+  /**
+   * Add an Agent Skill from the plugin's package (`path` like
+   * "skills/<name>/SKILL.md", `text` the file). It is untrusted: it never
+   * replaces a vault skill of the same name, runs behind the injection
+   * guard and asks before its first run. Removed with the plugin.
+   */
+  registerSkill: (path: string, text: string) => Promise<{ ok: true; name: string } | { ok: false; error: string }>;
 }
 
 // ── Plugin Registry ─────────────────────────────────────────────────────────
@@ -122,6 +131,11 @@ function createAPI(pluginId: string): LumenPluginAPI {
       };
     },
     showToast: (msg, _type) => _showToast(msg),
+    // The skills library loads on first use: plugins without skills keep it out of the startup bundle.
+    registerSkill: async (path, text) => {
+      const r = (await import("../agents/skills/library")).registerPluginSkill(pluginId, path, text);
+      return r.ok ? { ok: true, name: r.skill.name } : r;
+    },
   };
 }
 
@@ -146,6 +160,8 @@ export function unregisterPlugin(pluginId: string): void {
   if (!entry) return;
   
   entry.plugin.deactivate?.();
+  // A removed plugin's skills go with it (loaded only if the library is, so a plugin that added none costs nothing).
+  void import("../agents/skills/library").then((m) => m.unregisterPluginSkills(pluginId));
   pluginCommands.delete(pluginId);
   changeHandlers.delete(pluginId);
   saveHandlers.delete(pluginId);

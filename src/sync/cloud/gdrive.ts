@@ -81,6 +81,7 @@ function randomString(len = 64): string {
 async function refreshAccessToken(): Promise<string> {
   const refresh = getSecret(REFRESH_KEY);
   if (!refresh) throw new Error("Google Drive is disconnected — sign in again.");
+  // privacy-ledger: the user's own Google Drive (sync, OAuth): not AI traffic, listed in audit mode (network)
   const res = await fetchWithRetry("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -117,6 +118,7 @@ async function getAccessToken(): Promise<string> {
 export async function gdriveFetch(
   path: string,
   init: RequestInit = {},
+  // privacy-ledger: the user's own Google Drive (sync, OAuth): not AI traffic, listed in audit mode (network)
   fetchImpl: (input: string, init?: RequestInit) => Promise<Response> = (i, o) => fetch(i, o),
 ): Promise<Response> {
   const access = await getAccessToken();
@@ -131,6 +133,7 @@ async function api<T>(path: string, opts: RequestInit = {}): Promise<T> {
   const url = path.startsWith("http") ? path : `https://www.googleapis.com${path}`;
   const headers = new Headers(opts.headers ?? {});
   headers.set("Authorization", `Bearer ${access}`);
+  // privacy-ledger: the user's own Google Drive (sync, OAuth): not AI traffic, listed in audit mode (network)
   const res = await fetchWithRetry(url, { ...opts, headers }, { label: "gdrive.api", maxRetries: 2, baseDelayMs: 700, maxDelayMs: 2500 });
   if (!res.ok) {
     const text = await res.text().catch(() => "");
@@ -255,6 +258,7 @@ export const gdriveLegacy: LegacyCloudStore = {
 export async function finishGDriveOAuth(code: string): Promise<void> {
   const verifier = localStorage.getItem(PKCE_KEY);
   if (!verifier) throw new Error("Missing PKCE verifier — restart sign-in.");
+  // privacy-ledger: the user's own Google Drive (sync, OAuth): not AI traffic, listed in audit mode (network)
   const res = await fetchWithRetry("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },

@@ -36,13 +36,13 @@ import { scheduleIdle } from "../lib/idle";
 import { dropSnapshot } from "./indexSnapshot";
 import type { SnapshotKeys } from "./snapshotSeal";
 
-export type { BacklinkHit, SearchHit } from "./vaultIndexCore";
+export type { BacklinkHit, SearchHit, SearchResult } from "./vaultIndexCore";
 import { cache, type IndexedFile, type ListingWatch, type ReadNote } from "./workspaceIndexState";
 import { diffListing, fillingEncrypted, indexable, indexFile, listNotes, mapLimit, nameOf, recordVault, under, upsertAll, UPSERT_BATCH, type IndexOp, type ToRead } from "./workspaceIndexRead";
 import { CheckTimeoutError, wakeBuilds, wakeOnUnlockOrMove, withDeadline } from "./workspaceIndexWait";
 export type { IndexedFile } from "./workspaceIndexState";
 export { VAULT_ID_PATH } from "./workspaceIndexRead";
-export { findBacklinks, indexChecked, indexedFiles, indexedNotes, indexedNoteText, indexStats, indexVersion, queryVaultTasks, relatedInIndex, searchWorkspace, workspaceTree } from "./workspaceIndexQueries";
+export { findBacklinks, indexChecked, indexedFiles, indexedNotes, indexedHighlights, indexedNoteText, indexStats, indexVersion, queryVaultTasks, relatedInIndex, REGEX_TIME_LIMIT_MS, searchWorkspace, workspaceTree } from "./workspaceIndexQueries";
 
 /** Bumped by a reset (tests): work of an earlier index must not touch the new one. */
 let epoch = 0;
@@ -222,6 +222,34 @@ export async function withEngine<T>(fn: (e: IndexEngine) => Promise<T>): Promise
     for (const [path, f] of filled) cache.byPath.set(path, f);
     return fn(local);
   }
+}
+
+/**
+ * 2.39: stop `stuck`, a worker busy with a runaway /regex/ (a regex runs synchronously: terminating is the only way),
+ * and start a fresh engine, filled as withEngine's fallback fills one (from the snapshot, reading only what it lacks,
+ * Z5/Z7 guards). Requests wait for the filled engine. `current` is the engine promise the caller used.
+ */
+export function restartEngine(current: Promise<IndexEngine>, stuck: IndexEngine): Promise<void> {
+  if (engine !== current) return Promise.resolve();
+  const at = epoch;
+  const vault = snapshotVault();
+  stuck.dispose();
+  const next = createEngine().then(async (fresh) => {
+    const stale = () => moved(at, vault);
+    const filled = await fillEngine(fresh, [...cache.byPath.values()], stale);
+    if (stale()) {
+      if (at === epoch) dropIndex();
+    } else for (const [path, f] of filled) cache.byPath.set(path, f);
+    return fresh;
+  });
+  engine = next;
+  return next.then(undefined, (err) => {
+    log.warn("vault index: the restarted engine could not be filled; the index is rebuilt on next use", err);
+    if (engine === next) {
+      engine = null;
+      dropIndex();
+    }
+  });
 }
 
 // ── Keeping the index in step ───────────────────────────────────────────

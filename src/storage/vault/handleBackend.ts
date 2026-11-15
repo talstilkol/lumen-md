@@ -12,7 +12,8 @@
  * deletes, removing a half-written target when the copy fails.
  */
 
-import { checkRename, compareVaultEntries, VaultEmitter, vaultSegments } from "./shared";
+import { checkRename, compareVaultEntries, PathLock, VaultEmitter, vaultSegments } from "./shared";
+import type { HandleCasHost } from "./cas";
 import {
   VaultError,
   VaultNotFoundError,
@@ -61,11 +62,23 @@ function isMissing(e: unknown): boolean {
 export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): VaultBackend {
   const events = new VaultEmitter();
   const emit = (e: Omit<VaultEvent, "origin">) => events.emit({ ...e, origin: "self" });
+  /** write / writeMany / remove / writeIf / removeIf on one path, one at a time (2.28, #275). */
+  const pathLock = new PathLock();
 
   async function dirAt(parts: string[], create: boolean): Promise<FileSystemDirectoryHandle> {
     let cur = await o.root();
     for (const part of parts) cur = await cur.getDirectoryHandle(part, { create });
     return cur;
+  }
+
+  /** The files directly in the folder at `parts`, by name, from one listing (a bulk read or write, W7.4). */
+  async function filesIn(parts: string[]): Promise<Map<string, FileSystemFileHandle>> {
+    const dir = await dirAt(parts, false);
+    const files = new Map<string, FileSystemFileHandle>();
+    for await (const [name, h] of (dir as unknown as { entries(): AsyncIterable<[string, FileSystemHandle]> }).entries()) {
+      if (h.kind === "file") files.set(name, h as FileSystemFileHandle);
+    }
+    return files;
   }
 
   /** What is at `parts`, or null. Errors other than "not there" propagate. */
@@ -251,6 +264,25 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
     return true;
   }
 
+  /** What the lazy compare-and-swap (./cas.ts) needs of this backend. */
+  const casHost: HandleCasHost = {
+    lookup,
+    removeAt,
+    createFile: async (parts) => (await dirAt(parts.slice(0, -1), true)).getFileHandle(parts[parts.length - 1], { create: true }),
+    openWritable: (handle) => handle.createWritable(),
+    writeFallback: o.writeFallback,
+  };
+  /** writeIf / removeIf: the lazy compare-and-swap under the path lock; the event only for a swap that happened. */
+  const swap = async (path: string, type: "write" | "delete", run: (cas: typeof import("./cas"), parts: string[]) => Promise<boolean>) => {
+    const parts = vaultSegments(path);
+    const p = parts.join("/");
+    // An interrupted atomic save of this file (./atomic.ts) is finished or undone first, as read() does.
+    if (parts.length && !(await lookup(parts))) await recoverIn(parts.slice(0, -1));
+    const ok = await pathLock.run(p, async () => run(await import("./cas"), parts));
+    if (ok) emit({ type, path: p });
+    return ok;
+  };
+
   return {
     id: o.id,
 
@@ -316,11 +348,100 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
       return await (await (await fileRecovered(path)).getFile()).text();
     },
 
+    async readMany(paths) {
+      const out = new Map<string, File>();
+      const byDir = new Map<string, string[][]>();
+      for (const p of paths) {
+        const parts = vaultSegments(p);
+        if (!parts.length) continue;
+        const key = parts.slice(0, -1).join("/");
+        byDir.set(key, [...(byDir.get(key) ?? []), parts]);
+      }
+      await Promise.all(
+        [...byDir.values()].map(async (group) => {
+          let files: Map<string, FileSystemFileHandle>;
+          try {
+            files = await filesIn(group[0].slice(0, -1));
+          } catch {
+            // why: the folder is not there; each path then takes read(), which says so
+            return;
+          }
+          // A few at a time: a thousand getFile() calls at once queue up in the browser's storage process.
+          let next = 0;
+          const take = async () => {
+            while (next < group.length) {
+              const parts = group[next++];
+              const h = files.get(parts[parts.length - 1]);
+              if (!h) continue;
+              try {
+                out.set(parts.join("/"), await h.getFile());
+              } catch {
+                // why: held by a writer or gone: left to read()
+              }
+            }
+          };
+          await Promise.all(Array.from({ length: Math.min(16, group.length) }, take));
+        }),
+      );
+      return out;
+    },
+
+    async writeMany(items, lock) {
+      const out = new Map<string, boolean | Error>();
+      const dirs = new Map<string, Promise<Map<string, FileSystemFileHandle>>>();
+      const handleOf = async (parts: string[]) => {
+        const key = parts.slice(0, -1).join("/");
+        let files = dirs.get(key);
+        if (!files) dirs.set(key, (files = filesIn(parts.slice(0, -1)).catch(() => new Map<string, FileSystemFileHandle>())));
+        return (await files).get(parts[parts.length - 1]) ?? null;
+      };
+      let next = 0;
+      const worker = async () => {
+        while (next < items.length) {
+          const it = items[next++];
+          const parts = vaultSegments(it.path);
+          const key = parts.join("/");
+          try {
+            const done = await lock(it.path, () => pathLock.run(key, async () => {
+              const h = await handleOf(parts);
+              if (!h) return false;
+              const f = await h.getFile();
+              if (!it.expect.mtime || f.size !== it.expect.size || f.lastModified !== it.expect.mtime) return false;
+              if (typeof (h as { createWritable?: unknown }).createWritable !== "function") await writeAt(parts, it.data, it.path);
+              else {
+                const writable = await h.createWritable();
+                try {
+                  await writable.write(it.data as FileSystemWriteChunkType);
+                } catch (e) {
+                  await (writable as { abort?: () => Promise<void> }).abort?.().catch(() => undefined);
+                  throw e;
+                }
+                await writable.close();
+              }
+              emit({ type: "write", path: key });
+              return true;
+            }));
+            out.set(it.path, done);
+          } catch (e) {
+            out.set(it.path, e instanceof Error ? e : new Error(String(e)));
+          }
+        }
+      };
+      // OPFS writes don't get faster past a handful in flight (measured: 4–64 all ≈ the same); 8 keeps the lock queue short.
+      await Promise.all(Array.from({ length: Math.min(8, items.length) }, worker));
+      return out;
+    },
+
     async write(path, data) {
       const parts = vaultSegments(path);
-      await writeAt(parts, data, path);
-      emit({ type: "write", path: parts.join("/") });
+      const p = parts.join("/");
+      await pathLock.run(p, () => writeAt(parts, data, path));
+      emit({ type: "write", path: p });
     },
+
+    writeIf: (path, data, expect) => swap(path, "write", (cas, parts) => cas.handleWriteIf(casHost, parts, path, data, expect)),
+
+    removeIf: (path, expect) => swap(path, "delete", (cas, parts) => cas.handleRemoveIf(casHost, parts, path, expect)),
 
     async mkdir(path) {
       const parts = vaultSegments(path);
@@ -382,8 +503,9 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
 
     async remove(path) {
       const parts = vaultSegments(path);
-      await removeAt(parts, path);
-      emit({ type: "delete", path: parts.join("/") });
+      const p = parts.join("/");
+      await pathLock.run(p, () => removeAt(parts, path));
+      emit({ type: "delete", path: p });
     },
 
     watch: (listener) => events.on(listener),

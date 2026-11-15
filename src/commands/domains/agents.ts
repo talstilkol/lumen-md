@@ -1,5 +1,6 @@
 /** AI actions on the open note: tags, links, diagrams, translation, grammar, alt text, prompt templates. */
-import { cmdIcons, type Command } from "../../ui/CommandPalette";
+import { cmdIcons } from "../../ui/cmdIcons";
+import type { Command } from "../../ui/CommandPalette";
 import { t, tPlural } from "../../i18n";
 import { uiAlert, uiPrompt } from "../../ui/PromptDialog";
 import { AI_PROMPT_INDEX } from "../../ai/multiLangPromptIndex";
@@ -33,7 +34,7 @@ export function buildDocumentAgentCommands({ setContent, liveDoc }: CommandConte
       hint: t("cmd.ai.productAgent.hint", { defaultValue: "Generate a complete project from a description" }),
       icon: cmdIcons.Sparkles,
       group: t("group.tools"),
-      action: () => void import("./agentsActions").then((m) => m.productAgentFlow({ setContent })),
+      action: () => void import("./agentsActions").then((m) => m.productAgentFlow()),
     },
     {
       id: "ai.diagram",
@@ -70,7 +71,7 @@ export function buildDocumentAgentCommands({ setContent, liveDoc }: CommandConte
           showAiToast(t("toast.generatingChart"), "info");
           const { generateChart } = await import("../../agents/commands");
           const block = await cancellable((signal) => generateChart(liveDoc().content, signal));
-          setContent(`${liveDoc().content.trimEnd()}\n\n${block}\n`);
+          (await import("../../ai/aiWrites")).writeAiContent(liveDoc(), `${liveDoc().content.trimEnd()}\n\n${block}\n`, setContent);
           showAiToast(t("toast.chartInserted"), "success");
         } catch (e) {
           if (isAbort(e)) return;
@@ -93,7 +94,7 @@ export function buildDocumentAgentCommands({ setContent, liveDoc }: CommandConte
           const { analyseNote } = await import("../../agents/analyst");
           showAiToast(t("analyst.working"), "info");
           const { result, blocks } = await cancellable((signal) => analyseNote(liveDoc().content, question.trim(), signal));
-          setContent(`${liveDoc().content.trimEnd()}\n\n${blocks}\n`);
+          (await import("../../ai/aiWrites")).writeAiContent(liveDoc(), `${liveDoc().content.trimEnd()}\n\n${blocks}\n`, setContent);
           showAiToast(t("analyst.done", { answer: String(result.answer.answer) }), "success");
         } catch (e) {
           if (isAbort(e)) return;
@@ -122,7 +123,7 @@ export function buildAltTextCommands(): Command[] {
 
 /** Niqqud on the selection or the note (plans 6.3, W2.5): the whole flow is loaded on use. */
 export function buildNikudCommands({ getEditorView, locale }: CommandContext): Command[] {
-  const runNikud = async (mode: "add" | "partial" | "remove") => {
+  const runNikud = async (mode: "add" | "partial" | "nouns" | "verbs" | "remove") => {
     const view = getEditorView?.();
     if (view) await (await import("../../editor/nikudPalette")).runNikudFromPalette(view, mode, locale);
   };
@@ -142,6 +143,22 @@ export function buildNikudCommands({ getEditorView, locale }: CommandContext): C
       icon: cmdIcons.Sparkles,
       group: t("group.tools"),
       action: () => runNikud("partial"),
+    },
+    {
+      id: "nikud.nouns",
+      label: t("cmd.nikud.nouns"),
+      hint: t("cmd.nikud.nouns.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      action: () => runNikud("nouns"),
+    },
+    {
+      id: "nikud.verbs",
+      label: t("cmd.nikud.verbs"),
+      hint: t("cmd.nikud.verbs.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      action: () => runNikud("verbs"),
     },
     {
       id: "nikud.remove",
@@ -206,7 +223,7 @@ export function buildPromptTemplateCommands({ locale, setContent, liveDoc }: Com
           const { runAgentOrThrow } = await import("../../agents/runtime");
           const { templaterAgent } = await import("../../agents/defs");
           const result = await cancellable((signal) => runAgentOrThrow(templaterAgent, { text: prompt, extra: { templateId: tpl.id } }, { document: liveDoc().content, signal }));
-          setContent(liveDoc().content + "\n\n---\n\n" + result);
+          (await import("../../ai/aiWrites")).writeAiContent(liveDoc(), liveDoc().content + "\n\n---\n\n" + result, setContent);
           showAiToast(t("toast.completed", { name: tpl.label }), "success");
         } catch (e) {
           if (isAbort(e)) return;

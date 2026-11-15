@@ -14,8 +14,19 @@ if (self.trustedTypes && !self.trustedTypes.defaultPolicy) {
     self.trustedTypes.createPolicy("default", {
       createScript: function(s) { return s; },
     });
-  } catch (e) {}
+  } catch (e) {
+    // why: another script won the race for the "default" name, or the CSP's
+    // trusted-types list does not allow it. Nothing to undo: without a policy
+    // each run's new Function() throws a TypeError, and that run reports it
+    // as its error like any other.
+  }
 }
+
+// Every lock below that does not take (defineProperty throws on a
+// non-configurable property) is a hole in the second layer. It is recorded
+// here, and every run is then refused with the list instead of running with
+// a silent hole.
+var lockdownGaps = [];
 
 // Lock the run down before any user code exists. The real boundary is the
 // runner iframe (opaque origin, CSP connect-src 'none' — see
@@ -30,7 +41,7 @@ if (self.trustedTypes && !self.trustedTypes.defaultPolicy) {
   for (var o = self; o; o = Object.getPrototypeOf(o)) targets.push(o);
   names.forEach(function(name) {
     targets.forEach(function(t) {
-      try { Object.defineProperty(t, name, { value: undefined, writable: false, configurable: false }); } catch (e) {}
+      try { Object.defineProperty(t, name, { value: undefined, writable: false, configurable: false }); } catch (e) { lockdownGaps.push(name); }
     });
   });
 })();
@@ -46,6 +57,10 @@ if (self.trustedTypes && !self.trustedTypes.defaultPolicy) {
   var setI = typeof setInterval === "function" ? setInterval : null;
   var clearT = clearTimeout;
   var MakeFunction = Function;
+  // A private copy, taken before any user code exists; the global is then
+  // cleared, so a "shared" run cannot empty the list the check reads.
+  var gaps = lockdownGaps.slice();
+  lockdownGaps = null;
 
   // No import(), not even one built from a string. WebKit does not apply
   // the runner's script-src to a dynamic import() from a worker (blob:,
@@ -84,7 +99,7 @@ if (self.trustedTypes && !self.trustedTypes.defaultPolicy) {
     // Keeps \`x instanceof Function\` and Function.prototype.call working.
     refuse.prototype = MakeFunction.prototype;
     var lock = function(t, name, value) {
-      try { Object.defineProperty(t, name, { value: value, writable: false, configurable: false }); } catch (e) {}
+      try { Object.defineProperty(t, name, { value: value, writable: false, configurable: false }); } catch (e) { gaps.push(name); }
     };
     var protos = [
       MakeFunction.prototype,
@@ -145,7 +160,11 @@ if (self.trustedTypes && !self.trustedTypes.defaultPolicy) {
         level: level,
         parts: toParts(args),
       });
-    } catch (e) {}
+    } catch (e) {
+      // why: post() only throws once the worker is closing (after a timeout's
+      // closeWorker()); the parts are strings, so they always clone. A log
+      // line from a closing run has no one left to reach.
+    }
   };
 
   self.addEventListener("message", function(event) {
@@ -185,6 +204,14 @@ if (self.trustedTypes && !self.trustedTypes.defaultPolicy) {
 
     // Emitted as a plain message, not thrown: Firefox's and WebKit's
     // err.stack has only the frames, so the reason would not be shown.
+    // Before the import check, so a gap is reported even for a run that
+    // would be refused anyway.
+    if (gaps.length) {
+      emit("error", ["live-js refuses to run: the sandbox could not remove " + gaps.join(", ")], runId);
+      finish();
+      return;
+    }
+
     if (hasImportWord(source)) {
       emit("error", ["live-js has no import(): code that contains the word \\"import\\" does not run (the sandbox has no network)"], runId);
       finish();

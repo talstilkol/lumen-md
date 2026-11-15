@@ -4,7 +4,7 @@
  */
 
 import type { Command } from "../ui/CommandPalette";
-import { cmdIcons } from "../ui/CommandPalette";
+import { cmdIcons } from "../ui/cmdIcons";
 import { useAppStore } from "../store/useStore";
 import { uiPrompt, uiAlert } from "../ui/PromptDialog";
 import { t } from "../i18n";
@@ -108,7 +108,10 @@ export function buildAiOutlineCommand(getContent: () => string, setContent: (s: 
           return;
         }
         const newContent = applyOutline(content, headings);
-        setContent(newContent);
+        const { writeAiContent } = await import("./aiWrites");
+        const { doc } = useAppStore.getState();
+        // The outline's headings are AI text: tagged at the write (W10.E37).
+        writeAiContent({ ...doc, content }, newContent, setContent);
         showAiToast(t("toast.insertedHeadings", { count: headings.length }), "success");
       } catch (e) {
         if (isAbort(e)) return;

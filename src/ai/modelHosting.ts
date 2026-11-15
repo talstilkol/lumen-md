@@ -30,6 +30,8 @@
  * a worker and in tests.
  */
 
+import { releaseTagSlug } from "../lib/slug";
+
 export interface HostedFile {
   /** Path inside the model repository ("onnx/encoder_model_q4f16.onnx"). */
   path: string;
@@ -105,16 +107,8 @@ const HEX40 = /^[0-9a-f]{40}$/;
 
 export const hasSha = (f: Pick<HostedFile, "sha256">): boolean => typeof f.sha256 === "string" && HEX64.test(f.sha256);
 
-/** "onnx-community/whisper-base" → "onnx-community-whisper-base" (a release tag segment). */
-export function slug(id: string): string {
-  return id
-    .toLowerCase()
-    .replace(/[^a-z0-9._-]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
-
 export function releaseTag(m: Pick<HostedModel, "id" | "hosting">): string {
-  return m.hosting?.tag ?? `models-${slug(m.id)}`;
+  return m.hosting?.tag ?? `models-${releaseTagSlug(m.id)}`;
 }
 
 /** Release assets are flat: "onnx/encoder.onnx" is published as "onnx__encoder.onnx". */

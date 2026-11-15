@@ -32,6 +32,18 @@ Lumen לא משתמש ב-GitHub Actions. מפעל האימות
 | `lighthouse` | רק ב-main וב-PR-ים עם התווית `lighthouse`, כמו ב-ci.yml | linux |
 | `receipt` | הקבלה החתומה, אחרי כל השערים (עברו או נכשלו) | linux |
 
+שלוש משימות נוספות שייכות ל-Buildkite בלבד ואין להן צעד ב-ci.yml (`NATIVE_JOBS` ב-`scripts/buildkite/lib.mjs`). הן רצות בכל בנייה, בלי תנאי:
+
+| משימה | מה היא מריצה | תור |
+|---|---|---|
+| `pr-check` | ‏`npm run pr:check` על ה-PR עצמו (הבסיס, הגוף והתגובות שלו), ואחריו הדוח כתגובה אחת ב-PR שכל בנייה מעדכנת, בין שעבר ובין שנכשל (`scripts/buildkite/pr-comment.mjs`); בנייה שאינה של PR עוברת | linux |
+| `security` | ‏`scripts/security-scan.mjs`: ‏gitleaks, ‏npm audit (גבוה וקריטי), ‏cargo audit עם audit-lock, ‏semgrep עם חוקי קוד פתוח (במקום CodeQL). סורק שחסר בסוכן מכשיל את המשימה | linux |
+| `security-nightly` | רק בבנייה המתוזמנת: ‏osv-scanner על כל קובצי הנעילה, ‏cargo deny, ‏OpenSSF Scorecard (צריך `GITHUB_AUTH_TOKEN` לקריאה בלבד) ו-SBOM בפורמט CycloneDX ‏(syft) | linux |
+
+כדי לפרסם את התגובה, המכונה צריכה טוקן fine-grained עם "Pull requests: write" על הריפו, בקובץ ש-`LUMEN_PR_COMMENT_TOKEN_FILE` מציין. בלעדיו הדוח נשאר artifact של המשימה, והמשימה אומרת זאת. הסוכן צריך `gh` עם טוקן קריאה בשביל `pr-check`, ואת `gitleaks`, ‏`semgrep` ו-`cargo-audit` בשביל `security` (ואת `osv-scanner`, ‏`cargo-deny`, ‏`scorecard` ו-`syft` להרצה הלילית). גם `npm run ci:local` מריץ את gitleaks, ‏semgrep ו-cargo audit כשהם מותקנים.
+
+ה-PR מקבל את `pr:check` דרך `pr-check` ודרך `npm run ci:local`: ‏`ci:local` מריץ אותו בכל הרצה, מול הרכבת הנוכחית (או `--base`), ועם `--body <file>` בשביל הסעיפים של גוף ה-PR. ‏Vercel בונה רק את `main` ואת `verify/*` (`scripts/vercel-ignore.sh`): בתוכנית החינמית יש 100 בניות ביום, והאפליקציה של PR נבדקת דרך הרכבת.
+
 ב-ci.yml יש צעדים שאינם שערים: התקנות, תגובות ל-PR, מטמון הגדלים של main
 ואבחון. כל אחד מהם מופיע עם הסיבה ב-`NOT_GATES` שב-`scripts/buildkite/lib.mjs`.
 
@@ -45,6 +57,19 @@ Lumen לא משתמש ב-GitHub Actions. מפעל האימות
 - שער לא מדווח סטטוס, או שהקבלה לא מחכה לו
 
 אחרי שינוי ב-ci.yml: `npm run ci:pipeline -- --write`, ולשמור את הקובץ בקומיט.
+
+**עקיפה אחת מתועדת.** צעד סחיפת ה-i18n ב-ci.yml סופר אנגלית רק ב-`src/i18n/locales/en/`.
+לכן האנגלית של התחומים שנטענים בעצלות (`src/i18n/lazy/*.json`, מחוץ לחבילת
+ההפעלה) נראתה כמו סחיפה: en 2270 מול he 2493, בלי שאף מחרוזת חסרה. ה-pipeline
+מריץ במקומו `npm run i18n:drift`:
+
+- האנגלית נספרת כ-`locales/en` ועוד הקבצים העצלים
+- המגבלה של 10 מפתחות מ-ci.yml חלה על כל שפה, לא רק על עברית
+- מפתח בלי מחרוזת באנגלית נכשל
+
+הצעד שווה לזה של ci.yml או מחמיר ממנו. `OVERRIDES` ב-`scripts/buildkite/lib.mjs`
+נועץ את ה-sha256 של טקסט ה-ci.yml שהוא מחליף, ולכן שינוי בצעד הזה עוצר את
+המחולל עד שבודקים את העקיפה שוב.
 
 ### רסיסים לפי זמן
 

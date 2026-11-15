@@ -11,16 +11,19 @@
  *      the words instead. One click starts the sync.
  *   3. Every file's state (synced, waiting, conflict, can't sync).
  *
- * Google Drive and Dropbox appear only once their OAuth apps exist; the
- * advanced panel keeps WebDAV details, S3 and everything else.
+ * Google Drive and Dropbox are always listed (W10.C19). With their OAuth
+ * app in the build, choosing one signs in (the sign-in is listed in the
+ * privacy ledger) and, once connected, goes on to the key here; without
+ * it, the option says it is not in this build yet. The advanced panel
+ * keeps WebDAV details, S3 and everything else.
  */
 
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { getLocale, t } from "../../../i18n";
 import "../strings";
 import { syncSession, type SyncSession } from "./session";
-import { describeConnectError } from "./SyncPanel";
-import { oauthAvailable, type ProviderSettings } from "../providers";
+import { describeConnectError, savePendingOAuth } from "./SyncPanel";
+import { defaultSettings, hasProviderSecret, legacyStore, oauthAvailable, type ProviderSettings } from "../providers";
 import { relayOrigin } from "../providers/relay";
 import { isMobileDevice, setupChoices, type SetupBackend } from "../setup/recommend";
 import { checkPosition, newRecoveryWords, normalizeWord, parseRecoveryWords, relayToken } from "../setup/recoveryWords";
@@ -28,6 +31,9 @@ import type { FileSyncState } from "../status";
 import { WrongPassphraseError } from "../header";
 import { explainError } from "../../../lib/userError";
 import { HelpButton } from "../../../ui/HelpButton";
+import { UnauditedNotice } from "./unaudited";
+import { Modal } from "../../../ui/Modal";
+import { encodeQr, qrPath } from "../../../lib/qr";
 
 const muted: React.CSSProperties = { fontSize: 13, color: "hsl(var(--fg-muted))" };
 const errorStyle: React.CSSProperties = { fontSize: 13, color: "hsl(var(--danger))" };
@@ -65,6 +71,8 @@ export function SetupWizard({
   const [step, setStep] = useState<"where" | "key" | "done">(s.phase === "unlocked" ? "done" : "where");
   const [settings, setSettings] = useState<ProviderSettings | null>(null);
   const [webdav, setWebdav] = useState({ url: "", username: "", password: "" });
+  /** The words as a QR code, for the other device's camera (W10.C20); hidden until asked for. */
+  const [showQr, setShowQr] = useState(false);
   const [words, setWords] = useState<string[] | null>(null);
   const [join, setJoin] = useState(false);
   const [typed, setTyped] = useState("");
@@ -76,18 +84,31 @@ export function SetupWizard({
   useEffect(() => {
     void newRecoveryWords().then(setWords);
   }, []);
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
 
   const label = (b: SetupBackend) => t(`e2ee.guide.where.${b}`);
 
   /** Click 1: the place. A folder is picked here (the dialog needs the click). */
   async function chooseWhere() {
     setError(null);
-    if (where === "dropbox" || where === "gdrive") return onAdvanced();
+    if (where === "dropbox" || where === "gdrive") {
+      const chosen = defaultSettings(where);
+      if (hasProviderSecret(where)) {
+        // Signed in already: on to the key, like the other places.
+        setSettings(chosen);
+        setStep("key");
+        return;
+      }
+      // The sign-in leaves the page; the sync panel connects this choice on return (finishOAuthReturn).
+      savePendingOAuth(chosen);
+      const { recordUserShare } = await import("../../../ai/privacyLedger");
+      recordUserShare(where === "gdrive" ? "https://accounts.google.com/o/oauth2/v2/auth" : "https://www.dropbox.com/oauth2/authorize", 0, `Sign in to ${where === "gdrive" ? "Google Drive" : "Dropbox"} for encrypted sync (OAuth)`);
+      try {
+        await legacyStore(where)!.connect();
+      } catch (e) {
+        setError(explainError(e));
+      }
+      return;
+    }
     if (where === "folder") {
       const { pickSyncFolder } = await import("../setup/folderHandle");
       const picked = await pickSyncFolder().catch((e: unknown) => (setError(explainError(e)), null));
@@ -140,11 +161,8 @@ export function SetupWizard({
   const attention = files.filter(([, f]) => f.state === "conflict" || f.state === "error" || f.state === "pending").slice(0, 50);
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "var(--overlay)", display: "grid", placeItems: "center", zIndex: 1000 }} onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+    <Modal onClose={onClose} aria-labelledby="sync-setup-title" style={{ position: "fixed", inset: 0, background: "var(--overlay)", display: "grid", placeItems: "center", zIndex: 1000 }} onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="sync-setup-title"
         dir={getLocale() === "he" || getLocale() === "ar" ? "rtl" : "ltr"}
         data-testid="sync-setup"
         style={{ width: "min(540px, calc(100vw - 32px))", maxHeight: "calc(100vh - 32px)", overflow: "auto", background: "hsl(var(--bg))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border))", borderRadius: 12, padding: 20, display: "grid", gap: 14 }}
@@ -159,6 +177,7 @@ export function SetupWizard({
             ×
           </button>
         </div>
+        <UnauditedNotice />
 
         {step === "where" && (
           <>
@@ -173,6 +192,16 @@ export function SetupWizard({
                       {b === choices.recommended ? ` · ${t("e2ee.guide.recommended")}` : ""}
                     </strong>
                     <span style={muted}>{t(`e2ee.guide.where.${b}.about`)}</span>
+                  </span>
+                </label>
+              ))}
+              {choices.unready.map((b) => (
+                <label key={b} style={{ display: "flex", gap: 10, alignItems: "flex-start", padding: 10, border: "1px dashed hsl(var(--border))", borderRadius: 8, opacity: 0.7 }}>
+                  <input type="radio" name="sync-where" value={b} disabled data-testid={`sync-where-${b}`} />
+                  <span style={{ display: "grid", gap: 2 }}>
+                    <strong>{label(b)}</strong>
+                    <span style={muted}>{t(`e2ee.guide.where.${b}.about`)}</span>
+                    <span style={muted} data-testid={`sync-where-${b}-unready`}>{t("e2ee.guide.where.notInBuild", { name: label(b) })}</span>
                   </span>
                 </label>
               ))}
@@ -210,7 +239,11 @@ export function SetupWizard({
                   <button type="button" onClick={() => void navigator.clipboard?.writeText(words.join(" ")).catch(() => undefined)}>
                     {t("e2ee.guide.copy")}
                   </button>
+                  <button type="button" aria-expanded={showQr} onClick={() => setShowQr(!showQr)} data-testid="sync-setup-qr-toggle">
+                    {showQr ? t("e2ee.guide.hideQr") : t("e2ee.guide.showQr")}
+                  </button>
                 </div>
+                {showQr && <KeyQr text={words.join(" ")} />}
                 <label style={{ display: "grid", gap: 4, fontSize: 14 }}>
                   {t("e2ee.guide.checkAsk", { n: position })}
                   <input style={field} value={check} onChange={(e) => setCheck(e.target.value)} dir="rtl" lang="he" autoComplete="off" data-testid="sync-setup-check" />
@@ -266,6 +299,26 @@ export function SetupWizard({
           </div>
         )}
       </div>
-    </div>
+    </Modal>
+  );
+}
+
+/**
+ * The key's words as a QR code (W10.C20, lib/qr.ts: byte mode, level M):
+ * the other device's camera reads the words, which go into "I already have
+ * a key". Drawn here only, as an SVG path; the words are never logged.
+ */
+function KeyQr({ text }: { text: string }) {
+  const qr = useMemo(() => encodeQr(text, "M"), [text]);
+  const n = qr.size + 8;
+  return (
+    <figure style={{ margin: 0, display: "grid", gap: 6 }} data-testid="sync-setup-qr">
+      {/* design-allow: a QR code is black on white in both themes, so every scanner reads it */}
+      <svg role="img" aria-label={t("e2ee.guide.qr")} viewBox={`0 0 ${n} ${n}`} width={Math.min(240, n * 4)} height={Math.min(240, n * 4)} shapeRendering="crispEdges" style={{ background: "#fff", borderRadius: 4, justifySelf: "start" }}>
+        {/* design-allow: the QR modules are black (see above) */}
+        <path d={qrPath(qr)} fill="#000" />
+      </svg>
+      <figcaption style={{ fontSize: 13, color: "hsl(var(--fg-muted))" }}>{t("e2ee.guide.qrHint")}</figcaption>
+    </figure>
   );
 }

@@ -1,5 +1,4 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { useFocusTrap } from "./useFocusTrap";
 import type { ReactElement } from "react";
 import { Search, FileText, Sparkles, Loader2, FileCode2, Wand2, Image as ImageIcon } from "lucide-react";
 import { t, tPlural } from "../i18n";
@@ -13,12 +12,10 @@ import type { ChatMessage } from "../ai/llm";
 import { renderMarkdown } from "../renderer/pipeline";
 import { log } from "../lib/logger";
 import { showAiToast } from "../ui/AiToast";
-import { semanticSearch, type RagResult } from "../ai/embeddings";
+import type { RagResult } from "../ai/embeddings";
 import { indexWorkspace, searchHybrid, type SemanticHit } from "../ai/semanticSearch";
 import { rerank } from "../ai/reranker";
 import { CITE_INSTRUCTIONS, verifyVaultCitations, type VaultCitation } from "../ai/vaultCitations";
-import { useCapability } from "../billing/gates";
-import { UpgradeNotice } from "./UpgradeNotice";
 import { rememberSearch, getSearchHistory, forgetSearch } from "../storage/searchHistory";
 import { flashSearchHighlight } from "../editor/searchHighlight";
 import { isSaved, removeSavedSearch, saveSearch } from "../search/savedSearches";
@@ -29,6 +26,10 @@ import { explainError } from "../lib/userError";
 import { EmptyState, runCommand } from "./EmptyState";
 import { HelpButton } from "./HelpButton";
 import "./searchDialogStrings";
+import { Modal } from "./Modal";
+import { buildAskContext, retrieveForQuestion } from "./searchDialogParts";
+import { renderSnippet } from "./searchSnippet";
+import { regexNoteText } from "./searchRegexNote";
 
 interface Props {
   open: boolean;
@@ -41,9 +42,8 @@ interface Props {
 
 export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: Props) {
   const [mode, setMode] = useState<"search" | "smart" | "ai" | "images">("search");
-  // Smart (embedding) search is a Pro capability when billing is enforced;
-  // self-hosted setups always have it.
-  const smartAllowed = useCapability("smartSearch");
+  // Smart (embedding) search runs on this device, so it is never gated:
+  // the free tier never shrinks (src/billing/gates.ts gates hosted services only).
   const [query, setQuery] = useState("");
   // Re-render after saving / removing a saved search (its state lives in localStorage).
   const [, setSavedTick] = useState(0);
@@ -56,17 +56,26 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
   const [hits, setHits] = useState<SearchHit[]>([]);
   /** The other-layout reading of the query whose hits are shown too. */
   const [layoutVariant, setLayoutVariant] = useState<string | null>(null);
+  /** What a /regex/ could not check (2.39): skipped long notes, or a stopped search. */
+  const [regexNote, setRegexNote] = useState("");
   const [smartHits, setSmartHits] = useState<SemanticHit[]>([]);
   // W5.28: local translations of the hits in another language than the query, and whether the embeddings bridge languages.
   const [translations, setTranslations] = useState<Record<string, string | null>>({});
-  const [monolingual, setMonolingual] = useState(false);
+  // W10.B6: which path a Hebrew query takes to English notes (embedding, or keyword only and why).
+  const [crossPath, setCrossPath] = useState<import("../search/crossLingual").CrossLingualPath | null>(null);
   const [smartIndexing, setSmartIndexing] = useState(false);
   const [smartIndexedAt, setSmartIndexedAt] = useState<number | null>(null);
   const [active, setActive] = useState(0);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  // A tab button takes focus when clicked: hand it back to the query box, so
+  // typing after switching to Images (or any tab) searches instead of going
+  // nowhere (e2e image-search, W4.2).
+  const pickMode = (m: "search" | "smart" | "ai" | "images") => {
+    setMode(m);
+    inputRef.current?.focus();
+  };
   const listRef = useRef<HTMLDivElement | null>(null);
-  const dialogRef = useRef<HTMLDivElement | null>(null);
 
   const [aiAnswer, setAiAnswer] = useState<string | null>(null);
   const [aiRendered, setAiRendered] = useState<ReactElement | null>(null);
@@ -97,16 +106,14 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
     }
   }, [open]);
 
-  // Focus trap while open; focus returns to the opener; Escape closes from anywhere in the dialog (plan 10.1).
-  useFocusTrap(dialogRef, { active: open, onEscape: onClose });
-
   useEffect(() => {
     if (!open) return;
     if (mode !== "search") return;
     let cancelled = false;
     setLoading(true);
     const handle = setTimeout(() => {
-      searchWorkspace(query, { limit: 40 })
+      let note = "";
+      searchWorkspace(query, { limit: 40, onRegexInfo: (r) => (note = regexNoteText(r)) })
         .then(async (h) => {
           // Few hits: try the same keystrokes in the other keyboard layout too (plan W2.8).
           const other = h.length < 3 ? wrongLayoutVariant(query) : null;
@@ -114,12 +121,14 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
           if (cancelled) return;
           setLayoutVariant(more.length ? other : null);
           setHits(mergeLayoutHits(h, more));
+          setRegexNote(note);
           setActive(0);
           setLoading(false);
         })
         .catch(() => {
           if (cancelled) return;
           setHits([]);
+          setRegexNote("");
           setLoading(false);
         });
     }, 150);
@@ -133,7 +142,7 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
   useEffect(() => {
     if (!open) return;
     if (mode !== "smart") return;
-    if (!smartAllowed || !query.trim()) {
+    if (!query.trim()) {
       setSmartHits([]);
       return;
     }
@@ -165,7 +174,7 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
       clearTimeout(handle);
       abort.abort();
     };
-  }, [open, query, mode, smartAllowed]);
+  }, [open, query, mode]);
 
   async function rebuildSmartIndex() {
     // Embeddings are computed on this device by default (Ollama or
@@ -217,12 +226,12 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
     const ac = new AbortController();
     setTranslations({});
     void (async () => {
-      const [{ markCrossLingual, scriptOf }, { translatePassage }, { embeddingStatus }] = await Promise.all([import("../search/crossLingual"), import("../search/passageTranslator"), import("../ai/semanticSearch")]);
+      const [{ markCrossLingual, scriptOf, crossLingualPath }, { translatePassage }, { embeddingStatus, semanticIndexEmbedding }] = await Promise.all([import("../search/crossLingual"), import("../search/passageTranslator"), import("../ai/semanticSearch")]);
       const marked = markCrossLingual(query, smartHits).slice(0, 8).filter((h) => h.crossLingual);
       if (scriptOf(query) === "he") {
-        const st = await embeddingStatus().catch(() => null);
-        if (!ac.signal.aborted) setMonolingual(st ? !st.multilingual : false);
-      }
+        const [st, built] = await Promise.all([embeddingStatus().catch(() => null), semanticIndexEmbedding().catch(() => null)]);
+        if (!ac.signal.aborted) setCrossPath(crossLingualPath(query, st, built));
+      } else setCrossPath(null);
       const to = scriptOf(query) === "he" ? "he" : "en";
       for (const h of marked) {
         const r = await translatePassage(h.snippet, h.lang, to, { signal: ac.signal });
@@ -295,64 +304,12 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
     setAiCitations(null);
 
     try {
-      // Hybrid retrieval — when the user has built the embedding index
-      // (Smart tab → Build) we fuse BM25 + semantic via RRF for genuinely
-      // semantic-aware Q&A. When the index is empty, `searchHybrid` falls
-      // back to BM25 alone, so we never block the AI tab on a missing index.
-      const hybridHits = smartAllowed
-        ? await searchHybrid(query, 30).catch(() => [] as SemanticHit[])
-        : [];
-      const fallback =
-        hybridHits.length === 0
-          ? // Whole notes (bounded), like the hybrid path: the packer trims.
-            await semanticSearch(query, { topK: 8, maxContentChars: 200_000 })
-          : [];
-      // Materialise the hybrid hits into RagResult shape so the existing
-      // citation-rendering code below works untouched.
-      const hybridResults: RagResult[] = await Promise.all(
-        hybridHits.map(async (h) => ({
-          path: h.path,
-          score: h.score,
-          snippet: h.snippet,
-          content: await readWorkspaceFile(h.path)
-            // Whole notes (bounded): the context packer picks the parts.
-            .then((c) => c.slice(0, 200_000))
-            .catch(() => h.snippet),
-        })),
-      );
-      // T29: rerank the candidates against the question, keep the best 8.
-      const pool = hybridResults.length > 0 ? hybridResults : fallback;
-      const results: RagResult[] = (
-        await rerank(query, pool.map((r) => ({ ...r, text: `${r.snippet ?? ""}\n${r.content.slice(0, 1500)}` })))
-      )
-        .slice(0, 8)
-        .map(({ text: _text, rerankScore: _r, ...r }) => r as RagResult);
+      const results = await retrieveForQuestion(query);
       if (local.signal.aborted) throw local.signal.reason; // superseded or closed
       setAiSources(results);
       setAiCitations(null);
 
-      // Build context from semantic results: only the parts relevant to the
-      // question, within the AI mode's token budget (context packer).
-      const { packContext, CONTEXT_BUDGET, getAiMode } = await import("../ai/contextPacker");
-      const packed = packContext(
-        query,
-        results.map((r) => ({ path: r.path, content: r.content })),
-        CONTEXT_BUDGET[getAiMode()],
-      );
-      // Plan 2.7: a note from outside (clipped, imported, pulled) goes to the model cleaned and delimited, and taints the run.
-      const { ensureProvenanceBackfill, guardUntrusted, untrustedSourcesOfNote } = await import("../agents/untrusted");
-      await ensureProvenanceBackfill();
-      const untrusted: string[] = [];
-      const contextStr = results.length > 0
-        ? packed
-            .map((r, i) => {
-              const entry = `📄 [${i + 1}] ${r.path}\n${r.text}`;
-              const from = untrustedSourcesOfNote(r.path, results.find((x) => x.path === r.path)?.content);
-              untrusted.push(...from);
-              return `---\n${from.length ? guardUntrusted(entry, from).text : entry}`;
-            })
-            .join("\n")
-        : t("searchDialog.noRelevant");
+      const { contextStr, untrusted } = await buildAskContext(query, results);
 
       setAiAnswer(t("searchDialog.thinking"));
 
@@ -417,30 +374,30 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
   if (!open) return null;
 
   return (
-    <div className="cmd-palette-backdrop" onClick={onClose} role="dialog" aria-modal>
-      <div ref={dialogRef} className="cmd-palette" style={{ minHeight: "350px", display: "flex", flexDirection: "column" }} onClick={(e) => e.stopPropagation()}>
+    <Modal aria-label={t("search.placeholder")} onClose={onClose} className="cmd-palette-backdrop" onClick={onClose}>
+      <div className="cmd-palette" data-testid="search-dialog" style={{ minHeight: "350px", display: "flex", flexDirection: "column" }} onClick={(e) => e.stopPropagation()}>
         <div style={{ display: "flex", borderBottom: "1px solid hsl(var(--border))", padding: "0 10px", alignItems: "center" }}>
-          <button className={`chart-block-tab ${mode === "search" ? "active" : ""}`} style={{ fontSize: 13, background: "transparent" }} onClick={() => setMode("search")}>
+          <button className={`chart-block-tab ${mode === "search" ? "active" : ""}`} style={{ fontSize: 13, background: "transparent" }} onClick={() => pickMode("search")}>
              {t("searchDialog.mode.search")}
           </button>
           <button
             className={`chart-block-tab ${mode === "smart" ? "active" : ""}`}
             style={{ fontSize: 13, background: "transparent" }}
-            onClick={() => setMode("smart")}
+            onClick={() => pickMode("smart")}
             title={t("searchDialog.smartHint")}
           >
             <Wand2 size={11} style={{ display: "inline", marginInlineEnd: 4 }} /> {t("searchDialog.mode.smart")}
           </button>
-          <button className={`chart-block-tab ${mode === "ai" ? "active" : ""}`} style={{ fontSize: 13, background: "transparent" }} onClick={() => setMode("ai")}>
+          <button className={`chart-block-tab ${mode === "ai" ? "active" : ""}`} style={{ fontSize: 13, background: "transparent" }} onClick={() => pickMode("ai")}>
              <Sparkles size={11} style={{display:"inline", marginInlineEnd:4}}/> {t("searchDialog.mode.ai")}
           </button>
-          <button className={`chart-block-tab ${mode === "images" ? "active" : ""}`} style={{ fontSize: 13, background: "transparent" }} onClick={() => setMode("images")} data-testid="search-tab-images">
+          <button className={`chart-block-tab ${mode === "images" ? "active" : ""}`} style={{ fontSize: 13, background: "transparent" }} onClick={() => pickMode("images")} data-testid="search-tab-images">
              <ImageIcon size={11} style={{ display: "inline", marginInlineEnd: 4 }} /> {t("imageSearch.tab")}
           </button>
           <span style={{ marginInlineStart: "auto" }}>
             <HelpButton topic="workspace/search" />
           </span>
-          {mode === "smart" && smartAllowed && (
+          {mode === "smart" && (
             <button
               type="button"
               onClick={rebuildSmartIndex}
@@ -461,6 +418,12 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
             </button>
           )}
         </div>
+        {mode === "search" && /[\u05d0-\u05ea]{2}/.test(query) && hits.length < 3 && (
+          // W10.B6: keyword search does not reach English notes (held-out 0/30); say so where a Hebrew query finds little, and where it works.
+          <div role="status" data-testid="search-crosslingual-status" style={{ padding: "4px 14px", fontSize: 11.5, color: "hsl(var(--fg-muted))" }}>
+            {t("searchDialog.crossLingual.keyword")}
+          </div>
+        )}
         {mode === "search" && layoutVariant && query.trim() && (
           <div role="status" data-testid="search-layout-hint" dir="auto" style={{ padding: "6px 14px", fontSize: 12, color: "hsl(var(--fg-muted))" }}>
             {t("palette.layoutHint", { text: layoutVariant })}
@@ -538,6 +501,11 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
             {t("search.operatorsHint")}
           </div>
         )}
+        {mode === "search" && regexNote && (
+          <div data-testid="search-regex-note" role="status" dir="auto" style={{ padding: "2px 14px 6px", fontSize: 11, color: "hsl(var(--fg-muted))", unicodeBidi: "plaintext" }}>
+            {regexNote}
+          </div>
+        )}
         <div className="cmd-palette-list" ref={listRef}>
           {mode === "images" && (
             <Suspense fallback={null}>
@@ -552,10 +520,7 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
               />
             </Suspense>
           )}
-          {mode === "smart" && !smartAllowed && (
-            <UpgradeNotice compact plan="pro" message={t("billing.upgrade.smartSearch")} />
-          )}
-          {empty && mode !== "images" && !(mode === "smart" && !smartAllowed) && (
+          {empty && mode !== "images" && (
             mode === "smart" && !smartIndexedAt && !query ? (
               <div className="cmd-palette-empty">{t("searchDialog.buildHint")}</div>
             ) : query ? (
@@ -736,9 +701,9 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
               </div>
             );
           })}
-          {mode === "smart" && monolingual && smartHits.length > 0 && (
-            <div role="note" data-testid="smart-monolingual" style={{ padding: "6px 12px", fontSize: 11.5, color: "hsl(var(--fg-muted))" }}>
-              {t("searchDialog.monolingualEmbeddings")}
+          {mode === "smart" && crossPath?.path === "keyword-only" && smartHits.length > 0 && (
+            <div role="note" data-testid="smart-monolingual" data-reason={crossPath.reason} style={{ padding: "6px 12px", fontSize: 11.5, color: "hsl(var(--fg-muted))" }}>
+              {crossPath.reason === "reindex" ? t("searchDialog.crossLingual.reindex") : t("searchDialog.monolingualEmbeddings")}
             </div>
           )}
         </div>
@@ -827,27 +792,6 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
           <span><kbd>Esc</kbd> {t("palette.close")}</span>
         </div>
       </div>
-    </div>
-  );
-}
-
-function renderSnippet(hit: SearchHit): React.ReactNode {
-  if (!hit.snippet) return null;
-  if (!hit.match) return hit.snippet;
-  const { start, end } = hit.match;
-  return (
-    <>
-      {hit.snippet.slice(0, start)}
-      <mark
-        style={{
-          background: "hsl(var(--accent) / 0.25)",
-          color: "hsl(var(--fg))",
-          padding: 0,
-        }}
-      >
-        {hit.snippet.slice(start, end)}
-      </mark>
-      {hit.snippet.slice(end)}
-    </>
+    </Modal>
   );
 }

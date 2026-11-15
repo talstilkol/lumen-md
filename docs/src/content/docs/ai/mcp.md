@@ -86,6 +86,22 @@ npx -p @lumen-md/mcp-server lumen mcp enable claude-code --vault "$HOME/Document
 arguments: `npx -y @lumen-md/mcp-server --client cursor` (or `vscode`,
 `zed`) with `LUMEN_VAULT` in `env`.
 
+## What a client may see
+
+`.lumen/mcp.json` can limit, for every client (`scope`) or for one (`clients.<id>.scope`), which notes the MCP tools see at all:
+
+```json
+{ "scope": { "deny": { "folders": ["journal"], "tags": ["private"] } },
+  "clients": { "cursor": { "enabled": true, "scopes": ["search", "read"],
+                           "scope": { "allow": { "folders": ["work"] } } } } }
+```
+
+- **How a note is judged.** A note is visible when no allow list is set or it matches one (a folder or a tag), and it matches no deny entry. Deny always wins. Both the vault's rules and the client's rules must pass.
+- **Tags.** Tags are the frontmatter `tags` and inline `#tags`, outside code. `private` also covers `private/health`.
+- **Where it applies.** The rules apply to every tool: search, read, list, tags, backlinks and Bases. They also apply to every proposed change, so a client can't write into a hidden note, or tag a note to hide it.
+- **Hidden notes.** A hidden note answers exactly like a missing one, and the refusal is logged.
+- **Citations.** Every answer from a note carries an anchor: `[[note#Heading]]`, or `[[note#L12]]` above the first heading. It appears as a fourth column in search hits, and as `_meta["io.lumen/anchors"]` on read_note, search_notes and get_backlinks. A note's text is never changed.
+
 ## Approving changes
 
 A client's `create_note` / `append_note` / `write_note` /
@@ -142,6 +158,17 @@ generation connect.
 3. Ask it to *create a note*: the client says it is waiting for approval,
    and the proposal is in Lumen's review screen. Approve it; the note
    appears, and `lumen mcp log` shows `proposed` then `approved`.
+
+## Streamable HTTP
+
+`lumen mcp serve --http [port]` serves the same tools over Streamable HTTP. It listens on `127.0.0.1` only, at `/mcp`, and the default port is 3917. It follows MCP 2026-07-28:
+
+- **Request headers.** Every request must carry `MCP-Protocol-Version`, `Mcp-Method` and, for `tools/call`, `Mcp-Name`. Each has to match the request body. A missing header or one that doesn't match is refused with 400 and `HeaderMismatch` (-32020). A Base64 `=?base64?…?=` value is decoded first.
+- **Change notifications.** `subscriptions/listen` opens the stream, in place of the old GET stream. It acknowledges first, then sends `notifications/tools/list_changed` when you turn a client on or off, or change its scopes. GET and DELETE answer 405.
+- **Origin.** A browser origin other than a loopback one gets 403.
+- **Older clients.** A client that starts with `initialize` (2025-11-25 and earlier) still works.
+
+On stdio, `subscriptions/listen` works too, and its messages carry the subscription's id.
 
 ## Bases
 

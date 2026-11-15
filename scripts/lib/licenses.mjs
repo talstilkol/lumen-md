@@ -545,10 +545,10 @@ export function checkModels(registry, sources, readText = () => null) {
   return findings;
 }
 
-// ── Datasets: eval/golden/<set>/ ───────────────────────────────────────
+// ── Datasets: eval/golden/<set>/ and eval/synthetic/<set>/ ─────────────
 
 /**
- * Each eval/golden/<set>/ folder must say where its data comes from
+ * Each eval/golden/<set>/ (and eval/synthetic/<set>/) folder must say where its data comes from
  * (SOURCES.md) and under which licence (LICENSE, LICENSE.md or LICENSE.txt),
  * and every licence in the parts table of SOURCES.md (the column headed
  * "Licence") must be one a dataset may carry (plan 7.1, appendix 20.2 rule 4):
@@ -557,7 +557,7 @@ export function checkModels(registry, sources, readText = () => null) {
  *   - no licence (NOASSERTION): fail, unless the row's status is local-only
  *     (never stored or distributed): notice;
  *   - an unrecognised id: fail; one the folder's LICENSE never names: warn.
- * `dirs` = [{ name, files: [...], sources?: SOURCES.md text, license?: LICENSE text }].
+ * `dirs` = [{ name, root?: "eval/golden" (default) | "eval/synthetic", files: [...], sources?: SOURCES.md text, license?: LICENSE text }].
  */
 const DATA_OK = new Set(
   ["CC0-1.0", "CC-BY-4.0", "CC-BY-3.0", "CC-BY-2.5", "CC-BY-2.0", "LicenseRef-CC-BY-2.0-FR", "LicenseRef-PublicDomain", "CC-PDM-1.0", "PDDL-1.0", "ODC-By-1.0", "MIT", "MIT-0", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "ISC", "Unlicense", "OFL-1.1"].map((x) => x.toLowerCase()),
@@ -607,8 +607,8 @@ export function isModelScanSource(rel) {
 }
 
 export function checkDatasets(dirs) {
-  return dirs.map(({ name, files, sources, license }) => {
-    const base = { area: "dataset", name: `eval/golden/${name}`, license: "" };
+  return dirs.map(({ name, root = "eval/golden", files, sources, license }) => {
+    const base = { area: "dataset", name: `${root}/${name}`, license: "" };
     const missing = [];
     if (!files.includes("SOURCES.md")) missing.push("SOURCES.md");
     if (!files.some((f) => /^LICEN[CS]E(\.md|\.txt)?$/.test(f))) missing.push("LICENSE");

@@ -5,7 +5,7 @@
  * @vitest-environment node
  */
 import { describe, expect, it } from "vitest";
-import { mkdtempSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -108,7 +108,8 @@ describe("every manifest in lock-step (13.4.1)", () => {
     expect([lock.version, lock.packages[""].version]).toEqual(["0.2.0", "0.2.0"]);
     expect(JSON.parse(out["src-tauri/tauri.conf.json"]).version).toBe("0.2.0");
     expect(out["src-tauri/Cargo.toml"]).toMatch(/^\[package\]\nname = "lumen"\nversion = "0\.2\.0"/m); // #422 put [workspace] first
-    expect(out["ios/App/App.xcodeproj/project.pbxproj"].match(/MARKETING_VERSION = 0\.2\.0;/g)).toHaveLength(2);
+    // Three targets (App, the LumenWidgets and LumenShare extensions) × Debug/Release: the extensions move with the app (W10.C7, W11.P9).
+    expect(out["ios/App/App.xcodeproj/project.pbxproj"].match(/MARKETING_VERSION = 0\.2\.0;/g)).toHaveLength(6);
     expect(out["ios/App/App.xcodeproj/project.pbxproj"]).toMatch(/CURRENT_PROJECT_VERSION = 2;/);
     // Only the version lines differ: formatting, dependency versions and other entries stay.
     for (const p of paths) {
@@ -180,11 +181,8 @@ describe("the local pipeline (13.4) — no GitHub Actions needed", () => {
     expect(() => execFileSync("node", [script, "verify", d], { stdio: "ignore" })).toThrow();
   });
 
-  it("the workflow is kept, runs on a tag, and uses the script's notes", () => {
-    const wf = readFileSync(join(root, ".github/workflows/release.yml"), "utf8");
-    expect(wf).toMatch(/tags: \["v\*"\]/);
-    expect(wf).toContain("node scripts/release.mjs notes");
-    expect(wf).toContain("node scripts/release.mjs build");
+  it("the release path has no workflow: the script is the release (W1.24, W10.E61)", () => {
+    expect(existsSync(join(root, ".github/workflows/release.yml"))).toBe(false);
     const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
     expect(pkg.scripts.release).toBe("node scripts/release.mjs");
   });

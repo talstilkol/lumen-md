@@ -1,0 +1,73 @@
+{
+  "about": "DERIVED from the real public editing traces named in each fixture's `source` (repo, pinned commit, file sha256), by scripts/bench/merge-traces-shrink.ts: each is a split pair (window, checkpoint) on which a clean merge lost characters before the W1.9 fix, shrunk to a subset of that pair's own characters. base/ours/theirs/expected are projections of that one subset, so expected is exact. Not written by hand; not synthetic.",
+  "fixtures": [
+    {
+      "source": {
+        "repo": "josephg/editing-traces",
+        "commit": "762fa6c51605c88a05ebe5c4b9d4540caca30b97",
+        "path": "sequential_traces/json-crdt-patch.json.gz",
+        "sha256": "c7e60bdeacd8fd3a560f34f3d306ec88d4976e6a3cc6820ecb88f5c1017dca5a"
+      },
+      "window": 200,
+      "checkpoint": 3250,
+      "dependent": true,
+      "fullPairLost": 1,
+      "lostBefore": 1,
+      "base": ".\n\n\n.\nd",
+      "ours": ".\n\nn\n\n\n.\n",
+      "theirs": ".\n\n\n\n.\nd",
+      "expected": ".\n\nn\n\n\n\n.\n"
+    },
+    {
+      "source": {
+        "repo": "josephg/editing-traces",
+        "commit": "762fa6c51605c88a05ebe5c4b9d4540caca30b97",
+        "path": "sequential_traces/json-crdt-patch.json.gz",
+        "sha256": "c7e60bdeacd8fd3a560f34f3d306ec88d4976e6a3cc6820ecb88f5c1017dca5a"
+      },
+      "window": 1000,
+      "checkpoint": 7907,
+      "dependent": true,
+      "fullPairLost": 5,
+      "lostBefore": 5,
+      "base": "verbose human-rea JSON ",
+      "ours": "verbose human-readable JSON ",
+      "theirs": "verbose human-readable JSON e",
+      "expected": "verbose human-readable JSON edable"
+    },
+    {
+      "source": {
+        "repo": "josephg/editing-traces",
+        "commit": "762fa6c51605c88a05ebe5c4b9d4540caca30b97",
+        "path": "sequential_traces/sveltecomponent.json.gz",
+        "sha256": "0393353a1ff0281f4a2adad080b0843bffa7988f9a4869ed04faf0984f78a234"
+      },
+      "window": 200,
+      "checkpoint": 4794,
+      "dependent": true,
+      "fullPairLost": 24,
+      "lostBefore": 2,
+      "base": "}, 10)\nelse i",
+      "ours": "}, 1000)\nelse i",
+      "theirs": "}, 1000)\nelse ",
+      "expected": "}, 1000)\n00else "
+    },
+    {
+      "source": {
+        "repo": "josephg/editing-traces",
+        "commit": "762fa6c51605c88a05ebe5c4b9d4540caca30b97",
+        "path": "sequential_traces/sveltecomponent.json.gz",
+        "sha256": "0393353a1ff0281f4a2adad080b0843bffa7988f9a4869ed04faf0984f78a234"
+      },
+      "window": 200,
+      "checkpoint": 16159,
+      "dependent": true,
+      "fullPairLost": 29,
+      "lostBefore": 18,
+      "base": "\n| null\n\t",
+      "ours": "\n| null | any // Timeout?\n\t",
+      "theirs": "\n| null | any // Timeout?\n\n",
+      "expected": "\n| null | any // Timeout?\n\n | any // Timeout?"
+    }
+  ]
+}

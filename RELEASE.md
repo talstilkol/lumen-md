@@ -42,9 +42,9 @@ The steps below run one part at a time.
 
 ## Versioning and the release pipeline (plan 13.4)
 
-One script runs the whole release on your machine — GitHub Actions are not
-needed (`.github/workflows/release.yml` runs the same steps on a tag push when
-Actions are on):
+One script runs the whole release on your machine. No GitHub Actions are in
+the release path (plan W1.24): the release, tauri and mobile workflows were
+removed once the script covered them.
 
 ```bash
 node scripts/release.mjs plan                    # next version from Conventional Commits + changelog preview
@@ -76,7 +76,7 @@ dropped from commit subjects.
 |---|---|---|
 | `lumen-web-vX.tgz` | `SHA256SUMS` + `SHA256SUMS.asc` | `LUMEN_RELEASE_GPG_KEY` (a GPG key id) |
 | desktop bundles (`--desktop`) | Apple / Authenticode + the updater's minisign `.sig` | see "Signing" below, `TAURI_SIGNING_PRIVATE_KEY` |
-| `latest.json` (Tauri updater) | built from the `.sig` files | — |
+| `latest.json` (Tauri updater) | built from the `.sig` files; `latest.json.sig` (W11.S3): the file itself, signed with the updater key — no publish without it, and the app refuses an unsigned manifest | `TAURI_SIGNING_PRIVATE_KEY` |
 | iOS `.ipa`, Android `.aab` (plan 13.3) | Xcode / Gradle, store signing | put them in `release/` before `build`'s checksum step |
 
 Every key is optional: without one, that signature is skipped with a warning
@@ -320,27 +320,34 @@ In Android Studio:
 
 ---
 
-## 5. CI release pipeline
+## 5. What a release produces (no CI)
 
-`.github/workflows/release.yml` runs on tag push (`v*`) and produces:
+`node scripts/release.mjs build --desktop --mobile` on the release machine (one
+per desktop OS for the desktop bundles) produces, in `release/`:
 
-- Web bundle as a workflow artifact + GitHub Pages deploy.
-- macOS `.dmg` (Apple Silicon + Intel) attached to the GitHub Release.
-- Windows `.msi` + Linux `.AppImage` attached to the same Release.
-- iOS / Android archives are NOT produced by CI (signing keys live on
-  developer machines) — see sections 3 and 4 above.
+- the web bundle `lumen-web-<tag>.tgz`;
+- the desktop bundles of this OS (`.dmg`, `.msi` / `-setup.exe`, `.AppImage` / `.deb` / `.rpm`) and their updater `.sig` files, plus `latest.json`;
+- the Android AAB and APK (with `ANDROID_HOME`), and the iOS IPA (on a Mac), through `scripts/mobile-build.mjs`;
+- `SHA256SUMS`, `SHA256SUMS.asc` (with `LUMEN_RELEASE_GPG_KEY`), and `downloads.json`.
+
+`node scripts/release.mjs publish` attaches them to the GitHub release.
+`node scripts/release.mjs downloads --dir release` writes
+`docs/src/data/downloads.json`, which the docs site's
+downloads page (`/download/`) renders: every file
+with its SHA-256 and signatures.
 
 ### Signing and updates (plan 11.5)
 
-Every secret is optional: without it the step is skipped with a warning and
-the build still succeeds (unsigned). Tal sets them up in plan 15.7.
+Every key is optional: without it the step is skipped with a warning and the
+build still succeeds (unsigned). They are environment variables on the
+release machine. Tal sets them up in plan 15.7.
 
 | Secret / variable | What it does | Without it |
 |---|---|---|
 | `TAURI_SIGNING_PRIVATE_KEY` (+ `_PASSWORD`) | Signs the update artifacts (`.sig`); `latest.json` is published | No auto-update |
-| `vars.LUMEN_UPDATER_PUBKEY` | The public key compiled into the app | The updater is off ("not configured") |
-| `vars.LUMEN_UPDATER_ENDPOINT` | Where `latest.json` lives (default: this repo's latest release) | — |
-| `WINDOWS_CERTIFICATE` (base64 .pfx) + `WINDOWS_CERTIFICATE_PASSWORD` | Authenticode-signs the Windows installer | Unsigned: SmartScreen warns |
+| `LUMEN_UPDATER_PUBKEY` | The public key compiled into the app | The updater is off ("not configured") |
+| `LUMEN_UPDATER_ENDPOINT` | Where `latest.json` lives (default: this repo's latest release) | — |
+| `WINDOWS_CERTIFICATE_THUMBPRINT` (the certificate is in the Windows machine's store) | Authenticode-signs the Windows installer | Unsigned: SmartScreen warns |
 | `APPLE_CERTIFICATE`, `APPLE_SIGNING_IDENTITY`, `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD`, `APPLE_TEAM_ID` | Signs and notarises the macOS app | Ad-hoc signed, Gatekeeper warns |
 
 Create the updater key once: `npx tauri signer generate -w ~/.tauri/lumen.key`.

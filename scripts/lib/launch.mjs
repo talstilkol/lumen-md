@@ -46,10 +46,12 @@ const T = {
     topic: "Topic",
     sources: "Sources",
     unverified: "not yet verified",
-    unverifiedNote: "A claim marked *not yet verified* has a source that hasn't been checked yet. It is checked before the launch.",
+    withheld: "Not stated: this claim has not been checked against the maker's own page yet, so it is not shown.",
+    unverifiedNote: "A cell marked *not yet verified* holds no claim: its source hasn't been checked yet, so nothing is said there. It is checked before the launch.",
     gaps: "What Lumen still lacks",
     checked: "Checked",
     how: "This page is generated from `launch/comparison.json` by `node scripts/launch-check.mjs --write`. To correct a claim, change the JSON with a source, and the page follows.",
+    benchmark: "Measured on public Hebrew benchmarks, with the command behind every number: [Hebrew in notes, measured](/project/hebrew-benchmark/).",
     docs: "Lumen docs",
   },
   he: {
@@ -59,10 +61,12 @@ const T = {
     topic: "נושא",
     sources: "מקורות",
     unverified: "עוד לא נבדק",
-    unverifiedNote: "לטענה שמסומנת *עוד לא נבדק* יש מקור שעוד לא נבדק. היא נבדקת לפני ההשקה.",
+    withheld: "לא נאמר כאן: הטענה עוד לא נבדקה מול הדף של היצרן עצמו, ולכן היא לא מוצגת.",
+    unverifiedNote: "בתא שמסומן *עוד לא נבדק* אין טענה: המקור שלו עוד לא נבדק, ולכן לא נאמר שם כלום. הוא נבדק לפני ההשקה.",
     gaps: "מה עדיין חסר ב-Lumen",
     checked: "נבדק",
     how: "הדף נוצר מ-`launch/comparison.json` באמצעות `node scripts/launch-check.mjs --write`. כדי לתקן טענה, משנים את ה-JSON עם מקור, והדף מתעדכן.",
+    benchmark: "במדידה על מדדים ציבוריים לעברית, עם הפקודה שמאחורי כל מספר: [עברית בפתקים, במדידה](/he/project/hebrew-benchmark/).",
     docs: "התיעוד של Lumen",
   },
 };
@@ -81,7 +85,8 @@ export function renderCompare(data, lang) {
       const c = data.claims.find((x) => x.product === p && x.topic === topic.id);
       if (!c) continue;
       const mark = c.verified ? `${t.checked} ${c.verified}` : `⚠ ${t.unverified}`;
-      L.push(`| **${name(p)}** | ${c[lang]} | ${c.source.split(" · ").map((s) => link(s, lang)).join(" · ")} (${mark}) |`);
+      // Plan W10.B22: an unchecked claim is not built into the page; only its status is.
+      L.push(`| **${name(p)}** | ${c.verified ? c[lang] : `— ${t.withheld}`} | ${c.source.split(" · ").map((s) => link(s, lang)).join(" · ")} (${mark}) |`);
     }
     L.push("");
   }
@@ -89,6 +94,7 @@ export function renderCompare(data, lang) {
   for (const g of data.lumenGaps) L.push(`- ${g[lang]} (${link(g.source, lang)})`);
   L.push("");
   if (anyUnverified) L.push(`> ${t.unverifiedNote}`, "");
-  L.push(t.how, "");
+  // W11.H13: the measured page next to this one.
+  L.push(t.benchmark, "", t.how, "");
   return L.join("\n");
 }

@@ -23,7 +23,7 @@ import { explainError } from "../../../lib/userError";
 type Freshness = Awaited<ReturnType<E2eeSync["freshness"]>>;
 
 interface Props {
-  sync: Pick<E2eeSync, "freshness" | "pair" | "confirmFreshness" | "pairingRequest" | "pairingSas" | "confirmPairing" | "rejectPairing">;
+  sync: Pick<E2eeSync, "freshness" | "pair" | "confirmFreshness" | "pairingRequest" | "pairingSas" | "confirmPairing" | "rejectPairing" | "onChange">;
   /** How often the comparison asks for the other device's key or confirmation (ms; tests). */
   pollMs?: number;
 }
@@ -38,9 +38,23 @@ export function FreshnessBanner({ sync, pollMs }: Props) {
 
   useEffect(() => {
     let live = true;
-    void sync.freshness().then((f) => live && setState(f));
+    let reads = 0;
+    // Re-read after every round, pairing or confirmation (2.31, #275): a round
+    // can revoke a verification. While a re-read is pending, or when it fails,
+    // freshness is unknown, and "verified" is never shown for an unknown state.
+    const read = () => {
+      const n = ++reads;
+      setState((prev: Freshness | null) => (prev?.verified ? null : prev));
+      sync.freshness().then(
+        (f) => live && n === reads && setState(f),
+        () => live && n === reads && setState(null),
+      );
+    };
+    read();
+    const off = sync.onChange(read);
     return () => {
       live = false;
+      off();
     };
   }, [sync]);
 
@@ -48,7 +62,8 @@ export function FreshnessBanner({ sync, pollMs }: Props) {
     setError(null);
     try {
       await fn();
-      setState(await sync.freshness());
+      // The change listener re-reads too; this answers at once.
+      setState(await sync.freshness().catch(() => null));
     } catch (e) {
       // raw-error-allow: no raw text; e2eeErrorText names the known sync errors and falls back to explainError
       setError(e instanceof PairingEpochError && e.kind === "newer" ? t("e2ee.fresh.olderKeys") : e instanceof PairingError ? t("e2ee.fresh.badCode") : e2eeErrorText(e, "pair", explainError));

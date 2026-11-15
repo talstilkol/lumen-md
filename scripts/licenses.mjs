@@ -10,7 +10,7 @@
  * Fails (exit 1) on: GPL / AGPL / SSPL / BUSL / Commons Clause / Elastic /
  * CC-BY-NC / UNLICENSED / missing licences in production dependencies, a
  * known hidden-copyleft package, a `forbidden` registry model that app code
- * references, an eval/golden/<set>/ without SOURCES.md + LICENSE or whose
+ * references, an eval/golden/<set>/ or eval/synthetic/<set>/ without SOURCES.md + LICENSE or whose
  * SOURCES.md declares a licence a dataset may not carry (NonCommercial,
  * NoDerivatives, ShareAlike outside a ShareAlike folder, none), or an
  * invalid registry / allowlist. Warns on LGPL, "SEE LICENSE IN", unknown
@@ -79,18 +79,20 @@ try {
   modelFindings = [{ area: "model", name: "models/registry.json", license: "", level: "fail", reason: `cannot read the registry: ${e.message}`, refs: [] }];
 }
 
-// ── datasets ──
-const goldenDir = join(root, "eval", "golden");
-const datasetDirs = existsSync(goldenDir)
-  ? readdirSync(goldenDir)
-      .filter((n) => statSync(join(goldenDir, n)).isDirectory())
-      .map((name) => {
-        const dir = join(goldenDir, name);
-        const files = readdirSync(dir);
-        const read = (f) => (files.includes(f) ? readFileSync(join(dir, f), "utf8") : undefined);
-        return { name, files, sources: read("SOURCES.md"), license: read(files.find((f) => /^LICEN[CS]E(\.md|\.txt)?$/.test(f)) ?? "") };
-      })
-  : [];
+// ── datasets: the golden sets and the synthetic ones (eval/synthetic, W7.13) ──
+const datasetDirs = ["eval/golden", "eval/synthetic"].flatMap((base) => {
+  const baseDir = join(root, ...base.split("/"));
+  return existsSync(baseDir)
+    ? readdirSync(baseDir)
+        .filter((n) => statSync(join(baseDir, n)).isDirectory())
+        .map((name) => {
+          const dir = join(baseDir, name);
+          const files = readdirSync(dir);
+          const read = (f) => (files.includes(f) ? readFileSync(join(dir, f), "utf8") : undefined);
+          return { name, root: base, files, sources: read("SOURCES.md"), license: read(files.find((f) => /^LICEN[CS]E(\.md|\.txt)?$/.test(f)) ?? "") };
+        })
+    : [];
+});
 const datasetFindings = checkDatasets(datasetDirs);
 
 // ── allowlist ──
