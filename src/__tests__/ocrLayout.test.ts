@@ -6,7 +6,7 @@
  * to the right.
  */
 import { describe, it, expect } from "vitest";
-import { columnCount, defaultGutter, isRtlPage, layoutLines, layoutText, lineDir, lineOrderAccuracy, readingOrder, splitAtGutters, textLayerSpans, type LayoutLine } from "../ai/ocrLayout";
+import { columnCount, defaultGap, defaultGutter, isRtlPage, layoutLines, layoutText, lineDir, lineOrderAccuracy, readingOrder, splitAtGutters, textLayerSpans, type LayoutLine } from "../ai/ocrLayout";
 import type { Box } from "../ai/ocrMixed";
 
 const b = (x0: number, y0: number, x1: number, y1: number): Box => ({ x0, y0, x1, y1 });
@@ -121,5 +121,45 @@ describe("splitAtGutters", () => {
   it("leaves a line with ordinary word spaces alone", () => {
     const l: LayoutLine = { text: "של המגמה\n", words: [w("של", 420, 450), w("המגמה", 340, 410)] };
     expect(splitAtGutters([l], 30, true)).toEqual([l]);
+  });
+});
+
+describe("narrow gutters (W10.E41)", () => {
+  // Lines 30 px high, a gutter of 30 px: under 1.5 × the line height, the old only rule.
+  const page = [
+    b(620, 100, 1100, 130), // 0: right column, row 1
+    b(620, 140, 1100, 170), // 1: right column, row 2
+    b(620, 180, 900, 210), // 2: right column, row 3 (a short last line)
+    b(110, 100, 590, 130), // 3: left column, row 1
+    b(110, 140, 590, 170), // 4: left column, row 2
+    b(300, 180, 590, 210), // 5: left column, row 3
+  ];
+
+  it("a gap of one line height is a gutter when lines sit side by side across it on two rows or more", () => {
+    expect(readingOrder(page, { rtl: true, minGutter: 45, minGap: 18 }).map((o) => o.index)).toEqual([0, 1, 2, 3, 4, 5]);
+    // Without minGap (the old rule), the 30 px gap is not a gutter: rows are read across both columns.
+    expect(readingOrder(page, { rtl: true, minGutter: 45 }).map((o) => o.index)).toEqual([0, 3, 1, 4, 2, 5]);
+  });
+
+  it("layoutLines uses it by default (0.6 × the median line height)", () => {
+    const lines = page.map((bb, i) => ln(`שורה ${i}`, bb));
+    expect(defaultGap(lines)).toBe(18);
+    expect(layoutLines(lines, lines.map((l) => l.text)).map((p) => p.text)).toEqual(["שורה 0", "שורה 1", "שורה 2", "שורה 3", "שורה 4", "שורה 5"]);
+  });
+
+  it("a line cut in two on one row only is not a gutter: one column, one line", () => {
+    const col = [b(100, 100, 1100, 130), b(620, 140, 1100, 170), b(100, 140, 590, 170), b(100, 180, 1100, 210)];
+    expect(readingOrder(col, { rtl: true, minGutter: 45, minGap: 18 }).map((o) => o.index)).toEqual([0, 1, 2, 3]);
+  });
+
+  it("splitAtGutters cuts a line across a narrow gutter where the page has one, and not a wide word space elsewhere", () => {
+    const w = (text: string, x0: number, x1: number, y: number) => ({ text, bbox: b(x0, y, x1, y + 30), confidence: 90, symbols: [] });
+    const others = [b(620, 100, 1100, 130), b(620, 140, 1100, 170), b(110, 100, 590, 130), b(110, 140, 590, 170)].map((bb, i) => ln(`x${i}`, bb));
+    const merged: LayoutLine = { text: "a b c d\n", words: [w("ד", 900, 1100, 180), w("ג", 620, 880, 180), w("ב", 400, 590, 180), w("א", 110, 380, 180)] };
+    const out = splitAtGutters([...others, merged], 45, true, 18);
+    expect(out.slice(4).map((l) => l.text)).toEqual(["ד ג\n", "ב א\n"]);
+    // A 20 px word space in a line with nothing beside it: no page gutter there, the line stays whole.
+    const alone: LayoutLine = { text: "a b\n", words: [w("ב", 500, 1100, 300), w("א", 100, 480, 300)] };
+    expect(splitAtGutters([alone], 45, true, 18)).toHaveLength(1);
   });
 });
