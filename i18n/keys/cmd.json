@@ -2480,6 +2480,16 @@
       "vars": []
     },
     {
+      "key": "cmd.view.hebrewGrammarModel",
+      "en": "Hebrew grammar: check suggestions with a local model (on / off)",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.hebrewGrammarModel.hint",
+      "en": "Ollama on this computer (DictaLM first) drops the grammar suggestions it rejects. Off by default; nothing leaves this computer.",
+      "vars": []
+    },
+    {
       "key": "cmd.view.language",
       "en": "Language: {label}",
       "vars": [

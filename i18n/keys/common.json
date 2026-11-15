@@ -5758,6 +5758,33 @@
       ]
     },
     {
+      "key": "grammar.he.model.noHebrewModel",
+      "en": "Ollama has no Hebrew model. Pull one (DictaLM 3.0, for example), then turn this on again.",
+      "vars": []
+    },
+    {
+      "key": "grammar.he.model.noOllama",
+      "en": "Ollama does not answer on this computer, so the rules' suggestions are shown as they are.",
+      "vars": []
+    },
+    {
+      "key": "grammar.he.model.notLocal",
+      "en": "The grammar model runs on this computer only, and the Ollama address is not local.",
+      "vars": []
+    },
+    {
+      "key": "grammar.he.model.off",
+      "en": "The local grammar model is off: the suggestions come from the rules only.",
+      "vars": []
+    },
+    {
+      "key": "grammar.he.model.on",
+      "en": "Hebrew grammar suggestions are now checked by {model} on this computer.",
+      "vars": [
+        "model"
+      ]
+    },
+    {
       "key": "graph.ariaLabel",
       "en": "Knowledge graph of {nodes} notes",
       "vars": [
