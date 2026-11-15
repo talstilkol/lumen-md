@@ -6,7 +6,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { countWords, hebrewFind, normalizeForMatch, prefixVariants, stripNiqqud, words } from "../text/hebrew";
 import { headingSlug, headingSlugger, noteKey } from "../lib/slug";
-import { slug as remarkSlug } from "../renderer/remarkLumen";
+import { remarkWikiLinks } from "../renderer/remarkLumen";
 
 describe("hebrew text core", () => {
   it("strips niqqud and folds final letters for matching", () => {
@@ -50,8 +50,11 @@ describe("slugs and note keys", () => {
   it("gives Hebrew headings a real id, the same one rehype-slug uses", () => {
     expect(headingSlug("כותרת ראשית")).toBe("כותרת-ראשית");
     expect(headingSlug("Hello World!")).toBe("hello-world");
-    // the wiki-link anchor and the heading id agree
-    expect(remarkSlug("כותרת ראשית")).toBe(headingSlug("כותרת ראשית"));
+    // the wiki-link anchor and the heading id agree (remarkWikiLinks on a real mdast text node)
+    const tree = { type: "root", children: [{ type: "paragraph", children: [{ type: "text", value: "[[כותרת ראשית]]" }] }] };
+    (remarkWikiLinks() as (t: unknown) => void)(tree);
+    const link = (tree.children[0].children as { type: string; url?: string }[]).find((c) => c.type === "link");
+    expect(link?.url).toBe("#" + headingSlug("כותרת ראשית"));
   });
 
   it("numbers repeated headings like the preview", () => {

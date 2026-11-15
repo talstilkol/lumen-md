@@ -96,7 +96,7 @@ function splitWikiText(value: string): MdastTextLike[] {
     out.push({
       type: "link",
       // `[[#^id]]` points at the block's own id; anything else at a heading slug.
-      url: `#${target.startsWith("#^") ? target.slice(1) : slug(target)}`,
+      url: `#${target.startsWith("#^") ? target.slice(1) : headingSlug(target)}`,
       title: null,
       data: {
         hProperties: { className: ["wiki-link"], "data-wiki-target": target },
@@ -228,9 +228,4 @@ export function remarkStripFrontmatter() {
   return (tree: MdastRoot) => {
     tree.children = tree.children.filter((c) => c.type !== "yaml");
   };
-}
-
-/** Heading id for a wiki-link target — the same one rehype-slug gives the heading (T26). */
-export function slug(s: string): string {
-  return headingSlug(s);
 }
