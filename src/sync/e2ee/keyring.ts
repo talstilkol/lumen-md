@@ -66,9 +66,8 @@
 
 import { bs, equalBytes, fromB64u, fromUtf8, randomBytes, sha256Hex, toB64u, utf8 } from "./bytes";
 import { ageDecrypt, ageEncrypt, parseRecipient } from "./age";
-import { anchorKey, blobKey, DecryptError, droppedKey, epochKeys, hmac, namesKey, passphraseKeys, verifyHmac, type RingInfo, type VaultKeys } from "./keys";
+import { anchorKey, blobKey, DecryptError, droppedKey, epochKeys, hmac, namesKey, passphraseKeys, verifyHmac, type VaultKeys } from "./keys";
 import { parseContents, parsePreRelease, passkeyWraps, recoveryWrap, ringInfo, unwrapRecovery } from "./keyringParts";
-import { recoveryKeys } from "./recovery";
 import { PreconditionFailedError, type StoredObject, type SyncProvider } from "./provider";
 import { RevokedDeviceEnrollError, RevokedError, DroppedFromVaultError, TamperedWrapError, KeyringCommitLostError, KeyringRollbackError, KeyringForkError, PreReleaseKeyringError } from "./keyringErrors";
 export { RevokedDeviceEnrollError, RevokedError, DroppedFromVaultError, TamperedWrapError, KeyringCommitLostError, KeyringRollbackError, KeyringForkError, PreReleaseKeyringError } from "./keyringErrors";
