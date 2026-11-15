@@ -2,9 +2,12 @@
  * Conflict-resolution dialog — opens when cloud sync finds that both
  * local and remote sides changed since the last sync.
  *
- * Renders the 3-way diff (`threeWayDiff`) as a side-by-side view, with
- * radio toggles for each `conflict` hunk. Auto-merge hunks render
- * read-only so the user can see what they're getting.
+ * Renders the 3-way diff (`threeWayDiff`) in three columns — mine, the
+ * common base, theirs (W12.S3; in RTL "mine" is on the right) — with
+ * radio toggles for each `conflict` hunk, and a result editor under them
+ * that starts from the picks and can be edited by hand. Auto-merge hunks
+ * render read-only so the user can see what they're getting. Alt+↓/↑ or
+ * F7/Shift+F7 move between conflicts.
  *
  * Returns one of:
  *   • `{ kind: "merged", content }` — apply the merged content
@@ -13,9 +16,9 @@
  *   • `null`                         — cancelled
  */
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { applyMerge, threeWayDiff, type DiffHunk } from "./diff";
+import { applyMerge, attachBase, threeWayDiff, type DiffHunk } from "./diff";
 import { t } from "../../i18n";
 import { HelpButton } from "../../ui/HelpButton";
 import "./conflictDialogStrings";
@@ -66,7 +69,7 @@ function ConflictDialogImpl({ path, base, local, remote, labels, hunks: given, o
     ...labels,
   };
   const hunks = useMemo<DiffHunk[]>(
-    () => given ?? threeWayDiff(base, local, remote),
+    () => attachBase(given ?? threeWayDiff(base, local, remote)),
     [given, base, local, remote],
   );
   const conflictHunkIdxs = hunks
@@ -83,6 +86,30 @@ function ConflictDialogImpl({ path, base, local, remote, labels, hunks: given, o
     setPicks(next);
   }
 
+  // W12.S3: a result editor under the three columns. It follows the picks
+  // until the user types in it; from then on the typed text is what is
+  // applied (and "Reset to picks" brings the picks back).
+  const picked = useMemo(() => applyMerge(hunks, picks), [hunks, picks]);
+  const [edited, setEdited] = useState<string | null>(null);
+  const result = edited ?? picked;
+  const hunkRefs = useRef<Array<HTMLElement | null>>([]);
+  const [current, setCurrent] = useState(0);
+  const total = conflictHunkIdxs.length;
+  const go = (delta: number) => {
+    if (!total) return;
+    const next = (current + delta + total) % total;
+    setCurrent(next);
+    hunkRefs.current[next]?.focus();
+  };
+  // Alt+↓ / Alt+↑ (and F7 / Shift+F7, as in VS Code's merge editor) move between conflicts.
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if ((e.altKey && e.key === "ArrowDown") || (e.key === "F7" && !e.shiftKey)) go(1);
+    else if ((e.altKey && e.key === "ArrowUp") || (e.key === "F7" && e.shiftKey)) go(-1);
+    else return;
+    e.preventDefault();
+  };
+  const cols = { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 0 } as const;
+
   return (
     <Modal onClose={() => onResolve(null)}
       aria-labelledby="conflict-title"
@@ -98,12 +125,13 @@ function ConflictDialogImpl({ path, base, local, remote, labels, hunks: given, o
       }}
     >
       <div
+        onKeyDown={onKeyDown}
         style={{
           background: "hsl(var(--bg))",
           color: "hsl(var(--fg))",
           border: "1px solid hsl(var(--border-strong))",
           borderRadius: 12,
-          width: "min(960px, 100vw - 32px)",
+          width: "min(1200px, 100vw - 32px)",
           maxHeight: "calc(100vh - 64px)",
           display: "flex",
           flexDirection: "column",
@@ -120,6 +148,16 @@ function ConflictDialogImpl({ path, base, local, remote, labels, hunks: given, o
             <div id="conflict-title" style={{ fontWeight: 700, fontSize: 15, flex: 1 }}>
               {L.title}
             </div>
+            {total > 0 && (
+              <>
+                <button type="button" onClick={() => go(-1)} style={btnSecondary} aria-keyshortcuts="Alt+ArrowUp Shift+F7">
+                  {t("sync.conflict.prev")}
+                </button>
+                <button type="button" onClick={() => go(1)} style={btnSecondary} aria-keyshortcuts="Alt+ArrowDown F7">
+                  {t("sync.conflict.next")}
+                </button>
+              </>
+            )}
             <HelpButton topic="editor/tools#sync-conflicts" />
           </div>
           <div style={{ fontSize: 12, color: "hsl(var(--fg-muted))", marginTop: 2 }}>
@@ -128,15 +166,26 @@ function ConflictDialogImpl({ path, base, local, remote, labels, hunks: given, o
         </header>
 
         <div style={{ overflow: "auto", flex: 1, fontFamily: "JetBrains Mono, ui-monospace, monospace", fontSize: 12 }}>
+          {/* Column order follows the text direction: in RTL "mine" is on the right. */}
+          <div aria-hidden="true" style={{ ...cols, position: "sticky", top: 0, background: "hsl(var(--bg))", borderBottom: "1px solid hsl(var(--border))", fontWeight: 600, fontFamily: "inherit" }}>
+            <div style={{ padding: "4px 12px" }}>{L.local}</div>
+            <div style={{ padding: "4px 12px" }}>{t("sync.conflict.base")}</div>
+            <div style={{ padding: "4px 12px" }}>{L.remote}</div>
+          </div>
           {hunks.map((h, i) => {
             const conflictPickIdx = conflictHunkIdxs.indexOf(i);
+            const isConflict = h.op === "conflict";
             return (
               <div
                 key={i}
+                data-testid={isConflict ? "conflict-hunk" : undefined}
+                ref={isConflict ? (el) => void (hunkRefs.current[conflictPickIdx] = el) : undefined}
+                tabIndex={isConflict ? 0 : undefined}
+                role={isConflict ? "group" : undefined}
+                aria-label={isConflict ? t("sync.conflict.hunk", { n: conflictPickIdx + 1, total }) : undefined}
+                onFocus={isConflict ? () => setCurrent(conflictPickIdx) : undefined}
                 style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: 0,
+                  ...cols,
                   borderBottom: "1px solid hsl(var(--border))",
                   background:
                     h.op === "conflict"
@@ -163,6 +212,7 @@ function ConflictDialogImpl({ path, base, local, remote, labels, hunks: given, o
                       : undefined
                   }
                 />
+                <Side hunk={h} side="base" isPicked={h.op === "equal"} />
                 <Side
                   hunk={h}
                   side="remote"
@@ -178,22 +228,47 @@ function ConflictDialogImpl({ path, base, local, remote, labels, hunks: given, o
                       : undefined
                   }
                 />
-                {h.op === "conflict" && (
-                  <div style={{ gridColumn: "1 / span 2", padding: "4px 12px", fontSize: 11, color: "hsl(var(--fg-muted))", display: "flex", gap: 12 }}>
+                {isConflict && (
+                  <div role="radiogroup" aria-label={t("sync.conflict.hunk", { n: conflictPickIdx + 1, total })} style={{ gridColumn: "1 / span 3", padding: "4px 12px", fontSize: 11, color: "hsl(var(--fg-muted))", display: "flex", gap: 12 }}>
                     <label>
-                      <input type="radio" checked={picks[conflictPickIdx] === "local"} onChange={() => setPick(conflictPickIdx, "local")} /> {L.local}
+                      <input type="radio" name={`conflict-${i}`} checked={picks[conflictPickIdx] === "local"} onChange={() => setPick(conflictPickIdx, "local")} /> {L.local}
                     </label>
                     <label>
-                      <input type="radio" checked={picks[conflictPickIdx] === "remote"} onChange={() => setPick(conflictPickIdx, "remote")} /> {L.remote}
+                      <input type="radio" name={`conflict-${i}`} checked={picks[conflictPickIdx] === "remote"} onChange={() => setPick(conflictPickIdx, "remote")} /> {L.remote}
                     </label>
                     <label>
-                      <input type="radio" checked={picks[conflictPickIdx] === "both"} onChange={() => setPick(conflictPickIdx, "both")} /> {t("sync.conflict.both")}
+                      <input type="radio" name={`conflict-${i}`} checked={picks[conflictPickIdx] === "both"} onChange={() => setPick(conflictPickIdx, "both")} /> {t("sync.conflict.both")}
                     </label>
                   </div>
                 )}
               </div>
             );
           })}
+        </div>
+
+        <div style={{ padding: "8px 18px", borderTop: "1px solid hsl(var(--border))", display: "grid", gap: 4 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <label htmlFor="conflict-result" style={{ fontWeight: 600, fontSize: 12, flex: 1 }}>
+              {t("sync.conflict.result")}
+            </label>
+            {edited !== null && (
+              <button type="button" onClick={() => setEdited(null)} style={btnSecondary}>
+                {t("sync.conflict.resetResult")}
+              </button>
+            )}
+          </div>
+          <textarea
+            id="conflict-result"
+            dir="auto"
+            value={result}
+            onChange={(e) => setEdited(e.target.value)}
+            aria-describedby="conflict-result-hint"
+            rows={6}
+            style={{ width: "100%", boxSizing: "border-box", fontFamily: "JetBrains Mono, ui-monospace, monospace", fontSize: 12, padding: 8, borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--bg))", color: "inherit", resize: "vertical" }}
+          />
+          <div id="conflict-result-hint" style={{ fontSize: 11, color: "hsl(var(--fg-muted))" }}>
+            {t("sync.conflict.resultHint")}
+          </div>
         </div>
 
         <footer
@@ -212,7 +287,7 @@ function ConflictDialogImpl({ path, base, local, remote, labels, hunks: given, o
             onClick={() =>
               onResolve({
                 kind: "merged",
-                content: applyMerge(hunks, picks),
+                content: result,
               })
             }
             style={btnPrimary}
@@ -227,13 +302,13 @@ function ConflictDialogImpl({ path, base, local, remote, labels, hunks: given, o
 
 interface SideProps {
   hunk: DiffHunk;
-  side: "local" | "remote";
+  side: "local" | "base" | "remote";
   isPicked: boolean;
   onPick?: () => void;
 }
 
 function Side({ hunk, side, isPicked, onPick }: SideProps) {
-  const lines = side === "local" ? hunk.local : hunk.remote;
+  const lines = side === "local" ? hunk.local : side === "base" ? hunk.base : hunk.remote;
   return (
     <div
       onClick={onPick}
@@ -242,7 +317,7 @@ function Side({ hunk, side, isPicked, onPick }: SideProps) {
         opacity: isPicked ? 1 : 0.4,
         cursor: onPick ? "pointer" : "default",
         whiteSpace: "pre-wrap",
-        borderInlineEnd: side === "local" ? "1px solid hsl(var(--border))" : undefined,
+        borderInlineEnd: side !== "remote" ? "1px solid hsl(var(--border))" : undefined,
       }}
     >
       {lines.length === 0 ? (
