@@ -2002,6 +2002,20 @@
       "hint": "One search over Sefaria, the Knesset, data.gov.il and the Ben-Yehuda library, with each result's rights",
       "shortcut": "⌥⌘S",
       "icon": "Quote"
+    },
+    {
+      "id": "academic.choose",
+      "label": "Academic calendar: choose an institution…",
+      "group": "Tools",
+      "hint": "Semesters, Moed A and B and breaks in the daily note ({{academic}}) and for deadlines",
+      "icon": "FileText"
+    },
+    {
+      "id": "academic.ics",
+      "label": "Export the academic calendar (ICS)",
+      "group": "Tools",
+      "hint": "The chosen institution's year as a calendar file for Google Calendar or Apple Calendar",
+      "icon": "Download"
     }
   ],
   "full": [
@@ -4156,6 +4170,20 @@
       "hint": "One search over Sefaria, the Knesset, data.gov.il and the Ben-Yehuda library, with each result's rights",
       "shortcut": "⌥⌘S",
       "icon": "Quote"
+    },
+    {
+      "id": "academic.choose",
+      "label": "Academic calendar: choose an institution…",
+      "group": "Tools",
+      "hint": "Semesters, Moed A and B and breaks in the daily note ({{academic}}) and for deadlines",
+      "icon": "FileText"
+    },
+    {
+      "id": "academic.ics",
+      "label": "Export the academic calendar (ICS)",
+      "group": "Tools",
+      "hint": "The chosen institution's year as a calendar file for Google Calendar or Apple Calendar",
+      "icon": "Download"
     }
   ],
   "autoSaveOn": [
@@ -4444,6 +4472,8 @@
     "export.latexProject",
     "automations.new",
     "automations.dryRun",
-    "automations.undo"
+    "automations.undo",
+    "academic.choose",
+    "academic.ics"
   ]
 }

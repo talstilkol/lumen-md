@@ -180,8 +180,8 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "chatImport.json": { module: "capture/chats/strings.ts", users: ["capture/chats/runImport.ts"], prefixes: ["chatImport."] },
   // Mail and Takeout import (plan W5.18), loaded the same way.
   "mailImport.json": { module: "capture/mail/strings.ts", users: ["capture/mail/runImport.ts"], prefixes: ["mailImport."] },
-  // Academic submission export (plan W5.16): the dialog loads from the palette.
-  "academic.json": { module: "ui/academicStrings.ts", users: ["ui/AcademicExportDialog.tsx"], prefixes: ["academic."] },
+  // Academic submission export (plan W5.16) and the academic calendar (W7.8, academic/app.ts): both load on use.
+  "academic.json": { module: "ui/academicStrings.ts", users: ["academic/app.ts", "ui/AcademicExportDialog.tsx"], prefixes: ["academic."] },
   // Arabic (plan W5.17): the word list and the tashkeel view, both loaded on use.
   "arabic.json": { module: "ai/arabicStrings.ts", users: ["ai/arabicSpellService.ts", "editor/tashkeelView.ts"], prefixes: ["spell.ar.", "tashkeel."] },
   // No-code automations (plan W5.24): the engine's app layer and the palette's command bodies.
@@ -202,6 +202,8 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "standardSite.json": { module: "publish/standardSiteStrings.ts", users: ["publish/standardSiteActions.ts"], prefixes: ["atproto."] },
   // The host-move banner: pwa/hostMoveBoot.ts loads pwa/hostMove.ts with a dynamic import, and it holds its own strings.
   "hostmove.json": { module: "pwa/hostMove.ts", users: [], prefixes: ["pwa.move."] },
+  // Scanning printed highlights (plan W7.2): the dialog the highlights panel opens with a dynamic import.
+  "scanHighlights.json": { module: "highlights/scan/strings.ts", users: ["highlights/scan/ScanHighlights.tsx"], prefixes: ["hlscan."] },
 };
 
 function sources(dir: string): string[] {
