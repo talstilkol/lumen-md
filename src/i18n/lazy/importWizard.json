@@ -58,5 +58,12 @@
   "importWizard.warn.noDates": "the export has no creation or edit dates",
   "importWizard.error.nothing": "No notes in these files. Check that they are the export of {source}.",
   "importWizard.error.failed": "The import stopped ({error}). Nothing was left half-written; your vault is as it was.",
-  "importWizard.lost": "{n} attachments of the export are not in the vault."
+  "importWizard.lost": "{n} attachments of the export are not in the vault.",
+  "importWizard.review.types": "Types made from the databases",
+  "importWizard.warn.notionUnparsed": "a Notion value that does not fit its column's type was kept as text",
+  "importWizard.warn.notionComputed": "a Notion formula or rollup column: its values came across, the formula did not (add it as a formula column in the base)",
+  "importWizard.notionTypes": "Make each database a type too (its columns become the type's fields)",
+  "importWizard.warn.notionColumnConverted": "a Notion column became a type field of another kind",
+  "importWizard.warn.notionColumnLost": "a Notion column did not become a type field",
+  "importWizard.warn.typeExists": "a type with this id is already in the vault; it was left as it is"
 }
