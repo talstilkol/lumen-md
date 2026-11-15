@@ -106,7 +106,7 @@ describe("release.mjs deploy-beta checks the deployment before it gets an alias"
     try {
       calls = readFileSync(log, "utf8");
     } catch {
-      /* npx never ran */
+      /* why: npx never ran, so there is no log to read */
     }
     return { ...r, calls };
   }

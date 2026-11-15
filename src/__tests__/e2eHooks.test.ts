@@ -10,7 +10,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { installE2eHooks, type LumenTestHooks } from "../testing/e2eHooks";
 // @ts-expect-error — plain .mjs script without type declarations
-import { PRODUCTION_GATES, PREVIEW_GATES } from "../../scripts/vercel-build.mjs";
+import { gateEnv, PRODUCTION_GATES, PREVIEW_GATES } from "../../scripts/vercel-build.mjs";
 
 const ROOT = resolve(__dirname, "..", "..");
 const specs = readdirSync(join(ROOT, "e2e"))
@@ -40,6 +40,10 @@ describe("e2e test hooks", () => {
     // vercel-build sets VITE_E2E for a build whose gates include e2e: previews, not production.
     expect(PREVIEW_GATES).toContain("e2e");
     expect(PRODUCTION_GATES).not.toContain("e2e");
-    expect(readFileSync(join(ROOT, "scripts/vercel-build.mjs"), "utf8")).toMatch(/if \(gates\.includes\("e2e"\)\) \{?\s*process\.env\.VITE_E2E \?\?= "1";/);
+    // Since W6.8 (#626) through gateEnv: a gate of a build with e2e gets VITE_E2E=1 (the vitest gate excepted), a production build never.
+    expect(gateEnv("build", {}, PREVIEW_GATES).VITE_E2E).toBe("1");
+    expect(gateEnv("e2e", {}, PREVIEW_GATES).VITE_E2E).toBe("1");
+    expect(gateEnv("vitest", {}, PREVIEW_GATES).VITE_E2E).toBeUndefined();
+    expect(gateEnv("build", {}, PRODUCTION_GATES).VITE_E2E).toBeUndefined();
   });
 });
