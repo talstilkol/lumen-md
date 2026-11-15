@@ -19,12 +19,21 @@ note must be **one whole version**, no older than before, and still there.
 A save that fails must fail loudly, so the app keeps the text and tries
 again.
 
-The save paths it drives are the phone folder (`src/storage/vault/mobile.ts`,
-the real code), the OPFS worker that Safari before 26 uses, the desktop app's
-write in `src-tauri/vault/src/lib.rs` (its algorithm; `cargo test` checks the
-Rust itself), and the atomic save of plan W1.5 when the checkout has it. The
-browser's File System Access path is atomic by design and is covered by the
-e2e matrix (`e2e/data-safety.spec.ts`).
+Every save path it drives is the shipped code, never a copy of it:
+
+- the phone folder (`src/storage/vault/mobile.ts`);
+- the OPFS backend that Safari before 26 uses (`opfs.ts` → `opfsSyncWrite.ts`, its worker source as written). Only OPFS and `Worker` are stood in for, at the API level, over a real folder (`scripts/drill/opfs.mjs`);
+- the desktop app's `Vault::write` (`src-tauri/vault/src/lib.rs`), in a small binary built with `cargo` (`scripts/drill/tauri-writer`);
+- the atomic save of plan W1.5.
+
+The browser's File System Access path is atomic by design and is covered by
+the e2e matrix (`e2e/data-safety.spec.ts`).
+
+A combined round runs everything at once on one vault: two app windows saving
+the same notes, a sync client writing them, and the app's own git pull
+(`src/sync/gitPull.ts`). Then every process gets SIGKILL, the app recovers the
+folder, and every note must be whole. `--combined N` sets the number of rounds
+(default 20).
 
 ## Run it
 
@@ -37,5 +46,5 @@ npm run drill:data-safety -- --kills 1000 --full-disk /mnt/small
 part is skipped. Run as root, the saving process drops to an unprivileged
 user so the permission test means something.
 
-The report goes to `reports/data-safety-drill-<commit>.md` and `.json`, one
+The report goes to `reports/drill-<commit>.md` and `.json`, one
 per release. The exit code is 0 only when no note was damaged or lost.
