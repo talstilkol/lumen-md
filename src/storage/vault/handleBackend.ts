@@ -129,14 +129,20 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
     }
   }
 
-  /** fileAt, finishing an interrupted save of the file first when it is missing. */
-  async function fileRecovered(path: string): Promise<FileSystemFileHandle> {
+  /**
+   * The file at `path`, read under its path lock, finishing an interrupted save of it first when it is missing.
+   * Review Z7-M2: the OPFS worker's atomic save renames the note away and back, so between the two renames the name
+   * does not exist. Every write of the note holds this lock until the worker has answered, so a read under it never
+   * falls into that window. Recovery runs outside the lock (it takes the lock itself for each note, Z6-L3).
+   */
+  async function fileRecovered(path: string): Promise<File> {
     const parts = vaultSegments(path);
+    const once = () => pathLock.run(parts.join("/"), async () => (await fileAt(parts, path)).getFile());
     try {
-      return await fileAt(parts, path);
+      return await once();
     } catch (e) {
       if (!(e instanceof VaultNotFoundError) || !parts.length || !(await recoverIn(parts.slice(0, -1)))) throw e;
-      return await fileAt(parts, path);
+      return await once();
     }
   }
 
@@ -386,6 +392,8 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
     async stat(path): Promise<VaultStat | null> {
       const parts = vaultSegments(path);
       let found = await lookup(parts);
+      // Z7-M2: not there may be a save between its two renames; ask again once this note's write has finished.
+      if (!found && parts.length) found = await pathLock.run(parts.join("/"), () => lookup(parts));
       if (!found && parts.length && (await recoverIn(parts.slice(0, -1)))) found = await lookup(parts);
       if (!found) return null;
       if (found.kind === "directory") return { kind: "directory", size: 0, mtime: 0 };
@@ -403,13 +411,13 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
     async read(path) {
       const fast = o.readPrimary ? await o.readPrimary(vaultSegments(path)) : null;
       if (fast) return fast;
-      return await (await fileRecovered(path)).getFile();
+      return await fileRecovered(path);
     },
 
     async readText(path) {
       const fast = o.readPrimary ? await o.readPrimary(vaultSegments(path)) : null;
       if (fast) return await fast.text();
-      return await (await (await fileRecovered(path)).getFile()).text();
+      return await (await fileRecovered(path)).text();
     },
 
     async readMany(paths) {
