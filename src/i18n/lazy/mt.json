@@ -25,5 +25,8 @@
   "mt.sideBySide.upToDate": "Up to date",
   "mt.sideBySide.failed": "Couldn't translate: {error}",
   "mt.sideBySide.stale": "out of date",
-  "mt.sideBySide.missing": "not translated yet"
+  "mt.sideBySide.missing": "not translated yet",
+  "mt.sideBySide.close": "Close",
+  "mt.sideBySide.needVault": "Save the note in the vault first: the translation is saved next to it.",
+  "mt.sideBySide.sidecar": "Saved as {path}"
 }
