@@ -74,6 +74,11 @@ export function openStore(dir, { keepBackups = 24 } = {}) {
       "ON CONFLICT(name) DO UPDATE SET state = excluded.state, updated_at = excluded.updated_at",
   );
   const sweepOld = db.prepare("DELETE FROM documents WHERE updated_at < ?");
+  // W12.H3: a room deleted on request ("end session"), and the shorter retention of study rooms.
+  const deleteDocs = db.prepare("DELETE FROM documents WHERE name = ? OR name = ?");
+  const deleteOwner = db.prepare("DELETE FROM room_owners WHERE room = ?");
+  const deleteShares = db.prepare("DELETE FROM shares WHERE room = ?");
+  const sweepPrefixed = db.prepare("DELETE FROM documents WHERE substr(name, 1, length(?)) = ? AND updated_at < ?");
   let closed = false;
   const sealedCache = new Map();
 
@@ -123,6 +128,21 @@ export function openStore(dir, { keepBackups = 24 } = {}) {
      */
     sweep(cutoffMs) {
       return Number(sweepOld.run(cutoffMs).changes);
+    },
+    /**
+     * W12.H3: delete `room` (its document, its comments document, its owner
+     * and its share links) at its participants' request. The sealed flag stays,
+     * so the name can only ever hold ciphertext. Returns whether a document was stored.
+     */
+    deleteRoom(room) {
+      const n = Number(deleteDocs.run(room, `${room}~comments`).changes);
+      deleteOwner.run(room);
+      deleteShares.run(room);
+      return n > 0;
+    },
+    /** W12.H3: retention for one kind of room (names starting with `prefix`): delete those not changed since `cutoffMs`. */
+    sweepPrefix(prefix, cutoffMs) {
+      return Number(sweepPrefixed.run(prefix, prefix, cutoffMs).changes);
     },
     getMeta(key) {
       return getMeta.get(key)?.value ?? null;
