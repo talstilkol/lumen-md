@@ -12,6 +12,7 @@
  */
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
+import { readScope, type ScopeRules } from "./scope.js";
 
 export type McpScope = "search" | "read" | "propose";
 export const ALL_SCOPES: readonly McpScope[] = ["search", "read", "propose"];
@@ -23,11 +24,15 @@ export interface ClientGrant {
   scopes: McpScope[];
   /** ISO time the client was last enabled. */
   since: string;
+  /** W11.I7: which notes this client may see, on top of the vault's `scope` (scope.ts). */
+  scope?: ScopeRules;
 }
 
 export interface McpConfig {
   version: 1;
   clients: Record<string, ClientGrant>;
+  /** W11.I7: allow / deny by folder and tag for every client (scope.ts). */
+  scope?: ScopeRules;
 }
 
 export function lumenDir(vault: string): string {
@@ -76,14 +81,17 @@ export async function readConfig(vault: string): Promise<McpConfig> {
     return emptyConfig();
   }
   try {
-    const parsed = JSON.parse(raw) as { clients?: Record<string, Partial<ClientGrant>> };
+    const parsed = JSON.parse(raw) as { clients?: Record<string, Partial<ClientGrant>>; scope?: unknown };
     const cfg = emptyConfig();
+    const vaultScope = readScope(parsed.scope);
+    if (vaultScope) cfg.scope = vaultScope;
     for (const [id, g] of Object.entries(parsed.clients ?? {})) {
       if (!g || typeof g !== "object") continue;
       cfg.clients[normalizeClientId(id)] = {
         enabled: g.enabled === true,
         scopes: Array.isArray(g.scopes) ? g.scopes.filter(isScope) : [],
         since: typeof g.since === "string" ? g.since : "",
+        ...(readScope(g.scope) ? { scope: readScope(g.scope) } : {}),
       };
     }
     return cfg;
@@ -106,7 +114,9 @@ export async function writeConfig(vault: string, cfg: McpConfig): Promise<void> 
 
 export async function enableClient(vault: string, client: string, scopes: readonly McpScope[] = DEFAULT_SCOPES, now = new Date()): Promise<ClientGrant> {
   const cfg = await readConfig(vault);
-  const grant: ClientGrant = { enabled: true, scopes: [...scopes], since: now.toISOString() };
+  const prev = cfg.clients[normalizeClientId(client)];
+  // A client's scope (W11.I7) survives enable: only the grant's scopes and time change.
+  const grant: ClientGrant = { enabled: true, scopes: [...scopes], since: now.toISOString(), ...(prev?.scope ? { scope: prev.scope } : {}) };
   cfg.clients[normalizeClientId(client)] = grant;
   await writeConfig(vault, cfg);
   return grant;
