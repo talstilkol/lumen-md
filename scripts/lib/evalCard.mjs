@@ -19,6 +19,10 @@
  *
  * `public` is a published split (a URL in dataset.source); `heldout` is a W6.17
  * sealed set (dataset.name is its manifest id). Everything else is `dev`.
+ *
+ * A synthetic dataset (dataset.origin "synthetic", or a set under
+ * eval/synthetic, coordinator W7.13) is always `dev`: a card on it that says
+ * heldout or public is refused, so it can never back a ✅.
  */
 
 export const CARD_SCHEMA = 1;
@@ -33,6 +37,8 @@ export const EVAL_COMMAND = /\b(eval:[\w-]+|models:day|heldout\b|bench:[\w-]+)/;
 
 const isObj = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
 const nonEmpty = (v) => typeof v === "string" && v.trim().length > 0;
+/** A card dataset that is synthetic: origin "synthetic", or named after eval/synthetic (W7.13). */
+export const isSyntheticDataset = (d) => isObj(d) && (d.origin === "synthetic" || /^(eval\/)?synthetic\//.test(String(d.name ?? "")));
 const finite = (v) => typeof v === "number" && Number.isFinite(v);
 
 /**
@@ -55,6 +61,7 @@ export function validateCard(card) {
   if (!isObj(card.dataset)) p.push("card.dataset: missing");
   else {
     for (const k of ["name", "version", "license"]) if (!nonEmpty(card.dataset[k])) p.push(`card.dataset.${k}: missing`);
+    if (isSyntheticDataset(card.dataset) && card.tag !== "dev") p.push(`card.tag: ${card.tag} on a synthetic dataset (${card.dataset.name}) — a synthetic set is dev only and can never back a ✅`);
     if (card.tag === "public" && !(nonEmpty(card.dataset.source) && /^https:\/\//.test(card.dataset.source))) {
       p.push("card.dataset.source: a public set names where it is published (https URL)");
     }

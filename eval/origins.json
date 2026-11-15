@@ -1,5 +1,5 @@
 {
- "$comment": "Plan W10.B13 (audit W1.3, W1.4, W1.11, W1.14, W1.26, W2.2, W8.2, 4.15, W5.5, W2.10): the origin of every golden-set part and every test fixture. synthetic = written or generated here (including real text with errors we injected); real = data someone else made, used as published; derived-from-docs = real documents with items (questions, summaries, layouts) written here. Unknown provenance counts as synthetic. src/__tests__/origins.test.ts keeps this complete; scripts/golden/origin-claims.mjs flags plan statuses that call a synthetic set real.",
+ "$comment": "Plan W10.B13 (audit W1.3, W1.4, W1.11, W1.14, W1.26, W2.2, W8.2, 4.15, W5.5, W2.10): the origin of every golden-set part and every test fixture. synthetic = written or generated here (including real text with errors we injected); real = data someone else made, used as published; derived-from-docs = real documents with items (questions, summaries, layouts) written here. Unknown provenance counts as synthetic. src/__tests__/origins.test.ts keeps this complete; scripts/golden/origin-claims.mjs flags plan statuses that call a synthetic set real. Sets under eval/synthetic (not golden: no CI-only test split, and synthetic) are listed under \"synthetic\", every part of them with origin synthetic.",
  "golden": {
   "asr-he/fleurs": {
    "origin": "real",
@@ -133,14 +133,6 @@
    "origin": "real",
    "why": "Belebele heb_Hebr + eng_Latn"
   },
-  "retrieval-hard/crosslingual": {
-   "origin": "synthetic",
-   "why": "written for this repository (eval/probes/crosslingual-he-en.json, W5.28): questions and abstracts alike"
-  },
-  "retrieval-hard/hard": {
-   "origin": "synthetic",
-   "why": "real HeQ questions and paragraphs, but each query rewritten here by rule (synonym, prefix, spelling, acronym, loanword): real text with variation we injected"
-  },
   "spell-en/moby": {
    "origin": "synthetic",
    "why": "real sentences with synthetic non-word errors injected"
@@ -160,6 +152,16 @@
   "unlinked/notes": {
    "origin": "synthetic",
    "why": "written for this set"
+  }
+ },
+ "synthetic": {
+  "retrieval-hard/crosslingual": {
+   "origin": "synthetic",
+   "why": "written for this repository (eval/probes/crosslingual-he-en.json, W5.28): questions and abstracts alike"
+  },
+  "retrieval-hard/hard": {
+   "origin": "synthetic",
+   "why": "real HeQ questions and paragraphs, but each query rewritten here by rule (synonym, prefix, spelling, acronym, loanword): real text with variation we injected"
   }
  },
  "fixtures": {

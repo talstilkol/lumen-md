@@ -592,6 +592,33 @@ describe("scripts/licenses.mjs (CLI)", () => {
   });
 });
 
+describe("scripts/licenses.mjs reads eval/synthetic too (W7.13)", () => {
+  it("fails a synthetic set without a LICENSE, named by its own folder", () => {
+    const dir = mkdtempSync(join(tmpdir(), "lumen-licenses-syn-"));
+    try {
+      writeFileSync(join(dir, "package-lock.json"), JSON.stringify(lockFixture));
+      mkdirSync(join(dir, "node_modules/e"), { recursive: true });
+      writeFileSync(join(dir, "node_modules/e/package.json"), JSON.stringify({ name: "e", license: "ISC" }));
+      mkdirSync(join(dir, "models"));
+      writeFileSync(join(dir, "models/registry.json"), JSON.stringify(registryFixture));
+      mkdirSync(join(dir, "eval/synthetic/hard"), { recursive: true });
+      writeFileSync(join(dir, "eval/synthetic/hard/SOURCES.md"), "# sources\n");
+      const res = spawnSync(process.execPath, [join(repo, "scripts/licenses.mjs"), "--root", dir, "--json", join(dir, "out/r.json")], { encoding: "utf8" });
+      expect(res.status).toBe(1);
+      const report = JSON.parse(readFileSync(join(dir, "out/r.json"), "utf8"));
+      expect(report.failures.map((f: Finding) => `${f.area}:${f.name}`)).toContain("dataset:eval/synthetic/hard");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("checkDatasets names a dir by its root", () => {
+    const [f] = checkDatasets([{ name: "x", root: "eval/synthetic", files: [] }]);
+    expect(f).toMatchObject({ name: "eval/synthetic/x", level: "fail" });
+    expect(checkDatasets([{ name: "x", files: [] }])[0].name).toBe("eval/golden/x");
+  });
+});
+
 describe("the sources the model check reads", () => {
   it("app code under src/, not tests, fixtures, eval suites or the packed help docs", () => {
     for (const f of ["src/ai/modelCatalog.ts", "src/ui/ModelPicker.tsx", "src/ai/models.json", "src/workers/x.mjs"]) expect(isModelScanSource(f), f).toBe(true);

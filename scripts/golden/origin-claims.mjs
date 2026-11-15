@@ -21,7 +21,8 @@ function namesOf(origins) {
   const out = [];
   for (const [k, v] of Object.entries(origins.fixtures ?? {})) out.push({ name: k.replace(/\.(ts|json)$/, ""), origin: v.origin });
   const bySet = new Map();
-  for (const [k, v] of Object.entries(origins.golden ?? {})) {
+  // eval/synthetic sets (W7.13) are named the same way as golden ones.
+  for (const [k, v] of Object.entries({ ...(origins.golden ?? {}), ...(origins.synthetic ?? {}) })) {
     out.push({ name: k, origin: v.origin });
     const set = k.split("/")[0];
     bySet.set(set, [...(bySet.get(set) ?? []), v.origin]);

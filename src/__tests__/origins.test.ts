@@ -11,7 +11,7 @@ import { join } from "node:path";
 import { falseRealClaims } from "../../scripts/golden/origin-claims.mjs";
 
 type Entry = { origin: string; why: string };
-const origins = JSON.parse(readFileSync("eval/origins.json", "utf8")) as { golden: Record<string, Entry>; fixtures: Record<string, Entry> };
+const origins = JSON.parse(readFileSync("eval/origins.json", "utf8")) as { golden: Record<string, Entry>; synthetic: Record<string, Entry>; fixtures: Record<string, Entry> };
 const ALLOWED = ["synthetic", "real", "derived-from-docs"];
 
 describe("origins (W10.B13)", () => {
@@ -39,6 +39,25 @@ describe("origins (W10.B13)", () => {
     }
   });
 
+  it("every part of every eval/synthetic set has an origin under `synthetic`, and it is synthetic (W7.13)", () => {
+    const parts: string[] = [];
+    for (const set of readdirSync("eval/synthetic", { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name)) {
+      const m = JSON.parse(readFileSync(join("eval/synthetic", set, "manifest.json"), "utf8")) as { origin?: string; parts: Array<{ id: string }> };
+      expect(m.origin, set).toBe("synthetic");
+      for (const p of m.parts) parts.push(`${set}/${p.id}`);
+    }
+    expect(parts).toEqual(expect.arrayContaining(["retrieval-hard/hard", "retrieval-hard/crosslingual"]));
+    expect(Object.keys(origins.synthetic).sort()).toEqual(parts.sort());
+    for (const [k, v] of Object.entries(origins.synthetic)) {
+      expect(v.origin, k).toBe("synthetic");
+      expect(v.why.length, k).toBeGreaterThan(5);
+      const [set, part] = k.split("/");
+      expect(readFileSync(join("eval/synthetic", set, "SOURCES.md"), "utf8").split("\n").some((l) => l.startsWith(`| ${part} |`)), k).toBe(true);
+    }
+    // A synthetic set is never listed as golden too.
+    for (const k of Object.keys(origins.synthetic)) expect(origins.golden[k], k).toBeUndefined();
+  });
+
   it("100% of fixtures have an origin; unknown provenance is synthetic, never real", () => {
     const names = readdirSync("src/__tests__/fixtures");
     expect(Object.keys(origins.fixtures).sort()).toEqual([...names].sort());
@@ -60,6 +79,9 @@ describe("falseRealClaims: a status may not call a synthetic set real (W10.B13)"
     expect(flag("Import fidelity on the real-corpus: a real corpus of 245 files.")).toContain("real-corpus");
     expect(flag("relatedGold: Recall@5 100% on 100 real pairs.")).toContain("relatedGold");
     expect(flag("bidi: סט אמיתי של 40 שורות.")).toContain("bidi");
+    // eval/synthetic sets count too (W7.13).
+    expect(flag("retrieval-hard: a real set of 300 HeQ questions.")).toContain("retrieval-hard");
+    expect(flag("retrieval-hard/hard: real queries from HeQ.")).toContain("retrieval-hard/hard");
   });
 
   it("does not flag a real app or library, or a real set", () => {
