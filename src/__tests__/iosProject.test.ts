@@ -123,7 +123,7 @@ describe("the iOS project (W10.C7)", () => {
     const inTargets = new Set([...sourcesOf("App"), ...sourcesOf("LumenWidgets")]);
     const all = swiftFiles(join(ROOT, "ios/App"));
     expect(all.filter((f) => !inTargets.has(f))).toEqual([]);
-    expect(sourcesOf("App").sort()).toEqual(["ios/App/App/AppDelegate.swift", "ios/App/App/LumenIntents.swift", "ios/App/App/LumenNative.swift", "ios/App/App/iCloudSync.swift"]);
+    expect(sourcesOf("App").sort()).toEqual(["ios/App/App/AppDelegate.swift", "ios/App/App/LanDiscovery.swift", "ios/App/App/LumenIntents.swift", "ios/App/App/LumenNative.swift", "ios/App/App/iCloudSync.swift"]);
     expect(sourcesOf("LumenWidgets")).toEqual(["ios/App/LumenWidgets/LumenWidgets.swift"]);
   });
 

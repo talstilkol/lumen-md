@@ -78,6 +78,12 @@
 	<string>Lumen uses the microphone for voice-to-markdown dictation.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Lumen transcribes your voice into markdown using on-device speech recognition.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Lumen looks for your other device on this Wi-Fi network so you can pair it for sync without typing a code. Nothing leaves your network.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_lumen-lan._tcp</string>
+	</array>
 	<!-- File-sharing — let users drop .md files via the Files app and pick
 	     them up from iOS's share sheet. -->
 	<key>UIFileSharingEnabled</key>
