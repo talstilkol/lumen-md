@@ -140,6 +140,7 @@
 /src/storage/exportAll.ts                @talstilkol
 /src/storage/exportDocx.ts               @talstilkol
 /src/storage/exportFormats.ts            @talstilkol
+/src/storage/exportOutline.ts            @talstilkol
 /src/storage/exportHtml.ts               @talstilkol
 /src/storage/exportOdt.ts                @talstilkol
 /src/storage/exportPptx.ts               @talstilkol
