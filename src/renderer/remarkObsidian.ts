@@ -17,6 +17,7 @@
  *
  * Code, inline code, math and raw HTML are never touched.
  */
+import { MEDIA_EXT } from "../media/webvtt";
 import type { Root } from "mdast";
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- mdast nodes are rebuilt structurally here */
@@ -283,6 +284,13 @@ export function embedImages(tree: Root): void {
         const base = c.position?.start.offset;
         for (const m of c.value.matchAll(EMBED)) {
           const target = m[1].trim();
+          // Audio and video (W12.F8): a player with its transcript track (src/media/MediaEmbed.tsx).
+          if (MEDIA_EXT.test(target)) {
+            if (m.index > last) parts.push({ type: "text", value: c.value.slice(last, m.index) });
+            parts.push({ type: "mediaEmbed", data: { hName: "lumen-mediaembed", hProperties: { target }, hChildren: [] } });
+            last = m.index + m[0].length;
+            continue;
+          }
           if (!IMAGE_EXT.test(target)) continue;
           const { alt, width, height } = parseEmbedParams(m[2].split("|").slice(1));
           if (m.index > last) parts.push({ type: "text", value: c.value.slice(last, m.index) });
