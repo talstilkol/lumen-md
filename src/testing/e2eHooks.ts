@@ -19,6 +19,8 @@ const MODULES = {
   "store/gitPullDocs": () => import("../store/gitPullDocs"),
   "store/useStore": () => import("../store/useStore"),
   "ai/ocr": () => import("../ai/ocr"),
+  // e2e/rtl-parity/animations.spec.ts: a toast on demand, to read its entrance (plan 9.9).
+  "ui/AiToast": () => import("../ui/AiToast"),
 };
 
 export type E2eModuleName = keyof typeof MODULES;

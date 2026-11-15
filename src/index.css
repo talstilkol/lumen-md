@@ -1000,10 +1000,18 @@
   }
 
 
+  /* A toast sits at the inline end (src/ui/AiToast.tsx: insetInlineEnd), so it
+     comes in from beyond that edge: +x in LTR, −x in RTL (plan 9.9, W10.E22). */
+  :root {
+    --toast-enter-x: 20px;
+  }
+  [dir="rtl"] {
+    --toast-enter-x: -20px;
+  }
   @keyframes toast-slide-in {
     from {
       opacity: 0;
-      transform: translateX(20px);
+      transform: translateX(var(--toast-enter-x, 20px));
     }
     to {
       opacity: 1;

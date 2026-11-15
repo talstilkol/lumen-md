@@ -13,7 +13,8 @@ import { installE2eHooks, type LumenTestHooks } from "../testing/e2eHooks";
 import { PRODUCTION_GATES, PREVIEW_GATES } from "../../scripts/vercel-build.mjs";
 
 const ROOT = resolve(__dirname, "..", "..");
-const specs = readdirSync(join(ROOT, "e2e"))
+// Every spec and helper under e2e/, folders too (e2e/rtl-parity/, W10.E22).
+const specs = (readdirSync(join(ROOT, "e2e"), { recursive: true }) as string[])
   .filter((f) => f.endsWith(".ts"))
   .map((f) => ({ f, text: readFileSync(join(ROOT, "e2e", f), "utf8") }));
 
@@ -29,6 +30,7 @@ describe("e2e test hooks", () => {
     const known = new Set(target.__lumenTest!.modules);
     const used = new Set(specs.flatMap(({ text }) => [...text.matchAll(/__lumenTest\.load\("([^"]+)"\)/g)].map((m) => m[1])));
     expect(used.size).toBeGreaterThan(0);
+    expect(used.has("ui/AiToast")).toBe(true); // e2e/rtl-parity/animations.spec.ts, in a folder
     expect([...used].filter((n) => !known.has(n))).toEqual([]);
   });
 
