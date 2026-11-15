@@ -9,6 +9,17 @@ public class Intent {
   public Intent(String action, Uri uri) {}
   public Intent(Context packageContext, Class<?> cls) {}
   public Intent(String action, Uri uri, Context packageContext, Class<?> cls) {}
+  public static final String ACTION_SEND = "android.intent.action.SEND", ACTION_SEND_MULTIPLE = "android.intent.action.SEND_MULTIPLE";
+  public static final String EXTRA_TEXT = "android.intent.extra.TEXT", EXTRA_SUBJECT = "android.intent.extra.SUBJECT", EXTRA_STREAM = "android.intent.extra.STREAM";
+  public String getType() { return null; }
+  public String getStringExtra(String name) { return null; }
+  public Intent putExtra(String name, String value) { return this; }
+  /** @deprecated API 33 */
+  @Deprecated public <T extends android.os.Parcelable> T getParcelableExtra(String name) { return null; }
+  public <T> T getParcelableExtra(String name, Class<T> clazz) { return null; }
+  /** @deprecated API 33 */
+  @Deprecated public <T extends android.os.Parcelable> java.util.ArrayList<T> getParcelableArrayListExtra(String name) { return null; }
+  public <T> java.util.ArrayList<T> getParcelableArrayListExtra(String name, Class<? extends T> clazz) { return null; }
   public Uri getData() { return null; }
   public String getAction() { return null; }
   public Intent addFlags(int flags) { return this; }

@@ -4,6 +4,7 @@ import android.net.Uri;
 import java.io.*;
 import java.util.List;
 public abstract class ContentResolver {
+  public final String getType(Uri url) { return null; }
   public final void takePersistableUriPermission(Uri uri, int modeFlags) {}
   public List<UriPermission> getPersistedUriPermissions() { return null; }
   public final InputStream openInputStream(Uri uri) throws FileNotFoundException { return null; }

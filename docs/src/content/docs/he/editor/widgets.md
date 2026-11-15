@@ -58,6 +58,15 @@ description: ווידג'ט של Lumen במסך הבית, Siri ו-Spotlight בא�
 - תמונות ו-PDF נשמרים ב-`attachments/`, ושורה בתיבה מקשרת אליהם, עם שם
   הקובץ.
 
+## שיתוף והגדרות מהירות (אנדרואיד)
+
+- **שיתוף ← Lumen** מכל אפליקציה: טקסט, קישור, תמונות ו-PDF (אחד או כמה)
+  נשמרים בלי לפתוח את Lumen. הודעה ששותפה מ-WhatsApp או מ-Telegram שומרת
+  את האפליקציה, הכותב והשעה.
+- **אריח בהגדרות המהירות:** מושכים את הווילון, עורכים את האריחים ומוסיפים
+  את **לכידה**. הקשה פותחת תיבה קטנה. מקלידים שורה ומקישים **שמירה**; היא
+  נכנסת ל-`inbox.md` בפעם הבאה ש-Lumen נפתח.
+
 ## קיצורי אפליקציה (אנדרואיד)
 
 לחיצה ארוכה על הסמל של Lumen: **פתק מהיר**, **פתק קולי**, **חיפוש**
@@ -122,8 +131,15 @@ description: ווידג'ט של Lumen במסך הבית, Siri ו-Spotlight בא�
 
 הכול כבר בפרויקט: הווידג'ט (`LumenWidgetProvider`,
 ‏`res/layout/widget_lumen.xml`, ‏`res/xml/widget_lumen_info.xml`), קיצורי
-האפליקציה (`res/xml/shortcuts.xml`), מסנן ה-intent של `lumen://`, והתוסף,
-ש-`MainActivity` רושם.
+האפליקציה (`res/xml/shortcuts.xml`), מסנן ה-intent של `lumen://`, התוסף,
+ש-`MainActivity` רושם, גיליון השיתוף (`ShareActivity`), והאריח בהגדרות
+המהירות (`CaptureTileService`) עם תיבת הלכידה שלו (`CaptureActivity`). התור
+שהם כותבים אליו הוא `CaptureQueue.java`, בתיקיית הקבצים של האפליקציה.
+
+בלי ה-SDK, ‏`tools/native-check/check-android.sh .` מקמפל את ה-Java מול
+stubs ובודק כל הפניה למשאב, ו-`tools/native-check/test-android.sh .` מריץ
+את בדיקות ה-JUnit של התור. עם ה-SDK, ‏`cd android && ./gradlew test lint`
+מריץ את אותן בדיקות ואת ה-lint של Android.
 
 1. `npm run build && npx cap sync android`, ואז פותחים את `android/`
    ב-Android Studio.
@@ -153,3 +169,7 @@ description: ווידג'ט של Lumen במסך הבית, Siri ו-Spotlight בא�
    ב-`inbox.md` אחרי ש-Lumen נפתח.
 7. **שיתוף:** משתפים דף מ-Safari, תמונה מ-Photos ו-PDF מ-Files, כש-Lumen
    סגור. פותחים את Lumen: כל אחד מהם נמצא שם, עם הקישור או שם הקובץ.
+8. **שיתוף ואריח באנדרואיד:** משתפים דף מ-Chrome, שתי תמונות בבת אחת
+   והודעת WhatsApp, ואז מוסיפים שורה מהאריח בהגדרות המהירות. פותחים את
+   ‏Lumen: כולם ב-`inbox.md` (התמונות ב-`attachments/`), ושורת ה-WhatsApp
+   מציינת את האפליקציה ואת הכותב.
