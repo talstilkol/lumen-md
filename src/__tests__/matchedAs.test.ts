@@ -59,7 +59,8 @@ describe("match tiers", () => {
     expect(matchTier("תכנית", "תוכנית")?.tier).toBe("ktiv");
     expect(matchTier("אבודות", "אבודה")?.tier).toBe("lemma");
     expect(matchTier("מכונית", "רכב")?.tier).toBe("synonym");
-    expect(matchTier("מתכון", "recipe")?.tier).toBe("english");
+    // מתכון/recipe left HE_EN on the train (W10.B6: rows written from the dev probe are gone); ספר/book is general vocabulary.
+    expect(matchTier("ספר", "book")?.tier).toBe("english");
     expect(matchTier("Kohen", "כהן")?.tier).toBe("translit");
     expect(matchTier("Kohen", "שלום")).toBeNull();
   });

@@ -9,7 +9,7 @@
  * odd i. The expected edge set is computed separately below from that rule.
  */
 import { describe, expect, it } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { buildCitationGraph, citationRows, citedKeys, type CitingNote, type CslLibrary } from "../citations/citationGraph";
 import { validateEdge } from "../entities/schema";
 import { openAlexReferences } from "../citations/openAlex";
@@ -101,6 +101,9 @@ describe("the citation graph of a 50-source library", () => {
   it("the view's 'Citations only' button narrows the table to the cites edges", () => {
     const other = { id: "x", subject: id("s01"), predicate: "main_subject", object: id("s02"), confidence: 1, status: "approved" as const, provenance: g.edges[0].provenance };
     render(<EntityGraphView entities={g.entities} edges={[...g.edges, other]} notes={new Map()} onOpenEntity={() => undefined} initialMode="table" />);
+    // A library this big opens as an ego graph (R12.8, #886); the whole graph is one click away.
+    const ego = screen.queryByTestId("entity-graph-ego");
+    if (ego) fireEvent.click(within(ego).getByRole("button"));
     const stats = screen.getByTestId("entity-graph-stats");
     const before = stats.textContent;
     const button = screen.getByRole("button", { name: /citations only|ציטוטים בלבד|entityGraph.view.citationsOnly/i });
