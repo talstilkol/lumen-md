@@ -76,7 +76,9 @@ bundle-diff.md
 .bundle-base/
 
 # Live agent eval reports (npm run eval:agents)
-eval/results/
+eval/results/*
+# …except the Markdown conformance numbers (W11.Q8), which are committed with their exceptions
+!eval/results/md-conformance.json
 flake-results/
 visual-results/
 # Review triage / reply state (scripts/review-triage.mjs, review-reply.mjs)
