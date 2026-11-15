@@ -11,7 +11,7 @@ doesn't load it until you say so: the preview shows a placeholder with
 ## The list, and revoking
 
 Command palette → **Privacy: allowed image hosts…** lists every site you
-chose **Always allow** for.
+chose **Always allow** for. The same list is in **Settings → Privacy**.
 
 - **Revoke** next to a site: its images wait for you again, at once — the
   preview shows the placeholder and nothing more is requested from that
