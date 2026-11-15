@@ -786,6 +786,46 @@
       "vars": []
     },
     {
+      "key": "cmd.entities.concept",
+      "en": "Entities: Concepts",
+      "vars": []
+    },
+    {
+      "key": "cmd.entities.event",
+      "en": "Entities: Events",
+      "vars": []
+    },
+    {
+      "key": "cmd.entities.law",
+      "en": "Entities: Laws",
+      "vars": []
+    },
+    {
+      "key": "cmd.entities.organization",
+      "en": "Entities: Organizations",
+      "vars": []
+    },
+    {
+      "key": "cmd.entities.person",
+      "en": "Entities: People",
+      "vars": []
+    },
+    {
+      "key": "cmd.entities.place",
+      "en": "Entities: Places",
+      "vars": []
+    },
+    {
+      "key": "cmd.entities.review",
+      "en": "Entity graph: proposals to review",
+      "vars": []
+    },
+    {
+      "key": "cmd.entities.source",
+      "en": "Entities: Sources",
+      "vars": []
+    },
+    {
       "key": "cmd.epub.open",
       "en": "Open an EPUB for reading…",
       "vars": []

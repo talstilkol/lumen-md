@@ -4920,6 +4920,21 @@
       "vars": []
     },
     {
+      "key": "entityGraph.index.back",
+      "en": "Back to the list",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.index.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.index.empty",
+      "en": "No approved entities of this type yet. Approve proposals in the review panel.",
+      "vars": []
+    },
+    {
       "key": "entityGraph.merge.action",
       "en": "Merge",
       "vars": []

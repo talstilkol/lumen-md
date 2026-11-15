@@ -1,4 +1,7 @@
 {
+  "entityGraph.index.back": "Back to the list",
+  "entityGraph.index.close": "Close",
+  "entityGraph.index.empty": "No approved entities of this type yet. Approve proposals in the review panel.",
   "entityGraph.merge.action": "Merge",
   "entityGraph.merge.done": "Merged. Links now point at the kept note.",
   "entityGraph.merge.into": "and merge into it",
