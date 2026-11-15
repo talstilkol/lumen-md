@@ -6,7 +6,7 @@ not real data, names no real person, and is tagged `dev` on the card.
 Labels come from construction: a claim is `keep` only when it restates a
 source sentence; every other unit is an adversarial lie (`delete`).
 
-    python3 eval/golden/cite-gate/gen.py > eval/golden/cite-gate/cases.json
+    python3 eval/synthetic/cite-gate/gen.py > eval/synthetic/cite-gate/cases.json
 """
 import json
 

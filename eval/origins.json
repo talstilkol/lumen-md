@@ -162,12 +162,24 @@
   "retrieval-hard/hard": {
    "origin": "synthetic",
    "why": "real HeQ questions and paragraphs, but each query rewritten here by rule (synonym, prefix, spelling, acronym, loanword): real text with variation we injected"
+  },
+  "cite-gate/cases": {
+   "origin": "synthetic",
+   "why": "written for this repository by gen.py (R12.9): sources, questions and answers invented, labels by construction"
+  },
+  "claims/cases": {
+   "origin": "synthetic",
+   "why": "written for this repository by gen.py (R12.11): invented names, scripted model drafts, labels by construction"
   }
  },
  "fixtures": {
   "academic": {
    "origin": "synthetic",
    "why": "written for the tests"
+  },
+  "apa7-he-guides.json": {
+   "origin": "derived-from-docs",
+   "why": "examples transcribed from the published Bar-Ilan and Haifa library APA 7 guides (W11.H15); the fixture's own `about` says transcription is not yet checked by eye"
   },
   "apple-notes-synthetic": {
    "origin": "synthetic",
@@ -205,9 +217,17 @@
    "origin": "synthetic",
    "why": "provenance not recorded: treated as synthetic"
   },
+  "dates-he": {
+   "origin": "synthetic",
+   "why": "gold.synthetic.json: Hebrew date phrases written for the R12.6 tests"
+  },
   "eval-ingest": {
    "origin": "synthetic",
    "why": "made-up eval runs for evalIngest.test.ts; not measurements of any model (README)"
+  },
+  "format-roundtrip": {
+   "origin": "synthetic",
+   "why": "baseline.json: scores measured here by formatRoundTrip.test.ts, not data"
   },
   "golden": {
    "origin": "synthetic",
@@ -220,6 +240,14 @@
   "gps-photos.json": {
    "origin": "synthetic",
    "why": "written for the tests"
+  },
+  "gpx-public": {
+   "origin": "real",
+   "why": "GPX test files of gpxpy, copied unchanged at a pinned commit, Apache-2.0 (README, LICENSE-gpxpy)"
+  },
+  "hebcal-learning": {
+   "origin": "real",
+   "why": "the published daily Rambam schedule from hebcal-learning's test data at a pinned commit, BSD-2-Clause"
   },
   "highlight-import": {
    "origin": "synthetic",
@@ -236,6 +264,10 @@
   "ink": {
    "origin": "synthetic",
    "why": "written for the tests"
+  },
+  "ipynb-public": {
+   "origin": "real",
+   "why": "Jupyter's own documentation notebooks, copied unchanged, BSD-3-Clause (README)"
   },
   "json-canvas": {
    "origin": "real",
@@ -273,6 +305,10 @@
    "origin": "synthetic",
    "why": "written for the tests"
   },
+  "notionScenarios.ts": {
+   "origin": "synthetic",
+   "why": "the twenty W8.2 Notion export scenarios, made here (its header)"
+  },
   "obsidian": {
    "origin": "synthetic",
    "why": "written for the tests (Obsidian syntax), not from a real vault"
@@ -288,6 +324,14 @@
   "obsidian-importer": {
    "origin": "real",
    "why": "Obsidian Importer's own sample Keep exports and expected output at tag 3.1.15, copied unchanged (SOURCES.md); its authors' examples, not users' exports"
+  },
+  "office-roundtrip": {
+   "origin": "synthetic",
+   "why": "baseline.json: scores measured here by officeRoundTrip.test.ts, not data"
+  },
+  "openlaw": {
+   "origin": "synthetic",
+   "why": "real law titles with made-up section paraphrases, in the gkour/israeli_law shape (README)"
   },
   "owner-checklist": {
    "origin": "synthetic",
@@ -313,6 +357,10 @@
    "origin": "synthetic",
    "why": "despite the name: 7 of 8 formats are ours (render.py, notion_wa.py, LibreOffice on our documents); only evernote/ is third-party (manifest.json origin per format)"
   },
+  "registers": {
+   "origin": "synthetic",
+   "why": "*.synthetic.json: data.gov.il datastore responses written for the R12.19 tests"
+  },
   "relatedGold.ts": {
    "origin": "synthetic",
    "why": "generated: pairs built to share keywords"
@@ -328,6 +376,10 @@
   "sefaria": {
    "origin": "synthetic",
    "why": "provenance not recorded: treated as synthetic"
+  },
+  "sefaria-tools": {
+   "origin": "synthetic",
+   "why": "responses written from Sefaria's documented OpenAPI schema, not fetched (SOURCES.md)"
   },
   "slideNotes.ts": {
    "origin": "synthetic",

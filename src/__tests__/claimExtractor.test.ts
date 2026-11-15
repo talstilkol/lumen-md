@@ -1,7 +1,7 @@
 /**
  * R12.11: paragraph → candidate claims. Selection and anchoring are rules;
  * the model's drafts are scripted here. The eval runs 20 SYNTHETIC
- * paragraphs (eval/golden/claims, tag dev) and its card must be what this
+ * paragraphs (eval/synthetic/claims, tag dev) and its card must be what this
  * run computes (`LUMEN_WRITE_EVAL=1` rewrites it).
  */
 import { describe, expect, it, vi } from "vitest";
@@ -109,7 +109,7 @@ describe("R12.11 eval: 20 synthetic paragraphs", () => {
     paragraph: string;
     drafts: Array<ClaimDraft & { label: string }>;
   }
-  const SET = JSON.parse(readFileSync("eval/golden/claims/cases.json", "utf8")) as { name: string; version: string; license: string; cases: Case[] };
+  const SET = JSON.parse(readFileSync("eval/synthetic/claims/cases.json", "utf8")) as { name: string; version: string; license: string; cases: Case[] };
   const RESULT = "eval/cards/claim-extractor.json";
 
   const rows = SET.cases.map((c) => {

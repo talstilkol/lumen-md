@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "set": "cite-gate",
+  "title": "Cite-or-delete gate (synthetic)",
+  "capability": "R12.9",
+  "origin": "synthetic",
+  "license": "MIT",
+  "note": "A synthetic set (eval/origins.json, section synthetic), so it lives under eval/synthetic and not eval/golden (coordinator decision, W7.13). Written for this repository by gen.py, labels by construction; its numbers are dev numbers and its eval card is tagged dev. See SOURCES.md.",
+  "version": 1,
+  "status": "built",
+  "parts": [
+    {
+      "id": "cases",
+      "items": 30,
+      "dev": 30,
+      "test": 0,
+      "status": "built",
+      "license": "MIT",
+      "devFiles": [
+        "cases.json"
+      ]
+    }
+  ],
+  "frozen": true,
+  "test": {
+    "note": "No CI-only test split: every file is committed (SOURCES.md).",
+    "canary": null,
+    "items": 0,
+    "sha256": null,
+    "parts": {
+      "cases": null
+    }
+  },
+  "files": {
+    "LICENSE": "a63cb63565e3d7f9c5c0a53bd11a3dd8bcfcb85b1af2e0d1c5151b94cf44c3b1",
+    "SOURCES.md": "920f2cf572e7a47c1a821481647df8985e1977fcd918039fe2b83ac1b3ecbdb7",
+    "cases.json": "c14ab75a5a97decd4fae70b5715950a2feb4c1b2b1db0a0a9a7a678867fe5810",
+    "gen.py": "270038635cf1b6ddf8cc3360ff4d672e66b6435d91fc934ae0d546fb583b5249"
+  },
+  "changelog": [
+    {
+      "version": 1,
+      "date": "2026-11-15",
+      "reason": "first freeze, on train 7: moved from eval/golden (where #885/#895 put it) to eval/synthetic (coordinator decision W7.13), with SOURCES.md and LICENSE; data files unchanged"
+    }
+  ],
+  "frozenAt": "2026-11-15",
+  "frozenState": "eb3cc013c77fcc1605bfe2647e3483644835ab7cb6535ca444d3f3c94f95d852"
+}

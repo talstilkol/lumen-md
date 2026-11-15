@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "set": "claims",
+  "title": "Claim extractor (synthetic)",
+  "capability": "R12.11",
+  "origin": "synthetic",
+  "license": "MIT",
+  "note": "A synthetic set (eval/origins.json, section synthetic), so it lives under eval/synthetic and not eval/golden (coordinator decision, W7.13). Written for this repository by gen.py, labels by construction; its numbers are dev numbers and its eval card is tagged dev. See SOURCES.md.",
+  "version": 1,
+  "status": "built",
+  "parts": [
+    {
+      "id": "cases",
+      "items": 20,
+      "dev": 20,
+      "test": 0,
+      "status": "built",
+      "license": "MIT",
+      "devFiles": [
+        "cases.json"
+      ]
+    }
+  ],
+  "frozen": true,
+  "test": {
+    "note": "No CI-only test split: every file is committed (SOURCES.md).",
+    "canary": null,
+    "items": 0,
+    "sha256": null,
+    "parts": {
+      "cases": null
+    }
+  },
+  "files": {
+    "LICENSE": "a460c7f2b441b279aa4ea8d2d4838b80b05479400996de7fbf367bd1aec1a8ac",
+    "SOURCES.md": "591a6c7c372a23ef16b4843f1a867a848a959543a3d99dfe711bb641aa9460ef",
+    "cases.json": "0815594ebd41ee81e07ee7113895eeb017774c7bc969f8a866b2336b01159c75",
+    "gen.py": "1ce2c3941a1b6b6841b49533cf87fd59b980b2ae80ca5ca80a7555de3d90272f"
+  },
+  "changelog": [
+    {
+      "version": 1,
+      "date": "2026-11-15",
+      "reason": "first freeze, on train 7: moved from eval/golden (where #885/#895 put it) to eval/synthetic (coordinator decision W7.13), with SOURCES.md and LICENSE; data files unchanged"
+    }
+  ],
+  "frozenAt": "2026-11-15",
+  "frozenState": "2fbb3a56362d2f40b3997e578a4afb43a7546421dad2d1d241c811dd5eba5fb2"
+}

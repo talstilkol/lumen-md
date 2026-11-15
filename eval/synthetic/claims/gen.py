@@ -9,7 +9,7 @@ resolved) and three it must lose (an invented word, a flipped polarity, a
 claim from the opinion sentence). Tag: dev. It measures the deterministic
 rules around the model, not a model.
 
-    python3 eval/golden/claims/gen.py > eval/golden/claims/cases.json
+    python3 eval/synthetic/claims/gen.py > eval/synthetic/claims/cases.json
 """
 import json
 

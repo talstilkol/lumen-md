@@ -1,6 +1,6 @@
 /**
  * R12.9 eval: the cite-or-delete gate on 30 SYNTHETIC questions
- * (eval/golden/cite-gate, written by gen.py, labels by construction, tag
+ * (eval/synthetic/cite-gate, written by gen.py, labels by construction, tag
  * `dev`). Each answer mixes two true sentences with five adversarial ones:
  * flipped polarity, a changed number, an invented claim, no marker, an
  * unread source; and the model offers invented quotes.
@@ -21,7 +21,7 @@ interface Case {
   modelQuotes: Record<string, string[]>;
   units: Array<{ text: string; label: "keep" | "delete"; kind: string }>;
 }
-const SET = JSON.parse(readFileSync("eval/golden/cite-gate/cases.json", "utf8")) as { name: string; version: string; license: string; cases: Case[] };
+const SET = JSON.parse(readFileSync("eval/synthetic/cite-gate/cases.json", "utf8")) as { name: string; version: string; license: string; cases: Case[] };
 const RESULT = "eval/cards/cite-gate.json";
 
 /** mulberry32: a seeded generator, so the bootstrap is the same on every run. */

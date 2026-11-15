@@ -39,7 +39,7 @@ Every sentence of the agent's answer must be tied to an exact quote from a sourc
 - The note's first line always says how many sentences were removed, for example "2 sentences were removed: no exact quote in the sources backs them." Headings with nothing left under them go too; a code block is removed, because nothing quotes code at offsets.
 - For a library note, the footnote links the paragraph when it has a `^id`.
 
-The gate was measured on a **synthetic** set of 30 questions (15 English, 15 Hebrew; `eval/golden/cite-gate`), each answer mixing true sentences with planted lies. Result in `eval/cards/cite-gate.json`: 0 shown quotes that are not in the source. It is tagged `dev`: it shows how the gate treats known lies, not quality on real answers.
+The gate was measured on a **synthetic** set of 30 questions (15 English, 15 Hebrew; `eval/synthetic/cite-gate`), each answer mixing true sentences with planted lies. Result in `eval/cards/cite-gate.json`: 0 shown quotes that are not in the source. It is tagged `dev`: it shows how the gate treats known lies, not quality on real answers.
 
 ### Paragraph → claims
 
