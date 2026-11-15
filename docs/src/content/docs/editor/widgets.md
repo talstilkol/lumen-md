@@ -59,6 +59,15 @@ images and PDFs are saved without opening Lumen. The next time Lumen opens:
 - images and PDFs are saved in `attachments/`, and a line in the inbox
   links to them, with the file's name.
 
+## Share and Quick Settings (Android)
+
+- **Share → Lumen** from any app: text, a link, images and PDFs (one or
+  several) are saved without opening Lumen. A message shared from WhatsApp
+  or Telegram keeps its app, author and time.
+- **Quick Settings tile:** pull down the shade, edit the tiles, and add
+  **Capture**. A tap opens a small box. Type a line and tap **Save**; it
+  goes to `inbox.md` the next time Lumen opens.
+
 ## App Shortcuts (Android)
 
 Long-press the Lumen icon: **Quick note**, **Voice note**, **Search** and
@@ -127,8 +136,17 @@ To build:
 
 Everything is in the project already: the widget (`LumenWidgetProvider`,
 `res/layout/widget_lumen.xml`, `res/xml/widget_lumen_info.xml`), App
-Shortcuts (`res/xml/shortcuts.xml`), the `lumen://` intent filter, and the
-plugin, which `MainActivity` registers.
+Shortcuts (`res/xml/shortcuts.xml`), the `lumen://` intent filter, the
+plugin, which `MainActivity` registers, the share sheet (`ShareActivity`),
+and the Quick Settings tile (`CaptureTileService`) with its capture box
+(`CaptureActivity`). The queue they write is `CaptureQueue.java`, in the
+app's own files folder.
+
+Without the SDK, `tools/native-check/check-android.sh .` compiles the Java
+against stubs and checks every resource reference, and
+`tools/native-check/test-android.sh .` runs the queue's JUnit tests. With
+the SDK, `cd android && ./gradlew test lint` runs the same tests and Android
+lint.
 
 1. `npm run build && npx cap sync android`, then open `android/` in
    Android Studio.
@@ -161,3 +179,7 @@ Android phone, with the phone in Hebrew and then in English:
 7. **Share:** share a web page from Safari, a photo from Photos and a PDF
    from Files, with Lumen closed. Open Lumen: each one is there, with its
    link or file name.
+8. **Android share and tile:** share a page from Chrome, two photos at once,
+   and a WhatsApp message, then add a line from the Quick Settings tile.
+   Open Lumen: all of them are in `inbox.md` (the photos in
+   `attachments/`), and the WhatsApp line names the app and the author.

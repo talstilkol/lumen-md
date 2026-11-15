@@ -7,4 +7,5 @@ public class PluginCall {
   public String getString(String name, String defaultValue) { return null; }
   public void reject(String msg, Exception e) {}
   public JSObject getData() { return null; }
+  public JSArray getArray(String name) { return null; }
 }
