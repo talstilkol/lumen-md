@@ -9,3 +9,9 @@ src/__tests__/fixtures/obsidian-corpus/** -text
 # bundle is rebuilt after the merge (scripts/lane-merge.sh does both; by hand:
 # node scripts/help-merge-driver.mjs --install once, then node scripts/help-bundle.mjs).
 src/help/generated/*.json merge=lumen-help linguist-generated=true
+# Plan R12.13: lane merge rules by file kind (scripts/lanes/merge-driver.mjs, rules in
+# plan/LEASES.json). Install once per checkout: node scripts/lanes/merge-driver.mjs --install
+i18n/keys/*.json merge=lumen-lanes
+i18n/weblate/en/*.json merge=lumen-lanes
+src/__tests__/__snapshots__/commandIds.snapshot.json merge=lumen-lanes
+plan/lanes/** merge=lumen-lanes
