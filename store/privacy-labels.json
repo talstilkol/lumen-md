@@ -172,14 +172,22 @@
       ]
     },
     {
-      "feature": "Public sources (Sefaria, the Knesset, government data, Wikidata)",
+      "feature": "Public sources (Sefaria, the Knesset, government data)",
       "ledgerCategory": "cloud-text",
-      "sends": "Only the reference, name or search words you asked for; nothing from your notes",
-      "turnedOnBy": "Searching one of these sources; refused under local-only",
+      "sends": "Only the reference or search words you asked for; nothing from your notes",
+      "turnedOnBy": "Searching one of these sources, after you agree to that search; under local-only too, listed as consented in the ledger",
       "routes": [
         "Jewish sources (Sefaria): the reference only",
         "Knesset records (OData): the law or bill name only",
-        "Government data (data.gov.il, CBS): the search words or dataset id only",
+        "Government data (data.gov.il, CBS): the search words or dataset id only"
+      ]
+    },
+    {
+      "feature": "Wikidata (entity linking)",
+      "ledgerCategory": "cloud-text",
+      "sends": "The name of the entity you asked to link; nothing from your notes",
+      "turnedOnBy": "Searching Wikidata, after you agree (this once, or always on this device); refused under local-only, whatever you agreed",
+      "routes": [
         "Wikidata search: the entity name only"
       ]
     },
