@@ -319,6 +319,11 @@
       {
         "file": "src/__tests__/vaultHandleStrict.test.ts"
       }
+    ],
+    "src/sync/gitMerge.ts": [
+      {
+        "file": "src/__tests__/gitMerge.test.ts"
+      }
     ]
   },
   "critical": {
