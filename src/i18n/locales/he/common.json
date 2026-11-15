@@ -387,6 +387,7 @@
   "capture.save": "הוספה לתיבה",
   "capture.saved": "נוסף ל־{path}",
   "capture.title": "לכידה מהירה",
+  "capture.voice.afterStop": "אין תמלול חי (מודל ההכתבה לא מותקן, או שהשפה לא עברית): ההקלטה תתומלל במכשיר כשתעצרו.",
   "capture.voice.keepAudio": "לשמור את ההקלטה",
   "capture.voice.noMic": "אין מיקרופון, או שההרשאה נדחתה.",
   "capture.voice.noTranscript": "לא הצלחתי לתמלל במכשיר; ההקלטה נשמרת עם הפתק.",

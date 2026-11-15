@@ -2169,6 +2169,11 @@
       "vars": []
     },
     {
+      "key": "capture.voice.afterStop",
+      "en": "No live transcription (the dictation model is not installed, or the language is not Hebrew): the recording is transcribed on this device when you stop.",
+      "vars": []
+    },
+    {
       "key": "capture.voice.keepAudio",
       "en": "Keep audio",
       "vars": []
