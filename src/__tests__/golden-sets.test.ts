@@ -66,14 +66,16 @@ const DUMMY = "dummy-seed-for-tests-only";
 const TARGETS_7_1: Record<string, number> = { "asr-he": 80, "mt-he-en": 250, nikud: 100, "ocr-he": 150, "typos-he": 200, retrieval: 130, "ner-pii": 250, caption: 50, injection: 130, langid: 240 };
 /** The twelve small sets of plan 7.10 (11 built here, the meetings slot waits for the owner). */
 const TARGETS_7_10: Record<string, number> = { "spell-en": 100, "image-search": 30, clipper: 20, "pdf-qa": 30, "data-analysis": 20, summarize: 20, formulas: 30, unlinked: 30, bidi: 30, "hebrew-dates": 20, citations: 20, meetings: 5 };
-const TARGETS: Record<string, number> = { ...TARGETS_7_1, ...TARGETS_7_10 };
+/** W7.13's hard retrieval set (300 rewritten HeQ questions + 100 cross-lingual probes). It commits its held-out file, so it does not validate yet. */
+const TARGETS_W7_13: Record<string, number> = { "retrieval-hard": 400 };
+const TARGETS: Record<string, number> = { ...TARGETS_7_1, ...TARGETS_7_10, ...TARGETS_W7_13 };
 
 const hashItems = (items: Item[]) => contentHash({ id: "", items });
 
 describe("eval/golden — the committed sets", () => {
   const results = validateAll(golden);
 
-  it("holds exactly the ten sets of appendix 20.3 and the twelve small sets of 7.10, at their planned sizes", () => {
+  it("holds exactly the ten sets of appendix 20.3, the twelve small sets of 7.10 and W7.13's hard set, at their planned sizes", () => {
     expect(Object.fromEntries(results.map((r: { name: string; manifest: { target: number } }) => [r.name, r.manifest?.target]))).toEqual(TARGETS);
   });
 
