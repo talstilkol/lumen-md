@@ -1,0 +1,3 @@
+# The nightly runs on Linux (plan 0.11, W10.E11). `npm run nightly:install` fills the {{…}}
+# fields and adds this line to your crontab between the two lumen-md markers.
+{{MINUTE}} {{HOUR}} * * * {{COMMAND}} >> {{LOG}} 2>&1

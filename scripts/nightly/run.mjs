@@ -2,13 +2,15 @@
 /**
  * The nightly runs without GitHub Actions (plan W4.36; 0.5, 0.11, 0.14).
  *
- * One command a scheduler on the owner's machine starts (launchd or cron:
- * docs/dev/nightly.md). Each kind of run writes one sealed report to
+ * One command a scheduler on the owner's machine starts (launchd or cron, which
+ * `npm run nightly:install` sets up: scripts/nightly/scheduler.mjs; docs:
+ * docs/src/content/docs/contributing/nightly.md). Each kind of run writes one sealed report to
  * reports/nightly/<date>-<kind>.json (scripts/nightly/receipt.mjs) and
  * reports/nightly/status.json says where 0.5, 0.11 and 0.14 stand.
  *
  *   flake    e2e ×5 on chromium, firefox and webkit (npm run e2e:flake -- --all --times 5)
- *   perf     build + bundle budget, the @nightly perf project, Lighthouse (when installed)
+ *   perf     build + bundle budget, the @nightly perf project, the Lighthouse trend
+ *            (desktop + mobile, median of 3 → reports/trend/; collect only, nothing uploaded)
  *   triage   review triage over the open PRs, the 0.14 count over the first 20 PRs, live:meta (W6.2)
  *            and the GitHub ruleset drift check (W11.S4)
  *   weekly   dependency health (audit, outdated, licences) and mutation scores — Sundays:
@@ -23,7 +25,7 @@
  *   npm run nightly                          # what is due today: flake, perf, triage (+ weekly on Sunday)
  *   npm run nightly -- --only triage,weekly  # these kinds only
  *   npm run nightly -- --scheduled           # set by the scheduler: trigger "schedule" (0.11 counts these)
- *   npm run nightly -- --commit              # then commit reports/nightly/ ("[skip ci]"; never pushes)
+ *   npm run nightly -- --commit              # then commit reports/nightly/ and reports/trend/ ("[skip ci]"; never pushes)
  *   npm run nightly -- --status              # recompute status.json from the reports there
  *   npm run nightly -- --verify <file>…      # check each report's digest and signature
  *   npm run nightly -- --dry-run             # print the plan, run nothing
@@ -43,6 +45,11 @@ import { CHECKS as SUPPLY_CHECKS, onPath } from "../supply/nightly.mjs";
 const root = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 export const NIGHTLY_DIR = join(root, "reports", "nightly");
 export const PUBLIC_KEY = join(NIGHTLY_DIR, "PUBLIC_KEY.pem");
+/** What --commit commits: the sealed reports and the Lighthouse trend (both re-included in .gitignore). */
+export const COMMITTED = ["reports/nightly", "reports/trend"];
+/** Commands that would send a report off the machine (public storage, a server). The nightly runs none of them. */
+export const UPLOADS = [/\blhci\b.*\b(autorun|upload)\b/, /\bnpm run lighthouse\b/, /temporary-public-storage/];
+export const uploadsIn = (steps) => steps.filter((s) => UPLOADS.some((re) => re.test(s.cmd.join(" "))));
 /** 0.14 counts the PRs opened from this day (when the nightly receipts started). */
 export const METRIC_SINCE = "2026-11-12";
 const REPO = "talstilkol/lumen-md";
@@ -89,6 +96,17 @@ export function reportName(dir, date, kind, exists = existsSync) {
 /** W6.16: the floor every critical module must reach in the weekly real run (targets.json critical.min). */
 export const MUTATION_MIN = 80;
 export const MUTATION_RECEIPT = "scripts/mutation/receipt.json";
+/** This night's Lighthouse trend entry (written after `since`), so the sealed perf report carries the numbers; null when none. */
+export function lighthouseEntry(file, since) {
+  try {
+    const h = JSON.parse(readFileSync(file, "utf8"));
+    const e = Array.isArray(h) ? h[h.length - 1] : null;
+    return e && Date.parse(e.date) >= Date.parse(since) ? e : null;
+  } catch {
+    return null;
+  }
+}
+
 
 /**
  * The steps of one kind, as { id, cmd, timeoutMin, optional? }. `has` says
@@ -105,7 +123,9 @@ export function stepsFor(kind, has, exists = (f) => existsSync(join(root, f))) {
         { id: "perf-e2e", cmd: ["npx", "playwright", "test", "--project=perf", "--reporter=json"], timeoutMin: 30, json: "perf" },
         // Plan W6.45: INP and keypress → paint in both editors on 10,000 notes, gated per environment (+10 %), sealed receipt.
         ...(has("perf:responsiveness") ? [{ id: "perf-responsiveness", cmd: ["npm", "run", "perf:responsiveness", "--", "--seal"], timeoutMin: 45 }] : []),
-        ...(has("lighthouse") ? [{ id: "lighthouse", cmd: ["npm", "run", "lighthouse"], timeoutMin: 20 }] : []),
+        // Plan 0.11: desktop and mobile, median of 3, appended to reports/trend/. Not `npm run lighthouse`:
+        // that is `lhci autorun`, desktop only, and uploads to temporary-public-storage.
+        { id: "lighthouse-trend", cmd: ["node", "scripts/nightly/lighthouse-trend.mjs"], timeoutMin: 30 },
       ];
     case "triage":
       return [
@@ -132,7 +152,7 @@ export function stepsFor(kind, has, exists = (f) => existsSync(join(root, f))) {
     case SR_KIND:
       // VoiceOver needs a logged-in macOS session; setup --ci makes it scriptable
       // without prompts (it also writes the TCC grant; with SIP on, grant the
-      // terminal Accessibility and Automation once by hand: docs dev/nightly).
+      // terminal Accessibility and Automation once by hand: contributing/nightly.md).
       return [
         { id: "sr-setup", cmd: ["npx", "--no-install", "@guidepup/setup", "--ci"], timeoutMin: 10 },
         { id: "sr-voiceover", cmd: ["npm", "run", "test:sr", "--", "--project=voiceover"], timeoutMin: 30 },
@@ -342,6 +362,7 @@ function main() {
       } catch {
         report.perf = { annotations: [], error: "no Playwright JSON report" };
       }
+      report.lighthouse = lighthouseEntry(join(root, "reports/trend/lighthouse-history.json"), startedAt);
     }
     if (kind === SR_KIND) {
       const f = join(root, "sr-results", "results.json");
@@ -396,9 +417,10 @@ function main() {
   }
   writeStatus(privateKeyPem);
   if (argv.includes("--commit")) {
-    git(["add", "reports/nightly"]);
+    const paths = COMMITTED.filter((p) => existsSync(join(root, p)));
+    git(["add", ...paths]);
     const msg = `chore(nightly): ${kinds.join(", ") || "status"} reports ${now.toISOString().slice(0, 10)} [skip ci]`;
-    const r = spawnSync("git", ["-c", "core.hooksPath=/dev/null", "commit", "-m", msg, "--", "reports/nightly"], { cwd: root, stdio: "inherit" });
+    const r = spawnSync("git", ["-c", "core.hooksPath=/dev/null", "commit", "-m", msg, "--", ...paths], { cwd: root, stdio: "inherit" });
     if (r.status !== 0) console.error("nothing committed");
   }
   process.exit(failed ? 1 : 0);

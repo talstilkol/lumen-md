@@ -173,6 +173,7 @@
     "nightly": "node scripts/nightly/run.mjs",
     "security:ruleset-drift": "node scripts/security/ruleset-drift.mjs",
     "supply:nightly": "node scripts/supply/nightly.mjs",
+    "nightly:install": "node scripts/nightly/scheduler.mjs",
     "tts:mos": "node scripts/tts-mos.mjs",
     "test:sr": "playwright test -c sr/playwright.sr.config.ts",
     "drill:data-safety": "node scripts/data-safety-drill.mjs",
