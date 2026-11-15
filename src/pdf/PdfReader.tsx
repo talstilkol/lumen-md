@@ -42,6 +42,8 @@ import { HelpButton } from "../ui/HelpButton";
 import { explainError, UserFacingError } from "../lib/userError";
 import { EmptyState, learnHow } from "../ui/EmptyState";
 import { PdfPageView, withPageSize } from "./PdfPageView";
+import { InkLayer } from "./InkLayer";
+import { inkPage, readInkNote, setPageStrokes, upsertInkNote, moveInk, type PdfInkAnnotation, type PdfInkStroke } from "./ink";
 import type { PageSize } from "./PdfPageView";
 import type { OcrPage } from "./ocrPages";
 import { positionAt, scrollTopFor } from "./readingPosition";
@@ -131,6 +133,10 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
   const [visible, setVisible] = useState<Set<number>>(() => new Set([1]));
   const [current, setCurrent] = useState(1);
   const [annotations, setAnnotations] = useState<PdfAnnotation[]>([]);
+  // Ink (plan 4.14, W10.E64): the page strokes, in their own region of the companion note.
+  const [ink, setInk] = useState<PdfInkAnnotation[]>([]);
+  const inkRef = useRef<PdfInkAnnotation[]>([]);
+  const [inkMode, setInkMode] = useState(false);
   const [flash, setFlash] = useState<{ id: string; seq: number } | null>(null);
   const [hasSelection, setHasSelection] = useState(false);
   const [ocrPages, setOcrPages] = useState<Record<number, OcrPage>>({});
@@ -248,6 +254,12 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
       // or the next save would replace it with only the new highlights.
       if (!saved) throw new UserFacingError(t("pdf.notesUnreadable", { name: baseName(notePath) }));
       setAnnotations(saved.map((a) => (a.target.source === path ? a : { ...a, target: { ...a.target, source: path } })));
+      // The ink block, read as strictly: a damaged one is shown as unreadable, never saved over.
+      const savedInk = readInkNote(note);
+      if (!savedInk) throw new UserFacingError(t("pdf.inkUnreadable", { name: baseName(notePath) }));
+      // After the PDF moved, the strokes are still its own: they take the new path (ids kept).
+      inkRef.current = moveInk(savedInk, path);
+      setInk(inkRef.current);
       fingerprint.current = fp;
       setOcrPages(cachedOcr);
       restoreAt.current = savedPos && savedPos.page <= all.length ? { page: savedPos.page, offset: savedPos.offset } : null;
@@ -406,6 +418,45 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
             tab.workspaceName === notePath && tab.id !== activeId ? { ...tab, content: upsertAnnotationsNote(tab.content, path, next, labels) } : tab,
           ),
         }));
+        notifyWorkspaceChanged(existing === null ? { kind: "structure" } : { kind: "content", paths: [notePath] });
+        writeFailed.current = false;
+      });
+      writeQueue.current = job
+        .finally(() => {
+          pendingWrites.current--;
+        })
+        .catch((e: unknown) => {
+          writeFailed.current = true;
+          showAiToast(t("pdf.saveFailed", { error: explainError(e) }), "error");
+        });
+    },
+    [path, notePath],
+  );
+
+  // One stroke more on `page`, or (undo) one less: saved in the note's ink region, in the same queue as the highlights.
+  const persistInk = useCallback(
+    (page: number, change: (strokes: PdfInkStroke[]) => PdfInkStroke[]) => {
+      const pageStrokes = inkRef.current.find((a) => inkPage(a) === page)?.["lumen:strokes"] ?? [];
+      const next = setPageStrokes(inkRef.current, path, page, change(pageStrokes));
+      inkRef.current = next;
+      setInk(next);
+      pendingWrites.current++;
+      const job = writeQueue.current.then(async () => {
+        const [ws, { flushActiveWorkspaceDoc }, { notifyWorkspaceChanged }] = await Promise.all([import("../storage/workspace"), import("../store/openDocs"), import("../storage/workspaceEvents")]);
+        await flushActiveWorkspaceDoc();
+        let existing: string | null = null;
+        try {
+          existing = await ws.readWorkspaceFile(notePath);
+        } catch (e) {
+          if (!isMissing(e)) throw e;
+        }
+        if (existing !== null && !readInkNote(existing)) throw new UserFacingError(t("pdf.inkUnreadable", { name: baseName(notePath) }));
+        await ws.writeWorkspaceFile(notePath, upsertInkNote(existing, next));
+        const { useAppStore, tabIdOf } = await import("../store/useStore");
+        const st = useAppStore.getState();
+        if (st.doc.workspaceName === notePath) st.setDoc({ name: st.doc.name, content: upsertInkNote(st.doc.content, next), dirty: st.doc.dirty });
+        const activeId = tabIdOf(useAppStore.getState().doc);
+        useAppStore.setState((s) => ({ openTabs: s.openTabs.map((tab) => (tab.workspaceName === notePath && tab.id !== activeId ? { ...tab, content: upsertInkNote(tab.content, next) } : tab)) }));
         notifyWorkspaceChanged(existing === null ? { kind: "structure" } : { kind: "content", paths: [notePath] });
         writeFailed.current = false;
       });
@@ -685,6 +736,16 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
           <span data-testid="pdf-page-of">{t("pdf.page.of", { n: current, total: sizes.length })}</span>
         </label>
         <div className="pdf-group">
+          <button type="button" className="icon-btn pdf-text-btn" aria-pressed={inkMode} onClick={() => setInkMode((v) => !v)} title={t("pdf.ink.hint")} data-testid="pdf-ink-toggle">
+            {t("pdf.ink")}
+          </button>
+          {inkMode && (
+            <button type="button" className="icon-btn pdf-text-btn" disabled={!ink.some((a) => inkPage(a) === current)} onClick={() => persistInk(current, (s) => s.slice(0, -1))} data-testid="pdf-ink-undo">
+              {t("pdf.ink.undo")}
+            </button>
+          )}
+        </div>
+        <div className="pdf-group">
           <button type="button" className="icon-btn" onClick={() => zoom(scale - 0.25)} aria-label={t("pdf.zoomOut")} title={t("pdf.zoomOut")}>
             −
           </button>
@@ -796,6 +857,20 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
                 query={activeHit?.page === i + 1 ? query : ""}
                 occurrence={activeHit?.page === i + 1 ? activeHit.occurrence : -1}
                 registerEl={registerEl}
+                overlay={
+                  inkMode || ink.some((a) => inkPage(a) === i + 1) ? (
+                    <InkLayer
+                      strokes={ink.find((a) => inkPage(a) === i + 1)?.["lumen:strokes"] ?? []}
+                      width={size.w * scale}
+                      height={size.h * scale}
+                      drawing={inkMode}
+                      color="#d03b3b"
+                      size={0.004}
+                      label={t("pdf.ink.layer", { n: i + 1 })}
+                      onStroke={(stroke) => persistInk(i + 1, (s) => [...s, stroke])}
+                    />
+                  ) : undefined
+                }
                 onSize={onPageSize}
                 onText={onPageText}
                 onOcr={onOcr}

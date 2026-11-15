@@ -3,7 +3,7 @@
  * canvas, the text layer and the highlight rectangles drawn on it. Loaded only
  * with PdfReader, which registers its strings.
  */
-import { memo, useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { memo, useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { t } from "../i18n";
 import { showAiToast } from "../ui/AiToast";
 import { anchorAnnotation, findAll, shortId, type PageRect, type PdfAnnotation } from "./annotations";
@@ -47,6 +47,8 @@ interface PageProps {
   onText: (page: number, text: string) => void;
   onOcr: (page: number, value: OcrPage) => void;
   onAnchored: (missing: string[], all: string[]) => void;
+  /** Drawn over the page, under the scanned-page notice (W10.E64: the ink layer). */
+  overlay?: ReactNode;
 }
 
 interface DrawnRect {
@@ -73,6 +75,7 @@ export const PdfPageView = memo(function PdfPageView({
   onText,
   onOcr,
   onAnchored,
+  overlay,
 }: PageProps) {
   const boxRef = useRef<HTMLDivElement | null>(null);
   const canvasHost = useRef<HTMLDivElement>(null);
@@ -248,6 +251,7 @@ export const PdfPageView = memo(function PdfPageView({
         <div ref={canvasHost} className="pdf-canvas" />
         <div className="pdf-hl-layer">{marks(false)}</div>
         <div ref={textRef} className="textLayer" data-pdf-text="page" />
+        {overlay}
         {ocr?.spans && (
           // W6.47: the recognised lines where they are on the image — transparent, selectable, in reading order.
           <OcrTextLayer ref={ocrLayerRef} spans={ocr.spans} pageHeightPx={size.h * scale} />
