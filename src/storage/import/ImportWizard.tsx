@@ -3,7 +3,7 @@
  * its export, see what will come in and what will not, import into a new
  * folder, and undo it in one click.
  */
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Download, X } from "lucide-react";
 import "./strings";
 import { t } from "../../i18n";
