@@ -157,6 +157,8 @@
   "cmd.epub.open": "Open an EPUB for reading…",
   "cmd.export.latexProject": "Export LaTeX project (academic, Hebrew)…",
   "cmd.export.latexProject.hint": "main.tex for LuaLaTeX / XeLaTeX with Hebrew right to left, math, [@key] citations from the vault's .bib, and the images, in a ZIP",
+  "cmd.export.latexPdf": "PDF from LaTeX (desktop, Tectonic)…",
+  "cmd.export.latexPdf.hint": "The LaTeX export compiled to PDF by Tectonic on this computer; TeX's errors with their lines when it fails",
   "cmd.feedback": "Help: Send feedback",
   "cmd.feedback.hint": "A GitHub issue or text to copy — nothing is sent without your click",
   "cmd.file.exportAcademic": "Export for academic submission (Word)…",

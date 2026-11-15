@@ -1898,6 +1898,13 @@
       "icon": "Download"
     },
     {
+      "id": "export.latexPdf",
+      "label": "PDF from LaTeX (desktop, Tectonic)…",
+      "group": "File",
+      "hint": "The LaTeX export compiled to PDF by Tectonic on this computer; TeX's errors with their lines when it fails",
+      "icon": "Printer"
+    },
+    {
       "id": "automations.new",
       "label": "Automations: new rule (when… then…)…",
       "group": "Tools",
@@ -4052,6 +4059,13 @@
       "icon": "Download"
     },
     {
+      "id": "export.latexPdf",
+      "label": "PDF from LaTeX (desktop, Tectonic)…",
+      "group": "File",
+      "hint": "The LaTeX export compiled to PDF by Tectonic on this computer; TeX's errors with their lines when it fails",
+      "icon": "Printer"
+    },
+    {
       "id": "automations.new",
       "label": "Automations: new rule (when… then…)…",
       "group": "Tools",
@@ -4442,6 +4456,7 @@
     "book.open",
     "book.addChapter",
     "export.latexProject",
+    "export.latexPdf",
     "automations.new",
     "automations.dryRun",
     "automations.undo"

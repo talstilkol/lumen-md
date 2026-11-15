@@ -48,6 +48,7 @@ t desktop src-tauri/desktop/src/lib.rs
 t keychain src-tauri/keychain/src/lib.rs
 t vault src-tauri/vault/src/lib.rs -L "$CACHE/out" --extern serde
 t whisper src-tauri/src/whisper_core.rs
+t tectonic src-tauri/src/tectonic.rs
 
 echo; echo "## 2. src-tauri against tauri 2 signatures"
 "$D/check-tauri.sh" "$REPO/src-tauri" 2>&1 | grep -vE 'never (read|used)|warnings emitted' || status=1

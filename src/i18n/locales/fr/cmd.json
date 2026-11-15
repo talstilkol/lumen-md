@@ -158,6 +158,8 @@
   "cmd.epub.open": "Ouvrir un EPUB pour le lire…",
   "cmd.export.latexProject": "Exporter un projet LaTeX (académique, hébreu)…",
   "cmd.export.latexProject.hint": "main.tex pour LuaLaTeX / XeLaTeX avec l’hébreu de droite à gauche, les maths, les citations [@key] des .bib du coffre et les images, en ZIP",
+  "cmd.export.latexPdf": "PDF depuis LaTeX (bureau, Tectonic)…",
+  "cmd.export.latexPdf.hint": "L’export LaTeX compilé en PDF par Tectonic sur cet ordinateur ; en cas d’échec, les erreurs de TeX avec leurs lignes",
   "cmd.feedback": "Aide : envoyer un avis",
   "cmd.feedback.hint": "Une issue GitHub ou un texte à copier — rien n'est envoyé sans votre clic",
   "cmd.file.exportAcademic": "Exporter pour un rendu universitaire (Word)…",

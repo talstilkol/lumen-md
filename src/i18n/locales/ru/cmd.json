@@ -158,6 +158,8 @@
   "cmd.epub.open": "Открыть EPUB для чтения…",
   "cmd.export.latexProject": "Экспорт проекта LaTeX (научный, иврит)…",
   "cmd.export.latexProject.hint": "main.tex для LuaLaTeX / XeLaTeX с ивритом справа налево, формулами, ссылками [@key] из .bib хранилища и изображениями, в ZIP",
+  "cmd.export.latexPdf": "PDF из LaTeX (настольное приложение, Tectonic)…",
+  "cmd.export.latexPdf.hint": "Экспорт LaTeX, скомпилированный в PDF программой Tectonic на этом компьютере; при сбое — ошибки TeX с номерами строк",
   "cmd.feedback": "Справка: отправить отзыв",
   "cmd.feedback.hint": "Issue на GitHub или текст для копирования — без вашего щелчка ничего не отправляется",
   "cmd.file.exportAcademic": "Экспорт для сдачи в университет (Word)…",

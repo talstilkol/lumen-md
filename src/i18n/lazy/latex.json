@@ -1,5 +1,9 @@
 {
   "latex.exported": "{file}: main.tex, the references and the images. Compile with latexmk -lualatex (or -xelatex).",
   "latex.missingKeys": "Not in any .bib in the vault: {keys}",
-  "latex.failed": "LaTeX export: {error}"
+  "latex.failed": "LaTeX export: {error}",
+  "latex.pdf.saved": "{file}: compiled with Tectonic.",
+  "latex.pdf.web": "PDF from LaTeX needs the desktop app with Tectonic installed (tectonic-typesetting.github.io). In the browser, export the LaTeX project and compile it yourself.",
+  "latex.pdf.noTectonic": "Tectonic is not installed. Install it (brew install tectonic, or tectonic-typesetting.github.io), or set LUMEN_TECTONIC to its path, then try again.",
+  "latex.pdf.errors": "LaTeX did not compile ({count} errors):"
 }
