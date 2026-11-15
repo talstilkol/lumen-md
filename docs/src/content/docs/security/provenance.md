@@ -62,11 +62,16 @@ entry belongs to another artifact
    release builds under `attest.mjs`.
    - It writes the provenance and signs it with the host's key, which never
      leaves that machine.
-   - When [Witness](https://witness.dev) is installed
-     (`scripts/supply-chain/install-tools.sh`, pinned versions checked against
-     their release checksums), the build also runs under
-     `witness run --step build -a slsa`. Witness's own attestation is kept for
-     `witness verify` (`verify.mjs --witness`).
+   - [Witness](https://witness.dev) is the release gate (W7.22 step 3). It is
+     installed by `scripts/supply-chain/install-tools.sh`, pinned versions
+     checked against their release checksums. The attestation runs under
+     `witness run --step build -a slsa`, and every file must pass
+     `witness verify` (`verify.mjs --witness`). `npm run release -- <v> --publish`
+     **stops before anything is built or tagged** when any of these is missing:
+     `witness` on PATH, `LUMEN_WITNESS_KEY`, or the committed
+     `security/witness-policy.signed.json`.
+   - The repo's own Node attester alone is only the **explicit fallback**:
+     `LUMEN_PROVENANCE_ENGINE=node`, which the release log prints.
 
    ```bash
    node scripts/supply-chain/attest.mjs --out release -- <the release build: W4.5's release command, #492>
@@ -126,6 +131,10 @@ GitHub Actions, GitLab and CircleCI's cloud runners, not from our own machine
    `verify.mjs` and `sign.sh` refuse to run and name the placeholder.
 4. **On the build host:** `sudo bash scripts/supply-chain/install-tools.sh`. Record
    the sha256 values it prints in the PR.
+5. **Witness:** a Witness signing key on the build host (`LUMEN_WITNESS_KEY`,
+   not the policy key), and the Witness policy signed with the policy key,
+   committed as `security/witness-policy.signed.json`. Without them a
+   published release is refused unless `LUMEN_PROVENANCE_ENGINE=node`.
 
 ## Tested offline
 
