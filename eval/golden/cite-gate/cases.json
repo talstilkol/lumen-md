@@ -1,0 +1,1778 @@
+{
+ "name": "cite-gate-synthetic",
+ "version": "1",
+ "license": "MIT (written for lumen-md; synthetic, no real data)",
+ "note": "SYNTHETIC. Written for R12.9 by gen.py; labels by construction. Tag: dev.",
+ "cases": [
+  {
+   "id": "cg-01",
+   "lang": "en",
+   "question": "When does the library open?",
+   "sources": [
+    {
+     "n": 1,
+     "id": "[[synthetic-01]]",
+     "text": "The town library opens at 9 on weekdays. On Saturdays it opens at noon. The reading room is not open on holidays."
+    }
+   ],
+   "answer": "The library opens at 9 on weekdays.[^1] It opens at noon on Saturdays.[^1] The reading room is open on holidays.[^1] The library opens at 8 on weekdays.[^1] The library has a rooftop cafe.[^1] The library has a rooftop cafe and nobody checked it. The library opens at 9 on weekdays.[^9]",
+   "modelQuotes": {
+    "1": [
+     "This sentence is not in the source at all, it was invented",
+     "On Saturdays it opens at noon.",
+     "The reading room is open on holidays.",
+     "The library opens at 8 on weekdays.",
+     "The library has a rooftop cafe."
+    ]
+   },
+   "units": [
+    {
+     "text": "The library opens at 9 on weekdays.[^1]",
+     "label": "keep",
+     "kind": "keep-invented-model-quote"
+    },
+    {
+     "text": "It opens at noon on Saturdays.[^1]",
+     "label": "keep",
+     "kind": "keep-true-model-quote"
+    },
+    {
+     "text": "The reading room is open on holidays.[^1]",
+     "label": "delete",
+     "kind": "flipped-polarity"
+    },
+    {
+     "text": "The library opens at 8 on weekdays.[^1]",
+     "label": "delete",
+     "kind": "changed-number"
+    },
+    {
+     "text": "The library has a rooftop cafe.[^1]",
+     "label": "delete",
+     "kind": "invented"
+    },
+    {
+     "text": "The library has a rooftop cafe and nobody checked it.",
+     "label": "delete",
+     "kind": "no-marker"
+    },
+    {
+     "text": "The library opens at 9 on weekdays.[^9]",
+     "label": "delete",
+     "kind": "unread-source"
+    }
+   ]
+  },
+  {
+   "id": "cg-02",
+   "lang": "en",
+   "question": "How long should bread dough rise?",
+   "sources": [
+    {
+     "n": 1,
+     "id": "[[synthetic-02]]",
+     "text": "Bread dough should rise for 2 hours in a warm room. Punch the dough down after the first rise. The dough must never be refrigerated before shaping."
+    }
+   ],
+   "answer": "Bread dough rises for 2 hours in a warm room.[^1] Punch down the dough after the first rise.[^1] The dough may be refrigerated before shaping.[^1] Bread dough rises for 5 hours in a warm room.[^1] Bread dough needs sugar to rise at all.[^1] Bread dough needs sugar to rise at all and nobody checked it. Bread dough rises for 2 hours in a warm room.[^9]",
+   "modelQuotes": {
+    "1": [
+     "This sentence is not in the source at all, it was invented",
+     "Punch the dough down after the first rise.",
+     "The dough may be refrigerated before shaping.",
+     "Bread dough rises for 5 hours in a warm room.",
+     "Bread dough needs sugar to rise at all."
+    ]
+   },
+   "units": [
+    {
+     "text": "Bread dough rises for 2 hours in a warm room.[^1]",
+     "label": "keep",
+     "kind": "keep-invented-model-quote"
+    },
+    {
+     "text": "Punch down the dough after the first rise.[^1]",
+     "label": "keep",
+     "kind": "keep-true-model-quote"
+    },
+    {
+     "text": "The dough may be refrigerated before shaping.[^1]",
+     "label": "delete",
+     "kind": "flipped-polarity"
+    },
+    {
+     "text": "Bread dough rises for 5 hours in a warm room.[^1]",
+     "label": "delete",
+     "kind": "changed-number"
+    },
+    {
+     "text": "Bread dough needs sugar to rise at all.[^1]",
+     "label": "delete",
+     "kind": "invented"
+    },
+    {
+     "text": "Bread dough needs sugar to rise at all and nobody checked it.",
+     "label": "delete",
+     "kind": "no-marker"
+    },
+    {
+     "text": "Bread dough rises for 2 hours in a warm room.[^9]",
+     "label": "delete",
+     "kind": "unread-source"
+    }
+   ]
+  },
+  {
+   "id": "cg-03",
+   "lang": "en",
+   "question": "What did the club decide about dues?",
+   "sources": [
+    {
+     "n": 1,
+     "id": "[[synthetic-03]]",
+     "text": "The chess club raised annual dues to 120 shekels. Students pay half the annual dues. The board did not approve a lifetime membership."
+    }
+   ],
+   "answer": "The chess club raised its annual dues to 120 shekels.[^1] Students pay half of the annual dues.[^1] The board approved a lifetime membership.[^1] The chess club raised annual dues to 150 shekels.[^1] The chess club moved to a new building.[^1] The chess club moved to a new building and nobody checked it. The chess club raised its annual dues to 120 shekels.[^9]",
+   "modelQuotes": {
+    "1": [
+     "This sentence is not in the source at all, it was invented",
+     "Students pay half the annual dues.",
+     "The board approved a lifetime membership.",
+     "The chess club raised annual dues to 150 shekels.",
+     "The chess club moved to a new building."
+    ]
+   },
+   "units": [
+    {
+     "text": "The chess club raised its annual dues to 120 shekels.[^1]",
+     "label": "keep",
+     "kind": "keep-invented-model-quote"
+    },
+    {
+     "text": "Students pay half of the annual dues.[^1]",
+     "label": "keep",
+     "kind": "keep-true-model-quote"
+    },
+    {
+     "text": "The board approved a lifetime membership.[^1]",
+     "label": "delete",
+     "kind": "flipped-polarity"
+    },
+    {
+     "text": "The chess club raised annual dues to 150 shekels.[^1]",
+     "label": "delete",
+     "kind": "changed-number"
+    },
+    {
+     "text": "The chess club moved to a new building.[^1]",
+     "label": "delete",
+     "kind": "invented"
+    },
+    {
+     "text": "The chess club moved to a new building and nobody checked it.",
+     "label": "delete",
+     "kind": "no-marker"
+    },
+    {
+     "text": "The chess club raised its annual dues to 120 shekels.[^9]",
+     "label": "delete",
+     "kind": "unread-source"
+    }
+   ]
+  },
+  {
+   "id": "cg-04",
+   "lang": "en",
+   "question": "How far is the trail?",
+   "sources": [
+    {
+     "n": 1,
+     "id": "[[synthetic-04]]",
+     "text": "The ridge trail is 14 kilometres long. Most hikers finish the ridge trail in five hours. Dogs are not allowed on the ridge trail."
+    }
+   ],
+   "answer": "The ridge trail is 14 kilometres long.[^1] Most hikers finish the trail in five hours.[^1] Dogs are allowed on the ridge trail.[^1] The ridge trail is 22 kilometres long.[^1] The ridge trail has three water stations.[^1] The ridge trail has three water stations and nobody checked it. The ridge trail is 14 kilometres long.[^9]",
+   "modelQuotes": {
+    "1": [
+     "This sentence is not in the source at all, it was invented",
+     "Most hikers finish the ridge trail in five hours.",
+     "Dogs are allowed on the ridge trail.",
+     "The ridge trail is 22 kilometres long.",
+     "The ridge trail has three water stations."
+    ]
+   },
+   "units": [
+    {
+     "text": "The ridge trail is 14 kilometres long.[^1]",
+     "label": "keep",
+     "kind": "keep-invented-model-quote"
+    },
+    {
+     "text": "Most hikers finish the trail in five hours.[^1]",
+     "label": "keep",
+     "kind": "keep-true-model-quote"
+    },
+    {
+     "text": "Dogs are allowed on the ridge trail.[^1]",
+     "label": "delete",
+     "kind": "flipped-polarity"
+    },
+    {
+     "text": "The ridge trail is 22 kilometres long.[^1]",
+     "label": "delete",
+     "kind": "changed-number"
+    },
+    {
+     "text": "The ridge trail has three water stations.[^1]",
+     "label": "delete",
+     "kind": "invented"
+    },
+    {
+     "text": "The ridge trail has three water stations and nobody checked it.",
+     "label": "delete",
+     "kind": "no-marker"
+    },
+    {
+     "text": "The ridge trail is 14 kilometres long.[^9]",
+     "label": "delete",
+     "kind": "unread-source"
+    }
+   ]
+  },
+  {
+   "id": "cg-05",
+   "lang": "en",
+   "question": "What changed in the bus schedule?",
+   "sources": [
+    {
+     "n": 1,
+     "id": "[[synthetic-05]]",
+     "text": "Line 7 now runs every 12 minutes. The last line 7 bus leaves the station at midnight. Line 7 will not stop at the old market."
+    }
+   ],
+   "answer": "Line 7 runs every 12 minutes now.[^1] The last line 7 bus leaves the station at midnight.[^1] Line 7 will stop at the old market.[^1] Line 7 now runs every 20 minutes.[^1] Line 7 buses are all electric.[^1] Line 7 buses are all electric and nobody checked it. Line 7 runs every 12 minutes now.[^9]",
+   "modelQuotes": {
+    "1": [
+     "This sentence is not in the source at all, it was invented",
+     "The last line 7 bus leaves the station at midnight.",
+     "Line 7 will stop at the old market.",
+     "Line 7 now runs every 20 minutes.",
+     "Line 7 buses are all electric."
+    ]
+   },
+   "units": [
+    {
+     "text": "Line 7 runs every 12 minutes now.[^1]",
+     "label": "keep",
+     "kind": "keep-invented-model-quote"
+    },
+    {
+     "text": "The last line 7 bus leaves the station at midnight.[^1]",
+     "label": "keep",
+     "kind": "keep-true-model-quote"
+    },
+    {
+     "text": "Line 7 will stop at the old market.[^1]",
+     "label": "delete",
+     "kind": "flipped-polarity"
+    },
+    {
+     "text": "Line 7 now runs every 20 minutes.[^1]",
+     "label": "delete",
+     "kind": "changed-number"
+    },
+    {
+     "text": "Line 7 buses are all electric.[^1]",
+     "label": "delete",
+     "kind": "invented"
+    },
+    {
+     "text": "Line 7 buses are all electric and nobody checked it.",
+     "label": "delete",
+     "kind": "no-marker"
+    },
+    {
+     "text": "Line 7 runs every 12 minutes now.[^9]",
+     "label": "delete",
+     "kind": "unread-source"
+    }
+   ]
+  },
+  {
+   "id": "cg-06",
+   "lang": "en",
+   "question": "How much water do tomatoes need?",
+   "sources": [
+    {
+     "n": 1,
+     "id": "[[synthetic-06]]",
+     "text": "Tomato plants need about 3 litres of water a week. Water tomatoes at the base, not on the leaves. Tomatoes do not like wet leaves overnight."
+    }
+   ],
+   "answer": "Tomato plants need about 3 litres of water a week.[^1] Water the tomatoes at the base.[^1] Tomatoes like wet leaves overnight.[^1] Tomato plants need about 9 litres of water a week.[^1] Tomatoes grow best in full shade.[^1] Tomatoes grow best in full shade and nobody checked it. Tomato plants need about 3 litres of water a week.[^9]",
+   "modelQuotes": {
+    "1": [
+     "This sentence is not in the source at all, it was invented",
+     "Water tomatoes at the base, not on the leaves.",
+     "Tomatoes like wet leaves overnight.",
+     "Tomato plants need about 9 litres of water a week.",
+     "Tomatoes grow best in full shade."
+    ]
+   },
+   "units": [
+    {
+     "text": "Tomato plants need about 3 litres of water a week.[^1]",
+     "label": "keep",
+     "kind": "keep-invented-model-quote"
+    },
+    {
+     "text": "Water the tomatoes at the base.[^1]",
+     "label": "keep",
+     "kind": "keep-true-model-quote"
+    },
+    {
+     "text": "Tomatoes like wet leaves overnight.[^1]",
+     "label": "delete",
+     "kind": "flipped-polarity"
+    },
+    {
+     "text": "Tomato plants need about 9 litres of water a week.[^1]",
+     "label": "delete",
+     "kind": "changed-number"
+    },
+    {
+     "text": "Tomatoes grow best in full shade.[^1]",
+     "label": "delete",
+     "kind": "invented"
+    },
+    {
+     "text": "Tomatoes grow best in full shade and nobody checked it.",
+     "label": "delete",
+     "kind": "no-marker"
+    },
+    {
+     "text": "Tomato plants need about 3 litres of water a week.[^9]",
+     "label": "delete",
+     "kind": "unread-source"
+    }
+   ]
+  },
+  {
+   "id": "cg-07",
+   "lang": "en",
+   "question": "What is the museum's ticket price?",
+   "sources": [
+    {
+     "n": 1,
+     "id": "[[synthetic-07]]",
+     "text": "Adult tickets to the museum cost 45 shekels. Children under six enter the museum free. The museum does not accept cash at the door."
+    }
+   ],
+   "answer": "Adult museum tickets cost 45 shekels.[^1] Children under six enter the museum free.[^1] The museum accepts cash at the door.[^1] Adult museum tickets cost 60 shekels.[^1] The museum offers a free audio guide.[^1] The museum offers a free audio guide and nobody checked it. Adult museum tickets cost 45 shekels.[^9]",
+   "modelQuotes": {
+    "1": [
+     "This sentence is not in the source at all, it was invented",
+     "Children under six enter the museum free.",
+     "The museum accepts cash at the door.",
+     "Adult museum tickets cost 60 shekels.",
+     "The museum offers a free audio guide."
+    ]
+   },
+   "units": [
+    {
+     "text": "Adult museum tickets cost 45 shekels.[^1]",
+     "label": "keep",
+     "kind": "keep-invented-model-quote"
+    },
+    {
+     "text": "Children under six enter the museum free.[^1]",
+     "label": "keep",
+     "kind": "keep-true-model-quote"
+    },
+    {
+     "text": "The museum accepts cash at the door.[^1]",
+     "label": "delete",
+     "kind": "flipped-polarity"
+    },
+    {
+     "text": "Adult museum tickets cost 60 shekels.[^1]",
+     "label": "delete",
+     "kind": "changed-number"
+    },
+    {
+     "text": "The museum offers a free audio guide.[^1]",
+     "label": "delete",
+     "kind": "invented"
+    },
+    {
+     "text": "The museum offers a free audio guide and nobody checked it.",
+     "label": "delete",
+     "kind": "no-marker"
+    },
+    {
+     "text": "Adult museum tickets cost 45 shekels.[^9]",
+     "label": "delete",
+     "kind": "unread-source"
+    }
+   ]
+  },
+  {
+   "id": "cg-08",
+   "lang": "en",
+   "question": "When was the bridge repaired?",
+   "sources": [
+    {
+     "n": 1,
+     "id": "[[synthetic-08]]",
+     "text": "The footbridge was repaired in 2019. The repair took eleven weeks. The footbridge was never closed to cyclists."
+    }
+   ],
+   "answer": "The footbridge was repaired in 2019.[^1] The repair of the footbridge took eleven weeks.[^1] The footbridge was closed to cyclists.[^1] The footbridge was repaired in 2016.[^1] The footbridge was painted blue during the repair.[^1] The footbridge was painted blue during the repair and nobody checked it. The footbridge was repaired in 2019.[^9]",
+   "modelQuotes": {
+    "1": [
+     "This sentence is not in the source at all, it was invented",
+     "The repair took eleven weeks.",
+     "The footbridge was closed to cyclists.",
+     "The footbridge was repaired in 2016.",
+     "The footbridge was painted blue during the repair."
+    ]
+   },
+   "units": [
+    {
+     "text": "The footbridge was repaired in 2019.[^1]",
+     "label": "keep",
+     "kind": "keep-invented-model-quote"
+    },
+    {
+     "text": "The repair of the footbridge took eleven weeks.[^1]",
+     "label": "keep",
+     "kind": "keep-true-model-quote"
+    },
+    {
+     "text": "The footbridge was closed to cyclists.[^1]",
+     "label": "delete",
+     "kind": "flipped-polarity"
+    },
+    {
+     "text": "The footbridge was repaired in 2016.[^1]",
+     "label": "delete",
+     "kind": "changed-number"
+    },
+    {
+     "text": "The footbridge was painted blue during the repair.[^1]",
+     "label": "delete",
+     "kind": "invented"
+    },
+    {
+     "text": "The footbridge was painted blue during the repair and nobody checked it.",
+     "label": "delete",
+     "kind": "no-marker"
+    },
+    {
+     "text": "The footbridge was repaired in 2019.[^9]",
+     "label": "delete",
+     "kind": "unread-source"
+    }
+   ]
+  },
+  {
+   "id": "cg-09",
+   "lang": "en",
+   "question": "How many seats does the hall have?",
+   "sources": [
+    {
+     "n": 1,
+     "id": "[[synthetic-09]]",
+     "text": "The concert hall seats 840 people. The balcony holds a quarter of the seats. The hall has no seats behind the stage."
+    }
+   ],
+   "answer": "The concert hall seats 840 people.[^1] The balcony holds a quarter of the hall's seats.[^1] The hall has seats behind the stage.[^1] The concert hall seats 1,200 people.[^1] The concert hall was designed by a famous architect.[^1] The concert hall was designed by a famous architect and nobody checked it. The concert hall seats 840 people.[^9]",
+   "modelQuotes": {
+    "1": [
+     "This sentence is not in the source at all, it was invented",
+     "The balcony holds a quarter of the seats.",
+     "The hall has seats behind the stage.",
+     "The concert hall seats 1,200 people.",
+     "The concert hall was designed by a famous architect."
+    ]
+   },
+   "units": [
+    {
+     "text": "The concert hall seats 840 people.[^1]",
+     "label": "keep",
+     "kind": "keep-invented-model-quote"
+    },
+    {
+     "text": "The balcony holds a quarter of the hall's seats.[^1]",
+     "label": "keep",
+     "kind": "keep-true-model-quote"
+    },
+    {
+     "text": "The hall has seats behind the stage.[^1]",
+     "label": "delete",
+     "kind": "flipped-polarity"
+    },
+    {
+     "text": "The concert hall seats 1,200 people.[^1]",
+     "label": "delete",
+     "kind": "changed-number"
+    },
+    {
+     "text": "The concert hall was designed by a famous architect.[^1]",
+     "label": "delete",
+     "kind": "invented"
+    },
+    {
+     "text": "The concert hall was designed by a famous architect and nobody checked it.",
+     "label": "delete",
+     "kind": "no-marker"
+    },
+    {
+     "text": "The concert hall seats 840 people.[^9]",
+     "label": "delete",
+     "kind": "unread-source"
+    }
+   ]
+  },
+  {
+   "id": "cg-10",
+   "lang": "en",
+   "question": "What does the recipe say about eggs?",
+   "sources": [
+    {
+     "n": 1,
+     "id": "[[synthetic-10]]",
+     "text": "The cake recipe uses 4 eggs. Separate the egg whites and whip them until stiff. Do not add the yolks to hot butter."
+    }
+   ],
+   "answer": "The cake recipe uses 4 eggs.[^1] Whip the separated egg whites until stiff.[^1] Add the yolks to hot butter.[^1] The cake recipe uses 6 eggs.[^1] The cake recipe is from a famous bakery.[^1] The cake recipe is from a famous bakery and nobody checked it. The cake recipe uses 4 eggs.[^9]",
+   "modelQuotes": {
+    "1": [
+     "This sentence is not in the source at all, it was invented",
+     "Separate the egg whites and whip them until stiff.",
+     "Add the yolks to hot butter.",
+     "The cake recipe uses 6 eggs.",
+     "The cake recipe is from a famous bakery."
+    ]
+   },
+   "units": [
+    {
+     "text": "The cake recipe uses 4 eggs.[^1]",
+     "label": "keep",
+     "kind": "keep-invented-model-quote"
+    },
+    {
+     "text": "Whip the separated egg whites until stiff.[^1]",
+     "label": "keep",
+     "kind": "keep-true-model-quote"
+    },
+    {
+     "text": "Add the yolks to hot butter.[^1]",
+     "label": "delete",
+     "kind": "flipped-polarity"
+    },
+    {
+     "text": "The cake recipe uses 6 eggs.[^1]",
+     "label": "delete",
+     "kind": "changed-number"
+    },
+    {
+     "text": "The cake recipe is from a famous bakery.[^1]",
+     "label": "delete",
+     "kind": "invented"
+    },
+    {
+     "text": "The cake recipe is from a famous bakery and nobody checked it.",
+     "label": "delete",
+     "kind": "no-marker"
+    },
+    {
+     "text": "The cake recipe uses 4 eggs.[^9]",
+     "label": "delete",
+     "kind": "unread-source"
+    }
+   ]
+  },
+  {
+   "id": "cg-11",
+   "lang": "en",
+   "question": "What is the warranty on the kettle?",
+   "sources": [
+    {
+     "n": 1,
+     "id": "[[synthetic-11]]",
+     "text": "The kettle has a 24 month warranty. The warranty covers the heating element. The warranty does not cover a cracked lid."
+    }
+   ],
+   "answer": "The kettle has a 24 month warranty.[^1] The warranty covers the kettle's heating element.[^1] The warranty covers a cracked lid.[^1] The kettle has a 36 month warranty.[^1] The kettle switches off by voice command.[^1] The kettle switches off by voice command and nobody checked it. The kettle has a 24 month warranty.[^9]",
+   "modelQuotes": {
+    "1": [
+     "This sentence is not in the source at all, it was invented",
+     "The warranty covers the heating element.",
+     "The warranty covers a cracked lid.",
+     "The kettle has a 36 month warranty.",
+     "The kettle switches off by voice command."
+    ]
+   },
+   "units": [
+    {
+     "text": "The kettle has a 24 month warranty.[^1]",
+     "label": "keep",
+     "kind": "keep-invented-model-quote"
+    },
+    {
+     "text": "The warranty covers the kettle's heating element.[^1]",
+     "label": "keep",
+     "kind": "keep-true-model-quote"
+    },
+    {
+     "text": "The warranty covers a cracked lid.[^1]",
+     "label": "delete",
+     "kind": "flipped-polarity"
+    },
+    {
+     "text": "The kettle has a 36 month warranty.[^1]",
+     "label": "delete",
+     "kind": "changed-number"
+    },
+    {
+     "text": "The kettle switches off by voice command.[^1]",
+     "label": "delete",
+     "kind": "invented"
+    },
+    {
+     "text": "The kettle switches off by voice command and nobody checked it.",
+     "label": "delete",
+     "kind": "no-marker"
+    },
+    {
+     "text": "The kettle has a 24 month warranty.[^9]",
+     "label": "delete",
+     "kind": "unread-source"
+    }
+   ]
+  },
+  {
+   "id": "cg-12",
+   "lang": "en",
+   "question": "When is the school trip?",
+   "sources": [
+    {
+     "n": 1,
+     "id": "[[synthetic-12]]",
+     "text": "The school trip leaves on 14 March. Pupils must bring a packed lunch. Parents will not be charged for the bus."
+    }
+   ],
+   "answer": "The school trip leaves on 14 March.[^1] Pupils must bring a packed lunch on the trip.[^1] Parents will be charged for the bus.[^1] The school trip leaves on 21 March.[^1] The school trip ends with a night at a hotel.[^1] The school trip ends with a night at a hotel and nobody checked it. The school trip leaves on 14 March.[^9]",
+   "modelQuotes": {
+    "1": [
+     "This sentence is not in the source at all, it was invented",
+     "Pupils must bring a packed lunch.",
+     "Parents will be charged for the bus.",
+     "The school trip leaves on 21 March.",
+     "The school trip ends with a night at a hotel."
+    ]
+   },
+   "units": [
+    {
+     "text": "The school trip leaves on 14 March.[^1]",
+     "label": "keep",
+     "kind": "keep-invented-model-quote"
+    },
+    {
+     "text": "Pupils must bring a packed lunch on the trip.[^1]",
+     "label": "keep",
+     "kind": "keep-true-model-quote"
+    },
+    {
+     "text": "Parents will be charged for the bus.[^1]",
+     "label": "delete",
+     "kind": "flipped-polarity"
+    },
+    {
+     "text": "The school trip leaves on 21 March.[^1]",
+     "label": "delete",
+     "kind": "changed-number"
+    },
+    {
+     "text": "The school trip ends with a night at a hotel.[^1]",
+     "label": "delete",
+     "kind": "invented"
+    },
+    {
+     "text": "The school trip ends with a night at a hotel and nobody checked it.",
+     "label": "delete",
+     "kind": "no-marker"
+    },
+    {
+     "text": "The school trip leaves on 14 March.[^9]",
+     "label": "delete",
+     "kind": "unread-source"
+    }
+   ]
+  },
+  {
+   "id": "cg-13",
+   "lang": "en",
+   "question": "How big is the garden plot?",
+   "sources": [
+    {
+     "n": 1,
+     "id": "[[synthetic-13]]",
+     "text": "Each community garden plot is 25 square metres. Plots are assigned by lottery each spring. Members may not use chemical sprays."
+    }
+   ],
+   "answer": "Each community garden plot is 25 square metres.[^1] Plots are assigned by lottery each spring.[^1] Members may use chemical sprays.[^1] Each community garden plot is 40 square metres.[^1] Every plot comes with a wooden shed.[^1] Every plot comes with a wooden shed and nobody checked it. Each community garden plot is 25 square metres.[^9]",
+   "modelQuotes": {
+    "1": [
+     "This sentence is not in the source at all, it was invented",
+     "Plots are assigned by lottery each spring.",
+     "Members may use chemical sprays.",
+     "Each community garden plot is 40 square metres.",
+     "Every plot comes with a wooden shed."
+    ]
+   },
+   "units": [
+    {
+     "text": "Each community garden plot is 25 square metres.[^1]",
+     "label": "keep",
+     "kind": "keep-invented-model-quote"
+    },
+    {
+     "text": "Plots are assigned by lottery each spring.[^1]",
+     "label": "keep",
+     "kind": "keep-true-model-quote"
+    },
+    {
+     "text": "Members may use chemical sprays.[^1]",
+     "label": "delete",
+     "kind": "flipped-polarity"
+    },
+    {
+     "text": "Each community garden plot is 40 square metres.[^1]",
+     "label": "delete",
+     "kind": "changed-number"
+    },
+    {
+     "text": "Every plot comes with a wooden shed.[^1]",
+     "label": "delete",
+     "kind": "invented"
+    },
+    {
+     "text": "Every plot comes with a wooden shed and nobody checked it.",
+     "label": "delete",
+     "kind": "no-marker"
+    },
+    {
+     "text": "Each community garden plot is 25 square metres.[^9]",
+     "label": "delete",
+     "kind": "unread-source"
+    }
+   ]
+  },
+  {
+   "id": "cg-14",
+   "lang": "en",
+   "question": "What did the survey find?",
+   "sources": [
+    {
+     "n": 1,
+     "id": "[[synthetic-14]]",
+     "text": "In the survey, 62 percent of residents wanted more benches. Younger residents asked for shade over the playground. Few residents did not want a dog park."
+    }
+   ],
+   "answer": "62 percent of residents in the survey wanted more benches.[^1] Younger residents asked for shade over the playground.[^1] Few residents wanted a dog park.[^1] In the survey, 75 percent of residents wanted more benches.[^1] The survey was run by the national statistics office.[^1] The survey was run by the national statistics office and nobody checked it. 62 percent of residents in the survey wanted more benches.[^9]",
+   "modelQuotes": {
+    "1": [
+     "This sentence is not in the source at all, it was invented",
+     "Younger residents asked for shade over the playground.",
+     "Few residents wanted a dog park.",
+     "In the survey, 75 percent of residents wanted more benches.",
+     "The survey was run by the national statistics office."
+    ]
+   },
+   "units": [
+    {
+     "text": "62 percent of residents in the survey wanted more benches.[^1]",
+     "label": "keep",
+     "kind": "keep-invented-model-quote"
+    },
+    {
+     "text": "Younger residents asked for shade over the playground.[^1]",
+     "label": "keep",
+     "kind": "keep-true-model-quote"
+    },
+    {
+     "text": "Few residents wanted a dog park.[^1]",
+     "label": "delete",
+     "kind": "flipped-polarity"
+    },
+    {
+     "text": "In the survey, 75 percent of residents wanted more benches.[^1]",
+     "label": "delete",
+     "kind": "changed-number"
+    },
+    {
+     "text": "The survey was run by the national statistics office.[^1]",
+     "label": "delete",
+     "kind": "invented"
+    },
+    {
+     "text": "The survey was run by the national statistics office and nobody checked it.",
+     "label": "delete",
+     "kind": "no-marker"
+    },
+    {
+     "text": "62 percent of residents in the survey wanted more benches.[^9]",
+     "label": "delete",
+     "kind": "unread-source"
+    }
+   ]
+  },
+  {
+   "id": "cg-15",
+   "lang": "en",
+   "question": "How often is the pool cleaned?",
+   "sources": [
+    {
+     "n": 1,
+     "id": "[[synthetic-15]]",
+     "text": "The public pool is cleaned every 3 days. Chlorine levels are checked each morning. The pool is not heated in winter."
+    }
+   ],
+   "answer": "The public pool is cleaned every 3 days.[^1] Chlorine levels in the pool are checked each morning.[^1] The pool is heated in winter.[^1] The public pool is cleaned every 7 days.[^1] The pool has an Olympic diving board.[^1] The pool has an Olympic diving board and nobody checked it. The public pool is cleaned every 3 days.[^9]",
+   "modelQuotes": {
+    "1": [
+     "This sentence is not in the source at all, it was invented",
+     "Chlorine levels are checked each morning.",
+     "The pool is heated in winter.",
+     "The public pool is cleaned every 7 days.",
+     "The pool has an Olympic diving board."
+    ]
+   },
+   "units": [
+    {
+     "text": "The public pool is cleaned every 3 days.[^1]",
+     "label": "keep",
+     "kind": "keep-invented-model-quote"
+    },
+    {
+     "text": "Chlorine levels in the pool are checked each morning.[^1]",
+     "label": "keep",
+     "kind": "keep-true-model-quote"
+    },
+    {
+     "text": "The pool is heated in winter.[^1]",
+     "label": "delete",
+     "kind": "flipped-polarity"
+    },
+    {
+     "text": "The public pool is cleaned every 7 days.[^1]",
+     "label": "delete",
+     "kind": "changed-number"
+    },
+    {
+     "text": "The pool has an Olympic diving board.[^1]",
+     "label": "delete",
+     "kind": "invented"
+    },
+    {
+     "text": "The pool has an Olympic diving board and nobody checked it.",
+     "label": "delete",
+     "kind": "no-marker"
+    },
+    {
+     "text": "The public pool is cleaned every 3 days.[^9]",
+     "label": "delete",
+     "kind": "unread-source"
+    }
+   ]
+  },
+  {
+   "id": "cg-16",
+   "lang": "he",
+   "question": "מתי נפתחת הספרייה?",
+   "sources": [
+    {
+     "n": 1,
+     "id": "[[synthetic-16]]",
+     "text": "הספרייה העירונית נפתחת בשעה 9 בימי חול. בשבת הספרייה סגורה כל היום. אולם הקריאה אינו פתוח בחגים."
+    }
+   ],
+   "answer": "הספרייה העירונית נפתחת בשעה 9 בימי חול.[^1] בשבת הספרייה סגורה כל היום.[^1] אולם הקריאה פתוח בחגים.[^1] הספרייה העירונית נפתחת בשעה 8 בימי חול.[^1] בספרייה יש בית קפה על הגג.[^1] בספרייה יש בית קפה על הגג ואף אחד לא בדק. הספרייה העירונית נפתחת בשעה 9 בימי חול.[^9]",
+   "modelQuotes": {
+    "1": [
+     "This sentence is not in the source at all, it was invented",
+     "בשבת הספרייה סגורה כל היום.",
+     "אולם הקריאה פתוח בחגים.",
+     "הספרייה העירונית נפתחת בשעה 8 בימי חול.",
+     "בספרייה יש בית קפה על הגג."
+    ]
+   },
+   "units": [
+    {
+     "text": "הספרייה העירונית נפתחת בשעה 9 בימי חול.[^1]",
+     "label": "keep",
+     "kind": "keep-invented-model-quote"
+    },
+    {
+     "text": "בשבת הספרייה סגורה כל היום.[^1]",
+     "label": "keep",
+     "kind": "keep-true-model-quote"
+    },
+    {
+     "text": "אולם הקריאה פתוח בחגים.[^1]",
+     "label": "delete",
+     "kind": "flipped-polarity"
+    },
+    {
+     "text": "הספרייה העירונית נפתחת בשעה 8 בימי חול.[^1]",
+     "label": "delete",
+     "kind": "changed-number"
+    },
+    {
+     "text": "בספרייה יש בית קפה על הגג.[^1]",
+     "label": "delete",
+     "kind": "invented"
+    },
+    {
+     "text": "בספרייה יש בית קפה על הגג ואף אחד לא בדק.",
+     "label": "delete",
+     "kind": "no-marker"
+    },
+    {
+     "text": "הספרייה העירונית נפתחת בשעה 9 בימי חול.[^9]",
+     "label": "delete",
+     "kind": "unread-source"
+    }
+   ]
+  },
+  {
+   "id": "cg-17",
+   "lang": "he",
+   "question": "כמה זמן תופח הבצק?",
+   "sources": [
+    {
+     "n": 1,
+     "id": "[[synthetic-17]]",
+     "text": "בצק הלחם צריך לתפוח שעתיים במקום חם. אחרי התפיחה הראשונה משחררים את האוויר מהבצק. אין לקרר את הבצק לפני העיצוב."
+    }
+   ],
+   "answer": "בצק הלחם תופח שעתיים במקום חם.[^1] אחרי התפיחה הראשונה משחררים מהבצק את האוויר.[^1] מותר לקרר את הבצק לפני העיצוב.[^1] בצק הלחם צריך לתפוח 5 שעות במקום חם.[^1] הבצק חייב סוכר כדי לתפוח.[^1] הבצק חייב סוכר כדי לתפוח ואף אחד לא בדק. בצק הלחם תופח שעתיים במקום חם.[^9]",
+   "modelQuotes": {
+    "1": [
+     "This sentence is not in the source at all, it was invented",
+     "אחרי התפיחה הראשונה משחררים את האוויר מהבצק.",
+     "מותר לקרר את הבצק לפני העיצוב.",
+     "בצק הלחם צריך לתפוח 5 שעות במקום חם.",
+     "הבצק חייב סוכר כדי לתפוח."
+    ]
+   },
+   "units": [
+    {
+     "text": "בצק הלחם תופח שעתיים במקום חם.[^1]",
+     "label": "keep",
+     "kind": "keep-invented-model-quote"
+    },
+    {
+     "text": "אחרי התפיחה הראשונה משחררים מהבצק את האוויר.[^1]",
+     "label": "keep",
+     "kind": "keep-true-model-quote"
+    },
+    {
+     "text": "מותר לקרר את הבצק לפני העיצוב.[^1]",
+     "label": "delete",
+     "kind": "flipped-polarity"
+    },
+    {
+     "text": "בצק הלחם צריך לתפוח 5 שעות במקום חם.[^1]",
+     "label": "delete",
+     "kind": "changed-number"
+    },
+    {
+     "text": "הבצק חייב סוכר כדי לתפוח.[^1]",
+     "label": "delete",
+     "kind": "invented"
+    },
+    {
+     "text": "הבצק חייב סוכר כדי לתפוח ואף אחד לא בדק.",
+     "label": "delete",
+     "kind": "no-marker"
+    },
+    {
+     "text": "בצק הלחם תופח שעתיים במקום חם.[^9]",
+     "label": "delete",
+     "kind": "unread-source"
+    }
+   ]
+  },
+  {
+   "id": "cg-18",
+   "lang": "he",
+   "question": "מה הוחלט על דמי החבר?",
+   "sources": [
+    {
+     "n": 1,
+     "id": "[[synthetic-18]]",
+     "text": "מועדון השחמט העלה את דמי החבר השנתיים ל-120 שקלים. סטודנטים משלמים מחצית מדמי החבר. הוועד לא אישר מנוי לכל החיים."
+    }
+   ],
+   "answer": "מועדון השחמט העלה את דמי החבר השנתיים ל-120 שקלים.[^1] סטודנטים משלמים מחצית מדמי החבר.[^1] הוועד אישר מנוי לכל החיים.[^1] מועדון השחמט העלה את דמי החבר השנתיים ל-150 שקלים.[^1] מועדון השחמט עבר לבניין חדש.[^1] מועדון השחמט עבר לבניין חדש ואף אחד לא בדק. מועדון השחמט העלה את דמי החבר השנתיים ל-120 שקלים.[^9]",
+   "modelQuotes": {
+    "1": [
+     "This sentence is not in the source at all, it was invented",
+     "סטודנטים משלמים מחצית מדמי החבר.",
+     "הוועד אישר מנוי לכל החיים.",
+     "מועדון השחמט העלה את דמי החבר השנתיים ל-150 שקלים.",
+     "מועדון השחמט עבר לבניין חדש."
+    ]
+   },
+   "units": [
+    {
+     "text": "מועדון השחמט העלה את דמי החבר השנתיים ל-120 שקלים.[^1]",
+     "label": "keep",
+     "kind": "keep-invented-model-quote"
+    },
+    {
+     "text": "סטודנטים משלמים מחצית מדמי החבר.[^1]",
+     "label": "keep",
+     "kind": "keep-true-model-quote"
+    },
+    {
+     "text": "הוועד אישר מנוי לכל החיים.[^1]",
+     "label": "delete",
+     "kind": "flipped-polarity"
+    },
+    {
+     "text": "מועדון השחמט העלה את דמי החבר השנתיים ל-150 שקלים.[^1]",
+     "label": "delete",
+     "kind": "changed-number"
+    },
+    {
+     "text": "מועדון השחמט עבר לבניין חדש.[^1]",
+     "label": "delete",
+     "kind": "invented"
+    },
+    {
+     "text": "מועדון השחמט עבר לבניין חדש ואף אחד לא בדק.",
+     "label": "delete",
+     "kind": "no-marker"
+    },
+    {
+     "text": "מועדון השחמט העלה את דמי החבר השנתיים ל-120 שקלים.[^9]",
+     "label": "delete",
+     "kind": "unread-source"
+    }
+   ]
+  },
+  {
+   "id": "cg-19",
+   "lang": "he",
+   "question": "מה אורך השביל?",
+   "sources": [
+    {
+     "n": 1,
+     "id": "[[synthetic-19]]",
+     "text": "שביל הרכס באורך 14 קילומטרים. רוב המטיילים מסיימים את השביל בחמש שעות. אסור להכניס כלבים לשביל הרכס."
+    }
+   ],
+   "answer": "שביל הרכס באורך 14 קילומטרים.[^1] רוב המטיילים מסיימים את השביל בחמש שעות.[^1] מותר להכניס כלבים לשביל הרכס.[^1] שביל הרכס באורך 22 קילומטרים.[^1] לאורך שביל הרכס יש שלוש תחנות מים.[^1] לאורך שביל הרכס יש שלוש תחנות מים ואף אחד לא בדק. שביל הרכס באורך 14 קילומטרים.[^9]",
+   "modelQuotes": {
+    "1": [
+     "This sentence is not in the source at all, it was invented",
+     "רוב המטיילים מסיימים את השביל בחמש שעות.",
+     "מותר להכניס כלבים לשביל הרכס.",
+     "שביל הרכס באורך 22 קילומטרים.",
+     "לאורך שביל הרכס יש שלוש תחנות מים."
+    ]
+   },
+   "units": [
+    {
+     "text": "שביל הרכס באורך 14 קילומטרים.[^1]",
+     "label": "keep",
+     "kind": "keep-invented-model-quote"
+    },
+    {
+     "text": "רוב המטיילים מסיימים את השביל בחמש שעות.[^1]",
+     "label": "keep",
+     "kind": "keep-true-model-quote"
+    },
+    {
+     "text": "מותר להכניס כלבים לשביל הרכס.[^1]",
+     "label": "delete",
+     "kind": "flipped-polarity"
+    },
+    {
+     "text": "שביל הרכס באורך 22 קילומטרים.[^1]",
+     "label": "delete",
+     "kind": "changed-number"
+    },
+    {
+     "text": "לאורך שביל הרכס יש שלוש תחנות מים.[^1]",
+     "label": "delete",
+     "kind": "invented"
+    },
+    {
+     "text": "לאורך שביל הרכס יש שלוש תחנות מים ואף אחד לא בדק.",
+     "label": "delete",
+     "kind": "no-marker"
+    },
+    {
+     "text": "שביל הרכס באורך 14 קילומטרים.[^9]",
+     "label": "delete",
+     "kind": "unread-source"
+    }
+   ]
+  },
+  {
+   "id": "cg-20",
+   "lang": "he",
+   "question": "מה השתנה בלוח הזמנים של הקו?",
+   "sources": [
+    {
+     "n": 1,
+     "id": "[[synthetic-20]]",
+     "text": "קו 7 יוצא עכשיו כל 12 דקות. האוטובוס האחרון של קו 7 יוצא מהתחנה בחצות. קו 7 לא יעצור בשוק הישן."
+    }
+   ],
+   "answer": "קו 7 יוצא עכשיו כל 12 דקות.[^1] האוטובוס האחרון של קו 7 יוצא מהתחנה בחצות.[^1] קו 7 יעצור בשוק הישן.[^1] קו 7 יוצא עכשיו כל 20 דקות.[^1] כל האוטובוסים של קו 7 חשמליים.[^1] כל האוטובוסים של קו 7 חשמליים ואף אחד לא בדק. קו 7 יוצא עכשיו כל 12 דקות.[^9]",
+   "modelQuotes": {
+    "1": [
+     "This sentence is not in the source at all, it was invented",
+     "האוטובוס האחרון של קו 7 יוצא מהתחנה בחצות.",
+     "קו 7 יעצור בשוק הישן.",
+     "קו 7 יוצא עכשיו כל 20 דקות.",
+     "כל האוטובוסים של קו 7 חשמליים."
+    ]
+   },
+   "units": [
+    {
+     "text": "קו 7 יוצא עכשיו כל 12 דקות.[^1]",
+     "label": "keep",
+     "kind": "keep-invented-model-quote"
+    },
+    {
+     "text": "האוטובוס האחרון של קו 7 יוצא מהתחנה בחצות.[^1]",
+     "label": "keep",
+     "kind": "keep-true-model-quote"
+    },
+    {
+     "text": "קו 7 יעצור בשוק הישן.[^1]",
+     "label": "delete",
+     "kind": "flipped-polarity"
+    },
+    {
+     "text": "קו 7 יוצא עכשיו כל 20 דקות.[^1]",
+     "label": "delete",
+     "kind": "changed-number"
+    },
+    {
+     "text": "כל האוטובוסים של קו 7 חשמליים.[^1]",
+     "label": "delete",
+     "kind": "invented"
+    },
+    {
+     "text": "כל האוטובוסים של קו 7 חשמליים ואף אחד לא בדק.",
+     "label": "delete",
+     "kind": "no-marker"
+    },
+    {
+     "text": "קו 7 יוצא עכשיו כל 12 דקות.[^9]",
+     "label": "delete",
+     "kind": "unread-source"
+    }
+   ]
+  },
+  {
+   "id": "cg-21",
+   "lang": "he",
+   "question": "כמה מים צריכות עגבניות?",
+   "sources": [
+    {
+     "n": 1,
+     "id": "[[synthetic-21]]",
+     "text": "שתילי עגבניות צריכים כ-3 ליטרים של מים בשבוע. משקים את העגבניות בבסיס הצמח ולא על העלים. העגבניות אינן אוהבות עלים רטובים בלילה."
+    }
+   ],
+   "answer": "שתילי עגבניות צריכים כ-3 ליטרים של מים בשבוע.[^1] משקים את העגבניות בבסיס הצמח.[^1] העגבניות אוהבות עלים רטובים בלילה.[^1] שתילי עגבניות צריכים כ-9 ליטרים של מים בשבוע.[^1] עגבניות גדלות הכי טוב בצל מלא.[^1] עגבניות גדלות הכי טוב בצל מלא ואף אחד לא בדק. שתילי עגבניות צריכים כ-3 ליטרים של מים בשבוע.[^9]",
+   "modelQuotes": {
+    "1": [
+     "This sentence is not in the source at all, it was invented",
+     "משקים את העגבניות בבסיס הצמח ולא על העלים.",
+     "העגבניות אוהבות עלים רטובים בלילה.",
+     "שתילי עגבניות צריכים כ-9 ליטרים של מים בשבוע.",
+     "עגבניות גדלות הכי טוב בצל מלא."
+    ]
+   },
+   "units": [
+    {
+     "text": "שתילי עגבניות צריכים כ-3 ליטרים של מים בשבוע.[^1]",
+     "label": "keep",
+     "kind": "keep-invented-model-quote"
+    },
+    {
+     "text": "משקים את העגבניות בבסיס הצמח.[^1]",
+     "label": "keep",
+     "kind": "keep-true-model-quote"
+    },
+    {
+     "text": "העגבניות אוהבות עלים רטובים בלילה.[^1]",
+     "label": "delete",
+     "kind": "flipped-polarity"
+    },
+    {
+     "text": "שתילי עגבניות צריכים כ-9 ליטרים של מים בשבוע.[^1]",
+     "label": "delete",
+     "kind": "changed-number"
+    },
+    {
+     "text": "עגבניות גדלות הכי טוב בצל מלא.[^1]",
+     "label": "delete",
+     "kind": "invented"
+    },
+    {
+     "text": "עגבניות גדלות הכי טוב בצל מלא ואף אחד לא בדק.",
+     "label": "delete",
+     "kind": "no-marker"
+    },
+    {
+     "text": "שתילי עגבניות צריכים כ-3 ליטרים של מים בשבוע.[^9]",
+     "label": "delete",
+     "kind": "unread-source"
+    }
+   ]
+  },
+  {
+   "id": "cg-22",
+   "lang": "he",
+   "question": "כמה עולה כרטיס למוזיאון?",
+   "sources": [
+    {
+     "n": 1,
+     "id": "[[synthetic-22]]",
+     "text": "כרטיס מבוגר למוזיאון עולה 45 שקלים. ילדים מתחת לגיל שש נכנסים למוזיאון בחינם. המוזיאון אינו מקבל מזומן בכניסה."
+    }
+   ],
+   "answer": "כרטיס מבוגר למוזיאון עולה 45 שקלים.[^1] ילדים מתחת לגיל שש נכנסים בחינם למוזיאון.[^1] המוזיאון מקבל מזומן בכניסה.[^1] כרטיס מבוגר למוזיאון עולה 60 שקלים.[^1] המוזיאון מציע מדריך קולי בחינם.[^1] המוזיאון מציע מדריך קולי בחינם ואף אחד לא בדק. כרטיס מבוגר למוזיאון עולה 45 שקלים.[^9]",
+   "modelQuotes": {
+    "1": [
+     "This sentence is not in the source at all, it was invented",
+     "ילדים מתחת לגיל שש נכנסים למוזיאון בחינם.",
+     "המוזיאון מקבל מזומן בכניסה.",
+     "כרטיס מבוגר למוזיאון עולה 60 שקלים.",
+     "המוזיאון מציע מדריך קולי בחינם."
+    ]
+   },
+   "units": [
+    {
+     "text": "כרטיס מבוגר למוזיאון עולה 45 שקלים.[^1]",
+     "label": "keep",
+     "kind": "keep-invented-model-quote"
+    },
+    {
+     "text": "ילדים מתחת לגיל שש נכנסים בחינם למוזיאון.[^1]",
+     "label": "keep",
+     "kind": "keep-true-model-quote"
+    },
+    {
+     "text": "המוזיאון מקבל מזומן בכניסה.[^1]",
+     "label": "delete",
+     "kind": "flipped-polarity"
+    },
+    {
+     "text": "כרטיס מבוגר למוזיאון עולה 60 שקלים.[^1]",
+     "label": "delete",
+     "kind": "changed-number"
+    },
+    {
+     "text": "המוזיאון מציע מדריך קולי בחינם.[^1]",
+     "label": "delete",
+     "kind": "invented"
+    },
+    {
+     "text": "המוזיאון מציע מדריך קולי בחינם ואף אחד לא בדק.",
+     "label": "delete",
+     "kind": "no-marker"
+    },
+    {
+     "text": "כרטיס מבוגר למוזיאון עולה 45 שקלים.[^9]",
+     "label": "delete",
+     "kind": "unread-source"
+    }
+   ]
+  },
+  {
+   "id": "cg-23",
+   "lang": "he",
+   "question": "מתי תוקן הגשר?",
+   "sources": [
+    {
+     "n": 1,
+     "id": "[[synthetic-23]]",
+     "text": "גשר הולכי הרגל תוקן בשנת 2019. התיקון נמשך אחד עשר שבועות. הגשר מעולם לא נסגר לרוכבי אופניים."
+    }
+   ],
+   "answer": "גשר הולכי הרגל תוקן בשנת 2019.[^1] התיקון של הגשר נמשך אחד עשר שבועות.[^1] הגשר נסגר לרוכבי אופניים.[^1] גשר הולכי הרגל תוקן בשנת 2016.[^1] הגשר נצבע בכחול בזמן התיקון.[^1] הגשר נצבע בכחול בזמן התיקון ואף אחד לא בדק. גשר הולכי הרגל תוקן בשנת 2019.[^9]",
+   "modelQuotes": {
+    "1": [
+     "This sentence is not in the source at all, it was invented",
+     "התיקון נמשך אחד עשר שבועות.",
+     "הגשר נסגר לרוכבי אופניים.",
+     "גשר הולכי הרגל תוקן בשנת 2016.",
+     "הגשר נצבע בכחול בזמן התיקון."
+    ]
+   },
+   "units": [
+    {
+     "text": "גשר הולכי הרגל תוקן בשנת 2019.[^1]",
+     "label": "keep",
+     "kind": "keep-invented-model-quote"
+    },
+    {
+     "text": "התיקון של הגשר נמשך אחד עשר שבועות.[^1]",
+     "label": "keep",
+     "kind": "keep-true-model-quote"
+    },
+    {
+     "text": "הגשר נסגר לרוכבי אופניים.[^1]",
+     "label": "delete",
+     "kind": "flipped-polarity"
+    },
+    {
+     "text": "גשר הולכי הרגל תוקן בשנת 2016.[^1]",
+     "label": "delete",
+     "kind": "changed-number"
+    },
+    {
+     "text": "הגשר נצבע בכחול בזמן התיקון.[^1]",
+     "label": "delete",
+     "kind": "invented"
+    },
+    {
+     "text": "הגשר נצבע בכחול בזמן התיקון ואף אחד לא בדק.",
+     "label": "delete",
+     "kind": "no-marker"
+    },
+    {
+     "text": "גשר הולכי הרגל תוקן בשנת 2019.[^9]",
+     "label": "delete",
+     "kind": "unread-source"
+    }
+   ]
+  },
+  {
+   "id": "cg-24",
+   "lang": "he",
+   "question": "כמה מקומות יש באולם?",
+   "sources": [
+    {
+     "n": 1,
+     "id": "[[synthetic-24]]",
+     "text": "באולם הקונצרטים יש 840 מקומות ישיבה. היציע מכיל רבע מהמקומות. אין מקומות ישיבה מאחורי הבמה."
+    }
+   ],
+   "answer": "באולם הקונצרטים יש 840 מקומות ישיבה.[^1] היציע מכיל רבע ממקומות האולם.[^1] יש מקומות ישיבה מאחורי הבמה.[^1] באולם הקונצרטים יש 1,200 מקומות ישיבה.[^1] האולם תוכנן בידי אדריכל מפורסם.[^1] האולם תוכנן בידי אדריכל מפורסם ואף אחד לא בדק. באולם הקונצרטים יש 840 מקומות ישיבה.[^9]",
+   "modelQuotes": {
+    "1": [
+     "This sentence is not in the source at all, it was invented",
+     "היציע מכיל רבע מהמקומות.",
+     "יש מקומות ישיבה מאחורי הבמה.",
+     "באולם הקונצרטים יש 1,200 מקומות ישיבה.",
+     "האולם תוכנן בידי אדריכל מפורסם."
+    ]
+   },
+   "units": [
+    {
+     "text": "באולם הקונצרטים יש 840 מקומות ישיבה.[^1]",
+     "label": "keep",
+     "kind": "keep-invented-model-quote"
+    },
+    {
+     "text": "היציע מכיל רבע ממקומות האולם.[^1]",
+     "label": "keep",
+     "kind": "keep-true-model-quote"
+    },
+    {
+     "text": "יש מקומות ישיבה מאחורי הבמה.[^1]",
+     "label": "delete",
+     "kind": "flipped-polarity"
+    },
+    {
+     "text": "באולם הקונצרטים יש 1,200 מקומות ישיבה.[^1]",
+     "label": "delete",
+     "kind": "changed-number"
+    },
+    {
+     "text": "האולם תוכנן בידי אדריכל מפורסם.[^1]",
+     "label": "delete",
+     "kind": "invented"
+    },
+    {
+     "text": "האולם תוכנן בידי אדריכל מפורסם ואף אחד לא בדק.",
+     "label": "delete",
+     "kind": "no-marker"
+    },
+    {
+     "text": "באולם הקונצרטים יש 840 מקומות ישיבה.[^9]",
+     "label": "delete",
+     "kind": "unread-source"
+    }
+   ]
+  },
+  {
+   "id": "cg-25",
+   "lang": "he",
+   "question": "מה כתוב במתכון על הביצים?",
+   "sources": [
+    {
+     "n": 1,
+     "id": "[[synthetic-25]]",
+     "text": "מתכון העוגה משתמש ב-4 ביצים. מפרידים את החלבונים ומקציפים אותם לקצף יציב. אין להוסיף את החלמונים לחמאה חמה."
+    }
+   ],
+   "answer": "מתכון העוגה משתמש ב-4 ביצים.[^1] מקציפים את החלבונים המופרדים לקצף יציב.[^1] מוסיפים את החלמונים לחמאה חמה.[^1] מתכון העוגה משתמש ב-6 ביצים.[^1] המתכון לקוח ממאפייה מפורסמת.[^1] המתכון לקוח ממאפייה מפורסמת ואף אחד לא בדק. מתכון העוגה משתמש ב-4 ביצים.[^9]",
+   "modelQuotes": {
+    "1": [
+     "This sentence is not in the source at all, it was invented",
+     "מפרידים את החלבונים ומקציפים אותם לקצף יציב.",
+     "מוסיפים את החלמונים לחמאה חמה.",
+     "מתכון העוגה משתמש ב-6 ביצים.",
+     "המתכון לקוח ממאפייה מפורסמת."
+    ]
+   },
+   "units": [
+    {
+     "text": "מתכון העוגה משתמש ב-4 ביצים.[^1]",
+     "label": "keep",
+     "kind": "keep-invented-model-quote"
+    },
+    {
+     "text": "מקציפים את החלבונים המופרדים לקצף יציב.[^1]",
+     "label": "keep",
+     "kind": "keep-true-model-quote"
+    },
+    {
+     "text": "מוסיפים את החלמונים לחמאה חמה.[^1]",
+     "label": "delete",
+     "kind": "flipped-polarity"
+    },
+    {
+     "text": "מתכון העוגה משתמש ב-6 ביצים.[^1]",
+     "label": "delete",
+     "kind": "changed-number"
+    },
+    {
+     "text": "המתכון לקוח ממאפייה מפורסמת.[^1]",
+     "label": "delete",
+     "kind": "invented"
+    },
+    {
+     "text": "המתכון לקוח ממאפייה מפורסמת ואף אחד לא בדק.",
+     "label": "delete",
+     "kind": "no-marker"
+    },
+    {
+     "text": "מתכון העוגה משתמש ב-4 ביצים.[^9]",
+     "label": "delete",
+     "kind": "unread-source"
+    }
+   ]
+  },
+  {
+   "id": "cg-26",
+   "lang": "he",
+   "question": "מה האחריות על הקומקום?",
+   "sources": [
+    {
+     "n": 1,
+     "id": "[[synthetic-26]]",
+     "text": "לקומקום יש אחריות של 24 חודשים. האחריות מכסה את גוף החימום. האחריות אינה מכסה מכסה סדוק."
+    }
+   ],
+   "answer": "לקומקום יש אחריות של 24 חודשים.[^1] האחריות מכסה את גוף החימום של הקומקום.[^1] האחריות מכסה מכסה סדוק.[^1] לקומקום יש אחריות של 36 חודשים.[^1] הקומקום נכבה בפקודה קולית.[^1] הקומקום נכבה בפקודה קולית ואף אחד לא בדק. לקומקום יש אחריות של 24 חודשים.[^9]",
+   "modelQuotes": {
+    "1": [
+     "This sentence is not in the source at all, it was invented",
+     "האחריות מכסה את גוף החימום.",
+     "האחריות מכסה מכסה סדוק.",
+     "לקומקום יש אחריות של 36 חודשים.",
+     "הקומקום נכבה בפקודה קולית."
+    ]
+   },
+   "units": [
+    {
+     "text": "לקומקום יש אחריות של 24 חודשים.[^1]",
+     "label": "keep",
+     "kind": "keep-invented-model-quote"
+    },
+    {
+     "text": "האחריות מכסה את גוף החימום של הקומקום.[^1]",
+     "label": "keep",
+     "kind": "keep-true-model-quote"
+    },
+    {
+     "text": "האחריות מכסה מכסה סדוק.[^1]",
+     "label": "delete",
+     "kind": "flipped-polarity"
+    },
+    {
+     "text": "לקומקום יש אחריות של 36 חודשים.[^1]",
+     "label": "delete",
+     "kind": "changed-number"
+    },
+    {
+     "text": "הקומקום נכבה בפקודה קולית.[^1]",
+     "label": "delete",
+     "kind": "invented"
+    },
+    {
+     "text": "הקומקום נכבה בפקודה קולית ואף אחד לא בדק.",
+     "label": "delete",
+     "kind": "no-marker"
+    },
+    {
+     "text": "לקומקום יש אחריות של 24 חודשים.[^9]",
+     "label": "delete",
+     "kind": "unread-source"
+    }
+   ]
+  },
+  {
+   "id": "cg-27",
+   "lang": "he",
+   "question": "מתי הטיול השנתי?",
+   "sources": [
+    {
+     "n": 1,
+     "id": "[[synthetic-27]]",
+     "text": "הטיול השנתי יוצא ב-14 במרץ. התלמידים צריכים להביא ארוחת צהריים ארוזה. ההורים לא יחויבו בתשלום על האוטובוס."
+    }
+   ],
+   "answer": "הטיול השנתי יוצא ב-14 במרץ.[^1] התלמידים צריכים להביא לטיול ארוחת צהריים ארוזה.[^1] ההורים יחויבו בתשלום על האוטובוס.[^1] הטיול השנתי יוצא ב-21 במרץ.[^1] הטיול מסתיים בלילה במלון.[^1] הטיול מסתיים בלילה במלון ואף אחד לא בדק. הטיול השנתי יוצא ב-14 במרץ.[^9]",
+   "modelQuotes": {
+    "1": [
+     "This sentence is not in the source at all, it was invented",
+     "התלמידים צריכים להביא ארוחת צהריים ארוזה.",
+     "ההורים יחויבו בתשלום על האוטובוס.",
+     "הטיול השנתי יוצא ב-21 במרץ.",
+     "הטיול מסתיים בלילה במלון."
+    ]
+   },
+   "units": [
+    {
+     "text": "הטיול השנתי יוצא ב-14 במרץ.[^1]",
+     "label": "keep",
+     "kind": "keep-invented-model-quote"
+    },
+    {
+     "text": "התלמידים צריכים להביא לטיול ארוחת צהריים ארוזה.[^1]",
+     "label": "keep",
+     "kind": "keep-true-model-quote"
+    },
+    {
+     "text": "ההורים יחויבו בתשלום על האוטובוס.[^1]",
+     "label": "delete",
+     "kind": "flipped-polarity"
+    },
+    {
+     "text": "הטיול השנתי יוצא ב-21 במרץ.[^1]",
+     "label": "delete",
+     "kind": "changed-number"
+    },
+    {
+     "text": "הטיול מסתיים בלילה במלון.[^1]",
+     "label": "delete",
+     "kind": "invented"
+    },
+    {
+     "text": "הטיול מסתיים בלילה במלון ואף אחד לא בדק.",
+     "label": "delete",
+     "kind": "no-marker"
+    },
+    {
+     "text": "הטיול השנתי יוצא ב-14 במרץ.[^9]",
+     "label": "delete",
+     "kind": "unread-source"
+    }
+   ]
+  },
+  {
+   "id": "cg-28",
+   "lang": "he",
+   "question": "מה גודל החלקה בגינה?",
+   "sources": [
+    {
+     "n": 1,
+     "id": "[[synthetic-28]]",
+     "text": "כל חלקה בגינה הקהילתית בגודל 25 מטרים רבועים. החלקות מחולקות בהגרלה בכל אביב. אסור לחברים להשתמש בריסוס כימי."
+    }
+   ],
+   "answer": "כל חלקה בגינה הקהילתית בגודל 25 מטרים רבועים.[^1] החלקות מחולקות בהגרלה בכל אביב.[^1] מותר לחברים להשתמש בריסוס כימי.[^1] כל חלקה בגינה הקהילתית בגודל 40 מטרים רבועים.[^1] לכל חלקה יש מחסן עץ.[^1] לכל חלקה יש מחסן עץ ואף אחד לא בדק. כל חלקה בגינה הקהילתית בגודל 25 מטרים רבועים.[^9]",
+   "modelQuotes": {
+    "1": [
+     "This sentence is not in the source at all, it was invented",
+     "החלקות מחולקות בהגרלה בכל אביב.",
+     "מותר לחברים להשתמש בריסוס כימי.",
+     "כל חלקה בגינה הקהילתית בגודל 40 מטרים רבועים.",
+     "לכל חלקה יש מחסן עץ."
+    ]
+   },
+   "units": [
+    {
+     "text": "כל חלקה בגינה הקהילתית בגודל 25 מטרים רבועים.[^1]",
+     "label": "keep",
+     "kind": "keep-invented-model-quote"
+    },
+    {
+     "text": "החלקות מחולקות בהגרלה בכל אביב.[^1]",
+     "label": "keep",
+     "kind": "keep-true-model-quote"
+    },
+    {
+     "text": "מותר לחברים להשתמש בריסוס כימי.[^1]",
+     "label": "delete",
+     "kind": "flipped-polarity"
+    },
+    {
+     "text": "כל חלקה בגינה הקהילתית בגודל 40 מטרים רבועים.[^1]",
+     "label": "delete",
+     "kind": "changed-number"
+    },
+    {
+     "text": "לכל חלקה יש מחסן עץ.[^1]",
+     "label": "delete",
+     "kind": "invented"
+    },
+    {
+     "text": "לכל חלקה יש מחסן עץ ואף אחד לא בדק.",
+     "label": "delete",
+     "kind": "no-marker"
+    },
+    {
+     "text": "כל חלקה בגינה הקהילתית בגודל 25 מטרים רבועים.[^9]",
+     "label": "delete",
+     "kind": "unread-source"
+    }
+   ]
+  },
+  {
+   "id": "cg-29",
+   "lang": "he",
+   "question": "מה מצא הסקר?",
+   "sources": [
+    {
+     "n": 1,
+     "id": "[[synthetic-29]]",
+     "text": "בסקר, 62 אחוז מהתושבים ביקשו עוד ספסלים. תושבים צעירים ביקשו הצללה מעל גן המשחקים. מעט תושבים לא רצו גינת כלבים."
+    }
+   ],
+   "answer": "בסקר, 62 אחוז מהתושבים ביקשו עוד ספסלים.[^1] תושבים צעירים ביקשו הצללה מעל גן המשחקים.[^1] מעט תושבים רצו גינת כלבים.[^1] בסקר, 75 אחוז מהתושבים ביקשו עוד ספסלים.[^1] את הסקר ערכה הלשכה המרכזית לסטטיסטיקה.[^1] את הסקר ערכה הלשכה המרכזית לסטטיסטיקה ואף אחד לא בדק. בסקר, 62 אחוז מהתושבים ביקשו עוד ספסלים.[^9]",
+   "modelQuotes": {
+    "1": [
+     "This sentence is not in the source at all, it was invented",
+     "תושבים צעירים ביקשו הצללה מעל גן המשחקים.",
+     "מעט תושבים רצו גינת כלבים.",
+     "בסקר, 75 אחוז מהתושבים ביקשו עוד ספסלים.",
+     "את הסקר ערכה הלשכה המרכזית לסטטיסטיקה."
+    ]
+   },
+   "units": [
+    {
+     "text": "בסקר, 62 אחוז מהתושבים ביקשו עוד ספסלים.[^1]",
+     "label": "keep",
+     "kind": "keep-invented-model-quote"
+    },
+    {
+     "text": "תושבים צעירים ביקשו הצללה מעל גן המשחקים.[^1]",
+     "label": "keep",
+     "kind": "keep-true-model-quote"
+    },
+    {
+     "text": "מעט תושבים רצו גינת כלבים.[^1]",
+     "label": "delete",
+     "kind": "flipped-polarity"
+    },
+    {
+     "text": "בסקר, 75 אחוז מהתושבים ביקשו עוד ספסלים.[^1]",
+     "label": "delete",
+     "kind": "changed-number"
+    },
+    {
+     "text": "את הסקר ערכה הלשכה המרכזית לסטטיסטיקה.[^1]",
+     "label": "delete",
+     "kind": "invented"
+    },
+    {
+     "text": "את הסקר ערכה הלשכה המרכזית לסטטיסטיקה ואף אחד לא בדק.",
+     "label": "delete",
+     "kind": "no-marker"
+    },
+    {
+     "text": "בסקר, 62 אחוז מהתושבים ביקשו עוד ספסלים.[^9]",
+     "label": "delete",
+     "kind": "unread-source"
+    }
+   ]
+  },
+  {
+   "id": "cg-30",
+   "lang": "he",
+   "question": "כל כמה זמן מנקים את הבריכה?",
+   "sources": [
+    {
+     "n": 1,
+     "id": "[[synthetic-30]]",
+     "text": "את הבריכה הציבורית מנקים כל 3 ימים. רמת הכלור נבדקת בכל בוקר. הבריכה אינה מחוממת בחורף."
+    }
+   ],
+   "answer": "את הבריכה הציבורית מנקים כל 3 ימים.[^1] רמת הכלור בבריכה נבדקת בכל בוקר.[^1] הבריכה מחוממת בחורף.[^1] את הבריכה הציבורית מנקים כל 7 ימים.[^1] בבריכה יש מקפצה אולימפית.[^1] בבריכה יש מקפצה אולימפית ואף אחד לא בדק. את הבריכה הציבורית מנקים כל 3 ימים.[^9]",
+   "modelQuotes": {
+    "1": [
+     "This sentence is not in the source at all, it was invented",
+     "רמת הכלור נבדקת בכל בוקר.",
+     "הבריכה מחוממת בחורף.",
+     "את הבריכה הציבורית מנקים כל 7 ימים.",
+     "בבריכה יש מקפצה אולימפית."
+    ]
+   },
+   "units": [
+    {
+     "text": "את הבריכה הציבורית מנקים כל 3 ימים.[^1]",
+     "label": "keep",
+     "kind": "keep-invented-model-quote"
+    },
+    {
+     "text": "רמת הכלור בבריכה נבדקת בכל בוקר.[^1]",
+     "label": "keep",
+     "kind": "keep-true-model-quote"
+    },
+    {
+     "text": "הבריכה מחוממת בחורף.[^1]",
+     "label": "delete",
+     "kind": "flipped-polarity"
+    },
+    {
+     "text": "את הבריכה הציבורית מנקים כל 7 ימים.[^1]",
+     "label": "delete",
+     "kind": "changed-number"
+    },
+    {
+     "text": "בבריכה יש מקפצה אולימפית.[^1]",
+     "label": "delete",
+     "kind": "invented"
+    },
+    {
+     "text": "בבריכה יש מקפצה אולימפית ואף אחד לא בדק.",
+     "label": "delete",
+     "kind": "no-marker"
+    },
+    {
+     "text": "את הבריכה הציבורית מנקים כל 3 ימים.[^9]",
+     "label": "delete",
+     "kind": "unread-source"
+    }
+   ]
+  }
+ ]
+}
