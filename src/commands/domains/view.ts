@@ -149,6 +149,15 @@ export function buildViewCommands({ setSearchOpen, setRuntimeMetricsOpen, vimEna
       action: () => window.dispatchEvent(new CustomEvent("lumen-open-capture")),
     },
     {
+      id: "capture.triageInbox",
+      label: t("cmd.capture.triageInbox"),
+      hint: t("cmd.capture.triageInbox.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.file"),
+      // W10.C21: the inbox sorted by a local model (ai/structured), staged for review.
+      action: () => void import("../../capture/triageActions").then((m) => m.triageInboxFlow()),
+    },
+    {
       id: "epub.open",
       label: t("cmd.epub.open"),
       icon: cmdIcons.FileText,

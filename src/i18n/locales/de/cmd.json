@@ -112,6 +112,8 @@
   "cmd.book.open.hint": "Kapitelreihenfolge, Wortziele, heutige Wörter und Serie; EPUB exportieren oder als PDF drucken",
   "cmd.canvas.migrate": "🎨 Canvas: tldraw-Canvases in Excalidraw umwandeln",
   "cmd.canvas.migrate.hint": "die .tldr-Dateien bleiben als Sicherung erhalten",
+  "cmd.capture.triageInbox": "📥 Eingang: mit dem lokalen Modell sortieren",
+  "cmd.capture.triageInbox.hint": "Aufgaben bekommen ein Kästchen und ein Fälligkeitsdatum, jeder Eintrag Tags; du prüfst, bevor sich etwas ändert",
   "cmd.chat.import": "WhatsApp- oder Telegram-Chat importieren…",
   "cmd.chat.import.hint": "Exportierter Chat → eine Notiz pro Tag, mit Medien; nur auf diesem Gerät",
   "cmd.cite.fillReferencesOpenAlex": "Zitate: Literaturangaben aus OpenAlex ergänzen…",

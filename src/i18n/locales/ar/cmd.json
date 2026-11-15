@@ -112,6 +112,8 @@
   "cmd.book.open.hint": "ترتيب الفصول وأهداف الكلمات وكلمات اليوم والتتابع؛ تصدير EPUB أو طباعة PDF",
   "cmd.canvas.migrate": "🎨 اللوحة: تحويل لوحات tldraw إلى Excalidraw",
   "cmd.canvas.migrate.hint": "تبقى ملفات .tldr كنسخ احتياطية",
+  "cmd.capture.triageInbox": "📥 صندوق الوارد: الفرز بالنموذج المحلي",
+  "cmd.capture.triageInbox.hint": "تحصل المهام على مربع اختيار وتاريخ استحقاق، وكل إدخال على وسوم؛ تراجع قبل أي تغيير",
   "cmd.chat.import": "استيراد محادثة WhatsApp أو Telegram…",
   "cmd.chat.import.hint": "محادثة مُصدَّرة ← ملاحظة لكل يوم مع وسائطها؛ على هذا الجهاز فقط",
   "cmd.cite.fillReferencesOpenAlex": "الاستشهادات: ملء المراجع من OpenAlex…",

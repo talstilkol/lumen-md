@@ -66,6 +66,8 @@
   "cmd.book.addChapter": "Book: add this note as a chapter",
   "cmd.book.open": "Book: chapters, goals and export",
   "cmd.canvas.migrate": "🎨 Canvas: convert tldraw canvases to Excalidraw",
+  "cmd.capture.triageInbox": "📥 Inbox: sort with the local model",
+  "cmd.capture.triageInbox.hint": "Tasks get a checkbox and a due date, every entry tags; you review before anything changes",
   "cmd.chat.import": "Import a WhatsApp or Telegram chat…",
   "cmd.cite.fillReferencesOpenAlex": "Citations: fill references from OpenAlex…",
   "cmd.cite.insert": "Insert a citation [@key]…",
