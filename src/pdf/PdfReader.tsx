@@ -277,7 +277,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
       const b = scrollRef.current;
       if (!b) return;
       const pos = positionAt(pageBoxes(pageEls.current), b.scrollTop);
-      void import("./readingPosition").then(({ savePosition }) => savePosition(positionsIO, path, pos)).catch(() => undefined);
+      void import("./readingPosition").then(({ savePosition }) => savePosition(positionsIO, path, pos)).then(() => import("../reading/progress")).then((m) => m.noteReaderProgress(path, { page: pos.page, pages: pageEls.current.size })).catch(() => undefined); // + W12.X2: the source note's progress
     }, POSITION_SAVE_MS);
   }, [path]);
   const savePosTimer = useRef<ReturnType<typeof setTimeout> | null>(null);

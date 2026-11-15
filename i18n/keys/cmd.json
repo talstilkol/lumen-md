@@ -1820,6 +1820,26 @@
       "vars": []
     },
     {
+      "key": "cmd.reading.newFromCapture",
+      "en": "Reading list: new source from a captured page…",
+      "vars": []
+    },
+    {
+      "key": "cmd.reading.newFromCapture.hint",
+      "en": "The clipped page open now, or a link you type",
+      "vars": []
+    },
+    {
+      "key": "cmd.reading.newFromLibrary",
+      "en": "Reading list: new source from the citation library…",
+      "vars": []
+    },
+    {
+      "key": "cmd.reading.newFromLibrary.hint",
+      "en": "A Zotero, BibTeX or CSL-JSON item becomes a source note",
+      "vars": []
+    },
+    {
       "key": "cmd.related.folderOff",
       "en": "Related notes: on / off for this folder",
       "vars": []

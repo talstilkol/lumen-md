@@ -132,6 +132,7 @@ export default defineConfig({
             { label: "Safe saves and the vault check", slug: "workspace/vault-integrity" },
             { label: "Voice notes into the inbox", translations: { he: "פתקים קוליים ל-inbox" }, slug: "workspace/voice-capture" },
             { label: "EPUB reader and reading mode", translations: { he: "קורא EPUB ומצב קריאה" }, slug: "workspace/epub-reader" },
+            { label: "Reading list", translations: { he: "רשימת קריאה" }, slug: "workspace/reading-list" },
             { label: "All highlights", translations: { he: "כל ההדגשות" }, slug: "workspace/highlights" },
             { label: "Daily review (spaced repetition)", translations: { he: "חזרה יומית" }, slug: "workspace/review" },
             { label: "Daily notes and the Hebrew calendar", slug: "workspace/hebrew-calendar", translations: { he: "פתק יומי ולוח עברי" } },
