@@ -11,7 +11,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { execFileSync } from "node:child_process";
 // @ts-expect-error — plain .mjs module without type declarations
-import { baseVerdict, branchName, currentTrain, driftVerdicts, restackCommands, trainNumber, worst } from "../../scripts/lib/trainBase.mjs";
+import { baseVerdict, branchName, currentTrain, depthVerdict, driftVerdicts, restackCommands, stackDepth, trainNumber, worst } from "../../scripts/lib/trainBase.mjs";
 // @ts-expect-error — plain .mjs module without type declarations
 import { parseArgs, run } from "../../scripts/restack.mjs";
 
@@ -25,18 +25,50 @@ describe("the current train", () => {
     expect(currentTrain(["main"])).toBeNull();
     expect(branchName("origin/verify/train-2")).toBe("verify/train-2");
     expect(branchName("refs/remotes/origin/main")).toBe("main");
+    expect(branchName("main~1")).toBe("main");
+    expect(branchName("origin/verify/train-5^2~3")).toBe("verify/train-5");
   });
 });
 
 describe("the base rule", () => {
-  it("the train or main is fine; a feature branch or an older train warns with the restack command", () => {
+  it("the train or main is fine; an older train warns; a feature branch fails, with the restack command", () => {
     expect(baseVerdict("verify/train-2", "verify/train-2")).toEqual({ status: "ok", line: "The base `verify/train-2` is the current train." });
     expect(baseVerdict("main", "verify/train-2").status).toBe("ok");
     const feat = baseVerdict("feat/e2ee-sync-core", "verify/train-2");
-    expect(feat.status).toBe("warn");
+    expect(feat.status).toBe("fail");
+    expect(baseVerdict("verify/train", "verify/train-2").status).toBe("warn");
+    expect(baseVerdict("feat/x", null).status).toBe("fail");
     expect(feat.line).toContain("`node scripts/restack.mjs --branch <this branch> --base feat/e2ee-sync-core`");
     expect(baseVerdict("verify/train", "verify/train-2").line).toContain("(an older train; the current one is `verify/train-2`)");
     expect(baseVerdict("feat/x", null).line).toContain("is not `main`");
+  });
+
+  it("stack depth through the chain of bases: depth 1 passes, depth 2 fails (W6.22 step 2)", () => {
+    // The train-4 stack the audit found: #529 → #560 → #573 → #585 → #604 (heads made up, bases chained).
+    const prs = [
+      { number: 529, head: "feat/sync-crypto", base: "verify/train-4" },
+      { number: 560, head: "feat/sas", base: "feat/sync-crypto" },
+      { number: 573, head: "feat/sas-ui", base: "feat/sas" },
+      { number: 585, head: "feat/sas-qr", base: "feat/sas-ui" },
+      { number: 604, head: "feat/sas-final", base: "feat/sas-qr" },
+    ];
+    expect(stackDepth("verify/train-4", prs)).toMatchObject({ depth: 1, chain: [], known: true });
+    expect(stackDepth("main", prs).depth).toBe(1);
+    expect(depthVerdict(stackDepth("verify/train-4", prs))).toEqual({ status: "ok", line: "Stack depth 1 (limit 1)." });
+    const two = stackDepth("feat/sync-crypto", prs);
+    expect(two).toEqual({ depth: 2, chain: [{ branch: "feat/sync-crypto", pr: 529 }], known: true, root: "verify/train-4" });
+    expect(depthVerdict(two)).toEqual({ status: "fail", line: "Stack depth 2 (limit 1): this PR → #529 `feat/sync-crypto` → `verify/train-4`. Restack onto the train head." });
+    const six = stackDepth("feat/sas-final", prs);
+    expect(six.depth).toBe(6);
+    expect(six.chain.map((c: { pr: number }) => c.pr)).toEqual([604, 585, 573, 560, 529]);
+    expect(depthVerdict(six).status).toBe("fail");
+    // No open PR heads the base: at least 2, and the line says the chain is cut.
+    const unknown = stackDepth("feat/gone", prs);
+    expect(unknown).toMatchObject({ depth: 2, known: false });
+    expect(depthVerdict(unknown).line).toBe("Stack depth at least 2 (limit 1): this PR → `feat/gone` → (no open PR has this branch as its head). Restack onto the train head.");
+    // A cycle of bases ends instead of looping.
+    const loop = stackDepth("a", [{ number: 1, head: "a", base: "b" }, { number: 2, head: "b", base: "a" }]);
+    expect(loop).toMatchObject({ depth: 3, known: false });
   });
 
   it("drift warns, an old merge base and a criss-cross fail", () => {

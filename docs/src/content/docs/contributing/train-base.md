@@ -1,6 +1,6 @@
 ---
 title: Every PR on the train head
-description: A pull request is based on the current train or on main, never on another PR's branch. pr:check warns about a stacked base and about drift, and fails an old merge base or a criss-cross. scripts/restack.mjs prints how to move a stacked PR onto the train.
+description: A pull request is based on the current train or on main, never on another PR's branch. pr:check fails a stacked base and a stack deeper than 1, warns about an older train and about drift, and fails an old merge base or a criss-cross. scripts/restack.mjs prints how to move a stacked PR onto the train.
 ---
 
 Lumen used to stack pull requests: each PR's base was the branch of the
@@ -28,7 +28,9 @@ train head**:
 | Finding | Result |
 |---|---|
 | The base is the current train or `main` | ok |
-| The base is anything else (a stacked PR) | warning, with the restack command |
+| The base is an older train or another `verify/*` branch | warning, with the restack command |
+| The base is anything else (a stacked PR) | **fails**, with the restack command |
+| The stack is deeper than 1, followed through the open PRs' bases (`--pr` reads them from GitHub, `--prs <file>` from JSON) | **fails**, with the chain |
 | The branch is behind its base (the train head, when stacked) | warning, with the count |
 | The merge base is more than 7 days old (`--max-age-days`) | **fails** |
 | More than one merge base (criss-cross) | **fails** |
