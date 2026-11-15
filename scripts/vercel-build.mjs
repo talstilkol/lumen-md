@@ -6,14 +6,17 @@
  * verified through the train: scripts/vercel-ignore.sh) and reports the
  * result to GitHub as the "Vercel" commit status. A preview build therefore
  * runs the checks CI used to run, and any failing gate fails the build, so
- * a train with a failing test gets a red status. Production (main) builds as before:
- * the app, its bundle budget and its build manifest (W7.23), nothing else.
+ * a train with a failing test gets a red status. Production (main) builds
+ * the app, its bundle budget, its build manifest (W7.23) and the privacy
+ * ledger check (W10.D17), nothing else.
  *
  *   VERCEL_ENV=preview      lockfile, build, live:meta, budget, secrets, manifest, vitest, e2e, i18n:check,
  *                           hygiene, docs:sync, docs:complete (with the
- *                           strict Hebrew parity), the licence gate, the mutation floor
+ *                           strict Hebrew parity), the licence gate, the mutation floor,
+ *                           privacy:ledger (every network call in the ledger)
  *   VERCEL_ENV=production   build, live:meta, budget, manifest (after the scans: its
- *                           hashes are not secrets, but they look like them)
+ *                           hashes are not secrets, but they look like them), attacks,
+ *                           privacy:ledger
  *   (not on Vercel)         the preview set, so `node scripts/vercel-build.mjs`
  *                           reproduces a preview build locally
  *
@@ -67,6 +70,8 @@ export const GATES = {
   mutation: ["run", "-s", "mutation:check"],
   // Plan 8.3 / W10.E10: FCP, LCP, TBT, CLS on desktop and a phone, 5 runs, median run (perf-gate.config.json).
   "perf:gate": ["run", "-s", "perf:gate"],
+  // W10.D17: every network call in src/ in the privacy ledger, with no baseline — a gate of its own, on production too.
+  "privacy:ledger": ["run", "-s", "privacy:ledger"],
 };
 
 /**
@@ -194,8 +199,8 @@ export function gateEnv(gate, env, gates) {
   return { ...env, VITE_E2E: env.VITE_E2E ?? "1", VITE_CSP_CONNECT_EXTRA: [env.VITE_CSP_CONNECT_EXTRA, E2E_COLLAB_WS].filter(Boolean).join(" ") };
 }
 
-export const PRODUCTION_GATES = ["build", "live:meta", "budget", "manifest", "attacks"];
-export const PREVIEW_GATES = ["lockfile", "build", "live:meta", "budget", "secrets", "manifest", "attacks", "vitest", "e2e", "perf:gate", "i18n:check", "hygiene", "docs:sync", "docs:complete", "licenses", "mutation"];
+export const PRODUCTION_GATES = ["build", "live:meta", "budget", "manifest", "attacks", "privacy:ledger"];
+export const PREVIEW_GATES = ["lockfile", "build", "live:meta", "budget", "secrets", "manifest", "attacks", "vitest", "e2e", "perf:gate", "i18n:check", "hygiene", "docs:sync", "docs:complete", "licenses", "mutation", "privacy:ledger"];
 /**
  * `--e2e-only`: build and the e2e gate, nothing else. For a probe branch
  * that runs Playwright specs (LUMEN_E2E_SPECS, a longer LUMEN_E2E_MINUTES)

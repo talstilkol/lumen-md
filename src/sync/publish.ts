@@ -240,6 +240,7 @@ export async function publishNote(
   }
   const endpoint = publishEndpoint();
   if (!endpoint) throw new Error("Publish endpoint unavailable.");
+  // privacy-ledger: the deployment's own endpoint (VITE_PUBLISH_ENDPOINT, only when the user publishes); not AI traffic: listed in audit mode (network)
   const res = await fetchWithRetry(endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeader() },
@@ -323,6 +324,7 @@ export async function unpublishNote(slug: string): Promise<void> {
   }
   const endpoint = publishEndpoint();
   if (!endpoint) throw new Error("Publish endpoint unavailable.");
+  // privacy-ledger: the deployment's own endpoint (VITE_PUBLISH_ENDPOINT, only when the user publishes); not AI traffic: listed in audit mode (network)
   const res = await fetchWithRetry(`${endpoint}/${encodeURIComponent(slug)}`, {
     method: "DELETE",
     credentials: "include",

@@ -63,6 +63,7 @@ async function defaultLoadModel(url: string, base: string): Promise<ArrayBuffer>
   const cache = createModelCache({ base, registry, root: opfsRoot, fallback: async () => caches.open("transformers-cache") });
   const hit = await cache.match(url);
   if (hit) return hit.arrayBuffer();
+  // privacy-ledger: rule Model download (Lumen's mirror): CONVERTED_MODELS_BASE is VITE_MODEL_MIRROR_URL, model-download, sha256-checked
   const res = await fetch(url);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   await cache.put(url, res.clone()); // throws on a size or checksum mismatch

@@ -86,6 +86,7 @@ function randomString(len = 64): string {
 async function refreshAccessToken(): Promise<string> {
   const refresh = getSecret(REFRESH_KEY);
   if (!refresh) throw new Error("Dropbox is disconnected — sign in again.");
+  // privacy-ledger: the user's own Dropbox (sync, OAuth): not AI traffic, listed in audit mode (network)
   const res = await fetchWithRetry("https://api.dropboxapi.com/oauth2/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -124,6 +125,7 @@ async function getAccessToken(): Promise<string> {
 export async function dropboxFetch(
   path: string,
   init: { body?: BodyInit; headers?: Record<string, string>; contentEndpoint?: boolean } = {},
+  // privacy-ledger: the user's own Dropbox (sync, OAuth): not AI traffic, listed in audit mode (network)
   fetchImpl: (input: string, init?: RequestInit) => Promise<Response> = (i, o) => fetch(i, o),
 ): Promise<Response> {
   const access = await getAccessToken();
@@ -134,6 +136,7 @@ export async function dropboxFetch(
 }
 
 async function rpc<T>(path: string, body: unknown): Promise<T> {
+  // privacy-ledger: the user's own Dropbox (sync, OAuth): not AI traffic, listed in audit mode (network)
   const res = await fetchWithRetry(
     "https://api.dropboxapi.com" + path,
     { method: "POST", headers: { Authorization: `Bearer ${await getAccessToken()}`, "Content-Type": "application/json" }, body: JSON.stringify(body) },
@@ -230,6 +233,7 @@ export const dropboxLegacy: LegacyCloudStore = {
 export async function finishDropboxOAuth(code: string): Promise<void> {
   const verifier = localStorage.getItem(PKCE_KEY);
   if (!verifier) throw new Error("Missing PKCE verifier — restart sign-in.");
+  // privacy-ledger: the user's own Dropbox (sync, OAuth): not AI traffic, listed in audit mode (network)
   const res = await fetchWithRetry("https://api.dropboxapi.com/oauth2/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },

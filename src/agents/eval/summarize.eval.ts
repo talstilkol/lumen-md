@@ -30,6 +30,7 @@ const outDir = process.env.LUMEN_EVAL_OUT || "eval/results";
 // skip-reason: an opt-in eval against a real local model (npm run eval:summarize), not a unit test | task: 7.3 | until: 2027-05-12
 describe.skipIf(!process.env.LUMEN_EVAL_SUMMARY)(`summary eval — ${model} @ ${url}`, () => {
   it("summarises every document and writes the report", async () => {
+    // privacy-ledger: Ollama/SearXNG of the eval harness: runs in Node (npm run eval), where no ledger is installed
     const tags = await fetch(`${url}/api/tags`, { signal: AbortSignal.timeout(3000) }).catch((e: Error) => e);
     expect(tags instanceof Error ? `Ollama unreachable at ${url}: ${tags.message}` : "ok").toBe("ok");
     localStorage.setItem("lumen.ollama.baseUrl", url);

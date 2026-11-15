@@ -132,6 +132,7 @@ async function collectStyles(): Promise<string> {
       const href = (sheet as CSSStyleSheet).href;
       if (!href) continue;
       try {
+        // privacy-ledger: a stylesheet the open page already loaded (its href), for the HTML export: listed in audit mode (network)
         const res = await fetchWithRetry(href, {}, { label: "exportHtml.stylesheet", maxRetries: 2, baseDelayMs: 600, maxDelayMs: 2500 });
         if (res.ok) chunks.push(await res.text());
       } catch {

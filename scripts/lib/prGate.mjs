@@ -17,6 +17,8 @@ const NETWORK_CALL = /\b(?:fetch|fetchWithRetry)\s*\(|\bnew\s+(?:WebSocket|Event
 const URL_LITERAL = /\b(?:https?|wss?):\/\/([A-Za-z0-9.-]+)(?::\d+)?/g;
 /** The annotation for a call whose URL is not a literal: says which ledger rule covers it. */
 export const LEDGER_NOTE = /privacy-ledger:\s*\S/;
+/** A line inside a block comment: it starts with `/*` or `*` (and is not `*\/ code`). */
+const BLOCK_COMMENT_LINE = /^\s*(?:\/\*|\*(?!\/))/;
 
 /** Hosts the app may reach without a ledger rule: the page's own origin and the local machine. */
 const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "0.0.0.0", "[::1]"]);
@@ -44,7 +46,11 @@ export function unregisteredNetworkCalls(added, ledgerSource) {
   for (const [file, lines] of Object.entries(added)) {
     if (!isProductionSource(file)) continue;
     for (const { line, text, before = [] } of lines) {
-      const code = text.replace(/\/\/.*$/, "");
+      // Closed `/* … */` comments go; a line still inside a block comment
+      // (JSDoc ` * …`, an unclosed `/* …`) is prose, not a call (W10.D17).
+      const open = text.replace(/\/\*.*?\*\//g, "");
+      if (BLOCK_COMMENT_LINE.test(open)) continue;
+      const code = open.replace(/\/\/.*$/, "");
       if (!NETWORK_CALL.test(code)) continue;
       const hosts = [...text.matchAll(URL_LITERAL)].map((m) => m[1].toLowerCase());
       if (hosts.length) {

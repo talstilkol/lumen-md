@@ -142,6 +142,7 @@ export async function uploadTrainingFile(
   const form = new FormData();
   form.append("file", blob, "lumen-fine-tune.jsonl");
   form.append("purpose", "fine-tune");
+  // privacy-ledger: rule OpenAI: api.openai.com (files, fine_tuning), cloud-ai
   const res = await fetchWithRetry(
     "https://api.openai.com/v1/files",
     {
@@ -173,6 +174,7 @@ export async function createFineTuneJob(
 ): Promise<FineTuneJob> {
   assertCloudAllowed("OpenAI fine-tuning");
   const key = getAiKey();
+  // privacy-ledger: rule OpenAI: api.openai.com (files, fine_tuning), cloud-ai
   const res = await fetchWithRetry(
     "https://api.openai.com/v1/fine_tuning/jobs",
     {
@@ -213,6 +215,7 @@ export async function createFineTuneJob(
 export async function getFineTuneJob(jobId: string): Promise<FineTuneJob> {
   assertCloudAllowed("OpenAI fine-tuning");
   const key = getAiKey();
+  // privacy-ledger: rule OpenAI: api.openai.com (files, fine_tuning), cloud-ai
   const res = await fetchWithRetry(
     `https://api.openai.com/v1/fine_tuning/jobs/${jobId}`,
     {

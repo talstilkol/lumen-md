@@ -126,6 +126,23 @@ const RULES: Rule[] = [
   { test: (h) => h === "cdn.jsdelivr.net", category: "third-party", reason: "jsDelivr CDN (only the webR download is expected)" },
 ];
 
+/**
+ * Hosts the app reaches that are not AI traffic, so no rule above tracks or
+ * blocks them (a local-only policy must not stop the user's own sync), named
+ * here so that audit mode lists them by what they are, not as "Other
+ * request" (W10.D17: every network call is in the ledger).
+ */
+export const AUDIT_ONLY_HOSTS: ReadonlyArray<{ test: (host: string) => boolean; reason: string }> = [
+  { test: (h) => h === "api.dropboxapi.com" || h === "content.dropboxapi.com", reason: "Sync storage: your Dropbox (audit mode)" },
+  { test: (h) => h === "oauth2.googleapis.com" || h === "www.googleapis.com", reason: "Sync storage: your Google Drive (audit mode)" },
+];
+
+/** What audit mode calls a request no rule tracks. */
+export function auditReason(host: string): string {
+  const h = host.toLowerCase();
+  return AUDIT_ONLY_HOSTS.find((x) => x.test(h))?.reason ?? "Other request (audit mode)";
+}
+
 const MAX_ENTRIES = 500;
 const PERSIST_KEY = "lumen.privacy.ledger";
 const PERSIST_LAST = 200;
@@ -335,7 +352,7 @@ async function audited(inner: typeof fetch, input: RequestInfo | URL, init: Requ
   }
   if ((u.protocol !== "http:" && u.protocol !== "https:") || isLocalOrigin(u.href)) return inner(input, init);
   const method = (init?.method ?? (input instanceof Request ? input.method : "GET")).toUpperCase();
-  const id = record({ host: u.hostname.toLowerCase(), method, bytesOut: bodySize(init?.body), bytesIn: null, category: "network", reason: "Other request (audit mode)", policy: getAiPolicy(), decision: "allowed" });
+  const id = record({ host: u.hostname.toLowerCase(), method, bytesOut: bodySize(init?.body), bytesIn: null, category: "network", reason: auditReason(u.hostname), policy: getAiPolicy(), decision: "allowed" });
   const res = await inner(input, init);
   const len = Number(res.headers.get("content-length"));
   patch(id, { bytesIn: Number.isFinite(len) && res.headers.has("content-length") ? len : null, status: res.status });
@@ -472,6 +489,7 @@ let unwrappedFetch: typeof fetch | null = null;
  * records it twice nor blocks a request the user consented to.
  */
 export function ledgerFetch(opts: LedgerOptions): typeof fetch {
+  // privacy-ledger: the ledger's own pass-through to the unwrapped fetch: wrap() records what calls it
   const base: typeof fetch = unwrappedFetch ?? ((input, init) => globalThis.fetch(input, init));
   return withLedger(base, opts);
 }

@@ -85,6 +85,7 @@ export async function startCheckout(tier: Exclude<PlanTier, "free">, jwt: string
   if (!isConfiguredPriceId(priceId)) {
     throw new Error(`VITE_PRICE_ID_${tier.toUpperCase()} is not configured for ${tier}.`);
   }
+  // privacy-ledger: the deployment's own endpoint (the billing checkout/portal endpoint); not AI traffic: listed in audit mode (network)
   const res = await fetchWithRetry(
     checkoutUrl,
     {
@@ -122,6 +123,7 @@ export async function openBillingPortal(
   opts: { scope?: "personal" } = {},
 ): Promise<void> {
   if (!jwt) throw new Error("Sign in first to manage billing.");
+  // privacy-ledger: the deployment's own endpoint (the billing checkout/portal endpoint); not AI traffic: listed in audit mode (network)
   const res = await fetchWithRetry(
     portalEndpoint(),
     {

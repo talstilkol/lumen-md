@@ -477,6 +477,7 @@ export async function pullRepo(
   const author = opts.author ?? (await getGitIdentity());
   const branch = opts.branch ?? (((await git.currentBranch({ fs, dir, fullname: false })) as string | undefined) || undefined);
   const net = { fs, http, dir, corsProxy: opts.corsProxy ?? getCorsProxy(), ref: branch, singleBranch: true, ...authFor(token) };
+  // privacy-ledger: isomorphic-git's HTTP goes through window.fetch: the user's own git remote, listed in audit mode (network)
   const fetched = await git.fetch(net);
   const head = (await git.resolveRef({ fs, dir, ref: "HEAD" })) as string;
   const theirs = fetched.fetchHead;
@@ -500,13 +501,16 @@ export async function pullRepo(
     editor: opts.editor,
     deepen: async ({ depth, full }) => {
       if (full) {
+        // privacy-ledger: isomorphic-git's HTTP goes through window.fetch: the user's own git remote, listed in audit mode (network)
         await git.fetch({ ...net, depth: FULL_DEPTH });
         return;
       }
       try {
+        // privacy-ledger: isomorphic-git's HTTP goes through window.fetch: the user's own git remote, listed in audit mode (network)
         await git.fetch({ ...net, depth, relative: true });
       } catch {
         // A server without deepen-relative: ask for that much history from the tip.
+        // privacy-ledger: isomorphic-git's HTTP goes through window.fetch: the user's own git remote, listed in audit mode (network)
         await git.fetch({ ...net, depth });
       }
     },

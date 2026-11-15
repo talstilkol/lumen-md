@@ -155,6 +155,7 @@
     "security:audit-claims": "node scripts/security/audit-claims.mjs",
     "bench:models": "node scripts/bench-models.mjs",
     "pr:check": "node scripts/pr-check.mjs",
+    "privacy:ledger": "node scripts/privacy-ledger-check.mjs",
     "pr:triage": "node scripts/pr-triage.mjs",
     "launch:check": "node scripts/launch-check.mjs",
     "launch:gate": "node scripts/launch-gate.mjs",

@@ -30,6 +30,7 @@ self.onmessage = (e: MessageEvent<In>) => {
     // A missing list (an old cache, a failed fetch) only costs the hints: the
     // rules still run. No check waits for it: checks made before it arrives
     // go out without hints, and "freq-loaded" asks the page to check again.
+    // privacy-ledger: a worker: the frequency list from the app's own origin (the page passes its URL); worker traffic, see workerLedger
     freqLoad ??= fetch(msg.url)
       .then((r) => (r.ok ? r.text() : Promise.reject(new Error(`HTTP ${r.status}`))))
       .then((text) => {

@@ -13,6 +13,7 @@ let compiled: Promise<WebAssembly.Module> | null = null;
 function compile(): Promise<WebAssembly.Module> {
   if (!compiled) {
     compiled = (async () => {
+      // privacy-ledger: a worker: ruby.wasm from the app's own origin (rubyWasmUrl); worker traffic, see workerLedger
       const res = await fetch(rubyWasmUrl(import.meta.env.BASE_URL));
       if (!res.ok) throw new Error(`ruby.wasm: HTTP ${res.status}`);
       const mod =

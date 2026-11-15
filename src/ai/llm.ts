@@ -377,6 +377,7 @@ async function chatDirect(
   opts.onRoute?.("openai", model);
 
   try {
+    // privacy-ledger: rule OpenAI: api.openai.com (API_URL), cloud-ai
     const res = await fetchWithRetry(
       API_URL,
       {
@@ -585,6 +586,7 @@ async function* chatStreamDirect(
   opts.onRoute?.("openai", model);
 
   try {
+    // privacy-ledger: rule OpenAI: api.openai.com (API_URL), cloud-ai
     const res = await fetchWithRetry(
       API_URL,
       {

@@ -55,6 +55,13 @@ describe("network calls must be in the privacy ledger", () => {
     expect(unregisteredNetworkCalls(noted, LEDGER)).toEqual([]);
   });
 
+  it("a block comment that names fetch() is prose, not a call; code after a closed comment still counts (W10.D17)", () => {
+    const prose = addedLinesFromDiff(diffOf("src/lib/z.ts", ["/**", " * Can the page `fetch()` this URL?", " *   - `refetch()`: re-fetch on demand", " */", "/* fetch(url) in a one-line comment */"]));
+    expect(unregisteredNetworkCalls(prose, LEDGER)).toEqual([]);
+    const code = addedLinesFromDiff(diffOf("src/lib/z.ts", ["/* load */ const r = await fetch(url);", "  */ fetch(url);"]));
+    expect(unregisteredNetworkCalls(code, LEDGER)).toHaveLength(2);
+  });
+
   it("covers WebSocket, EventSource, XMLHttpRequest, sendBeacon and fetchWithRetry", () => {
     const lines = [
       '  new WebSocket("wss://relay.unknown.net");',

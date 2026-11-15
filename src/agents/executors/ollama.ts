@@ -167,6 +167,7 @@ export function versionAtLeast(version: string | null, min: readonly [number, nu
 }
 
 async function fetchJson(url: string, init: RequestInit = {}, timeoutMs = PROBE_TIMEOUT_MS): Promise<{ ok: boolean; status: number; data: unknown }> {
+  // privacy-ledger: Ollama at the configured base URL (classify: local-ai on this machine/LAN, cloud-ai when remote)
   const res = await fetch(url, { ...init, signal: init.signal ?? AbortSignal.timeout(timeoutMs) });
   const data = res.ok ? await res.json().catch(() => null) : null;
   return { ok: res.ok, status: res.status, data };
@@ -328,6 +329,7 @@ export const ollamaExecutor: Executor = {
     if (think !== undefined) body.think = think;
     if (useTools) body.tools = toOllamaTools(req.tools!);
     if (req.schema && this.supportsSchema()) body.format = req.schema;
+    // privacy-ledger: Ollama at the configured base URL (classify: local-ai on this machine/LAN, cloud-ai when remote)
     const res = await fetch(`${base}/api/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

@@ -33,7 +33,9 @@ npm run pr:check -- --base origin/main --body pr-body.md --build-base --out pr-c
 - **רשת.** כל קריאה חדשה ששולחת בקשה (`fetch`,‏ `WebSocket`,‏ `EventSource`,‏
   `sendBeacon`,‏ `importScripts`) הולכת לשרת שרשום ביומן הפרטיות
   (`src/ai/privacyLedger.ts`). קריאה שהכתובת שלה מחושבת צריכה במקום זה
-  הערה `// privacy-ledger: <rule>`.
+  הערה `// privacy-ledger: <rule>`. אותו כלל רץ על כל שורה ב־`src/` בתור
+  `npm run privacy:ledger`, שער נפרד בכל בנייה של Vercel (preview ו־production),
+  בלי רשימת חריגים: לכל קריאה באפליקציה יש הערה.
 - **רישיונות.** לכל חבילת production שנוספה או השתנתה ב־lockfile יש רישיון
   מותר (לא copyleft, לא לא־מסחרי, ולא חסר).
 - **דומיין.** אף שורה שנוספה לא מזכירה את הדומיין של הפרויקט.

@@ -11,6 +11,7 @@ import { inline } from "virtual:lumen-dictionary-en";
 export type EnglishDictionary = { aff: string; dic: string };
 
 async function fetchText(url: string): Promise<string> {
+  // privacy-ledger: this app's own origin (dict/en-US.*.txt under the app's base): not off the device's app host, so not ledger traffic
   const res = await fetch(url);
   if (!res.ok) throw new Error(`English dictionary: ${url} answered ${res.status}`);
   return res.text();

@@ -1,111 +1,76 @@
 /**
- * Plan W6.29: every network call goes through the privacy ledger.
+ * Plan W6.29, W10.D16-D17: every network call goes through the privacy ledger.
  *
  * `npm run pr:check` checks the lines a PR adds. This test checks every line of
  * production source with the same rule (scripts/lib/prGate.mjs,
- * unregisteredNetworkCalls): a fetch, fetchWithRetry, XMLHttpRequest, WebSocket,
- * EventSource, sendBeacon or importScripts call must name a host the ledger knows,
- * or carry `// privacy-ledger: <the rule that records it>` on its line or the two
- * above.
+ * unregisteredNetworkCalls, through scripts/privacy-ledger-check.mjs): a fetch,
+ * fetchWithRetry, XMLHttpRequest, WebSocket, EventSource, sendBeacon or
+ * importScripts call must name a host the ledger knows, or carry
+ * `// privacy-ledger: <the rule that records it>` on its line or the two above.
  *
- * The calls that were already there before W6.29 are listed in
- * fixtures/ledger-gaps-baseline.json. That list only goes down: a call that is not
- * in it fails here, and so does a listed call that is gone (delete its line).
+ * There is no baseline any more (W10.D17): the 86 calls that predated W6.29
+ * each carry their note, and one call without either fails here and in the
+ * `privacy:ledger` gate of scripts/vercel-build.mjs.
  * @vitest-environment node
  */
-import { readdirSync, readFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync, existsSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { spawnSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
-import {
-  isProductionSource,
-  unregisteredNetworkCalls,
-  // @ts-expect-error -- plain .mjs script, no types (as in prGate.test.ts)
-} from "../../scripts/lib/prGate.mjs";
+// @ts-expect-error -- plain .mjs script, no types (as in prGate.test.ts)
+import { ledgerGaps } from "../../scripts/privacy-ledger-check.mjs";
+// @ts-expect-error -- plain .mjs script, no types
+import { GATES, PREVIEW_GATES, PRODUCTION_GATES } from "../../scripts/vercel-build.mjs";
+import { auditReason } from "../ai/privacyLedger";
 
 const root = join(__dirname, "..", "..");
-const ledger = readFileSync(join(root, "src", "ai", "privacyLedger.ts"), "utf8");
-const baseline = (JSON.parse(readFileSync(join(__dirname, "fixtures", "ledger-gaps-baseline.json"), "utf8")) as { calls: string[] }).calls;
 
-type Lines = Record<string, Array<{ line: number; text: string; before: string[] }>>;
+describe("every network call in the app goes through the privacy ledger (W6.29, W10.D17)", () => {
+  it("0 calls outside the ledger, with no baseline", () => {
+    const gaps = ledgerGaps(root).map((g: { file: string; line: number; text: string }) => `${g.file}:${g.line} ${g.text}`);
+    // A new call: route it through a ledger rule, or add `// privacy-ledger: <rule>` above it.
+    expect(gaps).toEqual([]);
+    expect(existsSync(join(__dirname, "fixtures", "ledger-gaps-baseline.json"))).toBe(false);
+  });
 
-/** Every line of each file, with the two lines above it (what the rule reads). */
-function allLines(files: Record<string, string>): Lines {
-  const out: Lines = {};
-  for (const [file, src] of Object.entries(files)) {
-    const lines = src.split("\n");
-    out[file] = lines.map((text, i) => ({ line: i + 1, text, before: lines.slice(Math.max(0, i - 2), i) }));
-  }
-  return out;
-}
-
-/** Production files under src/, from the disk (a new file counts before it is committed; builds may have no .git). */
-function productionFiles(): Record<string, string> {
-  const out: Record<string, string> = {};
-  const walk = (dir: string) => {
-    for (const e of readdirSync(join(root, dir), { withFileTypes: true })) {
-      const rel = `${dir}/${e.name}`;
-      if (e.isDirectory()) walk(rel);
-      else if (isProductionSource(rel)) out[rel] = readFileSync(join(root, rel), "utf8");
+  it("the gate fails a seeded call without a note, and passes it once the note names its rule", () => {
+    const dir = mkdtempSync(join(tmpdir(), "ledger-gate-"));
+    try {
+      mkdirSync(join(dir, "src", "ai"), { recursive: true });
+      mkdirSync(join(dir, "src", "lib"), { recursive: true });
+      writeFileSync(join(dir, "src", "ai", "privacyLedger.ts"), readFileSync(join(root, "src", "ai", "privacyLedger.ts"), "utf8"));
+      const file = join(dir, "src", "lib", "beacon.ts");
+      writeFileSync(file, "export async function send(url: string) {\n  return fetch(url, { method: \"POST\" });\n}\n");
+      const cli = () => spawnSync(process.execPath, [join(root, "scripts", "privacy-ledger-check.mjs"), "--root", dir], { encoding: "utf8" });
+      let r = cli();
+      expect(r.status).toBe(1);
+      expect(r.stderr).toContain("src/lib/beacon.ts:2");
+      expect(ledgerGaps(dir)).toHaveLength(1);
+      // A literal host the ledger doesn't know fails too, a note or not.
+      writeFileSync(file, "// privacy-ledger: nothing\nexport const go = () => fetch(\"https://collect.example-tracker.io/x\");\n");
+      expect(ledgerGaps(dir)[0].why).toMatch(/example-tracker/);
+      writeFileSync(file, "export async function send(url: string) {\n  // privacy-ledger: the research endpoint (classify: researchEndpoint), research\n  return fetch(url, { method: \"POST\" });\n}\n");
+      r = cli();
+      expect(r.status).toBe(0);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
     }
-  };
-  walk("src");
-  return out;
-}
-
-/** a minus b, as multisets. */
-function minus(a: string[], b: string[]): string[] {
-  const left = new Map<string, number>();
-  for (const x of b) left.set(x, (left.get(x) ?? 0) + 1);
-  const out: string[] = [];
-  for (const x of a) {
-    const n = left.get(x) ?? 0;
-    if (n > 0) left.set(x, n - 1);
-    else out.push(x);
-  }
-  return out;
-}
-
-describe("every network call in the app goes through the privacy ledger (W6.29)", () => {
-  const found = unregisteredNetworkCalls(allLines(productionFiles()), ledger).map((v: { file: string; text: string }) => `${v.file} | ${v.text.trim()}`);
-
-  it("no call outside the ledger that is not on the baseline", () => {
-    // A new call: route it through the ledger, or add `// privacy-ledger: <rule>` above it.
-    expect(minus(found, baseline)).toEqual([]);
   });
 
-  it("the baseline only lists calls that are still there (it only goes down)", () => {
-    // A listed call was annotated, routed or removed: delete its line from the baseline.
-    expect(minus(baseline, found)).toEqual([]);
+  it("is a Vercel gate of its own, on preview and production builds", () => {
+    expect(GATES["privacy:ledger"]).toEqual(["run", "-s", "privacy:ledger"]);
+    expect(PREVIEW_GATES).toContain("privacy:ledger");
+    expect(PRODUCTION_GATES).toContain("privacy:ledger");
+    const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as { scripts: Record<string, string> };
+    expect(pkg.scripts["privacy:ledger"]).toBe("node scripts/privacy-ledger-check.mjs");
   });
-});
 
-describe("the rule catches each kind of call (self-test)", () => {
-  const planted: Array<[string, string]> = [
-    ["fetch", "  const r = await fetch(url);"],
-    ["fetchWithRetry", "  const r = await fetchWithRetry(endpoint, {}, { label: \"x\" });"],
-    ["XMLHttpRequest", "  const x = new XMLHttpRequest();"],
-    ["WebSocket", "  const ws = new WebSocket(serverUrl);"],
-    ["EventSource", "  const es = new EventSource(streamUrl);"],
-    ["sendBeacon", "  navigator.sendBeacon(reportUrl, body);"],
-    ["importScripts", "  importScripts(workerUrl);"],
-    ["an unknown host", '  await fetch("https://tracker.example.net/collect");'],
-  ];
-
-  for (const [kind, line] of planted) {
-    it(`a new ${kind} without a note fails`, () => {
-      const v = unregisteredNetworkCalls(allLines({ "src/new/feature.ts": `export async function go() {\n${line}\n}\n` }), ledger);
-      expect(v.map((x: { line: number }) => x.line)).toEqual([2]);
-    });
-
-    it(`the same ${kind} with a note passes`, () => {
-      if (kind === "an unknown host") return; // a literal host must be in the ledger: a note doesn't cover it
-      const src = `export async function go() {\n  // privacy-ledger: research — the research endpoint rule\n${line}\n}\n`;
-      expect(unregisteredNetworkCalls(allLines({ "src/new/feature.ts": src }), ledger)).toEqual([]);
-    });
-  }
-
-  it("a host the ledger knows passes without a note; tests are not production source", () => {
-    expect(unregisteredNetworkCalls(allLines({ "src/new/a.ts": 'await fetch("https://api.openai.com/v1/models");' }), ledger)).toEqual([]);
-    expect(unregisteredNetworkCalls(allLines({ "src/__tests__/a.test.ts": "await fetch(url);" }), ledger)).toEqual([]);
+  it("audit mode names the sync storages the rules don't track (they are never blocked)", () => {
+    expect(auditReason("api.dropboxapi.com")).toMatch(/Dropbox/);
+    expect(auditReason("content.dropboxapi.com")).toMatch(/Dropbox/);
+    expect(auditReason("oauth2.googleapis.com")).toMatch(/Google Drive/);
+    expect(auditReason("www.googleapis.com")).toMatch(/Google Drive/);
+    expect(auditReason("example.org")).toBe("Other request (audit mode)");
   });
 });

@@ -47,6 +47,7 @@ export async function chatMistral(
   opts: ChatOptions = {},
 ): Promise<string> {
   assertCloudAllowed("Mistral");
+  // privacy-ledger: rule Mistral: api.mistral.ai (API_URL), cloud-ai
   const res = await fetch(API_URL, {
     method: "POST",
     headers: headers(),
@@ -69,6 +70,7 @@ export async function* chatMistralStream(
   opts: ChatOptions = {},
 ): AsyncGenerator<string, void, undefined> {
   assertCloudAllowed("Mistral");
+  // privacy-ledger: rule Mistral: api.mistral.ai (API_URL), cloud-ai
   const res = await fetch(API_URL, {
     method: "POST",
     headers: headers(),
