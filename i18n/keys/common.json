@@ -7446,6 +7446,27 @@
       ]
     },
     {
+      "key": "media.missing",
+      "en": "Not in the vault: {target}",
+      "vars": [
+        "target"
+      ]
+    },
+    {
+      "key": "media.seek",
+      "en": "Play from {time}",
+      "vars": [
+        "time"
+      ]
+    },
+    {
+      "key": "media.transcript",
+      "en": "Transcript ({n} lines)",
+      "vars": [
+        "n"
+      ]
+    },
+    {
       "key": "meeting.decisions",
       "en": "Decisions",
       "vars": []

@@ -1,0 +1,5 @@
+{
+  "media.missing": "Not in the vault: {target}",
+  "media.seek": "Play from {time}",
+  "media.transcript": "Transcript ({n} lines)"
+}
