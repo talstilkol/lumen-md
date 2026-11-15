@@ -286,6 +286,7 @@
   "editor.line": "السطر {n}",
   "editor.loadingPageView": "جارٍ تحميل عرض الصفحات…",
   "editor.loadingWysiwyg": "جارٍ تحميل محرر WYSIWYG…",
+  "editor.wysiwygAriaLabel": "محرر WYSIWYG",
   "editor.wysiwygFailed": "تعطّل محرر WYSIWYG",
   "editor.wysiwygFailedHint": "جرّب التبديل إلى وضع المصدر.",
   "findReplace.caseSensitive": "مطابقة حالة الأحرف",

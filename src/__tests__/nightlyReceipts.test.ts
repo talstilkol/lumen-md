@@ -147,8 +147,42 @@ describe("the nightly runner", () => {
     const body = (j: unknown) => Buffer.from(JSON.stringify(j)).toString("base64");
     const journey = { setup: "VoiceOver / macOS", row: "| row |", results: [{ id: 1, missing: [] }, { id: 2, missing: ["דילוג לתוכן הראשי"] }] };
     const report = { suites: [{ suites: [{ specs: [{ tests: [{ results: [{ attachments: [{ name: "x.png", contentType: "image/png", body: "AA==" }, { name: "VoiceOver / macOS.json", contentType: "application/json", body: body(journey) }] }] }] }] }] }] };
-    expect(collectSr(report)).toEqual([{ setup: "VoiceOver / macOS", passed: 1, of: 2, blockers: ["2: דילוג לתוכן הראשי"], row: "| row |" }]);
+    expect(collectSr(report)).toEqual([
+      { setup: "VoiceOver / macOS", journey: "protocol", locale: "he", voice: null, passed: 1, of: 2, blockers: ["2: דילוג לתוכן הראשי"], row: "| row |", log: [{ id: 1, spoken: [] }, { id: 2, spoken: [] }] },
+    ]);
     expect(collectSr({})).toEqual([]);
+  });
+
+  it("W11.Q6: keeps the product journey's spoken-phrase log, language and voice in the receipt", () => {
+    const body = (j: unknown) => Buffer.from(JSON.stringify(j)).toString("base64");
+    const receipt = {
+      setup: "VoiceOver / macOS / he",
+      journey: "product",
+      locale: "he",
+      voice: "Carmit",
+      row: "| r |",
+      results: [
+        { id: 1, title: "t1", spoken: ["רשימת קניות, פריט בעץ"], missing: [] },
+        { id: 2, title: "t2", spoken: ["עורך מקור Markdown"], missing: ["ללא שם"] },
+      ],
+    };
+    const report = { suites: [{ specs: [{ tests: [{ results: [{ attachments: [{ name: "x.json", contentType: "application/json", body: body(receipt) }] }] }] }] }] };
+    expect(collectSr(report)).toEqual([
+      {
+        setup: "VoiceOver / macOS / he",
+        journey: "product",
+        locale: "he",
+        voice: "Carmit",
+        passed: 1,
+        of: 2,
+        blockers: ["2: ללא שם"],
+        row: "| r |",
+        log: [
+          { id: 1, spoken: ["רשימת קניות, פריט בעץ"] },
+          { id: 2, spoken: ["עורך מקור Markdown"] },
+        ],
+      },
+    ]);
   });
 
   it("names a report by day and kind, numbering a second run that day", () => {

@@ -114,6 +114,7 @@
   "editor.line": "Line {n}",
   "editor.loadingPageView": "Loading page view…",
   "editor.loadingWysiwyg": "Loading WYSIWYG editor…",
+  "editor.wysiwygAriaLabel": "WYSIWYG editor",
   "editor.wysiwygFailed": "WYSIWYG editor failed",
   "editor.wysiwygFailedHint": "Try switching to Source mode.",
   "findReplace.caseSensitive": "Case sensitive",

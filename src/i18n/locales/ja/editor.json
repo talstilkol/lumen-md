@@ -286,6 +286,7 @@
   "editor.line": "{n} 行目",
   "editor.loadingPageView": "ページビューを読み込み中…",
   "editor.loadingWysiwyg": "WYSIWYG エディターを読み込み中…",
+  "editor.wysiwygAriaLabel": "WYSIWYG エディター",
   "editor.wysiwygFailed": "WYSIWYG エディターでエラーが発生しました",
   "editor.wysiwygFailedHint": "ソースモードに切り替えてみてください。",
   "findReplace.caseSensitive": "大文字と小文字を区別",

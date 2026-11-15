@@ -286,6 +286,7 @@
   "editor.line": "第 {n} 行",
   "editor.loadingPageView": "正在加载分页视图…",
   "editor.loadingWysiwyg": "正在加载 WYSIWYG 编辑器…",
+  "editor.wysiwygAriaLabel": "WYSIWYG 编辑器",
   "editor.wysiwygFailed": "WYSIWYG 编辑器出错",
   "editor.wysiwygFailedHint": "请尝试切换到源码模式。",
   "findReplace.caseSensitive": "区分大小写",

@@ -286,6 +286,7 @@
   "editor.line": "Строка {n}",
   "editor.loadingPageView": "Загрузка постраничного вида…",
   "editor.loadingWysiwyg": "Загрузка редактора WYSIWYG…",
+  "editor.wysiwygAriaLabel": "Редактор WYSIWYG",
   "editor.wysiwygFailed": "Сбой редактора WYSIWYG",
   "editor.wysiwygFailedHint": "Попробуйте переключиться в режим исходника.",
   "findReplace.caseSensitive": "С учётом регистра",
