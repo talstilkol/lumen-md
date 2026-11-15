@@ -12,7 +12,7 @@
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { ExternalLink, Plus, SlidersHorizontal, X } from "lucide-react";
-import { t } from "../i18n";
+import { getLocale, t } from "../i18n";
 import { toast } from "../store/useToastStore";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
 import { headingSlug } from "../lib/slug";
@@ -29,6 +29,7 @@ import {
   type PropertyValue,
 } from "../properties/frontmatter";
 import "./propertiesPanelStrings";
+import { describeValue, inferValueType } from "../properties/valueTypes";
 import { HelpButton } from "./HelpButton";
 import { explainError } from "../lib/userError";
 
@@ -41,7 +42,7 @@ interface Props {
   applyEdit: (edit: (text: string) => string) => void;
 }
 
-const TYPES: PropertyType[] = ["text", "number", "date", "list", "checkbox", "link"];
+const TYPES: PropertyType[] = ["text", "number", "date", "list", "checkbox", "link", "amount", "address"];
 const TYPE_STORE = "lumen.propertyTypes";
 
 function typeLabel(type: PropertyType): string {
@@ -58,7 +59,28 @@ function typeLabel(type: PropertyType): string {
       return t("props.type.checkbox");
     case "link":
       return t("props.type.link");
+    case "amount":
+      return t("props.type.amount");
+    case "address":
+      return t("props.type.address");
   }
+}
+
+/** How an amount or address value was read, under its input (plan R12.17). */
+function ValueReading({ value }: { value: unknown }) {
+  const line = describeValue(value, getLocale(), {
+    approx: t("props.reading.approx"),
+    lowerBound: t("props.reading.lowerBound"),
+    upperBound: t("props.reading.upperBound"),
+    apartment: t("props.reading.apartment"),
+    poBox: t("props.reading.poBox"),
+  });
+  if (!line) return null;
+  return (
+    <span dir="auto" data-testid="property-reading" style={{ display: "block", fontSize: 10, color: "hsl(var(--fg-muted))" }}>
+      {t("props.readAs", { value: line })}
+    </span>
+  );
 }
 
 /** Types the user picked for a key (a remembered per-viewer convenience). */
@@ -319,6 +341,7 @@ function ValueEditor({
         <>
           <CommitInput label={label} value={v === null ? "" : String(v)} list={listId} onCommit={(s) => onChange(s === "" ? null : s)} />
           {datalist(suggestions)}
+          {(type === "amount" || type === "address") && <ValueReading value={v} />}
         </>
       );
   }
@@ -398,7 +421,8 @@ export function PropertiesPanel({ open, onClose, text, applyEdit }: Props) {
 
   if (!open) return null;
 
-  const typeOf = (p: Property): PropertyType => (p.editable ? types[p.key] ?? p.type : p.type);
+  // Text that reads as an amount or an address shows as that type (R12.17).
+  const typeOf = (p: Property): PropertyType => (p.editable ? types[p.key] ?? inferValueType(p.value, p.key) : p.type);
   const changeType = (p: Property, to: PropertyType) => {
     const next = { ...types, [p.key]: to };
     setTypes(next);
