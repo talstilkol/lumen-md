@@ -2271,6 +2271,21 @@
       "vars": []
     },
     {
+      "key": "calendar.candleMinutes",
+      "en": "Candle lighting, minutes before sunset",
+      "vars": []
+    },
+    {
+      "key": "calendar.city",
+      "en": "City for Shabbat and holiday times (picked by you, never located)",
+      "vars": []
+    },
+    {
+      "key": "calendar.city.none",
+      "en": "None",
+      "vars": []
+    },
+    {
       "key": "calendar.deadlineMove",
       "en": "A deadline on Shabbat or a chag",
       "vars": []
@@ -2366,6 +2381,43 @@
         "weekday",
         "title"
       ]
+    },
+    {
+      "key": "calendar.timeline.conflict",
+      "en": "“{text}” falls in Shabbat or a holiday. Suggested: {when}",
+      "vars": [
+        "text",
+        "when"
+      ]
+    },
+    {
+      "key": "calendar.timeline.hint",
+      "en": "Drag a block, or focus it and use ↑/↓ (Shift: change its length). Write blocks in the note as “- 09:00–10:30 …”.",
+      "vars": []
+    },
+    {
+      "key": "calendar.timeline.inRest",
+      "en": "in Shabbat or a holiday",
+      "vars": []
+    },
+    {
+      "key": "calendar.timeline.move",
+      "en": "Move",
+      "vars": []
+    },
+    {
+      "key": "calendar.timeline.rest",
+      "en": "Shabbat or yom tov in {city}: {from}–{to}",
+      "vars": [
+        "city",
+        "from",
+        "to"
+      ]
+    },
+    {
+      "key": "calendar.timeline.title",
+      "en": "Day plan",
+      "vars": []
     },
     {
       "key": "calendar.title",

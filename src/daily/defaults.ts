@@ -18,6 +18,10 @@ export interface DailySettings {
   deadlineMove?: "next" | "previous" | "off";
   /** The study cycles {{learning}} lists (plan W12.H4); unset: Daf Yomi, Mishnah Yomit and one chapter of Rambam. */
   learning?: Array<"dafYomi" | "mishnahYomit" | "rambam1" | "rambam3">;
+  /** The city for Shabbat and yom tov times (plan W12.H8: daily/shabbatTimes CITIES id), picked by hand; unset: no times. */
+  city?: string;
+  /** Candle lighting, minutes before sunset; unset: the city's custom (18; Jerusalem 40, Haifa 30). */
+  candleMinutes?: number;
 }
 
 /** The Hebrew-date setting, with its default. */
