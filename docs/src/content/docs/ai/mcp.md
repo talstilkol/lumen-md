@@ -45,8 +45,8 @@ npx -p @lumen-md/mcp-server lumen mcp status
 | Scope | Tools |
 |---|---|
 | `search` | `search_notes` — BM25 over Hebrew and English (prefix letters ו ה ב ל מ ש כ and niqqud are handled) |
-| `read` | `read_note`, `list_notes`, `list_tags`, `get_backlinks`, `bases_query` |
-| `propose` | `create_note`, `append_note`, `write_note`, `update_frontmatter`, `bases_update` — proposals only |
+| `read` | `read_note`, `list_notes`, `list_tags`, `get_backlinks`, `list_types`, `get_type`, `bases_query` |
+| `propose` | `create_note`, `append_note`, `write_note`, `update_frontmatter`, `create_object`, `bases_update` — proposals only |
 
 `lumen mcp enable <client>` without `--scopes` grants `search,read`. Add
 `propose` only for a client you want suggestions from. `lumen mcp disable
@@ -185,6 +185,33 @@ lumen bases update --edits edits.json --approve   # each diff at the terminal; t
 
 Bases need the engine bundle: build the server with `npm ci` in the
 repository root first, then `npm run build` in `mcp-server/`.
+
+## Types
+
+A type is a file in the vault, `.lumen/types/<id>.yaml`. It has labels, an
+activating tag, one `extends` parent and typed fields. The notes stay plain
+frontmatter.
+
+- `list_types` lists the types.
+- `get_type` gives one type's fields, inherited ones first, with their
+  kinds, options and relation targets.
+- `create_object` proposes a new note of a type. Its values are checked
+  against the schema first. An unknown field, a value of the wrong kind, an
+  option that is not in the list, or a relation to a note of another type is
+  an error. When there is an error nothing is proposed, and the ledger
+  records `denied` with the reason `schema: <fields>`. A valid object is one
+  proposal in the approval queue, inside the client's folder and tag scope.
+
+From a terminal:
+
+```bash
+lumen types                                   # the types
+lumen types show book                         # its fields; --json for JSON
+lumen new "Dune" --type book --set pages=412 --set 'author=[[Frank Herbert]]'
+```
+
+Like `lumen new`, `lumen new --type` writes directly, because you are at
+your terminal. A value that does not fit the type writes nothing.
 
 ## Lumen as a client: outside servers for the local agents
 
