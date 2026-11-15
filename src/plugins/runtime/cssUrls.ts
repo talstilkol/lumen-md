@@ -9,21 +9,32 @@
  * and an escape can spell any character.
  *
  * Every string a URL-taking function holds (`url()`, `src()`, `image()`,
- * `image-set()`, `-webkit-image-set()`, nested too) and every unquoted
- * `url(…)` body is a load target; `remoteTarget` then resolves it as the URL
+ * `image-set()`, `-webkit-image-set()`, nested too, at any depth below one, such as a
+ * `var()` fallback) and every unquoted `url(…)` body is a load target. A `var()`, `env()` or `attr()` anywhere
+ * inside such a function is refused, because its value comes from elsewhere (review Z7-M1); `remoteTarget` then resolves it as the URL
  * parser does (it strips tab and newline anywhere, and leading/trailing C0
  * controls and spaces), against a base of the plugin's own origin.
  */
 
-/** A load target found in a stylesheet, decoded (escapes applied). */
+/**
+ * A load target found in a stylesheet, decoded (escapes applied). `substitution` is a `var()`, `env()` or `attr()`
+ * inside a URL-taking function (review Z7-M1): its value is only known after substitution, so the review cannot see
+ * where it loads from and refuses it.
+ */
 export interface CssLoad {
-  kind: "import" | "url";
-  /** The decoded target; for an `@import`, its text up to the `;`. */
+  kind: "import" | "url" | "substitution";
+  /** The decoded target; for an `@import`, its text up to the `;`; for a substitution, `var() in image-set()`. */
   target: string;
 }
 
 /** The functions whose strings are URLs (CSS Values 4 `url()`/`src()`, CSS Images 4 `image()`/`image-set()`). */
 const URL_FUNCTIONS: ReadonlySet<string> = new Set(["url", "src", "image", "image-set", "-webkit-image-set"]);
+/**
+ * Functions whose value is substituted before the URL function reads it (CSS Variables 1 `var()`, CSS Environment
+ * Variables `env()`, CSS Values 5 `attr()`). `image-set(var(--x) 1x)` with `--x:"https://…"` loads that string,
+ * though no string sits inside the URL function (review Z7-M1).
+ */
+const SUBSTITUTION_FUNCTIONS: ReadonlySet<string> = new Set(["var", "env", "attr"]);
 
 const isHex = (c: string) => /^[0-9a-fA-F]$/.test(c);
 const isNewline = (c: string) => c === "\n" || c === "\r" || c === "\f";
@@ -178,11 +189,15 @@ export function cssLoads(css: string): CssLoad[] {
         const semi = toks.slice(k).find((x) => x.t === "semi") as { at: number } | undefined;
         out.push({ kind: "import", target: css.slice(tk.start, semi ? semi.at : undefined).replace(/\s+/g, " ").trim() });
       }
-    } else if (tk.t === "fn") stack.push(tk.name);
-    else if (tk.t === "open") stack.push("");
+    } else if (tk.t === "fn") {
+      const sink = stack.find((f) => URL_FUNCTIONS.has(f));
+      if (sink && SUBSTITUTION_FUNCTIONS.has(tk.name)) out.push({ kind: "substitution", target: `${tk.name}() in ${sink}()` });
+      stack.push(tk.name);
+    } else if (tk.t === "open") stack.push("");
     else if (tk.t === "close") stack.pop();
     else if (tk.t === "url") out.push({ kind: "url", target: tk.value });
-    else if (tk.t === "str" && stack.length && URL_FUNCTIONS.has(stack[stack.length - 1])) out.push({ kind: "url", target: tk.value });
+    // Any URL function among the open ones (review Z7-M1): a string in a `var()` fallback inside one is loaded too.
+    else if (tk.t === "str" && stack.some((f) => URL_FUNCTIONS.has(f))) out.push({ kind: "url", target: tk.value });
   }
   return out;
 }
