@@ -1,0 +1,20 @@
+{
+  "format": "lumen-transparency/1",
+  "service": "The encrypted sync relay and the share server",
+  "period": { "from": "2026-07-01", "to": "2026-12-31" },
+  "published": "2026-11-15",
+  "status": {
+    "en": "Interim report: no public relay or share server ran in this period (both are code only), so there was nothing anyone could ask for. The period closes on 31 December; the final report for it replaces this one.",
+    "he": "דוח ביניים: בתקופה הזו לא פעל ממסר ציבורי ולא שרת שיתוף ציבורי (שניהם קוד בלבד), ולכן לא היה מה לבקש. התקופה נסגרת ב-31 בדצמבר, והדוח הסופי שלה יחליף את זה."
+  },
+  "requests": {
+    "government": { "received": 0, "answered": 0, "rejected": 0 },
+    "court": { "received": 0, "answered": 0, "rejected": 0 },
+    "foreign": { "received": 0, "answered": 0, "rejected": 0 },
+    "takedown": { "received": 0, "answered": 0, "rejected": 0 }
+  },
+  "couldHandOver": {
+    "en": "Only what the servers hold: encrypted objects under opaque names, their sizes and times, the SHA-256 of each space's token, and room names. Never note text (encrypted on the device with keys the servers never see), and no IP addresses (the relay counts them under a daily key it never stores).",
+    "he": "רק מה שהשרתים מחזיקים: אובייקטים מוצפנים בשמות אטומים, הגדלים והזמנים שלהם, ה-SHA-256 של הטוקן של כל מרחב, ושמות חדרים. אף פעם לא טקסט של פתקים (הוא מוצפן במכשיר במפתחות שהשרתים לא רואים), ובלי כתובות IP (הממסר סופר אותן תחת מפתח יומי שהוא לא שומר)."
+  }
+}

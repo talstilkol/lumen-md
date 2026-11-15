@@ -64,6 +64,10 @@ Every version of every plugin in the registry goes through an automated review b
 | `lumen.tags` | 1.0.0 | A | 90 | Shows notifications; Reads notes in your vault; Changes notes in your vault; Collects nothing: no network access |
 | `lumen.templates` | 1.0.0 | A | 90 | Reads the open note; Changes the open note; Keeps its settings; Reads notes in your vault; Collects nothing: no network access |
 
+## Transparency report
+
+Every six months, the requests for user data the relay and the share server received, answered and rejected: [Transparency report](/security/transparency/). The store privacy labels are built from the privacy ledger, and a check fails when a route is missing from them (`store/privacy-labels.json`).
+
 ## Report a vulnerability
 
 Privately, as [SECURITY.md](https://github.com/talstilkol/lumen-md/blob/main/SECURITY.md) explains.

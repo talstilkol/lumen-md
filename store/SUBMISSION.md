@@ -14,6 +14,7 @@
 |---|---|---|
 | Listings in English and Hebrew: name, subtitle, keywords, promotional text, description, release notes, review notes | `store/listing.json` → `fastlane/metadata/**` | `node scripts/store.mjs check`: each store's limits, with App Store keywords in UTF-8 bytes (a Hebrew letter is 2) |
 | Privacy-label answers, question by question | `store/privacy-answers.md`, from `store/privacy-labels.json` (plan W2.24) | the same check; the labels file's own test (in #395) ties it to the privacy ledger and the audits |
+| App Store and Play label drafts, built from the labels (plan W11.S13) | `store/app-store-privacy.draft.md`, `store/play-data-safety.draft.md` | `node scripts/privacy/store-labels.mjs --check`, which pr:check runs too: every privacy-ledger route has a label entry |
 | Screenshots: iPhone 6.9″, iPad 13″, Android phone and desktop, in Hebrew and English | `node scripts/store-screenshots.mjs` → `store/screenshots/` | the script checks each PNG's exact pixel size |
 | winget manifests and a Homebrew cask | `node scripts/store.mjs desktop …` → `store/desktop/` | filled from the release's `SHA256SUMS` (plan 13.4) |
 

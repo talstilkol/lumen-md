@@ -48,6 +48,8 @@ import { existsSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSy
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import { LABELS, labelProblems } from "./privacy/store-labels.mjs";
+import { ledgerRoutes, unknownRecorders } from "./privacy/ledgerRoutes.mjs";
 import { addedLinesFromDiff, AI_LABEL, bodyProblems, domainMentions, licenceChanges, skipCiViolations, unregisteredNetworkCalls, untestedChanges, writtenByAi } from "./lib/prGate.mjs";
 import { bundleDiffMarkdown } from "./bundle-diff.mjs";
 import { BASELINE_PATH, baselineRaises } from "./lib/maxLines.mjs";
@@ -178,6 +180,12 @@ export function runChecks(opts) {
     const v = unregisteredNetworkCalls(added, readFileSync(ledgerFile, "utf8"));
     add("Network calls in the privacy ledger", v.length ? "fail" : "ok", v.length ? v.map((x) => `- \`${x.file}:${x.line}\` ${x.why}: \`${x.text.slice(0, 120)}\``) : ["No new network call outside the ledger."]);
   } else add("Network calls in the privacy ledger", "skipped", ["src/ai/privacyLedger.ts is not on this branch."]);
+
+  // W11.S13: every ledger route has its store privacy label entry (a label that doesn't match the ledger is a store risk).
+  if (existsSync(ledgerFile) && existsSync(join(cwd, LABELS))) {
+    const lp = labelProblems(JSON.parse(readFileSync(join(cwd, LABELS), "utf8")), ledgerRoutes(cwd), unknownRecorders(cwd));
+    add("Store privacy labels cover the ledger", lp.length ? "fail" : "ok", lp.length ? lp.map((x) => `- ${x}`) : [`Every ledger route has an entry in \`${LABELS}\`.`]);
+  } else add("Store privacy labels cover the ledger", "skipped", [`${LABELS} or the ledger is not on this branch.`]);
 
   const dom = domainMentions(added);
   add("The project's domain", dom.length ? "fail" : "ok", dom.length ? dom.map((x) => `- \`${x.file}:${x.line}\``) : ["Not named in any added line."]);
