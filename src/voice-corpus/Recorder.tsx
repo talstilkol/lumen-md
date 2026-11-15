@@ -12,12 +12,12 @@
  * measures the real background. Loaded on use from the palette
  * (`voice.corpusRecorder`), never in the startup bundle.
  */
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./recorderStrings";
 import { t } from "../i18n";
 import { explainError } from "../lib/userError";
-import { useFocusTrap } from "../ui/useFocusTrap";
+import { Modal } from "../ui/Modal";
 import { CONSENT_VERSION, CORPUS_RATE, addTake, exportZip, newSession, nextSentence, parseScript, sessionSummary, type Session, type Take } from "./session";
 
 /** A recording in progress: `stop` ends it and gives mono samples at CORPUS_RATE. */
@@ -85,8 +85,6 @@ const DEFAULT_DEPS: RecorderDeps = { startCapture: browserCapture, save: downloa
 const fmtDb = (x: number) => `${Math.round(x)} dB`;
 
 export function CorpusRecorder({ onClose, deps = DEFAULT_DEPS }: { onClose: () => void; deps?: RecorderDeps }) {
-  const trapRef = useRef<HTMLDivElement | null>(null);
-  useFocusTrap(trapRef, { onEscape: onClose });
   const [session, setSession] = useState<Session | null>(null);
   const [speaker, setSpeaker] = useState("");
   const [agreed, setAgreed] = useState(false);
@@ -145,7 +143,7 @@ export function CorpusRecorder({ onClose, deps = DEFAULT_DEPS }: { onClose: () =
 
   const sum = session ? sessionSummary(session) : null;
   return (
-    <div ref={trapRef} role="dialog" aria-modal="true" aria-label={t("voiceCorpus.title")} className="cmd-palette-backdrop" data-testid="voice-corpus-recorder">
+    <Modal aria-label={t("voiceCorpus.title")} onClose={onClose} className="cmd-palette-backdrop" data-testid="voice-corpus-recorder">
       <div className="cmd-palette" style={{ padding: 16, display: "flex", flexDirection: "column", gap: 10, fontSize: 13, maxInlineSize: 640 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <strong style={{ flex: 1 }}>{t("voiceCorpus.title")}</strong>
@@ -224,7 +222,7 @@ export function CorpusRecorder({ onClose, deps = DEFAULT_DEPS }: { onClose: () =
           </div>
         )}
       </div>
-    </div>
+    </Modal>
   );
 }
 

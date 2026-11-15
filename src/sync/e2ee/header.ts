@@ -92,7 +92,7 @@ export function decodeHeader(bytes: Uint8Array, policy: KdfPolicy = {}): VaultHe
   try {
     if (typeof o.vaultId === "string") idBytes = fromB64u(o.vaultId).length;
   } catch {
-    /* not base64url */
+    /* why: not base64url; idBytes stays -1 and the check below rejects the id */
   }
   if (idBytes !== 16) throw new HeaderFormatError("Bad vault id");
   if (typeof o.mac !== "string") throw new HeaderFormatError("The vault header has no MAC");

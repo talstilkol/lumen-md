@@ -7,12 +7,12 @@
  * it makes from sample values. Obsidian Web Clipper exports import as they are.
  * Loaded on use from the palette (`research.clipTemplates`).
  */
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./clipTemplatesStrings";
 import { t } from "../i18n";
 import { explainError } from "../lib/userError";
-import { useFocusTrap } from "../ui/useFocusTrap";
+import { Modal } from "../ui/Modal";
 import { DEFAULT_TEMPLATE, SITE_TEMPLATES, renderClip, type ClipTemplate, type ClipVars } from "./clipTemplates";
 import { importObsidianTemplate, loadUserTemplates, saveUserTemplates, slugId, templateProblems, whichTemplate, type TemplateIo } from "./clipTemplateStore";
 
@@ -45,8 +45,6 @@ const textToProps = (s: string) =>
     });
 
 export function ClipTemplatesEditor({ onClose, initial, io }: { onClose: () => void; initial: ClipTemplate[]; io?: TemplateIo | null }) {
-  const trapRef = useRef<HTMLDivElement | null>(null);
-  useFocusTrap(trapRef, { onEscape: onClose });
   const [mine, setMine] = useState<ClipTemplate[]>(initial);
   const [selected, setSelected] = useState<string | null>(initial[0]?.id ?? SITE_TEMPLATES[0]?.id ?? null);
   const [testUrl, setTestUrl] = useState("");
@@ -107,7 +105,7 @@ export function ClipTemplatesEditor({ onClose, initial, io }: { onClose: () => v
   );
   const field = { display: "block", inlineSize: "100%", marginBlockStart: 2 } as const;
   return (
-    <div ref={trapRef} role="dialog" aria-modal="true" aria-label={t("clipTemplates.title")} className="cmd-palette-backdrop" data-testid="clip-templates-editor">
+    <Modal aria-label={t("clipTemplates.title")} onClose={onClose} className="cmd-palette-backdrop" data-testid="clip-templates-editor">
       <div className="cmd-palette" style={{ padding: 16, display: "flex", flexDirection: "column", gap: 10, fontSize: 13, maxInlineSize: 900, inlineSize: "95vw" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <strong style={{ flex: 1 }}>{t("clipTemplates.title")}</strong>
@@ -174,7 +172,7 @@ export function ClipTemplatesEditor({ onClose, initial, io }: { onClose: () => v
           {status && <span role={status.kind === "error" ? "alert" : "status"} style={{ color: status.kind === "error" ? "hsl(var(--danger))" : "hsl(var(--fg-muted))" }}>{status.text}</span>}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 
