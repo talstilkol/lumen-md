@@ -62,6 +62,24 @@ the block says so instead of guessing. Nothing in a query is run as code —
 the language is parsed and interpreted, and a test checks that the query
 code has no `eval`.
 
+## Charts from a query
+
+Add `chart:` to a ```query or ```dataview block to draw its rows:
+
+```query
+tag:book
+chart: bar
+chart-x: folder
+```
+
+- `chart:` is bar, line, pie, scatter, heatmap or calendar; `chart-x:`,
+  `chart-y:`, `chart-series:` and `chart-aggregate:` work as `x`, `y`,
+  `series` and `aggregate` in a Bases chart view.
+- A ```query block offers the columns `name`, `folder`, `tags`,
+  `modified` (a day) and `path`; a Dataview `TABLE` offers its own
+  headers (`chart-y: pages` after `TABLE pages`).
+- The chart has the same data table and keyboard as a Bases chart.
+
 ## Live updates
 
 Both kinds of block re-run when a note is saved, deleted or renamed. In a

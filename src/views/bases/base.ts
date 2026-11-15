@@ -37,7 +37,7 @@ export { builtinSummary, compileFilter } from "./fastFilters";
 
 export type BasesFilter = string | { and: BasesFilter[] } | { or: BasesFilter[] } | { not: BasesFilter[] };
 
-export type BasesViewType = "table" | "cards" | "list" | "kanban" | "map" | "calendar" | "timeline";
+export type BasesViewType = "table" | "cards" | "list" | "kanban" | "map" | "calendar" | "timeline" | "chart";
 
 export interface BasesSort {
   property: string;
@@ -75,6 +75,14 @@ export interface BasesView {
   date?: string;
   /** Timeline: the end-date property; without it an item is one day long. */
   end?: string;
+  /**
+   * Chart (plan W12.V1, a Lumen view type: Obsidian shows it as its own
+   * table): `chart:` bar | line | pie | scatter | heatmap | calendar, the
+   * category / date / number property `x:`, the measure `y:` (absent: the
+   * count of notes), `series:` (heatmap: the row category) and `aggregate:`
+   * count | sum | avg | min | max.
+   */
+  chart?: { kind: string; x?: string; y?: string; series?: string; aggregate?: string };
 }
 
 /**
@@ -223,6 +231,7 @@ export function parseBase(text: string): BaseParse {
         coordinates: typeof rv.coordinates === "string" ? propertyId(rv.coordinates) : undefined,
         date: typeof rv.date === "string" ? propertyId(rv.date) : undefined,
         end: typeof rv.end === "string" ? propertyId(rv.end) : undefined,
+        chart: readChart(rv),
       });
     });
     if (!views.length) views.push({ type: "table", name: "Table", order: [], sort: [], summaries: {} });
@@ -304,6 +313,14 @@ export function propertyId(id: string): string {
   const s = id.trim();
   if (/^(note|file|formula|relation|rollup)\./.test(s)) return s;
   return `note.${s}`;
+}
+
+/** A chart view's settings (W12.V1); the kind is checked where it is drawn (src/viz). */
+function readChart(rv: Record<string, unknown>): BasesView["chart"] {
+  if (String(rv.type).toLowerCase() !== "chart") return undefined;
+  const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : undefined);
+  const prop = (v: unknown) => (str(v) ? propertyId(str(v)!) : undefined);
+  return { kind: (str(rv.chart) ?? "bar").toLowerCase(), x: prop(rv.x) ?? "file.folder", y: prop(rv.y), series: prop(rv.series), aggregate: str(rv.aggregate)?.toLowerCase() };
 }
 
 /** The column header: `properties:` displayName, else the name without its namespace. */
@@ -657,6 +674,7 @@ export function runBase(base: BaseModel, files: readonly BasesFile[], opts: RunO
   const kind = viewKind(view);
   if (kind === "calendar" || kind === "timeline") needed.add(view.date ?? "note.date");
   if (kind === "timeline" && view.end) needed.add(view.end);
+  if (kind === "chart" && view.chart) for (const id of [view.chart.x, view.chart.y, view.chart.series]) if (id) needed.add(id);
 
   const matched: BaseRow[] = [];
   for (const file of files) {
@@ -807,7 +825,7 @@ export function moveFilter(text: string, from: FilterScope & { index: number }, 
 /** The kind of view to draw: a plugin's view type (unknown here) is drawn as a table. */
 export function viewKind(view: BasesView): BasesViewType {
   const t = view.type.toLowerCase();
-  return t === "cards" || t === "list" || t === "kanban" || t === "map" || t === "calendar" || t === "timeline" ? t : "table";
+  return t === "cards" || t === "list" || t === "kanban" || t === "map" || t === "calendar" || t === "timeline" || t === "chart" ? t : "table";
 }
 
 /** A cell value as a point, for the map view: `[lat, lng]`, `"lat, lng"` or `{lat, lng}`. */

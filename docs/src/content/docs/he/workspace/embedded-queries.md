@@ -58,6 +58,24 @@ TABLE status, due FROM #project WHERE status != "done" SORT due ASC
 אומר זאת במקום לנחש. שום דבר בשאילתה לא רץ כקוד — השפה מפוענחת ומפורשת,
 ובדיקה מוודאת שאין `eval` בקוד השאילתות.
 
+## גרפים משאילתה
+
+מוסיפים `chart:` לבלוק ‏query או dataview כדי לצייר את השורות שלו:
+
+```query
+tag:book
+chart: bar
+chart-x: folder
+```
+
+- ‏`chart:` הוא bar, ‏line, ‏pie, ‏scatter, ‏heatmap או calendar; ‏`chart-x:`,
+  ‏`chart-y:`, ‏`chart-series:` ו-`chart-aggregate:` פועלים כמו `x`, ‏`y`,
+  ‏`series` ו-`aggregate` בתצוגת גרף של Bases.
+- בלוק query מציע את העמודות `name`, ‏`folder`, ‏`tags`, ‏`modified` (יום)
+  ו-`path`; ‏`TABLE` של Dataview מציע את הכותרות שלו (`chart-y: pages` אחרי
+  `TABLE pages`).
+- לגרף יש אותה טבלת נתונים ואותה מקלדת כמו לגרף של Bases.
+
 ## עדכון חי
 
 שני סוגי הבלוקים רצים מחדש כשפתק נשמר, נמחק או משנה שם. בכספת של 1,000
