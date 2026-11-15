@@ -143,7 +143,7 @@ export const SETTINGS: readonly SettingEntry[] = [
   local("lumen.research.provider", { kind: "setting", tab: "ai", type: "text" }),
   // A consent: like the other opt-ins, never taken from an imported file.
   data("lumen.research.webConsent"),
-  local("lumen.ai.rerank", { kind: "setting", tab: "ai", label: "cmd.ai.rerankModel", type: "choice", options: [{ value: "lexical" }, { value: "model" }] }),
+  local("lumen.ai.rerank", { kind: "setting", tab: "ai", label: "cmd.ai.rerankModel", type: "choice", options: [{ value: "off" }, { value: "lexical" }, { value: "model" }] }),
   local("lumen.ai.imageText", { kind: "setting", tab: "ai", label: "cmd.image.altText", type: "boolean", values: ["off", ""] }),
   local("lumen.ai.styleProfile.active", { kind: "setting", tab: "ai", label: "ai.settings.style.use", type: "boolean", values: ["", "1"] }),
   local("lumen.fim.enabled", { kind: "setting", tab: "ai", type: "boolean", values: ["", "1"] }),

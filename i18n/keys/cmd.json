@@ -312,7 +312,7 @@
     },
     {
       "key": "cmd.ai.rerankModel.hint",
-      "en": "On: bge-reranker-v2-m3 on this device (one-time ~570 MB download). Off: fast word matching.",
+      "en": "On: bge-reranker-v2-m3 on this device (one-time ~570 MB download). Off: the BM25 order, the default.",
       "vars": []
     },
     {
