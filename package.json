@@ -151,6 +151,7 @@
     "pr:triage": "node scripts/pr-triage.mjs",
     "launch:check": "node scripts/launch-check.mjs",
     "launch:gate": "node scripts/launch-gate.mjs",
+    "import:diff": "node scripts/import-diff.mjs",
     "beta:funnel": "node scripts/beta-funnel.mjs",
     "store:check": "node scripts/store.mjs check",
     "corpus:obsidian-help": "node scripts/obsidian-help-corpus.mjs --fetch",
