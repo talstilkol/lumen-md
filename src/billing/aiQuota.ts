@@ -1,6 +1,12 @@
 /**
  * Monthly AI prompt quota (Capabilities.aiMonthlyPrompts).
  *
+ * Not enforced (W11.P12): AI runs with the user's own key or a local model,
+ * neither of which is a hosted service we pay for, so aiMonthlyPrompts is
+ * not in HOSTED_GATES and `effectiveCapabilities()` always reports it as
+ * unlimited. The counter stays for a future hosted AI proxy, which would get
+ * its own HOSTED_GATES entry and count only requests sent to it.
+ *
  * A small client-side counter keyed by calendar month
  * (`lumen.ai.quota.YYYY-MM`). It is a UX guard, not a security boundary —
  * the hosted AI proxy enforces the real limit server-side. Storage access
@@ -12,7 +18,7 @@
  * counts as one prompt even when an agent fans out into several requests.
  */
 
-import { effectiveCapabilities, gatesEnforced } from "./gates";
+import { gatesEnforced } from "./gates";
 import { showAiToast } from "../ui/AiToast";
 import { t } from "../i18n";
 import { hasAiCredentials } from "../ai/credentials";
@@ -61,8 +67,24 @@ export interface AiQuotaStatus {
   remaining: number;
 }
 
+let hostedAiLimitForTesting: number | null = null;
+
+/**
+ * Test seam only: stands in for the limit a future hosted AI proxy would
+ * carry in HOSTED_GATES, so the counting machinery below stays covered.
+ * Production never sets it, so no plan ever limits AI on the device.
+ */
+export function __setHostedAiLimitForTesting(limit: number | null): void {
+  hostedAiLimitForTesting = limit;
+}
+
+/** No hosted AI service exists, so the limit is unlimited on every plan (W11.P12). */
+function promptLimit(): number {
+  return hostedAiLimitForTesting ?? Number.POSITIVE_INFINITY;
+}
+
 export function aiQuotaStatus(now: Date = new Date()): AiQuotaStatus {
-  const limit = gatesEnforced() ? effectiveCapabilities().aiMonthlyPrompts : Number.POSITIVE_INFINITY;
+  const limit = gatesEnforced() ? promptLimit() : Number.POSITIVE_INFINITY;
   const used = getAiUsage(now);
   const remaining = Math.max(0, limit - used);
   return { allowed: remaining > 0, used, limit, remaining };

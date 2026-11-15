@@ -1,0 +1,15 @@
+{
+  "$comment": "Plan W11.P12: the pricing decision, read by the pricing pages' test (src/__tests__/pricingPage.test.ts). While `provider` is null no payment button may be active: each stays a disabled <button> with no link. When the owner sets up the merchant of record (W11.O8), set `provider` and one https checkout link per plan in `checkout`, on that provider's host; only then may the pages link to it. The relay prices must equal scripts/cost-model.mjs PLANS.",
+  "provider": null,
+  "providerTask": "W11.O8",
+  "providerHosts": { "polar": ["polar.sh", "buy.polar.sh"] },
+  "plans": [
+    { "id": "app", "usd": 0, "period": null },
+    { "id": "relay-monthly", "usd": 4, "period": "month" },
+    { "id": "relay-yearly", "usd": 40, "period": "year" },
+    { "id": "supporter", "usd": 25, "period": "once" }
+  ],
+  "discounts": { "students": 0.5, "teachers": 0.5 },
+  "freeFor": ["schools", "yeshivas", "nonprofits"],
+  "checkout": {}
+}
