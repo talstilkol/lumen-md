@@ -13,7 +13,7 @@
  *
  * Registered by the lecture recorder before a lecture is processed.
  */
-import { setLectureSummarizer, type LectureSummarizer } from "./lecture";
+import type { LectureSummarizer } from "./lecture";
 import type { TimedText } from "./lectureCore";
 
 const squash = (s: string) => s.replace(/\s+/g, " ").trim();
@@ -50,9 +50,13 @@ export function checkedLectureSummarizer(run: SummaryRun = agentRun, language = 
   };
 }
 
-/** Plug the checked summarizer into processLecture (the recorder calls this before processing). */
-export function registerLectureSummarizer(run?: SummaryRun, language?: string): void {
-  setLectureSummarizer(checkedLectureSummarizer(run, languageName(language)));
+/**
+ * Plug the checked summarizer into processLecture (the recorder calls this
+ * before processing). ./lecture.ts loads on use: its strings stay in the
+ * student chunk, and the meeting flow can use the summarizer without it.
+ */
+export async function registerLectureSummarizer(run?: SummaryRun, language?: string): Promise<void> {
+  (await import("./lecture")).setLectureSummarizer(checkedLectureSummarizer(run, languageName(language)));
 }
 
 const NAMES: Record<string, string> = { he: "Hebrew", en: "English", ar: "Arabic", ru: "Russian", fr: "French", de: "German", ja: "Japanese", zh: "Chinese" };

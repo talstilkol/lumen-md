@@ -39,7 +39,7 @@ const knows = (language?: string) => !language || language.split(/[-_]/)[0].toLo
 
 /** The capture's live engine over a dictation session. */
 export function liveDictationTranscriber(deps: LiveDictationDeps = appDeps): VoiceTranscriber {
-  return async ({ language, onPartial, signal }) => {
+  return async ({ language, onPartial, onFinal, signal }) => {
     if (!knows(language)) throw new Error(`live dictation knows Hebrew only, not ${language}`);
     const finals: string[] = [];
     const joined = (interim = "") => [...finals, interim.trim()].filter(Boolean).join(" ");
@@ -48,7 +48,10 @@ export function liveDictationTranscriber(deps: LiveDictationDeps = appDeps): Voi
       {
         onInterim: (text) => onPartial(joined(text)),
         onFinal: (text) => {
-          if (text.trim()) finals.push(text.trim());
+          if (text.trim()) {
+            finals.push(text.trim());
+            onFinal?.(text.trim());
+          }
           onPartial(joined());
         },
         onError: (message) => {

@@ -93,6 +93,20 @@ describe("liveDictation: the capture's live engine", () => {
     expect(s.stopped).toBe(1);
   });
 
+  it("W11.I19: each finished sentence also reaches onFinal as it closes (the meeting recorder times them)", async () => {
+    const { s, deps } = scripted();
+    await registerLiveVoiceTranscriber(deps);
+    const finals: string[] = [];
+    const live = await startLiveTranscript({ language: "he", onPartial: () => {}, onFinal: (t) => finals.push(t) });
+    s.cb!.onInterim!("שלום");
+    expect(finals).toEqual([]);
+    s.cb!.onFinal!(" שלום עולם. ", []);
+    s.cb!.onFinal!("   ", []);
+    s.cb!.onFinal!("מה שלומך?", []);
+    expect(finals).toEqual(["שלום עולם.", "מה שלומך?"]);
+    await live!.stop();
+  });
+
   it("a language the model does not know, or a failed session, goes to Whisper after the recording", async () => {
     const { s, deps } = scripted();
     setVoiceTranscriber(liveDictationTranscriber(deps));

@@ -53,7 +53,7 @@ describe("the checked lecture summary (W10.C9)", () => {
   it("a local model's grounded summary is used, and the note says it is checked", async () => {
     // The model copies two sentences, one of them shortened with "…".
     registerExecutor(fakeExecutor(() => reply("המיטוכונדריה מייצרת את רוב האנרגיה של התא.\nבגרעין נמצא … החומר התורשתי של התא.")));
-    registerLectureSummarizer(undefined, "he-IL");
+    await registerLectureSummarizer(undefined, "he-IL");
     const res = await run();
     expect(res.summary).toBe("checked");
     const md = note(res.path);
@@ -66,7 +66,7 @@ describe("the checked lecture summary (W10.C9)", () => {
 
   it("a summary the check rejects (sentences not in the lecture) leaves the extractive one, labelled", async () => {
     registerExecutor(fakeExecutor(() => reply("התאים הם אבני הבניין של כל היצורים.\nהאנרגיה מגיעה מהשמש.")));
-    registerLectureSummarizer(undefined, "he");
+    await registerLectureSummarizer(undefined, "he");
     const res = await run();
     expect(res.summary).toBe("extractive");
     expect(note(res.path)).toContain("_Extractive summary");
@@ -74,7 +74,7 @@ describe("the checked lecture summary (W10.C9)", () => {
   });
 
   it("no local model: the extractive summary, labelled", async () => {
-    registerLectureSummarizer(undefined, "he");
+    await registerLectureSummarizer(undefined, "he");
     const res = await run();
     expect(res.summary).toBe("extractive");
     expect(note(res.path)).toContain("_Extractive summary");

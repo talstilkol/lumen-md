@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "synthetic": true,
+  "_note": "SYNTHETIC: written for the runner's test, not a review of any recording. It never produces a reported number.",
+  "recording": { "manifest": "meeting-knesset-committees", "file": "synthetic", "start": "0:00", "end": "30:00" },
+  "reviewers": [
+    { "id": "r1", "tasks": ["Send the budget table to the committee", "Invite the ministry's representative to the next session", "Publish the protocol on the website"] },
+    { "id": "r2", "tasks": ["Send the committee the budget table", "Invite a representative of the ministry"] },
+    { "id": "r3", "tasks": ["Publish the session protocol on the website", "Check the legal opinion"] }
+  ]
+}

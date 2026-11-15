@@ -14,7 +14,7 @@
  * pinned (a number measured on an unpinned set is not reproducible).
  */
 
-export const TASKS = ["asr", "tts-roundtrip", "nikud", "g2p", "ocr-handwriting", "ocr", "llm", "bidi-conformance", "ner", "lemma", "retrieval"] as const;
+export const TASKS = ["asr", "tts-roundtrip", "nikud", "g2p", "ocr-handwriting", "ocr", "llm", "bidi-conformance", "ner", "lemma", "retrieval", "meeting-tasks"] as const;
 export type PublicTask = (typeof TASKS)[number];
 
 export interface DatasetFile {

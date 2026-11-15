@@ -23,7 +23,7 @@ export interface RecorderDeps {
 async function defaultDeps(): Promise<RecorderDeps> {
   const [{ startRecording }, { processLecture }, { registerLectureSummarizer }] = await Promise.all([import("../capture/voiceCapture"), import("./lecture"), import("./lectureSummarizer")]);
   // Plan 6.11 (W10.C9): the checked local summary; without a local model the extractive one, and the note says which.
-  registerLectureSummarizer(undefined, document.documentElement.lang || undefined);
+  await registerLectureSummarizer(undefined, document.documentElement.lang || undefined);
   return {
     start: () => startRecording(),
     process: (audio, o) => processLecture(audio, o),
