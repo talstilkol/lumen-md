@@ -16,6 +16,7 @@ import { Compartment, EditorState } from "@codemirror/state";
 import { lineSeparatorFor } from "./lineEndings";
 import { obsidianSourceExtension } from "./obsidianSource";
 import { cleanPastedText, pastedHtmlToMarkdown, shouldConvertPaste } from "../paste/htmlPaste";
+import { imageTextEnabled } from "./imageTextSetting";
 import { wysiwygTakesPaste, type PasteDetail } from "../paste/pasteCommands";
 import { FIX_PDF_HEBREW_EVENT, fixSourceSelection, offerInSourceEditor } from "../paste/pdfPaste";
 import { EditorView, keymap, highlightActiveLine } from "@codemirror/view";
@@ -35,6 +36,7 @@ import {
 } from "@codemirror/autocomplete";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { bidiExtension } from "./bidi";
+import { noteLangExtension } from "./noteLang";
 import { hebrewTypographyExtension } from "./hebrewTypographyExtension";
 import { bidiMarksExtension } from "./bidiMarks";
 import { mathBidiExtension } from "./mathBidi";
@@ -107,15 +109,6 @@ interface EditorProps {
   collab?: CollabSession | null;
   /** Suggesting mode (track changes): record edits as CriticMarkup. */
   suggesting?: boolean;
-}
-
-/** Automatic alt text for pasted images (T31); `lumen.ai.imageText` = "off" disables it. */
-function imageTextEnabled(): boolean {
-  try {
-    return localStorage.getItem("lumen.ai.imageText") !== "off";
-  } catch {
-    return true;
-  }
 }
 
 export interface EditorHandle {
@@ -325,6 +318,8 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       EditorView.lineWrapping,
       // Hebrew and English lines each read in their own direction (T25).
       bidiExtension(),
+      // The note's language tag (Yiddish, Ladino…) on the content element (plan W7.9).
+      noteLangExtension(),
       // Hebrew typography as you type: ״ ׳ „” ־ – (plan W2.9).
       hebrewTypographyExtension(),
       bidiMarksExtension(),

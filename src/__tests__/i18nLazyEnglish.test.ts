@@ -202,6 +202,8 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "standardSite.json": { module: "publish/standardSiteStrings.ts", users: ["publish/standardSiteActions.ts"], prefixes: ["atproto."] },
   // The host-move banner: pwa/hostMoveBoot.ts loads pwa/hostMove.ts with a dynamic import, and it holds its own strings.
   "hostmove.json": { module: "pwa/hostMove.ts", users: [], prefixes: ["pwa.move."] },
+  // Yiddish and Ladino (plan W7.9): the transliteration command and the Yiddish checker, both loaded on use (i18nLazyJewishLanguages.test.ts).
+  "jewishLanguages.json": { module: "text/jewishLanguagesStrings.ts", users: ["ai/yiddishSpellService.ts", "text/jewishLanguageCommands.ts"], prefixes: ["jewishLang.", "yiddish."] },
 };
 
 function sources(dir: string): string[] {

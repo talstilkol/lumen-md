@@ -70,6 +70,7 @@ export default defineConfig({
             { label: "Handwriting and ink", slug: "editor/handwriting", translations: { he: "כתב יד ודיו" } },
             { label: "Hebrew and right-to-left", slug: "editor/hebrew", translations: { he: "עברית ומימין לשמאל" } },
             { label: "Hebrew dictionary and synonyms", slug: "editor/hebrew-dictionary", translations: { he: "מילון עברי ומילים נרדפות" } },
+            { label: "Yiddish and Ladino", slug: "editor/yiddish-ladino", translations: { he: "יידיש ולדינו" } },
             { label: "Settings", translations: { he: "הגדרות" }, slug: "editor/settings" },
             { label: "Hebrew and right-to-left", translations: { he: "עברית וכתיבה מימין לשמאל" }, slug: "editor/hebrew-rtl" },
             { label: "Accessibility statement", slug: "editor/accessibility-statement", translations: { he: "הצהרת נגישות" } },
