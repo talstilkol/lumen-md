@@ -2401,6 +2401,38 @@
       "vars": []
     },
     {
+      "key": "contacts.exported",
+      "en": "Exported {n} people as a vCard file",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "contacts.failed",
+      "en": "Contacts: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "contacts.imported",
+      "en": "Contacts: {created} new people, {merged} merged into people already in the vault",
+      "vars": [
+        "created",
+        "merged"
+      ]
+    },
+    {
+      "key": "contacts.noPeople",
+      "en": "No person notes (type: person) in the vault.",
+      "vars": []
+    },
+    {
+      "key": "contacts.none",
+      "en": "No contacts found in this file.",
+      "vars": []
+    },
+    {
       "key": "credits.close",
       "en": "Close",
       "vars": []

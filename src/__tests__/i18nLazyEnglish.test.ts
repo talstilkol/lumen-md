@@ -149,6 +149,7 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "autofillPanel.json": { module: "ui/autofillPanelStrings.ts", users: ["ui/AutofillPanel.tsx"], prefixes: ["autofill.approve", "autofill.approveAll", "autofill.empty", "autofill.hint", "autofill.reject", "autofill.stale", "autofill.title", "autofill.written"] },
   "conflictDialog.json": { module: "sync/cloud/conflictDialogStrings.ts", users: ["sync/cloud/ConflictDialog.tsx"], prefixes: ["sync."] },
   "markdownTableEditor.json": { module: "ui/markdownTableEditorStrings.ts", users: ["ui/MarkdownTableEditor.tsx"], prefixes: ["mdTable."] },
+  "contacts.json": { module: "contacts/strings.ts", users: ["contacts/vcardActions.ts"], prefixes: ["contacts."] },
   "csvBlock.json": { module: "plugins/csvBlockStrings.ts", users: ["plugins/CsvBlock.tsx"], prefixes: ["block.csv.refetch", "block.data.aiChart", "block.data.aiGenerating", "block.data.aiNone", "block.data.fetchFailed", "block.data.parseFailed", "toast.aiChartGenerationFailed"] },
   "settingsScreen.json": { module: "ui/settingsScreenStrings.ts", users: ["ui/SettingsScreen.tsx"], prefixes: ["locale.betaNote", "settings.empty", "settings.importFailed", "settings.importRefused", "settings.imported"] },
   "plantUMLBlock.json": { module: "plugins/plantUMLBlockStrings.ts", users: ["plugins/PlantUMLBlock.tsx"], prefixes: ["plantuml.", "block.plantuml.error", "block.plantuml.rendering"] },
