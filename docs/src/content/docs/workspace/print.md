@@ -17,6 +17,10 @@ as PDF" to get a file. The layout is built for paper, and for Hebrew first.
   Tables, rows, images, code blocks, callouts and display math are never
   split. A long table repeats its header row on every page.
 - **Forced breaks:** a paragraph that is just `\newpage` or `\pagebreak`.
+- **Footnotes at the bottom of the page.** Each footnote prints at the foot
+  of the page where it is first referenced. A paragraph whose footnote does
+  not fit moves to the next page together with the footnote. With Hebrew page
+  numbers, the footnotes are numbered in Hebrew numerals too (א׳, ב׳, ג׳).
 - **Embedded fonts.** The app's own OFL fonts (Heebo and Frank Ruhl Libre
   for Hebrew, Inter and Source Serif 4 for Latin) are embedded in the PDF,
   so it looks the same on any computer.
@@ -33,6 +37,7 @@ page-numbers: hebrew   # decimal (default), hebrew or none
 header: Quarterly memo # header text; "" for none
 footer: Confidential   # text before the page number
 page-size: Letter      # A4 (default) or Letter
+footnotes: end         # page (default): at the bottom of each page; end: as endnotes
 ---
 ```
 
@@ -44,8 +49,9 @@ from the current page instead.
 
 ## Limits
 
-- **Footnotes print at the end of the note,** not at the bottom of each
-  page. Chromium's print engine has no per-page footnotes.
+- **Per-page footnotes are laid out by Lumen,** because Chromium's print
+  engine has no per-page footnotes. A single block taller than a page, such
+  as a very long table, gets a page of its own, and its footnotes follow it.
 - **The table of contents has no page numbers.** Its entries are links,
   which still work in the PDF.
 - **Copying from the PDF:** Hebrew and English words copy in reading order.
