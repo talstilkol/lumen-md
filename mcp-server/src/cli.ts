@@ -17,7 +17,7 @@
  *   lumen mcp approve <id>|--client c  show each diff, ask, write (TTY only)
  *   lumen mcp reject <id>|--all        drop them
  *   lumen mcp log [--limit n]          the ledger
- *   lumen mcp serve [--client id]      the MCP server on stdio
+ *   lumen mcp serve [--client id] [--http [port]]   the MCP server on stdio, or Streamable HTTP on 127.0.0.1
  *
  * The vault is `--vault <dir>`, else $LUMEN_VAULT, else the current folder.
  * `new`, `append` and `daily` are you at your terminal, so they write
@@ -409,6 +409,19 @@ async function runMcp(vault: string, rest: string[], flags: Record<string, strin
     }
     case "serve": {
       // Not a static import: the stdio loop is only needed by `serve`.
+      if (flags.http !== undefined) {
+        // W11.I8: Streamable HTTP on 127.0.0.1 (default port 3917).
+        const port = flags.http === "true" || flags.http === "" ? 3917 : Number(flags.http);
+        if (!Number.isInteger(port) || port < 1 || port > 65535) {
+          io.err("lumen mcp serve --http [port]: the port must be 1–65535");
+          return 2;
+        }
+        const httpSpec = "./http.js";
+        const http = (await import(httpSpec)) as { serveHttp: (vault: string, port: number, client?: string) => Promise<{ once(e: "close", f: () => void): void }> };
+        const server = await http.serveHttp(vault, port, flags.client || io.env.LUMEN_MCP_CLIENT);
+        await new Promise<void>((resolve) => server.once("close", resolve));
+        return 0;
+      }
       const spec = "./server.js";
       const mod = (await import(spec)) as { serveStdio: (vault: string, client?: string) => Promise<void> };
       await mod.serveStdio(vault, flags.client || io.env.LUMEN_MCP_CLIENT);
