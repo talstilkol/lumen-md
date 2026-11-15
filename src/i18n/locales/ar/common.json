@@ -1205,6 +1205,8 @@
   "ink.title": "كتابة يدوية",
   "ink.undo": "تراجع",
   "ink.updated": "حُدّثت الكتابة اليدوية.",
+  "israeliTime.academic.inBreak": "في العطلة الأكاديمية ({name}): المقترح {date}",
+  "israeliTime.academic.inExams": "خلال فترة الامتحانات: {exams}",
   "israeliTime.dayOff": "يقع في {reason}",
   "israeliTime.dueToday": "مستحق اليوم",
   "israeliTime.left.one": "أيام العمل المتبقية: {n}",

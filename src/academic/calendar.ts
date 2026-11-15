@@ -133,6 +133,37 @@ export function deadlineInBreak(day: GDay, c: AcademicYear, opts: TimeOptions): 
   return { name: brk.name, suggestion: adjustDeadline(after, { ...opts, move: "next" }).due };
 }
 
+/**
+ * Why a deadline's day is unusual in the academic year (W10.C27): inside a
+ * break (with the day to move it to) or inside an exam period (which one).
+ * Null for an ordinary teaching day, outside the year, or an unverified file.
+ */
+export type AcademicDeadline =
+  | { kind: "break"; name: string; suggestion: GDay }
+  | { kind: "exams"; semester: SemesterId; moed: Moed };
+
+export function academicDeadline(day: GDay, c: AcademicYear, opts: TimeOptions): AcademicDeadline | null {
+  const brk = deadlineInBreak(day, c, opts);
+  if (brk) return { kind: "break", ...brk };
+  if (!c.verified) return null;
+  const f = fixedOf(day);
+  const ex = c.exams.find((e) => within(f, e));
+  return ex ? { kind: "exams", semester: ex.semester, moed: ex.moed } : null;
+}
+
+/** The words for an exam period and a semester ("מועד א׳ · סמסטר א׳" / "Moed A, semester A"). */
+export function examsLabel(semester: SemesterId, moed: Moed, lang: "he" | "en"): string {
+  return lang === "he" ? `${MOED_HE[moed]} · ${SEM_HE[semester]}` : `${MOED_EN[moed]}, ${SEM_EN[semester]}`;
+}
+
+/** Student mode (W10.C27): "שבוע 6 בסמסטר א׳" for a teaching day; empty outside the semesters or for an unverified file. */
+export function semesterWeekLine(day: GDay, c: AcademicYear, lang: "he" | "en" = "he"): string {
+  if (!c.verified) return "";
+  const pos = weekOfSemester(day, c);
+  if (!pos) return "";
+  return lang === "he" ? `שבוע ${pos.week} ב${SEM_HE[pos.semester]} · ${c.label}` : `week ${pos.week} of ${SEM_EN[pos.semester]} · ${c.label}`;
+}
+
 /** Student mode (W5.13): the exam periods of a course's semester. */
 export function examsForSemester(semester: SemesterId, c: AcademicYear): Array<Range & { moed: Moed }> {
   return c.exams.filter((e) => e.semester === semester).map(({ start, end, moed }) => ({ start, end, moed }));

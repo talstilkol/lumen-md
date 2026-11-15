@@ -1205,6 +1205,8 @@
   "ink.title": "Рукописный ввод",
   "ink.undo": "Отменить",
   "ink.updated": "Рукописный фрагмент обновлён.",
+  "israeliTime.academic.inBreak": "В академические каникулы ({name}): предлагается {date}",
+  "israeliTime.academic.inExams": "Во время сессии: {exams}",
   "israeliTime.dayOff": "Выпадает на {reason}",
   "israeliTime.dueToday": "Срок сегодня",
   "israeliTime.left.one": "Остался {n} рабочий день",
