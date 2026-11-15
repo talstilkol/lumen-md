@@ -196,3 +196,23 @@ the heads origin has, tasks, pushes, what it waits on, the next step), and a
 resumed lane starts with `node scripts/lane-state.mjs resume <STATE.md>`,
 which says per branch whether to push, open a PR, or push nothing. The
 template and the resume steps are in [lane-state.md](lane-state.md).
+## Leases, claims and merge rules (plan R12.13)
+
+For six sessions at once, three small tools in `scripts/lanes/` turn the
+conflict groups above into checks:
+
+- **Leases.** Before a session starts, the coordinator writes its lane's globs
+  into `plan/LEASES.json` (`lanes.<id>.globs`; `shared` lists files every lane
+  may touch). With `LUMEN_LANE=<id>` set and the hook on
+  (`git config core.hooksPath .githooks`), a commit that stages a file outside
+  the lease is refused, with the reason in Hebrew and English.
+  `node scripts/lanes/leases.mjs lint` reports two lanes holding the same path.
+- **Claims.** `node scripts/lanes/claims.mjs claim <task>` before working on a
+  plan task; a second session gets "already claimed by …" and picks another.
+  Claims live in the common git directory, shared by every worktree, never
+  committed.
+- **Merge rules.** `node scripts/lanes/merge-driver.mjs --install` once per
+  checkout. `.gitattributes` sends the files listed in `plan/LEASES.json`
+  `merge` to it: a lane's status file takes the lane's side, a generated file
+  keeps the train's side and is rebuilt afterwards (`regen`), a sorted list is
+  merged as the sorted union. Without the driver, git merges as before.
