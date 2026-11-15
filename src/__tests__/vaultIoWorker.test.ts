@@ -204,3 +204,28 @@ describe("the worker's answers (W11.Q10)", () => {
     expect(leftovers(full.files.keys())).toEqual([]);
   });
 });
+
+describe("persistent storage after the first saved note (W11.Q10)", () => {
+  it("asks navigator.storage.persist() once, after the first save, and never again", async () => {
+    const { afterFirstSave } = await import("../storage/vault/opfs");
+    const calls: string[] = [];
+    const nav = globalThis.navigator as unknown as { storage?: unknown };
+    const had = Object.getOwnPropertyDescriptor(globalThis.navigator, "storage");
+    Object.defineProperty(globalThis.navigator, "storage", {
+      configurable: true,
+      value: { persisted: async () => false, persist: async () => (calls.push("persist"), true) },
+    });
+    try {
+      const kv = new Map<string, string>();
+      const store = { getItem: (k: string) => kv.get(k) ?? null, setItem: (k: string, v: string) => void kv.set(k, v) };
+      await afterFirstSave(store);
+      await afterFirstSave(store);
+      await afterFirstSave(store);
+      expect(calls).toEqual(["persist"]);
+      expect([...kv.keys()]).toEqual(["lumen.storage.persistAskedAfterFirstSave"]);
+    } finally {
+      if (had) Object.defineProperty(globalThis.navigator, "storage", had);
+      else delete nav.storage;
+    }
+  });
+});
