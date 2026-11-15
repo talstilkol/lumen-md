@@ -57,6 +57,11 @@ const yWebsocketInstalled = existsSync(
   path.resolve(__dirname, "node_modules/y-websocket"),
 );
 
+// Plan W1.3 (W10.E77): Temml renders math when it is installed (it comes as an
+// optional dependency); otherwise `temml` is a null stub, and KaTeX renders it
+// (src/renderer/temmlCore.ts).
+const temmlInstalled = existsSync(path.resolve(__dirname, "node_modules/temml/package.json"));
+
 /**
  * The en-US Hunspell files of dictionary-en, for the English spelling
  * checker (plan 6.10). The package's own entry reads them with node:fs and
@@ -593,6 +598,7 @@ export default defineConfig({
       // bare `npm install` (most users, all CI runs) doesn't crash on
       // the unresolved import. In test mode the test-level vi.mock
       // overrides whichever resolution wins here.
+      ...(temmlInstalled ? {} : { temml: path.resolve(__dirname, "src/__tests__/stubs/temml.ts") }),
       ...(yWebsocketInstalled
         ? {}
         : {
