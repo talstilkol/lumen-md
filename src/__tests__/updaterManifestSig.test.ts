@@ -174,7 +174,7 @@ describe("the app does not trust the manifest (W11.S2)", () => {
       snapshot[f] = cap.permissions.map((p) => (typeof p === "string" ? p : p.identifier));
     }
     expect(snapshot).toEqual({
-      "default.json": ["core:default", "dialog:default", "core:window:allow-show", "core:window:allow-unminimize", "core:window:allow-set-focus", "deep-link:default"],
+      "default.json": ["core:default", "dialog:default", "core:window:allow-show", "core:window:allow-unminimize", "core:window:allow-set-focus", "deep-link:default", "global-shortcut:allow-register", "global-shortcut:allow-unregister"],
     });
     expect(Object.values(snapshot).flat().filter((p) => /^(updater|shell|fs|http):/.test(p))).toEqual([]);
   });

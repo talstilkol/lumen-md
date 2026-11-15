@@ -316,7 +316,7 @@ describe("the signed report and promote-main", () => {
 });
 
 describe("the Buildkite pipeline runs the shards and the report", () => {
-  const ci = () => parse(readFileSync(".github/workflows/ci.yml", "utf8"), { uniqueKeys: false });
+  const ci = () => parse(readFileSync("docs/archive/workflows/ci.yml", "utf8"), { uniqueKeys: false });
   it("e2e-shards runs E2E_SHARDS jobs of e2e-gate --full; e2e-receipt merges them for this hash", () => {
     const committed = parse(readFileSync(".buildkite/pipeline.yml", "utf8")) as { steps: Step[] };
     const shards = committed.steps.find((s) => s.key === "e2e-shards");

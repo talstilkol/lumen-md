@@ -258,7 +258,7 @@ describe("pr:check", () => {
       const comment = (r: object) => "Review\n\n```lumen-review\n" + JSON.stringify(r) + "\n```\n";
       const pr = (bodies: string[]) => () => ({ number: 9, labels: [], author: "a", headSha: head, headDate: "2026-11-12T09:00:00Z", reviews: [], events: [], comments: bodies.map((body, i) => ({ id: i + 1, user: "rev", association: "OWNER", body })) });
       const section = (o: Record<string, unknown>, extra: string[] = []) =>
-        runChecks({ ...parseArgs(["--cwd", r0.dir, "--base", base, "--no-size", ...(o.pr ? ["--pr", "9"] : []), ...extra]), ...o }).sections.find((s: { title: string }) => s.title === "Independent review of sensitive paths");
+        runChecks({ ...parseArgs(["--cwd", r0.dir, "--base", base, "--no-size", ...(o.pr ? ["--pr", "9"] : []), ...extra]), loadOpenPrs: () => [], ...o }).sections.find((s: { title: string }) => s.title === "Independent review of sensitive paths");
       expect(section({}).status).toBe("warn");
       expect(section({ pr: "9", loadPr: pr([]) }).status).toBe("fail");
       expect(section({ pr: "9", loadPr: pr([comment(receipt())]) }).status).toBe("ok");
@@ -334,7 +334,7 @@ describe("pr:check", () => {
       );
       writeFileSync(join(r0.dir, "self.json"), JSON.stringify(self));
       const loadPr = () => ({ number: 9, labels: [], author: "talstilkol", headSha: head, headDate: "2026-11-15T04:00:00Z", reviews: [], events: [], comments: [] });
-      const out = runChecks({ ...parseArgs(["--cwd", r0.dir, "--base", base, "--no-size", "--pr", "9", "--review", join(r0.dir, "self.json")]), loadPr });
+      const out = runChecks({ ...parseArgs(["--cwd", r0.dir, "--base", base, "--no-size", "--pr", "9", "--review", join(r0.dir, "self.json")]), loadOpenPrs: () => [], loadPr });
       const s = out.sections.find((x: { title: string }) => x.title === "Independent review of sensitive paths");
       expect(s.status).toBe("fail");
       expect(s.lines.join("\n")).toMatch(/reviewer independent-bot is not in security\/reviewers.json/);
@@ -342,12 +342,12 @@ describe("pr:check", () => {
       // The same receipt signed by a reviewer the base already trusts does count.
       const good = signReceipt({ ...self, reviewer: "S", signature: undefined }, honest.privatePem);
       writeFileSync(join(r0.dir, "good.json"), JSON.stringify(good));
-      const ok = runChecks({ ...parseArgs(["--cwd", r0.dir, "--base", base, "--no-size", "--pr", "9", "--review", join(r0.dir, "good.json")]), loadPr });
+      const ok = runChecks({ ...parseArgs(["--cwd", r0.dir, "--base", base, "--no-size", "--pr", "9", "--review", join(r0.dir, "good.json")]), loadOpenPrs: () => [], loadPr });
       expect(ok.sections.find((x: { title: string }) => x.title === "Independent review of sensitive paths").status).toBe("ok");
       // Nor can the PR make a path non-sensitive by dropping it from CODEOWNERS: the base's entries still apply.
       writeFileSync(join(r0.dir, ".github/CODEOWNERS"), "/docs/ @talstilkol\n");
       execFileSync("git", ["-c", "user.name=lane-A", "-c", "user.email=a@x", "commit", "-qam", "chore: owners [skip ci]"], { cwd: r0.dir });
-      const dropped = runChecks({ ...parseArgs(["--cwd", r0.dir, "--base", base, "--no-size", "--pr", "9"]), loadPr: () => ({ ...loadPr(), headSha: r0.git("rev-parse", "HEAD").trim() }) });
+      const dropped = runChecks({ ...parseArgs(["--cwd", r0.dir, "--base", base, "--no-size", "--pr", "9"]), loadOpenPrs: () => [], loadPr: () => ({ ...loadPr(), headSha: r0.git("rev-parse", "HEAD").trim() }) });
       expect(dropped.sections.find((x: { title: string }) => x.title === "Independent review of sensitive paths").status).toBe("fail");
     } finally {
       r0.done();
