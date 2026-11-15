@@ -127,6 +127,7 @@
     "help:bundle": "node scripts/help-bundle.mjs",
     "registry:site": "node scripts/registry-site.mjs",
     "plugins:review": "node scripts/plugins/review.mjs",
+    "themes:rtl": "node scripts/themes/rtl-check.mjs",
     "registry:verify": "node scripts/registry-site.mjs --verify",
     "help:check": "node scripts/help-bundle.mjs --check",
     "help:merge-driver": "node scripts/help-merge-driver.mjs --install",

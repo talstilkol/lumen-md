@@ -1,0 +1,29 @@
+/* Sepia — warm paper for long reading. Logical properties only, so it reads the same in Hebrew and English. */
+:root {
+  --bg: 40 40% 96%;
+  --bg-subtle: 40 35% 93%;
+  --bg-muted: 38 30% 90%;
+  --fg: 30 25% 14%;
+  --fg-subtle: 30 18% 30%;
+  --fg-muted: 30 14% 36%;
+  --accent: 18 70% 36%;
+  --accent-fg: 40 40% 98%;
+}
+.dark {
+  --bg: 30 18% 10%;
+  --bg-muted: 30 14% 15%;
+  --fg: 38 30% 88%;
+  --fg-subtle: 38 18% 72%;
+  --fg-muted: 38 12% 62%;
+  --accent: 28 80% 62%;
+  --accent-fg: 30 18% 10%;
+}
+.prose-lumen blockquote {
+  border-inline-start: 3px solid hsl(var(--accent));
+  padding-inline-start: 1em;
+  margin-inline: 0;
+}
+.prose-lumen ul,
+.prose-lumen ol {
+  padding-inline-start: 1.5em;
+}
