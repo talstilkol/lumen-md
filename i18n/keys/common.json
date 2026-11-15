@@ -7793,6 +7793,11 @@
       "vars": []
     },
     {
+      "key": "models.purpose.nerEn",
+      "en": "Finding names, places and organisations in English text",
+      "vars": []
+    },
+    {
       "key": "models.purpose.nerHe",
       "en": "Finding names, places and organisations in Hebrew text",
       "vars": []
@@ -9082,6 +9087,11 @@
       ]
     },
     {
+      "key": "pii.preview.noNames",
+      "en": "Names are not hidden: no name finder on this device (no name model, and Ollama is not running).",
+      "vars": []
+    },
+    {
       "key": "pii.preview.none",
       "en": "No personal data was found.",
       "vars": []
@@ -9098,7 +9108,7 @@
     },
     {
       "key": "pii.settings.hint",
-      "en": "E-mails, phone numbers, ID numbers, cards, IBANs, plates and birth dates are replaced with tokens such as ⟨EMAIL_1⟩ on this device, and put back in the answer. Names too when the Hebrew name model is downloaded.",
+      "en": "E-mails, phone numbers, ID numbers, cards, IBANs, plates and birth dates are replaced with tokens such as ⟨EMAIL_1⟩ on this device, and put back in the answer. Names too, but only when a name finder is on this device (a downloaded name model, or Ollama running here); otherwise the preview says that names are not hidden.",
       "vars": []
     },
     {
