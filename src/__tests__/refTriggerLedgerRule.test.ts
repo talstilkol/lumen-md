@@ -22,8 +22,12 @@ describe("refTrigger.ts and the privacy-ledger rule", () => {
     expect(unregisteredNetworkCalls(added, LEDGER)).toEqual([]);
   });
 
-  it("the rule still flags the old wording, so the fix is in the comment and not in the rule", () => {
+  it("the rule passes the old wording as prose (W10.D17 on the train) and still flags the same shape in code", () => {
+    // Since W10.D17 the rule skips comments, so the old doc comment no longer fails pr:check either;
+    // the call shape outside a comment still does, so the rule itself is not weaker.
     const old = "  /** Insert was chosen: fetch (with consent given by the click) and replace the typed reference. */";
-    expect(unregisteredNetworkCalls({ [FILE]: [{ line: 93, text: old, before: [] }] }, LEDGER)).toHaveLength(1);
+    expect(unregisteredNetworkCalls({ [FILE]: [{ line: 93, text: old, before: [] }] }, LEDGER)).toEqual([]);
+    const code = "  await fetch(target, { signal }); // replace the typed reference";
+    expect(unregisteredNetworkCalls({ [FILE]: [{ line: 93, text: code, before: [] }] }, LEDGER)).toHaveLength(1);
   });
 });

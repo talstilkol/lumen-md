@@ -89,7 +89,8 @@ describe("scripts/mutation/calibrate.mjs (W11.Q9)", () => {
     const src = "export const a = 1;\n";
     const sha = createHash("sha256").update(src).digest("hex");
     const tests = createHash("sha256").update("").digest("hex");
-    const receipt = { modules: { "src/a.ts": { score: 90, sha256: sha, tests, date: "2026-11-15" } } };
+    // A measured receipt (real vitest over every mutant): the train's gate counts anything else as an estimate.
+    const receipt = { modules: { "src/a.ts": { score: 90, sha256: sha, tests, date: "2026-11-15", runner: "vitest", sampled: 10, mutants: 10 } } };
     const rd = (p: string) => (p === "src/a.ts" ? src : null);
     expect(checkReceipt(t, receipt, rd)[0]).toMatchObject({ state: "ok", score: 90 });
     expect(checkReceipt(t, receipt, rd)[0].verified).toBeUndefined();
