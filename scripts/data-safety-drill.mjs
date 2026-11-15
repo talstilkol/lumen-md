@@ -100,7 +100,7 @@ const randomBody = (max = 3000) => "שלום עולם, hello world. ".repeat(1 +
 // ── Loading the save paths from this checkout ────────────────────────────
 
 /** Bundle a module of src/ for Node, with only the pieces a backend needs. */
-async function bundle(entry, outFile) {
+async function bundle(entry, outFile, format = "esm") {
   // The saving processes load what the drill built.
   if (args[0] === "--child") return outFile;
   const { build } = await import("esbuild");
@@ -108,7 +108,7 @@ async function bundle(entry, outFile) {
   await build({
     entryPoints: [join(repo, entry)],
     bundle: true,
-    format: "esm",
+    format,
     platform: "node",
     outfile: outFile,
     logLevel: "error",
@@ -234,6 +234,9 @@ async function loadPaths(work) {
   });
   // W10.E40: the OPFS and desktop paths run the shipped modules, not ports (scripts/drill/).
   if (atomicMod) {
+    // W11.Q10 (#856): writes and reads go to a module worker, `new URL("./vault-io.worker.ts", import.meta.url)`;
+    // next to the bundled opfs.mjs that URL names the worker built here (one script, run as the worker's source).
+    await bundle("src/storage/vault/vault-io.worker.ts", join(work, "vault-io.worker.ts"), "iife");
     const opfs = await import(pathToFileURL(await bundle("src/storage/vault/opfs.ts", join(work, "opfs.mjs"))).href);
     paths.push(opfsSyncPath(opfs, atomicMod));
   }
