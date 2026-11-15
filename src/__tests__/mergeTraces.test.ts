@@ -18,6 +18,7 @@ import { mergeText } from "../sync/merge/textMerge";
 import {
   ACCEPT,
   ConcurrentReplay,
+  GATE,
   PRIMARY_WINDOW,
   accepted,
   classify,
@@ -32,6 +33,7 @@ import {
   replay,
   sha256,
   tally,
+  verdict,
   type Patch,
 } from "../../scripts/bench/merge-traces-lib";
 
@@ -187,6 +189,46 @@ describe("counting", () => {
   });
 });
 
+describe("the W11.S7 gate (coordinator decision, 15.11)", () => {
+  // Synthetic pairs again: an independent one, and a dependent one (its second
+  // window deletes text only the first window had).
+  const ind = makePair("s", 0, 1, chars("one\ntwo\n"), [[[3, 0, "!"]]], [[[8, 0, "?"]]]);
+  const dep = makePair("s", 0, 1, chars("ab\n"), [[[1, 0, "XY"]]], [[[2, 1, ""]]]);
+  const dropOne = () => ({ clean: true, text: "x" });
+  const asks = () => ({ clean: false, text: "" });
+  const good = tally([ind], [classify(ind, mergeText)]);
+
+  it("is frozen: real pairs ≥ 90 % merged, 0 lost on every pair kind, the split's rate not gated", () => {
+    expect(GATE).toEqual({ realMergedRate: 0.9, lostOnEveryPairKind: 0, splitMergedRateGated: false });
+    expect(Object.isFrozen(GATE)).toBe(true);
+  });
+
+  it("the split's merged rate does not gate: a split where every pair asks still passes", () => {
+    const split = tally([ind, dep], [classify(ind, asks), classify(dep, asks)]);
+    expect(split).toMatchObject({ mergedRate: 0, lostChars: 0, dependentLostChars: 0 });
+    expect(verdict(good, [split]).met).toBe(true);
+  });
+
+  it("the real pairs' merged rate gates", () => {
+    const real = tally([ind, ind], [classify(ind, mergeText), classify(ind, asks)]);
+    expect(real.mergedRate).toBe(0.5);
+    expect(verdict(real, []).met).toBe(false);
+    expect(verdict(tally([], []), []).met).toBe(false);
+  });
+
+  it("a character lost on ANY pair kind fails it: real, split independent, and split dependent (not only reported apart)", () => {
+    const lostReal = tally([ind], [classify(ind, dropOne)]);
+    expect(verdict(lostReal, []).met).toBe(false);
+    const lostInd = tally([ind], [classify(ind, dropOne)]);
+    expect(verdict(good, [lostInd])).toMatchObject({ met: false, lost: { real: 0, splitIndependent: lostInd.lostChars, splitDependent: 0 } });
+    const lostDep = tally([dep], [classify(dep, dropOne)]);
+    expect(lostDep.lostChars).toBe(0); // the old per-tally count left it out …
+    expect(lostDep.dependentLostChars).toBeGreaterThan(0);
+    expect(verdict(good, [lostDep])).toMatchObject({ met: false, pairsWithLoss: 1 }); // … the gate does not
+    expect(verdict(good, [good, tally([dep], [classify(dep, asks)])]).met).toBe(true);
+  });
+});
+
 describe("the manifest and the committed results", () => {
   const manifest = JSON.parse(readFileSync("bench/merge-traces/manifest.json", "utf8")) as { sets: Array<{ id: string; repo: string; commit: string; format: string; files: Array<{ path: string; sha256: string; bytes: number }> }> };
 
@@ -211,5 +253,12 @@ describe("the manifest and the committed results", () => {
     expect(r.real.accepted).toBe(r.real.total.mergedRate >= ACCEPT.mergedRate && r.real.total.lostChars <= ACCEPT.lost);
     expect(r.split.accepted).toBe(r.split.primary.mergedRate >= ACCEPT.mergedRate && r.split.primary.lostChars <= ACCEPT.lost);
     expect(r.split.primaryWindow).toBe(PRIMARY_WINDOW);
+    // The gate's verdict, recomputed from the committed tallies: every window, every set.
+    expect(r.real.gated).toBe(true);
+    expect(r.split.gated).toBe(false);
+    expect(r.gate).toMatchObject(GATE);
+    const splits = Object.values(r.split.byWindow as Record<string, { bySet: Record<string, Parameters<typeof verdict>[0]> }>).flatMap((w) => Object.values(w.bySet));
+    expect(Object.keys(r.split.byWindow)).toEqual([`W${PRIMARY_WINDOW}`, "W50", "W1000"]);
+    expect(r.verdict).toEqual(verdict(r.real.total, splits));
   });
 });

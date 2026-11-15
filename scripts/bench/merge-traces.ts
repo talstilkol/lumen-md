@@ -18,9 +18,15 @@
  *   … --out bench/merge-traces/results.json          write the numbers there
  *   … --pairs 100 --window 200                       override the split's defaults
  *
+ * The gate (coordinator decision, 15.11; GATE in merge-traces-lib.ts): the
+ * real concurrent pairs merge without a dialog in ≥ 90 %, and zero
+ * characters are lost on every pair kind (real, and split at every window
+ * and set, dependent pairs included). The split's merged rate is reported,
+ * not gated.
+ *
  * Exit 2 when a file is missing, its sha256 differs or a replay does not
- * reach the trace's endContent; otherwise 0 (the acceptance verdict of each
- * measurement is printed and written, not turned into an exit code).
+ * reach the trace's endContent; otherwise 0 (the verdict is printed and
+ * written as `verdict`, not turned into an exit code).
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
@@ -30,6 +36,7 @@ import { mergeText } from "../../src/sync/merge/textMerge";
 import {
   ACCEPT,
   ConcurrentReplay,
+  GATE,
   PAIRS_PER_TRACE,
   PRIMARY_WINDOW,
   SENSITIVITY_WINDOWS,
@@ -44,6 +51,7 @@ import {
   replay,
   sha256,
   tally,
+  verdict,
   type Outcome,
   type Pair,
   type Tally,
@@ -133,18 +141,22 @@ async function main(argv: string[]) {
   }
 
   const splitPrimary = split[`W${PRIMARY_WINDOW}`]?.bySet["editing-traces"] ?? null;
+  const v = verdict(realTotal, Object.values(split).flatMap((w) => Object.values(w.bySet)));
   const out = {
     measured: new Date().toISOString().slice(0, 10),
     engine: "src/sync/merge/textMerge.ts mergeText",
     acceptance: ACCEPT,
-    real: { method: "concurrent_traces: each transaction with two parents; base = meet of the parents' versions, expected = their join", total: realTotal, accepted: accepted(realTotal), perTrace: real },
-    split: { method: `sequential traces: ${pairsPer} checkpoints per trace, evenly spaced; two consecutive windows of W transactions`, primaryWindow: PRIMARY_WINDOW, primary: splitPrimary, accepted: splitPrimary ? accepted(splitPrimary) : false, byWindow: split },
+    gate: { ...GATE, about: "W11.S7 gates the real concurrent pairs' merged rate (≥ 90 %) and 0 characters lost on every pair kind, dependent split pairs included; the split's merged rate is reported, not gated (coordinator decision, 15.11)" },
+    verdict: v,
+    real: { method: "concurrent_traces: each transaction with two parents; base = meet of the parents' versions, expected = their join", gated: true, total: realTotal, accepted: accepted(realTotal), perTrace: real },
+    split: { method: `sequential traces: ${pairsPer} checkpoints per trace, evenly spaced; two consecutive windows of W transactions`, primaryWindow: PRIMARY_WINDOW, primary: splitPrimary, gated: false, accepted: splitPrimary ? accepted(splitPrimary) : false, byWindow: split },
     traces: manifestPath.replace(`${root}/`, ""),
   };
   const outFile = opt("out");
   if (outFile) writeFileSync(outFile, JSON.stringify(out, null, 2) + "\n");
   console.log(`\nreal concurrent pairs: ${pct(realTotal)} → ${out.real.accepted ? "meets" : "does NOT meet"} ≥ ${100 * ACCEPT.mergedRate} % and ${ACCEPT.lost} lost`);
-  if (splitPrimary) console.log(`split, editing-traces, W=${PRIMARY_WINDOW}: ${pct(splitPrimary)} → ${out.split.accepted ? "meets" : "does NOT meet"} ≥ ${100 * ACCEPT.mergedRate} % and ${ACCEPT.lost} lost`);
+  if (splitPrimary) console.log(`split, editing-traces, W=${PRIMARY_WINDOW}: ${pct(splitPrimary)} (reported, not gated)`);
+  console.log(`W11.S7 gate (real ≥ ${100 * GATE.realMergedRate} % merged; 0 lost on every pair kind): ${v.met ? "MET" : "NOT met"}; lost real ${v.lost.real}, split independent ${v.lost.splitIndependent}, split dependent ${v.lost.splitDependent} (${v.pairsWithLoss} pairs)`);
   return 0;
 }
 

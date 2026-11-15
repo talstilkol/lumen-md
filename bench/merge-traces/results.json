@@ -1,12 +1,29 @@
 {
-  "measured": "2026-11-14",
+  "measured": "2026-11-15",
   "engine": "src/sync/merge/textMerge.ts mergeText",
   "acceptance": {
     "mergedRate": 0.9,
     "lost": 0
   },
+  "gate": {
+    "realMergedRate": 0.9,
+    "lostOnEveryPairKind": 0,
+    "splitMergedRateGated": false,
+    "about": "W11.S7 gates the real concurrent pairs' merged rate (≥ 90 %) and 0 characters lost on every pair kind, dependent split pairs included; the split's merged rate is reported, not gated (coordinator decision, 15.11)"
+  },
+  "verdict": {
+    "realMergedRate": 0.9979612640163099,
+    "lost": {
+      "real": 0,
+      "splitIndependent": 0,
+      "splitDependent": 59
+    },
+    "pairsWithLoss": 4,
+    "met": false
+  },
   "real": {
     "method": "concurrent_traces: each transaction with two parents; base = meet of the parents' versions, expected = their join",
+    "gated": true,
     "total": {
       "pairs": 5886,
       "merged": 5874,
@@ -74,6 +91,7 @@
       "dependentPairsWithLoss": 3,
       "mergedRate": 0.10375
     },
+    "gated": false,
     "accepted": false,
     "byWindow": {
       "W200": {

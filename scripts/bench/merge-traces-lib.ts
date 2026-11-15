@@ -306,8 +306,53 @@ export function tally(pairs: readonly Pair[], outcomes: readonly Outcome[]): Tal
   };
 }
 
-/** Does a tally meet W11.S7's acceptance? */
+/** Does a tally meet ≥ 90 % merged and 0 lost (independent pairs) on its own? Reported per measurement. */
 export const accepted = (t: Tally) => t.pairs > 0 && t.mergedRate >= ACCEPT.mergedRate && t.lostChars <= ACCEPT.lost;
+
+/* ─── the gate (coordinator decision for W11.S7, 15.11) ──────────────── */
+
+/**
+ * What W11.S7's acceptance gates, as the coordinator decided it:
+ *
+ *   1. the REAL concurrent pairs (concurrent_traces) merge without a dialog
+ *      in ≥ 90 % (ACCEPT.mergedRate);
+ *   2. zero characters are lost on EVERY pair kind: the real pairs, and the
+ *      split pairs at every window and in every set, dependent pairs
+ *      included (a clean merge that drops a character is a bug whatever the
+ *      pair, so dependentLostChars counts here too). This is an invariant.
+ *
+ * The split's merged rate (10.4 % at W = 200) is reported, not gated: one
+ * author's two consecutive windows are mostly dependent by construction.
+ */
+export const GATE = Object.freeze({
+  realMergedRate: ACCEPT.mergedRate,
+  lostOnEveryPairKind: ACCEPT.lost,
+  splitMergedRateGated: false,
+});
+
+export interface Verdict {
+  realMergedRate: number;
+  /** Characters lost in clean merges, by pair kind. */
+  lost: { real: number; splitIndependent: number; splitDependent: number };
+  /** Pairs with a loss, every kind together. */
+  pairsWithLoss: number;
+  met: boolean;
+}
+
+/**
+ * The gate's verdict. `split` is every split tally measured (each window,
+ * each set); the real total alone carries the merged-rate gate.
+ */
+export function verdict(real: Tally, split: readonly Tally[]): Verdict {
+  const lost = {
+    real: real.lostChars + real.dependentLostChars,
+    splitIndependent: split.reduce((s, t) => s + t.lostChars, 0),
+    splitDependent: split.reduce((s, t) => s + t.dependentLostChars, 0),
+  };
+  const pairsWithLoss = real.pairsWithLoss + real.dependentPairsWithLoss + split.reduce((s, t) => s + t.pairsWithLoss + t.dependentPairsWithLoss, 0);
+  const allLost = lost.real + lost.splitIndependent + lost.splitDependent;
+  return { realMergedRate: real.mergedRate, lost, pairsWithLoss, met: real.pairs > 0 && real.mergedRate >= GATE.realMergedRate && allLost <= GATE.lostOnEveryPairKind };
+}
 
 /* ─── real concurrent pairs (concurrent_traces) ──────────────────────── */
 
