@@ -3,12 +3,12 @@
  * into a note — once the user allowed it.
  *
  * The app's own policy has no `https:` in img-src / media-src and frame-src
- * is 'self' alone. An image, video or audio file from another site, an embed
- * (the embed block, a raw <iframe> in a note) and a GitHub Gist render
- * instead inside /content-frame.html (public/content-frame.html + .js): a
- * same-origin page with its own policy (security/policy.json, route
- * content-frame), which allows https: images and media and the embed
- * providers' frames, and nothing else.
+ * is 'self' alone. An image, video or audio file from another site and an
+ * embed (the embed block, a raw <iframe> in a note) render instead inside
+ * /content-frame.html (public/content-frame.html + .js): a same-origin page
+ * with its own policy (security/policy.json, route content-frame), which
+ * allows https: images and media and the embed providers' frames, and no
+ * third-party script. A GitHub Gist is a link (W10.D2).
  *
  * Nothing here decides *whether* something may load: the callers render
  * the remote-content placeholder until the user allows it
@@ -84,24 +84,29 @@ export type ContentFrameRequest =
   | { kind: "gist"; user: string; id: string };
 
 /**
- * Sandbox flags per kind. Images, media and Gists get an opaque origin
- * (no allow-same-origin): nothing in them can reach the app — a Gist is
- * GitHub's script writing into the page. Embeds keep the flags the embed
- * block always gave the provider's frame: a nested frame inherits its
- * parent's sandbox, and the providers need their own origin (storage,
- * cookies, a referrer) to play. Only the content frame's own script runs
- * at the app's origin there, and it builds elements, never HTML.
- * Embeds get allow-popups (a provider's "Watch on YouTube" link): airplane
- * mode's frame guard takes it away while the switch is on, and at the switch
- * counts a frame that had it as a window that may have reached the network
+ * The flags an embed's content frame gets: the ones the embed block always
+ * gave the provider's frame, which inherits them.
+ * allow-popups is for a provider's "Watch on YouTube" link: airplane mode's
+ * frame guard takes it away while the switch is on, and at the switch counts
+ * a frame that had it as a window that may have reached the network
  * (review 8 of #451, RR8-451-2).
  */
+export const EMBED_SANDBOX = "allow-scripts allow-same-origin allow-popups allow-presentation allow-forms";
+
+/**
+ * Sandbox flags of the content frame per kind. Images and media get an
+ * opaque origin (no allow-same-origin). An embed keeps EMBED_SANDBOX only on
+ * the frame site (W6.40: the origin it keeps must be the frame site's, never
+ * the app's); without one it is a link (null). A Gist is a link, not a frame
+ * (W10.D2, see createContentFrame).
+ */
 export function contentFrameSandbox(kind: ContentFrameRequest["kind"], frameOrigin: string | null = contentFrameOrigin()): string | null {
-  // W6.40: the origin an embed keeps must be the frame site's, never the app's.
-  if (kind === "embed") return frameOrigin ? "allow-scripts allow-same-origin allow-popups allow-presentation allow-forms" : null;
-  if (kind === "gist") return "allow-scripts";
+  if (kind === "embed") return frameOrigin ? EMBED_SANDBOX : null;
   return "allow-scripts";
 }
+
+/** A Gist's page on GitHub. */
+export const gistUrl = (req: { user: string; id: string }) => `https://gist.github.com/${encodeURIComponent(req.user)}/${encodeURIComponent(req.id)}`;
 
 /**
  * The frame's URL: the page (on the frame site when there is one) plus the
@@ -278,8 +283,23 @@ function embedLink(req: Extract<ContentFrameRequest, { kind: "embed" }>, doc: Do
   return a;
 }
 
-/** A content frame for `req`, ready to insert (the preview and the WYSIWYG editor). */
+/**
+ * What the app inserts for `req` (the preview and the WYSIWYG editor): a
+ * content frame, or a link — for a Gist always (its embed is GitHub's script
+ * document.write()ing into the page, so it never runs in a page of ours,
+ * W10.D2), and for an embed when there is no frame site (W6.40).
+ */
 export function createContentFrame(req: ContentFrameRequest, doc: Document = document): HTMLIFrameElement | HTMLAnchorElement {
+  if (req.kind === "gist") {
+    const a = doc.createElement("a");
+    a.href = gistUrl(req);
+    a.textContent = `gist.github.com/${req.user}/${req.id}`;
+    a.title = frameTitle(req);
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    a.dataset.contentFrame = "gist";
+    return a;
+  }
   const site = contentFrameSite(doc.defaultView?.location.origin);
   const frameOrigin = site?.origin ?? null;
   const sandbox = contentFrameSandbox(req.kind, frameOrigin);
