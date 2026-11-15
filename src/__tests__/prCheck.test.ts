@@ -88,6 +88,34 @@ describe("pr:check", () => {
     }
   });
 
+  it("W10.D20: a snapshot edited with nothing that produces it fails; regenerated with its source, it passes", () => {
+    const r0 = repo();
+    try {
+      mkdirSync(join(r0.dir, "src/__tests__/__snapshots__/render"), { recursive: true });
+      writeFileSync(join(r0.dir, "src/__tests__/__snapshots__/render/doc-a.html"), "<p>a</p>\n");
+      writeFileSync(join(r0.dir, "README.md"), "# A\n");
+      r0.git("add", "-A");
+      r0.git("commit", "-q", "-m", "test: snapshot [skip ci]");
+      // A hand edit: the snapshot moves, nothing that renders it does.
+      writeFileSync(join(r0.dir, "src/__tests__/__snapshots__/render/doc-a.html"), "<p>whatever passes</p>\n");
+      r0.git("add", "-A");
+      r0.git("commit", "-q", "-m", "test: snapshot edit [skip ci]");
+      const edited = runChecks(parseArgs(["--cwd", r0.dir, "--base", "main~1", "--no-size"]));
+      const gate = edited.sections.find((s: { title: string }) => s.title === "Snapshots are regenerated, not edited");
+      expect(gate.status).toBe("fail");
+      expect(gate.lines[0]).toContain("src/__tests__/__snapshots__/render/doc-a.html");
+      expect(edited.failed).toBe(true);
+      // The same snapshot with the document it renders: regenerated, fine.
+      writeFileSync(join(r0.dir, "README.md"), "# A, changed\n");
+      r0.git("add", "-A");
+      r0.git("commit", "-q", "-m", "docs: a [skip ci]");
+      const regenerated = runChecks(parseArgs(["--cwd", r0.dir, "--base", "main~2", "--no-size"]));
+      expect(regenerated.sections.find((s: { title: string }) => s.title === "Snapshots are regenerated, not edited").status).toBe("ok");
+    } finally {
+      r0.done();
+    }
+  });
+
   it("fails a diff that raises a max-lines baseline count or adds a file to it (W6.25), and passes one that lowers it", () => {
     const r0 = repo();
     try {

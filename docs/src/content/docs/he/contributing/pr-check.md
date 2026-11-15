@@ -37,6 +37,12 @@ npm run pr:check -- --base origin/main --body pr-body.md --build-base --out pr-c
 - **רישיונות.** לכל חבילת production שנוספה או השתנתה ב־lockfile יש רישיון
   מותר (לא copyleft, לא לא־מסחרי, ולא חסר).
 - **דומיין.** אף שורה שנוספה לא מזכירה את הדומיין של הפרויקט.
+- **snapshots (משימה W10.D20).** snapshot שהשתנה (`__snapshots__/` של vitest,‏
+  קובץ `.snap`,‏ `<spec>-snapshots/` של Playwright) נכשל, אלא אם השינוי משנה גם
+  את מה שמייצר אותו: קוד המקור של האפליקציה, בדיקה, מסמך קלט (Markdown) או
+  החבילות; לתמונה של Playwright — ה־spec שלה או האפליקציה. snapshot שנערך ביד
+  עובר מה שלא יהיה הקוד, ולכן מייצרים אותו מחדש (`npx vitest run <test> -u`,‏
+  `npx playwright test <spec> --update-snapshots`) באותו PR שמשנה את הפלט.
 - **סקירה אנושית (משימה W4.28).** שינוי בנתיב רגיש — כל נתיב
   ב־`.github/CODEOWNERS`: הצפנה, כתיבה לכספת, יומן הפרטיות, CSP ומדיניות
   אבטחה, הרשאות native — צריך את התווית `human-reviewed`, שאדם הוסיף אחרי
