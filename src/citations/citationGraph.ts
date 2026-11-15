@@ -8,7 +8,11 @@
  *     source (`type: source` with `citekey:`, W12.X2) cites the cited key;
  *  2. links from a source note to another source note (`[[Other]]`);
  *  3. `references:` of an item in a CSL-JSON library (Zotero's export via
- *     Better BibTeX, or what OpenAlex returned): cite keys or DOIs.
+ *     Better BibTeX, or what OpenAlex returned): cite keys or DOIs;
+ *  4. `references:` of a source note (what "Fill references from OpenAlex"
+ *     writes, or typed by hand): cite keys or DOIs. The provenance is the
+ *     note with the property as its anchor (`references`) and the entry
+ *     word for word. A pair a library already gave keeps that edge.
  *
  * Every source is a `source` entity whose id is `source:<citekey>` (or the
  * note's name when it has no key). Every edge carries provenance: the note
@@ -60,7 +64,23 @@ export function citedKeys(text: string): string[] {
   return out;
 }
 
-const normDoi = (v: string): string => v.trim().replace(/^https?:\/\/(dx\.)?doi\.org\//i, "").replace(/^doi:/i, "").toLowerCase();
+const normDoi = (v: string): string => v.trim().replace(/^https?:\/\/(dx\.)?doi\.org\//i, "").replace(/^doi:\s*/i, "").toLowerCase();
+
+/** A source note's own DOI: `doi:` (any case), or a doi.org `url:`. */
+const noteDoi = (fm: Record<string, unknown>): string | undefined => {
+  for (const [k, v] of Object.entries(fm)) {
+    if (typeof v !== "string" || !v.trim()) continue;
+    const key = k.toLowerCase();
+    if (key === "doi" || (key === "url" && /^https?:\/\/(dx\.)?doi\.org\//i.test(v.trim()))) {
+      const d = normDoi(v);
+      if (/^10\.\d{4,9}\/\S+$/.test(d)) return d;
+    }
+  }
+  return undefined;
+};
+
+/** The property whose entries are a source note's references. */
+export const REFERENCES_ANCHOR = "references";
 
 /** Build the citation graph of the vault's source notes and libraries. */
 export function buildCitationGraph(notes: readonly CitingNote[], libraries: readonly CslLibrary[], now = new Date().toISOString()): CitationGraph {
@@ -68,6 +88,7 @@ export function buildCitationGraph(notes: readonly CitingNote[], libraries: read
   const keyToId = new Map<string, string>();
   const doiToId = new Map<string, string>();
   const nameToId = new Map<string, string>();
+  const noteToId = new Map<string, string>();
   const addSource = (key: string, name: string, doi?: string): string => {
     const id = entityId("source", key);
     if (!entities.has(id)) entities.set(id, { id, type: "source", name, aliases: key !== name ? [key] : [] });
@@ -83,8 +104,12 @@ export function buildCitationGraph(notes: readonly CitingNote[], libraries: read
   const sourceNotes = notes.filter((n) => isSource(n.fm));
   for (const n of sourceNotes) {
     const key = typeof n.fm.citekey === "string" && n.fm.citekey.trim() ? n.fm.citekey.trim() : baseName(n.path);
-    const id = keyToId.get(key.toLowerCase()) ?? addSource(key, baseName(n.path));
+    const doi = noteDoi(n.fm);
+    // The same work as a library item: by its cite key, else by its DOI.
+    const id = keyToId.get(key.toLowerCase()) ?? (doi ? doiToId.get(doi) : undefined) ?? addSource(key, baseName(n.path), doi);
+    if (doi && !doiToId.has(doi)) doiToId.set(doi, id);
     nameToId.set(baseName(n.path).toLowerCase(), id);
+    noteToId.set(n.path, id);
   }
 
   const edges = new Map<string, Edge>();
@@ -98,8 +123,7 @@ export function buildCitationGraph(notes: readonly CitingNote[], libraries: read
 
   // 1 and 2: the text of each source note, paragraph by paragraph.
   for (const n of sourceNotes) {
-    const key = typeof n.fm.citekey === "string" && n.fm.citekey.trim() ? n.fm.citekey.trim() : baseName(n.path);
-    const from = keyToId.get(key.toLowerCase())!;
+    const from = noteToId.get(n.path)!;
     for (const p of splitParagraphs(n.body)) {
       if (p.kind === "heading") continue;
       for (const k of citedKeys(p.text)) {
@@ -126,6 +150,19 @@ export function buildCitationGraph(notes: readonly CitingNote[], libraries: read
         else unresolved.push({ from: lib.path, key: r, where: "references" });
       }
     }
+
+  // 4: references: of source notes (after the libraries, so a pair a library gave keeps its edge).
+  for (const n of sourceNotes) {
+    const raw = n.fm.references;
+    const refs = Array.isArray(raw) ? raw : typeof raw === "string" ? [raw] : [];
+    const from = noteToId.get(n.path)!;
+    for (const r of refs) {
+      if (typeof r !== "string" || !r.trim()) continue;
+      const to = keyToId.get(r.trim().toLowerCase()) ?? doiToId.get(normDoi(r));
+      if (to) addEdge(from, to, { note: n.path, anchor: REFERENCES_ANCHOR, quote: r, paragraphHash: paragraphHash(r) });
+      else unresolved.push({ from: n.path, key: r, where: "references" });
+    }
+  }
 
   return { entities: [...entities.values()], edges: [...edges.values()], unresolved };
 }

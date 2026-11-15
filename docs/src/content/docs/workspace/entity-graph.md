@@ -57,7 +57,11 @@ graph shows that as **cites** relations:
   own key is its `citekey:`);
 - a link from one source note to another (`[[Other source]]`);
 - `references:` of an item in your citation library (CSL-JSON, by cite key or
-  DOI).
+  DOI);
+- `references:` of a source note (by cite key or DOI), for example the ones
+  filled from OpenAlex. Such a relation names the note and its `references`
+  property. A source note with the same cite key or DOI as a library item is
+  that item, and a pair the library already gives is shown once.
 
 Plain notes that cite are not sources, so they draw no edge. Each relation
 keeps where it was seen: the note and paragraph, or the library file.
@@ -78,4 +82,6 @@ or press **Fill references from OpenAlex** in its properties panel. Save the
 note first. The DOIs OpenAlex returns wait in **Property proposals** as a
 `references:` change, before → after; nothing is written until you approve
 it, and a rejected proposal writes nothing. References the note already has
-are kept and not added twice.
+are kept and not added twice. Once approved, each reference to a source in
+your vault is a **cites** relation in the graph; the others are listed as
+unresolved.
