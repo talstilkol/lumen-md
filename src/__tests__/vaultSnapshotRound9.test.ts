@@ -79,17 +79,19 @@ function dyingWorker() {
   let next: { op: Op; hook?: () => void | Promise<void> } | null = null;
   const factory = (): IndexEngine => {
     const raw = localEngine(new VaultIndex());
-    const wrap = <K extends Op>(op: K) =>
+    // `on` is the death `die()` arms; `method` the engine call it kills. A search is `query` since 2.39
+    // (searchWorkspace asks for what a /regex/ could not check), so a "search" death kills both.
+    const wrap = <K extends keyof IndexEngine>(on: Op, method: K) =>
       (async (...a: unknown[]) => {
-        if (next?.op === op) {
+        if (next?.op === on) {
           const h = next.hook;
           next = null;
           await h?.();
           throw new Error("worker died");
         }
-        return (raw[op] as (...x: unknown[]) => Promise<unknown>)(...a);
+        return (raw[method] as (...x: unknown[]) => Promise<unknown>)(...a);
       }) as IndexEngine[K];
-    return { ...raw, kind: "worker", search: wrap("search"), saveSnapshot: wrap("saveSnapshot"), upsert: wrap("upsert") } as IndexEngine;
+    return { ...raw, kind: "worker", search: wrap("search", "search"), query: wrap("search", "query"), saveSnapshot: wrap("saveSnapshot", "saveSnapshot"), upsert: wrap("upsert", "upsert") } as IndexEngine;
   };
   return { factory, die: (op: Op, hook?: () => void | Promise<void>) => (next = { op, hook }) };
 }
