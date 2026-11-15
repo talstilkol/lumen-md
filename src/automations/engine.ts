@@ -17,7 +17,8 @@
 import YAML from "yaml";
 import { setProperty } from "../properties/frontmatter";
 import { basesFileFromText, parseBase, runBase } from "../views/bases/base";
-import { nextWorkday, restDayOf, type RestDay } from "./restDays";
+import { nextWorkday, restAt, type RestDay } from "./restDays";
+import type { City } from "../daily/shabbatTimes";
 
 export type Trigger =
   | { kind: "created"; folder?: string }
@@ -82,6 +83,15 @@ export interface PlanContext {
   lastDaily?: Readonly<Record<string, string>>;
   /** Holidays as in Israel (one day of yom tov) or the diaspora (two). Default: Israel. */
   israel?: boolean;
+  /**
+   * Review Z7-M6: the moment of the run (epoch ms) and the daily-notes city, so that "not on Shabbat or a holiday"
+   * starts at candle lighting on the eve (restDays.ts `restAt`). Without a city, an eve rests from 12:00; without
+   * `now`, an eve rests all day (fail safe).
+   */
+  now?: number;
+  city?: City | null;
+  /** Candle lighting, minutes before sunset (the daily-notes setting). */
+  candles?: number;
   /**
    * A note's types, lower case: by default `type:` in its frontmatter (one
    * value or a list). W12.T1's registry, which also knows activating tags
@@ -260,7 +270,7 @@ export function plan(rules: readonly Rule[], event: VaultEvent, ctx: PlanContext
   const read = (p: string) => (files.has(p) ? files.get(p)! : ctx.vault.read(p));
   const exists = (p: string) => (files.has(p) ? files.get(p) !== null : ctx.vault.exists(p));
   const out: Plan = { changes: [], fired: [], stopped: [], dailyRan: {}, postponed: [] };
-  const rest = restDayOf(ctx.today, ctx.israel ?? true);
+  const rest = restAt(ctx.today, ctx.now, { israel: ctx.israel ?? true, city: ctx.city ?? null, ...(ctx.candles !== undefined ? { candles: ctx.candles } : {}) });
   const seen = new Set<string>();
   const queue: Array<{ event: VaultEvent; depth: number }> = [{ event, depth: 0 }];
   const write = (path: string, after: string, rule: string, depth: number, cascade = true) => {

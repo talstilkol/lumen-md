@@ -6,6 +6,7 @@
  */
 import "./automationStrings";
 import { dailyPath as dailyPathOf, dayOf, parseIso } from "../daily/dailyNote";
+import { cityById } from "../daily/shabbatTimes";
 import { useAppStore } from "../store/useStore";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
 import { updateLinksAfterMove } from "../storage/linkRewrite";
@@ -77,6 +78,11 @@ const writeState = (st: State) => writeWorkspaceFile(STATE_PATH, JSON.stringify(
 
 /** Holidays as in Israel unless the daily-notes setting says diaspora. */
 const israel = () => (useAppStore.getState().dailyNotes as { israel?: boolean } | undefined)?.israel ?? true;
+/** Z7-M6: the moment and place of a run, for Shabbat and yom tov from candle lighting on the eve. */
+const restContext = () => {
+  const d = useAppStore.getState().dailyNotes as { city?: string; candleMinutes?: number } | undefined;
+  return { now: Date.now(), city: cityById(d?.city), ...(d?.candleMinutes !== undefined ? { candles: d.candleMinutes } : {}) };
+};
 
 async function contextFor() {
   const lastDaily: Record<string, string> = (await readState()).lastDaily ?? {};
@@ -97,10 +103,10 @@ export async function dryRun(event: VaultEvent, only?: Rule[]): Promise<Plan> {
   const read = (p: string) => vault.read(p);
   const pending = new Set<string>();
   const view = { read: (p: string) => read(p) ?? (pending.add(p), null), exists: vault.exists };
-  let p = plan(only ?? rules, event, { vault: view, dailyPath, today: isoToday(), lastDaily, israel: israel() });
+  let p = plan(only ?? rules, event, { vault: view, dailyPath, today: isoToday(), lastDaily, israel: israel(), ...restContext() });
   if (pending.size) {
     for (const path of pending) files.set(path, await readOrNull(path));
-    p = plan(only ?? rules, event, { vault: { read: (x) => files.get(x) ?? seen.get(x) ?? null, exists: vault.exists }, dailyPath, today: isoToday(), lastDaily, israel: israel() });
+    p = plan(only ?? rules, event, { vault: { read: (x) => files.get(x) ?? seen.get(x) ?? null, exists: vault.exists }, dailyPath, today: isoToday(), lastDaily, israel: israel(), ...restContext() });
   }
   return p;
 }
