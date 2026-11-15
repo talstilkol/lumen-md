@@ -5,8 +5,9 @@
  * Captures made outside the WebView wait in a native queue:
  * - iOS: one JSON file per capture in the App Group
  *   (ios/App/Shared/CaptureQueue.swift), written atomically;
- * - Android: the share intent and the Quick Settings tile
- *   (android/…/CaptureQueue.java).
+ * - Android: the share intent (ShareActivity) and the Quick Settings tile's
+ *   capture box (CaptureActivity), one JSON file per capture in the app's
+ *   files folder (android/…/CaptureQueue.java), moved into place atomically.
  *
  * The WebView lists the queue and adds each capture to inbox.md. It writes
  * the capture's id to a journal (localStorage) and only then asks the native
@@ -36,6 +37,8 @@ export interface QueuedCapture extends PendingCapture {
   mime?: string;
   /** The file's original name. */
   name?: string;
+  /** The sharing app's package (Android's referrer), when the system said. */
+  app?: string;
 }
 
 const KINDS: readonly CaptureKind[] = ["text", "url", "image", "pdf"];
@@ -80,6 +83,7 @@ export function validQueue(items: unknown): QueuedCapture[] {
       if (typeof p.mime === "string") c.mime = p.mime;
       if (typeof p.name === "string") c.name = clean(p.name).trim().slice(0, 200);
     }
+    if (typeof p.app === "string" && /^[A-Za-z0-9_.]{1,200}$/.test(p.app)) c.app = p.app;
     seen.add(p.id);
     out.push(c);
   }
@@ -124,9 +128,17 @@ function safeLocalStorage(): Storage | null {
   }
 }
 
-/** The inbox text of a text or link capture. */
-export function captureText(c: QueuedCapture): string {
+/**
+ * The inbox text of a text or link capture. Shared text that is a chat
+ * message (WhatsApp, Telegram) keeps its app, author and time (chatShareText,
+ * plan W5.7; W11.P10 closes the gap for Android's share sheet).
+ */
+export async function captureText(c: QueuedCapture): Promise<string> {
   if (c.kind === "url") return [c.text, `<${c.url}>`].filter(Boolean).join(" ");
+  if (c.source === "share") {
+    const { chatShareText } = await import("../capture/chats/share");
+    return chatShareText(c.text) ?? c.text;
+  }
   return c.text;
 }
 
@@ -158,7 +170,7 @@ export async function drainQueue(src: DrainSource, to: DrainTarget, journal: Cap
           if (!to.file || !src.read) break;
           await to.file(c, await src.read(c.file!), new Date(c.at));
         } else {
-          await to.text(captureText(c), new Date(c.at), c);
+          await to.text(await captureText(c), new Date(c.at), c);
         }
       } catch {
         break; // keep this one and the rest, in order
