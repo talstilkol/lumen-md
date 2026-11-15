@@ -141,6 +141,8 @@ export function createRoomMeter(doc) {
   const measure = () => {
     const store = doc.store;
     if (store.pendingStructs !== null || store.pendingDs !== null) return Y.encodeStateAsUpdate(doc).byteLength;
+    // A client the meter has not seen (a struct that moved no state) is counted with all the rest.
+    if (!all && [...dirty].filter((c) => !sections.has(c)).length + sections.size !== store.clients.size) all = true;
     const clients = all ? [...store.clients.keys()] : [...dirty];
     if (all) sections.clear();
     all = false;
