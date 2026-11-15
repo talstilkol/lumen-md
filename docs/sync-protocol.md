@@ -100,7 +100,11 @@ The **manifest** plaintext is JSON:
 Each entry is `{ver, rev, hash: sha256hex(plaintext), size, by, deleted?, e?}`.
 `e` is the epoch the blob was sealed in; it is absent for epoch 0.
 `counter` goes up by one on every write. A device refuses a lower counter,
-and an equal counter with a different digest (rollback / fork).
+and an equal counter with a different digest (rollback / fork). `history`
+lists the last 100 predecessors without gaps, so a higher counter at most 100
+ahead of the device's anchor must list the anchor's counter with its digest;
+leaving it out or listing another digest is a fork. Only a manifest more than
+100 ahead is "unproven" (§5, Anchors).
 
 A manifest with `"protocol":2` also has `frozen: {epoch, at, by}`, and only
 then: a re-key to `epoch` has frozen it (§5). Its files are its

@@ -353,11 +353,11 @@ describe("blind: a forked manifest whose history skips the anchor (W10.D18)", ()
   // e2ee.md: "the trusted one must be among them with the same digest — otherwise it is
   // another branch (a fork)"; only a device more than 100 versions behind drops to
   // "freshness not verified". Here the device is 2 behind and the history covers its counter.
-  // finding X-BL-1 (W10.D18, open): checkFreshness returns "unproven" instead of throwing a
-  // fork when a newer manifest's history covers the anchor's counter but leaves it out; the
-  // engine then accepts that branch as the new anchor and stays "verified" (E27). Spec:
-  // e2ee.md "Rollback and replay protection", sync-protocol.md §4. it.fails until fixed.
-  it.fails("E27 a newer manifest (sealed with the vault's keys) whose history covers the anchor's counter but leaves it out is refused as a fork", async () => {
+  // finding X-BL-1 (W10.D18, fixed on w10/blind-defect-fixes): checkFreshness returned
+  // "unproven" instead of throwing a fork when a newer manifest's history covers the anchor's
+  // counter but leaves it out; the engine then accepted that branch as the new anchor and stayed
+  // "verified". Spec: e2ee.md "Rollback and replay protection", sync-protocol.md §4.
+  it("E27 a newer manifest (sealed with the vault's keys) whose history covers the anchor's counter but leaves it out is refused as a fork", async () => {
     const { provider, creator: a } = await newVault();
     await a.engine.rekey();
     a.files.set("n.md", "v1");

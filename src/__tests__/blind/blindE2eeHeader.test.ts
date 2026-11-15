@@ -142,9 +142,10 @@ describe("blind: e2ee header (W10.D18)", () => {
     expect(() => decodeHeader(argon(7167, 10))).toThrow(); // < 7 MiB
     expect(() => decodeHeader(argon(9216, 4))).toThrow(); // 36 MiB total < 37 MiB
     expect(() => decodeHeader(argon(8192, 4))).toThrow(); // 32 MiB total
-    // At or above both floors is accepted. (kdf.ts's doc comment lists OWASP's 12 MiB × 3,
+    // At or above both floors is accepted. (kdf.ts's doc comment listed OWASP's 12 MiB × 3,
     // 9 MiB × 4 and 7 MiB × 5 as options, but those are 36, 36 and 35 MiB, below the
-    // spec's normative 37 MiB floor (§2); this test follows §2. Reported as a docs finding.)
+    // spec's normative 37 MiB floor (§2); this test follows §2. Finding X-BL-3, fixed in the
+    // comment; kdfFloor.test.ts checks every documented option against the floor.)
     for (const [m, t] of [
       [47104, 1],
       [19456, 2],

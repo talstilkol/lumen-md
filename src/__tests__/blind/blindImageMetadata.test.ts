@@ -366,11 +366,11 @@ describe("blind: photo metadata — what a file is, and failing closed (W10.D19)
     expect(() => stripImageMetadata(new TextEncoder().encode("not an image at all"), "image/jpeg")).toThrow(ImageMetadataError);
   });
 
-  // finding X-BL-2 (W10.D19, open, low): bytes that are a GIF but declared image/jpeg come back
-  // unchanged (format null) instead of ImageMetadataError, against stripImageMetadata's own
-  // doc comment. Its module comment also says GIF comes back unchanged, so this may be a docs
-  // ambiguity; either the code or the comment should change. it.fails until decided.
-  it.fails("I10b bytes that are a GIF but declared as JPEG are refused (stripImageMetadata's doc: 'when `declared` names JPEG, PNG or WebP but the bytes are none of them')", () => {
+  // finding X-BL-2 (W10.D19, fixed on w10/blind-defect-fixes): bytes that are a GIF but declared
+  // image/jpeg came back unchanged (format null) instead of ImageMetadataError, against
+  // stripImageMetadata's own doc comment. Decision: the code follows the doc; the module comment
+  // now says a GIF declared as itself comes back unchanged.
+  it("I10b bytes that are a GIF but declared as JPEG are refused (stripImageMetadata's doc: 'when `declared` names JPEG, PNG or WebP but the bytes are none of them')", () => {
     expect(() => stripImageMetadata(GIF, "image/jpeg")).toThrow(ImageMetadataError);
   });
 
