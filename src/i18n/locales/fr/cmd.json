@@ -462,6 +462,7 @@
   "cmd.tools.writingGoal.unset": "✍️ Définir un objectif d'écriture quotidien",
   "cmd.typesAll": "Tous les {type}",
   "cmd.typesPage": "Types : tous les objets par type",
+  "cmd.typesStudio": "Types : Atelier d’objets (nouveau type, champs, renommage)",
   "cmd.usage": "Aide : utilisation sur cet appareil",
   "cmd.usage.hint": "Des compteurs sur cet appareil et un rapport hebdomadaire que vous pouvez envoyer — rien ne sort sans votre clic",
   "cmd.vault.backups": "Sauvegardes…",

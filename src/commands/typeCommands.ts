@@ -7,7 +7,7 @@
 import { useEffect, useState } from "react";
 import type { Command } from "../ui/CommandPalette";
 import { cmdIcons } from "../ui/CommandPalette";
-import { openTypePage, TYPES_CHANGED_EVENT } from "../types/typeEvents";
+import { openObjectStudio, openTypePage, TYPES_CHANGED_EVENT } from "../types/typeEvents";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
 
 export interface TypeEntry {
@@ -40,6 +40,8 @@ export function buildTypeCommands(types: readonly TypeEntry[], deps: { locale: s
   const name = (e: TypeEntry) => (deps.locale === "he" ? (e.label.he ?? e.label.en) : (e.label.en ?? e.label.he)) ?? e.id;
   return [
     { id: "types.page", label: deps.t("cmd.typesPage"), icon: cmdIcons.Table, action: () => openTypePage() },
+    // W12.T2: Object Studio — new type, add a field, rename a field everywhere, new note of a type.
+    { id: "types.studio", label: deps.t("cmd.typesStudio"), icon: cmdIcons.Box, action: () => openObjectStudio() },
     ...types.map((e) => ({ id: `types.all.${e.id}`, label: deps.t("cmd.typesAll", { type: name(e) }), icon: cmdIcons.Table, action: () => openTypePage(e.id) })),
   ];
 }

@@ -462,6 +462,7 @@
   "cmd.tools.writingGoal.unset": "✍️ הגדר יעד כתיבה יומי",
   "cmd.typesAll": "כל ה{type}",
   "cmd.typesPage": "סוגים: כל האובייקטים לפי סוג",
+  "cmd.typesStudio": "סוגים: Object Studio (סוג חדש, שדות, שינוי שם)",
   "cmd.usage": "עזרה: שימוש במכשיר הזה",
   "cmd.usage.hint": "ספירות במכשיר הזה ודוח שבועי שאפשר לשלוח — שום דבר לא יוצא בלי לחיצה שלך",
   "cmd.vault.backups": "גיבויים…",
