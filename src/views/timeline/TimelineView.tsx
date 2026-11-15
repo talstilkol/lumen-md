@@ -34,7 +34,7 @@ export function TimelineView({ claims, names, onOpenSource }: TimelineViewProps)
   const gaps = useMemo(() => checkTimeline(shown), [shown]);
   const refs = useRef<Array<HTMLButtonElement | null>>([]);
   const name = (id: string) => names?.get(id) ?? id;
-  const byId = new Map(shown.map((c) => [c.id, c]));
+  const byId = new Map<string, TimelineClaim>(shown.map((c: TimelineClaim) => [c.id, c] as const));
 
   const onKey = (e: KeyboardEvent<HTMLOListElement>) => {
     const n = line.rows.length;
