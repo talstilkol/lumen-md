@@ -1,45 +1,893 @@
 {
-  "$comment": "Launch gates as code (plan W11.L1, research/R6.md §5). Each criterion maps to one plan acceptance and needs a receipt in docs/launch/receipts/<milestone>/<criterion>.json; see that folder's README. `npm run launch:gate -- M0` prints PASS/FAIL. M1–M4 and the 1.0 GA checklist come in W11.L2. Never loosen a criterion here: change it only to make it stricter.",
+  "$comment": "Launch gates as code (plan W11.L1, research/R6.md §5). Each criterion maps to one plan acceptance and needs a receipt in docs/launch/receipts/<milestone>/<criterion>.json; see that folder's README. `npm run launch:gate -- M0` prints PASS/FAIL. M1–M4 and the 1.0 GA exit checklist (W11.L2) follow; docs/launch/ga-checklist.md is built from this file. Never loosen a criterion here: change it only to make it stricter.",
   "milestones": [
     {
       "id": "M0",
-      "title": { "en": "Honest beta.1", "he": "בטא כנה: beta.1" },
+      "title": {
+        "en": "Honest beta.1",
+        "he": "בטא כנה: beta.1"
+      },
       "target": "2026-12-07",
       "criteria": [
         {
           "id": "no-simulated-plugin-install",
           "en": "0 fake trust UI: installing a remote plugin without a signed package adds nothing and shows no success.",
           "he": "‏0 ממשק אמון מזויף: התקנת תוסף מרוחק בלי חבילה חתומה לא מוסיפה כלום ולא מציגה הצלחה.",
-          "source": { "task": "W10.B1", "acceptance": "תוסף מרוחק לא מותקן בלי חבילה וחתימה; 0 קוד ״simulate״ בנתיב ההתקנה" },
-          "receipt": { "kind": "test", "tests": ["src/__tests__/pluginGallery.test.tsx"] }
+          "source": {
+            "task": "W10.B1",
+            "acceptance": "תוסף מרוחק לא מותקן בלי חבילה וחתימה; 0 קוד ״simulate״ בנתיב ההתקנה"
+          },
+          "receipt": {
+            "kind": "test",
+            "tests": [
+              "src/__tests__/pluginGallery.test.tsx"
+            ]
+          }
         },
         {
           "id": "no-unearned-verified-badge",
           "en": "0 fake trust UI: no \"Verified\" badge without a valid signature against the pinned key.",
           "he": "‏0 ממשק אמון מזויף: אין תג ״מאומת״ בלי חתימה תקפה מול המפתח המוצמד.",
-          "source": { "task": "W10.B2", "acceptance": "0 תגי ״מאומת״ בלי חתימה תקפה" },
-          "receipt": { "kind": "test", "tests": ["src/__tests__/pluginGallery.test.tsx"] }
+          "source": {
+            "task": "W10.B2",
+            "acceptance": "0 תגי ״מאומת״ בלי חתימה תקפה"
+          },
+          "receipt": {
+            "kind": "test",
+            "tests": [
+              "src/__tests__/pluginGallery.test.tsx"
+            ]
+          }
         },
         {
           "id": "e2ee-off-and-labelled",
           "en": "E2EE is off by default in every channel and labelled \"experimental, not externally audited\" in Hebrew and English; nothing calls the crypto audited.",
           "he": "‏E2EE כבוי כברירת מחדל בכל ערוץ ומסומן ״ניסיוני — לא עבר ביקורת אבטחה חיצונית״ בעברית ובאנגלית; שום מקום לא מתאר את הקריפטו כמבוקר.",
-          "source": { "task": "W11.S1", "acceptance": "הגדרות ברירת המחדל: e2ee=false בכל ערוץ; התווית מוצגת במסך ההפעלה בשתי השפות; git grep לא מוצא תיאור של הקריפטו כמבוקר" },
-          "receipt": { "kind": "test", "tests": ["src/__tests__/e2eeUnaudited.test.ts"] }
+          "source": {
+            "task": "W11.S1",
+            "acceptance": "הגדרות ברירת המחדל: e2ee=false בכל ערוץ; התווית מוצגת במסך ההפעלה בשתי השפות; git grep לא מוצא תיאור של הקריפטו כמבוקר"
+          },
+          "receipt": {
+            "kind": "test",
+            "tests": [
+              "src/__tests__/e2eeUnaudited.test.ts"
+            ]
+          }
         },
         {
           "id": "ttfv-e2e-three-browsers",
           "en": "The TTFV e2e is green on a production build without network in Chromium, Firefox and WebKit: TTFV-1 ≤ 2 s p75 and the first note ≤ 4 s.",
           "he": "בדיקת ה-e2e של TTFV ירוקה על build ייצור בלי רשת ב-Chromium, ב-Firefox וב-WebKit: ‏TTFV-1 ≤ 2 ש׳ p75 ופתק ראשון ≤ 4 ש׳.",
-          "source": { "task": "W11.P5", "acceptance": "TTFV-1 ≤ 2 ש׳ p75 ופתק ראשון ≤ 4 ש׳ ב-3 דפדפנים (ב-W11.M7)" },
-          "receipt": { "kind": "run", "runs": ["ttfv-chromium", "ttfv-firefox", "ttfv-webkit"] }
+          "source": {
+            "task": "W11.P5",
+            "acceptance": "TTFV-1 ≤ 2 ש׳ p75 ופתק ראשון ≤ 4 ש׳ ב-3 דפדפנים (ב-W11.M7)"
+          },
+          "receipt": {
+            "kind": "run",
+            "runs": [
+              "ttfv-chromium",
+              "ttfv-firefox",
+              "ttfv-webkit"
+            ]
+          }
         },
         {
           "id": "beta1-signed-and-updates",
           "en": "0.2.0-beta.1 is signed, its signature verifies, it installs on the Mac and auto-updates to the next beta.",
           "he": "‏0.2.0-beta.1 חתום, החתימה מאומתת, הוא מותקן על ה-Mac ומתעדכן אוטומטית לבטא הבאה.",
-          "source": { "task": "W10.O5", "acceptance": "עדכון אוטומטי עבד" },
-          "receipt": { "kind": "owner", "facts": ["version", "releaseVerify", "installedOn", "autoUpdatedTo"] }
+          "source": {
+            "task": "W10.O5",
+            "acceptance": "עדכון אוטומטי עבד"
+          },
+          "receipt": {
+            "kind": "owner",
+            "facts": [
+              "version",
+              "releaseVerify",
+              "installedOn",
+              "autoUpdatedTo"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "M1",
+      "title": {
+        "en": "Private Hebrew beta (50)",
+        "he": "בטא עברית סגורה (50)"
+      },
+      "target": "2027-01-15",
+      "after": "M0",
+      "criteria": [
+        {
+          "id": "activation-and-d7",
+          "en": "Activation ≥ 50% and D7 ≥ 30%, from the weekly opt-in beta reports.",
+          "he": "הפעלה ≥ 50% ו-D7 ≥ 30%, מהדוחות השבועיים של הבטא בהסכמה.",
+          "source": {
+            "task": "W11.L5",
+            "acceptance": "הפעלה ≥ 50%, ‏D7 ≥ 30%"
+          },
+          "receipt": {
+            "kind": "metric",
+            "from": "beta-reports",
+            "metrics": [
+              {
+                "name": "activationRate",
+                "min": 0.5
+              },
+              {
+                "name": "d7",
+                "min": 0.3
+              }
+            ]
+          }
+        },
+        {
+          "id": "fifty-testers-a-week-in",
+          "en": "50 beta testers who have been in the beta at least a week sent a report.",
+          "he": "‏50 בודקי בטא שנמצאים בבטא לפחות שבוע שלחו דוח.",
+          "source": {
+            "task": "W6.31",
+            "acceptance": "50 בודקי בטא פעילים 7 ימים"
+          },
+          "receipt": {
+            "kind": "metric",
+            "from": "beta-reports",
+            "metrics": [
+              {
+                "name": "testersWeek1",
+                "min": 50
+              }
+            ]
+          }
+        },
+        {
+          "id": "zero-data-loss-reports",
+          "en": "0 data-loss reports from the beta.",
+          "he": "‏0 דיווחי אובדן נתונים מהבטא.",
+          "source": {
+            "task": "W11.L5",
+            "acceptance": "0 דיווחי אובדן נתונים"
+          },
+          "receipt": {
+            "kind": "metric",
+            "from": "owner",
+            "metrics": [
+              {
+                "name": "dataLossReports",
+                "max": 0
+              }
+            ]
+          }
+        },
+        {
+          "id": "unmoderated-ten-of-twelve",
+          "en": "At least 10 of 12 unmoderated tests finish the first run and an import without help.",
+          "he": "לפחות 10 מתוך 12 בדיקות לא מונחות מסיימות ריצה ראשונה וייבוא בלי עזרה.",
+          "source": {
+            "task": "W11.L5",
+            "acceptance": "≥ 10/12 מסיימים ריצה ראשונה וייבוא בלי עזרה"
+          },
+          "receipt": {
+            "kind": "metric",
+            "from": "owner",
+            "metrics": [
+              {
+                "name": "unmoderatedTests",
+                "min": 12
+              },
+              {
+                "name": "finishedWithoutHelp",
+                "min": 10
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "title": {
+        "en": "Public Hebrew beta (300–1,000)",
+        "he": "בטא עברית פתוחה (300–1,000)"
+      },
+      "target": "2027-02-28",
+      "after": "M1",
+      "criteria": [
+        {
+          "id": "three-hundred-and-d30",
+          "en": "At least 300 opt-in users, and D30 ≥ 15%.",
+          "he": "לפחות 300 משתמשים בהסכמה, ו-D30 ≥ 15%.",
+          "source": {
+            "task": "W11.L6",
+            "acceptance": "≥ 300 משתמשים בהסכמה; ‏D30 ≥ 15%"
+          },
+          "receipt": {
+            "kind": "metric",
+            "from": "beta-reports",
+            "metrics": [
+              {
+                "name": "optInUsers",
+                "min": 300
+              },
+              {
+                "name": "d30",
+                "min": 0.15
+              }
+            ]
+          }
+        },
+        {
+          "id": "real-exports-eighteen",
+          "en": "18/18 real exports pass npm run import:diff.",
+          "he": "‏18/18 ייצואים אמיתיים עוברים את npm run import:diff.",
+          "source": {
+            "task": "W11.L6",
+            "acceptance": "18/18 ייצואים אמיתיים עוברים את import:diff"
+          },
+          "receipt": {
+            "kind": "metric",
+            "from": "owner",
+            "metrics": [
+              {
+                "name": "exportsPassed",
+                "min": 18
+              },
+              {
+                "name": "exportsFailed",
+                "max": 0
+              }
+            ]
+          }
+        },
+        {
+          "id": "mobile-capture-three-seconds",
+          "en": "Phone capture, Lock Screen to saved, ≤ 3 s p95 over at least 20 tries.",
+          "he": "לכידה בטלפון, ממסך הנעילה לשמירה, ≤ 3 ש׳ p95 בלפחות 20 ניסיונות.",
+          "source": {
+            "task": "W11.M10",
+            "acceptance": "ממסך הנעילה לשמירה ≤ 3 ש׳ p95 ב-20 ניסיונות"
+          },
+          "receipt": {
+            "kind": "metric",
+            "from": "owner",
+            "metrics": [
+              {
+                "name": "captureTries",
+                "min": 20
+              },
+              {
+                "name": "captureP95Ms",
+                "max": 3000
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "M3",
+      "title": {
+        "en": "Global launch",
+        "he": "השקה גלובלית"
+      },
+      "target": "2027-03-31",
+      "after": "M2",
+      "criteria": [
+        {
+          "id": "comparison-twenty-of-twenty",
+          "en": "The comparison page has 20/20 claims with a source, or fewer claims.",
+          "he": "לדף ההשוואה 20/20 טענות עם מקור, או פחות טענות.",
+          "source": {
+            "task": "W10.B22",
+            "acceptance": "20/20 עם מקור, או פחות טענות"
+          },
+          "receipt": {
+            "kind": "metric",
+            "from": "owner",
+            "metrics": [
+              {
+                "name": "claimsWithoutSource",
+                "max": 0
+              }
+            ]
+          }
+        },
+        {
+          "id": "external-audit-commissioned",
+          "en": "An external security audit of the sync protocol and the keyring is commissioned.",
+          "he": "ביקורת אבטחה חיצונית לפרוטוקול הסנכרון ול-keyring הוזמנה.",
+          "source": {
+            "task": "W11.O6",
+            "acceptance": "הביקורת הוזמנה לפני M3"
+          },
+          "receipt": {
+            "kind": "owner",
+            "facts": [
+              "auditor",
+              "commissionedOn",
+              "scope"
+            ]
+          }
+        },
+        {
+          "id": "store-privacy-labels-submitted",
+          "en": "The store privacy labels are submitted (App Store and Google Play).",
+          "he": "תוויות הפרטיות הוגשו לחנויות (App Store ו-Google Play).",
+          "source": {
+            "task": "W11.O7",
+            "acceptance": "התוויות הוגשו ואושרו"
+          },
+          "receipt": {
+            "kind": "owner",
+            "facts": [
+              "appStoreLabelSubmitted",
+              "playDataSafetySubmitted"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "M4",
+      "title": {
+        "en": "Full launch (1.0 GA)",
+        "he": "השקה מלאה (1.0 GA)"
+      },
+      "target": "2027-05-31",
+      "after": "M3",
+      "criteria": [
+        {
+          "id": "stores-in-production",
+          "en": "iOS is on the App Store and Android on Google Play production, not only TestFlight or internal tracks.",
+          "he": "‏iOS ב-App Store ו-Android ב-Google Play בייצור, לא רק TestFlight או מסלול פנימי.",
+          "source": {
+            "task": "W10.O7",
+            "acceptance": "הגשות נשלחו"
+          },
+          "receipt": {
+            "kind": "owner",
+            "facts": [
+              "appStoreVersion",
+              "playProductionVersion"
+            ]
+          }
+        },
+        {
+          "id": "pricing-page-live",
+          "en": "The pricing page is live: free and MIT forever, payment buttons off until a provider exists, gates on hosted services only.",
+          "he": "דף התמחור באוויר: חינם ו-MIT לתמיד, כפתורי התשלום כבויים עד שיש ספק, שערים רק על שירותים מתארחים.",
+          "source": {
+            "task": "W11.P12",
+            "acceptance": "בדיקה: אין כפתור תשלום פעיל בלי ספק מוגדר"
+          },
+          "receipt": {
+            "kind": "test",
+            "tests": [
+              "src/__tests__/pricingPage.test.ts",
+              "src/__tests__/billingGatesHostedOnly.test.ts"
+            ]
+          }
+        },
+        {
+          "id": "audit-report-or-unaudited-label",
+          "en": "Until an external audit report is published in full, E2EE stays off and labelled unaudited.",
+          "he": "עד שדוח ביקורת חיצונית מתפרסם במלואו, ‏E2EE כבוי ומסומן כלא מבוקר.",
+          "source": {
+            "task": "W11.O6",
+            "acceptance": "עד שהדוח מתפרסם — E2EE כבוי ומסומן (W11.S1)"
+          },
+          "receipt": {
+            "kind": "test",
+            "tests": [
+              "src/__tests__/e2eeUnaudited.test.ts"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "GA",
+      "title": {
+        "en": "1.0 GA exit checklist",
+        "he": "רשימת היציאה של 1.0 GA"
+      },
+      "after": "M4",
+      "criteria": [
+        {
+          "id": "desktop-signed-update-rollback",
+          "group": "Product",
+          "en": "Desktop builds are signed (macOS notarized, Windows, Linux), and auto-update is drilled, rollback included.",
+          "he": "בניות שולחן העבודה חתומות (macOS עם notarization, ‏Windows, ‏Linux), ותרגיל העדכון האוטומטי עבר, כולל חזרה לאחור.",
+          "source": {
+            "task": "W6.43",
+            "acceptance": "התרגיל beta.1 → beta.2 עובר ב-macOS וב-Windows",
+            "research": "R6 §5"
+          },
+          "receipt": {
+            "kind": "owner",
+            "facts": [
+              "macNotarized",
+              "windowsSigned",
+              "linuxSigned",
+              "updateDrill",
+              "rollbackDrill"
+            ]
+          }
+        },
+        {
+          "id": "stores-and-pwa-live",
+          "group": "Product",
+          "en": "iOS on the App Store and Android on Google Play production; the PWA is live on lumen-md.vercel.app.",
+          "he": "‏iOS ב-App Store ו-Android ב-Google Play בייצור; ה-PWA באוויר ב-lumen-md.vercel.app.",
+          "source": {
+            "task": "W10.O7",
+            "acceptance": "הגשות נשלחו",
+            "research": "R6 §5"
+          },
+          "receipt": {
+            "kind": "owner",
+            "facts": [
+              "appStoreVersion",
+              "playProductionVersion",
+              "pwaLive"
+            ]
+          }
+        },
+        {
+          "id": "ttfv1-cold-p75",
+          "group": "Product",
+          "en": "TTFV-1 ≤ 2 s p75 cold, on a production build with no network, in Chromium, Firefox and WebKit.",
+          "he": "‏TTFV-1 ≤ 2 ש׳ p75 בפתיחה קרה, על build ייצור בלי רשת, ב-Chromium, ב-Firefox וב-WebKit.",
+          "source": {
+            "task": "W11.P5",
+            "acceptance": "TTFV-1 ≤ 2 ש׳ p75 ופתק ראשון ≤ 4 ש׳ ב-3 דפדפנים (ב-W11.M7)",
+            "research": "R6 §5"
+          },
+          "receipt": {
+            "kind": "run",
+            "runs": [
+              "ttfv-chromium",
+              "ttfv-firefox",
+              "ttfv-webkit"
+            ]
+          }
+        },
+        {
+          "id": "unmoderated-first-note-sixty-seconds",
+          "group": "Product",
+          "en": "In 12 unmoderated tests the median time to the user's own first note is ≤ 60 s, and the median SUS is ≥ 75.",
+          "he": "ב-12 בדיקות לא מונחות הזמן החציוני עד הפתק הראשון של המשתמש ≤ 60 ש׳, ו-SUS החציוני ≥ 75.",
+          "source": {
+            "task": "W6.31",
+            "acceptance": "12 בדיקות הושלמו; ‏SUS חציוני ≥ 75",
+            "research": "R6 §5"
+          },
+          "receipt": {
+            "kind": "metric",
+            "from": "owner",
+            "metrics": [
+              {
+                "name": "unmoderatedTests",
+                "min": 12
+              },
+              {
+                "name": "medianFirstOwnNoteSeconds",
+                "max": 60
+              },
+              {
+                "name": "susMedian",
+                "min": 75
+              }
+            ]
+          }
+        },
+        {
+          "id": "hebrew-first-run-no-english",
+          "group": "Product",
+          "en": "A he-IL first run shows 0 English strings.",
+          "he": "הפעלה ראשונה ב-he-IL מציגה 0 מחרוזות באנגלית.",
+          "source": {
+            "task": "W4.35",
+            "acceptance": "0 מחרוזות אנגליות בהפעלה הראשונה בעברית",
+            "research": "R6 §5"
+          },
+          "receipt": {
+            "kind": "test",
+            "tests": [
+              "src/__tests__/hebrewFirstLoad.test.ts"
+            ]
+          }
+        },
+        {
+          "id": "importers-real-exports",
+          "group": "Product",
+          "en": "Notion, Evernote, Obsidian, Apple Notes, Google Keep and OneNote pass 18/18 real exports: 100% notes and files, ≥ 99% links, each within 1% of Obsidian Importer.",
+          "he": "‏Notion, ‏Evernote, ‏Obsidian, ‏Apple Notes, ‏Google Keep ו-OneNote עוברים 18/18 ייצואים אמיתיים: ‏100% פתקים וקבצים, ‏≥ 99% קישורים, כל אחד בטווח 1% מ-Obsidian Importer.",
+          "source": {
+            "task": "W11.M12",
+            "acceptance": "18/18: ‏100% פתקים וקבצים, ‏≥ 99% קישורים, ‏0 ג׳יבריש",
+            "research": "R6 §5"
+          },
+          "receipt": {
+            "kind": "metric",
+            "from": "owner",
+            "metrics": [
+              {
+                "name": "exportsPassed",
+                "min": 18
+              },
+              {
+                "name": "exportsFailed",
+                "max": 0
+              },
+              {
+                "name": "linkRate",
+                "min": 0.99
+              },
+              {
+                "name": "maxDiffVsOracle",
+                "max": 0.01
+              }
+            ]
+          }
+        },
+        {
+          "id": "mobile-capture-shares-kills",
+          "group": "Product",
+          "en": "Mobile capture ≤ 3 s p95; 100/100 shares land with their source; 0 captures lost when the app is killed.",
+          "he": "לכידה בטלפון ≤ 3 ש׳ p95; ‏100/100 שיתופים מגיעים עם המקור; ‏0 לכידות אבודות בהריגת האפליקציה.",
+          "source": {
+            "task": "W11.M10",
+            "acceptance": "100/100 שיתופים עם המקור; ‏0 לכידות אבודות בהריגה",
+            "research": "R6 §5"
+          },
+          "receipt": {
+            "kind": "metric",
+            "from": "owner",
+            "metrics": [
+              {
+                "name": "captureP95Ms",
+                "max": 3000
+              },
+              {
+                "name": "sharesLanded",
+                "min": 100
+              },
+              {
+                "name": "capturesLostOnKill",
+                "max": 0
+              }
+            ]
+          }
+        },
+        {
+          "id": "data-safety-drills",
+          "group": "Product",
+          "en": "0 open data-loss bugs; the data-safety and sync-conflict drills pass; export to plain Markdown round-trips.",
+          "he": "‏0 באגים פתוחים של אובדן נתונים; תרגילי בטיחות הנתונים והתנגשות הסנכרון עוברים; ייצוא ל-Markdown פשוט חוזר זהה.",
+          "source": {
+            "task": "W4.33",
+            "acceptance": "0 אובדן נתונים בכל התרחישים",
+            "research": "R6 §5"
+          },
+          "receipt": {
+            "kind": "test",
+            "tests": [
+              "src/__tests__/dataSafetyMatrix.test.ts",
+              "src/__tests__/mdRoundTrip.test.ts"
+            ]
+          }
+        },
+        {
+          "id": "zero-open-data-loss-bugs",
+          "group": "Product",
+          "en": "0 open data-loss bugs in the tracker.",
+          "he": "‏0 באגים פתוחים של אובדן נתונים במעקב.",
+          "source": {
+            "task": "W4.33",
+            "acceptance": "0 אובדן נתונים בכל התרחישים",
+            "research": "R6 §5"
+          },
+          "receipt": {
+            "kind": "metric",
+            "from": "owner",
+            "metrics": [
+              {
+                "name": "openDataLossBugs",
+                "max": 0
+              }
+            ]
+          }
+        },
+        {
+          "id": "vault-10k-and-crash-free",
+          "group": "Product",
+          "en": "A 10,000-note vault opens in ≤ 3 s on the Mac, and crash-free sessions are ≥ 99.5% in the beta.",
+          "he": "כספת של 10,000 פתקים נפתחת ב-≤ 3 ש׳ על ה-Mac, ושיעור ההפעלות בלי קריסה בבטא ≥ 99.5%.",
+          "source": {
+            "task": "W11.L8",
+            "acceptance": "launch:gate -- GA ירוק בכל הפריטים",
+            "research": "R6 §5"
+          },
+          "receipt": {
+            "kind": "metric",
+            "from": "owner",
+            "metrics": [
+              {
+                "name": "vault10kOpenMs",
+                "max": 3000
+              },
+              {
+                "name": "crashFreeSessions",
+                "min": 0.995
+              }
+            ]
+          }
+        },
+        {
+          "id": "e2ee-audit-or-unaudited",
+          "group": "Trust",
+          "en": "An external audit is published in full with open findings listed, or E2EE ships off and labelled unaudited; no \"audited\" claim without a report.",
+          "he": "ביקורת חיצונית מתפרסמת במלואה עם הממצאים הפתוחים, או ש-E2EE יוצא כבוי ומסומן כלא מבוקר; אין טענת ״מבוקר״ בלי דוח.",
+          "source": {
+            "task": "W11.S1",
+            "acceptance": "git grep לא מוצא תיאור של הקריפטו כמבוקר",
+            "research": "R6 §5"
+          },
+          "receipt": {
+            "kind": "test",
+            "tests": [
+              "src/__tests__/e2eeUnaudited.test.ts"
+            ]
+          }
+        },
+        {
+          "id": "crypto-vectors-pass",
+          "group": "Trust",
+          "en": "Crypto primitives come from audited libraries, and the test vectors pass 100%.",
+          "he": "הפרימיטיבים הקריפטוגרפיים מספריות מבוקרות, ווקטורי הבדיקה עוברים ב-100%.",
+          "source": {
+            "task": "W1.7",
+            "acceptance": "100% מוקטורי הבדיקה מפוענחים זהה במימוש הבדיקה העצמאי",
+            "research": "R6 §5"
+          },
+          "receipt": {
+            "kind": "test",
+            "tests": [
+              "src/__tests__/e2eeVectors.test.ts"
+            ]
+          }
+        },
+        {
+          "id": "store-labels-no-data-collected",
+          "group": "Trust",
+          "en": "App Store label \"Data Not Collected\"; Play Data safety: no data collected or shared; both approved.",
+          "he": "תווית App Store ״Data Not Collected״; ‏Play Data safety: אין איסוף ואין שיתוף; שתיהן אושרו.",
+          "source": {
+            "task": "W11.O7",
+            "acceptance": "התוויות הוגשו ואושרו",
+            "research": "R6 §5"
+          },
+          "receipt": {
+            "kind": "owner",
+            "facts": [
+              "appStoreDataNotCollected",
+              "playNoDataCollectedOrShared"
+            ]
+          }
+        },
+        {
+          "id": "network-calls-mapped",
+          "group": "Trust",
+          "en": "100% of network calls are mapped in the privacy log; the gate fails on an unmapped call.",
+          "he": "‏100% מקריאות הרשת ממופות ביומן הפרטיות; השער נכשל על קריאה שלא ממופה.",
+          "source": {
+            "task": "W11.S13",
+            "acceptance": "השער נכשל על קריאת רשת שלא ממופה",
+            "research": "R6 §5"
+          },
+          "receipt": {
+            "kind": "run",
+            "runs": [
+              "privacy-network-map"
+            ]
+          }
+        },
+        {
+          "id": "relay-transparency-and-disclosure",
+          "group": "Trust",
+          "en": "Relay transparency report v1 is published, and SECURITY.md has a disclosure process.",
+          "he": "דוח השקיפות v1 של הממסר פורסם, ו-SECURITY.md כולל תהליך דיווח.",
+          "source": {
+            "task": "W11.S13",
+            "acceptance": "הטיוטות נבנות; ההגשה — W11.O7",
+            "research": "R6 §5"
+          },
+          "receipt": {
+            "kind": "owner",
+            "facts": [
+              "transparencyReportUrl",
+              "securityMdDisclosure"
+            ]
+          }
+        },
+        {
+          "id": "slsa-provenance",
+          "group": "Trust",
+          "en": "Releases carry SLSA provenance and signatures, and witness verify passes on a clean machine without network.",
+          "he": "השחרורים נושאים SLSA provenance וחתימות, ו-witness verify עובר במכונה נקייה בלי רשת.",
+          "source": {
+            "task": "W7.22",
+            "acceptance": "beta.1 (W4.5) מתפרסם עם attestation לכל קובץ, ו-`witness verify` עובר במכונה נקייה בלי רשת",
+            "research": "R6 §5"
+          },
+          "receipt": {
+            "kind": "run",
+            "runs": [
+              "witness-verify"
+            ]
+          }
+        },
+        {
+          "id": "plugin-directory-reviewed",
+          "group": "Trust",
+          "en": "Every plugin and theme version is auto-reviewed, permissions are shown before install, scorecards are public, and there are 0 unsigned \"Verified\" badges.",
+          "he": "כל גרסה של תוסף וערכת נושא עוברת ביקורת אוטומטית, ההרשאות מוצגות לפני ההתקנה, כרטיסי הניקוד ציבוריים, ו-0 תגי ״מאומת״ בלי חתימה.",
+          "source": {
+            "task": "W11.S14",
+            "acceptance": "100% דחייה של דוגמאות רעות: קוד מוסתר, eval, קריאת רשת לא מוצהרת, url() לזליגה ב-CSS",
+            "research": "R6 §5"
+          },
+          "receipt": {
+            "kind": "test",
+            "tests": [
+              "src/__tests__/pluginReview.test.ts",
+              "src/__tests__/PluginGalleryRender.test.tsx"
+            ]
+          }
+        },
+        {
+          "id": "beta-300-activation-retention",
+          "group": "Community and business",
+          "en": "The beta reached ≥ 300 opt-in users with activation ≥ 50%, D7 ≥ 30% and D30 ≥ 15%.",
+          "he": "הבטא הגיעה ל-≥ 300 משתמשים בהסכמה עם הפעלה ≥ 50%, ‏D7 ≥ 30% ו-D30 ≥ 15%.",
+          "source": {
+            "task": "W11.L6",
+            "acceptance": "≥ 300 משתמשים בהסכמה; ‏D30 ≥ 15%",
+            "research": "R6 §5"
+          },
+          "receipt": {
+            "kind": "metric",
+            "from": "beta-reports",
+            "metrics": [
+              {
+                "name": "optInUsers",
+                "min": 300
+              },
+              {
+                "name": "activationRate",
+                "min": 0.5
+              },
+              {
+                "name": "d7",
+                "min": 0.3
+              },
+              {
+                "name": "d30",
+                "min": 0.15
+              }
+            ]
+          }
+        },
+        {
+          "id": "docs-complete-both-languages",
+          "group": "Community and business",
+          "en": "Docs are complete in Hebrew and English: every feature has a page, docs-sync is green.",
+          "he": "התיעוד שלם בעברית ובאנגלית: לכל פיצ׳ר עמוד, ‏docs-sync ירוק.",
+          "source": {
+            "task": "13.1",
+            "acceptance": "כל פיצ'ר עם עמוד; docs-sync ירוק",
+            "research": "R6 §5"
+          },
+          "receipt": {
+            "kind": "test",
+            "tests": [
+              "src/__tests__/docsSync.test.ts"
+            ]
+          }
+        },
+        {
+          "id": "community-channels-response",
+          "group": "Community and business",
+          "en": "GitHub Discussions and a chat channel are open with a code of conduct; the median first response is ≤ 24 h over the last 30 days.",
+          "he": "‏GitHub Discussions וערוץ צ׳אט פתוחים עם קוד התנהגות; זמן התגובה הראשונה החציוני ≤ 24 שעות ב-30 הימים האחרונים.",
+          "source": {
+            "task": "W11.L8",
+            "acceptance": "launch:gate -- GA ירוק בכל הפריטים",
+            "research": "R6 §5"
+          },
+          "receipt": {
+            "kind": "metric",
+            "from": "owner",
+            "metrics": [
+              {
+                "name": "medianFirstResponseHours",
+                "max": 24
+              }
+            ]
+          }
+        },
+        {
+          "id": "pricing-page-promise",
+          "group": "Community and business",
+          "en": "The pricing page is live: free and MIT forever, an optional relay, an education discount, the free tier never shrinks.",
+          "he": "דף התמחור באוויר: חינם ו-MIT לתמיד, ממסר אופציונלי, הנחה לחינוך, השכבה החינמית אף פעם לא מצטמצמת.",
+          "source": {
+            "task": "W11.P12",
+            "acceptance": "הדף נבנה בשתי השפות",
+            "research": "R6 §5"
+          },
+          "receipt": {
+            "kind": "test",
+            "tests": [
+              "src/__tests__/pricingPage.test.ts",
+              "src/__tests__/billingGatesHostedOnly.test.ts"
+            ]
+          }
+        },
+        {
+          "id": "launch-assets-ready",
+          "group": "Community and business",
+          "en": "Launch assets are ready: the Product Hunt page, a Show HN text, a press kit in Hebrew and English, a 60-second demo video and the \"Leaving Evernote or Notion?\" page; every claim links a source or a receipt.",
+          "he": "ערכת ההשקה מוכנה: דף Product Hunt, טקסט Show HN, ערכת עיתונות בעברית ובאנגלית, סרטון הדגמה של 60 שניות ודף ״עוזבים את Evernote או Notion?״; כל טענה מקושרת למקור או לקבלה.",
+          "source": {
+            "task": "W11.L3",
+            "acceptance": "כל טענה בערכה מקושרת למקור או לקבלה",
+            "research": "R6 §5"
+          },
+          "receipt": {
+            "kind": "run",
+            "runs": [
+              "launch-kit-claims"
+            ]
+          }
+        },
+        {
+          "id": "comparison-and-a11y-statement",
+          "group": "Community and business",
+          "en": "The comparison page has 20/20 claims sourced, and an accessibility statement is published one click from the app and the site.",
+          "he": "לדף ההשוואה 20/20 טענות עם מקור, והצהרת נגישות מפורסמת במרחק לחיצה מהאפליקציה ומהאתר.",
+          "source": {
+            "task": "W11.Q7",
+            "acceptance": "שני המסמכים במרחק לחיצה אחת מהאפליקציה ומהאתר",
+            "research": "R6 §5"
+          },
+          "receipt": {
+            "kind": "test",
+            "tests": [
+              "src/__tests__/a11yStatement.test.ts"
+            ]
+          }
+        },
+        {
+          "id": "release-and-final-review",
+          "group": "Community and business",
+          "en": "The independent release review (13.5) and the final review against §14 (13.6) are done.",
+          "he": "ביקורת השחרור העצמאית (13.5) והביקורת הסופית מול §14 (13.6) נעשו.",
+          "source": {
+            "task": "13.5",
+            "acceptance": "כל ה-P0 ירוקים",
+            "research": "R6 §5"
+          },
+          "receipt": {
+            "kind": "owner",
+            "facts": [
+              "releaseReview",
+              "finalReview"
+            ]
+          }
         }
       ]
     }
