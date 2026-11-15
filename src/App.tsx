@@ -36,6 +36,7 @@ const MarkdownTableEditor = lazy(() => import("./ui/MarkdownTableEditor").then(m
 // PDF reader (plan 4.14): pdf.js and the reader load only when a PDF is opened.
 const PdfReader = lazy(() => import("./pdf/PdfReader").then(m => ({ default: m.PdfReaderOverlay })));
 const EpubReader = lazy(() => import("./epub/EpubReader").then(m => ({ default: m.EpubReaderOverlay })));
+const FileViewerOverlay = lazy(() => import("./viewers/FileViewerOverlay"));
 import { CommandPalette } from "./ui/CommandPalette";
 import { AiFab } from "./ui/AiFab";
 import { FileTree } from "./ui/FileTree";
@@ -254,7 +255,7 @@ export default function App() {
   }, []);
 
   // PDF / EPUB readers and every `lumen-open-file` (W6.25).
-  const { pdfView, setPdfView, epubView, setEpubView, registerPdfSaveGate } = useOpenFileEvent(handleOpenFromWorkspace);
+  const { pdfView, setPdfView, epubView, setEpubView, fileView, setFileView, registerPdfSaveGate } = useOpenFileEvent(handleOpenFromWorkspace);
 
   // Automations (W5.24): a lazy chunk that starts only when the vault has a rules file.
   useEffect(() => {
@@ -645,6 +646,21 @@ export default function App() {
       {epubView && (
         <Suspense fallback={null}>
           <EpubReader key={epubView.path} path={epubView.path} fragment={epubView.fragment} openSeq={epubView.seq} onClose={() => setEpubView(null)} />
+        </Suspense>
+      )}
+
+      {/* Notebook, data file and map file viewers (plan W12.F4, F5, F7) */}
+      {fileView && (
+        <Suspense fallback={null}>
+          <FileViewerOverlay
+            key={`${fileView.path}#${fileView.seq}`}
+            view={fileView}
+            onClose={() => setFileView(null)}
+            onOpenAsText={(path, text) => {
+              setFileView(null);
+              handleOpenFromWorkspace(path, text);
+            }}
+          />
         </Suspense>
       )}
 

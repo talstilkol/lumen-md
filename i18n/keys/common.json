@@ -5478,6 +5478,133 @@
       "vars": []
     },
     {
+      "key": "fileViewer.asText",
+      "en": "Open as text",
+      "vars": []
+    },
+    {
+      "key": "fileViewer.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "fileViewer.convert",
+      "en": "Convert to note",
+      "vars": []
+    },
+    {
+      "key": "fileViewer.data.groupBy",
+      "en": "Group by",
+      "vars": []
+    },
+    {
+      "key": "fileViewer.data.kanban",
+      "en": "Board",
+      "vars": []
+    },
+    {
+      "key": "fileViewer.data.none",
+      "en": "None",
+      "vars": []
+    },
+    {
+      "key": "fileViewer.data.readOnly",
+      "en": "Read only",
+      "vars": []
+    },
+    {
+      "key": "fileViewer.data.rows",
+      "en": "{n} rows",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "fileViewer.data.saved",
+      "en": "Saved to the file",
+      "vars": []
+    },
+    {
+      "key": "fileViewer.data.table",
+      "en": "Table",
+      "vars": []
+    },
+    {
+      "key": "fileViewer.failed",
+      "en": "Couldn't open this file: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "fileViewer.geo.detail",
+      "en": "Where / length",
+      "vars": []
+    },
+    {
+      "key": "fileViewer.geo.empty",
+      "en": "This file has no points or tracks.",
+      "vars": []
+    },
+    {
+      "key": "fileViewer.geo.features",
+      "en": "{n} features",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "fileViewer.geo.mapLabel",
+      "en": "Map of {n} features",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "fileViewer.geo.name",
+      "en": "Name",
+      "vars": []
+    },
+    {
+      "key": "fileViewer.geo.noTiles",
+      "en": "Airplane mode: the map is shown without its background, which would be loaded from the network.",
+      "vars": []
+    },
+    {
+      "key": "fileViewer.geo.type",
+      "en": "Type",
+      "vars": []
+    },
+    {
+      "key": "fileViewer.loading",
+      "en": "Opening…",
+      "vars": []
+    },
+    {
+      "key": "fileViewer.nb.empty",
+      "en": "This notebook has no cells.",
+      "vars": []
+    },
+    {
+      "key": "fileViewer.nb.image",
+      "en": "Notebook output image",
+      "vars": []
+    },
+    {
+      "key": "fileViewer.nb.in",
+      "en": "Input {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "fileViewer.nb.notRun",
+      "en": "{mime} output, shown and not run",
+      "vars": [
+        "mime"
+      ]
+    },
+    {
       "key": "fim.off",
       "en": "Local autocomplete off",
       "vars": []

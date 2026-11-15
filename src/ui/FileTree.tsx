@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { fileViewerKind } from "../viewers/fileViewers";
 // The tree's own rules (width, background, the border that faces the editor,
 // header, rows, row actions). Nothing imported this file, so the tree drew
 // unstyled: no border, no hover, row actions always shown (e2e rtl-parity 6).
@@ -337,8 +338,9 @@ export function FileTree({
 
   async function open(node: WorkspaceNode) {
     if (node.kind !== "file") return;
-    // A PDF or an EPUB opens in its reader (plans 4.14, W1.14), not as text.
-    if (/\.(pdf|epub)$/i.test(node.path)) {
+    // A PDF or an EPUB opens in its reader (plans 4.14, W1.14), not as text; a
+    // notebook, a data file or a map file in its viewer (W12.F4, F5, F7).
+    if (/\.(pdf|epub)$/i.test(node.path) || fileViewerKind(node.path)) {
       window.dispatchEvent(new CustomEvent("lumen-open-file", { detail: { path: node.path } }));
       return;
     }

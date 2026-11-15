@@ -10,6 +10,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useAppStore } from "../store/useStore";
 import { docIdentity } from "../renderer/previewDoc";
 import { scrollToHeadingWhenRendered } from "../renderer/wikiLinks";
+import { fileViewerKind, type FileView } from "../viewers/fileViewers";
 
 /** A document open in a reader, with the link fragment that opened it (`page=N&highlight=ID`). */
 export interface ReaderView {
@@ -22,6 +23,8 @@ export function useOpenFileEvent(handleOpenFromWorkspace: (name: string, content
   /** The PDF open in the reader, with the link fragment that opened it (`page=N&highlight=ID`). */
   const [pdfView, setPdfView] = useState<ReaderView | null>(null);
   const [epubView, setEpubView] = useState<ReaderView | null>(null);
+  /** A notebook, data file or map file open in its viewer (W12.F4, F5, F7). */
+  const [fileView, setFileView] = useState<FileView | null>(null);
   /** The open reader's save gate: replacing the reader waits until its highlights are saved. */
   const pdfSaveGate = useRef<((then: () => void) => void) | null>(null);
   const registerPdfSaveGate = useCallback((gate: ((then: () => void) => void) | null) => {
@@ -38,6 +41,12 @@ export function useOpenFileEvent(handleOpenFromWorkspace: (name: string, content
       // A book opens in the EPUB reader, at the chapter / highlight the link names (W1.14).
       if (/\.epub$/i.test(detail.path)) {
         setEpubView((prev) => ({ path: detail.path, fragment: detail.fragment ?? null, seq: (prev?.seq ?? 0) + 1 }));
+        return;
+      }
+      // A notebook, a data file or a map file opens in its viewer (W12.F4, F5, F7).
+      const kind = fileViewerKind(detail.path);
+      if (kind) {
+        setFileView((prev) => ({ kind, path: detail.path, seq: (prev?.seq ?? 0) + 1 }));
         return;
       }
       // A PDF opens in the reader, at the page / highlight the link names.
@@ -65,5 +74,5 @@ export function useOpenFileEvent(handleOpenFromWorkspace: (name: string, content
     return () => window.removeEventListener("lumen-open-file", onOpen);
   }, [handleOpenFromWorkspace]);
 
-  return { pdfView, setPdfView, epubView, setEpubView, registerPdfSaveGate };
+  return { pdfView, setPdfView, epubView, setEpubView, fileView, setFileView, registerPdfSaveGate };
 }
