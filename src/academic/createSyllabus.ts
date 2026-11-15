@@ -62,7 +62,9 @@ export async function createSyllabus(now = new Date()): Promise<void> {
       return;
     }
     const path = await ws.uniqueWorkspaceName(d.path);
-    await ws.createWorkspaceFolder(SYLLABUS_FOLDER).catch(() => {});
+    await ws.createWorkspaceFolder(SYLLABUS_FOLDER).catch(() => {
+      // why: the folder already exists; the write below fails loudly if it really is missing
+    });
     await ws.writeWorkspaceFile(path, d.md);
     window.dispatchEvent(new CustomEvent("lumen-workspace-changed"));
     store.openTab({ name: path.split("/").pop()!, content: d.md, workspaceName: path });

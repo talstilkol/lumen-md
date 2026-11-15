@@ -17,7 +17,7 @@ beforeEach(() => {
   try {
     globalThis.indexedDB = new IDBFactory();
   } catch {
-    // Offline browser runner: the real IndexedDB; each test gets its own vault scope below.
+    // why: offline browser runner: the real IndexedDB; each test gets its own vault scope below.
   }
   history.__resetHistoryDb();
   history.setHistoryVault(`as-of-test-${Date.now()}-${run++}`);

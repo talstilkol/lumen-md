@@ -221,7 +221,9 @@ export async function startAcpSession(o: AcpHostOptions): Promise<AcpSession> {
       }
       await refuse(m.id, -32601, `Lumen does not offer ${m.method}`);
     } catch (e) {
-      await refuse(m.id, -32603, (e as Error)?.message ?? String(e)).catch(() => {});
+      await refuse(m.id, -32603, (e as Error)?.message ?? String(e)).catch(() => {
+        // why: the agent process already went away, so there is no one to send the refusal to
+      });
     }
   }
 

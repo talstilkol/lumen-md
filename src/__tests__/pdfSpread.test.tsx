@@ -15,7 +15,7 @@ beforeEach(() => {
   try {
     localStorage.clear();
   } catch {
-    /* no storage */
+    /* why: no storage in this runner; the test does not need it cleared */
   }
 });
 
