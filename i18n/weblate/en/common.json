@@ -1179,6 +1179,8 @@
   "importWizard.warn.encryptedPart": "an encrypted part was left out",
   "importWizard.warn.missingAttachment": "an attachment it points at is not in the export",
   "importWizard.warn.noDates": "the export has no creation or edit dates",
+  "importWizard.warn.notionComputed": "a Notion formula or rollup column: its values came across, the formula did not (add it as a formula column in the base)",
+  "importWizard.warn.notionUnparsed": "a Notion value that does not fit its column's type was kept as text",
   "ink.cancel": "Cancel",
   "ink.clear": "Clear",
   "ink.color.black": "Black",
