@@ -1,55 +1,42 @@
 // @vitest-environment node
 /**
- * Plan 13.3 — Android and iOS in CI, and the Safari eviction reminder.
+ * Plan 13.3 — Android and iOS in the release, and the Safari eviction reminder.
  *
- * The APK and IPA builds themselves run only on GitHub's runners (an Android
- * SDK and Xcode); here the workflow is held to its contract: both jobs on
- * every pull request, the unsigned artifacts without any secret, signing
- * only when the secrets exist, and the native projects it builds in place.
+ * The APK, AAB and IPA are built on the release machine (scripts/mobile-build.mjs,
+ * run by `release.mjs build --mobile`; its commands are mobileBuild.test.ts's).
+ * Here: no GitHub workflow is left in the release path (W1.24, W10.E61), and
+ * the native projects hold their signing contract.
  */
 import { describe, it, expect } from "vitest";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
-import YAML from "yaml";
 import { REMINDER_EVERY_MS, isWebKitBrowser, shouldRemind, type ReminderEnv } from "../storage/evictionReminder";
 import { readLocale } from "../../scripts/lib/i18n-files.mjs";
 
 const ROOT = resolve(__dirname, "..", "..");
 const read = (f: string) => readFileSync(join(ROOT, f), "utf8");
-const wf = YAML.parse(read(".github/workflows/mobile.yml")) as {
-  on: Record<string, unknown>;
-  jobs: Record<string, { "runs-on": string; env?: Record<string, string>; steps: { name?: string; uses?: string; run?: string; if?: string; with?: Record<string, string> }[] }>;
-};
-const steps = (job: string) => wf.jobs[job].steps;
-const runOf = (job: string, name: RegExp) => steps(job).find((s) => s.name && name.test(s.name))?.run ?? "";
+const WORKFLOWS = join(ROOT, ".github/workflows");
 
-describe("mobile.yml: APK and IPA on every pull request", () => {
-  it("runs both jobs on pull requests, on pinned images", () => {
-    expect(Object.keys(wf.on)).toContain("pull_request");
-    expect(wf.jobs.android["runs-on"]).toBe("ubuntu-24.04");
-    expect(wf.jobs.ios["runs-on"]).toBe("macos-14");
-  });
-
-  it("every action is pinned to a full commit SHA with a version comment", () => {
-    const text = read(".github/workflows/mobile.yml");
-    for (const line of text.split("\n").filter((l) => /uses:/.test(l))) {
-      expect(line, line).toMatch(/uses: [\w./-]+@[0-9a-f]{40} # v\d/);
+describe("mobile builds in the release, no GitHub Actions (13.3, W1.24, W10.E61)", () => {
+  it("0 workflows in the release path: release, tauri, mobile and deploy are gone, none runs on a release tag or builds a release", () => {
+    for (const f of ["release.yml", "tauri.yml", "mobile.yml", "deploy.yml"]) expect(existsSync(join(WORKFLOWS, f)), f).toBe(false);
+    for (const f of existsSync(WORKFLOWS) ? readdirSync(WORKFLOWS) : []) {
+      const text = read(`.github/workflows/${f}`);
+      expect(text, f).not.toMatch(/release\.mjs (build|publish)|mobile-build\.mjs|tauri:build|gradlew|xcodebuild|flyctl deploy/);
+      expect(text, f).not.toMatch(/tags:\s*\[\s*["']v\*["']\s*\]/);
     }
+    // What deploy.yml did is a release subcommand now.
+    expect(read("scripts/release.mjs")).toContain('run("flyctl", ["deploy", "--remote-only", "--app", app]);');
   });
 
-  it("Android: web build → cap sync → debug APK, and a release APK that is unsigned without the keystore secret", () => {
-    const names = steps("android").map((s) => s.name ?? s.uses ?? "");
-    const order = ["Build the web app", "Capacitor sync", "Debug APK", "Release keystore", "Release APK"].map((n) => names.findIndex((x) => x.startsWith(n)));
-    expect(order.every((i, k) => i >= 0 && (k === 0 || i > order[k - 1]))).toBe(true);
-    expect(runOf("android", /^Debug APK/)).toContain("assembleDebug");
-    expect(runOf("android", /^Release APK/)).toContain("assembleRelease");
-    const keystore = steps("android").find((s) => s.name?.startsWith("Release keystore"))!;
-    expect(keystore.if).toBe("env.HAS_KEYSTORE == 'true'");
-    expect(wf.jobs.android.env?.HAS_KEYSTORE).toBe("${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}");
-    const upload = steps("android").find((s) => s.uses?.startsWith("actions/upload-artifact"))!;
-    expect(upload.if).toBeUndefined(); // uploaded with or without signing
-    expect(upload.with?.path).toContain("apk/debug/*.apk");
-    expect(upload.with?.path).toContain("apk/release/*.apk");
+  it("release.mjs build --mobile runs the local mobile build on the release's web build and puts AAB, APK and IPA in release/", () => {
+    const rel = read("scripts/release.mjs");
+    expect(rel).toContain('flag("--mobile")');
+    expect(rel).toMatch(/"scripts\/mobile-build\.mjs", t, "--version", version, "--skip-web"/);
+    expect(rel).toContain('"--no-upload"');
+    expect(rel).toMatch(/\.\(aab\|apk\|ipa\)\$/);
+    // the copy happens before SHA256SUMS is written, so the sums cover the mobile files
+    expect(rel.indexOf('flag("--mobile")')).toBeLessThan(rel.indexOf('writeFileSync(path.join(OUT, "SHA256SUMS")'));
   });
 
   it("Android: the Gradle project signs only when the four ANDROID_* variables are set", () => {
@@ -67,34 +54,19 @@ describe("mobile.yml: APK and IPA on every pull request", () => {
     expect(read("android/app/build.gradle")).toContain('applicationId "com.lumen.editor"');
   });
 
-  it("iOS: web build → cap sync → archive; unsigned archive and unsigned IPA without the secrets, exportArchive with them", () => {
-    const archive = runOf("ios", /^Archive/);
-    expect(archive).toContain("-project ios/App/App.xcodeproj -scheme App");
-    expect(archive).toContain("CODE_SIGNING_ALLOWED=NO");
-    expect(archive).toContain("CODE_SIGN_STYLE=Manual");
-    const ipa = runOf("ios", /^IPA$/);
-    expect(ipa).toContain("-exportArchive");
-    expect(ipa).toContain("Lumen-unsigned.ipa");
-    expect(ipa).toContain("ios/exportOptions.plist");
-    const signing = steps("ios").find((s) => s.name?.startsWith("Signing certificate"))!;
-    expect(signing.if).toBe("env.HAS_SIGNING == 'true'");
-    expect(wf.jobs.ios.env?.HAS_SIGNING).toBe("${{ secrets.IOS_CERTIFICATE_P12_BASE64 != '' }}");
-    const upload = steps("ios").find((s) => s.uses?.startsWith("actions/upload-artifact"))!;
-    expect(upload.with?.path).toBe("build/ipa/*.ipa");
-    // The scheme xcodebuild is given exists and points at the App target.
+  it("iOS: the scheme xcodebuild is given exists and points at the App target; the export template names the app", () => {
     const scheme = read("ios/App/App.xcodeproj/xcshareddata/xcschemes/App.xcscheme");
     const target = /([0-9A-F]{24}) \/\* App \*\/ = \{\s*isa = PBXNativeTarget;/.exec(read("ios/App/App.xcodeproj/project.pbxproj"))![1];
     expect(scheme).toContain(`BlueprintIdentifier = "${target}"`);
     expect(read("ios/exportOptions.plist")).toContain("<key>com.lumen.editor</key>");
   });
 
-  it("the secrets are documented and nothing in the repo stands in for them", () => {
-    const doc = read("docs/src/content/docs/self-hosting/mobile.md");
-    for (const s of ["ANDROID_KEYSTORE_BASE64", "ANDROID_KEYSTORE_PASSWORD", "ANDROID_KEY_ALIAS", "ANDROID_KEY_PASSWORD", "IOS_CERTIFICATE_P12_BASE64", "IOS_CERTIFICATE_PASSWORD", "IOS_PROVISIONING_PROFILE_BASE64", "IOS_PROVISIONING_PROFILE_NAME", "APPLE_TEAM_ID"]) {
-      expect(doc, s).toContain(s);
-      expect(read(".github/workflows/mobile.yml")).toContain(`secrets.${s}`);
+  it("the signing variables are documented in both languages, and the docs name no workflow", () => {
+    for (const f of ["docs/src/content/docs/self-hosting/mobile.md", "docs/src/content/docs/he/self-hosting/mobile.md"]) {
+      const doc = read(f);
+      for (const v of ["ANDROID_KEYSTORE_PATH", "ANDROID_KEYSTORE_PASSWORD", "ANDROID_KEY_ALIAS", "ANDROID_KEY_PASSWORD", "release.mjs build --mobile"]) expect(doc, `${f}: ${v}`).toContain(v);
+      expect(doc, f).not.toContain(".github/workflows/mobile.yml");
     }
-    expect(existsSync(join(ROOT, "docs/src/content/docs/he/self-hosting/mobile.md"))).toBe(true);
   });
 });
 

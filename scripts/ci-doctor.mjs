@@ -21,7 +21,7 @@
  *   node scripts/ci-doctor.mjs 190                 # PR number → its head branch
  *   node scripts/ci-doctor.mjs 190 --peers 30 --max-distance 50 --json
  *   node scripts/ci-doctor.mjs --run 39085293928   # one particular run, not the latest
- *   node scripts/ci-doctor.mjs 190 --workflow tauri.yml
+ *   node scripts/ci-doctor.mjs 190 --workflow ci.yml
  *
  * Exit codes: 0 done (with --json: no real failure), 1 a real failure (--json)
  * or a lookup error, 2 usage, 3 the diagnosed run's jobs could not be read.

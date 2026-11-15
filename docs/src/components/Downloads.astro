@@ -1,0 +1,91 @@
+---
+/**
+ * The downloads table (plan W1.24, W10.E61), from docs/src/data/downloads.json,
+ * which `node scripts/release.mjs downloads` writes from the release's own
+ * SHA256SUMS. Used by pages/download.astro (English) and pages/he/download.astro.
+ */
+import manifest from "../data/downloads.json";
+import { byPlatform, humanSize } from "../../../scripts/lib/downloads.mjs";
+
+interface Props {
+  locale: "en" | "he";
+}
+const { locale } = Astro.props;
+const S = {
+  en: {
+    none: "No release has been published yet. Until the first one, build from source (see Self-hosting).",
+    version: "Version",
+    beta: "beta",
+    file: "File",
+    size: "Size",
+    sha: "SHA-256",
+    update: "signed update",
+    verifyTitle: "Check what you downloaded",
+    verify: "Every file's SHA-256 is in SHA256SUMS. Compare it with:",
+    gpg: "SHA256SUMS is signed (SHA256SUMS.asc). Check the signature, then the file:",
+    unsigned: "This release's SHA256SUMS is not signed: the checksums show the download is intact, not who made it.",
+    platforms: { macos: "macOS", windows: "Windows", linux: "Linux", android: "Android", ios: "iOS", web: "Web app (self-hosting)" },
+  },
+  he: {
+    none: "עוד לא פורסמה גרסה. עד הראשונה, בונים מקוד המקור (ראו אירוח עצמי).",
+    version: "גרסה",
+    beta: "בטא",
+    file: "קובץ",
+    size: "גודל",
+    sha: "SHA-256",
+    update: "עדכון חתום",
+    verifyTitle: "בדיקת ההורדה",
+    verify: "ה-SHA-256 של כל קובץ נמצא ב-SHA256SUMS. משווים בעזרת:",
+    gpg: "הקובץ SHA256SUMS חתום (SHA256SUMS.asc). בודקים את החתימה, ואז את הקובץ:",
+    unsigned: "קובץ SHA256SUMS של הגרסה הזאת לא חתום: הסכומים מראים שההורדה שלמה, לא מי יצר אותה.",
+    platforms: { macos: "macOS", windows: "Windows", linux: "Linux", android: "Android", ios: "iOS", web: "אפליקציית הרשת (אירוח עצמי)" },
+  },
+}[locale];
+const groups = byPlatform(manifest);
+---
+{manifest.version === null || groups.length === 0 ? (
+  <p data-testid="downloads-none">{S.none}</p>
+) : (
+  <>
+    <p>
+      {S.version} <strong>{manifest.version}</strong>
+      {manifest.channel === "beta" && <> ({S.beta})</>} · {manifest.date}
+    </p>
+    {groups.map((g) => (
+      <section>
+        <h2>{S.platforms[g.platform as keyof typeof S.platforms]}</h2>
+        <table>
+          <thead>
+            <tr><th>{S.file}</th><th>{S.size}</th><th>{S.sha}</th></tr>
+          </thead>
+          <tbody>
+            {g.rows.map((r) => (
+              <tr>
+                <td>
+                  {r.url ? <a href={r.url} dir="ltr">{r.name}</a> : <span dir="ltr">{r.name}</span>}
+                  {r.updaterSig && <> · {S.update}</>}
+                </td>
+                <td dir="ltr">{humanSize(r.size)}</td>
+                <td><code dir="ltr" style="word-break: break-all">{r.sha256}</code></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+    ))}
+    <h2>{S.verifyTitle}</h2>
+    {manifest.sums?.signature ? (
+      <>
+        <p>{S.gpg}</p>
+        <pre dir="ltr"><code>gpg --verify SHA256SUMS.asc SHA256SUMS
+sha256sum --check --ignore-missing SHA256SUMS</code></pre>
+      </>
+    ) : (
+      <>
+        <p>{S.verify}</p>
+        <pre dir="ltr"><code>sha256sum --check --ignore-missing SHA256SUMS</code></pre>
+        <p>{S.unsigned}</p>
+      </>
+    )}
+  </>
+)}

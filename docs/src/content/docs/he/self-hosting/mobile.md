@@ -5,14 +5,13 @@ description: איך ה-APK ל-Android וה-IPA ל-iOS נבנים בכל pull req
 
 האפליקציות של Lumen לנייד הן אותו build של הווב עטוף ב-Capacitor: `android/`
 ו-`ios/App/` הם שלדי פרויקט שמחויבים לריפו, ו-`npx cap sync` מעתיק את
-`dist/` לתוכם. `.github/workflows/mobile.yml` בונה את שניהם בכל pull request,
-כך ששינוי שמקלקל את הפרויקטים הנייטיב מתגלה לפני המיזוג.
+`dist/` לתוכם. את שניהם בונים במחשב השחרור, בלי GitHub Actions בנתיב השחרור
+(משימה W1.24).
 
 ## פקודה אחת במחשב שלכם (משימה W4.22)
 
-GitHub Actions כבויים בריפו הזה (החלטת הבעלים, 9.11). לכן לבניות המובייל יש
-גם פקודה מקומית אחת לכל פלטפורמה. ה-workflow שמתואר למטה נשאר לזמן ש-Actions
-יופעלו.
+GitHub Actions כבויים בריפו הזה (החלטת הבעלים, 9.11). לכן בניות המובייל רצות
+בפקודה מקומית אחת לכל פלטפורמה.
 
 ```bash
 npm run mobile:check                                   # מה חסר לכל פלטפורמה, ואיך לתקן
@@ -101,43 +100,18 @@ Connect. כל עוד `ITSAppUsesNonExemptEncryption` לא מוגדר ב-`Info.pl
 - **iOS:** ‏TestFlight במכשיר של טל, או BrowserStack App Live עם קובץ
   ה-`.ipa` (תוכנית הקוד הפתוח).
 
-## מה כל pull request מייצר
+## בשחרור
 
-| job | runner | ארטיפקט | חתום? |
-|---|---|---|---|
-| Android APK | `ubuntu-24.04`, Temurin 21, Android SDK 36 | `lumen-android`: `app-debug.apk` (מפתח debug, מותקן על מכשיר מפתח) ו-`app-release-unsigned.apk` | debug: כן (מפתח debug) · release: רק עם ה-secrets של ה-keystore |
-| iOS IPA | `macos-14`, Xcode | `lumen-ios`: `Lumen-unsigned.ipa` | רק עם ה-secrets של התעודה והפרופיל |
-
-בלי חשבונות בחנויות (פעולה 15.7) שני ה-jobs נשארים ירוקים והארטיפקטים לא
-חתומים: הם מוכיחים שהפרויקטים הנייטיב מתקמפלים מול ה-build הנוכחי של הווב.
-IPA לא חתום לא מותקן בשום מקום; APK של debug מותקן על כל מכשיר Android במצב
-מפתח.
+`node scripts/release.mjs build --mobile` (וכך גם `npm run release -- <גרסה>`)
+מריץ את בניית Android כש-`ANDROID_HOME` מוגדר, ואת בניית iOS (archive
+ו-`.ipa`, בלי העלאה) על Mac. הוא מריץ אותן על בניית הווב של השחרור עצמו ומניח
+את ה-AAB, ה-APK וה-IPA ב-`release/`. כך `SHA256SUMS`, החתימה שלו
+ו[דף ההורדות](/he/download/) מכסים אותם. החתימה מגיעה מאותם משתני סביבה
+שלמעלה (`ANDROID_KEYSTORE_PATH` ושלוש הסיסמאות שלו; מפתח App Store Connect
+ל-iOS), ומשתנה חסר מוזכר לפני שמשהו נבנה.
 
 מקומית: `npm run android:open` / `npm run ios:open` בונים את אפליקציית
 הווב, מסנכרנים אותה לפרויקט הנייטיב ופותחים Android Studio / Xcode.
-
-## חתימה (secrets אופציונליים)
-
-הגדירו את ה-secrets האלה בריפו ואותם jobs יחתמו על ארטיפקטי ה-release;
-צינור השחרור (משימה 13.4) מפרסם אותם.
-
-| secret | מה |
-|---|---|
-| `ANDROID_KEYSTORE_BASE64` | ה-keystore של ה-release, ב-base64 (`base64 -w0 release.keystore`) |
-| `ANDROID_KEYSTORE_PASSWORD` | הסיסמה שלו |
-| `ANDROID_KEY_ALIAS` | ה-alias של המפתח בתוכו |
-| `ANDROID_KEY_PASSWORD` | סיסמת המפתח |
-| `IOS_CERTIFICATE_P12_BASE64` | תעודת ההפצה עם המפתח הפרטי שלה, כ-`.p12`, ב-base64 |
-| `IOS_CERTIFICATE_PASSWORD` | סיסמת ה-`.p12` |
-| `IOS_PROVISIONING_PROFILE_BASE64` | פרופיל ה-provisioning ל-App Store עבור `com.lumen.editor`, ב-base64 |
-| `IOS_PROVISIONING_PROFILE_NAME` | שמו, כפי שמופיע בפורטל המפתחים של Apple |
-| `APPLE_TEAM_ID` | מזהה הצוות |
-
-`android/app/build.gradle` קורא את ה-keystore מ-`ANDROID_KEYSTORE_PATH`
-(ה-workflow מפענח את ה-secret לשם) וחותם על build ה-release רק כשהוא
-מוגדר; שום דבר בריפו לא מחזיק חומר מפתחות. הייצוא ל-iOS משתמש
-ב-`ios/exportOptions.plist` (שיטה `app-store-connect`) עם הצוות והפרופיל
-ממולאים מה-secrets.
 
 גרסאות: `./gradlew -PversionCode=42 -PversionName=1.2.0` קובע את גרסת
 Android; גרסת iOS היא `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION`
