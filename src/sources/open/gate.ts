@@ -62,11 +62,14 @@ export async function withGate<T>(opts: GateOptions & { source: string }, fn: (f
   }
 }
 
-/** Which open sources the user turned on (W7.24). Sefaria is on by default because W5.1 shipped that way; the rest start off. */
-export type OpenSourceId = "sefaria" | "knesset" | "datagov" | "benyehuda";
+/**
+ * Which open sources the user turned on (W7.24). Sefaria is on by default because W5.1 shipped that way; the rest start off.
+ * `registers` (R12.19): the non-profits and companies registers on data.gov.il, and links to Reshumot.
+ */
+export type OpenSourceId = "sefaria" | "knesset" | "datagov" | "benyehuda" | "registers";
 
 const KEY = "lumen.openSources";
-const DEFAULTS: Record<OpenSourceId, boolean> = { sefaria: true, knesset: false, datagov: false, benyehuda: false };
+const DEFAULTS: Record<OpenSourceId, boolean> = { sefaria: true, knesset: false, datagov: false, benyehuda: false, registers: false };
 
 export function enabledSources(storage: Pick<Storage, "getItem"> | null = safeStorage()): Record<OpenSourceId, boolean> {
   try {

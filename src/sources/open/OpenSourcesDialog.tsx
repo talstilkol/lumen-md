@@ -10,7 +10,7 @@
  */
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { t } from "../../i18n";
+import { getLocale, t } from "../../i18n";
 import "./strings";
 import "../../citations/CiteDialog.css";
 import "./OpenSourcesDialog.css";
@@ -32,7 +32,7 @@ export interface DialogDeps {
   onClose: () => void;
 }
 
-const SOURCES: readonly OpenSourceId[] = ["sefaria", "knesset", "datagov", "benyehuda"];
+const SOURCES: readonly OpenSourceId[] = ["sefaria", "knesset", "datagov", "benyehuda", "registers"];
 
 export function OpenSourcesDialog(d: DialogDeps) {
   const [query, setQuery] = useState("");
@@ -175,6 +175,15 @@ export function OpenSourcesDialog(d: DialogDeps) {
               <span className={`os-badge os-badge-${r.rights}`} data-testid="open-sources-badge">
                 {t(`openSources.rights.${r.rights}`)}
               </span>
+              {r.terms && (
+                // R12.19: each register's licence light and its terms of use.
+                <span className={`os-terms os-light-${r.terms.light}`} data-testid="open-sources-terms" dir="auto">
+                  {t(`openSources.light.${r.terms.light}`)} · {getLocale() === "he" ? r.terms.noteHe : r.terms.noteEn}{" "}
+                  <a href={r.terms.termsUrl} target="_blank" rel="noopener noreferrer" onMouseDown={(e) => e.stopPropagation()}>
+                    {t("openSources.terms")}
+                  </a>
+                </span>
+              )}
             </li>
           ))}
         </ul>
