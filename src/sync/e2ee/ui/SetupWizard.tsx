@@ -28,6 +28,8 @@ import type { FileSyncState } from "../status";
 import { WrongPassphraseError } from "../header";
 import { explainError } from "../../../lib/userError";
 import { HelpButton } from "../../../ui/HelpButton";
+import { UnauditedNotice } from "./unaudited";
+import { Modal } from "../../../ui/Modal";
 
 const muted: React.CSSProperties = { fontSize: 13, color: "hsl(var(--fg-muted))" };
 const errorStyle: React.CSSProperties = { fontSize: 13, color: "hsl(var(--danger))" };
@@ -140,11 +142,8 @@ export function SetupWizard({
   const attention = files.filter(([, f]) => f.state === "conflict" || f.state === "error" || f.state === "pending").slice(0, 50);
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "var(--overlay)", display: "grid", placeItems: "center", zIndex: 1000 }} onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+    <Modal aria-labelledby="sync-setup-title" style={{ position: "fixed", inset: 0, background: "var(--overlay)", display: "grid", placeItems: "center", zIndex: 1000 }} onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="sync-setup-title"
         dir={getLocale() === "he" || getLocale() === "ar" ? "rtl" : "ltr"}
         data-testid="sync-setup"
         style={{ width: "min(540px, calc(100vw - 32px))", maxHeight: "calc(100vh - 32px)", overflow: "auto", background: "hsl(var(--bg))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border))", borderRadius: 12, padding: 20, display: "grid", gap: 14 }}
@@ -159,6 +158,7 @@ export function SetupWizard({
             ×
           </button>
         </div>
+        <UnauditedNotice />
 
         {step === "where" && (
           <>
@@ -266,6 +266,6 @@ export function SetupWizard({
           </div>
         )}
       </div>
-    </div>
+    </Modal>
   );
 }

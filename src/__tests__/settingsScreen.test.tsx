@@ -13,6 +13,7 @@ import { SettingsScreen } from "../ui/SettingsScreen";
 import { useAppStore } from "../store/useStore";
 import { downloadText } from "../storage/exportFormats";
 import { showAiToast } from "../ui/AiToast";
+import { allowRemoteImageHosts, allowedRemoteImageHosts, forgetAllRemoteImageHosts } from "../lib/remoteImages";
 
 function file(text: string): File {
   const f = new File([text], "lumen-settings.json", { type: "application/json" });
@@ -39,6 +40,7 @@ describe("SettingsScreen", () => {
       "AI settings",
       "Collaboration settings",
       "Train AI on my style",
+      "Privacy",
       "Trusted signing keys",
       "Organization",
     ]);
@@ -89,6 +91,20 @@ describe("SettingsScreen", () => {
     // Only the screen's own close button: the embedded dialog drops its one.
     expect(screen.getAllByRole("button", { name: "Close" })).toHaveLength(1);
     expect(screen.getAllByRole("dialog")).toHaveLength(1);
+  });
+
+  it("decision 2.41 (W10.E70): the Privacy tab lists the allowed image hosts, and revoking one blocks it again", async () => {
+    forgetAllRemoteImageHosts();
+    allowRemoteImageHosts(["cdn.example.com", "img.example.org"]);
+    render(<SettingsScreen tab="privacy" onClose={() => {}} />);
+    expect(screen.getByRole("tab", { name: "Privacy" }).getAttribute("aria-selected")).toBe("true");
+    const section = await screen.findByTestId("settings-image-hosts");
+    expect(section.querySelector("h3")?.textContent).toBe("Allowed image hosts");
+    expect([...section.querySelectorAll('[data-testid="image-hosts"] li span')].map((s) => s.textContent)).toEqual(["cdn.example.com", "img.example.org"]);
+    fireEvent.click(screen.getByRole("button", { name: /cdn\.example\.com/ }));
+    expect(allowedRemoteImageHosts()).toEqual(["img.example.org"]);
+    await waitFor(() => expect(section.querySelectorAll('[data-testid="image-hosts"] li')).toHaveLength(1));
+    forgetAllRemoteImageHosts();
   });
 
   it("Escape closes", () => {

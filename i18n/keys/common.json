@@ -3604,6 +3604,21 @@
       "vars": []
     },
     {
+      "key": "e2ee.gate.cancel",
+      "en": "Not now",
+      "vars": []
+    },
+    {
+      "key": "e2ee.gate.enable",
+      "en": "Turn on (experimental)",
+      "vars": []
+    },
+    {
+      "key": "e2ee.gate.title",
+      "en": "Turn on encrypted sync?",
+      "vars": []
+    },
+    {
       "key": "e2ee.guide.advanced",
       "en": "Advanced: S3, Dropbox, Google Drive and every detail",
       "vars": []
@@ -4875,6 +4890,16 @@
       "vars": []
     },
     {
+      "key": "e2ee.unaudited.badge",
+      "en": "Experimental — not externally security-audited",
+      "vars": []
+    },
+    {
+      "key": "e2ee.unaudited.body",
+      "en": "Lumen's encryption was written in this project and has not been reviewed by an outside security firm. Keep your own backup of anything you can't afford to lose.",
+      "vars": []
+    },
+    {
       "key": "e2ee.wrap.tampered",
       "en": "This device's key in the vault's keyring doesn't open it: the sync service changed it or put back an old one. Nothing on this device was changed. Try again later; if it stays like this, pair this device again from one you trust.",
       "vars": []
@@ -5273,6 +5298,15 @@
       "vars": []
     },
     {
+      "key": "entityGraph.view.egoOf",
+      "en": "Around {name}: {shown} of {total} entities",
+      "vars": [
+        "name",
+        "shown",
+        "total"
+      ]
+    },
+    {
       "key": "entityGraph.view.everything",
       "en": "Everything",
       "vars": []
@@ -5285,6 +5319,26 @@
     {
       "key": "entityGraph.view.folder",
       "en": "Source folder",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.view.mode",
+      "en": "View",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.view.mode.flows",
+      "en": "Flows, one band per relation",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.view.mode.matrix",
+      "en": "Adjacency matrix",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.view.mode.sankey",
+      "en": "Relations between types (Sankey)",
       "vars": []
     },
     {
@@ -5373,6 +5427,21 @@
     {
       "key": "entityGraph.view.until",
       "en": "Up to",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.view.whole",
+      "en": "Show the whole graph",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.view.why",
+      "en": "Why",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.view.whyOpen",
+      "en": "Why is this here?",
       "vars": []
     },
     {
@@ -5926,6 +5995,16 @@
       "vars": []
     },
     {
+      "key": "flag.sync.e2ee.desc",
+      "en": "End-to-end encrypted sync to a folder, WebDAV, S3 or the relay. Off by default in every build: its cryptography has not had an external security audit yet.",
+      "vars": []
+    },
+    {
+      "key": "flag.sync.e2ee.name",
+      "en": "Encrypted sync (experimental)",
+      "vars": []
+    },
+    {
       "key": "flag.update.checkOnLaunch.desc",
       "en": "Desktop app: look for a new version once a day when Lumen starts, so beta fixes arrive quickly. Never in local-only mode; every check is in the privacy log.",
       "vars": []
@@ -5990,6 +6069,11 @@
     {
       "key": "flags.stage.beta",
       "en": "Beta",
+      "vars": []
+    },
+    {
+      "key": "flags.stage.experimental",
+      "en": "Experimental",
       "vars": []
     },
     {
@@ -10912,6 +10996,11 @@
       "vars": []
     },
     {
+      "key": "settings.privacy",
+      "en": "Privacy",
+      "vars": []
+    },
+    {
       "key": "settings.search",
       "en": "Search settings",
       "vars": []
@@ -14035,6 +14124,419 @@
       "key": "versions.unknownAuthor",
       "en": "someone",
       "vars": []
+    },
+    {
+      "key": "viz.chart",
+      "en": "chart",
+      "vars": []
+    },
+    {
+      "key": "viz.chartFailed",
+      "en": "The chart couldn't be drawn here; its data is in the table.",
+      "vars": []
+    },
+    {
+      "key": "viz.claim.close",
+      "en": "Close the claim card",
+      "vars": []
+    },
+    {
+      "key": "viz.claim.copied",
+      "en": "Copied",
+      "vars": []
+    },
+    {
+      "key": "viz.claim.copy",
+      "en": "Copy the claim",
+      "vars": []
+    },
+    {
+      "key": "viz.claim.counts",
+      "en": "Notes",
+      "vars": []
+    },
+    {
+      "key": "viz.claim.credibility",
+      "en": "Credibility of the information (1–6)",
+      "vars": []
+    },
+    {
+      "key": "viz.claim.credibility.1",
+      "en": "confirmed by three or more notes",
+      "vars": []
+    },
+    {
+      "key": "viz.claim.credibility.2",
+      "en": "confirmed by two notes",
+      "vars": []
+    },
+    {
+      "key": "viz.claim.credibility.3",
+      "en": "confirmed by one note",
+      "vars": []
+    },
+    {
+      "key": "viz.claim.credibility.4",
+      "en": "doubtful: a note rejects it",
+      "vars": []
+    },
+    {
+      "key": "viz.claim.credibility.5",
+      "en": "improbable: more notes reject it than state it",
+      "vars": []
+    },
+    {
+      "key": "viz.claim.credibility.6",
+      "en": "cannot be judged: only proposed, not confirmed",
+      "vars": []
+    },
+    {
+      "key": "viz.claim.forAgainst",
+      "en": "{for} state it · {against} reject it",
+      "vars": [
+        "for",
+        "against"
+      ]
+    },
+    {
+      "key": "viz.claim.noAnchor",
+      "en": "No quote with a paragraph: this claim can't be exported",
+      "vars": []
+    },
+    {
+      "key": "viz.claim.quote",
+      "en": "Quote",
+      "vars": []
+    },
+    {
+      "key": "viz.claim.refused",
+      "en": "Not copied: the claim has no quote",
+      "vars": []
+    },
+    {
+      "key": "viz.claim.reliability",
+      "en": "Reliability of the source (A–F)",
+      "vars": []
+    },
+    {
+      "key": "viz.claim.reliability.A",
+      "en": "court or official record",
+      "vars": []
+    },
+    {
+      "key": "viz.claim.reliability.B",
+      "en": "primary or academic source",
+      "vars": []
+    },
+    {
+      "key": "viz.claim.reliability.C",
+      "en": "media or archive",
+      "vars": []
+    },
+    {
+      "key": "viz.claim.reliability.D",
+      "en": "other source",
+      "vars": []
+    },
+    {
+      "key": "viz.claim.reliability.E",
+      "en": "unreliable (set in the note)",
+      "vars": []
+    },
+    {
+      "key": "viz.claim.reliability.F",
+      "en": "cannot be judged: the note sets no reliability or source class",
+      "vars": []
+    },
+    {
+      "key": "viz.claim.title",
+      "en": "{subject} — {predicate} → {object}",
+      "vars": [
+        "subject",
+        "predicate",
+        "object"
+      ]
+    },
+    {
+      "key": "viz.claim.which",
+      "en": "{count} claims in this band",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "viz.count",
+      "en": "Count",
+      "vars": []
+    },
+    {
+      "key": "viz.date",
+      "en": "Date",
+      "vars": []
+    },
+    {
+      "key": "viz.empty",
+      "en": "Nothing to show: no row has a value for {field}.",
+      "vars": [
+        "field"
+      ]
+    },
+    {
+      "key": "viz.kind.bar",
+      "en": "Bar chart",
+      "vars": []
+    },
+    {
+      "key": "viz.kind.calendar",
+      "en": "Calendar heatmap",
+      "vars": []
+    },
+    {
+      "key": "viz.kind.heatmap",
+      "en": "Heatmap",
+      "vars": []
+    },
+    {
+      "key": "viz.kind.line",
+      "en": "Line chart",
+      "vars": []
+    },
+    {
+      "key": "viz.kind.pie",
+      "en": "Pie chart",
+      "vars": []
+    },
+    {
+      "key": "viz.kind.sankey",
+      "en": "Sankey",
+      "vars": []
+    },
+    {
+      "key": "viz.kind.scatter",
+      "en": "Scatter chart",
+      "vars": []
+    },
+    {
+      "key": "viz.matrix.caption",
+      "en": "{title}: number of relations between each pair",
+      "vars": [
+        "title"
+      ]
+    },
+    {
+      "key": "viz.matrix.limited",
+      "en": "The {shown} most connected of {total}",
+      "vars": [
+        "shown",
+        "total"
+      ]
+    },
+    {
+      "key": "viz.matrix.order",
+      "en": "Order",
+      "vars": []
+    },
+    {
+      "key": "viz.matrix.order.leiden",
+      "en": "Communities (Leiden)",
+      "vars": []
+    },
+    {
+      "key": "viz.matrix.order.louvain",
+      "en": "Communities (Louvain)",
+      "vars": []
+    },
+    {
+      "key": "viz.matrix.order.name",
+      "en": "Name",
+      "vars": []
+    },
+    {
+      "key": "viz.navHint",
+      "en": "{title}. Arrow keys move between the {count} points; Home and End go to the first and last.",
+      "vars": [
+        "title",
+        "count"
+      ]
+    },
+    {
+      "key": "viz.point",
+      "en": "{label}: {value}",
+      "vars": [
+        "label",
+        "value"
+      ]
+    },
+    {
+      "key": "viz.point.name",
+      "en": "Note",
+      "vars": []
+    },
+    {
+      "key": "viz.pointSeries",
+      "en": "{series}, {label}: {value}",
+      "vars": [
+        "series",
+        "label",
+        "value"
+      ]
+    },
+    {
+      "key": "viz.sankey.allYears",
+      "en": "All years",
+      "vars": []
+    },
+    {
+      "key": "viz.sankey.amount",
+      "en": "Amount as written",
+      "vars": []
+    },
+    {
+      "key": "viz.sankey.banner",
+      "en": "Documented in your notes only; no record is not the same as nothing. Every band is one relation, the same width — nothing is added up.",
+      "vars": []
+    },
+    {
+      "key": "viz.sankey.claims",
+      "en": "Claims",
+      "vars": []
+    },
+    {
+      "key": "viz.sankey.from",
+      "en": "From",
+      "vars": []
+    },
+    {
+      "key": "viz.sankey.noAmount",
+      "en": "no amount stated",
+      "vars": []
+    },
+    {
+      "key": "viz.sankey.open",
+      "en": "Open ({count})",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "viz.sankey.to",
+      "en": "To",
+      "vars": []
+    },
+    {
+      "key": "viz.sankey.undated",
+      "en": "no date stated",
+      "vars": []
+    },
+    {
+      "key": "viz.sankey.undatedCount",
+      "en": "{count} with no date stated: always shown, never dated",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "viz.sankey.year",
+      "en": "Up to the year",
+      "vars": []
+    },
+    {
+      "key": "viz.showChart",
+      "en": "Show the chart",
+      "vars": []
+    },
+    {
+      "key": "viz.showTable",
+      "en": "Show the table",
+      "vars": []
+    },
+    {
+      "key": "viz.skipped",
+      "en": "{count} rows without a value are not shown",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "viz.summary",
+      "en": "{kind}: {count} points",
+      "vars": [
+        "kind",
+        "count"
+      ]
+    },
+    {
+      "key": "viz.tableCaption",
+      "en": "{title}: data",
+      "vars": [
+        "title"
+      ]
+    },
+    {
+      "key": "viz.truncated",
+      "en": "{count} more are left out",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "viz.unknownKind",
+      "en": "Unknown chart type {kind}; use one of {kinds}.",
+      "vars": [
+        "kind",
+        "kinds"
+      ]
+    },
+    {
+      "key": "viz.why.confidence",
+      "en": "confidence {value}",
+      "vars": [
+        "value"
+      ]
+    },
+    {
+      "key": "viz.why.confirmed",
+      "en": "confirmed by you",
+      "vars": []
+    },
+    {
+      "key": "viz.why.nobody",
+      "en": "nobody has confirmed it yet",
+      "vars": []
+    },
+    {
+      "key": "viz.why.step.edge",
+      "en": "Line",
+      "vars": []
+    },
+    {
+      "key": "viz.why.step.note",
+      "en": "Note",
+      "vars": []
+    },
+    {
+      "key": "viz.why.step.paragraph",
+      "en": "Paragraph",
+      "vars": []
+    },
+    {
+      "key": "viz.why.step.quote",
+      "en": "Quote",
+      "vars": []
+    },
+    {
+      "key": "viz.why.title",
+      "en": "Why is this edge here",
+      "vars": []
+    },
+    {
+      "key": "viz.why.tool",
+      "en": "Proposed by {extractor} ({model}) on {date}",
+      "vars": [
+        "extractor",
+        "model",
+        "date"
+      ]
     },
     {
       "key": "voiceCmd.confirmDelete",

@@ -26,7 +26,8 @@ const reqs: ContentFrameRequest[] = [
 
 describe("createContentFrame (C9)", () => {
   // W6.40 (#528): an embed is framed only from the content frame's own site; on the app's host it is a link.
-  for (const req of reqs.filter((r) => r.kind !== "embed")) {
+  // W10.D2 (#666): a Gist is always a link to GitHub, never a frame running GitHub's script.
+  for (const req of reqs.filter((r) => r.kind !== "embed" && r.kind !== "gist")) {
     it(`${req.kind}: an iframe on the content frame page, with the kind's sandbox`, () => {
       const f = createContentFrame(req, document);
       expect(f.tagName).toBe("IFRAME");
@@ -37,6 +38,22 @@ describe("createContentFrame (C9)", () => {
       expect(f.hasAttribute("srcdoc")).toBe(false);
     });
   }
+  it("gist: a link to gist.github.com, with no frame and no script, on any host (W10.D2)", () => {
+    const gist = reqs.find((r) => r.kind === "gist")!;
+    for (const site of [null, "https://frame.example.org/"]) {
+      __setContentFrameUrl(site);
+      try {
+        const scripts = document.querySelectorAll("script").length;
+        const el = createContentFrame(gist, document);
+        expect(el.tagName).toBe("A");
+        expect(new URL(el.getAttribute("href") ?? "").origin).toBe("https://gist.github.com");
+        expect(el.querySelector("iframe, script")).toBeNull();
+        expect(document.querySelectorAll("script").length).toBe(scripts);
+      } finally {
+        __setContentFrameUrl(undefined);
+      }
+    }
+  });
   it("embed: a link on the app's host, an iframe on the content frame's own site (W6.40)", () => {
     const embed = reqs.find((r) => r.kind === "embed")!;
     __setContentFrameUrl(null);

@@ -31,6 +31,9 @@ export interface NoteInfo {
   tags: readonly string[];
   /** ISO day of the note (its `date` property), if any. */
   date?: string;
+  /** R12.8 claim card: the note's own `reliability:` (A–F) and `source-class:`, as written. */
+  reliability?: string;
+  sourceClass?: string;
 }
 
 export interface VisibleGraph {

@@ -5,6 +5,7 @@ import "./strings";
 import "./WhatsNewDialog.css";
 import { t } from "../i18n";
 import { HelpButton } from "../ui/HelpButton";
+import { Modal } from "../ui/Modal";
 
 export interface ShownNotes {
   version: string;
@@ -28,8 +29,8 @@ export function WhatsNewDialog({ notes, version, render, onClose }: { notes: Sho
     return () => window.removeEventListener("keydown", k);
   }, [onClose]);
   return (
-    <div className="wn-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="wn-dialog" role="dialog" aria-modal="true" aria-labelledby="wn-title" data-testid="whats-new" data-version={notes?.version ?? version}>
+    <Modal aria-labelledby="wn-title" className="wn-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="wn-dialog" data-testid="whats-new" data-version={notes?.version ?? version}>
         <h2 id="wn-title">{t("whatsNew.title", { version: notes?.version ?? version })}</h2>
         <HelpButton topic="getting-started/whats-new" />
         {notes?.date && <p className="wn-date">{notes.date}</p>}
@@ -44,7 +45,7 @@ export function WhatsNewDialog({ notes, version, render, onClose }: { notes: Sho
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

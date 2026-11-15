@@ -47,3 +47,39 @@ the relations between them ("born in", "member of", "cites", …).
   neighbours, and Enter centres the view.
 - Export to JSON-LD (schema.org), GraphML, RDF/Turtle with PROV-O, or
   Neo4j `neo4j-admin import` CSV. Every relation keeps its source.
+
+## Sankey, matrix, claims and "why"
+
+The view's **View** menu adds three ways to look at the same filtered
+relations:
+
+- **Relations between types (Sankey)**: how many relations run from each
+  entity type to each other type. A `.base` chart view does the same for
+  two properties: `chart: sankey` with `x:` (from) and `series:` (to).
+- **Flows, one band per relation**: every relation is one band of the same
+  width, so nothing is added up or compared by size; an amount is shown
+  only as the note states it ("no amount stated" otherwise). "Up to the
+  year" keeps the dated flows up to that year; flows with no date are
+  always shown as their own group.
+- **Adjacency matrix**: a table with a row and a column per entity and the
+  number of relations in each cell, in community order (Leiden by default,
+  or Louvain, or by name), so groups sit together along the diagonal. Up
+  to 200 entities; a bigger graph shows its most connected 200.
+
+In Hebrew the Sankey's sources are on the right. Each Sankey has a table of
+its bands with an "Open" button, and on the picture the arrow keys move from
+band to band and **Enter** opens one.
+
+**Ego graph by default.** A graph of more than 50 entities opens around one
+entity (the most connected, or the one you opened from), two steps out and
+trimmed to 50, and says "50 of 1,234"; "Show the whole graph" is one click.
+
+**The claim card.** "Why is this here?" on a relation (or Open on a band)
+shows two separate grades, the NATO/Admiralty way: **A–F**, how reliable the
+source note is (its `reliability:` if you set one, else its `source-class:`
+— court/official A, primary/academic B, media/archive C, other D — else F,
+cannot be judged), and **1–6**, how credible the information is (how many
+notes state it and whether any rejects it). Under them: the quote with its
+note and paragraph, and the chain note → paragraph → quote → line, with
+the tool that proposed it and whether you confirmed it. A claim with no
+quote is marked and can't be copied out.

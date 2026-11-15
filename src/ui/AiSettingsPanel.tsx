@@ -13,7 +13,6 @@
  */
 
 import { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
-import { useFocusTrap } from "./useFocusTrap";
 import { Cpu, X } from "lucide-react";
 import { t } from "../i18n";
 import { ollamaLicenceNotice } from "../ai/modelCatalog";
@@ -30,6 +29,7 @@ import { uiConfirm } from "./PromptDialog";
 import { HelpButton } from "./HelpButton";
 import "./aiSettingsPanelStrings";
 import { explainError } from "../lib/userError";
+import { Modal } from "./Modal";
 
 interface Props {
   open: boolean;
@@ -218,11 +218,6 @@ export function AiSettingsPanel({ open, onClose, embedded = false }: Props) {
     };
   }, [open, refreshStatus, refreshStorage]);
 
-  // Focus stays in the dialog while it is open and returns on close; Escape closes it (plan 10.1).
-  const trapRef = useRef<HTMLDivElement | null>(null);
-  // Embedded in the settings screen, that screen traps focus and handles Escape.
-  useFocusTrap(trapRef, { active: open && !embedded, onEscape: onClose });
-
   if (!open) return null;
 
   const flash = () => {
@@ -396,12 +391,10 @@ export function AiSettingsPanel({ open, onClose, embedded = false }: Props) {
     s === "checking" ? t("ai.settings.checking") : s.available ? t("ai.settings.available") : t("ai.settings.unavailable", { reason: s.detail ?? "" });
 
   return (
-    <div
+    <Modal
+      embedded={embedded} onClose={onClose}
       className={embedded ? undefined : "cmd-palette-backdrop"}
       onClick={embedded ? undefined : onClose}
-      ref={trapRef}
-      role={embedded ? "region" : "dialog"}
-      aria-modal={embedded ? undefined : "true"}
       aria-label={t("ai.settings.title")}
     >
       <div
@@ -669,6 +662,6 @@ export function AiSettingsPanel({ open, onClose, embedded = false }: Props) {
           </section>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

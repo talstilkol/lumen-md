@@ -1639,6 +1639,14 @@
       ]
     },
     {
+      "key": "vault.folder.lateCopies",
+      "en": "{n} note(s) were saved in the previous location while the move was finishing. Their newer text is in the vault now, as a conflict copy next to the note where needed (first: “{path}”).",
+      "vars": [
+        "n",
+        "path"
+      ]
+    },
+    {
       "key": "vault.folder.moved",
       "en": "The vault is now in the folder “{folder}”: {n} files copied and checked. Your notes in browser storage were not deleted.",
       "vars": [
@@ -1716,6 +1724,18 @@
     {
       "key": "vault.prompt.encryptPassword",
       "en": "Enter encryption password:",
+      "vars": []
+    },
+    {
+      "key": "vault.watch.unreadable.body",
+      "en": "Changes made outside Lumen in “{folder}” are not noticed until it can be read again.",
+      "vars": [
+        "folder"
+      ]
+    },
+    {
+      "key": "vault.watch.unreadable.title",
+      "en": "A folder can't be read",
       "vars": []
     },
     {

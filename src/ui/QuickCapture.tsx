@@ -26,6 +26,7 @@ import { tapReady } from "../mobile/nativeActions";
 import { log } from "../lib/logger";
 import { HelpButton } from "./HelpButton";
 import { explainError } from "../lib/userError";
+import { Modal } from "./Modal";
 
 interface Props {
   open: boolean;
@@ -147,10 +148,9 @@ export function QuickCapture({ open, onClose, voice: voiceOnOpen }: Props) {
   };
 
   return (
-    <div
+    <Modal
+      onClose={close}
       className="prompt-backdrop"
-      role="dialog"
-      aria-modal="true"
       aria-labelledby="quick-capture-title"
       data-testid="quick-capture"
       onMouseDown={(e) => {
@@ -234,6 +234,6 @@ export function QuickCapture({ open, onClose, voice: voiceOnOpen }: Props) {
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

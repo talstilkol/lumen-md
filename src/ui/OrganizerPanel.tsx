@@ -15,6 +15,7 @@ import { formatEta } from "./BatchPanel";
 import "./organizerPanelStrings";
 import { HelpButton } from "./HelpButton";
 import { EmptyState, learnHow } from "./EmptyState";
+import { Modal } from "./Modal";
 
 const btn: React.CSSProperties = { padding: "4px 10px", fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer" };
 const primary: React.CSSProperties = { ...btn, background: "hsl(var(--accent))", color: "hsl(var(--accent-fg, 0 0% 100%))", borderColor: "transparent" };
@@ -67,7 +68,7 @@ export function OrganizerPanel({ job, onClose }: { job: OrganizerJob; onClose: (
   };
 
   return (
-    <div className="cmd-palette-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-label={t("organizer.title")} data-testid="organizer-panel" data-phase={s.phase}>
+    <Modal className="cmd-palette-backdrop" onClick={onClose} aria-label={t("organizer.title")} data-testid="organizer-panel" data-phase={s.phase}>
       <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 680, padding: 0, display: "flex", flexDirection: "column", maxHeight: "84vh" }}>
         <header style={{ padding: "12px 16px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <Network size={16} />
@@ -141,7 +142,7 @@ export function OrganizerPanel({ job, onClose }: { job: OrganizerJob; onClose: (
           ))}
         </ul>
       </div>
-    </div>
+    </Modal>
   );
 }
 

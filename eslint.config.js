@@ -17,6 +17,7 @@ import reactHooks from "eslint-plugin-react-hooks";
 import jsxA11y from "eslint-plugin-jsx-a11y";
 import globals from "globals";
 import emptyCatchWhy from "./eslint-rules/empty-catch-why.js";
+import modalOnly from "./eslint-rules/modal-only.js";
 
 export default tseslint.config(
   {
@@ -43,7 +44,7 @@ export default tseslint.config(
     },
     plugins: {
       "react-hooks": reactHooks,
-      lumen: { rules: { "empty-catch-why": emptyCatchWhy } },
+      lumen: { rules: { "empty-catch-why": emptyCatchWhy, "modal-only": modalOnly } },
     },
     rules: {
       // 0.4.1
@@ -52,6 +53,8 @@ export default tseslint.config(
       "@typescript-eslint/no-floating-promises": ["error", { ignoreVoid: true }],
       // 0.4.2: an empty catch says why (`// why: …`). Replaces no-empty for catch blocks.
       "lumen/empty-catch-why": "error",
+      // 10.1 / W10.E8: every modal dialog is <Modal> (src/ui/Modal.tsx); aria-modal nowhere else.
+      "lumen/modal-only": "error",
       "no-empty": ["error", { allowEmptyCatch: true }],
       // TypeScript already checks these.
       "no-undef": "off",
@@ -63,6 +66,8 @@ export default tseslint.config(
     // Tests: same rules, plus the test runner's globals.
     files: ["src/**/__tests__/**/*.{ts,tsx}", "src/**/*.test.{ts,tsx}"],
     languageOptions: { globals: { ...globals.node } },
+    // Test fixtures build hand-made dialogs on purpose (the focus trap's own tests).
+    rules: { "lumen/modal-only": "off" },
   },
   {
     // errorBoundary.test.ts and .tsx share a base name, so the TypeScript
