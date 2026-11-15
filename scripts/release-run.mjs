@@ -69,7 +69,7 @@ import { filesUnder } from "./supply-chain/lib.mjs";
 import { formatPublicKey, generateKeys, parsePublicKey, rawPublicKey, readSecretKey, signData, verifyData } from "./supply-chain/minisign.mjs";
 import { buildSbom, sourceDate } from "./supply-chain/sbom.mjs";
 import { verifyRelease } from "./supply-chain/verify-release.mjs";
-import { provenanceGate } from "./supply-chain/release-gate.mjs";
+import { ENGINE_ENV, provenanceGate, releaseEngine, witnessProblems, witnessRefusal } from "./supply-chain/release-gate.mjs";
 
 const ROOT = process.cwd();
 const OUT = path.join(ROOT, "release");
@@ -213,6 +213,14 @@ export async function main(argv) {
   for (const i of items) console.log(`${i.ok ? "✓" : i.blocking ? "✗" : "·"} ${i.what}${i.ok ? "" : `\n    → ${i.fix}`}`);
   const blocking = items.filter((i) => i.blocking);
   if (blocking.length) throw new Error(`${blocking.length} preflight item(s) missing — fix the ✗ lines above and run again`);
+  // W7.22 (W10.E54): before anything is built or tagged, Witness must be ready, unless the Node attester is asked for by name.
+  if (o.publish) {
+    if (releaseEngine(process.env) === "witness") {
+      const missing = witnessProblems({ root: ROOT });
+      if (missing.length) throw new Error(witnessRefusal(missing));
+      console.log("✓ provenance: Witness");
+    } else console.log(`· provenance: ${ENGINE_ENV}=node, the Node attester without Witness (the explicit fallback)`);
+  }
 
   const original = new Map();
   const write = (p, text) => {

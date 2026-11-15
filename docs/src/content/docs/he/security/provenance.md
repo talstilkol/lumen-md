@@ -58,10 +58,15 @@ cosign ישן מ-3.0.4 נדחה: הוא עלול לקבל חבילה שרשומ�
 1. **במארח הבנייה** (המכונה של מפעל האימות, W6.5): הגרסה נבנית תחת
    `attest.mjs`.
    - הסקריפט כותב את ה-provenance וחותם עליו במפתח של המארח, שלא יוצא מהמכונה.
-   - כש-[Witness](https://witness.dev) מותקן (`scripts/supply-chain/install-tools.sh`,
-     גרסאות נעוצות שנבדקות מול קובצי ה-checksum של הגרסה שלהן), הבנייה רצה
-     גם תחת `witness run --step build -a slsa`. ה-attestation של Witness נשמר
-     ל-`witness verify`‏ (`verify.mjs --witness`).
+   - [Witness](https://witness.dev) הוא שער השחרור (W7.22 צעד 3). הוא מותקן
+     ב-`scripts/supply-chain/install-tools.sh`, בגרסאות נעוצות שנבדקות מול קובצי
+     ה-checksum של הגרסה שלהן. ה-attestation רץ תחת `witness run --step build -a slsa`,
+     וכל קובץ חייב לעבור `witness verify`‏ (`verify.mjs --witness`).
+     ‏`npm run release -- <v> --publish` **עוצר לפני שמשהו נבנה או מתויג** כשחסר
+     אחד מאלה: `witness` ב-PATH, ‏`LUMEN_WITNESS_KEY`, או
+     `security/witness-policy.signed.json` שמור בקומיט.
+   - ה-attester של Node שבריפו, לבדו, הוא רק **גיבוי מפורש**:
+     `LUMEN_PROVENANCE_ENGINE=node`, ויומן השחרור מדפיס את זה.
 
    ```bash
    node scripts/supply-chain/attest.mjs --out release -- <the release build: W4.5's release command, #492>
@@ -121,6 +126,10 @@ publishing וה-provenance האוטומטי של npm עובדים רק מ-GitHub
    ו-`sign.sh` מסרבים לרוץ ומציינים את ה-placeholder בשמו.
 4. **במארח הבנייה:** `sudo bash scripts/supply-chain/install-tools.sh`. רושמים
    ב-PR את ערכי ה-sha256 שהוא מדפיס.
+5. **Witness:** מפתח חתימה של Witness במארח הבנייה (`LUMEN_WITNESS_KEY`, לא מפתח
+   המדיניות), ומדיניות Witness חתומה במפתח המדיניות, שמורה בקומיט בתור
+   `security/witness-policy.signed.json`. בלעדיהם גרסה שמתפרסמת נדחית, אלא אם
+   `LUMEN_PROVENANCE_ENGINE=node`.
 
 ## נבדק בלי רשת
 
