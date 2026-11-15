@@ -20,6 +20,7 @@ npm run nightly -- --dry-run     # print the plan, run nothing
 | `triage` | every night | review triage of the open PRs, the 0.14 count over the first 20 PRs since 12.11.2026, `live:meta --self-test` and the ruleset drift check (both below) |
 | `weekly` | Sundays (UTC) | dependency health (audit, outdated, licences), and mutation scores: on a branch with `scripts/mutation/check.mjs`, the critical modules under real vitest (`run.mjs --critical --receipt --min 80`, then `mutation:check`), otherwise `test:mutation` |
 | `sr` | every night, on a Mac with `@guidepup/*` installed | `npx @guidepup/setup --ci`, then the Hebrew journey under VoiceOver ([screen readers, automated](/editor/screen-reader-automation/)). Not counted by 0.11. |
+| `supply` | every night, on a host where `scorecard`, `osv-scanner`, `cargo-deny` or `syft` is installed | the supply-chain checks ([below](#supply-chain-checks-plan-w11s5)). Not counted by 0.11. |
 
 `--only flake,perf` picks kinds. The scheduler passes `--scheduled`, which
 marks the reports as scheduled. Plan 0.11 counts only those.
@@ -120,6 +121,51 @@ or open a PR from it. Linux uses cron instead:
   has no browsers and can't install packages, so it can run only the
   `triage` kind (GitHub's REST API) and read the committed receipts. That is
   useful for a morning summary, not for the measurements themselves.
+
+## Supply-chain checks (plan W11.S5)
+
+Scorecard and CodeQL exist in this repository only as GitHub Actions YAML,
+so neither has ever run. `scripts/supply/nightly.mjs` runs the
+supply-chain checks on the nightly host instead:
+
+| Check | Command | Needs |
+|---|---|---|
+| Scorecard | `scorecard --repo=github.com/talstilkol/lumen-md --format json` | the network and `GITHUB_AUTH_TOKEN`, a fine-grained token with read-only access |
+| OSV | `osv-scanner scan source` on `package-lock.json`, `mcp-server/package-lock.json` and `src-tauri/Cargo.lock` | the network |
+| cargo deny | `cargo-deny check advisories bans` in `src-tauri` | the network (the RustSec database) |
+| SBOM | `syft dir:. -o cyclonedx-json` | nothing |
+
+```bash
+npm run supply:nightly                 # what is installed; sealed receipt → reports/nightly/<date>-supply.json
+npm run supply:nightly -- --dry-run    # nothing runs, no network; the receipt gives each skip reason
+npm run supply:nightly -- --open-tasks # also open a GitHub issue for each new task
+```
+
+Inside `npm run nightly`, the `supply` kind runs the script and seals its
+results into that night's report, under `supply`.
+
+The receipt holds the gates of W11.M8. A check that was skipped leaves its
+gates **unmeasured**, never passed:
+
+- the Scorecard aggregate is at least 7.0;
+- Branch-Protection is at least 8, Code-Review at least 8, and
+  Dangerous-Workflow is 10;
+- OSV finds 0 critical vulnerabilities.
+
+A **task** is listed in the receipt, and opened as an issue with
+`--open-tasks`, when:
+
+- the Scorecard aggregate is lower than in the previous receipt;
+- a gated check is below its floor;
+- OSV finds a critical or high vulnerability;
+- cargo deny reports an error.
+
+Each task has a stable key, so a finding that is still there the next night
+doesn't open a second issue.
+
+The release already ships its own CycloneDX SBOM (`release/sbom.cdx.json`,
+[supply chain](/security/supply-chain/)). The nightly's `syft` SBOM is a
+second, independent inventory of the same tree.
 
 ## Live metadata check (plan W6.2)
 

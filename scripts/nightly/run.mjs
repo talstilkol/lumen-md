@@ -16,6 +16,9 @@
  *            branch has scripts/mutation/check.mjs, else npm run test:mutation
  *   sr       the Hebrew screen-reader journey under VoiceOver (Guidepup, W6.30) — on a
  *            Mac with @guidepup/* installed, every night; `--only sr` runs it alone
+ *   supply   Scorecard, osv-scanner, cargo deny and a syft SBOM (W11.S5,
+ *            scripts/supply/nightly.mjs) — every night on a host where at least one
+ *            of those binaries is installed; `--only supply` runs it anyway
  *
  *   npm run nightly                          # what is due today: flake, perf, triage (+ weekly on Sunday)
  *   npm run nightly -- --only triage,weekly  # these kinds only
@@ -35,6 +38,7 @@ import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { check, keyPath, loadOrCreateKey, seal, sha256 } from "./receipt.mjs";
 import { BROWSERS, ciLocalMetric, FLAKE_TIMES, KINDS, planStatus, PROBE } from "./status.mjs";
+import { CHECKS as SUPPLY_CHECKS, onPath } from "../supply/nightly.mjs";
 
 const root = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 export const NIGHTLY_DIR = join(root, "reports", "nightly");
@@ -49,6 +53,14 @@ const REPO = "talstilkol/lumen-md";
  */
 export const SR_KIND = "sr";
 
+/**
+ * The supply-chain kind (W11.S5). Not one of status.mjs's KINDS either: 0.11
+ * counts the four scheduled kinds. Its numbers and gates go into the sealed
+ * report under `supply`.
+ */
+export const SUPPLY_KIND = "supply";
+export const SUPPLY_SUMMARY = join("reports", "supply", "summary.json");
+
 /** Guidepup is installed (owner: `npm install -D @guidepup/guidepup @guidepup/playwright @guidepup/setup`). */
 export function srReady(dir = root, exists = existsSync) {
   return ["@guidepup/guidepup", "@guidepup/playwright", "@guidepup/setup"].every((p) => exists(join(dir, "node_modules", p, "package.json")));
@@ -56,12 +68,13 @@ export function srReady(dir = root, exists = existsSync) {
 
 /**
  * The kinds due on a date: every night flake, perf and triage; weekly on
- * Sundays (UTC); sr every night on a Mac where Guidepup is installed.
+ * Sundays (UTC); sr every night on a Mac where Guidepup is installed;
+ * supply every night where a supply-chain scanner is installed.
  */
-export function kindsDue(date, only = null, host = { platform: "", sr: false }) {
-  const all = [...KINDS, SR_KIND];
+export function kindsDue(date, only = null, host = { platform: "", sr: false, supply: false }) {
+  const all = [...KINDS, SR_KIND, SUPPLY_KIND];
   if (only?.length) return all.filter((k) => only.includes(k));
-  return all.filter((k) => (k === "weekly" ? date.getUTCDay() === 0 : k === SR_KIND ? host.platform === "darwin" && host.sr : true));
+  return all.filter((k) => (k === "weekly" ? date.getUTCDay() === 0 : k === SR_KIND ? host.platform === "darwin" && host.sr : k === SUPPLY_KIND ? Boolean(host.supply) : true));
 }
 
 /** reports/nightly/<YYYY-MM-DD>-<kind>.json, or -2, -3… when that name is taken. */
@@ -124,6 +137,9 @@ export function stepsFor(kind, has, exists = (f) => existsSync(join(root, f))) {
         { id: "sr-setup", cmd: ["npx", "--no-install", "@guidepup/setup", "--ci"], timeoutMin: 10 },
         { id: "sr-voiceover", cmd: ["npm", "run", "test:sr", "--", "--project=voiceover"], timeoutMin: 30 },
       ];
+    case SUPPLY_KIND:
+      // The script writes its unsealed summary; this report seals it (one receipt, not two).
+      return [{ id: "supply-chain", cmd: ["node", "scripts/supply/nightly.mjs", "--no-seal", "--out", SUPPLY_SUMMARY], timeoutMin: 60 }];
     default:
       throw new Error(`unknown kind ${kind}`);
   }
@@ -288,7 +304,7 @@ function main() {
   }
   const now = new Date();
   const only = opt("only")?.split(",").filter(Boolean) ?? null;
-  const kinds = argv.includes("--status") ? [] : kindsDue(now, only, { platform: process.platform, sr: srReady() });
+  const kinds = argv.includes("--status") ? [] : kindsDue(now, only, { platform: process.platform, sr: srReady(), supply: SUPPLY_CHECKS.some((c) => onPath(c.bin)) });
   const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
   const has = (s) => Boolean(pkg.scripts?.[s]);
   if (argv.includes("--dry-run")) {
@@ -333,6 +349,15 @@ function main() {
         report.sr = { journeys: collectSr(JSON.parse(readFileSync(f, "utf8"))) };
       } catch {
         report.sr = { journeys: [], error: "no sr-results/results.json" };
+      }
+    }
+    if (kind === SUPPLY_KIND) {
+      try {
+        const { version: _v, kind: _k, ...supply } = JSON.parse(readFileSync(join(root, SUPPLY_SUMMARY), "utf8"));
+        // A summary left over from an earlier run is not this night's.
+        report.supply = supply.startedAt >= startedAt ? supply : { error: `${SUPPLY_SUMMARY} is older than this run` };
+      } catch {
+        report.supply = { error: `no ${SUPPLY_SUMMARY}` };
       }
     }
     if (kind === "triage") {
