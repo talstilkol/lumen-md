@@ -20,6 +20,7 @@ const SRC = resolve(__dirname, "..");
  * statically); the users may import each other statically inside it.
  */
 const DOMAINS: Record<string, { module: string; users: string[]; prefixes: string[]; within?: string; shared?: string[] }> = {
+  "entityGraph.json": { module: "ui/entityGraphStrings.ts", users: ["ui/EntityReviewPanel.tsx", "ui/EntityGraphView.tsx", "ui/EntityPage.tsx"], prefixes: ["entityGraph."] },
   "caption.json": { module: "ai/captionStrings.ts", users: ["ai/caption.ts"], prefixes: ["caption."] },
   "nikud.json": { module: "ai/nikudStrings.ts", users: ["ai/nikudService.ts"], prefixes: ["toast.nikud.", "models.purpose.nikud", "nikud.alt."] },
   "eviction.json": { module: "storage/evictionStrings.ts", users: ["storage/evictionReminder.ts"], prefixes: ["storage.eviction."] },

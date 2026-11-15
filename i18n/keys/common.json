@@ -5743,6 +5743,462 @@
       "vars": []
     },
     {
+      "key": "entityGraph.merge.action",
+      "en": "Merge",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.merge.done",
+      "en": "Merged. Links now point at the kept note.",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.merge.into",
+      "en": "and merge into it",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.merge.keep",
+      "en": "Keep",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.merge.title",
+      "en": "Merge two entities",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.notice.no-relations",
+      "en": "Relations need a local model; none is running, and there is no cloud path.",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.notice.rules-only",
+      "en": "Rules only: no local entity model on this device, so only dates, laws and verses are found.",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.page.aliases",
+      "en": "Also known as",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.page.incoming",
+      "en": "Referred to by",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.page.mentions",
+      "en": "Mentions",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.page.none",
+      "en": "None yet.",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.page.openSource",
+      "en": "Open the source paragraph {link}",
+      "vars": [
+        "link"
+      ]
+    },
+    {
+      "key": "entityGraph.page.outgoing",
+      "en": "Relations",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.page.source.changed",
+      "en": "Source changed",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.page.source.missing-note",
+      "en": "Source note missing",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.page.source.missing-paragraph",
+      "en": "Source paragraph missing",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.page.source.ok",
+      "en": "Source unchanged",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.predicate.amends",
+      "en": "amends",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.predicate.author",
+      "en": "author",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.predicate.born_in",
+      "en": "born in",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.predicate.child",
+      "en": "child",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.predicate.cites",
+      "en": "cites",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.predicate.died_in",
+      "en": "died in",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.predicate.employer",
+      "en": "works for",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.predicate.enacted_by",
+      "en": "enacted by",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.predicate.founded_by",
+      "en": "founded by",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.predicate.headquarters",
+      "en": "headquarters",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.predicate.located_in",
+      "en": "located in",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.predicate.main_subject",
+      "en": "main subject",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.predicate.member_of",
+      "en": "member of",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.predicate.part_of",
+      "en": "part of",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.predicate.participant_in",
+      "en": "participant in",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.predicate.point_in_time",
+      "en": "point in time",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.predicate.position_held",
+      "en": "position held",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.predicate.related_to",
+      "en": "related to",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.predicate.spouse",
+      "en": "spouse",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.predicate.student_of",
+      "en": "student of",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.review.actions",
+      "en": "Proposal actions",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.review.approve",
+      "en": "Approve",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.review.approveSelected",
+      "en": "Approve {n} selected",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "entityGraph.review.approved",
+      "en": "Approved.",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.review.empty",
+      "en": "No proposals waiting.",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.review.list",
+      "en": "Proposals: arrows move, Space selects, A approves, R rejects",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.review.reject",
+      "en": "Reject",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.review.rejectSelected",
+      "en": "Reject {n} selected",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "entityGraph.review.rejected",
+      "en": "Rejected. It will not be proposed again.",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.review.select",
+      "en": "Select",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.review.title",
+      "en": "Graph proposals",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.review.undo",
+      "en": "Undo",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.review.undone",
+      "en": "Undone. The files are back as they were.",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.split.action",
+      "en": "Split",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.split.done",
+      "en": "Split into a new entity.",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.split.from",
+      "en": "Split from",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.split.name",
+      "en": "New entity's name",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.split.pick",
+      "en": "Names and relations to move",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.split.title",
+      "en": "Split an entity",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.type.concept",
+      "en": "Concept",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.type.event",
+      "en": "Event / date",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.type.law",
+      "en": "Law",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.type.organization",
+      "en": "Organization",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.type.person",
+      "en": "Person",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.type.place",
+      "en": "Place",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.type.source",
+      "en": "Source / verse",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.view.aria",
+      "en": "Entity graph of {nodes} entities",
+      "vars": [
+        "nodes"
+      ]
+    },
+    {
+      "key": "entityGraph.view.around",
+      "en": "Around",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.view.confidence",
+      "en": "Min. confidence",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.view.date",
+      "en": "Date",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.view.depth",
+      "en": "Hops",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.view.edges",
+      "en": "Relations",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.view.everything",
+      "en": "Everything",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.view.filters",
+      "en": "Entity graph filters",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.view.folder",
+      "en": "Source folder",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.view.name",
+      "en": "Name",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.view.neighbours",
+      "en": "Neighbours",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.view.nodes",
+      "en": "Entities",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.view.object",
+      "en": "Object",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.view.pause",
+      "en": "Pause",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.view.play",
+      "en": "Play",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.view.relation",
+      "en": "Relation",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.view.relations",
+      "en": "Relations",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.view.showGraph",
+      "en": "Show as graph",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.view.showTable",
+      "en": "Show as table",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.view.source",
+      "en": "Source",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.view.stats",
+      "en": "{nodes} entities · {edges} relations",
+      "vars": [
+        "nodes",
+        "edges"
+      ]
+    },
+    {
+      "key": "entityGraph.view.subject",
+      "en": "Subject",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.view.tag",
+      "en": "Source tag",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.view.type",
+      "en": "Type",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.view.types",
+      "en": "Entity types",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.view.until",
+      "en": "Up to",
+      "vars": []
+    },
+    {
       "key": "epub.chapterOf",
       "en": "Chapter {n} of {total}",
       "vars": [
