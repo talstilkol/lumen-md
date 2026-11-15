@@ -78,8 +78,20 @@ export interface SearchResult {
   regexSkipped: number;
   /** With `regexSkipped`: the length limit (characters) those notes are over. */
   regexMaxChars?: number;
-  /** The /regex/ ran past `REGEX_TIME_LIMIT_MS` and was stopped: no hits (set by the main thread). */
+  /** The /regex/ ran past `REGEX_TIME_LIMIT_MS` and was stopped: no hits. */
   regexTimedOut?: true;
+}
+
+/**
+ * 2.39, review Z6-H1/M4: what a search tells its caller about the /regex/ it runs. The decision rests on the
+ * parse that runs the regex (`parseQuery` below), never on a second look at the query text, so no query syntax
+ * runs a regex without them.
+ */
+export interface QueryHooks {
+  /** Called once, right before the first note is matched against a /regex/ of the query (not at all without one). */
+  onRegexStart?: () => void;
+  /** Asked between notes once the regex runs: true stops the search with `regexTimedOut` (the in-thread budget). */
+  regexOverdue?: () => boolean;
 }
 
 export interface SearchOptions {
@@ -413,18 +425,20 @@ export class VaultIndex {
    * the whole query found as a phrase adds a few more. Each hit carries a
    * snippet around the phrase, or around its best-matching word.
    */
-  search(rawQuery: string, opts: SearchOptions = {}): SearchHit[] {
-    return this.query(rawQuery, opts).hits;
+  search(rawQuery: string, opts: SearchOptions = {}, hooks: QueryHooks = {}): SearchHit[] {
+    return this.query(rawQuery, opts, hooks).hits;
   }
 
-  /** `search`, and how many notes a /regex/ skipped because they are too long (2.39). */
-  query(rawQuery: string, opts: SearchOptions = {}): SearchResult {
+  /** `search`, and how many notes a /regex/ skipped because they are too long (2.39), or that it ran out of time. */
+  query(rawQuery: string, opts: SearchOptions = {}, hooks: QueryHooks = {}): SearchResult {
     let regexSkipped = 0;
-    const hits = this.rank(rawQuery, opts, () => regexSkipped++);
+    let timedOut = false;
+    const hits = this.rank(rawQuery, opts, () => regexSkipped++, hooks, () => (timedOut = true));
+    if (timedOut) return { hits: [], regexSkipped, regexTimedOut: true };
     return regexSkipped ? { hits, regexSkipped, regexMaxChars: REGEX_MAX_CHARS } : { hits, regexSkipped };
   }
 
-  private rank(rawQuery: string, opts: SearchOptions, onRegexSkip: () => void): SearchHit[] {
+  private rank(rawQuery: string, opts: SearchOptions, onRegexSkip: () => void, hooks: QueryHooks, onTimeout: () => void): SearchHit[] {
     const limit = opts.limit ?? 30;
     // Operators (plan 11.3): tag:, path:, "phrase", /regex/, -term. The rest ranks.
     const { text: query, ops, invalid } = parseQuery(rawQuery);
@@ -432,8 +446,22 @@ export class VaultIndex {
     if (invalid.length) return [];
     const q = query.trim().toLowerCase();
     const scope = opts.paths ? new Set(opts.paths) : null;
-    const pass = (e: Entry) => (!scope || scope.has(e.path)) && (!ops.length || matchesOps(ops, matchable(e), onRegexSkip));
+    // Z6-H1: the time limit is armed from this parse, the one whose regex runs below.
+    const regex = ops.some((o) => o.kind === "regex");
+    if (regex) hooks.onRegexStart?.();
+    let overdue = false;
+    const pass = (e: Entry) => {
+      if (scope && !scope.has(e.path)) return false;
+      if (!ops.length) return true;
+      if (regex && !overdue && hooks.regexOverdue?.() === true) overdue = true;
+      if (overdue) return false;
+      return matchesOps(ops, matchable(e), onRegexSkip);
+    };
     const allow = scope || ops.length ? new Set([...this.files.values()].filter(pass).map((e) => e.path)) : null;
+    if (overdue) {
+      onTimeout();
+      return [];
+    }
     if (!q) {
       return [...this.files.values()]
         .filter((f) => !allow || allow.has(f.path))

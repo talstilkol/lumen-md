@@ -51,24 +51,38 @@ describe("the /regex/ size cap (VaultIndex)", () => {
   });
 });
 
-/** A worker over the real protocol; `hang` makes it never answer a /regex/ query (a runaway pattern). */
+/**
+ * A worker over the real protocol, posting `regexStart` as vaultIndex.worker.ts does; `hang` makes it never answer
+ * once a /regex/ starts (a runaway pattern), nor anything after it.
+ */
 class FakeWorker implements WorkerLike {
   onmessage: ((e: MessageEvent<IndexResponse>) => void) | null = null;
   onerror: ((e: ErrorEvent) => void) | null = null;
   readonly index = new VaultIndex();
   terminated = false;
+  private stuck = false;
   constructor(private readonly hang: boolean) {}
   terminate(): void {
     this.terminated = true;
+  }
+  private post(res: IndexResponse): void {
+    if (!this.terminated) this.onmessage?.({ data: JSON.parse(JSON.stringify(res)) } as MessageEvent<IndexResponse>);
   }
   // In order, like the worker's queue; train 6's handleIndexRequest answers asynchronously (W2.22).
   private queue: Promise<void> = Promise.resolve();
   postMessage(message: IndexRequest): void {
     const req = JSON.parse(JSON.stringify(message)) as IndexRequest;
-    if (this.terminated || (this.hang && req.op === "query" && req.query.includes("/"))) return;
+    if (this.terminated) return;
     this.queue = this.queue.then(async () => {
-      const res = await handleIndexRequest(this.index, req);
-      if (!this.terminated) this.onmessage?.({ data: JSON.parse(JSON.stringify(res)) } as MessageEvent<IndexResponse>);
+      if (this.stuck) return;
+      let started = false;
+      const onRegexStart = () => {
+        started = true;
+        this.post({ id: req.id, progress: "regexStart" });
+      };
+      const res = await handleIndexRequest(this.index, req, undefined, { onRegexStart });
+      if (this.hang && started) this.stuck = true;
+      else this.post(res);
     });
   }
 }
