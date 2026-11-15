@@ -107,3 +107,29 @@ The block sits between `<!-- lumen:morning:start -->` and
 `<!-- lumen:morning:end -->`. Writing it again replaces only that part, so
 your own text in the note stays as it is. While today's note is open with
 edits, the block is written into the editor instead of the file.
+
+## Learning plans
+
+`⌘K → Learning plans…` lists four study cycles, each with today's reading
+and a link to its text on Sefaria:
+
+| Cycle | A cycle | Started |
+|---|---|---|
+| Daf Yomi | 2,711 days, a folio a day | cycle 14 on 5 January 2020 |
+| Mishnah Yomit | 2,096 days, two mishnayot a day | 20 May 1947 |
+| Daily Rambam, one chapter | 1,017 days | 29 April 1984 |
+| Daily Rambam, three chapters | 339 days | 29 April 1984 |
+
+Both Rambam cycles start with the Mishneh Torah's introduction (the
+transmission of the Oral Law, the positive and the negative commandments,
+and the list of commandments by section), each part in three days at one
+chapter a day, or one day at three. They also include The Order of Prayer
+and the text of the Haggadah, as the published schedule does.
+
+Tick **Follow** to follow a cycle from today. A followed cycle shows how
+many days you marked learned out of the days since you started, and how
+many are not marked. **Learned today** marks today; **Review later** makes
+today's reading a review card in the review queue. The plans are saved in
+`.lumen/learning.json` in your vault; nothing is sent anywhere, and Sefaria
+opens only when you click a link. `{{learning}}` in the daily note template
+writes one line per cycle with the same link.
