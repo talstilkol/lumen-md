@@ -6,7 +6,7 @@
  */
 
 import { extractFrontmatter, renderMarkdown } from "../renderer/pipeline";
-import { applyPageBreaks, buildToc, contentDirection, contentLang, printCss, printFrontmatter } from "../print/printLayout";
+import { MM, PAGE_AREA_MM, PAGE_SLACK_MM, applyPageBreaks, buildToc, contentDirection, contentLang, layoutFootnotePages, printCss, printFrontmatter, type PrintOptions } from "../print/printLayout";
 import { getLocale, t } from "../i18n";
 import { safeSetHtml, safeClearHtml } from "../lib/trustedTypes";
 import { exportReadyText } from "../storage/exportReady";
@@ -70,7 +70,7 @@ export async function preparePrint(markdownText: string, docName: string, opts: 
     const toc = buildToc(temp, t("print.toc"));
     if (toc) temp.prepend(toc);
   }
-  const html = temp.innerHTML;
+  let html = temp.innerHTML;
   root.unmount();
 
   // The app's own styles (theme, callouts, code, math, fonts), then the print layout.
@@ -85,6 +85,10 @@ export async function preparePrint(markdownText: string, docName: string, opts: 
     }
   }
   styles.push(printCss({ title, dir, ...settings }));
+  // W2.23: footnotes at the bottom of their page unless the note asks for endnotes.
+  if ((settings.footnotes ?? "page") === "page" && /data-footnotes|class="footnotes"/.test(html)) {
+    html = (await layoutInFrame(html, styles.join("\n\n"), dir, lang, { title, dir, ...settings })) ?? html;
+  }
   return {
     title,
     // Paper is white: print in the light theme whatever the screen shows.
@@ -94,6 +98,36 @@ export async function preparePrint(markdownText: string, docName: string, opts: 
     styles: styles.join("\n\n"),
     html,
   };
+}
+
+/**
+ * Lay the note out in pages with per-page footnotes, in an off-screen frame
+ * as wide as the page's printable area, so the measurement sees the print
+ * fonts and styles. Null when there is no layout to measure (no frame, or a
+ * DOM without layout): the footnotes then stay endnotes.
+ */
+async function layoutInFrame(html: string, styles: string, dir: string, lang: string, o: PrintOptions): Promise<string | null> {
+  const area = PAGE_AREA_MM[o.pageSize ?? "A4"];
+  const frame = document.createElement("iframe");
+  frame.setAttribute("aria-hidden", "true");
+  frame.tabIndex = -1;
+  frame.style.cssText = `position:fixed;left:-10000px;top:0;width:${area.width + 40}mm;height:${area.height}mm;border:0;visibility:hidden;`;
+  document.body.appendChild(frame);
+  try {
+    const doc = frame.contentDocument;
+    if (!doc) return null;
+    hydratePrintDocument(doc, o.title, "", dir, lang, styles, html);
+    const content = doc.getElementById("lumen-print-content");
+    if (!content) return null;
+    content.style.width = `${area.width}mm`;
+    await doc.fonts?.ready;
+    if (!content.getBoundingClientRect().height) return null;
+    layoutFootnotePages(content, { pageHeight: (area.height - PAGE_SLACK_MM) * MM, numbering: o.numbering });
+    content.style.removeProperty("width");
+    return content.innerHTML;
+  } finally {
+    frame.remove();
+  }
 }
 
 /** The whole print document as HTML (for tests: render it, print it to PDF). */
