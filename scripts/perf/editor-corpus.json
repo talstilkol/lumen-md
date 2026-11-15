@@ -1,0 +1,21 @@
+{
+  "_comment": "W11.Q5: the texts e2e/inp-budget.spec.ts types into. Nothing here is committed but the pins. sha256 is null until the owner's first `npm run perf:editor-corpus -- --record-pins` (the cloud sandbox cannot reach gutenberg.org); after that a changed file is refused.",
+  "sources": [
+    {
+      "id": "moby-dick",
+      "url": "https://www.gutenberg.org/cache/epub/2701/pg2701.txt",
+      "file": "pg2701.txt",
+      "sha256": null,
+      "license": "public-domain",
+      "attribution": "Herman Melville, Moby-Dick; or, The Whale (1851). Project Gutenberg eBook #2701"
+    },
+    {
+      "id": "benyehuda",
+      "url": "https://github.com/projectbenyehuda/public_domain_dump",
+      "file": "(a local checkout, --benyehuda)",
+      "sha256": null,
+      "license": "public-domain",
+      "attribution": "Project Ben-Yehuda, public_domain_dump (VERSION 2026-03, commit 5e4277f); the works used are listed in reports/perf/corpus/manifest.json"
+    }
+  ]
+}
