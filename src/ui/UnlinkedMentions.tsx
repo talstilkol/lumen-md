@@ -16,6 +16,7 @@ import { showAiToast } from "./AiToast";
 import { t } from "../i18n";
 import "./unlinkedMentionsStrings";
 import { explainError } from "../lib/userError";
+import { entitySuggestions, type EntitySuggestion, type TextEntity } from "../ai/ner/entities";
 
 const MD = /\.(md|markdown)$/i;
 const stem = (p: string) => basename(p).replace(MD, "");
@@ -61,6 +62,8 @@ function linkTargetFor(path: string): string {
 
 export default function UnlinkedMentions({ filePath, onOpen }: { filePath: string; onOpen: (path: string) => void }) {
   const [hits, setHits] = useState<UnlinkedHit[] | null>(null);
+  // W11.H11: the names this note mentions (DictaBERT-NER, only when the model is already on this device).
+  const [names, setNames] = useState<{ ents: TextEntity[]; list: EntitySuggestion[] } | null>(null);
   const scan = useCallback(async () => {
     await ensureIndex(false, { checked: true });
     // The open note's latest text, not the index's copy.
@@ -68,6 +71,31 @@ export default function UnlinkedMentions({ filePath, onOpen }: { filePath: strin
     const files = (await indexedNotes()).map((f) => (f.path === doc.workspaceName ? { path: f.path, content: doc.content } : f));
     return unlinkedMentionsOf(filePath, files);
   }, [filePath]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setNames(null);
+    void (async () => {
+      const find = await (await import("../ai/piiNer")).entitiesIfCached();
+      if (!find || cancelled) return;
+      const text = useAppStore.getState().doc.content;
+      const ents = await find(text);
+      const titles = [...new Set(indexedFiles().filter((f) => MD.test(f.path)).map((f) => stem(f.path)))].filter((x) => x !== stem(filePath));
+      if (!cancelled) setNames({ ents, list: entitySuggestions(text, ents, titles) });
+    })().catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [filePath]);
+
+  /** Link the first mention of a name in the open note to its note. */
+  const linkName = (s: EntitySuggestion) => {
+    const store = useAppStore.getState();
+    const e = names?.ents.find((x) => x.start === s.first);
+    if (!s.note || !e || store.doc.content.slice(e.start, e.end) !== e.text) return showAiToast(t("backlinks.changed"), "info");
+    store.setContent(linkMention(store.doc.content, { start: e.start, end: e.end, target: s.note }));
+    setNames((n) => (n ? { ...n, list: n.list.filter((x) => x !== s) } : n));
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -141,6 +169,27 @@ export default function UnlinkedMentions({ filePath, onOpen }: { filePath: strin
             </li>
           ))}
         </ul>
+      )}
+      {names && names.list.length > 0 && (
+        <>
+          <div className="file-tree-header" style={{ marginBlockStart: 8 }}>
+            <span>{t("backlinks.entities")}</span>
+          </div>
+          <ul className="backlinks-list" role="list" data-testid="entity-names">
+            {names.list.map((n) => (
+              <li key={`${n.label}:${n.first}`} role="listitem" style={{ display: "flex", alignItems: "center", gap: 6, padding: "2px 1rem" }}>
+                <span dir="auto" style={{ flex: 1 }}>{n.text}</span>
+                {n.note ? (
+                  <button type="button" className="backlink-link" onClick={() => linkName(n)} aria-label={t("backlinks.entityLinkAria", { text: n.text, note: n.note })} style={{ fontSize: 11, padding: "2px 8px", border: "1px solid hsl(var(--border))", borderRadius: 4, background: "hsl(var(--bg))", color: "hsl(var(--fg))" }}>
+                    {t("backlinks.link")}
+                  </button>
+                ) : (
+                  <span style={{ fontSize: 11, color: "hsl(var(--fg-muted))" }}>{t("backlinks.entityNoNote")}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </>
       )}
     </section>
   );
