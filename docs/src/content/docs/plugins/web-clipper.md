@@ -71,6 +71,17 @@ the page with `{{meta:name}}` (a `<meta>` tag, by name, property or itemprop;
 several tags of one name are joined) and `{{selector:css}}` (the text of the
 elements a CSS selector picks).
 
+### Your own templates
+
+Run **Web clipper: templates and triggers** from the palette. Your templates
+come first, before the built-in ones above, and are saved in the vault at
+`.lumen/clip-templates.json`, so they sync with your notes. A built-in
+template is read-only: *Duplicate* it to change it. *Test an address* shows
+which template a page would get, and by which trigger. The preview shows the
+note it makes from sample values. A trigger that is not an address, a valid
+`/regex/` or `schema:@Type` is named before you can save. Templates exported
+from the Obsidian Web Clipper (its JSON *Export*) can be imported as they are.
+
 ## Interpreter: fields a local model fills in
 
 A template can ask questions about the page: `{{"a one-sentence summary"}}`,

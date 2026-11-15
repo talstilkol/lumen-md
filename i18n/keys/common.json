@@ -2401,6 +2401,178 @@
       "vars": []
     },
     {
+      "key": "clipTemplates.builtIn",
+      "en": "Built in",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.content",
+      "en": "Note body (Markdown, with {{variables}})",
+      "vars": [
+        "variables"
+      ]
+    },
+    {
+      "key": "clipTemplates.copy",
+      "en": "copy",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.delete",
+      "en": "Delete",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.duplicate",
+      "en": "Duplicate",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.import",
+      "en": "Import (Obsidian Web Clipper JSON)",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.importFailed",
+      "en": "Could not import: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "clipTemplates.imported",
+      "en": "Imported {count} template(s). Save to keep them.",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "clipTemplates.name",
+      "en": "Name",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.new",
+      "en": "New template",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.noteName",
+      "en": "Note name",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.path",
+      "en": "Folder (in the vault)",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.preview",
+      "en": "Preview with sample values",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.problem.duplicate",
+      "en": "Two templates have the id {detail}.",
+      "vars": [
+        "detail"
+      ]
+    },
+    {
+      "key": "clipTemplates.problem.name",
+      "en": "A template needs a name.",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.problem.noteName",
+      "en": "A template needs a note name.",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.problem.property",
+      "en": "Not a property name: {detail}",
+      "vars": [
+        "detail"
+      ]
+    },
+    {
+      "key": "clipTemplates.problem.regex",
+      "en": "Not a valid regular expression: {detail}",
+      "vars": [
+        "detail"
+      ]
+    },
+    {
+      "key": "clipTemplates.problem.trigger",
+      "en": "Not a trigger: {detail} (an address starting with https://, /regex/ or schema:@Type)",
+      "vars": [
+        "detail"
+      ]
+    },
+    {
+      "key": "clipTemplates.properties",
+      "en": "Properties, one per line: name: value",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.readOnly",
+      "en": "Built in: duplicate it to change it.",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.save",
+      "en": "Save",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.saved",
+      "en": "Saved to .lumen/clip-templates.json.",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.test",
+      "en": "Test an address",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.testDefault",
+      "en": "No trigger matches: the default template",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.testResult",
+      "en": "{name}, by the trigger {trigger}",
+      "vars": [
+        "name",
+        "trigger"
+      ]
+    },
+    {
+      "key": "clipTemplates.title",
+      "en": "Clip templates and triggers",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.triggers",
+      "en": "Triggers, one per line: an address prefix (https://…), /regex/ or schema:@Type",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.untitled",
+      "en": "New template",
+      "vars": []
+    },
+    {
+      "key": "clipTemplates.yours",
+      "en": "Your templates",
+      "vars": []
+    },
+    {
       "key": "credits.close",
       "en": "Close",
       "vars": []

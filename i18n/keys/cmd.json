@@ -1730,6 +1730,16 @@
       "vars": []
     },
     {
+      "key": "cmd.research.clipTemplates",
+      "en": "Web clipper: templates and triggers",
+      "vars": []
+    },
+    {
+      "key": "cmd.research.clipTemplates.hint",
+      "en": "Edit the templates clips are saved with, and which site gets which",
+      "vars": []
+    },
+    {
       "key": "cmd.research.litReview",
       "en": "Literature review from the vault's PDFs",
       "vars": []

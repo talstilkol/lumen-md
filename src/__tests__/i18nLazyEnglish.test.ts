@@ -202,6 +202,8 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "standardSite.json": { module: "publish/standardSiteStrings.ts", users: ["publish/standardSiteActions.ts"], prefixes: ["atproto."] },
   // The host-move banner: pwa/hostMoveBoot.ts loads pwa/hostMove.ts with a dynamic import, and it holds its own strings.
   "hostmove.json": { module: "pwa/hostMove.ts", users: [], prefixes: ["pwa.move."] },
+  // The clip templates editor (4.15, W10.E67): the palette loads ClipTemplatesEditor.tsx with a dynamic import.
+  "clipTemplates.json": { module: "research/clipTemplatesStrings.ts", users: ["research/ClipTemplatesEditor.tsx"], prefixes: ["clipTemplates."] },
 };
 
 function sources(dir: string): string[] {
