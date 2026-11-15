@@ -868,11 +868,15 @@ steps:
         allow_failure: true
       - step: "real-model-pr"
         allow_failure: true
+      - step: "real-model-nightly"
+        allow_failure: true
+      - step: "real-model-hebrew"
+        allow_failure: true
       - step: "deadcode"
         allow_failure: true
     command: |-
       buildkite-agent artifact download 'ci-out/vitest-summary.json' . || true
-      node scripts/buildkite/receipt.mjs --gates vitest,vitest-merge,static,lint,licenses,build,e2e-chromium,e2e-firefox,e2e-webkit,e2e-prod,e2e-headers,local-ai,ocr-cer,visual,lighthouse,pr-check,security,e2e-shards,e2e-receipt,real-model-pr,deadcode
+      node scripts/buildkite/receipt.mjs --gates vitest,vitest-merge,static,lint,licenses,build,e2e-chromium,e2e-firefox,e2e-webkit,e2e-prod,e2e-headers,local-ai,ocr-cer,visual,lighthouse,pr-check,security,e2e-shards,e2e-receipt,real-model-pr,real-model-nightly,real-model-hebrew,deadcode
     agents:
       queue: "linux"
     artifact_paths:

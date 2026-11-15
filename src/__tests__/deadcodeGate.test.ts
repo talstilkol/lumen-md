@@ -24,7 +24,7 @@ import { buildPipeline, pipelineRules } from "../../scripts/buildkite/lib.mjs";
 type Step = { id: string; cmd: string[]; skipReason?: string };
 type BkStep = { key: string; command: string; if?: string };
 const pkg = JSON.parse(readFileSync("package.json", "utf8"));
-const ci = () => parse(readFileSync(".github/workflows/ci.yml", "utf8"), { uniqueKeys: false });
+const ci = () => parse(readFileSync("docs/archive/workflows/ci.yml", "utf8"), { uniqueKeys: false });
 
 describe("a new orphan file fails, in every gate", () => {
   it("check-unused-files finds a src/ file nothing imports", () => {

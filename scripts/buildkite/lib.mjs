@@ -546,7 +546,10 @@ export function buildPipeline(ci, { jobs = JOBS, shards = VITEST_SHARDS, native 
     steps.push(s);
   }
   steps.push(deadcodeStep());
-  const gateKeys = steps.filter((s) => s.notify && s.if !== SCHEDULE_IF).map((s) => s.key);
+  // #747's schedule-only steps (SCHEDULED_STEPS) post no PR status, so the receipt does not wait for
+  // them; the real-model steps stay gates of the receipt (#716, W10.E33), scheduled or not.
+  const realKeys = new Set(REAL_MODEL_STEPS.map((r) => r.key));
+  const gateKeys = steps.filter((s) => s.notify && (s.if !== SCHEDULE_IF || realKeys.has(s.key))).map((s) => s.key);
   steps.push({
     label: ":lock_with_ink_pen: signed receipt",
     key: "receipt",
@@ -637,7 +640,7 @@ export function deadcodeStep() {
  * the receipt would count a skipped step as failed; the scheduled build's
  * fuzz result is its own commit status and artifact).
  */
-export const gateKeys = (pipeline) => pipeline.steps.filter((s) => s.notify && s.key !== "receipt" && s.if !== SCHEDULE_IF).map((s) => s.key);
+export const gateKeys = (pipeline) => pipeline.steps.filter((s) => s.notify && s.key !== "receipt" && (s.if !== SCHEDULE_IF || REAL_MODEL_STEPS.some((r) => r.key === s.key))).map((s) => s.key);
 
 // ── YAML ─────────────────────────────────────────────────────────────────
 

@@ -76,7 +76,7 @@ describe("the real-model steps", () => {
   });
 
   it("the generated file is what the generator gives", () => {
-    const ci = parse(readFileSync(join(ROOT, ".github/workflows/ci.yml"), "utf8"), { uniqueKeys: false });
+    const ci = parse(readFileSync(join(ROOT, "docs/archive/workflows/ci.yml"), "utf8"), { uniqueKeys: false });
     const built = buildPipeline(ci) as { steps: Array<{ key?: string; if_changed?: string }> };
     expect(built.steps.find((s) => s.key === "real-model-pr")?.if_changed).toBe("src/agents/**");
   });

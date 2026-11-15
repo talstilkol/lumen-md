@@ -271,8 +271,8 @@ describe("the real runner with stand-in binaries on PATH (no network)", () => {
 describe("nightly runner wiring (W4.36)", () => {
   it("supply is due every night on a host with a scanner, and not counted among 0.11's four kinds", () => {
     const sat = new Date("2026-11-14T02:00:00Z");
-    expect(kindsDue(sat, null, { platform: "darwin", sr: false, supply: true })).toEqual(["flake", "perf", "triage", "supply"]);
-    expect(kindsDue(sat, null, { platform: "darwin", sr: false, supply: false })).toEqual(["flake", "perf", "triage"]);
+    expect(kindsDue(sat, null, { platform: "darwin", sr: false, supply: true })).toEqual(["flake", "perf", "triage", "fuzz", "supply"]) // fuzz: every night since #747 (W10.E58);
+    expect(kindsDue(sat, null, { platform: "darwin", sr: false, supply: false })).toEqual(["flake", "perf", "triage", "fuzz"]);
     expect(kindsDue(sat, ["supply"])).toEqual(["supply"]);
     expect(stepsFor("supply", none).map((s: { cmd: string[] }) => s.cmd.join(" "))).toEqual(["node scripts/supply/nightly.mjs --no-seal --out reports/supply/summary.json"]);
   });

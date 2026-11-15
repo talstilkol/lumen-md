@@ -16,7 +16,7 @@ import { MARKER, MAX_BODY, commentBody, planComment } from "../../scripts/buildk
 import { buildPipeline, pipelineRules } from "../../scripts/buildkite/lib.mjs";
 
 type Step = { key: string; command: string };
-const ci = () => parse(readFileSync(".github/workflows/ci.yml", "utf8"), { uniqueKeys: false });
+const ci = () => parse(readFileSync("docs/archive/workflows/ci.yml", "utf8"), { uniqueKeys: false });
 
 describe("the pr:check comment", () => {
   it("carries the marker, the report and the build; a huge report is cut under GitHub's limit", () => {

@@ -177,7 +177,7 @@ describe("on every PR", () => {
     expect(step!.if).toBeUndefined();
     expect(step!.artifact_paths).toContain("reports/lh/**/*");
     // ci.yml repeats `env:` on its Build step; GitHub keeps the last one (as scripts/buildkite/pipeline.mjs parses it).
-    const ci = YAML.parse(readFileSync(join(ROOT, ".github/workflows/ci.yml"), "utf8"), { uniqueKeys: false }) as { jobs: Record<string, { if?: string }> };
+    const ci = YAML.parse(readFileSync(join(ROOT, "docs/archive/workflows/ci.yml"), "utf8"), { uniqueKeys: false }) as { jobs: Record<string, { if?: string }> };
     expect(ci.jobs.lighthouse.if).toBeUndefined();
   });
 
