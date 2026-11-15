@@ -8,7 +8,7 @@
  */
 import { applyBulkOp, type BulkChange, type BulkOp, type BulkSkip } from "./bulkEdit";
 import { editNote } from "./databaseEdit";
-import { readWorkspaceTexts, writeWorkspaceFilesIf, type FileStamp } from "../storage/workspace";
+import { readWorkspaceTexts, writeWorkspaceFilesIf, type FileStamp } from "../storage/workspaceBulk";
 import { notifyWorkspaceChanged } from "../storage/workspaceEvents";
 import { useAppStore } from "../store/useStore";
 

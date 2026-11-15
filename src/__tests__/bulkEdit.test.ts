@@ -7,7 +7,8 @@ import { describe, it, expect } from "vitest";
 import { applyBulkOp, applyBulkOpYaml, bodyOf, planBulkEdit, selectRows, wouldChange, type BulkOp } from "../views/bulkEdit";
 import { lastBulkEditAt, runBulkEdit, undoBulkChanges, undoLastBulkEdit, __resetBulkUndo } from "../views/bulkEditRun";
 import { createMemoryBackend, setVaultBackend } from "../storage/vault";
-import { readWorkspaceFile, readWorkspaceTexts, writeWorkspaceFile, writeWorkspaceFileIf } from "../storage/workspace";
+import { readWorkspaceFile, writeWorkspaceFile } from "../storage/workspace";
+import { readWorkspaceTexts, writeWorkspaceFileIf } from "../storage/workspaceBulk";
 import { parseProperties } from "../properties/frontmatter";
 import { fastBulkOp } from "../views/bulkFast";
 

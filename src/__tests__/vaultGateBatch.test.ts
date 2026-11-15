@@ -8,7 +8,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createMemoryBackend, getVaultBackend, setVaultBackend } from "../storage/vault";
 import { ENCRYPTED_PREFIX, HEADER_PATH } from "../storage/vault/encrypted/paths";
-import { readWorkspaceTexts, writeWorkspaceFile, writeWorkspaceFilesIf } from "../storage/workspace";
+import { writeWorkspaceFile } from "../storage/workspace";
+import { readWorkspaceTexts, writeWorkspaceFilesIf } from "../storage/workspaceBulk";
 import type { VaultBackend } from "../storage/vault/types";
 
 /** A memory store with batch methods that count their calls (the real handle backend has them; the memory one does not). */

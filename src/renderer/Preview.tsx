@@ -10,7 +10,6 @@ import { hasEmbeds } from "./remarkEmbeds";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
 import { wikiFragmentId } from "../lib/slug";
 import { attachFootnoteHover } from "./footnoteHover";
-import { attachImageResize, clearImageWidth, setImageWidth } from "./imageSize";
 import { scheduleIdle } from "../lib/idle";
 import { CopyButtonHandler } from "./components";
 import { Frontmatter } from "../ui/Frontmatter";
@@ -71,16 +70,26 @@ export function Preview({ markdownText, docKey = null, onSourceEdit, focusOffset
   useEffect(() => {
     const root = rootRef.current;
     if (!root || !canEdit) return;
-    return attachImageResize(root, (offset, target, width) => {
-      const md = textRef.current;
-      const next = setImageWidth(md, offset, width, target);
-      if (next !== md) editRef.current?.(next);
-    }, (offset, target) => {
-      // Double-click on the edge: back to the image's own size (W7.3).
-      const md = textRef.current;
-      const next = clearImageWidth(md, offset, target);
-      if (next !== md) editRef.current?.(next);
+    // The handles load on use (./imageSize, 6 KB): not in the startup bundle (222 KB ceiling, train 6).
+    let detach: (() => void) | undefined;
+    let live = true;
+    void import("./imageSize").then(({ attachImageResize, clearImageWidth, setImageWidth }) => {
+      if (!live) return;
+      detach = attachImageResize(root, (offset, target, width) => {
+        const md = textRef.current;
+        const next = setImageWidth(md, offset, width, target);
+        if (next !== md) editRef.current?.(next);
+      }, (offset, target) => {
+        // Double-click on the edge: back to the image's own size (W7.3).
+        const md = textRef.current;
+        const next = clearImageWidth(md, offset, target);
+        if (next !== md) editRef.current?.(next);
+      });
     });
+    return () => {
+      live = false;
+      detach?.();
+    };
   }, [canEdit]);
   // First paint (A7 levers 1 + 3): render the text synchronously on the
   // very first commit with the chunk-free pipeline, so the LCP element
