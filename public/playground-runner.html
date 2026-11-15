@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Same policy as the deploy headers (rendered from security/policy.json
+         by `npm run headers:write`), also where no header is sent: Vite dev,
+         Tauri, Capacitor. The page's one script is
+         public/runners/playground-runner.js, allowed by its sha256 (plan
+         W10.D1): no 'self' (WebKit does not match it in this sandboxed,
+         opaque-origin frame) and no nonce (a nonce in a public file is no
+         secret). Everything it runs after that is a blob: URL: the user's
+         files, and React / Vue from the source text the block sends. The file
+         is prebuilt and committed: `node scripts/build-runners.mjs` rebuilds it
+         and pins the hash here, in the integrity attribute and in the policy. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-M34w8E1oHcID6a6aGAMZbL5pBYkJOW7dyTDGOaXW0nE=' blob: 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src * data: blob:; media-src * data: blob:; font-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'" />
+    <title>Lumen Playground runner</title>
+    <meta name="robots" content="noindex" />
+  </head>
+  <body>
+    <script src="runners/playground-runner.js" integrity="sha256-M34w8E1oHcID6a6aGAMZbL5pBYkJOW7dyTDGOaXW0nE=" crossorigin="anonymous"></script>
+  </body>
+</html>

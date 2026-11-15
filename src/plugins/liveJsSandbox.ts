@@ -11,14 +11,9 @@
  */
 import type { WorkerLike, WorkerRunPayload } from "./liveJsShared";
 import { airplaneFlagOn } from "../privacy/airplaneBoot";
+import { RUNNER_CHANNEL, type RunnerToApp } from "./liveJsChannel";
 
-export const RUNNER_CHANNEL = "lumen-livejs";
-
-export type RunnerToApp =
-  | { channel: typeof RUNNER_CHANNEL; kind: "ready" }
-  | { channel: typeof RUNNER_CHANNEL; kind: "unavailable" }
-  | { channel: typeof RUNNER_CHANNEL; kind: "message"; data: unknown }
-  | { channel: typeof RUNNER_CHANNEL; kind: "error"; message: string };
+export { RUNNER_CHANNEL, type RunnerToApp } from "./liveJsChannel";
 
 export function liveJsRunnerUrl(base: string = import.meta.env?.BASE_URL ?? "/"): string {
   return `${base.replace(/\/?$/, "/")}livejs-runner.html`;

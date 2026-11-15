@@ -226,7 +226,7 @@ describe("drift is caught", () => {
   /** A fresh copy of every source + the policy. */
   const copy = (name: string): string => {
     const dir = join(tmp, name);
-    for (const f of [...Object.keys(policy.sources), "security/policy.json", "playground-runner.html"]) {
+    for (const f of [...Object.keys(policy.sources), "security/policy.json"]) {
       mkdirSync(dirname(join(dir, f)), { recursive: true });
       cpSync(join(ROOT, f), join(dir, f));
     }
@@ -237,7 +237,8 @@ describe("drift is caught", () => {
     const dir = copy(file.replace(/\W/g, "_"));
     const path = join(dir, file);
     const original = readFileSync(path, "utf8");
-    const changed = original.replace("script-src 'self'", "script-src 'self' https://cdn.evil.example");
+    // The first script-src gains a host (the content frame's has no 'self' to anchor on, W10.D1).
+    const changed = original.replace(/script-src (?=')/, "script-src https://cdn.evil.example ");
     expect(changed).not.toBe(original);
     writeFileSync(path, changed);
 

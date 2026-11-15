@@ -27,13 +27,13 @@
 /playground-runner.html
   ! Content-Security-Policy
   ! X-Frame-Options
-  Content-Security-Policy: default-src 'none'; script-src 'self' 'nonce-lumen-livejs-runner' blob: 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src * data: blob:; media-src * data: blob:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'
+  Content-Security-Policy: default-src 'none'; script-src 'sha256-M34w8E1oHcID6a6aGAMZbL5pBYkJOW7dyTDGOaXW0nE=' blob: 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src * data: blob:; media-src * data: blob:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'
 # Cloudflare Pages redirects /playground-runner.html to /playground-runner (308)
 # and serves the page there: the same policy at that path.
 /playground-runner
   ! Content-Security-Policy
   ! X-Frame-Options
-  Content-Security-Policy: default-src 'none'; script-src 'self' 'nonce-lumen-livejs-runner' blob: 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src * data: blob:; media-src * data: blob:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'
+  Content-Security-Policy: default-src 'none'; script-src 'sha256-M34w8E1oHcID6a6aGAMZbL5pBYkJOW7dyTDGOaXW0nE=' blob: 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src * data: blob:; media-src * data: blob:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'
 
 # live-js runner (T48): the hidden iframe live-js code runs in
 # (`sandbox="allow-scripts"`, opaque origin: no IndexedDB, localStorage,
@@ -42,12 +42,12 @@
 /livejs-runner.html
   ! Content-Security-Policy
   ! X-Frame-Options
-  Content-Security-Policy: default-src 'none'; script-src 'self' 'nonce-lumen-livejs-runner' blob: 'unsafe-eval'; worker-src blob:; connect-src 'none'; img-src 'none'; style-src 'none'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'
+  Content-Security-Policy: default-src 'none'; script-src 'sha256-4oRZEJQuzN7dn4P1oKuQx2lkOhZJ/CVSR4QC/RPnHYU=' blob: 'unsafe-eval'; worker-src blob:; connect-src 'none'; img-src 'none'; style-src 'none'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'
 # The same at the extension-less path Cloudflare Pages serves it from.
 /livejs-runner
   ! Content-Security-Policy
   ! X-Frame-Options
-  Content-Security-Policy: default-src 'none'; script-src 'self' 'nonce-lumen-livejs-runner' blob: 'unsafe-eval'; worker-src blob:; connect-src 'none'; img-src 'none'; style-src 'none'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'
+  Content-Security-Policy: default-src 'none'; script-src 'sha256-4oRZEJQuzN7dn4P1oKuQx2lkOhZJ/CVSR4QC/RPnHYU=' blob: 'unsafe-eval'; worker-src blob:; connect-src 'none'; img-src 'none'; style-src 'none'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'
 
 # Content frame (plan W4.15): the same-origin page that shows, after the
 # user allowed it, an image / video / audio from another site, a provider
@@ -57,13 +57,13 @@
 /content-frame.html
   ! Content-Security-Policy
   ! X-Frame-Options
-  Content-Security-Policy: default-src 'none'; script-src 'self' 'nonce-lumen-livejs-runner'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://www.loom.com https://codepen.io https://codesandbox.io https://www.figma.com https://open.spotify.com https://www.google.com https://maps.google.com https://www.openstreetmap.org https://platform.twitter.com https://www.facebook.com https://www.instagram.com https://www.tiktok.com https://www.redditmedia.com https://www.reddit.com https://www.linkedin.com https://w.soundcloud.com; connect-src 'none'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'; sandbox allow-scripts allow-popups allow-popups-to-escape-sandbox
+  Content-Security-Policy: default-src 'none'; script-src 'sha256-Rf4QgNpk0oMcQ+YgcXJfyoPlCplv1m75pHrj2Q2mXa4='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://www.loom.com https://codepen.io https://codesandbox.io https://www.figma.com https://open.spotify.com https://www.google.com https://maps.google.com https://www.openstreetmap.org https://platform.twitter.com https://www.facebook.com https://www.instagram.com https://www.tiktok.com https://www.redditmedia.com https://www.reddit.com https://www.linkedin.com https://w.soundcloud.com; connect-src 'none'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'; sandbox allow-scripts allow-popups allow-popups-to-escape-sandbox
 # Cloudflare Pages redirects /content-frame.html to /content-frame (308) and
 # serves the page there: the same policy, sandbox included, at that path.
 /content-frame
   ! Content-Security-Policy
   ! X-Frame-Options
-  Content-Security-Policy: default-src 'none'; script-src 'self' 'nonce-lumen-livejs-runner'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://www.loom.com https://codepen.io https://codesandbox.io https://www.figma.com https://open.spotify.com https://www.google.com https://maps.google.com https://www.openstreetmap.org https://platform.twitter.com https://www.facebook.com https://www.instagram.com https://www.tiktok.com https://www.redditmedia.com https://www.reddit.com https://www.linkedin.com https://w.soundcloud.com; connect-src 'none'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'; sandbox allow-scripts allow-popups allow-popups-to-escape-sandbox
+  Content-Security-Policy: default-src 'none'; script-src 'sha256-Rf4QgNpk0oMcQ+YgcXJfyoPlCplv1m75pHrj2Q2mXa4='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://www.loom.com https://codepen.io https://codesandbox.io https://www.figma.com https://open.spotify.com https://www.google.com https://maps.google.com https://www.openstreetmap.org https://platform.twitter.com https://www.facebook.com https://www.instagram.com https://www.tiktok.com https://www.redditmedia.com https://www.reddit.com https://www.linkedin.com https://w.soundcloud.com; connect-src 'none'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'; sandbox allow-scripts allow-popups allow-popups-to-escape-sandbox
 
 # On-device OCR (T31): the tesseract.js worker, its wasm cores and the language
 # models (tesseract/lang/, same origin since plan 7.5). Dedicated workers get
@@ -99,6 +99,10 @@
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=31536000, immutable
 /playground/*
+  Access-Control-Allow-Origin: *
+# The runner pages' prebuilt scripts (plan W10.D1): loaded with integrity, so
+# with CORS from the opaque origin.
+/runners/*
   Access-Control-Allow-Origin: *
 
 # Caching, as deploy/vercel.base.json (scripts/host-parity.mjs compares them):

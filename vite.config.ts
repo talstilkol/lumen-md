@@ -605,8 +605,9 @@ export default defineConfig({
     port: 5173,
     host: true,
     fs: { allow: devFsAllow },
-    // The Web Playground runner (sandboxed iframe, origin "null") loads its
-    // module scripts with CORS; allow it and local pages, nothing else.
+    // The runner pages (sandboxed iframes, origin "null") load their script
+    // (public/runners/, with an integrity hash) with CORS; allow them and
+    // local pages, nothing else.
     cors: { origin: playgroundCorsOrigin },
   },
   // y-websocket is an optional peer-dep (see src/collab/yjs.ts). The
@@ -633,7 +634,7 @@ export default defineConfig({
     // 0.5). Scanning the worker files too finds those deps before the first
     // page loads. Setting `entries` replaces the default (the HTML inputs),
     // so they are listed here as well.
-    entries: ["index.html", "playground-runner.html", "livejs-runner.html", "src/**/*.worker.ts"],
+    entries: ["index.html", "src/**/*.worker.ts"],
   },
   // ε.4.3 — clean-URL aliases for the auxiliary HTML pages so dev links
   // like `/roadmap` and `/landing` work without the `.html` suffix.
@@ -643,10 +644,6 @@ export default defineConfig({
     port: 5173,
     cors: { origin: playgroundCorsOrigin },
   },
-  // The live-js runner's CSP allows its scripts by this nonce (WebKit doesn't match
-  // 'self' inside an opaque-origin sandboxed frame). Vite stamps it on every script
-  // and modulepreload tag it writes; other pages' policies simply ignore it.
-  html: { cspNonce: "lumen-livejs-runner" },
   build: {
     target: "es2022",
     // No source maps in what ships (plan 11.5, F7): they publish the whole
@@ -669,10 +666,9 @@ export default defineConfig({
         landing: path.resolve(__dirname, "public/landing.html"),
         roadmap: path.resolve(__dirname, "public/roadmap.html"),
         benchmarks: path.resolve(__dirname, "public/benchmarks.html"),
-        // Web Playground runner: the page inside the block's sandboxed iframe.
-        playground: path.resolve(__dirname, "playground-runner.html"),
-        // live-js runner: the hidden sandboxed iframe live-js code runs in (T48).
-        livejs: path.resolve(__dirname, "livejs-runner.html"),
+        // The two runner pages (playground, live-js) are not Vite inputs: they are
+        // static files in public/ with a prebuilt script whose sha256 their CSP
+        // pins (scripts/build-runners.mjs, plan W10.D1).
       },
       // `y-websocket` is an OPTIONAL runtime dep (see comments in
       // src/collab/yjs.ts). It's not in package.json — users opt in by

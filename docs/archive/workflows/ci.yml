@@ -573,8 +573,12 @@ jobs:
             grep -q "https://publish.lumen-test.dev" <<<"$c" || { echo "::error::$path: endpoint origin missing from connect-src"; exit 1; }
             ! grep -q "__CSP_CONNECT_EXTRA__" <<<"$c" || { echo "::error::$path: placeholder left"; exit 1; }
           done
-          grep -q "'nonce-lumen-livejs-runner'" <<<"$(csp /playground-runner.html)" || { echo "::error::playground runner: no nonce"; exit 1; }
-          grep -q 'nonce="lumen-livejs-runner"' dist/playground-runner.html || { echo "::error::playground runner script has no nonce"; exit 1; }
+          # Plan W10.D1: each runner page's CSP pins its served bundle's sha256, with no nonce.
+          for r in playground-runner livejs-runner; do
+            c=$(csp "/$r.html"); h=$(openssl dgst -sha256 -binary "dist/runners/$r.js" | base64)
+            grep -qF "'sha256-$h'" <<<"$c" || { echo "::error::$r: the CSP does not pin dist/runners/$r.js (sha256-$h)"; exit 1; }
+            ! grep -q "nonce-" <<<"$c" || { echo "::error::$r: a nonce in the policy"; exit 1; }
+          done
           grep -q "'unsafe-eval'" <<<"$(csp /webr/webr-worker.js)" || { echo "::error::webR worker: no eval policy"; exit 1; }
       - name: Run E2E under the headers
         env:

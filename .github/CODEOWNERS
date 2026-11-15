@@ -108,11 +108,16 @@
 #   Frame sandboxes and sinks
 /src/lib/trustedTypes.ts                 @talstilkol
 /src/playground/runner.ts                @talstilkol
+/src/playground/runtime.ts               @talstilkol
+/src/playground/compile.ts               @talstilkol
 /src/plugins/liveJsRunner.ts             @talstilkol
+/src/plugins/liveJsChannel.ts            @talstilkol
 #   CSPs outside /deploy/ and public/_headers (index.html's frame-src must equal EMBED_ORIGINS)
 /index.html                              @talstilkol
-/playground-runner.html                  @talstilkol
-/livejs-runner.html                      @talstilkol
+/public/playground-runner.html           @talstilkol
+/public/livejs-runner.html               @talstilkol
+/public/runners/                         @talstilkol
+/scripts/build-runners.mjs               @talstilkol
 
 # ── Native permissions and updates ──
 /src-tauri/capabilities/                 @talstilkol
@@ -151,7 +156,6 @@
 /src/plugins/r/                          @talstilkol
 /src/theme/cssSanitizer.ts               @talstilkol
 #   Frame sandboxes
-/public/content-frame.js                 @talstilkol
 /src/agents/python/sandbox.ts            @talstilkol
 /src/lib/contentFrame.ts                 @talstilkol
 /src/plugins/EmbedBlock.tsx              @talstilkol
@@ -163,9 +167,9 @@
 /src/renderer/components.tsx             @talstilkol
 #   CSP and security headers
 /index.html                              @talstilkol
-/livejs-runner.html                      @talstilkol
+/public/livejs-runner.html               @talstilkol
 /packages/vscode-lumen/src/render.ts     @talstilkol
-/playground-runner.html                  @talstilkol
+/public/playground-runner.html           @talstilkol
 /src/ai/ollamaProvider.ts                @talstilkol
 /src/storage/templateMarketplace.ts      @talstilkol
 /src/ui/RuntimeMetricsPanel.tsx          @talstilkol

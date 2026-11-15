@@ -37,7 +37,7 @@ describe("live-js runner CSP", () => {
   });
 
   it("the runner page carries the policy itself (dev, Tauri, Capacitor serve no header)", () => {
-    const html = readFileSync(join(root, "livejs-runner.html"), "utf8");
+    const html = readFileSync(join(root, "public/livejs-runner.html"), "utf8");
     const meta = /http-equiv="Content-Security-Policy" content="([^"]*)"/.exec(html)?.[1] ?? "";
     // frame-ancestors is ignored in <meta>; everything else must match.
     expect(meta).toBe(csp.replace(/ frame-ancestors 'self';/, ""));
@@ -46,7 +46,7 @@ describe("live-js runner CSP", () => {
   it("build-time endpoint origins never widen connect-src 'none'", async () => {
     const { addConnectSrc, extendIndexHtmlCsp } = await import("../build/cspEndpoints");
     expect(addConnectSrc(csp, ["https://ai.example"])).toBe(csp);
-    const html = readFileSync(join(root, "livejs-runner.html"), "utf8");
+    const html = readFileSync(join(root, "public/livejs-runner.html"), "utf8");
     expect(extendIndexHtmlCsp(html, ["https://ai.example"])).toBe(html);
     expect(addConnectSrc("connect-src 'self'", ["https://ai.example"])).toBe("connect-src 'self' https://ai.example");
   });
