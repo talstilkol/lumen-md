@@ -10,7 +10,7 @@ import { StatusBar } from "./ui/StatusBar";
 import { ScrollProgress } from "./ui/ScrollProgress";
 import { SearchReplace } from "./ui/SearchReplace";
 import { LocalGraphPanel, CanvasWhiteboard, PluginGallery, TemplateGallery, AuditLog, SettingsScreen, ReadingSettings, PrivacyLedgerPanel, TrashPanel, PropertiesPanel, QuickCapture, ImageHostsPanel, AiDoctorPanel, AgentReviewPanel } from "./appPanels";
-import { FIRST_RUN_SOURCES, OPEN_IMPORT_EVENT, importFromSearch, readOpenImport, type OpenImportDetail } from "./onboarding/importEvent";
+import { useImportPreset } from "./hooks/useImportPreset";
 const ImportWizard = lazy(() => import("./storage/import/ImportWizard").then(m => ({ default: m.ImportWizard })));
 const InstallDialog = lazy(() => import("./pwa/InstallDialog").then((m) => ({ default: m.InstallDialog })));
 const VersionHistory = lazy(() => import("./ui/VersionHistory").then(m => ({ default: m.VersionHistory })));
@@ -362,22 +362,8 @@ export default function App() {
   // the status bar counts the waiting ones, a toast announces new ones.
   const agentReviewPending = useAgentReview(editorRef, openAgentReview);
   useWindowEvent("lumen-open-agent-review", openAgentReview);
-  // W11.P6: the first run's "Bring your notes" opens the wizard on the source picked there.
-  const [importPreset, setImportPreset] = useState<OpenImportDetail>({});
-  useWindowEvent(OPEN_IMPORT_EVENT, (e) => {
-    setImportPreset(readOpenImport(e, FIRST_RUN_SOURCES));
-    setImportOpen(true);
-  });
-  // W11.P7: a `?import=<source>` link (the "Leaving Evernote or Notion?" page) opens the wizard on that source, once.
-  useEffect(() => {
-    const source = importFromSearch(window.location.search);
-    if (!source) return;
-    const url = new URL(window.location.href);
-    url.searchParams.delete("import");
-    window.history.replaceState(window.history.state, "", url.pathname + url.search + url.hash);
-    setImportPreset({ source });
-    setImportOpen(true);
-  }, []);
+  // W11.P6/P7: the first run's "Bring your notes" and a `?import=<source>` link open the wizard on that source.
+  const importPreset = useImportPreset(() => setImportOpen(true));
   useWindowEvent("lumen-open-install", () => setInstallOpen(true));
 
   // Comment-anchor click in the editor → window event from
@@ -666,15 +652,7 @@ export default function App() {
       {/* Notebook, data file and map file viewers (plan W12.F4, F5, F7) */}
       {fileView && (
         <Suspense fallback={null}>
-          <FileViewerOverlay
-            key={`${fileView.path}#${fileView.seq}`}
-            view={fileView}
-            onClose={() => setFileView(null)}
-            onOpenAsText={(path, text) => {
-              setFileView(null);
-              handleOpenFromWorkspace(path, text);
-            }}
-          />
+          <FileViewerOverlay key={`${fileView.path}#${fileView.seq}`} view={fileView} onClose={() => setFileView(null)} onOpenAsText={(path, text) => { setFileView(null); handleOpenFromWorkspace(path, text); }} />
         </Suspense>
       )}
 

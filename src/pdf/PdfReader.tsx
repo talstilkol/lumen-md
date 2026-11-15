@@ -46,8 +46,7 @@ import type { PageSize } from "./PdfPageView";
 import type { OcrPage } from "./ocrPages";
 import { positionAt, scrollTopFor } from "./readingPosition";
 import { SpreadControls, SpreadRows, useSpread } from "./PdfSpread";
-// The spread controls' English (pdf.spread) loads with the reader, which loads on demand.
-import "./spreadStrings";
+import "./spreadStrings"; // the spread controls' English (pdf.spread) loads with the reader, on demand
 import { annotationsByPage, baseName, byPosition, EMPTY, isMissing, MAX_SCALE, MIN_SCALE, newUuid, pageBoxes, POSITION_SAVE_MS, positionsIO, ROOT_MARGIN, type Props } from "./pdfReaderParts";
 import { Modal } from "../ui/Modal";
 import { isTopDialog } from "../ui/useFocusTrap";
