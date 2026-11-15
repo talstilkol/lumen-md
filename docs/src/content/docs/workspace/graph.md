@@ -23,6 +23,26 @@ for every `[[link]]` between two notes.
 - **Labels** show for the bigger notes, and for more of them as you zoom
   in. Hebrew names are shaped and written right to left.
 
+## Structure: tree and sunburst
+
+A ```structure block draws the vault's folders, its nested tags
+(`#project/lumen/ui`) or this note's headings as a tree or a sunburst:
+
+```structure
+source: tags        # folders | tags | headings
+view: sunburst      # tree | sunburst
+root: project       # optional: only under this folder or tag
+```
+
+- Each item shows how many notes are under it (headings: how many headings).
+- In Hebrew the tree grows from the right, and the sunburst runs
+  counter-clockwise from the top.
+- "Show as a tree" swaps the picture for an outline tree. **Tab** to it,
+  then ↓ / ↑ move, the arrow toward the text's end opens an item or goes
+  to its first child (← in Hebrew, → in English), the other arrow closes
+  it or goes to its parent, Home / End go to the ends, and **Enter**
+  opens the note or jumps to the heading.
+
 ## The local graph
 
 **Show / hide the local graph** opens a panel beside the note: the open
