@@ -32,6 +32,7 @@ import { getLocale, isRTL, t } from "../../i18n";
 import "./basesBlockStrings";
 import { explainError } from "../../lib/userError";
 import { EmptyState, learnHow } from "../../ui/EmptyState";
+import { useVisibleRefresh } from "../../lib/visibleRefresh";
 
 const DatabaseMapView = lazy(() => import("../DatabaseMapView"));
 // W12.V1: the chart view loads ECharts and its strings only when it is shown.
@@ -130,6 +131,8 @@ export default function BasesBlock({ source, meta }: { source: string; meta?: st
   const [loadError, setLoadError] = useState<string | null>(null);
   const [viewIndex, setViewIndex] = useState<number | null>(null);
   const [sortOverride, setSortOverride] = useState<BasesSort[] | null>(null);
+  // W12.V6: off screen (a long dashboard), a vault change waits until the base is seen again.
+  const [rootRef, schedule] = useVisibleRefresh();
 
   useEffect(() => {
     let cancelled = false;
@@ -158,12 +161,12 @@ export default function BasesBlock({ source, meta }: { source: string; meta?: st
         if (!cancelled) setLoadError(explainError(e));
       })
       .finally(() => !cancelled && setLoading(false));
-    const off = onWorkspaceChanged(() => void load().catch(() => undefined), { debounceMs: 500 });
+    const off = onWorkspaceChanged(() => schedule(() => void load().catch(() => undefined)), { debounceMs: 500 });
     return () => {
       cancelled = true;
       off();
     };
-  }, [embed]);
+  }, [embed, schedule]);
 
   const text = embed ? (embedded?.text ?? null) : source;
   const parsed = useMemo(() => (text === null ? null : parseBase(text)), [text]);
@@ -223,7 +226,7 @@ export default function BasesBlock({ source, meta }: { source: string; meta?: st
   const fileLabel = embedded?.path ?? (activePath?.toLowerCase().endsWith(".base") ? activePath : null);
 
   return (
-    <div className="chart-block lumen-base" data-testid="base-block" data-view-kind={kind}>
+    <div ref={rootRef} className="chart-block lumen-base" data-testid="base-block" data-view-kind={kind}>
       <div className="chart-block-header">
         <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
           <span style={{ fontWeight: 600 }} dir="auto">

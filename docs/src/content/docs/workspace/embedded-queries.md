@@ -80,6 +80,28 @@ chart-x: folder
   headers (`chart-y: pages` after `TABLE pages`).
 - The chart has the same data table and keyboard as a Bases chart.
 
+## Dashboard notes
+
+Put `layout: dashboard` in a note's frontmatter and its blocks — query
+and dataview blocks, embedded `.base` files and their charts, tasks,
+structure trees — are laid out as a grid:
+
+```markdown
+---
+layout: dashboard
+dashboard-columns: 2     # optional, 1–6; without it as many columns as fit
+---
+## Reading
+![[Books.base#Pages by status]]
+```
+
+- Headings and text run across the whole row; each block takes one cell.
+  In Hebrew the grid starts on the right.
+- Blocks that are scrolled out of view don't re-run on every save; they
+  catch up when you scroll back to them.
+- Nothing is written to the note, and Obsidian (which ignores `layout`)
+  shows it as a plain note with its embeds.
+
 ## Live updates
 
 Both kinds of block re-run when a note is saved, deleted or renamed. In a
