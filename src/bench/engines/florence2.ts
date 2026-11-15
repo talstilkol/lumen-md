@@ -9,7 +9,8 @@ import { dataUrlBlob, type BenchEngine } from "../types";
 
 // ai/caption.ts is loaded on use (its English is a lazy chunk, i18nLazyEnglish): the id is named here
 // and load() checks it against the app's own CAPTION_MODELS.
-const MODEL = { id: "onnx-community/Florence-2-base-ft", family: "florence2" as const };
+const MODEL_ID = "onnx-community/Florence-2-base-ft";
+const MODEL = { id: MODEL_ID, family: "florence2" as const };
 const caption = () => import("../../ai/caption");
 
 /** A 32×32 grey PNG, enough to load the model. */

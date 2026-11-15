@@ -230,9 +230,14 @@ describe("the app marks the five events where they happen", () => {
     ["src/editor/Editor.tsx", 'markActivation("editor.ready")'],
     ["src/hooks/useAutosave.ts", 'markActivation("note.firstOwnSave")'],
     ["src/storage/import/ImportWizard.tsx", 'markActivation("import.complete", report.notes)'],
-    ["src/onboarding/FirstRun.tsx", 'markActivation("import.complete", r.notes)'],
+    // W11.P6: first run's "Bring your notes" opens the import wizard, which marks import.complete above.
+    ["src/onboarding/FirstRun.tsx", "openImportWizard({ source, firstRun: true })"],
     ["src/metrics/count.ts", 'markActivation("day2.return")'],
   ] as [string, string][])("%s: %s", (file: string, call: string) => {
     expect(readFileSync(file, "utf8")).toContain(call);
+  });
+
+  it("an import is marked once: in the wizard, not again by first run", () => {
+    expect(readFileSync("src/onboarding/FirstRun.tsx", "utf8")).not.toContain('"import.complete"');
   });
 });

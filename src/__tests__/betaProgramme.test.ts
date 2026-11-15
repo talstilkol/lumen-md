@@ -166,9 +166,11 @@ describe("no request, and the wiring", () => {
 
   it("the palette command opens the panel with every command id; the reminder is lazy", () => {
     expect(read("src/commands/domains/ai.ts")).toMatch(/id: "help\.beta"[\s\S]{0,300}lumen-open-beta/);
-    const app = read("src/App.tsx");
-    expect(app).toContain('window.addEventListener("lumen-open-beta", onBeta)');
-    expect(app).toContain('import("./ui/BetaPanel").then((m) => m.openBeta({ commandIds: commandIds() }))');
+    // App.tsx's command events live in useCommandEvents since the max-lines split (#500, train 5); App mounts it.
+    expect(read("src/App.tsx")).toContain("useCommandEvents(commands);");
+    const events = read("src/hooks/useCommandEvents.ts");
+    expect(events).toContain('window.addEventListener("lumen-open-beta", onBeta)');
+    expect(events).toContain('import("../ui/BetaPanel").then((m) => m.openBeta({ commandIds: commandIds() }))');
     expect(read("src/metrics/count.ts")).toMatch(/import\("\.\.\/beta\/programme"\)[\s\S]{0,200}import\("\.\.\/beta\/reminder"\)/);
   });
 });
