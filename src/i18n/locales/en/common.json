@@ -236,6 +236,7 @@
   "scroll.page": "page {current}/{total}",
   "settings.general": "General",
   "settings.language": "Language",
+  "settings.privacy": "Privacy",
   "settings.search": "Search settings",
   "settings.telemetryOptOut": "Send no error reports",
   "settings.title": "Settings",

@@ -5,8 +5,9 @@
  * the preview and the WYSIWYG editor show the placeholder, and nothing is
  * requested from it until the user allows it again.
  *
- * `ImageHostsList` is the list alone, for a Privacy section of the settings
- * screen; `ImageHostsPanel` is the dialog the palette opens. Lazy-loaded.
+ * `ImageHostsList` is the list alone; `ImageHostsSection` is it under its
+ * heading, the Privacy tab of the settings screen (decision 2.41);
+ * `ImageHostsPanel` is the dialog the palette opens. Lazy-loaded.
  */
 
 import { useEffect, useSyncExternalStore } from "react";
@@ -66,6 +67,18 @@ export function ImageHostsList() {
         </button>
       </div>
     </div>
+  );
+}
+
+/** The settings screen's Privacy tab: the allowed image hosts under their heading. */
+export function ImageHostsSection() {
+  return (
+    <section aria-labelledby="settings-image-hosts" data-testid="settings-image-hosts">
+      <h3 id="settings-image-hosts" style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 600 }}>
+        {t("imageHosts.title")}
+      </h3>
+      <ImageHostsList />
+    </section>
   );
 }
 
