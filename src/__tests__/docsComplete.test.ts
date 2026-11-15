@@ -83,6 +83,14 @@ describe("docs-complete (plan 13.1)", () => {
     ]);
   });
 
+  it("a link may target a page the site builds from docs/src/pages (the downloads page, W10.E61)", () => {
+    const files = { ...ALL, "start/intro.md": "[d](/download/) [x](/nowhere/)", "he/start/intro.md": "[d](/he/download/)" };
+    const routes = (rel: string) => rel === "download" || rel === "he/download";
+    expect(check({ config: CONFIG, required: {}, ...tree(files), routes })).toEqual(["start/intro.md: link /nowhere/ — no such page"]);
+    // Without the route the same link is still reported.
+    expect(check({ config: CONFIG, required: {}, ...tree(files) })).toContain("start/intro.md: link /download/ — no such page");
+  });
+
   it("pending pages are exempt until they land, then must be unlisted", () => {
     const files: Record<string, string> = { ...ALL };
     delete files["sync/git.md"];

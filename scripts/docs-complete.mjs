@@ -35,10 +35,14 @@ export function sidebarOf(src) {
   return { slugs, dirs };
 }
 
-/** The problems for a docs tree; `has(rel)` says whether docs/src/content/docs/<rel> exists, `list(dir)` lists a directory. */
-export function check({ config, required, has, list, pages = [], read = () => "" }) {
+/**
+ * The problems for a docs tree; `has(rel)` says whether docs/src/content/docs/<rel> exists, `list(dir)` lists a directory.
+ * `routes(rel)` says whether docs/src/pages/<rel>.astro exists: a page the site builds outside the content
+ * collection (the downloads page, W10.E61), which a link may target like any other page.
+ */
+export function check({ config, required, has, list, pages = [], read = () => "", routes = () => false }) {
   const problems = [];
-  const page = (slug, lang) => ["md", "mdx"].some((ext) => has(`${lang === "he" ? "he/" : ""}${slug}.${ext}`));
+  const page = (slug, lang) => ["md", "mdx"].some((ext) => has(`${lang === "he" ? "he/" : ""}${slug}.${ext}`)) || routes(`${lang === "he" ? "he/" : ""}${slug}`);
   const { slugs, dirs } = sidebarOf(config);
   const pending = required.pending ?? {};
   for (const slug of slugs) {
@@ -120,6 +124,7 @@ function main() {
     list: (dir) => (existsSync(join(DOCS, dir)) ? readdirSync(join(DOCS, dir)) : []),
     pages: walk(DOCS).map((p) => relative(DOCS, p).split("\\").join("/")),
     read: (rel) => readFileSync(join(DOCS, rel), "utf8"),
+    routes: (rel) => existsSync(join(ROOT, "docs/src/pages", `${rel}.astro`)),
   });
   if (problems.length) {
     console.error(problems.join("\n"));
