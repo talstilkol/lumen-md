@@ -50,14 +50,26 @@ Rosh Hashana, Yom Kippur, the first and last days of Sukkot and Pesach, and
 Shavuot. Outside Israel, the second days count too, following the daily-notes
 setting.
 
+Shabbat and yom tov begin on the evening before, so the wait does too:
+
+- **With a city** (calendar settings, *City for Shabbat and holiday times*),
+  the wait starts at candle lighting on the eve, by your candle-lighting
+  minutes or the city's custom, and ends when Shabbat or the yom tov ends
+  there (the sun 8.5° below the horizon). A rule can run again on Saturday
+  night once Shabbat is out.
+- **Without a city** the app does not know when sunset is, so it waits from
+  12:00 noon (device time) on Friday and on the eve of every yom tov, and all
+  of Shabbat and the yom tov itself, until midnight. This is earlier than
+  candle lighting anywhere, on purpose: it may wait a few hours too long, but
+  never runs after Shabbat has begun. Pick a city for exact times.
+
 - A daily rule that falls on such a day runs on the next weekday.
 - A rule that a change would set off keeps the change and runs it on the
   next weekday.
 
-Days are civil dates, so a rule that waits over Shabbat runs after midnight
-on Saturday night, or in the morning. The dry run lists every rule that
-waits, with the day it will run (`⏸ rule: today is Shabbat; it runs on
-2026-11-15`). The log, undo and the loop guard work as for any rule.
+The dry run lists every rule that waits, with the day it will run (`⏸ rule:
+today is Shabbat; it runs on 2026-11-15`). The log, undo and the loop guard
+work as for any rule.
 
 ## Dry run
 
