@@ -26,6 +26,7 @@ export const DIALOGS = [
   { file: "src/pdf/PdfReader.tsx", command: "pdf.open", fixme: "needs a PDF in the vault" },
   { file: "src/plugins/runtime/InstallDialog.tsx", fixme: "shown when a sandboxed plugin is installed from a file" },
   { file: "src/privacy/NetworkMonitor.tsx", command: "privacy.networkMonitor" },
+  { file: "src/research/ClipTemplatesEditor.tsx", command: "research.clipTemplates" },
   { file: "src/share/ShareLinkDialog.tsx", command: "file.shareLink" },
   { file: "src/slides/Presentation.tsx", command: "view.present" },
   { file: "src/sources/open/OpenSourcesDialog.tsx", command: "sources.open" },
@@ -79,5 +80,6 @@ export const DIALOGS = [
   { file: "src/ui/VaultEncryptionDialog.tsx", command: "vault.encryptAtRest" },
   { file: "src/ui/VaultUnlock.tsx", guarded: true, fixme: "shown only for a locked encrypted vault" },
   { file: "src/ui/VersionHistory.tsx", command: "view.versionHistory" },
+  { file: "src/voice-corpus/Recorder.tsx", command: "voice.corpusRecorder" },
   { file: "src/whatsNew/WhatsNewDialog.tsx", command: "help.whatsNew" },
 ];
