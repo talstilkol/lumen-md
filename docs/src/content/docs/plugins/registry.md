@@ -102,6 +102,34 @@ unsigned one is refused. Only the folder that ships with the app
 (`/plugins/examples`), served from the app's own origin, falls back to the
 SHA-256 check against its scan when it has no `index.json.sig`.
 
+## Themes tested in RTL (W12.S6)
+
+Every theme in the gallery (`public/themes/examples/`) is reviewed like a
+plugin version with only a stylesheet (the review on the
+[Security](/security/) page: licence, public source, no remote CSS), and then
+checked for right-to-left use. `node scripts/themes/rtl-check.mjs` writes its
+scorecard to `public/themes/examples/scorecards/<id>@<version>.json`;
+`--check` fails when one is stale, and `--css <file>` checks one stylesheet.
+
+- **Physical CSS.** `margin-left`, `padding-right`, `left:`/`right:`,
+  one-sided borders and corners, `float`, `clear` and `text-align` with
+  `left`/`right` break a Hebrew layout. Each one is reported with the
+  logical property to use instead (`margin-inline-start`, `text-align:
+  start`, …). A rule scoped to one direction (`[dir="rtl"] …`, `:dir(ltr)`)
+  is allowed.
+- **Contrast** (WCAG 2.2, 1.4.3): the theme's text colours against its
+  backgrounds, 4.5:1, in light and in dark. The app's own colours fill in
+  whatever the theme leaves unset.
+- **Screens.** Eight screens (editor, preview, table, lists, callouts, code
+  inside Hebrew, Bases, settings) are captured in RTL and in LTR by a
+  browser run, merged with `--screens <results.json>`.
+
+A failing RTL check is a warning on the scorecard, not a delisting: each
+finding costs the score what any review warning costs (10 points). The
+**Tested in RTL** badge is given only when all three pass, so it waits for
+the browser run. There are no user ratings: ratings need accounts and
+moderation, and the scorecard and the badge do that job.
+
 ## A registry site of its own
 
 The same registry can be published as a static site of its own on Cloudflare

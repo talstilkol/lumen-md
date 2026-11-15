@@ -1,0 +1,159 @@
+{
+  "kind": "lumen-plugin-scorecard",
+  "v": 1,
+  "reviewer": "lumen-review/1",
+  "id": "lumen.theme.high-contrast",
+  "version": "1.0.0",
+  "reviewedAt": "2026-11-15T05:16:52.347Z",
+  "passed": true,
+  "score": 90,
+  "grade": "A",
+  "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "source": {
+    "repository": null,
+    "inRepo": true
+  },
+  "permissions": {
+    "declared": [],
+    "added": [],
+    "removed": []
+  },
+  "audit": "none",
+  "findings": [
+    {
+      "rule": "unsigned",
+      "severity": "warning",
+      "detail": "no signature"
+    }
+  ],
+  "durationMs": 1,
+  "rtl": {
+    "rtl": 1,
+    "id": "lumen.theme.high-contrast",
+    "version": "1.0.0",
+    "checks": {
+      "physical": "pass",
+      "contrast": "pass",
+      "screens": "owed"
+    },
+    "physical": [],
+    "contrast": [
+      {
+        "mode": "light",
+        "fg": "--fg",
+        "bg": "--bg",
+        "ratio": 21,
+        "min": 4.5,
+        "pass": true
+      },
+      {
+        "mode": "light",
+        "fg": "--fg",
+        "bg": "--bg-muted",
+        "ratio": 19.23,
+        "min": 4.5,
+        "pass": true
+      },
+      {
+        "mode": "light",
+        "fg": "--fg-subtle",
+        "bg": "--bg",
+        "ratio": 15.08,
+        "min": 4.5,
+        "pass": true
+      },
+      {
+        "mode": "light",
+        "fg": "--fg-muted",
+        "bg": "--bg",
+        "ratio": 10.41,
+        "min": 4.5,
+        "pass": true
+      },
+      {
+        "mode": "light",
+        "fg": "--fg-muted",
+        "bg": "--bg-muted",
+        "ratio": 9.53,
+        "min": 4.5,
+        "pass": true
+      },
+      {
+        "mode": "light",
+        "fg": "--accent",
+        "bg": "--bg",
+        "ratio": 12.43,
+        "min": 4.5,
+        "pass": true
+      },
+      {
+        "mode": "light",
+        "fg": "--accent-fg",
+        "bg": "--accent",
+        "ratio": 12.43,
+        "min": 4.5,
+        "pass": true
+      },
+      {
+        "mode": "dark",
+        "fg": "--fg",
+        "bg": "--bg",
+        "ratio": 21,
+        "min": 4.5,
+        "pass": true
+      },
+      {
+        "mode": "dark",
+        "fg": "--fg",
+        "bg": "--bg-muted",
+        "ratio": 18.36,
+        "min": 4.5,
+        "pass": true
+      },
+      {
+        "mode": "dark",
+        "fg": "--fg-subtle",
+        "bg": "--bg",
+        "ratio": 15.97,
+        "min": 4.5,
+        "pass": true
+      },
+      {
+        "mode": "dark",
+        "fg": "--fg-muted",
+        "bg": "--bg",
+        "ratio": 13.08,
+        "min": 4.5,
+        "pass": true
+      },
+      {
+        "mode": "dark",
+        "fg": "--fg-muted",
+        "bg": "--bg-muted",
+        "ratio": 11.43,
+        "min": 4.5,
+        "pass": true
+      },
+      {
+        "mode": "dark",
+        "fg": "--accent",
+        "bg": "--bg",
+        "ratio": 17.53,
+        "min": 4.5,
+        "pass": true
+      },
+      {
+        "mode": "dark",
+        "fg": "--accent-fg",
+        "bg": "--accent",
+        "ratio": 17.53,
+        "min": 4.5,
+        "pass": true
+      }
+    ],
+    "screens": {},
+    "rtlTested": false
+  },
+  "rtlTested": false,
+  "path": "high-contrast"
+}
