@@ -158,6 +158,8 @@
     "launch:check": "node scripts/launch-check.mjs",
     "launch:gate": "node scripts/launch-gate.mjs",
     "import:diff": "node scripts/import-diff.mjs",
+    "plugins:review": "node scripts/review-plugins.mjs",
+    "security:page": "node scripts/security-page.mjs",
     "beta:funnel": "node scripts/beta-funnel.mjs",
     "store:check": "node scripts/store.mjs check",
     "corpus:obsidian-help": "node scripts/obsidian-help-corpus.mjs --fetch",
