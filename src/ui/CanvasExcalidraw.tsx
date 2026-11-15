@@ -55,7 +55,7 @@ import { JSON_CANVAS_EXT, excalidrawToJsonCanvas, jsonCanvasToExcalidraw, serial
 import { CARD_HEIGHT, CARD_WIDTH, NOTE_LINK, cardPositions, noteLink, notePathOf, pastedNoteRefs, resolveNoteRef } from "../canvas/noteCards";
 import { NoteCard, readNote } from "../canvas/NoteCard";
 import { listWorkspace } from "../storage/workspace";
-import { useHighlightCards } from "../canvas/useHighlightCards";
+import { useHighlightCards } from "./useHighlightCards";
 import type { ExportKind } from "./canvasExport";
 // The Mermaid → diagram dialog loads when it opens (its own strings and the converter come with it).
 const DiagramDialog = lazy(() => import("../canvas/DiagramDialog").then((m) => ({ default: m.DiagramDialog })));

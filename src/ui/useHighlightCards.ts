@@ -6,7 +6,7 @@
  */
 import { useCallback, useEffect, type DragEvent, type RefObject } from "react";
 import { t } from "../i18n";
-import { HIGHLIGHT_MIME, highlightCard, markSourceDeleted, parseCardLink, type HighlightDrag } from "./highlightCards";
+import { HIGHLIGHT_MIME, highlightCard, markSourceDeleted, parseCardLink, type HighlightDrag } from "../canvas/highlightCards";
 
 interface Api {
   getSceneElements(): readonly unknown[];
