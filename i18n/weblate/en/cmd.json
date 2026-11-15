@@ -24,6 +24,8 @@
   "cmd.ai.cancel.hint": "Stops every running AI request (Esc does the same)",
   "cmd.ai.chart": "AI: Chart from Data",
   "cmd.ai.chart.hint": "Turn CSV or table data into an ECharts chart",
+  "cmd.ai.claims": "AI: Paragraph → Claims",
+  "cmd.ai.claims.hint": "Checkable claims from the paragraph at the cursor, each with an exact quote (R12.11)",
   "cmd.ai.diagram": "AI: Diagram from Text",
   "cmd.ai.diagram.hint": "Generate a Mermaid diagram from the document",
   "cmd.ai.doctor": "AI: Doctor (diagnose local AI)",
