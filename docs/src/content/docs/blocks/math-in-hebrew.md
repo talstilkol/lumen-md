@@ -17,7 +17,10 @@ wherever it sits in a right-to-left line:
 ## Where it holds
 
 - **Preview and print (PDF).** Each formula is an isolated left-to-right
-  block, so KaTeX's pieces (`a =`, `b +`, `c`) stay in order.
+  block, so its pieces (`a =`, `b +`, `c`) stay in order. Formulas are drawn
+  by Temml as MathML, which the browser typesets itself, when the app has
+  Temml. Otherwise KaTeX draws them. Either one loads only when a note has
+  math.
 - **Source editor.** `$…$` is an isolated left-to-right run. The digits,
   operators and `$` signs stay where you typed them, and the cursor moves
   through the formula the way it is drawn.
