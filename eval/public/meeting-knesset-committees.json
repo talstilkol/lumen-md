@@ -1,0 +1,38 @@
+{
+  "id": "meeting-knesset-committees",
+  "task": "meeting-tasks",
+  "title": "Knesset committee meeting, 30 minutes — tasks agreed, against three reviewers",
+  "dataset": {
+    "hub": "huggingface",
+    "id": "ivrit-ai/knesset-committees",
+    "url": "https://huggingface.co/datasets/ivrit-ai/knesset-committees",
+    "revision": null,
+    "files": [
+      {
+        "path": "one public committee session's audio file (chosen at pin time)",
+        "sha256": null
+      }
+    ]
+  },
+  "license": {
+    "id": "to confirm",
+    "redistribute": false,
+    "note": "Knesset committee recordings published by ivrit.ai; the dataset card's terms are read at pin time. The audio is never committed: only this manifest and the reviewers' task lists (text written by the reviewers)."
+  },
+  "split": "one 30-minute excerpt (start and end in the review file)",
+  "format": "audio file + eval/reviews/meeting-knesset-committees.review.json (schema: src/meetings/meetingEval.ts)",
+  "normalizer": "none (tasks are matched by word overlap, meetingCore.sameTask)",
+  "metrics": [
+    "task-precision",
+    "task-recall"
+  ],
+  "owed": [
+    "pin: on a machine with network, pick one committee session from the dataset's file list, record its path and sha256 and the dataset revision (40-hex) here, and the 30-minute start/end in the review file",
+    "review (W11.O5): three people listen to the excerpt and each writes the tasks agreed in it, one per line, into the review file; a task counts when two of the three wrote it",
+    "run: record the excerpt through the meeting recorder (or feed the file), then `npm run eval:meeting-tasks -- --note <the meeting note> --review eval/reviews/meeting-knesset-committees.review.json`"
+  ],
+  "plan": [
+    "W11.I21",
+    "W11.O5"
+  ]
+}
