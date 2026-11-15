@@ -27,6 +27,28 @@ description: איך אפליקציית Lumen לשולחן העבודה בודק�
 (Windows Authenticode, ‏Apple Developer ID). עד אז Windows SmartScreen
 ו-macOS Gatekeeper מציגים אזהרה בהפעלה הראשונה.
 
+**‏Windows: ‏SignPath Foundation (משימה W11.S15).** ‏Smart App Control חוסם
+אפליקציות לא חתומות, ושירות Artifact Signing של Microsoft לא פתוח לאדם
+פרטי בישראל. ‏SignPath Foundation חותמת בחינם, בתעודה שלה, על פרויקטי קוד
+פתוח ברישיון שאושר ב-OSI. ‏Lumen ברישיון MIT, שאושר ב-OSI. לא צריך תעודת
+EV. הבקשה היא צעד של הבעלים (W11.O1).
+
+- ‏`npm run release` מעביר ל-Tauri את SignPath בתור ה-`signCommand` של
+  Windows (‏`scripts/windows/signpath-sign.mjs`), כשארבעת ערכי `SIGNPATH_*`
+  מוגדרים. כל בקשת חתימה מחכה אז לאישור שלה ב-SignPath.
+- אחרי הבנייה, כל מתקין של Windows נבדק (‏`scripts/windows/verify-signature.mjs`):
+  חייבת להיות בו חתימת Authenticode, וב-Windows גם `signtool verify /pa`
+  צריך לקבל אותה.
+- ‏`release/signing.json` אומר "Windows: חתום" רק כששני התנאים מתקיימים.
+  בלי פרטי SignPath הגרסה יוצאת עם מתקין לא חתום, והרשומה אומרת את זה.
+
+כל אחד יכול לבדוק מתקין:
+
+```bash
+node scripts/windows/verify-signature.mjs Lumen_<version>_x64-setup.exe   # יציאה 1 כשהוא לא חתום
+signtool verify /pa /v Lumen_<version>_x64-setup.exe                      # ב-Windows
+```
+
 ## מה מותר לאפליקציה
 
 לחלון אין הרשאה כללית למערכת הקבצים. הוא ניגש רק לתיקיית הכספת שבחרתם, דרך
