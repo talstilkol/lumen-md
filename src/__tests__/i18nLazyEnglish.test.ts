@@ -182,6 +182,8 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "mailImport.json": { module: "capture/mail/strings.ts", users: ["capture/mail/runImport.ts"], prefixes: ["mailImport."] },
   // Academic submission export (plan W5.16): the dialog loads from the palette.
   "academic.json": { module: "ui/academicStrings.ts", users: ["ui/AcademicExportDialog.tsx"], prefixes: ["academic."] },
+  // "Create a syllabus…" (plan W12.H5): the palette loads academic/createSyllabus.ts with a dynamic import.
+  "syllabus.json": { module: "academic/syllabusStrings.ts", users: ["academic/createSyllabus.ts"], prefixes: ["syllabus."] },
   // Arabic (plan W5.17): the word list and the tashkeel view, both loaded on use.
   "arabic.json": { module: "ai/arabicStrings.ts", users: ["ai/arabicSpellService.ts", "editor/tashkeelView.ts"], prefixes: ["spell.ar.", "tashkeel."] },
   // No-code automations (plan W5.24): the engine's app layer and the palette's command bodies.

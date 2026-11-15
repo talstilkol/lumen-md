@@ -74,6 +74,24 @@ export function semesterFromIcs(ics: string, opts: { after?: string; start?: str
   return { start, end, breaks };
 }
 
+/**
+ * Every semester the calendar names, in order (one per start event), and
+ * the one for `today`: the first that has not ended yet.
+ */
+export function semestersFromIcs(ics: string): SemesterCalendar[] {
+  const starts = parseEvents(ics)
+    .filter((e) => !e.rrule && START.test(e.summary))
+    .map((e) => e.start.date)
+    .sort();
+  const out: SemesterCalendar[] = [];
+  for (const d of starts) {
+    const sem = semesterFromIcs(ics, { after: d });
+    if (sem && !out.some((x) => x.start === sem.start)) out.push(sem);
+  }
+  return out;
+}
+export const semesterFor = (ics: string, today: string): SemesterCalendar | null => semestersFromIcs(ics).find((s) => s.end >= today) ?? null;
+
 export interface TeachingWeek {
   n: number;
   /** The week's first and last day in the semester (YYYY-MM-DD). */
