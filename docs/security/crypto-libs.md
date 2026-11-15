@@ -14,7 +14,7 @@ follow research R3 (§1.2 and R3.5, 14.11).
   - `IN_HOUSE`: today's code, the default until the Mac run.
   - `AUDITED`: `src/sync/e2ee/primitives/lib/audited.ts`, over the libraries below.
 - age has its own adapter, `src/sync/e2ee/primitives/lib/age.ts`. It wraps typage with the same signatures as `src/sync/e2ee/age.ts`.
-- `src/sync/e2ee/primitives/lib/` is **excluded from `tsconfig.json` and ESLint** until the packages are in the lockfile. Nothing in the app imports it; only `cryptoDifferential.test.ts` loads it. That test probes the library code and skips its library half with a `skip-reason` when the packages are missing.
+- `src/sync/e2ee/primitives/lib/` is **excluded from the root `tsconfig.json`** until the packages are in the lockfile. ESLint lints it like the rest, and tsc checks it on its own project (`src/sync/e2ee/primitives/lib/tsconfig.json`, `npm run typecheck:crypto-lib`; review Z6-L7). Until the packages are installed, that check reports only their missing modules (TS2307). Nothing in the app imports it; only `cryptoDifferential.test.ts` loads it. That test probes the library code and skips its library half with a `skip-reason` when the packages are missing.
 
 ## The libraries
 
@@ -55,8 +55,9 @@ for p in @noble/ciphers @noble/hashes hash-wasm libsodium-wrappers-sumo age-encr
   echo "$p@$v lock=$lock registry=$reg pack=$pack"   # all three must be equal
 done
 # 2. Copy each version and integrity into the table above.
-# 3. Put the library code into the build: remove "src/sync/e2ee/primitives/lib" from tsconfig.json's
-#    exclude and from eslint.config.js's ignores
+# 3. Put the library code into the build: check it on its own project first, then remove
+#    "src/sync/e2ee/primitives/lib" from tsconfig.json's exclude and delete src/sync/e2ee/primitives/lib/tsconfig.json
+npm run -s typecheck:crypto-lib
 npx tsc --noEmit -p . && npm run -s lint
 # 4. The differential run: 10,000 random vectors per primitive (scrypt 200, Argon2id 100), RFC vectors, age both ways
 npx vitest run src/__tests__/cryptoDifferential.test.ts src/__tests__/cryptoPrimitivesDoor.test.ts
@@ -64,7 +65,7 @@ npx vitest run src/__tests__/cryptoDifferential.test.ts src/__tests__/cryptoPrim
 npx vitest run src/__tests__/e2ee*.test.ts src/__tests__/vaultArgon2.test.ts
 python3 scripts/sync-protocol/check_vectors.py      # the 39 protocol vectors
 # 6. Make AUDITED the default: one line at startup, usePrimitives(AUDITED); then the suites of 5 again
-git add package.json package-lock.json tsconfig.json eslint.config.js docs/security/crypto-libs.md && git commit
+git add package.json package-lock.json tsconfig.json src/sync/e2ee/primitives/lib/tsconfig.json docs/security/crypto-libs.md && git commit
 ```
 
 **Acceptance at 10.M:**
@@ -104,6 +105,6 @@ Record the measured times here, then set the default from the result.
 | ‏age | ‏typage ‏(`age-encryption`) |
 
 - **ממשק אחד.** כל הקוראים עוברים דרך `src/sync/e2ee/primitives/index.ts`, והבחירה במימוש נעשית במקום אחד.
-- **עד ההרצה ב-Mac.** המימוש מעל הספריות נמצא ב-`primitives/lib`, מחוץ ל-tsconfig ול-ESLint, ובדיקת ההפרשים מדלגת עליו ואומרת למה.
+- **עד ההרצה ב-Mac.** המימוש מעל הספריות נמצא ב-`primitives/lib`, מחוץ ל-tsconfig הראשי, ובדיקת ההפרשים מדלגת עליו ואומרת למה. ‏ESLint בודק אותו כמו את השאר, ו-tsc בודק אותו בפרויקט משלו (`npm run typecheck:crypto-lib`).
 - **ב-Mac** מתקינים גרסאות מדויקות ומשווים את ה-integrity של ה-lock, של ה-registry ושל `npm pack`. אחר כך מסירים את ההחרגה, מריצים 10,000 וקטורים אקראיים ואת וקטורי ה-RFC, ומעבירים את ברירת המחדל לספריות.
 - **פרמטרי Argon2id.** היעד הוא ‏64 MiB, ‏3 מעברים ו-parallelism 1. ברירת המחדל משתנה רק אחרי מדידה במכשיר חלש. כספות קיימות שומרות את הפרמטרים שלהן.

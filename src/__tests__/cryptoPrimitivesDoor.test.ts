@@ -4,7 +4,9 @@
  * place. Inside primitives/ the files may import each other (argon2 uses
  * blake2b); one test file tests poly1305, which is no primitive of the
  * interface, in its in-house file. W10.D13: the library-backed code is outside
- * tsconfig and ESLint until the Mac run, and nothing in the app imports it.
+ * the root tsconfig until the Mac run, and nothing in the app imports it; review
+ * Z6-L7: ESLint lints it, and tsc checks it on its own project
+ * (z6/cryptoLibChecked.test.ts).
  * @vitest-environment node
  */
 import { describe, expect, it } from "vitest";
@@ -38,9 +40,10 @@ describe("one door to the crypto primitives", () => {
     expect(readFileSync("src/sync/e2ee/age.ts", "utf8")).toMatch(/import \{ chachaOpen, chachaSeal, scrypt \} from "\.\/primitives";/);
   });
 
-  it("the audited implementation is outside tsconfig and ESLint, and only tests import it, until 10.M", () => {
+  it("the audited implementation is outside the root tsconfig (on its own project, Z6-L7), and only tests import it, until 10.M", () => {
     expect(JSON.parse(readFileSync("tsconfig.json", "utf8")).exclude).toContain("src/sync/e2ee/primitives/lib");
-    expect(readFileSync("eslint.config.js", "utf8")).toContain('"src/sync/e2ee/primitives/lib/**"');
+    expect(readFileSync("eslint.config.js", "utf8")).not.toContain('"src/sync/e2ee/primitives/lib/**"');
+    expect(JSON.parse(readFileSync("src/sync/e2ee/primitives/lib/tsconfig.json", "utf8")).extends).toBe("../../../../../tsconfig.json");
     const users = files.filter((f) => !f.startsWith("src/sync/e2ee/primitives/lib/") && /primitives\/lib\//.test(readFileSync(f, "utf8")));
     expect(users.every((f) => f.startsWith("src/__tests__/"))).toBe(true);
     // Not noble's argon2 (outside its audit): hash-wasm, with libsodium as the fallback.

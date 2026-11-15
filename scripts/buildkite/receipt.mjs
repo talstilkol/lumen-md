@@ -26,7 +26,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { check, keyPath, loadOrCreateKey, seal } from "../nightly/receipt.mjs";
 import { RECEIPTS_REPO, receiptPath } from "../factory/lib.mjs";
-import { REPO, receiptReport } from "./lib.mjs";
+import { REPO, collectOutcomes, receiptReport } from "./lib.mjs";
 
 const root = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 const argv = process.argv.slice(2);
@@ -58,12 +58,7 @@ if (!gates.length) {
   process.exit(2);
 }
 const agent = env.BUILDKITE_AGENT_BIN || "buildkite-agent";
-const outcomes = {};
-for (const key of gates) {
-  const r = spawnSync(agent, ["step", "get", "outcome", "--step", key], { encoding: "utf8" });
-  // An unknown or unreadable outcome is recorded as such and never counted as a pass.
-  outcomes[key] = r.status === 0 ? r.stdout.trim() || "unknown" : "unknown";
-}
+const { outcomes, skips } = collectOutcomes(gates, (args) => spawnSync(agent, args, { encoding: "utf8" }));
 const sha = env.BUILDKITE_COMMIT ?? "";
 if (!/^[0-9a-f]{40}$/.test(sha)) {
   console.error(`receipt: BUILDKITE_COMMIT is not a commit sha (${sha || "unset"})`);
@@ -78,6 +73,7 @@ const report = receiptReport({
   commit: { sha, branch: env.BUILDKITE_BRANCH ?? null, pr: /^\d+$/.test(env.BUILDKITE_PULL_REQUEST ?? "") ? Number(env.BUILDKITE_PULL_REQUEST) : env.LUMEN_CI_PR ? Number(env.LUMEN_CI_PR) : null, dirty: false },
   build: { system: "buildkite", number: Number(env.BUILDKITE_BUILD_NUMBER) || null, url: env.BUILDKITE_BUILD_URL ?? null, pipeline: env.BUILDKITE_PIPELINE_SLUG ?? null },
   outcomes,
+  skips,
   vitest,
   machine: { platform: process.platform, arch: process.arch, node: process.version, cpus: availableParallelism(), host: env.LUMEN_FACTORY_HOST || "buildkite-linux", exec: "buildkite" },
   startedAt,
@@ -89,7 +85,9 @@ const out = join(root, "ci-out/receipt.json");
 mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, JSON.stringify(sealed, null, 2) + "\n");
 const bad = Object.entries(report.suites).filter(([, s]) => !s.ok).map(([k]) => k);
-log(`sealed ${Object.keys(report.suites).length} suites (${bad.length ? `failed: ${bad.join(", ")}` : "all passed"}), sha256 ${sealed.receipt.sha256}, key ${sealed.receipt.key}`);
+const skipped = Object.entries(report.suites).filter(([, s]) => s.skipped).map(([k]) => k);
+const skipNote = skipped.length ? `; skipped by policy: ${skipped.join(", ")}` : "";
+log(`sealed ${Object.keys(report.suites).length} suites (${bad.length ? `failed: ${bad.join(", ")}` : skipped.length ? "none failed" : "all passed"}${skipNote}), sha256 ${sealed.receipt.sha256}, key ${sealed.receipt.key}`);
 
 // The receipts repository (W6.5): only on the factory host, which has the clone and the deploy key.
 let link = env.BUILDKITE_BUILD_URL ? `${env.BUILDKITE_BUILD_URL}#receipt` : null;
@@ -111,13 +109,13 @@ if (receipts && existsSync(join(receipts, ".git")) && !argv.includes("--no-push"
   log(pushed ? `pushed ${path}` : `✗ could not push ${path}; it stays in ${receipts}`);
 }
 
-const annotation = [`**Signed receipt** for \`${sha.slice(0, 12)}\`: sha256 \`${sealed.receipt.sha256}\`, Ed25519 key \`${sealed.receipt.key}\``, link ? `([receipt](${link}))` : "", "", "| suite | | detail |", "|---|---|---|", ...Object.entries(report.suites).map(([k, s]) => `| ${k} | ${s.ok ? "✓" : "✗"} | ${String(s.detail).replace(/\|/g, "\\|")} |`)].join("\n");
+const annotation = [`**Signed receipt** for \`${sha.slice(0, 12)}\`: sha256 \`${sealed.receipt.sha256}\`, Ed25519 key \`${sealed.receipt.key}\``, link ? `([receipt](${link}))` : "", "", "| suite | | detail |", "|---|---|---|", ...Object.entries(report.suites).map(([k, s]) => `| ${k} | ${s.skipped ? "–" : s.ok ? "✓" : "✗"} | ${String(s.detail).replace(/\|/g, "\\|")} |`)].join("\n");
 spawnSync(agent, ["annotate", "--style", bad.length ? "error" : "success", "--context", "lumen-receipt"], { input: annotation, encoding: "utf8" });
 
 // One status with the receipt's hash and link (the factory's fine-grained token: Commit statuses only).
 const tokenFile = env.LUMEN_FACTORY_TOKEN_FILE;
 if (tokenFile && existsSync(tokenFile) && link && !argv.includes("--no-status")) {
   const token = readFileSync(tokenFile, "utf8").trim();
-  const r = spawnSync("gh", ["api", "-X", "POST", `repos/${REPO}/statuses/${sha}`, "-f", `state=${bad.length ? "failure" : "success"}`, "-f", "context=lumen/receipt", "-f", `description=sha256 ${sealed.receipt.sha256.slice(0, 16)}… ${bad.length ? `${bad.length} failed` : "all passed"}`, "-f", `target_url=${link}`], { encoding: "utf8", env: { ...env, GH_TOKEN: token } });
+  const r = spawnSync("gh", ["api", "-X", "POST", `repos/${REPO}/statuses/${sha}`, "-f", `state=${bad.length ? "failure" : "success"}`, "-f", "context=lumen/receipt", "-f", `description=sha256 ${sealed.receipt.sha256.slice(0, 16)}… ${bad.length ? `${bad.length} failed` : skipped.length ? `none failed, ${skipped.length} skipped by policy` : "all passed"}`, "-f", `target_url=${link}`], { encoding: "utf8", env: { ...env, GH_TOKEN: token } });
   log(r.status === 0 ? "status lumen/receipt posted" : `✗ status: ${(r.stderr || "").trim().slice(0, 200)}`);
 }
