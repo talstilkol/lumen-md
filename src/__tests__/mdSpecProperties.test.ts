@@ -176,6 +176,7 @@ describe("CommonMark 0.31.2 conformance (W11.Q8)", () => {
     expect(committed.cards.parser.tag).toBe("public");
     expect(validateCard(committed.cards.parser)).toEqual([]);
     const rt = fresh.find((r: { kind: string }) => r.kind === "round-trip");
+    if (!rt) throw new Error("score() gave no round-trip row");
     expect(committed.card.n).toBe(rt.total);
     expect(committed.card.metrics.html_kept.value).toBeCloseTo(rt.passed / rt.total, 6);
     // rowScores refuses a row whose exceptions do not account for its failures.
