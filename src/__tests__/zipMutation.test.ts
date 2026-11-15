@@ -46,6 +46,35 @@ describe("storage/zip", () => {
     expect(v.getUint16(eocd + 10, true)).toBe(2);
   });
 
+  it("writes the central directory record by the spec (APPNOTE 4.3.12) and a zero mod time (W10.E26)", async () => {
+    const z = await zip([{ name: "a.txt", data: "hello" }, { name: "ב.txt", data: "x".repeat(70) }]);
+    const v = new DataView(z.buffer);
+    expect(v.getUint16(10, true)).toBe(0); // local mod time
+    const eocd = z.length - 22;
+    let c = v.getUint32(eocd + 16, true); // central directory offset
+    const rows: number[][] = [];
+    for (let i = 0; i < 2; i++) {
+      expect(v.getUint32(c, true)).toBe(0x02014b50);
+      rows.push([4, 6, 8, 10, 12, 14].map((o) => v.getUint16(c + o, true)).concat([v.getUint32(c + 16, true), v.getUint32(c + 20, true), v.getUint32(c + 24, true)]));
+      c += 46 + v.getUint16(c + 28, true) + v.getUint16(c + 30, true) + v.getUint16(c + 32, true);
+    }
+    // made by 2.0, needs 2.0, flags, method, time 0, date 1980-01-01, CRC, compressed, uncompressed.
+    expect(rows[0]).toEqual([20, 20, 0, 0, 0, 0x21, 0x3610a686, 5, 5]);
+    expect(rows[1].slice(0, 6)).toEqual([20, 20, 0x0800, 8, 0, 0x21]);
+    expect(rows[1][8]).toBe(70);
+    expect(rows[1][7]).toBeLessThan(70);
+  });
+
+  it("reads a real Info-ZIP archive whose entries carry extra fields and file comments", async () => {
+    // Made with Zip 3.0 (Info-ZIP): `printf 'comment one\ncomment two\n' | zip -c real.zip a.txt b.txt`.
+    // Local and central headers carry a UT/ux extra field (24 / 28 bytes), and each central entry a comment.
+    const real = Uint8Array.from(atob("UEsDBAoAAAAAAO0Sb13fMNv0CwAAAAsAAAAFABwAYS50eHRVVAkAA337+Gp9+/hqdXgLAAEEAAAAAAQAAAAAZmlyc3QgZmlsZQpQSwMECgAAAAAA7RJvXSmjGjoJAAAACQAAAAUAHABiLnR4dFVUCQADffv4an37+Gp1eAsAAQQAAAAABAAAAADXqdec15XXnQpQSwECHgMKAAAAAADtEm9d3zDb9AsAAAALAAAABQAYAAsAAAABAAAApIEAAAAAYS50eHRVVAUAA337+Gp1eAsAAQQAAAAABAAAAABjb21tZW50IG9uZVBLAQIeAwoAAAAAAO0Sb10poxo6CQAAAAkAAAAFABgACwAAAAEAAACkgUoAAABiLnR4dFVUBQADffv4anV4CwABBAAAAAAEAAAAAGNvbW1lbnQgdHdvUEsFBgAAAAACAAIArAAAAJIAAAAAAA=="), (ch) => ch.charCodeAt(0));
+    const files = await unzip(real.buffer);
+    expect([...files.keys()]).toEqual(["a.txt", "b.txt"]);
+    expect(text(files.get("a.txt"))).toBe("first file\n");
+    expect(text(files.get("b.txt"))).toBe("שלום\n");
+  });
+
   it("deflates entries above 64 bytes and stores the rest", async () => {
     const z = await zip([{ name: "a", data: "x".repeat(64) }, { name: "b", data: "x".repeat(65) }]);
     const v = new DataView(z.buffer);
