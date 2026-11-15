@@ -44,8 +44,8 @@ npx -p @lumen-md/mcp-server lumen mcp status
 | הרשאה | כלים |
 |---|---|
 | `search` | `search_notes` — BM25 בעברית ובאנגלית (אותיות השימוש ו ה ב ל מ ש כ וניקוד מטופלים) |
-| `read` | `read_note`, `list_notes`, `list_tags`, `get_backlinks`, `bases_query` |
-| `propose` | `create_note`, `append_note`, `write_note`, `update_frontmatter`, `bases_update` — הצעות בלבד |
+| `read` | `read_note`, `list_notes`, `list_tags`, `get_backlinks`, `list_types`, `get_type`, `bases_query` |
+| `propose` | `create_note`, `append_note`, `write_note`, `update_frontmatter`, `create_object`, `bases_update` — הצעות בלבד |
 
 `lumen mcp enable <client>` בלי `--scopes` נותן `search,read`. מוסיפים
 `propose` רק ללקוח שרוצים ממנו הצעות. `lumen mcp disable <client>` חל מהקריאה
@@ -187,6 +187,31 @@ lumen bases update --edits edits.json --approve   # כל diff בטרמינל; מ
 
 Bases דורשים את חבילת המנוע: בנה את השרת אחרי `npm ci` בשורש המאגר, ואז
 `npm run build` בתיקייה `mcp-server/`.
+
+## סוגים
+
+סוג הוא קובץ בכספת, `.lumen/types/<id>.yaml`. יש לו שמות, תגית שמפעילה אותו,
+הורה אחד ב-`extends` ושדות מוקלדים. הפתקים עצמם נשארים frontmatter רגיל.
+
+- `list_types` מחזיר את רשימת הסוגים.
+- `get_type` מחזיר את השדות של סוג אחד, עם הנורשים ראשונים, ולכל שדה את
+  סוג הערך, האפשרויות ויעד הקשר.
+- `create_object` מציע פתק חדש מסוג מסוים. קודם הערכים נבדקים מול הסכמה.
+  שגיאה היא שדה שלא קיים בסוג, ערך מסוג לא נכון, אפשרות שלא ברשימה, או קשר
+  לפתק מסוג אחר. כשיש שגיאה לא מוצע כלום, והיומן רושם `denied` עם הסיבה
+  `schema: <השדות>`. אובייקט תקין הופך להצעה אחת בתור האישורים, בתוך היקף
+  התיקיות והתגיות של הלקוח.
+
+מהטרמינל:
+
+```bash
+lumen types                                   # הסוגים
+lumen types show book                         # השדות; ‏--json ל-JSON
+lumen new "Dune" --type book --set pages=412 --set 'author=[[Frank Herbert]]'
+```
+
+כמו `lumen new`, גם `lumen new --type` כותב ישירות, כי אתה זה שנמצא
+בטרמינל. ערך שלא מתאים לסוג לא כותב כלום.
 
 ## Lumen כלקוח: שרתים חיצוניים לסוכנים המקומיים
 

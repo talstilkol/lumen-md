@@ -132,7 +132,8 @@ describe("MCP 2026-07-28 client (20 scenarios)", () => {
   it("8. a read-only grant lists only read-only tools, marked readOnlyHint", async () => {
     await enableClient(vault, "claude-code", ["search", "read"]);
     const tools = result(await new McpEndpoint({ vault }).handle(modern("tools/list"))).tools as { name: string; annotations: { readOnlyHint: boolean } }[];
-    expect(tools.map((t) => t.name)).toEqual(["search_notes", "read_note", "list_notes", "list_tags", "get_backlinks", "bases_query"]);
+    // W12.T4 adds list_types and get_type (read); create_object is a propose tool, so it is not here.
+    expect(tools.map((t) => t.name)).toEqual(["search_notes", "read_note", "list_notes", "list_tags", "get_backlinks", "list_types", "get_type", "bases_query"]);
     expect(tools.every((t) => t.annotations.readOnlyHint)).toBe(true);
   });
 
@@ -327,7 +328,8 @@ describe("MCP 2025-11-25 client (10 scenarios)", () => {
     const ep = new McpEndpoint({ vault });
     await ep.handle(init());
     const r = result(await ep.handle(req("tools/list")));
-    expect((r.tools as unknown[]).length).toBe(6);
+    // Search and read tools: 6, plus W12.T4's list_types and get_type.
+    expect((r.tools as unknown[]).length).toBe(8);
     expect(r.resultType).toBeUndefined();
     expect(r.ttlMs).toBeUndefined();
   });
