@@ -66,6 +66,8 @@ async function main(argv, env) {
   console.log(`$ LUMEN_VISUAL_APPROVE=1 ${run.cmd} ${run.args.join(" ")}`);
   if (dry) return 0;
   const r = spawnSync(run.cmd, run.args, { stdio: "inherit", env: run.env });
+  // The surfaces suite records which Chromium rendered its baselines; the gate checks it (plan 10.3).
+  if (suite === "visual" && r.status === 0) spawnSync(process.execPath, ["scripts/visual-stamp.mjs", "--write"], { stdio: "inherit", env: run.env });
   console.log("\nNow look at every new or changed PNG (git status; the HTML report), and commit only the ones you checked.");
   return r.status ?? 1;
 }

@@ -480,6 +480,32 @@ steps:
           limit: 1
     artifact_paths:
       - "reports/ocr-cer.json"
+  - label: ":camera_with_flash: visual regression (Mac)"
+    key: "visual"
+    command: |-
+      LUMEN_CI_JOB=visual LUMEN_CI_BROWSERS=chromium bash scripts/buildkite/run.sh <<'LUMEN_JOB'
+      gate 'Baselines exist for this platform and Chromium' <<'LUMEN_STEP'
+      node scripts/visual-stamp.mjs --check
+      LUMEN_STEP
+      gate 'Visual regression (plan 10.3)' <<'LUMEN_STEP'
+      npm run test:visual
+      LUMEN_STEP
+      gates_done
+      LUMEN_JOB
+    agents:
+      queue: "mac"
+    timeout_in_minutes: 30
+    notify:
+      - github_commit_status:
+          context: "lumen/buildkite: visual"
+    retry:
+      automatic:
+        - exit_status: -1
+          limit: 2
+        - exit_status: 255
+          limit: 1
+    artifact_paths:
+      - "visual-results/**/*"
   - label: ":lighthouse: Lighthouse CI"
     key: "lighthouse"
     command: |-
@@ -534,11 +560,13 @@ steps:
         allow_failure: true
       - step: "ocr-cer"
         allow_failure: true
+      - step: "visual"
+        allow_failure: true
       - step: "lighthouse"
         allow_failure: true
     command: |-
       buildkite-agent artifact download 'ci-out/vitest-summary.json' . || true
-      node scripts/buildkite/receipt.mjs --gates vitest,vitest-merge,static,lint,licenses,build,e2e-chromium,e2e-firefox,e2e-webkit,e2e-prod,e2e-headers,local-ai,ocr-cer,lighthouse
+      node scripts/buildkite/receipt.mjs --gates vitest,vitest-merge,static,lint,licenses,build,e2e-chromium,e2e-firefox,e2e-webkit,e2e-prod,e2e-headers,local-ai,ocr-cer,visual,lighthouse
     agents:
       queue: "linux"
     artifact_paths:

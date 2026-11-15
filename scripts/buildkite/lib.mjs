@@ -108,6 +108,19 @@ export const JOBS = [
     timeout: 30,
   },
   {
+    // Plan 10.3 (W10.E23): the baselines are approved on the Mac
+    // (`npm run visual:approve -- visual`), so they are compared there.
+    // No baseline, or one from another Chromium, fails; so does a diff.
+    key: "visual",
+    label: ":camera_with_flash: visual regression (Mac)",
+    job: "visual",
+    steps: ["Baselines exist for this platform and Chromium", "Visual regression (plan 10.3)"],
+    queue: "mac",
+    browsers: ["chromium"],
+    artifacts: ["visual-results/**/*"],
+    timeout: 30,
+  },
+  {
     key: "lighthouse",
     label: ":lighthouse: Lighthouse CI",
     job: "lighthouse",
@@ -132,6 +145,7 @@ export const NOT_GATES = {
   "e2e › Install Playwright browser (${{ matrix.browser }})": "setup: Playwright's image has the browsers; on the Mac run.sh installs the job's browser",
   "e2e › Software GL for headless WebGL (firefox)": "setup: Mesa and xvfb are in scripts/factory/Dockerfile.factory",
   "e2e-prod › Install Playwright browsers (chromium only — saves ~6 min)": "setup: in the image",
+  "visual › Install Playwright browser (chromium)": "setup: on the Mac run.sh installs the job's browser (LUMEN_CI_BROWSERS)",
   "e2e-headers › Install Playwright browsers (chromium, webkit)": "setup: in the image",
   "ocr-cer › Install Playwright Chromium": "setup: in the image",
   "check › Test": "covered by the `vitest` shards: the merged run is the whole suite, with coverage on (a superset of `npm run test`)",
@@ -415,8 +429,9 @@ export const pipelineYaml = (ci, opts) => `${PIPELINE_HEADER}${toYaml(buildPipel
 /**
  * Rules the pipeline itself must keep (on top of gateCoverage):
  * no soft_fail anywhere (it would turn a red gate green), no retry on a
- * test failure, every gate posts its own commit status, WebKit runs on the
- * Mac's queue without a condition, and every job has a timeout.
+ * test failure, every gate posts its own commit status, WebKit and the
+ * visual gate run on the Mac's queue without a condition, and every job has
+ * a timeout.
  */
 export function pipelineRules(p) {
   const problems = [];
@@ -434,6 +449,15 @@ export function pipelineRules(p) {
   else {
     if (webkit.agents?.queue !== "mac") problems.push("e2e-webkit must run on the Mac's queue (real WebKit on macOS)");
     if (webkit.if || webkit.skip) problems.push("e2e-webkit must run on every build (no if/skip)");
+  }
+  // Plan 10.3 (W10.E23): the visual gate compares on the Mac, where its baselines are approved, on every build.
+  const visual = (p.steps ?? []).find((s) => s.key === "visual");
+  if (!visual) problems.push("no visual job (plan 10.3: npm run test:visual)");
+  else {
+    if (visual.agents?.queue !== "mac") problems.push("visual must run on the Mac's queue (its baselines are approved there)");
+    if (visual.if || visual.skip) problems.push("visual must run on every build (no if/skip)");
+    if (!/visual-stamp\.mjs --check/.test(visual.command ?? "")) problems.push("visual must check its baselines first (scripts/visual-stamp.mjs --check)");
+    if (!/npm run test:visual\b/.test(visual.command ?? "")) problems.push("visual must run npm run test:visual");
   }
   const receipt = (p.steps ?? []).find((s) => s.key === "receipt");
   const deps = new Set((receipt?.depends_on ?? []).map((d) => d.step));
