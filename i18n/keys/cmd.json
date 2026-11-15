@@ -1905,6 +1905,11 @@
       "vars": []
     },
     {
+      "key": "cmd.roleVault.open",
+      "en": "Family or classroom vault…",
+      "vars": []
+    },
+    {
       "key": "cmd.save",
       "en": "Save",
       "vars": []

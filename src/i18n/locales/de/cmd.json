@@ -376,6 +376,7 @@
   "cmd.research.verify": "🔎 Recherche: Zitate in dieser Notiz prüfen",
   "cmd.research.verify.hint": "Prüft, ob jeder Fußnoten-Link lebt und das Zitat wirklich auf der Seite steht",
   "cmd.review.daily": "Tägliche Wiederholung",
+  "cmd.roleVault.open": "Familien- oder Klassen-Tresor…",
   "cmd.save": "Speichern",
   "cmd.saveAs": "Speichern as…",
   "cmd.search": "Suchen workspace…",

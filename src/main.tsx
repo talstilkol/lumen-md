@@ -189,6 +189,8 @@ if (location.pathname === "/oauth/onenote") void import("./storage/import/onenot
 else if (location.pathname.startsWith("/oauth/")) void import("./sync/e2ee/ui/launch").then((m) => m.oauthReturn(Promise.all([secretsReady, vaultReady])));
 // Plan W5.21: a classroom link (`#class=…`, never sent to any server) offers to join once the app is up.
 if (location.hash.startsWith("#class=")) void import("./sync/e2ee/classroom/launch").then((m) => m.classLinkReturn(Promise.all([secretsReady, vaultReady])));
+// Plan W12.S4: a role-vault invite (`#rolevault=…`, never sent to any server) offers to join, behind the sync.e2ee gate.
+else if (location.hash.startsWith("#rolevault=")) void import("./sync/e2ee/roles/ui/launch").then((m) => m.roleVaultLinkReturn(Promise.all([secretsReady, vaultReady])));
 void Promise.all([initLocale(), secretsReady, vaultReady])
   .then(([applied]) => {
     // initLocale falls back to English when the saved locale's chunk can't
