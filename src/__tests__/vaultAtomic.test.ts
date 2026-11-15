@@ -352,6 +352,28 @@ describe("atomic saves: leftovers of the OPFS write worker", () => {
     expect((await backend.list("")).map((e) => e.name)).toEqual(["notes", "r.md", "s.md"]);
     expect([...notes.files.keys()]).toEqual(["a.md"]);
   });
+
+  it("a compare-and-swap (2.28, #275 port) finishes an interrupted save first: writeIf(null) never lands over it, writeIf(hash) swaps the recovered note", async () => {
+    const root = new FakeDir("opfs");
+    const backend = createDirectoryHandleBackend({ id: "opfs", root: async () => root as unknown as FileSystemDirectoryHandle });
+    const put = async (name: string, text: string) => {
+      const w = await (await root.getFileHandle(name, { create: true })).createWritable();
+      await w.write(text);
+      await w.close();
+    };
+    const hash = async (text: string) => (await import("../storage/vault/cas")).sha256Hex(new TextEncoder().encode(text));
+    // Saves of a.md, b.md and c.md were stopped after the old version was put aside: each note is missing until
+    // recovery restores it (one folder: the first look at it recovers all three).
+    await put(oldNameFor("a.md", "w1"), "old a");
+    await put(oldNameFor("b.md", "w2"), "old b");
+    await put(oldNameFor("c.md", "w3"), "old c");
+    expect(await backend.writeIf("a.md", "created over it", null)).toBe(false);
+    expect(await backend.readText("a.md")).toBe("old a");
+    expect(await backend.writeIf("b.md", "synced", await hash("old b"))).toBe(true);
+    expect(await backend.readText("b.md")).toBe("synced");
+    expect(await backend.removeIf("c.md", await hash("old c"))).toBe(true);
+    expect([...root.files.keys()].sort()).toEqual(["a.md", "b.md"]);
+  });
 });
 
 describe("atomic saves: a real process killed with SIGKILL", () => {

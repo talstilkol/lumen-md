@@ -430,7 +430,7 @@ export class E2eeSync extends E2eeSyncPairing {
     return out;
   }
 
-  /** Step 3 (blobs): upload every local change; returns the new manifest entries. */
+  /** Step 3 (blobs): upload every local change the tree check lets through; returns the new manifest entries. */
   private async collectChanges(
     remote: Manifest,
     held: Set<string>,
@@ -440,7 +440,6 @@ export class E2eeSync extends E2eeSyncPairing {
     const listed = await this.listLocal();
     const local = new Map(listed.map((f) => [f.path, f.hash]));
     const sizes = new Map(listed.map((f) => [f.path, f.size ?? null]));
-    const out = new Map<string, { entry: ManifestEntry; data: Uint8Array | null }>();
     const paths = [...new Set([...Object.keys(s.base), ...local.keys()])].sort();
     // What goes up, and what this device keeps (plan W1.8): judged before
     // anything is read, so an excluded file never even enters the round.
@@ -461,13 +460,48 @@ export class E2eeSync extends E2eeSyncPairing {
       planBytes += lh === null ? 0 : (sizes.get(path) ?? 0);
     }
     this.emit({ kind: "plan", at: this.o.now(), direction: "up", files: todo.length, bytes: planBytes });
+    // Planned first, uploaded after the tree check below (2.29, #275): a
+    // change the check holds is never read, encrypted or uploaded. The check
+    // runs on the listing, so no file's bytes are held while it runs (W1.8);
+    // a file that then can't be read, or is excluded late, only counted as
+    // live in this round's check (it can hold a clashing change one round
+    // longer, never let a clash through).
+    const plan = new Map<string, { ver: number; deleted: boolean }>();
     for (const path of todo) {
       const r = remote.files[path];
-      const lh = local.get(path) ?? null;
-      const ver = (r?.ver ?? 0) + 1;
-      if (lh === null) {
+      if ((local.get(path) ?? null) === null) {
         if (!r || r.deleted) continue; // never existed there, or already deleted
-        out.set(path, { entry: { ver, rev: "", hash: "", size: 0, deleted: true, by: s.deviceId }, data: null });
+        plan.set(path, { ver: (r?.ver ?? 0) + 1, deleted: true });
+      } else plan.set(path, { ver: (r?.ver ?? 0) + 1, deleted: false });
+    }
+    // The manifest must describe a tree a file system can hold: never a live
+    // file `x` together with live entries under `x/`. A change that would
+    // create that — typically because the other side of the clash is held —
+    // is held too, until the clash is settled.
+    for (let changed = true; changed; ) {
+      changed = false;
+      const live = new Set(Object.keys(remote.files).filter((p) => !remote.files[p].deleted));
+      for (const [p, c] of plan) {
+        if (c.deleted) live.delete(p);
+        else live.add(p);
+      }
+      for (const [p, c] of plan) {
+        if (c.deleted) continue;
+        const segs = p.split("/");
+        const above = segs.slice(0, -1).some((_, k) => live.has(segs.slice(0, k + 1).join("/")));
+        const below = [...live].some((q) => q.startsWith(`${p}/`));
+        if (above || below) {
+          plan.delete(p);
+          this.hold(held, p, "clash");
+          changed = true;
+          break;
+        }
+      }
+    }
+    const out = new Map<string, { entry: ManifestEntry; data: Uint8Array | null }>();
+    for (const [path, c] of plan) {
+      if (c.deleted) {
+        out.set(path, { entry: { ver: c.ver, rev: "", hash: "", size: 0, deleted: true, by: s.deviceId }, data: null });
         continue;
       }
       const data = await this.o.local.read(path);
@@ -492,31 +526,7 @@ export class E2eeSync extends E2eeSyncPairing {
         uploads.set(path, up);
         this.emit({ kind: "upload", at: this.o.now(), path, bytes: data.length, direction: "up" });
       }
-      out.set(path, { entry: { ver, rev: up.rev, hash, size: up.size, by: s.deviceId, ...(up.epoch ? { e: up.epoch } : {}) }, data: up.data });
-    }
-    // The manifest must describe a tree a file system can hold: never a live
-    // file `x` together with live entries under `x/`. A change that would
-    // create that — typically because the other side of the clash is held —
-    // is held too, until the clash is settled.
-    for (let changed = true; changed; ) {
-      changed = false;
-      const live = new Set(Object.keys(remote.files).filter((p) => !remote.files[p].deleted));
-      for (const [p, c] of out) {
-        if (c.entry.deleted) live.delete(p);
-        else live.add(p);
-      }
-      for (const [p, c] of out) {
-        if (c.entry.deleted) continue;
-        const segs = p.split("/");
-        const above = segs.slice(0, -1).some((_, k) => live.has(segs.slice(0, k + 1).join("/")));
-        const below = [...live].some((q) => q.startsWith(`${p}/`));
-        if (above || below) {
-          out.delete(p);
-          this.hold(held, p, "clash");
-          changed = true;
-          break;
-        }
-      }
+      out.set(path, { entry: { ver: c.ver, rev: up.rev, hash, size: up.size, by: s.deviceId, ...(up.epoch ? { e: up.epoch } : {}) }, data: up.data });
     }
     return out;
   }

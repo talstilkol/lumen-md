@@ -5,8 +5,8 @@
  */
 
 import { equalBytes, fromB64u, sha256Hex } from "./bytes";
-import { createHeader, decodeHeader, encodeHeader, HEADER_NAME, unlockHeader, WrongPassphraseError, type VaultHeader } from "./header";
-import { PBKDF2_MIN_ITERATIONS, type KdfPolicy } from "./kdf";
+import { createHeader, decodeHeader, encodeHeader, HEADER_NAME, HeaderFormatError, unlockHeader, UnsupportedProtocolError, WrongPassphraseError, type VaultHeader } from "./header";
+import { KdfUnavailableError, PBKDF2_MIN_ITERATIONS, WeakKdfError, type KdfPolicy } from "./kdf";
 import { DecryptError, type VaultKeys } from "./keys";
 import {
   checkDeviceEnrolled,
@@ -25,6 +25,24 @@ import { PreconditionFailedError, type SyncProvider } from "./provider";
 import type { DeviceState } from "./state";
 import { NoVaultError, VaultExistsError, type RekeyRequest, type RekeyResult } from "./engineTypes";
 import { newRecoveryKey, recoveryKeys, RecoveryKeyError } from "./recovery";
+
+/**
+ * The vault there can't be resumed with this passphrase (2.30, #275): a wrong
+ * passphrase, a header that is not one we can open (format, protocol, a KDF
+ * refused), or — since the keyring (W1.7), which #275's base did not have — a
+ * keyring this passphrase does not open (DecryptError and its subclasses:
+ * not JSON, another vault's, a tampered or pre-release wrap).
+ */
+function isForeignVault(err: unknown): boolean {
+  return (
+    err instanceof WrongPassphraseError ||
+    err instanceof HeaderFormatError ||
+    err instanceof UnsupportedProtocolError ||
+    err instanceof WeakKdfError ||
+    err instanceof KdfUnavailableError ||
+    err instanceof DecryptError
+  );
+}
 
 /**
  * Create a vault at `provider`: the header (create-only) and the first,
@@ -49,8 +67,12 @@ export async function createVault(
     const floor = Math.min(PBKDF2_MIN_ITERATIONS, opts.pbkdf2Iterations ?? PBKDF2_MIN_ITERATIONS);
     try {
       ({ header, keys } = await unlockVault(provider, passphrase, { minPbkdf2Iterations: floor }));
-    } catch {
-      throw new VaultExistsError();
+    } catch (err) {
+      // Only an answer about the vault that is there means "someone else's
+      // vault" (2.30, #275): a provider that is down, a timeout, a header that
+      // vanished in between are rethrown, so the caller can retry the create.
+      if (isForeignVault(err)) throw new VaultExistsError();
+      throw err;
     }
   }
   const name = await manifestName(keys);

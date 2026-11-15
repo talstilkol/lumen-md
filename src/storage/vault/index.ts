@@ -25,7 +25,7 @@ import type { VaultBackend, VaultEvent, VaultListener } from "./types";
 import { ENCRYPTED_PREFIX, ENCRYPTED_TEXT_PREFIX, HEADER_BACKUP_PATH, HEADER_PATH, isLayerPath } from "./encrypted/paths";
 
 export * from "./types";
-export { checkRename, compareVaultEntries, toBytes, VaultEmitter, vaultSegments } from "./shared";
+export { checkRename, compareVaultEntries, PathLock, toBytes, VaultEmitter, vaultSegments } from "./shared";
 export { createDirectoryHandleBackend, type DirectoryHandleBackendOptions } from "./handleBackend";
 export { createMemoryBackend } from "./memory";
 export { createOpfsBackend, isOpfsSupported } from "./opfs";
@@ -138,6 +138,9 @@ function gate(inner: VaultBackend): Gate {
       return checked(b, path, text, text.startsWith(ENCRYPTED_TEXT_PREFIX), (n) => n.readText(path));
     }),
     write: via((b, path: string, data: Parameters<VaultBackend["write"]>[1]) => b.write(path, data)),
+    // 2.28 (#275): the compare-and-swap of whichever backend is active (plain, or the encrypted layer, which compares the note's plaintext).
+    writeIf: via((b, path: string, data: Parameters<VaultBackend["write"]>[1], expect: string | null) => b.writeIf(path, data, expect)),
+    removeIf: via((b, path: string, expect: string) => b.removeIf(path, expect)),
     // Plan W7.4 (W10.E51): the store's batch read and write, which the gate used not to pass on, so
     // every bulk edit fell back to a read, a stat and a write per note. Only over a vault that is not
     // encrypted (the encrypted layer reads and writes one file at a time); otherwise nothing is batched
