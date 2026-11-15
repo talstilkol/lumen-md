@@ -14,6 +14,7 @@
    | Category | Type | Linked to the user | Used for tracking | Only when |
    |---|---|---|---|---|
    | Diagnostics | Crash Data | **No** | **No** | Only in a build made with a crash-reporting key (VITE_SENTRY_DSN), and only after the user turns error reports on (Settings; off by default, refused under the local-only policy). A report holds the error's class name and where in the code, never its message, note text, titles, paths or the page address (src/lib/telemetry.ts). |
+   | Diagnostics | Performance Data | **No** | **No** | Only with an error tracker (VITE_SENTRY_DSN, or one the user sets) and only after the user turns performance reports on (Settings → Security; off by default, a separate switch from error reports, plan W11.S19). One report per session with counts of web-vitals ratings per metric; no timings, no page address. |
 
    **The store build is made without `VITE_SENTRY_DSN`**, so the answer to question 1 stays *No*. If a build ever ships with it, declare *Crash Data*: not linked, not used for tracking, *App Functionality*.
 
@@ -28,6 +29,7 @@
    Only in a differently configured build:
 
    - **App info and performance: Crash logs** (optional for the user): Only in a build made with a crash-reporting key (VITE_SENTRY_DSN), and only after the user turns error reports on (off by default, refused under the local-only policy).
+   - **App info and performance: Diagnostics** (optional for the user): Only with an error tracker and only after the user turns performance reports on (off by default, separate from error reports): counts of web-vitals ratings per session, no timings.
 
 ## Features the user turns on (not collection by the developer)
 

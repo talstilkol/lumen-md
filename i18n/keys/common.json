@@ -7763,6 +7763,58 @@
       "vars": []
     },
     {
+      "key": "monitoring.settings.dsn",
+      "en": "Your own error tracker (GlitchTip or Sentry DSN)",
+      "vars": []
+    },
+    {
+      "key": "monitoring.settings.dsnInvalid",
+      "en": "Not a DSN: it looks like https://<key>@host/<project number>.",
+      "vars": []
+    },
+    {
+      "key": "monitoring.settings.dsnNote",
+      "en": "Optional. Reports go there instead of the build's tracker. Leave it empty to use the build's, if it has one. The site's security policy must allow the host.",
+      "vars": []
+    },
+    {
+      "key": "monitoring.settings.errors",
+      "en": "Send error reports",
+      "vars": []
+    },
+    {
+      "key": "monitoring.settings.errorsNote",
+      "en": "The error's class name and where in the code it happened. No message, note text, titles, paths, page address or IP address. Secrets and personal details are removed too.",
+      "vars": []
+    },
+    {
+      "key": "monitoring.settings.noTracker",
+      "en": "No error tracker is set, so nothing is sent whatever the switches say.",
+      "vars": []
+    },
+    {
+      "key": "monitoring.settings.performance",
+      "en": "Send performance reports",
+      "vars": []
+    },
+    {
+      "key": "monitoring.settings.performanceNote",
+      "en": "Once per session: how many page loads were good, needs improvement or poor for each web vital. No timings, no page address.",
+      "vars": []
+    },
+    {
+      "key": "monitoring.settings.title",
+      "en": "Error and performance reports",
+      "vars": []
+    },
+    {
+      "key": "monitoring.settings.tracker",
+      "en": "Reports go to {host}, and only with a switch below turned on.",
+      "vars": [
+        "host"
+      ]
+    },
+    {
       "key": "morning.changed",
       "en": "Changed since the last morning",
       "vars": []

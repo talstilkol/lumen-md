@@ -2,10 +2,16 @@
  * Error monitoring (plan 12.4) — off by default.
  *
  * Nothing is loaded and nothing is sent unless BOTH hold:
- *   1. the user turned error reports on (`lumen.monitoring.consent = "1"`,
- *      the Telemetry pill in the status bar), and
- *   2. the build names an error tracker: `VITE_SENTRY_DSN` (Sentry, or a
- *      self-hosted GlitchTip, which speaks the same protocol).
+ *   1. the user turned on error reports (`lumen.monitoring.consent = "1"`,
+ *      the Telemetry pill in the status bar) or performance reports
+ *      (`lumen.monitoring.performance = "1"`): two separate consents
+ *      (plan W11.S19), each off by default and each in Settings → Security;
+ *   2. there is an error tracker: the user's own DSN (`lumen.monitoring.dsn`,
+ *      e.g. their GlitchTip, plan W11.S19), else the build's `VITE_SENTRY_DSN`
+ *      (Sentry, or a self-hosted GlitchTip, which speaks the same protocol).
+ *
+ * Performance reports carry only counts of web-vitals ratings (good,
+ * needs improvement, poor) per metric: no values, no page address.
  *
  * A DSN is public by design (it ships in every Sentry-enabled page and only
  * lets a client *submit* events), so a build-time variable is the right
@@ -44,6 +50,57 @@ export function setMonitoringConsent(on: boolean): void {
   else setErrorSink(null);
 }
 
+const PERFORMANCE_KEY = "lumen.monitoring.performance";
+const USER_DSN_KEY = "lumen.monitoring.dsn";
+
+/** Has the user turned performance reports on (web-vitals buckets)? False by default. */
+export function getPerformanceConsent(): boolean {
+  try {
+    return localStorage.getItem(PERFORMANCE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+/** The performance switch (Settings → Security). Separate from error reports. */
+export function setPerformanceConsent(on: boolean): void {
+  try {
+    if (on) localStorage.setItem(PERFORMANCE_KEY, "1");
+    else localStorage.removeItem(PERFORMANCE_KEY);
+  } catch {
+    // why: private mode — consent can't be stored, so performance reports stay off
+  }
+  if (on) void initTelemetry();
+}
+
+/** The user's own error tracker DSN as typed (null: none set). */
+export function getUserDsn(): string | null {
+  try {
+    return localStorage.getItem(USER_DSN_KEY);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Set (or clear, with "") the user's own DSN. Refuses one that isn't a
+ * usable `https://<key>@host/<project>` address; returns whether it was kept.
+ */
+export function setUserDsn(dsn: string): boolean {
+  const v = dsn.trim();
+  try {
+    if (!v) {
+      localStorage.removeItem(USER_DSN_KEY);
+      return true;
+    }
+    if (!validDsn(v)) return false;
+    localStorage.setItem(USER_DSN_KEY, v);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 let dsnOverride: string | null = null;
 
 /**
@@ -63,22 +120,27 @@ function readEnvDsn(): string | undefined {
   }
 }
 
-/**
- * The configured DSN, or null when it is missing or not a usable
- * `https://<key>@host/<project>` address (http only for localhost).
- */
-export function monitoringDsn(): string | null {
-  const raw = readEnvDsn()?.trim();
-  if (!raw) return null;
+/** A usable `https://<key>@host/<project>` DSN (http only for localhost)? */
+function validDsn(raw: string): boolean {
   try {
     const u = new URL(raw);
     const local = u.hostname === "localhost" || u.hostname === "127.0.0.1";
-    if (u.protocol !== "https:" && !(u.protocol === "http:" && local)) return null;
-    if (!u.username || !/\/\d+\/?$/.test(u.pathname)) return null;
-    return raw;
+    if (u.protocol !== "https:" && !(u.protocol === "http:" && local)) return false;
+    return !!u.username && /\/\d+\/?$/.test(u.pathname);
   } catch {
-    return null;
+    return false;
   }
+}
+
+/**
+ * The DSN in use: the user's own (plan W11.S19), else the build's; null when
+ * neither is a usable `https://<key>@host/<project>` address.
+ */
+export function monitoringDsn(): string | null {
+  const user = getUserDsn()?.trim();
+  if (user && validDsn(user)) return user;
+  const raw = readEnvDsn()?.trim();
+  return raw && validDsn(raw) ? raw : null;
 }
 
 /** Origin of the error tracker (for the ledger's rules), or null without a DSN. */
@@ -114,7 +176,7 @@ let monitor: Awaited<ReturnType<MonitorLoader>> | null = null;
  * Resolves to whether the monitor is running.
  */
 export async function initTelemetry(load: MonitorLoader = defaultLoader): Promise<boolean> {
-  if (!getMonitoringConsent()) return false;
+  if (!getMonitoringConsent() && !getPerformanceConsent()) return false;
   const dsn = monitoringDsn();
   if (!dsn) return false;
   try {

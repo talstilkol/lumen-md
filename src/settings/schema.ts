@@ -205,6 +205,8 @@ export const SETTINGS: readonly SettingEntry[] = [
   data("lumen.remoteImages.allowedHosts"),
   data("lumen.plantuml.krokiOptIn"),
   data("lumen.monitoring.consent"),
+  data("lumen.monitoring.performance"),
+  data("lumen.monitoring.dsn"),
   data("lumen.agents.untrustedNotes"),
   data("lumen.agents.provenanceBackfill.v1"),
   data("lumen.secrets.index"),
