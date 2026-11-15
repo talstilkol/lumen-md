@@ -88,7 +88,6 @@ export async function openStudyScreen(opts: { ref?: SourceRef; invite?: { room: 
   }
   const host = document.createElement("div");
   host.setAttribute("role", "dialog");
-  host.setAttribute("aria-modal", "false");
   host.setAttribute("aria-label", t("havruta.title", { ref: hRef.he }));
   Object.assign(host.style, { position: "fixed", inset: "48px 0 0 0", zIndex: "45", display: "flex", flexDirection: "column", background: "hsl(var(--bg))" });
   document.body.appendChild(host);

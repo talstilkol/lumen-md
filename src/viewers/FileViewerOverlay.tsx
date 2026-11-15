@@ -7,7 +7,7 @@
  */
 import "./strings";
 import "./FileViewer.css";
-import { useCallback, useEffect, useState, type KeyboardEvent } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { t } from "../i18n";
 import { ErrorBoundary } from "../ui/ErrorBoundary";
 import { explainError } from "../lib/userError";
@@ -18,6 +18,7 @@ import { dataFormatOf, parseDataText, writeCell, type DataTable } from "./dataFi
 import { DataKanbanView, DataTableView } from "./DataFileView";
 import { parseGeoFile, type GeoCollection } from "./geoFile";
 import { GeoFileView } from "./GeoFileView";
+import { Modal } from "../ui/Modal";
 
 type Loaded =
   | { kind: "notebook"; text: string; notebook: Notebook }
@@ -121,16 +122,7 @@ function Viewer({ view, onClose, onOpenAsText, io = workspaceIo }: Props) {
 
   const l = state.loaded;
   return (
-    <div
-      className="fv-overlay"
-      role="dialog"
-      aria-modal="true"
-      aria-label={name}
-      tabIndex={-1}
-      onKeyDown={(e: KeyboardEvent) => {
-        if (e.key === "Escape") onClose();
-      }}
-    >
+    <Modal className="fv-overlay" aria-label={name} onClose={onClose}>
       <header className="fv-toolbar">
         <h2 dir="auto">{name}</h2>
         {l?.kind === "data" && (
@@ -182,7 +174,7 @@ function Viewer({ view, onClose, onOpenAsText, io = workspaceIo }: Props) {
         {l?.kind === "data" && (mode === "table" ? <DataTableView table={l.table} onEdit={(r, c, v) => void onEdit(r, c, v)} /> : <DataKanbanView table={l.table} groupBy={groupBy || l.table.columns[0]} />)}
         {l?.kind === "geo" && <GeoFileView geo={l.geo} />}
       </main>
-    </div>
+    </Modal>
   );
 }
 

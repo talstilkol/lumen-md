@@ -11,6 +11,7 @@ import { t } from "../i18n";
 import { ledgerFetch } from "../ai/privacyLedger";
 import { CONSENT_PATH, LEDGER_REASON, WIKIDATA_LICENCE, consentFile, consentFromFile, searchWikidata, withQid, type WikidataHit } from "../entities/wikidata";
 import "./entityGraphStrings";
+import { Modal } from "./Modal";
 
 export interface WikidataVault {
   readWorkspaceFile(path: string): Promise<string>;
@@ -90,7 +91,7 @@ export function WikidataLink({ name, path, onClose, vault, fetchImpl }: Wikidata
   };
 
   return (
-    <div className="cmd-palette-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-label={t("entityGraph.wikidata.title")} data-testid="wikidata-link">
+    <Modal onClose={onClose} className="cmd-palette-backdrop" onClick={onClose} aria-label={t("entityGraph.wikidata.title")} data-testid="wikidata-link">
       <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 560, padding: 18, display: "flex", flexDirection: "column", gap: 10, fontSize: 13 }}>
         <h2 style={{ margin: 0, fontSize: 16 }}>
           {t("entityGraph.wikidata.title")}: <span dir="auto">{name}</span>
@@ -140,6 +141,6 @@ export function WikidataLink({ name, path, onClose, vault, fetchImpl }: Wikidata
         {phase.at === "error" && <p role="alert">{phase.message}</p>}
         <p style={{ margin: 0, color: "hsl(var(--fg-muted))" }}>{t("entityGraph.wikidata.privacy")}</p>
       </div>
-    </div>
+    </Modal>
   );
 }

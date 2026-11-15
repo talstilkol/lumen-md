@@ -8,9 +8,8 @@
  * is approved. While the studio is open, one Ctrl+Z undoes the whole rename
  * (every note and the type file that still hold what the rename wrote).
  */
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { t } from "../i18n";
-import { useFocusTrap } from "../ui/useFocusTrap";
 import { showAiToast } from "../ui/AiToast";
 import { explainError } from "../lib/userError";
 import { listWorkspace, readWorkspaceFile, workspaceHasFile, writeWorkspaceFile } from "../storage/workspace";
@@ -23,6 +22,7 @@ import { useTypeRegistry, TYPES_CHANGED_EVENT } from "./vaultTypes";
 import { addFieldToTypeText, newTypedNote, newTypeFile, planFieldRename, templatePathOf, undoFileChanges, type FileChange } from "./typedForm";
 import type { TypeRegistry } from "./typeRegistry";
 import "./typedObjectsStrings";
+import { Modal } from "../ui/Modal";
 
 const btn = { fontSize: 12, padding: "4px 10px", border: "1px solid hsl(var(--border))", borderRadius: 6, background: "transparent", color: "inherit", cursor: "pointer" } as const;
 const field = { fontSize: 12, padding: "3px 6px", border: "1px solid hsl(var(--border))", borderRadius: 4, background: "hsl(var(--bg))", color: "inherit" } as const;
@@ -59,8 +59,6 @@ interface RenameRun {
 
 export function ObjectStudio({ onClose, locale }: { onClose: () => void; locale: string }) {
   const reg = useTypeRegistry();
-  const trapRef = useRef<HTMLDivElement>(null);
-  useFocusTrap(trapRef, { active: true, onEscape: onClose });
   const types = useMemo(() => (reg ? [...reg.types.values()] : []), [reg]);
   const name = (id: string) => {
     const x = reg?.get(id);
@@ -177,7 +175,7 @@ export function ObjectStudio({ onClose, locale }: { onClose: () => void; locale:
   const row = { display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", marginBlockEnd: 6 } as const;
 
   return (
-    <div className="cmd-palette-backdrop" onClick={onClose} ref={trapRef} role="dialog" aria-modal="true" aria-labelledby="object-studio-title" data-testid="object-studio">
+    <Modal onClose={onClose} className="cmd-palette-backdrop" onClick={onClose} aria-labelledby="object-studio-title" data-testid="object-studio">
       <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 640, padding: 16, maxHeight: "85vh", overflow: "auto" }}>
         <header style={{ display: "flex", alignItems: "center", marginBlockEnd: 8 }}>
           <h2 id="object-studio-title" style={{ margin: 0, fontSize: 15, flex: 1 }}>
@@ -251,6 +249,6 @@ export function ObjectStudio({ onClose, locale }: { onClose: () => void; locale:
           </div>
         </form>
       </div>
-    </div>
+    </Modal>
   );
 }

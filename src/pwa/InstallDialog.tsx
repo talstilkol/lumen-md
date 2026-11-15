@@ -9,6 +9,8 @@ import { Download, X } from "lucide-react";
 import { t } from "../i18n";
 import { currentEnv, installCount, installMode, recordInstall, runInstall, type GuideId, type InstallEnv, type InstallMode } from "./install";
 import { onPromptChange } from "./installPrompt";
+import "./installStrings";
+import { Modal } from "../ui/Modal";
 
 const btn: React.CSSProperties = { padding: "6px 12px", fontSize: 13, borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer" };
 const primary: React.CSSProperties = { ...btn, background: "hsl(var(--accent))", color: "hsl(var(--accent-fg))", borderColor: "transparent" };
@@ -96,7 +98,7 @@ export function InstallDialog({ open, onClose, env = currentEnv }: Props) {
   };
 
   return (
-    <div className="cmd-palette-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-label={t("install.title")} data-testid="install-dialog">
+    <Modal onClose={onClose} className="cmd-palette-backdrop" onClick={onClose} aria-label={t("install.title")} data-testid="install-dialog">
       <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 460, padding: 0 }}>
         <header style={{ padding: "12px 16px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <Download size={16} />
@@ -112,6 +114,6 @@ export function InstallDialog({ open, onClose, env = currentEnv }: Props) {
           {count > 0 && <p data-testid="install-count" style={{ margin: 0, fontSize: 12, color: "hsl(var(--fg-muted))" }}>{t("install.count", { n: count })}</p>}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

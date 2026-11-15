@@ -5,12 +5,12 @@
  * neighbourhood, "Citations only"). An entity opens its note: the entity
  * note, or the source note a cited source came from.
  */
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { t } from "../i18n";
 import { loadEntityGraph, type EntityGraphData } from "../entities/graphData";
 import type { EntityVault } from "../entities/vaultIo";
 import { useAppStore } from "../store/useStore";
-import { useFocusTrap } from "./useFocusTrap";
+import { Modal } from "./Modal";
 import { explainError } from "../lib/userError";
 import "./entityGraphStrings";
 
@@ -29,8 +29,6 @@ const muted: React.CSSProperties = { padding: "2rem", color: "hsl(var(--fg-muted
 export function EntityGraphScreen({ onClose, vault, initialMode }: EntityGraphScreenProps) {
   const [data, setData] = useState<EntityGraphData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const ref = useRef<HTMLDivElement>(null);
-  useFocusTrap(ref, { onEscape: onClose });
 
   useEffect(() => {
     let off = false;
@@ -53,7 +51,7 @@ export function EntityGraphScreen({ onClose, vault, initialMode }: EntityGraphSc
   };
 
   return (
-    <div ref={ref} role="dialog" aria-modal="true" aria-labelledby="entity-graph-title" data-testid="entity-graph-screen" style={{ position: "fixed", inset: 0, zIndex: 9999, background: "hsl(var(--bg))", display: "flex", flexDirection: "column" }}>
+    <Modal onClose={onClose} aria-labelledby="entity-graph-title" data-testid="entity-graph-screen" style={{ position: "fixed", inset: 0, zIndex: 9999, background: "hsl(var(--bg))", display: "flex", flexDirection: "column" }}>
       <div style={bar}>
         <h2 id="entity-graph-title" style={{ margin: 0, fontSize: 14, color: "hsl(var(--fg))" }}>
           {t("entityGraph.screen.title")}
@@ -80,6 +78,6 @@ export function EntityGraphScreen({ onClose, vault, initialMode }: EntityGraphSc
           </Suspense>
         )}
       </div>
-    </div>
+    </Modal>
   );
 }

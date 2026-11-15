@@ -6,10 +6,9 @@
  * Obsidian `.base` file; an existing file is replaced only after the user
  * approves the change.
  */
-import { lazy, Suspense, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import { t } from "../i18n";
 import { useAppStore } from "../store/useStore";
-import { useFocusTrap } from "../ui/useFocusTrap";
 import { uiConfirm } from "../ui/PromptDialog";
 import { readWorkspaceFile, writeWorkspaceFile } from "../storage/workspace";
 import { showAiToast } from "../ui/AiToast";
@@ -19,6 +18,7 @@ import { useTypeRegistry } from "./vaultTypes";
 import { noteIsA } from "./typeRegistry";
 import type { BasesFile } from "../views/bases/values";
 import "./typedObjectsStrings";
+import { Modal } from "../ui/Modal";
 
 const BasesBlock = lazy(() => import("../views/bases/BasesBlock"));
 
@@ -28,8 +28,6 @@ export function TypePage({ type, onClose }: { type?: string; onClose: () => void
   const reg = useTypeRegistry();
   const lang = (useAppStore((s) => s.locale) as string) === "he" ? "he" : "en";
   const [picked, setPicked] = useState<string | undefined>(type);
-  const trapRef = useRef<HTMLDivElement>(null);
-  useFocusTrap(trapRef, { active: true, onEscape: onClose });
   const types = reg ? [...reg.types.values()] : [];
   const current = picked && reg?.get(picked) ? reg.get(picked)!.id : types[0]?.id;
   const label = (id: string) => {
@@ -51,7 +49,7 @@ export function TypePage({ type, onClose }: { type?: string; onClose: () => void
     }
   };
   return (
-    <div className="cmd-palette-backdrop" onClick={onClose} ref={trapRef} role="dialog" aria-modal="true" aria-label={t("types.page.title")} data-testid="type-page">
+    <Modal onClose={onClose} className="cmd-palette-backdrop" onClick={onClose} aria-label={t("types.page.title")} data-testid="type-page">
       <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 1100, inlineSize: "95vw", padding: 0, display: "flex", maxHeight: "85vh" }}>
         <nav aria-label={t("types.page.list")} style={{ inlineSize: 180, borderInlineEnd: "1px solid hsl(var(--border))", overflow: "auto", padding: 8 }}>
           <h2 style={{ fontSize: 13, margin: "4px 4px 8px" }}>{t("types.page.list")}</h2>
@@ -96,6 +94,6 @@ export function TypePage({ type, onClose }: { type?: string; onClose: () => void
           )}
         </main>
       </div>
-    </div>
+    </Modal>
   );
 }
