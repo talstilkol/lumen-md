@@ -120,6 +120,19 @@ export function HighlightsPanel({ onClose, load = loadIndex }: { onClose: () => 
         <button type="button" onClick={() => void exportResults()} disabled={!results.length} data-testid="highlights-export">
           {t("hl.export")}
         </button>
+        <button
+          type="button"
+          disabled={!results.some((r) => r.kind === "pdf")}
+          data-testid="highlights-export-apa"
+          onClick={() =>
+            void import("./apaExportRun")
+              .then(({ runApaExport }) => runApaExport(results.filter((r) => r.kind === "pdf"), whereLabel))
+              .then((path) => path && (onClose(), window.dispatchEvent(new CustomEvent("lumen-open-file", { detail: { path } }))))
+              .catch((e) => showAiToast(t("hl.exportFailed", { error: explainError(e) }), "error"))
+          }
+        >
+          {t("hl.exportApa")}
+        </button>
         <button type="button" onClick={onClose} aria-label={t("epub.close")}>
           ✕
         </button>

@@ -5860,6 +5860,31 @@
       "vars": []
     },
     {
+      "key": "hl.apaNoLibrary",
+      "en": "No sources in the citation library: sync Zotero or add a .bib or .csl.json file first.",
+      "vars": []
+    },
+    {
+      "key": "hl.apaReferences",
+      "en": "References",
+      "vars": []
+    },
+    {
+      "key": "hl.apaTitle",
+      "en": "Highlights with citations — {date} ({n})",
+      "vars": [
+        "date",
+        "n"
+      ]
+    },
+    {
+      "key": "hl.apaWhich",
+      "en": "Which source is {source}?",
+      "vars": [
+        "source"
+      ]
+    },
+    {
       "key": "hl.count",
       "en": "{n} of {total}",
       "vars": [
@@ -5870,6 +5895,11 @@
     {
       "key": "hl.export",
       "en": "Export to a note",
+      "vars": []
+    },
+    {
+      "key": "hl.exportApa",
+      "en": "Export with APA citations",
       "vars": []
     },
     {
