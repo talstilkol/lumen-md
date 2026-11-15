@@ -2,7 +2,7 @@
  * Plan W10.B18 (audit 7.6): the reranker decision was taken on HeQ dev,
  * where BM25 alone already scores nDCG@10 1.0, so no reranker can show a
  * gain there (1.0 vs 1.0). Here the same comparison runs on the hard set
- * (eval/golden/retrieval-hard, plan W7.13: real HeQ test questions with
+ * (eval/synthetic/retrieval-hard, plan W7.13: real HeQ test questions with
  * spelling, paraphrase and other changes, over 238 real HeQ paragraphs),
  * where BM25 is below 1.0.
  *
@@ -12,6 +12,9 @@
  * reranker (bge-reranker-v2-m3) is NOT measured here; it needs the model
  * (Mac / `npm run eval:rerank`), and it may become the default only with a
  * Mac receipt that beats BM25 by ≥ 3 points on both splits.
+ *
+ * The set is synthetic (eval/origins.json; moved out of eval/golden by
+ * #930, coordinator W7.13), so every eval card on it is `dev` only.
  */
 import { describe, it, expect, beforeAll, beforeEach, vi } from "vitest";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
@@ -19,7 +22,9 @@ import { join } from "node:path";
 import { Bm25Index } from "../search/bm25";
 import { DEFAULT_RERANK_MODE, RERANK_DEFAULT_EVIDENCE, getRerankMode, rerank, setRerankMode, type RerankMode } from "../ai/reranker";
 // @ts-expect-error the harness is plain JavaScript
-import { compareRerank, rerankDecision, modelDefaultAllowed, MODEL_DEFAULT_MIN_GAIN_POINTS } from "../../scripts/golden/evals/rerank.mjs";
+import { compareRerank, rerankDecision, modelDefaultAllowed, rerankCardInput, MODEL_DEFAULT_MIN_GAIN_POINTS } from "../../scripts/golden/evals/rerank.mjs";
+// @ts-expect-error plain JavaScript
+import { makeCard, validateCard } from "../../scripts/lib/evalCard.mjs";
 
 // The model can't run in a unit test; this stands in for "no WebGPU / download refused / offline".
 vi.mock("../ai/transformersEngine", () => ({
@@ -29,8 +34,9 @@ vi.mock("../ai/transformersEngine", () => ({
 }));
 
 type Split = { items: Array<{ id: string; query: string; relevant: string[]; sameArticle?: string[] }>; corpus: Array<{ id: string; title: string; text: string }> };
-type Res = { items: number; bm25: number; reranked: number; gain: number };
-const load = (f: string) => JSON.parse(readFileSync(join(__dirname, "../../eval/golden/retrieval-hard", f), "utf8")) as Split;
+type Res = { items: number; bm25: number; reranked: number; gain: number; perItem: { bm25: number[]; reranked: number[] } };
+const HARD = "eval/synthetic/retrieval-hard";
+const load = (f: string) => JSON.parse(readFileSync(join(__dirname, "../../eval/synthetic/retrieval-hard", f), "utf8")) as Split;
 const SPLITS = ["dev", "heldout"] as const;
 const measured: Record<string, Res> = {};
 
@@ -86,7 +92,7 @@ describe("the default is pinned to the measured winner (W10.B18)", () => {
 
   it("the model may become the default only from a Mac receipt that beats BM25 by ≥ 3 points on both splits", () => {
     expect(MODEL_DEFAULT_MIN_GAIN_POINTS).toBe(3);
-    const row = (part: string, bm25: number, reranked: number) => ({ split: "eval/golden/retrieval-hard", part, items: 90, bm25, reranked, gain: Math.round((reranked - bm25) * 10000) / 100 });
+    const row = (part: string, bm25: number, reranked: number) => ({ split: "eval/synthetic/retrieval-hard", part, items: 90, bm25, reranked, gain: Math.round((reranked - bm25) * 10000) / 100 });
     const mac = { platform: "darwin", arch: "arm64", cpu: "Apple M1" };
     const ok = { model: "onnx-community/bge-reranker-v2-m3-ONNX", machine: mac, rows: [row("dev", 0.9479, 0.98), row("heldout", 0.9521, 0.99)] };
     expect(modelDefaultAllowed(ok)).toEqual({ ok: true, why: "" });
@@ -95,6 +101,33 @@ describe("the default is pinned to the measured winner (W10.B18)", () => {
     expect(modelDefaultAllowed({ ...ok, rows: [row("dev", 0.9479, 0.98), row("heldout", 0.9521, 0.98)] }).why).toMatch(/heldout: gain 2\.79 < 3/);
     expect(modelDefaultAllowed({ ...ok, rows: [row("dev", 0.9479, 0.98)] }).why).toMatch(/no retrieval-hard heldout/);
     expect(modelDefaultAllowed({ ...ok, model: "some-other-model" }).ok).toBe(false);
+  });
+});
+
+describe("a rerank card on the hard set is dev only: the set is synthetic (W7.13)", () => {
+  const manifest = JSON.parse(readFileSync(join(__dirname, "../..", HARD, "manifest.json"), "utf8")) as { version: number; origin: string; license: string };
+  it("the set's manifest says synthetic, and rerankCardInput tags its cards dev with origin synthetic", () => {
+    expect(manifest.origin).toBe("synthetic");
+    for (const split of SPLITS) {
+      const res = measured[split];
+      expect(res.perItem.bm25).toHaveLength(res.items);
+      expect(res.perItem.reranked).toHaveLength(res.items);
+      const input = rerankCardInput({ dir: HARD, part: split, manifest, model: { name: "lexical (lumen reranker)", digest: "none:lexical" }, result: res });
+      expect(input).toMatchObject({ tag: "dev", dataset: { name: `synthetic/retrieval-hard/${split}`, origin: "synthetic", version: String(manifest.version) } });
+      const card = makeCard(input);
+      expect(validateCard(card)).toEqual([]);
+      expect(card.n).toBe(res.items);
+      expect(card.metrics.ndcg_at_10_reranked.value).toBeCloseTo(res.reranked, 3);
+      expect(card.metrics.ndcg_at_10_bm25.value).toBeCloseTo(res.bm25, 3);
+      // Claiming held-out on it is refused (validateCard's synthetic rule).
+      expect(() => makeCard({ ...input, tag: "heldout" })).toThrow(/synthetic set is dev only/);
+    }
+  });
+
+  it("a set under eval/synthetic is synthetic even when its manifest does not say so", () => {
+    const res = measured.dev;
+    expect(rerankCardInput({ dir: HARD, part: "dev", manifest: { version: 2 }, model: { name: "m", digest: "x" }, result: res }).dataset.origin).toBe("synthetic");
+    expect(rerankCardInput({ dir: "eval/golden/retrieval/dev", part: "heq", manifest: { version: 3, license: "CC-BY-4.0" }, model: { name: "m", digest: "x" }, result: res })).toMatchObject({ tag: "dev", dataset: { name: "eval/golden/retrieval/dev/heq" } });
   });
 });
 

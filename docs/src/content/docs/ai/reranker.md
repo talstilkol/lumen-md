@@ -31,7 +31,7 @@ nDCG@10:
 BM25 already puts every answer first on this split, so no reranker can show
 a gain there. That makes this split no basis for the decision.
 
-On the **hard set** (`eval/golden/retrieval-hard`: real HeQ test questions
+On the **hard set** (`eval/synthetic/retrieval-hard`, a synthetic set, so these are development numbers: real HeQ test questions
 changed by spelling, paraphrase and word order, over the same 238
 paragraphs) BM25 is below the ceiling, and the built-in reranker makes it
 **worse**:
@@ -52,7 +52,7 @@ dev and the held-out split**, recorded in an eval receipt
 (`eval/results/rerank-<date>.json`, which records the machine):
 
 ```sh
-LUMEN_EVAL_RERANK_DIRS=eval/golden/retrieval-hard npm run eval:rerank
+LUMEN_EVAL_RERANK_DIRS=eval/synthetic/retrieval-hard npm run eval:rerank
 ```
 
 The model is offered only where it runs fast, after consent. The cross-lingual

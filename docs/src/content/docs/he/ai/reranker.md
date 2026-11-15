@@ -30,7 +30,7 @@ BM25, כי הוא זה שנמדד כטוב ביותר (למטה).
 ‏BM25 כבר מציב כל תשובה ראשונה בחלק הזה, ולכן שום מדרג לא יכול להראות שם
 שיפור. החלק הזה לא יכול לשמש בסיס להחלטה.
 
-על **הסט הקשה** (`eval/golden/retrieval-hard`: שאלות מבחן אמיתיות של HeQ ששונו
+על **הסט הקשה** (`eval/synthetic/retrieval-hard`, סט סינתטי, ולכן אלה מספרי פיתוח: שאלות מבחן אמיתיות של HeQ ששונו
 בכתיב, בניסוח ובסדר המילים, על אותן 238 פסקאות) ‏BM25 מתחת לתקרה, והמדרג
 המובנה **מוריד** את התוצאה:
 
@@ -49,7 +49,7 @@ BM25, כי הוא זה שנמדד כטוב ביותר (למטה).
 הערכה (`eval/results/rerank-<date>.json`, שרושמת את המכונה):
 
 ```sh
-LUMEN_EVAL_RERANK_DIRS=eval/golden/retrieval-hard npm run eval:rerank
+LUMEN_EVAL_RERANK_DIRS=eval/synthetic/retrieval-hard npm run eval:rerank
 ```
 
 המודל מוצע רק היכן שהוא רץ מהר, אחרי הסכמה. החלק הבין-לשוני (Belebele — שאלה באנגלית על
