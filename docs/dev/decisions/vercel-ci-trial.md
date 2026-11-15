@@ -32,7 +32,7 @@ git push -u origin trial/vercel-ci
    `node scripts/ci/ci-compare.mjs --buildkite build.json --vercel lint=<s>,test=<s> --vercel-cost <$> --needs-restructure <yes|no>`
 4. If the rule keeps it, open a PR that moves `turbo.json` to the root with the Vercel preview build checked. If not, delete the `trial/vercel-ci` branch and `ci/vercel-ci-trial/`.
 
-A preview build of `trial/vercel-ci` on the existing project sees the root `turbo.json`. That preview is part of what the trial checks: `npm run build` must still be the build command. Production (`main`) never sees the file.
+A preview build of `trial/vercel-ci` on the existing project sees the root `turbo.json`. That preview is part of what the trial checks: its build command must still be `node scripts/vercel-build.mjs` (from `deploy/vercel.base.json`), and its Ignored Build Step must be unchanged. Production (`main`) never sees the file.
 
 ## The comparison
 
