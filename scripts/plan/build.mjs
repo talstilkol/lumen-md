@@ -12,7 +12,9 @@
  *   npm run plan             regenerate both
  *   npm run plan:check       exit 1 when either differs from plan.json (CI),
  *                            or a ✅ task has no `dod` (plan 0.7, scripts/dod.mjs),
- *                            or a ✅ task has no green `evidence` (plan R12.14, claimGuard.mjs);
+ *                            a ✅ task has no green `evidence` (plan R12.14, claimGuard.mjs),
+ *                            a ✅ is verified below `browser` (W10.G8), or a
+ *                            status is longer than STATUS_MAX (W10.G7);
  *                            warns when a wave is over its work-in-progress limit
  *                            while the next wave has started (plan W6.39, below)
  *   npm run plan:check -- --wip-strict      the WIP warning fails the check
@@ -146,6 +148,35 @@ export function checkVerified(plan) {
   return problems;
 }
 
+/**
+ * Plan W10.G8 (the core of W4.24) — ✅ means checked at least in a browser.
+ * `built`, `node` and `owner` (only the owner's real-world check is left, the
+ * ✅* tasks) are ⏳ until that check runs.
+ */
+export const DONE_LEVELS = Object.freeze(["browser", "real"]);
+export function checkDoneLevel(plan) {
+  const problems = [];
+  for (const p of plan.phases) for (const t of p.tasks) {
+    if (!String(t.status ?? "").startsWith("✅")) continue;
+    if (!DONE_LEVELS.includes(t.verified)) problems.push(`${t.id}: marked ${t.status.slice(0, 2).trim()} but verified ${JSON.stringify(t.verified ?? null)} — ✅ needs ${DONE_LEVELS.join(" or ")}; keep it ⏳ until that check runs (W10.G8)`);
+  }
+  return problems;
+}
+
+/**
+ * Plan W10.G7 — a status is one short line on the board. The detail goes in
+ * `notes` (rendered under the task, not in the table).
+ */
+export const STATUS_MAX = 200;
+export function checkStatusLength(plan, { max = STATUS_MAX } = {}) {
+  const problems = [];
+  for (const p of plan.phases) for (const t of p.tasks) {
+    if (t.status !== undefined && [...String(t.status)].length > max) problems.push(`${t.id}: status is ${[...String(t.status)].length} characters, over ${max} — move the detail to "notes" (W10.G7)`);
+    if (t.notes !== undefined && (typeof t.notes !== "string" || !t.notes.trim())) problems.push(`${t.id}: notes must be a non-empty string`);
+  }
+  return problems;
+}
+
 // ───────────────────────────── model ─────────────────────────────
 
 /**
@@ -165,11 +196,11 @@ export function buildModel(plan) {
     tasks: p.tasks.map((x) => {
       const done = (x.status ?? "").startsWith("✅");
       const t = {
-        id: x.id, t: x.title, br: x.branch, lane: x.lane,
+        id: x.id, t: x.title, br: x.branch ?? "—", lane: x.lane,
         m: done ? 0 : x.minutes, m_est: x.minutes, done,
         dep: [...(x.dep ?? [])], depRule: x.depRule, g: [...(x.groups ?? [])], p: x.priority,
         status: x.status, verified: x.verified, pr: x.pr, new: !!x.new, tal: x.owner ?? "", old: x.was ?? "", w: x.source ?? "",
-        steps: x.steps, ok: x.acceptance, phase: pi,
+        steps: x.steps, ok: x.acceptance, notes: x.notes, phase: pi,
       };
       agent.push(t);
       return t;
@@ -408,7 +439,7 @@ export function renderBoard(M) {
   o.push("| # | שלב | יעד world class (נמדד) | משימות | מאמץ | התחלה | סיום |\n|---|---|---|---|---|---|---|");
   M.phases.forEach((p, i) => {
     const [a, b] = M.span(p.tasks);
-    o.push(`| ${i} | ${cell(p.title)} | ${cell(p.goal)} | ${p.tasks.length} | ${dur(sum(p.tasks))} | ${fmt(a)} | ${fmt(b)} |`);
+    o.push(`| ${i} | ${cell(p.title)} | ${cell(p.goal ?? "—")} | ${p.tasks.length} | ${dur(sum(p.tasks))} | ${fmt(a)} | ${fmt(b)} |`);
   });
   o.push(`| 15 | מה צריך ממך | — | ${M.owner.length} | ${dur(sum(M.owner))} שלך | ${fmt(Math.min(...M.owner.map((t) => t.start)))} | ${fmt(Math.max(...M.owner.map((t) => t.end)))} |\n`);
   o.push("#### ציר זמן לפי מסלול\n");
@@ -420,7 +451,7 @@ export function renderBoard(M) {
   o.push("");
   M.phases.forEach((p, i) => {
     o.push(`#### ${i}. ${p.title}\n`);
-    o.push(`**יעד:** ${p.goal}` + (p.why ? `  \n**למה:** ${p.why}` : "") + "\n");
+    if (p.goal || p.why) o.push((p.goal ? `**יעד:** ${p.goal}` : "") + (p.goal && p.why ? "  \n" : "") + (p.why ? `**למה:** ${p.why}` : "") + "\n");
     o.push("| # | משימה | עדיפות | מסלול | הערכה | תלוי ב- | התחלה | סיום | מצב | אימות |\n|---|---|---|---|---|---|---|---|---|---|");
     for (const t of p.tasks) {
       const tag = t.new ? " 🆕" : "";
@@ -433,6 +464,7 @@ export function renderBoard(M) {
       o.push(`**${t.id} · ${t.t}** — ${br} · ${lanes[t.lane]} · ${est(t)} · מקור: ${t.w}${extra}\n`);
       t.steps.forEach((st, k) => o.push(`${t.id}.${k + 1}. ${st}`));
       o.push("\n**קבלה:** " + t.ok.join(" · ") + "\n");
+      if (t.notes) o.push(`**פירוט הסטטוס:** ${t.notes}\n`);
     }
   });
   o.push("#### 15. מה צריך ממך\n");
@@ -553,7 +585,7 @@ export function renderHtml(M) {
   M.phases.forEach((p, i) => {
     const [a, b] = M.span(p.tasks);
     H.push(`<section class="card" id="p${i}"><header><h2><span class="num">${i}</span>${E(p.title)}</h2><span class="when">${p.tasks.length} משימות · ${dur(sum(p.tasks))} · ${fmt(a)} ← ${fmt(b)}</span></header>`);
-    H.push(`<div class="target"><b>יעד world class:</b> ${codeHtml(p.goal)}</div>`);
+    if (p.goal) H.push(`<div class="target"><b>יעד world class:</b> ${codeHtml(p.goal)}</div>`);
     if (p.why) H.push(`<div class="why">${codeHtml(p.why)}</div>`);
     for (const t of p.tasks) {
       let pills = "";
@@ -568,7 +600,7 @@ export function renderHtml(M) {
       H.push(`<details class="task"><summary><span class="tid">${t.id}</span><span class="tt">${codeHtml(t.t)}${pills}<span class="meta">${meta}</span></span><span class="est">${est(t)}<span class="dt">${when}</span></span></summary>`);
       H.push('<div class="body"><ol class="steps">');
       t.steps.forEach((st, k) => H.push(`<li><b>${t.id}.${k + 1}</b><span>${codeHtml(st)}</span></li>`));
-      H.push('</ol><div class="ok"><b>קבלה (נמדד):</b><ul>' + t.ok.map((x) => `<li>${codeHtml(x)}</li>`).join("") + `</ul></div><div class="meta">מקור: ${codeHtml(t.w)}${t.old && t.old !== t.id ? " · היה " + E(t.old) : ""}</div></div></details>`);
+      H.push('</ol><div class="ok"><b>קבלה (נמדד):</b><ul>' + t.ok.map((x) => `<li>${codeHtml(x)}</li>`).join("") + `</ul></div>${t.notes ? `<div class="why"><b>פירוט הסטטוס:</b> ${codeHtml(t.notes)}</div>` : ""}<div class="meta">מקור: ${codeHtml(t.w)}${t.old && t.old !== t.id ? " · היה " + E(t.old) : ""}</div></div></details>`);
     }
     H.push("</section>");
   });
@@ -766,7 +798,12 @@ export function belowFloor(task, floor = WIP_FLOOR) {
 }
 
 /** A task is started once it has a status (a PR, work in progress, or done). */
-export const isStarted = (task) => String(task.status ?? "").trim() !== "";
+/** The placeholder a wave's tasks carry before any work ("⏳ גל 10 — לא התחיל"): not started (W10.G6). */
+export const NOT_STARTED = /^⏳\s*גל\s+\d+\s+—\s+לא התחיל/;
+export const isStarted = (task) => {
+  const s = String(task.status ?? "").trim();
+  return s !== "" && !NOT_STARTED.test(s);
+};
 
 /**
  * Every wave over its limit whose next wave has started:
@@ -809,6 +846,10 @@ export function run({ root = ROOT, check = false, wipLimit } = {}) {
   // Plan R12.14: and no ✅ without recorded evidence that a check went green.
   const claimProblems = claimGuard(plan);
   if (claimProblems.length) throw new Error(`plan: ✅ without evidence (scripts/plan/claimGuard.mjs) —\n  ${claimProblems.join("\n  ")}`);
+  const levelProblems = checkDoneLevel(plan);
+  if (levelProblems.length) throw new Error(`plan: ✅ below browser (W10.G8) —\n  ${levelProblems.join("\n  ")}`);
+  const lengthProblems = checkStatusLength(plan);
+  if (lengthProblems.length) throw new Error(`plan: status length (W10.G7) —\n  ${lengthProblems.join("\n  ")}`);
   const M = buildModel(plan);
   M.velocity = planVelocity(historyFromGit(root), countPlan(plan));
   const docPath = join(root, DOC_FILE);
