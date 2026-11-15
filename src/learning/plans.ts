@@ -133,6 +133,11 @@ export function follow(f: LearningFile, cycle: CycleId, day: GDay): LearningFile
   return { ...f, plans: [...f.plans, { cycle, started: iso(day), done: [], review: [] }] };
 }
 
+/** Stop following a cycle (its days marked learned go with it). */
+export function unfollow(f: LearningFile, cycle: CycleId): LearningFile {
+  return { ...f, plans: f.plans.filter((p) => p.cycle !== cycle) };
+}
+
 /** Mark a day learned (or not). */
 export function markDone(f: LearningFile, cycle: CycleId, day: GDay, done = true): LearningFile {
   const d = iso(day);
