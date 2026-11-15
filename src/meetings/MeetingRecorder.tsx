@@ -14,6 +14,7 @@ import { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./meetingFlowStrings";
 import { t } from "../i18n";
+import { Modal } from "../ui/Modal";
 import { clock } from "../ai/dictation/longform";
 import { explainError } from "../lib/userError";
 import type { MeetingAvailability, MeetingDeps, MeetingResult } from "./meetingFlow";
@@ -149,7 +150,7 @@ export function MeetingRecorder({ onClose, deps }: { onClose: () => void; deps?:
 
   const canStart = phase === "idle" || phase === "done" || phase === "declined" || phase === "error";
   return (
-    <div role="dialog" aria-modal="true" aria-labelledby="meeting-title" data-testid="meeting-recorder" data-phase={phase} style={{ position: "fixed", inset: 0, zIndex: 9999, background: "var(--overlay)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+    <Modal aria-labelledby="meeting-title" onClose={phase === "processing" ? undefined : onClose} data-testid="meeting-recorder" data-phase={phase} style={{ position: "fixed", inset: 0, zIndex: 9999, background: "var(--overlay)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
       <div style={{ background: "hsl(var(--bg))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border-strong))", borderRadius: 12, padding: 20, width: "min(480px, 100%)", maxHeight: "90vh", overflow: "auto", display: "grid", gap: 12 }}>
         <h2 id="meeting-title" style={{ margin: 0, fontSize: 17 }}>{t("meetingFlow.title")}</h2>
         <p style={{ margin: 0, fontSize: 12.5, color: "hsl(var(--fg-muted))" }}>{t("meetingFlow.about")}</p>
@@ -204,7 +205,7 @@ export function MeetingRecorder({ onClose, deps }: { onClose: () => void; deps?:
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

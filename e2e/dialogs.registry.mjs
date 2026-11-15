@@ -22,6 +22,7 @@ export const DIALOGS = [
   { file: "src/ink/InkPad.tsx", command: "insert.ink" },
   { file: "src/lexicon/LexiconPopover.tsx", command: "lexicon.lookup", fixme: "needs the Hebrew lexicon pack and a Hebrew word at the cursor" },
   { file: "src/onboarding/FirstRun.tsx", firstRun: true, guarded: false },
+  { file: "src/meetings/MeetingRecorder.tsx", command: "voice.meeting" },
   { file: "src/pdf/PdfReader.tsx", command: "pdf.open", fixme: "needs a PDF in the vault" },
   { file: "src/plugins/runtime/InstallDialog.tsx", fixme: "shown when a sandboxed plugin is installed from a file" },
   { file: "src/privacy/NetworkMonitor.tsx", command: "privacy.networkMonitor" },
