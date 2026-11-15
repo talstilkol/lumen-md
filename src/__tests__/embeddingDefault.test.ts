@@ -24,12 +24,18 @@ vi.mock("../ai/transformersEngine", () => ({ embedTextsLocal: (t: string[], o?: 
 
 // @ts-expect-error — plain .mjs module without type declarations
 import { acceptEmbedRun, embedDefault, parseRowId, withMeasured } from "../../scripts/lib/embedIngest.mjs";
+// @ts-expect-error — plain .mjs module without type declarations
+import { makeCard } from "../../scripts/lib/evalCard.mjs";
 import { measuredEmbedding, measuredProvider, pickEmbeddingProvider, truncateMatryoshka } from "../ai/embeddingProvider";
 
 const manifest = JSON.parse(readFileSync("eval/models/embedding-candidates.json", "utf8"));
 const verified = { ...manifest, candidates: manifest.candidates.map((c: { id: string }) => (c.id === "embeddinggemma-2" ? { ...c, licenseVerified: true, sha256: "a".repeat(64) } : c)) };
 const row = (id: string, held: number) => ({ id, dev: { ndcg10: held - 0.01, recall20: 0.9, msPerQuery: 20, dims: 256, indexBytes: 1, items: 60 }, heldout: { ndcg10: held, recall20: 0.9, msPerQuery: 25, dims: 256, indexBytes: 1, items: 40 } });
+// Review Z6-M5: only a run whose card is heldout or public (and not synthetic) changes the default. These reports
+// carry a heldout card on a W6.17 sealed set (a synthetic stand-in); z6/embedIngestCard.test.ts covers dev cards.
+const card = makeCard({ tag: "heldout", model: { name: "embeddinggemma-2", digest: "sha256:test" }, seed: 1, temperature: 0, dataset: { name: "heldout-retrieval-he", version: "1", license: "CC-BY-4.0" }, scores: { ndcg_at_10: [1, 0, 1] } });
 const report = (winner: string, discriminates = true) => ({
+  card,
   rows: [row("multilingual-e5-small", 0.61), row("embeddinggemma-2", 0.7), row("embeddinggemma-2@256", 0.69), row("qwen3-embedding-0.6b", 0.66)],
   decision: { discriminates, default: { id: winner, reason: "+8 nDCG@10 points on the held-out part, 25 ms per query at 10000 notes" }, reranker: null },
 });

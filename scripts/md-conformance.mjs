@@ -123,7 +123,9 @@ export function mdCards(rows, versions) {
     model: { name: `micromark ${versions.micromark}`, digest: `npm:micromark@${versions.micromark}` },
     seed: 1,
     temperature: 0,
-    dataset: dataset("all examples of the published spec; micromark is not tuned on it"),
+    // Review Z6-L6: micromark is developed and tested against these very examples, so this is a conformance check
+    // on a published split, not an untuned result.
+    dataset: dataset("all examples of the published spec; micromark is developed and tested against them, so this is a conformance check"),
     scores: { html_exact: rowScores(byKind.parser) },
   });
   const roundTrip = makeCard({

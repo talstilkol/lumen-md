@@ -52,7 +52,7 @@
         "version": "0.31.2",
         "license": "CC-BY-SA-4.0",
         "source": "https://spec.commonmark.org/0.31.2/",
-        "split": "all examples of the published spec; micromark is not tuned on it"
+        "split": "all examples of the published spec; micromark is developed and tested against them, so this is a conformance check"
       },
       "n": 652,
       "metrics": {
