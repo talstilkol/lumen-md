@@ -6,7 +6,7 @@
  *   GET    /v1/vault/o/            → {"names": [...]}
  *   GET    /v1/vault/o/<name>      → bytes + ETag
  *   PUT    /v1/vault/o/<name>      If-Match / If-None-Match: *
- *   DELETE /v1/vault/o/<name>
+ *   DELETE /v1/vault/o/<name>      If-Match (412 lost race)
  *   GET    /healthz                {"ok":true,"service":"lumen-vault-relay"} (also / and /health;
  *                                   exact paths, so never an object's name)
  *
