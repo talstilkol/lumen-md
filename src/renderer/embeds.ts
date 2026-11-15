@@ -33,6 +33,7 @@
  */
 
 import { BLOCK_MARK } from "./remarkBlockIds";
+import { checksum } from "../editor/embedEdit";
 import type { Root as MdastRoot } from "mdast";
 import { headingSlug, headingSlugger, noteKey } from "../lib/slug";
 import { firstStrongDirection, markdownBaseDirection } from "../lib/textDirection";
@@ -244,6 +245,7 @@ interface Node {
   title?: string | null;
   children?: Node[];
   data?: { hName?: string; hProperties?: Record<string, unknown> };
+  position?: { start?: { offset?: number }; end?: { offset?: number } };
 }
 interface Item {
   node: Node;
@@ -448,6 +450,16 @@ function buildEmbed(inner: string, env: Env, blockAllowed: boolean): Item {
     ? firstStrongDirection(plainText(children, NO_DIRECTION)) ?? markdownBaseDirection(source)
     : markdownBaseDirection(source);
 
+  // W12.U1: a block or section of another note, embedded at the top level, can be
+  // edited in place. Its exact range in the source comes from the parse positions,
+  // with a checksum so an edit never lands on text that changed since.
+  let editRange: string | null = null;
+  if (e.fragment && path !== hostKey && env.depth === 0) {
+    const a = children[0]?.position?.start?.offset;
+    const b = children[children.length - 1]?.position?.end?.offset;
+    if (typeof a === "number" && typeof b === "number" && b >= a) editRange = `${a}:${b}:${checksum(source.slice(a, b))}`;
+  }
+
   // Embedded headings get ids of their own, so rehype-slug's numbering of
   // the host's headings (outline, scroll sync, `#heading` links) is the same
   // with or without the embed.
@@ -483,7 +495,14 @@ function buildEmbed(inner: string, env: Env, blockAllowed: boolean): Item {
         },
       },
       children: [
-        { type: "lumenEmbedTitle", data: { hName: "div", hProperties: { className: ["lumen-embed-title"] } }, children: [wikiLink(linkTarget, label || e.target)] },
+        {
+          type: "lumenEmbedTitle",
+          data: { hName: "div", hProperties: { className: ["lumen-embed-title"] } },
+          children: [
+            wikiLink(linkTarget, label || e.target),
+            ...(editRange ? [{ type: "lumenEmbedEdit", data: { hName: "lumen-embed-edit", hProperties: { path, range: editRange, note: name } }, children: [] }] : []),
+          ],
+        },
         { type: "lumenEmbedBody", data: { hName: "div", hProperties: { className: ["lumen-embed-body"] } }, children: body.children },
       ],
     },
