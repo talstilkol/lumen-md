@@ -286,6 +286,7 @@
   "editor.line": "Zeile {n}",
   "editor.loadingPageView": "Seitenansicht wird geladen…",
   "editor.loadingWysiwyg": "WYSIWYG-Editor wird geladen…",
+  "editor.wysiwygAriaLabel": "WYSIWYG-Editor",
   "editor.wysiwygFailed": "WYSIWYG-Editor fehlgeschlagen",
   "editor.wysiwygFailedHint": "Wechseln Sie testweise in den Quelltextmodus.",
   "findReplace.caseSensitive": "Groß-/Kleinschreibung beachten",

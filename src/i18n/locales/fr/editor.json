@@ -286,6 +286,7 @@
   "editor.line": "Ligne {n}",
   "editor.loadingPageView": "Chargement de la vue paginée…",
   "editor.loadingWysiwyg": "Chargement de l’éditeur WYSIWYG…",
+  "editor.wysiwygAriaLabel": "Éditeur WYSIWYG",
   "editor.wysiwygFailed": "L’éditeur WYSIWYG a échoué",
   "editor.wysiwygFailedHint": "Essayez de passer en mode Source.",
   "findReplace.caseSensitive": "Respecter la casse",

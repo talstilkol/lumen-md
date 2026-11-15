@@ -123,8 +123,10 @@ export function collectFlake(dir) {
 /**
  * What the screen-reader run said, from sr-results/results.json (Playwright's
  * JSON report): each journey attaches `<setup>.json` = { setup, row, results }
- * (sr/runJourney.ts). Per setup: tasks passed of all, the blockers, the
- * protocol row for docs editor/screen-reader-protocol.
+ * (sr/runJourney.ts, and W11.Q6's product journey, sr/runProductJourney.ts,
+ * with journey, locale and voice). Per setup: tasks passed of all, the
+ * blockers, the protocol row for docs editor/screen-reader-protocol, and the
+ * spoken-phrase log of every step.
  */
 export function collectSr(report) {
   const out = [];
@@ -138,7 +140,18 @@ export function collectSr(report) {
               const j = JSON.parse(Buffer.from(a.body, "base64").toString("utf8"));
               if (!Array.isArray(j.results)) continue;
               const blockers = j.results.filter((x) => x.missing?.length).map((x) => `${x.id}: ${x.missing.join(", ")}`);
-              out.push({ setup: j.setup, passed: j.results.length - blockers.length, of: j.results.length, blockers, row: j.row });
+              // W11.Q6: the receipt keeps what the reader spoke at each step, and which journey, language and voice it was.
+              out.push({
+                setup: j.setup,
+                journey: j.journey ?? "protocol",
+                locale: j.locale ?? "he",
+                voice: j.voice ?? null,
+                passed: j.results.length - blockers.length,
+                of: j.results.length,
+                blockers,
+                row: j.row,
+                log: j.results.map((x) => ({ id: x.id, spoken: Array.isArray(x.spoken) ? x.spoken : [] })),
+              });
             } catch {
               /* not a journey attachment */
             }

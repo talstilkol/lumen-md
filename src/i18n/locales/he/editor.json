@@ -286,6 +286,7 @@
   "editor.line": "שורה {n}",
   "editor.loadingPageView": "טוען תצוגת עמודים…",
   "editor.loadingWysiwyg": "טוען את עורך ה-WYSIWYG…",
+  "editor.wysiwygAriaLabel": "עורך WYSIWYG",
   "editor.wysiwygFailed": "עורך ה-WYSIWYG נכשל",
   "editor.wysiwygFailedHint": "נסו לעבור למצב קוד מקור.",
   "findReplace.caseSensitive": "תלוי רישיות",
