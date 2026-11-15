@@ -14,9 +14,15 @@
  * kept). Clean implementation; GraphML/Turtle/JSON-LD/CSV per their specs
  * (graphml.graphdrawing.org, W3C Turtle and PROV-O, JSON-LD 1.1, the
  * neo4j-admin import header format).
+ *
+ * An export door (review 8, RR8-481-1): every text that comes from a note —
+ * names, aliases and quotes — goes through `prepareForExportSync`, so a
+ * `<redact>` passage or a hidden comment inside a quoted paragraph never
+ * leaves the vault, whichever format is chosen.
  */
 import { PREDICATES, TYPE_INFO, predicateInfo, type Edge, type Entity } from "./model";
 import type { EntityGraph } from "./store";
+import { prepareForExportSync } from "../lib/redaction";
 
 const byId = <T extends { id: string }>(xs: readonly T[]) => [...xs].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
 
@@ -36,10 +42,14 @@ const PROV = "http://www.w3.org/ns/prov#";
 const RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 const XSD = "http://www.w3.org/2001/XMLSchema#";
 
-/** Only edges whose two ends are entities of the graph are exported. */
+const clean = (s: string) => prepareForExportSync(s, { keepImageMetadata: true });
+
+/** Only edges whose two ends are entities of the graph are exported; note text is cleaned for export. */
 function exportable(g: EntityGraph): { entities: Entity[]; edges: Edge[] } {
   const ids = new Set(g.entities.map((e) => e.id));
-  return { entities: byId(g.entities), edges: byId(g.edges.filter((e) => ids.has(e.subject) && ids.has(e.object))) };
+  const entities = byId(g.entities).map((e) => ({ ...e, name: clean(e.name), aliases: e.aliases.map(clean) }));
+  const edges = byId(g.edges.filter((e) => ids.has(e.subject) && ids.has(e.object))).map((e) => ({ ...e, provenance: { ...e.provenance, quote: clean(e.provenance.quote) } }));
+  return { entities, edges };
 }
 
 // ---------------------------------------------------------------- JSON-LD
