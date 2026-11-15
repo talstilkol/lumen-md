@@ -1,0 +1,89 @@
+{
+  "about": "Public editing traces for the merge measurement (plan W11.S7). The traces are not committed: scripts/bench/merge-traces.ts downloads each file at the pinned commit and refuses a file whose sha256 differs.",
+  "sets": [
+    {
+      "id": "editing-traces",
+      "repo": "josephg/editing-traces",
+      "commit": "762fa6c51605c88a05ebe5c4b9d4540caca30b97",
+      "licence": "CC BY 4.0 (rustcode, sveltecomponent, seph-blog1, friendsforever_flat, clownschool_flat, json-crdt-*); automerge-paper is Martin Kleppmann's trace from automerge/automerge-perf",
+      "format": "editing-traces",
+      "files": [
+        {
+          "path": "sequential_traces/automerge-paper.json.gz",
+          "bytes": 901823,
+          "sha256": "42c0ff1720c0cad77077e190e36135c9cab9f7bbc266351c0a7fe4981c6a1546"
+        },
+        {
+          "path": "sequential_traces/clownschool_flat.json.gz",
+          "bytes": 118921,
+          "sha256": "b433734c2b372651ca3254245d998de4a17d5c16594c9715bd09fa448ac86946"
+        },
+        {
+          "path": "sequential_traces/friendsforever_flat.json.gz",
+          "bytes": 107513,
+          "sha256": "a385143a43b59eb9a0fcc9f5a0807f39c070db8cde8f2885a43d0225b3732f46"
+        },
+        {
+          "path": "sequential_traces/json-crdt-blog-post.json.gz",
+          "bytes": 202876,
+          "sha256": "30d0c2f2f4c37cb61a27c940eda73fe2767405092da270185c5ddd9c409e716d"
+        },
+        {
+          "path": "sequential_traces/json-crdt-patch.json.gz",
+          "bytes": 191870,
+          "sha256": "c7e60bdeacd8fd3a560f34f3d306ec88d4976e6a3cc6820ecb88f5c1017dca5a"
+        },
+        {
+          "path": "sequential_traces/rustcode.json.gz",
+          "bytes": 358177,
+          "sha256": "a13d472b5641dcad18d52882eff8c2d68ecbc27aa0f1e5a17eeb42f0f3130f38"
+        },
+        {
+          "path": "sequential_traces/seph-blog1.json.gz",
+          "bytes": 733701,
+          "sha256": "43b5d326ca8c9094cd94e28ab66cd2f3073ce2893db959a0388c53f0aed8156d"
+        },
+        {
+          "path": "sequential_traces/sveltecomponent.json.gz",
+          "bytes": 137864,
+          "sha256": "0393353a1ff0281f4a2adad080b0843bffa7988f9a4869ed04faf0984f78a234"
+        }
+      ]
+    },
+    {
+      "id": "editing-traces-concurrent",
+      "repo": "josephg/editing-traces",
+      "commit": "762fa6c51605c88a05ebe5c4b9d4540caca30b97",
+      "licence": "CC BY 4.0",
+      "format": "concurrent",
+      "note": "Two or three people typing into one document at the same time, with 0.5-1 s of simulated latency. Every transaction with two parents is a real concurrent pair.",
+      "files": [
+        {
+          "path": "concurrent_traces/clownschool.json.gz",
+          "bytes": 208430,
+          "sha256": "b53866c8ab53233755a7b6ad60698a66cad041607e95c07056b036f464240b94"
+        },
+        {
+          "path": "concurrent_traces/friendsforever.json.gz",
+          "bytes": 208662,
+          "sha256": "c80f9ee71bb2f063d58d1db8513d60145f0f7e209f6c72c8600b22eee73a2769"
+        }
+      ]
+    },
+    {
+      "id": "crdt-benchmarks-b4",
+      "repo": "dmonad/crdt-benchmarks",
+      "commit": "796f70250c8c003dfb3a50369d0b2733a760e54d",
+      "licence": "the trace file is Martin Kleppmann's (excluded from the repository's MIT licence); read as data, never executed",
+      "format": "b4",
+      "note": "B4 is the automerge-paper trace again, in another encoding (one edit per transaction); it is reported as its own set and not added to the editing-traces total.",
+      "files": [
+        {
+          "path": "js-lib/b4-editing-trace.js",
+          "bytes": 4580271,
+          "sha256": "48d4cd40ad8788a60a6c63f7a0337504958b753bd0fe1ef5a254715960c37c50"
+        }
+      ]
+    }
+  ]
+}

@@ -17,7 +17,10 @@
  *      between `<<<<<<<` / `=======` / `>>>>>>>` markers.
  *
  * A clean merge never drops a character either side wrote: every chunk is
- * either kept from base, or taken whole from the side that changed it.
+ * either kept from base, or taken whole from the side that changed it. A
+ * chunk both sides changed the same way is taken once only when it is the
+ * same deletion; the same new text written by both at one place asks.
+ * (Two whole versions that are equal are one version: that is not a merge.)
  */
 import { parse as parseYaml } from "yaml";
 
@@ -108,11 +111,30 @@ export function diff3(base: readonly string[], ours: readonly string[], theirs: 
   return out;
 }
 
-/** One unstable chunk settled without asking, or null when both sides changed it differently. */
+/** Is `s` what is left of `base` after deleting characters (and inserting none)? */
+export function onlyDeletes(base: string, s: string): boolean {
+  const b = Array.from(base);
+  let i = 0;
+  for (const ch of s) {
+    while (i < b.length && b[i] !== ch) i++;
+    if (i === b.length) return false;
+    i++;
+  }
+  return true;
+}
+
+/**
+ * One unstable chunk settled without asking, or null when both sides changed
+ * it. Both sides changing it the same way settles only when neither wrote
+ * anything there (the same deletion): when both wrote the same new text at
+ * the same place, keeping it once would drop one side's characters, and
+ * keeping it twice would guess, so the merge asks (W1.9; found on the public
+ * editing traces, W11.S7).
+ */
 function settle(c: Extract<Chunk, { stable: false }>): string[] | null {
-  if (same(c.ours, c.theirs)) return c.ours;
   if (same(c.ours, c.base)) return c.theirs;
   if (same(c.theirs, c.base)) return c.ours;
+  if (same(c.ours, c.theirs) && onlyDeletes(c.base.join(""), c.ours.join(""))) return c.ours;
   return null;
 }
 
@@ -144,7 +166,9 @@ function mergeAligned(c: Extract<Chunk, { stable: false }>): string | null {
   let out = "";
   for (let i = 0; i < n; i++) {
     const [b, o, t] = [c.base[i], c.ours[i], c.theirs[i]];
-    const s = o === t || t === b ? o : o === b ? t : mergeWords(b, o, t);
+    // A line both sides changed, even the same way, goes to the word merge,
+    // which settles a shared change only when it is a deletion (see settle).
+    const s = t === b ? o : o === b ? t : mergeWords(b, o, t);
     if (s === null) return null;
     out += s;
   }
