@@ -39,7 +39,13 @@ export interface DirectoryHandleBackendOptions {
    * path segments relative to `root`.
    */
   writeFallback?: (segments: string[], data: VaultData) => Promise<void>;
-  /** Is a `writeFallback` save still running (its temporary files are not leftovers yet)? */
+  /**
+   * W11.Q10: the write to try first (OPFS: the sync-access-handle worker).
+   * Resolves true when it wrote the file, false when this engine cannot use
+   * it, and the usual path (createWritable, else writeFallback) runs instead.
+   */
+  writePrimary?: (segments: string[], data: VaultData) => Promise<boolean>;
+  /** Is a `writeFallback` or `writePrimary` save still running (its temporary files are not leftovers yet)? */
   writesPending?: () => boolean;
 }
 
@@ -124,6 +130,7 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
       if (isMissing(e)) throw new VaultError("EKIND", path, `Cannot write "${path}": a file or folder of that name is in the way`);
       throw e;
     }
+    if (o.writePrimary && (await o.writePrimary(parts, data))) return;
     if (typeof (handle as { createWritable?: unknown }).createWritable !== "function") {
       if (!o.writeFallback) throw new Error("This browser cannot write files here.");
       return o.writeFallback(parts, data);
