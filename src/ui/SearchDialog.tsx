@@ -12,7 +12,7 @@ import type { ChatMessage } from "../ai/llm";
 import { renderMarkdown } from "../renderer/pipeline";
 import { log } from "../lib/logger";
 import { showAiToast } from "../ui/AiToast";
-import { semanticSearch, type RagResult } from "../ai/embeddings";
+import type { RagResult } from "../ai/embeddings";
 import { indexWorkspace, searchHybrid, type SemanticHit } from "../ai/semanticSearch";
 import { rerank } from "../ai/reranker";
 import { CITE_INSTRUCTIONS, verifyVaultCitations, type VaultCitation } from "../ai/vaultCitations";
@@ -27,6 +27,7 @@ import { EmptyState, runCommand } from "./EmptyState";
 import { HelpButton } from "./HelpButton";
 import "./searchDialogStrings";
 import { Modal } from "./Modal";
+import { buildAskContext, retrieveForQuestion } from "./searchDialogParts";
 import { renderSnippet } from "./searchSnippet";
 
 interface Props {
@@ -297,62 +298,12 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
     setAiCitations(null);
 
     try {
-      // Hybrid retrieval — when the user has built the embedding index
-      // (Smart tab → Build) we fuse BM25 + semantic via RRF for genuinely
-      // semantic-aware Q&A. When the index is empty, `searchHybrid` falls
-      // back to BM25 alone, so we never block the AI tab on a missing index.
-      const hybridHits = await searchHybrid(query, 30).catch(() => [] as SemanticHit[]);
-      const fallback =
-        hybridHits.length === 0
-          ? // Whole notes (bounded), like the hybrid path: the packer trims.
-            await semanticSearch(query, { topK: 8, maxContentChars: 200_000 })
-          : [];
-      // Materialise the hybrid hits into RagResult shape so the existing
-      // citation-rendering code below works untouched.
-      const hybridResults: RagResult[] = await Promise.all(
-        hybridHits.map(async (h) => ({
-          path: h.path,
-          score: h.score,
-          snippet: h.snippet,
-          content: await readWorkspaceFile(h.path)
-            // Whole notes (bounded): the context packer picks the parts.
-            .then((c) => c.slice(0, 200_000))
-            .catch(() => h.snippet),
-        })),
-      );
-      // T29: rerank the candidates against the question, keep the best 8.
-      const pool = hybridResults.length > 0 ? hybridResults : fallback;
-      const results: RagResult[] = (
-        await rerank(query, pool.map((r) => ({ ...r, text: `${r.snippet ?? ""}\n${r.content.slice(0, 1500)}` })))
-      )
-        .slice(0, 8)
-        .map(({ text: _text, rerankScore: _r, ...r }) => r as RagResult);
+      const results = await retrieveForQuestion(query);
       if (local.signal.aborted) throw local.signal.reason; // superseded or closed
       setAiSources(results);
       setAiCitations(null);
 
-      // Build context from semantic results: only the parts relevant to the
-      // question, within the AI mode's token budget (context packer).
-      const { packContext, CONTEXT_BUDGET, getAiMode } = await import("../ai/contextPacker");
-      const packed = packContext(
-        query,
-        results.map((r) => ({ path: r.path, content: r.content })),
-        CONTEXT_BUDGET[getAiMode()],
-      );
-      // Plan 2.7: a note from outside (clipped, imported, pulled) goes to the model cleaned and delimited, and taints the run.
-      const { ensureProvenanceBackfill, guardUntrusted, untrustedSourcesOfNote } = await import("../agents/untrusted");
-      await ensureProvenanceBackfill();
-      const untrusted: string[] = [];
-      const contextStr = results.length > 0
-        ? packed
-            .map((r, i) => {
-              const entry = `📄 [${i + 1}] ${r.path}\n${r.text}`;
-              const from = untrustedSourcesOfNote(r.path, results.find((x) => x.path === r.path)?.content);
-              untrusted.push(...from);
-              return `---\n${from.length ? guardUntrusted(entry, from).text : entry}`;
-            })
-            .join("\n")
-        : t("searchDialog.noRelevant");
+      const { contextStr, untrusted } = await buildAskContext(query, results);
 
       setAiAnswer(t("searchDialog.thinking"));
 

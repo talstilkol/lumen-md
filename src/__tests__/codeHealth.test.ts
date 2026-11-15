@@ -4,19 +4,17 @@
  *    function passed to `.catch(…)`, holds a `why:` comment (the same check
  *    as the `lumen/empty-catch-why` ESLint rule, so it also runs without ESLint);
  *  - no production file is longer than 800 lines (as ESLint `max-lines`
- *    counts) — W6.25: the files that already were are grandfathered in
- *    scripts/max-lines-baseline.json with their count, may not grow, and the
- *    baseline only goes down (scripts/lib/maxLines.mjs; pr:check fails a diff
- *    that raises it);
+ *    counts), with no baseline and no exception (W10.E31: the files that
+ *    were grandfathered were split, and the baseline was deleted);
  *  - eslint-suppressions.json records neither rule, so neither can be baselined.
  * @vitest-environment node
  */
 import { describe, it, expect } from "vitest";
 import ts from "typescript";
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 // @ts-expect-error — plain .mjs module without type declarations
-import { BASELINE_PATH, baselineRaises, checkMaxLines, countLines, describeProblems, productionLineCounts, shrinkBaseline } from "../../scripts/lib/maxLines.mjs";
+import { RETIRED_BASELINE_PATH, checkMaxLines, countLines, describeProblems, productionLineCounts } from "../../scripts/lib/maxLines.mjs";
 
 const SRC = join(__dirname, "..");
 const MAX_LINES = 800;
@@ -124,43 +122,22 @@ describe("code health (12.1)", () => {
     expect(swallowedIn("export const T = `we catch it later`;\n", at)).toEqual([]);
   });
 
-  describe(`no production file is longer than ${MAX_LINES} lines (W6.25 ratchet)`, () => {
-    type Baseline = { max: number; files: Record<string, number> };
+  describe(`no production file is longer than ${MAX_LINES} lines (W6.25; W10.E31: no baseline)`, () => {
     const ROOT = join(SRC, "..");
-    const baseline = JSON.parse(readFileSync(join(ROOT, BASELINE_PATH), "utf8")) as Baseline;
 
-    it("no new file passes 800 lines and no grandfathered file grew past its baseline", () => {
-      const r = checkMaxLines(productionLineCounts(ROOT), baseline);
-      expect(describeProblems({ ...r, shrunk: [], invalid: [] })).toEqual([]);
+    it("no production file passes 800 lines", () => {
+      expect(describeProblems(checkMaxLines(productionLineCounts(ROOT)))).toEqual([]);
     });
 
-    it("the baseline is exact: every entry is a file still over 800 at its current count (lower it with --shrink)", () => {
-      expect(baseline.max).toBe(MAX_LINES);
-      const r = checkMaxLines(productionLineCounts(ROOT), baseline);
-      expect(describeProblems({ ...r, grown: [], tooLong: [] })).toEqual([]);
+    it("there is no baseline to grandfather a file", () => {
+      expect(existsSync(join(ROOT, RETIRED_BASELINE_PATH))).toBe(false);
     });
 
-    it("the baseline only goes down: a shrink lowers and drops entries, never raises or adds one", () => {
-      const before = { max: 800, files: { "src/a.ts": 900, "src/b.ts": 850, "src/c.ts": 1000, "src/gone.ts": 810 } };
-      const counts = { "src/a.ts": 880, "src/b.ts": 790, "src/c.ts": 1200, "src/new.ts": 2000 };
-      const after = shrinkBaseline(before, counts);
-      expect(after.files).toEqual({ "src/a.ts": 880, "src/c.ts": 1000 });
-      expect(baselineRaises(before, after)).toEqual([]);
-      // The grown file and the new one still fail after the shrink.
-      const r = checkMaxLines(counts, after);
-      expect(r.grown).toEqual([{ file: "src/c.ts", lines: 1200, baseline: 1000 }]);
-      expect(r.tooLong).toEqual([{ file: "src/new.ts", lines: 2000 }]);
-      // Editing the baseline upwards is caught (pr:check runs this against the merge base).
-      const edited = { max: 800, files: { ...after.files, "src/c.ts": 1200, "src/new.ts": 2000 } };
-      expect(baselineRaises(after, edited)).toEqual([
-        { file: "src/c.ts", before: 1000, after: 1200 },
-        { file: "src/new.ts", before: null, after: 2000 },
-      ]);
-      // A stale entry fails until it is lowered; one at or under 800 is invalid.
-      expect(checkMaxLines({ "src/a.ts": 850 }, { files: { "src/a.ts": 880, "src/x.ts": 800 } })).toMatchObject({
-        shrunk: [{ file: "src/a.ts", lines: 850, baseline: 880 }, { file: "src/x.ts", lines: null, baseline: 800 }],
-        invalid: [{ file: "src/x.ts", baseline: 800 }],
+    it("the check flags every file over 800, and nothing else", () => {
+      expect(checkMaxLines({ "src/a.ts": 800, "src/c.ts": 1200, "src/b.ts": 801 })).toEqual({
+        tooLong: [{ file: "src/b.ts", lines: 801 }, { file: "src/c.ts", lines: 1200 }],
       });
+      expect(describeProblems(checkMaxLines({ "src/x.ts": 900 }))).toEqual(["src/x.ts: 900 lines, over 800 (split it into smaller modules)"]);
     });
 
     it("counts lines as ESLint max-lines does", () => {
