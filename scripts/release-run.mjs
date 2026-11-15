@@ -21,7 +21,10 @@
  *   6. desktop: tauri build with TAURI_SIGNING_PRIVATE_KEY → bundles + .sig; latest.json; every
  *      signature checked against the updater key, and a changed byte must fail the check;
  *      latest.json.sig: latest.json itself signed with the updater key (W11.S3), verified, and a
- *      changed byte refused. No publish without it: the app refuses an unsigned manifest (W11.S2)
+ *      changed byte refused. No publish without it: the app refuses an unsigned manifest (W11.S2).
+ *      Windows (plan W11.S15): with the SignPath details, Tauri signs through SignPath
+ *      (bundle.windows.signCommand); every Windows installer is then checked, and
+ *      release/signing.json says "signed" only when SignPath was set up and each one verified
  *   7. sbom.cdx.json (CycloneDX, offline from package-lock.json + Cargo.lock)
  *   8. RELEASE_NOTES.md: Hebrew, then English (release-notes/<version>.{he,en}.md), then every change
  *   9. SHA256SUMS of every asset, SHA256SUMS.minisig + sbom.cdx.json.minisig (plan W1.27's key), verified
@@ -65,6 +68,8 @@ import {
   verifyTauriSig,
 } from "./lib/releaseRun.mjs";
 import { fakeDesktop } from "./lib/releaseFake.mjs";
+import { SIGN_COMMAND, peSignature, windowsSigningPlan, windowsSigningRecord } from "./lib/windowsSigning.mjs";
+import { verifyFile } from "./windows/verify-signature.mjs";
 import { filesUnder } from "./supply-chain/lib.mjs";
 import { formatPublicKey, generateKeys, parsePublicKey, rawPublicKey, readSecretKey, signData, verifyData } from "./supply-chain/minisign.mjs";
 import { buildSbom, sourceDate } from "./supply-chain/sbom.mjs";
@@ -179,6 +184,7 @@ function facts(o, repo) {
     updaterPubIsTest: !!pub && isTestKey(pub),
     releaseKey: !!releaseKey,
     releasePub,
+    signPath: windowsSigningPlan().configured,
   };
 }
 
@@ -316,12 +322,22 @@ export async function main(argv) {
       else {
         const override = path.join(temp, "tauri.release.json");
         // dist/ is already built (and checked) above: tauri must not rebuild it.
-        writeFileSync(override, JSON.stringify({ build: { beforeBuildCommand: "" } }));
+        // W11.S15: with the SignPath details, Tauri signs each Windows binary through SignPath.
+        const winSign = process.platform === "win32" && windowsSigningPlan().configured ? { bundle: { windows: { signCommand: SIGN_COMMAND } } } : {};
+        writeFileSync(override, JSON.stringify({ build: { beforeBuildCommand: "" }, ...winSign }));
         const extra = ["--config", override, ...(isBeta(v) && process.platform === "win32" ? ["--bundles", "nsis"] : [])];
         run("npm", ["run", "tauri:build", "--", ...extra], { ...channelEnv, ...updaterBuildEnv({ pubkey: updater.pubkey, repo }) });
         bundles = bundlesFromTarget(v);
       }
       for (const b of bundles) writeFileSync(path.join(OUT, b.name), b.data);
+      // W11.S15: never call the Windows installer signed unless SignPath signed it and it verifies.
+      const plan = windowsSigningPlan();
+      const installers = bundles.filter((b) => /\.(exe|msi)$/i.test(b.name));
+      const verified = installers.map((b) => (process.platform === "win32" ? verifyFile(path.join(OUT, b.name)) : { name: b.name, ...(({ signed, why }) => ({ signed, why }))(peSignature(b.data)) }));
+      const winRecord = windowsSigningRecord(plan, verified);
+      writeFileSync(path.join(OUT, "signing.json"), JSON.stringify({ windows: winRecord }, null, 2) + "\n");
+      console.log(`Windows: ${winRecord.signed ? "signed" : "NOT signed"} — ${winRecord.reason}`);
+      if (plan.configured && installers.length && !winRecord.signed) throw new Error(`SignPath is set up but a Windows installer is not signed: ${winRecord.reason}`);
       const sigs = bundles.filter((b) => b.name.endsWith(".sig")).map((b) => ({ name: b.name, signature: b.data.toString("utf8") }));
       if (!sigs.length) throw new Error("tauri build made no .sig files: is TAURI_SIGNING_PRIVATE_KEY set and createUpdaterArtifacts on?");
       const he = exists(notesFiles(v).he) ? read(notesFiles(v).he) : "";

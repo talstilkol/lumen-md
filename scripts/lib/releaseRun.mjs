@@ -486,6 +486,8 @@ export function preflight(o, f) {
     add(f.updaterPub && !f.updaterPubIsTest, "the updater public key (LUMEN_UPDATER_PUBKEY or security/updater-key.pub) is a real key", "cp ~/.tauri/lumen-updater.key.pub security/updater-key.pub && git add security/updater-key.pub && git commit -m 'chore(release): the updater public key'");
     add(f.releaseKey, "the release signing key (LUMEN_RELEASE_KEY, plan W1.27) opens with LUMEN_RELEASE_PASSPHRASE", "export LUMEN_RELEASE_KEY=~/.lumen-release/lumen-release.key LUMEN_RELEASE_PASSPHRASE=… (made once: node scripts/supply-chain/keys.mjs)");
     add(f.releasePub, "security/release-key.pub is committed and matches LUMEN_RELEASE_KEY", "cp ~/.lumen-release/lumen-release.pub security/release-key.pub && git add security/release-key.pub && git commit -m 'chore(release): the release public key'");
+    // W11.S15: without SignPath the release goes out with an unsigned Windows installer, and says so.
+    add(f.signPath, "SignPath is set up for Windows (SIGNPATH_API_TOKEN, SIGNPATH_ORGANIZATION_ID, SIGNPATH_PROJECT_SLUG, SIGNPATH_SIGNING_POLICY_SLUG)", "apply to SignPath Foundation (W11.O1), then export the four SIGNPATH_* values; without them the Windows installer is released unsigned and marked so", false);
   } else {
     add(f.updaterKey && f.updaterPub, "updater key (else this dry run signs with a throwaway test key)", "nothing to do for a dry run", false);
     add(f.releaseKey, "release key (else this dry run signs with a throwaway test key)", "nothing to do for a dry run", false);
