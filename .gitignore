@@ -145,6 +145,8 @@ ci-docker-out/
 !/reports/perf/
 /reports/perf/*
 !/reports/perf/baselines/
+# …and W1.22's gate baseline (W11.Q5): `npm run perf:inp:gate` compares every run against it
+!/reports/perf/inp-baseline.json
 # Buildkite job output (plan W7.21): shard plans, blob reports, receipts — build artifacts
 /ci-out/
 /.vitest/
