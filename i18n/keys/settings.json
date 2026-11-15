@@ -778,6 +778,73 @@
       ]
     },
     {
+      "key": "privacy.mcp.allClients",
+      "en": "All clients",
+      "vars": []
+    },
+    {
+      "key": "privacy.mcp.client",
+      "en": "Client",
+      "vars": []
+    },
+    {
+      "key": "privacy.mcp.col.path",
+      "en": "Note",
+      "vars": []
+    },
+    {
+      "key": "privacy.mcp.col.tool",
+      "en": "Tool",
+      "vars": []
+    },
+    {
+      "key": "privacy.mcp.decision.allowed",
+      "en": "Read",
+      "vars": []
+    },
+    {
+      "key": "privacy.mcp.decision.approved",
+      "en": "Approved",
+      "vars": []
+    },
+    {
+      "key": "privacy.mcp.decision.conflict",
+      "en": "Not written (note changed)",
+      "vars": []
+    },
+    {
+      "key": "privacy.mcp.decision.denied",
+      "en": "Refused",
+      "vars": []
+    },
+    {
+      "key": "privacy.mcp.decision.proposed",
+      "en": "Change proposed",
+      "vars": []
+    },
+    {
+      "key": "privacy.mcp.decision.rejected",
+      "en": "Rejected",
+      "vars": []
+    },
+    {
+      "key": "privacy.mcp.decision.written",
+      "en": "Written",
+      "vars": []
+    },
+    {
+      "key": "privacy.mcp.empty",
+      "en": "No MCP client has used this vault yet.",
+      "vars": []
+    },
+    {
+      "key": "privacy.mcp.unavailable",
+      "en": "The MCP ledger could not be read: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
       "key": "privacy.onlyLeaving",
       "en": "Only what left this device",
       "vars": []
@@ -835,6 +902,16 @@
       "vars": [
         "n"
       ]
+    },
+    {
+      "key": "privacy.tab.mcp",
+      "en": "MCP clients",
+      "vars": []
+    },
+    {
+      "key": "privacy.tab.requests",
+      "en": "Network requests",
+      "vars": []
     },
     {
       "key": "privacy.title",

@@ -2,7 +2,7 @@
  * Privacy ledger panel (T37): every AI network request — where, how much,
  * why, under which policy — and what the policy blocked.
  */
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { ShieldCheck, X } from "lucide-react";
 import { t, getLocale } from "../i18n";
 import { auditMode, clearLedger, leftDevice, ledgerEntries, ledgerSummary, subscribeLedger, type LedgerEntry } from "../ai/privacyLedger";
@@ -14,10 +14,13 @@ import { EmptyState } from "./EmptyState";
 import { HelpButton } from "./HelpButton";
 import "./privacyLedgerPanelStrings";
 import { Modal } from "./Modal";
+import { mcpBytesByClient, mcpClients, parseMcpLedger, readVaultMcpLedger, type McpLedgerRow } from "../privacy/mcpLedger";
 
 interface Props {
   open: boolean;
   onClose: () => void;
+  /** The vault's MCP ledger text (W11.I9); default: `.lumen/mcp/ledger.jsonl` of the open vault. */
+  mcpLedger?: () => Promise<string | null>;
 }
 
 const btn: React.CSSProperties = { padding: "4px 10px", fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer" };
@@ -29,7 +32,7 @@ function bytes(n: number | null): string {
   return `${(n / 1024 / 1024).toFixed(1)} MB`;
 }
 
-export function PrivacyLedgerPanel({ open, onClose }: Props) {
+export function PrivacyLedgerPanel({ open, onClose, mcpLedger = readVaultMcpLedger }: Props) {
   const list = useSyncExternalStore(subscribeLedger, ledgerEntries, ledgerEntries);
   const [onlyCloud, setOnlyCloud] = useState(false);
   const redactions = useSyncExternalStore(subscribeRedactionLog, redactionLog, redactionLog);
@@ -50,6 +53,22 @@ export function PrivacyLedgerPanel({ open, onClose }: Props) {
         (e: unknown) => setExported(t("privacy.report.failed", { error: String((e as Error)?.message ?? e) })),
       );
   };
+
+  // W11.I9: what MCP clients (outside agents) took from the vault, from the server's own ledger.
+  const [tab, setTab] = useState<"requests" | "mcp">("requests");
+  const [mcp, setMcp] = useState<{ rows: McpLedgerRow[]; error?: string } | null>(null);
+  const [mcpClient, setMcpClient] = useState("");
+  useEffect(() => {
+    if (!open) return;
+    let live = true;
+    mcpLedger().then(
+      (text) => live && setMcp({ rows: text ? parseMcpLedger(text) : [] }),
+      (e: unknown) => live && setMcp({ rows: [], error: String((e as Error)?.message ?? e) }),
+    );
+    return () => {
+      live = false;
+    };
+  }, [open, mcpLedger]);
 
   if (!open) return null;
   const sum = ledgerSummary(list);
@@ -78,6 +97,18 @@ export function PrivacyLedgerPanel({ open, onClose }: Props) {
           <span data-testid="privacy-redacted">{t("pii.ledger.redacted", { n: redactionTotals(redactions).items, requests: redactionTotals(redactions).requests })}</span>
           {guard.length > 0 && <span data-testid="privacy-guard">{t("privacy.guard.summary", { ...guardTotals(guard) })}</span>}
         </div>
+        <div role="tablist" style={{ padding: "8px 16px 0", display: "flex", gap: 6, fontSize: 12 }}>
+          {(["requests", "mcp"] as const).map((k) => (
+            <button key={k} type="button" role="tab" aria-selected={tab === k} data-testid={`privacy-tab-${k}`} style={{ ...btn, fontWeight: tab === k ? 600 : 400 }} onClick={() => setTab(k)}>
+              {t(`privacy.tab.${k}`)}
+              {k === "mcp" && mcp?.rows.length ? ` (${mcp.rows.length})` : ""}
+            </button>
+          ))}
+        </div>
+        {tab === "mcp" ? (
+          <McpLedgerView state={mcp} client={mcpClient} onClient={setMcpClient} />
+        ) : (
+        <>
         {guard.some((g) => g.event !== "tainted") && (
           <ul style={{ margin: 0, padding: "6px 16px 8px 32px", fontSize: 12, borderBottom: "1px solid hsl(var(--border))" }} data-testid="privacy-guard-list" aria-label={t("privacy.guard.title")}>
             {[...guard].reverse().filter((g) => g.event !== "tainted").slice(0, 20).map((g) => (
@@ -147,8 +178,58 @@ export function PrivacyLedgerPanel({ open, onClose }: Props) {
             </table>
           )}
         </div>
+        </>
+        )}
         <footer style={{ padding: "8px 16px", fontSize: 11.5, color: "hsl(var(--fg-muted))", borderTop: "1px solid hsl(var(--border))" }}>{t("privacy.footer")}</footer>
       </div>
     </Modal>
+  );
+}
+
+/** The MCP tab (W11.I9): one row per MCP call, newest first, filtered by client. */
+function McpLedgerView({ state, client, onClient }: { state: { rows: McpLedgerRow[]; error?: string } | null; client: string; onClient: (c: string) => void }) {
+  if (!state) return <div style={{ padding: 16, fontSize: 12.5 }}>…</div>;
+  if (state.error) return <div role="alert" style={{ padding: 16, fontSize: 12.5 }}>{t("privacy.mcp.unavailable", { error: state.error })}</div>;
+  if (!state.rows.length) return <p style={{ padding: 16, fontSize: 13, color: "hsl(var(--fg-muted))" }}>{t("privacy.mcp.empty")}</p>;
+  const clients = mcpClients(state.rows);
+  const shown = [...state.rows].reverse().filter((r) => !client || r.client === client);
+  const sent = mcpBytesByClient(state.rows);
+  return (
+    <div style={{ overflow: "auto", flex: 1 }}>
+      <div style={{ padding: "8px 16px", display: "flex", gap: 8, alignItems: "center", fontSize: 12 }}>
+        <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          {t("privacy.mcp.client")}
+          <select value={client} onChange={(e) => onClient(e.target.value)} data-testid="privacy-mcp-client">
+            <option value="">{t("privacy.mcp.allClients")}</option>
+            {clients.map((c) => (
+              <option key={c} value={c}>
+                {c} — {bytes(sent[c] ?? 0)}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+        <thead>
+          <tr style={{ color: "hsl(var(--fg-muted))" }}>
+            {[t("privacy.col.time"), t("privacy.mcp.client"), t("privacy.mcp.col.tool"), t("privacy.mcp.col.path"), t("privacy.col.sent"), t("privacy.col.decision")].map((h) => (
+              <th key={h} style={{ textAlign: "start", padding: "6px 10px", fontWeight: 600 }}>{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {shown.map((r, i) => (
+            <tr key={`${r.ts}-${i}`} data-testid="privacy-mcp-row" data-client={r.client} data-decision={r.decision} style={{ borderTop: "1px solid hsl(var(--border))" }}>
+              <td style={{ padding: "6px 10px", whiteSpace: "nowrap" }}>{new Date(r.ts).toLocaleString(getLocale())}</td>
+              <td style={{ padding: "6px 10px" }}><bdi dir="ltr">{r.client}</bdi></td>
+              <td style={{ padding: "6px 10px" }}><bdi dir="ltr">{r.tool}</bdi></td>
+              <td style={{ padding: "6px 10px" }}>{r.path ? <bdi>{r.path}</bdi> : "—"}</td>
+              <td style={{ padding: "6px 10px", whiteSpace: "nowrap" }}>{bytes(r.bytesOut)}</td>
+              <td style={{ padding: "6px 10px", whiteSpace: "nowrap", color: r.decision === "denied" || r.decision === "rejected" ? "hsl(var(--danger))" : undefined }}>{t(`privacy.mcp.decision.${r.decision}`)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
