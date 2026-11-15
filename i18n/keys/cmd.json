@@ -131,6 +131,16 @@
       "vars": []
     },
     {
+      "key": "cmd.ai.claims",
+      "en": "AI: Paragraph → Claims",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.claims.hint",
+      "en": "Checkable claims from the paragraph at the cursor, each with an exact quote (R12.11)",
+      "vars": []
+    },
+    {
       "key": "cmd.ai.diagram",
       "en": "AI: Diagram from Text",
       "vars": []

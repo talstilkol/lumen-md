@@ -1,0 +1,948 @@
+{
+ "name": "claim-extractor-synthetic",
+ "version": "1",
+ "license": "MIT (written for lumen-md; synthetic, no real data)",
+ "note": "SYNTHETIC: invented names, scripted model drafts, labels by construction. Tag: dev.",
+ "cases": [
+  {
+   "id": "cl-01",
+   "lang": "en",
+   "paragraph": "Dana Levi works as a engineer in Haifa. She moved to Haifa in 2019. I think she should get a prize.",
+   "drafts": [
+    {
+     "sentence": 1,
+     "text": "Dana Levi works as a engineer in Haifa.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 2,
+     "text": "Dana Levi moved to Haifa in 2019.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 1,
+     "text": "Dana Levi works as a senior engineer in Haifa.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "invented-words"
+    },
+    {
+     "sentence": 1,
+     "text": "Dana Levi is not a engineer in Haifa.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "no-quote"
+    },
+    {
+     "sentence": 3,
+     "text": "Dana Levi should get a prize.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "not-selected"
+    }
+   ]
+  },
+  {
+   "id": "cl-02",
+   "lang": "en",
+   "paragraph": "Omer Katz works as a teacher in Eilat. He moved to Eilat in 2015. I think he should get a prize.",
+   "drafts": [
+    {
+     "sentence": 1,
+     "text": "Omer Katz works as a teacher in Eilat.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 2,
+     "text": "Omer Katz moved to Eilat in 2015.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 1,
+     "text": "Omer Katz works as a senior teacher in Eilat.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "invented-words"
+    },
+    {
+     "sentence": 1,
+     "text": "Omer Katz is not a teacher in Eilat.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "no-quote"
+    },
+    {
+     "sentence": 3,
+     "text": "Omer Katz should get a prize.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "not-selected"
+    }
+   ]
+  },
+  {
+   "id": "cl-03",
+   "lang": "en",
+   "paragraph": "Noa Bar works as a nurse in Ashdod. She moved to Ashdod in 2021. I think she should get a prize.",
+   "drafts": [
+    {
+     "sentence": 1,
+     "text": "Noa Bar works as a nurse in Ashdod.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 2,
+     "text": "Noa Bar moved to Ashdod in 2021.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 1,
+     "text": "Noa Bar works as a senior nurse in Ashdod.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "invented-words"
+    },
+    {
+     "sentence": 1,
+     "text": "Noa Bar is not a nurse in Ashdod.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "no-quote"
+    },
+    {
+     "sentence": 3,
+     "text": "Noa Bar should get a prize.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "not-selected"
+    }
+   ]
+  },
+  {
+   "id": "cl-04",
+   "lang": "en",
+   "paragraph": "Yoni Peretz works as a baker in Safed. He moved to Safed in 2012. I think he should get a prize.",
+   "drafts": [
+    {
+     "sentence": 1,
+     "text": "Yoni Peretz works as a baker in Safed.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 2,
+     "text": "Yoni Peretz moved to Safed in 2012.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 1,
+     "text": "Yoni Peretz works as a senior baker in Safed.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "invented-words"
+    },
+    {
+     "sentence": 1,
+     "text": "Yoni Peretz is not a baker in Safed.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "no-quote"
+    },
+    {
+     "sentence": 3,
+     "text": "Yoni Peretz should get a prize.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "not-selected"
+    }
+   ]
+  },
+  {
+   "id": "cl-05",
+   "lang": "en",
+   "paragraph": "Maya Golan works as a pilot in Netanya. She moved to Netanya in 2018. I think she should get a prize.",
+   "drafts": [
+    {
+     "sentence": 1,
+     "text": "Maya Golan works as a pilot in Netanya.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 2,
+     "text": "Maya Golan moved to Netanya in 2018.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 1,
+     "text": "Maya Golan works as a senior pilot in Netanya.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "invented-words"
+    },
+    {
+     "sentence": 1,
+     "text": "Maya Golan is not a pilot in Netanya.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "no-quote"
+    },
+    {
+     "sentence": 3,
+     "text": "Maya Golan should get a prize.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "not-selected"
+    }
+   ]
+  },
+  {
+   "id": "cl-06",
+   "lang": "en",
+   "paragraph": "Avi Tal works as a architect in Rehovot. He moved to Rehovot in 2010. I think he should get a prize.",
+   "drafts": [
+    {
+     "sentence": 1,
+     "text": "Avi Tal works as a architect in Rehovot.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 2,
+     "text": "Avi Tal moved to Rehovot in 2010.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 1,
+     "text": "Avi Tal works as a senior architect in Rehovot.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "invented-words"
+    },
+    {
+     "sentence": 1,
+     "text": "Avi Tal is not a architect in Rehovot.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "no-quote"
+    },
+    {
+     "sentence": 3,
+     "text": "Avi Tal should get a prize.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "not-selected"
+    }
+   ]
+  },
+  {
+   "id": "cl-07",
+   "lang": "en",
+   "paragraph": "Lior Ben works as a chemist in Modiin. He moved to Modiin in 2020. I think he should get a prize.",
+   "drafts": [
+    {
+     "sentence": 1,
+     "text": "Lior Ben works as a chemist in Modiin.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 2,
+     "text": "Lior Ben moved to Modiin in 2020.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 1,
+     "text": "Lior Ben works as a senior chemist in Modiin.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "invented-words"
+    },
+    {
+     "sentence": 1,
+     "text": "Lior Ben is not a chemist in Modiin.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "no-quote"
+    },
+    {
+     "sentence": 3,
+     "text": "Lior Ben should get a prize.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "not-selected"
+    }
+   ]
+  },
+  {
+   "id": "cl-08",
+   "lang": "en",
+   "paragraph": "Shira Oz works as a librarian in Arad. She moved to Arad in 2016. I think she should get a prize.",
+   "drafts": [
+    {
+     "sentence": 1,
+     "text": "Shira Oz works as a librarian in Arad.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 2,
+     "text": "Shira Oz moved to Arad in 2016.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 1,
+     "text": "Shira Oz works as a senior librarian in Arad.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "invented-words"
+    },
+    {
+     "sentence": 1,
+     "text": "Shira Oz is not a librarian in Arad.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "no-quote"
+    },
+    {
+     "sentence": 3,
+     "text": "Shira Oz should get a prize.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "not-selected"
+    }
+   ]
+  },
+  {
+   "id": "cl-09",
+   "lang": "en",
+   "paragraph": "Tamar Ron works as a dentist in Ramla. She moved to Ramla in 2014. I think she should get a prize.",
+   "drafts": [
+    {
+     "sentence": 1,
+     "text": "Tamar Ron works as a dentist in Ramla.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 2,
+     "text": "Tamar Ron moved to Ramla in 2014.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 1,
+     "text": "Tamar Ron works as a senior dentist in Ramla.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "invented-words"
+    },
+    {
+     "sentence": 1,
+     "text": "Tamar Ron is not a dentist in Ramla.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "no-quote"
+    },
+    {
+     "sentence": 3,
+     "text": "Tamar Ron should get a prize.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "not-selected"
+    }
+   ]
+  },
+  {
+   "id": "cl-10",
+   "lang": "en",
+   "paragraph": "Eitan Gil works as a farmer in Dimona. He moved to Dimona in 2011. I think he should get a prize.",
+   "drafts": [
+    {
+     "sentence": 1,
+     "text": "Eitan Gil works as a farmer in Dimona.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 2,
+     "text": "Eitan Gil moved to Dimona in 2011.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 1,
+     "text": "Eitan Gil works as a senior farmer in Dimona.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "invented-words"
+    },
+    {
+     "sentence": 1,
+     "text": "Eitan Gil is not a farmer in Dimona.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "no-quote"
+    },
+    {
+     "sentence": 3,
+     "text": "Eitan Gil should get a prize.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "not-selected"
+    }
+   ]
+  },
+  {
+   "id": "cl-11",
+   "lang": "he",
+   "paragraph": "דנה לוי עובדת כמהנדסת בחיפה. היא עברה לחיפה בשנת 2019. לדעתי מגיע לה פרס.",
+   "drafts": [
+    {
+     "sentence": 1,
+     "text": "דנה לוי עובדת כמהנדסת בחיפה.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 2,
+     "text": "דנה לוי עברה לחיפה בשנת 2019.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 1,
+     "text": "דנה לוי עובדת כמהנדסת בכירה בחיפה.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "invented-words"
+    },
+    {
+     "sentence": 1,
+     "text": "דנה לוי אינה עובדת כמהנדסת בחיפה.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "no-quote"
+    },
+    {
+     "sentence": 3,
+     "text": "לדנה לוי מגיע פרס.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "not-selected"
+    }
+   ]
+  },
+  {
+   "id": "cl-12",
+   "lang": "he",
+   "paragraph": "נועה בר עובדת כאחות באשדוד. היא עברה לאשדוד בשנת 2021. לדעתי מגיע לה פרס.",
+   "drafts": [
+    {
+     "sentence": 1,
+     "text": "נועה בר עובדת כאחות באשדוד.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 2,
+     "text": "נועה בר עברה לאשדוד בשנת 2021.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 1,
+     "text": "נועה בר עובדת כאחות בכירה באשדוד.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "invented-words"
+    },
+    {
+     "sentence": 1,
+     "text": "נועה בר אינה עובדת כאחות באשדוד.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "no-quote"
+    },
+    {
+     "sentence": 3,
+     "text": "לנועה בר מגיע פרס.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "not-selected"
+    }
+   ]
+  },
+  {
+   "id": "cl-13",
+   "lang": "he",
+   "paragraph": "מאיה גולן עובדת כטייסת בנתניה. היא עברה לנתניה בשנת 2018. לדעתי מגיע לה פרס.",
+   "drafts": [
+    {
+     "sentence": 1,
+     "text": "מאיה גולן עובדת כטייסת בנתניה.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 2,
+     "text": "מאיה גולן עברה לנתניה בשנת 2018.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 1,
+     "text": "מאיה גולן עובדת כטייסת בכירה בנתניה.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "invented-words"
+    },
+    {
+     "sentence": 1,
+     "text": "מאיה גולן אינה עובדת כטייסת בנתניה.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "no-quote"
+    },
+    {
+     "sentence": 3,
+     "text": "למאיה גולן מגיע פרס.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "not-selected"
+    }
+   ]
+  },
+  {
+   "id": "cl-14",
+   "lang": "he",
+   "paragraph": "שירה עוז עובדת כספרנית בערד. היא עברה לערד בשנת 2016. לדעתי מגיע לה פרס.",
+   "drafts": [
+    {
+     "sentence": 1,
+     "text": "שירה עוז עובדת כספרנית בערד.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 2,
+     "text": "שירה עוז עברה לערד בשנת 2016.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 1,
+     "text": "שירה עוז עובדת כספרנית בכירה בערד.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "invented-words"
+    },
+    {
+     "sentence": 1,
+     "text": "שירה עוז אינה עובדת כספרנית בערד.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "no-quote"
+    },
+    {
+     "sentence": 3,
+     "text": "לשירה עוז מגיע פרס.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "not-selected"
+    }
+   ]
+  },
+  {
+   "id": "cl-15",
+   "lang": "he",
+   "paragraph": "תמר רון עובדת כרופאת שיניים ברמלה. היא עברה לרמלה בשנת 2014. לדעתי מגיע לה פרס.",
+   "drafts": [
+    {
+     "sentence": 1,
+     "text": "תמר רון עובדת כרופאת שיניים ברמלה.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 2,
+     "text": "תמר רון עברה לרמלה בשנת 2014.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 1,
+     "text": "תמר רון עובדת כרופאת שיניים בכירה ברמלה.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "invented-words"
+    },
+    {
+     "sentence": 1,
+     "text": "תמר רון אינה עובדת כרופאת שיניים ברמלה.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "no-quote"
+    },
+    {
+     "sentence": 3,
+     "text": "לתמר רון מגיע פרס.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "not-selected"
+    }
+   ]
+  },
+  {
+   "id": "cl-16",
+   "lang": "he",
+   "paragraph": "רותם שגיא עובדת כמורה באילת. היא עברה לאילת בשנת 2015. לדעתי מגיע לה פרס.",
+   "drafts": [
+    {
+     "sentence": 1,
+     "text": "רותם שגיא עובדת כמורה באילת.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 2,
+     "text": "רותם שגיא עברה לאילת בשנת 2015.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 1,
+     "text": "רותם שגיא עובדת כמורה בכירה באילת.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "invented-words"
+    },
+    {
+     "sentence": 1,
+     "text": "רותם שגיא אינה עובדת כמורה באילת.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "no-quote"
+    },
+    {
+     "sentence": 3,
+     "text": "לרותם שגיא מגיע פרס.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "not-selected"
+    }
+   ]
+  },
+  {
+   "id": "cl-17",
+   "lang": "he",
+   "paragraph": "ליה כהן עובדת כאופה בצפת. היא עברה לצפת בשנת 2012. לדעתי מגיע לה פרס.",
+   "drafts": [
+    {
+     "sentence": 1,
+     "text": "ליה כהן עובדת כאופה בצפת.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 2,
+     "text": "ליה כהן עברה לצפת בשנת 2012.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 1,
+     "text": "ליה כהן עובדת כאופה בכירה בצפת.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "invented-words"
+    },
+    {
+     "sentence": 1,
+     "text": "ליה כהן אינה עובדת כאופה בצפת.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "no-quote"
+    },
+    {
+     "sentence": 3,
+     "text": "לליה כהן מגיע פרס.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "not-selected"
+    }
+   ]
+  },
+  {
+   "id": "cl-18",
+   "lang": "he",
+   "paragraph": "עדי מור עובדת כאדריכלית ברחובות. היא עברה לרחובות בשנת 2010. לדעתי מגיע לה פרס.",
+   "drafts": [
+    {
+     "sentence": 1,
+     "text": "עדי מור עובדת כאדריכלית ברחובות.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 2,
+     "text": "עדי מור עברה לרחובות בשנת 2010.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 1,
+     "text": "עדי מור עובדת כאדריכלית בכירה ברחובות.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "invented-words"
+    },
+    {
+     "sentence": 1,
+     "text": "עדי מור אינה עובדת כאדריכלית ברחובות.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "no-quote"
+    },
+    {
+     "sentence": 3,
+     "text": "לעדי מור מגיע פרס.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "not-selected"
+    }
+   ]
+  },
+  {
+   "id": "cl-19",
+   "lang": "he",
+   "paragraph": "גלי נוי עובדת ככימאית במודיעין. היא עברה למודיעין בשנת 2020. לדעתי מגיע לה פרס.",
+   "drafts": [
+    {
+     "sentence": 1,
+     "text": "גלי נוי עובדת ככימאית במודיעין.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 2,
+     "text": "גלי נוי עברה למודיעין בשנת 2020.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 1,
+     "text": "גלי נוי עובדת ככימאית בכירה במודיעין.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "invented-words"
+    },
+    {
+     "sentence": 1,
+     "text": "גלי נוי אינה עובדת ככימאית במודיעין.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "no-quote"
+    },
+    {
+     "sentence": 3,
+     "text": "לגלי נוי מגיע פרס.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "not-selected"
+    }
+   ]
+  },
+  {
+   "id": "cl-20",
+   "lang": "he",
+   "paragraph": "הדס צור עובדת כחקלאית בדימונה. היא עברה לדימונה בשנת 2011. לדעתי מגיע לה פרס.",
+   "drafts": [
+    {
+     "sentence": 1,
+     "text": "הדס צור עובדת כחקלאית בדימונה.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 2,
+     "text": "הדס צור עברה לדימונה בשנת 2011.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "keep"
+    },
+    {
+     "sentence": 1,
+     "text": "הדס צור עובדת כחקלאית בכירה בדימונה.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "invented-words"
+    },
+    {
+     "sentence": 1,
+     "text": "הדס צור אינה עובדת כחקלאית בדימונה.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "no-quote"
+    },
+    {
+     "sentence": 3,
+     "text": "להדס צור מגיע פרס.",
+     "subject": "",
+     "predicate": "",
+     "object": "",
+     "label": "not-selected"
+    }
+   ]
+  }
+ ]
+}

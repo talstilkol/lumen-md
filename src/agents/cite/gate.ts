@@ -122,6 +122,30 @@ function forms(w: string): string[] {
   return [...out];
 }
 
+/**
+ * Words of a text as a lookup for `hasWord`. Two words are the same word when
+ * one is the other with prefix letters (בחיפה / חיפה), or both bare forms
+ * share a stem of at least four letters (בחיפה / לחיפה). A three-letter
+ * remainder alone is not enough: stripping ב and כ from בכירה leaves ירה,
+ * which is also שירה without its ש.
+ */
+export function wordIndex(text: string): { full: Set<string>; bare: Set<string>; stems: Set<string> } {
+  const full = new Set(contentWords(text));
+  const bare = new Set<string>();
+  const stems = new Set<string>();
+  for (const w of full)
+    for (const f of forms(w)) {
+      bare.add(f);
+      if ([...f].length >= 4) stems.add(f);
+    }
+  return { full, bare, stems };
+}
+
+export function hasWord(idx: ReturnType<typeof wordIndex>, w: string): boolean {
+  if (idx.full.has(w) || idx.bare.has(w)) return true;
+  return forms(w).some((f) => idx.full.has(f) || ([...f].length >= 4 && idx.stems.has(f)));
+}
+
 /** Every number a text states, canonical: "1,200" → "1200", "2.50" → "2.5", "40%" → "40". */
 export function numbersOf(text: string): string[] {
   return (text.match(/\d[\d,]*(?:\.\d+)?/g) ?? []).map((n) => {
@@ -144,8 +168,8 @@ export interface Support {
  */
 export function supportOf(claim: string, passage: string, context: string = passage): Support {
   const cw = [...new Set(contentWords(claim))];
-  const pw = new Set(contentWords(passage).flatMap(forms));
-  const hit = cw.filter((w) => forms(w).some((f) => pw.has(f))).length;
+  const idx = wordIndex(passage);
+  const hit = cw.filter((w) => hasWord(idx, w)).length;
   const score = cw.length ? hit / cw.length : 0;
   const pn = new Set(numbersOf(passage));
   if (numbersOf(claim).some((n) => !pn.has(n))) return { score, reject: "number-mismatch" };

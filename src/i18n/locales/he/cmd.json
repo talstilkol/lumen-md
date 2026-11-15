@@ -24,6 +24,8 @@
   "cmd.ai.cancel.hint": "עוצר כל בקשת AI שרצה (גם Esc עושה זאת)",
   "cmd.ai.chart": "AI: תרשים מנתונים",
   "cmd.ai.chart.hint": "הפוך נתוני CSV או טבלה לתרשים ECharts",
+  "cmd.ai.claims": "AI: פסקה ← טענות",
+  "cmd.ai.claims.hint": "טענות שאפשר לבדוק מהפסקה שבה הסמן, כל אחת עם ציטוט מדויק (R12.11)",
   "cmd.ai.diagram": "AI: דיאגרמה מטקסט",
   "cmd.ai.diagram.hint": "צור דיאגרמת Mermaid מהמסמך",
   "cmd.ai.doctor": "AI: רופא (אבחון AI מקומי)",

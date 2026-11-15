@@ -124,6 +124,31 @@
       "vars": []
     },
     {
+      "key": "toast.claimsDone",
+      "en": "{{kept}} candidate claims · {{dropped}} dropped without a quote",
+      "vars": [
+        "kept",
+        "dropped"
+      ]
+    },
+    {
+      "key": "toast.claimsExtracting",
+      "en": "Turning the paragraph into claims…",
+      "vars": []
+    },
+    {
+      "key": "toast.claimsFailed",
+      "en": "Could not extract claims: {{error}}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "toast.claimsNoParagraph",
+      "en": "Put the cursor in a paragraph first.",
+      "vars": []
+    },
+    {
       "key": "toast.completed",
       "en": "✅ {name} completed",
       "vars": [

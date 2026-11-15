@@ -41,6 +41,16 @@ Every sentence of the agent's answer must be tied to an exact quote from a sourc
 
 The gate was measured on a **synthetic** set of 30 questions (15 English, 15 Hebrew; `eval/golden/cite-gate`), each answer mixing true sentences with planted lies. Result in `eval/cards/cite-gate.json`: 0 shown quotes that are not in the source. It is tagged `dev`: it shows how the gate treats known lies, not quality on real answers.
 
+### Paragraph → claims
+
+Command: **AI: Paragraph → Claims**. It works on the paragraph that holds the cursor:
+
+1. **Selection (rules):** questions, opinions and hedges ("I think", "maybe", "לדעתי", "אולי", "should") and sentences with fewer than three content words or numbers are left out.
+2. **The local model** resolves pronouns ("She moved…" → "Dana Levi moved…") and splits each sentence into atomic claims. It may use only words the paragraph has; a claim with any other word is dropped as invented.
+3. **The cite-or-delete gate** picks each claim's quote from the paragraph at exact offsets. A claim without one is dropped.
+
+The candidates appear under the paragraph in a `[!claims]` callout. Each one has its quote, and the callout says how many were dropped. Nothing is recorded as a fact; Undo removes the callout. Each candidate keeps its note, paragraph anchor, offsets, paragraph hash, extractor version, model and date for the review queue.
+
 The Claude web search route is not gated this way: Anthropic returns its own verbatim quotes but not the page text, so Lumen has nothing to align offsets against. Its unsupported passages are still flagged.
 
 Every page is outside content: the agent gets it cleaned and delimited, and instructions planted in it are flagged (see Local agents → Outside content). The note is saved with `untrusted: true` in its frontmatter.
