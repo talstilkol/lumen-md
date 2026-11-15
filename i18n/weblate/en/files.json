@@ -117,6 +117,8 @@
   "search.noMatches": "No matches.",
   "search.operatorsHint": "Operators: tag:name  path:folder  \"exact phrase\"  /regex/  -exclude",
   "search.placeholder": "Search workspace files & content…",
+  "search.regexSkipped": "/regex/ skipped {count} very long notes (over {limit} characters).",
+  "search.regexTimedOut": "The /regex/ took too long and was stopped. Try a simpler pattern.",
   "search.removeSaved": "Remove saved search {name}",
   "search.results.one": "{n} result",
   "search.results.other": "{n} results",

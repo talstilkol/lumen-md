@@ -117,6 +117,8 @@
   "search.noMatches": "Keine Treffer.",
   "search.operatorsHint": "Operatoren: tag:name  path:ordner  \"genaue Phrase\"  /regex/  -ausschließen",
   "search.placeholder": "Dateien und Inhalte durchsuchen…",
+  "search.regexSkipped": "/regex/ hat {count} sehr lange Notizen übersprungen (über {limit} Zeichen).",
+  "search.regexTimedOut": "Der /regex/ hat zu lange gedauert und wurde abgebrochen. Versuchen Sie ein einfacheres Muster.",
   "search.removeSaved": "Gespeicherte Suche {name} entfernen",
   "search.results.one": "{n} Ergebnis",
   "search.results.other": "{n} Ergebnisse",

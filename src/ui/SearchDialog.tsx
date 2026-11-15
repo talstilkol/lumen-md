@@ -29,6 +29,7 @@ import "./searchDialogStrings";
 import { Modal } from "./Modal";
 import { buildAskContext, retrieveForQuestion } from "./searchDialogParts";
 import { renderSnippet } from "./searchSnippet";
+import { regexNoteText } from "./searchRegexNote";
 
 interface Props {
   open: boolean;
@@ -55,6 +56,8 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
   const [hits, setHits] = useState<SearchHit[]>([]);
   /** The other-layout reading of the query whose hits are shown too. */
   const [layoutVariant, setLayoutVariant] = useState<string | null>(null);
+  /** What a /regex/ could not check (2.39): skipped long notes, or a stopped search. */
+  const [regexNote, setRegexNote] = useState("");
   const [smartHits, setSmartHits] = useState<SemanticHit[]>([]);
   // W5.28: local translations of the hits in another language than the query, and whether the embeddings bridge languages.
   const [translations, setTranslations] = useState<Record<string, string | null>>({});
@@ -109,7 +112,8 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
     let cancelled = false;
     setLoading(true);
     const handle = setTimeout(() => {
-      searchWorkspace(query, { limit: 40 })
+      let note = "";
+      searchWorkspace(query, { limit: 40, onRegexInfo: (r) => (note = regexNoteText(r)) })
         .then(async (h) => {
           // Few hits: try the same keystrokes in the other keyboard layout too (plan W2.8).
           const other = h.length < 3 ? wrongLayoutVariant(query) : null;
@@ -117,12 +121,14 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
           if (cancelled) return;
           setLayoutVariant(more.length ? other : null);
           setHits(mergeLayoutHits(h, more));
+          setRegexNote(note);
           setActive(0);
           setLoading(false);
         })
         .catch(() => {
           if (cancelled) return;
           setHits([]);
+          setRegexNote("");
           setLoading(false);
         });
     }, 150);
@@ -493,6 +499,11 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
             style={{ padding: "2px 14px 6px", fontSize: 11, color: "hsl(var(--fg-muted))", unicodeBidi: "plaintext" }}
           >
             {t("search.operatorsHint")}
+          </div>
+        )}
+        {mode === "search" && regexNote && (
+          <div data-testid="search-regex-note" role="status" dir="auto" style={{ padding: "2px 14px 6px", fontSize: 11, color: "hsl(var(--fg-muted))", unicodeBidi: "plaintext" }}>
+            {regexNote}
           </div>
         )}
         <div className="cmd-palette-list" ref={listRef}>

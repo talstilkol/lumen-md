@@ -681,6 +681,19 @@
       "vars": []
     },
     {
+      "key": "search.regexSkipped",
+      "en": "/regex/ skipped {count} very long notes (over {limit} characters).",
+      "vars": [
+        "count",
+        "limit"
+      ]
+    },
+    {
+      "key": "search.regexTimedOut",
+      "en": "The /regex/ took too long and was stopped. Try a simpler pattern.",
+      "vars": []
+    },
+    {
       "key": "search.removeSaved",
       "en": "Remove saved search {name}",
       "vars": [

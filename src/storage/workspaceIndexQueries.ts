@@ -3,9 +3,10 @@
  * unchanged; ./workspaceIndex.ts re-exports every one).
  */
 import { listWorkspaceTree, type WorkspaceNode } from "./workspace";
-import type { BacklinkHit, IndexStats, SearchHit } from "./vaultIndexCore";
+import type { BacklinkHit, IndexStats, SearchHit, SearchResult } from "./vaultIndexCore";
 import type { IndexEngine } from "./vaultIndexProtocol";
-import { checkedIndex, getEngine, verified, withEngine } from "./workspaceIndex";
+import { checkedIndex, getEngine, restartEngine, verified, withEngine } from "./workspaceIndex";
+import { log } from "../lib/logger";
 import { cache, type IndexedFile } from "./workspaceIndexState";
 
 // ── Queries ─────────────────────────────────────────────────────────────
@@ -41,18 +42,73 @@ export async function findBacklinks(targetPath: string): Promise<BacklinkHit[]> 
   return withEngine((e) => e.backlinks(targetPath));
 }
 
+/** A search with a /regex/ that runs longer than this (ms) in the worker is stopped (2.39). */
+export const REGEX_TIME_LIMIT_MS = 3_000;
+
+/**
+ * Does the query hold a /regex/ operator (../search/queryOps.ts)? The same token shape, checked here without
+ * loading the query parser on the main thread; a false positive (a slash inside a quoted phrase) only arms the timer.
+ */
+const REGEX_TOKEN = /(?:^|\s)-?\/(?:\\.|[^/\\])+\/[imsu]*(?=\s|$)/;
+const hasRegexOp = (query: string) => REGEX_TOKEN.test(query);
+
 /** Cheap fuzzy + substring search across filenames, paths, and content. */
 export async function searchWorkspace(
   query: string,
   /** `filter`: only these paths — applied before `limit`. */
-  opts: { limit?: number; filter?: (path: string) => boolean } = {},
+  opts: {
+    limit?: number;
+    filter?: (path: string) => boolean;
+    /** Told what a /regex/ could not check (2.39): notes too long for it, or a search stopped at the time limit. */
+    onRegexInfo?: (info: Omit<SearchResult, "hits">) => void;
+    /** Test hook: the /regex/ time limit (default REGEX_TIME_LIMIT_MS). */
+    timeLimitMs?: number;
+  } = {},
 ): Promise<SearchHit[]> {
+  const { hits, ...info } = await searchDetailed(query, opts);
+  opts.onRegexInfo?.(info);
+  return hits;
+}
+
+/**
+ * The search, and what a /regex/ could not check (2.39): how many notes were too long for it, and whether it ran
+ * past REGEX_TIME_LIMIT_MS. A /regex/ search in the index worker that runs past the limit is stopped by restarting
+ * the worker (restartEngine: a fresh one is filled again), and answers with no hits and `regexTimedOut`. Without a
+ * worker the regex runs in this thread and cannot be stopped; only the size cap (REGEX_MAX_CHARS) holds.
+ */
+async function searchDetailed(query: string, opts: { limit?: number; filter?: (path: string) => boolean; timeLimitMs?: number }): Promise<SearchResult> {
   await checkedIndex();
-  if (!cache.byPath.size) return [];
+  if (!cache.byPath.size) return { hits: [], regexSkipped: 0 };
   const filter = opts.filter;
   // A function cannot cross into the worker: send the paths it allows.
   const paths = filter ? [...cache.byPath.keys()].filter((p) => filter(p)) : undefined;
-  return withEngine((e) => e.search(query, { limit: opts.limit ?? 30, paths }));
+  const req = { limit: opts.limit ?? 30, paths };
+  if (hasRegexOp(query)) {
+    const current = getEngine();
+    const e = await current;
+    if (e.kind === "worker") {
+      const limitMs = opts.timeLimitMs ?? REGEX_TIME_LIMIT_MS;
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const timedOut = new Promise<"timeout">((resolve) => {
+        timer = setTimeout(() => resolve("timeout"), limitMs);
+      });
+      const answer = e.query(query, req);
+      try {
+        const res = await Promise.race([answer, timedOut]);
+        if (res !== "timeout") return res;
+      } catch {
+        // The worker failed for another reason: withEngine's fallback (an in-thread engine).
+        return withEngine((x) => x.query(query, req));
+      } finally {
+        clearTimeout(timer);
+      }
+      answer.catch(() => undefined);
+      log.warn(`search: /regex/ ran past ${limitMs} ms; restarting the index worker`);
+      void restartEngine(current, e);
+      return { hits: [], regexSkipped: 0, regexTimedOut: true };
+    }
+  }
+  return withEngine((x) => x.query(query, req));
 }
 
 /**
