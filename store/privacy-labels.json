@@ -1,6 +1,6 @@
 {
   "format": "lumen-store-privacy-labels/1",
-  "basis": "What the privacy report and the published local-only audits show (docs: security/privacy-report). src/__tests__/privacyLabels.test.ts keeps this file in step with the privacy ledger's categories and with the published audits.",
+  "basis": "What the privacy report and the published local-only audits show (docs: security/privacy-report). src/__tests__/privacyLabels.test.ts keeps this file in step with the privacy ledger's categories and with the published audits. Plan W11.S13: every privacy-ledger route is listed under exactly one feature's `routes` or under `onDevice`; scripts/privacy/store-labels.mjs checks it (pr:check runs it) and writes the two store drafts.",
   "default": {
     "summary": "With the default settings (no cloud key, no sync provider, no crash-reporting key in the build) nothing leaves the device: the local-only audit shows 0 non-local requests.",
     "dataLeavesDevice": false
@@ -33,16 +33,204 @@
     ]
   },
   "optionalFeatures": [
-    { "feature": "Cloud AI (OpenAI, Anthropic, Google Gemini, Mistral)", "ledgerCategory": "cloud-ai", "sends": "The text you send to the AI", "turnedOnBy": "Your own API key and the cloud or local-first AI policy; refused under local-only" },
-    { "feature": "Cloud grammar check (LanguageTool)", "ledgerCategory": "cloud-text", "sends": "The text being checked", "turnedOnBy": "A policy other than local-only; refused under local-only" },
-    { "feature": "Research service", "ledgerCategory": "research", "sends": "Your search query", "turnedOnBy": "Running a research command with a research service configured; refused under local-only" },
-    { "feature": "Canvas (tldraw) licence check", "ledgerCategory": "third-party", "sends": "The page address", "turnedOnBy": "Opening a canvas in a production build; refused under local-only" },
-    { "feature": "Model and dictionary downloads (Hugging Face, GitHub)", "ledgerCategory": "model-download", "sends": "Nothing of yours (a download)", "turnedOnBy": "Choosing a local model or a dictionary" },
-    { "feature": "Canvas fonts, icons and translations", "ledgerCategory": "static-asset", "sends": "Nothing of yours (static files)", "turnedOnBy": "Opening a canvas" },
-    { "feature": "Error reports (Sentry / GlitchTip)", "ledgerCategory": "monitoring", "sends": "The error's class name and where in the code it happened; no error message, note text, titles, paths or page address", "turnedOnBy": "Turning error reports on in Settings (off by default), in a build made with VITE_SENTRY_DSN; refused under local-only" },
-    { "feature": "Plugins' network requests", "ledgerCategory": "plugin", "sends": "Whatever the plugin's request carries, to the destination the plugin names", "turnedOnBy": "Installing a plugin and granting it network access; refused under local-only" },
-    { "feature": "Other requests in audit mode", "ledgerCategory": "network", "sends": "Whatever that request carries; listed so an audit can compare", "turnedOnBy": "Audit mode only (lumen.privacy.audit)" },
-    { "feature": "Encrypted sync (WebDAV, S3, Dropbox, Google Drive)", "ledgerCategory": null, "sends": "Ciphertext only, to the storage you chose", "turnedOnBy": "Connecting a sync provider" },
-    { "feature": "Live collaboration", "ledgerCategory": null, "sends": "End-to-end encrypted edits, to your collaborators (and a collab server, if configured)", "turnedOnBy": "Starting or joining a session" }
-  ]
+    {
+      "feature": "Cloud AI (OpenAI, Anthropic, Google Gemini, Mistral)",
+      "ledgerCategory": "cloud-ai",
+      "sends": "The text you send to the AI",
+      "turnedOnBy": "Your own API key and the cloud or local-first AI policy; refused under local-only",
+      "routes": [
+        "OpenAI",
+        "Anthropic (Claude)",
+        "Google Gemini",
+        "Mistral",
+        "Ollama on a remote server"
+      ]
+    },
+    {
+      "feature": "Cloud grammar check (LanguageTool)",
+      "ledgerCategory": "cloud-text",
+      "sends": "The text being checked",
+      "turnedOnBy": "A policy other than local-only; refused under local-only",
+      "routes": [
+        "LanguageTool grammar check"
+      ]
+    },
+    {
+      "feature": "Research service",
+      "ledgerCategory": "research",
+      "sends": "Your search query",
+      "turnedOnBy": "Running a research command with a research service configured; refused under local-only",
+      "routes": [
+        "Research service",
+        "Agent tool ",
+        "Zotero Web API (your library; writes only the PDF highlights you send)"
+      ]
+    },
+    {
+      "feature": "Canvas (tldraw) licence check",
+      "ledgerCategory": "third-party",
+      "sends": "The page address",
+      "turnedOnBy": "Opening a canvas in a production build; refused under local-only",
+      "routes": []
+    },
+    {
+      "feature": "Model and dictionary downloads (Hugging Face, GitHub)",
+      "ledgerCategory": "model-download",
+      "sends": "Nothing of yours (a download)",
+      "turnedOnBy": "Choosing a local model or a dictionary",
+      "routes": [
+        "Model download (Hugging Face)",
+        "Model download (Lumen's mirror)",
+        "Dictionary / OCR model download (GitHub)",
+        "webR (R runtime) download"
+      ]
+    },
+    {
+      "feature": "Canvas fonts, icons and translations",
+      "ledgerCategory": "static-asset",
+      "sends": "Nothing of yours (static files)",
+      "turnedOnBy": "Opening a canvas",
+      "routes": []
+    },
+    {
+      "feature": "Error reports (Sentry / GlitchTip)",
+      "ledgerCategory": "monitoring",
+      "sends": "The error's class name and where in the code it happened; no error message, note text, titles, paths or page address",
+      "turnedOnBy": "Turning error reports on in Settings (off by default), in a build made with VITE_SENTRY_DSN; refused under local-only",
+      "routes": [
+        "Error report (Sentry / GlitchTip), content removed"
+      ]
+    },
+    {
+      "feature": "Plugins' network requests",
+      "ledgerCategory": "plugin",
+      "sends": "Whatever the plugin's request carries, to the destination the plugin names",
+      "turnedOnBy": "Installing a plugin and granting it network access; refused under local-only",
+      "routes": [
+        "Plugin "
+      ]
+    },
+    {
+      "feature": "Other requests in audit mode",
+      "ledgerCategory": "network",
+      "sends": "Whatever that request carries; listed so an audit can compare",
+      "turnedOnBy": "Audit mode only (lumen.privacy.audit)",
+      "routes": [
+        "Other request (audit mode)"
+      ]
+    },
+    {
+      "feature": "Encrypted sync (WebDAV, S3, Dropbox, Google Drive)",
+      "ledgerCategory": null,
+      "sends": "Ciphertext only, to the storage you chose",
+      "turnedOnBy": "Connecting a sync provider",
+      "routes": []
+    },
+    {
+      "feature": "Live collaboration",
+      "ledgerCategory": null,
+      "sends": "End-to-end encrypted edits, to your collaborators (and a collab server, if configured)",
+      "turnedOnBy": "Starting or joining a session",
+      "routes": []
+    },
+    {
+      "feature": "Diagrams (PlantUML, rendered by kroki.io)",
+      "ledgerCategory": "cloud-text",
+      "sends": "The diagram's source",
+      "turnedOnBy": "Confirming the first time a diagram would be sent; refused under local-only",
+      "routes": [
+        "PlantUML rendering (kroki.io)"
+      ]
+    },
+    {
+      "feature": "Read aloud and dictation with the browser's speech service",
+      "ledgerCategory": "cloud-text",
+      "sends": "The text read aloud, or your voice",
+      "turnedOnBy": "Choosing a network voice, or dictation under the cloud policy after a confirmation; refused under local-only",
+      "routes": [
+        "Read aloud (",
+        "Dictation through the browser's speech service",
+        "Browser speech recognition (Web Speech API)"
+      ]
+    },
+    {
+      "feature": "Public sources (Sefaria, the Knesset, government data)",
+      "ledgerCategory": "cloud-text",
+      "sends": "Only the reference, name or search words you asked for; nothing from your notes",
+      "turnedOnBy": "Searching one of these sources; refused under local-only",
+      "routes": [
+        "Jewish sources (Sefaria): the reference only",
+        "Knesset records (OData): the law or bill name only",
+        "Government data (data.gov.il, CBS): the search words or dataset id only"
+      ]
+    },
+    {
+      "feature": "Web clipper",
+      "ledgerCategory": "third-party",
+      "sends": "A request for the page you clip",
+      "turnedOnBy": "Clipping a page; refused under local-only",
+      "routes": [
+        "Web clipper — fetches the page you clip"
+      ]
+    },
+    {
+      "feature": "Publishing to Bluesky (Standard.site)",
+      "ledgerCategory": "third-party",
+      "sends": "The note you publish, publicly, and your login for that session",
+      "turnedOnBy": "Confirming a publish; refused under local-only",
+      "routes": [
+        "Publish to the AT Protocol (Standard.site), your PDS",
+        "AT Protocol identity lookup (plc.directory)"
+      ]
+    },
+    {
+      "feature": "Calendar connections (CalDAV, ICS)",
+      "ledgerCategory": "third-party",
+      "sends": "Your tasks and credentials to your calendar server; a read request for a subscription",
+      "turnedOnBy": "Setting up a connection; refused under local-only",
+      "routes": [
+        "CalDAV task sync (your calendar server)",
+        "Calendar subscription (ICS, read only)"
+      ]
+    },
+    {
+      "feature": "Themes and CSS snippets",
+      "ledgerCategory": "third-party",
+      "sends": "A request for a file the stylesheet names",
+      "turnedOnBy": "Installing a theme or snippet; refused under local-only",
+      "routes": [
+        "A stylesheet (theme or CSS snippet) loaded it"
+      ]
+    },
+    {
+      "feature": "Desktop update check",
+      "ledgerCategory": "static-asset",
+      "sends": "The app version and platform only",
+      "turnedOnBy": "Running \"Check for updates\" in the desktop app; not under local-only",
+      "routes": [
+        "Desktop update check (app version and platform only)"
+      ]
+    },
+    {
+      "feature": "CDN requests that should not happen",
+      "ledgerCategory": "third-party",
+      "sends": "A file request; listed as a warning so a stray request is visible",
+      "turnedOnBy": "Nothing: each is a bug when it appears",
+      "routes": [
+        "jsDelivr CDN (only the webR download is expected)",
+        "Excalidraw font fallback CDN (not needed: fonts are served locally)"
+      ]
+    }
+  ],
+  "onDevice": {
+    "note": "Routes that stay on the user's own machine or local network: nothing reaches the developer or a third party.",
+    "routes": [
+      "Ollama (this machine / LAN)",
+      "LanguageTool (this machine / LAN)",
+      "Research (local service)",
+      "Research (local SearXNG)",
+      "Encrypted sync on the local network (no cloud)",
+      "Agent tool run_python: the Python sandbox has no network"
+    ]
+  }
 }
