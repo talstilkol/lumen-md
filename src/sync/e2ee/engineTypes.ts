@@ -182,6 +182,8 @@ export interface RekeyRequest {
    * remove it (null). Left out, the vault's recovery key is wrapped again.
    */
   recovery?: { recipient: string; mac: string } | null;
+  /** Plan W11.S10: passkeys to add (credential id → recipient and MAC key) or remove. */
+  passkeys?: { add?: Record<string, { recipient: string; mac: string }>; remove?: string[] };
 }
 
 export interface RekeyResult {

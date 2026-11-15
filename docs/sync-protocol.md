@@ -122,7 +122,8 @@ a frozen manifest only once the keyring lists the frozen manifest's digest in
  "sealed":{"n":"…","c":"…"},
  "header":"<b64u>", "prev":"<b64u>",
  "dropped":[{"epoch":N,"at":ms,"devices":["<id>",…],"mac":"<b64u>"}],
- "recovery":{"recipient":"age1…","wrap":"<b64u age file of S_N>","check":"<b64u>"}}
+ "recovery":{"recipient":"age1…","wrap":"<b64u age file of S_N>","check":"<b64u>"},
+ "passkeys":{"<credential id>":{"recipient":"age1…","wrap":"…","check":"…"}}}
 ```
 
 `protocol` is 3, or 2 for a keyring written before the recovery key
@@ -158,6 +159,8 @@ a frozen manifest only once the keyring lists the frozen manifest's digest in
     called off (at most 16).
   - `recovery` (protocol 3 only): `{recipient, mac}`, the recovery key's age
     recipient and its MAC key, b64u (§5a).
+  - `passkeys` (protocol 3 only): `{"<credential id>": {recipient, mac}}`,
+    at most 16 (§5b).
 - The keyring's **digest** is
   `sha256hex(JSON.stringify([format, protocol, vaultId, epoch, passphrase.n, passphrase.c, sealed.n, sealed.c, header ?? null, prev ?? null]))`:
   every checkable field, never the plaintext wraps.
@@ -227,6 +230,31 @@ Why it holds:
   it can't open a later wrap. Together with the storage it could make a
   keyring that `R` accepts, and a restore in a clean profile has no anchor to
   catch that (§9).
+
+### 5b. Passkeys (protocol 3, plan W11.S10)
+
+A passkey can open the vault in place of the passphrase, through the
+WebAuthn PRF extension. The design follows typage. It is offered only where
+`PublicKeyCredential.getClientCapabilities()` reports `"extension:prf"`.
+
+- The page asks the passkey for its PRF output on the salt
+  `salt = SHA-256("lumen-e2ee/1/passkey-prf-salt/" ‖ vaultId)`. The browser
+  hashes the salt again before the authenticator sees it (WebAuthn L3), and
+  the 32-byte output `P` exists only inside a ceremony the user confirmed.
+- `P` stands in for `R` (§5a), with the labels `passkey-x25519` and
+  `passkey-mac`: `x = HKDF(P, vaultId, "lumen-e2ee/1/passkey-x25519")` and
+  `m = HKDF(P, vaultId, "lumen-e2ee/1/passkey-mac")`.
+- Each passkey is one entry, keyed by its WebAuthn credential id (b64u),
+  in the sealed `passkeys` and in the file's `passkeys`. Each entry's
+  `check` is
+  `HMAC(m, JSON ["lumen-e2ee-passkey/1", vaultId, N, digest, credentialId, recipient, wrap])`,
+  so a wrap can't move from one passkey to another.
+- Every re-key and rewrite wraps every listed passkey again, as for `R`.
+  **Revoking** a passkey is a re-key without it: it opens no later epoch.
+- Opening with a passkey runs the same four checks as `R`, on that
+  credential's entry.
+
+The same caveat as §5a applies: a clean profile has no anchor (§9).
 
 Why a new protocol: a build that knows only protocol 2 would re-key without
 `recovery` and silently drop it. Such a build refuses protocol 3. A protocol 2
@@ -581,13 +609,17 @@ scrypt file.
   key (hex) alone opens epoch 3 and every file; another key is refused, a
   wrap the storage makes to the public recipient fails the check, and the
   revoked device can't open it.
+- Vault 6 (`passkey`, plan W11.S10): keyring protocol 3 with one passkey,
+  given as its credential id and its PRF output `P` (hex; from a real
+  authenticator in use). `P` alone opens the vault, and another `P` is
+  refused.
 - `sas[]` (§6a): for each of those sessions and both flows, the two fixed
   X25519 private keys (hex), the transcript, the commitment(s), the five
   symbols and both confirmations. `make-vectors.mts --pairing-only` remakes
   the pairing vectors and these without touching the rest.
 
 ```sh
-python3 scripts/sync-protocol/check_vectors.py      # the independent reader: 46/46
+python3 scripts/sync-protocol/check_vectors.py      # the independent reader: 51/51
 npx vitest run src/__tests__/e2eeVectors.test.ts    # Lumen's own reader, same file
 ```
 

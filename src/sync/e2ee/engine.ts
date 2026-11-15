@@ -87,7 +87,7 @@ export {
   type RekeyResult,
   type SyncResult,
 } from "./engineTypes";
-export { createVault, setUpRecovery, unlockVault, unlockWithDevice, unlockWithRecoveryKey } from "./vaultOpen";
+export { addPasskey, createVault, removePasskey, setUpRecovery, unlockVault, unlockWithDevice, unlockWithPasskey, unlockWithRecoveryKey } from "./vaultOpen";
 
 
 export class E2eeSync extends E2eeSyncPairing {

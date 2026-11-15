@@ -16,6 +16,7 @@
  *     prev?: "<b64u>",             // with `header`: the keyring this one replaced (the old passphrase's way back)
  *     dropped?: [{epoch, at, devices, mac}]  // devices a re-key from an unverified device left out (F4)
  *     recovery?: {recipient, wrap, check}   // protocol 3: the epoch secret for the recovery key (W11.S8)
+ *     passkeys?: { <credential id>: {recipient, wrap, check} }  // protocol 3: for each passkey (W11.S10)
  *   }
  *
  * Every AES-GCM has the protocol, the vault id, the epoch and its role as
@@ -56,6 +57,11 @@
  * and rewritten as protocol 2; recovery comes with the next re-key, which
  * writes protocol 3. A build that knows only protocol 2 refuses protocol 3,
  * so it can't re-key a vault and silently drop its recovery wrap.
+ *
+ * Passkeys (plan W11.S10) are wrapped the same way, one entry per WebAuthn
+ * credential id: the passkey's PRF output stands in for the recovery key
+ * (recovery.ts `recoveryKeys(prf, vaultId, "passkey")`), and the check also
+ * names the credential, so a wrap can't move from one passkey to another.
  */
 
 import { bs, equalBytes, fromB64u, fromUtf8, randomBytes, sha256Hex, toB64u, utf8 } from "./bytes";
@@ -120,7 +126,12 @@ export interface KeyringFile {
   dropped?: DroppedMarker[];
   /** Protocol 3: the epoch secret for the recovery key. Untrusted until `check` verifies under the sealed MAC key. */
   recovery?: RecoveryWrap;
+  /** Protocol 3 (W11.S10): the epoch secret for each passkey, by WebAuthn credential id (b64u). */
+  passkeys?: Record<string, RecoveryWrap>;
 }
+
+/** How many passkeys a vault can have. */
+export const MAX_PASSKEYS = 16;
 
 export interface RecoveryWrap {
   /** The recovery key's age X25519 recipient. */
@@ -165,6 +176,8 @@ export interface KeyringContents {
   aborted?: string[];
   /** Protocol 3: the recovery key's recipient and MAC key (b64u); every keyring wraps its secret for it. */
   recovery?: { recipient: string; mac: string };
+  /** Protocol 3 (W11.S10): each passkey's recipient and MAC key, by credential id. */
+  passkeys?: Record<string, { recipient: string; mac: string }>;
 }
 
 /** What a device remembers of the keyring it verified last. */
@@ -234,7 +247,8 @@ export function decodeKeyring(bytes: Uint8Array): KeyringFile {
     (o.header !== undefined && typeof o.header !== "string") ||
     (o.prev !== undefined && (typeof o.prev !== "string" || o.header === undefined)) ||
     (o.dropped !== undefined && !(Array.isArray(o.dropped) && o.dropped.length <= DROPPED_LENGTH && o.dropped.every(droppedOk))) ||
-    (o.recovery !== undefined && (o.protocol < RECOVERY_PROTOCOL || !recoveryOk(o.recovery)))
+    (o.recovery !== undefined && (o.protocol < RECOVERY_PROTOCOL || !recoveryOk(o.recovery))) ||
+    (o.passkeys !== undefined && (o.protocol < RECOVERY_PROTOCOL || !o.passkeys || typeof o.passkeys !== "object" || Array.isArray(o.passkeys) || Object.keys(o.passkeys).length > MAX_PASSKEYS || !Object.values(o.passkeys).every(recoveryOk)))
   ) {
     throw new DecryptError("Not a Lumen keyring");
   }
@@ -267,16 +281,25 @@ export async function readKeyring(provider: SyncProvider, name = KEYRING_NAME): 
 }
 
 /** How this device opens the keyring: the passphrase's wrap key, its own age identity, or the recovery key (W11.S8). */
-export type KeyAccess = { wrap: CryptoKey } | { device: string; identity: string } | { recovery: Uint8Array };
+export type KeyAccess = { wrap: CryptoKey } | { device: string; identity: string } | { recovery: Uint8Array } | { passkey: { id: string; prf: Uint8Array } };
 
-const recoveryData = (vaultId: string, epoch: number, digest: string, w: Pick<RecoveryWrap, "recipient" | "wrap">) =>
-  utf8(JSON.stringify(["lumen-e2ee-recovery/1", vaultId, epoch, digest, w.recipient, w.wrap]));
+/** What a recovery (`passkey` null) or passkey wrap's check covers. */
+const recoveryData = (vaultId: string, epoch: number, digest: string, w: Pick<RecoveryWrap, "recipient" | "wrap">, passkey: string | null = null) =>
+  utf8(JSON.stringify(passkey === null ? ["lumen-e2ee-recovery/1", vaultId, epoch, digest, w.recipient, w.wrap] : ["lumen-e2ee-passkey/1", vaultId, epoch, digest, passkey, w.recipient, w.wrap]));
 
-/** The recovery wrap of an epoch: `secret` as an age file to the sealed recipient, and its check under the sealed MAC key. */
-async function recoveryWrap(vaultId: string, epoch: number, digest: string, secret: Uint8Array, sealed: { recipient: string; mac: string }): Promise<RecoveryWrap> {
+/** The recovery (or passkey) wrap of an epoch: `secret` as an age file to the sealed recipient, and its check under the sealed MAC key. */
+async function recoveryWrap(vaultId: string, epoch: number, digest: string, secret: Uint8Array, sealed: { recipient: string; mac: string }, passkey: string | null = null): Promise<RecoveryWrap> {
   const wrap = toB64u(await ageEncrypt(secret, [{ x25519: sealed.recipient }]));
   const mac = await crypto.subtle.importKey("raw", bs(fromB64u(sealed.mac)), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-  return { recipient: sealed.recipient, wrap, check: toB64u(await hmac(mac, recoveryData(vaultId, epoch, digest, { recipient: sealed.recipient, wrap }))) };
+  return { recipient: sealed.recipient, wrap, check: toB64u(await hmac(mac, recoveryData(vaultId, epoch, digest, { recipient: sealed.recipient, wrap }, passkey))) };
+}
+
+/** Every passkey wrap of an epoch, from the sealed list. */
+async function passkeyWraps(vaultId: string, epoch: number, digest: string, secret: Uint8Array, sealed: Record<string, { recipient: string; mac: string }> | undefined): Promise<Record<string, RecoveryWrap> | undefined> {
+  if (!sealed || !Object.keys(sealed).length) return undefined;
+  const out: Record<string, RecoveryWrap> = {};
+  for (const [id, s] of Object.entries(sealed)) out[id] = await recoveryWrap(vaultId, epoch, digest, secret, s, id);
+  return out;
 }
 
 /**
@@ -285,20 +308,21 @@ async function recoveryWrap(vaultId: string, epoch: number, digest: string, secr
  * then the age file opens with its identity. RecoveryKeyError when the
  * keyring has no recovery wrap, or it is for another key.
  */
-async function unwrapRecovery(file: KeyringFile, key: Uint8Array): Promise<Uint8Array> {
-  if (!file.recovery) throw new RecoveryKeyError("This vault has no recovery key set up");
-  const rk = await recoveryKeys(key, file.vaultId);
-  if (rk.age.recipient !== file.recovery.recipient) throw new RecoveryKeyError();
+async function unwrapRecovery(file: KeyringFile, key: Uint8Array, passkey: string | null = null): Promise<Uint8Array> {
+  const w = passkey === null ? file.recovery : file.passkeys?.[passkey];
+  if (!w) throw new RecoveryKeyError(passkey === null ? "This vault has no recovery key set up" : "This passkey doesn't open this vault");
+  const rk = await recoveryKeys(key, file.vaultId, passkey === null ? "recovery" : "passkey");
+  if (rk.age.recipient !== w.recipient) throw new RecoveryKeyError(passkey === null ? undefined : "This passkey doesn't open this vault");
   let tag: Uint8Array;
   try {
-    tag = fromB64u(file.recovery.check);
+    tag = fromB64u(w.check);
   } catch {
     throw new TamperedWrapError();
   }
   const mac = await crypto.subtle.importKey("raw", bs(fromB64u(rk.mac)), { name: "HMAC", hash: "SHA-256" }, false, ["verify"]);
-  if (!(await crypto.subtle.verify("HMAC", mac, bs(tag), bs(recoveryData(file.vaultId, file.epoch, await keyringDigest(file), file.recovery))))) throw new TamperedWrapError();
+  if (!(await crypto.subtle.verify("HMAC", mac, bs(tag), bs(recoveryData(file.vaultId, file.epoch, await keyringDigest(file), w, passkey))))) throw new TamperedWrapError();
   try {
-    return await ageDecrypt(fromB64u(file.recovery.wrap), [{ identity: rk.age.identity }]);
+    return await ageDecrypt(fromB64u(w.wrap), [{ identity: rk.age.identity }]);
   } catch {
     throw new TamperedWrapError();
   }
@@ -312,6 +336,7 @@ export async function unwrapSecret(file: KeyringFile, access: KeyAccess): Promis
   if ("wrap" in access) return openWith(access.wrap, file.passphrase, aadFor(file.protocol, file.vaultId, file.epoch, "passphrase"));
   if (!isCurrent(file.protocol)) throw new PreReleaseKeyringError();
   if ("recovery" in access) return unwrapRecovery(file, access.recovery);
+  if ("passkey" in access) return unwrapRecovery(file, access.passkey.prf, access.passkey.id);
   const d = file.devices[access.device];
   // A dropped re-key's marker says "left out", not "removed" (F4). The device
   // can't check it here (it holds no secret yet); E2eeSync checks its MAC.
@@ -392,7 +417,9 @@ function parseContents(bytes: Uint8Array, epoch: number, protocol: number): Keyr
   if (c.carry !== undefined && (!c.carry || !isManifestLabel(c.carry.label) || !Number.isSafeInteger(c.carry.epoch) || typeof c.carry.digest !== "string")) throw new DecryptError("Bad keyring carry");
   if (c.header !== undefined && !isHex64(c.header)) throw new DecryptError("Bad keyring header");
   if (c.aborted !== undefined && (!Array.isArray(c.aborted) || !c.aborted.every((d) => typeof d === "string"))) throw new DecryptError("Bad keyring aborted list");
-  if (c.recovery !== undefined && (protocol < RECOVERY_PROTOCOL || !c.recovery || typeof c.recovery.recipient !== "string" || typeof c.recovery.mac !== "string")) throw new DecryptError("Bad keyring recovery");
+  const unlockerOk = (u: unknown) => !!u && typeof (u as { recipient: unknown }).recipient === "string" && typeof (u as { mac: unknown }).mac === "string";
+  if (c.recovery !== undefined && (protocol < RECOVERY_PROTOCOL || !unlockerOk(c.recovery))) throw new DecryptError("Bad keyring recovery");
+  if (c.passkeys !== undefined && (protocol < RECOVERY_PROTOCOL || !c.passkeys || typeof c.passkeys !== "object" || Array.isArray(c.passkeys) || Object.keys(c.passkeys).length > MAX_PASSKEYS || !Object.values(c.passkeys).every(unlockerOk))) throw new DecryptError("Bad keyring passkeys");
   return c;
 }
 
@@ -422,6 +449,7 @@ function ringInfo(c: KeyringContents, digest: string, preRelease = false): RingI
     enrolled: { ...c.devices },
     revoked: c.revoked.map((r) => ({ device: r.device, ...(r.recipient ? { recipient: r.recipient } : {}) })),
     ...(c.recovery ? { recovery: c.recovery.recipient } : {}),
+    ...(c.passkeys && Object.keys(c.passkeys).length ? { passkeys: Object.keys(c.passkeys).sort() } : {}),
   };
 }
 
@@ -627,6 +655,8 @@ export interface RekeyOptions {
    * wraps the new secret for it again.
    */
   recovery?: { recipient: string; mac: string } | null;
+  /** Passkeys (W11.S10): add these (credential id → recipient and MAC key), remove these ids. The rest are carried over. */
+  passkeys?: { add?: Record<string, { recipient: string; mac: string }>; remove?: string[] };
   now?: () => number;
 }
 
@@ -719,6 +749,16 @@ export async function prepareEpoch(current: ReadKeyring | null, keys: VaultKeys,
     if (fromB64u(recovery.mac).length !== 32) throw new Error("A recovery MAC key has 32 bytes");
     contents.recovery = { recipient: recovery.recipient, mac: recovery.mac };
   }
+  const passkeys: Record<string, { recipient: string; mac: string }> = { ...(preRelease ? {} : (prior?.passkeys ?? {})) };
+  for (const id of opts.passkeys?.remove ?? []) delete passkeys[id];
+  for (const [id, p] of Object.entries(opts.passkeys?.add ?? {})) {
+    parseRecipient(p.recipient);
+    if (!/^[A-Za-z0-9_-]{16,512}$/.test(id)) throw new Error("A passkey id is a base64url WebAuthn credential id");
+    if (fromB64u(p.mac).length !== 32) throw new Error("A passkey MAC key has 32 bytes");
+    passkeys[id] = { recipient: p.recipient, mac: p.mac };
+  }
+  if (Object.keys(passkeys).length > MAX_PASSKEYS) throw new Error(`A vault has at most ${MAX_PASSKEYS} passkeys`);
+  if (Object.keys(passkeys).length) contents.passkeys = passkeys;
   const file: KeyringFile = {
     format: FORMAT,
     protocol: KEYRING_PROTOCOL,
@@ -732,6 +772,8 @@ export async function prepareEpoch(current: ReadKeyring | null, keys: VaultKeys,
   };
   const digest = await keyringDigest(file);
   if (contents.recovery) file.recovery = await recoveryWrap(keys.vaultId, epoch, digest, secret, contents.recovery);
+  const pw = await passkeyWraps(keys.vaultId, epoch, digest, secret, contents.passkeys);
+  if (pw) file.passkeys = pw;
   const bytes = utf8(JSON.stringify(file));
   const olderSecrets = new Map(keys.olderSecrets);
   olderSecrets.set(keys.epoch, keys.secret);
@@ -764,11 +806,15 @@ export async function rewriteKeyring(
   const devices: Record<string, DeviceWrap> = {};
   for (const [id, recipient] of Object.entries(contents.devices)) devices[id] = { recipient, wrap: toB64u(await ageEncrypt(keys.secret, [{ x25519: recipient }])) };
   // The keyring keeps its protocol (its passphrase wrap is bound to it); recovery needs protocol 3, which a re-key writes.
-  if (contents.recovery && f.protocol < RECOVERY_PROTOCOL) throw new Error("Recovery comes with a re-key: this keyring is protocol 2");
+  if ((contents.recovery || contents.passkeys) && f.protocol < RECOVERY_PROTOCOL) throw new Error("Recovery comes with a re-key: this keyring is protocol 2");
   const next: KeyringFile = { ...f, devices, sealed: await sealWith(keys.keyring, utf8(JSON.stringify(contents)), aadFor(f.protocol, f.vaultId, f.epoch, "sealed")) };
   delete next.recovery;
-  // The recovery wrap is made again from the sealed part too, for the new digest.
-  if (contents.recovery) next.recovery = await recoveryWrap(f.vaultId, f.epoch, await keyringDigest(next), keys.secret, contents.recovery);
+  delete next.passkeys;
+  // The recovery and passkey wraps are made again from the sealed part too, for the new digest.
+  const nextDigest = await keyringDigest(next);
+  if (contents.recovery) next.recovery = await recoveryWrap(f.vaultId, f.epoch, nextDigest, keys.secret, contents.recovery);
+  const pw = await passkeyWraps(f.vaultId, f.epoch, nextDigest, keys.secret, contents.passkeys);
+  if (pw) next.passkeys = pw;
   const bytes = utf8(JSON.stringify(next));
   await provider.put(KEYRING_NAME, bytes, { ifMatch: current.etag });
   const out = { ...keys, ring: ringInfo(contents, await keyringDigest(next)) };

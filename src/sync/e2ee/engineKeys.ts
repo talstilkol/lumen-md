@@ -293,6 +293,7 @@ export abstract class E2eeSyncKeys extends E2eeSyncCore {
       dropDevices,
       excludeRecipients: mine.map((r) => r.recipient).filter((r): r is string => !!r),
       ...(opts.recovery !== undefined ? { recovery: opts.recovery } : {}),
+      ...(opts.passkeys ? { passkeys: opts.passkeys } : {}),
       now: this.o.now,
     });
     const keys = prepared.keys;

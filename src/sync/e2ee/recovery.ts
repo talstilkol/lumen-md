@@ -53,8 +53,12 @@ export interface RecoveryKeys {
   mac: string;
 }
 
-/** The keys a recovery key gives for one vault. */
-export async function recoveryKeys(key: Uint8Array, vaultId: string): Promise<RecoveryKeys> {
-  const [x, m] = await Promise.all([derive(key, vaultId, "recovery-x25519"), derive(key, vaultId, "recovery-mac")]);
+/**
+ * The keys a recovery key gives for one vault. `kind` "passkey" (plan
+ * W11.S10): the same derivation from a passkey's 32-byte WebAuthn PRF
+ * output, under its own labels ("passkey-x25519", "passkey-mac").
+ */
+export async function recoveryKeys(key: Uint8Array, vaultId: string, kind: "recovery" | "passkey" = "recovery"): Promise<RecoveryKeys> {
+  const [x, m] = await Promise.all([derive(key, vaultId, `${kind}-x25519`), derive(key, vaultId, `${kind}-mac`)]);
   return { age: await identityFromRaw(x), mac: toB64u(m) };
 }

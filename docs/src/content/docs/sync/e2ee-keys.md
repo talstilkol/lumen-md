@@ -251,6 +251,24 @@ A profile restored this way can't vouch for the device list, so your other
 devices pair again afterwards. Restore on a device you trust: see the spec's
 §5a for what a restore on a fresh profile can and can't check.
 
+## Unlocking with a passkey
+
+Where the browser supports the WebAuthn **PRF** extension, a passkey can
+unlock the vault instead of the passphrase. Lumen asks the browser (with
+`getClientCapabilities`), and shows the option only when the answer is yes.
+
+- **Add one:** Encrypted sync → **Passkeys** → **Add a passkey**. This is a
+  key change, and later key changes keep the passkey.
+- **Unlock:** on the unlock screen, **Unlock with a passkey**. You can pick
+  any of the vault's passkeys, including one your password manager syncs to
+  a new device.
+- **Remove:** **Remove** next to the passkey. This is a key change, so the
+  removed passkey opens nothing written after it.
+
+No password is stored. The passkey gives a 32-byte value only inside a
+confirmation you make on the device. Lumen uses that value the way it uses
+the recovery key, and keeps it in memory only while the vault is open.
+
 ## Removing a lost device
 
 A device can be enrolled with its own key (an age X25519 key pair), so it

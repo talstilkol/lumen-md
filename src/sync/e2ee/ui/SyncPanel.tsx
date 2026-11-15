@@ -15,6 +15,7 @@ import { SyncActivity } from "./SyncActivity";
 import { SyncRulesForm } from "./SyncRulesForm";
 import { PairingCompare } from "./PairingCompare";
 import { RecoveryKitSetup, RecoveryRestore } from "./RecoveryKit";
+import { PasskeySetup, PasskeyUnlockButton } from "./PasskeyUnlock";
 import { e2eeErrorText, e2eeResultNotices } from "./errorText";
 import { syncSession, type SyncSession } from "./session";
 import { ProviderAuthError, ProviderUnreachableError, ProviderUnsupportedError } from "../providers/http";
@@ -435,6 +436,7 @@ function Unlocked({ session }: { session: SyncSession }) {
         </div>
       )}
       {engine && <RecoveryKitSetup engine={engine} />}
+      {engine && <PasskeySetup engine={engine} />}
       {s.settings?.kind === "lan" && s.settings.role === "host" && <LanHostPairing />}
       {s.settings && <Migration session={session} kind={s.settings.kind} />}
     </div>
@@ -493,6 +495,8 @@ export function SyncPanel({ onClose, session = syncSession() }: { onClose: () =>
               <>
                 <div style={muted}>{t(s.vaultExists ? "e2ee.sync.existingVault" : "e2ee.sync.newVault")}</div>
                 {!restoring && <PassphraseForm mode={s.vaultExists ? "unlock" : "create"} onSubmit={async (pass) => void (await session.open(pass))} />}
+                {/* Plan W11.S10: a passkey, only where the browser reports PRF support. */}
+                {s.vaultExists && !restoring && <PasskeyUnlockButton onUnlock={(api) => session.openWithPasskey(api)} />}
                 {/* Plan W11.S9: the passphrase is forgotten; the recovery words open the vault. */}
                 {s.vaultExists && !restoring && (
                   <button type="button" style={{ justifySelf: "start" }} onClick={() => setRestoring(true)}>

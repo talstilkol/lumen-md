@@ -133,29 +133,33 @@ def open_manifest(key, vid, name, data):
 
 # ── A whole vault ──────────────────────────────────────────────────────────
 
-def recovery_secret(ring, key):
-    """Spec §5 (plan W11.S8): the epoch secret through the recovery key alone, or ValueError."""
+def recovery_secret(ring, key, passkey=None):
+    """Spec §5a (plan W11.S8): the epoch secret through the recovery key alone, or ValueError.
+    Spec §5b (plan W11.S10): with `passkey` (a credential id), `key` is that passkey's PRF output."""
     vid, epoch = ring["vaultId"], ring["epoch"]
-    w = ring.get("recovery")
+    w = ring.get("recovery") if passkey is None else (ring.get("passkeys") or {}).get(passkey)
     if ring["protocol"] < RECOVERY_PROTOCOL or not w:
-        raise ValueError("no recovery wrap")
-    x = subkey(key, vid, "recovery-x25519")
-    mac = subkey(key, vid, "recovery-mac")
+        raise ValueError("no recovery wrap" if passkey is None else "no wrap for this passkey")
+    kind = "recovery" if passkey is None else "passkey"
+    x = subkey(key, vid, f"{kind}-x25519")
+    mac = subkey(key, vid, f"{kind}-mac")
     identity = agepy.bech32_encode("age-secret-key-", x).upper()
     recipient = agepy.bech32_encode("age", X25519PrivateKey.from_private_bytes(x).public_key().public_bytes(serialization.Encoding.Raw, serialization.PublicFormat.Raw))
     if recipient != w["recipient"]:
         raise ValueError("the recovery wrap is for another key")
-    check = hmac256(mac, jdump(["lumen-e2ee-recovery/1", vid, epoch, keyring_digest(ring), w["recipient"], w["wrap"]]).encode())
+    label = ["lumen-e2ee-recovery/1", vid, epoch, keyring_digest(ring), w["recipient"], w["wrap"]] if passkey is None else ["lumen-e2ee-passkey/1", vid, epoch, keyring_digest(ring), passkey, w["recipient"], w["wrap"]]
+    check = hmac256(mac, jdump(label).encode())
     if not hmac.compare_digest(check, unb64u(w["check"])):
         raise ValueError("the recovery check doesn't verify: not made by the vault")
     secret = agepy.decrypt(unb64u(w["wrap"]), identity=identity)
     contents = open_contents(ring, secret)
-    if contents.get("recovery") != {"recipient": recipient, "mac": b64u(mac)}:
-        raise ValueError("the sealed part doesn't name this recovery key")
+    sealed = contents.get("recovery") if passkey is None else (contents.get("passkeys") or {}).get(passkey)
+    if sealed != {"recipient": recipient, "mac": b64u(mac)}:
+        raise ValueError("the sealed part doesn't name this key")
     return secret, contents
 
 
-def read_vault(objects, passphrase=None, device=None, recovery=None):
+def read_vault(objects, passphrase=None, device=None, recovery=None, passkey=None):
     """Returns (epoch, files, secret, manifest) at the epoch this passphrase or device opens."""
     header = json.loads(objects["lumen-e2ee-vault"])
     vid = header["vaultId"]
@@ -196,7 +200,7 @@ def read_vault(objects, passphrase=None, device=None, recovery=None):
                 raise ValueError("prev is not this keyring's parent")
     elif recovery is not None:
         epoch = ring["epoch"]
-        secret, contents = recovery_secret(ring, recovery)
+        secret, contents = recovery_secret(ring, recovery, passkey)
     else:
         epoch = ring["epoch"]
         wrap = ring["devices"][device["id"]]
@@ -268,6 +272,16 @@ def main():
                 check(f"{vault['name']}: a wrap the storage made to the public recipient fails the check", False)
             except ValueError:
                 check(f"{vault['name']}: a wrap the storage made to the public recipient fails the check", True)
+        if "passkey" in vault:
+            pk = vault["passkey"]
+            e4, f4, s4, _, _ = read_vault(objects, recovery=bytes.fromhex(pk["prf"]), passkey=pk["id"])
+            _, _, s_pass, _, _ = read_vault(objects, passphrase=vault["passphrase"])
+            check(f"{vault['name']}: the passkey's PRF output alone opens epoch {e4} and every file", e4 == epoch and s4 == s_pass and f4 == vault["expect"]["files"])
+            try:
+                read_vault(objects, recovery=bytes(32), passkey=pk["id"])
+                check(f"{vault['name']}: another PRF output is refused", False)
+            except ValueError:
+                check(f"{vault['name']}: another PRF output is refused", True)
         if "device" in vault:
             e2, f2, _, _, _ = read_vault(objects, device=vault["device"])
             check(f"{vault['name']}: the enrolled device opens it with its own key (age)", e2 == epoch and f2 == vault["expect"]["files"])

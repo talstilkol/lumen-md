@@ -364,5 +364,11 @@
   "e2ee.recovery.words": "The {n} recovery words",
   "e2ee.recovery.verify": "Type three of the words to show they're written down.",
   "e2ee.recovery.verifyWrong": "Not the right word: {n}. Check what you wrote down.",
-  "e2ee.recovery.pdf": "Download the printable kit (PDF)"
+  "e2ee.recovery.pdf": "Download the printable kit (PDF)",
+  "e2ee.passkey.add": "Add a passkey",
+  "e2ee.passkey.title": "Passkeys",
+  "e2ee.passkey.item": "Passkey {n}",
+  "e2ee.passkey.unlock": "Unlock with a passkey",
+  "e2ee.passkey.remove": "Remove",
+  "e2ee.passkey.note": "A passkey on this device (or one your password manager syncs) can unlock the vault instead of the passphrase. Lumen uses the passkey's PRF extension, so no password is stored."
 }
