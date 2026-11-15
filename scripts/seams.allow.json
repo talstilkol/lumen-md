@@ -84,6 +84,12 @@
       "task": "W11.I1",
       "reason": "changing the at-rest password: no UI calls it",
       "expires": "2026-12-15"
+    },
+    "setRenderPortFactory": {
+      "kind": "test-only",
+      "task": "W10.E1",
+      "reason": "the real render handler behind a structured-clone boundary for tests (renderWorker, viewportPreview)",
+      "expires": "2027-05-14"
     }
   }
 }
