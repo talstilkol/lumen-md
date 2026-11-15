@@ -221,6 +221,7 @@
 /src/playground/runner.ts                @talstilkol
 /src/plugins/LiveSvgBlock.tsx            @talstilkol
 /src/renderer/pipeline.ts                @talstilkol
+/src/viewers/NotebookView.tsx            @talstilkol
 /vite.config.ts                          @talstilkol
 
 # ── Agent tools and MCP: what an agent may do, and what reaches it (review 21) ──

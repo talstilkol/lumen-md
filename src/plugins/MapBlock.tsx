@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import YAML from "yaml";
 import { t } from "../i18n";
 import { getLeaflet } from "./map/leaflet";
+import { addBaseTiles } from "./map/tiles";
 
 interface Props {
   source: string;
@@ -97,14 +98,7 @@ export default function MapBlock({ source, lang }: Props) {
         scrollWheelZoom: false,
       });
 
-      L.tileLayer(
-        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        {
-          maxZoom: 19,
-          attribution:
-            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        },
-      ).addTo(mapInstance);
+      addBaseTiles(L, mapInstance);
 
       for (const m of markers) {
         const marker = L.marker([m.lat, m.lng]).addTo(mapInstance);

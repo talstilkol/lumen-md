@@ -65,6 +65,7 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "capture.json": { module: "capture/strings.ts", users: ["capture/quickCapture.ts", "ui/QuickCapture.tsx"], prefixes: ["capture."] },
   "citations.json": { module: "citations/strings.ts", users: ["citations/CiteDialog.tsx", "citations/LegalCiteDialog.tsx", "citations/run.ts", "pdf/zoteroSend.ts"], prefixes: ["cite.", "legalCite."] },
   "epub.json": { module: "epub/strings.ts", users: ["epub/EpubReader.tsx", "epub/ReadingMode.tsx", "epub/openEpub.ts", "highlights/HighlightsPanel.tsx"], prefixes: ["epub.", "reading."] },
+  "fileViewer.json": { module: "viewers/strings.ts", users: ["viewers/FileViewerOverlay.tsx"], prefixes: ["fileViewer."] },
   "fineTune.json": { module: "ui/fineTuneStrings.ts", users: ["ui/FineTuneSettings.tsx"], prefixes: ["fineTune."] },
   "highlightImport.json": { module: "highlights/import/strings.ts", users: ["highlights/import/runImport.ts"], prefixes: ["hlimport."] },
   "highlights.json": { module: "highlights/strings.ts", users: ["highlights/HighlightsPanel.tsx"], prefixes: ["hl."] },

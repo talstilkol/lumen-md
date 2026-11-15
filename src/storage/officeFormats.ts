@@ -275,13 +275,9 @@ function colToIndex(ref: string): number {
  * each worksheet as a Markdown table under a `## SheetName` heading. Formulas
  * render as their cached value; styles/merged cells are not preserved.
  */
-export async function xlsxToMarkdown(file: File): Promise<string> {
-  let files: Map<string, Uint8Array>;
-  try {
-    files = await unzip(await file.arrayBuffer());
-  } catch (err) {
-    return `> ⚠️ Could not read XLSX archive: ${(err as Error).message}`;
-  }
+/** The sheets of an XLSX workbook as rows of cell text (shared and inline strings resolved), in workbook order. */
+export async function xlsxSheets(buffer: ArrayBuffer): Promise<{ name: string; rows: string[][] }[]> {
+  const files = await unzip(buffer);
   const dec = new TextDecoder();
   const parse = (name: string) =>
     files.has(name)
@@ -299,10 +295,7 @@ export async function xlsxToMarkdown(file: File): Promise<string> {
   const sheets = [...files.keys()]
     .filter((n) => /^xl\/worksheets\/sheet\d+\.xml$/.test(n))
     .sort((a, b) => slideNum(a) - slideNum(b));
-  if (!sheets.length) return "> ⚠️ XLSX: no worksheets found.";
-
-  const out: string[] = [];
-  sheets.forEach((name, si) => {
+  return sheets.map((name, si) => {
     const doc = parse(name)!;
     const matrix: string[][] = [];
     for (const row of els(doc, "row")) {
@@ -321,7 +314,22 @@ export async function xlsxToMarkdown(file: File): Promise<string> {
       for (let i = 0; i < arr.length; i++) if (arr[i] === undefined) arr[i] = "";
       matrix.push(arr);
     }
-    if (!matrix.length) return;
+    return { name: names[si] || `Sheet ${si + 1}`, rows: matrix };
+  });
+}
+
+export async function xlsxToMarkdown(file: File): Promise<string> {
+  let sheets: { name: string; rows: string[][] }[];
+  try {
+    sheets = await xlsxSheets(await file.arrayBuffer());
+  } catch (err) {
+    return `> ⚠️ Could not read XLSX archive: ${(err as Error).message}`;
+  }
+  if (!sheets.length) return "> ⚠️ XLSX: no worksheets found.";
+
+  const out: string[] = [];
+  for (const { name, rows: matrix } of sheets) {
+    if (!matrix.length) continue;
     const cols = Math.max(...matrix.map((r) => r.length));
     const pad = (r: string[]) => {
       const c = [...r];
@@ -331,14 +339,14 @@ export async function xlsxToMarkdown(file: File): Promise<string> {
     const header = pad(matrix[0]);
     out.push(
       [
-        `## ${names[si] || `Sheet ${si + 1}`}`,
+        `## ${name}`,
         "",
         "| " + header.join(" | ") + " |",
         "| " + header.map(() => "---").join(" | ") + " |",
         ...matrix.slice(1).map((r) => "| " + pad(r).join(" | ") + " |"),
       ].join("\n"),
     );
-  });
+  }
   return out.join("\n\n") || "> ⚠️ XLSX contained no data.";
 }
 
