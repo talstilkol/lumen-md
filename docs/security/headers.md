@@ -154,6 +154,32 @@ These are written in `policy.json` under `hosts`.
 | nginx | COOP `same-origin`, COEP `credentialless` | cross-origin isolation (D9). COEP goes on every document and worker it serves. Since 13.2 this is the compose bundle's image too; keeping it is decision 15.10(7) |
 | Netlify | runner pages and the content frame: `X-Frame-Options` dropped, CSP replaced, by `netlify/edge-functions/runner-headers.ts` | Netlify's `_headers` cannot detach the catch-all rules (13.2); the function's policy strings are a `headers.mjs` source |
 
+## Narrowing the `default` Trusted Types policy (plan W11.S17)
+
+The `default` policy exists so that third-party libraries (mermaid, the
+canvas, ProseMirror, model-viewer) keep working when they hand a plain string
+to a sink: it sanitizes that string with a broad DOMPurify profile. That also
+hides sinks that should be explicit. The plan is to remove `default` from
+`trusted-types`, in three steps:
+
+1. **Record every hit.** `src/lib/trustedTypes.ts` records each sink that
+   reaches the `default` policy, where it came from (the first stack frame
+   outside the module) and how often (`defaultPolicyHits()`,
+   `window.__lumenTrustedTypesDefaultHits`). The policy still returns what
+   it returned before.
+
+   The research suggested a Report-Only header without `default`. It would
+   report only the creation of the `default` policy: while the enforced header
+   lists `default`, the browser converts each string before the Report-Only
+   policy sees a sink. So the record lives in the policy itself.
+2. **Make each hit explicit.** Each sink the record lists becomes a `lumen`
+   or `dompurify` call. `safeSetHtml` already uses the HTML Sanitizer API's
+   `Element.setHTML` where the browser has it, after DOMPurify, so that path
+   reaches no policy at all.
+3. **Remove `default`** from the app route's `trusted-types` in
+   `security/policy.json`, once `e2e/trusted-types-default.spec.ts` ends a
+   full run against a production build with no hits.
+
 ## Images in notes and WebSockets (plan 2.2)
 
 **Images from other sites.** A static policy cannot hold one user's choices, so the
