@@ -379,6 +379,11 @@
       ]
     },
     {
+      "key": "toast.nikud.lexicon",
+      "en": "Niqqud on nouns or verbs only needs the offline Hebrew dictionary: download it in “Hebrew dictionary and synonyms (download / remove)”. Nothing was changed.",
+      "vars": []
+    },
+    {
       "key": "toast.nikud.noHost",
       "en": "The niqqud model is not available to download yet (its host is not set up).",
       "vars": []

@@ -63,6 +63,7 @@
   "toast.nikud.done": "Niqqud auf diesem Gerät hinzugefügt. Unterstrichene Wörter lassen sich mehrfach lesen: Klicken Sie eines an, um die Lesarten zu sehen (Alt+Klick auf jedes Wort).",
   "toast.nikud.doneHigh": "Niqqud auf diesem Gerät mit DictaBERT-char-menaked (hohe Qualität) hinzugefügt. Unterstrichene Wörter lassen sich mehrfach lesen: Klicken Sie eines an.",
   "toast.nikud.failed": "Niqqud fehlgeschlagen: {error}",
+  "toast.nikud.lexicon": "Niqqud nur für Nomen oder Verben braucht das hebräische Offline-Wörterbuch: Laden Sie es unter “Hebräisches Wörterbuch und Synonyme (herunterladen / entfernen)” herunter. Nichts wurde geändert.",
   "toast.nikud.noHost": "Das Niqqud-Modell ist noch nicht herunterladbar (sein Hosting ist nicht eingerichtet).",
   "toast.nikud.nothing": "Kein hebräischer Text zum Ändern.",
   "toast.nikud.working": "Niqqud wird auf diesem Gerät hinzugefügt…",

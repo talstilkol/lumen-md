@@ -2,6 +2,7 @@
   "toast.nikud.working": "Adding niqqud on this device…",
   "toast.nikud.nothing": "No Hebrew text to change.",
   "toast.nikud.noHost": "The niqqud model is not available to download yet (its host is not set up).",
+  "toast.nikud.lexicon": "Niqqud on nouns or verbs only needs the offline Hebrew dictionary: download it in “Hebrew dictionary and synonyms (download / remove)”. Nothing was changed.",
   "toast.nikud.declined": "Niqqud needs the model download; nothing was changed.",
   "toast.nikud.failed": "Niqqud failed: {error}",
   "models.purpose.nikud": "Hebrew niqqud (vowel points) on this device",
