@@ -10,7 +10,7 @@
  *   `update(u: ViewUpdate)` that wants to dispatch synchronously.
  */
 import { screenReaderAnnouncements } from "./srAnnouncements";
-import { readyToReveal } from "./revealLine";
+import { readyToReveal, revealSelection } from "./revealLine";
 import { useEffect, useImperativeHandle, useRef, useState, forwardRef } from "react";
 import { Compartment, EditorState } from "@codemirror/state";
 import { lineSeparatorFor } from "./lineEndings";
@@ -833,7 +833,8 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
   useEffect(() => {
     function onReveal(e: Event) {
       // `select: false` (a tap on reading view, W1.25) puts the cursor at the line's end instead of selecting it.
-      const detail = (e as CustomEvent<{ line: number; content?: string; select?: boolean }>).detail;
+      // `endLine` (W12.A1, a cited paragraph) selects through the end of that line.
+      const detail = (e as CustomEvent<{ line: number; endLine?: number; content?: string; select?: boolean }>).detail;
       const line = detail?.line;
       if (!line || line < 1) return;
       let tries = 0;
@@ -847,7 +848,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
           return;
         }
         const l = view.state.doc.line(line);
-        view.dispatch({ selection: detail.select === false ? { anchor: l.to } : { anchor: l.from, head: l.to }, effects: EditorView.scrollIntoView(l.from, { y: "center" }) });
+        view.dispatch({ selection: revealSelection(view.state.doc, line, detail.endLine, detail.select !== false), effects: EditorView.scrollIntoView(l.from, { y: "center" }) });
         view.focus();
       };
       go();
