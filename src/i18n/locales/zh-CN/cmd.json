@@ -84,6 +84,8 @@
   "cmd.app.checkUpdates.hint": "桌面版：向发布服务器询问是否有更新的已签名版本",
   "cmd.app.featureFlags": "功能开关…",
   "cmd.app.featureFlags.hint": "在这台设备上开启或关闭测试功能",
+  "cmd.app.install": "将 Lumen 安装为应用…",
+  "cmd.app.install.hint": "独立的窗口和图标；可离线使用",
   "cmd.app.updateChannel": "更新渠道：在稳定版和测试版之间切换",
   "cmd.app.updateChannel.hint": "测试版先获得新功能；稳定版获得经过测试的版本",
   "cmd.arabic.removeTashkeel": "删除阿拉伯语元音符号(所选内容或笔记)",

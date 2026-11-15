@@ -742,6 +742,13 @@
       "icon": "Save"
     },
     {
+      "id": "app.install",
+      "label": "Install Lumen as an app…",
+      "group": "File",
+      "hint": "Its own window and icon; works offline",
+      "icon": "Save"
+    },
+    {
       "id": "vault.importUndo",
       "label": "Undo the last import",
       "group": "File",
@@ -2780,6 +2787,13 @@
       "icon": "Save"
     },
     {
+      "id": "app.install",
+      "label": "Install Lumen as an app…",
+      "group": "File",
+      "hint": "Its own window and icon; works offline",
+      "icon": "Save"
+    },
+    {
       "id": "vault.importUndo",
       "label": "Undo the last import",
       "group": "File",
@@ -4275,6 +4289,7 @@
     "vault.backups",
     "vault.export",
     "vault.import",
+    "app.install",
     "vault.importUndo",
     "vault.importChat",
     "vault.importMail",

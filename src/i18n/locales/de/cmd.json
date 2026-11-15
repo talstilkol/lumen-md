@@ -84,6 +84,8 @@
   "cmd.app.checkUpdates.hint": "Desktop-App: fragt den Release-Server nach einer neueren, signierten Version",
   "cmd.app.featureFlags": "Feature-Flags…",
   "cmd.app.featureFlags.hint": "Beta-Funktionen auf diesem Gerät ein- oder ausschalten",
+  "cmd.app.install": "Lumen als App installieren…",
+  "cmd.app.install.hint": "Eigenes Fenster und Symbol; funktioniert offline",
   "cmd.app.updateChannel": "Update-Kanal: zwischen stabil und Beta wechseln",
   "cmd.app.updateChannel.hint": "Beta bekommt neue Funktionen zuerst; stabil bekommt getestete Versionen",
   "cmd.arabic.removeTashkeel": "Arabische Vokalzeichen entfernen (Auswahl oder Notiz)",

@@ -347,6 +347,8 @@ export default defineConfig({
       // linked from index.html, pointing at icons that did not exist and
       // disagreeing on the colours; its share/file handlers live here now.)
       manifest: {
+        // Plan W11.P13: navigator.install() needs an id. "/" is what browsers compute from start_url anyway, so installed apps keep theirs.
+        id: "/",
         name: "Lumen — Markdown, illuminated",
         short_name: "Lumen",
         description:
