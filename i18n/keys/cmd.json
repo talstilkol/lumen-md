@@ -1950,6 +1950,16 @@
       "vars": []
     },
     {
+      "key": "cmd.sources.havruta",
+      "en": "Study with a partner (havruta)…",
+      "vars": []
+    },
+    {
+      "key": "cmd.sources.havruta.hint",
+      "en": "A shared, encrypted study room on this reference: notes and highlights travel, the text stays on each device",
+      "vars": []
+    },
+    {
       "key": "cmd.sources.insert",
       "en": "Insert a source from Sefaria…",
       "vars": []

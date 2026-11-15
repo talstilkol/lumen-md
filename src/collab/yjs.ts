@@ -239,6 +239,18 @@ function configuredWebsocketUrl(): string | null {
 }
 
 /**
+ * W12.H1: the persistent server a study room (src/havruta) syncs through —
+ * the configured one, and only when the plan includes it, as for a shared
+ * note. null: no relay (the session stays on this device until one is set).
+ */
+export async function persistentCollabUrl(): Promise<string | null> {
+  const url = configuredWebsocketUrl();
+  if (!url) return null;
+  if (!entitlementResolved()) await waitForEntitlement(PERSISTENT_SYNC_TIMEOUT_MS);
+  return effectiveCapabilities().persistentCollab ? url : null;
+}
+
+/**
  * Best-effort attach of the persistent collab provider (Hocuspocus, plan
  * 3.6) in the background. The provider package is dynamically imported so
  * a session without a server never pays its bundle cost. Failures are

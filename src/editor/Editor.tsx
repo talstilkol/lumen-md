@@ -37,6 +37,7 @@ import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { bidiExtension } from "./bidi";
 import { hebrewTypographyExtension } from "./hebrewTypographyExtension";
 import { bidiMarksExtension } from "./bidiMarks";
+import { sefariaRefTrigger } from "./refTrigger";
 import { mathBidiExtension } from "./mathBidi";
 import { languages } from "@codemirror/language-data";
 import { tags as t } from "@lezer/highlight";
@@ -317,8 +318,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
         // completion UI now on (for `[[` links) it would pop up on every `<`.
         completeHTMLTags: false,
       }),
-      // `[[` → notes, `[[Note#` → headings, `[[Note#^` → blocks (4.5); the
-      // source itself loads on the first `[[`.
+      // `[[` → notes, `[[Note#` → headings, `[[Note#^` → blocks (4.5); the source itself loads on the first `[[`.
       wikiLinkAutocomplete(),
       // Hover over [[Note]] previews it (4.6).
       wikiHover,
@@ -328,11 +328,11 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       // Hebrew typography as you type: ״ ׳ „” ־ – (plan W2.9).
       hebrewTypographyExtension(),
       bidiMarksExtension(),
+      sefariaRefTrigger(), // W5.1: a typed source reference offers its text; nothing is sent before Insert
       // W5.14 — inline formulas as LTR isolates, Ctrl/⌘+M, Hebrew layout inside math.
       mathBidiExtension(),
-      // Accessible name for the contenteditable (role=textbox) surface —
-      // without it, screen readers announce an unnamed input (axe:
-      // aria-input-field-name).
+      // Accessible name for the contenteditable (role=textbox) surface — without it,
+      // screen readers announce an unnamed input (axe: aria-input-field-name).
       // tabindex makes the content explicitly focusable, so its scroller counts as keyboard-reachable (axe scrollable-region-focusable, plan 10.1).
       EditorView.contentAttributes.of({ "aria-label": i18nT("editor.ariaLabel"), tabindex: "0" }),
       // Spoken structure of the line the cursor lands on (plan W1.23).
