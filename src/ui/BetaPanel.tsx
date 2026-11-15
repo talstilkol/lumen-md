@@ -24,6 +24,7 @@ import { getAiPolicy } from "../ai/policy";
 import { recordUserShare } from "../ai/privacyLedger";
 import { useToastStore } from "../store/useToastStore";
 import { HelpButton } from "./HelpButton";
+import { Modal } from "./Modal";
 
 export interface BetaOptions {
   /** Every command id of the app: the report names only these. */
@@ -98,8 +99,8 @@ function BetaPanel({ options, onClose }: { options: BetaOptions; onClose: () => 
   };
 
   return (
-    <div className="cmd-palette-backdrop" onKeyDown={(e) => e.key === "Escape" && onClose()}>
-      <div className="cmd-palette" role="dialog" aria-modal="true" aria-label={t("beta.title")} data-testid="beta-panel" style={{ maxWidth: 560, padding: 0, display: "flex", flexDirection: "column", maxHeight: "88vh" }}>
+    <Modal aria-label={t("beta.title")} className="cmd-palette-backdrop" onKeyDown={(e) => e.key === "Escape" && onClose()}>
+      <div className="cmd-palette" data-testid="beta-panel" style={{ maxWidth: 560, padding: 0, display: "flex", flexDirection: "column", maxHeight: "88vh" }}>
         <header style={{ padding: "14px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <FlaskConical size={18} style={{ color: "hsl(var(--accent))" }} />
           <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600, flex: 1 }}>{t("beta.title")}</h2>
@@ -192,7 +193,7 @@ function BetaPanel({ options, onClose }: { options: BetaOptions; onClose: () => 
           )}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

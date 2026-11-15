@@ -13,7 +13,6 @@
  */
 
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { useFocusTrap } from "./useFocusTrap";
 import { Loader2, Sparkles, ShieldOff, Brain } from "lucide-react";
 import { useAppStore } from "../store/useStore";
 import { showAiToast } from "./AiToast";
@@ -28,6 +27,7 @@ import "../ai/localLoraStrings";
 const LocalLoraSection = lazy(() => import("./LocalLoraSection").then((m) => ({ default: m.LocalLoraSection })));
 import { explainError } from "../lib/userError";
 import { HelpButton } from "./HelpButton";
+import { Modal } from "./Modal";
 
 interface Props {
   open: boolean;
@@ -172,19 +172,13 @@ export function FineTuneSettings({ open, onClose, embedded = false }: Props) {
     showAiToast(t("fineTune.toast.forgot"), "info");
   }, [setFineTunedModelId, toggleFineTunedModel, useFineTunedModel]);
 
-  // Focus stays in the dialog while it is open and returns on close; Escape closes it (plan 10.1).
-  const trapRef = useRef<HTMLDivElement | null>(null);
-  useFocusTrap(trapRef, { active: open && !embedded, onEscape: onClose });
-
   if (!open) return null;
 
   return (
-    <div
+    <Modal
+      embedded={embedded} onClose={onClose}
       className={embedded ? undefined : "cmd-palette-backdrop"}
       onClick={embedded ? undefined : onClose}
-      ref={trapRef}
-      role={embedded ? "region" : "dialog"}
-      aria-modal={embedded ? undefined : "true"}
       aria-label={t("fineTune.title")}
     >
       <div
@@ -350,6 +344,6 @@ export function FineTuneSettings({ open, onClose, embedded = false }: Props) {
           </p>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

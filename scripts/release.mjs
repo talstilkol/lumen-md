@@ -28,6 +28,7 @@
  *                                                  its latest.json — and a stable one's, when newer — also goes
  *                                                  to the rolling "beta-channel" release the beta updater reads.
  *   node scripts/release.mjs deploy-beta           the beta web app: a Vercel preview deployment of dist/,
+ *                                                  checked with live:meta on its URL (W10.C29) before any alias,
  *                                                  aliased to $LUMEN_BETA_HOST when set (stable stays on --prod)
  *   node scripts/release.mjs verify [dir]          check SHA256SUMS (and its signature) in release/ or dir
  *   node scripts/release.mjs rollback <bad> [--to <good>]
@@ -50,9 +51,12 @@ import { bumpManifests, changelogSection, insertChangelog, nextVersion, parseCom
 import { LOCALES, UNTRANSLATED, addUntranslated } from "./lib/whats-new.mjs";
 import { betaFlags } from "./lib/flags.mjs";
 import { latestJson } from "./lib/tauriSigning.mjs";
+import { publishRefusals } from "./lib/releaseRun.mjs";
 import { allPackages, flatpakManifest, packagingMeta, parseSums, wingetObjects } from "./lib/packaging.mjs";
 import { checkAur, checkCask, checkFlatpak, checkWinget } from "./lib/packagingCheck.mjs";
 import { createHash } from "node:crypto";
+import { deploymentUrlFrom } from "./lib/liveMeta.mjs";
+import { liveMetaAlert, liveMetaReport } from "./live-meta.mjs";
 
 const ROOT = process.cwd();
 const OUT = path.join(ROOT, "release");
@@ -236,6 +240,10 @@ const commands = {
   },
 
   publish() {
+    // Plan W6.43 / W10.E68: never a release whose app carries the placeholder (or test) updater key.
+    const pubkey = (process.env.LUMEN_UPDATER_PUBKEY ?? "").trim() || (existsSync(path.join(ROOT, "security/updater-key.pub")) ? read("security/updater-key.pub").trim() : JSON.parse(read("src-tauri/tauri.conf.json")).plugins?.updater?.pubkey);
+    const refusals = publishRefusals({ pubkey, files: existsSync(OUT) ? readdirSync(OUT) : [] });
+    if (refusals.length) throw new Error(`refusing to publish:\n  - ${refusals.join("\n  - ")}`);
     const version = current();
     const tag = tagOf(version);
     const at = git("rev-list", "-n", "1", tag);
@@ -252,16 +260,30 @@ const commands = {
     if (!flag("--draft") && existsSync(path.join(OUT, "latest.json"))) updateBetaChannel(version);
   },
 
-  "deploy-beta"() {
+  async "deploy-beta"() {
     // The beta web app (plan 14.4): a separate deployment from the same build pipeline, never production.
     if (!isBeta(current())) throw new Error(`${current()} is not a beta: run \`release.mjs prepare --beta\` first`);
     if (!existsSync(path.join(ROOT, "dist", "index.html"))) throw new Error("no dist/: run `node scripts/release.mjs build` first");
     const out = execFileSync("npx", ["vercel", "deploy", "dist", "--yes"], { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "inherit"] }).trim();
-    const url = out.split("\n").pop();
+    const url = deploymentUrlFrom(out) ?? out.split("\n").pop();
     console.log(`beta deployed: ${url}`);
+    // Audit W10.C29: every deploy checks the deployed metadata (live:meta) before it gets an alias.
+    const meta = await liveMetaReport({ url, selfTest: false });
+    console.log(meta.lines.join("\n"));
+    if (!meta.ok) {
+      console.error(liveMetaAlert(url, meta.problems));
+      throw new Error(`live:meta failed on ${url}: the beta keeps no alias`);
+    }
     const host = (process.env.LUMEN_BETA_HOST ?? "").trim();
-    if (host) run("npx", ["vercel", "alias", "set", url, host]);
-    else warn("LUMEN_BETA_HOST not set — the beta is only at its deployment URL");
+    if (host) {
+      run("npx", ["vercel", "alias", "set", url, host]);
+      const aliased = await liveMetaReport({ url: `https://${host.replace(/^https?:\/\//, "").replace(/\/+$/, "")}`, selfTest: false });
+      console.log(aliased.lines.join("\n"));
+      if (!aliased.ok) {
+        console.error(liveMetaAlert(host, aliased.problems));
+        throw new Error(`live:meta failed on ${host}`);
+      }
+    } else warn("LUMEN_BETA_HOST not set — the beta is only at its deployment URL");
   },
 
   verify() {
@@ -347,7 +369,7 @@ if (!commands[cmd]) {
   process.exit(2);
 }
 try {
-  commands[cmd]();
+  await commands[cmd]();
 } catch (e) {
   console.error(`release: ${e.message}`);
   process.exit(1);

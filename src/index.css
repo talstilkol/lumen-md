@@ -2186,3 +2186,29 @@
 .cm-sugg-ai::after { content: "AI"; font-size: 0.65em; vertical-align: super; color: hsl(280 60% 45%); margin-inline-start: 1px; }
 .version-diff ins { text-decoration: none; background: hsl(140 60% 45% / 0.2); }
 .version-diff del { background: hsl(0 80% 60% / 0.18); }
+
+/*
+ * The modal dialog primitive (src/ui/Modal.tsx, plan 10.1): a native
+ * <dialog> opened with showModal(), in the top layer. The browser's own
+ * dialog look (border, padding, a centred box) is reset with zero
+ * specificity, so each dialog's own class (.cmd-palette-backdrop, …) styles
+ * it as before; the browser's ::backdrop stays clear — the dialogs draw
+ * their own.
+ */
+:where(dialog.lumen-modal) {
+  position: fixed;
+  inset: 0;
+  inline-size: auto;
+  block-size: auto;
+  max-inline-size: none;
+  max-block-size: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  overflow: visible;
+}
+dialog.lumen-modal::backdrop {
+  background: transparent;
+}

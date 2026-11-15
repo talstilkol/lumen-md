@@ -25,6 +25,7 @@ import * as Y from "yjs";
 import * as encoding from "lib0/encoding";
 import * as decoding from "lib0/decoding";
 import { Awareness, applyAwarenessUpdate, encodeAwarenessUpdate, removeAwarenessStates } from "y-protocols/awareness";
+import { createRoomMeter } from "./roomSize.mjs";
 
 export const E2E_ARRAY = "e2e";
 
@@ -95,12 +96,28 @@ function structAt(structs, clock) {
  * has stays valid; only what the update adds is new.
  */
 export function checkE2eeUpdate(doc, update) {
+  // Review of train 5 (H2): whatever a crafted update makes the reasoning below do, it is refused, never thrown.
+  try {
+    return checkStructs(doc, update);
+  } catch {
+    return "malformed";
+  }
+}
+
+function checkStructs(doc, update) {
   let decoded;
   try {
     decoded = Y.decodeUpdate(update);
   } catch {
     return "malformed";
   }
+  // Review of train 5 (H1): Yjs integrates only the last block of a client named in two
+  // blocks (readClientsStructRefs), while decodeUpdate yields both, so the check would
+  // reason about structs Yjs drops. Yjs never writes such an update: refuse it.
+  const blocks = decoding.readVarUint(decoding.createDecoder(update));
+  if (blocks !== new Set(decoded.structs.map((s) => s.id.client)).size) return "malformed";
+  // Nor a struct of no length: it would sit in the room's store without moving its state.
+  if (decoded.structs.some((s) => !(s.length > 0))) return "malformed";
   const store = doc.store;
   /** The update's structs per client, in clock order (as Yjs writes them). */
   const own = new Map();
@@ -145,17 +162,25 @@ export function checkE2eeUpdate(doc, update) {
     if (doc.share.get(E2E_ARRAY) !== parent) return "other";
     return struct.parentSub === null ? "e2e" : "other";
   };
+  // What the room already has of a client wins: Yjs skips the update's structs for those
+  // clocks (and the known part of a struct that reaches past them), so an id the room has
+  // means the room's struct, whatever the update says is there (review of train 5).
   const find = (id) => {
     if (!id) return null;
+    if (id.clock < Y.getState(store, id.client)) {
+      const theirs = structAt(store.clients.get(id.client), id.clock);
+      return theirs ? { theirs } : { missing: true };
+    }
     const mine = structAt(own.get(id.client), id.clock);
-    if (mine && !(mine instanceof Y.Skip)) return { mine };
-    if (id.clock >= Y.getState(store, id.client)) return { missing: true };
-    const theirs = structAt(store.clients.get(id.client), id.clock);
-    return theirs ? { theirs } : { missing: true };
+    return mine && !(mine instanceof Y.Skip) ? { mine } : { missing: true };
   };
+  /** The clocks of `struct` the room already has (Yjs integrates only the rest, after the room's last one). */
+  const knownOf = (struct) => Math.max(0, Y.getState(store, struct.id.client) - struct.id.clock);
   const placeOf = (start) => {
-    // Iterative: an update of many inserts is a chain of origins.
+    // Iterative, origins and parents alike: an update of many inserts is a chain of origins.
+    // `chain` holds the items walked, each with whether the walk then went up to its parent type.
     const chain = [];
+    const seen = new Set();
     let item = start;
     let place;
     for (;;) {
@@ -165,6 +190,17 @@ export function checkE2eeUpdate(doc, update) {
       }
       if (item instanceof Y.GC) {
         place = "gc";
+        break;
+      }
+      // An origin or parent that leads back to an item of this walk (itself, a cycle): no real update does that (H2).
+      if (seen.has(item)) throw new Error("cycle");
+      seen.add(item);
+      // Partly known: Yjs integrates the rest with the room's last struct of the client as its
+      // origin, and drops it when that struct is a GC (Item.getMissing with an offset).
+      const offset = knownOf(item);
+      const lastKnown = offset > 0 ? structAt(store.clients.get(item.id.client), item.id.clock + offset - 1) : null;
+      if (offset > 0 && (!lastKnown || lastKnown instanceof Y.GC)) {
+        place = lastKnown ? "gc" : "missing";
         break;
       }
       if (typeof item.parent === "string") {
@@ -177,12 +213,13 @@ export function checkE2eeUpdate(doc, update) {
         if (!up || up.missing) place = "missing";
         else if (up.theirs) place = roomPlace(up.theirs) === "e2e" ? "nested" : up.theirs instanceof Y.GC ? "gc" : "other";
         else {
-          const at = placeOf(up.mine);
-          place = at === "e2e" || at === "nested" ? "nested" : at;
+          chain.push({ item, up: true });
+          item = up.mine;
+          continue;
         }
         break;
       }
-      const left = find(item.origin);
+      const left = offset > 0 ? { theirs: lastKnown } : find(item.origin);
       const right = find(item.rightOrigin);
       if (left?.missing || right?.missing) {
         place = "missing";
@@ -203,17 +240,29 @@ export function checkE2eeUpdate(doc, update) {
         place = r ?? "missing";
         break;
       }
-      chain.push(item);
+      chain.push({ item, up: false });
       item = next;
     }
     memo.set(item, place);
-    for (const c of chain) memo.set(c, place);
+    for (let i = chain.length - 1; i >= 0; i--) {
+      // Inside a type that sits in the array (or deeper) is "nested".
+      if (chain[i].up && (place === "e2e" || place === "nested")) place = "nested";
+      memo.set(chain[i].item, place);
+    }
     return place;
   };
 
   let notEnvelope = false;
   for (const s of decoded.structs) {
     if (!(s instanceof Y.Item)) continue; // GC and Skip carry no content
+    // Yjs resolves the references of every struct, known or not (Item.getMissing): one that is
+    // missing parks the update, and one to the struct itself or later in its own client throws.
+    for (const ref of [s.origin, s.rightOrigin, s.parent instanceof Y.ID ? s.parent : null]) {
+      if (!ref) continue;
+      if (ref.client === s.id.client && ref.clock >= s.id.clock) return "malformed";
+      if (find(ref)?.missing) return "incomplete";
+    }
+    if (knownOf(s) >= s.length) continue; // the room has all of it: Yjs integrates none of it
     const place = placeOf(s);
     if (place === "missing") return "incomplete";
     if (place === "gc") continue; // Yjs keeps none of it
@@ -274,13 +323,28 @@ export function createRelayRoom({ name, state = null, authorize, onChange = () =
   awareness.setLocalState(null); // the server is not a participant
   const peers = new Set();
   let bytes = state ? state.byteLength : 0;
+  // The exact size again after each update, at the cost of what the update touched (roomSize.mjs).
+  const meter = createRoomMeter(doc);
+  if (state) meter.measure(); // why: the stored room's structs are counted at load, not in its first message
+
+  // Review of train 5 (H1, second line): the check refuses updates Yjs would park. Should one
+  // get through anyway, what it left pending is dropped and its sender closed: a room never
+  // holds structs or deletions it could not check (the probe check refused them as "incomplete").
+  let dropped = false;
+  const dropPending = () => {
+    if (doc.store.pendingStructs === null && doc.store.pendingDs === null) return;
+    doc.store.pendingStructs = null;
+    doc.store.pendingDs = null;
+    dropped = true;
+  };
 
   doc.on("update", (update, origin) => {
+    dropPending(); // before the size: what is dropped is not the room's
     for (const p of peers) if (p !== origin && p.ready) p.socket.send(frame(p.address, MessageType.Sync, (e) => {
       encoding.writeVarUint(e, SyncUpdate);
       encoding.writeVarUint8Array(e, update);
     }));
-    bytes = Y.encodeStateAsUpdate(doc).byteLength;
+    bytes = meter.measure(); // = Y.encodeStateAsUpdate(doc).byteLength
     onChange(doc, origin); // origin: the peer whose update it was (its socket), or null
   });
   awareness.on("update", ({ added, updated, removed }, origin) => {
@@ -306,10 +370,19 @@ export function createRelayRoom({ name, state = null, authorize, onChange = () =
       peer.socket.close(Close.TooLarge.code, Close.TooLarge.reason);
       return false;
     }
+    dropped = false;
     try {
       Y.applyUpdate(doc, update, peer);
     } catch {
+      dropPending();
       peer.socket.close(Close.Forbidden.code, "e2ee-only: malformed");
+      return false;
+    }
+    dropPending(); // an update that integrated nothing emits no "update" event
+    if (dropped) {
+      peer.socket.send(frame(peer.address, MessageType.SyncStatus, (e) => encoding.writeVarUint(e, 0)));
+      peer.socket.send(frame(peer.address, MessageType.CLOSE, (e) => encoding.writeVarString(e, "e2ee-only: incomplete")));
+      peer.socket.close(Close.Forbidden.code, "e2ee-only: incomplete");
       return false;
     }
     peer.socket.send(frame(peer.address, MessageType.SyncStatus, (e) => encoding.writeVarUint(e, 1)));

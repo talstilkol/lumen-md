@@ -16,8 +16,7 @@
  * Reachable from the command palette (`settings.organization`).
  */
 
-import { useCallback, useEffect, useState, useRef } from "react";
-import { useFocusTrap } from "./useFocusTrap";
+import { useCallback, useEffect, useState } from "react";
 import { Building2, X, Plus, Trash2, ShieldCheck, Users, ScrollText } from "lucide-react";
 import { useAuth } from "../auth/useAuth";
 import { isWorkosEnabled } from "../auth/workosProvider";
@@ -30,6 +29,7 @@ import { UpgradeNotice } from "./UpgradeNotice";
 import { t } from "../i18n";
 import { HelpButton } from "./HelpButton";
 import "./orgSettingsStrings";
+import { Modal } from "./Modal";
 
 interface Props {
   open: boolean;
@@ -62,7 +62,6 @@ export function OrgSettings({ open, onClose, onOpenAuditLog, embedded = false }:
     setDirty(false);
   }, [open]);
 
-
   const addDomain = useCallback(() => {
     const d = normalizeDomain(domainDraft);
     if (!d) {
@@ -92,10 +91,6 @@ export function OrgSettings({ open, onClose, onOpenAuditLog, embedded = false }:
     [settings],
   );
 
-  // Focus stays in the dialog while it is open and returns on close; Escape closes it (plan 10.1).
-  const trapRef = useRef<HTMLDivElement | null>(null);
-  useFocusTrap(trapRef, { active: open && !embedded, onEscape: onClose });
-
   if (!open) return null;
 
   const ssoConfigured = isWorkosEnabled();
@@ -109,13 +104,9 @@ export function OrgSettings({ open, onClose, onOpenAuditLog, embedded = false }:
   });
 
   return (
-    <div className={embedded ? undefined : "cmd-palette-backdrop"} onClick={embedded ? undefined : onClose}>
+    <Modal aria-labelledby="org-settings-title" embedded={embedded} onClose={onClose} className={embedded ? undefined : "cmd-palette-backdrop"} onClick={embedded ? undefined : onClose}>
       <div
         className={embedded ? undefined : "cmd-palette"}
-        ref={trapRef}
-        role={embedded ? "region" : "dialog"}
-        aria-modal={embedded ? undefined : "true"}
-        aria-labelledby="org-settings-title"
         onClick={(e) => e.stopPropagation()}
         style={embedded ? { display: "flex", flexDirection: "column" } : { maxWidth: 640, maxHeight: "85vh", display: "flex", flexDirection: "column" }}
       >
@@ -301,7 +292,7 @@ export function OrgSettings({ open, onClose, onOpenAuditLog, embedded = false }:
           )}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

@@ -19,6 +19,7 @@ import type { StagedChange } from "../agents/types";
 import "./agentReviewPanelStrings";
 import { HelpButton } from "./HelpButton";
 import { EmptyState, learnHow } from "./EmptyState";
+import { Modal } from "./Modal";
 
 interface Props {
   open: boolean;
@@ -213,7 +214,7 @@ export function AgentReviewPanel({ open, onClose }: Props) {
   const pendingChanges = model.pending.flatMap((g) => g.changes);
 
   return (
-    <div className="cmd-palette-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-label={t("agentReview.title")} data-testid="agent-review-panel">
+    <Modal className="cmd-palette-backdrop" onClick={onClose} aria-label={t("agentReview.title")} data-testid="agent-review-panel">
       <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 720, padding: 0, display: "flex", flexDirection: "column", maxHeight: "85vh" }}>
         <header style={{ padding: "14px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <FileDiff size={18} style={{ color: "hsl(var(--accent))" }} />
@@ -265,6 +266,6 @@ export function AgentReviewPanel({ open, onClose }: Props) {
           )}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

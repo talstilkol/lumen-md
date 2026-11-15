@@ -7,6 +7,6 @@
     "src/editor/Editor.tsx": 915,
     "src/editor/WysiwygEditor.tsx": 950,
     "src/search/dataview.ts": 833,
-    "src/ui/SearchDialog.tsx": 853
+    "src/ui/SearchDialog.tsx": 836
   }
 }
