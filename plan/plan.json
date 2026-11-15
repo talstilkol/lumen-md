@@ -1,7 +1,7 @@
 {
  "$comment": "The plan's single source (plan 0.6). Edit this file, then `npm run plan` regenerates the board in MASTER_PLAN.md and plan/board.html; CI (`npm run plan:check`) fails when they differ. A task's status is one line: phases[].tasks[].status.",
- "updated": "2026-11-15T03:10",
- "note": "**15.11 (מסלול plan2, #618):** 8 תיקוני סטטוס (xb) הוחלו; התקדמות גל 10/11 מלוח ההתקדמות (קוד ב-PR → ⏳ ממתין לרכבת 6, בעבודה → ⏳); החלטות הרכז 15.11 ב-notes; גל 12 נוסף (68 משימות) וגל 12ב (17 משימות שימוש חוזר; R12.2–R12.5 מוזגו ל-W12.E1/E2/E3/E8; R12.1 = היתר MIT מטל לקבצי israelconnect, משימת בעלים).\n\n**14.11 (מסלול X-G, #618):** גל 11 נוסף (118 משימות, ממחקר R1–R6) ו-119 התיקונים שלו הוחלו; W10.G6 (חלקי), ‏G10 (יומן P2), ‏G11 (#643).\n\n**14.11 (מסלול X-G, #618):** גל 10 נוסף (241 משימות); ‏16 ✅ ירדו ל-⏳ לפי ביקורת הקוד 14.11 וכלל W10.G8; ל-52 המשימות הפטורות dod אמיתי או ⏳, והפטור נמחק (W10.G5); כל סטטוס ≤200 תווים והפירוט ב-notes (W10.G7).\n\n**המצב ב-ב׳ 9.11 23:05:** אף PR לא מוזג מאז 17.10 (main = 552ea5b7). סשן 24.10 פתח #282–#316 (כ-30 משימות) — נרשמו כאן עכשיו. כמעט כל ה-PR-ים אדומים משתי סיבות שאינן בקוד: (1) מ-19.10 GitHub מעביר את ubuntu-latest ל-Ubuntu 26 והתקנת Playwright נשברת — #330 מצמיד ל-ubuntu-24.04; (2) תקציבי החבילה (startup 460 KB ותקציבי קובץ) — #330 גם מוסיף annotation שמראה איזה קובץ חורג. **החלטת טל 9.11: לא משתמשים יותר ב-GitHub Actions** — כל commit עם [skip ci], הבדיקות רצות ב-Vercel Sandbox. אזהרה: כל ענף מודד startup לבד (459–460 KB); אחרי 15.1 התוספות מכל השרשראות יצטברו — צריך את #248 או החלטה 15.16 (14) לפני המיזוג.\n\n**מחקר world class (9.11, plan/research-2026-11.md):** ציון ממוצע ב-19 תחומים מול Obsidian, Notion, Logseq, Typora, Word ואחרים — main 3.7 → עם ה-PR-ים הפתוחים 6.6 → כל התוכנית 7.3 → אחרי הגלים W1–W3 9.1. הפערים הגדולים: מסירה (אף PR לא מוזג), קריאה ומחקר (PDF), תאימות לפורמטים של Obsidian, INP ונגישות אמיתית עם קורא מסך (ת״י 5568), שיתוף והרשאות. 65 משימות חדשות בשלושה גלים (W1 ≈173 ש׳, W2 ≈119 ש׳, W3 ≈49 ש׳).\n\n**החלטות 10.11 (Claude, בהסמכת טל ״תחליט לבד כל החלטה״):** כל ההחלטות הפתוחות ב-15.2, 15.9, 15.10, 15.16 הוכרעו (פירוט בפריטים עצמם). נוסף: שער ה-OCR האנגלי (7.5) — ratchet ברמה הנמדדת (≤ 12.5% CER) ויעד ≤ 5% דרך W1.18, בלי להוריד את שער העברית; #271 — טוקן המחקר רק מההגדרות, לא VITE_RESEARCH_TOKEN (שום סוד בבנייה); החבילות שמחכות להתקנה (hash-wasm, @noble/ciphers, @excalidraw/excalidraw, @mlc-ai/web-llm@0.2.86, @capacitor/filesystem, quickjs-emscripten, knip, @citation-js) — מאושרות, כולן MIT / Apache / ISC, יותקנו ב-Vercel Sandbox; baselines ויזואליים — ייווצרו שם; שערי CI בלי Actions — W1.35. **בדיקה אמיתית בלי Actions:** Vercel בונה כל ענף (tsc -b מחמיר כולל בדיקות + vite build): 77 מתוך 86 PR-ים פתוחים ירוקים, 8 אדומים (#257, #261, #274, #277, #279, #280, #336, #347), 1 בתהליך.\n\n**10.11 01:30:** probe על chore/dod: build + budget עוברים ב-Vercel; עם vitest — נכשל (אין לוגים עד ש-Vercel מאושר). 83 מה-PR-ים ה\"אדומים\" ב-Vercel לא נכשלו בקוד — הבנייה שלהם נחסמה במגבלת 100 פריסות ביום (״Deployment rate limited״); כשל אמיתי היה רק ב-#336.\n\n**10.11 04:00 — Vercel חסם:** מגבלת השימוש של חשבון Hobby נוצלה (402 payment_required, מתאפס ב-1.12): אי אפשר לפתוח Sandbox חדש. מה שנבדק עד עכשיו נבדק במלואו; מה שלא — מחכה. החלטה של טל: לשדרג ל-Pro, או לחכות ל-1.12 (בינתיים בדיקות node בלבד).\n\n**10.11 06:50:** כל משימות התוכנית חוץ מ-4 נמצאות ב-PR (156 ⏳). שער הרישיונות על verify/train: 4→0 כשלים (format, fuzzy, khroma אומתו כ-MIT ב-tag המדויק). הדחיפה הבאה של verify/train — אחרי 03:47 ב-11.11 (איפוס מכסת הפריסות של Vercel).\n\n**החלטה 11.11 (Claude, בהסמכת טל):** ליבת Excalidraw 0.18.1 היא מודול אחד של 718.6 KB gzip שלא ניתן לפצל; קיבלה כלל תקציב משלה של 740 KB (נמדד + 3%), כל שאר החלקים נשארו ב-700, ושום תקציב אחר לא השתנה. W1.36 סוגר את החוב.\n\n**החלטות 11.11:** (1) package.json engines מוצמד ל-^22.13.0 || ^24.0.0 — Vercel בנה על Node 26 וה-Web Storage המובנה שבר את ה-shim של הבדיקות. (2) הסכמות לשליחת תוכן מחוץ למכשיר ורשימות אמון מסווגות כ-data בסכמת ההגדרות (לא מיובאות לעולם).\n\n**דוח חולשות 12.11:** ממוצע 19 תחומים — main 3.66 · #431 6.31 · התוכנית כפי שנבנתה 7.75 · אחרי גלים 4–5 9.30 (עוקפים את המוביל ב-7 תחומים, שוויון ב-3). 40 חולשות (4 קריטיות, 9 גבוהות, 23 בינוניות, 4 נמוכות), כל הקריטיות-בינוניות ממופות למשימה. **תיקון:** #431 כולל את #135–#354 בלבד; 77 ה-PR-ים שמעליו (13.4, 14.4 ורוב W1–W3) צריכים רכבת שנייה (W4.1). גל 4 (36 משימות, ≈213 ש׳) וגל 5 (28 רעיונות, 15 ייחודיים, ≈213 ש׳) נוספו. · 14.11: כל הבנייה והבדיקות המלאות ב-Mac (לא Vercel). פעולות בעלים 4–9 (חשבונות, פריסה, חתימה, משפט, תוויות חנות, בדיקות ידניות) נדחו לאחר ההרצה ב-Mac לפי בקשת הבעלים.",
+ "updated": "2026-11-15T07:00",
+ "note": "**15.11 (מסלול plan3, #618):** סטטוסי גל 10/11/12/12ב סונכרנו עם לוח ההתקדמות (קוד ב-PR → ⏳ ממתין לרכבת, בעבודה → ⏳); W10.Z1/Z2: רכבת 6 סבב P0 נבנתה (#844, f4ed3b4a8f), ביקורת עצמאית — 1 חמור תוקן ב-#878.\n\n**15.11 (מסלול plan2, #618):** 8 תיקוני סטטוס (xb) הוחלו; התקדמות גל 10/11 מלוח ההתקדמות (קוד ב-PR → ⏳ ממתין לרכבת 6, בעבודה → ⏳); החלטות הרכז 15.11 ב-notes; גל 12 נוסף (68 משימות) וגל 12ב (17 משימות שימוש חוזר; R12.2–R12.5 מוזגו ל-W12.E1/E2/E3/E8; R12.1 = היתר MIT מטל לקבצי israelconnect, משימת בעלים).\n\n**14.11 (מסלול X-G, #618):** גל 11 נוסף (118 משימות, ממחקר R1–R6) ו-119 התיקונים שלו הוחלו; W10.G6 (חלקי), ‏G10 (יומן P2), ‏G11 (#643).\n\n**14.11 (מסלול X-G, #618):** גל 10 נוסף (241 משימות); ‏16 ✅ ירדו ל-⏳ לפי ביקורת הקוד 14.11 וכלל W10.G8; ל-52 המשימות הפטורות dod אמיתי או ⏳, והפטור נמחק (W10.G5); כל סטטוס ≤200 תווים והפירוט ב-notes (W10.G7).\n\n**המצב ב-ב׳ 9.11 23:05:** אף PR לא מוזג מאז 17.10 (main = 552ea5b7). סשן 24.10 פתח #282–#316 (כ-30 משימות) — נרשמו כאן עכשיו. כמעט כל ה-PR-ים אדומים משתי סיבות שאינן בקוד: (1) מ-19.10 GitHub מעביר את ubuntu-latest ל-Ubuntu 26 והתקנת Playwright נשברת — #330 מצמיד ל-ubuntu-24.04; (2) תקציבי החבילה (startup 460 KB ותקציבי קובץ) — #330 גם מוסיף annotation שמראה איזה קובץ חורג. **החלטת טל 9.11: לא משתמשים יותר ב-GitHub Actions** — כל commit עם [skip ci], הבדיקות רצות ב-Vercel Sandbox. אזהרה: כל ענף מודד startup לבד (459–460 KB); אחרי 15.1 התוספות מכל השרשראות יצטברו — צריך את #248 או החלטה 15.16 (14) לפני המיזוג.\n\n**מחקר world class (9.11, plan/research-2026-11.md):** ציון ממוצע ב-19 תחומים מול Obsidian, Notion, Logseq, Typora, Word ואחרים — main 3.7 → עם ה-PR-ים הפתוחים 6.6 → כל התוכנית 7.3 → אחרי הגלים W1–W3 9.1. הפערים הגדולים: מסירה (אף PR לא מוזג), קריאה ומחקר (PDF), תאימות לפורמטים של Obsidian, INP ונגישות אמיתית עם קורא מסך (ת״י 5568), שיתוף והרשאות. 65 משימות חדשות בשלושה גלים (W1 ≈173 ש׳, W2 ≈119 ש׳, W3 ≈49 ש׳).\n\n**החלטות 10.11 (Claude, בהסמכת טל ״תחליט לבד כל החלטה״):** כל ההחלטות הפתוחות ב-15.2, 15.9, 15.10, 15.16 הוכרעו (פירוט בפריטים עצמם). נוסף: שער ה-OCR האנגלי (7.5) — ratchet ברמה הנמדדת (≤ 12.5% CER) ויעד ≤ 5% דרך W1.18, בלי להוריד את שער העברית; #271 — טוקן המחקר רק מההגדרות, לא VITE_RESEARCH_TOKEN (שום סוד בבנייה); החבילות שמחכות להתקנה (hash-wasm, @noble/ciphers, @excalidraw/excalidraw, @mlc-ai/web-llm@0.2.86, @capacitor/filesystem, quickjs-emscripten, knip, @citation-js) — מאושרות, כולן MIT / Apache / ISC, יותקנו ב-Vercel Sandbox; baselines ויזואליים — ייווצרו שם; שערי CI בלי Actions — W1.35. **בדיקה אמיתית בלי Actions:** Vercel בונה כל ענף (tsc -b מחמיר כולל בדיקות + vite build): 77 מתוך 86 PR-ים פתוחים ירוקים, 8 אדומים (#257, #261, #274, #277, #279, #280, #336, #347), 1 בתהליך.\n\n**10.11 01:30:** probe על chore/dod: build + budget עוברים ב-Vercel; עם vitest — נכשל (אין לוגים עד ש-Vercel מאושר). 83 מה-PR-ים ה\"אדומים\" ב-Vercel לא נכשלו בקוד — הבנייה שלהם נחסמה במגבלת 100 פריסות ביום (״Deployment rate limited״); כשל אמיתי היה רק ב-#336.\n\n**10.11 04:00 — Vercel חסם:** מגבלת השימוש של חשבון Hobby נוצלה (402 payment_required, מתאפס ב-1.12): אי אפשר לפתוח Sandbox חדש. מה שנבדק עד עכשיו נבדק במלואו; מה שלא — מחכה. החלטה של טל: לשדרג ל-Pro, או לחכות ל-1.12 (בינתיים בדיקות node בלבד).\n\n**10.11 06:50:** כל משימות התוכנית חוץ מ-4 נמצאות ב-PR (156 ⏳). שער הרישיונות על verify/train: 4→0 כשלים (format, fuzzy, khroma אומתו כ-MIT ב-tag המדויק). הדחיפה הבאה של verify/train — אחרי 03:47 ב-11.11 (איפוס מכסת הפריסות של Vercel).\n\n**החלטה 11.11 (Claude, בהסמכת טל):** ליבת Excalidraw 0.18.1 היא מודול אחד של 718.6 KB gzip שלא ניתן לפצל; קיבלה כלל תקציב משלה של 740 KB (נמדד + 3%), כל שאר החלקים נשארו ב-700, ושום תקציב אחר לא השתנה. W1.36 סוגר את החוב.\n\n**החלטות 11.11:** (1) package.json engines מוצמד ל-^22.13.0 || ^24.0.0 — Vercel בנה על Node 26 וה-Web Storage המובנה שבר את ה-shim של הבדיקות. (2) הסכמות לשליחת תוכן מחוץ למכשיר ורשימות אמון מסווגות כ-data בסכמת ההגדרות (לא מיובאות לעולם).\n\n**דוח חולשות 12.11:** ממוצע 19 תחומים — main 3.66 · #431 6.31 · התוכנית כפי שנבנתה 7.75 · אחרי גלים 4–5 9.30 (עוקפים את המוביל ב-7 תחומים, שוויון ב-3). 40 חולשות (4 קריטיות, 9 גבוהות, 23 בינוניות, 4 נמוכות), כל הקריטיות-בינוניות ממופות למשימה. **תיקון:** #431 כולל את #135–#354 בלבד; 77 ה-PR-ים שמעליו (13.4, 14.4 ורוב W1–W3) צריכים רכבת שנייה (W4.1). גל 4 (36 משימות, ≈213 ש׳) וגל 5 (28 רעיונות, 15 ייחודיים, ≈213 ש׳) נוספו. · 14.11: כל הבנייה והבדיקות המלאות ב-Mac (לא Vercel). פעולות בעלים 4–9 (חשבונות, פריסה, חתימה, משפט, תוויות חנות, בדיקות ידניות) נדחו לאחר ההרצה ב-Mac לפי בקשת הבעלים.",
  "start": "2026-10-18T08:00",
  "buffer": 0.35,
  "ownerWindow": [
@@ -11501,7 +11501,7 @@
       "W6.42"
      ],
      "files": "src/views/bases/evaluate.ts, src/views/bases/catalogue.ts, src/__tests__/obsidian115.test.ts",
-     "status": "⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת 6; ברכבת 5",
+     "status": "⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת; ברכבת 5",
      "verified": "built",
      "pr": 640
     },
@@ -11532,7 +11532,7 @@
       "W4.1"
      ],
      "files": "src/__tests__/helpers/locale.ts, src/__tests__/firstRunLanguage.test.ts, israeliTemplates.test.ts, pdfHebrew.test.ts, scripts/check-code-hygiene.mjs",
-     "status": "⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת 6; ברכבת 5",
+     "status": "⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת; ברכבת 5",
      "verified": "built",
      "pr": 640
     },
@@ -11559,7 +11559,7 @@
       "W3.5"
      ],
      "files": "src/reading/fonts.ts, src/__tests__/readingFonts.test.ts",
-     "status": "⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת 6; ברכבת 5",
+     "status": "⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת; ברכבת 5",
      "verified": "built",
      "pr": 640
     },
@@ -11587,7 +11587,7 @@
       "W5.26"
      ],
      "files": "models/registry.json, src/__tests__/hebrewLexicon.test.ts, respectfulMessages.test.ts, bookEpub.test.ts",
-     "status": "⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת 6; ברכבת 5",
+     "status": "⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת; ברכבת 5",
      "verified": "built",
      "pr": 640
     },
@@ -11614,7 +11614,7 @@
       "0.5"
      ],
      "files": "e2e/obsidian-syntax.spec.ts, e2e/pdf-paste.spec.ts, playwright.gifs.config.ts",
-     "status": "⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת 6; ברכבת 5",
+     "status": "⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת; ברכבת 5",
      "verified": "built",
      "pr": 640
     },
@@ -11642,7 +11642,7 @@
       "W6.15"
      ],
      "files": "src/__tests__/blind/*.test.ts, scripts/lib/skipAudit.mjs",
-     "status": "⏳ קוד ב-PR #654 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #654 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 654
     },
@@ -11669,7 +11669,7 @@
       "W4.11"
      ],
      "files": "src/App.tsx, src/ui/**, src/a11y/**",
-     "status": "⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת 6; ברכבת 5",
+     "status": "⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת; ברכבת 5",
      "verified": "built",
      "pr": 640
     },
@@ -11697,7 +11697,7 @@
       "W4.11"
      ],
      "files": "src/lib/**, src/ai/**, src/storage/**, src/sync/**",
-     "status": "⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת 6; ברכבת 5",
+     "status": "⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת; ברכבת 5",
      "verified": "built",
      "pr": 640
     },
@@ -11724,7 +11724,7 @@
       "11.1"
      ],
      "files": "src/settings/schema.ts, src/settings/io.ts, src/__tests__/settingsSchema.test.ts",
-     "status": "⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת 6; ברכבת 5",
+     "status": "⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת; ברכבת 5",
      "verified": "built",
      "pr": 640
     },
@@ -11750,7 +11750,7 @@
       "11.1"
      ],
      "files": "src/settings/schema.ts:33, src/i18n/lazy/fineTune.json, src/ui/SettingsScreen.tsx",
-     "status": "⏳ קוד ב-PR #790 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #790, #844 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 790,
      "notes": "החלטות הרכז 15.11: ‏#790 (ברכבת 5) הוא ה-PR למיזוג להחלטה 2.41 / E70; ‏#623 הוחלף — נשאר פתוח ומסומן superseded"
@@ -11777,7 +11777,7 @@
       "14.4"
      ],
      "files": "scripts/check-flags.mjs, src/i18n/lazy/featureFlagsPanel.json",
-     "status": "⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת 6; ברכבת 5",
+     "status": "⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת; ברכבת 5",
      "verified": "built",
      "pr": 640
     },
@@ -11805,7 +11805,7 @@
       "4.4"
      ],
      "files": "src/storage/vault/watcher.ts, src/__tests__/externalChanges.test.ts, src/__tests__/watcher.test.ts",
-     "status": "⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת 6; ברכבת 5",
+     "status": "⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת; ברכבת 5",
      "verified": "built",
      "pr": 640
     },
@@ -11832,7 +11832,7 @@
       "4.4"
      ],
      "files": "src/storage/externalChanges.ts, src/__tests__/externalChanges.test.ts",
-     "status": "⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת 6; ברכבת 5",
+     "status": "⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת; ברכבת 5",
      "verified": "built",
      "pr": 640
     },
@@ -11878,9 +11878,9 @@
       "1.8"
      ],
      "files": "scripts/train-offline.mjs, scripts/lib/ciLocal.mjs, reports/",
-     "status": "⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת 6; ברכבת 5",
+     "status": "⏳ קוד ב-PR #902 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
-     "pr": 640
+     "pr": 902
     },
     {
      "id": "W10.B1",
@@ -11907,7 +11907,7 @@
       "11.2"
      ],
      "files": "src/ui/PluginGallery.tsx, src/__tests__/pluginGallery.test.tsx",
-     "status": "⏳ קוד ב-PR #631, #650, #653, #720 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #631, #650, #653, #720, #844 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 631
     },
@@ -11936,7 +11936,7 @@
       "W4.32"
      ],
      "files": "src/ui/PluginGallery.tsx, public/plugins/registry.json",
-     "status": "⏳ קוד ב-PR #631, #650 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #631, #650 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 631
     },
@@ -11967,7 +11967,7 @@
       "11.2"
      ],
      "files": "scripts/build-plugin-registry.mjs, src/plugins/signing.ts, src/plugins/install.ts",
-     "status": "⏳ קוד ב-PR #631, #739 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #631, #739 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 631
     },
@@ -11994,7 +11994,7 @@
       "12.2"
      ],
      "files": "src/plugins/sandbox.ts, scripts/unused-files.baseline.json",
-     "status": "⏳ קוד ב-PR #638 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #638 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 638
     },
@@ -12024,7 +12024,7 @@
       "W8.2"
      ],
      "files": "eval/corpus/manifest.json, src/__tests__/realCorpus.test.ts, plan.json",
-     "status": "⏳ קוד ב-PR #697, #715 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #697, #715 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 697
     },
@@ -12051,7 +12051,7 @@
       "W2.11"
      ],
      "files": "src/text/hebrewMorph.ts:104-120, eval/golden/crosslingual/, src/__tests__/hebrewMorph.test.ts",
-     "status": "⏳ קוד ב-PR #700 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #700 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 700
     },
@@ -12077,7 +12077,7 @@
       "W2.7"
      ],
      "files": "src/__tests__/diarize.test.ts, scripts/eval/der.mjs",
-     "status": "⏳ קוד ב-PR #723 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #723 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 723
     },
@@ -12104,7 +12104,7 @@
       "W5.3"
      ],
      "files": "scripts/grammar/make-probe.mjs, scripts/grammar/eval.mjs",
-     "status": "⏳ קוד ב-PR #677, #683 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #677, #683 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 677
     },
@@ -12132,7 +12132,7 @@
       "W5.3"
      ],
      "files": "src/ai/grammarRanker.ts, src/ai/hebrewSpellService.ts, src/App.tsx",
-     "status": "⏳ קוד ב-PR #632, #683 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #632, #683 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 632
     },
@@ -12159,7 +12159,7 @@
       "W7.5"
      ],
      "files": "src/sources/knesset/store.ts:236-255, src/agents/outcomes.ts",
-     "status": "⏳ קוד ב-PR #693 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #693 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 693
     },
@@ -12185,7 +12185,7 @@
       "W7.16"
      ],
      "files": "src/ai/screenshotNote.ts, scripts/eval/screenshot.mjs",
-     "status": "⏳ קוד ב-PR #746, #772 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #746, #772 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 746
     },
@@ -12231,7 +12231,7 @@
       "W4.21"
      ],
      "files": "plan.json (chore/dod), MASTER_PLAN.md, scripts/build.mjs",
-     "status": "⏳ קוד ב-PR #715 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #715 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "node",
      "pr": 715,
      "notes": "⏳ #618 — 16 ✅ ירדו ל-⏳ עם ״ביקורת 14.11״, והערת פסק דין לסטטוסים שהביקורת סותרת; plan:check ו-planBuild/dod ב-shim; מחכה למיזוג"
@@ -12268,7 +12268,7 @@
       "W2.10"
      ],
      "files": "eval/golden/**, src/__tests__/fixtures/**, scripts/plan-check.mjs",
-     "status": "⏳ קוד ב-PR #715 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #715, #816 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 715
     },
@@ -12297,7 +12297,7 @@
       "W6.16"
      ],
      "files": "scripts/mutation/*.mjs, reports/mutation/receipt.json, scripts/vercel-build.mjs",
-     "status": "⏳ קוד ב-PR #674 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #674 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 674
     },
@@ -12322,7 +12322,7 @@
       "W4.23"
      ],
      "files": "tools/native-check/real-cargo.sh, src/__tests__/realCargo.test.ts",
-     "status": "⏳ קוד ב-PR #641 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #641 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 641
     },
@@ -12353,7 +12353,7 @@
       "10.3"
      ],
      "files": "playwright.config.ts, e2e/print-*.spec.ts, e2e/canvas-note-cards.spec.ts, visual/rtl.visual.ts",
-     "status": "⏳ קוד ב-PR #662, #777 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #662, #777, #862, #902 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 662
     },
@@ -12380,7 +12380,7 @@
       "3.7"
      ],
      "files": "src/__tests__/dataSafetyMatrix.test.ts, e2e/data-safety.spec.ts:392, plan.json",
-     "status": "⏳ קוד ב-PR #633, #662 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #633, #662, #844 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 633
     },
@@ -12408,7 +12408,7 @@
       "7.6"
      ],
      "files": "scripts/golden/evals/rerank.mjs, eval/golden/retrieval-hard/",
-     "status": "⏳ קוד ב-PR #706 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #706 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 706
     },
@@ -12434,7 +12434,7 @@
       "W2.2"
      ],
      "files": "eval/golden/related-real/, scripts/golden/evals/related.mjs",
-     "status": "⏳ קוד ב-PR #704 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #704 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 704
     },
@@ -12461,7 +12461,7 @@
       "1.7"
      ],
      "files": "models/dictalm3.json, src/commands/domains/help.ts",
-     "status": "⏳ קוד ב-PR #656 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #656 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 656
     },
@@ -12486,7 +12486,7 @@
       "W5.25"
      ],
      "files": "public/support.html:90-136, .github/FUNDING.yml",
-     "status": "⏳ קוד ב-PR #718 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #718 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 718
     },
@@ -12511,7 +12511,7 @@
       "W2.25"
      ],
      "files": "docs/src/content/docs/compare*.md, scripts/check-compare.mjs",
-     "status": "⏳ קוד ב-PR #710 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #710 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 710
     },
@@ -12536,7 +12536,7 @@
       "W7.10"
      ],
      "files": "src/voice-corpus/corpus.ts, src/capture/desktopShortcut.ts",
-     "status": "⏳ קוד ב-PR #720 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #720 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 720
     },
@@ -12565,7 +12565,7 @@
       "W7.18"
      ],
      "files": "src/agents/mcp/transports/stdio.ts, src-tauri/src/mcp_stdio.rs, src/agents/mcp/client.ts",
-     "status": "⏳ קוד ב-PR #728, #753 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #728, #753 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 728
     },
@@ -12596,7 +12596,7 @@
       "W7.18"
      ],
      "files": "src/ui/settings/McpServers.tsx, src/agents/mcp/registry.ts, src/agents/runtime.ts",
-     "status": "⏳ קוד ב-PR #632, #699, #728 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #632, #699, #728 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 632
     },
@@ -12623,7 +12623,7 @@
       "W7.18"
      ],
      "files": "src/ui/settings/McpServers.tsx, src/agents/mcp/suggested.ts",
-     "status": "⏳ קוד ב-PR #728 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #728 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 728
     },
@@ -12652,7 +12652,7 @@
       "W7.20"
      ],
      "files": "src/ui/settings/CalendarSettings.tsx, src/calendar/*, src/settings/schema.ts",
-     "status": "⏳ קוד ב-PR #751 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #751 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 751
     },
@@ -12681,7 +12681,7 @@
       "W7.20"
      ],
      "files": "src/ui/CalendarConflictDialog.tsx",
-     "status": "⏳ קוד ב-PR #751 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #751 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 751
     },
@@ -12708,7 +12708,7 @@
       "W7.20"
      ],
      "files": "src/daily/dailyNote.ts, src/calendar/ics.ts",
-     "status": "⏳ קוד ב-PR #751 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #751 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 751
     },
@@ -12736,7 +12736,7 @@
       "W4.22"
      ],
      "files": "ios/App/App.xcodeproj/project.pbxproj, ios/App/LumenWidgets/Info.plist, src/__tests__/iosProject.test.ts",
-     "status": "⏳ קוד ב-PR #675, #766 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #675, #766, #857 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 675,
      "notes": "החלטות הרכז 15.11: סדר מחסנית המובייל: #675 → #774 → #782 (כולל #685) → #791"
@@ -12766,7 +12766,7 @@
       "W1.13"
      ],
      "files": "src/capture/voiceCapture.ts:28, src/ai/dictation/*, src/App.tsx",
-     "status": "⏳ קוד ב-PR #632, #634, #639, #812 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #632, #634, #639, #812 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 632
     },
@@ -12793,7 +12793,7 @@
       "W5.13"
      ],
      "files": "src/student/lecture.ts:19, src/agents/summary/*",
-     "status": "⏳ קוד ב-PR #632, #639, #669, #812 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #632, #639, #669, #812 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 632
     },
@@ -12818,7 +12818,7 @@
       "W5.7"
      ],
      "files": "src/pwa/launch.ts, src/capture/chatImport.ts",
-     "status": "⏳ קוד ב-PR #647 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #647 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 647
     },
@@ -12843,7 +12843,7 @@
       "W5.9"
      ],
      "files": "src/privacy/NetworkMonitor.tsx, src/privacy/report.ts:130",
-     "status": "⏳ קוד ב-PR #652 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #652 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 652
     },
@@ -12873,7 +12873,7 @@
       "5.3"
      ],
      "files": "src/ai/productAgent.ts, src/agents/tools/writeFile.ts",
-     "status": "⏳ קוד ב-PR #627 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #627, #844 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 627
     },
@@ -12900,7 +12900,7 @@
       "4.16"
      ],
      "files": "src-tauri/Cargo.toml, src-tauri/capabilities/*.json, src-tauri/src/lib.rs, src/capture/desktopShortcut.ts",
-     "status": "⏳ קוד ב-PR #657 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #657 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 657
     },
@@ -12927,7 +12927,7 @@
       "4.20"
      ],
      "files": "package.json, android/app/src/main/java/**/MainActivity.java, mobile/android/LumenVaultFolderPlugin.java",
-     "status": "⏳ קוד ב-PR #685 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #685 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 685
     },
@@ -12953,7 +12953,7 @@
       "W1.6"
      ],
      "files": "src/backup/start.ts, src/backup/backup.ts:90, src/ui/BackupPanel.tsx",
-     "status": "⏳ קוד ב-PR #763 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #763 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 763
     },
@@ -12979,7 +12979,7 @@
       "W2.1"
      ],
      "files": "src/agents/organizer/job.ts:30, src/agents/organizer/learning.ts, src/agents/outcomes.ts",
-     "status": "⏳ קוד ב-PR #632, #669 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #632, #669 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 632
     },
@@ -13006,7 +13006,7 @@
       "1.9"
      ],
      "files": "src/ui/trashUndoShortcut.ts, src/__tests__/trashUndo.test.ts",
-     "status": "⏳ קוד ב-PR #644 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #644 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 644
     },
@@ -13031,7 +13031,7 @@
       "W1.30"
      ],
      "files": "src/ui/SettingsScreen.tsx, src/privacy/ImageHostsList.tsx",
-     "status": "⏳ קוד ב-PR #645 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #645 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 645
     },
@@ -13057,7 +13057,7 @@
       "W4.19"
      ],
      "files": "src/sync/setup/Wizard.tsx, src/sync/cloud/gdrive.ts, src/sync/cloud/dropbox.ts",
-     "status": "⏳ קוד ב-PR #663 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #663 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 663
     },
@@ -13083,7 +13083,7 @@
       "W4.19"
      ],
      "files": "src/lib/qr.ts, src/sync/setup/PairDevice.tsx",
-     "status": "⏳ קוד ב-PR #663 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #663, #835, #880 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 663
     },
@@ -13111,7 +13111,7 @@
       "W7.14"
      ],
      "files": "src/ai/structured/index.ts, src/tags/suggest.ts, src/capture/triage.ts",
-     "status": "⏳ גל 10 — לא התחיל",
+     "status": "⏳ בעבודה",
      "verified": "built",
      "notes": "החלטות הרכז 15.11: ממתין: W10.C21 אחרי ש-F16 ‏(#722) ברכבת"
     },
@@ -13139,7 +13139,7 @@
       "W7.16"
      ],
      "files": "src/editor/paste.ts, src/ai/screenshotNote.ts",
-     "status": "⏳ קוד ב-PR #772 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #772 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 772
     },
@@ -13166,7 +13166,7 @@
       "2.6"
      ],
      "files": "src/privacy/piiNer.ts:16, models/registry.json, src/ui/CloudSendDialog.tsx",
-     "status": "⏳ קוד ב-PR #678 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #678 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 678
     },
@@ -13193,7 +13193,7 @@
       "W5.1"
      ],
      "files": "src/sources/sefaria/*, src/editor/refTrigger.ts, src/graph/nodes.ts",
-     "status": "⏳ קוד ב-PR #736 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #736, #835, #845, #880, #881 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 736
     },
@@ -13218,7 +13218,7 @@
       "W1.15"
      ],
      "files": "src/highlights/HighlightsPanel.tsx, src/highlights/hub.ts",
-     "status": "⏳ קוד ב-PR #682 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #682 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 682
     },
@@ -13243,7 +13243,7 @@
       "W5.15"
      ],
      "files": "src/views/bases/functions/*, src/views/rollups.ts",
-     "status": "⏳ קוד ב-PR #755 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #755, #831 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 755
     },
@@ -13270,7 +13270,7 @@
       "W7.8"
      ],
      "files": "src/academic/calendar.ts, src/time/deadlines.ts, src/student/*",
-     "status": "⏳ גל 10 — לא התחיל",
+     "status": "⏳ בעבודה",
      "verified": "built",
      "notes": "החלטות הרכז 15.11: ממתין: W10.C27 אחרי F24"
     },
@@ -13296,7 +13296,7 @@
       "W7.24"
      ],
      "files": "src/sources/open/OpenSourcesDialog.tsx, src/editor/triggers.ts",
-     "status": "⏳ קוד ב-PR #758 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #758 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 758,
      "notes": "החלטות הרכז 15.11: Save As נשאר על Ctrl+Shift+S (מוסכמת הפלטפורמה); דיאלוג המקורות נשאר ⌥⌘S ‏(#758)"
@@ -13323,7 +13323,7 @@
       "W6.2"
      ],
      "files": "scripts/pages-deploy.sh, scripts/release.mjs, scripts/vercel-build.mjs",
-     "status": "⏳ קוד ב-PR #629 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #629, #844 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 629
     },
@@ -13349,7 +13349,7 @@
       "W4.3"
      ],
      "files": "scripts/check-code-hygiene.mjs, scripts/pr-check.mjs:180",
-     "status": "⏳ קוד ב-PR #628 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #628, #844 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 628
     },
@@ -13378,7 +13378,7 @@
       "W3.4"
      ],
      "files": "android/app/src/main/java/**/VoiceTileService.java, ios/App/App/LumenIntents.swift",
-     "status": "⏳ קוד ב-PR #766, #782 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #766, #782 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 766,
      "notes": "החלטות הרכז 15.11: סדר מחסנית המובייל: #675 → #774 → #782 (כולל #685) → #791"
@@ -13412,7 +13412,7 @@
       "W6.40"
      ],
      "files": "public/content-frame.html:15,30, public/playground-runner.html, security/policy.json",
-     "status": "⏳ קוד ב-PR #666, #684 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #666, #684 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 666,
      "notes": "החלטות הרכז 15.11: להוסיף את esbuild 0.28.2 כ-devDependency מדויק (`npm i -D -E esbuild@0.28.2`), כדי שגם CI יריץ את בדיקת הבנייה מחדש ברמת הבייט ב-runnerBundles.test.ts (#684)"
@@ -13442,7 +13442,7 @@
       "W6.40"
      ],
      "files": "public/content-frame.js, src/plugins/EmbedBlock.tsx",
-     "status": "⏳ קוד ב-PR #666 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #666, #844 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 666
     },
@@ -13473,7 +13473,7 @@
       "W9.4"
      ],
      "files": "scripts/pr-check.mjs, scripts/review-sign.mjs, scripts/review-coverage.mjs",
-     "status": "⏳ קוד ב-PR #649, #668 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #649, #668, #844 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 649
     },
@@ -13505,7 +13505,7 @@
       "W1.35"
      ],
      "files": ".buildkite/pipeline.yml, scripts/vercel-ignore.sh, src/__tests__/vercelIgnore.test.ts",
-     "status": "⏳ קוד ב-PR #668, #750 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #668, #750, #844 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 668
     },
@@ -13534,7 +13534,7 @@
       "W6.43"
      ],
      "files": "src/sync/e2ee/**",
-     "status": "⏳ קוד ב-PR #632, #642, #717 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #632, #642, #717, #844 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 632
     },
@@ -13564,7 +13564,7 @@
       "W6.4"
      ],
      "files": "security/attacks/*.test.ts, scripts/train-offline.mjs, plan.json",
-     "status": "⏳ קוד ב-PR #642, #655 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #642, #655 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 642
     },
@@ -13592,7 +13592,7 @@
       "W6.3"
      ],
      "files": "src/sync/e2ee/keyring.ts, src/sync/e2ee/manifest.ts, src/sync/e2ee/thaw.ts",
-     "status": "⏳ קוד ב-PR #642, #698, #721 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #642, #698, #721 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 642
     },
@@ -13622,7 +13622,7 @@
       "W1.7"
      ],
      "files": "src/sync/e2ee/engine.ts, src/sync/cloud/gdrive.ts",
-     "status": "⏳ קוד ב-PR #642, #698 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #642, #698 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 642
     },
@@ -13651,7 +13651,7 @@
       "W6.24"
      ],
      "files": "src-tauri/Cargo.toml, scripts/audit-lock.mjs, security/advisories.json",
-     "status": "⏳ קוד ב-PR #636, #670, #691 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #636, #670, #691, #844 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 636
     },
@@ -13678,7 +13678,7 @@
       "W6.14"
      ],
      "files": "package-lock.json, mcp-server/package-lock.json, docs/security/dependabot.md",
-     "status": "⏳ קוד ב-PR #670 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #670, #844 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 670
     },
@@ -13706,7 +13706,7 @@
       "W1.7"
      ],
      "files": "docs/security/crypto-libs.md",
-     "status": "⏳ קוד ב-PR #671, #768 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #671, #768 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 671
     },
@@ -13739,7 +13739,7 @@
       "W1.7"
      ],
      "files": "src/sync/e2ee/primitives/index.ts, src/__tests__/cryptoDifferential.test.ts",
-     "status": "⏳ קוד ב-PR #671 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #671 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 671
     },
@@ -13772,7 +13772,7 @@
       "W1.7"
      ],
      "files": "src/sync/e2ee/primitives/lib/*.ts, tsconfig.json",
-     "status": "⏳ קוד ב-PR #671 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #671 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 671
     },
@@ -13800,7 +13800,7 @@
       "2.8"
      ],
      "files": ".buildkite/pipeline.yml, scripts/lib/ciLocal.mjs, scripts/pr-check.mjs",
-     "status": "⏳ קוד ב-PR #643, #668, #726 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #643, #668, #726 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 643
     },
@@ -13825,7 +13825,7 @@
       "W6.12"
      ],
      "files": "SECURITY.md, security/channels.json",
-     "status": "⏳ קוד ב-PR #630 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #630, #844 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 630
     },
@@ -13850,7 +13850,7 @@
       "W6.29"
      ],
      "files": "src/**, scripts/privacy-baseline.json",
-     "status": "⏳ קוד ב-PR #733 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #733 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 733
     },
@@ -13878,7 +13878,7 @@
       "W6.29"
      ],
      "files": "src/**, scripts/vercel-build.mjs",
-     "status": "⏳ קוד ב-PR #733 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #733 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 733
     },
@@ -13903,7 +13903,7 @@
       "W6.15"
      ],
      "files": "src/__tests__/blind/*.test.ts",
-     "status": "⏳ קוד ב-PR #756, #776 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #756, #776 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 756
     },
@@ -13929,7 +13929,7 @@
       "W6.15"
      ],
      "files": "src/__tests__/blind/*.test.ts",
-     "status": "⏳ קוד ב-PR #756, #776 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #756, #776 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 756
     },
@@ -13954,7 +13954,7 @@
       "W6.15"
      ],
      "files": "scripts/pr-check.mjs, scripts/lib/prGate.mjs",
-     "status": "⏳ קוד ב-PR #709 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #709 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 709
     },
@@ -13982,7 +13982,7 @@
       "W4.16"
      ],
      "files": "scripts/fuzz/known.json, vite.config.ts, scripts/repro-check.mjs",
-     "status": "⏳ גל 10 — לא התחיל",
+     "status": "⏳ בעבודה",
      "verified": "built"
     },
     {
@@ -14006,7 +14006,7 @@
       "2.4"
      ],
      "files": "src/**/*.worker.ts, src/ai/workerLedgerInstall.ts",
-     "status": "⏳ קוד ב-PR #719, #733 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #719, #733 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 719
     },
@@ -14033,7 +14033,7 @@
       "8.1"
      ],
      "files": "src/renderer/render.worker.ts, src/renderer/pipeline.ts, src/renderer/renderSnapshot.ts",
-     "status": "⏳ קוד ב-PR #680, #687 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #680, #687, #844 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 680
     },
@@ -14061,7 +14061,7 @@
       "8.1"
      ],
      "files": "src/renderer/render.worker.ts, src/renderer/shiki.ts, src/renderer/math.ts",
-     "status": "⏳ קוד ב-PR #687 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #687, #861 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 687
     },
@@ -14090,7 +14090,7 @@
       "8.1"
      ],
      "files": "src/renderer/viewport.ts, src/ui/Preview.tsx",
-     "status": "⏳ קוד ב-PR #687 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #687 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 687
     },
@@ -14117,7 +14117,7 @@
       "4.6"
      ],
      "files": "src/ui/HoverPreview.tsx",
-     "status": "⏳ קוד ב-PR #687 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #687 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 687
     },
@@ -14144,7 +14144,7 @@
       "10.1"
      ],
      "files": "src/ui/*Dialog.tsx, src/ui/*Panel.tsx, src/a11y/useFocusTrap.ts",
-     "status": "⏳ קוד ב-PR #730 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #730, #844 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 730
     },
@@ -14171,7 +14171,7 @@
       "10.1"
      ],
      "files": "src/ui/*Dialog.tsx, src/ui/*Panel.tsx, src/a11y/useFocusTrap.ts",
-     "status": "⏳ קוד ב-PR #730 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #730 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 730
     },
@@ -14198,7 +14198,7 @@
       "10.1"
      ],
      "files": "src/ui/*Dialog.tsx, src/ui/*Panel.tsx, src/a11y/useFocusTrap.ts",
-     "status": "⏳ קוד ב-PR #730 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #730 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 730
     },
@@ -14227,7 +14227,7 @@
       "10.1"
      ],
      "files": "src/__tests__/modalTraps.test.ts, e2e/a11y-dialogs.spec.ts",
-     "status": "⏳ קוד ב-PR #730 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #730 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 730
     },
@@ -14260,7 +14260,7 @@
       "0.11"
      ],
      "files": "lighthouserc.json, perf-gate.config.json, src/__tests__/perfGate.test.ts",
-     "status": "⏳ קוד ב-PR #680 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #680, #844 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 680
     },
@@ -14291,7 +14291,7 @@
       "W1.35"
      ],
      "files": ".buildkite/pipeline.yml:483-507, scripts/vercel-build.mjs",
-     "status": "⏳ קוד ב-PR #680 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #680 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 680
     },
@@ -14318,7 +14318,7 @@
       "0.11"
      ],
      "files": "scripts/nightly/*.mjs, scripts/nightly/launchd.plist, scripts/nightly/crontab",
-     "status": "⏳ קוד ב-PR #742, #747, #749 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #742, #747, #749 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 742
     },
@@ -14346,7 +14346,7 @@
       "7.9"
      ],
      "files": "scripts/eval/ingest.mjs, models/registry.json, src/ai/defaults.ts",
-     "status": "⏳ קוד ב-PR #727, #757 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #727, #757, #844 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 727
     },
@@ -14372,7 +14372,7 @@
       "13.6"
      ],
      "files": "plan/targets.json, scripts/plan-targets.mjs",
-     "status": "⏳ קוד ב-PR #749, #764 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #749, #764 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 749
     },
@@ -14398,8 +14398,9 @@
       "W5.22"
      ],
      "files": "src-tauri/src/tectonic.rs, src/export/latexAcademic.ts",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #843 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 843,
      "notes": "בעבודה"
     },
     {
@@ -14423,8 +14424,9 @@
       "W5.24"
      ],
      "files": "src/automations/automationsActions.ts:35",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #822 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 822,
      "notes": "בעבודה"
     },
     {
@@ -14448,8 +14450,9 @@
       "W2.22"
      ],
      "files": "src/ui/fileTreeRows.tsx, src/ui/FileTree.tsx",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #828, #836 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 828,
      "notes": "בעבודה"
     },
     {
@@ -14475,8 +14478,9 @@
       "W2.22"
      ],
      "files": "src/__tests__/vault100k.test.ts",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #828, #836 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 828,
      "notes": "בעבודה"
     },
     {
@@ -14501,7 +14505,7 @@
       "W2.23"
      ],
      "files": "src/export/printLayout.ts:25-26",
-     "status": "⏳ קוד ב-PR #809 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #809 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 809
     },
@@ -14531,7 +14535,7 @@
       "W4.9"
      ],
      "files": "public/*-boot.js, src/App.tsx, scripts/bundle-budgets.json",
-     "status": "⏳ קוד ב-PR #680 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #680, #814, #888 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 680
     },
@@ -14561,8 +14565,9 @@
       "W2.21"
      ],
      "files": "public/note-boot.js, index.html, src/main.tsx",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #888 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 888,
      "notes": "בעבודה"
     },
     {
@@ -14586,7 +14591,7 @@
       "9.5"
      ],
      "files": "src/editor/wysiwyg/table.ts, e2e/rtl-matrix.spec.ts:103-125",
-     "status": "⏳ קוד ב-PR #771 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #771 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 771
     },
@@ -14611,7 +14616,7 @@
       "9.9"
      ],
      "files": "e2e/rtl-parity/*.spec.ts",
-     "status": "⏳ קוד ב-PR #803 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #803 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 803
     },
@@ -14643,7 +14648,7 @@
       "10.3"
      ],
      "files": ".buildkite/pipeline.yml, visual/*",
-     "status": "⏳ קוד ב-PR #777 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #777 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 777
     },
@@ -14668,7 +14673,7 @@
       "0.16"
      ],
      "files": ".buildkite/pipeline.yml, scripts/lib/ciLocal.mjs, scripts/vercel-build.mjs, knip.json",
-     "status": "⏳ קוד ב-PR #754 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #754 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 754
     },
@@ -14695,7 +14700,7 @@
       "0.19"
      ],
      "files": ".buildkite/pipeline.yml, renovate.json",
-     "status": "⏳ קוד ב-PR #750 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #750 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 750
     },
@@ -14726,7 +14731,7 @@
       "W4.17"
      ],
      "files": "scripts/mutation/targets.json, src/__tests__/runtime*.test.ts",
-     "status": "⏳ קוד ב-PR #801 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #801 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 801,
      "notes": "החלטות הרכז 15.11: להוסיף את src/agents/runtime.ts לרשימת `critical` ב-scripts/mutation/targets.json ‏(#702) — החמרה — ואז ריצת mutation מלאה ב-vitest"
@@ -14753,7 +14758,7 @@
       "12.2"
      ],
      "files": "scripts/unused-files.baseline.json, src/lib/slug.ts, src/lib/utils.ts:26",
-     "status": "⏳ קוד ב-PR #786 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #786 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 786
     },
@@ -14784,7 +14789,7 @@
       "W9.1"
      ],
      "files": "src/App.tsx, src/app/*.tsx",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד — נבדק לא מקוון; ממתין לרכבת; App.tsx כבר 785 שורות — אין צורך בשינוי",
      "verified": "built",
      "notes": "בעבודה"
     },
@@ -14812,8 +14817,9 @@
       "W6.25"
      ],
      "files": "src/canvas/tldrawToExcalidraw.ts, src/editor/WysiwygEditor.tsx, src/editor/Editor.tsx",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #832 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 832,
      "notes": "בעבודה"
     },
     {
@@ -14839,8 +14845,9 @@
       "W6.25"
      ],
      "files": "src/agents/runtime.ts, src/ui/SearchDialog.tsx, src/views/dataview.ts",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #832 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 832,
      "notes": "בעבודה"
     },
     {
@@ -14870,8 +14877,9 @@
       "W6.25"
      ],
      "files": "src/__tests__/codeHealth.test.ts, max-lines-baseline.json",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #832 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 832,
      "notes": "בעבודה"
     },
     {
@@ -14898,7 +14906,7 @@
       "0.9"
      ],
      "files": "scripts/ci-doctor.mjs",
-     "status": "⏳ קוד ב-PR #646, #795 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #646, #795 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 646
     },
@@ -14925,7 +14933,7 @@
       "7.2"
      ],
      "files": ".buildkite/pipeline.yml, scripts/ollama-smoke.mjs",
-     "status": "⏳ קוד ב-PR #716 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #716, #844 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 716
     },
@@ -14950,8 +14958,9 @@
       "7.8"
      ],
      "files": "src/bench/engines/*",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #818 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 818,
      "notes": "בעבודה"
     },
     {
@@ -14977,8 +14986,9 @@
       "7.8"
      ],
      "files": "src/bench/engines/*",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #818 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 818,
      "notes": "בעבודה"
     },
     {
@@ -15004,8 +15014,9 @@
       "7.6"
      ],
      "files": "src/research/library/*",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #893 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 893,
      "notes": "בעבודה"
     },
     {
@@ -15030,8 +15041,9 @@
       "5.9"
      ],
      "files": "src/editor/aiAuthorship.ts, src/editor/WysiwygEditor.tsx",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #846 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 846,
      "notes": "בעבודה"
     },
     {
@@ -15055,8 +15067,9 @@
       "6.13"
      ],
      "files": "src/citations/doi.ts, src/research/answer.ts",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #851 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 851,
      "notes": "בעבודה"
     },
     {
@@ -15086,7 +15099,7 @@
       "W6.8"
      ],
      "files": "scripts/e2e-gate.mjs, scripts/promote-main.mjs, .buildkite/pipeline.yml",
-     "status": "⏳ קוד ב-PR #738, #749 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #738, #749, #844 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 738
     },
@@ -15114,8 +15127,9 @@
       "3.7"
      ],
      "files": "scripts/drill/*.mjs",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #883 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 883,
      "notes": "בעבודה"
     },
     {
@@ -15139,7 +15153,7 @@
       "W1.18"
      ],
      "files": "src/ocr/layout.ts",
-     "status": "⏳ קוד ב-PR #799 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #799 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 799
     },
@@ -15164,8 +15178,9 @@
       "W2.5"
      ],
      "files": "src/text/nikudRun.ts",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #819 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 819,
      "notes": "בעבודה"
     },
     {
@@ -15188,7 +15203,7 @@
       "6.3"
      ],
      "files": "src/text/menaked.ts, src/__tests__/menaked.test.ts",
-     "status": "⏳ קוד ב-PR #762 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #762 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 762
     },
@@ -15213,8 +15228,9 @@
       "W2.19"
      ],
      "files": "src/__tests__/lanSync.test.ts",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #821 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 821,
      "notes": "בעבודה"
     },
     {
@@ -15240,8 +15256,9 @@
       "W2.19"
      ],
      "files": "android/**/LanDiscovery.java, ios/App/App/LanDiscovery.swift",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #857 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 857,
      "notes": "בעבודה"
     },
     {
@@ -15265,7 +15282,7 @@
       "W3.3"
      ],
      "files": "src/review/*, src/__tests__/fsrsGolden.test.ts",
-     "status": "⏳ קוד ב-PR #806 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #806 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 806
     },
@@ -15317,7 +15334,7 @@
       "W1.26"
      ],
      "files": "src/storage/import/appleNotes.ts",
-     "status": "⏳ קוד ב-PR #690, #740 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #690, #740 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 690
     },
@@ -15346,7 +15363,7 @@
       "W1.26"
      ],
      "files": "src/storage/import/oneNote.ts",
-     "status": "⏳ קוד ב-PR #690, #745, #759 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #690, #745, #759 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 690,
      "notes": "החלטות הרכז 15.11: OneNote: ‏#745 → #759"
@@ -15374,8 +15391,9 @@
       "W7.3"
      ],
      "files": "src/search/index.ts",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #852 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 852,
      "notes": "בעבודה"
     },
     {
@@ -15401,8 +15419,9 @@
       "W7.4"
      ],
      "files": "src/views/bulkFast.ts",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #850 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 850,
      "notes": "בעבודה"
     },
     {
@@ -15427,8 +15446,9 @@
       "W7.10"
      ],
      "files": "src/voice-corpus/Recorder.tsx",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #830 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 830,
      "notes": "בעבודה"
     },
     {
@@ -15457,7 +15477,7 @@
       "W7.13"
      ],
      "files": "src/search/embeddings/*",
-     "status": "⏳ קוד ב-PR #802 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #802 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 802
     },
@@ -15483,7 +15503,7 @@
       "W7.22"
      ],
      "files": "scripts/supply-chain/*.mjs, scripts/release.mjs",
-     "status": "⏳ קוד ב-PR #658, #783 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #658, #783 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 658
     },
@@ -15508,8 +15528,9 @@
       "W7.25"
      ],
      "files": ".buildkite/pipeline.yml, visual/percy.ts",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #815 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 815,
      "notes": "בעבודה"
     },
     {
@@ -15534,7 +15555,7 @@
       "W8.9"
      ],
      "files": "scripts/lockfile-drift.mjs",
-     "status": "⏳ קוד ב-PR #741 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #741 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 741
     },
@@ -15560,7 +15581,7 @@
       "W8.10"
      ],
      "files": "scripts/lane-state.mjs",
-     "status": "⏳ קוד ב-PR #741 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #741 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 741
     },
@@ -15586,7 +15607,7 @@
       "W8.8"
      ],
      "files": "scripts/nightly/run.mjs, .buildkite/pipeline.yml",
-     "status": "⏳ קוד ב-PR #747 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #747 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 747
     },
@@ -15611,7 +15632,7 @@
       "W6.22"
      ],
      "files": "scripts/lib/trainBase.mjs",
-     "status": "⏳ קוד ב-PR #737 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #737 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 737
     },
@@ -15636,7 +15657,7 @@
       "W1.10"
      ],
      "files": "e2e/a11y-hebrew-gate.spec.ts",
-     "status": "⏳ קוד ב-PR #779 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #779, #886, #889, #902 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 779
     },
@@ -15661,8 +15682,9 @@
       "W1.24"
      ],
      "files": "scripts/release.mjs, docs/src/pages/download.astro",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #834 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 834,
      "notes": "בעבודה"
     },
     {
@@ -15689,7 +15711,7 @@
       "W1.17"
      ],
      "files": "scripts/models/convert.mjs, .github/workflows/model-convert.yml",
-     "status": "⏳ קוד ב-PR #752 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #752 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 752
     },
@@ -15714,7 +15736,7 @@
       "W4.28"
      ],
      "files": "CONTRIBUTING.md, docs/dev/good-first-issues.md",
-     "status": "⏳ קוד ב-PR #760 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #760 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 760
     },
@@ -15741,8 +15763,9 @@
       "4.14"
      ],
      "files": "src/pdf/ink.ts, src/pdf/annotations.ts",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #854 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 854,
      "notes": "בעבודה"
     },
     {
@@ -15766,7 +15789,7 @@
       "6.2"
      ],
      "files": "src/ai/tts/kokoro.ts",
-     "status": "⏳ קוד ב-PR #810 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #810 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 810
     },
@@ -15792,7 +15815,7 @@
       "2.7"
      ],
      "files": "src/agents/untrusted.ts:35",
-     "status": "⏳ קוד ב-PR #770 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #770 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 770
     },
@@ -15817,8 +15840,9 @@
       "4.15"
      ],
      "files": "extension/*, src/research/clipTemplates.ts",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #841 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 841,
      "notes": "בעבודה"
     },
     {
@@ -15850,7 +15874,7 @@
       "W4.5"
      ],
      "files": "scripts/release.mjs, src-tauri/tauri.conf.json",
-     "status": "⏳ קוד ב-PR #721 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #721, #844 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 721
     },
@@ -15877,7 +15901,7 @@
       "W9.8"
      ],
      "files": "לפי השורות ב-#618",
-     "status": "⏳ קוד ב-PR #790 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #790, #844 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 790,
      "notes": "החלטות הרכז 15.11: ‏#790 (ברכבת 5) הוא ה-PR למיזוג להחלטה 2.41 / E70; ‏#623 הוחלף — נשאר פתוח ומסומן superseded"
@@ -15905,7 +15929,7 @@
       "W9.8"
      ],
      "files": "לפי השורות ב-#618",
-     "status": "⏳ קוד ב-PR #456 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #456 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 456,
      "notes": "החלטות הרכז 15.11: E71–E74 מכוסות על ידי PR-י המקור שלהן (#456, ‏#316, ‏#469, ‏#602), שנכנסים לרכבת 6"
@@ -15933,7 +15957,7 @@
       "W9.8"
      ],
      "files": "לפי השורות ב-#618",
-     "status": "⏳ קוד ב-PR #316 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #316 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 316,
      "notes": "החלטות הרכז 15.11: E71–E74 מכוסות על ידי PR-י המקור שלהן (#456, ‏#316, ‏#469, ‏#602), שנכנסים לרכבת 6"
@@ -15961,7 +15985,7 @@
       "W9.8"
      ],
      "files": "לפי השורות ב-#618",
-     "status": "⏳ קוד ב-PR #469 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #469 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 469,
      "notes": "החלטות הרכז 15.11: E71–E74 מכוסות על ידי PR-י המקור שלהן (#456, ‏#316, ‏#469, ‏#602), שנכנסים לרכבת 6"
@@ -15989,7 +16013,7 @@
       "W9.8"
      ],
      "files": "לפי השורות ב-#618",
-     "status": "⏳ קוד ב-PR #602 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #602 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 602,
      "notes": "החלטות הרכז 15.11: E71–E74 מכוסות על ידי PR-י המקור שלהן (#456, ‏#316, ‏#469, ‏#602), שנכנסים לרכבת 6"
@@ -16015,7 +16039,7 @@
       "W4.18"
      ],
      "files": "e2e/rtl-matrix.spec.ts",
-     "status": "⏳ קוד ב-PR #773 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #773 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 773
     },
@@ -16040,7 +16064,7 @@
       "W2.10"
      ],
      "files": "src/__tests__/hebcalReference.test.ts",
-     "status": "⏳ קוד ב-PR #805 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #805, #859, #866, #872 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 805
     },
@@ -16067,8 +16091,9 @@
       "W1.3"
      ],
      "files": "src/renderer/math.ts",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #861 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 861,
      "notes": "בעבודה"
     },
     {
@@ -16091,8 +16116,9 @@
       "13.3"
      ],
      "files": "codemagic.yaml",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #860 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 860,
      "notes": "בעבודה (X-Q)"
     },
     {
@@ -16123,7 +16149,7 @@
       "W6.42"
      ],
      "files": "scripts/test-tiers.mjs, scripts/check-vercel-ignore.mjs, e2e/**",
-     "status": "⏳ קוד ב-PR #626, #654, #660, #738 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #626, #654, #660, #738, #844 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 626
     },
@@ -16151,7 +16177,7 @@
       "W6.8"
      ],
      "files": "scripts/vercel-build.mjs, scripts/test-tiers.mjs",
-     "status": "⏳ קוד ב-PR #626 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #626 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 626
     },
@@ -16177,7 +16203,7 @@
       "W6.10"
      ],
      "files": "scripts/check-vercel-ignore.mjs",
-     "status": "⏳ קוד ב-PR #626 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #626 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 626
     },
@@ -16202,7 +16228,7 @@
       "4.2"
      ],
      "files": "src/storage/vault/move.ts",
-     "status": "⏳ קוד ב-PR #635 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #635, #844, #854 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 635
     },
@@ -16229,7 +16255,7 @@
       "W4.2"
      ],
      "files": "e2e/**",
-     "status": "⏳ קוד ב-PR #626 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #626 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 626
     },
@@ -16254,7 +16280,7 @@
       "0.7"
      ],
      "files": "scripts/dod.mjs",
-     "status": "⏳ קוד ב-PR #637, #673, #734 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #637, #673, #734, #844 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 637
     },
@@ -16282,7 +16308,7 @@
       "W6.42"
      ],
      "files": "scripts/train-missing.mjs, plan/train-missing.json",
-     "status": "⏳ קוד ב-PR #648 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #648, #844 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 648
     },
@@ -16307,7 +16333,7 @@
       "4.14"
      ],
      "files": "src/pdf/**",
-     "status": "⏳ קוד ב-PR #665 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #665, #854 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 665
     },
@@ -16331,7 +16357,7 @@
       "0.9"
      ],
      "files": "scripts/ci-doctor.mjs",
-     "status": "⏳ קוד ב-PR #646, #795 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #646, #795 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 646
     },
@@ -16359,7 +16385,7 @@
       "11.2"
      ],
      "files": "e2e/plugins.spec.ts",
-     "status": "⏳ קוד ב-PR #653 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #653 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 653
     },
@@ -16385,7 +16411,7 @@
       "W4.12"
      ],
      "files": "e2e/**",
-     "status": "⏳ קוד ב-PR #654 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #654 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 654
     },
@@ -16409,7 +16435,7 @@
       "W4.9"
      ],
      "files": "src/commands/**",
-     "status": "⏳ קוד ב-PR #686 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #686 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 686
     },
@@ -16433,7 +16459,7 @@
       "W6.16"
      ],
      "files": "scripts/nightly/*.mjs",
-     "status": "⏳ קוד ב-PR #651 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #651 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 651
     },
@@ -16462,7 +16488,7 @@
       "W6.23"
      ],
      "files": "verify/train-5, verify/train-6",
-     "status": "⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת 6; ברכבת 5",
+     "status": "⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת; ברכבת 5",
      "verified": "built",
      "pr": 640
     },
@@ -16489,7 +16515,7 @@
       "W6.3"
      ],
      "files": "src/sync/e2ee/sas.ts, src/lib/embedProviders.ts",
-     "status": "⏳ קוד ב-PR #717 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #717 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 717
     },
@@ -16516,7 +16542,7 @@
       "W9.7"
      ],
      "files": "src/ai/structured/*, scripts/golden/evals/*",
-     "status": "⏳ קוד ב-PR #706, #722, #802 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #706, #722, #802, #893 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 706
     },
@@ -16541,7 +16567,7 @@
       "W8.10"
      ],
      "files": "scripts/lockfile-drift.mjs, scripts/lane-state.mjs",
-     "status": "⏳ קוד ב-PR #660, #741 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #660, #741, #867 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 660
     },
@@ -16566,7 +16592,7 @@
       "W8.12"
      ],
      "files": "src/research/usability/*",
-     "status": "⏳ קוד ב-PR #731 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #731 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 731
     },
@@ -16590,7 +16616,7 @@
       "W7.22"
      ],
      "files": "scripts/supply-chain/*",
-     "status": "⏳ קוד ב-PR #658, #783 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #658, #783 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 658
     },
@@ -16614,7 +16640,7 @@
       "W9.3"
      ],
      "files": "scripts/owner-checklist.mjs",
-     "status": "⏳ קוד ב-PR #673 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #673 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 673
     },
@@ -16638,7 +16664,7 @@
       "W9.5"
      ],
      "files": "mcp-server/src/vault/paths.ts, src/lib/redaction.ts",
-     "status": "⏳ קוד ב-PR #667 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #667 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 667
     },
@@ -16662,7 +16688,7 @@
       "W7.9"
      ],
      "files": "src/text/yiddish.ts, src/text/ladino.ts",
-     "status": "⏳ קוד ב-PR #781, #784 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #781, #784 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 781
     },
@@ -16687,7 +16713,7 @@
       "W7.4"
      ],
      "files": "src/editor/Editor.tsx, src/views/bulk*.ts",
-     "status": "⏳ קוד ב-PR #781, #784 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #781, #784, #850, #852 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 781
     },
@@ -16712,7 +16738,7 @@
       "W7.11"
      ],
      "files": "src/academic/*, src/highlights/scan/*, src/ink/handwriting.ts",
-     "status": "⏳ קוד ב-PR #788 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #788 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 788
     },
@@ -16737,7 +16763,7 @@
       "W8.4"
      ],
      "files": "src/storage/import/notion.ts, scripts/zotero/*",
-     "status": "⏳ קוד ב-PR #789 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #789 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 789
     },
@@ -16764,7 +16790,7 @@
       "W3.9"
      ],
      "files": "src/ai/tts/*, docs/accessibility/*, src-tauri/Cargo.lock",
-     "status": "⏳ קוד ב-PR #796 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #796 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 796
     },
@@ -16792,7 +16818,7 @@
       "W6.39"
      ],
      "files": "scripts/plan-check.mjs, scripts/build.mjs, plan/areas.json",
-     "status": "⏳ קוד ב-PR #637, #734 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #637, #734 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 637
     },
@@ -16817,7 +16843,7 @@
       "W9.8"
      ],
      "files": "/home/claude/w-NC-*",
-     "status": "⏳ קוד — נבדק לא מקוון; ממתין לרכבת 6; הוחלט, אין צורך ב-PR",
+     "status": "⏳ קוד — נבדק לא מקוון; ממתין לרכבת; הוחלט, אין צורך ב-PR",
      "verified": "built"
     },
     {
@@ -16840,7 +16866,7 @@
       "10.3"
      ],
      "files": "visual/*",
-     "status": "⏳ קוד — נבדק לא מקוון; ממתין לרכבת 6; הוחלט, אין צורך ב-PR",
+     "status": "⏳ קוד — נבדק לא מקוון; ממתין לרכבת; הוחלט, אין צורך ב-PR",
      "verified": "built"
     },
     {
@@ -16880,7 +16906,7 @@
       "1.4"
      ],
      "files": "plan.json, scripts/dod.mjs",
-     "status": "⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "node",
      "pr": 618,
      "notes": "⏳ #618 — dod לכל משימה שבדיקת היחידה שלה ירוקה ב-shim על train-4, השאר ל-⏳; מחכה ל-vitest אמיתי ולמיזוג"
@@ -16922,7 +16948,7 @@
       "3.6"
      ],
      "files": "plan.json, scripts/dod.mjs",
-     "status": "⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "node",
      "pr": 618,
      "notes": "⏳ #618 — dod לכל משימה שבדיקת היחידה שלה ירוקה ב-shim על train-4, השאר ל-⏳; מחכה ל-vitest אמיתי ולמיזוג"
@@ -16964,7 +16990,7 @@
       "5.2"
      ],
      "files": "plan.json, scripts/dod.mjs",
-     "status": "⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "node",
      "pr": 618,
      "notes": "⏳ #618 — dod לכל משימה שבדיקת היחידה שלה ירוקה ב-shim על train-4, השאר ל-⏳; מחכה ל-vitest אמיתי ולמיזוג"
@@ -17006,7 +17032,7 @@
       "14.1"
      ],
      "files": "plan.json, scripts/dod.mjs",
-     "status": "⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "node",
      "pr": 618,
      "notes": "⏳ #618 — dod לכל משימה שבדיקת היחידה שלה ירוקה ב-shim על train-4, השאר ל-⏳; מחכה ל-vitest אמיתי ולמיזוג"
@@ -17035,9 +17061,9 @@
       "1.8"
      ],
      "files": "scripts/dod.mjs, plan.json",
-     "status": "⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #868 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "node",
-     "pr": 618,
+     "pr": 868,
      "notes": "⏳ #618 — DOD_GRANDFATHER_BASELINE, ‏dodGrandfathered ו-dodRevoked נמחקו; plan:check מסרב לרשימה; dod 19/19 ב-shim; מחכה למיזוג"
     },
     {
@@ -17061,7 +17087,7 @@
       "W6.39"
      ],
      "files": "scripts/plan-check.mjs",
-     "status": "⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת 6; חלקי: מופעל אחרי רכבת 6",
+     "status": "⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת; חלקי: מופעל אחרי רכבת 6",
      "verified": "built",
      "pr": 618,
      "notes": "⏳ #618 — ״לא התחיל״ לא נחשב התחלה (WIP מ-#502 עם -x); ברירת מחדל קפדנית לא הופעלה: 8 גלים (1→9) עדיין מעל הגבול, צריך החלטה"
@@ -17089,7 +17115,7 @@
       "W6.7"
      ],
      "files": "plan.json, scripts/plan-check.mjs, scripts/migrate-status.mjs",
-     "status": "⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "node",
      "pr": 618,
      "notes": "⏳ #618 — 0 סטטוסים מעל 200 תווים, הפירוט ב-notes ומוצג בלוח; כלל STATUS_MAX ב-plan:check; planBuild ב-shim; מחכה למיזוג"
@@ -17117,7 +17143,7 @@
       "W4.24"
      ],
      "files": "scripts/build.mjs, scripts/plan-check.mjs",
-     "status": "⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "node",
      "pr": 618,
      "notes": "⏳ #618 — plan:check מסרב ל-✅ עם built/node/owner; ‏9 ה-✅* ירדו ל-⏳; planBuild ב-shim; מחכה למיזוג"
@@ -17147,8 +17173,9 @@
       "W6.44"
      ],
      "files": "scripts/verified.mjs, plan/areas.json",
-     "status": "⏳ גל 10 — לא התחיל",
-     "verified": "built"
+     "status": "⏳ ממתין ל-#511 ברכבת",
+     "verified": "built",
+     "pr": 511
     },
     {
      "id": "W10.G10",
@@ -17171,7 +17198,7 @@
       "W1.32"
      ],
      "files": "scripts/p2-ledger.mjs, plan/p2-ledger.json",
-     "status": "⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 618,
      "notes": "⏳ #618 — plan/p2-ledger.md: ‏110 תגובות P2 ב-12 ה-PR-ים: 101 תוקנו, 5 סיכון מקובל, 1 הוחלף, 3 פתוחות (נכתבו 14.11 אחרי W1.32)"
@@ -17205,7 +17232,7 @@
       "W1.17"
      ],
      "files": ".github/workflows/*, src/__tests__/noActions.test.ts",
-     "status": "⏳ קוד ב-PR #643 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #643 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "node",
      "pr": 643,
      "notes": "⏳ #643 (על verify/train-4) — workflows ל-docs/archive/workflows, ‏check-no-workflows ב-hygiene; noActions 4/4 ו-5 בדיקות workflow ירוקות ב-shim"
@@ -17235,7 +17262,7 @@
       "W8.10"
      ],
      "files": "plan.json, MASTER_PLAN.md, plan/board.html",
-     "status": "⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 618,
      "notes": "⏳ #618 — גל 10 (241 משימות) בתוכנית, סטטוס ל-W8.9 ול-W8.10, הלוח נבנה מחדש; plan:check ירוק; מחכה למיזוג"
@@ -17329,8 +17356,9 @@
       "W6.1"
      ],
      "files": "verify/train-6",
-     "status": "⏳ בעבודה",
+     "status": "⏳ רכבת 6 סבב P0 נבנתה (#844, f4ed3b4a8f); ביקורת עצמאית — 1 חמור תוקן ב-#878",
      "verified": "built",
+     "pr": 844,
      "notes": "נבנית עכשיו · החלטות הרכז 15.11: סדר מיזוג: #632 → #655 → #744; ‏#659 לפני #725 ו-#681; ‏#650 לפני #732; ‏#690 לפני #696; ‏#631 לפני #739; ‏#642 לפני #698; ‏#668 לפני #750; דף ההפניה של #745 נכנס אחריו"
     },
     {
@@ -17359,9 +17387,9 @@
       "W6.11"
      ],
      "files": "reports/review-coverage-<sha>.json",
-     "status": "⏳ קוד ב-PR #649 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ רכבת 6 סבב P0 נבנתה (#844, f4ed3b4a8f); ביקורת עצמאית — 1 חמור תוקן ב-#878",
      "verified": "built",
-     "pr": 649
+     "pr": 844
     },
     {
      "id": "W10.Z3",
@@ -17387,7 +17415,7 @@
       "1.8"
      ],
      "files": "reports/release-review-<sha>.md",
-     "status": "⏳ גל 10 — לא התחיל",
+     "status": "⏳ שלב רכבת — אחרי סבב P1",
      "verified": "built"
     },
     {
@@ -17522,7 +17550,7 @@
       "W9.9"
      ],
      "files": "verify/train-6",
-     "status": "⏳ גל 10 — לא התחיל",
+     "status": "⏳ בעבודה",
      "verified": "built",
      "notes": "החלטות הרכז 15.11: סדר מיזוג: #632 → #655 → #744; ‏#659 לפני #725 ו-#681; ‏#650 לפני #732; ‏#690 לפני #696; ‏#631 לפני #739; ‏#642 לפני #698; ‏#668 לפני #750; דף ההפניה של #745 נכנס אחריו"
     },
@@ -17590,7 +17618,7 @@
       "W9.9"
      ],
      "files": "verify/train-6",
-     "status": "⏳ גל 10 — לא התחיל",
+     "status": "⏳ שלב רכבת — אחרי סבב P1",
      "verified": "built",
      "notes": "החלטות הרכז 15.11: סדר מיזוג: #632 → #655 → #744; ‏#659 לפני #725 ו-#681; ‏#650 לפני #732; ‏#690 לפני #696; ‏#631 לפני #739; ‏#642 לפני #698; ‏#668 לפני #750; דף ההפניה של #745 נכנס אחריו"
     },
@@ -17617,7 +17645,7 @@
       "13.5"
      ],
      "files": "$S/audit-w10/*",
-     "status": "⏳ גל 10 — לא התחיל",
+     "status": "⏳ שלב רכבת — אחרי סבב P1",
      "verified": "built"
     },
     {
@@ -17643,7 +17671,7 @@
       "13.5"
      ],
      "files": "$S/audit-w10/*",
-     "status": "⏳ גל 10 — לא התחיל",
+     "status": "⏳ שלב רכבת — אחרי סבב P1",
      "verified": "built"
     },
     {
@@ -17671,7 +17699,7 @@
       "W4.7"
      ],
      "files": "docs/owner/checklist.md",
-     "status": "⏳ קוד ב-PR #673 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #673 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 673
     },
@@ -18527,7 +18555,7 @@
      ],
      "why": "זה התחום היחיד שבו Obsidian חלש בגלוי ב-2026. מוכיחים את היתרון על סט הבדיקה הרשמי של Unicode, לא בטענה.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #661 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #661 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 661,
      "stage": "11.H",
@@ -18557,7 +18585,7 @@
      ],
      "why": "באג Home/End וקפיצות החצים של Obsidian 1.14.2 קיים אצלנו באותה גרסת CodeMirror. מתקנים לפני המתחרה.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #672 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #672 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 672,
      "stage": "11.H",
@@ -18588,7 +18616,7 @@
      ],
      "why": "בלי תרחישים מתועדים אי אפשר לטעון שאנחנו טובים מ-Obsidian ב-RTL.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #672, #712 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #672, #712 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 672,
      "stage": "11.H",
@@ -18618,7 +18646,7 @@
      ],
      "why": "בקשה פתוחה בפורום של Obsidian שאין לה מענה; אצלנו היא סוגרת את הפער האחרון בעריכה דו-כיוונית.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #679 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #679 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 679,
      "stage": "11.H",
@@ -18651,7 +18679,7 @@
      ],
      "why": "מספרים על סטים שכתבנו לא משתווים לאף אחד. מדדים ציבוריים הופכים את ״#1 בעברית״ לעובדה שאפשר לבדוק.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #661, #812 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #661, #812, #838 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 661,
      "stage": "11.H",
@@ -18680,7 +18708,7 @@
      ],
      "why": "היעד ״FLEURS ≤ 15%״ משתנה ב-±12 נקודות לפי נרמול. לוח ivrit.ai משתמש ב-eval-d1 וב-eval-whatsapp.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #661 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #661 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 661,
      "stage": "11.H",
@@ -18712,7 +18740,7 @@
      ],
      "why": "המודל החדש משתווה ל-Whisper-turbo על דיבור אמיתי (5.3/8.8 מול 5.3/7.1) בהורדה קטנה יותר.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #661 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #661 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 661,
      "stage": "11.H",
@@ -18743,7 +18771,7 @@
      ],
      "why": "ההנחה של 6.2 ו-W7.10 שאין קול עברי מותר כבר לא נכונה. זה פותח את ההקראה, את W5.6 ואת ההאזנה ל-PDF.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #661 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #661 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 661,
      "stage": "11.H",
@@ -18775,7 +18803,7 @@
      ],
      "why": "MOS של 5 מדרגים לא משתווה לאף אחד. סבב ASR הוא סינון אוטומטי שאפשר לשחזר.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #661 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #661 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 661,
      "stage": "11.H",
@@ -18806,7 +18834,7 @@
      ],
      "why": "״40 משפטים מקומיים״ לא משתווים לאף מאמר. ניקוד הוא יתרון עברי, רק כשהוא מדוד.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #661 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #661 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 661,
      "stage": "11.H",
@@ -18837,7 +18865,7 @@
      ],
      "why": "אין היום מודל ישויות עברי בקטלוג, ו-PII, הגרף והקישורים צריכים אותו.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #707 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #707, #838 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 707,
      "stage": "11.H",
@@ -18867,7 +18895,7 @@
      ],
      "why": "Shoshan: ‏92.4% מחוץ לתחום ו-0% שגיאות במילים לא מוכרות, מול 12.3% של DictaBERT-lex.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #708 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #708, #838 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 708,
      "stage": "11.H",
@@ -18898,7 +18926,7 @@
      ],
      "why": "שיווק שעומד בבדיקה, מול מתחרים בלי עומק בעברית.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #712 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #712 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 712,
      "stage": "11.H",
@@ -18928,7 +18956,7 @@
      ],
      "why": "חוסך עבודת בעלים ונותן מספר שאפשר להשוות.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #661 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #661, #911 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 661,
      "stage": "11.H",
@@ -18959,7 +18987,7 @@
      ],
      "why": "Zotero ו-Word נכשלים בזה, ואין אפליקציית פתקים שעושה את זה נכון.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #661, #689 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #661, #689 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 661,
      "stage": "11.H",
@@ -18988,7 +19016,7 @@
      ],
      "why": "משפטנים וסטודנטים לא מקבלים את זה בשום מתחרה.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #695 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #695 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 695,
      "stage": "11.H",
@@ -19017,7 +19045,7 @@
      ],
      "why": "לומדי תורה לא מקבלים את זה בשום מתחרה.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #699 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #699, #835, #880 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 699,
      "stage": "11.H",
@@ -19046,7 +19074,7 @@
      ],
      "why": "משלים את W7.9 ביידיש — אף מתחרה לא מציע.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #661 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #661 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 661,
      "stage": "11.H",
@@ -19075,7 +19103,7 @@
      ],
      "why": "הביקורת מצאה חמישה seams מתים (דקדוק, הרצאות, תמלול חי, פלט מובנה, לקוח MCP). בלי שער הדפוס יחזור.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #655 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #655, #844 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 655,
      "stage": "11.I",
@@ -19106,7 +19134,7 @@
      ],
      "why": "הכספת תמיד [B]. רק מגבלה ארכיטקטונית מחזיקה מול הזרקה; 12 הגנות סינון נשברו ביותר מ-90%.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #692, #703 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #692, #703, #844 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 692,
      "stage": "11.I",
@@ -19135,7 +19163,7 @@
      ],
      "why": "שכבה שנייה מעל האישור, לפי CaMeL ו-spotlighting.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #692, #703 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #692, #703 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 692,
      "stage": "11.I",
@@ -19165,9 +19193,9 @@
      ],
      "why": "מדד ציבורי במקום 130 מקרים מול מודל מדומה שמציית.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #692, #703 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #703 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
-     "pr": 692,
+     "pr": 703,
      "stage": "11.I",
      "research": [
       "R4.7"
@@ -19196,7 +19224,7 @@
      ],
      "why": "VS Code, ‏LM Studio ו-Notion כבר נותנים MCP עם אישור לכל כלי. נעיצה מונעת rug-pull של תיאור כלי.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #728 — נבדק לא מקוון; ממתין לרכבת 6; בתוך לקוח ה-MCP",
+     "status": "⏳ קוד ב-PR #728 — נבדק לא מקוון; ממתין לרכבת; בתוך לקוח ה-MCP",
      "verified": "built",
      "pr": 728,
      "stage": "11.I",
@@ -19224,7 +19252,7 @@
      ],
      "why": "בלי elicitation לפי המפרט שרתים חדשים לא יעבדו, ו-URL מטעה הוא וקטור דיוג.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #728 — נבדק לא מקוון; ממתין לרכבת 6; בתוך לקוח ה-MCP",
+     "status": "⏳ קוד ב-PR #728 — נבדק לא מקוון; ממתין לרכבת; בתוך לקוח ה-MCP",
      "verified": "built",
      "pr": 728,
      "stage": "11.I",
@@ -19254,7 +19282,7 @@
      ],
      "why": "Bear 2.9 ו-Heptabase כבר מציעים היקף וציטוטים. היקף הוא יתרון פרטיות שמתאים לנו.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #787 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #787, #825, #833, #879 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 787,
      "stage": "11.I",
@@ -19283,7 +19311,7 @@
      ],
      "why": "המפרט פורסם אחרי שהשרת נכתב; עכשיו אפשר לאמת.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #767 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #767 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 767,
      "stage": "11.I",
@@ -19309,7 +19337,7 @@
      ],
      "why": "ההבטחה ״הכול ביומן הפרטיות״ נכונה היום רק בחצי.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #780 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #780, #833 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 780,
      "stage": "11.I",
@@ -19340,7 +19368,7 @@
      ],
      "why": "ברירת המחדל (qwen2.5:7b) ישנה בשני דורות. Gemma 4 ו-Qwen3.5 הם Apache-2.0 ותומכים בכלים.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #711 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #711 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 711,
      "stage": "11.I",
@@ -19370,7 +19398,7 @@
      ],
      "why": "בלי AlephBench אין דרך לבחור מודל עברי לפי ראיות.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #711, #757 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #711, #757 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 711,
      "stage": "11.I",
@@ -19400,7 +19428,7 @@
      ],
      "why": "DictaLM 1.7B חזק בניקוד וחלש בתרגום. צריך מדידה, לא הנחה.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #711, #757 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #711, #757 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 711,
      "stage": "11.I",
@@ -19431,7 +19459,7 @@
      ],
      "why": "HeQ dev רווי (1.0 מול 1.0), ולכן אף החלטה עליו לא אמיתית.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #729, #793 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #729, #793, #826, #884 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 729,
      "stage": "11.I",
@@ -19460,7 +19488,7 @@
      ],
      "why": "פתקים הם מסמכים ארוכים עם מבנה; קידומת הקשר הורידה כשלי אחזור ב-49% אצל Anthropic.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #729 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #729, #825, #826, #879, #884 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 729,
      "stage": "11.I",
@@ -19490,7 +19518,7 @@
      ],
      "why": "195/200 נמדד מול mock שמחליק בכוונה. זה לא מספר אמינות.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #735, #743, #757 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #735, #743, #757 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 735,
      "stage": "11.I",
@@ -19521,7 +19549,7 @@
      ],
      "why": "ל-Firefox בלינוקס ובאנדרואיד ולהרבה מכשירי אנדרואיד אין WebGPU.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #724 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #724 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 724,
      "stage": "11.I",
@@ -19550,7 +19578,7 @@
      ],
      "why": "LM Studio הוא ה-runtime המקומי השני בגודלו, עם הרשאות.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #724 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #724 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 724,
      "stage": "11.I",
@@ -19581,7 +19609,7 @@
      ],
      "why": "הביקורת מצאה שוב ושוב טענות על סטים שהכותבים כתבו. צריך שער מכני.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #735, #743, #757, #793 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #735, #743, #757, #793, #826, #838, #884, #885, #900 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 735,
      "stage": "11.I",
@@ -19611,7 +19639,7 @@
      ],
      "why": "התכונה המובילה של 2026 אצל Notion, ‏Tana, ‏Keep ו-Copilot — כולן בענן ובתשלום.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #812 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #812, #897 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 812,
      "stage": "11.I",
@@ -19639,7 +19667,7 @@
      ],
      "why": "מה שהופך הקלטה לפעולה.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #812 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #812 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 812,
      "stage": "11.I",
@@ -19667,7 +19695,7 @@
      ],
      "why": "דיאריזציה מול fakeOrt אינה מדידה (W10.B7); לא מציגים יכולת שאין.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #812 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #812 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 812,
      "stage": "11.I",
@@ -19696,7 +19724,7 @@
      ],
      "why": "התקן אומץ ב-30+ כלים; מיומנות שלא עוברת validate לא תעבור לכלים אחרים.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #761 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #761 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 761,
      "stage": "11.I",
@@ -19726,7 +19754,7 @@
      ],
      "why": "Obsidian Copilot 4 כבר מארח סוכנים חיצוניים; משתמשים מתקדמים יצפו לזה.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #753 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #753 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 753,
      "stage": "11.I",
@@ -19755,7 +19783,7 @@
      ],
      "why": "הקריפטו נכתב ביד ולא עבר ביקורת חיצונית. המתחרים מפרסמים דוחות Cure53 ו-Trail of Bits; טענה לא מגובה תיתפס בהשקה.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #650, #676, #701, #732, #775 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #650, #676, #701, #732, #775, #844 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 650,
      "stage": "11.S",
@@ -19786,7 +19814,7 @@
      ],
      "why": "ה-manifest של Tauri לא חתום (CVE-2026-95625), והאופציה שמתקנת לא מופיעה בהערות השחרור. מגינים בקוד שלנו.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #691, #800 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #691, #800, #844 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 691,
      "stage": "11.S",
@@ -19814,7 +19842,7 @@
      ],
      "why": "בלי חתימה על ה-manifest ההגנה של W11.S2 לא שלמה.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #691 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #691 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 691,
      "stage": "11.S",
@@ -19842,7 +19870,7 @@
      ],
      "why": "בלי Actions, רק השרת יכול לאכוף; ‏main קיבל את #432 בלי קבלה.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #694 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #694, #844 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 694,
      "stage": "11.S",
@@ -19874,7 +19902,7 @@
      ],
      "why": "Scorecard ו-CodeQL קיימים רק כ-YAML של Actions, אז אף אחד מהם לא רץ.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #726 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #726 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 726,
      "stage": "11.S",
@@ -19904,7 +19932,7 @@
      ],
      "why": "ל-Obsidian יש בחירה בין מיזוג לקובץ קונפליקט מאז 1.9.7.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #713 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #713, #907 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 713,
      "stage": "11.S",
@@ -19932,7 +19960,7 @@
      ],
      "why": "המספר הנוכחי נמדד על זוגות שאנחנו יצרנו.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #748, #794 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #748, #794, #827 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 748,
      "stage": "11.S",
@@ -19962,7 +19990,7 @@
      ],
      "why": "בלי שחזור, סיסמה שנשכחה מאבדת את הכספת — התלונה הראשונה ב-E2EE.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #768, #769, #778 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #768, #769, #778 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 768,
      "stage": "11.S",
@@ -19991,7 +20019,7 @@
      ],
      "why": "Anytype ו-Standard Notes נותנים דרך לשחזר; Obsidian Sync לא.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #768, #769, #778 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #768, #769, #778 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 768,
      "stage": "11.S",
@@ -20019,7 +20047,7 @@
      ],
      "why": "פתיחה בלי סיסמה, בלי לוותר על E2EE.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #778 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #778 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 778,
      "stage": "11.S",
@@ -20049,7 +20077,7 @@
      ],
      "why": "תיקון 13 בתוקף עם קנסות; GDPR חל על המטא-דאטה של הממסר גם כשהתוכן מוצפן.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #765 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #765 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 765,
      "stage": "11.S",
@@ -20079,7 +20107,7 @@
      ],
      "why": "סימני אמון הם התנאי לאימוץ במוצר פרטיות.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #701, #775, #785, #804 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #701, #775, #785, #804 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 701,
      "stage": "11.S",
@@ -20110,7 +20138,7 @@
      ],
      "why": "Obsidian ו-Proton מפרסמים; תווית שלא תואמת ליומן היא סיכון בחנות.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #785 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #785 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 785,
      "stage": "11.S",
@@ -20141,7 +20169,7 @@
      ],
      "why": "זה הסטנדרט מאז מאי 2026; עם ארגז החול של QuickJS אנחנו מעל Obsidian.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #701, #714 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #701, #714, #910 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 701,
      "stage": "11.S",
@@ -20168,7 +20196,7 @@
      ],
      "why": "Smart App Control חוסם אפליקציות לא חתומות, ו-Artifact Signing לא פתוח ליחיד בישראל.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #792 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #792 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 792,
      "stage": "11.S",
@@ -20193,7 +20221,7 @@
      ],
      "why": "למנוע מעבר יקר בלי רווח.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #794 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #794 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 794,
      "stage": "11.S",
@@ -20220,7 +20248,7 @@
      ],
      "why": "מדיניות default מסתירה כיורים שצריכים להיות מפורשים.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #798 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #798 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 798,
      "stage": "11.S",
@@ -20249,7 +20277,7 @@
      ],
      "why": "שכבת הגנה מול XSS ותלויות עוינות ב-webview.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #800 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #800 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 800,
      "stage": "11.S",
@@ -20278,7 +20306,7 @@
      ],
      "why": "המטרה: שליטה ביעד ובהסכמה, לא רק חסימה.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #807 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #807 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 807,
      "stage": "11.S",
@@ -20307,8 +20335,9 @@
      ],
      "why": "vault-100k.ts מייצר טקסט מ-20 מילים ולא בודק מורפולוגיה, גרף או פתקים ארוכים.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #816, #831, #875 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 816,
      "stage": "11.Q",
      "research": [
       "R5.5"
@@ -20336,8 +20365,9 @@
      ],
      "why": "Obsidian לא מפרסם מספרים; מספרים שאפשר לשחזר הם יתרון.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #816, #875 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 816,
      "stage": "11.Q",
      "research": [
       "R5.5"
@@ -20364,8 +20394,9 @@
      ],
      "why": "קישוט של כל המסמך הוא מה שגורם להקלדה איטית בפתקים ארוכים.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #817 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 817,
      "stage": "11.Q",
      "research": [
       "R5.6"
@@ -20392,8 +20423,9 @@
      ],
      "why": "ProseMirror מצייר את כל המסמך ואין לו וירטואליזציה.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #823, #824 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 823,
      "stage": "11.Q",
      "research": [
       "R5.6"
@@ -20422,8 +20454,9 @@
      ],
      "why": "ב-Obsidian פתק של 2MB תוקע את המעבד.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #817, #823, #824 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 817,
      "stage": "11.Q",
      "research": [
       "R5.6"
@@ -20451,8 +20484,9 @@
      ],
      "why": "sr/*.sr.ts מייבאים חבילה שלא הייתה ב-package.json, ולכן קורא המסך לא רץ בכלל.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #829 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 829,
      "stage": "11.Q",
      "research": [
       "R5.7",
@@ -20482,8 +20516,9 @@
      ],
      "why": "הצהרה היא דרישה חוקית בישראל; ‏EN 301 549 v4.1.1 עבר ל-WCAG 2.2.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #840 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 840,
      "stage": "11.Q",
      "research": [
       "R5.8"
@@ -20511,8 +20546,9 @@
      ],
      "why": "spec.json הוא סט זהב ציבורי ואמיתי.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #847, #877 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 847,
      "stage": "11.Q",
      "research": [
       "R5.9"
@@ -20539,8 +20575,9 @@
      ],
      "why": "ציון מכלי שכתבנו בעצמנו אי אפשר להשוות לשום דבר בחוץ.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #853 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 853,
      "stage": "11.Q",
      "research": [
       "R5.9"
@@ -20568,8 +20605,9 @@
      ],
      "why": "Safari חסר createWritable; ב-Obsidian במובייל IndexedDB הוא צוואר הבקבוק.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #856 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 856,
      "stage": "11.Q",
      "research": [
       "R5.12"
@@ -20596,8 +20634,9 @@
      ],
      "why": "בחירת ה-backend לפי מספרים.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #856 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 856,
      "stage": "11.Q",
      "research": [
       "R5.12"
@@ -20623,8 +20662,9 @@
      ],
      "why": "יתירות אפשרית בלי GitHub Actions.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #858 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 858,
      "stage": "11.Q",
      "research": [
       "R5.15"
@@ -20652,7 +20692,7 @@
      ],
      "why": "Evernote העלה מחירים ביולי 2026 — חלון הגירה. Apple Notes ו-OneNote עוברים ב-W10.E48/E49.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #690, #696 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #690, #696 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 690,
      "stage": "11.P",
@@ -20683,7 +20723,7 @@
      ],
      "why": "כל הבדיקות היום סינתטיות; oracle חיצוני מוכיח ״שום דבר לא הולך לאיבוד״.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #690, #696 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #690, #696 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 690,
      "stage": "11.P",
@@ -20713,7 +20753,7 @@
      ],
      "why": "מעבר מ-Obsidian הוא ערוץ הגיוס הראשי, וה-golden של W1.11 נגזר מהתיעוד.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #797 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #797, #820, #842 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 797,
      "stage": "11.P",
@@ -20744,7 +20784,7 @@
      ],
      "why": "בלי מדד הפעלה אי אפשר לדעת אם ההשקה עובדת.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #659, #725, #732, #811 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #659, #725, #732, #811 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 659,
      "stage": "11.P",
@@ -20772,7 +20812,7 @@
      ],
      "why": "הבדיקה של W4.35 לא רצה אף פעם.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #650, #659, #725 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #650, #659, #725 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 650,
      "stage": "11.P",
@@ -20802,7 +20842,7 @@
      ],
      "why": "מי שעוזב אפליקציה מחפש קודם את הפתקים הישנים שלו.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #681 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #681 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 681,
      "stage": "11.P",
@@ -20830,7 +20870,7 @@
      ],
      "why": "ערוץ רכישה בזמן חלון ההגירה מ-Evernote.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #681 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #681 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 681,
      "stage": "11.P",
@@ -20860,7 +20900,7 @@
      ],
      "why": "Obsidian לוכד ממסך הנעילה לפני שהכספת נטענת; הקוד שלנו לא נכנס ל-Xcode.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #774, #782 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #774, #782 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 774,
      "stage": "11.P",
@@ -20889,7 +20929,7 @@
      ],
      "why": "שיתוף הוא ערוץ הלכידה הראשי בטלפון.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #774 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #774 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 774,
      "stage": "11.P",
@@ -20919,7 +20959,7 @@
      ],
      "why": "בלי זה הלכידה בטלפון נשארת PWA.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #774, #782 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #774, #782 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 774,
      "stage": "11.P",
@@ -20949,7 +20989,7 @@
      ],
      "why": "מ-31.8.2026 גוגל דורשת API 36; אפל דורשת Xcode 26.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #791 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #791 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 791,
      "stage": "11.P",
@@ -20978,7 +21018,7 @@
      ],
      "why": "18% מהנטישה על תמחור; Evernote ו-Anytype ספגו ביקורת על צמצום החינם.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #705 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #705 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 705,
      "stage": "11.P",
@@ -21003,7 +21043,7 @@
      ],
      "why": "שני ניסויי origin trial מחליפים את beforeinstallprompt.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #808 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #808 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 808,
      "stage": "11.P",
@@ -21033,8 +21073,9 @@
      ],
      "why": "כלי בלי חשבון עוקף את רוב החיכוך של החוזר; NetFree חוסם CDN.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ בעבודה",
+     "status": "⏳ קוד ב-PR #813 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 813,
      "stage": "11.P",
      "research": [
       "R6.13"
@@ -21062,7 +21103,7 @@
      ],
      "why": "12% מהתלונות על שינויי ממשק כפויים.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #811 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #811 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 811,
      "stage": "11.P",
@@ -21093,7 +21134,7 @@
      ],
      "why": "השקה גלובלית לפני שהמוצר נבדק שורפת את ההזדמנות היחידה ב-HN וב-PH.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #650, #732 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #650, #732, #844 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 650,
      "stage": "11.L",
@@ -21123,7 +21164,7 @@
      ],
      "why": "רשימת יציאה שאי אפשר לסמן ביד.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #650, #732 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #650, #732 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 650,
      "stage": "11.L",
@@ -21153,7 +21194,7 @@
      ],
      "why": "נכסי השקה מוכנים לפני M3.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #804 — נבדק לא מקוון; ממתין לרכבת 6",
+     "status": "⏳ קוד ב-PR #804 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
      "pr": 804,
      "stage": "11.L",
@@ -22074,7 +22115,7 @@
      ],
      "why": "משימות ה-Mac של גל 11 רצות על ראש אחד שנבדק.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 11 — לא התחיל",
+     "status": "⏳ שלב רכבת — אחרי סבב P1",
      "verified": "built",
      "stage": "11.Q",
      "research": []
@@ -22114,7 +22155,7 @@
      ],
      "why": "סגירת גל 11 בענן לפני ריצת ה-Mac האחרונה.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 11 — לא התחיל",
+     "status": "⏳ שלב רכבת — אחרי סבב P1",
      "verified": "built",
      "stage": "11.Q",
      "research": []
@@ -22149,8 +22190,9 @@
      ],
      "why": "מגמה 4 ב-R1: Tana, ‏Capacities, ‏Logseq DB ו-Anytype בנויים על סוגים. אצלנו הסוג חייב להישאר Markdown רגיל, אחרת מאבדים את היתרון מול Logseq DB שעבר ל-SQLite.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #820, #831, #833, #837, #887, #894, #901 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 820,
      "stage": "12.T",
      "decision": "N1",
      "reuse": [
@@ -22182,8 +22224,9 @@
      ],
      "why": "בלי ממשק, סוג הוא רק YAML. Capacities ו-Tana מנצחים בזה שהשדות מופיעים לבד כשמסמנים אובייקט.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #820, #849 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 820,
      "stage": "12.T",
      "decision": "N1",
      "reuse": [
@@ -22215,8 +22258,9 @@
      ],
      "why": "Tana פותח לכל supertag טבלה של כל הצמתים שלו. אצלנו מנוע ה-Bases כבר קיים, כך שזה חיבור ולא מנוע חדש.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #831, #839, #842, #865, #892, #898 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 831,
      "stage": "12.T",
      "decision": "N1",
      "reuse": [
@@ -22246,8 +22290,9 @@
      ],
      "why": "Bear 2.9 ו-Heptabase MCP 0.11 הם הרף ב-2026; סוכן שיודע מה זה ״ספר״ אצל המשתמש כותב נתונים נקיים.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #820, #833 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 820,
      "stage": "12.T",
      "decision": "N1",
      "reuse": [
@@ -22279,8 +22324,9 @@
      ],
      "why": "Bases כבר מציג table/cards/list/kanban/map/calendar/timeline (BasesBlock.tsx). הפער הוא התאמה מדויקת לקובץ של Obsidian, שהוא ערוץ המעבר העיקרי (R1 #7, #8).",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #842 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 842,
      "stage": "12.T",
      "decision": "U1",
      "reuse": [
@@ -22310,8 +22356,9 @@
      ],
      "why": "Notion מוביל בקשרים וב-rollups (R1, ‏10/10 במסדי נתונים); אצלנו W1.12 נתן אותם ל-Bases, והחיבור לסוגים הוא מה שהופך אותם לשימושיים.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #820, #831, #892, #898 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 820,
      "stage": "12.T",
      "decision": "U1",
      "reuse": [
@@ -22341,8 +22388,9 @@
      ],
      "why": "ייבוא הוא ערוץ הצמיחה (R6 §1.3). P2 כי W8.2 הוא P2, ולפי כלל קו החיתוך P1 לא תלוי בו.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #898 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 898,
      "stage": "12.T",
      "decision": "U1",
      "reuse": [
@@ -22374,8 +22422,9 @@
      ],
      "why": "הבקשה המרכזית של הבעלים. מקור לכל קשת הוא מה שמבדיל גרף ידע מגרף ״AI אמר״, ומאפשר לבדוק כל טענה מול הפסקה.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #820, #837, #838, #839, #892, #895, #901 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 820,
      "stage": "12.E",
      "decision": "E",
      "reuse": [
@@ -22411,8 +22460,9 @@
      ],
      "why": "החילוץ הוא הבסיס. מודלים בעברית כבר נבחרו ב-W11.H11, ולכן לא בוחרים מחדש.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #838 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 838,
      "stage": "12.E",
      "decision": "E",
      "reuse": [
@@ -22448,8 +22498,9 @@
      ],
      "why": "בעברית ״לירושלים״, ״בירושלים״ ו״שבירושלים״ הן אותה ישות. בלי זה הגרף מתפצל לעשרות צמתים ולא שווה כלום.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #838 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 838,
      "stage": "12.E",
      "decision": "E",
      "reuse": [
@@ -22484,8 +22535,9 @@
      ],
      "why": "LLM שממציא קשרים הוא הסיכון הגדול. ציטוט מאומת לכל קשת ותור אישור הופכים את זה לכלי שאפשר לסמוך עליו.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #838 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 838,
      "stage": "12.E",
      "decision": "E",
      "reuse": [
@@ -22517,8 +22569,9 @@
      ],
      "why": "המשתמש הוא הסמכות. בלי מיזוג ופיצול נוחים, שגיאות האיחוד נשארות לתמיד.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #839, #865, #869, #886, #895 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 839,
      "stage": "12.E",
      "decision": "E",
      "reuse": [
@@ -22548,8 +22601,9 @@
      ],
      "why": "כך הגרף הופך לשימושי בלי לפתוח תצוגת גרף בכלל.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #839, #865 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 839,
      "stage": "12.E",
      "decision": "E",
      "reuse": [
@@ -22581,8 +22635,9 @@
      ],
      "why": "הבעלים ביקש במפורש סינון, מחוון זמן ושכונה. הרנדרר כבר קיים; לא בונים שני.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #839, #889 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 839,
      "stage": "12.E",
      "decision": "E",
      "reuse": [
@@ -22614,8 +22669,9 @@
      ],
      "why": "ייצוא פתוח הוא חלק מהבטחת ״הנתונים שלך״ — אפשר לקחת את הגרף ל-Neo4j, ל-Gephi או ל-SPARQL.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #837 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 837,
      "stage": "12.E",
      "decision": "E",
      "reuse": [
@@ -22649,8 +22705,9 @@
      ],
      "why": "הבעלים ביקש precision ו-recall על סט ציבורי. HeRE (AACL 2026) הוא סט חילוץ היחסים העברי הראשון עם סט מבחן ידני.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #838 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 838,
      "stage": "12.E",
      "decision": "E",
      "reuse": [
@@ -22680,8 +22737,9 @@
      ],
      "why": "אופציונלי ודורש רשת, ולכן P2. ה-P1 לא תלוי בו.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #869 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 869,
      "stage": "12.E",
      "decision": "E",
      "reuse": [
@@ -22711,8 +22769,9 @@
      ],
      "why": "Heptabase MCP 0.11 הוסיף ציטוטים ברמת פסקה (R1). אצלנו הקוד מאמת ציטוטים כבר, אבל ברמת שורה ובלי עוגן יציב.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #825, #826, #879, #884, #885, #895 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 825,
      "stage": "12.A",
      "decision": "U3",
      "reuse": [
@@ -22743,8 +22802,9 @@
      ],
      "why": "Bear 2.9 הציב רף של היקף לפי תגית. היקף אחד לשני המסלולים מונע מצב שבו הסוכן החיצוני מוגבל והפנימי לא.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #825, #826, #879, #884 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 825,
      "stage": "12.A",
      "decision": "U3",
      "reuse": [
@@ -22775,8 +22835,9 @@
      ],
      "why": "קל לטעון ״תשובות עם מקורות״. HeQ נותן לכל שאלה פסקה ידועה, כך שאפשר למדוד אם הציטוט נכון.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #826, #884 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 826,
      "stage": "12.A",
      "decision": "U3",
      "reuse": [
@@ -22804,8 +22865,9 @@
      ],
      "why": "שפת השאילתות והחיפושים השמורים כבר קיימים (W2.12). הפער היחיד שמצאנו: הם לא עוברים בין מכשירים.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #848, #875 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 848,
      "stage": "12.A",
      "decision": "U3",
      "reuse": [
@@ -22838,8 +22900,9 @@
      ],
      "why": "לימוד בחברותא הוא דרך הלימוד המרכזית בעולם התורני, ואף אפליקציית פתקים לא תומכת בו. ספריא נותנת טקסטים עם רישיון לכל גרסה, וקישורים ב-CC-BY 4.0.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #835, #845, #880, #881 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 835,
      "stage": "12.H",
      "decision": "N2",
      "reuse": [
@@ -22872,8 +22935,9 @@
      ],
      "why": "החלק הגלוי של חברותא. הכול מורכב מרכיבים שכבר בקוד: ספריא, חדרים מוצפנים, ניקוד לתצוגה.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #845, #881 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 845,
      "stage": "12.H",
      "decision": "N2",
      "reuse": [
@@ -22903,8 +22967,9 @@
      ],
      "why": "ישיבות ובתי מדרש עובדים הרבה בלי רשת או עם NetFree (W11.P14). חדר שנשאר על הממסר לתמיד הוא סיכון פרטיות.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #835, #880 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 835,
      "stage": "12.H",
      "decision": "N2",
      "reuse": [
@@ -22933,8 +22998,9 @@
      ],
      "why": "אין אפליקציית פתקים שמחברת בין לוח הלימוד לפתקים. P2 כי W2.10 הוא P2.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #859 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 859,
      "stage": "12.H",
      "decision": "N12",
      "reuse": [
@@ -22964,8 +23030,9 @@
      ],
      "why": "סטודנטים הם קהל השקה (W11.L5). P2 כי W7.8 הוא P2.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #874 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 874,
      "stage": "12.H",
      "decision": "N12",
      "reuse": [
@@ -22994,8 +23061,9 @@
      ],
      "why": "הקוד לתרגום קיים; מה שחסר זה תצוגה ללימוד ולכתיבה דו-לשונית. P2 כי זה לא בלב ההשקה.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #876 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 876,
      "stage": "12.H",
      "decision": "N9",
      "reuse": [
@@ -23024,8 +23092,9 @@
      ],
      "why": "R6 מצא שתכנון יום הוא לולאת שימור. הקוד לימי עבודה ולחגים כבר קיים.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #871 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 871,
      "stage": "12.H",
      "decision": "N-timeblock",
      "reuse": [
@@ -23055,8 +23124,9 @@
      ],
      "why": "בלי זמנים אמיתיים ״שבת חסומה״ היא יום שלם במקום מכניסה עד יציאה.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #871, #894 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 871,
      "stage": "12.H",
      "decision": "N-timeblock",
      "reuse": [
@@ -23086,7 +23156,7 @@
      ],
      "why": "Heptabase מוביל בקריאה (9/10 ב-R1) בזכות הדגשות שהופכות לכרטיסים על לוח. אצלנו ההדגשות והקנבס קיימים; חסר החיבור.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ בעבודה",
      "verified": "built",
      "stage": "12.R",
      "decision": "N4",
@@ -23118,7 +23188,7 @@
      ],
      "why": "pdf.js תומך ב-spread רק בסדר משמאל לימין. ספר עברי סרוק בתצוגה כפולה הפוכה הוא באג שמשתמש עברי רואה מיד.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ בעבודה",
      "verified": "built",
      "stage": "12.R",
      "decision": "U7",
@@ -23149,7 +23219,7 @@
      ],
      "why": "Zotero לא מייצר רשימת APA עברית נכונה (R2 §1.10). זה מחבר שני דברים שכבר בנויים.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ בעבודה",
      "verified": "built",
      "stage": "12.R",
      "decision": "U7",
@@ -23180,7 +23250,7 @@
      ],
      "why": "הדיו קיים (W5.27) והמדידה מתוכננת (W7.11, ‏W11.H14). מה שנשאר הוא רק החיבור לחיפוש, ורק אחרי הוכחה.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ בעבודה",
      "verified": "built",
      "stage": "12.R",
      "decision": "N5",
@@ -23211,7 +23281,7 @@
      ],
      "why": "אף מתחרה לא נותן חיפוש בכספת כפי שהייתה. ההיסטוריה המלאה כבר נשמרת (3.2 ✅), אז זו בעיקר שאילתה חדשה.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ בעבודה",
      "verified": "built",
      "stage": "12.S",
      "decision": "N3",
@@ -23243,7 +23313,7 @@
      ],
      "why": "השימוש הגלוי של S1.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ בעבודה",
      "verified": "built",
      "stage": "12.S",
      "decision": "N3",
@@ -23273,7 +23343,7 @@
      ],
      "why": "סנכרון סלקטיבי (rules.ts) ומיזוג תלת-כיווני (W1.9) כבר קיימים; חסר רק התצוגה בשלושה טורים.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ בעבודה",
      "verified": "built",
      "stage": "12.S",
      "decision": "U5",
@@ -23305,7 +23375,7 @@
      ],
      "why": "Craft מוכר תוכנית משפחה; אצלנו זה אפשרי בלי חשבונות. P2 כי זה תלוי בקריפטו שעוד לא עבר ביקורת חיצונית.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ בעבודה",
      "verified": "built",
      "stage": "12.S",
      "decision": "N11",
@@ -23335,7 +23405,7 @@
      ],
      "why": "הפרסום קיים (4.18, ‏W7.19); ״גן דיגיטלי״ הוא בעיקר backlinks וגרף. Quartz כבר תומך ב-RTL, אז הרף הוא לעשות את זה טוב יותר בעברית.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ בעבודה",
      "verified": "built",
      "stage": "12.S",
      "decision": "N10",
@@ -23365,7 +23435,7 @@
      ],
      "why": "ב-Obsidian ערכות נשברות ב-RTL. כרטיסי פרטיות והרשאות כבר נבנו (W11.S14, ‏W1.20), כך שהחלק החדש הוא רק RTL.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ בעבודה",
      "verified": "built",
      "stage": "12.S",
      "decision": "U9",
@@ -23395,8 +23465,9 @@
      ],
      "why": "הפורמטים האלה כבר קיימים בקוד בשני הכיוונים. אין טעם לבנות אותם שוב; חסרה הוכחה מה עובד.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #855 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 855,
      "stage": "12.F",
      "decision": "F",
      "reuse": [
@@ -23423,8 +23494,9 @@
      ],
      "why": "Typst הוא תחליף מודרני ל-LaTeX עם RTL טוב, והקומפיילר רץ בדפדפן. P2 כי LaTeX כבר קיים.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #873 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 873,
      "stage": "12.F",
      "decision": "F",
      "reuse": [
@@ -23450,8 +23522,9 @@
      ],
      "why": "DOCX ו-EPUB כבר קיימים בשני הכיוונים; ODT חסר בייצוא, והוא הפורמט של משרדי ממשלה ובתי ספר שעובדים עם LibreOffice.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #863 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 863,
      "stage": "12.F",
      "decision": "F",
      "reuse": [
@@ -23479,8 +23552,9 @@
      ],
      "why": "ייבוא ipynb קיים; תצוגה בלי המרה היא מה שחוקרים מצפים לו.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #887 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 887,
      "stage": "12.F",
      "decision": "F",
      "reuse": [
@@ -23509,8 +23583,9 @@
      ],
      "why": "CSV ו-XLSX כבר מיובאים, אבל רק כהמרה. Obsidian Bases לא פותח CSV, וזה פער שקל לנצל.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #887 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 887,
      "stage": "12.F",
      "decision": "F",
      "reuse": [
@@ -23540,8 +23615,9 @@
      ],
      "why": "אנשי קשר הם המקור הטבעי לישויות ״אדם״. קטן וזול.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #901 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 901,
      "stage": "12.F",
      "decision": "F",
      "reuse": []
@@ -23565,8 +23641,9 @@
      ],
      "why": "המפה קיימת; GPX חסר. מטיילים וחוקרי שטח בישראל משתמשים בו הרבה.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #887 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 887,
      "stage": "12.F",
      "decision": "F",
      "reuse": [
@@ -23595,8 +23672,9 @@
      ],
      "why": "זה פורמט שהבעלים ביקש, ולא תכונת קול חדשה: הוא משתמש רק בתמלולים שכבר קיימים.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #897 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 897,
      "stage": "12.F",
      "decision": "F",
      "reuse": [
@@ -23622,8 +23700,9 @@
      ],
      "why": "יש טבלאות נתונים, SQL ו-CSV, אבל אין חישוב תאים קטן בתוך פתק. מנוע הנוסחאות כבר קיים.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #890 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 890,
      "stage": "12.X",
      "decision": "X",
      "reuse": [
@@ -23653,7 +23732,7 @@
      ],
      "why": "Readwise ו-Capacities מראים שרשימת קריאה שמתעדכנת לבד היא סיבה לחזור כל יום.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ בעבודה",
      "verified": "built",
      "stage": "12.X",
      "decision": "X",
@@ -23684,7 +23763,7 @@
      ],
      "why": "מטריצת סקירת הספרות (W5.12) קיימת; גרף ציטוטים הוא התצוגה שחוקרים מבקשים.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ בעבודה",
      "verified": "built",
      "stage": "12.X",
      "decision": "X",
@@ -23716,8 +23795,9 @@
      ],
      "why": "יש גרפים מבלוקי נתונים, אבל לא מ-Bases. ECharts כבר בחבילה, ולכן אין תלות חדשה.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #862, #864, #872, #875, #886, #887, #892, #902 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 862,
      "stage": "12.V",
      "decision": "V",
      "reuse": [
@@ -23746,8 +23826,9 @@
      ],
      "why": "שתי תצוגות שמראות מבנה שהגרף מסתיר.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #886, #889, #902 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 886,
      "stage": "12.V",
      "decision": "V",
      "reuse": [
@@ -23773,8 +23854,9 @@
      ],
      "why": "קל, וממחיש מבנה של כספת גדולה.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #864 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 864,
      "stage": "12.V",
      "decision": "V",
      "reuse": []
@@ -23801,8 +23883,9 @@
      ],
      "why": "מתאים לסטודנטים, לעיתונאים ולמשפטנים — קהלים מ-R6. משתמש בקשרים של W12.T6 ולא בגרף חדש.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #892 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 892,
      "stage": "12.V",
      "decision": "V",
      "reuse": [
@@ -23832,8 +23915,9 @@
      ],
      "why": "תצוגת לוח לועזית יש בכל מקום. בתצוגה עברית אנחנו לבד. P2 כי W2.10 הוא P2.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #862, #872 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 862,
      "stage": "12.V",
      "decision": "V",
      "reuse": [
@@ -23862,8 +23946,9 @@
      ],
      "why": "דשבורד הוא פשוט פתק עם הטמעות. כל הרכיבים כבר קיימים חוץ מהפריסה.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #848, #875 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 848,
      "stage": "12.V",
      "decision": "V",
      "reuse": [
@@ -23897,8 +23982,9 @@
      ],
      "why": "הבעלים דרש RTL, נגישות ועבודה בלי רשת לכל תצוגה. שער אחד אוכף את זה על כולן.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #902 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 902,
      "stage": "12.V",
      "decision": "V",
      "reuse": []
@@ -23922,8 +24008,9 @@
      ],
      "why": "מסננים לגרף כבר קיימים (graphModel.passes); מה שחסר זה ציר הזמן.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #889, #902 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 889,
      "stage": "12.V",
      "decision": "U6",
      "reuse": [
@@ -23953,8 +24040,9 @@
      ],
      "why": "אאוטליינר, הטמעות והפניות לבלוקים כבר קיימים (4.7, ‏4.8). Logseq ו-Tana נותנים לערוך את הבלוק המוטמע במקום, וזה הפער היחיד.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #904 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 904,
      "stage": "12.S",
      "decision": "U2",
      "reuse": [
@@ -23984,8 +24072,9 @@
      ],
      "why": "מנוע האוטומציות קיים (W5.24, ‏W10.E15). זה רק טריגרים חדשים לסוגים, ולא מנוע שני.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #894 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 894,
      "stage": "12.S",
      "decision": "N7",
      "reuse": [
@@ -24033,7 +24122,7 @@
      ],
      "why": "כמו W11.Q13: רכבת אחת לכל גל.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ שלב רכבת — אחרי סבב P1",
      "verified": "built",
      "stage": "12.L",
      "decision": "L",
@@ -24057,7 +24146,7 @@
      ],
      "why": "כמו W11.Q14.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ שלב רכבת — אחרי סבב P1",
      "verified": "built",
      "stage": "12.L",
      "decision": "L",
@@ -24282,8 +24371,9 @@
      "hoursSaved": 6,
      "licence": "israelconnect: AGPL-3.0-or-later (קוד) / CC BY 4.0 (נתונים וסכמות) — מותר ל-lumen-md (MIT) רק אחרי R12.1",
      "stage": "12.R",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #866, #867, #870 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 866,
      "notes": "תלויות שהוסרו (W2.10, W5.15): src/daily/hebrewCalendar.ts ו-src/tasks/taskParser.ts כבר בקוד; W2.10 ו-W5.15 (P2) צרכנים ולא תלויות — כלל קו החיתוך · חופף ל-W12.E2 (כללי תאריכים בחילוץ): לבנות מעל המשימות האלה, לא מודול שני"
     },
     {
@@ -24315,8 +24405,9 @@
      "hoursSaved": 8,
      "licence": "israelconnect: AGPL-3.0-or-later (קוד) / CC BY 4.0 (נתונים וסכמות) — מותר ל-lumen-md (MIT) רק אחרי R12.1",
      "stage": "12.R",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #866, #870 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 866,
      "notes": "חופף ל-W12.E7 (מחוון זמן), W12.S1 (״מה ידעתי אז״): לבנות מעל המשימות האלה, לא מודול שני"
     },
     {
@@ -24349,8 +24440,9 @@
      "hoursSaved": 7,
      "licence": "israelconnect: AGPL-3.0-or-later (קוד) / CC BY 4.0 (נתונים וסכמות) — מותר ל-lumen-md (MIT) רק אחרי R12.1",
      "stage": "12.R",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #886, #889, #902 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 886,
      "notes": "חופף ל-W12.E7 (תצוגת הגרף), W12.V2 (Sankey): לבנות מעל המשימות האלה, לא מודול שני"
     },
     {
@@ -24381,8 +24473,9 @@
      "hoursSaved": 7,
      "licence": "israelconnect: AGPL-3.0-or-later (קוד) / CC BY 4.0 (נתונים וסכמות) — מותר ל-lumen-md (MIT) רק אחרי R12.1",
      "stage": "12.R",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #885, #895 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 885,
      "notes": "תלויות שהוסרו (W10.E38): שער הציטוטים עובד על פתקי הכספת; חיפוש DOI (W10.E38, P2) הוא תוספת ולא תלות — כלל קו החיתוך · חופף ל-W12.A1 (ציטוט ברמת פסקה): לבנות מעל המשימות האלה, לא מודול שני"
     },
     {
@@ -24415,8 +24508,9 @@
      "hoursSaved": 6,
      "licence": "israelconnect: AGPL-3.0-or-later (קוד) / CC BY 4.0 (נתונים וסכמות) — מותר ל-lumen-md (MIT) רק אחרי R12.1",
      "stage": "12.R",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #870 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 870,
      "notes": "חופף ל-W12.V4 (מפת טיעונים), W12.E4: לבנות מעל המשימות האלה, לא מודול שני"
     },
     {
@@ -24448,8 +24542,9 @@
      "hoursSaved": 4,
      "licence": "israelconnect: AGPL-3.0-or-later (קוד) / CC BY 4.0 (נתונים וסכמות) — מותר ל-lumen-md (MIT) רק אחרי R12.1",
      "stage": "12.R",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #895 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 895,
      "notes": "חופף ל-W12.V4 (מפת טיעונים), W12.E4: לבנות מעל המשימות האלה, לא מודול שני"
     },
     {
@@ -24482,8 +24577,9 @@
      "hoursSaved": 8,
      "licence": "israelconnect: AGPL-3.0-or-later (קוד) / CC BY 4.0 (נתונים וסכמות) — מותר ל-lumen-md (MIT) רק אחרי R12.1 · tasker: אין קובץ LICENSE — של טל, מותר; מומלץ להוסיף MIT ב-R12.1",
      "stage": "12.R",
-     "status": "⏳ גל 12 — לא התחיל",
-     "verified": "built"
+     "status": "⏳ קוד ב-PR #891 — נבדק לא מקוון; ממתין לרכבת",
+     "verified": "built",
+     "pr": 891
     },
     {
      "id": "R12.13",
@@ -24513,8 +24609,9 @@
      "hoursSaved": 6,
      "licence": "israelconnect: AGPL-3.0-or-later (קוד) / CC BY 4.0 (נתונים וסכמות) — מותר ל-lumen-md (MIT) רק אחרי R12.1",
      "stage": "12.R",
-     "status": "⏳ גל 12 — לא התחיל",
-     "verified": "built"
+     "status": "⏳ קוד ב-PR #867 — נבדק לא מקוון; ממתין לרכבת",
+     "verified": "built",
+     "pr": 867
     },
     {
      "id": "R12.14",
@@ -24546,8 +24643,9 @@
      "hoursSaved": 4,
      "licence": "israelconnect: AGPL-3.0-or-later (קוד) / CC BY 4.0 (נתונים וסכמות) — מותר ל-lumen-md (MIT) רק אחרי R12.1",
      "stage": "12.R",
-     "status": "⏳ גל 12 — לא התחיל",
-     "verified": "built"
+     "status": "⏳ קוד ב-PR #868 — נבדק לא מקוון; ממתין לרכבת",
+     "verified": "built",
+     "pr": 868
     },
     {
      "id": "R12.15",
@@ -24577,8 +24675,9 @@
      "hoursSaved": 4,
      "licence": "israelconnect: AGPL-3.0-or-later (קוד) / CC BY 4.0 (נתונים וסכמות) — מותר ל-lumen-md (MIT) רק אחרי R12.1 · tasker: אין קובץ LICENSE — של טל, מותר; מומלץ להוסיף MIT ב-R12.1",
      "stage": "12.R",
-     "status": "⏳ גל 12 — לא התחיל",
-     "verified": "built"
+     "status": "⏳ קוד ב-PR #900 — נבדק לא מקוון; ממתין לרכבת",
+     "verified": "built",
+     "pr": 900
     },
     {
      "id": "R12.16",
@@ -24608,7 +24707,7 @@
      "hoursSaved": 4,
      "licence": "israelconnect: AGPL-3.0-or-later (קוד) / CC BY 4.0 (נתונים וסכמות) — מותר ל-lumen-md (MIT) רק אחרי R12.1",
      "stage": "12.R",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ בעבודה",
      "verified": "built",
      "notes": "חופף ל-W12.E3 (איחוד ישויות בעברית): לבנות מעל המשימות האלה, לא מודול שני"
     },
@@ -24638,7 +24737,7 @@
      "hoursSaved": 4,
      "licence": "israelconnect: AGPL-3.0-or-later (קוד) / CC BY 4.0 (נתונים וסכמות) — מותר ל-lumen-md (MIT) רק אחרי R12.1",
      "stage": "12.R",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ בעבודה",
      "verified": "built",
      "notes": "חופף ל-W12.T1 (שדות מוקלדים): לבנות מעל המשימות האלה, לא מודול שני"
     },
@@ -24668,8 +24767,9 @@
      "hoursSaved": 2,
      "licence": "tasker: אין קובץ LICENSE — של טל, מותר; מומלץ להוסיף MIT ב-R12.1",
      "stage": "12.R",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #896 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 896,
      "notes": "מקור: tasker בלבד (של טל) — לא תלוי ב-R12.1"
     },
     {
@@ -24700,7 +24800,7 @@
      "hoursSaved": 6,
      "licence": "israelconnect: AGPL-3.0-or-later (קוד) / CC BY 4.0 (נתונים וסכמות) — מותר ל-lumen-md (MIT) רק אחרי R12.1",
      "stage": "12.R",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ בעבודה",
      "verified": "built"
     },
     {
@@ -24730,8 +24830,9 @@
      "hoursSaved": 3,
      "licence": "israelconnect: AGPL-3.0-or-later (קוד) / CC BY 4.0 (נתונים וסכמות) — מותר ל-lumen-md (MIT) רק אחרי R12.1",
      "stage": "12.R",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #882 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 882,
      "notes": "חופף ל-W12.V4 (מפת טיעונים): לבנות מעל המשימות האלה, לא מודול שני"
     },
     {
@@ -24760,8 +24861,9 @@
      "hoursSaved": 3,
      "licence": "tasker: אין קובץ LICENSE — של טל, מותר; מומלץ להוסיף MIT ב-R12.1",
      "stage": "12.R",
-     "status": "⏳ גל 12 — לא התחיל",
+     "status": "⏳ קוד ב-PR #899 — נבדק לא מקוון; ממתין לרכבת",
      "verified": "built",
+     "pr": 899,
      "notes": "מקור: tasker בלבד (של טל) — לא תלוי ב-R12.1"
     }
    ]
