@@ -1,13 +1,17 @@
 # Contributing to Lumen
 
+> **העברית היא הגרסה הראשית:** [CONTRIBUTING.he.md](CONTRIBUTING.he.md). This English
+> version follows it; where they differ, the Hebrew one is right. Small first tasks:
+> [docs/dev/good-first-issues.md](docs/dev/good-first-issues.md).
+
 Thanks for your interest in Lumen! This document explains how to set up the project, the conventions we follow, and how to submit changes.
 
 ## Setup
 
 ```bash
-git clone <repo-url>
-cd "md editor"
-npm install
+git clone https://github.com/talstilkol/lumen-md.git
+cd lumen-md
+npm ci
 npm run dev        # http://localhost:5173
 ```
 
@@ -80,8 +84,8 @@ Scopes are area names: `editor`, `renderer`, `collab`, `storage`, `ui`, `ai`, `i
 
 ## Pull Requests
 
-1. Open against `main`.
-2. Ensure CI passes: `npm run typecheck && npm run test && npm run build`.
+1. Open against the current train (`verify/train-N`, the highest N) or `main`, never on another PR's branch; every commit subject carries `[skip ci]`.
+2. Run `npm run ci:local -- --changed` (typecheck, lint, i18n, tests, build for what the diff touches).
 3. Add a short description: what changed, why.
 4. Link any related issue.
 5. One of the maintainers will review.
@@ -119,7 +123,7 @@ It also warns (without failing):
 
 ### Structure
 
-- **Unit tests** live in `src/__tests/` and run with Vitest (jsdom environment).
+- **Unit tests** live in `src/__tests__/` and run with Vitest.
 - **E2E tests** live in `e2e/` and run with Playwright.
 - Run unit tests: `npm run test` (single-shot) or `npm run test:watch`.
 - Run E2E: `npx playwright test` (requires a running dev server).
@@ -195,7 +199,7 @@ npm run test:visual                    # compare; a missing baseline fails
 
 ### Coverage
 
-- **Current:** 131 test files, 1074 passing tests, 97% line coverage.
+- The test runner reports the current counts; don't copy them here (they go stale).
 - The CI gate requires `npm run typecheck && npm run test` to pass on every push.
 - The i18n drift gate (`i18nDrift.test.ts`) ensures every key in the `en` bundle exists in all 8 locales.
 

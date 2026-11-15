@@ -53,3 +53,33 @@ describe("docs-sync (plan 0.18)", () => {
     expect(staleCounts("Safari and iOS 16.4+, Chrome / Edge 111+")).toEqual([]);
   });
 });
+
+// @ts-expect-error — plain .mjs script without type declarations
+import { CONTRIBUTING, contributingProblems } from "../../scripts/docs-sync.mjs";
+import { existsSync as exists, readFileSync as read } from "node:fs";
+
+describe("the contributing guide is Hebrew first (plan W4.28, W10.E63)", () => {
+  const repo = () => Object.fromEntries((CONTRIBUTING as string[]).map((f) => [f, exists(f) ? read(f, "utf8") : null]));
+
+  it("the repository's guides pass: CONTRIBUTING.he.md exists, opens in Hebrew, and the two link each other", () => {
+    expect(exists("CONTRIBUTING.he.md")).toBe(true);
+    expect(contributingProblems(repo())).toEqual([]);
+    expect(exists("docs/dev/good-first-issues.md")).toBe(true);
+    // Fifteen tasks, each with where, and when it is done.
+    const gfi = read("docs/dev/good-first-issues.md", "utf8");
+    expect(gfi.match(/^### \d+\. /gm)).toHaveLength(15);
+    expect(gfi.match(/\*\*גמור כש:\*\*/g)).toHaveLength(15);
+    expect(gfi.match(/\*\*איפה:\*\*/g)).toHaveLength(15);
+  });
+
+  it("no Hebrew guide, an English-first one or a missing link fails", () => {
+    expect(contributingProblems({ "CONTRIBUTING.he.md": null, "CONTRIBUTING.md": "# Contributing\n" })).toEqual([
+      "CONTRIBUTING.he.md: missing — the Hebrew guide is the main one (plan W4.28)",
+      "CONTRIBUTING.md: must link CONTRIBUTING.he.md in its first lines (the Hebrew guide is the main one)",
+    ]);
+    expect(contributingProblems({ "CONTRIBUTING.he.md": "# Contributing\n\nEnglish here.\n", "CONTRIBUTING.md": "# C\n\n[he](CONTRIBUTING.he.md)\n" })).toEqual([
+      "CONTRIBUTING.he.md: must open in Hebrew",
+      "CONTRIBUTING.he.md: no link to CONTRIBUTING.md",
+    ]);
+  });
+});
