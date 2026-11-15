@@ -5,7 +5,8 @@
 //
 // 1. The interface language and direction (W4.10).
 // 2. The saved theme (C1).
-// 3. The last note in the boot shell (W2.21).
+// 3. The last note in the boot shell, editable (W2.21, W10.E20).
+// 4. Parallel modulepreload of the start's lazy chunks (W10.E20).
 
 // The interface language and direction, set before the first paint (plan
 // W4.10): the saved choice; else Hebrew if the system lists it at all
@@ -76,12 +77,15 @@
   document.documentElement.classList.toggle("dark", dark);
 })();
 
-// The last note, painted before the bundle loads (plan W2.21): it reads the
-// note the app already keeps in localStorage ("lumen-md", the persisted
-// store — no new copy is stored anywhere) and shows its beginning as plain
-// text in the boot shell, so a cold start shows the user's own note at once
-// instead of skeleton bars. React replaces the whole shell on its first
-// render. Text only (textContent), never HTML. This runs in <head>, before
+// The last note, painted before the bundle loads (plan W2.21), and editable
+// at once (W10.E20): it reads the note the app already keeps in localStorage
+// ("lumen-md", the persisted store — no new copy is stored anywhere) and puts
+// its beginning in a plain <textarea> in the boot shell, so a cold start
+// shows the user's own note at once and takes typing before the app has
+// loaded. Text only (a textarea's value), never HTML. A long note shows its
+// first MAX_CHARS characters; the rest is kept aside and put back after them.
+// src/boot/bootNote.ts hands what was typed to the editor before React
+// replaces the shell (window.__lumenBootNote). This runs in <head>, before
 // the shell exists, so it fills the shell as soon as the parser inserts it:
 // mutation records are delivered at the end of the parser's task, before
 // the next paint.
@@ -89,24 +93,36 @@
   var MAX_CHARS = 4000;
   function paint(page) {
     var text = "";
+    var name = "";
     var rtl = false;
     try {
       var raw = localStorage.getItem("lumen-md");
       var saved = raw ? JSON.parse(raw) : null;
       var s = saved && saved.state;
       if (s && s.doc && typeof s.doc.content === "string") text = s.doc.content;
+      if (s && s.doc && typeof s.doc.name === "string") name = s.doc.name;
       rtl = !!(s && s.rtl);
     } catch (e) {
       /* storage unavailable or corrupt: keep the skeleton */
       return;
     }
     if (!text.trim()) return;
-    var note = document.createElement("pre");
+    var head = text.length > MAX_CHARS ? text.slice(0, MAX_CHARS) : text;
+    var note = document.createElement("textarea");
     note.className = "boot-note";
     note.setAttribute("dir", rtl ? "rtl" : "auto");
-    note.textContent = text.length > MAX_CHARS ? text.slice(0, MAX_CHARS) : text;
+    note.setAttribute("spellcheck", "false");
+    if (name) note.setAttribute("aria-label", name);
+    note.value = head;
     page.textContent = "";
     page.appendChild(note);
+    // The note can be typed in: the shell is no longer decoration.
+    var shell = page.closest ? page.closest(".boot-shell") : null;
+    if (shell) shell.removeAttribute("aria-hidden");
+    window.__lumenBootNote = { el: note, name: name, base: text, tail: text.slice(head.length) };
+    note.addEventListener("input", function () {
+      document.documentElement.setAttribute("data-boot-edited", "");
+    });
     // Read by e2e/cold-start.spec.ts (the shell showed the note before the
     // app started) and by index.html's CSS, which hides skeleton bars the
     // parser adds after this ran.
@@ -128,4 +144,46 @@
   document.addEventListener("DOMContentLoaded", function () {
     mo.disconnect();
   });
+})();
+
+// The chunks the start will load, fetched in parallel now rather than one
+// after another (W10.E20): the build writes their list into the page
+// (#lumen-boot-preload, src/build/bootPreload.ts), and this picks the ones
+// this start needs: the vault's, the saved language's strings, and the
+// editor of the saved view. Without the list (the dev server) it does nothing.
+(function () {
+  var data = null;
+  try {
+    var tag = document.getElementById("lumen-boot-preload");
+    data = tag ? JSON.parse(tag.textContent || "null") : null;
+  } catch (e) {
+    return;
+  }
+  if (!data || typeof data !== "object") return;
+  var mode = "";
+  try {
+    var raw = localStorage.getItem("lumen-md");
+    var saved = raw ? JSON.parse(raw) : null;
+    mode = (saved && saved.state && saved.state.mode) || "";
+  } catch (e) {
+    /* storage unavailable or corrupt: no saved view */
+  }
+  var files = [].concat(data.always || []);
+  var locale = window.__lumenBootLocale;
+  if (locale && data.locales && data.locales[locale]) files = files.concat(data.locales[locale]);
+  // The view the app opens in; with none saved, defaultMode() in src/store/useStore.ts (Preview under 768 px, else Split).
+  if (!mode) mode = (window.innerWidth || 1280) < 768 ? "preview" : "split";
+  var editor = mode === "source" || mode === "split" ? "source" : mode === "wysiwyg" ? "wysiwyg" : "";
+  if (editor && data.editors && data.editors[editor]) files = files.concat(data.editors[editor]);
+  var seen = {};
+  for (var i = 0; i < files.length; i++) {
+    var href = files[i];
+    if (typeof href !== "string" || seen[href] || !/^\/(?!\/)[\w\-./]+\.js$/.test(href)) continue;
+    seen[href] = true;
+    var link = document.createElement("link");
+    link.rel = "modulepreload";
+    link.href = href;
+    link.setAttribute("crossorigin", "");
+    document.head.appendChild(link);
+  }
 })();
