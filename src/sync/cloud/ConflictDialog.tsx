@@ -13,13 +13,13 @@
  *   • `null`                         — cancelled
  */
 
-import { useMemo, useRef, useState } from "react";
-import { useFocusTrap } from "../../ui/useFocusTrap";
+import { useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { applyMerge, threeWayDiff, type DiffHunk } from "./diff";
 import { t } from "../../i18n";
 import { HelpButton } from "../../ui/HelpButton";
 import "./conflictDialogStrings";
+import { Modal } from "../../ui/Modal";
 
 export type ConflictChoice =
   | { kind: "merged"; content: string }
@@ -77,10 +77,6 @@ function ConflictDialogImpl({ path, base, local, remote, labels, hunks: given, o
     () => conflictHunkIdxs.map(() => "local"),
   );
 
-  // Focus stays in the dialog and returns on close; Escape cancels.
-  const dialogRef = useRef<HTMLDivElement | null>(null);
-  useFocusTrap(dialogRef, { onEscape: () => onResolve(null) });
-
   function setPick(idx: number, val: "local" | "remote" | "both") {
     const next = [...picks];
     next[idx] = val;
@@ -88,10 +84,7 @@ function ConflictDialogImpl({ path, base, local, remote, labels, hunks: given, o
   }
 
   return (
-    <div
-      ref={dialogRef}
-      role="dialog"
-      aria-modal="true"
+    <Modal onClose={() => onResolve(null)}
       aria-labelledby="conflict-title"
       style={{
         position: "fixed",
@@ -228,7 +221,7 @@ function ConflictDialogImpl({ path, base, local, remote, labels, hunks: given, o
           </button>
         </footer>
       </div>
-    </div>
+    </Modal>
   );
 }
 

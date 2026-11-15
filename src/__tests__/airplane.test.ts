@@ -516,13 +516,13 @@ describe("review 2 fixes", () => {
     expect(guardedSandbox("allow-scripts allow-same-origin allow-popups", "https://example.com/widget", base, false)).toBe("allow-scripts allow-popups");
     // The embed block's providers are the known ones.
     const src = readFileSync(resolve(process.cwd(), "src/plugins/EmbedBlock.tsx"), "utf8");
-    // On the train a Gist is shown by the content frame with an opaque origin (src/lib/contentFrame.ts),
-    // never framed from gist.github.com with same-origin powers, so it needs no place in EMBED_ORIGINS.
+    // A Gist is a link (W10.D2, src/lib/contentFrame.ts), never framed from gist.github.com,
+    // so it needs no place in EMBED_ORIGINS.
     const origins = new Set([...src.matchAll(/src: `(https:\/\/[^/`$]+)/g)].map((m) => m[1]).filter((o) => o !== "https://gist.github.com"));
     expect(origins.size).toBeGreaterThan(10);
     for (const o of origins) expect(EMBED_ORIGINS.has(o), o).toBe(true);
     // One list (RR8-451-2): the known embeds are exactly the https origins public/_headers lets the content
-    // frame (W4.15) load: its frame-src providers, and the Gist script.
+    // frame (W4.15) load: its frame-src providers (no Gist script since W10.D2).
     const headers = readFileSync(resolve(process.cwd(), "public/_headers"), "utf8");
     const allowed = new Set<string>();
     for (const m of headers.matchAll(/(?:frame-src|script-src) ([^;]+);/g)) for (const t of m[1].split(" ")) if (t.startsWith("https://")) allowed.add(t);

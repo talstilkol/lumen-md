@@ -2,8 +2,7 @@
  * Privacy ledger panel (T37): every AI network request — where, how much,
  * why, under which policy — and what the policy blocked.
  */
-import { useState, useSyncExternalStore, useRef } from "react";
-import { useFocusTrap } from "./useFocusTrap";
+import { useState, useSyncExternalStore } from "react";
 import { ShieldCheck, X } from "lucide-react";
 import { t, getLocale } from "../i18n";
 import { auditMode, clearLedger, leftDevice, ledgerEntries, ledgerSummary, subscribeLedger, type LedgerEntry } from "../ai/privacyLedger";
@@ -13,6 +12,7 @@ import { redactionLog, redactionTotals, subscribeRedactionLog } from "../ai/piiR
 import { EmptyState } from "./EmptyState";
 import { HelpButton } from "./HelpButton";
 import "./privacyLedgerPanelStrings";
+import { Modal } from "./Modal";
 
 interface Props {
   open: boolean;
@@ -48,10 +48,6 @@ export function PrivacyLedgerPanel({ open, onClose }: Props) {
       );
   };
 
-  // Focus stays in the dialog while it is open and returns on close; Escape closes it (plan 10.1).
-  const trapRef = useRef<HTMLDivElement | null>(null);
-  useFocusTrap(trapRef, { active: open, onEscape: onClose });
-
   if (!open) return null;
   const sum = ledgerSummary(list);
   const shown = [...list].reverse().filter((e) => !onlyCloud || leftDevice(e));
@@ -59,7 +55,7 @@ export function PrivacyLedgerPanel({ open, onClose }: Props) {
   const catLabel = (e: LedgerEntry) => t(`privacy.cat.${e.category}`);
 
   return (
-    <div className="cmd-palette-backdrop" onClick={onClose} ref={trapRef} role="dialog" aria-modal="true" aria-label={t("privacy.title")}>
+    <Modal onClose={onClose} className="cmd-palette-backdrop" onClick={onClose} aria-label={t("privacy.title")}>
       <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 760, padding: 0, display: "flex", flexDirection: "column", maxHeight: "82vh" }}>
         <header style={{ padding: "12px 16px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <ShieldCheck size={16} />
@@ -140,6 +136,6 @@ export function PrivacyLedgerPanel({ open, onClose }: Props) {
         </div>
         <footer style={{ padding: "8px 16px", fontSize: 11.5, color: "hsl(var(--fg-muted))", borderTop: "1px solid hsl(var(--border))" }}>{t("privacy.footer")}</footer>
       </div>
-    </div>
+    </Modal>
   );
 }

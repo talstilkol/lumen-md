@@ -10,6 +10,7 @@ import { t } from "../i18n";
 import { clock } from "./lectureCore";
 import { HelpButton } from "../ui/HelpButton";
 import { explainError } from "../lib/userError";
+import { Modal } from "../ui/Modal";
 
 type Phase = "idle" | "recording" | "processing" | "done" | "error";
 
@@ -94,7 +95,7 @@ export function LectureRecorder({ onClose, deps }: { onClose: () => void; deps?:
   }
 
   return (
-    <div role="dialog" aria-modal="true" aria-labelledby="lecture-title" data-testid="lecture-recorder" style={{ position: "fixed", inset: 0, zIndex: 9999, background: "var(--overlay)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+    <Modal onClose={onClose} aria-labelledby="lecture-title" data-testid="lecture-recorder" style={{ position: "fixed", inset: 0, zIndex: 9999, background: "var(--overlay)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
       <div style={{ background: "hsl(var(--bg))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border-strong))", borderRadius: 12, padding: 20, width: "min(440px, 100%)", display: "grid", gap: 12 }}>
         <h2 id="lecture-title" style={{ margin: 0, fontSize: 17 }}>{t("student.title")}</h2>
         <HelpButton topic="workspace/student-mode#the-lecture-note" />
@@ -135,7 +136,7 @@ export function LectureRecorder({ onClose, deps }: { onClose: () => void; deps?:
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

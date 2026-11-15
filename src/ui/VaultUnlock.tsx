@@ -15,6 +15,7 @@ import { WrongPassphraseError, MIN_PASSPHRASE_LENGTH } from "../storage/vault/en
 import "../storage/vault/encrypted/strings";
 import { HelpButton } from "./HelpButton";
 import { explainError } from "../lib/userError";
+import { Modal } from "./Modal";
 
 
 const field: React.CSSProperties = {
@@ -66,9 +67,7 @@ export function VaultUnlockScreen() {
   }
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
+    <Modal
       aria-labelledby="vault-unlock-title"
       data-testid="vault-unlock"
       style={{ position: "fixed", inset: 0, zIndex: 10000, background: "hsl(var(--bg))", color: "hsl(var(--fg))", display: "grid", placeItems: "center", padding: 16 }}
@@ -127,7 +126,7 @@ export function VaultUnlockScreen() {
           </button>
         )}
       </form>
-    </div>
+    </Modal>
   );
 }
 

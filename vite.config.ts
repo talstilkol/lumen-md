@@ -86,6 +86,19 @@ const dictionaryEn = {
     return `export const inline = { aff: ${JSON.stringify(aff)}, dic: ${JSON.stringify(dic)} };\n`;
   },
 };
+/**
+ * Worker builds: hast-util-from-html-isomorphic's "browser" entry parses
+ * with DOMParser, which a worker does not have; the render worker
+ * (src/renderer/render.worker.ts) runs rehype-katex, which uses it, so
+ * workers get the package's DOM-free entry (its "worker" export, parse5).
+ */
+const htmlIsomorphicInWorkers: Plugin = {
+  name: "lumen-html-isomorphic-in-workers",
+  enforce: "pre",
+  resolveId(id: string) {
+    return id === "hast-util-from-html-isomorphic" ? path.resolve(__dirname, "node_modules/hast-util-from-html-isomorphic/index.js") : null;
+  },
+};
 /** Main build only (not the worker build), so each file is emitted once. */
 const dictionaryEnFiles: Plugin = {
   name: "lumen-dictionary-en-files",
@@ -326,7 +339,7 @@ export default defineConfig({
     __LUMEN_E2E__: JSON.stringify(process.env.VITE_E2E === "1"),
   },
   // Worker bundles get only these plugins (plus Vite's own).
-  worker: { plugins: () => [dictionaryEn] },
+  worker: { plugins: () => [dictionaryEn, htmlIsomorphicInWorkers] },
   plugins: [
     // W4.4: a VITE_* not on security/vite-env-allowlist.json fails the build.
     viteEnvGatePlugin(),
@@ -713,7 +726,8 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     // The VS Code extension's pure helpers are tested from the root suite too.
-    include: ["src/__tests__/**/*.test.{ts,tsx}", "packages/vscode-lumen/test/**/*.test.ts"],
+    // W10.D6: the crypto attack tests (security/attacks) are part of the suite.
+    include: ["src/__tests__/**/*.test.{ts,tsx}", "packages/vscode-lumen/test/**/*.test.ts", "security/attacks/**/*.test.ts"],
     globals: true,
     css: false,
     setupFiles: ["src/__tests__/setup.ts"],

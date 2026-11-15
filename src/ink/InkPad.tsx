@@ -13,12 +13,12 @@ import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
 import { createRoot } from "react-dom/client";
 import "./inkStrings";
 import { t } from "../i18n";
-import { useFocusTrap } from "../ui/useFocusTrap";
 import { cropInk, newInkId, roundPoint, type Ink, type InkDir, type InkPlacement, type InkStroke } from "./inkModel";
 import { strokeOutline } from "./inkPath";
 import { PalmGate, isEraser } from "./palmGate";
 import { strokesHit } from "./eraser";
 import { HelpButton } from "../ui/HelpButton";
+import { Modal } from "../ui/Modal";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const COLORS = [
@@ -77,7 +77,6 @@ export function InkPad({ initial, dir, onDone }: InkPadProps) {
   const [width, setWidth] = useState(() => Math.max(initial?.width ?? 0, 320));
   const height = Math.max(MIN_HEIGHT, initial?.height ?? 0);
 
-  const dialogRef = useRef<HTMLDivElement | null>(null);
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const liveRef = useRef<SVGGElement | null>(null);
@@ -91,8 +90,6 @@ export function InkPad({ initial, dir, onDone }: InkPadProps) {
   toolRef.current = tool;
   const penRef = useRef({ color, size });
   penRef.current = { color, size };
-
-  useFocusTrap(dialogRef, { onEscape: () => onDone(null) });
 
   // The surface fills the dialog's width (at least the edited ink's).
   useLayoutEffect(() => {
@@ -241,9 +238,7 @@ export function InkPad({ initial, dir, onDone }: InkPadProps) {
   const isEdit = initial !== null;
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
+    <Modal onClose={() => onDone(null)}
       aria-labelledby="ink-pad-title"
       data-testid="ink-pad"
       style={{
@@ -258,7 +253,6 @@ export function InkPad({ initial, dir, onDone }: InkPadProps) {
       }}
     >
       <div
-        ref={dialogRef}
         style={{
           background: "hsl(var(--bg))",
           color: "hsl(var(--fg))",
@@ -367,7 +361,7 @@ export function InkPad({ initial, dir, onDone }: InkPadProps) {
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

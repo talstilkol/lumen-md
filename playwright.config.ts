@@ -1,4 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
+// @ts-expect-error — plain .mjs script without type declarations
+import { E2E_COLLAB_WS } from "./scripts/test-tiers.mjs";
 
 /**
  * Playwright configuration for Lumen end-to-end tests.
@@ -97,7 +99,12 @@ export default defineConfig({
         // server by its other loopback name, so e2e frames it cross-origin
         // as production does (src/lib/contentFrame.ts).
         command: "npm run webr:local && npm run dev -- --host 127.0.0.1",
-        env: { VITE_CONTENT_FRAME_URL: `http://127.0.0.1:${PORT}/content-frame.html` },
+        // The page may reach the loopback collab server of e2e/collab-persist.spec.ts
+        // (an e2e build adds the same origin: scripts/vercel-build.mjs).
+        env: {
+          VITE_CONTENT_FRAME_URL: `http://127.0.0.1:${PORT}/content-frame.html`,
+          VITE_CSP_CONNECT_EXTRA: [process.env.VITE_CSP_CONNECT_EXTRA, E2E_COLLAB_WS].filter(Boolean).join(" "),
+        },
         url: BASE_URL,
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,

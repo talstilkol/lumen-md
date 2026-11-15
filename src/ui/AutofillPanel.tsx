@@ -14,6 +14,7 @@ import "./autofillPanelStrings";
 import { HelpButton } from "./HelpButton";
 import { explainError } from "../lib/userError";
 import { EmptyState, runCommand } from "./EmptyState";
+import { Modal } from "./Modal";
 
 const btn: React.CSSProperties = { padding: "4px 10px", fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer" };
 
@@ -106,7 +107,7 @@ export function AutofillPanel({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="cmd-palette-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-label={t("autofill.title")}>
+    <Modal className="cmd-palette-backdrop" onClick={onClose} aria-label={t("autofill.title")}>
       <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 680, padding: 0, display: "flex", flexDirection: "column", maxHeight: "82vh" }}>
         <header style={{ padding: "12px 16px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <strong style={{ flex: 1 }}>{t("autofill.title")}</strong>
@@ -131,7 +132,7 @@ export function AutofillPanel({ onClose }: { onClose: () => void }) {
           )}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

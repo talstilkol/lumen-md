@@ -28,12 +28,14 @@ import { editNote } from "../databaseEdit";
 import { addDays, csvToNotes, daysBetween, monthWeeks, moveDateInText, pinnedProperties, resultToCsv, rowsByDay, tableKeyMove, timelineItems, visibleWindow, writableKey } from "./viewsData";
 import { showAiToast } from "../../ui/AiToast";
 import { log } from "../../lib/logger";
-import { t } from "../../i18n";
+import { getLocale, isRTL, t } from "../../i18n";
 import "./basesBlockStrings";
 import { explainError } from "../../lib/userError";
 import { EmptyState, learnHow } from "../../ui/EmptyState";
 
 const DatabaseMapView = lazy(() => import("../DatabaseMapView"));
+// W12.V1: the chart view loads ECharts and its strings only when it is shown.
+const BaseChartView = lazy(() => import("../../viz/BaseChartView"));
 
 const muted = "hsl(var(--fg-muted))";
 const danger = "hsl(var(--danger))";
@@ -289,6 +291,11 @@ export default function BasesBlock({ source, meta, select }: { source: string; m
         {result.rows.length > 0 && kind === "cards" && <CardsView result={result} files={files} />}
         {result.rows.length > 0 && kind === "list" && <ListView result={result} files={files} />}
         {result.rows.length > 0 && kind === "kanban" && <KanbanView result={result} files={files} />}
+        {result.rows.length > 0 && kind === "chart" && (
+          <Suspense fallback={<div style={{ padding: 12, fontSize: 12, color: muted }}>{t("db.loading")}</div>}>
+            <BaseChartView base={base} result={result} dir={isRTL() ? "rtl" : "ltr"} locale={getLocale()} />
+          </Suspense>
+        )}
         {result.rows.length > 0 && kind === "map" && (
           <Suspense fallback={<div style={{ padding: 12, fontSize: 12, color: muted }}>{t("db.loading")}</div>}>
             <MapView result={result} />

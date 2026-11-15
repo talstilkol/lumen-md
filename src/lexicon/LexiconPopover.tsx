@@ -11,11 +11,11 @@ import { createRoot } from "react-dom/client";
 import type { EditorView } from "@codemirror/view";
 import "./strings";
 import { t } from "../i18n";
-import { useFocusTrap } from "../ui/useFocusTrap";
 import { loadLexicon } from "./store";
 import { lookup, withPrefix, type LookupResult } from "./lexicon";
 import { wordAt } from "./wordAt";
 import { HelpButton } from "../ui/HelpButton";
+import { Modal } from "../ui/Modal";
 
 export type LexiconMode = "menu" | "synonyms" | "definition" | "nikud";
 
@@ -29,8 +29,7 @@ function replaceWord(view: EditorView, range: { from: number; to: number; word: 
 const btn: CSSProperties = { border: "1px solid hsl(var(--border))", borderRadius: 6, padding: "2px 8px", background: "transparent", color: "inherit", cursor: "pointer", fontSize: 13 };
 
 function Panel({ view, range, initial, x, y, close }: { view: EditorView; range: { from: number; to: number; word: string }; initial: LexiconMode; x: number; y: number; close: () => void }) {
-  const ref = useRef<HTMLDivElement>(null);
-  useFocusTrap(ref, { onEscape: close });
+  const ref = useRef<HTMLElement>(null);
   const [mode, setMode] = useState<LexiconMode>(initial);
   const [result, setResult] = useState<LookupResult | null | undefined>(undefined);
   const [attribution, setAttribution] = useState("");
@@ -53,16 +52,16 @@ function Panel({ view, range, initial, x, y, close }: { view: EditorView; range:
   };
   const pointed = result?.senses.map((s) => s.pointed).filter((p, i, all) => p && all.indexOf(p) === i) ?? [];
   return (
-    <div
+    <Modal
+      onClose={close}
       ref={ref}
-      role="dialog"
-      aria-modal="true"
       aria-label={t("lexicon.title", { word: range.word })}
       data-testid="lexicon-popover"
       dir="rtl"
       lang="he"
       tabIndex={-1}
-      style={{ position: "fixed", left: Math.max(8, Math.min(x, window.innerWidth - 328)), top: Math.max(8, Math.min(y, window.innerHeight - 340)), zIndex: 9999, width: 320, maxHeight: 340, overflow: "auto", background: "hsl(var(--bg))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border-strong))", borderRadius: 10, padding: 12, boxShadow: "var(--shadow-md)", fontSize: 13 }}
+      // `inset: auto` first: a modal <dialog> is pinned to all four edges by the reset in index.css.
+      style={{ position: "fixed", inset: "auto", left: Math.max(8, Math.min(x, window.innerWidth - 328)), top: Math.max(8, Math.min(y, window.innerHeight - 340)), zIndex: 9999, width: 320, maxHeight: 340, overflow: "auto", background: "hsl(var(--bg))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border-strong))", borderRadius: 10, padding: 12, boxShadow: "var(--shadow-md)", fontSize: 13 }}
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
         <strong>{range.word}</strong>
@@ -139,7 +138,7 @@ function Panel({ view, range, initial, x, y, close }: { view: EditorView; range:
           {attribution}
         </p>
       )}
-    </div>
+    </Modal>
   );
 }
 

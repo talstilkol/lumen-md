@@ -8,10 +8,20 @@
 import type { Availability, Executor, ExecutorId } from "../types";
 import { getAiPolicy } from "../../ai/policy";
 import { chatExecutor } from "./chatExecutor";
-import { ollamaExecutor } from "./ollama";
+import { configuredOllamaModel, installedOllamaModels, ollamaExecutor } from "./ollama";
+import { measuredModelFor } from "../../ai/defaults";
 import { webllmExecutor } from "./webllm";
 
 const registry = new Map<ExecutorId, Executor>();
+
+/**
+ * Plan 7.9: an agent's measured default (src/ai/defaults.ts, from real eval
+ * runs) when the executor is Ollama, that model is installed and the user
+ * picked none; otherwise null (runAgent then asks the executor).
+ */
+export function measuredModel(agentId: string, executorId: ExecutorId): string | null {
+  return executorId === "ollama" ? measuredModelFor(agentId, installedOllamaModels(), configuredOllamaModel()) : null;
+}
 
 export const DEFAULT_EXECUTOR_ORDER: ExecutorId[] = ["ollama", "webllm", "chat"];
 

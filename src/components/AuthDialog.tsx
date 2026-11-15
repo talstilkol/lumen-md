@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from "react";
-import { useFocusTrap } from "../ui/useFocusTrap";
+import { useEffect, useState } from "react";
 import { useAuth } from "../auth/useAuth";
 import { describeAuthError, describeAuthStatus, type AuthStatusDescription } from "../auth/authStatus";
 import { isWorkosEnabled, signInWithSso } from "../auth/workosProvider";
 import { loadOrgSettings } from "../lib/orgSettings";
 import { t } from "../i18n";
 import { HelpButton } from "../ui/HelpButton";
+import { Modal } from "../ui/Modal";
 
 /**
  * Email/password + OAuth sign-in dialog.
@@ -35,7 +35,6 @@ export function AuthDialog({ open, onClose }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<AuthStatusDescription | null>(null);
   const [ssoDomain, setSsoDomain] = useState("");
-  const dialogRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -47,8 +46,6 @@ export function AuthDialog({ open, onClose }: Props) {
     setSsoDomain(loadOrgSettings().domains[0] ?? "");
   }, [open]);
 
-  // Focus stays in the dialog while it is open and returns on close; Escape closes it.
-  useFocusTrap(dialogRef, { active: open, onEscape: onClose });
 
   if (!open) return null;
 
@@ -103,9 +100,8 @@ export function AuthDialog({ open, onClose }: Props) {
   }
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
+    <Modal
+      onClose={onClose}
       aria-labelledby="auth-dialog-title"
       style={{
         position: "fixed",
@@ -122,7 +118,6 @@ export function AuthDialog({ open, onClose }: Props) {
       }}
     >
       <div
-        ref={dialogRef}
         style={{
           background: "hsl(var(--bg))",
           color: "hsl(var(--fg))",
@@ -331,7 +326,7 @@ export function AuthDialog({ open, onClose }: Props) {
           {t("auth.dialog.close")}
         </button>
       </div>
-    </div>
+    </Modal>
   );
 }
 
