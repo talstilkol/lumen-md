@@ -33,6 +33,8 @@ ledger) מופיע מסלול שלא מתועד כאן.
 |---|---|---|---|---|
 | AI בענן | הפרומפט והטקסט שבחרתם לשלוח, עם המפתח שלכם | הספק שבחרתם: `OpenAI`,‏ `Anthropic (Claude)`,‏ `Google Gemini`,‏ `Mistral` | לפי מדיניות הספק. Lumen לא שומר עותק ולא מעביר דרך שרת שלו | `cloud-ai` |
 | Ollama | הפרומפט והטקסט | `Ollama (this machine / LAN)` במחשב שלכם או ברשת המקומית; `Ollama on a remote server` אם הגדרתם שרת מרוחק | אצלכם, או לפי מי שמפעיל את השרת המרוחק | `local-ai` / `cloud-ai` |
+| LM Studio | הפרומפט והטקסט | `LM Studio (this machine / LAN)` בכתובת שהגדרתם (ברירת מחדל localhost:1234); `LM Studio on a remote server` אם הכתובת לא במחשב שלכם או ברשת המקומית | אצלכם, או לפי מי שמפעיל את השרת המרוחק | `local-ai` / `cloud-ai` |
+| המודל המובנה של הדפדפן | **שום דבר לא יוצא.** מופיע כדי שתראו שהמודל רץ | `Runs on this device; nothing is sent` (המודל המובנה של Chrome, לפלט מובנה) | בשום מקום | `local-ai` |
 | בדיקת דקדוק | טקסט הפסקה שנבדקת | `LanguageTool grammar check` (‏api.languagetool.org, או שרת שהגדרתם), או `LanguageTool (this machine / LAN)` | לפי מדיניות LanguageTool | `cloud-text` / `local-ai` |
 | דיאגרמות PlantUML | קוד הדיאגרמה | `PlantUML rendering (kroki.io)`, רק אחרי שאישרתם | לפי מדיניות kroki.io | `cloud-text` |
 | הורדת מודלים ומילונים | בקשה לקובץ, בלי תוכן שלכם (השרת רואה את כתובת ה-IP) | `Model download (Hugging Face)`,‏ `Model download (Lumen's mirror)` (כשהבנייה מגדירה `VITE_MODEL_MIRROR_URL`; כל קובץ נבדק ב-sha256),‏ `Dictionary / OCR model download (GitHub)`,‏ `webR (R runtime) download` | יומני השרת של הספק | `model-download` |
@@ -44,6 +46,7 @@ ledger) מופיע מסלול שלא מתועד כאן.
 | הכתבה בשירות הדפדפן | הקול שלכם | `Dictation through the browser's speech service`,‏ `Browser speech recognition (Web Speech API)` (ב-Chrome זו Google), רק תחת מדיניות `cloud` ואחרי אישור | לפי ספק הדפדפן | `cloud-text` / `cloud-ai` |
 | דיווח שגיאות | שם סוג השגיאה והמקום בקוד. **בלי** הודעת השגיאה, טקסט, כותרות, נתיבים או כתובת הדף | `Error report (Sentry / GlitchTip), content removed`, רק אם הפעלתם, **וגם** הבנייה הוגדרה עם `VITE_SENTRY_DSN` | לפי מי שמפעיל את Sentry / GlitchTip | `monitoring` |
 | תוספים | הבקשה שהתוסף שולח | `Plugin <מזהה>` | לפי היעד | `plugin` |
+| התקנת תוסף | בקשת קובץ לאינדקס החתום של המאגר, למניפסט של התוסף ולקוד שלו. בלי שום מידע שלכם | `Plugin registry download (signed index, manifest, code); no user data` (השרת של האפליקציה עצמה, ‎/plugins/examples), כשלוחצים "התקנה" | ביומני השרת | `static-asset` |
 | בדיקת עדכונים (אפליקציה למחשב) | גרסה ומערכת הפעלה בלבד | `Desktop update check (app version and platform only)` | יומני GitHub Releases | `static-asset` |
 | מקורות יהודיים | ההפניה שביקשתם ("ברכות ב ע״א"), ושום דבר מהפתקים | `Jewish sources (Sefaria): the reference only` (‏sefaria.org), כשאתם מחפשים מקור | לפי מדיניות ספריא | `cloud-text` |
 | רשומות הכנסת | שם החוק או הצעת החוק שביקשתם, ושום דבר מהפתקים | `Knesset records (OData): the law or bill name only` (‏knesset.gov.il), כשאתם מחפשים | לפי מדיניות הכנסת | `cloud-text` |
@@ -53,6 +56,7 @@ ledger) מופיע מסלול שלא מתועד כאן.
 | חיבורי לוח שנה | ב-CalDAV: המשימות שלכם, לשרת לוח השנה שהגדרתם, עם שם המשתמש והסיסמה. במינוי: בקשת קריאה בלבד לכתובת ה-ICS שהוספתם | `CalDAV task sync (your calendar server)`,‏ `Calendar subscription (ICS, read only)`, רק אחרי שהגדרתם חיבור | בשרת לוח השנה, לפי מי שמפעיל אותו; ביומני שרת ה-ICS | `third-party` |
 | ערכות נושא וקטעי CSS | בקשת קובץ מגיליון סגנון שהתקנתם (גופן או תמונה) | `A stylesheet (theme or CSS snippet) loaded it` | ביומני השרת. מופיע כדי שתראו אותו | `third-party` |
 | סנכרון מוצפן ברשת המקומית | הפתקים, מוצפנים מקצה לקצה, רק למכשיר השני שלכם | `Encrypted sync on the local network (no cloud)` | במכשיר השני. שום דבר לא עובר בשרת | `local-ai` |
+| אחסון הסנכרון המוצפן, כפי שמצב הביקורת מציג אותו | הכספת, מוצפנת מקצה לקצה (ראו "סנכרון מוצפן" למטה) | `Sync storage: your Dropbox (audit mode)`,‏ `Sync storage: your Google Drive (audit mode)`: מופיעים רק כשמצב הביקורת פועל; אף כלל לא חוסם את הסנכרון שלכם | אצל הספק שלכם, עד שאתם מוחקים | `network` |
 | כל בקשה אחרת (מצב ביקורת) | מה שהבקשה נושאת | `Other request (audit mode)`: כשמצב הביקורת פועל, כל בקשה שיוצאת מהמכשיר ושהכללים למעלה לא מזהים מופיעה גם היא | לפי היעד | `network` |
 
 שתי סיומות יכולות להופיע אחרי כל שם בפנקס: `(worker: <שם>)` לבקשה מתוך Web Worker,
@@ -63,7 +67,7 @@ ledger) מופיע מסלול שלא מתועד כאן.
 | מסלול | מה יוצא | לאן | מתי | מה נשמר שם |
 |---|---|---|---|---|
 | טעינת האפליקציה | בקשות לקבצי האפליקציה. השרת רואה IP, דפדפן, שעה ונתיב. **בלי** פתקים | שרת האירוח (lumen-md.vercel.app מתארח ב-Vercel) | בכל טעינה | יומני Vercel, לפי מדיניות Vercel |
-| סנכרון מוצפן | הכספת מוצפנת מקצה לקצה: הספק רואה קבצים מוצפנים, גדלים ושעות | החשבון שלכם ב-Google Drive,‏ Dropbox,‏ WebDAV או S3 | רק כשהגדרתם | אצל הספק שלכם, עד שאתם מוחקים. פתקים שגרסה ישנה סנכרנה כטקסט רגיל מועברים בספק לתיקיית גיבוי `lumen-plaintext-backup-<תאריך>` (קריאה) עד שתמחקו אותה |
+| סנכרון מוצפן | הכספת מוצפנת מקצה לקצה: הספק רואה קבצים מוצפנים, גדלים ושעות | החשבון שלכם ב-Google Drive,‏ Dropbox,‏ WebDAV או S3 (מצב הביקורת מציג את Dropbox ואת Google Drive בשמם, למעלה, ואת WebDAV או S3 כ-`Other request (audit mode)`) | רק כשהגדרתם | אצל הספק שלכם, עד שאתם מוחקים. פתקים שגרסה ישנה סנכרנה כטקסט רגיל מועברים בספק לתיקיית גיבוי `lumen-plaintext-backup-<תאריך>` (קריאה) עד שתמחקו אותה |
 | Git | הפתקים כפי שהם (לא מוצפנים), לפי בחירתכם | המאגר שלכם, דרך פרוקסי ה-CORS שהבנייה הגדירה | רק כשהגדרתם | במאגר שלכם |
 | פרסום אתר | הפתקים שבחרתם, כ-HTML ציבורי | ‏GitHub Pages בחשבון שלכם, או קובץ zip אצלכם | רק בלחיצה | ציבורי, עד שתמחקו |
 | שיתוף חי (WebRTC) | עדכוני המסמך, מוצפנים בחדר עם סיסמה (כל חדר חדש). שרת האיתות רואה את שם החדר (128 ביט אקראיים), כתובות IP ושעות | בין המשתתפים; שרת איתות רק אם הבנייה הגדירה אחד, או אם בחרתם בשרתים הציבוריים | רק כשאתם בחדר | שרת האיתות לא שומר תוכן |
