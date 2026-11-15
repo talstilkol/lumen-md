@@ -40,7 +40,7 @@ export function HelpPanel({ topic, initialQuery = "", onClose }: { topic: string
     };
   }, [lang, topic]);
 
-  // Focus goes back to what opened the help (Escape closes it through <Modal onClose>).
+  // Focus goes back to what opened the help (Escape closes it through the Modal's onClose).
   useEffect(() => {
     const back = opener.current;
     if (!topic) searchRef.current?.focus();

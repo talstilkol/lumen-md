@@ -16,7 +16,7 @@
  * top dialog: one document listener, added when this module loads (before
  * any dialog's own), handles it for the top dialog and stops it there, so a
  * dialog underneath never sees it. A dialog closes on Escape through
- * `<Modal onClose>`, never through a keydown listener of its own; one that
+ * the Modal's `onClose`, never through a keydown listener of its own; one that
  * must listen for other keys in the capture phase asks `isTopDialog` first.
  */
 import { useEffect, useRef, type RefObject } from "react";
@@ -95,7 +95,7 @@ function dispatchKey(e: KeyboardEvent): void {
 if (typeof document !== "undefined") {
   document.addEventListener("keydown", dispatchKey);
   // A key event sent to the window itself never passes the document.
-  window.addEventListener("keydown", (e) => e.target === window && dispatchKey(e));
+  window.addEventListener("keydown", (e) => !(e.target instanceof Node) && dispatchKey(e));
 }
 
 /**
