@@ -9,6 +9,10 @@
  * main thread's `createWritable` writes (or, where that is missing too, the
  * worker writes in place). After the first note is saved, Lumen asks the
  * browser to keep the storage (navigator.storage.persist()), once.
+ *
+ * The #856 follow-up: reads go to the same worker, batched (readInWorker).
+ * A file the worker does not find, and every read in an engine where the
+ * worker cannot start, takes the main thread's path as before.
  */
 
 import { createDirectoryHandleBackend } from "./handleBackend";
@@ -63,9 +67,27 @@ export async function afterFirstSave(store: Pick<Storage, "getItem" | "setItem">
   await requestPersistentStorage();
 }
 
+/** null until the first answer: can this engine read through the worker? */
+let workerReads: boolean | null = null;
+
+/** The worker read (batched); null when the main thread should read it (not found there, or no worker here). */
+export async function readInWorker(segments: string[]): Promise<Blob | null> {
+  if (workerReads === false || typeof Worker === "undefined") return null;
+  let bytes: Uint8Array | null;
+  try {
+    bytes = await (await import("./opfsSyncWrite")).readOpfsBatched(segments);
+  } catch (e) {
+    if ((e as { name?: string }).name === "SyncWriteUnsupported") workerReads = false;
+    return null; // why: the main thread's read gives the real answer (and its error)
+  }
+  workerReads = true;
+  return bytes ? new Blob([bytes as Uint8Array<ArrayBuffer>]) : null;
+}
+
 /** For tests: forget what the engine answered. */
 export function resetWorkerWrites(): void {
   workerWrites = null;
+  workerReads = null;
 }
 
 export function createOpfsBackend(): VaultBackend {
@@ -77,6 +99,7 @@ export function createOpfsBackend(): VaultBackend {
       return await navigator.storage.getDirectory();
     },
     writePrimary: writeInWorker,
+    readPrimary: readInWorker,
     // Engines without createWritable on the main thread (Safari before 26):
     // the worker writes even when it cannot rename (in place).
     writeFallback: async (segments, data) => {

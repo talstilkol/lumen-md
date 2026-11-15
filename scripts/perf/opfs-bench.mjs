@@ -11,7 +11,10 @@
  *
  * Per engine: write all (the worker for OPFS; one transaction per file for
  * IndexedDB, as one save each), read every file one by one (as opening each
- * note), IndexedDB getAll, and the main thread's long tasks (over 50 ms)
+ * note), OPFS read both ways: `opfsRead` on the main thread one file at a
+ * time, and `opfsReadWorker` through the vault-io worker in batches
+ * (READ_BATCH per message, the app's path since the #856 follow-up),
+ * IndexedDB getAll, and the main thread's long tasks (over 50 ms)
  * while importing (Chromium only: the others have no longtask entries).
  * Targets (W11.Q11, measured on the Mac in W11.M8): reading 10,000 files
  * ≤ 1.5 s in Chromium, and 0 long tasks over 50 ms during the import.

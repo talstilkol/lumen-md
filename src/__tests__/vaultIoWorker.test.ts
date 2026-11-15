@@ -9,10 +9,12 @@
  * removeEntry, entries). It can fail a write part-way, the way a crash or a
  * full disk does. The worker in a real Chromium is exercised by
  * `node scripts/perf/opfs-bench.mjs --selftest`.
+ *
+ * The #856 follow-up: reads go through the same worker, many files per message.
  * @vitest-environment node
  */
 import { describe, expect, it } from "vitest";
-import { errorFromAnswer, handleWrite, SyncWriteUnsupported, writeViaSyncHandles, type DirLike, type FileLike, type SyncHandle } from "../storage/vault/vaultIoFs";
+import { errorFromAnswer, handleRead, handleWrite, readViaSyncHandles, READ_MISSING, splitRead, SyncWriteUnsupported, writeViaSyncHandles, type DirLike, type FileLike, type SyncHandle } from "../storage/vault/vaultIoFs";
 import { explainError, errorKind } from "../lib/userError";
 
 type Fault = { failAfterBytes?: number; flushError?: string; shortSize?: boolean };
@@ -23,6 +25,8 @@ interface MemDir extends DirLike {
 }
 
 /** An in-memory OPFS folder tree. `fault(name)` decides how a write to that file fails. */
+const opfsCalls = { getDirectoryHandle: 0, syncModes: [] as string[], getFile: 0 };
+
 function memoryOpfs(opts: { noMove?: boolean; noSync?: boolean; fault?: (name: string) => Fault | undefined } = {}): MemDir {
   const make = (name: string): MemDir => {
     const files = new Map<string, Uint8Array>();
@@ -33,16 +37,23 @@ function memoryOpfs(opts: { noMove?: boolean; noSync?: boolean; fault?: (name: s
         kind: "file",
         name: fname,
         getFile: async () => {
+          opfsCalls.getFile++;
           const b = files.get(fname);
           if (!b) throw notFound();
           return { size: b.byteLength, arrayBuffer: async () => b.slice().buffer as ArrayBuffer };
         },
       };
       if (!opts.noSync)
-        h.createSyncAccessHandle = async (): Promise<SyncHandle> => {
+        h.createSyncAccessHandle = async (o?: { mode?: string }): Promise<SyncHandle> => {
+          opfsCalls.syncModes.push(o?.mode ?? "readwrite");
           const f = opts.fault?.(fname) ?? {};
           let buf = files.get(fname) ?? new Uint8Array(0);
           return {
+            read(into, { at }) {
+              const part = buf.subarray(at, at + into.byteLength);
+              into.set(part);
+              return part.byteLength;
+            },
             truncate(n) {
               buf = buf.slice(0, n);
               files.set(fname, buf);
@@ -91,6 +102,7 @@ function memoryOpfs(opts: { noMove?: boolean; noSync?: boolean; fault?: (name: s
       files,
       dirs,
       async getDirectoryHandle(n, o) {
+        opfsCalls.getDirectoryHandle++;
         if (!dirs.has(n)) {
           if (!o?.create) throw notFound();
           dirs.set(n, make(n));
@@ -202,6 +214,68 @@ describe("the worker's answers (W11.Q10)", () => {
     // And the note was not damaged.
     expect(text(full.files.get("a.md"))).toBe("still here");
     expect(leftovers(full.files.keys())).toEqual([]);
+  });
+});
+
+describe("OPFS reads through the worker, batched (#856 follow-up)", () => {
+  const reset = () => {
+    opfsCalls.getDirectoryHandle = 0;
+    opfsCalls.getFile = 0;
+    opfsCalls.syncModes.length = 0;
+  };
+
+  it("reads many files in one call, exact bytes, with read-only sync access handles", async () => {
+    const root = memoryOpfs();
+    await writeViaSyncHandles(root, ["notes", "a.md"], enc("שלום עולם"));
+    await writeViaSyncHandles(root, ["notes", "deep", "b.md"], enc("bee"));
+    await writeViaSyncHandles(root, ["c.md"], enc(""));
+    reset();
+    const { data, lengths } = await readViaSyncHandles(root, [["notes", "a.md"], ["notes", "deep", "b.md"], ["c.md"]]);
+    expect(splitRead(data.buffer as ArrayBuffer, lengths).map((b) => text(b ?? undefined))).toEqual(["שלום עולם", "bee", ""]);
+    expect(lengths).toEqual([enc("שלום עולם").byteLength, 3, 0]);
+    expect(opfsCalls.syncModes).toEqual(["read-only", "read-only", "read-only"]);
+    expect(opfsCalls.getFile).toBe(0);
+  });
+
+  it("says -1 for what is not a readable file here, and the rest of the batch still reads", async () => {
+    const root = memoryOpfs();
+    await writeViaSyncHandles(root, ["notes", "a.md"], enc("a"));
+    await writeViaSyncHandles(root, ["notes", "sub", "x.md"], enc("x"));
+    const { data, lengths } = await readViaSyncHandles(root, [["notes", "missing.md"], ["nofolder", "a.md"], ["notes", "sub"], ["notes", "a.md"], []]);
+    expect(lengths).toEqual([READ_MISSING, READ_MISSING, READ_MISSING, 1, READ_MISSING]);
+    expect(text(splitRead(data.buffer as ArrayBuffer, lengths)[3] ?? undefined)).toBe("a");
+  });
+
+  it("resolves each folder once per batch: 1,000 notes in 100 folders, 100 folder lookups", async () => {
+    const root = memoryOpfs();
+    const paths = Array.from({ length: 1000 }, (_, i) => [`f${i % 100}`, `note-${i}.md`]);
+    for (const p of paths) await writeViaSyncHandles(root, p, enc(p[1]));
+    reset();
+    const { data, lengths } = await readViaSyncHandles(root, paths);
+    expect(opfsCalls.getDirectoryHandle).toBe(100);
+    expect(splitRead(data.buffer as ArrayBuffer, lengths).map((b) => text(b ?? undefined))).toEqual(paths.map((p) => p[1]));
+  });
+
+  it("an engine without sync access handles still reads in the worker, with getFile()", async () => {
+    const root = memoryOpfs();
+    await writeViaSyncHandles(root, ["a.md"], enc("old engine"));
+    const noSync = memoryOpfs({ noSync: true });
+    noSync.files.set("a.md", root.files.get("a.md")!);
+    reset();
+    const { data, lengths } = await readViaSyncHandles(noSync, [["a.md"]]);
+    expect(text(splitRead(data.buffer as ArrayBuffer, lengths)[0] ?? undefined)).toBe("old engine");
+    expect(opfsCalls.getFile).toBe(1);
+  });
+
+  it("a read sent right after a write of the same note sees the new text (one order per path in the worker)", async () => {
+    const root = memoryOpfs();
+    await writeViaSyncHandles(root, ["a.md"], enc("before"));
+    const w = handleWrite({ id: 1, op: "write", parts: ["a.md"], bytes: enc("after, longer").buffer as ArrayBuffer }, async () => root);
+    const r = handleRead({ id: 2, op: "read", paths: [["a.md"]] }, async () => root);
+    const [wa, ra] = await Promise.all([w, r]);
+    expect(wa).toEqual({ id: 1, ok: true });
+    if (!ra.ok || ra.op !== "read") throw new Error("expected a read answer");
+    expect(text(splitRead(ra.data, ra.lengths)[0] ?? undefined)).toBe("after, longer");
   });
 });
 

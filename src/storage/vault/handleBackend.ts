@@ -45,6 +45,13 @@ export interface DirectoryHandleBackendOptions {
    * it, and the usual path (createWritable, else writeFallback) runs instead.
    */
   writePrimary?: (segments: string[], data: VaultData) => Promise<boolean>;
+  /**
+   * The #856 follow-up: the read to try first (OPFS: the worker, batched).
+   * Resolves the file's bytes, or null when the usual main-thread read
+   * should answer (not found there, or this engine cannot use it). The
+   * usual read reports not-found and recovers interrupted saves.
+   */
+  readPrimary?: (segments: string[]) => Promise<Blob | null>;
   /** Is a `writeFallback` or `writePrimary` save still running (its temporary files are not leftovers yet)? */
   writesPending?: () => boolean;
 }
@@ -316,10 +323,14 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
     },
 
     async read(path) {
+      const fast = o.readPrimary ? await o.readPrimary(vaultSegments(path)) : null;
+      if (fast) return fast;
       return await (await fileRecovered(path)).getFile();
     },
 
     async readText(path) {
+      const fast = o.readPrimary ? await o.readPrimary(vaultSegments(path)) : null;
+      if (fast) return await fast.text();
       return await (await (await fileRecovered(path)).getFile()).text();
     },
 

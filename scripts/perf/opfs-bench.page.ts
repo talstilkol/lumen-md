@@ -4,7 +4,9 @@
  * `window.opfsBench` (the benchmark) and `window.opfsSelftest` (the real
  * worker's atomic save, end to end).
  */
-import { errorFromAnswer, type WriteAnswer, type WriteRequest } from "../../src/storage/vault/vaultIoFs";
+import { errorFromAnswer, splitRead, type ReadAnswer, type ReadRequest, type WriteAnswer, type WriteRequest } from "../../src/storage/vault/vaultIoFs";
+// The app's batch size for worker reads (src/storage/vault/opfsSyncWrite.ts).
+import { READ_BATCH } from "../../src/storage/vault/opfsSyncWrite";
 
 declare global {
   interface Window {
@@ -15,11 +17,11 @@ declare global {
 
 let worker: Worker | null = null;
 let nextId = 0;
-const pending = new Map<number, (a: WriteAnswer) => void>();
+const pending = new Map<number, (a: WriteAnswer | ReadAnswer) => void>();
 function getWorker(): Worker {
   if (worker) return worker;
   worker = new Worker("./vault-io.worker.js", { type: "module" });
-  worker.onmessage = (e: MessageEvent<WriteAnswer>) => {
+  worker.onmessage = (e: MessageEvent<WriteAnswer | ReadAnswer>) => {
     pending.get(e.data.id)?.(e.data);
     pending.delete(e.data.id);
   };
@@ -30,8 +32,17 @@ function workerWrite(parts: string[], text: string): Promise<void> {
   const id = ++nextId;
   return new Promise((resolve, reject) => {
     pending.set(id, (a) => (a.ok ? resolve() : reject(errorFromAnswer(a))));
-    const msg: WriteRequest = { id, parts, bytes };
+    const msg: WriteRequest = { id, op: "write", parts, bytes };
     getWorker().postMessage(msg, [bytes]);
+  });
+}
+/** The app's worker read: one message per batch of paths, the bytes back in one transferred buffer. */
+function workerRead(paths: string[][]): Promise<Array<Uint8Array | null>> {
+  const id = ++nextId;
+  return new Promise((resolve, reject) => {
+    pending.set(id, (a) => (a.ok && "op" in a && a.op === "read" ? resolve(splitRead(a.data, a.lengths)) : reject(a.ok ? new Error("no read answer") : errorFromAnswer(a))));
+    const msg: ReadRequest = { id, op: "read", paths };
+    getWorker().postMessage(msg);
   });
 }
 
@@ -98,6 +109,21 @@ window.opfsBench = async ({ files, concurrency }) => {
     }
     return bytes;
   });
+  // The #856 follow-up: the same files through the worker, READ_BATCH per message, as readAllNotes does.
+  const dec = new TextDecoder();
+  const opfsReadWorker = await withLongTasks(async () => {
+    let bytes = 0;
+    let missing = 0;
+    for (let i = 0; i < files.length; i += READ_BATCH) {
+      const out = await workerRead(files.slice(i, i + READ_BATCH).map((f) => f.path.split("/")));
+      for (const b of out) {
+        if (b) bytes += dec.decode(b).length;
+        else missing++;
+      }
+    }
+    if (missing) throw new Error(`${missing} files not read through the worker`);
+    return bytes;
+  });
   const db = await idb();
   const idbWrite = await withLongTasks(() => pool(files, concurrency, (f) => tx(db, "readwrite", (s) => s.put(f.text, f.path)).then(() => undefined)));
   const idbRead = await withLongTasks(async () => {
@@ -108,7 +134,8 @@ window.opfsBench = async ({ files, concurrency }) => {
   const idbReadAll = await withLongTasks(async () => ((await tx(db, "readonly", (s) => s.getAll())) as string[]).reduce((n, x) => n + x.length, 0));
   db.close();
   await clearOpfs();
-  return { opfsWrite, opfsRead, idbWrite, idbRead, idbReadAll };
+  // opfsRead: the main thread, one file at a time (the path before the follow-up); opfsReadWorker: the worker, batched.
+  return { opfsWrite, opfsRead, opfsReadWorker, idbWrite, idbRead, idbReadAll, readBatch: READ_BATCH };
 };
 
 window.opfsSelftest = async () => {
@@ -122,6 +149,9 @@ window.opfsSelftest = async () => {
   const names: string[] = [];
   for await (const [n] of (dir as unknown as { entries(): AsyncIterable<[string, FileSystemHandle]> }).entries()) names.push(n);
   out.names = names.sort();
+  // The worker read path: the note, a missing one, and a folder name.
+  const read = await workerRead([["notes", "a.md"], ["notes", "missing.md"], ["notes"]]);
+  out.workerRead = read.map((b) => (b ? new TextDecoder().decode(b) : null));
   await clearOpfs();
   return out;
 };

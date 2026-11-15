@@ -34,4 +34,13 @@ describe("opfs-bench (W11.Q11)", () => {
     expect(readFileSync("scripts/perf/opfs-bench.mjs", "utf8")).toContain('src/storage/vault/vault-io.worker.ts');
     expect(readFileSync("src/storage/vault/opfsSyncWrite.ts", "utf8")).toContain('new Worker(new URL("./vault-io.worker.ts", import.meta.url), { type: "module"');
   });
+
+  it("reports both OPFS read paths: the main thread one by one, and the worker in the app's batches", () => {
+    const page = readFileSync("scripts/perf/opfs-bench.page.ts", "utf8");
+    expect(page).toMatch(/return \{ opfsWrite, opfsRead, opfsReadWorker, idbWrite, idbRead, idbReadAll, readBatch: READ_BATCH \}/);
+    expect(page).toContain('import { READ_BATCH } from "../../src/storage/vault/opfsSyncWrite"');
+    expect(page).toContain('op: "read", paths');
+    // The app's backend reads through the worker first (src/storage/vault/opfs.ts).
+    expect(readFileSync("src/storage/vault/opfs.ts", "utf8")).toContain("readPrimary: readInWorker");
+  });
 });
