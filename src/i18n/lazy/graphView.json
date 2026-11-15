@@ -10,5 +10,12 @@
   "graph.groupBy.none": "Nothing",
   "graph.groupBy.tag": "Tag",
   "graph.groups": "Colour groups",
-  "graph.layingOut": "laying out…"
+  "graph.layingOut": "laying out…",
+  "graph.table.caption": "Notes and their links: {shown} of {nodes} notes, most linked first",
+  "graph.table.linkedTo": "Linked notes",
+  "graph.table.links": "Links",
+  "graph.table.more": "and {n} more",
+  "graph.table.none": "no links",
+  "graph.table.note": "Note",
+  "graph.table.toggle": "Show as a table"
 }
