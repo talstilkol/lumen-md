@@ -100,7 +100,9 @@ describe("Temml math (W10.E77)", () => {
     const importers = files.filter((f) => /from\s+["']temml["']|import\(\s*["']temml["']\s*\)/.test(readFileSync(f, "utf8"))).map((f) => f.slice(ROOT.length + 1));
     expect(importers).toEqual(["src/renderer/temmlEngine.ts"]);
     const statically = files.filter((f) => /^import[^;(]*["']\.\/temml(Engine|Core)["']/m.test(readFileSync(f, "utf8"))).map((f) => f.slice(ROOT.length + 1));
-    // temmlCore (pure, no Temml) is imported by renderCore and temmlEngine; temmlEngine only dynamically.
-    expect(statically.sort()).toEqual(["src/renderer/renderCore.ts", "src/renderer/temmlEngine.ts"]);
+    // temmlCore (pure, no Temml) is imported statically by temmlEngine only; renderCore loads it, as the
+    // engines, on the first note with math, so none of the three is in the startup bundle (222 KB budget).
+    expect(statically.sort()).toEqual(["src/renderer/temmlEngine.ts"]);
+    expect(core).toContain('import("./temmlCore")');
   });
 });

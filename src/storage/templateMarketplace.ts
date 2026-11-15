@@ -20,6 +20,7 @@ import { connectAllowedByCsp } from "../lib/cspConnect";
 import { isOPFSAvailable, listWorkspace, readWorkspaceFile, workspaceHasFile, writeWorkspaceFile } from "./workspace";
 import { fetchWithRetry } from "../lib/fetchRetry";
 import { getLocale } from "../i18n";
+import { TEMPLATES_CHANGED_EVENT } from "./templateEvents";
 
 export interface MarketplaceTemplate {
   id: string;
@@ -164,8 +165,8 @@ export async function importTemplateFile(fileName: string, text: string): Promis
 
 /** Folder in the workspace where `installTemplate()` writes bodies. */
 export const INSTALLED_TEMPLATES_DIR = "templates";
-/** Window event fired after an install so listeners (⌘K) can refresh. */
-export const TEMPLATES_CHANGED_EVENT = "lumen:templates-changed";
+/** Window event fired after an install so listeners (⌘K) can refresh (./templateEvents.ts). */
+export { TEMPLATES_CHANGED_EVENT };
 const INSTALLED_NAMES_KEY = "lumen.templates.installedNames";
 
 export interface InstalledTemplate {

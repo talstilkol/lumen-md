@@ -35,7 +35,6 @@ import { rehypeSanitizeRaw } from "./rehypeSanitizeRaw";
 // parse5 (~275 KB raw / ~40 KB gzipped) and most docs don't need it.
 import { rehypeShiki } from "./shiki";
 import { rehypeKatexCached } from "./math";
-import { pickMathPlugin } from "./temmlCore";
 import { prepareCriticMarkup, rehypeCriticMarkup } from "./criticMarkup";
 import { boundMarkdown } from "./boundMarkdown";
 import { remarkBreaks, remarkWikiLinks, remarkAdmonitions, remarkColumns, remarkStripFrontmatter } from "./remarkLumen";
@@ -284,10 +283,15 @@ let katexPromise: Promise<RehypeKatex> | null = null;
  */
 function loadKatex(): Promise<RehypeKatex> {
   if (!katexPromise) {
-    katexPromise = pickMathPlugin(
-      () => import("./temmlEngine"),
-      () => import("./katexPlugin").then((m) => m.default),
-    ).then((m) => m.plugin as RehypeKatex);
+    // temmlCore too is loaded here, not imported at the top: it is not in the startup bundle (W10.E77).
+    katexPromise = import("./temmlCore")
+      .then(({ pickMathPlugin }) =>
+        pickMathPlugin(
+          () => import("./temmlEngine"),
+          () => import("./katexPlugin").then((m) => m.default),
+        ),
+      )
+      .then((m) => m.plugin as RehypeKatex);
     katexPromise.catch(() => {
       katexPromise = null; // allow a retry after a failed chunk fetch
     });

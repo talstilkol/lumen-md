@@ -13,12 +13,11 @@
 import { useEffect, useState } from "react";
 import type { Command } from "../ui/CommandPalette";
 import { cmdIcons } from "../ui/cmdIcons";
-import {
-  listInstalledTemplates,
-  readInstalledTemplate,
-  TEMPLATES_CHANGED_EVENT,
-  type InstalledTemplate,
-} from "../storage/templateMarketplace";
+import type { InstalledTemplate } from "../storage/templateMarketplace";
+import { TEMPLATES_CHANGED_EVENT } from "../storage/templateEvents";
+
+/** storage/templateMarketplace.ts loads on first use, not at startup (the 222 KB budget). */
+const marketplace = () => import("../storage/templateMarketplace");
 import { log } from "../lib/logger";
 
 export function useInstalledTemplates(): InstalledTemplate[] {
@@ -26,7 +25,8 @@ export function useInstalledTemplates(): InstalledTemplate[] {
   useEffect(() => {
     let cancelled = false;
     const load = () => {
-      listInstalledTemplates()
+      marketplace()
+        .then((m) => m.listInstalledTemplates())
         .then((list) => {
           if (!cancelled) setTemplates(list);
         })
@@ -76,7 +76,8 @@ export function buildInstalledTemplateCommands(
     icon: cmdIcons.FileText,
     group: deps.groupLabel,
     action: () => {
-      readInstalledTemplate(tpl)
+      marketplace()
+        .then((m) => m.readInstalledTemplate(tpl))
         .then((content) => deps.apply(tpl.name, content))
         .catch((e: unknown) => {
           log.error("installed template: read failed", e);
