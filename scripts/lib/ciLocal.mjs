@@ -4,7 +4,7 @@ import { delimiter as pathDelimiter, join as pathJoin } from "node:path";
  * The steps `npm run ci:local` runs (plan 0.14), as data, so the choice of
  * steps is testable without running any of them.
  *
- * The list mirrors .github/workflows/ci.yml's `check` job plus the e2e job on
+ * The list mirrors docs/archive/workflows/ci.yml's `check` job plus the e2e job on
  * Chromium. A step whose tool is not in this checkout (an older branch with no
  * licence gate, say) is reported as "not here" instead of failing.
  */
@@ -42,7 +42,7 @@ export function prCheckBase(explicit, remoteRefs = []) {
   return best?.ref ?? "origin/main";
 }
 
-/** CI's coverage gate (.github/workflows/ci.yml "Coverage gate (lines >= 65%)"). */
+/** CI's coverage gate (docs/archive/workflows/ci.yml "Coverage gate (lines >= 65%)"). */
 export const COVERAGE_MIN = 65;
 
 /**
