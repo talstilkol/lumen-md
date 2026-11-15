@@ -9,6 +9,7 @@ import { isOPFSAvailable, listWorkspaceFolder, readWorkspaceFile } from "../stor
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
 import { log } from "../lib/logger";
 import { TYPES_DIR, type TypeDef } from "./typeSchema";
+import { argumentTypes } from "../argument/argumentMap";
 import { loadTypeRegistry, type TypeRegistry } from "./typeRegistry";
 
 import { TYPES_CHANGED_EVENT } from "./typeEvents";
@@ -16,6 +17,8 @@ import { ENTITY_TYPES_FEATURE, entityTypeDefs } from "../entities/types";
 export { OPEN_TYPE_PAGE, TYPES_CHANGED_EVENT, openTypePage } from "./typeEvents";
 
 const builtins = new Map<string, TypeDef[]>();
+// W12.V4: the argument map's claim and source types ship with the app.
+builtins.set("argument-map", argumentTypes());
 
 /** Types a feature ships in code (`feature` replaces its earlier set). */
 export function registerBuiltinTypes(feature: string, defs: readonly TypeDef[]): void {

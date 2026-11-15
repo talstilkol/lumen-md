@@ -120,6 +120,8 @@ export const SPECIAL_LANGS = new Set([
   "structure",
   // The Hebrew month grid of the daily notes, and the year's activity (plan W12.V5).
   "hebrew-calendar",
+  // Claims and sources with supports / contradicts / qualifies (plan W12.V4).
+  "argument-map",
   // Single-language live previews — render the snippet inside a tiny
   // sandboxed iframe so users can experiment with HTML/CSS/JS/GLSL/SVG
   // without writing the full boilerplate of an `htmlpreview` block.

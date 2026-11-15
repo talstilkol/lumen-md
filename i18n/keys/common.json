@@ -17788,6 +17788,111 @@
       "vars": []
     },
     {
+      "key": "viz.arg.by.contradicts",
+      "en": "Contradicted by",
+      "vars": []
+    },
+    {
+      "key": "viz.arg.by.qualifies",
+      "en": "Qualified by",
+      "vars": []
+    },
+    {
+      "key": "viz.arg.by.supports",
+      "en": "Supported by",
+      "vars": []
+    },
+    {
+      "key": "viz.arg.claim",
+      "en": "claim",
+      "vars": []
+    },
+    {
+      "key": "viz.arg.conclusion",
+      "en": "conclusion",
+      "vars": []
+    },
+    {
+      "key": "viz.arg.contradicts",
+      "en": "contradicts",
+      "vars": []
+    },
+    {
+      "key": "viz.arg.empty",
+      "en": "No claims or sources yet: give notes `type: claim` or `type: evidence`, and link them with supports:, contradicts: or qualifies:.",
+      "vars": []
+    },
+    {
+      "key": "viz.arg.noSource",
+      "en": "no source",
+      "vars": []
+    },
+    {
+      "key": "viz.arg.qualifies",
+      "en": "qualifies",
+      "vars": []
+    },
+    {
+      "key": "viz.arg.save",
+      "en": "Save as a canvas",
+      "vars": []
+    },
+    {
+      "key": "viz.arg.saved",
+      "en": "Saved {path}.canvas and {path}.excalidraw",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "viz.arg.showList",
+      "en": "Show as a list",
+      "vars": []
+    },
+    {
+      "key": "viz.arg.showMap",
+      "en": "Show the map",
+      "vars": []
+    },
+    {
+      "key": "viz.arg.source",
+      "en": "source",
+      "vars": []
+    },
+    {
+      "key": "viz.arg.summary",
+      "en": "{claims} claims, {sources} sources; {unsupported} without a source",
+      "vars": [
+        "claims",
+        "sources",
+        "unsupported"
+      ]
+    },
+    {
+      "key": "viz.arg.supports",
+      "en": "supports",
+      "vars": []
+    },
+    {
+      "key": "viz.arg.title",
+      "en": "Argument map",
+      "vars": []
+    },
+    {
+      "key": "viz.arg.titleIn",
+      "en": "Argument map: {folder}",
+      "vars": [
+        "folder"
+      ]
+    },
+    {
+      "key": "viz.arg.unused",
+      "en": "Sources that support nothing yet: {names}",
+      "vars": [
+        "names"
+      ]
+    },
+    {
       "key": "viz.chart",
       "en": "chart",
       "vars": []
