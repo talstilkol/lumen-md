@@ -30,6 +30,7 @@
  */
 import { getAiPolicy, isLocalOrigin, type AiPolicy } from "./policy";
 import { getBaseUrl } from "./ollamaProvider";
+import { lmStudioUrl } from "./lmStudioEndpoint";
 import { grammarEndpoint } from "./grammar";
 import { researchEndpoint } from "../research/client";
 import { LEDGER_CHANNEL, type WorkerLedgerMessage } from "./workerLedger";
@@ -254,6 +255,18 @@ export function classify(url: string): { host: string; category: LedgerCategory;
     return isLocalOrigin(u.href)
       ? { host, category: "local-ai", reason: "Ollama (this machine / LAN)" }
       : { host, category: "cloud-ai", reason: "Ollama on a remote server" };
+  }
+  // LM Studio at its configured address (W11.I17), like Ollama.
+  let lmHost = "";
+  try {
+    lmHost = new URL(lmStudioUrl()).host.toLowerCase();
+  } catch {
+    /* why: an LM Studio address that is not a URL: nothing to match */
+  }
+  if (lmHost && u.host.toLowerCase() === lmHost) {
+    return isLocalOrigin(u.href)
+      ? { host, category: "local-ai", reason: "LM Studio (this machine / LAN)" }
+      : { host, category: "cloud-ai", reason: "LM Studio on a remote server" };
   }
   // The configured endpoints, wherever they are hosted (a self-hosted
   // LanguageTool, a research worker on any domain).

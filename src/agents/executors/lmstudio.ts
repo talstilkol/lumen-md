@@ -25,10 +25,11 @@ import type { AgentTool, Availability, Executor, ExecutorMessage, ExecutorReques
 import { getAiPolicy, isLocalOrigin } from "../../ai/policy";
 import { getSecret } from "../../lib/secretStore";
 
-export const LMSTUDIO_URL_KEY = "lumen.ai.lmstudio.url";
+import { LMSTUDIO_DEFAULT_URL, LMSTUDIO_URL_KEY, lmStudioUrl } from "../../ai/lmStudioEndpoint";
+
+export { LMSTUDIO_DEFAULT_URL, LMSTUDIO_URL_KEY, lmStudioUrl };
 export const LMSTUDIO_KEY_KEY = "lumen.ai.lmstudio.key";
 export const LMSTUDIO_MODEL_KEY = "lumen.ai.lmstudio.model";
-export const LMSTUDIO_DEFAULT_URL = "http://localhost:1234";
 
 const read = (k: string): string | null => {
   try {
@@ -38,9 +39,6 @@ const read = (k: string): string | null => {
   }
 };
 
-export function lmStudioUrl(): string {
-  return (read(LMSTUDIO_URL_KEY) || LMSTUDIO_DEFAULT_URL).replace(/\/+$/, "");
-}
 
 const isLoopback = (url: string) => {
   try {
@@ -84,6 +82,7 @@ export async function detectLmStudio(url = lmStudioUrl()): Promise<{ found: bool
   const refused = await lmStudioRefusal(url);
   if (refused) return { found: false, models: [], reason: refused };
   try {
+    // privacy-ledger: LM Studio at the configured base URL (classify: local-ai on this machine/LAN, cloud-ai when remote)
     const res = await fetch(`${url.replace(/\/+$/, "")}/v1/models`, { headers: headers() });
     if (res.status === 401 || res.status === 403) return { found: true, models: [], reason: "unauthorized" };
     if (!res.ok) return { found: false, models: [], reason: `HTTP ${res.status}` };
@@ -109,6 +108,7 @@ export function __resetLmStudioState(): void {
 }
 
 async function listModels(signal?: AbortSignal): Promise<string[]> {
+  // privacy-ledger: LM Studio at the configured base URL (classify: local-ai on this machine/LAN, cloud-ai when remote)
   const res = await fetch(`${lmStudioUrl()}/v1/models`, { headers: headers(), signal });
   if (res.status === 401 || res.status === 403) throw Object.assign(new Error("LM Studio refused the permission key"), { code: "unauthorized" });
   if (!res.ok) throw new Error(`LM Studio /v1/models: HTTP ${res.status}`);
@@ -167,6 +167,7 @@ async function chatCompletions(req: ExecutorRequest, model: string): Promise<Exe
   };
   if (req.tools?.length) body.tools = toOpenAiTools(req.tools);
   if (req.schema) body.response_format = { type: "json_schema", json_schema: { name: "answer", strict: true, schema: req.schema } };
+  // privacy-ledger: LM Studio at the configured base URL (classify: local-ai on this machine/LAN, cloud-ai when remote)
   const res = await fetch(`${lmStudioUrl()}/v1/chat/completions`, { method: "POST", headers: headers(), body: JSON.stringify(body), signal: req.signal });
   if (!res.ok) throw new Error(`LM Studio /v1/chat/completions: HTTP ${res.status} ${(await res.text().catch(() => "")).slice(0, 200)}`);
   const out = (await res.json()) as { model?: string; choices?: Array<{ message?: { content?: string | null; tool_calls?: unknown } }>; usage?: { prompt_tokens?: number; completion_tokens?: number } };
@@ -196,10 +197,12 @@ async function nativeTurn(req: ExecutorRequest, model: string): Promise<Executor
     ...(req.temperature !== undefined ? { temperature: Math.min(1, Math.max(0, req.temperature)) } : {}),
     ...(req.maxTokens ? { max_output_tokens: req.maxTokens } : {}),
   };
+  // privacy-ledger: LM Studio at the configured base URL (classify: local-ai on this machine/LAN, cloud-ai when remote)
   let res = await fetch(`${lmStudioUrl()}/api/v1/chat`, { method: "POST", headers: headers(), body: JSON.stringify(body), signal: req.signal });
   // A model without a reasoning switch rejects the field: once more without it.
   if (res.status === 400 && body.reasoning) {
     delete body.reasoning;
+    // privacy-ledger: LM Studio at the configured base URL (classify: local-ai on this machine/LAN, cloud-ai when remote)
     res = await fetch(`${lmStudioUrl()}/api/v1/chat`, { method: "POST", headers: headers(), body: JSON.stringify(body), signal: req.signal });
   }
   if (res.status === 404 || res.status === 405) return null;
