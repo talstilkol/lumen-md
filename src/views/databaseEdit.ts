@@ -10,6 +10,7 @@
  */
 
 import { inferType, removeProperty, setProperty, type PropertyType, type PropertyValue } from "../properties/frontmatter";
+import { inferValueType } from "../properties/valueTypes";
 import { readWorkspaceFile, writeWorkspaceFile } from "../storage/workspace";
 import { notifyWorkspaceChanged } from "../storage/workspaceEvents";
 import { useAppStore } from "../store/useStore";
@@ -92,7 +93,7 @@ export function writeCell(path: string, key: string, value: PropertyValue | unde
 
 /** The type a column holds: its first value's, else what its name suggests. */
 export function columnType(values: Iterable<unknown>, key: string): PropertyType {
-  for (const v of values) if (v !== null && v !== undefined && v !== "") return inferType(v, key);
+  for (const v of values) if (v !== null && v !== undefined && v !== "") return inferValueType(v, key);
   return inferType(null, key);
 }
 
