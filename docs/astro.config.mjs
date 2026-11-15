@@ -196,6 +196,7 @@ export default defineConfig({
             { label: "Organize the vault", translations: { he: "סידור הכספת" }, slug: "ai/organizer" },
             { label: "Research + citation checks", slug: "ai/research" },
             { label: "MCP and the lumen CLI", translations: { he: "MCP וה-CLI של lumen" }, slug: "ai/mcp" },
+            { label: "External agents (ACP)", translations: { he: "סוכנים חיצוניים (ACP)" }, slug: "ai/external-agents" },
             { label: "Agent skills", translations: { he: "מיומנויות סוכן" }, slug: "ai/skills" },
             { label: "Structured output and Chrome's built-in model", translations: { he: "פלט מובנה והמודל המובנה של Chrome" }, slug: "ai/structured-output" },
             { label: "Speculative decoding in Ollama", translations: { he: "פענוח ספקולטיבי ב-Ollama" }, slug: "ai/speculative-decoding" },
