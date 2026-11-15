@@ -469,6 +469,8 @@
   "cmd.vault.toBrowser.hint": "把文件夹中的每条笔记复制到浏览器的私有存储并检查，然后在那里工作。文件夹不会改变。",
   "cmd.vault.toFolder": "将库移动到文件夹…",
   "cmd.vault.toFolder.hint": "把每条笔记复制到这台电脑上的文件夹，逐字节检查每个文件，然后在那里工作。不会删除任何内容。",
+  "cmd.view.asOf": "当时我所知道的",
+  "cmd.view.asOf.hint": "按过去某一日期的保险库状态进行搜索",
   "cmd.view.autoSave.hint": "每 {interval} 秒",
   "cmd.view.autoSave.off": "禁用 Auto-保存",
   "cmd.view.autoSave.on": "启用 Auto-保存",
