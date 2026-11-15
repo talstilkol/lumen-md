@@ -6,7 +6,7 @@
  * Properties view, Bases, Dataview and the graph see them without Lumen.
  * The provenance of each relation stays in `.lumen/entities/edges.jsonl`.
  */
-import { splitFrontmatter } from "../storage/import/frontmatter";
+import { splitFrontmatter } from "./frontmatter";
 import { stringify } from "yaml";
 import { ENTITY_ROOT, TYPE_INFO, entityId, entityNotePath, isEntityType, isPredicate, type Edge, type Entity } from "./model";
 
