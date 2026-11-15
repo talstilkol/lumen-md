@@ -23,6 +23,7 @@ import { noteAiOutput } from "../ai/authorship";
 import { AiQuotaExceededError, aiQuotaStatus, chargeAiCommandDispatch, consumeAiPrompt } from "../billing/aiQuota";
 import { mergeOutputs, splitText } from "./runtimeText";
 import { freezeTools, guardUntrustedResult, loadGuard, logTainted, unmarkDelta, unmarkReply } from "./ruleOfTwo";
+import { createRunGuard, stops, type GuardVerdict } from "./runGuard";
 import { isAbort, truncate, type ToolEnv, execTool, modelTools, systemPrompt, inputTextOf, languageMode, sameLanguage, inputKeyOf } from "./runtimeSteps";
 export { sameScript, sameLanguage, inputKeyOf } from "./runtimeSteps";
 export { mergeOutputs, splitText } from "./runtimeText";
@@ -312,9 +313,12 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     // a second invalid turn in a row stops the run and asks the user.
     let invalidTurns = 0;
     let askUser: { tool: string; problem: string } | null = null;
+    // R12.18: the same call or error over and over stops the run.
+    const rg = createRunGuard();
+    let runaway: GuardVerdict | null = null;
 
     try {
-      for (let i = 0; i < maxSteps && finalText === null && !askUser; i++) {
+      for (let i = 0; i < maxSteps && finalText === null && !askUser && !runaway; i++) {
         if (opts.signal?.aborted) throw new DOMException("aborted", "AbortError");
         // The chat adapter charges at dispatch, after its own checks.
         if (executor.id !== "chat") chargeOnce();
@@ -387,10 +391,16 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
           const detail = [r.note, guardNote, repairNote, argsText].filter(Boolean).join(" · ");
           step({ kind: "tool", ms: Date.now() - t1, label: call.name, ok: r.error === undefined, detail: r.error ?? detail });
           messages.push({ role: "tool", content: body, toolCallId: call.id, name: call.name });
+          const v = rg.observe({ error: r.error, call });
+          if (v.action !== "ok") step({ kind: "validate", ms: 0, label: "runaway", ok: !stops(v), detail: `${v.action}: ${v.reason}` });
+          if (stops(v)) {
+            runaway = v;
+            break;
+          }
         }
         invalidTurns = turnInvalid ? invalidTurns + 1 : 0;
       }
-      if (finalText === null && !askUser) {
+      if (finalText === null && !askUser && !runaway) {
         failure = { kind: "empty", attempt, maxRetries, tier, executor: executor.id, reason: `no final answer after ${maxSteps} steps`, inputChars, splittable: !!def.splittable };
       }
     } catch (e) {
@@ -401,6 +411,9 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
       failure = { kind: "error", attempt, maxRetries, tier, executor: executor.id, reason: msg, inputChars, splittable: !!def.splittable };
     }
 
+    // The log keeps the prompt's hash and size, never its text (R12.18).
+    run.guard = rg.log(messages.slice(0, 2).map((m) => m.content).join("\n"));
+    if (runaway) return finish("failed", { errorCode: "runaway", error: `Stopped a runaway run: ${runaway.reason} (${runaway.action}). Change the request and run it again.` });
     if (askUser) {
       const ask: { tool: string; problem: string } = askUser;
       return finish("failed", {
