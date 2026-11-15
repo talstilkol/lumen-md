@@ -39,3 +39,15 @@ a `.canvas` (JSON Canvas) file the card is a file node with the highlight as
 its subpath, as Obsidian Canvas keeps one. If you delete the highlight
 later, the card stays on the canvas, dashed, and says the source was
 deleted.
+
+**Export with APA citations** (PDF highlights) writes the same note with a
+Hebrew APA 7 citation after each quote, for example
+"(כהן ואחרים, 2020, עמ׳ 14)", and a reference list at the end, Hebrew
+sources before English ones. The citations follow the Bar-Ilan and Haifa
+library guides (no comma before the last author's ו, "ואחרים" for three or
+more) and are bidi isolates, so their brackets do not flip in a Hebrew
+document. Each PDF's details come from your citation library (Zotero, or a
+`.bib` / `.csl.json` file in the vault); a PDF it cannot match is asked
+about once, and the answer is remembered on this device. The page is the
+PDF page number; a book whose printed page numbers differ needs its page
+labels, which this export does not read yet.
