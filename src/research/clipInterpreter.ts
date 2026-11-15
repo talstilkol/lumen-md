@@ -153,8 +153,8 @@ export async function interpret(t: ClipTemplate, page: { doc: Document | null; a
   const prompts = findPrompts(t);
   if (!prompts.length) return null;
   const t0 = Date.now();
-  const { guardUntrusted, sanitizeUntrusted, unmarkData } = await import("../agents/untrusted");
-  const guarded = guardUntrusted(interpreterContext(t, page.doc, page.article), [page.url]);
+  const { guardUntrustedAsync, sanitizeUntrusted, unmarkData } = await import("../agents/untrusted");
+  const guarded = await guardUntrustedAsync(interpreterContext(t, page.doc, page.article), [page.url], signal);
   const raw = await ask({ ...interpreterPrompt(prompts, guarded.text), signal, sources: [page.url] });
   const answers = parseAnswers(raw, prompts);
   let flagged = guarded.findings.length;

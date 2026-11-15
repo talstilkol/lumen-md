@@ -55,9 +55,10 @@ export async function logTainted(guard: Guard, taint: string[]): Promise<void> {
 }
 
 /** `guardToolResult` (outside content is cleaned, delimited, and taints the run); the first taint is logged (W11.I2). */
-export async function guardUntrustedResult(guard: Guard, serialize: (v: unknown) => string, result: unknown, sources: string[], taint: string[], messages: ExecutorMessage[]): Promise<{ body: string; note: string }> {
+export async function guardUntrustedResult(guard: Guard, serialize: (v: unknown) => string, result: unknown, sources: string[], taint: string[], messages: ExecutorMessage[], signal?: AbortSignal): Promise<{ body: string; note: string }> {
   const wasClean = taint.length === 0;
-  const out = guard.guardToolResult(serialize, result, sources, taint, messages);
+  // W10.E66: the async guard, which also asks the injection classifier when one is registered.
+  const out = await guard.guardToolResultAsync(serialize, result, sources, taint, messages, signal);
   if (wasClean) await logTainted(guard, taint);
   return out;
 }

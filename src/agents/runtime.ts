@@ -388,7 +388,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     private: !opts.inputMayLeave && !!(ctx.document || ctx.selection || input.text),
     consentUntrusted: opts.consentUntrusted,
   };
-  const modelInput: I = guard.guardInput(input, inputUntrusted, ctx.document);
+  const modelInput: I = await guard.guardInputAsync(input, inputUntrusted, ctx.document, opts.signal);
   toolEnvRef.current = toolEnv;
   await logTainted(guard, toolEnv.taint); // W11.I2: the privacy log shows when a run became tainted.
   const inputChars = (input.text ?? "").length + (input.selection ?? "").length;
@@ -464,7 +464,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     else if (r.untrusted?.length) {
       // Plan 2.7: context from outside notes is cleaned and delimited, and taints the run
       // (the system prompt, built after this loop, then carries the rule).
-      ({ body, note: guardNote } = await guardUntrustedResult(guard, (v) => truncate(toolResultMessage(call, v), TOOL_RESULT_LIMIT), r.result, r.untrusted, toolEnv.taint, []));
+      ({ body, note: guardNote } = await guardUntrustedResult(guard, (v) => truncate(toolResultMessage(call, v), TOOL_RESULT_LIMIT), r.result, r.untrusted, toolEnv.taint, [], opts.signal));
     } else body = truncate(toolResultMessage(call, r.result), TOOL_RESULT_LIMIT);
     step({ kind: "tool", ms: Date.now() - t1, label: call.name, ok: r.error === undefined, detail: ["context", guardNote, r.error ?? truncate(JSON.stringify(call.args), 200)].filter(Boolean).join(" · ") });
     context.push({ role: "assistant", content: "", toolCalls: [call] }, { role: "tool", content: body, toolCallId: call.id, name: call.name });
@@ -634,7 +634,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
           else if (r.error !== undefined) body = toolResultMessage(call, undefined, r.error);
           else if (r.untrusted?.length) {
             // Outside content: cleaned, then delimited (after truncation, so the closing marker stays).
-            ({ body, note: guardNote } = await guardUntrustedResult(guard, (v) => truncate(toolResultMessage(call, v), TOOL_RESULT_LIMIT), r.result, r.untrusted, toolEnv.taint, messages));
+            ({ body, note: guardNote } = await guardUntrustedResult(guard, (v) => truncate(toolResultMessage(call, v), TOOL_RESULT_LIMIT), r.result, r.untrusted, toolEnv.taint, messages, opts.signal));
           } else body = truncate(toolResultMessage(call, r.result), TOOL_RESULT_LIMIT);
           const argsText = truncate(JSON.stringify(call.args), 200);
           const detail = [r.note, guardNote, repairNote, argsText].filter(Boolean).join(" · ");
