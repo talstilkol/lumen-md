@@ -5,6 +5,7 @@
 import type { EditorView } from "@milkdown/prose/view";
 import { toggleMark } from "@milkdown/prose/commands";
 import { showAiToast } from "../ui/AiToast";
+import { markAiInsert } from "./wysiwygAiAuthorship";
 import { openAiPrompt } from "../ui/AiInlinePrompt";
 import { log } from "../lib/logger";
 import { t } from "../i18n";
@@ -82,7 +83,8 @@ export function buildTooltip(getView: () => EditorView | null): HTMLDivElement {
           // Plan 5.5: the `rewriter` agent (with the style profile), through the runtime.
           const [{ runAgentOrThrow }, { rewriterAgent }] = await Promise.all([import("../agents/runtime"), import("../agents/defs")]);
           const rewritten = await runAgentOrThrow(rewriterAgent, { text: selectedText, extra: { instruction: instructions } }, { ownPrompt: true, signal: op.signal, selection: selectedText });
-          dispatch(state.tr.replaceWith(from, to, state.schema.text(rewritten)));
+          // 5.9 / W10.E37: the rewrite is the agent's text, marked as it goes in.
+          dispatch(markAiInsert(state.tr.replaceWith(from, to, state.schema.text(rewritten))));
         } catch (e) {
           if (isAbort(e)) return;
           log.error("WYSIWYG AI rewrite failed", e);

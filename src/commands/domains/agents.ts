@@ -71,7 +71,7 @@ export function buildDocumentAgentCommands({ setContent, liveDoc }: CommandConte
           showAiToast(t("toast.generatingChart"), "info");
           const { generateChart } = await import("../../agents/commands");
           const block = await cancellable((signal) => generateChart(liveDoc().content, signal));
-          setContent(`${liveDoc().content.trimEnd()}\n\n${block}\n`);
+          (await import("../../ai/aiWrites")).writeAiContent(liveDoc(), `${liveDoc().content.trimEnd()}\n\n${block}\n`, setContent);
           showAiToast(t("toast.chartInserted"), "success");
         } catch (e) {
           if (isAbort(e)) return;
@@ -94,7 +94,7 @@ export function buildDocumentAgentCommands({ setContent, liveDoc }: CommandConte
           const { analyseNote } = await import("../../agents/analyst");
           showAiToast(t("analyst.working"), "info");
           const { result, blocks } = await cancellable((signal) => analyseNote(liveDoc().content, question.trim(), signal));
-          setContent(`${liveDoc().content.trimEnd()}\n\n${blocks}\n`);
+          (await import("../../ai/aiWrites")).writeAiContent(liveDoc(), `${liveDoc().content.trimEnd()}\n\n${blocks}\n`, setContent);
           showAiToast(t("analyst.done", { answer: String(result.answer.answer) }), "success");
         } catch (e) {
           if (isAbort(e)) return;
@@ -207,7 +207,7 @@ export function buildPromptTemplateCommands({ locale, setContent, liveDoc }: Com
           const { runAgentOrThrow } = await import("../../agents/runtime");
           const { templaterAgent } = await import("../../agents/defs");
           const result = await cancellable((signal) => runAgentOrThrow(templaterAgent, { text: prompt, extra: { templateId: tpl.id } }, { document: liveDoc().content, signal }));
-          setContent(liveDoc().content + "\n\n---\n\n" + result);
+          (await import("../../ai/aiWrites")).writeAiContent(liveDoc(), liveDoc().content + "\n\n---\n\n" + result, setContent);
           showAiToast(t("toast.completed", { name: tpl.label }), "success");
         } catch (e) {
           if (isAbort(e)) return;

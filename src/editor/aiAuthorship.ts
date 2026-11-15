@@ -2,12 +2,15 @@
  * AI-written text in the source editor (plan 5.9), like iA Writer's
  * authorship: what the AI wrote is shown lighter until you edit it.
  *
- * - A transaction that inserts text without the user typing it (an AI
- *   command inserting at the cursor, replacing a selection, or rewriting
- *   the whole document from the store) is checked against the recent AI
- *   answers (`ai/authorship.ts`, fed by the agent runtime); the matching
- *   parts are marked. An editor that knows its insertion is AI text (the
- *   ghost completion) says so with the `aiAuthored` annotation.
+ * - Tagged at insertion (W10.E37): an editor or command that knows its
+ *   insertion is AI text says so — the ghost completion, the inline
+ *   suggestion and an agent's applied edit with the `aiAuthored`
+ *   annotation, an AI command writing through the store with
+ *   `writeAiContent` (ai/aiWrites.ts), whose whole-document change is then
+ *   marked where it inserted text.
+ * - Any other insertion that the user did not type is still checked
+ *   against the recent AI answers (`ai/authorship.ts`, fed by the agent
+ *   runtime), for writers that do not tag yet.
  * - What the user types, pastes or drops is never marked, and typing
  *   inside a mark cuts that part out of it: edited text is the user's.
  * - The marks are saved per note (text-checked on load) and can be hidden
@@ -17,6 +20,7 @@
 import { Annotation, StateEffect, StateField, type Extension, type Transaction } from "@codemirror/state";
 import { Decoration, EditorView, ViewPlugin, type DecorationSet, type ViewUpdate } from "@codemirror/view";
 import { aiSpansIn, diffMiddle, loadSpans, marksShown, normalize, recentAiTexts, saveSpans, subtract, type Span } from "../ai/authorship";
+import { carrySpans, insertedSpans, takeAiWrite } from "../ai/aiWrites";
 
 /** Marks every insertion of the transaction as AI-written. */
 export const aiAuthored = Annotation.define<boolean>();
@@ -47,33 +51,29 @@ export function nextSpans(spans: readonly Span[], tr: Transaction, texts: () => 
 
   const explicit = tr.annotation(aiAuthored) === true;
   const user = !explicit && byUser(tr);
+  // An AI command's write through the store (writeAiContent): tagged for exactly this text.
+  const tagged = !explicit && !user && takeAiWrite(tr.state.doc.toString());
   const before = tr.startState.doc;
   const whole = before.length > 0 && !explicit && !user && isWholeReplace(tr);
 
   if (whole) {
     // A rewrite from outside (the store): keep the spans in the unchanged
-    // prefix and suffix, look for AI text only in the middle.
+    // prefix and suffix; in the middle, what a tagged AI write inserted, else
+    // the recent AI answers it contains.
     const prev = before.toString();
     const now = tr.state.doc.toString();
-    const { start, endBefore, endAfter } = diffMiddle(prev, now);
-    const delta = endAfter - endBefore;
-    next = next.flatMap(([a, b]): Span[] => {
-      if (b <= start) return [[a, b]];
-      if (a >= endBefore) return [[a + delta, b + delta]];
-      const head: Span[] = a < start ? [[a, start]] : [];
-      const tail: Span[] = b > endBefore ? [[endBefore + delta, b + delta]] : [];
-      return [...head, ...tail];
-    });
-    const middle = now.slice(start, endAfter);
-    for (const [a, b] of aiSpansIn(middle, texts())) next.push([start + a, start + b]);
+    next = carrySpans(prev, now, next);
+    if (tagged) return normalize([...next, ...insertedSpans(prev, now)]);
+    const { start, endAfter } = diffMiddle(prev, now);
+    for (const [a, b] of aiSpansIn(now.slice(start, endAfter), texts())) next.push([start + a, start + b]);
     return normalize(next);
   }
 
   next = mapSpans(next, tr);
-  const recent = explicit || user ? [] : texts();
+  const recent = explicit || tagged || user ? [] : texts();
   tr.changes.iterChanges((_fa, _ta, fromB, toB, inserted) => {
     if (toB <= fromB) return;
-    if (explicit) next.push([fromB, toB]);
+    if (explicit || tagged) next.push([fromB, toB]);
     else if (user) next = subtract(normalize(next), fromB, toB);
     else if (recent.length) for (const [a, b] of aiSpansIn(inserted.toString(), recent)) next.push([fromB + a, fromB + b]);
   });

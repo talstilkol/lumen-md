@@ -12,6 +12,9 @@ import type { EditorView } from "@milkdown/prose/view";
 import { Plugin } from "@milkdown/prose/state";
 import { wysiwygBidiPlugin } from "./wysiwygBidi";
 import { frontmatterDir } from "../lib/paragraphDirection";
+import { wysiwygAiAuthorshipPlugin } from "./wysiwygAiAuthorship";
+import { saveWysiwygAiSpans } from "./wysiwygAiSave";
+import { restoreWysiwygAiSpans } from "./wysiwygAiRestore";
 import { remoteImagePlugin } from "./remoteImageView";
 import { wysiwygBidiMarksPlugin } from "./wysiwygBidiMarks";
 import { listSpreadFix } from "./milkdownListSpread";
@@ -166,6 +169,7 @@ const pasteCleanPlugin = $prose(
     serializedRef.current = md;
     const full = frontmatterRef.current + restoreSource(md);
     if (full !== lastEmittedRef.current) {
+      saveWysiwygAiSpans(ed, lastEmittedRef.current, full, frontmatterRef.current, md);
       lastEmittedRef.current = full;
       onChangeRef.current(full);
     }
@@ -239,6 +243,8 @@ const pasteCleanPlugin = $prose(
             if (md === serializedRef.current) return; // already flushed
             serializedRef.current = md;
             const full = frontmatterRef.current + restoreSource(md);
+            // W10.E37: the AI ranges go into the note's saved spans, for the source view and the export.
+            if (editorRef.current) saveWysiwygAiSpans(editorRef.current, lastEmittedRef.current, full, frontmatterRef.current, md);
             lastEmittedRef.current = full;
             onChangeRef.current(full);
           });
@@ -254,6 +260,8 @@ const pasteCleanPlugin = $prose(
             dragHandlePlugin,
             // T25 — every block reads in the direction of its own text.
             wysiwygBidiPlugin({ pinned: () => frontmatterDir(frontmatterRef.current) }),
+            // 5.9 / W10.E37 — what an agent inserted is marked when it is inserted.
+            wysiwygAiAuthorshipPlugin(),
             // Plan 2.2 — images from other sites wait for the user.
             remoteImagePlugin(),
             // 9.2 layer 1 — the browser / OS spellchecker, Hebrew included, no dictionary in the bundle.
@@ -440,6 +448,8 @@ const pasteCleanPlugin = $prose(
       lastEmittedRef.current = value;
       registeredViewRef.current = editor.action((ctx) => ctx.get(editorViewCtx));
       registerWysiwygView(registeredViewRef.current);
+      // W10.E37: the note's saved AI spans (source view, AI commands, the last emission) drawn here too.
+      restoreWysiwygAiSpans(editor, value, fm, (md) => encodeCriticForWysiwyg(protectEscapedWikiLinks(md)));
       serializedRef.current = editor.action(getMarkdown());
       try {
         preserveRef.current = wysiwygSourcePreserver(body, serializedRef.current).restore;
