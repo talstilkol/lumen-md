@@ -9,10 +9,10 @@
  * a train with a failing test gets a red status. Production (main) builds as before:
  * the app, its bundle budget and its build manifest (W7.23), nothing else.
  *
- *   VERCEL_ENV=preview      build, budget, secrets, manifest, vitest, e2e, i18n:check,
+ *   VERCEL_ENV=preview      build, live:meta, budget, secrets, manifest, vitest, e2e, i18n:check,
  *                           hygiene, docs:sync, docs:complete (with the
  *                           strict Hebrew parity), the licence gate, the mutation floor
- *   VERCEL_ENV=production   build, budget, manifest (after the scans: its
+ *   VERCEL_ENV=production   build, live:meta, budget, manifest (after the scans: its
  *                           hashes are not secrets, but they look like them)
  *   (not on Vercel)         the preview set, so `node scripts/vercel-build.mjs`
  *                           reproduces a preview build locally
@@ -46,6 +46,8 @@ export const GATES = {
   build: ["run", "build"],
   // W7.23: the manifest of this dist, which the second infrastructure's build is compared with.
   manifest: ["run", "-s", "build:manifest"],
+  // W6.2 / audit W10.C29: the metadata of the files this build deploys names only our host.
+  "live:meta": ["run", "-s", "live:meta"],
   budget: ["run", "budget"],
   vitest: ["run", "test"],
   // W10.D6: the crypto attack tests on their own, so a red one names itself in the log.
@@ -80,6 +82,7 @@ export const GATE_EXTRA = {
   budget: ["--", "--json", SIZES_REPORT],
   // The gate's tables and numbers, kept with the build (W10.E10).
   "perf:gate": ["--", "--out", "reports/perf-gate.md", "--json", "reports/perf-gate.json"],
+  "live:meta": ["--", "--dir", "dist", "--self-test"],
 };
 
 /**
@@ -189,8 +192,8 @@ export function gateEnv(gate, env, gates) {
   return { ...env, VITE_E2E: env.VITE_E2E ?? "1", VITE_CSP_CONNECT_EXTRA: [env.VITE_CSP_CONNECT_EXTRA, E2E_COLLAB_WS].filter(Boolean).join(" ") };
 }
 
-export const PRODUCTION_GATES = ["build", "budget", "manifest", "attacks"];
-export const PREVIEW_GATES = ["build", "budget", "secrets", "manifest", "attacks", "vitest", "e2e", "perf:gate", "i18n:check", "hygiene", "docs:sync", "docs:complete", "licenses", "mutation"];
+export const PRODUCTION_GATES = ["build", "live:meta", "budget", "manifest", "attacks"];
+export const PREVIEW_GATES = ["build", "live:meta", "budget", "secrets", "manifest", "attacks", "vitest", "e2e", "perf:gate", "i18n:check", "hygiene", "docs:sync", "docs:complete", "licenses", "mutation"];
 /**
  * `--e2e-only`: build and the e2e gate, nothing else. For a probe branch
  * that runs Playwright specs (LUMEN_E2E_SPECS, a longer LUMEN_E2E_MINUTES)

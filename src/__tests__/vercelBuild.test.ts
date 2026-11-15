@@ -18,9 +18,10 @@ const ROOT = resolve(__dirname, "..", "..");
 const pkg = JSON.parse(readFileSync(resolve(ROOT, "package.json"), "utf8")) as { scripts: Record<string, string> };
 
 describe("scripts/vercel-build.mjs", () => {
-  it("runs every gate on a preview, and only build + budget (+ the attack tests, W10.D6) in production", () => {
-    expect(gatesFor({ VERCEL_ENV: "preview" })).toEqual(["build", "budget", "secrets", "manifest", "attacks", "vitest", "e2e", "perf:gate", "i18n:check", "hygiene", "docs:sync", "docs:complete", "licenses", "mutation"]);
-    expect(gatesFor({ VERCEL_ENV: "production" })).toEqual(["build", "budget", "manifest", "attacks"]);
+  it("runs every gate on a preview, and only build + live:meta + budget + manifest (+ the attack tests, W10.D6) in production", () => {
+    expect(gatesFor({ VERCEL_ENV: "preview" })).toEqual(["build", "live:meta", "budget", "secrets", "manifest", "attacks", "vitest", "e2e", "perf:gate", "i18n:check", "hygiene", "docs:sync", "docs:complete", "licenses", "mutation"]);
+    // W10.C29: the metadata of what is deployed is checked on production builds too.
+    expect(gatesFor({ VERCEL_ENV: "production" })).toEqual(["build", "live:meta", "budget", "manifest", "attacks"]);
     // Not on Vercel: a local run reproduces a preview build.
     expect(gatesFor({})).toEqual(PREVIEW_GATES);
     expect(gatesFor({ VERCEL_ENV: "preview" }, ["--production"])).toEqual(PRODUCTION_GATES);

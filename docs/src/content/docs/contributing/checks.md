@@ -14,8 +14,8 @@ No GitHub Actions minutes are used.
 
 | Build | What runs, in order |
 |---|---|
-| Preview (the `verify/…` trains) | build, bundle budget, the secret scan of `dist/`, vitest (without the nightly-only suites), e2e (the fast set on chromium, with the Hebrew axe and aria specs; smoke on firefox), `i18n:check`, hygiene, `docs:sync`, `docs:complete` (every page in both languages, and each Hebrew page with its English page's sections, help anchors and at least 60% of its words), the licence gate, the mutation floor (`mutation:check`) |
-| Production (`main`) | build, bundle budget — as before |
+| Preview (the `verify/…` trains) | build, `live:meta` on `dist/` (the deployed metadata names only lumen-md.vercel.app), bundle budget, the secret scan of `dist/`, vitest (without the nightly-only suites), e2e (the fast set on chromium, with the Hebrew axe and aria specs; smoke on firefox), `i18n:check`, hygiene, `docs:sync`, `docs:complete` (every page in both languages, and each Hebrew page with its English page's sections, help anchors and at least 60% of its words), the licence gate, the mutation floor (`mutation:check`) |
+| Production (`main`) | build, `live:meta` on `dist/`, bundle budget, build manifest, the crypto attack tests (`test:attacks`) |
 
 The gates stop at the first failure. The build log ends with the gate that
 failed and the ones that passed before it, with their times:
@@ -74,7 +74,7 @@ fails that command with a non-zero exit, so it builds as before.
 
 ```bash
 node scripts/vercel-build.mjs              # the preview set
-node scripts/vercel-build.mjs --production # build and budget only
+node scripts/vercel-build.mjs --production # build, live:meta, budget and manifest only
 node scripts/vercel-build.mjs --dry-run    # print the gates, run nothing
 ```
 
