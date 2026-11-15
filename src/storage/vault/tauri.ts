@@ -80,6 +80,15 @@ export function createTauriBackend(invoke: TauriInvoke, root: string, opts: { av
    * nothing expected); false otherwise. Rust then compares these exact bytes
    * again and replaces the file in the same command, so the swap does not
    * span a round trip.
+   *
+   * Review Z6-L8: this costs about 3× the file over IPC (read here, then sent
+   * back with the new bytes). Sending only the expected SHA-256 needs Rust to
+   * hash, and lumen-vault is plain std + serde: that means a new crate (sha2,
+   * with its licence and cargo-deny review) or a hand-written hash in the
+   * vault's compare-and-swap. Neither can be built or `cargo test`ed offline,
+   * so the byte form stays until the Mac run; the change then is an
+   * `x-vault-expect-sha256` header next to `x-vault-expect`, the byte form kept
+   * for one release.
    */
   const current = async (path: string, p: string, expect: string | null): Promise<Uint8Array | null | false> => {
     const st = await call<VaultStat | null>(path, "vault_stat", { root, path: p });
