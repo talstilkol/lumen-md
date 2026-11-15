@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
+import { vaultOrSkip } from "./_opfs";
 
 /**
  * Plan W6.30 — axe in the e2e gate, on the key Hebrew flows.
@@ -12,6 +13,10 @@ import { createRequire } from "node:module";
  * axe-core runs WCAG 2.0/2.1/2.2 A and AA (2.2 adds target-size): no serious
  * or critical violation may remain. scripts/e2e-gate.mjs runs this spec by
  * default, so a preview build fails on a new blocker.
+ *
+ * The knowledge graph (plan W1.10, W10.E60) too: a small Hebrew vault in
+ * OPFS, the graph view on its canvas and as its text alternative (the
+ * table of notes and links), axe on both.
  *
  * e2e/a11y.spec.ts covers English as well and the keyboard journey; this
  * spec is the Hebrew one, kept short enough for the gate's time box.
@@ -101,6 +106,60 @@ for (const theme of ["light", "dark"] as const) {
       await page.keyboard.press("Escape");
       await expect(page.locator(MODAL), `${d.name} closes on Escape`).toHaveCount(0, { timeout: 5_000 });
     }
+    expect(found.join("\n"), "axe serious/critical violations").toBe("");
+  });
+}
+
+/** Hebrew notes that link to each other, written to the OPFS vault root (as e2e/block-refs.spec.ts does). */
+const VAULT: Record<string, string> = {
+  "בית.md": "# בית\n\nראו [[פרויקטים]], [[יומן]] ו-[[Reading list]].\n",
+  "פרויקטים.md": "# פרויקטים\n\nהיומן: [[יומן]].\n",
+  "יומן.md": "# יומן\n\nיום ראשון.\n",
+  "Reading list.md": "# Reading list\n\nBooks.\n",
+};
+
+async function seedVault(page: Page): Promise<boolean> {
+  return page.evaluate(async (files) => {
+    try {
+      const root = await navigator.storage.getDirectory();
+      for (const [name, data] of Object.entries(files)) {
+        const fh = (await root.getFileHandle(name, { create: true })) as unknown as { createWritable?: () => Promise<{ write(d: string): Promise<void>; close(): Promise<void> }> };
+        if (typeof fh.createWritable !== "function") return false;
+        const w = await fh.createWritable();
+        await w.write(data);
+        await w.close();
+      }
+      window.dispatchEvent(new Event("lumen-workspace-changed"));
+      return true;
+    } catch {
+      return false;
+    }
+  }, VAULT);
+}
+
+for (const theme of ["light", "dark"] as const) {
+  test(`axe gate, Hebrew RTL ${theme}: the knowledge graph, on its canvas and as a table`, async ({ page, browserName }) => {
+    test.setTimeout(120_000);
+    await boot(page, theme, "source");
+    vaultOrSkip(await seedVault(page), browserName);
+    await run(page, "view.graphView");
+    const view = page.getByTestId("graph-view");
+    await expect(view).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId("graph-stats")).toContainText("4", { timeout: 20_000 });
+    await expect(page.getByTestId("graph-canvas")).toBeVisible();
+    const found: string[] = [];
+    const onCanvas = blocking(await axe(page, '[data-testid="graph-view"]'));
+    if (onCanvas.length) found.push(`— graph, canvas\n${report(onCanvas)}`);
+
+    // The text alternative: the same notes and links, as a table.
+    await page.getByTestId("graph-as-table").click();
+    await expect(page.getByTestId("graph-as-table")).toHaveAttribute("aria-pressed", "true");
+    const table = page.getByTestId("graph-table").getByRole("table");
+    await expect(table).toBeVisible();
+    await expect(table.getByRole("rowheader")).toHaveCount(4);
+    await expect(table.getByRole("row").nth(1)).toContainText("בית");
+    const asTable = blocking(await axe(page, '[data-testid="graph-view"]'));
+    if (asTable.length) found.push(`— graph, table\n${report(asTable)}`);
     expect(found.join("\n"), "axe serious/critical violations").toBe("");
   });
 }

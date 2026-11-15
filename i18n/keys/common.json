@@ -5808,6 +5808,46 @@
       "vars": []
     },
     {
+      "key": "graph.table.caption",
+      "en": "Notes and their links: {shown} of {nodes} notes, most linked first",
+      "vars": [
+        "shown",
+        "nodes"
+      ]
+    },
+    {
+      "key": "graph.table.linkedTo",
+      "en": "Linked notes",
+      "vars": []
+    },
+    {
+      "key": "graph.table.links",
+      "en": "Links",
+      "vars": []
+    },
+    {
+      "key": "graph.table.more",
+      "en": "and {n} more",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "graph.table.none",
+      "en": "no links",
+      "vars": []
+    },
+    {
+      "key": "graph.table.note",
+      "en": "Note",
+      "vars": []
+    },
+    {
+      "key": "graph.table.toggle",
+      "en": "Show as a table",
+      "vars": []
+    },
+    {
       "key": "help.back",
       "en": "Back to the contents",
       "vars": []
