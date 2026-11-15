@@ -46,6 +46,8 @@ import {
   wysiwygSuggestPlugins,
 } from "./wysiwygSuggest";
 import { keepWikiLinks, protectEscapedWikiLinks } from "./wysiwygWikiLinks";
+import { roundTripSafe } from "./markdownSerialize.mjs";
+import type { Options as ToMarkdownOptions } from "mdast-util-to-markdown";
 import { wysiwygWikiComplete } from "./wysiwygWikiComplete";
 import { registerPendingEdits, useAppStore } from "../store/useStore";
 import { useAuth } from "../auth/useAuth";
@@ -673,8 +675,11 @@ const pasteCleanPlugin = $prose(
           ctx.set(rootCtx, host);
           // An escaped `\[\[x]]` stays escaped (not a wiki link) on the way out.
           ctx.set(defaultValueCtx, encodeCriticForWysiwyg(protectEscapedWikiLinks(body)));
-          // `[[Note]]` is written back as is, not as `\[\[Note]]`.
-          ctx.update(remarkStringifyOptionsCtx, keepWikiLinks);
+          // `[[Note]]` is written back as is, not as `\[\[Note]]`. And an
+          // edited block keeps its meaning when it is saved through the AST:
+          // nested emphasis stays emphasis (CommonMark 461/463), and an
+          // indented HTML block after a list stays out of the list (#847).
+          ctx.update(remarkStringifyOptionsCtx, (o: ToMarkdownOptions) => roundTripSafe(keepWikiLinks(o)));
           ctx.get(listenerCtx).markdownUpdated((_, md) => {
             // The listener plugin debounces emissions by 200ms and
             // nothing cancels that timer on destroy, so a torn-down (or
