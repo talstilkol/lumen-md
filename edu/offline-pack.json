@@ -1,0 +1,44 @@
+{
+  "$comment": "Plan W11.P14: the offline package for yeshivot and schools without internet (or behind NetFree): what goes on the drive, where it comes from and its licence. `node scripts/edu-offline-pack.mjs` builds it from local files only (it downloads nothing) and writes SHA256SUMS. Every model entry names its id in models/registry.json, and only `allowed` models go in.",
+  "format": "lumen-edu-offline-pack/1",
+  "components": [
+    {
+      "id": "installer",
+      "what": { "he": "התקנת Lumen לחלונות", "en": "Lumen for Windows" },
+      "required": true,
+      "from": "installer",
+      "accept": ["\\.msix$", "\\.msi$", "-setup\\.exe$"],
+      "note": "MSIX for Intune / the Microsoft Store; the Tauri build gives .msi and an NSIS -setup.exe today (MSIX packaging is owed: W11.M13)."
+    },
+    {
+      "id": "ocr-he",
+      "what": { "he": "זיהוי טקסט בעברית (OCR)", "en": "Hebrew OCR" },
+      "required": true,
+      "from": "repo",
+      "paths": ["public/tesseract/lang/heb.traineddata.gz", "public/tesseract/lang/eng.traineddata.gz", "public/tesseract/lang/LICENSE"],
+      "registry": ["tessdata_fast/heb.traineddata", "tessdata_fast/eng.traineddata"],
+      "note": "Inside the app already; copied to the drive too, so IT can check it."
+    },
+    {
+      "id": "semantic-search",
+      "what": { "he": "חיפוש לפי משמעות (אופציונלי)", "en": "Search by meaning (optional)" },
+      "required": false,
+      "from": "models",
+      "dir": "Xenova/multilingual-e5-small",
+      "registry": ["Xenova/multilingual-e5-small"],
+      "note": "Keyword search in Hebrew needs no model; this one adds search by meaning."
+    },
+    {
+      "id": "dictation-he",
+      "what": { "he": "הכתבה בעברית (אופציונלי)", "en": "Hebrew dictation (optional)" },
+      "required": false,
+      "from": "models",
+      "dir": "ivrit-ai/zipformer2-66m-streaming-he",
+      "registry": ["ivrit-ai/zipformer2-66m-streaming-he"]
+    }
+  ],
+  "tts": {
+    "he": "ההקראה משתמשת בקולות של מערכת ההפעלה. ב-Windows מתקינים את חבילת השפה העברית עם הקול (הגדרות ← זמן ושפה ← שפה ← עברית ← דיבור). מודלי ההקראה העבריים הפתוחים ברישיון לא מסחרי, ולכן אינם בחבילה.",
+    "en": "Read aloud uses the system's voices. On Windows, install the Hebrew language pack with its voice. The open Hebrew TTS models are non-commercial (models/registry.json: forbidden), so none is on the drive."
+  }
+}

@@ -181,6 +181,8 @@
     "store:check": "node scripts/store.mjs check",
     "corpus:obsidian-help": "node scripts/obsidian-help-corpus.mjs --fetch",
     "android:16kb": "node scripts/check-16kb.mjs",
+    "edu:pdf": "node scripts/edu-pdf.mjs",
+    "edu:pack": "node scripts/edu-offline-pack.mjs",
     "eval:crosslingual": "LUMEN_EVAL_XL=1 vitest run --config vitest.eval.config.ts src/agents/eval/crosslingual.eval.ts",
     "eval:lit-review": "LUMEN_EVAL_LIT=1 vitest run --config vitest.eval.config.ts src/agents/eval/litReview.eval.ts",
     "skips": "node scripts/skip-report.mjs",

@@ -159,3 +159,5 @@ dist-frame/
 # W11.I13: public retrieval sets fetched by scripts/retrieval/fetch.py (never committed)
 eval/public-data/
 scripts/drill/tauri-writer/target/
+# Plan W11.P14: the teacher PDF is built (npm run edu:pdf), not kept
+edu/dist/
