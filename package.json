@@ -167,6 +167,7 @@
     "launch:check": "node scripts/launch-check.mjs",
     "launch:gate": "node scripts/launch-gate.mjs",
     "import:diff": "node scripts/import-diff.mjs",
+    "launch:kit": "node scripts/launch-kit.mjs",
     "plugins:review": "node scripts/review-plugins.mjs",
     "security:page": "node scripts/security-page.mjs",
     "beta:funnel": "node scripts/beta-funnel.mjs",
