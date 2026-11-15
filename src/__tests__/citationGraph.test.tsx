@@ -11,6 +11,7 @@
 import { describe, expect, it } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { buildCitationGraph, citationRows, citedKeys, type CitingNote, type CslLibrary } from "../citations/citationGraph";
+import { validateEdge } from "../entities/schema";
 import { openAlexReferences } from "../citations/openAlex";
 import { classify } from "../ai/privacyLedger";
 import { entityId } from "../entities/model";
@@ -65,6 +66,24 @@ describe("the citation graph of a 50-source library", () => {
     expect(e.provenance.paragraphHash).toMatch(/^sha256:[0-9a-f]{64}$/);
     expect(g.edges.some((x) => x.object === id("s03") && x.provenance.note === "notes/plain.md")).toBe(false);
     expect(g.unresolved).toEqual([{ from: "sources/חיבור חדש.md", key: "missing2020", where: "note" }]);
+  });
+
+  it("every edge, from the library and from notes, passes the entity model's edge check, with a deterministic anchor", () => {
+    expect(g.edges.length).toBeGreaterThan(50);
+    for (const e of g.edges) expect({ id: e.id, check: validateEdge(e) }).toEqual({ id: e.id, check: { ok: true, problems: [] } });
+    // A library entry: the property and the item's key.
+    const lib = g.edges.find((e) => e.provenance.note === LIBRARY.path && e.subject === id("s02"))!;
+    expect(lib.provenance.anchor).toBe("references-s02");
+    // A paragraph without a ^id: p- and the start of its hash, the id the review queue would add.
+    const link = g.edges.find((e) => e.object === id("חיבור חדש"))!;
+    expect(link.provenance.anchor).toBe(`p-${link.provenance.paragraphHash.slice("sha256:".length, "sha256:".length + 12)}`);
+    // The same vault gives the same anchors.
+    const again = buildCitationGraph(NOTES, [LIBRARY], "2026-11-15T00:00:00Z");
+    expect(again.edges.map((e) => `${e.id}#${e.provenance.anchor}`)).toEqual(g.edges.map((e) => `${e.id}#${e.provenance.anchor}`));
+    // A key with characters outside the rule, and one with none of them.
+    const odd = buildCitationGraph([], [{ path: "lib.json", items: [{ id: "doe_2020:a", type: "book", references: ["שלום"] }, { id: "שלום", type: "book", references: ["doe_2020:a"] }] }], "2026-11-15T00:00:00Z");
+    expect(odd.edges.map((e) => e.provenance.anchor)).toEqual(["references-doe-2020-a", "references-item2"]);
+    for (const e of odd.edges) expect(validateEdge(e).ok).toBe(true);
   });
 
   it("the table lists who cites whom", () => {

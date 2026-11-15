@@ -82,6 +82,24 @@ const noteDoi = (fm: Record<string, unknown>): string | undefined => {
 /** The property whose entries are a source note's references. */
 export const REFERENCES_ANCHOR = "references";
 
+/**
+ * Every edge's anchor fits the entity model's rule (`[A-Za-z0-9-]+`,
+ * schema.ts), and is a pure function of the vault's text:
+ *  - a paragraph with a `^id` keeps it;
+ *  - a paragraph without one gets `p-` + the first 12 hex digits of its
+ *    sha256, the id the review queue writes when such an edge is approved
+ *    (review.ts finds the paragraph by its hash and adds this `^id`);
+ *  - a library item's `references:` entry: `references-` + the item's cite
+ *    key (characters outside the rule become `-`), or its position in the
+ *    file when its key has none of them.
+ */
+export const paragraphAnchor = (p: { anchor: string | null; hash: string }): string => p.anchor ?? `p-${p.hash.replace(/^sha256:/, "").slice(0, 12)}`;
+
+export function libraryAnchor(key: string, index: number): string {
+  const slug = key.replace(/[^A-Za-z0-9-]+/g, "-").replace(/^-+|-+$/g, "");
+  return `${REFERENCES_ANCHOR}-${slug || `item${index + 1}`}`;
+}
+
 /** Build the citation graph of the vault's source notes and libraries. */
 export function buildCitationGraph(notes: readonly CitingNote[], libraries: readonly CslLibrary[], now = new Date().toISOString()): CitationGraph {
   const entities = new Map<string, Entity>();
@@ -128,25 +146,27 @@ export function buildCitationGraph(notes: readonly CitingNote[], libraries: read
       if (p.kind === "heading") continue;
       for (const k of citedKeys(p.text)) {
         const to = keyToId.get(k.toLowerCase());
-        if (to) addEdge(from, to, { note: n.path, anchor: p.anchor ?? "", quote: `@${k}`, paragraphHash: p.hash });
+        if (to) addEdge(from, to, { note: n.path, anchor: paragraphAnchor(p), quote: `@${k}`, paragraphHash: p.hash });
         else unresolved.push({ from: n.path, key: k, where: "note" });
       }
       for (const m of p.text.matchAll(/(?<!!)\[\[([^\]|#]+)(?:[#|][^\]]*)?\]\]/g)) {
         const to = nameToId.get(baseName(m[1].trim()).toLowerCase());
-        if (to) addEdge(from, to, { note: n.path, anchor: p.anchor ?? "", quote: m[0], paragraphHash: p.hash });
+        if (to) addEdge(from, to, { note: n.path, anchor: paragraphAnchor(p), quote: m[0], paragraphHash: p.hash });
       }
     }
   }
 
   // 3: references of library items (keys or DOIs).
   for (const lib of libraries)
-    for (const item of lib.items) {
+    for (const [index, item] of lib.items.entries()) {
       const refs = Array.isArray(item.references) ? item.references : [];
-      const from = keyToId.get(String(item["citation-key"] ?? item.id).toLowerCase())!;
+      const itemKey = String(item["citation-key"] ?? item.id);
+      const from = keyToId.get(itemKey.toLowerCase())!;
+      const anchor = libraryAnchor(itemKey, index);
       for (const r of refs) {
         if (typeof r !== "string" || !r.trim()) continue;
         const to = keyToId.get(r.trim().toLowerCase()) ?? doiToId.get(normDoi(r));
-        if (to) addEdge(from, to, { note: lib.path, anchor: "", quote: r, paragraphHash: paragraphHash(r) });
+        if (to) addEdge(from, to, { note: lib.path, anchor, quote: r, paragraphHash: paragraphHash(r) });
         else unresolved.push({ from: lib.path, key: r, where: "references" });
       }
     }
