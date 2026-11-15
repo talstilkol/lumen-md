@@ -20,7 +20,7 @@
  * | tashkeelView.ts (hide marks) | document text | yes — tested |
  * | mathBidi.ts (`$…$` isolates) | document text | yes — tested |
  * | obsidianSource.ts (`%%`, `==`, callouts) | document text | whole note under 20,000 chars, else visible — tested |
- * | embedHintExtension.ts (embed hints) | document text | yes — tested (its fence scan still reads every line per update) |
+ * | embedHintExtension.ts (embed hints) | document text | yes — tested; its fence index rescans only the changed lines (embedHintScan.test.ts) |
  * | searchHighlight.ts (search hits) | document text | **was the whole document (up to 200 hits); now visible — tested** |
  * | outlineExtension.ts (zoom) | the zoomed section: 2 ranges | constant |
  * | speechHighlight.ts, suggestingExtension.ts, aiAuthorship.ts, commentDecorations.ts | a range per spoken word / suggestion / AI span / comment | data, not text |
