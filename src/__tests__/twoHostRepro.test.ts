@@ -6,7 +6,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { spawnSync } from "node:child_process";
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 // @ts-expect-error -- plain ESM script module, no types
@@ -101,5 +101,49 @@ describe("two-host reproducible build (W7.23, #575's cases)", () => {
     expect(bad.status).toBe(1);
     expect(bad.stdout).toMatch(/differs {6}assets\/app\.js/);
     expect(bad.stdout).toMatch(/0 consecutive identical commit/);
+  });
+});
+
+describe("the manifest scripts, ported from #575's head 2331e10358 (W10 port, train 6)", () => {
+  it("the builder: --builder wins, then Cloudflare Workers Builds, then Vercel, else local-<os>; importing writes nothing", async () => {
+    // @ts-expect-error -- plain ESM script module, no types
+    const { builderOf } = await import("../../scripts/supply-chain/dist-manifest.mjs");
+    expect(builderOf({ WORKERS_CI: "1", VERCEL: "1" }, "mine")).toBe("mine");
+    expect(builderOf({ WORKERS_CI: "1", VERCEL: "1" })).toBe("cloudflare-workers-builds");
+    expect(builderOf({ VERCEL: "1" })).toBe("vercel");
+    expect(builderOf({}, undefined, "linux")).toBe("local-linux");
+  });
+
+  it("a build with no package-lock.json gets no manifest (exit 2), as #575's writeManifest did", () => {
+    const d = build();
+    const out = join(d, MANIFEST_PATH);
+    const r = spawnSync(process.execPath, [join(ROOT, "scripts/supply-chain/dist-manifest.mjs"), "--root", d, "--dir", ".", "--builder", "vercel", "--out", out], { cwd: ROOT, encoding: "utf8" });
+    expect(r.status).toBe(2);
+    expect(r.stderr).toMatch(/no package-lock\.json/);
+    expect(existsSync(out)).toBe(false);
+  });
+
+  it("a commit or lockfile that only one side names is an error, not a skipped check (#575: a.lockfile !== b.lockfile)", () => {
+    const d = build();
+    const a = manifestOf(d, meta("vercel"));
+    const { lockfileSha256: _l, ...noLock } = manifestOf(d, meta("cloudflare-workers-builds"));
+    const r = compareManifests(a, noLock);
+    expect(r.identical).toBe(false);
+    expect(r.errors).toEqual(["only one build names its package-lock.json"]);
+    const { commit: _c, ...noCommit } = manifestOf(d, meta("cloudflare-workers-builds"));
+    expect(compareManifests(noCommit, a).errors[0]).toMatch(/only one build names its commit/);
+    expect(() => attestationStatement(a, noLock, r)).toThrow(/identical/);
+    // Two local directories name neither: still compared file by file.
+    expect(compareManifests(manifestOf(d, { builder: "dir:a" }), manifestOf(d, { builder: "dir:b" })).identical).toBe(true);
+  });
+
+  it("the gates keep isTrainBuild(): manifest in both gate lists, the nightly-only suites only off a train", async () => {
+    // @ts-expect-error -- plain ESM script module, no types
+    const vb = await import("../../scripts/vercel-build.mjs");
+    expect(vb.PRODUCTION_GATES).toContain("manifest");
+    expect(vb.PREVIEW_GATES).toContain("manifest");
+    expect(vb.isTrainBuild({ VERCEL_GIT_COMMIT_REF: "verify/train-6" })).toBe(true);
+    expect(vb.isTrainBuild({ VERCEL_GIT_COMMIT_REF: "w10/port-575" })).toBe(false);
+    expect(vb.vitestArgs({ VERCEL_GIT_COMMIT_REF: "verify/train-6" }, 2).some((a: string) => a.startsWith("--exclude="))).toBe(false);
   });
 });
