@@ -69,6 +69,7 @@
   "ai.doctor.check.ollamaVersion": "Ollamaのバージョン（構造化出力には0.5以上）",
   "ai.doctor.check.policy": "AIポリシーと優先エグゼキュータ",
   "ai.doctor.check.research": "リサーチサービス（Web検索とページ抽出）",
+  "ai.doctor.check.speculative": "投機的デコード（Ollama 0.34 以降）",
   "ai.doctor.check.spellEn": "このデバイス上の英語スペルチェック",
   "ai.doctor.check.spellHe": "ヘブライ語スペル辞書",
   "ai.doctor.check.storage": "保管庫のストレージ: 容量と永続性",

@@ -99,6 +99,16 @@ describe("findOrphans", () => {
 });
 
 describe("the parts", () => {
+  it("a Vitest config's setupFiles reach their files, from the repository root (W10.F16 on train 6)", () => {
+    expect(extractSpecifiers('defineConfig({ test: { setupFiles: ["src/agents/eval/reproducible.ts", "./local.ts"] } })').specs).toEqual(["/src/agents/eval/reproducible.ts", "./local.ts"]);
+    const dir = repo("setup-files", {
+      "vitest.eval.config.ts": 'export default { test: { setupFiles: ["src/eval/setup.ts"] } };\n',
+      "src/eval/setup.ts": "export {};\n",
+      "src/eval/orphan.ts": "export {};\n",
+    });
+    expect(findOrphans({ root: dir }).orphans).toEqual(["src/eval/orphan.ts"]);
+  });
+
   it("extracts every kind of specifier", () => {
     const { specs, globs } = extractSpecifiers(
       [

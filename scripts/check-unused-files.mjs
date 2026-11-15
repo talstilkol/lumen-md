@@ -85,6 +85,11 @@ export function extractSpecifiers(text) {
   add(/\brequire\s*\(\s*["'`]([^"'`$\n]+)["'`]/g);
   add(/\bvi\.(?:mock|doMock|importActual)\s*\(\s*["'`]([^"'`$\n]+)["'`]/g);
   add(/new\s+URL\s*\(\s*["'`]([^"'`$\n]+)["'`]\s*,\s*import\.meta\.url/g);
+  // A Vitest config's setupFiles: paths from the repository root ("src/…"), loaded before every test file
+  // of that config (vitest.eval.config.ts runs src/agents/eval/reproducible.ts for the live evals, W7.15).
+  for (const m of text.matchAll(/\bsetupFiles\s*:\s*\[([^\]]*)\]/g)) {
+    for (const f of m[1].matchAll(/["'`]([^"'`$\n]+)["'`]/g)) specs.push(f[1].startsWith("src/") ? `/${f[1]}` : f[1]);
+  }
   for (const m of text.matchAll(/import\.meta\.glob\s*(?:<[^>]*>)?\s*\(\s*(\[[^\]]*\]|["'`][^"'`]+["'`])/g)) {
     globs.push([...m[1].matchAll(/["'`]([^"'`]+)["'`]/g)].map((g) => g[1]));
   }

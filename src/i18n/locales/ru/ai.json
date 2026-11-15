@@ -69,6 +69,7 @@
   "ai.doctor.check.ollamaVersion": "Версия Ollama (0.5+ для структурированного вывода)",
   "ai.doctor.check.policy": "Политика ИИ и предпочитаемый исполнитель",
   "ai.doctor.check.research": "Сервис исследований (поиск и извлечение страниц)",
+  "ai.doctor.check.speculative": "Спекулятивное декодирование (Ollama 0.34+)",
   "ai.doctor.check.spellEn": "Проверка английской орфографии на этом устройстве",
   "ai.doctor.check.spellHe": "Словарь иврита для проверки орфографии",
   "ai.doctor.check.storage": "Хранилище: квота и сохранность",

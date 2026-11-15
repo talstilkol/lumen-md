@@ -69,6 +69,7 @@
   "ai.doctor.check.ollamaVersion": "إصدار Ollama (0.5+ للمخرجات المنظّمة)",
   "ai.doctor.check.policy": "سياسة الذكاء الاصطناعي والمنفّذ المفضّل",
   "ai.doctor.check.research": "خدمة البحث (بحث الويب واستخراج الصفحات)",
+  "ai.doctor.check.speculative": "فك الترميز التخميني (Ollama 0.34 فما فوق)",
   "ai.doctor.check.spellEn": "التدقيق الإملائي الإنجليزي على هذا الجهاز",
   "ai.doctor.check.spellHe": "قاموس التدقيق الإملائي العبري",
   "ai.doctor.check.storage": "تخزين الخزنة: الحصة والمتانة",
