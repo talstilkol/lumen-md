@@ -77,6 +77,9 @@
 /src/storage/exportHtml.ts               @talstilkol
 /src/ui/PrintExport.tsx                  @talstilkol
 /src/commands/domains/export.ts          @talstilkol
+# W12.R3: highlights written as an APA note inside the vault (nothing leaves the device).
+/src/highlights/apaExport.ts             @talstilkol
+/src/highlights/apaExportRun.ts          @talstilkol
 /src/publish/site.ts                     @talstilkol
 /src/cli/publish.ts                      @talstilkol
 /src/cli/convert.ts                      @talstilkol
