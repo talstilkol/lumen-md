@@ -14,27 +14,32 @@
  *     straight to HTML, compared byte for byte with the spec's HTML;
  *   - round-trip: Markdown → mdast (mdast-util-from-markdown) → Markdown
  *     (mdast-util-to-markdown, the serializer remark-stringify and Milkdown
- *     use) → HTML, compared with the parser's HTML for the same input: does
- *     saving through the AST keep what the note means?
+ *     use, with the app's round-trip handlers from
+ *     src/editor/markdownSerialize.mjs) → HTML, compared with the parser's
+ *     HTML for the same input: does saving through the AST keep what the
+ *     note means?
  *   - app (with --app): the preview's renderer, from the vitest report.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { roundTripSafe } from "../src/editor/markdownSerialize.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export const SPEC = "src/__tests__/fixtures/md-spec/commonmark-0.31.2.txt";
 export const OUT = "eval/results/md-conformance.json";
 export const TARGET = 0.99;
 
-/** Why each round-trip exception happens (mdast-util-to-markdown 2.1.2), by example number. */
+/**
+ * Why each round-trip exception happens (mdast-util-to-markdown 2.1.2 with
+ * the app's handlers), by example number. 461 and 463 (nested emphasis
+ * written as strong) are fixed by src/editor/markdownSerialize.mjs.
+ */
 export const ROUND_TRIP_EXCEPTIONS = {
   20: "a backslash inside an autolink is escaped again, so the link's URL changes (%5C → %5C%5C)",
   39: "&#10; is decoded to a newline and written raw, so two blank-separated lines become two paragraphs",
   148: "a line ending inside raw HTML is written as a space",
   187: "a soft line break before inline raw HTML is written as a space",
-  461: "*_foo_* (emphasis inside emphasis) is written as **foo**, which reads as strong",
-  463: "_*foo*_ (emphasis inside emphasis) is written as **foo**, which reads as strong",
   603: "a backslash inside an autolink is escaped again, so the link's URL changes",
 };
 
@@ -59,11 +64,11 @@ export function parseSpecText(text) {
   return out;
 }
 
-/** The three packages, from the app's node_modules. */
+/** The three packages, from the app's node_modules; the serializer with the app's handlers (roundTripSafe). */
 export async function loadParsers(root = ROOT) {
   const [{ micromark }, { fromMarkdown }, { toMarkdown }] = await Promise.all([import("micromark"), import("mdast-util-from-markdown"), import("mdast-util-to-markdown")]);
   const version = (n) => JSON.parse(readFileSync(join(root, "node_modules", n, "package.json"), "utf8")).version;
-  return { micromark, fromMarkdown, toMarkdown, versions: { micromark: version("micromark"), "mdast-util-from-markdown": version("mdast-util-from-markdown"), "mdast-util-to-markdown": version("mdast-util-to-markdown") } };
+  return { micromark, fromMarkdown, toMarkdown: (tree) => toMarkdown(tree, roundTripSafe()), versions: { micromark: version("micromark"), "mdast-util-from-markdown": version("mdast-util-from-markdown"), "mdast-util-to-markdown": version("mdast-util-to-markdown") } };
 }
 
 const OPTS = { allowDangerousHtml: true, allowDangerousProtocol: true };
@@ -86,7 +91,7 @@ export function score(examples, p) {
   const row = (kind, what, failed) => ({ kind, what, spec: "CommonMark 0.31.2", total: examples.length, passed: examples.length - failed.length, rate: Math.round(((examples.length - failed.length) / examples.length) * 10000) / 10000, target: TARGET, exceptions: failed });
   return [
     row("parser", `micromark ${p.versions.micromark} to HTML, byte for byte`, parserFailed),
-    row("round-trip", `mdast-util-from-markdown ${p.versions["mdast-util-from-markdown"]} → mdast-util-to-markdown ${p.versions["mdast-util-to-markdown"]} → micromark, HTML compared with the parser's`, roundFailed),
+    row("round-trip", `mdast-util-from-markdown ${p.versions["mdast-util-from-markdown"]} → mdast-util-to-markdown ${p.versions["mdast-util-to-markdown"]} with src/editor/markdownSerialize.mjs → micromark, HTML compared with the parser's`, roundFailed),
   ];
 }
 

@@ -21,11 +21,11 @@
     },
     {
       "kind": "round-trip",
-      "what": "mdast-util-from-markdown 2.0.3 → mdast-util-to-markdown 2.1.2 → micromark, HTML compared with the parser's",
+      "what": "mdast-util-from-markdown 2.0.3 → mdast-util-to-markdown 2.1.2 with src/editor/markdownSerialize.mjs → micromark, HTML compared with the parser's",
       "spec": "CommonMark 0.31.2",
       "total": 652,
-      "passed": 645,
-      "rate": 0.9893,
+      "passed": 647,
+      "rate": 0.9923,
       "target": 0.99,
       "exceptions": [
         {
@@ -47,16 +47,6 @@
           "example": 187,
           "section": "HTML blocks",
           "reason": "a soft line break before inline raw HTML is written as a space"
-        },
-        {
-          "example": 461,
-          "section": "Emphasis and strong emphasis",
-          "reason": "*_foo_* (emphasis inside emphasis) is written as **foo**, which reads as strong"
-        },
-        {
-          "example": 463,
-          "section": "Emphasis and strong emphasis",
-          "reason": "_*foo*_ (emphasis inside emphasis) is written as **foo**, which reads as strong"
         },
         {
           "example": 603,
