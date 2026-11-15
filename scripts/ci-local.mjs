@@ -7,7 +7,9 @@
  *   npm run ci:local -- --base origin/fix/codex-backlog --changed
  *   npm run ci:local -- --only pr-check --body pr-body.md   the PR gate, with the body's sections
  *   npm run ci:local -- --skip e2e,build --only typecheck,test --coverage --bail
- *   npm run ci:local -- --install-hook   pre-push hook: `ci:local --changed --skip e2e`
+ *   npm run ci:local -- --install-hook   pre-push hook: lockfile drift (W8.9), then
+ *                                         `ci:local --changed --skip e2e`; it also notes the
+ *                                         push for the lane-state hook (W8.10)
  *                                         (an existing hook of yours is kept unless --force,
  *                                         which saves it as pre-push.bak)
  *
@@ -53,7 +55,7 @@ if (flag("install-hook")) {
   const file = join(hooks, "pre-push");
   const plan = hookPlan(existsSync(file) ? readFileSync(file, "utf8") : null, { force: flag("force") });
   if (plan.action === "refuse") {
-    console.error(`ci:local: ${file} already exists and is not ours; not replacing it. Add \`npm run -s ci:local -- --changed --skip e2e --bail\` to it yourself, or rerun with --force to save it as pre-push.bak and install ours.`);
+    console.error(`ci:local: ${file} already exists and is not ours; not replacing it. Add \`node scripts/lockfile-drift.mjs && npm run -s ci:local -- --changed --skip e2e --bail\` to it yourself, or rerun with --force to save it as pre-push.bak and install ours.`);
     process.exit(1);
   }
   if (plan.action === "backup") {

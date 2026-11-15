@@ -25,6 +25,34 @@ template is at `$S/lanes/STATE.template.md`.
 Write it in place, in full. Do not append a log that the next reader has to
 replay.
 
+### Written for you: the hooks and the hourly tick
+
+Two of those writes happen without anyone doing them, once per clone:
+
+```bash
+npm run ci:local -- --install-hook                              # pre-push: notes what the push sends
+node scripts/lane-state.mjs install-hook --state-dir "$S/lanes"  # reference-transaction: records it
+node scripts/lane-state.mjs watch "$S/lanes/<lane>/STATE.md" &   # the hourly tick, while the lane works
+```
+
+- **After a push.** Git has no post-push hook. So the pre-push hook writes
+  what it is about to send to `$(git rev-parse --git-path lumen-lane-pending.json)`.
+  When origin accepts the push, git moves `refs/remotes/origin/<branch>` to that
+  sha, and the `reference-transaction` hook then writes three things into the
+  `STATE.md` whose Branches table lists the branch: the new head in `pushed`,
+  one line in Pushes, and the Updated time. A rejected push records nothing.
+  A fetch that moves the same ref to someone else's head is not logged as a
+  push either; the hourly tick (or `resume`) picks that up.
+  `--state <file>` names one STATE.md instead of a folder of lanes.
+  `$LUMEN_LANE_STATE` / `$LUMEN_LANE_STATE_DIR` override the git config.
+  With nothing set, the hooks do nothing.
+- **Every hour.** `watch` runs `tick` now and every `--every-min` minutes
+  (60 by default). A tick writes the Updated time, and records any Branches
+  head that origin has moved since. As a cron line instead:
+  `0 * * * * cd <clone> && node scripts/lane-state.mjs tick <STATE.md>`.
+
+The hooks write only these fields. Tasks, Next and Decisions stay yours.
+
 ## The template
 
 ```markdown

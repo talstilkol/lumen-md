@@ -81,3 +81,124 @@ export function renderBranches(rows) {
   const body = rows.map((r) => `| ${r.branch} | ${r.worktree} | ${r.base} | ${r.pushed ?? "—"} | ${r.pr != null ? `#${r.pr}` : "—"} |`);
   return [head, rule, ...body].join("\n");
 }
+
+/*
+ * Writing STATE.md without a person (W8.10 step 2): after every push and
+ * every hour. Git has no post-push hook, so a push is recorded in two
+ * halves: the pre-push hook (scripts/ci-local.mjs --install-hook) notes
+ * what the push sends (`pending`), and the reference-transaction hook
+ * (`lane-state.mjs install-hook`) records it when git moves the
+ * remote-tracking ref to that sha, which happens only once origin has
+ * accepted the push. A fetch that moves the same ref to another sha is
+ * not a push of ours and is not logged as one.
+ */
+
+const ZERO = /^0+$/;
+
+/** The pre-push hook's stdin → [{ branch, sha }] for branches this push creates or moves (not deletes). */
+export function pushedRefs(stdin) {
+  const out = [];
+  for (const line of String(stdin).split("\n")) {
+    const [, localSha, remoteRef] = line.trim().split(/\s+/);
+    if (!localSha || ZERO.test(localSha) || !remoteRef?.startsWith("refs/heads/")) continue;
+    out.push({ branch: remoteRef.slice("refs/heads/".length), sha: localSha });
+  }
+  return out;
+}
+
+/**
+ * The reference-transaction hook's stdin (committed) against what pre-push
+ * noted → { confirmed: [{ branch, sha }], pending: the notes still waiting }.
+ * A note is confirmed when refs/remotes/<remote>/<branch> moved to its sha.
+ */
+export function confirmedPushes(stdin, pending, remote = "origin") {
+  const prefix = `refs/remotes/${remote}/`;
+  const moved = new Map();
+  for (const line of String(stdin).split("\n")) {
+    const [, newSha, ref] = line.trim().split(/\s+/);
+    if (ref?.startsWith(prefix) && newSha && !ZERO.test(newSha)) moved.set(ref.slice(prefix.length), newSha);
+  }
+  const confirmed = [];
+  const left = [];
+  for (const p of pending) (moved.get(p.branch) === p.sha && (p.remote ?? remote) === remote ? confirmed : left).push(p);
+  return { confirmed: confirmed.map(({ branch, sha }) => ({ branch, sha })), pending: left };
+}
+
+/** Replace the "Updated:" line's time (the part before " · ", if any); add the line under the title when there is none. */
+export function touchUpdated(md, at) {
+  const lines = String(md).split("\n");
+  const i = lines.findIndex((l) => /^Updated:/.test(l));
+  if (i < 0) {
+    const t = lines.findIndex((l) => /^#\s/.test(l));
+    lines.splice(t + 1, 0, "", `Updated: ${at}`);
+    return lines.join("\n");
+  }
+  const rest = lines[i].includes(" · ") ? lines[i].slice(lines[i].indexOf(" · ")) : "";
+  lines[i] = `Updated: ${at}${rest}`;
+  return lines.join("\n");
+}
+
+/** The lines of one "## <title>" section: [start, end) indices, or null. */
+function section(lines, title) {
+  const start = lines.findIndex((l) => new RegExp(`^##\\s+${title}\\b`, "i").test(l));
+  if (start < 0) return null;
+  let end = lines.findIndex((l, j) => j > start && /^##\s/.test(l));
+  if (end < 0) end = lines.length;
+  return [start, end];
+}
+
+/**
+ * STATE.md after `branch` reached origin at `sha`:
+ *   - Updated: `at`;
+ *   - the Branches row's pushed cell is the sha (a row is added when the branch has none);
+ *   - one line at the end of "## Pushes": "<at> <branch> <sha10> <note>".
+ * Recording the same sha twice changes only the Updated line.
+ */
+export function recordPush(md, { branch, sha, at, note = "(recorded by the reference-transaction hook)", worktree = "—", base = "—" }) {
+  const short = sha.slice(0, 10);
+  const rows = parseBranches(md);
+  const had = rows.find((r) => r.branch === branch);
+  const already = had && had.pushed && same(had.pushed, sha);
+  let lines = touchUpdated(md, at).split("\n");
+  if (already) return lines.join("\n");
+  const next = had ? rows.map((r) => (r.branch === branch ? { ...r, pushed: short } : r)) : [...rows, { branch, worktree, base, pushed: short, pr: null }];
+  const b = section(lines, "Branches");
+  if (b) {
+    const [start, end] = b;
+    const first = lines.findIndex((l, j) => j > start && j < end && l.trim().startsWith("|"));
+    let last = first;
+    while (first >= 0 && last + 1 < end && lines[last + 1].trim().startsWith("|")) last++;
+    const table = renderBranches(next).split("\n");
+    if (first >= 0) lines.splice(first, last - first + 1, ...table);
+    else lines.splice(start + 1, 0, "", ...table);
+  } else {
+    lines.push("", "## Branches", "", ...renderBranches(next).split("\n"));
+  }
+  const entry = `${at} ${branch} ${short} ${note}`.trim();
+  const p = section(lines, "Pushes");
+  if (p) {
+    let at2 = p[1];
+    while (at2 - 1 > p[0] && !lines[at2 - 1].trim()) at2--;
+    const add = at2 - 1 === p[0] ? ["", entry] : [entry];
+    if (/^##\s/.test(lines[at2] ?? "")) add.push("");
+    lines.splice(at2, 0, ...add);
+  } else {
+    while (lines.length && !lines[lines.length - 1].trim()) lines.pop();
+    lines.push("", "## Pushes", "", entry, "");
+  }
+  return lines.join("\n");
+}
+
+/** The STATE.md (path → text) whose Branches table lists `branch`, or null. */
+export function stateFor(branch, files) {
+  for (const [path, md] of files) if (parseBranches(md).some((r) => r.branch === branch)) return path;
+  return null;
+}
+
+/** The reference-transaction hook (mark included, so a reinstall replaces only ours). */
+export const TXN_HOOK_MARK = "installed by `node scripts/lane-state.mjs install-hook` (W8.10)";
+export function txnHookPlan(existing, { force = false } = {}) {
+  const content = `#!/bin/sh\n# ${TXN_HOOK_MARK}\n# Records a push in the lane's STATE.md once origin has it; never fails the transaction.\n[ "$1" = committed ] || exit 0\n[ -s "$(git rev-parse --git-path lumen-lane-pending.json)" ] || exit 0\nnode scripts/lane-state.mjs committed >/dev/null 2>&1 || true\nexit 0\n`;
+  if (existing == null || existing.includes(TXN_HOOK_MARK)) return { action: "write", content };
+  return { action: force ? "backup" : "refuse", content };
+}
