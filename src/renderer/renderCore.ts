@@ -80,6 +80,8 @@ export const SPECIAL_LANGS = new Set([
   "chart",
   "csv",
   "tsv",
+  // A small spreadsheet kept as CSV, with formulas (plan W12.X1).
+  "sheet",
   "json-table",
   "insights",
   "jsonl",

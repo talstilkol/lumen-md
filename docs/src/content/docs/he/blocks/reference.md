@@ -14,6 +14,7 @@ description: שפות בלוקי הקוד המגודרים ש-Lumen מציגה �
 | ` ```mermaid ` | תרשים SVG בשורה (זרימה, רצף, גאנט, מחלקות, מצבים, ER) | ‏Mermaid v11; נטען בעצלות |
 | ` ```chart ` | ‏ECharts (קו / עמודות / עוגה / פיזור / מפת חום / רדאר / קופסה / treemap / sunburst / sankey) | מפרט YAML או JSON |
 | ` ```csv ` / ` ```tsv ` | ‏DataTable שאפשר למיין ולסנן + הצעת גרף אוטומטית | כותרת עם `title="..."` |
+| ` ```sheet ` | גיליון קטן: תאי CSV, ונוסחאות `=` עם כתובות A1 וטווחים | ראו [בלוק גיליון](/he/blocks/sheet/) |
 | ` ```json-table ` | ‏DataTable ממערך JSON | נדרש מערך של אובייקטים |
 | ` ```sql ` / ` ```pandas ` / ` ```object ` / ` ```data ` | תצוגה טבלאית דרך המציג המשותף `DataBlock` | ‏`pandas` מפענח את הצורה של `to_dict()` של DataFrame |
 | ` ```map ` / ` ```geojson ` | מפת Leaflet (אריחים, סמנים, מצולעים, חלוניות) | ‏GeoJSON או מפרט מפה ב-YAML |

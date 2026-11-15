@@ -1,0 +1,50 @@
+/* The ```sheet block (plan W12.X1). Logical properties only: column A sits at the inline start (the right in RTL). */
+.sheet-block {
+  margin-block: 8px;
+  font-size: 13px;
+}
+.sheet-bar {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  padding-block: 4px;
+  min-height: 1.6em;
+}
+.sheet-ref {
+  font-weight: 600;
+  min-width: 3em;
+}
+.sheet-formula {
+  color: var(--fg-muted);
+}
+.sheet-error-msg,
+.sheet-err {
+  color: #c62828;
+}
+.sheet-grid {
+  border-collapse: collapse;
+}
+.sheet-grid th {
+  background: var(--bg-subtle);
+  color: var(--fg-muted);
+  font-weight: 500;
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+}
+.sheet-grid td {
+  border: 1px solid var(--border);
+  padding: 2px 8px;
+  min-width: 4.5em;
+  text-align: start;
+}
+.sheet-grid td.sheet-num {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+.sheet-grid td:focus {
+  outline: 2px solid var(--border-strong);
+  outline-offset: -2px;
+}
+.sheet-note {
+  color: var(--fg-muted);
+}
