@@ -3700,6 +3700,11 @@
       "vars": []
     },
     {
+      "key": "e2ee.guide.hideQr",
+      "en": "Hide the QR code",
+      "vars": []
+    },
+    {
       "key": "e2ee.guide.join",
       "en": "Connect this device",
       "vars": []
@@ -3730,6 +3735,16 @@
       "vars": []
     },
     {
+      "key": "e2ee.guide.qr",
+      "en": "QR code of the key's words",
+      "vars": []
+    },
+    {
+      "key": "e2ee.guide.qrHint",
+      "en": "Scan it with the other device's camera, then paste the words into “I already have a key from another device”. Anyone who sees this code can read your notes: show it only to your own device.",
+      "vars": []
+    },
+    {
       "key": "e2ee.guide.recommended",
       "en": "recommended",
       "vars": []
@@ -3737,6 +3752,11 @@
     {
       "key": "e2ee.guide.secondDevice",
       "en": "On your next device: open Lumen, run “Set up sync”, choose the same place and paste the 13 words.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.guide.showQr",
+      "en": "Show as a QR code",
       "vars": []
     },
     {
@@ -3766,7 +3786,7 @@
     },
     {
       "key": "e2ee.guide.where.dropbox.about",
-      "en": "Sign in to Dropbox.",
+      "en": "Sign in to Dropbox. Lumen keeps only encrypted files in its app folder; Dropbox can't read them.",
       "vars": []
     },
     {
@@ -3786,8 +3806,15 @@
     },
     {
       "key": "e2ee.guide.where.gdrive.about",
-      "en": "Sign in to Google.",
+      "en": "Sign in to Google. Lumen keeps only encrypted files in a “Lumen Vault” folder of your Drive; Google can't read them.",
       "vars": []
+    },
+    {
+      "key": "e2ee.guide.where.notInBuild",
+      "en": "Not in this build yet: {name} needs Lumen's sign-in app, which isn't registered. Until then, choose your {name} folder on a computer, or the relay.",
+      "vars": [
+        "name"
+      ]
     },
     {
       "key": "e2ee.guide.where.relay",
