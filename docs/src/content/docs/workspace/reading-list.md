@@ -38,7 +38,7 @@ is left as it is.
 
 ## The reading list
 
-Command palette (⌘K) → **All Source** (in Hebrew, **כל המקור**) opens the type's Base. Its
+Command palette (⌘K) → **All Sources** (in Hebrew, **כל המקורות**) opens the type's Base. Its
 **By status** view is a kanban with the columns to read, reading and done.
 **Save as .base** keeps it as a file that Obsidian opens too.
 

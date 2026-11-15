@@ -155,6 +155,8 @@
   "cmd.edit.pastePlain.hint": "يلصق نص الحافظة دون أي تنسيق",
   "cmd.edit.redact": "حجب التحديد",
   "cmd.edit.redact.hint": "يُحذف من كل تصدير",
+  "cmd.entities.graph": "رسم الكيانات",
+  "cmd.entities.graph.hint": "كل الكيانات ومن يستشهد بمن، كرسم أو كجدول",
   "cmd.entities.review": "مخطط الكيانات: مقترحات للمراجعة",
   "cmd.epub.open": "فتح كتاب EPUB للقراءة…",
   "cmd.export.latexProject": "تصدير مشروع LaTeX (أكاديمي، عبرية)…",

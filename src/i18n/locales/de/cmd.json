@@ -155,6 +155,8 @@
   "cmd.edit.pastePlain.hint": "Fügt den Text der Zwischenablage ohne Formatierung ein",
   "cmd.edit.redact": "Auswahl schwärzen",
   "cmd.edit.redact.hint": "wird aus jedem Export entfernt",
+  "cmd.entities.graph": "Entitätsgraph",
+  "cmd.entities.graph.hint": "Alle Entitäten und wer wen zitiert, als Graph oder Tabelle",
   "cmd.entities.review": "Entitätsgraph: Vorschläge prüfen",
   "cmd.epub.open": "EPUB zum Lesen öffnen…",
   "cmd.export.latexProject": "LaTeX-Projekt exportieren (akademisch, Hebräisch)…",

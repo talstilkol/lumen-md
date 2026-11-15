@@ -155,6 +155,8 @@
   "cmd.edit.pastePlain.hint": "Вставляет текст из буфера обмена без форматирования",
   "cmd.edit.redact": "Скрыть выделенное",
   "cmd.edit.redact.hint": "удаляется из любого экспорта",
+  "cmd.entities.graph": "Граф сущностей",
+  "cmd.entities.graph.hint": "Все сущности и кто кого цитирует — графом или таблицей",
   "cmd.entities.review": "Граф сущностей: предложения на проверку",
   "cmd.epub.open": "Открыть EPUB для чтения…",
   "cmd.export.latexProject": "Экспорт проекта LaTeX (научный, иврит)…",

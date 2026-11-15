@@ -2007,6 +2007,12 @@
       "id": "entities.review",
       "label": "Entity graph: proposals to review",
       "icon": "FileText"
+    },
+    {
+      "id": "entities.graph",
+      "label": "Entity graph",
+      "hint": "Every entity and who cites whom, as a graph or a table",
+      "icon": "Network"
     }
   ],
   "full": [
@@ -4166,6 +4172,12 @@
       "id": "entities.review",
       "label": "Entity graph: proposals to review",
       "icon": "FileText"
+    },
+    {
+      "id": "entities.graph",
+      "label": "Entity graph",
+      "hint": "Every entity and who cites whom, as a graph or a table",
+      "icon": "Network"
     }
   ],
   "autoSaveOn": [
@@ -4455,6 +4467,7 @@
     "automations.new",
     "automations.dryRun",
     "automations.undo",
-    "entities.review"
+    "entities.review",
+    "entities.graph"
   ]
 }

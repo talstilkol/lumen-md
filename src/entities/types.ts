@@ -13,9 +13,14 @@
  *   may be several types (`author`: a person or an organization) stay plain
  *   properties.
  * `aliases` is Obsidian's own property, reserved by the registry.
+ *
+ * `source` is also the reading list's type (W12.X2): one built-in type with
+ * the reading list's fields (status, progress, citekey, …, and its #source
+ * tag) and the entity fields, so the two features never declare it twice.
  */
 import { ENTITY_TYPES, PREDICATES, type EntityType } from "./model";
 import { typeDefFromObject, type TypeDef } from "../types/typeSchema";
+import { SOURCE_TYPE_OBJECT } from "../reading/sourceType";
 
 /** Plural labels: the type's Base and its ⌘K entry ("All People", "כל האנשים"). */
 const PLURAL: Record<EntityType, { he: string; en: string }> = {
@@ -37,6 +42,7 @@ export function entityTypeObject(type: EntityType): Record<string, unknown> {
     if (!p.range || p.range.length !== 1) continue;
     fields[p.id] = { type: "relation", to: p.range[0], multiple: true, label: { he: p.he, en: p.en } };
   }
+  if (type === "source") return { label: PLURAL[type], tag: SOURCE_TYPE_OBJECT.tag, fields: { ...SOURCE_TYPE_OBJECT.fields, ...fields } };
   return { label: PLURAL[type], fields };
 }
 

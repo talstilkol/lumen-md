@@ -155,6 +155,8 @@
   "cmd.edit.pastePlain.hint": "クリップボードのテキストを書式なしで貼り付けます",
   "cmd.edit.redact": "選択範囲を黒塗り",
   "cmd.edit.redact.hint": "すべてのエクスポートから削除",
+  "cmd.entities.graph": "エンティティグラフ",
+  "cmd.entities.graph.hint": "すべてのエンティティと引用関係を、グラフまたは表で",
   "cmd.entities.review": "エンティティグラフ: 確認待ちの提案",
   "cmd.epub.open": "EPUB を開いて読む…",
   "cmd.export.latexProject": "LaTeX プロジェクトを書き出す（学術、ヘブライ語）…",

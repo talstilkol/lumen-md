@@ -155,6 +155,8 @@
   "cmd.edit.pastePlain.hint": "粘贴剪贴板中的文本，不带任何格式",
   "cmd.edit.redact": "涂黑所选内容",
   "cmd.edit.redact.hint": "从所有导出中删除",
+  "cmd.entities.graph": "实体图",
+  "cmd.entities.graph.hint": "所有实体以及谁引用了谁，以图或表显示",
   "cmd.entities.review": "实体图：待审核的建议",
   "cmd.epub.open": "打开 EPUB 阅读…",
   "cmd.export.latexProject": "导出 LaTeX 项目（学术，希伯来语）…",

@@ -10,15 +10,14 @@ import { onWorkspaceChanged } from "../storage/workspaceEvents";
 import { log } from "../lib/logger";
 import { TYPES_DIR, type TypeDef } from "./typeSchema";
 import { loadTypeRegistry, type TypeRegistry } from "./typeRegistry";
-import { sourceTypeDef } from "../reading/sourceType";
 
 import { TYPES_CHANGED_EVENT } from "./typeEvents";
 import { ENTITY_TYPES_FEATURE, entityTypeDefs } from "../entities/types";
 export { OPEN_TYPE_PAGE, TYPES_CHANGED_EVENT, openTypePage } from "./typeEvents";
 
 const builtins = new Map<string, TypeDef[]>();
-// W12.X2: the reading list's "source" type ships with the app.
-builtins.set("reading-list", [sourceTypeDef()]);
+// W12.X2: the reading list's "source" type ships with the app as the entity type `source`
+// (entities/types.ts carries its fields), so the two features never declare it twice.
 
 /** Types a feature ships in code (`feature` replaces its earlier set). */
 export function registerBuiltinTypes(feature: string, defs: readonly TypeDef[]): void {
