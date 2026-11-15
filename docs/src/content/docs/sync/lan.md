@@ -73,14 +73,15 @@ app, or copy and paste the text, for example through a note-to-self or
 AirDrop. Native scanning belongs to the mobile apps and is not part of this
 version.
 
-## Finding the device without a code (desktop app)
+## Finding the device without a code (desktop and mobile apps)
 
-In the desktop app, there's no code to bring across:
+In the desktop app and in the iOS and Android apps, there's no code to bring
+across. A phone can pair with a desktop, or with another phone:
 
 1. On the device that keeps the vault, choose **Pair a device**. While the
    dialog is open, the device is also visible on the network under a
    random name such as **Lumen-K7Q2**, and the dialog shows that name.
-2. On the other desktop, choose **Find devices on this network**, then
+2. On the other device, choose **Find devices on this network**, then
    **Pair with Lumen-K7Q2**. The two swap their codes by themselves and
    connect as usual. You still unlock with the vault's passphrase.
 
@@ -93,6 +94,11 @@ name and the port. The codes carry no key, as with the QR code. A device
 that takes a code without the passphrase can't pass the vault's proof. A
 pairing is used up by the first answer, and the device stops announcing
 once it is paired or the dialog closes.
+
+On a phone, the app does the same with the system's own service discovery:
+NsdManager on Android, Bonjour (Network framework) on iOS. iOS asks once
+whether Lumen may look for devices on your local network. If you refuse,
+pair with the QR code or the text code instead.
 
 Before anything syncs, both screens show the same **8-digit code** (on
 the hosting device it sits next to the new device in its list). Continue

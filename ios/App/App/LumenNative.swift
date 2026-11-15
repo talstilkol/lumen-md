@@ -110,5 +110,7 @@ public class LumenNativePlugin: CAPPlugin, CAPBridgedPlugin {
 class MainViewController: CAPBridgeViewController {
     override open func capacitorDidLoad() {
         bridge?.registerPluginInstance(LumenNativePlugin())
+        // Plan W2.19 (W10.E45): LAN discovery for pairing without a code (LanDiscovery.swift).
+        bridge?.registerPluginInstance(LumenLanPlugin())
     }
 }
