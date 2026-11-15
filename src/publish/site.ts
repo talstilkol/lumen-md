@@ -28,6 +28,7 @@ import { MD_RE, PUBLISH_CSS, encodePath, pageTitle, rewriteMarkdownLinks, rewrit
 import { prepareForExport } from "../lib/redaction";
 import { cleanPublishedFile, keepImageMetadata } from "../lib/imageMetadata";
 import { linkTags, wellKnownFile } from "./standardSite";
+import { GARDEN_CSS, GARDEN_EN, GARDEN_HE, PREVIEW_JS, backlinkMap, gardenBlock, noteTags, outgoingLinks, tagOutput, tagPageMarkdown, textLang, type GardenWords } from "./siteGarden";
 
 export interface SiteNote {
   /** Vault-relative path, POSIX separators (`Projects/Plan.md`). */
@@ -65,6 +66,10 @@ export interface SiteOptions {
    * publication and, when published, its document record (by note path).
    */
   standardSite?: { publication: string; documents?: Readonly<Record<string, string>> };
+  /** W12.S5: backlinks, local graph, tags and link previews on every page (default on). */
+  garden?: boolean;
+  /** Garden words, in `lang`. */
+  gardenWords?: Partial<GardenWords>;
 }
 
 export interface SiteWords {
@@ -235,6 +240,7 @@ export const SITE_CSS = [
   ".lumen-site-layout .lumen-export{flex:1;min-width:0;margin:0}",
   ".lumen-site-unpublished{color:hsl(var(--fg-muted))}",
   "@media (max-width:760px){.lumen-site-layout{display:block}.lumen-site-tree{position:static;max-height:none;margin-bottom:1rem}}",
+  GARDEN_CSS,
 ].join("\n");
 
 /**
@@ -254,7 +260,10 @@ export const SEARCH_JS = `(() => {
     const words = norm(q.value).split(/\\s+/).filter(Boolean);
     list.textContent = "";
     if (!words.length) { list.hidden = true; return; }
-    const hits = (await load()).filter((e) => words.every((w) => e.n.includes(w))).slice(0, 20);
+    // W12.S5: a Hebrew word also matches without one common prefix (ו ה ב כ ל מ ש, or two of them), so
+    // "בירושלים" finds "ירושלים"; "ירושלים" finds "בירושלים" already, as a substring.
+    const forms = (w) => { const f = [w], m = /^[\u05d0-\u05ea]{4,}/.test(w) ? /^(?:[ושכ]?[הבלמ]|[ושכ])/.exec(w) : null; if (m && w.length - m[0].length >= 2 + m[0].length) f.push(w.slice(m[0].length)); if (m && m[0].length === 2 && w.length >= 5) f.push(w.slice(1)); return f; };
+    const hits = (await load()).filter((e) => words.every((w) => forms(w).some((f) => e.n.includes(f)))).slice(0, 20);
     if (!hits.length) { const li = document.createElement("li"); li.textContent = list.dataset.empty || ""; list.append(li); }
     for (const h of hits) {
       const li = document.createElement("li"), a = document.createElement("a"), small = document.createElement("small");
@@ -284,6 +293,8 @@ export interface SiteResult {
 /** Build the site from the picked notes. */
 export async function buildSite(notes: readonly SiteNote[], opts: SiteOptions): Promise<SiteResult> {
   const words = { ...wordsFor(opts.lang), ...opts.words };
+  const garden = opts.garden ?? true;
+  const gWords: GardenWords = { ...(opts.lang === "he" ? GARDEN_HE : GARDEN_EN), ...opts.gardenWords };
   const chromeDir: "ltr" | "rtl" = isRtlLang(opts.lang) ? "rtl" : "ltr";
   const seen = new Set<string>();
   const pages: (SitePage & { md: string })[] = [];
@@ -311,18 +322,24 @@ export async function buildSite(notes: readonly SiteNote[], opts: SiteOptions): 
     const std = opts.standardSite ? linkTags(opts.standardSite.publication, source ? opts.standardSite.documents?.[source] : undefined) : "";
     let html = await opts.render(md, {
       title,
-      head: `\n<link rel="stylesheet" href="${prefix}style.css" />\n<meta name="lumen-site-root" content="${prefix}" />\n<script src="${prefix}search.js" defer></script>${std}`,
+      head: `\n<link rel="stylesheet" href="${prefix}style.css" />\n<meta name="lumen-site-root" content="${prefix}" />\n<script src="${prefix}search.js" defer></script>${garden ? `\n<script src="${prefix}preview.js" defer></script>` : ""}${std}`,
       before: `${siteBar(opts.title, output, words, chromeDir, opts.lang)}\n<div class="lumen-site-layout" dir="${chromeDir}">${navTree(navPages, output, words)}`,
     });
     // The layout takes the site's direction (sidebar side); the page keeps its own, as the renderer set it on <html>.
     const pageDir = /<html\b[^>]*\sdir="(ltr|rtl)"/.exec(html)?.[1] ?? "ltr";
     html = html.replace(/<main\b(?![^>]*\sdir=)/, `<main dir="${pageDir}"`);
+    // W12.S5: the page's language from its own text (a Hebrew note on an English site is lang="he").
+    if (garden) {
+      const { lang } = textLang(plainText(md), opts.lang);
+      html = /<html\b[^>]*\slang="/.test(html) ? html.replace(/(<html\b[^>]*?\slang=")[^"]*"/, `$1${lang}"`) : html.replace(/<html\b/, `<html lang="${lang}"`);
+    }
     // Close the layout after the page body.
     const at = html.lastIndexOf("</body>");
     html = at < 0 ? `${html}${extra}</div>` : `${html.slice(0, at)}${extra}</div>\n${html.slice(at)}`;
     return html;
   };
 
+  const rendered: Array<{ page: (typeof pages)[number]; html: string }> = [];
   for (const p of pages) {
     let html = await pageShell(p.md, p.output, p.output === "index.html" ? opts.title : `${p.title} — ${opts.title}`, "", p.source);
     html = rewriteMarkdownLinks(html, p.output);
@@ -348,7 +365,30 @@ export async function buildSite(notes: readonly SiteNote[], opts: SiteOptions): 
         }
       }
     }
-    files.push({ path: p.output, data: html });
+    rendered.push({ page: p, html });
+  }
+
+  // W12.S5: backlinks, tags and the local graph, from the links the reader can actually click.
+  const byOutput = new Map(navPages.map((p) => [p.output, p]));
+  const links = new Map(rendered.map(({ page, html }) => [page.output, outgoingLinks(html, page.output, outputs)]));
+  const back = backlinkMap(links);
+  const tagged = new Map<string, SitePage[]>();
+  for (const { page, html: h } of rendered) {
+    let html = h;
+    if (garden) {
+      const tags = noteTags(page.md);
+      for (const t of tags) tagged.set(t, [...(tagged.get(t) ?? []), byOutput.get(page.output)!]);
+      const pick = (xs: readonly string[] | undefined) => (xs ?? []).map((o) => byOutput.get(o)).filter((x): x is SitePage => !!x);
+      const block = gardenBlock(page, { backlinks: pick(back.get(page.output)), outgoing: pick(links.get(page.output)), tags, words: gWords });
+      const at = html.lastIndexOf("</main>");
+      if (at >= 0) html = `${html.slice(0, at)}${block}\n${html.slice(at)}`;
+    }
+    files.push({ path: page.output, data: html });
+  }
+  for (const [tag, list] of [...tagged].sort((a, b) => a[0].localeCompare(b[0]))) {
+    const out = tagOutput(tag);
+    if (outputs.has(out)) continue; // a note already lives there
+    files.push({ path: out, data: await pageShell(tagPageMarkdown(tag, list, out, gWords), out, `#${tag} — ${opts.title}`) });
   }
 
   if (!hasIndex) {
@@ -363,6 +403,7 @@ export async function buildSite(notes: readonly SiteNote[], opts: SiteOptions): 
   files.push({ path: "404.html", data: await pageShell(`# ${words.notFound}\n\n[${words.home}](index.html)\n`, "404.html", `${words.notFound} — ${opts.title}`) });
   files.push({ path: "style.css", data: SITE_CSS });
   files.push({ path: "search.js", data: SEARCH_JS });
+  if (garden) files.push({ path: "preview.js", data: PREVIEW_JS });
   const index: SearchEntry[] = pages.map((p) => ({ p: p.output, t: p.title, x: plainText(p.md) }));
   files.push({ path: "search-index.json", data: JSON.stringify(index) });
   // GitHub Pages: serve files as they are (no Jekyll, which hides _folders).
