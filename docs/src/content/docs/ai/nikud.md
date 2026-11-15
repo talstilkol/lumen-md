@@ -10,6 +10,8 @@ is selected:
 |---|---|
 | **Hebrew: add niqqud** | Points every Hebrew word. Existing points are replaced. |
 | **Hebrew: add partial niqqud** | Points only the words the model finds ambiguous, the way modern texts point a word that could be read two ways. |
+| **Hebrew: niqqud on nouns only** | Points only the nouns. Needs the offline Hebrew dictionary. |
+| **Hebrew: niqqud on verbs only** | Points only the verbs. Needs the offline Hebrew dictionary. |
 | **Hebrew: remove niqqud** | Strips the points. Needs no model. |
 
 English, code, numbers and punctuation pass through unchanged. Before
@@ -70,5 +72,13 @@ The readings come from the model's own probabilities for each letter, so
 they cost no second model run. Every reading keeps the word's letters.
 
 *Add partial niqqud* points only the ambiguous words, and the same list is
-there for them. Pointing only nouns or only verbs needs a part-of-speech
-tagger, which Lumen does not have yet.
+there for them.
+
+*Niqqud on nouns only* and *niqqud on verbs only* point the whole text
+first, then keep the points only on one part of speech. The part of speech
+comes from the offline Hebrew dictionary (Hebrew Wiktionary, the
+"Hebrew dictionary and synonyms" command). For a word written two ways,
+like ספר (a book, or "told"), the sense whose pointing matches the model's
+reading decides. A word the dictionary does not know, or cannot settle, is
+left plain rather than pointed as the wrong part of speech. Without the
+dictionary these two commands say so and change nothing.

@@ -68,6 +68,7 @@
   "toast.nikud.done": "Niqqud ajouté sur cet appareil. Les mots soulignés ont plusieurs lectures : cliquez sur un mot pour les voir (Alt+clic sur n’importe quel mot).",
   "toast.nikud.doneHigh": "Niqqud ajouté sur cet appareil avec DictaBERT-char-menaked (haute qualité). Les mots soulignés ont plusieurs lectures : cliquez sur un mot pour les voir.",
   "toast.nikud.failed": "Échec du niqqud : {error}",
+  "toast.nikud.lexicon": "Le niqqud des noms ou des verbes seulement nécessite le dictionnaire hébreu hors ligne : téléchargez-le dans “Dictionnaire hébreu et synonymes (télécharger / supprimer)”. Rien n'a été modifié.",
   "toast.nikud.noHost": "Le modèle de niqqud n'est pas encore téléchargeable (son hébergement n'est pas configuré).",
   "toast.nikud.nothing": "Aucun texte hébreu à modifier.",
   "toast.nikud.working": "Ajout du niqqud sur cet appareil…",

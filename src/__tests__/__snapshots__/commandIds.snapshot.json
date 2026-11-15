@@ -1017,6 +1017,20 @@
       "icon": "Sparkles"
     },
     {
+      "id": "nikud.nouns",
+      "label": "Hebrew: niqqud on nouns only",
+      "group": "Tools",
+      "hint": "Point only the nouns (needs the Hebrew dictionary, “Hebrew dictionary and synonyms (download / remove)”)",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "nikud.verbs",
+      "label": "Hebrew: niqqud on verbs only",
+      "group": "Tools",
+      "hint": "Point only the verbs (needs the Hebrew dictionary, “Hebrew dictionary and synonyms (download / remove)”)",
+      "icon": "Sparkles"
+    },
+    {
       "id": "nikud.remove",
       "label": "Hebrew: remove niqqud",
       "group": "Tools",
@@ -3055,6 +3069,20 @@
       "icon": "Sparkles"
     },
     {
+      "id": "nikud.nouns",
+      "label": "Hebrew: niqqud on nouns only",
+      "group": "Tools",
+      "hint": "Point only the nouns (needs the Hebrew dictionary, “Hebrew dictionary and synonyms (download / remove)”)",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "nikud.verbs",
+      "label": "Hebrew: niqqud on verbs only",
+      "group": "Tools",
+      "hint": "Point only the verbs (needs the Hebrew dictionary, “Hebrew dictionary and synonyms (download / remove)”)",
+      "icon": "Sparkles"
+    },
+    {
       "id": "nikud.remove",
       "label": "Hebrew: remove niqqud",
       "group": "Tools",
@@ -4315,6 +4343,8 @@
     "ai.switchProvider",
     "nikud.add",
     "nikud.partial",
+    "nikud.nouns",
+    "nikud.verbs",
     "nikud.remove",
     "tools.checkGrammar",
     "view.rtl",

@@ -68,6 +68,7 @@
   "toast.nikud.done": "Niqqud added on this device. Underlined words can be read more than one way: click one for its readings (Alt+click any word).",
   "toast.nikud.doneHigh": "Niqqud added on this device with DictaBERT-char-menaked (high quality). Underlined words can be read more than one way: click one for its readings.",
   "toast.nikud.failed": "Niqqud failed: {error}",
+  "toast.nikud.lexicon": "Niqqud on nouns or verbs only needs the offline Hebrew dictionary: download it in “Hebrew dictionary and synonyms (download / remove)”. Nothing was changed.",
   "toast.nikud.noHost": "The niqqud model is not available to download yet (its host is not set up).",
   "toast.nikud.nothing": "No Hebrew text to change.",
   "toast.nikud.working": "Adding niqqud on this device…",

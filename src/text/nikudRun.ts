@@ -6,6 +6,7 @@
  */
 import { argmax, chunks, decodeChunk, encode, margin, removeNikud, sameSkeleton, canNiqqud } from "./nikud";
 import { nakdimonOptions, wordAlternatives, type LetterOption, type WordAlternatives } from "./nikudAlt";
+import { keepWordsOfClass, type PartialMode, type PosTagger } from "./nikudPos";
 
 export interface Logits {
   /** [rows, length, 16] */
@@ -19,8 +20,14 @@ export interface Logits {
 export type Infer = (ids: Int32Array, rows: number, length: number) => Promise<Logits>;
 
 export interface NikudOptions {
-  /** Partial niqqud (6.3.5): only words the model is unsure about keep their points. */
-  partial?: boolean;
+  /**
+   * Partial niqqud (6.3.5, W2.5): `"ambiguous"` (or `true`) keeps points only on
+   * the words the model is unsure about; `"nouns"` / `"verbs"` only on one part
+   * of speech, as `tagger` names it (text/nikudPos.ts).
+   */
+  partial?: boolean | PartialMode;
+  /** The part-of-speech tagger for the `"nouns"` / `"verbs"` modes. */
+  tagger?: PosTagger;
   /** In partial mode: a word is "ambiguous" when some letter's best vowel leads the next by less than this (softmax probability). */
   partialMargin?: number;
   /** Chunks per model call. */
@@ -96,6 +103,8 @@ export async function addNikudDetailed(text: string, model: Infer | NikudEngine,
 
 async function pointDetailed(text: string, model: Infer | NikudEngine, opts: NikudOptions, withOptions: boolean): Promise<DetailedNikud> {
   const engine = typeof model === "function" ? nakdimonEngine(model, opts.maxlen ?? 100) : model;
+  const mode: PartialMode | null = opts.partial === true ? "ambiguous" : opts.partial || null;
+  if ((mode === "nouns" || mode === "verbs") && !opts.tagger) throw new Error(`niqqud: "${mode}" needs a part-of-speech tagger`);
   const plain = removeNikud(text);
   const parts = chunks(plain, opts.maxlen ?? engine.maxlen);
   const per = opts.batch ?? 16;
@@ -110,13 +119,14 @@ async function pointDetailed(text: string, model: Infer | NikudEngine, opts: Nik
     batch.forEach((chunk, row) => {
       const r = results[row];
       out += r.text;
-      if (opts.partial) r.unsure.forEach((u, i) => u && unsure.push([offset + i, offset + i + 1]));
+      if (mode === "ambiguous") r.unsure.forEach((u, i) => u && unsure.push([offset + i, offset + i + 1]));
       if (withOptions) for (let i = 0; i < chunk.length; i++) options.push(r.options?.[i]);
       offset += chunk.length;
     });
   }
   if (!sameSkeleton(out, plain)) throw new Error("niqqud: the consonants changed");
-  const final = opts.partial ? keepAmbiguousWords(plain, out, unsure) : out;
+  if (mode === "nouns" || mode === "verbs") return keepWordsOfClass({ text: out, words: withOptions ? wordsOf(plain, out, options) : [] }, mode, opts.tagger!);
+  const final = mode === "ambiguous" ? keepAmbiguousWords(plain, out, unsure) : out;
   return { text: final, words: withOptions ? wordsOf(plain, final, options) : [] };
 }
 
