@@ -14,6 +14,28 @@
       "vars": []
     },
     {
+      "key": "about.a11yStatement",
+      "en": "Accessibility statement",
+      "vars": []
+    },
+    {
+      "key": "about.a11yStatement.hint",
+      "en": "Lumen's accessibility statement: the standard, what works, known gaps and how to report a barrier",
+      "vars": []
+    },
+    {
+      "key": "about.acr",
+      "en": "Accessibility conformance report",
+      "vars": []
+    },
+    {
+      "key": "about.version",
+      "en": "Lumen version {version}",
+      "vars": [
+        "version"
+      ]
+    },
+    {
       "key": "academic.close",
       "en": "Close",
       "vars": []

@@ -1,6 +1,10 @@
 {
   "a11y.sidebarResizer": "Seitenleiste in der Breite ändern",
   "a11y.skipToContent": "Zum Inhalt springen",
+  "about.a11yStatement": "Erklärung zur Barrierefreiheit",
+  "about.a11yStatement.hint": "Lumens Erklärung zur Barrierefreiheit: Norm, was funktioniert, bekannte Lücken und wie man eine Barriere meldet",
+  "about.acr": "Konformitätsbericht zur Barrierefreiheit",
+  "about.version": "Lumen Version {version}",
   "academic.close": "Schließen",
   "academic.cover": "Titelblatt",
   "academic.done": "{name} exportiert. Öffnen Sie die Datei in Word und drücken Sie F9 im Inhaltsverzeichnis, um die Seitenzahlen einzutragen.",

@@ -1,6 +1,10 @@
 {
   "a11y.sidebarResizer": "Resize the sidebar",
   "a11y.skipToContent": "Skip to content",
+  "about.a11yStatement": "Accessibility statement",
+  "about.a11yStatement.hint": "Lumen's accessibility statement: the standard, what works, known gaps and how to report a barrier",
+  "about.acr": "Accessibility conformance report",
+  "about.version": "Lumen version {version}",
   "agentReview.badge": "Review {count}",
   "agentReview.badge.tooltip": "Changes proposed by agents are waiting for your approval",
   "agentReview.close": "Close",
