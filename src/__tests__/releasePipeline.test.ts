@@ -5,7 +5,7 @@
  * @vitest-environment node
  */
 import { describe, expect, it } from "vitest";
-import { mkdtempSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -181,11 +181,8 @@ describe("the local pipeline (13.4) — no GitHub Actions needed", () => {
     expect(() => execFileSync("node", [script, "verify", d], { stdio: "ignore" })).toThrow();
   });
 
-  it("the workflow is kept, runs on a tag, and uses the script's notes", () => {
-    const wf = readFileSync(join(root, "docs/archive/workflows/release.yml"), "utf8");
-    expect(wf).toMatch(/tags: \["v\*"\]/);
-    expect(wf).toContain("node scripts/release.mjs notes");
-    expect(wf).toContain("node scripts/release.mjs build");
+  it("the release path has no workflow: the script is the release (W1.24, W10.E61)", () => {
+    expect(existsSync(join(root, ".github/workflows/release.yml"))).toBe(false);
     const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
     expect(pkg.scripts.release).toBe("node scripts/release.mjs");
   });

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<!-- Used by `xcodebuild -exportArchive` in .github/workflows/mobile.yml when the
-     signing secrets exist (plan 13.3.4 / 15.7). The workflow fills TEAM_ID and
-     PROFILE_NAME from the secrets before the export. -->
+<!-- The committed template of the App Store Connect export options (plan 13.3.4 / 15.7).
+     scripts/mobile-build.mjs writes the filled-in copy per build (lib/mobileBuild.mjs
+     exportOptionsPlist); the placeholders stay here. -->
 <plist version="1.0">
 <dict>
   <key>method</key>

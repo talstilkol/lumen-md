@@ -69,11 +69,12 @@ describe("signing is optional (11.5.2) and the updater stays off without keys (1
     expect(withWindowsThumbprint(conf, "a".repeat(40)).bundle.windows.certificateThumbprint).toBe("A".repeat(40));
   });
 
-  it("the release workflow skips signing steps without secrets instead of failing", () => {
-    const wf = readFileSync(join(root, "docs/archive/workflows/release.yml"), "utf8");
-    expect(wf).toMatch(/WINDOWS_CERTIFICATE not set — the Windows installer is NOT signed/);
-    expect(wf).toMatch(/TAURI_SIGNING_PRIVATE_KEY not set/);
-    expect(wf).toMatch(/check-sourcemaps\.mjs dist/);
+  it("the release build skips signing without the keys instead of failing (no workflow: W10.E61)", () => {
+    const rel = readFileSync(join(root, "scripts/release.mjs"), "utf8");
+    expect(rel).toMatch(/WINDOWS_CERTIFICATE_THUMBPRINT not set — the Windows installer is NOT signed/);
+    expect(rel).toContain('"scripts/tauri-signing.mjs", "windows-thumbprint", process.env.WINDOWS_CERTIFICATE_THUMBPRINT');
+    expect(rel).toMatch(/TAURI_SIGNING_PRIVATE_KEY not set/);
+    expect(rel).toMatch(/"scripts\/check-sourcemaps\.mjs", "dist"/);
   });
 });
 

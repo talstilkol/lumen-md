@@ -1,23 +1,17 @@
 #!/usr/bin/env node
 /**
- * Desktop release signing helpers (plan 11.5), used by docs/archive/workflows/release.yml.
+ * Desktop release signing helpers (plan 11.5), used by scripts/release.mjs build --desktop.
  *
  *   node scripts/tauri-signing.mjs updater-config
  *       fill src-tauri/tauri.conf.json's updater from LUMEN_UPDATER_PUBKEY /
  *       LUMEN_UPDATER_ENDPOINT / TAURI_SIGNING_PRIVATE_KEY (inert without them)
  *   node scripts/tauri-signing.mjs windows-thumbprint <SHA1>
  *       sign the Windows bundle with the imported certificate
- *   node scripts/tauri-signing.mjs signpath
- *       sign the Windows binaries through SignPath Foundation (plan W11.S15):
- *       bundle.windows.signCommand. Not committed: without the SIGNPATH_*
- *       details the command refuses, so a contributor's Windows build would
- *       fail. release-run adds it for the release build only.
  *   node scripts/tauri-signing.mjs latest-json --tag vX --repo o/r --sigs DIR --out latest.json
  */
 import { readFileSync, writeFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { latestJson, withUpdater, withWindowsThumbprint } from "./lib/tauriSigning.mjs";
-import { withSignPath } from "./lib/windowsSigning.mjs";
 
 const CONF = path.join(process.cwd(), "src-tauri", "tauri.conf.json");
 const [cmd, ...rest] = process.argv.slice(2);
@@ -35,9 +29,6 @@ if (cmd === "updater-config") {
 } else if (cmd === "windows-thumbprint") {
   write(withWindowsThumbprint(read(), rest[0]));
   console.log("windows: signing with the imported certificate");
-} else if (cmd === "signpath") {
-  write(withSignPath(read()));
-  console.log("windows: signing through SignPath (bundle.windows.signCommand)");
 } else if (cmd === "latest-json") {
   const dir = opt("--sigs");
   const sigs = readdirSync(dir).filter((f) => f.endsWith(".sig")).map((name) => ({ name, signature: readFileSync(path.join(dir, name), "utf8") }));
@@ -49,6 +40,6 @@ if (cmd === "updater-config") {
   writeFileSync(opt("--out") ?? "latest.json", JSON.stringify(out, null, 2) + "\n");
   console.log(`latest.json: ${Object.keys(out.platforms).join(", ")}`);
 } else {
-  console.error("usage: tauri-signing.mjs updater-config | windows-thumbprint <SHA1> | signpath | latest-json --tag --repo --sigs --out");
+  console.error("usage: tauri-signing.mjs updater-config | windows-thumbprint <SHA1> | latest-json --tag --repo --sigs --out");
   process.exit(2);
 }

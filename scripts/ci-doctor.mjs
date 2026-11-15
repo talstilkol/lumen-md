@@ -29,7 +29,7 @@
  *   node scripts/ci-doctor.mjs 190                 # PR number → its head branch
  *   node scripts/ci-doctor.mjs 190 --peers 30 --max-distance 50 --json
  *   node scripts/ci-doctor.mjs --run 39085293928   # one particular run, not the latest
- *   node scripts/ci-doctor.mjs 190 --workflow tauri.yml
+ *   node scripts/ci-doctor.mjs 190 --workflow ci.yml
  *   node scripts/ci-doctor.mjs --around 39082608120   # that run, peers from the hours around it
  *   node scripts/ci-doctor.mjs 189 --around latest --window 24
  *
