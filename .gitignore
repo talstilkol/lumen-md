@@ -79,6 +79,11 @@ bundle-diff.md
 # committed: npm run eval:ingest takes it into the registry (plan 7.9).
 eval/results/*
 !eval/results/agents-*.json
+# Public-benchmark results (eval/results/<task>/<model>@<rev>.json, plan W11.H5) are committed.
+!eval/results/*/
+eval/results/*/report.json
+# Downloaded public benchmark data (npm run eval:public -- fetch): never committed.
+eval/public/.data/
 flake-results/
 visual-results/
 # Review triage / reply state (scripts/review-triage.mjs, review-reply.mjs)
