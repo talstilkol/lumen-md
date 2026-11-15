@@ -4668,6 +4668,366 @@
       "vars": []
     },
     {
+      "key": "e2ee.roles.back",
+      "en": "Back",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.create.go",
+      "en": "Create the vault",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.create.note",
+      "en": "This device becomes the vault's admin. Only the admin needs the passphrase; members join with their own device keys.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.create.title",
+      "en": "New shared vault",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.empty",
+      "en": "This device isn't in any shared vault yet.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.error",
+      "en": "That didn't work: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "e2ee.roles.folder",
+      "en": "Synced into the folder {folder}",
+      "vars": [
+        "folder"
+      ]
+    },
+    {
+      "key": "e2ee.roles.fresh.body",
+      "en": "Before this device sends anything, check once that you see the vault's latest notes (ask the admin if you're not sure). You're asked only once.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.fresh.confirm",
+      "en": "Yes, it's current",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.fresh.done",
+      "en": "Confirmed. You won't be asked again on this device.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.fresh.title",
+      "en": "Is this the vault you expect?",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.intro",
+      "en": "One encrypted vault for a family or a class. Each device gets a role: reader, writer or admin. No accounts, no names, no e-mail.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.invite.copy",
+      "en": "Copy",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.invite.link",
+      "en": "Invite link",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.invite.make",
+      "en": "Make the link",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.invite.note",
+      "en": "One link per device, for the role shown. It carries no name and no e-mail. Send it only to the person it's for: you still accept each request.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.invite.open",
+      "en": "Links not used yet: {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "e2ee.roles.invite.personal",
+      "en": "With a personal folder that only this device and the admin can read",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.invite.qr",
+      "en": "The invite link as a QR code",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.invite.qrHint",
+      "en": "Scan it with the camera of the device that should join.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.invite.role",
+      "en": "Role for this link",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.invite.title",
+      "en": "Invite a device",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.invite.withdraw",
+      "en": "Withdraw",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.invite.withdrawLabel",
+      "en": "Withdraw the {role} link {id}",
+      "vars": [
+        "role",
+        "id"
+      ]
+    },
+    {
+      "key": "e2ee.roles.join.as",
+      "en": "This link invites this device as: {role}",
+      "vars": [
+        "role"
+      ]
+    },
+    {
+      "key": "e2ee.roles.join.bad",
+      "en": "This invite link is broken or incomplete.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.join.go",
+      "en": "Ask to join",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.join.note",
+      "en": "This device makes its own keys. Nothing about you is sent: no name, no e-mail. The admin accepts the request on their device.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.join.otherRelay",
+      "en": "This invite is for another relay ({relay}), so this app won't send anything to it.",
+      "vars": [
+        "relay"
+      ]
+    },
+    {
+      "key": "e2ee.roles.join.refresh",
+      "en": "Check again",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.join.sent",
+      "en": "Request sent. The admin accepts it on their device; then open the vault here.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.join.title",
+      "en": "Join a shared vault",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.join.waiting",
+      "en": "Waiting for the admin to accept this device.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.members.device",
+      "en": "Device {id}",
+      "vars": [
+        "id"
+      ]
+    },
+    {
+      "key": "e2ee.roles.members.revoke",
+      "en": "Revoke",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.members.revokeLabel",
+      "en": "Revoke device {id}",
+      "vars": [
+        "id"
+      ]
+    },
+    {
+      "key": "e2ee.roles.members.revoked",
+      "en": "Revoked",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.members.thisDevice",
+      "en": "this device",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.members.title",
+      "en": "Members",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.noRelay",
+      "en": "This build has no relay set, so it can't open a shared vault.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.open",
+      "en": "Open",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.passphrase",
+      "en": "Admin passphrase",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.pending.accept",
+      "en": "Accept",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.pending.acceptLabel",
+      "en": "Accept device {id}",
+      "vars": [
+        "id"
+      ]
+    },
+    {
+      "key": "e2ee.roles.pending.check",
+      "en": "Check for join requests",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.pending.none",
+      "en": "No join requests.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.pending.row",
+      "en": "Device {id} asks to join as {role}",
+      "vars": [
+        "id",
+        "role"
+      ]
+    },
+    {
+      "key": "e2ee.roles.pending.title",
+      "en": "Waiting to join",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.personal.badge",
+      "en": "Personal folder",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.personal.member",
+      "en": "Has a personal folder only this device and you can read",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.personal.mine",
+      "en": "You have a personal folder. Only you and the admin can read it.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.readOnly",
+      "en": "This device reads the vault. Its changes outside a personal folder aren't sent.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.revoke.confirm",
+      "en": "Revoke device {id}? The relay refuses its changes from now on, and the vault gets a new key it can't read. What it already downloaded stays on it.",
+      "vars": [
+        "id"
+      ]
+    },
+    {
+      "key": "e2ee.roles.revoke.done",
+      "en": "Device {id} revoked. The vault has a new key.",
+      "vars": [
+        "id"
+      ]
+    },
+    {
+      "key": "e2ee.roles.revoke.title",
+      "en": "Revoke this device?",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.role.admin",
+      "en": "Admin",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.role.reader",
+      "en": "Reader",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.role.readerHint",
+      "en": "Reads the vault. Writes only its own personal folder, if it has one.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.role.writer",
+      "en": "Writer",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.role.writerHint",
+      "en": "Reads and changes the vault.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.syncNow",
+      "en": "Sync now",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.synced",
+      "en": "Synced.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.title",
+      "en": "Family and classroom vaults",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.unlock.go",
+      "en": "Unlock",
+      "vars": []
+    },
+    {
+      "key": "e2ee.roles.vault",
+      "en": "Vault {id}",
+      "vars": [
+        "id"
+      ]
+    },
+    {
+      "key": "e2ee.roles.you",
+      "en": "Your role: {role}",
+      "vars": [
+        "role"
+      ]
+    },
+    {
       "key": "e2ee.rollback.fork",
       "en": "The sync service returned another version of the vault in place of the one this device saw: another device's changes replaced it, so the service didn't keep a conditional write. This device stopped and wrote nothing; the notes on it are unchanged. Don't make changes here for now: sync your other devices and see which one has the latest notes. If this happens again, don't use this service for this vault.",
       "vars": []

@@ -151,6 +151,14 @@ export function buildSyncCommands(): Command[] {
       group: t("group.tools"),
       action: () => void import("../../sync/e2ee/classroom/launch").then((m) => m.openClassroom()),
     },
+    {
+      // Plan W12.S4: one encrypted vault for a family or a class, with reader / writer / admin keys; loaded on use.
+      id: "roleVault.open",
+      label: t("cmd.roleVault.open"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      action: () => void import("../../sync/e2ee/roles/ui/launch").then((m) => m.openRoleVaults()),
+    },
   ];
 }
 
