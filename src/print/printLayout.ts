@@ -22,11 +22,15 @@
  *   Source Serif 4) come first, so the PDF embeds them instead of a system
  *   fallback.
  *
- * Footnotes print as endnotes at the end of the document. Chromium does not
- * support `float: footnote`, so per-page footnotes would need a paged-media
- * polyfill; see docs/workspace/print.
+ * - Footnotes at the bottom of the page (the default; `footnotes: end` keeps
+ *   them as endnotes). Chromium has no `float: footnote`, so the pages are
+ *   laid out here: the note is measured at the page's width, its blocks are
+ *   placed on pages, and each footnote goes to the bottom of the page that
+ *   holds its first reference (`layoutFootnotePages`). In a note with Hebrew
+ *   page numbers the footnotes are numbered in Hebrew numerals too.
  */
 import { firstStrongDirection } from "../lib/textDirection";
+import { gematria } from "../daily/gematria";
 
 export type PageNumbering = "decimal" | "hebrew" | "none";
 
@@ -42,8 +46,26 @@ export interface PrintOptions {
   /** Heading of the table of contents, in the note's language. */
   tocTitle?: string;
   pageSize?: "A4" | "Letter";
+  /** Where footnotes print: the bottom of the page (default) or the end of the note. */
+  footnotes?: FootnotePlacement;
   dir: "rtl" | "ltr";
 }
+
+export type FootnotePlacement = "page" | "end";
+
+/** The printable area of a page (the paper less the `@page` margins), in mm. */
+export const PAGE_AREA_MM = {
+  A4: { width: 210 - 36, height: 297 - 42 },
+  Letter: { width: 215.9 - 36, height: 279.4 - 42 },
+} as const;
+
+/**
+ * How much shorter a laid-out page is than the printable area, in mm: room
+ * for rounding between the measurement and the print engine, so a full page
+ * never spills a line (or a blank page) onto the next.
+ */
+export const PAGE_SLACK_MM = 3;
+export const MM = 96 / 25.4;
 
 /** A CSS string literal (for `content:`), safe for any title. */
 export function cssString(s: string): string {
@@ -87,6 +109,9 @@ export function printFrontmatter(fm: Record<string, unknown> | null | undefined)
   const size = String(fm["page-size"] ?? "");
   if (size === "Letter" || size === "letter") out.pageSize = "Letter";
   if (size === "A4" || size === "a4") out.pageSize = "A4";
+  const fn = String(fm.footnotes ?? "");
+  if (fn === "page" || fn === "bottom") out.footnotes = "page";
+  if (fn === "end" || fn === "endnotes") out.footnotes = "end";
   return out;
 }
 
@@ -134,6 +159,15 @@ a { color: inherit; text-decoration: underline; }
 .print-toc li { margin: 0.2em 0; }
 .print-toc a { text-decoration: none; }
 section.footnotes, section[data-footnotes] { break-before: auto; font-size: 9.5pt; border-top: 1px solid #ccc; margin-top: 8mm; }
+.print-page { display: flow-root; position: relative; height: ${(PAGE_AREA_MM[o.pageSize ?? "A4"].height - PAGE_SLACK_MM + 1).toFixed(1)}mm; break-after: page; }
+.print-page:last-child, .print-page .print-toc { break-after: auto; }
+.print-page.print-page-tall { height: auto; }
+.page-footnotes { position: absolute; inset-inline: 0; bottom: 0; font-size: 9.5pt; line-height: 1.4; }
+.print-page-tall .page-footnotes { position: static; }
+.page-footnotes::before { content: ""; display: block; width: 33%; border-top: 1px solid #999; margin-bottom: 1.5mm; }
+.page-footnote { margin: 0 0 1mm; }
+.page-footnote > p { display: inline; margin: 0; }
+.page-footnote .fn-num { text-decoration: none; margin-inline-end: 0.35em; font-weight: 600; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 @media screen { body { max-width: 190mm; margin: 12mm auto; padding: 0 8mm; } }
 `;
@@ -185,4 +219,177 @@ export function buildToc(root: ParentNode, title: string): HTMLElement | null {
     cur.list.appendChild(li);
   }
   return nav;
+}
+
+/** A block of the note as the page planner sees it. */
+export interface PlanBlock {
+  /** Its height in the flow, margins included. */
+  height: number;
+  /** The footnote ids it references, in order. */
+  refs: string[];
+  /** A forced page break (`\newpage`) comes right before it. */
+  breakBefore?: boolean;
+}
+
+export interface PlannedPage {
+  /** Indexes into the blocks. */
+  blocks: number[];
+  /** The footnotes printed at its bottom, in order. */
+  notes: string[];
+  /** One block taller than a page: the browser splits it, its notes follow it. */
+  tall?: boolean;
+}
+
+/**
+ * Place blocks on pages so that every footnote sits at the bottom of the
+ * page that holds its first reference. A block whose notes do not fit
+ * moves, with them, to the next page; a note is never on another page than
+ * its reference. A block taller than a page gets a page of its own.
+ */
+export function planFootnotePages(blocks: PlanBlock[], noteHeight: (id: string) => number, pageHeight: number, separator: number): PlannedPage[] {
+  const pages: PlannedPage[] = [];
+  const placed = new Set<string>();
+  let page: PlannedPage = { blocks: [], notes: [] };
+  let used = 0;
+  let notesHeight = 0;
+  const next = () => {
+    pages.push(page);
+    page = { blocks: [], notes: [] };
+    used = 0;
+    notesHeight = 0;
+  };
+  blocks.forEach((b, i) => {
+    if (b.breakBefore && page.blocks.length) next();
+    const fresh = [...new Set(b.refs)].filter((id) => !placed.has(id));
+    const add = fresh.reduce((h, id) => h + noteHeight(id), 0);
+    const fits = (sep: number) => used + b.height + notesHeight + add + sep <= pageHeight;
+    if (page.blocks.length && !fits(fresh.length && !page.notes.length ? separator : 0)) next();
+    const sep = fresh.length && !page.notes.length ? separator : 0;
+    if (!page.blocks.length && !fits(sep)) page.tall = true;
+    page.blocks.push(i);
+    page.notes.push(...fresh);
+    fresh.forEach((id) => placed.add(id));
+    used += b.height;
+    notesHeight += add + sep;
+    // A tall block keeps its page to itself.
+    if (page.tall) next();
+  });
+  if (page.blocks.length) pages.push(page);
+  return pages;
+}
+
+const REF = "a[data-footnote-ref]";
+const refTarget = (a: Element) => decodeURIComponent((a.getAttribute("href") ?? "").replace(/^#/, ""));
+
+/** The label of the n-th footnote: 1, 2, 3 … or א׳, ב׳, ג׳ … */
+export function footnoteLabel(n: number, numbering: PageNumbering): string {
+  return numbering === "hebrew" ? gematria(n) : String(n);
+}
+
+/** Top-to-top heights of `els` in the flow (margins included); the last runs to `bottom`. */
+function flowHeights(els: Element[], bottom: number): number[] {
+  const tops = els.map((e) => e.getBoundingClientRect().top);
+  return tops.map((t, i) => (i + 1 < tops.length ? tops[i + 1] : bottom) - t);
+}
+
+/**
+ * Lay a rendered note out in pages with its footnotes at the bottom of each
+ * page (W2.23, step 2). `root` must be laid out at the page's width (the
+ * print window or a frame of that width), with `printCss` applied. The
+ * footnotes section is removed: no endnotes are left. Returns the number of
+ * pages and of footnotes placed; a note without footnotes is left as it is.
+ */
+export function layoutFootnotePages(root: HTMLElement, o: { pageHeight: number; numbering?: PageNumbering }): { pages: number; notes: number } {
+  const doc = root.ownerDocument;
+  const section = root.querySelector("section[data-footnotes], section.footnotes");
+  if (!section) return { pages: 0, notes: 0 };
+  const items = new Map<string, Element>();
+  section.querySelectorAll("li[id]").forEach((li) => items.set(li.id, li));
+  section.remove();
+
+  // Number the notes in the order of their first reference.
+  const order: string[] = [];
+  const firstRef = new Map<string, string>();
+  root.querySelectorAll(REF).forEach((a) => {
+    const id = refTarget(a);
+    if (!items.has(id)) return;
+    if (!firstRef.has(id)) {
+      order.push(id);
+      firstRef.set(id, a.id);
+    }
+    a.textContent = footnoteLabel(order.indexOf(id) + 1, o.numbering ?? "decimal");
+  });
+
+  // Each note as it prints: its number (a link back to the reference), then its text.
+  const notes = new Map<string, HTMLElement>();
+  order.forEach((id, i) => {
+    const li = items.get(id)!;
+    li.querySelectorAll("[data-footnote-backref]").forEach((n) => n.remove());
+    const el = doc.createElement("div");
+    el.className = "page-footnote";
+    el.id = id;
+    // Its own text decides (a Hebrew numeral in front must not turn an English note RTL).
+    el.setAttribute("dir", firstStrongDirection(li.textContent ?? "") ?? "auto");
+    const num = doc.createElement("a");
+    num.className = "fn-num";
+    num.href = `#${firstRef.get(id) ?? ""}`;
+    num.textContent = footnoteLabel(i + 1, o.numbering ?? "decimal");
+    el.append(num, ...Array.from(li.childNodes));
+    notes.set(id, el);
+  });
+
+  const prevDisplay = root.style.display;
+  root.style.display = "flow-root";
+  // Forced breaks become page boundaries.
+  const breaks = new Set<Element>();
+  const blocks = Array.from(root.children).filter((el) => {
+    // The table of contents keeps its own page.
+    if (el.classList.contains("print-toc") && el.nextElementSibling) breaks.add(el.nextElementSibling);
+    if (el.classList.contains("page-break")) {
+      if (el.nextElementSibling) breaks.add(el.nextElementSibling);
+      el.remove();
+      return false;
+    }
+    return true;
+  });
+  const heights = flowHeights(blocks, root.getBoundingClientRect().bottom);
+
+  // The notes, measured in a footnote area of the same width.
+  const probe = doc.createElement("div");
+  probe.className = "page-footnotes";
+  probe.style.position = "static";
+  root.appendChild(probe);
+  const separator = probe.getBoundingClientRect().height;
+  const noteEls = order.map((id) => notes.get(id)!);
+  probe.append(...noteEls);
+  const noteHeights = new Map(order.map((id, i) => [id, flowHeights(noteEls, probe.getBoundingClientRect().bottom)[i]]));
+  probe.remove();
+  root.style.display = prevDisplay;
+
+  const plan = planFootnotePages(
+    blocks.map((el, i) => ({
+      height: heights[i],
+      refs: Array.from(el.matches(REF) ? [el] : el.querySelectorAll(REF)).map(refTarget).filter((id) => notes.has(id)),
+      breakBefore: breaks.has(el),
+    })),
+    (id) => noteHeights.get(id) ?? 0,
+    o.pageHeight,
+    separator,
+  );
+
+  const pages = plan.map((p) => {
+    const page = doc.createElement("div");
+    page.className = p.tall ? "print-page print-page-tall" : "print-page";
+    page.append(...p.blocks.map((i) => blocks[i]));
+    if (p.notes.length) {
+      const area = doc.createElement("div");
+      area.className = "page-footnotes";
+      area.setAttribute("role", "note");
+      area.append(...p.notes.map((id) => notes.get(id)!));
+      page.appendChild(area);
+    }
+    return page;
+  });
+  root.replaceChildren(...pages);
+  return { pages: pages.length, notes: order.length };
 }
