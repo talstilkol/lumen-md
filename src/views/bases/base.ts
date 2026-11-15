@@ -78,6 +78,11 @@ export interface BasesView {
 export interface BasesRelation {
   property: string;
   incoming: boolean;
+  /**
+   * W12.T6: only related notes that pass this filter (a typed relation: the
+   * notes of one type). The same filter syntax as `filters:`.
+   */
+  filter?: BasesFilter;
 }
 
 /** "workdays": working days from today until the earliest date of `property` among the related notes (W10.C26). */
@@ -187,7 +192,8 @@ export function parseBase(text: string): BaseParse {
       for (const [name, r] of Object.entries(raw.relations)) {
         const rel = typeof r === "string" ? { property: r } : r;
         if (!isRecord(rel) || typeof rel.property !== "string" || !rel.property.trim()) throw new Error(`relations.${name}: needs a property (the link property)`);
-        relations[name] = { property: rel.property.trim().replace(/^note\./, ""), incoming: rel.incoming === true || rel.direction === "incoming" };
+        const relFilter = readFilter(rel.filter, `relations.${name}.filter`);
+        relations[name] = { property: rel.property.trim().replace(/^note\./, ""), incoming: rel.incoming === true || rel.direction === "incoming", ...(relFilter !== undefined ? { filter: relFilter } : {}) };
       }
     const rollups: Record<string, BasesRollup> = {};
     if (isRecord(raw.rollups))
@@ -397,6 +403,11 @@ export interface RunOptions extends BasesEvalOptions {
   view?: number | string;
   /** `this`: the base file, or the note that embeds it. */
   thisFile?: BasesFile | null;
+  /**
+   * W12.T3: rows only from these paths (a type's notes, chosen by the type
+   * registry); every file still resolves links, relations and rollups.
+   */
+  only?: ReadonlySet<string>;
 }
 
 const err = (where: string, e: FormulaError) => `${where}: ${e.message}${e.at >= 0 ? ` (character ${e.at + 1})` : ""}`;
@@ -531,7 +542,21 @@ export function runBase(base: BaseModel, files: readonly BasesFile[], opts: RunO
     }
     return out;
   };
+  // W12.T6: a typed relation keeps only the related notes that pass its filter (decided once per file).
+  const relPass = new Map<BasesFilter, Map<string, boolean>>();
   const related = (file: BasesFile, rel: BasesRelation): BasesFile[] => {
+    const all = relatedAll(file, rel);
+    const f = rel.filter;
+    if (f === undefined) return all;
+    let memo = relPass.get(f);
+    if (!memo) relPass.set(f, (memo = new Map()));
+    return all.filter((x) => {
+      let ok = memo!.get(x.path);
+      if (ok === undefined) memo!.set(x.path, (ok = test(f, scopeFor(x), "relation filter")));
+      return ok;
+    });
+  };
+  const relatedAll = (file: BasesFile, rel: BasesRelation): BasesFile[] => {
     if (!rel.incoming) {
       const seen = new Set<string>();
       const out: BasesFile[] = [];
@@ -596,6 +621,7 @@ export function runBase(base: BaseModel, files: readonly BasesFile[], opts: RunO
 
   const matched: BaseRow[] = [];
   for (const file of files) {
+    if (opts.only && !opts.only.has(file.path)) continue;
     const scope = scopeFor(file);
     if (!test(base.filters, scope, "filters")) continue;
     if (!test(view.filters, scope, `view ${view.name} filters`)) continue;

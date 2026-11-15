@@ -9,6 +9,8 @@ import type { Command } from "../ui/CommandPalette";
 import { useAppStore } from "../store/useStore";
 import { withAiQuota } from "../billing/aiQuota";
 import { useInstalledTemplates } from "./installedTemplates";
+import { buildTypeCommands, useTypeEntries } from "./typeCommands";
+import { t } from "../i18n";
 import { COMMAND_SECTIONS } from "./domains";
 import { useCommandStore, type CommandContext, type UseCommandsOptions } from "./domains/context";
 
@@ -19,6 +21,8 @@ export { saveClip, saveClipV2 } from "./domains/research";
 export function useCommands(options: UseCommandsOptions) {
   const store = useCommandStore();
   const installedTemplates = useInstalledTemplates();
+  // W12.T3: "All <type>" for each type of the vault.
+  const typeEntries = useTypeEntries();
   const o = options;
 
   return useMemo<Command[]>(() => {
@@ -35,7 +39,7 @@ export function useCommands(options: UseCommandsOptions) {
       toggleOutline,
     };
     // AI-prompt commands are wrapped with the monthly quota check.
-    return withAiQuota(COMMAND_SECTIONS.flatMap((build) => build(ctx)));
+    return withAiQuota([...COMMAND_SECTIONS.flatMap((build) => build(ctx)), ...buildTypeCommands(typeEntries, { locale: store.locale, t })]);
     // Every store value a label or an action reads is listed, so a toggle's
     // label never goes stale. The document itself is not: actions read it
     // through liveDoc(), so typing does not rebuild the list (C5).
@@ -64,6 +68,7 @@ export function useCommands(options: UseCommandsOptions) {
     store.theme,
     o.setRuntimeMetricsOpen,
     installedTemplates,
+    typeEntries,
     store.suggestingMode,
     store.toggleSuggestingMode,
     store.suggestAuthorsKey,
