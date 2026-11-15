@@ -10,7 +10,8 @@ import { describe, expect, it } from "vitest";
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { claimGuard, evidenceProblems, overclaimReport, overclaims, RECEIPT_GRANDFATHER, verifyShas } from "../../scripts/plan/claimGuard.mjs";
+import * as guard from "../../scripts/plan/claimGuard.mjs";
+import { claimGuard, evidenceProblems, overclaimReport, overclaims, verifyShas } from "../../scripts/plan/claimGuard.mjs";
 import { run } from "../../scripts/plan/build.mjs";
 import { judgePerf, measure } from "../../scripts/plan/perfHonesty.mjs";
 import { lintRunPlan } from "../../scripts/plan/planLint.mjs";
@@ -25,9 +26,20 @@ const withTask = (task: object) => {
 };
 
 describe("R12.14 claim guard", () => {
-  it("the plan as it is passes (the earlier ✅ are grandfathered, the list only shrinks)", () => {
+  it("the plan as it is passes, with no task exempt", () => {
     expect(claimGuard(realPlan())).toEqual([]);
-    expect(RECEIPT_GRANDFATHER.length).toBe(64);
+  });
+
+  it("no grandfather list: a task that was ✅ before the rule needs evidence too (W10.G5)", () => {
+    expect(Object.keys(guard).filter((k) => /grandfather|exempt/i.test(k))).toEqual([]);
+    // 0.1 was the first id in the old list; ✅ and stripped of its evidence it must fail.
+    const plan = realPlan();
+    const t01 = plan.phases.flatMap((p: { tasks: { id: string }[] }) => p.tasks).find((t: { id: string }) => t.id === "0.1");
+    t01.status = "✅ #202";
+    delete t01.evidence;
+    expect(claimGuard(plan)).toContain("0.1 is ✅ with no evidence");
+    expect(claimGuard({ ...withTask({ status: "✅", evidence: GOOD }), receiptGrandfathered: ["R12.99"] }).filter((p) => p.startsWith("receiptGrandfathered:"))).toEqual(["receiptGrandfathered: no task is exempt from the evidence rule (W10.G5) — remove the list; a ✅ task needs its evidence, or goes back to ⏳"]);
+    expect(claimGuard(withTask({ status: "✅", evidenceExempt: true }))).toContain('R12.99: "evidenceExempt" — no task is exempt from the evidence rule (W10.G5)');
   });
 
   it("a ✅ needs DONE, a sha and all-green checks", () => {
@@ -51,7 +63,7 @@ describe("R12.14 claim guard", () => {
       } catch (e) {
         msg = String((e as Error).message);
       }
-      expect(msg).not.toMatch(/without evidence/);
+      expect(msg).not.toMatch(/R12\.99 is ✅/);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -60,7 +72,8 @@ describe("R12.14 claim guard", () => {
   it("the overclaim report: by evidence only, the weak back to ⏳, in Hebrew", () => {
     const plan = withTask({ status: "✅", evidence: { ...GOOD, checks: [] } });
     const row = overclaims(plan).find((r) => r.id === "R12.99")!;
-    expect(row).toMatchObject({ level: 1, suggest: "⏳", grandfathered: false });
+    expect(row).toMatchObject({ level: 1, suggest: "⏳" });
+    expect(row).not.toHaveProperty("grandfathered");
     const md = overclaimReport(plan);
     expect(md).toContain("# דוח טענות-יתר");
     expect(md).toContain("| R12.99 | חלקית | לא נרשמה אף בדיקה | ⏳ |");
@@ -68,7 +81,8 @@ describe("R12.14 claim guard", () => {
   });
 
   it("a shallow clone: a missing sha is not checkable here, not a failure", () => {
-    const plan = withTask({ status: "✅", evidence: GOOD });
+    // Synthetic one-task plan: the real plan's ✅ tasks carry shas of their own.
+    const plan = { phases: [{ tasks: [{ id: "R12.99", status: "✅", evidence: GOOD }] }] };
     const git = (shallow: boolean) => (args: string[]) => {
       if (args[0] === "rev-parse") return shallow ? "true\n" : "false\n";
       throw new Error("missing");

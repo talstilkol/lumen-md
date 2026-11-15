@@ -9,8 +9,11 @@
  *
  * - `claimGuard(plan)`: the problems plan:check fails on — a ✅ task
  *   without evidence, a verdict other than DONE, a check that was not all
- *   green, a sha that is not one. The tasks ✅ before this rule existed are
- *   frozen in RECEIPT_GRANDFATHER (the list only shrinks, as in dod.mjs).
+ *   green, a sha that is not one. No task is exempt: there is no
+ *   grandfather list (W10.G5 removed them all), and a plan or task key that
+ *   would exempt one is refused rather than read. The tasks that were ✅
+ *   before this rule got evidence from the 15.11 audit or went back to ⏳
+ *   (scripts/plan/migrate-evidence.mjs, on chore/plan-fixes-d).
  * - `overclaimReport(plan)`: every ✅ task ranked by its evidence, and the
  *   ones that should go back to ⏳, with the reason, in Hebrew.
  * - `verifyShas(plan, git)`: a recorded sha missing from this clone is
@@ -29,8 +32,8 @@ import { fileURLToPath } from "node:url";
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
-/** ✅ before R12.14 (verify/train-5 and chore/dod, 15.11.2026). Only ever loses ids. */
-export const RECEIPT_GRANDFATHER = Object.freeze(["0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.8", "0.9", "0.10", "0.11", "0.12", "0.13", "0.14", "0.17", "0.18", "0.20", "0.21", "1.1", "1.2", "1.3", "1.4", "1.5", "1.6", "1.7", "1.8", "1.9", "2.1", "2.2", "2.3", "2.4", "2.5", "2.7", "2.8", "3.1", "3.2", "3.6", "4.1", "4.2", "4.3", "4.4", "4.5", "4.6", "4.7", "4.8", "4.9", "4.10", "4.12", "5.1", "5.2", "5.3", "5.11", "6.0", "6.1", "7.1", "7.10", "8.5", "9.1", "9.2", "9.3", "9.7", "9.8", "14.1", "W1.35", "W6.4"]);
+/** Plan keys that would exempt tasks from the rule; refused (W10.G5: no exemption lists). */
+const EXEMPTION_KEY = /grandfather|exempt/i;
 
 const tasksOf = (plan) => plan.phases.flatMap((p) => p.tasks);
 const isDone = (s = "") => s.startsWith("✅");
@@ -52,25 +55,25 @@ export function evidenceProblems(task) {
   return out;
 }
 
-export function claimGuard(plan, grandfather = RECEIPT_GRANDFATHER) {
-  const old = new Set(grandfather);
+export function claimGuard(plan) {
   const out = [];
+  for (const k of Object.keys(plan)) if (EXEMPTION_KEY.test(k)) out.push(`${k}: no task is exempt from the evidence rule (W10.G5) — remove the list; a ✅ task needs its evidence, or goes back to ⏳`);
   for (const t of tasksOf(plan)) {
-    if (!isDone(t.status) || old.has(t.id)) continue;
+    for (const k of Object.keys(t)) if (EXEMPTION_KEY.test(k)) out.push(`${t.id}: "${k}" — no task is exempt from the evidence rule (W10.G5)`);
+    if (!isDone(t.status)) continue;
     for (const p of evidenceProblems(t)) out.push(`${t.id} is ✅ with ${p}`);
   }
   return out;
 }
 
 /** Each ✅ task with its evidence level (2 = complete, 1 = partial, 0 = none) and why, weakest first. */
-export function overclaims(plan, grandfather = RECEIPT_GRANDFATHER) {
-  const old = new Set(grandfather);
+export function overclaims(plan) {
   return tasksOf(plan)
     .filter((t) => isDone(t.status))
     .map((t) => {
       const problems = evidenceProblems(t);
       const level = problems.length === 0 ? 2 : t.evidence ? 1 : 0;
-      return { id: t.id, title: t.title, level, problems, grandfathered: old.has(t.id), suggest: level === 2 ? t.status : "⏳" };
+      return { id: t.id, title: t.title, level, problems, suggest: level === 2 ? t.status : "⏳" };
     })
     .sort((a, b) => a.level - b.level || (a.id < b.id ? -1 : 1));
 }
@@ -92,13 +95,13 @@ const he = (p) => {
 };
 
 /** The overclaim report, in Hebrew Markdown. */
-export function overclaimReport(plan, grandfather = RECEIPT_GRANDFATHER) {
-  const rows = overclaims(plan, grandfather);
+export function overclaimReport(plan) {
+  const rows = overclaims(plan);
   const down = rows.filter((r) => r.level < 2);
   const out = ["# דוח טענות-יתר: משימות ✅ לפי הראיה בלבד", "", `${rows.length} משימות ✅; ל-${down.length} אין ראיה מלאה, ומוצע להחזיר אותן ל-⏳.`, ""];
   if (down.length) {
     out.push("| משימה | ראיה | למה | הצעה |", "| --- | --- | --- | --- |");
-    for (const r of down) out.push(`| ${r.id}${r.grandfathered ? " (לפני הכלל)" : ""} | ${r.level === 0 ? "אין" : "חלקית"} | ${r.problems.map(he).join("; ")} | ${r.suggest} |`);
+    for (const r of down) out.push(`| ${r.id} | ${r.level === 0 ? "אין" : "חלקית"} | ${r.problems.map(he).join("; ")} | ${r.suggest} |`);
   } else out.push("לכל משימה ✅ יש ראיה מלאה.");
   return out.join("\n") + "\n";
 }
