@@ -8,8 +8,9 @@
  *     }))
  *
  * On receipt, the extension:
- *   1. Finds every case-insensitive match for the query in the doc.
- *   2. Paints a yellow mark decoration on every match.
+ *   1. Remembers the query (case-insensitive).
+ *   2. Paints a yellow mark on each match in the visible ranges only
+ *      (W11.Q3: a long note is never decorated as a whole).
  *   3. Scrolls the first match into view and centers it.
  *   4. Fades the decorations after 4 seconds so the editor returns to
  *      its baseline look.
@@ -24,55 +25,66 @@ import type { Extension } from "@codemirror/state";
 
 const setHighlight = StateEffect.define<{ query: string } | null>();
 
-const highlightField = StateField.define<DecorationSet>({
+/** The query being highlighted (lower-cased and trimmed), or null. */
+const highlightQuery = StateField.define<string | null>({
   create() {
-    return Decoration.none;
+    return null;
   },
   update(value, tr) {
-    // Decorations track the text they cover across insertions/deletions.
-    let next = value.map(tr.changes);
-    for (const e of tr.effects) {
-      if (e.is(setHighlight)) {
-        if (!e.value) {
-          next = Decoration.none;
-        } else {
-          next = computeHighlights(tr.state.doc.toString(), e.value.query);
-        }
-      }
-    }
-    return next;
-  },
-  provide(f) {
-    return EditorView.decorations.from(f);
+    for (const e of tr.effects) if (e.is(setHighlight)) value = e.value ? e.value.query.trim().toLowerCase() || null : null;
+    return value;
   },
 });
 
-function computeHighlights(docText: string, query: string): DecorationSet {
-  const q = query.trim();
+const mark = Decoration.mark({
+  class: "cm-lumen-search-hit",
+  attributes: {
+    style:
+      "background: hsl(48 95% 55% / 0.45); border-radius: 2px; transition: background 1.4s ease-out 2.6s; box-shadow: 0 0 0 1px hsl(48 95% 50% / 0.5)",
+  },
+});
+
+/** Cap per visible range, so a 1-letter query on a dense screen stays cheap. */
+const MAX = 200;
+
+/**
+ * The matches in the visible ranges only (W11.Q3): a long note is never
+ * scanned or decorated as a whole. Case-insensitive, without a regex, so the
+ * query can hold regex meta-characters.
+ */
+export function searchHighlights(view: EditorView): DecorationSet {
+  const q = view.state.field(highlightQuery, false);
   if (!q) return Decoration.none;
-  // Case-insensitive scan. We avoid a regex to skip having to escape the
-  // query — search dialogs can contain regex meta-chars freely.
-  const lcDoc = docText.toLowerCase();
-  const lcQ = q.toLowerCase();
-  let pos = 0;
-  // Cap matches so a 1-letter query doesn't produce 50k decorations.
-  const MAX = 200;
-  const mark = Decoration.mark({
-    class: "cm-lumen-search-hit",
-    attributes: {
-      style:
-        "background: hsl(48 95% 55% / 0.45); border-radius: 2px; transition: background 1.4s ease-out 2.6s; box-shadow: 0 0 0 1px hsl(48 95% 50% / 0.5)",
-    },
-  });
   const ranges: Range<Decoration>[] = [];
-  while (ranges.length < MAX) {
-    const idx = lcDoc.indexOf(lcQ, pos);
-    if (idx === -1) break;
-    ranges.push(mark.range(idx, idx + q.length));
-    pos = idx + Math.max(1, q.length);
+  for (const { from, to } of view.visibleRanges) {
+    // Read a query's length past each edge, so a match the edge cuts is found.
+    const a = Math.max(0, from - q.length + 1);
+    const b = Math.min(view.state.doc.length, to + q.length - 1);
+    const text = view.state.sliceDoc(a, b).toLowerCase();
+    let pos = 0;
+    for (let n = 0; n < MAX; n++) {
+      const idx = text.indexOf(q, pos);
+      if (idx === -1) break;
+      const at = a + idx;
+      if (!ranges.length || at >= ranges[ranges.length - 1].to) ranges.push(mark.range(at, at + q.length));
+      pos = idx + Math.max(1, q.length);
+    }
   }
-  return Decoration.set(ranges, /* sort */ true);
+  return Decoration.set(ranges, true);
 }
+
+const highlightPlugin = ViewPlugin.fromClass(
+  class {
+    decorations: DecorationSet;
+    constructor(view: EditorView) {
+      this.decorations = searchHighlights(view);
+    }
+    update(u: ViewUpdate) {
+      if (u.docChanged || u.viewportChanged || u.startState.field(highlightQuery, false) !== u.state.field(highlightQuery, false)) this.decorations = searchHighlights(u.view);
+    }
+  },
+  { decorations: (v) => v.decorations },
+);
 
 interface SearchTargetEventDetail {
   /** The query the user searched for. */
@@ -113,7 +125,7 @@ function bridgePlugin() {
         window.addEventListener("lumen-search-target", this.listener);
       }
 
-      // No need to react to view updates — the field handles redraws.
+      // No need to react to view updates — the highlight plugin redraws.
       update(_u: ViewUpdate) {
         /* noop */
       }
@@ -128,7 +140,7 @@ function bridgePlugin() {
 
 /** Public entry point — bundle the field + bridge as a single extension. */
 export function searchHighlightExtension(): Extension {
-  return [highlightField, bridgePlugin()];
+  return [highlightQuery, highlightPlugin, bridgePlugin()];
 }
 
 /**

@@ -47,3 +47,34 @@ describe("searchHighlightExtension", () => {
     expect((ext as unknown[]).length).toBeGreaterThanOrEqual(2);
   });
 });
+
+describe("searchHighlightExtension in an editor (W11.Q3)", () => {
+  it("marks the matches on screen, case-insensitively, and clears with an empty query", async () => {
+    const { EditorState } = await import("@codemirror/state");
+    const { EditorView } = await import("@codemirror/view");
+    const { searchHighlights } = await import("../editor/searchHighlight");
+    const parent = document.createElement("div");
+    document.body.appendChild(parent);
+    const view = new EditorView({ state: EditorState.create({ doc: "a Needle b\nneedle\nnone", extensions: searchHighlightExtension() }), parent });
+    try {
+      flashSearchHighlight("NEEDLE");
+      const hits: string[] = [];
+      searchHighlights(view).between(0, view.state.doc.length, (from, to) => {
+        hits.push(view.state.sliceDoc(from, to));
+      });
+      expect(hits).toEqual(["Needle", "needle"]);
+      // An edit before the hits keeps them on the text they cover.
+      view.dispatch({ changes: { from: 0, insert: "xx " } });
+      const after: string[] = [];
+      searchHighlights(view).between(0, view.state.doc.length, (from, to) => {
+        after.push(view.state.sliceDoc(from, to));
+      });
+      expect(after).toEqual(["Needle", "needle"]);
+      flashSearchHighlight("  ");
+      expect(searchHighlights(view).size).toBe(0);
+    } finally {
+      view.destroy();
+      parent.remove();
+    }
+  });
+});
