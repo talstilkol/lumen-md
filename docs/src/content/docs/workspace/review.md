@@ -30,6 +30,19 @@ Easy**, by key or by button. The name of the source opens the note or the
 highlight. Each review has the cards that are due, most overdue first, then
 up to 5 new ones a day.
 
+## In the daily note
+
+Put `{{review}}` in the daily-note template, next to `{{date}}`,
+`{{hebrewDate}}` and the others. Each new day's note then gets that day's review
+where the placeholder is:
+- the same cards **Daily review** shows (cards due by the end of the day,
+  then new cards);
+- each card's question, with a link to where it came from;
+- its answer in a folded callout, so you can check yourself before you open it.
+
+Rating stays in **Daily review**, which keeps the schedule. A note written
+earlier keeps its list as it was.
+
 ## Where it is kept
 
 The schedule of every card is in `.lumen/review.json` in your vault, so it
