@@ -386,6 +386,26 @@ export function buildPanelCommands({ setFindReplaceOpen, setGraphOpen, setHistor
       action: () => setHistoryOpen(true),
     },
     {
+      id: "view.asOf",
+      label: t("cmd.view.asOf"),
+      hint: t("cmd.view.asOf.hint"),
+      icon: cmdIcons.PanelRightOpen,
+      group: t("group.view"),
+      action: () => {
+        // W12.S2: lazy, so the dialog and its strings load only when asked for.
+        void Promise.all([import("../../ui/AsOfDialog"), import("../../editor/asOfRestoreEdit"), import("../../storage/history")]).then(([ui, edit, h]) => {
+          const d = liveDoc();
+          ui.openAsOfDialog({
+            activeName: h.historyKey(d),
+            applyRestore: (hunk) => {
+              const view = edit.activeSourceView();
+              return !!view && edit.restoreInView(view, hunk);
+            },
+          });
+        });
+      },
+    },
+    {
       id: "insert.table",
       label: t("cmd.insert.table"),
       hint: t("cmd.insert.table.hint"),

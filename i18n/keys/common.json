@@ -826,6 +826,102 @@
       "vars": []
     },
     {
+      "key": "asOf.added",
+      "en": "New since",
+      "vars": []
+    },
+    {
+      "key": "asOf.back",
+      "en": "Back to results",
+      "vars": []
+    },
+    {
+      "key": "asOf.banner",
+      "en": "This is how it was on {date}. Read-only.",
+      "vars": [
+        "date"
+      ]
+    },
+    {
+      "key": "asOf.changed",
+      "en": "Changed since",
+      "vars": []
+    },
+    {
+      "key": "asOf.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "asOf.compare",
+      "en": "Then vs now",
+      "vars": []
+    },
+    {
+      "key": "asOf.coverage",
+      "en": "History starts on {date}. Edits before that were never saved, so they cannot be shown.",
+      "vars": [
+        "date"
+      ]
+    },
+    {
+      "key": "asOf.date",
+      "en": "Vault as of",
+      "vars": []
+    },
+    {
+      "key": "asOf.noHistory",
+      "en": "No history yet. Saved versions show up here from now on.",
+      "vars": []
+    },
+    {
+      "key": "asOf.none",
+      "en": "Nothing matched in the vault as of this date.",
+      "vars": []
+    },
+    {
+      "key": "asOf.openToRestore",
+      "en": "Open this note in the editor to restore a paragraph.",
+      "vars": []
+    },
+    {
+      "key": "asOf.query",
+      "en": "Search the vault as it was",
+      "vars": []
+    },
+    {
+      "key": "asOf.removed",
+      "en": "Deleted since",
+      "vars": []
+    },
+    {
+      "key": "asOf.restore",
+      "en": "Restore paragraph",
+      "vars": []
+    },
+    {
+      "key": "asOf.restored",
+      "en": "Paragraph restored. Ctrl+Z undoes it.",
+      "vars": []
+    },
+    {
+      "key": "asOf.results",
+      "en": "{count} notes matched",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "asOf.same",
+      "en": "No change since then.",
+      "vars": []
+    },
+    {
+      "key": "asOf.title",
+      "en": "What I knew then",
+      "vars": []
+    },
+    {
       "key": "askScope.folder",
       "en": "One folder",
       "vars": []
