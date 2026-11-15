@@ -60,4 +60,6 @@ Each one is good at something. This page says what each does on five points that
 
 > A cell marked *not yet verified* holds no claim: its source hasn't been checked yet, so nothing is said there. It is checked before the launch.
 
+Measured on public Hebrew benchmarks, with the command behind every number: [Hebrew in notes, measured](/project/hebrew-benchmark/).
+
 This page is generated from `launch/comparison.json` by `node scripts/launch-check.mjs --write`. To correct a claim, change the JSON with a source, and the page follows.
