@@ -19,6 +19,7 @@ import { useAppStore } from "../store/useStore";
 import { MAX_LIMIT, parseEmbeddedQuery, rowsFor, splitChartOptions, type QueryChart, type QueryNote, type QueryRow } from "../search/embeddedQuery";
 import { DataviewError, parseDataview, runDataview, show, type DvResult, type Value } from "../search/dataview";
 import "./queryBlockStrings";
+import { useVisibleRefresh } from "../lib/visibleRefresh";
 import { EmptyState, learnHow } from "../ui/EmptyState";
 
 // W12.V1: `chart:` draws the rows; ECharts and the chart strings load only then.
@@ -69,6 +70,8 @@ export default function QueryBlock({ source, lang }: Props) {
   }, [source, isDataview]);
   const [out, setOut] = useState<Outcome | null>(null);
   const [runs, setRuns] = useState(0);
+  // W12.V6: off screen (a long dashboard), a vault change waits until the block is seen again.
+  const [rootRef, schedule] = useVisibleRefresh();
 
   useEffect(() => {
     let cancelled = false;
@@ -104,15 +107,15 @@ export default function QueryBlock({ source, lang }: Props) {
     void run();
     // A save anywhere in the vault: re-run at once (the index re-reads only what changed).
     const offVault = watchVault((e) => {
-      if (e.type === "write" || e.type === "delete" || e.type === "rename") void run();
+      if (e.type === "write" || e.type === "delete" || e.type === "rename") schedule(() => void run());
     });
-    const offWs = onWorkspaceChanged(() => void run(), { debounceMs: 50 });
+    const offWs = onWorkspaceChanged(() => schedule(() => void run()), { debounceMs: 50 });
     return () => {
       cancelled = true;
       offVault();
       offWs();
     };
-  }, [parsed]);
+  }, [parsed, schedule]);
 
   const problems = parsed.q?.problems ?? [];
   const count = out?.kind === "query" ? out.rows.length : out?.kind === "dataview" ? out.result.rows.length : 0;
@@ -120,7 +123,7 @@ export default function QueryBlock({ source, lang }: Props) {
   const title = isDataview ? t("query.dataviewTitle") : parsed.q?.query || t("query.title");
 
   return (
-    <div className="chart-block lumen-query-block" data-query-runs={runs} data-query-kind={isDataview ? "dataview" : "query"}>
+    <div ref={rootRef} className="chart-block lumen-query-block" data-query-runs={runs} data-query-kind={isDataview ? "dataview" : "query"}>
       <div className="chart-block-header">
         <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
           <span style={{ fontWeight: 600 }} dir="auto">

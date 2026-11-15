@@ -94,6 +94,17 @@
 }
 .lumen-viz-claim dd {
   margin: 0;
+.lumen-viz-arg-list ul {
+  margin-block: 2px;
+  padding-inline-start: 18px;
+}
+.lumen-viz-arg-link {
+  all: unset;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.lumen-viz-arg-link:focus-visible {
+  outline: 2px solid hsl(var(--accent));
 }
 .lumen-viz-claim-missing {
   color: hsl(var(--danger));
@@ -101,4 +112,86 @@
 .lumen-viz-why {
   margin-block: 4px;
   padding-inline-start: 20px;
+.lumen-viz-tree,
+.lumen-viz-tree ul {
+  list-style: none;
+  margin: 0;
+  padding-inline-start: 0;
+}
+.lumen-viz-tree ul {
+  padding-inline-start: 16px;
+}
+.lumen-viz-treeitem > .lumen-viz-treelabel {
+  display: inline-block;
+  padding-block: 1px;
+  padding-inline: 4px;
+  border-radius: 4px;
+  cursor: default;
+}
+.lumen-viz-treeitem:focus {
+  outline: none;
+}
+.lumen-viz-treeitem:focus-visible > .lumen-viz-treelabel {
+  outline: 2px solid hsl(var(--accent));
+}
+.lumen-viz-treevalue {
+  color: hsl(var(--fg-muted));
+  font-size: 11px;
+.lumen-viz-hcal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-block-end: 6px;
+}
+.lumen-viz-hcal-grid {
+  border-collapse: collapse;
+  inline-size: 100%;
+  table-layout: fixed;
+  font-size: 12px;
+}
+.lumen-viz-hcal-grid th {
+  font-weight: 600;
+  padding-block: 2px;
+}
+.lumen-viz-hcal-grid td {
+  vertical-align: top;
+  block-size: 64px;
+  border: 1px solid hsl(var(--border));
+  padding-block: 2px;
+  padding-inline: 4px;
+}
+.lumen-viz-hcal-grid td[role="gridcell"]:focus-visible {
+  outline: 2px solid hsl(var(--accent));
+  outline-offset: -2px;
+}
+.lumen-viz-hcal-grid td[data-shabbat] {
+  background: hsl(var(--bg-muted, var(--bg)));
+}
+.lumen-viz-hcal-day {
+  font-weight: 600;
+}
+.lumen-viz-hcal-greg {
+  float: inline-end;
+  color: hsl(var(--fg-muted));
+  font-size: 10px;
+}
+.lumen-viz-hcal-holiday,
+.lumen-viz-hcal-reading,
+.lumen-viz-hcal-item {
+  display: block;
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lumen-viz-hcal-holiday {
+  color: hsl(var(--accent));
+}
+.lumen-viz-hcal-reading {
+  color: hsl(var(--fg-muted));
+}
+.lumen-viz-hcal-item {
+  cursor: pointer;
+  text-decoration: underline;
 }

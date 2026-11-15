@@ -10,7 +10,7 @@
 import { lazy, useCallback, useMemo, useRef } from "react";
 import type { ECharts } from "echarts";
 import { t } from "../i18n";
-import { chartData, chartOption, chartPoints, chartTable, VIZ_CHART_KINDS, type ChartLabels, type ChartSpec, type VizRow } from "./chartModel";
+import { chartData, chartOption, chartPoints, chartTable, VIZ_CHART_KINDS, type ChartData, type ChartLabels, type ChartSpec, type VizRow } from "./chartModel";
 import { DataTable } from "./DataTable";
 import { VizFrame } from "./VizFrame";
 import type { Dir } from "./bidi";
@@ -27,6 +27,8 @@ export interface ChartFigureProps {
   height?: number;
   isDark?: boolean;
   initial?: "picture" | "alternative";
+  /** Numbers already computed (W12.V5's Hebrew-month heatmap): drawn as they are, `rows` ignored. */
+  data?: ChartData;
 }
 
 export function monthName(locale: string) {
@@ -40,9 +42,12 @@ export function weekdayNames(locale: string): string[] {
   return Array.from({ length: 7 }, (_, i) => f.format(new Date(Date.UTC(2023, 0, 1 + i))));
 }
 
-export default function ChartFigure({ rows, spec, title, labels, dir, locale = "he", height = 320, isDark, initial }: ChartFigureProps) {
+export default function ChartFigure({ rows, spec, title, labels, dir, locale = "he", height = 320, isDark, initial, data: given }: ChartFigureProps) {
   const known = (VIZ_CHART_KINDS as readonly string[]).includes(spec.kind);
-  const { data, skipped, truncated } = useMemo(() => chartData(rows, known ? spec : { ...spec, kind: "bar" }, locale), [rows, spec, known, locale]);
+  const { data, skipped, truncated } = useMemo(
+    () => (given ? { data: given, skipped: 0, truncated: 0 } : chartData(rows, known ? spec : { ...spec, kind: "bar" }, locale)),
+    [given, rows, spec, known, locale],
+  );
   const kindName = t(`viz.kind.${data.kind}`);
   const points = useMemo(() => chartPoints(data), [data]);
   const option = useMemo(

@@ -66,6 +66,31 @@ For example, the template
 gives, on Friday 16 May 2025 in Israel, a line with the Hebrew date,
 `Emor` and `Lag BaOmer` (in a Hebrew UI: `פרשת אמור` and `ל״ג בעומר`).
 
+## The Hebrew-month view
+
+A ```hebrew-calendar block shows the daily notes on a month of the Hebrew
+calendar — Tishrei to Elul, with Adar I and Adar II in a leap year — with
+each day's holidays and the Shabbat reading, and under it the year's
+writing activity (notes saved per day) by Hebrew month:
+
+```hebrew-calendar
+heatmap: true      # false: the month only
+```
+
+In a `.base`, `type: hebrew-calendar` (with `date:`, default `date`) puts
+each note of the view on its day.
+
+- **Tab** to the month, then ← / → move a day (in Hebrew ← is the next
+  day), ↑ / ↓ a week, Home / End the ends of the week, PageUp / PageDown
+  the month before or after, and **Enter** opens the day's note (a Base:
+  the first note on that day). Each day reads out its Hebrew and Gregorian
+  date, holidays and portion.
+- The heatmap has a row per Hebrew month and a column per day of the month
+  (day 1 on the right in Hebrew), and "Show the table" gives its numbers.
+- Gregorian calendar charts can't do this: their calendar is Gregorian only,
+  so this view is drawn by Lumen itself from the same calendar as the daily
+  note.
+
 ## How it is computed
 
 The calendar is Lumen's own code: the fixed Hebrew calendar (the molad and

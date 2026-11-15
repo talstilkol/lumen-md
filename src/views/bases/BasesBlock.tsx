@@ -25,17 +25,20 @@ import { isOPFSAvailable, listWorkspace, readWorkspaceFile, writeWorkspaceFile }
 import { onWorkspaceChanged } from "../../storage/workspaceEvents";
 import { useAppStore } from "../../store/useStore";
 import { editNote } from "../databaseEdit";
-import { addDays, csvToNotes, daysBetween, monthWeeks, moveDateInText, pinnedProperties, resultToCsv, rowsByDay, timelineItems, visibleWindow, writableKey } from "./viewsData";
+import { addDays, csvToNotes, daysBetween, monthWeeks, moveDateInText, pinnedProperties, resultToCsv, rowsByDay, tableKeyMove, timelineItems, visibleWindow, writableKey } from "./viewsData";
 import { showAiToast } from "../../ui/AiToast";
 import { log } from "../../lib/logger";
 import { getLocale, isRTL, t } from "../../i18n";
 import "./basesBlockStrings";
 import { explainError } from "../../lib/userError";
 import { EmptyState, learnHow } from "../../ui/EmptyState";
+import { useVisibleRefresh } from "../../lib/visibleRefresh";
 
 const DatabaseMapView = lazy(() => import("../DatabaseMapView"));
 // W12.V1: the chart view loads ECharts and its strings only when it is shown.
 const BaseChartView = lazy(() => import("../../viz/BaseChartView"));
+// W12.V5: the Hebrew-calendar view, loaded when shown.
+const BaseHebrewCalendarView = lazy(() => import("../../viz/BaseHebrewCalendarView"));
 
 const muted = "hsl(var(--fg-muted))";
 const danger = "hsl(var(--danger))";
@@ -121,7 +124,11 @@ function nameCell(row: BaseRow, id: string, files: readonly BasesFile[]): ReactN
   return <Cell value={row.cells[id]} files={files} />;
 }
 
-export default function BasesBlock({ source, meta }: { source: string; meta?: string }) {
+/**
+ * `select` (W12.T3, a type's page): the rows come from these paths, chosen
+ * by the type registry, instead of the base's own `filters:`.
+ */
+export default function BasesBlock({ source, meta, select }: { source: string; meta?: string; select?: (files: readonly BasesFile[]) => ReadonlySet<string> }) {
   const embed = useMemo(() => parseBaseEmbedMeta(meta), [meta]);
   const activePath = useAppStore((s) => s.doc.workspaceName ?? null);
   const [files, setFiles] = useState<BasesFile[]>([]);
@@ -130,6 +137,8 @@ export default function BasesBlock({ source, meta }: { source: string; meta?: st
   const [loadError, setLoadError] = useState<string | null>(null);
   const [viewIndex, setViewIndex] = useState<number | null>(null);
   const [sortOverride, setSortOverride] = useState<BasesSort[] | null>(null);
+  // W12.V6: off screen (a long dashboard), a vault change waits until the base is seen again.
+  const [rootRef, schedule] = useVisibleRefresh();
 
   useEffect(() => {
     let cancelled = false;
@@ -158,12 +167,12 @@ export default function BasesBlock({ source, meta }: { source: string; meta?: st
         if (!cancelled) setLoadError(explainError(e));
       })
       .finally(() => !cancelled && setLoading(false));
-    const off = onWorkspaceChanged(() => void load().catch(() => undefined), { debounceMs: 500 });
+    const off = onWorkspaceChanged(() => schedule(() => void load().catch(() => undefined)), { debounceMs: 500 });
     return () => {
       cancelled = true;
       off();
     };
-  }, [embed]);
+  }, [embed, schedule]);
 
   const text = embed ? (embedded?.text ?? null) : source;
   const parsed = useMemo(() => (text === null ? null : parseBase(text)), [text]);
@@ -180,8 +189,9 @@ export default function BasesBlock({ source, meta }: { source: string; meta?: st
   const result: BaseResult | null = useMemo(() => {
     if (!base) return null;
     const views = sortOverride ? base.views.map((v, i) => (i === current ? { ...v, sort: sortOverride } : v)) : base.views;
+    if (select) return runBase({ ...base, views, filters: undefined }, files, { view: current, thisFile, only: select(files) });
     return runBase({ ...base, views }, files, { view: current, thisFile });
-  }, [base, files, current, sortOverride, thisFile]);
+  }, [base, files, current, sortOverride, thisFile, select]);
 
   if (loadError || (parsed && !parsed.ok)) {
     return (
@@ -223,7 +233,7 @@ export default function BasesBlock({ source, meta }: { source: string; meta?: st
   const fileLabel = embedded?.path ?? (activePath?.toLowerCase().endsWith(".base") ? activePath : null);
 
   return (
-    <div className="chart-block lumen-base" data-testid="base-block" data-view-kind={kind}>
+    <div ref={rootRef} className="chart-block lumen-base" data-testid="base-block" data-view-kind={kind}>
       <div className="chart-block-header">
         <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
           <span style={{ fontWeight: 600 }} dir="auto">
@@ -291,6 +301,11 @@ export default function BasesBlock({ source, meta }: { source: string; meta?: st
             <BaseChartView base={base} result={result} dir={isRTL() ? "rtl" : "ltr"} locale={getLocale()} />
           </Suspense>
         )}
+        {result.rows.length > 0 && kind === "hebrew-calendar" && (
+          <Suspense fallback={<div style={{ padding: 12, fontSize: 12, color: muted }}>{t("db.loading")}</div>}>
+            <BaseHebrewCalendarView result={result} dir={isRTL() ? "rtl" : "ltr"} locale={getLocale()} />
+          </Suspense>
+        )}
         {result.rows.length > 0 && kind === "map" && (
           <Suspense fallback={<div style={{ padding: 12, fontSize: 12, color: muted }}>{t("db.loading")}</div>}>
             <MapView result={result} />
@@ -316,8 +331,32 @@ const VIRTUAL_FROM = 200;
 
 type TableItem = { kind: "group"; key: BValue; count: number } | { kind: "row"; row: BaseRow };
 
-function TableView({ result, files, sort, onSort }: ViewProps & { sort: BasesSort[]; onSort: (id: string) => void }) {
+export function TableView({ result, files, sort, onSort }: ViewProps & { sort: BasesSort[]; onSort: (id: string) => void }) {
   const cols = result.columns;
+  // W12.T3: one cell is in the tab order (roving tabindex); arrows move it, as the text runs.
+  const [focus, setFocus] = useState<{ row: number; col: number }>({ row: 0, col: 0 });
+  const rowList = useMemo(() => (result.groups ? result.groups.flatMap((g) => g.rows) : result.rows), [result]);
+  const rowAt = useMemo(() => new Map(rowList.map((r, i) => [r, i])), [rowList]);
+  const onCellKey = (e: ReactKeyboardEvent<HTMLTableCellElement>, row: number, col: number) => {
+    if (e.key === "Enter" && (cols[col].id === "file.name" || cols[col].id === "file.basename")) {
+      e.preventDefault();
+      openFile(rowList[row].file.path);
+      return;
+    }
+    const rtl = getComputedStyle(e.currentTarget).direction === "rtl" || isRtl();
+    const next = tableKeyMove(e.key, { ctrl: e.ctrlKey || e.metaKey, rtl }, { row, col }, { rows: rowList.length, cols: cols.length });
+    if (!next) return;
+    e.preventDefault();
+    setFocus(next);
+    const scroller = e.currentTarget.closest("[data-testid=base-table-scroll]");
+    if (virtual && scroller) {
+      const index = items.findIndex((it) => it.kind === "row" && it.row === rowList[next.row]);
+      // Spacer rows keep the scrollbar true, so a row's top is its item index × the row height.
+      const top = index * ROW_H;
+      if (top < scroller.scrollTop || top > scroller.scrollTop + viewport - ROW_H) scroller.scrollTop = Math.max(0, top - viewport / 2);
+    }
+    requestAnimationFrame(() => (scroller?.querySelector(`[data-cell="${next.row}:${next.col}"]`) as HTMLElement | null)?.focus());
+  };
   const summaryIds = Object.keys(result.summaries);
   const items: TableItem[] = useMemo(() => {
     const out: TableItem[] = [];
@@ -336,7 +375,7 @@ function TableView({ result, files, sort, onSort }: ViewProps & { sort: BasesSor
   const cell = { padding: "4px 6px", borderBlockEnd: "1px solid hsl(var(--border))", blockSize: virtual ? ROW_H - 9 : undefined, whiteSpace: virtual ? ("nowrap" as const) : undefined, overflow: "hidden", textOverflow: "ellipsis" };
   return (
     <div ref={scroller} style={{ overflow: "auto", maxBlockSize: virtual ? viewport : undefined }} onScroll={virtual ? (e) => setScrollTop(e.currentTarget.scrollTop) : undefined} data-testid="base-table-scroll" data-virtual={virtual || undefined}>
-      <table style={{ inlineSize: "100%", borderCollapse: "collapse", fontSize: 12 }} aria-rowcount={virtual ? items.length + 1 : undefined}>
+      <table role="grid" style={{ inlineSize: "100%", borderCollapse: "collapse", fontSize: 12 }} aria-rowcount={virtual ? items.length + 1 : undefined}>
         <thead style={virtual ? { position: "sticky", insetBlockStart: 0, background: "hsl(var(--bg))", zIndex: 1 } : undefined}>
           <tr>
             {cols.map((c) => {
@@ -363,11 +402,15 @@ function TableView({ result, files, sort, onSort }: ViewProps & { sort: BasesSor
               </tr>
             ) : (
               <tr key={it.row.file.path} data-path={it.row.file.path} aria-rowindex={virtual ? win.start + i + 2 : undefined}>
-                {cols.map((c) => (
-                  <td key={c.id} style={cell}>
-                    {nameCell(it.row, c.id, files)}
-                  </td>
-                ))}
+                {cols.map((c, ci) => {
+                  const ri = rowAt.get(it.row) ?? -1;
+                  const here = ri === focus.row && ci === focus.col;
+                  return (
+                    <td key={c.id} style={cell} tabIndex={here ? 0 : -1} data-cell={`${ri}:${ci}`} onKeyDown={(e) => onCellKey(e, ri, ci)} onFocus={() => (here ? undefined : setFocus({ row: ri, col: ci }))}>
+                      {nameCell(it.row, c.id, files)}
+                    </td>
+                  );
+                })}
               </tr>
             ),
           )}

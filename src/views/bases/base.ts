@@ -31,11 +31,12 @@ import { evaluateBases, parseBases, type BasesEvalOptions, type BasesScope, type
 import type { BasesNode } from "./expr";
 import { equalValues, fromYaml, isEmptyValue, isTagged, parseWikiLink, sortCompare, toText, truthy, type BasesFile, type BValue } from "./values";
 import { builtinSummary, compileFilter, sortDate } from "./fastFilters";
+import { workdaysUntil } from "../workdays";
 export { builtinSummary, compileFilter } from "./fastFilters";
 
 export type BasesFilter = string | { and: BasesFilter[] } | { or: BasesFilter[] } | { not: BasesFilter[] };
 
-export type BasesViewType = "table" | "cards" | "list" | "kanban" | "map" | "calendar" | "timeline" | "chart";
+export type BasesViewType = "table" | "cards" | "list" | "kanban" | "map" | "calendar" | "timeline" | "chart" | "hebrew-calendar";
 
 export interface BasesSort {
   property: string;
@@ -63,7 +64,7 @@ export interface BasesView {
   image?: string;
   /** Map: the property with the coordinates. */
   coordinates?: string;
-  /** Calendar and timeline (W1.12): the date property (default `note.date`). */
+  /** Calendar, timeline (W1.12) and hebrew-calendar (W12.V5, a Lumen view type): the date property (default `note.date`). */
   date?: string;
   /** Timeline: the end-date property; without it an item is one day long. */
   end?: string;
@@ -85,9 +86,15 @@ export interface BasesView {
 export interface BasesRelation {
   property: string;
   incoming: boolean;
+  /**
+   * W12.T6: only related notes that pass this filter (a typed relation: the
+   * notes of one type). The same filter syntax as `filters:`.
+   */
+  filter?: BasesFilter;
 }
 
-export const ROLLUP_FUNCTIONS = ["count", "sum", "avg", "min", "max", "earliest", "latest"] as const;
+/** "workdays": working days from today until the earliest date of `property` among the related notes (W10.C26). */
+export const ROLLUP_FUNCTIONS = ["count", "sum", "avg", "min", "max", "earliest", "latest", "workdays"] as const;
 export type RollupFunction = (typeof ROLLUP_FUNCTIONS)[number];
 
 /** A rollup: `function` over `property` of the notes of `relation`. */
@@ -194,7 +201,8 @@ export function parseBase(text: string): BaseParse {
       for (const [name, r] of Object.entries(raw.relations)) {
         const rel = typeof r === "string" ? { property: r } : r;
         if (!isRecord(rel) || typeof rel.property !== "string" || !rel.property.trim()) throw new Error(`relations.${name}: needs a property (the link property)`);
-        relations[name] = { property: rel.property.trim().replace(/^note\./, ""), incoming: rel.incoming === true || rel.direction === "incoming" };
+        const relFilter = readFilter(rel.filter, `relations.${name}.filter`);
+        relations[name] = { property: rel.property.trim().replace(/^note\./, ""), incoming: rel.incoming === true || rel.direction === "incoming", ...(relFilter !== undefined ? { filter: relFilter } : {}) };
       }
     const rollups: Record<string, BasesRollup> = {};
     if (isRecord(raw.rollups))
@@ -412,6 +420,11 @@ export interface RunOptions extends BasesEvalOptions {
   view?: number | string;
   /** `this`: the base file, or the note that embeds it. */
   thisFile?: BasesFile | null;
+  /**
+   * W12.T3: rows only from these paths (a type's notes, chosen by the type
+   * registry); every file still resolves links, relations and rollups.
+   */
+  only?: ReadonlySet<string>;
 }
 
 const err = (where: string, e: FormulaError) => `${where}: ${e.message}${e.at >= 0 ? ` (character ${e.at + 1})` : ""}`;
@@ -546,7 +559,21 @@ export function runBase(base: BaseModel, files: readonly BasesFile[], opts: RunO
     }
     return out;
   };
+  // W12.T6: a typed relation keeps only the related notes that pass its filter (decided once per file).
+  const relPass = new Map<BasesFilter, Map<string, boolean>>();
   const related = (file: BasesFile, rel: BasesRelation): BasesFile[] => {
+    const all = relatedAll(file, rel);
+    const f = rel.filter;
+    if (f === undefined) return all;
+    let memo = relPass.get(f);
+    if (!memo) relPass.set(f, (memo = new Map()));
+    return all.filter((x) => {
+      let ok = memo!.get(x.path);
+      if (ok === undefined) memo!.set(x.path, (ok = test(f, scopeFor(x), "relation filter")));
+      return ok;
+    });
+  };
+  const relatedAll = (file: BasesFile, rel: BasesRelation): BasesFile[] => {
     if (!rel.incoming) {
       const seen = new Set<string>();
       const out: BasesFile[] = [];
@@ -588,6 +615,10 @@ export function runBase(base: BaseModel, files: readonly BasesFile[], opts: RunO
     try {
       const values = targets.map((f) => value(r.property!, scopeFor(f)));
       const flat = values.flatMap((v) => (Array.isArray(v) ? v : [v]));
+      if (r.function === "workdays") {
+        const first = builtinSummary("Earliest", flat);
+        return first === undefined || first === null ? null : workdaysUntil(first, evalOpts.now);
+      }
       const summary = { sum: "Sum", avg: "Average", min: "Min", max: "Max", earliest: "Earliest", latest: "Latest" }[r.function];
       const out = builtinSummary(summary, flat);
       return out === undefined ? null : out;
@@ -602,12 +633,13 @@ export function runBase(base: BaseModel, files: readonly BasesFile[], opts: RunO
   if (view.image) needed.add(view.image);
   if (view.coordinates) needed.add(view.coordinates);
   const kind = viewKind(view);
-  if (kind === "calendar" || kind === "timeline") needed.add(view.date ?? "note.date");
+  if (kind === "calendar" || kind === "timeline" || kind === "hebrew-calendar") needed.add(view.date ?? "note.date");
   if (kind === "timeline" && view.end) needed.add(view.end);
   if (kind === "chart" && view.chart) for (const id of [view.chart.x, view.chart.y, view.chart.series]) if (id) needed.add(id);
 
   const matched: BaseRow[] = [];
   for (const file of files) {
+    if (opts.only && !opts.only.has(file.path)) continue;
     const scope = scopeFor(file);
     if (!test(base.filters, scope, "filters")) continue;
     if (!test(view.filters, scope, `view ${view.name} filters`)) continue;
@@ -740,7 +772,7 @@ export function moveFilter(text: string, from: FilterScope & { index: number }, 
 /** The kind of view to draw: a plugin's view type (unknown here) is drawn as a table. */
 export function viewKind(view: BasesView): BasesViewType {
   const t = view.type.toLowerCase();
-  return t === "cards" || t === "list" || t === "kanban" || t === "map" || t === "calendar" || t === "timeline" || t === "chart" ? t : "table";
+  return t === "cards" || t === "list" || t === "kanban" || t === "map" || t === "calendar" || t === "timeline" || t === "chart" || t === "hebrew-calendar" ? t : "table";
 }
 
 /** A cell value as a point, for the map view: `[lat, lng]`, `"lat, lng"` or `{lat, lng}`. */

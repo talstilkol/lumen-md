@@ -13014,6 +13014,52 @@
       ]
     },
     {
+      "key": "types.base.replace",
+      "en": "{file} already exists and differs from the type's base. Replace it?",
+      "vars": [
+        "file"
+      ]
+    },
+    {
+      "key": "types.base.save",
+      "en": "Save as .base",
+      "vars": []
+    },
+    {
+      "key": "types.base.saved",
+      "en": "Saved {file}",
+      "vars": [
+        "file"
+      ]
+    },
+    {
+      "key": "types.page.all",
+      "en": "All {type}",
+      "vars": [
+        "type"
+      ]
+    },
+    {
+      "key": "types.page.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "types.page.list",
+      "en": "Types",
+      "vars": []
+    },
+    {
+      "key": "types.page.none",
+      "en": "No types yet. A type is a file in .lumen/types.",
+      "vars": []
+    },
+    {
+      "key": "types.page.title",
+      "en": "Types",
+      "vars": []
+    },
+    {
       "key": "typo.applied",
       "en": "{count} typography changes applied",
       "vars": [
@@ -14196,6 +14242,111 @@
       "vars": []
     },
     {
+      "key": "viz.arg.by.contradicts",
+      "en": "Contradicted by",
+      "vars": []
+    },
+    {
+      "key": "viz.arg.by.qualifies",
+      "en": "Qualified by",
+      "vars": []
+    },
+    {
+      "key": "viz.arg.by.supports",
+      "en": "Supported by",
+      "vars": []
+    },
+    {
+      "key": "viz.arg.claim",
+      "en": "claim",
+      "vars": []
+    },
+    {
+      "key": "viz.arg.conclusion",
+      "en": "conclusion",
+      "vars": []
+    },
+    {
+      "key": "viz.arg.contradicts",
+      "en": "contradicts",
+      "vars": []
+    },
+    {
+      "key": "viz.arg.empty",
+      "en": "No claims or sources yet: give notes `type: claim` or `type: evidence`, and link them with supports:, contradicts: or qualifies:.",
+      "vars": []
+    },
+    {
+      "key": "viz.arg.noSource",
+      "en": "no source",
+      "vars": []
+    },
+    {
+      "key": "viz.arg.qualifies",
+      "en": "qualifies",
+      "vars": []
+    },
+    {
+      "key": "viz.arg.save",
+      "en": "Save as a canvas",
+      "vars": []
+    },
+    {
+      "key": "viz.arg.saved",
+      "en": "Saved {path}.canvas and {path}.excalidraw",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "viz.arg.showList",
+      "en": "Show as a list",
+      "vars": []
+    },
+    {
+      "key": "viz.arg.showMap",
+      "en": "Show the map",
+      "vars": []
+    },
+    {
+      "key": "viz.arg.source",
+      "en": "source",
+      "vars": []
+    },
+    {
+      "key": "viz.arg.summary",
+      "en": "{claims} claims, {sources} sources; {unsupported} without a source",
+      "vars": [
+        "claims",
+        "sources",
+        "unsupported"
+      ]
+    },
+    {
+      "key": "viz.arg.supports",
+      "en": "supports",
+      "vars": []
+    },
+    {
+      "key": "viz.arg.title",
+      "en": "Argument map",
+      "vars": []
+    },
+    {
+      "key": "viz.arg.titleIn",
+      "en": "Argument map: {folder}",
+      "vars": [
+        "folder"
+      ]
+    },
+    {
+      "key": "viz.arg.unused",
+      "en": "Sources that support nothing yet: {names}",
+      "vars": [
+        "names"
+      ]
+    },
+    {
       "key": "viz.chart",
       "en": "chart",
       "vars": []
@@ -14352,6 +14503,50 @@
       ]
     },
     {
+      "key": "viz.hcal.activity",
+      "en": "Activity in {year} by Hebrew month",
+      "vars": [
+        "year"
+      ]
+    },
+    {
+      "key": "viz.hcal.dayOfMonth",
+      "en": "Day of the month",
+      "vars": []
+    },
+    {
+      "key": "viz.hcal.items",
+      "en": "{count} notes",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "viz.hcal.month",
+      "en": "Month",
+      "vars": []
+    },
+    {
+      "key": "viz.hcal.next",
+      "en": "Next month",
+      "vars": []
+    },
+    {
+      "key": "viz.hcal.nextYear",
+      "en": "Next year",
+      "vars": []
+    },
+    {
+      "key": "viz.hcal.prev",
+      "en": "Previous month",
+      "vars": []
+    },
+    {
+      "key": "viz.hcal.prevYear",
+      "en": "Previous year",
+      "vars": []
+    },
+    {
       "key": "viz.kind.bar",
       "en": "Bar chart",
       "vars": []
@@ -14384,6 +14579,21 @@
     {
       "key": "viz.kind.scatter",
       "en": "Scatter chart",
+      "vars": []
+    },
+    {
+      "key": "viz.kind.sunburst",
+      "en": "Sunburst",
+      "vars": []
+    },
+    {
+      "key": "viz.kind.tree",
+      "en": "Tree",
+      "vars": []
+    },
+    {
+      "key": "viz.loading",
+      "en": "Loading…",
       "vars": []
     },
     {
@@ -14521,11 +14731,53 @@
       "vars": []
     },
     {
+      "key": "viz.showTree",
+      "en": "Show as a tree",
+      "vars": []
+    },
+    {
       "key": "viz.skipped",
       "en": "{count} rows without a value are not shown",
       "vars": [
         "count"
       ]
+    },
+    {
+      "key": "viz.structure.badOptions",
+      "en": "Not understood: {options}. The options are source:, view: and root:.",
+      "vars": [
+        "options"
+      ]
+    },
+    {
+      "key": "viz.structure.tags",
+      "en": "Tags",
+      "vars": []
+    },
+    {
+      "key": "viz.structure.thisNote",
+      "en": "This note",
+      "vars": []
+    },
+    {
+      "key": "viz.structure.title.folders",
+      "en": "Folders of the vault",
+      "vars": []
+    },
+    {
+      "key": "viz.structure.title.headings",
+      "en": "Headings of the note",
+      "vars": []
+    },
+    {
+      "key": "viz.structure.title.tags",
+      "en": "Tag hierarchy",
+      "vars": []
+    },
+    {
+      "key": "viz.structure.vault",
+      "en": "Vault",
+      "vars": []
     },
     {
       "key": "viz.summary",
@@ -14538,6 +14790,13 @@
     {
       "key": "viz.tableCaption",
       "en": "{title}: data",
+      "vars": [
+        "title"
+      ]
+    },
+    {
+      "key": "viz.treeLabel",
+      "en": "{title}: tree",
       "vars": [
         "title"
       ]

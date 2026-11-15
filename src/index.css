@@ -378,6 +378,20 @@
     letter-spacing: var(--reading-letter-spacing, normal);
     padding: 2.5rem 2rem 30vh;
   }
+  /* W12.V6: a dashboard note (src/renderer/dashboard.ts) — blocks in a grid from the inline start, prose across the row. */
+  .prose-lumen.lumen-dashboard {
+    display: grid;
+    grid-template-columns: repeat(var(--lumen-dashboard-columns, auto-fill), minmax(min(100%, 24rem), 1fr));
+    gap: 12px;
+    align-items: start;
+  }
+  .prose-lumen.lumen-dashboard > :is(h1, h2, h3, h4, h5, h6, p, ul, ol, blockquote, hr, dl, details, header) {
+    grid-column: 1 / -1;
+  }
+  .prose-lumen.lumen-dashboard > :is(.chart-block, figure, table, pre) {
+    margin-block: 0;
+    min-inline-size: 0;
+  }
   .prose-lumen :is(h1, h2, h3, h4, h5, h6) {
     font-family: var(--font-sans);
     font-weight: 700;
