@@ -692,6 +692,26 @@
       "vars": []
     },
     {
+      "key": "askScope.folder",
+      "en": "One folder",
+      "vars": []
+    },
+    {
+      "key": "askScope.label",
+      "en": "Ask in",
+      "vars": []
+    },
+    {
+      "key": "askScope.tag",
+      "en": "One tag",
+      "vars": []
+    },
+    {
+      "key": "askScope.vault",
+      "en": "The vault (minus what MCP scope denies)",
+      "vars": []
+    },
+    {
       "key": "atproto.confirm.ok",
       "en": "Publish publicly",
       "vars": []

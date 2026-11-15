@@ -46,5 +46,14 @@
   "search.saveAsBase": "Save as Base",
   "search.saveAsBaseHint": "An Obsidian .base table of this search's tag: and path: operators; embed it in any note with ![[name.base]]",
   "search.saveAsBaseDone": "Saved as {path}",
-  "search.saveAsBaseNo": "Bases can't search note text, so this part can't go into a Base: {parts}"
+  "search.saveAsBaseNo": "Bases can't search note text, so this part can't go into a Base: {parts}",
+  "askScope.label": "Ask in",
+  "vaultCite.pin": "Pin link [{n}]",
+  "askScope.folder": "One folder",
+  "vaultCite.unsupportedClaim": "not supported by a verified quote",
+  "askScope.vault": "The vault (minus what MCP scope denies)",
+  "vaultCite.pinned": "Link pinned and copied: {link}",
+  "askScope.tag": "One tag",
+  "vaultCite.claimsUnsupported": "{n} of {total} claims have no verified quote — they are marked in the answer.",
+  "vaultCite.pinGone": "That paragraph has changed since the answer; ask again."
 }

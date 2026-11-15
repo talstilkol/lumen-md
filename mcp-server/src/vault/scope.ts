@@ -75,8 +75,19 @@ function passes(rel: string, tags: string[], r: ScopeRules | undefined): boolean
   return true;
 }
 
-/** Whether a note (its vault-relative path and its text, or null for a note that does not exist yet) is in scope for every rule set. */
+/**
+ * The first line of a note locked with its own password (src/storage/lockedNotesRegistry.ts
+ * `LOCKED_NOTE_MAGIC`; this package cannot import the app, and a test keeps the two equal).
+ * W12.A2: a locked note is never in scope, whatever the rules say.
+ */
+export const LOCKED_NOTE_MAGIC = "<!-- lumen-locked-note v1 -->";
+
+/**
+ * Whether a note (its vault-relative path and its text, or null for a note that does not exist yet) is in scope for every rule set.
+ * This is the one scope test for both the MCP server (W11.I7) and "Ask the vault" in the app (W12.A2, src/ai/askScope.ts).
+ */
 export function inScope(rel: string, text: string | null, rules: readonly (ScopeRules | undefined)[]): boolean {
+  if (text !== null && text.startsWith(LOCKED_NOTE_MAGIC)) return false;
   const tags = text === null ? [] : noteTags(text);
   return rules.every((r) => passes(rel, tags, r));
 }

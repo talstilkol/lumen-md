@@ -8,9 +8,11 @@ import { readWorkspaceFile } from "../storage/workspace";
 import { semanticSearch, type RagResult } from "../ai/embeddings";
 import { searchHybrid, type SemanticHit } from "../ai/semanticSearch";
 import { rerank } from "../ai/reranker";
+import { keepInScope, type ScopeFilter } from "../ai/askScope";
+import { buildAskContext as buildScopedContext } from "../ai/askVault";
 
 /** The notes an Ask Workspace question is answered from: hybrid hits (or BM25), reranked, the best 8. */
-export async function retrieveForQuestion(query: string): Promise<RagResult[]> {
+export async function retrieveForQuestion(query: string, inScope: ScopeFilter): Promise<RagResult[]> {
   // Hybrid retrieval — when the user has built the embedding index
   // (Smart tab → Build) we fuse BM25 + semantic via RRF for genuinely
   // semantic-aware Q&A. When the index is empty, `searchHybrid` falls
@@ -35,8 +37,9 @@ export async function retrieveForQuestion(query: string): Promise<RagResult[]> {
         .catch(() => h.snippet),
     })),
   );
+  // W12.A2: out-of-scope notes are dropped before reranking (and again in the context).
   // T29: rerank the candidates against the question, keep the best 8.
-  const pool = hybridResults.length > 0 ? hybridResults : fallback;
+  const pool = keepInScope(hybridResults.length > 0 ? hybridResults : fallback, inScope);
   const results: RagResult[] = (
     await rerank(query, pool.map((r) => ({ ...r, text: `${r.snippet ?? ""}\n${r.content.slice(0, 1500)}` })))
   )
@@ -45,29 +48,17 @@ export async function retrieveForQuestion(query: string): Promise<RagResult[]> {
   return results;
 }
 
-/** The context of the question: the relevant parts of each note, an outside note guarded (plan 2.7). */
-export async function buildAskContext(query: string, results: RagResult[]): Promise<{ contextStr: string; untrusted: string[] }> {
-  // Build context from semantic results: only the parts relevant to the
-  // question, within the AI mode's token budget (context packer).
-  const { packContext, CONTEXT_BUDGET, getAiMode } = await import("../ai/contextPacker");
-  const packed = packContext(
-    query,
-    results.map((r) => ({ path: r.path, content: r.content })),
-    CONTEXT_BUDGET[getAiMode()],
-  );
+/** The context of the question: the relevant parts of each in-scope note, an outside note guarded (plan 2.7, W12.A1–A2 ../ai/askVault). */
+export async function buildAskContext(query: string, results: RagResult[], inScope: ScopeFilter): Promise<{ contextStr: string; untrusted: string[] }> {
+  // Only the parts relevant to the question, within the AI mode's token budget (context packer).
+  const { CONTEXT_BUDGET, getAiMode } = await import("../ai/contextPacker");
   // Plan 2.7: a note from outside (clipped, imported, pulled) goes to the model cleaned and delimited, and taints the run.
   const { ensureProvenanceBackfill, guardUntrusted, untrustedSourcesOfNote } = await import("../agents/untrusted");
   await ensureProvenanceBackfill();
-  const untrusted: string[] = [];
-  const contextStr = results.length > 0
-    ? packed
-        .map((r, i) => {
-          const entry = `📄 [${i + 1}] ${r.path}\n${r.text}`;
-          const from = untrustedSourcesOfNote(r.path, results.find((x) => x.path === r.path)?.content);
-          untrusted.push(...from);
-          return `---\n${from.length ? guardUntrusted(entry, from).text : entry}`;
-        })
-        .join("\n")
-    : t("searchDialog.noRelevant");
+  const { context: contextStr, untrusted } = buildScopedContext(query, results, CONTEXT_BUDGET[getAiMode()], inScope, {
+    untrustedOf: untrustedSourcesOfNote,
+    guard: guardUntrusted,
+    noRelevant: t("searchDialog.noRelevant"),
+  });
   return { contextStr, untrusted };
 }
