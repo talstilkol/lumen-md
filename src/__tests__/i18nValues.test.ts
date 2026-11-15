@@ -23,6 +23,9 @@ const SAME_IN_HEBREW = new Set([
   "pii.type.IBAN", // the international standard's own abbreviation, written so in Hebrew too
   "backup.target", "versions.by", // placeholders and punctuation only ({name} · {mode}, {author}, {date})
   "query.dataviewTitle", // Dataview, the Obsidian plugin's own name
+  // The apps first-run imports from (W11.P6): product names, written so in the Hebrew docs and UI too.
+  "onboard.import.source.notion", "onboard.import.source.evernote", "onboard.import.source.appleNotes",
+  "onboard.import.source.keep", "onboard.import.source.onenote", "onboard.import.source.obsidian",
 ]);
 
 const words = (s: string) => /[A-Za-z]{3}/.test(s);
