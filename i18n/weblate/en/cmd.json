@@ -155,6 +155,7 @@
   "cmd.edit.pastePlain.hint": "Pastes the clipboard's text without any formatting",
   "cmd.edit.redact": "Redact selection",
   "cmd.edit.redact.hint": "removed from every export",
+  "cmd.entities.review": "Entity graph: proposals to review",
   "cmd.epub.open": "Open an EPUB for reading…",
   "cmd.export.latexProject": "Export LaTeX project (academic, Hebrew)…",
   "cmd.export.latexProject.hint": "main.tex for LuaLaTeX / XeLaTeX with Hebrew right to left, math, [@key] citations from the vault's .bib, and the images, in a ZIP",

@@ -155,6 +155,7 @@
   "cmd.edit.pastePlain.hint": "يلصق نص الحافظة دون أي تنسيق",
   "cmd.edit.redact": "حجب التحديد",
   "cmd.edit.redact.hint": "يُحذف من كل تصدير",
+  "cmd.entities.review": "مخطط الكيانات: مقترحات للمراجعة",
   "cmd.epub.open": "فتح كتاب EPUB للقراءة…",
   "cmd.export.latexProject": "تصدير مشروع LaTeX (أكاديمي، عبرية)…",
   "cmd.export.latexProject.hint": "main.tex لـ LuaLaTeX / XeLaTeX مع العبرية من اليمين إلى اليسار والرياضيات واستشهادات [@key] من ملفات ‎.bib والصور، في ZIP",

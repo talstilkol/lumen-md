@@ -13,6 +13,7 @@ import { loadTypeRegistry, type TypeRegistry } from "./typeRegistry";
 import { sourceTypeDef } from "../reading/sourceType";
 
 import { TYPES_CHANGED_EVENT } from "./typeEvents";
+import { ENTITY_TYPES_FEATURE, entityTypeDefs } from "../entities/types";
 export { OPEN_TYPE_PAGE, TYPES_CHANGED_EVENT, openTypePage } from "./typeEvents";
 
 const builtins = new Map<string, TypeDef[]>();
@@ -24,6 +25,9 @@ export function registerBuiltinTypes(feature: string, defs: readonly TypeDef[]):
   builtins.set(feature, [...defs]);
   if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent(TYPES_CHANGED_EVENT));
 }
+
+// W12.E1's entity types: a Base, "All <type>" in ⌘K and a field form for each.
+registerBuiltinTypes(ENTITY_TYPES_FEATURE, entityTypeDefs());
 
 export function builtinTypes(): TypeDef[] {
   return [...builtins.values()].flat();

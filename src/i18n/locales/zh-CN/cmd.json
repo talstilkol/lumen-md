@@ -155,6 +155,7 @@
   "cmd.edit.pastePlain.hint": "粘贴剪贴板中的文本，不带任何格式",
   "cmd.edit.redact": "涂黑所选内容",
   "cmd.edit.redact.hint": "从所有导出中删除",
+  "cmd.entities.review": "实体图：待审核的建议",
   "cmd.epub.open": "打开 EPUB 阅读…",
   "cmd.export.latexProject": "导出 LaTeX 项目（学术，希伯来语）…",
   "cmd.export.latexProject.hint": "适用于 LuaLaTeX / XeLaTeX 的 main.tex，含从右到左的希伯来语、数学公式、来自库中 .bib 的 [@key] 引用及图片，打包为 ZIP",

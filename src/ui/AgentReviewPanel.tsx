@@ -19,6 +19,7 @@ import type { StagedChange } from "../agents/types";
 import "./agentReviewPanelStrings";
 import { HelpButton } from "./HelpButton";
 import { EmptyState, learnHow } from "./EmptyState";
+import { EntityReviewHost } from "./EntityReviewHost";
 
 interface Props {
   open: boolean;
@@ -235,6 +236,8 @@ export function AgentReviewPanel({ open, onClose }: Props) {
         </header>
 
         <div style={{ padding: 18, display: "flex", flexDirection: "column", gap: 12, fontSize: 13, lineHeight: 1.5, overflowY: "auto" }}>
+          {/* W12.E5: the entity graph's proposals sit above the agents' staged changes (nothing when the vault has no graph). */}
+          <EntityReviewHost />
           <p style={{ ...muted, margin: 0 }}>{t("agentReview.intro")}</p>
           {model.pendingCount === 0 && (
             <EmptyState testId="agent-review-empty" style={{ padding: "12px 0" }} message={t("agentReview.empty")} action={learnHow("ai/local-agents#reviewing-proposed-changes")} />

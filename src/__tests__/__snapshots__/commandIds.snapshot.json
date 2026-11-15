@@ -2002,6 +2002,11 @@
       "hint": "One search over Sefaria, the Knesset, data.gov.il and the Ben-Yehuda library, with each result's rights",
       "shortcut": "⌥⌘S",
       "icon": "Quote"
+    },
+    {
+      "id": "entities.review",
+      "label": "Entity graph: proposals to review",
+      "icon": "FileText"
     }
   ],
   "full": [
@@ -4156,6 +4161,11 @@
       "hint": "One search over Sefaria, the Knesset, data.gov.il and the Ben-Yehuda library, with each result's rights",
       "shortcut": "⌥⌘S",
       "icon": "Quote"
+    },
+    {
+      "id": "entities.review",
+      "label": "Entity graph: proposals to review",
+      "icon": "FileText"
     }
   ],
   "autoSaveOn": [
@@ -4444,6 +4454,7 @@
     "export.latexProject",
     "automations.new",
     "automations.dryRun",
-    "automations.undo"
+    "automations.undo",
+    "entities.review"
   ]
 }
