@@ -25,12 +25,15 @@ a test (`src/__tests__/formatRoundTrip.test.ts`), not estimated.
 
 | Format | All 702 | Hebrew notes (50) | Keeps well | Loses |
 |---|---|---|---|---|
+| OPML | 99.7% | 100% | headings as outline levels, bullet lists as child outlines | little: a section that is not a plain list is kept as Markdown in the outline's `_note` (the attribute pandoc and OmniOutliner use), so other outliners show it as a note, not as outlines |
+| Org-mode | 95.0% | 98% | headings, code blocks with their language, bold inside a Hebrew word (a zero-width space separates it) | odd nestings of emphasis (84%), lists (85%) |
+| AsciiDoc | 94.2% | 96% | headings, code blocks, intraword bold and italic (unconstrained marks) | odd nestings of emphasis (75%) |
+| LaTeX | 91.6% | 100% | heading levels (`#` is `\section`, read back as `#`), numbered and nested lists, code | indented code (33%), tabs, fenced code inside other blocks |
 | reStructuredText | 91.6% | 92% | emphasis, links, images, code spans | fenced code (24%), setext headings |
 | Jupyter `.ipynb` | 90.7% | 92% | prose, inline markup | indented and fenced code with info strings (28–33%), tabs |
-| AsciiDoc | 81.8% | 38% | code blocks, links, autolinks | emphasis (42%): `_x_` and `*x*` change meaning on the way back |
-| Org-mode | 78.2% | 30% | indented code, reference links | fenced code (55%); `/` and `=` in plain text are read back as italic and code |
-| LaTeX | 58.8% | 0% | raw HTML, code spans | **heading levels**: `#` is exported as `\section`, which the importer reads as `##`; backslash escapes |
-| OPML | 1.6% | 0% | nested lists only | everything that is not a list item: OPML is an outline format |
+
+Emphasis and code are converted line by line: emphasis that spans two lines
+stays as Markdown asterisks.
 
 The full table by element type is written to
 `test-results/format-roundtrip/report.md` on every test run.
@@ -39,6 +42,7 @@ The full table by element type is written to
 
 - For a lossless copy, keep the Markdown file. The other formats are for
   handing a note to another tool.
-- For LaTeX, use [Academic LaTeX export](/workspace/latex-export/), which
-  writes a full project.
-- For outlines, OPML is fine; for anything else, it keeps only the lists.
+- For LaTeX, use [Academic LaTeX export](/workspace/latex-export/) when you
+  need a full project; the plain export reads back with its heading levels.
+- OPML keeps the whole note: headings become the outline, and the text under a
+  heading travels in the outline's note.

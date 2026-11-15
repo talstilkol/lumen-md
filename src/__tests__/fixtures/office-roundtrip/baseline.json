@@ -1,0 +1,39 @@
+{
+ "note": "Measured by officeRoundTrip.test.ts; a drop of more than 1 point fails. Raise only.",
+ "formats": {
+  "odt": {
+   "headings": 100,
+   "paragraphs": 100,
+   "bold": 100,
+   "italic": 100,
+   "links": 100,
+   "list items": 100,
+   "list kind": 100,
+   "table cells": 100,
+   "footnotes": 100
+  },
+  "docx": {
+   "headings": 100,
+   "paragraphs": 100,
+   "bold": 89.6,
+   "italic": 100,
+   "links": 50,
+   "list items": 100,
+   "list kind": 100,
+   "table cells": 100,
+   "footnotes": 100
+  },
+  "epub": {
+   "headings": 100,
+   "paragraphs": 100,
+   "bold": 100,
+   "italic": 100,
+   "links": 100,
+   "list items": 100,
+   "list kind": 100,
+   "table cells": 100,
+   "footnotes": 100
+  },
+  "docx_corpus_unstable": 0
+ }
+}

@@ -11,6 +11,8 @@
 import { describe, expect, it } from "vitest";
 import { mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { markdownToOpml } from "../storage/exportFormats";
+import { opmlToMarkdown } from "../storage/markupFormats";
 import {
   HEBREW_SECTION,
   ROUND_TRIP_FORMATS,
@@ -74,12 +76,27 @@ describe("normalization", () => {
     expect(normalizedTree("*a*\n")).not.toBe(normalizedTree("**a**\n"));
   });
 
-  it("a heading survives every format but LaTeX and OPML", () => {
-    for (const f of ROUND_TRIP_FORMATS.filter((f) => f !== "opml" && f !== "latex")) expect(survives(f, "## כותרת\n"), f).toBe(true);
+  it("a heading survives every format", () => {
+    for (const f of ROUND_TRIP_FORMATS) expect(survives(f, "## כותרת\n"), f).toBe(true);
   });
 
-  it("known loss, recorded: LaTeX export writes # as \\section, the importer reads \\section as ##", () => {
-    expect(roundTrip("latex", "# כותרת\n").trim()).toBe("## כותרת");
+  it("LaTeX keeps every heading level (fixed here: \\section came back as ##, so every heading moved down one level)", () => {
+    const md = "# א\n\n## ב\n\n### ג\n\n#### ד\n\n##### ה\n";
+    expect(roundTrip("latex", md).trim()).toBe(md.trim());
+    expect(survives("latex", "# Title\n\ntext\n\n## Sub\n")).toBe(true);
+  });
+
+  it("LaTeX keeps numbered and nested lists, list starts and code languages", () => {
+    for (const md of [
+      "1. אחד\n2. שתיים\n",
+      "3. c\n4. d\n",
+      "- a\n  - b\n    1. c\n- d\n",
+      "- a\n\n  more\n- b\n",
+      "```js\nlet x = 1;\n```\n",
+      "- foo\n- bar\n+ baz\n",
+      "a \\ b {c} 50% #1 x_y\n",
+    ])
+      expect(survives("latex", md), `${md} → ${roundTrip("latex", md)}`).toBe(true);
   });
 
   it("bold and italic survive Org and AsciiDoc (fixed here: bold came back as italic)", () => {
@@ -97,6 +114,48 @@ describe("normalization", () => {
   it("OPML keeps a list outline; the envelope title is not content", () => {
     expect(roundTrip("opml", "- a\n  - b\n")).toBe("- a\n  - b");
     expect(survives("opml", "- a\n  - b\n")).toBe(true);
+  });
+
+  it("OPML keeps headings as outline levels, with lists as child outlines (fixed here: only lists survived)", () => {
+    const md = "## פרק\n\n- א\n  - ב\n\n### סעיף\n\nטקסט **מודגש**.\n\n# Top\n";
+    const opml = markdownToOpml(md, "Outline");
+    expect(opml).toContain('<outline text="פרק" _heading="2">');
+    expect(opml).toMatch(/<outline text="פרק" _heading="2">\n\s+<outline text="א">\n\s+<outline text="ב">/);
+    expect(opml).toContain('<outline text="סעיף" _heading="3">');
+    expect(opml).toContain('_note="טקסט **מודגש**."');
+    expect(roundTrip("opml", md).trim()).toBe(md.trim());
+    for (const s of ["# a\n\n## b\n\n#### c\n", "intro\n\n# a\n\ntext\nmore\n"]) expect(survives("opml", s), s).toBe(true);
+  });
+
+  it("OPML from an outliner: an outline with _note (pandoc, OmniOutliner) is a heading", () => {
+    const opml = `<?xml version="1.0"?><opml version="2.0"><head><title>T</title></head><body>
+      <outline text="Chapter" _note="Body text."><outline text="Section" _note=""><outline text="item"/></outline></outline>
+    </body></opml>`;
+    expect(opmlToMarkdown(opml)).toBe("# T\n\n# Chapter\n\nBody text.\n\n## Section\n\n- item");
+  });
+
+  it("Org keeps bold inside a Hebrew word, code with markup characters, code languages and rules", () => {
+    for (const md of [
+      "ב**קובץ** ו-*נטוי* ב`קוד`.\n",
+      "`a*b*c` and `=x=`\n",
+      "```python\nx = *y*\n```\n",
+      "~~~\n```\n~~~\n",
+      "para\n\n***\n\nnext\n",
+      "** not a heading\n",
+      "snake_case and _italic_\n",
+    ])
+      expect(survives("org", md), `${JSON.stringify(md)} → ${JSON.stringify(roundTrip("org", md))}`).toBe(true);
+  });
+
+  it("AsciiDoc keeps intraword bold and italic (unconstrained marks), code blocks and rules", () => {
+    for (const md of [
+      "ב**קובץ** and foo*bar*baz\n",
+      "__strong__ and _em_ and snake_case\n",
+      "```js\nlet a = *b*;\n```\n",
+      "a ` `` ` b\n",
+      "para\n\n---\n\nnext\n",
+    ])
+      expect(survives("adoc", md), `${JSON.stringify(md)} → ${JSON.stringify(roundTrip("adoc", md))}`).toBe(true);
   });
 });
 
