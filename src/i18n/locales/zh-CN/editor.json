@@ -286,6 +286,7 @@
   "editor.line": "第 {n} 行",
   "editor.loadingPageView": "正在加载分页视图…",
   "editor.loadingWysiwyg": "正在加载 WYSIWYG 编辑器…",
+  "editor.wysiwygAriaLabel": "WYSIWYG 编辑器",
   "editor.wysiwygCeiling.backToSource": "返回源码视图",
   "editor.wysiwygCeiling.blocks": "此笔记的块很多（{blocks}），因此以源码视图打开：WYSIWYG 会一次绘制整篇笔记，输入会变慢。",
   "editor.wysiwygCeiling.bytes": "此笔记较大（{kb} KB），因此以源码视图打开：WYSIWYG 会一次绘制整篇笔记，输入会变慢。",

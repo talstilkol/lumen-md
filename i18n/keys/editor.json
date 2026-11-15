@@ -1650,6 +1650,11 @@
       "vars": []
     },
     {
+      "key": "editor.wysiwygAriaLabel",
+      "en": "WYSIWYG editor",
+      "vars": []
+    },
+    {
       "key": "editor.wysiwygCeiling.backToSource",
       "en": "Back to Source view",
       "vars": []

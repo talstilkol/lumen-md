@@ -703,7 +703,8 @@ const pasteCleanPlugin = $prose(
             // Plan 2.2 — images from other sites wait for the user.
             remoteImagePlugin(),
             // 9.2 layer 1 — the browser / OS spellchecker, Hebrew included, no dictionary in the bundle.
-            new Plugin({ props: { attributes: () => ({ spellcheck: spellCheckRef.current ? "true" : "false" }) } }),
+            // W11.Q6 — the editable area has a name and a role for screen readers, like the source editor's (editor.ariaLabel).
+            new Plugin({ props: { attributes: () => ({ spellcheck: spellCheckRef.current ? "true" : "false", role: "textbox", "aria-multiline": "true", "aria-label": t("editor.wysiwygAriaLabel") }) } }),
             // W5.4 — direction-control tags, the Trojan Source paste warning.
             wysiwygBidiMarksPlugin(),
             // W5.5 — "Looks reversed — fix?" after pasting Hebrew from a PDF.

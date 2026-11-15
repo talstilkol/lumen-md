@@ -286,6 +286,7 @@
   "editor.line": "Line {n}",
   "editor.loadingPageView": "Loading page view…",
   "editor.loadingWysiwyg": "Loading WYSIWYG editor…",
+  "editor.wysiwygAriaLabel": "WYSIWYG editor",
   "editor.wysiwygCeiling.backToSource": "Back to Source view",
   "editor.wysiwygCeiling.blocks": "This note has many blocks ({blocks}), so it opened in Source view: WYSIWYG draws the whole note at once and would make typing slow.",
   "editor.wysiwygCeiling.bytes": "This note is large ({kb} KB), so it opened in Source view: WYSIWYG draws the whole note at once and would make typing slow.",
