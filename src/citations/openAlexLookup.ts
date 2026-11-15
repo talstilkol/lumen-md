@@ -54,6 +54,7 @@ export interface LookupOptions {
 export async function lookupOpenAlexReferences(doi: string, opts: LookupOptions = {}): Promise<OpenAlexLookup> {
   if (!openAlexEnabled()) return { status: "off", dois: [] };
   if (!(await (opts.ask ?? askInApp)(doi))) return { status: "declined", dois: [] };
+  // privacy-ledger: research — api.openalex.org (privacyLedger RULES); only the DOI, with the switch on and the user's yes for this lookup
   const dois = await openAlexReferences(doi, { consent: true, fetch: opts.fetch ?? ((input, init) => globalThis.fetch(input, init)), ...(opts.mailto ? { mailto: opts.mailto } : {}) });
   return { status: "done", dois };
 }
