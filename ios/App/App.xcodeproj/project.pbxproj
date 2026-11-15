@@ -30,6 +30,8 @@
 		C8A000000000000000000015 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8A000000000000000000004 /* ShareViewController.swift */; };
 		C8A000000000000000000016 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C8A000000000000000000009 /* Localizable.strings */; };
 		C8A000000000000000000017 /* LumenShare.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C8A00000000000000000000A /* LumenShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		C9A000000000000000000003 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C9A000000000000000000001 /* PrivacyInfo.xcprivacy */; };
+		C9A000000000000000000004 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C9A000000000000000000002 /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -98,6 +100,8 @@
 		C8A000000000000000000007 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C8A000000000000000000008 /* he */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = he; path = he.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C8A00000000000000000000A /* LumenShare.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = LumenShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		C9A000000000000000000001 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		C9A000000000000000000002 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -160,6 +164,7 @@
 				C7A000000000000000000007 /* Localizable.strings */,
 				C7A00000000000000000000B /* AppShortcuts.strings */,
 				C7A00000000000000000000F /* App.entitlements */,
+				C9A000000000000000000001 /* PrivacyInfo.xcprivacy */,
 				504EC30B1FED79650016851F /* Main.storyboard */,
 				504EC30E1FED79650016851F /* Assets.xcassets */,
 				504EC3101FED79650016851F /* LaunchScreen.storyboard */,
@@ -197,6 +202,7 @@
 				C8A000000000000000000009 /* Localizable.strings */,
 				C8A000000000000000000005 /* Info.plist */,
 				C8A000000000000000000006 /* LumenShare.entitlements */,
+				C9A000000000000000000002 /* PrivacyInfo.xcprivacy */,
 			);
 			path = LumenShare;
 			sourceTree = "<group>";
@@ -322,6 +328,7 @@
 				2FAD9763203C412B000D30F8 /* config.xml in Resources */,
 				C7A00000000000000000000A /* Localizable.strings in Resources */,
 				C7A00000000000000000000E /* AppShortcuts.strings in Resources */,
+				C9A000000000000000000003 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -338,6 +345,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C8A000000000000000000016 /* Localizable.strings in Resources */,
+				C9A000000000000000000004 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

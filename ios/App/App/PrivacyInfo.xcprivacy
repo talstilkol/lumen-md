@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  The app's privacy manifest (plan W11.P11). Kept in step with
+  store/privacy-labels.json and the Swift sources by src/__tests__/storeReadiness.test.ts.
+  - No tracking, no tracking domains.
+  - No data collected by the store build (made without VITE_SENTRY_DSN), as the
+    App Store privacy answers say.
+  - Required-reason APIs the app's own Swift uses:
+    * UserDefaults: CA92.1 (the app's own values) and 1C8F.1 (the App Group
+      shared with its extensions: AppDelegate, CaptureQueue's one-time move).
+    * File timestamps: C617.1 (files in the app's container, its App Group
+      container and its iCloud container: iCloudSync's modification dates and
+      sizes, CaptureQueue's file sizes).
+  Capacitor and its plugins ship their own manifests inside their packages.
+-->
+<plist version="1.0">
+<dict>
+	<key>NSPrivacyTracking</key>
+	<false/>
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array/>
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array>
+		<dict>
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<string>CA92.1</string>
+				<string>1C8F.1</string>
+			</array>
+		</dict>
+		<dict>
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryFileTimestamp</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<string>C617.1</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>
