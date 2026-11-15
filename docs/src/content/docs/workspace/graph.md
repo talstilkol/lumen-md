@@ -30,6 +30,16 @@ note in the middle, and the notes within **1, 2 or 3** links of it. It has
 the same tag and folder filters, and is coloured by folder. It follows you
 as you open other notes, and opens in well under a fifth of a second.
 
+## The time slider
+
+"Up to" narrows the graph to the notes dated up to a day — by **Last saved**
+or by **Created** (the note's `created` property, else its `date`). Notes
+with no such date always stay. It works together with the tag, folder and
+property filters, and the table view lists exactly the notes the graph
+draws. In Hebrew the slider runs right to left; ←/→, Home and End move it,
+and Play steps through the days. It is the same slider as the entity
+graph's.
+
 ## With the keyboard
 
 The graph is one focusable area. Tab to it, and:
