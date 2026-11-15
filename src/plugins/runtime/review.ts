@@ -220,6 +220,11 @@ export function cssFindings(css: string, allowed: readonly string[] = CSS_ALLOWE
       out.push({ rule: "css-import", severity: "error", detail: load.target.slice(0, 120) });
       continue;
     }
+    if (load.kind === "substitution") {
+      // Review Z7-M1: the value a var()/env()/attr() puts into a URL function is not known here, so it is refused.
+      out.push({ rule: "css-remote-url", severity: "error", detail: `${load.target}: the loaded value is not reviewable` });
+      continue;
+    }
     const origin = remoteTarget(load.target, allowed);
     if (origin) out.push({ rule: "css-remote-url", severity: "error", detail: `${origin}: ${JSON.stringify(load.target.slice(0, 120))}` });
   }
