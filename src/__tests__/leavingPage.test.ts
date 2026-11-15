@@ -89,9 +89,12 @@ describe("the ?import= link", () => {
   });
 
   it("App reads it once at start and opens the wizard", () => {
+    // The reading moved from App.tsx into its hook (max-lines, train 7); App calls the hook.
     const app = readFileSync("src/App.tsx", "utf8");
-    expect(app).toContain("importFromSearch(window.location.search)");
-    expect(app).toContain('url.searchParams.delete("import")');
+    expect(app).toContain("useImportPreset(() => setImportOpen(true))");
+    const hook = readFileSync("src/hooks/useImportPreset.ts", "utf8");
+    expect(hook).toContain("importFromSearch(window.location.search)");
+    expect(hook).toContain('url.searchParams.delete("import")');
   });
 
   it("is in the docs sidebar in both languages", () => {

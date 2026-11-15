@@ -391,7 +391,10 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
           const detail = [r.note, guardNote, repairNote, argsText].filter(Boolean).join(" · ");
           step({ kind: "tool", ms: Date.now() - t1, label: call.name, ok: r.error === undefined, detail: r.error ?? detail });
           messages.push({ role: "tool", content: body, toolCallId: call.id, name: call.name });
-          const v = rg.observe({ error: r.error, call });
+          // A call the user declined (plan 2.7) is the user's answer, not the model failing in a loop: the
+          // same declined error is not counted (the same call still is). R12.18 with the injection set.
+          const declined = typeof r.error === "string" && r.error.includes(guard.UNTRUSTED_DENIED);
+          const v = rg.observe({ error: declined ? null : r.error, call });
           if (v.action !== "ok") step({ kind: "validate", ms: 0, label: "runaway", ok: !stops(v), detail: `${v.action}: ${v.reason}` });
           if (stops(v)) {
             runaway = v;
