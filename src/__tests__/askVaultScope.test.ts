@@ -110,7 +110,7 @@ describe("one scope for MCP and the app", () => {
     cfg.scope = VAULT_SCOPE;
     writeFileSync(configPath(vault), JSON.stringify(cfg));
     const ep = new McpEndpoint({ vault });
-    const r = (await ep.handle({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "list_notes", arguments: {}, _meta: { [META.protocolVersion]: "2026-07-28", [META.clientInfo]: { name: "claude-code", version: "1" }, [META.clientCapabilities]: {} } } })) as { result: { content: { text: string }[] } };
+    const r = (await ep.handle({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "list_notes", arguments: {}, _meta: { [META.protocolVersion]: "2026-07-28", [META.clientInfo]: { name: "claude-code", version: "1" }, [META.clientCapabilities]: {} } } })) as unknown as { result: { content: { text: string }[] } };
     const mcpVisible = new Set(r.result.content.map((c) => c.text).join("\n").split("\n").filter(Boolean));
     const app = scopeFilter(await loadVaultScope(readVault));
     for (const [p, c] of Object.entries(NOTES)) expect(app(p, c), p).toBe(mcpVisible.has(p));
