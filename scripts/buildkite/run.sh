@@ -80,6 +80,8 @@ mkdir -p "$CACHE/npm"
 envs=(); for v in "${PASS[@]}"; do [ -n "${!v+x}" ] && envs+=(-e "$v"); done
 uid="$(id -u):$(id -g)"
 # --ipc=host: Chromium needs more shared memory than Docker's 64 MB; --init reaps a server left in the background.
-exec "$DOCKER" run --rm --init --ipc=host -u "$uid" \
+# LUMEN_CI_DOCKER_NET: the job joins a network of pinned service containers (the real-model steps, plan 7.2).
+net=(); [ -n "${LUMEN_CI_DOCKER_NET:-}" ] && net=(--network "$LUMEN_CI_DOCKER_NET")
+exec "$DOCKER" run --rm --init --ipc=host "${net[@]}" -u "$uid" \
   -e HOME=/tmp/home -e npm_config_cache=/cache/npm -e LUMEN_CI_EXEC_INSIDE=docker "${envs[@]}" \
   -v "$PWD:/lumen" -v "$CACHE:/cache" -w /lumen "$TAG" bash "$SCRIPT"

@@ -649,6 +649,114 @@ steps:
           limit: 2
         - exit_status: 255
           limit: 1
+  - label: ":robot_face: real tiny model (qwen3:0.6b)"
+    key: "real-model-pr"
+    command: |-
+      set -euo pipefail
+      pins() { node scripts/real-model-pins.mjs "$$@"; }
+      pins check --model qwen3:0.6b --image ollama/ollama
+      NET="lumen-rm-$${BUILDKITE_JOB_ID:-local}"
+      STORE="$$(pins cache-dir qwen3:0.6b "$${LUMEN_CI_CACHE:-$$HOME/.cache/lumen-ci}")"
+      mkdir -p "$$STORE"
+      docker network create "$$NET" > /dev/null
+      trap 'docker rm -f "$$NET-ollama" "$$NET-lt" "$$NET-sx" > /dev/null 2>&1 || true; docker network rm "$$NET" > /dev/null 2>&1 || true' EXIT
+      docker run -d --rm --name "$$NET-ollama" --network "$$NET" --network-alias ollama -v "$$STORE:/root/.ollama" "$$(pins image ollama/ollama)" > /dev/null
+      export LUMEN_CI_DOCKER_NET="$$NET"
+      LUMEN_CI_JOB=real-model-pr bash scripts/buildkite/run.sh <<'LUMEN_JOB'
+      gate 'Every agent against the real model, at the pinned digest' LUMEN_REAL_MODEL_REQUIRED=1 LUMEN_REAL_OLLAMA_URL=http://ollama:11434 <<'LUMEN_STEP'
+      npm run -s ci:real-model -- --model qwen3:0.6b --digest "$$(node scripts/real-model-pins.mjs digest qwen3:0.6b)"
+      LUMEN_STEP
+      gates_done
+      LUMEN_JOB
+    agents:
+      queue: "linux"
+    timeout_in_minutes: 30
+    notify:
+      - github_commit_status:
+          context: "lumen/buildkite: real-model-pr"
+    retry:
+      automatic:
+        - exit_status: -1
+          limit: 2
+        - exit_status: 255
+          limit: 1
+    artifact_paths:
+      - "eval/results/real-*"
+    if_changed: "src/agents/**"
+  - label: ":crescent_moon: real model, multi-step (qwen3:1.7b) + LanguageTool, SearXNG"
+    key: "real-model-nightly"
+    command: |-
+      set -euo pipefail
+      pins() { node scripts/real-model-pins.mjs "$$@"; }
+      pins check --model qwen3:1.7b --image ollama/ollama --image erikvl87/languagetool --image searxng/searxng
+      NET="lumen-rm-$${BUILDKITE_JOB_ID:-local}"
+      STORE="$$(pins cache-dir qwen3:1.7b "$${LUMEN_CI_CACHE:-$$HOME/.cache/lumen-ci}")"
+      mkdir -p "$$STORE"
+      docker network create "$$NET" > /dev/null
+      trap 'docker rm -f "$$NET-ollama" "$$NET-lt" "$$NET-sx" > /dev/null 2>&1 || true; docker network rm "$$NET" > /dev/null 2>&1 || true' EXIT
+      docker run -d --rm --name "$$NET-ollama" --network "$$NET" --network-alias ollama -v "$$STORE:/root/.ollama" "$$(pins image ollama/ollama)" > /dev/null
+      docker run -d --rm --name "$$NET-lt" --network "$$NET" --network-alias languagetool -e Java_Xms=512m -e Java_Xmx=1g "$$(pins image erikvl87/languagetool)" > /dev/null
+      docker run -d --rm --name "$$NET-sx" --network "$$NET" --network-alias searxng -v "$$PWD/docker/searxng/settings.yml:/etc/searxng/settings.yml:ro" "$$(pins image searxng/searxng)" > /dev/null
+      export LUMEN_CI_DOCKER_NET="$$NET"
+      LUMEN_CI_JOB=real-model-nightly bash scripts/buildkite/run.sh <<'LUMEN_JOB'
+      gate 'Every agent against the real model, at the pinned digest' LUMEN_REAL_MODEL_REQUIRED=1 LUMEN_REAL_OLLAMA_URL=http://ollama:11434 <<'LUMEN_STEP'
+      npm run -s ci:real-model -- --model qwen3:1.7b --digest "$$(node scripts/real-model-pins.mjs digest qwen3:1.7b)"
+      LUMEN_STEP
+      gate 'LanguageTool and SearXNG for real' LUMEN_REAL_LANGUAGETOOL_URL=http://languagetool:8010/v2/check LUMEN_REAL_SEARXNG_URL=http://searxng:8080 <<'LUMEN_STEP'
+      for i in $$(seq 1 60); do curl -sf http://languagetool:8010/v2/languages > /dev/null && break; sleep 2; done
+      npx vitest run --config vitest.eval.config.ts --reporter dot src/agents/eval/services.eval.ts
+      LUMEN_STEP
+      gates_done
+      LUMEN_JOB
+    agents:
+      queue: "linux"
+    timeout_in_minutes: 45
+    notify:
+      - github_commit_status:
+          context: "lumen/buildkite: real-model-nightly"
+    retry:
+      automatic:
+        - exit_status: -1
+          limit: 2
+        - exit_status: 255
+          limit: 1
+    artifact_paths:
+      - "eval/results/real-*"
+    if: "build.source == \"schedule\""
+  - label: ":crescent_moon: Hebrew smoke (DictaLM 3.0 1.7B)"
+    key: "real-model-hebrew"
+    command: |-
+      set -euo pipefail
+      pins() { node scripts/real-model-pins.mjs "$$@"; }
+      pins check --model hf.co/dicta-il/DictaLM-3.0-1.7B-Thinking-GGUF --image ollama/ollama
+      NET="lumen-rm-$${BUILDKITE_JOB_ID:-local}"
+      STORE="$$(pins cache-dir hf.co/dicta-il/DictaLM-3.0-1.7B-Thinking-GGUF "$${LUMEN_CI_CACHE:-$$HOME/.cache/lumen-ci}")"
+      mkdir -p "$$STORE"
+      docker network create "$$NET" > /dev/null
+      trap 'docker rm -f "$$NET-ollama" "$$NET-lt" "$$NET-sx" > /dev/null 2>&1 || true; docker network rm "$$NET" > /dev/null 2>&1 || true' EXIT
+      docker run -d --rm --name "$$NET-ollama" --network "$$NET" --network-alias ollama -v "$$STORE:/root/.ollama" "$$(pins image ollama/ollama)" > /dev/null
+      export LUMEN_CI_DOCKER_NET="$$NET"
+      LUMEN_CI_JOB=real-model-hebrew bash scripts/buildkite/run.sh <<'LUMEN_JOB'
+      gate 'Hebrew smoke test, at the pinned digest' LUMEN_REAL_MODEL_REQUIRED=1 LUMEN_REAL_OLLAMA_URL=http://ollama:11434 <<'LUMEN_STEP'
+      npm run -s ci:real-model -- --hebrew-smoke --model hf.co/dicta-il/DictaLM-3.0-1.7B-Thinking-GGUF --digest "$$(node scripts/real-model-pins.mjs digest hf.co/dicta-il/DictaLM-3.0-1.7B-Thinking-GGUF)"
+      LUMEN_STEP
+      gates_done
+      LUMEN_JOB
+    agents:
+      queue: "linux"
+    timeout_in_minutes: 45
+    notify:
+      - github_commit_status:
+          context: "lumen/buildkite: real-model-hebrew"
+    retry:
+      automatic:
+        - exit_status: -1
+          limit: 2
+        - exit_status: 255
+          limit: 1
+    artifact_paths:
+      - "eval/results/real-*"
+    if: "build.source == \"schedule\""
   - label: ":lock_with_ink_pen: signed receipt"
     key: "receipt"
     depends_on:
@@ -690,9 +798,15 @@ steps:
         allow_failure: true
       - step: "e2e-receipt"
         allow_failure: true
+      - step: "real-model-pr"
+        allow_failure: true
+      - step: "real-model-nightly"
+        allow_failure: true
+      - step: "real-model-hebrew"
+        allow_failure: true
     command: |-
       buildkite-agent artifact download 'ci-out/vitest-summary.json' . || true
-      node scripts/buildkite/receipt.mjs --gates vitest,vitest-merge,static,lint,licenses,build,e2e-chromium,e2e-firefox,e2e-webkit,e2e-prod,e2e-headers,local-ai,ocr-cer,lighthouse,pr-check,security,security-nightly,e2e-shards,e2e-receipt
+      node scripts/buildkite/receipt.mjs --gates vitest,vitest-merge,static,lint,licenses,build,e2e-chromium,e2e-firefox,e2e-webkit,e2e-prod,e2e-headers,local-ai,ocr-cer,lighthouse,pr-check,security,security-nightly,e2e-shards,e2e-receipt,real-model-pr,real-model-nightly,real-model-hebrew
     agents:
       queue: "linux"
     artifact_paths:
