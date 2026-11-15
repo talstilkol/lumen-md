@@ -29,6 +29,7 @@ import { EmptyState, runCommand } from "./EmptyState";
 import { HelpButton } from "./HelpButton";
 import "./searchDialogStrings";
 import { Modal } from "./Modal";
+import { renderSnippet } from "./searchSnippet";
 
 interface Props {
   open: boolean;
@@ -831,26 +832,5 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
         </div>
       </div>
     </Modal>
-  );
-}
-
-function renderSnippet(hit: SearchHit): React.ReactNode {
-  if (!hit.snippet) return null;
-  if (!hit.match) return hit.snippet;
-  const { start, end } = hit.match;
-  return (
-    <>
-      {hit.snippet.slice(0, start)}
-      <mark
-        style={{
-          background: "hsl(var(--accent) / 0.25)",
-          color: "hsl(var(--fg))",
-          padding: 0,
-        }}
-      >
-        {hit.snippet.slice(start, end)}
-      </mark>
-      {hit.snippet.slice(end)}
-    </>
   );
 }

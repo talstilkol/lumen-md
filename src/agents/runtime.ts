@@ -25,9 +25,7 @@ import type {
   ToolContext,
   ToolScope,
 } from "./types";
-import { configuredOllamaModel, installedOllamaModels } from "./executors/ollama";
-import { measuredModelFor } from "../ai/defaults";
-import { DEFAULT_EXECUTOR_ORDER, getExecutor, listExecutors, pickExecutor } from "./executors";
+import { DEFAULT_EXECUTOR_ORDER, getExecutor, listExecutors, measuredModel, pickExecutor } from "./executors";
 import { parseProtocolTurn, protocolSchema, toolProtocolPrompt, toolResultMessage } from "./protocol";
 import { repairCall, retryMessage } from "./toolRepair";
 import { hebrewRatio } from "../text/hebrew";
@@ -548,12 +546,10 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     }
     run.executor = executor.id;
     const tier: ModelTier = patch.tier ?? tierOf(executor.id);
-    // The model is resolved once here and pinned on the request, so the
-    // capability decision (native tools / schema) and the call agree.
+    // The model (an agent's measured default first, plan 7.9) is resolved once here and pinned on the
+    // request, so the capability decision (native tools / schema) and the call agree.
     const offered = modelTools(def);
-    // Plan 7.9: an agent's measured default (src/ai/defaults.ts, from real eval runs) when it is installed and the user picked no model.
-    const measured = executor.id === "ollama" ? measuredModelFor(def.id, installedOllamaModels(), configuredOllamaModel()) : null;
-    const model = patch.model ?? measured ?? executor.modelFor(tier, { tools: offered.length > 0 });
+    const model = patch.model ?? measuredModel(def.id, executor.id) ?? executor.modelFor(tier, { tools: offered.length > 0 });
     // Small models get every turn held to a JSON Schema where the executor can
     // (5.3.5): JSON-ReAct under the protocol's schema is more reliable for
     // them than free-form native tool calls, whose arguments and final answer

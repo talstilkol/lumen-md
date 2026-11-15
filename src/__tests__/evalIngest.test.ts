@@ -143,9 +143,11 @@ describe("the app reads the result", () => {
   });
 
   it("the agent runtime runs the measured default; the catalog ranks by measured scores", () => {
+    // The resolution lives in src/agents/executors/index.ts (measuredModel), so runtime.ts stays under its max-lines baseline.
+    const executors = readFileSync(join(ROOT, "src/agents/executors/index.ts"), "utf8");
+    expect(executors).toMatch(/executorId === "ollama" \? measuredModelFor\(agentId, installedOllamaModels\(\), configuredOllamaModel\(\)\) : null/);
     const runtime = readFileSync(join(ROOT, "src/agents/runtime.ts"), "utf8");
-    expect(runtime).toMatch(/measuredModelFor\(def\.id, installedOllamaModels\(\), configuredOllamaModel\(\)\)/);
-    expect(runtime).toMatch(/const model = patch\.model \?\? measured \?\? executor\.modelFor/);
+    expect(runtime).toMatch(/const model = patch\.model \?\? measuredModel\(def\.id, executor\.id\) \?\? executor\.modelFor/);
     const catalog = readFileSync(join(ROOT, "src/ai/modelCatalog.ts"), "utf8");
     expect(catalog).toContain("MEASURED_SCORES[e.name] ?? e.measured");
     expect(JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")).scripts["eval:ingest"]).toBe("node scripts/eval/ingest.mjs");

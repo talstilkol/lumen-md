@@ -27,6 +27,7 @@ import type { VaultBackend } from "./types";
 import { createTauriBackend, isDesktopApp, loadTauriInvoke, type TauriInvoke } from "./tauri";
 import { createMobileBackend, isMobileApp, loadMobileBridge, mobileFsFor, type MobileBridge, type MobileStore } from "./mobile";
 import { observeDirectoryHandle, watchExternalChanges } from "./watcher";
+import { warnUnreadable } from "./watchNotice";
 import { VaultMoveConflictError, refuseEncryptedMove, VaultPermissionError, allEntries, bytes, parentsOf, preflight, saveLateWrites, same, sha256, targetBytes, trashLeftovers } from "./moveCheck";
 import { __resetIdentity, activeVaultId, adoptIdentity, enterIdentity, identityOrNull } from "./identity";
 import type { MoveReport } from "./moveCheck";
@@ -260,17 +261,6 @@ export function setOnVaultReplaced(fn: () => void): void {
 }
 
 let stopWatching: (() => void) | null = null;
-
-/**
- * The one-time notice for a sub-folder the watcher skips because it keeps
- * failing to list (review t5, L1): changes in it are not noticed until it can
- * be read again. The toast store and i18n load here, off the startup path.
- */
-function warnUnreadable(dir: string): void {
-  void Promise.all([import("../../store/useToastStore"), import("../../i18n")])
-    .then(([{ toast }, { t }]) => toast.warn(t("vault.watch.unreadable.title"), t("vault.watch.unreadable.body", { folder: dir })))
-    .catch(() => undefined);
-}
 
 /**
  * Watch a folder vault for changes made outside Lumen (plan 4.4). OPFS is
