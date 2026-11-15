@@ -13,7 +13,7 @@ import { ensureAnchor, paragraphByAnchor, paragraphHash, splitParagraphs } from 
 import { edgeSourceState, makeProvenance, markSourceChanges, quoteInParagraph } from "../entities/provenance";
 import { appendEdge, mergeProposals, parseJsonl, proposalKey, readEdges, toJsonl, PROPOSALS_PATH, type Proposal } from "../entities/store";
 import { entityNote, parseEntityNote, relationProps } from "../entities/notes";
-import { splitFrontmatter } from "../storage/import/frontmatter";
+import { splitFrontmatter } from "../entities/frontmatter";
 
 const NOTE = "יומן/פגישה.md";
 const CONTENT = [
