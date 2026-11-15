@@ -460,6 +460,8 @@
   "cmd.tools.writingGoal.hint": "Ein dezenter Fortschrittsbalken über dem Editor",
   "cmd.tools.writingGoal.set": "✍️ Schreibziel: {{words}} Wörter/Tag",
   "cmd.tools.writingGoal.unset": "✍️ Tägliches Schreibziel festlegen",
+  "cmd.typesAll": "Alle {type}",
+  "cmd.typesPage": "Typen: alle Objekte nach Typ",
   "cmd.usage": "Hilfe: Nutzung auf diesem Gerät",
   "cmd.usage.hint": "Zähler auf diesem Gerät und ein Wochenbericht, den du senden kannst — nichts geht ohne deinen Klick hinaus",
   "cmd.vault.backups": "Backups…",

@@ -26,13 +26,14 @@ import { onWorkspaceChanged } from "../../storage/workspaceEvents";
 import { useAppStore } from "../../store/useStore";
 import { editNote } from "../databaseEdit";
 import { selectRows } from "../bulkEdit";
-import { addDays, csvToNotes, daysBetween, monthWeeks, moveDateInText, pinnedProperties, resultToCsv, rowsByDay, timelineItems, visibleWindow, writableKey } from "./viewsData";
+import { addDays, daysBetween, monthWeeks, moveDateInText, rowsByDay, tableKeyMove, timelineItems, visibleWindow, writableKey } from "./viewsData";
 import { showAiToast } from "../../ui/AiToast";
 import { log } from "../../lib/logger";
 import { t } from "../../i18n";
 import "./basesBlockStrings";
 import { explainError } from "../../lib/userError";
 import { EmptyState, learnHow } from "../../ui/EmptyState";
+import { downloadCsv, importCsv } from "./basesCsv";
 
 const DatabaseMapView = lazy(() => import("../DatabaseMapView"));
 // Bulk property editing (W7.4): the same bar as the database block, loaded on the first selection.
@@ -122,7 +123,11 @@ function nameCell(row: BaseRow, id: string, files: readonly BasesFile[]): ReactN
   return <Cell value={row.cells[id]} files={files} />;
 }
 
-export default function BasesBlock({ source, meta }: { source: string; meta?: string }) {
+/**
+ * `select` (W12.T3, a type's page): the rows come from these paths, chosen
+ * by the type registry, instead of the base's own `filters:`.
+ */
+export default function BasesBlock({ source, meta, select }: { source: string; meta?: string; select?: (files: readonly BasesFile[]) => ReadonlySet<string> }) {
   const embed = useMemo(() => parseBaseEmbedMeta(meta), [meta]);
   const activePath = useAppStore((s) => s.doc.workspaceName ?? null);
   const [files, setFiles] = useState<BasesFile[]>([]);
@@ -184,8 +189,9 @@ export default function BasesBlock({ source, meta }: { source: string; meta?: st
   const result: BaseResult | null = useMemo(() => {
     if (!base) return null;
     const views = sortOverride ? base.views.map((v, i) => (i === current ? { ...v, sort: sortOverride } : v)) : base.views;
+    if (select) return runBase({ ...base, views, filters: undefined }, files, { view: current, thisFile, only: select(files) });
     return runBase({ ...base, views }, files, { view: current, thisFile });
-  }, [base, files, current, sortOverride, thisFile]);
+  }, [base, files, current, sortOverride, thisFile, select]);
 
   if (loadError || (parsed && !parsed.ok)) {
     return (
@@ -348,8 +354,34 @@ interface TableSelect {
   total: number;
 }
 
-function TableView({ result, files, sort, onSort, select }: ViewProps & { sort: BasesSort[]; onSort: (id: string) => void; select: TableSelect }) {
+const NO_SELECT: TableSelect = { has: () => false, click: () => undefined, toggleAll: () => undefined, count: 0, total: 0 };
+
+export function TableView({ result, files, sort, onSort, select = NO_SELECT }: ViewProps & { sort: BasesSort[]; onSort: (id: string) => void; select?: TableSelect }) {
   const cols = result.columns;
+  // W12.T3: one cell is in the tab order (roving tabindex); arrows move it, as the text runs.
+  const [focus, setFocus] = useState<{ row: number; col: number }>({ row: 0, col: 0 });
+  const rowList = useMemo(() => (result.groups ? result.groups.flatMap((g) => g.rows) : result.rows), [result]);
+  const rowAt = useMemo(() => new Map(rowList.map((r, i) => [r, i])), [rowList]);
+  const onCellKey = (e: ReactKeyboardEvent<HTMLTableCellElement>, row: number, col: number) => {
+    if (e.key === "Enter" && (cols[col].id === "file.name" || cols[col].id === "file.basename")) {
+      e.preventDefault();
+      openFile(rowList[row].file.path);
+      return;
+    }
+    const rtl = getComputedStyle(e.currentTarget).direction === "rtl" || isRtl();
+    const next = tableKeyMove(e.key, { ctrl: e.ctrlKey || e.metaKey, rtl }, { row, col }, { rows: rowList.length, cols: cols.length });
+    if (!next) return;
+    e.preventDefault();
+    setFocus(next);
+    const scroller = e.currentTarget.closest("[data-testid=base-table-scroll]");
+    if (virtual && scroller) {
+      const index = items.findIndex((it) => it.kind === "row" && it.row === rowList[next.row]);
+      // Spacer rows keep the scrollbar true, so a row's top is its item index × the row height.
+      const top = index * ROW_H;
+      if (top < scroller.scrollTop || top > scroller.scrollTop + viewport - ROW_H) scroller.scrollTop = Math.max(0, top - viewport / 2);
+    }
+    requestAnimationFrame(() => (scroller?.querySelector(`[data-cell="${next.row}:${next.col}"]`) as HTMLElement | null)?.focus());
+  };
   const summaryIds = Object.keys(result.summaries);
   const items: TableItem[] = useMemo(() => {
     const out: TableItem[] = [];
@@ -368,7 +400,7 @@ function TableView({ result, files, sort, onSort, select }: ViewProps & { sort: 
   const cell = { padding: "4px 6px", borderBlockEnd: "1px solid hsl(var(--border))", blockSize: virtual ? ROW_H - 9 : undefined, whiteSpace: virtual ? ("nowrap" as const) : undefined, overflow: "hidden", textOverflow: "ellipsis" };
   return (
     <div ref={scroller} style={{ overflow: "auto", maxBlockSize: virtual ? viewport : undefined }} onScroll={virtual ? (e) => setScrollTop(e.currentTarget.scrollTop) : undefined} data-testid="base-table-scroll" data-virtual={virtual || undefined}>
-      <table style={{ inlineSize: "100%", borderCollapse: "collapse", fontSize: 12 }} aria-rowcount={virtual ? items.length + 1 : undefined}>
+      <table role="grid" style={{ inlineSize: "100%", borderCollapse: "collapse", fontSize: 12 }} aria-rowcount={virtual ? items.length + 1 : undefined}>
         <thead style={virtual ? { position: "sticky", insetBlockStart: 0, background: "hsl(var(--bg))", zIndex: 1 } : undefined}>
           <tr>
             <th scope="col" style={{ inlineSize: 24, padding: "4px 6px", borderBlockEnd: "1px solid hsl(var(--border))" }}>
@@ -418,11 +450,15 @@ function TableView({ result, files, sort, onSort, select }: ViewProps & { sort: 
                     />
                   )}
                 </td>
-                {cols.map((c) => (
-                  <td key={c.id} style={cell}>
-                    {nameCell(it.row, c.id, files)}
-                  </td>
-                ))}
+                {cols.map((c, ci) => {
+                  const ri = rowAt.get(it.row) ?? -1;
+                  const here = ri === focus.row && ci === focus.col;
+                  return (
+                    <td key={c.id} style={cell} tabIndex={here ? 0 : -1} data-cell={`${ri}:${ci}`} onKeyDown={(e) => onCellKey(e, ri, ci)} onFocus={() => (here ? undefined : setFocus({ row: ri, col: ci }))}>
+                      {nameCell(it.row, c.id, files)}
+                    </td>
+                  );
+                })}
               </tr>
             ),
           )}
@@ -521,40 +557,6 @@ function MapView({ result }: { result: BaseResult }) {
   );
   const fields = result.columns.filter((c) => c.id !== "file.name").map((c) => c.label);
   return <DatabaseMapView rows={rows} spec={{ location: "location" }} fields={fields} />;
-}
-
-/* ─── CSV (W1.12) ────────────────────────────────────────────────────── */
-
-function downloadCsv(result: BaseResult, name: string) {
-  const blob = new Blob(["\uFEFF", resultToCsv(result)], { type: "text/csv;charset=utf-8" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = `${name.replace(/^.*\//, "").replace(/\.base$/i, "") || "base"}.csv`;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-}
-
-/** Pick a CSV and add one note per row to a folder named after the base, with the properties its filter pins. */
-async function importCsv(base: BaseModel, name: string, files: readonly BasesFile[]) {
-  const file = await new Promise<File | null>((resolve) => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".csv,text/csv";
-    input.onchange = () => resolve(input.files?.[0] ?? null);
-    input.addEventListener("cancel", () => resolve(null));
-    input.click();
-  });
-  if (!file) return;
-  const folder = name.replace(/^.*\//, "").replace(/\.base$/i, "") || "Imported";
-  try {
-    const notes = csvToNotes(await file.text(), folder, { extra: pinnedProperties(base.filters), taken: new Set(files.map((f) => f.path)) });
-    for (const n of notes) await writeWorkspaceFile(n.path, n.content);
-    const { notifyWorkspaceChanged } = await import("../../storage/workspaceEvents");
-    notifyWorkspaceChanged({ kind: "structure", paths: notes.map((n) => n.path) });
-    showAiToast(t("base.csv.imported", { count: notes.length, folder }));
-  } catch (e) {
-    showAiToast(t("base.csv.failed", { error: explainError(e) }), "error");
-  }
 }
 
 /* ─── Calendar and timeline (W1.12) ──────────────────────────────────── */
