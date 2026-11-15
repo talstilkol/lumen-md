@@ -26,7 +26,9 @@ import { fromMarkdown } from "mdast-util-from-markdown";
 import { toMarkdown } from "mdast-util-to-markdown";
 import { roundTripSafe } from "../editor/markdownSerialize.mjs";
 import { parseSpec } from "./helpers/mdSpec";
-import { OUT, ROUND_TRIP_EXCEPTIONS, SPEC, TARGET, parseSpecText, score } from "../../scripts/md-conformance.mjs";
+import { OUT, ROUND_TRIP_EXCEPTIONS, SPEC, TARGET, mdCards, parseSpecText, rowScores, score } from "../../scripts/md-conformance.mjs";
+// @ts-expect-error plain JavaScript
+import { validateCard } from "../../scripts/lib/evalCard.mjs";
 
 const text = readFileSync(SPEC, "utf8");
 const examples = parseSpecText(text);
@@ -162,6 +164,22 @@ describe("CommonMark 0.31.2 conformance (W11.Q8)", () => {
     expect(committed.versions).toEqual(P.versions);
     const fresh = score(examples, P);
     expect(committed.rows.filter((r: { kind: string }) => r.kind !== "app")).toEqual(fresh);
+  });
+
+  it("the committed results carry their eval card (W11.I18): round-trip dev, parser public, built from the rows", () => {
+    const committed = JSON.parse(readFileSync(OUT, "utf8"));
+    const fresh = score(examples, P);
+    expect(validateCard(committed.card)).toEqual([]);
+    expect(committed.card).toEqual(mdCards(fresh, P.versions).card);
+    expect(committed.cards).toEqual(mdCards(fresh, P.versions).cards);
+    expect(committed.card.tag).toBe("dev");
+    expect(committed.cards.parser.tag).toBe("public");
+    expect(validateCard(committed.cards.parser)).toEqual([]);
+    const rt = fresh.find((r: { kind: string }) => r.kind === "round-trip");
+    expect(committed.card.n).toBe(rt.total);
+    expect(committed.card.metrics.html_kept.value).toBeCloseTo(rt.passed / rt.total, 6);
+    // rowScores refuses a row whose exceptions do not account for its failures.
+    expect(() => rowScores({ ...rt, exceptions: rt.exceptions.slice(1) })).toThrow(/exceptions listed/);
   });
 });
 

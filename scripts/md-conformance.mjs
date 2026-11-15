@@ -19,11 +19,21 @@
  *     HTML for the same input: does saving through the AST keep what the
  *     note means?
  *   - app (with --app): the preview's renderer, from the vitest report.
+ *
+ * Eval cards (W11.I18, scripts/lib/evalCard.mjs `makeCard`), built from the
+ * rows alone (an example scores 1 unless it is listed as an exception):
+ *   - parser: tag `public`, the whole published spec (652 examples), and we
+ *     did not tune micromark on it;
+ *   - round-trip: tag `dev`, because src/editor/markdownSerialize.mjs was fixed on
+ *     these very examples (461, 463), so the spec is not held out from it.
+ * The report's top-level `card` is the round-trip one: the app's own claim.
+ * No card yet for the app rows; they need the Mac run (--app).
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { roundTripSafe } from "../src/editor/markdownSerialize.mjs";
+import { makeCard } from "./lib/evalCard.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export const SPEC = "src/__tests__/fixtures/md-spec/commonmark-0.31.2.txt";
@@ -95,6 +105,38 @@ export function score(examples, p) {
   ];
 }
 
+export const SPEC_SOURCE = "https://spec.commonmark.org/0.31.2/";
+
+/** Per-example 0/1 scores of a row, from its own counts and exceptions (no rerun). */
+export function rowScores(row) {
+  const failed = new Set(row.exceptions.map((e) => e.example));
+  if (failed.size !== row.total - row.passed) throw new Error(`${row.kind}: ${row.total - row.passed} failures but ${failed.size} exceptions listed`);
+  return Array.from({ length: row.total }, (_, i) => (failed.has(i + 1) ? 0 : 1));
+}
+
+/** The eval cards of the parser and round-trip rows: { card (round-trip), cards: { parser, "round-trip" } }. */
+export function mdCards(rows, versions) {
+  const dataset = (split) => ({ name: "commonmark-spec", version: "0.31.2", license: "CC-BY-SA-4.0", source: SPEC_SOURCE, split });
+  const byKind = Object.fromEntries(rows.filter((r) => r.kind !== "app").map((r) => [r.kind, r]));
+  const parser = makeCard({
+    tag: "public",
+    model: { name: `micromark ${versions.micromark}`, digest: `npm:micromark@${versions.micromark}` },
+    seed: 1,
+    temperature: 0,
+    dataset: dataset("all examples of the published spec; micromark is not tuned on it"),
+    scores: { html_exact: rowScores(byKind.parser) },
+  });
+  const roundTrip = makeCard({
+    tag: "dev",
+    model: { name: "mdast round trip with src/editor/markdownSerialize.mjs", digest: `npm:mdast-util-from-markdown@${versions["mdast-util-from-markdown"]}+mdast-util-to-markdown@${versions["mdast-util-to-markdown"]}+micromark@${versions.micromark}` },
+    seed: 1,
+    temperature: 0,
+    dataset: dataset("all examples of the published spec; dev, because the round-trip handlers were fixed on these examples"),
+    scores: { html_kept: rowScores(byKind["round-trip"]) },
+  });
+  return { card: roundTrip, cards: { parser, "round-trip": roundTrip } };
+}
+
 /** The app renderer's rows from mdConformance.test.ts's report.json (Mac). */
 export function appRows(report, examples) {
   return report.map((r) => ({
@@ -118,7 +160,7 @@ async function main() {
   const appAt = argv.indexOf("--app");
   if (appAt >= 0) rows = [...rows, ...appRows(JSON.parse(readFileSync(argv[appAt + 1], "utf8")), examples)];
   else if (prev) rows = [...rows, ...prev.rows.filter((r) => r.kind === "app")];
-  const out = { schema: 1, generator: "scripts/md-conformance.mjs", origin: "real", source: `${SPEC} (commonmark/commonmark-spec 0.31.2, CC BY-SA 4.0)`, versions: p.versions, rows };
+  const out = { schema: 1, generator: "scripts/md-conformance.mjs", origin: "real", source: `${SPEC} (commonmark/commonmark-spec 0.31.2, CC BY-SA 4.0)`, versions: p.versions, ...mdCards(rows, p.versions), rows };
   const text = `${JSON.stringify(out, null, 2)}\n`;
   if (argv.includes("--check")) {
     const have = existsSync(join(ROOT, OUT)) ? readFileSync(join(ROOT, OUT), "utf8") : "";

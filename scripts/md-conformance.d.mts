@@ -23,3 +23,6 @@ export function parseSpecText(text: string): Example[];
 export function loadParsers(root?: string): Promise<{ micromark: (md: string, o?: object) => string; fromMarkdown: (md: string) => unknown; toMarkdown: (tree: unknown) => string; versions: Record<string, string> }>;
 export function score(examples: Example[], p: { micromark: (md: string, o?: object) => string; fromMarkdown: (md: string) => unknown; toMarkdown: (tree: never) => string; versions: Record<string, string> }): Row[];
 export function appRows(report: unknown[], examples: Example[]): Row[];
+export const SPEC_SOURCE: string;
+export function rowScores(row: Row): number[];
+export function mdCards(rows: Row[], versions: Record<string, string>): { card: Record<string, any>; cards: Record<"parser" | "round-trip", Record<string, any>> };
