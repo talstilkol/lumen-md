@@ -5,8 +5,11 @@
  *
  * Runs now, on the real packages at the lockfile's versions:
  *   - the parser (micromark) gives the spec's HTML for all 652 examples;
- *   - Markdown → AST → Markdown keeps the HTML for all but 7, each with its
- *     reason (serializer bugs in mdast-util-to-markdown 2.1.2);
+ *   - Markdown → AST → Markdown, with the app's handlers
+ *     (src/editor/markdownSerialize.mjs), keeps the HTML for all but 5, each
+ *     with its reason (serializer bugs in mdast-util-to-markdown 2.1.2):
+ *     647/652, over the 99% target. Nested emphasis (461, 463) and an
+ *     indented HTML block after a list are fixed and pinned below;
  *   - the committed results file is what a run gives now.
  *
  * Property tests (fast-check, installed with W10.M2) are skipped until the
@@ -21,27 +24,24 @@ import { readFileSync } from "node:fs";
 import { micromark } from "micromark";
 import { fromMarkdown } from "mdast-util-from-markdown";
 import { toMarkdown } from "mdast-util-to-markdown";
+import { roundTripSafe } from "../editor/markdownSerialize.mjs";
 import { parseSpec } from "./helpers/mdSpec";
 import { OUT, ROUND_TRIP_EXCEPTIONS, SPEC, TARGET, parseSpecText, score } from "../../scripts/md-conformance.mjs";
 
 const text = readFileSync(SPEC, "utf8");
 const examples = parseSpecText(text);
 const versions = (n: string) => JSON.parse(readFileSync(`node_modules/${n}/package.json`, "utf8")).version as string;
-const P = { micromark, fromMarkdown, toMarkdown, versions: { micromark: versions("micromark"), "mdast-util-from-markdown": versions("mdast-util-from-markdown"), "mdast-util-to-markdown": versions("mdast-util-to-markdown") } };
+const P = { micromark, fromMarkdown, toMarkdown: (tree: never) => toMarkdown(tree, roundTripSafe()), versions: { micromark: versions("micromark"), "mdast-util-from-markdown": versions("mdast-util-from-markdown"), "mdast-util-to-markdown": versions("mdast-util-to-markdown") } };
 const OPTS = { allowDangerousHtml: true, allowDangerousProtocol: true };
 const html = (md: string) => micromark(md, OPTS);
 /** Block-level HTML with the whitespace between blocks dropped (a link definition leaves an empty line, nothing else). */
 const blocks = (h: string) => h.replace(/>\s+</g, "><").trim();
-/**
- * The one interaction the concatenation property found in a seeded run of
- * 3,000 notes before fast-check was installed (see the test below): a raw
- * HTML block indented 1–3 spaces right after a list is written with its
- * indentation, and joins the list.
- */
-const INDENTED_HTML = /^ {1,3}</m;
 /** Examples 20 and 603: an autolink with a backslash in it. */
 const AUTOLINK_BACKSLASH = /<[a-z][a-z0-9+.-]{1,31}:[^\s<>]*\\/i;
-const roundTrip = (md: string) => toMarkdown(fromMarkdown(md));
+/** Saving through the AST the way the app does (remark-stringify with roundTripSafe). */
+const roundTrip = (md: string) => toMarkdown(fromMarkdown(md), roundTripSafe());
+/** The serializer without the app's handlers, to show each fix is needed. */
+const plainRoundTrip = (md: string) => toMarkdown(fromMarkdown(md));
 
 /** The parts of fast-check and Yjs these properties use (both are optional here). */
 type Fn = (...args: unknown[]) => unknown;
@@ -97,21 +97,63 @@ describe("CommonMark 0.31.2 conformance (W11.Q8)", () => {
     expect(parser.rate).toBeGreaterThanOrEqual(TARGET);
   });
 
-  it("Markdown → AST → Markdown keeps the meaning of all but the 7 listed examples, each with its reason", () => {
+  it("Markdown → AST → Markdown keeps the meaning of all but the 5 listed examples, each with its reason: ≥ 99%", () => {
     const [, rt] = score(examples, P);
     expect(rt.exceptions.map((e: { example: number }) => e.example)).toEqual(Object.keys(ROUND_TRIP_EXCEPTIONS).map(Number));
+    expect(rt.exceptions.map((e: { example: number }) => e.example)).toEqual([20, 39, 148, 187, 603]);
     for (const e of rt.exceptions) expect(e.reason).not.toBe("not explained yet");
-    expect(rt.passed).toBe(645);
-    // Two of them change what the note says: nested emphasis becomes strong.
-    expect(roundTrip("*_foo_*\n")).toBe("**foo**\n");
+    expect(rt.passed).toBe(647);
+    expect(rt.rate).toBeGreaterThanOrEqual(TARGET);
   });
 
-  it("known serializer bug: an indented HTML block after a list joins the list when saved through the AST", () => {
+  it("examples 461 and 463: nested emphasis is saved as nested emphasis, not as strong", () => {
+    for (const n of [461, 463]) {
+      const md = examples[n - 1].markdown;
+      expect(html(roundTrip(md)), `example ${n}`).toBe(html(md));
+      expect(html(roundTrip(md))).toBe("<p><em><em>foo</em></em></p>\n");
+      // Without the app's handler it reads as strong (the bug).
+      expect(html(plainRoundTrip(md))).toBe("<p><strong>foo</strong></p>\n");
+    }
+    expect(roundTrip("*_foo_*\n")).toBe("*_foo_*\n");
+    expect(roundTrip("_*foo*_\n")).toBe("*_foo_*\n");
+    // Nested emphasis that does not touch the outer marker keeps it, and strong is untouched.
+    expect(roundTrip("*a *b* c*\n")).toBe("*a *b* c*\n");
+    expect(roundTrip("**foo**\n")).toBe("**foo**\n");
+    expect(html(roundTrip("_a *_b_* c_\n"))).toBe(html("_a *_b_* c_\n"));
+  });
+
+  it("regression (seeded concatenation property): an indented HTML block after a list stays out of the list", () => {
     // Found by a seeded run of the concatenation property: a nested list example followed by an indented <div> example.
     const md = "10) foo\n   - bar\n\n\n  <div>\n";
-    expect(roundTrip(md)).toBe("10. foo\n\n* bar\n\n  <div>\n");
     expect(blocks(html(md))).toBe('<ol start="10"><li>foo</li></ol><ul><li>bar</li></ul><div>');
-    expect(blocks(html(roundTrip(md)))).toBe('<ol start="10"><li>foo</li></ol><ul><li><p>bar</p><div></li></ul>');
+    expect(roundTrip(md)).toBe("10. foo\n\n* bar\n\n<div>\n");
+    expect(blocks(html(roundTrip(md)))).toBe(blocks(html(md)));
+    // Without the app's handler the <div> joins the list (the bug).
+    expect(blocks(html(plainRoundTrip(md)))).toBe('<ol start="10"><li>foo</li></ol><ul><li><p>bar</p><div></li></ul>');
+    // An indented HTML block anywhere else keeps its indentation byte for byte.
+    expect(roundTrip("  <div>\n  *hi*\n")).toBe("  <div>\n  *hi*\n");
+    expect(roundTrip("para\n\n   <!-- c -->\n")).toBe("para\n\n   <!-- c -->\n");
+  });
+
+  it("the concatenation property, seeded (no fast-check needed): 2,000 random notes of spec examples keep their HTML", () => {
+    const clean = examples.filter((e: { example: number }) => !(e.example in ROUND_TRIP_EXCEPTIONS)).map((e: { markdown: string }) => e.markdown);
+    let seed = 20261115;
+    const rnd = (n: number) => {
+      seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+      return seed % n;
+    };
+    const bad: string[] = [];
+    let checked = 0;
+    for (let run = 0; run < 2000; run++) {
+      const parts = Array.from({ length: 1 + rnd(6) }, () => clean[rnd(clean.length)]);
+      const md = parts.join("\n\n");
+      // Only notes whose parts stay separate blocks (an unclosed fence or a definition can swallow or change the next part).
+      if (blocks(html(md)) !== blocks(parts.map(html).join(""))) continue;
+      checked++;
+      if (blocks(html(roundTrip(md))) !== blocks(html(md))) bad.push(md);
+    }
+    expect(checked).toBeGreaterThan(500);
+    expect(bad.slice(0, 3)).toEqual([]);
   });
 
   it("the committed eval/results/md-conformance.json is what a run gives now, origin real", () => {
@@ -130,9 +172,8 @@ describe.skipIf(NO_FC !== null)(`property tests${NO_FC ? ` — skipped: ${NO_FC}
     fc!.assert(
       fc!.property(fc!.array(fc!.constantFrom(...clean), { minLength: 1, maxLength: 6 }), (parts: string[]) => {
         const md = parts.join("\n\n");
-        // Only notes whose parts stay separate blocks (an unclosed fence or a definition can swallow or change the next part),
-        // and not the known bug above.
-        if (blocks(html(md)) !== blocks(parts.map(html).join("")) || INDENTED_HTML.test(md)) return true;
+        // Only notes whose parts stay separate blocks (an unclosed fence or a definition can swallow or change the next part).
+        if (blocks(html(md)) !== blocks(parts.map(html).join(""))) return true;
         return blocks(html(roundTrip(md))) === blocks(html(md));
       }),
       { numRuns: 300 },
