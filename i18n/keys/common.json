@@ -8349,8 +8349,18 @@
       "vars": []
     },
     {
+      "key": "openSources.kind.gazette",
+      "en": "Reshumot",
+      "vars": []
+    },
+    {
       "key": "openSources.kind.law",
       "en": "Laws",
+      "vars": []
+    },
+    {
+      "key": "openSources.kind.register",
+      "en": "Registers",
       "vars": []
     },
     {
@@ -8366,6 +8376,21 @@
     {
       "key": "openSources.kind.work",
       "en": "Literature",
+      "vars": []
+    },
+    {
+      "key": "openSources.light.amber",
+      "en": "Site terms: link and quote only",
+      "vars": []
+    },
+    {
+      "key": "openSources.light.green",
+      "en": "Open licence",
+      "vars": []
+    },
+    {
+      "key": "openSources.light.red",
+      "en": "Not to be used",
       "vars": []
     },
     {
@@ -8454,6 +8479,11 @@
       "vars": []
     },
     {
+      "key": "openSources.sends.registers",
+      "en": "Sends the non-profit or company name or number you type to data.gov.il; Reshumot references are links only",
+      "vars": []
+    },
+    {
       "key": "openSources.sends.sefaria",
       "en": "sends the reference you choose",
       "vars": []
@@ -8474,6 +8504,11 @@
       "vars": []
     },
     {
+      "key": "openSources.source.registers",
+      "en": "Israeli registers",
+      "vars": []
+    },
+    {
       "key": "openSources.source.sefaria",
       "en": "Sefaria",
       "vars": []
@@ -8481,6 +8516,11 @@
     {
       "key": "openSources.switches",
       "en": "Sources (off: nothing is sent to it)",
+      "vars": []
+    },
+    {
+      "key": "openSources.terms",
+      "en": "Terms of use",
       "vars": []
     },
     {

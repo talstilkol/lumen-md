@@ -1,0 +1,77 @@
+{
+ "_synthetic": "SYNTHETIC: written by hand in the shape of a CKAN datastore_search answer (data.gov.il, API v3) for plan R12.19. The organisations, numbers and fields' values are invented; only the field names follow the register's published schema. Replace with a recorded live answer (owed: the network is closed to the build that wrote this).",
+ "help": "https://data.gov.il/api/3/action/help_show?name=datastore_search",
+ "success": true,
+ "result": {
+  "resource_id": "be5b7935-3922-45d4-9638-08871b17ec95",
+  "fields": [
+   {
+    "id": "_id",
+    "type": "int"
+   },
+   {
+    "id": "מספר עמותה",
+    "type": "numeric"
+   },
+   {
+    "id": "שם עמותה בעברית",
+    "type": "text"
+   },
+   {
+    "id": "שם עמותה באנגלית",
+    "type": "text"
+   },
+   {
+    "id": "סטטוס עמותה",
+    "type": "text"
+   },
+   {
+    "id": "תאריך רישום עמותה",
+    "type": "text"
+   },
+   {
+    "id": "עיר",
+    "type": "text"
+   }
+  ],
+  "records": [
+   {
+    "_id": 1,
+    "מספר עמותה": 580000001,
+    "שם עמותה בעברית": "עמותת דוגמה לחינוך מדעי",
+    "שם עמותה באנגלית": "Example Science Education Association",
+    "סטטוס עמותה": "רשומה",
+    "תאריך רישום עמותה": "2001-03-14",
+    "עיר": "חיפה"
+   },
+   {
+    "_id": 2,
+    "מספר עמותה": 580000002,
+    "שם עמותה בעברית": "ידידי הספרייה לדוגמה",
+    "שם עמותה באנגלית": "Friends of the Example Library",
+    "סטטוס עמותה": "מחוקה",
+    "תאריך רישום עמותה": "1995-07-02",
+    "עיר": "ירושלים"
+   },
+   {
+    "_id": 3,
+    "מספר עמותה": 580000003,
+    "שם עמותה בעברית": "מרכז דוגמה לחינוך מוזיקלי",
+    "שם עמותה באנגלית": "",
+    "סטטוס עמותה": "רשומה",
+    "תאריך רישום עמותה": "2010-11-30",
+    "עיר": "באר שבע"
+   },
+   {
+    "_id": 4,
+    "מספר עמותה": null,
+    "שם עמותה בעברית": "שורה בלי מספר",
+    "שם עמותה באנגלית": "",
+    "סטטוס עמותה": "",
+    "תאריך רישום עמותה": "",
+    "עיר": ""
+   }
+  ],
+  "total": 4
+ }
+}
