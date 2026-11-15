@@ -136,6 +136,7 @@
     "launch:check": "node scripts/launch-check.mjs",
     "beta:funnel": "node scripts/beta-funnel.mjs",
     "store:check": "node scripts/store.mjs check",
+    "corpus:obsidian-help": "node scripts/obsidian-help-corpus.mjs --fetch",
     "eval:crosslingual": "LUMEN_EVAL_XL=1 vitest run --config vitest.eval.config.ts src/agents/eval/crosslingual.eval.ts",
     "eval:lit-review": "LUMEN_EVAL_LIT=1 vitest run --config vitest.eval.config.ts src/agents/eval/litReview.eval.ts",
     "skips": "node scripts/skip-report.mjs",
