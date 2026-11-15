@@ -22,8 +22,14 @@
  *
  * A synthetic dataset (dataset.origin "synthetic", or a set under
  * eval/synthetic, coordinator W7.13) is always `dev`: a card on it that says
- * heldout or public is refused, so it can never back a ✅.
+ * heldout or public is refused, so it can never back a ✅. Which datasets are
+ * synthetic is read from the repository (`isSyntheticDataset`), not from the
+ * name's spelling alone.
  */
+
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { isAbsolute, join, relative, resolve, sep } from "node:path";
+import { fileURLToPath } from "node:url";
 
 export const CARD_SCHEMA = 1;
 export const TAGS = Object.freeze(["dev", "heldout", "public"]);
@@ -37,8 +43,63 @@ export const EVAL_COMMAND = /\b(eval:[\w-]+|models:day|heldout\b|bench:[\w-]+)/;
 
 const isObj = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
 const nonEmpty = (v) => typeof v === "string" && v.trim().length > 0;
-/** A card dataset that is synthetic: origin "synthetic", or named after eval/synthetic (W7.13). */
-export const isSyntheticDataset = (d) => isObj(d) && (d.origin === "synthetic" || /^(eval\/)?synthetic\//.test(String(d.name ?? "")));
+
+const ROOT = fileURLToPath(new URL("../..", import.meta.url));
+const readJson = (path) => {
+  try {
+    return JSON.parse(readFileSync(path, "utf8"));
+  } catch {
+    return null;
+  }
+};
+/** What the repository says is synthetic (read once): the sets under eval/synthetic, and eval/origins.json's synthetic parts. */
+let known = null;
+function syntheticKnown() {
+  if (known) return known;
+  const dir = join(ROOT, "eval/synthetic");
+  const sets = new Set(existsSync(dir) ? readdirSync(dir, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name.toLowerCase()) : []);
+  const parts = new Set();
+  const origins = readJson(join(ROOT, "eval/origins.json")) ?? {};
+  for (const [section, entries] of Object.entries(origins)) {
+    if (section.startsWith("$") || !isObj(entries)) continue;
+    for (const [id, e] of Object.entries(entries)) if (e?.origin === "synthetic") parts.add(id.toLowerCase());
+  }
+  return (known = { sets, parts });
+}
+
+/**
+ * A dataset name as a path inside the repository, lower case, "/"-separated and normalised (`./`, `..`, `\\`, an
+ * absolute path into the checkout); null when it points outside it.
+ */
+function datasetPath(name) {
+  const raw = String(name ?? "").trim().replace(/\\/g, "/");
+  if (!raw) return null;
+  const rel = relative(ROOT, resolve(ROOT, raw)).split(sep).join("/");
+  return rel.startsWith("../") || rel === ".." || isAbsolute(rel) ? null : rel.toLowerCase();
+}
+
+/**
+ * A card dataset that is synthetic (W7.13; review Z6-M5: not by its name's prefix alone). Synthetic when any of:
+ * its `origin` says so; its name resolves under eval/synthetic in any path form; its first segment (after an
+ * `eval/<section>/` prefix) is a set under eval/synthetic (`retrieval-hard/heldout`); that set's manifest says
+ * `origin: synthetic`; or eval/origins.json lists the set's part (`<set>/<part>`) as synthetic. A name the repository
+ * cannot place is judged by `origin` alone.
+ */
+export function isSyntheticDataset(d) {
+  if (!isObj(d)) return false;
+  if (d.origin === "synthetic") return true;
+  const rel = datasetPath(d.name);
+  if (rel === null) return false;
+  if (rel === "eval/synthetic" || rel.startsWith("eval/synthetic/") || rel === "synthetic" || rel.startsWith("synthetic/")) return true;
+  const segs = rel.replace(/^eval\/(?:golden|synthetic|public|heldout)\//, "").split("/").filter(Boolean);
+  if (!segs.length) return false;
+  const { sets, parts } = syntheticKnown();
+  if (sets.has(segs[0])) return true;
+  for (const section of ["golden", "synthetic", "public"]) {
+    if (readJson(join(ROOT, "eval", section, segs[0], "manifest.json"))?.origin === "synthetic") return true;
+  }
+  return segs.length > 1 && parts.has(`${segs[0]}/${segs[1]}`);
+}
 const finite = (v) => typeof v === "number" && Number.isFinite(v);
 
 /**
