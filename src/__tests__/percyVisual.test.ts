@@ -68,7 +68,10 @@ describe("Percy visual regression (W7.25)", () => {
     const steps = (parse(readFileSync(join(ROOT, ".buildkite/pipeline.yml"), "utf8")) as { steps: Array<{ key: string; command: string; if?: string; notify?: unknown[] }> }).steps;
     const percy = steps.find((s) => s.key === "percy");
     expect(percy?.command).toContain("npm run -s visual:percy");
-    expect(percy?.if).toBe('build.branch == "main" || build.pull_request.labels includes "percy"');
+    // Main and the `percy` label only, decided inside the step: a skipped step would fail the receipt.
+    expect(percy?.if).toBeUndefined();
+    expect(percy?.command).toContain('*,percy,*)');
+    expect(percy?.command).toContain('BUILDKITE_BRANCH:-}" != "main"');
     expect(percy?.notify).toEqual([{ github_commit_status: { context: "lumen/buildkite: percy" } }]);
     const pkg = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")) as { scripts: Record<string, string> };
     expect(pkg.scripts["visual:percy"]).toBe("node scripts/visual/percy-run.mjs");

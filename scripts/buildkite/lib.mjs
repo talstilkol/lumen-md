@@ -153,7 +153,8 @@ export const JOBS = [
  *              PERCY_TOKEN comes from the agent's secret store; without it
  *              percy-run.mjs exits non-zero, so the step never passes silently.
  *              Main pushes and PRs labelled `percy` only (the free plan's
- *              screenshot allowance does not cover every PR build).
+ *              screenshot allowance does not cover every PR build); other
+ *              builds pass the step with a message, never skip it.
  */
 export const NATIVE_JOBS = [
   {
@@ -210,8 +211,17 @@ export const NATIVE_JOBS = [
     timeout: 40,
     keepGoing: false,
     browsers: ["chromium"],
-    if: 'build.branch == "main" || build.pull_request.labels includes "percy"',
-    steps: [{ name: "Percy snapshots of the 30 screens", run: "npm run -s visual:percy" }],
+    // No step-level `if`: the receipt waits for percy, and it would count a skipped step as failed
+    // (see gateKeys). The step itself passes with a message when Percy was not asked for.
+    steps: [
+      {
+        name: "Percy snapshots of the 30 screens",
+        run: [
+          'case ",${BUILDKITE_PULL_REQUEST_LABELS:-}," in *,percy,*) ;; *) if [ "${BUILDKITE_BRANCH:-}" != "main" ]; then echo "percy: runs on main and on PRs labelled percy"; exit 0; fi ;; esac',
+          "npm run -s visual:percy",
+        ].join("\n"),
+      },
+    ],
   },
 ];
 
