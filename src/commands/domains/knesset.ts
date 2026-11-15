@@ -15,7 +15,8 @@
  * Knesset sources start off: the first use asks to turn them on.
  */
 import { t } from "../../i18n";
-import { cmdIcons, type Command } from "../../ui/CommandPalette";
+import { cmdIcons } from "../../ui/cmdIcons";
+import type { Command } from "../../ui/CommandPalette";
 import type { CommandContext } from "./context";
 
 // The command bodies load on first use (knessetActions.ts): the palette lists these commands at start-up (W4.9).

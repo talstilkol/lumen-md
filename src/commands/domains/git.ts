@@ -1,5 +1,6 @@
 /** Git commands for a repository cloned into the workspace. */
-import { cmdIcons, type Command } from "../../ui/CommandPalette";
+import { cmdIcons } from "../../ui/cmdIcons";
+import type { Command } from "../../ui/CommandPalette";
 import { t } from "../../i18n";
 import { uiAlert, uiConfirm } from "../../ui/PromptDialog";
 import { type CommandContext } from "./context";

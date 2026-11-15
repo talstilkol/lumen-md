@@ -326,7 +326,7 @@ describe("App first launch", () => {
     expect(actions[0].id).toBe("runtimeMetrics.open");
     expect(actions[0].label).toBe(t("tour.action.openRuntimeMetrics"));
     await run(() => actions[0].onRun());
-    expect(screen.getByText("[RuntimeMetricsPanel]")).toBeTruthy();
+    expect(await screen.findByText("[RuntimeMetricsPanel]")).toBeTruthy();
     await run(() => cb("RuntimeMetricsPanel", "onClose")());
     expect(screen.queryByText("[RuntimeMetricsPanel]")).toBeNull();
   });
@@ -398,9 +398,10 @@ describe("App launch parameters", () => {
 describe("App keyboard shortcuts", () => {
   it("⌘K toggles the palette, ⌘/ the shortcuts sheet, ⌘H find & replace", async () => {
     await renderApp();
-    expect(propsOf("CommandPalette").open).toBe(false);
+    // W10.E19: the palette is lazy; it mounts on first open and then stays.
+    expect(h.props.CommandPalette).toBeUndefined();
     key("k");
-    expect(propsOf("CommandPalette").open).toBe(true);
+    await opened("CommandPalette");
     key("K", { meta: true });
     expect(propsOf("CommandPalette").open).toBe(false);
     key("/");
@@ -429,7 +430,7 @@ describe("App keyboard shortcuts", () => {
     await renderApp();
     expect(screen.queryByText("[FocusMode]")).toBeNull();
     key("F", { ctrl: true, shift: true });
-    expect(screen.getByText("[FocusMode]")).toBeTruthy();
+    expect(await screen.findByText("[FocusMode]")).toBeTruthy();
     key("f", { ctrl: true, shift: true });
     expect(screen.queryByText("[FocusMode]")).toBeNull();
   });
@@ -772,7 +773,7 @@ describe("App overlay panels opened from commands", () => {
   it("graph view opens a note and closes itself", async () => {
     await renderApp();
     await run(() => opts().setGraphOpen(true));
-    expect(screen.getByText(t("graphView.title"))).toBeTruthy();
+    expect(await screen.findByText(t("graphView.title"))).toBeTruthy();
     await screen.findByText("[GraphView]");
     await run(() => cb("GraphView", "onOpenFile")("dir/graph.md", "# G"));
     expect(doc().name).toBe("graph.md");
@@ -826,7 +827,7 @@ describe("App overlay panels opened from commands", () => {
     setDocState({ name: "f.md", content: "find me" });
     await renderApp();
     await run(() => opts().setTagsPanelOpen?.(true));
-    expect(propsOf("TagsPanel").open).toBe(true);
+    await opened("TagsPanel");
     await run(() => cb("TagsPanel", "onClose")());
     expect(propsOf("TagsPanel").open).toBe(false);
     await run(() => opts().setFindReplaceOpen(true));

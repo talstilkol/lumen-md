@@ -1,5 +1,6 @@
 /** AI actions on the open note: tags, links, diagrams, translation, grammar, alt text, prompt templates. */
-import { cmdIcons, type Command } from "../../ui/CommandPalette";
+import { cmdIcons } from "../../ui/cmdIcons";
+import type { Command } from "../../ui/CommandPalette";
 import { t, tPlural } from "../../i18n";
 import { uiAlert, uiPrompt } from "../../ui/PromptDialog";
 import { AI_PROMPT_INDEX } from "../../ai/multiLangPromptIndex";

@@ -5,7 +5,8 @@
  * (./automationsActions.ts), is loaded on first use.
  */
 import { t } from "../../i18n";
-import { cmdIcons, type Command } from "../../ui/CommandPalette";
+import { cmdIcons } from "../../ui/cmdIcons";
+import type { Command } from "../../ui/CommandPalette";
 import type { CommandContext } from "./context";
 
 const actions = () => import("./automationsActions");

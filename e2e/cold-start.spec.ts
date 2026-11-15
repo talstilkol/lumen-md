@@ -10,7 +10,7 @@ import { vaultOrSkip } from "./_opfs";
  *   - a 10,000-note vault opens within 15 % of a 100-note one;
  *   - the start shifts nothing: CLS < 0.05;
  *   - the boot shell shows the note's own text before the app has started
- *     (public/note-boot.js).
+ *     (public/boot.js).
  *
  * Budgets are asserted against a production build only (PLAYWRIGHT_BASE_URL),
  * as e2e/perf-vault.spec.ts does: the dev server's on-the-fly transforms are

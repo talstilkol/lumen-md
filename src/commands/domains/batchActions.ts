@@ -1,5 +1,6 @@
 /** AI batch jobs over a folder of notes: the commands' bodies, loaded on first use (./batch.ts lists them). */
-import { cmdIcons, type Command } from "../../ui/CommandPalette";
+import { cmdIcons } from "../../ui/cmdIcons";
+import type { Command } from "../../ui/CommandPalette";
 import { useAppStore } from "../../store/useStore";
 import { t } from "../../i18n";
 import { uiAlert, uiConfirm, uiPrompt, uiSelect } from "../../ui/PromptDialog";
