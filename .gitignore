@@ -114,7 +114,9 @@ fuzz-findings/
 
 # Plan 13.7: store screenshots are build output (node scripts/store-screenshots.mjs)
 store/screenshots/
-reports/
+# (was `reports/`, which also matched the directory itself, so no `!/reports/…` line below could ever re-include a file)
+/reports/*
+!/reports/nightly/
 
 # Signed release output and fuzzer findings (plan W1.27)
 /release/
@@ -135,6 +137,8 @@ ci-docker-out/
 !/reports/perf/
 /reports/perf/*
 !/reports/perf/baselines/
+# …and W1.22's gate baseline (W11.Q5): `npm run perf:inp:gate` compares every run against it
+!/reports/perf/inp-baseline.json
 # Buildkite job output (plan W7.21): shard plans, blob reports, receipts — build artifacts
 /ci-out/
 /.vitest/

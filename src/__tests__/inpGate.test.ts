@@ -10,7 +10,14 @@ const run = (inp: number, k50: number, k2: number) => ({ inpP75: inp, keyToPaint
 
 describe("scripts/perf/inp-gate.mjs", () => {
   it("gates the three numbers W1.22 budgets", () => {
-    expect(Object.keys(gatedMetrics(run(1, 2, 3)))).toEqual(["INP p75", "keypress→paint p95 (50KB)", "keypress→paint p95 (2MB)"]);
+    expect(Object.keys(gatedMetrics(run(1, 2, 3)))).toEqual([
+      "INP p75",
+      "keypress→paint p95 (50KB)",
+      "keypress→paint p95 (2MB)",
+      "keypress→paint p95 (Moby-Dick, source)",
+      "keypress→paint p95 (Ben-Yehuda 2MB, source)",
+      "keypress→paint p95 (Moby-Dick, WYSIWYG)",
+    ]);
     expect(REGRESSION).toBe(0.1);
   });
 
@@ -26,5 +33,19 @@ describe("scripts/perf/inp-gate.mjs", () => {
 
   it("skips a metric one of the runs lacks", () => {
     expect(compare({ inpP75: 50 }, run(50, 1, 1))).toHaveLength(1);
+  });
+
+  it("gates the real-text numbers of W11.Q5, and skips a WYSIWYG run that fell back to the source editor", () => {
+    const base = { ...run(50, 10, 20), realText: { mobyDick: 20, benYehuda2MB: 25, wysiwyg: { mobyDick: 30 } } };
+    const slower = { ...run(50, 10, 20), realText: { mobyDick: 22, benYehuda2MB: 25, wysiwyg: { mobyDick: "fallback" } } };
+    const rows = compare(base, slower);
+    expect(rows.map((r: { metric: string }) => r.metric)).toEqual([
+      "INP p75",
+      "keypress→paint p95 (50KB)",
+      "keypress→paint p95 (2MB)",
+      "keypress→paint p95 (Moby-Dick, source)",
+      "keypress→paint p95 (Ben-Yehuda 2MB, source)",
+    ]);
+    expect(rows.find((r: { metric: string }) => r.metric.includes("Moby-Dick, source")).regressed).toBe(true);
   });
 });
