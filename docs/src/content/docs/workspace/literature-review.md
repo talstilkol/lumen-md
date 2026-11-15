@@ -28,6 +28,37 @@ looked up in its passage and located on its page:
 The model is the local one in AI settings (Ollama or the browser model). A
 cloud model is used only if your AI policy allows it.
 
+## Competing hypotheses (ACH)
+
+An ```ach block weighs evidence against competing explanations, the way
+Richards Heuer's Analysis of Competing Hypotheses does:
+
+```ach
+title: Who leaked the report?
+hypotheses:
+  H1: Someone inside
+  H2: A contractor
+evidence:
+  - text: The file names an office laptop
+    weight: 3
+    marks: { H1: CC, H2: I }
+  - text: The contractor's own blog post
+    deceptive: true
+    marks: { H1: N, H2: C }
+```
+
+- Each mark is **CC** (very consistent), **C**, **N** (neutral; an empty
+  cell is N), **I** (inconsistent) or **II**; `++ + 0 - --` work too. A
+  weight is a whole number (default 1).
+- Hypotheses are ranked by the **least** weighted inconsistency
+  (I = 1, II = 2 per weight): evidence rules hypotheses out more than it
+  proves them. Ties go to the most consistency.
+- The block also says which rows don't tell the hypotheses apart, which
+  single row the verdict rests on (a linchpin), and whether the leader
+  holds without the rows marked `deceptive`.
+- "Copy as a table" copies the matrix as a Markdown table. It is a research
+  instrument, not a verdict.
+
 ## How it is measured
 
 `eval/probes/lit-review.json` has five short papers (English and Hebrew).
