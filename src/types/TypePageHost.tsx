@@ -4,8 +4,7 @@
  * startup bundle.
  */
 import { lazy, Suspense, useEffect, useState } from "react";
-import { OPEN_TYPE_PAGE } from "./vaultTypes";
-import { OPEN_OBJECT_STUDIO } from "./typeEvents";
+import { OPEN_OBJECT_STUDIO, OPEN_TYPE_PAGE } from "./typeEvents";
 import { useAppStore } from "../store/useStore";
 
 const TypePage = lazy(() => import("./TypePage").then((m) => ({ default: m.TypePage })));

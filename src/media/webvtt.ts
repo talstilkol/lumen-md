@@ -155,6 +155,4 @@ export function cueAt(cues: readonly Cue[], time: number): number {
 /** The transcript file beside a media file: `rec.m4a` → `rec.vtt` (and `.srt`). */
 export const sidecarPath = (media: string, ext: "vtt" | "srt" = "vtt") => media.replace(/\.[^./]+$/, "") + `.${ext}`;
 
-export const MEDIA_EXT = /\.(m4a|mp3|wav|ogg|oga|opus|flac|aac|webm|mp4|m4v|mov|ogv)$/i;
-/** Shown as a video; `.webm` stays audio, since that is what the app records (a <audio> plays it either way). */
-export const VIDEO_EXT = /\.(mp4|m4v|mov|ogv)$/i;
+export { MEDIA_EXT, VIDEO_EXT } from "./mediaExt";

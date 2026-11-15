@@ -154,8 +154,8 @@ describe("W12.E4 prompt injection: 10 notes, 0 writes, 0 edges without a quote",
     // Proposals are data for the review queue (W12.E5), never a note write.
     expect(toJsonl(proposals).length).toBeGreaterThanOrEqual(0);
   });
-  it("the paragraph reaches the model inside the untrusted-content markers", () => {
-    const { user } = buildMessages({ note: "inj/0.md", anchor: "p0", text: injections[5], entities: [david, haifa] });
+  it("the paragraph reaches the model inside the untrusted-content markers", async () => {
+    const { user } = await buildMessages({ note: "inj/0.md", anchor: "p0", text: injections[5], entities: [david, haifa] });
     expect(user).toMatch(/untrusted|UNTRUSTED|external/i);
     expect(user).not.toContain("‮");
   });

@@ -32,7 +32,7 @@ export function AskScopePicker({ value, onChange }: { value: AskScopeChoice; onC
           aria-label={value.kind === "folder" ? t("askScope.folder") : t("askScope.tag")}
           dir="auto"
           value={value.kind === "folder" ? value.folder : value.tag}
-          placeholder={value.kind === "folder" ? "work/" : "#project"}
+          placeholder={value.kind === "folder" ? "work/" : "#project"} /* i18n-allow: an example folder path and tag, typed as they are in the vault */
           onChange={(e) => onChange(value.kind === "folder" ? { kind: "folder", folder: e.target.value } : { kind: "tag", tag: e.target.value })}
           style={{ flex: 1, minWidth: 0, fontSize: 11.5 }}
         />

@@ -25,7 +25,6 @@ import { r4 } from "../metrics";
 import { NEMO_TO_TYPE } from "../../../entities/extract/labels";
 import { EntityIndex, resolveMention, type ResolverOptions } from "../../../entities/resolve";
 import { quoteInParagraph } from "../../../entities/provenance";
-import { guardUntrusted } from "../../../agents/untrusted";
 import type { Executor } from "../../../agents/types";
 import { LOCAL_EXECUTORS } from "../../../entities/relations";
 import { entityId, type EntityType } from "../../../entities/model";
@@ -230,6 +229,8 @@ export const HERE_SYSTEM = [
  */
 export async function verifyTriple(executor: Executor, row: HereRow, model?: string): Promise<boolean> {
   if (!LOCAL_EXECUTORS.has(executor.id)) throw new Error("HeRE runs on a local engine only");
+  // A dynamic import: agents/untrusted brings its lazy strings (i18nLazyEnglish).
+  const { guardUntrusted } = await import("../../../agents/untrusted");
   const passage = guardUntrusted(row.text, ["dataset:HeRE"]).text;
   const res = await executor.chat({
     messages: [

@@ -7,6 +7,7 @@
 import { useState } from "react";
 import { t } from "../i18n";
 import { getMonitoringConsent, getPerformanceConsent, getUserDsn, monitoringDsn, setMonitoringConsent, setPerformanceConsent, setUserDsn } from "../lib/telemetry";
+import "./monitoringSettingsStrings";
 
 const muted: React.CSSProperties = { fontSize: 12, color: "hsl(var(--fg-muted))" };
 const field: React.CSSProperties = { width: "100%", padding: "6px 8px", border: "1px solid hsl(var(--border))", borderRadius: 6, background: "transparent", color: "inherit", font: "inherit" };

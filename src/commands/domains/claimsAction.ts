@@ -11,6 +11,7 @@ import { isAbort } from "../../ai/aiAbort";
 import { hasHebrew } from "../../text/hebrew";
 import { explainError } from "../../lib/userError";
 import { cancellable, type CommandContext } from "./context";
+import "./claimsActionStrings";
 
 export async function claimsFlow({ getEditorView, liveDoc }: Pick<CommandContext, "getEditorView" | "liveDoc">): Promise<void> {
   const view = getEditorView?.();

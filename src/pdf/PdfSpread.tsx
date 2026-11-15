@@ -10,7 +10,6 @@ import { Children, useCallback, useEffect, useState, type ReactNode, type RefObj
 import { t } from "../i18n";
 import type { PdfDocument } from "./pdfjs";
 import { bookDirOf, pagingDelta, parsePrefs, rowOfPage, spreadRows, type BookDir, type SpreadMode, type SpreadPrefs } from "./spread";
-import "./spreadStrings";
 
 const KEY = "lumen.pdf.spread";
 /** Pages read to guess the direction. */

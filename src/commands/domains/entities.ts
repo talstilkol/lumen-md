@@ -14,7 +14,8 @@
  * entities/types.ts registers them as built-in types.
  */
 import { t } from "../../i18n";
-import { cmdIcons, type Command } from "../../ui/CommandPalette";
+import type { Command } from "../../ui/CommandPalette";
+import { cmdIcons } from "../../ui/cmdIcons";
 import { showAiToast } from "../../ui/AiToast";
 import { airplaneFlagOn } from "../../privacy/airplaneBoot";
 import type { CommandContext } from "./context";

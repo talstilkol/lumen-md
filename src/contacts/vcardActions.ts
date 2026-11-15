@@ -12,7 +12,7 @@ import { prepareForExportSync } from "../lib/redaction";
 import { parseVCards, toVCard } from "./vcard";
 import { contactOfNote, findPerson, isPersonNote, mergeIntoPerson, newPersonNote } from "./personNotes";
 
-const toast = (kind: "success" | "error" | "info", title: string) => useToastStore.getState().push({ kind, title });
+const toast = (title: string, kind: "success" | "error" | "info") => useToastStore.getState().push({ kind, title });
 
 function pickVcf(): Promise<File | null> {
   return new Promise((resolve) => {
@@ -36,7 +36,7 @@ export async function importVcard(file?: File | null): Promise<void> {
     const picked = file ?? (await pickVcf());
     if (!picked) return;
     const contacts = parseVCards(await picked.text());
-    if (!contacts.length) return void toast("info", t("contacts.none"));
+    if (!contacts.length) return void toast(t("contacts.none"), "info");
     const ws = await import("../storage/workspace");
     const notes = await vaultNotes();
     let created = 0;
@@ -59,22 +59,22 @@ export async function importVcard(file?: File | null): Promise<void> {
         created++;
       }
     }
-    toast("success", t("contacts.imported", { created, merged }));
+    toast(t("contacts.imported", { created, merged }), "success");
   } catch (e) {
-    toast("error", t("contacts.failed", { error: explainError(e) }));
+    toast(t("contacts.failed", { error: explainError(e) }), "error");
   }
 }
 
 export async function exportVcard(): Promise<void> {
   try {
     const people = (await vaultNotes()).filter((n) => isPersonNote(n.text));
-    if (!people.length) return void toast("info", t("contacts.noPeople"));
+    if (!people.length) return void toast(t("contacts.noPeople"), "info");
     // The export door (W5.11): <redact> passages and hidden comments never leave the device.
     const vcf = toVCard(people.map((n) => contactOfNote(n.path, prepareForExportSync(n.text))));
     const { downloadText } = await import("../storage/exportFormats");
     downloadText("people.vcf", vcf, "text/vcard");
-    toast("success", t("contacts.exported", { n: people.length }));
+    toast(t("contacts.exported", { n: people.length }), "success");
   } catch (e) {
-    toast("error", t("contacts.failed", { error: explainError(e) }));
+    toast(t("contacts.failed", { error: explainError(e) }), "error");
   }
 }

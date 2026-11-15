@@ -585,7 +585,7 @@
     },
     {
       "key": "toast.rerankModelOff",
-      "en": "Search reranking: word matching",
+      "en": "Search reranking: off (BM25 order)",
       "vars": []
     },
     {
@@ -595,7 +595,7 @@
     },
     {
       "key": "toast.rerankUnsupported",
-      "en": "The search reranking model needs WebGPU or the desktop app; this browser keeps the built-in reranking.",
+      "en": "The search reranking model needs WebGPU or the desktop app; this browser keeps the BM25 order.",
       "vars": []
     },
     {

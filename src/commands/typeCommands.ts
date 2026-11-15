@@ -6,7 +6,7 @@
  */
 import { useEffect, useState } from "react";
 import type { Command } from "../ui/CommandPalette";
-import { cmdIcons } from "../ui/CommandPalette";
+import { cmdIcons } from "../ui/cmdIcons";
 import { openObjectStudio, openTypePage, TYPES_CHANGED_EVENT } from "../types/typeEvents";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
 

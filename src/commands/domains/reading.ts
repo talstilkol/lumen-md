@@ -5,7 +5,8 @@
  * (readingActions.ts), so the startup bundle holds only these entries.
  */
 import { t } from "../../i18n";
-import { cmdIcons, type Command } from "../../ui/CommandPalette";
+import type { Command } from "../../ui/CommandPalette";
+import { cmdIcons } from "../../ui/cmdIcons";
 import type { CommandContext } from "./context";
 
 export function buildReadingCommands(ctx: CommandContext): Command[] {

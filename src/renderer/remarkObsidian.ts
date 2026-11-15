@@ -17,7 +17,7 @@
  *
  * Code, inline code, math and raw HTML are never touched.
  */
-import { MEDIA_EXT } from "../media/webvtt";
+import { MEDIA_EXT } from "../media/mediaExt";
 import type { Root } from "mdast";
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- mdast nodes are rebuilt structurally here */

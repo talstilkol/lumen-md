@@ -18,7 +18,6 @@
  *   lmstudio). There is no cloud path: the chat executor is refused, and
  *   with no local engine the result is `unavailable`, which the UI shows.
  */
-import { guardUntrusted } from "../agents/untrusted";
 import type { Executor, JsonSchema } from "../agents/types";
 import { PREDICATES, edgeId, predicateInfo, type Edge, type Entity } from "./model";
 import { validateEdge } from "./schema";
@@ -84,7 +83,9 @@ export interface RelationResult {
 
 const zero = (): Record<DropReason, number> => ({ "no-quote": 0, "quote-not-verified": 0, "unknown-predicate": 0, "unknown-entity": 0, "self-loop": 0, "invalid-edge": 0, "tool-call": 0, "bad-json": 0 });
 
-export function buildMessages(p: ParagraphInput): { system: string; user: string } {
+export async function buildMessages(p: ParagraphInput): Promise<{ system: string; user: string }> {
+  // A dynamic import: agents/untrusted brings its lazy strings (i18nLazyEnglish), so it loads on use.
+  const { guardUntrusted } = await import("../agents/untrusted");
   const guarded = guardUntrusted(p.text, [`note:${p.note}`]).text;
   const list = p.entities.map((e) => `- ${e.name} (${e.type})${e.aliases.length ? ` — also: ${e.aliases.join(", ")}` : ""}`).join("\n");
   return { system: SYSTEM_PROMPT, user: `Entities:\n${list}\n\nParagraph:\n${guarded}` };
@@ -110,7 +111,7 @@ export async function extractRelations(p: ParagraphInput, executor: Executor | n
   if (!executor) return { status: "unavailable", reason: "no-local-engine", proposals: [], dropped };
   if (!LOCAL_EXECUTORS.has(executor.id)) return { status: "unavailable", reason: "cloud-refused", proposals: [], dropped };
   if (p.entities.length < 2) return { status: "ok", proposals: [], dropped };
-  const { system, user } = buildMessages(p);
+  const { system, user } = await buildMessages(p);
   const model = opts.model ?? executor.modelFor("small");
   // No `tools`: the extractor cannot write or reach the network, whatever the paragraph says.
   const res = await executor.chat({
