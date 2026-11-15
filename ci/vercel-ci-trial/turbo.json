@@ -1,0 +1,16 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "//": "W11.Q12 (parked here on purpose, NOT at the repo root: a root turbo.json can change how the existing Vercel project builds). Copied to the root only on the throwaway branch trial/vercel-ci; see docs/dev/decisions/vercel-ci-trial.md, How to run the trial. A trial of Vercel CI (Beta, 28.10.2026) for lint and unit tests only, next to Buildkite, which stays the CI of record. Vercel CI runs the tasks tagged \"ci\". Each task is the package.json script of the same name. Nothing else (build, e2e, gates) is tagged; the decision rule is in docs/dev/decisions/vercel-ci-trial.md.",
+  "tasks": {
+    "lint": {
+      "tags": ["ci"],
+      "inputs": ["src/**", "eslint.config.*", "package.json", "package-lock.json", "tsconfig*.json"],
+      "outputs": []
+    },
+    "test": {
+      "tags": ["ci"],
+      "inputs": ["src/**", "vitest.config.*", "vite.config.ts", "package.json", "package-lock.json", "tsconfig*.json", "public/**", "eval/**", "docs/src/content/**", "scripts/**"],
+      "outputs": []
+    }
+  }
+}
