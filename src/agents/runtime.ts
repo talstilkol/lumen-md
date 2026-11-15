@@ -38,9 +38,8 @@ import { currentDocumentKey } from "./docKey";
 import { noteAiOutput } from "../ai/authorship";
 import { AiQuotaExceededError, aiQuotaStatus, chargeAiCommandDispatch, consumeAiPrompt } from "../billing/aiQuota";
 import { mergeOutputs, splitText } from "./runtimeText";
+import { approveTaintedWrite, approveUntrusted, freezeTools, guardUntrustedResult, loadGuard, logTainted, unmarkDelta, unmarkReply } from "./ruleOfTwo";
 export { mergeOutputs, splitText } from "./runtimeText";
-// The injection guard (plan 2.7) loads with the first run: the runtime is on the startup path.
-const loadGuard = () => import("./untrusted");
 
 export const DEFAULT_MAX_STEPS = 8;
 export const DEFAULT_MAX_RETRIES = 2;
@@ -97,11 +96,6 @@ interface ToolEnv {
 /** Tools whose result is the model's own input turned around, not the user's data. */
 const NOT_PRIVATE = new Set(["validate_json", "validate_mermaid", "validate_echarts", "csv_parse"]);
 
-/** Ask the user about a write / network call in a run with untrusted content (plan 2.7). */
-async function approveUntrusted(env: ToolEnv, tool: AgentTool, args: Record<string, unknown>, network?: NetworkConsentRequest): Promise<boolean> {
-  return (await loadGuard()).askUntrusted(env.consentUntrusted, { tool: tool.name, scope: tool.scope as "write" | "network", args, sources: [...env.taint], ...(network ? { network } : {}) });
-}
-
 /**
  * Run one tool call under the runtime's rules:
  *  - unknown tools and scopes the run was not granted are refused;
@@ -138,19 +132,11 @@ async function execTool(tools: AgentTool[], call: ToolCall, env: ToolEnv): Promi
       callCtx.network = gate.bound;
       note = gate.consented ? (tainted ? "network: sent on the user's approval (untrusted content in the run)" : "network: sent on the user's consent (local-only)") : "network: allowed by the AI policy";
     } else if (tool.scope === "write") {
-      // Plan 2.7: a change proposed while outside content is in the run
-      // waits for the user's explicit yes before it is even staged.
-      // Plan W1.33: when all of it comes from repositories the user
-      // trusts, the write is staged without that question (still for review).
+      // Plan 2.7 / W1.33: a tainted run's write waits for the user's yes (ruleOfTwo.ts).
       if (tainted) {
-        const guard = await loadGuard();
-        if (guard.taintIsTrusted(env.taint)) {
-          note = "no extra approval: the untrusted content comes only from repositories the user trusts";
-        } else if (!(await approveUntrusted(env, tool, args))) {
-          return { error: `denied: ${guard.UNTRUSTED_DENIED}` };
-        } else {
-          note = "approved by the user (untrusted content in the run)";
-        }
+        const approval = await approveTaintedWrite(env, tool, args);
+        if (approval.error !== undefined) return { error: approval.error };
+        note = approval.note;
       }
       const { stageChange, receiptOf, textFingerprint } = await import("./staging");
       callCtx.stage = (proposal) => {
@@ -313,9 +299,7 @@ export function inputKeyOf<I extends AgentInput>(def: AgentDefinition<I, unknown
 }
 
 export async function runAgent<I extends AgentInput, O = string>(def: AgentDefinition<I, O>, input: I, opts: RunOptions = {}): Promise<AgentRun<O>> {
-  // W11.I3, plan-then-execute: the tools are fixed before the run reads anything. A copy, frozen,
-  // so nothing the run reads (a page, a note, a tool that edits the definition) adds one.
-  def = { ...def, tools: def.tools ? (Object.freeze([...def.tools]) as AgentTool[]) : def.tools };
+  def = freezeTools(def); // W11.I3, plan-then-execute: the run's tools are fixed before it reads anything.
   // Before anything awaits: the document the caller just read is the active one now.
   const docKey = opts.docKey ?? currentDocumentKey();
   const run: AgentRun<O> = {
@@ -343,14 +327,12 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
   let streamed = "";
   const onDelta = opts.onDelta
     ? (raw: string) => {
-        // W11.I3: what streams to the user carries no data marks.
-        const d = toolEnvRef.current?.taint.length && unmarkGuard ? unmarkGuard.unmarkData(raw) : raw;
+        const d = unmarkDelta(toolEnvRef.current?.taint, raw); // W11.I3: no data marks reach the user.
         streamed += d;
         noteAiOutput(run.id, streamed);
         opts.onDelta?.(d);
       }
     : undefined;
-  let unmarkGuard: Awaited<ReturnType<typeof loadGuard>> | null = null;
   const toolEnvRef: { current: ToolEnv | null } = { current: null };
   const finish = async (status: AgentRun["status"], extra: Partial<AgentRun<O>> = {}): Promise<AgentRun<O>> => {
     Object.assign(run, extra, { status, endedAt: Date.now() });
@@ -391,7 +373,6 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
   // pulled note, or what the caller says is untrusted) is cleaned and
   // delimited before the model sees it, and taints the run from the start.
   const guard = await loadGuard();
-  unmarkGuard = guard;
   const inputUntrusted = await guard.inputSources({ path: ctx.path, document: ctx.document, text: input.text, selection: input.selection, untrusted: opts.untrusted });
   if (inputUntrusted.length) ctx.documentUntrusted = inputUntrusted;
   const toolEnv: ToolEnv = {
@@ -409,8 +390,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
   };
   const modelInput: I = guard.guardInput(input, inputUntrusted, ctx.document);
   toolEnvRef.current = toolEnv;
-  // W11.I2: the privacy log shows when a run became tainted, and by what.
-  if (toolEnv.taint.length) await guard.logRuleOfTwo({ event: "tainted", sources: toolEnv.taint });
+  await logTainted(guard, toolEnv.taint); // W11.I2: the privacy log shows when a run became tainted.
   const inputChars = (input.text ?? "").length + (input.selection ?? "").length;
   const maxRetries = def.maxRetries ?? DEFAULT_MAX_RETRIES;
   const maxSteps = def.maxSteps ?? DEFAULT_MAX_STEPS;
@@ -484,9 +464,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     else if (r.untrusted?.length) {
       // Plan 2.7: context from outside notes is cleaned and delimited, and taints the run
       // (the system prompt, built after this loop, then carries the rule).
-      const wasClean = toolEnv.taint.length === 0;
-      ({ body, note: guardNote } = guard.guardToolResult((v) => truncate(toolResultMessage(call, v), TOOL_RESULT_LIMIT), r.result, r.untrusted, toolEnv.taint, []));
-      if (wasClean) await guard.logRuleOfTwo({ event: "tainted", sources: toolEnv.taint });
+      ({ body, note: guardNote } = await guardUntrustedResult(guard, (v) => truncate(toolResultMessage(call, v), TOOL_RESULT_LIMIT), r.result, r.untrusted, toolEnv.taint, []));
     } else body = truncate(toolResultMessage(call, r.result), TOOL_RESULT_LIMIT);
     step({ kind: "tool", ms: Date.now() - t1, label: call.name, ok: r.error === undefined, detail: ["context", guardNote, r.error ?? truncate(JSON.stringify(call.args), 200)].filter(Boolean).join(" · ") });
     context.push({ role: "assistant", content: "", toolCalls: [call] }, { role: "tool", content: body, toolCallId: call.id, name: call.name });
@@ -606,8 +584,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
           signal: opts.signal,
           onDelta: def.streaming && !offered.length ? onDelta : undefined,
         });
-        // W11.I3: the data marks of untrusted blocks never reach the user, a tool or the parsed output.
-        const res = toolEnv.taint.length ? { ...sent, content: guard.unmarkData(sent.content), toolCalls: (sent.toolCalls ?? []).map((c) => ({ ...c, args: guard.unmarkValue(c.args) })) } : sent;
+        const res = unmarkReply(guard, toolEnv.taint, sent); // W11.I3: data marks never reach the user, a tool or the parser.
         run.model = res.model || run.model;
         if (res.usage) {
           run.tokens.input += res.usage.inputTokens;
@@ -657,9 +634,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
           else if (r.error !== undefined) body = toolResultMessage(call, undefined, r.error);
           else if (r.untrusted?.length) {
             // Outside content: cleaned, then delimited (after truncation, so the closing marker stays).
-            const wasClean = toolEnv.taint.length === 0;
-            ({ body, note: guardNote } = guard.guardToolResult((v) => truncate(toolResultMessage(call, v), TOOL_RESULT_LIMIT), r.result, r.untrusted, toolEnv.taint, messages));
-            if (wasClean) await guard.logRuleOfTwo({ event: "tainted", sources: toolEnv.taint });
+            ({ body, note: guardNote } = await guardUntrustedResult(guard, (v) => truncate(toolResultMessage(call, v), TOOL_RESULT_LIMIT), r.result, r.untrusted, toolEnv.taint, messages));
           } else body = truncate(toolResultMessage(call, r.result), TOOL_RESULT_LIMIT);
           const argsText = truncate(JSON.stringify(call.args), 200);
           const detail = [r.note, guardNote, repairNote, argsText].filter(Boolean).join(" · ");
