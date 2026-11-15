@@ -1,0 +1,7 @@
+{
+  "contacts.exported": "Exported {n} people as a vCard file",
+  "contacts.failed": "Contacts: {error}",
+  "contacts.imported": "Contacts: {created} new people, {merged} merged into people already in the vault",
+  "contacts.noPeople": "No person notes (type: person) in the vault.",
+  "contacts.none": "No contacts found in this file."
+}

@@ -211,6 +211,22 @@ export function buildExportCommands({ handleExportHtml, liveDoc, getEditorView }
       action: () => exportAs(liveDoc(), "opml"),
     },
     {
+      id: "file.importVcard",
+      label: t("cmd.file.importVcard"),
+      hint: t("cmd.file.importVcard.hint"),
+      icon: cmdIcons.Download,
+      group: t("group.file"),
+      action: async () => (await import("../../contacts/vcardActions")).importVcard(),
+    },
+    {
+      id: "file.exportVcard",
+      label: t("cmd.file.exportVcard"),
+      hint: t("cmd.file.exportVcard.hint"),
+      icon: cmdIcons.Download,
+      group: t("group.file"),
+      action: async () => (await import("../../contacts/vcardActions")).exportVcard(),
+    },
+    {
       id: "file.exportReveal",
       label: t("cmd.file.exportReveal"),
       hint: t("cmd.file.exportReveal.hint"),
