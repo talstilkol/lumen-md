@@ -20,6 +20,7 @@ const PdfReader = lazy(() => import("./pdf/PdfReaderOverlay").then(m => ({ defau
 const EpubReader = lazy(() => import("./epub/EpubReader").then(m => ({ default: m.EpubReaderOverlay })));
 // W10.E19 (8.2): every dialog and panel that is hidden at start loads on first open.
 const CommandPalette = lazy(() => import("./ui/CommandPalette").then((m) => ({ default: m.CommandPalette })));
+const FileViewerOverlay = lazy(() => import("./viewers/FileViewerOverlay"));
 import { AiFab } from "./ui/AiFab";
 import { FileTree } from "./ui/FileTree";
 import { SidebarResizer } from "./ui/SidebarResizer";
@@ -243,7 +244,7 @@ export default function App() {
   }, []);
 
   // PDF / EPUB readers and every `lumen-open-file` (W6.25).
-  const { pdfView, setPdfView, epubView, setEpubView, registerPdfSaveGate } = useOpenFileEvent(handleOpenFromWorkspace);
+  const { pdfView, setPdfView, epubView, setEpubView, fileView, setFileView, registerPdfSaveGate } = useOpenFileEvent(handleOpenFromWorkspace);
 
   // Automations (W5.24): a lazy chunk that starts only when the vault has a rules file.
   useEffect(() => {
@@ -655,6 +656,21 @@ export default function App() {
       {epubView && (
         <Suspense fallback={null}>
           <EpubReader key={epubView.path} path={epubView.path} fragment={epubView.fragment} openSeq={epubView.seq} onClose={() => setEpubView(null)} />
+        </Suspense>
+      )}
+
+      {/* Notebook, data file and map file viewers (plan W12.F4, F5, F7) */}
+      {fileView && (
+        <Suspense fallback={null}>
+          <FileViewerOverlay
+            key={`${fileView.path}#${fileView.seq}`}
+            view={fileView}
+            onClose={() => setFileView(null)}
+            onOpenAsText={(path, text) => {
+              setFileView(null);
+              handleOpenFromWorkspace(path, text);
+            }}
+          />
         </Suspense>
       )}
 

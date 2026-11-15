@@ -1,0 +1,204 @@
+/* File viewers (plan W12.F4, F5, F7): notebook, data file, map file. Theme colours come from the app's tokens. */
+.fv-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--fg);
+  outline: none;
+}
+.fv-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--border);
+  font: 13px system-ui, sans-serif;
+}
+.fv-toolbar h2 {
+  margin: 0;
+  margin-inline-end: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.fv-toolbar button,
+.fv-toolbar select {
+  background: transparent;
+  color: inherit;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font: inherit;
+  cursor: pointer;
+}
+.fv-toolbar button[aria-pressed="true"] {
+  background: var(--bg-muted);
+}
+.fv-spacer {
+  flex: 1;
+}
+.fv-meta {
+  color: var(--fg-muted);
+}
+.fv-body {
+  flex: 1;
+  overflow: auto;
+  padding: 12px 16px;
+}
+
+/* Notebook */
+.nb-view {
+  max-width: 960px;
+  margin-inline: auto;
+}
+.nb-cell {
+  margin-block: 10px;
+}
+.nb-code {
+  display: flex;
+  gap: 8px;
+}
+.nb-prompt {
+  flex: 0 0 3.5em;
+  color: var(--fg-muted);
+  font: 12px ui-monospace, monospace;
+  text-align: end;
+  padding-top: 8px;
+}
+.nb-body {
+  flex: 1;
+  min-width: 0;
+}
+.nb-source pre,
+.nb-out pre,
+pre.nb-out,
+.nb-raw pre,
+.nb-plain {
+  margin: 0;
+  padding: 8px;
+  overflow: auto;
+  background: var(--bg-subtle);
+  border-radius: 6px;
+  font: 12.5px/1.45 ui-monospace, monospace;
+  white-space: pre-wrap;
+}
+.nb-out {
+  margin-top: 6px;
+}
+.nb-error {
+  border-inline-start: 3px solid #d33;
+}
+.nb-stderr {
+  border-inline-start: 3px solid #d90;
+}
+.nb-image {
+  max-width: 100%;
+  height: auto;
+}
+.nb-html {
+  overflow: auto;
+}
+.nb-html table {
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.nb-html th,
+.nb-html td {
+  border: 1px solid var(--border);
+  padding: 2px 6px;
+}
+.nb-inactive figcaption {
+  font-size: 12px;
+  color: var(--fg-muted);
+}
+
+/* Data file */
+.df-table {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  font-size: 13px;
+}
+.df-scroll {
+  flex: 1;
+  overflow: auto;
+  min-height: 300px;
+  max-height: calc(100vh - 120px);
+}
+.df-row {
+  display: grid;
+  border-bottom: 1px solid var(--border);
+}
+.df-head {
+  font-weight: 600;
+  background: var(--bg-subtle);
+}
+.df-cell {
+  padding: 4px 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.df-value[role="button"]:focus-visible {
+  outline: 2px solid var(--border-strong);
+}
+.df-input {
+  width: 100%;
+  font: inherit;
+}
+.df-kanban {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  align-items: flex-start;
+}
+.df-lane {
+  flex: 0 0 240px;
+  background: var(--bg-subtle);
+  border-radius: 8px;
+  padding: 8px;
+}
+.df-lane h3 {
+  margin: 0 0 6px;
+  font-size: 13px;
+}
+.df-lane ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.df-lane li {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 6px;
+  margin-block: 4px;
+}
+.df-count {
+  color: var(--fg-muted);
+  font-weight: 400;
+}
+
+/* Map file */
+.geo-map {
+  height: 60vh;
+  min-height: 280px;
+  border-radius: 8px;
+}
+.geo-note {
+  color: var(--fg-muted);
+}
+.geo-table {
+  margin-top: 12px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.geo-table th,
+.geo-table td {
+  border: 1px solid var(--border);
+  padding: 3px 8px;
+  text-align: start;
+}
