@@ -259,3 +259,4 @@
 /src/commands/domains/journalistActions.ts @talstilkol
 /src/pdf/zoteroSend.ts                   @talstilkol
 /src/ui/AcademicExportDialog.tsx         @talstilkol
+/src/agents/eval/reproducible.ts         @talstilkol
