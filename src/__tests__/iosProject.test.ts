@@ -64,6 +64,7 @@ describe("the iOS project (W10.C7)", () => {
     expect(all.filter((f) => !inTargets.has(f))).toEqual([]);
     expect(sourcesOf("App").sort()).toEqual([
       "ios/App/App/AppDelegate.swift",
+      "ios/App/App/LanDiscovery.swift",
       "ios/App/App/LumenIntents.swift",
       "ios/App/App/LumenNative.swift",
       "ios/App/App/NativeCapture.swift",

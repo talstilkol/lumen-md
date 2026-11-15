@@ -9,8 +9,9 @@
  * ./rpc.ts): the codes carry no key, and a device that takes one without the
  * passphrase fails the proof.
  *
- * The sockets live in the desktop app (src-tauri/lan-mdns, std-only Rust): a
- * web page can't send UDP or listen on a port. In a browser or on a phone
+ * The sockets live in the desktop app (src-tauri/lan-mdns, std-only Rust) and,
+ * on phones, in the native Capacitor plugin `LumenLan` (./nativeDiscovery.ts,
+ * W10.E45): a web page can't send UDP or listen on a port. In a browser
  * `discoveryAvailable()` is false and the dialog shows the codes as before.
  *
  * Every address the app returns is checked again here (./address.ts), and a
@@ -21,6 +22,7 @@
 import { isLanHost } from "./address";
 import { channelBinding, comparisonCode, type LinkFingerprints } from "./rpc";
 import { CODE_PREFIX } from "./link";
+import { capacitorInvoke, lumenLanPlugin, nativeLanAvailable } from "./nativeDiscovery";
 
 export type Invoke = <T>(cmd: string, args?: Record<string, unknown>) => Promise<T>;
 
@@ -49,16 +51,18 @@ export class DiscoveryError extends Error {
   }
 }
 
-/** True in the desktop app, which has the sockets for it. */
+const inTauri = () => typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+
+/** True in the desktop app and in the iOS / Android app, which have the sockets for it. */
 export function discoveryAvailable(): boolean {
-  return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+  return inTauri() || nativeLanAvailable();
 }
 
 async function invokeOf(deps: DiscoveryDeps): Promise<Invoke> {
   if (deps.invoke) return deps.invoke;
-  if (!discoveryAvailable()) throw new DiscoveryError("unavailable");
-  const core = await import("@tauri-apps/api/core");
-  return core.invoke as Invoke;
+  if (inTauri()) return (await import("@tauri-apps/api/core")).invoke as Invoke;
+  if (nativeLanAvailable()) return capacitorInvoke(await lumenLanPlugin());
+  throw new DiscoveryError("unavailable");
 }
 
 const isCode = (s: unknown): s is string => typeof s === "string" && s.startsWith(CODE_PREFIX) && s.length < 60_000 && /^[A-Za-z0-9_-]+$/.test(s.slice(CODE_PREFIX.length));
