@@ -65,6 +65,8 @@
     "budget:history": "node scripts/budget-ratchet.mjs --history",
     "ci:local": "node scripts/ci-local.mjs",
     "perf:vault100k": "node --expose-gc --max-old-space-size=4096 --import tsx scripts/perf/vault-100k.ts",
+    "perf:corpus-vault": "node scripts/perf/corpus-vault.mjs",
+    "perf:large-vault": "node --max-old-space-size=8192 --import tsx scripts/perf/large-vault.ts",
     "review:coverage": "node scripts/review-coverage.mjs",
     "review:sign": "node scripts/review-sign.mjs",
     "lighthouse": "npx -y @lhci/cli@0.16.1 autorun --config=./lighthouserc.json && npx -y @lhci/cli@0.16.1 autorun --config=./lighthouserc.mobile.json",

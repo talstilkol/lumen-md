@@ -1,0 +1,48 @@
+<mediawiki xmlns="http://www.mediawiki.org/xml/export-0.11/" version="0.11" xml:lang="en">
+  <siteinfo>
+    <sitename>fixture</sitename>
+  </siteinfo>
+  <page>
+    <title>Jerusalem</title>
+    <ns>0</ns>
+    <id>1</id>
+    <revision>
+      <id>1</id>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text bytes="769" xml:space="preserve">{{Infobox settlement
+| name = Jerusalem
+| country = [[Israel]]
+| population_total = 1,000,000
+}}
+'''Jerusalem''' is a city in the [[judaean Mountains]] and the capital of [[Israel]].
+The city lies on a plateau in the Judaean Mountains and has been a religious and cultural centre for thousands of years. Its old streets hold markets, synagogues, churches and mosques. The city lies on a plateau in the Judaean Mountains and has been a religious and cultural centre for thousands of years. Its old streets hold markets, synagogues, churches and mosques. The city lies on a plateau in the Judaean Mountains and has been a religious and cultural centre for thousands of years. Its old streets hold markets, synagogues, churches and mosques. 
+[[Category:Capitals in Asia]]
+</text>
+    </revision>
+  </page>
+  <page>
+    <title>Israel</title>
+    <ns>0</ns>
+    <id>1</id>
+    <revision>
+      <id>1</id>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text bytes="636" xml:space="preserve">'''Israel''' is a country. Its capital is [[Jerusalem]]. The city lies on a plateau in the Judaean Mountains and has been a religious and cultural centre for thousands of years. Its old streets hold markets, synagogues, churches and mosques. The city lies on a plateau in the Judaean Mountains and has been a religious and cultural centre for thousands of years. Its old streets hold markets, synagogues, churches and mosques. The city lies on a plateau in the Judaean Mountains and has been a religious and cultural centre for thousands of years. Its old streets hold markets, synagogues, churches and mosques. 
+[[Category:Countries]]
+</text>
+    </revision>
+  </page>
+  <page>
+    <title>Judaean Mountains</title>
+    <ns>0</ns>
+    <id>1</id>
+    <revision>
+      <id>1</id>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text bytes="607" xml:space="preserve">The '''Judaean Mountains''' surround [[Jerusalem]]. The city lies on a plateau in the Judaean Mountains and has been a religious and cultural centre for thousands of years. Its old streets hold markets, synagogues, churches and mosques. The city lies on a plateau in the Judaean Mountains and has been a religious and cultural centre for thousands of years. Its old streets hold markets, synagogues, churches and mosques. The city lies on a plateau in the Judaean Mountains and has been a religious and cultural centre for thousands of years. Its old streets hold markets, synagogues, churches and mosques. </text>
+    </revision>
+  </page>
+</mediawiki>
