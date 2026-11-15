@@ -13,6 +13,30 @@ const load = () => import("../../automations/app");
 const ask = async (key: string, defaultValue = "") => (await uiPrompt({ message: t(key), defaultValue }))?.trim() ?? null;
 const fail = (e: unknown) => useToastStore.getState().push({ kind: "error", title: t("automations.failed", { error: explainError(e) }) });
 
+/** The actions the picker offers (W10.E15: six, with "run an agent" and "add a task"). */
+export const ACTIONS = ["move", "tag", "template", "appendDaily", "createTask", "runAgent"] as const;
+
+async function buildAction(a: string): Promise<Action | null> {
+  if (a === "runAgent") {
+    const { listAgents } = await import("../../agents/registry");
+    const agent = await uiSelect({ message: t("automations.ask.agent"), choices: listAgents().map((d) => ({ value: d.id, label: d.id })) });
+    if (!agent) return null;
+    const prompt = await ask("automations.ask.prompt");
+    if (prompt === null) return null;
+    return { kind: "runAgent", agent, ...(prompt ? { prompt } : {}) };
+  }
+  if (a === "createTask") {
+    const text = await ask("automations.ask.task", "{{link}}");
+    if (!text) return null;
+    const file = await ask("automations.ask.tasksFile", "Tasks.md");
+    if (file === null) return null;
+    return { kind: "createTask", text, ...(file ? { file } : {}) };
+  }
+  const value = await ask(a === "move" ? "automations.ask.folder" : a === "tag" ? "automations.ask.tag" : a === "template" ? "automations.ask.template" : "automations.ask.text", a === "appendDaily" ? "- {{link}}" : "");
+  if (value === null || (a !== "move" && !value)) return null;
+  return a === "move" ? { kind: "move", folder: value } : a === "tag" ? { kind: "tag", tag: value } : a === "template" ? { kind: "template", template: value } : { kind: "appendDaily", text: value };
+}
+
 async function buildRule(): Promise<Rule | null> {
   const w = await uiSelect({ message: t("automations.pick.trigger"), choices: ["created", "tagAdded", "propertyChanged", "rowChanged", "daily"].map((v) => ({ value: v, label: t(`automations.trigger.${v}`) })) });
   if (!w) return null;
@@ -32,11 +56,10 @@ async function buildRule(): Promise<Rule | null> {
     if (!base) return null;
     when = { kind: "rowChanged", base: /\.base$/i.test(base) ? base : `${base}.base`, view: (await ask("automations.ask.view")) || undefined, property: (await ask("automations.ask.rowProperty")) || undefined };
   } else when = { kind: "daily" };
-  const a = await uiSelect({ message: t("automations.pick.action"), choices: ["move", "tag", "template", "appendDaily"].map((v) => ({ value: v, label: t(`automations.action.${v}`) })) });
+  const a = await uiSelect({ message: t("automations.pick.action"), choices: ACTIONS.map((v) => ({ value: v, label: t(`automations.action.${v}`) })) });
   if (!a) return null;
-  const value = await ask(a === "move" ? "automations.ask.folder" : a === "tag" ? "automations.ask.tag" : a === "template" ? "automations.ask.template" : "automations.ask.text", a === "appendDaily" ? "- {{link}}" : "");
-  if (value === null || (a !== "move" && !value)) return null;
-  const action: Action = a === "move" ? { kind: "move", folder: value } : a === "tag" ? { kind: "tag", tag: value } : a === "template" ? { kind: "template", template: value } : { kind: "appendDaily", text: value };
+  const action = await buildAction(a);
+  if (!action) return null;
   const name = (await ask("automations.ask.name", `${t(`automations.trigger.${w}`)} → ${t(`automations.action.${a}`)}`)) || w;
   return { id: `r${Date.now().toString(36)}`, name, enabled: true, when, then: [action] };
 }
@@ -63,7 +86,9 @@ export async function dryRunAutomations(doc: { workspaceName?: string | null; co
       await uiAlert({ message: t("automations.dryRun.none") });
       return;
     }
-    const lines = p.changes.map((c) => (c.kind === "move" ? `• ${c.rule}: ${c.from} → ${c.to}` : `• ${c.rule}: ${c.path}`));
+    const lines = p.changes.map((c) =>
+      c.kind === "move" ? `• ${c.rule}: ${c.from} → ${c.to}` : c.kind === "agent" ? `• ${c.rule}: ${t("automations.dryRun.agent", { agent: c.agent, path: c.path ?? "" })}` : `• ${c.rule}: ${c.path}`,
+    );
     await uiAlert({ message: [t("automations.dryRun.title"), ...lines, ...(p.stopped.length ? [t("automations.dryRun.stopped", { count: p.stopped.length })] : [])].join("\n") });
   } catch (e) {
     fail(e);
