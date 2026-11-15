@@ -29,8 +29,18 @@ The wording is reviewed first (W6.37).
 
 ## 3. Recording and the take check
 
-Record one WAV per line (`wavs/he_0001.wav`, 16-bit mono, 22,050 Hz) in a
-quiet room, then run:
+**In the app:** open the palette and run *Voice corpus: record sentences for
+an open Hebrew voice*. Load `script.tsv`, give the consent, and read the
+sentence on screen. The microphone is opened raw (no echo cancellation,
+noise suppression or automatic gain), and each take is checked as soon as
+it stops. A take that fails says why, and you record it again. *Export the
+corpus* saves one ZIP: `script.tsv`, `wavs/<id>.wav` (16-bit mono, 22,050
+Hz), the LJSpeech `metadata.csv` of the passing takes, and `manifest.json`
+with the consent and every take's levels. Nothing is uploaded. Unzip it as
+`recording/` for the steps below.
+
+**Or by hand:** record one WAV per line (`wavs/he_0001.wav`, 16-bit mono,
+22,050 Hz) in a quiet room. Then, for either way, run:
 
 ```sh
 npx tsx scripts/voice-corpus/kit.mjs check recording/

@@ -202,6 +202,8 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "standardSite.json": { module: "publish/standardSiteStrings.ts", users: ["publish/standardSiteActions.ts"], prefixes: ["atproto."] },
   // The host-move banner: pwa/hostMoveBoot.ts loads pwa/hostMove.ts with a dynamic import, and it holds its own strings.
   "hostmove.json": { module: "pwa/hostMove.ts", users: [], prefixes: ["pwa.move."] },
+  // The voice corpus recorder (W7.10, W10.E52): the palette loads Recorder.tsx with a dynamic import.
+  "voiceCorpus.json": { module: "voice-corpus/recorderStrings.ts", users: ["voice-corpus/Recorder.tsx"], prefixes: ["voiceCorpus."] },
 };
 
 function sources(dir: string): string[] {
