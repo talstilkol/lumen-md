@@ -25,6 +25,7 @@ import { isBetaLocale } from "../i18n/review";
 import { useFocusTrap } from "./useFocusTrap";
 import "./settingsScreenStrings";
 import { HelpButton } from "./HelpButton";
+import { SettingsAbout } from "./AccessibilityLinks";
 // W5.11: the "keep photo metadata" switch's label ships with this lazy screen.
 import "../lib/journalistStrings";
 
@@ -342,6 +343,7 @@ export function SettingsScreen({ tab: initialTab = "general", onClose, onOpenAud
             {visibleTabs.length > 0 && <Suspense fallback={<p style={muted}>…</p>}>{panel()}</Suspense>}
           </section>
         </div>
+        <SettingsAbout />
       </div>
     </div>
   );

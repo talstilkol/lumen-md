@@ -15,6 +15,11 @@
  * Rules: every A / AA criterion has a status; none at level A is "does not
  * support"; every partial or unsupported one has a plan; every evidence
  * path exists; the report's version is the app's version.
+ *
+ * W11.Q7: the pages also carry EN 301 549 V4.1.1 clauses 9–11 in the VPAT
+ * 2.5 INT structure, from docs/acr/en301549.json plus the WCAG entries
+ * (enRows, checkEn): every row has a status, a row that mirrors a WCAG
+ * criterion has that criterion's status, and partial rows have a plan.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
@@ -22,6 +27,8 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export const SOURCE = "docs/acr/wcag22.json";
+/** W11.Q7: EN 301 549 V4.1.1 clauses 9–11 (VPAT 2.5 INT): the rows that are not a WCAG criterion, and the chapter notes. */
+export const EN_SOURCE = "docs/acr/en301549.json";
 export const PAGES = { en: "docs/src/content/docs/editor/acr.md", he: "docs/src/content/docs/he/editor/acr.md" };
 
 /** WCAG 2.2 level A and AA success criteria (4.1.1 Parsing was removed in 2.2). */
@@ -37,6 +44,65 @@ const LABEL = {
 
 export function loadReport(root = ROOT) {
   return JSON.parse(readFileSync(join(root, SOURCE), "utf8"));
+}
+
+export function loadEn(root = ROOT) {
+  return JSON.parse(readFileSync(join(root, EN_SOURCE), "utf8"));
+}
+
+/**
+ * Every EN 301 549 V4.1.1 row of clauses 9, 10 and 11, with a status:
+ * clause 9 is each WCAG 2.2 A / AA criterion as web content; clause 10 is
+ * one row for the whole clause (Lumen ships no non-web documents); clause 11
+ * is each WCAG criterion that V4.1.1 applies to non-web software, then the
+ * software-only rows (11.5–11.8) from en301549.json. A WCAG-derived row
+ * carries the WCAG entry's status, remarks and plan; it is never "not
+ * evaluated".
+ */
+export function enRows(report, en) {
+  const byId = new Map(report.criteria.map((c) => [c.id, c]));
+  const order = [...WCAG22.A, ...WCAG22.AA].sort(cmpIds);
+  const fromWcag = (clause, id, name) => {
+    const c = byId.get(id);
+    return { clause, id: `${clause}.${id}`, wcag: id, level: c?.level ?? null, name: name ?? c?.name ?? id, status: c?.status ?? null, remarks: c?.remarks ?? null, plan: c?.plan ?? null, evidence: c?.evidence ?? [] };
+  };
+  return [
+    ...order.map((id) => fromWcag(9, id)),
+    { clause: 10, id: "10", wcag: null, level: null, name: "Non-web documents", status: en.chapter10.status, remarks: { en: en.chapter10.en, he: en.chapter10.he }, plan: null, evidence: [] },
+    ...order.filter((id) => !en.softwareExcluded.includes(id)).map((id) => fromWcag(11, id, en.softwareNames[id])),
+    ...en.rows.map((r) => ({ clause: 11, id: r.id, wcag: null, mirrors: r.mirrors ?? null, level: null, name: r.name, status: r.status, remarks: r.remarks, plan: r.plan ?? null, evidence: r.evidence ?? [] })),
+  ];
+}
+
+function cmpIds(a, b) {
+  const x = a.split(".").map(Number);
+  const y = b.split(".").map(Number);
+  for (let i = 0; i < Math.max(x.length, y.length); i++) if ((x[i] ?? 0) !== (y[i] ?? 0)) return (x[i] ?? 0) - (y[i] ?? 0);
+  return 0;
+}
+
+/** Problems with the EN 301 549 part (empty = good). */
+export function checkEn(report, en, root = ROOT) {
+  const problems = [];
+  const byId = new Map(report.criteria.map((c) => [c.id, c]));
+  for (const id of en.softwareExcluded) if (!byId.has(id)) problems.push(`EN: excluded ${id} is not a WCAG 2.2 A / AA criterion`);
+  const seen = new Set();
+  for (const r of enRows(report, en)) {
+    if (seen.has(r.id)) problems.push(`EN ${r.id} is listed twice`);
+    seen.add(r.id);
+    if (!STATUSES.includes(r.status)) problems.push(`EN ${r.id}: status "${r.status}" is not one of ${STATUSES.join(", ")} (no row may be left "not evaluated")`);
+    if (!r.remarks?.en?.trim() || !r.remarks?.he?.trim()) problems.push(`EN ${r.id}: remarks in English and Hebrew are required`);
+    else if (!/[֐-׿]/.test(r.remarks.he)) problems.push(`EN ${r.id}: the Hebrew remarks are not in Hebrew`);
+    if ((r.status === "partially-supports" || r.status === "does-not-support") && !(r.plan?.en && r.plan?.he && r.plan?.target)) problems.push(`EN ${r.id}: ${r.status} needs a plan (en, he, target)`);
+    if (r.mirrors) {
+      const m = byId.get(r.mirrors);
+      if (!m) problems.push(`EN ${r.id}: mirrors ${r.mirrors}, which is not in the report`);
+      else if (m.status !== r.status) problems.push(`EN ${r.id}: mirrors ${r.mirrors} (${m.status}) but says ${r.status}`);
+    }
+    for (const e of r.evidence ?? []) if (!existsSync(join(root, e))) problems.push(`EN ${r.id}: evidence ${e} does not exist`);
+  }
+  for (const k of ["chapter9", "chapter10", "chapter11", "source"]) if (!en[k]?.en || !en[k]?.he) problems.push(`EN: ${k} needs en and he`);
+  return problems;
 }
 
 /** Problems with the report (empty = good). */
@@ -77,7 +143,7 @@ export function summary(report) {
 const esc = (s) => s.replace(/\|/g, "\\|").replace(/\n/g, " ");
 
 /** The docs page in one language. */
-export function renderPage(report, lang) {
+export function renderPage(report, lang, en = null) {
   const L = LABEL[lang];
   const he = lang === "he";
   const s = summary(report);
@@ -85,7 +151,7 @@ export function renderPage(report, lang) {
   const rows = [...report.criteria].sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
   const lines = [
     "---",
-    `title: ${he ? "דוח תאימות נגישות (ACR) — WCAG 2.2" : "Accessibility conformance report (ACR) — WCAG 2.2"}`,
+    `title: ${he ? "דוח תאימות נגישות (ACR) — WCAG 2.2 ו-EN 301 549" : "Accessibility conformance report (ACR) — WCAG 2.2 and EN 301 549"}`,
     `description: ${he ? `כל קריטריון הצלחה של WCAG 2.2 ברמות A ו-AA, עם הסטטוס של Lumen ${report.version}, הערות, ראיות ותוכנית תיקון.` : `Every WCAG 2.2 level A and AA success criterion, with Lumen ${report.version}'s status, remarks, evidence and remediation plan.`}`,
     "---",
     "",
@@ -123,6 +189,7 @@ export function renderPage(report, lang) {
   lines.push(he ? "## הוסר ב-WCAG 2.2" : "## Removed in WCAG 2.2", "");
   for (const r of report.removed) lines.push(`- ${r.id} ${r.name}: ${r.note[lang]}`);
   lines.push("");
+  if (en) lines.push(...renderEn(report, en, lang));
   lines.push(he ? "## פנייה בנושא נגישות" : "## Accessibility contact", "");
   lines.push(
     he
@@ -131,6 +198,45 @@ export function renderPage(report, lang) {
   );
   lines.push("");
   return lines.join("\n");
+}
+
+/** The EN 301 549 V4.1.1 chapters 9–11, VPAT 2.5 INT style. */
+export function renderEn(report, en, lang) {
+  const L = LABEL[lang];
+  const he = lang === "he";
+  const rows = enRows(report, en);
+  const count = (clause) => Object.fromEntries(STATUSES.map((st) => [st, rows.filter((r) => r.clause === clause && r.status === st).length]));
+  const out = [
+    he ? `## ${en.standard} (‏${en.format})` : `## ${en.standard} (${en.format})`,
+    "",
+    he
+      ? "החלק הזה ממפה את הדוח לסעיפים 9 (רשת), 10 (מסמכים שאינם רשת) ו-11 (תוכנה שאינה רשת) של התקן האירופי, במבנה של מהדורת ה-INT של VPAT®‏ 2.5. לכל שורה יש סטטוס; אין שורה \"לא נבדק\"."
+      : "This part maps the report to clauses 9 (web), 10 (non-web documents) and 11 (non-web software) of the European standard, in the structure of the VPAT® 2.5 INT edition. Every row has a status; no row is \"not evaluated\".",
+    "",
+    en.source[lang],
+    "",
+    he ? "| סעיף | שורות | נתמך | נתמך חלקית | לא נתמך | לא רלוונטי |" : "| Clause | Rows | Supports | Partially supports | Does not support | Not applicable |",
+    "|---|---|---|---|---|---|",
+    ...[9, 10, 11].map((c) => {
+      const n = count(c);
+      return `| ${c} | ${rows.filter((r) => r.clause === c).length} | ${n.supports} | ${n["partially-supports"]} | ${n["does-not-support"]} | ${n["not-applicable"]} |`;
+    }),
+    "",
+  ];
+  const table = (clause, title, note) => {
+    out.push(title, "", note, "", he ? "| שורה | סטטוס | הערות |" : "| Row | Status | Remarks |", "|---|---|---|");
+    for (const r of rows.filter((x) => x.clause === clause)) {
+      const name = r.wcag ? `${r.id} ${r.name} (WCAG ${r.wcag})` : `${r.id} ${r.name}`;
+      const plan = r.plan ? ` ${he ? "**תוכנית:**" : "**Plan:**"} ${r.plan[lang]} (${r.plan.target})` : "";
+      const mirrors = r.mirrors ? ` (${he ? "כמו" : "as"} WCAG ${r.mirrors})` : "";
+      out.push(`| ${esc(name)} | ${L[r.status]}${mirrors} | ${esc(r.remarks[lang])}${esc(plan)} |`);
+    }
+    out.push("");
+  };
+  table(9, he ? "### סעיף 9: רשת" : "### Clause 9: Web", en.chapter9[lang]);
+  table(10, he ? "### סעיף 10: מסמכים שאינם רשת" : "### Clause 10: Non-web documents", en.chapter10[lang]);
+  table(11, he ? "### סעיף 11: תוכנה שאינה רשת" : "### Clause 11: Non-web software", en.chapter11[lang]);
+  return out;
 }
 
 const slug = (name) =>
@@ -142,13 +248,14 @@ const slug = (name) =>
 
 function main() {
   const report = loadReport();
-  const problems = checkReport(report);
+  const en = loadEn();
+  const problems = [...checkReport(report), ...checkEn(report, en)];
   for (const p of problems) console.error(`✖ ${p}`);
   if (problems.length) process.exit(1);
   const check = process.argv.includes("--check");
   let stale = 0;
   for (const [lang, rel] of Object.entries(PAGES)) {
-    const want = renderPage(report, lang);
+    const want = renderPage(report, lang, en);
     const path = join(ROOT, rel);
     const have = existsSync(path) ? readFileSync(path, "utf8") : null;
     if (have === want) continue;
@@ -163,6 +270,7 @@ function main() {
   }
   if (stale) process.exit(1);
   const s = summary(report);
+  console.error(`✓ ACR: EN 301 549 V4.1.1, ${enRows(report, en).length} rows of clauses 9–11 with a status.`);
   console.error(`✓ ACR: ${report.criteria.length} criteria with a status — A: ${s.A.supports} supports, ${s.A["partially-supports"]} partial, ${s.A["does-not-support"]} not supported; AA: ${s.AA.supports} supports, ${s.AA["partially-supports"]} partial, ${s.AA["does-not-support"]} not supported.`);
 }
 

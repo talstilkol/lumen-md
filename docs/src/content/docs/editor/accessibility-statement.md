@@ -2,11 +2,11 @@
 title: Accessibility statement
 description: How accessible Lumen is — the standard it follows (Israeli Standard 5568, WCAG), what works, known gaps, and how to report a barrier.
 appVersion: 0.1.0
-reviewed: 2026-11-10
+reviewed: 2026-11-15
 ---
 
 This statement covers the Lumen app (web, desktop and mobile builds) at
-version **0.1.0**. It was last reviewed on **10 November 2026** and is
+version **0.1.0**. It was last reviewed on **15 November 2026** and is
 updated with every release: a test (`a11yStatement.test.ts`) fails the
 build when the version here and the app's version differ.
 
@@ -16,6 +16,11 @@ Israel's Equal Rights for Persons with Disabilities regulations (service
 accessibility adjustments, regulation 35) require **Israeli Standard
 5568**, which adopts **WCAG 2.0 level AA**. Lumen aims for **WCAG 2.2
 level AA**, which includes everything WCAG 2.0 AA asks for.
+
+For the European Union, the same report is mapped to **EN 301 549 V4.1.1**
+(clauses 9 web, 10 documents and 11 software, which now use WCAG 2.2): see
+the [accessibility conformance report](/editor/acr/), where every row has a
+status.
 
 ## What is accessible
 
