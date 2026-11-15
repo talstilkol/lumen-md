@@ -13615,6 +13615,159 @@
       ]
     },
     {
+      "key": "voiceCorpus.agree",
+      "en": "I have read this and I agree",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.allDone",
+      "en": "Every sentence has a good take. Export the corpus.",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.consentDraft",
+      "en": "This consent text is a draft awaiting legal review (plan 10.O). Do not publish a corpus recorded under it until the reviewed text replaces it.",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.consentOk",
+      "en": "Agree and start",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.consentText",
+      "en": "I am the speaker, I am 18 or older, and I agree that the recordings I make here are released under CC0 1.0 (a public-domain dedication): anyone may use them for any purpose, including training and publishing a synthetic voice that sounds like me, without credit. I can stop at any time; takes I do not export never leave this device.",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.consentTitle",
+      "en": "Consent",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.export",
+      "en": "Export the corpus (ZIP)",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.levels",
+      "en": "speech {speech}, background {noise}, signal to noise {snr}",
+      "vars": [
+        "speech",
+        "noise",
+        "snr"
+      ]
+    },
+    {
+      "key": "voiceCorpus.loadScript",
+      "en": "Load the recording script (script.tsv from the voice kit)",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.micFailed",
+      "en": "The microphone could not record: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "voiceCorpus.next",
+      "en": "Next sentence",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.problem.clipping",
+      "en": "clipping",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.problem.no-lead",
+      "en": "no pause before speaking",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.problem.no-tail",
+      "en": "no pause after speaking",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.problem.noisy",
+      "en": "background noise",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.problem.too-long",
+      "en": "over 15 seconds",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.problem.too-loud",
+      "en": "too loud",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.problem.too-quiet",
+      "en": "too quiet",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.record",
+      "en": "Record",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.retake",
+      "en": "Record again",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.scriptEmpty",
+      "en": "The script has no sentences (one per line: id, tab, text, tab, source).",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.speaker",
+      "en": "Your name or pseudonym, as you want to be credited:",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.stop",
+      "en": "Stop",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.summary",
+      "en": "{ok} good takes of {takes} recorded, {sentences} sentences in the script, {minutes} minutes of good audio",
+      "vars": [
+        "ok",
+        "takes",
+        "sentences",
+        "minutes"
+      ]
+    },
+    {
+      "key": "voiceCorpus.takeBad",
+      "en": "Record this one again: {problems}",
+      "vars": [
+        "problems"
+      ]
+    },
+    {
+      "key": "voiceCorpus.takeOk",
+      "en": "Good take.",
+      "vars": []
+    },
+    {
+      "key": "voiceCorpus.title",
+      "en": "Voice corpus recorder (open Hebrew voice)",
+      "vars": []
+    },
+    {
       "key": "whatsNew.close",
       "en": "Got it",
       "vars": []
