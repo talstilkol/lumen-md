@@ -334,7 +334,8 @@ describe("agent runtime", () => {
   });
 
   it("gives up when the model never produces a final answer within maxSteps", async () => {
-    registerExecutor(fakeExecutor(() => reply('{"tool":"upper","args":{"text":"a"}}')));
+    // A different call each step: the same call three times is the runaway guard's case (R12.18, runGuard.test.ts).
+    registerExecutor(fakeExecutor((_req, n) => reply(`{"tool":"upper","args":{"text":"a${n}"}}`)));
     const def: AgentDefinition = { id: "loop", description: "", system: "s", user: () => "u", tools: [echo], maxSteps: 3, maxRetries: 0 };
     const run = await runAgent(def, {});
     expect(run.status).toBe("failed");

@@ -455,13 +455,15 @@ export interface AgentRun<O = unknown> {
   endedAt: number;
   status: RunStatus;
   output?: O;
-  /** Stable code when failed (`no-executor`, `validation`, `parse`, `tool`, `aborted`, `error`). */
+  /** Stable code when failed (`no-executor`, `validation`, `parse`, `tool`, `aborted`, `error`, `runaway`: R12.18). */
   errorCode?: string;
   error?: string;
   attempts: number;
   steps: AgentStep[];
   suggestions: Suggestion[];
   tokens: { input: number; output: number; estimated: boolean };
+  /** R12.18: the runaway guard of the last attempt: the prompt by hash and size only, and every verdict above ok. */
+  guard?: { promptHash: string; promptChars: number; events: Array<{ action: string; reason: string; at: string }> };
   /** Key of the input (agent + user prompt): a retry picked in the panel applies to this input. */
   inputKey?: string;
   /** The run this one re-does: the user said its answer was not good (plan 5.6.3). */
