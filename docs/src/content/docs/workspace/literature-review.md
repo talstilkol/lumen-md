@@ -14,6 +14,30 @@ vault on this device. Scanned pages are read with OCR. It writes:
   **All papers** and **Verified only**, which lists only the papers where
   every field is verified.
 
+## Argument map
+
+Give notes `type: claim` (טענה) or `type: evidence` (מקור, a source), and
+link them with `supports:`, `contradicts:` or `qualifies:` (each a list of
+`[[links]]` to claims). Mark the end points with `conclusion: true`. An
+```argument-map block draws them:
+
+```argument-map
+folder: research/wages     # optional
+```
+
+- Sources sit in the first column (on the right in Hebrew), then the claims
+  they lead to, then the conclusions. Green lines support, red dashed lines
+  contradict, yellow dotted lines qualify.
+- A claim that no source reaches through "supports" or "qualifies" is
+  marked **no source**.
+- "Show as a list" gives the same map as a nested list: each claim with the
+  notes that support, contradict or qualify it. On the map, **Tab** to it,
+  then the arrow keys go from note to note and **Enter** opens one.
+- "Save as a canvas" writes the map to `canvases/` as a JSON Canvas (opens
+  in Obsidian) and as an Excalidraw drawing.
+- The two types are built in, so they show in the type list, the type's
+  Base and the properties form like your own types.
+
 ## No value without a quote
 
 For each field, the passages that search finds go to the local model. The
