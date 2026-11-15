@@ -82,7 +82,7 @@ export function readingOf(cycle: CycleId, day: GDay, lang: "he" | "en"): Reading
   if (!r) return null;
   const label =
     lang === "he"
-      ? groupBy(r.units).map((g) => (g[0].intro ? g[0].he : `${g[0].he} ${g.map((u) => gematria(u.chapter)).join(", ")}`)).join(" · ")
+      ? groupBy(r.units).map((g) => (g[0].intro ? g[0].he : `${g[0].he} ${g.map((u) => u.span.split("-").map((c) => gematria(Number(c))).join("–")).join(", ")}`)).join(" · ")
       : r.refs.map((x) => x.replace(/^Mishneh Torah, /, "")).join(" · ");
   return { cycle, name, label, refs: r.refs, url: sefariaUrl(r.refs[0]) };
 }

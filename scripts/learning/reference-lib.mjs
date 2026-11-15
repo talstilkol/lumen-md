@@ -57,10 +57,10 @@ export const sameName = (a, b) => {
  * Compare the fixture to ours. `ours` gives, for an ISO day:
  *   dafYomi(iso) → [name, daf] | null
  *   mishnaYomi(iso) → [[name, "c:m"], [name, "c:m"]] | null
- *   rambam(iso, 1 | 3) → { units: [[name, chapter, intro]] } | null
+ *   rambam(iso, 1 | 3) → { units: [[name, span, intro]] } | null   (span: "3", "4-5", "1-21")
  * Returns, per cycle, the days compared and the differences (each with
  * both sides), and for Rambam whether each difference falls on a day of
- * the introduction (the one assumption in our table).
+ * the introduction.
  */
 export function compareLearning(fixture, ours) {
   const out = {};
@@ -88,7 +88,7 @@ export function compareLearning(fixture, ours) {
       const iso = row[0];
       const theirs = per === 1 ? [[row[1], row[2]]] : row[1];
       const o = ours.rambam(iso, per);
-      const same = o && o.units.length === theirs.length && o.units.every(([n, c], i) => sameName(n, theirs[i][0]) && c === theirs[i][1]);
+      const same = o && o.units.length === theirs.length && o.units.every(([n, c], i) => sameName(n, theirs[i][0]) && String(c) === String(theirs[i][1]));
       if (!same) diffs.push({ iso, theirs, ours: o?.units ?? null, intro: !!o?.units.some((u) => u[2]) });
     }
     out[key] = { days: fixture[key].length, diffs, outsideIntro: diffs.filter((d) => !d.intro).length };

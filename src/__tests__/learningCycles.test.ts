@@ -12,6 +12,13 @@
  *
  * Facts used as anchors are the public ones the plan states: cycle 14 of
  * Daf Yomi began on 5 January 2020; 2,711 folios a cycle.
+ *
+ * The daily Rambam is checked against the PUBLISHED schedule:
+ * fixtures/hebcal-learning/rambam-published.json is hebcal-learning's own
+ * test data (BSD-2-Clause, commit 63fadce4, checked there against
+ * chabad.org's daily Rambam): one full one-chapter cycle (1,017 days from
+ * 23 April 2023), the first days of 1984 in both schedules, spot dates
+ * 1986–1991, and 41 days of the three-chapter cycle in 2020. Data only.
  * @vitest-environment node
  */
 import { describe, expect, it } from "vitest";
@@ -19,7 +26,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { fixedOf, gregorianOf, type GDay } from "../daily/hebrewCalendar";
 import { renderTemplate } from "../daily/dailyNote";
-import { DAF_YOMI_DAYS, MISHNAH_COUNT, MISHNAH_YOMIT_DAYS, RAMBAM_CHAPTERS, RAMBAM_UNITS, dafYomi, dafYomiCycleStart, dailyRambam, mishnahRefs, mishnahYomit, sefariaUrl } from "../learning/cycles";
+import { DAF_YOMI_DAYS, MISHNAH_COUNT, MISHNAH_YOMIT_DAYS, RAMBAM_CHAPTERS, RAMBAM_INTRO_UNITS, RAMBAM_UNITS, dafYomi, dafYomiCycleStart, dailyRambam, mishnahRefs, mishnahYomit, rambamCycleDays, sefariaUrl } from "../learning/cycles";
 import { emptyLearningFile, follow, learningLines, markDone, markForReview, parseLearningFile, progress, reviewCards, serializeLearningFile } from "../learning/plans";
 import { emptyReviewFile, syncSources } from "../srs/cards";
 // @ts-expect-error -- plain .mjs module without type declarations
@@ -40,18 +47,22 @@ const OURS = {
   mishnaYomi: (iso: string) => mishnahYomit(g(iso))?.mishnayot.map((p) => [p.tractate, `${p.chapter}:${p.mishnah}`]) ?? null,
   rambam: (iso: string, per: 1 | 3) => {
     const r = dailyRambam(g(iso), per);
-    return r ? { units: r.units.map((u) => [u.title.replace(/^Mishneh Torah, /, ""), u.chapter, u.intro]) } : null;
+    return r ? { units: r.units.map((u) => [u.title.replace(/^Mishneh Torah, /, ""), u.span, u.intro]) } : null;
   },
 };
 
 describe("the tables", () => {
-  it("2,711 folios of Daf Yomi, 4,192 mishnayot (2,096 days), 1,000 chapters of the Mishneh Torah (+ 17 units of its introduction)", () => {
+  it("2,711 folios of Daf Yomi, 4,192 mishnayot (2,096 days), 1,000 chapters of the Mishneh Torah; the Rambam cycles are 1,017 and 339 days", () => {
     expect(DAF_YOMI_DAYS).toBe(2711);
     expect(MISHNAH_COUNT).toBe(4192);
     expect(MISHNAH_YOMIT_DAYS).toBe(2096);
     expect(RAMBAM_CHAPTERS).toBe(1000);
+    // The introduction is 4 parts learned in 3 days each; with "The Order of
+    // Prayer" and the Haggadah the schedule has 1,017 units (published lengths).
+    expect(RAMBAM_INTRO_UNITS).toBe(12);
     expect(RAMBAM_UNITS).toBe(1017);
-    expect(RAMBAM_UNITS % 3).toBe(0);
+    expect(rambamCycleDays(1)).toBe(1017);
+    expect(rambamCycleDays(3)).toBe(339);
   });
 });
 
@@ -98,12 +109,19 @@ describe("Mishnah Yomit and Rambam", () => {
     expect(mishnahYomit(g("1947-05-19"))).toBeNull();
   });
 
-  it("one chapter or three a day, the introduction first", () => {
-    expect(dailyRambam(g("1984-04-29"), 1)?.units[0]).toMatchObject({ intro: true, chapter: 1 });
+  it("one chapter or three a day, the introduction first: 12 days at one chapter, 4 at three", () => {
+    expect(dailyRambam(g("1984-04-29"), 1)).toMatchObject({ cycle: 1, refs: ["Mishneh Torah, Transmission of the Oral Law 1-21"] });
+    expect(dailyRambam(g("1984-04-29"), 1)?.units[0]).toMatchObject({ intro: true, chapter: 1, span: "1-21" });
     const r3 = dailyRambam(g("1984-04-29"), 3)!;
     expect(r3.units).toHaveLength(3);
-    // After the 17 introduction units, day 18 of the one-chapter cycle is Foundations of the Torah 1.
-    expect(dailyRambam(gregorianOf(fixedOf(g("1984-04-29")) + 17), 1)?.refs).toEqual(["Mishneh Torah, Foundations of the Torah 1"]);
+    expect(r3.refs).toEqual(["Mishneh Torah, Transmission of the Oral Law 1-45"]);
+    // After the 12 introduction days, day 13 of the one-chapter cycle is Foundations of the Torah 1.
+    expect(dailyRambam(gregorianOf(fixedOf(g("1984-04-29")) + 12), 1)?.refs).toEqual(["Mishneh Torah, Foundations of the Torah 1"]);
+    expect(dailyRambam(gregorianOf(fixedOf(g("1984-04-29")) + 4), 3)?.refs).toEqual(["Mishneh Torah, Foundations of the Torah 1-3"]);
+    // 9 July 2020: both cycles ended (the 39th at three a day, the 13th at one).
+    expect(dailyRambam(g("2020-07-09"), 1)).toMatchObject({ cycle: 13, refs: ["Mishneh Torah, Kings and Wars 12"] });
+    expect(dailyRambam(g("2020-07-09"), 3)).toMatchObject({ cycle: 39, refs: ["Mishneh Torah, Kings and Wars 10-12"] });
+    expect(dailyRambam(g("2020-07-10"), 3)).toMatchObject({ cycle: 40, refs: ["Mishneh Torah, Transmission of the Oral Law 1-45"] });
     expect(sefariaUrl("Mishneh Torah, Foundations of the Torah 1")).toBe("https://www.sefaria.org/Mishneh_Torah,_Foundations_of_the_Torah.1");
     expect(sefariaUrl("Mishnah Berakhot 1:1-2")).toBe("https://www.sefaria.org/Mishnah_Berakhot.1.1-2");
   });
@@ -151,7 +169,7 @@ describe("the comparison (SYNTHETIC fixture: hand-written in hebcal-learning's o
       source: "SYNTHETIC — written by hand for this test",
       dafYomi: [["2020-01-05", "Berachot", 2], ["2020-01-06", "Berachot", 3], ["2020-01-07", "Berachot", 99]],
       mishnaYomi: [["1947-05-20", [["Berakhot", "1:1"], ["Berakhot", "1:2"]]]],
-      rambam1: [["1984-04-29", "Transmission of the Oral Law", 1], ["1984-05-16", "Foundations of the Torah", 2]],
+      rambam1: [["1984-04-29", "Transmission of the Oral Law", "1-21"], ["1984-05-16", "Foundations of the Torah", 2]],
     };
     const cmp = compareLearning(synthetic, OURS);
     expect(cmp.dafYomi).toMatchObject({ days: 3, diffs: [{ iso: "2020-01-07", theirs: ["Berachot", 99], ours: ["Berakhot", 4] }] });
@@ -163,9 +181,30 @@ describe("the comparison (SYNTHETIC fixture: hand-written in hebcal-learning's o
   });
 });
 
+describe("the daily Rambam against the published schedule (hebcal-learning's test data, BSD-2-Clause)", () => {
+  const pub = JSON.parse(readFileSync(join(__dirname, "fixtures/hebcal-learning/rambam-published.json"), "utf8"));
+  it("one chapter a day: a full cycle (1,017 days from 23 April 2023), 1984's first days and spot dates, 0 differences", () => {
+    expect(pub.rambam1.length).toBeGreaterThanOrEqual(1017 + 18);
+    const cmp = compareLearning({ rambam1: pub.rambam1 }, OURS);
+    // hygiene-allow: the gap report, for the PR's verification table
+    if (cmp.rambam1.diffs.length) console.log(learningReport(cmp));
+    expect(cmp.rambam1.days).toBe(pub.rambam1.length);
+    expect(cmp.rambam1.diffs).toEqual([]);
+  });
+  it("three chapters a day: 1984's first 22 days and 41 days of 2020 (The Order of Prayer in 5, Haggadah with chapter 8), 0 differences", () => {
+    const diffs: string[] = [];
+    for (const [iso, desc] of Object.entries(pub.rambam3desc as Record<string, string>)) {
+      const ours = dailyRambam(g(iso), 3)!.refs.map((r) => r.replace(/^Mishneh Torah, /, "")).join(", ");
+      if (ours !== desc) diffs.push(`${iso}: theirs ${desc} ours ${ours}`);
+    }
+    expect(Object.keys(pub.rambam3desc)).toHaveLength(63);
+    expect(diffs).toEqual([]);
+  });
+});
+
 const FIXTURE = join(__dirname, "fixtures/hebcal-learning/2020-2030.json");
 describe("against hebcal-learning's output, 2020–2030 (fixture built outside the app)", () => {
-  it.skipIf(!existsSync(FIXTURE))("0 differences in Daf Yomi and Mishnah Yomit; Rambam's only in the introduction", () => {
+  it.skipIf(!existsSync(FIXTURE))("0 differences in Daf Yomi, Mishnah Yomit and both Rambam cycles", () => {
     const fixture = JSON.parse(readFileSync(FIXTURE, "utf8"));
     const cmp = compareLearning(fixture, OURS);
     // hygiene-allow: the gap report, for the PR's verification table
@@ -173,8 +212,8 @@ describe("against hebcal-learning's output, 2020–2030 (fixture built outside t
     expect(cmp.dafYomi.days).toBeGreaterThan(4000);
     expect(cmp.dafYomi.diffs).toEqual([]);
     expect(cmp.mishnaYomi.diffs).toEqual([]);
-    expect(cmp.rambam1.outsideIntro).toBe(0);
-    expect(cmp.rambam3.outsideIntro).toBe(0);
+    expect(cmp.rambam1.diffs).toEqual([]);
+    expect(cmp.rambam3.diffs).toEqual([]);
   });
 });
 

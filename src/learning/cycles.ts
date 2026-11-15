@@ -250,7 +250,14 @@ export function mishnahYomit(day: GDay): MishnahYomit | null {
 
 /**
  * The Mishneh Torah in order: Sefaria's section title (after "Mishneh
- * Torah, "), the Hebrew title, the chapters. 83 sections, 1,000 chapters.
+ * Torah, "), the Hebrew title, the chapters as the one-chapter schedule
+ * counts them. The 83 sections of halakhot have 1,000 chapters; the
+ * schedule also learns "The Order of Prayer" (the prayer texts at the end of
+ * Sefer Ahavah, its own section on Sefaria) and the text of the Haggadah,
+ * which Sefaria and the schedule count as chapter 9 of "Leavened and
+ * Unleavened Bread". Sources: the published daily schedule (chabad.org's
+ * daily Rambam) as tabulated by hebcal-learning (BSD-2-Clause,
+ * src/mishnehTorah.json at 63fadce4), whose names are Sefaria's titles.
  */
 const RAMBAM: ReadonlyArray<readonly [en: string, he: string, chapters: number]> = [
   ["Foundations of the Torah", "יסודי התורה", 10],
@@ -264,11 +271,12 @@ const RAMBAM: ReadonlyArray<readonly [en: string, he: string, chapters: number]>
   ["Fringes", "ציצית", 3],
   ["Blessings", "ברכות", 11],
   ["Circumcision", "מילה", 3],
+  ["The Order of Prayer", "סדר התפילות", 4],
   ["Sabbath", "שבת", 30],
   ["Eruvin", "עירובין", 8],
   ["Rest on the Tenth of Tishrei", "שביתת עשור", 3],
   ["Rest on a Holiday", "שביתת יום טוב", 8],
-  ["Leavened and Unleavened Bread", "חמץ ומצה", 8],
+  ["Leavened and Unleavened Bread", "חמץ ומצה", 9],
   ["Shofar, Sukkah and Lulav", "שופר וסוכה ולולב", 8],
   ["Sheqel Dues", "שקלים", 4],
   ["Sanctification of the New Month", "קידוש החודש", 19],
@@ -337,42 +345,73 @@ const RAMBAM: ReadonlyArray<readonly [en: string, he: string, chapters: number]>
   ["Mourning", "אבל", 14],
   ["Kings and Wars", "מלכים ומלחמות", 12],
 ];
-export const RAMBAM_CHAPTERS = RAMBAM.reduce((n, [, , c]) => n + c, 0); // 1,000
+/** The 83 sections of halakhot: neither "The Order of Prayer" nor the Haggadah's chapter. */
+export const RAMBAM_CHAPTERS = RAMBAM.reduce((n, [en, , c]) => n + (en === "The Order of Prayer" ? 0 : en === "Leavened and Unleavened Bread" ? c - 1 : c), 0); // 1,000
 
 /**
- * Before the first section the cycle learns the Mishneh Torah's
+ * Before the first section both schedules learn the Mishneh Torah's
  * introduction: the transmission of the Oral Law, the positive and the
- * negative commandments, and the list of commandments by section. They are
- * counted here as 17 units (so 1,017 units: 1,017 days at one chapter, 339
- * days at three). ASSUMPTION, checked against the outside table: how the
- * introduction is split into units; where it differs, the differences are
- * in the introduction's days only and are reported as such.
+ * negative commandments, and the list of commandments by section. Each of
+ * the four is learned in three parts (12 days at one chapter a day, one day
+ * each at three), with these spans, as the published schedule has them
+ * (Sefaria references: verses of a one-level text, or chapter:verse).
  */
-const RAMBAM_INTRO: ReadonlyArray<readonly [en: string, he: string, units: number]> = [
-  ["Transmission of the Oral Law", "מסירת תורה שבעל פה", 1],
-  ["Positive Mitzvot", "מצוות עשה", 1],
-  ["Negative Mitzvot", "מצוות לא תעשה", 1],
-  ["Overview of Mishneh Torah Contents", "תוכן החיבור", 14],
+const RAMBAM_INTRO: ReadonlyArray<readonly [en: string, he: string, spans: readonly [string, string, string]]> = [
+  ["Transmission of the Oral Law", "מסירת תורה שבעל פה", ["1-21", "22-33", "34-45"]],
+  ["Positive Mitzvot", "מצוות עשה", ["1-83", "84-166", "167-248"]],
+  ["Negative Mitzvot", "מצוות לא תעשה", ["1-122", "123-245", "246-365"]],
+  ["Overview of Mishneh Torah Contents", "תוכן החיבור", ["1:1-4:8", "5:1-9:9", "10:1-14:10"]],
 ];
+export const RAMBAM_INTRO_UNITS = RAMBAM_INTRO.length * 3; // 12
 
 export interface RambamUnit {
   /** Sefaria's title: "Mishneh Torah, Foundations of the Torah". */
   title: string;
   he: string;
-  /** Chapter (or the introduction's unit number). */
+  /** The unit's number within its section, from 1. */
   chapter: number;
+  /** What the schedule prints for it: "3", "4-5" (two chapters on one day), "1-21" (verses). */
+  span: string;
   intro: boolean;
 }
 
-let rambamUnits: RambamUnit[] | null = null;
-function allRambam(): RambamUnit[] {
-  if (rambamUnits) return rambamUnits;
+/**
+ * The two schedules differ in two places, so that each day of the
+ * three-chapter cycle stays together (hebcal-learning src/rambam3Base.ts,
+ * after chabad.org):
+ * - one chapter a day: "The Order of Prayer" in 4 days, its chapters 4 and 5
+ *   on the fourth; the Haggadah (chapter 9 of "Leavened and Unleavened
+ *   Bread") on a day of its own;
+ * - three a day: "The Order of Prayer" in 5 units; chapters 8 and 9 of
+ *   "Leavened and Unleavened Bread" as one unit.
+ * Both come to 1,017 units: 1,017 days at one chapter, 339 at three. The
+ * Sefer HaMitzvot track runs alongside the three-chapter cycle (339 days),
+ * not the one-chapter cycle; it is not computed here.
+ */
+const rambamUnits: { 1?: RambamUnit[]; 3?: RambamUnit[] } = {};
+function allRambam(perDay: 1 | 3): RambamUnit[] {
+  const cached = rambamUnits[perDay];
+  if (cached) return cached;
   const out: RambamUnit[] = [];
-  for (const [en, he, n] of RAMBAM_INTRO) for (let c = 1; c <= n; c++) out.push({ title: `Mishneh Torah, ${en}`, he, chapter: c, intro: true });
-  for (const [en, he, n] of RAMBAM) for (let c = 1; c <= n; c++) out.push({ title: `Mishneh Torah, ${en}`, he: `הלכות ${he}`, chapter: c, intro: false });
-  return (rambamUnits = out);
+  for (const [en, he, spans] of RAMBAM_INTRO) spans.forEach((span, i) => out.push({ title: `Mishneh Torah, ${en}`, he, chapter: i + 1, span, intro: true }));
+  for (const [en, heTitle, n] of RAMBAM) {
+    const he = en === "The Order of Prayer" ? heTitle : `הלכות ${heTitle}`;
+    const spans: string[] = [];
+    if (en === "The Order of Prayer") {
+      if (perDay === 1) spans.push("1", "2", "3", "4-5");
+      else spans.push("1", "2", "3", "4", "5");
+    } else if (en === "Leavened and Unleavened Bread" && perDay === 3) {
+      for (let c = 1; c < n - 1; c++) spans.push(String(c));
+      spans.push(`${n - 1}-${n}`);
+    } else for (let c = 1; c <= n; c++) spans.push(String(c));
+    spans.forEach((span, i) => out.push({ title: `Mishneh Torah, ${en}`, he, chapter: i + 1, span, intro: false }));
+  }
+  return (rambamUnits[perDay] = out);
 }
-export const RAMBAM_UNITS = RAMBAM_CHAPTERS + RAMBAM_INTRO.reduce((n, [, , u]) => n + u, 0); // 1,017
+/** Units in a cycle (the same for both schedules): 1,017. */
+export const RAMBAM_UNITS = allRambam(1).length;
+/** Days in a cycle: 1,017 at one chapter, 339 at three. */
+export const rambamCycleDays = (perDay: 1 | 3): number => allRambam(perDay).length / perDay;
 
 /** Both daily Rambam cycles began on 27 Nisan 5744, 29 April 1984. */
 const RAMBAM_START = fixedOf({ y: 1984, m: 4, d: 29 });
@@ -389,8 +428,8 @@ export interface RambamDaily {
 export function dailyRambam(day: GDay, perDay: 1 | 3): RambamDaily | null {
   const f = fixedOf(day);
   if (f < RAMBAM_START) return null;
-  const all = allRambam();
-  const days = RAMBAM_UNITS / perDay;
+  const all = allRambam(perDay);
+  const days = all.length / perDay;
   const cycle = 1 + Math.floor((f - RAMBAM_START) / days);
   const n = ((f - RAMBAM_START) % days) * perDay;
   const units = all.slice(n, n + perDay);
@@ -398,7 +437,9 @@ export function dailyRambam(day: GDay, perDay: 1 | 3): RambamDaily | null {
   for (let i = 0; i < units.length; ) {
     let j = i;
     while (j + 1 < units.length && units[j + 1].title === units[i].title) j++;
-    refs.push(units[i].chapter === units[j].chapter ? `${units[i].title} ${units[i].chapter}` : `${units[i].title} ${units[i].chapter}-${units[j].chapter}`);
+    const from = units[i].span.split("-")[0];
+    const to = units[j].span.split("-").pop()!;
+    refs.push(`${units[i].title} ${from === to ? from : `${from}-${to}`}`);
     i = j + 1;
   }
   return { cycle, perDay, units, refs };
