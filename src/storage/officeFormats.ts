@@ -186,7 +186,7 @@ export async function docxToMarkdown(file: File): Promise<string> {
       else out.push(md);
       inList = !!list;
     } else if (node.tagName === "w:tbl") {
-      out.push(docxTableToMd(node));
+      out.push(docxTableToMd(node, paraText));
       inList = false;
     }
   }
@@ -195,15 +195,28 @@ export async function docxToMarkdown(file: File): Promise<string> {
   return md || "> ⚠️ DOCX contained no extractable text.";
 }
 
-function docxTableToMd(tbl: Element): string {
+/**
+ * A table's cells keep their runs' emphasis and links (paragraph text, as
+ * outside tables; they came back as bare text, so **bold** in a cell was
+ * lost). A header row (w:tblHeader) that is bold as a whole, as Word and our
+ * writer make it, gives plain header text: the bold is the header's style.
+ */
+function docxTableToMd(tbl: Element, paraText: (p: Element) => string): string {
   const rows = els(tbl, "w:tr");
   if (!rows.length) return "";
-  const cellText = (tc: Element) =>
-    els(tc, "w:p")
-      .map((p) => els(p, "w:t").map((t) => t.textContent ?? "").join(""))
+  const cellText = (tc: Element, header: boolean) => {
+    const text = els(tc, "w:p")
+      .map(paraText)
       .join(" ")
-      .trim();
-  const matrix = rows.map((tr) => els(tr, "w:tc").map(cellText));
+      .trim()
+      .replace(/(?<!\\)\|/g, "\\|");
+    const whole = header ? /^\*\*([^*]+)\*\*$/.exec(text) : null;
+    return whole ? whole[1] : text;
+  };
+  const matrix = rows.map((tr) => {
+    const header = tr.getElementsByTagName("w:tblHeader").length > 0;
+    return els(tr, "w:tc").map((tc) => cellText(tc, header));
+  });
   const cols = Math.max(...matrix.map((r) => r.length));
   const pad = (r: string[]) => [...r, ...Array(cols - r.length).fill("")];
   const header = pad(matrix[0]);

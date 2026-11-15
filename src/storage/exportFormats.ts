@@ -264,7 +264,20 @@ function escapeLatexInline(s: string): string {
 export function markdownToRst(md: string): string {
   const lines = md.split(/\r?\n/);
   const out: string[] = [];
-  for (const line of lines) {
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    // A fenced block is a `code-block` directive with its body indented (it was copied as text, and came back as inline code).
+    const fence = /^(\s*)(`{3,}|~{3,})\s*([\w+-]*)/.exec(line);
+    // A backtick fence's info string has no backtick (```foo`` is a code span).
+    if (fence && !(fence[2][0] === "`" && line.slice(fence[0].length).includes("`"))) {
+      const [, indent, marks, lang] = fence;
+      const close = new RegExp(`^\\s*${marks[0] === "`" ? "`" : "~"}{${marks.length},}\\s*$`);
+      if (!indent && out.length && out[out.length - 1].trim()) out.push(""); // a directive starts a block of its own
+      out.push(`${indent}.. code-block::${lang ? ` ${lang}` : ""}`, "");
+      for (i++; i < lines.length && !close.test(lines[i]); i++) out.push(lines[i].trim() ? `${indent}   ${lines[i].startsWith(indent) ? lines[i].slice(indent.length) : lines[i].trimStart()}` : "");
+      out.push("");
+      continue;
+    }
     const h = /^(#{1,6})\s+(.+)$/.exec(line);
     if (h) {
       const c = h[1].length === 1 ? "=" : h[1].length === 2 ? "-" : "~";
@@ -644,9 +657,12 @@ export async function markdownToStaticSiteBytes(md: string, siteTitle = "Site"):
 /* ─── Markdown → Jupyter notebook (.ipynb) ─────────────────────────── */
 
 /**
- * Convert Markdown to a valid Jupyter notebook (nbformat 4.5). Fenced code
- * blocks become code cells (in the fence's language); everything else becomes
- * markdown cells. Round-trips with `ipynbToMarkdown` in ./fileFormats.
+ * Convert Markdown to a valid Jupyter notebook (nbformat 4.5). A top-level
+ * fenced block in the notebook's language becomes a code cell; everything
+ * else becomes markdown cells, including a fence in another language (or none)
+ * and a fence inside a list item, which a code cell could not hold without
+ * losing its language or splitting the list. Round-trips with
+ * `ipynbToMarkdown` in ./fileFormats.
  */
 export function markdownToIpynb(md: string, lang = "python"): string {
   const lines = md.replace(/\r\n/g, "\n").split("\n");
@@ -665,8 +681,13 @@ export function markdownToIpynb(md: string, lang = "python"): string {
 
   let i = 0;
   while (i < lines.length) {
-    const fence = lines[i].match(/^\s*```(\w+)?/);
-    if (fence) {
+    const fence = lines[i].match(/^(\s*)```([\w+-]+)?/);
+    if (fence && (fence[1] !== "" || (fence[2] ?? "").toLowerCase() !== lang.toLowerCase())) {
+      // Not a code cell: the fence stays Markdown, whole, with its language.
+      prose.push(lines[i++]);
+      while (i < lines.length && !/^\s*```\s*$/.test(lines[i])) prose.push(lines[i++]);
+      if (i < lines.length) prose.push(lines[i++]);
+    } else if (fence) {
       flushProse();
       i++;
       const code: string[] = [];

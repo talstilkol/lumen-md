@@ -491,9 +491,35 @@ export function latexToMarkdown(text: string): string {
 export function rstToMarkdown(text: string): string {
   const lines = text.split("\n");
   const out: string[] = [];
+  const code: string[] = [];
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     const next = lines[i + 1] ?? "";
+    // `.. code-block:: lang` (or `.. code::`, `.. sourcecode::`): its indented body is a fenced block, kept verbatim.
+    const dir = /^(\s*)\.\.\s+(?:code-block|code|sourcecode)::\s*(\S*)\s*$/.exec(line);
+    if (dir) {
+      const [, indent, lang] = dir;
+      const body: string[] = [];
+      let j = i + 1;
+      while (j < lines.length && !lines[j].trim()) j++;
+      const inner = /^\s*/.exec(lines[j] ?? "")![0].length;
+      if (j < lines.length && inner > indent.length) {
+        for (; j < lines.length; j++) {
+          if (!lines[j].trim()) {
+            const k = lines.slice(j).findIndex((l) => l.trim());
+            if (k < 0 || /^\s*/.exec(lines[j + k])![0].length < inner) break;
+            body.push("");
+          } else if (/^\s*/.exec(lines[j])![0].length < inner) break;
+          else body.push(lines[j].slice(inner));
+        }
+        while (j < lines.length && !lines[j].trim() && lines[j + 1] !== undefined && !lines[j + 1].trim()) j++;
+        const ticks = "`".repeat(Math.max(3, ...body.map((b) => (/^`+/.exec(b.trim())?.[0].length ?? 0) + 1)));
+        code.push([`${indent}${ticks}${lang}`, ...body.map((b) => (b ? indent + b : "")), `${indent}${ticks}`].join("\n"));
+        out.push(`\u0005${code.length - 1}\u0005`);
+        i = lines[j] !== undefined && !lines[j].trim() ? j : j - 1;
+        continue;
+      }
+    }
     if (
       /^[=\-~`'"^*+#<>]{3,}$/.test(next.trim()) &&
       line.trim() &&
@@ -509,7 +535,8 @@ export function rstToMarkdown(text: string): string {
   }
   return out
     .join("\n")
-    .replace(/``([^`]+)``/g, "`$1`");
+    .replace(/``([^`]+)``/g, "`$1`")
+    .replace(/\u0005(\d+)\u0005/g, (_m, k: string) => code[Number(k)]);
 }
 
 /* ─── AsciiDoc → Markdown ──────────────────────────────────────────── */
