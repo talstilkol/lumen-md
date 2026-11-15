@@ -8302,6 +8302,36 @@
       "vars": []
     },
     {
+      "key": "graph.time.created",
+      "en": "Created",
+      "vars": []
+    },
+    {
+      "key": "graph.time.field",
+      "en": "Time by",
+      "vars": []
+    },
+    {
+      "key": "graph.time.modified",
+      "en": "Last saved",
+      "vars": []
+    },
+    {
+      "key": "graph.time.pause",
+      "en": "Pause",
+      "vars": []
+    },
+    {
+      "key": "graph.time.play",
+      "en": "Play",
+      "vars": []
+    },
+    {
+      "key": "graph.time.until",
+      "en": "Up to",
+      "vars": []
+    },
+    {
       "key": "havruta.add",
       "en": "Add note",
       "vars": []

@@ -25,7 +25,7 @@ export async function loadVaultGraph(): Promise<GraphData> {
   const key = signature(files);
   if (cached?.key === key) return cached.graph;
   // W2.22: the index's summary carries the tags and frontmatter values; no note text on this thread.
-  const notes = files.map((f) => ({ path: f.path, wikiTargets: f.wikiTargets, meta: f.meta }));
+  const notes = files.map((f) => ({ path: f.path, wikiTargets: f.wikiTargets, meta: f.meta, modified: f.modified }));
   // W5.1: links to a verse meet at one node per verse (the reference parser loads with the graph view).
   const [{ withVerseNodes }, { parseSourceRef }] = await Promise.all([import("../../graph/nodes"), import("../../sources/sefaria/refs")]);
   const graph = buildGraph(withVerseNodes(notes, parseSourceRef));

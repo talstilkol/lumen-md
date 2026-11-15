@@ -17,6 +17,8 @@ export interface GraphNoteInput {
   meta?: { tags: string[]; props: Record<string, string> };
   /** The node's label, when it is not the file name (a verse node: its Hebrew name, nodes.ts). */
   label?: string;
+  /** Last saved, ms since the epoch (the vault index's `modified`), for the time slider (W12.V8). */
+  modified?: number;
 }
 
 export interface GraphData {
@@ -33,6 +35,8 @@ export interface GraphData {
   neighbors: Uint32Array;
   /** Index of a path. */
   indexOf: Map<string, number>;
+  /** Last saved (ms), NaN when unknown (W12.V8); absent in a graph built without times. */
+  modified?: Float64Array;
 }
 
 const basename = (p: string) => p.slice(p.lastIndexOf("/") + 1).replace(/\.(md|markdown)$/i, "");
@@ -127,7 +131,38 @@ export function buildGraph(notes: readonly GraphNoteInput[]): GraphData {
     offsets,
     neighbors,
     indexOf: new Map(notes.map((x, i) => [x.path, i])),
+    modified: Float64Array.from(notes, (x) => (typeof x.modified === "number" && x.modified > 0 ? x.modified : Number.NaN)),
   };
+}
+
+/* ─── Time (W12.V8) ──────────────────────────────────────────────────── */
+
+export type GraphDateField = "created" | "modified";
+
+const ISO_DAY = /^(\d{4}-\d{2}-\d{2})/;
+
+/**
+ * The ISO day of a note for the time slider: "created" is the note's
+ * `created` (else `date`) frontmatter property; "modified" is when it was
+ * last saved. null: the note has no such date (it is always shown).
+ */
+export function noteDay(g: GraphData, i: number, field: GraphDateField): string | null {
+  if (field === "created") {
+    const m = ISO_DAY.exec(g.props[i].created ?? g.props[i].date ?? "");
+    return m ? m[1] : null;
+  }
+  const ms = g.modified?.[i] ?? Number.NaN;
+  return Number.isFinite(ms) ? new Date(ms).toISOString().slice(0, 10) : null;
+}
+
+/** The days the slider runs over, ascending. */
+export function graphTimeDomain(g: GraphData, field: GraphDateField): string[] {
+  const days = new Set<string>();
+  for (let i = 0; i < g.paths.length; i++) {
+    const d = noteDay(g, i, field);
+    if (d) days.add(d);
+  }
+  return [...days].sort();
 }
 
 export const degreeOf = (g: GraphData, i: number) => g.offsets[i + 1] - g.offsets[i];
@@ -142,6 +177,9 @@ export interface GraphFilter {
   folder?: string;
   /** Keep notes whose frontmatter `key` equals `value` (`status=open`), or has `key` at all. */
   property?: string;
+  /** W12.V8: keep notes dated up to this ISO day (inclusive) by `dateField`; undated notes stay. */
+  until?: string;
+  dateField?: GraphDateField;
 }
 
 /** Whether node i passes the filter. */
@@ -160,6 +198,10 @@ export function passes(g: GraphData, i: number, f: GraphFilter): boolean {
     const value = rest.join("=").trim();
     const have = g.props[i][key.trim()];
     if (have === undefined || (value && have.toLowerCase() !== value.toLowerCase())) return false;
+  }
+  if (f.until) {
+    const day = noteDay(g, i, f.dateField ?? "modified");
+    if (day && day > f.until) return false;
   }
   return true;
 }

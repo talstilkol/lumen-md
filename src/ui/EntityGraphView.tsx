@@ -17,6 +17,7 @@ import { ENTITY_TYPES, PREDICATES, type Edge, type Entity, type EntityType } fro
 import { edgeDay, neighbours, timeDomain, toRenderEdges, visibleGraph, type EntityGraphFilter, type NoteInfo } from "../entities/view";
 import { runLayout } from "../graph/layoutClient";
 import { GraphCanvas } from "./graph/GraphCanvas";
+import { TimeSlider, untilOf } from "./graph/TimeSlider";
 import { groupColor, resolveColor } from "./graph/graphData";
 import "./entityGraphStrings";
 import { egoDefault } from "../views/graph/ego";
@@ -56,7 +57,6 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
   const [minConf, setMinConf] = useState(0);
   const domain = useMemo(() => timeDomain(edges, notes), [edges, notes]);
   const [until, setUntil] = useState(domain.length - 1);
-  const [playing, setPlaying] = useState(false);
   // R12.8: a big graph opens as the ego graph of `start`, else of the most connected entity.
   const ego = useMemo(() => egoDefault(entities.map((e) => e.id), edges, { max: EGO_MAX, start: start ?? null }), [entities, edges, start]);
   const [center, setCenter] = useState(ego.center ?? "");
@@ -67,11 +67,6 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
   const table = useRef<HTMLTableSectionElement>(null);
 
   useEffect(() => setUntil(domain.length - 1), [domain.length]);
-  useEffect(() => {
-    if (!playing) return;
-    const h = setInterval(() => setUntil((u) => (u + 1 < domain.length ? u + 1 : (setPlaying(false), u))), 700);
-    return () => clearInterval(h);
-  }, [playing, domain.length]);
 
   const filter: EntityGraphFilter = useMemo(
     () => ({
@@ -80,7 +75,7 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
       folder: folder.trim() || undefined,
       tag: tag.trim().replace(/^#/, "") || undefined,
       minConfidence: minConf > 0 ? minConf : undefined,
-      to: domain.length && until < domain.length - 1 ? domain[Math.max(0, until)] : undefined,
+      to: untilOf(domain, until),
       center: center || undefined,
       depth,
     }),
@@ -188,16 +183,14 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
         <label>
           {t("entityGraph.view.confidence")} <input type="number" min={0} max={1} step={0.1} style={{ ...field, inlineSize: 56 }} value={minConf} onChange={(e) => setMinConf(Number(e.target.value) || 0)} />
         </label>
-        {domain.length > 0 && (
-          <label style={{ display: "inline-flex", gap: 4, alignItems: "center" }}>
-            {t("entityGraph.view.until")}
-            <input type="range" min={0} max={domain.length - 1} value={until} onChange={(e) => setUntil(Number(e.target.value))} aria-valuetext={domain[until]} data-testid="entity-graph-time" />
-            <output>{domain[until]}</output>
-            <button type="button" style={field} onClick={() => (until >= domain.length - 1 && setUntil(0), setPlaying((p) => !p))} aria-pressed={playing}>
-              {playing ? t("entityGraph.view.pause") : t("entityGraph.view.play")}
-            </button>
-          </label>
-        )}
+        <TimeSlider
+          domain={domain}
+          value={until}
+          onChange={setUntil}
+          labels={{ until: t("entityGraph.view.until"), play: t("entityGraph.view.play"), pause: t("entityGraph.view.pause") }}
+          testId="entity-graph-time"
+          style={field}
+        />
         <label>
           {t("entityGraph.view.around")}{" "}
           <select style={field} value={center} onChange={(e) => setCenter(e.target.value)}>
