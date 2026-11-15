@@ -15,7 +15,7 @@
   "entityGraph.page.source.changed": "Source changed",
   "entityGraph.page.source.missing-note": "Source note missing",
   "entityGraph.page.source.missing-paragraph": "Source paragraph missing",
-  "entityGraph.page.source.ok": "",
+  "entityGraph.page.source.ok": "Source unchanged",
   "entityGraph.predicate.amends": "amends",
   "entityGraph.predicate.author": "author",
   "entityGraph.predicate.born_in": "born in",
