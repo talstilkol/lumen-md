@@ -38,5 +38,14 @@
   "toast.aiWorkspaceSearchFailed": "AI workspace search failed",
   "toast.buildingSemanticIndex": "🧠 Building semantic index…",
   "toast.indexedFiles": "✅ Files indexed: {count}",
-  "toast.indexingFailed": "Indexing failed: {error}"
+  "toast.indexingFailed": "Indexing failed: {error}",
+  "vaultCite.unsupportedClaim": "not supported by a verified quote",
+  "vaultCite.claimsUnsupported": "{n} of {total} claims have no verified quote — they are marked in the answer.",
+  "vaultCite.pin": "Pin link [{n}]",
+  "vaultCite.pinned": "Link pinned and copied: {link}",
+  "vaultCite.pinGone": "That paragraph has changed since the answer; ask again.",
+  "askScope.label": "Ask in",
+  "askScope.vault": "The vault (minus what MCP scope denies)",
+  "askScope.folder": "One folder",
+  "askScope.tag": "One tag"
 }

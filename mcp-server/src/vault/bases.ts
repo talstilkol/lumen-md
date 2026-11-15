@@ -89,12 +89,24 @@ export async function vaultFiles(vault: string): Promise<string[]> {
   return out.sort();
 }
 
-export function readDeps(vault: string, now?: Date): ReadDeps {
+/** W11.I7: a note an MCP client may see (path and text); the CLI passes none. */
+export type NoteFilter = (rel: string, text: string) => boolean;
+
+export function readDeps(vault: string, now?: Date, visible?: NoteFilter): ReadDeps {
   return {
-    paths: () => vaultFiles(vault),
+    paths: visible
+      ? async () => {
+          const out: string[] = [];
+          for (const p of await vaultFiles(vault)) {
+            const t = /\.(md|markdown)$/i.test(p) ? await readNote(vault, safeRel(p)) : "";
+            if (t !== null && visible(p, t)) out.push(p);
+          }
+          return out;
+        }
+      : () => vaultFiles(vault),
     readText: async (p) => {
       const t = await readNote(vault, safeRel(p));
-      if (t === null) throw new VaultPathError(`No file at ${p}.`);
+      if (t === null || (visible && !visible(safeRel(p), t))) throw new VaultPathError(`No file at ${p}.`);
       return t;
     },
     ...(now ? { now } : {}),
@@ -107,11 +119,11 @@ export function basePathOf(raw: unknown): string {
   return p;
 }
 
-export async function queryVaultBase(vault: string, base: unknown, view?: unknown, page: { offset?: unknown; limit?: unknown } = {}, now?: Date): Promise<BasesQueryResult> {
+export async function queryVaultBase(vault: string, base: unknown, view?: unknown, page: { offset?: unknown; limit?: unknown } = {}, now?: Date, visible?: NoteFilter): Promise<BasesQueryResult> {
   const e = await basesEngine();
   const v = typeof view === "number" || (typeof view === "string" && view !== "") ? view : undefined;
   const num = (x: unknown) => (x === undefined || x === null || x === "" ? undefined : Number(x));
-  return e.queryBase(readDeps(vault, now), basePathOf(base), v, { offset: num(page.offset), limit: num(page.limit) });
+  return e.queryBase(readDeps(vault, now, visible), basePathOf(base), v, { offset: num(page.offset), limit: num(page.limit) });
 }
 
 export interface PlannedUpdate {
@@ -120,9 +132,9 @@ export interface PlannedUpdate {
 }
 
 /** What an update would change, computed by the engine; nothing is written. */
-export async function planBasesUpdate(vault: string, edits: unknown): Promise<PlannedUpdate> {
+export async function planBasesUpdate(vault: string, edits: unknown, visible?: NoteFilter): Promise<PlannedUpdate> {
   const e = await basesEngine();
-  const deps = readDeps(vault);
+  const deps = readDeps(vault, undefined, visible);
   const after = new Map<string, string>();
   let summary: BasesUpdateSummary = { notes: 0, properties: [], sample: [], unchanged: 0 };
   const r = await e.updateRows(
