@@ -29,6 +29,22 @@ export function findingsProblems(data) {
   return out;
 }
 
+/**
+ * The findings register against W11.S1's audit record (security/crypto-audit.json):
+ * the page may not say "audited" while the record has no external report,
+ * nor "not audited" once it has one, and while there is none an open finding
+ * must say so (area "sync").
+ */
+export function cryptoAuditProblems(findings, cryptoAudit) {
+  if (!cryptoAudit) return [];
+  const out = [];
+  const audited = cryptoAudit.external !== null && cryptoAudit.external !== undefined;
+  if (audited && !/^https:\/\//.test(String(cryptoAudit.external?.report ?? ""))) out.push("security/crypto-audit.json: an external audit needs its published report (https link)");
+  if (Boolean(findings?.audit?.external) !== audited) out.push(`security/findings.json says external: ${Boolean(findings?.audit?.external)}, but security/crypto-audit.json ${audited ? "records an external audit" : "has no external audit"} (W11.S1)`);
+  if (!audited && !(findings?.findings ?? []).some((f) => f.area === "sync" && f.status !== "fixed")) out.push("no external audit yet: an open finding (area sync) must say so");
+  return out;
+}
+
 /** Privacy label lines for a plugin, from the permissions its manifest declares. */
 export function privacyLabel(permissions, lang) {
   const L = {
@@ -50,6 +66,8 @@ const T = {
     description: "Lumen's security status in public: the external audit (none yet), the threat model, fuzzing, release provenance, every open finding, and a review scorecard with a privacy label for each plugin.",
     intro: "This page is written from the repository itself: the findings register (`security/findings.json`) and the plugin scorecards (`public/plugins/examples/scorecards/`). A test fails when the page is out of date, so an open finding can't be left off it.",
     audit: "External audit",
+    e2ee: (scope) => `**Encrypted sync is experimental.** Until an external audit is published, encrypted sync (E2EE) is behind an experimental flag that is off in every channel, beta included, and its setup screen says it has not had an external security audit (plan W11.S1). No text in the app may call this cryptography audited, and a check enforces that. The audit covers ${scope}.`,
+    e2eeAudited: (a) => `Encrypted sync was audited by ${a.auditor} (${a.date}): [the full report](${a.report})${a.openFindings ? `, [its open findings](${a.openFindings})` : ""}.`,
     threat: "Threat model",
     threatBody: "What is protected, who we defend against, and the known gaps: [Threat model](/security/threat-model/).",
     fuzz: "Fuzzing",
@@ -73,6 +91,8 @@ const T = {
     description: "מצב האבטחה של Lumen בפומבי: ביקורת חיצונית (עוד אין), מודל האיום, fuzzing, מקור הגרסאות, כל ממצא פתוח, וכרטיס ניקוד עם תווית פרטיות לכל תוסף.",
     intro: "הדף הזה נכתב מהמאגר עצמו: רשימת הממצאים (`security/findings.json`) וכרטיסי הניקוד של התוספים (`public/plugins/examples/scorecards/`). בדיקה נכשלת כשהדף לא מעודכן, כך שאי אפשר להשמיט ממנו ממצא פתוח.",
     audit: "ביקורת חיצונית",
+    e2ee: (scope) => `**הסנכרון המוצפן ניסיוני.** עד שתפורסם ביקורת חיצונית, הסנכרון המוצפן (E2EE) נמצא מאחורי דגל ניסיוני שכבוי בכל ערוץ, גם בבטא, ומסך ההגדרה שלו אומר שהוא לא עבר ביקורת אבטחה חיצונית (משימה W11.S1). שום טקסט באפליקציה לא יתאר את ההצפנה הזו כמבוקרת, ובדיקה אוכפת את זה. הביקורת תכסה את ${scope}.`,
+    e2eeAudited: (a) => `הסנכרון המוצפן עבר ביקורת של ${a.auditor} (${a.date}): [הדוח המלא](${a.report})${a.openFindings ? `, [הממצאים הפתוחים שלו](${a.openFindings})` : ""}.`,
     threat: "מודל האיום",
     threatBody: "מה מוגן, ממי אנחנו מתגוננים, והפערים הידועים: [מודל האיום](/he/security/threat-model/).",
     fuzz: "Fuzzing",
@@ -96,7 +116,7 @@ const T = {
 const cell = (s) => String(s).replace(/\|/g, "\\|").replace(/\n/g, " ");
 
 /** The page in one language. `cards` are scorecards (W11.S14). */
-export function renderSecurityPage(findings, cards, lang) {
+export function renderSecurityPage(findings, cards, lang, cryptoAudit = null) {
   const t = T[lang];
   const open = findings.findings.filter((f) => f.status !== "fixed").sort((a, b) => SEVERITIES.indexOf(a.severity) - SEVERITIES.indexOf(b.severity) || (a.id < b.id ? -1 : 1));
   const listed = [...cards].filter((c) => c.passed).sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : a.version < b.version ? -1 : 1));
@@ -114,6 +134,7 @@ export function renderSecurityPage(findings, cards, lang) {
     "",
     findings.audit[lang],
     ...(findings.audit.external && findings.audit.report ? ["", `[${findings.audit.report}](${findings.audit.report})`] : []),
+    ...(cryptoAudit ? ["", cryptoAudit.external ? t.e2eeAudited(cryptoAudit.external) : t.e2ee((cryptoAudit.scope ?? []).map((s) => `\`${s}\``).join(", "))] : []),
     "",
     `## ${t.threat}`,
     "",
