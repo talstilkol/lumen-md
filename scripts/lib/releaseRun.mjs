@@ -87,6 +87,25 @@ export function updaterBuildEnv({ pubkey, repo }) {
   return { LUMEN_UPDATER_PUBKEY: normalizeUpdaterPubkey(pubkey), LUMEN_UPDATER_ENDPOINT: ends.stable, LUMEN_UPDATER_ENDPOINT_BETA: ends.beta };
 }
 
+/**
+ * Why a GitHub release must not be published (plan W6.43, W10.E68): the
+ * updater key the app is built with is the committed placeholder, empty,
+ * not a key, or the throwaway test key; or release/ holds a fake build.
+ * `pubkey` is the key the release uses (LUMEN_UPDATER_PUBKEY, else
+ * security/updater-key.pub, else tauri.conf.json's). [] = publish.
+ */
+export function publishRefusals({ pubkey, files = [] }) {
+  const out = [];
+  try {
+    const key = normalizeUpdaterPubkey(pubkey);
+    if (isTestKey(key)) out.push("the updater public key is the throwaway TEST key: an app built with it can never be updated by a real release");
+  } catch (e) {
+    out.push(`${e.message} (${PUBKEY_PLACEHOLDER}): an app built with it accepts no update — set LUMEN_UPDATER_PUBKEY or commit security/updater-key.pub`);
+  }
+  if (files.includes(".FAKE-BUILD")) out.push("release/ holds a fake build (.FAKE-BUILD): never publish stand-in bundles");
+  return out;
+}
+
 /** A throwaway key pair in Tauri's formats, for dry runs and tests only — never for a publish. */
 export function testUpdaterKey(generate) {
   const { pem, publicKey } = generate();

@@ -34,6 +34,9 @@ exact commands `--publish` would run.
    a beta: the rolling `beta-channel` release). It also turns on signed update
    bundles. The build stops if the key is empty, is still the placeholder or
    is not a minisign key. Afterwards the file goes back to the placeholder.
+   The separate `node scripts/release.mjs publish` refuses as well: with the
+   placeholder, an empty key, the throwaway test key or a fake build in
+   `release/`, it stops before any `git` or `gh` command.
 5. **A reproducible web build.** `repro-check` builds twice with
    `SOURCE_DATE_EPOCH` and compares every file, then the bundle budget and the
    source-map check run. `lumen-web-vX.tgz` is the same bytes on every machine:
