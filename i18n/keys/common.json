@@ -4920,21 +4920,6 @@
       "vars": []
     },
     {
-      "key": "entityGraph.index.back",
-      "en": "Back to the list",
-      "vars": []
-    },
-    {
-      "key": "entityGraph.index.close",
-      "en": "Close",
-      "vars": []
-    },
-    {
-      "key": "entityGraph.index.empty",
-      "en": "No approved entities of this type yet. Approve proposals in the review panel.",
-      "vars": []
-    },
-    {
       "key": "entityGraph.merge.action",
       "en": "Merge",
       "vars": []
@@ -12868,6 +12853,52 @@
       "vars": [
         "repo"
       ]
+    },
+    {
+      "key": "types.base.replace",
+      "en": "{file} already exists and differs from the type's base. Replace it?",
+      "vars": [
+        "file"
+      ]
+    },
+    {
+      "key": "types.base.save",
+      "en": "Save as .base",
+      "vars": []
+    },
+    {
+      "key": "types.base.saved",
+      "en": "Saved {file}",
+      "vars": [
+        "file"
+      ]
+    },
+    {
+      "key": "types.page.all",
+      "en": "All {type}",
+      "vars": [
+        "type"
+      ]
+    },
+    {
+      "key": "types.page.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "types.page.list",
+      "en": "Types",
+      "vars": []
+    },
+    {
+      "key": "types.page.none",
+      "en": "No types yet. A type is a file in .lumen/types.",
+      "vars": []
+    },
+    {
+      "key": "types.page.title",
+      "en": "Types",
+      "vars": []
     },
     {
       "key": "typo.applied",

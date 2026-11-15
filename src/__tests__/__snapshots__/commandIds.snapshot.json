@@ -2007,41 +2007,6 @@
       "id": "entities.review",
       "label": "Entity graph: proposals to review",
       "icon": "FileText"
-    },
-    {
-      "id": "entities.list.person",
-      "label": "Entities: People",
-      "icon": "Table"
-    },
-    {
-      "id": "entities.list.place",
-      "label": "Entities: Places",
-      "icon": "Table"
-    },
-    {
-      "id": "entities.list.organization",
-      "label": "Entities: Organizations",
-      "icon": "Table"
-    },
-    {
-      "id": "entities.list.event",
-      "label": "Entities: Events",
-      "icon": "Table"
-    },
-    {
-      "id": "entities.list.law",
-      "label": "Entities: Laws",
-      "icon": "Table"
-    },
-    {
-      "id": "entities.list.source",
-      "label": "Entities: Sources",
-      "icon": "Table"
-    },
-    {
-      "id": "entities.list.concept",
-      "label": "Entities: Concepts",
-      "icon": "Table"
     }
   ],
   "full": [
@@ -4201,41 +4166,6 @@
       "id": "entities.review",
       "label": "Entity graph: proposals to review",
       "icon": "FileText"
-    },
-    {
-      "id": "entities.list.person",
-      "label": "Entities: People",
-      "icon": "Table"
-    },
-    {
-      "id": "entities.list.place",
-      "label": "Entities: Places",
-      "icon": "Table"
-    },
-    {
-      "id": "entities.list.organization",
-      "label": "Entities: Organizations",
-      "icon": "Table"
-    },
-    {
-      "id": "entities.list.event",
-      "label": "Entities: Events",
-      "icon": "Table"
-    },
-    {
-      "id": "entities.list.law",
-      "label": "Entities: Laws",
-      "icon": "Table"
-    },
-    {
-      "id": "entities.list.source",
-      "label": "Entities: Sources",
-      "icon": "Table"
-    },
-    {
-      "id": "entities.list.concept",
-      "label": "Entities: Concepts",
-      "icon": "Table"
     }
   ],
   "autoSaveOn": [
@@ -4525,13 +4455,6 @@
     "automations.new",
     "automations.dryRun",
     "automations.undo",
-    "entities.review",
-    "entities.list.person",
-    "entities.list.place",
-    "entities.list.organization",
-    "entities.list.event",
-    "entities.list.law",
-    "entities.list.source",
-    "entities.list.concept"
+    "entities.review"
   ]
 }

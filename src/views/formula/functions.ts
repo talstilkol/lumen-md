@@ -16,6 +16,7 @@
 
 import { FormulaError, type Budget, type FormulaValue } from "./ast";
 import { asDate, clean, describe, equal, isEmpty, toNumber, toText, truthy, utcDate } from "./values";
+import { workdaysBetween } from "../workdays";
 
 export interface CallContext {
   budget: Budget;
@@ -335,6 +336,7 @@ const BUILTINS: Record<string, FormulaFunction> = {
 
   /* ─── dates (UTC) ─── */
   today: { min: 0, max: 0, doc: "today() — today's date", call: (_args, ctx) => new Date(startOfDay(ctx.now)) },
+  workdays: { min: 2, max: 3, doc: 'workdays(from, to[, "mon-fri"]) — working days after from, up to to (Sunday–Thursday and holidays by default)', call: ([a, b, w]) => workdaysBetween(a, b, w) },
   now: { min: 0, max: 0, doc: "now() — the current date and time", call: (_args, ctx) => new Date(ctx.now.getTime()) },
   date: {
     min: 1,

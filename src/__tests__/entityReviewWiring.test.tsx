@@ -4,9 +4,10 @@
  * memory vault behind storage/workspace). Approving writes the entity note
  * through the controlled write path; Undo takes the vault back byte for
  * byte; a file changed underneath is refused and nothing is written.
- * ⌘K has "Entity graph: proposals to review" and "Entities: <type>" for
- * every type, which open the type's list and the entity page. axe on the
- * panel and the list. Synthetic vault.
+ * ⌘K has "Entity graph: proposals to review"; the seven entity types are
+ * built-in typed-object types (W12.T3), so each has its Base and "All
+ * <type>" entry, and an approved note is of its type. axe on the panel.
+ * Synthetic vault.
  */
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
@@ -16,8 +17,12 @@ import { createMemoryBackend } from "../storage/vault/memory";
 import type { VaultBackend } from "../storage/vault/types";
 import * as workspace from "../storage/workspace";
 import { AgentReviewPanel } from "../ui/AgentReviewPanel";
-import { EntityIndexHost } from "../ui/EntityIndexHost";
-import { buildEntityCommands, OPEN_ENTITIES_EVENT } from "../commands/domains/entities";
+import { buildEntityCommands } from "../commands/domains/entities";
+import { buildTypeCommands } from "../commands/typeCommands";
+import { loadVaultTypes } from "../types/vaultTypes";
+import { noteIsA } from "../types/typeRegistry";
+import { typeFilter } from "../types/typeBase";
+import { parse as parseYaml } from "yaml";
 import { entityId, entityNotePath, ENTITY_TYPES, type EntityType } from "../entities/model";
 import { PROPOSALS_PATH, toJsonl, type Proposal } from "../entities/store";
 import { approve } from "../entities/review";
@@ -123,40 +128,29 @@ describe("W12.E5 graph proposals inside the review panel", () => {
 });
 
 describe("W12.E6 ⌘K entries", () => {
-  it("one review entry and one list per entity type", () => {
+  it("the review entry", () => {
     const cmds = buildEntityCommands({} as CommandContext);
-    expect(cmds.map((c) => c.id)).toEqual(["entities.review", ...ENTITY_TYPES.map((t) => `entities.list.${t}`)]);
+    expect(cmds.map((c) => c.id)).toEqual(["entities.review"]);
     for (const c of cmds) expect(c.label).not.toMatch(/^cmd\./);
   });
 
-  it("\"Entities: People\" opens the list; an entity opens its page", async () => {
+  it("the entity types come from the type registry: a Base and \"All <type>\" each, and an approved note is of its type", async () => {
     await seed();
     const files = await loadEntityFiles();
-    await applyEntityOp(files, approve(files, [PROPS[0].id, PROPS[1].id, PROPS[2].id]));
-    let opened: string | null = null;
-    const onOpen = (e: Event) => (opened = (e as CustomEvent<{ type: string }>).detail.type);
-    window.addEventListener(OPEN_ENTITIES_EVENT, onOpen);
-    render(<EntityIndexHost />);
-    const people = buildEntityCommands({} as CommandContext).find((c) => c.id === "entities.list.person")!;
-    await act(async () => {
-      people.action();
-    });
-    window.removeEventListener(OPEN_ENTITIES_EVENT, onOpen);
-    expect(opened).toBe("person");
-    const dialog = await screen.findByTestId("entity-index", undefined, { timeout: 10_000 });
-    const items = await within(dialog).findAllByRole("button", { name: /דוד כהן|רחל לוי/ });
-    expect(items).toHaveLength(2); // the place is not a person
-    await axeClean(dialog);
-    await act(async () => {
-      fireEvent.click(within(dialog).getByRole("button", { name: "דוד כהן" }));
-    });
-    const page = await within(dialog).findByTestId("entity-page");
-    expect(within(page).getByRole("heading", { level: 2 }).textContent).toBe("דוד כהן");
-    expect(within(page).getByTestId("entity-mentions").querySelectorAll("li").length).toBeGreaterThan(0);
-    await act(async () => {
-      fireEvent.keyDown(window, { key: "Escape" });
-    });
-    await waitFor(() => expect(screen.queryByTestId("entity-index")).toBeNull());
-    void entityId;
+    await applyEntityOp(files, approve(files, [PROPS[0].id, PROPS[2].id]));
+    const reg = await loadVaultTypes();
+    for (const type of ENTITY_TYPES) expect(reg.get(type)?.source).toBe("builtin:entities");
+    expect(reg.errors).toEqual([]);
+    expect(reg.get("person")!.effective.find((f) => f.name === "born_in")).toMatchObject({ kind: "relation", to: "place", multiple: true });
+    // ⌘K (W12.T3): "All People", "All Laws", "All Sources", … from the registry.
+    const labels = buildTypeCommands([...reg.types.values()].map((x) => ({ id: x.id, label: x.label })), { locale: "en", t: (id, v) => (id === "cmd.typesAll" ? `All ${v!.type}` : id) }).map((c) => c.label);
+    expect(labels).toEqual(expect.arrayContaining(["All People", "All Laws", "All Sources"]));
+    // The approved note says type: person, so the person Base finds it and the place Base does not.
+    const path = entityNotePath({ type: "person", name: "דוד כהן" } as never);
+    const text = await workspace.readWorkspaceFile(path);
+    const fm = parseYaml(text.split("---")[1]) as Record<string, unknown>;
+    expect(noteIsA(reg, { fm }, "person")).toBe(true);
+    expect(noteIsA(reg, { fm }, "place")).toBe(false);
+    expect(typeFilter(reg, "person")).toContain("person");
   });
 });

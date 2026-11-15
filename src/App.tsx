@@ -92,7 +92,7 @@ const UsabilitySelfPanel = lazy(() => import("./ui/UsabilitySelfPanel").then((m)
 import { explainError } from "./lib/userError";
 import { useEdgeSwipes, useLongNotesOpenForReading } from "./mobile/useMobileGestures";
 import { FeatureFlagsHost } from "./ui/FeatureFlagsHost";
-import { EntityIndexHost } from "./ui/EntityIndexHost";
+import { TypePageHost } from "./types/TypePageHost";
 import { useDesktopShell } from "./desktop/useDesktopShell";
 // W6.25: App.tsx split into hooks and components, behaviour unchanged.
 import { useAppBootEffects } from "./hooks/useAppBootEffects";
@@ -605,7 +605,7 @@ export default function App() {
       <AiToastContainer />
       <HelpHost />
       <FeatureFlagsHost />
-      <EntityIndexHost />
+      <TypePageHost />
       <AiSuggestionsPanel />
       <AiInlinePromptOverlay />
       <MobileKeyboardBarHost />
