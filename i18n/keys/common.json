@@ -8735,6 +8735,35 @@
       "vars": []
     },
     {
+      "key": "pdf.ink",
+      "en": "Ink",
+      "vars": []
+    },
+    {
+      "key": "pdf.ink.hint",
+      "en": "Draw on the page with a pen, a finger or the mouse; the strokes are saved with the highlights",
+      "vars": []
+    },
+    {
+      "key": "pdf.ink.layer",
+      "en": "Ink on page {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "pdf.ink.undo",
+      "en": "Undo stroke",
+      "vars": []
+    },
+    {
+      "key": "pdf.inkUnreadable",
+      "en": "The ink in {name} can't be read, so it isn't changed. Fix or remove its lumen-pdf-ink block first.",
+      "vars": [
+        "name"
+      ]
+    },
+    {
       "key": "pdf.noWorkspace",
       "en": "PDFs need the workspace, which this browser can't provide.",
       "vars": []
