@@ -101,4 +101,29 @@
 .lumen-viz-why {
   margin-block: 4px;
   padding-inline-start: 20px;
+.lumen-viz-tree,
+.lumen-viz-tree ul {
+  list-style: none;
+  margin: 0;
+  padding-inline-start: 0;
+}
+.lumen-viz-tree ul {
+  padding-inline-start: 16px;
+}
+.lumen-viz-treeitem > .lumen-viz-treelabel {
+  display: inline-block;
+  padding-block: 1px;
+  padding-inline: 4px;
+  border-radius: 4px;
+  cursor: default;
+}
+.lumen-viz-treeitem:focus {
+  outline: none;
+}
+.lumen-viz-treeitem:focus-visible > .lumen-viz-treelabel {
+  outline: 2px solid hsl(var(--accent));
+}
+.lumen-viz-treevalue {
+  color: hsl(var(--fg-muted));
+  font-size: 11px;
 }
