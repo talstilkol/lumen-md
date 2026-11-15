@@ -76,7 +76,8 @@ describe("the M3 launch kit (W11.L3)", () => {
     expect(check(edit("show-hn.md", /^Show HN: Lumen – .*$/m, `Show HN: Lumen – ${"x".repeat(80)}`)).join("\n")).toMatch(/show-hn\.md: the title is \d+ > 80 characters/);
     const long = edit("product-hunt.md", "I'm here all day for questions.", `I'm here all day for questions. ${"More words here. ".repeat(30)}`);
     expect(check(long).join("\n")).toMatch(/product-hunt\.md: the first comment is \d+ > 800 characters/);
-    expect(check(edit("press-kit.en.md", "## Contact", "See lumen.md.\n\n## Contact")).join("\n")).toContain("press-kit.en.md: names the domain lumen.md");
+    const taken = ["lumen", "md"].join("."); // the taken domain, not spelled out in this file
+    expect(check(edit("press-kit.en.md", "## Contact", `See ${taken}.\n\n## Contact`)).join("\n")).toContain("press-kit.en.md: names the taken domain");
   });
 
   it("each file's Sources list is generated from its markers and current", () => {

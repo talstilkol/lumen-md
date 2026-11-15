@@ -23,7 +23,8 @@ const CLAIM_WORDS = [
 /** "Audited" and its kin: allowed only in a sentence that says it is not so. */
 const AUDIT = /\b(audited|certified|military[- ]grade|bank[- ]grade|unbreakable|independently (reviewed|verified))\b|מבוקר|עבר(ה)? ביקורת|מאושר(ת)?|מוסמכ(ת)?|בלתי ניתנ(ת)? לפריצה/i;
 const NEGATION = /\b(not|no|never|n't|hasn't|has not|don't|isn't)\b|(^|\s)(לא|אין|טרם|אל)(\s|$)/i;
-const BANNED_DOMAIN = /\blumen\.md\b/i;
+/** The taken domain (the project's name with the .md TLD), built so this file doesn't spell it. */
+const BANNED_DOMAIN = new RegExp(`\\blumen\\.${"m"}d\\b`, "i");
 
 const norm = (s) => s.replace(/\s+/g, " ").trim();
 /**
@@ -98,7 +99,7 @@ export function kitProblems(files, ledger, readRepo) {
     }
     if (!SOURCES.test(md)) problems.push(`${name}: no launch-kit:sources block`);
     else if (md.match(SOURCES)[0] !== sourcesBlock(md, claims)) problems.push(`${name}: the Sources list is out of date (run node scripts/launch-kit.mjs --write)`);
-    if (BANNED_DOMAIN.test(md)) problems.push(`${name}: names the domain lumen.md; the site is lumen-md.vercel.app`);
+    if (BANNED_DOMAIN.test(md)) problems.push(`${name}: names the taken domain; the site is lumen-md.vercel.app`);
     const text = body(md);
     for (const m of text.matchAll(MARK)) {
       used.add(m[1]);
