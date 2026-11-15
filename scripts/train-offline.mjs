@@ -11,10 +11,13 @@
  *                                                  "… pass N fail 0")
  *   node scripts/train-offline.mjs --list          the files, one per line
  *
- * Exit 1 when any attack test fails, or when there is none to run.
+ * Plan W12.V7: the visualisation gate (every wave-12 view: an alternative
+ * with the view's data, the keyboard, axe, no network) runs here too.
+ *
+ * Exit 1 when any attack or gate test fails, or when there is none to run.
  */
 import { spawnSync } from "node:child_process";
-import { readdirSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -26,6 +29,14 @@ export function attackFiles(root = process.cwd()) {
     .filter((f) => f.endsWith(".test.ts"))
     .sort()
     .map((f) => `${ATTACK_DIR}/${f}`);
+}
+
+/** Gate test files outside security/attacks that the offline train runs as well (W12.V7). */
+export const OFFLINE_GATES = ["src/__tests__/vizGate.test.tsx"];
+
+/** Everything the offline train runs: the attack files, then the gates that exist in this checkout. */
+export function gateFiles(root = process.cwd()) {
+  return [...attackFiles(root), ...OFFLINE_GATES.filter((f) => existsSync(join(root, f)))];
 }
 
 /** Pass/fail counts from a runner's last "pass N fail M" line, or null. */
@@ -45,7 +56,7 @@ export function green(counts) {
 
 function main(argv) {
   const root = process.cwd();
-  const files = attackFiles(root);
+  const files = gateFiles(root);
   if (argv.includes("--list")) {
     console.log(files.join("\n"));
     return 0;
@@ -57,7 +68,7 @@ function main(argv) {
   const i = argv.indexOf("--runner");
   if (i < 0) {
     const npx = process.platform === "win32" ? "npx.cmd" : "npx";
-    const r = spawnSync(npx, ["vitest", "run", ATTACK_DIR], { stdio: "inherit" });
+    const r = spawnSync(npx, ["vitest", "run", ATTACK_DIR, ...files.filter((f) => !f.startsWith(`${ATTACK_DIR}/`))], { stdio: "inherit" });
     return r.status ?? 1;
   }
   const runner = argv[i + 1];
@@ -69,7 +80,7 @@ function main(argv) {
     if (!ok) bad++;
     console.log(`${ok ? "✓" : "✗"} ${f}: ${c ? `pass ${c.pass} fail ${c.fail}` : "no result"}`);
   }
-  console.log(`train-offline: ${files.length - bad}/${files.length} attack files green`);
+  console.log(`train-offline: ${files.length - bad}/${files.length} attack and gate files green`);
   return bad ? 1 : 0;
 }
 

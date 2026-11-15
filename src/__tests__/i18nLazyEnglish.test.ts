@@ -130,7 +130,7 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "propertiesPanel.json": { module: "ui/propertiesPanelStrings.ts", users: ["ui/PropertiesPanel.tsx"], prefixes: ["props."] },
   "network.json": { module: "agents/networkStrings.ts", users: ["agents/network.ts"], prefixes: ["agents.netConsent.body", "agents.netConsent.credential", "agents.netConsent.exact", "agents.netConsent.ok", "agents.netConsent.perCall", "agents.netConsent.title", "agents.netConsent.untrusted", "agents.netConsent.visits", "agents.netConsent.what.page-address", "agents.netConsent.what.search-query", "agents.netConsent.what.tool-args"] },
   "achBlock.json": { module: "plugins/achBlockStrings.ts", users: ["plugins/AchBlock.tsx"], prefixes: ["ach."] },
-  "viz.json": { module: "viz/vizStrings.ts", users: ["viz/VizFrame.tsx", "viz/HebrewMonthView.tsx", "viz/graph/AdjacencyMatrixView.tsx", "viz/graph/EdgeInspector.tsx"], prefixes: ["viz."], within: "viz/" },
+  "viz.json": { module: "viz/vizStrings.ts", users: ["viz/VizFrame.tsx", "viz/HebrewMonthView.tsx", "viz/graph/AdjacencyMatrixView.tsx", "viz/graph/EdgeInspector.tsx"], prefixes: ["viz."], within: "viz/", shared: ["viz/bidi.ts"] },
   "basesBlock.json": { module: "views/bases/basesBlockStrings.ts", users: ["views/bases/BasesBlock.tsx"], prefixes: ["base."] },
   "typedObjects.json": { module: "types/typedObjectsStrings.ts", users: ["types/ObjectStudio.tsx", "types/TypePage.tsx", "types/TypedFields.tsx"], prefixes: ["types."] },
   // The reading list's commands (plan W12.X2), loaded on first use.
