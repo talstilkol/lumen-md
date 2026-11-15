@@ -23,7 +23,7 @@
  * Pure data: no imports, so the test and the export code load it alone.
  */
 
-export type SettingsTab = "general" | "appearance" | "ai" | "sync" | "fineTune" | "security" | "org";
+export type SettingsTab = "general" | "appearance" | "ai" | "sync" | "fineTune" | "privacy" | "security" | "org";
 
 export const SETTINGS_TABS: ReadonlyArray<{ id: SettingsTab; label: string }> = [
   { id: "general", label: "settings.general" },
@@ -31,6 +31,8 @@ export const SETTINGS_TABS: ReadonlyArray<{ id: SettingsTab; label: string }> = 
   { id: "ai", label: "ai.settings.title" },
   { id: "sync", label: "collab.settings.title" },
   { id: "fineTune", label: "fineTune.title" },
+  // Decision 2.41 (#372, W10.E70): the allowed image hosts, with revoke, inside the settings screen too.
+  { id: "privacy", label: "settings.privacy" },
   { id: "security", label: "trustedKeys.title" },
   { id: "org", label: "org.title" },
 ];
