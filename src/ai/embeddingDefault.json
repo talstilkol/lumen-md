@@ -1,0 +1,4 @@
+{
+  "about": "Written by npm run eval:embed-ingest (plan W7.13): the measured winner of the embeddings competition, or null for the built-in multilingual-e5-small. Never by hand.",
+  "default": null
+}

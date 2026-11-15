@@ -35,3 +35,24 @@ for nDCG@10, Recall@20, time per query, download size and index size.
   takes at most **150 ms** on 10,000 notes on an average computer.
 - The reranker is turned on only if it adds at least **3 points**; otherwise it stays off.
 - Every model needs a checked licence, a sha256 and a mirror before Lumen downloads it.
+
+## From a run to the app
+
+A run changes the app only through the ingest:
+
+```bash
+npm run eval:embed-compete      # writes eval/results/embed-compete-<date>.json
+npm run eval:embed-ingest       # judges it, then writes src/ai/embeddingDefault.json
+```
+
+The ingest takes a run only when every row is measured on both the dev and
+held-out parts, and the decision names a default with its reason. The
+winner becomes the search model only when all three hold:
+- the set separated the models;
+- the model's licence is verified;
+- its files have a sha256.
+
+Otherwise multilingual-e5-small stays. A winner at 256 dimensions
+(`embeddinggemma-2@256`) is used at that size: the first 256 values,
+renormalised. The index records the model and the size, so changing either
+rebuilds it. `--check` judges a run without writing anything.
