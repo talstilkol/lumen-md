@@ -256,12 +256,57 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
           if (f.kind !== "file") throw new Error("a folder, not a file");
           return new Uint8Array(await (await f.handle.getFile()).arrayBuffer());
         },
+        // Z6-L3: each note's recovery under its path lock; recoverIn is never called with a path lock held.
+        lockTarget: (path, fn) => pathLock.run(vaultSegments(path).join("/"), fn),
       },
       key,
       names,
     );
     clean.add(key);
     return true;
+  }
+
+  /** rename's work, holding the path locks of `r.src` and `r.dst` (no event). */
+  async function renameLocked(r: NonNullable<ReturnType<typeof checkRename>>, from: string, to: string, opts: { overwrite?: boolean }): Promise<void> {
+    const target = await lookup(r.dst);
+    const source = await lookup(r.src);
+    if (!source) throw new VaultNotFoundError(from);
+    const alias = !!target && (await sameEntry(source.handle, target.handle));
+    if (target && !alias && !opts.overwrite) throw new WorkspaceConflictError(to);
+    // The textual checks (checkRename) miss aliases on a case-insensitive
+    // or normalising real folder: "Folder" → "folder/sub" is a move into
+    // itself, and replacing a folder that holds the source deletes it.
+    if (source.kind === "directory") {
+      for (const h of await existingAncestors(r.dst)) {
+        if (await sameEntry(source.handle, h)) throw new VaultError("EINVAL", to, `Cannot move "${from}" into itself`);
+      }
+    }
+    if (target && !alias && target.kind === "directory") {
+      for (const h of await existingAncestors(r.src)) {
+        if (await sameEntry(target.handle, h)) throw new VaultError("EINVAL", to, `Cannot replace "${to}" with "${from}", which is inside it`);
+      }
+    }
+    if (alias) {
+      // Two spellings of one entry (a case-only or normalisation-only
+      // rename on a case-insensitive / normalising real folder): go
+      // through a temporary name, or "replacing" the target would delete
+      // the source itself.
+      const tmp = [...r.dst.slice(0, -1), `.lumen-rename-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`];
+      await move(r.src, tmp, source, null);
+      const staged = await lookup(tmp);
+      if (!staged) throw new VaultNotFoundError(tmp.join("/"));
+      try {
+        await move(tmp, r.dst, staged, null);
+      } catch (e) {
+        // Put the entry back under its original name rather than leave it
+        // only under the hidden temporary one.
+        const left = await lookup(tmp).catch(() => null);
+        if (left) await move(tmp, r.src, left, null).catch(() => undefined);
+        throw e;
+      }
+    } else {
+      await move(r.src, r.dst, source, target);
+    }
   }
 
   /** What the lazy compare-and-swap (./cas.ts) needs of this backend. */
@@ -276,7 +321,8 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
   const swap = async (path: string, type: "write" | "delete", run: (cas: typeof import("./cas"), parts: string[]) => Promise<boolean>) => {
     const parts = vaultSegments(path);
     const p = parts.join("/");
-    // An interrupted atomic save of this file (./atomic.ts) is finished or undone first, as read() does.
+    // An interrupted atomic save of this file (./atomic.ts) is finished or undone first, as read() does: before the
+    // lock is taken (the recovery takes it for each note it restores, Z6-L3), and the swap compares again under it.
     if (parts.length && !(await lookup(parts))) await recoverIn(parts.slice(0, -1));
     const ok = await pathLock.run(p, async () => run(await import("./cas"), parts));
     if (ok) emit({ type, path: p });
@@ -458,47 +504,10 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
     async rename(from, to, opts = {}) {
       const r = checkRename(from, to);
       if (!r) return;
-      const target = await lookup(r.dst);
-      const source = await lookup(r.src);
-      if (!source) throw new VaultNotFoundError(from);
-      const alias = !!target && (await sameEntry(source.handle, target.handle));
-      if (target && !alias && !opts.overwrite) throw new WorkspaceConflictError(to);
-      const dst = r.dst.join("/");
-      // The textual checks (checkRename) miss aliases on a case-insensitive
-      // or normalising real folder: "Folder" → "folder/sub" is a move into
-      // itself, and replacing a folder that holds the source deletes it.
-      if (source.kind === "directory") {
-        for (const h of await existingAncestors(r.dst)) {
-          if (await sameEntry(source.handle, h)) throw new VaultError("EINVAL", to, `Cannot move "${from}" into itself`);
-        }
-      }
-      if (target && !alias && target.kind === "directory") {
-        for (const h of await existingAncestors(r.src)) {
-          if (await sameEntry(target.handle, h)) throw new VaultError("EINVAL", to, `Cannot replace "${to}" with "${from}", which is inside it`);
-        }
-      }
-      if (alias) {
-        // Two spellings of one entry (a case-only or normalisation-only
-        // rename on a case-insensitive / normalising real folder): go
-        // through a temporary name, or "replacing" the target would delete
-        // the source itself.
-        const tmp = [...r.dst.slice(0, -1), `.lumen-rename-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`];
-        await move(r.src, tmp, source, null);
-        const staged = await lookup(tmp);
-        if (!staged) throw new VaultNotFoundError(tmp.join("/"));
-        try {
-          await move(tmp, r.dst, staged, null);
-        } catch (e) {
-          // Put the entry back under its original name rather than leave it
-          // only under the hidden temporary one.
-          const left = await lookup(tmp).catch(() => null);
-          if (left) await move(tmp, r.src, left, null).catch(() => undefined);
-          throw e;
-        }
-      } else {
-        await move(r.src, r.dst, source, target);
-      }
-      emit({ type: "rename", path: dst, from: r.src.join("/") });
+      // Z6-L3: under the lock of the source and the target path (in ascending order, PathLock.runAll), so a rename
+      // onto a note never lands between a writeIf's compare and its swap.
+      await pathLock.runAll([r.src.join("/"), r.dst.join("/")], () => renameLocked(r, from, to, opts));
+      emit({ type: "rename", path: r.dst.join("/"), from: r.src.join("/") });
     },
 
     async remove(path) {

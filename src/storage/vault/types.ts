@@ -99,8 +99,11 @@ export interface VaultBackend {
    * — `null`: only while nothing is at `path`. Resolves false, writing
    * nothing, when the file is no longer that one or a folder is there.
    *
-   * Atomic against every write, writeIf, remove and removeIf made through
-   * the same backend (they wait for each other, per path). Against other
+   * Atomic against every write, writeIf, remove, removeIf and rename made
+   * through the same backend (they wait for each other, per path; a rename
+   * holds the lock of its source and its target path, review Z6-L3, not of
+   * each file under a renamed folder). On the directory-handle backend also
+   * against the recovery of an interrupted save of that path. Against other
    * writers, per backend: memory — atomic; directory handle (OPFS, a picked
    * folder) — the new bytes go to the swap file first, and the file is
    * compared again right before the swap replaces it, so only a write by
