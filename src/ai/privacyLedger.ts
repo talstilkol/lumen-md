@@ -96,6 +96,8 @@ const RULES: Rule[] = [
   // a local-only policy blocks it like the research service. W6.47: it also
   // writes — only the PDF highlights the user sends and confirms.
   { test: (h) => h === "api.zotero.org", category: "research", reason: "Zotero Web API (your library; writes only the PDF highlights you send)" },
+  // W10.E38 (plan 6.13): a DOI the user looked up and approved, and nothing else.
+  { test: (h) => h === "api.crossref.org", category: "research", reason: "CrossRef DOI lookup: the DOI you asked for only" },
   // Knesset records (plan W7.5): the law or bill name the user asked for.
   { test: (h) => h === "knesset.gov.il" || h === "main.knesset.gov.il", category: "cloud-text", reason: "Knesset records (OData): the law or bill name only" },
   // Government data (plan W7.6): search words, a dataset id or a series id.
