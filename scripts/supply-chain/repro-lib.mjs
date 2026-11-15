@@ -72,8 +72,12 @@ export function filesDigest(manifest) {
 export function compareManifests(a, b) {
   for (const m of [a, b]) if (m?.schema !== MANIFEST_SCHEMA) throw new Error(`not a ${MANIFEST_SCHEMA} manifest`);
   const errors = [];
-  if (a.commit && b.commit && a.commit !== b.commit) errors.push(`different commits: ${a.commit} vs ${b.commit}`);
-  if (a.lockfileSha256 && b.lockfileSha256 && a.lockfileSha256 !== b.lockfileSha256) errors.push("different package-lock.json");
+  // #575's rule (W10 port): a commit or lockfile that only one side names is an
+  // error too, not a skipped check — "identical" must mean the same commit built
+  // from the same package-lock.json. Two sides that both name neither (two local
+  // directories) are still compared.
+  if (a.commit !== b.commit && (a.commit || b.commit)) errors.push(a.commit && b.commit ? `different commits: ${a.commit} vs ${b.commit}` : `only one build names its commit (${a.commit || "none"} vs ${b.commit || "none"})`);
+  if (a.lockfileSha256 !== b.lockfileSha256 && (a.lockfileSha256 || b.lockfileSha256)) errors.push(a.lockfileSha256 && b.lockfileSha256 ? "different package-lock.json" : "only one build names its package-lock.json");
   const notes = [];
   if (a.node && b.node && a.node !== b.node) notes.push(`Node ${a.node} vs ${b.node}`);
   const va = JSON.stringify(a.viteEnv ?? {});

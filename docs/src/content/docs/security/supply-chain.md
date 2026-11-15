@@ -84,6 +84,9 @@ npm run repro:compare -- <A> <B>
   appends the verdict to `reports/repro/ledger.jsonl`, and runs diffoscope on any
   file that differs. When the build is identical, it writes an in-toto statement
   ("built identically on two infrastructures") for the release attestation to sign.
+- A manifest always names its commit and the SHA-256 of `package-lock.json`: a
+  build without a lockfile gets no manifest, and a comparison in which only one
+  side names its commit or lockfile is an error, never "identical".
 - The target is 0 differing files, `.map` files included, on 10 commits in a row,
   with the Cloudflare build under 15 minutes.
 
