@@ -134,6 +134,7 @@
     "pr:check": "node scripts/pr-check.mjs",
     "pr:triage": "node scripts/pr-triage.mjs",
     "launch:check": "node scripts/launch-check.mjs",
+    "launch:kit": "node scripts/launch-kit.mjs",
     "plugins:review": "node scripts/review-plugins.mjs",
     "security:page": "node scripts/security-page.mjs",
     "beta:funnel": "node scripts/beta-funnel.mjs",
