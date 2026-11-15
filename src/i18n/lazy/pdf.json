@@ -37,5 +37,9 @@
   "pdf.zotero.noLibrary": "Sync your Zotero library from zotero.org first (Citations: sync the Zotero library from zotero.org).",
   "pdf.zotero.noAttachment": "This PDF isn't a PDF attachment in your synced Zotero library. Add “zotero-attachment: KEY” to the front matter of {note}.",
   "pdf.zotero.noWrite": "Your Zotero key can't write. On zotero.org → Settings → Security → Applications, edit the key and allow write access.",
-  "pdf.zotero.failed": "Couldn't send to Zotero: {error}"
+  "pdf.zotero.failed": "Couldn't send to Zotero: {error}",
+  "pdf.listen": "Read aloud",
+  "pdf.listen.stop": "Stop reading",
+  "pdf.listen.page": "Reading page {n}",
+  "pdf.listen.empty": "This PDF has no text to read. Recognise the text of its scanned pages (OCR) first."
 }
