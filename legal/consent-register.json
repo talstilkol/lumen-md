@@ -35,7 +35,7 @@
           "Google (Gemini)",
           "Mistral AI"
         ],
-        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy). Also: remove the key in Settings → AI.",
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy), except a single request the user explicitly agrees to at that moment, which the ledger records as consented (Wikidata is refused even then). Also: remove the key in Settings → AI.",
         "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
       },
       "status": "meets"
@@ -83,7 +83,7 @@
         "namedRecipients": [
           "The operator of the server the user entered"
         ],
-        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy), except a single request the user explicitly agrees to at that moment, which the ledger records as consented (Wikidata is refused even then).",
         "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
       },
       "status": "meets"
@@ -131,7 +131,7 @@
         "namedRecipients": [
           "The operator of the server the user entered"
         ],
-        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy), except a single request the user explicitly agrees to at that moment, which the ledger records as consented (Wikidata is refused even then).",
         "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
       },
       "status": "meets"
@@ -179,7 +179,7 @@
         "namedRecipients": [
           "LanguageTool GmbH (api.languagetool.org), or the server the user entered"
         ],
-        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy). Also: the grammar check switch.",
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy), except a single request the user explicitly agrees to at that moment, which the ledger records as consented (Wikidata is refused even then). Also: the grammar check switch.",
         "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
       },
       "status": "meets"
@@ -227,7 +227,7 @@
         "namedRecipients": [
           "kroki.io (Yuzutech)"
         ],
-        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy), except a single request the user explicitly agrees to at that moment, which the ledger records as consented (Wikidata is refused even then).",
         "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
       },
       "status": "meets"
@@ -287,7 +287,7 @@
           "jsDelivr",
           "the Excalidraw font CDN"
         ],
-        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy), except a single request the user explicitly agrees to at that moment, which the ledger records as consented (Wikidata is refused even then).",
         "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
       },
       "status": "alarm",
@@ -316,7 +316,7 @@
           "The research service the build or the user configured",
           "the user's own service"
         ],
-        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy), except a single request the user explicitly agrees to at that moment, which the ledger records as consented (Wikidata is refused even then).",
         "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
       },
       "status": "meets"
@@ -341,7 +341,7 @@
         "namedRecipients": [
           "The tool's target, named in the approval dialog"
         ],
-        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy). Also: deny in the agent's approval dialog.",
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy), except a single request the user explicitly agrees to at that moment, which the ledger records as consented (Wikidata is refused even then). Also: deny in the agent's approval dialog.",
         "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
       },
       "status": "meets"
@@ -365,7 +365,7 @@
         "namedRecipients": [
           "The website being clipped"
         ],
-        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy), except a single request the user explicitly agrees to at that moment, which the ledger records as consented (Wikidata is refused even then).",
         "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
       },
       "status": "meets"
@@ -389,7 +389,7 @@
         "namedRecipients": [
           "The browser vendor's speech service"
         ],
-        "withdrawal": "Pick a local voice; Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "withdrawal": "Pick a local voice; Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy), except a single request the user explicitly agrees to at that moment, which the ledger records as consented (Wikidata is refused even then).",
         "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
       },
       "status": "meets"
@@ -414,7 +414,7 @@
         "namedRecipients": [
           "The browser vendor's speech service (Google in Chrome)"
         ],
-        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy), except a single request the user explicitly agrees to at that moment, which the ledger records as consented (Wikidata is refused even then).",
         "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
       },
       "status": "meets"
@@ -438,7 +438,7 @@
         "namedRecipients": [
           "The Sentry or GlitchTip server the build sets with VITE_SENTRY_DSN"
         ],
-        "withdrawal": "The error-report switch; consent is re-read for every event (lib/sentryMonitor.ts), so turning it off stops reports at once. Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "withdrawal": "The error-report switch; consent is re-read for every event (lib/sentryMonitor.ts), so turning it off stops reports at once. Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy), except a single request the user explicitly agrees to at that moment, which the ledger records as consented (Wikidata is refused even then).",
         "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
       },
       "status": "meets"
@@ -462,7 +462,7 @@
         "namedRecipients": [
           "The origins the plugin declared in its manifest"
         ],
-        "withdrawal": "Disable or remove the plugin. Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "withdrawal": "Disable or remove the plugin. Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy), except a single request the user explicitly agrees to at that moment, which the ledger records as consented (Wikidata is refused even then).",
         "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
       },
       "status": "meets"
@@ -534,7 +534,7 @@
         "namedRecipients": [
           "Sefaria (sefaria.org)"
         ],
-        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy), except a single request the user explicitly agrees to at that moment, which the ledger records as consented (Wikidata is refused even then).",
         "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
       },
       "status": "meets"
@@ -558,7 +558,7 @@
         "namedRecipients": [
           "The Knesset (knesset.gov.il)"
         ],
-        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy), except a single request the user explicitly agrees to at that moment, which the ledger records as consented (Wikidata is refused even then).",
         "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
       },
       "status": "meets"
@@ -584,7 +584,7 @@
           "data.gov.il",
           "the Central Bureau of Statistics (apis.cbs.gov.il)"
         ],
-        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy), except a single request the user explicitly agrees to at that moment, which the ledger records as consented (Wikidata is refused even then).",
         "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
       },
       "status": "meets"
@@ -608,7 +608,7 @@
         "namedRecipients": [
           "Zotero (api.zotero.org)"
         ],
-        "withdrawal": "Disconnect Zotero; Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "withdrawal": "Disconnect Zotero; Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy), except a single request the user explicitly agrees to at that moment, which the ledger records as consented (Wikidata is refused even then).",
         "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
       },
       "status": "meets"
@@ -635,7 +635,7 @@
           "The user's AT Protocol PDS",
           "plc.directory"
         ],
-        "withdrawal": "Don't publish; delete the record in the user's account. Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "withdrawal": "Don't publish; delete the record in the user's account. Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy), except a single request the user explicitly agrees to at that moment, which the ledger records as consented (Wikidata is refused even then).",
         "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
       },
       "status": "meets"
@@ -662,7 +662,7 @@
           "The calendar server the user entered",
           "the ICS address the user added"
         ],
-        "withdrawal": "Remove the connection. Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "withdrawal": "Remove the connection. Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy), except a single request the user explicitly agrees to at that moment, which the ledger records as consented (Wikidata is refused even then).",
         "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
       },
       "status": "meets"
@@ -686,7 +686,7 @@
         "namedRecipients": [
           "The server the stylesheet names"
         ],
-        "withdrawal": "Remove the theme. Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "withdrawal": "Remove the theme. Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy), except a single request the user explicitly agrees to at that moment, which the ledger records as consented (Wikidata is refused even then).",
         "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
       },
       "status": "meets"
@@ -786,7 +786,7 @@
         "namedRecipients": [
           "Wikimedia Foundation (www.wikidata.org)"
         ],
-        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy), except a single request the user explicitly agrees to at that moment, which the ledger records as consented (Wikidata is refused even then).",
         "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
       },
       "status": "meets"
@@ -810,7 +810,7 @@
         "namedRecipients": [
           "OurResearch (api.openalex.org)"
         ],
-        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy), except a single request the user explicitly agrees to at that moment, which the ledger records as consented (Wikidata is refused even then).",
         "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
       },
       "status": "meets"
