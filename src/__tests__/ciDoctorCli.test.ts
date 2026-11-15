@@ -75,7 +75,7 @@ beforeAll(() => {
 afterAll(() => rmSync(dir, { recursive: true, force: true }));
 
 function doctor(...args: string[]) {
-  const r = spawnSync(process.execPath, [cli, ...args, "--json"], {
+  const r = spawnSync(process.execPath, [cli, "--source", "github", ...args, "--json"], {
     encoding: "utf8",
     env: { ...process.env, PATH: `${dir}:${process.env.PATH}`, GH_REPO: "o/r", FAKE_GH_ROUTES: join(dir, "routes.json") },
   });
@@ -88,7 +88,7 @@ describe("scripts/ci-doctor.mjs (fake gh)", () => {
   it("fails visibly when the diagnosed run's jobs cannot be read", () => {
     const routes = join(dir, "routes-no-jobs.json");
     writeFileSync(routes, JSON.stringify(ROUTES.filter(([re]) => !re.includes("runs/100/jobs"))));
-    const r = spawnSync(process.execPath, [cli, "--run", "100", "--json"], {
+    const r = spawnSync(process.execPath, [cli, "--source", "github", "--run", "100", "--json"], {
       encoding: "utf8",
       env: { ...process.env, PATH: `${dir}:${process.env.PATH}`, GH_REPO: "o/r", FAKE_GH_ROUTES: routes },
     });
@@ -123,7 +123,7 @@ describe("scripts/ci-doctor.mjs (fake gh)", () => {
     const routes = join(dir, "routes-setup.json");
     const changed = ROUTES.map(([re, body]) => (re === `^${esc(`repos/o/r/compare/${S1}...${S2}`)}$` ? [re, { a: 3, b: 2, n: 2, files: ["src/other.ts", "playwright.config.ts"] }] : [re, body]));
     writeFileSync(routes, JSON.stringify(changed));
-    const r = spawnSync(process.execPath, [cli, "--run", "100", "--json"], {
+    const r = spawnSync(process.execPath, [cli, "--source", "github", "--run", "100", "--json"], {
       encoding: "utf8",
       env: { ...process.env, PATH: `${dir}:${process.env.PATH}`, GH_REPO: "o/r", FAKE_GH_ROUTES: routes },
     });
@@ -148,7 +148,7 @@ describe("scripts/ci-doctor.mjs (fake gh)", () => {
         ...ROUTES,
       ]),
     );
-    const r = spawnSync(process.execPath, [cli, "--around", "100", "--peers", "1", "--json"], {
+    const r = spawnSync(process.execPath, [cli, "--source", "github", "--around", "100", "--peers", "1", "--json"], {
       encoding: "utf8",
       env: { ...process.env, PATH: `${dir}:${process.env.PATH}`, GH_REPO: "o/r", FAKE_GH_ROUTES: routes },
     });
@@ -164,7 +164,7 @@ describe("scripts/ci-doctor.mjs (fake gh)", () => {
   });
 
   it("--window must be positive", () => {
-    const r = spawnSync(process.execPath, [cli, "--around", "100", "--window", "0"], { encoding: "utf8", env: { ...process.env, GH_REPO: "o/r" } });
+    const r = spawnSync(process.execPath, [cli, "--source", "github", "--around", "100", "--window", "0"], { encoding: "utf8", env: { ...process.env, GH_REPO: "o/r" } });
     expect(r.status).toBe(2);
   });
 });
