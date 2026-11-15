@@ -2013,6 +2013,20 @@
       "label": "Entity graph",
       "hint": "Every entity and who cites whom, as a graph or a table",
       "icon": "Network"
+    },
+    {
+      "id": "reading.newFromLibrary",
+      "label": "Reading list: new source from the citation library…",
+      "group": "Insert",
+      "hint": "A Zotero, BibTeX or CSL-JSON item becomes a source note",
+      "icon": "Quote"
+    },
+    {
+      "id": "reading.newFromCapture",
+      "label": "Reading list: new source from a captured page…",
+      "group": "Insert",
+      "hint": "The clipped page open now, or a link you type",
+      "icon": "Link"
     }
   ],
   "full": [
@@ -4178,6 +4192,20 @@
       "label": "Entity graph",
       "hint": "Every entity and who cites whom, as a graph or a table",
       "icon": "Network"
+    },
+    {
+      "id": "reading.newFromLibrary",
+      "label": "Reading list: new source from the citation library…",
+      "group": "Insert",
+      "hint": "A Zotero, BibTeX or CSL-JSON item becomes a source note",
+      "icon": "Quote"
+    },
+    {
+      "id": "reading.newFromCapture",
+      "label": "Reading list: new source from a captured page…",
+      "group": "Insert",
+      "hint": "The clipped page open now, or a link you type",
+      "icon": "Link"
     }
   ],
   "autoSaveOn": [
@@ -4468,6 +4496,8 @@
     "automations.dryRun",
     "automations.undo",
     "entities.review",
-    "entities.graph"
+    "entities.graph",
+    "reading.newFromLibrary",
+    "reading.newFromCapture"
   ]
 }
