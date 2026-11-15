@@ -53,6 +53,20 @@
       "icon": "Link"
     },
     {
+      "id": "file.publishAtproto",
+      "label": "Publish to Bluesky (Standard.site)…",
+      "group": "File",
+      "hint": "This note as a public record in your AT Protocol account",
+      "icon": "Link"
+    },
+    {
+      "id": "file.unpublishAtproto",
+      "label": "Remove from Bluesky (Standard.site)…",
+      "group": "File",
+      "hint": "Delete this note's public record from your account",
+      "icon": "Link"
+    },
+    {
       "id": "file.exportDocx",
       "label": "Export to Word (.doc)",
       "group": "File",
@@ -162,10 +176,6 @@
       "icon": "Download"
     },
     {
-      "id": "file.exportOdt",
-      "label": "Export to OpenDocument (ODT)",
-      "group": "File",
-      "hint": "LibreOffice text document, right-to-left paragraphs kept",
       "id": "file.importVcard",
       "label": "Import contacts (vCard)…",
       "group": "File",
@@ -574,6 +584,13 @@
       "icon": "Sparkles"
     },
     {
+      "id": "ai.claims",
+      "label": "AI: Paragraph → Claims",
+      "group": "Tools",
+      "hint": "Checkable claims from the paragraph at the cursor, each with an exact quote (R12.11)",
+      "icon": "Sparkles"
+    },
+    {
       "id": "ai.translate",
       "label": "AI: Translate Document",
       "group": "Tools",
@@ -913,6 +930,12 @@
     {
       "id": "classroom.open",
       "label": "Private classroom…",
+      "group": "Tools",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "roleVault.open",
+      "label": "Family or classroom vault…",
       "group": "Tools",
       "icon": "Sparkles"
     },
@@ -2127,9 +2150,39 @@
       "icon": "FileText"
     },
     {
+      "id": "entities.graph",
+      "label": "Entity graph",
+      "hint": "Every entity and who cites whom, as a graph or a table",
+      "icon": "Network"
+    },
+    {
       "id": "entities.wikidata",
       "label": "Entity: link to Wikidata…",
       "icon": "FileText"
+    },
+    {
+      "id": "reading.newFromLibrary",
+      "label": "Reading list: new source from the citation library…",
+      "group": "Insert",
+      "hint": "A Zotero, BibTeX or CSL-JSON item becomes a source note",
+      "icon": "Quote"
+    },
+    {
+      "id": "reading.newFromCapture",
+      "label": "Reading list: new source from a captured page…",
+      "group": "Insert",
+      "hint": "The clipped page open now, or a link you type",
+      "icon": "Link"
+    },
+    {
+      "id": "types.page",
+      "label": "Types: all objects by type",
+      "icon": "Table"
+    },
+    {
+      "id": "types.studio",
+      "label": "Types: Object Studio (new type, fields, rename)",
+      "icon": "Box"
     }
   ],
   "full": [
@@ -2209,6 +2262,20 @@
       "label": "Share as encrypted link",
       "group": "File",
       "hint": "A read-only copy inside the link, no server",
+      "icon": "Link"
+    },
+    {
+      "id": "file.publishAtproto",
+      "label": "Publish to Bluesky (Standard.site)…",
+      "group": "File",
+      "hint": "This note as a public record in your AT Protocol account",
+      "icon": "Link"
+    },
+    {
+      "id": "file.unpublishAtproto",
+      "label": "Remove from Bluesky (Standard.site)…",
+      "group": "File",
+      "hint": "Delete this note's public record from your account",
       "icon": "Link"
     },
     {
@@ -2321,10 +2388,6 @@
       "icon": "Download"
     },
     {
-      "id": "file.exportOdt",
-      "label": "Export to OpenDocument (ODT)",
-      "group": "File",
-      "hint": "LibreOffice text document, right-to-left paragraphs kept",
       "id": "file.importVcard",
       "label": "Import contacts (vCard)…",
       "group": "File",
@@ -2740,6 +2803,13 @@
       "icon": "Sparkles"
     },
     {
+      "id": "ai.claims",
+      "label": "AI: Paragraph → Claims",
+      "group": "Tools",
+      "hint": "Checkable claims from the paragraph at the cursor, each with an exact quote (R12.11)",
+      "icon": "Sparkles"
+    },
+    {
       "id": "ai.translate",
       "label": "AI: Translate Document",
       "group": "Tools",
@@ -3079,6 +3149,12 @@
     {
       "id": "classroom.open",
       "label": "Private classroom…",
+      "group": "Tools",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "roleVault.open",
+      "label": "Family or classroom vault…",
       "group": "Tools",
       "icon": "Sparkles"
     },
@@ -3786,30 +3862,6 @@
       "icon": "Pencil"
     },
     {
-      "id": "billing.upgradePro",
-      "label": "Billing: Upgrade to Pro",
-      "group": "Tools",
-      "icon": "Sparkles"
-    },
-    {
-      "id": "billing.upgradeTeam",
-      "label": "Billing: Upgrade to Team",
-      "group": "Tools",
-      "icon": "Sparkles"
-    },
-    {
-      "id": "billing.manage",
-      "label": "Billing: Manage subscription",
-      "group": "Tools",
-      "icon": "Sparkles"
-    },
-    {
-      "id": "billing.managePersonal",
-      "label": "Billing: Manage personal subscription",
-      "group": "Tools",
-      "icon": "Sparkles"
-    },
-    {
       "id": "view.bidiMarks",
       "label": "Show direction marks",
       "group": "View",
@@ -3938,6 +3990,30 @@
       "group": "Edit",
       "hint": "Puts Hebrew copied from a PDF back in reading order, keeping numbers and English the right way round, and fixes final letters",
       "icon": "Pencil"
+    },
+    {
+      "id": "billing.upgradePro",
+      "label": "Billing: Upgrade to Pro",
+      "group": "Tools",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "billing.upgradeTeam",
+      "label": "Billing: Upgrade to Team",
+      "group": "Tools",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "billing.manage",
+      "label": "Billing: Manage subscription",
+      "group": "Tools",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "billing.managePersonal",
+      "label": "Billing: Manage personal subscription",
+      "group": "Tools",
+      "icon": "Sparkles"
     },
     {
       "id": "ai.settings",
@@ -4409,9 +4485,39 @@
       "icon": "FileText"
     },
     {
+      "id": "entities.graph",
+      "label": "Entity graph",
+      "hint": "Every entity and who cites whom, as a graph or a table",
+      "icon": "Network"
+    },
+    {
       "id": "entities.wikidata",
       "label": "Entity: link to Wikidata…",
       "icon": "FileText"
+    },
+    {
+      "id": "reading.newFromLibrary",
+      "label": "Reading list: new source from the citation library…",
+      "group": "Insert",
+      "hint": "A Zotero, BibTeX or CSL-JSON item becomes a source note",
+      "icon": "Quote"
+    },
+    {
+      "id": "reading.newFromCapture",
+      "label": "Reading list: new source from a captured page…",
+      "group": "Insert",
+      "hint": "The clipped page open now, or a link you type",
+      "icon": "Link"
+    },
+    {
+      "id": "types.page",
+      "label": "Types: all objects by type",
+      "icon": "Table"
+    },
+    {
+      "id": "types.studio",
+      "label": "Types: Object Studio (new type, fields, rename)",
+      "icon": "Box"
     }
   ],
   "autoSaveOn": [
@@ -4432,6 +4538,8 @@
     "file.exportHtml",
     "file.publishSite",
     "file.shareLink",
+    "file.publishAtproto",
+    "file.unpublishAtproto",
     "file.exportDocx",
     "cite.insert",
     "cite.legal",
@@ -4448,7 +4556,6 @@
     "file.exportAdoc",
     "file.exportOrg",
     "file.exportOpml",
-    "file.exportOdt",
     "file.importVcard",
     "file.exportVcard",
     "file.exportReveal",
@@ -4507,6 +4614,7 @@
     "ai.productAgent",
     "ai.diagram",
     "ai.actionItems",
+    "ai.claims",
     "ai.translate",
     "ai.chart",
     "ai.analyse",
@@ -4557,6 +4665,7 @@
     "sync.open",
     "sync.setup",
     "classroom.open",
+    "roleVault.open",
     "tasks.open",
     "ai.cancel",
     "note.read",
@@ -4718,7 +4827,24 @@
     "automations.new",
     "automations.dryRun",
     "automations.undo",
+    "sources.knessetLaw",
+    "sources.knessetBill",
+    "sources.knessetProtocol",
+    "sources.askLaw",
+    "sources.datagovInsert",
+    "sources.cbsSeries",
+    "sources.datasetRefresh",
+    "sources.benyehudaDownload",
+    "sources.benyehudaSearch",
+    "sources.benyehudaQuote",
+    "sources.benyehudaHighlight",
+    "sources.open",
     "entities.review",
-    "entities.wikidata"
+    "entities.graph",
+    "entities.wikidata",
+    "reading.newFromLibrary",
+    "reading.newFromCapture",
+    "types.page",
+    "types.studio"
   ]
 }
