@@ -29,7 +29,7 @@ is taken. One click — **Undo the import** in the wizard, or the command
 | Notion | Settings → Export → *Markdown & CSV* or *HTML*, the .zip as it came | names without Notion's ids; links follow the pages; **each database becomes a `.base` file** with the same columns, and each row a note whose properties are the row's cells (Yes/No, numbers and dates typed) |
 | Evernote | `.enex` files (one per notebook) | a folder per notebook; tasks, images and files in place (`_resources/<note>/`); tags, author, source URL, created and updated as properties; links between notes as `[[wikilinks]]`; encrypted parts are left out and reported |
 | Bear | a backup (`.bearbk`) or TextBundles | a note per bundle with its `assets/`; `::highlight::` → `==highlight==`, `#multi word tag#` → `#multi-word-tag`; trashed notes left out |
-| Apple Notes | HTML or Markdown from an exporter app | a note per page; images inside the HTML (`data:` URIs) become files; links between pages follow |
+| Apple Notes | its own database: the folder `~/Library/Group Containers/group.com.apple.notes` (or `NoteStore.sqlite` alone); or HTML or Markdown from an exporter app | from the database: a note per note in its folder, with created/modified dates; titles, headings, bold, italic, strikethrough, links, lists, checklists, code and quotes; images and files from `Media/`; locked notes and Recently Deleted left out, with the reason. From HTML: a note per page; images inside the HTML (`data:` URIs) become files; links between pages follow |
 | Google Keep | Google Takeout (Keep only), the .zip | checklists as tasks; labels as tags; colour and pin as properties; archived notes in `Archive/`; trashed notes left out |
 | Logseq | the graph folder, or a .zip | page properties as frontmatter; `TODO`/`DONE` as tasks; block references `((id))` and `{{embed}}` as `[[Page#^id]]` / `![[…]]`; journals named by date (`2024-01-31`); `a___b` pages as folders |
 | OneNote | pages or sections saved as *Single File Web Page* (`.mht`) | a note per page, its images and attached files next to it |
@@ -56,8 +56,10 @@ the folder to the trash instead, so nothing of yours is lost.
 
 ## Limits
 
-- Apple Notes has no export of its own, and reading its database needs the
-  Mac app; the wizard imports what an exporter app saved.
+- Apple Notes: quit Notes before picking its folder. Changes Notes has not
+  yet written into `NoteStore.sqlite` (its `-wal` file) are not read, and the
+  report says so. Tables, drawings and scans in a note are not converted yet;
+  the report lists each one. Locked notes need unlocking in Notes first.
 - OneNote's own `.one` files cannot be read; export pages or sections as
   `.mht`. A direct import through Microsoft Graph (sign in, read only:
   `Notes.Read`) is built for deployments that register an app with Microsoft
