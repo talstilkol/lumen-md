@@ -26,6 +26,8 @@ import type { ViewMode, SplitAxis } from "../store/useStore";
 import type { CollabSession } from "../collab/yjs";
 import { t } from "../i18n";
 import { tapToEditHandlers } from "../mobile/useMobileGestures";
+import { forceWysiwyg, isWysiwygForced } from "../editor/wysiwygCeiling";
+import { useWysiwygCeiling, WysiwygCeilingNotice, WysiwygCeilingWarning } from "../ui/WysiwygCeilingBanner";
 
 const WysiwygEditor = lazy(() => import("../editor/WysiwygEditor"));
 const PageView = lazy(() => import("../ui/PageView").then(m => ({ default: m.PageView })));
@@ -86,14 +88,24 @@ export function EditorLayout({
   grammarCheck,
   typewriterMode,
   suggestingMode = false,
+  activeFile,
   pageView,
   collab,
   setContent,
   handleAddAsset,
 }: Props) {
-  const showEditor = mode === "source" || mode === "split";
+  // W11.Q4: a note over the WYSIWYG ceiling opens in the source editor with
+  // a notice; "Open in WYSIWYG anyway" is remembered for that note this session.
+  const ceiling = useWysiwygCeiling(mode, activeFile, docContent);
+  const [, setForcedTick] = useState(0);
+  const sourceInstead = mode === "wysiwyg" && ceiling.tooLarge && !isWysiwygForced(activeFile);
+  const setForced = (on: boolean) => {
+    forceWysiwyg(activeFile, on);
+    setForcedTick((n) => n + 1);
+  };
+  const showEditor = mode === "source" || mode === "split" || sourceInstead;
   const showPreview = mode === "preview" || mode === "split";
-  const showWysiwyg = mode === "wysiwyg";
+  const showWysiwyg = mode === "wysiwyg" && !sourceInstead;
 
   // Resolve the split axis. "auto" picks horizontal on wide viewports and
   // vertical on phones; explicit "horizontal"/"vertical" lock the layout.
@@ -350,6 +362,7 @@ export function EditorLayout({
               : "w-full min-w-0 h-full min-h-0 bg-bg flex flex-col"
           }
         >
+          {sourceInstead && <WysiwygCeilingNotice verdict={ceiling} onOpenAnyway={() => setForced(true)} />}
           <WritingGoalBanner />
           {/* Layout-preserving fallback: the pane keeps its flex size while
               CodeMirror hydrates, so the lazy mount causes no CLS. */}
@@ -394,6 +407,7 @@ export function EditorLayout({
       )}
       {showWysiwyg && (
         <section className="w-full min-w-0 bg-bg">
+          {ceiling.tooLarge && <WysiwygCeilingWarning onBack={() => setForced(false)} />}
           <Suspense
             fallback={
               <div
