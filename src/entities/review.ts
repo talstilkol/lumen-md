@@ -21,7 +21,7 @@
  * them: the extractors only write proposals (Rule of Two, W12.E4).
  */
 import { parse as parseYaml, stringify } from "yaml";
-import { splitFrontmatter } from "../storage/import/frontmatter";
+import { splitFrontmatter } from "./frontmatter";
 import { ENTITY_ROOT, edgeId, entityId, entityNotePath, type Edge, type Entity } from "./model";
 import { ensureAnchor, paragraphByAnchor, splitParagraphs } from "./paragraphs";
 import { assertEdge } from "./schema";

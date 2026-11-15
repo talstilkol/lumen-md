@@ -14,7 +14,7 @@ import { DECISIONS_PATH, EDGES_PATH, PROPOSALS_PATH, mergeProposals, toJsonl, ty
 import { approve, edgesOf, entitiesOf, merge, proposalsOf, reject, relink, split, undoOp, type Files } from "../entities/review";
 import { entityBase, entityPage, edgeLinkExists } from "../entities/pages";
 import { neighbours, timeDomain, toRenderEdges, visibleGraph, type NoteInfo } from "../entities/view";
-import { splitFrontmatter } from "../storage/import/frontmatter";
+import { splitFrontmatter } from "../entities/frontmatter";
 
 const NOTE = "יומן/2026-11-15.md";
 const NOTE_TEXT = [
