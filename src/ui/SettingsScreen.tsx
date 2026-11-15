@@ -34,6 +34,7 @@ const CollabSettings = lazy(() => import("./CollabSettings").then((m) => ({ defa
 const FineTuneSettings = lazy(() => import("./FineTuneSettings").then((m) => ({ default: m.FineTuneSettings })));
 const TrustedKeysSettings = lazy(() => import("./TrustedKeysSettings").then((m) => ({ default: m.TrustedKeysSettings })));
 const OrgSettings = lazy(() => import("./OrgSettings").then((m) => ({ default: m.OrgSettings })));
+const ImageHostsSection = lazy(() => import("./ImageHostsPanel").then((m) => ({ default: m.ImageHostsSection })));
 
 /** A settings file is a few KB; anything far larger isn't one. */
 const IMPORT_MAX_BYTES = 256 * 1024;
@@ -256,6 +257,8 @@ export function SettingsScreen({ tab: initialTab = "general", onClose, onOpenAud
         return <CollabSettings embedded onClose={onClose} />;
       case "fineTune":
         return <FineTuneSettings open embedded onClose={onClose} />;
+      case "privacy":
+        return <ImageHostsSection />;
       case "security":
         return <TrustedKeysSettings open embedded onClose={onClose} />;
       case "org":
