@@ -1,5 +1,5 @@
 {
-  "$comment": "Plan W2.25: the honest comparison. Every claim names its source; `verified` is the date someone read that source and found the claim there, or null while it still has to be checked. `npm run launch:check` refuses a claim without a source, and the docs page (project/compare) is generated from this file, with unverified claims marked. Lumen's own claims cite its docs. Wording is plain and checkable: no 'best', no 'fastest'.",
+  "$comment": "Plan W2.25: the honest comparison. Every claim names its source; `verified` is the date someone read that source and found the claim there, or null while it still has to be checked. `npm run launch:check` refuses a claim without a source, and the docs page (project/compare) is generated from this file, with unverified claims marked. Lumen's own claims cite its docs. Wording is plain and checkable: no 'best', no 'fastest'. Plan W10.B22: a claim whose source has not been checked (verified: null) is NOT published: the page shows that it was not checked, never the claim itself.",
   "products": [
     "lumen",
     "obsidian",
@@ -71,10 +71,10 @@
     {
       "product": "notion",
       "topic": "price",
-      "en": "A free plan and paid plans; see Notion's pricing page.",
-      "he": "תוכנית חינמית ותוכניות בתשלום; ראו את דף המחירים של Notion.",
+      "en": "A free plan, and paid plans: Plus, Business and Enterprise.",
+      "he": "תוכנית חינמית, ותוכניות בתשלום: Plus, ‏Business ו-Enterprise.",
       "source": "https://www.notion.com/pricing",
-      "verified": null
+      "verified": "2026-11-15"
     },
     {
       "product": "gdocs",
@@ -127,10 +127,10 @@
     {
       "product": "obsidian",
       "topic": "offline",
-      "en": "Notes are files in a folder on the device, so they open without a network.",
-      "he": "הפתקים הם קבצים בתיקייה במכשיר, כך שהם נפתחים בלי רשת.",
-      "source": "https://help.obsidian.md/data-storage",
-      "verified": null
+      "en": "Notes are plain-text Markdown files in a vault, a folder on the device's file system, so they open without a network.",
+      "he": "הפתקים הם קובצי Markdown בטקסט פשוט בכספת, תיקייה במערכת הקבצים של המכשיר, כך שהם נפתחים בלי רשת.",
+      "source": "https://obsidian.md/help/data-storage",
+      "verified": "2026-11-15"
     },
     {
       "product": "notion",
@@ -159,18 +159,18 @@
     {
       "product": "obsidian",
       "topic": "markdown",
-      "en": "Notes are Markdown files.",
-      "he": "הפתקים הם קובצי Markdown.",
-      "source": "https://help.obsidian.md/data-storage",
-      "verified": null
+      "en": "Notes are Markdown-formatted plain-text files.",
+      "he": "הפתקים הם קובצי טקסט פשוט בפורמט Markdown.",
+      "source": "https://obsidian.md/help/data-storage",
+      "verified": "2026-11-15"
     },
     {
       "product": "notion",
       "topic": "markdown",
-      "en": "Pages live in Notion's database; they can be exported as Markdown.",
-      "he": "הדפים נשמרים במסד הנתונים של Notion; אפשר לייצא אותם כ-Markdown.",
+      "en": "Any non-database page can be exported as Markdown; a whole workspace as HTML, Markdown or CSV (for databases).",
+      "he": "כל דף שאינו מסד נתונים אפשר לייצא כ-Markdown; סביבת עבודה שלמה כ-HTML, ‏Markdown או CSV (למסדי נתונים).",
       "source": "https://www.notion.com/help/export-your-content",
-      "verified": null
+      "verified": "2026-11-15"
     },
     {
       "product": "gdocs",
@@ -191,10 +191,10 @@
     {
       "product": "obsidian",
       "topic": "source",
-      "en": "The app's source code is not published.",
-      "he": "קוד המקור של האפליקציה לא מפורסם.",
+      "en": "Proprietary: Obsidian reserves the rights to the code in the app. The app is free for every use.",
+      "he": "קנייני: Obsidian שומרת לעצמה את הזכויות על הקוד באפליקציה. האפליקציה חינם לכל שימוש.",
       "source": "https://obsidian.md/license",
-      "verified": null
+      "verified": "2026-11-15"
     },
     {
       "product": "notion",
