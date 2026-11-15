@@ -1,0 +1,19 @@
+{
+  "default.json": {
+    "identifier": "default",
+    "windows": [
+      "capture",
+      "main",
+      "presenter",
+      "w-*"
+    ],
+    "permissions": [
+      "core:default",
+      "core:window:allow-set-focus",
+      "core:window:allow-show",
+      "core:window:allow-unminimize",
+      "deep-link:default",
+      "dialog:default"
+    ]
+  }
+}

@@ -36,3 +36,18 @@ SmartScreen and macOS Gatekeeper show a warning on first launch.
 The window has no general file-system permission. It reaches only the vault
 folder you picked, through Lumen's own commands. No shell, no arbitrary
 HTTP from the native side, and no source maps in the shipped files.
+
+**Checked on every change (plan W11.S18):**
+
+- Every capability file is compared with a reviewed snapshot
+  (`security/tauri-capabilities.snapshot.json`). A capability that grants an
+  updater, shell, file-system, process, HTTP or opener permission to the
+  window fails the check.
+- An **isolation app** (`src-tauri/isolation/`) checks every message from the
+  window before it reaches the native side, as a second wall behind the
+  capability. Only Lumen's own commands pass. A vault path must stay inside
+  the vault, and updater and shell commands never pass.
+
+The isolation app is written and tested. It is turned on with
+`node scripts/tauri-isolation.mjs --enable`, which needs a dependency update
+with network access. That step is still to come.
