@@ -35,7 +35,7 @@ export { builtinSummary, compileFilter } from "./fastFilters";
 
 export type BasesFilter = string | { and: BasesFilter[] } | { or: BasesFilter[] } | { not: BasesFilter[] };
 
-export type BasesViewType = "table" | "cards" | "list" | "kanban" | "map" | "calendar" | "timeline" | "chart";
+export type BasesViewType = "table" | "cards" | "list" | "kanban" | "map" | "calendar" | "timeline" | "chart" | "hebrew-calendar";
 
 export interface BasesSort {
   property: string;
@@ -63,7 +63,7 @@ export interface BasesView {
   image?: string;
   /** Map: the property with the coordinates. */
   coordinates?: string;
-  /** Calendar and timeline (W1.12): the date property (default `note.date`). */
+  /** Calendar, timeline (W1.12) and hebrew-calendar (W12.V5, a Lumen view type): the date property (default `note.date`). */
   date?: string;
   /** Timeline: the end-date property; without it an item is one day long. */
   end?: string;
@@ -602,7 +602,7 @@ export function runBase(base: BaseModel, files: readonly BasesFile[], opts: RunO
   if (view.image) needed.add(view.image);
   if (view.coordinates) needed.add(view.coordinates);
   const kind = viewKind(view);
-  if (kind === "calendar" || kind === "timeline") needed.add(view.date ?? "note.date");
+  if (kind === "calendar" || kind === "timeline" || kind === "hebrew-calendar") needed.add(view.date ?? "note.date");
   if (kind === "timeline" && view.end) needed.add(view.end);
   if (kind === "chart" && view.chart) for (const id of [view.chart.x, view.chart.y, view.chart.series]) if (id) needed.add(id);
 
@@ -740,7 +740,7 @@ export function moveFilter(text: string, from: FilterScope & { index: number }, 
 /** The kind of view to draw: a plugin's view type (unknown here) is drawn as a table. */
 export function viewKind(view: BasesView): BasesViewType {
   const t = view.type.toLowerCase();
-  return t === "cards" || t === "list" || t === "kanban" || t === "map" || t === "calendar" || t === "timeline" || t === "chart" ? t : "table";
+  return t === "cards" || t === "list" || t === "kanban" || t === "map" || t === "calendar" || t === "timeline" || t === "chart" || t === "hebrew-calendar" ? t : "table";
 }
 
 /** A cell value as a point, for the map view: `[lat, lng]`, `"lat, lng"` or `{lat, lng}`. */

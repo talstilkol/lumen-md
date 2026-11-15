@@ -36,6 +36,8 @@ import { EmptyState, learnHow } from "../../ui/EmptyState";
 const DatabaseMapView = lazy(() => import("../DatabaseMapView"));
 // W12.V1: the chart view loads ECharts and its strings only when it is shown.
 const BaseChartView = lazy(() => import("../../viz/BaseChartView"));
+// W12.V5: the Hebrew-calendar view, loaded when shown.
+const BaseHebrewCalendarView = lazy(() => import("../../viz/BaseHebrewCalendarView"));
 
 const muted = "hsl(var(--fg-muted))";
 const danger = "hsl(var(--danger))";
@@ -289,6 +291,11 @@ export default function BasesBlock({ source, meta }: { source: string; meta?: st
         {result.rows.length > 0 && kind === "chart" && (
           <Suspense fallback={<div style={{ padding: 12, fontSize: 12, color: muted }}>{t("db.loading")}</div>}>
             <BaseChartView base={base} result={result} dir={isRTL() ? "rtl" : "ltr"} locale={getLocale()} />
+          </Suspense>
+        )}
+        {result.rows.length > 0 && kind === "hebrew-calendar" && (
+          <Suspense fallback={<div style={{ padding: 12, fontSize: 12, color: muted }}>{t("db.loading")}</div>}>
+            <BaseHebrewCalendarView result={result} dir={isRTL() ? "rtl" : "ltr"} locale={getLocale()} />
           </Suspense>
         )}
         {result.rows.length > 0 && kind === "map" && (
