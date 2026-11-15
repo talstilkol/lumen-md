@@ -118,6 +118,14 @@
 /public/livejs-runner.html               @talstilkol
 /public/runners/                         @talstilkol
 /scripts/build-runners.mjs               @talstilkol
+/src/plugins/sandbox.ts                  @talstilkol
+/src/lib/trustedTypes.ts                 @talstilkol
+/src/playground/runner.ts                @talstilkol
+/src/plugins/liveJsRunner.ts             @talstilkol
+#   CSPs outside /deploy/ and public/_headers (index.html's frame-src must equal EMBED_ORIGINS)
+/index.html                              @talstilkol
+/playground-runner.html                  @talstilkol
+/livejs-runner.html                      @talstilkol
 
 # ── Native permissions and updates ──
 /src-tauri/capabilities/                 @talstilkol
