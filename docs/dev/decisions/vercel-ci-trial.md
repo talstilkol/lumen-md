@@ -8,9 +8,31 @@ Vercel CI went into Beta on all plans on 28.10.2026 (https://vercel.com/blog/int
 
 ## What is set up
 
-- `turbo.json` at the root tags two tasks `ci`: `lint` (`npm run lint`) and `test` (`npm run test`, vitest). Each task's `inputs` decide when the cache can answer.
+- `ci/vercel-ci-trial/turbo.json` tags two tasks `ci`: `lint` (`npm run lint`) and `test` (`npm run test`, vitest). Each task's `inputs` decide when the cache can answer.
+- **It is not at the repo root, on purpose.** Vercel detects Turborepo from a root `turbo.json`. Vercel CI also reads a root `turbo.json` and the `ci` key of a root `vercel.json` (Vercel CI configuration reference, https://vercel.com/docs/ci/configuration). A root file could change how the existing Vercel project (lumen-md.vercel.app) builds every branch. So on `main`, the trains and the lane branches, nothing at the root changes. `vercelCiTrial.test.ts` fails if a root `turbo.json` appears.
 - Nothing is restructured: the repo stays one package. The announcement says single-package repos work; that is part of what the trial checks.
 - `turbo` itself is not in the lockfile yet (the registry is offline in the cloud lane); the owner adds it with the first run.
+
+## How to run the trial (owner)
+
+The trial runs only on a throwaway branch, `trial/vercel-ci`. That branch is never merged, and the root `turbo.json` exists only there.
+
+```bash
+git switch -c trial/vercel-ci origin/main
+cp ci/vercel-ci-trial/turbo.json turbo.json
+npm install --save-dev turbo@^2          # Vercel CI runs the tasks through turbo
+git add turbo.json package.json package-lock.json
+git commit -m "trial: Vercel CI on this branch only [skip ci]"
+git push -u origin trial/vercel-ci
+```
+
+1. Turn Vercel CI on for the project in the Vercel dashboard (Project → Settings → CI, Beta).
+2. Push to `trial/vercel-ci` and wait for the `lint` and `test` runs. The run page and its logs give each task's time in seconds.
+3. Run Buildkite on the same commit, then fill in the table below with:
+   `node scripts/ci/ci-compare.mjs --buildkite build.json --vercel lint=<s>,test=<s> --vercel-cost <$> --needs-restructure <yes|no>`
+4. If the rule keeps it, open a PR that moves `turbo.json` to the root with the Vercel preview build checked. If not, delete the `trial/vercel-ci` branch and `ci/vercel-ci-trial/`.
+
+A preview build of `trial/vercel-ci` on the existing project sees the root `turbo.json`. That preview is part of what the trial checks: `npm run build` must still be the build command. Production (`main`) never sees the file.
 
 ## The comparison
 
@@ -25,7 +47,7 @@ On one commit, both run; `node scripts/ci/ci-compare.mjs` reads Buildkite's buil
 
 ## The rule
 
-Keep Vercel CI as a fallback for these two steps only if all of these hold, otherwise drop it and delete `turbo.json`:
+Keep Vercel CI as a fallback for these two steps only if all of these hold, otherwise drop it and delete `ci/vercel-ci-trial/`:
 
 1. it ran both without restructuring the repo into a Turborepo;
 2. it cost nothing on the current Vercel plan;

@@ -1,17 +1,19 @@
 /**
  * W11.Q12: the Vercel CI (Beta) trial for lint and unit tests, next to
- * Buildkite. turbo.json tags exactly those two tasks; scripts/ci/ci-compare.mjs
+ * Buildkite. ci/vercel-ci-trial/turbo.json tags exactly those two tasks (it is
+ * kept out of the repo root so the existing Vercel project's build is unchanged); scripts/ci/ci-compare.mjs
  * turns one commit's runs into the decision. The Buildkite build below has the
  * shape of Buildkite's REST answer and is written for this test (synthetic
  * times); the real comparison needs both CIs to run (owner).
  * @vitest-environment node
  */
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 // @ts-expect-error — plain .mjs script without type declarations
 import { buildkiteTimes, decide } from "../../scripts/ci/ci-compare.mjs";
 
-const turbo = JSON.parse(readFileSync("turbo.json", "utf8"));
+const TRIAL_TURBO = "ci/vercel-ci-trial/turbo.json";
+const turbo = JSON.parse(readFileSync(TRIAL_TURBO, "utf8"));
 const pkg = JSON.parse(readFileSync("package.json", "utf8"));
 
 const job = (step_key: string, name: string, start: string, end: string, state = "passed") => ({ type: "script", step_key, name, started_at: `2026-11-20T10:${start}Z`, finished_at: `2026-11-20T10:${end}Z`, state });
@@ -29,6 +31,15 @@ const build = {
 };
 
 describe("the Vercel CI trial (W11.Q12)", () => {
+  it("keeps the trial config out of the repo root, so the existing Vercel project's build does not change", () => {
+    // Vercel detects Turborepo from a root turbo.json; the trial must not be picked up by the production project.
+    expect(existsSync("turbo.json")).toBe(false);
+    expect(existsSync(TRIAL_TURBO)).toBe(true);
+    // No root vercel.json either: the project is configured by vercel.ts, which has no `ci` key.
+    expect(existsSync("vercel.json")).toBe(false);
+    expect(readFileSync("vercel.ts", "utf8")).not.toMatch(/\bci\s*:/);
+  });
+
   it("tags exactly lint and the unit tests for Vercel CI, and both are real npm scripts", () => {
     const tagged = Object.entries(turbo.tasks as Record<string, { tags?: string[] }>).filter(([, t]) => t.tags?.includes("ci")).map(([k]) => k);
     expect(tagged).toEqual(["lint", "test"]);
@@ -60,5 +71,9 @@ describe("the Vercel CI trial (W11.Q12)", () => {
     expect(doc).toContain("10 concurrent self-hosted jobs");
     expect(doc).toContain("1.5× slower");
     expect(doc).toMatch(/\| lint \| owed \| owed \|/);
+    // How to run it, on a branch the existing project's deployments ignore.
+    expect(doc).toContain("## How to run the trial");
+    expect(doc).toContain("cp ci/vercel-ci-trial/turbo.json turbo.json");
+    expect(doc).toContain("trial/vercel-ci");
   });
 });
