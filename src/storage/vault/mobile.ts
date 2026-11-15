@@ -286,15 +286,22 @@ export function createMobileBackend(fs: MobileFs, opts: { id?: string; available
       const r = checkRename(from, to);
       if (!r) return;
       const [a, b] = [join(r.src), join(r.dst)];
-      await settled([...saving.keys()].filter((k) => k === a || k.startsWith(a + "/") || k === b || k.startsWith(b + "/")));
-      if (!(await statRecovered(a))) throw new VaultNotFoundError(from);
-      const target = await fs.stat(b);
-      if (target && !o.overwrite) throw new WorkspaceConflictError(to);
-      await checkParents(r.dst, to);
-      const parent = join(r.dst.slice(0, -1));
-      if (parent && !(await fs.stat(parent))) await fs.mkdir(parent);
-      if (target) await fs.remove(b);
-      await fs.rename(a, b);
+      await settled([...saving.keys()].filter((k) => k.startsWith(a + "/") || k.startsWith(b + "/")));
+      // Z6-L3: in the chain of both paths (ascending), so a rename never lands between a writeIf's check and its
+      // save; inside it, the source's own chain is not waited on again (statRecovered(…, false)).
+      const [first, second] = [a, b].sort();
+      await inChain(first, () =>
+        inChain(second, async () => {
+          if (!(await statRecovered(a, false))) throw new VaultNotFoundError(from);
+          const target = await fs.stat(b);
+          if (target && !o.overwrite) throw new WorkspaceConflictError(to);
+          await checkParents(r.dst, to);
+          const parent = join(r.dst.slice(0, -1));
+          if (parent && !(await fs.stat(parent))) await fs.mkdir(parent);
+          if (target) await fs.remove(b);
+          await fs.rename(a, b);
+        }),
+      );
       emit({ type: "rename", path: b, from: a });
     },
 
