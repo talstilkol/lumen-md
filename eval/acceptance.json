@@ -1,0 +1,6 @@
+{
+  "about": "Plan 7.9 / W10.E12: what a real eval run must be for scripts/eval/ingest.mjs to take it, and when a model becomes an agent's default. A run against the fake server (kind \"wiring\") is never taken. An agent's default is the best model whose pass rate on that agent's cases is at least `threshold`, over at least `minCases` cases, with an open licence (class \"allowed\" in models/registry.json).",
+  "threshold": 0.8,
+  "minCases": 1,
+  "agents": {}
+}
