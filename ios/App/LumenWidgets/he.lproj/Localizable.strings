@@ -3,3 +3,8 @@
 "widget.search" = "חיפוש";
 "widget.quickNote" = "פתק מהיר";
 "widget.daily" = "היום";
+"control.capture" = "לכידה לתיבה";
+"control.capture.description" = "פותח תיבה להקלדת שורה לתיבת הלכידה ב-Lumen.";
+"lock.capture" = "לכידה";
+"lock.capture.hint" = "לתיבה ב-Lumen";
+"lock.capture.description" = "הקלדת שורה לתיבה ממסך הנעילה.";

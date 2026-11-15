@@ -6,3 +6,5 @@
 "Search ${applicationName}" = "חפש ב-${applicationName}";
 "Today's ${applicationName} note" = "הפתק של היום ב-${applicationName}";
 "Open today in ${applicationName}" = "פתח את היום ב-${applicationName}";
+"Capture to ${applicationName}" = "לכידה ב-${applicationName}";
+"Capture to my ${applicationName} inbox" = "לכידה לתיבה שלי ב-${applicationName}";

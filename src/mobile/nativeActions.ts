@@ -20,16 +20,19 @@
  *    A widget adds `t=<ms since epoch>` (the tap time), so the app can
  *    log how long the tap took to become a cursor (target: under 1 s).
  *
- * 2. **The pending-captures queue**: "Add to inbox" in Shortcuts / Siri
- *    runs without opening the app (the note lives in the WebView's storage,
- *    which a background intent can't reach), so the intent queues the text
- *    natively and the app adds it to the inbox the next time it starts or
- *    comes to the front, each entry with the time it was captured.
+ * 2. **The capture queue** (src/mobile/captureQueue.ts): "Add to inbox" in
+ *    Shortcuts / Siri, the native capture sheet (Control Center, Lock
+ *    Screen), the share sheet and Android's Quick Settings tile all run
+ *    without the WebView (the notes live in its storage, which they can't
+ *    reach), so they queue the capture natively, with its source. The app
+ *    adds it to the inbox the next time it starts or comes to the front, each
+ *    entry with the time it was captured, journaled so a kill loses nothing.
  *
  * The native code (ios/App/App/LumenNativePlugin.swift,
  * android/…/LumenNativePlugin.java) only forwards links and hands over the
  * queue; every decision is here, and tested.
  */
+import type { QueuedCapture } from "./captureQueue";
 
 export type NativeAction =
   | { kind: "capture"; mode: "text" | "voice"; text: string | null }
@@ -133,6 +136,8 @@ export function tapLatency(tappedAt: number | null, readyAt: number): number | n
 export interface NativeHandlers {
   capture: (mode: "text" | "voice", tappedAt: number | null) => void;
   captureText: (text: string, when: Date) => Promise<unknown>;
+  /** A shared image or PDF from the queue; without it, files wait in the queue. */
+  captureFile?: (c: QueuedCapture, bytes: Uint8Array, when: Date) => Promise<unknown>;
   newNote: () => void;
   search: (query: string) => void;
   daily: () => void;
@@ -156,6 +161,8 @@ export interface LumenNativePlugin {
   pendingCaptures(): Promise<{ items: unknown }>;
   /** Forget the captures that were added. */
   removeCaptures(o: { ids: string[] }): Promise<void>;
+  /** A queued image or PDF, base64 (plan W11.P9). */
+  captureFile?(o: { file: string }): Promise<{ data: string }>;
   addListener(event: "url" | "resume", fn: (e: { url?: string }) => void): Promise<{ remove: () => Promise<void> }>;
 }
 
@@ -169,16 +176,25 @@ export async function initNativeBridge(h: NativeHandlers, plugin?: LumenNativePl
     const parsed = url ? parseNativeUrl(url) : null;
     if (parsed) applyAction(parsed, h);
   };
-  const drain = async () => {
+  const { drainQueue, fromBase64 } = await import("./captureQueue");
+  let draining: Promise<unknown> = Promise.resolve();
+  const drainOnce = async () => {
     try {
-      const { items } = await p.pendingCaptures();
-      const ids = await drainPending(items, h.captureText);
-      if (ids.length) await p.removeCaptures({ ids });
+      await drainQueue(
+        {
+          list: async () => (await p.pendingCaptures()).items,
+          read: p.captureFile ? async (file) => fromBase64((await p.captureFile!({ file })).data) : undefined,
+          remove: (ids) => p.removeCaptures({ ids }),
+        },
+        { text: (text, when) => h.captureText(text, when), file: h.captureFile },
+      );
     } catch {
       // why: the pending captures stay with the native side and are drained on the next resume
       /* the plugin is missing in this build: nothing queued */
     }
   };
+  // One drain at a time: a resume during a drain must not add the same capture twice.
+  const drain = () => (draining = draining.then(drainOnce));
   const subs = await Promise.all([p.addListener("url", (e) => onUrl(e.url)), p.addListener("resume", () => void drain())]).catch(() => []);
   try {
     onUrl((await p.getLaunchUrl()).url);
