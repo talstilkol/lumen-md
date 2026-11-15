@@ -14,7 +14,8 @@ import { join, relative } from "node:path";
 
 const ROOT = join(__dirname, "..", "..");
 const read = (p: string) => readFileSync(join(ROOT, p), "utf8");
-const app = read("src/App.tsx");
+// App.tsx and its lazy panel table, src/appPanels.ts (split from App.tsx for the 800-line limit, W10.E31).
+const app = read("src/App.tsx") + "\n" + read("src/appPanels.ts");
 
 /** Hidden at start: shown by a command, a shortcut or a toggle that is off by default. */
 const HIDDEN = {

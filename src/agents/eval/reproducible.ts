@@ -23,5 +23,5 @@ try {
     writeFileSync(join(outDir, "ollama-run.json"), JSON.stringify({ ollama: v, url, draft_num_predict: 0, at: new Date().toISOString() }, null, 2) + "\n");
   }
 } catch {
-  /* no Ollama: the evals that need it say so themselves */
+  /* why: no Ollama: the evals that need it say so themselves */
 }

@@ -22,6 +22,6 @@ export function setAttachmentPolicy(next: AttachmentPolicy): void {
     if (next === "ask") localStorage.removeItem(KEY);
     else localStorage.setItem(KEY, next);
   } catch {
-    /* private mode: asks again next time */
+    /* why: private mode: asks again next time */
   }
 }

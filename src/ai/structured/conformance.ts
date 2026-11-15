@@ -153,7 +153,7 @@ export async function scoreShortTasks(engine: StructuredEngine, inputs: Input[] 
         const c = checkStructured(await engine.generate({ system: s.instruction, prompt: input.text, schema: s.schema, temperature: 0 }), s.schema);
         if (c.ok) sum += s.score(c.value, input.want[s.id]);
       } catch {
-        /* a failed call scores 0 */
+        /* why: a failed call scores 0 */
       }
     }
   }

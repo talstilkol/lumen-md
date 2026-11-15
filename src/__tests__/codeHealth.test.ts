@@ -59,8 +59,9 @@ function shippedCode(n: ts.Node): string | null {
     }
     code = scripts;
   }
-  // `catch` alone is often prose ("we catch it later"); code has a `try` or a `.catch(` call.
-  return /\btry\b/.test(code) || /\.catch\s*\(/.test(code) ? code : null;
+  // `catch` alone is often prose ("we catch it later"), and so is `try` (a BIP-39 word list has both,
+  // W11.S9's bip39.ts); code has a `try {` block or a `.catch(` call.
+  return /\btry\s*\{/.test(code) || /\.catch\s*\(/.test(code) ? code : null;
 }
 
 /**
@@ -120,6 +121,8 @@ describe("code health (12.1)", () => {
     expect(swallowedIn(why, at)).toEqual([]);
     // Prose that mentions catch is not code.
     expect(swallowedIn("export const T = `we catch it later`;\n", at)).toEqual([]);
+    // Nor is a word list that has both words (bip39.ts): no `try {` block, no `.catch(` call.
+    expect(swallowedIn("export const W = `cat catalog catch\ncategory try tube`;\n", at)).toEqual([]);
   });
 
   describe(`no production file is longer than ${MAX_LINES} lines (W6.25; W10.E31: no baseline)`, () => {

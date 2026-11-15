@@ -9,32 +9,13 @@ import { Outline } from "./ui/Outline";
 import { StatusBar } from "./ui/StatusBar";
 import { ScrollProgress } from "./ui/ScrollProgress";
 import { SearchReplace } from "./ui/SearchReplace";
-const LocalGraphPanel = lazy(() => import("./ui/LocalGraphPanel").then(m => ({ default: m.LocalGraphPanel })));
-// Canvas on Excalidraw (plan 4.19; γ.2 had it on tldraw). The legacy custom
-// canvas (CanvasWhiteboard.tsx) was removed in W10.E27 (plan 12.2).
-const CanvasWhiteboard = lazy(() => import("./ui/CanvasExcalidraw").then(m => ({ default: m.CanvasExcalidraw })));
-const PluginGallery = lazy(() => import("./ui/PluginGallery").then(m => ({ default: m.PluginGallery })));
-const TemplateGallery = lazy(() => import("./ui/TemplateGallery").then(m => ({ default: m.TemplateGallery })));
-const AuditLog = lazy(() => import("./ui/AuditLog").then(m => ({ default: m.AuditLog })));
-// One settings screen (plan 11.1); the theme, AI, training, trusted-key and
-// organization dialogs are its tabs.
-const SettingsScreen = lazy(() => import("./ui/SettingsScreen").then(m => ({ default: m.SettingsScreen })));
-const ReadingSettings = lazy(() => import("./ui/ReadingSettings").then(m => ({ default: m.ReadingSettings })));
-const PrivacyLedgerPanel = lazy(() => import("./ui/PrivacyLedgerPanel").then(m => ({ default: m.PrivacyLedgerPanel })));
-const TrashPanel = lazy(() => import("./ui/TrashPanel").then(m => ({ default: m.TrashPanel })));
-// Properties editor (plan 4.9) — lazy: the yaml-editing code is not in the startup bundle.
-const PropertiesPanel = lazy(() => import("./ui/PropertiesPanel").then(m => ({ default: m.PropertiesPanel })));
-// Quick capture to inbox.md (plan 4.16): its own chunk, loaded on first open.
-const QuickCapture = lazy(() => import("./ui/QuickCapture").then(m => ({ default: m.QuickCapture })));
-const ImageHostsPanel = lazy(() => import("./ui/ImageHostsPanel").then(m => ({ default: m.ImageHostsPanel })));
-const AiDoctorPanel = lazy(() => import("./ui/AiDoctorPanel").then(m => ({ default: m.AiDoctorPanel })));
-const AgentReviewPanel = lazy(() => import("./ui/AgentReviewPanel").then(m => ({ default: m.AgentReviewPanel })));
+import { LocalGraphPanel, CanvasWhiteboard, PluginGallery, TemplateGallery, AuditLog, SettingsScreen, ReadingSettings, PrivacyLedgerPanel, TrashPanel, PropertiesPanel, QuickCapture, ImageHostsPanel, AiDoctorPanel, AgentReviewPanel } from "./appPanels";
 import { FIRST_RUN_SOURCES, OPEN_IMPORT_EVENT, importFromSearch, readOpenImport, type OpenImportDetail } from "./onboarding/importEvent";
 const ImportWizard = lazy(() => import("./storage/import/ImportWizard").then(m => ({ default: m.ImportWizard })));
 const VersionHistory = lazy(() => import("./ui/VersionHistory").then(m => ({ default: m.VersionHistory })));
 const MarkdownTableEditor = lazy(() => import("./ui/MarkdownTableEditor").then(m => ({ default: m.MarkdownTableEditor })));
 // PDF reader (plan 4.14): pdf.js and the reader load only when a PDF is opened.
-const PdfReader = lazy(() => import("./pdf/PdfReader").then(m => ({ default: m.PdfReaderOverlay })));
+const PdfReader = lazy(() => import("./pdf/PdfReaderOverlay").then(m => ({ default: m.PdfReaderOverlay })));
 const EpubReader = lazy(() => import("./epub/EpubReader").then(m => ({ default: m.EpubReaderOverlay })));
 // W10.E19 (8.2): every dialog and panel that is hidden at start loads on first open.
 const CommandPalette = lazy(() => import("./ui/CommandPalette").then((m) => ({ default: m.CommandPalette })));

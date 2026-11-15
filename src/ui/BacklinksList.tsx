@@ -38,7 +38,7 @@ export default function BacklinksList({ hits, onOpen }: Props) {
     try {
       localStorage.setItem(SORT_KEY, next);
     } catch {
-      /* private mode: this session only */
+      /* why: private mode: this session only */
     }
   };
   const toggle = (path: string) =>

@@ -36,7 +36,7 @@ export function saveGate(r: GateResult, store: Store | null = ls()): void {
   try {
     store?.setItem(GATE_KEY, JSON.stringify(r));
   } catch {
-    /* blocked storage: the gate stays closed */
+    /* why: blocked storage: the gate stays closed */
   }
 }
 

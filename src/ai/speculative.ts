@@ -78,7 +78,7 @@ export function saveMeasurement(m: SpeculativeMeasurement, store: Store | null =
   try {
     store?.setItem(STORE_KEY, JSON.stringify({ ...readMeasurements(store), [m.model]: m }));
   } catch {
-    /* blocked storage: measured again next time */
+    /* why: blocked storage: measured again next time */
   }
 }
 

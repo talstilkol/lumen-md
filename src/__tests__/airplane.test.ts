@@ -298,7 +298,9 @@ describe("certificate", () => {
   it("every certificate the monitor exports is signed with the device's minisign key, and a changed byte is rejected (W10.C11)", async () => {
     enableAirplaneMode();
     const from = Date.now();
-    await fake.win.fetch("https://evil.example.com/a").catch(() => {});
+    await fake.win.fetch("https://evil.example.com/a").catch(() => {
+      // why: the request is blocked by design; the certificate reads the attempt log
+    });
     const cert = buildCertificate(egressAttempts(), from, Date.now() + 1, "test");
     const key = await newSigningKey();
     const file = await signedCertificateFile(cert, key);

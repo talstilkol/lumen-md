@@ -116,7 +116,7 @@ describe("the same schema on three engines (5 schemas × 50 inputs)", () => {
             const r = await generateStructured({ system: s.instruction, prompt: input.text, schema: s.schema }, { engines: [make()], builtinAllowed: () => true, task: s.short ? "short" : "general" });
             if (checkStructured(JSON.stringify(r.value), s.schema).ok) valid++;
           } catch {
-            /* counted as invalid */
+            /* why: counted as invalid */
           }
         }
       }
