@@ -1,4 +1,5 @@
 import { test, expect, type Page, type TestInfo } from "@playwright/test";
+import { vaultOrSkip } from "./_opfs";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import {
