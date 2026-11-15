@@ -8,7 +8,6 @@ import { writeWorkspaceFile } from "../../storage/workspace";
 import { csvToNotes, pinnedProperties, resultToCsv } from "./viewsData";
 import { showAiToast } from "../../ui/AiToast";
 import { t } from "../../i18n";
-import "./basesBlockStrings";
 import { explainError } from "../../lib/userError";
 
 export function downloadCsv(result: BaseResult, name: string) {
