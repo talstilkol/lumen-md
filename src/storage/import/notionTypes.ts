@@ -93,7 +93,15 @@ const linkTarget = (s: string) => s.replace(/^\[\[|\]\]$/g, "").split("|")[0].sp
  * imported database (to find a relation's target type); `typeOfFolder` maps
  * a database folder to its type id.
  */
-export function databaseType(db: NotionDbInput, id: string, ctx: { typeOfRow: (name: string) => string | null }): DatabaseTypeResult {
+export function databaseType(
+  db: NotionDbInput,
+  id: string,
+  ctx: {
+    typeOfRow?: (name: string) => string | null;
+    /** Review Z7-L4: every type that has a row of this name (two databases can share one); preferred over typeOfRow. */
+    typesOfRow?: (name: string) => readonly string[];
+  },
+): DatabaseTypeResult {
   const report: ColumnReport[] = [];
   const fields: Record<string, unknown> = {};
   const computed = new Set(db.computed ?? []);
@@ -137,8 +145,14 @@ export function databaseType(db: NotionDbInput, id: string, ctx: { typeOfRow: (n
       return;
     }
     if (values.every(isLinkList)) {
-      const targets = new Set((values as string[][]).flat().map(linkTarget).map((n) => ctx.typeOfRow(n)));
-      const to = targets.size === 1 ? [...targets][0] : null;
+      const names = (values as string[][]).flat().map(linkTarget);
+      // Z7-L4: the column's target is the one database that has a row for every link (the intersection), so a name
+      // that two databases share does not decide it alone; with no single one, the links stay a list.
+      const candidates = names.map((n) => new Set(ctx.typesOfRow ? ctx.typesOfRow(n) : [ctx.typeOfRow?.(n) ?? null].filter((x): x is string => !!x)));
+      const outside = candidates.some((c) => c.size === 0);
+      const common = outside ? [] : [...(candidates[0] ?? [])].filter((t) => candidates.every((c) => c.has(t)));
+      const to = common.length === 1 ? common[0] : null;
+      const targets = new Set<string | null>(outside ? [null] : common);
       if (to) {
         fields[name] = { type: "relation", to, multiple: true };
         report.push({ column: col, status: "kept", kind: "relation", note: `relation → ${to}` });

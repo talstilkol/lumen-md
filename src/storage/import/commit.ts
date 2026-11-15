@@ -13,12 +13,12 @@
  * the folder since, the folder goes to the trash instead (nothing of
  * theirs is deleted for good).
  */
-import { createWorkspaceFolder, deleteWorkspaceFile, listWorkspace, listWorkspaceTree, readWorkspaceBlob, workspaceHasEntry, writeWorkspaceBlob, writeWorkspaceFile } from "../workspace";
+import { createWorkspaceFolder, deleteWorkspaceFile, listWorkspace, listWorkspaceFolder, listWorkspaceTree, readWorkspaceBlob, workspaceHasEntry, writeWorkspaceBlob, writeWorkspaceFile } from "../workspace";
 import { moveToTrash } from "../trash";
 import { convertExport, detectImportSource, expandArchives, stripWrapper } from "./convert";
 import { linkStats } from "./links";
 import { safeName } from "./names";
-import { typeFilePath } from "../../types/typeSchema";
+import { TYPES_DIR, typeFilePath } from "../../types/typeSchema";
 import type { ConvertedVault, ImportReport, ImportSourceId, LinkStats } from "./types";
 
 export const IMPORT_ROOT = "Imported";
@@ -81,9 +81,23 @@ export async function prepareImport(picked: Map<string, Uint8Array>, name: strin
   const folder = await importFolderFor(name);
   // Apple Notes' own database (W10.E48) needs an async read (gzip'd bodies); its HTML exports go the usual way.
   const noteStore = chosen === "appleNotes" && [...opened.keys()].some((p) => /(^|\/)NoteStore\.sqlite$/i.test(p));
-  const vault = noteStore ? await (await import("./appleNotes")).convertAppleNotesStore(opened) : convertExport(chosen, opened, folder, opts);
+  // Review Z7-L3: the vault's own type ids, so an imported database never takes one (and its schema) over.
+  const existingTypeIds = opts.notionTypes ? (await listWorkspaceFolder(TYPES_DIR)).filter((n) => n.endsWith(".yaml")).map((n) => n.slice(0, -".yaml".length)) : [];
+  const vault = noteStore ? await (await import("./appleNotes")).convertAppleNotesStore(opened) : convertExport(chosen, opened, folder, { ...opts, existingTypeIds });
   for (const p of junk) vault.skipped.push({ path: p, reason: "appFolder" });
   return { source: chosen, detected, name, folder, vault, links: linkStats(vault) };
+}
+
+/** `text` with the front-matter lines `type: <id>` for the ids in `ids` removed (Z7-L3). */
+export function withoutTypes(text: string, ids: ReadonlySet<string>): string {
+  return text.replace(/^(\uFEFF?---\r?\n)([\s\S]*?)(\r?\n---[ \t]*(?:\r?\n|$))/, (_m, open: string, body: string, close: string) => {
+    const eol = open.endsWith("\r\n") ? "\r\n" : "\n";
+    const kept = body.split(/\r?\n/).filter((l) => {
+      const m = /^type:\s*(["']?)([^"'\s]+)\1\s*$/.exec(l);
+      return !(m && ids.has(m[2]));
+    });
+    return `${open}${kept.join(eol)}${close}`;
+  });
 }
 
 /** Write a prepared import into its folder. */
@@ -94,8 +108,13 @@ export async function commitImport(prep: PreparedImport, now = Date.now()): Prom
   await createWorkspaceFolder(folder);
   const digests: Record<string, string> = {};
   const undo: UndoRecord = { folder, createdRoot, digests, at: now };
+  // Z7-L3: a type file of the same id that appeared after the import was prepared is kept, and the rows are then
+  // not marked with that type (its schema is not theirs). Prepared imports already avoid the vault's own ids.
+  const clash = new Set<string>();
+  for (const [id] of prep.vault.types ?? []) if (await workspaceHasEntry(typeFilePath(id))) clash.add(id);
   try {
-    for (const [path, text] of prep.vault.notes) {
+    for (const [path, note] of prep.vault.notes) {
+      const text = clash.size ? withoutTypes(note, clash) : note;
       await writeWorkspaceFile(`${folder}/${path}`, text);
       digests[path] = await sha256(text);
     }

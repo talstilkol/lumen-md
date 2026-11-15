@@ -176,7 +176,7 @@ describe("helpers", () => {
 });
 
 describe("writing the types into the vault, and undo (fake OPFS)", () => {
-  it("types go to .lumen/types/, an existing one is left as it is, undo takes the new ones back to the same vault hash", async () => {
+  it("types go to .lumen/types/, an existing one is left as it is (the import takes the next id), undo takes the new ones back to the same vault hash", async () => {
     const { installFakeOpfs } = await import("./helpers/fakeOpfs");
     installFakeOpfs();
     localStorage.clear();
@@ -195,8 +195,9 @@ describe("writing the types into the vault, and undo (fake OPFS)", () => {
     const { report, undo } = await commitImport(prep);
     expect(await workspaceHasEntry(".lumen/types/tasks.yaml")).toBe(true);
     expect(await readWorkspaceFile(".lumen/types/projects.yaml")).toBe("label: { en: Mine }\nfields: {}\n");
-    expect(report.warnings).toContainEqual({ path: ".lumen/types/projects.yaml", reason: "typeExists", detail: "projects" });
-    expect(Object.keys(undo.typeFiles ?? {})).toEqual([".lumen/types/tasks.yaml"]);
+    // Review Z7-L3: the vault's own `projects` is taken, so the database is `projects-2` (its rows too), not skipped.
+    expect(report.warnings.filter((w) => w.reason === "typeExists")).toEqual([]);
+    expect(Object.keys(undo.typeFiles ?? {}).sort()).toEqual([".lumen/types/projects-2.yaml", ".lumen/types/tasks.yaml"]);
     expect(reportMarkdown(report)).toContain("### Tasks → `tasks`");
     expect(await undoImport(undo)).toBe("removed");
     expect(await hash()).toBe(before);
