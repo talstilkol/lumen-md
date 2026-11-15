@@ -135,6 +135,7 @@ export default defineConfig({
             { label: "Daily notes and the Hebrew calendar", slug: "workspace/hebrew-calendar", translations: { he: "פתק יומי ולוח עברי" } },
             { label: "Very large vaults (100,000 notes)", slug: "workspace/vault-100k", translations: { he: "כספות גדולות מאוד" } },
             { label: "Graph and local graph", slug: "workspace/graph", translations: { he: "גרף וגרף מקומי" } },
+            { label: "Entity graph", slug: "workspace/entity-graph", translations: { he: "גרף ישויות" } },
             { label: "Note cards and image export", slug: "workspace/canvas-cards", translations: { he: "כרטיסי פתקים וייצוא תמונה" } },
             { label: "Backups to a second drive", slug: "workspace/backups", translations: { he: "גיבוי לכונן שני" } },
             { label: "Diagrams on the canvas (Mermaid, draw me)", slug: "workspace/canvas-diagrams", translations: { he: "תרשימים בקנבס (Mermaid,‏ צייר לי)" } },
