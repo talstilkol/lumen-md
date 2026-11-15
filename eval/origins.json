@@ -1,0 +1,307 @@
+{
+ "$comment": "Plan W10.B13 (audit W1.3, W1.4, W1.11, W1.14, W1.26, W2.2, W8.2, 4.15, W5.5, W2.10): the origin of every golden-set part and every test fixture. synthetic = written or generated here (including real text with errors we injected); real = data someone else made, used as published; derived-from-docs = real documents with items (questions, summaries, layouts) written here. Unknown provenance counts as synthetic. src/__tests__/origins.test.ts keeps this complete; scripts/golden/origin-claims.mjs flags plan statuses that call a synthetic set real.",
+ "golden": {
+  "asr-he/fleurs": {
+   "origin": "real",
+   "why": "FLEURS he_il test clips, as published"
+  },
+  "asr-he/common-voice": {
+   "origin": "real",
+   "why": "Common Voice he test clips, as published"
+  },
+  "asr-he/owner": {
+   "origin": "real",
+   "why": "the owner's own recordings (not committed)"
+  },
+  "bidi/lines": {
+   "origin": "synthetic",
+   "why": "written for this set"
+  },
+  "caption/xm3600": {
+   "origin": "real",
+   "why": "Crossmodal-3600 images and their human captions"
+  },
+  "caption/owner": {
+   "origin": "real",
+   "why": "the owner's descriptions of real images (not committed)"
+  },
+  "citations/records": {
+   "origin": "synthetic",
+   "why": "written for this set"
+  },
+  "clipper/pages": {
+   "origin": "derived-from-docs",
+   "why": "public-domain text (Moby-Dick) and pages written here, wrapped in layouts written for this set"
+  },
+  "data-analysis/rose": {
+   "origin": "derived-from-docs",
+   "why": "a real dataset (Nightingale's rose); the questions come from templates written for this set"
+  },
+  "formulas/row": {
+   "origin": "synthetic",
+   "why": "written for this set"
+  },
+  "hebrew-dates/dates": {
+   "origin": "synthetic",
+   "why": "written for this set"
+  },
+  "image-search/xm3600": {
+   "origin": "real",
+   "why": "Crossmodal-3600 images with their human captions as queries"
+  },
+  "injection/deepset": {
+   "origin": "real",
+   "why": "deepset/prompt-injections test split"
+  },
+  "injection/gandalf": {
+   "origin": "real",
+   "why": "Lakera/gandalf_ignore_instructions test split"
+  },
+  "injection/bipia": {
+   "origin": "real",
+   "why": "BIPIA benchmark"
+  },
+  "injection/hebrew": {
+   "origin": "real",
+   "why": "the owner's Hebrew attacks (not committed)"
+  },
+  "langid/tatoeba": {
+   "origin": "real",
+   "why": "Tatoeba sentences"
+  },
+  "langid/hard": {
+   "origin": "synthetic",
+   "why": "written for this set"
+  },
+  "meetings/owner": {
+   "origin": "real",
+   "why": "the owner's own meeting recordings (not committed)"
+  },
+  "mt-he-en/ntrex": {
+   "origin": "real",
+   "why": "NTREX-128 human translations"
+  },
+  "mt-he-en/tatoeba": {
+   "origin": "real",
+   "why": "Tatoeba sentence pairs"
+  },
+  "mt-he-en/flores": {
+   "origin": "real",
+   "why": "FLORES+ devtest"
+  },
+  "ner-pii/iahltwiki": {
+   "origin": "real",
+   "why": "UD_Hebrew-IAHLTwiki human annotations"
+  },
+  "ner-pii/synthetic": {
+   "origin": "synthetic",
+   "why": "generated with Faker"
+  },
+  "nikud/benyehuda": {
+   "origin": "real",
+   "why": "pointed public-domain texts from Project Ben-Yehuda"
+  },
+  "nikud/nakdimon": {
+   "origin": "real",
+   "why": "Nakdimon's own test set"
+  },
+  "ocr-he/lines": {
+   "origin": "synthetic",
+   "why": "line images rendered by the builder from fonts; real text"
+  },
+  "ocr-he/pages": {
+   "origin": "synthetic",
+   "why": "synthetic pages rendered by the builder"
+  },
+  "ocr-he/owner": {
+   "origin": "real",
+   "why": "the owner's photographed pages (not committed)"
+  },
+  "pdf-qa/docs": {
+   "origin": "derived-from-docs",
+   "why": "public-domain documents rendered to PDF; 30 questions written for this set"
+  },
+  "retrieval/heq": {
+   "origin": "real",
+   "why": "HeQ questions and paragraphs, human-written"
+  },
+  "retrieval/owner": {
+   "origin": "real",
+   "why": "the owner's own queries (not committed)"
+  },
+  "retrieval/belebele": {
+   "origin": "real",
+   "why": "Belebele heb_Hebr + eng_Latn"
+  },
+  "spell-en/moby": {
+   "origin": "synthetic",
+   "why": "real sentences with synthetic non-word errors injected"
+  },
+  "summarize/sotu": {
+   "origin": "derived-from-docs",
+   "why": "real State of the Union openings; reference summaries written for this set"
+  },
+  "typos-he/synthetic": {
+   "origin": "synthetic",
+   "why": "real NTREX sentences with synthetic errors injected"
+  },
+  "typos-he/wikipedia": {
+   "origin": "real",
+   "why": "real Hebrew Wikipedia spelling corrections"
+  },
+  "unlinked/notes": {
+   "origin": "synthetic",
+   "why": "written for this set"
+  }
+ },
+ "fixtures": {
+  "academic": {
+   "origin": "synthetic",
+   "why": "written for the tests"
+  },
+  "bases": {
+   "origin": "synthetic",
+   "why": "written for the tests"
+  },
+  "benyehuda": {
+   "origin": "real",
+   "why": "projectbenyehuda/public_domain_dump at a pinned commit (SOURCES.md)"
+  },
+  "bidi-marks-lines.json": {
+   "origin": "synthetic",
+   "why": "written for the tests"
+  },
+  "chats": {
+   "origin": "synthetic",
+   "why": "written for the tests (WhatsApp-shaped)"
+  },
+  "ci-doctor": {
+   "origin": "synthetic",
+   "why": "provenance not recorded: treated as synthetic"
+  },
+  "citation-styles.json": {
+   "origin": "synthetic",
+   "why": "written for the tests"
+  },
+  "datagov": {
+   "origin": "synthetic",
+   "why": "provenance not recorded: treated as synthetic"
+  },
+  "golden": {
+   "origin": "synthetic",
+   "why": "written for the tests"
+  },
+  "goldenBidiLines.ts": {
+   "origin": "synthetic",
+   "why": "written for the tests"
+  },
+  "gps-photos.json": {
+   "origin": "synthetic",
+   "why": "written for the tests"
+  },
+  "highlight-import": {
+   "origin": "synthetic",
+   "why": "written for the tests (Kobo / Kindle / Readwise-shaped)"
+  },
+  "import": {
+   "origin": "synthetic",
+   "why": "written for the tests"
+  },
+  "injection": {
+   "origin": "derived-from-docs",
+   "why": "cases written for plan 2.7 after public injection datasets (SOURCES.md); not the official set"
+  },
+  "ink": {
+   "origin": "synthetic",
+   "why": "written for the tests"
+  },
+  "json-canvas": {
+   "origin": "real",
+   "why": "the JSON Canvas sample, vendored with its upstream licence"
+  },
+  "knesset": {
+   "origin": "synthetic",
+   "why": "recorded fixtures written from the documented schema (SOURCES.md); real law titles"
+  },
+  "latex": {
+   "origin": "synthetic",
+   "why": "written for the tests"
+  },
+  "ledger-gaps-baseline.json": {
+   "origin": "synthetic",
+   "why": "generated by the repo"
+  },
+  "licenses": {
+   "origin": "synthetic",
+   "why": "written for the tests"
+  },
+  "math-he": {
+   "origin": "synthetic",
+   "why": "written for the tests"
+  },
+  "md-spec": {
+   "origin": "real",
+   "why": "the official CommonMark and GFM spec test files, vendored unmodified"
+  },
+  "mermaidGolden.ts": {
+   "origin": "synthetic",
+   "why": "written for the tests"
+  },
+  "obsidian": {
+   "origin": "synthetic",
+   "why": "written for the tests (Obsidian syntax), not from a real vault"
+  },
+  "obsidian-corpus": {
+   "origin": "real",
+   "why": "public Obsidian vaults, byte-for-byte at pinned commits (manifest.json)"
+  },
+  "paste": {
+   "origin": "synthetic",
+   "why": "written for the tests (Word / Docs-shaped HTML)"
+  },
+  "pdf-paste": {
+   "origin": "synthetic",
+   "why": "written for the tests"
+  },
+  "print": {
+   "origin": "synthetic",
+   "why": "written for the tests"
+  },
+  "real-corpus": {
+   "origin": "synthetic",
+   "why": "despite the name: 7 of 8 formats are ours (render.py, notion_wa.py, LibreOffice on our documents); only evernote/ is third-party (manifest.json origin per format)"
+  },
+  "relatedGold.ts": {
+   "origin": "synthetic",
+   "why": "generated: pairs built to share keywords"
+  },
+  "renderDocs.ts": {
+   "origin": "derived-from-docs",
+   "why": "the repo's own docs and templates plus synthetic cases"
+  },
+  "scanned-he": {
+   "origin": "synthetic",
+   "why": "rendered scans of generated pages (manifest.json)"
+  },
+  "sefaria": {
+   "origin": "synthetic",
+   "why": "provenance not recorded: treated as synthetic"
+  },
+  "slideNotes.ts": {
+   "origin": "synthetic",
+   "why": "written for the tests"
+  },
+  "stack": {
+   "origin": "synthetic",
+   "why": "written for the tests"
+  },
+  "tldrawCanvases.ts": {
+   "origin": "synthetic",
+   "why": "written for the tests"
+  },
+  "zotero-web": {
+   "origin": "synthetic",
+   "why": "shaped like the documented Web API responses (SOURCES.md), not captured"
+  }
+ }
+}
