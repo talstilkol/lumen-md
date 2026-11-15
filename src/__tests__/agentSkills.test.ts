@@ -19,7 +19,8 @@ import { registerExecutor, resetExecutors } from "../agents/executors";
 import { clearStagedChanges, listStagedChanges } from "../agents/staging";
 import { isTrusted, parseSkill, readAllowedTools, skillFingerprint, type Skill } from "../agents/skills/skillFile";
 import { STARTER_SKILL_FILES, starterSkills } from "../agents/skills/starters";
-import { allowedStore, loadSkills, matchSkills, parseSlash, registerPluginSkill, unregisterPluginSkills, type SkillStore } from "../agents/skills/library";
+import { allowedStore, loadSkills, matchSkills, parseSlash, type SkillStore } from "../agents/skills/library";
+import { registerPlugin, unregisterPlugin } from "../plugins/pluginSystem";
 import { resolveSkillTools, runSkill, skillAgent, SkillRefusedError } from "../agents/skills/run";
 import { safeWriteTarget } from "../agents/tools/define";
 
@@ -134,12 +135,25 @@ describe("the library and /", () => {
   it("marks a shared vault's and a plugin's skills untrusted; a plugin never replaces a vault skill", async () => {
     const shared = await loadSkills(store({ ".lumen/skills/mine/SKILL.md": SKILL("mine", "") }), { sharedFrom: "dana" });
     expect(shared.skills.find((s) => s.name === "mine")!.source.kind).toBe("shared");
-    expect(registerPluginSkill("acme", "skills/mine/SKILL.md", SKILL("mine", "write_file")).ok).toBe(true);
-    expect(registerPluginSkill("acme", "skills/extra/SKILL.md", SKILL("extra", "")).ok).toBe(true);
+    // Through the plugin host's API (the real caller): a plugin's skills come and go with the plugin.
+    const added: unknown[] = [];
+    await registerPlugin({
+      id: "acme",
+      name: "Acme",
+      version: "1.0.0",
+      activate: async (api) => {
+        added.push(await api.registerSkill("skills/mine/SKILL.md", SKILL("mine", "write_file")));
+        added.push(await api.registerSkill("skills/extra/SKILL.md", SKILL("extra", "")));
+        added.push(await api.registerSkill("skills/bad/SKILL.md", "no frontmatter"));
+      },
+    });
+    expect(added.map((a) => (a as { ok: boolean }).ok)).toEqual([true, true, false]);
     const r = await loadSkills(store({ ".lumen/skills/mine/SKILL.md": SKILL("mine", "") }));
     expect(r.skills.find((s) => s.name === "mine")!.source.kind).toBe("vault");
-    expect(r.skills.find((s) => s.name === "extra")!.source.kind).toBe("plugin");
-    unregisterPluginSkills("acme");
+    expect(r.skills.find((s) => s.name === "extra")!.source).toMatchObject({ kind: "plugin", plugin: "acme" });
+    unregisterPlugin("acme");
+    await new Promise((res) => setTimeout(res, 0));
+    await new Promise((res) => setTimeout(res, 0));
     expect((await loadSkills(null)).skills.some((s) => s.name === "extra")).toBe(false);
   });
 
