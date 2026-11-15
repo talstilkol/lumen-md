@@ -38,7 +38,15 @@ export interface LiveTranscript {
  * text through `onPartial` while the user speaks (plan 6.1). Rejects when
  * it cannot start (no model, a language it does not know, no microphone).
  */
-export type VoiceTranscriber = (opts: { language?: string; onPartial: (text: string) => void; signal?: AbortSignal }) => Promise<LiveTranscript>;
+export type VoiceTranscriber = (opts: LiveOptions) => Promise<LiveTranscript>;
+
+export interface LiveOptions {
+  language?: string;
+  onPartial: (text: string) => void;
+  /** Each finished sentence as the engine closes it (the meeting recorder times them, W11.I19). */
+  onFinal?: (text: string) => void;
+  signal?: AbortSignal;
+}
 
 let transcriber: VoiceTranscriber | null = null;
 /** The live dictation (./liveDictation.ts) plugs in here; null unregisters it. */
@@ -52,7 +60,7 @@ export function hasLiveTranscriber(): boolean {
 }
 
 /** Start the live transcript, or null when no engine is registered or it cannot start (then: Whisper after the recording). */
-export async function startLiveTranscript(opts: { language?: string; onPartial: (text: string) => void; signal?: AbortSignal }): Promise<LiveTranscript | null> {
+export async function startLiveTranscript(opts: LiveOptions): Promise<LiveTranscript | null> {
   if (!transcriber) return null;
   try {
     return await transcriber(opts);

@@ -2142,6 +2142,11 @@
       "vars": []
     },
     {
+      "key": "capture.meeting",
+      "en": "Meeting",
+      "vars": []
+    },
+    {
       "key": "capture.noWorkspace",
       "en": "Quick capture needs the workspace, which this browser can't provide.",
       "vars": []
@@ -7884,6 +7889,175 @@
     {
       "key": "meeting.transcript",
       "en": "Transcript",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.about",
+      "en": "Record a meeting on this device. The transcript, summary, tasks and decisions are made here, and nothing is sent anywhere.",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.checking",
+      "en": "Checking which models are on this device…",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.declined",
+      "en": "Not saved: you declined. The note is below, to copy.",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.done",
+      "en": "Meeting note saved: {sentences} sentences, {tasks} tasks.",
+      "vars": [
+        "sentences",
+        "tasks"
+      ]
+    },
+    {
+      "key": "meetingFlow.empty",
+      "en": "Nothing was heard in the recording.",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.failed",
+      "en": "The meeting note could not be made: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "meetingFlow.liveOff",
+      "en": "No live transcript: the recording is transcribed on this device after it stops.",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.liveOn",
+      "en": "Live transcript on this device.",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.micFailed",
+      "en": "The microphone could not start: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "meetingFlow.name",
+      "en": "Meeting name",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.note.decisions",
+      "en": "Decisions",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.note.noModel",
+      "en": "No local model was available to find these.",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.note.none",
+      "en": "None.",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.note.questions",
+      "en": "Open questions",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.note.recording",
+      "en": "Recording",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.note.rejected",
+      "en": "{n} items the model wrote had no source in the transcript and were left out.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "meetingFlow.note.summary",
+      "en": "Summary",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.note.summaryChecked",
+      "en": "Checked summary: every sentence is copied from the transcript (a local model picked them).",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.note.summaryExtractive",
+      "en": "Extractive summary: the most central sentences (no local model, or its summary did not pass the check).",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.note.tasks",
+      "en": "Tasks",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.note.transcript",
+      "en": "Transcript",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.saving",
+      "en": "The note comes from the transcript, so it is saved only after you approve it…",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.speakersOff",
+      "en": "Speakers are not identified: no diarization model is set up on this device.",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.speakersOn",
+      "en": "Speakers are identified on this device.",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.start",
+      "en": "Start recording",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.stop",
+      "en": "Stop and write the note",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.summarizing",
+      "en": "Writing the summary, tasks and decisions…",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.title",
+      "en": "Meeting",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.transcribing",
+      "en": "Transcribing on this device…",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.unavailable",
+      "en": "Unavailable: no transcription model is on this device. Download the Hebrew dictation model or a Whisper model under Settings → Models, then open this again. Nothing was recorded.",
+      "vars": []
+    },
+    {
+      "key": "meetingFlow.untitled",
+      "en": "Meeting",
       "vars": []
     },
     {

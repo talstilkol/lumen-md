@@ -234,6 +234,19 @@ export function QuickCapture({ open, onClose, voice: voiceOnOpen }: Props) {
                 ? t("capture.voice.transcribing")
                 : t("capture.voice.start")}
           </button>
+          <button
+            type="button"
+            className="prompt-btn prompt-btn-cancel"
+            data-testid="capture-meeting"
+            disabled={busy || voice.kind !== "idle"}
+            onClick={() => {
+              // W11.I19: the meeting recorder, from the capture box (desktop and mobile).
+              close();
+              void import("../meetings/MeetingRecorder").then((m) => m.openMeetingRecorder());
+            }}
+          >
+            {t("capture.meeting")}
+          </button>
           <label style={{ display: "inline-flex", gap: 4, alignItems: "center", fontSize: 12 }}>
             <input type="checkbox" checked={keepAudio} onChange={(e) => setKeepAudio(e.target.checked)} data-testid="capture-keep-audio" />
             {t("capture.voice.keepAudio")}

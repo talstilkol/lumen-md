@@ -15,5 +15,6 @@
   "capture.globalShortcut.taken": "⌥⌘N is taken by another app, so it does not open Lumen from other apps. Inside Lumen, ⌥⌘N and File ▸ Quick capture still work.",
   "capture.voice.noMic": "No microphone access.",
   "capture.voice.noTranscript": "Not transcribed; audio kept.",
-  "capture.voice.placeholderNote": "Voice note (not transcribed)"
+  "capture.voice.placeholderNote": "Voice note (not transcribed)",
+  "capture.meeting": "Meeting"
 }

@@ -169,6 +169,17 @@ async function runDiarization(samples: Float32Array, models: DiarizationModels, 
   );
 }
 
+/**
+ * Turns of a recording from the pinned diarization models (the meeting
+ * recorder, W11.I21), or null: the models are not pinned, or the user
+ * declined their one-time download. Never a stand-in: without real models
+ * there are no speakers.
+ */
+export async function diarizeRecording(samples: Float32Array, signal?: AbortSignal, models: DiarizationModels = DIARIZATION_MODELS): Promise<Turn[] | null> {
+  if (!diarizationAvailable(models)) return null;
+  return runDiarization(samples, models, signal);
+}
+
 /* ─── The command ──────────────────────────────────────────────────── */
 
 export async function transcribeMeeting(file?: File | null, models: DiarizationModels = DIARIZATION_MODELS): Promise<void> {

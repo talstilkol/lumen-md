@@ -1296,12 +1296,6 @@
       "icon": "Sparkles"
     },
     {
-      "id": "speakers.rename",
-      "label": "Rename a speaker in this note…",
-      "group": "Tools",
-      "icon": "Sparkles"
-    },
-    {
       "id": "ai.meetingNotes",
       "label": "AI: Meeting Notes from a Transcript",
       "group": "Tools",
@@ -3419,12 +3413,6 @@
       "icon": "Sparkles"
     },
     {
-      "id": "speakers.rename",
-      "label": "Rename a speaker in this note…",
-      "group": "Tools",
-      "icon": "Sparkles"
-    },
-    {
       "id": "ai.meetingNotes",
       "label": "AI: Meeting Notes from a Transcript",
       "group": "Tools",
@@ -4385,7 +4373,6 @@
     "voice.transcribeFile",
     "voice.meeting",
     "voice.meetingFile",
-    "speakers.rename",
     "ai.meetingNotes",
     "voice.dictate",
     "vault.encrypt",

@@ -70,6 +70,8 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "highlights.json": { module: "highlights/strings.ts", users: ["highlights/HighlightsPanel.tsx"], prefixes: ["hl."] },
   "importWizard.json": { module: "storage/import/strings.ts", users: ["storage/import/ImportWizard.tsx", "storage/import/report.ts"], prefixes: ["importWizard."], within: "storage/import/" },
   "meetingSpeakers.json": { module: "meetings/speakerStrings.ts", users: ["meetings/meetingTranscribe.ts"], prefixes: ["speakers."] },
+  // W11.I19: the meeting recorder and its flow (both loaded on use).
+  "meetingFlow.json": { module: "meetings/meetingFlowStrings.ts", users: ["meetings/meetingFlow.ts", "meetings/MeetingRecorder.tsx"], prefixes: ["meetingFlow."] },
   "morning.json": { module: "daily/morningStrings.ts", users: ["daily/morning.ts"], prefixes: ["morning."] },
   "pdf.json": { module: "pdf/strings.ts", users: ["highlights/HighlightsPanel.tsx", "pdf/PdfReader.tsx", "pdf/openPdf.ts", "pdf/zoteroSend.ts"], prefixes: ["pdf."] },
   "pluginDev.json": { module: "plugins/runtime/devStrings.ts", users: ["plugins/runtime/DevPanel.tsx", "plugins/runtime/SandboxedPlugins.tsx"], prefixes: ["pluginDev."], within: "plugins/runtime/", shared: ["plugins/runtime/rendererRegistry.ts"] },

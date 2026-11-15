@@ -151,6 +151,11 @@ export function tasksToIcs(tasks: readonly MeetingTask[], opts: { title: string;
 
 const STOP = new Set("the a an to of for and or on in at by with is are be will should we i you he she they it this that".split(" ").concat("את של על עם זה זו הוא היא הם אני אנחנו".split(" ")));
 
+/** The content words of a text (no stop words, light English stem, Hebrew one-letter prefixes off): what grounding and task matching compare. */
+export function contentWords(s: string): Set<string> {
+  return words(s);
+}
+
 function words(s: string): Set<string> {
   return new Set(
     s
