@@ -2263,6 +2263,18 @@
       "vars": []
     },
     {
+      "key": "cmd.typesAll",
+      "en": "All {type}",
+      "vars": [
+        "type"
+      ]
+    },
+    {
+      "key": "cmd.typesPage",
+      "en": "Types: all objects by type",
+      "vars": []
+    },
+    {
       "key": "cmd.usage",
       "en": "Help: Usage on this device",
       "vars": []
