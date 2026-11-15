@@ -2,19 +2,22 @@
  * Linking an entity to Wikidata (plan W12.E10): optional, by consent, in
  * the privacy ledger.
  *
- * - Nothing is sent until the user agrees, each time ("this once") or for
- *   the vault ("always for this vault", kept in the vault as
- *   `.lumen/entities/wikidata.json`, so it travels with the vault and
- *   nowhere else).
+ * - Nothing is sent until the user agrees, each time ("this once") or on
+ *   this device ("always on this device"). Review Z7-M3: the standing
+ *   consent is an app setting (`lumen.wikidata.always`, schema kind "data",
+ *   so the settings export and import leave it out), not a vault file: a
+ *   vault someone else made, cloned, synced or imported never brings it. A
+ *   `.lumen/entities/wikidata.json` from an older build is not read.
+ * - Under the local-only AI policy nothing is sent at all, whatever was
+ *   agreed (review Z7-M3): the dialog says so, and the request is not
+ *   marked as consented, so the ledger refuses it too.
  * - What is sent: the entity's name, to `wbsearchentities` in Hebrew and in
  *   English (two GET requests to www.wikidata.org). Nothing from the notes.
  *   The browser's own User-Agent cannot be replaced, so the request names
  *   the app in `Api-User-Agent`, as Wikimedia asks of browser clients, with
  *   nothing about the user.
- * - The request goes through the privacy ledger (`ledgerFetch` with the
- *   user's consent, as the Sefaria and open-data sources do): it is listed
- *   as "Wikidata search: the entity name only", marked as consented, so a
- *   local-only AI policy lets this one request through and shows it.
+ * - The request goes through the privacy ledger (`ledgerFetch`), listed as
+ *   "Wikidata search: the entity name only".
  * - The chosen item's QID is written to the entity note's `wikidata`
  *   property. Wikidata's data is CC0 (public domain): the entity card says
  *   so next to the QID.
@@ -26,7 +29,8 @@ export const WIKIDATA_API = "https://www.wikidata.org/w/api.php";
 export const WIKIDATA_LICENCE = "CC0 1.0";
 /** How the ledger lists the request (privacyLedger.ts has the same rule for the host). */
 export const LEDGER_REASON = "Wikidata search: the entity name only";
-export const CONSENT_PATH = ".lumen/entities/wikidata.json";
+/** The standing consent ("always on this device"): an app setting, never a vault file (Z7-M3). */
+export const CONSENT_KEY = "lumen.wikidata.always";
 /** Names the app only (Wikimedia's User-Agent policy, for browser clients). */
 export const API_USER_AGENT = "lumen-md/1.0 (https://lumen-md.vercel.app; entity linking)";
 
@@ -61,16 +65,22 @@ export async function searchWikidata(name: string, fetchImpl: typeof fetch = (..
   return [...out.values()];
 }
 
-/** The vault's standing consent ("always for this vault"), read from the vault. */
-export function consentFromFile(text: string | null): boolean {
-  if (!text) return false;
+/** The standing consent on this device ("always on this device"). */
+export function wikidataAlways(): boolean {
   try {
-    return (JSON.parse(text) as { always?: unknown }).always === true;
+    return localStorage.getItem(CONSENT_KEY) === "1";
   } catch {
     return false;
   }
 }
-export const consentFile = (at: Date = new Date()) => JSON.stringify({ always: true, since: at.toISOString().slice(0, 10), what: "the entity name only, to www.wikidata.org (wbsearchentities)" }, null, 2) + "\n";
+export function setWikidataAlways(on: boolean): void {
+  try {
+    if (on) localStorage.setItem(CONSENT_KEY, "1");
+    else localStorage.removeItem(CONSENT_KEY);
+  } catch {
+    /* why: storage blocked (private window): the next search asks again */
+  }
+}
 
 /** The note with `wikidata: <qid>` in its front matter (added or replaced); the body and other properties byte for byte. */
 export function withQid(text: string, qid: string): string {

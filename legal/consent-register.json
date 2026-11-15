@@ -781,7 +781,7 @@
       "lawfulBasis": "consent",
       "needsConsent": true,
       "ppa2026": {
-        "activeOptIn": "The user runs \"Entity: link to Wikidata…\" and agrees (this once, or always for the vault) before any request.",
+        "activeOptIn": "The user runs \"Entity: link to Wikidata…\" and agrees (this once, or always on this device: an app setting, never read from a vault or an imported settings file) before any request; under the local-only policy nothing is sent, whatever was agreed.",
         "preTicked": false,
         "namedRecipients": [
           "Wikimedia Foundation (www.wikidata.org)"

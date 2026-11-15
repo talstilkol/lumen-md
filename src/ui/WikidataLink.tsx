@@ -1,7 +1,9 @@
 /**
  * "Search Wikidata" for an entity (plan W12.E10). Asks first — this once,
- * or always for this vault — and only then sends the entity's name, and
- * nothing else, to www.wikidata.org through the privacy ledger. Choosing an
+ * or always on this device (an app setting, never a vault file: review
+ * Z7-M3) — and only then sends the entity's name, and nothing else, to
+ * www.wikidata.org through the privacy ledger. Under the local-only AI
+ * policy it sends nothing, whatever was agreed, and says why. Choosing an
  * item writes its QID to the note's `wikidata` property, refused when the
  * note changed since the dialog read it. Wikidata's data is CC0. Not shown
  * in airplane mode (the host and the command check it).
@@ -9,7 +11,8 @@
 import { useEffect, useState } from "react";
 import { t } from "../i18n";
 import { ledgerFetch } from "../ai/privacyLedger";
-import { CONSENT_PATH, LEDGER_REASON, WIKIDATA_LICENCE, consentFile, consentFromFile, searchWikidata, withQid, type WikidataHit } from "../entities/wikidata";
+import { getAiPolicy } from "../ai/policy";
+import { LEDGER_REASON, WIKIDATA_LICENCE, searchWikidata, setWikidataAlways, wikidataAlways, withQid, type WikidataHit } from "../entities/wikidata";
 import "./entityGraphStrings";
 import { Modal } from "./Modal";
 import { EmptyState, learnHow } from "./EmptyState";
@@ -30,7 +33,7 @@ export interface WikidataLinkProps {
 }
 
 const btn: React.CSSProperties = { padding: "4px 10px", fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer", textAlign: "start" };
-type Phase = { at: "loading" } | { at: "ask" } | { at: "searching" } | { at: "results"; hits: WikidataHit[] } | { at: "linked"; qid: string } | { at: "error"; message: string };
+type Phase = { at: "loading" } | { at: "localOnly" } | { at: "ask" } | { at: "searching" } | { at: "results"; hits: WikidataHit[] } | { at: "linked"; qid: string } | { at: "error"; message: string };
 
 export function WikidataLink({ name, path, onClose, vault, fetchImpl }: WikidataLinkProps) {
   const [phase, setPhase] = useState<Phase>({ at: "loading" });
@@ -40,8 +43,9 @@ export function WikidataLink({ name, path, onClose, vault, fetchImpl }: Wikidata
   const search = async () => {
     setPhase({ at: "searching" });
     try {
-      // Only after the user chose: the consented, recorded fetch (a local-only policy would otherwise refuse it).
-      setPhase({ at: "results", hits: await searchWikidata(name, fetchImpl ?? ledgerFetch({ force: { category: "cloud-text", reason: LEDGER_REASON }, consent: true })) });
+      // Only after the user chose. Not marked as consented (Z7-M3): under local-only the ledger refuses it as well.
+      if (getAiPolicy() === "local-only") return setPhase({ at: "localOnly" });
+      setPhase({ at: "results", hits: await searchWikidata(name, fetchImpl ?? ledgerFetch({ force: { category: "cloud-text", reason: LEDGER_REASON } })) });
     } catch (e) {
       setPhase({ at: "error", message: e instanceof Error ? e.message : String(e) });
     }
@@ -52,10 +56,11 @@ export function WikidataLink({ name, path, onClose, vault, fetchImpl }: Wikidata
     void (async () => {
       const v = await ws();
       const note = await v.readWorkspaceFile(path);
-      const always = consentFromFile((await v.workspaceHasFile(CONSENT_PATH)) ? await v.readWorkspaceFile(CONSENT_PATH) : null);
       if (cancelled) return;
       setRead(note);
-      if (always) void search();
+      // Z7-M3: local-only refuses before any question; the standing consent is this device's, not the vault's.
+      if (getAiPolicy() === "local-only") setPhase({ at: "localOnly" });
+      else if (wikidataAlways()) void search();
       else setPhase({ at: "ask" });
     })().catch((e) => !cancelled && setPhase({ at: "error", message: String(e?.message ?? e) }));
     return () => {
@@ -75,8 +80,8 @@ export function WikidataLink({ name, path, onClose, vault, fetchImpl }: Wikidata
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const always = async () => {
-    await (await ws()).writeWorkspaceFile(CONSENT_PATH, consentFile());
+  const always = () => {
+    setWikidataAlways(true);
     void search();
   };
   const link = async (qid: string) => {
@@ -104,7 +109,7 @@ export function WikidataLink({ name, path, onClose, vault, fetchImpl }: Wikidata
               <button type="button" style={btn} onClick={() => void search()}>
                 {t("entityGraph.wikidata.once")}
               </button>
-              <button type="button" style={btn} onClick={() => void always()}>
+              <button type="button" style={btn} onClick={always}>
                 {t("entityGraph.wikidata.always")}
               </button>
               <button type="button" style={btn} onClick={onClose}>
@@ -112,6 +117,11 @@ export function WikidataLink({ name, path, onClose, vault, fetchImpl }: Wikidata
               </button>
             </div>
           </>
+        )}
+        {phase.at === "localOnly" && (
+          <p role="status" style={{ margin: 0 }}>
+            {t("entityGraph.wikidata.localOnly")}
+          </p>
         )}
         {(phase.at === "loading" || phase.at === "searching") && <p role="status">{t("entityGraph.wikidata.searching")}</p>}
         {phase.at === "results" &&

@@ -30,7 +30,10 @@ You don't have to take this page's word for it. The privacy ledger (⌘K → *Pr
 None of these runs on its own. Each starts only when you turn a feature on, or when the
 deployment's build configures it. The "In the ledger" name is exactly what the privacy
 ledger panel shows. The `local-only` policy blocks every path that carries user content
-(categories `cloud-ai`, `cloud-text`, `research`, `third-party`, `monitoring`, `plugin`).
+(categories `cloud-ai`, `cloud-text`, `research`, `third-party`, `monitoring`, `plugin`),
+except a request you agree to at the moment it is made (the public sources and the agent's
+network tools): that one goes, and the ledger lists it as consented. The Wikidata search
+is refused under `local-only` even then.
 
 | Path | What leaves | Where to | What is kept there, and for how long | In the ledger (category) |
 |---|---|---|---|---|
@@ -53,7 +56,7 @@ ledger panel shows. The `local-only` policy blocks every path that carries user 
 | Update check (desktop app) | App version and platform only | `Desktop update check (app version and platform only)` | GitHub Releases' logs | `static-asset` |
 | Jewish sources | The reference you asked for ("Berakhot 2a"), nothing from your notes | `Jewish sources (Sefaria): the reference only` (sefaria.org), when you look one up | Sefaria's policy | `cloud-text` |
 | Knesset records | The law or bill name you asked for, nothing from your notes | `Knesset records (OData): the law or bill name only` (knesset.gov.il), when you look one up | The Knesset's policy | `cloud-text` |
-| Wikidata (entity linking) | The name of the one entity you asked to link, nothing from your notes, only after you agree (this once, or always for the vault) | `Wikidata search: the entity name only` (www.wikidata.org), when you search | Wikimedia's privacy policy; the data you get back is CC0 | `cloud-text` |
+| Wikidata (entity linking) | The name of the one entity you asked to link, nothing from your notes, only after you agree (this once, or always on this device: an app setting, never kept in or taken from a vault). Refused under the `local-only` policy, whatever you agreed | `Wikidata search: the entity name only` (www.wikidata.org), when you search | Wikimedia's privacy policy; the data you get back is CC0 | `cloud-text` |
 | OpenAlex (citation graph) | The DOIs of the sources you asked about, nothing from your notes; off until you turn the lookup on | `OpenAlex: the references of a DOI (citation graph, only when you turn it on)` (api.openalex.org), when you fill references | OpenAlex's terms; the data you get back is CC0 | `research` |
 | Government data | The search words, dataset id or series id you asked for | `Government data (data.gov.il, CBS): the search words or dataset id only` (data.gov.il, apis.cbs.gov.il), when you search | The government site's policy | `cloud-text` |
 | Zotero | Requests to your Zotero library with your own key; it writes only the PDF highlights you send and confirm | `Zotero Web API (your library; writes only the PDF highlights you send)` (api.zotero.org) | In your Zotero library, per Zotero's policy | `research` |

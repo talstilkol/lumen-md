@@ -32,7 +32,8 @@ Play counts data the app sends off the device. The routes below are each started
 | Encrypted sync (WebDAV, S3, Dropbox, Google Drive) | Ciphertext only, to the storage you chose | Connecting a sync provider |
 | Diagrams (PlantUML, rendered by kroki.io) | The diagram's source | Confirming the first time a diagram would be sent; refused under local-only |
 | Read aloud and dictation with the browser's speech service | The text read aloud, or your voice | Choosing a network voice, or dictation under the cloud policy after a confirmation; refused under local-only |
-| Public sources (Sefaria, the Knesset, government data, Wikidata) | Only the reference, name or search words you asked for; nothing from your notes | Searching one of these sources; refused under local-only |
+| Public sources (Sefaria, the Knesset, government data) | Only the reference or search words you asked for; nothing from your notes | Searching one of these sources, after you agree to that search; under local-only too, listed as consented in the ledger |
+| Wikidata (entity linking) | The name of the entity you asked to link; nothing from your notes | Searching Wikidata, after you agree (this once, or always on this device); refused under local-only, whatever you agreed |
 | Web clipper | A request for the page you clip | Clipping a page; refused under local-only |
 | Publishing to Bluesky (Standard.site) | The note you publish, publicly, and your login for that session | Confirming a publish; refused under local-only |
 | Calendar connections (CalDAV, ICS) | Your tasks and credentials to your calendar server; a read request for a subscription | Setting up a connection; refused under local-only |

@@ -7145,7 +7145,7 @@
     },
     {
       "key": "entityGraph.wikidata.always",
-      "en": "Always for this vault",
+      "en": "Always on this device",
       "vars": []
     },
     {
@@ -7178,6 +7178,11 @@
       "vars": [
         "qid"
       ]
+    },
+    {
+      "key": "entityGraph.wikidata.localOnly",
+      "en": "Your AI policy is local-only, so nothing is sent to Wikidata, even with your agreement. To search, choose another policy in Settings → AI.",
+      "vars": []
     },
     {
       "key": "entityGraph.wikidata.none",

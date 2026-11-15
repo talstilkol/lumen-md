@@ -1,7 +1,8 @@
 /**
  * W12.E10 — linking an entity to Wikidata: 0 requests before consent
  * (checked in the privacy ledger); "this once" asks again next time,
- * "always for this vault" does not; only the name goes out, with a generic
+ * "always on this device" does not (an app setting since review Z7-M3, see
+ * z7/wikidataLocalOnly.test.tsx for local-only and the vault file); only the name goes out, with a generic
  * Api-User-Agent; the QID lands in the note's `wikidata` property with
  * the rest of the note byte for byte; the entity card says CC0; nothing in
  * airplane mode. Wikidata is faked (offline): a recorded response shape.
@@ -14,7 +15,8 @@ import type { VaultBackend } from "../storage/vault/types";
 import * as workspace from "../storage/workspace";
 import { __resetLedger, ledgerEntries, withLedger } from "../ai/privacyLedger";
 import { __setAirplaneFlag } from "../privacy/airplaneBoot";
-import { CONSENT_PATH, API_USER_AGENT, LEDGER_REASON, searchUrl, withQid } from "../entities/wikidata";
+import { setAiPolicy } from "../ai/policy";
+import { CONSENT_KEY, API_USER_AGENT, LEDGER_REASON, searchUrl, withQid } from "../entities/wikidata";
 import { WikidataLink } from "../ui/WikidataLink";
 import { WikidataHost } from "../ui/WikidataHost";
 import { buildEntityCommands, WIKIDATA_EVENT } from "../commands/domains/entities";
@@ -33,13 +35,15 @@ const inner = (async (input: RequestInfo | URL, init?: RequestInit) => {
   const search = lang === "he" ? [{ id: "Q37085", label: "דוד בן-גוריון", description: "ראש הממשלה הראשון" }] : [{ id: "Q37085", label: "David Ben-Gurion" }, { id: "Q999999", label: "Ben Gurion Airport" }];
   return new Response(JSON.stringify({ search }), { status: 200, headers: { "content-type": "application/json" } });
 }) as typeof fetch;
-const ledgered = () => withLedger(inner, { force: { category: "cloud-text", reason: LEDGER_REASON }, consent: true });
+const ledgered = () => withLedger(inner, { force: { category: "cloud-text", reason: LEDGER_REASON } });
 const wikidataEntries = () => ledgerEntries().filter((e) => e.host === "www.wikidata.org");
 
 beforeEach(async () => {
   calls.length = 0;
   __resetLedger();
   localStorage.clear();
+  // Z7-M3: Wikidata is refused under local-only (the default with no cloud key); these tests run under local-first.
+  setAiPolicy("local-first");
   __setAirplaneFlag(false);
   previous = setVaultBackend(createMemoryBackend());
   await workspace.writeWorkspaceFile(PATH, NOTE);
@@ -85,8 +89,8 @@ describe("W12.E10 consent and the ledger", () => {
       ["cloud-text", "Wikidata search: the entity name only", "allowed"],
       ["cloud-text", "Wikidata search: the entity name only", "allowed"],
     ]);
-    // Under the default local-only policy the request goes only because the user agreed, and says so.
-    expect(wikidataEntries().map((e) => e.consent)).toEqual([true, true]);
+    // Not a consent that overrides a policy (Z7-M3): under local-first cloud-text is allowed anyway.
+    expect(wikidataEntries().map((e) => e.consent)).toEqual([undefined, undefined]);
     expect(screen.getAllByRole("listitem")).toHaveLength(2); // one row per item
 
     await act(async () => {
@@ -100,16 +104,17 @@ describe("W12.E10 consent and the ledger", () => {
     // "This once" was not remembered: the next time asks again, and sends nothing until then.
     calls.length = 0;
     const second = render(<WikidataLink name="דוד בן-גוריון" path={PATH} onClose={() => {}} fetchImpl={ledgered()} vault={workspace} />);
-    await screen.findByRole("button", { name: "Always for this vault" });
+    await screen.findByRole("button", { name: "Always on this device" });
     expect(calls).toEqual([]);
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: "Always for this vault" }));
+      fireEvent.click(screen.getByRole("button", { name: "Always on this device" }));
     });
     await screen.findByRole("button", { name: /Q37085/ }, T);
-    expect(await workspace.workspaceHasFile(CONSENT_PATH)).toBe(true);
+    expect(localStorage.getItem(CONSENT_KEY)).toBe("1");
+    expect(await workspace.workspaceHasFile(".lumen/entities/wikidata.json")).toBe(false);
     second.unmount();
 
-    // Always for this vault: no question, straight to the search.
+    // Always on this device: no question, straight to the search.
     calls.length = 0;
     render(<WikidataLink name="דוד בן-גוריון" path={PATH} onClose={() => {}} fetchImpl={ledgered()} vault={workspace} />);
     await screen.findByRole("button", { name: /Q37085/ }, T);
@@ -118,7 +123,7 @@ describe("W12.E10 consent and the ledger", () => {
   });
 
   it("a note changed underneath is not overwritten", async () => {
-    expect(await workspace.workspaceHasFile(CONSENT_PATH)).toBe(false);
+    expect(localStorage.getItem(CONSENT_KEY)).toBe(null);
     render(<WikidataLink name="דוד בן-גוריון" path={PATH} onClose={() => {}} fetchImpl={ledgered()} vault={workspace} />);
     const once = await screen.findByRole("button", { name: "Search this once" }, T);
     await act(async () => {

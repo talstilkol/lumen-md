@@ -62,9 +62,13 @@ the relations between them ("born in", "member of", "cites", …).
 ## Linking to Wikidata (optional)
 
 Open an entity note and choose ⌘K "Entity: link to Wikidata…". Nothing is
-sent until you choose "Search this once" or "Always for this vault". Then
+sent until you choose "Search this once" or "Always on this device". Then
 only the entity's name goes to www.wikidata.org, in Hebrew and in English,
-and the request is listed in the privacy ledger. The item you pick is
+and the request is listed in the privacy ledger. "Always on this device" is
+an app setting: it is not kept in the vault, so a vault you open, clone or
+import never brings it, and a settings file you import never turns it on.
+Under the `local-only` AI policy nothing is sent, whatever you agreed: the
+dialog says so. The item you pick is
 saved as the note's `wikidata` property. Wikidata's data is CC0 (public
 domain). In airplane mode the command is not shown.
 ## Sankey, matrix, claims and "why"
