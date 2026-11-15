@@ -1,0 +1,40 @@
+{
+  "what": "Plan W2.19 acceptance on a loopback socket (W10.E44): src/__tests__/lanSyncLoopback.test.ts, LAN_SYNC_REPORT=eval/lan-sync/loopback.json. A cloud Linux container (shared, load average ~13), not a user's LAN: the WebRTC link between two real devices is still owed (Mac).",
+  "commit_base": "origin/verify/train-5 c3f055218e",
+  "transport": "TCP over 127.0.0.1 (node:net), [u32 length] framing",
+  "node": "v22.22.0",
+  "platform": "linux-x64",
+  "rounds": {
+    "done": 1000,
+    "of": 1000,
+    "lost": 0,
+    "sharedLost": 0,
+    "divergedAtCheckpoints": [],
+    "notes": 24,
+    "frames": 11058,
+    "wireBytes": 26833321,
+    "ms": 6024
+  },
+  "live": {
+    "hostToPeer": {
+      "n": 100,
+      "p50": 108,
+      "p95": 131,
+      "max": 179
+    },
+    "peerToHost": {
+      "n": 100,
+      "p50": 108,
+      "p95": 136,
+      "max": 240
+    },
+    "all": {
+      "n": 200,
+      "p50": 108,
+      "p95": 134,
+      "max": 240
+    },
+    "debounceMs": 50
+  },
+  "at": "2026-11-15T01:18:13.224Z"
+}
