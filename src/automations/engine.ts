@@ -6,6 +6,8 @@
  *
  *   when: note created (in a folder) · tag added · property changed (to a
  *         value) · daily (once a day) · a row of a base view changes (W6.46)
+ *         · an object of a type is created · a field of a type changes (W12.U2)
+ *   unless: Shabbat or a yom tov (W12.U2): the rule waits for the next weekday
  *   then: move to a folder · add a tag · apply a template · add a line to
  *         the daily note
  *
@@ -15,6 +17,7 @@
 import YAML from "yaml";
 import { setProperty } from "../properties/frontmatter";
 import { basesFileFromText, parseBase, runBase } from "../views/bases/base";
+import { nextWorkday, restDayOf, type RestDay } from "./restDays";
 
 export type Trigger =
   | { kind: "created"; folder?: string }
@@ -26,7 +29,14 @@ export type Trigger =
    * (after the change) has a property changed (`property`, or any), or a new
    * note joins the view. The view's filters decide, as in the table itself.
    */
-  | { kind: "rowChanged"; base: string; view?: string; property?: string };
+  | { kind: "rowChanged"; base: string; view?: string; property?: string }
+  /**
+   * W12.U2: a note becomes an object of type `type`: created with it, or
+   * given it later (`type:` in frontmatter, by id or label, as W12.T1 reads it).
+   */
+  | { kind: "typeCreated"; type: string }
+  /** W12.U2: a field of an object of type `type` changes (`field`, or any; to `value`, or any). */
+  | { kind: "typeFieldChanged"; type: string; field?: string; value?: string };
 
 export type Action =
   | { kind: "move"; folder: string }
@@ -40,6 +50,12 @@ export interface Rule {
   enabled: boolean;
   when: Trigger;
   then: Action[];
+  /**
+   * W12.U2: not on Shabbat or a yom tov. On such a day the rule does not run:
+   * a daily rule runs on the next weekday, and an event waits in the
+   * postponed list until then (the caller replays it).
+   */
+  notOnRestDays?: boolean;
 }
 
 export type VaultEvent =
@@ -64,6 +80,14 @@ export interface PlanContext {
   today: string;
   /** Rule id → the last day it ran (daily rules run once a day). */
   lastDaily?: Readonly<Record<string, string>>;
+  /** Holidays as in Israel (one day of yom tov) or the diaspora (two). Default: Israel. */
+  israel?: boolean;
+  /**
+   * A note's types, lower case: by default `type:` in its frontmatter (one
+   * value or a list). W12.T1's registry, which also knows activating tags
+   * and labels, can be passed instead.
+   */
+  typesOf?: (text: string) => string[];
 }
 
 /** How deep a cascade may go: a rule's change may trigger rules, theirs may too, then it stops. */
@@ -121,8 +145,15 @@ function propsChanged(before: string, after: string, key?: string): boolean {
   return [...keys].some((k) => JSON.stringify(a[k] ?? null) !== JSON.stringify(b[k] ?? null));
 }
 
+/** A note's types from `type:` in its frontmatter (a value or a list), lower case. */
+export function frontmatterTypes(text: string): string[] {
+  const t = frontmatter(text).type;
+  const list = Array.isArray(t) ? t : t === undefined || t === null ? [] : [t];
+  return list.map((x) => String(x).trim().toLowerCase()).filter(Boolean);
+}
+
 /** Does `rule` fire on `event`? */
-export function fires(rule: Rule, event: VaultEvent, ctx: Pick<PlanContext, "today" | "lastDaily"> & { vault?: VaultView }): boolean {
+export function fires(rule: Rule, event: VaultEvent, ctx: Pick<PlanContext, "today" | "lastDaily" | "typesOf"> & { vault?: VaultView }): boolean {
   if (!rule.enabled) return false;
   const w = rule.when;
   switch (w.kind) {
@@ -149,6 +180,23 @@ export function fires(rule: Rule, event: VaultEvent, ctx: Pick<PlanContext, "tod
         return isRowOf(ctx.vault.read(w.base), w.view, event.path, event.text);
       }
       return propsChanged(event.before, event.after, w.property) && isRowOf(ctx.vault.read(w.base), w.view, event.path, event.after);
+    }
+    case "typeCreated": {
+      if (event.kind === "daily" || !event.path.endsWith(".md") || (event.kind === "created" && event.moved)) return false;
+      const typesOf = ctx.typesOf ?? frontmatterTypes;
+      const want = w.type.trim().toLowerCase();
+      const after = typesOf(event.kind === "created" ? event.text : event.after);
+      const before = event.kind === "created" ? [] : typesOf(event.before);
+      return after.includes(want) && !before.includes(want);
+    }
+    case "typeFieldChanged": {
+      if (event.kind !== "changed" || !event.path.endsWith(".md")) return false;
+      const typesOf = ctx.typesOf ?? frontmatterTypes;
+      if (!typesOf(event.after).includes(w.type.trim().toLowerCase())) return false;
+      if (!w.field) return propsChanged(event.before, event.after);
+      const a = scalar(frontmatter(event.before)[w.field]);
+      const b = scalar(frontmatter(event.after)[w.field]);
+      return a !== b && (w.value === undefined || b === w.value);
     }
   }
 }
@@ -193,6 +241,12 @@ export interface Plan {
   stopped: Array<{ rule: string; on: string; reason: "depth" | "repeat" }>;
   /** Daily rules that ran (rule id → date), for the caller to remember. */
   dailyRan: Record<string, string>;
+  /**
+   * W12.U2: rules that would have run but wait for the end of Shabbat or a
+   * yom tov, with the day they wait for. An event rule's event is kept here
+   * for the caller to replay; a daily rule simply runs on that day.
+   */
+  postponed: Array<{ rule: string; on: string; why: RestDay; until: string; event?: VaultEvent }>;
 }
 
 /**
@@ -205,7 +259,8 @@ export function plan(rules: readonly Rule[], event: VaultEvent, ctx: PlanContext
   const files = new Map<string, string | null>();
   const read = (p: string) => (files.has(p) ? files.get(p)! : ctx.vault.read(p));
   const exists = (p: string) => (files.has(p) ? files.get(p) !== null : ctx.vault.exists(p));
-  const out: Plan = { changes: [], fired: [], stopped: [], dailyRan: {} };
+  const out: Plan = { changes: [], fired: [], stopped: [], dailyRan: {}, postponed: [] };
+  const rest = restDayOf(ctx.today, ctx.israel ?? true);
   const seen = new Set<string>();
   const queue: Array<{ event: VaultEvent; depth: number }> = [{ event, depth: 0 }];
   const write = (path: string, after: string, rule: string, depth: number, cascade = true) => {
@@ -221,6 +276,11 @@ export function plan(rules: readonly Rule[], event: VaultEvent, ctx: PlanContext
     const on = ev.kind === "daily" ? `daily:${ev.date}` : ev.path;
     for (const rule of rules) {
       if (!fires(rule, ev, { ...ctx, vault: { read, exists } })) continue;
+      if (rule.notOnRestDays && rest) {
+        // Nothing is written on Shabbat or a yom tov; the dry run shows the wait.
+        out.postponed.push({ rule: rule.id, on, why: rest, until: nextWorkday(ctx.today, ctx.israel ?? true), event: ev.kind === "daily" ? undefined : ev });
+        continue;
+      }
       const key = `${rule.id}\u0000${on}`;
       if (seen.has(key)) {
         out.stopped.push({ rule: rule.id, on, reason: "repeat" });

@@ -900,6 +900,16 @@
       ]
     },
     {
+      "key": "automations.ask.type",
+      "en": "Type (its id or name, as in type: of the note)",
+      "vars": []
+    },
+    {
+      "key": "automations.ask.typeField",
+      "en": "Field to watch (empty: any field)",
+      "vars": []
+    },
+    {
       "key": "automations.ask.value",
       "en": "Value (empty: any change)",
       "vars": []
@@ -920,6 +930,22 @@
       "key": "automations.dryRun.none",
       "en": "No rule would change anything for this note.",
       "vars": []
+    },
+    {
+      "key": "automations.dryRun.postponedShabbat",
+      "en": "⏸ {rule}: today is Shabbat; it runs on {until}",
+      "vars": [
+        "rule",
+        "until"
+      ]
+    },
+    {
+      "key": "automations.dryRun.postponedYomTov",
+      "en": "⏸ {rule}: today is a holiday; it runs on {until}",
+      "vars": [
+        "rule",
+        "until"
+      ]
     },
     {
       "key": "automations.dryRun.stopped",
@@ -946,6 +972,11 @@
       "vars": []
     },
     {
+      "key": "automations.pick.restDays",
+      "en": "On Shabbat and holidays…",
+      "vars": []
+    },
+    {
       "key": "automations.pick.trigger",
       "en": "When…",
       "vars": []
@@ -956,6 +987,16 @@
       "vars": [
         "count"
       ]
+    },
+    {
+      "key": "automations.restDays.any",
+      "en": "run as on any day",
+      "vars": []
+    },
+    {
+      "key": "automations.restDays.notOnRestDays",
+      "en": "wait: not on Shabbat or a holiday",
+      "vars": []
     },
     {
       "key": "automations.trigger.created",
@@ -980,6 +1021,16 @@
     {
       "key": "automations.trigger.tagAdded",
       "en": "a tag is added",
+      "vars": []
+    },
+    {
+      "key": "automations.trigger.typeCreated",
+      "en": "an object of a type is created",
+      "vars": []
+    },
+    {
+      "key": "automations.trigger.typeFieldChanged",
+      "en": "a field of a type changes",
       "vars": []
     },
     {
