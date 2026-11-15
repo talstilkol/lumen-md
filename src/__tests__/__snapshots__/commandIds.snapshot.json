@@ -2002,6 +2002,20 @@
       "hint": "One search over Sefaria, the Knesset, data.gov.il and the Ben-Yehuda library, with each result's rights",
       "shortcut": "⌥⌘S",
       "icon": "Quote"
+    },
+    {
+      "id": "reading.newFromLibrary",
+      "label": "Reading list: new source from the citation library…",
+      "group": "Insert",
+      "hint": "A Zotero, BibTeX or CSL-JSON item becomes a source note",
+      "icon": "Quote"
+    },
+    {
+      "id": "reading.newFromCapture",
+      "label": "Reading list: new source from a captured page…",
+      "group": "Insert",
+      "hint": "The clipped page open now, or a link you type",
+      "icon": "Link"
     }
   ],
   "full": [
@@ -4156,6 +4170,20 @@
       "hint": "One search over Sefaria, the Knesset, data.gov.il and the Ben-Yehuda library, with each result's rights",
       "shortcut": "⌥⌘S",
       "icon": "Quote"
+    },
+    {
+      "id": "reading.newFromLibrary",
+      "label": "Reading list: new source from the citation library…",
+      "group": "Insert",
+      "hint": "A Zotero, BibTeX or CSL-JSON item becomes a source note",
+      "icon": "Quote"
+    },
+    {
+      "id": "reading.newFromCapture",
+      "label": "Reading list: new source from a captured page…",
+      "group": "Insert",
+      "hint": "The clipped page open now, or a link you type",
+      "icon": "Link"
     }
   ],
   "autoSaveOn": [
@@ -4444,6 +4472,8 @@
     "export.latexProject",
     "automations.new",
     "automations.dryRun",
-    "automations.undo"
+    "automations.undo",
+    "reading.newFromLibrary",
+    "reading.newFromCapture"
   ]
 }
