@@ -176,7 +176,8 @@ describe("5.6.4 every failure reaches the panel", () => {
       ["src/plugins/CsvBlock.tsx", "ai.chart"],
       // The selection tooltip is its own module (W6.25, train 5).
       ["src/editor/wysiwygTooltip.ts", "wysiwyg.aiRewrite"],
-      ["src/editor/WysiwygEditor.tsx", "wysiwyg.aiWrite"],
+      // The slash menu is its own module (W10.E29, the 800-line split).
+      ["src/editor/wysiwygSlashMenu.ts", "wysiwyg.aiWrite"],
     ])
       expect(readFileSync(file, "utf8"), `${file} ${id}`).toMatch(new RegExp(`reportAgentFailure\\(e, "${id.replace(".", "\\.")}"\\)`));
   });
