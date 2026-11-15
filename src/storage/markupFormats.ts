@@ -366,7 +366,10 @@ export function adocToMarkdown(text: string): string {
     .replace(/^\.([^\n]+)$/gm, "**$1**")
     .replace(/^\*\s/gm, "- ")
     .replace(/`{2}([^`]+?)`{2}/g, "`$1`")
-    .replace(/_([^_\n]+?)_/g, "*$1*");
+    .replace(/_([^_\n]+?)_/g, "\u0001$1\u0001")
+    // `*x*` is AsciiDoc bold, so it comes back as **x** (W12.F1 round-trip finding).
+    .replace(/(?<![*\w])\*(?=\S)([^*\n]+?)\*(?![*\w])/g, "**$1**")
+    .replace(/\u0001([^\u0001]*)\u0001/g, "*$1*");
 }
 
 /* ─── Org-mode → Markdown ──────────────────────────────────────────── */
