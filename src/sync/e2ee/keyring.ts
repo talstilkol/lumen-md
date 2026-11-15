@@ -15,6 +15,7 @@
  *     header?: "<b64u>",           // a passphrase change: the new vault header, until it is written
  *     prev?: "<b64u>",             // with `header`: the keyring this one replaced (the old passphrase's way back)
  *     dropped?: [{epoch, at, devices, mac}]  // devices a re-key from an unverified device left out (F4)
+ *     recovery?: {recipient, wrap, check}   // protocol 3: the epoch secret for the recovery key (W11.S8)
  *   }
  *
  * Every AES-GCM has the protocol, the vault id, the epoch and its role as
@@ -45,20 +46,39 @@
  * Each epoch's manifest has a random label (`manifest/<epoch>/<random>`,
  * RR-3) in the sealed part: nobody without the epoch's secret can name it in
  * advance.
+ *
+ * The recovery wrap (protocol 3, plan W11.S8, recovery.ts): the sealed part
+ * names the recovery key's age recipient and its MAC key; the file carries
+ * the epoch secret as an age file to that recipient and a `check` under the
+ * MAC key. Every re-key (a rotation, a revocation) and every same-epoch
+ * rewrite wraps the secret for it again, from the sealed part, so the device
+ * doing it never needs the recovery key. Protocol 2 keyrings are still read
+ * and rewritten as protocol 2; recovery comes with the next re-key, which
+ * writes protocol 3. A build that knows only protocol 2 refuses protocol 3,
+ * so it can't re-key a vault and silently drop its recovery wrap.
  */
 
 import { bs, equalBytes, fromB64u, fromUtf8, randomBytes, sha256Hex, toB64u, utf8 } from "./bytes";
 import { ageDecrypt, ageEncrypt, parseRecipient } from "./age";
 import { anchorKey, blobKey, DecryptError, droppedKey, epochKeys, hmac, namesKey, passphraseKeys, verifyHmac, type RingInfo, type VaultKeys } from "./keys";
 import { isManifestLabel } from "./manifest";
+import { recoveryKeys, RecoveryKeyError } from "./recovery";
 import { PreconditionFailedError, type StoredObject, type SyncProvider } from "./provider";
 import { RevokedDeviceEnrollError, RevokedError, DroppedFromVaultError, TamperedWrapError, KeyringCommitLostError, KeyringRollbackError, KeyringForkError, PreReleaseKeyringError } from "./keyringErrors";
 export { RevokedDeviceEnrollError, RevokedError, DroppedFromVaultError, TamperedWrapError, KeyringCommitLostError, KeyringRollbackError, KeyringForkError, PreReleaseKeyringError } from "./keyringErrors";
 
 export const KEYRING_NAME = "lumen-e2ee-keyring";
 const FORMAT = "lumen-e2ee-keyring";
-/** Protocol 2 (re-review 12.11): the sealed device list, the hash chain, random manifest labels. */
-export const KEYRING_PROTOCOL = 2;
+/**
+ * Protocol 3 (plan W11.S8): protocol 2 plus the recovery wrap.
+ * Protocol 2 (re-review 12.11): the sealed device list, the hash chain, random manifest labels.
+ */
+export const KEYRING_PROTOCOL = 3;
+/** The first protocol with a recovery wrap. */
+export const RECOVERY_PROTOCOL = 3;
+/** Protocols this build reads and rewrites (in their own protocol). */
+const CURRENT_PROTOCOLS: readonly number[] = [2, 3];
+const isCurrent = (protocol: number) => CURRENT_PROTOCOLS.includes(protocol);
 /** Pre-release keyrings (no sealed device list, no chain). Opened only to reset them. */
 const PRE_RELEASE_PROTOCOL = 1;
 /** How many earlier keyrings a keyring lists (`chain`). */
@@ -98,6 +118,17 @@ export interface KeyringFile {
    * left out can check with the secret it holds.
    */
   dropped?: DroppedMarker[];
+  /** Protocol 3: the epoch secret for the recovery key. Untrusted until `check` verifies under the sealed MAC key. */
+  recovery?: RecoveryWrap;
+}
+
+export interface RecoveryWrap {
+  /** The recovery key's age X25519 recipient. */
+  recipient: string;
+  /** The epoch secret, as an age file to `recipient` (base64url). */
+  wrap: string;
+  /** HMAC(recovery MAC key, recoveryData(…)) (base64url): only the vault's members and the recovery key can make it. */
+  check: string;
 }
 
 export interface DroppedMarker {
@@ -132,6 +163,8 @@ export interface KeyringContents {
   header?: string;
   /** Digests of this epoch's frozen manifests whose re-key was called off (RR-4): devices may write over them. */
   aborted?: string[];
+  /** Protocol 3: the recovery key's recipient and MAC key (b64u); every keyring wraps its secret for it. */
+  recovery?: { recipient: string; mac: string };
 }
 
 /** What a device remembers of the keyring it verified last. */
@@ -170,6 +203,11 @@ async function openWith(key: CryptoKey, s: Sealed, ad: Uint8Array): Promise<Uint
 
 /* ─── Reading ──────────────────────────────────────────────────────────── */
 
+const recoveryOk = (r: unknown) => {
+  const w = r as RecoveryWrap;
+  return !!w && typeof w.recipient === "string" && typeof w.wrap === "string" && typeof w.check === "string";
+};
+
 const droppedOk = (d: unknown) => {
   const m = d as DroppedMarker;
   return !!m && Number.isSafeInteger(m.epoch) && m.epoch >= 1 && Number.isSafeInteger(m.at) && Array.isArray(m.devices) && m.devices.every((x) => typeof x === "string") && typeof m.mac === "string";
@@ -185,7 +223,7 @@ export function decodeKeyring(bytes: Uint8Array): KeyringFile {
   const sealedOk = (s: unknown) => !!s && typeof (s as Sealed).n === "string" && typeof (s as Sealed).c === "string";
   if (
     o?.format !== FORMAT ||
-    (o.protocol !== KEYRING_PROTOCOL && o.protocol !== PRE_RELEASE_PROTOCOL) ||
+    (!isCurrent(o.protocol) && o.protocol !== PRE_RELEASE_PROTOCOL) ||
     typeof o.vaultId !== "string" ||
     !Number.isSafeInteger(o.epoch) ||
     o.epoch < 1 ||
@@ -195,7 +233,8 @@ export function decodeKeyring(bytes: Uint8Array): KeyringFile {
     typeof o.devices !== "object" ||
     (o.header !== undefined && typeof o.header !== "string") ||
     (o.prev !== undefined && (typeof o.prev !== "string" || o.header === undefined)) ||
-    (o.dropped !== undefined && !(Array.isArray(o.dropped) && o.dropped.length <= DROPPED_LENGTH && o.dropped.every(droppedOk)))
+    (o.dropped !== undefined && !(Array.isArray(o.dropped) && o.dropped.length <= DROPPED_LENGTH && o.dropped.every(droppedOk))) ||
+    (o.recovery !== undefined && (o.protocol < RECOVERY_PROTOCOL || !recoveryOk(o.recovery)))
   ) {
     throw new DecryptError("Not a Lumen keyring");
   }
@@ -227,8 +266,43 @@ export async function readKeyring(provider: SyncProvider, name = KEYRING_NAME): 
   return { file, etag: obj.etag, bytes: obj.data, digest: await keyringDigest(file) };
 }
 
-/** How this device opens the keyring: the passphrase's wrap key, or its own age identity. */
-export type KeyAccess = { wrap: CryptoKey } | { device: string; identity: string };
+/** How this device opens the keyring: the passphrase's wrap key, its own age identity, or the recovery key (W11.S8). */
+export type KeyAccess = { wrap: CryptoKey } | { device: string; identity: string } | { recovery: Uint8Array };
+
+const recoveryData = (vaultId: string, epoch: number, digest: string, w: Pick<RecoveryWrap, "recipient" | "wrap">) =>
+  utf8(JSON.stringify(["lumen-e2ee-recovery/1", vaultId, epoch, digest, w.recipient, w.wrap]));
+
+/** The recovery wrap of an epoch: `secret` as an age file to the sealed recipient, and its check under the sealed MAC key. */
+async function recoveryWrap(vaultId: string, epoch: number, digest: string, secret: Uint8Array, sealed: { recipient: string; mac: string }): Promise<RecoveryWrap> {
+  const wrap = toB64u(await ageEncrypt(secret, [{ x25519: sealed.recipient }]));
+  const mac = await crypto.subtle.importKey("raw", bs(fromB64u(sealed.mac)), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  return { recipient: sealed.recipient, wrap, check: toB64u(await hmac(mac, recoveryData(vaultId, epoch, digest, { recipient: sealed.recipient, wrap }))) };
+}
+
+/**
+ * The epoch secret through the recovery key: the wrap's check must verify
+ * under the MAC key the recovery key gives (the storage can't make one),
+ * then the age file opens with its identity. RecoveryKeyError when the
+ * keyring has no recovery wrap, or it is for another key.
+ */
+async function unwrapRecovery(file: KeyringFile, key: Uint8Array): Promise<Uint8Array> {
+  if (!file.recovery) throw new RecoveryKeyError("This vault has no recovery key set up");
+  const rk = await recoveryKeys(key, file.vaultId);
+  if (rk.age.recipient !== file.recovery.recipient) throw new RecoveryKeyError();
+  let tag: Uint8Array;
+  try {
+    tag = fromB64u(file.recovery.check);
+  } catch {
+    throw new TamperedWrapError();
+  }
+  const mac = await crypto.subtle.importKey("raw", bs(fromB64u(rk.mac)), { name: "HMAC", hash: "SHA-256" }, false, ["verify"]);
+  if (!(await crypto.subtle.verify("HMAC", mac, bs(tag), bs(recoveryData(file.vaultId, file.epoch, await keyringDigest(file), file.recovery))))) throw new TamperedWrapError();
+  try {
+    return await ageDecrypt(fromB64u(file.recovery.wrap), [{ identity: rk.age.identity }]);
+  } catch {
+    throw new TamperedWrapError();
+  }
+}
 
 /**
  * The epoch secret of `file`, through `access`. RevokedError when the device
@@ -236,7 +310,8 @@ export type KeyAccess = { wrap: CryptoKey } | { device: string; identity: string
  */
 export async function unwrapSecret(file: KeyringFile, access: KeyAccess): Promise<Uint8Array> {
   if ("wrap" in access) return openWith(access.wrap, file.passphrase, aadFor(file.protocol, file.vaultId, file.epoch, "passphrase"));
-  if (file.protocol !== KEYRING_PROTOCOL) throw new PreReleaseKeyringError();
+  if (!isCurrent(file.protocol)) throw new PreReleaseKeyringError();
+  if ("recovery" in access) return unwrapRecovery(file, access.recovery);
   const d = file.devices[access.device];
   // A dropped re-key's marker says "left out", not "removed" (F4). The device
   // can't check it here (it holds no secret yet); E2eeSync checks its MAC.
@@ -291,7 +366,7 @@ async function markerValid(vaultId: string, m: DroppedMarker, keys: Pick<VaultKe
   return verifyHmac(await droppedKey(prev, vaultId), tag, droppedData(vaultId, m));
 }
 
-function parseContents(bytes: Uint8Array, epoch: number): KeyringContents {
+function parseContents(bytes: Uint8Array, epoch: number, protocol: number): KeyringContents {
   let c: KeyringContents;
   try {
     c = JSON.parse(fromUtf8(bytes)) as KeyringContents;
@@ -317,6 +392,7 @@ function parseContents(bytes: Uint8Array, epoch: number): KeyringContents {
   if (c.carry !== undefined && (!c.carry || !isManifestLabel(c.carry.label) || !Number.isSafeInteger(c.carry.epoch) || typeof c.carry.digest !== "string")) throw new DecryptError("Bad keyring carry");
   if (c.header !== undefined && !isHex64(c.header)) throw new DecryptError("Bad keyring header");
   if (c.aborted !== undefined && (!Array.isArray(c.aborted) || !c.aborted.every((d) => typeof d === "string"))) throw new DecryptError("Bad keyring aborted list");
+  if (c.recovery !== undefined && (protocol < RECOVERY_PROTOCOL || !c.recovery || typeof c.recovery.recipient !== "string" || typeof c.recovery.mac !== "string")) throw new DecryptError("Bad keyring recovery");
   return c;
 }
 
@@ -345,12 +421,13 @@ function ringInfo(c: KeyringContents, digest: string, preRelease = false): RingI
     ...(preRelease ? { preRelease: true as const } : {}),
     enrolled: { ...c.devices },
     revoked: c.revoked.map((r) => ({ device: r.device, ...(r.recipient ? { recipient: r.recipient } : {}) })),
+    ...(c.recovery ? { recovery: c.recovery.recipient } : {}),
   };
 }
 
 /** Open the sealed part of `file` with its epoch's keyring key. */
 async function openContents(file: KeyringFile, keyring: CryptoKey, allowPreRelease = false): Promise<KeyringContents> {
-  if (file.protocol === KEYRING_PROTOCOL) return parseContents(await openWith(keyring, file.sealed, aad(file.vaultId, file.epoch, "sealed")), file.epoch);
+  if (isCurrent(file.protocol)) return parseContents(await openWith(keyring, file.sealed, aadFor(file.protocol, file.vaultId, file.epoch, "sealed")), file.epoch, file.protocol);
   if (!allowPreRelease) throw new PreReleaseKeyringError();
   return parsePreRelease(await openWith(keyring, file.sealed, aadFor(PRE_RELEASE_PROTOCOL, file.vaultId, file.epoch, "sealed")));
 }
@@ -385,7 +462,7 @@ export async function keysFromKeyring(
     secret,
     olderBlobs,
     olderSecrets,
-    ring: ringInfo(contents, opts.digest ?? "", file.protocol !== KEYRING_PROTOCOL),
+    ring: ringInfo(contents, opts.digest ?? "", !isCurrent(file.protocol)),
   };
 }
 
@@ -543,6 +620,13 @@ export interface RekeyOptions {
   dropDevices?: boolean;
   /** Recipients (age public keys) that never get a wrap, whatever id they are listed under (F2: this device revoked them). */
   excludeRecipients?: string[];
+  /**
+   * The recovery key's recipient and MAC key (`recoveryKeys`) for the new
+   * epoch and every later one; null removes it. Left out, the current
+   * keyring's (sealed) recovery is carried over: a rotation or a revocation
+   * wraps the new secret for it again.
+   */
+  recovery?: { recipient: string; mac: string } | null;
   now?: () => number;
 }
 
@@ -574,7 +658,7 @@ const chainAfter = (c: KeyringContents | null, epoch: number, digest: string): A
 export async function prepareEpoch(current: ReadKeyring | null, keys: VaultKeys, opts: RekeyOptions = {}): Promise<PreparedEpoch> {
   if (current && (current.file.epoch !== keys.epoch || (keys.ring && current.digest !== keys.ring.digest))) throw new PreconditionFailedError(KEYRING_NAME);
   if (!current && keys.epoch !== 0) throw new KeyringRollbackError(keys.epoch, 0);
-  const preRelease = !!current && current.file.protocol !== KEYRING_PROTOCOL;
+  const preRelease = !!current && !isCurrent(current.file.protocol);
   const prior: KeyringContents | null = current ? await openContents(current.file, keys.keyring, preRelease) : null;
   const enrolled: Record<string, string> = prior && !preRelease && !opts.dropDevices ? prior.devices : {};
   const priorRevoked = prior?.revoked ?? [];
@@ -629,6 +713,12 @@ export async function prepareEpoch(current: ReadKeyring | null, keys: VaultKeys,
     ...(opts.carry ? { carry: opts.carry } : {}),
     ...(opts.newHeader ? { header: await sha256Hex(opts.newHeader) } : {}),
   };
+  const recovery = opts.recovery === undefined ? (preRelease ? undefined : prior?.recovery) : (opts.recovery ?? undefined);
+  if (recovery) {
+    parseRecipient(recovery.recipient);
+    if (fromB64u(recovery.mac).length !== 32) throw new Error("A recovery MAC key has 32 bytes");
+    contents.recovery = { recipient: recovery.recipient, mac: recovery.mac };
+  }
   const file: KeyringFile = {
     format: FORMAT,
     protocol: KEYRING_PROTOCOL,
@@ -640,8 +730,9 @@ export async function prepareEpoch(current: ReadKeyring | null, keys: VaultKeys,
     ...(opts.newHeader ? { header: toB64u(opts.newHeader), ...(current ? { prev: toB64u(current.bytes) } : {}) } : {}),
     ...(markers.length ? { dropped: markers.slice(-DROPPED_LENGTH) } : {}),
   };
-  const bytes = utf8(JSON.stringify(file));
   const digest = await keyringDigest(file);
+  if (contents.recovery) file.recovery = await recoveryWrap(keys.vaultId, epoch, digest, secret, contents.recovery);
+  const bytes = utf8(JSON.stringify(file));
   const olderSecrets = new Map(keys.olderSecrets);
   olderSecrets.set(keys.epoch, keys.secret);
   const olderBlobs = new Map(keys.olderBlobs);
@@ -672,7 +763,12 @@ export async function rewriteKeyring(
   // Every wrap is made again from the sealed list (N5): a wrap the storage swapped is repaired, one it added is dropped.
   const devices: Record<string, DeviceWrap> = {};
   for (const [id, recipient] of Object.entries(contents.devices)) devices[id] = { recipient, wrap: toB64u(await ageEncrypt(keys.secret, [{ x25519: recipient }])) };
-  const next: KeyringFile = { ...f, protocol: KEYRING_PROTOCOL, devices, sealed: await sealWith(keys.keyring, utf8(JSON.stringify(contents)), aad(f.vaultId, f.epoch, "sealed")) };
+  // The keyring keeps its protocol (its passphrase wrap is bound to it); recovery needs protocol 3, which a re-key writes.
+  if (contents.recovery && f.protocol < RECOVERY_PROTOCOL) throw new Error("Recovery comes with a re-key: this keyring is protocol 2");
+  const next: KeyringFile = { ...f, devices, sealed: await sealWith(keys.keyring, utf8(JSON.stringify(contents)), aadFor(f.protocol, f.vaultId, f.epoch, "sealed")) };
+  delete next.recovery;
+  // The recovery wrap is made again from the sealed part too, for the new digest.
+  if (contents.recovery) next.recovery = await recoveryWrap(f.vaultId, f.epoch, await keyringDigest(next), keys.secret, contents.recovery);
   const bytes = utf8(JSON.stringify(next));
   await provider.put(KEYRING_NAME, bytes, { ifMatch: current.etag });
   const out = { ...keys, ring: ringInfo(contents, await keyringDigest(next)) };
@@ -728,5 +824,5 @@ export async function enrollDevice(provider: SyncProvider, keys: VaultKeys, devi
   });
 }
 
-/** The additional data of a keyring field (the spec's test vectors use it). */
-export const keyringAad = aad;
+/** The additional data of a keyring field (the spec's test vectors use it); `protocol` defaults to the current one. */
+export const keyringAad = (vaultId: string, epoch: number, role: string, protocol: number = KEYRING_PROTOCOL) => aadFor(protocol, vaultId, epoch, role);

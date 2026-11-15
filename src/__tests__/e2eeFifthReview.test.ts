@@ -55,7 +55,7 @@ async function forgeFor(p: Provider, vaultId: string, deviceId: string, recipien
   const ek = await epochKeys(S, vaultId);
   const contents = { older: { "0": toB64u(randomBytes(32)) }, revoked: [], devices: listed ? { [deviceId]: recipient } : {}, manifest: `manifest/${epoch}/${toB64u(randomBytes(16))}`, rev: 0, parent: anchor.digest, chain: [[anchor.epoch, anchor.rev, anchor.digest]] };
   const n = randomBytes(12);
-  const c = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv: bs(n), additionalData: bs(keyringAad(vaultId, epoch, "sealed")) }, ek.keyring, bs(utf8(JSON.stringify(contents)))));
+  const c = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv: bs(n), additionalData: bs(keyringAad(vaultId, epoch, "sealed", 2)) }, ek.keyring, bs(utf8(JSON.stringify(contents)))));
   const file = {
     format: "lumen-e2ee-keyring",
     protocol: 2,

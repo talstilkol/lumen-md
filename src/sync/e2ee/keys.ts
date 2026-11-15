@@ -84,6 +84,8 @@ export interface RingInfo {
   /** The sealed device list (id → age recipient) and the revoked ids (fifth review 12.11, F2: a device checks its own revocations against them). */
   enrolled?: Record<string, string>;
   revoked?: Array<{ device: string; recipient?: string }>;
+  /** Protocol 3 (plan W11.S8): the recovery key's age recipient, when the vault has one. */
+  recovery?: string;
 }
 
 /** The blob key for a manifest entry's epoch (absent: 0). Throws when this device doesn't hold it. */
