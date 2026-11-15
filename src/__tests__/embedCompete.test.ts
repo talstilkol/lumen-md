@@ -6,12 +6,14 @@
  * @vitest-environment node
  */
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 // @ts-expect-error the harness is plain JavaScript
 import { ACRONYMS, buildHard, hardenQuery, KINDS } from "../../scripts/golden/sets/retrieval-hard.mjs";
 // @ts-expect-error the harness is plain JavaScript
-import { chooseDefault, discriminates, evaluateCandidate, recallAt, rerankDecision, truncateMatryoshka } from "../../scripts/golden/evals/embed-compete.mjs";
+import { HARD_SET_DIR, chooseDefault, discriminates, evaluateCandidate, hardSetCard, recallAt, rerankDecision, truncateMatryoshka } from "../../scripts/golden/evals/embed-compete.mjs";
+// @ts-expect-error plain JavaScript
+import { validateCard } from "../../scripts/lib/evalCard.mjs";
 
 const heq = JSON.parse(readFileSync(join(__dirname, "../../eval/golden/retrieval/dev/heq.json"), "utf8")) as { items: Array<{ id: string; query: string; relevant: string[]; heqId: string }>; corpus: Array<{ id: string; title?: string; text: string }> };
 
@@ -99,5 +101,31 @@ describe("the plan's rules", () => {
   it("the reranker is on only when it adds ≥ 3 points", () => {
     expect(rerankDecision(r("x", 0.73), r("x", 0.7))).toEqual({ on: true, gain: 3 });
     expect(rerankDecision(r("x", 0.72), r("x", 0.7)).on).toBe(false);
+  });
+});
+
+describe("the hard set is synthetic: eval/synthetic, dev cards only (W7.13)", () => {
+  it("lives under eval/synthetic, not eval/golden", () => {
+    expect(HARD_SET_DIR).toBe("eval/synthetic/retrieval-hard");
+    expect(existsSync(join(__dirname, "../..", HARD_SET_DIR, "dev.json"))).toBe(true);
+    expect(existsSync(join(__dirname, "../../eval/golden/retrieval-hard"))).toBe(false);
+  });
+
+  it("hardSetCard makes a complete dev card with origin synthetic, from per-item scores of the real held-out file", async () => {
+    const held = JSON.parse(readFileSync(join(__dirname, "../..", HARD_SET_DIR, "heldout.json"), "utf8")) as { items: never[]; corpus: Array<{ id: string; text: string }> };
+    const bag = (t: string) => {
+      const v = new Array(512).fill(0);
+      for (const w of t.split(/\s+/)) v[[...w].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) >>> 0, 7) % 512] += 1;
+      return v;
+    };
+    const r = await evaluateCandidate({ id: "bag", embed: async (ts: string[]) => ts.map(bag) }, held);
+    expect(r.perItem.ndcg_at_10).toHaveLength(held.items.length);
+    expect(r.perItem.recall_at_20).toHaveLength(held.items.length);
+    const card = hardSetCard({ model: { name: "bag", digest: "none:test" }, split: "heldout", version: "2", result: r });
+    expect(validateCard(card)).toEqual([]);
+    expect(card).toMatchObject({ tag: "dev", n: held.items.length, dataset: { name: "synthetic/retrieval-hard/heldout", origin: "synthetic" } });
+    expect(card.metrics.ndcg_at_10.value).toBeCloseTo(r.ndcg10, 3);
+    // The same card claiming "heldout" is refused.
+    expect(validateCard({ ...card, tag: "heldout" }).join(" ")).toMatch(/synthetic set is dev only/);
   });
 });

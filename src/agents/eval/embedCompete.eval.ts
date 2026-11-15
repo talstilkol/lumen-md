@@ -9,8 +9,12 @@
  *   LUMEN_EVAL_EMBED_MODELS   comma-separated candidate ids (default: every embedding candidate)
  *   LUMEN_EVAL_OUT            report directory, default eval/results
  *
+ * The hard set is eval/synthetic/retrieval-hard: synthetic, not golden
+ * (coordinator, W7.13). Every card this writes is tagged `dev` with
+ * dataset.origin "synthetic" (hardSetCard), so no run here can back a ✅.
+ *
  * Writes the table (nDCG@10, Recall@20, ms per query, download and index
- * size, Matryoshka 256) and the decisions: does the set discriminate
+ * size, Matryoshka 256), a dev card per candidate and split, and the decisions: does the set discriminate
  * (≥ 5 points), which model is the default (≥ 5 held-out points and
  * ≤ 150 ms per query at 10,000 notes), is the reranker on (≥ 3 points).
  */
@@ -18,7 +22,7 @@ import { describe, it, expect } from "vitest";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 // @ts-expect-error the harness is plain JavaScript
-import { chooseDefault, discriminates, evaluateCandidate } from "../../../scripts/golden/evals/embed-compete.mjs";
+import { HARD_SET_DIR, chooseDefault, discriminates, evaluateCandidate, hardSetCard } from "../../../scripts/golden/evals/embed-compete.mjs";
 
 interface Candidate {
   id: string;
@@ -29,21 +33,25 @@ interface Candidate {
   prefix?: { query: string; document: string };
   dtype?: string;
   licenseVerified: boolean;
+  sha256?: string | null;
 }
 const manifest = JSON.parse(readFileSync("eval/models/embedding-candidates.json", "utf8")) as { current: string; candidates: Candidate[] };
 const outDir = process.env.LUMEN_EVAL_OUT || "eval/results";
 const wanted = (process.env.LUMEN_EVAL_EMBED_MODELS || "").split(",").filter(Boolean);
-const load = (f: string) => JSON.parse(readFileSync(join("eval/golden/retrieval-hard", f), "utf8")) as { items: never[]; corpus: Array<{ id: string; title?: string; text: string }> };
+const hardVersion = String((JSON.parse(readFileSync(join(HARD_SET_DIR, "manifest.json"), "utf8")) as { version: number }).version);
+const load = (f: string) => JSON.parse(readFileSync(join(HARD_SET_DIR, f), "utf8")) as { items: never[]; corpus: Array<{ id: string; title?: string; text: string }> };
 
 // skip-reason: an opt-in eval that downloads real models (npm run eval:embed-compete), not a unit test | task: W7.13 | until: 2027-05-14
 describe.skipIf(!process.env.LUMEN_EVAL_EMBED)("Hebrew embeddings competition (W7.13)", () => {
   it("measures every candidate on dev and held-out and records the decisions", async () => {
-    expect(existsSync("eval/golden/retrieval-hard/dev.json") ? "ok" : "run node scripts/golden/build-retrieval-hard.mjs first").toBe("ok");
+    expect(existsSync(join(HARD_SET_DIR, "dev.json")) ? "ok" : "run node scripts/golden/build-retrieval-hard.mjs first").toBe("ok");
     const { pipeline } = await import("@huggingface/transformers");
     const dev = load("dev.json");
     const held = load("heldout.json");
     const rows: Array<Record<string, unknown>> = [];
-    type Row = { id: string; ndcg10: number; recall20: number; msPerQuery: number; dims: number; indexBytes: number; items: number };
+    type Row = { id: string; ndcg10: number; recall20: number; msPerQuery: number; dims: number; indexBytes: number; items: number; perItem: Record<string, number[]> };
+    const cards: Record<string, unknown> = {};
+    const bare = ({ perItem: _p, ...r }: Row) => r;
     const heldRows: Row[] = [];
     const devRows: Row[] = [];
     for (const c of manifest.candidates.filter((x) => x.kind === "embedding" && (!wanted.length || wanted.includes(x.id)))) {
@@ -60,7 +68,11 @@ describe.skipIf(!process.env.LUMEN_EVAL_EMBED)("Hebrew embeddings competition (W
         const h: Row = await evaluateCandidate(cand, held);
         devRows.push(d);
         heldRows.push(h);
-        rows.push({ id: cand.id, dev: d, heldout: h });
+        // The weights are pinned by sha256 once the W4.14 mirror records it; until then the card says so.
+        const model = { name: cand.id, digest: c.sha256 ?? `unpinned:hf:${c.hf}@${c.dtype ?? "q8"}` };
+        const card = { dev: hardSetCard({ model, split: "dev", version: hardVersion, result: d }), heldout: hardSetCard({ model, split: "heldout", version: hardVersion, result: h }) };
+        cards[cand.id] = card.heldout;
+        rows.push({ id: cand.id, dev: bare(d), heldout: bare(h), cards: card });
       }
     }
     const decision = {
@@ -69,7 +81,9 @@ describe.skipIf(!process.env.LUMEN_EVAL_EMBED)("Hebrew embeddings competition (W
       reranker: null as null | { on: boolean; gain: number },
     };
     mkdirSync(outDir, { recursive: true });
-    writeFileSync(join(outDir, `embed-compete-${new Date().toISOString().slice(0, 10)}.json`), JSON.stringify({ rows, decision }, null, 2) + "\n");
+    // The report's own card (eval:card) is the default's run on heldout.json: dev, like every card here.
+    const card = cards[decision.default.id] ?? Object.values(cards)[0];
+    writeFileSync(join(outDir, `embed-compete-${new Date().toISOString().slice(0, 10)}.json`), JSON.stringify({ card, rows, decision }, null, 2) + "\n");
     expect(decision.discriminates, "the hard set must separate the candidates by ≥ 5 nDCG@10 points").toBe(true);
   }, 6 * 3_600_000);
 });

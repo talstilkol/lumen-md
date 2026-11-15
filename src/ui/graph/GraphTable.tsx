@@ -49,6 +49,7 @@ export function GraphTable({ labels, neighbors, onOpen }: { labels: readonly str
               </th>
               <td style={cell}>{r.links.length}</td>
               <td style={cell} dir="auto">
+                {/* empty-action: the note's button in this row's header opens it, where the links are added */}
                 {r.links.length ? r.links.slice(0, NAMED).map((j) => labels[j]).join(", ") + (r.links.length > NAMED ? ` ${t("graph.table.more", { n: String(r.links.length - NAMED) })}` : "") : t("graph.table.none")}
               </td>
             </tr>

@@ -26,6 +26,8 @@ const RECORDERS: Record<string, (src: string) => string[]> = {
     ...[...src.matchAll(/reason: "([^"]+)"/g)].map((m) => m[1]),
     ...[...src.matchAll(/reason: `([^`$]+)\$\{/g)].map((m) => m[1]).filter((p) => !/^\s*$/.test(p)),
     /export const MONITORING_REASON = "([^"]+)"/.exec(src)![1],
+    // Audit mode: what it calls a request no rule names (auditReason's fallback).
+    /\?\.reason \?\? "([^"]+)"/.exec(src)![1],
   ],
   "src/research/clipper.ts": (src) => [/reason: "([^"]+)"/.exec(src)![1]],
   "src/agents/python/runner.ts": (src) => [/export const LEDGER_REASON = "([^"]+)"/.exec(src)![1]],
@@ -47,6 +49,8 @@ const RECORDERS: Record<string, (src: string) => string[]> = {
   // Open sources (W7.24): each host under its source's reason; the gate itself records its callers' reasons.
   "src/sources/open/app.ts": (src) => [...src.matchAll(/reason: "([^"]+)"/g)].map((m) => m[1]),
   "src/sources/open/gate.ts": () => [],
+  // Signed plugin install (W10.B3): every registry download under its one fixed reason.
+  "src/plugins/install.ts": (src) => [/const LEDGER_REASON = "([^"]+)"/.exec(src)![1]],
 };
 
 function walk(dir: string, out: string[] = []): string[] {

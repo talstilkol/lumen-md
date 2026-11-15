@@ -23,6 +23,12 @@ a perfect 1.0 on it.
 30% of the questions are held out and used only for the final decision. The
 cross-lingual questions of the Hebrew→English probe are measured too.
 
+The set is **synthetic**: the rewrites were made by rule for this project, the
+cross-lingual questions were written for it, and the held-out questions are
+in the repository. So it lives in `eval/synthetic/retrieval-hard`, not with
+the golden sets, and every result on it is a development result. It can
+choose between models, but it cannot prove a quality claim on its own.
+
 ## The candidates and the rules
 
 The candidates are multilingual-e5-small (the current model), EmbeddingGemma 2

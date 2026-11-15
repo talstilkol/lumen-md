@@ -17,6 +17,7 @@ import { explainError } from "../../lib/userError";
 import { searchLibrary, syncLibrary, type LibraryDeps, type LibraryHit, appDeps } from "./clipIndex";
 import "./libraryStrings";
 import { HelpButton } from "../../ui/HelpButton";
+import { EmptyState, runCommand } from "../../ui/EmptyState";
 
 /** Wait after the last keystroke before searching. */
 export const LIBRARY_SEARCH_DELAY_MS = 250;
@@ -120,10 +121,13 @@ export function LibraryPanel({ vault, deps, onClose }: { vault: LibraryVault; de
       />
       <p style={muted} role="status" data-testid="library-status">
         {status.kind === "indexing" && t("library.indexing", { done: status.done, total: status.total })}
-        {status.kind === "ready" && (status.count ? t("library.count", { count: status.count }) : t("library.empty"))}
+        {status.kind === "ready" && !!status.count && t("library.count", { count: status.count })}
         {status.kind === "error" && t("library.unavailable", { message: status.message })}
         {status.kind === "noVault" && t("library.noVault")}
       </p>
+      {status.kind === "ready" && !status.count && (
+        <EmptyState testId="library-empty" style={{ padding: 0 }} message={t("library.empty")} action={{ label: t("cmd.clip.url"), onClick: () => (onClose(), runCommand("clip.url")) }} />
+      )}
       {hits && hits.length === 0 && <p style={muted}>{t("library.noResults")}</p>}
       {hits && hits.length > 0 && (
         <ul style={{ margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 6 }}>

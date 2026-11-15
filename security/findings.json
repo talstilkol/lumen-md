@@ -3,8 +3,8 @@
   "audit": {
     "external": false,
     "task": "W11.O6",
-    "en": "Lumen has not had an external security audit. One is to be commissioned (plan W11.O6) for the sync protocol and the keyring. Until a report is published in full, nothing may call Lumen's cryptography audited, and encrypted sync (E2EE) stays off by default, labelled as not externally audited (plan W11.S1; security/crypto-audit.json records the audit state).",
-    "he": "‏Lumen עוד לא עבר ביקורת אבטחה חיצונית. ביקורת לפרוטוקול הסנכרון ול-keyring תוזמן (משימה W11.O6). עד שיפורסם דוח מלא, שום מקום לא יתאר את הקריפטוגרפיה של Lumen כמבוקרת, והסנכרון המוצפן (E2EE) נשאר כבוי כברירת מחדל, עם תווית שאומרת שהוא לא עבר ביקורת חיצונית (משימה W11.S1; ‏security/crypto-audit.json רושם את מצב הביקורת)."
+    "en": "Lumen has not had an external security audit. One is to be commissioned (plan W11.O6) for the sync protocol and the keyring. Until a report is published in full, Lumen's cryptography is not audited and no text may say otherwise, and encrypted sync (E2EE) stays off by default, labelled as not externally audited (plan W11.S1; security/crypto-audit.json records the audit state).",
+    "he": "‏Lumen עוד לא עבר ביקורת אבטחה חיצונית. ביקורת לפרוטוקול הסנכרון ול-keyring תוזמן (משימה W11.O6). עד שיפורסם דוח מלא, הקריפטוגרפיה של Lumen לא מבוקרת ושום מקום לא יתאר אותה אחרת, והסנכרון המוצפן (E2EE) נשאר כבוי כברירת מחדל, עם תווית שאומרת שהוא לא עבר ביקורת חיצונית (משימה W11.S1; ‏security/crypto-audit.json רושם את מצב הביקורת)."
   },
   "findings": [
     { "id": "LUM-2026-001", "status": "open", "severity": "medium", "area": "sync", "opened": "2026-11-15", "source": "/security/threat-model/", "en": "Encrypted sync (E2EE) has had no external audit.", "he": "לסנכרון המוצפן (E2EE) לא הייתה ביקורת חיצונית." },

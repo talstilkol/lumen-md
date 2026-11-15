@@ -117,7 +117,8 @@ async function vaultWithDevice() {
 }
 
 describe("blind: keyring format and digest (W10.D18)", () => {
-  it("K1 epoch 0 has no keyring; the first re-key writes `lumen-e2ee-keyring` at epoch 1, protocol 2", async () => {
+  // §5: `protocol` is 3, or 2 for a keyring written before the recovery key; only a re-key writes 3 (§5b, §10).
+  it("K1 epoch 0 has no keyring; the first re-key writes `lumen-e2ee-keyring` at epoch 1, protocol 3", async () => {
     const { provider, creator } = await newVault();
     expect(await provider.get(KEYRING_NAME)).toBeNull();
     expect(KEYRING_NAME).toBe("lumen-e2ee-keyring");
@@ -127,7 +128,7 @@ describe("blind: keyring format and digest (W10.D18)", () => {
     const f = await keyringFile(provider);
     expect(f.format).toBe("lumen-e2ee-keyring");
     expect(f.protocol).toBe(KEYRING_PROTOCOL);
-    expect(KEYRING_PROTOCOL).toBe(2);
+    expect(KEYRING_PROTOCOL).toBe(3);
     expect(f.epoch).toBe(1);
     expect(f.vaultId).toBe(creator.engine.keys().vaultId);
     expect(creator.engine.keys().epoch).toBe(1);

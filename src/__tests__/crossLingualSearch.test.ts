@@ -155,8 +155,8 @@ describe("dev probe: 100 Hebrew questions over English abstracts (W5.28 + 2.78)"
 });
 
 describe("the retrieval-hard copy of the probe (W7.13)", () => {
-  it("eval/golden/retrieval-hard/crosslingual.json holds the same 100 questions and abstracts", () => {
-    const hard = JSON.parse(readFileSync(join(__dirname, "../../eval/golden/retrieval-hard/crosslingual.json"), "utf8")) as typeof probe & { note: string };
+  it("eval/synthetic/retrieval-hard/crosslingual.json holds the same 100 questions and abstracts", () => {
+    const hard = JSON.parse(readFileSync(join(__dirname, "../../eval/synthetic/retrieval-hard/crosslingual.json"), "utf8")) as typeof probe & { note: string };
     expect(hard.items).toEqual(probe.items);
     expect(hard.corpus).toEqual(probe.corpus);
     expect(hard.note).toMatch(/^100 cross-lingual questions/);

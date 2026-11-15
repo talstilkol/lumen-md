@@ -167,7 +167,8 @@ describe("argument schemas", () => {
     );
     const def: AgentDefinition = { id: "p", description: "", system: "s", user: () => "u", tools: [tool], language: "any" };
     await runAgent(def, {});
-    expect(results[0].error).toMatch(/^bad-args: \$\.n must be integer/);
+    // The first invalid call gets toolRepair's retry message around the runtime's bad-args error (one retry).
+    expect(results[0].error).toMatch(/^Invalid tool call: bad-args: \$\.n must be integer/);
     expect(spy).toHaveBeenCalledTimes(1);
     expect(spy.mock.calls[0][0]).toEqual({ n: 3 });
   });

@@ -89,6 +89,28 @@ describe("validateCard", () => {
   });
 });
 
+describe("a synthetic dataset is dev only (W7.13)", () => {
+  const syn = { name: "synthetic/retrieval-hard/heldout", version: "2", license: "CC-BY-4.0", origin: "synthetic" };
+  it("refuses heldout or public on a synthetic dataset, by origin or by an eval/synthetic name", () => {
+    expect(validateCard(card({ tag: "dev", dataset: syn }))).toEqual([]);
+    expect(validateCard(card({ tag: "heldout", dataset: syn })).join(" ")).toMatch(/synthetic set is dev only/);
+    expect(validateCard(card({ tag: "public", dataset: { ...syn, source: "https://example.org/x" } })).join(" ")).toMatch(/synthetic set is dev only/);
+    const { origin: _o, ...byName } = syn;
+    expect(validateCard(card({ tag: "heldout", dataset: byName })).join(" ")).toMatch(/synthetic set is dev only/);
+    expect(validateCard(card({ tag: "heldout", dataset: { ...byName, name: "eval/synthetic/retrieval-hard" } })).join(" ")).toMatch(/synthetic set is dev only/);
+    // A real held-out set is unaffected.
+    expect(validateCard(card({ tag: "heldout", dataset: { name: "retrieval", version: "3", license: "CC-BY-4.0", origin: "real" } }))).toEqual([]);
+  });
+
+  it("makeCard will not write a heldout card on a synthetic set, and plan:check keeps a synthetic card at ✅*", () => {
+    expect(() => makeCard({ tag: "heldout", model: { name: "m", digest: "sha256:1" }, seed: 1, temperature: 0, dataset: syn, scores: { ndcg_at_10: [1, 0, 1] } })).toThrow(/synthetic set is dev only/);
+    const dev = makeCard({ tag: "dev", model: { name: "m", digest: "sha256:1" }, seed: 1, temperature: 0, dataset: syn, scores: { ndcg_at_10: [1, 0, 1] } });
+    const p = checkEvalClaims({ phases: [{ tasks: [{ id: "W7.13", title: "x", status: "✅ #1", dod: ["npm run eval:embed-compete"], evalCards: ["eval/cards/hard.json"] }] }] }, () => ({ card: dev }));
+    expect(p).toHaveLength(1);
+    expect(p[0]).toMatch(/✅ on a dev report/);
+  });
+});
+
 describe("bootstrapCi and cohenKappa", () => {
   it("the interval contains the mean, is reproducible from the seed, and narrows with n", () => {
     const small = Array.from({ length: 20 }, (_, i) => (i % 4 === 0 ? 0 : 1));

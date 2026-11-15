@@ -26,6 +26,11 @@ Every eval report carries a top-level `card` (built with `makeCard` in `scripts/
 
 - `npm run eval:card [file|dir …]` fails any report under `eval/results` and `eval/cards` (or the given paths) whose card is missing a field.
 - plan:check refuses a plain ✅ that rests on a `dev` card: a task's `evalCards` lists committed card files, and a ✅ task whose `dod` runs an eval (`eval:*`, `models:day`, `heldout`, `bench:*`) must list them, each tagged `public` or `heldout`. A dev number keeps the task at ✅* at most.
+- A synthetic dataset is `dev` only: a card whose `dataset.origin` is `"synthetic"`, or whose `dataset.name` starts with `synthetic/` or `eval/synthetic/`, is refused when tagged `heldout` or `public`, so it can never back a ✅.
+
+### Synthetic sets: eval/synthetic (plan W7.13)
+
+`eval/golden` holds only sets that meet the golden-set rules (`scripts/lib/golden.mjs`), with a CI-only test split. A set we generated or rewrote ourselves, and that commits its "held-out" file, lives under `eval/synthetic` instead. Its manifest says `"origin": "synthetic"`, its parts are listed under `synthetic` in `eval/origins.json`, it is frozen (sha256 of every file) and the licence gate reads it like a golden set. Today it holds `retrieval-hard` (W7.13): 297 of its 300 HeQ questions are rewritten by rule, and its cross-lingual part was written for this repo. `npm run eval:embed-compete` reads it and writes `dev` cards only.
 
 ## כרטיסי הערכה (משימה W11.I18)
 
@@ -43,6 +48,11 @@ Every eval report carries a top-level `card` (built with `makeCard` in `scripts/
 
 - ‏`npm run eval:card [קובץ|תיקייה …]` נכשל על כל דוח ב-`eval/results` וב-`eval/cards` (או בנתיבים שניתנו) שחסר שדה בכרטיס שלו.
 - ‏plan:check מסרב ל-✅ מלא שנשען על כרטיס `dev`: השדה `evalCards` של משימה מונה קובצי כרטיס שנמצאים בריפו, ומשימה ב-✅ שה-`dod` שלה מריץ הערכה (`eval:*`, ‏`models:day`, ‏`heldout`, ‏`bench:*`) חייבת למנות אותם, וכל אחד מהם מתויג `public` או `heldout`. מספר dev משאיר את המשימה לכל היותר ב-✅*.
+- ‏סט סינתטי הוא `dev` בלבד: כרטיס שה-`dataset.origin` שלו `"synthetic"`, או שה-`dataset.name` שלו מתחיל ב-`synthetic/` או ב-`eval/synthetic/`, נדחה כשהוא מתויג `heldout` או `public`, ולכן הוא לעולם לא יכול לתמוך ב-✅.
+
+### סטים סינתטיים: eval/synthetic (משימה W7.13)
+
+ב-`eval/golden` יש רק סטים שעומדים בכללי סטי הזהב (`scripts/lib/golden.mjs`), עם חלוקת test שקיימת רק ב-CI. סט שייצרנו או שכתבנו בעצמנו, ושקובץ ה-"held-out" שלו נמצא בריפו, יושב ב-`eval/synthetic`. במניפסט שלו כתוב `"origin": "synthetic"`, החלקים שלו רשומים תחת `synthetic` ב-`eval/origins.json`, הוא קפוא (sha256 לכל קובץ), ושער הרישיונות קורא אותו כמו סט זהב. כרגע יש בו את `retrieval-hard` ‏(W7.13): ‏297 מתוך 300 שאלות HeQ שלו שוכתבו לפי כלל, והחלק הבין-לשוני שלו נכתב בשביל הריפו הזה. ‏`npm run eval:embed-compete` קורא אותו וכותב רק כרטיסי `dev`.
 
 ## BFCL v4 (plan W11.I15)
 

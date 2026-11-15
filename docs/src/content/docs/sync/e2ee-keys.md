@@ -318,7 +318,9 @@ again.
 that someone else can implement it. `docs/sync-protocol-vectors.json` holds
 whole vaults (epoch 0 with PBKDF2; an Argon2id vault re-keyed twice with
 devices; one with a re-key cut off before it committed; one with a
-passphrase change cut off before its header) plus Argon2id, age and pairing
-vectors. An independent Python
+passphrase change cut off before its header; one with a recovery key; one
+with a passkey) plus Argon2id, age and pairing vectors. The keyring is
+protocol 3 since the recovery key: a re-key writes protocol 3, and a keyring
+written before it (protocol 2) is still read. An independent Python
 reader (`scripts/sync-protocol/check_vectors.py`) decodes all of them
 identically. Review is welcome in the repository's Discussions.

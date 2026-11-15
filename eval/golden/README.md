@@ -186,4 +186,4 @@ The next `task=test` run decrypts the bundle in the runner. `scripts/golden/owne
 
 ## Origin
 
-Every part of every set here, and every test fixture under `src/__tests__/fixtures`, has an origin in `eval/origins.json`: `synthetic` (written or generated here, including real text with errors we injected), `real` (someone else's data, used as published) or `derived-from-docs` (real documents with items written here). Unknown provenance counts as synthetic. `src/__tests__/origins.test.ts` keeps the list complete (plan W10.B13).
+Every part of every set here, and every test fixture under `src/__tests__/fixtures`, has an origin in `eval/origins.json`: `synthetic` (written or generated here, including real text with errors we injected), `real` (someone else's data, used as published) or `derived-from-docs` (real documents with items written here). Unknown provenance counts as synthetic. `src/__tests__/origins.test.ts` keeps the list complete (plan W10.B13). Synthetic sets that are not golden (no CI-only test split) live in `eval/synthetic`, not here; their parts are listed under `synthetic` in the same file (plan W7.13).

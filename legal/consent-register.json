@@ -89,6 +89,78 @@
       "status": "meets"
     },
     {
+      "id": "lmstudio-local",
+      "routes": [
+        "LM Studio (this machine / LAN)"
+      ],
+      "category": "local-ai",
+      "purpose": "Run the AI request on the user's own machine",
+      "recipients": [
+        "The user's own LM Studio server"
+      ],
+      "dataSent": "The prompt and the text",
+      "lawfulBasis": "performance of the service the user set up",
+      "needsConsent": false,
+      "ppa2026": {
+        "activeOptIn": "The user sets up LM Studio and selects it.",
+        "preTicked": false,
+        "namedRecipients": [
+          "The user's own LM Studio server"
+        ],
+        "withdrawal": "Deselect LM Studio in Settings → AI.",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "lmstudio-remote",
+      "routes": [
+        "LM Studio on a remote server"
+      ],
+      "category": "cloud-ai",
+      "purpose": "Run the AI request on a server the user configured",
+      "recipients": [
+        "The operator of the server the user entered"
+      ],
+      "dataSent": "The prompt and the text",
+      "lawfulBasis": "consent",
+      "needsConsent": true,
+      "ppa2026": {
+        "activeOptIn": "The user enters an LM Studio address that is not on this machine or the local network.",
+        "preTicked": false,
+        "namedRecipients": [
+          "The operator of the server the user entered"
+        ],
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy).",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "on-device-model",
+      "routes": [
+        "Runs on this device; nothing is sent"
+      ],
+      "category": "local-ai",
+      "purpose": "Show that the browser's built-in model ran on this device",
+      "recipients": [
+        "Nobody: the browser's built-in model runs on this device"
+      ],
+      "dataSent": "Nothing leaves the device",
+      "lawfulBasis": "performance of the feature the user asked for",
+      "needsConsent": false,
+      "ppa2026": {
+        "activeOptIn": "The user runs a feature that uses the browser's built-in model.",
+        "preTicked": false,
+        "namedRecipients": [
+          "Nobody: the browser's built-in model runs on this device"
+        ],
+        "withdrawal": "Don't use the feature; nothing is sent either way.",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
       "id": "grammar",
       "routes": [
         "LanguageTool grammar check"
@@ -396,6 +468,30 @@
       "status": "meets"
     },
     {
+      "id": "plugin-registry",
+      "routes": [
+        "Plugin registry download (signed index, manifest, code); no user data"
+      ],
+      "category": "static-asset",
+      "purpose": "Download the signed registry index and the plugin the user chose to install",
+      "recipients": [
+        "The app's own host (the plugin registry under /plugins/examples)"
+      ],
+      "dataSent": "A file request; no user content (the server sees the IP address)",
+      "lawfulBasis": "performance of the action the user asked for",
+      "needsConsent": false,
+      "ppa2026": {
+        "activeOptIn": "The user presses Install on a plugin.",
+        "preTicked": false,
+        "namedRecipients": [
+          "The app's own host (the plugin registry under /plugins/examples)"
+        ],
+        "withdrawal": "Don't install; remove an installed plugin in the plugin gallery.",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
       "id": "update-check",
       "routes": [
         "Desktop update check (app version and platform only)"
@@ -615,6 +711,33 @@
           "The user's own device"
         ],
         "withdrawal": "Unpair, or stop LAN sync.",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "sync-storage-audit",
+      "routes": [
+        "Sync storage: your Dropbox (audit mode)",
+        "Sync storage: your Google Drive (audit mode)"
+      ],
+      "category": "network",
+      "purpose": "Sync the end-to-end encrypted vault to the user's own storage; audit mode names the requests",
+      "recipients": [
+        "The user's own Dropbox account",
+        "The user's own Google Drive account"
+      ],
+      "dataSent": "End-to-end encrypted vault files (the provider sees ciphertext, sizes and times)",
+      "lawfulBasis": "performance of the service the user set up",
+      "needsConsent": false,
+      "ppa2026": {
+        "activeOptIn": "The user connects Dropbox or Google Drive as sync storage.",
+        "preTicked": false,
+        "namedRecipients": [
+          "The user's own Dropbox account",
+          "The user's own Google Drive account"
+        ],
+        "withdrawal": "Disconnect the sync provider in Settings → Sync.",
         "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
       },
       "status": "meets"

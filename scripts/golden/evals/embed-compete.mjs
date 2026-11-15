@@ -1,10 +1,13 @@
 /**
- * The embeddings / reranker competition (plan W7.13) on retrieval/hard.
+ * The embeddings / reranker competition (plan W7.13) on the hard set,
+ * eval/synthetic/retrieval-hard (HARD_SET_DIR). That set is synthetic, not
+ * golden (coordinator, W7.13), so every card made on it is tagged `dev`
+ * with dataset.origin "synthetic" (hardSetCard) and can never back a ✅.
  * Plain JavaScript like retrieval.mjs and rerank.mjs, so tests and the
  * real-model eval (src/agents/eval/embedCompete.eval.ts) share it.
  *
  *   evaluateCandidate(candidate, { items, corpus })
- *     → { ndcg10, recall20, msPerQuery, indexBytes, dims }
+ *     → { ndcg10, recall20, msPerQuery, indexBytes, dims, perItem: { ndcg_at_10, recall_at_20 } }
  *   candidate = { id, embed(texts, "query" | "document") → number[][], dims?, matryoshka?, rerank?(query, docs) }
  *
  * The plan's rules, as functions:
@@ -14,6 +17,22 @@
  *   rerankDecision  a reranker is on only when it adds ≥ 3 points
  */
 import { ndcgAt } from "./retrieval.mjs";
+import { makeCard } from "../../lib/evalCard.mjs";
+
+/** Where the hard set lives: under eval/synthetic, not eval/golden (W7.13). */
+export const HARD_SET_DIR = "eval/synthetic/retrieval-hard";
+/** The card dataset of the hard set: synthetic, so a card on it is dev. */
+export const HARD_SET_DATASET = Object.freeze({ name: "synthetic/retrieval-hard", license: "CC-BY-4.0 AND CC-BY-SA-4.0 AND CC0-1.0", origin: "synthetic" });
+
+/**
+ * The eval card of one candidate on one split of the hard set. Always
+ * tag "dev": the set is synthetic and its held-out file is committed, so
+ * neither split is a held-out run in the W11.I18 sense.
+ * @param {{ model: { name: string, digest: string }, split: string, version: string, result: { perItem: Record<string, number[]> }, seed?: number }} r
+ */
+export function hardSetCard({ model, split, version, result, seed = 1 }) {
+  return makeCard({ tag: "dev", model, seed, temperature: 0, dataset: { ...HARD_SET_DATASET, name: `${HARD_SET_DATASET.name}/${split}`, version }, scores: result.perItem });
+}
 
 export const DISCRIMINATE_POINTS = 5;
 export const SWITCH_POINTS = 5;
@@ -52,6 +71,7 @@ export async function evaluateCandidate(candidate, { items, corpus, k = 10, reca
   let nd = 0;
   let rc = 0;
   let ms = 0;
+  const perItem = { ndcg_at_10: [], recall_at_20: [] };
   for (const it of items) {
     const t0 = now();
     const [qv] = (await candidate.embed([it.query], "query")).map(fit);
@@ -67,12 +87,16 @@ export async function evaluateCandidate(candidate, { items, corpus, k = 10, reca
       ranking = [...re.map((r) => r.id), ...ranking.slice(rerankTop)];
     }
     ms += now() - t0;
-    nd += ndcgAt(ranking, it.relevant, k);
-    rc += recallAt(ranking, it.relevant, recallK);
+    const ni = ndcgAt(ranking, it.relevant, k);
+    const ri = recallAt(ranking, it.relevant, recallK);
+    perItem.ndcg_at_10.push(ni);
+    perItem.recall_at_20.push(ri);
+    nd += ni;
+    rc += ri;
   }
   const n = items.length || 1;
   const d = docVecs[0]?.length ?? 0;
-  return { id: candidate.id, ndcg10: round(nd / n), recall20: round(rc / n), msPerQuery: round(ms / n, 2), dims: d, indexBytes: corpus.length * d * 4, items: items.length };
+  return { id: candidate.id, ndcg10: round(nd / n), recall20: round(rc / n), msPerQuery: round(ms / n, 2), dims: d, indexBytes: corpus.length * d * 4, items: items.length, perItem };
 }
 
 /** nDCG points (×100) between two results. */

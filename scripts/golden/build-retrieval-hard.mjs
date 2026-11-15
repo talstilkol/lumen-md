@@ -1,12 +1,17 @@
 #!/usr/bin/env node
 /**
- * Build eval/golden/retrieval-hard/ (plan W7.13) from HeQ v1.1 (the same
+ * Build eval/synthetic/retrieval-hard/ (plan W7.13) from HeQ v1.1 (the same
  * pinned download as retrieval/heq, sha256-checked) and the W5.28
  * cross-lingual probes:
  *
  *   node scripts/golden/build-retrieval-hard.mjs [--cache DIR] [--n 300]
  *
  * dev.json (70 %) and heldout.json (30 %), deterministic for the seed.
+ *
+ * A synthetic set (eval/origins.json, W10.B13): 297 of the 300 questions
+ * are rewritten by rule and the cross-lingual part was written for this
+ * repository, and heldout.json is committed. So it lives under eval/synthetic,
+ * not eval/golden, and its numbers are dev numbers (coordinator, W7.13).
  */
 import { mkdirSync, readFileSync, writeFileSync, existsSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
@@ -33,7 +38,7 @@ for (const split of readdirSync(heqDir).filter((d) => existsSync(join(heqDir, d,
 }
 const { dev, heldout } = buildHard(pool, { n, seed: SEED, exclude, corpus: pool.corpus });
 const xl = JSON.parse(readFileSync(join(root, "eval/probes/crosslingual-he-en.json"), "utf8"));
-const out = join(root, "eval/golden/retrieval-hard");
+const out = join(root, "eval/synthetic/retrieval-hard");
 mkdirSync(out, { recursive: true });
 const write = (name, items, extra = {}) =>
   writeFileSync(

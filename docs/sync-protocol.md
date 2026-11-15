@@ -718,6 +718,12 @@ Changes:
   devices don't upload, and their re-keys wrap for no device (N6, RR-5). A
   wrap that doesn't open the keyring is reported as tampered, not as a
   revocation, and every rewrite makes all wraps again (N5).
+- Recovery key and passkeys (W11.S8, W11.S10): keyring protocol 3. A
+  keyring may carry `recovery` and `passkeys` (§5a, §5b), and `<p>` in
+  every AES-GCM is 3. A re-key writes protocol 3; a protocol 2 keyring is
+  still read, and rewritten at its own epoch as protocol 2. A build that
+  knows only protocol 2 refuses protocol 3, so it can't drop a recovery
+  key by re-keying without it. Vaults 5 and 6 of the vectors are protocol 3.
 - Fifth review 12.11: pairing messages are domain-separated — the kind is in
   the MAC and the body, each kind has its own fields, and the answer names the
   request's hash; versions request 2, answer 2, code 3 (F1). A re-key waits
