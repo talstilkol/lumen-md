@@ -1,5 +1,6 @@
 /** The academic calendar for the app (plan W7.8): the chosen institution's line for a day, and its ICS file. */
-import "./strings";
+// Its English shares the lazy academic strings with the submission export (W5.16), through that file's one strings module.
+import "../ui/academicStrings";
 import { dailyLine, toIcs, type AcademicYear } from "./calendar";
 import { CALENDARS, choose, chosen } from "./registry";
 
