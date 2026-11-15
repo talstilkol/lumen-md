@@ -23,6 +23,18 @@ Pages are rendered only when they come near the screen, so long documents
 open quickly. Use **−** / **+** / **Fit width** to zoom, and type a number
 in the page box to jump to a page.
 
+## Two pages side by side
+
+**Page layout** in the toolbar shows **Two pages** (1–2, 3–4, …) or **Two
+pages (cover alone)** (1, then 2–3, 4–5, …, as a printed book with a cover
+opens). A Hebrew or Arabic book is laid out right to left: the first page
+of each spread is on the right. Lumen guesses the direction from the text of
+the first pages; the **Book: right to left** button switches it. In two-page
+view the arrow keys turn a whole spread in the book's direction (in a Hebrew
+book **←** is the next spread), and **Page Down** / **Page Up** work either
+way. The layout and direction are remembered per PDF, and your place is
+kept as the spread's first page.
+
 ## Highlight text
 
 1. Select text on a page.
