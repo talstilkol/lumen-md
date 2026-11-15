@@ -80,6 +80,7 @@
 /src/ui/PrintExport.tsx                  @talstilkol
 /src/commands/domains/export.ts          @talstilkol
 /src/publish/site.ts                     @talstilkol
+/src/entities/export.ts                  @talstilkol
 /src/cli/publish.ts                      @talstilkol
 /src/cli/convert.ts                      @talstilkol
 
