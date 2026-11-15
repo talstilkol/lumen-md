@@ -8,17 +8,20 @@ import { test, expect, type Request } from "@playwright/test";
  */
 const MONITORING = /sentry|glitchtip|\/api\/\d+\/(envelope|store)\//i;
 
-for (const consent of [false, true]) {
-  test(`default build: 0 monitoring requests (${consent ? "error reports turned on, no DSN" : "fresh state"})`, async ({ page }) => {
+// W11.S19: error reports and performance reports are separate consents; with either on and no DSN, still 0.
+for (const [consent, performance] of [[false, false], [true, false], [false, true], [true, true]] as const) {
+  test(`default build: 0 monitoring requests (${consent || performance ? `${[consent && "error reports", performance && "performance reports"].filter(Boolean).join(" and ")} turned on, no DSN` : "fresh state"})`, async ({ page }) => {
     const hits: string[] = [];
     page.on("request", (r: Request) => {
       if (MONITORING.test(r.url())) hits.push(`${r.method()} ${r.url()}`);
     });
-    await page.addInitScript((on: boolean) => {
+    await page.addInitScript(([on, perf]: readonly [boolean, boolean]) => {
       localStorage.setItem("lumen-tour-done", "1");
       if (on) localStorage.setItem("lumen.monitoring.consent", "1");
       else localStorage.removeItem("lumen.monitoring.consent");
-    }, consent);
+      if (perf) localStorage.setItem("lumen.monitoring.performance", "1");
+      else localStorage.removeItem("lumen.monitoring.performance");
+    }, [consent, performance] as const);
     await page.goto("/");
     await expect(page.locator(".cm-content").first()).toBeVisible({ timeout: 15_000 });
     await expect(page.getByTestId("status-telemetry")).toHaveAttribute("aria-pressed", String(consent));
@@ -36,6 +39,8 @@ for (const consent of [false, true]) {
     await expect(vitals).toBeVisible({ timeout: 8000 });
     await expect(vitals.locator('[data-rating]:not([data-rating="none"])').first()).toBeVisible({ timeout: 8000 });
 
+    // A performance report would go when the page is hidden.
+    await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
     await page.waitForLoadState("networkidle");
     expect(hits).toEqual([]);
     const ledger = await page.evaluate(() => localStorage.getItem("lumen.privacy.ledger") ?? "[]");

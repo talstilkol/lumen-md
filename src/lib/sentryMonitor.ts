@@ -17,8 +17,9 @@
 import * as Sentry from "@sentry/browser";
 import { guardedFetch, MONITORING_REASON } from "../ai/privacyLedger";
 import { setErrorSink } from "./logger";
-import { getMonitoringConsent } from "./telemetry";
-import { scrubEvent } from "./monitoringScrub";
+import { getMonitoringConsent, getPerformanceConsent } from "./telemetry";
+import { isVitalsEvent, redactEvent, scrubEvent, scrubVitalsEvent, vitalsBuckets } from "./monitoringScrub";
+import { vitalsSnapshot } from "./webVitals";
 
 /** `fetch` for the transport: recorded by the ledger as monitoring traffic. */
 export const ledgerFetch: typeof fetch = (input, init) => {
@@ -44,9 +45,16 @@ export async function startSentry(dsn: string): Promise<void> {
       enableMetrics: false,
       maxBreadcrumbs: 0,
       beforeBreadcrumb: () => null,
-      // why: consent is re-read for every event — turning the pill off stops reports at once
-      beforeSend: (event) => (getMonitoringConsent() ? scrubEvent(event) : null),
+      // why: consent is re-read for every event — turning a switch off stops its reports at once.
+      // W11.S19: error reports and performance reports have separate consents; whatever is left after
+      // the allowlist goes through the secret and PII redactor too.
+      beforeSend: (event) => (isVitalsEvent(event) ? (getPerformanceConsent() ? scrubVitalsEvent(event) : null) : getMonitoringConsent() ? redactEvent(scrubEvent(event)) : null),
     });
+    // Performance reports: once, when the page is hidden, the session's web-vitals buckets.
+    if (typeof document !== "undefined")
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "hidden") reportVitalsBuckets();
+      });
   }
   setErrorSink((...args: unknown[]) => {
     if (!getMonitoringConsent()) return;
@@ -55,6 +63,21 @@ export async function startSentry(dsn: string): Promise<void> {
     // A log.error without an Error is reported by where it was logged.
     Sentry.captureException(err ?? new Error("log.error"));
   });
+}
+
+let vitalsSent = false;
+
+/**
+ * Send this session's web vitals as counts per rating (W11.S19), once, and
+ * only with performance consent. No value and no page address leave.
+ */
+export function reportVitalsBuckets(snapshot = vitalsSnapshot()): boolean {
+  if (vitalsSent || !getPerformanceConsent()) return false;
+  const buckets = vitalsBuckets(Object.values(snapshot).filter((s): s is NonNullable<typeof s> => !!s));
+  if (!Object.keys(buckets).length) return false;
+  vitalsSent = true;
+  Sentry.captureEvent({ message: "web-vitals", level: "info", extra: { lumenVitals: buckets } });
+  return true;
 }
 
 /** Send what is queued (tests, and before the page closes). */
