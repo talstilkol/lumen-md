@@ -14352,6 +14352,50 @@
       ]
     },
     {
+      "key": "viz.hcal.activity",
+      "en": "Activity in {year} by Hebrew month",
+      "vars": [
+        "year"
+      ]
+    },
+    {
+      "key": "viz.hcal.dayOfMonth",
+      "en": "Day of the month",
+      "vars": []
+    },
+    {
+      "key": "viz.hcal.items",
+      "en": "{count} notes",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "viz.hcal.month",
+      "en": "Month",
+      "vars": []
+    },
+    {
+      "key": "viz.hcal.next",
+      "en": "Next month",
+      "vars": []
+    },
+    {
+      "key": "viz.hcal.nextYear",
+      "en": "Next year",
+      "vars": []
+    },
+    {
+      "key": "viz.hcal.prev",
+      "en": "Previous month",
+      "vars": []
+    },
+    {
+      "key": "viz.hcal.prevYear",
+      "en": "Previous year",
+      "vars": []
+    },
+    {
       "key": "viz.kind.bar",
       "en": "Bar chart",
       "vars": []
