@@ -1327,6 +1327,78 @@
       ]
     },
     {
+      "key": "base.filters.all",
+      "en": "All views",
+      "vars": []
+    },
+    {
+      "key": "base.filters.drag",
+      "en": "Drag to reorder, or Alt+Up / Alt+Down",
+      "vars": []
+    },
+    {
+      "key": "base.filters.moveToAll",
+      "en": "Move to All views",
+      "vars": []
+    },
+    {
+      "key": "base.filters.moveToView",
+      "en": "Move to This view",
+      "vars": []
+    },
+    {
+      "key": "base.filters.saved",
+      "en": "Filter order saved in {file}",
+      "vars": [
+        "file"
+      ]
+    },
+    {
+      "key": "base.filters.title",
+      "en": "Filters",
+      "vars": []
+    },
+    {
+      "key": "base.filters.view",
+      "en": "This view",
+      "vars": []
+    },
+    {
+      "key": "base.kanban.card",
+      "en": "card",
+      "vars": []
+    },
+    {
+      "key": "base.kanban.cardHint",
+      "en": "Drag to another column, or Alt+arrow keys",
+      "vars": []
+    },
+    {
+      "key": "base.kanban.moved",
+      "en": "Moved {name} to {column}",
+      "vars": [
+        "name",
+        "column"
+      ]
+    },
+    {
+      "key": "base.kanban.none",
+      "en": "None",
+      "vars": []
+    },
+    {
+      "key": "base.kanban.notMarkdown",
+      "en": "Only Markdown notes can be moved between columns",
+      "vars": []
+    },
+    {
+      "key": "base.kanban.readOnly",
+      "en": "Grouped by {property}: cards can't be moved here (only note properties and file.folder can be changed by dragging)",
+      "vars": [
+        "property"
+      ]
+    },
+    {
       "key": "base.limited",
       "en": "Showing {count} of {total}",
       "vars": [
