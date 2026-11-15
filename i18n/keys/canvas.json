@@ -4,18 +4,8 @@
   "source": "src/i18n/locales/en/canvas.json",
   "entries": [
     {
-      "key": "canvas.addNote",
-      "en": "+ Add Note",
-      "vars": []
-    },
-    {
       "key": "canvas.autoSaved",
       "en": "Canvas · auto-saved",
-      "vars": []
-    },
-    {
-      "key": "canvas.back",
-      "en": "← Back to Editor",
       "vars": []
     },
     {
@@ -178,11 +168,6 @@
       "vars": []
     },
     {
-      "key": "canvas.done",
-      "en": "Done",
-      "vars": []
-    },
-    {
       "key": "canvas.export.failed",
       "en": "Export failed: {error}",
       "vars": [
@@ -297,11 +282,6 @@
       "vars": []
     },
     {
-      "key": "canvas.new.placeholder",
-      "en": "ideas",
-      "vars": []
-    },
-    {
       "key": "canvas.new.prompt",
       "en": "Canvas name:",
       "vars": []
@@ -321,11 +301,6 @@
     {
       "key": "canvas.new.replaceTitle",
       "en": "Replace this canvas?",
-      "vars": []
-    },
-    {
-      "key": "canvas.new.title",
-      "en": "Create a new canvas",
       "vars": []
     },
     {
@@ -367,11 +342,6 @@
       ]
     },
     {
-      "key": "canvas.switch",
-      "en": "Switch canvas",
-      "vars": []
-    },
-    {
       "key": "canvas.title",
       "en": "Canvas",
       "vars": []
@@ -381,20 +351,6 @@
       "en": "Couldn’t read the canvas “{name}”. It stays read-only so its saved drawing isn’t overwritten.",
       "vars": [
         "name"
-      ]
-    },
-    {
-      "key": "canvas.unsaved",
-      "en": "{name} (unsaved)",
-      "vars": [
-        "name"
-      ]
-    },
-    {
-      "key": "canvas.zoom",
-      "en": "Zoom: {pct}%",
-      "vars": [
-        "pct"
       ]
     },
     {

@@ -124,18 +124,6 @@
       "vars": []
     },
     {
-      "key": "toast.clonedFilesIntoWorkspace",
-      "en": "✅ Cloned files into the workspace: {count}",
-      "vars": [
-        "count"
-      ]
-    },
-    {
-      "key": "toast.cloningRepository",
-      "en": "Cloning repository…",
-      "vars": []
-    },
-    {
       "key": "toast.completed",
       "en": "✅ {name} completed",
       "vars": [
@@ -241,11 +229,6 @@
       "vars": []
     },
     {
-      "key": "toast.generatingCommitMessage",
-      "en": "Generating commit message…",
-      "vars": []
-    },
-    {
       "key": "toast.generatingDiagram",
       "en": "🧩 Generating diagram…",
       "vars": []
@@ -259,14 +242,6 @@
       "key": "toast.generatingTemplate",
       "en": "Generating template...",
       "vars": []
-    },
-    {
-      "key": "toast.gitIdentitySet",
-      "en": "✅ Git identity set: {name} <{email}>",
-      "vars": [
-        "name",
-        "email"
-      ]
     },
     {
       "key": "toast.gitWatchOnPullingEvery",
@@ -529,33 +504,11 @@
       ]
     },
     {
-      "key": "toast.pulledChangedFiles",
-      "en": "✅ Pulled changed files: {count}",
-      "vars": [
-        "count"
-      ]
-    },
-    {
       "key": "toast.pulledFile",
       "en": "⬇️ Pulled files: {count}",
       "vars": [
         "count"
       ]
-    },
-    {
-      "key": "toast.pulling",
-      "en": "Pulling…",
-      "vars": []
-    },
-    {
-      "key": "toast.pushedToRemote",
-      "en": "✅ Pushed to remote",
-      "vars": []
-    },
-    {
-      "key": "toast.pushing",
-      "en": "Pushing…",
-      "vars": []
     },
     {
       "key": "toast.recordingIsNotSupportedIn",

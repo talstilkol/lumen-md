@@ -371,11 +371,6 @@
       "vars": []
     },
     {
-      "key": "git.alert.noRepo",
-      "en": "This workspace isn't a Git repo. Run `git clone` first or use `Init repository`.",
-      "vars": []
-    },
-    {
       "key": "git.alert.pullFailed",
       "en": "Pull failed: {error}",
       "vars": [
@@ -390,23 +385,9 @@
       ]
     },
     {
-      "key": "git.alert.pushFailed",
-      "en": "Push failed: {error}",
-      "vars": [
-        "error"
-      ]
-    },
-    {
       "key": "git.alert.pushed",
       "en": "Pushed.",
       "vars": []
-    },
-    {
-      "key": "git.alert.statusFailed",
-      "en": "Status failed: {error}",
-      "vars": [
-        "error"
-      ]
     },
     {
       "key": "git.alert.tokenCleared",
@@ -508,26 +489,11 @@
       ]
     },
     {
-      "key": "git.defaultCommitMessage",
-      "en": "Update files",
-      "vars": []
-    },
-    {
       "key": "git.lfs.unsupported",
       "en": "Git LFS is not supported; these are LFS pointers: {files}",
       "vars": [
         "files"
       ]
-    },
-    {
-      "key": "git.placeholder.name",
-      "en": "Your name",
-      "vars": []
-    },
-    {
-      "key": "git.prompt.cloneUrl",
-      "en": "Repository URL (https://… or git@…):",
-      "vars": []
     },
     {
       "key": "git.prompt.commitMessage",
@@ -545,11 +511,6 @@
       "vars": []
     },
     {
-      "key": "git.prompt.email",
-      "en": "Git email:",
-      "vars": []
-    },
-    {
       "key": "git.prompt.identityEmail",
       "en": "Email:",
       "vars": []
@@ -562,11 +523,6 @@
     {
       "key": "git.prompt.message",
       "en": "Commit message:",
-      "vars": []
-    },
-    {
-      "key": "git.prompt.name",
-      "en": "Git name:",
       "vars": []
     },
     {
