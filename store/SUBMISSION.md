@@ -15,6 +15,8 @@
 | Listings in English and Hebrew: name, subtitle, keywords, promotional text, description, release notes, review notes | `store/listing.json` → `fastlane/metadata/**` | `node scripts/store.mjs check`: each store's limits, with App Store keywords in UTF-8 bytes (a Hebrew letter is 2) |
 | Privacy-label answers, question by question | `store/privacy-answers.md`, from `store/privacy-labels.json` (plan W2.24) | the same check; the labels file's own test (in #395) ties it to the privacy ledger and the audits |
 | Screenshots: iPhone 6.9″, iPad 13″, Android phone and desktop, in Hebrew and English | `node scripts/store-screenshots.mjs` → `store/screenshots/` | the script checks each PNG's exact pixel size |
+| Target SDK 36 and 16 KB pages (Google Play) | `android/variables.gradle`; `node scripts/check-16kb.mjs <.apk/.aab>` | `src/__tests__/storeReadiness.test.ts` (plan W11.P11); the script checks every `.so`'s ELF alignment and, in an .apk, its zip offset, and runs `zipalign -c -P 16` when the SDK is on PATH |
+| Privacy manifests (Apple's required-reason APIs) | `ios/App/App/PrivacyInfo.xcprivacy`, `ios/App/LumenShare/PrivacyInfo.xcprivacy` | the same test: in each target's resources, no tracking, nothing collected (as `store/privacy-labels.json` says), and a reason for exactly the APIs that target's Swift uses |
 | winget manifests and a Homebrew cask | `node scripts/store.mjs desktop …` → `store/desktop/` | filled from the release's `SHA256SUMS` (plan 13.4) |
 
 ## 0. Before any store
@@ -45,7 +47,8 @@ Account: Apple Developer Program (15.7). App ID: `com.lumen.editor`.
 - [ ] **App Privacy:** answer from `store/privacy-answers.md` → *App Store Connect*. Privacy policy URL from `privacy_url.txt`.
 - [ ] **Pricing:** Free, in all territories.
 - [ ] **Export compliance:** Lumen encrypts with the system's standard algorithms (WebCrypto AES-GCM; HTTPS). Apple's guidance usually treats this as exempt. **Confirm the answer with Apple's export-compliance questions** before setting `ITSAppUsesNonExemptEncryption` in `ios/App/App/Info.plist`; it isn't set yet, so App Store Connect asks on upload.
-- [ ] Xcode → Product → **Archive** → Distribute → App Store Connect (signing team from 15.7). Steps are in RELEASE.md §3.
+- [ ] Xcode 26 → Product → **Archive** → Distribute → App Store Connect (signing team from 15.7). Steps are in RELEASE.md §3. Apple requires Xcode 26 and the iOS 26 SDK for uploads from 28.4.2026.
+- [ ] In the Organizer, **Generate Privacy Report** for the archive: the app and LumenShare list *User Defaults* and *File Timestamp* with the reasons in their `PrivacyInfo.xcprivacy`, and the Capacitor packages list their own.
 - [ ] **TestFlight:**
       - internal testers first;
       - *What to Test* from `release_notes.txt`, in both languages;
@@ -78,7 +81,8 @@ Account: Google Play Console (15.7). Package: `com.lumen.editor`.
       - **Target audience:** 13+ (adults; not designed for children).
       - **Data safety:** from `store/privacy-answers.md` → *Data safety*.
       - **Government apps:** no. **Financial features:** none.
-- [ ] Build the **.aab**: `cd android && ./gradlew bundleRelease -PversionCode=<n> -PversionName=<x.y.z>`, signed with the upload key (15.7; RELEASE.md §4). The target SDK is 36 (`android/variables.gradle`), which meets Play's current requirement.
+- [ ] Build the **.aab**: `cd android && ./gradlew bundleRelease -PversionCode=<n> -PversionName=<x.y.z>`, signed with the upload key (15.7; RELEASE.md §4). The target SDK is 36 (`android/variables.gradle`), which meets Play's requirement from 31.8.2026.
+- [ ] `node scripts/check-16kb.mjs android/app/build/outputs/bundle/release/app-release.aab` → *16 KB check: ok*. If the app ships no native library at all, the script says so (then `--allow-none`).
 - [ ] **Testing → Internal testing → Create release:**
       - upload the .aab;
       - release notes from `changelogs/default.txt`;
