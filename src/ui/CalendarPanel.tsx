@@ -20,6 +20,9 @@ import "./calendarPanelStrings";
 import { dayStatus, defaultWorkWeek, type WorkWeek } from "../daily/israeliTime";
 import { showHebrewDates } from "../daily/defaults";
 import { explainError } from "../lib/userError";
+import { CITIES, cityById } from "../daily/shabbatTimes";
+import { calendarEvents } from "../daily/timeBlocks";
+import { DayTimeline } from "./DayTimeline";
 
 /** Holidays that get a mark on their day (the rest are in the day's label only). */
 const MARKED = new Set<Holiday["kind"]>(["major", "modern", "fast", "minor"]);
@@ -75,6 +78,12 @@ export function CalendarPanel() {
   const [withNotes, setWithNotes] = useState<Set<string>>(new Set());
   const [editing, setEditing] = useState(false);
   const [patternError, setPatternError] = useState(false);
+  // Plan W12.H7: the open daily note's timeline.
+  const openPath = useAppStore((s) => s.doc.workspaceName) as string | null | undefined;
+  const openContent = useAppStore((s) => s.doc.content) as string;
+  const setContent = useAppStore((s) => s.setContent);
+  const openDay = openPath ? dayOfPath(openPath, settings) : null;
+  const city = cityById(settings.city);
 
   const refresh = useCallback(async () => {
     try {
@@ -236,6 +245,16 @@ export function CalendarPanel() {
           ))}
         </ul>
       )}
+      {openDay && (
+        <DayTimeline
+          note={openContent}
+          day={openDay}
+          city={city}
+          shabbat={settings.candleMinutes !== undefined ? { candles: settings.candleMinutes } : undefined}
+          events={calendarEvents(openContent)}
+          onChange={setContent}
+        />
+      )}
       {editing && (
         <form
           onSubmit={(e) => {
@@ -257,6 +276,8 @@ export function CalendarPanel() {
               workWeek: week === "mon-fri" ? "mon-fri" : "sun-thu",
               hebrewDates: f.get("hebrewDates") === "on",
               deadlineMove: move === "previous" || move === "off" ? move : "next",
+              city: cityById(String(f.get("city") ?? ""))?.id,
+              candleMinutes: /^\d{1,2}$/.test(String(f.get("candleMinutes") ?? "")) ? Number(f.get("candleMinutes")) : undefined,
             });
             setEditing(false);
           }}
@@ -302,6 +323,21 @@ export function CalendarPanel() {
               <option value="previous">{t("calendar.deadlineMove.previous")}</option>
               <option value="off">{t("calendar.deadlineMove.off")}</option>
             </select>
+          </label>
+          <label style={{ display: "grid", gap: 2 }}>
+            <span>{t("calendar.city")}</span>
+            <select name="city" defaultValue={settings.city ?? ""} style={input}>
+              <option value="">{t("calendar.city.none")}</option>
+              {CITIES.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {lang === "he" ? c.he : c.en}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label style={{ display: "grid", gap: 2 }}>
+            <span>{t("calendar.candleMinutes")}</span>
+            <input name="candleMinutes" inputMode="numeric" dir="ltr" placeholder={String(city?.candles ?? 18)} defaultValue={settings.candleMinutes ?? ""} style={input} />
           </label>
           <button type="submit" style={{ ...btn, justifySelf: "end", color: "hsl(var(--accent))", fontWeight: 600 }}>
             {t("calendar.save")}

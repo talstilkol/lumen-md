@@ -16,6 +16,10 @@ export interface DailySettings {
   hebrewDates?: boolean;
   /** A deadline on Shabbat or a chag: suggest the next working day, the previous one, or don't move it. Unset: next. */
   deadlineMove?: "next" | "previous" | "off";
+  /** The city for Shabbat and yom tov times (plan W12.H8: daily/shabbatTimes CITIES id), picked by hand; unset: no times. */
+  city?: string;
+  /** Candle lighting, minutes before sunset; unset: the city's custom (18; Jerusalem 40, Haifa 30). */
+  candleMinutes?: number;
 }
 
 /** The Hebrew-date setting, with its default. */
