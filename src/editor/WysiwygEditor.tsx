@@ -13,6 +13,7 @@ import { Plugin } from "@milkdown/prose/state";
 import { wysiwygBidiPlugin } from "./wysiwygBidi";
 import { wysiwygAiAuthorshipPlugin } from "./wysiwygAiAuthorship";
 import { saveWysiwygAiSpans } from "./wysiwygAiSave";
+import { restoreWysiwygAiSpans } from "./wysiwygAiRestore";
 import { remoteImagePlugin } from "./remoteImageView";
 import { wysiwygBidiMarksPlugin } from "./wysiwygBidiMarks";
 import { listSpreadFix } from "./milkdownListSpread";
@@ -445,6 +446,8 @@ const pasteCleanPlugin = $prose(
       lastEmittedRef.current = value;
       registeredViewRef.current = editor.action((ctx) => ctx.get(editorViewCtx));
       registerWysiwygView(registeredViewRef.current);
+      // W10.E37: the note's saved AI spans (source view, AI commands, the last emission) drawn here too.
+      restoreWysiwygAiSpans(editor, value, fm, (md) => encodeCriticForWysiwyg(protectEscapedWikiLinks(md)));
       serializedRef.current = editor.action(getMarkdown());
       try {
         preserveRef.current = wysiwygSourcePreserver(body, serializedRef.current).restore;

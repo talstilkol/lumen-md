@@ -23,6 +23,16 @@ export function markAiInsert(tr: Transaction): Transaction {
   return tr.setMeta(META, true);
 }
 
+const RESTORE = "lumenAiRestore";
+
+/**
+ * Draw saved AI ranges (from the note's saved spans, after a build) on `tr`,
+ * without changing the document or the undo history. Returns `tr`.
+ */
+export function restoreAiRanges(tr: Transaction, ranges: ReadonlyArray<readonly [number, number]>): Transaction {
+  return tr.setMeta(RESTORE, ranges).setMeta("addToHistory", false);
+}
+
 const isAi = (tr: Transaction) => tr.getMeta(META) === true;
 const deco = (from: number, to: number) => Decoration.inline(from, to, { class: "ai-authored" }, { ai: true });
 
@@ -40,6 +50,12 @@ function changedRanges(tr: Transaction): Array<[number, number]> {
 }
 
 function apply(tr: Transaction, set: DecorationSet): DecorationSet {
+  const restored = tr.getMeta(RESTORE) as ReadonlyArray<readonly [number, number]> | undefined;
+  if (restored && !tr.docChanged) {
+    const size = tr.doc.content.size;
+    const add = restored.filter(([a, b]) => a >= 0 && b <= size && b > a).map(([a, b]) => deco(a, b));
+    if (add.length) set = set.add(tr.doc, add);
+  }
   if (!tr.docChanged) return set;
   let next = set.map(tr.mapping, tr.doc);
   const ranges = changedRanges(tr);
