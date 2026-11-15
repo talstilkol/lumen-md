@@ -25,6 +25,8 @@ import { discardRunChanges, getStagedChange, listStagedChanges, onStagedChanges,
 import type { ChangeProposal, StagedChange } from "./types";
 import { flushPendingEdits, tabIdOf, useAppStore } from "../store/useStore";
 import { showAiToast } from "../ui/AiToast";
+import { writeAiContent } from "../ai/aiWrites";
+import { aiAuthored } from "../editor/aiAuthorship";
 import { t, tPlural } from "../i18n";
 
 /**
@@ -73,12 +75,13 @@ export function editorDocumentHost(editorRef: RefObject<EditorHandle | null>, ke
         // Through CodeMirror: undoable, and its onChange marks the document
         // unsaved. Not an "input" event, so suggesting mode's filter leaves
         // it as it is (a tracked change was already written by the applier).
-        view.dispatch({ changes: edit, userEvent: "agent.apply", selection: { anchor: edit.from + edit.insert.length }, scrollIntoView: true });
+        // The agent's text is AI text, tagged at the insertion (W10.E37).
+        view.dispatch({ changes: edit, userEvent: "agent.apply", annotations: aiAuthored.of(true), selection: { anchor: edit.from + edit.insert.length }, scrollIntoView: true });
         return true;
       }
       // Preview / WYSIWYG: no editor history to put it in (WYSIWYG rebuilds
       // from the new text), so the result says Undo cannot take it back.
-      setContent(doc.content.slice(0, edit.from) + edit.insert + doc.content.slice(edit.to));
+      writeAiContent(doc, doc.content.slice(0, edit.from) + edit.insert + doc.content.slice(edit.to), setContent);
       return false;
     },
     setTab(id, text) {
