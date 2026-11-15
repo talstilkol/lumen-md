@@ -86,6 +86,22 @@ npx -p @lumen-md/mcp-server lumen mcp enable claude-code --vault "$HOME/Document
 arguments: `npx -y @lumen-md/mcp-server --client cursor` (or `vscode`,
 `zed`) with `LUMEN_VAULT` in `env`.
 
+## What a client may see
+
+`.lumen/mcp.json` can limit, for every client (`scope`) or for one (`clients.<id>.scope`), which notes the MCP tools see at all:
+
+```json
+{ "scope": { "deny": { "folders": ["journal"], "tags": ["private"] } },
+  "clients": { "cursor": { "enabled": true, "scopes": ["search", "read"],
+                           "scope": { "allow": { "folders": ["work"] } } } } }
+```
+
+- **How a note is judged.** A note is visible when no allow list is set or it matches one (a folder or a tag), and it matches no deny entry. Deny always wins. Both the vault's rules and the client's rules must pass.
+- **Tags.** Tags are the frontmatter `tags` and inline `#tags`, outside code. `private` also covers `private/health`.
+- **Where it applies.** The rules apply to every tool: search, read, list, tags, backlinks and Bases. They also apply to every proposed change, so a client can't write into a hidden note, or tag a note to hide it.
+- **Hidden notes.** A hidden note answers exactly like a missing one, and the refusal is logged.
+- **Citations.** Every answer from a note carries an anchor: `[[note#Heading]]`, or `[[note#L12]]` above the first heading. It appears as a fourth column in search hits, and as `_meta["io.lumen/anchors"]` on read_note, search_notes and get_backlinks. A note's text is never changed.
+
 ## Approving changes
 
 A client's `create_note` / `append_note` / `write_note` /

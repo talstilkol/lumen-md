@@ -318,7 +318,10 @@ export class McpEndpoint {
       return ok(id, toolBody(res));
     }
 
-    const complete = (res: ToolResult) => ok(id, { resultType: "complete", ...toolBody(res), _meta: { [META.serverInfo]: serverInfo() } });
+    const complete = (res: ToolResult) => {
+      const body = toolBody(res);
+      return ok(id, { resultType: "complete", ...body, _meta: { ...((body._meta as Record<string, unknown>) ?? {}), [META.serverInfo]: serverInfo() } });
+    };
 
     // A retry of a write that waited for the user (MRTR).
     if (params.requestState !== undefined) {
@@ -384,7 +387,8 @@ export class McpEndpoint {
 }
 
 function toolBody(res: ToolResult): Record<string, unknown> {
-  return { content: res.content, ...(res.isError ? { isError: true } : {}) };
+  // W11.I7: the answer's anchors travel in _meta, so a note's text is never altered.
+  return { content: res.content, ...(res.isError ? { isError: true } : {}), ...(res.anchors?.length ? { _meta: { "io.lumen/anchors": res.anchors } } : {}) };
 }
 
 function ok(id: JsonRpcId, result: Record<string, unknown>): JsonRpcResponse {
