@@ -85,6 +85,7 @@
     "eval:compare": "node scripts/eval-compare.mjs",
     "eval:ingest": "node scripts/eval/ingest.mjs",
     "eval:public": "node --import tsx scripts/eval-public.mjs",
+    "eval:card": "node scripts/eval-card.mjs",
     "fake-ollama": "node --experimental-strip-types scripts/fake-ollama.mjs",
     "headers": "node scripts/headers.mjs --check",
     "headers:write": "node scripts/headers.mjs --write",
