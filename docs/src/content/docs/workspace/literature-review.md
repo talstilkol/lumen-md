@@ -19,7 +19,7 @@ vault on this device. Scanned pages are read with OCR. It writes:
 Give notes `type: claim` (טענה) or `type: evidence` (מקור, a source), and
 link them with `supports:`, `contradicts:` or `qualifies:` (each a list of
 `[[links]]` to claims). Mark the end points with `conclusion: true`. An
-```argument-map block draws them:
+`argument-map` block draws them:
 
 ```argument-map
 folder: research/wages     # optional
@@ -54,7 +54,7 @@ cloud model is used only if your AI policy allows it.
 
 ## Competing hypotheses (ACH)
 
-An ```ach block weighs evidence against competing explanations, the way
+An `ach` block weighs evidence against competing explanations, the way
 Richards Heuer's Analysis of Competing Hypotheses does:
 
 ```ach
