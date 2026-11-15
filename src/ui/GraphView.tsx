@@ -7,29 +7,36 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
-import { filteredGraph, groupsOf, type GraphFilter, type GroupBy } from "../graph/graphModel";
+import { filteredGraph, graphTimeDomain, groupsOf, type GraphDateField, type GraphFilter, type GroupBy } from "../graph/graphModel";
 import { runLayout } from "../graph/layoutClient";
 import { readWorkspaceFile } from "../storage/workspace";
 import { log } from "../lib/logger";
 import { t } from "../i18n";
 import { GraphCanvas } from "./graph/GraphCanvas";
 import { GraphTable } from "./graph/GraphTable";
+import { TimeSlider, untilOf } from "./graph/TimeSlider";
 import { EmptyState, runCommand } from "./EmptyState";
 import { groupColor, nodeStyle, resolveColor, useVaultGraph } from "./graph/graphData";
 import "./graphViewStrings";
 
 const field = { fontSize: 12, paddingInline: 6, paddingBlock: 3, borderRadius: 4, border: "1px solid hsl(var(--border))", background: "hsl(var(--bg))", color: "hsl(var(--fg))", inlineSize: 120 } as const;
 
-export function GraphView({ onOpenFile }: { onOpenFile: (path: string, content: string) => void }) {
+export function GraphView({ onOpenFile, initialTable = false }: { onOpenFile: (path: string, content: string) => void; initialTable?: boolean }) {
   const { graph } = useVaultGraph();
   const [filter, setFilter] = useState<GraphFilter>({});
+  // W12.V8: the entity graph's time slider (W12.E7) over the notes' created or modified day.
+  const [dateField, setDateField] = useState<GraphDateField>("modified");
+  const domain = useMemo(() => (graph ? graphTimeDomain(graph, dateField) : []), [graph, dateField]);
+  const [until, setUntil] = useState(Number.MAX_SAFE_INTEGER);
+  const at = Math.min(until, Math.max(0, domain.length - 1));
+  const timed: GraphFilter = useMemo(() => ({ ...filter, dateField, until: untilOf(domain, at) }), [filter, dateField, domain, at]);
   const [groupBy, setGroupBy] = useState<GroupBy>("folder");
   const [positions, setPositions] = useState<Float32Array | null>(null);
   const [laying, setLaying] = useState(false);
   // The text alternative (W10.E60): the same nodes and links as a table.
-  const [asTable, setAsTable] = useState(false);
+  const [asTable, setAsTable] = useState(initialTable);
 
-  const sub = useMemo(() => (graph ? filteredGraph(graph, filter) : null), [graph, filter]);
+  const sub = useMemo(() => (graph ? filteredGraph(graph, timed) : null), [graph, timed]);
   const groups = useMemo(() => (graph ? groupsOf(graph, groupBy) : null), [graph, groupBy]);
   const style = useMemo(() => (graph && sub ? nodeStyle(graph, sub.nodes, groupBy === "none" ? null : groups!.group) : null), [graph, sub, groups, groupBy]);
   const labels = useMemo(() => (graph && sub ? Array.from(sub.nodes, (i: number) => graph.labels[i]) : []), [graph, sub]);
@@ -102,6 +109,17 @@ export function GraphView({ onOpenFile }: { onOpenFile: (path: string, content: 
             <option value="none">{t("graph.groupBy.none")}</option>
           </select>
         </label>
+        <label style={{ display: "inline-flex", gap: 4, alignItems: "center" }}>
+          {t("graph.time.field")}
+          <select value={dateField} onChange={(e) => {
+              setDateField(e.target.value as GraphDateField);
+              setUntil(Number.MAX_SAFE_INTEGER);
+            }} style={{ ...field, inlineSize: "auto" }} data-testid="graph-time-field">
+            <option value="modified">{t("graph.time.modified")}</option>
+            <option value="created">{t("graph.time.created")}</option>
+          </select>
+        </label>
+        <TimeSlider domain={domain} value={at} onChange={setUntil} labels={{ until: t("graph.time.until"), play: t("graph.time.play"), pause: t("graph.time.pause") }} testId="graph-time" style={{ ...field, inlineSize: "auto" }} />
         <button type="button" className="icon-btn" aria-pressed={asTable} onClick={() => setAsTable((v) => !v)} data-testid="graph-as-table" style={{ inlineSize: "auto", paddingInline: 8, fontSize: 12 }}>
           {t("graph.table.toggle")}
         </button>
@@ -131,7 +149,7 @@ export function GraphView({ onOpenFile }: { onOpenFile: (path: string, content: 
             labelColor={labelColor}
             onOpen={(k) => void open(k)}
             ariaLabel={t("graph.ariaLabel", { nodes: sub.nodes.length })}
-            fitKey={`${sub.nodes.length}:${sub.edges.length}:${JSON.stringify(filter)}`}
+            fitKey={`${sub.nodes.length}:${sub.edges.length}:${JSON.stringify(timed)}`}
           />
         )}
       </div>
