@@ -41,7 +41,8 @@
  * ── Storage ───────────────────────────────────────────────────────────────
  *   COLLAB_DATA_DIR (default ./.collab-data): collab.sqlite plus backups/.
  *   A backup is taken every COLLAB_BACKUP_INTERVAL_MS (default 1 h) and on
- *   shutdown; the newest COLLAB_BACKUP_KEEP (default 24) are kept.
+ *   shutdown; the newest COLLAB_BACKUP_KEEP (default 24) are kept. A room
+ *   deleted on request is taken out of all of them (see Deleting a room).
  *   Upgrading from persistent-server.js: rooms in the LevelDB directory
  *   COLLAB_LEGACY_LEVELDB_DIR (the Docker image sets /data/yjs) are imported
  *   once at start, never overwriting a room SQLite already has.
@@ -62,8 +63,10 @@
  *   documents, owner and share links and closes its connections, and
  *   {action: "exists", room, token} answers {status: 200 | 404}. `token` is
  *   a room token for that room (an edit token, not one bought with a share
- *   link), so only a participant can delete it. The hourly backups keep
- *   their (ciphertext) copy until they rotate out (COLLAB_BACKUP_KEEP).
+ *   link), so only a participant can delete it. The room is also taken out
+ *   of every backup in backups/ at once (each one rewritten with VACUUM), so
+ *   no (ciphertext) copy waits there for the backups to rotate out. Backups
+ *   copied elsewhere are the operator's to delete.
  *   Logs name no IP address.
  *
  * ── Health ────────────────────────────────────────────────────────────────
@@ -154,7 +157,14 @@ export function createCollabServer(opts = {}) {
       }
     }
     const had = store.deleteRoom(d.room);
-    log(`room deleted on request${had ? "" : " (nothing was stored)"}`);
+    // W12.H3 (coordinator decision): the room leaves the backups too, not only when they rotate out.
+    let inBackups = { purged: 0, removed: 0 };
+    try {
+      inBackups = store.purgeBackups(d.room);
+    } catch (e) {
+      log(`room deleted, but the backups could not be read: ${e instanceof Error ? e.message : String(e)}`);
+    }
+    log(`room deleted on request${had ? "" : " (nothing was stored)"}; taken out of ${inBackups.purged} backup(s)${inBackups.removed ? `, ${inBackups.removed} unreadable backup(s) removed` : ""}`);
     return { deleted: true, status: 404 };
   };
 
