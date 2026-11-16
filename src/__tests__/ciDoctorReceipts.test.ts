@@ -34,6 +34,25 @@ describe("localRuns", () => {
   });
 });
 
+describe("pickRun --red (plan 0.9, g2: a green rerun must not hide the red run it explains)", () => {
+  it("picks the newest run with a red gate; that run is then diagnosed against the green rerun of the same commit", () => {
+    // The shape of a real pair on verify/train-7 af2d0d7ce5 (16.11): dod-done red under load at 17:02, green alone at 17:42.
+    const runs = localRuns([
+      { file: ".ci-local/runs/late.json", json: rec(A, "2026-11-16T17:42:55Z", [["dod-done", "pass"]]) },
+      { file: ".ci-local/runs/early.json", json: rec(A, "2026-11-16T17:02:44Z", [["plan", "pass"], ["dod-rule", "pass"], ["dod-done", "fail"]]) },
+      { file: ".ci-local/runs/other.json", json: rec(B, "2026-11-16T18:00:00Z", [["plan", "pass"]]) },
+    ]);
+    expect(pickRun(runs, A.slice(0, 10)).file).toBe(".ci-local/runs/late.json");
+    const red = pickRun(runs, A.slice(0, 10), { red: true });
+    expect(red.file).toBe(".ci-local/runs/early.json");
+    expect(pickRun(runs, null, { red: true }).file).toBe(".ci-local/runs/early.json");
+    expect(pickRun(runs, B.slice(0, 10), { red: true })).toBeNull();
+    const [item] = diagnoseLocal(red, runs, { distance: () => 0 });
+    expect(item).toMatchObject({ gate: "dod-done", verdict: "flaky" });
+    expect(formatLocal(red, [item])).toMatch(/FLAKY {3}dod-done/);
+  });
+});
+
 describe("diagnoseLocal", () => {
   const distance = (x: string, y: string) => (x === y ? 0 : 3);
 
