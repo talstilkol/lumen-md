@@ -16,7 +16,6 @@
  * Needs a browser with OPFS (navigator.storage.getDirectory): headless
  * Chromium in the offline shim or vitest's browser mode.
  */
-// skip-reason: OPFS (navigator.storage.getDirectory) is in real browsers only; Node and jsdom have none, so the file runs in the Chromium runner | task: W5.1 | until: 2027-05-16
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import fixture from "./fixtures/sefaria/refs.json";
 import { findTypedRef } from "../editor/refTrigger";
@@ -41,6 +40,7 @@ const requests: string[] = [];
 let network: "up" | "down" = "up";
 const realFetch = globalThis.fetch;
 
+// skip-reason: OPFS (navigator.storage.getDirectory) is in real browsers only; Node and jsdom have none, so the file runs in the Chromium runner | task: W5.1 | until: 2027-05-16
 describe.skipIf(!hasOpfs)("Sefaria sources in the app, on a real vault (W5.1)", () => {
   beforeAll(async () => {
     globalThis.fetch = (async (input: RequestInfo | URL) => {
