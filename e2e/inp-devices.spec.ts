@@ -11,7 +11,6 @@ import {
   twoFrames,
   type InpEntry,
 } from "./perf/probes";
-import { vaultOrSkip } from "./_opfs";
 
 /**
  * Plan W6.45: INP and keypress → paint in both editors (source and WYSIWYG)
@@ -34,7 +33,7 @@ import { vaultOrSkip } from "./_opfs";
  */
 
 const NOTES = 10_000;
-const OUT_DIR = join(__dirname, "..", "reports", "perf", "responsiveness");
+const OUT_DIR = join(import.meta.dirname, "..", "reports", "perf", "responsiveness");
 type EditorName = "source" | "wysiwyg";
 interface EditorResult {
   inpP75: number | null;

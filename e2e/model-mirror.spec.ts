@@ -27,7 +27,7 @@ async function devServerOrSkip(page: Page): Promise<void> {
  * And the check that needs no browser: no model is only on Hugging Face
  * without a message, in English and in Hebrew.
  */
-const ROOT = join(__dirname, "..");
+const ROOT = join(import.meta.dirname, "..");
 const registry = JSON.parse(readFileSync(join(ROOT, "models", "registry.json"), "utf8")) as { models: HostedModel[] };
 const REAL = process.env.MODEL_MIRROR_URL?.replace(/\/+$/, "") ?? "";
 
