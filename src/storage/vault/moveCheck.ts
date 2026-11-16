@@ -240,6 +240,39 @@ export async function foldersNested(a: FileSystemDirectoryHandle, b: FileSystemD
   return (await inside(a, b)) || (await inside(b, a));
 }
 
+/** Is the file system of this desktop case-insensitive by default (macOS APFS/HFS+, Windows NTFS)? */
+export function caseInsensitiveDesktop(): boolean {
+  if (typeof navigator === "undefined") return false;
+  const nav = navigator as Navigator & { userAgentData?: { platform?: string } };
+  return /mac|win/i.test(nav.userAgentData?.platform || nav.platform || nav.userAgent || "");
+}
+
+/**
+ * A desktop vault root in one spelling (R8-L10): `\` as `/`, no repeated or
+ * trailing separator, `.` and `..` resolved, and lower case where the file
+ * system ignores case (macOS, Windows). `/Users/x/Vault/`, `/users/x/./vault`
+ * and `/Users/x/A/../Vault` are then the same folder.
+ */
+export function desktopRootKey(root: string, caseInsensitive = caseInsensitiveDesktop()): string {
+  const s = root.replace(/\\/g, "/");
+  const lead = /^\/\/[^/]/.test(s) ? "//" : s.startsWith("/") ? "/" : "";
+  const out: string[] = [];
+  for (const part of s.split("/")) {
+    if (part === "" || part === ".") continue;
+    if (part === ".." && out.length && out[out.length - 1] !== "..") out.pop();
+    else out.push(part);
+  }
+  const key = lead + out.join("/");
+  return caseInsensitive ? key.toLowerCase() : key;
+}
+
+/** Two desktop roots where one is the other or inside it: copying would write into the source itself. */
+export function desktopRootsNested(a: string, b: string, caseInsensitive = caseInsensitiveDesktop()): boolean {
+  const [x, y] = [desktopRootKey(a, caseInsensitive), desktopRootKey(b, caseInsensitive)];
+  const within = (outer: string, inner: string) => inner === outer || inner.startsWith(outer.endsWith("/") ? outer : `${outer}/`);
+  return within(x, y) || within(y, x);
+}
+
 /**
  * Before the switch: a file an interrupted run copied (`written`) that has
  * left the source since (deleted or renamed before Resume, so not in
