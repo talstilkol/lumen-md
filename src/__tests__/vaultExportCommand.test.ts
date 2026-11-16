@@ -4,6 +4,7 @@
  * debounced autosave has not written yet are in the export.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import "./helpers/commandSections";
 import { renderHook } from "@testing-library/react";
 import { installFakeOpfs, FakeDir } from "./helpers/fakeOpfs";
 import { writeWorkspaceFile } from "../storage/workspace";

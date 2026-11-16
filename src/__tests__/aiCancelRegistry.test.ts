@@ -4,6 +4,7 @@
  * command ends quietly instead of reporting an error.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import "./helpers/commandSections";
 import { renderHook } from "@testing-library/react";
 
 const toasts: Array<[string, string]> = [];

@@ -5,7 +5,7 @@
  */
 import { lazy, Suspense, useEffect, useState } from "react";
 import { airplaneFlagOn } from "../privacy/airplaneBoot";
-import { WIKIDATA_EVENT } from "../commands/domains/entities";
+import { WIKIDATA_EVENT } from "../commands/wikidataEvent";
 
 const WikidataLink = lazy(() => import("./WikidataLink").then((m) => ({ default: m.WikidataLink })));
 

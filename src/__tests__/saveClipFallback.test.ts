@@ -1,5 +1,6 @@
 /** T34 — without OPFS a clip isn't written anywhere: it must open as unsaved. */
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import "./helpers/commandSections";
 
 vi.mock("../storage/workspace", async (orig) => ({
   ...(await orig<typeof import("../storage/workspace")>()),

@@ -10,6 +10,7 @@
  * i18n and the AI toast stack are the real ones.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import "./helpers/commandSections";
 import { render, screen, fireEvent, waitFor, act, cleanup } from "@testing-library/react";
 import type { UseCommandsOptions } from "../commands/useCommands";
 import type { MenuActions } from "../hooks/useTauriMenu";

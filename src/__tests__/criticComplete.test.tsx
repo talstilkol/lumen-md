@@ -8,6 +8,7 @@
  * Acceptance: every suggestion performs an action — one test per action type.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import "./helpers/commandSections";
 import { render, screen, fireEvent, act, waitFor } from "@testing-library/react";
 
 vi.mock("../store/useStore", () => ({ useAppStore: { getState: () => ({ aiKey: null, useLocalAi: false, useFineTunedModel: false, fineTunedModelId: null }) } }));
