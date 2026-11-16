@@ -869,12 +869,19 @@ export function belowFloor(task, floor = WIP_FLOOR) {
   return WIP_LEVELS.indexOf(task.verified) < WIP_LEVELS.indexOf(floor);
 }
 
-/** A task is started once it has a status (a PR, work in progress, or done). */
 /** The placeholder a wave's tasks carry before any work ("⏳ גל 10 — לא התחיל"): not started (W10.G6). */
 export const NOT_STARTED = /^⏳\s*גל\s+\d+\s+—\s+לא התחיל/;
+const present = (v) => v !== undefined && v !== null && v !== "" && !(Array.isArray(v) && v.length === 0) && !(typeof v === "object" && !Array.isArray(v) && Object.keys(v).length === 0);
+/**
+ * A task is started once it has a status other than the placeholder (a PR, work
+ * in progress, or done), or once anything records work on it: a `verified`
+ * level, a `pr`, or `evidence` (review 11, M4: a placeholder status alone used
+ * to hide a task whose work had begun).
+ */
 export const isStarted = (task) => {
   const s = String(task.status ?? "").trim();
-  return s !== "" && !NOT_STARTED.test(s);
+  if (s !== "" && !NOT_STARTED.test(s)) return true;
+  return present(task.verified) || present(task.pr) || present(task.evidence);
 };
 
 /**
