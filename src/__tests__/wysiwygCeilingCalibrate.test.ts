@@ -65,8 +65,19 @@ describe("--check against the ceiling in src/editor/wysiwygCeiling.ts", () => {
     expect(r.code).toBe(0);
     expect(r.out).toMatch(/supported ceiling: 307200 B/);
   });
-  it("without a report it says the calibration is owed, and does not fail", () => {
-    const out = execFileSync(process.execPath, ["scripts/perf/wysiwyg-ceiling.mjs", "--report", "no/such.json", "--check"], { encoding: "utf8" });
+  it("without a report it says the calibration is owed; --check then fails (review 11, L13), the plain report does not", () => {
+    const out = execFileSync(process.execPath, ["scripts/perf/wysiwyg-ceiling.mjs", "--report", "no/such.json"], { encoding: "utf8" });
     expect(out).toMatch(/calibration is owed/);
+    let code = 0;
+    let text = "";
+    try {
+      execFileSync(process.execPath, ["scripts/perf/wysiwyg-ceiling.mjs", "--report", "no/such.json", "--check"], { encoding: "utf8", stdio: "pipe" });
+    } catch (e) {
+      const err = e as { status: number; stdout: string; stderr: string };
+      code = err.status;
+      text = err.stdout + err.stderr;
+    }
+    expect(code).toBe(1);
+    expect(text).toMatch(/calibration is owed[\s\S]*nothing was measured/);
   });
 });
