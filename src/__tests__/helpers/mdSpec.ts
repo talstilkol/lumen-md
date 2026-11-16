@@ -133,7 +133,11 @@ export function normalizeHtml(html: string, parse: FragmentParser): string {
       }
     }
   };
-  walk(parse(html), false);
+  // Trailing whitespace of the whole fragment carries no meaning either (the
+  // reference normalizer, commonmark-spec's test/normalize.py, strips the
+  // output). A DOM tree builder would move it inside an element the HTML
+  // left open (`<a href="x">\n`), where the final trim no longer reaches it.
+  walk(parse(html.replace(/\s+$/, "")), false);
   // Whitespace next to a block-level tag carries no meaning; drop it.
   return parts
     .join("")
