@@ -13,7 +13,7 @@ import { withAiQuota } from "../billing/aiQuota";
 import { useInstalledTemplates } from "./installedTemplates";
 import { buildTypeCommands, useTypeEntries } from "./typeCommands";
 import { t } from "../i18n";
-import { commandSections, loadCommandSectionsWhenIdle, onCommandSections } from "./sectionsLoader";
+import { commandSections, loadCommandSectionsWhenIdle, markBuiltWithSections, onCommandSections } from "./sectionsLoader";
 import { useCommandStore, type CommandContext, type UseCommandsOptions } from "./domains/context";
 
 export type { UseCommandsOptions } from "./domains/context";
@@ -50,7 +50,8 @@ export function useCommands(options: UseCommandsOptions) {
       toggleOutline,
     };
     // AI-prompt commands are wrapped with the monthly quota check.
-    return withAiQuota([...(sections ?? []).flatMap((build) => build(ctx)), ...buildTypeCommands(typeEntries, { locale: store.locale, t })]);
+    const list = withAiQuota([...(sections ?? []).flatMap((build) => build(ctx)), ...buildTypeCommands(typeEntries, { locale: store.locale, t })]);
+    return sections ? markBuiltWithSections(list) : list;
     // Every store value a label or an action reads is listed, so a toggle's
     // label never goes stale. The document itself is not: actions read it
     // through liveDoc(), so typing does not rebuild the list (C5).

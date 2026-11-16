@@ -38,6 +38,20 @@ export function loadCommandSections(): Promise<ReadonlyArray<CommandSection>> {
   return pending;
 }
 
+/**
+ * Review 10 M1: whether a command list was built with the domains. The
+ * listener in hooks/useCommandEvents decides from the list it has (not from
+ * `commandSections()`): the chunk can have arrived before the list is rebuilt.
+ */
+const withSections = new WeakSet<object>();
+export function markBuiltWithSections<T extends object>(list: T): T {
+  withSections.add(list);
+  return list;
+}
+export function builtWithSections(list: object): boolean {
+  return withSections.has(list);
+}
+
 export function onCommandSections(listener: () => void): () => void {
   listeners.add(listener);
   return () => listeners.delete(listener);
