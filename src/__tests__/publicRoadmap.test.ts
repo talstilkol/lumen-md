@@ -17,6 +17,8 @@ import {
   ROADMAP_FILE,
   // @ts-expect-error — plain .mjs script without type declarations
 } from "../../scripts/plan/build.mjs";
+// @ts-expect-error — plain .mjs script without type declarations
+import { auditClaims } from "../../scripts/security/audit-claims.mjs";
 
 const ROOT = resolve(__dirname, "..", "..");
 const plan = () => JSON.parse(readFileSync(join(ROOT, "plan/plan.json"), "utf8"));
@@ -78,6 +80,21 @@ describe("public roadmap (14.5)", () => {
     const done = rows.filter((r) => r[1] === "done").length;
     expect(html).toContain(`${done} הושלמו`);
     expect(html).toContain(`aria-valuenow="${done}"`);
+  });
+
+  // INT4a: the rows sat on one line, so the audit-claim scan (W11.S1) read two
+  // tasks' titles as one sentence: W13.S5's "ביקורת אבטחה" (audit funding) next
+  // to W13.S6's "מוצפנת" was flagged as a claim that the crypto is audited.
+  it("puts each task on its own line, so the audit-claim scan reads one title at a time (W11.S1)", () => {
+    const p = plan();
+    const last = p.phases[p.phases.length - 1].tasks;
+    const at = last.length;
+    last.push({ ...last[at - 1], id: "X.1", title: "funding for a security audit", dep: [] }, { ...last[at - 1], id: "X.2", title: "encrypted presence in the shared vault", dep: [] });
+    const rows = data(renderRoadmap(buildModel(p))).at(-1)![2];
+    expect(rows.slice(-2).map((r) => r[0])).toEqual(["X.1", "X.2"]);
+    expect(auditClaims(renderRoadmap(buildModel(p)))).toEqual([]);
+    expect(auditClaims(renderRoadmap(buildModel(plan())))).toEqual([]);
+    expect(auditClaims("a security audit of the encryption")).not.toEqual([]);
   });
 
   it("renders with the external script under the app's CSP (no inline script, no handlers)", () => {

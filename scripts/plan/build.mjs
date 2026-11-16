@@ -709,6 +709,18 @@ export function publicTitle(title) {
  * or the owner's items. The page renders the JSON block with /roadmap.js
  * (an external script: the app's CSP allows no inline script).
  */
+/**
+ * The roadmap's JSON, one task row per line: the page's text is scanned a
+ * sentence (or line) at a time (security/audit-claims, W11.S1), and rows on one
+ * line read two titles as one sentence (INT4a: W13.S5's audit funding next to
+ * W13.S6's encrypted presence). Still one JSON value; `<` is escaped.
+ */
+export function roadmapJson(phases) {
+  const row = (r) => JSON.stringify(r);
+  const body = phases.map(([i, title, rows]) => `[${i},${JSON.stringify(title)},[\n${rows.map(row).join(",\n")}]]`).join(",\n");
+  return `[${body}]`.replace(/</g, "\\u003c");
+}
+
 export function renderRoadmap(M) {
   const states = { done: 0, partial: 0, planned: 0 };
   const phases = M.phases.map((p, i) => [i, p.title, p.tasks.map((t) => {
@@ -800,7 +812,7 @@ export function renderRoadmap(M) {
     <footer>
       הדף נוצר על ידי <code>npm run plan</code> מ-<code>plan/plan.json</code>; CI נכשל כשהוא לא תואם. Lumen היא קוד פתוח ברישיון MIT.
     </footer>
-    <script type="application/json" id="roadmap-data">${JSON.stringify(phases).replace(/</g, "\\u003c")}</script>
+    <script type="application/json" id="roadmap-data">${roadmapJson(phases)}</script>
     <script src="/roadmap.js" defer></script>
   </body>
 </html>
