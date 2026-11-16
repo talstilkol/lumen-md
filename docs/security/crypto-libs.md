@@ -78,7 +78,7 @@ git add package.json package-lock.json tsconfig.json src/sync/e2ee/primitives/li
 
 - 0 differences in 10,000 vectors.
 - Byte-identical outputs on the 39 protocol vectors and the e2ee suites (e2eeSync 43, e2eeVectors, e2eeAge, keyring).
-- Wycheproof `chacha20_poly1305_test.json` passes.
+- Wycheproof `chacha20_poly1305_test.json` passes. The in-house half already does: `src/__tests__/wycheproofChacha.test.ts`, all 325 cases (fixture pinned by sha256 at C2SP/wycheproof 65ca494727). The library half is the Mac's.
 - The RFC 9106 Argon2id vectors pass.
 - The C2SP CCTV age testkit passes in full.
 - `AUDITED` is the default.
