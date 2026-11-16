@@ -410,7 +410,7 @@
       "tasker:package.json (no licence field)"
     ],
     "changes": "THIRD_PARTY_REUSE.md (new, draft PR); israelconnect project/lanes/DECISIONS.md (one line); tasker LICENSE (new); a receipt in scripts/owner.",
-    "draftPr": "fix/g6-L6-owner-r12-1 (OWNER-DECISION: R12.1 MIT grant for israelconnect reuse)",
+    "draftPr": "#1090 fix/g6-L6-owner-r12-1 (OWNER-DECISION: R12.1 MIT grant for israelconnect reuse)",
     "cmd": "test -f THIRD_PARTY_REUSE.md && ! grep -q '_(none yet' THIRD_PARTY_REUSE.md",
     "expect": {
       "exit": 0
