@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-11-16T07:09:06.974Z",
+  "generatedAt": "2026-11-16T11:16:01.987Z",
   "method": "score = 10 × mean metric credit; credit from signed, dated receipts only (scripts/plan/areas.mjs)",
   "sources": {
     "counted": 0,
@@ -95,7 +95,7 @@
         }
       ],
       "tasks": {
-        "count": 34,
+        "count": 46,
         "computed": null
       }
     },
@@ -179,7 +179,7 @@
         }
       ],
       "tasks": {
-        "count": 65,
+        "count": 99,
         "computed": null
       }
     },
@@ -262,7 +262,7 @@
         }
       ],
       "tasks": {
-        "count": 35,
+        "count": 43,
         "computed": null
       }
     },
@@ -334,7 +334,7 @@
         }
       ],
       "tasks": {
-        "count": 40,
+        "count": 47,
         "computed": null
       }
     },
@@ -391,7 +391,7 @@
         }
       ],
       "tasks": {
-        "count": 48,
+        "count": 65,
         "computed": null
       }
     },
@@ -448,7 +448,7 @@
         }
       ],
       "tasks": {
-        "count": 36,
+        "count": 43,
         "computed": null
       }
     },
@@ -519,7 +519,7 @@
         }
       ],
       "tasks": {
-        "count": 33,
+        "count": 38,
         "computed": null
       }
     },
@@ -589,7 +589,7 @@
         }
       ],
       "tasks": {
-        "count": 37,
+        "count": 40,
         "computed": null
       }
     },
@@ -704,7 +704,7 @@
         }
       ],
       "tasks": {
-        "count": 108,
+        "count": 134,
         "computed": null
       }
     },
@@ -776,7 +776,7 @@
         }
       ],
       "tasks": {
-        "count": 54,
+        "count": 57,
         "computed": null
       }
     },
@@ -846,7 +846,7 @@
         }
       ],
       "tasks": {
-        "count": 27,
+        "count": 36,
         "computed": null
       }
     },
@@ -890,7 +890,7 @@
         }
       ],
       "tasks": {
-        "count": 14,
+        "count": 23,
         "computed": null
       }
     },
@@ -976,7 +976,7 @@
         }
       ],
       "tasks": {
-        "count": 31,
+        "count": 39,
         "computed": null
       }
     },
@@ -1060,7 +1060,7 @@
         }
       ],
       "tasks": {
-        "count": 18,
+        "count": 35,
         "computed": null
       }
     },
@@ -1131,7 +1131,7 @@
         }
       ],
       "tasks": {
-        "count": 46,
+        "count": 68,
         "computed": null
       }
     },
@@ -1203,7 +1203,7 @@
         }
       ],
       "tasks": {
-        "count": 30,
+        "count": 48,
         "computed": null
       }
     },
@@ -1312,7 +1312,7 @@
         }
       ],
       "tasks": {
-        "count": 85,
+        "count": 107,
         "computed": null
       }
     },
@@ -1409,7 +1409,7 @@
         }
       ],
       "tasks": {
-        "count": 29,
+        "count": 43,
         "computed": null
       }
     }
