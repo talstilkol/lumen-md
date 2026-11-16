@@ -9,8 +9,12 @@ import { translatorAgent } from "../../agents/defs";
 import { DEFAULT_OLLAMA_MODEL, isOllamaAvailable, listOllamaModels, setOllamaConfig } from "../../ai/ollamaProvider";
 import type { BenchEngine } from "../types";
 
+/** A stuck model fails its item instead of hanging the whole bench (T55: every run carries a cancel signal). */
+const ITEM_TIMEOUT_MS = 120_000;
+
 async function translate(text: string): Promise<string> {
-  return runAgentOrThrow(translatorAgent, { text, extra: { targetLanguage: "English" } }, { executor: "ollama" });
+  const signal = AbortSignal.timeout(ITEM_TIMEOUT_MS);
+  return runAgentOrThrow(translatorAgent, { text, extra: { targetLanguage: "English" } }, { executor: "ollama", signal });
 }
 
 export const engine: BenchEngine = {

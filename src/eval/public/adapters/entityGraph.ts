@@ -227,7 +227,7 @@ export const HERE_SYSTEM = [
  * model says so AND gives a quote that is word for word in the passage —
  * the same rule every edge of the graph obeys (W12.E4).
  */
-export async function verifyTriple(executor: Executor, row: HereRow, model?: string): Promise<boolean> {
+export async function verifyTriple(executor: Executor, row: HereRow, model?: string, signal?: AbortSignal): Promise<boolean> {
   if (!LOCAL_EXECUTORS.has(executor.id)) throw new Error("HeRE runs on a local engine only");
   // A dynamic import: agents/untrusted brings its lazy strings (i18nLazyEnglish).
   const { guardUntrusted, unmarkData } = await import("../../../agents/untrusted");
@@ -242,6 +242,7 @@ export async function verifyTriple(executor: Executor, row: HereRow, model?: str
     temperature: 0,
     seed: 7,
     think: false,
+    signal,
   });
   try {
     // The passage went out datamarked (W11.I3): a quote copied from it may carry the marks.

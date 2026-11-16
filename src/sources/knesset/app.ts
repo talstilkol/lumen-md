@@ -78,7 +78,7 @@ export async function localLawChat(): Promise<import("./answer").LawChat | null>
   const { pickExecutor } = await import("../../agents/executors");
   const { executor } = await pickExecutor(["ollama", "webllm"]);
   if (!executor || executor.id === "chat") return null;
-  return async (messages) => (await executor.chat({ messages, tier: "small", temperature: 0, maxTokens: 200 })).content;
+  return async (messages, signal) => (await executor.chat({ messages, tier: "small", temperature: 0, maxTokens: 200, signal })).content;
 }
 
 /** A protocol quote from the open note (a protocol's text) and the selected words; null when the words are not in a speaker's turn. */

@@ -136,6 +136,8 @@ export interface HarnessDeps {
   register: RegisterFn;
   /** Test hook: change the tools before the run (a tool declared with the wrong scope, say). */
   tamper?: (tools: ReturnType<typeof slackTools>) => void;
+  /** Stops the run (T55: every agent run carries a cancel signal). */
+  signal?: AbortSignal;
 }
 
 export async function runPair(deps: HarnessDeps, defence: Defence, task: UserTask, inj: InjectionTask | null, attack: Attack | null, vector: string | null): Promise<PairResult> {
@@ -165,6 +167,7 @@ export async function runPair(deps: HarnessDeps, defence: Defence, task: UserTas
   };
   const run = await deps.runAgent(def, { text: task.prompt }, {
     grants: ["network"],
+    signal: deps.signal,
     consentUntrusted: (r: UntrustedConsentRequest) => decide(r.tool, r.args),
     consentNetwork: (r: NetworkConsentRequest) => decide(r.tool, r.args),
   });

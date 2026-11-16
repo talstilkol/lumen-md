@@ -27,7 +27,8 @@ export interface PiiSpan {
 }
 
 /** A name finder (NER): spans of PERSON / LOCATION in `text`. */
-export type NerFn = (text: string) => Promise<Array<{ start: number; end: number; type: PiiType }>>;
+/** A name finder; `signal` cancels a model call behind it (T55: Esc stops the request it serves). */
+export type NerFn = (text: string, signal?: AbortSignal) => Promise<Array<{ start: number; end: number; type: PiiType }>>;
 
 /* ── Validators ─────────────────────────────────────────────────────── */
 
@@ -149,13 +150,15 @@ function dropOverlaps(spans: PiiSpan[]): PiiSpan[] {
 }
 
 /** Patterns, then (when given) the NER's names in what the patterns left. */
-export async function findPii(text: string, opts: { ner?: NerFn | null; types?: readonly PiiType[] } = {}): Promise<PiiSpan[]> {
+export async function findPii(text: string, opts: { ner?: NerFn | null; types?: readonly PiiType[]; signal?: AbortSignal } = {}): Promise<PiiSpan[]> {
   let spans = findPatterns(text);
   if (opts.ner) {
     let names: Array<{ start: number; end: number; type: PiiType }> = [];
     try {
-      names = await opts.ner(text);
-    } catch {
+      names = await opts.ner(text, opts.signal);
+    } catch (e) {
+      // A cancelled request stops here; it does not go on with patterns only.
+      if (opts.signal?.aborted) throw e;
       /* why: the model failed: patterns only */
     }
     spans = dropOverlaps([...spans, ...names.filter((n) => n.end > n.start).map((n) => ({ ...n, text: text.slice(n.start, n.end) }))]);
@@ -228,7 +231,7 @@ export function applyRedaction(text: string, spans: readonly PiiSpan[], vault: P
 }
 
 /** Redact one text (patterns, plus names when `ner` is given). */
-export async function redactText(text: string, vault: PiiVault, opts: { ner?: NerFn | null } = {}): Promise<string> {
+export async function redactText(text: string, vault: PiiVault, opts: { ner?: NerFn | null; signal?: AbortSignal } = {}): Promise<string> {
   if (!text) return text;
   return applyRedaction(text, await findPii(text, opts), vault);
 }

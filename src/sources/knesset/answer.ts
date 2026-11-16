@@ -15,8 +15,8 @@
  */
 import type { LawAnswer } from "./store";
 
-/** A chat call to a local model: messages in, the reply's text out. */
-export type LawChat = (messages: Array<{ role: "system" | "user"; content: string }>) => Promise<string>;
+/** A chat call to a local model: messages in, the reply's text out; `signal` cancels it (T55). */
+export type LawChat = (messages: Array<{ role: "system" | "user"; content: string }>, signal?: AbortSignal) => Promise<string>;
 
 export type CriticVerdict = "supported" | "contradicted" | "unsupported" | "no-critic";
 
@@ -41,7 +41,7 @@ const CRITIC_SYSTEM =
   "states what the answer says, CONTRADICTED if the section says otherwise, NOT_ENOUGH if the section does not say.";
 
 /** The critic: deterministic numbers first, then the model. Without a model there is no critic. */
-export async function criticCheck(claim: string, sectionText: string, chat: LawChat | null): Promise<CriticVerdict> {
+export async function criticCheck(claim: string, sectionText: string, chat: LawChat | null, signal?: AbortSignal): Promise<CriticVerdict> {
   if (!chat) return "no-critic";
   if (numbersNotInSection(claim, sectionText).length) return "contradicted";
   let reply: string;
@@ -49,7 +49,7 @@ export async function criticCheck(claim: string, sectionText: string, chat: LawC
     reply = await chat([
       { role: "system", content: CRITIC_SYSTEM },
       { role: "user", content: `Section:\n${sectionText}\n\nAnswer:\n${claim}` },
-    ]);
+    ], signal);
   } catch {
     return "unsupported";
   }
@@ -67,7 +67,7 @@ const ANSWER_SYSTEM =
  * An answer from one quoted section, checked by the critic. Null without a
  * model: then there is only the quote.
  */
-export async function answerLawQuestion(question: string, quote: LawAnswer, chat: LawChat | null): Promise<LawClaimAnswer | null> {
+export async function answerLawQuestion(question: string, quote: LawAnswer, chat: LawChat | null, signal?: AbortSignal): Promise<LawClaimAnswer | null> {
   if (!chat) return null;
   const sectionText = `${quote.section.number}. ${quote.section.text}`;
   let claim: string;
@@ -75,11 +75,11 @@ export async function answerLawQuestion(question: string, quote: LawAnswer, chat
     claim = (await chat([
       { role: "system", content: ANSWER_SYSTEM },
       { role: "user", content: `Law: ${quote.law.law.name}\nSection ${sectionText}\n\nQuestion: ${question}` },
-    ])).trim();
+    ], signal)).trim();
   } catch {
     return null;
   }
   if (!claim) return null;
-  const critic = await criticCheck(claim, sectionText, chat);
+  const critic = await criticCheck(claim, sectionText, chat, signal);
   return { kind: "answer", question, claim, quote, critic, verified: critic === "supported" };
 }

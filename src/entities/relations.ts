@@ -106,7 +106,7 @@ export function parseRelations(content: string): Array<Record<string, unknown>> 
  * Relations of one paragraph, as edge proposals. `executor` must be a
  * local one; `model` names the pinned model (it goes into provenance).
  */
-export async function extractRelations(p: ParagraphInput, executor: Executor | null, opts: { model?: string; seed?: number; date?: Date } = {}): Promise<RelationResult> {
+export async function extractRelations(p: ParagraphInput, executor: Executor | null, opts: { model?: string; seed?: number; date?: Date; signal?: AbortSignal } = {}): Promise<RelationResult> {
   const dropped = zero();
   if (!executor) return { status: "unavailable", reason: "no-local-engine", proposals: [], dropped };
   if (!LOCAL_EXECUTORS.has(executor.id)) return { status: "unavailable", reason: "cloud-refused", proposals: [], dropped };
@@ -123,6 +123,7 @@ export async function extractRelations(p: ParagraphInput, executor: Executor | n
     model,
     temperature: 0,
     seed: opts.seed ?? 7,
+    signal: opts.signal,
     think: false,
   });
   dropped["tool-call"] += res.toolCalls?.length ?? 0;
