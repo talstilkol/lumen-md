@@ -2257,6 +2257,34 @@
       "icon": "Download"
     },
     {
+      "id": "writing.repetition",
+      "label": "Writing: repetition and clichés",
+      "group": "Edit",
+      "hint": "Words repeated too soon (Hebrew prefixes and forms included), doubled words and clichés — on this device",
+      "icon": "Pencil"
+    },
+    {
+      "id": "writing.loanwords",
+      "label": "Writing: Hebrew alternatives to loanwords",
+      "group": "Edit",
+      "hint": "In the academic register: אימייל → דוא״ל, פידבק → משוב… — proposed, never applied; each term can be switched off",
+      "icon": "Pencil"
+    },
+    {
+      "id": "writing.explainChange",
+      "label": "Writing: explain my change",
+      "group": "Edit",
+      "hint": "Compare with an earlier version: a short summary and every change of a number, a negation or a name — on this device",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.goals",
+      "label": "Writing: goals and weekly report",
+      "group": "Edit",
+      "hint": "A word or time target, readability and tone for this note; your week on this device",
+      "icon": "Sparkles"
+    },
+    {
       "id": "types.page",
       "label": "Types: all objects by type",
       "icon": "Table"
@@ -4674,6 +4702,34 @@
       "icon": "Download"
     },
     {
+      "id": "writing.repetition",
+      "label": "Writing: repetition and clichés",
+      "group": "Edit",
+      "hint": "Words repeated too soon (Hebrew prefixes and forms included), doubled words and clichés — on this device",
+      "icon": "Pencil"
+    },
+    {
+      "id": "writing.loanwords",
+      "label": "Writing: Hebrew alternatives to loanwords",
+      "group": "Edit",
+      "hint": "In the academic register: אימייל → דוא״ל, פידבק → משוב… — proposed, never applied; each term can be switched off",
+      "icon": "Pencil"
+    },
+    {
+      "id": "writing.explainChange",
+      "label": "Writing: explain my change",
+      "group": "Edit",
+      "hint": "Compare with an earlier version: a short summary and every change of a number, a negation or a name — on this device",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.goals",
+      "label": "Writing: goals and weekly report",
+      "group": "Edit",
+      "hint": "A word or time target, readability and tone for this note; your week on this device",
+      "icon": "Sparkles"
+    },
+    {
       "id": "types.page",
       "label": "Types: all objects by type",
       "icon": "Table"
@@ -5020,6 +5076,10 @@
     "spell.yiddishDictionary",
     "academic.choose",
     "academic.ics",
+    "writing.repetition",
+    "writing.loanwords",
+    "writing.explainChange",
+    "writing.goals",
     "types.page",
     "types.studio"
   ]
