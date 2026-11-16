@@ -113,6 +113,7 @@
     "plan": "node scripts/plan/build.mjs",
     "plan:check": "node scripts/plan/build.mjs --check",
     "plan:receipts": "node scripts/plan/receipts.mjs",
+    "plan:areas": "node scripts/plan/areas.mjs",
     "plan:targets": "node scripts/plan-targets.mjs",
     "owner:session": "node scripts/owner/session.mjs",
     "owner:checklist": "node scripts/owner-checklist.mjs",

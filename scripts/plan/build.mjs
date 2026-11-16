@@ -39,6 +39,7 @@ import { checkDod } from "../dod.mjs";
 import { checkEvalClaims } from "../lib/evalCard.mjs";
 import { claimGuard } from "./claimGuard.mjs";
 import { RECEIPTS_FILE, checkReceiptClaims } from "./receiptLevels.mjs";
+import { AREAS_FILE, checkAreas } from "./areas.mjs";
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 export const PLAN_FILE = "plan/plan.json";
@@ -889,6 +890,11 @@ export function run({ root = ROOT, check = false, wipLimit, strictReceipts = fal
   const receipts = existsSync(receiptsPath) ? JSON.parse(readFileSync(receiptsPath, "utf8")) : null;
   const receiptClaims = checkReceiptClaims(plan, receipts, { strict: strictReceipts });
   if (receiptClaims.problems.length) throw new Error(`plan: levels without a receipt (W10.G9, npm run plan:receipts) —\n  ${receiptClaims.problems.join("\n  ")}`);
+  // W6.44 (#513, #734): every task maps to its areas, and each area has its bar for 10 as code (npm run plan:areas).
+  const areasPath = join(root, AREAS_FILE);
+  const areaCheck = existsSync(areasPath) ? checkAreas(plan, JSON.parse(readFileSync(areasPath, "utf8"))) : { problems: [], unknown: [] };
+  if (areaCheck.problems.length) throw new Error(`plan: ${AREAS_FILE} (W6.44) —\n  ${areaCheck.problems.join("\n  ")}`);
+  if (areaCheck.unknown.length) console.warn(`plan: ${areaCheck.unknown.length} id(s) in ${AREAS_FILE} are not in the plan (a removed task): ${areaCheck.unknown.slice(0, 12).join(", ")}${areaCheck.unknown.length > 12 ? " …" : ""}`);
   const M = buildModel(plan);
   M.MANUAL_LEVELS = receiptClaims.manual;
   M.velocity = planVelocity(historyFromGit(root), countPlan(plan));
