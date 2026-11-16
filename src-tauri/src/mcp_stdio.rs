@@ -4,29 +4,38 @@
 //!
 //! - `mcp_stdio_approve` asks the user in a **native** dialog (not the WebView)
 //!   to allow one exact command; the approvals live in the app's config folder.
-//!   A page that runs script in the WebView can ask, but cannot answer.
+//!   A page that runs script in the WebView can ask, but cannot answer. The
+//!   dialog shows each argument quoted on its own line, and says that the
+//!   server's name comes from the page (R8-M4).
 //! - `mcp_stdio_spawn` starts only an approved, valid command (`may_spawn`).
 //! - Lines come back as `mcp-stdio` events: `{ session, kind: "out" | "err" | "exit", line }`.
 //!   The WebView matches responses to requests by JSON-RPC id (transports/stdio.ts).
+//!   A session whose process exited leaves the map (R8-M3).
 //! - `mcp_stdio_close` closes stdin, waits, then kills.
 //! - `mcp_open_url` opens an elicitation URL in the system browser (http/https only).
+//!
+//! R8-M3: every command is `async` and does its blocking work (files, the
+//! process, pipe writes, the shutdown wait) in `spawn_blocking`, never on the
+//! main thread. The map lock is held only to look a session up; each session
+//! writes through its own writer thread with a timeout (`WRITE_TIMEOUT`), so a
+//! server that stops reading blocks neither the UI nor the other servers.
 
-use lumen_mcp_stdio::{clean_env, may_spawn, open_url_command, spawn, Approved, Event, Session, Spec};
+use lumen_mcp_stdio::{approval_text, clean_env, may_spawn, open_url_command, spawn, Approved, Event, Session, Spec, WRITE_TIMEOUT};
 use serde::Serialize;
 use std::collections::HashMap;
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tauri::{AppHandle, Emitter, Manager, State};
 
 #[derive(Default)]
 pub struct McpStdioInner {
     approved: Option<Approved>,
-    sessions: HashMap<u32, Session>,
+    sessions: HashMap<u32, Arc<Session>>,
     next: u32,
 }
 
 #[derive(Default)]
-pub struct McpStdio(pub Mutex<McpStdioInner>);
+pub struct McpStdio(pub Arc<Mutex<McpStdioInner>>);
 
 #[derive(Serialize, Clone)]
 struct LineEvent {
@@ -62,13 +71,22 @@ fn spec(command: String, args: Vec<String>, cwd: Option<String>) -> Spec {
     Spec { command, args, cwd: cwd.filter(|c| !c.is_empty()) }
 }
 
+/// Run `f` off the main thread and the async workers (it may block on files, a pipe or a process).
+async fn blocking<T: Send + 'static>(f: impl FnOnce() -> Result<T, String> + Send + 'static) -> Result<T, String> {
+    tauri::async_runtime::spawn_blocking(f).await.map_err(|e| e.to_string())?
+}
+
 /// Is this exact command approved? (Never asks.)
 #[tauri::command]
-pub fn mcp_stdio_approved(app: AppHandle, state: State<McpStdio>, command: String, args: Vec<String>, cwd: Option<String>) -> Result<bool, String> {
+pub async fn mcp_stdio_approved(app: AppHandle, state: State<'_, McpStdio>, command: String, args: Vec<String>, cwd: Option<String>) -> Result<bool, String> {
     let s = spec(command, args, cwd);
-    let mut inner = state.0.lock().map_err(|_| "EIO: lock")?;
-    load(&app, &mut inner)?;
-    Ok(s.validate().is_ok() && inner.approved.as_ref().map(|a| a.contains(&s)).unwrap_or(false))
+    let inner = state.0.clone();
+    blocking(move || {
+        let mut inner = inner.lock().map_err(|_| "EIO: lock")?;
+        load(&app, &mut inner)?;
+        Ok(s.validate().is_ok() && inner.approved.as_ref().map(|a| a.contains(&s)).unwrap_or(false))
+    })
+    .await
 }
 
 /// Ask the user, in a native dialog, to allow this exact command. Async: the dialog blocks its thread.
@@ -77,88 +95,115 @@ pub async fn mcp_stdio_approve(app: AppHandle, state: State<'_, McpStdio>, serve
     use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
     let s = spec(command, args, cwd);
     s.validate()?;
-    {
-        let mut inner = state.0.lock().map_err(|_| "EIO: lock")?;
-        load(&app, &mut inner)?;
-        if inner.approved.as_ref().map(|a| a.contains(&s)).unwrap_or(false) {
-            return Ok(true);
+    let inner = state.0.clone();
+    blocking(move || {
+        {
+            let mut guard = inner.lock().map_err(|_| "EIO: lock")?;
+            load(&app, &mut guard)?;
+            if guard.approved.as_ref().map(|a| a.contains(&s)).unwrap_or(false) {
+                return Ok(true);
+            }
         }
-    }
-    let shown = format!(
-        "The MCP server \"{}\" wants Lumen to run this program on your computer:\n\n{} {}\n\nFolder: {}\n\nIt runs with your user's rights. Allow only a program you installed and trust.",
-        server.chars().take(120).collect::<String>(),
-        s.command,
-        s.args.join(" "),
-        s.cwd.clone().unwrap_or_else(|| "(Lumen's default)".into())
-    );
-    let yes = app
-        .dialog()
-        .message(shown)
-        .title("Run an MCP server?")
-        .kind(MessageDialogKind::Warning)
-        .buttons(MessageDialogButtons::OkCancelCustom("Allow".into(), "Don't allow".into()))
-        .blocking_show();
-    if !yes {
-        return Ok(false);
-    }
-    let mut inner = state.0.lock().map_err(|_| "EIO: lock")?;
-    load(&app, &mut inner)?;
-    let approved = inner.approved.get_or_insert_with(Approved::default);
-    approved.add(&s);
-    save(&app, approved)?;
-    Ok(true)
+        // The lock is not held while the dialog is open.
+        let yes = app
+            .dialog()
+            .message(approval_text(&server, &s))
+            .title("Run an MCP server?")
+            .kind(MessageDialogKind::Warning)
+            .buttons(MessageDialogButtons::OkCancelCustom("Allow".into(), "Don't allow".into()))
+            .blocking_show();
+        if !yes {
+            return Ok(false);
+        }
+        let mut guard = inner.lock().map_err(|_| "EIO: lock")?;
+        load(&app, &mut guard)?;
+        let approved = guard.approved.get_or_insert_with(Approved::default);
+        approved.add(&s);
+        save(&app, approved)?;
+        Ok(true)
+    })
+    .await
 }
 
 #[tauri::command]
-pub fn mcp_stdio_revoke(app: AppHandle, state: State<McpStdio>, command: String, args: Vec<String>, cwd: Option<String>) -> Result<bool, String> {
+pub async fn mcp_stdio_revoke(app: AppHandle, state: State<'_, McpStdio>, command: String, args: Vec<String>, cwd: Option<String>) -> Result<bool, String> {
     let s = spec(command, args, cwd);
-    let mut inner = state.0.lock().map_err(|_| "EIO: lock")?;
-    load(&app, &mut inner)?;
-    let approved = inner.approved.get_or_insert_with(Approved::default);
-    let removed = approved.remove(&s);
-    save(&app, approved)?;
-    Ok(removed)
+    let inner = state.0.clone();
+    blocking(move || {
+        let mut inner = inner.lock().map_err(|_| "EIO: lock")?;
+        load(&app, &mut inner)?;
+        let approved = inner.approved.get_or_insert_with(Approved::default);
+        let removed = approved.remove(&s);
+        save(&app, approved)?;
+        Ok(removed)
+    })
+    .await
 }
 
 #[tauri::command]
-pub fn mcp_stdio_spawn(app: AppHandle, state: State<McpStdio>, command: String, args: Vec<String>, cwd: Option<String>) -> Result<u32, String> {
+pub async fn mcp_stdio_spawn(app: AppHandle, state: State<'_, McpStdio>, command: String, args: Vec<String>, cwd: Option<String>) -> Result<u32, String> {
     let s = spec(command, args, cwd);
-    let mut inner = state.0.lock().map_err(|_| "EIO: lock")?;
-    load(&app, &mut inner)?;
-    may_spawn(&s, inner.approved.as_ref().unwrap_or(&Approved::default()))?;
-    inner.next = inner.next.wrapping_add(1).max(1);
-    let id = inner.next;
-    let handle = app.clone();
-    let session = spawn(&s, clean_env(std::env::vars()), move |e| {
-        let (kind, line) = match e {
-            Event::Out(l) => ("out", l),
-            Event::Err(l) => ("err", l),
-            Event::Exit(c) => ("exit", c.map(|c| c.to_string()).unwrap_or_default()),
+    let inner = state.0.clone();
+    blocking(move || {
+        let id = {
+            let mut guard = inner.lock().map_err(|_| "EIO: lock")?;
+            load(&app, &mut guard)?;
+            may_spawn(&s, guard.approved.as_ref().unwrap_or(&Approved::default()))?;
+            guard.next = guard.next.wrapping_add(1).max(1);
+            guard.next
         };
-        let _ = handle.emit("mcp-stdio", LineEvent { session: id, kind, line });
-    })?;
-    inner.sessions.insert(id, session);
-    Ok(id)
+        let handle = app.clone();
+        let map = inner.clone();
+        // Started without the lock held; the exit event removes the session again.
+        let session = spawn(&s, clean_env(std::env::vars()), move |e| {
+            let (kind, line) = match e {
+                Event::Out(l) => ("out", l),
+                Event::Err(l) => ("err", l),
+                Event::Exit(c) => {
+                    if let Ok(mut g) = map.lock() {
+                        g.sessions.remove(&id);
+                    }
+                    ("exit", c.map(|c| c.to_string()).unwrap_or_default())
+                }
+            };
+            let _ = handle.emit("mcp-stdio", LineEvent { session: id, kind, line });
+        })?;
+        let session = Arc::new(session);
+        let mut guard = inner.lock().map_err(|_| "EIO: lock")?;
+        if session.running() {
+            guard.sessions.insert(id, session);
+        }
+        Ok(id)
+    })
+    .await
+}
+
+fn session_of(state: &McpStdio, session: u32) -> Result<Arc<Session>, String> {
+    let inner = state.0.lock().map_err(|_| "EIO: lock")?;
+    inner.sessions.get(&session).cloned().ok_or_else(|| "no such server process".to_string())
 }
 
 #[tauri::command]
-pub fn mcp_stdio_write(state: State<McpStdio>, session: u32, line: String) -> Result<(), String> {
-    let mut inner = state.0.lock().map_err(|_| "EIO: lock")?;
-    inner.sessions.get_mut(&session).ok_or("no such server process")?.write_line(&line)
+pub async fn mcp_stdio_write(state: State<'_, McpStdio>, session: u32, line: String) -> Result<(), String> {
+    let s = session_of(&state, session)?;
+    blocking(move || s.write_line_within(&line, WRITE_TIMEOUT)).await
 }
 
 #[tauri::command]
-pub fn mcp_stdio_close(state: State<McpStdio>, session: u32) -> Result<Option<i32>, String> {
+pub async fn mcp_stdio_close(state: State<'_, McpStdio>, session: u32) -> Result<Option<i32>, String> {
     let s = {
         let mut inner = state.0.lock().map_err(|_| "EIO: lock")?;
         inner.sessions.remove(&session)
     };
-    Ok(s.and_then(|mut s| s.close(Duration::from_secs(2))))
+    match s {
+        Some(s) => blocking(move || Ok(s.close(Duration::from_secs(2)))).await,
+        None => Ok(None),
+    }
 }
 
 /// Elicitation URL mode: the system browser, which neither Lumen nor the model can read.
 #[tauri::command]
-pub fn mcp_open_url(url: String) -> Result<(), String> {
+pub async fn mcp_open_url(url: String) -> Result<(), String> {
     let os = if cfg!(target_os = "macos") {
         "macos"
     } else if cfg!(windows) {
@@ -167,5 +212,5 @@ pub fn mcp_open_url(url: String) -> Result<(), String> {
         "linux"
     };
     let (prog, args) = open_url_command(&url, os)?;
-    std::process::Command::new(prog).args(args).spawn().map(|_| ()).map_err(|e| e.to_string())
+    blocking(move || std::process::Command::new(prog).args(args).spawn().map(|_| ()).map_err(|e| e.to_string())).await
 }
