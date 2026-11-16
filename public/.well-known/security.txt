@@ -3,7 +3,11 @@
 # Do not put the details of a vulnerability in a public issue: the contact
 # below asks for a private channel first, with no details.
 # Checked by `npm run security:page -- --check` and src/__tests__/securityTxt.test.ts;
-# renew Expires before it passes (the check fails on the day it does).
+# renew Expires by 2027-04-16 (security/disclosure.json securityTxt.renewBy:
+# the check fails from that day, a month before the file expires).
+# Contact moves to GitHub private vulnerability reporting
+# (https://github.com/talstilkol/lumen-md/security/advisories/new) once it is
+# turned on; until then it is off and the button does not work.
 
 Contact: https://github.com/talstilkol/lumen-md/issues/new?title=Security%20contact%20request
 Expires: 2027-05-16T00:00:00.000Z

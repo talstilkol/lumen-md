@@ -234,6 +234,7 @@ function disclosureSection(t, d, lang) {
     "",
     `### ${t.support}`,
     "",
+    ...(d.supportPeriod ? [d.supportPeriod[lang], ""] : []),
     t.supportCols,
     "|---|---|---|",
     ...d.support.map((s) => `| ${cell(s.line)} | ${t.status[s.status]} | ${cell(s[lang])} |`),
@@ -243,6 +244,21 @@ function disclosureSection(t, d, lang) {
     ...(d.hallOfFame.length ? d.hallOfFame.map((h) => `- ${h.url ? `[${cell(h.name)}](${h.url})` : cell(h.name)} — ${cell(h.advisory)} (${h.date})`) : [t.hallNone]),
     "",
   ];
+}
+
+/**
+ * D1 §4: security.txt is renewed before it lapses. `expires` is its Expires
+ * value; renewBy must be at least 30 days before it, and the check fails
+ * from renewBy on, a month before the file itself would expire.
+ */
+export function renewalProblems(d, expires, now = Date.now()) {
+  const rb = Date.parse(`${d?.securityTxt?.renewBy ?? ""}T00:00:00Z`);
+  const ex = Date.parse(String(expires ?? ""));
+  if (!Number.isFinite(rb) || !Number.isFinite(ex)) return ["securityTxt.renewBy and security.txt's Expires must both be dates"];
+  const out = [];
+  if (ex - rb < 30 * 86_400_000) out.push(`securityTxt.renewBy ${d.securityTxt.renewBy} is less than 30 days before Expires ${expires}`);
+  if (+now >= rb) out.push(`security.txt is due for renewal since ${d.securityTxt.renewBy}: move Expires up to a year ahead and renewBy with it`);
+  return out;
 }
 
 /** Problems with security/disclosure.json (W13.X2). */
@@ -260,6 +276,19 @@ export function disclosureProblems(d) {
     if (!["current", "previous", "unsupported"].includes(s.status)) out.push(`support ${s.line}: status must be current, previous or unsupported`);
     if (!String(s.en ?? "").trim() || !String(s.he ?? "").trim()) out.push(`support ${s.line}: needs the period in English and Hebrew`);
   }
+  // D1 §3: the product's support period (CRA Art. 13(8)-(10)): five years at least, an end date, ten years of downloads, free moves to the newest line.
+  const sp = d?.supportPeriod;
+  if (!sp) out.push("supportPeriod: the product's support period (CRA Art. 13(8))");
+  else {
+    if (!(Number.isInteger(sp.minYears) && sp.minYears >= 5)) out.push("supportPeriod.minYears: at least 5 (CRA Art. 13(8))");
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(sp.notBefore ?? "")) || !/^\d{4}-\d{2}-\d{2}$/.test(String(sp.decided ?? "")) || Date.parse(sp.notBefore) < Date.parse(sp.decided) + 5 * 365 * 86_400_000) out.push("supportPeriod.notBefore: a date at least five years after the decision (decided)");
+    if (!(Number.isInteger(sp.updatesAvailableYears) && sp.updatesAvailableYears >= 10)) out.push("supportPeriod.updatesAvailableYears: at least 10 (CRA Art. 13(9))");
+    if (sp.newestLineFree !== true) out.push("supportPeriod.newestLineFree: true — fixes only in the newest line need a free move to it (CRA Art. 13(10))");
+    if (!String(sp.en ?? "").includes(String(sp.notBefore ?? "").slice(0, 4)) || !String(sp.he ?? "").includes(String(sp.notBefore ?? "").slice(0, 4))) out.push("supportPeriod: needs the period in English and Hebrew, with its end year");
+  }
+  // D1 §4: security.txt's Expires is renewed by renewBy, at least 30 days ahead of it.
+  const rb = d?.securityTxt?.renewBy;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(rb ?? ""))) out.push("securityTxt.renewBy: the date to renew security.txt's Expires by (YYYY-MM-DD)");
   if (!Array.isArray(d?.hallOfFame)) out.push("hallOfFame: a list (empty until a report is credited)");
   for (const h of d?.hallOfFame ?? []) if (!String(h.name ?? "").trim() || !/^\d{4}-\d{2}-\d{2}$/.test(String(h.date)) || !String(h.advisory ?? "").trim()) out.push("hallOfFame: each entry needs name, date and advisory");
   return out;

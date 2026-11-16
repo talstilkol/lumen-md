@@ -10,8 +10,8 @@
  */
 import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { cryptoAuditProblems, disclosureProblems, findingsProblems, renderSecurityPage } from "./lib/securityPage.mjs";
-import { securityTxtProblems } from "./lib/securityTxt.mjs";
+import { cryptoAuditProblems, disclosureProblems, findingsProblems, renderSecurityPage, renewalProblems } from "./lib/securityPage.mjs";
+import { securityTxtProblems, securityTxtValues } from "./lib/securityTxt.mjs";
 
 const root = process.argv.includes("--root") ? process.argv[process.argv.indexOf("--root") + 1] : ".";
 const findings = JSON.parse(readFileSync(join(root, "security/findings.json"), "utf8"));
@@ -25,6 +25,8 @@ const disclosure = JSON.parse(readFileSync(join(root, "security/disclosure.json"
 const txtPath = join(root, disclosure.securityTxt.path);
 const txtProblems = existsSync(txtPath) ? securityTxtProblems(readFileSync(txtPath, "utf8"), { canonical: disclosure.securityTxt.canonical }) : ["is missing"];
 const problems = [...findingsProblems(findings), ...cryptoAuditProblems(findings, cryptoAudit), ...disclosureProblems(disclosure), ...txtProblems.map((p) => `${disclosure.securityTxt.path}: ${p}`)];
+// D1 §4: renew security.txt a month before it expires.
+if (existsSync(txtPath)) problems.push(...renewalProblems(disclosure, securityTxtValues(readFileSync(txtPath, "utf8"), "Expires")[0]));
 const pages = { en: join(root, "docs/src/content/docs/security/index.md"), he: join(root, "docs/src/content/docs/he/security/index.md") };
 if (process.argv.includes("--check")) {
   for (const [lang, p] of Object.entries(pages)) if (!existsSync(p) || readFileSync(p, "utf8") !== renderSecurityPage(findings, cards, lang, cryptoAudit, disclosure)) problems.push(`${p} is out of date: run node scripts/security-page.mjs`);
