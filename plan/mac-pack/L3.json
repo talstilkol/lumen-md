@@ -1,0 +1,1058 @@
+[
+ {
+  "id": "L3-setup",
+  "cmd": "npm ci && npx playwright install chromium firefox webkit",
+  "expect": {
+   "exit": 0,
+   "says": "dependencies and the three Playwright browsers installed"
+  },
+  "needs": [
+   "macOS on Apple Silicon, 16 GB+",
+   "Node ^22.13 or ^24 (package.json engines)"
+  ],
+  "minutes": 20
+ },
+ {
+  "id": "L3-e2e-run",
+  "cmd": "node scripts/nightly/plan.mjs --run --only build,vitest,e2e,perf --jobs 4",
+  "expect": {
+   "exit": 0,
+   "json": {
+    "file": "reports/nightly/full-*.json",
+    "path": [
+     "results"
+    ],
+    "op": "len>=",
+    "value": 15
+   },
+   "says": "the e2e build, the whole vitest suite (2 shards), every spec on chromium, firefox and webkit (4 shards each) and the @nightly perf project; every step ok. The shard files are what every L3 e2e entry below reads."
+  },
+  "needs": [
+   "L3-setup"
+  ],
+  "minutes": 180
+ },
+ {
+  "id": "L3-W4.1-vitest",
+  "cmd": "node -e \"const j=require('./reports/nightly/full-'+new Date().toISOString().slice(0,10)+'.json');const v=j.results.filter(r=>r.id.startsWith('vitest-'));process.exit(v.length&&v.every(r=>r.status==='ok')?0:1)\"",
+  "expect": {
+   "exit": 0,
+   "says": "W4.1's 'vitest 0 failed' on real vitest: every vitest shard of the run is ok"
+  },
+  "needs": [
+   "L3-e2e-run"
+  ],
+  "minutes": 1
+ },
+ {
+  "id": "L3-W4.2",
+  "cmd": "npx vitest run src/__tests__/e2eShards.test.ts && node scripts/mac-pack/L3/e2e-summary.mjs --all --max-shard-min 40 --label W4.2",
+  "expect": {
+   "exit": 0,
+   "json": {
+    "file": "reports/mac-pack/L3-e2e-W4.2.json",
+    "path": [
+     "ok"
+    ],
+    "op": "==",
+    "value": true
+   },
+   "says": "full 3-browser e2e report on this head: every shard there, 0 failed, 0 flaky, each shard ≤ 40 min"
+  },
+  "needs": [
+   "L3-e2e-run"
+  ],
+  "minutes": 3
+ },
+ {
+  "id": "L3-W4.10",
+  "cmd": "node scripts/mac-pack/L3/e2e-summary.mjs --specs e2e/hebrew-first-load.spec.ts,e2e/first-run-language.spec.ts --label W4.10",
+  "expect": {
+   "exit": 0,
+   "json": {
+    "file": "reports/mac-pack/L3-e2e-W4.10.json",
+    "path": [
+     "ok"
+    ],
+    "op": "==",
+    "value": true
+   },
+   "says": "Hebrew first frame (dir=rtl, no flash) and og:locale in 3 browsers"
+  },
+  "needs": [
+   "L3-e2e-run"
+  ],
+  "minutes": 2
+ },
+ {
+  "id": "L3-W4.35",
+  "cmd": "node scripts/mac-pack/L3/e2e-summary.mjs --specs e2e/first-run-language.spec.ts,e2e/locale-switch.spec.ts --label W4.35",
+  "expect": {
+   "exit": 0,
+   "json": {
+    "file": "reports/mac-pack/L3-e2e-W4.35.json",
+    "path": [
+     "ok"
+    ],
+    "op": "==",
+    "value": true
+   },
+   "says": "two system languages (he-IL, en-US): the first note in the right language, 0 English strings in a Hebrew first run"
+  },
+  "needs": [
+   "L3-e2e-run"
+  ],
+  "minutes": 2
+ },
+ {
+  "id": "L3-W4.15",
+  "cmd": "npm run headers && node scripts/mac-pack/L3/e2e-summary.mjs --specs e2e/embeds.spec.ts,e2e/image-hosts.spec.ts,e2e/remote-images.spec.ts,e2e/csp-violations.spec.ts,e2e/content-frame-origin.spec.ts --label W4.15",
+  "expect": {
+   "exit": 0,
+   "json": {
+    "file": "reports/mac-pack/L3-e2e-W4.15.json",
+    "path": [
+     "ok"
+    ],
+    "op": "==",
+    "value": true
+   },
+   "says": "embeds and images still work under the tighter CSP; headers --check green"
+  },
+  "needs": [
+   "L3-e2e-run"
+  ],
+  "minutes": 2
+ },
+ {
+  "id": "L3-W4.32",
+  "cmd": "node scripts/scan-plugins.mjs --check && node scripts/mac-pack/L3/e2e-summary.mjs --specs e2e/plugin-install.spec.ts,e2e/plugin-ecosystem.spec.ts,e2e/plugins.spec.ts --label W4.32",
+  "expect": {
+   "exit": 0,
+   "json": {
+    "file": "reports/mac-pack/L3-e2e-W4.32.json",
+    "path": [
+     "ok"
+    ],
+    "op": "==",
+    "value": true
+   },
+   "says": "install -> use -> remove in 3 browsers; every gallery plugin passes scan-plugins"
+  },
+  "needs": [
+   "L3-e2e-run"
+  ],
+  "minutes": 2
+ },
+ {
+  "id": "L3-11.2",
+  "cmd": "node scripts/mac-pack/L3/e2e-summary.mjs --specs e2e/plugins.spec.ts --label 11.2",
+  "expect": {
+   "exit": 0,
+   "json": {
+    "file": "reports/mac-pack/L3-e2e-11.2.json",
+    "path": [
+     "ok"
+    ],
+    "op": "==",
+    "value": true
+   },
+   "says": "3 plugins run; a tampered package fails with a visible message, in 3 browsers"
+  },
+  "needs": [
+   "L3-e2e-run"
+  ],
+  "minutes": 2
+ },
+ {
+  "id": "L3-11.1",
+  "cmd": "npx vitest run src/__tests__/settingsSchema.test.ts src/__tests__/settingsIo.test.ts src/__tests__/settingsScreen.test.tsx && node scripts/mac-pack/L3/e2e-summary.mjs --specs e2e/settings.spec.ts --label 11.1",
+  "expect": {
+   "exit": 0,
+   "json": {
+    "file": "reports/mac-pack/L3-e2e-11.1.json",
+    "path": [
+     "ok"
+    ],
+    "op": "==",
+    "value": true
+   },
+   "says": "settings schema 100% + search and change in the settings screen"
+  },
+  "needs": [
+   "L3-e2e-run"
+  ],
+  "minutes": 2
+ },
+ {
+  "id": "L3-11.4",
+  "cmd": "npx vitest run src/__tests__/vaultEncryption.test.ts src/__tests__/vaultBackend.contract.test.ts src/__tests__/vaultArgon2.test.ts && node scripts/mac-pack/L3/e2e-summary.mjs --specs e2e/vault-encryption.spec.ts --label 11.4",
+  "expect": {
+   "exit": 0,
+   "json": {
+    "file": "reports/mac-pack/L3-e2e-11.4.json",
+    "path": [
+     "ok"
+    ],
+    "op": "==",
+    "value": true
+   },
+   "says": "only ciphertext in storage; scan and restore e2e in 3 browsers"
+  },
+  "needs": [
+   "L3-e2e-run"
+  ],
+  "minutes": 2
+ },
+ {
+  "id": "L3-W4.20",
+  "cmd": "npm i --no-save hash-wasm@4.12.0 && node --experimental-strip-types --no-warnings --import ./scripts/lib/ts-register.mjs scripts/mac-pack/L3/argon2-bench.mjs --runs 3",
+  "expect": {
+   "exit": 0,
+   "json": {
+    "file": "reports/mac-pack/L3-argon2.json",
+    "path": [
+     "ok"
+    ],
+    "op": "==",
+    "value": true
+   },
+   "says": "Argon2id m=64 MiB t=3 p=1 on hash-wasm: RFC 9106 passes and the median is ≤ 1000 ms on this Mac (the in-house figure is recorded beside it)"
+  },
+  "needs": [
+   "L3-setup",
+   "npm registry for hash-wasm (approved 10.11; --no-save: lockfile unchanged)"
+  ],
+  "minutes": 5
+ },
+ {
+  "id": "L3-W4.33",
+  "cmd": "npm run drill:data-safety -- --kills 200 && node scripts/mac-pack/L3/e2e-summary.mjs --specs e2e/data-safety.spec.ts,e2e/backup-drill.spec.ts --label W4.33",
+  "expect": {
+   "exit": 0,
+   "json": {
+    "file": "reports/mac-pack/L3-e2e-W4.33.json",
+    "path": [
+     "ok"
+    ],
+    "op": "==",
+    "value": true
+   },
+   "says": "0 notes lost in every scenario incl. the combined sync+git+crash one; reports/drill-<commit>.{json,md} written"
+  },
+  "needs": [
+   "L3-e2e-run"
+  ],
+  "minutes": 30
+ },
+ {
+  "id": "L3-0.20",
+  "cmd": "npm run headers && node scripts/mac-pack/L3/e2e-summary.mjs --specs e2e/playground.spec.ts --projects chromium,webkit --label 0.20",
+  "expect": {
+   "exit": 0,
+   "json": {
+    "file": "reports/mac-pack/L3-e2e-0.20.json",
+    "path": [
+     "ok"
+    ],
+    "op": "==",
+    "value": true
+   },
+   "says": "the playground e2e passes in WebKit (and Chromium); headers --check green"
+  },
+  "needs": [
+   "L3-e2e-run"
+  ],
+  "minutes": 2
+ },
+ {
+  "id": "L3-8.5",
+  "cmd": "node scripts/mac-pack/L3/e2e-summary.mjs --specs e2e/pwa-offline.spec.ts,e2e/pwa.spec.ts,e2e/airplane-mode.spec.ts --label 8.5",
+  "expect": {
+   "exit": 0,
+   "json": {
+    "file": "reports/mac-pack/L3-e2e-8.5.json",
+    "path": [
+     "ok"
+    ],
+    "op": "==",
+    "value": true
+   },
+   "says": "offline e2e: highlighting, fonts, sharing and files"
+  },
+  "needs": [
+   "L3-e2e-run"
+  ],
+  "minutes": 2
+ },
+ {
+  "id": "L3-8.4",
+  "cmd": "npx vitest run src/__tests__/vaultWorker.test.ts src/__tests__/perfVault.test.ts src/__tests__/workspaceIndexFreshness.test.ts src/__tests__/extractToc.test.ts && node scripts/mac-pack/L3/e2e-summary.mjs --specs e2e/perf-vault.spec.ts --projects chromium,perf --label 8.4",
+  "expect": {
+   "exit": 0,
+   "json": {
+    "file": "reports/mac-pack/L3-e2e-8.4.json",
+    "path": [
+     "ok"
+    ],
+    "op": "==",
+    "value": true
+   },
+   "says": "10k notes / 2 MB note e2e, incl. the @nightly typing budget in the perf project"
+  },
+  "needs": [
+   "L3-e2e-run"
+  ],
+  "minutes": 2
+ },
+ {
+  "id": "L3-W12.M2",
+  "cmd": "node scripts/mac-pack/L3/e2e-summary.mjs --specs e2e/bases-kanban.spec.ts,e2e/obsidian-bases.spec.ts,e2e/bulk-properties.spec.ts --label W12.M2",
+  "expect": {
+   "exit": 0,
+   "json": {
+    "file": "reports/mac-pack/L3-e2e-W12.M2.json",
+    "path": [
+     "ok"
+    ],
+    "op": "==",
+    "value": true
+   },
+   "says": "wave-12 kanban (new spec, W12.T5) and the .base views green in 3 browsers"
+  },
+  "needs": [
+   "L3-e2e-run"
+  ],
+  "minutes": 2
+ },
+ {
+  "id": "L3-7.4",
+  "cmd": "node scripts/mac-pack/L3/e2e-summary.mjs --specs e2e/ai-doctor.spec.ts --label 7.4",
+  "expect": {
+   "exit": 0,
+   "json": {
+    "file": "reports/mac-pack/L3-e2e-7.4.json",
+    "path": [
+     "ok"
+    ],
+    "op": "==",
+    "value": true
+   },
+   "says": "AI doctor on an empty machine: every row has the right suggestion"
+  },
+  "needs": [
+   "L3-e2e-run"
+  ],
+  "minutes": 2
+ },
+ {
+  "id": "L3-W4.9",
+  "cmd": "npm run build && npm run budget && npm run perf:gate -- --runs 5 --json reports/mac-pack/L3-perf-gate.json && npm run perf:inp",
+  "expect": {
+   "exit": 0,
+   "json": {
+    "file": "reports/mac-pack/L3-perf-gate.json",
+    "path": [
+     "failed"
+    ],
+    "op": "==",
+    "value": false
+   },
+   "says": "startup within the budget; perf:gate desktop FCP ≤ 1000 / LCP ≤ 2500 and mobile LCP ≤ 2500 (median of 5); INP gate green"
+  },
+  "needs": [
+   "L3-e2e-run"
+  ],
+  "minutes": 25
+ },
+ {
+  "id": "L3-8.1",
+  "cmd": "npx vitest run src/__tests__/renderSnapshot.test.ts src/__tests__/renderSnapshotDocs.test.ts && npm run perf:gate -- --profiles mobile --runs 5 --json reports/mac-pack/L3-perf-mobile.json",
+  "expect": {
+   "exit": 0,
+   "json": {
+    "file": "reports/mac-pack/L3-perf-mobile.json",
+    "path": [
+     "failed"
+    ],
+    "op": "==",
+    "value": false
+   },
+   "says": "the 50-document render snapshot on real vitest; mobile TBT < 300 ms (perf-gate.config.json mobile.tbt.error)"
+  },
+  "needs": [
+   "L3-W4.9"
+  ],
+  "minutes": 10
+ },
+ {
+  "id": "L3-11.5",
+  "cmd": "node scripts/check-sourcemaps.mjs dist && npm run release -- 0.2.0-beta.1 --dry-run --no-repro",
+  "expect": {
+   "exit": 0,
+   "says": "0 source maps in the build; desktop bundles signed and every signature checked (dry run, nothing published)"
+  },
+  "needs": [
+   "L3-W4.9",
+   "Rust + Xcode command-line tools",
+   "TAURI_SIGNING_PRIVATE_KEY and the updater pubkey (owner, W4.5)"
+  ],
+  "minutes": 40
+ },
+ {
+  "id": "L3-W4.5",
+  "cmd": "npx vitest run src/__tests__/releaseRun.test.ts && npm run release -- 0.2.0-beta.1 --dry-run",
+  "expect": {
+   "exit": 0,
+   "says": "the whole 0.2.0-beta.1 release dry run: preflight 0 missing, 2 reproducible web builds, signed desktop bundles, latest.json + .sig verified, SHA256SUMS.minisig verified; a changed byte refused"
+  },
+  "needs": [
+   "L3-setup",
+   "owner keys: TAURI_SIGNING_PRIVATE_KEY, security/updater-key.pub or LUMEN_UPDATER_PUBKEY, the minisign key"
+  ],
+  "minutes": 60
+ },
+ {
+  "id": "L3-W4.16",
+  "cmd": "npx vitest run src/__tests__/markdownSlowInputs.test.ts src/__tests__/deterministicSourcemaps.test.ts && npm run fuzz -- --slow-ms 200 --clock cpu --hang-ms 2000 && npm run repro -- --sourcemap",
+  "expect": {
+   "exit": 0,
+   "says": "the 7 slow inputs < 50 ms; 1,000,000 fuzz inputs per decoder, none > 200 ms CPU; two builds with --sourcemap give byte-identical .map files"
+  },
+  "needs": [
+   "L3-setup"
+  ],
+  "minutes": 150
+ },
+ {
+  "id": "L3-W4.17",
+  "cmd": "node scripts/mutation/run.mjs --critical --receipt && npm run mutation:check && npx vitest run src/__tests__/mutationReceipt.test.ts",
+  "expect": {
+   "exit": 0,
+   "says": "every critical module ≥ 80 under real vitest over every mutant; scripts/mutation/receipt.json rewritten (commit it); mutationReceipt 0 failed (also plan 0.15)"
+  },
+  "needs": [
+   "L3-setup",
+   "a clean tree (the run refuses uncommitted target files)"
+  ],
+  "minutes": 240
+ },
+ {
+  "id": "L3-0.16",
+  "cmd": "npm i --no-save knip && npm run deadcode && npm run unused && npx vitest run src/__tests__/unusedFiles.test.ts",
+  "expect": {
+   "exit": 0,
+   "says": "knip against its baseline (no new issue); 0 unused files; unusedFiles on real vitest"
+  },
+  "needs": [
+   "L3-setup",
+   "npm registry for knip (approved 10.11; --no-save)"
+  ],
+  "minutes": 10
+ },
+ {
+  "id": "L3-W4.21",
+  "cmd": "npm i --no-save @guidepup/guidepup @guidepup/playwright && npx --no-install @guidepup/setup && npm run test:sr -- --project=voiceover",
+  "expect": {
+   "json": [
+    {
+     "file": "sr-results/results.json",
+     "path": [
+      "stats",
+      "unexpected"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "file": "sr-results/results.json",
+     "path": [
+      "stats",
+      "expected"
+     ],
+     "op": ">=",
+     "value": 10
+    }
+   ],
+   "says": "10/10 Hebrew screen-reader tasks pass under VoiceOver (NVDA is the Windows half, not this Mac)"
+  },
+  "needs": [
+   "L3-setup",
+   "VoiceOver allowed to be controlled by AppleScript (npx @guidepup/setup asks once)",
+   "the Mac left alone while it runs: it takes over audio and keyboard"
+  ],
+  "minutes": 30
+ },
+ {
+  "id": "L3-W4.22-android",
+  "cmd": "npm run mobile:check && npm run mobile:android -- --unsigned",
+  "expect": {
+   "exit": 0,
+   "says": "web build -> cap sync -> Gradle: an APK in release/mobile/ (unsigned/debug; the signed AAB needs the owner's keystore)"
+  },
+  "needs": [
+   "L3-setup",
+   "Android SDK + JDK 21"
+  ],
+  "minutes": 25
+ },
+ {
+  "id": "L3-W4.22-ios",
+  "cmd": "npm run mobile:ios",
+  "expect": {
+   "exit": 0,
+   "says": "xcodebuild archive + upload: the build appears in TestFlight for internal testers"
+  },
+  "needs": [
+   "L3-setup",
+   "Xcode",
+   "App Store Connect API key (owner)"
+  ],
+  "minutes": 30
+ },
+ {
+  "id": "L3-W4.23-mac",
+  "cmd": "(cd src-tauri && cargo check --locked) && npm run tauri:build && (cd android && ./gradlew assembleDebug) && xcodebuild -project ios/App/App.xcodeproj -scheme App -sdk iphonesimulator -configuration Debug CODE_SIGNING_ALLOWED=NO build",
+  "expect": {
+   "exit": 0,
+   "says": "the Rust, Swift and Gradle code compiled at least once"
+  },
+  "needs": [
+   "L3-setup",
+   "Rust, Xcode, Android SDK"
+  ],
+  "minutes": 45
+ },
+ {
+  "id": "L3-W4.23-linux",
+  "cmd": "docker run --rm -v \"$PWD\":/w -w /w ubuntu:24.04 bash scripts/native/linux-build.sh --install --skip-android",
+  "expect": {
+   "exit": 0,
+   "says": "tauri build (deb, rpm, AppImage) on Linux; summary in reports/native/<commit>.txt"
+  },
+  "needs": [
+   "Docker Desktop (or any Ubuntu 24.04 host)"
+  ],
+  "minutes": 60
+ },
+ {
+  "id": "L3-models-day",
+  "cmd": "npm run models:day -- --yes && npm run models:day -- verify \"$(ls -td eval/results/day/*/ | head -1)report.json\"",
+  "expect": {
+   "exit": 0,
+   "json": {
+    "file": "eval/results/day/*/report.json",
+    "path": [
+     "kind"
+    ],
+    "op": "==",
+    "value": "model"
+   },
+   "says": "one sealed report with every real-model step; the receipt verifies; kind is 'model', not a wiring run"
+  },
+  "needs": [
+   "L3-setup",
+   "Ollama running",
+   "the models `npm run models:day -- check` lists",
+   "Python 3 with scripts/golden/requirements.txt"
+  ],
+  "minutes": 180
+ },
+ {
+  "id": "L3-W4.6",
+  "cmd": "npm run models:day -- verify \"$(ls -td eval/results/day/*/ | head -1)report.json\"",
+  "expect": {
+   "exit": 0,
+   "json": [
+    {
+     "file": "eval/results/day/*/report.json",
+     "path": [
+      "kind"
+     ],
+     "op": "==",
+     "value": "model"
+    },
+    {
+     "file": "eval/results/day/*/report.json",
+     "path": [
+      "steps",
+      {
+       "id": "agents-gemma3"
+      },
+      "status"
+     ],
+     "op": "==",
+     "value": "pass"
+    },
+    {
+     "file": "eval/results/day/*/report.json",
+     "path": [
+      "steps",
+      {
+       "id": "agents-qwen"
+      },
+      "status"
+     ],
+     "op": "==",
+     "value": "pass"
+    },
+    {
+     "file": "eval/results/day/*/report.json",
+     "path": [
+      "steps",
+      {
+       "id": "pdf-chat"
+      },
+      "status"
+     ],
+     "op": "==",
+     "value": "pass"
+    },
+    {
+     "file": "eval/results/day/*/report.json",
+     "path": [
+      "steps",
+      {
+       "id": "fim"
+      },
+      "status"
+     ],
+     "op": "==",
+     "value": "pass"
+    }
+   ],
+   "says": "real scores for the 14 agents, FIM p50/p95 and pdf-chat in one report"
+  },
+  "needs": [
+   "L3-models-day"
+  ],
+  "minutes": 1
+ },
+ {
+  "id": "L3-W4.13",
+  "cmd": "ls -td eval/results/day/*/ | head -1",
+  "expect": {
+   "json": [
+    {
+     "file": "eval/results/day/*/report.json",
+     "path": [
+      "kind"
+     ],
+     "op": "==",
+     "value": "model"
+    },
+    {
+     "file": "eval/results/day/*/report.json",
+     "path": [
+      "steps",
+      {
+       "id": "asr-web"
+      },
+      "status"
+     ],
+     "op": "==",
+     "value": "pass"
+    },
+    {
+     "file": "eval/results/day/*/report.json",
+     "path": [
+      "steps",
+      {
+       "id": "asr-zipformer"
+      },
+      "status"
+     ],
+     "op": "==",
+     "value": "pass"
+    }
+   ],
+   "says": "dictation WER in the browser models and the streaming Zipformer on FLEURS-he, at their targets"
+  },
+  "needs": [
+   "L3-models-day"
+  ],
+  "minutes": 1
+ },
+ {
+  "id": "L3-W4.31",
+  "cmd": "LUMEN_EVAL_MODELS=qwen2.5:7b,gemma3:12b npm run eval:bfcl",
+  "expect": {
+   "exit": 0,
+   "json": [
+    {
+     "file": "eval/results/day/*/report.json",
+     "path": [
+      "kind"
+     ],
+     "op": "==",
+     "value": "model"
+    },
+    {
+     "file": "eval/results/day/*/report.json",
+     "path": [
+      "steps",
+      {
+       "id": "tool-calls"
+      },
+      "status"
+     ],
+     "op": "==",
+     "value": "pass"
+    }
+   ],
+   "says": "≥ 95% valid tool calls on qwen2.5:7b and gemma3:12b; then BFCL v4 on the same models"
+  },
+  "needs": [
+   "L3-models-day"
+  ],
+  "minutes": 60
+ },
+ {
+  "id": "L3-7.2",
+  "cmd": "npx vitest run src/__tests__/realTinyModel.test.ts",
+  "expect": {
+   "exit": 0,
+   "json": [
+    {
+     "file": "eval/results/day/*/report.json",
+     "path": [
+      "kind"
+     ],
+     "op": "==",
+     "value": "model"
+    },
+    {
+     "file": "eval/results/day/*/report.json",
+     "path": [
+      "steps",
+      {
+       "id": "real-tiny"
+      },
+      "status"
+     ],
+     "op": "==",
+     "value": "pass"
+    }
+   ],
+   "says": "14/14 agents return schema-valid output on the tiny real model"
+  },
+  "needs": [
+   "L3-models-day"
+  ],
+  "minutes": 1
+ },
+ {
+  "id": "L3-7.3",
+  "cmd": "npx vitest run src/__tests__/agentEval.test.ts",
+  "expect": {
+   "exit": 0,
+   "json": [
+    {
+     "file": "eval/results/day/*/report.json",
+     "path": [
+      "kind"
+     ],
+     "op": "==",
+     "value": "model"
+    },
+    {
+     "file": "eval/results/day/*/report.json",
+     "path": [
+      "steps",
+      {
+       "id": "agents-gemma3"
+      },
+      "status"
+     ],
+     "op": "==",
+     "value": "pass"
+    },
+    {
+     "file": "eval/results/day/*/report.json",
+     "path": [
+      "steps",
+      {
+       "id": "agents-qwen"
+      },
+      "status"
+     ],
+     "op": "==",
+     "value": "pass"
+    }
+   ],
+   "says": "eval:agents report against live models (eval/results/)"
+  },
+  "needs": [
+   "L3-models-day"
+  ],
+  "minutes": 1
+ },
+ {
+  "id": "L3-7.8",
+  "cmd": "ls -td eval/results/day/*/ | head -1",
+  "expect": {
+   "json": [
+    {
+     "file": "eval/results/day/*/report.json",
+     "path": [
+      "kind"
+     ],
+     "op": "==",
+     "value": "model"
+    },
+    {
+     "file": "eval/results/day/*/report.json",
+     "path": [
+      "steps",
+      {
+       "id": "bench-models"
+      },
+      "status"
+     ],
+     "op": "==",
+     "value": "pass"
+    }
+   ],
+   "says": "every browser engine measured in real Chromium (WebGPU); registry measured entries written"
+  },
+  "needs": [
+   "L3-models-day"
+  ],
+  "minutes": 1
+ },
+ {
+  "id": "L3-7.9",
+  "cmd": "npm run eval:ingest && npm run eval:ingest -- --check",
+  "expect": {
+   "exit": 0,
+   "says": "eval/results -> models/registry.json measured + src/ai/defaults.ts; --check exit 0 (commit the two files and eval/failures.md)"
+  },
+  "needs": [
+   "L3-models-day"
+  ],
+  "minutes": 2
+ },
+ {
+  "id": "L3-W12.M1",
+  "cmd": "npx tsx scripts/eval-entity-graph.mjs ner --test \"$LUMEN_NEMO_TEST\" --sha256 \"$LUMEN_NEMO_SHA256\" && npm run eval:ask-vault",
+  "expect": {
+   "exit": 0,
+   "says": "NER card on NEMO (rules; DictaBERT-NER/GLiNER need their ONNX engines, W11.M3) and ask-the-vault on HeQ"
+  },
+  "needs": [
+   "L3-setup",
+   "LUMEN_NEMO_TEST: a local NEMO token-single test file (never committed, W12.O1)",
+   "Ollama for eval:ask-vault"
+  ],
+  "minutes": 30
+ },
+ {
+  "id": "L3-W12.M3",
+  "cmd": "node scripts/golden/evals/mt-flores-card.mjs --flores \"$LUMEN_FLORES_DIR\" --out reports/eval/mt-flores-card.json",
+  "expect": {
+   "exit": 0,
+   "json": {
+    "file": "reports/eval/mt-flores-card.json",
+    "path": [],
+    "op": "exists"
+   },
+   "says": "chrF on FLORES-200 devtest for the local MT layers (the ODT-in-LibreOffice and Typst checks and visual:approve are human looks)"
+  },
+  "needs": [
+   "L3-setup",
+   "LUMEN_FLORES_DIR: a local FLORES-200 copy (gated; never re-hosted)"
+  ],
+  "minutes": 30
+ },
+ {
+  "id": "L3-W4.30-prepare",
+  "cmd": "npm run obsidian:compare -- prepare \"$LUMEN_OBSIDIAN_VAULT\"",
+  "expect": {
+   "exit": 0,
+   "says": "probe .base files and the 'Lumen compare' plugin installed into the vault; then in Obsidian 1.15.1 run 'Lumen compare: run every probe'"
+  },
+  "needs": [
+   "L3-setup",
+   "Obsidian 1.15.1",
+   "LUMEN_OBSIDIAN_VAULT: a vault with real .base files"
+  ],
+  "minutes": 5
+ },
+ {
+  "id": "L3-W4.30-diff",
+  "cmd": "npm run obsidian:compare -- diff \"$LUMEN_OBSIDIAN_VAULT\" --out reports/mac-pack/L3-obsidian-compare.md",
+  "expect": {
+   "exit": 0,
+   "says": "0 differences between Lumen's rows and Obsidian's for every view (also W12.M2's .base half)"
+  },
+  "needs": [
+   "L3-W4.30-prepare",
+   "the probes run once inside Obsidian"
+  ],
+  "minutes": 5
+ },
+ {
+  "id": "L3-nightly-install",
+  "cmd": "npm run nightly:install",
+  "expect": {
+   "exit": 0,
+   "says": "the launchd job installed (02:17 local); it runs flake, perf, triage and weekly by itself (plan 0.11)"
+  },
+  "needs": [
+   "L3-setup"
+  ],
+  "minutes": 1
+ },
+ {
+  "id": "L3-0.5",
+  "cmd": "npm run nightly -- --status",
+  "expect": {
+   "exit": 0,
+   "json": {
+    "file": "reports/nightly/status.json",
+    "path": [
+     "plan",
+     "0.5",
+     "met"
+    ],
+    "op": "==",
+    "value": true
+   },
+   "says": "3 nights in a row with 0 flakes"
+  },
+  "needs": [
+   "L3-nightly-install",
+   "3 nights"
+  ],
+  "minutes": 1
+ },
+ {
+  "id": "L3-0.11",
+  "cmd": "npm run nightly -- --status",
+  "expect": {
+   "exit": 0,
+   "json": {
+    "file": "reports/nightly/status.json",
+    "path": [
+     "plan",
+     "0.11",
+     "met"
+    ],
+    "op": "==",
+    "value": true
+   },
+   "says": "the 4 kinds of scheduled run each produced a report unattended"
+  },
+  "needs": [
+   "L3-nightly-install",
+   "a Sunday for the weekly kind"
+  ],
+  "minutes": 1
+ },
+ {
+  "id": "L3-0.14",
+  "cmd": "npm run nightly -- --status",
+  "expect": {
+   "exit": 0,
+   "json": {
+    "file": "reports/nightly/status.json",
+    "path": [
+     "plan",
+     "0.14",
+     "met"
+    ],
+    "op": "==",
+    "value": true
+   },
+   "says": "the 0.14 count over the first 20 PRs since ci:local: 0 preview failures"
+  },
+  "needs": [
+   "L3-nightly-install",
+   "20 PRs opened since ci:local"
+  ],
+  "minutes": 1
+ },
+ {
+  "id": "L3-W4.36",
+  "cmd": "npm run nightly -- --status",
+  "expect": {
+   "exit": 0,
+   "json": [
+    {
+     "file": "reports/nightly/status.json",
+     "path": [
+      "plan",
+      "0.5",
+      "met"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "file": "reports/nightly/status.json",
+     "path": [
+      "plan",
+      "0.11",
+      "met"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "file": "reports/nightly/status.json",
+     "path": [
+      "plan",
+      "0.14",
+      "met"
+     ],
+     "op": "==",
+     "value": true
+    }
+   ],
+   "says": "0.5, 0.11 and 0.14 all met"
+  },
+  "needs": [
+   "L3-0.5",
+   "L3-0.11",
+   "L3-0.14"
+  ],
+  "minutes": 1
+ },
+ {
+  "id": "L3-8.3",
+  "cmd": "npm run nightly -- --status",
+  "expect": {
+   "exit": 0,
+   "json": [
+    {
+     "file": "reports/nightly/status.json",
+     "path": [
+      "plan",
+      "0.11",
+      "kinds",
+      "perf",
+      "ok"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "file": "reports/nightly/status.json",
+     "path": [
+      "plan",
+      "0.5",
+      "met"
+     ],
+     "op": "==",
+     "value": true
+    }
+   ],
+   "says": "the scheduled perf run (perf gate + Lighthouse trend, collect only, nothing uploaded) green; 3 consecutive nights"
+  },
+  "needs": [
+   "L3-nightly-install",
+   "3 nights"
+  ],
+  "minutes": 1
+ }
+]

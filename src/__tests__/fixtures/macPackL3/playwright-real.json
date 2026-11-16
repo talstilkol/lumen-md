@@ -1,0 +1,176 @@
+{
+ "config": {
+  "version": "1.56.1"
+ },
+ "suites": [
+  {
+   "title": "a.spec.mjs",
+   "file": "a.spec.mjs",
+   "column": 0,
+   "line": 0,
+   "specs": [
+    {
+     "title": "passes",
+     "ok": true,
+     "tags": [],
+     "tests": [
+      {
+       "timeout": 30000,
+       "expectedStatus": "passed",
+       "projectId": "chromium",
+       "projectName": "chromium",
+       "status": "expected"
+      }
+     ],
+     "id": "f10c3055afda6889ad03-edd6484de980fb15ca73",
+     "file": "a.spec.mjs",
+     "line": 2,
+     "column": 1
+    },
+    {
+     "title": "fails",
+     "ok": false,
+     "tags": [],
+     "tests": [
+      {
+       "timeout": 30000,
+       "expectedStatus": "passed",
+       "projectId": "chromium",
+       "projectName": "chromium",
+       "status": "unexpected"
+      }
+     ],
+     "id": "f10c3055afda6889ad03-12ee7fc1705fc3f28848",
+     "file": "a.spec.mjs",
+     "line": 3,
+     "column": 1
+    },
+    {
+     "title": "skips",
+     "ok": true,
+     "tags": [],
+     "tests": [
+      {
+       "timeout": 30000,
+       "expectedStatus": "skipped",
+       "projectId": "chromium",
+       "projectName": "chromium",
+       "status": "skipped"
+      }
+     ],
+     "id": "f10c3055afda6889ad03-8470a2cd4dd84c6a31bd",
+     "file": "a.spec.mjs",
+     "line": 4,
+     "column": 1
+    },
+    {
+     "title": "passes",
+     "ok": true,
+     "tags": [],
+     "tests": [
+      {
+       "timeout": 30000,
+       "expectedStatus": "passed",
+       "projectId": "webkit",
+       "projectName": "webkit",
+       "status": "expected"
+      }
+     ],
+     "id": "f10c3055afda6889ad03-4792cfc8f079a7343627",
+     "file": "a.spec.mjs",
+     "line": 2,
+     "column": 1
+    },
+    {
+     "title": "fails",
+     "ok": false,
+     "tags": [],
+     "tests": [
+      {
+       "timeout": 30000,
+       "expectedStatus": "passed",
+       "projectId": "webkit",
+       "projectName": "webkit",
+       "status": "unexpected"
+      }
+     ],
+     "id": "f10c3055afda6889ad03-6be1f1f5d6f6eacd3259",
+     "file": "a.spec.mjs",
+     "line": 3,
+     "column": 1
+    },
+    {
+     "title": "skips",
+     "ok": true,
+     "tags": [],
+     "tests": [
+      {
+       "timeout": 30000,
+       "expectedStatus": "skipped",
+       "projectId": "webkit",
+       "projectName": "webkit",
+       "status": "skipped"
+      }
+     ],
+     "id": "f10c3055afda6889ad03-9b401ac21d9ea5078f03",
+     "file": "a.spec.mjs",
+     "line": 4,
+     "column": 1
+    }
+   ],
+   "suites": [
+    {
+     "title": "group",
+     "file": "a.spec.mjs",
+     "line": 5,
+     "column": 6,
+     "specs": [
+      {
+       "title": "nested pass",
+       "ok": true,
+       "tags": [],
+       "tests": [
+        {
+         "timeout": 30000,
+         "expectedStatus": "passed",
+         "projectId": "chromium",
+         "projectName": "chromium",
+         "status": "expected"
+        }
+       ],
+       "id": "f10c3055afda6889ad03-b2d9128bbaaf9d8585ec",
+       "file": "a.spec.mjs",
+       "line": 5,
+       "column": 32
+      },
+      {
+       "title": "nested pass",
+       "ok": true,
+       "tags": [],
+       "tests": [
+        {
+         "timeout": 30000,
+         "expectedStatus": "passed",
+         "projectId": "webkit",
+         "projectName": "webkit",
+         "status": "expected"
+        }
+       ],
+       "id": "f10c3055afda6889ad03-888ccb6c270a091e050d",
+       "file": "a.spec.mjs",
+       "line": 5,
+       "column": 32
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "errors": [],
+ "stats": {
+  "expected": 4,
+  "skipped": 2,
+  "unexpected": 2,
+  "flaky": 0
+ }
+}
