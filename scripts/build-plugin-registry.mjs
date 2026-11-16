@@ -116,7 +116,10 @@ const index = {
     "Static plugin registry (plan 11.2, W1.20, W4.32), built by scripts/build-plugin-registry.mjs: one folder per version; every version listed here is scanned (scripts/scan-plugins.mjs → scan.json); a version whose scan fails is not shown.",
   plugins: order.map((id) => {
     const versions = [...found.get(id)].sort((a, b) => semverCmp(a.version, b.version));
-    return { id, name: versions[versions.length - 1].name, versions: versions.map((v) => ({ version: v.version, path: v.path, sha256: v.sha256, manifestSha256: v.manifestSha256 })) };
+    // W11.S14: a takedown (review-plugins.mjs --takedown) stays until the version's folder is removed.
+    const before = previous.plugins.find((p) => p.id === id)?.versions ?? [];
+    const delisted = (v) => before.find((b) => b.version === v.version && b.path === v.path)?.delisted;
+    return { id, name: versions[versions.length - 1].name, versions: versions.map((v) => ({ version: v.version, path: v.path, sha256: v.sha256, manifestSha256: v.manifestSha256, ...(delisted(v) ? { delisted: delisted(v) } : {}) })) };
   }),
 };
 const out = JSON.stringify(index, null, 2) + "\n";
