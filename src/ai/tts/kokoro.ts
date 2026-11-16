@@ -8,8 +8,8 @@
  * - No kokoro-js: it bundles eSpeak NG (GPL-3.0), which the licence gate
  *   fails (ttsLicence.test.ts). The model runs in our own worker
  *   (./kokoro.worker.ts, onnxruntime-web, MIT). English text → token ids is
- *   a seam too (`setEnglishPhonemizer`): a permissively licensed G2P is part
- *   of 15.10; without one the engine refuses to load.
+ *   chosen with the voice (`ENGLISH_PHONEMIZER`, null today): a permissively
+ *   licensed G2P is part of 15.10; without one the engine refuses to load.
  * - With a voice: the download is explicit (the user is asked, with the
  *   size, before any request), both files are checked against their sha256
  *   (neuralReader.verifiedFile, Cache Storage "lumen-voices"), and after
@@ -51,11 +51,12 @@ export function usableKokoro(packs: readonly KokoroPack[], registry: readonly Re
 
 /** English text → Kokoro token ids. */
 export type EnglishPhonemizer = (text: string) => Promise<number[]>;
-let phonemizer: EnglishPhonemizer | null = null;
-/** Register the English G2P (null removes it). */
-export function setEnglishPhonemizer(p: EnglishPhonemizer | null): void {
-  phonemizer = p;
-}
+/**
+ * The app's English G2P: none chosen yet (decision 15.10), like ENGLISH_VOICES.
+ * A constant, not a register hook: the G2P ships with the pinned voice, and
+ * tests pass their own through LoadDeps.phonemize.
+ */
+export const ENGLISH_PHONEMIZER: EnglishPhonemizer | null = null;
 
 /** The engine the reader drives: text in, audio at `sampleRate` out. */
 export interface KokoroEngine {
@@ -93,8 +94,8 @@ export interface LoadDeps {
  * consent → refused before any request; then both files, checked.
  */
 export async function loadKokoro(pack: KokoroPack, deps: LoadDeps): Promise<KokoroEngine> {
-  const g2p = deps.phonemize === undefined ? phonemizer : deps.phonemize;
-  if (!g2p) throw new Error("kokoro: no English phonemizer is registered (decision 15.10)");
+  const g2p = deps.phonemize === undefined ? ENGLISH_PHONEMIZER : deps.phonemize;
+  if (!g2p) throw new Error("kokoro: no English phonemizer is chosen yet (decision 15.10)");
   if (!(await deps.consent(pack, pack.model.bytes + pack.voice.bytes))) throw new Error("kokoro: the download was not allowed");
   const fetchVerified = deps.fetchVerified ?? (async (f: VoiceFile) => (await import("./neuralReader")).verifiedFile(f));
   const [model, voice] = await Promise.all([fetchVerified(pack.model), fetchVerified(pack.voice)]);

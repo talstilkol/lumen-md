@@ -6,9 +6,9 @@
  * yes, checks the files, and the reader drives any engine sentence by
  * sentence (prefetching the next), with word highlights and abort.
  */
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createHash } from "node:crypto";
-import { ENGLISH_VOICES, englishNeuralVoice, loadKokoro, setEnglishPhonemizer, speakKokoro, styleFor, usableKokoro, wordStarts, type KokoroEngine, type KokoroPack } from "../ai/tts/kokoro";
+import { ENGLISH_VOICES, englishNeuralVoice, ENGLISH_PHONEMIZER, loadKokoro, speakKokoro, styleFor, usableKokoro, wordStarts, type KokoroEngine, type KokoroPack } from "../ai/tts/kokoro";
 import { verifiedFile } from "../ai/tts/neuralReader";
 import { speakableSentences, wordRanges } from "../ai/tts";
 
@@ -39,11 +39,11 @@ function fakeAudio() {
   return { ctx, ended };
 }
 
-afterEach(() => setEnglishPhonemizer(null));
 
 describe("dormant until 15.10", () => {
   it("no pinned English voice: none is used, nothing is imported or fetched", async () => {
     expect(ENGLISH_VOICES).toEqual([]);
+    expect(ENGLISH_PHONEMIZER).toBeNull(); // no G2P chosen either (15.10)
     expect(await englishNeuralVoice()).toBeNull();
   });
 
