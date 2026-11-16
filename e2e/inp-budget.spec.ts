@@ -28,7 +28,7 @@ import { join } from "node:path";
  * (`npm run perf:inp`), never in the per-browser PR runs.
  */
 
-const REPORT_DIR = join(__dirname, "..", "reports", "perf");
+const REPORT_DIR = join(import.meta.dirname, "..", "reports", "perf");
 const CPU_SLOWDOWN = 4;
 
 interface Metrics {
@@ -214,7 +214,7 @@ for (const [label, bytes, budget] of [
 }
 
 // ── W11.Q5: real long texts ─────────────────────────────────────────────
-const CORPUS = process.env.LUMEN_EDITOR_CORPUS ?? join(__dirname, "..", "reports", "perf", "corpus");
+const CORPUS = process.env.LUMEN_EDITOR_CORPUS ?? join(import.meta.dirname, "..", "reports", "perf", "corpus");
 const REAL = [
   { key: "mobyDick", file: "moby-dick.md", title: "Moby-Dick", shows: "Moby-Dick; or, The Whale" },
   { key: "benYehuda2MB", file: "benyehuda-2mb.md", title: "Ben-Yehuda 2 MB", shows: "בן-יהודה" },

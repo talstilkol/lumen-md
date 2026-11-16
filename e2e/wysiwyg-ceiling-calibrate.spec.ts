@@ -107,7 +107,7 @@ for (const kb of SIZES_KB) {
 
 test.afterAll(() => {
   if (!points.length) return;
-  const dir = join(__dirname, "..", "reports", "perf");
+  const dir = join(import.meta.dirname, "..", "reports", "perf");
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, "wysiwyg-ceiling.json"), JSON.stringify({ at: new Date().toISOString(), cpuSlowdown: CPU_SLOWDOWN, points }, null, 2) + "\n");
 });
