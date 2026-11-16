@@ -15,7 +15,7 @@ import { connectAllowedByCsp } from "../lib/cspConnect";
  * build time (`VITE_LANGUAGETOOL_URL`). When no LanguageTool on this machine
  * is configured and the AI policy keeps the public API off limits, an
  * English paragraphs are spell-checked on this device instead (nspell,
- * plan 6.10), and an explicit check (`{ allowModel: true }`) adds the
+ * plan 6.10) and grammar-checked by Harper when it is installed (W13.W10), and an explicit check (`{ allowModel: true }`) adds the
  * local `proofreader` agent.
  */
 
@@ -130,7 +130,10 @@ export async function checkGrammar(
   if (!isLocalOrigin(endpoint()) && !remoteGrammarAllowed(endpoint())) {
     const { checkEnglishParagraphs } = await import("./englishSpellService");
     const spelling = await checkEnglishParagraphs(trimmed).catch(() => [] as GrammarMatch[]);
-    const matches = opts.allowModel ? mergeMatches(spelling, await checkWithModel(trimmed, language, opts.signal)) : spelling;
+    // W13.W10: Harper's English grammar on this device, when it is installed in this build ([] otherwise).
+    const harper = await import("../agents/writing/harper/harperService").then((m) => m.harperGrammarMatches(trimmed, opts.signal));
+    const local = mergeMatches(harper, spelling);
+    const matches = opts.allowModel ? mergeMatches(local, await checkWithModel(trimmed, language, opts.signal)) : local;
     remember(cacheKey, matches);
     return matches;
   }
