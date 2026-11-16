@@ -51,7 +51,8 @@ const DOMAINS = [
     file: "fineTune.json",
     prefix: "fineTune.",
     module: "ui/fineTuneStrings.ts",
-    users: ["ui/FineTuneSettings.tsx"],
+    // W10.A10: the settings screen names the fine-tune tab before its panel loads (00f9bea233).
+    users: ["ui/FineTuneSettings.tsx", "ui/SettingsScreen.tsx"],
     sameChunk: [] as string[],
     min: 20,
   },
