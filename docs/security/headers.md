@@ -321,14 +321,14 @@ header policy is written before the build and cannot name them. Now:
 Embeds kept `allow-same-origin`, so the content frame ran with the app's origin: any
 future sink in the content frame's script would have been full XSS on the app. Now:
 
-- **The frame has its own site**: `VITE_CONTENT_FRAME_URL`, officially
+- **The frame has its own site**: `LUMEN_CONTENT_FRAME_URL`, officially
   `https://lumen-md-frame.pages.dev/` (Cloudflare Pages by Direct Upload,
   `scripts/content-frame-site.mjs`; `pages.dev` is on the Public Suffix List, so it is
   another *site*, not only another origin). Host `content-frame-site` in `policy.json`,
   checked file `deploy/content-frame/_headers`: no `sandbox`, `frame-ancestors` = the apps.
   The app's `frame-src` is `'self'` plus that origin. There an embed's `allow-same-origin`
   is the frame site's origin.
-- **Without one** (a build with no `VITE_CONTENT_FRAME_URL`): images, media and Gists
+- **Without one** (a build with no `LUMEN_CONTENT_FRAME_URL`): images, media and Gists
   still render in an opaque frame on the app's host, and the host's header adds
   `sandbox allow-scripts allow-popups allow-popups-to-escape-sandbox` to
   `/content-frame.html`, so even a top-level visit runs it opaque. Embeds become a link.

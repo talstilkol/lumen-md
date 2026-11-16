@@ -1,7 +1,7 @@
 /// <reference types="vitest" />
 import { defineConfig as defineViteConfig, searchForWorkspaceRoot } from "vite";
 import type { Plugin, UserConfig as ViteUserConfig } from "vite";
-import { cspEndpointsPlugin } from "./src/build/cspEndpoints";
+import { contentFramePage, cspEndpointsPlugin } from "./src/build/cspEndpoints";
 import { laneCacheDir } from "./src/build/laneCache";
 import { webrManifestPlugin } from "./src/build/webrManifest";
 import { LOCALES, whatsNew } from "./scripts/lib/whats-new.mjs";
@@ -344,6 +344,9 @@ export default defineConfig({
     // window.__lumenTest for Playwright (src/testing/e2eHooks.ts): a literal,
     // so a build without VITE_E2E=1 drops the hook and its chunk entirely.
     __LUMEN_E2E__: JSON.stringify(process.env.VITE_E2E === "1"),
+    // The content frame's own site (plan W6.40, D1 §7): a build-only variable, never VITE_*, and only
+    // an https origin with "/" or "/content-frame.html" reaches the bundle (contentFramePage).
+    __LUMEN_CONTENT_FRAME_URL__: JSON.stringify(contentFramePage(process.env.LUMEN_CONTENT_FRAME_URL)),
     // window.__lumen.agentReview (src/agents/reviewBridge.ts, plan W1.31): a
     // literal too. Vite leaves an unset VITE_* as `({}).VITE_…`, which the
     // minifier does not fold, so the surface stayed in a normal production

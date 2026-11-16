@@ -24,7 +24,9 @@ export const CONTENT_FRAME_MESSAGE = "lumen-content-frame";
 
 /**
  * The content frame's own site (plan W6.40, review E52): the deployment's
- * `VITE_CONTENT_FRAME_URL`, the page's URL on a second static site that
+ * `LUMEN_CONTENT_FRAME_URL` (build-time, inlined by vite.config.ts as
+ * `__LUMEN_CONTENT_FRAME_URL__` after src/build/cspEndpoints.ts
+ * contentFramePage() checked it; D1 §7), the page's URL on a second static site that
  * serves only public/content-frame.{html,js} (scripts/content-frame-site.mjs;
  * the official one is https://lumen-md-frame.pages.dev/, on the Public Suffix
  * List, so it is another *site* as well as another origin). There the frame
@@ -37,7 +39,7 @@ export const CONTENT_FRAME_MESSAGE = "lumen-content-frame";
  * top-level visit can't run it with the app's origin. Embeds, which need an
  * origin of their own, are then a link instead of a player.
  */
-const ENV_URL: string | undefined = import.meta.env.VITE_CONTENT_FRAME_URL;
+const ENV_URL: string | undefined = typeof __LUMEN_CONTENT_FRAME_URL__ === "string" && __LUMEN_CONTENT_FRAME_URL__ ? __LUMEN_CONTENT_FRAME_URL__ : undefined;
 let urlOverride: string | null | undefined;
 
 /** Tests: pretend the build was made with this frame site URL (undefined: back to the build's). */

@@ -9,7 +9,7 @@
  *
  *   node scripts/content-frame-site.mjs            → dist-frame/
  *   npx wrangler pages deploy dist-frame --project-name lumen-md-frame
- *   then build the app with VITE_CONTENT_FRAME_URL=https://lumen-md-frame.pages.dev/
+ *   then build the app with LUMEN_CONTENT_FRAME_URL=https://lumen-md-frame.pages.dev/
  *
  * The site sees only `GET /` (the page's one script is inline, plan W10.D1): what
  * the frame shows travels in the #fragment, which a browser never sends.

@@ -1,7 +1,7 @@
 /**
  * Plan W6.40 (review E52): the content frame runs on its own origin, never
  * the app's. In e2e the frame site is the dev server by its other loopback
- * name (playwright.config.ts: VITE_CONTENT_FRAME_URL). Code evaluated inside
+ * name (playwright.config.ts: LUMEN_CONTENT_FRAME_URL). Code evaluated inside
  * each frame stands in for a future XSS there: it must not reach the app's
  * localStorage, IndexedDB or document.
  */
