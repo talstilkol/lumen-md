@@ -50,7 +50,7 @@ is a known gap.
 | | Threat | Defence | Where |
 |---|---|---|---|
 | I | The provider reads the notes | End-to-end encryption before upload (plan 3.4/3.5); without it the provider sees plaintext — shown in the sync settings | `src/sync` |
-| T | The provider changes or rolls back files | Authenticated encryption (AES-GCM) with versions (3.4); a conflict keeps both sides as `.conflict-<time>.md` | `src/sync/cloud/sync.ts` |
+| T | The provider changes or rolls back files | Authenticated encryption (AES-GCM) with versions (3.4); a conflict keeps both sides: the other side as `<name>.sync-conflict-<YYYYMMDD-HHMMSS>-<device>.md` (Syncthing's name) | `src/sync/e2ee/conflict.ts` |
 | D | The provider deletes everything | A deletion is never synced blindly; local trash and history | 3.7 data-safety matrix |
 | S | A token leaks from storage | Tokens encrypted at rest; OS keychain on desktop | [Secrets](/security/vault/), `src/lib/secretStore.ts` |
 

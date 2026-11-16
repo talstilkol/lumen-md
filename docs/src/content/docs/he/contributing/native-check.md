@@ -19,7 +19,7 @@ bash tools/native-check/run.sh
 
 | שלב | מה רץ | מה הצלחה מוכיחה |
 |---|---|---|
-| 1. crates בלי תלויות | `rustc --test` על `src-tauri/desktop`, `keychain`, `vault`, `src/whisper_core.rs` | הקוד מתקמפל ובדיקות היחידה שלו עוברות — באמת, בלי stubs. |
+| 1. crates בלי תלויות | `rustc --test` על `src-tauri/desktop`, `keychain`, `vault`, `src-tauri/src/whisper_core.rs` | הקוד מתקמפל ובדיקות היחידה שלו עוברות — באמת, בלי stubs. |
 | 2. ה-glue של Tauri | `rustc` על `src-tauri/src/lib.rs` ו-`main.rs` מול `tools/native-check/rust-stubs/`, פעם עם `--cfg desktop` ופעם עם `--cfg mobile` | כל מודול, import, טיפוס, השאלה ו-lifetime תקינים מול החתימות של tauri 2 והתוספים שלו. |
 | 2. פקודות | ה-`#[tauri::command]` המדומה | כל ארגומנט הוא ארגומנט פקודה (Deserialize,‏ `State`,‏ `AppHandle`,‏ `Window`,‏ `Request`), כל ערך מוחזר הוא תשובת IPC, ה-future של כל פקודה אסינכרונית הוא `Send`, ופקודה אסינכרונית שמשאילה מחזירה `Result` — הכללים שהמאקרו האמיתי אוכף. |
 | 2. ‏Cargo.lock | `lockcheck.mjs` | כל תלות ב-`Cargo.toml` נמצאת ב-`Cargo.lock`: ‏`cargo check --locked` לא יסרב. |
