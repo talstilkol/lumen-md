@@ -183,9 +183,9 @@ describe("axe a11y smoke", () => {
     const { container } = render(
       <SearchDialog open onClose={() => {}} onOpenFile={() => {}} />,
     );
-    // The first (debounced, 150 ms) search settles into the empty state;
-    // wait for that DOM, then check the settled dialog.
-    await waitFor(() => expect(container.querySelector(".cmd-palette-empty")).not.toBeNull(), { timeout: 5_000 });
+    // The first (debounced, 150 ms) search settles into the empty state
+    // (W3.2's EmptyState, with its action); wait for that DOM, then check the settled dialog.
+    await waitFor(() => expect(container.querySelector('[data-testid="empty-state"]')).not.toBeNull(), { timeout: 5_000 });
     await expectNoBlockersEventually(container);
   });
 
