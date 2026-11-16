@@ -8,12 +8,24 @@
 
 import type { BackupMode } from "./backup";
 
-export interface BackupConfig {
-  kind: "folder";
-  handle: FileSystemDirectoryHandle;
-  label: string;
-  mode: BackupMode;
-}
+export type BackupConfig =
+  | {
+      kind: "folder";
+      handle: FileSystemDirectoryHandle;
+      label: string;
+      mode: BackupMode;
+    }
+  | {
+      /** A WebDAV server (W10.C15): the password is in the secret store (WEBDAV_BACKUP_PASSWORD), never here. */
+      kind: "webdav";
+      url: string;
+      username: string;
+      label: string;
+      mode: BackupMode;
+    };
+
+/** The WebDAV backup password's name in the secret store (lib/secretStore). */
+export const WEBDAV_BACKUP_PASSWORD = "lumen.backup.webdav.password";
 
 const KEY = "lumen-backup-config";
 /** Read at startup without loading anything: are backups set up at all? */
