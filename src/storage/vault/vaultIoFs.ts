@@ -303,6 +303,9 @@ export interface WriteRequest {
 export type WriteAnswer = { id: number; ok: true } | { id: number; ok: false; name: string; message: string; unsupported: boolean };
 
 /** The worker's whole job, for one request. */
+/** The OPFS root the worker reads and writes under (navigator.storage.getDirectory()). */
+export const opfsRootDir = async (): Promise<DirLike> => (await navigator.storage.getDirectory()) as unknown as DirLike;
+
 export async function handleWrite(msg: WriteRequest, root: () => Promise<DirLike>): Promise<WriteAnswer> {
   try {
     const bytes = new Uint8Array(msg.bytes);

@@ -142,6 +142,14 @@ export async function isModelCached(root: Dir, entry: RegistryModel, dtype: Conv
   return true;
 }
 
+/**
+ * isModelCached on this origin's OPFS root, for a caller that holds no root of its own (the bench
+ * engines): the one place outside the vault that opens OPFS for the model cache stays this file.
+ */
+export async function isModelCachedInOpfs(entry: RegistryModel, dtype: ConvertedDtype): Promise<boolean> {
+  return isModelCached(await navigator.storage.getDirectory(), entry, dtype);
+}
+
 /** Remove a downloaded model from OPFS (settings → models → remove). */
 export async function removeCachedModel(root: Dir, id: string): Promise<void> {
   const dir = await dirFor(root, [ROOT_DIR], false);

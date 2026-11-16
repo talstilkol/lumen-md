@@ -25,9 +25,8 @@ export const engine: BenchEngine = {
   models: [NER_MODEL_ID_EN],
   async load() {
     if (!CONVERTED_MODELS_BASE) throw new Error("the converted-model host is not set (15.9): bert-base-NER cannot be downloaded");
-    const { isModelCached } = await import("../../ai/modelCache");
-    const root = (await navigator.storage.getDirectory()) as unknown as Parameters<typeof isModelCached>[0];
-    const answer = await requestConvertedModel(NER_MODEL_ID_EN, "q8", { confirm: async () => true, isCached: async (e, d) => isModelCached(root, e, d), t: (k) => k, base: CONVERTED_MODELS_BASE });
+    const { isModelCachedInOpfs } = await import("../../ai/modelCache");
+    const answer = await requestConvertedModel(NER_MODEL_ID_EN, "q8", { confirm: async () => true, isCached: (e, d) => isModelCachedInOpfs(e, d), t: (k) => k, base: CONVERTED_MODELS_BASE });
     if (answer !== "ready") throw new Error(`bert-base-NER: ${answer}`);
     ner = await nerIfCached(CONVERTED_MODELS_BASE, NER_MODEL_ID_EN);
     if (!ner) throw new Error("bert-base-NER is not cached after its download");
