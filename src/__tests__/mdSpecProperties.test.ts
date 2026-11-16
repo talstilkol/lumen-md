@@ -12,6 +12,14 @@
  *     indented HTML block after a list are fixed and pinned below;
  *   - the committed results file is what a run gives now.
  *
+ * GFM 0.29 (the vendored github/cmark-gfm spec, 672 examples): the parser
+ * with micromark-extension-gfm and the round trip with mdast-util-gfm, each
+ * a row with every exception's reason; the committed rows are checked
+ * against a fresh run where the GFM packages are installed.
+ *
+ * The same properties, seeded (a PRNG, so a failure reproduces), run now:
+ * idempotence over the spec and 3,000 random texts, E2EE round trip and
+ * tamper rejection over 40 texts, Yjs convergence (when yjs is installed).
  * Property tests (fast-check, installed with W10.M2) are skipped until the
  * package is there, and say so:
  *   - round trip and idempotence of random concatenations of spec examples;
@@ -26,7 +34,7 @@ import { fromMarkdown } from "mdast-util-from-markdown";
 import { toMarkdown } from "mdast-util-to-markdown";
 import { roundTripSafe } from "../editor/markdownSerialize.mjs";
 import { parseSpec } from "./helpers/mdSpec";
-import { OUT, ROUND_TRIP_EXCEPTIONS, SPEC, TARGET, mdCards, parseSpecText, rowScores, score } from "../../scripts/md-conformance.mjs";
+import { GFM_LEFT_OUT, GFM_PARSER_EXCEPTIONS, GFM_ROUND_TRIP_EXCEPTIONS, GFM_SPEC, OUT, ROUND_TRIP_EXCEPTIONS, SPEC, TARGET, loadGfm, mdCards, parseGfmSpecText, parseSpecText, rowScores, score, scoreGfm } from "../../scripts/md-conformance.mjs";
 // @ts-expect-error plain JavaScript
 import { validateCard } from "../../scripts/lib/evalCard.mjs";
 
@@ -161,9 +169,10 @@ describe("CommonMark 0.31.2 conformance (W11.Q8)", () => {
   it("the committed eval/results/md-conformance.json is what a run gives now, origin real", () => {
     const committed = JSON.parse(readFileSync(OUT, "utf8"));
     expect(committed.origin).toBe("real");
-    expect(committed.versions).toEqual(P.versions);
+    // The CommonMark packages; the GFM ones are checked in the GFM block below.
+    expect(Object.fromEntries(Object.entries(committed.versions).filter(([k]) => !k.includes("gfm")))).toEqual(P.versions);
     const fresh = score(examples, P);
-    expect(committed.rows.filter((r: { kind: string }) => r.kind !== "app")).toEqual(fresh);
+    expect(committed.rows.filter((r: { kind: string }) => r.kind === "parser" || r.kind === "round-trip")).toEqual(fresh);
   });
 
   it("the committed results carry their eval card (W11.I18): round-trip dev, parser public, built from the rows", () => {
@@ -171,7 +180,8 @@ describe("CommonMark 0.31.2 conformance (W11.Q8)", () => {
     const fresh = score(examples, P);
     expect(validateCard(committed.card)).toEqual([]);
     expect(committed.card).toEqual(mdCards(fresh, P.versions).card);
-    expect(committed.cards).toEqual(mdCards(fresh, P.versions).cards);
+    expect(committed.cards.parser).toEqual(mdCards(fresh, P.versions).cards.parser);
+    expect(committed.cards["round-trip"]).toEqual(mdCards(fresh, P.versions).cards["round-trip"]);
     expect(committed.card.tag).toBe("dev");
     expect(committed.cards.parser.tag).toBe("public");
     expect(validateCard(committed.cards.parser)).toEqual([]);
@@ -181,6 +191,155 @@ describe("CommonMark 0.31.2 conformance (W11.Q8)", () => {
     expect(committed.card.metrics.html_kept.value).toBeCloseTo(rt.passed / rt.total, 6);
     // rowScores refuses a row whose exceptions do not account for its failures.
     expect(() => rowScores({ ...rt, exceptions: rt.exceptions.slice(1) })).toThrow(/exceptions listed/);
+  });
+});
+
+const gfmText = readFileSync(GFM_SPEC, "utf8");
+const gfmExamples = parseGfmSpecText(gfmText);
+const committedAll = JSON.parse(readFileSync(OUT, "utf8"));
+const gfmRows = committedAll.rows.filter((r: { kind: string }) => r.kind.startsWith("gfm-"));
+/** The GFM packages (remark-gfm's micromark and mdast parts), when installed. */
+const G = await loadGfm(".", P).catch(() => null);
+
+describe("GFM 0.29 conformance (W11.Q8): published with every exception", () => {
+  it("reads the 672 examples of the vendored GFM spec, with their extension names", () => {
+    expect(gfmExamples).toHaveLength(672);
+    expect(gfmExamples.map((e: { markdown: string }) => e.markdown)).toEqual(parseSpec(gfmText).map((e) => e.markdown));
+    const count = (k: string) => gfmExamples.filter((e: { extension: string }) => e.extension === k).length;
+    expect([count("table"), count("strikethrough"), count("autolink"), count("tagfilter"), count("disabled")]).toEqual([8, 2, 11, 1, 2]);
+  });
+
+  it("the committed GFM rows: parser and round trip, every exception with its reason, left-out examples listed", () => {
+    expect(gfmRows.map((r: { kind: string }) => r.kind)).toEqual(["gfm-parser", "gfm-round-trip"]);
+    const [parser, rt] = gfmRows;
+    expect(parser.leftOut.disabled).toHaveLength(2);
+    expect(parser.leftOut.superseded.length).toBeGreaterThan(0);
+    expect(parser.total + parser.leftOut.disabled.length + parser.leftOut.superseded.length).toBe(672);
+    expect(parser.exceptions.map((e: { example: number }) => e.example)).toEqual(Object.keys(GFM_PARSER_EXCEPTIONS).map(Number));
+    expect(rt.exceptions.map((e: { example: number }) => e.example)).toEqual(Object.keys(GFM_ROUND_TRIP_EXCEPTIONS).map(Number));
+    for (const e of [...parser.exceptions, ...rt.exceptions]) expect(e.reason).not.toBe("not explained yet");
+    for (const r of gfmRows) expect(r.passed).toBe(r.total - r.exceptions.length);
+    expect(Object.keys(GFM_LEFT_OUT)).toEqual(["disabled", "superseded"]);
+    // The numbers, as published: under the 99% target, and said so (the 9 parser exceptions are the spec's own core examples that its extensions override).
+    expect([parser.passed, parser.total, rt.passed, rt.total]).toEqual([652, 661, 654, 661]);
+  });
+
+  it("the GFM eval cards are built from the committed rows: parser public, round trip dev", () => {
+    const want = mdCards(committedAll.rows, committedAll.versions).cards;
+    expect(committedAll.cards["gfm-parser"]).toEqual(want["gfm-parser"]);
+    expect(committedAll.cards["gfm-round-trip"]).toEqual(want["gfm-round-trip"]);
+    expect(committedAll.cards["gfm-parser"].tag).toBe("public");
+    expect(committedAll.cards["gfm-round-trip"].tag).toBe("dev");
+    for (const k of ["gfm-parser", "gfm-round-trip"]) expect(validateCard(committedAll.cards[k])).toEqual([]);
+    expect(committedAll.cards["gfm-parser"].n).toBe(661);
+  });
+
+  // skip-reason: needs micromark-extension-gfm and mdast-util-gfm (remark-gfm's parts, in the lockfile); an offline overlay without them skips, and the title says so | task: W11.Q8 | until: 2027-05-16
+  it.skipIf(!G)(`a run now gives the committed GFM rows and versions${G ? "" : " — skipped: the GFM packages are not installed here"}`, () => {
+    const fresh = scoreGfm(gfmExamples, examples, G!);
+    expect(gfmRows).toEqual(fresh);
+    for (const [k, v] of Object.entries(G!.versions)) expect(committedAll.versions[k]).toBe(v);
+  });
+
+  // skip-reason: as above, the GFM packages | task: W11.Q8 | until: 2027-05-16
+  it.skipIf(!G)(`a table, strikethrough, task list and autolink literal keep their HTML through the GFM round trip${G ? "" : " — skipped: the GFM packages are not installed here"}`, () => {
+    for (const md of ["| a | ב |\n| :- | -: |\n| 1 | ש |\n", "~~מחוק~~ and ~~gone~~\n", "- [ ] לקנות\n- [x] done\n", "see www.example.com and https://example.org/שלום\n"]) {
+      expect(G!.html(G!.roundTrip(md)), md).toBe(G!.html(md));
+    }
+  });
+});
+
+describe("property tests, seeded (run now; fast-check runs the same properties below once installed)", () => {
+  const clean = examples.filter((e: { example: number }) => !(e.example in ROUND_TRIP_EXCEPTIONS)).map((e: { markdown: string }) => e.markdown);
+  let seed = 0x5eed2026;
+  const rnd = (n: number) => {
+    seed = (Math.imul(seed ^ (seed >>> 15), 0x2c1b3c6d) + 0x9e3779b9) >>> 0;
+    return seed % n;
+  };
+  const ALPH = [..."abc אבג*_`#>-+=[]()!<>&\\|~:/.\n\n  \t1234", "**", "__", "```", "- ", "1. ", "> ", "# ", "[x](y)", "![a](b)", "<div>", "&amp;", "\\*"];
+  const randomText = (max: number) => Array.from({ length: rnd(max) }, () => ALPH[rnd(ALPH.length)]).join("");
+
+  it("saving through the AST twice gives what saving once gave (idempotence): 652 spec examples and 3,000 random texts", () => {
+    const bad: string[] = [];
+    const inputs = [...clean, ...Array.from({ length: 3000 }, () => randomText(60))];
+    for (const md of inputs) {
+      // A backslash inside an autolink is escaped again on every save (examples 20 and 603): known, left out.
+      if (AUTOLINK_BACKSLASH.test(md)) continue;
+      const once = roundTrip(md);
+      if (roundTrip(once) !== once) bad.push(md);
+    }
+    expect(bad.slice(0, 3)).toEqual([]);
+  });
+
+  it("saving through the AST keeps the HTML of 3,000 random texts (a soft break before inline HTML, as CommonMark 187, left out)", () => {
+    const SOFT_BREAK_BEFORE_HTML = /\n[>\s]*<[a-z!/?]/i;
+    const bad: string[] = [];
+    for (let run = 0; run < 3000; run++) {
+      const md = randomText(60);
+      if (AUTOLINK_BACKSLASH.test(md) || SOFT_BREAK_BEFORE_HTML.test(md)) continue;
+      if (blocks(html(roundTrip(md))) !== blocks(html(md))) bad.push(md);
+    }
+    expect(bad.slice(0, 3)).toEqual([]);
+  });
+
+  it("regressions found by the seeded properties: delimiter runs that would touch take the other marker", () => {
+    const cases: Array<[string, string]> = [
+      // two emphases side by side
+      ["*)*_4_\n", "*)*_4_\n"],
+      ["_1_*)*\n", "*1*_)_\n"],
+      ["_`_*c*\n", "*\\`*_c_\n"],
+      // strong in strong with punctuation just inside
+      ["**__)__>**\n", "**__)__>**\n"],
+      // nested emphasis in the middle next to punctuation
+      ["_[*\\\\*|_\n", "*\\[_\\\\_|*\n"],
+    ];
+    for (const [md, want] of cases) {
+      expect(roundTrip(md), md).toBe(want);
+      expect(blocks(html(roundTrip(md))), md).toBe(blocks(html(md)));
+      expect(roundTrip(roundTrip(md)), md).toBe(roundTrip(md));
+      // Without the app's handlers the meaning changes (the bug).
+      expect(blocks(html(plainRoundTrip(md))), md).not.toBe(blocks(html(md)));
+    }
+    // Three strongs in a row (example 466) keep their meaning.
+    expect(blocks(html(roundTrip("******foo******\n")))).toBe("<p><strong><strong><strong>foo</strong></strong></strong></p>");
+    // `_` is never chosen next to a letter or digit, where it could not open or close.
+    expect(roundTrip("*a*b*c*\n")).toBe(plainRoundTrip("*a*b*c*\n"));
+  });
+
+  it("E2EE: decrypt(encrypt(x)) = x for 40 random texts, and a flipped byte anywhere is rejected", async () => {
+    const { decryptText, encryptText } = await import("../storage/encryption");
+    const pw = "correct horse battery staple";
+    for (let run = 0; run < 40; run++) {
+      const plain = run === 0 ? "" : randomText(200) + (run % 5 === 0 ? "😀\u05B8\u200F" : "");
+      const sealed = await encryptText(plain, pw);
+      expect(await decryptText(sealed, pw)).toBe(plain);
+      const bytes = Uint8Array.from(atob(sealed), (c) => c.charCodeAt(0));
+      bytes[rnd(bytes.length)] ^= 1 << rnd(8);
+      const tampered = btoa(String.fromCharCode(...bytes));
+      await expect(decryptText(tampered, pw), `run ${run}`).rejects.toBeTruthy();
+    }
+  }, 60_000);
+
+  // skip-reason: the convergence property needs yjs installed; the reason is printed in the title | task: W11.Q8 | until: 2027-05-16
+  it.skipIf(!Y)(`Yjs: two replicas converge whatever order 200 random update sequences arrive in${Y ? "" : " — skipped: yjs is not installed here"}`, () => {
+    const Yjs = Y!;
+    for (let run = 0; run < 200; run++) {
+      const a = new Yjs.Doc();
+      const b = new Yjs.Doc();
+      const updates: Uint8Array[] = [];
+      for (let k = 0, n = 1 + rnd(20); k < n; k++) {
+        const d = rnd(2) ? a : b;
+        const t = d.getText("t");
+        const before = Yjs.encodeStateVector(d);
+        t.insert(Math.min(rnd(41), t.length), randomText(4) || "x");
+        updates.push(Yjs.encodeStateAsUpdate(d, before));
+      }
+      const c = new Yjs.Doc();
+      const e = new Yjs.Doc();
+      for (const u of updates) Yjs.applyUpdate(c, u);
+      for (const u of [...updates].reverse()) Yjs.applyUpdate(e, u);
+      expect(e.getText("t").toString(), `run ${run}`).toBe(c.getText("t").toString());
+    }
   });
 });
 

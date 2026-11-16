@@ -9,7 +9,10 @@
  *                                              # adds the app renderer's rows (CommonMark and GFM),
  *                                              # from mdConformance.test.ts's report (needs the real packages)
  *
- * Rows, each against the vendored spec (src/__tests__/fixtures/md-spec, CC BY-SA 4.0):
+ * Rows, each against the vendored specs (src/__tests__/fixtures/md-spec, CC BY-SA 4.0):
+ *   - gfm-parser / gfm-round-trip: the same two on the GFM 0.29 spec, with
+ *     micromark-extension-gfm and mdast-util-gfm (what remark-gfm loads);
+ *     `disabled` and superseded examples are left out and listed;
  *   - parser: micromark (the parser under remark-parse, the app's version)
  *     straight to HTML, compared byte for byte with the spec's HTML;
  *   - round-trip: Markdown → mdast (mdast-util-from-markdown) → Markdown
@@ -53,6 +56,58 @@ export const ROUND_TRIP_EXCEPTIONS = {
   603: "a backslash inside an autolink is escaped again, so the link's URL changes",
 };
 
+export const GFM_SPEC = "src/__tests__/fixtures/md-spec/gfm-0.29.txt";
+export const GFM_SOURCE = "https://github.github.com/gfm/";
+
+/**
+ * GFM 0.29 examples left out of the GFM rows, with why: the 2 the spec
+ * itself marks `disabled`, and the ones CommonMark 0.31.2 superseded (the
+ * same Markdown has a different expected HTML in the newer spec, which the
+ * parser follows; the CommonMark rows score them).
+ */
+export const GFM_LEFT_OUT = { disabled: "marked `disabled` in the GFM spec itself (upstream skips them too)", superseded: "CommonMark 0.31.2 changed the expected HTML of this very Markdown; the parser follows the newer spec, scored in the CommonMark rows" };
+
+/**
+ * Why micromark + micromark-extension-gfm differs from the GFM 0.29 spec's
+ * HTML, by example. Every one is an example in a CORE section that the GFM
+ * spec did not update for its own extensions: with the extensions on, its
+ * expected HTML is not what GFM (or github.com) renders.
+ */
+export const GFM_PARSER_EXCEPTIONS = {
+  140: "the GFM tag filter (example 652, gfmHtml) escapes <script>; this core example was written without the filter",
+  141: "the GFM tag filter (example 652) escapes </style>; this core example was written without the filter",
+  145: "the GFM tag filter (example 652) escapes <style>; this core example was written without the filter",
+  147: "the GFM tag filter (example 652) escapes <script>; this core example was written without the filter",
+  610: "the autolink-literal extension links the bare URL inside; this core example was written without the extension",
+  616: "the autolink-literal extension links the bare URL inside; this core example was written without the extension",
+  619: "the autolink-literal extension links a bare URL; this core example was written without the extension",
+  620: "the autolink-literal extension links a bare email address; this core example was written without the extension",
+  628: "ftp:// is not an autolink literal: micromark follows github.com, which dropped it after the 0.29 spec",
+};
+
+/** Why the GFM round trip (with mdast-util-gfm) changes the parser's HTML, by example. */
+export const GFM_ROUND_TRIP_EXCEPTIONS = {
+  118: "a line ending inside raw HTML is written as a space (as CommonMark 148)",
+  156: "a soft line break before inline raw HTML is written as a space (as CommonMark 187)",
+  204: "a table row with more cells than the header: the extra cell is dropped when rendered but written back as a new column",
+  316: "a backslash inside an autolink is escaped again, so the link's URL changes (as CommonMark 20)",
+  335: "&#10; is decoded to a newline and written raw, so two blank-separated lines become two paragraphs (as CommonMark 39)",
+  611: "a backslash inside an autolink is escaped again, so the link's URL changes (as CommonMark 603)",
+  614: "an escaped character in <foo\\+@…> is written unescaped, and the text becomes an email autolink",
+};
+
+/** The GFM spec's examples, each with its extension name ("" for core, table, strikethrough, autolink, tagfilter, disabled). */
+export function parseGfmSpecText(text) {
+  const kinds = [];
+  for (const l of text.replace(/\r\n?/g, "\n").split("\n")) {
+    const m = /^`{32} example(?: (\w+))?$/.exec(l);
+    if (m) kinds.push(m[1] ?? "");
+  }
+  const examples = parseSpecText(text);
+  if (kinds.length !== examples.length) throw new Error(`GFM spec: ${examples.length} examples but ${kinds.length} headers`);
+  return examples.map((e, i) => ({ ...e, extension: kinds[i] }));
+}
+
 /** The spec's examples: { example, section, markdown, html }, tabs restored (→ is a tab in spec.txt). */
 export function parseSpecText(text) {
   const out = [];
@@ -82,6 +137,74 @@ export async function loadParsers(root = ROOT) {
 }
 
 const OPTS = { allowDangerousHtml: true, allowDangerousProtocol: true };
+
+/**
+ * The GFM packages (micromark-extension-gfm, mdast-util-gfm: what remark-gfm
+ * loads), or null when they are not installed (an offline runner).
+ */
+export async function loadGfm(root = ROOT, p) {
+  let ext, mdast;
+  try {
+    [ext, mdast] = await Promise.all([import("micromark-extension-gfm"), import("mdast-util-gfm")]);
+    if (typeof ext.gfm !== "function" || typeof mdast.gfmToMarkdown !== "function") return null;
+    ext.gfm();
+  } catch {
+    return null;
+  }
+  const version = (n) => JSON.parse(readFileSync(join(root, "node_modules", n, "package.json"), "utf8")).version;
+  const { fromMarkdown } = await import("mdast-util-from-markdown");
+  const { toMarkdown } = await import("mdast-util-to-markdown");
+  const options = { allowDangerousHtml: true, allowDangerousProtocol: true, extensions: [ext.gfm()], htmlExtensions: [ext.gfmHtml()] };
+  return {
+    html: (md) => p.micromark(md, options),
+    roundTrip: (md) => {
+      const safe = roundTripSafe();
+      const tree = fromMarkdown(md, { extensions: [ext.gfm()], mdastExtensions: [mdast.gfmFromMarkdown()] });
+      return toMarkdown(tree, { ...safe, extensions: [...(safe.extensions ?? []), mdast.gfmToMarkdown()] });
+    },
+    versions: { "micromark-extension-gfm": version("micromark-extension-gfm"), "mdast-util-gfm": version("mdast-util-gfm") },
+  };
+}
+
+/**
+ * Score the GFM 0.29 spec: the parser with the GFM extensions against the
+ * spec's HTML byte for byte, and the GFM round trip against the parser.
+ * `disabled` and superseded examples are left out (counted in `leftOut`).
+ */
+export function scoreGfm(gfmExamples, cmExamples, g) {
+  const cmHtml = new Map(cmExamples.map((e) => [e.markdown, e.html]));
+  const leftOut = { disabled: [], superseded: [] };
+  const parserFailed = [];
+  const roundFailed = [];
+  let total = 0;
+  for (const e of gfmExamples) {
+    if (e.extension === "disabled") {
+      leftOut.disabled.push(e.example);
+      continue;
+    }
+    const c = cmHtml.get(e.markdown);
+    if (c !== undefined && c !== e.html) {
+      leftOut.superseded.push(e.example);
+      continue;
+    }
+    total++;
+    const html = g.html(e.markdown);
+    if (html !== e.html) parserFailed.push({ example: e.example, section: e.section, reason: GFM_PARSER_EXCEPTIONS[e.example] ?? "not explained yet" });
+    let again;
+    try {
+      again = g.html(g.roundTrip(e.markdown));
+    } catch (err) {
+      again = `error: ${err.message}`;
+    }
+    if (again !== html) roundFailed.push({ example: e.example, section: e.section, reason: GFM_ROUND_TRIP_EXCEPTIONS[e.example] ?? "not explained yet" });
+  }
+  const row = (kind, what, failed) => ({ kind, what, spec: "GFM 0.29", total, passed: total - failed.length, rate: Math.round(((total - failed.length) / total) * 10000) / 10000, target: TARGET, exceptions: failed, leftOut: { disabled: leftOut.disabled, superseded: leftOut.superseded } });
+  return [
+    row("gfm-parser", `micromark with micromark-extension-gfm ${g.versions["micromark-extension-gfm"]} to HTML, byte for byte`, parserFailed),
+    row("gfm-round-trip", `mdast-util-from-markdown → mdast-util-to-markdown with mdast-util-gfm ${g.versions["mdast-util-gfm"]} and src/editor/markdownSerialize.mjs → micromark with GFM, HTML compared with the parser's`, roundFailed),
+  ];
+}
+
 
 /** Score the parser and the round trip on the spec's examples. */
 export function score(examples, p) {
@@ -136,7 +259,27 @@ export function mdCards(rows, versions) {
     dataset: dataset("all examples of the published spec; dev, because the round-trip handlers were fixed on these examples"),
     scores: { html_kept: rowScores(byKind["round-trip"]) },
   });
-  return { card: roundTrip, cards: { parser, "round-trip": roundTrip } };
+  const cards = { parser, "round-trip": roundTrip };
+  if (byKind["gfm-parser"] && byKind["gfm-round-trip"]) {
+    const gfmSet = (split) => ({ name: "gfm-spec", version: "0.29-gfm", license: "CC-BY-SA-4.0", source: GFM_SOURCE, split });
+    cards["gfm-parser"] = makeCard({
+      tag: "public",
+      model: { name: `micromark ${versions.micromark} + micromark-extension-gfm ${versions["micromark-extension-gfm"]}`, digest: `npm:micromark@${versions.micromark}+micromark-extension-gfm@${versions["micromark-extension-gfm"]}` },
+      seed: 1,
+      temperature: 0,
+      dataset: gfmSet("the published GFM 0.29 spec without its 2 disabled examples and the ones CommonMark 0.31.2 superseded; micromark is tested against it, so this is a conformance check"),
+      scores: { html_exact: rowScores(byKind["gfm-parser"]) },
+    });
+    cards["gfm-round-trip"] = makeCard({
+      tag: "dev",
+      model: { name: "mdast round trip with mdast-util-gfm and src/editor/markdownSerialize.mjs", digest: `npm:mdast-util-from-markdown@${versions["mdast-util-from-markdown"]}+mdast-util-to-markdown@${versions["mdast-util-to-markdown"]}+mdast-util-gfm@${versions["mdast-util-gfm"]}` },
+      seed: 1,
+      temperature: 0,
+      dataset: gfmSet("as the GFM parser row; dev, because the round-trip handlers were fixed on the spec's examples"),
+      scores: { html_kept: rowScores(byKind["gfm-round-trip"]) },
+    });
+  }
+  return { card: roundTrip, cards };
 }
 
 /** The app renderer's rows from mdConformance.test.ts's report.json (Mac). */
@@ -159,10 +302,19 @@ async function main() {
   const p = await loadParsers();
   const prev = existsSync(join(ROOT, OUT)) ? JSON.parse(readFileSync(join(ROOT, OUT), "utf8")) : null;
   let rows = score(examples, p);
+  const g = await loadGfm(ROOT, p);
+  if (g) {
+    rows = [...rows, ...scoreGfm(parseGfmSpecText(readFileSync(join(ROOT, GFM_SPEC), "utf8")), examples, g)];
+    Object.assign(p.versions, g.versions);
+  } else if (prev) {
+    console.error("md-conformance: the GFM packages are not installed here; the committed GFM rows are kept as they are");
+    rows = [...rows, ...prev.rows.filter((r) => r.kind.startsWith("gfm-"))];
+    Object.assign(p.versions, Object.fromEntries(Object.entries(prev.versions).filter(([k]) => k.includes("gfm"))));
+  }
   const appAt = argv.indexOf("--app");
   if (appAt >= 0) rows = [...rows, ...appRows(JSON.parse(readFileSync(argv[appAt + 1], "utf8")), examples)];
   else if (prev) rows = [...rows, ...prev.rows.filter((r) => r.kind === "app")];
-  const out = { schema: 1, generator: "scripts/md-conformance.mjs", origin: "real", source: `${SPEC} (commonmark/commonmark-spec 0.31.2, CC BY-SA 4.0)`, versions: p.versions, ...mdCards(rows, p.versions), rows };
+  const out = { schema: 1, generator: "scripts/md-conformance.mjs", origin: "real", source: `${SPEC} (commonmark/commonmark-spec 0.31.2, CC BY-SA 4.0); ${GFM_SPEC} (github/cmark-gfm 0.29-gfm, CC BY-SA 4.0)`, versions: p.versions, ...mdCards(rows, p.versions), rows };
   const text = `${JSON.stringify(out, null, 2)}\n`;
   if (argv.includes("--check")) {
     const have = existsSync(join(ROOT, OUT)) ? readFileSync(join(ROOT, OUT), "utf8") : "";
