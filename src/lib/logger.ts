@@ -97,3 +97,22 @@ export const log = {
 };
 
 export type Logger = typeof log;
+
+const swallowedSites = new Set<string>();
+
+/**
+ * An error a storage or sync path handled by going on (W10.A8, audit r3: no
+ * catch there is silent). `where` names the site ("storage/fs: stat"); the
+ * first one per site and session goes to the diagnostics ring (content-free),
+ * every one to the dev console. Never throws.
+ */
+export function swallowed(where: string, err?: unknown): void {
+  try {
+    log.debug(`swallowed: ${where}`, err);
+    if (swallowedSites.has(where)) return;
+    swallowedSites.add(where);
+    remember("warn", [`swallowed: ${where}`, err]);
+  } catch {
+    // why: reporting a handled error must never raise a new one
+  }
+}

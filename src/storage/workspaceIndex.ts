@@ -31,7 +31,7 @@ import { WORKSPACE_CHANGED, changeOf } from "./workspaceEvents";
 import { isOPFSAvailable, type WorkspaceEntry } from "./workspace";
 import { getVaultBackend, refreshVaultEncryption, unwrapVaultBackend, vaultEncryptionReady, watchVault, type VaultEvent } from "./vault";
 import type { IndexEngine } from "./vaultIndexProtocol";
-import { log } from "../lib/logger";
+import { log, swallowed } from "../lib/logger";
 import { scheduleIdle } from "../lib/idle";
 import { dropSnapshot } from "./indexSnapshot";
 import type { SnapshotKeys } from "./snapshotSeal";
@@ -367,8 +367,9 @@ function scheduleSnapshot(): void {
     snapshotTimer = null;
     scheduleIdle(() => {
       if (gen !== snapshotGen) return;
-      void saveSnapshotNow().catch(() => {
+      void saveSnapshotNow().catch((err: unknown) => {
         // why: a snapshot save is best effort; the next idle save or the next open tries again
+        swallowed("storage/workspaceIndex: a snapshot save is best effort; the next idle save or the next open tr", err);
       });
     });
   }, SNAPSHOT_DELAY_MS);

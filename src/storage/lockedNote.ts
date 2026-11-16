@@ -25,6 +25,7 @@
 import { bs, fromB64u, fromUtf8, randomBytes, toB64u, utf8 } from "../sync/e2ee/bytes";
 import { deriveMasterKey, newKdfParams, validateKdfParams, type KdfParams, type KdfPolicy } from "../sync/e2ee/kdf";
 import { isSealedNote, LOCKED_NOTE_MAGIC, lockedNotes, setNoteSealer } from "./lockedNotesRegistry";
+import { swallowed } from "../lib/logger";
 
 export { isSealedNote, LOCKED_NOTE_MAGIC };
 
@@ -187,8 +188,9 @@ export function makeSealer(readCurrent: (path: string) => Promise<string | null>
           await openWith(parse(content, STRUCTURE_ONLY), k);
           lockedNotes.set(path, content, k);
           return content;
-        } catch {
+        } catch (err) {
           /* why: an envelope under another key: sealed again below, never written as it is */
+          swallowed("storage/lockedNote: an envelope under another key: sealed again below, never written as it", err);
         }
       }
       const sealed = await sealNote(content, k);

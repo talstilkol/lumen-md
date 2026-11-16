@@ -18,6 +18,7 @@ import {
   workspaceHasEntry,
   writeWorkspaceBlob,
 } from "./workspace";
+import { swallowed } from "../lib/logger";
 
 export interface MoveResult {
   /** Where the entry is now. */
@@ -84,9 +85,10 @@ async function relink(from: string, to: string, folder: boolean | undefined, mov
   // Per-note reading options follow the note (plan W3.5) — only once someone has set any.
   try {
     if (localStorage.getItem("lumen-reading") !== null) (await import("../reading/settings")).moveNoteReading(from, to);
-  } catch {
+  } catch (err) {
     // why: storage is blocked: there are no per-note reading options to move
     /* no storage: nothing to move */
+    swallowed("storage/fileOps: storage is blocked: there are no per-note reading options to move", err);
   }
   window.dispatchEvent(new Event("lumen-workspace-changed"));
   const vault = moved.vault;

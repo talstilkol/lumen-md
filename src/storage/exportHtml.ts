@@ -3,6 +3,7 @@ import { fetchWithRetry } from "../lib/fetchRetry";
 import { markdownBaseDirection, scriptLanguage, type BaseDirection } from "../lib/textDirection";
 import { escapeHtml } from "../lib/escapeHtml";
 import { exportReadyText } from "./exportReady";
+import { swallowed } from "../lib/logger";
 
 export interface HtmlDocumentOptions {
   /** <title> text. */
@@ -138,8 +139,9 @@ async function collectStyles(): Promise<string> {
         // privacy-ledger: a stylesheet the open page already loaded (its href), for the HTML export: listed in audit mode (network)
         const res = await fetchWithRetry(href, {}, { label: "exportHtml.stylesheet", maxRetries: 2, baseDelayMs: 600, maxDelayMs: 2500 });
         if (res.ok) chunks.push(await res.text());
-      } catch {
+      } catch (err) {
         /* why: network unavailable; skip */
+        swallowed("storage/exportHtml: network unavailable; skip", err);
       }
     }
   }

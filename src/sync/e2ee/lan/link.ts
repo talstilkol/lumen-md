@@ -20,6 +20,7 @@ import { fromB64u, toB64u } from "../bytes";
 import { isLanHost, lanOnlySdp } from "./address";
 import type { LanChannel } from "./channel";
 import type { LinkFingerprints } from "./rpc";
+import { swallowed } from "../../../lib/logger";
 
 export const CODE_PREFIX = "lumen-lan:1:";
 export const GATHER_TIMEOUT_MS = 3000;
@@ -121,9 +122,10 @@ function dataChannel(pc: RTCPeerConnection, dc: RTCDataChannel, counters: { out:
     try {
       dc.close();
       pc.close();
-    } catch {
+    } catch (err) {
       // why: the channel or the connection is already closed
       /* already closed */
+      swallowed("sync/e2ee/lan/link: the channel or the connection is already closed", err);
     }
   };
   dc.addEventListener("close", shut);

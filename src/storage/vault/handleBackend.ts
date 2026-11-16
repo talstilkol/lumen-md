@@ -24,6 +24,7 @@ import {
   type VaultEvent,
   type VaultStat,
 } from "./types";
+import { swallowed } from "../../lib/logger";
 
 export interface DirectoryHandleBackendOptions {
   id: string;
@@ -447,8 +448,9 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
               if (!h) continue;
               try {
                 out.set(parts.join("/"), await h.getFile());
-              } catch {
+              } catch (err) {
                 // why: held by a writer or gone: left to read()
+                swallowed("storage/vault/handleBackend: held by a writer or gone: left to read()", err);
               }
             }
           };

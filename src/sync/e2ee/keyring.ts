@@ -70,6 +70,7 @@ import { anchorKey, blobKey, DecryptError, droppedKey, epochKeys, hmac, namesKey
 import { parseContents, parsePreRelease, passkeyWraps, recoveryWrap, ringInfo, unwrapRecovery } from "./keyringParts";
 import { PreconditionFailedError, type StoredObject, type SyncProvider } from "./provider";
 import { RevokedDeviceEnrollError, RevokedError, DroppedFromVaultError, TamperedWrapError, KeyringCommitLostError, KeyringRollbackError, KeyringForkError, PreReleaseKeyringError } from "./keyringErrors";
+import { swallowed } from "../../lib/logger";
 export { RevokedDeviceEnrollError, RevokedError, DroppedFromVaultError, TamperedWrapError, KeyringCommitLostError, KeyringRollbackError, KeyringForkError, PreReleaseKeyringError } from "./keyringErrors";
 
 export const KEYRING_NAME = "lumen-e2ee-keyring";
@@ -732,9 +733,10 @@ export async function confirmCommit(provider: SyncProvider, keys: VaultKeys, byt
     try {
       await refreshKeys(provider, keys, access, anchorOf(keys));
       return;
-    } catch {
+    } catch (err) {
       // why: this refresh failed; the loop tries the next one and reports when none is left
       // not a descendant: lost
+      swallowed("sync/e2ee/keyring: this refresh failed; the loop tries the next one and reports when none", err);
     }
   }
   throw new KeyringCommitLostError(revoked);

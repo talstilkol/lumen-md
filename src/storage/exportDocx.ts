@@ -32,6 +32,7 @@ import { zip } from "./zip";
 import { BIBLIOGRAPHY_HEADING, COVER_LABELS, splitCover, type AcademicTemplate, type CoverFields, type PageNumberFormat } from "./academicTemplates";
 import { exportReadyText } from "./exportReady";
 import { BULLET_NUM_ID, buildDocumentRels, buildFootnotes, buildNumbering, buildPageFooter, buildSettings, buildStyles, esc, FIRST_ORDERED_NUM_ID, FOOTER_REL, M, MAX_LIST_LEVEL, R, sectionBreak, sectPrXml, W, type ExtraRel } from "./docxParts";
+import { swallowed } from "../lib/logger";
 
 const DOCX_MIME =
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
@@ -759,8 +760,9 @@ export async function exportToDocx(content: string, fileName: string, opts: Docx
         document.body.removeChild(a);
       }
       URL.revokeObjectURL(url);
-    } catch {
+    } catch (err) {
       // why: already torn down
+      swallowed("storage/exportDocx: already torn down", err);
     }
   }, 100);
 }

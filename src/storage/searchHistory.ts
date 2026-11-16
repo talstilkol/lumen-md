@@ -1,3 +1,4 @@
+import { swallowed } from "../lib/logger";
 /**
  * Tiny localStorage-backed search-history store. Records the last 8
  * non-empty workspace-search queries (BM25 / Smart / Ask) so the user
@@ -48,8 +49,9 @@ export function getSearchHistory(): string[] {
 export function clearSearchHistory(): void {
   try {
     localStorage.removeItem(STORAGE_KEY);
-  } catch {
+  } catch (err) {
     /* why: storage denied: the in-memory history is cleared below */
+    swallowed("storage/searchHistory: storage denied: the in-memory history is cleared below", err);
   }
   memoryFallback = [];
 }

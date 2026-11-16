@@ -20,6 +20,7 @@
 import { noteKey } from "../lib/slug";
 import { decodeWikiPath, encodeWikiPath } from "../lib/wikiPath";
 import { basename, dirname, listWorkspace, readWorkspaceFile, writeWorkspaceFile } from "./workspace";
+import { swallowed } from "../lib/logger";
 
 const MD_EXT = /\.(md|markdown)$/i;
 const stem = (p: string) => basename(p).replace(MD_EXT, "");
@@ -166,8 +167,9 @@ export function rewriteLinks(content: string, notePath: string, oldPath: string,
     let decoded = path;
     try {
       decoded = decodeURI(path);
-    } catch {
+    } catch (err) {
       /* why: a malformed %-escape: resolve the link as written */
+      swallowed("storage/linkRewrite: a malformed %-escape: resolve the link as written", err);
     }
     const before = resolve(prevDir, decoded);
     const after = moved(before, oldPath, newPath, folder) ?? before;

@@ -24,7 +24,7 @@
  */
 
 import { pullRepo } from "./git";
-import { log } from "../lib/logger";
+import { log, swallowed } from "../lib/logger";
 
 const STORAGE_KEY = "lumen.git.watch";
 const DEFAULT_INTERVAL_MS = 5 * 60_000;
@@ -57,8 +57,9 @@ export function setWatching(on: boolean): void {
   try {
     if (on) localStorage.setItem(STORAGE_KEY, "1");
     else localStorage.removeItem(STORAGE_KEY);
-  } catch {
+  } catch (err) {
     /* why: private mode — best-effort */
+    swallowed("sync/gitWatch: private mode — best-effort", err);
   }
 }
 

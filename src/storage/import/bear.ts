@@ -9,6 +9,7 @@
 import { claimPath, dirOf, mdDest, relativeTo, safeName, safePath, stemOf } from "./names";
 import { isoDate, tagValue, withFrontmatter } from "./frontmatter";
 import { emptyVault, type ConvertedVault } from "./types";
+import { swallowed } from "../../lib/logger";
 
 interface BearInfo {
   creationDate?: string;
@@ -73,9 +74,10 @@ export function convertBear(files: Map<string, Uint8Array>): ConvertedVault {
       try {
         const j = JSON.parse(dec.decode(infoBytes)) as Record<string, unknown>;
         info = (j["net.shinyfrog.bear"] as BearInfo | undefined) ?? {};
-      } catch {
+      } catch (err) {
         // why: no readable info.json: the note is imported without Bear's metadata
         /* dates only — the note still imports */
+        swallowed("storage/import/bear: no readable info.json: the note is imported without Bear's metadata", err);
       }
     }
     if (info.trashed) {
@@ -100,9 +102,10 @@ export function convertBear(files: Map<string, Uint8Array>): ConvertedVault {
       let raw = dest.replace(/^<|>$/g, "");
       try {
         raw = decodeURIComponent(raw);
-      } catch {
+      } catch (err) {
         // why: not percent-encoded: the link target is used as written
         /* keep as written */
+        swallowed("storage/import/bear: not percent-encoded: the link target is used as written", err);
       }
       const target = moved.get(raw);
       if (!target) return m;

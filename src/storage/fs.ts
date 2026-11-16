@@ -6,6 +6,7 @@
 import { SUPPORTED_IMPORT_EXTENSIONS } from "./importExtensions";
 // The converters load on the first import, not at startup (bundle budget).
 import type * as FileFormats from "./fileFormats";
+import { swallowed } from "../lib/logger";
 
 /** The converters of the markup formats `convertImported` turns into Markdown. */
 export type MarkupConverters = Pick<typeof FileFormats, "rtfToMarkdown" | "htmlToMarkdown" | "xmlToMarkdown">;
@@ -102,8 +103,9 @@ export async function saveFile(
         await writable.write(file.content);
         await writable.close();
         return file;
-      } catch {
+      } catch (err) {
         /* why: fall through to Save As */
+        swallowed("storage/fs: fall through to Save As", err);
       }
     }
   }
@@ -177,8 +179,9 @@ export function convertImported(name: string, raw: string, markup?: MarkupConver
     let isArray = false;
     try {
       isArray = Array.isArray(JSON.parse(trimmed));
-    } catch {
+    } catch (err) {
       /* why: malformed json — keep as code block */
+      swallowed("storage/fs: malformed json — keep as code block", err);
     }
     if (isArray) {
       return `# ${name}\n\n\`\`\`json-table title="${name}"\n${trimmed}\n\`\`\`\n`;

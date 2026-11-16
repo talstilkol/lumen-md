@@ -55,6 +55,7 @@ import {
   type RekeyRequest,
   type RekeyResult,
 } from "./engineTypes";
+import { swallowed } from "../../lib/logger";
 
 /** @internal One of the engine's parts: use `E2eeSync`, never extend these (review 34). */
 export abstract class E2eeSyncCore {
@@ -104,9 +105,10 @@ export abstract class E2eeSyncCore {
   protected emit(e: SyncEvent): void {
     try {
       this.o.onEvent(e);
-    } catch {
+    } catch (err) {
       // why: a listener that throws must not break the sync round that reports to it
       /* the activity panel must never break a round */
+      swallowed("sync/e2ee/engineCore: a listener that throws must not break the sync round that reports to i", err);
     }
   }
 
@@ -480,8 +482,9 @@ export abstract class E2eeSyncCore {
       for (const l of [...this.changeListeners]) {
         try {
           l();
-        } catch {
+        } catch (err) {
           // why: a listener's failure is its own; the round's result stands
+          swallowed("sync/e2ee/engineCore: a listener's failure is its own; the round's result stands", err);
         }
       }
     };

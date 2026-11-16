@@ -29,6 +29,7 @@ import { HelpButton } from "../../../ui/HelpButton";
 import { UnauditedNotice } from "./unaudited";
 import { explainError } from "../../../lib/userError";
 import { Modal } from "../../../ui/Modal";
+import { swallowed } from "../../../lib/logger";
 
 const NAMES: Record<ProviderKind, string> = { webdav: "WebDAV", s3: "S3", dropbox: "Dropbox", gdrive: "Google Drive", lan: "LAN", folder: "📁", relay: "Lumen relay" };
 const PENDING_OAUTH = "lumen-sync-pending-oauth";
@@ -83,8 +84,9 @@ function ProviderForm({ session, initial, onDone }: { session: SyncSession; init
       // The sign-in leaves the page; the panel reopens and connects on return.
       try {
         sessionStorage.setItem(PENDING_OAUTH, JSON.stringify(settings));
-      } catch {
+      } catch (err) {
         /* why: private mode: the user connects again after signing in */
+        swallowed("sync/e2ee/ui/SyncPanel: private mode: the user connects again after signing in", err);
       }
       await legacyStore(kind)!.connect();
       return;
@@ -532,8 +534,9 @@ export function SyncPanel({ onClose, session = syncSession() }: { onClose: () =>
 export function savePendingOAuth(settings: ProviderSettings): void {
   try {
     sessionStorage.setItem(PENDING_OAUTH, JSON.stringify(settings));
-  } catch {
+  } catch (err) {
     /* why: private mode: the user connects again after signing in */
+    swallowed("sync/e2ee/ui/SyncPanel: private mode: the user connects again after signing in", err);
   }
 }
 

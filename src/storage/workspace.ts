@@ -18,6 +18,7 @@ export { basename, dirname, joinPath, splitPath } from "./vault/shared";
 export { WorkspaceConflictError } from "./vault/types";
 export type { VaultEntry } from "./vault/types";
 import { readText } from "./textCodec";
+import { swallowed } from "../lib/logger";
 
 export interface WorkspaceEntry {
   /** File path relative to the workspace root. */
@@ -262,8 +263,9 @@ export async function renameWorkspaceFile(
   } catch (e) {
     try {
       prov.restoreRecords(before);
-    } catch {
+    } catch (err) {
       /* why: the records stay on the new name as well: outside content is never lost */
+      swallowed("storage/workspace: the records stay on the new name as well: outside content is never los", err);
     }
     throw e;
   }

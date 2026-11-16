@@ -15,6 +15,7 @@
 import { fromUtf8, randomBytes, toB64u, fromB64u, utf8 } from "./bytes";
 import { deriveMasterKey, newKdfParams, validateKdfParams, type KdfParams, type KdfPolicy } from "./kdf";
 import { deriveVaultKeys, hmac, verifyHmac, type VaultKeys } from "./keys";
+import { swallowed } from "../../lib/logger";
 
 /** Protocol version, written into the header and every manifest since day one. */
 export const PROTOCOL_VERSION = 1;
@@ -91,8 +92,9 @@ export function decodeHeader(bytes: Uint8Array, policy: KdfPolicy = {}): VaultHe
   let idBytes = -1;
   try {
     if (typeof o.vaultId === "string") idBytes = fromB64u(o.vaultId).length;
-  } catch {
+  } catch (err) {
     /* why: not base64url; idBytes stays -1 and the check below rejects the id */
+    swallowed("sync/e2ee/header: not base64url; idBytes stays -1 and the check below rejects the id", err);
   }
   if (idBytes !== 16) throw new HeaderFormatError("Bad vault id");
   if (typeof o.mac !== "string") throw new HeaderFormatError("The vault header has no MAC");

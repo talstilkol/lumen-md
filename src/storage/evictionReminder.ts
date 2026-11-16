@@ -10,6 +10,7 @@
 import type { PersistenceStatus } from "./persistentStorage";
 // Its English ships with this lazy chunk, not the startup bundle.
 import "./evictionStrings";
+import { swallowed } from "../lib/logger";
 
 export const REMINDER_KEY = "lumen.evictionReminder.shownAt";
 export const REMINDER_EVERY_MS = 7 * 24 * 60 * 60 * 1000;
@@ -84,8 +85,9 @@ export async function remindIfEvictable(status: PersistenceStatus | null): Promi
   });
   try {
     localStorage.setItem(REMINDER_KEY, String(env.now));
-  } catch {
+  } catch (err) {
     /* why: private mode: the reminder simply shows again next time */
+    swallowed("storage/evictionReminder: private mode: the reminder simply shows again next time", err);
   }
   return true;
 }

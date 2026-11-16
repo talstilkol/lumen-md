@@ -1,3 +1,4 @@
+import { swallowed } from "../lib/logger";
 /**
  * localStorage-backed history for the AI inline prompt (AiInlinePrompt).
  * Keeps the last 20 submitted prompts, most recent first, deduped
@@ -28,8 +29,9 @@ function save(history: string[]): void {
   memoryFallback = history.slice();
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
-  } catch {
+  } catch (err) {
     /* why: quota / private mode — memory fallback already updated */
+    swallowed("storage/aiPromptHistory: quota / private mode — memory fallback already updated", err);
   }
 }
 
@@ -51,7 +53,8 @@ export function clearAiPromptHistory(): void {
   memoryFallback = [];
   try {
     localStorage.removeItem(STORAGE_KEY);
-  } catch {
+  } catch (err) {
     /* why: storage denied: the in-memory history is cleared, nothing was persisted */
+    swallowed("storage/aiPromptHistory: storage denied: the in-memory history is cleared, nothing was persiste", err);
   }
 }

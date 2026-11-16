@@ -1,3 +1,4 @@
+import { swallowed } from "../../../lib/logger";
 /**
  * The classroom link (plan W5.21): what a teacher sends the class.
  *
@@ -65,8 +66,9 @@ export function fromBase64Url(text: string): Uint8Array {
 
 async function pipe(bytes: Uint8Array, stream: CompressionStream | DecompressionStream): Promise<Uint8Array> {
   const writer = stream.writable.getWriter();
-  void writer.write(bytes as Uint8Array<ArrayBuffer>).then(() => writer.close()).catch(() => {
+  void writer.write(bytes as Uint8Array<ArrayBuffer>).then(() => writer.close()).catch((err: unknown) => {
     /* why: a corrupt stream rejects the read side below, which reports it */
+    swallowed("sync/e2ee/classroom/link: a corrupt stream rejects the read side below, which reports it", err);
   });
   return new Uint8Array(await new Response(stream.readable).arrayBuffer());
 }
