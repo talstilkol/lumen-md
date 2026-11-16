@@ -294,3 +294,21 @@ export function summary(results) {
   });
   return lines.join("\n");
 }
+
+/**
+ * The uncommitted files from `git status --porcelain -z` (not trimmed: the
+ * first entry's leading space is part of its status), leaving out .ci-local/.
+ * A rename or copy names its new path (the old one follows it and is skipped).
+ * @param {string} out
+ */
+export function porcelainFiles(out) {
+  const parts = String(out ?? "").split("\0");
+  const files = [];
+  for (let i = 0; i < parts.length; i++) {
+    const e = parts[i];
+    if (e.length < 4) continue;
+    files.push(e.slice(3));
+    if (/^[RC]/.test(e)) i++;
+  }
+  return files.filter((f) => !f.startsWith(".ci-local/"));
+}

@@ -52,6 +52,9 @@ export const RECEIPT_DIR = "reports";
 export const RUNS_DIR = ".ci-local/runs";
 export const receiptPath = (sha) => `${RECEIPT_DIR}/train-offline-${sha}.json`;
 
+// Shared with scripts/ci-local.mjs (which copies only lib/ciLocal.mjs in its CLI test).
+export { porcelainFiles } from "./ciLocal.mjs";
+
 /** A full 40-hex commit hash. */
 export const isSha = (s) => /^[0-9a-f]{40}$/.test(String(s ?? ""));
 
@@ -92,34 +95,84 @@ export function refusal({ results, sha, dirty }) {
   return null;
 }
 
+/** The receipt classes: `full` is vitest itself (the Mac receipt); any --runner makes a `cloud` one. */
+export const receiptClass = (runner) => (runner ? "cloud" : "full");
+
 /**
  * The run record (always) and the receipt (only when green and clean): the same shape.
- * @param {{ sha: string, branch?: string, results: any[], runner?: string|null, at: string, dirty: string[] }} run
+ * `dirty` is the list of uncommitted files (empty on a clean tree), so
+ * `ci-doctor --source local` can leave a dirty run out of its comparisons;
+ * `tree` is `HEAD^{tree}` and `runnerSha256` the hash of the --runner program,
+ * so a receipt names the code and the runner it was made with (review 9, M1/M2).
+ * @param {{ sha: string, tree?: string|null, branch?: string, results: any[], runner?: string|null, runnerSha256?: string|null, at: string, dirty: string[] }} run
  */
-export function record({ sha, branch = null, results, runner = null, at, dirty }) {
+export function record({ sha, tree = null, branch = null, results, runner = null, runnerSha256 = null, at, dirty }) {
   return {
     kind: "train-offline",
     sha,
+    tree,
     branch,
     at,
     runner: runner ?? "vitest",
+    runnerSha256: runner ? runnerSha256 : null,
+    class: receiptClass(runner),
+    dirty: dirty.slice(0, 50),
     green: allGreen(results) && !dirty.length,
     gates: results,
   };
 }
 
 /**
- * Checks a receipt read back from reports/: its hash is the commit it is named
- * after, it is green, and every gate in it passed.
+ * The exact gate ids a receipt for this checkout must hold: every command gate,
+ * then the test files (the attack files, the OFFLINE_GATES and TEST_GATES that
+ * exist), in order.
+ * @param {string[]} testFiles
+ */
+export const expectedGates = (testFiles) => [...COMMAND_GATES.map((g) => g.id), ...testFiles];
+
+const isHex = (s, n) => new RegExp(`^[0-9a-f]{${n}}$`).test(String(s ?? ""));
+
+/**
+ * Checks a receipt read back from reports/ (review 9, M1): it names the commit
+ * it is filed under, it is green, it holds exactly the expected gates (at least
+ * one attack file among them), all passed, and it records the tree and the
+ * runner it was made with. A receipt made through a --runner is `cloud` class:
+ * it can never stand in for the Mac (vitest) receipt (`requireFull`).
+ * @param {any} receipt
+ * @param {string} fileSha
+ * @param {{ expected?: string[], tree?: string|null, runnerSha256?: string|null, requireFull?: boolean }} [want]
+ *   `expected`: expectedGates() of the checkout; `tree`: `git rev-parse <sha>^{tree}`;
+ *   `runnerSha256`: the hash of the receipt's runner as it is now (null when it can't be read)
  * @returns {string[]} problems (empty = valid)
  */
-export function receiptProblems(receipt, fileSha) {
+export function receiptProblems(receipt, fileSha, want = {}) {
   const out = [];
   if (!receipt || receipt.kind !== "train-offline") return ["not a train-offline receipt"];
   if (receipt.sha !== fileSha) out.push(`names ${receipt.sha} but is filed as ${fileSha}`);
   if (!receipt.green) out.push("not green");
-  const red = (receipt.gates ?? []).filter((g) => g.status !== "pass");
-  if (!(receipt.gates ?? []).length) out.push("no gates");
+  if (!Array.isArray(receipt.dirty) || receipt.dirty.length) out.push("made on a dirty tree (or the tree state is not recorded)");
+  const gates = Array.isArray(receipt.gates) ? receipt.gates : [];
+  const red = gates.filter((g) => g.status !== "pass");
+  if (!gates.length) out.push("no gates");
   if (red.length) out.push(`${red.length} gate(s) not passed: ${red.map((g) => g.id).join(", ")}`);
+  const ids = gates.map((g) => g.id);
+  const dup = ids.filter((id, i) => ids.indexOf(id) !== i);
+  if (dup.length) out.push(`gate(s) listed twice: ${[...new Set(dup)].join(", ")}`);
+  if (!ids.some((id) => String(id).startsWith("security/attacks/"))) out.push("no attack gate (security/attacks/*.test.ts): a receipt needs at least one");
+  if (want.expected) {
+    const missing = want.expected.filter((id) => !ids.includes(id));
+    const extra = ids.filter((id) => !want.expected.includes(id));
+    if (missing.length) out.push(`missing gate(s): ${missing.join(", ")}`);
+    if (extra.length) out.push(`unexpected gate(s): ${extra.join(", ")}`);
+  }
+  if (!isHex(receipt.tree, 40)) out.push("no tree hash (HEAD^{tree})");
+  else if (want.tree !== undefined && receipt.tree !== want.tree) out.push(`tree ${receipt.tree} is not the commit's tree ${want.tree ?? "(unknown)"}`);
+  const full = receipt.runner === "vitest";
+  if (receipt.class !== receiptClass(full ? null : receipt.runner)) out.push(`class "${receipt.class}" does not match runner ${receipt.runner}: a --runner receipt is cloud class`);
+  if (!full) {
+    if (!isHex(receipt.runnerSha256, 64)) out.push(`no sha256 of the runner ${receipt.runner}`);
+    else if (want.runnerSha256 !== undefined && receipt.runnerSha256 !== want.runnerSha256) out.push(`runner ${receipt.runner} hashes to ${want.runnerSha256 ?? "(not readable here)"}, not the receipt's ${receipt.runnerSha256}`);
+  }
+  if (want.requireFull && (!full || receipt.class !== "full")) out.push(`a cloud-class receipt (runner ${receipt.runner}) can never stand in for the Mac (vitest) receipt`);
   return out;
 }

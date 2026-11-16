@@ -7,10 +7,13 @@
  */
 import { describe, expect, it } from "vitest";
 // @ts-expect-error — plain .mjs script without type declarations
-import { counts, notHere, reportMarkdown, runCommand, runTasks, verdictOf, vitestFiles } from "../../scripts/lib/dodRunner.mjs";
+import { counts, jsonCounts, notHere, reportMarkdown, runCommand, runTasks, verdictOf, vitestFiles, vitestJsonSync } from "../../scripts/lib/dodRunner.mjs";
 // @ts-expect-error — plain .mjs script without type declarations
-import { p0Tasks } from "../../scripts/dod.mjs";
-import { resolve } from "node:path";
+import { p0Tasks, reportExit } from "../../scripts/dod.mjs";
+import { join, resolve } from "node:path";
+import { spawnSync } from "node:child_process";
+import { cpSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 
 const root = resolve(__dirname, "../..");
 type Res = { code: number; out: string };
@@ -89,6 +92,113 @@ describe("runCommand and runTasks", () => {
     expect(md).toMatch(/\*\*2 P0 tasks:\*\* green 1 · red 1 · not here 0/);
     expect(md).toMatch(/\| B \| red \| `npm run x` \| fail: exit 1/);
     expect(md).toMatch(/not here: Playwright/);
+  });
+});
+
+describe("without a runner: vitest's JSON reporter (review 9, M5)", () => {
+  const a = "src/__tests__/dod.test.ts";
+  const b = "src/__tests__/handoff.test.ts";
+  const report = (byFile: Record<string, string[]>) => ({
+    testResults: Object.entries(byFile).map(([f, st]) => ({ name: join(root, f), status: st.includes("failed") ? "failed" : "passed", assertionResults: st.map((status) => ({ status })) })),
+  });
+  // a fake `npx vitest run --reporter=json --outputFile=…` that writes the report vitest would
+  const fakeVitest = (byFile: Record<string, string[]>, calls: string[][] = []) => async (cmd: string, args: string[]): Promise<Res> => {
+    calls.push([cmd, ...args]);
+    const out = args.find((x) => x.startsWith("--outputFile="));
+    if (out) writeFileSync(out.slice("--outputFile=".length), JSON.stringify(report(byFile)));
+    return { code: 0, out: "" };
+  };
+
+  it("an exit 0 with every test of a file skipped is not a pass", async () => {
+    const calls: string[][] = [];
+    const r = await runCommand(`npx vitest run ${a} ${b}`, { root, run: fakeVitest({ [a]: ["passed", "skipped"], [b]: ["skipped", "todo"] }, calls) });
+    expect(calls).toHaveLength(1);
+    expect(calls[0].slice(0, 4)).toEqual(["npx", "vitest", "run", "--reporter=json"]);
+    expect(r).toMatchObject({ status: "skipped", detail: "dod.test.ts 1/1, handoff.test.ts 0/0 (all skipped here)" });
+    expect(await runCommand(`npx vitest run ${a}`, { root, run: fakeVitest({ [a]: ["passed"] }) })).toMatchObject({ status: "pass" });
+    expect(await runCommand(`npx vitest run ${a}`, { root, run: fakeVitest({ [a]: ["passed", "failed"] }) })).toMatchObject({ status: "fail", detail: "dod.test.ts 1/2" });
+    // a file vitest did not report on (and no report at all) is red
+    expect(await runCommand(`npx vitest run ${a} ${b}`, { root, run: fakeVitest({ [a]: ["passed"] }) })).toMatchObject({ status: "fail", detail: "dod.test.ts 1/1, handoff.test.ts load error" });
+    expect(await runCommand(`npx vitest run ${a}`, { root, run: async () => ({ code: 0, out: "" }) })).toMatchObject({ status: "fail" });
+  });
+
+  it("the synchronous path (dod.mjs without --runner) judges the same way", () => {
+    const spawn = (_c: string, args: string[]) => {
+      writeFileSync(args.find((x) => x.startsWith("--outputFile="))!.slice(13), JSON.stringify(report({ [a]: ["skipped"] })));
+      return { status: 0 };
+    };
+    expect(vitestJsonSync([a], root, spawn)).toMatchObject({ status: "skipped" });
+    expect(jsonCounts(report({ [a]: ["passed", "passed", "skipped", "failed"] }), root).get(a)).toEqual({ pass: 2, fail: 1 });
+  });
+
+  it("no files at all (an empty directory) is red, through the runner or not (review 9, L12)", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "dod-empty-"));
+    try {
+      mkdirSync(join(dir, "empty"));
+      writeFileSync(join(dir, "empty/notATest.ts"), "");
+      expect(vitestFiles("npx vitest run empty", dir)).toEqual([]);
+      let ran = 0;
+      const run = async () => {
+        ran++;
+        return { code: 0, out: "pass 1 fail 0" };
+      };
+      expect(await runCommand("npx vitest run empty", { root: dir, runner: "shim", run })).toEqual({ cmd: "npx vitest run empty", status: "fail", detail: "no files" });
+      expect(await runCommand("npx vitest run empty", { root: dir, run })).toMatchObject({ status: "fail", detail: "no files" });
+      expect(ran).toBe(0);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("the report header names the run that was made (review 9, L12)", () => {
+  const rows = [{ id: "A", verdict: "green", cmds: [{ cmd: "x", status: "pass", detail: "" }], expect: [] }];
+  it("--done is a ✅ run; without a runner it says vitest, not <shim>", () => {
+    const md = reportMarkdown(rows, { sha: "f".repeat(40), branch: "b", runner: null, at: "now", mode: "--done" });
+    expect(md).toMatch(/^# ✅ definition-of-done run on b @ ffffffffff/);
+    expect(md).toMatch(/`node scripts\/dod\.mjs --done --report …`/);
+    expect(md).not.toMatch(/<shim>|P0/);
+    expect(md).toMatch(/vitest with its JSON reporter/);
+    expect(md).toMatch(/\*\*1 ✅ tasks:\*\*/);
+    const p0 = reportMarkdown(rows, { sha: "f".repeat(40), branch: "b", runner: "/x/v4.sh", at: "now", mode: "--p0" });
+    expect(p0).toMatch(/^# P0 definition-of-done run/);
+    expect(p0).toMatch(/--p0 --runner <shim> --report/);
+    expect(reportMarkdown(rows, { sha: "f".repeat(40), branch: "b", runner: null, at: "now", mode: "W1.1" })).toMatch(/^# Selected definition-of-done run/);
+  });
+});
+
+describe("--done exits 0 only when every row is green (review 9, H1)", () => {
+  it("reportExit: not here and no dod are not green with --done or chosen ids; --p0 is red only on red", () => {
+    const rows = (...v: string[]) => v.map((verdict) => ({ verdict }));
+    for (const mode of ["--done", "W10.F5"]) {
+      expect(reportExit(rows("green", "green"), mode)).toBe(0);
+      expect(reportExit(rows("green", "not here"), mode)).toBe(1);
+      expect(reportExit(rows("no dod"), mode)).toBe(1);
+      expect(reportExit(rows("red"), mode)).toBe(1);
+      expect(reportExit([], mode)).toBe(1);
+    }
+    expect(reportExit(rows("green", "not here"), "--p0")).toBe(0);
+    expect(reportExit(rows("red"), "--p0")).toBe(1);
+  });
+
+  it("dod --done --runner on a plan whose ✅ task can't run here exits 1", () => {
+    const dir = mkdtempSync(join(tmpdir(), "dod-done-"));
+    try {
+      mkdirSync(join(dir, "scripts/lib"), { recursive: true });
+      mkdirSync(join(dir, "plan"));
+      cpSync(join(root, "scripts/dod.mjs"), join(dir, "scripts/dod.mjs"));
+      cpSync(join(root, "scripts/lib/dodRunner.mjs"), join(dir, "scripts/lib/dodRunner.mjs"));
+      const plan = (dod: string[]) => JSON.stringify({ phases: [{ tasks: [{ id: "T.1", title: "t", status: "✅ #1", dod }] }] });
+      const done = () => spawnSync("node", [join(dir, "scripts/dod.mjs"), "--done", "--runner", "/bin/false"], { cwd: dir, encoding: "utf8" });
+      writeFileSync(join(dir, "plan/plan.json"), plan(["npx playwright test e2e/x.spec.ts"]));
+      const r = done();
+      expect(`${r.stdout}${r.stderr}`).toMatch(/0 green, 0 red, 1 not here/);
+      expect(r.status).toBe(1);
+      writeFileSync(join(dir, "plan/plan.json"), plan(["true"]));
+      expect(done().status).toBe(0);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });
 
