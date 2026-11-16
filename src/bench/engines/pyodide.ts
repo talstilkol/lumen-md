@@ -6,10 +6,12 @@
  * measures the runtime and the sandbox (load, run, answer contract), not
  * the analyst agent.
  */
-import { analyse } from "../../agents/analyst";
 import { DEFAULT_PYTHON_TIMEOUT_MS } from "../../agents/python/limits";
 import { runPython } from "../../agents/python/runner";
 import type { BenchEngine } from "../types";
+
+// agents/analyst.ts is loaded on use (its English is a lazy chunk, i18nLazyEnglish).
+const analyst = () => import("../../agents/analyst");
 
 const run = (code: string, inputs: Record<string, unknown>, signal?: AbortSignal) => runPython({ code, inputsJson: JSON.stringify(inputs), timeoutMs: DEFAULT_PYTHON_TIMEOUT_MS, signal });
 
@@ -25,6 +27,6 @@ export const engine: BenchEngine = {
   },
   async run(item) {
     const { question, csv, code } = item.input as { question: string; csv: string; code: string };
-    return (await analyse(question, csv, { writeCode: async () => code, run })).answer.answer;
+    return (await (await analyst()).analyse(question, csv, { writeCode: async () => code, run })).answer.answer;
   },
 };
