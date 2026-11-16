@@ -19,9 +19,9 @@
  *     2,000 links in 2,000 list items are not, and stay as they are;
  *   - MAX_CONTAINER_DEPTH nested list items and block quotes on one line.
  *
- *   - MAX_DELIMITERS `*` / `_` / `~` in one inline run (W10.D21: thousands
- *     of them cost seconds in the emphasis resolver, and after a URL in GFM's
- *     autolink-literal trailing-punctuation scan; one input overflowed the stack);
+ *   - MAX_DELIMITERS `*` / `_` / `~` / `-` in one inline run (W10.D21:
+ *     thousands of them cost seconds in the emphasis resolver and in GFM's
+ *     autolink-literal scans; one input overflowed the stack);
  *   - MAX_HTML_DEPTH raw HTML elements left open, counted over the whole note
  *     (rehype-raw parses all of a note's raw HTML as one stream, and the
  *     hast conversion recurses per level: about 2,200 levels overflow the
@@ -98,39 +98,17 @@ const blank = (line: string) => /^[ \t]*$/.test(line);
 const NO_DEPTH = new Set(["area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr", "p", "li", "dt", "dd", "tr", "td", "th", "option", "optgroup", "thead", "tbody", "tfoot", "rb", "rt", "rp", "colgroup", "caption"]);
 const TAG = /<(\/?)([A-Za-z][A-Za-z0-9-]*)(?:\s[^<>]*?)?(\/?)>/g;
 
-/** `text` without its code spans, in linear time (a backreference regex is quadratic on unmatched runs). */
-function withoutCodeSpans(text: string): string {
-  if (!text.includes("`")) return text;
-  const runs: Array<[number, number]> = [];
-  for (const m of text.matchAll(/`+/g)) runs.push([m.index, m[0].length]);
-  const next = new Array<number>(runs.length).fill(-1);
-  const last = new Map<number, number>();
-  for (let i = runs.length - 1; i >= 0; i--) {
-    next[i] = last.get(runs[i][1]) ?? -1;
-    last.set(runs[i][1], i);
-  }
-  let out = "";
-  let at = 0;
-  for (let i = 0; i < runs.length; i++) {
-    const j = next[i];
-    if (j < 0) continue;
-    out += text.slice(at, runs[i][0]);
-    at = runs[j][0] + runs[j][1];
-    i = j;
-  }
-  return out + text.slice(at);
-}
-
 /**
  * The raw-HTML depth after `text`, starting at `depth`, and the deepest it
- * reached. Code spans are not HTML; they are taken line by line, so a stray
- * backtick cannot hide the tags of the lines after it (a table row ends a
- * code span; W10.D21, fuzz #970703).
+ * reached. Tags in code spans count too: where a code span ends depends on
+ * the whole paragraph or table row, and a guess that pairs the wrong
+ * backticks hides the tags between them (W10.D21, fuzz #970703 #428652).
+ * Counting them only makes the bound trip sooner.
  */
 function htmlDepth(text: string, depth: number): { end: number; max: number } {
   let max = depth;
   if (!text.includes("<")) return { end: depth, max };
-  for (const m of text.split(/\r\n?|\n/).map(withoutCodeSpans).join("\n").matchAll(TAG)) {
+  for (const m of text.matchAll(TAG)) {
     if (m[3] || NO_DEPTH.has(m[2].toLowerCase())) continue;
     depth = m[1] ? Math.max(0, depth - 1) : depth + 1;
     if (depth > max) max = depth;
@@ -172,7 +150,9 @@ function delimiters(text: string, stopAt = Infinity): number {
   let n = 0;
   for (let i = 0; i < text.length && n < stopAt; i++) {
     const c = text.charCodeAt(i);
-    if (c === 0x2a || c === 0x5f || c === 0x7e) n++;
+    // `-` too: GFM's autolink literal rescans runs of domain characters
+    // ("- - - …" thousands long: 0.5-2 s; W10.D21, fuzz #10898 #193112).
+    if (c === 0x2a || c === 0x5f || c === 0x7e || c === 0x2d) n++;
   }
   return n;
 }
@@ -352,11 +332,13 @@ export function boundMarkdown(input: string): string {
     // container would end inside it, and the rest of the block be parsed.
     if (opens || closes) {
       flush();
-      // A container label past the bounds (`:::note[[[[…`) is raw text, and opens nothing.
-      if (opens && overRuns(line)) {
+      // A container line past the bounds (`:::note[[[[…`, `:::n<div><div>…`) is raw text, and opens nothing.
+      const d = htmlDepth(line, html);
+      if (opens && (tooDeep(line) || overRuns(line) || d.max > MAX_HTML_DEPTH)) {
         out.push(rawRows([row]));
         continue;
       }
+      html = d.end;
       out.push(row);
       if (opens) containers++;
       else containers--;

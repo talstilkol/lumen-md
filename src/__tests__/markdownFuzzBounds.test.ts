@@ -27,14 +27,18 @@
  * taken as fences (#618854 #747704), and lists nested in footnote
  * definitions (#158774 #694468). The final run: a directive container's
  * label of thousands of brackets (#21616 #33882 #38881), and a stray
- * backtick in a table row hiding deep HTML (#970703).
+ * backtick in a table row hiding deep HTML (#970703). The fourth: a
+ * container line full of open <div> (#48699), code spans paired the wrong
+ * way (#428652), thousands of "- " in one run (GFM autolink literal:
+ * #10898 #193112 #150847 #401308), and parse5 throwing on an end tag split
+ * across raw nodes (#511908: rehypeRawSafe shows that HTML as text).
  */
 import { describe, it, expect } from "vitest";
 import { generate } from "../../scripts/fuzz/generators";
 import { asRawText, boundMarkdown, MAX_CONTAINER_DEPTH, MAX_DELIMITERS, MAX_HTML_DEPTH, needsBounding } from "../renderer/boundMarkdown";
 import { renderMarkdown } from "../renderer/pipeline";
 
-const FOUND = [655, 17957, 93, 185, 17976, 19495, 9178, 2101, 3877, 12929, 16139, 11087, 1459, 4812, 17461, 21240, 25369, 29767, 72864, 76842, 93948, 555134, 196813, 618854, 747704, 158774, 694468, 21616, 33882, 38881, 970703];
+const FOUND = [655, 17957, 93, 185, 17976, 19495, 9178, 2101, 3877, 12929, 16139, 11087, 1459, 4812, 17461, 21240, 25369, 29767, 72864, 76842, 93948, 555134, 196813, 618854, 747704, 158774, 694468, 21616, 33882, 38881, 970703, 48699, 428652, 511908, 10898, 193112, 150847, 401308];
 
 describe("fuzz findings of W10.D21", () => {
   it.each(FOUND)("#%i renders, in under 100 ms", async (i) => {
@@ -75,12 +79,14 @@ describe("the bounds", () => {
     const out = boundMarkdown([part, part, part].join("\n\n")).split("\n\n");
     expect(out.slice(0, 2)).toEqual([part, part]);
     expect(out[2]).toBe(asRawText(part));
-    // Elements the parser closes itself, and HTML in code spans, do not count.
+    // Elements the parser closes itself do not count.
     const cells = "<table>" + "<tr><td>a".repeat(400) + "</table>";
     expect(boundMarkdown(cells)).toBe(cells);
     const row = "| a ` b | " + "<div>".repeat(MAX_HTML_DEPTH + 1) + " |\n| c ` d |";
     expect(needsBounding(row)).toBe(true);
-    const code = Array.from({ length: 400 }, () => "Write `<div>` to open a block.").join("\n");
+    // Tags in code spans count too (where a span ends depends on the whole
+    // paragraph); within the bound such a note is unchanged.
+    const code = Array.from({ length: 200 }, () => "Write `<div>` to open a block.").join("\n");
     expect(boundMarkdown(code)).toBe(code);
   });
 

@@ -30,7 +30,8 @@ export const TARGETS = [
         import("remark-frontmatter"),
         import("remark-directive"),
         import("remark-rehype"),
-        import("rehype-raw"),
+        // The preview's own rehype-raw wrapper (W10.D21: falls back to text when parse5 throws).
+        imp(root, "src/renderer/rehypeRawSafe.ts"),
         import("rehype-slug"),
         imp(root, "src/renderer/remarkLumen.ts"),
         imp(root, "src/renderer/rehypeSanitizeRaw.ts"),

@@ -366,7 +366,8 @@ async function buildFullProcessor(
   // rehype-raw pulls in parse5 (~40 KB gz); only docs with inline HTML
   // pay for it (M12-followup-2).
   const [rehypeRaw, rehypeKatex] = await Promise.all([
-    opts.raw ? import("rehype-raw").then((m) => m.default) : null,
+    // rehypeRawSafe: rehype-raw, falling back to text when parse5 throws (W10.D21).
+    opts.raw ? import("./rehypeRawSafe").then((m) => m.default) : null,
     opts.math ? loadKatex() : null,
   ]);
   let p = buildBase();
