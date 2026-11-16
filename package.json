@@ -134,6 +134,8 @@
     "docs:audit": "node scripts/docs-audit.mjs",
     "bench:fim": "node --experimental-strip-types scripts/bench-fim.mjs",
     "models:day": "node scripts/models-day.mjs",
+    "mac:pack": "node scripts/mac-pack/run-all.mjs",
+    "owner:index": "node scripts/mac-pack/owner-index.mjs",
     "models:select": "node scripts/models-select.mjs",
     "eval:asr-web": "node scripts/asr/web-eval.mjs",
     "eval:voice-commands": "node --experimental-strip-types scripts/voice-commands-eval.mjs",

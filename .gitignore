@@ -163,3 +163,5 @@ scripts/drill/tauri-writer/target/
 edu/dist/
 .ci-doctor/
 .ci-local/
+# Mac pack results (plan/mac-pack/*.json, npm run mac:pack): lane L2 writes .mac-pack/; reports/mac-pack/ is under /reports/* above
+/.mac-pack/
