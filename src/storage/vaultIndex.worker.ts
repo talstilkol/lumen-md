@@ -12,6 +12,15 @@ import type { IndexProgress, IndexRequest } from "./vaultIndexProtocol";
 
 const index = new VaultIndex();
 
+// W11.H12: search lemmas from a lemmatizer model, only once one passed the W11.M3 rule
+// (eval/public/_verdicts.json) and its runtime exists — today neither, so this ends at null.
+void import("../search/lemma/lemmaIndex")
+  .then((m) => m.chosenLemmatizer())
+  .then((lz) => (lz ? index.useLemmatizer(lz) : undefined))
+  .catch(() => {
+    // why: without a lemmatizer search is BM25 over words with the rule-based morphology, as before
+  });
+
 // Requests run one after another: a snapshot restore finishes before the
 // upserts sent after it (W2.22: some requests are asynchronous now).
 let queue: Promise<void> = Promise.resolve();

@@ -10,7 +10,16 @@ writes eval/public/.data/normalizer-parity.jsonl with {"input", "expected"};
     python3 scripts/eval-public/normalizer_parity.py --module <python module path> --function <name>
 
 --module is the .py file in a checkout of the leaderboard's code at a pinned
-commit (record the commit in the PR that marks the parity verified).
+commit (record the commit in the PR that marks the parity verified). The port
+(src/eval/public/normalize.ts) was read from ivrit-ai/asr-training @
+e333b4a0fb35bc626e7d4da88250936ff773475e, where the normaliser is a class:
+
+    git clone https://github.com/ivrit-ai/asr-training && git -C asr-training checkout e333b4a0fb
+    pip install -r asr-training/requirements.txt   # hebrew, openai-whisper, jiwer, datasets
+    python3 scripts/eval-public/normalizer_parity.py --module asr-training/evaluate_model.py --function HebrewTextNormalizer
+    npm run eval:public -- parity                  # expect "normaliser parity: 50/50", exit 0
+
+A class given as --function is instantiated once and then called.
 """
 import argparse, importlib.util, json, os, sys
 
@@ -27,6 +36,8 @@ def main():
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     fn = getattr(mod, a.function)
+    if isinstance(fn, type):
+        fn = fn()
     rows = []
     for sid in ("asr-ivrit-eval-d1", "asr-ivrit-eval-whatsapp"):
         p = os.path.join(DATA, sid, "export", "items.jsonl")
