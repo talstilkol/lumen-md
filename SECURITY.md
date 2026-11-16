@@ -12,14 +12,14 @@ The same table is on the public security page (written from `security/disclosure
 
 **Do not put the details of a vulnerability in a public GitHub issue, discussion or pull request.**
 
-**Today:** open a public issue titled **["Security contact request"](https://github.com/talstilkol/lumen-md/issues/new?title=Security%20contact%20request)** with no details at all, only a way to reach you if you want one. A maintainer answers within 48 hours with a private channel, and you send the report there. Include:
+**First choice:** report it privately through GitHub: **[Report a vulnerability](https://github.com/talstilkol/lumen-md/security/advisories/new)** (Security → Advisories). Only the maintainers see it. If you can't use GitHub's form, open a public issue titled **["Security contact request"](https://github.com/talstilkol/lumen-md/issues/new?title=Security%20contact%20request)** with no details at all, only a way to reach you; a maintainer answers within 48 hours with a private channel. Include:
 
 1. What is affected (file, feature, version or commit)
 2. Steps to reproduce, or a proof of concept
 3. The impact: what an attacker gets (notes read, notes changed, keys, code run, data sent off the device)
 4. A suggested fix, if you have one
 
-GitHub's private vulnerability reporting is **not turned on yet** for this repository, so the "Report a vulnerability" button does not work. Once the owner turns it on, it becomes the first channel here. A dedicated security mailbox with a published key will follow. The state of every channel is in `security/channels.json`.
+GitHub's private vulnerability reporting is **turned on** for this repository and is the first channel. A dedicated security mailbox with a published key will follow. The state of every channel is in `security/channels.json`.
 
 ### What happens next
 
@@ -65,7 +65,7 @@ We will not take legal action against research, or ask a host to act against it,
 
 ### בעברית
 
-לא מפרסמים פרטים של חולשת אבטחה ב-issue, בדיון או ב-PR ציבוריים. **היום** פותחים issue ציבורי בכותרת **["Security contact request"](https://github.com/talstilkol/lumen-md/issues/new?title=Security%20contact%20request)** בלי שום פרט, ומתחזק עונה תוך 48 שעות עם ערוץ פרטי שאליו שולחים את הדיווח. הדיווח הפרטי של GitHub ‏(Report a vulnerability) **עוד לא מופעל** במאגר הזה, ולכן הכפתור לא עובד; כשהבעלים יפעיל אותו הוא יהיה הערוץ הראשון, ואחריו תיבת דואר ייעודית עם מפתח מפורסם. מצב כל ערוץ נמצא ב-`security/channels.json`. ניתן חומרה ותאריך תיקון תוך 5 ימי עבודה, נתקן ב-fork פרטי זמני ונפרסם את הגרסה ואז את ה-advisory (עם CVE מחומרה בינונית ומעלה, ועם קרדיט למדווח). המועד האחרון לפרסום הוא 90 יום מהדיווח. אם המתחזק הראשון לא עונה תוך 48 שעות, המתחזק השני מטפל.
+לא מפרסמים פרטים של חולשת אבטחה ב-issue, בדיון או ב-PR ציבוריים. **הערוץ הראשון** הוא הדיווח הפרטי של GitHub: **[Report a vulnerability](https://github.com/talstilkol/lumen-md/security/advisories/new)** (Security → Advisories), שרק המתחזקים רואים. הוא **מופעל** במאגר הזה. מי שלא יכול להשתמש בטופס פותח issue ציבורי בכותרת **["Security contact request"](https://github.com/talstilkol/lumen-md/issues/new?title=Security%20contact%20request)** בלי שום פרט, ומתחזק עונה תוך 48 שעות עם ערוץ פרטי. אחר כך תבוא תיבת דואר ייעודית עם מפתח מפורסם. מצב כל ערוץ נמצא ב-`security/channels.json`. ניתן חומרה ותאריך תיקון תוך 5 ימי עבודה, נתקן ב-fork פרטי זמני ונפרסם את הגרסה ואז את ה-advisory (עם CVE מחומרה בינונית ומעלה, ועם קרדיט למדווח). המועד האחרון לפרסום הוא 90 יום מהדיווח. אם המתחזק הראשון לא עונה תוך 48 שעות, המתחזק השני מטפל.
 
 **לוחות זמנים לפי ה-CRA (סעיף 14):** לחולשה שמנוצלת בפועל — התרעה מוקדמת עד 24 שעות מרגע שנודע עליה (מה מושפע ומה לעשות, בלי פרטי ניצול), הודעה עד 72 שעות (גרסאות, חומרה, התגוננות), ודוח סופי עד 14 יום אחרי שיש תיקון או התגוננות (ה-advisory של GitHub עם CVE). באירוע חמור הדוח הסופי תוך 30 יום. פרויקט חינמי כנראה פטור מהחובות האלה, שחלות מ-11 בספטמבר 2026, אבל אנחנו שומרים על אותם זמנים.
 
