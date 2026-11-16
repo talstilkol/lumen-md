@@ -200,6 +200,7 @@ describe("--done exits 0 only when every row is green (review 9, H1)", () => {
       cpSync(join(root, "scripts/dod.mjs"), join(dir, "scripts/dod.mjs"));
       cpSync(join(root, "scripts/lib/dodRunner.mjs"), join(dir, "scripts/lib/dodRunner.mjs"));
       cpSync(join(root, "scripts/lib/rustStd.mjs"), join(dir, "scripts/lib/rustStd.mjs"));
+      cpSync(join(root, "scripts/lib/dodExpect.mjs"), join(dir, "scripts/lib/dodExpect.mjs"));
       const plan = (dod: string[]) => JSON.stringify({ phases: [{ tasks: [{ id: "T.1", title: "t", status: "✅ #1", dod }] }] });
       const done = () => spawnSync("node", [join(dir, "scripts/dod.mjs"), "--done", "--runner", "/bin/false"], { cwd: dir, encoding: "utf8" });
       writeFileSync(join(dir, "plan/plan.json"), plan(["npx playwright test e2e/x.spec.ts"]));

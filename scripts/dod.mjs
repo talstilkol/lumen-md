@@ -34,6 +34,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { spawnSync } from "node:child_process";
 import { vitestFiles, vitestJsonSync } from "./lib/dodRunner.mjs";
 import { rustCounts, rustGreen } from "./lib/rustStd.mjs";
+import { expectedExit, unmetExpect } from "./lib/dodExpect.mjs";
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export const PLAN_FILE = "plan/plan.json";
@@ -139,9 +140,9 @@ export function runDod(tasks, { root = ROOT, exec = defaultExec, log = console.l
   for (const t of tasks) {
     const t0 = Date.now();
     let failed;
-    for (const cmd of t.dod ?? []) {
+    for (const [k, cmd] of (t.dod ?? []).entries()) {
       log(`dod ${t.id} › ${cmd}`);
-      if (!exec(cmd, root)) {
+      if (!exec(cmd, root, t.dodExpect?.[k])) {
         failed = cmd;
         break;
       }
@@ -151,7 +152,7 @@ export function runDod(tasks, { root = ROOT, exec = defaultExec, log = console.l
   return results;
 }
 
-function defaultExec(cmd, cwd) {
+function defaultExec(cmd, cwd, expect) {
   // A vitest file list: vitest's JSON reporter, and a passed test in every file (review 9, M5).
   const files = vitestFiles(cmd, cwd);
   if (files) {
@@ -159,22 +160,31 @@ function defaultExec(cmd, cwd) {
     if (r.status !== "pass") console.error(`dod: ${cmd} → ${r.status}: ${r.detail}`);
     return r.status === "pass";
   }
-  return shellPasses(cmd, cwd);
+  return shellPasses(cmd, cwd, spawnSync, expect);
 }
 
 /**
- * A shell command of a dod: green on exit 0, except a Rust test run that ran
- * no test (review 10, M5: `cargo test … <filter>` matching nothing exits 0
- * with "running 0 tests"). Its output is shown as it is.
+ * A shell command of a dod: green on its expected exit code (0 unless
+ * `dodExpect` names another), except a Rust test run that ran no test
+ * (review 10, M5: `cargo test … <filter>` matching nothing exits 0 with
+ * "running 0 tests"), and except an expected result it does not meet where a
+ * machine can tell (audit r3, ./lib/dodExpect.mjs: "expect unmet").
+ * Its output is shown as it is.
  * @param {string} cmd
  * @param {string} cwd
  * @param {typeof spawnSync} [spawn]
+ * @param {string} [expect] the command's dodExpect entry
  */
-export function shellPasses(cmd, cwd, spawn = spawnSync) {
+export function shellPasses(cmd, cwd, spawn = spawnSync, expect) {
   const r = spawn(cmd, { cwd, shell: true, encoding: "utf8", maxBuffer: 256 * 1024 * 1024 });
   if (r.stdout) process.stdout.write(r.stdout);
   if (r.stderr) process.stderr.write(r.stderr);
-  if (r.status !== 0) return false;
+  if (r.status !== expectedExit(expect)) return false;
+  const unmet = unmetExpect(expect, { code: r.status, out: `${r.stdout ?? ""}\n${r.stderr ?? ""}` });
+  if (unmet.length) {
+    console.error(`dod: ${cmd} → exit ${r.status}, but expect unmet: ${unmet.join("; ")}`);
+    return false;
+  }
   const rust = rustCounts(`${r.stdout ?? ""}\n${r.stderr ?? ""}`);
   if (rust && !rustGreen(rust)) {
     console.error(`dod: ${cmd} → exit 0, but ${rust.ran === 0 ? "running 0 tests" : `${rust.passed}/${rust.ran} passed`}: nothing was checked`);
