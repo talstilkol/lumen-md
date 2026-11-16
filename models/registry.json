@@ -342,11 +342,11 @@
       "attribution": "Aya Expanse © Cohere For AI, CC-BY-NC-4.0 (non-commercial), with the C4AI Acceptable Use Policy.",
       "size": "~5.1 GB (q4)",
       "runs": "ollama",
-      "delivery": "ollama-pull",
-      "catalog": "OLLAMA_CATALOG (src/ai/modelCatalog.ts)",
+      "delivery": "none",
+      "catalog": "not in a catalog: removed from OLLAMA_CATALOG by task 1.7 (3f1ca54612); hebrewSupportOf() and the licence check still recognise it when a person installed it themselves",
       "match": ["aya-expanse"],
       "verified": true,
-      "notes": "Non-commercial. Currently in OLLAMA_CATALOG, and recommendOllamaModel() picks it for Hebrew notes on 8-11 GB machines (the AI doctor offers a one-click pull). Removal is task 1.7."
+      "notes": "Non-commercial. The app neither offers nor pulls it (task 1.7); a copy a person pulled is labelled with its licence class. So no bench (W10.E35)."
     },
     {
       "id": "gemma3:12b",
