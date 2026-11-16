@@ -283,20 +283,36 @@ export function desktopRootsNested(a: string, b: string, caseInsensitive = caseI
 type NestedInvoke = <T>(cmd: string, args?: Record<string, unknown>) => Promise<T>;
 
 /**
+ * The desktop app could not say whether one folder is inside the other (review 9,
+ * L7): the move is refused rather than risk copying the vault into itself.
+ */
+export class VaultNestingUnknownError extends Error {
+  constructor(readonly reason: string) {
+    super(`Lumen could not check on disk whether one of the two folders is inside the other (${reason}), so the vault was not moved.`);
+    this.name = "VaultNestingUnknownError";
+  }
+}
+
+/**
  * The same, asking the disk too (R8b-L1): the desktop app's `vault_roots_nested`
  * resolves both granted folders (realpath, and the inode on Unix), so a symlink,
  * `/tmp` vs `/private/tmp`, a junction or a case the platform guess missed is
- * seen. The spelling check runs first and stays the answer when the app cannot
- * say (an older app, or the command not yet allowed by the isolation app).
+ * seen. The spelling check runs first. When the disk can't answer (an older
+ * app, the command not yet allowed by the isolation app, an error, an answer
+ * that is not a boolean) the move is refused: it throws VaultNestingUnknownError
+ * (review 9, L7: it used to fall back to the spelling, which can miss a nesting).
  */
 export async function desktopRootsNestedOnDisk(a: string, b: string, invoke?: NestedInvoke): Promise<boolean> {
   if (desktopRootsNested(a, b)) return true;
+  let answer: unknown;
   try {
     const call: NestedInvoke = invoke ?? (await (await import("./tauri")).loadTauriInvoke());
-    return (await call<boolean>("vault_roots_nested", { a, b })) === true;
-  } catch {
-    return false; // why: no answer from the disk; the spelling check above has spoken
+    answer = await call<unknown>("vault_roots_nested", { a, b });
+  } catch (e) {
+    throw new VaultNestingUnknownError((e as Error)?.message || String(e));
   }
+  if (typeof answer !== "boolean") throw new VaultNestingUnknownError(`the app answered ${JSON.stringify(answer) ?? String(answer)}`);
+  return answer;
 }
 
 /**

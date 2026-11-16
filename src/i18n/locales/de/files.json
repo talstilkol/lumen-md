@@ -303,6 +303,7 @@
   "vault.folder.moved": "Der Tresor liegt jetzt im Ordner „{folder}“: {n} Dateien kopiert und geprüft. Deine Notizen im Browserspeicher wurden nicht gelöscht.",
   "vault.folder.movedBack": "Der Tresor ist wieder im Browserspeicher: {n} Dateien kopiert und geprüft. Der Ordner „{folder}“ wurde nicht verändert.",
   "vault.folder.moving": "Tresor wird verschoben… {done} von {total} Dateien",
+  "vault.folder.nestingUnknown": "Der Tresor wurde nicht verschoben: Lumen konnte auf dem Datenträger nicht prüfen, ob einer der Ordner im anderen liegt. Aktualisiere Lumen und versuche es erneut.",
   "vault.folder.opened": "Lumen arbeitet jetzt im Ordner „{folder}“. Notizen im Browserspeicher bleiben, wo sie sind.",
   "vault.folder.permissionDenied": "Lumen hat keine Berechtigung erhalten, den Ordner „{folder}“ zu bearbeiten.",
   "vault.folder.reconnect": "Ordner neu verbinden",

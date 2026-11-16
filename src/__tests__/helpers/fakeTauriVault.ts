@@ -125,6 +125,14 @@ export function fakeTauriVault(active: string | null = null): FakeTauriVault {
             return await vault(a.root).rename(a.from, a.to, { overwrite: a.overwrite });
           case "vault_remove":
             return await vault(a.root).remove(a.path);
+          case "vault_roots_nested": {
+            // The real command (src-tauri vault_roots_nested, nesting.rs) asks the disk about two
+            // granted folders; this disk has no links or aliases, so the paths decide.
+            vault(a.a);
+            vault(a.b);
+            const inside = (o: string, i: string) => i === o || i.startsWith(`${o.replace(/\/$/, "")}/`);
+            return inside(a.a, a.b) || inside(a.b, a.a);
+          }
         }
         throw `EINVAL: unknown command ${cmd}`;
       } catch (e) {

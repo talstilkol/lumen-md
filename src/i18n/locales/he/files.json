@@ -303,6 +303,7 @@
   "vault.folder.moved": "הכספת נמצאת עכשיו בתיקייה „{folder}”: {n} קבצים הועתקו ונבדקו. הפתקים באחסון הדפדפן לא נמחקו.",
   "vault.folder.movedBack": "הכספת חזרה לאחסון הדפדפן: {n} קבצים הועתקו ונבדקו. התיקייה „{folder}” לא שונתה.",
   "vault.folder.moving": "מעביר את הכספת… {done} מתוך {total} קבצים",
+  "vault.folder.nestingUnknown": "הכספת לא הועברה: Lumen לא הצליח לבדוק בדיסק אם אחת התיקיות נמצאת בתוך השנייה. יש לעדכן את Lumen ולנסות שוב.",
   "vault.folder.opened": "Lumen עובד עכשיו בתיקייה „{folder}”. הפתקים באחסון הדפדפן נשארים במקומם.",
   "vault.folder.permissionDenied": "Lumen לא קיבל הרשאה לערוך את התיקייה „{folder}”.",
   "vault.folder.reconnect": "חיבור מחדש לתיקייה",

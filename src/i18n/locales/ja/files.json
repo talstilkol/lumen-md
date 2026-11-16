@@ -303,6 +303,7 @@
   "vault.folder.moved": "保管庫はフォルダー「{folder}」に移りました：{n} 件のファイルをコピーして確認しました。ブラウザーストレージのノートは削除されていません。",
   "vault.folder.movedBack": "保管庫はブラウザーストレージに戻りました：{n} 件のファイルをコピーして確認しました。フォルダー「{folder}」は変更されていません。",
   "vault.folder.moving": "保管庫を移動中… {total} 件中 {done} 件",
+  "vault.folder.nestingUnknown": "保管庫は移動されませんでした：一方のフォルダーがもう一方の中にあるかどうかを Lumen がディスク上で確認できませんでした。Lumen を更新してもう一度お試しください。",
   "vault.folder.opened": "Lumen はフォルダー「{folder}」で作業しています。ブラウザーストレージのノートはそのまま残ります。",
   "vault.folder.permissionDenied": "Lumen はフォルダー「{folder}」を編集する許可を得られませんでした。",
   "vault.folder.reconnect": "フォルダーに再接続",

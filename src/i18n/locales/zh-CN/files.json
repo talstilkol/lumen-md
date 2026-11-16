@@ -303,6 +303,7 @@
   "vault.folder.moved": "库现在位于文件夹“{folder}”：已复制并检查 {n} 个文件。浏览器存储中的笔记没有被删除。",
   "vault.folder.movedBack": "库已回到浏览器存储：已复制并检查 {n} 个文件。文件夹“{folder}”没有改变。",
   "vault.folder.moving": "正在移动库… {done}/{total} 个文件",
+  "vault.folder.nestingUnknown": "库未移动：Lumen 无法在磁盘上检查其中一个文件夹是否位于另一个文件夹内。请更新 Lumen 后重试。",
   "vault.folder.opened": "Lumen 现在在文件夹“{folder}”中工作。浏览器存储中的笔记保持原样。",
   "vault.folder.permissionDenied": "Lumen 未获得编辑文件夹“{folder}”的权限。",
   "vault.folder.reconnect": "重新连接文件夹",

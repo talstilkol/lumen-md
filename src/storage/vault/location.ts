@@ -31,7 +31,7 @@ import { warnUnreadable } from "./watchNotice";
 import { VaultMoveConflictError, refuseEncryptedMove, VaultPermissionError, allEntries, bytes, desktopRootKey, desktopRootsNestedOnDisk, dropStaleCopies, foldersNested, parentsOf, preflight, saveLateWrites, same, sha256, targetBytes, trashLeftovers } from "./moveCheck";
 import { __resetIdentity, activeVaultId, adoptIdentity, enterIdentity, identityOrNull } from "./identity";
 import type { MoveReport } from "./moveCheck";
-export { VaultMoveConflictError, VaultEncryptedMoveError, VaultPermissionError } from "./moveCheck";
+export { VaultMoveConflictError, VaultEncryptedMoveError, VaultNestingUnknownError, VaultPermissionError } from "./moveCheck";
 export type { MoveReport } from "./moveCheck";
 
 // ── Persistence ──────────────────────────────────────────────────────────

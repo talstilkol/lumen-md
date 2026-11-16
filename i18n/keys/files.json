@@ -1741,6 +1741,11 @@
       ]
     },
     {
+      "key": "vault.folder.nestingUnknown",
+      "en": "The vault was not moved: Lumen could not check on disk whether one of the folders is inside the other. Update Lumen and try again.",
+      "vars": []
+    },
+    {
       "key": "vault.folder.opened",
       "en": "Lumen now works in the folder “{folder}”. Notes in browser storage stay where they are.",
       "vars": [

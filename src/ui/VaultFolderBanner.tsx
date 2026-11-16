@@ -19,6 +19,7 @@ import {
   reconnectVaultFolder,
   switchToBrowserStorage,
   VaultMoveConflictError,
+  VaultNestingUnknownError,
 } from "../storage/vault/location";
 import "./vaultFolderBannerStrings";
 import { HelpButton } from "./HelpButton";
@@ -119,6 +120,7 @@ export function VaultFolderBanner() {
               if (r.conflictCopies.length) showAiToast(t("vault.folder.lateCopies", { n: String(r.conflictCopies.length), path: r.conflictCopies[0] }), "info");
             } catch (e) {
               if (e instanceof VaultMoveConflictError) showAiToast(t("vault.folder.conflict", { n: String(e.paths.length), folder: to, path: e.paths[0] }), "error");
+              else if (e instanceof VaultNestingUnknownError) showAiToast(t("vault.folder.nestingUnknown"), "error");
               else showAiToast(t("vault.folder.failed", { error: explainError(e) }), "error");
             } finally {
               setBusy(false);
