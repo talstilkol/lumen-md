@@ -10529,6 +10529,464 @@
       ]
     },
     {
+      "key": "mcpServers.add",
+      "en": "Add a server",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.ask.none",
+      "en": "No MCP server is on. Add one in Settings → MCP servers.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.ask.problems",
+      "en": "Left out: {list}",
+      "vars": [
+        "list"
+      ]
+    },
+    {
+      "key": "mcpServers.ask.prompt",
+      "en": "What should the agent do with your MCP servers' tools?",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.ask.title",
+      "en": "Ask with my MCP servers",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.call.args",
+      "en": "What it sends",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.call.deny",
+      "en": "Don't allow",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.call.description",
+      "en": "What the server says the tool does",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.call.once",
+      "en": "Allow once",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.call.session",
+      "en": "Allow until I close Lumen",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.call.title",
+      "en": "Allow “{tool}” on “{server}”?",
+      "vars": [
+        "tool",
+        "server"
+      ]
+    },
+    {
+      "key": "mcpServers.call.vault",
+      "en": "Allow for this vault",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.call.why.ask",
+      "en": "This tool asks before each call.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.call.why.changed",
+      "en": "The server changed this tool since you approved it. Read what it says now before you allow it.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.call.why.new",
+      "en": "You have not approved this tool yet.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.default",
+      "en": "Default for its tools",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.desktopOnly",
+      "en": "This server is a program: it runs only in the desktop app.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.elicit.cancel",
+      "en": "Cancel",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.elicit.decline",
+      "en": "Decline",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.elicit.error.choice",
+      "en": "Pick one of the choices.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.elicit.error.date",
+      "en": "A date.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.elicit.error.email",
+      "en": "An email address.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.elicit.error.integer",
+      "en": "A whole number.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.elicit.error.long",
+      "en": "Too long.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.elicit.error.max",
+      "en": "Too large.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.elicit.error.min",
+      "en": "Too small.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.elicit.error.number",
+      "en": "A number.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.elicit.error.required",
+      "en": "Required.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.elicit.error.short",
+      "en": "Too short.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.elicit.error.uri",
+      "en": "An address.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.elicit.noMessage",
+      "en": "The server gave no reason.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.elicit.open",
+      "en": "Open in my browser",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.elicit.review",
+      "en": "Check and change your answers before you send them.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.elicit.secret",
+      "en": "The server asks for a secret ({fields}) in a form. MCP servers must not do that, so Lumen will not send it. Decline, or cancel.",
+      "vars": [
+        "fields"
+      ]
+    },
+    {
+      "key": "mcpServers.elicit.send",
+      "en": "Send",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.elicit.site",
+      "en": "Site:",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.elicit.title",
+      "en": "The MCP server “{server}” asks for your input",
+      "vars": [
+        "server"
+      ]
+    },
+    {
+      "key": "mcpServers.elicit.urlIntro",
+      "en": "It wants you to open this page. Lumen has not opened or loaded it.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.elicit.urlOutside",
+      "en": "It opens in your browser, outside Lumen: neither Lumen nor the AI can see the page or what you type there.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.elicit.warn.ip-address",
+      "en": "The address is a bare IP address, not a site name.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.elicit.warn.long-host",
+      "en": "The address has an unusually long host name.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.elicit.warn.mixed-script",
+      "en": "The address mixes alphabets: it may imitate another site's name.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.elicit.warn.not-https",
+      "en": "The address is not https: what you send there is not encrypted.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.elicit.warn.punycode",
+      "en": "The address uses Punycode (xn--): it may imitate another site's name.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.elicit.warn.userinfo",
+      "en": "The address has a user name in it (user@host): the real site is after the @.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.enabled",
+      "en": "On",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.forget",
+      "en": "Forget approvals",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.form.args",
+      "en": "Arguments, one per line",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.form.command",
+      "en": "Program",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.form.cwd",
+      "en": "Folder",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.form.error.command",
+      "en": "Name the program to run.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.form.error.id",
+      "en": "The id is lowercase letters, digits and dashes.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.form.error.label",
+      "en": "Give the server a name.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.form.error.npx",
+      "en": "npx -y downloads and runs a package without asking. Install the server and name its program.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.form.error.taken",
+      "en": "A server with this id is already in the list.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.form.error.transport",
+      "en": "Choose how Lumen reaches it.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.form.error.url",
+      "en": "Use an https address, or http only on this computer.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.form.http",
+      "en": "Address (Streamable HTTP)",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.form.id",
+      "en": "Id",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.form.label",
+      "en": "Name",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.form.save",
+      "en": "Add (off)",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.form.stdio",
+      "en": "Program on this computer (stdio)",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.form.stdioNote",
+      "en": "The first time it runs, the desktop app shows the exact command and asks you to allow it.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.form.transport",
+      "en": "How Lumen reaches it",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.form.url",
+      "en": "Address",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.intro",
+      "en": "Outside MCP servers give the local agents more tools. A server is off until you turn it on. Lumen asks before a tool runs the first time, and again whenever a server changes a tool.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.license",
+      "en": "Licence: {license}",
+      "vars": [
+        "license"
+      ]
+    },
+    {
+      "key": "mcpServers.licenseUnverified",
+      "en": "Licence not checked: read it before you add it",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.log",
+      "en": "Log",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.log.empty",
+      "en": "Nothing logged yet.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.none",
+      "en": "No servers yet. Add one below, or pick a suggested one.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.offline",
+      "en": "This program makes no network requests (otherwise airplane mode blocks it)",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.perm.ask",
+      "en": "Ask each time",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.perm.block",
+      "en": "Never offer",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.perm.read",
+      "en": "Run without asking (read-only tools)",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.reaches.computer",
+      "en": "Runs on this computer",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.reaches.files",
+      "en": "Reads and writes the folders you give it",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.reaches.network",
+      "en": "Reaches the internet",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.remove",
+      "en": "Remove",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.showTools",
+      "en": "Show tools",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.suggested",
+      "en": "Suggested servers",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.suggestedNote",
+      "en": "Use fills the form. Nothing connects or runs until you add the server and turn it on.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.tools.changed",
+      "en": "changed since you approved it",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.tools.new",
+      "en": "not approved yet",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.tools.permission",
+      "en": "Permission for {tool}",
+      "vars": [
+        "tool"
+      ]
+    },
+    {
+      "key": "mcpServers.tools.pinAll",
+      "en": "Approve these definitions",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.tools.pinned",
+      "en": "as you approved it",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.use",
+      "en": "Use",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.yours",
+      "en": "Your servers",
+      "vars": []
+    },
+    {
       "key": "media.missing",
       "en": "Not in the vault: {target}",
       "vars": [
@@ -14305,6 +14763,11 @@
     {
       "key": "settings.language",
       "en": "Language",
+      "vars": []
+    },
+    {
+      "key": "settings.mcp",
+      "en": "MCP servers",
       "vars": []
     },
     {

@@ -2190,6 +2190,20 @@
       "id": "types.studio",
       "label": "Types: Object Studio (new type, fields, rename)",
       "icon": "Box"
+    },
+    {
+      "id": "mcp.settings",
+      "label": "MCP servers…",
+      "group": "Tools",
+      "hint": "Add outside MCP servers and choose what their tools may do",
+      "icon": "Network"
+    },
+    {
+      "id": "mcp.ask",
+      "label": "Ask with my MCP servers…",
+      "group": "Tools",
+      "hint": "The local agent uses your MCP servers' tools, asking before each one that needs it",
+      "icon": "Network"
     }
   ],
   "full": [
@@ -4532,6 +4546,20 @@
       "id": "types.studio",
       "label": "Types: Object Studio (new type, fields, rename)",
       "icon": "Box"
+    },
+    {
+      "id": "mcp.settings",
+      "label": "MCP servers…",
+      "group": "Tools",
+      "hint": "Add outside MCP servers and choose what their tools may do",
+      "icon": "Network"
+    },
+    {
+      "id": "mcp.ask",
+      "label": "Ask with my MCP servers…",
+      "group": "Tools",
+      "hint": "The local agent uses your MCP servers' tools, asking before each one that needs it",
+      "icon": "Network"
     }
   ],
   "autoSaveOn": [
@@ -4860,6 +4888,8 @@
     "reading.newFromLibrary",
     "reading.newFromCapture",
     "types.page",
-    "types.studio"
+    "types.studio",
+    "mcp.settings",
+    "mcp.ask"
   ]
 }

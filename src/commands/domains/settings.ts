@@ -160,3 +160,29 @@ export function buildAirplaneCommands(): Command[] {
     },
   ];
 }
+
+/** MCP servers (plan W7.18, W10.C2): the settings tab, and the agent that uses their tools. Both load on use. */
+export function buildMcpCommands(): Command[] {
+  return [
+    {
+      id: "mcp.settings",
+      label: t("cmd.mcp.settings"),
+      hint: t("cmd.mcp.settings.hint"),
+      icon: cmdIcons.Network,
+      group: t("group.tools"),
+      action: () => {
+        window.dispatchEvent(new CustomEvent("lumen-open-settings", { detail: { tab: "mcp" } }));
+      },
+    },
+    {
+      id: "mcp.ask",
+      label: t("cmd.mcp.ask"),
+      hint: t("cmd.mcp.ask.hint"),
+      icon: cmdIcons.Network,
+      group: t("group.tools"),
+      action: () => {
+        void import("../../agents/mcp/agent").then((m) => m.askWithMcpServers());
+      },
+    },
+  ];
+}

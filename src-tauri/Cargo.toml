@@ -46,6 +46,10 @@ lumen-desktop = { path = "desktop" }
 # pairing-code rendezvous, std only.
 lumen-lan-mdns = { path = "lan-mdns" }
 
+# MCP servers on stdio (plan W7.18, W10.C1): which commands may run, the process and its
+# lines, std only (tested offline with rustc --test); src/mcp_stdio.rs is the glue (desktop only).
+lumen-mcp-stdio = { path = "mcp-stdio" }
+
 [target.'cfg(any(target_os = "macos", target_os = "windows", target_os = "linux"))'.dependencies]
 # One instance: a second launch forwards its files and links (Windows, Linux).
 tauri-plugin-single-instance = { version = "2", features = ["deep-link"] }
