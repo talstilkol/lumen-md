@@ -30,6 +30,12 @@ const check = (ok, msg) => {
   } else console.log(`ok   ${msg}`);
 };
 
+// Every tool of the search, read and propose scopes, by name (W8.1 added the
+// two Bases tools, W12.T4 the three types tools): a tool that disappears or
+// appears unannounced fails here.
+const ALL_TOOLS = ["append_note", "bases_query", "bases_update", "create_note", "create_object", "get_backlinks", "get_type", "list_notes", "list_tags", "list_types", "read_note", "search_notes", "update_frontmatter", "write_note"];
+const sameTools = (tools) => JSON.stringify((tools ?? []).map((t) => t.name).sort()) === JSON.stringify(ALL_TOOLS);
+
 function start() {
   const child = spawn(process.execPath, [path.join(dist, "index.js"), "--vault", vault, "--client", "smoke-26"], { stdio: ["pipe", "pipe", "pipe"] });
   const waiting = new Map();
@@ -61,7 +67,7 @@ try {
   const d = await s.send("server/discover", {});
   check(d.result?.supportedVersions?.[0] === "2026-07-28" && d.result.resultType === "complete", "server/discover");
   const l = await s.send("tools/list", {});
-  check(l.result?.tools?.length === 11 && l.result.cacheScope === "private" && typeof l.result.ttlMs === "number", "tools/list: 11 tools, ttlMs, cacheScope private");
+  check(sameTools(l.result?.tools) && l.result.cacheScope === "private" && typeof l.result.ttlMs === "number", `tools/list: the ${ALL_TOOLS.length} tools, ttlMs, cacheScope private`);
   const r = await s.send("tools/call", { name: "read_note", arguments: { path: "hello.md" } });
   check(r.result?.content?.[0]?.text.includes("שלום"), "read_note over stdio (Hebrew intact)");
   const call = { name: "create_note", arguments: { path: "from-agent.md", content: "# From an agent\n" } };
@@ -84,7 +90,7 @@ try {
   const init = await legacy.send("initialize", { protocolVersion: "2025-11-25", capabilities: {}, clientInfo: { name: "old", version: "1" } }, false);
   check(init.result?.protocolVersion === "2025-11-25", "legacy initialize on a second process");
   const ll = await legacy.send("tools/list", {}, false);
-  check(ll.result?.tools?.length === 11 && ll.result.resultType === undefined, "legacy tools/list");
+  check(sameTools(ll.result?.tools) && ll.result.resultType === undefined, "legacy tools/list");
   legacy.child.stdin.end();
 } finally {
   rmSync(vault, { recursive: true, force: true });
