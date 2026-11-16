@@ -630,14 +630,16 @@ fn latex_status() -> LatexStatus {
 /// Compile main.tex (and the export's other files) to PDF; the errors with their lines when TeX fails.
 /// `offline` (airplane mode or local-only, from the page): Tectonic uses its cache only, no download (R8-M1).
 #[tauri::command]
-async fn latex_pdf(tex: String, files: Vec<LatexFile>, offline: Option<bool>) -> Result<tauri::ipc::Response, LatexFailure> {
+async fn latex_pdf(app: tauri::AppHandle, tex: String, files: Vec<LatexFile>, offline: Option<bool>) -> Result<tauri::ipc::Response, LatexFailure> {
     let bin = tectonic_bin().ok_or(LatexFailure::NoTectonic)?;
     let stamp = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_nanos()).unwrap_or(0);
     let work = std::env::temp_dir().join(format!("lumen-latex-{}-{}", std::process::id(), stamp));
     let files: Vec<(String, Vec<u8>)> = files.into_iter().map(|f| (f.name, f.data)).collect();
     // A missing flag (an older page) counts as offline: no download without the page's say-so.
     let offline = offline.unwrap_or(true);
-    tauri::async_runtime::spawn_blocking(move || tectonic::compile(&bin, &tex, &files, &work, offline, tectonic::COMPILE_TIMEOUT))
+    // D1 §5: 10 minutes for the first online compile (Tectonic's first download), 120 s once it is warm.
+    let marker = app.path().app_cache_dir().ok().map(|d| d.join(tectonic::WARM_MARKER));
+    tauri::async_runtime::spawn_blocking(move || tectonic::compile_with_marker(&bin, &tex, &files, &work, offline, marker.as_deref()))
         .await
         .map_err(|e| LatexFailure::Other { message: e.to_string() })?
         .map_err(|e| match e {
