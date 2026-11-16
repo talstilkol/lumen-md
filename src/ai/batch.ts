@@ -9,6 +9,7 @@
  * confirms).
  */
 import { getActiveProvider, getProviderKey, effectiveModel, AiError, type AiProvider } from "./llm";
+import { assertCloudAllowed } from "./policy";
 import { PROMPTS } from "./prompts";
 import { recordUsage } from "./usage";
 
@@ -139,6 +140,7 @@ export async function submitBatch(
   const f = opts.fetchImpl ?? fetch;
   const provider = batchProviderFor(getActiveProvider());
   if (!provider) throw new AiError("API_ERROR", "Batch jobs need the OpenAI or Anthropic provider (AI: Switch Provider).");
+  assertCloudAllowed(`${provider} batch API`);
   const model = effectiveModel(provider);
   const items: BatchItem[] = notes.map((n, i) => ({ customId: `n${i}`, path: n.path, hash: textHash(n.text) }));
   let id: string;
@@ -198,6 +200,7 @@ export interface BatchResults {
 
 /** Poll a job; when it has ended, download its results and meter them (batch price). */
 export async function fetchBatchResults(job: BatchJob, fetchImpl: Fetch = fetch): Promise<BatchResults> {
+  assertCloudAllowed(`${job.provider} batch API`);
   const answers = new Map<string, string>();
   let failed = 0;
   // Results may be fetched again (user declined to apply): meter once.

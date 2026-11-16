@@ -10,6 +10,7 @@ import { fetchWithRetry } from "../lib/fetchRetry";
 import { t } from "../i18n";
 import { docsUrl } from "../lib/docsLinks";
 import { estimateTokens, recordCacheHit, recordUsage, type Usage } from "./usage";
+import { cloudAllowed, getAiPolicy, isCloudProvider, isLocalOrigin, providerAllowed } from "./policy";
 
 // ── Rate limiting ───────────────────────────────────────────────────────
 // Token bucket — protects the user's API key against runaway loops.
@@ -117,6 +118,11 @@ export interface ChatOptions {
   onUsage?: (u: Omit<Usage, "provider"> & { provider?: string }) => void;
   /** Internal: the provider a fallback actually sent the request to. */
   onRoute?: (provider: AiProvider, model: string) => void;
+  /**
+   * Internal: `model` was chosen by the model router for the selected
+   * provider, not pinned by the caller — a local reroute must drop it.
+   */
+  modelFromRouter?: boolean;
 }
 
 const DEFAULT_MODEL = "gpt-4o-mini";
@@ -145,11 +151,68 @@ export function getAiKey(): string {
 
 export class AiError extends Error {
   constructor(
-    public code: "NO_KEY" | "API_ERROR" | "PARSE_ERROR" | "ABORTED",
+    public code: "NO_KEY" | "API_ERROR" | "PARSE_ERROR" | "ABORTED" | "POLICY" | "NO_LOCAL",
     message: string,
   ) {
     super(message);
     this.name = "AiError";
+  }
+}
+
+/**
+ * The AI policy gate (./policy.ts). A cloud provider is contacted only
+ * when the policy allows it: as the selected provider under `cloud` /
+ * `local-first`, or as the fallback when a local provider is unavailable
+ * under `local-first`. Under `local-only` the request stops here with a
+ * clear code instead of silently reaching a third party.
+ */
+function assertCloudProvider(provider: AiProvider): void {
+  if (!providerAllowed(provider)) {
+    throw new AiError("POLICY", `AI policy is "${getAiPolicy()}": ${provider} is a cloud provider and was not contacted.`);
+  }
+}
+
+/**
+ * Where a request goes when a CLOUD provider is selected but the policy
+ * prefers local backends:
+ *
+ *   local-first  a reachable Ollama server, else in-browser WebGPU when the
+ *                user turned Privacy Mode on (never a surprise multi-GB
+ *                download for someone who picked a cloud provider), else
+ *                null — the cloud provider answers.
+ *   local-only   Ollama, else WebGPU, else NO_LOCAL — the cloud provider is
+ *                never contacted.
+ *   cloud        null.
+ *
+ * A selected local provider returns null and takes the normal branches.
+ */
+async function localRoute(provider: AiProvider): Promise<"ollama" | "local-webgpu" | null> {
+  if (!isCloudProvider(provider)) return null;
+  const policy = getAiPolicy();
+  if (policy === "cloud") return null;
+  const { isOllamaAvailable, getBaseUrl } = await import("./ollamaProvider");
+  // A custom Ollama URL on a public origin is a third party, not a local route.
+  if (isLocalOrigin(getBaseUrl()) && (await isOllamaAvailable())) return "ollama";
+  if (policy === "local-only" || useAppStore.getState().useLocalAi) {
+    const { localLlmAvailable } = await import("./localLlm");
+    if (localLlmAvailable().available) return "local-webgpu";
+  }
+  if (policy === "local-only") {
+    throw new AiError("NO_LOCAL", `AI policy is "local-only": ${provider} is a cloud provider and no local backend (Ollama, WebGPU) is available.`);
+  }
+  return null;
+}
+
+/** Under `local-only`, an Ollama server off this machine / network is a third party. */
+function assertOllamaOrigin(baseUrl: string): void {
+  if (getAiPolicy() === "local-only" && !isLocalOrigin(baseUrl)) {
+    throw new AiError("POLICY", `AI policy is "local-only": the Ollama server at ${baseUrl} is not on this machine or network.`);
+  }
+}
+
+function assertCloudFallback(unavailable: string): void {
+  if (!cloudAllowed()) {
+    throw new AiError("NO_LOCAL", `${unavailable} is unavailable and the AI policy is "local-only", so no cloud fallback was used.`);
   }
 }
 
@@ -248,8 +311,13 @@ export function routeOptions(provider: AiProvider, opts: ChatOptions, mode: "eco
   if (opts.model || mode === "quality") return opts;
   const light = LIGHT_MODELS[provider];
   if (!light) return opts;
-  if (opts.tier === "light" || mode === "economy") return { ...opts, model: light };
+  if (opts.tier === "light" || mode === "economy") return { ...opts, model: light, modelFromRouter: true };
   return opts;
+}
+
+/** Options for a request rerouted to a local backend: a router-chosen cloud model name must not travel with it. */
+function forLocal(opts: ChatOptions): ChatOptions {
+  return opts.modelFromRouter ? { ...opts, model: undefined, modelFromRouter: false } : opts;
 }
 
 async function routed(provider: AiProvider, opts: ChatOptions): Promise<ChatOptions> {
@@ -340,69 +408,38 @@ async function chatDirect(
     chargeAiCommandDispatch();
   };
   const provider = getActiveProvider();
+  // At the monthly limit nothing goes out — not even the local probe.
+  if (!opts.prepaid && !aiQuotaStatus(new Date()).allowed) charge();
+  let localFirst = await localRoute(provider);
 
   // ── Ollama (local server) ──────────────────────────────────────
-  if (provider === "ollama") {
+  if (provider === "ollama" || localFirst === "ollama") {
     const { chatOllama, isOllamaAvailable, getBaseUrl } = await import("./ollamaProvider");
+    assertOllamaOrigin(getBaseUrl());
     if (await isOllamaAvailable()) {
       charge();
-      return chatOllama(messages, opts);
+      const local = forLocal(opts);
+      opts.onRoute?.("ollama", effectiveModel("ollama", local));
+      return chatOllama(messages, local);
     }
+    // A transient failure between the two probes: the selected provider
+    // takes the request again (never a different cloud provider).
+    if (localFirst === "ollama") localFirst = await localRoute(provider);
     toast.warn(
       t("ai.toast.ollamaUnavailable.title"),
       t("ai.toast.ollamaUnavailable.body", { url: getBaseUrl() }),
     );
-    // Ollama is unreachable. Execution continues below: the anthropic /
-    // gemini / mistral branches only match their own provider id, so they
-    // are skipped; the WebGPU branch runs only if `useLocalAi` is on; and
-    // otherwise we reach the OpenAI request at the end of this function,
-    // which throws NO_KEY when no OpenAI key is configured.
-  }
-
-  // ── Anthropic Claude (cloud) ───────────────────────────────────
-  if (provider === "anthropic") {
-    const { chatAnthropic } = await import("./anthropicProvider");
-    getProviderKey("anthropic"); // NO_KEY before anything is charged
-    checkRateLimit();
-    charge();
-    inflight++;
-    try {
-      return await chatAnthropic(messages, opts);
-    } finally {
-      inflight--;
-    }
-  }
-
-  // ── Google Gemini (cloud) ──────────────────────────────────────
-  if (provider === "gemini") {
-    const { chatGemini } = await import("./geminiProvider");
-    getProviderKey("gemini"); // NO_KEY before anything is charged
-    checkRateLimit();
-    charge();
-    inflight++;
-    try {
-      return await chatGemini(messages, opts);
-    } finally {
-      inflight--;
-    }
-  }
-
-  // ── Mistral (cloud, OpenAI-compatible) ─────────────────────────
-  if (provider === "mistral") {
-    const { chatMistral } = await import("./mistralProvider");
-    getProviderKey("mistral"); // NO_KEY before anything is charged
-    checkRateLimit();
-    charge();
-    inflight++;
-    try {
-      return await chatMistral(messages, opts);
-    } finally {
-      inflight--;
-    }
+    // Ollama is unreachable. Under `local-only` the request stops here.
+    // Otherwise execution continues below: the anthropic / gemini / mistral
+    // branches only match their own provider id, so they are skipped; the
+    // WebGPU branch runs only if `useLocalAi` is on; and otherwise we reach
+    // the OpenAI request at the end of this function, which throws NO_KEY
+    // when no OpenAI key is configured.
+    if (!useAppStore.getState().useLocalAi) assertCloudFallback("Ollama");
   }
 
   // ── WebGPU local (in-browser) ──────────────────────────────────
-  if (provider === "local-webgpu" || useAppStore.getState().useLocalAi) {
+  if (provider === "local-webgpu" || localFirst === "local-webgpu" || (!isCloudProvider(provider) && useAppStore.getState().useLocalAi)) {
     const { chatLocal, localLlmAvailable, onLocalLlmProgress } = await import(
       "./localLlm"
     );
@@ -423,10 +460,11 @@ async function chatDirect(
       });
       try {
         charge();
-        const text = await chatLocal(messages, { model: opts.model, maxTokens: opts.maxTokens, temperature: opts.temperature });
+        const localModel = forLocal(opts).model;
+        const text = await chatLocal(messages, { model: localModel, maxTokens: opts.maxTokens, temperature: opts.temperature });
         opts.onUsage?.({
           provider: "local-webgpu",
-          model: opts.model ?? PROVIDER_DEFAULT_MODELS["local-webgpu"],
+          model: localModel ?? PROVIDER_DEFAULT_MODELS["local-webgpu"],
           inputTokens: estimateTokens(promptChars(messages)),
           outputTokens: estimateTokens(text),
           estimated: true,
@@ -437,10 +475,59 @@ async function chatDirect(
       }
     }
     toast.warn(t("ai.toast.localUnavailable.title"), t("ai.toast.localUnavailable.body"), docsUrl("localLlm"));
+    assertCloudFallback("Local WebGPU AI");
+    localFirst = null;
+  }
+
+  // ── Anthropic Claude (cloud) ───────────────────────────────────
+  if (provider === "anthropic" && !localFirst) {
+    const { chatAnthropic } = await import("./anthropicProvider");
+    assertCloudProvider("anthropic");
+    getProviderKey("anthropic"); // NO_KEY before anything is charged
+    checkRateLimit();
+    charge();
+    inflight++;
+    try {
+      return await chatAnthropic(messages, opts);
+    } finally {
+      inflight--;
+    }
+  }
+
+  // ── Google Gemini (cloud) ──────────────────────────────────────
+  if (provider === "gemini" && !localFirst) {
+    const { chatGemini } = await import("./geminiProvider");
+    assertCloudProvider("gemini");
+    getProviderKey("gemini"); // NO_KEY before anything is charged
+    checkRateLimit();
+    charge();
+    inflight++;
+    try {
+      return await chatGemini(messages, opts);
+    } finally {
+      inflight--;
+    }
+  }
+
+  // ── Mistral (cloud, OpenAI-compatible) ─────────────────────────
+  if (provider === "mistral" && !localFirst) {
+    const { chatMistral } = await import("./mistralProvider");
+    assertCloudProvider("mistral");
+    getProviderKey("mistral"); // NO_KEY before anything is charged
+    checkRateLimit();
+    charge();
+    inflight++;
+    try {
+      return await chatMistral(messages, opts);
+    } finally {
+      inflight--;
+    }
   }
 
   // ── OpenAI (cloud) ─────────────────────────────────────────────
-  // Also the fallback when Ollama / WebGPU isn't available.
+  // Also the fallback when Ollama / WebGPU isn't available (never under
+  // `local-only`: the fallbacks above stop first).
+  assertCloudProvider("openai");
   const key = getAiKey();
   checkRateLimit();
   charge();
@@ -577,34 +664,63 @@ async function* chatStreamDirect(
     chargeAiCommandDispatch();
   };
   const provider = getActiveProvider();
+  if (!opts.prepaid && !aiQuotaStatus(new Date()).allowed) charge();
+  let localFirst = await localRoute(provider);
 
-  if (provider === "ollama") {
-    const { chatOllamaStream, isOllamaAvailable } = await import("./ollamaProvider");
+  if (provider === "ollama" || localFirst === "ollama") {
+    const { chatOllamaStream, isOllamaAvailable, getBaseUrl } = await import("./ollamaProvider");
+    assertOllamaOrigin(getBaseUrl());
     if (await isOllamaAvailable()) {
       charge();
-      yield* chatOllamaStream(messages, opts);
+      const local = forLocal(opts);
+      opts.onRoute?.("ollama", effectiveModel("ollama", local));
+      yield* chatOllamaStream(messages, local);
       return;
     }
+    if (localFirst === "ollama") localFirst = await localRoute(provider);
+    // As in chat(): with Privacy Mode on, the in-browser model below may
+    // still answer; only without it is the cloud fallback checked here.
+    else if (!useAppStore.getState().useLocalAi) assertCloudFallback("Ollama");
   }
 
-  if (provider === "anthropic") {
+  // ── WebGPU local (in-browser) ──────────────────────────────────
+  // No streaming engine yet: the local answer is produced whole and
+  // yielded once, so a local route never leaks a prompt to the cloud.
+  if (provider === "local-webgpu" || localFirst === "local-webgpu" || (!isCloudProvider(provider) && useAppStore.getState().useLocalAi)) {
+    const { chatLocal, localLlmAvailable } = await import("./localLlm");
+    if (localLlmAvailable().available) {
+      charge();
+      const local = forLocal(opts);
+      opts.onRoute?.("local-webgpu", local.model ?? PROVIDER_DEFAULT_MODELS["local-webgpu"]);
+      const text = await chatLocal(messages, { model: local.model, maxTokens: opts.maxTokens, temperature: opts.temperature });
+      yield text;
+      return;
+    }
+    assertCloudFallback("Local WebGPU AI (streaming)");
+    localFirst = null;
+  }
+
+  if (provider === "anthropic" && !localFirst) {
     const { chatAnthropicStream } = await import("./anthropicProvider");
+    assertCloudProvider("anthropic");
     getProviderKey("anthropic"); // NO_KEY before anything is charged
     charge();
     yield* chatAnthropicStream(messages, opts);
     return;
   }
 
-  if (provider === "gemini") {
+  if (provider === "gemini" && !localFirst) {
     const { chatGeminiStream } = await import("./geminiProvider");
+    assertCloudProvider("gemini");
     getProviderKey("gemini"); // NO_KEY before anything is charged
     charge();
     yield* chatGeminiStream(messages, opts);
     return;
   }
 
-  if (provider === "mistral") {
+  if (provider === "mistral" && !localFirst) {
     const { chatMistralStream } = await import("./mistralProvider");
+    assertCloudProvider("mistral");
     getProviderKey("mistral"); // NO_KEY before anything is charged
     charge();
     yield* chatMistralStream(messages, opts);
@@ -612,6 +728,7 @@ async function* chatStreamDirect(
   }
 
   // OpenAI — also the fallback when Ollama isn't available.
+  assertCloudProvider("openai");
   const key = getAiKey();
   checkRateLimit();
   charge();

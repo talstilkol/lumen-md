@@ -18,6 +18,7 @@
 
 import { get, set } from "idb-keyval";
 import { useAppStore } from "../store/useStore";
+import { assertCloudAllowed } from "./policy";
 import { log } from "../lib/logger";
 import { fetchWithRetry } from "../lib/fetchRetry";
 import {
@@ -124,6 +125,7 @@ export function chunkMarkdown(text: string): { start: number; end: number; text:
 /* ─── OpenAI embedding ──────────────────────────────────────────────── */
 
 async function embedTexts(texts: string[]): Promise<Float32Array[]> {
+  assertCloudAllowed("OpenAI embeddings (smart search)");
   const key = useAppStore.getState().aiKey;
   if (!key) throw new Error("Configure your AI Key (⌘K → AI Settings) to use semantic search.");
   const res = await fetchWithRetry(
@@ -176,6 +178,7 @@ let inFlightIndex: Promise<SemanticIndex> | null = null;
 export async function indexWorkspace(opts: { force?: boolean } = {}): Promise<SemanticIndex> {
   if (inFlightIndex && !opts.force) return inFlightIndex;
   inFlightIndex = (async () => {
+    assertCloudAllowed("OpenAI embeddings (smart search)");
     if (!isOPFSAvailable()) return { builtAt: 0, files: {} };
     const entries = await listWorkspace({ includeAssets: false });
     const files = entries.filter(

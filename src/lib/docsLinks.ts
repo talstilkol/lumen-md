@@ -17,6 +17,7 @@ export const DOCS_TOPICS = {
   organization: "account/organization",
   pluginSigning: "plugins/signing",
   localLlm: "ai/local-llm",
+  localAgents: "ai/local-agents",
 } as const;
 
 export type DocsTopic = keyof typeof DOCS_TOPICS;

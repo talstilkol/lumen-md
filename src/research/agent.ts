@@ -21,7 +21,8 @@ import { chat, getActiveProvider, getProviderKey, parseJsonResponse } from "../a
 import { recordUsage } from "../ai/usage";
 import { chargeAiCommandDispatch } from "../billing/aiQuota";
 import { APPROXIMATE_AT, quoteCoverage } from "./citations";
-import { extractPage, getResearchSettings, searchWeb, type ExtractedPage, type ResearchSettings, type SearchHit } from "./client";
+import { extractPage, getResearchSettings, researchEndpoint, searchWeb, type ExtractedPage, type ResearchSettings, type SearchHit } from "./client";
+import { assertCloudAllowed, isLocalOrigin } from "../ai/policy";
 
 export interface ResearchOptions {
   question: string;
@@ -363,10 +364,15 @@ async function proxyResearch(o: ResearchOptions, settings: ResearchSettings): Pr
 export async function runResearch(o: ResearchOptions): Promise<ResearchResult> {
   const settings = o.deps?.settings ?? getResearchSettings();
   if (settings.provider === "claude") {
+    assertCloudAllowed("Claude web search");
     if (getActiveProvider() !== "anthropic") {
       throw new Error("Claude web search needs the Anthropic provider (AI: Switch Provider), or pick Brave / Tavily in Research: Settings.");
     }
     return claudeResearch(o);
   }
+  // The research service (search + page extraction) is a third party unless
+  // it runs on this machine / network (e.g. a local SearXNG + extractor).
+  const endpoint = o.deps?.search || o.deps?.extract ? null : researchEndpoint();
+  if (endpoint && !isLocalOrigin(endpoint)) assertCloudAllowed("the research service (web search and page extraction)");
   return proxyResearch(o, settings);
 }

@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-17T03:38:18.020Z",
+  "generated_at": "2026-10-17T12:58:10.347Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1041,
+  "count": 1051,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -3254,6 +3254,26 @@
       "vars": []
     },
     {
+      "key": "cmd.ai.policy",
+      "en": "AI: Local or Cloud Policy",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.policy.hint",
+      "en": "Where AI requests may go: this device only, local first, or the cloud",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.trace",
+      "en": "AI: Recent Agent Runs",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.trace.hint",
+      "en": "Executor, model, tools, retries and failures of the last runs on this device",
+      "vars": []
+    },
+    {
       "key": "cmd.ai.usage.hint",
       "en": "Requests, tokens and estimated cost per provider on this device",
       "vars": []
@@ -3541,6 +3561,36 @@
     {
       "key": "ai.usage.title",
       "en": "AI usage",
+      "vars": []
+    },
+    {
+      "key": "ai.policy.title",
+      "en": "AI policy",
+      "vars": []
+    },
+    {
+      "key": "ai.policy.localOnly",
+      "en": "Local only — nothing leaves this device",
+      "vars": []
+    },
+    {
+      "key": "ai.policy.localFirst",
+      "en": "Local first — cloud only when no local model can answer",
+      "vars": []
+    },
+    {
+      "key": "ai.policy.cloud",
+      "en": "Cloud — use the selected cloud provider",
+      "vars": []
+    },
+    {
+      "key": "ai.trace.title",
+      "en": "Agent runs",
+      "vars": []
+    },
+    {
+      "key": "ai.trace.empty",
+      "en": "No agent runs yet.",
       "vars": []
     },
     {
