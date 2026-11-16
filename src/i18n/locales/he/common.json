@@ -1702,7 +1702,7 @@
   "importWizard.warn.notionColumnConverted": "עמודת Notion הפכה לשדה מסוג אחר בסוג",
   "importWizard.warn.notionColumnLost": "עמודת Notion לא הפכה לשדה בסוג",
   "importWizard.warn.notionComputed": "עמודת נוסחה או rollup של Notion: הערכים הגיעו, הנוסחה לא (הוסיפו אותה כעמודת נוסחה בקובץ ה-base)",
-  "importWizard.warn.notionUnparsed": "ערך של Notion שלא מתאים לסוג העמודה שלו נשמר כטקסט",
+  "importWizard.warn.notionUnparsed": "ערך של Notion שלא מתאים לסוג העמודה נשמר כטקסט",
   "importWizard.warn.typeExists": "סוג עם המזהה הזה כבר קיים בכספת; הוא נשאר כמו שהוא",
   "ink.cancel": "ביטול",
   "ink.clear": "ניקוי",
