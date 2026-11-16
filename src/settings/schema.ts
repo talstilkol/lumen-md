@@ -333,6 +333,8 @@ export const SETTINGS: readonly SettingEntry[] = [
   data("lumen.organizer.model"),
   data("lumen.grammar.he.model"),
   data("lumen.plugins.installed"),
+  // The highest registry-index serial seen per registry (review 11, M5): an imported file must never roll it back.
+  data("lumen.plugins.registrySerial"),
   data("lumen-update-channel"),
   data("lumen-flags"),
   data("lumen-classic-look"),
