@@ -389,6 +389,13 @@
       "icon": "FileText"
     },
     {
+      "id": "capture.triageInbox",
+      "label": "📥 Inbox: sort with the local model",
+      "group": "File",
+      "hint": "Tasks get a checkbox and a due date, every entry tags; you review before anything changes",
+      "icon": "Sparkles"
+    },
+    {
       "id": "epub.open",
       "label": "Open an EPUB for reading…",
       "group": "File",
@@ -2203,6 +2210,13 @@
       "id": "types.studio",
       "label": "Types: Object Studio (new type, fields, rename)",
       "icon": "Box"
+    },
+    {
+      "id": "ai.screenshotToNote",
+      "label": "Screenshot to note…",
+      "group": "Tools",
+      "hint": "The image on the clipboard (or a file) as text, read on this device, previewed before it is inserted",
+      "icon": "Sparkles"
     }
   ],
   "full": [
@@ -2619,6 +2633,13 @@
       "group": "File",
       "shortcut": "⌥⌘N",
       "icon": "FileText"
+    },
+    {
+      "id": "capture.triageInbox",
+      "label": "📥 Inbox: sort with the local model",
+      "group": "File",
+      "hint": "Tasks get a checkbox and a due date, every entry tags; you review before anything changes",
+      "icon": "Sparkles"
     },
     {
       "id": "epub.open",
@@ -4558,6 +4579,13 @@
       "id": "types.studio",
       "label": "Types: Object Studio (new type, fields, rename)",
       "icon": "Box"
+    },
+    {
+      "id": "ai.screenshotToNote",
+      "label": "Screenshot to note…",
+      "group": "Tools",
+      "hint": "The image on the clipboard (or a file) as text, read on this device, previewed before it is inserted",
+      "icon": "Sparkles"
     }
   ],
   "autoSaveOn": [
@@ -4626,6 +4654,7 @@
     "student.lecture",
     "student.syllabus",
     "note.capture",
+    "capture.triageInbox",
     "epub.open",
     "view.reading",
     "view.highlights",
@@ -4888,6 +4917,7 @@
     "reading.newFromLibrary",
     "reading.newFromCapture",
     "types.page",
-    "types.studio"
+    "types.studio",
+    "ai.screenshotToNote"
   ]
 }

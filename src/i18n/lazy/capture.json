@@ -16,5 +16,11 @@
   "capture.voice.noMic": "No microphone access.",
   "capture.voice.noTranscript": "Not transcribed; audio kept.",
   "capture.voice.placeholderNote": "Voice note (not transcribed)",
-  "capture.meeting": "Meeting"
+  "capture.meeting": "Meeting",
+  "capture.triage.running": "Sorting the inbox with the local model…",
+  "capture.triage.summary": "Inbox: {count} entries sorted ({engine})",
+  "capture.triage.nothing": "Nothing to sort: every entry is already sorted",
+  "capture.triage.noModel": "No local model is available to sort the inbox (Chrome's built-in model, Ollama or web-llm)",
+  "capture.triage.failedSome": "No local model could sort {count} entries",
+  "capture.triage.empty": "The inbox is empty"
 }

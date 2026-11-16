@@ -17,10 +17,31 @@ import "../ai/mt/strings";
  * Throws AgentRunError (with suggestions) when there is no usable answer.
  */
 export async function suggestTags(content: string, signal?: AbortSignal): Promise<string[]> {
+  // W10.C21: a local structured engine first (built-in model, Ollama, web-llm), with the workspace's tags as the pool.
+  try {
+    const { suggestTagsLocal } = await import("../tags/suggest");
+    const pool = await workspaceTags(signal);
+    const local = await suggestTagsLocal(content, pool, { signal });
+    if (local.tags.length) return local.tags;
+  } catch (e) {
+    if ((e as Error)?.name === "AbortError") throw e;
+    // No local engine answered: the tagger agent on the chosen provider, as before.
+  }
   const { runAgentOrThrow } = await import("./runtime");
   const { taggerAgent, normalizeTags } = await import("./defs");
   const out = await runAgentOrThrow(taggerAgent, { text: content }, { document: content, signal });
   return normalizeTags(out.tags);
+}
+
+/** The workspace's tags, most used first (the runtime's list_tags tool); none when it cannot be read. */
+async function workspaceTags(signal?: AbortSignal): Promise<string[]> {
+  try {
+    const { callTool } = await import("./runtime");
+    const r = await callTool<{ tags: Array<{ tag: string }> }>("list_tags", { limit: 80 }, { signal });
+    return r.tags.map((x) => x.tag);
+  } catch {
+    return [];
+  }
 }
 
 /**
