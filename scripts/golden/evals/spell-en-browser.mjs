@@ -17,14 +17,15 @@
  *     prints one JSON line; exits 1 below target or on any other request
  *
  * Needs playwright (dev dependency) and a Chromium: Playwright's own, or
- * --chromium / PW_CHROMIUM. Numbers only; no item text is printed.
+ * --chromium / PW_CHROMIUM; esbuild comes with tsx (scripts/lib/esbuild.mjs).
+ * Numbers only; no item text is printed.
  */
 import { createServer } from "node:http";
 import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { build } from "esbuild";
+import { loadEsbuild } from "../../lib/esbuild.mjs";
 import { tsImport } from "tsx/esm/api";
 
 const ROOT = fileURLToPath(new URL("../../../", import.meta.url));
@@ -33,6 +34,7 @@ export const TARGETS = { detection_recall: 0.9, fp_word_rate: 0.03 };
 
 /** The worker as the app ships it, minus Vite: the virtual dictionary module is `inline = null` outside Vitest. */
 export async function bundleWorker() {
+  const { build } = await loadEsbuild();
   const out = await build({
     entryPoints: [join(ROOT, "src/ai/englishSpell.worker.ts")],
     bundle: true,
