@@ -53,7 +53,9 @@ function copy(name: string): string {
   const dir = join(tmp, name);
   mkdirSync(join(dir, "plan"), { recursive: true });
   mkdirSync(join(dir, "public"), { recursive: true });
-  for (const f of ["plan/plan.json", "plan/audit-verdicts.json", "plan/board.html", "public/roadmap.html", "MASTER_PLAN.md"]) cpSync(join(ROOT, f), join(dir, f));
+  // eval/origins.json: plan:check fails without it (review 10, L8).
+  mkdirSync(join(dir, "eval"), { recursive: true });
+  for (const f of ["plan/plan.json", "plan/audit-verdicts.json", "plan/board.html", "public/roadmap.html", "MASTER_PLAN.md", "eval/origins.json"]) cpSync(join(ROOT, f), join(dir, f));
   return dir;
 }
 type Task = { id: string; status?: string; verified?: string; pr?: number; priority: string; dep?: string[]; notes?: string };

@@ -923,8 +923,10 @@ export function run({ root = ROOT, check = false, wipLimit, strictReceipts = fal
   const auditProblems = auditGuard(plan, readLedger(root));
   if (auditProblems.length) throw new Error(`plan: ✅ the audit did not call DONE (scripts/plan/auditGuard.mjs) —\n  ${auditProblems.join("\n  ")}`);
   // W10.B13: no status calls a synthetic golden set or fixture real (eval/origins.json).
+  // Review 10, L8: without eval/origins.json the rule cannot run, and plan:check fails (it used to pass).
   const originsPath = join(root, "eval/origins.json");
-  const originProblems = existsSync(originsPath) ? checkOriginClaims(plan, JSON.parse(readFileSync(originsPath, "utf8"))) : [];
+  if (!existsSync(originsPath)) throw new Error("plan: eval/origins.json is missing (W10.B13): the origin of every golden set and fixture is unknown, so no status can be checked against it");
+  const originProblems = checkOriginClaims(plan, JSON.parse(readFileSync(originsPath, "utf8")));
   if (originProblems.length) throw new Error(`plan: a synthetic set called real (W10.B13, scripts/golden/origin-claims.mjs) —\n  ${originProblems.join("\n  ")}`);
   const levelProblems = checkDoneLevel(plan);
   if (levelProblems.length) throw new Error(`plan: ✅ below browser (W10.G8) —\n  ${levelProblems.join("\n  ")}`);
