@@ -7,6 +7,7 @@ import { webrManifestPlugin } from "./src/build/webrManifest";
 import { LOCALES, whatsNew } from "./scripts/lib/whats-new.mjs";
 import { viteEnvGatePlugin } from "./src/build/viteEnvGate";
 import { bootPreloadPlugin } from "./src/build/bootPreload";
+import { deterministicMapsPlugin } from "./src/build/deterministicMaps";
 
 interface VitestConfig {
   test?: {
@@ -361,6 +362,8 @@ export default defineConfig({
     cspEndpointsPlugin(),
     // W10.E20: the start's lazy chunks listed for public/boot.js, which preloads them in parallel.
     bootPreloadPlugin(),
+    // W10.D21: with LUMEN_SOURCEMAP=1, every .map is rewritten deterministically once the bundle is written.
+    deterministicMapsPlugin(process.env.LUMEN_SOURCEMAP === "1", __dirname),
     VitePWA({
       registerType: "prompt",
       includeAssets: ["favicon.svg", "icons/*.png"],
