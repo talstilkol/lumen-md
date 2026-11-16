@@ -1041,6 +1041,7 @@
   "e2ee.rules.save": "保存",
   "e2ee.rules.saved": "已保存。从下次同步起生效。",
   "e2ee.rules.title": "此设备同步的内容",
+  "e2ee.rules.unreadable": "无法读取此设备的同步规则，因此没有同步任何内容：请打开“同步”→“此设备同步的内容”，然后重新保存。",
   "e2ee.sas.aborted": "配对已停止，没有配对任何设备。请重新开始，并且只与你面前的设备配对。",
   "e2ee.sas.done": "已配对：两台设备都确认了符号。",
   "e2ee.sas.match": "一致",

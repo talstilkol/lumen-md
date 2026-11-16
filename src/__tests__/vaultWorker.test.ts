@@ -65,18 +65,25 @@ class FakeWorker implements WorkerLike {
   }
 }
 
-/** The memory backend, counting the file reads that go through it. */
+/**
+ * The memory backend, counting the note reads that go through it. The
+ * vault's own app data (`.lumen/`, e.g. the vault id the index snapshot is
+ * filed under, review 19 Y2) is not a note and is not counted.
+ */
 function countingBackend(): { backend: VaultBackend; reads: () => number } {
   const inner = createMemoryBackend();
   let reads = 0;
+  const count = (p: string) => {
+    if (!p.startsWith(".lumen/")) reads++;
+  };
   const backend: VaultBackend = {
     ...inner,
     read: (p) => {
-      reads++;
+      count(p);
       return inner.read(p);
     },
     readText: (p) => {
-      reads++;
+      count(p);
       return inner.readText(p);
     },
   };

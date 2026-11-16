@@ -429,7 +429,7 @@ describe("session and activity panel", () => {
   });
 
   it("unreadable rules stop the round with a message; saved rules apply from the next round", async () => {
-    const { device } = lab();
+    const { device, server } = lab();
     const a = device();
     await a.files.write("Videos/clip.mp4", bytes(1000), null);
     await a.files.write("n.md", text("n"), null);
