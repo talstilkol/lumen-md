@@ -1,0 +1,445 @@
+[
+  {
+    "id": "L7-W2.5",
+    "task": "W2.5",
+    "decision": "Export DictaBERT-large-char-menaked to ONNX at a pinned revision and publish it on the model mirror, so nikud stops falling back to Nakdimon.",
+    "options": [
+      "A: export with scripts/models/export-menaked.py and publish as a GitHub Release `models-dictabert-char-menaked`, read through the model-mirror proxy (decision 15.9)",
+      "B: use the third-party dicta-onnx export (not endorsed by Dicta)",
+      "C: keep Nakdimon only and drop the ≥95% target"
+    ],
+    "recommendation": "A",
+    "why": "The model card is CC BY 4.0 (attribution only), which the licence gate allows; the export script checks the card's licence and every assumption about the custom head, and prints the registry `files` entry. B is an unreviewed third-party artefact; C gives up the plan's quality target. Hosting follows the decision already taken (15.9: GitHub Releases + CORS proxy).",
+    "sources": [
+      "https://huggingface.co/dicta-il/dictabert-large-char-menaked",
+      "scripts/models/export-menaked.py",
+      "src/ai/convertedModels.ts (CONVERTED_MODELS_BASE, decision 15.9)"
+    ],
+    "changes": [
+      "models/registry.json: the \"dictabert-char-menaked\" entry's `files` (sha256, size, licence, attribution) — pasted from the export script's output",
+      "Vercel env VITE_MODEL_MIRROR_URL (deploy-side) once the edge-workers/model-mirror proxy is deployed"
+    ],
+    "draftPr": null,
+    "cmd": "python -I scripts/models/export-menaked.py --revision <commit sha from the model card> --out out/dictabert-char-menaked  (needs torch, transformers, onnx, onnxruntime; huggingface.co is blocked in the cloud)"
+  },
+  {
+    "id": "L7-W2.6",
+    "task": "W2.6",
+    "decision": "Choose a Hebrew neural TTS voice whose weights AND training data allow shipping it; #611 is already in verify/train-7.",
+    "options": [
+      "A: train/fine-tune a Piper voice on a commercially licensed Hebrew corpus (or the owner's own recordings) and pin it with `npm run tts:voice`",
+      "B: Phonikud TTS checkpoints (non-commercial: rejected by the gate)",
+      "C: stay on the system voice (Web Speech / OS) and leave MOS/latency targets open"
+    ],
+    "recommendation": "C now, A as the follow-up task",
+    "why": "The Phonikud checkpoints are marked non-commercial (cc-nc), and scripts/lib/tts-voice.mjs refuses NC/GPL weights or data, so B cannot ship. No permissively licensed Hebrew neural voice was found in this round; A needs a corpus whose licence the owner signs off. C keeps the feature honest: the code (#611, 87624fb27e) is merged and waits for a voice.",
+    "sources": [
+      "https://huggingface.co/Phonikud/phonikud-tts-checkpoints",
+      "scripts/lib/tts-voice.mjs (licence checks)",
+      "git merge-base --is-ancestor 87624fb27e f090c20 → true"
+    ],
+    "changes": [
+      "`npm run tts:voice -- …` writes the voice pin (see scripts/tts-voice.mjs --help); nothing changes until a voice is chosen"
+    ],
+    "draftPr": null,
+    "cmd": null
+  },
+  {
+    "id": "L7-W2.7",
+    "task": "W2.7",
+    "decision": "Pin the two diarization networks (pyannote segmentation-3.0 and a speaker-embedding model) and record 5 golden meetings for DER ≤ 20%.",
+    "options": [
+      "A: segmentation = onnx-community/pyannote-segmentation-3.0 (MIT); embedding = a WeSpeaker VoxCeleb ResNet34 ONNX (CC BY 4.0)",
+      "B: embedding = 3D-Speaker ERes2Net/CAM++ ONNX (Apache-2.0)",
+      "C: leave diarization off (feature stays unreachable)"
+    ],
+    "recommendation": "A for segmentation; B for the embedding if its ONNX input matches `feats` (Kaldi fbank), else A's WeSpeaker",
+    "why": "segmentation-3.0 is MIT; Apache-2.0 (B) has no attribution chain to carry in the UI, CC BY 4.0 needs a credit line (models credits screen exists, #429). The pin script refuses NC/ND licences and checks revision/sha256/bytes. DIARIZATION_MODELS stays null until both are pinned, so nothing downloads by accident.",
+    "sources": [
+      "https://huggingface.co/onnx-community/pyannote-segmentation-3.0",
+      "src/meetings/diarizePins.ts:27-37 (TODO(owner, W2.7))",
+      "scripts/meetings/diarization-pin.mjs"
+    ],
+    "changes": [
+      "src/meetings/diarizePins.ts: DIARIZATION_MODELS.segmentation and .embedding (repo, revision, file, bytes, sha256, license) — the pin script prints the exact lines"
+    ],
+    "draftPr": null,
+    "cmd": "node scripts/meetings/diarization-pin.mjs --model segmentation --repo onnx-community/pyannote-segmentation-3.0 --revision <40-hex> --file onnx/model.onnx --bytes <n> --sha256 <64-hex> --license MIT"
+  },
+  {
+    "id": "L7-W2.25",
+    "task": "W2.25",
+    "decision": "Recruit the Hebrew beta (≥ 50 active testers) and open Discussions for feedback; settle the 4 comparison claims still unverified (W10.B22).",
+    "options": [
+      "A: enable GitHub Discussions + the beta page (public/beta.html) with the mailing list still off; recruit through the launch kit",
+      "B: also turn on the mailing list (needs an endpoint and a consent text)"
+    ],
+    "recommendation": "A",
+    "why": "A needs no new data processing; B needs a privacy review of the endpoint. The launch kit, survey and press kit are already in launch/ (launchKit 9/9).",
+    "sources": [
+      "launch/beta-recruitment.he.md",
+      "launch/beta-recruitment.en.md",
+      "public/beta.html",
+      ".github/DISCUSSION_TEMPLATE/beta-feedback.yml"
+    ],
+    "changes": [
+      "repo setting: Discussions on (owner)",
+      "docs comparison page: the 4 rows still marked not stated (see L7-W10.B22)"
+    ],
+    "draftPr": null,
+    "cmd": null
+  },
+  {
+    "id": "L7-W10.D1",
+    "task": "W10.D1",
+    "decision": "Run Google's CSP Evaluator on every route policy and deploy the content frame on its own origin (a second static site).",
+    "options": [
+      "A: the Cloudflare Pages project lumen-md-frame (Direct Upload of dist-frame/, the official target named in scripts/content-frame-site.mjs), set as VITE_CONTENT_FRAME_URL on the app build",
+      "B: keep the app-host fallback (opaque origin by header sandbox, W6.40)"
+    ],
+    "recommendation": "A",
+    "why": "With its own origin an embed never shares the app's origin even if the sandbox header is lost; B is the safe fallback already shipped. The hash-based CSP (no fixed nonce) is in the train (#666, #684).",
+    "sources": [
+      "public/content-frame.html (CSP by sha256)",
+      "security/policy.json",
+      "src/lib/contentFrame.ts (VITE_CONTENT_FRAME_URL)",
+      "scripts/content-frame-site.mjs"
+    ],
+    "changes": [
+      "Cloudflare Pages project lumen-md-frame; app build env VITE_CONTENT_FRAME_URL=https://lumen-md-frame.pages.dev/",
+      "plan W10.D1: record the CSP Evaluator result (0 high) per route of security/policy.json"
+    ],
+    "draftPr": null,
+    "cmd": "node scripts/content-frame-site.mjs && npx wrangler pages deploy dist-frame --project-name lumen-md-frame && node scripts/headers.mjs --check"
+  },
+  {
+    "id": "L7-W10.D4",
+    "task": "W10.D4",
+    "decision": "Give PRs an automatic pr:check: create a Buildkite organisation and run one self-hosted agent (the Mac or the second host).",
+    "options": [
+      "A: Buildkite Free plan + 1 self-hosted agent (scripts/buildkite/agent-bootstrap.sh)",
+      "B: no CI service: the pre-push hook (`npm run ci:local -- --install-hook`) + the Vercel preview build",
+      "C: GitHub Actions (ruled out by the owner)"
+    ],
+    "recommendation": "A",
+    "why": "Buildkite's Free plan allows up to 5 users and up to 10 concurrent self-hosted jobs, enough for one agent; the pipeline, receipts and PR comments are already written (scripts/buildkite/). B leaves PRs from others unchecked. C is excluded by the owner's rule.",
+    "sources": [
+      "https://buildkite.com/pricing/",
+      "scripts/buildkite/pipeline.mjs",
+      "scripts/buildkite/agent-bootstrap.sh"
+    ],
+    "changes": [
+      "Buildkite: org + pipeline from scripts/buildkite/pipeline.mjs; agent token in the agent's own config (never in the repo)",
+      "GitHub: webhook to Buildkite (repo settings)"
+    ],
+    "draftPr": null,
+    "cmd": "bash scripts/buildkite/agent-bootstrap.sh  (after creating the org and an agent token)"
+  },
+  {
+    "id": "L7-W10.D8",
+    "task": "W10.D8",
+    "decision": "Run the Drive provider against a real Google Drive to check the no-CAS fork detection (t8) end to end.",
+    "options": [
+      "A: a throwaway Google account + an OAuth client of type 'Desktop' limited to drive.file",
+      "B: skip Drive until a CAS-capable provider is the default"
+    ],
+    "recommendation": "A",
+    "why": "drive.file only sees files the app created, so a throwaway account risks nothing; the fork detection is code-complete and unit-tested (#642, #698) and only the real provider run is missing.",
+    "sources": [
+      "src/sync (Drive provider)",
+      "plan W10.D8 acceptance: t8 green, 0 writes after a fork is detected"
+    ],
+    "changes": [
+      "none in the repo; the OAuth client id is a local env value"
+    ],
+    "draftPr": null,
+    "cmd": null
+  },
+  {
+    "id": "L7-W10.D10",
+    "task": "W10.D10",
+    "decision": "Close the dependabot PRs per docs/security/dependabot.md after one dependency train; run a real `npm audit`.",
+    "options": [
+      "A: one `verify/deps` train with the 19 safe rows (real npm install / cargo update), then close the 32 PRs as the table says",
+      "B: close all 32 now without the train"
+    ],
+    "recommendation": "A",
+    "why": "#499 (body-parser, fast-uri, MCP SDK, ws) is already an ancestor of verify/train-7 @ f090c20. 32 dependabot PRs are open today (REST search, 16.11), and every one has a row in the table: 7 superseded, 2 not used, 19 safe, 4 major. B throws away 19 safe updates.",
+    "sources": [
+      "docs/security/dependabot.md",
+      "GET search/issues?q=repo:talstilkol/lumen-md+is:pr+is:open+author:app/dependabot → 32 (16.11)",
+      "git merge-base --is-ancestor 1329854b6e f090c20 → true"
+    ],
+    "changes": [
+      "none until the train; then close PRs #151 #152 #153 #154 #160 #161 #162 #164 #165 #166 #167 #168 #264 #294 #296 #317 #318 #319 #320 #323 #324 #325 #326 #327 #328 #329 #532 #533 #534 #612 #613 #614 per their row"
+    ],
+    "draftPr": null,
+    "cmd": "npm audit --omit=dev --json > reports/npm-audit.json && npm run audit:lock"
+  },
+  {
+    "id": "L7-W10.D14",
+    "task": "W10.D14",
+    "decision": "Same Buildkite decision as W10.D4: gitleaks, audit and semgrep run in the same pipeline once an agent exists.",
+    "options": [
+      "A: Buildkite (as W10.D4)",
+      "B: run them in the pre-push hook only"
+    ],
+    "recommendation": "A",
+    "why": "The scanners are wired into the pipeline (#643, #668, #726); without an agent no PR gets them.",
+    "sources": [
+      "https://buildkite.com/pricing/",
+      "scripts/buildkite/pipeline.mjs",
+      "src/__tests__/securityScanners.test.ts"
+    ],
+    "changes": [
+      "as W10.D4"
+    ],
+    "draftPr": null,
+    "cmd": null
+  },
+  {
+    "id": "L7-W10.D15",
+    "task": "W10.D15",
+    "decision": "Turn on GitHub private vulnerability reporting, then make it the first channel in SECURITY.md.",
+    "options": [
+      "A: turn it on (one REST call) and merge the prepared draft",
+      "B: keep the contact-request issue only"
+    ],
+    "recommendation": "A",
+    "why": "It is off today: GET repos/talstilkol/lumen-md/private-vulnerability-reporting → {\"enabled\":false} (16.11). Reporters then get a private advisory with a temporary fork, which SECURITY.md's process already assumes.",
+    "sources": [
+      "security/channels.json (entry github-private-reporting, owner step)",
+      "SECURITY.md lines 15, 22, 68",
+      "src/__tests__/securityChannels.test.ts"
+    ],
+    "changes": [
+      "security/channels.json: github-private-reporting status off → on, evidence",
+      "SECURITY.md: the 'not turned on yet' sentences (en + he)",
+      "src/__tests__/securityChannels.test.ts: the 'not on yet' case"
+    ],
+    "draftPr": "OWNER-DECISION draft (see PR list)",
+    "cmd": "gh api -X PUT repos/talstilkol/lumen-md/private-vulnerability-reporting && gh api repos/talstilkol/lumen-md/private-vulnerability-reporting"
+  },
+  {
+    "id": "L7-W10.B9",
+    "task": "W10.B9",
+    "decision": "Get 200 Hebrew Wikipedia sentences tagged by someone who did not write the grammar rules, for precision with a CI (rules vs rules + ranker).",
+    "options": [
+      "A: one paid annotator (native Hebrew) with the W6.17 guideline",
+      "B: two volunteers, agreement measured (kappa)"
+    ],
+    "recommendation": "B if two are available, else A",
+    "why": "Two taggers give an agreement figure, which makes the CI meaningful; the ranker is already wired (registerGrammarRanker outside tests, #632, #683).",
+    "sources": [
+      "plan W6.17, W11.O5",
+      "src/__tests__ (grammar ranker wiring)"
+    ],
+    "changes": [
+      "eval/golden/<grammar set>/ (new set with manifest, licence CC BY-SA from Wikipedia)"
+    ],
+    "draftPr": null,
+    "cmd": null
+  },
+  {
+    "id": "L7-W10.B22",
+    "task": "W10.B22",
+    "decision": "Verify or remove the 4 comparison-page claims still shown as 'not stated'.",
+    "options": [
+      "A: check each against the vendor's own page and add the source",
+      "B: remove the 4 rows"
+    ],
+    "recommendation": "A where a vendor page exists, else B",
+    "why": "Acceptance is 20/20 with a source or fewer claims; removing is allowed and honest.",
+    "sources": [
+      "the comparison page source (PR #710)",
+      "plan W10.B22"
+    ],
+    "changes": [
+      "the comparison data file of #710 (4 rows)"
+    ],
+    "draftPr": null,
+    "cmd": null
+  },
+  {
+    "id": "L7-W8.2",
+    "task": "W8.2",
+    "decision": "Provide 20 real Notion exports (owner's or volunteers', with consent) to measure 18/20 scenarios after import.",
+    "options": [
+      "A: the owner's own workspace exports",
+      "B: volunteers via the beta, consent form"
+    ],
+    "recommendation": "A first (no consent issue), B to reach 20",
+    "why": "notionScenarios 20/20 runs on synthetic exports; real ones are the missing proof.",
+    "sources": [
+      "src/__tests__/notionScenarios.test.ts",
+      "PR #598"
+    ],
+    "changes": [
+      "src/__tests__/fixtures/real-corpus/notion/ (only exports whose owner agreed to publish; else keep them local and record the score only)"
+    ],
+    "draftPr": null,
+    "cmd": null
+  },
+  {
+    "id": "L7-W8.3",
+    "task": "W8.3",
+    "decision": "Run the CAS probe against a real R2 or B2 bucket (200/200).",
+    "options": [
+      "A: Cloudflare R2 (free tier)",
+      "B: Backblaze B2"
+    ],
+    "recommendation": "A",
+    "why": "R2 supports conditional writes (If-Match/If-None-Match) used by the probe; the 423/409-as-lost-race handling is unit-tested (webdavLostRace 9/9).",
+    "sources": [
+      "PR #543 (commands in its description)",
+      "src/__tests__/webdavLostRace.test.ts"
+    ],
+    "changes": [
+      "none; credentials stay in local env"
+    ],
+    "draftPr": null,
+    "cmd": null
+  },
+  {
+    "id": "L7-W8.4",
+    "task": "W8.4",
+    "decision": "Live Zotero write: notes come back identical, 0 duplicates on re-send; #600 is already in the train.",
+    "options": [
+      "A: Zotero 7 desktop with a test library",
+      "B: Zotero web API with a test group"
+    ],
+    "recommendation": "A",
+    "why": "#600 (9f40a35458) is an ancestor of verify/train-7 @ f090c20; the local API is 127.0.0.1-only, so no account is needed.",
+    "sources": [
+      "git merge-base --is-ancestor 9f40a35458 f090c20 → true",
+      "scripts/zotero/"
+    ],
+    "changes": [
+      "none"
+    ],
+    "draftPr": null,
+    "cmd": null
+  },
+  {
+    "id": "L7-W8.5",
+    "task": "W8.5",
+    "decision": "Run the 5-user SAS usability test (each compares the 5 emoji correctly in < 20 s).",
+    "options": [
+      "A: 5 people in person, two devices each",
+      "B: remote with screen share"
+    ],
+    "recommendation": "A",
+    "why": "The SAS check is about reading two screens side by side; remote adds noise. The script and form are in docs/security/pairing-sas-usability.md.",
+    "sources": [
+      "docs/security/pairing-sas-usability.md"
+    ],
+    "changes": [
+      "plan W8.5 result (owner records the 5 times)"
+    ],
+    "draftPr": null,
+    "cmd": null
+  },
+  {
+    "id": "L7-W8.12",
+    "task": "W8.12",
+    "decision": "Recruit 12 participants for the unmoderated usability tests (#487 is clean on the train).",
+    "options": [
+      "A: from the beta list (W2.25)",
+      "B: a paid panel"
+    ],
+    "recommendation": "A",
+    "why": "No cost, and the tests are already in the beta plan (usabilityUnmoderated 8/8).",
+    "sources": [
+      "PR #541",
+      "src/__tests__/usabilityUnmoderated.test.ts"
+    ],
+    "changes": [
+      "none"
+    ],
+    "draftPr": null,
+    "cmd": null
+  },
+  {
+    "id": "L7-W9.4",
+    "task": "W9.4",
+    "decision": "Review receipts and the human-reviewed label for the sensitive PRs on the merged train head (#932, #936, #937, #939–#943).",
+    "options": [
+      "A: review each and sign with `npm run review:sign`",
+      "B: accept unsigned (fails review:coverage)"
+    ],
+    "recommendation": "A",
+    "why": "review:coverage must be 100% on the train head; only the owner can sign and label (lanes may not).",
+    "sources": [
+      "scripts/review-coverage.mjs",
+      "scripts/review-sign.mjs",
+      "security/reviewers.json"
+    ],
+    "changes": [
+      "receipts under the review receipts folder; labels on GitHub"
+    ],
+    "draftPr": null,
+    "cmd": "npm run review:coverage"
+  },
+  {
+    "id": "L7-1.1",
+    "task": "1.1",
+    "decision": "Accept that '0 open Codex threads' and 'CI green' are replaced by: every thread answered in code + a ci:local receipt (Actions are retired).",
+    "options": [
+      "A: accept the replacement and close the task when the Mac run (L7-W9.2) is green",
+      "B: resolve every thread on GitHub by hand"
+    ],
+    "recommendation": "A",
+    "why": "The owner retired GitHub Actions and Codex reviews; 'CI green' cannot be shown on GitHub any more. All Codex findings were handled in code (plan note).",
+    "sources": [
+      "plan 1.1 notes",
+      "owner memory rules: no Actions, no Codex"
+    ],
+    "changes": [
+      "plan/plan.json 1.1 acceptance text (integrator, after the decision)"
+    ],
+    "draftPr": null,
+    "cmd": null
+  },
+  {
+    "id": "L7-14.3",
+    "task": "14.3",
+    "decision": "Schedule the daily issue triage (no Actions): add it to the nightly scheduler on the owner's host.",
+    "options": [
+      "A: `npm run nightly:install` (launchd/cron) with issue-triage in the nightly plan",
+      "B: a Claude scheduled task",
+      "C: Buildkite schedule (after W10.D4)"
+    ],
+    "recommendation": "A",
+    "why": "The scheduler and the triage script exist (scripts/nightly/scheduler.mjs, scripts/issue-triage.mjs, issueTriage 10/10); A needs no new service.",
+    "sources": [
+      "scripts/nightly/scheduler.mjs",
+      "scripts/issue-triage.mjs"
+    ],
+    "changes": [
+      "scripts/nightly/plan.mjs: add an issue-triage step (none today: grep finds no issue-triage in scripts/nightly/)"
+    ],
+    "draftPr": null,
+    "cmd": "npm run nightly:install -- --print"
+  },
+  {
+    "id": "L7-14.4",
+    "task": "14.4",
+    "decision": "Create the beta channel deploy (a beta Vercel alias and the desktop pre-release) and ship one feature to beta before stable.",
+    "options": [
+      "A: Vercel alias beta-<app>.vercel.app from deploy-beta (no --prod) + GitHub pre-release 0.2.0-beta.1",
+      "B: beta only on desktop"
+    ],
+    "recommendation": "A",
+    "why": "The channel code is in (#417: 0.2.0-beta.N, rolling latest.json, flags:check blocks a stable flag without beta). flags:check failed on train-4 per the audit; on verify/train-7 @ f090c20 it passes (\"4 flag(s), every one through beta before stable\", run 16.11).",
+    "sources": [
+      "PR #417",
+      "scripts/check-flags.mjs",
+      "release-notes/0.2.0-beta.1.en.md"
+    ],
+    "changes": [
+      "Vercel project alias; GitHub release (owner)"
+    ],
+    "draftPr": null,
+    "cmd": "npm run flags:check"
+  }
+]
