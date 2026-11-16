@@ -151,6 +151,8 @@ export const SETTINGS: readonly SettingEntry[] = [
   local("lumen.ai.model.local-webgpu", { kind: "setting", tab: "ai", label: "cmd.ai.localModels", type: "text" }),
   local("lumen.ai.model.*", { kind: "setting", tab: "ai", type: "text" }),
   local("lumen.ai.executor", { kind: "setting", tab: "ai", label: "ai.settings.executor", type: "text" }),
+  // W11.I16: the engine ladder's WebNN rung, off unless turned on (agents/doctorLadder.ts).
+  local("lumen.ai.webnn", { kind: "setting", tab: "ai", type: "boolean", values: ["", "1"] }),
   local("lumen.ollama.baseUrl", { kind: "setting", tab: "ai", label: "ai.settings.ollama.url", type: "text" }),
   local("lumen.ollama.model", { kind: "setting", tab: "ai", label: "ai.settings.ollama.model", type: "text" }),
   local("lumen.grammar.endpoint", { kind: "setting", tab: "ai", label: "ai.settings.grammar", type: "text" }),
@@ -197,6 +199,8 @@ export const SETTINGS: readonly SettingEntry[] = [
   // The provider settings kept for one OAuth sign-in round trip (sessionStorage).
   secret("lumen-sync-pending-oauth", "sync"),
   secret("lumen.sync.webdav.password", "sync"),
+  // W10.C15: the WebDAV backup target's password (backup/config.ts), in the secret store.
+  secret("lumen.backup.webdav.password", "sync"),
   secret("lumen.sync.s3.secretAccessKey", "sync"),
   secret("lumen.publish.github.token", "sync"),
   // The git CORS proxy sees the git traffic, token included: not imported.

@@ -10,7 +10,7 @@ import { buildLanguageCommands, buildPanelCommands, buildThemeToggleCommands, bu
 import { buildEditCommands, buildInsertCommands } from "./edit";
 import { buildHebrewDictionaryCommands, buildPluginCommands, buildUsabilityStudyCommands, buildWritingGoalCommands, buildArabicCommands } from "./tools";
 import { buildAiCancelCommands, buildAiCapabilityCommands, buildAiControlCommands, buildAiModelCommands, buildAiProviderCommands, buildPrivacyModeCommands } from "./ai";
-import { buildAltTextCommands, buildDocumentAgentCommands, buildGrammarCommands, buildNikudCommands, buildPromptTemplateCommands } from "./agents";
+import { buildAltTextCommands, buildExternalAgentCommands, buildDocumentAgentCommands, buildGrammarCommands, buildNikudCommands, buildPromptTemplateCommands } from "./agents";
 import { buildBatchCommands } from "./batch";
 import { buildResearchCommands } from "./research";
 import { buildDigestCommands, buildEncryptionCommands, buildVaultDoctorCommands, buildVaultTransferCommands } from "./vault";
@@ -94,4 +94,5 @@ export const COMMAND_SECTIONS: ReadonlyArray<(ctx: CommandContext) => Command[]>
   buildReadingCommands,
   buildScreenshotCommands,
   buildMcpCommands,
+  buildExternalAgentCommands,
 ];

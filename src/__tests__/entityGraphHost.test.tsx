@@ -98,7 +98,7 @@ describe("⌘K Entity graph", () => {
     expect(stats()).toBe("5 entities · 4 relations");
   });
 
-  it("an entity opens its note; Escape closes the view", async () => {
+  it("an entity opens its page (W12.E6); the page opens its note; Escape closes the view", async () => {
     await writeVault(VAULT);
     let closed = 0;
     render(<EntityGraphScreen onClose={() => closed++} initialMode="table" />);
@@ -108,10 +108,57 @@ describe("⌘K Entity graph", () => {
       return r;
     });
     fireEvent.dblClick(row);
+    await screen.findByTestId("entity-page-panel");
+    expect(document.getElementById("entity-page-title")?.textContent).toBe("levi");
+    expect(closed).toBe(0);
+    fireEvent.click(screen.getByRole("button", { name: "Open the note" }));
     await waitFor(() => expect(useAppStore.getState().doc.workspaceName).toBe("Sources/levi.md"));
     expect(closed).toBe(1);
     fireEvent.keyDown(document, { key: "Escape" });
     expect(closed).toBe(2);
+  });
+
+  it("the page shows the relations, the mentions with their paragraph and a timeline; a source link selects its paragraph (W12.E6, R12.7)", async () => {
+    await writeVault({ ...VAULT, "notes/a.md": "---\ndate: 2026-11-01\n---\n\nדנה כהן חברת הכנסת מאז 2021.\n^p1\n" });
+    let closed = 0;
+    render(<EntityGraphScreen onClose={() => closed++} initialMode="table" />);
+    const row = await waitFor(() => {
+      const r = document.querySelector<HTMLTableRowElement>(`tr[data-node="${DANA}"]`);
+      if (!r) throw new Error("not yet");
+      return r;
+    });
+    fireEvent.dblClick(row);
+    const panel = await screen.findByTestId("entity-page-panel");
+    expect(panel.textContent).toContain("דנה כהן חברת הכנסת");
+    expect(screen.getByTestId("entity-mentions").querySelectorAll("li").length).toBeGreaterThanOrEqual(1);
+    // The edge has no date and its quote names none: the claim goes to the undated group, never placed (R12.7).
+    expect((await screen.findByTestId("timeline-undated")).textContent).toContain("הכנסת");
+    const reveals: Array<{ line: number; endLine: number }> = [];
+    const on = (e: Event) => reveals.push((e as CustomEvent).detail);
+    window.addEventListener("lumen-reveal-line", on);
+    fireEvent.click(screen.getByRole("button", { name: /notes\/a#\^p1/ }));
+    await waitFor(() => expect(useAppStore.getState().doc.workspaceName).toBe("notes/a.md"));
+    window.removeEventListener("lumen-reveal-line", on);
+    expect(reveals[0]).toMatchObject({ line: 5, endLine: 5 });
+    expect(closed).toBe(1);
+    fireEvent.click(screen.getByRole("button", { name: "Back to the graph" }));
+  });
+
+  it("exports the graph as JSON-LD from the screen, as a download (W12.E8)", async () => {
+    await writeVault(VAULT);
+    const blobs: Blob[] = [];
+    const orig = URL.createObjectURL;
+    URL.createObjectURL = ((b: Blob) => (blobs.push(b), "blob:x")) as typeof URL.createObjectURL;
+    try {
+      render(<EntityGraphScreen onClose={() => {}} initialMode="table" />);
+      const sel = await screen.findByTestId("entity-graph-export");
+      fireEvent.change(sel, { target: { value: "jsonld" } });
+      await waitFor(() => expect(blobs.length).toBe(1));
+      const doc = JSON.parse(await blobs[0].text());
+      expect(JSON.stringify(doc)).toContain("דנה כהן");
+    } finally {
+      URL.createObjectURL = orig;
+    }
   });
 
   it("an empty vault says what to do", async () => {

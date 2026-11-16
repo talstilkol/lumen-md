@@ -16,6 +16,7 @@ import { CalDavError, createCalDavClient, discoverCalendars, type DiscoveredCale
 import { authorizationFor, CALDAV_STATE, calendarFetch, httpUrl, readAccount, readSubscriptions, type CalDavAccount } from "./config";
 import { BLOCK_END, BLOCK_START, eventLines, feedEventsOn } from "./dailyEvents";
 import { emptyState, runSync, type Choice, type Conflict, type SyncReport, type SyncState, type VaultIO } from "./taskSync";
+import "./calendarStrings";
 
 export type ConnectionResult = { ok: true; tasks: number } | { ok: false; reason: "auth" | "cors" | "not-found" | "server" | "url" | "no-account" };
 

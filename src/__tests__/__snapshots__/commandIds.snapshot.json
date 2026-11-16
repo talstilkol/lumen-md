@@ -2170,6 +2170,12 @@
       "icon": "Network"
     },
     {
+      "id": "entities.contradictions",
+      "label": "Where my notes disagree",
+      "hint": "Finds denials, corrections and differing values or dates between notes, with exact quotes; the report goes to the review panel",
+      "icon": "FileText"
+    },
+    {
       "id": "entities.wikidata",
       "label": "Entity: link to Wikidata…",
       "icon": "FileText"
@@ -2187,6 +2193,27 @@
       "group": "Insert",
       "hint": "The clipped page open now, or a link you type",
       "icon": "Link"
+    },
+    {
+      "id": "ai.screenshotToNote",
+      "label": "Screenshot to note…",
+      "group": "Tools",
+      "hint": "The image on the clipboard (or a file) as text, read on this device, previewed before it is inserted",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "mcp.settings",
+      "label": "MCP servers…",
+      "group": "Tools",
+      "hint": "Add outside MCP servers and choose what their tools may do",
+      "icon": "Network"
+    },
+    {
+      "id": "mcp.ask",
+      "label": "Ask with my MCP servers…",
+      "group": "Tools",
+      "hint": "The local agent uses your MCP servers' tools, asking before each one that needs it",
+      "icon": "Network"
     },
     {
       "id": "types.page",
@@ -4519,6 +4546,12 @@
       "icon": "Network"
     },
     {
+      "id": "entities.contradictions",
+      "label": "Where my notes disagree",
+      "hint": "Finds denials, corrections and differing values or dates between notes, with exact quotes; the report goes to the review panel",
+      "icon": "FileText"
+    },
+    {
       "id": "entities.wikidata",
       "label": "Entity: link to Wikidata…",
       "icon": "FileText"
@@ -4536,6 +4569,27 @@
       "group": "Insert",
       "hint": "The clipped page open now, or a link you type",
       "icon": "Link"
+    },
+    {
+      "id": "ai.screenshotToNote",
+      "label": "Screenshot to note…",
+      "group": "Tools",
+      "hint": "The image on the clipboard (or a file) as text, read on this device, previewed before it is inserted",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "mcp.settings",
+      "label": "MCP servers…",
+      "group": "Tools",
+      "hint": "Add outside MCP servers and choose what their tools may do",
+      "icon": "Network"
+    },
+    {
+      "id": "mcp.ask",
+      "label": "Ask with my MCP servers…",
+      "group": "Tools",
+      "hint": "The local agent uses your MCP servers' tools, asking before each one that needs it",
+      "icon": "Network"
     },
     {
       "id": "types.page",
@@ -4871,9 +4925,13 @@
     "sources.open",
     "entities.review",
     "entities.graph",
+    "entities.contradictions",
     "entities.wikidata",
     "reading.newFromLibrary",
     "reading.newFromCapture",
+    "ai.screenshotToNote",
+    "mcp.settings",
+    "mcp.ask",
     "types.page",
     "types.studio"
   ]

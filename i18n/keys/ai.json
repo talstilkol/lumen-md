@@ -253,6 +253,63 @@
       "vars": []
     },
     {
+      "key": "ai.acp.consent",
+      "en": "{agent} sends what it reads in your vault to its cloud model. Let it open this vault for this session?",
+      "vars": [
+        "agent"
+      ]
+    },
+    {
+      "key": "ai.acp.done",
+      "en": "{agent} finished ({reason}). Its changes are in the review panel.",
+      "vars": [
+        "agent",
+        "reason"
+      ]
+    },
+    {
+      "key": "ai.acp.failed",
+      "en": "{agent} could not run: {error}",
+      "vars": [
+        "agent",
+        "error"
+      ]
+    },
+    {
+      "key": "ai.acp.noVault",
+      "en": "Open a vault folder first: the agent works inside it.",
+      "vars": []
+    },
+    {
+      "key": "ai.acp.permission",
+      "en": "Allow the agent's tool \"{tool}\" once?",
+      "vars": [
+        "tool"
+      ]
+    },
+    {
+      "key": "ai.acp.pick",
+      "en": "Which agent? It must be installed on this computer; you approve its command in a system dialog.",
+      "vars": []
+    },
+    {
+      "key": "ai.acp.prompt",
+      "en": "What should the agent do? Every file it writes waits in the review panel.",
+      "vars": []
+    },
+    {
+      "key": "ai.acp.running",
+      "en": "{agent} is working; its changes wait in the review panel",
+      "vars": [
+        "agent"
+      ]
+    },
+    {
+      "key": "ai.acp.title",
+      "en": "Ask an external agent (ACP)",
+      "vars": []
+    },
+    {
       "key": "ai.alert.keySaved",
       "en": "AI key saved.",
       "vars": []
@@ -357,6 +414,11 @@
     {
       "key": "ai.doctor.check.grammar",
       "en": "Grammar service (LanguageTool)",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.check.ladder",
+      "en": "The engine ladder on this device (what can run, in order)",
       "vars": []
     },
     {

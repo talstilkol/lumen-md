@@ -10,6 +10,8 @@
   "entityGraph.page.incoming": "Referred to by",
   "entityGraph.page.mentions": "Mentions",
   "entityGraph.page.none": "None yet.",
+  "entityGraph.page.back": "Back to the graph",
+  "entityGraph.page.openNote": "Open the note",
   "entityGraph.page.openSource": "Open the source paragraph {link}",
   "entityGraph.page.outgoing": "Relations",
   "entityGraph.page.source.changed": "Source changed",
@@ -116,5 +118,6 @@
   "entityGraph.wikidata.privacy": "Nothing is sent before you choose. Airplane mode hides this.",
   "entityGraph.wikidata.results": "Wikidata items",
   "entityGraph.wikidata.searching": "Searching Wikidata…",
-  "entityGraph.wikidata.title": "Link to Wikidata"
+  "entityGraph.wikidata.title": "Link to Wikidata",
+  "entityGraph.export.label": "Export the graph:"
 }

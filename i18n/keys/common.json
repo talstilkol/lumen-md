@@ -6945,6 +6945,11 @@
       "vars": []
     },
     {
+      "key": "entityGraph.export.label",
+      "en": "Export the graph:",
+      "vars": []
+    },
+    {
       "key": "entityGraph.merge.action",
       "en": "Merge",
       "vars": []
@@ -6985,6 +6990,11 @@
       "vars": []
     },
     {
+      "key": "entityGraph.page.back",
+      "en": "Back to the graph",
+      "vars": []
+    },
+    {
       "key": "entityGraph.page.incoming",
       "en": "Referred to by",
       "vars": []
@@ -6997,6 +7007,11 @@
     {
       "key": "entityGraph.page.none",
       "en": "None yet.",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.page.openNote",
+      "en": "Open the note",
       "vars": []
     },
     {

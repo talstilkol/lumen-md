@@ -26,6 +26,8 @@ export interface EntityGraphData {
   noteOf: Map<string, string>;
   /** `[@key]` citations and references that match no source. */
   unresolved: number;
+  /** The notes' text as read (W12.E6: an entity's page shows each mention with its paragraph). */
+  texts: ReadonlyMap<string, string>;
 }
 
 const tagsOf = (v: unknown): string[] =>
@@ -78,7 +80,7 @@ export function graphFromFiles(files: ReadonlyMap<string, string>, libraries: re
   // An entity note wins over the citation graph's entity of the same id (it has the user's name and aliases).
   for (const e of cites.entities) if (!entities.has(e.id)) entities.set(e.id, e);
   for (const e of cites.edges) if (!edges.has(e.id)) edges.set(e.id, e);
-  return { entities: [...entities.values()], edges: [...edges.values()], notes, noteOf, unresolved: cites.unresolved.length };
+  return { entities: [...entities.values()], edges: [...edges.values()], notes, noteOf, unresolved: cites.unresolved.length, texts: files };
 }
 
 /** Read the vault and build the graph (the app's workspace, or `vault` in tests). */

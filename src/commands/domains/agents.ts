@@ -242,3 +242,18 @@ export function buildPromptTemplateCommands({ locale, setContent, liveDoc }: Com
     })),
   ];
 }
+
+/** W11.I23: an external agent over ACP — desktop only (it needs the native process bridge), never in airplane mode. */
+export function buildExternalAgentCommands(): Command[] {
+  if (typeof window === "undefined" || !("__TAURI_INTERNALS__" in window)) return [];
+  return [
+    {
+      id: "agents.acp",
+      label: t("cmd.agents.acp"),
+      hint: t("cmd.agents.acp.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      action: () => void import("./acpActions").then((m) => m.askExternalAgentFlow()),
+    },
+  ];
+}
