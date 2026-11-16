@@ -307,6 +307,38 @@ export const SETTINGS: readonly SettingEntry[] = [
   data("lumen.sync.speed.v1"),
   data("lumen.academicExport.v1"),
   data("lumen.whatsNew.seen"),
+
+  // ── Train 7 (W10.Z3 re-review of W10.A9): keys stored since train 5 ──
+  // User choices with no privacy effect.
+  local("lumen.ai.lmstudio.model", { kind: "setting", tab: "ai", type: "text" }),
+  local("lumen.attachmentCleanup", { kind: "setting", tab: "general", type: "choice", options: [{ value: "ask" }, { value: "always" }, { value: "never" }] }),
+  local("lumen.sync.conflictMode.v1", { kind: "setting", tab: "sync", type: "choice", options: [{ value: "merge" }, { value: "file" }] }),
+  local("lumen.backlinks.sort", { kind: "setting", tab: "general", type: "choice", options: [{ value: "name" }, { value: "modified" }] }),
+  // Secrets: the LM Studio API key, and the OneNote sign-in kept for one OAuth round trip.
+  secret("lumen.ai.lmstudio.key", "ai"),
+  secret("lumen-onenote-signin", "general"),
+  // Where text goes, opt-ins to a model, the update channel and feature flags: never taken from an imported file.
+  data("lumen.ai.lmstudio.url"),
+  data("lumen.ai.lmstudio.on"),
+  data("lumen.organizer.model"),
+  data("lumen.grammar.he.model"),
+  data("lumen.plugins.installed"),
+  data("lumen-update-channel"),
+  data("lumen-flags"),
+  data("lumen-classic-look"),
+  // Measurements, caches, per-document state and bookkeeping.
+  data("lumen.pdf.spread"),
+  data("lumen.ollama.speculative"),
+  data("lumen.ollama.reproducible"),
+  data("lumen.ai.builtinGate"),
+  data("lumen-boot-edit"),
+  data("lumen.highlights.citeKeys"),
+  data("lumen.activation.v1"),
+  data("lumen.capturesAdded"),
+  data("lumen.install.count"),
+  data("lumen.storage.persistAskedAfterFirstSave"),
+  data("lumen-update-last-check"),
+  data("lumen-saved-searches-migrated"),
 ];
 
 /** True when `key` is the entry's id, or matches it with `*` as a wildcard. */
