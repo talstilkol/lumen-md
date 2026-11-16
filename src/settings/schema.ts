@@ -307,6 +307,39 @@ export const SETTINGS: readonly SettingEntry[] = [
   data("lumen.sync.speed.v1"),
   data("lumen.academicExport.v1"),
   data("lumen.whatsNew.seen"),
+
+  // ── Train 7 (T8): keys stored since the schema was last complete ──────
+  // LM Studio and the local engines' models: AI choices, like the Ollama ones.
+  local("lumen.ai.lmstudio.url", { kind: "setting", tab: "ai", type: "text" }),
+  local("lumen.ai.lmstudio.model", { kind: "setting", tab: "ai", type: "text" }),
+  local("lumen.ai.lmstudio.on", { kind: "setting", tab: "ai", type: "boolean", values: ["", "1"] }),
+  secret("lumen.ai.lmstudio.key", "ai"),
+  local("lumen.organizer.model", { kind: "setting", tab: "ai", type: "text" }),
+  local("lumen.grammar.he.model", { kind: "setting", tab: "ai", type: "text" }),
+  local("lumen.ollama.reproducible", { kind: "setting", tab: "ai", type: "boolean", values: ["", "1"] }),
+  // Display choices with no privacy effect.
+  local("lumen.backlinks.sort", { kind: "setting", tab: "general", type: "choice", options: [{ value: "name" }, { value: "modified" }] }),
+  local("lumen.attachmentCleanup", { kind: "setting", tab: "general", type: "choice", options: [{ value: "ask" }, { value: "always" }, { value: "never" }] }),
+  local("lumen-classic-look", { kind: "setting", tab: "appearance", type: "boolean", values: ["", "1"] }),
+  local("lumen.sync.conflictMode.v1", { kind: "setting", tab: "sync", type: "choice", options: [{ value: "merge" }, { value: "file" }] }),
+  // A OneNote sign-in in progress holds its PKCE verifier.
+  secret("lumen-onenote-signin", "general"),
+  // What code the desktop app installs, and which unfinished features run: not taken from an imported file.
+  data("lumen-update-channel"),
+  data("lumen-flags"),
+  data("lumen.plugins.installed"),
+  // Measurements, caches and bookkeeping.
+  data("lumen.ollama.speculative"),
+  data("lumen.ai.builtinGate"),
+  data("lumen-update-last-check"),
+  data("lumen-boot-edit"),
+  data("lumen-saved-searches-migrated"),
+  data("lumen.highlights.citeKeys"),
+  data("lumen.activation.v1"),
+  data("lumen.capturesAdded"),
+  data("lumen.pdf.spread"),
+  data("lumen.install.count"),
+  data("lumen.storage.persistAskedAfterFirstSave"),
 ];
 
 /** True when `key` is the entry's id, or matches it with `*` as a wildcard. */
