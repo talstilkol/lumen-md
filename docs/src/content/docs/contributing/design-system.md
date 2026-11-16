@@ -56,12 +56,48 @@ name with a folder, such as `sync/cloud/ConflictDialog`, is a surface outside
 `src/ui`. A real exception is
 marked `design-allow: <reason>` in the code.
 
-## Shared components
+## Component library
 
-| Component | Where | For |
-|---|---|---|
-| Dialogs | `uiAlert`, `uiConfirm`, `uiPrompt`, `uiSelect` (`src/ui/PromptDialog.tsx`) | every question and confirmation; never `window.confirm` |
-| Modal frame | `.cmd-palette-backdrop` + `.cmd-palette` (`src/ui/CommandPalette.css`) | panels such as the trash, the AI doctor, settings |
-| Toasts | `showAiToast()` (`src/ui/AiToast.tsx`), `toast.*` (`src/store/useToastStore.ts`) | short messages; `action` for an Undo |
-| Icon button | `.icon-btn` (`src/index.css`) | toolbar and panel buttons |
-| Command palette | `src/ui/CommandPalette.tsx` | every action has a command |
+Build a new surface from these parts before writing a new one. Each row names
+the export and its file; `src/__tests__/designLibrary.test.ts` fails when a
+row names something that is not exported there, and when a component that
+many surfaces import is missing from this table.
+
+| Component | Import | For | Behaviour you get |
+|---|---|---|---|
+| `Modal` | `src/ui/Modal.tsx` | every modal dialog | a native `<dialog>` in the top layer; the rest of the page inert; Tab stays inside; Escape (and the Android back gesture) calls `onClose`; focus goes back to the opener; `closedBy="none"` while it works; `embedded` for a tab inside another surface. Needs `aria-label` or `aria-labelledby`. Only this element may set `aria-modal` (the `lumen/modal-only` lint rule) |
+| `uiAlert`, `uiConfirm`, `uiPrompt`, `uiSelect` | `src/ui/PromptDialog.tsx` | every question, confirmation and short input | promise-based (`await uiConfirm({ message })`), built on `Modal`; `password: true` for a secret, `choices` for a list. Never `window.confirm` / `prompt` |
+| `EmptyState` | `src/ui/EmptyState.tsx` | a panel with nothing in it | one sentence on why it is empty and one required `action` out of it (`runCommand(id)`, `learnHow(topic)`); `role="status"`. `scripts/check-empty-states.mjs` fails an empty string rendered without it |
+| `HelpButton`, `openHelp` | `src/ui/HelpButton.tsx` | the “?” next to a setting or a panel title | opens the in-app help on a topic; `openHelp(topic)` from code |
+| `showAiToast` | `src/ui/AiToast.tsx` | a short message that does not need an answer | `info` / `success` / `error`; one optional `action` (an Undo) and a `learnMoreUrl`; errors read out at once (`role="alert"`), the rest politely (`role="status"`) |
+| `ErrorBoundary` | `src/ui/ErrorBoundary.tsx` | around a surface that can fail on its own | shows its `fallback`, or by default the recovery actions (`ErrorActions`), instead of a white screen |
+| `CommandPalette`, `Command` | `src/ui/CommandPalette.tsx` | every action the app has | an action is a command first (an id, a title, a shortcut); menus and buttons call the same command |
+| `cmdIcons` | `src/ui/cmdIcons.ts` | the icon of a command | one icon per command, the same in the palette, the menus and the toolbar |
+| `useFocusTrap` | `src/ui/useFocusTrap.ts` | a non-modal surface that still holds focus (a popover) | Tab cycles inside, Escape, focus restore; `Modal` already uses it |
+| `color`, `shadow`, `space`, `radius`, `text`, `transition`, `enter`, `resolvedColor` | `src/ui/tokens.ts` | inline styles | the tokens above as TypeScript; `transition()` accepts only `transform` and `opacity` |
+| `.icon-btn` | `src/index.css` | a toolbar or panel button with only an icon | the hover, focus ring and size of every icon button; give it an `aria-label` |
+| `.cmd-palette-backdrop`, `.cmd-palette` | `src/ui/CommandPalette.css` | the frame of a large panel (trash, AI doctor) | the overlay colour, elevation and enter motion of the palette |
+| `toast` | `src/store/useToastStore.ts` | a toast from a store or a non-React module | the same toasts as `showAiToast`, through the store |
+
+### Using them together
+
+```tsx
+import { Modal } from "../ui/Modal";
+import { EmptyState, runCommand } from "../ui/EmptyState";
+import { HelpButton } from "../ui/HelpButton";
+import { uiConfirm } from "../ui/PromptDialog";
+import { color, space } from "../ui/tokens";
+
+<Modal aria-labelledby="trash-title" onClose={close}>
+  <h2 id="trash-title">{t("trash.title")} <HelpButton topic="trash" /></h2>
+  {items.length === 0 ? (
+    <EmptyState message={t("trash.empty")} action={{ label: t("trash.openFiles"), onClick: () => runCommand("files.open") }} />
+  ) : (
+    <ul style={{ padding: space[3], color: color.fg }}>…</ul>
+  )}
+  <button className="icon-btn" aria-label={t("trash.emptyAll")} onClick={async () => (await uiConfirm({ message: t("trash.confirmEmpty") })) && emptyAll()} />
+</Modal>
+```
+
+A new shared component gets a row here, in English and in Hebrew, in the same
+change.
