@@ -1,9 +1,9 @@
 {
  "about": "W10.F7: a decision for every open PR whose head is not in the train (npm run train:missing). in = a task or train brings it; rejected = it will not go in, and why; replaced = what carries it instead. A decision is about one head: a PR that moves needs a new one.",
  "train": "verify/train-7",
- "trainHead": "a878a844f12167eb69b24f2272cc8d38c6f4c189",
+ "trainHead": "2cb1792f1d23b730db459c1bf522e1c7e40b1efa",
  "decided": "2026-11-16",
- "note": "T8 integration (lane INT): re-run against the integration head a878a844f1 after merging the 39 T8 PRs (#946-#984); decisions about PRs now in the train were dropped (train:missing ignores them), and #513/#734 are replaced by their re-applied port. Before: lane A1 (T8) decided every open PR outside verify/train-7 @ 3100c18c43 (ports #957-#983; evidence in the lane's decisions.tsv).",
+ "note": "Lane F8 (review 8): re-run against the F8 integration head 2cb1792f1d (13 F8 PRs #986-#998 merged into verify/train-7 @ eba3a0eaee). The five dependabot bumps (#160 #161 #162 #264 #325) were re-keyed to their rebased heads and are now decided by number, author and title; #985 (opened after the T8 push) is decided 'in' via W10.B12. Before: T8 integration (lane INT): re-run against the integration head a878a844f1 after merging the 39 T8 PRs (#946-#984); decisions about PRs now in the train were dropped (train:missing ignores them), and #513/#734 are replaced by their re-applied port. Before: lane A1 (T8) decided every open PR outside verify/train-7 @ 3100c18c43 (ports #957-#983; evidence in the lane's decisions.tsv).",
  "decisions": [
   {
    "pr": 109,
@@ -428,6 +428,13 @@
    "decision": "replaced",
    "reason": "superseded: RTL theme check in train 7 via #926 (train 7 STATE).",
    "by": "#926 (re-stack of #910)"
+  },
+  {
+   "pr": 985,
+   "head": "2a016e18b1e09a8283a90e21ff9f8163686d73bf",
+   "decision": "in",
+   "via": "W10.B12",
+   "reason": "Lane A6's plan sync to the honest audit (draft, base verify/train-7), opened after the T8 push; it goes into the train with its own review and integration, not with F8's fixes."
   }
  ]
 }
