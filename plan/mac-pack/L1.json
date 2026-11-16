@@ -1,0 +1,347 @@
+[
+  {
+    "id": "L1/setup",
+    "task": "(setup)",
+    "cmd": "npm ci && npx playwright install chromium firefox webkit && mkdir -p reports/mac-pack/L1",
+    "expect": {
+      "exit": 0
+    },
+    "needs": [],
+    "minutes": 10
+  },
+  {
+    "id": "L1/e2e-batch",
+    "task": "9.5 9.7 9.9 W3.11 W6.29 W6.34 W6.36 W6.43",
+    "cmd": "PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L1/e2e.json npx playwright test e2e/rtl-matrix.spec.ts e2e/rtl-parity.spec.ts e2e/bidi-editing.spec.ts e2e/rtl-caret.spec.ts e2e/collab-suggest-versions.spec.ts e2e/local-only-all-commands.spec.ts e2e/obsidian-bases.spec.ts e2e/vault-encryption.spec.ts e2e/e2ee-unaudited.spec.ts --project=chromium --project=firefox --project=webkit --reporter=json; node scripts/mac-pack/pw-slice.mjs reports/mac-pack/L1/e2e.json e2e/rtl-matrix.spec.ts e2e/rtl-parity.spec.ts e2e/bidi-editing.spec.ts e2e/rtl-caret.spec.ts e2e/collab-suggest-versions.spec.ts e2e/local-only-all-commands.spec.ts e2e/obsidian-bases.spec.ts e2e/vault-encryption.spec.ts e2e/e2ee-unaudited.spec.ts --total 513 --out reports/mac-pack/L1/e2e-batch.json",
+    "expect": {
+      "exit": 0,
+      "json": {
+        "file": "reports/mac-pack/L1/e2e-batch.json",
+        "ok": true,
+        "total": 513,
+        "unexpected": 0,
+        "skipped": 0
+      }
+    },
+    "needs": [
+      "L1/setup"
+    ],
+    "minutes": 50
+  },
+  {
+    "id": "L1/9.5",
+    "task": "9.5",
+    "cmd": "node scripts/mac-pack/pw-slice.mjs reports/mac-pack/L1/e2e.json e2e/rtl-matrix.spec.ts --total 33 --out reports/mac-pack/L1/9.5.json",
+    "expect": {
+      "exit": 0,
+      "json": {
+        "file": "reports/mac-pack/L1/9.5.json",
+        "ok": true,
+        "total": 33
+      }
+    },
+    "needs": [
+      "L1/e2e-batch"
+    ],
+    "minutes": 1
+  },
+  {
+    "id": "L1/9.7",
+    "task": "9.7",
+    "cmd": "node scripts/mac-pack/pw-slice.mjs reports/mac-pack/L1/e2e.json e2e/bidi-editing.spec.ts --total 180 --out reports/mac-pack/L1/9.7.json",
+    "expect": {
+      "exit": 0,
+      "json": {
+        "file": "reports/mac-pack/L1/9.7.json",
+        "ok": true,
+        "total": 180
+      }
+    },
+    "needs": [
+      "L1/e2e-batch"
+    ],
+    "minutes": 1
+  },
+  {
+    "id": "L1/9.9",
+    "task": "9.9",
+    "cmd": "npx vitest run src/__tests__/rtlLogical.test.ts && node scripts/mac-pack/pw-slice.mjs reports/mac-pack/L1/e2e.json e2e/rtl-parity.spec.ts e2e/rtl-caret.spec.ts --total 279 --out reports/mac-pack/L1/9.9.json",
+    "expect": {
+      "exit": 0,
+      "json": {
+        "file": "reports/mac-pack/L1/9.9.json",
+        "ok": true,
+        "total": 279
+      }
+    },
+    "needs": [
+      "L1/e2e-batch",
+      "PR #1077 in the train (rtlLogical is red on f090c20812 without it)"
+    ],
+    "minutes": 2
+  },
+  {
+    "id": "L1/W3.11",
+    "task": "W3.11",
+    "cmd": "node scripts/mac-pack/pw-slice.mjs reports/mac-pack/L1/e2e.json e2e/collab-suggest-versions.spec.ts --total 3 --out reports/mac-pack/L1/W3.11.json",
+    "expect": {
+      "exit": 0,
+      "json": {
+        "file": "reports/mac-pack/L1/W3.11.json",
+        "ok": true,
+        "total": 3
+      }
+    },
+    "needs": [
+      "L1/e2e-batch"
+    ],
+    "minutes": 1
+  },
+  {
+    "id": "L1/W6.29",
+    "task": "W6.29",
+    "cmd": "npm run privacy:ledger && node scripts/mac-pack/pw-slice.mjs reports/mac-pack/L1/e2e.json e2e/local-only-all-commands.spec.ts --total 3 --out reports/mac-pack/L1/W6.29.json",
+    "expect": {
+      "exit": 0,
+      "json": {
+        "file": "reports/mac-pack/L1/W6.29.json",
+        "ok": true,
+        "total": 3
+      }
+    },
+    "needs": [
+      "L1/e2e-batch"
+    ],
+    "minutes": 1
+  },
+  {
+    "id": "L1/W6.34",
+    "task": "W6.34",
+    "cmd": "node scripts/mac-pack/pw-slice.mjs reports/mac-pack/L1/e2e.json e2e/obsidian-bases.spec.ts --total 3 --out reports/mac-pack/L1/W6.34-e2e.json && V=$(mktemp -d)/vault && cp -R src/__tests__/fixtures/obsidian-corpus/kepano-obsidian \"$V\" && npm run obsidian:compare -- prepare \"$V\" && open -W -a Obsidian \"$V\" ; npm run obsidian:compare -- diff \"$V\" --out reports/mac-pack/L1/W6.34-obsidian-diff.md",
+    "expect": {
+      "exit": 0,
+      "file": "reports/mac-pack/L1/W6.34-obsidian-diff.md",
+      "note": "exit 1 when any view is ❌ or ⏳"
+    },
+    "needs": [
+      "L1/e2e-batch",
+      "Obsidian ≥ 1.15.1 installed",
+      "one manual step inside Obsidian: turn on the Lumen compare plugin, run 'Lumen compare: Run every probe', quit"
+    ],
+    "minutes": 20
+  },
+  {
+    "id": "L1/W6.36",
+    "task": "W6.36",
+    "cmd": "PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L1/perf.json npx playwright test --project=perf e2e/perf-vault.spec.ts --reporter=json; node scripts/mac-pack/pw-slice.mjs reports/mac-pack/L1/perf.json e2e/perf-vault.spec.ts --total 3 --out reports/mac-pack/L1/W6.36-perf.json && node scripts/mac-pack/pw-slice.mjs reports/mac-pack/L1/e2e.json e2e/vault-encryption.spec.ts --total 6 --out reports/mac-pack/L1/W6.36.json",
+    "expect": {
+      "exit": 0,
+      "json": {
+        "file": "reports/mac-pack/L1/W6.36.json",
+        "ok": true,
+        "total": 6
+      }
+    },
+    "needs": [
+      "L1/e2e-batch"
+    ],
+    "minutes": 10
+  },
+  {
+    "id": "L1/W6.3",
+    "task": "W6.3",
+    "cmd": "npx vitest run security/attacks src/__tests__/e2eeRekeyIntegrity.test.ts src/__tests__/e2eeKeyring.test.ts src/__tests__/lanSync.test.ts --reporter=json --outputFile=reports/mac-pack/L1/W6.3-vitest.json && python3 scripts/sync-protocol/check_vectors.py && git fetch -q origin chore/release-beta1 && git merge-base --is-ancestor f090c2081271c5a2e71f98e97dd9c3675224511f origin/chore/release-beta1",
+    "expect": {
+      "exit": 0,
+      "json": {
+        "file": "reports/mac-pack/L1/W6.3-vitest.json",
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numPassedTests": ">=71"
+      }
+    },
+    "needs": [
+      "L1/setup",
+      "integrator: chore/release-beta1 rebuilt on the train (W6.43)"
+    ],
+    "minutes": 25
+  },
+  {
+    "id": "L1/W6.8",
+    "task": "W6.8",
+    "cmd": "npm run nightly:full && node -e \"const fs=require('fs');const f=fs.readdirSync('reports/nightly').filter(n=>/^full-.*\\.json$/.test(n)).sort().pop();const r=fs.readFileSync('reports/nightly/'+f,'utf8').trim().split('\\n').map(JSON.parse);const bad=r.filter(x=>x.status!=='ok');console.log(JSON.stringify({file:f,steps:r.length,bad:bad.length}));process.exit(bad.length?1:0)\"",
+    "expect": {
+      "exit": 0,
+      "json": {
+        "file": "reports/nightly/full-<date>.json",
+        "every line": {
+          "status": "ok"
+        }
+      }
+    },
+    "needs": [
+      "L1/setup"
+    ],
+    "minutes": 120
+  },
+  {
+    "id": "L1/W6.16",
+    "task": "W6.16",
+    "cmd": "node scripts/mutation/run.mjs --critical --receipt --max 100000 && node scripts/mutation/check.mjs && npm run mutation:calibrate",
+    "expect": {
+      "exit": 0,
+      "file": "scripts/mutation/receipt.json",
+      "note": "check.mjs exits 0 only when all 18 critical modules have a measured (runner vitest) score ≥ 80"
+    },
+    "needs": [
+      "L1/setup"
+    ],
+    "minutes": 240
+  },
+  {
+    "id": "L1/W6.19",
+    "task": "W6.19",
+    "cmd": "npm run whisper:desktop -- pin && npm run whisper:desktop -- wer --split test=\"$LUMEN_HELDOUT_DIR/asr-he\" --model \"$WHISPER_MODEL\" --out reports/mac-pack/L1/W6.19-whisper.json",
+    "expect": {
+      "exit": 0,
+      "json": {
+        "file": "reports/mac-pack/L1/W6.19-whisper.json",
+        "wer": "<= 0.10 (desktop)"
+      }
+    },
+    "needs": [
+      "L1/setup",
+      "owner: held-out key and the unsealed asr-he split (W6.17)",
+      "whisper.cpp `whisper-cli` on PATH and a pinned ggml model"
+    ],
+    "minutes": 40
+  },
+  {
+    "id": "L1/W6.24",
+    "task": "W6.24",
+    "cmd": "npm run mobile:check && npm run mobile:android -- --unsigned && npm run tauri:build",
+    "expect": {
+      "exit": 0,
+      "files": [
+        "android/app/build/outputs/bundle/release/*.aab",
+        "src-tauri/target/release/bundle/macos/*.app"
+      ]
+    },
+    "needs": [
+      "L1/setup",
+      "Android SDK + JDK 17 (mobile:check lists what is missing)",
+      "signed AAB/IPA and TestFlight: the owner's keys (owner:session accounts/signing)"
+    ],
+    "minutes": 45
+  },
+  {
+    "id": "L1/W6.26",
+    "task": "W6.26",
+    "cmd": "npm run build && node scripts/bundle-budget.mjs --json > reports/bundle-sizes.json && npm run budget:ratchet -- --sizes reports/bundle-sizes.json && npm run budget:history -- --since all",
+    "expect": {
+      "exit": 0,
+      "note": "budget:history exits 1 on any raise of a budget file"
+    },
+    "needs": [
+      "L1/setup"
+    ],
+    "minutes": 10
+  },
+  {
+    "id": "L1/W6.41",
+    "task": "W6.41",
+    "cmd": "npm run design:check && npm run test:visual",
+    "expect": {
+      "exit": 0,
+      "note": "the first run fails on missing baselines by design (W10.B16); after the owner approves them with `npm run visual:approve`, the second run must exit 0"
+    },
+    "needs": [
+      "L1/setup",
+      "owner: look at the 47 new screenshots and run `npm run visual:approve` (no run approves itself)"
+    ],
+    "minutes": 15
+  },
+  {
+    "id": "L1/W6.43",
+    "task": "W6.43",
+    "cmd": "npx vitest run src/__tests__/releasePublishRefusal.test.ts src/__tests__/updaterManifestSig.test.ts && npm run repro && git fetch -q origin chore/release-beta1 && git merge-base --is-ancestor f090c2081271c5a2e71f98e97dd9c3675224511f origin/chore/release-beta1 && node scripts/mac-pack/pw-slice.mjs reports/mac-pack/L1/e2e.json e2e/e2ee-unaudited.spec.ts --total 6 --out reports/mac-pack/L1/W6.43.json",
+    "expect": {
+      "exit": 0,
+      "json": {
+        "file": "reports/mac-pack/L1/W6.43.json",
+        "ok": true,
+        "total": 6
+      }
+    },
+    "needs": [
+      "L1/e2e-batch",
+      "integrator: rebuild chore/release-beta1 on the train's crypto head (today it lacks f090c20812)",
+      "owner: updater key (accounts/signing) for the beta.1 → beta.2 drill"
+    ],
+    "minutes": 30
+  },
+  {
+    "id": "L1/W6.45",
+    "task": "W6.45",
+    "cmd": "npm run build && npm run perf:responsiveness",
+    "expect": {
+      "exit": 0,
+      "files": [
+        "reports/perf/responsiveness/desktop-chromium.json",
+        "reports/perf/responsiveness/mid-phone-emulated.json"
+      ],
+      "note": "the first run writes the baseline with `gate --update`; the gate then fails a 10% artificial regression"
+    },
+    "needs": [
+      "L1/setup",
+      "BrowserStack (W6.6) for real devices: `node scripts/perf/responsiveness.mjs browserstack`"
+    ],
+    "minutes": 25
+  },
+  {
+    "id": "L1/W6.48",
+    "task": "W6.48",
+    "cmd": "PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L1/canvas.json npx playwright test --project=perf e2e/canvas-perf.spec.ts --reporter=json; node scripts/mac-pack/pw-slice.mjs reports/mac-pack/L1/canvas.json e2e/canvas-perf.spec.ts --total 1 --out reports/mac-pack/L1/W6.48.json",
+    "expect": {
+      "exit": 0,
+      "json": {
+        "file": "reports/mac-pack/L1/W6.48.json",
+        "ok": true,
+        "total": 1
+      },
+      "note": "the spec asserts ≥ 55 fps on a real GPU; its annotation 'canvas 5000 shapes pan/zoom: N fps' is the number"
+    },
+    "needs": [
+      "L1/setup"
+    ],
+    "minutes": 5
+  },
+  {
+    "id": "L1/W3.4",
+    "task": "W3.4",
+    "cmd": "npm run ios:sync && xcodebuild -project ios/App/App.xcodeproj -target LumenWidgets -sdk iphonesimulator -configuration Debug CODE_SIGNING_ALLOWED=NO build",
+    "expect": {
+      "exit": 0,
+      "stdout": "** BUILD SUCCEEDED **"
+    },
+    "needs": [
+      "L1/setup",
+      "Xcode"
+    ],
+    "minutes": 15
+  },
+  {
+    "id": "L1/W3.9",
+    "task": "W3.9",
+    "cmd": "(cd src-tauri && cargo test) && npm run tauri:build -- --debug --bundles app && open \"lumen://clip?data=%7B%7D\"",
+    "expect": {
+      "exit": 0,
+      "note": "cargo test runs src-tauri/src/lib.rs deep_link_tests"
+    },
+    "needs": [
+      "L1/setup",
+      "Rust toolchain"
+    ],
+    "minutes": 25
+  }
+]
