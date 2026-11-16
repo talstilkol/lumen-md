@@ -169,6 +169,8 @@
   "cmd.entities.wikidata": "ישות: קישור ל-Wikidata…",
   "cmd.entities.wikidata.notEntity": "פתחו קודם פתק ישות (פתק תחת ישויות/).",
   "cmd.epub.open": "פתיחת ספר EPUB לקריאה…",
+  "cmd.export.latexPdf": "PDF מ-LaTeX (שולחן העבודה, Tectonic)…",
+  "cmd.export.latexPdf.hint": "ייצוא ה-LaTeX מקומפל ל-PDF ב-Tectonic במחשב הזה; שגיאות TeX עם מספרי השורות אם הקומפילציה נכשלת",
   "cmd.export.latexProject": "ייצוא פרויקט LaTeX (אקדמי, עברית)…",
   "cmd.export.latexProject.hint": "main.tex ל-LuaLaTeX / XeLaTeX עם עברית מימין לשמאל, מתמטיקה, ציטוטי [@key] מקובצי ה-.bib בכספת, והתמונות, ב-ZIP",
   "cmd.feedback": "עזרה: שליחת משוב",

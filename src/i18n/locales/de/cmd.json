@@ -169,6 +169,8 @@
   "cmd.entities.wikidata": "Entität: mit Wikidata verknüpfen…",
   "cmd.entities.wikidata.notEntity": "Öffne zuerst eine Entitätsnotiz (unter ישויות/).",
   "cmd.epub.open": "EPUB zum Lesen öffnen…",
+  "cmd.export.latexPdf": "PDF aus LaTeX (Desktop, Tectonic)…",
+  "cmd.export.latexPdf.hint": "Der LaTeX-Export, von Tectonic auf diesem Computer zu PDF kompiliert; bei Fehlern die TeX-Fehler mit ihren Zeilen",
   "cmd.export.latexProject": "LaTeX-Projekt exportieren (akademisch, Hebräisch)…",
   "cmd.export.latexProject.hint": "main.tex für LuaLaTeX / XeLaTeX mit Hebräisch von rechts nach links, Mathematik, [@key]-Zitaten aus den .bib-Dateien und den Bildern, als ZIP",
   "cmd.feedback": "Hilfe: Feedback senden",

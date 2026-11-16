@@ -169,6 +169,8 @@
   "cmd.entities.wikidata": "Сущность: связать с Wikidata…",
   "cmd.entities.wikidata.notEntity": "Сначала откройте заметку сущности (в ישויות/).",
   "cmd.epub.open": "Открыть EPUB для чтения…",
+  "cmd.export.latexPdf": "PDF из LaTeX (настольное приложение, Tectonic)…",
+  "cmd.export.latexPdf.hint": "Экспорт LaTeX, скомпилированный в PDF программой Tectonic на этом компьютере; при сбое — ошибки TeX с номерами строк",
   "cmd.export.latexProject": "Экспорт проекта LaTeX (научный, иврит)…",
   "cmd.export.latexProject.hint": "main.tex для LuaLaTeX / XeLaTeX с ивритом справа налево, формулами, ссылками [@key] из .bib хранилища и изображениями, в ZIP",
   "cmd.feedback": "Справка: отправить отзыв",

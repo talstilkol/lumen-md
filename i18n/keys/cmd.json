@@ -856,6 +856,16 @@
       "vars": []
     },
     {
+      "key": "cmd.export.latexPdf",
+      "en": "PDF from LaTeX (desktop, Tectonic)…",
+      "vars": []
+    },
+    {
+      "key": "cmd.export.latexPdf.hint",
+      "en": "The LaTeX export compiled to PDF by Tectonic on this computer; TeX's errors with their lines when it fails",
+      "vars": []
+    },
+    {
       "key": "cmd.export.latexProject",
       "en": "Export LaTeX project (academic, Hebrew)…",
       "vars": []

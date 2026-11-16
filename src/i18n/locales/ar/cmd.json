@@ -169,6 +169,8 @@
   "cmd.entities.wikidata": "كيان: ربط بـ Wikidata…",
   "cmd.entities.wikidata.notEntity": "افتح أولاً ملاحظة كيان (ملاحظة تحت ישויות/).",
   "cmd.epub.open": "فتح كتاب EPUB للقراءة…",
+  "cmd.export.latexPdf": "PDF من LaTeX (سطح المكتب، Tectonic)…",
+  "cmd.export.latexPdf.hint": "تصدير LaTeX مُجمَّعًا إلى PDF بواسطة Tectonic على هذا الحاسوب؛ أخطاء TeX مع أرقام الأسطر عند الفشل",
   "cmd.export.latexProject": "تصدير مشروع LaTeX (أكاديمي، عبرية)…",
   "cmd.export.latexProject.hint": "main.tex لـ LuaLaTeX / XeLaTeX مع العبرية من اليمين إلى اليسار والرياضيات واستشهادات [@key] من ملفات ‎.bib والصور، في ZIP",
   "cmd.feedback": "مساعدة: إرسال ملاحظات",

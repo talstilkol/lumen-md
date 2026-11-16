@@ -9,6 +9,7 @@ mod update_guard;
 mod manifest_sig;
 
 mod whisper_core;
+mod tectonic;
 
 /// Build the native menu bar and emit `lumen-menu` events when an item fires.
 /// The frontend listens for these events in `useTauriMenu` and dispatches the
@@ -568,6 +569,69 @@ fn close_presenter_window(app: tauri::AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+// ── LaTeX → PDF with Tectonic (plan W5.22 step 3, W10.E14) ─────────────────
+// The user installs Tectonic; Lumen bundles no TeX. Logic and tests:
+// tectonic.rs (std only).
+
+#[derive(serde::Serialize)]
+struct LatexStatus {
+    tectonic: Option<String>,
+}
+
+#[derive(serde::Deserialize)]
+struct LatexFile {
+    name: String,
+    data: Vec<u8>,
+}
+
+#[derive(serde::Serialize)]
+struct LatexErrorOut {
+    line: Option<u32>,
+    message: String,
+}
+
+#[derive(serde::Serialize)]
+#[serde(tag = "kind")]
+enum LatexFailure {
+    #[serde(rename = "no-tectonic")]
+    NoTectonic,
+    #[serde(rename = "tex")]
+    Tex { errors: Vec<LatexErrorOut>, log_tail: String },
+    #[serde(rename = "other")]
+    Other { message: String },
+}
+
+fn tectonic_bin() -> Option<std::path::PathBuf> {
+    let env = std::env::var("LUMEN_TECTONIC").ok();
+    let path = std::env::var("PATH").ok();
+    tectonic::find(&tectonic::candidates(env.as_deref(), path.as_deref()))
+}
+
+/// Is Tectonic installed? Its path, or null.
+#[tauri::command]
+fn latex_status() -> LatexStatus {
+    LatexStatus { tectonic: tectonic_bin().map(|p| p.display().to_string()) }
+}
+
+/// Compile main.tex (and the export's other files) to PDF; the errors with their lines when TeX fails.
+#[tauri::command]
+async fn latex_pdf(tex: String, files: Vec<LatexFile>) -> Result<tauri::ipc::Response, LatexFailure> {
+    let bin = tectonic_bin().ok_or(LatexFailure::NoTectonic)?;
+    let stamp = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_nanos()).unwrap_or(0);
+    let work = std::env::temp_dir().join(format!("lumen-latex-{}-{}", std::process::id(), stamp));
+    let files: Vec<(String, Vec<u8>)> = files.into_iter().map(|f| (f.name, f.data)).collect();
+    tauri::async_runtime::spawn_blocking(move || tectonic::compile(&bin, &tex, &files, &work))
+        .await
+        .map_err(|e| LatexFailure::Other { message: e.to_string() })?
+        .map_err(|e| match e {
+            tectonic::CompileError::Tex { errors, log_tail } => LatexFailure::Tex { errors: errors.into_iter().map(|e| LatexErrorOut { line: e.line, message: e.message }).collect(), log_tail },
+            tectonic::CompileError::Spawn(m) | tectonic::CompileError::Io(m) => LatexFailure::Other { message: m },
+            tectonic::CompileError::BadName(n) => LatexFailure::Other { message: format!("invalid file name: {n}") },
+        })
+        // The PDF as raw bytes (an ArrayBuffer in the page), not a JSON array of numbers.
+        .map(tauri::ipc::Response::new)
+}
+
 mod zotero_local;
 
 /// Zotero's answer for the web view (plan W2.15).
@@ -631,6 +695,8 @@ pub fn run() {
             desktop_vault::vault_backup,
             whisper_status,
             whisper_transcribe,
+            latex_status,
+            latex_pdf,
             shell::shell_ready,
             shell::external_read,
             shell::external_write,

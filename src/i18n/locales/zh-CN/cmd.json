@@ -169,6 +169,8 @@
   "cmd.entities.wikidata": "实体：链接到 Wikidata…",
   "cmd.entities.wikidata.notEntity": "请先打开实体笔记（ישויות/ 下的笔记）。",
   "cmd.epub.open": "打开 EPUB 阅读…",
+  "cmd.export.latexPdf": "从 LaTeX 生成 PDF（桌面版，Tectonic）…",
+  "cmd.export.latexPdf.hint": "在此电脑上用 Tectonic 将 LaTeX 导出编译为 PDF；失败时显示 TeX 错误及行号",
   "cmd.export.latexProject": "导出 LaTeX 项目（学术，希伯来语）…",
   "cmd.export.latexProject.hint": "适用于 LuaLaTeX / XeLaTeX 的 main.tex，含从右到左的希伯来语、数学公式、来自库中 .bib 的 [@key] 引用及图片，打包为 ZIP",
   "cmd.feedback": "帮助：发送反馈",
