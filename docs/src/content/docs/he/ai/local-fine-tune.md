@@ -16,6 +16,19 @@ description: מתאם LoRA שמאומן על הפתקים שלך במחשב Mac 
    - **NVIDIA:** הסקריפט מאמן עם PEFT דרך ספריית הליבה של Unsloth (Apache-2.0). הוא לא משתמש ב-Unsloth Studio, שהוא AGPL. אחר כך הוא ממיר את המתאם עם `convert_lora_to_gguf.py` של llama.cpp ויוצר Modelfile עם `ADAPTER`.
 3. בוחרים את `lumen-style` כמודל Ollama בהגדרות ה-AI.
 
+## משורת הפקודה
+
+אותו ייצוא, בלי האפליקציה, מתיקיית כספת בדיסק (פרופיל הסגנון לא נכלל, כי
+הוא שמור באפליקציה):
+
+```bash
+node scripts/lora/export.mjs --vault ~/Notes --out ~/lumen-lora --platform mac
+cd ~/lumen-lora && bash train-mac.sh
+```
+
+הפקודה מדפיסה רק מספרים. היא יוצאת עם 1 כשיש מעט מדי פתקים לאימון, לפי
+אותו כלל של הכפתור.
+
 ## האם הוא קרוב יותר לסגנון שלך?
 
 ```bash
