@@ -5,7 +5,7 @@ import { useAppStore } from "../../store/useStore";
 import { t, getLocale } from "../../i18n";
 import { getRecents, removeRecent } from "../../storage/recent";
 import { uiAlert } from "../../ui/PromptDialog";
-import { TEMPLATES } from "../../editor/templates";
+import { TEMPLATE_META } from "../../editor/templateMeta";
 import { buildInstalledTemplateCommands } from "../installedTemplates";
 import { showAiToast } from "../../ui/AiToast";
 import { isOPFSAvailable, readWorkspaceFile } from "../../storage/workspace";
@@ -165,13 +165,18 @@ export function buildSyncCommands(): Command[] {
 /** New note from a built-in or an installed template. */
 export function buildTemplateCommands({ installedTemplates }: CommandContext): Command[] {
   return [
-    ...TEMPLATES.map((tpl) => ({
+    // The content loads when a template is chosen (startup: the names only).
+    ...TEMPLATE_META.map((tpl) => ({
       id: `template.${tpl.id}`,
       label: `${t("group.templates")}: ${tpl.name}`,
       hint: tpl.category,
       icon: cmdIcons.FileText,
       group: t("group.templates"),
-      action: () => openTemplateDoc(tpl.name, tpl.content),
+      action: () =>
+        void import("../../editor/templates").then(({ TEMPLATES }) => {
+          const full = TEMPLATES.find((x) => x.id === tpl.id);
+          if (full) openTemplateDoc(full.name, full.content);
+        }),
     })),
     // Marketplace templates installed into the workspace (templates/<id>.md).
     ...buildInstalledTemplateCommands(installedTemplates, {
