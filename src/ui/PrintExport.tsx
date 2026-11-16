@@ -111,7 +111,7 @@ async function layoutInFrame(html: string, styles: string, dir: string, lang: st
   const frame = document.createElement("iframe");
   frame.setAttribute("aria-hidden", "true");
   frame.tabIndex = -1;
-  frame.style.cssText = `position:fixed;left:-10000px;top:0;width:${area.width + 40}mm;height:${area.height}mm;border:0;visibility:hidden;`;
+  frame.style.cssText = `position:fixed;inset-inline-start:-10000px;top:0;width:${area.width + 40}mm;height:${area.height}mm;border:0;visibility:hidden;`;
   document.body.appendChild(frame);
   try {
     const doc = frame.contentDocument;

@@ -26,7 +26,7 @@ import type { McpServerConfig } from "../agents/mcp/servers";
 import { Modal } from "./Modal";
 
 const box: React.CSSProperties = { maxWidth: 560, width: "min(560px, 94vw)" };
-const mono: React.CSSProperties = { fontFamily: "var(--font-mono, monospace)", fontSize: 12, wordBreak: "break-all", whiteSpace: "pre-wrap", direction: "ltr", textAlign: "left", unicodeBidi: "isolate" };
+const mono: React.CSSProperties = { fontFamily: "var(--font-mono, monospace)", fontSize: 12, wordBreak: "break-all", whiteSpace: "pre-wrap", direction: "ltr", textAlign: "start", unicodeBidi: "isolate" };
 const warn: React.CSSProperties = { color: "hsl(var(--destructive, 0 70% 45%))", fontSize: 13, margin: "6px 0" };
 
 function Field({ f, value, error, onChange }: { f: FormField; value: unknown; error?: string; onChange: (v: unknown) => void }) {
