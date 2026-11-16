@@ -1,6 +1,6 @@
 # Vercel CI (Beta) as a fallback for lint and unit tests (W11.Q12)
 
-**Status:** trial set up 15.11.2026; **decision pending the first runs** (owner, below). Buildkite stays the CI of record either way.
+**Status:** trial set up 15.11.2026; **dropped 16.11.2026 without running it** (owner decision, below). Buildkite stays the CI of record.
 
 ## Why try it
 
@@ -55,6 +55,10 @@ Keep Vercel CI as a fallback for these two steps only if all of these hold, othe
 
 ## Decision
 
-Pending. Fill in the table and the line below from the first run:
+`Decision (2026-11-16, f090c20812): drop — reasons:`
 
-`Decision (date, commit): keep / drop — reasons`
+- Verification moved to the owner's Mac (the Mac run happens after the cloud tasks), and no Buildkite agent runs yet either, so there is no CI of record for Vercel CI to back up.
+- The trial needs `turbo` as a devDependency, a dashboard toggle and two CI runs on one commit, all for a fallback nobody would use.
+- No numbers: the table above stays "owed" because the trial was not run. Rule 3 (≤ 1.5× Buildkite) could not be checked; this is a decision not to spend the time, not a measured result.
+
+After this is merged, one follow-up removes `ci/vercel-ci-trial/`, `scripts/ci/ci-compare.mjs` and `src/__tests__/vercelCiTrial.test.ts` together.
