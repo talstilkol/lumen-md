@@ -6,6 +6,7 @@
   "license": "MIT",
   "description": "Lumen — a hybrid markdown editor focused on world-class rendering and turning data into beautiful tables and charts.",
   "scripts": {
+    "prepare": "node scripts/install-git-hooks.mjs || exit 0",
     "predev": "node scripts/copy-pyodide.mjs && node scripts/copy-ruby.mjs && node scripts/copy-ort.mjs && node scripts/copy-quickjs.mjs && node scripts/copy-vad.mjs && node scripts/copy-tesseract.mjs && node scripts/copy-excalidraw.mjs && node scripts/copy-playground-vendor.mjs",
     "dev": "vite",
     "prebuild": "node scripts/copy-pyodide.mjs && node scripts/copy-ruby.mjs && node scripts/copy-ort.mjs && node scripts/copy-quickjs.mjs && node scripts/copy-vad.mjs && node scripts/copy-tesseract.mjs && node scripts/copy-excalidraw.mjs && node scripts/copy-playground-vendor.mjs",

@@ -198,7 +198,40 @@ export function stateFor(branch, files) {
 /** The reference-transaction hook (mark included, so a reinstall replaces only ours). */
 export const TXN_HOOK_MARK = "installed by `node scripts/lane-state.mjs install-hook` (W8.10)";
 export function txnHookPlan(existing, { force = false } = {}) {
-  const content = `#!/bin/sh\n# ${TXN_HOOK_MARK}\n# Records a push in the lane's STATE.md once origin has it; never fails the transaction.\n[ "$1" = committed ] || exit 0\n[ -s "$(git rev-parse --git-path lumen-lane-pending.json)" ] || exit 0\nnode scripts/lane-state.mjs committed >/dev/null 2>&1 || true\nexit 0\n`;
+  const content = [
+    "#!/bin/sh",
+    `# ${TXN_HOOK_MARK}`,
+    "# Records a push in the lane's STATE.md once origin has it, and keeps the lane's hourly",
+    "# tick running (W10.E57); with no lane state set it does nothing. Never fails the transaction.",
+    '[ "$1" = committed ] || exit 0',
+    'if [ -n "$LUMEN_LANE_STATE$LUMEN_LANE_STATE_DIR" ] || git config --get lumen.laneState >/dev/null 2>&1 || git config --get lumen.laneStateDir >/dev/null 2>&1; then',
+    "  node scripts/lane-state.mjs ensure-watch </dev/null >/dev/null 2>&1 || true",
+    "fi",
+    '[ -s "$(git rev-parse --git-path lumen-lane-pending.json)" ] || exit 0',
+    "node scripts/lane-state.mjs committed >/dev/null 2>&1 || true",
+    "exit 0",
+    "",
+  ].join("\n");
   if (existing == null || existing.includes(TXN_HOOK_MARK)) return { action: "write", content };
   return { action: force ? "backup" : "refuse", content };
 }
+
+/**
+ * The hourly tick, started by the reference-transaction hook (W10.E57): which
+ * STATE.md to watch, and whether a watcher already runs for it.
+ * @param {{ file?: string; dir?: string } | null} cfg  the lane config
+ * @param {string[]} candidates  the STATE.md files of a --state-dir config
+ * @param {string | null} branch  the checkout's branch
+ * @param {(f: string) => string} read
+ * @param {{ pid: number; file: string } | null} running  the watcher on record
+ * @param {(pid: number) => boolean} alive
+ * @returns {{ action: "none"; why: string } | { action: "start"; file: string }}
+ */
+export function watchPlan(cfg, candidates, branch, read, running, alive) {
+  if (!cfg) return { action: "none", why: "no lane state" };
+  const file = cfg.file ?? (branch ? stateFor(branch, candidates.map((p) => [p, read(p)])) : null);
+  if (!file) return { action: "none", why: "no STATE.md lists this branch" };
+  if (running && running.file === file && alive(running.pid)) return { action: "none", why: "a watcher runs" };
+  return { action: "start", file };
+}
+

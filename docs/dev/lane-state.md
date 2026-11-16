@@ -27,13 +27,19 @@ replay.
 
 ### Written for you: the hooks and the hourly tick
 
-Two of those writes happen without anyone doing them, once per clone:
+Two of those writes happen without anyone doing them. `npm install` and
+`npm ci` install both hooks in every clone (the `prepare` script,
+`scripts/install-git-hooks.mjs`; it keeps a hook that is not ours, and does
+nothing in CI or with `LUMEN_NO_HOOKS=1`). The one thing a lane does is say
+where its state lives:
 
 ```bash
-npm run ci:local -- --install-hook                              # pre-push: notes what the push sends
-node scripts/lane-state.mjs install-hook --state-dir "$S/lanes"  # reference-transaction: records it
-node scripts/lane-state.mjs watch "$S/lanes/<lane>/STATE.md" &   # the hourly tick, while the lane works
+git config lumen.laneStateDir "$S/lanes"    # or: lumen.laneState <STATE.md>, or $LUMEN_LANE_STATE(_DIR)
 ```
+
+By hand, the same hooks: `npm run ci:local -- --install-hook` (pre-push) and
+`node scripts/lane-state.mjs install-hook --state-dir "$S/lanes"`
+(reference-transaction; it also sets the git config above).
 
 - **After a push.** Git has no post-push hook. So the pre-push hook writes
   what it is about to send to `$(git rev-parse --git-path lumen-lane-pending.json)`.
@@ -46,8 +52,14 @@ node scripts/lane-state.mjs watch "$S/lanes/<lane>/STATE.md" &   # the hourly ti
   `--state <file>` names one STATE.md instead of a folder of lanes.
   `$LUMEN_LANE_STATE` / `$LUMEN_LANE_STATE_DIR` override the git config.
   With nothing set, the hooks do nothing.
-- **Every hour.** `watch` runs `tick` now and every `--every-min` minutes
-  (60 by default). A tick writes the Updated time, and records any Branches
+- **Every hour.** The first ref change after the lane state is set (a
+  commit, a fetch, a push) makes the reference-transaction hook start
+  `lane-state.mjs watch` in the background for the lane's STATE.md, unless a
+  watcher already runs for it (`$(git rev-parse --git-path lumen-lane-watch.json)`
+  holds its pid). After a reboot the next ref change starts it again; when
+  the STATE.md is deleted the watcher stops. `watch` runs `tick` now and
+  every `--every-min` minutes (60 by default; `$LUMEN_LANE_TICK_MIN` for the
+  one the hook starts). A tick writes the Updated time, and records any Branches
   head that origin has moved since. As a cron line instead:
   `0 * * * * cd <clone> && node scripts/lane-state.mjs tick <STATE.md>`.
 

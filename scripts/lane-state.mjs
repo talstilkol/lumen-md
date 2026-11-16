@@ -16,6 +16,9 @@
  *        STATE.md is the one under <dir> whose Branches table lists the branch.
  *   node scripts/lane-state.mjs watch <STATE.md> [--every-min 60]   the hourly timer:
  *        `tick` now and every N minutes, until stopped
+ *   node scripts/lane-state.mjs ensure-watch   what the reference-transaction hook calls: starts
+ *        `watch` in the background for the lane's STATE.md unless one already runs (W10.E57),
+ *        so the hourly tick needs no one to start it ($LUMEN_LANE_TICK_MIN: the interval)
  *   node scripts/lane-state.mjs tick <STATE.md> [--no-remote]       once: Updated, and any
  *        Branches head that origin moved (ls-remote) recorded
  *   node scripts/lane-state.mjs record <STATE.md> --branch <b> --sha <sha>
@@ -31,10 +34,11 @@
  * resume exit 0: every branch is "nothing", "push" or "open-pr". Exit 1: a
  * branch needs a person ("look"), or STATE.md is stale ("record").
  */
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { chmodSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { confirmedPushes, parseBranches, pushedRefs, recordPush, renderBranches, resumeAction, stateFor, touchUpdated, txnHookPlan } from "./lib/lane-state.mjs";
+import { fileURLToPath } from "node:url";
+import { confirmedPushes, parseBranches, pushedRefs, recordPush, renderBranches, resumeAction, stateFor, touchUpdated, txnHookPlan, watchPlan } from "./lib/lane-state.mjs";
 
 const argv = process.argv.slice(2);
 const [cmd, file] = argv;
@@ -125,7 +129,38 @@ function tick(path) {
   writeAtomic(path, md);
 }
 
+const watchFile = () => resolve(sh(["git", "rev-parse", "--git-path", "lumen-lane-watch.json"]) ?? ".git/lumen-lane-watch.json");
+const isAlive = (pid) => {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (e) {
+    return e?.code === "EPERM";
+  }
+};
+
+function ensureWatch() {
+  const cfg = laneConfig();
+  let running = null;
+  try {
+    running = JSON.parse(readFileSync(watchFile(), "utf8"));
+  } catch {
+    running = null;
+  }
+  const plan = watchPlan(cfg, cfg ? stateFiles(cfg) : [], sh(["git", "rev-parse", "--abbrev-ref", "HEAD"]), (f) => readFileSync(f, "utf8"), running, isAlive);
+  if (plan.action === "none") return 0;
+  const every = Number(process.env.LUMEN_LANE_TICK_MIN ?? 60) > 0 ? String(Number(process.env.LUMEN_LANE_TICK_MIN ?? 60)) : "60";
+  const child = spawn(process.execPath, [fileURLToPath(import.meta.url), "watch", plan.file, "--every-min", every, ...(flag("no-remote") ? ["--no-remote"] : [])], {
+    detached: true,
+    stdio: "ignore",
+  });
+  child.unref();
+  writeAtomic(watchFile(), JSON.stringify({ pid: child.pid, file: plan.file, since: now() }));
+  return 0;
+}
+
 function main() {
+  if (cmd === "ensure-watch") return ensureWatch();
   if (cmd === "pending") {
     // pre-push: argv[1] is the remote's name. Nothing to note without a lane state.
     if (!laneConfig()) return 0;
@@ -200,11 +235,19 @@ function main() {
     tick(file);
     if (cmd === "tick") return 0;
     console.log(`lane-state: ticking ${file} every ${every} min (Ctrl-C stops)`);
-    setInterval(() => tick(file), every * 60_000);
+    const timer = setInterval(() => {
+      // The lane's folder went away (the lane is over): stop, rather than tick forever.
+      if (!existsSync(file)) return clearInterval(timer);
+      try {
+        tick(file);
+      } catch (e) {
+        console.error(`lane-state: tick failed: ${e instanceof Error ? e.message : String(e)}`);
+      }
+    }, every * 60_000);
     return null;
   }
   if (!["resume", "table"].includes(cmd) || !file) {
-    console.error("usage: node scripts/lane-state.mjs resume|table|tick|watch|record <STATE.md> | install-hook");
+    console.error("usage: node scripts/lane-state.mjs resume|table|tick|watch|record <STATE.md> | install-hook | ensure-watch");
     return 2;
   }
   const rows = parseBranches(readFileSync(file, "utf8"));
