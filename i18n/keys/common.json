@@ -1166,8 +1166,18 @@
       "vars": []
     },
     {
+      "key": "automations.action.createTask",
+      "en": "add a task",
+      "vars": []
+    },
+    {
       "key": "automations.action.move",
       "en": "move it to a folder",
+      "vars": []
+    },
+    {
+      "key": "automations.action.runAgent",
+      "en": "run an agent (its changes wait for your approval)",
       "vars": []
     },
     {
@@ -1178,6 +1188,26 @@
     {
       "key": "automations.action.template",
       "en": "apply a template",
+      "vars": []
+    },
+    {
+      "key": "automations.agent.summary",
+      "en": "Agent {agent}, from the automation {rule}",
+      "vars": [
+        "agent",
+        "rule"
+      ]
+    },
+    {
+      "key": "automations.agent.unknown",
+      "en": "There is no agent called {agent}",
+      "vars": [
+        "agent"
+      ]
+    },
+    {
+      "key": "automations.ask.agent",
+      "en": "Which agent?",
       "vars": []
     },
     {
@@ -1201,6 +1231,15 @@
       "vars": []
     },
     {
+      "key": "automations.ask.prompt",
+      "en": "Instruction for the agent (optional; {{link}}, {{title}}, {{date}})",
+      "vars": [
+        "link",
+        "title",
+        "date"
+      ]
+    },
+    {
       "key": "automations.ask.rowProperty",
       "en": "Property to watch (empty: any property)",
       "vars": []
@@ -1208,6 +1247,20 @@
     {
       "key": "automations.ask.tag",
       "en": "Tag",
+      "vars": []
+    },
+    {
+      "key": "automations.ask.task",
+      "en": "Task text ({{link}}, {{title}}, {{date}})",
+      "vars": [
+        "link",
+        "title",
+        "date"
+      ]
+    },
+    {
+      "key": "automations.ask.tasksFile",
+      "en": "Tasks note",
       "vars": []
     },
     {
@@ -1249,6 +1302,14 @@
       "en": "Rule saved: {name}",
       "vars": [
         "name"
+      ]
+    },
+    {
+      "key": "automations.dryRun.agent",
+      "en": "would run the agent {agent} on {path}; its changes would wait for approval",
+      "vars": [
+        "agent",
+        "path"
       ]
     },
     {

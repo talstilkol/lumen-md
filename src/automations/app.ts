@@ -11,7 +11,8 @@ import { useAppStore } from "../store/useStore";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
 import { updateLinksAfterMove } from "../storage/linkRewrite";
 import { deleteWorkspaceFile, isOPFSAvailable, listWorkspace, readWorkspaceFile, renameWorkspaceFile, workspaceHasFile, writeWorkspaceFile } from "../storage/workspace";
-import { applyPlan, parseRules, plan, undoRun, type Fs, type Plan, type Rule, type RunLogEntry, type VaultEvent } from "./engine";
+import { applyPlan, parseRules, plan, undoRun, type Change, type Fs, type Plan, type Rule, type RunLogEntry, type VaultEvent } from "./engine";
+import { t } from "../i18n";
 
 export const RULES_PATH = ".lumen/automations.json";
 export const LOG_PATH = ".lumen/automations-log.json";
@@ -29,7 +30,28 @@ const fs: Fs = {
     await updateLinksAfterMove(a, b).catch(() => []);
   },
   remove: (p) => deleteWorkspaceFile(p),
+  runAgent: async (c) => void (await runAgentForRule(c)),
 };
+
+/**
+ * "Run an agent" (W10.E15): the agent runs on the note through the runtime,
+ * whose write tools stage their changes; an answer that changed nothing is
+ * staged as an addition to the note. Either way the change waits in the
+ * review panel (`agents/staging.ts`) and is written only when approved.
+ */
+export async function runAgentForRule(c: Extract<Change, { kind: "agent" }>): Promise<{ staged: string[] }> {
+  const [{ getAgent }, { runAgent }, { stageChange }] = await Promise.all([import("../agents/registry"), import("../agents/runtime"), import("../agents/staging")]);
+  const def = getAgent(c.agent);
+  if (!def) throw new Error(t("automations.agent.unknown", { agent: c.agent }));
+  const text = c.path ? await readOrNull(c.path) : null;
+  const run = await runAgent(def, { text: text ?? "", path: c.path, extra: c.prompt ? { instruction: c.prompt } : {} }, { path: c.path, document: text ?? undefined, grants: ["write"] });
+  const staged = [...(run.staged ?? [])];
+  if (run.status === "ok" && !staged.length && c.path && text !== null && typeof run.output === "string" && run.output.trim()) {
+    const summary = t("automations.agent.summary", { agent: def.id, rule: c.rule });
+    staged.push(stageChange({ kind: "file", path: c.path, before: text, after: `${text.replace(/\s*$/, "")}\n\n${run.output.trim()}\n`, summary }, { tool: "automation", runId: run.id, agentId: def.id }).id);
+  }
+  return { staged };
+}
 
 export async function loadRules(): Promise<Rule[]> {
   return parseRules((await readOrNull(RULES_PATH)) ?? "[]");
