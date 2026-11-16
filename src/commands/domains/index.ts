@@ -30,6 +30,7 @@ import { buildBenYehudaCommands } from "./benyehuda";
 import { buildOpenSourceCommands } from "./openSources";
 import { buildEntityCommands } from "./entities";
 import { buildReadingCommands } from "./reading";
+import { buildAcademicCommands } from "./academic";
 
 export const COMMAND_SECTIONS: ReadonlyArray<(ctx: CommandContext) => Command[]> = [
   buildRecentCommands,
@@ -92,4 +93,5 @@ export const COMMAND_SECTIONS: ReadonlyArray<(ctx: CommandContext) => Command[]>
   buildOpenSourceCommands,
   buildEntityCommands,
   buildReadingCommands,
+  buildAcademicCommands,
 ];

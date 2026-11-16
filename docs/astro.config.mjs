@@ -152,6 +152,7 @@ export default defineConfig({
             { label: "Government data (data.gov.il, CBS)", slug: "workspace/government-data", translations: { he: "נתונים ממשלתיים (data.gov.il, הלמ״ס)" } },
             { label: "Ben-Yehuda library (offline)", slug: "workspace/ben-yehuda-library", translations: { he: "ספריית בן־יהודה (בלי רשת)" } },
             { label: "Open sources", slug: "workspace/open-sources", translations: { he: "מקורות פתוחים" } },
+            { label: "Israeli academic calendar", slug: "workspace/academic-calendar", translations: { he: "לוח אקדמי ישראלי" } },
             { label: "Israeli time", slug: "workspace/israeli-time", translations: { he: "זמן ישראלי" } },
             { label: "Writing a book", slug: "workspace/book", translations: { he: "כתיבת ספר" } },
             { label: "Academic LaTeX export (Hebrew)", slug: "workspace/latex-export", translations: { he: "ייצוא LaTeX אקדמי (עברית)" } },

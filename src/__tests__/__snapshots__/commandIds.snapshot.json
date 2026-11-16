@@ -2190,6 +2190,20 @@
       "id": "types.studio",
       "label": "Types: Object Studio (new type, fields, rename)",
       "icon": "Box"
+    },
+    {
+      "id": "academic.choose",
+      "label": "Academic calendar: choose an institution…",
+      "group": "Tools",
+      "hint": "Semesters, Moed A and B and breaks in the daily note ({{academic}}) and for deadlines",
+      "icon": "FileText"
+    },
+    {
+      "id": "academic.ics",
+      "label": "Export the academic calendar (ICS)",
+      "group": "Tools",
+      "hint": "The chosen institution's year as a calendar file for Google Calendar or Apple Calendar",
+      "icon": "Download"
     }
   ],
   "full": [
@@ -4532,6 +4546,20 @@
       "id": "types.studio",
       "label": "Types: Object Studio (new type, fields, rename)",
       "icon": "Box"
+    },
+    {
+      "id": "academic.choose",
+      "label": "Academic calendar: choose an institution…",
+      "group": "Tools",
+      "hint": "Semesters, Moed A and B and breaks in the daily note ({{academic}}) and for deadlines",
+      "icon": "FileText"
+    },
+    {
+      "id": "academic.ics",
+      "label": "Export the academic calendar (ICS)",
+      "group": "Tools",
+      "hint": "The chosen institution's year as a calendar file for Google Calendar or Apple Calendar",
+      "icon": "Download"
     }
   ],
   "autoSaveOn": [
@@ -4860,6 +4888,8 @@
     "reading.newFromLibrary",
     "reading.newFromCapture",
     "types.page",
-    "types.studio"
+    "types.studio",
+    "academic.choose",
+    "academic.ics"
   ]
 }

@@ -36,6 +36,20 @@
       ]
     },
     {
+      "key": "academic.chosen",
+      "en": "Academic calendar: {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "academic.chosenUnverified",
+      "en": "{name} is chosen, but its dates are not checked yet, so Lumen shows nothing from it.",
+      "vars": [
+        "name"
+      ]
+    },
+    {
       "key": "academic.close",
       "en": "Close",
       "vars": []
@@ -56,6 +70,13 @@
       "key": "academic.export",
       "en": "Export .docx",
       "vars": []
+    },
+    {
+      "key": "academic.exported",
+      "en": "Saved {file}",
+      "vars": [
+        "file"
+      ]
     },
     {
       "key": "academic.failed",
@@ -145,6 +166,21 @@
       "vars": []
     },
     {
+      "key": "academic.noChoice",
+      "en": "Choose an institution first.",
+      "vars": []
+    },
+    {
+      "key": "academic.none",
+      "en": "None (stop showing it)",
+      "vars": []
+    },
+    {
+      "key": "academic.pick",
+      "en": "Which institution and year?",
+      "vars": []
+    },
+    {
       "key": "academic.source",
       "en": "The guideline",
       "vars": []
@@ -167,6 +203,11 @@
     {
       "key": "academic.toc",
       "en": "Table of contents",
+      "vars": []
+    },
+    {
+      "key": "academic.unverified",
+      "en": "not yet checked against the official document",
       "vars": []
     },
     {
@@ -8696,6 +8737,11 @@
       "vars": []
     },
     {
+      "key": "hl.scan",
+      "en": "Scan a page",
+      "vars": []
+    },
+    {
       "key": "hl.search",
       "en": "Search highlights and notes",
       "vars": []
@@ -8811,6 +8857,136 @@
     {
       "key": "hlimport.zotero.notRunning",
       "en": "Zotero isn't running on this computer. Open Zotero 7 and try again.",
+      "vars": []
+    },
+    {
+      "key": "hlscan.author",
+      "en": "Author",
+      "vars": []
+    },
+    {
+      "key": "hlscan.bookTitle",
+      "en": "Book title",
+      "vars": []
+    },
+    {
+      "key": "hlscan.cancel",
+      "en": "Cancel",
+      "vars": []
+    },
+    {
+      "key": "hlscan.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "hlscan.color.blue",
+      "en": "blue",
+      "vars": []
+    },
+    {
+      "key": "hlscan.color.green",
+      "en": "green",
+      "vars": []
+    },
+    {
+      "key": "hlscan.color.orange",
+      "en": "orange",
+      "vars": []
+    },
+    {
+      "key": "hlscan.color.pen",
+      "en": "pen",
+      "vars": []
+    },
+    {
+      "key": "hlscan.color.pink",
+      "en": "pink",
+      "vars": []
+    },
+    {
+      "key": "hlscan.color.yellow",
+      "en": "yellow",
+      "vars": []
+    },
+    {
+      "key": "hlscan.drop",
+      "en": "Take a photo of a page, or drop an image here",
+      "vars": []
+    },
+    {
+      "key": "hlscan.failed",
+      "en": "Could not read the page: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "hlscan.found",
+      "en": "{n} marked passages found",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "hlscan.intro",
+      "en": "Highlighter (yellow, green, pink, orange, blue) and pen underlines are found on this device; only the marked lines are read.",
+      "vars": []
+    },
+    {
+      "key": "hlscan.isbn",
+      "en": "ISBN (optional)",
+      "vars": []
+    },
+    {
+      "key": "hlscan.isbnInvalid",
+      "en": "That ISBN's check digit doesn't match",
+      "vars": []
+    },
+    {
+      "key": "hlscan.keepPhoto",
+      "en": "Keep the photo in the vault",
+      "vars": []
+    },
+    {
+      "key": "hlscan.none",
+      "en": "No highlighter or underline found on this page",
+      "vars": []
+    },
+    {
+      "key": "hlscan.page",
+      "en": "Page",
+      "vars": []
+    },
+    {
+      "key": "hlscan.pick",
+      "en": "Choose a photo",
+      "vars": []
+    },
+    {
+      "key": "hlscan.reading",
+      "en": "Reading the marked lines…",
+      "vars": []
+    },
+    {
+      "key": "hlscan.save",
+      "en": "Add {n} highlights",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "hlscan.saved",
+      "en": "{n} highlights added to “{book}” in {s} s",
+      "vars": [
+        "n",
+        "book",
+        "s"
+      ]
+    },
+    {
+      "key": "hlscan.title",
+      "en": "Scan highlights from a printed page",
       "vars": []
     },
     {
