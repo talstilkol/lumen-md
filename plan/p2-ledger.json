@@ -935,7 +935,7 @@
    "url": "https://github.com/talstilkol/lumen-md/pull/235#discussion_r4575404796",
    "finding": "Pin vault snapshot reads to the captured backend (`src/sync/autoBackup.ts`)",
    "decision": "fixed",
-   "evidence": "fix(vault) \"Codex P2 on #235\" (#235's head), an ancestor of verify/train-7 063d3d2c82; checked 16.11",
+   "evidence": "commit \"Codex P2 on #235\", an ancestor of verify/train-7 063d3d2c82: a snapshot pass stays in its vault (src/sync/autoBackup.ts); test historyVaultIdentity.test.ts (W10.G10 re-check 16.11)",
    "sha": "1334460696"
   },
   {
@@ -944,7 +944,7 @@
    "url": "https://github.com/talstilkol/lumen-md/pull/235#discussion_r4575404797",
    "finding": "Reject moving a folder vault into its own descendant (`src/storage/vault/location.ts`)",
    "decision": "fixed",
-   "evidence": "fix(vault) \"Codex P2 on #235\" (#235's head), an ancestor of verify/train-7 063d3d2c82; checked 16.11",
+   "evidence": "commit \"Codex P2 on #235\", an ancestor of verify/train-7 063d3d2c82: no move into or around itself (location.ts); test vaultLocation.test.ts (W10.G10 re-check 16.11)",
    "sha": "1334460696"
   },
   {
@@ -953,7 +953,7 @@
    "url": "https://github.com/talstilkol/lumen-md/pull/235#discussion_r4575404801",
    "finding": "Reconcile deleted files from an interrupted move (`src/storage/vault/location.ts`)",
    "decision": "fixed",
-   "evidence": "fix(vault) \"Codex P2 on #235\" (#235's head), an ancestor of verify/train-7 063d3d2c82; checked 16.11",
+   "evidence": "commit \"Codex P2 on #235\", an ancestor of verify/train-7 063d3d2c82: a resume drops copies of notes deleted since (dropStaleCopies); test vaultLocation.test.ts (W10.G10 re-check 16.11)",
    "sha": "1334460696"
   },
   {
