@@ -31,6 +31,7 @@ Play counts data the app sends off the device. The routes below are each started
 | Outside MCP servers you add | A request for the list of that server's tools; what a tool call sends is listed as the agent's tool request | Adding and enabling a remote MCP server in Settings → MCP servers, then "Show tools" or an agent run that uses it; not in airplane mode, and refused under local-only |
 | Other requests in audit mode | Whatever that request carries; listed so an audit can compare | Audit mode only (lumen.privacy.audit) |
 | Encrypted sync (WebDAV, S3, Dropbox, Google Drive) | Ciphertext only, to the storage you chose | Connecting a sync provider |
+| Backups to your WebDAV server | The vault archive, encrypted (age) or plain as you choose, to the server you set; a plain one is readable there | Setting up a WebDAV backup in Backups (encrypted is the first choice); a plain backup is refused under local-only |
 | Diagrams (PlantUML, rendered by kroki.io) | The diagram's source | Confirming the first time a diagram would be sent; refused under local-only |
 | Read aloud and dictation with the browser's speech service | The text read aloud, or your voice | Choosing a network voice, or dictation under the cloud policy after a confirmation; refused under local-only |
 | Public sources (Sefaria, the Knesset, government data) | Only the reference or search words you asked for; nothing from your notes | Searching one of these sources, after you agree to that search; under local-only too, listed as consented in the ledger |
