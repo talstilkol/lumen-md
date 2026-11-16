@@ -115,6 +115,7 @@
     "plan:receipts": "node scripts/plan/receipts.mjs",
     "plan:areas": "node scripts/plan/areas.mjs",
     "plan:targets": "node scripts/plan-targets.mjs",
+    "p2:ledger": "node scripts/p2-ledger.mjs",
     "owner:session": "node scripts/owner/session.mjs",
     "owner:checklist": "node scripts/owner-checklist.mjs",
     "models:convert": "node scripts/models/convert.mjs",
