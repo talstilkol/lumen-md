@@ -31,6 +31,19 @@ script on your own computer, and the result appears in Ollama as the model
      and creates a Modelfile with `ADAPTER`.
 3. Select `lumen-style` as the Ollama model in the AI settings.
 
+## From the command line
+
+The same export, without the app, for a vault folder on disk (the style
+profile is not included, since it lives in the app):
+
+```bash
+node scripts/lora/export.mjs --vault ~/Notes --out ~/lumen-lora --platform mac
+cd ~/lumen-lora && bash train-mac.sh
+```
+
+It prints only counts. It exits with 1 when the notes are too few to
+train on, the same rule as the button.
+
 ## Is it closer to your style?
 
 ```bash
