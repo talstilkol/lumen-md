@@ -62,6 +62,556 @@
     "ru": "1xxzzbf",
     "zh-CN": "1xxzzbf"
   },
+  "backup.webdav.badUrl": {
+    "ar": "zwsxw8",
+    "de": "zwsxw8",
+    "fr": "zwsxw8",
+    "ja": "zwsxw8",
+    "ru": "zwsxw8",
+    "zh-CN": "zwsxw8"
+  },
+  "backup.webdav.missing": {
+    "ar": "46vs25",
+    "de": "46vs25",
+    "fr": "46vs25",
+    "ja": "46vs25",
+    "ru": "46vs25",
+    "zh-CN": "46vs25"
+  },
+  "backup.webdav.noPassword": {
+    "ar": "wqaw1x",
+    "de": "wqaw1x",
+    "fr": "wqaw1x",
+    "ja": "wqaw1x",
+    "ru": "wqaw1x",
+    "zh-CN": "wqaw1x"
+  },
+  "backup.webdav.note": {
+    "ar": "rch9ky",
+    "de": "rch9ky",
+    "fr": "rch9ky",
+    "ja": "rch9ky",
+    "ru": "rch9ky",
+    "zh-CN": "rch9ky"
+  },
+  "backup.webdav.password": {
+    "ar": "cf437c",
+    "de": "cf437c",
+    "fr": "cf437c",
+    "ja": "cf437c",
+    "ru": "cf437c",
+    "zh-CN": "cf437c"
+  },
+  "backup.webdav.title": {
+    "ar": "1i5ybib",
+    "de": "1i5ybib",
+    "fr": "1i5ybib",
+    "ja": "1i5ybib",
+    "ru": "1i5ybib",
+    "zh-CN": "1i5ybib"
+  },
+  "backup.webdav.url": {
+    "ar": "1xfwc90",
+    "de": "1xfwc90",
+    "fr": "1xfwc90",
+    "ja": "1xfwc90",
+    "ru": "1xfwc90",
+    "zh-CN": "1xfwc90"
+  },
+  "backup.webdav.useAge": {
+    "ar": "2y9gal",
+    "de": "2y9gal",
+    "fr": "2y9gal",
+    "ja": "2y9gal",
+    "ru": "2y9gal",
+    "zh-CN": "2y9gal"
+  },
+  "backup.webdav.usePlain": {
+    "ar": "k7n903",
+    "de": "k7n903",
+    "fr": "k7n903",
+    "ja": "k7n903",
+    "ru": "k7n903",
+    "zh-CN": "k7n903"
+  },
+  "backup.webdav.user": {
+    "ar": "p39jit",
+    "de": "p39jit",
+    "fr": "p39jit",
+    "ja": "p39jit",
+    "ru": "p39jit",
+    "zh-CN": "p39jit"
+  },
+  "calendar.conflict.both": {
+    "ar": "y0o6qf",
+    "de": "y0o6qf",
+    "fr": "y0o6qf",
+    "ja": "y0o6qf",
+    "ru": "y0o6qf",
+    "zh-CN": "y0o6qf"
+  },
+  "calendar.conflict.deleted": {
+    "ar": "1ez99u3",
+    "de": "1ez99u3",
+    "fr": "1ez99u3",
+    "ja": "1ez99u3",
+    "ru": "1ez99u3",
+    "zh-CN": "1ez99u3"
+  },
+  "calendar.conflict.done": {
+    "ar": "13cn9g1",
+    "de": "13cn9g1",
+    "fr": "13cn9g1",
+    "ja": "13cn9g1",
+    "ru": "13cn9g1",
+    "zh-CN": "13cn9g1"
+  },
+  "calendar.conflict.due": {
+    "ar": "ongenz",
+    "de": "ongenz",
+    "fr": "ongenz",
+    "ja": "ongenz",
+    "ru": "ongenz",
+    "zh-CN": "ongenz"
+  },
+  "calendar.conflict.here": {
+    "ar": "v3jxaz",
+    "de": "v3jxaz",
+    "fr": "v3jxaz",
+    "ja": "v3jxaz",
+    "ru": "v3jxaz",
+    "zh-CN": "v3jxaz"
+  },
+  "calendar.conflict.keepHere": {
+    "ar": "rzp4o3",
+    "de": "rzp4o3",
+    "fr": "rzp4o3",
+    "ja": "rzp4o3",
+    "ru": "rzp4o3",
+    "zh-CN": "rzp4o3"
+  },
+  "calendar.conflict.keepThere": {
+    "ar": "b0pu05",
+    "de": "b0pu05",
+    "fr": "b0pu05",
+    "ja": "b0pu05",
+    "ru": "b0pu05",
+    "zh-CN": "b0pu05"
+  },
+  "calendar.conflict.later": {
+    "ar": "15s0pz",
+    "de": "15s0pz",
+    "fr": "15s0pz",
+    "ja": "15s0pz",
+    "ru": "15s0pz",
+    "zh-CN": "15s0pz"
+  },
+  "calendar.conflict.open": {
+    "ar": "4b5tty",
+    "de": "4b5tty",
+    "fr": "4b5tty",
+    "ja": "4b5tty",
+    "ru": "4b5tty",
+    "zh-CN": "4b5tty"
+  },
+  "calendar.conflict.there": {
+    "ar": "sk4siu",
+    "de": "sk4siu",
+    "fr": "sk4siu",
+    "ja": "sk4siu",
+    "ru": "sk4siu",
+    "zh-CN": "sk4siu"
+  },
+  "calendar.conflict.title": {
+    "ar": "105j6pc",
+    "de": "105j6pc",
+    "fr": "105j6pc",
+    "ja": "105j6pc",
+    "ru": "105j6pc",
+    "zh-CN": "105j6pc"
+  },
+  "calendar.conflict.why.both-changed": {
+    "ar": "12y0wdp",
+    "de": "12y0wdp",
+    "fr": "12y0wdp",
+    "ja": "12y0wdp",
+    "ru": "12y0wdp",
+    "zh-CN": "12y0wdp"
+  },
+  "calendar.conflict.why.changed-here-deleted-there": {
+    "ar": "i2iv20",
+    "de": "i2iv20",
+    "fr": "i2iv20",
+    "ja": "i2iv20",
+    "ru": "i2iv20",
+    "zh-CN": "i2iv20"
+  },
+  "calendar.conflict.why.deleted-here-changed-there": {
+    "ar": "soqkb4",
+    "de": "soqkb4",
+    "fr": "soqkb4",
+    "ja": "soqkb4",
+    "ru": "soqkb4",
+    "zh-CN": "soqkb4"
+  },
+  "calendar.settings.add": {
+    "ar": "17rv3f8",
+    "de": "17rv3f8",
+    "fr": "17rv3f8",
+    "ja": "17rv3f8",
+    "ru": "17rv3f8",
+    "zh-CN": "17rv3f8"
+  },
+  "calendar.settings.caldav": {
+    "ar": "l38hko",
+    "de": "l38hko",
+    "fr": "l38hko",
+    "ja": "l38hko",
+    "ru": "l38hko",
+    "zh-CN": "l38hko"
+  },
+  "calendar.settings.choose": {
+    "ar": "9g3s43",
+    "de": "9g3s43",
+    "fr": "9g3s43",
+    "ja": "9g3s43",
+    "ru": "9g3s43",
+    "zh-CN": "9g3s43"
+  },
+  "calendar.settings.fail.auth": {
+    "ar": "8e2hwu",
+    "de": "8e2hwu",
+    "fr": "8e2hwu",
+    "ja": "8e2hwu",
+    "ru": "8e2hwu",
+    "zh-CN": "8e2hwu"
+  },
+  "calendar.settings.fail.cors": {
+    "ar": "x5qo0h",
+    "de": "x5qo0h",
+    "fr": "x5qo0h",
+    "ja": "x5qo0h",
+    "ru": "x5qo0h",
+    "zh-CN": "x5qo0h"
+  },
+  "calendar.settings.fail.no-account": {
+    "ar": "1t2jnez",
+    "de": "1t2jnez",
+    "fr": "1t2jnez",
+    "ja": "1t2jnez",
+    "ru": "1t2jnez",
+    "zh-CN": "1t2jnez"
+  },
+  "calendar.settings.fail.not-found": {
+    "ar": "17agleg",
+    "de": "17agleg",
+    "ja": "17agleg",
+    "ru": "17agleg",
+    "zh-CN": "17agleg"
+  },
+  "calendar.settings.fail.server": {
+    "ar": "ahiv6e",
+    "de": "ahiv6e",
+    "fr": "ahiv6e",
+    "ja": "ahiv6e",
+    "ru": "ahiv6e",
+    "zh-CN": "ahiv6e"
+  },
+  "calendar.settings.fail.url": {
+    "ar": "1e8ozos",
+    "de": "1e8ozos",
+    "fr": "1e8ozos",
+    "ja": "1e8ozos",
+    "ru": "1e8ozos",
+    "zh-CN": "1e8ozos"
+  },
+  "calendar.settings.find": {
+    "ar": "is93j3",
+    "de": "is93j3",
+    "fr": "is93j3",
+    "ja": "is93j3",
+    "ru": "is93j3",
+    "zh-CN": "is93j3"
+  },
+  "calendar.settings.forget": {
+    "ar": "o8vuzw",
+    "de": "o8vuzw",
+    "fr": "o8vuzw",
+    "ja": "o8vuzw",
+    "ru": "o8vuzw",
+    "zh-CN": "o8vuzw"
+  },
+  "calendar.settings.forgotten": {
+    "ar": "10qdesm",
+    "de": "10qdesm",
+    "fr": "10qdesm",
+    "ja": "10qdesm",
+    "ru": "10qdesm",
+    "zh-CN": "10qdesm"
+  },
+  "calendar.settings.home": {
+    "ar": "lc2d5g",
+    "de": "lc2d5g",
+    "fr": "lc2d5g",
+    "ja": "lc2d5g",
+    "ru": "lc2d5g",
+    "zh-CN": "lc2d5g"
+  },
+  "calendar.settings.ics": {
+    "ar": "1e7c148",
+    "de": "1e7c148",
+    "fr": "1e7c148",
+    "ja": "1e7c148",
+    "ru": "1e7c148",
+    "zh-CN": "1e7c148"
+  },
+  "calendar.settings.icsName": {
+    "ar": "4el6o6",
+    "de": "4el6o6",
+    "fr": "4el6o6",
+    "ja": "4el6o6",
+    "ru": "4el6o6",
+    "zh-CN": "4el6o6"
+  },
+  "calendar.settings.icsNote": {
+    "ar": "vas1fo",
+    "de": "vas1fo",
+    "fr": "vas1fo",
+    "ja": "vas1fo",
+    "ru": "vas1fo",
+    "zh-CN": "vas1fo"
+  },
+  "calendar.settings.icsUrl": {
+    "ar": "1ink5hq",
+    "de": "1ink5hq",
+    "fr": "1ink5hq",
+    "ja": "1ink5hq",
+    "ru": "1ink5hq",
+    "zh-CN": "1ink5hq"
+  },
+  "calendar.settings.inbox": {
+    "ar": "u564ku",
+    "de": "u564ku",
+    "fr": "u564ku",
+    "ja": "u564ku",
+    "ru": "u564ku",
+    "zh-CN": "u564ku"
+  },
+  "calendar.settings.intro": {
+    "ar": "1ryvllu",
+    "de": "1ryvllu",
+    "fr": "1ryvllu",
+    "ja": "1ryvllu",
+    "ru": "1ryvllu",
+    "zh-CN": "1ryvllu"
+  },
+  "calendar.settings.noTasks": {
+    "ar": "1r0ip28",
+    "de": "1r0ip28",
+    "ja": "1r0ip28",
+    "ru": "1r0ip28",
+    "zh-CN": "1r0ip28"
+  },
+  "calendar.settings.noneFound": {
+    "ar": "1dkse33",
+    "de": "1dkse33",
+    "fr": "1dkse33",
+    "ja": "1dkse33",
+    "ru": "1dkse33",
+    "zh-CN": "1dkse33"
+  },
+  "calendar.settings.ok": {
+    "ar": "1xmdjqf",
+    "de": "1xmdjqf",
+    "fr": "1xmdjqf",
+    "ja": "1xmdjqf",
+    "ru": "1xmdjqf",
+    "zh-CN": "1xmdjqf"
+  },
+  "calendar.settings.password": {
+    "ar": "obxurp",
+    "de": "obxurp",
+    "fr": "obxurp",
+    "ja": "obxurp",
+    "ru": "obxurp",
+    "zh-CN": "obxurp"
+  },
+  "calendar.settings.passwordKept": {
+    "ar": "1doitao",
+    "de": "1doitao",
+    "fr": "1doitao",
+    "ja": "1doitao",
+    "ru": "1doitao",
+    "zh-CN": "1doitao"
+  },
+  "calendar.settings.remove": {
+    "ar": "9c35st",
+    "de": "9c35st",
+    "fr": "9c35st",
+    "ja": "9c35st",
+    "ru": "9c35st",
+    "zh-CN": "9c35st"
+  },
+  "calendar.settings.saved": {
+    "ar": "gj5eme",
+    "de": "gj5eme",
+    "fr": "gj5eme",
+    "ja": "gj5eme",
+    "ru": "gj5eme",
+    "zh-CN": "gj5eme"
+  },
+  "calendar.settings.syncNow": {
+    "ar": "7pn7qw",
+    "de": "7pn7qw",
+    "fr": "7pn7qw",
+    "ja": "7pn7qw",
+    "ru": "7pn7qw",
+    "zh-CN": "7pn7qw"
+  },
+  "calendar.settings.synced": {
+    "ar": "lifxgi",
+    "de": "lifxgi",
+    "fr": "lifxgi",
+    "ja": "lifxgi",
+    "ru": "lifxgi",
+    "zh-CN": "lifxgi"
+  },
+  "calendar.settings.test": {
+    "ar": "56t2a2",
+    "de": "56t2a2",
+    "fr": "56t2a2",
+    "ja": "56t2a2",
+    "ru": "56t2a2",
+    "zh-CN": "56t2a2"
+  },
+  "calendar.settings.url": {
+    "ar": "1dt5fmz",
+    "de": "1dt5fmz",
+    "fr": "1dt5fmz",
+    "ja": "1dt5fmz",
+    "ru": "1dt5fmz",
+    "zh-CN": "1dt5fmz"
+  },
+  "calendar.settings.user": {
+    "ar": "p39jit",
+    "de": "p39jit",
+    "fr": "p39jit",
+    "ja": "p39jit",
+    "ru": "p39jit",
+    "zh-CN": "p39jit"
+  },
+  "cmd.mcp.ask": {
+    "ar": "vubk2m",
+    "de": "vubk2m",
+    "fr": "vubk2m",
+    "ja": "vubk2m",
+    "ru": "vubk2m",
+    "zh-CN": "vubk2m"
+  },
+  "cmd.mcp.ask.hint": {
+    "ar": "upymcb",
+    "de": "upymcb",
+    "fr": "upymcb",
+    "ja": "upymcb",
+    "ru": "upymcb",
+    "zh-CN": "upymcb"
+  },
+  "cmd.mcp.settings": {
+    "ar": "x0ihz7",
+    "de": "x0ihz7",
+    "fr": "x0ihz7",
+    "ja": "x0ihz7",
+    "ru": "x0ihz7",
+    "zh-CN": "x0ihz7"
+  },
+  "cmd.mcp.settings.hint": {
+    "ar": "1b01jxe",
+    "de": "1b01jxe",
+    "fr": "1b01jxe",
+    "ja": "1b01jxe",
+    "ru": "1b01jxe",
+    "zh-CN": "1b01jxe"
+  },
+  "cmd.screenshotToNote": {
+    "ar": "11kn380",
+    "de": "11kn380",
+    "fr": "11kn380",
+    "ja": "11kn380",
+    "ru": "11kn380",
+    "zh-CN": "11kn380"
+  },
+  "cmd.screenshotToNote.hint": {
+    "ar": "l899cf",
+    "de": "l899cf",
+    "fr": "l899cf",
+    "ja": "l899cf",
+    "ru": "l899cf",
+    "zh-CN": "l899cf"
+  },
+  "daily.calendar.allDay": {
+    "ar": "dqozwm",
+    "de": "dqozwm",
+    "fr": "dqozwm",
+    "ja": "dqozwm",
+    "ru": "dqozwm",
+    "zh-CN": "dqozwm"
+  },
+  "daily.calendar.failed": {
+    "ar": "1gvq369",
+    "de": "1gvq369",
+    "fr": "1gvq369",
+    "ja": "1gvq369",
+    "ru": "1gvq369",
+    "zh-CN": "1gvq369"
+  },
+  "daily.calendar.heading": {
+    "ar": "mkmabi",
+    "de": "mkmabi",
+    "fr": "mkmabi",
+    "ja": "mkmabi",
+    "ru": "mkmabi",
+    "zh-CN": "mkmabi"
+  },
+  "daily.calendar.none": {
+    "ar": "1ff06tn",
+    "de": "1ff06tn",
+    "fr": "1ff06tn",
+    "ja": "1ff06tn",
+    "ru": "1ff06tn",
+    "zh-CN": "1ff06tn"
+  },
+  "daily.review.answer": {
+    "ar": "1x69ce7",
+    "de": "1x69ce7",
+    "fr": "1x69ce7",
+    "ja": "1x69ce7",
+    "ru": "1x69ce7",
+    "zh-CN": "1x69ce7"
+  },
+  "daily.review.none": {
+    "ar": "wraqqa",
+    "de": "wraqqa",
+    "fr": "wraqqa",
+    "ja": "wraqqa",
+    "ru": "wraqqa",
+    "zh-CN": "wraqqa"
+  },
+  "daily.review.rate": {
+    "ar": "iwetd5",
+    "de": "iwetd5",
+    "fr": "iwetd5",
+    "ja": "iwetd5",
+    "ru": "iwetd5",
+    "zh-CN": "iwetd5"
+  },
+  "daily.review.title": {
+    "ar": "bosydm",
+    "de": "bosydm",
+    "fr": "bosydm",
+    "ja": "bosydm",
+    "ru": "bosydm",
+    "zh-CN": "bosydm"
+  },
   "hl.scan": {
     "ar": "qb0k9u",
     "de": "qb0k9u",
@@ -293,5 +843,801 @@
     "ja": "1m06cjj",
     "ru": "1m06cjj",
     "zh-CN": "1m06cjj"
+  },
+  "mcpServers.add": {
+    "ar": "1df7h82",
+    "de": "1df7h82",
+    "fr": "1df7h82",
+    "ja": "1df7h82",
+    "ru": "1df7h82",
+    "zh-CN": "1df7h82"
+  },
+  "mcpServers.ask.problems": {
+    "ar": "1hyaz2",
+    "de": "1hyaz2",
+    "fr": "1hyaz2",
+    "ja": "1hyaz2",
+    "ru": "1hyaz2",
+    "zh-CN": "1hyaz2"
+  },
+  "mcpServers.ask.prompt": {
+    "ar": "1jqyfet",
+    "de": "1jqyfet",
+    "fr": "1jqyfet",
+    "ja": "1jqyfet",
+    "ru": "1jqyfet",
+    "zh-CN": "1jqyfet"
+  },
+  "mcpServers.ask.title": {
+    "ar": "19kg05o",
+    "de": "19kg05o",
+    "fr": "19kg05o",
+    "ja": "19kg05o",
+    "ru": "19kg05o",
+    "zh-CN": "19kg05o"
+  },
+  "mcpServers.call.args": {
+    "ar": "11vtnnz",
+    "de": "11vtnnz",
+    "fr": "11vtnnz",
+    "ja": "11vtnnz",
+    "ru": "11vtnnz",
+    "zh-CN": "11vtnnz"
+  },
+  "mcpServers.call.deny": {
+    "ar": "1u4gj3k",
+    "de": "1u4gj3k",
+    "fr": "1u4gj3k",
+    "ja": "1u4gj3k",
+    "ru": "1u4gj3k",
+    "zh-CN": "1u4gj3k"
+  },
+  "mcpServers.call.description": {
+    "ar": "wkjee9",
+    "de": "wkjee9",
+    "fr": "wkjee9",
+    "ja": "wkjee9",
+    "ru": "wkjee9",
+    "zh-CN": "wkjee9"
+  },
+  "mcpServers.call.once": {
+    "ar": "8ajno3",
+    "de": "8ajno3",
+    "fr": "8ajno3",
+    "ja": "8ajno3",
+    "ru": "8ajno3",
+    "zh-CN": "8ajno3"
+  },
+  "mcpServers.call.session": {
+    "ar": "1yako54",
+    "de": "1yako54",
+    "fr": "1yako54",
+    "ja": "1yako54",
+    "ru": "1yako54",
+    "zh-CN": "1yako54"
+  },
+  "mcpServers.call.title": {
+    "ar": "2egvb5",
+    "de": "2egvb5",
+    "fr": "2egvb5",
+    "ja": "2egvb5",
+    "ru": "2egvb5",
+    "zh-CN": "2egvb5"
+  },
+  "mcpServers.call.vault": {
+    "ar": "7kpadb",
+    "de": "7kpadb",
+    "fr": "7kpadb",
+    "ja": "7kpadb",
+    "ru": "7kpadb",
+    "zh-CN": "7kpadb"
+  },
+  "mcpServers.call.why.ask": {
+    "ar": "hgnuyb",
+    "de": "hgnuyb",
+    "fr": "hgnuyb",
+    "ja": "hgnuyb",
+    "ru": "hgnuyb",
+    "zh-CN": "hgnuyb"
+  },
+  "mcpServers.call.why.changed": {
+    "ar": "ica5b9",
+    "de": "ica5b9",
+    "fr": "ica5b9",
+    "ja": "ica5b9",
+    "ru": "ica5b9",
+    "zh-CN": "ica5b9"
+  },
+  "mcpServers.call.why.new": {
+    "ar": "94iy7w",
+    "de": "94iy7w",
+    "fr": "94iy7w",
+    "ja": "94iy7w",
+    "ru": "94iy7w",
+    "zh-CN": "94iy7w"
+  },
+  "mcpServers.default": {
+    "ar": "10087wk",
+    "de": "10087wk",
+    "fr": "10087wk",
+    "ja": "10087wk",
+    "ru": "10087wk",
+    "zh-CN": "10087wk"
+  },
+  "mcpServers.desktopOnly": {
+    "ar": "14lm8r",
+    "de": "14lm8r",
+    "fr": "14lm8r",
+    "ja": "14lm8r",
+    "ru": "14lm8r",
+    "zh-CN": "14lm8r"
+  },
+  "mcpServers.elicit.decline": {
+    "ar": "oo69tl",
+    "de": "oo69tl",
+    "fr": "oo69tl",
+    "ja": "oo69tl",
+    "ru": "oo69tl",
+    "zh-CN": "oo69tl"
+  },
+  "mcpServers.elicit.error.choice": {
+    "ar": "1yfh3bw",
+    "de": "1yfh3bw",
+    "fr": "1yfh3bw",
+    "ja": "1yfh3bw",
+    "ru": "1yfh3bw",
+    "zh-CN": "1yfh3bw"
+  },
+  "mcpServers.elicit.error.date": {
+    "ar": "18ihhwq",
+    "de": "18ihhwq",
+    "fr": "18ihhwq",
+    "ja": "18ihhwq",
+    "ru": "18ihhwq",
+    "zh-CN": "18ihhwq"
+  },
+  "mcpServers.elicit.error.email": {
+    "ar": "1uiqfhw",
+    "de": "1uiqfhw",
+    "fr": "1uiqfhw",
+    "ja": "1uiqfhw",
+    "ru": "1uiqfhw",
+    "zh-CN": "1uiqfhw"
+  },
+  "mcpServers.elicit.error.integer": {
+    "ar": "wix6qi",
+    "de": "wix6qi",
+    "fr": "wix6qi",
+    "ja": "wix6qi",
+    "ru": "wix6qi",
+    "zh-CN": "wix6qi"
+  },
+  "mcpServers.elicit.error.long": {
+    "ar": "whd2mh",
+    "de": "whd2mh",
+    "fr": "whd2mh",
+    "ja": "whd2mh",
+    "ru": "whd2mh",
+    "zh-CN": "whd2mh"
+  },
+  "mcpServers.elicit.error.max": {
+    "ar": "1workz4",
+    "de": "1workz4",
+    "fr": "1workz4",
+    "ja": "1workz4",
+    "ru": "1workz4",
+    "zh-CN": "1workz4"
+  },
+  "mcpServers.elicit.error.min": {
+    "ar": "12ukpl0",
+    "de": "12ukpl0",
+    "fr": "12ukpl0",
+    "ja": "12ukpl0",
+    "ru": "12ukpl0",
+    "zh-CN": "12ukpl0"
+  },
+  "mcpServers.elicit.error.number": {
+    "ar": "e4dnep",
+    "de": "e4dnep",
+    "fr": "e4dnep",
+    "ja": "e4dnep",
+    "ru": "e4dnep",
+    "zh-CN": "e4dnep"
+  },
+  "mcpServers.elicit.error.required": {
+    "ar": "op6q7e",
+    "de": "op6q7e",
+    "fr": "op6q7e",
+    "ja": "op6q7e",
+    "ru": "op6q7e",
+    "zh-CN": "op6q7e"
+  },
+  "mcpServers.elicit.error.short": {
+    "ar": "tp9yav",
+    "de": "tp9yav",
+    "fr": "tp9yav",
+    "ja": "tp9yav",
+    "ru": "tp9yav",
+    "zh-CN": "tp9yav"
+  },
+  "mcpServers.elicit.error.uri": {
+    "ar": "98k01o",
+    "de": "98k01o",
+    "fr": "98k01o",
+    "ja": "98k01o",
+    "ru": "98k01o",
+    "zh-CN": "98k01o"
+  },
+  "mcpServers.elicit.noMessage": {
+    "ar": "11zgdkp",
+    "de": "11zgdkp",
+    "ja": "11zgdkp",
+    "ru": "11zgdkp",
+    "zh-CN": "11zgdkp"
+  },
+  "mcpServers.elicit.review": {
+    "ar": "fsjt5o",
+    "de": "fsjt5o",
+    "fr": "fsjt5o",
+    "ja": "fsjt5o",
+    "ru": "fsjt5o",
+    "zh-CN": "fsjt5o"
+  },
+  "mcpServers.elicit.secret": {
+    "ar": "pxi4q3",
+    "de": "pxi4q3",
+    "fr": "pxi4q3",
+    "ja": "pxi4q3",
+    "ru": "pxi4q3",
+    "zh-CN": "pxi4q3"
+  },
+  "mcpServers.elicit.send": {
+    "ar": "1vatbdb",
+    "de": "1vatbdb",
+    "fr": "1vatbdb",
+    "ja": "1vatbdb",
+    "ru": "1vatbdb",
+    "zh-CN": "1vatbdb"
+  },
+  "mcpServers.elicit.site": {
+    "ar": "y67t4s",
+    "de": "y67t4s",
+    "fr": "y67t4s",
+    "ja": "y67t4s",
+    "ru": "y67t4s",
+    "zh-CN": "y67t4s"
+  },
+  "mcpServers.elicit.title": {
+    "ar": "1kydhyp",
+    "de": "1kydhyp",
+    "fr": "1kydhyp",
+    "ja": "1kydhyp",
+    "ru": "1kydhyp",
+    "zh-CN": "1kydhyp"
+  },
+  "mcpServers.elicit.urlIntro": {
+    "ar": "1t8ir0w",
+    "de": "1t8ir0w",
+    "fr": "1t8ir0w",
+    "ja": "1t8ir0w",
+    "ru": "1t8ir0w",
+    "zh-CN": "1t8ir0w"
+  },
+  "mcpServers.elicit.urlOutside": {
+    "ar": "5y1gjc",
+    "de": "5y1gjc",
+    "fr": "5y1gjc",
+    "ja": "5y1gjc",
+    "ru": "5y1gjc",
+    "zh-CN": "5y1gjc"
+  },
+  "mcpServers.elicit.warn.ip-address": {
+    "ar": "jpggy4",
+    "de": "jpggy4",
+    "fr": "jpggy4",
+    "ja": "jpggy4",
+    "ru": "jpggy4",
+    "zh-CN": "jpggy4"
+  },
+  "mcpServers.elicit.warn.long-host": {
+    "ar": "g7mefs",
+    "de": "g7mefs",
+    "fr": "g7mefs",
+    "ja": "g7mefs",
+    "ru": "g7mefs",
+    "zh-CN": "g7mefs"
+  },
+  "mcpServers.elicit.warn.mixed-script": {
+    "ar": "n2ry2g",
+    "de": "n2ry2g",
+    "fr": "n2ry2g",
+    "ja": "n2ry2g",
+    "ru": "n2ry2g",
+    "zh-CN": "n2ry2g"
+  },
+  "mcpServers.elicit.warn.not-https": {
+    "ar": "1oomcpw",
+    "de": "1oomcpw",
+    "fr": "1oomcpw",
+    "ja": "1oomcpw",
+    "ru": "1oomcpw",
+    "zh-CN": "1oomcpw"
+  },
+  "mcpServers.elicit.warn.punycode": {
+    "ar": "gnhr18",
+    "de": "gnhr18",
+    "fr": "gnhr18",
+    "ja": "gnhr18",
+    "ru": "gnhr18",
+    "zh-CN": "gnhr18"
+  },
+  "mcpServers.elicit.warn.userinfo": {
+    "ar": "mc1o0y",
+    "de": "mc1o0y",
+    "fr": "mc1o0y",
+    "ja": "mc1o0y",
+    "ru": "mc1o0y",
+    "zh-CN": "mc1o0y"
+  },
+  "mcpServers.enabled": {
+    "ar": "qvtz3k",
+    "de": "qvtz3k",
+    "fr": "qvtz3k",
+    "ja": "qvtz3k",
+    "ru": "qvtz3k",
+    "zh-CN": "qvtz3k"
+  },
+  "mcpServers.forget": {
+    "ar": "1fknumc",
+    "de": "1fknumc",
+    "fr": "1fknumc",
+    "ja": "1fknumc",
+    "ru": "1fknumc",
+    "zh-CN": "1fknumc"
+  },
+  "mcpServers.form.args": {
+    "ar": "hs8yvo",
+    "de": "hs8yvo",
+    "fr": "hs8yvo",
+    "ja": "hs8yvo",
+    "ru": "hs8yvo",
+    "zh-CN": "hs8yvo"
+  },
+  "mcpServers.form.command": {
+    "ar": "1if8prf",
+    "de": "1if8prf",
+    "fr": "1if8prf",
+    "ja": "1if8prf",
+    "ru": "1if8prf",
+    "zh-CN": "1if8prf"
+  },
+  "mcpServers.form.cwd": {
+    "ar": "1q0oot",
+    "de": "1q0oot",
+    "fr": "1q0oot",
+    "ja": "1q0oot",
+    "ru": "1q0oot",
+    "zh-CN": "1q0oot"
+  },
+  "mcpServers.form.error.command": {
+    "ar": "n4n34r",
+    "de": "n4n34r",
+    "fr": "n4n34r",
+    "ja": "n4n34r",
+    "ru": "n4n34r",
+    "zh-CN": "n4n34r"
+  },
+  "mcpServers.form.error.id": {
+    "ar": "ssget6",
+    "de": "ssget6",
+    "fr": "ssget6",
+    "ja": "ssget6",
+    "ru": "ssget6",
+    "zh-CN": "ssget6"
+  },
+  "mcpServers.form.error.label": {
+    "ar": "1x0ykva",
+    "de": "1x0ykva",
+    "fr": "1x0ykva",
+    "ja": "1x0ykva",
+    "ru": "1x0ykva",
+    "zh-CN": "1x0ykva"
+  },
+  "mcpServers.form.error.taken": {
+    "ar": "1rpokha",
+    "de": "1rpokha",
+    "fr": "1rpokha",
+    "ja": "1rpokha",
+    "ru": "1rpokha",
+    "zh-CN": "1rpokha"
+  },
+  "mcpServers.form.error.transport": {
+    "ar": "pg06y9",
+    "de": "pg06y9",
+    "fr": "pg06y9",
+    "ja": "pg06y9",
+    "ru": "pg06y9",
+    "zh-CN": "pg06y9"
+  },
+  "mcpServers.form.error.url": {
+    "ar": "1879isb",
+    "de": "1879isb",
+    "fr": "1879isb",
+    "ja": "1879isb",
+    "ru": "1879isb",
+    "zh-CN": "1879isb"
+  },
+  "mcpServers.form.http": {
+    "ar": "sw05pg",
+    "de": "sw05pg",
+    "fr": "sw05pg",
+    "ja": "sw05pg",
+    "ru": "sw05pg",
+    "zh-CN": "sw05pg"
+  },
+  "mcpServers.form.id": {
+    "ar": "f8gyyo",
+    "de": "f8gyyo",
+    "fr": "f8gyyo",
+    "ja": "f8gyyo",
+    "ru": "f8gyyo",
+    "zh-CN": "f8gyyo"
+  },
+  "mcpServers.form.label": {
+    "ar": "4el6o6",
+    "de": "4el6o6",
+    "fr": "4el6o6",
+    "ja": "4el6o6",
+    "ru": "4el6o6",
+    "zh-CN": "4el6o6"
+  },
+  "mcpServers.form.save": {
+    "ar": "xrxem0",
+    "de": "xrxem0",
+    "fr": "xrxem0",
+    "ja": "xrxem0",
+    "ru": "xrxem0",
+    "zh-CN": "xrxem0"
+  },
+  "mcpServers.form.stdio": {
+    "ar": "11p7oal",
+    "de": "11p7oal",
+    "fr": "11p7oal",
+    "ja": "11p7oal",
+    "ru": "11p7oal",
+    "zh-CN": "11p7oal"
+  },
+  "mcpServers.form.stdioNote": {
+    "ar": "142ym8i",
+    "de": "142ym8i",
+    "fr": "142ym8i",
+    "ja": "142ym8i",
+    "ru": "142ym8i",
+    "zh-CN": "142ym8i"
+  },
+  "mcpServers.form.transport": {
+    "ar": "1doej20",
+    "de": "1doej20",
+    "fr": "1doej20",
+    "ja": "1doej20",
+    "ru": "1doej20",
+    "zh-CN": "1doej20"
+  },
+  "mcpServers.form.url": {
+    "ar": "v2y2ur",
+    "de": "v2y2ur",
+    "fr": "v2y2ur",
+    "ja": "v2y2ur",
+    "ru": "v2y2ur",
+    "zh-CN": "v2y2ur"
+  },
+  "mcpServers.intro": {
+    "ar": "1gpkt10",
+    "de": "1gpkt10",
+    "fr": "1gpkt10",
+    "ja": "1gpkt10",
+    "ru": "1gpkt10",
+    "zh-CN": "1gpkt10"
+  },
+  "mcpServers.license": {
+    "ar": "1aewhsx",
+    "de": "1aewhsx",
+    "fr": "1aewhsx",
+    "ja": "1aewhsx",
+    "ru": "1aewhsx",
+    "zh-CN": "1aewhsx"
+  },
+  "mcpServers.licenseUnverified": {
+    "ar": "liurtb",
+    "de": "liurtb",
+    "fr": "liurtb",
+    "ja": "liurtb",
+    "ru": "liurtb",
+    "zh-CN": "liurtb"
+  },
+  "mcpServers.log": {
+    "ar": "18wtqlt",
+    "de": "18wtqlt",
+    "fr": "18wtqlt",
+    "ja": "18wtqlt",
+    "ru": "18wtqlt",
+    "zh-CN": "18wtqlt"
+  },
+  "mcpServers.log.empty": {
+    "ar": "3c0wvg",
+    "de": "3c0wvg",
+    "fr": "3c0wvg",
+    "ja": "3c0wvg",
+    "ru": "3c0wvg",
+    "zh-CN": "3c0wvg"
+  },
+  "mcpServers.none": {
+    "ar": "1r6h134",
+    "de": "1r6h134",
+    "fr": "1r6h134",
+    "ja": "1r6h134",
+    "ru": "1r6h134",
+    "zh-CN": "1r6h134"
+  },
+  "mcpServers.offline": {
+    "ar": "b4kcus",
+    "de": "b4kcus",
+    "ja": "b4kcus",
+    "ru": "b4kcus",
+    "zh-CN": "b4kcus"
+  },
+  "mcpServers.perm.ask": {
+    "ar": "1f9n66g",
+    "de": "1f9n66g",
+    "fr": "1f9n66g",
+    "ja": "1f9n66g",
+    "ru": "1f9n66g",
+    "zh-CN": "1f9n66g"
+  },
+  "mcpServers.perm.block": {
+    "ar": "1yv3k0v",
+    "de": "1yv3k0v",
+    "fr": "1yv3k0v",
+    "ja": "1yv3k0v",
+    "ru": "1yv3k0v",
+    "zh-CN": "1yv3k0v"
+  },
+  "mcpServers.perm.read": {
+    "ar": "1l1lpes",
+    "de": "1l1lpes",
+    "fr": "1l1lpes",
+    "ja": "1l1lpes",
+    "ru": "1l1lpes",
+    "zh-CN": "1l1lpes"
+  },
+  "mcpServers.reaches.computer": {
+    "ar": "y0bzep",
+    "de": "y0bzep",
+    "fr": "y0bzep",
+    "ja": "y0bzep",
+    "ru": "y0bzep",
+    "zh-CN": "y0bzep"
+  },
+  "mcpServers.reaches.files": {
+    "ar": "17k5iia",
+    "de": "17k5iia",
+    "fr": "17k5iia",
+    "ja": "17k5iia",
+    "ru": "17k5iia",
+    "zh-CN": "17k5iia"
+  },
+  "mcpServers.reaches.network": {
+    "ar": "tnm7ek",
+    "de": "tnm7ek",
+    "fr": "tnm7ek",
+    "ja": "tnm7ek",
+    "ru": "tnm7ek",
+    "zh-CN": "tnm7ek"
+  },
+  "mcpServers.remove": {
+    "ar": "9c35st",
+    "de": "9c35st",
+    "fr": "9c35st",
+    "ja": "9c35st",
+    "ru": "9c35st",
+    "zh-CN": "9c35st"
+  },
+  "mcpServers.showTools": {
+    "ar": "rj7imf",
+    "de": "rj7imf",
+    "fr": "rj7imf",
+    "ja": "rj7imf",
+    "ru": "rj7imf",
+    "zh-CN": "rj7imf"
+  },
+  "mcpServers.suggested": {
+    "ar": "cg3318",
+    "de": "cg3318",
+    "fr": "cg3318",
+    "ja": "cg3318",
+    "ru": "cg3318",
+    "zh-CN": "cg3318"
+  },
+  "mcpServers.suggestedNote": {
+    "ar": "7xxq7k",
+    "de": "7xxq7k",
+    "fr": "7xxq7k",
+    "ja": "7xxq7k",
+    "ru": "7xxq7k",
+    "zh-CN": "7xxq7k"
+  },
+  "mcpServers.tools.changed": {
+    "ar": "19gpgu",
+    "de": "19gpgu",
+    "fr": "19gpgu",
+    "ja": "19gpgu",
+    "ru": "19gpgu",
+    "zh-CN": "19gpgu"
+  },
+  "mcpServers.tools.new": {
+    "ar": "9zqm8n",
+    "de": "9zqm8n",
+    "fr": "9zqm8n",
+    "ja": "9zqm8n",
+    "ru": "9zqm8n",
+    "zh-CN": "9zqm8n"
+  },
+  "mcpServers.tools.permission": {
+    "ar": "xf2v9l",
+    "de": "xf2v9l",
+    "fr": "xf2v9l",
+    "ja": "xf2v9l",
+    "ru": "xf2v9l",
+    "zh-CN": "xf2v9l"
+  },
+  "mcpServers.tools.pinAll": {
+    "ar": "uor64j",
+    "de": "uor64j",
+    "fr": "uor64j",
+    "ja": "uor64j",
+    "ru": "uor64j",
+    "zh-CN": "uor64j"
+  },
+  "mcpServers.tools.pinned": {
+    "ar": "i7501u",
+    "de": "i7501u",
+    "fr": "i7501u",
+    "ja": "i7501u",
+    "ru": "i7501u",
+    "zh-CN": "i7501u"
+  },
+  "mcpServers.use": {
+    "ar": "1fn0bdg",
+    "de": "1fn0bdg",
+    "fr": "1fn0bdg",
+    "ja": "1fn0bdg",
+    "ru": "1fn0bdg",
+    "zh-CN": "1fn0bdg"
+  },
+  "mcpServers.yours": {
+    "ar": "1qjiuwu",
+    "de": "1qjiuwu",
+    "fr": "1qjiuwu",
+    "ja": "1qjiuwu",
+    "ru": "1qjiuwu",
+    "zh-CN": "1qjiuwu"
+  },
+  "screenshotNote.byModel": {
+    "ar": "2ujuaq",
+    "de": "2ujuaq",
+    "fr": "2ujuaq",
+    "ja": "2ujuaq",
+    "ru": "2ujuaq",
+    "zh-CN": "2ujuaq"
+  },
+  "screenshotNote.byOcr": {
+    "ar": "1w5pnqt",
+    "de": "1w5pnqt",
+    "ja": "1w5pnqt",
+    "ru": "1w5pnqt",
+    "zh-CN": "1w5pnqt"
+  },
+  "screenshotNote.failed": {
+    "ar": "10612r8",
+    "de": "10612r8",
+    "fr": "10612r8",
+    "ja": "10612r8",
+    "ru": "10612r8",
+    "zh-CN": "10612r8"
+  },
+  "screenshotNote.flagged": {
+    "ar": "tznifl",
+    "de": "tznifl",
+    "fr": "tznifl",
+    "ja": "tznifl",
+    "ru": "tznifl",
+    "zh-CN": "tznifl"
+  },
+  "screenshotNote.noImage": {
+    "ar": "jsrv4p",
+    "de": "jsrv4p",
+    "ja": "jsrv4p",
+    "ru": "jsrv4p",
+    "zh-CN": "jsrv4p"
+  },
+  "screenshotNote.offer": {
+    "ar": "ogpqob",
+    "de": "ogpqob",
+    "fr": "ogpqob",
+    "ja": "ogpqob",
+    "ru": "ogpqob",
+    "zh-CN": "ogpqob"
+  },
+  "screenshotNote.offerAction": {
+    "ar": "uip7hy",
+    "de": "uip7hy",
+    "fr": "uip7hy",
+    "ja": "uip7hy",
+    "ru": "uip7hy",
+    "zh-CN": "uip7hy"
+  },
+  "screenshotNote.reading": {
+    "ar": "m42bvy",
+    "de": "m42bvy",
+    "fr": "m42bvy",
+    "ja": "m42bvy",
+    "ru": "m42bvy",
+    "zh-CN": "m42bvy"
+  },
+  "screenshotNote.text": {
+    "ar": "iwdez9",
+    "de": "iwdez9",
+    "fr": "iwdez9",
+    "ja": "iwdez9",
+    "ru": "iwdez9",
+    "zh-CN": "iwdez9"
+  },
+  "screenshotNote.title": {
+    "ar": "1ls7n9y",
+    "de": "1ls7n9y",
+    "fr": "1ls7n9y",
+    "ja": "1ls7n9y",
+    "ru": "1ls7n9y",
+    "zh-CN": "1ls7n9y"
+  },
+  "settings.calendar": {
+    "ar": "17xfl1b",
+    "de": "17xfl1b",
+    "fr": "17xfl1b",
+    "ja": "17xfl1b",
+    "ru": "17xfl1b",
+    "zh-CN": "17xfl1b"
+  },
+  "settings.mcp": {
+    "ar": "195b0jb",
+    "de": "195b0jb",
+    "fr": "195b0jb",
+    "ja": "195b0jb",
+    "ru": "195b0jb",
+    "zh-CN": "195b0jb"
+  },
+  "tts.kokoro.body": {
+    "ar": "15pi4g7",
+    "de": "15pi4g7",
+    "fr": "15pi4g7",
+    "ja": "15pi4g7",
+    "ru": "15pi4g7",
+    "zh-CN": "15pi4g7"
+  },
+  "tts.kokoro.ok": {
+    "ar": "1ot74o",
+    "de": "1ot74o",
+    "fr": "1ot74o",
+    "ja": "1ot74o",
+    "ru": "1ot74o",
+    "zh-CN": "1ot74o"
+  },
+  "tts.kokoro.title": {
+    "ar": "1gjpbva",
+    "de": "1gjpbva",
+    "fr": "1gjpbva",
+    "ja": "1gjpbva",
+    "ru": "1gjpbva",
+    "zh-CN": "1gjpbva"
   }
 }
