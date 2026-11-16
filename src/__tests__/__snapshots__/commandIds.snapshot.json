@@ -81,6 +81,12 @@
       "icon": "FileText"
     },
     {
+      "id": "cite.fromDoi",
+      "label": "Cite from a DOI (CrossRef)…",
+      "group": "Tools",
+      "icon": "FileText"
+    },
+    {
       "id": "cite.legal",
       "label": "Citations: legal source (uniform citation rules)…",
       "group": "Tools",
@@ -2304,6 +2310,12 @@
       "label": "Insert a citation [@key]…",
       "group": "Tools",
       "shortcut": "⌥⌘C",
+      "icon": "FileText"
+    },
+    {
+      "id": "cite.fromDoi",
+      "label": "Cite from a DOI (CrossRef)…",
+      "group": "Tools",
       "icon": "FileText"
     },
     {
@@ -4570,6 +4582,7 @@
     "file.unpublishAtproto",
     "file.exportDocx",
     "cite.insert",
+    "cite.fromDoi",
     "cite.legal",
     "cite.legalFromCase",
     "cite.syncZotero",

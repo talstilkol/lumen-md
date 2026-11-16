@@ -3346,6 +3346,55 @@
       ]
     },
     {
+      "key": "cite.doi.ask",
+      "en": "DOI (10.…, doi:…, or a doi.org link)",
+      "vars": []
+    },
+    {
+      "key": "cite.doi.consent.message",
+      "en": "The DOI {doi}, and nothing else, is sent to {host} (CrossRef's public API). The request is listed in the privacy ledger.",
+      "vars": [
+        "doi",
+        "host"
+      ]
+    },
+    {
+      "key": "cite.doi.consent.ok",
+      "en": "Look it up",
+      "vars": []
+    },
+    {
+      "key": "cite.doi.consent.title",
+      "en": "Look up the DOI on CrossRef?",
+      "vars": []
+    },
+    {
+      "key": "cite.doi.failed",
+      "en": "DOI lookup failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "cite.doi.inserted",
+      "en": "Reference inserted (APA 7)",
+      "vars": []
+    },
+    {
+      "key": "cite.doi.invalid",
+      "en": "Not a DOI: {doi}",
+      "vars": [
+        "doi"
+      ]
+    },
+    {
+      "key": "cite.doi.notFound",
+      "en": "CrossRef has no record for {doi}",
+      "vars": [
+        "doi"
+      ]
+    },
+    {
       "key": "cite.keys",
       "en": "Enter [@key] · ⇧Enter @key · Tab locator · Esc",
       "vars": []

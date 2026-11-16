@@ -116,6 +116,7 @@
   "cmd.chat.import.hint": "Exportierter Chat → eine Notiz pro Tag, mit Medien; nur auf diesem Gerät",
   "cmd.cite.fillReferencesOpenAlex": "Zitate: Literaturangaben aus OpenAlex ergänzen…",
   "cmd.cite.fillReferencesOpenAlex.hint": "Für eine Quellennotiz mit DOI: fragt zuerst, sendet nur die DOI und schreibt nichts, bevor Sie zustimmen",
+  "cmd.cite.fromDoi": "Aus einer DOI zitieren (CrossRef)…",
   "cmd.cite.insert": "Zitat einfügen [@key]…",
   "cmd.cite.legal": "Zitate: Rechtsquelle (einheitliche Zitierregeln)…",
   "cmd.cite.legal.hint": "Ein Urteil, ein Gesetz, eine Verordnung, ein Gesetzentwurf, ein Buch oder ein Artikel nach den israelischen einheitlichen Zitierregeln (3. Aufl., 2021)",

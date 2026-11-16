@@ -116,6 +116,7 @@
   "cmd.chat.import.hint": "שיחה מיוצאת ← פתק לכל יום, עם המדיה; רק במכשיר הזה",
   "cmd.cite.fillReferencesOpenAlex": "ציטוטים: מילוי הפניות מ-OpenAlex…",
   "cmd.cite.fillReferencesOpenAlex.hint": "לפתק מקור עם DOI: שואל קודם, שולח רק את ה-DOI, ולא כותב דבר עד שתאשרו",
+  "cmd.cite.fromDoi": "ציטוט מ-DOI ‏(CrossRef)…",
   "cmd.cite.insert": "הוספת ציטוט ‎[@key]…",
   "cmd.cite.legal": "ציטוטים: מקור משפטי (כללי האזכור האחיד)…",
   "cmd.cite.legal.hint": "פסק דין, חוק, תקנות, הצעת חוק, ספר או מאמר, לפי כללי האזכור האחיד (מהדורה שלישית, 2021)",

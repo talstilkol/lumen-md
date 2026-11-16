@@ -15,6 +15,7 @@
  *
  * Caps: sources and answer length; every model call is in the run's trace.
  */
+import { answerLang, referenceSection } from "./references";
 import { anthropicWebResearch, type CitedBlock } from "../ai/anthropicProvider";
 import { getActiveProvider, getProviderKey, parseJsonResponse } from "../ai/llm";
 import { recordUsage } from "../ai/usage";
@@ -142,6 +143,8 @@ export function citedBlocksToMarkdown(
     "",
     body.trim(),
     "",
+    // W10.E38: the reference list (APA by default), every cited page once.
+    ...referenceSection(blocks.flatMap((b) => b.citations), "apa", answerLang(question)),
     ...defs,
     "",
   ].join("\n");
@@ -415,6 +418,8 @@ export async function agentResearch(o: ResearchOptions, settings: ResearchSettin
     "",
     kept ? body : lang === "he" ? "_אף משפט בתשובה לא נקשר לציטוט מדויק, ולכן לא מוצג דבר._" : "_No sentence of the answer could be tied to an exact quote, so none is shown._",
     "",
+    // W10.E38: the cited web sources as a reference list (a library note is a [[link]], not a reference).
+    ...(mode === "library" ? [] : referenceSection(read.filter((s) => cited.has(s.n)).map((s) => ({ title: s.title, url: s.link })), "apa", answerLang(o.question))),
     ...(uncited.length ? ["## Also read", "", ...uncited.map((s) => (mode === "library" ? `- ${s.link}` : `- [${s.title}](${s.link})`)), ""] : []),
     ...defs,
     "",

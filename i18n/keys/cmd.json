@@ -591,6 +591,11 @@
       "vars": []
     },
     {
+      "key": "cmd.cite.fromDoi",
+      "en": "Cite from a DOI (CrossRef)…",
+      "vars": []
+    },
+    {
       "key": "cmd.cite.insert",
       "en": "Insert a citation [@key]…",
       "vars": []

@@ -99,6 +99,8 @@ const RULES: Rule[] = [
   { test: (h) => h === "api.zotero.org", category: "research", reason: "Zotero Web API (your library; writes only the PDF highlights you send)" },
   // Plan W12.X3: the citation graph's optional reference lookup, off by default; only DOIs go out.
   { test: (h) => h === "api.openalex.org", category: "research", reason: "OpenAlex: the references of a DOI (citation graph, only when you turn it on)" },
+  // W10.E38 (plan 6.13): a DOI the user looked up and approved, and nothing else.
+  { test: (h) => h === "api.crossref.org", category: "research", reason: "CrossRef DOI lookup: the DOI you asked for only" },
   // Knesset records (plan W7.5): the law or bill name the user asked for.
   { test: (h) => h === "knesset.gov.il" || h === "main.knesset.gov.il", category: "cloud-text", reason: "Knesset records (OData): the law or bill name only" },
   // Wikidata (plan W12.E10): an entity's name, after the user's consent, to link the entity to its item.
