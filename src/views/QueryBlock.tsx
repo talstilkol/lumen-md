@@ -17,7 +17,7 @@ import { watchVault } from "../storage/vault";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
 import { useAppStore } from "../store/useStore";
 import { MAX_LIMIT, parseEmbeddedQuery, rowsFor, splitChartOptions, type QueryChart, type QueryNote, type QueryRow } from "../search/embeddedQuery";
-import { DataviewError, parseDataview, runDataview, show, type DvResult, type Value } from "../search/dataview";
+import { DataviewError, DataviewLimitError, parseDataview, runDataview, show, type DvResult, type Value } from "../search/dataview";
 import "./queryBlockStrings";
 import { useVisibleRefresh } from "../lib/visibleRefresh";
 import { EmptyState, learnHow } from "../ui/EmptyState";
@@ -104,7 +104,8 @@ export default function QueryBlock({ source, lang }: Props) {
           setRuns((n) => n + 1);
         }
       } catch (e) {
-        if (!cancelled && mine === seq) setOut({ kind: "error", message: e instanceof Error ? e.message : String(e) });
+        // Review 11, M3: a query past its bounds (rows, evaluations, text) says so in the reader's language.
+        if (!cancelled && mine === seq) setOut({ kind: "error", message: e instanceof DataviewLimitError ? t("query.tooLarge") : e instanceof Error ? e.message : String(e) });
       }
     };
     void run();

@@ -2748,6 +2748,7 @@
   "query.loading": "正在运行查询…",
   "query.none": "没有匹配的笔记。",
   "query.title": "查询",
+  "query.tooLarge": "此查询生成的行过多或耗时过长，已被停止。请在 FLATTEN 之前添加 WHERE 或 LIMIT，或减少嵌套的 map() 调用。",
   "reading.close": "关闭",
   "reading.dyslexia": "适合阅读障碍者的英文字体",
   "reading.failed": "无法下载字体。文本保持当前字体；联网后请重试。",
