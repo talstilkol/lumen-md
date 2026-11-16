@@ -17,6 +17,7 @@
  * |---|---|---|
  * | bidi.ts (line `dir`) | document text | yes — tested |
  * | bidiMarks.ts (control-character tags) | document text | yes — tested |
+ * | bidiIsolates.ts (inline isolates: code, URLs, links, tags) | document text | yes — tested |
  * | tashkeelView.ts (hide marks) | document text | yes — tested |
  * | mathBidi.ts (`$…$` isolates) | document text | yes — tested |
  * | obsidianSource.ts (`%%`, `==`, callouts) | document text | whole note under 20,000 chars, else visible — tested |
@@ -24,11 +25,15 @@
  * | searchHighlight.ts (search hits) | document text | **was the whole document (up to 200 hits); now visible — tested** |
  * | outlineExtension.ts (zoom) | the zoomed section: 2 ranges | constant |
  * | speechHighlight.ts, suggestingExtension.ts, aiAuthorship.ts, commentDecorations.ts | a range per spoken word / suggestion / AI span / comment | data, not text |
+ * | nikudAlternatives.ts | a mark per word the person asked about (an effect) | data, not text |
  * | lintExtension.ts, grammarExtension.ts, tsCheckExtension.ts | a range per diagnostic | data, not text |
  * | collabAwareness.ts, ghostText.ts, inlineSuggestion.ts, related/editorPlugin.ts | a cursor or a suggestion at the cursor | constant |
  *
  * "Data, not text" plugins draw what another engine returned; their count
  * follows that engine's result, not the note's length.
+ *
+ * cm6DecorationAudit.test.ts keeps this table complete: a new file that
+ * makes CodeMirror decorations and is not listed there fails.
  */
 import { afterEach, describe, expect, it } from "vitest";
 import { EditorState, type Extension, RangeSetBuilder } from "@codemirror/state";
@@ -41,6 +46,7 @@ import { mathBidiExtension } from "../editor/mathBidi";
 import { obsidianSourceExtension } from "../editor/obsidianSource";
 import { embedHintExtension } from "../editor/embedHintExtension";
 import { flashSearchHighlight, searchHighlightExtension } from "../editor/searchHighlight";
+import { inlineIsolatesPlugin } from "../editor/bidiIsolates";
 
 const LINES = 50_000;
 
@@ -138,6 +144,7 @@ describe("CodeMirror plugins decorate the visible ranges only (W11.Q3)", () => {
 
   const cases: Array<[string, (i: number) => string, Extension, ((v: EditorView) => void)?]> = [
     ["bidiMarks (control tags)", (i) => `a\u202e${i}`, bidiMarksExtension()],
+    ["bidiIsolates (inline code and links)", (i) => `שורה \`code ${i}\` ו-[[note ${i}]]`, inlineIsolatesPlugin],
     ["tashkeel (hidden marks)", (i) => `مرحبًا ${i}`, [], (v) => toggleTashkeel(v)],
     ["mathBidi (inline math)", (i) => `x $a_${i}$ y`, mathBidiExtension()],
     ["embedHint (embed lines)", (i) => `https://youtu.be/${String(i).padStart(11, "a")}`, embedHintExtension()],
