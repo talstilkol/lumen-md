@@ -102,7 +102,7 @@ describe("plan:check runs the origin rule (W10.B13)", () => {
     try {
       mkdirSync(join(dir, "plan"), { recursive: true });
       mkdirSync(join(dir, "eval"), { recursive: true });
-      for (const f of ["plan/plan.json", "plan/board.html", "MASTER_PLAN.md", "eval/origins.json"]) cpSync(f, join(dir, f));
+      for (const f of ["plan/plan.json", "plan/audit-verdicts.json", "plan/board.html", "MASTER_PLAN.md", "eval/origins.json"]) cpSync(f, join(dir, f));
       const plan = JSON.parse(readFileSync("plan/plan.json", "utf8"));
       // A ⏳ task anywhere in the plan, told it was measured on "real data" from a synthetic set.
       let target: { id: string; status: string } | null = null;
