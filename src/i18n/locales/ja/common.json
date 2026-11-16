@@ -1841,6 +1841,8 @@
   "install.guide.other.title": "このブラウザ",
   "install.intro": "インストールした Lumen は専用のアイコンから専用のウィンドウで開き、オフラインでも動作します。",
   "install.title": "Lumen をインストール",
+  "israeliTime.academic.inBreak": "学期休み（{name}）中：{date} を提案",
+  "israeliTime.academic.inExams": "試験期間中：{exams}",
   "israeliTime.dayOff": "{reason}に当たります",
   "israeliTime.dueToday": "今日が期限",
   "israeliTime.left.one": "残り {n} 勤務日",

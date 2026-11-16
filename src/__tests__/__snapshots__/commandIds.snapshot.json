@@ -2245,6 +2245,20 @@
       "group": "Tools",
       "hint": "Offline Yiddish spell check (hunspell-yi, 2.4 MB, GPL)",
       "icon": "Download"
+    },
+    {
+      "id": "academic.choose",
+      "label": "Academic calendar: choose an institution…",
+      "group": "Tools",
+      "hint": "Semesters, Moed A and B and breaks in the daily note ({{academic}}) and for deadlines",
+      "icon": "FileText"
+    },
+    {
+      "id": "academic.ics",
+      "label": "Export the academic calendar (ICS)",
+      "group": "Tools",
+      "hint": "The chosen institution's year as a calendar file for Google Calendar or Apple Calendar",
+      "icon": "Download"
     }
   ],
   "full": [
@@ -4642,6 +4656,20 @@
       "group": "Tools",
       "hint": "Offline Yiddish spell check (hunspell-yi, 2.4 MB, GPL)",
       "icon": "Download"
+    },
+    {
+      "id": "academic.choose",
+      "label": "Academic calendar: choose an institution…",
+      "group": "Tools",
+      "hint": "Semesters, Moed A and B and breaks in the daily note ({{academic}}) and for deadlines",
+      "icon": "FileText"
+    },
+    {
+      "id": "academic.ics",
+      "label": "Export the academic calendar (ICS)",
+      "group": "Tools",
+      "hint": "The chosen institution's year as a calendar file for Google Calendar or Apple Calendar",
+      "icon": "Download"
     }
   ],
   "autoSaveOn": [
@@ -4978,6 +5006,8 @@
     "mcp.settings",
     "mcp.ask",
     "text.transliterate",
-    "spell.yiddishDictionary"
+    "spell.yiddishDictionary",
+    "academic.choose",
+    "academic.ics"
   ]
 }

@@ -26,5 +26,6 @@
   "hl.apaTitle": "Highlights with citations — {date} ({n})",
   "hl.apaReferences": "References",
   "hl.apaWhich": "Which source is {source}?",
-  "hl.apaNoLibrary": "No sources in the citation library: sync Zotero or add a .bib or .csl.json file first."
+  "hl.apaNoLibrary": "No sources in the citation library: sync Zotero or add a .bib or .csl.json file first.",
+  "hl.scan": "Scan a page"
 }

@@ -1,6 +1,8 @@
 {
   "cmd.a11y.srVerbosity": "Screen reader announcements: {mode}",
   "cmd.a11y.whereAmI": "Announce cursor position",
+  "cmd.academic.choose": "Academic calendar: choose an institution…",
+  "cmd.academic.ics": "Export the academic calendar (ICS)",
   "cmd.ai.actionItems": "AI: Extract Action Items",
   "cmd.ai.agentSettings": "AI: Settings (local agents)",
   "cmd.ai.analyse": "AI: Analyse the table",

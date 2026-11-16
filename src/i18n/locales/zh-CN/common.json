@@ -1841,6 +1841,8 @@
   "install.guide.other.title": "在此浏览器中",
   "install.intro": "安装后的 Lumen 从自己的图标打开，在独立窗口中运行，并可离线使用。",
   "install.title": "安装 Lumen",
+  "israeliTime.academic.inBreak": "在学术假期（{name}）内：建议 {date}",
+  "israeliTime.academic.inExams": "考试期间：{exams}",
   "israeliTime.dayOff": "落在{reason}",
   "israeliTime.dueToday": "今天到期",
   "israeliTime.left.one": "还剩 {n} 个工作日",

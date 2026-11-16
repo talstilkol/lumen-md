@@ -1841,6 +1841,8 @@
   "install.guide.other.title": "Dans ce navigateur",
   "install.intro": "Lumen installé s’ouvre dans sa propre fenêtre, depuis sa propre icône, et fonctionne hors ligne.",
   "install.title": "Installer Lumen",
+  "israeliTime.academic.inBreak": "Pendant les vacances universitaires ({name}) : proposé le {date}",
+  "israeliTime.academic.inExams": "Pendant les examens : {exams}",
   "israeliTime.dayOff": "Tombe un jour de {reason}",
   "israeliTime.dueToday": "Pour aujourd’hui",
   "israeliTime.left.one": "{n} jour ouvré restant",

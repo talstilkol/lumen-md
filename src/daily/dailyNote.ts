@@ -167,7 +167,7 @@ export function reviewSection(queue: readonly Entry[]): string {
   return lines.join("\n");
 }
 
-export function renderTemplate(template: string, day: Day, locale: string, opts: { israel?: boolean; learning?: readonly CycleId[]; calendar?: string; review?: readonly Entry[] } = {}): string {
+export function renderTemplate(template: string, day: Day, locale: string, opts: { israel?: boolean; learning?: readonly CycleId[]; calendar?: string; review?: readonly Entry[]; academic?: string } = {}): string {
   const date = noonUtc(day);
   const israel = opts.israel ?? defaultIsrael(locale);
   const lang = nameLang(locale);
@@ -182,8 +182,10 @@ export function renderTemplate(template: string, day: Day, locale: string, opts:
     // W10.C6: the day's events from the calendar subscriptions (read before rendering: calendarBlockFor).
     calendar: () => opts.calendar ?? "",
     review: () => reviewSection(opts.review ?? []),
+    // The academic calendar's line (plan W7.8): "שבוע 6 בסמסטר א׳ · 23 יום למועד א׳", or nothing.
+    academic: () => opts.academic ?? "",
   };
-  return template.replace(/\{\{\s*(date|hebrewDate|weekday|title|holiday|parasha|learning|calendar|review)\s*\}\}/g, (_, k: string) => vars[k]());
+  return template.replace(/\{\{\s*(date|hebrewDate|weekday|title|holiday|parasha|learning|calendar|review|academic)\s*\}\}/g, (_, k: string) => vars[k]());
 }
 
 /**
@@ -227,7 +229,8 @@ export function ensureDailyNote(day: Day, settings: DailySettings, locale: strin
       // {{calendar}}: the subscriptions' events for the day (nothing is fetched when there is none).
       const calendar = /\{\{\s*calendar\s*\}\}/.test(settings.template) ? await dailyCalendarBlock(isoOf(day)) : undefined;
       const review = /\{\{\s*review\s*\}\}/.test(settings.template) ? await reviewQueueFor(day, ws.readWorkspaceFile) : undefined;
-      await ws.writeWorkspaceFile(path, renderTemplate(settings.template, day, locale, { israel: isIsrael(settings, locale), learning: settings.learning, calendar, review }));
+      const academic = /\{\{\s*academic\s*\}\}/.test(settings.template) ? await import("../academic/app").then((m) => m.dailyLineFor(day, locale)) : "";
+      await ws.writeWorkspaceFile(path, renderTemplate(settings.template, day, locale, { israel: isIsrael(settings, locale), learning: settings.learning, calendar, review, academic }));
       const { notifyWorkspaceChanged } = await import("../storage/workspaceEvents");
       notifyWorkspaceChanged({ kind: "structure", paths: [path] });
     }
