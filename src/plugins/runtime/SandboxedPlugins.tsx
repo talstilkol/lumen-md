@@ -40,13 +40,14 @@ async function getJson<T>(url: string, signal: AbortSignal): Promise<T> {
 /** The registry's versions that passed their scan, newest last per plugin. */
 async function loadListed(signal: AbortSignal): Promise<Listed[]> {
   const [index, scans] = await Promise.all([
-    getJson<{ plugins: Array<{ id: string; versions: Array<{ version: string; path: string }> }> }>(`${BASE}/index.json`, signal),
+    getJson<{ plugins: Array<{ id: string; versions: Array<{ version: string; path: string; delisted?: unknown }> }> }>(`${BASE}/index.json`, signal),
     getJson<{ results: Array<ScanResult & { path: string }> }>(`${BASE}/scan.json`, signal),
   ]);
   const { parseManifest } = await import("./manifest");
   const out: Listed[] = [];
   for (const p of index.plugins) {
-    const ok = p.versions.map((v) => ({ v, scan: scans.results.find((r) => r.id === p.id && r.version === v.version) ?? null })).filter((x) => x.scan?.passed);
+    // W11.S14: a version taken down after a failed review is never shown.
+    const ok = p.versions.filter((v) => !v.delisted).map((v) => ({ v, scan: scans.results.find((r) => r.id === p.id && r.version === v.version) ?? null })).filter((x) => x.scan?.passed);
     const latest = ok[ok.length - 1];
     if (!latest?.scan) continue;
     const manifest = parseManifest(await getJson<unknown>(`${BASE}/${latest.v.path}/lumen-plugin.json`, signal));

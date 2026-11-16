@@ -316,6 +316,19 @@ export function withReviewWarnings<C extends Scorecard>(card: C, extra: readonly
 }
 
 /** Listed versions whose review failed more than 24 hours ago: they must already be down. */
+/**
+ * W11.S14: the listed versions to take down now — every one whose review
+ * on record failed. `review-plugins.mjs --takedown` marks them `delisted`
+ * in index.json (the app neither shows nor installs them), and the owner
+ * re-signs the index; `--check` keeps failing on one still listed after
+ * TAKEDOWN_MS (overdueTakedowns).
+ */
+export function takedowns(listed: ReadonlyArray<{ id: string; version: string }>, cards: readonly Scorecard[]): Scorecard[] {
+  const key = (x: { id: string; version: string }) => `${x.id}@${x.version}`;
+  const up = new Set(listed.map(key));
+  return cards.filter((c) => !c.passed && up.has(key(c)));
+}
+
 export function overdueTakedowns(listed: ReadonlyArray<{ id: string; version: string }>, cards: readonly Scorecard[], now: number): Scorecard[] {
   const key = (x: { id: string; version: string }) => `${x.id}@${x.version}`;
   const up = new Set(listed.map(key));

@@ -39,6 +39,7 @@ export type InstallRefusal =
   | "registry-untrusted-signer"
   | "registry-format"
   | "not-listed"
+  | "delisted"
   | "download"
   | "sha256-code"
   | "sha256-manifest"
@@ -60,7 +61,12 @@ export interface RegistryVersion {
   path: string;
   sha256: string;
   manifestSha256: string;
+  /** W11.S14: taken down after a failed review (scripts/review-plugins.mjs --takedown); never installed. */
+  delisted?: { at: string; rules: string[] };
 }
+
+/** The versions a user can install: every version not taken down (W11.S14), oldest first. */
+export const installableVersions = (versions: readonly RegistryVersion[]): RegistryVersion[] => versions.filter((v) => !v.delisted);
 export interface RegistryIndex {
   plugins: Array<{ id: string; name: string; versions: RegistryVersion[] }>;
 }
@@ -138,6 +144,7 @@ function parseIndex(bytes: Uint8Array): RegistryIndex {
     for (const v of p.versions) {
       if (typeof v?.version !== "string" || typeof v.path !== "string" || !/^[A-Za-z0-9._@-]+$/.test(v.path)) throw new InstallRefused("registry-format", `${p.id}: a version has no safe path`);
       if (!hex.test(String(v.sha256)) || !hex.test(String(v.manifestSha256))) throw new InstallRefused("registry-format", `${p.id}@${v.version}: missing SHA-256`);
+      if (v.delisted !== undefined && (typeof v.delisted?.at !== "string" || !Array.isArray(v.delisted.rules))) throw new InstallRefused("registry-format", `${p.id}@${v.version}: a takedown without its date and rules`);
     }
   }
   return data as RegistryIndex;
@@ -184,8 +191,13 @@ export interface InstallResult {
 export async function installFromRegistry(base: string, id: string, version?: string, deps: InstallDeps = {}): Promise<InstallResult> {
   const index = await loadSignedRegistry(base, deps);
   const entry = index.plugins.find((p) => p.id === id);
-  const v = entry ? (version ? entry.versions.find((x) => x.version === version) : entry.versions[entry.versions.length - 1]) : undefined;
-  if (!entry || !v) throw new InstallRefused("not-listed", `${id}${version ? `@${version}` : ""} is not in the signed registry`);
+  const live = entry ? installableVersions(entry.versions) : [];
+  const v = version ? live.find((x) => x.version === version) : live[live.length - 1];
+  if (!entry || !v) {
+    const down = entry?.versions.find((x) => x.delisted && (!version || x.version === version));
+    if (down && (version || !live.length)) throw new InstallRefused("delisted", `${id}@${down.version} was taken down after its review failed (${down.delisted!.rules.join(", ")})`);
+    throw new InstallRefused("not-listed", `${id}${version ? `@${version}` : ""} is not in the signed registry`);
+  }
 
   const f = ledgerFetch(deps);
   const manifestBytes = await required(f, join(base, `${v.path}/lumen-plugin.json`));

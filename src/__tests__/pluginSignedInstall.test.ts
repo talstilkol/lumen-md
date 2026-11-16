@@ -225,3 +225,34 @@ describe("who may sign", () => {
     expect(verifyRegistryBytes(bytes, sig, generateSigningKey().spkiBase64)).toBe("wrong-key");
   });
 });
+
+describe("W11.S14: a version taken down after a failed review", () => {
+  /** The sample registry with its one version marked delisted (as review-plugins.mjs --takedown writes it), signed. */
+  const delisted = () => {
+    const { files, indexText } = sampleRegistry();
+    const index = JSON.parse(indexText);
+    index.plugins[0].versions[0].delisted = { at: "2026-11-16T10:00:00.000Z", rules: ["eval"] };
+    files.set(`${BASE}/index.json`, enc.encode(JSON.stringify(index, null, 2) + "\n"));
+    sign(files, key.privateKeyPem);
+    return files;
+  };
+
+  it("is never installed, latest or by its version, and no code is downloaded", async () => {
+    for (const version of [undefined, "1.0.0"]) {
+      const srv = server(delisted());
+      expect(await refusal(installFromRegistry(BASE, ID, version, { fetch: srv.fetch, createWorker: fakePluginWorker }))).toBe("delisted");
+      expect(srv.hits).toEqual([`${BASE}/index.json`, `${BASE}/index.json.sig`]);
+    }
+    expect(runningPlugins()).toEqual([]);
+    expect(await installedPlugins()).toEqual({});
+  });
+
+  it("a takedown without its date and rules is a malformed registry", async () => {
+    const { files, indexText } = sampleRegistry();
+    const index = JSON.parse(indexText);
+    index.plugins[0].versions[0].delisted = true;
+    files.set(`${BASE}/index.json`, enc.encode(JSON.stringify(index)));
+    sign(files, key.privateKeyPem);
+    expect(await refusal(installFromRegistry(BASE, ID, undefined, { fetch: server(files).fetch, createWorker: fakePluginWorker }))).toBe("registry-format");
+  });
+});
