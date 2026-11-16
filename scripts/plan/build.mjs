@@ -13,6 +13,7 @@
  *   npm run plan:check       exit 1 when either differs from plan.json (CI),
  *                            or a ✅ task has no `dod` (plan 0.7, scripts/dod.mjs),
  *                            a ✅ task has no green `evidence` (plan R12.14, claimGuard.mjs),
+ *                            a ✅ task the latest audit did not call DONE (W10.B12, auditGuard.mjs),
  *                            a ✅ is verified below `browser` (W10.G8), or a
  *                            status is longer than STATUS_MAX (W10.G7);
  *                            warns when a wave is over its work-in-progress limit
@@ -38,6 +39,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { checkDod } from "../dod.mjs";
 import { checkEvalClaims } from "../lib/evalCard.mjs";
 import { claimGuard } from "./claimGuard.mjs";
+import { auditGuard, readLedger } from "./auditGuard.mjs";
 import { RECEIPTS_FILE, checkReceiptClaims } from "./receiptLevels.mjs";
 import { AREAS_FILE, checkAreas } from "./areas.mjs";
 import { checkOriginClaims } from "../golden/origin-claims.mjs";
@@ -894,6 +896,9 @@ export function run({ root = ROOT, check = false, wipLimit, strictReceipts = fal
   // Plan R12.14: and no ✅ without recorded evidence that a check went green.
   const claimProblems = claimGuard(plan);
   if (claimProblems.length) throw new Error(`plan: ✅ without evidence (scripts/plan/claimGuard.mjs) —\n  ${claimProblems.join("\n  ")}`);
+  // W10.B12: and no ✅ on a task the latest audit did not call DONE (plan/audit-verdicts.json).
+  const auditProblems = auditGuard(plan, readLedger(root));
+  if (auditProblems.length) throw new Error(`plan: ✅ the audit did not call DONE (scripts/plan/auditGuard.mjs) —\n  ${auditProblems.join("\n  ")}`);
   // W10.B13: no status calls a synthetic golden set or fixture real (eval/origins.json).
   const originsPath = join(root, "eval/origins.json");
   const originProblems = existsSync(originsPath) ? checkOriginClaims(plan, JSON.parse(readFileSync(originsPath, "utf8"))) : [];
