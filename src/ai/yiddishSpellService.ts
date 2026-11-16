@@ -33,7 +33,8 @@ export async function yiddishDictionaryInstalled(): Promise<boolean> {
 }
 
 async function sha256Hex(bytes: Uint8Array): Promise<string> {
-  const buf = await crypto.subtle.digest("SHA-256", bytes);
+  // A copy on its own ArrayBuffer: the BufferSource that digest() is typed to take.
+  const buf = await crypto.subtle.digest("SHA-256", new Uint8Array(bytes));
   return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
