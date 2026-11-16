@@ -5804,6 +5804,11 @@
       "vars": []
     },
     {
+      "key": "e2ee.rules.unreadable",
+      "en": "This device's sync rules can't be read, so nothing was synced: open Sync → What syncs on this device and save them again.",
+      "vars": []
+    },
+    {
       "key": "e2ee.sas.aborted",
       "en": "Pairing stopped, and nothing was paired. Start again, and pair only with the device in front of you.",
       "vars": []

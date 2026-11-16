@@ -436,5 +436,6 @@
   "e2ee.roles.fresh.body": "Before this device sends anything, check once that you see the vault's latest notes (ask the admin if you're not sure). You're asked only once.",
   "e2ee.roles.fresh.confirm": "Yes, it's current",
   "e2ee.roles.fresh.done": "Confirmed. You won't be asked again on this device.",
-  "e2ee.roles.readOnly": "This device reads the vault. Its changes outside a personal folder aren't sent."
+  "e2ee.roles.readOnly": "This device reads the vault. Its changes outside a personal folder aren't sent.",
+  "e2ee.rules.unreadable": "This device's sync rules can't be read, so nothing was synced: open Sync → What syncs on this device and save them again."
 }

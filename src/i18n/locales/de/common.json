@@ -1041,6 +1041,7 @@
   "e2ee.rules.save": "Speichern",
   "e2ee.rules.saved": "Gespeichert. Gilt ab der nächsten Synchronisierung.",
   "e2ee.rules.title": "Was auf diesem Gerät synchronisiert wird",
+  "e2ee.rules.unreadable": "Die Synchronisierungsregeln dieses Geräts können nicht gelesen werden, daher wurde nichts synchronisiert: Öffne Sync → Was auf diesem Gerät synchronisiert wird und speichere sie erneut.",
   "e2ee.sas.aborted": "Kopplung abgebrochen, nichts wurde gekoppelt. Beginne neu und kopple nur mit dem Gerät vor dir.",
   "e2ee.sas.done": "Gekoppelt: Die Symbole wurden auf beiden Geräten bestätigt.",
   "e2ee.sas.match": "Sie stimmen überein",

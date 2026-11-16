@@ -1041,6 +1041,7 @@
   "e2ee.rules.save": "Enregistrer",
   "e2ee.rules.saved": "Enregistré. S’applique dès la prochaine synchro.",
   "e2ee.rules.title": "Ce qui se synchronise sur cet appareil",
+  "e2ee.rules.unreadable": "Les règles de synchronisation de cet appareil sont illisibles, rien n'a donc été synchronisé : ouvrez Synchronisation → Ce qui se synchronise sur cet appareil et enregistrez-les à nouveau.",
   "e2ee.sas.aborted": "Association interrompue, rien n’a été associé. Recommencez, et associez uniquement l’appareil que vous avez devant vous.",
   "e2ee.sas.done": "Associé : les symboles ont été confirmés sur les deux appareils.",
   "e2ee.sas.match": "Ils sont identiques",

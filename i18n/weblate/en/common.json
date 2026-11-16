@@ -1041,6 +1041,7 @@
   "e2ee.rules.save": "Save",
   "e2ee.rules.saved": "Saved. Applies from the next sync.",
   "e2ee.rules.title": "What syncs on this device",
+  "e2ee.rules.unreadable": "This device's sync rules can't be read, so nothing was synced: open Sync → What syncs on this device and save them again.",
   "e2ee.sas.aborted": "Pairing stopped, and nothing was paired. Start again, and pair only with the device in front of you.",
   "e2ee.sas.done": "Paired: the symbols were confirmed on both devices.",
   "e2ee.sas.match": "They match",

@@ -9,6 +9,7 @@ import { DeviceBusyError, DropDevicesRequiredError, KeyChangeInProgressError, Pa
 import { DroppedFromVaultError, KeyringCommitLostError, KeyringForkError, KeyringRollbackError, RevokedError, TamperedWrapError } from "../keyring";
 import { RollbackError } from "../manifest";
 import { PairingEpochError } from "../pairing";
+import { SyncRulesUnreadableError } from "../rules";
 import "../strings";
 
 /**
@@ -38,6 +39,8 @@ export function e2eeErrorText(e: unknown, side: "answer" | "pair" | "other" = "o
   if (e instanceof PairingDuringKeyChangeError) return t("e2ee.pair.rekeying");
   if (e instanceof PairingAbortedError) return t("e2ee.sas.aborted"); // plan W8.5
   if (e instanceof DeviceBusyError) return t("e2ee.busy");
+  // Unreadable selective-sync rules stop the round (fail closed): say where to fix them.
+  if (e instanceof SyncRulesUnreadableError) return t("e2ee.rules.unreadable");
   if (e instanceof PairingEpochError) {
     if (side === "answer" && e.kind === "older") return t("e2ee.pair.stale");
     if (side === "pair" && e.kind === "newer") return t("e2ee.fresh.olderKeys");
