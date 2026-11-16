@@ -20,6 +20,7 @@ import { E2E_COLLAB_PORT } from "../scripts/test-tiers.mjs";
 
 // One engine is enough for a server round trip; the client code is the same.
 // The flow under test is the collab server's persistence, which no engine changes (3.6).
+// skip-reason: the flow under test is the collab server's persistence, which no engine changes; one engine runs it | task: 3.6 | until: 2027-05-16
 chromiumOnlyHere("one engine for a server round trip");
 
 const ACCESS_KEY = "e2e-collab-access-key";

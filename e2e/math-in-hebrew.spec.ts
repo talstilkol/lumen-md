@@ -133,6 +133,7 @@ test("50 golden lines: formulas stay one LTR unit in the source editor", async (
 });
 
 test("the printed PDF keeps each formula whole", async ({ page, browserName }) => {
+  // skip-reason: Playwright has page.pdf() in Chromium only; Firefox and WebKit cannot print the page to PDF | task: W4.12 | until: 2027-05-16
   chromiumOnly(browserName, "page.pdf()");
   await loadNote(page);
   await page.keyboard.press("Meta+3");

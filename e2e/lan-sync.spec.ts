@@ -71,6 +71,7 @@ const result = (page: Page) => page.getByTestId("sync-result");
 
 test("two devices on the local network pair, sync both ways on their own, and reach nothing else", async ({ browser, browserName, baseURL }) => {
   // Real LAN addresses need the Chromium flag above; Firefox needs its own pref, not wired yet (W2.19).
+  // skip-reason: real LAN addresses (mDNS host candidates) need Chromium's command-line flag; Firefox's pref is not wired yet | task: W4.12 | until: 2027-05-16
   chromiumOnly(browserName, "the mDNS flag");
   test.setTimeout(120_000);
   const appHost = new URL(baseURL ?? "http://localhost:5173").host;

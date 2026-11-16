@@ -15,6 +15,12 @@
  * many specs goes through one helper (e2e/_opfs.ts `vaultOrSkip`), not a
  * copy in every test.
  *
+ * A call to a shared engine-gap helper (an exported function of
+ * e2e/_engines.ts that skips, such as `chromiumOnly`) is a skip of its own
+ * (R8-L3): each call site needs its own `// skip-reason:` with a task and a
+ * date, and e2e/ may hold at most MAX_E2E_HELPER_SKIPS of them, so a new
+ * spec cannot skip WebKit and Firefox through the helper unreviewed.
+ *
  * The check walks the TypeScript AST, so the words in strings and comments
  * do not count. Used by scripts/check-code-hygiene.mjs and
  * scripts/skip-report.mjs.
@@ -24,6 +30,10 @@ import { join, relative } from "node:path";
 import ts from "typescript";
 
 export const MAX_E2E_SKIPS = 15;
+/** Calls of the e2e/_engines.ts skip helpers (R8-L3: today's count, 8; a new one is reviewed with this number). */
+export const MAX_E2E_HELPER_SKIPS = 8;
+/** The file whose exported skipping functions count as skips where they are called. */
+export const ENGINE_HELPERS_FILE = "e2e/_engines.ts";
 export const MAX_HORIZON_DAYS = 366;
 
 /** Test-API roots and the members that skip or defer a test. */
@@ -92,27 +102,38 @@ function annotationFor(lines, line) {
  * Every skip/defer call in one file: { line, call, condition, annotation, problems }.
  * `problems` is empty for a call with a complete, in-date skip-reason.
  */
-export function findSkips(file, text, today = new Date()) {
+export function findSkips(file, text, today = new Date(), helpers = new Set()) {
   const kind = /\.tsx$/.test(file) ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
   const sf = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, kind);
   const lines = text.split(/\r?\n/);
   const out = [];
   const visit = (node) => {
     if (ts.isCallExpression(node)) {
-      const c = skipCallee(node.expression);
+      const c = skipCallee(node.expression) ?? (ts.isIdentifier(node.expression) && helpers.has(node.expression.text) ? { root: node.expression.text, member: "", helper: true } : null);
       if (c) {
         const line = sf.getLineAndCharacterOfPosition(node.getStart(sf)).line + 1;
         const annotation = annotationFor(lines, line);
         const problems = annotation === null ? ["no `// skip-reason: <why> | task: <id> | until: YYYY-MM-DD` comment"] : parseAnnotation(annotation, today).problems;
         const first = node.arguments[0];
         const condition = first && !ts.isStringLiteralLike(first) && !ts.isNoSubstitutionTemplateLiteral(first) ? first.getText(sf).replace(/\s+/g, " ") : "";
-        out.push({ line, call: `${c.root}${node.expression.getText(sf).slice(c.root.length)}`, condition, annotation, problems });
+        out.push({ line, call: `${c.root}${node.expression.getText(sf).slice(c.root.length)}`, condition, annotation, problems, ...(c.helper ? { helper: true } : {}) });
       }
     }
     ts.forEachChild(node, visit);
   };
   visit(sf);
   return out;
+}
+
+/** The exported functions of a helper file that contain a skip call (`chromiumOnly`, `chromiumOnlyHere`, …). */
+export function skipHelpers(text, file = ENGINE_HELPERS_FILE) {
+  const sf = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  const names = new Set();
+  for (const st of sf.statements) {
+    if (!ts.isFunctionDeclaration(st) || !st.name || !st.modifiers?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword)) continue;
+    if (findSkips(file, st.getText(sf)).length) names.add(st.name.text);
+  }
+  return names;
 }
 
 /** All .ts/.tsx files below `dir` (tests included), without node_modules. */
@@ -132,6 +153,12 @@ export function testSourceFiles(dir, out = []) {
  */
 export function auditSkips(root, { today = new Date() } = {}) {
   const sites = [];
+  let helpers = new Set();
+  try {
+    helpers = skipHelpers(readFileSync(join(root, ENGINE_HELPERS_FILE), "utf8"));
+  } catch {
+    // why: no e2e/_engines.ts in this checkout: no helper to count
+  }
   for (const area of ["src", "e2e"]) {
     let files = [];
     try {
@@ -141,13 +168,18 @@ export function auditSkips(root, { today = new Date() } = {}) {
     }
     for (const file of files) {
       const text = readFileSync(file, "utf8");
-      if (!/\b(skip|fixme|todo|skipIf|runIf)\b/.test(text)) continue;
-      for (const s of findSkips(file, text, today)) sites.push({ area, file: relative(root, file).split("\\").join("/"), ...s });
+      const rel = relative(root, file).split("\\").join("/");
+      const own = area === "e2e" && rel !== ENGINE_HELPERS_FILE ? helpers : new Set();
+      if (!/\b(skip|fixme|todo|skipIf|runIf)\b/.test(text) && ![...own].some((h) => text.includes(`${h}(`))) continue;
+      for (const s of findSkips(file, text, today, own)) sites.push({ area, file: rel, ...s });
     }
   }
   const violations = sites.filter((s) => s.problems.length).map((s) => ({ file: s.file, line: s.line, rule: "skip-reason", text: `${s.call}: ${s.problems.join("; ")}` }));
-  const e2eCount = sites.filter((s) => s.area === "e2e").length;
+  const e2eCount = sites.filter((s) => s.area === "e2e" && !s.helper).length;
+  const e2eHelperCount = sites.filter((s) => s.area === "e2e" && s.helper).length;
   if (e2eCount > MAX_E2E_SKIPS)
     violations.push({ file: "e2e/", line: 0, rule: "skip-count", text: `${e2eCount} skip calls in e2e/, at most ${MAX_E2E_SKIPS}: fix a test or share one helper for an engine gap` });
-  return { sites, violations, e2eCount };
+  if (e2eHelperCount > MAX_E2E_HELPER_SKIPS)
+    violations.push({ file: "e2e/", line: 0, rule: "skip-count", text: `${e2eHelperCount} calls of the ${ENGINE_HELPERS_FILE} skip helpers, at most ${MAX_E2E_HELPER_SKIPS}: each one skips engines, so a new one is reviewed` });
+  return { sites, violations, e2eCount, e2eHelperCount };
 }

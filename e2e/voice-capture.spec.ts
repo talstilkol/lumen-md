@@ -13,6 +13,7 @@ import { chromiumOnlyHere } from "./_engines";
 
 // Chromium's fake microphone; Firefox and WebKit have no equivalent permission in Playwright.
 // Playwright gives a fake microphone only to Chromium (W1.13).
+// skip-reason: Playwright gives a fake microphone only to Chromium (--use-fake-device-for-media-stream); Firefox and WebKit have none | task: W1.13 | until: 2027-05-16
 chromiumOnlyHere("a fake microphone");
 test.use({
   permissions: ["microphone"],
