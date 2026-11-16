@@ -85,6 +85,23 @@ const T = {
     transparencyBody: "Every six months, the requests for user data the relay and the share server received, answered and rejected: [Transparency report](/security/transparency/). The store privacy labels are built from the privacy ledger, and a check fails when a route is missing from them (`store/privacy-labels.json`).",
     report: "Report a vulnerability",
     reportBody: "Privately, as [SECURITY.md](https://github.com/talstilkol/lumen-md/blob/main/SECURITY.md) explains.",
+    securityTxt: "The same contact is in [`/.well-known/security.txt`](https://lumen-md.vercel.app/.well-known/security.txt) (RFC 9116); a check fails when the file expires.",
+    cra: "Disclosure timelines (EU Cyber Resilience Act)",
+    craBody: (c) => `The reporting duties of the CRA (${c.article}) apply from ${c.appliesFrom}. A free project that is not monetised is most likely outside them, but Lumen keeps the same clock for a vulnerability that is actively exploited:`,
+    craCols: "| When | What Lumen publishes |",
+    craRows: (c) => [
+      `| ≤ ${c.earlyWarningHours} hours after learning it is exploited | Early warning: what is affected and what to do meanwhile, with no exploit details. |`,
+      `| ≤ ${c.notificationHours} hours | Notification: the affected versions, the severity (CVSS 3.1) and the mitigations. |`,
+      `| ≤ ${c.finalReportDays} days after a fix or mitigation is available | Final report: the GitHub security advisory (GHSA) with the description, severity, impact, root cause and fix, and a CVE requested through it. |`,
+    ],
+    craAfter: (c) => `For a severe incident the final report comes within ${c.severeIncidentFinalReportDays} days. If Lumen ever becomes a manufacturer under the CRA (for example through a paid relay), the same reports also go to the CSIRT and ENISA's single reporting platform, on the same clock.`,
+    harbor: "Good-faith research (safe harbor)",
+    harborBody: "We will not take legal action against research, or ask a host to act against it, when it follows SECURITY.md, tests only your own data and installations, does not read, change or delete other people's data, does not degrade the service for others, and gives us the time above before publishing. If someone else acts against you for such research, we will say publicly that it followed this policy.",
+    support: "Supported versions",
+    supportCols: "| Release line | Status | Security fixes |",
+    status: { current: "current", previous: "previous", unsupported: "not supported" },
+    hall: "Hall of fame",
+    hallNone: "No reports credited yet. Reporters are credited here and in the advisory unless they ask not to be.",
     sev: { critical: "critical", high: "high", medium: "medium", low: "low", info: "info" },
     acc: " (accepted)",
   },
@@ -112,6 +129,23 @@ const T = {
     transparencyBody: "כל חצי שנה, בקשות למידע של משתמשים שהממסר ושרת השיתוף קיבלו, ענו עליהן ודחו: [דוח שקיפות](/he/security/transparency/). תוויות הפרטיות לחנויות נבנות מפנקס הפרטיות, ובדיקה נכשלת כשחסר בהן מסלול (`store/privacy-labels.json`).",
     report: "דיווח על חולשה",
     reportBody: "באופן פרטי, כמו ש-[SECURITY.md](https://github.com/talstilkol/lumen-md/blob/main/SECURITY.md) מסביר.",
+    securityTxt: "אותו ערוץ קשר נמצא גם ב-[`/.well-known/security.txt`](https://lumen-md.vercel.app/.well-known/security.txt) ‏(RFC 9116); בדיקה נכשלת כשתוקף הקובץ פג.",
+    cra: "לוחות זמנים לגילוי (חוק החוסן הקיברנטי של האיחוד האירופי, CRA)",
+    craBody: (c) => `חובות הדיווח של ה-CRA ‏(${c.article}) חלות מ-${c.appliesFrom}. פרויקט חינמי שלא מרוויח כסף כנראה פטור מהן, אבל Lumen שומר על אותם זמנים לחולשה שמנוצלת בפועל:`,
+    craCols: "| מתי | מה Lumen מפרסם |",
+    craRows: (c) => [
+      `| עד ${c.earlyWarningHours} שעות מרגע שנודע שהיא מנוצלת | התרעה מוקדמת: מה מושפע ומה לעשות בינתיים, בלי פרטי ניצול. |`,
+      `| עד ${c.notificationHours} שעות | הודעה: הגרסאות המושפעות, החומרה (CVSS 3.1) ודרכי ההתגוננות. |`,
+      `| עד ${c.finalReportDays} יום אחרי שיש תיקון או דרך התגוננות | דוח סופי: ה-advisory של GitHub ‏(GHSA) עם התיאור, החומרה, ההשפעה, שורש הבעיה והתיקון, ו-CVE שמתבקש דרכו. |`,
+    ],
+    craAfter: (c) => `באירוע חמור הדוח הסופי יוצא תוך ${c.severeIncidentFinalReportDays} יום. אם Lumen יהפוך אי פעם ל"יצרן" לפי ה-CRA (למשל דרך ממסר בתשלום), אותם דוחות יישלחו גם ל-CSIRT ולפלטפורמת הדיווח של ENISA, באותם זמנים.`,
+    harbor: "מחקר בתום לב (safe harbor)",
+    harborBody: "לא ננקוט צעדים משפטיים נגד מחקר, ולא נבקש מספק אחסון לפעול נגדו, כשהוא פועל לפי SECURITY.md, בודק רק על הנתונים וההתקנות שלכם, לא קורא, משנה או מוחק נתונים של אחרים, לא פוגע בשירות לאחרים, ונותן לנו את הזמן שלמעלה לפני פרסום. אם מישהו אחר יפעל נגדכם בגלל מחקר כזה, נאמר בפומבי שהוא פעל לפי המדיניות הזו.",
+    support: "גרסאות נתמכות",
+    supportCols: "| קו גרסאות | מצב | תיקוני אבטחה |",
+    status: { current: "נוכחי", previous: "קודם", unsupported: "לא נתמך" },
+    hall: "היכל התהילה",
+    hallNone: "עוד אין דיווחים עם קרדיט. מדווחים מקבלים קרדיט כאן וב-advisory, אלא אם ביקשו שלא.",
     sev: { critical: "קריטית", high: "גבוהה", medium: "בינונית", low: "נמוכה", info: "מידע" },
     acc: " (התקבל)",
   },
@@ -120,7 +154,7 @@ const T = {
 const cell = (s) => String(s).replace(/\|/g, "\\|").replace(/\n/g, " ");
 
 /** The page in one language. `cards` are scorecards (W11.S14). */
-export function renderSecurityPage(findings, cards, lang, cryptoAudit = null) {
+export function renderSecurityPage(findings, cards, lang, cryptoAudit = null, disclosure = null) {
   const t = T[lang];
   const open = findings.findings.filter((f) => f.status !== "fixed").sort((a, b) => SEVERITIES.indexOf(a.severity) - SEVERITIES.indexOf(b.severity) || (a.id < b.id ? -1 : 1));
   const listed = [...cards].filter((c) => c.passed).sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : a.version < b.version ? -1 : 1));
@@ -174,5 +208,59 @@ export function renderSecurityPage(findings, cards, lang, cryptoAudit = null) {
     "",
     t.reportBody,
     "",
+    ...(disclosure ? disclosureSection(t, disclosure, lang) : []),
   ].join("\n");
+}
+
+/** W13.X2: the disclosure part of the page, from security/disclosure.json. */
+function disclosureSection(t, d, lang) {
+  const c = d.cra;
+  return [
+    t.securityTxt,
+    "",
+    `### ${t.cra}`,
+    "",
+    t.craBody(c),
+    "",
+    t.craCols,
+    "|---|---|",
+    ...t.craRows(c),
+    "",
+    t.craAfter(c),
+    "",
+    `### ${t.harbor}`,
+    "",
+    t.harborBody,
+    "",
+    `### ${t.support}`,
+    "",
+    t.supportCols,
+    "|---|---|---|",
+    ...d.support.map((s) => `| ${cell(s.line)} | ${t.status[s.status]} | ${cell(s[lang])} |`),
+    "",
+    `### ${t.hall}`,
+    "",
+    ...(d.hallOfFame.length ? d.hallOfFame.map((h) => `- ${h.url ? `[${cell(h.name)}](${h.url})` : cell(h.name)} — ${cell(h.advisory)} (${h.date})`) : [t.hallNone]),
+    "",
+  ];
+}
+
+/** Problems with security/disclosure.json (W13.X2). */
+export function disclosureProblems(d) {
+  const out = [];
+  const c = d?.cra ?? {};
+  // The CRA's Article 14 clock; the page may promise faster, never slower.
+  if (!(c.earlyWarningHours > 0 && c.earlyWarningHours <= 24)) out.push("cra.earlyWarningHours: at most 24 (CRA Art. 14(2)(a))");
+  if (!(c.notificationHours > 0 && c.notificationHours <= 72)) out.push("cra.notificationHours: at most 72 (CRA Art. 14(2)(b))");
+  if (!(c.finalReportDays > 0 && c.finalReportDays <= 14)) out.push("cra.finalReportDays: at most 14 (CRA Art. 14(2)(c))");
+  if (!(c.severeIncidentFinalReportDays > 0 && c.severeIncidentFinalReportDays <= 30)) out.push("cra.severeIncidentFinalReportDays: at most one month (CRA Art. 14(4)(c))");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(c.appliesFrom ?? "")) || !String(c.article ?? "").trim()) out.push("cra: needs appliesFrom (a date) and article");
+  if (!Array.isArray(d?.support) || !d.support.some((s) => s.status === "current")) out.push("support: at least one release line with status current");
+  for (const s of d?.support ?? []) {
+    if (!["current", "previous", "unsupported"].includes(s.status)) out.push(`support ${s.line}: status must be current, previous or unsupported`);
+    if (!String(s.en ?? "").trim() || !String(s.he ?? "").trim()) out.push(`support ${s.line}: needs the period in English and Hebrew`);
+  }
+  if (!Array.isArray(d?.hallOfFame)) out.push("hallOfFame: a list (empty until a report is credited)");
+  for (const h of d?.hallOfFame ?? []) if (!String(h.name ?? "").trim() || !/^\d{4}-\d{2}-\d{2}$/.test(String(h.date)) || !String(h.advisory ?? "").trim()) out.push("hallOfFame: each entry needs name, date and advisory");
+  return out;
 }

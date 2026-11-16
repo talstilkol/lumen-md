@@ -1,0 +1,24 @@
+{
+  "$comment": "Plan W13.X2 (with W11.S12): what the public security page and SECURITY.md promise about disclosure. scripts/security-page.mjs renders the 'Reporting and disclosure' section of /security and /he/security from this file; src/__tests__/securityTxt.test.ts checks that SECURITY.md states the same numbers in English and Hebrew and that public/.well-known/security.txt passes RFC 9116. The support period is a proposal for the owner to confirm in review (lane B2c).",
+  "securityTxt": {
+    "path": "public/.well-known/security.txt",
+    "canonical": "https://lumen-md.vercel.app/.well-known/security.txt"
+  },
+  "cra": {
+    "article": "Regulation (EU) 2024/2847 (Cyber Resilience Act), Article 14",
+    "appliesFrom": "2026-09-11",
+    "earlyWarningHours": 24,
+    "notificationHours": 72,
+    "finalReportDays": 14,
+    "severeIncidentFinalReportDays": 30
+  },
+  "support": [
+    {
+      "line": "0.1.x",
+      "status": "current",
+      "en": "While it is the newest release line, and for critical and high severity for 90 days after the next minor line ships.",
+      "he": "כל עוד זה קו הגרסאות החדש ביותר, ותיקונים בחומרה קריטית וגבוהה עוד 90 יום אחרי שקו הגרסאות הבא יוצא."
+    }
+  ],
+  "hallOfFame": []
+}

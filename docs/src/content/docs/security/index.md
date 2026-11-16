@@ -71,3 +71,31 @@ Every six months, the requests for user data the relay and the share server rece
 ## Report a vulnerability
 
 Privately, as [SECURITY.md](https://github.com/talstilkol/lumen-md/blob/main/SECURITY.md) explains.
+
+The same contact is in [`/.well-known/security.txt`](https://lumen-md.vercel.app/.well-known/security.txt) (RFC 9116); a check fails when the file expires.
+
+### Disclosure timelines (EU Cyber Resilience Act)
+
+The reporting duties of the CRA (Regulation (EU) 2024/2847 (Cyber Resilience Act), Article 14) apply from 2026-09-11. A free project that is not monetised is most likely outside them, but Lumen keeps the same clock for a vulnerability that is actively exploited:
+
+| When | What Lumen publishes |
+|---|---|
+| ≤ 24 hours after learning it is exploited | Early warning: what is affected and what to do meanwhile, with no exploit details. |
+| ≤ 72 hours | Notification: the affected versions, the severity (CVSS 3.1) and the mitigations. |
+| ≤ 14 days after a fix or mitigation is available | Final report: the GitHub security advisory (GHSA) with the description, severity, impact, root cause and fix, and a CVE requested through it. |
+
+For a severe incident the final report comes within 30 days. If Lumen ever becomes a manufacturer under the CRA (for example through a paid relay), the same reports also go to the CSIRT and ENISA's single reporting platform, on the same clock.
+
+### Good-faith research (safe harbor)
+
+We will not take legal action against research, or ask a host to act against it, when it follows SECURITY.md, tests only your own data and installations, does not read, change or delete other people's data, does not degrade the service for others, and gives us the time above before publishing. If someone else acts against you for such research, we will say publicly that it followed this policy.
+
+### Supported versions
+
+| Release line | Status | Security fixes |
+|---|---|---|
+| 0.1.x | current | While it is the newest release line, and for critical and high severity for 90 days after the next minor line ships. |
+
+### Hall of fame
+
+No reports credited yet. Reporters are credited here and in the advisory unless they ask not to be.
