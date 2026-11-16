@@ -12,6 +12,9 @@ import { secretStoreMode, subscribeSecretStoreMode } from "../lib/secretStore";
 import { parseSuggestions, mayContainCriticMarkup } from "../editor/suggesting";
 import { BetaBadge } from "./FeatureFlagsHost";
 import { StatusBarA11yLink } from "./AccessibilityLinks";
+// W13.W14: the note's writing goal, in its own chunk, loaded only for a note whose frontmatter sets one.
+const NoteGoalStatus = React.lazy(() => import("./NoteGoalStatus"));
+const HAS_GOAL = /^\uFEFF?---\r?\n[\s\S]*?^goal[.:\s]/m;
 
 /** Number of CriticMarkup suggestions (cheap no-op for plain docs). */
 function countCriticMarkup(text: string): number {
@@ -178,6 +181,11 @@ export const StatusBar = React.memo(function StatusBar({
       <span className="sb-item" title={t("status.reading.title")}>
         {t("status.reading", { n: stats.readingMin })}
       </span>
+      {HAS_GOAL.test(settledText.slice(0, 4000)) && (
+        <React.Suspense fallback={null}>
+          <NoteGoalStatus text={settledText} />
+        </React.Suspense>
+      )}
       {agentReviewPending > 0 && (
         <button type="button" className="sb-item sb-review" onClick={onOpenAgentReview} title={t("agentReview.badge.tooltip")} data-testid="status-agent-review">
           <Sparkles size={10} />
