@@ -1,0 +1,1876 @@
+[
+  {
+    "id": "L2-W10.E1",
+    "cmd": "npx vitest run src/__tests__/renderWorker.test.ts src/__tests__/renderSnapshot.test.ts src/__tests__/pipeline.test.ts --reporter=json --outputFile=.mac-pack/L2/W10.E1.vitest.json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E1.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E1.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 81
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci"
+    ],
+    "minutes": 4
+  },
+  {
+    "id": "L2-W10.E2",
+    "cmd": "npx vitest run src/__tests__/renderWorker.test.ts src/__tests__/pipeline.test.ts --reporter=json --outputFile=.mac-pack/L2/W10.E2.vitest.json && PLAYWRIGHT_JSON_OUTPUT_NAME=.mac-pack/L2/W10.E2.e2e.json npx playwright test e2e/math-in-hebrew.spec.ts --project=chromium --reporter=json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E2.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E2.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 29
+        },
+        {
+          "file": ".mac-pack/L2/W10.E2.e2e.json",
+          "path": "stats.unexpected",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E2.e2e.json",
+          "path": "stats.expected",
+          "op": ">=",
+          "value": 3
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "playwright chromium"
+    ],
+    "minutes": 5
+  },
+  {
+    "id": "L2-W10.E3",
+    "cmd": "npx vitest run src/__tests__/viewportPreview.test.ts --reporter=json --outputFile=.mac-pack/L2/W10.E3.vitest.json && npm run build && npm run perf:gate -- --json .mac-pack/L2/W10.E3.perf.json --out .mac-pack/L2/W10.E3.perf.md",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E3.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E3.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 7
+        },
+        {
+          "file": ".mac-pack/L2/W10.E3.perf.json",
+          "path": "failed",
+          "op": "==",
+          "value": false
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "playwright chromium",
+      "quiet Mac (no other load)"
+    ],
+    "minutes": 15
+  },
+  {
+    "id": "L2-W10.E4",
+    "cmd": "npx vitest run src/__tests__/renderWorker.test.ts --reporter=json --outputFile=.mac-pack/L2/W10.E4.vitest.json && PLAYWRIGHT_JSON_OUTPUT_NAME=.mac-pack/L2/W10.E4.e2e.json npx playwright test e2e/hover-preview.spec.ts --project=chromium --project=firefox --project=webkit --reporter=json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E4.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E4.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 11
+        },
+        {
+          "file": ".mac-pack/L2/W10.E4.e2e.json",
+          "path": "stats.unexpected",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E4.e2e.json",
+          "path": "stats.expected",
+          "op": ">=",
+          "value": 6
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "playwright browsers: chromium, firefox, webkit (npx playwright install, on the Mac)"
+    ],
+    "minutes": 5
+  },
+  {
+    "id": "L2-W10.E5",
+    "cmd": "npx vitest run src/__tests__/dialogsModal.test.tsx src/__tests__/modal.test.tsx src/__tests__/modalTraps.test.ts src/__tests__/useFocusTrap.test.tsx --reporter=json --outputFile=.mac-pack/L2/W10.E5.vitest.json && PLAYWRIGHT_JSON_OUTPUT_NAME=.mac-pack/L2/dialogs.e2e.json npx playwright test e2e/a11y-dialogs.spec.ts --project=chromium --project=firefox --project=webkit --reporter=json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E5.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E5.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 51
+        },
+        {
+          "file": ".mac-pack/L2/dialogs.e2e.json",
+          "path": "stats.unexpected",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/dialogs.e2e.json",
+          "path": "stats.expected",
+          "op": ">=",
+          "value": 402
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "playwright browsers: chromium, firefox, webkit (npx playwright install, on the Mac)"
+    ],
+    "minutes": 25
+  },
+  {
+    "id": "L2-W10.E6",
+    "cmd": "npx vitest run src/__tests__/dialogsModal.test.tsx src/__tests__/modal.test.tsx src/__tests__/modalTraps.test.ts src/__tests__/useFocusTrap.test.tsx --reporter=json --outputFile=.mac-pack/L2/W10.E6.vitest.json && PLAYWRIGHT_JSON_OUTPUT_NAME=.mac-pack/L2/dialogs.e2e.json npx playwright test e2e/a11y-dialogs.spec.ts --project=chromium --project=firefox --project=webkit --reporter=json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E6.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E6.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 51
+        },
+        {
+          "file": ".mac-pack/L2/dialogs.e2e.json",
+          "path": "stats.unexpected",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/dialogs.e2e.json",
+          "path": "stats.expected",
+          "op": ">=",
+          "value": 402
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "playwright browsers: chromium, firefox, webkit (npx playwright install, on the Mac)"
+    ],
+    "minutes": 25
+  },
+  {
+    "id": "L2-W10.E7",
+    "cmd": "npx vitest run src/__tests__/dialogsModal.test.tsx src/__tests__/modal.test.tsx src/__tests__/modalTraps.test.ts src/__tests__/useFocusTrap.test.tsx --reporter=json --outputFile=.mac-pack/L2/W10.E7.vitest.json && PLAYWRIGHT_JSON_OUTPUT_NAME=.mac-pack/L2/dialogs.e2e.json npx playwright test e2e/a11y-dialogs.spec.ts --project=chromium --project=firefox --project=webkit --reporter=json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E7.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E7.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 51
+        },
+        {
+          "file": ".mac-pack/L2/dialogs.e2e.json",
+          "path": "stats.unexpected",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/dialogs.e2e.json",
+          "path": "stats.expected",
+          "op": ">=",
+          "value": 402
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "playwright browsers: chromium, firefox, webkit (npx playwright install, on the Mac)"
+    ],
+    "minutes": 25
+  },
+  {
+    "id": "L2-W10.E8",
+    "cmd": "npx vitest run src/__tests__/eslintModalOnly.test.ts src/__tests__/modalTraps.test.ts --reporter=json --outputFile=.mac-pack/L2/W10.E8.vitest.json && PLAYWRIGHT_JSON_OUTPUT_NAME=.mac-pack/L2/dialogs.e2e.json npx playwright test e2e/a11y-dialogs.spec.ts --project=chromium --project=firefox --project=webkit --reporter=json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E8.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E8.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 13
+        },
+        {
+          "file": ".mac-pack/L2/dialogs.e2e.json",
+          "path": "stats.unexpected",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/dialogs.e2e.json",
+          "path": "stats.expected",
+          "op": ">=",
+          "value": 402
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "playwright browsers: chromium, firefox, webkit (npx playwright install, on the Mac)"
+    ],
+    "minutes": 25
+  },
+  {
+    "id": "L2-W10.E9",
+    "cmd": "npx vitest run src/__tests__/perfGate.test.ts --reporter=json --outputFile=.mac-pack/L2/W10.E9.vitest.json && npm run build && npm run perf:gate -- --json .mac-pack/L2/W10.E9.perf.json --out .mac-pack/L2/W10.E9.perf.md && PLAYWRIGHT_JSON_OUTPUT_NAME=.mac-pack/L2/W10.E9.e2e.json npx playwright test e2e/privacy-audit.spec.ts --project=chromium --reporter=json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E9.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E9.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 15
+        },
+        {
+          "file": ".mac-pack/L2/W10.E9.perf.json",
+          "path": "failed",
+          "op": "==",
+          "value": false
+        },
+        {
+          "file": ".mac-pack/L2/W10.E9.e2e.json",
+          "path": "stats.unexpected",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E9.e2e.json",
+          "path": "stats.expected",
+          "op": ">=",
+          "value": 1
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "playwright chromium",
+      "quiet Mac"
+    ],
+    "minutes": 20
+  },
+  {
+    "id": "L2-W10.E9-canary",
+    "cmd": "npm run build && node -e \"const fs=require('fs'),c=require('crypto'),p=require('path');const d='dist/assets';const f=fs.readdirSync(d).filter(x=>/^index-.*\\.js$/.test(x)).map(x=>p.join(d,x)).sort((a,b)=>fs.statSync(b).size-fs.statSync(a).size)[0];fs.appendFileSync(f,'\\n/*'+c.randomBytes(153600).toString('base64')+'*/');console.log('canary +150 KB in',f)\" && npm run budget",
+    "expect": {
+      "exit": 1,
+      "json": [],
+      "note": "exit must be NOT 0: the bundle budget refuses +150 KB of incompressible bytes in the startup entry. Rebuild afterwards (npm run build) — dist/ is left poisoned on purpose."
+    },
+    "needs": [
+      "node 22+",
+      "npm ci"
+    ],
+    "minutes": 6
+  },
+  {
+    "id": "L2-W10.E11",
+    "cmd": "npx vitest run src/__tests__/nightlyTrend.test.ts src/__tests__/nightlyReceipts.test.ts --reporter=json --outputFile=.mac-pack/L2/W10.E11.vitest.json && npm run nightly:install -- --print && npm run nightly:install && (launchctl list | grep -c lumen)",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E11.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E11.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 29
+        }
+      ],
+      "stdoutLastLine": ">= 1"
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "macOS (launchd)"
+    ],
+    "minutes": 5
+  },
+  {
+    "id": "L2-W10.E12",
+    "cmd": "npx vitest run src/__tests__/evalIngest.test.ts --reporter=json --outputFile=.mac-pack/L2/W10.E12.vitest.json && npm run eval:agents -- --model qwen3:8b && npm run eval:ingest && npm run eval:ingest -- --check",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E12.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E12.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 9
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "ollama running locally with qwen3:8b pulled"
+    ],
+    "minutes": 60
+  },
+  {
+    "id": "L2-W10.E18",
+    "cmd": "PLAYWRIGHT_JSON_OUTPUT_NAME=.mac-pack/L2/W10.E18.e2e.json npx playwright test e2e/print-golden.spec.ts --project=chromium --project=firefox --project=webkit --reporter=json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E18.e2e.json",
+          "path": "stats.unexpected",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E18.e2e.json",
+          "path": "stats.expected",
+          "op": ">=",
+          "value": 30
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "playwright browsers: chromium, firefox, webkit (npx playwright install, on the Mac)"
+    ],
+    "minutes": 8
+  },
+  {
+    "id": "L2-W10.E19",
+    "cmd": "npx vitest run src/__tests__/noteBoot.test.ts src/__tests__/startupLazyPanels.test.ts --reporter=json --outputFile=.mac-pack/L2/W10.E19.vitest.json && npm run build && npm run budget",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E19.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E19.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 34
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci"
+    ],
+    "minutes": 6
+  },
+  {
+    "id": "L2-W10.E20",
+    "cmd": "npx vitest run src/__tests__/noteBoot.test.ts src/__tests__/bootPreload.test.ts src/__tests__/bootShellCls.test.ts --reporter=json --outputFile=.mac-pack/L2/W10.E20.vitest.json && npm run build && PLAYWRIGHT_JSON_OUTPUT_NAME=.mac-pack/L2/W10.E20.e2e.json npx playwright test --project=coldstart --project=coldstart-phone e2e/cold-start.spec.ts --reporter=json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E20.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E20.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 22
+        },
+        {
+          "file": ".mac-pack/L2/W10.E20.e2e.json",
+          "path": "stats.unexpected",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E20.e2e.json",
+          "path": "stats.expected",
+          "op": ">=",
+          "value": 4
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "playwright chromium"
+    ],
+    "minutes": 10
+  },
+  {
+    "id": "L2-W10.E21",
+    "cmd": "npx vitest run src/__tests__/bidiBlocks.test.ts --reporter=json --outputFile=.mac-pack/L2/W10.E21.vitest.json && PLAYWRIGHT_JSON_OUTPUT_NAME=.mac-pack/L2/W10.E21.e2e.json npx playwright test e2e/rtl-matrix.spec.ts --project=chromium --project=firefox --project=webkit --reporter=json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E21.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E21.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 1
+        },
+        {
+          "file": ".mac-pack/L2/W10.E21.e2e.json",
+          "path": "stats.unexpected",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E21.e2e.json",
+          "path": "stats.expected",
+          "op": ">=",
+          "value": 33
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "playwright browsers: chromium, firefox, webkit (npx playwright install, on the Mac)"
+    ],
+    "minutes": 8
+  },
+  {
+    "id": "L2-W10.E22",
+    "cmd": "npx eslint e2e/rtl-parity/ && PLAYWRIGHT_JSON_OUTPUT_NAME=.mac-pack/L2/W10.E22.e2e.json npx playwright test e2e/rtl-parity/ --project=chromium --project=firefox --project=webkit --reporter=json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E22.e2e.json",
+          "path": "stats.unexpected",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E22.e2e.json",
+          "path": "stats.expected",
+          "op": ">=",
+          "value": 54
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "playwright browsers: chromium, firefox, webkit (npx playwright install, on the Mac)"
+    ],
+    "minutes": 10
+  },
+  {
+    "id": "L2-W10.E23",
+    "cmd": "npm run test:visual; test $? -ne 0 && npm run visual:approve && for i in 1 2 3; do PLAYWRIGHT_JSON_OUTPUT_NAME=.mac-pack/L2/W10.E23.run$i.json npx playwright test -c playwright.visual.config.ts --reporter=json || exit 1; done",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E23.run1.json",
+          "path": "stats.unexpected",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E23.run2.json",
+          "path": "stats.unexpected",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E23.run3.json",
+          "path": "stats.unexpected",
+          "op": "==",
+          "value": 0
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "playwright browsers: chromium, firefox, webkit (npx playwright install, on the Mac)"
+    ],
+    "minutes": 30
+  },
+  {
+    "id": "L2-W10.E23-canary",
+    "cmd": "printf '.sidebar{margin-inline-start:2px!important}' > public/__canary.css && sed -i.bak 's#</head>#<link rel=\"stylesheet\" href=\"/__canary.css\"></head>#' index.html && (npx playwright test -c playwright.visual.config.ts; r=$?; mv index.html.bak index.html; rm -f public/__canary.css; test $r -ne 0)",
+    "expect": {
+      "exit": 0,
+      "json": [],
+      "note": "exit 0 here means the visual run FAILED with the 2 px shift, which is the point; index.html is restored either way"
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "playwright browsers: chromium, firefox, webkit (npx playwright install, on the Mac)"
+    ],
+    "minutes": 10
+  },
+  {
+    "id": "L2-W10.E26",
+    "cmd": "for m in agents/runtime.ts text/hebrew.ts storage/zip.ts; do node scripts/mutation/run.mjs --min 80 --module $m --receipt || exit 1; done && npm run mutation:check",
+    "expect": {
+      "exit": 0,
+      "json": []
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "stryker (npm ci installs it)",
+      "2-4 h of CPU"
+    ],
+    "minutes": 240
+  },
+  {
+    "id": "L2-W10.E36",
+    "cmd": "npx vitest run src/__tests__/libraryIndex.test.ts src/__tests__/libraryIndexStore.test.ts src/__tests__/libraryPanel.test.tsx --reporter=json --outputFile=.mac-pack/L2/W10.E36.vitest.json && LUMEN_EVAL_EMBED=1 npx vitest run --config vitest.eval.config.ts src/agents/eval/embedCompete.eval.ts",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E36.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E36.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 16
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "ollama running locally with the embedding candidates of embedCompete.eval.ts pulled"
+    ],
+    "minutes": 30
+  },
+  {
+    "id": "L2-W10.E39",
+    "cmd": "npx vitest run src/__tests__/e2eShards.test.ts src/__tests__/promoteCheck.test.ts --reporter=json --outputFile=.mac-pack/L2/W10.E39.vitest.json && VITE_E2E=1 npm run build && for n in 1 2 3 4; do LUMEN_E2E_SHARD=$n/4 node scripts/e2e-gate.mjs --full || exit 1; done && node scripts/e2e-gate.mjs merge --total 4 --sha $(git rev-parse HEAD) && npm run promote:main -- HEAD --report reports/e2e-$(git rev-parse HEAD).json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E39.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E39.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 22
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "playwright chromium"
+    ],
+    "minutes": 45
+  },
+  {
+    "id": "L2-W10.E40",
+    "cmd": "npx vitest run src/__tests__/drillShippedCode.test.ts --reporter=json --outputFile=.mac-pack/L2/W10.E40.vitest.json && npm run drill:data-safety -- --out .mac-pack/L2/drill --json > .mac-pack/L2/W10.E40.drill.json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E40.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E40.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 3
+        },
+        {
+          "file": ".mac-pack/L2/W10.E40.drill.json",
+          "path": "combined.lost",
+          "op": "==",
+          "value": 0
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "cargo (the Tauri writer of scripts/drill/tauri-writer)"
+    ],
+    "minutes": 20
+  },
+  {
+    "id": "L2-W10.E44",
+    "cmd": "npx vitest run src/__tests__/lanSync.test.ts src/__tests__/lanSyncLoopback.test.ts --reporter=json --outputFile=.mac-pack/L2/W10.E44.vitest.json && PLAYWRIGHT_JSON_OUTPUT_NAME=.mac-pack/L2/W10.E44.e2e.json npx playwright test e2e/lan-sync.spec.ts --project=chromium --reporter=json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E44.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E44.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 10
+        },
+        {
+          "file": ".mac-pack/L2/W10.E44.e2e.json",
+          "path": "stats.unexpected",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E44.e2e.json",
+          "path": "stats.expected",
+          "op": ">=",
+          "value": 1
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "playwright chromium",
+      "two devices on one LAN for the device part"
+    ],
+    "minutes": 30
+  },
+  {
+    "id": "L2-W10.E48",
+    "cmd": "npx vitest run src/__tests__/appleNotesStore.test.ts --reporter=json --outputFile=.mac-pack/L2/W10.E48.vitest.json && npm run import:diff -- --lumen \"$LUMEN_IMPORTED/Apple Notes\" --oracle \"$ORACLE/Apple Notes\" --json > .mac-pack/L2/W10.E48.diff.json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E48.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E48.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 22
+        },
+        {
+          "file": ".mac-pack/L2/W10.E48.diff.json",
+          "path": "pass",
+          "op": "==",
+          "value": true
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "an Apple Notes export imported by lumen-md (LUMEN_IMPORTED) and by Obsidian Importer (ORACLE)"
+    ],
+    "minutes": 30
+  },
+  {
+    "id": "L2-W10.E49",
+    "cmd": "npx vitest run src/__tests__/onenoteGraph.test.ts src/__tests__/onenoteSignIn.test.tsx --reporter=json --outputFile=.mac-pack/L2/W10.E49.vitest.json && npm run import:diff -- --lumen \"$LUMEN_IMPORTED/OneNote\" --oracle \"$ORACLE/OneNote\" --json > .mac-pack/L2/W10.E49.diff.json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E49.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E49.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 30
+        },
+        {
+          "file": ".mac-pack/L2/W10.E49.diff.json",
+          "path": "pass",
+          "op": "==",
+          "value": true
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "a OneNote notebook imported by both (Microsoft sign-in on the Mac)"
+    ],
+    "minutes": 40
+  },
+  {
+    "id": "L2-W10.E51",
+    "cmd": "npx vitest run src/__tests__/vaultGateBatch.test.ts src/__tests__/bulkEditOpfsBench.test.ts --reporter=json --outputFile=.mac-pack/L2/W10.E51.vitest.json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E51.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E51.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 3
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "real IndexedDB/OPFS (vitest browser mode or the bench's own runner)"
+    ],
+    "minutes": 10
+  },
+  {
+    "id": "L2-W10.E52",
+    "cmd": "npx vitest run src/__tests__/voiceCorpusRecorder.test.tsx --reporter=json --outputFile=.mac-pack/L2/W10.E52.vitest.json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E52.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E52.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 5
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "a microphone"
+    ],
+    "minutes": 10
+  },
+  {
+    "id": "L2-W10.E53",
+    "cmd": "npx vitest run src/__tests__/embeddingDefault.test.ts --reporter=json --outputFile=.mac-pack/L2/W10.E53.vitest.json && LUMEN_EVAL_EMBED=1 npx vitest run --config vitest.eval.config.ts src/agents/eval/embedCompete.eval.ts && npm run eval:embed-ingest",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E53.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E53.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 8
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "ollama running locally with the embedding candidates pulled"
+    ],
+    "minutes": 45
+  },
+  {
+    "id": "L2-W10.E54",
+    "cmd": "npx vitest run src/__tests__/releaseWitness.test.ts --reporter=json --outputFile=.mac-pack/L2/W10.E54.vitest.json && bash scripts/supply-chain/install-tools.sh && witness version && npm run release -- 0.2.0-beta.1 --dry-run",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E54.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E54.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 5
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "the Witness signing key (LUMEN_WITNESS_KEY)",
+      "security/witness-policy.signed.json committed"
+    ],
+    "minutes": 30
+  },
+  {
+    "id": "L2-W10.E58",
+    "cmd": "npx vitest run src/__tests__/supplyNightly.test.ts src/__tests__/buildkitePipeline.test.ts --reporter=json --outputFile=.mac-pack/L2/W10.E58.vitest.json && npm run fuzz:redaction -- --n 2000 --no-save && npm run nightly:install && npm run nightly -- --only fuzz",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E58.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E58.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 34
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "macOS (launchd)"
+    ],
+    "minutes": 15
+  },
+  {
+    "id": "L2-W10.E60",
+    "cmd": "npx vitest run src/__tests__/graphTable.test.tsx --reporter=json --outputFile=.mac-pack/L2/W10.E60.vitest.json && PLAYWRIGHT_JSON_OUTPUT_NAME=.mac-pack/L2/W10.E60.e2e.json npx playwright test e2e/a11y-hebrew-gate.spec.ts --project=chromium --project=firefox --project=webkit --reporter=json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E60.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E60.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 3
+        },
+        {
+          "file": ".mac-pack/L2/W10.E60.e2e.json",
+          "path": "stats.unexpected",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E60.e2e.json",
+          "path": "stats.expected",
+          "op": ">=",
+          "value": 8
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "playwright browsers: chromium, firefox, webkit (npx playwright install, on the Mac)"
+    ],
+    "minutes": 8
+  },
+  {
+    "id": "L2-W10.E62",
+    "cmd": "npx vitest run src/__tests__/modelConvertLocal.test.ts --reporter=json --outputFile=.mac-pack/L2/W10.E62.vitest.json && npm run models:convert -- --dry-run && npm run models:convert && npm run models:mirror",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E62.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E62.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 8
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "python3 with optimum/onnx (the convert script prints what it needs)",
+      "a mirror host for CONVERTED_MODELS_BASE"
+    ],
+    "minutes": 90
+  },
+  {
+    "id": "L2-W10.E64",
+    "cmd": "npx vitest run src/__tests__/pdfInk.test.tsx --reporter=json --outputFile=.mac-pack/L2/W10.E64.vitest.json && PLAYWRIGHT_JSON_OUTPUT_NAME=.mac-pack/L2/W10.E64.e2e.json npx playwright test e2e/pdf-reader.spec.ts e2e/ink.spec.ts --project=chromium --project=firefox --reporter=json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E64.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E64.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 7
+        },
+        {
+          "file": ".mac-pack/L2/W10.E64.e2e.json",
+          "path": "stats.unexpected",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E64.e2e.json",
+          "path": "stats.expected",
+          "op": ">=",
+          "value": 4
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "playwright browsers: chromium, firefox, webkit (npx playwright install, on the Mac)"
+    ],
+    "minutes": 6
+  },
+  {
+    "id": "L2-W10.E66",
+    "cmd": "npx vitest run src/__tests__/injectionClassifier.test.ts --reporter=json --outputFile=.mac-pack/L2/W10.E66.vitest.json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E66.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E66.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 11
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "the ProtectAI prompt-injection model downloaded through the model manager"
+    ],
+    "minutes": 20
+  },
+  {
+    "id": "L2-W10.E67",
+    "cmd": "npx vitest run src/__tests__/clipTemplatesEditor.test.tsx --reporter=json --outputFile=.mac-pack/L2/W10.E67.vitest.json && PLAYWRIGHT_JSON_OUTPUT_NAME=.mac-pack/L2/W10.E67.e2e.json npx playwright test e2e/clipper-v2.spec.ts --project=chromium --reporter=json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E67.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E67.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 5
+        },
+        {
+          "file": ".mac-pack/L2/W10.E67.e2e.json",
+          "path": "stats.unexpected",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E67.e2e.json",
+          "path": "stats.expected",
+          "op": ">=",
+          "value": 1
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "playwright chromium",
+      "Chrome to load extension/ unpacked"
+    ],
+    "minutes": 15
+  },
+  {
+    "id": "L2-W10.E68",
+    "cmd": "npx vitest run src/__tests__/releasePublishRefusal.test.ts src/__tests__/updaterManifestSig.test.ts --reporter=json --outputFile=.mac-pack/L2/W10.E68.vitest.json && git fetch origin && git switch -c release-beta1-r3 f090c2081271c5a2e71f98e97dd9c3675224511f && npm ci && npm run release -- 0.2.0-beta.1 --dry-run && test -s release/latest.json.sig && npm run release -- verify",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E68.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E68.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 21
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "Tauri toolchain",
+      "TAURI_SIGNING_PRIVATE_KEY (the real updater key, not the placeholder)"
+    ],
+    "minutes": 60
+  },
+  {
+    "id": "L2-W10.E75",
+    "cmd": "PLAYWRIGHT_JSON_OUTPUT_NAME=.mac-pack/L2/W10.E75.e2e.json npx playwright test e2e/rtl-matrix-ar.spec.ts --project=chromium --project=firefox --project=webkit --reporter=json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W10.E75.e2e.json",
+          "path": "stats.unexpected",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W10.E75.e2e.json",
+          "path": "stats.expected",
+          "op": ">=",
+          "value": 33
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "playwright browsers: chromium, firefox, webkit (npx playwright install, on the Mac)"
+    ],
+    "minutes": 8
+  },
+  {
+    "id": "L2-W11.I4",
+    "cmd": "npx vitest run src/__tests__/agentDojo.test.ts src/__tests__/ruleOfTwo.test.ts --reporter=json --outputFile=.mac-pack/L2/W11.I4.vitest.json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W11.I4.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W11.I4.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 34
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci"
+    ],
+    "minutes": 5
+  },
+  {
+    "id": "L2-W11.I8",
+    "cmd": "cd mcp-server && npm ci && npm run test:stdio",
+    "expect": {
+      "exit": 0,
+      "json": []
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "@modelcontextprotocol/sdk from mcp-server/package-lock.json"
+    ],
+    "minutes": 10
+  },
+  {
+    "id": "L2-W11.I11",
+    "cmd": "npx vitest run src/__tests__/alephbench.test.ts src/__tests__/modelSelect.test.ts --reporter=json --outputFile=.mac-pack/L2/W11.I11.vitest.json && npm run eval:public -- fetch llm-alephbench --pin && LUMEN_EVAL_ALEPH=1 LUMEN_EVAL_ALEPH_REV=$(git -C eval/public/llm-alephbench rev-parse HEAD 2>/dev/null || echo PIN) npx vitest run --config vitest.eval.config.ts src/agents/eval/alephbench.eval.ts",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W11.I11.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W11.I11.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 21
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "ollama running locally with qwen3.5:4b, gemma4:e4b, qwen2.5:7b pulled"
+    ],
+    "minutes": 180
+  },
+  {
+    "id": "L2-W11.I12",
+    "cmd": "npx vitest run src/__tests__/modelSelect.test.ts src/__tests__/modelCatalogRefresh.test.ts --reporter=json --outputFile=.mac-pack/L2/W11.I12.vitest.json && npm run models:select -- --from eval/results && npm run models:select -- --check",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W11.I12.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W11.I12.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 19
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "the real eval cards of W11.I11, W11.I15 and HeQ in eval/results"
+    ],
+    "minutes": 5
+  },
+  {
+    "id": "L2-W11.I13",
+    "cmd": "npx vitest run src/__tests__/retrievalPublic.test.ts --reporter=json --outputFile=.mac-pack/L2/W11.I13.vitest.json && python3 scripts/retrieval/fetch.py && npm run eval:retrieval-public",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W11.I13.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W11.I13.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 7
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "network for the dataset download"
+    ],
+    "minutes": 60
+  },
+  {
+    "id": "L2-W11.I14",
+    "cmd": "npx vitest run src/__tests__/headingChunks.test.ts src/__tests__/askVaultParagraphs.test.ts --reporter=json --outputFile=.mac-pack/L2/W11.I14.vitest.json && npm run eval:retrieval-public && npm run perf:large-vault",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W11.I14.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W11.I14.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 17
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "8 GB free RAM for the 10K-note vault"
+    ],
+    "minutes": 60
+  },
+  {
+    "id": "L2-W11.I15",
+    "cmd": "npx vitest run src/__tests__/bfcl.test.ts --reporter=json --outputFile=.mac-pack/L2/W11.I15.vitest.json && npm run eval:bfcl",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W11.I15.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W11.I15.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 12
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "ollama running locally with gemma4:e4b, qwen3.5:4b, qwen2.5:7b pulled"
+    ],
+    "minutes": 240
+  },
+  {
+    "id": "L2-W11.I19",
+    "cmd": "npx vitest run src/__tests__/meetingFlow.test.ts src/__tests__/meetingRecorder.test.tsx src/__tests__/liveVoiceCapture.test.tsx --reporter=json --outputFile=.mac-pack/L2/W11.I19.vitest.json && PLAYWRIGHT_JSON_OUTPUT_NAME=.mac-pack/L2/W11.I19.e2e.json npx playwright test e2e/meeting-speakers.spec.ts e2e/voice-capture.spec.ts --project=chromium --project=firefox --project=webkit --reporter=json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W11.I19.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W11.I19.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 29
+        },
+        {
+          "file": ".mac-pack/L2/W11.I19.e2e.json",
+          "path": "stats.unexpected",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W11.I19.e2e.json",
+          "path": "stats.expected",
+          "op": ">=",
+          "value": 9
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "playwright browsers: chromium, firefox, webkit (npx playwright install, on the Mac)"
+    ],
+    "minutes": 10
+  },
+  {
+    "id": "L2-W11.I20",
+    "cmd": "npx vitest run src/__tests__/meetingFlow.test.ts --reporter=json --outputFile=.mac-pack/L2/W11.I20.vitest.json && LUMEN_EVAL_MEETINGS=1 npx vitest run --config vitest.eval.config.ts src/agents/eval/meetings.eval.ts",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W11.I20.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W11.I20.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 18
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "ollama running locally with the meeting summary model (see meetings.eval.ts) pulled"
+    ],
+    "minutes": 30
+  },
+  {
+    "id": "L2-W11.I21",
+    "cmd": "npx vitest run src/__tests__/meetingEval.test.ts src/__tests__/derEval.test.ts --reporter=json --outputFile=.mac-pack/L2/W11.I21.vitest.json && npm run eval:meeting-tasks -- --note \"$MEETING_NOTE\" --review \"$MEETING_REVIEW\" --out .mac-pack/L2/W11.I21.score.json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W11.I21.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W11.I21.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 9
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "pyannote models (diarizePins)",
+      "a real recording + 3 reviewers' review.json (W11.M12/O5)"
+    ],
+    "minutes": 60
+  },
+  {
+    "id": "L2-5.2",
+    "cmd": "npx vitest run src/__tests__/bm25.test.ts src/__tests__/bm25Golden.test.ts --reporter=json --outputFile=.mac-pack/L2/5.2.vitest.json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/5.2.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/5.2.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 19
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "quiet Mac"
+    ],
+    "minutes": 5
+  },
+  {
+    "id": "L2-5.3",
+    "cmd": "npx vitest run src/__tests__/agentsUseTools.test.ts src/__tests__/agentEval.test.ts --reporter=json --outputFile=.mac-pack/L2/5.3.vitest.json && npm run ci:real-model-pins -- pin --write && npm run ci:real-model -- --model qwen3:0.6b --digest $(npm run -s ci:real-model-pins -- digest qwen3:0.6b)",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/5.3.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/5.3.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 267
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "ollama running locally with qwen3:0.6b pulled",
+      "docker (for imagetools)"
+    ],
+    "minutes": 30
+  },
+  {
+    "id": "L2-5.4",
+    "cmd": "npx vitest run src/__tests__/researcherAgent.test.ts src/__tests__/research.test.ts --reporter=json --outputFile=.mac-pack/L2/5.4.vitest.json && LUMEN_EVAL_LIT=1 npx vitest run --config vitest.eval.config.ts src/agents/eval/litReview.eval.ts",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/5.4.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/5.4.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 33
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "ollama running locally with the research agent's model pulled"
+    ],
+    "minutes": 45
+  },
+  {
+    "id": "L2-5.6",
+    "cmd": "npx vitest run src/__tests__/criticComplete.test.tsx --reporter=json --outputFile=.mac-pack/L2/5.6.vitest.json && LUMEN_REAL_OLLAMA_URL=http://127.0.0.1:11434 npx vitest run --config vitest.eval.config.ts src/agents/eval/live.eval.ts",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/5.6.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/5.6.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 12
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "ollama running locally with the critic's model pulled"
+    ],
+    "minutes": 20
+  },
+  {
+    "id": "L2-5.11",
+    "cmd": "npx vitest run src/__tests__/agentReviewApply.test.ts src/__tests__/agentReviewPanel.test.tsx --reporter=json --outputFile=.mac-pack/L2/5.11.vitest.json && PLAYWRIGHT_JSON_OUTPUT_NAME=.mac-pack/L2/5.11.e2e.json npx playwright test e2e/agent-review.spec.ts --project=chromium --project=firefox --project=webkit --reporter=json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/5.11.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/5.11.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 34
+        },
+        {
+          "file": ".mac-pack/L2/5.11.e2e.json",
+          "path": "stats.unexpected",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/5.11.e2e.json",
+          "path": "stats.expected",
+          "op": ">=",
+          "value": 9
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "playwright browsers: chromium, firefox, webkit (npx playwright install, on the Mac)"
+    ],
+    "minutes": 6
+  },
+  {
+    "id": "L2-13.2",
+    "cmd": "npx vitest run src/__tests__/hosting.test.ts src/__tests__/knownLimits.test.ts --reporter=json --outputFile=.mac-pack/L2/13.2.vitest.json && npm run build && npm run docker:build && docker image inspect lumen-md --format '{{.Size}}' && npx netlify-cli@17 deploy --dir dist && PLAYWRIGHT_BASE_URL=$NETLIFY_DRAFT_URL npx playwright test e2e/playground.spec.ts --project=chromium",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/13.2.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/13.2.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 13
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "playwright chromium",
+      "docker",
+      "a Netlify account (owner) for the draft deploy"
+    ],
+    "minutes": 30
+  },
+  {
+    "id": "L2-13.3",
+    "cmd": "npx vitest run src/__tests__/mobileBuilds.test.ts --reporter=json --outputFile=.mac-pack/L2/13.3.vitest.json && npm run mobile:check && npm run mobile:android -- --unsigned && npm run mobile:ios -- --no-upload && ls release/*.apk release/*.ipa",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/13.3.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/13.3.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 9
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "Android SDK + JDK 17",
+      "Xcode",
+      "CocoaPods"
+    ],
+    "minutes": 60
+  },
+  {
+    "id": "L2-13.4",
+    "cmd": "npx vitest run src/__tests__/releasePipeline.test.ts src/__tests__/whatsNew.test.ts src/__tests__/desktopRelease.test.ts --reporter=json --outputFile=.mac-pack/L2/13.4.vitest.json && npm run release -- 0.2.0-beta.1 --dry-run && npm run release -- verify",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/13.4.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/13.4.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 24
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "Tauri toolchain",
+      "signing keys (owner)"
+    ],
+    "minutes": 60
+  },
+  {
+    "id": "L2-W12.S2",
+    "cmd": "npx vitest run src/__tests__/asOfDialog.test.tsx --reporter=json --outputFile=.mac-pack/L2/W12.S2.vitest.json && PLAYWRIGHT_JSON_OUTPUT_NAME=.mac-pack/L2/W12.S2.e2e.json npx playwright test e2e/as-of.spec.ts --project=chromium --project=firefox --project=webkit --reporter=json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W12.S2.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W12.S2.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 1
+        },
+        {
+          "file": ".mac-pack/L2/W12.S2.e2e.json",
+          "path": "stats.unexpected",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W12.S2.e2e.json",
+          "path": "stats.expected",
+          "op": ">=",
+          "value": 6
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "playwright browsers: chromium, firefox, webkit (npx playwright install, on the Mac)"
+    ],
+    "minutes": 6
+  },
+  {
+    "id": "L2-W12.S3",
+    "cmd": "npx vitest run src/__tests__/conflictDialog3Way.test.tsx --reporter=json --outputFile=.mac-pack/L2/W12.S3.vitest.json && PLAYWRIGHT_JSON_OUTPUT_NAME=.mac-pack/L2/W12.S3.e2e.json npx playwright test e2e/conflict-3way.spec.ts --project=chromium --project=firefox --project=webkit --reporter=json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W12.S3.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W12.S3.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 7
+        },
+        {
+          "file": ".mac-pack/L2/W12.S3.e2e.json",
+          "path": "stats.unexpected",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W12.S3.e2e.json",
+          "path": "stats.expected",
+          "op": ">=",
+          "value": 12
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "playwright browsers: chromium, firefox, webkit (npx playwright install, on the Mac)"
+    ],
+    "minutes": 6
+  },
+  {
+    "id": "L2-W12.S5",
+    "cmd": "npx vitest run src/__tests__/siteGarden.test.ts --reporter=json --outputFile=.mac-pack/L2/W12.S5.vitest.json && PLAYWRIGHT_JSON_OUTPUT_NAME=.mac-pack/L2/W12.S5.e2e.json npx playwright test e2e/publish-site.spec.ts --project=chromium --project=firefox --project=webkit --reporter=json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W12.S5.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W12.S5.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 6
+        },
+        {
+          "file": ".mac-pack/L2/W12.S5.e2e.json",
+          "path": "stats.unexpected",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W12.S5.e2e.json",
+          "path": "stats.expected",
+          "op": ">=",
+          "value": 3
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "playwright browsers: chromium, firefox, webkit (npx playwright install, on the Mac)",
+      "pagefind (npm ci)"
+    ],
+    "minutes": 20
+  },
+  {
+    "id": "L2-W12.X2",
+    "cmd": "npx vitest run src/__tests__/readingList.test.ts src/__tests__/readingListCommands.test.ts --reporter=json --outputFile=.mac-pack/L2/W12.X2.vitest.json && PLAYWRIGHT_JSON_OUTPUT_NAME=.mac-pack/L2/W12.X2.e2e.json npx playwright test e2e/reading-list-progress.spec.ts --project=chromium --project=firefox --reporter=json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/W12.X2.vitest.json",
+          "path": "numFailedTests",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W12.X2.vitest.json",
+          "path": "numPassedTests",
+          "op": ">=",
+          "value": 18
+        },
+        {
+          "file": ".mac-pack/L2/W12.X2.e2e.json",
+          "path": "stats.unexpected",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/W12.X2.e2e.json",
+          "path": "stats.expected",
+          "op": ">=",
+          "value": 2
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "playwright browsers: chromium, firefox, webkit (npx playwright install, on the Mac)"
+    ],
+    "minutes": 5
+  },
+  {
+    "id": "L2-e2e-batch",
+    "cmd": "PLAYWRIGHT_JSON_OUTPUT_NAME=.mac-pack/L2/batch.e2e.json npx playwright test e2e/a11y-dialogs.spec.ts e2e/a11y-hebrew-gate.spec.ts e2e/hover-preview.spec.ts e2e/math-in-hebrew.spec.ts e2e/print-golden.spec.ts e2e/rtl-matrix.spec.ts e2e/rtl-matrix-ar.spec.ts e2e/rtl-parity/ e2e/pdf-reader.spec.ts e2e/ink.spec.ts e2e/agent-review.spec.ts e2e/meeting-speakers.spec.ts e2e/voice-capture.spec.ts e2e/publish-site.spec.ts e2e/lan-sync.spec.ts e2e/clipper-v2.spec.ts e2e/privacy-audit.spec.ts e2e/as-of.spec.ts e2e/conflict-3way.spec.ts e2e/reading-list-progress.spec.ts --project=chromium --project=firefox --project=webkit --reporter=json",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": ".mac-pack/L2/batch.e2e.json",
+          "path": "stats.unexpected",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "file": ".mac-pack/L2/batch.e2e.json",
+          "path": "stats.expected",
+          "op": ">=",
+          "value": 500
+        }
+      ]
+    },
+    "needs": [
+      "node 22+",
+      "npm ci",
+      "playwright browsers: chromium, firefox, webkit (npx playwright install, on the Mac)"
+    ],
+    "minutes": 60
+  }
+]

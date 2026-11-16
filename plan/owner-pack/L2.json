@@ -1,0 +1,144 @@
+[
+  {
+    "id": "L2-O-W10.E10",
+    "decision": "Turn Buildkite on once (shared by W10.E10, E24, E25, E32, E33): create the Buildkite organisation and one pipeline that reads .buildkite/pipeline.yml from talstilkol/lumen-md, connect the GitHub app for commit statuses, and start two agents with scripts/buildkite/agent-bootstrap.sh: queue `linux` (the factory host, Docker) and queue `mac` (this Mac, WebKit). Then decide where a PR's Lighthouse number comes from.",
+    "options": [
+      "A. Buildkite's `lighthouse` job on every PR (it has no branch condition: perfGate.test checks that), against the PR's own build on the linux agent; Vercel keeps skipping PR previews.",
+      "B. Set LUMEN_BUILD_ALL=1 on Vercel so every PR gets a preview, and run Lighthouse against the preview URL.",
+      "C. No CI: `npm run ci:local` on the Mac per PR, by hand."
+    ],
+    "recommendation": "A",
+    "why": "A needs no repo change (the job exists, unconditional, with reports/lh as artefacts) and does not spend Vercel's free-plan builds, which vercel-ignore.sh saves for main and the trains (100 a day). B spends those builds and still needs a runner for Lighthouse. C gives no automatic number, which is the task.",
+    "sources": [
+      "https://buildkite.com/pricing/",
+      "docs/src/content/docs/self-hosting/buildkite.md",
+      "scripts/buildkite/agent-bootstrap.sh",
+      "scripts/vercel-ignore.sh (header: why PR builds are skipped)",
+      "src/__tests__/perfGate.test.ts ('on every PR')"
+    ],
+    "changes": "Nothing in the repo for A. Buildkite UI: the pipeline; the agents' tokens on the two hosts. Proof: 3 consecutive green PR builds whose `lumen/buildkite: lighthouse` status links a report.",
+    "draftPr": null
+  },
+  {
+    "id": "L2-O-W10.E24",
+    "decision": "Allow knip as a devDependency, so `npm run deadcode` (Buildkite job `deadcode`, ci:local, vercel-build) can run it. One Mac command: `npm i -D knip@latest --save-exact && npm run deadcode`, then commit package.json and package-lock.json.",
+    "options": [
+      "A. Add knip as an exact-pinned devDependency (the gate already calls `npx --no-install knip`).",
+      "B. Keep knip out; rely on the repo's own unused-files gate (scripts/check-unused-files.mjs), which already fails on a new orphan file."
+    ],
+    "recommendation": "A",
+    "why": "The unused-files gate covers whole files only; knip adds unused exports and dependencies, which is what 0.16 asks for. The npm registry is blocked in the cloud, so the lockfile change can only be made on the Mac. Checked in the cloud: a new orphan file (src/lib/__orphanCanary.ts) makes check-unused-files exit 1 ('nothing imports it, not even a test'); `node scripts/knip-gate.mjs` stops with 'knip did not run … Install it as a devDependency'.",
+    "sources": [
+      "scripts/knip-gate.mjs (header)",
+      "knip.json",
+      "https://buildkite.com/pricing/"
+    ],
+    "changes": "package.json devDependencies + package-lock.json (Mac). The Buildkite part is the shared switch-on in L2-O-W10.E10.",
+    "draftPr": null
+  },
+  {
+    "id": "L2-O-W10.E25",
+    "decision": "Give Buildkite's `pr-check` job a way to comment, and turn Renovate on: (1) create a fine-grained GitHub token for talstilkol/lumen-md with only 'Pull requests: write', save it in a file on the linux agent and set LUMEN_PR_COMMENT_TOKEN_FILE to that path; (2) install the Renovate GitHub app on this repository only (renovate.json is committed).",
+    "options": [
+      "A. Fine-grained token in a file + the Renovate app (the repo is ready for both).",
+      "B. No token: the report stays a Buildkite artefact (pr-comment.mjs says so) and dependency updates stay manual."
+    ],
+    "recommendation": "A",
+    "why": "The comment is the replacement for Danger that 0.19 asks for; the token's scope is one repo and one permission. Renovate works from the committed renovate.json without Actions.",
+    "sources": [
+      "scripts/buildkite/pr-comment.mjs",
+      "docs/src/content/docs/self-hosting/buildkite.md ('To post the comment…')",
+      "renovate.json"
+    ],
+    "changes": "No repo change. Agent host: the token file and the env var. GitHub: the Renovate app install.",
+    "draftPr": null
+  },
+  {
+    "id": "L2-O-W10.E32",
+    "decision": "Create a read-only Buildkite API token (read_builds, read_build_logs) for ci-doctor and put it where scripts/lib/ci-doctor-sources.mjs reads it (BUILDKITE_API_TOKEN in the Mac's shell profile), after the first real Buildkite build exists.",
+    "options": [
+      "A. Read-only API token on the Mac.",
+      "B. No token: ci-doctor keeps `--source local` and Vercel only."
+    ],
+    "recommendation": "A",
+    "why": "ciDoctorBuildkite.test 10/10 shows the classifier works on recorded builds; a real build is the only thing missing, and reading it needs a token. Read scopes cannot change anything.",
+    "sources": [
+      "scripts/ci-doctor.mjs",
+      "scripts/lib/ci-doctor-sources.mjs",
+      "https://buildkite.com/pricing/"
+    ],
+    "changes": "No repo change. Then: `node scripts/ci-doctor.mjs <PR> --json` names a Buildkite build and classifies it.",
+    "draftPr": null
+  },
+  {
+    "id": "L2-O-W10.E33",
+    "decision": "Allow the linux agent to run Docker with the pinned Ollama image and cache models under $LUMEN_CI_CACHE, and pin the digests: on the Mac run `npm run ci:real-model-pins -- pin --write` (new in this wave) and commit models/ci-models.json.",
+    "options": [
+      "A. Docker + model cache on the factory host; qwen3:0.6b on PRs that touch src/agents/**, 1.7b and DictaLM nightly (as the pipeline has it).",
+      "B. Real models only on the Mac, by hand (npm run ci:real-model)."
+    ],
+    "recommendation": "A",
+    "why": "The pipeline already has the three jobs with digests as cache keys; only the pins (PIN-ON-THE-MAC placeholders, checked: `ci:real-model-pins check` exits 1) and the host permission are missing. The registries (registry.ollama.ai, Docker Hub) are blocked from the cloud, so the pins can only be read on the Mac.",
+    "sources": [
+      "models/ci-models.json",
+      "scripts/real-model-pins.mjs (pin)",
+      ".buildkite/pipeline.yml (real-model-pr, real-model-nightly, hebrew smoke)"
+    ],
+    "changes": "models/ci-models.json (written by the pin command on the Mac). Host: Docker and the cache directory.",
+    "draftPr": null
+  },
+  {
+    "id": "L2-O-W10.E55",
+    "decision": "Percy: open a BrowserStack Percy account and give the linux agent PERCY_TOKEN, or decide not to use Percy.",
+    "options": [
+      "A. Percy free tier, PERCY_TOKEN on the agent; the job stays on main and PRs labelled `percy`.",
+      "B. No Percy: our own visual regression (W10.E23, Playwright baselines on the Mac, nothing uploaded) is the visual gate; W10.E55 is closed as superseded."
+    ],
+    "recommendation": "B",
+    "why": "Percy uploads screenshots of the app to a third-party service and needs an account whose free tier has a monthly screenshot cap (30 screens × 3 browsers per run adds up; see the plans page); W10.E23 already catches the same regressions locally, with no upload, which fits the project's local-first rule. The Percy job is label-gated, so B needs no code change. If the owner wants cross-browser review in a web UI, A is the way.",
+    "sources": [
+      "https://www.browserstack.com/docs/percy/overview/plans-and-billing",
+      "visual/percy.ts",
+      "playwright.visual.config.ts",
+      ".buildkite/pipeline.yml (percy job: main and the percy label only)"
+    ],
+    "changes": "B: none (proposed plan status: W10.E55 superseded by W10.E23). A: PERCY_TOKEN on the agent host.",
+    "draftPr": null
+  },
+  {
+    "id": "L2-O-W10.E61",
+    "decision": "Publish the first release so the downloads page has something to list: on the Mac, with the signing keys, `npm run release -- 0.2.0-beta.1 --publish` (beta = a GitHub pre-release, never 'latest'), then `node scripts/release.mjs downloads --dir release --out docs/src/data/downloads.json` and commit it.",
+    "options": [
+      "A. 0.2.0-beta.1 as a pre-release from release-beta1-r3 (= verify/train-7 @ f090c20, which contains the sync-crypto head; see the Mac entry L2-W10.E68).",
+      "B. Wait for train 8."
+    ],
+    "recommendation": "A",
+    "why": "The release path has no workflows left (release.yml, tauri.yml, mobile.yml, deploy.yml removed; releasePipeline 9/9, desktopRelease 9/9, downloadsPage 5/5 in the shim). Only a published release and its SHA256SUMS are missing. A beta pre-release does not reach stable users.",
+    "sources": [
+      "scripts/release.mjs (header)",
+      "docs/src/pages/download.astro",
+      "scripts/lib/downloads.mjs"
+    ],
+    "changes": "docs/src/data/downloads.json (generated after the publish). Keys: TAURI_SIGNING_PRIVATE_KEY, LUMEN_RELEASE_GPG_KEY, LUMEN_WITNESS_KEY (owner).",
+    "draftPr": null
+  },
+  {
+    "id": "L2-O-13.7",
+    "decision": "Which store gets the first build for review, and open that developer account.",
+    "options": [
+      "A. Google Play first: a one-time developer fee; upload the AAB from `npm run mobile:android` to the internal testing track (the acceptance accepts 'internal track').",
+      "B. Apple first: the yearly Apple Developer Program fee; `npm run mobile:ios` uploads to TestFlight.",
+      "C. Both now."
+    ],
+    "recommendation": "A",
+    "why": "Lower cost, and the internal track satisfies the acceptance without waiting for a review. Check the Play Console's current testing rules for new personal accounts before production; they apply to production, not to the internal track. The store files are ready: `npm run store:check` passes on the base, and storeSubmit 15/15 (the stale privacy-answers note is fixed on the base).",
+    "sources": [
+      "https://passion.io/blog/99-apple-vs-25-google-play-choosing-your-app-submission-path",
+      "https://capawesome.io/blog/how-to-create-apple-developer-and-google-play-accounts/",
+      "scripts/store.mjs",
+      "fastlane/"
+    ],
+    "changes": "No repo change for A beyond the build number the upload records; Play Console: the app, the listing from store/, the privacy answers from store/privacy-answers.md.",
+    "draftPr": null
+  }
+]
