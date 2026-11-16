@@ -547,6 +547,8 @@
   "cmd.view.bidiMarks.hint": "תגית קטנה לכל תו בלתי נראה שקובע כיוון טקסט (RLM, LRM, בידוד…)",
   "cmd.view.bidiMarks.off": "הסתרת סימני כיוון",
   "cmd.view.bidiMarks.on": "הצגת סימני כיוון",
+  "cmd.view.bilingual": "📖 קורא דו-לשוני (טורים / שורה מתחת לשורה)",
+  "cmd.view.bilingual.hint": "טקסט מספריא עם התרגום הרשמי שלו, או פתק עם קובץ התרגום שלו, מיושרים פסוק מול פסוק",
   "cmd.view.calendar": "הצגה / הסתרה של לוח השנה",
   "cmd.view.calendar.hint": "לוח שנה חודשי של הפתקים היומיים, מתחת לעץ הקבצים",
   "cmd.view.canvas": "🎨 קנבס / לוח לבן",

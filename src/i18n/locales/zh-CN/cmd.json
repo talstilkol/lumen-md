@@ -547,6 +547,8 @@
   "cmd.view.bidiMarks.hint": "为决定文字方向的不可见字符（RLM、LRM、隔离符等）加上标签",
   "cmd.view.bidiMarks.off": "隐藏方向标记",
   "cmd.view.bidiMarks.on": "显示方向标记",
+  "cmd.view.bilingual": "📖 Bilingual reader (columns / line under line)",
+  "cmd.view.bilingual.hint": "A Sefaria text with its official translation, or a note with its translation file, aligned verse by verse",
   "cmd.view.calendar": "显示 / 隐藏日历",
   "cmd.view.calendar.hint": "文件树下方的每日笔记月历",
   "cmd.view.canvas": "🎨 画布 / 白板",

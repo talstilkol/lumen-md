@@ -160,6 +160,150 @@
     "ru": "p39jit",
     "zh-CN": "p39jit"
   },
+  "bilingual.close": {
+    "ar": "1l0xxoj",
+    "de": "1l0xxoj",
+    "fr": "1l0xxoj",
+    "ja": "1l0xxoj",
+    "ru": "1l0xxoj",
+    "zh-CN": "1l0xxoj"
+  },
+  "bilingual.layout": {
+    "ar": "1woj3tr",
+    "de": "1woj3tr",
+    "fr": "1woj3tr",
+    "ja": "1woj3tr",
+    "ru": "1woj3tr",
+    "zh-CN": "1woj3tr"
+  },
+  "bilingual.machine": {
+    "ar": "6oi6sf",
+    "de": "6oi6sf",
+    "fr": "6oi6sf",
+    "ja": "6oi6sf",
+    "ru": "6oi6sf",
+    "zh-CN": "6oi6sf"
+  },
+  "bilingual.makeOne": {
+    "ar": "yztsrx",
+    "de": "yztsrx",
+    "fr": "yztsrx",
+    "ja": "yztsrx",
+    "ru": "yztsrx",
+    "zh-CN": "yztsrx"
+  },
+  "bilingual.missing": {
+    "ar": "1eyzutn",
+    "de": "1eyzutn",
+    "fr": "1eyzutn",
+    "ja": "1eyzutn",
+    "ru": "1eyzutn",
+    "zh-CN": "1eyzutn"
+  },
+  "bilingual.mode.columns": {
+    "ar": "1sy73ks",
+    "de": "1sy73ks",
+    "fr": "1sy73ks",
+    "ja": "1sy73ks",
+    "ru": "1sy73ks",
+    "zh-CN": "1sy73ks"
+  },
+  "bilingual.mode.interlinear": {
+    "ar": "1uxwgat",
+    "de": "1uxwgat",
+    "fr": "1uxwgat",
+    "ja": "1uxwgat",
+    "ru": "1uxwgat",
+    "zh-CN": "1uxwgat"
+  },
+  "bilingual.mode.source": {
+    "ar": "w3mdcq",
+    "de": "w3mdcq",
+    "fr": "w3mdcq",
+    "ja": "w3mdcq",
+    "ru": "w3mdcq",
+    "zh-CN": "w3mdcq"
+  },
+  "bilingual.none": {
+    "ar": "rbc6jy",
+    "de": "rbc6jy",
+    "fr": "rbc6jy",
+    "ja": "rbc6jy",
+    "ru": "rbc6jy",
+    "zh-CN": "rbc6jy"
+  },
+  "bilingual.official": {
+    "ar": "bafcyy",
+    "de": "bafcyy",
+    "fr": "bafcyy",
+    "ja": "bafcyy",
+    "ru": "bafcyy",
+    "zh-CN": "bafcyy"
+  },
+  "bilingual.source": {
+    "ar": "r5qyuw",
+    "de": "r5qyuw",
+    "fr": "r5qyuw",
+    "ja": "r5qyuw",
+    "ru": "r5qyuw",
+    "zh-CN": "r5qyuw"
+  },
+  "bilingual.stale": {
+    "ar": "utb69g",
+    "de": "utb69g",
+    "fr": "utb69g",
+    "ja": "utb69g",
+    "ru": "utb69g",
+    "zh-CN": "utb69g"
+  },
+  "bilingual.table": {
+    "ar": "g0c965",
+    "de": "g0c965",
+    "fr": "g0c965",
+    "ja": "g0c965",
+    "ru": "g0c965",
+    "zh-CN": "g0c965"
+  },
+  "bilingual.title": {
+    "ar": "aiknop",
+    "de": "aiknop",
+    "fr": "aiknop",
+    "ja": "aiknop",
+    "ru": "aiknop",
+    "zh-CN": "aiknop"
+  },
+  "bilingual.translation": {
+    "ar": "a5hr64",
+    "de": "a5hr64",
+    "fr": "a5hr64",
+    "ja": "a5hr64",
+    "ru": "a5hr64",
+    "zh-CN": "a5hr64"
+  },
+  "bilingual.unmatched": {
+    "ar": "1bsua3n",
+    "de": "1bsua3n",
+    "fr": "1bsua3n",
+    "ja": "1bsua3n",
+    "ru": "1bsua3n",
+    "zh-CN": "1bsua3n"
+  },
+  "bilingual.verse": {
+    "ar": "ojuxaq",
+    "de": "ojuxaq",
+    "fr": "ojuxaq",
+    "ja": "ojuxaq",
+    "ru": "ojuxaq",
+    "zh-CN": "ojuxaq"
+  },
+  "bilingual.verseN": {
+    "ar": "5nft3m",
+    "de": "5nft3m",
+    "fr": "5nft3m",
+    "ja": "5nft3m",
+    "ru": "5nft3m",
+    "zh-CN": "5nft3m"
+  },
   "calendar.conflict.both": {
     "ar": "y0o6qf",
     "de": "y0o6qf",

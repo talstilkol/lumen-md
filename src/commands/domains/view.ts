@@ -44,6 +44,13 @@ export function buildViewCommands({ setSearchOpen, setRuntimeMetricsOpen, vimEna
       group: t("group.view"),
       // W13.R11: the main text with its commentaries around it (lazy; reads the vault only).
       action: () => void import("../../reading/daf/openDaf").then((m) => m.openDaf()),
+      id: "view.bilingual",
+      label: t("cmd.view.bilingual"),
+      hint: t("cmd.view.bilingual.hint"),
+      icon: cmdIcons.Columns2,
+      group: t("group.view"),
+      // W13.R12: official versions or the W12.H6 sidecar, by verse; columns, interlinear, source only.
+      action: () => void import("../../reading/bilingual/openBilingual").then((m) => m.openBilingual()),
     },
     {
       id: "view.preview",
