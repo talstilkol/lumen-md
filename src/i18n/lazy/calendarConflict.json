@@ -1,0 +1,16 @@
+{
+  "calendar.conflict.both": "Keep both",
+  "calendar.conflict.deleted": "(deleted)",
+  "calendar.conflict.done": "Done",
+  "calendar.conflict.due": "Due {date}",
+  "calendar.conflict.here": "In Lumen",
+  "calendar.conflict.keepHere": "Keep mine",
+  "calendar.conflict.keepThere": "Keep theirs",
+  "calendar.conflict.later": "Decide later",
+  "calendar.conflict.open": "Not done",
+  "calendar.conflict.there": "On the calendar server",
+  "calendar.conflict.title": "This task changed in both places",
+  "calendar.conflict.why.both-changed": "You changed it here, and it was changed on the server too.",
+  "calendar.conflict.why.changed-here-deleted-there": "You changed it here, and it was deleted on the server.",
+  "calendar.conflict.why.deleted-here-changed-there": "You deleted it here, and it was changed on the server."
+}

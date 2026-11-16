@@ -21,6 +21,7 @@ import { basicAuth, type DiscoveredCalendar } from "../../calendar/caldav";
 import { forgetAccount, readAccount, readSubscriptions, saveAccount, saveSubscriptions, type CalDavAccount, type IcsSubscription } from "../../calendar/config";
 import type { ConnectionResult } from "../../calendar/app";
 import type { SyncReport } from "../../calendar/taskSync";
+import "./calendarSettingsStrings";
 
 type App = typeof import("../../calendar/app");
 const app = (): Promise<App> => import("../../calendar/app");

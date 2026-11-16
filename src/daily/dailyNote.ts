@@ -22,7 +22,6 @@ import { defaultIsrael, holidaysOn, weeklyReading } from "./hebrewCalendar";
 import { holidayLabel, nameLang, readingName } from "./hebrewCalendarNames";
 import { learningLines, type CycleId } from "../learning/plans";
 import type { Entry } from "../srs/cards";
-import "./dailyNoteStrings";
 
 export { DEFAULT_DAILY, isValidDailyPattern, type DailySettings };
 

@@ -14,6 +14,7 @@ import "./PromptDialog.css";
 import { useFocusTrap } from "./useFocusTrap";
 import type { Choice, Conflict } from "../calendar/taskSync";
 import type { Todo } from "../calendar/ical";
+import "./calendarConflictStrings";
 
 function describe(todo: Omit<Todo, "uid"> | null): string[] {
   if (!todo) return [t("calendar.conflict.deleted")];
