@@ -156,10 +156,25 @@ export interface Redacted<M extends Message> {
 export async function redactForCloud<M extends Message>(messages: M[], provider: string, signal?: AbortSignal): Promise<Redacted<M>> {
   const vault = new PiiVault();
   if (!redactionEnabled()) return { messages, vault };
-  const ner = await namesFinder();
+  const finder = await namesFinder();
+  // A finder that fails on any message (Ollama stopped, the model threw) left
+  // that message with patterns only: then names were not hidden, and the
+  // preview and the log must not say they were (audit W10.C23).
+  let namesFailed = false;
+  const ner: NerFn | null = finder
+    ? async (text, sig) => {
+        try {
+          return await finder(text, sig);
+        } catch (e) {
+          if (!sig?.aborted) namesFailed = true;
+          throw e;
+        }
+      }
+    : null;
   const out: M[] = [];
   for (const m of messages) out.push({ ...m, content: typeof m.content === "string" ? await redactText(m.content, vault, { ner, signal }) : m.content });
-  if (vault.size) record({ ts: Date.now(), provider, counts: { ...vault.counts }, names: !!ner });
-  if (previewEnabled() && !(await showPreview(out, vault.counts, !!ner))) throw new RedactionCancelledError();
+  const names = !!finder && !namesFailed;
+  if (vault.size || (finder && namesFailed)) record({ ts: Date.now(), provider, counts: { ...vault.counts }, names });
+  if (previewEnabled() && !(await showPreview(out, vault.counts, names))) throw new RedactionCancelledError();
   return { messages: out, vault };
 }
