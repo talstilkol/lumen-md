@@ -506,8 +506,10 @@ let unwrappedFetch: typeof fetch | null = null;
  * records it twice nor blocks a request the user consented to.
  */
 export function ledgerFetch(opts: LedgerOptions): typeof fetch {
+  // The transport is read on each call, not when this fetch is made (review 25, RR25-1): one made before
+  // the ledger or airplane mode's guard was installed must still send through them.
   // privacy-ledger: the ledger's own pass-through to the unwrapped fetch: wrap() records what calls it
-  const base: typeof fetch = unwrappedFetch ?? ((input, init) => globalThis.fetch(input, init));
+  const base: typeof fetch = (input, init) => (unwrappedFetch ? unwrappedFetch(input, init) : globalThis.fetch(input, init));
   return withLedger(base, opts);
 }
 
