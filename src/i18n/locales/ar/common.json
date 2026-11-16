@@ -621,6 +621,7 @@
   "cite.doi.inserted": "أُدرج المرجع (APA 7)",
   "cite.doi.invalid": "ليس DOI: {doi}",
   "cite.doi.notFound": "لا يوجد في CrossRef سجل لـ {doi}",
+  "cite.doi.pending": "الاستشهاد من DOI معطّل في هذا الإصدار: البحث في CrossRef بانتظار موافقة مالك المشروع. لم يُرسَل أي شيء.",
   "cite.keys": "Enter ‏[@key] · ⇧Enter ‏@key · Tab الموضع · Esc",
   "cite.loading": "جارٍ قراءة المكتبة…",
   "cite.locator": "ص. 10",

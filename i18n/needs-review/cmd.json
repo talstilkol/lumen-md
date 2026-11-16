@@ -1,0 +1,50 @@
+{
+  "cmd.mcp.ask": {
+    "ar": "vubk2m",
+    "de": "vubk2m",
+    "fr": "vubk2m",
+    "ja": "vubk2m",
+    "ru": "vubk2m",
+    "zh-CN": "vubk2m"
+  },
+  "cmd.mcp.ask.hint": {
+    "ar": "upymcb",
+    "de": "upymcb",
+    "fr": "upymcb",
+    "ja": "upymcb",
+    "ru": "upymcb",
+    "zh-CN": "upymcb"
+  },
+  "cmd.mcp.settings": {
+    "ar": "x0ihz7",
+    "de": "x0ihz7",
+    "fr": "x0ihz7",
+    "ja": "x0ihz7",
+    "ru": "x0ihz7",
+    "zh-CN": "x0ihz7"
+  },
+  "cmd.mcp.settings.hint": {
+    "ar": "1b01jxe",
+    "de": "1b01jxe",
+    "fr": "1b01jxe",
+    "ja": "1b01jxe",
+    "ru": "1b01jxe",
+    "zh-CN": "1b01jxe"
+  },
+  "cmd.screenshotToNote": {
+    "ar": "11kn380",
+    "de": "11kn380",
+    "fr": "11kn380",
+    "ja": "11kn380",
+    "ru": "11kn380",
+    "zh-CN": "11kn380"
+  },
+  "cmd.screenshotToNote.hint": {
+    "ar": "l899cf",
+    "de": "l899cf",
+    "fr": "l899cf",
+    "ja": "l899cf",
+    "ru": "l899cf",
+    "zh-CN": "l899cf"
+  }
+}

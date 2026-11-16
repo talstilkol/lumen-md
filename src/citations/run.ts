@@ -97,12 +97,14 @@ export async function syncZoteroWebLibrary(): Promise<void> {
  * APA 7, in the interface's language.
  */
 export async function citeFromDoi(): Promise<void> {
-  const [{ uiConfirm, uiPrompt }, { lookupDoi, DoiNotFoundError }, { formatReference, runsToMarkdown }, { getLocale }] = await Promise.all([
+  const [{ uiConfirm, uiPrompt }, { lookupDoi, DoiNotFoundError, CROSSREF_LOOKUP_ENABLED }, { formatReference, runsToMarkdown }, { getLocale }] = await Promise.all([
     import("../ui/PromptDialog"),
     import("./doi"),
     import("../data/citationStyles"),
     import("../i18n"),
   ]);
+  // R8-L1: pending the owner's approval of api.crossref.org in the CSP; nothing is asked or sent.
+  if (!CROSSREF_LOOKUP_ENABLED) return showAiToast(t("cite.doi.pending"), "info");
   // i18n-allow: a DOI's syntax (the DOI Handbook's example), the same in every language
   const input = await uiPrompt({ message: t("cite.doi.ask"), placeholder: "10.1000/xyz123" });
   if (!input?.trim()) return;

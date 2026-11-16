@@ -1,6 +1,8 @@
 /**
  * DOI lookup (plan 6.13, W10.E38): a DOI → a filled reference record, from
- * CrossRef's public REST API (api.crossref.org/works/<doi>). Only the DOI
+ * CrossRef's public REST API (api.crossref.org/works/<doi>). Switched off in
+ * this version, pending the owner's approval of the CSP entry
+ * (CROSSREF_LOOKUP_ENABLED below). Only the DOI
  * is sent, after the user approves the request, and through window.fetch,
  * which the privacy ledger wraps (its api.crossref.org rule, category
  * research: a local-only policy blocks it like the other research routes).
@@ -10,6 +12,24 @@
 import type { CitationRecord, Name } from "../data/citationStyles";
 
 export const CROSSREF_HOST = "api.crossref.org";
+
+/**
+ * Off until the owner approves adding api.crossref.org to the CSP's
+ * connect-src (R8-L1: an allow-list change needs the owner; the host is not
+ * in security/policy.json in this version). While it is false, lookupDoi
+ * refuses before asking or sending anything, and "Cite from a DOI" says the
+ * lookup is pending the owner's approval. To turn it on: add the host back to
+ * security/policy.json, run `npm run headers:write`, and set this to true.
+ */
+export const CROSSREF_LOOKUP_ENABLED = false;
+
+/** The lookup is switched off pending the owner's approval (CROSSREF_LOOKUP_ENABLED). */
+export class DoiLookupPendingError extends Error {
+  constructor() {
+    super("DOI lookup via CrossRef is pending the owner's approval");
+    this.name = "DoiLookupPendingError";
+  }
+}
 
 /** "10.1234/abc", "doi:10.1234/abc", "https://doi.org/10.1234/abc" → "10.1234/abc"; null when it is not a DOI. */
 export function normalizeDoi(input: string): string | null {
@@ -106,6 +126,8 @@ export interface DoiDeps {
   t: (key: string, vars?: Record<string, string | number>) => string;
   fetch?: typeof fetch;
   signal?: AbortSignal;
+  /** Tests: the lookup as it runs once approved (default CROSSREF_LOOKUP_ENABLED). */
+  enabled?: boolean;
 }
 
 export class DoiNotFoundError extends Error {
@@ -115,8 +137,9 @@ export class DoiNotFoundError extends Error {
   }
 }
 
-/** Look a DOI up on CrossRef, after the user's approval. null: declined. */
+/** Look a DOI up on CrossRef, after the user's approval. null: declined. Throws DoiLookupPendingError while switched off. */
 export async function lookupDoi(input: string, deps: DoiDeps): Promise<CitationRecord | null> {
+  if (!(deps.enabled ?? CROSSREF_LOOKUP_ENABLED)) throw new DoiLookupPendingError();
   const doi = normalizeDoi(input);
   if (!doi) throw new Error(deps.t("cite.doi.invalid", { doi: input }));
   const ok = await deps.confirm({ title: deps.t("cite.doi.consent.title"), message: deps.t("cite.doi.consent.message", { doi, host: CROSSREF_HOST }), okLabel: deps.t("cite.doi.consent.ok") });

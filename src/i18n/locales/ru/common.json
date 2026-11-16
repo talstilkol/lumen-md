@@ -621,6 +621,7 @@
   "cite.doi.inserted": "Источник вставлен (APA 7)",
   "cite.doi.invalid": "Это не DOI: {doi}",
   "cite.doi.notFound": "В CrossRef нет записи для {doi}",
+  "cite.doi.pending": "Цитирование по DOI в этой версии отключено: поиск в CrossRef ждёт одобрения владельца проекта. Ничего не отправлено.",
   "cite.keys": "Enter [@key] · ⇧Enter @key · Tab место · Esc",
   "cite.loading": "Читаю библиотеку…",
   "cite.locator": "с. 10",
