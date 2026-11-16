@@ -16,7 +16,7 @@ import { diagnoseLocal, formatLocal, localRuns, nextLocal, pickRun } from "../..
 const A = "a".repeat(40);
 const B = "b".repeat(40);
 const C = "c".repeat(40);
-const rec = (sha: string, at: string, gates: [string, string][], kind = "train-offline") => ({ kind, sha, at, gates: gates.map(([id, status]) => ({ id, status })) });
+const rec = (sha: string, at: string, gates: [string, string][], kind = "train-offline", dirty: string[] = []) => ({ kind, sha, at, dirty, gates: gates.map(([id, status]) => ({ id, status })) });
 
 describe("localRuns", () => {
   it("reads train-offline records and ci:local's steps, newest first, a receipt and its run once", () => {
@@ -82,6 +82,43 @@ describe("diagnoseLocal", () => {
       { file: "2", json: rec(B, "2", [[f, "pass"]]) },
     ]);
     expect(diagnoseLocal(far[0], far, { distance: () => 500 })[0].verdict).toBe("unknown");
+  });
+
+  it("a code-only gate that passed on this same commit in another clean run is flaky: the environment differs", () => {
+    const runs = localRuns([
+      { file: "1", json: rec(A, "2026-11-16T02:00:00Z", [["typecheck", "fail"]]) },
+      { file: "2", json: { ...rec(A, "2026-11-16T01:00:00Z", [["typecheck", "pass"]]), runner: "vitest" } },
+    ]);
+    const [d] = diagnoseLocal(runs[0], runs, { distance });
+    expect(d).toMatchObject({ gate: "typecheck", kind: "command", verdict: "flaky", passed: 1 });
+    expect(d.why).toMatch(/passed on this same commit in another run: the environment differs/);
+  });
+
+  it("a dirty run is never compared with (review 9, M2): a same-commit pass in a dirty tree proves nothing", () => {
+    const f = "src/__tests__/x.test.ts";
+    for (const other of [rec(A, "1", [[f, "pass"], ["typecheck", "pass"]], "train-offline", ["src/x.ts"]), { ...rec(A, "1", [[f, "pass"], ["typecheck", "pass"]]), dirty: undefined }]) {
+      const runs = localRuns([
+        { file: "1", json: rec(A, "2", [[f, "fail"], ["typecheck", "fail"]]) },
+        { file: "2", json: other },
+      ]);
+      const [t, c] = diagnoseLocal(runs[0], runs, { distance });
+      expect(t).toMatchObject({ gate: f, verdict: "unknown", passed: 0 });
+      expect(c).toMatchObject({ gate: "typecheck", verdict: "real", passed: 0 });
+    }
+  });
+
+  it("a dirty run itself is diagnosed without comparisons: its red may be the local edit's, never 'flaky'", () => {
+    const f = "src/__tests__/x.test.ts";
+    const runs = localRuns([
+      { file: "1", json: rec(A, "2", [[f, "fail"], ["typecheck", "fail"]], "train-offline", ["src/x.ts"]) },
+      { file: "2", json: rec(A, "1", [[f, "pass"], ["typecheck", "pass"]]) },
+    ]);
+    expect(runs[0]).toMatchObject({ dirty: true });
+    const [t, c] = diagnoseLocal(runs[0], runs, { distance });
+    expect(t.verdict).toBe("unknown");
+    expect(c.verdict).toBe("real");
+    expect(c.why).toMatch(/^this run's tree was dirty: not compared with other runs/);
+    expect(localRuns([{ file: "x", json: { ...rec(A, "1", []), dirty: undefined } }])[0].dirty).toBeNull();
   });
 
   it("formats a green run and a red one", () => {

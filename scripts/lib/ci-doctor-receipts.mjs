@@ -12,6 +12,12 @@
  *   flake?  passed at similar commits, fails only in this run
  *   unknown no other run of it at a similar commit
  *
+ * A run made on a dirty tree (uncommitted files: its record's `dirty` list is
+ * not empty), or one whose record does not say, is not a run of its commit:
+ * it is never compared with (review 9, M2), and a dirty run itself is
+ * diagnosed without comparisons, so a real red in local edits can't be called
+ * "flaky" because a clean run of the same commit passed.
+ *
  * Pure functions; scripts/ci-doctor.mjs reads the files and asks git for distances.
  */
 import { classify } from "./ci-doctor.mjs";
@@ -36,6 +42,9 @@ export function localRuns(docs) {
       at: String(json.at ?? ""),
       kind: json.kind ?? "run",
       file,
+      // true: uncommitted files; false: a clean tree; null: the record doesn't say (treated as dirty).
+      dirty: Array.isArray(json.dirty) ? json.dirty.length > 0 : typeof json.dirty === "boolean" ? json.dirty : null,
+      runner: typeof json.runner === "string" ? json.runner : null,
       gates: gates.filter((g) => g && g.id).map((g) => ({ id: String(g.id), status: g.status === "pass" ? "pass" : g.status === "fail" ? "fail" : "skip" })),
     });
   }
@@ -67,7 +76,10 @@ const isTestGate = (id) => /\.(test|spec)\.[cm]?[jt]sx?$/.test(id) || id === "vi
  */
 export function diagnoseLocal(run, runs, opts = {}) {
   const { distance = () => null, maxDistance = 30 } = opts;
-  const others = runs.filter((r) => r !== run && !(r.sha === run.sha && r.at === run.at));
+  // Only clean runs compare, with each other (review 9, M2).
+  const clean = (r) => r.dirty === false;
+  const others = clean(run) ? runs.filter((r) => r !== run && !(r.sha === run.sha && r.at === run.at) && clean(r)) : [];
+  const note = clean(run) ? "" : `${run.dirty ? "this run's tree was dirty" : "this run's record does not say whether its tree was clean"}: not compared with other runs — `;
   return run.gates
     .filter((g) => g.status === "fail")
     .map((g) => {
@@ -76,12 +88,12 @@ export function diagnoseLocal(run, runs, opts = {}) {
           const peer = o.gates.find((x) => x.id === g.id);
           if (!peer || peer.status === "skip") return null;
           const sameSha = o.sha === run.sha;
-          return { outcome: peer.status === "pass" ? "passed" : "failed", sameSha, distance: sameSha ? 0 : distance(run.sha, o.sha), branch: `${o.sha.slice(0, 10)} ${o.at}` };
+          return { outcome: peer.status === "pass" ? "passed" : "failed", sameSha, distance: sameSha ? 0 : distance(run.sha, o.sha), branch: `${o.sha.slice(0, 10)} ${o.at}${o.runner ? ` (${o.runner})` : ""}` };
         })
         .filter(Boolean);
       const test = isTestGate(g.id);
       const c = test ? classify({ kind: "test", path: g.id }, observations, { maxDistance }) : commandVerdict(observations, maxDistance);
-      return { gate: g.id, kind: test ? "test" : "command", ...c, next: nextLocal(g.id, c.verdict, opts.runner) };
+      return { gate: g.id, kind: test ? "test" : "command", ...c, why: `${note}${c.why}`, next: nextLocal(g.id, c.verdict, opts.runner) };
     });
 }
 

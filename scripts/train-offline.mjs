@@ -25,14 +25,28 @@
  *       a record in .ci-local/runs/ for `ci-doctor --source local` (plan 0.9).
  *   --only <id,…>   just these command gates (no test files, never a receipt)
  *   --root <dir>    run in another checkout
+ *   Without --runner the test files go through vitest's JSON reporter, one
+ *   gate per file, each needing a passed test (review 9, M5). No attack file →
+ *   a red "attacks" gate (L2). The receipt records HEAD^{tree}, the dirty
+ *   list, the runner and its sha256; a --runner receipt is "cloud" class (M1).
+ *   Before it is written the receipt is checked (receiptProblems) against the
+ *   exact gate list of this checkout.
+ *
+ *   node scripts/train-offline.mjs --verify [<sha>] [--require-full] [--root <dir>]
+ *       checks reports/train-offline-<sha>.json (default HEAD) against this
+ *       checkout: the exact gates, the tree, the runner's hash; --require-full
+ *       refuses a cloud-class receipt (it never stands in for the Mac one).
  *
  * Exit 1 when any attack or gate test fails, or when there is none to run.
  */
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { createHash } from "node:crypto";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { delimiter, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { COMMAND_GATES, RUNS_DIR, TEST_GATES, gateCommand, receiptPath, record, refusal, runGates } from "./lib/trainReceipt.mjs";
+import { COMMAND_GATES, RUNS_DIR, TEST_GATES, expectedGates, gateCommand, porcelainFiles, receiptPath, receiptProblems, record, refusal, runGates } from "./lib/trainReceipt.mjs";
+import { jsonCounts, vitestJsonArgs } from "./lib/dodRunner.mjs";
 
 export const ATTACK_DIR = "security/attacks";
 
@@ -77,17 +91,117 @@ const git = (root, ...args) => {
   return r.status === 0 ? r.stdout.trim() : "";
 };
 
-/** One test file through the runner (its last "pass N fail M" line), or all of them through vitest. */
-function testGates(root, files, runner) {
-  if (!runner) return [{ id: "vitest", files, run: () => spawnSync("npx", ["vitest", "run", ...files], { cwd: root, stdio: "inherit" }).status === 0 }];
-  return files.map((f) => ({
-    id: f,
-    run: () => {
-      const r = spawnSync(runner, [root, f], { encoding: "utf8" });
-      const c = parseCounts(`${r.stdout}\n${r.stderr}`);
-      return { ok: green(c), detail: c ? `pass ${c.pass} fail ${c.fail}` : "no result" };
-    },
-  }));
+/** Every test file the receipt covers in this checkout: attack files, OFFLINE_GATES, TEST_GATES (in that order). */
+export function receiptTestFiles(root) {
+  return [...gateFiles(root), ...TEST_GATES.filter((f) => existsSync(join(root, f)))];
+}
+
+/**
+ * The test-file gates, one per file: through the runner (its last "pass N fail
+ * M" line), or through one vitest run with the JSON reporter (each file needs
+ * a passed test and no failure: a file whose every test skipped is not green).
+ * With no attack file at all, a red "attacks" gate comes first (review 9, L2).
+ * @param {string} root
+ * @param {string[]} files
+ * @param {string|null} runner
+ * @param {typeof spawnSync} [spawn]
+ */
+export function testGates(root, files, runner, spawn = spawnSync) {
+  const guard = attackFiles(root).length ? [] : [{ id: "attacks", run: () => ({ ok: false, detail: `no attack test in ${ATTACK_DIR}: a receipt needs at least one` }) }];
+  if (!runner) {
+    let byFile = null;
+    const vitest = () => {
+      if (byFile) return byFile;
+      const dir = mkdtempSync(join(tmpdir(), "train-offline-"));
+      try {
+        const out = join(dir, "vitest.json");
+        spawn(process.platform === "win32" ? "npx.cmd" : "npx", vitestJsonArgs(files, out), { cwd: root, stdio: "inherit" });
+        let json = null;
+        try {
+          json = JSON.parse(readFileSync(out, "utf8"));
+        } catch {}
+        byFile = jsonCounts(json, root);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+      return byFile;
+    };
+    return [
+      ...guard,
+      ...files.map((f) => ({
+        id: f,
+        run: () => {
+          const c = vitest().get(f) ?? null;
+          return { ok: green(c), detail: c ? `pass ${c.pass} fail ${c.fail}` : "no result in vitest's JSON report" };
+        },
+      })),
+    ];
+  }
+  return [
+    ...guard,
+    ...files.map((f) => ({
+      id: f,
+      run: () => {
+        const r = spawn(runner, [root, f], { encoding: "utf8" });
+        const c = parseCounts(`${r.stdout}\n${r.stderr}`);
+        return { ok: green(c), detail: c ? `pass ${c.pass} fail ${c.fail}` : "no result" };
+      },
+    })),
+  ];
+}
+
+/** The program a --runner names (a path, or a name on PATH), or null. */
+export function runnerFile(runner, root = process.cwd()) {
+  if (!runner) return null;
+  const isFile = (p) => {
+    try {
+      return statSync(p).isFile();
+    } catch {
+      return false;
+    }
+  };
+  if (runner.includes("/") || runner.includes("\\")) return isFile(resolve(root, runner)) ? resolve(root, runner) : null;
+  for (const d of (process.env.PATH ?? "").split(delimiter)) if (d && isFile(join(d, runner))) return join(d, runner);
+  return null;
+}
+
+/** The sha256 of the --runner program's file, or null when it can't be read. */
+export function runnerSha256(runner, root = process.cwd()) {
+  const f = runnerFile(runner, root);
+  if (!f) return null;
+  try {
+    return createHash("sha256").update(readFileSync(f)).digest("hex");
+  } catch {
+    return null;
+  }
+}
+
+/** What a receipt for `sha` in `root` must match: receiptProblems' `want`. */
+function wantFor(root, sha, receipt, requireFull = false) {
+  const tree = git(root, "rev-parse", `${sha}^{tree}`) || null;
+  return { expected: expectedGates(receiptTestFiles(root)), tree, ...(receipt?.runner && receipt.runner !== "vitest" ? { runnerSha256: runnerSha256(receipt.runner, root) } : {}), requireFull };
+}
+
+/** --verify: a receipt read back from reports/ against this checkout (review 9, M1). */
+function verify(root, argv) {
+  const head = git(root, "rev-parse", "HEAD");
+  const sha = argv.find((a, i) => /^[0-9a-f]{40}$/.test(a) && argv[i - 1] !== "--root") ?? head;
+  if (sha !== head) {
+    console.error(`✗ train-offline --verify: check out ${sha} first (HEAD is ${head || "none"}): the gate list is read from the checkout`);
+    return 1;
+  }
+  const file = join(root, receiptPath(sha));
+  let receipt;
+  try {
+    receipt = JSON.parse(readFileSync(file, "utf8"));
+  } catch {
+    console.error(`✗ train-offline --verify: no readable receipt ${receiptPath(sha)}`);
+    return 1;
+  }
+  const problems = receiptProblems(receipt, sha, wantFor(root, sha, receipt, argv.includes("--require-full")));
+  for (const p of problems) console.error(`  ✗ ${p}`);
+  console.log(problems.length ? `✗ train-offline --verify: ${receiptPath(sha)} — ${problems.length} problem(s)` : `✓ train-offline --verify: ${receiptPath(sha)} (${receipt.class} class, ${receipt.gates.length} gates)`);
+  return problems.length ? 1 : 0;
 }
 
 /** W10.A14: every offline gate; a receipt only when all are green on a clean tree. */
@@ -95,9 +209,11 @@ function all(root, argv) {
   const only = (opt(argv, "--only") ?? "").split(",").filter(Boolean);
   const runner = opt(argv, "--runner");
   const sha = git(root, "rev-parse", "HEAD");
-  const dirty = git(root, "status", "--porcelain").split("\n").filter(Boolean).map((l) => l.slice(3)).filter((f) => !f.startsWith(".ci-local/"));
+  const st = spawnSync("git", ["status", "--porcelain", "-z"], { cwd: root, encoding: "utf8" });
+  // review 9: not trimmed (a trimmed first line lost a character of its path); a failed status is dirty.
+  const dirty = st.status === 0 ? porcelainFiles(st.stdout) : ["(git status failed)"];
   const commands = only.length ? COMMAND_GATES.filter((g) => only.includes(g.id)) : COMMAND_GATES;
-  const tests = only.length ? [] : testGates(root, [...gateFiles(root), ...TEST_GATES.filter((f) => existsSync(join(root, f)))], runner);
+  const tests = only.length ? [] : testGates(root, receiptTestFiles(root), runner);
   const results = runGates([...commands, ...tests], (g) => {
     const t0 = Date.now();
     const cmd = g.cmd ? gateCommand(g, runner) : null;
@@ -106,7 +222,7 @@ function all(root, argv) {
     const out = typeof r === "boolean" ? { ok: r } : r;
     return { ...out, ms: Date.now() - t0 };
   });
-  const rec = record({ sha, branch: git(root, "rev-parse", "--abbrev-ref", "HEAD") || null, results, runner, at: new Date().toISOString(), dirty });
+  const rec = record({ sha, tree: git(root, "rev-parse", "HEAD^{tree}") || null, branch: git(root, "rev-parse", "--abbrev-ref", "HEAD") || null, results, runner, runnerSha256: runnerSha256(runner, root), at: new Date().toISOString(), dirty });
   mkdirSync(join(root, RUNS_DIR), { recursive: true });
   writeFileSync(join(root, RUNS_DIR, `${sha || "nosha"}-${Date.now()}.json`), `${JSON.stringify(rec, null, 2)}\n`);
   console.log("");
@@ -121,14 +237,21 @@ function all(root, argv) {
     console.error(`✗ train-offline: no receipt — ${why}`);
     return 1;
   }
+  // The receipt is checked as a reader will check it, before it is written (review 9, M1).
+  const problems = receiptProblems(rec, sha, wantFor(root, sha, rec));
+  if (problems.length) {
+    console.error(`✗ train-offline: no receipt — it would not verify: ${problems.join("; ")}`);
+    return 1;
+  }
   mkdirSync(join(root, "reports"), { recursive: true });
   writeFileSync(join(root, receiptPath(sha)), `${JSON.stringify(rec, null, 2)}\n`);
-  console.log(`✓ train-offline: ${results.length} gates green; receipt ${receiptPath(sha)}`);
+  console.log(`✓ train-offline: ${results.length} gates green; receipt ${receiptPath(sha)} (${rec.class} class${rec.class === "cloud" ? ": never a stand-in for the Mac receipt" : ""})`);
   return 0;
 }
 
 function main(argv) {
   const root = resolve(opt(argv, "--root") ?? process.cwd());
+  if (argv.includes("--verify")) return verify(root, argv);
   if (argv.includes("--all") || argv.includes("--only")) return all(root, argv);
   const files = gateFiles(root);
   if (argv.includes("--list")) {
@@ -139,20 +262,13 @@ function main(argv) {
     console.error(`✗ train-offline: no attack tests in ${ATTACK_DIR}`);
     return 1;
   }
-  const i = argv.indexOf("--runner");
-  if (i < 0) {
-    const npx = process.platform === "win32" ? "npx.cmd" : "npx";
-    const r = spawnSync(npx, ["vitest", "run", ATTACK_DIR, ...files.filter((f) => !f.startsWith(`${ATTACK_DIR}/`))], { stdio: "inherit" });
-    return r.status ?? 1;
-  }
-  const runner = argv[i + 1];
+  // Each file is its own result, through the runner or vitest's JSON reporter: a
+  // file whose every test skipped is not green (review 9, M5).
   let bad = 0;
-  for (const f of files) {
-    const r = spawnSync(runner, [root, f], { encoding: "utf8" });
-    const c = parseCounts(`${r.stdout}\n${r.stderr}`);
-    const ok = green(c);
-    if (!ok) bad++;
-    console.log(`${ok ? "✓" : "✗"} ${f}: ${c ? `pass ${c.pass} fail ${c.fail}` : "no result"}`);
+  for (const g of testGates(root, files, opt(argv, "--runner"))) {
+    const r = g.run();
+    if (!r.ok) bad++;
+    console.log(`${r.ok ? "✓" : "✗"} ${g.id}: ${r.detail}`);
   }
   console.log(`train-offline: ${files.length - bad}/${files.length} attack and gate files green`);
   return bad ? 1 : 0;

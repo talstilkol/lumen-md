@@ -9,9 +9,12 @@ import { describe, expect, it } from "vitest";
 import { spawnSync } from "node:child_process";
 import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
+import { createHash } from "node:crypto";
 import { join, resolve } from "node:path";
 // @ts-expect-error — plain .mjs script without type declarations
-import { COMMAND_GATES, TEST_GATES, allGreen, gateCommand, isSha, receiptPath, receiptProblems, record, refusal, runGates } from "../../scripts/lib/trainReceipt.mjs";
+import { COMMAND_GATES, TEST_GATES, allGreen, expectedGates, gateCommand, isSha, porcelainFiles, receiptPath, receiptProblems, record, refusal, runGates } from "../../scripts/lib/trainReceipt.mjs";
+// @ts-expect-error — plain .mjs script without type declarations
+import { receiptTestFiles, runnerSha256, testGates } from "../../scripts/train-offline.mjs";
 // @ts-expect-error — plain .mjs script without type declarations
 import { brokenImports, resolves, specifiers } from "../../scripts/lib/importCheck.mjs";
 
@@ -74,14 +77,176 @@ describe("refusal: no receipt on red", () => {
     expect(refusal({ results: [], sha: SHA, dirty: [] })).toMatch(/no gate ran/);
   });
 
+  it("reads git status -z untrimmed: a first entry keeps its whole path; renames name the new path", () => {
+    expect(porcelainFiles(" M src/b.ts\0?? new.ts\0R  to.ts\0from.ts\0 M .ci-local/runs/x.json\0")).toEqual(["src/b.ts", "new.ts", "to.ts"]);
+    expect(porcelainFiles("")).toEqual([]);
+  });
+
   it("a receipt read back is checked against its file name and its gates", () => {
-    const rec = record({ sha: SHA, results: green, at: "t", dirty: [] });
+    const rec = record({ sha: SHA, tree: TREE, results: greenWithAttack, at: "t", dirty: [] });
     expect(rec.green).toBe(true);
     expect(receiptProblems(rec, SHA)).toEqual([]);
     expect(receiptProblems(rec, "b".repeat(40))).toEqual([expect.stringMatching(/filed as/)]);
-    const red = record({ sha: SHA, results: [{ id: "a", status: "fail" }], at: "t", dirty: [] });
+    const red = record({ sha: SHA, tree: TREE, results: [{ id: "a", status: "fail" }], at: "t", dirty: [] });
     expect(receiptProblems(red, SHA)).toEqual(expect.arrayContaining(["not green"]));
     expect(receiptProblems({ kind: "other" }, SHA)).toEqual(["not a train-offline receipt"]);
+  });
+});
+
+const TREE = "e".repeat(40);
+const ATTACK = "security/attacks/rr7-1-freeze-lockout.test.ts";
+const greenWithAttack = [{ id: "a", status: "pass" }, { id: ATTACK, status: "pass" }];
+const pass = (ids: string[]) => ids.map((id) => ({ id, status: "pass" }));
+
+describe("receiptProblems: not self-asserted (review 9, M1)", () => {
+  const expected = expectedGates([ATTACK, "src/__tests__/skipAudit.test.ts"]);
+
+  it("needs exactly the expected gates: none missing, none extra, none twice", () => {
+    const ok = record({ sha: SHA, tree: TREE, results: pass(expected), at: "t", dirty: [] });
+    expect(receiptProblems(ok, SHA, { expected, tree: TREE })).toEqual([]);
+    const short = record({ sha: SHA, tree: TREE, results: pass(expected.filter((id: string) => id !== "dod-done")), at: "t", dirty: [] });
+    expect(receiptProblems(short, SHA, { expected, tree: TREE })).toEqual(["missing gate(s): dod-done"]);
+    const extra = record({ sha: SHA, tree: TREE, results: pass([...expected, "src/__tests__/other.test.ts"]), at: "t", dirty: [] });
+    expect(receiptProblems(extra, SHA, { expected, tree: TREE })).toEqual(["unexpected gate(s): src/__tests__/other.test.ts"]);
+    const twice = record({ sha: SHA, tree: TREE, results: pass([...expected, "imports"]), at: "t", dirty: [] });
+    expect(receiptProblems(twice, SHA, { expected, tree: TREE })).toEqual(["gate(s) listed twice: imports"]);
+  });
+
+  it("needs an attack gate, the commit's tree, and a clean tree", () => {
+    expect(receiptProblems(record({ sha: SHA, tree: TREE, results: pass(["a"]), at: "t", dirty: [] }), SHA)).toEqual([expect.stringMatching(/no attack gate/)]);
+    expect(receiptProblems(record({ sha: SHA, results: greenWithAttack, at: "t", dirty: [] }), SHA)).toEqual([expect.stringMatching(/no tree hash/)]);
+    expect(receiptProblems(record({ sha: SHA, tree: TREE, results: greenWithAttack, at: "t", dirty: [] }), SHA, { tree: "d".repeat(40) })).toEqual([expect.stringMatching(/is not the commit's tree/)]);
+    const dirty = record({ sha: SHA, tree: TREE, results: greenWithAttack, at: "t", dirty: ["src/a.ts"] });
+    expect(receiptProblems(dirty, SHA)).toEqual(expect.arrayContaining(["not green", expect.stringMatching(/dirty tree/)]));
+    const { dirty: _d, ...noDirty } = record({ sha: SHA, tree: TREE, results: greenWithAttack, at: "t", dirty: [] });
+    expect(receiptProblems(noDirty, SHA)).toEqual([expect.stringMatching(/dirty tree \(or the tree state is not recorded\)/)]);
+  });
+
+  it("a --runner receipt is cloud class, carries the runner's hash, and never stands in for the Mac receipt", () => {
+    const H = "1".repeat(64);
+    const cloud = record({ sha: SHA, tree: TREE, results: greenWithAttack, runner: "/x/v4.sh", runnerSha256: H, at: "t", dirty: [] });
+    expect(cloud).toMatchObject({ runner: "/x/v4.sh", class: "cloud", runnerSha256: H });
+    expect(receiptProblems(cloud, SHA, { runnerSha256: H })).toEqual([]);
+    expect(receiptProblems(cloud, SHA, { runnerSha256: "2".repeat(64) })).toEqual([expect.stringMatching(/hashes to 2{64}, not the receipt's/)]);
+    expect(receiptProblems(cloud, SHA, { runnerSha256: null })).toEqual([expect.stringMatching(/not readable here/)]);
+    expect(receiptProblems(cloud, SHA, { requireFull: true })).toEqual([expect.stringMatching(/cloud-class receipt .* can never stand in for the Mac/)]);
+    expect(receiptProblems({ ...cloud, runnerSha256: null }, SHA)).toEqual([expect.stringMatching(/no sha256 of the runner/)]);
+    // relabelled as the Mac receipt: the class does not match its runner
+    expect(receiptProblems({ ...cloud, class: "full" }, SHA)).toEqual([expect.stringMatching(/a --runner receipt is cloud class/)]);
+    const full = record({ sha: SHA, tree: TREE, results: greenWithAttack, at: "t", dirty: [] });
+    expect(full).toMatchObject({ runner: "vitest", class: "full", runnerSha256: null });
+    expect(receiptProblems(full, SHA, { requireFull: true })).toEqual([]);
+  });
+
+  it("the runner's hash is the sha256 of its file, found by path or on PATH", () => {
+    const dir = mkdtempSync(join(tmpdir(), "runner-hash-"));
+    try {
+      writeFileSync(join(dir, "r.sh"), "echo pass 1 fail 0\n");
+      expect(runnerSha256(join(dir, "r.sh"))).toBe(createHash("sha256").update("echo pass 1 fail 0\n").digest("hex"));
+      expect(runnerSha256(join(dir, "none.sh"))).toBeNull();
+      expect(runnerSha256("node")).toMatch(/^[0-9a-f]{64}$/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("the expected list of this checkout is every command gate, then every attack and gate file", () => {
+    const files = receiptTestFiles(repo);
+    expect(files.filter((f: string) => f.startsWith("security/attacks/")).length).toBeGreaterThanOrEqual(13);
+    expect(expectedGates(files)).toEqual([...COMMAND_GATES.map((g: { id: string }) => g.id), ...files]);
+  });
+});
+
+describe("train-offline --verify checks a receipt against the checkout (review 9, M1)", () => {
+  it("passes the exact receipt, refuses a missing gate, a wrong tree, a changed runner, and a cloud receipt with --require-full", () => {
+    const dir = mkdtempSync(join(tmpdir(), "train-verify-"));
+    try {
+      mkdirSync(join(dir, "security/attacks"), { recursive: true });
+      writeFileSync(join(dir, "security/attacks/a1.test.ts"), "// attack\n");
+      writeFileSync(join(dir, ".gitignore"), "reports/\n");
+      const git = (...a: string[]) => spawnSync("git", a, { cwd: dir, encoding: "utf8" }).stdout.trim();
+      git("init", "-q");
+      git("add", "-A");
+      git("-c", "user.name=t", "-c", "user.email=t@example.invalid", "commit", "-qm", "c");
+      const head = git("rev-parse", "HEAD");
+      const tree = git("rev-parse", "HEAD^{tree}");
+      const runner = join(dir, "..", `${dir.split("/").pop()}-runner.sh`);
+      writeFileSync(runner, "echo pass 1 fail 0\n");
+      const ids = expectedGates(["security/attacks/a1.test.ts"]);
+      const put = (r: object) => {
+        mkdirSync(join(dir, "reports"), { recursive: true });
+        writeFileSync(join(dir, receiptPath(head)), JSON.stringify(r));
+      };
+      const verify = (...extra: string[]) => spawnSync("node", [join(repo, "scripts/train-offline.mjs"), "--verify", "--root", dir, ...extra], { encoding: "utf8" });
+      const good = record({ sha: head, tree, results: pass(ids), at: "t", dirty: [] });
+      put(good);
+      expect(verify().status).toBe(0);
+      expect(verify("--require-full").status).toBe(0);
+      put(record({ sha: head, tree, results: pass(ids.filter((id: string) => id !== "dod-done")), at: "t", dirty: [] }));
+      expect(verify().stderr).toMatch(/missing gate\(s\): dod-done/);
+      put({ ...good, tree: "d".repeat(40) });
+      expect(verify().status).toBe(1);
+      const cloud = record({ sha: head, tree, results: pass(ids), runner, runnerSha256: createHash("sha256").update("echo pass 1 fail 0\n").digest("hex"), at: "t", dirty: [] });
+      put(cloud);
+      expect(verify().status).toBe(0);
+      const full = verify("--require-full");
+      expect(full.status).toBe(1);
+      expect(full.stderr).toMatch(/can never stand in for the Mac/);
+      writeFileSync(runner, "echo pass 9 fail 0\n");
+      expect(verify().stderr).toMatch(/hashes to [0-9a-f]{64}, not the receipt's/);
+      rmSync(runner);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }, 60_000);
+});
+
+describe("the test-file gates (review 9, M5 and L2)", () => {
+  type Spawn = (cmd: string, args: string[]) => { stdout: string; stderr: string; status: number };
+  const a = "src/__tests__/dod.test.ts";
+  const b = "src/__tests__/handoff.test.ts";
+
+  it("without a runner, vitest's JSON reporter: a file whose every test skipped is not green", () => {
+    const calls: string[][] = [];
+    const spawn: Spawn = (cmd, args) => {
+      calls.push([cmd, ...args]);
+      const out = args.find((x) => x.startsWith("--outputFile="))!.slice("--outputFile=".length);
+      const results = [
+        { name: join(repo, a), status: "passed", assertionResults: [{ status: "passed" }, { status: "skipped" }] },
+        { name: join(repo, b), status: "passed", assertionResults: [{ status: "skipped" }, { status: "skipped" }] },
+      ];
+      writeFileSync(out, JSON.stringify({ testResults: results }));
+      return { stdout: "", stderr: "", status: 0 };
+    };
+    const gates = testGates(repo, [a, b, "src/__tests__/missing.test.ts"], null, spawn);
+    const res = gates.map((g: { id: string; run: () => { ok: boolean; detail: string } }) => [g.id, g.run()]);
+    expect(calls).toHaveLength(1);
+    expect(calls[0].slice(1, 4)).toEqual(["vitest", "run", "--reporter=json"]);
+    expect(res).toEqual([
+      [a, { ok: true, detail: "pass 1 fail 0" }],
+      [b, { ok: false, detail: "pass 0 fail 0" }],
+      ["src/__tests__/missing.test.ts", { ok: false, detail: "no result in vitest's JSON report" }],
+    ]);
+  });
+
+  it("a failed file with no test result (a load error) is red", () => {
+    const spawn: Spawn = (_c, args) => {
+      writeFileSync(args.find((x) => x.startsWith("--outputFile="))!.slice(13), JSON.stringify({ testResults: [{ name: join(repo, a), status: "failed", assertionResults: [] }] }));
+      return { stdout: "", stderr: "", status: 1 };
+    };
+    expect(testGates(repo, [a], null, spawn)[0].run()).toEqual({ ok: false, detail: "pass 0 fail 1" });
+  });
+
+  it("with no security/attacks at all, a red attacks gate comes first", () => {
+    const dir = mkdtempSync(join(tmpdir(), "no-attacks-"));
+    try {
+      const gates = testGates(dir, [], "/x/v4.sh");
+      expect(gates.map((g: { id: string }) => g.id)).toEqual(["attacks"]);
+      expect(gates[0].run()).toMatchObject({ ok: false, detail: expect.stringMatching(/needs at least one/) });
+      expect(testGates(repo, [ATTACK], "/x/v4.sh").map((g: { id: string }) => g.id)).toEqual([ATTACK]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });
 
@@ -156,6 +321,36 @@ describe("a broken import fails train:offline --all fast, and no receipt is writ
       expect(rec.green).toBe(false);
       expect(rec.gates[0]).toMatchObject({ id: "imports", status: "fail" });
       expect(rec.gates.slice(1).every((g: { status: string }) => g.status === "skip")).toBe(true);
+      expect(rec).toMatchObject({ dirty: [], runner: "vitest", class: "full", tree: git("rev-parse", "HEAD^{tree}").stdout.trim() });
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }, 120_000);
+
+  it("a dirty tree is refused by name, and its run record says so (review 9, L1/M2)", () => {
+    const dir = mkdtempSync(join(tmpdir(), "train-receipt-dirty-"));
+    try {
+      mkdirSync(join(dir, "scripts/lib"), { recursive: true });
+      mkdirSync(join(dir, "src"), { recursive: true });
+      for (const f of ["scripts/check-imports.mjs", "scripts/lib/importCheck.mjs"]) copyFileSync(join(repo, f), join(dir, f));
+      symlinkSync(join(repo, "node_modules"), join(dir, "node_modules"));
+      writeFileSync(join(dir, ".gitignore"), "node_modules\n.ci-local/\n");
+      // a broken import keeps the run short (fail-fast); the refusal names the dirty tree first
+      writeFileSync(join(dir, "src/a.ts"), 'import { b } from "./bee";\nexport const a = b;\n');
+      writeFileSync(join(dir, "src/b.ts"), "export const b = 1;\n");
+      const git = (...a: string[]) => spawnSync("git", a, { cwd: dir, encoding: "utf8" });
+      git("init", "-q");
+      git("add", "-A");
+      git("-c", "user.name=t", "-c", "user.email=t@example.invalid", "commit", "-qm", "c");
+      writeFileSync(join(dir, "src/b.ts"), "export const b = 2;\n");
+      const r = spawnSync("node", [join(repo, "scripts/train-offline.mjs"), "--all", "--root", dir], { encoding: "utf8" });
+      expect(r.status).toBe(1);
+      expect(r.stderr).toMatch(/no receipt — the tree has 1 uncommitted change\(s\) \(src\/b\.ts\)/);
+      expect(existsSync(join(dir, "reports"))).toBe(false);
+      const runs = readdirSync(join(dir, ".ci-local/runs"));
+      expect(runs).toHaveLength(1);
+      const rec = JSON.parse(readFileSync(join(dir, ".ci-local/runs", runs[0]), "utf8"));
+      expect(rec).toMatchObject({ green: false, dirty: ["src/b.ts"] });
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

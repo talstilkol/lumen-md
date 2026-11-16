@@ -17,7 +17,12 @@
  *       `npx vitest run` one file at a time through the runner, and the table
  *       written to the report (scripts/lib/dodRunner.mjs). Exit 1 when any is red.
  *   node scripts/dod.mjs --done --runner <shim> [--report <file>]
- *       the same for every ✅ / ✅* task (plan 0.7: a ✅ whose dod is red shows here)
+ *       the same for every ✅ / ✅* task (plan 0.7: a ✅ whose dod is red shows here).
+ *       Exit 0 only when every row is green: a row that is red, "not here" (a
+ *       command that can't run on this machine, a file whose tests all skipped)
+ *       or "no dod" is not a proof, so the train's dod-done gate is red on it
+ *       (review 9, H1). Without --runner, `npx vitest run <files>` goes through
+ *       vitest's JSON reporter and needs a passed test in every file (M5).
  *
  * ✅* (green against mocks only — no GPU / Ollama here) is set with
  * `"dodMock": true`: such a task can never be plain ✅ until the real-model
@@ -27,6 +32,7 @@ import { readFileSync } from "node:fs";
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { spawnSync } from "node:child_process";
+import { vitestFiles, vitestJsonSync } from "./lib/dodRunner.mjs";
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export const PLAN_FILE = "plan/plan.json";
@@ -145,8 +151,27 @@ export function runDod(tasks, { root = ROOT, exec = defaultExec, log = console.l
 }
 
 function defaultExec(cmd, cwd) {
+  // A vitest file list: vitest's JSON reporter, and a passed test in every file (review 9, M5).
+  const files = vitestFiles(cmd, cwd);
+  if (files) {
+    const r = vitestJsonSync(files, cwd);
+    if (r.status !== "pass") console.error(`dod: ${cmd} → ${r.status}: ${r.detail}`);
+    return r.status === "pass";
+  }
   const r = spawnSync(cmd, { cwd, shell: true, stdio: "inherit" });
   return r.status === 0;
+}
+
+/**
+ * The exit code of a report run: with --done (and for chosen task ids) 0 only
+ * when there is a row and every row is green (review 9, H1: "not here" and
+ * "no dod" are not green); --p0 is the release review's table, 1 when any row is red.
+ * @param {{ verdict: string }[]} rows
+ * @param {string} mode
+ */
+export function reportExit(rows, mode) {
+  if (mode === "--p0") return rows.some((r) => r.verdict === "red") ? 1 : 0;
+  return rows.length && rows.every((r) => r.verdict === "green") ? 0 : 1;
 }
 
 /** The P0 tasks whose dod the release review runs: all but 13.5 and W10.Z3, whose dod is that run. */
@@ -162,7 +187,8 @@ async function report(plan, argv) {
   const tasks = argv.includes("--p0") ? p0Tasks(plan) : select(plan, { ids, done: argv.includes("--done") });
   const git = (...a) => spawnSync("git", a, { cwd: ROOT, encoding: "utf8" }).stdout.trim();
   const rows = await runTasks(tasks, { root: ROOT, runner, jobs, log: (l) => console.log(l) });
-  const md = reportMarkdown(rows, { sha: git("rev-parse", "HEAD"), branch: git("rev-parse", "--abbrev-ref", "HEAD"), runner, at: new Date().toISOString(), mode: argv.includes("--p0") ? "--p0" : argv.includes("--done") ? "--done" : ids.join(" ") });
+  const mode = argv.includes("--p0") ? "--p0" : argv.includes("--done") ? "--done" : ids.join(" ");
+  const md = reportMarkdown(rows, { sha: git("rev-parse", "HEAD"), branch: git("rev-parse", "--abbrev-ref", "HEAD"), runner, at: new Date().toISOString(), mode });
   if (file) {
     const { writeFileSync, mkdirSync } = await import("node:fs");
     mkdirSync(dirname(resolve(ROOT, file)), { recursive: true });
@@ -171,7 +197,9 @@ async function report(plan, argv) {
   } else console.log(md);
   const red = rows.filter((r) => r.verdict === "red").length;
   console.log(`dod: ${rows.length} tasks — ${rows.filter((r) => r.verdict === "green").length} green, ${red} red, ${rows.filter((r) => r.verdict === "not here").length} not here`);
-  return red ? 1 : 0;
+  const code = reportExit(rows, mode);
+  if (mode !== "--p0" && code) console.error(`dod ${mode}: not every task is green here — a "not here" or "no dod" row is not a proof`);
+  return code;
 }
 
 async function main(argv) {
@@ -189,8 +217,8 @@ async function main(argv) {
   }
   const tasks = select(plan, { ids, done: flags.has("--done") });
   if (!tasks.length) {
-    console.error(flags.has("--done") ? "dod: no done task has a dod yet" : "usage: node scripts/dod.mjs <task id…> | --done | --list [--dry | --markdown]");
-    return flags.has("--done") ? 0 : 2;
+    console.error(flags.has("--done") ? "dod: no done task has a dod — nothing proves the ✅ tasks" : "usage: node scripts/dod.mjs <task id…> | --done | --list [--dry | --markdown]");
+    return flags.has("--done") ? 1 : 2;
   }
   if (flags.has("--markdown")) {
     console.log(markdown(tasks));

@@ -27,6 +27,7 @@ import { createServer } from "node:net";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { planSteps, e2eSpecs, i18nDrift, summary, coverageGate, hookPlan, buildState, argErrors, dynamicImportTargets, onPath, prCheckBase } from "./lib/ciLocal.mjs";
+import { porcelainFiles } from "./lib/trainReceipt.mjs";
 
 // fileURLToPath, not `.pathname`: a checkout in "lumen md/" is "lumen%20md/" in the URL.
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
@@ -234,7 +235,10 @@ try {
   const sha = git("rev-parse", "HEAD");
   mkdirSync(".ci-local/runs", { recursive: true });
   const steps = shown.map((r) => ({ id: r.id ?? r.title, status: r.status }));
-  writeFileSync(`.ci-local/runs/${sha ?? "nosha"}-${Date.now()}.json`, `${JSON.stringify({ kind: "ci-local", sha, at: new Date().toISOString(), changed: changed !== null, steps }, null, 2)}\n`);
+  // review 9, M2: the uncommitted files, so ci-doctor leaves a dirty run out of its comparisons.
+  const st = spawnSync("git", ["status", "--porcelain", "-z"], { encoding: "utf8" });
+  const dirty = st.status === 0 ? porcelainFiles(st.stdout) : ["(git status failed)"];
+  writeFileSync(`.ci-local/runs/${sha ?? "nosha"}-${Date.now()}.json`, `${JSON.stringify({ kind: "ci-local", sha, at: new Date().toISOString(), changed: changed !== null, runner: "vitest", dirty: dirty.slice(0, 50), steps }, null, 2)}\n`);
 } catch (e) {
   console.error(`ci:local: no run record written (${e?.message ?? e})`);
 }
