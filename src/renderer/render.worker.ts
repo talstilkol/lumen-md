@@ -5,6 +5,7 @@
  * ./renderProtocol.ts. The handler is ./renderWorkerCore.ts; the window side
  * is ./renderClient.ts.
  */
+import "../ai/workerLedgerInstall"; // first: what this worker fetches reaches the privacy ledger (plan 2.4, W10.D22)
 import { createRenderHandler } from "./renderWorkerCore";
 import type { RenderRequest } from "./renderProtocol";
 
