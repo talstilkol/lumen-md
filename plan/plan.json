@@ -33689,7 +33689,6 @@
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
      "verified": "built",
-     "pr": 1016,
      "notes": "Shipped in #1016 (merged into verify/train-7 af2d0d7ce5 by INT4a): AllowList pins the resolved program, its sha256, the argv, the folder and every file an argument names; checked_spawn refuses anything else before a process starts. On af2d0d7ce5: rustc --test src-tauri/mcp-stdio/src/lib.rs 29/29, mcpStdioAllowlist.test.tsx 9/9 (offline runner). Review 10 found gaps (M4 M6 M7 L1-L5): the list was looked up after hashing, the deny-list read only the typed name, --opt=file and folder arguments were not pinned. fix/f10-mcp: lookup first with one message, 256 MB cap, deny on the resolved file, attached inline-code forms and stdin code refused, --opt=file hashed, a folder where an interpreter takes its program refused, nothing inside a granted vault, package-runner warning (en, he), revoke after a move, PATHEXT; rustc --test 43/43, 22/22 mutants killed; mcpStdioAllowlist 10/10. Review 10 M5: the old dod (cargo test --manifest-path src-tauri/Cargo.toml mcp_stdio) ran 0 tests; it now names the crate's own manifest, and a rustc line runs here. Owed: cargo build and cargo test on the Mac; real servers (npx, uvx, python) through the dialog; the isolation entries for mcp_stdio_* (owner); review receipts and the human-reviewed label (owner, security). Status (INT5, 16.11): kept at the wave-13 placeholder, not because no work exists (the code above is in the train) but because W6.39's WIP gate (#1053) refuses a new wave-13 start while wave 12 is over its limit, and plan/wip-frozen.json only shrinks. The status moves when wave 12 is verified, or when the owner decides otherwise.",
      "stage": "13.X",
      "dod": [
@@ -33732,7 +33731,6 @@
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
      "verified": "built",
-     "pr": 1019,
      "notes": "Shipped in #1019 (merged into verify/train-7 af2d0d7ce5 by INT4a). On af2d0d7ce5: securityTxt.test.ts 10/10 (offline runner), npm run security:page exit 0 (the page is generated in both languages and unchanged). Review 10 L12, owed by the owner: security.txt's Contact is a public issue, and GitHub private vulnerability reporting is off (turn it on, then point Contact at the advisory form); its Expires is 2027-05-16 (renew before then). Owed: the human-reviewed label and receipts (security). Status (INT5, 16.11): kept at the wave-13 placeholder, not because no work exists (the code above is in the train) but because W6.39's WIP gate (#1053) refuses a new wave-13 start while wave 12 is over its limit, and plan/wip-frozen.json only shrinks. The status moves when wave 12 is verified, or when the owner decides otherwise.",
      "stage": "13.X",
      "dod": [
