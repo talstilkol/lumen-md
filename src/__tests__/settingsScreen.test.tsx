@@ -38,6 +38,7 @@ describe("SettingsScreen", () => {
       "General",
       "Theme",
       "AI settings",
+      "Calendar",
       "Collaboration settings",
       "Train AI on my style",
       "Privacy",
