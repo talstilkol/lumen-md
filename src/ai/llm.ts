@@ -128,9 +128,9 @@ function assertOllamaOrigin(baseUrl: string): void {
  * right before the provider is contacted, restored in the answer. Local
  * routes (Ollama on this machine, WebGPU) never come through here.
  */
-async function forCloud(messages: ChatMessage[], provider: string): Promise<{ messages: ChatMessage[]; restore: (s: string) => string; restoreStream: (c: AsyncIterable<string>) => AsyncIterable<string> }> {
+async function forCloud(messages: ChatMessage[], provider: string, signal?: AbortSignal): Promise<{ messages: ChatMessage[]; restore: (s: string) => string; restoreStream: (c: AsyncIterable<string>) => AsyncIterable<string> }> {
   const { redactForCloud } = await import("./piiRedactor");
-  const { messages: out, vault } = await redactForCloud(messages, provider);
+  const { messages: out, vault } = await redactForCloud(messages, provider, signal);
   return { messages: out, restore: (s) => vault.restore(s), restoreStream: (c) => (vault.size ? vault.restoreStream(c) : c) };
 }
 
@@ -312,7 +312,7 @@ async function chatDirect(
     getProviderKey("anthropic"); // NO_KEY before anything is charged
     checkRateLimit();
     // Redacted (and previewed) before the prompt is charged: a cancelled preview costs nothing.
-    const red = await forCloud(messages, "anthropic");
+    const red = await forCloud(messages, "anthropic", opts.signal);
     charge();
     inflight++;
     try {
@@ -329,7 +329,7 @@ async function chatDirect(
     getProviderKey("gemini"); // NO_KEY before anything is charged
     checkRateLimit();
     // Redacted (and previewed) before the prompt is charged: a cancelled preview costs nothing.
-    const red = await forCloud(messages, "gemini");
+    const red = await forCloud(messages, "gemini", opts.signal);
     charge();
     inflight++;
     try {
@@ -346,7 +346,7 @@ async function chatDirect(
     getProviderKey("mistral"); // NO_KEY before anything is charged
     checkRateLimit();
     // Redacted (and previewed) before the prompt is charged: a cancelled preview costs nothing.
-    const red = await forCloud(messages, "mistral");
+    const red = await forCloud(messages, "mistral", opts.signal);
     charge();
     inflight++;
     try {
@@ -362,7 +362,7 @@ async function chatDirect(
   assertCloudProvider("openai");
   const key = getAiKey();
   checkRateLimit();
-  const red = await forCloud(messages, "openai");
+  const red = await forCloud(messages, "openai", opts.signal);
   charge();
   inflight++;
   // F3 — when the user has trained + enabled their personal model,
@@ -549,7 +549,7 @@ async function* chatStreamDirect(
     const { chatAnthropicStream } = await import("./anthropicProvider");
     assertCloudProvider("anthropic");
     getProviderKey("anthropic"); // NO_KEY before anything is charged
-    const red = await forCloud(messages, "anthropic");
+    const red = await forCloud(messages, "anthropic", opts.signal);
     charge();
     yield* red.restoreStream(chatAnthropicStream(red.messages, opts));
     return;
@@ -559,7 +559,7 @@ async function* chatStreamDirect(
     const { chatGeminiStream } = await import("./geminiProvider");
     assertCloudProvider("gemini");
     getProviderKey("gemini"); // NO_KEY before anything is charged
-    const red = await forCloud(messages, "gemini");
+    const red = await forCloud(messages, "gemini", opts.signal);
     charge();
     yield* red.restoreStream(chatGeminiStream(red.messages, opts));
     return;
@@ -569,7 +569,7 @@ async function* chatStreamDirect(
     const { chatMistralStream } = await import("./mistralProvider");
     assertCloudProvider("mistral");
     getProviderKey("mistral"); // NO_KEY before anything is charged
-    const red = await forCloud(messages, "mistral");
+    const red = await forCloud(messages, "mistral", opts.signal);
     charge();
     yield* red.restoreStream(chatMistralStream(red.messages, opts));
     return;
@@ -579,7 +579,7 @@ async function* chatStreamDirect(
   assertCloudProvider("openai");
   const key = getAiKey();
   checkRateLimit();
-  const red = await forCloud(messages, "openai");
+  const red = await forCloud(messages, "openai", opts.signal);
   charge();
   inflight++;
   const model = opts.model ?? DEFAULT_MODEL;

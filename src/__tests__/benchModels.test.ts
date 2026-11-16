@@ -218,8 +218,8 @@ describe("engine adapters", () => {
 
   it("the new engines run the app's own code, not a copy (W10.E34, W10.E35)", () => {
     const src = (f: string) => readFileSync(join(dir, f), "utf8");
-    expect(src("webllm.ts")).toMatch(/runAgentOrThrow\(translatorAgent, [^)]*\{ executor: "webllm" \}\)/);
-    expect(src("ollama.ts")).toMatch(/runAgentOrThrow\(translatorAgent, [^)]*\{ executor: "ollama" \}\)/);
+    expect(src("webllm.ts")).toMatch(/runAgentOrThrow\(translatorAgent, [^)]*\{ executor: "webllm", signal \}\)/);
+    expect(src("ollama.ts")).toMatch(/runAgentOrThrow\(translatorAgent, [^)]*\{ executor: "ollama", signal \}\)/);
     expect(src("m2m100.ts")).toMatch(/from "\.\.\/\.\.\/ai\/transformersEngine"/);
     expect(src("florence2.ts")).toMatch(/captionLocal\(MODEL\.id, MODEL\.family, image\)/);
     expect(src("siglip.ts")).toMatch(/rankImages\(index, \(await queryVector\(/);

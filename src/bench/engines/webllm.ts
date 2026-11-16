@@ -12,8 +12,12 @@ import type { BenchEngine } from "../types";
 
 const MODEL = "Qwen3-0.6B";
 
+/** A stuck model fails its item instead of hanging the whole bench (T55: every run carries a cancel signal). */
+const ITEM_TIMEOUT_MS = 120_000;
+
 async function translate(text: string): Promise<string> {
-  return runAgentOrThrow(translatorAgent, { text, extra: { targetLanguage: "English" } }, { executor: "webllm" });
+  const signal = AbortSignal.timeout(ITEM_TIMEOUT_MS);
+  return runAgentOrThrow(translatorAgent, { text, extra: { targetLanguage: "English" } }, { executor: "webllm", signal });
 }
 
 export const engine: BenchEngine = {

@@ -153,12 +153,12 @@ export interface Redacted<M extends Message> {
  * messages pass unchanged (an empty vault restores nothing). Throws
  * RedactionCancelledError when the user cancels the preview.
  */
-export async function redactForCloud<M extends Message>(messages: M[], provider: string): Promise<Redacted<M>> {
+export async function redactForCloud<M extends Message>(messages: M[], provider: string, signal?: AbortSignal): Promise<Redacted<M>> {
   const vault = new PiiVault();
   if (!redactionEnabled()) return { messages, vault };
   const ner = await namesFinder();
   const out: M[] = [];
-  for (const m of messages) out.push({ ...m, content: typeof m.content === "string" ? await redactText(m.content, vault, { ner }) : m.content });
+  for (const m of messages) out.push({ ...m, content: typeof m.content === "string" ? await redactText(m.content, vault, { ner, signal }) : m.content });
   if (vault.size) record({ ts: Date.now(), provider, counts: { ...vault.counts }, names: !!ner });
   if (previewEnabled() && !(await showPreview(out, vault.counts, !!ner))) throw new RedactionCancelledError();
   return { messages: out, vault };

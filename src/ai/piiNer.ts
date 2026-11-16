@@ -58,11 +58,11 @@ export async function nerIfCached(base: string | null = CONVERTED_MODELS_BASE, i
 /* ── The fallback: Ollama on this machine ───────────────────────────── */
 
 /** Asks a local model for the person names in a text (JSON `{"names": [...]}`); rejects when none runs. */
-export type NamesAsk = (text: string) => Promise<string[]>;
+export type NamesAsk = (text: string, signal?: AbortSignal) => Promise<string[]>;
 
-const ollamaAsk: NamesAsk = async (text) => {
+const ollamaAsk: NamesAsk = async (text, signal) => {
   const [{ runAgentOrThrow }, { piiNamesAgent }] = await Promise.all([import("../agents/runtime"), import("../agents/defs/piiNames")]);
-  return (await runAgentOrThrow(piiNamesAgent, { text })).names;
+  return (await runAgentOrThrow(piiNamesAgent, { text }, { signal })).names;
 };
 
 /** Every occurrence of every name the model gave, as PERSON spans (a name not in the text is ignored). */
@@ -78,7 +78,7 @@ export function spansOf(text: string, names: readonly string[]): Array<{ start: 
 
 /** The name finder over a local model's answer. */
 export function ollamaNamesFinder(ask: NamesAsk = ollamaAsk): NerFn {
-  return async (text) => spansOf(text, await ask(text));
+  return async (text, signal) => spansOf(text, await ask(text, signal));
 }
 
 export type NamesEngine = "dictabert" | "bert-base-ner" | "ollama" | "none";
