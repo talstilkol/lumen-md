@@ -1856,6 +1856,25 @@
       "vars": []
     },
     {
+      "key": "tts.kokoro.body",
+      "en": "Read English with {voice} ({license}), on this device. It downloads once ({mb} MB), is checked against its checksum, and after that reading sends nothing.",
+      "vars": [
+        "voice",
+        "license",
+        "mb"
+      ]
+    },
+    {
+      "key": "tts.kokoro.ok",
+      "en": "Download and read",
+      "vars": []
+    },
+    {
+      "key": "tts.kokoro.title",
+      "en": "Download an English neural voice?",
+      "vars": []
+    },
+    {
       "key": "tts.networkVoice.body",
       "en": "This device has no voice for this note. Your browser offers voices that synthesize on the provider's servers, so the note's text would be sent there. The privacy ledger records each use.",
       "vars": []
