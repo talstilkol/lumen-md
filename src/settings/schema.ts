@@ -347,6 +347,11 @@ export const SETTINGS: readonly SettingEntry[] = [
   data("lumen.storage.persistAskedAfterFirstSave"),
   data("lumen-update-last-check"),
   data("lumen-saved-searches-migrated"),
+  // T8 integration: keys the merged ports store (#982 academic calendar, #981 Yiddish dictionary) and the
+  // vault location the MCP approvals read (#978): a choice tied to this device, a user's word list, a path.
+  data("lumen.academic"),
+  data("lumen.dict.yi.v1"),
+  data("lumen-vault-location"),
 ];
 
 /** True when `key` is the entry's id, or matches it with `*` as a wildcard. */

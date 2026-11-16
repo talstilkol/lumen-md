@@ -4,6 +4,7 @@
  * user downloaded (handed over by the service, ≈ 1.4 s once) and answers
  * check requests off the main thread. It fetches nothing.
  */
+import "./workerLedgerInstall"; // first: what this worker fetches reaches the privacy ledger (plan 2.4, W10.D22)
 import nspell from "nspell";
 import { yiddishSpelling } from "./yiddishSpell";
 import type { GrammarMatch } from "./grammar";
