@@ -66,6 +66,11 @@ export async function docxToMarkdown(file: File): Promise<string> {
       return !!el && v !== "0" && v !== "false";
     });
 
+  // Inline code (W12.F3 round trip): our writer's "Code" character style, or pandoc's VerbatimChar.
+  // A monospace font alone is not enough: a code block's runs carry one too.
+  const isCode = (rPr: Element | undefined): boolean =>
+    /^(Code|VerbatimChar)$/i.test(rPr?.getElementsByTagName("w:rStyle")[0]?.getAttribute("w:val") ?? "");
+
   const imageMd = (drawing: Element): string => {
     const props = drawing.getElementsByTagName("wp:docPr")[0];
     const alt = (props?.getAttribute("descr") || props?.getAttribute("title") || "").replace(/[[\]]/g, "");
@@ -105,7 +110,7 @@ export async function docxToMarkdown(file: File): Promise<string> {
 
   // Runs of a paragraph (hyperlinks included), with neighbouring runs of the same emphasis joined.
   const paraText = (p: Element): string => {
-    const pieces: { text: string; b: boolean; i: boolean; href?: string; raw?: boolean }[] = [];
+    const pieces: { text: string; b: boolean; i: boolean; href?: string; raw?: boolean; code?: boolean }[] = [];
     const runOf = (r: Element, href?: string) => {
       for (const d of els(r, "w:drawing")) pieces.push({ text: imageMd(d), b: false, i: false, raw: true });
       let t = "";
@@ -125,7 +130,7 @@ export async function docxToMarkdown(file: File): Promise<string> {
       }
       if (!t) return;
       const rPr = r.getElementsByTagName("w:rPr")[0];
-      pieces.push({ text: t, b: on(rPr, "w:b", "w:bCs"), i: on(rPr, "w:i", "w:iCs"), href });
+      pieces.push({ text: t, b: on(rPr, "w:b", "w:bCs"), i: on(rPr, "w:i", "w:iCs"), href, code: isCode(rPr) });
     };
     for (const c of Array.from(p.children)) {
       if (c.tagName === "w:r") runOf(c);
@@ -135,11 +140,11 @@ export async function docxToMarkdown(file: File): Promise<string> {
       } else if (c.tagName === "w:ins" || c.tagName === "w:smartTag" || c.tagName === "w:sdt") for (const r of els(c, "w:r")) runOf(r);
     }
     // Whitespace takes the emphasis of the text before it, so "**a** **b**" joins into one span.
-    for (let k = 1; k < pieces.length; k++) if (!pieces[k].raw && !pieces[k].text.trim()) Object.assign(pieces[k], { b: pieces[k - 1].b, i: pieces[k - 1].i });
+    for (let k = 1; k < pieces.length; k++) if (!pieces[k].raw && !pieces[k].code && !pieces[k].text.trim()) Object.assign(pieces[k], { b: pieces[k - 1].b, i: pieces[k - 1].i });
     const groups: typeof pieces = [];
     for (const x of pieces) {
       const last = groups[groups.length - 1];
-      if (last && !last.raw && !x.raw && last.b === x.b && last.i === x.i && last.href === x.href) last.text += x.text;
+      if (last && !last.raw && !x.raw && last.b === x.b && last.i === x.i && last.href === x.href && !!last.code === !!x.code) last.text += x.text;
       else groups.push({ ...x });
     }
     return groups
@@ -149,6 +154,7 @@ export async function docxToMarkdown(file: File): Promise<string> {
         const trail = /\s*$/.exec(g.text)![0];
         let core = g.text.trim();
         if (!core) return g.text;
+        if (g.code) core = core.includes("`") ? `\`\` ${core} \`\`` : `\`${core}\``;
         if (g.b) core = `**${core}**`;
         if (g.i) core = `*${core}*`;
         if (g.href) core = `[${core}](${g.href})`;

@@ -69,8 +69,10 @@ export function features(md: string): Record<Feature, string[]> {
     }
     if (fence || !l.trim()) continue;
     const text = l.replace(/^\s*(#{1,6}\s+|[-*+]\s+(\[[ xX]\]\s+)?|\d+[.)]\s+|>\s?|\|)/, "");
-    for (const m of text.matchAll(/\*\*([^*]+?)\*\*/g)) f.bold.push(squash(m[1]));
-    for (const m of text.replace(/\*\*[^*]+?\*\*/g, "").matchAll(/(?<![*\w])\*(?=\S)([^*]+?)\*(?![*\w])/g)) f.italic.push(squash(m[1]));
+    // Emphasis is read outside code spans: the `*` of `*.host.example` is not italic.
+    const prose = text.replace(/`[^`]*`/g, " ");
+    for (const m of prose.matchAll(/\*\*([^*]+?)\*\*/g)) f.bold.push(squash(m[1]));
+    for (const m of prose.replace(/\*\*[^*]+?\*\*/g, "").matchAll(/(?<![*\w])\*(?=\S)([^*]+?)\*(?![*\w])/g)) f.italic.push(squash(m[1]));
     for (const m of text.matchAll(/(?<!!)\[([^\]^][^\]]*)\]\(([^)\s]+)/g)) f.links.push(`${plain(m[1])} → ${m[2]}`);
     const fn = /^\[\^([^\]]+)\]:\s*(.*)$/.exec(l);
     if (fn) {

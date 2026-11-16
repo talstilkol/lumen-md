@@ -73,15 +73,27 @@ export function markdownToRtf(md: string): string {
   return out.join("\n");
 }
 
+/**
+ * Inline Markdown → another format, code spans first: a `*` inside one
+ * (`*.host.example`) is not emphasis and must not pair with a `*` after
+ * the span (the LaTeX, EPUB and RTF writers all turned it into italics).
+ * `rest` converts the text around the spans; `code` renders each span.
+ */
+function codeSpansFirst(s: string, rest: (t: string) => string, code: (c: string) => string): string {
+  const spans: string[] = [];
+  const out = rest(s.replace(/`([^`]+)`/g, (_m, c: string) => `\u0001${spans.push(c) - 1}\u0001`));
+  return out.replace(/\u0001(\d+)\u0001/g, (_m, i: string) => code(spans[Number(i)]));
+}
+
 function escapeRtf(s: string): string {
   return s.replace(/\\/g, "\\\\").replace(/[{}]/g, "\\$&");
 }
 function escapeRtfInline(s: string): string {
-  return escapeRtf(s)
-    .replace(/\*\*([^*]+)\*\*/g, "\\b $1\\b0")
-    .replace(/\*([^*]+)\*/g, "\\i $1\\i0")
-    .replace(/`([^`]+)`/g, "{\\f1 $1}")
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1 ($2)");
+  return codeSpansFirst(
+    escapeRtf(s),
+    (t) => t.replace(/\*\*([^*]+)\*\*/g, "\\b $1\\b0").replace(/\*([^*]+)\*/g, "\\i $1\\i0").replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1 ($2)"),
+    (c) => `{\\f1 ${c}}`,
+  );
 }
 
 /**
@@ -250,11 +262,11 @@ function escapeLatex(s: string): string {
   return s.replace(/[\\&%$#_{}~^]/g, (c) => (c === "\\" ? "\\textbackslash{}" : "\\" + c));
 }
 function escapeLatexInline(s: string): string {
-  return escapeLatex(s)
-    .replace(/\*\*([^*]+)\*\*/g, "\\textbf{$1}")
-    .replace(/\*([^*]+)\*/g, "\\textit{$1}")
-    .replace(/`([^`]+)`/g, "\\texttt{$1}")
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, "\\href{$2}{$1}");
+  return codeSpansFirst(
+    escapeLatex(s),
+    (t) => t.replace(/\*\*([^*]+)\*\*/g, "\\textbf{$1}").replace(/\*([^*]+)\*/g, "\\textit{$1}").replace(/\[([^\]]+)\]\(([^)]+)\)/g, "\\href{$2}{$1}"),
+    (c) => `\\texttt{${c}}`,
+  );
 }
 
 /**
@@ -376,11 +388,11 @@ export function markdownToRevealHtml(md: string, title = "Slides"): string {
 /* ─── Markdown → EPUB 3 (real package, zipped) ─────────────────────── */
 
 function mdInlineToHtml(s: string): string {
-  return escapeHtml(s)
-    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
-    .replace(/\*([^*\n]+)\*/g, "<em>$1</em>")
-    .replace(/`([^`]+)`/g, "<code>$1</code>")
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+  return codeSpansFirst(
+    escapeHtml(s),
+    (t) => t.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>").replace(/\*([^*\n]+)\*/g, "<em>$1</em>").replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>'),
+    (c) => `<code>${c}</code>`,
+  );
 }
 
 const isRtlText = (s: string): boolean => (s.match(/[\u0590-\u08FF]/g)?.length ?? 0) > (s.match(/[A-Za-z]/g)?.length ?? 0);
