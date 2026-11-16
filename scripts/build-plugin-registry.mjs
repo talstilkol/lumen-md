@@ -4,6 +4,7 @@
  * app serves from public/plugins/examples/.
  *
  *   node scripts/build-plugin-registry.mjs           # writes index.json, then scan.json
+ *   node scripts/build-plugin-registry.mjs --bump-serial  # raise index.json's serial now (review 11, M5), then --sign
  *   node scripts/build-plugin-registry.mjs --check   # exit 1 when either is out of date, a version fails its scan,
  *                                                    # or index.json.sig no longer matches index.json
  *   node scripts/build-plugin-registry.mjs --keygen <dir>   # owner, once: a new Ed25519 key pair in <dir>
@@ -122,7 +123,11 @@ const index = {
     return { id, name: versions[versions.length - 1].name, versions: versions.map((v) => ({ version: v.version, path: v.path, sha256: v.sha256, manifestSha256: v.manifestSha256, ...(delisted(v) ? { delisted: delisted(v) } : {}) })) };
   }),
 };
-const out = JSON.stringify(index, null, 2) + "\n";
+// Review 11, M5: the serial goes up with every change to what the index lists (the app refuses an older
+// index once it saw a newer one); unchanged content keeps it. --bump-serial raises it now (the owner, before --sign).
+const sameContent = JSON.stringify(index.plugins) === JSON.stringify(previous.plugins ?? []);
+const serial = (Number.isSafeInteger(previous.serial) ? previous.serial : 0) + (sameContent && !process.argv.includes("--bump-serial") ? 0 : 1);
+const out = JSON.stringify(serial > 0 ? { about: index.about, serial, plugins: index.plugins } : index, null, 2) + "\n";
 const stale = !existsSync(INDEX) || readFileSync(INDEX, "utf8") !== out;
 console.log(`${index.plugins.length} plugins in the registry${stale ? (check ? " — index.json is out of date: run node scripts/build-plugin-registry.mjs" : " — index.json written") : ""}`);
 if (!check && stale) writeFileSync(INDEX, out);
