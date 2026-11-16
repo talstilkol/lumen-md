@@ -2062,6 +2062,7 @@
   "mcpServers.add": "Ajouter un serveur",
   "mcpServers.approval.check": "Vérifier l'autorisation",
   "mcpServers.approval.no": "Non autorisé, ou le programme ou un fichier qu'il reçoit a changé depuis. Une nouvelle autorisation vous sera demandée avant son exécution.",
+  "mcpServers.approval.notRevoked": "Rien à retirer : ce programme, avec ces arguments et ce dossier, n'était pas dans la liste des autorisations.",
   "mcpServers.approval.revoke": "Retirer l'autorisation",
   "mcpServers.approval.revoked": "Autorisation retirée. Rien ne s'exécute avant une nouvelle autorisation.",
   "mcpServers.approval.yes": "Autorisé : ce programme précis peut s'exécuter avec ces arguments.",

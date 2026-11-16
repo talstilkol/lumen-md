@@ -933,6 +933,15 @@
     "ru": "11z5x4p",
     "zh-CN": "11z5x4p"
   },
+  "mcpServers.approval.notRevoked": {
+    "ar": "bcsrer",
+    "de": "bcsrer",
+    "fr": "bcsrer",
+    "he": "bcsrer",
+    "ja": "bcsrer",
+    "ru": "bcsrer",
+    "zh-CN": "bcsrer"
+  },
   "mcpServers.approval.revoke": {
     "ar": "vs8xhy",
     "de": "vs8xhy",

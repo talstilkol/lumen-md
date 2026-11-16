@@ -2,6 +2,7 @@
   "mcpServers.add": "Add a server",
   "mcpServers.approval.check": "Check approval",
   "mcpServers.approval.no": "Not approved, or the program or a file it is given changed since. It asks you again before it runs.",
+  "mcpServers.approval.notRevoked": "Nothing to withdraw: this program, with these arguments and this folder, was not on the allow-list.",
   "mcpServers.approval.revoke": "Withdraw approval",
   "mcpServers.approval.revoked": "Approval withdrawn. Nothing runs until you approve it again.",
   "mcpServers.approval.yes": "Approved: this exact program and these arguments may run.",

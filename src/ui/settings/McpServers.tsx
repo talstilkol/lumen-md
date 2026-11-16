@@ -81,20 +81,29 @@ function connectError(message: string): string {
 }
 
 function StdioApproval({ server, approvals }: { server: McpServerConfig; approvals: StdioApprovals }) {
-  const [state, setState] = useState<"unknown" | "yes" | "no" | "revoked" | string>("unknown");
-  const run = (f: () => Promise<"yes" | "no" | "revoked">) =>
+  const [state, setState] = useState<"unknown" | "yes" | "no" | "revoked" | "notRevoked" | string>("unknown");
+  const run = (f: () => Promise<"yes" | "no" | "revoked" | "notRevoked">) =>
     void f().then(setState, (e) => setState(String((e as Error)?.message ?? e)));
   return (
     <div style={row}>
       <button type="button" data-testid={`mcp-approval-check-${server.id}`} onClick={() => run(async () => ((await approvals.approved(specOf(server))) ? "yes" : "no"))}>
         {t("mcpServers.approval.check")}
       </button>
-      <button type="button" data-testid={`mcp-approval-revoke-${server.id}`} onClick={() => run(async () => (await approvals.revoke(specOf(server)), "revoked"))}>
+      {/* Review 10, L4: false means nothing matched this command (nothing was withdrawn). */}
+      <button type="button" data-testid={`mcp-approval-revoke-${server.id}`} onClick={() => run(async () => ((await approvals.revoke(specOf(server))) ? "revoked" : "notRevoked"))}>
         {t("mcpServers.approval.revoke")}
       </button>
       {state !== "unknown" && (
         <span role="status" style={muted} data-testid={`mcp-approval-${server.id}`}>
-          {state === "yes" ? t("mcpServers.approval.yes") : state === "no" ? t("mcpServers.approval.no") : state === "revoked" ? t("mcpServers.approval.revoked") : state}
+          {state === "yes"
+            ? t("mcpServers.approval.yes")
+            : state === "no"
+              ? t("mcpServers.approval.no")
+              : state === "revoked"
+                ? t("mcpServers.approval.revoked")
+                : state === "notRevoked"
+                  ? t("mcpServers.approval.notRevoked")
+                  : state}
         </span>
       )}
     </div>

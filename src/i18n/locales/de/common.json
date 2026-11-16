@@ -2062,6 +2062,7 @@
   "mcpServers.add": "Server hinzufügen",
   "mcpServers.approval.check": "Freigabe prüfen",
   "mcpServers.approval.no": "Nicht freigegeben, oder das Programm oder eine Datei, die es erhält, hat sich seitdem geändert. Vor dem Start werden Sie erneut gefragt.",
+  "mcpServers.approval.notRevoked": "Nichts zurückzuziehen: Dieses Programm mit diesen Argumenten und diesem Ordner stand nicht auf der Freigabeliste.",
   "mcpServers.approval.revoke": "Freigabe zurückziehen",
   "mcpServers.approval.revoked": "Freigabe zurückgezogen. Nichts läuft, bis Sie erneut zustimmen.",
   "mcpServers.approval.yes": "Freigegeben: Genau dieses Programm darf mit diesen Argumenten laufen.",

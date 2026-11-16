@@ -243,9 +243,15 @@ your files. Nothing is connected until you add a server and turn it on.
   app shows the program's full path, its sha256, each argument and the
   folder in its own dialog, and the approval is for exactly that: that file,
   those arguments, that folder, and every file an argument names (a script,
-  for example). If one byte of them changes, or the arguments do, nothing
-  starts until you approve again. Settings → MCP servers → *Check approval* /
-  *Withdraw approval*.
+  for example, or the file in `--config=file`). If one byte of them changes,
+  or the arguments do, nothing starts until you approve again. Settings → MCP
+  servers → *Check approval* / *Withdraw approval*. Refused outright: shells,
+  code written in the command line or read from stdin, a folder where an
+  interpreter takes its program, and a program, file or working folder inside
+  one of your vaults. Not pinned, and the dialog says so: files the program
+  loads by itself (modules a script imports, plugins, a folder's contents) and
+  what a package runner such as `npx`, `uvx`, `pnpm dlx` or
+  `deno run https://…` downloads each time it starts.
 - **Permission per server and per tool:** *read* (runs without asking, only
   for tools the server marks read-only), *ask* (you approve each call, the
   default) or *block* (never offered to the model).
