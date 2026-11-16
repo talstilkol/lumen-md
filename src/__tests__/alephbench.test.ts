@@ -56,7 +56,7 @@ const oracle = (xs: ReturnType<typeof fixtures>): AlephEngine => ({ id: "mock:or
 describe("the subsets", () => {
   it("are 11, each with an adapter kind and an instruction", () => {
     expect(SUBSETS).toHaveLength(11);
-    expect(new Set(SUBSETS.map((s) => s.id)).size).toBe(11);
+    expect(new Set((SUBSETS as Array<{ id: string }>).map((s) => s.id)).size).toBe(11);
     expect(() => subsetOf("hebnli")).not.toThrow();
     expect(() => subsetOf("nope")).toThrow(/unknown subset "nope"/);
   });
@@ -92,7 +92,7 @@ describe("5 examples per subset with a mock engine", () => {
   it("the average is the leaderboard's: per-subset means first, then their plain mean (not the mean over examples)", async () => {
     const xs = fixtures().filter((x) => x.subset !== "winograd" || x.id === "winograd-0");
     // winograd keeps one example (scored 0), every other subset is perfect.
-    const engine: AlephEngine = { id: "mock", answer: async (p, e) => (e.subset === "winograd" ? "ב" : fixtures().find((x) => x.id === e.id)!.gold) };
+    const engine: AlephEngine = { id: "mock", answer: async (_p, e) => (e.subset === "winograd" ? "ב" : fixtures().find((x) => x.id === e.id)!.gold) };
     const rows = await runAleph(xs, engine);
     const micro = (rows as Row[]).reduce((a, r) => a + r.score, 0) / rows.length;
     expect(micro).toBeCloseTo(50 / 51);
