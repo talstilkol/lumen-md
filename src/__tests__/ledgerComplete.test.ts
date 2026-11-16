@@ -100,7 +100,10 @@ describe("worker requests reach the ledger", () => {
     // The six the audit named are among them (2.4), and nothing was missed by the walk.
     const names = workers.map((w) => relative(src, w).replace(/\\/g, "/"));
     for (const w of ["ai/dictation/dictation.worker.ts", "ai/tts/piper.worker.ts", "ai/nikud.worker.ts", "ai/hebrewSpell.worker.ts", "plugins/ruby/ruby.worker.ts", "agents/python/python.worker.ts", "ai/transformers.worker.ts", "ai/webllm.worker.ts"]) expect(names).toContain(w);
-    expect(workers.length).toBeGreaterThanOrEqual(16);
+    // Every module worker by name, and the floor at today's count (22 *.worker.ts; R8-L2 restores the >=20 of
+    // #961 and tightens it to the count: a regression that drops a worker's ledger bridge with its file fails here).
+    for (const w of ["agents/python/python.worker.ts", "ai/dictation/dictation.worker.ts", "ai/englishSpell.worker.ts", "ai/hebrewSpell.worker.ts", "ai/nikud.worker.ts", "ai/search.worker.ts", "ai/transformers.worker.ts", "ai/tts/kokoro.worker.ts", "ai/tts/piper.worker.ts", "ai/webllm.worker.ts", "ai/yiddishSpell.worker.ts", "entities/extract/extract.worker.ts", "graph/layout.worker.ts", "lsp/tsCheck.worker.ts", "plugins/graphviz.worker.ts", "plugins/lua/lua.worker.ts", "plugins/ruby/ruby.worker.ts", "plugins/runtime/host.worker.ts", "renderer/render.worker.ts", "search/asOf.worker.ts", "storage/vault/vault-io.worker.ts", "storage/vaultIndex.worker.ts"]) expect(names).toContain(w);
+    expect(workers.length).toBeGreaterThanOrEqual(22);
     const without: string[] = [];
     for (const w of workers) {
       const text = readFileSync(w, "utf8");
