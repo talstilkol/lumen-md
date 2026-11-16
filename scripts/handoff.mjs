@@ -15,7 +15,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { missingRefs, parseWorktrees, renderHandoff } from "./lib/handoff.mjs";
+import { missingRefs, nextStepProblems, parseWorktrees, renderHandoff } from "./lib/handoff.mjs";
 
 // fileURLToPath, not `.pathname`: a checkout in "lumen md/" is "lumen%20md/" in the URL.
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
@@ -98,12 +98,15 @@ if (!flag("no-github")) {
   }
 }
 
-const problems = missingRefs({ prs, worktrees, branches, repo });
+// Where the next step runs: this checkout (the worktree the handoff is written from).
+const where = { path: sh("git", ["rev-parse", "--show-toplevel"]).trim(), branch: sh("git", ["branch", "--show-current"]).trim() || null };
+const problems = [...missingRefs({ prs, worktrees, branches, repo }), ...nextStepProblems({ task: opt("task"), next: opt("next"), where })];
 const md = renderHandoff({
   now: new Date().toISOString().replace(/\.\d+Z$/, "Z"),
   repo,
   task: opt("task"),
   next: opt("next"),
+  where,
   prs,
   worktrees,
   problems,
