@@ -11,11 +11,10 @@
     },
     {
       "id": "github-private-reporting",
-      "status": "off",
+      "status": "on",
       "how": "GitHub private vulnerability reporting (Security -> Advisories -> Report a vulnerability).",
       "url": "https://github.com/talstilkol/lumen-md/security/advisories/new",
-      "evidence": "GET repos/talstilkol/lumen-md/private-vulnerability-reporting -> {\"enabled\":false} (2026-11-14)",
-      "owner": "gh api -X PUT repos/talstilkol/lumen-md/private-vulnerability-reporting"
+      "evidence": "OWNER: fill in after the PUT — GET repos/talstilkol/lumen-md/private-vulnerability-reporting -> {\"enabled\":true} (<date>). On 2026-11-16 it was {\"enabled\":false}."
     },
     {
       "id": "security-email",

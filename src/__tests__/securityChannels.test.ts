@@ -33,7 +33,6 @@ describe("vulnerability-reporting channels", () => {
 
   it("no link in SECURITY.md or the outreach pages points to a channel that is off or not created", () => {
     const dead = channels.filter((c) => c.status !== "on" && c.url).map((c) => c.url!);
-    expect(dead.length).toBeGreaterThan(0); // the private-reporting entry is recorded as off
     for (const doc of ["SECURITY.md", ...OTHER_DOCS]) {
       for (const u of links(readFileSync(doc, "utf8"))) expect(dead, `${doc}: ${u}`).not.toContain(u);
     }
@@ -44,9 +43,14 @@ describe("vulnerability-reporting channels", () => {
     for (const u of reportingLinks()) expect(on.has(u), u).toBe(true);
   });
 
-  it("says plainly that GitHub private reporting is not on yet, in English and Hebrew", () => {
-    expect(security).toMatch(/private vulnerability reporting is \*\*not turned on yet\*\*/);
-    expect(security).toContain("**עוד לא מופעל**");
+  it("GitHub private reporting is on and is the first channel, in English and Hebrew (W10.D15, owner turned it on)", () => {
+    const pvr = channels.find((c) => c.id === "github-private-reporting")!;
+    expect(pvr.status).toBe("on");
+    const urls = reportingLinks();
+    expect(urls[0]).toBe(pvr.url);
+    expect(security).toMatch(/private vulnerability reporting is \*\*turned on\*\*/);
+    expect(security).toContain("**מופעל**");
+    expect(security).not.toMatch(/not turned on yet/);
   });
 
   it("each channel that is off or the owner's names the owner's step", () => {
