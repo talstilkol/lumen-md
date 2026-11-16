@@ -41,6 +41,7 @@ import {
 } from "../../scripts/plan/build.mjs";
 // @ts-expect-error — plain .mjs script without type declarations
 import { classify, prOf, migrate } from "../../scripts/plan/migrate-verified.mjs";
+import { WIP_FROZEN_FILE, formatGate, pruned, readFrozen, wipGate } from "../../scripts/plan/wipGate.mjs";
 
 const ROOT = resolve(__dirname, "..", "..");
 const plan = () => JSON.parse(readFileSync(join(ROOT, "plan/plan.json"), "utf8"));
@@ -407,7 +408,52 @@ describe("work-in-progress limit (plan W6.39)", () => {
     expect(wipWarnings(verified, { limit: 0 })).toEqual([]);
   });
 
-  it("run() reports the warnings; the CLI only warns unless --wip-strict", () => {
+  it("the gate blocks a task that starts in a frozen wave; the frozen list only shrinks (W6.39)", () => {
+    const started = mini(w1, [{ id: "W2.1", status: "⏳ #9" }, { id: "W2.2" }]);
+    const warnings = wipWarnings(started, { limit: 1 });
+    // The debt it inherited passes; nothing frozen (or no file) exempts nothing.
+    expect(wipGate(warnings, { started: ["W2.1"] })).toEqual({ blocked: [], stale: [] });
+    expect(wipGate(warnings, null).blocked).toEqual([{ id: "W2.1", wave: 1, next: 2 }]);
+    expect(wipGate(warnings, { started: "W2.1" }).blocked).toHaveLength(1);
+    // A second task of wave 2 starts: blocked, with the way out in the message.
+    const more = wipWarnings(mini(w1, [{ id: "W2.1", status: "⏳ #9" }, { id: "W2.2", status: "⏳ #10" }]), { limit: 1 });
+    const g = wipGate(more, { started: ["W2.1"] });
+    expect(g.blocked).toEqual([{ id: "W2.2", wave: 1, next: 2 }]);
+    expect(formatGate(g)[0]).toBe('plan: WIP gate (W6.39) — W2.2 of wave 2 started while wave 1 is over its work-in-progress limit. Verify wave 1 first, or set W2.2 back to "⏳ גל 2 — לא התחיל".');
+    // A placeholder is not a start: inserting planned tasks stays allowed.
+    expect(wipGate(wipWarnings(mini(w1, [{ id: "W2.1", status: "⏳ #9" }, { id: "W2.3", status: "⏳ גל 2 — לא התחיל" }]), { limit: 1 }), { started: ["W2.1"] }).blocked).toEqual([]);
+    // Wave 1 verified: W2.1 no longer needs the exemption, and keeping it fails until --prune drops it.
+    const verified = wipWarnings(mini(w1.map((t) => (t.status?.startsWith("⏳") ? { ...t, verified: "browser" } : t)), [{ id: "W2.1", status: "⏳" }]), { limit: 1 });
+    const s = wipGate(verified, { started: ["W2.1", "W9.9"] });
+    expect(s).toEqual({ blocked: [], stale: ["W2.1", "W9.9"] });
+    expect(formatGate(s)).toHaveLength(1);
+    expect(pruned({ note: "n", started: ["W2.1", "W2.5", "W9.9"] }, s.stale)).toEqual({ note: "n", started: ["W2.5"] });
+  });
+
+  it("plan:check fails with no flag when a new task starts in a frozen wave, and the checked-in list has no stale id", () => {
+    const frozen = readFrozen(ROOT);
+    expect(Array.isArray(frozen.started)).toBe(true);
+    expect(run({ root: ROOT, check: true }).gate).toEqual({ blocked: [], stale: [] });
+    // A copy of the real plan where one not-started task of a frozen wave gets a PR.
+    const dir = copy("wipgate");
+    cpSync(join(ROOT, WIP_FROZEN_FILE), join(dir, WIP_FROZEN_FILE));
+    const p = plan();
+    const live = new Set(wipWarnings(p).map((w) => w.next));
+    const phase = p.phases.find((ph: { title: string; tasks: Task[] }) => live.has(waveNumber(ph.title)) && ph.tasks.some((t) => !frozen.started.includes(t.id)));
+    const fresh: Task = phase.tasks.find((t: Task) => !frozen.started.includes(t.id));
+    fresh.status = "⏳ #99999 started anyway";
+    writeFileSync(join(dir, "plan/plan.json"), JSON.stringify(p, null, 1));
+    const { gate } = run({ root: dir, check: true });
+    expect(gate.blocked.map((b: { id: string }) => b.id)).toEqual([fresh.id]);
+    // Without the frozen file nothing is exempt (fail closed).
+    rmSync(join(dir, WIP_FROZEN_FILE));
+    expect(run({ root: dir, check: true }).gate.blocked.length).toBe(frozen.started.length + 1);
+    // The CLI on the real plan: the gate uses the plan's own limit, so --wip-limit 0 still only warns.
+    const cli = spawnSync(process.execPath, [join(ROOT, "scripts/plan/wipGate.mjs")], { cwd: ROOT, encoding: "utf8" });
+    expect(cli.status).toBe(0);
+  });
+
+  it("run() reports the warnings; past the gate, the CLI only warns unless --wip-strict", () => {
     const p = plan();
     expect(run({ root: ROOT, check: true, wipLimit: 3 }).wip).toEqual(wipWarnings(p, { limit: 3 }));
     const cli = (...args: string[]) => spawnSync(process.execPath, [join(ROOT, "scripts/plan/build.mjs"), "--check", ...args], { cwd: ROOT, encoding: "utf8" });
