@@ -16,11 +16,13 @@
  *                            a ✅ task the latest audit did not call DONE (W10.B12, auditGuard.mjs),
  *                            a ✅ is verified below `browser` (W10.G8), or a
  *                            status is longer than STATUS_MAX (W10.G7);
- *                            warns when a wave is over its work-in-progress limit
- *                            while the next wave has started (plan W6.39, below)
- *   npm run plan:check -- --wip-strict      any WIP warning fails the check (without it, a task that
- *                                           starts in a frozen wave fails it: scripts/plan/wipGate.mjs)
- *   npm run plan:check -- --wip-limit 8     another limit than plan.schedule.wipLimit / WIP_LIMIT
+ *                            or a wave is over its work-in-progress limit while
+ *                            the next wave has started and no written decision in
+ *                            plan.schedule.wipDecisions freezes it (plan W6.39,
+ *                            strict by default since W10.G6: scripts/plan/wipDecisions.mjs),
+ *                            or a task starts in a frozen wave (scripts/plan/wipGate.mjs)
+ *   npm run plan:check -- --wip-limit 3     a lower limit than plan.schedule.wipLimit / WIP_LIMIT (never a higher one)
+ *   npm run plan:check -- --wip-strict      accepted, and the default: there is no flag that only warns
  *   npm run plan -- --hours  also print actual hours per task branch (git)
  *
  * The scheduler started as a port of the earlier Python generator (plan5.py
@@ -45,6 +47,7 @@ import { RECEIPTS_FILE, checkReceiptClaims } from "./receiptLevels.mjs";
 import { AREAS_FILE, checkAreas } from "./areas.mjs";
 import { formatGate, readFrozen, wipGate } from "./wipGate.mjs";
 import { checkOriginClaims } from "../golden/origin-claims.mjs";
+import { lowerOnlyLimit, wipDecisionProblems } from "./wipDecisions.mjs";
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 export const PLAN_FILE = "plan/plan.json";
@@ -910,6 +913,7 @@ export function formatWip(w) {
 
 export function run({ root = ROOT, check = false, wipLimit, strictReceipts = false } = {}) {
   const plan = JSON.parse(readFileSync(join(root, PLAN_FILE), "utf8"));
+  const limit = lowerOnlyLimit(wipLimit, Number.isInteger(plan.schedule?.wipLimit) ? plan.schedule.wipLimit : WIP_LIMIT);
   // Plan 0.7: no ✅ without the commands that prove it.
   // W11.I18: a ✅ that rests on an eval cites a complete public or held-out card.
   const dodProblems = [...checkDod(plan), ...checkEvalClaims(plan, (p) => JSON.parse(readFileSync(join(root, p), "utf8")))];
@@ -963,16 +967,16 @@ export function run({ root = ROOT, check = false, wipLimit, strictReceipts = fal
     if (htmlNow !== wantHtml) writeFileSync(htmlPath, wantHtml);
     if (stale.includes(ROADMAP_FILE)) writeFileSync(roadmapPath, wantRoadmap);
   }
-  // W6.39: the gate holds at the plan's own limit; --wip-limit only changes the warnings.
-  return { M, stale, wip: wipWarnings(plan, { limit: wipLimit }), gate: wipGate(wipWarnings(plan), readFrozen(root)) };
+  // W6.39: the frozen-wave gate holds at the plan's own limit; W10.G6: the written decisions are checked at `limit` (never above the plan's).
+  const wip = wipWarnings(plan, { limit });
+  return { M, stale, wip, wipProblems: wipDecisionProblems(plan, wip), gate: wipGate(wipWarnings(plan), readFrozen(root)) };
 }
 
 function main(argv) {
   const check = argv.includes("--check");
   const at = argv.indexOf("--wip-limit");
-  const wipLimit = at >= 0 ? Number(argv[at + 1]) : undefined;
-  if (at >= 0 && !(Number.isInteger(wipLimit) && wipLimit >= 0)) throw new Error(`plan: --wip-limit takes a whole number, not ${JSON.stringify(argv[at + 1])}`);
-  const { M, stale, wip, gate } = run({ check, wipLimit, strictReceipts: argv.includes("--strict-receipts") });
+  const wipLimit = at >= 0 ? (/^\d+$/.test(argv[at + 1] ?? "") ? Number(argv[at + 1]) : argv[at + 1] ?? null) : undefined;
+  const { M, stale, wip, wipProblems, gate } = run({ check, wipLimit, strictReceipts: argv.includes("--strict-receipts") });
   if (M.MANUAL_LEVELS.length) console.error(`plan: ${M.MANUAL_LEVELS.length} level(s) above what the signed receipts prove (W10.G9; --strict-receipts fails on them): ${M.MANUAL_LEVELS.slice(0, 8).join(", ")}${M.MANUAL_LEVELS.length > 8 ? " …" : ""}`);
   const P0 = M.agent.filter((t) => t.eff === "P0").length;
   const levels = [...VERIFIED_LEVELS.map((k) => `${k} ${M.VERIFIED[k]}`), ...(M.VERIFIED.none ? [`unset ${M.VERIFIED.none}`] : [])].join(", ");
@@ -983,8 +987,9 @@ function main(argv) {
   }
   if (check) {
     for (const w of wip) console.error(formatWip(w));
-    if (wip.length && argv.includes("--wip-strict")) {
-      console.error(`plan: ${wip.length} wave${wip.length > 1 ? "s" : ""} over the work-in-progress limit (--wip-strict).`);
+    // W10.G6: strict by default. A wave over its limit passes only with a written decision that freezes it.
+    if (wipProblems.length) {
+      console.error(`plan: work-in-progress limit (W6.39, strict by default — W10.G6) —\n  ${wipProblems.join("\n  ")}`);
       return 1;
     }
     const gateLines = formatGate(gate);

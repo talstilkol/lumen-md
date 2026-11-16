@@ -42,6 +42,8 @@ import {
 // @ts-expect-error — plain .mjs script without type declarations
 import { classify, prOf, migrate } from "../../scripts/plan/migrate-verified.mjs";
 import { WIP_FROZEN_FILE, formatGate, pruned, readFrozen, wipGate } from "../../scripts/plan/wipGate.mjs";
+// @ts-expect-error — plain .mjs script without type declarations
+import { lowerOnlyLimit, wipDecisionProblems } from "../../scripts/plan/wipDecisions.mjs";
 
 const ROOT = resolve(__dirname, "..", "..");
 const plan = () => JSON.parse(readFileSync(join(ROOT, "plan/plan.json"), "utf8"));
@@ -467,15 +469,22 @@ describe("work-in-progress limit (plan W6.39)", () => {
     expect(cli.status).toBe(0);
   });
 
-  it("run() reports the warnings; past the gate, the CLI only warns unless --wip-strict", () => {
+  it("run() reports the warnings and their problems; the CLI fails on them with no flag (W10.G6)", () => {
     const p = plan();
-    expect(run({ root: ROOT, check: true, wipLimit: 3 }).wip).toEqual(wipWarnings(p, { limit: 3 }));
+    const r = run({ root: ROOT, check: true, wipLimit: 3 });
+    expect(r.wip).toEqual(wipWarnings(p, { limit: 3 }));
+    expect(r.wipProblems).toEqual(wipDecisionProblems(p, r.wip));
     const cli = (...args: string[]) => spawnSync(process.execPath, [join(ROOT, "scripts/plan/build.mjs"), "--check", ...args], { cwd: ROOT, encoding: "utf8" });
-    const loose = cli("--wip-limit", "0");
-    expect(loose.status).toBe(0);
-    expect(loose.stderr.split("\n").filter((l) => l.startsWith("plan: WIP")).length).toBe(wipWarnings(p, { limit: 0 }).length);
-    expect(cli("--wip-limit", "0", "--wip-strict").status).toBe(wipWarnings(p, { limit: 0 }).length ? 1 : 0);
-    expect(cli("--wip-limit", "100000", "--wip-strict").status).toBe(0);
+    const red = wipDecisionProblems(p, wipWarnings(p)).length ? 1 : 0;
+    expect(cli().status).toBe(red);
+    expect(cli("--wip-strict").status).toBe(red);
+    const low = cli("--wip-limit", "0");
+    expect(low.status).toBe(wipDecisionProblems(p, wipWarnings(p, { limit: 0 })).length ? 1 : 0);
+    expect(low.stderr.split("\n").filter((l) => l.startsWith("plan: WIP")).length).toBe(wipWarnings(p, { limit: 0 }).length);
+    // --wip-limit only lowers the limit: a higher one is refused, never read.
+    const high = cli("--wip-limit", "100000");
+    expect(high.status).toBe(1);
+    expect(high.stderr).toMatch(/can only lower it/);
     expect(cli("--wip-limit", "x").status).toBe(1);
   });
 });
@@ -543,15 +552,72 @@ describe("work-in-progress limit (plan W6.39)", () => {
     expect(wipWarnings({ schedule: {}, phases: [wave(1, w1), part([{ id: "R1.1", status: "⏳ #7" }])] }, { limit: 0 })).toEqual([]);
   });
 
-  it("run() reports the warnings; the CLI only warns unless --wip-strict", () => {
+  it("run() reports the warnings and their problems; the CLI fails on them with no flag (W10.G6)", () => {
     const p = plan();
-    expect(run({ root: ROOT, check: true, wipLimit: 3 }).wip).toEqual(wipWarnings(p, { limit: 3 }));
+    const r = run({ root: ROOT, check: true, wipLimit: 3 });
+    expect(r.wip).toEqual(wipWarnings(p, { limit: 3 }));
+    expect(r.wipProblems).toEqual(wipDecisionProblems(p, r.wip));
     const cli = (...args: string[]) => spawnSync(process.execPath, [join(ROOT, "scripts/plan/build.mjs"), "--check", ...args], { cwd: ROOT, encoding: "utf8" });
-    const loose = cli("--wip-limit", "0");
-    expect(loose.status).toBe(0);
-    expect(loose.stderr.split("\n").filter((l) => l.startsWith("plan: WIP")).length).toBe(wipWarnings(p, { limit: 0 }).length);
-    expect(cli("--wip-limit", "0", "--wip-strict").status).toBe(wipWarnings(p, { limit: 0 }).length ? 1 : 0);
-    expect(cli("--wip-limit", "100000", "--wip-strict").status).toBe(0);
+    const red = wipDecisionProblems(p, wipWarnings(p)).length ? 1 : 0;
+    expect(cli().status).toBe(red);
+    expect(cli("--wip-strict").status).toBe(red);
+    const low = cli("--wip-limit", "0");
+    expect(low.status).toBe(wipDecisionProblems(p, wipWarnings(p, { limit: 0 })).length ? 1 : 0);
+    expect(low.stderr.split("\n").filter((l) => l.startsWith("plan: WIP")).length).toBe(wipWarnings(p, { limit: 0 }).length);
+    // --wip-limit only lowers the limit: a higher one is refused, never read.
+    const high = cli("--wip-limit", "100000");
+    expect(high.status).toBe(1);
+    expect(high.stderr).toMatch(/can only lower it/);
     expect(cli("--wip-limit", "x").status).toBe(1);
+  });
+});
+
+describe("work in progress: strict by default, a written decision only freezes (W10.G6)", () => {
+  const wave = (n: number, tasks: object[]) => ({ title: `גל ${n} — x`, tasks });
+  const open = (n: number) => Array.from({ length: n }, (_, i) => ({ id: `W1.${i}`, status: "⏳ #1", verified: "built" }));
+  const at = (w1: object[], w2: object[], wipDecisions?: object[]) => ({ schedule: wipDecisions ? { wipDecisions } : {}, phases: [wave(1, w1), wave(2, w2)] });
+  const started = [{ id: "W2.1", status: "⏳ #9 בעבודה" }];
+  const d = (o: object = {}) => ({ wave: 1, next: 2, open: 6, started: 1, at: "2026-11-16", decision: "written down", ...o });
+  const problems = (p: ReturnType<typeof at>) => wipDecisionProblems(p, wipWarnings(p));
+
+  it("a wave over its limit with the next one started fails without a decision", () => {
+    expect(problems(at(open(6), started))).toEqual([expect.stringMatching(/wave 1 is over its WIP limit while wave 2 has started/)]);
+    expect(problems(at(open(5), started))).toEqual([]);
+    expect(problems(at(open(6), [{ id: "W2.1", status: "⏳ גל 2 — לא התחיל" }]))).toEqual([]);
+  });
+
+  it("a decision passes only at its frozen numbers: growth fails, and so does a decision left looser than the plan", () => {
+    expect(problems(at(open(6), started, [d()]))).toEqual([]);
+    expect(problems(at(open(7), started, [d()]))[0]).toMatch(/7 open tasks below browser, more than the 6/);
+    expect(problems(at(open(6), [...started, { id: "W2.2", status: "⏳ #10" }], [d()]))[0]).toMatch(/2 started tasks, more than the 1/);
+    expect(problems(at(open(6), started, [d({ open: 8 })]))[0]).toMatch(/lower "open" from 8 to 6/);
+    expect(problems(at(open(6), started, [d({ started: 3 })]))[0]).toMatch(/lower "started" from 3 to 1/);
+    expect(problems(at(open(5), started, [d()]))[0]).toMatch(/no longer over its WIP limit — remove the decision/);
+  });
+
+  it("a decision is written down and dated, once per wave pair", () => {
+    expect(problems(at(open(6), started, [d({ decision: " " })]))[0]).toMatch(/not written down/);
+    expect(problems(at(open(6), started, [d({ at: "16.11" })]))[0]).toMatch(/"at" is the date/);
+    expect(problems(at(open(6), started, [d(), d()]))).toContainEqual(expect.stringMatching(/listed twice/));
+    expect(problems(at(open(6), started, [d({ open: "6" })]))[0]).toMatch(/whole numbers/);
+  });
+
+  it("the repo's own plan passes the strict rule: every wave over its limit has a dated, written decision at today's numbers (D1, 16.11)", () => {
+    const p = plan();
+    expect(wipDecisionProblems(p, wipWarnings(p))).toEqual([]);
+    const ds = p.schedule.wipDecisions as Array<{ wave: number; next: number; decision: string }>;
+    expect(ds.map((d) => `${d.wave}→${d.next}`)).toEqual(wipWarnings(p).map((w: { wave: number; next: number }) => `${w.wave}→${w.next}`));
+    for (const d of ds) expect(d.decision).toMatch(/delegation of 16\.11\.2026 21:53/);
+    // Wave 13 stays unstarted (decision §1b): no decision lets it start while wave 12 is over its limit.
+    expect(ds.some((d) => d.next === 13)).toBe(false);
+  });
+
+  it("--wip-limit can lower the limit, never raise it", () => {
+    expect(lowerOnlyLimit(undefined, 5)).toBeUndefined();
+    expect(lowerOnlyLimit(0, 5)).toBe(0);
+    expect(lowerOnlyLimit(5, 5)).toBe(5);
+    expect(() => lowerOnlyLimit(6, 5)).toThrow(/can only lower it/);
+    expect(() => lowerOnlyLimit("x", 5)).toThrow(/whole number/);
+    expect(() => lowerOnlyLimit(-1, 5)).toThrow(/whole number/);
   });
 });

@@ -42,7 +42,89 @@
   "cutLineExempt": [
    "13.6"
   ],
-  "releaseTask": "13.5"
+  "releaseTask": "13.5",
+  "wipDecisions": [
+   {
+    "wave": 1,
+    "next": 2,
+    "open": 24,
+    "started": 25,
+    "at": "2026-11-16",
+    "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 1's 24 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 2's 25 started tasks keep going, but nothing grows: no new start in wave 2 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 1 is verified."
+   },
+   {
+    "wave": 2,
+    "next": 3,
+    "open": 19,
+    "started": 11,
+    "at": "2026-11-16",
+    "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 2's 19 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 3's 11 started tasks keep going, but nothing grows: no new start in wave 3 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 2 is verified."
+   },
+   {
+    "wave": 3,
+    "next": 4,
+    "open": 11,
+    "started": 36,
+    "at": "2026-11-16",
+    "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 3's 11 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 4's 36 started tasks keep going, but nothing grows: no new start in wave 4 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 3 is verified."
+   },
+   {
+    "wave": 4,
+    "next": 5,
+    "open": 30,
+    "started": 28,
+    "at": "2026-11-16",
+    "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 4's 30 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 5's 28 started tasks keep going, but nothing grows: no new start in wave 5 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 4 is verified."
+   },
+   {
+    "wave": 5,
+    "next": 6,
+    "open": 22,
+    "started": 46,
+    "at": "2026-11-16",
+    "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 5's 22 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 6's 46 started tasks keep going, but nothing grows: no new start in wave 6 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 5 is verified."
+   },
+   {
+    "wave": 6,
+    "next": 7,
+    "open": 41,
+    "started": 25,
+    "at": "2026-11-16",
+    "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 6's 41 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 7's 25 started tasks keep going, but nothing grows: no new start in wave 7 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 6 is verified."
+   },
+   {
+    "wave": 7,
+    "next": 8,
+    "open": 25,
+    "started": 12,
+    "at": "2026-11-16",
+    "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 7's 25 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 8's 12 started tasks keep going, but nothing grows: no new start in wave 8 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 7 is verified."
+   },
+   {
+    "wave": 8,
+    "next": 9,
+    "open": 11,
+    "started": 3,
+    "at": "2026-11-16",
+    "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 8's 11 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 9's 3 started tasks keep going, but nothing grows: no new start in wave 9 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 8 is verified."
+   },
+   {
+    "wave": 10,
+    "next": 11,
+    "open": 241,
+    "started": 92,
+    "at": "2026-11-16",
+    "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 10's 241 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 11's 92 started tasks keep going, but nothing grows: no new start in wave 11 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 10 is verified."
+   },
+   {
+    "wave": 11,
+    "next": 12,
+    "open": 118,
+    "started": 78,
+    "at": "2026-11-16",
+    "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 11's 118 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 12's 78 started tasks keep going, but nothing grows: no new start in wave 12 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 11 is verified."
+   }
+  ]
  },
  "milestones": [
   {
