@@ -303,6 +303,7 @@
   "vault.folder.moved": "Le coffre est maintenant dans le dossier « {folder} » : {n} fichiers copiés et vérifiés. Vos notes du stockage du navigateur n'ont pas été supprimées.",
   "vault.folder.movedBack": "Le coffre est de retour dans le stockage du navigateur : {n} fichiers copiés et vérifiés. Le dossier « {folder} » n'a pas été modifié.",
   "vault.folder.moving": "Déplacement du coffre… {done} sur {total} fichiers",
+  "vault.folder.nestingUnknown": "Le coffre n'a pas été déplacé : Lumen n'a pas pu vérifier sur le disque si l'un des dossiers se trouve dans l'autre. Mettez Lumen à jour et réessayez.",
   "vault.folder.opened": "Lumen travaille maintenant dans le dossier « {folder} ». Les notes du stockage du navigateur restent où elles sont.",
   "vault.folder.permissionDenied": "Lumen n'a pas obtenu l'autorisation de modifier le dossier « {folder} ».",
   "vault.folder.reconnect": "Reconnecter le dossier",

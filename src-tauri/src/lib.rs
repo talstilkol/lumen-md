@@ -213,7 +213,8 @@ mod desktop_vault {
     /// Is one granted vault folder the other or inside it, on disk (realpath and, on Unix, the
     /// inode; R8b-L1)? Only folders the dialog granted, so the page learns nothing about other paths.
     /// Needs its entry in src-tauri/isolation/index.js (owner) before the page can call it; until
-    /// then the page's spelling check (moveCheck.ts desktopRootsNested) is the one that runs.
+    /// then the page gets no answer and refuses every desktop-to-desktop move it can't rule out by
+    /// spelling (moveCheck.ts desktopRootsNestedOnDisk fails closed; review 9, L7).
     #[tauri::command]
     pub fn vault_roots_nested(state: State<VaultState>, a: String, b: String) -> Result<bool, String> {
         let g = lock(&state)?;

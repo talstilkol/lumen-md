@@ -36,10 +36,15 @@ fn same_dir(a: &Path, b: &Path) -> bool {
 pub fn inside(outer: &Path, inner: &Path) -> io::Result<bool> {
     let o = std::fs::canonicalize(outer)?;
     let i = std::fs::canonicalize(inner)?;
-    if i.starts_with(&o) {
-        return Ok(true);
-    }
-    Ok(i.ancestors().any(|a| same_dir(a, &o)))
+    Ok(inside_canonical(&o, &i, same_dir))
+}
+
+/// The decision on two canonical paths: a component prefix, or else any ancestor of `i` (itself
+/// included) that `same` says is the directory `o`. On Unix `same` compares device and inode, so a
+/// folder reached by two canonical spellings (a bind mount, a case-insensitive volume, a hard link
+/// where the file system allows one) is still seen (review 9, L6: this branch is tested on its own).
+fn inside_canonical(o: &Path, i: &Path, same: impl Fn(&Path, &Path) -> bool) -> bool {
+    i.starts_with(o) || i.ancestors().any(|a| same(a, o))
 }
 
 /// One folder is the other or inside it: moving the vault there would copy it into itself.
@@ -114,6 +119,45 @@ mod tests {
             std::fs::create_dir_all(&nfd).unwrap();
         }
         assert_eq!(roots_nested(&nfc, &nfd).unwrap(), one_folder);
+        let _ = std::fs::remove_dir_all(&base);
+    }
+
+    /// Review 9, L6: the inode branch. Two canonical spellings of one folder (what a bind mount or a
+    /// case-insensitive volume gives) are nested when the identity check says they are the same
+    /// directory, at the folder itself or at any ancestor; never through a shared name prefix.
+    #[test]
+    fn the_identity_branch_finds_one_folder_under_two_canonical_spellings() {
+        let o = Path::new("/mnt/bind/Vault");
+        let alias = Path::new("/home/u/Vault");
+        let same = |a: &Path, b: &Path| a == b || (a == alias && b == o) || (a == o && b == alias);
+        // no shared prefix: only the identity check can see these
+        assert!(!Path::new("/home/u/Vault/sub/deeper").starts_with(o));
+        assert!(inside_canonical(o, Path::new("/home/u/Vault/sub/deeper"), same));
+        assert!(inside_canonical(o, alias, same));
+        assert!(!inside_canonical(o, Path::new("/home/u/Vault2/sub"), same), "a prefix of the name is not the folder");
+        assert!(!inside_canonical(o, Path::new("/home/u"), same), "the folder that holds the alias is not inside it");
+        // without the identity, only the prefix speaks
+        let never = |_: &Path, _: &Path| false;
+        assert!(!inside_canonical(o, Path::new("/home/u/Vault/sub"), never));
+        assert!(inside_canonical(o, Path::new("/mnt/bind/Vault/sub"), never));
+    }
+
+    /// The identity itself: one directory by two paths is the same (device, inode); two directories
+    /// are not, and a missing path is never the same as anything.
+    #[cfg(unix)]
+    #[test]
+    fn same_dir_compares_the_directory_not_the_spelling() {
+        let base = tmp("ino");
+        let real = base.join("Real");
+        std::fs::create_dir_all(real.join("sub")).unwrap();
+        let link = base.join("Link");
+        std::os::unix::fs::symlink(&real, &link).unwrap();
+        assert!(same_dir(&real, &link), "metadata follows the link: one directory");
+        assert!(same_dir(&real.join("sub").join(".."), &real));
+        assert!(!same_dir(&real, &real.join("sub")));
+        assert!(!same_dir(&real, &base.join("missing")));
+        // the walk with the real identity over a non-canonical spelling finds it too
+        assert!(inside_canonical(&real, &link.join("sub"), same_dir));
         let _ = std::fs::remove_dir_all(&base);
     }
 

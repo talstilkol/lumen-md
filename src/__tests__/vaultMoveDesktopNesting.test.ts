@@ -7,7 +7,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createMemoryBackend, setVaultBackend } from "../storage/vault";
 import { __resetVaultLocation, __setDesktopInvoke, __setLocationStore, getPendingMove, moveVault, type StoredLocation } from "../storage/vault/location";
-import { desktopRootKey, desktopRootsNested, desktopRootsNestedOnDisk } from "../storage/vault/moveCheck";
+import { desktopRootKey, desktopRootsNested, desktopRootsNestedOnDisk, VaultNestingUnknownError } from "../storage/vault/moveCheck";
 
 describe("desktop vault roots", () => {
   it("one spelling per folder: separators, dots, and case where the file system ignores it", () => {
@@ -66,9 +66,11 @@ describe("desktop vault roots", () => {
     expect(await desktopRootsNestedOnDisk("/tmp/Vault", "/private/tmp/Vault/sub", disk(true))).toBe(true);
     expect(asked).toEqual([["vault_roots_nested", { a: "/tmp/Vault", b: "/private/tmp/Vault/sub" }]]);
     expect(await desktopRootsNestedOnDisk("/a/Vault", "/a/Other", disk(false))).toBe(false);
-    // Not allowed by the isolation app yet, or an older app: no answer, the spelling check stands.
-    expect(await desktopRootsNestedOnDisk("/a/Vault", "/a/Other", disk(new Error("vault_roots_nested is not allowed from the webview")))).toBe(false);
-    expect(await desktopRootsNestedOnDisk("/a/Vault", "/a/Other", disk("yes"))).toBe(false);
+    // Not allowed by the isolation app yet, an older app, or a non-boolean answer: unknown, so the
+    // move is refused (review 9, L7: the spelling alone can miss a nesting the disk would see).
+    await expect(desktopRootsNestedOnDisk("/a/Vault", "/a/Other", disk(new Error("vault_roots_nested is not allowed from the webview")))).rejects.toThrow(VaultNestingUnknownError);
+    await expect(desktopRootsNestedOnDisk("/a/Vault", "/a/Other", disk(new Error("not allowed")))).rejects.toThrow(/could not check on disk .*\(not allowed\), so the vault was not moved/);
+    for (const odd of ["yes", null, undefined, 1]) await expect(desktopRootsNestedOnDisk("/a/Vault", "/a/Other", disk(odd))).rejects.toThrow(VaultNestingUnknownError);
     asked.length = 0;
     expect(await desktopRootsNestedOnDisk("/a/Vault", "/a/Vault/sub", disk(false))).toBe(true);
     expect(asked).toEqual([]); // the spelling already says nested: the disk is not asked
@@ -113,5 +115,13 @@ describe("moving a desktop vault", () => {
     await expect(moveVault(at("/private/tmp/Vault/sub"), { from: at("/tmp/Vault") })).rejects.toThrow(/inside itself|contains it/);
     expect(calls).toContain("vault_roots_nested");
     expect(calls.filter((c) => /write|mkdir|copy|use/.test(c))).toEqual([]);
+  });
+
+  it("refuses, before writing, a move the disk can't judge (review 9, L7: fail closed)", async () => {
+    // the default invoke of this suite answers null for every command: no answer about nesting
+    await expect(moveVault(at("/a/Other"), { from: at("/a/Vault") })).rejects.toThrow(VaultNestingUnknownError);
+    expect(calls).toContain("vault_roots_nested");
+    expect(calls.filter((c) => /write|mkdir|copy|use/.test(c))).toEqual([]);
+    expect(getPendingMove()).toBeNull();
   });
 });

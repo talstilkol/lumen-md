@@ -303,6 +303,7 @@
   "vault.folder.moved": "أصبحت الخزنة الآن في المجلد «{folder}»: نُسخ {n} ملفات وتم التحقق منها. لم تُحذف ملاحظاتك في تخزين المتصفح.",
   "vault.folder.movedBack": "عادت الخزنة إلى تخزين المتصفح: نُسخ {n} ملفات وتم التحقق منها. لم يتغير المجلد «{folder}».",
   "vault.folder.moving": "جارٍ نقل الخزنة… {done} من {total} ملفات",
+  "vault.folder.nestingUnknown": "لم تُنقل الخزنة: لم يتمكن Lumen من التحقق على القرص مما إذا كان أحد المجلدين داخل الآخر. حدِّث Lumen وحاول مرة أخرى.",
   "vault.folder.opened": "يعمل Lumen الآن في المجلد «{folder}». تبقى الملاحظات في تخزين المتصفح في مكانها.",
   "vault.folder.permissionDenied": "لم يحصل Lumen على إذن لتعديل المجلد «{folder}».",
   "vault.folder.reconnect": "إعادة الاتصال بالمجلد",
