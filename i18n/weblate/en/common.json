@@ -621,6 +621,7 @@
   "cite.doi.inserted": "Reference inserted (APA 7)",
   "cite.doi.invalid": "Not a DOI: {doi}",
   "cite.doi.notFound": "CrossRef has no record for {doi}",
+  "cite.doi.pending": "Cite from a DOI is off in this version: the CrossRef lookup is waiting for the owner's approval. Nothing was sent.",
   "cite.keys": "Enter [@key] · ⇧Enter @key · Tab locator · Esc",
   "cite.loading": "Reading the library…",
   "cite.locator": "p. 10",

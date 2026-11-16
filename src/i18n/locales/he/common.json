@@ -621,6 +621,7 @@
   "cite.doi.inserted": "המקור הוכנס (APA 7)",
   "cite.doi.invalid": "זה לא DOI: {doi}",
   "cite.doi.notFound": "אין ב-CrossRef רשומה ל-{doi}",
+  "cite.doi.pending": "ציטוט מ-DOI כבוי בגרסה הזו: החיפוש ב-CrossRef ממתין לאישור הבעלים. שום דבר לא נשלח.",
   "cite.keys": "Enter ‏[@key] · ⇧Enter ‏@key · Tab מיקום · Esc",
   "cite.loading": "קורא את הספרייה…",
   "cite.locator": "עמ׳ 10",

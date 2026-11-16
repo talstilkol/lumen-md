@@ -181,8 +181,10 @@ describe("the real policy", () => {
     const origin = "https://lumen-auth.acme.workers.dev";
     const runner = renderHeaderLine(policy, "livejs-runner");
     expect(extendHeadersFileCsp(`  ${runner}`, [origin])).toBe(`  ${runner}`);
-    // Appended at the end of connect-src, after the policy's own last origin (api.crossref.org since #975).
-    expect(addConnectSrc(renderCsp(policy, "app", "cloudflare"), [origin])).toContain(`https://api.crossref.org ${origin};`);
+    // Appended at the end of connect-src, after the policy's own last origin (fonts.gstatic.com: api.crossref.org
+    // is pending the owner's approval, R8-L1).
+    expect(addConnectSrc(renderCsp(policy, "app", "cloudflare"), [origin])).toContain(`https://fonts.gstatic.com ${origin};`);
+    expect(renderCsp(policy, "app", "cloudflare")).not.toContain("api.crossref.org");
   });
 });
 

@@ -621,6 +621,7 @@
   "cite.doi.inserted": "Référence insérée (APA 7)",
   "cite.doi.invalid": "Ce n’est pas un DOI : {doi}",
   "cite.doi.notFound": "CrossRef n’a pas de notice pour {doi}",
+  "cite.doi.pending": "Citer depuis un DOI est désactivé dans cette version : la recherche CrossRef attend l’approbation du responsable du projet. Rien n’a été envoyé.",
   "cite.keys": "Entrée [@key] · ⇧Entrée @key · Tab localisation · Échap",
   "cite.loading": "Lecture de la bibliothèque…",
   "cite.locator": "p. 10",

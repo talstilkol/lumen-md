@@ -59,6 +59,11 @@ after you confirm it, with a key that has write access. If Zotero asks the app t
 
 ## From a DOI
 
+> **Off in this version.** The lookup needs `api.crossref.org` in the app's
+> Content-Security-Policy, and that change is waiting for the owner's approval.
+> Until then the command says so and sends nothing. What follows is how it works
+> once it is on.
+
 **Cite from a DOI (CrossRef)…** in the command palette takes a DOI (`10.…`,
 `doi:…` or a `doi.org` link). After you approve the request, it fills the
 reference from CrossRef's public API: authors, year, title, journal or book,

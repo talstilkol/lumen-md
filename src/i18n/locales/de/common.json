@@ -621,6 +621,7 @@
   "cite.doi.inserted": "Quelle eingefügt (APA 7)",
   "cite.doi.invalid": "Keine DOI: {doi}",
   "cite.doi.notFound": "CrossRef hat keinen Eintrag für {doi}",
+  "cite.doi.pending": "Zitieren aus einer DOI ist in dieser Version aus: Die CrossRef-Suche wartet auf die Freigabe des Projektinhabers. Es wurde nichts gesendet.",
   "cite.keys": "Enter [@key] · ⇧Enter @key · Tab Fundstelle · Esc",
   "cite.loading": "Lese die Bibliothek…",
   "cite.locator": "S. 10",

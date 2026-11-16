@@ -3471,6 +3471,11 @@
       ]
     },
     {
+      "key": "cite.doi.pending",
+      "en": "Cite from a DOI is off in this version: the CrossRef lookup is waiting for the owner's approval. Nothing was sent.",
+      "vars": []
+    },
+    {
       "key": "cite.keys",
       "en": "Enter [@key] · ⇧Enter @key · Tab locator · Esc",
       "vars": []

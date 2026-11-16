@@ -6,7 +6,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { CROSSREF_HOST, DoiNotFoundError, lookupDoi, normalizeDoi, recordFromCrossref, type CrossrefWork } from "../citations/doi";
+import { CROSSREF_HOST, CROSSREF_LOOKUP_ENABLED, DoiLookupPendingError, DoiNotFoundError, lookupDoi, normalizeDoi, recordFromCrossref, type CrossrefWork } from "../citations/doi";
 import { formatReference, runsToMarkdown } from "../data/citationStyles";
 import { classify, blockedByPolicy } from "../ai/privacyLedger";
 import { answerLang, referenceSection } from "../research/references";
@@ -68,7 +68,7 @@ describe("lookupDoi", () => {
   it("asks first; a declined request sends nothing", async () => {
     const fetch = vi.fn();
     const confirm = vi.fn(async () => false);
-    expect(await lookupDoi("10.5555/example.2024.001", { confirm, t, fetch })).toBeNull();
+    expect(await lookupDoi("10.5555/example.2024.001", { confirm, t, fetch, enabled: true })).toBeNull();
     expect(confirm.mock.calls[0][0].message).toContain("10.5555/example.2024.001");
     expect(confirm.mock.calls[0][0].message).toContain(CROSSREF_HOST);
     expect(fetch).not.toHaveBeenCalled();
@@ -76,22 +76,31 @@ describe("lookupDoi", () => {
 
   it("approved: only the DOI goes to CrossRef, and the record comes back filled", async () => {
     const fetch = vi.fn(async () => new Response(JSON.stringify({ status: "ok", message: WORK }), { status: 200 }));
-    const r = await lookupDoi("doi:10.5555/example.2024.001", { confirm: async () => true, t, fetch: fetch as unknown as typeof globalThis.fetch });
+    const r = await lookupDoi("doi:10.5555/example.2024.001", { confirm: async () => true, t, fetch: fetch as unknown as typeof globalThis.fetch, enabled: true });
     expect(fetch).toHaveBeenCalledTimes(1);
     expect((fetch.mock.calls[0] as unknown[])[0]).toBe("https://api.crossref.org/works/10.5555%2Fexample.2024.001");
     expect(r?.title).toBe("Hebrew diacritics in the browser");
     const missing = vi.fn(async () => new Response("Resource not found.", { status: 404 }));
-    await expect(lookupDoi("10.5555/none", { confirm: async () => true, t, fetch: missing as unknown as typeof globalThis.fetch })).rejects.toBeInstanceOf(DoiNotFoundError);
-    await expect(lookupDoi("not a doi", { confirm: async () => true, t, fetch })).rejects.toThrow(/cite\.doi\.invalid/);
+    await expect(lookupDoi("10.5555/none", { confirm: async () => true, t, fetch: missing as unknown as typeof globalThis.fetch, enabled: true })).rejects.toBeInstanceOf(DoiNotFoundError);
+    await expect(lookupDoi("not a doi", { confirm: async () => true, t, fetch, enabled: true })).rejects.toThrow(/cite\.doi\.invalid/);
   });
 
-  it("goes through the privacy ledger as research, blocked by local-only, and the CSP allows it", () => {
+  it("pending the owner's approval (R8-L1): off, nothing asked or sent, and the CSP does not list the host", async () => {
+    expect(CROSSREF_LOOKUP_ENABLED).toBe(false);
+    const fetch = vi.fn();
+    const confirm = vi.fn(async () => true);
+    await expect(lookupDoi("10.5555/example.2024.001", { confirm, t, fetch })).rejects.toBeInstanceOf(DoiLookupPendingError);
+    expect(confirm).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalled();
+    const policy = JSON.parse(readFileSync(join(__dirname, "../../security/policy.json"), "utf8"));
+    expect(JSON.stringify(policy)).not.toContain("api.crossref.org");
+    expect(readFileSync(join(__dirname, "../../index.html"), "utf8")).not.toContain("api.crossref.org");
+  });
+
+  it("once approved, it goes through the privacy ledger as research, blocked by local-only", () => {
     const c = classify("https://api.crossref.org/works/10.5555%2Fx");
     expect(c).toMatchObject({ host: "api.crossref.org", category: "research" });
     expect(blockedByPolicy("research", "local-only")).toBe(true);
-    const policy = JSON.parse(readFileSync(join(__dirname, "../../security/policy.json"), "utf8"));
-    expect(JSON.stringify(policy)).toContain("https://api.crossref.org");
-    expect(readFileSync(join(__dirname, "../../index.html"), "utf8")).toContain("https://api.crossref.org");
   });
 });
 
