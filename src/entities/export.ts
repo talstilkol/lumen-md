@@ -103,6 +103,28 @@ const xml = (s: string) =>
 /** XML 1.0 forbids most control characters even as references; they are dropped. */
 const xmlText = (s: string) => xml(s.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F￾￿]/g, ""));
 
+/**
+ * GraphML has no list type, so aliases are one string joined by `|`. An
+ * alias that holds `|` or `\` has it escaped with `\`, so the list splits
+ * back exactly (splitGraphMLList); a plain list reads as before.
+ */
+export const joinGraphMLList = (xs: readonly string[]) => xs.map((x) => x.replace(/\\/g, "\\\\").replace(/\|/g, "\\|")).join("|");
+export function splitGraphMLList(s: string): string[] {
+  if (s === "") return [];
+  const out: string[] = [];
+  let cur = "";
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (c === "\\" && i + 1 < s.length) cur += s[++i];
+    else if (c === "|") {
+      out.push(cur);
+      cur = "";
+    } else cur += c;
+  }
+  out.push(cur);
+  return out;
+}
+
 const NODE_KEYS = [
   ["type", "string"],
   ["name", "string"],
@@ -133,12 +155,13 @@ export function toGraphML(g: EntityGraph): string {
   out.push('  <graph id="lumen-entities" edgedefault="directed">');
   const data = (k: string, v: string | number | null | undefined) => (v === null || v === undefined || v === "" ? "" : `<data key="${k}">${xmlText(String(v))}</data>`);
   for (const e of entities) {
-    out.push(`    <node id="${xml(e.id)}">${data("n_type", e.type)}${data("n_name", e.name)}${data("n_aliases", e.aliases.join("|"))}${data("n_schema", TYPE_INFO[e.type].schema)}${data("n_wikidata", e.qid)}</node>`);
+    out.push(`    <node id="${xmlText(e.id)}">${data("n_type", e.type)}${data("n_name", e.name)}${data("n_aliases", joinGraphMLList(e.aliases))}${data("n_schema", TYPE_INFO[e.type].schema)}${data("n_wikidata", e.qid)}</node>`);
   }
   for (const x of edges) {
     const p = x.provenance;
     out.push(
-      `    <edge id="${xml(x.id)}" source="${xml(x.subject)}" target="${xml(x.object)}">` +
+      // Ids go through the same control-character filter as text: XML 1.0 cannot carry them even in an attribute.
+      `    <edge id="${xmlText(x.id)}" source="${xmlText(x.subject)}" target="${xmlText(x.object)}">` +
         data("e_predicate", x.predicate) +
         data("e_wikidataProperty", predicateInfo(x.predicate)?.wikidata) +
         data("e_note", p.note) +
