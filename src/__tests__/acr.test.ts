@@ -17,7 +17,9 @@ async function acr() {
     loadReport(root?: string): { version: string; criteria: Array<{ id: string; level: string; status: string; plan?: unknown }> };
     checkReport(report: unknown, root?: string): string[];
     summary(report: unknown): Record<"A" | "AA", Record<string, number>>;
-    renderPage(report: unknown, lang: "en" | "he", en?: unknown): string;
+    renderPage(report: unknown, lang: "en" | "he", en?: unknown, runs?: Set<string>): string;
+    loadE2eRuns(root?: string): Set<string>;
+    unrunE2e(entry: unknown, runs: Set<string>): string[];
     loadEn(root?: string): EnSource;
     enRows(report: unknown, en: unknown): EnRow[];
     checkEn(report: unknown, en: unknown, root?: string): string[];
@@ -37,6 +39,21 @@ interface EnSource {
 }
 
 describe("the ACR (WCAG 2.2)", () => {
+  it("a status that rests on an e2e spec with no recorded run is marked not yet verified (audit A4)", async () => {
+    const m = await acr();
+    const report = m.loadReport(ROOT);
+    const runs = m.loadE2eRuns(ROOT);
+    const onE2e = report.criteria.filter((c) => c.status !== "not-applicable" && m.unrunE2e(c, runs).length);
+    // No run receipt is committed yet: every criterion with e2e evidence is unverified.
+    expect(onE2e.length).toBeGreaterThan(0);
+    const page = m.renderPage(report, "en", m.loadEn(ROOT), runs);
+    for (const c of onE2e) expect(page).toMatch(new RegExp(`\\[${c.id.replace(/\./g, "\\.")} [^\\]]+\\]\\([^)]+\\) \\| [^|]+ — \\*\\*not yet verified\\*\\*`));
+    // With a passing run of every spec, the mark is gone.
+    const all = new Set([...report.criteria, ...m.loadEn(ROOT).rows].flatMap((c) => (c as { evidence?: string[] }).evidence ?? []));
+    expect(m.renderPage(report, "en", m.loadEn(ROOT), all)).not.toContain("— **not yet verified**");
+    expect(m.renderPage(report, "he", m.loadEn(ROOT), runs)).toContain("עוד לא אומת");
+  });
+
   it("lists all 55 A and AA criteria", async () => {
     const m = await acr();
     expect(m.WCAG22.A.length).toBe(31);
@@ -75,7 +92,7 @@ describe("the ACR (WCAG 2.2)", () => {
     const report = m.loadReport(ROOT);
     for (const lang of ["en", "he"] as const) {
       const page = readFileSync(join(ROOT, m.PAGES[lang]), "utf8");
-      expect(page).toBe(m.renderPage(report, lang, m.loadEn(ROOT)));
+      expect(page).toBe(m.renderPage(report, lang, m.loadEn(ROOT), m.loadE2eRuns(ROOT)));
       for (const id of [...m.WCAG22.A, ...m.WCAG22.AA]) expect(page).toContain(`[${id} `);
       expect(page).toContain("issues/new?template=accessibility.yml");
     }

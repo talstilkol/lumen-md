@@ -16,6 +16,14 @@
  * support"; every partial or unsupported one has a plan; every evidence
  * path exists; the report's version is the app's version.
  *
+ * Audit A4 (round 2): a status that rests on an end-to-end spec is only as
+ * good as a run of that spec. A criterion whose evidence includes an
+ * e2e/*.spec.ts with no passing run recorded in reports/e2e-runs.json (the
+ * receipt the owner's Playwright run writes: { "specs": { "<path>":
+ * { "result": "pass", "at": "<date>", "commit": "<sha>" } } }) is shown as
+ * "not yet verified", in its row, in the summary and in the EN 301 549 rows
+ * that mirror it. No such receipt exists yet, so every one of them is.
+ *
  * W11.Q7: the pages also carry EN 301 549 V4.1.1 clauses 9–11 in the VPAT
  * 2.5 INT structure, from docs/acr/en301549.json plus the WCAG entries
  * (enRows, checkEn): every row has a status, a row that mirrors a WCAG
@@ -29,6 +37,8 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export const SOURCE = "docs/acr/wcag22.json";
 /** W11.Q7: EN 301 549 V4.1.1 clauses 9–11 (VPAT 2.5 INT): the rows that are not a WCAG criterion, and the chapter notes. */
 export const EN_SOURCE = "docs/acr/en301549.json";
+/** The e2e run receipt (written by the owner's Playwright run, never by hand). */
+export const E2E_RUNS = "reports/e2e-runs.json";
 export const PAGES = { en: "docs/src/content/docs/editor/acr.md", he: "docs/src/content/docs/he/editor/acr.md" };
 
 /** WCAG 2.2 level A and AA success criteria (4.1.1 Parsing was removed in 2.2). */
@@ -37,6 +47,10 @@ export const WCAG22 = {
   AA: ["1.2.4", "1.2.5", "1.3.4", "1.3.5", "1.4.3", "1.4.4", "1.4.5", "1.4.10", "1.4.11", "1.4.12", "1.4.13", "2.4.5", "2.4.6", "2.4.7", "2.4.11", "2.5.7", "2.5.8", "3.1.2", "3.2.3", "3.2.4", "3.3.3", "3.3.4", "3.3.8", "4.1.3"],
 };
 export const STATUSES = ["supports", "partially-supports", "does-not-support", "not-applicable"];
+const UNVERIFIED = {
+  en: { mark: "not yet verified", why: (specs) => `Not yet verified: this status rests on ${specs.join(", ")}, which has not run on this version.` },
+  he: { mark: "עוד לא אומת", why: (specs) => `עוד לא אומת: הסטטוס הזה נשען על ${specs.join(", ")}, שעוד לא רץ על הגרסה הזו.` },
+};
 const LABEL = {
   en: { supports: "Supports", "partially-supports": "Partially supports", "does-not-support": "Does not support", "not-applicable": "Not applicable" },
   he: { supports: "נתמך", "partially-supports": "נתמך חלקית", "does-not-support": "לא נתמך", "not-applicable": "לא רלוונטי" },
@@ -44,6 +58,21 @@ const LABEL = {
 
 export function loadReport(root = ROOT) {
   return JSON.parse(readFileSync(join(root, SOURCE), "utf8"));
+}
+
+/** The e2e specs with a passing recorded run (empty when there is no receipt). */
+export function loadE2eRuns(root = ROOT) {
+  const p = join(root, E2E_RUNS);
+  if (!existsSync(p)) return new Set();
+  const specs = JSON.parse(readFileSync(p, "utf8")).specs ?? {};
+  return new Set(Object.entries(specs).filter(([, r]) => r && r.result === "pass").map(([k]) => k));
+}
+
+const isE2e = (e) => /^e2e\/.+\.spec\.[cm]?[jt]sx?$/.test(e);
+
+/** The e2e evidence of an entry that has not run (an empty list: verified, or no e2e evidence). */
+export function unrunE2e(entry, runs) {
+  return (entry?.evidence ?? []).filter((e) => isE2e(e) && !runs.has(e));
 }
 
 export function loadEn(root = ROOT) {
@@ -132,10 +161,11 @@ export function checkReport(report, root = ROOT) {
   return problems;
 }
 
-export function summary(report) {
+export function summary(report, runs = null) {
   const out = {};
   for (const level of ["A", "AA"]) {
     out[level] = Object.fromEntries(STATUSES.map((s) => [s, report.criteria.filter((c) => c.level === level && c.status === s).length]));
+    if (runs) out[level].unverified = report.criteria.filter((c) => c.level === level && c.status !== "not-applicable" && unrunE2e(c, runs).length).length;
   }
   return out;
 }
@@ -143,10 +173,11 @@ export function summary(report) {
 const esc = (s) => s.replace(/\|/g, "\\|").replace(/\n/g, " ");
 
 /** The docs page in one language. */
-export function renderPage(report, lang, en = null) {
+export function renderPage(report, lang, en = null, runs = new Set()) {
   const L = LABEL[lang];
+  const U = UNVERIFIED[lang];
   const he = lang === "he";
-  const s = summary(report);
+  const s = summary(report, runs);
   const order = [...WCAG22.A, ...WCAG22.AA];
   const rows = [...report.criteria].sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
   const lines = [
@@ -163,9 +194,13 @@ export function renderPage(report, lang, en = null) {
     "",
     he ? "## סיכום" : "## Summary",
     "",
-    he ? "| רמה | נתמך | נתמך חלקית | לא נתמך | לא רלוונטי |" : "| Level | Supports | Partially supports | Does not support | Not applicable |",
-    "|---|---|---|---|---|",
-    ...["A", "AA"].map((lv) => `| ${lv} | ${s[lv].supports} | ${s[lv]["partially-supports"]} | ${s[lv]["does-not-support"]} | ${s[lv]["not-applicable"]} |`),
+    he ? "| רמה | נתמך | נתמך חלקית | לא נתמך | לא רלוונטי | מתוכם עוד לא אומתו |" : "| Level | Supports | Partially supports | Does not support | Not applicable | Of which not yet verified |",
+    "|---|---|---|---|---|---|",
+    ...["A", "AA"].map((lv) => `| ${lv} | ${s[lv].supports} | ${s[lv]["partially-supports"]} | ${s[lv]["does-not-support"]} | ${s[lv]["not-applicable"]} | ${s[lv].unverified} |`),
+    "",
+    he
+      ? "**עוד לא אומת:** סטטוס שנשען על בדיקת קצה-לקצה (‏e2e) שעוד לא רצה על הגרסה הזו. הבדיקות כתובות; הן ירוצו במחשב של הבעלים לפני השחרור, והסימון יורד כשהריצה שלהן רשומה (‏`reports/e2e-runs.json`)."
+      : "**Not yet verified:** a status that rests on an end-to-end (e2e) spec that has not run on this version. The specs are written; they run on the owner's machine before the release, and the mark goes when their run is recorded (`reports/e2e-runs.json`).",
     "",
     he ? "## איך נבדק" : "## How it was evaluated",
     "",
@@ -177,7 +212,10 @@ export function renderPage(report, lang, en = null) {
     for (const c of rows.filter((x) => x.level === level)) {
       const link = `[${c.id} ${c.name}](https://www.w3.org/WAI/WCAG22/Understanding/${slug(c.name)})`;
       const plan = c.plan ? ` ${he ? "**תוכנית:**" : "**Plan:**"} ${c.plan[lang]} (${c.plan.target})` : "";
-      lines.push(`| ${link} | ${L[c.status]} | ${esc(c.remarks[lang])}${esc(plan)} |`);
+      const unrun = c.status === "not-applicable" ? [] : unrunE2e(c, runs);
+      const status = unrun.length ? `${L[c.status]} — **${U.mark}**` : L[c.status];
+      const why = unrun.length ? ` ${U.why(unrun)}` : "";
+      lines.push(`| ${link} | ${status} | ${esc(c.remarks[lang])}${esc(plan)}${esc(why)} |`);
     }
     lines.push("");
   }
@@ -189,7 +227,7 @@ export function renderPage(report, lang, en = null) {
   lines.push(he ? "## הוסר ב-WCAG 2.2" : "## Removed in WCAG 2.2", "");
   for (const r of report.removed) lines.push(`- ${r.id} ${r.name}: ${r.note[lang]}`);
   lines.push("");
-  if (en) lines.push(...renderEn(report, en, lang));
+  if (en) lines.push(...renderEn(report, en, lang, runs));
   lines.push(he ? "## פנייה בנושא נגישות" : "## Accessibility contact", "");
   lines.push(
     he
@@ -201,8 +239,10 @@ export function renderPage(report, lang, en = null) {
 }
 
 /** The EN 301 549 V4.1.1 chapters 9–11, VPAT 2.5 INT style. */
-export function renderEn(report, en, lang) {
+export function renderEn(report, en, lang, runs = new Set()) {
   const L = LABEL[lang];
+  const U = UNVERIFIED[lang];
+  const byId = new Map(report.criteria.map((c) => [c.id, c]));
   const he = lang === "he";
   const rows = enRows(report, en);
   const count = (clause) => Object.fromEntries(STATUSES.map((st) => [st, rows.filter((r) => r.clause === clause && r.status === st).length]));
@@ -229,7 +269,10 @@ export function renderEn(report, en, lang) {
       const name = r.wcag ? `${r.id} ${r.name} (WCAG ${r.wcag})` : `${r.id} ${r.name}`;
       const plan = r.plan ? ` ${he ? "**תוכנית:**" : "**Plan:**"} ${r.plan[lang]} (${r.plan.target})` : "";
       const mirrors = r.mirrors ? ` (${he ? "כמו" : "as"} WCAG ${r.mirrors})` : "";
-      out.push(`| ${esc(name)} | ${L[r.status]}${mirrors} | ${esc(r.remarks[lang])}${esc(plan)} |`);
+      const src = r.wcag ? byId.get(r.wcag) : r.mirrors ? byId.get(r.mirrors) : r;
+      const unrun = r.status === "not-applicable" ? [] : [...new Set([...unrunE2e(src, runs), ...unrunE2e(r, runs)])];
+      const mark = unrun.length ? ` — **${U.mark}**` : "";
+      out.push(`| ${esc(name)} | ${L[r.status]}${mirrors}${mark} | ${esc(r.remarks[lang])}${esc(plan)}${unrun.length ? esc(` ${U.why(unrun)}`) : ""} |`);
     }
     out.push("");
   };
@@ -249,13 +292,14 @@ const slug = (name) =>
 function main() {
   const report = loadReport();
   const en = loadEn();
+  const runs = loadE2eRuns();
   const problems = [...checkReport(report), ...checkEn(report, en)];
   for (const p of problems) console.error(`✖ ${p}`);
   if (problems.length) process.exit(1);
   const check = process.argv.includes("--check");
   let stale = 0;
   for (const [lang, rel] of Object.entries(PAGES)) {
-    const want = renderPage(report, lang, en);
+    const want = renderPage(report, lang, en, runs);
     const path = join(ROOT, rel);
     const have = existsSync(path) ? readFileSync(path, "utf8") : null;
     if (have === want) continue;
@@ -269,7 +313,8 @@ function main() {
     }
   }
   if (stale) process.exit(1);
-  const s = summary(report);
+  const s = summary(report, runs);
+  console.error(`✓ ACR: ${s.A.unverified + s.AA.unverified} criteria rest on e2e specs that have not run: marked "not yet verified".`);
   console.error(`✓ ACR: EN 301 549 V4.1.1, ${enRows(report, en).length} rows of clauses 9–11 with a status.`);
   console.error(`✓ ACR: ${report.criteria.length} criteria with a status — A: ${s.A.supports} supports, ${s.A["partially-supports"]} partial, ${s.A["does-not-support"]} not supported; AA: ${s.AA.supports} supports, ${s.AA["partially-supports"]} partial, ${s.AA["does-not-support"]} not supported.`);
 }

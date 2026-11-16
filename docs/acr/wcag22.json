@@ -8,8 +8,8 @@
   ],
   "reviewed": "2026-11-10",
   "method": {
-    "en": "Automated: axe-core on six surfaces in Hebrew and English, light and dark (e2e/a11y.spec.ts); reflow at 320 and 640 px and forced colours (e2e/reflow.spec.ts); spoken announcements (e2e/sr-announce.spec.ts); unit tests of the focus trap, contrast and toasts. Manual: review of each criterion against the app's code and behaviour for this version.",
-    "he": "אוטומטי: axe-core בשישה מסכים בעברית ובאנגלית, בבהיר ובכהה (e2e/a11y.spec.ts); התאמה לרוחב 320 ו-640 פיקסלים וצבעים מאולצים (e2e/reflow.spec.ts); הכרזות קוליות (e2e/sr-announce.spec.ts); בדיקות יחידה של לכידת המיקוד, הניגודיות וההודעות. ידני: סקירה של כל קריטריון מול הקוד וההתנהגות של הגרסה הזו."
+    "en": "Automated: axe-core on six surfaces in Hebrew and English, light and dark (e2e/a11y.spec.ts); reflow at 320 and 640 px and forced colours (e2e/reflow.spec.ts); spoken announcements (e2e/sr-announce.spec.ts); unit tests of the focus trap, contrast and toasts. Manual: review of each criterion against the app's code and behaviour for this version. The end-to-end specs above have not run on this version yet (there is no CI runner; they run on the owner's Mac before the release): every status that rests on one is marked \"not yet verified\" until its run is recorded.",
+    "he": "אוטומטי: axe-core בשישה מסכים בעברית ובאנגלית, בבהיר ובכהה (e2e/a11y.spec.ts); התאמה לרוחב 320 ו-640 פיקסלים וצבעים מאולצים (e2e/reflow.spec.ts); הכרזות קוליות (e2e/sr-announce.spec.ts); בדיקות יחידה של לכידת המיקוד, הניגודיות וההודעות. ידני: סקירה של כל קריטריון מול הקוד וההתנהגות של הגרסה הזו. בדיקות הקצה-לקצה שלמעלה עוד לא רצו על הגרסה הזו (אין שרת CI; הן ירוצו במחשב ה-Mac של הבעלים לפני השחרור): כל סטטוס שנשען על אחת מהן מסומן \"עוד לא אומת\" עד שהריצה שלה רשומה."
   },
   "removed": [
     {
