@@ -22,7 +22,7 @@ import { getBaseUrl } from "./ollamaProvider";
 import { grammarEndpoint } from "./grammar";
 import { researchEndpoint } from "../research/client";
 
-export type LedgerCategory = "cloud-ai" | "cloud-text" | "local-ai" | "model-download" | "static-asset" | "research" | "third-party";
+export type LedgerCategory = "cloud-ai" | "cloud-text" | "local-ai" | "model-download" | "static-asset" | "research" | "third-party" | "plugin";
 
 export interface LedgerEntry {
   id: number;
@@ -205,7 +205,7 @@ export function classify(url: string): { host: string; category: LedgerCategory;
 }
 
 /** Categories whose requests carry the user's data (text, a query, the page address). */
-const CARRIES_DATA: ReadonlySet<LedgerCategory> = new Set(["cloud-ai", "cloud-text", "research", "third-party"]);
+const CARRIES_DATA: ReadonlySet<LedgerCategory> = new Set(["cloud-ai", "cloud-text", "research", "third-party", "plugin"]);
 
 /** Would the policy block this category? Model downloads and static assets carry no user data. */
 export function blockedByPolicy(category: LedgerCategory, policy: AiPolicy): boolean {
@@ -290,6 +290,31 @@ export function addSpeechVoiceBytes(id: number, bytes: number): void {
 export function recordSpeechRecognition(decision: "allowed" | "blocked"): LedgerEntry | null {
   const id = record({ host: "browser speech recognition", method: "AUDIO", bytesOut: 0, bytesIn: null, category: "cloud-text", reason: "Dictation through the browser's speech service", policy: getAiPolicy(), decision });
   return entries.find((x) => x.id === id) ?? null;
+}
+
+/**
+ * A plugin's network request (plan 11.2): only to an origin the user granted
+ * the plugin, and never under local-only — then it is recorded as blocked and
+ * not sent. Returns the entry so the response size can be added.
+ */
+export function recordPluginRequest(pluginId: string, url: string, method: string, bytesOut: number): LedgerEntry {
+  let host = "?";
+  try {
+    host = new URL(url).hostname.toLowerCase();
+  } catch {
+    /* keep "?" */
+  }
+  const policy = getAiPolicy();
+  const decision = blockedByPolicy("plugin", policy) ? "blocked" : "allowed";
+  const id = record({ host, method, bytesOut, bytesIn: null, category: "plugin", reason: `Plugin ${pluginId}`, policy, decision });
+  const entry = entries.find((x) => x.id === id)!;
+  if (decision === "blocked") onBlocked?.(entry);
+  return entry;
+}
+
+/** Response size and status of a recorded request. */
+export function completeLedgerEntry(id: number, status: number, bytesIn: number | null): void {
+  patch(id, { status, bytesIn });
 }
 
 /** Install once at startup. `blocked` is called for every blocked request. */

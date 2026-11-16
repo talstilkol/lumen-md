@@ -1458,6 +1458,7 @@
   "privacy.cat.static-asset": "静态文件（字体、图标）— 不发送文本",
   "privacy.cat.research": "研究服务 — 会发送你的查询",
   "privacy.cat.third-party": "第三方服务 — 会发送页面地址",
+  "privacy.cat.plugin": "插件 — 发送到你允许该插件访问的地址",
   "privacy.footer": "记录：时间、去向、大小、原因。从不记录提示或回答的内容。模型 Worker 内的请求（下载）不在列表中。",
   "toast.privacyBlocked": "已被“仅本地”策略阻止：{reason}。请使用本地模型，或在 AI 设置中更改策略。",
   "collab.settings.title": "协作设置",

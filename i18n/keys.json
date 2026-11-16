@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-19T08:04:02.431Z",
+  "generated_at": "2026-10-24T15:28:20.440Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1511,
+  "count": 1512,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -2378,6 +2378,11 @@
     {
       "key": "privacy.cat.third-party",
       "en": "Third-party service — the page address is sent",
+      "vars": []
+    },
+    {
+      "key": "privacy.cat.plugin",
+      "en": "Plugin — sent to an address you allowed the plugin",
       "vars": []
     },
     {

@@ -1458,6 +1458,7 @@
   "privacy.cat.static-asset": "Statische Dateien (Schriften, Symbole) — kein Text gesendet",
   "privacy.cat.research": "Recherchedienst — deine Anfrage wird gesendet",
   "privacy.cat.third-party": "Drittanbieterdienst — die Seitenadresse wird gesendet",
+  "privacy.cat.plugin": "Plugin — an eine Adresse gesendet, die Sie dem Plugin erlaubt haben",
   "privacy.footer": "Erfasst: Zeit, Ziel, Größe, Grund. Nie der Text von Prompts oder Antworten. Anfragen aus Modell-Workern (Downloads) fehlen.",
   "toast.privacyBlocked": "Durch die Richtlinie „nur lokal“ blockiert: {reason}. Nutze ein lokales Modell oder ändere die Richtlinie in den KI-Einstellungen.",
   "collab.settings.title": "Einstellungen für Zusammenarbeit",

@@ -57,6 +57,7 @@ coverage/
 public/pyodide/
 public/webr/
 public/ort/
+public/quickjs/
 public/ruby/
 public/playground/vendor/
 bundle-sizes.json
