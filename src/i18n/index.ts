@@ -8,6 +8,7 @@
 import { fillTemplate } from "./fill";
 import { platformKeys } from "../lib/platformKeys";
 import { detectLocale, systemLanguages } from "./detect";
+import { isFullLocale } from "./review";
 
 // β.4 — `Locale` includes the 6 deferred locales so the type is stable
 // across the rest of the codebase. Bundles for ar / ru / fr / de / ja /
@@ -46,22 +47,19 @@ export const SUPPORTED_LOCALES: { code: Locale; label: string; dir: "ltr" | "rtl
 const SYNCHRONOUS_LOCALES = new Set<Locale>(["en"]);
 
 /**
- * Locales whose JSON bundle is first-party and complete (key-for-key with
- * `en`, enforced by the i18nDrift + i18nStrings tests). They count as
- * available before their chunk has been fetched.
- */
-const COMPLETE_LOCALES = new Set<Locale>(["en", "he"]);
-
-/**
- * Returns true when the locale's bundle is usable. English and Hebrew are
- * always available. Other lazy locales count as available only when the
+ * Returns true when the locale's bundle is usable. The full languages
+ * (English and Hebrew) are always available. Other lazy locales count as available only when the
  * bundle is loaded AND has at least one key — this keeps empty
  * placeholder stubs (`{}`) from being mistakenly treated as complete
  * locales (a translator's PR-in-flight shouldn't silently flip the
  * locale "on" for users).
  */
 export function isLocaleAvailable(locale: Locale): boolean {
-  if (COMPLETE_LOCALES.has(locale)) return true;
+  // The full languages (./review.ts, the one list of which languages are
+  // full and which are beta) are first-party and complete — key-for-key with
+  // `en`, enforced by the i18nDrift + i18nStrings tests — so they count as
+  // available before their chunk has been fetched.
+  if (isFullLocale(locale)) return true;
   const bundle = BUNDLES[locale];
   if (!bundle) return false;
   // Ignore underscore-prefixed metadata keys (e.g. _placeholder, _note)

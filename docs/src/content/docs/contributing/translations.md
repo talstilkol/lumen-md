@@ -1,16 +1,18 @@
 ---
 title: Languages in beta, and how to help
-description: Six of Lumen's languages were translated by machine and are marked beta until a native speaker reviews them; suggest a better translation from inside the app.
+description: English and Hebrew are Lumen's full languages; the other six were translated by machine and are marked Beta (machine translation, awaiting native review). How to report a translation issue from inside the app.
 ---
 
-Lumen's interface is in eight languages. **English** is the source and **Hebrew** is
-written by native speakers. The other six were translated by machine (plan 9.1) and no
-native speaker has reviewed them yet, so Lumen marks them **beta**:
+Lumen ships two **full** languages: **English**, the source, and **Hebrew**, written by
+native speakers. The interface is also available in six more languages, but they were
+translated by machine (plan 9.1) and no native speaker has reviewed them yet. Lumen marks
+each of them **Beta (machine translation, awaiting native review)**, and you should expect
+wrong or awkward wording in them:
 
 | Language | Status |
 |---|---|
-| English | source |
-| עברית (Hebrew) | native |
+| English | full (source) |
+| עברית (Hebrew) | full (native) |
 | العربية (Arabic) | beta |
 | Русский (Russian) | beta |
 | Français (French) | beta |
@@ -18,10 +20,28 @@ native speaker has reviewed them yet, so Lumen marks them **beta**:
 | 日本語 (Japanese) | beta |
 | 简体中文 (Simplified Chinese) | beta |
 
-In **Settings → General → Language** and in the command palette, a beta language reads
-"Русский (бета)", "Français (bêta)" and so on, in the language you are using. When the
-interface is in a beta language, Settings says the translation is waiting for a native
-speaker's review and links to the suggestion form.
+Where you pick a language, a beta language says so, in the language you are using:
+
+- **Command palette** (Language: …) and **Settings → General → Language**: "Русский — Beta
+  (machine translation, awaiting native review)".
+- **First-run setup**: each beta language carries the same marker under its name.
+
+Under the language setting and on the first-run language step, a link opens this page at
+[Report a translation issue](#report-a-translation-issue). When the interface is in a beta
+language, Settings also says the translation is waiting for a native speaker's review and
+links to the suggestion form.
+
+The list of which languages are full and which are beta lives in one place,
+`src/i18n/review.ts`; the picker, the first run, Settings and this table all follow it (a
+test checks this table against it).
+
+## Report a translation issue
+
+Found a string that reads wrong, is cut off, or is still in English? Use **Suggest a better
+translation** below; it is the quickest way and needs nothing but a GitHub account. If you
+would rather not use GitHub, use **Copy the text** in the same form and send it to the
+project any other way. Say which language, what you saw and, if you
+can, what it should say.
 
 ## Suggest a better translation
 

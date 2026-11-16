@@ -10397,8 +10397,23 @@
       "vars": []
     },
     {
+      "key": "locale.beta",
+      "en": "Beta (machine translation, awaiting native review)",
+      "vars": []
+    },
+    {
+      "key": "locale.betaHelp",
+      "en": "How to report a translation issue",
+      "vars": []
+    },
+    {
+      "key": "locale.betaHint",
+      "en": "Languages marked Beta were translated by machine and are waiting for a native speaker's review.",
+      "vars": []
+    },
+    {
       "key": "locale.betaLabel",
-      "en": "{label} (beta)",
+      "en": "{label} — Beta (machine translation, awaiting native review)",
       "vars": [
         "label"
       ]
