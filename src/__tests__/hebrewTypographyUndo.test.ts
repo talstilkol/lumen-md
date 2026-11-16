@@ -24,7 +24,7 @@ function mount(): EditorView {
   try {
     localStorage.removeItem("lumen-hebrew-typography");
   } catch {
-    /* no storage: the defaults apply */
+    /* why: no storage here; the defaults apply */
   }
   const parent = document.createElement("div");
   document.body.appendChild(parent);
