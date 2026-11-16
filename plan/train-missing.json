@@ -1,9 +1,9 @@
 {
  "about": "W10.F7: a decision for every open PR whose head is not in the train (npm run train:missing). in = a task or train brings it; rejected = it will not go in, and why; replaced = what carries it instead. A decision is about one head: a PR that moves needs a new one.",
  "train": "verify/train-7",
- "trainHead": "3100c18c431e5ac854a14d7ea5ad1807bce2d3c9",
+ "trainHead": "a878a844f12167eb69b24f2272cc8d38c6f4c189",
  "decided": "2026-11-16",
- "note": "Lane A1 (T8): every open PR whose head is not an ancestor of verify/train-7 @ 3100c18c43, decided again against that head (heads read from the GitHub REST API on 2026-11-16). Ports onto train 7 are #957-#983; the lane's evidence table is decisions.tsv in the lane's notes. Decisions about PRs now in the train or closed were dropped (train:missing ignores them).",
+ "note": "T8 integration (lane INT): re-run against the integration head a878a844f1 after merging the 39 T8 PRs (#946-#984); decisions about PRs now in the train were dropped (train:missing ignores them), and #513/#734 are replaced by their re-applied port. Before: lane A1 (T8) decided every open PR outside verify/train-7 @ 3100c18c43 (ports #957-#983; evidence in the lane's decisions.tsv).",
  "decisions": [
   {
    "pr": 109,
@@ -82,13 +82,6 @@
    "head": "a2b1e9b5031412c110672b00c3d97fd575d2ef79",
    "decision": "rejected",
    "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run."
-  },
-  {
-   "pr": 235,
-   "head": "13344606962cce6d33e9be3e1b100ac4927e3917",
-   "decision": "in",
-   "reason": "still needed: #235's last commit 1334460696 (3 Codex P2 vault-move fixes) was missing; its tests failed on the train; rebuilt in #983.",
-   "via": "#983 (lane A1 port onto verify/train-7 @ 3100c18c43)"
   },
   {
    "pr": 264,
@@ -217,13 +210,6 @@
    "by": "verify/train-7 (git cherry: 0 unique commits against 3100c18c43)"
   },
   {
-   "pr": 422,
-   "head": "9dad38fda356f9807750d0027b0f11e9736420c0",
-   "decision": "replaced",
-   "reason": "superseded: #422's only own change is src-tauri/Cargo.lock; train 7 already lists deep-link, single-instance and lumen-desktop, and W3.9's 7d5505dc40 is an ancestor.",
-   "by": "train 7 (7d5505dc40 and the Cargo.lock entries) and #979"
-  },
-  {
    "pr": 469,
    "head": "18620faf2785cf77a471896714af7d8465641d4b",
    "decision": "replaced",
@@ -247,9 +233,9 @@
   {
    "pr": 513,
    "head": "5b35ab7af85ecc0d2af04a2ffdb34c233aa40b91",
-   "decision": "in",
-   "reason": "still needed: W6.44 areas board; #955 leaves plan:areas open for lack of a task→area field, which #513's plan/areas.json is. Not ported here: it builds on #511's receipts.mjs, which #955 replaces, and RULES-T8 forbids stacking on an unmerged PR.",
-   "via": "W10.G9 follow-up after #955 lands (plan:areas)"
+   "decision": "replaced",
+   "reason": "W6.44 areas board re-applied on the T8 integration on top of #955 (its receipts.mjs replaces #511's): area-bars.mjs, areas.mjs, planAreas.test.ts and the plan:check hook as on #734's head, plan/areas.json with #734's 372 entries + the 446 tasks added since.",
+   "by": "7a35be85ef port(plan) on verify/train-7 (T8 integration)"
   },
   {
    "pr": 532,
@@ -318,53 +304,11 @@
    "by": "#923 (a187ca6dbb) and #561 (b14d1fdc5b)"
   },
   {
-   "pr": 576,
-   "head": "1b44f978962b8b79f18db4b24c58742d5db76008",
-   "decision": "in",
-   "reason": "still needed (W7.9 code absent from the build): #781 (contains #576's head) merged in #981.",
-   "via": "#981 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
-   "pr": 594,
-   "head": "36b68563478e1e84ac4ab0bbd444705471d7090e",
-   "decision": "in",
-   "reason": "still needed (W7.2/W7.8/W7.11 absent from the build): #788 and #920 (contain #594/#595/#603) merged in #982.",
-   "via": "#982 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
-   "pr": 595,
-   "head": "79d32daeb3f94bd9a46e6d57bede4ad00273fc3b",
-   "decision": "in",
-   "reason": "still needed (W7.2/W7.8/W7.11 absent from the build): #788 and #920 (contain #594/#595/#603) merged in #982.",
-   "via": "#982 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
    "pr": 596,
    "head": "4535c57746883adda28056f0812a261b662ee32f",
    "decision": "replaced",
    "reason": "superseded: plan W7.19 names #587, which is in train 7; #596 was the other design.",
    "by": "#587 (W7.19, chosen in review 20: ce51ca55e8)"
-  },
-  {
-   "pr": 600,
-   "head": "9f40a35458b214195990eea77e8bb80f7d38f517",
-   "decision": "in",
-   "reason": "still needed (W8.4): #789 (contains #600's head) merged in #980; #598 was already in the train via #898.",
-   "via": "#980 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
-   "pr": 603,
-   "head": "584172b6f867945d99ce827b03e97cd204232e26",
-   "decision": "in",
-   "reason": "still needed (W7.2/W7.8/W7.11 absent from the build): #788 and #920 (contain #594/#595/#603) merged in #982.",
-   "via": "#982 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
-   "pr": 611,
-   "head": "87624fb27e5ac5bda0c0baf37046f042ab22be8e",
-   "decision": "in",
-   "reason": "still needed (audit r2-1 item 10, W2.6/W3.8): #796 (contains #611 and #615 heads) merged in #979; ACR keeps EN 301 549 and adds axe.",
-   "via": "#979 (lane A1 port onto verify/train-7 @ 3100c18c43)"
   },
   {
    "pr": 612,
@@ -386,46 +330,11 @@
    "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run."
   },
   {
-   "pr": 615,
-   "head": "a43a7141c2f151f351bc871ef263d037b682afbb",
-   "decision": "in",
-   "reason": "still needed (audit r2-1 item 10, W2.6/W3.8): #796 (contains #611 and #615 heads) merged in #979; ACR keeps EN 301 549 and adds axe.",
-   "via": "#979 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
-   "pr": 619,
-   "head": "f885336f8b982ccc20c34913877d0ed606c1fd6d",
-   "decision": "in",
-   "reason": "still needed (audit r2-1 item 10): #667 (whose head contains #619's) merged in #977.",
-   "via": "#977 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
-   "pr": 621,
-   "head": "9031e57099091344bb98cc8f3ea595baeeb2d65f",
-   "decision": "in",
-   "reason": "still needed: merged --no-ff onto train 7 in #957 (chunk anatomy, docs audit, stack limit); duplicate MAX_STACK_DEPTH export fixed.",
-   "via": "#957 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
-   "pr": 622,
-   "head": "6d09bb12d716609ba31cda4ff5cd5d7b97278aca",
-   "decision": "in",
-   "reason": "still needed: merged --no-ff onto train 7 in #957 (chunk anatomy, docs audit, stack limit); duplicate MAX_STACK_DEPTH export fixed.",
-   "via": "#957 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
    "pr": 623,
    "head": "d363921deadbb059953bbaae798cd0bbe603ff24",
    "decision": "replaced",
    "reason": "superseded: same Privacy tab, in train 7 via #790 (train 7 STATE: skipped as superseded).",
    "by": "#790 (W10.E70)"
-  },
-  {
-   "pr": 624,
-   "head": "a26175b20dc8a563b273bcf2476d164e66fe36f8",
-   "decision": "in",
-   "reason": "still needed: merged --no-ff onto train 7 in #957 (chunk anatomy, docs audit, stack limit); duplicate MAX_STACK_DEPTH export fixed.",
-   "via": "#957 (lane A1 port onto verify/train-7 @ 3100c18c43)"
   },
   {
    "pr": 625,
@@ -442,32 +351,11 @@
    "by": "#790 (W10.E70)"
   },
   {
-   "pr": 667,
-   "head": "965847024b15ae77848a1bf00e2555a05e5131b8",
-   "decision": "in",
-   "reason": "still needed (audit r2-1 item 10): #667 (whose head contains #619's) merged in #977.",
-   "via": "#977 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
    "pr": 714,
    "head": "30333c6121635dcbce977c5a9aab8fdc6a359962",
    "decision": "replaced",
    "reason": "superseded: W11.S14 is in train 7 via #701 and #924 (train 7 STATE).",
    "by": "#701 + #924 (port of #714's checks)"
-  },
-  {
-   "pr": 718,
-   "head": "24f5ab7fadc37bf5ae404a758114dc7340b13049",
-   "decision": "in",
-   "reason": "still needed: W10.B21/B7/B11 claims fixes merged clean in #958.",
-   "via": "#958 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
-   "pr": 719,
-   "head": "2bbf868cdb402f356d51a99e0e28e24b3f70832a",
-   "decision": "in",
-   "reason": "still needed (audit r2-2: workers without the ledger bridge): merged in #959, plus the 4 workers written since.",
-   "via": "#959 (lane A1 port onto verify/train-7 @ 3100c18c43)"
   },
   {
    "pr": 720,
@@ -476,25 +364,11 @@
    "reason": "obsolete: both comments it corrected are true again in train 7 — the in-app recorder exists (W10.E52, #830) and the global-shortcut plugin is in the build (W10.C13, #657); its text would be false now."
   },
   {
-   "pr": 723,
-   "head": "515de51115b8780ff1f11ed4b8f28896fc74d037",
-   "decision": "in",
-   "reason": "still needed: W10.B21/B7/B11 claims fixes merged clean in #958.",
-   "via": "#958 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
-   "pr": 728,
-   "head": "b369d30269fbf7871542c6ae1a99e98012360678",
-   "decision": "in",
-   "reason": "still needed (audit: MCP client had no settings/agent tools): merged in #978 with the train's built-in Sefaria suggestion.",
-   "via": "#978 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
    "pr": 734,
    "head": "76fa2616fb4147a3ef2af09433daabd25232869c",
-   "decision": "in",
-   "reason": "still needed for its #513 part (see #513); its #511 part is replaced by #955, its #502 part is in train 7.",
-   "via": "W10.G9 follow-up after #955 lands (plan:areas)"
+   "decision": "replaced",
+   "reason": "its #513 part (the areas board and #734's 19 area entries) re-applied on the T8 integration on top of #955; its #511 part is replaced by #955, its #502 part is in train 7.",
+   "by": "7a35be85ef port(plan) on verify/train-7 (T8 integration)"
   },
   {
    "pr": 736,
@@ -504,116 +378,11 @@
    "by": "#880 (replays #699/#736)"
   },
   {
-   "pr": 746,
-   "head": "ad3c6280d35476ba3085bda9bdc00c0d1899a041",
-   "decision": "in",
-   "reason": "still needed: W10.B21/B7/B11 claims fixes merged clean in #958.",
-   "via": "#958 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
-   "pr": 751,
-   "head": "213f15fa26b9dc62fe860c4abc80cd440852ecf1",
-   "decision": "in",
-   "reason": "still needed: calendar settings/conflict dialog/{{calendar}}, {{review}}, hebcal harness merged in #962 with the train's {{learning}}.",
-   "via": "#962 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
-   "pr": 758,
-   "head": "9667b432ef3614a4bb22e79ff9be9d65d9e376c7",
-   "decision": "in",
-   "reason": "still needed: @מקור trigger and the voice tile/Record-to-inbox intent merged in #966 (manifest fixed by hand).",
-   "via": "#966 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
-   "pr": 763,
-   "head": "70ff46c5063c058c0813ed62c20679649e47f425",
-   "decision": "in",
-   "reason": "still needed (audit: providerTarget had 0 callers): WebDAV backup merged clean in #965.",
-   "via": "#965 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
-   "pr": 766,
-   "head": "2668dbafea7920d8c93e354d89af1d50a3772fcb",
-   "decision": "in",
-   "reason": "still needed: @מקור trigger and the voice tile/Record-to-inbox intent merged in #966 (manifest fixed by hand).",
-   "via": "#966 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
-   "pr": 772,
-   "head": "e21304e71fb654f1a6efcdcadfea3a5f80780bea",
-   "decision": "in",
-   "reason": "still needed (audit: structured output 0 importers, screenshotToNote no UI): merged in #976.",
-   "via": "#976 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
    "pr": 779,
    "head": "d0c19e0dd9293e1d10598a4c38d47a3c4db705bb",
    "decision": "replaced",
    "reason": "superseded: its one line (graph.table. prefix) is covered: train 7's i18nLazyEnglish lists every graph.table.* key.",
    "by": "#886/#889/#902 (graph.table.* keys listed in the lazy registry)"
-  },
-  {
-   "pr": 781,
-   "head": "d91fc0635893cc877a49e0f96a77d2b8b864d880",
-   "decision": "in",
-   "reason": "still needed (W7.9 code absent from the build): #781 (contains #576's head) merged in #981.",
-   "via": "#981 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
-   "pr": 788,
-   "head": "f7ddbfd8122a6d8b233b03d15e5aad0d6c816e34",
-   "decision": "in",
-   "reason": "still needed (W7.2/W7.8/W7.11 absent from the build): #788 and #920 (contain #594/#595/#603) merged in #982.",
-   "via": "#982 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
-   "pr": 789,
-   "head": "2005b1c95ed4c06cb4b47dc4892fdacd53f7ff65",
-   "decision": "in",
-   "reason": "still needed (W8.4): #789 (contains #600's head) merged in #980; #598 was already in the train via #898.",
-   "via": "#980 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
-   "pr": 796,
-   "head": "c507977bee45a116695b0a408b11979bc7241efe",
-   "decision": "in",
-   "reason": "still needed (audit r2-1 item 10, W2.6/W3.8): #796 (contains #611 and #615 heads) merged in #979; ACR keeps EN 301 549 and adds axe.",
-   "via": "#979 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
-   "pr": 805,
-   "head": "256453b4e2d370d3f5fb1fd55ad443638a69dfd1",
-   "decision": "in",
-   "reason": "still needed: calendar settings/conflict dialog/{{calendar}}, {{review}}, hebcal harness merged in #962 with the train's {{learning}}.",
-   "via": "#962 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
-   "pr": 806,
-   "head": "b4829a1edbcd8287219b74527631b62468d9cba7",
-   "decision": "in",
-   "reason": "still needed: calendar settings/conflict dialog/{{calendar}}, {{review}}, hebcal harness merged in #962 with the train's {{learning}}.",
-   "via": "#962 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
-   "pr": 810,
-   "head": "4a43147dda56648da8a9163f4dcde2ee7e489e0f",
-   "decision": "in",
-   "reason": "still needed: Kokoro seam merged in #971; setEnglishPhonemizer became a constant for the live-seams gate.",
-   "via": "#971 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
-   "pr": 818,
-   "head": "9397f4b08d209f61e00e62d9679f972039d50688",
-   "decision": "in",
-   "reason": "still needed: bench engines merged in #963 + bert-base-NER adapter; benchEngineCoverage 6/1 names 2 later registry entries without a bench (owed to W11.H18/W11.H16).",
-   "via": "#963 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
-   "pr": 822,
-   "head": "c71e577f88e0be504ab49a8103048c3b47139c7c",
-   "decision": "in",
-   "reason": "still needed: automations run-agent/add-task merged in #973 with the train's Shabbat postponements.",
-   "via": "#973 (lane A1 port onto verify/train-7 @ 3100c18c43)"
   },
   {
    "pr": 825,
@@ -630,32 +399,11 @@
    "by": "#884 (restack of #826)"
   },
   {
-   "pr": 828,
-   "head": "08fdc6bdbbb9f5fa1ac27b38e0de47ef8794d930",
-   "decision": "in",
-   "reason": "still needed: virtual file tree + vault-open test merged in #960; the tree loads on use (startup 226,392 B gz).",
-   "via": "#960 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
    "pr": 835,
    "head": "8546a88b671134edc3de7576eeb7a71574f288cf",
    "decision": "replaced",
    "reason": "superseded: 98% of its added lines are in train 7; #880 is an ancestor.",
    "by": "#880 (restack of #835)"
-  },
-  {
-   "pr": 836,
-   "head": "5ed2bfe04fb6af3c9d73c5f2ab72a2939e2a3240",
-   "decision": "in",
-   "reason": "still needed: virtual file tree + vault-open test merged in #960; the tree loads on use (startup 226,392 B gz).",
-   "via": "#960 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
-   "pr": 843,
-   "head": "c347e421a65dc02558ad47d84312056c7e4c1a34",
-   "decision": "in",
-   "reason": "still needed: Tectonic PDF merged in #974 (isolation allow-list entries owed to the owner).",
-   "via": "#974 (lane A1 port onto verify/train-7 @ 3100c18c43)"
   },
   {
    "pr": 845,
@@ -665,312 +413,11 @@
    "by": "#881 (restack of #845)"
   },
   {
-   "pr": 851,
-   "head": "9c9b7a4d79529fd0973723962d4b173f7cd24513",
-   "decision": "in",
-   "reason": "still needed: DOI lookup merged in #975 (policy.json + headers regenerated, ledger rule).",
-   "via": "#975 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
-   "pr": 860,
-   "head": "5f11643dd8cdbbf95af99ade50cac9e8eaf14b7c",
-   "decision": "in",
-   "reason": "still needed: deterministic source maps and the Codemagic PR build merged in #972.",
-   "via": "#972 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
    "pr": 910,
    "head": "b7534f345a9fa9e3b6f4ca208faf12178fbb7f9c",
    "decision": "replaced",
    "reason": "superseded: RTL theme check in train 7 via #926 (train 7 STATE).",
    "by": "#926 (re-stack of #910)"
-  },
-  {
-   "pr": 917,
-   "head": "865871ecf1f95b6f4170e24e04648aa70bddb9de",
-   "decision": "in",
-   "reason": "still needed (audit: structured output 0 importers, screenshotToNote no UI): merged in #976.",
-   "via": "#976 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
-   "pr": 920,
-   "head": "38e5ceac5c58786484cc13b33cb9667e5aff98ec",
-   "decision": "in",
-   "reason": "still needed (W7.2/W7.8/W7.11 absent from the build): #788 and #920 (contain #594/#595/#603) merged in #982.",
-   "via": "#982 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
-   "pr": 921,
-   "head": "0e596b7ce7b82513c11dc221d35b4937bb67e8af",
-   "decision": "in",
-   "reason": "still needed: deterministic source maps and the Codemagic PR build merged in #972.",
-   "via": "#972 (lane A1 port onto verify/train-7 @ 3100c18c43)"
-  },
-  {
-   "pr": 946,
-   "head": "0cfdae29dcec4f00e23e673e00474eb9997da7f2",
-   "decision": "in",
-   "reason": "an open lane PR based on 3100c18c43: its head is not in the train only because the integrator has not merged it yet.",
-   "via": "#946 (T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 947,
-   "head": "24be33bbb0c3fa291b3102f05615439b67d9b273",
-   "decision": "in",
-   "reason": "an open lane PR based on 3100c18c43: its head is not in the train only because the integrator has not merged it yet.",
-   "via": "#947 (T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 948,
-   "head": "80c443f6e96f48598b3fb1bd94a8fc13452bf24e",
-   "decision": "in",
-   "reason": "an open lane PR based on 3100c18c43: its head is not in the train only because the integrator has not merged it yet.",
-   "via": "#948 (T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 949,
-   "head": "f1969dc5c467d53d93ae65668f74c338cc18ca19",
-   "decision": "in",
-   "reason": "an open lane PR based on 3100c18c43: its head is not in the train only because the integrator has not merged it yet.",
-   "via": "#949 (T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 950,
-   "head": "ad5fbc869f6e6b564b3db0cb09ec037e83a0457d",
-   "decision": "in",
-   "reason": "an open lane PR based on 3100c18c43: its head is not in the train only because the integrator has not merged it yet.",
-   "via": "#950 (T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 951,
-   "head": "3ec685472a212b9df7ecf61b9290b1c90a2e6c26",
-   "decision": "in",
-   "reason": "an open lane PR based on 3100c18c43: its head is not in the train only because the integrator has not merged it yet.",
-   "via": "#951 (T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 952,
-   "head": "4ecef34678ac48a65246cf9cc08437f16e4d7f5c",
-   "decision": "in",
-   "reason": "an open lane PR based on 3100c18c43: its head is not in the train only because the integrator has not merged it yet.",
-   "via": "#952 (T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 953,
-   "head": "1437ac9b932f3e16f2c4a80bad77cb146cb561c2",
-   "decision": "in",
-   "reason": "an open lane PR based on 3100c18c43: its head is not in the train only because the integrator has not merged it yet.",
-   "via": "#953 (T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 954,
-   "head": "4551790f46a866deb6e1c6e05c5cd59a1076078a",
-   "decision": "in",
-   "reason": "an open lane PR based on 3100c18c43: its head is not in the train only because the integrator has not merged it yet.",
-   "via": "#954 (T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 955,
-   "head": "0138f929b679a267e93947f5848e26e2c527007f",
-   "decision": "in",
-   "reason": "an open lane PR based on 3100c18c43: its head is not in the train only because the integrator has not merged it yet.",
-   "via": "#955 (T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 956,
-   "head": "5e2ae2adf82bf9fdec94366875c7a60dc0c3a66d",
-   "decision": "in",
-   "reason": "an open lane PR based on 3100c18c43: its head is not in the train only because the integrator has not merged it yet.",
-   "via": "#956 (T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 957,
-   "head": "fa641a525003a75aa7eda327eb4dc87a26cdb15f",
-   "decision": "in",
-   "reason": "a lane A1 port PR based on 3100c18c43, waiting for the integrator.",
-   "via": "#957 (lane A1 port; T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 958,
-   "head": "cac48bdc13f80a3a2c5f8a90b23a6ac1106c148d",
-   "decision": "in",
-   "reason": "a lane A1 port PR based on 3100c18c43, waiting for the integrator.",
-   "via": "#958 (lane A1 port; T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 959,
-   "head": "9b456dc697d154579c721bf808897fb0c020b664",
-   "decision": "in",
-   "reason": "a lane A1 port PR based on 3100c18c43, waiting for the integrator.",
-   "via": "#959 (lane A1 port; T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 960,
-   "head": "9e7bf756c48c096cbc547bf3f376ecfbc2c55e1a",
-   "decision": "in",
-   "reason": "a lane A1 port PR based on 3100c18c43, waiting for the integrator.",
-   "via": "#960 (lane A1 port; T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 961,
-   "head": "f4f1853a94ab9c75d703f58329747bf5efcfb00f",
-   "decision": "in",
-   "reason": "an open lane PR based on 3100c18c43: its head is not in the train only because the integrator has not merged it yet.",
-   "via": "#961 (T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 962,
-   "head": "48389cd05809f0a9cba78761231f7228903dfb6c",
-   "decision": "in",
-   "reason": "a lane A1 port PR based on 3100c18c43, waiting for the integrator.",
-   "via": "#962 (lane A1 port; T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 963,
-   "head": "06951222aa0382bb776d21f6134730dd37b2fe18",
-   "decision": "in",
-   "reason": "a lane A1 port PR based on 3100c18c43, waiting for the integrator.",
-   "via": "#963 (lane A1 port; T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 964,
-   "head": "1590e75409dde9159d070751fc0e84b5a11c40d9",
-   "decision": "in",
-   "reason": "an open lane PR based on 3100c18c43: its head is not in the train only because the integrator has not merged it yet.",
-   "via": "#964 (T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 965,
-   "head": "3cca1adab50b7bf8fd1203b8bfe6dc86fe03359d",
-   "decision": "in",
-   "reason": "a lane A1 port PR based on 3100c18c43, waiting for the integrator.",
-   "via": "#965 (lane A1 port; T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 966,
-   "head": "c35c0e0035cb75ed12768f0b32092db6eadfcd0b",
-   "decision": "in",
-   "reason": "a lane A1 port PR based on 3100c18c43, waiting for the integrator.",
-   "via": "#966 (lane A1 port; T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 967,
-   "head": "58310607217785a98c55fa8fb0c7c7df96274497",
-   "decision": "in",
-   "reason": "an open lane PR based on 3100c18c43: its head is not in the train only because the integrator has not merged it yet.",
-   "via": "#967 (T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 968,
-   "head": "eff41dfcb0adc59240e65e6ed3d5c741f4f8e893",
-   "decision": "in",
-   "reason": "an open lane PR based on 3100c18c43: its head is not in the train only because the integrator has not merged it yet.",
-   "via": "#968 (T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 969,
-   "head": "f4e5d1472a325ad0160d30e7362d9527c210180d",
-   "decision": "in",
-   "reason": "an open lane PR based on 3100c18c43: its head is not in the train only because the integrator has not merged it yet.",
-   "via": "#969 (T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 970,
-   "head": "da849476bb529927a0a538b43f0ba2798855c5ac",
-   "decision": "in",
-   "reason": "an open lane PR based on 3100c18c43: its head is not in the train only because the integrator has not merged it yet.",
-   "via": "#970 (T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 971,
-   "head": "e48647642a21a6c830eba19e3296492c66e71d5b",
-   "decision": "in",
-   "reason": "a lane A1 port PR based on 3100c18c43, waiting for the integrator.",
-   "via": "#971 (lane A1 port; T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 972,
-   "head": "8d7680f207ba416eedc785cd5ac9b7714b5baf30",
-   "decision": "in",
-   "reason": "a lane A1 port PR based on 3100c18c43, waiting for the integrator.",
-   "via": "#972 (lane A1 port; T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 973,
-   "head": "66f636a9aa0993fc00b25a8441dd66a00563ded7",
-   "decision": "in",
-   "reason": "a lane A1 port PR based on 3100c18c43, waiting for the integrator.",
-   "via": "#973 (lane A1 port; T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 974,
-   "head": "e200e07dc2e5f2b71d4fd2ff751e1b4a028e43f7",
-   "decision": "in",
-   "reason": "a lane A1 port PR based on 3100c18c43, waiting for the integrator.",
-   "via": "#974 (lane A1 port; T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 975,
-   "head": "6ef353053715dbc29090dcd0dde9dec06f35a2ae",
-   "decision": "in",
-   "reason": "a lane A1 port PR based on 3100c18c43, waiting for the integrator.",
-   "via": "#975 (lane A1 port; T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 976,
-   "head": "fdbd37156a781478bc73810ff7c28760ade55f82",
-   "decision": "in",
-   "reason": "a lane A1 port PR based on 3100c18c43, waiting for the integrator.",
-   "via": "#976 (lane A1 port; T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 977,
-   "head": "afbe1f9cc3f45e17a4bba4fcb0e5a69ff664285a",
-   "decision": "in",
-   "reason": "a lane A1 port PR based on 3100c18c43, waiting for the integrator.",
-   "via": "#977 (lane A1 port; T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 978,
-   "head": "4050f8974db704920850458933ee29add3e7c9b4",
-   "decision": "in",
-   "reason": "a lane A1 port PR based on 3100c18c43, waiting for the integrator.",
-   "via": "#978 (lane A1 port; T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 979,
-   "head": "1356342636475963bfcc4d25257979013da18c1f",
-   "decision": "in",
-   "reason": "a lane A1 port PR based on 3100c18c43, waiting for the integrator.",
-   "via": "#979 (lane A1 port; T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 980,
-   "head": "855339c8600b355a3df4c3a39698b87f1ad7b60f",
-   "decision": "in",
-   "reason": "a lane A1 port PR based on 3100c18c43, waiting for the integrator.",
-   "via": "#980 (lane A1 port; T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 981,
-   "head": "6548f01fade78bf2c48d27e555c2c6cfdef615c7",
-   "decision": "in",
-   "reason": "a lane A1 port PR based on 3100c18c43, waiting for the integrator.",
-   "via": "#981 (lane A1 port; T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 982,
-   "head": "19888718a264b4c820f45221768e9ec8d9306dae",
-   "decision": "in",
-   "reason": "a lane A1 port PR based on 3100c18c43, waiting for the integrator.",
-   "via": "#982 (lane A1 port; T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
-  },
-  {
-   "pr": 983,
-   "head": "f38def9e5aaa9485c27d454fed12da8ce51f531f",
-   "decision": "in",
-   "reason": "a lane A1 port PR based on 3100c18c43, waiting for the integrator.",
-   "via": "#983 (lane A1 port; T8 lane PR on verify/train-7 @ 3100c18c43, waiting for the integrator (RULES-T8))"
   }
  ]
 }
