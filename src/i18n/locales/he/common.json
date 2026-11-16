@@ -2062,6 +2062,7 @@
   "mcpServers.add": "הוספת שרת",
   "mcpServers.approval.check": "בדיקת האישור",
   "mcpServers.approval.no": "לא מאושר, או שהתוכנה או קובץ שהיא מקבלת השתנו מאז. לפני שהיא רצה תתבקש לאשר מחדש.",
+  "mcpServers.approval.notRevoked": "אין מה לבטל: התוכנה הזאת, עם הארגומנטים והתיקייה האלה, לא הייתה ברשימת האישורים.",
   "mcpServers.approval.revoke": "ביטול האישור",
   "mcpServers.approval.revoked": "האישור בוטל. שום דבר לא ירוץ עד שתאשר מחדש.",
   "mcpServers.approval.yes": "מאושר: התוכנה הזו בדיוק עם הארגומנטים האלה יכולה לרוץ.",

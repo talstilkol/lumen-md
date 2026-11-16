@@ -49,7 +49,7 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 mod allowlist;
-pub use allowlist::{checked_spawn, may_spawn, pin, pin_text, resolve_program, revoke_key_of, sha256_file, sha256_hex, AllowList, Lang, Pin, Sha256};
+pub use allowlist::{approval_pin, checked_spawn, may_spawn, may_spawn_in, pin, pin_in, pin_text, resolve_program, sha256_file, sha256_hex, AllowList, Lang, Pin, Sha256, MAX_PINNED_BYTES, NOT_APPROVED};
 
 /// Longest stdout line (one JSON-RPC message) we accept.
 pub const MAX_LINE: usize = 4 * 1024 * 1024;
@@ -123,22 +123,87 @@ fn interpreter(name: &str) -> Option<&'static str> {
     }
 }
 
-/// An argument that hands the interpreter code to run from the command line itself.
+/// An argument that hands the interpreter code to run from the command line itself, also in
+/// the attached forms (review 10, M7): `-cX=1`, `-Ic`, `-eprint(1)`, `-lane`, `-pe`, `-rX;`.
+/// A short-option cluster is read letter by letter until an option that takes a value (the rest
+/// of the cluster is that value: `-mcalendar`, `-Wignore`, `-pi.bak` are not code).
 fn inline_code(family: &str, arg: &str) -> bool {
-    let short = |letters: &str| arg.len() >= 2 && arg.starts_with('-') && !arg.starts_with("--") && arg[1..].chars().all(|c| c.is_ascii_alphabetic()) && arg.ends_with(|c: char| letters.contains(c));
+    let cluster = if arg.len() >= 2 && arg.starts_with('-') && !arg.starts_with("--") { Some(&arg[1..]) } else { None };
+    // The cluster's letters before the first option that takes a value; `code` letters are code.
+    let scan = |code: &str, takes_value: &str, digits: &str| -> bool {
+        let Some(c) = cluster else { return false };
+        let mut chars = c.chars().peekable();
+        while let Some(ch) = chars.next() {
+            if code.contains(ch) {
+                return true;
+            }
+            if takes_value.contains(ch) {
+                return false;
+            }
+            if digits.contains(ch) {
+                // An octal number, or `x` and a hex one (perl -0777, -0x1F); an `e` after octal digits is -e.
+                if chars.peek().is_some_and(|d| *d == 'x' || *d == 'X') {
+                    chars.next();
+                    while chars.peek().is_some_and(|d| d.is_ascii_hexdigit()) {
+                        chars.next();
+                    }
+                } else {
+                    while chars.peek().is_some_and(|d| ('0'..='7').contains(d)) {
+                        chars.next();
+                    }
+                }
+                continue;
+            }
+            if !ch.is_ascii_alphabetic() {
+                return false;
+            }
+        }
+        false
+    };
+    let long = |names: &[&str]| names.iter().any(|n| arg == *n || arg.strip_prefix(n).is_some_and(|r| r.starts_with('=')));
     match family {
-        // python -c, also in a cluster (-Ic, -uc).
-        "python" => short("c"),
-        "node" => matches!(arg, "-e" | "-p" | "--eval" | "--print") || arg.starts_with("--eval=") || arg.starts_with("--print="),
+        // python -c, also clustered (-Ic, -uc) and attached (-cX=1); -i reads stdin after the
+        // script; -m, -W, -X take a value.
+        "python" => scan("ci", "mWXQ", ""),
+        // node -e / -p, clustered (-pe) or attached (-eX); -i is the REPL on stdin; -r, -C take a value.
+        "node" => long(&["--eval", "--print", "--interactive"]) || scan("epi", "rC", ""),
         "deno" => matches!(arg, "eval" | "repl"),
-        "bun" => matches!(arg, "-e" | "-p" | "--eval" | "--print"),
-        // perl -e / -E, also clustered (-ne, -lane).
-        "perl" => short("eE"),
-        "ruby" => short("e"),
-        "osascript" => arg == "-e",
-        "php" => arg == "-r" || arg == "--run",
-        "lua" => arg == "-e",
-        "rscript" => arg == "-e",
+        "bun" => long(&["--eval", "--print"]) || scan("ep", "r", ""),
+        // perl -e / -E, clustered (-ne, -lane) or attached (-eprint); -l and -0 take digits only.
+        "perl" => scan("eE", "CdDFiImMx", "l0"),
+        // ruby -e (attached too); -E is the encoding.
+        "ruby" => scan("e", "CEFIKrTWxi", "0"),
+        "osascript" => arg == "-e" || arg.starts_with("-e"),
+        // php -r (attached too), and -B / -R / -E, code run around each input line.
+        // php -r (attached too), -B / -R / -E (code run around each input line), -a (interactive).
+        "php" => long(&["--run", "--process-begin", "--process-code", "--process-end", "--interactive"]) || cluster.is_some_and(|c| c.starts_with(['r', 'B', 'R', 'E', 'a'])),
+        "lua" => arg.starts_with("-e") || arg == "-i",
+        "rscript" => arg.starts_with("-e") || long(&["--expr"]),
+        _ => false,
+    }
+}
+
+/// Does this interpreter read its program from stdin? With no argument, or with `-` (the script
+/// is stdin), it runs whatever is written to it: the page writes the server's stdin.
+fn reads_code_from_stdin(family: &str, args: &[String]) -> bool {
+    family != "osascript" && (args.is_empty() || args.iter().any(|a| a == "-"))
+}
+
+/// A program that downloads a package (or a URL) and runs it: what it runs is fetched when it
+/// starts, so no approval can pin it (review 10, M4). The dialog says so.
+pub fn package_runner(spec: &Spec) -> bool {
+    let name = base_name(&spec.command);
+    let name = name.strip_suffix(".exe").or_else(|| name.strip_suffix(".cmd")).unwrap_or(&name).to_string();
+    let first = spec.args.iter().find(|a| !a.starts_with('-')).map(String::as_str);
+    let remote = |a: &String| a.starts_with("http://") || a.starts_with("https://") || a.starts_with("npm:") || a.starts_with("jsr:");
+    match name.as_str() {
+        "npx" | "pnpx" | "bunx" | "uvx" => true,
+        "pnpm" | "yarn" => first == Some("dlx"),
+        "npm" => matches!(first, Some("exec" | "x")),
+        "pipx" => first == Some("run"),
+        "uv" => matches!(first, Some("tool" | "run")),
+        "bun" => first == Some("x") || spec.args.iter().any(remote),
+        "deno" => spec.args.iter().any(remote),
         _ => false,
     }
 }
@@ -174,6 +239,9 @@ impl Spec {
         if let Some(family) = interpreter(&name) {
             if let Some(a) = self.args.iter().find(|a| inline_code(family, a)) {
                 return Err(format!("\"{name} {a}\" runs code written in the command line: name the server's script or module instead"));
+            }
+            if reads_code_from_stdin(family, &self.args) {
+                return Err(format!("\"{name}\" without a script reads its code from stdin, which the page writes: name the server's script or module"));
             }
         }
         if let Some(cwd) = &self.cwd {
@@ -753,11 +821,56 @@ mod tests {
     }
 
     #[test]
+    fn attached_inline_code_and_code_from_stdin_never_run() {
+        // Review 10, M7: the attached and clustered forms.
+        for (cmd, a) in [
+            ("python3", "-cX=1"),
+            ("python3", "-Ic"),
+            ("python3", "-ucimport os"),
+            ("python3", "-i"),
+            ("perl", "-eprint(1)"),
+            ("perl", "-Eprint(1)"),
+            ("perl", "-lane"),
+            ("perl", "-0e"),
+            ("perl", "-l0e"),
+            ("ruby", "-eputs(1)"),
+            ("ruby", "-pe"),
+            ("node", "-pe"),
+            ("node", "-eX"),
+            ("node", "-i"),
+            ("node", "--print=1"),
+            ("node", "--interactive"),
+            ("bun", "--eval=x"),
+            ("bun", "-ex"),
+            ("php", "-rX;"),
+            ("php", "-Rx"),
+            ("php", "-a"),
+            ("lua5.4", "-eprint(1)"),
+            ("lua", "-i"),
+            ("Rscript", "-e1"),
+            ("osascript", "-ex"),
+        ] {
+            let e = spec(cmd, &[a, "s"]).validate().unwrap_err();
+            assert!(e.contains("code written in the command line"), "{cmd} {a}: {e}");
+        }
+        // A value-taking option ends the cluster: these are not code.
+        for (cmd, a) in [("python3", "-mcalendar"), ("python3", "-Wignore"), ("python3", "-Xdev"), ("perl", "-MFile::Temp"), ("perl", "-Ilib"), ("perl", "-pi.bak"), ("perl", "-0777"), ("ruby", "-Eutf-8"), ("ruby", "-rjson"), ("node", "-r"), ("node", "--require=x")] {
+            assert!(spec(cmd, &[a, "s"]).validate().is_ok(), "{cmd} {a}");
+        }
+        // No script, or `-`: the interpreter reads its code from stdin, which the page writes.
+        for (cmd, args) in [("python3", &[][..]), ("node", &["-"]), ("python3", &["-u", "-"]), ("deno", &[]), ("ruby", &[])] {
+            let e = spec(cmd, args).validate().unwrap_err();
+            assert!(e.contains("reads its code from stdin"), "{cmd} {args:?}: {e}");
+        }
+        assert!(spec("mcp-server-files", &[]).validate().is_ok(), "a compiled server needs no argument");
+    }
+
+    #[test]
     fn format_characters_and_odd_spaces_are_refused() {
         for bad in ["a\u{202E}gpj.exe", "\u{2066}x\u{2069}", "x\u{200B}y", "\u{FEFF}x", "a\u{2028}b", "a\u{00A0}b", "a\u{3000}b", "a\tb", "\u{E0041}"] {
             assert!(spec("node", &[bad]).validate().is_err(), "{bad:?}");
             assert!(spec(&format!("n{bad}"), &[]).validate().is_err(), "command {bad:?}");
-            let mut s = spec("node", &[]);
+            let mut s = spec("node", &["s.js"]);
             s.cwd = Some(format!("/tmp/{bad}"));
             assert!(s.validate().is_err(), "folder {bad:?}");
         }
@@ -786,7 +899,7 @@ mod tests {
             let bad = format!("a{c}b");
             assert!(spec("node", &[&bad]).validate().is_err(), "U+{:04X}", c as u32);
             assert!(spec(&format!("node{c}"), &[]).validate().is_err(), "command U+{:04X}", c as u32);
-            let mut s = spec("node", &[]);
+            let mut s = spec("node", &["s.js"]);
             s.cwd = Some(format!("/tmp/{bad}"));
             assert!(s.validate().is_err(), "folder U+{:04X}", c as u32);
         }

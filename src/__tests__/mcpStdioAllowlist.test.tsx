@@ -104,11 +104,11 @@ describe("the bridge asks the allow-list before anything starts", () => {
   });
 });
 
-function approvalsFake(answer: boolean) {
+function approvalsFake(answer: boolean, revoked = true) {
   const seen: Array<[string, unknown]> = [];
   const a: StdioApprovals = {
     approved: async (s) => (seen.push(["approved", s]), answer),
-    revoke: async (s) => (seen.push(["revoke", s]), true),
+    revoke: async (s) => (seen.push(["revoke", s]), revoked),
   };
   return { a, seen };
 }
@@ -133,6 +133,14 @@ describe("Settings → MCP servers: the allow-list entry of a program", () => {
       ["revoke", SPEC],
     ]);
     expect(listed).toBe(0);
+  });
+
+  it("Withdraw approval says so when nothing was on the list (review 10, L4)", async () => {
+    oneStdioServer();
+    const { a } = approvalsFake(true, false);
+    render(<McpServers desktop approvals={a} list={async () => []} />);
+    await act(async () => fireEvent.click(screen.getByTestId("mcp-approval-revoke-files")));
+    await waitFor(() => expect(screen.getByTestId("mcp-approval-files").textContent).toBe("Nothing to withdraw: this program, with these arguments and this folder, was not on the allow-list."));
   });
 
   it("a program that is not on the allow-list (or changed) says so, in Hebrew", async () => {

@@ -26,7 +26,7 @@
 //! writes through its own writer thread with a timeout (`WRITE_TIMEOUT`), so a
 //! server that stops reading blocks neither the UI nor the other servers.
 
-use lumen_mcp_stdio::{checked_spawn, clean_env, may_spawn, open_url_command, pin, pin_text, revoke_key_of, AllowList, Event, Lang, Session, Spec, WRITE_TIMEOUT};
+use lumen_mcp_stdio::{approval_pin, checked_spawn, clean_env, may_spawn_in, open_url_command, pin_text, AllowList, Event, Lang, Session, Spec, WRITE_TIMEOUT};
 use serde::Serialize;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
@@ -83,6 +83,12 @@ fn path_var() -> Option<String> {
     std::env::var("PATH").ok()
 }
 
+/// The folders the user granted as vaults (canonical paths): a program, a file it is given or its
+/// working folder may not be inside one (review 10, M4: the page can write there).
+fn vaults(app: &AppHandle) -> Vec<String> {
+    crate::desktop_vault::known_roots(&app.state::<crate::desktop_vault::VaultState>())
+}
+
 /// Run `f` off the main thread and the async workers (it may block on files, a pipe or a process).
 async fn blocking<T: Send + 'static>(f: impl FnOnce() -> Result<T, String> + Send + 'static) -> Result<T, String> {
     tauri::async_runtime::spawn_blocking(f).await.map_err(|e| e.to_string())?
@@ -97,7 +103,8 @@ pub async fn mcp_stdio_approved(app: AppHandle, state: State<'_, McpStdio>, comm
         let mut inner = inner.lock().map_err(|_| "EIO: lock")?;
         load(&app, &mut inner)?;
         let empty = AllowList::default();
-        Ok(may_spawn(&s, inner.approved.as_ref().unwrap_or(&empty), path_var().as_deref()).is_ok())
+        // Review 10, M6: looked up before anything is hashed; a command not on the list reads no file.
+        Ok(may_spawn_in(&s, inner.approved.as_ref().unwrap_or(&empty), path_var().as_deref(), &vaults(&app)).is_ok())
     })
     .await
 }
@@ -112,8 +119,9 @@ pub async fn mcp_stdio_approve(app: AppHandle, state: State<'_, McpStdio>, serve
     let lang = Lang::of(lang.as_deref());
     let inner = state.0.clone();
     blocking(move || {
-        // Resolved and hashed now: what the dialog shows is exactly what gets pinned.
-        let p = pin(&s, path_var().as_deref())?;
+        // Resolved and hashed now: what the dialog shows is exactly what gets pinned. A refusal
+        // that looked at files is one message (review 10, M6).
+        let p = approval_pin(&s, path_var().as_deref(), &vaults(&app))?;
         let changed = {
             let mut guard = inner.lock().map_err(|_| "EIO: lock")?;
             load(&app, &mut guard)?;
@@ -152,7 +160,8 @@ pub async fn mcp_stdio_revoke(app: AppHandle, state: State<'_, McpStdio>, comman
         let mut inner = inner.lock().map_err(|_| "EIO: lock")?;
         load(&app, &mut inner)?;
         let approved = inner.approved.get_or_insert_with(AllowList::default);
-        let removed = approved.revoke_key(&revoke_key_of(&s, path_var().as_deref()));
+        // Review 10, L4: also a pinned program that moved since (its path resolves elsewhere now).
+        let removed = approved.revoke(&s, path_var().as_deref());
         save(&app, approved)?;
         Ok(removed)
     })
@@ -176,7 +185,7 @@ pub async fn mcp_stdio_spawn(app: AppHandle, state: State<'_, McpStdio>, command
         // Started without the lock held (hashing the program takes a moment). checked_spawn refuses,
         // before any process exists, anything that is not exactly a pin on the allow-list (W13.X1).
         // The exit event removes the session again.
-        let session = checked_spawn(&s, &list, path_var().as_deref(), clean_env(std::env::vars()), move |e| {
+        let session = checked_spawn(&s, &list, path_var().as_deref(), &vaults(&app), clean_env(std::env::vars()), move |e| {
             let (kind, line) = match e {
                 Event::Out(l) => ("out", l),
                 Event::Err(l) => ("err", l),

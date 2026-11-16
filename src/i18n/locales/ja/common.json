@@ -2062,6 +2062,7 @@
   "mcpServers.add": "サーバーを追加",
   "mcpServers.approval.check": "承認を確認",
   "mcpServers.approval.no": "未承認か、承認後にプログラムまたは渡されるファイルが変更されています。実行前にもう一度確認されます。",
+  "mcpServers.approval.notRevoked": "取り消すものはありません：このプログラムは、この引数とフォルダーでは承認リストにありませんでした。",
   "mcpServers.approval.revoke": "承認を取り消す",
   "mcpServers.approval.revoked": "承認を取り消しました。もう一度承認するまで何も実行されません。",
   "mcpServers.approval.yes": "承認済み: このプログラムをこの引数で実行できます。",

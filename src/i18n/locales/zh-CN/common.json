@@ -2062,6 +2062,7 @@
   "mcpServers.add": "添加服务器",
   "mcpServers.approval.check": "检查批准",
   "mcpServers.approval.no": "未批准，或者程序或传给它的文件此后已更改。运行前会再次询问你。",
+  "mcpServers.approval.notRevoked": "没有可撤销的批准：此程序（使用这些参数和此文件夹）不在批准列表中。",
   "mcpServers.approval.revoke": "撤销批准",
   "mcpServers.approval.revoked": "已撤销批准。在你再次批准之前不会运行任何内容。",
   "mcpServers.approval.yes": "已批准：这个程序可以使用这些参数运行。",

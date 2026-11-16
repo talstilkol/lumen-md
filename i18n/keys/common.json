@@ -11380,6 +11380,11 @@
       "vars": []
     },
     {
+      "key": "mcpServers.approval.notRevoked",
+      "en": "Nothing to withdraw: this program, with these arguments and this folder, was not on the allow-list.",
+      "vars": []
+    },
+    {
       "key": "mcpServers.approval.revoke",
       "en": "Withdraw approval",
       "vars": []
