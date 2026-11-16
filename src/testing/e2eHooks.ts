@@ -23,6 +23,10 @@ const MODULES = {
   "lib/contentFrame": () => import("../lib/contentFrame"),
   // e2e/rtl-parity/animations.spec.ts: a toast on demand, to read its entrance (plan 9.9).
   "ui/AiToast": () => import("../ui/AiToast"),
+  // e2e/bulk-properties-1k.spec.ts: 1,000 notes in one bulk edit, timed in every engine (plan W7.4).
+  "views/bulkEditRun": () => import("../views/bulkEditRun"),
+  // e2e/voice-live-partial.spec.ts: a scripted live engine on the capture box's seam (plan W10.C8, 6.1).
+  "capture/voiceCapture": () => import("../capture/voiceCapture"),
 };
 
 export type E2eModuleName = keyof typeof MODULES;
