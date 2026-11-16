@@ -18,6 +18,7 @@
  * Code, inline code, math and raw HTML are never touched.
  */
 import { MEDIA_EXT } from "../media/mediaExt";
+import { EMBEDS_DATA_KEY } from "./remarkEmbeds";
 import type { Root } from "mdast";
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- mdast nodes are rebuilt structurally here */
@@ -102,6 +103,11 @@ export interface ObsidianOptions {
   keepComments?: boolean;
   /** Turn callouts into elements (the preview). The editor keeps them as quotes. */
   callouts?: boolean;
+  /**
+   * `false`: leave `![[image.png]]` text to remarkEmbeds (the embedded-note
+   * parser). The preview's own render decides from its embed context.
+   */
+  textImageEmbeds?: boolean;
 }
 
 export const defaultCalloutTitle = (_kind: string, type: string) => type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
@@ -258,7 +264,13 @@ function sizeProps(width?: number, height?: number): Record<string, number> {
   return p;
 }
 
-export function embedImages(tree: Root): void {
+/**
+ * `textImages: false` leaves `![[image.png]]` text alone: with an embed
+ * context, remarkEmbeds resolves it in the workspace (plan 4.7: the file's
+ * path and version, a notice when it is missing). Sized `![alt|300](x)`
+ * images and audio/video embeds are handled either way.
+ */
+export function embedImages(tree: Root, textImages = true): void {
   const walk = (parent: Node) => {
     if (!Array.isArray(parent.children)) return;
     for (let i = 0; i < parent.children.length; i++) {
@@ -291,7 +303,7 @@ export function embedImages(tree: Root): void {
             last = m.index + m[0].length;
             continue;
           }
-          if (!IMAGE_EXT.test(target)) continue;
+          if (!textImages || !IMAGE_EXT.test(target)) continue;
           const { alt, width, height } = parseEmbedParams(m[2].split("|").slice(1));
           if (m.index > last) parts.push({ type: "text", value: c.value.slice(last, m.index) });
           const props: Record<string, unknown> = { className: ["obsidian-embed"], ...sizeProps(width, height) };
@@ -384,9 +396,11 @@ export function transformCallouts(tree: Root, title: ObsidianOptions["calloutTit
 
 /** The preview's remark plugin. */
 export function remarkObsidian(options: ObsidianOptions = {}) {
-  return (tree: Root) => {
+  return (tree: Root, file?: { data?: unknown }) => {
     if (!options.keepComments) stripComments(tree);
-    embedImages(tree);
+    // A render with an embed context (file.data.lumenEmbeds, ./remarkEmbeds) leaves image embeds to it.
+    const withEmbeds = options.textImageEmbeds === false || !!(file?.data as Record<string, unknown> | undefined)?.[EMBEDS_DATA_KEY];
+    embedImages(tree, !withEmbeds);
     if (options.callouts !== false) transformCallouts(tree, options.calloutTitle);
     wrapHighlights(tree);
   };
