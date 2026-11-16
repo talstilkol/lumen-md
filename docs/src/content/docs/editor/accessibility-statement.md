@@ -91,6 +91,11 @@ Lumen is an open-source project. Its maintainer is its accessibility
 coordinator: write through the form below, or open the issue in Hebrew.
 Each report gets a reply with what will be done and when.
 
+- Coordinator: OWNER_NAME (the maintainer)
+- E-mail: OWNER_A11Y_EMAIL
+- Phone: OWNER_PHONE (optional; leave out if the clinic confirms it is not required)
+- Reply time: within 5 working days
+
 ## Report a barrier
 
 Use the [accessibility report form](https://github.com/talstilkol/lumen-md/issues/new?template=accessibility.yml)
