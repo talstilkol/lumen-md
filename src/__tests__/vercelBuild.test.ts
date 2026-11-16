@@ -19,7 +19,7 @@ const pkg = JSON.parse(readFileSync(resolve(ROOT, "package.json"), "utf8")) as {
 
 describe("scripts/vercel-build.mjs", () => {
   it("runs every gate on a preview, and only build + live:meta + budget + manifest (+ the attack tests, W10.D6, and the privacy ledger, W10.D17) in production", () => {
-    expect(gatesFor({ VERCEL_ENV: "preview" })).toEqual(["lockfile", "build", "live:meta", "budget", "secrets", "manifest", "attacks", "vitest", "e2e", "perf:gate", "i18n:check", "hygiene", "unused", "docs:sync", "docs:complete", "licenses", "mutation", "privacy:ledger"]);
+    expect(gatesFor({ VERCEL_ENV: "preview" })).toEqual(["lockfile", "build", "live:meta", "budget", "secrets", "manifest", "attacks", "vitest", "e2e", "perf:gate", "i18n:check", "hygiene", "lint", "unused", "docs:sync", "docs:complete", "licenses", "mutation", "privacy:ledger"]);
     // W10.C29: the metadata of what is deployed is checked on production builds too.
     expect(gatesFor({ VERCEL_ENV: "production" })).toEqual(["build", "live:meta", "budget", "manifest", "attacks", "privacy:ledger"]);
     // Not on Vercel: a local run reproduces a preview build.
@@ -39,6 +39,12 @@ describe("scripts/vercel-build.mjs", () => {
     expect(gateEnv("vitest", env, PREVIEW_GATES)).toEqual(env);
     expect(gateEnv("build", env, PRODUCTION_GATES)).toEqual(env);
     expect(env).toEqual({ PATH: "/bin", VITE_CSP_CONNECT_EXTRA: "https://relay.example.com" });
+  });
+
+  it("plan 0.4: ESLint (with its baseline) is a preview gate, so an empty catch without a why: fails the build", () => {
+    expect(PREVIEW_GATES).toContain("lint");
+    expect(GATES.lint).toEqual(["run", "-s", "lint"]);
+    expect(pkg.scripts.lint).toBe("eslint src");
   });
 
   it("every gate is an npm script that exists", () => {
