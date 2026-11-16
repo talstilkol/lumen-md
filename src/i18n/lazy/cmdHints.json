@@ -128,6 +128,8 @@
   "cmd.lexicon.lookup.hint": "Synonyms, definition and niqqud of the word, from the offline dictionary",
   "cmd.lexicon.pack.hint": "Definitions, synonyms and niqqud from Hebrew Wiktionary, on this device; right-click a Hebrew word to use them",
   "cmd.mail.import.hint": "A note per thread with attachments, Keep notes and Docs; files only, on this device",
+  "cmd.mcp.ask.hint": "The local agent uses your MCP servers' tools, asking before each one that needs it",
+  "cmd.mcp.settings.hint": "Add outside MCP servers and choose what their tools may do",
   "cmd.mobile.customizeToolbar.hint": "The actions above the on-screen keyboard",
   "cmd.nikud.add.hint": "Point the selection (or the whole note) on this device",
   "cmd.nikud.display.hint": "Vowel points on the preview for reading; the note itself is not changed. Run again to hide",
