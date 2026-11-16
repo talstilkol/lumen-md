@@ -40,6 +40,8 @@ function selfPath(): string | null {
 }
 
 function NoteLink({ path, name }: { path: string; name: string }) {
+  // A GROUP BY row whose key is not a note: its key as text.
+  if (!path) return <span dir="auto">{name}</span>;
   return (
     <a className="wiki-link" href="#" data-wiki-target={path.replace(/\.md$/i, "")} dir="auto">
       {name}
@@ -85,8 +87,9 @@ export default function QueryBlock({ source, lang }: Props) {
           await ensureIndex();
           const self = selfPath();
           // W2.22: the text is read from the index for this run, then let go.
-          const notes = (await indexedNotes()).filter((f) => f.path !== self);
-          next = { kind: "dataview", result: runDataview(parsed.dv, notes) };
+          // As in Dataview, the note the block is in is one of the pages (`WHERE file = this.file` lists it) and is `this`.
+          const notes = await indexedNotes();
+          next = { kind: "dataview", result: runDataview(parsed.dv, notes, Date.now(), notes.find((f) => f.path === self)) };
         } else {
           const q = parsed.q!;
           if (!q.query.trim()) next = { kind: "error", message: t("query.empty") };
@@ -197,8 +200,8 @@ export default function QueryBlock({ source, lang }: Props) {
         )}
         {!chart && out?.kind === "dataview" && count > 0 && out.result.type === "list" && (
           <ul className="lumen-query-list">
-            {out.result.rows.map((r) => (
-              <li key={r.path}>
+            {out.result.rows.map((r, i) => (
+              <li key={`${r.path}|${i}`}>
                 <NoteLink path={r.path} name={r.name} />
                 {r.cells.length > 0 && r.cells[0] !== null && (
                   <>
@@ -206,6 +209,30 @@ export default function QueryBlock({ source, lang }: Props) {
                     <Cell v={r.cells[0]} />
                   </>
                 )}
+              </li>
+            ))}
+          </ul>
+        )}
+        {!chart && out?.kind === "dataview" && count > 0 && out.result.type === "task" && (
+          <ul className="lumen-query-list lumen-query-tasks" style={{ listStyle: "none", paddingInlineStart: 0 }}>
+            {out.result.rows.map((r, i) => (
+              <li key={`${r.path}|${r.task?.line}|${i}`} data-task-status={r.task?.status}>
+                {r.group !== undefined && r.group !== out.result.rows[i - 1]?.group && (
+                  <div style={{ fontWeight: 600, marginTop: i ? 6 : 0 }} dir="auto">
+                    {r.group}
+                  </div>
+                )}
+                <label style={{ display: "inline-flex", alignItems: "baseline", gap: 6 }}>
+                  {/* Read-only here: the task is ticked in its own note. */}
+                  <input type="checkbox" checked={r.task?.completed ?? false} readOnly disabled aria-readonly="true" />
+                  <span dir="auto" style={r.task?.completed ? { textDecoration: "line-through", color: "hsl(var(--fg-muted))" } : undefined}>
+                    {r.task?.text}
+                  </span>
+                </label>
+                <span style={{ color: "hsl(var(--fg-muted))", fontSize: 12 }}>
+                  {" — "}
+                  <NoteLink path={r.path} name={r.name} />
+                </span>
               </li>
             ))}
           </ul>
@@ -222,8 +249,8 @@ export default function QueryBlock({ source, lang }: Props) {
               </tr>
             </thead>
             <tbody>
-              {out.result.rows.map((r) => (
-                <tr key={r.path}>
+              {out.result.rows.map((r, i) => (
+                <tr key={`${r.path}|${i}`}>
                   {out.result.headers.length > r.cells.length && (
                     <td>
                       <NoteLink path={r.path} name={r.name} />

@@ -42,19 +42,32 @@ TABLE status, due FROM #project WHERE status != "done" SORT due ASC
 ```
 ````
 
-- **`LIST [expr]`** ו-**`TABLE [WITHOUT ID] expr [AS "name"], …`**
+- **`LIST [expr]`**,‏ **`TABLE [WITHOUT ID] expr [AS "name"], …`** ו-**`TASK`**
+  (המשימות `- [ ]` של הפתקים, לקריאה בלבד, עם קישור לכל פתק)
 - **`FROM`**‏ `#tag`,‏ `"folder"`,‏ `[[note]]` (פתקים שמקשרים אליו), עם
   `AND`,‏ `OR`,‏ `-` וסוגריים
-- **`WHERE`** השוואות (`= != < > <= >=`), ‏`and` / `or` / `!`,‏ `+ - * /`
-- **`SORT`** שדה אחד או יותר, `ASC` / `DESC`; ‏**`LIMIT`** n
+- אחר כך, לפי סדר הכתיבה: **`WHERE`** השוואות (`= != < > <= >=`), ‏`and` /
+  `or` / `!`,‏ `+ - * /`; ‏**`SORT`** שדה אחד או יותר, `ASC` / `DESC`;
+  ‏**`LIMIT`** n; ‏**`GROUP BY`** ביטוי [`AS` שם] (אחריו `key` ו-`rows`);
+  ‏**`FLATTEN`** ביטוי [`AS` שם]
 - שדות: front matter, שדות בשורה (`key:: value`,‏ `[key:: value]`), ו-
   `file.name`,‏ `file.path`,‏ `file.folder`,‏ `file.link`,‏ `file.mtime`,
-  ‏`file.ctime`,‏ `file.size`,‏ `file.tags`,‏ `file.outlinks`
+  ‏`file.ctime`,‏ `file.day`,‏ `file.size`,‏ `file.tags`,‏ `file.outlinks`,
+  ‏`file.tasks`; ‏`this` הוא הפתק שהבלוק נמצא בו
+- משימות: `text`,‏ `status`,‏ `completed`,‏ `fullyCompleted`,‏ `checked`,
+  ‏`annotated`,‏ `section`,‏ `line`, שדות `[key:: value]` שלהן והתאריכים של
+  תוסף Tasks ‏(📅 `due`,‏ ⏳ `scheduled`,‏ 🛫 `start`,‏ ➕ `created`,‏ ✅
+  `completion`); למשימה יש גם את השדות של הפתק שלה
 - פונקציות: `contains`,‏ `icontains`,‏ `startswith`,‏ `endswith`,‏ `length`,
   ‏`lower`,‏ `upper`,‏ `date(today)`,‏ `dur(7 days)`,‏ `default`,‏ `choice`,
-  ‏`round`,‏ `number`,‏ `string`,‏ `join`,‏ `regexmatch`
+  ‏`round`,‏ `number`,‏ `string`,‏ `join`,‏ `regexmatch`,‏ `dateformat`,‏ `split`,
+  ‏`replace`,‏ `substring`,‏ `truncate`,‏ `padleft`,‏ `sum`,‏ `min`,‏ `max`,
+  ‏`average`,‏ `reverse`,‏ `sort`,‏ `flat`,‏ `nonnull`,‏ `link`,‏ `meta`,
+  ‏`typeof`, ו-`filter`,‏ `map`,‏ `any`,‏ `all`,‏ `none` עם `(x) => …`
+- ‏`.days`,‏ `.year`,‏ `.month` … על משך זמן או תאריך:
+  ‏`(date(today) - file.day).days`
 
-‏`TASK`,‏ `CALENDAR`,‏ `GROUP BY`,‏ `FLATTEN` ו-DataviewJS לא נתמכים: הבלוק
+‏`CALENDAR` ו-DataviewJS לא נתמכים: הבלוק
 אומר זאת במקום לנחש. שום דבר בשאילתה לא רץ כקוד — השפה מפוענחת ומפורשת,
 ובדיקה מוודאת שאין `eval` בקוד השאילתות.
 

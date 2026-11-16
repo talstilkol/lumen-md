@@ -45,19 +45,33 @@ TABLE status, due FROM #project WHERE status != "done" SORT due ASC
 ```
 ````
 
-- **`LIST [expr]`** and **`TABLE [WITHOUT ID] expr [AS "name"], …`**
+- **`LIST [expr]`**, **`TABLE [WITHOUT ID] expr [AS "name"], …`** and
+  **`TASK`** (the `- [ ]` tasks of the notes, read-only, with a link to each
+  note)
 - **`FROM`** `#tag`, `"folder"`, `[[note]]` (notes that link to it), with
   `AND`, `OR`, `-` and parentheses
-- **`WHERE`** comparisons (`= != < > <= >=`), `and` / `or` / `!`, `+ - * /`
-- **`SORT`** one or more fields, `ASC` / `DESC`; **`LIMIT`** n
+- Then, in the order written: **`WHERE`** comparisons (`= != < > <= >=`),
+  `and` / `or` / `!`, `+ - * /`; **`SORT`** one or more fields, `ASC` /
+  `DESC`; **`LIMIT`** n; **`GROUP BY`** expr [`AS` name] (`key` and `rows`
+  after it); **`FLATTEN`** expr [`AS` name]
 - Fields: front matter, inline fields (`key:: value`, `[key:: value]`) and
   `file.name`, `file.path`, `file.folder`, `file.link`, `file.mtime`,
-  `file.ctime`, `file.size`, `file.tags`, `file.outlinks`
+  `file.ctime`, `file.day`, `file.size`, `file.tags`, `file.outlinks`,
+  `file.tasks`; `this` is the note the block is in
+- Tasks: `text`, `status`, `completed`, `fullyCompleted`, `checked`,
+  `annotated`, `section`, `line`, their `[key:: value]` fields and the Tasks
+  plugin's dates (📅 `due`, ⏳ `scheduled`, 🛫 `start`, ➕ `created`,
+  ✅ `completion`); a task also has its note's fields
 - Functions: `contains`, `icontains`, `startswith`, `endswith`, `length`,
   `lower`, `upper`, `date(today)`, `dur(7 days)`, `default`, `choice`,
-  `round`, `number`, `string`, `join`, `regexmatch`
+  `round`, `number`, `string`, `join`, `regexmatch`, `dateformat`, `split`,
+  `replace`, `substring`, `truncate`, `padleft`, `sum`, `min`, `max`,
+  `average`, `reverse`, `sort`, `flat`, `nonnull`, `link`, `meta`,
+  `typeof`, and `filter`, `map`, `any`, `all`, `none` with `(x) => …`
+- `.days`, `.year`, `.month` … on a duration or a date:
+  `(date(today) - file.day).days`
 
-`TASK`, `CALENDAR`, `GROUP BY`, `FLATTEN` and DataviewJS are not supported:
+`CALENDAR` and DataviewJS are not supported:
 the block says so instead of guessing. Nothing in a query is run as code —
 the language is parsed and interpreted, and a test checks that the query
 code has no `eval`.

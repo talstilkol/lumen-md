@@ -2,17 +2,18 @@
  * A subset of Obsidian Dataview's query language (plan W2.12), so the
  * ```dataview blocks in vaults that come from Obsidian render here too:
  *
- *   LIST [expr] | TABLE [WITHOUT ID] expr [AS "name"], …
+ *   LIST [expr] | TABLE [WITHOUT ID] expr [AS "name"], … | TASK
  *   [FROM #tag | "folder" | [[note]] | -source, combined with AND / OR / ( )]
- *   [WHERE expr]
- *   [SORT expr [ASC|DESC], …]
- *   [LIMIT n]
+ *   then, in any order and as often as written:
+ *   WHERE expr · SORT expr [ASC|DESC], … · LIMIT n · GROUP BY expr [AS name] · FLATTEN expr [AS name]
  *
  * Expressions: numbers, "strings", true/false/null, fields (`status`,
  * `file.name`, `file.mtime`, nested `a.b`), comparisons (= != < > <= >=),
  * + - * /, and / or / !, and the common functions (contains, icontains,
  * startswith, endswith, length, lower, upper, date, default, choice, round,
- * number, string, regexmatch, join, list).
+ * number, string, regexmatch, join, list, dateformat, split, replace, sum,
+ * min, max, …), and `(x) => …` inside filter, map, any, all, none and sort.
+ * `file.tasks`, `file.day` and `this` (the note the block is in) as in Dataview.
  *
  * A hand-written tokenizer, parser and interpreter: no eval, no Function,
  * nothing from the query reaches JavaScript as code (a static check in the
@@ -20,6 +21,8 @@
  */
 
 import { DataviewError, type Expr, type Source, type DvQuery } from "./dataviewParse";
+import { tasksOf, taskValue } from "./dataviewTasks";
+import { formatDate, isoWeek } from "./dataviewDates";
 export { DataviewError, parseDataview, type Expr, type Source, type DvQuery } from "./dataviewParse";
 
 /* ─── Values ─────────────────────────────────────────────────────── */
@@ -148,11 +151,13 @@ export function dvTags(content: string): string[] {
 
 /** Outgoing wiki-link targets. */
 function outlinks(content: string): string[] {
-  return [...content.matchAll(/\[\[([^\]|#]+)(?:[#|][^\]]*)?\]\]/g)].map((m) => m[1].trim());
+  // A [[link]] in code (a ```dataview block's FROM [[note]]) is not a link.
+  const text = content.replace(/^([ \t>]*)(```|~~~)[^\n]*\n[\s\S]*?(?:\n\1\2[^\n]*|(?![\s\S]))/gm, " ").replace(/`+[^`\n]*`+/g, " ");
+  return [...text.matchAll(/\[\[([^\]|#]+)(?:[#|][^\]]*)?\]\]/g)].map((m) => m[1].trim());
 }
 
 /** The page object of a note: its fields, and `file`. */
-export function pageOf(note: DvNote): Record<string, Value> {
+export function pageOf(note: DvNote, self?: DvNote): Record<string, Value> {
   const name = note.name.replace(/\.md$/i, "");
   const folder = note.path.includes("/") ? note.path.slice(0, note.path.lastIndexOf("/")) : "";
   const tags = dvTags(note.content);
@@ -171,6 +176,12 @@ export function pageOf(note: DvNote): Record<string, Value> {
     outlinks: outlinks(note.content).map((l) => ({ link: l, display: l })),
   };
   const fields = { ...inlineFields(note.content), ...frontMatter(note.content) };
+  // file.day: the date in the note's name (daily notes), else its `date` field.
+  const day = /(\d{4}-\d{2}-\d{2})/.exec(name)?.[1];
+  const dayValue = day ? scalar(day) : fields.date instanceof DateValue ? fields.date : null;
+  if (dayValue) file.day = dayValue;
+  // Parsed now (cheap test first), so a cached page does not keep the note's text.
+  file.tasks = HAS_TASK.test(note.content) ? tasksOf(note.content).map((t) => taskValue(t, note.path, scalar)) : [];
   const page: Record<string, Value> = {};
   for (const [k, v] of Object.entries(fields)) {
     page[k] = v;
@@ -179,6 +190,34 @@ export function pageOf(note: DvNote): Record<string, Value> {
     if (!(norm in page)) page[norm] = v;
   }
   page.file = file;
+  return self ? { ...page, this: pageOf(self) } : page;
+}
+
+const HAS_TASK = /^[ \t]*(?:[-*+]|\d+[.)])[ \t]+\[.\]/m;
+
+/**
+ * The pages of the last runs, by path: a save re-reads only the note that
+ * changed (W2.12 "update after a save < 100 ms"). Keyed by modified time,
+ * size and a hash of the text, so an edit that keeps the time is still seen;
+ * the text itself is not kept.
+ */
+const PAGES = new Map<string, { stamp: string; page: Record<string, Value> }>();
+const PAGE_CACHE_MAX = 50_000;
+
+function stampOf(n: DvNote): string {
+  let h = 0x811c9dc5;
+  const s = n.content;
+  for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 0x01000193);
+  return `${n.name}|${n.modified}|${n.created ?? ""}|${s.length}|${h >>> 0}`;
+}
+
+function cachedPage(n: DvNote): Record<string, Value> {
+  const stamp = stampOf(n);
+  const hit = PAGES.get(n.path);
+  if (hit && hit.stamp === stamp) return hit.page;
+  const page = pageOf(n);
+  if (PAGES.size >= PAGE_CACHE_MAX) PAGES.clear();
+  PAGES.set(n.path, { stamp, page });
   return page;
 }
 
@@ -315,6 +354,77 @@ function call(fn: string, args: Value[], now: number): Value {
       const unit = m[2][0] === "w" ? 7 * DAY : m[2][0] === "d" ? DAY : m[2][0] === "h" ? 3_600_000 : 60_000;
       return n * unit;
     }
+    case "any":
+      return Array.isArray(a) ? a.some(truthy) : truthy(a ?? null);
+    case "all":
+      return Array.isArray(a) ? a.every(truthy) : truthy(a ?? null);
+    case "none":
+      return Array.isArray(a) ? !a.some(truthy) : !truthy(a ?? null);
+    case "sum":
+    case "product":
+    case "average":
+    case "min":
+    case "max": {
+      const list = Array.isArray(a) ? a : args;
+      const nums = list.map(toNum).filter((n): n is number => n !== null);
+      if (!nums.length) return null;
+      if (fn === "sum") return nums.reduce((x, y) => x + y, 0);
+      if (fn === "product") return nums.reduce((x, y) => x * y, 1);
+      if (fn === "average") return nums.reduce((x, y) => x + y, 0) / nums.length;
+      const best = list.reduce<Value>((m, x) => (x === null ? m : m === null || (fn === "min" ? compare(x, m) < 0 : compare(x, m) > 0) ? x : m), null);
+      return best;
+    }
+    case "reverse":
+      return Array.isArray(a) ? [...a].reverse() : typeof a === "string" ? [...a].reverse().join("") : (a ?? null);
+    case "sort":
+      return Array.isArray(a) ? [...a].sort(compare) : (a ?? null);
+    case "flat":
+      return Array.isArray(a) ? a.flat(typeof b === "number" ? b : 1) as Value[] : (a ?? null);
+    case "nonnull":
+      return (Array.isArray(a) ? a : args).filter((x) => x !== null);
+    case "firstvalue":
+      return (Array.isArray(a) ? a : args).find((x) => x !== null) ?? null;
+    case "array":
+      return Array.isArray(a) ? a : a === null || a === undefined ? [] : [a];
+    case "typeof":
+      return a === null || a === undefined ? "null" : Array.isArray(a) ? "array" : a instanceof DateValue ? "date" : isLink(a) ? "link" : typeof a === "object" ? "object" : typeof a;
+    case "link":
+      return typeof a === "string" ? { link: a, display: typeof b === "string" ? b : a.replace(/\.md$/i, "").split("/").pop()! } : isLink(a ?? null) ? (a as LinkValue) : null;
+    case "split":
+      return typeof a === "string" && typeof b === "string" ? a.split(b) : null;
+    case "replace":
+      return typeof a === "string" && typeof b === "string" && typeof c === "string" ? a.split(b).join(c) : (a ?? null);
+    case "substring": {
+      if (typeof a !== "string") return null;
+      return a.substring(toNum(b ?? null) ?? 0, c === undefined ? undefined : (toNum(c) ?? undefined));
+    }
+    case "truncate": {
+      const n = toNum(b ?? null);
+      if (typeof a !== "string" || n === null || a.length <= n) return a ?? null;
+      const tail = typeof c === "string" ? c : "...";
+      return a.slice(0, Math.max(0, n - tail.length)) + tail;
+    }
+    case "padleft":
+    case "padright": {
+      const n = toNum(b ?? null) ?? 0;
+      const fill = typeof c === "string" && c ? c : " ";
+      const str = show(a ?? null);
+      return fn === "padleft" ? str.padStart(n, fill) : str.padEnd(n, fill);
+    }
+    case "containsword":
+      return typeof a === "string" && typeof b === "string" && a.toLowerCase().split(/[^\p{L}\p{N}]+/u).includes(b.toLowerCase());
+    case "striptime":
+      return a instanceof DateValue ? new DateValue(Math.floor(a.ms / DAY) * DAY) : (a ?? null);
+    case "dateformat":
+      return a instanceof DateValue && typeof b === "string" ? formatDate(a.ms, b) : a === null || a === undefined ? null : show(a);
+    case "meta": {
+      if (!isLink(a ?? null)) return null;
+      const l = a as LinkValue;
+      const hash = l.link.indexOf("#");
+      return { path: hash < 0 ? l.link : l.link.slice(0, hash), subpath: hash < 0 ? null : l.link.slice(hash + 1), display: l.display, type: hash < 0 ? "file" : l.link[hash + 1] === "^" ? "block" : "header", embed: false };
+    }
+    case "__get":
+      return member(a ?? null, typeof b === "string" ? b : show(b ?? null));
     case "__index": {
       if (Array.isArray(a) && typeof b === "number") return a[b] ?? null;
       if (a && typeof a === "object" && !Array.isArray(a) && !(a instanceof DateValue) && typeof b === "string") return (a as Record<string, Value>)[b] ?? null;
@@ -325,6 +435,53 @@ function call(fn: string, args: Value[], now: number): Value {
   }
 }
 
+const LAMBDA_FNS = new Set(["filter", "map", "any", "all", "none", "sort"]);
+
+/** filter / map / any / all / none / sort with a `(x) => …`: the function runs on each item with x bound. */
+function callWithLambda(fn: string, args: Expr[], page: Record<string, Value>, now: number): Value {
+  const [listExpr, fnExpr] = args;
+  const raw = listExpr ? evaluate(listExpr, page, now) : null;
+  const list = Array.isArray(raw) ? raw : raw === null ? [] : [raw];
+  if (fnExpr?.k !== "lambda") throw new DataviewError(`${fn}() takes a list and a function (x) => …`);
+  const { params, body } = fnExpr;
+  const apply = (x: Value, i: number) => evaluate(body, { ...page, [params[0] ?? "_"]: x, ...(params[1] ? { [params[1]]: i } : {}) }, now);
+  switch (fn) {
+    case "filter":
+      return list.filter((x, i) => truthy(apply(x, i)));
+    case "map":
+      return list.map(apply);
+    case "any":
+      return list.some((x, i) => truthy(apply(x, i)));
+    case "all":
+      return list.every((x, i) => truthy(apply(x, i)));
+    case "none":
+      return !list.some((x, i) => truthy(apply(x, i)));
+    default: {
+      const keyed = list.map((x, i) => ({ x, k: apply(x, i) }));
+      keyed.sort((p, q) => compare(p.k, q.k));
+      return keyed.map((e) => e.x);
+    }
+  }
+}
+
+/** `.name` on a value: a duration's days / hours …, a date's year / month / day …, a link's path, an object's key. */
+function member(v: Value, part: string): Value {
+  const low = part.toLowerCase();
+  if (typeof v === "number") {
+    const unit: Record<string, number> = { milliseconds: 1, seconds: 1000, minutes: 60_000, hours: 3_600_000, days: DAY, weeks: 7 * DAY, months: 30 * DAY, years: 365 * DAY };
+    return low in unit ? v / unit[low] : null;
+  }
+  if (v instanceof DateValue) {
+    const d = new Date(v.ms);
+    const parts: Record<string, number> = { year: d.getUTCFullYear(), month: d.getUTCMonth() + 1, day: d.getUTCDate(), hour: d.getUTCHours(), minute: d.getUTCMinutes(), second: d.getUTCSeconds(), millisecond: d.getUTCMilliseconds(), weekday: d.getUTCDay() || 7, weeknumber: isoWeek(d), week: isoWeek(d) };
+    return low in parts ? parts[low] : null;
+  }
+  if (isLink(v)) return low === "path" ? v.link : low === "display" ? v.display : null;
+  if (Array.isArray(v)) return v.map((x) => member(x, part));
+  if (v && typeof v === "object") return part in v ? (v as Record<string, Value>)[part] : ((v as Record<string, Value>)[low] ?? null);
+  return null;
+}
+
 function field(page: Record<string, Value>, path: string[]): Value {
   let v: Value = page;
   for (const part of path) {
@@ -333,7 +490,11 @@ function field(page: Record<string, Value>, path: string[]): Value {
       v = v.map((x) => (x && typeof x === "object" && !Array.isArray(x) && !(x instanceof DateValue) ? ((x as Record<string, Value>)[part] ?? null) : null));
       continue;
     }
-    if (!v || typeof v !== "object" || v instanceof DateValue) return null;
+    if (v instanceof DateValue || isLink(v)) {
+      v = member(v, part);
+      continue;
+    }
+    if (!v || typeof v !== "object") return null;
     const obj = v as Record<string, Value>;
     v = part in obj ? obj[part] : (obj[part.toLowerCase()] ?? null);
   }
@@ -355,7 +516,10 @@ export function evaluate(e: Expr, page: Record<string, Value>, now: number): Val
       return n === null ? null : -n;
     }
     case "call":
+      if (LAMBDA_FNS.has(e.fn) && e.args.some((x) => x.k === "lambda")) return callWithLambda(e.fn, e.args, page, now);
       return call(e.fn, e.args.map((x) => evaluate(x, page, now)), now);
+    case "lambda":
+      throw new DataviewError("a function (x) => … goes only inside filter, map, any, all, none or sort");
     case "bin": {
       if (e.op === "and") return truthy(evaluate(e.a, page, now)) && truthy(evaluate(e.b, page, now));
       if (e.op === "or") return truthy(evaluate(e.a, page, now)) || truthy(evaluate(e.b, page, now));
@@ -424,36 +588,121 @@ function inSource(s: Source, page: Record<string, Value>): boolean {
 }
 
 export interface DvResult {
-  type: "list" | "table";
-  /** Column headers (TABLE: "File" first unless WITHOUT ID). */
+  type: "list" | "table" | "task";
+  /** Column headers (TABLE: "File" first unless WITHOUT ID; the group's name after GROUP BY). */
   headers: string[];
-  rows: Array<{ path: string; name: string; cells: Value[] }>;
+  /**
+   * One per note — or per group after GROUP BY (path: the key's note when the
+   * key is a link, else ""), or per task in a TASK query.
+   */
+  rows: Array<{ path: string; name: string; cells: Value[]; task?: { text: string; status: string; completed: boolean; line: number }; group?: string }>;
 }
 
-/** Run a parsed query over the notes. `now` makes date(today) deterministic in tests. */
-export function runDataview(q: DvQuery, notes: readonly DvNote[], now = Date.now()): DvResult {
-  const pages = notes.filter((n) => /\.md$/i.test(n.name)).map((n) => ({ n, page: pageOf(n) }));
-  let hits = pages.filter(({ page }) => (!q.from || inSource(q.from, page)) && (!q.where || truthy(evaluate(q.where, page, now))));
-  if (q.sort.length) {
-    const keyed = hits.map((h) => ({ h, keys: q.sort.map((s) => evaluate(s.e, h.page, now)) }));
-    keyed.sort((x, y) => {
-      for (let i = 0; i < q.sort.length; i++) {
-        const c = compare(x.keys[i], y.keys[i]);
-        if (c) return q.sort[i].desc ? -c : c;
-      }
-      return x.h.n.path < y.h.n.path ? -1 : 1;
+interface Row {
+  page: Record<string, Value>;
+  note?: DvNote;
+  line?: number;
+  /** After GROUP BY: the rows in this group. */
+  members?: Row[];
+}
+
+function setPath(page: Record<string, Value>, path: string[], v: Value): Record<string, Value> {
+  const out = { ...page };
+  if (path.length === 1) out[path[0]] = v;
+  else {
+    const inner = out[path[0]];
+    out[path[0]] = setPath(inner && typeof inner === "object" && !Array.isArray(inner) && !(inner instanceof DateValue) ? (inner as Record<string, Value>) : {}, path.slice(1), v);
+  }
+  return out;
+}
+
+/**
+ * Run a parsed query over the notes. `now` makes date(today) deterministic in
+ * tests; `self` is the note the block is in (`this`).
+ */
+export function runDataview(q: DvQuery, notes: readonly DvNote[], now = Date.now(), self?: DvNote): DvResult {
+  const thisPage = self ? pageOf(self) : null;
+  const pages = notes
+    .filter((n) => /\.md$/i.test(n.name))
+    .map((n) => {
+      const page = cachedPage(n);
+      return { note: n, page: thisPage ? { ...page, this: thisPage } : page };
+    })
+    .filter(({ page }) => !q.from || inSource(q.from, page))
+    .sort((x, y) => (x.note.path < y.note.path ? -1 : x.note.path > y.note.path ? 1 : 0));
+  let rows: Row[] = pages;
+  if (q.type === "task") {
+    rows = pages.flatMap(({ note, page }) => {
+      const file = page.file as Record<string, Value>;
+      const tasks = file.tasks as Array<Record<string, Value>>;
+      if (!tasks.length) return [];
+      // A task inherits its page's fields (Dataview), but not the bracketed fields of the note's other tasks: those are theirs.
+      const own = tasksOf(note.content);
+      const fm = frontMatter(note.content);
+      const theirs = new Set(own.flatMap((t) => Object.keys(t.fields).flatMap((k) => [k, k.toLowerCase().replace(/\s+/g, "-")])).filter((k) => !(k in fm)));
+      const inherited = Object.fromEntries(Object.entries(page).filter(([k]) => !theirs.has(k)));
+      return tasks.map((t) => ({ note, line: t.line as number, page: { ...inherited, ...t, file } }));
     });
-    hits = keyed.map((k) => k.h);
-  } else hits.sort((x, y) => (x.n.path < y.n.path ? -1 : x.n.path > y.n.path ? 1 : 0));
-  if (q.limit !== null) hits = hits.slice(0, q.limit);
-  const headers = q.type === "table" ? [...(q.withoutId ? [] : ["File"]), ...q.fields.map((f) => f.name)] : [];
+  }
+  // Old callers built queries before `steps`: the merged clauses, in the old order.
+  const steps = q.steps ?? [...(q.where ? [{ k: "where" as const, e: q.where }] : []), ...(q.sort.length ? [{ k: "sort" as const, keys: q.sort }] : []), ...(q.limit !== null ? [{ k: "limit" as const, n: q.limit }] : [])];
+  let groupName: string | null = null;
+  for (const step of steps) {
+    if (step.k === "where") rows = rows.filter((r) => truthy(evaluate(step.e, r.page, now)));
+    else if (step.k === "limit") rows = rows.slice(0, step.n);
+    else if (step.k === "sort") {
+      const keyed = rows.map((r) => ({ r, keys: step.keys.map((s) => evaluate(s.e, r.page, now)) }));
+      keyed.sort((x, y) => {
+        for (let i = 0; i < step.keys.length; i++) {
+          const c = compare(x.keys[i], y.keys[i]);
+          if (c) return step.keys[i].desc ? -c : c;
+        }
+        return 0;
+      });
+      rows = keyed.map((k) => k.r);
+    } else if (step.k === "flatten") {
+      rows = rows.flatMap((r) => {
+        const v = evaluate(step.e, r.page, now);
+        return (Array.isArray(v) ? v : [v]).map((x) => ({ ...r, page: setPath(r.page, step.name, x) }));
+      });
+    } else {
+      const groups = new Map<string, { key: Value; members: Row[] }>();
+      for (const r of rows) {
+        const key = evaluate(step.e, r.page, now);
+        const id = isLink(key) ? "link:" + linkKey(key) : JSON.stringify(key instanceof DateValue ? key.ms : key);
+        const g = groups.get(id) ?? groups.set(id, { key, members: [] }).get(id)!;
+        g.members.push(r);
+      }
+      const sorted = [...groups.values()].sort((a, b) => compare(a.key, b.key));
+      // A group is a row with no note of its own: `key`, `rows` (its members' pages) and the key under the group's name.
+      rows = sorted.map((g) => ({ page: { key: g.key, rows: g.members.map((m) => m.page), [step.name]: g.key }, members: g.members }));
+      groupName = step.name;
+    }
+  }
+  if (q.type === "task") {
+    const out: DvResult["rows"] = [];
+    const push = (r: Row, group?: string) => {
+      const p = r.page;
+      out.push({ path: r.note!.path, name: r.note!.name.replace(/\.md$/i, ""), cells: [p.text ?? null], task: { text: String(p.text ?? ""), status: String(p.status ?? " "), completed: p.completed === true, line: r.line ?? 0 }, ...(group !== undefined ? { group } : {}) });
+    };
+    for (const r of rows) {
+      if (r.members) r.members.forEach((m) => push(m, show(r.page.key ?? null)));
+      else push(r);
+    }
+    return { type: "task", headers: [], rows: out };
+  }
+  const headers = q.type === "table" ? [...(q.withoutId ? [] : [groupName ?? "File"]), ...q.fields.map((f) => f.name)] : [];
   return {
     type: q.type,
     headers,
-    rows: hits.map(({ n, page }) => ({
-      path: n.path,
-      name: n.name.replace(/\.md$/i, ""),
-      cells: q.fields.map((f) => evaluate(f.e, page, now)),
-    })),
+    rows: rows.map((r) => {
+      const key = r.page.key;
+      const grouped = !r.note;
+      return {
+        path: grouped ? (isLink(key ?? null) ? (key as LinkValue).link : "") : r.note!.path,
+        name: grouped ? show(key ?? null) : r.note!.name.replace(/\.md$/i, ""),
+        cells: q.fields.map((f) => evaluate(f.e, r.page, now)),
+      };
+    }),
   };
 }
