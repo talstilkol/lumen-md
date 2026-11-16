@@ -3,6 +3,8 @@
  * code, links or the frontmatter changes, and each rule can be turned off.
  */
 import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { applyEdits, editsForKeystroke, hebrewTypography, keystrokeEdits, protectedRanges, RLM, typographyEdits, TYPO_RULES, type TypoRule } from "../text/hebrewTypography";
 
 /** [what was typed, what it becomes with every rule on]. */
@@ -219,6 +221,24 @@ describe("Ctrl+Z on a fix sticks (W2.9)", () => {
     expect(keystrokeEdits(text, {}, { from: 0, to: 4 }, 4)).toEqual([expect.objectContaining({ from: 2, to: 3, insert: "״" })]);
     const q = 'אמר "שלום" ';
     expect(applyEdits(q, keystrokeEdits(q, {}, { from: 0, to: q.length }, q.length))).toBe('אמר "שלום” ');
+  });
+
+  it("review 11, L3: a fix that was offered but never made (its dispatch dropped) is made at the next key; a made and undone one is not", () => {
+    const first = keystrokeEdits("ג'", {}, { from: 0, to: 2 }, 2);
+    expect(first).toEqual([expect.objectContaining({ from: 1, to: 2, insert: "׳" })]);
+    const text = "ג'י";
+    const line = { from: 0, to: 3 };
+    // Made, then Ctrl+Z: not again (as before, also with no record of what was made).
+    expect(keystrokeEdits(text, {}, line, 3, first)).toEqual([]);
+    expect(keystrokeEdits(text, {}, line, 3)).toEqual([]);
+    // Never made (the text changed before the dispatch ran): the next key makes it.
+    expect(applyEdits(text, keystrokeEdits(text, {}, line, 3, []))).toBe("ג׳י");
+  });
+
+  it("review 11, L3: the editor records the fix it dispatched, and only that one", () => {
+    const src = readFileSync(join(__dirname, "../editor/hebrewTypographyExtension.ts"), "utf8");
+    expect(src).toMatch(/, head, this\.made\)/);
+    expect(src).toMatch(/if \(this\.view\.state\.doc !== doc\) return;\s*this\.made = edits;/);
   });
 
   it("only the line being typed is looked at", () => {
