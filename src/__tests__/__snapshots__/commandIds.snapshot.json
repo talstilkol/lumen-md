@@ -2271,6 +2271,41 @@
       "icon": "Sparkles"
     },
     {
+      "id": "writing.toneFormal",
+      "label": "Writing: Formal Tone (3 versions)",
+      "group": "Tools",
+      "hint": "Rewrite the selection formally; numbers, names and negations are checked",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.toneNeutral",
+      "label": "Writing: Neutral Tone (3 versions)",
+      "group": "Tools",
+      "hint": "Rewrite the selection plainly; numbers, names and negations are checked",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.toneFriendly",
+      "label": "Writing: Friendly Tone (3 versions)",
+      "group": "Tools",
+      "hint": "Rewrite the selection warmly; numbers, names and negations are checked",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.registerHigh",
+      "label": "Writing: High Hebrew Register",
+      "group": "Tools",
+      "hint": "עברית גבוהה ותקנית for the selection, meaning checked",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.registerSpoken",
+      "label": "Writing: Spoken Hebrew Register",
+      "group": "Tools",
+      "hint": "עברית מדוברת וטבעית for the selection, meaning checked",
+      "icon": "Sparkles"
+    },
+    {
       "id": "writing.panel",
       "label": "Writing: Show Suggestions",
       "group": "Tools",
@@ -4709,6 +4744,41 @@
       "icon": "Sparkles"
     },
     {
+      "id": "writing.toneFormal",
+      "label": "Writing: Formal Tone (3 versions)",
+      "group": "Tools",
+      "hint": "Rewrite the selection formally; numbers, names and negations are checked",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.toneNeutral",
+      "label": "Writing: Neutral Tone (3 versions)",
+      "group": "Tools",
+      "hint": "Rewrite the selection plainly; numbers, names and negations are checked",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.toneFriendly",
+      "label": "Writing: Friendly Tone (3 versions)",
+      "group": "Tools",
+      "hint": "Rewrite the selection warmly; numbers, names and negations are checked",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.registerHigh",
+      "label": "Writing: High Hebrew Register",
+      "group": "Tools",
+      "hint": "עברית גבוהה ותקנית for the selection, meaning checked",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.registerSpoken",
+      "label": "Writing: Spoken Hebrew Register",
+      "group": "Tools",
+      "hint": "עברית מדוברת וטבעית for the selection, meaning checked",
+      "icon": "Sparkles"
+    },
+    {
       "id": "writing.panel",
       "label": "Writing: Show Suggestions",
       "group": "Tools",
@@ -5064,6 +5134,11 @@
     "academic.ics",
     "writing.coach",
     "writing.proofreadHe",
+    "writing.toneFormal",
+    "writing.toneNeutral",
+    "writing.toneFriendly",
+    "writing.registerHigh",
+    "writing.registerSpoken",
     "writing.panel",
     "types.page",
     "types.studio"
