@@ -31,6 +31,8 @@ const MODULES = {
   "storage/history": () => import("../storage/history"),
   // e2e/conflict-3way.spec.ts: the conflict dialog as sync opens it (W12.S3).
   "sync/cloud/ConflictDialog": () => import("../sync/cloud/ConflictDialog"),
+  // e2e/paged-preview.spec.ts: the PDF export's document, printed to count its pages (W13.R10).
+  "ui/PrintExport": () => import("../ui/PrintExport"),
 };
 
 export type E2eModuleName = keyof typeof MODULES;
