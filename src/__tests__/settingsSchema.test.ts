@@ -61,7 +61,8 @@ function storedKeys(): Map<string, string> {
     for (const m of src.matchAll(/(?:localStorage|sessionStorage)\??\.(?:getItem|setItem|removeItem)\(\s*["'`]([^"'`]+)["'`]/g)) add(star(m[1]), file);
     const consts = new Map<string, string>();
     for (const m of src.matchAll(/const\s+([A-Za-z_$][\w$]*)\s*=\s*["'`]([^"'`]+)["'`]/g)) consts.set(m[1], m[2]);
-    for (const m of src.matchAll(/(?:localStorage|sessionStorage)\??\.(?:getItem|setItem|removeItem)\(\s*([A-Za-z_$][\w$]*)\s*[,)]/g)) {
+    // A Storage passed in (`storage`, `local`: safeStorage() or a parameter, as in savedSearchStore.ts) reads the same keys.
+    for (const m of src.matchAll(/\b(?:localStorage|sessionStorage|storage|local)\??\.(?:getItem|setItem|removeItem)\(\s*([A-Za-z_$][\w$]*)\s*[,)]/g)) {
       const value = consts.get(m[1]);
       if (value) add(star(value), file);
     }
