@@ -303,6 +303,8 @@
   "backup.webdav.noPassword": "Le mot de passe WebDAV n'est pas sur cet appareil : configurez de nouveau le serveur dans Sauvegardes.",
   "backup.webdav.note": "Les archives vont dans un dossier lumen-backups sur ce serveur. Le mot de passe est conservé dans le coffre à secrets, pas avec les réglages de sauvegarde.",
   "backup.webdav.password": "Mot de passe",
+  "backup.webdav.plainLocalOnly": "Une sauvegarde non chiffrée vers un serveur WebDAV est refusée avec la politique de confidentialité « local uniquement ». Choisissez la sauvegarde chiffrée, ou une autre politique.",
+  "backup.webdav.plainWarning": "Non chiffré : la personne qui gère le serveur peut lire vos notes. Avec la politique de confidentialité « local uniquement », ce choix est refusé.",
   "backup.webdav.title": "Sauvegarder sur un serveur WebDAV",
   "backup.webdav.url": "Adresse WebDAV (https)",
   "backup.webdav.useAge": "Utiliser ce serveur, chiffré",

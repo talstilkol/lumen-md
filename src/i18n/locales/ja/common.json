@@ -303,6 +303,8 @@
   "backup.webdav.noPassword": "この端末に WebDAV のパスワードがありません。「バックアップ」でサーバーをもう一度設定してください。",
   "backup.webdav.note": "アーカイブはそのサーバーの lumen-backups フォルダーに保存されます。パスワードはバックアップ設定ではなく、シークレットストアに保管されます。",
   "backup.webdav.password": "パスワード",
+  "backup.webdav.plainLocalOnly": "「ローカルのみ」のプライバシーポリシーでは、WebDAV サーバーへの暗号化なしのバックアップは拒否されます。暗号化されたバックアップか、別のポリシーを選んでください。",
+  "backup.webdav.plainWarning": "暗号化されません。サーバーの運営者はあなたのノートを読めます。プライバシーポリシーが「ローカルのみ」のときは、この選択は拒否されます。",
   "backup.webdav.title": "WebDAV サーバーにバックアップ",
   "backup.webdav.url": "WebDAV のアドレス（https）",
   "backup.webdav.useAge": "このサーバーを暗号化して使う",

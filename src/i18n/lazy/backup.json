@@ -32,6 +32,8 @@
   "backup.webdav.noPassword": "The WebDAV password is not on this device: set the server up again in Backups.",
   "backup.webdav.note": "Archives go into a lumen-backups folder there. The password is kept in the secret store, not with the backup settings.",
   "backup.webdav.password": "Password",
+  "backup.webdav.plainLocalOnly": "A plain (not encrypted) backup to a WebDAV server is refused under the local-only privacy policy. Choose the encrypted backup, or another policy.",
+  "backup.webdav.plainWarning": "Not encrypted: whoever runs the server can read your notes. Under the local-only privacy policy this choice is refused.",
   "backup.webdav.title": "Back up to a WebDAV server",
   "backup.webdav.url": "WebDAV address (https)",
   "backup.webdav.useAge": "Use this server, encrypted",

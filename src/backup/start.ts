@@ -28,7 +28,18 @@ export async function targetFor(c: BackupConfig, deps: { fetch?: typeof fetch; p
     const root = `${c.url.replace(/\/+$/, "")}/lumen-backups/`;
     const provider = webdavProvider({ url: root, username: c.username, password }, deps.fetch ? { fetch: deps.fetch } : {});
     if (deps.probe) await provider.probe();
-    return providerTarget(provider, c.label, "");
+    const target = providerTarget(provider, c.label, "");
+    if (c.mode.kind !== "plain") return target;
+    // R8-M2: a plain archive is the vault readable on someone's server: each upload is in the privacy
+    // ledger, and local-only refuses it (an age-encrypted one is ciphertext, like sync).
+    const { recordPlainBackup } = await import("../ai/privacyLedger");
+    return {
+      ...target,
+      async write(name, data) {
+        if (recordPlainBackup(`${root}${name}`, data.byteLength).decision === "blocked") throw new BackupError(t("backup.webdav.plainLocalOnly"));
+        await target.write(name, data);
+      },
+    };
   }
   // Without a click the browser may not grant the folder again: that is a failure the user sees and fixes in the panel.
   if (!(await ensureFolderPermission(c.handle, false))) throw new BackupError(t("backup.reconnect"));

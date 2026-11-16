@@ -303,6 +303,8 @@
   "backup.webdav.noPassword": "Das WebDAV-Passwort ist nicht auf diesem Gerät: Richten Sie den Server unter „Sicherungen“ erneut ein.",
   "backup.webdav.note": "Archive landen dort in einem Ordner lumen-backups. Das Passwort liegt im Geheimnisspeicher, nicht bei den Sicherungseinstellungen.",
   "backup.webdav.password": "Passwort",
+  "backup.webdav.plainLocalOnly": "Eine unverschlüsselte Sicherung auf einen WebDAV-Server wird unter der Datenschutzrichtlinie „nur lokal“ abgelehnt. Wähle die verschlüsselte Sicherung oder eine andere Richtlinie.",
+  "backup.webdav.plainWarning": "Nicht verschlüsselt: Wer den Server betreibt, kann deine Notizen lesen. Unter der Datenschutzrichtlinie „nur lokal“ wird diese Wahl abgelehnt.",
   "backup.webdav.title": "Auf einen WebDAV-Server sichern",
   "backup.webdav.url": "WebDAV-Adresse (https)",
   "backup.webdav.useAge": "Diesen Server verwenden, verschlüsselt",

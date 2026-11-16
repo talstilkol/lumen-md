@@ -1706,6 +1706,16 @@
       "vars": []
     },
     {
+      "key": "backup.webdav.plainLocalOnly",
+      "en": "A plain (not encrypted) backup to a WebDAV server is refused under the local-only privacy policy. Choose the encrypted backup, or another policy.",
+      "vars": []
+    },
+    {
+      "key": "backup.webdav.plainWarning",
+      "en": "Not encrypted: whoever runs the server can read your notes. Under the local-only privacy policy this choice is refused.",
+      "vars": []
+    },
+    {
       "key": "backup.webdav.title",
       "en": "Back up to a WebDAV server",
       "vars": []

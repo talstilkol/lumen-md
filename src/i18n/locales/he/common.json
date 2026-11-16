@@ -303,6 +303,8 @@
   "backup.webdav.noPassword": "סיסמת ה-WebDAV לא נמצאת במכשיר הזה: יש להגדיר את השרת מחדש בגיבויים.",
   "backup.webdav.note": "הארכיונים נשמרים שם בתיקייה lumen-backups. הסיסמה נשמרת באחסון הסודות, לא עם הגדרות הגיבוי.",
   "backup.webdav.password": "סיסמה",
+  "backup.webdav.plainLocalOnly": "גיבוי רגיל (לא מוצפן) לשרת WebDAV נחסם במדיניות הפרטיות \"מקומי בלבד\". בחרו בגיבוי המוצפן, או במדיניות אחרת.",
+  "backup.webdav.plainWarning": "לא מוצפן: מי שמפעיל את השרת יכול לקרוא את הפתקים שלכם. במדיניות הפרטיות \"מקומי בלבד\" הבחירה הזו נחסמת.",
   "backup.webdav.title": "גיבוי לשרת WebDAV",
   "backup.webdav.url": "כתובת WebDAV ‏(https)",
   "backup.webdav.useAge": "שימוש בשרת הזה, מוצפן",

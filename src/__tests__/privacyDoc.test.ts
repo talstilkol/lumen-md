@@ -55,6 +55,8 @@ const RECORDERS: Record<string, (src: string) => string[]> = {
   "src/plugins/install.ts": (src) => [/const LEDGER_REASON = "([^"]+)"/.exec(src)![1]],
   // A remote MCP server's tool listing (W10.C2, #978): "MCP server <name>".
   "src/agents/mcp/registry.ts": (src) => [/reason: `([^`$]+)\$\{/.exec(src)![1]],
+  // A plain WebDAV backup (R8-M2): recordPlainBackup, with the ledger's own fixed reason.
+  "src/backup/start.ts": () => [],
 };
 
 function walk(dir: string, out: string[] = []): string[] {
@@ -67,7 +69,7 @@ function walk(dir: string, out: string[] = []): string[] {
   return out;
 }
 
-const RECORDING_CALL = /\b(recordBrowserService|recordBlockedRequest|recordPluginRequest|recordAppUpdateCheck|recordSpeechVoice|recordSpeechRecognition|guardedFetch|ledgerFetch)\(/;
+const RECORDING_CALL = /\b(recordBrowserService|recordBlockedRequest|recordPluginRequest|recordAppUpdateCheck|recordSpeechVoice|recordSpeechRecognition|recordPlainBackup|guardedFetch|ledgerFetch)\(/;
 
 describe("PRIVACY.he.md / PRIVACY.md map every privacy-ledger route (plan W4.29)", () => {
   it("every module that records into the ledger is known here", () => {
