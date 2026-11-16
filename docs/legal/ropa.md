@@ -22,7 +22,7 @@ Controller: the Lumen project, through its maintainer (contact:
 | Categories of data | **Content:** opaque objects encrypted on the device with keys the relay never sees. **Metadata:** object names (opaque), sizes and times, and the SHA-256 of each space's bearer token. **Network:** the client's IP address, while a request is handled. It is counted for rate limits under an HMAC whose random key lives in memory and changes daily, so no address is kept and no count links across days. |
 | Recipients | The hosting provider: Cloudflare (Workers and Durable Objects), or Fly.io for the Node relay |
 | Transfers outside Israel / the EU | The hosting provider's regions (Cloudflare and Fly.io, USA and global). Basis to confirm in review (W6.37, question 4). |
-| Retention | A space nobody read or wrote for 180 days is deleted (`VAULT_RELAY_RETENTION_DAYS`). Addresses: not kept. |
+| Retention | A space nobody read or wrote for 90 days is deleted (`VAULT_RELAY_RETENTION_DAYS`). Addresses: not kept. |
 | Security (Art. 32) | End-to-end encryption. Token hashes only. Per-address and global quotas. An optional invite or proof of work for new spaces. No accounts and no address logs. |
 
 ## 2. The share server (`sync-server/collab-server.mjs`, `server.js`, `edge-workers/collab/`)
