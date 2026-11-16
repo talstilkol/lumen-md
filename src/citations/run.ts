@@ -102,6 +102,7 @@ export async function citeFromDoi(): Promise<void> {
     import("../data/citationStyles"),
     import("../i18n"),
   ]);
+  // i18n-allow: a DOI's syntax (the DOI Handbook's example), the same in every language
   const input = await uiPrompt({ message: t("cite.doi.ask"), placeholder: "10.1000/xyz123" });
   if (!input?.trim()) return;
   try {
