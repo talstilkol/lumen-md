@@ -21,14 +21,18 @@
  * paragraph counted line by line (#72864); a fence inside a directive
  * container, which ends with it (#25369 #76842 #93948 #11087); a raw-text
  * fence opened inside the front matter (#29767 #72864); and `$$` inside a
- * list hiding a 40-level line (#21240).
+ * list hiding a 40-level line (#21240). Replaying all 59 of its findings
+ * then found: a lone CR read as part of a line (#555134 #196813), a backtick
+ * fence with a backtick in its info string and `$$` with text after it
+ * taken as fences (#618854 #747704), and lists nested in footnote
+ * definitions (#158774 #694468).
  */
 import { describe, it, expect } from "vitest";
 import { generate } from "../../scripts/fuzz/generators";
 import { asRawText, boundMarkdown, MAX_CONTAINER_DEPTH, MAX_DELIMITERS, MAX_HTML_DEPTH, needsBounding } from "../renderer/boundMarkdown";
 import { renderMarkdown } from "../renderer/pipeline";
 
-const FOUND = [655, 17957, 93, 185, 17976, 19495, 9178, 2101, 3877, 12929, 16139, 11087, 1459, 4812, 17461, 21240, 25369, 29767, 72864, 76842, 93948];
+const FOUND = [655, 17957, 93, 185, 17976, 19495, 9178, 2101, 3877, 12929, 16139, 11087, 1459, 4812, 17461, 21240, 25369, 29767, 72864, 76842, 93948, 555134, 196813, 618854, 747704, 158774, 694468];
 
 describe("fuzz findings of W10.D21", () => {
   it.each(FOUND)("#%i renders, in under 100 ms", async (i) => {
@@ -122,5 +126,31 @@ describe("the bounds", () => {
     expect(boundMarkdown(md)).toBe(asRawText(md));
     const code = "```js\nconst a = [[[1]]];\n```";
     expect(boundMarkdown(`${code}\n\n${deep}`)).toBe(`${code}\n\n${asRawText(deep)}`);
+  });
+
+  it("a lone CR is a line ending: `$$\\r` closes the math block", () => {
+    const bad = "[".repeat(1100);
+    const md = `$$\nx\n$$\r${bad}`;
+    expect(boundMarkdown(md)).toBe(`$$\nx\n$$\r${asRawText(bad)}`);
+    const crlf = "# A\r\n\r\ntext\r\n\r\n";
+    expect(boundMarkdown(crlf + bad)).toBe(crlf + asRawText(bad));
+  });
+
+  it("reads fence openers as CommonMark does", () => {
+    const bad = "[".repeat(1100);
+    // A backtick in a backtick fence's info string: a paragraph, not a fence.
+    expect(boundMarkdown("```a`b\n" + bad)).toBe(asRawText("```a`b\n" + bad));
+    // `$$` with text after it opens math; the next `$$` closes it.
+    expect(boundMarkdown(`$$ meta\nx\n$$\n\n${bad}`)).toBe(`$$ meta\nx\n$$\n\n${asRawText(bad)}`);
+  });
+
+  it("counts lists nested in a footnote definition, in a quote too", () => {
+    const deep = "> [^a]: " + "- ".repeat(MAX_CONTAINER_DEPTH + 2) + "x";
+    expect(needsBounding(deep)).toBe(true);
+    expect(needsBounding("[^a]: a footnote with - dashes - in it")).toBe(false);
+  });
+
+  it("raw HTML with a style that is not CSS renders (the attribute is dropped)", async () => {
+    await expect(renderMarkdown('a <b style=x>bold</b> <svg style="color:">x</svg>', () => false)).resolves.toBeTruthy();
   });
 });

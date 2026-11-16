@@ -60,6 +60,14 @@ function lineDepth(line: string): number {
   while (i < line.length && isSpace(line.charCodeAt(i))) i++;
   for (;;) {
     const c = line.charCodeAt(i);
+    // A footnote definition holds blocks as a list item does (W10.D21: "> [^x]: - - - …").
+    const note = c === 0x5b ? /^\[\^[^\]\r\n]{1,999}\]:/.exec(line.slice(i, i + 1004)) : null;
+    if (note) {
+      if (++depth > MAX_CONTAINER_DEPTH) return depth;
+      i += note[0].length;
+      while (i < line.length && isSpace(line.charCodeAt(i))) i++;
+      continue;
+    }
     let j = i;
     if (c === 0x3e /* > */ || c === 0x2a || c === 0x2b || c === 0x2d /* * + - */) j = i + 1;
     else if (isDigit(c)) {
@@ -84,7 +92,7 @@ function tooDeep(md: string): boolean {
 }
 
 /** A blank line as CommonMark reads it: spaces and tabs only (not U+00A0, which `trim()` drops). */
-const blank = (line: string) => /^[ \t\r]*$/.test(line);
+const blank = (line: string) => /^[ \t]*$/.test(line);
 
 /** HTML elements the parser closes by itself (or that have no content): they never nest deeper. */
 const NO_DEPTH = new Set(["area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr", "p", "li", "dt", "dd", "tr", "td", "th", "option", "optgroup", "thead", "tbody", "tfoot", "rb", "rt", "rp", "colgroup", "caption"]);
@@ -131,6 +139,8 @@ const wellFormed = (s: string): string =>
     : s.replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, "\uFFFD");
 
 const FENCE = /^ {0,3}(`{3,}|~{3,})/;
+const MATH_OPEN = /^ {0,3}(\${2,})(.*)$/;
+const MATH_CLOSE = /^ {0,3}(\${2,})[ \t]*$/;
 /** A line that starts its own inline run: a list item, a heading or a table row (inside block quotes too). */
 const STARTS_RUN = /^[ \t]*(?:[*+-][ \t]|\d{1,9}[.)][ \t]|#{1,6}[ \t]|\|)/;
 /**
@@ -176,7 +186,7 @@ export function needsBounding(md: string): boolean {
 function htmlTooDeep(md: string): boolean {
   if (!md.includes("<")) return false;
   let depth = 0;
-  for (const part of md.split(/\n[ \t\r]*\n/)) {
+  for (const part of md.split(/(?:\r\n?|\n)[ \t]*(?:\r\n?|\n)/)) {
     const d = htmlDepth(part, depth);
     if (d.max > MAX_HTML_DEPTH) return true;
     depth = d.end;
@@ -189,7 +199,7 @@ function overRuns(text: string): boolean {
   if (brackets(text, MAX_BRACKETS + 1) <= MAX_BRACKETS && delimiters(text, MAX_DELIMITERS + 1) <= MAX_DELIMITERS) return false;
   let run = 0;
   let delims = 0;
-  for (const line of text.split("\n")) {
+  for (const line of text.split(/\r\n?|\n/)) {
     if (newRun(line)) run = delims = 0;
     run += brackets(line);
     delims += delimiters(line);
@@ -228,6 +238,16 @@ function htmlBlockStart(line: string, atBlockStart: boolean): RegExp | null {
   return null;
 }
 
+/** A row's line without its line ending (CommonMark: \r\n, \n or a lone \r). */
+const EOL = /(?:\r\n|\r|\n)$/;
+const bare = (row: string) => row.replace(EOL, "");
+/** `rows` (each with its line ending) shown as raw text; the last row's line ending stays outside the fence. */
+function rawRows(rows: string[]): string {
+  const text = rows.join("");
+  const core = text.replace(EOL, "");
+  return asRawText(core) + text.slice(core.length);
+}
+
 export function boundMarkdown(input: string): string {
   const md = wellFormed(input);
   if (!needsBounding(md)) return md;
@@ -236,14 +256,14 @@ export function boundMarkdown(input: string): string {
   let html = 0;
   const flush = () => {
     if (!block.length) return;
-    const text = block.join("\n");
+    const text = block.join("").replace(EOL, "");
     let raw = tooDeep(text) || overRuns(text);
     if (!raw) {
       const d = htmlDepth(text, html);
       if (d.max > MAX_HTML_DEPTH) raw = true;
       else html = d.end;
     }
-    out.push(raw ? asRawText(text) : text);
+    out.push(raw ? rawRows(block) : block.join(""));
     block = [];
   };
   // A fenced code or `$$` math region is never changed, unless a line in it
@@ -253,9 +273,10 @@ export function boundMarkdown(input: string): string {
   let region: string[] | null = null;
   let fence: string | null = null;
   let math = false;
+  let mathLength = 2;
   const endRegion = () => {
     if (!region) return;
-    out.push(region.some((l) => lineDepth(l) > MAX_CONTAINER_DEPTH) ? asRawText(region.join("\n")) : region.join("\n"));
+    out.push(region.some((r) => lineDepth(bare(r)) > MAX_CONTAINER_DEPTH) ? rawRows(region) : region.join(""));
     region = null;
     fence = null;
     math = false;
@@ -266,35 +287,41 @@ export function boundMarkdown(input: string): string {
   // Inside an HTML block a fence line is HTML text, not a fence (W10.D21: an
   // unclosed "~~~" there hid the deep HTML after it from the bounds).
   let htmlEnd: RegExp | null = null;
-  const lines = md.split("\n");
+  // Rows split at every CommonMark line ending, a lone \r too (W10.D21: "$$\r[[[…"
+  // closes the math block on its first line; read as one line, it hid the rest).
+  const rows = md.match(/[^\r\n]*(?:\r\n|\r|\n)|[^\r\n]+$/g) ?? [];
   // Front matter is YAML (or TOML) to the parser, never Markdown: pass it
   // through, so no raw-text fence starts inside it (W10.D21: a fence opened
   // in the front matter ended there, and the block it should have held was
   // parsed after all).
-  const fm = /^(---|\+\+\+)[ \t\r]*$/.exec(lines[0] ?? "");
+  const fm = /^(---|\+\+\+)[ \t]*$/.exec(bare(rows[0] ?? ""));
   let start = 0;
   if (fm) {
-    const close = lines.findIndex((l, i) => i > 0 && l.replace(/[ \t\r]+$/, "") === fm[1]);
+    const close = rows.findIndex((r, i) => i > 0 && bare(r).replace(/[ \t]+$/, "") === fm[1]);
     if (close > 0) {
-      out.push(...lines.slice(0, close + 1));
+      out.push(...rows.slice(0, close + 1));
       start = close + 1;
     }
   }
-  for (const line of lines.slice(start)) {
+  for (const row of rows.slice(start)) {
+    const line = bare(row);
     const opens = CONTAINER_OPEN.test(line);
     const closes = containers > 0 && CONTAINER_CLOSE.test(line);
     if (region) {
       if (closes) {
         endRegion();
         containers--;
-        out.push(line);
+        out.push(row);
         continue;
       }
-      region.push(line);
+      region.push(row);
       if (fence) {
         const f = FENCE.exec(line);
         if (f && f[1][0] === fence[0] && f[1].length >= fence.length && line.trim() === f[1]) endRegion();
-      } else if (math && line.trim() === "$$") endRegion();
+      } else if (math) {
+        const m = MATH_CLOSE.exec(line);
+        if (m && m[1].length >= mathLength) endRegion();
+      }
       continue;
     }
     if (htmlEnd) {
@@ -302,17 +329,17 @@ export function boundMarkdown(input: string): string {
       if (closes) {
         htmlEnd = null;
         flush();
-        out.push(line);
+        out.push(row);
         containers--;
         continue;
       }
       if (htmlEnd === UNTIL_BLANK && blank(line)) {
         htmlEnd = null;
         flush();
-        out.push(line);
+        out.push(row);
         continue;
       }
-      block.push(line);
+      block.push(row);
       if (htmlEnd !== UNTIL_BLANK && htmlEnd.test(line)) htmlEnd = null;
       continue;
     }
@@ -320,34 +347,42 @@ export function boundMarkdown(input: string): string {
     // container would end inside it, and the rest of the block be parsed.
     if (opens || closes) {
       flush();
-      out.push(line);
+      out.push(row);
       if (opens) containers++;
       else containers--;
       continue;
     }
+    // An opening fence as CommonMark (and remark-math) read it: a backtick
+    // fence's info string has no backtick, a `$$` fence's meta no `$`
+    // (W10.D21: "```ma…`…" and "$$ text" were taken the wrong way round, and
+    // the "fence" hid the rest of the note).
     const f = FENCE.exec(line);
-    if (f || line.trim() === "$$") {
+    const m = f ? null : MATH_OPEN.exec(line);
+    if ((f && !(f[1][0] === "`" && line.slice(f[0].length).includes("`"))) || (m && !m[2].includes("$"))) {
       flush();
-      region = [line];
+      region = [row];
       if (f) fence = f[1];
-      else math = true;
+      else {
+        math = true;
+        mathLength = m![1].length;
+      }
       continue;
     }
     if (blank(line)) {
       flush();
-      out.push(line);
+      out.push(row);
       continue;
     }
     const end = htmlBlockStart(line, block.length === 0);
     if (end) {
-      block.push(line);
+      block.push(row);
       // A kind 1–5 block can end on its first line (`<!-- x -->`).
       if (end === UNTIL_BLANK || !end.test(line.replace(/^ *<!?-?-?/, ""))) htmlEnd = end;
       continue;
     }
-    block.push(line);
+    block.push(row);
   }
   endRegion();
   flush();
-  return out.join("\n");
+  return out.join("");
 }
