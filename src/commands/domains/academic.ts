@@ -5,7 +5,8 @@
  * is in the app.
  */
 import { t } from "../../i18n";
-import { cmdIcons, type Command } from "../../ui/CommandPalette";
+import { cmdIcons } from "../../ui/cmdIcons";
+import type { Command } from "../../ui/CommandPalette";
 import { uiAlert, uiSelect } from "../../ui/PromptDialog";
 import { useToastStore } from "../../store/useToastStore";
 
