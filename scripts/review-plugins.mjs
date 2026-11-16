@@ -91,7 +91,10 @@ if (args.includes("--takedown")) {
     console.log(`taken down: ${c.id}@${c.version} (failed ${c.reviewedAt}: ${v.delisted.rules.join(", ")})`);
   }
   if (down.length) {
-    writeFileSync(join(DIR, "index.json"), JSON.stringify(index, null, 2) + "\n");
+    // Review 11, M5: a takedown raises the index's serial, so the app refuses the older index (a replay) once it saw this one.
+    const { serial: _old, ...rest } = index;
+    const next = { about: rest.about, serial: (Number.isSafeInteger(index.serial) ? index.serial : 0) + 1, ...rest };
+    writeFileSync(join(DIR, "index.json"), JSON.stringify(next, null, 2) + "\n");
     console.log(`index.json changed: re-sign it (LUMEN_PLUGIN_SIGNING_KEY=… node scripts/build-plugin-registry.mjs --sign)`);
   } else console.log("nothing to take down");
   process.exit(0);

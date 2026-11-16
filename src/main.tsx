@@ -82,6 +82,8 @@ setTimeout(() => void loadCommandHints(), 2000);
 // Task reminders (plan 4.13.4), only when the user turned them on; loaded after start-up.
 try {
   if (localStorage.getItem("lumen.tasks.reminders") === "1") setTimeout(() => void import("./tasks/reminders").then((m) => m.startReminders()), 5000);
+  // Review 11, M5: a plugin version taken down after it was installed is disabled (reads only the signed index, and only with a plugin installed).
+  setTimeout(() => void import("./plugins/install").then((m) => m.disableDelisted()).catch(() => undefined), 4000);
 } catch {
   /* why: storage blocked: no reminders */
 }

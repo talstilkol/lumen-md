@@ -198,6 +198,8 @@ describe("W11.S14: a failing version is taken down, as code", () => {
       expect(ws.delisted.rules.length).toBeGreaterThan(0);
       expect(Date.parse(ws.delisted.at)).toBeGreaterThan(Date.now() - 60_000);
       expect(index.plugins.find((p: { id: string }) => p.id !== "lumen.example.word-stats").versions[0].delisted).toBeUndefined();
+      // Review 11, M5: the takedown raises the serial (the app refuses the older index once it saw this one).
+      expect(index.serial).toBe(1);
       // No longer listed: not overdue. The failing version itself still fails the check until its folder goes.
       const after = run("--check");
       expect(after.stdout).not.toContain("overdue takedown");
