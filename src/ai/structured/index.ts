@@ -27,6 +27,7 @@ import { extractJsonObject } from "../../agents/protocol";
 import { formatSchemaErrors, validateSchema } from "../../agents/schema";
 import { builtinAvailability, languageModelApi, promptBuiltin, type LanguageModelApi } from "./chromeBuiltin";
 import { builtinGateOpen } from "./gate";
+import { PROMPT_API_MAX_CHARS } from "../../agents/executors/ladder";
 
 export type StructuredEngineId = "builtin" | "ollama" | "webllm";
 
@@ -122,10 +123,17 @@ export function defaultEngines(): StructuredEngine[] {
 
 export type StructuredTask = "short" | "general";
 
-/** The engines to try, in order, for a task. */
-export function engineOrder(engines: readonly StructuredEngine[], task: StructuredTask): StructuredEngine[] {
+/**
+ * The engines to try, in order, for a task. A general task follows the
+ * engine ladder (W11.I16, agents/executors/ladder.ts): the native server,
+ * then the Prompt API — a schema task with no tools is what it is for — when
+ * the input fits its short context, then WebGPU; a longer input leaves the
+ * built-in model last. `inputChars` unknown: the built-in model stays last.
+ */
+export function engineOrder(engines: readonly StructuredEngine[], task: StructuredTask, inputChars?: number): StructuredEngine[] {
   const by = (id: StructuredEngineId) => engines.find((e) => e.id === id);
-  const ids: StructuredEngineId[] = task === "short" ? ["builtin", "ollama", "webllm"] : ["ollama", "webllm", "builtin"];
+  const fitsPromptApi = inputChars !== undefined && inputChars <= PROMPT_API_MAX_CHARS;
+  const ids: StructuredEngineId[] = task === "short" ? ["builtin", "ollama", "webllm"] : fitsPromptApi ? ["ollama", "builtin", "webllm"] : ["ollama", "webllm", "builtin"];
   return ids.map(by).filter((e): e is StructuredEngine => !!e);
 }
 
@@ -153,7 +161,7 @@ export interface GenerateOptions {
 
 /** JSON matching `schema` from the first engine that gives it. Throws StructuredOutputError when none does. */
 export async function generateStructured<T = unknown>(req: StructuredRequest, opts: GenerateOptions = {}): Promise<StructuredResult<T>> {
-  const engines = engineOrder(opts.engines ?? defaultEngines(), opts.task ?? "general");
+  const engines = engineOrder(opts.engines ?? defaultEngines(), opts.task ?? "general", (req.system?.length ?? 0) + req.prompt.length);
   const allowBuiltin = opts.builtinAllowed ?? builtinGateOpen;
   const retries = opts.retries ?? 1;
   const skipped: StructuredResult<T>["skipped"] = [];

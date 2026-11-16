@@ -13,7 +13,8 @@ import type { ChatCompletionMessageParam } from "@mlc-ai/web-llm";
 import type { Availability, Executor, ExecutorMessage, ExecutorRequest, ExecutorResponse, ModelTier, ToolCall } from "../types";
 import { flattenMessages } from "./chatExecutor";
 import { prefersHebrew } from "../../ai/modelCatalog";
-import { detectHardware, webLlmModelFor, catalogEntryFor } from "../../ai/modelManager";
+import { detectHardware, webLlmModelFor, catalogEntryFor, vramBudgetMB } from "../../ai/modelManager";
+import { engineLadder } from "./ladder";
 import { webLlmChat } from "../../ai/webllmEngine";
 import { estimateTokens } from "../../ai/usage";
 import { getAiPolicy } from "../../ai/policy";
@@ -82,6 +83,30 @@ function chosenInSettings(): boolean {
   }
 }
 
+/** Why the WebGPU rung cannot run `modelId` on this hardware (the ladder's VRAM and memory guard), or null when it can. */
+export function webgpuGuard(hw: Awaited<ReturnType<typeof detectHardware>>, modelId: string): string | null {
+  const entry = catalogEntryFor(modelId);
+  if (!entry) return null; // a model outside the catalogue: its size is unknown, so nothing to guard
+  const mb = modelId.includes("q4f16") ? entry.vramMB.f16 : entry.vramMB.f32;
+  const r = engineLadder(
+    {
+      userChoice: null,
+      ollama: false,
+      lmstudio: false,
+      promptApi: "unavailable",
+      webgpu: true,
+      webgpuBudgetMB: vramBudgetMB(hw),
+      webnn: false,
+      webnnFlag: false,
+      wasm: false,
+      deviceMemoryMB: hw.deviceMemoryGB === null ? null : hw.deviceMemoryGB * 1024,
+    },
+    { schema: false, tools: false, inputChars: 0 },
+    { webgpuMB: mb, webnnMB: mb, wasmMB: mb },
+  );
+  return r.pick === "webgpu" ? null : (r.skipped.find((x) => x.rung === "webgpu")?.why ?? "does not fit");
+}
+
 export const webllmExecutor: Executor = {
   id: "webllm",
   label: "WebGPU (web-llm)",
@@ -96,6 +121,12 @@ export const webllmExecutor: Executor = {
     if (policy === "local-first" && !optedIn) return { available: false, reason: "not-opted-in" };
     hwSnapshot = await detectHardware();
     if (!hwSnapshot.webgpu) return { available: false, reason: "no-webgpu", detail: hwSnapshot.reason };
+    // The engine ladder's memory guard (W11.I16): the model this device would
+    // load, with a quarter more for context and runtime, must fit the VRAM
+    // budget and the device's memory; otherwise the next rung answers rather
+    // than a multi-GB download that cannot run here.
+    const guard = webgpuGuard(hwSnapshot, this.modelFor("small"));
+    if (guard) return { available: false, reason: "memory", detail: guard };
     return { available: true };
   },
   supportsTools(model?: string): boolean {
