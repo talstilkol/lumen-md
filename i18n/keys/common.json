@@ -10617,6 +10617,23 @@
       ]
     },
     {
+      "key": "latex.pdf.consent.message",
+      "en": "Tectonic, the TeX engine you installed, downloads its TeX support files and any package it lacks from its bundle server ({host}). That request carries your IP address and the package names, never the document. You are asked once; each compile that may download is listed in the privacy ledger. In airplane mode or under local-only, Tectonic uses only the packages it already has.",
+      "vars": [
+        "host"
+      ]
+    },
+    {
+      "key": "latex.pdf.consent.ok",
+      "en": "Allow downloads",
+      "vars": []
+    },
+    {
+      "key": "latex.pdf.consent.title",
+      "en": "Let Tectonic download TeX packages?",
+      "vars": []
+    },
+    {
       "key": "latex.pdf.errors",
       "en": "LaTeX did not compile ({count} errors):",
       "vars": [

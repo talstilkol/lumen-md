@@ -136,6 +136,15 @@
       ]
     },
     {
+      "feature": "LaTeX to PDF with Tectonic (desktop)",
+      "ledgerCategory": "network",
+      "sends": "Tectonic's own requests for TeX packages it has not cached: your IP address and the package names, never the document",
+      "turnedOnBy": "Exporting a PDF from LaTeX in the desktop app with Tectonic installed, after allowing its downloads once; cache only (no request) in airplane mode and under local-only",
+      "routes": [
+        "Tectonic: TeX packages from its bundle server (LaTeX to PDF)"
+      ]
+    },
+    {
       "feature": "Other requests in audit mode",
       "ledgerCategory": "network",
       "sends": "Whatever that request carries; listed so an audit can compare",

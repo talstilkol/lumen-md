@@ -5,5 +5,8 @@
   "latex.pdf.saved": "{file}: compiled with Tectonic.",
   "latex.pdf.web": "PDF from LaTeX needs the desktop app with Tectonic installed (tectonic-typesetting.github.io). In the browser, export the LaTeX project and compile it yourself.",
   "latex.pdf.noTectonic": "Tectonic is not installed. Install it (brew install tectonic, or tectonic-typesetting.github.io), or set LUMEN_TECTONIC to its path, then try again.",
-  "latex.pdf.errors": "LaTeX did not compile ({count} errors):"
+  "latex.pdf.errors": "LaTeX did not compile ({count} errors):",
+  "latex.pdf.consent.title": "Let Tectonic download TeX packages?",
+  "latex.pdf.consent.message": "Tectonic, the TeX engine you installed, downloads its TeX support files and any package it lacks from its bundle server ({host}). That request carries your IP address and the package names, never the document. You are asked once; each compile that may download is listed in the privacy ledger. In airplane mode or under local-only, Tectonic uses only the packages it already has.",
+  "latex.pdf.consent.ok": "Allow downloads"
 }

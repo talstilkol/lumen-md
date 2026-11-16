@@ -67,6 +67,7 @@ is refused under `local-only` even then.
 | Themes and CSS snippets | A file request from a stylesheet you installed (a font or an image) | `A stylesheet (theme or CSS snippet) loaded it` | The host's logs. Listed so you can see it | `third-party` |
 | Encrypted sync on the local network | Your notes, end-to-end encrypted, to your other device only | `Encrypted sync on the local network (no cloud)` | On your other device. Nothing goes to a server | `local-ai` |
 | Encrypted sync storage, as audit mode names it | The vault, end-to-end encrypted (see "Encrypted sync" below) | `Sync storage: your Dropbox (audit mode)`, `Sync storage: your Google Drive (audit mode)`: listed only with audit mode on; no rule blocks your own sync | At your provider until you delete it | `network` |
+| LaTeX to PDF with Tectonic (desktop) | Tectonic, a program you install, fetches the TeX packages it has not cached: your IP address and the package names, never the document | `Tectonic: TeX packages from its bundle server (LaTeX to PDF)` (relay.fullyjustified.net, Tectonic's bundle server), for each compile after you allow its downloads once. In airplane mode or under local-only it runs with `--only-cached`: no request | The bundle server's logs, per its operator | `network` |
 | Any other request (audit mode) | Whatever that request carries | `Other request (audit mode)`: with audit mode on, every off-device request the rules above don't name is listed too | Per the destination | `network` |
 
 Two suffixes can follow any ledger name: `(worker: <name>)` for a request from a Web
