@@ -3,6 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import "./helpers/commandSections";
 import { render, screen, fireEvent, waitFor, renderHook } from "@testing-library/react";
 
 vi.mock("../ui/AiToast", () => ({ showAiToast: vi.fn() }));

@@ -3,6 +3,7 @@
  * its lazy chunk, not the startup bundle (plan W1.26).
  */
 import { describe, expect, it } from "vitest";
+import "./helpers/commandSections";
 import { readdirSync, readFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { t } from "../i18n";

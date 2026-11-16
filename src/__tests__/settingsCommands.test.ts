@@ -3,6 +3,7 @@
  */
 
 import { describe, it, expect, vi } from "vitest";
+import "./helpers/commandSections";
 import { renderHook } from "@testing-library/react";
 import { useCommands, type UseCommandsOptions } from "../commands/useCommands";
 

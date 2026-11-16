@@ -7,6 +7,7 @@
  * (`npx vitest run -u src/__tests__/commandIds.test.ts`).
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import "./helpers/commandSections";
 import { act, renderHook } from "@testing-library/react";
 import "../commands/cmdHintStrings";
 import { shownHint } from "../commands/hints";

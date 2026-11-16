@@ -1,5 +1,6 @@
 /** Export commands export the note they were invoked on, even if the tab changes while the export chunk loads. */
 import { describe, it, expect, vi } from "vitest";
+import "./helpers/commandSections";
 import { renderHook } from "@testing-library/react";
 
 const exported = vi.hoisted(() => ({ docx: [] as Array<[string, string]>, text: [] as Array<[string, string]> }));
