@@ -92,9 +92,13 @@ export default function FirstRun({ onDone }: Props) {
     };
   }, []);
 
-  // Each step starts at its first control (keyboard and screen readers).
+  // Each step starts at its first control (keyboard and screen readers); in a
+  // radio group that is the chosen radio, as Tab reaches it (Hebrew is listed
+  // first, the language in use is the one checked).
   useEffect(() => {
-    panel.current?.querySelector<HTMLElement>("input:not([disabled]), button:not([disabled])")?.focus();
+    const first = panel.current?.querySelector<HTMLInputElement>("input:not([disabled]), button:not([disabled])");
+    const chosen = first?.type === "radio" && first.name ? panel.current?.querySelector<HTMLInputElement>(`input[type="radio"][name="${first.name}"]:checked:not([disabled])`) : null;
+    (chosen ?? first)?.focus();
   }, [step]);
 
   const skip = () => {
