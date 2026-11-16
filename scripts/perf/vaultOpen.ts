@@ -15,7 +15,7 @@ import { decodeSnapshot, encodeSnapshot, type SnapshotFile } from "../../src/sto
 import { summarize } from "../../src/storage/noteSummary";
 import { VaultIndex } from "../../src/storage/vaultIndexCore";
 import type { WorkspaceNode } from "../../src/storage/workspace";
-import { flattenTree } from "../../src/ui/fileTreeRows";
+import { flattenTree } from "../../src/ui/virtualTreeRows";
 
 export const OPEN_LIMIT_MS = 2000;
 

@@ -9,7 +9,8 @@
  */
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { WorkspaceNode } from "../storage/workspace";
-import { ROW_HEIGHT, flattenTree, renderFlatRow, scrollTopFor, treeMove, windowOf, type RenderCtx } from "./fileTreeRows";
+import type { RenderCtx } from "./fileTreeRows";
+import { ROW_HEIGHT, flattenTree, renderFlatRow, scrollTopFor, treeMove, windowOf } from "./virtualTreeRows";
 
 export function VirtualFileTree({ nodes, ctx }: { nodes: WorkspaceNode[]; ctx: RenderCtx }) {
   const rows = useMemo(() => flattenTree(nodes, ctx.collapsed), [nodes, ctx.collapsed]);

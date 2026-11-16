@@ -8,7 +8,8 @@ import { describe, expect, it, vi } from "vitest";
 import { createRef } from "react";
 import { fireEvent, render } from "@testing-library/react";
 import type { WorkspaceNode } from "../storage/workspace";
-import { DEFAULT_VIEWPORT, OVERSCAN, ROW_HEIGHT, flattenTree, scrollTopFor, treeMove, windowOf, type RenderCtx } from "../ui/fileTreeRows";
+import type { RenderCtx } from "../ui/fileTreeRows";
+import { DEFAULT_VIEWPORT, OVERSCAN, ROW_HEIGHT, flattenTree, scrollTopFor, treeMove, windowOf } from "../ui/virtualTreeRows";
 import { VirtualFileTree } from "../ui/VirtualFileTree";
 
 const file = (path: string): WorkspaceNode => ({ name: path.split("/").pop()!, path, kind: "file" }) as WorkspaceNode;

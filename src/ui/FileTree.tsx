@@ -23,7 +23,8 @@ import { useAppStore } from "../store/useStore";
 import { duplicateFile, movedPath, renamedFileName, safeMoveWithCompanion, undoTrash, withoutCompanions, type MoveResult } from "../storage/fileOps";
 import { flushActiveWorkspaceDoc, syncOpenDocsAfterMove, trashWithOpenEdits } from "../store/openDocs";
 import { renderChildren, type RenderCtx } from "./fileTreeRows";
-import { VirtualFileTree } from "./VirtualFileTree";
+// W10.E16: the virtual list is only for a large vault, so it loads on use (off the startup path).
+const VirtualFileTree = lazy(() => import("./VirtualFileTree").then((m) => ({ default: m.VirtualFileTree })));
 export { visibleChildren } from "./fileTreeRows";
 // Saved searches (plan W2.12): a small chunk of its own, off the startup path.
 const SavedSearches = lazy(() => import("./SavedSearches"));
@@ -673,7 +674,9 @@ export function FileTree({
           )}
           {/* W10.E16: a large vault scrolls a virtual list; a small one keeps the nested tree. */}
           {fileLimit !== null ? (
-            <VirtualFileTree nodes={displayedTree} ctx={treeCtx} />
+            <Suspense fallback={<ul className="file-tree-list" role="tree">{renderChildren(displayedTree, "", 0, treeCtx)}</ul>}>
+              <VirtualFileTree nodes={displayedTree} ctx={treeCtx} />
+            </Suspense>
           ) : (
             <ul className="file-tree-list" role="tree">
               {renderChildren(displayedTree, "", 0, treeCtx)}
