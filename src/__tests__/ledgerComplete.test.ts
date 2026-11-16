@@ -84,14 +84,36 @@ describe("worker requests reach the ledger", () => {
     expect(client).not.toMatch(/noteModelDownload|recordWorkerRequest/);
   });
 
-  it("the transformers and web-llm workers install the bridge before anything else", async () => {
-    const { readFileSync } = await import("node:fs");
-    const { join } = await import("node:path");
-    for (const f of ["transformers.worker.ts", "webllm.worker.ts"]) {
-      const src = readFileSync(join(__dirname, "../ai", f), "utf8");
-      const firstImport = src.split("\n").find((l) => l.startsWith("import "));
-      expect(firstImport, f).toMatch(/^import "\.\/workerLedgerInstall";/);
+  it("every worker installs the bridge before anything else: 0 workers without the ledger (W10.D22)", async () => {
+    const { readFileSync, readdirSync } = await import("node:fs");
+    const { join, relative, dirname } = await import("node:path");
+    const src = join(__dirname, "..");
+    const workers: string[] = [];
+    const walk = (dir: string) => {
+      for (const e of readdirSync(dir, { withFileTypes: true })) {
+        if (e.isDirectory()) {
+          if (e.name !== "__tests__") walk(join(dir, e.name));
+        } else if (e.name.endsWith(".worker.ts")) workers.push(join(dir, e.name));
+      }
+    };
+    walk(src);
+    // The six the audit named are among them (2.4), and nothing was missed by the walk.
+    const names = workers.map((w) => relative(src, w).replace(/\\/g, "/"));
+    for (const w of ["ai/dictation/dictation.worker.ts", "ai/tts/piper.worker.ts", "ai/nikud.worker.ts", "ai/hebrewSpell.worker.ts", "plugins/ruby/ruby.worker.ts", "agents/python/python.worker.ts", "ai/transformers.worker.ts", "ai/webllm.worker.ts"]) expect(names).toContain(w);
+    expect(workers.length).toBeGreaterThanOrEqual(16);
+    const without: string[] = [];
+    for (const w of workers) {
+      const text = readFileSync(w, "utf8");
+      const firstImport = text.split("\n").find((l) => /^import\s/.test(l));
+      // The first import (ES modules evaluate in import order), by its path from this worker.
+      let want = relative(dirname(w), join(src, "ai", "workerLedgerInstall")).replace(/\\/g, "/");
+      if (!want.startsWith(".")) want = `./${want}`;
+      if (firstImport?.trim().split(";")[0] !== `import "${want}"`) without.push(relative(src, w));
+      // A dynamic import or a fetch before it would run first.
+      const before = text.slice(0, text.indexOf(firstImport ?? "\u0000"));
+      if (/\bimport\(|\bfetch\(/.test(before.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, ""))) without.push(`${relative(src, w)} (code before it)`);
     }
+    expect(without).toEqual([]);
   });
 });
 

@@ -4,6 +4,7 @@
  * network/storage APIs and gives every run a fresh VM. All execution logic
  * lives in ./rubyRuntime so it can be unit-tested in Node.
  */
+import "../../ai/workerLedgerInstall"; // first: what this worker fetches reaches the privacy ledger (plan 2.4, W10.D22)
 import { createRubyHandler, hardenWorkerScope, rubyWasmUrl } from "./rubyRuntime";
 import { instantiateRubyVm } from "./rubyVm";
 

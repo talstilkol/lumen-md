@@ -6,6 +6,7 @@
  * consent and verified against models/registry.json); nothing is fetched
  * here except ONNX Runtime's own same-origin wasm (public/ort/).
  */
+import "./workerLedgerInstall"; // first: what this worker fetches reaches the privacy ledger (plan 2.4, W10.D22)
 import * as ort from "onnxruntime-web/wasm";
 import { decodeMenaked, encodeMenaked, type MenakedSpec } from "../text/menaked";
 import { addNikudDetailed, nakdimonEngine, type NikudEngine } from "../text/nikudRun";
