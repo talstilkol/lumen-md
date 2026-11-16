@@ -105,11 +105,17 @@ describe("pr:check", () => {
       expect(gate.status).toBe("fail");
       expect(gate.lines[0]).toContain("src/__tests__/__snapshots__/render/doc-a.html");
       expect(edited.failed).toBe(true);
-      // The same snapshot with the document it renders: regenerated, fine.
+      // A README edit does not vouch for it (audit r3: README.md renders into no snapshot).
       writeFileSync(join(r0.dir, "README.md"), "# A, changed\n");
       r0.git("add", "-A");
+      r0.git("commit", "-q", "-m", "docs: readme [skip ci]");
+      const readme = runChecks(parseArgs(["--cwd", r0.dir, "--base", "main~2", "--no-size"]));
+      expect(readme.sections.find((s: { title: string }) => s.title === "Snapshots are regenerated, not edited").status).toBe("fail");
+      // The same snapshot with a document the render set reads: regenerated, fine.
+      writeFileSync(join(r0.dir, "SECURITY.md"), "# Security, changed\n");
+      r0.git("add", "-A");
       r0.git("commit", "-q", "-m", "docs: a [skip ci]");
-      const regenerated = runChecks(parseArgs(["--cwd", r0.dir, "--base", "main~2", "--no-size"]));
+      const regenerated = runChecks(parseArgs(["--cwd", r0.dir, "--base", "main~3", "--no-size"]));
       expect(regenerated.sections.find((s: { title: string }) => s.title === "Snapshots are regenerated, not edited").status).toBe("ok");
     } finally {
       r0.done();

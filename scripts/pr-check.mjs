@@ -294,7 +294,7 @@ export function runChecks(opts) {
 
   const untested = untestedChanges(changed);
   // W10.D20 (W6.15 step 4): a snapshot changes only with what produces it.
-  const handEdited = handEditedSnapshots(changed, (f) => existsSync(join(cwd, f)));
+  const handEdited = handEditedSnapshots(changed, (f) => existsSync(join(cwd, f)), { root: cwd, list: () => git(cwd, "ls-files").split("\n").filter(Boolean) });
   add("Snapshots are regenerated, not edited", handEdited.length ? "fail" : "ok", handEdited.length ? [`Changed with nothing that produces them (no source, test, input document or package changed): ${handEdited.map((f) => `\`${f}\``).join(", ")}. Regenerate them with the test's update flag (\`npx vitest run <test> -u\`, \`npx playwright test <spec> --update-snapshots\`) in the PR that changes their output.`] : ["No snapshot changed without what produces it."]);
   add("Tests", untested.length ? "warn" : "ok", untested.length ? [`Source changed and no test changed: ${untested.slice(0, 10).map((f) => `\`${f}\``).join(", ")}${untested.length > 10 ? ` and ${untested.length - 10} more` : ""}.`] : ["Source changes come with test changes (or there are none)."]);
 
