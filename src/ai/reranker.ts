@@ -16,7 +16,7 @@
  *
  * Why "off" is the default (coordinator decision, W10.B18): on the hard
  * retrieval set (eval/synthetic/retrieval-hard, a synthetic set: dev numbers) BM25 alone scores nDCG@10
- * 0.948 (dev) / 0.952 (held-out), and the lexical reranker lowers that to
+ * 0.950 (dev) / 0.952 (held-out), and the lexical reranker lowers that to
  * 0.918 / 0.907. src/__tests__/rerankHard.test.ts re-measures both and pins
  * the default to the winner. The model may become the default only with a
  * Mac receipt that beats BM25 by ≥ 3 points on both splits
@@ -34,8 +34,8 @@ export const DEFAULT_RERANK_MODE: RerankMode = "off";
 export const RERANK_DEFAULT_EVIDENCE = {
   set: "eval/synthetic/retrieval-hard",
   metric: "nDCG@10",
-  bm25: { dev: 0.9479, heldout: 0.9521 },
-  lexical: { dev: 0.9177, heldout: 0.9072 },
+  bm25: { dev: 0.95, heldout: 0.9521 },
+  lexical: { dev: 0.9184, heldout: 0.9072 },
   /** Not measured yet: needs the model (Mac, `npm run eval:rerank`). */
   model: null,
 } as const;

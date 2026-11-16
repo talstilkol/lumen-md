@@ -38,8 +38,8 @@ paragraphs) BM25 is below the ceiling, and the built-in reranker makes it
 
 | | dev (210 questions) | held-out (90) |
 |---|---|---|
-| BM25 alone | 0.9479 | 0.9521 |
-| BM25 + built-in reranker | 0.9177 (−3.0) | 0.9072 (−4.5) |
+| BM25 alone | 0.9500 | 0.9521 |
+| BM25 + built-in reranker | 0.9184 (−3.2) | 0.9072 (−4.5) |
 
 So **BM25 alone is the default**, and the lexical reranker is an opt-in
 setting. `src/__tests__/rerankHard.test.ts` re-measures both on every run and
