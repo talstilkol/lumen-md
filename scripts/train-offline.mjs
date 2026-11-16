@@ -37,13 +37,18 @@
  *       checkout: the exact gates, the tree, the runner's hash; --require-full
  *       refuses a cloud-class receipt (it never stands in for the Mac one).
  *
+ * A receipt is self-asserted: it records what the machine that ran the train
+ * says it ran, and nothing signs it until the owner's signing key exists
+ * (owed). The runner's hash covers the runner and the helper scripts it runs
+ * from its own folder (review 10, L9), not the node_modules it loads.
+ *
  * Exit 1 when any attack or gate test fails, or when there is none to run.
  */
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { delimiter, join, resolve } from "node:path";
+import { basename, delimiter, dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { COMMAND_GATES, RUNS_DIR, TEST_GATES, expectedGates, gateCommand, porcelainFiles, receiptPath, receiptProblems, record, refusal, runGates } from "./lib/trainReceipt.mjs";
 import { jsonCounts, vitestJsonArgs } from "./lib/dodRunner.mjs";
@@ -165,12 +170,70 @@ export function runnerFile(runner, root = process.cwd()) {
   return null;
 }
 
-/** The sha256 of the --runner program's file, or null when it can't be read. */
+/** Files a runner reaches that are hashed with it: at most this many. */
+const MAX_RUNNER_FILES = 500;
+
+/**
+ * Review 10, L9: the files a --runner runs besides itself, inside its own
+ * folder: what a shell runner names under `$here/…` or `$(dirname "$0")/…`,
+ * and what those scripts import or load by a relative path (`./x.mjs`,
+ * `../lib/y.js`), followed transitively. Sorted, relative to the runner's
+ * folder; the runner itself is not in the list.
+ * @param {string} file  the runner's resolved path
+ */
+export function runnerHelpers(file) {
+  const base = dirname(file);
+  const seen = new Set([file]);
+  const todo = [file];
+  const inside = (p) => p.startsWith(base + sep);
+  while (todo.length && seen.size <= MAX_RUNNER_FILES) {
+    const f = todo.pop();
+    let text;
+    try {
+      // A program, not a script (node itself on PATH): nothing to follow.
+      if (statSync(f).size > 2 * 1024 * 1024) continue;
+      text = readFileSync(f, "utf8");
+    } catch {
+      continue;
+    }
+    const refs = [];
+    for (const m of text.matchAll(/(?:\$\{?here\}?|\$\(dirname "?\$0"?\))\/([\w./-]+)/g)) refs.push(resolve(base, m[1]));
+    if (/\.[cm]?[jt]s$/.test(f)) for (const m of text.matchAll(/["'`](\.\.?\/[^"'`\s$]+)["'`]/g)) refs.push(resolve(dirname(f), m[1]));
+    for (const r of refs) {
+      if (seen.has(r) || !inside(r)) continue;
+      try {
+        if (!statSync(r).isFile()) continue;
+      } catch {
+        continue;
+      }
+      seen.add(r);
+      todo.push(r);
+    }
+  }
+  seen.delete(file);
+  return [...seen].map((p) => relative(base, p).split(sep).join("/")).sort();
+}
+
+/**
+ * The sha256 of the --runner program, or null when it can't be read. A runner
+ * that runs helper scripts of its own (runnerHelpers) is hashed with them: the
+ * sha256 of "runner-files-v1", then one "<path>\t<sha256>" line per file, the
+ * runner first (review 10, L9: hashing v4.sh alone left the shim's own code
+ * free to change under the same receipt). A runner with no helpers keeps the
+ * plain sha256 of its bytes.
+ *
+ * Like the whole receipt, this is self-asserted: whoever runs the train writes
+ * it, and nothing signs it yet (owed: the owner's signing key).
+ */
 export function runnerSha256(runner, root = process.cwd()) {
   const f = runnerFile(runner, root);
   if (!f) return null;
+  const sha = (p) => createHash("sha256").update(readFileSync(p)).digest("hex");
   try {
-    return createHash("sha256").update(readFileSync(f)).digest("hex");
+    const helpers = runnerHelpers(f);
+    if (!helpers.length) return sha(f);
+    const lines = [`${basename(f)}\t${sha(f)}`, ...helpers.map((h) => `${h}\t${sha(join(dirname(f), h))}`)];
+    return createHash("sha256").update(`runner-files-v1\n${lines.join("\n")}\n`).digest("hex");
   } catch {
     return null;
   }

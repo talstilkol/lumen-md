@@ -75,6 +75,17 @@ describe("runCommand and runTasks", () => {
     expect(await runCommand("npm run plan:check", { root, runner: "shim", run })).toMatchObject({ status: "fail", detail: "exit 1 — boom" });
   });
 
+  it("a Rust test run that ran no test is a fail, even on exit 0 (review 10, M5)", async () => {
+    const out = (text: string) => async () => ({ code: 0, out: text });
+    const zero = await runCommand("node scripts/rust-std-tests.mjs --only mcp-stdio", { root, runner: "shim", run: out("running 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 29 filtered out; finished in 0.00s\n") });
+    expect(zero).toMatchObject({ status: "fail", detail: expect.stringMatching(/running 0 tests: nothing was checked/) });
+    // cargo: a unit-test binary with tests and a doc-test binary with none is green.
+    const some = await runCommand("node scripts/rust-std-tests.mjs", { root, runner: "shim", run: out("running 3 tests\ntest result: ok. 3 passed; 0 failed; 0 ignored\n\nrunning 0 tests\ntest result: ok. 0 passed; 0 failed; 0 ignored\n") });
+    expect(some.status).toBe("pass");
+    // No Rust output at all: an ordinary shell command.
+    expect((await runCommand("npm run plan:check", { root, runner: "shim", run: out("plan: ok") })).status).toBe("pass");
+  });
+
   it("verdicts: red beats not here beats green", async () => {
     expect(verdictOf([{ status: "pass" }, { status: "not here" }])).toBe("not here");
     expect(verdictOf([{ status: "not here" }, { status: "fail" }])).toBe("red");
@@ -188,6 +199,7 @@ describe("--done exits 0 only when every row is green (review 9, H1)", () => {
       mkdirSync(join(dir, "plan"));
       cpSync(join(root, "scripts/dod.mjs"), join(dir, "scripts/dod.mjs"));
       cpSync(join(root, "scripts/lib/dodRunner.mjs"), join(dir, "scripts/lib/dodRunner.mjs"));
+      cpSync(join(root, "scripts/lib/rustStd.mjs"), join(dir, "scripts/lib/rustStd.mjs"));
       const plan = (dod: string[]) => JSON.stringify({ phases: [{ tasks: [{ id: "T.1", title: "t", status: "✅ #1", dod }] }] });
       const done = () => spawnSync("node", [join(dir, "scripts/dod.mjs"), "--done", "--runner", "/bin/false"], { cwd: dir, encoding: "utf8" });
       writeFileSync(join(dir, "plan/plan.json"), plan(["npx playwright test e2e/x.spec.ts"]));

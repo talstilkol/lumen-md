@@ -11,6 +11,7 @@ import {
   checkDod,
   select,
   runDod,
+  shellPasses,
   markdown,
   allTasks,
   // @ts-expect-error — plain .mjs script without type declarations
@@ -162,5 +163,15 @@ describe("select and markdown", () => {
     expect(md).toMatch(/^### 0\.6 · /);
     expect(md).toContain("- [ ] `npm run plan:check` → exit 0");
     expect(markdown([{ id: "1.1", title: "x", dod: ["true"] }])).toContain("- [ ] `true` green");
+  });
+});
+
+describe("a shell command of a dod (review 10, M5)", () => {
+  const fake = (status: number, stdout: string) => () => ({ status, stdout, stderr: "" });
+  it("a Rust test run that ran no test is not green, even on exit 0", () => {
+    expect(shellPasses("cargo test --offline x", ".", fake(0, "running 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 29 filtered out\n"))).toBe(false);
+    expect(shellPasses("cargo test --offline", ".", fake(0, "running 29 tests\ntest result: ok. 29 passed; 0 failed;\n\nrunning 0 tests\ntest result: ok. 0 passed; 0 failed;\n"))).toBe(true);
+    expect(shellPasses("npm run plan:check", ".", fake(0, "plan: ok\n"))).toBe(true);
+    expect(shellPasses("npm run plan:check", ".", fake(1, ""))).toBe(false);
   });
 });

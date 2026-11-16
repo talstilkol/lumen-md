@@ -304,8 +304,15 @@ export function buildModel(plan) {
   };
   // Busy intervals per lane and per conflict group.
   const busy = new Map();
+  // Review 10 (plan 0.6): how often each key was reserved, so a task's start is only worked out
+  // again when its lane or a group of it changed (the schedule was O(tasks² · intervals): about
+  // 2 s per build at 950 tasks, past vitest's 5 s per test in planBuild.test.ts). Same result.
+  const version = new Map();
   const intervals = (key) => busy.get(key) ?? [];
-  const reserve = (key, a, b) => busy.set(key, [...intervals(key), [a, b]].sort((x, y) => x[0] - y[0]));
+  const reserve = (key, a, b) => {
+    busy.set(key, [...intervals(key), [a, b]].sort((x, y) => x[0] - y[0]));
+    version.set(key, (version.get(key) ?? 0) + 1);
+  };
   const lastEnd = (keys) => Math.max(START, ...keys.flatMap((k) => intervals(k).map((iv) => iv[1])));
   /** The earliest start ≥ ready where `m` minutes fit between the intervals of `keys`. */
   const firstGap = (keys, ready, m) => {
@@ -327,15 +334,25 @@ export function buildModel(plan) {
    */
   const schedule = (batch, backfill) => {
     const pending = batch.filter((t) => !t.done);
+    // A task's start depends only on its dependencies' ends (fixed once set) and its keys' intervals.
+    const cached = new Map();
+    const keysOf = new Map(pending.map((t) => [t, [`lane:${t.lane}`, ...t.g.map((g) => `group:${g}`)]]));
+    const fresh = (c, keys) => !!c && keys.every((k, i) => (version.get(k) ?? 0) === c.v[i]);
     while (pending.length) {
       let best = null;
       for (const t of pending) {
         if (t.dep.some((d) => BYID.get(d).end === undefined)) continue;
-        const keys = [`lane:${t.lane}`, ...t.g.map((g) => `group:${g}`)];
-        const ready = Math.max(START, ...t.dep.map((d) => BYID.get(d).end));
-        let st;
-        if (t.lane === "T") st = ownerFit(Math.max(ready, lastEnd(keys)), t.m)[0];
-        else st = backfill ? firstGap(keys, ready, t.m) : Math.max(ready, lastEnd(keys));
+        const keys = keysOf.get(t);
+        let c = cached.get(t);
+        if (!fresh(c, keys)) {
+          const ready = Math.max(START, ...t.dep.map((d) => BYID.get(d).end));
+          let st;
+          if (t.lane === "T") st = ownerFit(Math.max(ready, lastEnd(keys)), t.m)[0];
+          else st = backfill ? firstGap(keys, ready, t.m) : Math.max(ready, lastEnd(keys));
+          c = { st, v: keys.map((k) => version.get(k) ?? 0) };
+          cached.set(t, c);
+        }
+        const st = c.st;
         const key = [st, PRIO.get(t.id)];
         if (!best || key[0] < best.key[0] || (key[0] === best.key[0] && key[1] < best.key[1])) best = { key, t, st, keys };
       }

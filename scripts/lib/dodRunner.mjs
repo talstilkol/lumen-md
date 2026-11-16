@@ -9,12 +9,14 @@
  * with at least one passed test and no failure. Every other command runs in a shell.
  * Commands that cannot run on a cloud machine without the full install (a
  * browser, cargo, the npm registry, a GPU or the owner's accounts) are not run
- * and are reported as "not here", with the reason: never as a pass.
+ * and are reported as "not here", with the reason: never as a pass. A Rust
+ * test run that ran no test ("running 0 tests") is a fail (review 10, M5).
  */
 import { spawn, spawnSync } from "node:child_process";
 import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, relative, sep } from "node:path";
+import { rustCounts, rustGreen } from "./rustStd.mjs";
 
 /** [pattern, reason]: commands this runner does not run, and why. */
 export const NOT_HERE = [
@@ -187,6 +189,9 @@ export async function runCommand(cmd, { root, runner = null, run = sh }) {
     }
   }
   const r = await run("bash", ["-c", cmd], { cwd: root });
+  // Review 10, M5: a Rust test run (cargo test, rustc --test) that ran no test checked nothing.
+  const rust = rustCounts(r.out);
+  if (r.code === 0 && rust && !rustGreen(rust)) return { cmd, status: "fail", detail: `exit 0 — but ${rust.ran === 0 ? "running 0 tests" : `${rust.passed}/${rust.ran} passed`}: nothing was checked` };
   const outLines = r.out.trim().split("\n").filter((l) => l.trim() && !/^Node\.js v\d/.test(l));
   const tail = (r.code !== 0 ? outLines.filter((l) => /error|✗|fail|cannot|not found/i.test(l)).slice(-1)[0] : null) ?? outLines.slice(-1)[0] ?? "";
   return { cmd, status: r.code === 0 ? "pass" : "fail", detail: `exit ${r.code}${tail ? ` — ${tail.slice(0, 160)}` : ""}` };

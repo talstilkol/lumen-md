@@ -27,6 +27,8 @@ export const COMMAND_GATES = [
   { id: "i18n", cmd: "npm run -s i18n:check" },
   { id: "plan", cmd: "node scripts/plan/build.mjs --check" },
   { id: "dod-rule", cmd: "node scripts/dod.mjs --list" },
+  // Review 10, M5: the std-only Rust crates, built and run with rustc --test (0 tests is red).
+  { id: "rust-std", cmd: "node scripts/rust-std-tests.mjs" },
   // Plan 0.7: every ✅ / ✅* task's dod is run, so a ✅ whose dod went red blocks the receipt.
   // `withRunner`: with --runner the dod's vitest files go through that runner (gateCommand).
   { id: "dod-done", cmd: "node scripts/dod.mjs --done", withRunner: true },
