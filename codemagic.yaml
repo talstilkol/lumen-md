@@ -5,9 +5,16 @@
 # macOS M2 minutes a month (docs.codemagic.io/billing/pricing, checked 12.11.2026);
 # Linux and Windows have no free minutes, so both workflows use the Mac.
 #
-# There is no `triggering:` section, so nothing builds on a push: every build is
-# started by hand in the Codemagic UI (Start new build → pick the workflow).
-# This is not GitHub Actions.
+# Builds are started by hand in the Codemagic UI (Start new build → pick the
+# workflow), except `pr-build` (W10.E78, audit 13.3): every pull request into
+# main builds both apps, unsigned and with no environment group, so it needs
+# no secret and a fork's PR cannot reach one. Every other workflow has no
+# `triggering:` section. This is not GitHub Actions.
+#
+# Minutes: pr-build is ≈ 25 macOS M2 minutes; `cancel_previous_builds` drops
+# a superseded run of the same PR. PRs into main are the trains (a handful a
+# month), so it stays inside the 500 free minutes with the rest below. The
+# lanes' PRs into verify/train-* do not trigger it.
 #
 # Environment groups (Codemagic UI → the app → Environment variables), all secure:
 #   lumen_ios:     APPLE_TEAM_ID, ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY (the .p8 file's text)
@@ -31,6 +38,36 @@
 # runs, so `bash scripts/mobile-device-smoke.sh testlab` from any machine is cheaper),
 # desktop-macos ≈ 25. A month of one of each a week stays under 500.
 workflows:
+  # W10.E78 (audit 13.3): every PR into main starts a build. Unsigned: the debug APK and an
+  # iOS simulator build, no keys and no environment group.
+  pr-build:
+    name: PR → main — Android debug APK + iOS simulator build (unsigned)
+    instance_type: mac_mini_m2
+    max_build_duration: 45
+    environment:
+      node: 22
+      java: 21
+      xcode: latest
+    triggering:
+      events:
+        - pull_request
+      branch_patterns:
+        - pattern: "main"
+          include: true
+          source: false
+      cancel_previous_builds: true
+    scripts:
+      - name: Install
+        script: npm ci
+      - name: Android debug APK (npm run mobile:android -- --unsigned)
+        script: npm run mobile:android -- --unsigned
+      - name: iOS simulator build, no signing
+        script: |
+          npx cap sync ios
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -sdk iphonesimulator -configuration Debug CODE_SIGNING_ALLOWED=NO build
+    artifacts:
+      - release/mobile/*.apk
+
   ios-testflight:
     name: iOS → TestFlight
     instance_type: mac_mini_m2

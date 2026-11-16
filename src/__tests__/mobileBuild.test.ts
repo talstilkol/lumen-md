@@ -174,9 +174,10 @@ describe("wiring (W4.22)", () => {
     expect(bad.stderr).toMatch(/item\(s\) missing — fix the ✗ lines above/);
   });
 
-  it("Codemagic runs the same scripts, only when started by hand, on the free macOS M2 machines", () => {
+  it("Codemagic runs the same scripts, by hand except the unsigned PR build, on the free macOS M2 machines", () => {
     const y = readFileSync(join(ROOT, "codemagic.yaml"), "utf8");
-    expect(y).not.toMatch(/^\s*triggering:/m);
+    // W10.E78: only pr-build has a triggering section (one in the whole file).
+    expect((y.match(/^\s*triggering:/gm) ?? []).length).toBe(1);
     // Every workflow (W4.22's two, and those W6.24 added) runs on the free M2 machine, and no other.
     const workflows = [...y.matchAll(/^  ([a-z][\w-]*):\s*$/gm)].map((m) => m[1]);
     expect(workflows).toEqual(expect.arrayContaining(["ios-testflight", "android-aab"]));
@@ -185,5 +186,23 @@ describe("wiring (W4.22)", () => {
     expect(y).toContain("script: npm run mobile:android");
     // The script takes the key's text from the group (ASC_KEY) as well as a path.
     expect(readFileSync(join(ROOT, "scripts/mobile-build.mjs"), "utf8")).toContain("process.env.ASC_KEY");
+  });
+
+  it("W10.E78: every pull request into main starts pr-build, unsigned and without secrets", () => {
+    const y = readFileSync(join(ROOT, "codemagic.yaml"), "utf8");
+    const start = y.indexOf("\n  pr-build:\n");
+    expect(start).toBeGreaterThan(0);
+    const next = y.slice(start + 1).search(/\n  [a-z][\w-]*:\n/);
+    const block = y.slice(start, next > 0 ? start + 1 + next : undefined);
+    expect(block).toMatch(/triggering:\n\s+events:\n\s+- pull_request\n/);
+    expect(block).toMatch(/- pattern: "main"\n\s+include: true\n\s+source: false/);
+    expect(block).toContain("cancel_previous_builds: true");
+    // Unsigned, no keys: no environment group, the debug APK only, no code signing for iOS.
+    expect(block).not.toMatch(/groups:/);
+    expect(block).toContain("npm run mobile:android -- --unsigned");
+    expect(block).toContain("CODE_SIGNING_ALLOWED=NO");
+    expect(block).not.toMatch(/publishing:|ASC_KEY|KEYSTORE/);
+    // The triggering section is inside pr-build, not in any other workflow.
+    expect(block).toContain("triggering:");
   });
 });
