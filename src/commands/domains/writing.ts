@@ -17,6 +17,7 @@ export function buildWritingCommands(ctx: CommandContext): Command[] {
   const run = (r: Run) => () => void import("./writingActions").then((m) => m.runWritingAgent(ctx, r.agent, r.options));
   const entry = (id: string, r: Run): Command => ({ id: `writing.${id}`, label: t(`cmd.writing.${id}`), hint: t(`cmd.writing.${id}.hint`), icon: cmdIcons.Sparkles, group, action: run(r) });
   return [
+    entry("coach", { agent: "styleCoach" }),
     entry("proofreadHe", { agent: "proofreaderHe" }),
     {
       id: "writing.panel",
