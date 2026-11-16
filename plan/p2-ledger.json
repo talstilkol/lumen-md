@@ -2,7 +2,7 @@
  "$comment": "Plan W10.G10: one entry per top-level Codex review comment that mentions P2 on the W1.32 PRs. Edit this file, then run `npm run p2:ledger`; `npm run p2:ledger -- --check --fetch` checks it against GitHub (REST).",
  "title": "P2 ledger — W1.32 (W10.G10)",
  "intro": "Every top-level Codex review comment that mentions P2 on the 12 W1.32 PRs (#199, #201, #202, #204, #210, #211, #218, #225, #231, #232, #235, #238), from `gh api repos/talstilkol/lumen-md/pulls/N/comments` on 14.11 (REST; replies matched by `in_reply_to_id`), with its decision.",
- "method": "How each decision was reached: a \"Fixed in <sha>\" reply in the thread (the sha checked against verify/train-4 fcf760fde8, by ancestry or by the same commit subject when the PR was rebased); otherwise the W1.32 commit on train-4 titled \"Codex P2 on #N\", whose message names the finding; otherwise the decline reason in the thread, docs/known-limits.md, or the lane D owner-checklist decisions. A comment none of these covers is **open**. Re-checked on 16.11 (`npm run p2:ledger -- --check --fetch`, lane B2c): every fixed commit is in verify/train-7 063d3d2c82 (a rebased one through the commit of the same subject, `inHead` in plan/p2-ledger.json), and the three #235 comments open on 14.11 are fixed by 1334460696; one P2 comment posted later on #235 is new and open.",
+ "method": "How each decision was reached: a \"Fixed in <sha>\" reply in the thread (the sha checked against verify/train-4 fcf760fde8, by ancestry or by the same commit subject when the PR was rebased); otherwise the W1.32 commit on train-4 titled \"Codex P2 on #N\", whose message names the finding; otherwise the decline reason in the thread, docs/known-limits.md, or the lane D owner-checklist decisions. A comment none of these covers is **open**. Re-checked on 16.11 (`npm run p2:ledger -- --check --fetch`, lane B2c): every fixed commit is in verify/train-7 063d3d2c82 (a rebased one through the commit of the same subject, `inHead` in plan/p2-ledger.json), and the three #235 comments open on 14.11 are fixed by 1334460696; one P2 comment posted later on #235 (4575737192, cached image URLs not scoped by vault) is fixed by 687b15a780 (lane FA, audit r3).",
  "prs": [
   199,
   201,
@@ -961,8 +961,9 @@
    "id": 4575737192,
    "url": "https://github.com/talstilkol/lumen-md/pull/235#discussion_r4575737192",
    "finding": "Scope cached image URLs to the activated vault (`src/storage/vault/location.ts`)",
-   "decision": "open",
-   "evidence": "posted 14.11 21:35, after this ledger was written; no reply. On 063d3d2c82 `blobUrlCache` in src/renderer/components.tsx is still keyed by path and version only, not by vault"
+   "decision": "fixed",
+   "sha": "687b15a780",
+   "evidence": "lane FA (audit r3): blobUrlCache moved to src/renderer/blobUrlCache.ts, scoped by vault identity + backend generation and emptied on a switch; src/__tests__/blobUrlVaultScope.test.tsx (0/3 at f090c20812, 3/3 fixed)"
   },
   {
    "pr": 238,
