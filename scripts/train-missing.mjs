@@ -16,13 +16,18 @@
  * is stale and the PR counts as undecided again. The run fails (exit 1)
  * while any PR head outside the train has no current decision.
  *
- * One exception (R8 train:missing): dependabot rebases its PRs onto the
- * default branch on its own, which moves their heads without changing what
- * they bump. A decision with `"author": "dependabot[bot]"` and the PR's exact
- * `"title"` holds across such a rebase, but only for a PR whose author really
- * is dependabot[bot] and whose title is still that title (a new version in
- * the title is a new bump, and stale). Every other PR is matched by head, as
- * before.
+ * One exception (R8 train:missing, R8b-L3): dependabot rebases its PRs onto
+ * the default branch on its own, which moves their heads without changing
+ * what they bump. A `"rejected"` decision with `"author": "dependabot[bot]"`
+ * and the PR's exact `"title"` holds across such a rebase, but only while
+ *   - the PR's author is dependabot[bot] and its title is still that title
+ *     (a new version in the title is a new bump, and stale; a grouped title
+ *     names no versions, which is why only a rejection may follow), and
+ *   - every commit on the PR is dependabot's own: authored by dependabot[bot],
+ *     committed by it or by GitHub (web-flow), and signature-verified
+ *     (`GET pulls/{n}/commits`). One push by anyone else makes it stale.
+ * "in" and "replaced" never follow a rebase: a new head needs a new look.
+ * Every other PR is matched by head, as before.
  *
  *   npm run train:missing [-- --train verify/train-4] [--decisions plan/train-missing.json] [--json]
  */
@@ -36,6 +41,8 @@ export const DECISIONS = ["in", "rejected", "replaced"];
 /** The one author whose PRs a decision may follow across a rebase (by number, author and title). */
 export const DEPENDABOT = "dependabot[bot]";
 export const DECISIONS_FILE = "plan/train-missing.json";
+/** Who may commit a dependabot PR's commits: the bot, or GitHub signing for it. */
+const BOT_COMMITTERS = [DEPENDABOT, "web-flow"];
 
 /** Every open PR, all pages: `api(path)` returns one page (an array). */
 export function openPulls(api, repo) {
@@ -43,6 +50,18 @@ export function openPulls(api, repo) {
   for (let page = 1; page < 100; page++) {
     const batch = api(`repos/${repo}/pulls?state=open&per_page=100&page=${page}`);
     if (!Array.isArray(batch)) throw new Error(`GET pulls page ${page}: not a list`);
+    out.push(...batch);
+    if (batch.length < 100) break;
+  }
+  return out;
+}
+
+/** A PR's commits, all pages (the endpoint lists at most 250). */
+export function pullCommits(api, repo, number) {
+  const out = [];
+  for (let page = 1; page <= 3; page++) {
+    const batch = api(`repos/${repo}/pulls/${number}/commits?per_page=100&page=${page}`);
+    if (!Array.isArray(batch)) throw new Error(`GET pulls/${number}/commits page ${page}: not a list`);
     out.push(...batch);
     if (batch.length < 100) break;
   }
@@ -67,20 +86,40 @@ export function checkDecisions(file) {
     if (d?.decision === "replaced" && !(typeof d.by === "string" && d.by.trim())) problems.push(`${at}: "replaced" names what replaces it (by)`);
     if (d?.author !== undefined && d.author !== DEPENDABOT) problems.push(`${at}: author may only be "${DEPENDABOT}" (other PRs are decided by head)`);
     if (d?.author === DEPENDABOT && !(typeof d.title === "string" && d.title.trim())) problems.push(`${at}: a dependabot decision names the PR's title (a new version is a new decision)`);
+    if (d?.author === DEPENDABOT && d?.decision !== "rejected") problems.push(`${at}: only a "rejected" dependabot decision may follow a rebase; "${d?.decision}" is decided by head`);
   }
   return problems;
 }
 
-/** A dependabot PR rebased since its decision: the same number, author and title. */
-function followsRebase(d, p) {
-  return d.author === DEPENDABOT && p.user?.login === DEPENDABOT && typeof d.title === "string" && d.title === p.title;
+/** Every commit is dependabot's own: its author, committed by it or GitHub, signature-verified. */
+export function onlyBotCommits(commits) {
+  return (
+    Array.isArray(commits) &&
+    commits.length > 0 &&
+    commits.every((c) => c?.author?.login === DEPENDABOT && BOT_COMMITTERS.includes(c?.committer?.login) && c?.commit?.verification?.verified === true)
+  );
+}
+
+/**
+ * A dependabot PR rebased since its "rejected" decision: the same number, author and title,
+ * and only the bot's commits. `commitsOf(pr)` lists the PR's commits; without it nothing follows.
+ */
+function followsRebase(d, p, commitsOf) {
+  if (!(d.decision === "rejected" && d.author === DEPENDABOT && p.user?.login === DEPENDABOT && typeof d.title === "string" && d.title === p.title)) return false;
+  if (typeof commitsOf !== "function") return false;
+  try {
+    return onlyBotCommits(commitsOf(p.number));
+  } catch {
+    return false;
+  }
 }
 
 /**
  * The verdict: { inTrain, decided, stale, undecided, gone, problems, ok }.
- * `isAncestor(sha)` answers whether a commit is in the train.
+ * `isAncestor(sha)` answers whether a commit is in the train; `commitsOf(pr)`
+ * lists a PR's commits (asked only for a dependabot PR that moved).
  */
-export function classify(pulls, file, isAncestor) {
+export function classify(pulls, file, isAncestor, commitsOf) {
   const problems = checkDecisions(file);
   const byPr = new Map((Array.isArray(file?.decisions) ? file.decisions : []).filter((d) => Number.isInteger(d?.pr)).map((d) => [d.pr, d]));
   const out = { inTrain: [], decided: [], stale: [], undecided: [], gone: [], problems };
@@ -96,7 +135,7 @@ export function classify(pulls, file, isAncestor) {
     const d = byPr.get(p.number);
     if (!d) out.undecided.push(row);
     else if (head && head.startsWith(d.head)) out.decided.push({ ...row, decision: d.decision, reason: d.reason, via: d.via, by: d.by });
-    else if (head && followsRebase(d, p)) out.decided.push({ ...row, decision: d.decision, reason: d.reason, via: d.via, by: d.by, rebasedFrom: d.head });
+    else if (head && followsRebase(d, p, commitsOf)) out.decided.push({ ...row, decision: d.decision, reason: d.reason, via: d.via, by: d.by, rebasedFrom: d.head });
     else out.stale.push({ ...row, decidedHead: d.head, decision: d.decision });
   }
   for (const d of byPr.values()) if (!open.has(d.pr)) out.gone.push(d.pr);
@@ -110,7 +149,7 @@ export function report(v, train) {
   const count = (d) => v.decided.filter((x) => x.decision === d).length;
   lines.push(`Decisions: in ${count("in")} · rejected ${count("rejected")} · replaced ${count("replaced")}.`);
   for (const p of v.problems) lines.push(`✗ ${DECISIONS_FILE}: ${p}`);
-  for (const r of v.decided.filter((x) => x.rebasedFrom)) lines.push(`· #${r.pr} (dependabot) rebased to ${r.head.slice(0, 10)} since the decision "${r.decision}" about ${r.rebasedFrom.slice(0, 10)}: same PR, author and title, kept`);
+  for (const r of v.decided.filter((x) => x.rebasedFrom)) lines.push(`· #${r.pr} (dependabot) rebased to ${r.head.slice(0, 10)} since the decision "${r.decision}" about ${r.rebasedFrom.slice(0, 10)}: same PR, author and title, only the bot's commits, kept`);
   for (const r of v.stale) lines.push(`✗ #${r.pr} moved to ${r.head.slice(0, 10)} since the decision "${r.decision}" about ${r.decidedHead.slice(0, 10)} (${r.title.slice(0, 70)})`);
   for (const r of v.undecided) lines.push(`✗ #${r.pr} (${r.base}) ${r.head?.slice(0, 10)}: no decision — ${r.title.slice(0, 80)}`);
   if (v.gone.length) lines.push(`Decisions about PRs no longer open (can go): ${v.gone.map((x) => `#${x}`).join(" ")}.`);
@@ -144,7 +183,7 @@ export function run({ cwd = process.cwd(), remote = "origin", train, decisions =
   if (!t) throw new Error(`no verify/train(-N) on ${remote}: pass --train`);
   const trainHead = git("rev-parse", `${remote}/${t}`);
   const file = JSON.parse(readFileSync(resolve(cwd, decisions), "utf8"));
-  const v = classify(openPulls(api, repo), file, ancestry({ git, api, repo, trainHead }));
+  const v = classify(openPulls(api, repo), file, ancestry({ git, api, repo, trainHead }), (n) => pullCommits(api, repo, n));
   return { train: t, trainHead, ...v, lines: report(v, t) };
 }
 

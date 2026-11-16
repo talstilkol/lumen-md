@@ -12,7 +12,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { execFileSync } from "node:child_process";
 // @ts-expect-error — plain .mjs script without type declarations
-import { DECISIONS_FILE, ancestry, checkDecisions, classify, openPulls, report, run } from "../../scripts/train-missing.mjs";
+import { DECISIONS_FILE, ancestry, checkDecisions, classify, onlyBotCommits, openPulls, pullCommits, report, run } from "../../scripts/train-missing.mjs";
 
 const ROOT = resolve(__dirname, "..", "..");
 const tmp = mkdtempSync(join(tmpdir(), "train-missing-"));
@@ -115,10 +115,12 @@ describe("dependabot PRs follow a rebase (by number, author and title); no other
   const bot = (number: number, sha: string, title: string, login = "dependabot[bot]") => ({ number, title, head: { sha }, base: { ref: "main" }, user: { login } });
   const T = "chore(deps): Bump the yjs group across 1 directory with 2 updates";
   const inTrain = () => false;
+  const c = (author = "dependabot[bot]", committer = "web-flow", verified = true) => ({ author: { login: author }, committer: { login: committer }, commit: { verification: { verified } } });
+  const botOnly = () => [c(), c("dependabot[bot]", "dependabot[bot]")];
 
   it("a dependabot decision with the PR's title holds after the bot rebased the PR", () => {
     const file = { decisions: [{ pr: 162, head: "5b8963441b", decision: "rejected", author: "dependabot[bot]", title: T, reason: "bumps go in as one lockfile update on the Mac" }] };
-    const v = classify([bot(162, "32169deb10425c4d63b2f65fcaeb45096bb8352e", T)], file, inTrain);
+    const v = classify([bot(162, "32169deb10425c4d63b2f65fcaeb45096bb8352e", T)], file, inTrain, botOnly);
     expect(v.ok).toBe(true);
     expect(v.decided[0]).toMatchObject({ pr: 162, decision: "rejected", rebasedFrom: "5b8963441b" });
     expect(report(v, "t").some((l: string) => l.startsWith("· #162 (dependabot) rebased to 32169deb10"))).toBe(true);
@@ -126,10 +128,44 @@ describe("dependabot PRs follow a rebase (by number, author and title); no other
 
   it("stale when the title changed (a new bump), when the author is not dependabot, or when the decision does not say dependabot", () => {
     const file = { decisions: [{ pr: 162, head: "5b8963441b", decision: "rejected", author: "dependabot[bot]", title: T, reason: "bumps go in as one lockfile update on the Mac" }] };
-    expect(classify([bot(162, "32169deb10", T.replace("2 updates", "3 updates"))], file, inTrain).stale.map((r: { pr: number }) => r.pr)).toEqual([162]);
-    expect(classify([bot(162, "32169deb10", T, "someone")], file, inTrain).stale.map((r: { pr: number }) => r.pr)).toEqual([162]);
+    expect(classify([bot(162, "32169deb10", T.replace("2 updates", "3 updates"))], file, inTrain, botOnly).stale.map((r: { pr: number }) => r.pr)).toEqual([162]);
+    expect(classify([bot(162, "32169deb10", T, "someone")], file, inTrain, botOnly).stale.map((r: { pr: number }) => r.pr)).toEqual([162]);
     const plain = { decisions: [{ pr: 162, head: "5b8963441b", decision: "rejected", reason: "bumps go in as one lockfile update on the Mac" }] };
-    expect(classify([bot(162, "32169deb10", T)], plain, inTrain).stale.map((r: { pr: number }) => r.pr)).toEqual([162]);
+    expect(classify([bot(162, "32169deb10", T)], plain, inTrain, botOnly).stale.map((r: { pr: number }) => r.pr)).toEqual([162]);
+  });
+
+  it("stale when anyone but the bot pushed a commit, or the commits cannot be read (R8b-L3)", () => {
+    const file = { decisions: [{ pr: 162, head: "5b8963441b", decision: "rejected", author: "dependabot[bot]", title: T, reason: "bumps go in as one lockfile update on the Mac" }] };
+    const stale = (commitsOf?: (n: number) => unknown) => classify([bot(162, "32169deb10", T)], file, inTrain, commitsOf).stale.map((r: { pr: number }) => r.pr);
+    expect(stale(() => [c(), c("someone", "someone")])).toEqual([162]);
+    expect(stale(() => [c(), c("dependabot[bot]", "someone")])).toEqual([162]);
+    expect(stale(() => [c(), c("dependabot[bot]", "web-flow", false)])).toEqual([162]);
+    expect(stale(() => [c(), { author: null, committer: { login: "web-flow" }, commit: { verification: { verified: true } } }])).toEqual([162]);
+    expect(stale(() => [])).toEqual([162]);
+    expect(stale(() => ({ message: "Not Found" }))).toEqual([162]);
+    expect(stale(() => { throw new Error("rate limited"); })).toEqual([162]);
+    expect(stale(undefined)).toEqual([162]);
+    expect(stale(botOnly)).toEqual([]);
+    expect(onlyBotCommits(botOnly())).toBe(true);
+  });
+
+  it("only a 'rejected' decision follows a rebase: 'in' and 'replaced' need a new look", () => {
+    for (const extra of [{ decision: "in", via: "W6.14" }, { decision: "replaced", by: "#1" }]) {
+      const file = { decisions: [{ pr: 162, head: "5b8963441b", author: "dependabot[bot]", title: T, reason: "bumps go in as one lockfile update on the Mac", ...extra }] };
+      const v = classify([bot(162, "32169deb10", T)], file, inTrain, botOnly);
+      expect(v.stale.map((r: { pr: number }) => r.pr)).toEqual([162]);
+      expect(v.problems).toEqual([expect.stringMatching(/only a "rejected" dependabot decision/)]);
+    }
+  });
+
+  it("reads a PR's commits page by page", () => {
+    const asked: string[] = [];
+    const api = (path: string) => {
+      asked.push(path);
+      return path.endsWith("page=1") ? Array.from({ length: 100 }, () => c()) : [c()];
+    };
+    expect(pullCommits(api, "o/r", 162)).toHaveLength(101);
+    expect(asked).toEqual([1, 2].map((p) => `repos/o/r/pulls/162/commits?per_page=100&page=${p}`));
   });
 
   it("the file may name only dependabot as an author, and then the title too", () => {
