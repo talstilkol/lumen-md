@@ -22,7 +22,8 @@ import { FileContextMenu, buildFileActions } from "./FileContextMenu";
 import { useAppStore } from "../store/useStore";
 import { duplicateFile, movedPath, renamedFileName, safeMoveWithCompanion, undoTrash, withoutCompanions, type MoveResult } from "../storage/fileOps";
 import { flushActiveWorkspaceDoc, syncOpenDocsAfterMove, trashWithOpenEdits } from "../store/openDocs";
-import { renderChildren } from "./fileTreeRows";
+import { renderChildren, type RenderCtx } from "./fileTreeRows";
+import { VirtualFileTree } from "./VirtualFileTree";
 export { visibleChildren } from "./fileTreeRows";
 // Saved searches (plan W2.12): a small chunk of its own, off the startup path.
 const SavedSearches = lazy(() => import("./SavedSearches"));
@@ -464,6 +465,28 @@ export function FileTree({
     );
   }
 
+  const treeCtx: RenderCtx = {
+    activePath,
+    collapsed,
+    editingPath,
+    editValue,
+    setEditValue,
+    setEditingPath,
+    inputRef,
+    toggle,
+    open,
+    commitRename,
+    remove,
+    newFile,
+    newFolder,
+    selectedPaths,
+    toggleSelect,
+    openContextMenu: (x, y, n) => setContextMenu({ x, y, node: n }),
+    fileLimit,
+    shownAll,
+    showAll: (dir) => setShownAll((prev) => new Set(prev).add(dir)),
+  };
+
   return (
     <aside className="file-tree" aria-label={t("tree.title")} data-testid="file-tree" data-ready={String(listed)}>
       <div className="file-tree-header">
@@ -648,29 +671,14 @@ export function FileTree({
               </button>
             </div>
           )}
-          <ul className="file-tree-list" role="tree">
-            {renderChildren(displayedTree, "", 0, {
-                activePath,
-                collapsed,
-                editingPath,
-                editValue,
-                setEditValue,
-                setEditingPath,
-                inputRef,
-                toggle,
-                open,
-                commitRename,
-                remove,
-                newFile,
-                newFolder,
-                selectedPaths,
-                toggleSelect,
-                openContextMenu: (x, y, n) => setContextMenu({ x, y, node: n }),
-                fileLimit,
-                shownAll,
-                showAll: (dir) => setShownAll((prev) => new Set(prev).add(dir)),
-            })}
-          </ul>
+          {/* W10.E16: a large vault scrolls a virtual list; a small one keeps the nested tree. */}
+          {fileLimit !== null ? (
+            <VirtualFileTree nodes={displayedTree} ctx={treeCtx} />
+          ) : (
+            <ul className="file-tree-list" role="tree">
+              {renderChildren(displayedTree, "", 0, treeCtx)}
+            </ul>
+          )}
         </>
       )}
       {contextMenu && (
