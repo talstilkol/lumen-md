@@ -162,7 +162,7 @@ async function report(plan, argv) {
   const tasks = argv.includes("--p0") ? p0Tasks(plan) : select(plan, { ids, done: argv.includes("--done") });
   const git = (...a) => spawnSync("git", a, { cwd: ROOT, encoding: "utf8" }).stdout.trim();
   const rows = await runTasks(tasks, { root: ROOT, runner, jobs, log: (l) => console.log(l) });
-  const md = reportMarkdown(rows, { sha: git("rev-parse", "HEAD"), branch: git("rev-parse", "--abbrev-ref", "HEAD"), runner, at: new Date().toISOString() });
+  const md = reportMarkdown(rows, { sha: git("rev-parse", "HEAD"), branch: git("rev-parse", "--abbrev-ref", "HEAD"), runner, at: new Date().toISOString(), mode: argv.includes("--p0") ? "--p0" : argv.includes("--done") ? "--done" : ids.join(" ") });
   if (file) {
     const { writeFileSync, mkdirSync } = await import("node:fs");
     mkdirSync(dirname(resolve(ROOT, file)), { recursive: true });
