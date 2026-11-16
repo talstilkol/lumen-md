@@ -61,17 +61,25 @@ The window has no general file-system permission. It reaches only the vault
 folder you picked, through Lumen's own commands. No shell, no arbitrary
 HTTP from the native side, and no source maps in the shipped files.
 
-**Checked on every change (plan W11.S18):**
+**What is written, and what is not on yet (plan W11.S18):**
 
-- Every capability file is compared with a reviewed snapshot
-  (`security/tauri-capabilities.snapshot.json`). A capability that grants an
-  updater, shell, file-system, process, HTTP or opener permission to the
-  window fails the check.
-- An **isolation app** (`src-tauri/isolation/`) checks every message from the
-  window before it reaches the native side, as a second wall behind the
-  capability. Only Lumen's own commands pass. A vault path must stay inside
-  the vault, and updater and shell commands never pass.
+- Every capability file is meant to match a reviewed snapshot
+  (`security/tauri-capabilities.snapshot.json`), and a capability that grants
+  an updater, shell, file-system, process, HTTP or opener permission to the
+  window should fail the check. The check is a unit test
+  (`src/__tests__/tauriIsolation.test.ts`), run by hand: there is no CI that
+  runs it on every change yet. **It is red today**: the default capability
+  changed (a global-shortcut permission) and its snapshot was not reviewed
+  again. The owner reviews it and refreshes the snapshot.
+- An **isolation app** (`src-tauri/isolation/`) is written to check every
+  message from the window before it reaches the native side, as a second wall
+  behind the capability: only Lumen's own commands, a vault path only inside
+  the vault, never an updater or shell command. **It is not turned on**:
+  `tauri.conf.json` does not use the isolation pattern. Its allow-list also
+  lacks two commands the desktop app has since gained, `vault_write_if` and
+  `vault_remove_if` (compare-and-swap saves), so turning it on as it is would
+  break saving on the desktop. The same test is red on that too.
 
-The isolation app is written and tested. It is turned on with
-`node scripts/tauri-isolation.mjs --enable`, which needs a dependency update
-with network access. That step is still to come.
+Until the allow-list is updated, the test is green and the pattern is on
+(`node scripts/tauri-isolation.mjs --enable`, which also needs a dependency
+update with network access), the capability file is the only wall.

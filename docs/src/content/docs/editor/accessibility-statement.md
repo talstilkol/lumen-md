@@ -47,6 +47,12 @@ status.
 
 ## How it is checked
 
+These checks are written. For this version none of the end-to-end specs
+(`e2e/…`) has run yet, the nightly Mac does not exist yet, and no CI runs
+them on each build: they run on the owner's machine before the release. The
+[conformance report](/editor/acr/) marks every status that rests on one of
+them as **not yet verified** until that run is recorded.
+
 - axe-core (WCAG 2.0/2.1 A and AA) on six surfaces, in Hebrew and English,
   in light and dark mode (`e2e/a11y.spec.ts`).
 - In every preview build, axe-core (WCAG 2.0, 2.1 and 2.2 A and AA, target

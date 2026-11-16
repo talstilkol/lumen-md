@@ -1,5 +1,15 @@
-/** Plan W5.26: the offline Hebrew lexicon — the Wiktionary parser, the lookup, the pack store and its credit. */
+/**
+ * Plan W5.26: the offline Hebrew lexicon — the Wiktionary parser, the lookup, the pack store and its credit.
+ *
+ * Every suite but the last runs on synthetic pages and packs written here: they prove the code, not
+ * that the feature has data. The last suite reads the published pack from the tree and is RED until
+ * one is built from a real Hebrew Wiktionary dump (scripts/build-hebrew-lexicon.mjs; the dump host is
+ * not reachable from the cloud lanes) — audit A4: a green suite must not imply a lexicon exists.
+ */
 import { describe, it, expect, beforeEach } from "vitest";
+import { existsSync, readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { join } from "node:path";
 import { buildPack, pagesOf, parsePage, plainText } from "../../scripts/lib/hewiktionary.mjs";
 import { buildIndex, candidates, lookup, type LexiconPack, type PackEntry } from "../lexicon/lexicon";
 import { LEXICON_CACHE, LEXICON_PACK_PATH, LexiconUnavailableError, __resetLexicon, downloadLexicon, lexiconManifest, loadLexicon, removeLexicon } from "../lexicon/store";
@@ -158,7 +168,7 @@ describe("lexicon pack on this device", () => {
     localStorage.clear();
   });
 
-  it("not published yet: the manifest is missing and the download says so", async () => {
+  it("without a manifest (synthetic: no pack served), the download says the pack is not there", async () => {
     const { deps } = fakeEnv(null);
     expect(await lexiconManifest(deps)).toBeNull();
     await expect(downloadLexicon(deps)).rejects.toBeInstanceOf(LexiconUnavailableError);
@@ -198,5 +208,27 @@ describe("lexicon credit (plan 1.7)", () => {
     // screen lists conditional entries with their notice. So "conditional", not "allowed" (train 5, audit item 11).
     expect(e).toMatchObject({ license: "CC-BY-SA-4.0", class: "conditional", commercial: "conditional", delivery: "user-download", unmodified: false });
     expect(String(e.attribution)).toMatch(/Hebrew Wiktionary.*CC BY-SA 4\.0/);
+  });
+});
+
+describe("the published pack in public/lexicon (W5.26 acceptance: ≥ 20,000 entries, from a real dump)", () => {
+  const dir = join(__dirname, "..", "..", "public", "lexicon");
+  const manifestPath = join(dir, "manifest.json");
+
+  it("public/lexicon has a manifest and the pack it names, and the pack matches its size and sha256", () => {
+    expect(existsSync(manifestPath), "public/lexicon/manifest.json is missing: no lexicon has been built (scripts/build-hebrew-lexicon.mjs)").toBe(true);
+    const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as { bytes: number; sha256: string };
+    const packPath = join(__dirname, "..", "..", "public", LEXICON_PACK_PATH);
+    expect(existsSync(packPath), `${LEXICON_PACK_PATH} is missing`).toBe(true);
+    const bytes = readFileSync(packPath);
+    expect(bytes.byteLength).toBe(manifest.bytes);
+    expect(createHash("sha256").update(bytes).digest("hex")).toBe(manifest.sha256);
+  });
+
+  it("the pack has ≥ 20,000 entries and names the Wiktionary dump it was built from", () => {
+    expect(existsSync(manifestPath), "no published pack").toBe(true);
+    const pack = JSON.parse(readFileSync(join(__dirname, "..", "..", "public", LEXICON_PACK_PATH), "utf8")) as LexiconPack;
+    expect(pack.entries.length).toBeGreaterThanOrEqual(20_000);
+    expect(pack.source).toMatch(/hewiktionary-\d{8}/);
   });
 });

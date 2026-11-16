@@ -113,6 +113,19 @@ describe("FUNDING.yml", () => {
     expect(yml).toContain("# open_collective: lumen-md");
   });
 
+  it("the support page links an account only once FUNDING.yml switches it on: 0 links to empty pages (W10.B21)", () => {
+    const on = (key: string) => live.some((l) => l.startsWith(`${key}:`));
+    const accounts: Array<[string, RegExp]> = [
+      ["github", /href="https:\/\/github\.com\/sponsors\//],
+      ["open_collective", /href="https:\/\/opencollective\.com\//],
+    ];
+    for (const [key, link] of accounts) {
+      expect(link.test(page), `${key}: the page links it while FUNDING.yml has it off`).toBe(on(key));
+      // While off, the page names it as coming, in both languages, without a link.
+      if (!on(key)) expect(page.match(new RegExp(`data-funding="${key}"`, "g"))?.length).toBe(2);
+    }
+  });
+
   it("the sitemap lists the support page", () => {
     expect(read("public/sitemap.xml")).toContain("<loc>https://lumen-md.vercel.app/support.html</loc>");
   });

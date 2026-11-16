@@ -669,6 +669,39 @@ export const roadmapState = (status) => {
 };
 
 /**
+ * A task title for the public page: the internal references taken out — PR
+ * numbers (#123, ranges, "מ-#235"), commit hashes and the empty brackets
+ * they leave. An outside catalogue number stays when it is named
+ * ("Gutenberg #2701"). Audit A4: the roadmap is for readers, not the train.
+ */
+export function publicTitle(title) {
+  const raw = String(title ?? "");
+  let t = raw
+    .replace(/(^|[^\p{L}])(?:[מבלוה]-)?#\d+(?:\s*[–-]\s*#\d+)?/gu, (m, pre, off, str) => (/Gutenberg\s$/.test(str.slice(0, off + pre.length)) ? m : pre))
+    .replace(/\b(?=[0-9a-f]*[a-f])(?=[0-9a-f]*\d)[0-9a-f]{7,40}\b/g, "");
+  const tidy = (x) =>
+    x
+      .replace(/‏(?=\s|$|[,)+])/g, "")
+      .replace(/\(\s*[,،]?\s*\)/g, "")
+      .replace(/\s+([,):])/g, "$1")
+      .replace(/([(])\s+/g, "$1")
+      .replace(/\+\s*,/g, "+")
+      .replace(/(?:\+\s*){2,}/g, "+ ")
+      .replace(/,\s*(?=[,+]|$)/g, "")
+      .replace(/(?:→\s*){2,}/g, "→ ")
+      .replace(/:\s*→\s*/g, ": ")
+      .replace(/\s*→\s*(?=$|[^\p{L}\d\s])/gu, " ")
+      .replace(/PR-ים\s*(?=\(|$)/g, "")
+      .replace(/(^|\s)ש-\s+\(/g, "$1ש-(")
+      .replace(/\s+(?:מעל|על|ו-|ו|קבוצת)$/u, "")
+      .replace(/\s{2,}/g, " ")
+      .replace(/^[\s,:—–-]+|[\s,:—–-]+$/g, "")
+      .trim();
+  t = tidy(tidy(t));
+  return t || raw.replace(/#\d+/g, "").trim();
+}
+
+/**
  * public/roadmap.html: the plan's phases with every task's number, title and
  * state, and nothing else — no steps, acceptance, estimates, dates, branches
  * or the owner's items. The page renders the JSON block with /roadmap.js
@@ -679,7 +712,7 @@ export function renderRoadmap(M) {
   const phases = M.phases.map((p, i) => [i, p.title, p.tasks.map((t) => {
     const st = roadmapState(t.status);
     states[st]++;
-    return [t.id, st, t.t];
+    return [t.id, st, publicTitle(t.t)];
   })]);
   const total = M.agent.length;
   const pct = Math.round((states.done / total) * 100);
