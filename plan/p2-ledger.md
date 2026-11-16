@@ -2,7 +2,7 @@
 
 Every top-level Codex review comment that mentions P2 on the 12 W1.32 PRs (#199, #201, #202, #204, #210, #211, #218, #225, #231, #232, #235, #238), from `gh api repos/talstilkol/lumen-md/pulls/N/comments` on 14.11 (REST; replies matched by `in_reply_to_id`), with its decision.
 
-**110 comments:** fixed 101 · accepted risk 5 · superseded 1 · open 3.
+**110 comments:** fixed 104 · accepted risk 5 · superseded 1 · open 0 (the 3 left open on 14.11 were fixed by 1334460696; re-checked 16.11 on 063d3d2c82).
 
 How each decision was reached: a "Fixed in <sha>" reply in the thread (the sha checked against verify/train-4 fcf760fde8, by ancestry or by the same commit subject when the PR was rebased); otherwise the W1.32 commit on train-4 titled "Codex P2 on #N", whose message names the finding; otherwise the decline reason in the thread, docs/known-limits.md, or the lane D owner-checklist decisions. A comment none of these covers is **open**.
 
@@ -108,9 +108,9 @@ How each decision was reached: a "Fixed in <sha>" reply in the thread (the sha c
 | #235 | [4306783259](https://github.com/talstilkol/lumen-md/pull/235#discussion_r4306783259) | Freeze source writes through final verification (`src/storage/vault/location.ts`) | accepted risk | docs/known-limits.md (7c4fbdcbc7); lane D decision 2.9: no write freeze in the core write path, a post-switch re-hash instead |
 | #235 | [4306783265](https://github.com/talstilkol/lumen-md/pull/235#discussion_r4306783265) | Avoid duplicating notes already copied into trash (`src/storage/vault/location.ts`) | fixed in 7908d1e768 | W1.32 commit; lane D decision 2.10 |
 | #235 | [4306783268](https://github.com/talstilkol/lumen-md/pull/235#discussion_r4306783268) | Skip detachment when reopening the active folder (`src/storage/vault/location.ts`) | fixed in 7908d1e768 | W1.32 commit; lane D decision 2.11 |
-| #235 | [4575404796](https://github.com/talstilkol/lumen-md/pull/235#discussion_r4575404796) | Pin vault snapshot reads to the captured backend (`src/sync/autoBackup.ts`) | open | posted 14.11 19:52, after W1.32; no reply and no decision |
-| #235 | [4575404797](https://github.com/talstilkol/lumen-md/pull/235#discussion_r4575404797) | Reject moving a folder vault into its own descendant (`src/storage/vault/location.ts`) | open | posted 14.11 19:52, after W1.32; no reply and no decision |
-| #235 | [4575404801](https://github.com/talstilkol/lumen-md/pull/235#discussion_r4575404801) | Reconcile deleted files from an interrupted move (`src/storage/vault/location.ts`) | open | posted 14.11 19:52, after W1.32; no reply and no decision |
+| #235 | [4575404796](https://github.com/talstilkol/lumen-md/pull/235#discussion_r4575404796) | Pin vault snapshot reads to the captured backend (`src/sync/autoBackup.ts`) | fixed in 1334460696 | commit "Codex P2 on #235", an ancestor of verify/train-7 063d3d2c82: a snapshot pass stays in its vault (src/sync/autoBackup.ts); test historyVaultIdentity.test.ts (W10.G10 re-check 16.11) |
+| #235 | [4575404797](https://github.com/talstilkol/lumen-md/pull/235#discussion_r4575404797) | Reject moving a folder vault into its own descendant (`src/storage/vault/location.ts`) | fixed in 1334460696 | commit "Codex P2 on #235", an ancestor of verify/train-7 063d3d2c82: no move into or around itself (location.ts); test vaultLocation.test.ts (W10.G10 re-check 16.11) |
+| #235 | [4575404801](https://github.com/talstilkol/lumen-md/pull/235#discussion_r4575404801) | Reconcile deleted files from an interrupted move (`src/storage/vault/location.ts`) | fixed in 1334460696 | commit "Codex P2 on #235", an ancestor of verify/train-7 063d3d2c82: a resume drops copies of notes deleted since (dropStaleCopies); test vaultLocation.test.ts (W10.G10 re-check 16.11) |
 | #238 | [4306734416](https://github.com/talstilkol/lumen-md/pull/238#discussion_r4306734416) | Disambiguate links copied from duplicate headings (`src/editor/blockLink.ts`) | fixed in 1dbdf8bb | reply in the thread; in train-4 |
 | #238 | [4306796825](https://github.com/talstilkol/lumen-md/pull/238#discussion_r4306796825) | Track fenced-code delimiter lengths (`src/editor/blockLink.ts`) | fixed in 51d6d824 | reply in the thread; in train-4 |
 | #238 | [4306796829](https://github.com/talstilkol/lumen-md/pull/238#discussion_r4306796829) | Recognize setext headings before adding block IDs (`src/editor/blockLink.ts`) | fixed in 51d6d824 | reply in the thread; in train-4 |
@@ -121,6 +121,4 @@ How each decision was reached: a "Fixed in <sha>" reply in the thread (the sha c
 
 ## Open
 
-- #235 4575404796: Pin vault snapshot reads to the captured backend (`src/sync/autoBackup.ts`)
-- #235 4575404797: Reject moving a folder vault into its own descendant (`src/storage/vault/location.ts`)
-- #235 4575404801: Reconcile deleted files from an interrupted move (`src/storage/vault/location.ts`)
+None. (14.11 had three, from #235; 1334460696 fixed all three, with tests.)
