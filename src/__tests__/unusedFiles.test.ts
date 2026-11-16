@@ -17,6 +17,8 @@ import {
   isProduction,
   isEntryFile,
   BASELINE,
+  LIBRARY,
+  isTestFile,
   // @ts-expect-error — plain .mjs script without type declarations
 } from "../../scripts/check-unused-files.mjs";
 
@@ -48,15 +50,37 @@ describe("findOrphans", () => {
     expect(findOrphans({ root: dir }).orphans).toEqual(["src/orphan.ts"]);
   });
 
-  it("tests, e2e and scripts are entry points; their imports count as used", () => {
+  it("tests and e2e are NOT entry points (audit A3): a module only its test imports is unreachable from the app; scripts are entry points", () => {
     const dir = repo("tests", {
+      "index.html": '<script type="module" src="/src/main.ts"></script>',
+      "src/main.ts": 'import { d } from "./d";\n',
+      "src/d.ts": "export const d = 1;\n",
       "src/__tests__/a.test.ts": 'import { a } from "../a";\n',
       "src/a.ts": "export const a = 1;\n",
       "e2e/x.spec.ts": 'import { b } from "../src/b";\n',
       "src/b.ts": "export const b = 1;\n",
+      "tests/helper.ts": 'import { h } from "../src/h";\n',
+      "src/h.ts": "export const h = 1;\n",
+      "scripts/tool.mjs": 'import { s } from "../src/s.ts";\n',
+      "src/s.ts": "export const s = 1;\n",
       "src/c.ts": "export const c = 1;\n",
     });
-    expect(findOrphans({ root: dir }).orphans).toEqual(["src/c.ts"]);
+    const r = findOrphans({ root: dir });
+    expect(r.orphans).toEqual(["src/a.ts", "src/b.ts", "src/c.ts", "src/h.ts"]);
+    // a, b and h are built and tested but unreachable; c is reached by nothing at all.
+    expect(r.testOnly).toEqual(["src/a.ts", "src/b.ts", "src/h.ts"]);
+    for (const f of ["src/__tests__/a.test.ts", "e2e/x.spec.ts", "tests/helper.ts", "src/x.eval.ts", "packages/p/test/a.test.ts", "src/__mocks__/m.ts"]) expect(isTestFile(f)).toBe(true);
+    expect(isTestFile("scripts/tool.mjs")).toBe(false);
+  });
+
+  it("a script that bundles a source file by its path reaches it (mcp-server's build(\"src/types/api.ts\"))", () => {
+    const dir = repo("bundled", {
+      "mcp-server/scripts/bundle.mjs": 'await build("src/types/api.ts", out);\n',
+      "src/types/api.ts": 'import "./dep";\n',
+      "src/types/dep.ts": "export {};\n",
+      "src/types/other.ts": "export {};\n",
+    });
+    expect(findOrphans({ root: dir }).orphans).toEqual(["src/types/other.ts"]);
   });
 
   it("executables and packages outside src/ are roots too (bin/, api-server/, packages/ …)", () => {
@@ -72,7 +96,8 @@ describe("findOrphans", () => {
     expect(findOrphans({ root: dir }).orphans).toEqual(["src/dead.ts"]);
     expect(isEntryFile("bin/lumen.ts")).toBe(true);
     expect(isEntryFile("src/a.ts")).toBe(false);
-    expect(isEntryFile("src/__tests__/a.test.ts")).toBe(true);
+    expect(isEntryFile("src/__tests__/a.test.ts")).toBe(false);
+    expect(isEntryFile("e2e/a.spec.ts")).toBe(false);
   });
 
   it("import.meta.glob marks every match as used", () => {
@@ -159,8 +184,8 @@ describe("the parts", () => {
 
 describe("the gate", () => {
   it("a new orphan fails; a baseline entry that is used again must be pruned", () => {
-    expect(compare(["src/old.ts", "src/new.ts"], ["src/old.ts"])).toEqual({ added: ["src/new.ts"], stale: [] });
-    expect(compare([], ["src/old.ts"])).toEqual({ added: [], stale: ["src/old.ts"] });
+    expect(compare(["src/old.ts", "src/new.ts"], ["src/old.ts"])).toMatchObject({ added: ["src/new.ts"], stale: [] });
+    expect(compare([], ["src/old.ts"])).toMatchObject({ added: [], stale: ["src/old.ts"] });
   });
 
   it("a file only a baseline orphan imports is held by it; a file nothing imports still fails", () => {
@@ -175,7 +200,7 @@ describe("the gate", () => {
     const { orphans, held } = findOrphans({ root: dir, baseline: ["src/dead.ts"] });
     expect(orphans).toEqual(["src/dead.ts", "src/deadDeeper.ts", "src/deadStrings.ts", "src/newOrphan.ts"]);
     expect(held).toEqual({ "src/deadStrings.ts": "src/dead.ts", "src/deadDeeper.ts": "src/dead.ts" });
-    expect(compare(orphans, ["src/dead.ts"], held)).toEqual({ added: ["src/newOrphan.ts"], stale: [] });
+    expect(compare(orphans, ["src/dead.ts"], held)).toMatchObject({ added: ["src/newOrphan.ts"], stale: [] });
     // Without the baseline entry nothing is held: all three are new orphans.
     expect(compare(orphans, [], findOrphans({ root: dir }).held).added).toEqual(["src/dead.ts", "src/deadDeeper.ts", "src/deadStrings.ts", "src/newOrphan.ts"]);
   });
@@ -191,9 +216,27 @@ describe("the gate", () => {
     expect(findOrphans({ root: dir }).orphans).toEqual([]);
   });
 
-  it("the checked-in tree matches the baseline exactly", () => {
+  it("a library-listed file: allowed while only tests reach it; fails once the app reaches it, when no test does, or without a reason", () => {
+    const lib = { "src/lib.ts": "An eval harness, run by the eval suite only (test)." };
+    expect(compare(["src/lib.ts"], [], {}, lib, ["src/lib.ts"])).toEqual({ added: [], stale: [], libraryReached: [], libraryDead: [], libraryNoReason: [] });
+    expect(compare([], [], {}, lib, []).libraryReached).toEqual(["src/lib.ts"]);
+    expect(compare(["src/lib.ts"], [], {}, lib, []).libraryDead).toEqual(["src/lib.ts"]);
+    expect(compare(["src/lib.ts"], [], {}, { "src/lib.ts": "x" }, ["src/lib.ts"]).libraryNoReason).toEqual(["src/lib.ts"]);
+    // A file only a library entry imports is held by it.
+    const dir = repo("held-lib", {
+      "index.html": '<script type="module" src="/src/main.ts"></script>',
+      "src/main.ts": "export {};\n",
+      "src/harness.ts": 'import "./harnessData";\n',
+      "src/harnessData.ts": "export {};\n",
+      "src/__tests__/h.test.ts": 'import "../harness";\n',
+    });
+    expect(findOrphans({ root: dir, library: ["src/harness.ts"] }).held).toEqual({ "src/harnessData.ts": "src/harness.ts" });
+  });
+
+  it("the checked-in tree matches the baseline and the library list exactly", () => {
     const baseline: string[] = JSON.parse(readFileSync(join(ROOT, BASELINE), "utf8")).files;
-    const { orphans, held } = findOrphans({ root: ROOT, baseline });
-    expect(compare(orphans, baseline, held)).toEqual({ added: [], stale: [] });
+    const library: Record<string, string> = JSON.parse(readFileSync(join(ROOT, LIBRARY), "utf8")).files;
+    const { orphans, held, testOnly } = findOrphans({ root: ROOT, baseline, library: Object.keys(library) });
+    expect(compare(orphans, baseline, held, library, testOnly)).toEqual({ added: [], stale: [], libraryReached: [], libraryDead: [], libraryNoReason: [] });
   });
 });

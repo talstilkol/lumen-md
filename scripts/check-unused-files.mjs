@@ -5,10 +5,24 @@
  * Walks the import graph from every entry point and reports production files
  * under src/ that nothing reaches. Entry points:
  *   - <script type="module" src="/src/…"> in every *.html page (root, public/, bench/ …)
- *   - every test in src/ (__tests__, *.test.*, *.spec.*, *.eval.*)
- *   - every code file outside src/: e2e/, scripts/, eval/, the root configs, and the
- *     other executables and packages that reuse src/ (bin/, api-server/, mcp-server/,
- *     packages/, extension/ …) — anything they import is used
+ *   - every code file outside src/ that is not a test: scripts/, eval/, the root
+ *     configs, and the other executables and packages that reuse src/ (bin/,
+ *     api-server/, mcp-server/, packages/, extension/ …) — anything they import is used.
+ *     A script that bundles a source file by its path (`build("src/types/api.ts")`)
+ *     reaches it too.
+ *
+ * Tests are NOT entry points (audit A3, round 2): a module that only its own test
+ * imports is built and tested but unreachable from the app, and the gate reports
+ * it. That covers *.test.* / *.spec.* / *.eval.*, __tests__/ and __mocks__/
+ * anywhere, and the e2e/ and tests/ folders. The test graph is still walked, to
+ * tell the two kinds of unreached file apart:
+ *   - a file no test reaches either is dead code: delete it;
+ *   - a file only tests reach must be wired into the app (a command, a menu, a
+ *     view, a setting) — or, when it is a library on purpose (an eval harness, a
+ *     measurement, a seam whose engine is owed), listed in
+ *     scripts/unused-files.library.json with the reason. The gate fails on a
+ *     listed file the app now reaches (take it off the list) and on one no test
+ *     reaches (it is dead).
  * Edges: static `import … from`, `export … from`, side-effect `import "…"`,
  * `import("…")`, `require("…")`, `new URL("…", import.meta.url)` (workers) and
  * `import.meta.glob("…")`. Specifiers resolve relative to the file or through the
@@ -40,6 +54,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export const BASELINE = "scripts/unused-files.baseline.json";
+export const LIBRARY = "scripts/unused-files.library.json";
 
 const CODE_RE = /\.(ts|tsx|js|jsx|mjs|cjs|mts|cts)$/;
 const EXTS = [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".mts", ".cts"];
@@ -144,15 +159,19 @@ export function resolveSpecifier(spec, fromRel, files) {
   return null;
 }
 
-/** Every code file outside src/ (bin/, api-server/, packages/, extension/, e2e/, scripts/, configs …) and every test in src/. */
-export const isEntryFile = (rel) => CODE_RE.test(rel) && !/\.d\.[cm]?ts$/.test(rel) && (!rel.startsWith("src/") || !isProduction(rel));
+/** A test or test support, anywhere: *.test.* / *.spec.* / *.eval.*, __tests__/, __mocks__/, e2e/, tests/. */
+export const isTestFile = (rel) => /\.(test|spec|eval)\.[cm]?[jt]sx?$/.test(rel) || /(^|\/)(__tests__|__mocks__)\//.test(rel) || /^(e2e|tests)\//.test(rel);
+
+/** Every code file outside src/ that is not a test (bin/, api-server/, packages/, extension/, scripts/, configs …). */
+export const isEntryFile = (rel) => CODE_RE.test(rel) && !/\.d\.[cm]?ts$/.test(rel) && !rel.startsWith("src/") && !isTestFile(rel);
 
 /**
- * @param {{ root?: string, baseline?: string[] }} [opts]
- * @returns {{ orphans: string[], production: number, held: Record<string, string> }}
- *   held: orphan → the baseline entry it is reached from (only baseline orphans import it)
+ * @param {{ root?: string, baseline?: string[], library?: string[] }} [opts]
+ * @returns {{ orphans: string[], production: number, held: Record<string, string>, testOnly: string[] }}
+ *   held: orphan → the baseline or library entry it is reached from (only those orphans import it)
+ *   testOnly: the orphans some test reaches (built and tested, but not reachable from the app)
  */
-export function findOrphans({ root = ROOT, baseline = [] } = {}) {
+export function findOrphans({ root = ROOT, baseline = [], library = [] } = {}) {
   const all = walk(root, "", []);
   const files = new Set(all.map(toPosix));
   const code = all.filter((f) => CODE_RE.test(f) && !/\.d\.[cm]?ts$/.test(f));
@@ -171,9 +190,25 @@ export function findOrphans({ root = ROOT, baseline = [] } = {}) {
   for (const f of all) {
     if (/\.html$/.test(f)) for (const e of htmlEntries(readFileSync(join(root, f), "utf8"))) reach(resolveSpecifier(`/${e}`, f, files));
   }
-  for (const f of code) if (isEntryFile(f)) reach(f);
+  for (const f of code) if (isEntryFile(f)) {
+    reach(f);
+    if (!f.startsWith("src/")) for (const m of readFileSync(join(root, f), "utf8").matchAll(/["'`](src\/[^"'`$\s]+\.(?:ts|tsx|js|jsx|mjs))["'`]/g)) if (files.has(m[1])) reach(m[1]);
+  }
   walkFrom(root, files, code, queue, reach);
   const orphans = production.filter((f) => !seen.has(f)).sort();
+
+  // The tests' own graph, only to tell "only tests reach it" from "nothing does".
+  const byTests = new Set(seen);
+  const tq = [];
+  const treach = (rel) => {
+    if (rel && !byTests.has(rel)) {
+      byTests.add(rel);
+      tq.push(rel);
+    }
+  };
+  for (const f of code) if (isTestFile(f)) treach(f);
+  walkFrom(root, files, code, tq, treach);
+  const testOnly = orphans.filter((f) => byTests.has(f));
 
   // A file that only baseline orphans import (a dead module's own strings
   // module, say) is part of that dead code, not a new orphan: it is "held"
@@ -181,7 +216,8 @@ export function findOrphans({ root = ROOT, baseline = [] } = {}) {
   // A file nothing imports at all is never held.
   const held = {};
   const orphanSet = new Set(orphans);
-  for (const parent of baseline.filter((f) => orphanSet.has(f))) {
+  const parents = [...baseline, ...library];
+  for (const parent of parents.filter((f) => orphanSet.has(f))) {
     const sub = new Set([parent]);
     const q = [parent];
     walkFrom(root, files, code, q, (rel) => {
@@ -190,9 +226,32 @@ export function findOrphans({ root = ROOT, baseline = [] } = {}) {
         q.push(rel);
       }
     });
-    for (const f of sub) if (f !== parent && !baseline.includes(f) && !(f in held)) held[f] = parent;
+    for (const f of sub) if (f !== parent && !parents.includes(f) && !(f in held)) held[f] = parent;
   }
-  return { orphans, production: production.length, held };
+  return { orphans, production: production.length, held, testOnly };
+}
+
+/**
+ * Every file reachable from the app's own pages (the HTML entries only — no
+ * script, package or test): what a user of the app can reach. The
+ * reachability test (appReachable.test.ts) checks the audit's modules on it.
+ * @returns {Set<string>}
+ */
+export function reachFromPages({ root = ROOT, pages = ["index.html"] } = {}) {
+  const all = walk(root, "", []);
+  const files = new Set(all.map(toPosix));
+  const code = all.filter((f) => CODE_RE.test(f) && !/\.d\.[cm]?ts$/.test(f));
+  const seen = new Set();
+  const queue = [];
+  const reach = (rel) => {
+    if (rel && !seen.has(rel)) {
+      seen.add(rel);
+      queue.push(rel);
+    }
+  };
+  for (const p of pages) for (const e of htmlEntries(readFileSync(join(root, p), "utf8"))) reach(resolveSpecifier(`/${e}`, p, files));
+  walkFrom(root, files, code, queue, reach);
+  return seen;
 }
 
 /** Breadth-first over the import edges from `queue`, calling `reach` on every target. */
@@ -217,19 +276,32 @@ function walkFrom(root, files, code, queue, reach) {
 }
 
 /**
- * Compare today's orphans with the baseline. `held` (from findOrphans):
- * orphans that only baseline entries import — not new, not failing.
- * @returns {{ added: string[], stale: string[] }}
+ * Compare today's orphans with the baseline and the library list. `held` (from
+ * findOrphans): orphans that only baseline or library entries import — not new,
+ * not failing. `library`: path → reason; `testOnly`: the orphans a test reaches.
+ * @returns {{ added: string[], stale: string[], libraryReached: string[], libraryDead: string[], libraryNoReason: string[] }}
  */
-export function compare(orphans, baseline, held = {}) {
+export function compare(orphans, baseline, held = {}, library = {}, testOnly = orphans) {
   const now = new Set(orphans);
   const base = new Set(baseline);
-  return { added: orphans.filter((f) => !base.has(f) && !(f in held)), stale: baseline.filter((f) => !now.has(f)) };
+  const tested = new Set(testOnly);
+  const lib = Object.keys(library);
+  return {
+    added: orphans.filter((f) => !base.has(f) && !(f in held) && !(f in library)),
+    stale: baseline.filter((f) => !now.has(f)),
+    libraryReached: lib.filter((f) => !now.has(f)),
+    libraryDead: lib.filter((f) => now.has(f) && !tested.has(f)),
+    libraryNoReason: lib.filter((f) => typeof library[f] !== "string" || library[f].trim().length < 20),
+  };
 }
 
 const readBaseline = (root) => {
   const p = join(root, BASELINE);
   return existsSync(p) ? JSON.parse(readFileSync(p, "utf8")).files ?? [] : [];
+};
+const readLibrary = (root) => {
+  const p = join(root, LIBRARY);
+  return existsSync(p) ? JSON.parse(readFileSync(p, "utf8")).files ?? {} : {};
 };
 const writeBaseline = (root, files) =>
   writeFileSync(
@@ -247,28 +319,35 @@ const writeBaseline = (root, files) =>
 function main(argv) {
   const flags = new Set(argv);
   const baseline = readBaseline(ROOT);
-  const { orphans, production, held } = findOrphans({ baseline });
+  const library = readLibrary(ROOT);
+  const { orphans, production, held, testOnly } = findOrphans({ baseline, library: Object.keys(library) });
   if (flags.has("--write")) {
-    writeBaseline(ROOT, orphans.filter((f) => !(f in held)));
+    writeBaseline(ROOT, orphans.filter((f) => !(f in held) && !(f in library)));
     console.log(`unused-files: baseline written — ${orphans.length} of ${production} production files`);
     return 0;
   }
-  const { added, stale } = compare(orphans, baseline, held);
+  const { added, stale, libraryReached, libraryDead, libraryNoReason } = compare(orphans, baseline, held, library, testOnly);
+  const libFail = libraryReached.length + libraryDead.length + libraryNoReason.length;
   if (flags.has("--prune")) {
     writeBaseline(ROOT, baseline.filter((f) => !stale.includes(f)));
     console.log(`unused-files: pruned ${stale.length} stale baseline entr${stale.length === 1 ? "y" : "ies"}`);
     return added.length ? 1 : 0;
   }
   if (flags.has("--json")) {
-    console.log(JSON.stringify({ production, orphans: orphans.length, baseline: baseline.length, held, added, stale }, null, 1));
+    console.log(JSON.stringify({ production, orphans: orphans.length, baseline: baseline.length, library: Object.keys(library).length, held, added, stale, libraryReached, libraryDead, libraryNoReason }, null, 1));
   } else {
     const nHeld = Object.keys(held).length;
-    console.log(`unused-files: ${production} production files, ${orphans.length} unreached (${baseline.length} in the baseline${nHeld ? `, ${nHeld} only imported by them` : ""})`);
-    for (const [f, parent] of Object.entries(held)) console.log(`  · ${f} — only ${parent} (baseline) imports it; it goes with that file`);
-    for (const f of added) console.error(`  ✗ ${f} — nothing imports it. Import it from where it's used, or delete it.`);
+    console.log(`unused-files: ${production} production files, ${orphans.length} unreachable from the app (${baseline.length} in the baseline, ${Object.keys(library).length} listed as libraries${nHeld ? `, ${nHeld} only imported by them` : ""})`);
+    for (const [f, parent] of Object.entries(held)) console.log(`  · ${f} — only ${parent} (baseline or library list) imports it; it goes with that file`);
+    const testedSet = new Set(testOnly);
+    for (const f of added)
+      console.error(testedSet.has(f) ? `  ✗ ${f} — only tests reach it, nothing in the app. Wire it in (a command, a menu, a view, a setting), delete it, or list it in ${LIBRARY} with the reason.` : `  ✗ ${f} — nothing imports it, not even a test. Delete it, or import it from where it's used.`);
+    for (const f of libraryReached) console.error(`  ✗ ${f} is in ${LIBRARY} but the app reaches it now — take it off the list.`);
+    for (const f of libraryDead) console.error(`  ✗ ${f} is in ${LIBRARY} but no test reaches it either — it is dead: delete it.`);
+    for (const f of libraryNoReason) console.error(`  ✗ ${f} is in ${LIBRARY} without a reason (one sentence: why it is a library, and what would wire it).`);
     for (const f of stale) console.error(`  ✗ ${f} is in ${BASELINE} but is no longer an orphan — run: node scripts/check-unused-files.mjs --prune`);
   }
-  return added.length || stale.length ? 1 : 0;
+  return added.length || stale.length || libFail ? 1 : 0;
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) process.exit(main(process.argv.slice(2)));

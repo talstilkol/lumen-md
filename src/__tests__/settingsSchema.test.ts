@@ -23,7 +23,7 @@ const SRC = join(ROOT, "src");
 
 /** Literals that look like keys but are not stored under that name. */
 const NOT_KEYS: Record<string, string> = {
-  "lumen.": "prefix that clearLumenState matches on",
+  "lumen.": "the prefix every Lumen key starts with",
   "lumen.collab.v1": "PBKDF2 salt text, not a key",
   "lumen.word-count": "built-in plugin id",
 };
