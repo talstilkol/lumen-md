@@ -31,6 +31,14 @@
 //!   closing kills the whole group, so a program the server started itself
 //!   (a grandchild) does not outlive it (R8b-L5). Windows: a Job Object is
 //!   owed (only the server's own process is killed there today).
+//!   A waiter thread watches the server's own exit, independently of stdout
+//!   (review 9, M4): a server that exits while a grandchild still holds its
+//!   stdout still gets its group killed and its `Exit` event. The group is
+//!   killed *before* the server is reaped (L8: Linux and macOS see the exit
+//!   with `waitid(WNOWAIT)`), so the group id can't have been reused by then.
+//!   Limit: a grandchild that calls `setsid` (or `setpgid`) leaves the group,
+//!   and no group kill reaches it; `Exit` still comes, at most `EXIT_DRAIN`
+//!   after the server ended, even if that process keeps stdout open.
 //! - **Opening a URL** in the system browser (elicitation URL mode): only
 //!   http and https, so the client and the model never see the page.
 
@@ -75,13 +83,15 @@ fn is_format(c: char) -> bool {
 
 /// Characters that draw nothing although they are not format characters (R8b-L7): the other
 /// Default_Ignorable_Code_Point ranges (the combining grapheme joiner, the Hangul fillers, the
-/// Mongolian and the other variation selectors, the Khmer inherent vowels, the reserved and the
-/// tag / variation-selector-supplement planes), plus the Braille blank and the musical null
-/// notehead, which most fonts draw empty.
+/// Mongolian and the other variation selectors, the Khmer inherent vowels, the Khitan small
+/// script filler (review 9, L9), the reserved and the tag / variation-selector-supplement
+/// planes), plus the Braille blank and the musical null notehead, which most fonts draw empty.
+/// With `is_format` this covers every Default_Ignorable_Code_Point range of the UCD's
+/// DerivedCoreProperties.txt (listed in the test `every_default_ignorable_code_point_is_refused`).
 fn is_blank(c: char) -> bool {
     matches!(c as u32,
         0x034F | 0x115F | 0x1160 | 0x17B4 | 0x17B5 | 0x180B..=0x180F | 0x2065 | 0x2800 | 0x3164
-        | 0xFE00..=0xFE0F | 0xFFA0 | 0xFFF0..=0xFFF8 | 0x1D159 | 0xE0000..=0xE0FFF)
+        | 0xFE00..=0xFE0F | 0xFFA0 | 0xFFF0..=0xFFF8 | 0x16FE4 | 0x1D159 | 0xE0000..=0xE0FFF)
 }
 
 /// Anything the dialog could not show as it is: control characters, format characters, other
@@ -345,6 +355,10 @@ pub enum Event {
     Exit(Option<i32>),
 }
 
+/// After the server ends, how long its `Exit` waits for the last stdout lines (a process that left
+/// the group with setsid may hold stdout open for ever; review 9, M4).
+pub const EXIT_DRAIN: Duration = Duration::from_secs(2);
+
 /// How long one write may wait for the server to take the message off its stdin (R8-M3).
 pub const WRITE_TIMEOUT: Duration = Duration::from_secs(10);
 /// Messages waiting for the writer thread; one more is refused (the server is not reading).
@@ -355,7 +369,7 @@ type WriteJob = (String, mpsc::SyncSender<Result<(), String>>);
 /// One running server. Every method takes `&self`, so the glue can hold it in an `Arc` and do the
 /// blocking work without any shared lock (R8-M3): writes go through this session's own writer thread.
 pub struct Session {
-    child: Arc<Mutex<Child>>,
+    child: Arc<Mutex<Proc>>,
     writer: Mutex<Option<mpsc::SyncSender<WriteJob>>>,
 }
 
@@ -443,6 +457,76 @@ fn kill_group(pgid: u32) {
 #[cfg(not(unix))]
 fn kill_group(_pgid: u32) {}
 
+/// Has child `pid` exited? Asked without reaping it (`waitid` with WNOWAIT), so its pid, and so
+/// the group id, stay reserved until we reap it (review 9, L8). `None`: can't tell here (no such
+/// child, an error, or a platform without this call).
+#[cfg(any(target_os = "linux", target_os = "android", target_os = "macos", target_os = "ios"))]
+fn exited_unreaped(pid: u32) -> Option<bool> {
+    extern "C" {
+        fn waitid(idtype: i32, id: u32, info: *mut u64, options: i32) -> i32;
+    }
+    const P_PID: i32 = 1;
+    const WNOHANG: i32 = 1;
+    const WEXITED: i32 = 4;
+    #[cfg(any(target_os = "linux", target_os = "android"))]
+    const WNOWAIT: i32 = 0x0100_0000;
+    #[cfg(any(target_os = "macos", target_os = "ios"))]
+    const WNOWAIT: i32 = 0x20;
+    // siginfo_t is 128 bytes on Linux and smaller on macOS; si_signo is its first int on both, and
+    // stays 0 when WNOHANG finds no exited child.
+    let mut info = [0u64; 32];
+    // SAFETY: waitid writes at most sizeof(siginfo_t) bytes into `info` (256 bytes, 8-aligned).
+    let r = unsafe { waitid(P_PID, pid, info.as_mut_ptr(), WEXITED | WNOHANG | WNOWAIT) };
+    if r != 0 {
+        return None;
+    }
+    Some(info[0] as u32 != 0)
+}
+
+#[cfg(not(any(target_os = "linux", target_os = "android", target_os = "macos", target_os = "ios")))]
+fn exited_unreaped(_pid: u32) -> Option<bool> {
+    None
+}
+
+/// The server's process: the child, its group id, and whether it was reaped (and its group killed).
+struct Proc {
+    child: Child,
+    pgid: u32,
+    reaped: bool,
+}
+
+impl Proc {
+    /// Its exit status if it ended. The group is killed first, while the ended server is still
+    /// unreaped, so `kill(-pgid)` can't hit a group that took a reused id (review 9, L8). Where the
+    /// exit can't be seen without reaping (not Linux or macOS), it falls back to reap, then kill.
+    fn reap_with(&mut self, kill: impl FnOnce(u32)) -> std::io::Result<Option<std::process::ExitStatus>> {
+        if self.reaped {
+            return self.child.try_wait();
+        }
+        match exited_unreaped(self.child.id()) {
+            Some(false) => Ok(None),
+            Some(true) => {
+                kill(self.pgid);
+                let st = self.child.try_wait();
+                self.reaped = matches!(st, Ok(Some(_)));
+                st
+            }
+            None => {
+                let st = self.child.try_wait();
+                if let Ok(Some(_)) = st {
+                    kill(self.pgid);
+                    self.reaped = true;
+                }
+                st
+            }
+        }
+    }
+
+    fn reap(&mut self) -> std::io::Result<Option<std::process::ExitStatus>> {
+        self.reap_with(kill_group)
+    }
+}
+
 /// Start `spec` (the caller checked `may_spawn`). Events arrive on other threads.
 pub fn spawn(spec: &Spec, env: Vec<(String, String)>, on_event: impl Fn(Event) + Send + Sync + 'static) -> Result<Session, String> {
     let mut cmd = Command::new(&spec.command);
@@ -460,15 +544,16 @@ pub fn spawn(spec: &Spec, env: Vec<(String, String)>, on_event: impl Fn(Event) +
     let stdin = child.stdin.take();
     let stdout = child.stdout.take().ok_or("no stdout")?;
     let stderr = child.stderr.take().ok_or("no stderr")?;
-    let child = Arc::new(Mutex::new(child));
+    let pgid = child.id();
+    let child = Arc::new(Mutex::new(Proc { child, pgid, reaped: false }));
     let on_event = Arc::new(on_event);
     {
         let ev = on_event.clone();
         thread::spawn(move || read_lines(stderr, MAX_ERR_LINE, true, |l| ev(Event::Err(l))));
     }
+    let (drained, stdout_done) = mpsc::channel::<()>();
     {
         let ev = on_event.clone();
-        let child = child.clone();
         thread::spawn(move || {
             read_lines(stdout, MAX_LINE, false, |l| {
                 if let Some(note) = l.strip_prefix('\u{0}') {
@@ -477,18 +562,27 @@ pub fn spawn(spec: &Spec, env: Vec<(String, String)>, on_event: impl Fn(Event) +
                     ev(Event::Out(l));
                 }
             });
-            // stdout closed: the process is ending. Wait a little for its code.
-            let until = Instant::now() + Duration::from_secs(2);
-            let mut code = None;
-            while Instant::now() < until {
+            let _ = drained.send(());
+        });
+    }
+    {
+        // The waiter (review 9, M4): the server's own exit, not stdout's EOF, ends the session. A
+        // grandchild may hold stdout open; the group is killed as soon as the server is gone.
+        let ev = on_event.clone();
+        let child = child.clone();
+        thread::spawn(move || {
+            let code = loop {
                 if let Ok(mut c) = child.lock() {
-                    if let Ok(Some(s)) = c.try_wait() {
-                        code = s.code();
-                        break;
+                    match c.reap() {
+                        Ok(Some(s)) => break s.code(),
+                        Ok(None) => {}
+                        Err(_) => break None,
                     }
                 }
                 thread::sleep(Duration::from_millis(20));
-            }
+            };
+            // The last lines first (the group is dead, so stdout ends now), but never for ever.
+            let _ = stdout_done.recv_timeout(EXIT_DRAIN);
             ev(Event::Exit(code));
         });
     }
@@ -534,18 +628,16 @@ impl Session {
         let until = Instant::now() + grace;
         loop {
             if let Ok(mut c) = self.child.lock() {
-                let pgid = c.id();
-                match c.try_wait() {
-                    Ok(Some(s)) => {
-                        // The server ended on its own: what it started may still run in its group.
-                        kill_group(pgid);
-                        return s.code();
-                    }
+                let pgid = c.pgid;
+                // Ended on its own: reap() killed what it started (its group) before reaping it.
+                match c.reap() {
+                    Ok(Some(s)) => return s.code(),
                     Ok(None) if Instant::now() >= until => {
                         // The whole group first, while the leader (so the group id) is still alive.
                         kill_group(pgid);
-                        let _ = c.kill();
-                        return c.wait().ok().and_then(|s| s.code());
+                        let _ = c.child.kill();
+                        c.reaped = true;
+                        return c.child.wait().ok().and_then(|s| s.code());
                     }
                     Ok(None) => {}
                     Err(_) => return None,
@@ -556,7 +648,7 @@ impl Session {
     }
 
     pub fn running(&self) -> bool {
-        self.child.lock().map(|mut c| matches!(c.try_wait(), Ok(None))).unwrap_or(false)
+        self.child.lock().map(|mut c| matches!(c.reap(), Ok(None))).unwrap_or(false)
     }
 }
 
@@ -773,6 +865,30 @@ mod tests {
         assert!(!first.contains("Files"), "the first line is Lumen's own words only: {first}");
     }
 
+    /// Review 9, L9. Default_Ignorable_Code_Point, transcribed from DerivedCoreProperties.txt
+    /// (Unicode 15.1/16.0; the file can't be fetched on this machine, so this list is the check).
+    const DEFAULT_IGNORABLE: &[(u32, u32)] = &[
+        (0x00AD, 0x00AD), (0x034F, 0x034F), (0x061C, 0x061C), (0x115F, 0x1160), (0x17B4, 0x17B5), (0x180B, 0x180F),
+        (0x200B, 0x200F), (0x202A, 0x202E), (0x2060, 0x206F), (0x3164, 0x3164), (0xFE00, 0xFE0F), (0xFEFF, 0xFEFF),
+        (0xFFA0, 0xFFA0), (0xFFF0, 0xFFF8), (0x1BCA0, 0x1BCA3), (0x16FE4, 0x16FE4), (0x1D173, 0x1D17A), (0xE0000, 0xE0FFF),
+    ];
+
+    #[test]
+    fn every_default_ignorable_code_point_is_refused() {
+        for &(a, b) in DEFAULT_IGNORABLE {
+            for cp in a..=b {
+                let Some(c) = char::from_u32(cp) else { continue };
+                assert!(has_hidden(&format!("a{c}b")), "U+{cp:04X}");
+                assert!(spec("node", &[&format!("a{c}b")]).validate().is_err(), "U+{cp:04X}");
+            }
+        }
+        // the reviewer's case, by name: KHITAN SMALL SCRIPT FILLER
+        assert!(spec("node", &["s\u{16FE4}.js"]).validate().is_err());
+        assert!(!approval_text("a\u{16FE4}b", &spec("node", &[])).contains('\u{16FE4}'));
+        // its visible neighbours in the block still pass
+        assert!(spec("node", &["\u{16FE3}\u{16FF0}"]).validate().is_ok());
+    }
+
     #[cfg(unix)]
     #[test]
     fn a_server_that_stops_reading_times_out_the_write_and_still_closes() {
@@ -856,8 +972,9 @@ mod tests {
     fn a_server_that_exits_on_its_own_leaves_no_grandchild_behind() {
         let (tx, rx) = mpsc::channel();
         let tx = Mutex::new(tx);
-        // The server reads stdin, starts a helper that ignores it, and exits at EOF: the helper keeps stdout open.
-        let s = spawn(&spec("sh", &["-c", "sleep 30 >/dev/null 2>&1 & echo $!; cat >/dev/null"]), clean_env(std::env::vars()), move |e| {
+        // The server reads stdin, starts a helper that ignores it, and exits at EOF: the helper keeps
+        // stdout open (it inherits it; review 9, M4: the old helper sent it to /dev/null).
+        let s = spawn(&spec("sh", &["-c", "sleep 30 2>/dev/null & echo $!; cat >/dev/null"]), clean_env(std::env::vars()), move |e| {
             let _ = tx.lock().unwrap().send(e);
         })
         .unwrap();
@@ -875,6 +992,67 @@ mod tests {
             let _ = Command::new("kill").args(["-9", &pid.to_string()]).status();
         }
         assert!(!left, "the helper was killed with its group");
+    }
+
+    /// Review 9, M4: nobody calls close(). The server exits by itself while its grandchild holds
+    /// stdout open; the waiter still kills the group and sends Exit, without stdout's EOF.
+    #[cfg(unix)]
+    #[test]
+    fn a_server_that_exits_while_a_grandchild_holds_stdout_still_ends_and_takes_it_along() {
+        let (tx, rx) = mpsc::channel();
+        let tx = Mutex::new(tx);
+        let s = spawn(&spec("sh", &["-c", "sleep 30 & echo $!; exit 3"]), clean_env(std::env::vars()), move |e| {
+            let _ = tx.lock().unwrap().send(e);
+        })
+        .unwrap();
+        let pid: u32 = match rx.recv_timeout(Duration::from_secs(5)).unwrap() {
+            Event::Out(l) => l.trim().parse().unwrap(),
+            e => panic!("{e:?}"),
+        };
+        let exit = rx.recv_timeout(Duration::from_secs(EXIT_DRAIN.as_secs() + 3));
+        let until = Instant::now() + Duration::from_secs(2);
+        while alive(pid) && Instant::now() < until {
+            thread::sleep(Duration::from_millis(20));
+        }
+        let left = alive(pid);
+        if left {
+            let _ = Command::new("kill").args(["-9", &pid.to_string()]).status();
+        }
+        assert_eq!(exit, Ok(Event::Exit(Some(3))), "Exit came although the grandchild held stdout");
+        assert!(!left, "the grandchild was killed with the group, with no close()");
+        assert!(!s.running());
+    }
+
+    /// Review 9, L8: the group is killed while the ended server is still unreaped (a zombie), so its
+    /// pid, and the group id, can't have been reused yet.
+    #[cfg(any(target_os = "linux", target_os = "android"))]
+    #[test]
+    fn the_group_is_killed_before_the_server_is_reaped() {
+        let child = Command::new("sh").args(["-c", "exit 5"]).spawn().unwrap();
+        let pid = child.id();
+        let zombie = |pid: u32| std::fs::read_to_string(format!("/proc/{pid}/stat")).map(|st| st.rsplit(')').next().unwrap_or("").trim_start().starts_with('Z')).unwrap_or(false);
+        let until = Instant::now() + Duration::from_secs(5);
+        while !zombie(pid) && Instant::now() < until {
+            thread::sleep(Duration::from_millis(10));
+        }
+        assert!(zombie(pid), "the child ended");
+        assert_eq!(exited_unreaped(pid), Some(true));
+        assert!(zombie(pid), "asking did not reap it");
+        let pgid = child.id();
+        let mut p = Proc { child, pgid, reaped: false };
+        let mut at_kill = None;
+        let st = p.reap_with(|g| at_kill = Some((g, zombie(pid)))).unwrap();
+        assert_eq!(st.and_then(|s| s.code()), Some(5));
+        assert_eq!(at_kill, Some((pid, true)), "killed once, while the server was still a zombie");
+        assert!(!zombie(pid), "reaped after the kill");
+        // Reaped once: no second group kill (the id may belong to someone else by now).
+        let mut again = 0;
+        assert!(p.reap_with(|_| again += 1).unwrap().is_some());
+        assert_eq!(again, 0);
+        let mut running = Command::new("sleep").arg("5").spawn().unwrap();
+        assert_eq!(exited_unreaped(running.id()), Some(false));
+        let _ = running.kill();
+        let _ = running.wait();
     }
 
     #[test]
