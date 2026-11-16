@@ -9,8 +9,9 @@ Lumen is built for notes that mix Hebrew and English.
 
 `⌘K → Language: …` switches the interface. Hebrew and Arabic flip the
 whole layout (sidebar, menus and dialogs mirror). The interface is in 8
-languages: English, Hebrew, Arabic, Russian, French, German, Japanese and
-Chinese.
+languages: English and Hebrew in full, and Arabic, Russian, French, German,
+Japanese and Chinese in beta — machine-translated and awaiting a native
+speaker's review ([Languages in beta](/contributing/translations/)).
 
 ## Direction in a note
 

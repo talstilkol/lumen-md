@@ -172,18 +172,18 @@ npm run docs:sync     # the docs name only commands and scripts that exist
 
 ## 🌍 Internationalisation
 
-8 languages with full key coverage (the i18n drift gate in CI keeps them equal):
+Two full languages, **English** and **Hebrew**; six more are **Beta (machine translation, awaiting native review)** and say so in the language picker, the first-run setup and Settings, with a link to [how to report a translation issue](docs/src/content/docs/contributing/translations.md). All 8 have full key coverage (the i18n drift gate keeps them equal); which ones are full is set in one place, `src/i18n/review.ts`.
 
-| Language | Code | Direction |
-|---|---|---|
-| English | `en` | LTR |
-| עברית | `he` | RTL |
-| العربية | `ar` | RTL |
-| Français | `fr` | LTR |
-| Deutsch | `de` | LTR |
-| Русский | `ru` | LTR |
-| 日本語 | `ja` | LTR |
-| 简体中文 | `zh-CN` | LTR |
+| Language | Code | Direction | Status |
+|---|---|---|---|
+| English | `en` | LTR | full (source) |
+| עברית | `he` | RTL | full (native) |
+| العربية | `ar` | RTL | beta |
+| Français | `fr` | LTR | beta |
+| Deutsch | `de` | LTR | beta |
+| Русский | `ru` | LTR | beta |
+| 日本語 | `ja` | LTR | beta |
+| 简体中文 | `zh-CN` | LTR | beta |
 
 Switch via `⌘K → Language: …`. Adding a new locale: create `src/i18n/locales/<code>.json`, run `node scripts/generate-all-locales.mjs`, then add the code to `SUPPORTED_LOCALES` in `src/i18n/index.ts`.
 

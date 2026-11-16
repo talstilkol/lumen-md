@@ -1,5 +1,5 @@
 /** View commands: editor modes, panels, editor settings, language and theme. */
-import { isBetaLocale } from "../../i18n/review";
+import { localeOptionLabel } from "../../i18n/localeLabel";
 import { cmdIcons } from "../../ui/cmdIcons";
 import type { Command } from "../../ui/CommandPalette";
 import { useAppStore } from "../../store/useStore";
@@ -332,8 +332,8 @@ export function buildLanguageCommands({ rtl, toggleRtl, setLocale }: CommandCont
     },
     ...SUPPORTED_LOCALES.map((l) => ({
       id: `lang.${l.code}`,
-      // Plan W4.18: a language no native speaker has reviewed says so.
-      label: t("cmd.view.language", { label: isBetaLocale(l.code) ? t("locale.betaLabel", { label: l.label }) : l.label }),
+      // Plan W4.18 / launch P0 #16: a language no native speaker has reviewed says "Beta (machine translation, awaiting native review)".
+      label: t("cmd.view.language", { label: localeOptionLabel(l.code) }),
       hint:
         l.dir === "rtl"
           ? t("cmd.view.language.rtl")
