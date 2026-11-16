@@ -571,6 +571,16 @@
       "vars": []
     },
     {
+      "key": "cmd.capture.triageInbox",
+      "en": "📥 Inbox: sort with the local model",
+      "vars": []
+    },
+    {
+      "key": "cmd.capture.triageInbox.hint",
+      "en": "Tasks get a checkbox and a due date, every entry tags; you review before anything changes",
+      "vars": []
+    },
+    {
       "key": "cmd.chat.import",
       "en": "Import a WhatsApp or Telegram chat…",
       "vars": []

@@ -67,7 +67,7 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "backup.json": { module: "backup/strings.ts", users: ["backup/BackupPanel.tsx", "backup/start.ts"], prefixes: ["backup."], within: "backup/" },
   "canvasCards.json": { module: "canvas/strings.ts", users: ["ui/CanvasExcalidraw.tsx"], prefixes: ["canvas."] },
   "canvasDiagram.json": { module: "canvas/diagramStrings.ts", users: ["canvas/DiagramDialog.tsx"], prefixes: ["canvas."] },
-  "capture.json": { module: "capture/strings.ts", users: ["capture/quickCapture.ts", "ui/QuickCapture.tsx"], prefixes: ["capture."] },
+  "capture.json": { module: "capture/strings.ts", users: ["capture/quickCapture.ts", "ui/QuickCapture.tsx", "capture/triageActions.ts"], prefixes: ["capture."] },
   "citations.json": { module: "citations/strings.ts", users: ["citations/CiteDialog.tsx", "citations/LegalCiteDialog.tsx", "citations/run.ts", "pdf/zoteroSend.ts"], prefixes: ["cite.", "legalCite."] },
   "embedEdit.json": { module: "editor/embedEditStrings.ts", users: ["editor/EmbedEditor.tsx"], prefixes: ["embedEdit."] },
   "epub.json": { module: "epub/strings.ts", users: ["epub/EpubReader.tsx", "epub/ReadingMode.tsx", "epub/openEpub.ts", "highlights/HighlightsPanel.tsx"], prefixes: ["epub.", "reading."] },

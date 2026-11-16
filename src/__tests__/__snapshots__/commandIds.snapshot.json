@@ -383,6 +383,13 @@
       "icon": "FileText"
     },
     {
+      "id": "capture.triageInbox",
+      "label": "📥 Inbox: sort with the local model",
+      "group": "File",
+      "hint": "Tasks get a checkbox and a due date, every entry tags; you review before anything changes",
+      "icon": "Sparkles"
+    },
+    {
       "id": "epub.open",
       "label": "Open an EPUB for reading…",
       "group": "File",
@@ -2602,6 +2609,13 @@
       "icon": "FileText"
     },
     {
+      "id": "capture.triageInbox",
+      "label": "📥 Inbox: sort with the local model",
+      "group": "File",
+      "hint": "Tasks get a checkbox and a due date, every entry tags; you review before anything changes",
+      "icon": "Sparkles"
+    },
+    {
       "id": "epub.open",
       "label": "Open an EPUB for reading…",
       "group": "File",
@@ -4599,6 +4613,7 @@
     "student.lecture",
     "student.syllabus",
     "note.capture",
+    "capture.triageInbox",
     "epub.open",
     "view.reading",
     "view.highlights",
