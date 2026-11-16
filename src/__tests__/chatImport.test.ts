@@ -124,9 +124,11 @@ describe("W5.7 WhatsApp exports (golden)", () => {
     expect(chatNameFromFile("_chat.txt")).toBe("WhatsApp");
   });
 
-  it("WhatsApp's marks become Markdown, and a line that would start a block is escaped", () => {
+  it("WhatsApp's marks become Markdown; its lists and quotes stay; any other line that would start a block is escaped", () => {
     expect(whatsappMarkdown("מביא *חומוס* ו_פיתות_ ~לא~")).toBe("מביא **חומוס** ו*פיתות* ~~לא~~");
-    expect(whatsappMarkdown("# not a heading\n- not a list\n1. no")).toBe("\\# not a heading\n\\- not a list\n\\1. no");
+    // WhatsApp's block formats (lists "- " "* " "1. ", quotes "> ") are the same Markdown (lane T8).
+    expect(whatsappMarkdown("- a list\n* a list\n1. one\n> a quote")).toBe("- a list\n* a list\n1. one\n> a quote");
+    expect(whatsappMarkdown("# not a heading\n+ not a list\n---\n| not a table\n```")).toBe("\\# not a heading\n\\+ not a list\n\\---\n\\| not a table\n\\```");
     expect(whatsappMarkdown("2*3*4 snake_case_name")).toBe("2*3*4 snake_case_name");
   });
 });
