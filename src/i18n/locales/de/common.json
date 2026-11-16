@@ -2744,6 +2744,7 @@
   "query.loading": "Abfrage läuft…",
   "query.none": "Keine passenden Notizen.",
   "query.title": "Abfrage",
+  "query.tooLarge": "Diese Abfrage erzeugt zu viele Zeilen oder dauert zu lange und wurde deshalb angehalten. Fügen Sie vor FLATTEN ein WHERE oder LIMIT ein oder verschachteln Sie weniger map()-Aufrufe.",
   "reading.close": "Schließen",
   "reading.dyslexia": "Legasthenie-freundliche Schrift für englischen Text",
   "reading.failed": "Die Schrift konnte nicht geladen werden. Der Text bleibt in der aktuellen Schrift; versuchen Sie es online erneut.",

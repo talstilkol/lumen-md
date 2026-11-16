@@ -2744,6 +2744,7 @@
   "query.loading": "Running the query…",
   "query.none": "No notes match.",
   "query.title": "Query",
+  "query.tooLarge": "This query makes too many rows or takes too long, so it was stopped. Add a WHERE or a LIMIT before FLATTEN, or nest fewer map() calls.",
   "reading.close": "Close",
   "reading.dyslexia": "Dyslexia-friendly font for English text",
   "reading.failed": "The font could not be downloaded. The text stays in its current font; try again when you are online.",

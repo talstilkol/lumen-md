@@ -2744,6 +2744,7 @@
   "query.loading": "Requête en cours…",
   "query.none": "Aucune note ne correspond.",
   "query.title": "Requête",
+  "query.tooLarge": "Cette requête produit trop de lignes ou prend trop de temps : elle a été arrêtée. Ajoutez un WHERE ou un LIMIT avant FLATTEN, ou imbriquez moins d’appels map().",
   "reading.close": "Fermer",
   "reading.dyslexia": "Police adaptée à la dyslexie pour le texte anglais",
   "reading.failed": "La police n’a pas pu être téléchargée. Le texte garde sa police actuelle ; réessayez une fois en ligne.",

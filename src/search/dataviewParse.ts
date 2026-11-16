@@ -15,7 +15,21 @@ export type Tok =
   | { t: "link"; v: string }
   | { t: "op"; v: string };
 
-export class DataviewError extends Error {}
+export class DataviewError extends Error {
+  override name = "DataviewError";
+}
+
+/**
+ * A query that would make too many rows or take too long (review 11, M3): a
+ * chained FLATTEN or a nested map grows about 20× per step, on the main
+ * thread. `kind` says which bound it hit; the block shows a friendly message.
+ */
+export class DataviewLimitError extends DataviewError {
+  override name = "DataviewLimitError";
+  constructor(readonly kind: "rows" | "budget" | "string") {
+    super(kind === "rows" ? "the query makes too many rows" : kind === "string" ? "a text in the query is too long" : "the query takes too long");
+  }
+}
 
 export function tokenize(src: string): Tok[] {
   const out: Tok[] = [];

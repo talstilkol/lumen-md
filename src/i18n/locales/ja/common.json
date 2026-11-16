@@ -2744,6 +2744,7 @@
   "query.loading": "クエリを実行中…",
   "query.none": "一致するノートはありません。",
   "query.title": "クエリ",
+  "query.tooLarge": "このクエリは行が多すぎるか時間がかかりすぎるため、停止しました。FLATTEN の前に WHERE か LIMIT を加えるか、map() の入れ子を減らしてください。",
   "reading.close": "閉じる",
   "reading.dyslexia": "英語の文章にディスレクシアに配慮したフォント",
   "reading.failed": "フォントをダウンロードできませんでした。文字は今のフォントのままです。オンラインになったらもう一度お試しください。",

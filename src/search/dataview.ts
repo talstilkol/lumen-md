@@ -20,10 +20,22 @@
  * tests holds this). DOM-free and pure: notes in, rows out.
  */
 
-import { DataviewError, type Expr, type Source, type DvQuery } from "./dataviewParse";
+import { DataviewError, DataviewLimitError, type Expr, type Source, type DvQuery } from "./dataviewParse";
 import { tasksOf, taskValue } from "./dataviewTasks";
 import { formatDate, isoWeek } from "./dataviewDates";
-export { DataviewError, parseDataview, type Expr, type Source, type DvQuery } from "./dataviewParse";
+export { DataviewError, DataviewLimitError, parseDataview, type Expr, type Source, type DvQuery } from "./dataviewParse";
+
+/**
+ * Bounds of one run (review 11, M3): at most MAX_ROWS rows from a FLATTEN,
+ * at most EVAL_BUDGET expression evaluations in all, and no text longer than
+ * MAX_TEXT made by padleft / padright. Past one, runDataview throws a
+ * DataviewLimitError instead of holding the main thread.
+ */
+export const MAX_ROWS = 100_000;
+export const EVAL_BUDGET = 2_000_000;
+export const MAX_TEXT = 100_000;
+/** Evaluations left in the current run (none outside runDataview: `evaluate` alone is unbounded). */
+let evalLeft = Infinity;
 
 /* ─── Values ─────────────────────────────────────────────────────── */
 
@@ -408,6 +420,7 @@ function call(fn: string, args: Value[], now: number): Value {
     case "padleft":
     case "padright": {
       const n = toNum(b ?? null) ?? 0;
+      if (n > MAX_TEXT) throw new DataviewLimitError("string");
       const fill = typeof c === "string" && c ? c : " ";
       const str = show(a ?? null);
       return fn === "padleft" ? str.padStart(n, fill) : str.padEnd(n, fill);
@@ -503,6 +516,7 @@ function field(page: Record<string, Value>, path: string[]): Value {
 }
 
 export function evaluate(e: Expr, page: Record<string, Value>, now: number): Value {
+  if (--evalLeft < 0) throw new DataviewLimitError("budget");
   switch (e.k) {
     case "lit":
       return e.v;
@@ -622,6 +636,16 @@ function setPath(page: Record<string, Value>, path: string[], v: Value): Record<
  * tests; `self` is the note the block is in (`this`).
  */
 export function runDataview(q: DvQuery, notes: readonly DvNote[], now = Date.now(), self?: DvNote): DvResult {
+  const outer = evalLeft;
+  evalLeft = EVAL_BUDGET;
+  try {
+    return runBounded(q, notes, now, self);
+  } finally {
+    evalLeft = outer;
+  }
+}
+
+function runBounded(q: DvQuery, notes: readonly DvNote[], now: number, self?: DvNote): DvResult {
   const thisPage = self ? pageOf(self) : null;
   const pages = notes
     .filter((n) => /\.md$/i.test(n.name))
@@ -662,10 +686,15 @@ export function runDataview(q: DvQuery, notes: readonly DvNote[], now = Date.now
       });
       rows = keyed.map((k) => k.r);
     } else if (step.k === "flatten") {
-      rows = rows.flatMap((r) => {
+      const out: Row[] = [];
+      for (const r of rows) {
         const v = evaluate(step.e, r.page, now);
-        return (Array.isArray(v) ? v : [v]).map((x) => ({ ...r, page: setPath(r.page, step.name, x) }));
-      });
+        for (const x of Array.isArray(v) ? v : [v]) {
+          if (out.length >= MAX_ROWS) throw new DataviewLimitError("rows");
+          out.push({ ...r, page: setPath(r.page, step.name, x) });
+        }
+      }
+      rows = out;
     } else {
       const groups = new Map<string, { key: Value; members: Row[] }>();
       for (const r of rows) {

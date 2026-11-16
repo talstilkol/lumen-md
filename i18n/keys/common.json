@@ -15137,6 +15137,11 @@
       "vars": []
     },
     {
+      "key": "query.tooLarge",
+      "en": "This query makes too many rows or takes too long, so it was stopped. Add a WHERE or a LIMIT before FLATTEN, or nest fewer map() calls.",
+      "vars": []
+    },
+    {
       "key": "reading.close",
       "en": "Close",
       "vars": []
