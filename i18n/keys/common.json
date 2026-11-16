@@ -1579,6 +1579,56 @@
       ]
     },
     {
+      "key": "backup.webdav.badUrl",
+      "en": "Use an https address for the WebDAV server.",
+      "vars": []
+    },
+    {
+      "key": "backup.webdav.missing",
+      "en": "Fill in the user name and the password.",
+      "vars": []
+    },
+    {
+      "key": "backup.webdav.noPassword",
+      "en": "The WebDAV password is not on this device: set the server up again in Backups.",
+      "vars": []
+    },
+    {
+      "key": "backup.webdav.note",
+      "en": "Archives go into a lumen-backups folder there. The password is kept in the secret store, not with the backup settings.",
+      "vars": []
+    },
+    {
+      "key": "backup.webdav.password",
+      "en": "Password",
+      "vars": []
+    },
+    {
+      "key": "backup.webdav.title",
+      "en": "Back up to a WebDAV server",
+      "vars": []
+    },
+    {
+      "key": "backup.webdav.url",
+      "en": "WebDAV address (https)",
+      "vars": []
+    },
+    {
+      "key": "backup.webdav.useAge",
+      "en": "Use this server, encrypted",
+      "vars": []
+    },
+    {
+      "key": "backup.webdav.usePlain",
+      "en": "Use this server",
+      "vars": []
+    },
+    {
+      "key": "backup.webdav.user",
+      "en": "User name",
+      "vars": []
+    },
+    {
       "key": "base.calendar.next",
       "en": "Next month",
       "vars": []
