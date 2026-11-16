@@ -38,6 +38,8 @@ import { wysiwygWikiComplete } from "./wysiwygWikiComplete";
 import { registerPendingEdits, useAppStore } from "../store/useStore";
 import { useAuth } from "../auth/useAuth";
 import { type SlashMenuRoot, buildSlashMenu } from "./wysiwygSlashMenu";
+import { splitFrontmatter } from "./wysiwygFrontmatter";
+export { splitFrontmatter };
 
 // Suggesting mode (track changes) works in WYSIWYG too: CriticMarkup ↔
 // marks, edits tracked while the store's suggestingMode is on.
@@ -68,18 +70,6 @@ const tooltip = tooltipFactory("wysiwyg-tooltip");
  * Includes math (KaTeX), a `/` slash command menu, and a selection tooltip
  * for inline formatting.
  */
-/**
- * Split a leading YAML frontmatter block off a markdown document. Milkdown
- * has no frontmatter concept — fed raw, `---\ntitle: …\n---` renders as a
- * thematic break + loose text (ugly, and editing it corrupts the metadata).
- * We keep the block verbatim and re-prepend it on every emission, so the
- * metadata survives WYSIWYG editing invisibly.
- */
-export function splitFrontmatter(md: string): { fm: string; body: string } {
-  const m = md.match(/^---[ \t]*\r?\n[\s\S]*?\r?\n---[ \t]*(?:\r?\n|$)/);
-  if (!m) return { fm: "", body: md };
-  return { fm: m[0], body: md.slice(m[0].length) };
-}
 
 export default function WysiwygEditor({ value, onChange, spellCheck = true }: Props) {
 /** Word lists, Google Docs spans, inline styles and needless direction marks, cleaned on paste. */

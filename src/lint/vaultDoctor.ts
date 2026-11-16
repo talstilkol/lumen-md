@@ -130,7 +130,8 @@ function blankFences(text: string): string {
     const listed = quoted.replace(/^[ \t]*(?:[-*+]|\d+[.)])[ \t]+/, "");
     const continuation = /^ {2,}\S/.test(quoted) && item >= 0;
     const inContainer: boolean = depth > 0 || listed !== quoted || continuation;
-    const m: RegExpExecArray | null = (inContainer ? /^[ \t]*(`{3,}|~{3,})(.*)$/ : /^ {0,3}(`{3,}|~{3,})(.*)$/).exec(listed);
+    // `(.*?)\r?$`: `.` stops at a CRLF note's \r, so an opening fence there would not match (W10.E47).
+    const m: RegExpExecArray | null = (inContainer ? /^[ \t]*(`{3,}|~{3,})(.*?)\r?$/ : /^ {0,3}(`{3,}|~{3,})(.*?)\r?$/).exec(listed);
     if (m && !(m[1][0] === "`" && m[2].includes("`"))) {
       // The list item's content column: the fence may sit up to 3 spaces
       // past it. Indented 4+ past it, the line starts an indented code
