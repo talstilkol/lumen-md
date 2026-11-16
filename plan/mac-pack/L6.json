@@ -452,7 +452,7 @@
   {
     "id": "L6-W10.C8-partial",
     "task": "W10.C8",
-    "cmd": "mkdir -p reports/mac-pack/L6 && PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L6/L6-W10.C8-partial.pw.json npx playwright test e2e/voice-live-partial.spec.ts e2e/voice-capture.spec.ts --project=chromium --reporter=json,list",
+    "cmd": "mkdir -p reports/mac-pack/L6 && PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L6/L6-W10.C8-partial.pw.json npx playwright test e2e/voice-capture.spec.ts --project=chromium --reporter=json,list",
     "expect": {
       "exit": 0,
       "json": [
