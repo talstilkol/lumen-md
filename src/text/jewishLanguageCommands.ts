@@ -64,6 +64,9 @@ export async function runYiddishDictionaryCommand(): Promise<void> {
     showAiToast(t("jewishLang.dict.removed"), "info");
     return;
   }
+  // R8-M5: off pending the owner's licence decision; nothing is asked or sent.
+  const { YIDDISH_DOWNLOAD_ENABLED } = await import("../ai/yiddishSpell");
+  if (!YIDDISH_DOWNLOAD_ENABLED) return showAiToast(t("jewishLang.dict.pending"), "info");
   if (!(await uiConfirm({ message: t("jewishLang.dict.downloadConfirm") }))) return;
   try {
     const n = await svc.downloadYiddishDictionary();

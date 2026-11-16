@@ -1888,6 +1888,7 @@
   "jewishLang.dict.downloadConfirm": "هل تريد تنزيل قائمة التدقيق اليديشية (hunspell-yi، 2.4MB، GPL-3.0، من إعداد رافائيل فينكل وسيمخه تاوب وأندريه روزنبرغ) من GitHub إلى هذا الجهاز؟ ليست جزءًا من Lumen، وتُحفظ هنا فقط.",
   "jewishLang.dict.failed": "لم تُنزَّل قائمة التدقيق اليديشية: {error}",
   "jewishLang.dict.installed": "التدقيق اليديشي مفعّل ({count} كلمة).",
+  "jewishLang.dict.pending": "قائمة التدقيق الإملائي لليديشية معطّلة في هذا الإصدار: ترخيصها (GPL-3.0) بانتظار قرار مالك المشروع. لم يُنزَّل أي شيء.",
   "jewishLang.dict.removeConfirm": "هل تريد إزالة قائمة التدقيق اليديشية من هذا الجهاز؟",
   "jewishLang.dict.removed": "أُزيلت قائمة التدقيق اليديشية.",
   "jewishLang.translit.done": "تم النقل الحرفي.",
