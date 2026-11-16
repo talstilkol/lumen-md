@@ -11,9 +11,15 @@
 //! page) it runs with `--only-cached`, so it fails on a package it has not
 //! cached. `--only-cached` alone is not a hard guarantee (R8b-L2: with a
 //! partial cache Tectonic may still fetch the bundle index), so offline the
-//! child also gets every proxy variable set to a closed local port
-//! (`OFFLINE_PROXY`, the discard port 9) and an empty NO_PROXY: a request it
-//! still makes fails at once instead of leaving the machine. A compile is killed after `timeout` (a TeX file
+//! child also gets every proxy variable set to port 0 on the loopback
+//! (`OFFLINE_PROXY`) and an empty NO_PROXY. Port 0 can't be listened on (a
+//! bind to port 0 gets an ephemeral port), so no local process can stand in
+//! as that proxy; review 9, M3: the discard port 9 could be bound by any
+//! process on macOS or Windows. A client that honours the proxy variables
+//! fails at once instead of leaving the machine. This is a policy for
+//! well-behaved clients, not a sandbox: a child that ignores the proxy
+//! variables can still connect directly. Owed (Mac/owner): run offline
+//! compiles under a deny-network sandbox (macOS sandbox-exec). A compile is killed after `timeout` (a TeX file
 //! that loops would otherwise hold the thread forever), and the work folder
 //! is created fresh with mode 0700. Only `std`, so it is unit-tested without
 //! the Tauri crates:
@@ -28,8 +34,9 @@ use std::time::{Duration, Instant};
 /// How long one compile may run before it is killed (R8-M1).
 pub const COMPILE_TIMEOUT: Duration = Duration::from_secs(120);
 
-/// Offline, every proxy variable points here: nothing listens on 127.0.0.1:9 (discard), so a request fails locally (R8b-L2).
-pub const OFFLINE_PROXY: &str = "http://127.0.0.1:9";
+/// Offline, every proxy variable points here (R8b-L2, review 9 M3): port 0 on the loopback, which no
+/// process can listen on, so a client that honours the proxy fails locally whatever runs on the machine.
+pub const OFFLINE_PROXY: &str = "http://127.0.0.1:0";
 
 /// The environment the child gets on top of the app's: offline, all proxies go to `OFFLINE_PROXY` and
 /// nothing bypasses them (both spellings, since curl and Rust HTTP clients read the lower-case ones).
@@ -356,7 +363,7 @@ printf '%%PDF-1.7 cached' > "$5/main.pdf""#);
     fn offline_points_every_proxy_at_a_closed_local_port() {
         let env = child_env(true);
         for k in ["HTTPS_PROXY", "HTTP_PROXY", "ALL_PROXY", "https_proxy", "http_proxy", "all_proxy"] {
-            assert!(env.contains(&(k, "http://127.0.0.1:9")), "{k}");
+            assert!(env.contains(&(k, "http://127.0.0.1:0")), "{k}");
         }
         assert!(env.contains(&("NO_PROXY", "")) && env.contains(&("no_proxy", "")), "nothing bypasses the proxy");
         assert!(child_env(false).is_empty(), "online keeps the user's own proxy settings");
@@ -369,11 +376,25 @@ printf '%%PDF-1.7 cached' > "$5/main.pdf""#);
         // The stand-in writes the variables it sees into the "PDF".
         let bin = fake_tectonic(&bins, r#"printf '%s|%s|%s|%s|%s|[%s][%s]' "$HTTPS_PROXY" "$HTTP_PROXY" "$ALL_PROXY" "$https_proxy" "$all_proxy" "${NO_PROXY-unset}" "${no_proxy-unset}" > "$5/main.pdf""#);
         let pdf = compile(&bin, "x", &[], &tmp("work-proxy"), true, COMPILE_TIMEOUT).expect("compiled");
-        let p = "http://127.0.0.1:9";
+        let p = OFFLINE_PROXY;
         assert_eq!(String::from_utf8_lossy(&pdf), format!("{p}|{p}|{p}|{p}|{p}|[][]"));
-        // A request through that proxy fails locally: nothing listens on port 9.
-        assert!(std::net::TcpStream::connect_timeout(&"127.0.0.1:9".parse().unwrap(), Duration::from_secs(2)).is_err());
         let _ = std::fs::remove_dir_all(&bins);
+    }
+
+    /// Review 9, M3: the proxy is a loopback address on port 0, which nothing can occupy. Deterministic:
+    /// it does not depend on what happens to listen on this machine (the old test probed port 9).
+    #[test]
+    fn the_offline_proxy_is_port_zero_on_the_loopback_which_no_process_can_hold() {
+        let addr = OFFLINE_PROXY.strip_prefix("http://").expect("an http:// proxy URL");
+        let sock: std::net::SocketAddr = addr.parse().expect("an ip:port, no name to resolve");
+        assert!(sock.ip().is_loopback(), "{sock}");
+        assert_eq!(sock.port(), 0, "port 0: a listener can never be bound there");
+        // Asking for port 0 never gets port 0: the OS hands out an ephemeral port instead.
+        let l = std::net::TcpListener::bind(sock).unwrap();
+        assert_ne!(l.local_addr().unwrap().port(), 0);
+        drop(l);
+        // So a connection to it fails at once, with a listener on any other port or not.
+        assert!(std::net::TcpStream::connect_timeout(&sock, Duration::from_secs(2)).is_err());
     }
 
     #[test]
