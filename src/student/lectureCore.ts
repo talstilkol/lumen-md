@@ -138,6 +138,8 @@ export interface Lecture {
   important: Set<number>;
   summary: number[];
   cards: LectureCard[];
+  /** W10.C27: where the lecture falls in the academic year ("שבוע 6 בסמסטר א׳ · תשפ״ז"), from the chosen calendar. */
+  semester?: { id: string; week: number; line: string } | null;
 }
 
 /** A transcript line must not read as a card (`::`) to the review queue. */
@@ -150,11 +152,13 @@ export function lectureNote(l: Lecture, w: LectureWords): string {
     `lecture-date: ${l.date}`,
     `lecture-audio: ${JSON.stringify(l.audioPath)}`,
     `lecture-duration: ${JSON.stringify(clock(l.durationSec))}`,
+    ...(l.semester ? [`semester: ${l.semester.id}`, `semester-week: ${l.semester.week}`] : []),
     "tags: [lecture]",
     "---",
     "",
     `# ${l.title}`,
     "",
+    ...(l.semester ? [`_${l.semester.line}_`, ""] : []),
     `${w.recording}: [▶ 0:00–${clock(l.durationSec)}](<${l.audioPath}>)`,
     "",
     `## ${w.summary}`,

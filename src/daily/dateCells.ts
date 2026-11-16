@@ -9,6 +9,7 @@ import { adjustDeadline, dayOfValue, defaultWorkWeek, isoOfDay, noteLabel, offLa
 import { defaultIsrael, type GDay } from "./hebrewCalendar";
 import { nameLang } from "./hebrewCalendarNames";
 import { showHebrewDates, type DailySettings } from "./defaults";
+import { academicDeadline, examsLabel, isoOf, type AcademicYear } from "../academic/calendar";
 
 export interface DateCellOptions {
   locale: string;
@@ -18,6 +19,8 @@ export interface DateCellOptions {
   /** Override the Hebrew-date setting (a database block's `hebrewDate:`). */
   hebrewDates?: boolean;
   today?: GDay;
+  /** The user's academic calendar (W10.C27): a deadline in a break or an exam period says so. */
+  academic?: AcademicYear | null;
 }
 
 export interface DateCell {
@@ -34,6 +37,8 @@ export interface DateCell {
     notes: string[];
     /** Working days from today to the due day; negative when past. */
     left: number;
+    /** W10.C27: the written day falls in an academic break (with the day after it) or an exam period. */
+    academic?: { kind: "break"; name: string; suggestion: string } | { kind: "exams"; label: string };
   };
 }
 
@@ -68,6 +73,8 @@ export function dateCell(value: unknown, opts: DateCellOptions): DateCell | null
       notes: a.notes.map((n) => noteLabel(n, lang)),
       left: workingDaysUntil(opts.today ?? todayOf(), a.due, { israel, workWeek }),
     };
+    const ac = opts.academic ? academicDeadline(day, opts.academic, { israel, workWeek }) : null;
+    if (ac) cell.deadline.academic = ac.kind === "break" ? { kind: "break", name: ac.name, suggestion: isoOf(ac.suggestion) } : { kind: "exams", label: examsLabel(ac.semester, ac.moed, opts.locale === "he" ? "he" : "en") };
   }
   return cell;
 }

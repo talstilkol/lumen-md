@@ -9836,6 +9836,21 @@
       "vars": []
     },
     {
+      "key": "israeliTime.academic.inBreak",
+      "en": "In the academic break ({name}): suggested {date}",
+      "vars": [
+        "name",
+        "date"
+      ]
+    },
+    {
+      "key": "israeliTime.academic.inExams",
+      "en": "During the exams: {exams}",
+      "vars": [
+        "exams"
+      ]
+    },
+    {
       "key": "israeliTime.dayOff",
       "en": "Falls on {reason}",
       "vars": [

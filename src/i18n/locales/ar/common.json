@@ -1753,6 +1753,8 @@
   "install.guide.other.title": "في هذا المتصفح",
   "install.intro": "يفتح Lumen المثبَّت في نافذته الخاصة، من أيقونته، ويعمل دون اتصال.",
   "install.title": "تثبيت Lumen",
+  "israeliTime.academic.inBreak": "في العطلة الأكاديمية ({name}): المقترح {date}",
+  "israeliTime.academic.inExams": "خلال فترة الامتحانات: {exams}",
   "israeliTime.dayOff": "يقع في {reason}",
   "israeliTime.dueToday": "مستحق اليوم",
   "israeliTime.left.one": "أيام العمل المتبقية: {n}",

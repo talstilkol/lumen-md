@@ -1778,6 +1778,8 @@
   "install.guide.other.title": "בדפדפן הזה",
   "install.intro": "‏Lumen מותקן נפתח בחלון משלו, מהסמל שלו, ועובד בלי אינטרנט.",
   "install.title": "התקנת Lumen",
+  "israeliTime.academic.inBreak": "בחופשה האקדמית ({name}): מוצע {date}",
+  "israeliTime.academic.inExams": "בתקופת הבחינות: {exams}",
   "israeliTime.dayOff": "נופל ב{reason}",
   "israeliTime.dueToday": "להיום",
   "israeliTime.left.one": "ימי עבודה שנותרו: {n}",

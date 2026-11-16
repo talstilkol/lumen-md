@@ -6,13 +6,15 @@
 import { useAppStore } from "../store/useStore";
 import { DEADLINE_KEY, dateCell } from "./dateCells";
 import { deadlineText } from "./deadlineText";
+import { chosen } from "../academic/registry";
 import "./israeliTimeStrings";
 
 
 export default function DateHint({ name, value }: { name: string; value: unknown }) {
   const locale = useAppStore((s) => s.locale) as string;
   const settings = useAppStore((s) => s.dailyNotes);
-  const cell = dateCell(value, { locale, settings, deadline: DEADLINE_KEY.test(name) });
+  const deadline = DEADLINE_KEY.test(name);
+  const cell = dateCell(value, { locale, settings, deadline, academic: deadline ? chosen() : null });
   if (!cell) return null;
   const d = cell.deadline && deadlineText(cell.deadline);
   return (
@@ -28,6 +30,11 @@ export default function DateHint({ name, value }: { name: string; value: unknown
         </span>
       )}
       {d?.notes && <span style={{ marginInlineStart: 6, color: "hsl(var(--fg-muted))" }}>· {d.notes}</span>}
+      {d?.academic && (
+        <span data-testid="deadline-academic" role="note" style={{ marginInlineStart: 6, color: "hsl(var(--warning, 35 90% 40%))" }}>
+          🎓 {d.academic}
+        </span>
+      )}
     </>
   );
 }

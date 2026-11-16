@@ -18,6 +18,7 @@ import { t } from "../i18n";
 import { useAppStore } from "../store/useStore";
 import { dateCell, type DateCellOptions } from "../daily/dateCells";
 import { deadlineText } from "../daily/deadlineText";
+import { chosen } from "../academic/registry";
 import { defaultIsrael, holidaysOn } from "../daily/hebrewCalendar";
 import { holidayLabel, nameLang } from "../daily/hebrewCalendarNames";
 import { dayOfValue } from "../daily/israeliTime";
@@ -169,7 +170,8 @@ interface CellDates {
 function useDateOptions(spec: DatabaseSpec): DateOpts {
   const locale = useAppStore((s) => s.locale) as string;
   const settings = useAppStore((s) => s.dailyNotes);
-  return useMemo(() => ({ locale, settings, hebrewDates: spec.hebrewDate }), [locale, settings, spec.hebrewDate]);
+  // W10.C27: the chosen academic calendar, so a deadline in a break or an exam period says so.
+  return useMemo(() => ({ locale, settings, hebrewDates: spec.hebrewDate, academic: chosen() }), [locale, settings, spec.hebrewDate]);
 }
 
 /** A cell's value: a date with its Hebrew date; the deadline column with its suggested working day and the working days left. */
@@ -191,6 +193,11 @@ function CellValue({ value, dates }: { value: unknown; dates: CellDates }) {
       {d?.moved && (
         <span role="note" data-testid="db-deadline-moved" style={{ fontSize: 11, color: "hsl(var(--warning, 35 90% 40%))" }}>
           ⚠ {d.moved}
+        </span>
+      )}
+      {d?.academic && (
+        <span role="note" data-testid="db-deadline-academic" style={{ fontSize: 11, color: "hsl(var(--warning, 35 90% 40%))" }}>
+          🎓 {d.academic}
         </span>
       )}
       {d && (
@@ -663,10 +670,11 @@ function CalendarDayHeader({ iso, opts }: { iso: string; opts: DateOpts }) {
 function CalendarDeadline({ value, opts }: { value: unknown; opts: DateOpts }) {
   const cell = dateCell(value, { ...opts, deadline: true });
   const d = cell?.deadline && deadlineText(cell.deadline);
-  if (!d?.moved) return null;
+  if (!d?.moved && !d?.academic) return null;
   return (
     <div role="note" data-testid="db-deadline-moved" style={{ fontSize: 11, color: "hsl(var(--warning, 35 90% 40%))" }}>
-      ⚠ {d.moved} · {d.left}
+      {d.moved ? `⚠ ${d.moved} · ${d.left}` : d.left}
+      {d.academic && ` · 🎓 ${d.academic}`}
     </div>
   );
 }

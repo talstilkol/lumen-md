@@ -9,7 +9,7 @@
  * say which one it is (`summary: "checked" | "extractive"`).
  */
 import "./strings";
-import { t } from "../i18n";
+import { getLocale, t } from "../i18n";
 import { cardsFrom, extractiveSummary, importantOf, lectureNote, sentencesOf, verifySummary, type Lecture, type TimedText } from "./lectureCore";
 
 export const LECTURES_DIR = "Lectures";
@@ -23,6 +23,21 @@ export function setLectureSummarizer(fn: LectureSummarizer | null): void {
 
 /** Which summary the lecture got: the checked model summary, or the extractive one. */
 export type SummaryKind = "checked" | "extractive";
+/**
+ * W10.C27: where a day falls in the user's academic year, from the calendar
+ * they chose (academic/registry): the semester, its teaching week and the
+ * line student mode shows. Null with no calendar, an unverified one, or a
+ * day outside the semesters.
+ */
+export async function semesterOf(when: Date, locale: string): Promise<{ id: string; week: number; line: string } | null> {
+  const [{ chosen }, { semesterWeekLine, weekOfSemester }] = await Promise.all([import("../academic/registry"), import("../academic/calendar")]);
+  const c = chosen();
+  if (!c?.verified) return null;
+  const day = { y: when.getFullYear(), m: when.getMonth() + 1, d: when.getDate() };
+  const pos = weekOfSemester(day, c);
+  if (!pos) return null;
+  return { id: pos.semester, week: pos.week, line: semesterWeekLine(day, c, locale.startsWith("he") ? "he" : "en") };
+}
 
 export interface LectureProgress {
   step: "saving" | "transcribing" | "writing";
@@ -64,7 +79,8 @@ export async function processLecture(audio: Blob, opts: { durationMs: number; ma
       summaryKind = "checked";
     }
   }
-  const lecture: Lecture = { title: opts.title, date: when.toISOString().slice(0, 10), audioPath: paths.audioLink, durationSec, sentences, important, summary, cards: cardsFrom(sentences, important, paths.audioLink) };
+  const semester = await semesterOf(when, getLocale()).catch(() => null);
+  const lecture: Lecture = { title: opts.title, date: when.toISOString().slice(0, 10), audioPath: paths.audioLink, durationSec, sentences, important, summary, cards: cardsFrom(sentences, important, paths.audioLink), semester };
   opts.onProgress?.({ step: "writing" });
   await writeWorkspaceFile(paths.note, lectureNote(lecture, { recording: t("student.recording"), summary: t("student.summary"), summaryKind: t(summaryKind === "checked" ? "student.summary.checked" : "student.summary.extractive"), cards: t("student.cards"), noCards: t("student.noCards"), transcript: t("student.transcript"), important: t("student.important") }));
   notifyWorkspaceChanged({ kind: "structure", paths: [paths.audio, paths.note] });
