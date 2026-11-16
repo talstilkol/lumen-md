@@ -1,0 +1,30 @@
+{
+ "$comment": "Production files under src/ that the app does not reach on purpose: libraries only tests (and eval/measurement runs) use, each with why and what would wire it. scripts/check-unused-files.mjs fails on a listed file the app reaches (take it off) and on one no test reaches (dead: delete it). Audit A3 (round 2), lane A34.",
+ "files": {
+  "src/agents/eval/agentdojo/harness.ts": "Eval harness (W11.I2–I4, AgentDojo attacks): run by the agent eval suite, never by the app.",
+  "src/agents/eval/agentdojo/slack.ts": "Eval fixture (W11.I2, AgentDojo's Slack suite as data and tools): used only by the AgentDojo harness and its tests.",
+  "src/agents/eval/askVaultEval.ts": "Eval harness (W11.I13/I14, W12.A1–A3: Ask-the-vault retrieval and citations on HeQ/SQuAD): run by evals only.",
+  "src/agents/eval/bfcl.ts": "Eval harness (W11.I15, the BFCL v4 tool-calling benchmark): run by evals only.",
+  "src/agents/eval/promptCases.ts": "Eval fixture (the prompt cases of the agents' eval, plan 7.3): data for the eval suite only.",
+  "src/agents/eval/retrievalPublic.ts": "Eval harness (W11.I13, public retrieval sets BEIR/Belebele, nDCG and recall): run by evals only.",
+  "src/agents/eval/scripted.ts": "Eval fixture (a scripted stand-in answerer for the eval harnesses): test support only.",
+  "src/agents/mcp/oauth.ts": "MCP OAuth for remote servers (W7.18 step 1: iss check, client metadata, PKCE): no UI asks for it yet; the MCP settings tab (W10.C2) adds HTTP servers without auth. Wire it when the tab offers 'Sign in' for a remote server.",
+  "src/ai/dictation/polish.ts": "Dictation's optional local-model punctuation pass (plan 6.1): no setting turns it on yet; wire it into the dictation flow behind an AI-settings switch.",
+  "src/ai/hebocrbench.ts": "Measurement harness (W7.11/W11.H14, the HebOCRBench package and submission format): run by the public eval only.",
+  "src/ai/structured/conformance.ts": "Measurement harness (W7.14: 5 schemas x 50 Hebrew inputs per engine, and the built-in model's gate eval): run from devtools on a real Chrome 148, never by the app.",
+  "src/ai/timedSegments.ts": "A second Whisper timestamp shifter (W5.13). The worker uses dictation/longform.ts timedChunks, which drops a window without chunk timestamps; this one keeps it as one segment. Which behaviour student mode wants is an owner decision; then keep one and delete the other.",
+  "src/ink/inkText.ts": "Handwriting-to-text behind the public CER gate (W11.H14): nothing is offered until eval/public/_verdicts.json has a passing handwriting result (none yet) and a recogniser is pinned; wire it into the ink panel then.",
+  "src/mobile/tapCounts.ts": "Measurement table (W1.25 acceptance: taps per common phone action vs Obsidian Mobile): read by its test only.",
+  "src/search/lemma/dictaLex.ts": "DictaBERT-lex behind the lemmatizer seam (W11.H12): needs the ONNX export (W11.M3); the A/B harness uses it with a stand-in. Wire the winner into search after W11.M3.",
+  "src/search/lemma/shoshan.ts": "Shoshan's lemma port behind the lemmatizer seam (W11.H12): needs the ONNX encoder (W11.M3); the A/B harness uses it with a stand-in. Wire the winner into search after W11.M3.",
+  "src/sources/openlaw/book.ts": "The Open Book of Laws as an offline source (W11.H16): needs its dataset package (CC BY-SA, downloaded by the user) and a source-picker entry; neither exists yet.",
+  "src/storage/formatRoundTrip.ts": "Measurement harness (W12.F1: md→format→md on the CommonMark examples and 50 Hebrew notes): run by its test and the docs table, not the app.",
+  "src/storage/templates.ts": "The old built-in template list: the gallery now reads public/templates. Candidate for deletion together with its template.* strings in 8 locales (a cleanup of its own).",
+  "src/sync/e2ee/primitives/lib/age.ts": "Audited-crypto adapter (W10.D13): imports age-encryption, which is not installed (the npm registry is blocked here); tsconfig excludes this folder. Wired at the Mac run per docs/security/crypto-libs.md.",
+  "src/sync/e2ee/primitives/lib/argon2.ts": "Audited-crypto adapter (W10.D13): Argon2id over hash-wasm / libsodium, which are not installed (registry blocked); tsconfig excludes this folder. Wired at the Mac run per docs/security/crypto-libs.md.",
+  "src/sync/e2ee/primitives/lib/audited.ts": "Audited-crypto adapter (W10.D13): the primitives over @noble/ciphers, @noble/hashes and hash-wasm, none installed (registry blocked); the app still runs the in-house primitives. Wired by usePrimitives(AUDITED) at the Mac run, after cryptoDifferential.",
+  "src/sync/gitAsOf.ts": "The git half of 'what did I know then' (W12.S1 step 3: history before install from git log): needs a git log bridge in the app (desktop gitWatch); the asOf search uses the history store only for now.",
+  "src/types/objects.ts": "A barrel of typeSchema/typeRegistry/fieldValues for the typed-objects test; the app imports the three modules directly.",
+  "src/ui/tokens.ts": "The design system's tokens for inline styles (W3.1): components still use the CSS variables directly; adopting it is W3.1's remaining step (its lint rule)."
+ }
+}

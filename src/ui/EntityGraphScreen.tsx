@@ -23,6 +23,16 @@ export interface EntityGraphScreenProps {
 }
 
 const EntityGraphView = lazy(() => import("./EntityGraphView").then((m) => ({ default: m.EntityGraphView })));
+// W12.E6 / R12.7: an entity's page and timeline, when one is chosen.
+const EntityPagePanel = lazy(() => import("./EntityPagePanel").then((m) => ({ default: m.EntityPagePanel })));
+
+/** W12.E8's formats, by their own names (the same in every language). */
+const EXPORT_FORMATS = [
+  ["jsonld", "JSON-LD (schema.org)"],
+  ["graphml", "GraphML"],
+  ["turtle", "RDF/Turtle (PROV-O)"],
+  ["neo4j", "Neo4j CSV"],
+] as const;
 
 const bar: React.CSSProperties = { display: "flex", alignItems: "center", gap: 12, padding: "8px 16px", borderBottom: "1px solid hsl(var(--border))" };
 const muted: React.CSSProperties = { padding: "2rem", color: "hsl(var(--fg-muted))" };
@@ -30,6 +40,7 @@ const muted: React.CSSProperties = { padding: "2rem", color: "hsl(var(--fg-muted
 export function EntityGraphScreen({ onClose, vault, initialMode }: EntityGraphScreenProps) {
   const [data, setData] = useState<EntityGraphData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState<string | null>(null);
 
   useEffect(() => {
     let off = false;
@@ -51,6 +62,32 @@ export function EntityGraphScreen({ onClose, vault, initialMode }: EntityGraphSc
     onClose();
   };
 
+  // A source link on the page: open its note, then select the cited paragraph.
+  const openAt = async (note: string, anchor: string | null) => {
+    const ws = vault ?? (await import("../storage/workspace"));
+    const content = await ws.readWorkspaceFile(note);
+    useAppStore.getState().openTab({ name: note.split("/").pop()!, content, workspaceName: note });
+    const { anchorLines } = await import("./EntityPagePanel");
+    const at = anchorLines(content, anchor);
+    if (at) window.dispatchEvent(new CustomEvent("lumen-reveal-line", { detail: { ...at, content } }));
+    onClose();
+  };
+  const chosen = page && data ? data.entities.find((e) => e.id === page) : undefined;
+
+  // W12.E8: the graph as JSON-LD, GraphML, Turtle (PROV-O) or Neo4j import CSV, downloaded — never sent anywhere.
+  const exportAs = async (format: string) => {
+    if (!data || !format) return;
+    const { exportGraph } = await import("../entities/export");
+    const files = exportGraph({ entities: data.entities, edges: data.edges }, format as "jsonld" | "graphml" | "turtle" | "neo4j");
+    for (const [name, text] of Object.entries(files)) {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([text], { type: "text/plain;charset=utf-8" }));
+      a.download = name;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }
+  };
+
   return (
     <Modal onClose={onClose} aria-labelledby="entity-graph-title" data-testid="entity-graph-screen" style={{ position: "fixed", inset: 0, zIndex: 9999, background: "hsl(var(--bg))", display: "flex", flexDirection: "column" }}>
       <div style={bar}>
@@ -62,7 +99,20 @@ export function EntityGraphScreen({ onClose, vault, initialMode }: EntityGraphSc
             {t("entityGraph.screen.counts", { entities: String(data.entities.length), edges: String(data.edges.length) })}
           </span>
         )}
-        <button type="button" className="icon-btn" onClick={onClose} style={{ marginInlineStart: "auto", width: "auto", padding: "4px 12px", fontSize: 12 }}>
+        {data && data.entities.length > 0 && (
+          <label style={{ fontSize: 12, color: "hsl(var(--fg-muted))", marginInlineStart: "auto" }}>
+            {t("entityGraph.export.label")}{" "}
+            <select data-testid="entity-graph-export" value="" onChange={(e) => void exportAs(e.target.value)}>
+              <option value="">…</option>
+              {EXPORT_FORMATS.map(([value, name]) => (
+                <option key={value} value={value}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+        <button type="button" className="icon-btn" onClick={onClose} style={{ marginInlineStart: data && data.entities.length > 0 ? undefined : "auto", width: "auto", padding: "4px 12px", fontSize: 12 }}>
           {t("entityGraph.screen.close")}
         </button>
       </div>
@@ -75,7 +125,20 @@ export function EntityGraphScreen({ onClose, vault, initialMode }: EntityGraphSc
           <EmptyState testId="entity-graph-empty" message={t("entityGraph.screen.empty")} action={learnHow("workspace/entity-graph")} />
         ) : (
           <Suspense fallback={<p style={muted}>{t("entityGraph.screen.loading")}</p>}>
-            <EntityGraphView entities={data.entities} edges={data.edges} notes={data.notes} onOpenEntity={(id) => void open(id)} initialMode={initialMode} />
+            {chosen ? (
+              <EntityPagePanel
+                entity={chosen}
+                entities={data.entities}
+                edges={data.edges}
+                texts={data.texts}
+                dates={new Map([...data.notes].map(([p, n]) => [p, n.date]))}
+                onOpen={(note, anchor) => void openAt(note, anchor)}
+                onOpenNote={() => void open(chosen.id)}
+                onBack={() => setPage(null)}
+              />
+            ) : (
+              <EntityGraphView entities={data.entities} edges={data.edges} notes={data.notes} onOpenEntity={setPage} initialMode={initialMode} />
+            )}
           </Suspense>
         )}
       </div>

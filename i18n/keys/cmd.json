@@ -48,6 +48,16 @@
       "vars": []
     },
     {
+      "key": "cmd.agents.acp",
+      "en": "Ask an external agent (Claude Code, Codex, OpenCode)…",
+      "vars": []
+    },
+    {
+      "key": "cmd.agents.acp.hint",
+      "en": "Desktop: the agent works in your vault over ACP; every file it writes waits in the review panel",
+      "vars": []
+    },
+    {
       "key": "cmd.ai.actionItems",
       "en": "AI: Extract Action Items",
       "vars": []
@@ -860,6 +870,30 @@
     {
       "key": "cmd.edit.toggleDirection.hint",
       "en": "Saved in the note as an invisible direction mark at the paragraph's start; frontmatter dir: rtl | ltr | auto sets the whole note",
+      "vars": []
+    },
+    {
+      "key": "cmd.entities.contradictions",
+      "en": "Where my notes disagree",
+      "vars": []
+    },
+    {
+      "key": "cmd.entities.contradictions.done",
+      "en": "{n} candidates: the report is in the review panel, waiting for you",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "cmd.entities.contradictions.failed",
+      "en": "Could not look for disagreements: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "cmd.entities.contradictions.hint",
+      "en": "Finds denials, corrections and differing values or dates between notes, with exact quotes; the report goes to the review panel",
       "vars": []
     },
     {

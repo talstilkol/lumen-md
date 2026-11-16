@@ -8,7 +8,11 @@
  * they are `reach: "remote"`: a session needs the user's consent, airplane
  * mode refuses it, and the privacy ledger records it (host.ts).
  *
- * The launch commands are the adapters' published ones as of 2026-11; the
+ * The launch commands are the adapters' own programs, installed by the user
+ * (`npm i -g @zed-industries/claude-code-acp`, `npm i -g
+ * @zed-industries/codex-acp`, OpenCode's installer): the desktop's process
+ * bridge refuses `npx -y`, which would download and run a package without
+ * asking (src-tauri/mcp-stdio, the same rule as stdio MCP servers). The
  * real runs are W11.M6, which checks each one on the Mac.
  */
 
@@ -24,8 +28,8 @@ export interface AcpAgentSpec {
 }
 
 export const ACP_AGENTS: readonly AcpAgentSpec[] = Object.freeze([
-  { id: "claude-code", label: "Claude Code", command: "npx", args: ["-y", "@zed-industries/claude-code-acp"], reach: "remote", docs: "https://github.com/zed-industries/claude-code-acp" },
-  { id: "codex", label: "Codex", command: "npx", args: ["-y", "@zed-industries/codex-acp"], reach: "remote", docs: "https://github.com/zed-industries/codex-acp" },
+  { id: "claude-code", label: "Claude Code", command: "claude-code-acp", args: [], reach: "remote", docs: "https://github.com/zed-industries/claude-code-acp" },
+  { id: "codex", label: "Codex", command: "codex-acp", args: [], reach: "remote", docs: "https://github.com/zed-industries/codex-acp" },
   { id: "opencode", label: "OpenCode", command: "opencode", args: ["acp"], reach: "remote", docs: "https://opencode.ai/docs/acp/" },
 ]);
 

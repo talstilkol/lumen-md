@@ -81,7 +81,7 @@ hold the same group.
 | **search** | `src/ui/SearchDialog.tsx`, `src/ui/SearchReplace.tsx`, `src/ai/semanticSearch.ts`, `src/ai/neuralSearch.ts`, `src/ai/search.worker.ts`, `src/storage/workspaceIndex.ts`, `src/storage/searchHistory.ts`, `src/editor/searchHighlight.ts` |
 | **settings** | `src/ui/*Settings*.tsx`, `src/ui/AiSettingsPanel.tsx`, `src/lib/themeSettings.ts`, `src/lib/orgSettings.ts`, `src/lib/configHealth.ts` |
 | **ci** | `.github/**`, `scripts/**`, `playwright.config.ts`, `lighthouserc.json`, the build half of `vite.config.ts`, `Dockerfile`, `fly.toml` |
-| **commands** | `src/commands/**`, `src/ui/CommandPalette.*`, `src/ui/KeyboardShortcuts.tsx`, `src/editor/slashCommands.ts`, `src/editor/keymapExtra.ts` |
+| **commands** | `src/commands/**`, `src/ui/CommandPalette.*`, `src/ui/KeyboardShortcuts.tsx`, `src/editor/keymapExtra.ts` |
 | **i18n** | `src/i18n/**`, `i18n/keys.json` |
 | **tree** | `src/ui/FileTree.*`, `src/ui/FileContextMenu.tsx`, `src/ui/TrashPanel.tsx`, `src/storage/workspace*.ts`, `src/storage/fileOps.ts`, `src/storage/trash.ts` |
 | **history** | `src/storage/history.ts`, `src/ui/VersionHistory.tsx`, `src/collab/versionHistory.ts` |

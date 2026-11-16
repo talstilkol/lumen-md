@@ -522,6 +522,24 @@ export async function readAloudCommand(deps: {
         if (last === sentences.length - 1 && !ctl.signal.aborted) savePosition(key, null, 0);
         return;
       }
+      // W11.H8: Chatterbox, only after the public CER gate (W11.H9) passed and its runtime is there — today never.
+      const cb = await import("./tts/chatterbox");
+      const runtime = await cb.chatterboxForReadAloud();
+      if (!isCurrentRun(run)) return;
+      if (runtime) {
+        const ctl = new AbortController();
+        neuralAbort = ctl;
+        try {
+          const [{ pointHebrew }, { uiConfirm }] = await Promise.all([import("./nikudService"), import("../ui/PromptDialog")]);
+          const rest = sentences.slice(startAt);
+          await cb.playChatterbox(rest, { runtime, nikud: (text) => pointHebrew(text, { consent: { confirm: uiConfirm, t: deps.t } }), onSentence: (i) => onSentence(rest[i], startAt + i) }, ctl.signal);
+        } finally {
+          if (neuralAbort === ctl) neuralAbort = null;
+          range(null);
+        }
+        if (last === sentences.length - 1 && !ctl.signal.aborted) savePosition(key, null, 0);
+        return;
+      }
     }
     // Plan 6.2 (W10.E65): a pinned Kokoro voice for English, when one exists (none yet — decision 15.10). On the device.
     if (hebrewRatio(content) < 0.2) {

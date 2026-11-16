@@ -157,11 +157,6 @@
       "count": 1
     }
   },
-  "src/lib/utils.ts": {
-    "no-useless-escape": {
-      "count": 1
-    }
-  },
   "src/lint/vaultDoctor.ts": {
     "no-useless-escape": {
       "count": 2

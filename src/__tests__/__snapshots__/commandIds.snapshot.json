@@ -2183,6 +2183,12 @@
       "icon": "Network"
     },
     {
+      "id": "entities.contradictions",
+      "label": "Where my notes disagree",
+      "hint": "Finds denials, corrections and differing values or dates between notes, with exact quotes; the report goes to the review panel",
+      "icon": "FileText"
+    },
+    {
       "id": "entities.wikidata",
       "label": "Entity: link to Wikidata…",
       "icon": "FileText"
@@ -4594,6 +4600,12 @@
       "icon": "Network"
     },
     {
+      "id": "entities.contradictions",
+      "label": "Where my notes disagree",
+      "hint": "Finds denials, corrections and differing values or dates between notes, with exact quotes; the report goes to the review panel",
+      "icon": "FileText"
+    },
+    {
       "id": "entities.wikidata",
       "label": "Entity: link to Wikidata…",
       "icon": "FileText"
@@ -5008,6 +5020,7 @@
     "text.transliterate",
     "spell.yiddishDictionary",
     "academic.choose",
-    "academic.ics"
+    "academic.ics",
+    "entities.contradictions"
   ]
 }
