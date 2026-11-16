@@ -237,3 +237,19 @@ describe("end to end against the fake Ollama", () => {
     expect(again.stdout).toContain("fim: pass in an earlier session — kept");
   }, 90_000);
 });
+
+describe("the structured-output step (W7.14)", () => {
+  const st = steps.find((s) => s.id === "structured") as (Step & { parse: (dir: string) => Record<string, number> | null }) | undefined;
+  it("is optional (the default run stays within its 3 hours), and judges valid/total against 98 %", () => {
+    expect(st, "a models-day step for W7.14").toBeDefined();
+    expect(st!.optional).toBe(true);
+    expect(st!.requires.script).toBe("eval:structured");
+    expect(selectSteps(steps, { withOptional: ["structured"] }).some((s: Step) => s.id === "structured")).toBe(true);
+    const dir = tmp();
+    writeFileSync(join(dir, "structured-qwen2.5_7b-2026-11-16.json"), JSON.stringify({ valid: 246, total: 250 }));
+    expect(st!.parse(dir)).toEqual({ valid: 246, total: 250, share: 0.984 });
+    expect(judge(st, 0, st!.parse(dir))).toBe("pass");
+    writeFileSync(join(dir, "structured-qwen2.5_7b-2026-11-17.json"), JSON.stringify({ valid: 50, total: 250 }));
+    expect(judge(st, 0, st!.parse(dir))).toBe("fail");
+  });
+});

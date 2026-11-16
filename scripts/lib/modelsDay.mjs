@@ -310,6 +310,19 @@ export const STEPS = [
     ],
     parse: (dir) => ({ files: listFiles(dir).length }),
   },
+  {
+    id: "structured",
+    title: "Structured output — 5 schemas × 50 Hebrew inputs valid for the schema on Ollama",
+    plan: ["W7.14"],
+    requires: { script: "eval:structured" },
+    models: ["qwen2.5:7b"],
+    minutes: 10,
+    // optional: the default run is declared at 179 of its 180 minutes (W4.6); run it with --with structured
+    optional: true,
+    target: { metric: "share", min: 0.98, text: "≥ 98 % valid for the schema (plan W7.14)" },
+    commands: (c) => [npm("eval:structured", [], evalEnv(c, "qwen2.5:7b"))],
+    parse: (dir) => shareFrom(dir, /^structured-.*\.json$/, "valid", "total"),
+  },
 ];
 
 /**
@@ -343,6 +356,7 @@ export const COVERAGE = [
   ["W2.18", "canvas-draw", "golden 21/21 with real Mermaid; the model part is owed"],
   ["W4.13", "asr-web", "the browser Whisper path"],
   ["W4.31", "tool-calls", "200 calls per model"],
+  ["W7.14", "structured", "optional step: Ollama's half of the ≥ 98 % run; web-llm and Chrome 148's built-in model (and its 90 % Hebrew gate) run in the browser: conformance.ts runConformanceInBrowser / runGateEvalInBrowser"],
   ["W5.3", null, "rule-based checker; owed is a held-out set of 200 real sentences (owner), the optional model is not required"],
   ["W5.12", "lit-review", "dev probe only; 20 gold papers are the owner's"],
   ["W5.13", "asr-web", "Whisper on WebGPU; the 90-minute lecture timing is a hand check"],
