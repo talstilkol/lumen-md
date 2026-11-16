@@ -35,7 +35,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { generate } from "../../scripts/fuzz/generators";
-import { asRawText, boundMarkdown, MAX_CONTAINER_DEPTH, MAX_DELIMITERS, MAX_HTML_DEPTH, needsBounding } from "../renderer/boundMarkdown";
+import { asRawText, boundMarkdown, MAX_BRACKETS, MAX_CONTAINER_DEPTH, MAX_DELIMITERS, MAX_HTML_DEPTH, needsBounding } from "../renderer/boundMarkdown";
 import { renderMarkdown } from "../renderer/pipeline";
 
 const FOUND = [655, 17957, 93, 185, 17976, 19495, 9178, 2101, 3877, 12929, 16139, 11087, 1459, 4812, 17461, 21240, 25369, 29767, 72864, 76842, 93948, 555134, 196813, 618854, 747704, 158774, 694468, 21616, 33882, 38881, 970703, 48699, 428652, 511908, 10898, 193112, 150847, 401308];
@@ -164,5 +164,64 @@ describe("the bounds", () => {
 
   it("raw HTML with a style that is not CSS renders (the attribute is dropped)", async () => {
     await expect(renderMarkdown('a <b style=x>bold</b> <svg style="color:">x</svg>', () => false)).resolves.toBeTruthy();
+  });
+
+  // Review 10 M2: an element opened in a paragraph closes with it, unless
+  // the parser keeps it open past the paragraph (block, formatting, scoping
+  // elements) or it is in an HTML block.
+  it("generics in code spans and prose do not carry over to later blocks (review 10 M2)", () => {
+    const code = Array.from({ length: 300 }, (_, i) => `Step ${i}: call \`load<T>()\` and return \`Promise<void>\`.`).join("\n\n");
+    expect(boundMarkdown(code)).toBe(code);
+    const prose = Array.from({ length: 300 }, (_, i) => `A List<String> ${i} or a Map<K, V> here.`).join("\n\n");
+    expect(boundMarkdown(prose)).toBe(prose);
+  });
+
+  it("elements that stay open past their paragraph still carry (review 10 M2)", () => {
+    // Formatting elements are reopened in every later paragraph.
+    const bold = Array.from({ length: MAX_HTML_DEPTH + 1 }, (_, i) => `a <b title=${i}>`).join("\n\n");
+    expect(needsBounding(bold)).toBe(true);
+    // A line that is one tag is an HTML block: nothing closes it.
+    const blocks = Array.from({ length: MAX_HTML_DEPTH + 1 }, () => "<x>").join("\n\n");
+    expect(needsBounding(blocks)).toBe(true);
+    // A <pre> block goes on past blank lines; the paragraphs in it are HTML.
+    const pre = "<pre>\n\n" + Array.from({ length: MAX_HTML_DEPTH + 1 }, () => "a<x>").join("\n\n");
+    expect(needsBounding(pre)).toBe(true);
+    expect(boundMarkdown(pre)).not.toBe(pre);
+  });
+
+  it("an end tag closes only an element of its name; <x/> opens x outside svg (review 10)", () => {
+    const mismatched = "<x></y>".repeat(MAX_HTML_DEPTH + 1);
+    expect(needsBounding(mismatched)).toBe(true);
+    const slash = "<div/>".repeat(MAX_HTML_DEPTH + 1);
+    expect(needsBounding(slash)).toBe(true);
+    const icon = "<svg>" + '<path d="M0 0"/>'.repeat(MAX_HTML_DEPTH + 1) + "</svg>";
+    expect(boundMarkdown(icon)).toBe(icon);
+  });
+
+  // Review 10 M3: a row of a GFM table is an inline run of its own.
+  it("a table without leading pipes is one run per row (review 10 M3)", () => {
+    const rows = ["date | from | to | note", "--- | --- | --- | ---", ...Array.from({ length: 200 }, (_, i) => `2024-01-${(i % 28) + 1} | 2024-02-01 | 2024-03-01 | re-run`)];
+    expect(boundMarkdown(rows.join("\n"))).toBe(rows.join("\n"));
+    const after = "Some text\n" + rows.join("\n");
+    expect(boundMarkdown(after)).toBe(after);
+  });
+
+  it("a line starting with | outside a table is paragraph text (review 10)", () => {
+    const md = "|[\n".repeat(MAX_BRACKETS + 1);
+    expect(needsBounding(md)).toBe(true);
+  });
+
+  it("a header the parser does not read as one starts no table (review 10 M3)", () => {
+    const rest = "\n" + "[c\n".repeat(MAX_BRACKETS + 1);
+    // Lazy ends of a list item, a footnote and a quote paragraph: one paragraph to the parser.
+    for (const head of ["- x\na | b\n--- | ---", "[^1]: a | b\n--- | ---", "> a | b\n--- | ---", "a | b | c\n--- | ---", "a \\| b\n--- | ---"]) {
+      expect(needsBounding(head + rest), head).toBe(true);
+    }
+    // The same with the lines after them indented into the item, or quoted: still that one paragraph.
+    expect(needsBounding("- x\na | b\n--- | ---\n" + "  [c\n".repeat(MAX_BRACKETS + 1))).toBe(true);
+    expect(needsBounding("> a | b\n--- | ---\n" + "> [c\n".repeat(MAX_BRACKETS + 1))).toBe(true);
+    // A table inside a list item, and a row that starts another block ends the table.
+    expect(needsBounding("- x\n  a | b\n  --- | ---\n  c\nd" + rest)).toBe(true);
+    expect(needsBounding("a | b\n--- | ---\n<div>" + rest)).toBe(true);
   });
 });
