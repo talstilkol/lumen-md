@@ -55,6 +55,7 @@
 /src/lib/markupSanitizer.ts              @talstilkol
 /src/lib/urlSanitizer.ts                 @talstilkol
 /src/renderer/rehypeSanitizeRaw.ts       @talstilkol
+/src/renderer/rehypeRawSafe.ts           @talstilkol
 /src/plugins/runtime/capabilities.ts     @talstilkol
 /src/plugins/plantumlPolicy.ts           @talstilkol
 
