@@ -197,6 +197,21 @@ export function stateFor(branch, files) {
 
 /** The reference-transaction hook (mark included, so a reinstall replaces only ours). */
 export const TXN_HOOK_MARK = "installed by `node scripts/lane-state.mjs install-hook` (W8.10)";
+/**
+ * The pre-push half (W8.10, so one command sets a clone up): `install-hook`
+ * also writes a pre-push hook that only notes the push, when there is none.
+ * A pre-push hook that already notes it (ci:local's, or ours) is kept as it
+ * is; anyone else's is never replaced (`refuse`: add the line yourself).
+ */
+export const PREPUSH_MARK = "lane-state pre-push half, installed by `node scripts/lane-state.mjs install-hook` (W8.10)";
+export const PREPUSH_LINE = 'printf \'%s\\n\' "$(cat)" | node scripts/lane-state.mjs pending "$1" || true';
+export function prePushPlan(existing) {
+  const content = `#!/bin/sh\n# ${PREPUSH_MARK}\n# Notes what this push sends, for the reference-transaction hook; never stops a push.\n${PREPUSH_LINE}\nexit 0\n`;
+  if (existing == null) return { action: "write", content };
+  if (existing.includes(PREPUSH_MARK) || existing.includes("lane-state.mjs pending")) return { action: "keep", content };
+  return { action: "refuse", content };
+}
+
 export function txnHookPlan(existing, { force = false } = {}) {
   const content = `#!/bin/sh\n# ${TXN_HOOK_MARK}\n# Records a push in the lane's STATE.md once origin has it; never fails the transaction.\n[ "$1" = committed ] || exit 0\n[ -s "$(git rev-parse --git-path lumen-lane-pending.json)" ] || exit 0\nnode scripts/lane-state.mjs committed >/dev/null 2>&1 || true\nexit 0\n`;
   if (existing == null || existing.includes(TXN_HOOK_MARK)) return { action: "write", content };

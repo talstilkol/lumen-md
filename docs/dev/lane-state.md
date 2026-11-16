@@ -30,10 +30,17 @@ replay.
 Two of those writes happen without anyone doing them, once per clone:
 
 ```bash
-npm run ci:local -- --install-hook                              # pre-push: notes what the push sends
-node scripts/lane-state.mjs install-hook --state-dir "$S/lanes"  # reference-transaction: records it
+node scripts/lane-state.mjs install-hook --state-dir "$S/lanes"  # both hooks: pre-push notes, reference-transaction records
 node scripts/lane-state.mjs watch "$S/lanes/<lane>/STATE.md" &   # the hourly tick, while the lane works
 ```
+
+`install-hook` writes the pre-push half itself when the clone has no pre-push
+hook. A clone with `npm run ci:local -- --install-hook` already has it (that
+hook notes the push before it runs the checks); a pre-push hook of your own is
+never replaced, and install-hook prints the one line to add to it.
+`src/__tests__/laneStateResume.test.ts` runs the whole thing on a throw-away
+origin: a stop after a push, a stop between a push and the STATE.md edit, and
+a stop with an unpushed commit; resume, follow it, and no sha arrives twice.
 
 - **After a push.** Git has no post-push hook. So the pre-push hook writes
   what it is about to send to `$(git rev-parse --git-path lumen-lane-pending.json)`.

@@ -13,7 +13,8 @@
  *        the reference-transaction hook: once origin has a push that the pre-push hook
  *        (npm run ci:local -- --install-hook) noted, the lane's STATE.md gets the new head
  *        in Branches, a line in Pushes and a new Updated time. With --state-dir, the
- *        STATE.md is the one under <dir> whose Branches table lists the branch.
+ *        STATE.md is the one under <dir> whose Branches table lists the branch. It also
+ *        writes the pre-push half when the clone has no pre-push hook (one command per clone).
  *   node scripts/lane-state.mjs watch <STATE.md> [--every-min 60]   the hourly timer:
  *        `tick` now and every N minutes, until stopped
  *   node scripts/lane-state.mjs tick <STATE.md> [--no-remote]       once: Updated, and any
@@ -34,7 +35,7 @@
 import { spawnSync } from "node:child_process";
 import { chmodSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { confirmedPushes, parseBranches, pushedRefs, recordPush, renderBranches, resumeAction, stateFor, touchUpdated, txnHookPlan } from "./lib/lane-state.mjs";
+import { PREPUSH_LINE, confirmedPushes, parseBranches, prePushPlan, pushedRefs, recordPush, renderBranches, resumeAction, stateFor, touchUpdated, txnHookPlan } from "./lib/lane-state.mjs";
 
 const argv = process.argv.slice(2);
 const [cmd, file] = argv;
@@ -175,6 +176,13 @@ function main() {
     if (plan.action === "backup") renameSync(hook, `${hook}.bak`);
     writeFileSync(hook, plan.content);
     chmodSync(hook, 0o755);
+    // The pre-push half too, unless a hook already notes the push (ci:local's does) or is someone else's.
+    const pp = join(hooks, "pre-push");
+    const pre = prePushPlan(existsSync(pp) ? readFileSync(pp, "utf8") : null);
+    if (pre.action === "write") {
+      writeFileSync(pp, pre.content);
+      chmodSync(pp, 0o755);
+    } else if (pre.action === "refuse") console.error(`lane-state: ${pp} is not ours and does not note pushes; add this line to it: ${PREPUSH_LINE}`);
     sh(["git", "config", state ? "lumen.laneState" : "lumen.laneStateDir", resolve(state ?? dir)]);
     console.log(`reference-transaction hook written to ${hook}; lane state: ${resolve(state ?? dir)}. The pre-push half: npm run ci:local -- --install-hook.`);
     return 0;

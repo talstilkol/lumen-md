@@ -6,8 +6,9 @@ public/dict/he_50k.txt linguist-generated=true -diff
 src/__tests__/fixtures/obsidian-corpus/** -text
 # Plan W8.11: the in-app help bundle is built from docs/ (scripts/help-bundle.mjs).
 # Its shards never get conflict markers: the lumen-help driver keeps our side and the
-# bundle is rebuilt after the merge (scripts/lane-merge.sh does both; by hand:
-# node scripts/help-merge-driver.mjs --install once, then node scripts/help-bundle.mjs).
+# bundle is rebuilt after the merge (scripts/lane-merge.sh does both). `npm install` turns
+# the drivers on in every clone (prepare → scripts/git-setup.mjs); after a plain git merge
+# run node scripts/help-bundle.mjs (npm run help:check catches a bundle that wasn't rebuilt).
 src/help/generated/*.json merge=lumen-help linguist-generated=true
 # Plan W10.D1: the runner pages' CSP pins these bundles' sha256 — byte-for-byte, never
 # converted (scripts/build-runners.mjs builds them).
