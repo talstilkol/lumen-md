@@ -10,6 +10,7 @@ import { readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import {
   buildModel,
+  publicTitle,
   renderRoadmap,
   roadmapState,
   run,
@@ -44,7 +45,8 @@ describe("public roadmap (14.5)", () => {
     const rows = data(renderRoadmap(buildModel(p)));
     expect(rows.map(([n, title]) => [n, title])).toEqual(p.phases.map((ph: { title: string }, i: number) => [i, ph.title]));
     p.phases.forEach((ph: { tasks: { id: string; title: string; status?: string }[] }, i: number) => {
-      expect(rows[i][2]).toEqual(ph.tasks.map((t) => [t.id, roadmapState(t.status), t.title]));
+      // The title as published: without pull-request numbers or commit hashes (publicTitle, tested below).
+      expect(rows[i][2]).toEqual(ph.tasks.map((t) => [t.id, roadmapState(t.status), publicTitle(t.title)]));
     });
   });
 
@@ -64,6 +66,14 @@ describe("public roadmap (14.5)", () => {
     const done = rows.filter((r) => r[1] === "done").length;
     expect(html).toContain(`${done} הושלמו`);
     expect(html).toContain(`aria-valuenow="${done}"`);
+  });
+
+  it("drops pull-request numbers and commit hashes from a title, and leaves other titles as they are", () => {
+    expect(publicTitle("אשף ייבוא מכל מקור (חיזוק לייבוא הקיים ב-#176)")).toBe("אשף ייבוא מכל מקור (חיזוק לייבוא הקיים)");
+    expect(publicTitle("רכבת 5 + W9.8 + #617, #618, #619 + משימות")).toBe("רכבת 5 + W9.8 + משימות");
+    expect(publicTitle("4.2 תיקוני בטיחות העברת כספת מ-#235 ‏2483bdca")).toBe("4.2 תיקוני בטיחות העברת כספת");
+    expect(publicTitle("רכבת מיזוג: PR-ים #355–#430 (כל W1–W3)")).toBe("רכבת מיזוג: PR-ים (כל W1–W3)");
+    for (const plain of ["קובצי נתונים כ-Base: CSV, TSV, XLSX, JSON ו-YAML", "W12.F5 (44 → 15)", "deadline 2026"]) expect(publicTitle(plain)).toBe(plain);
   });
 
   it("renders with the external script under the app's CSP (no inline script, no handlers)", () => {

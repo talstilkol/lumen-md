@@ -668,6 +668,29 @@ export const roadmapState = (status) => {
 };
 
 /**
+ * A task title as the public roadmap shows it: without pull-request numbers
+ * ("#176", "#355–#430", "ב-#176") — they are the repository's bookkeeping,
+ * not the roadmap (plan 14.5). Parentheses left empty go too.
+ */
+export function publicTitle(title) {
+  const REF = /(?:[בומלהש]-)?#\d+(?:\s*[–-]\s*#\d+)?|\b(?=[0-9a-f]*\d)(?=[0-9a-f]*[a-f])[0-9a-f]{7,12}\b/g;
+  const text = String(title);
+  if (!text.match(REF)) return text;
+  return text
+    .replace(REF, "")
+    .replace(/\(\s*[,،‏\s]*\)/g, "")
+    .replace(/\((?:[‏\s]*[,،])*[‏\s]*/g, "(")
+    .replace(/[‏\s]+([),:،])/g, "$1")
+    .replace(/([,،+→])(?:[‏\s]*[,،])+/g, "$1")
+    .replace(/\+(?:[‏\s]*\+)+/g, "+")
+    .replace(/:(?:[‏\s]*→)+/g, ":")
+    .replace(/→(?:[‏\s]*→)+/g, "→")
+    .replace(/^[‏\s,،]+|[‏\s,،:]+$/g, "")
+    .replace(/[ \t‏]{2,}/g, " ")
+    .trim();
+}
+
+/**
  * public/roadmap.html: the plan's phases with every task's number, title and
  * state, and nothing else — no steps, acceptance, estimates, dates, branches
  * or the owner's items. The page renders the JSON block with /roadmap.js
@@ -678,7 +701,7 @@ export function renderRoadmap(M) {
   const phases = M.phases.map((p, i) => [i, p.title, p.tasks.map((t) => {
     const st = roadmapState(t.status);
     states[st]++;
-    return [t.id, st, t.t];
+    return [t.id, st, publicTitle(t.t)];
   })]);
   const total = M.agent.length;
   const pct = Math.round((states.done / total) * 100);
