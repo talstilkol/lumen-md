@@ -123,6 +123,14 @@
     "started": 78,
     "at": "2026-11-16",
     "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 11's 118 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 12's 78 started tasks keep going, but nothing grows: no new start in wave 12 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 11 is verified."
+   },
+   {
+    "wave": 12,
+    "next": 13,
+    "open": 85,
+    "started": 2,
+    "at": "2026-11-17",
+    "decision": "Decided by Claude (integrator INT6b) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1b. W13.X1/X2 shipped in the train (#1016, #1019, #1072) before the rule counted verified/pr/evidence (review 11, M4); no other wave-13 start until wave 12 is verified. Wave 12's 85 open tasks are built and tested in Node; lifting them needs the Mac run. Remove this once wave 12 is verified."
    }
   ]
  },
@@ -23496,7 +23504,6 @@
      ],
      "files": "Mac",
      "status": "⏳ גל 10 — לא התחיל",
-     "verified": "built",
      "notes": "החלטות הרכז 15.11: ה-snapshot של commandIds כבר ישן ב-train-5: לחדש פעם אחת ברכבת 6, אחרי שכל ה-PR-ים מוזגו: `npx vitest run -u src/__tests__/commandIds.test.ts`; סדר מיזוג: #632 → #655 → #744; ‏#659 לפני #725 ו-#681; ‏#650 לפני #732; ‏#690 לפני #696; ‏#631 לפני #739; ‏#642 לפני #698; ‏#668 לפני #750; דף ההפניה של #745 נכנס אחריו",
      "auditVerdict": {
       "at": "2026-11-16",
@@ -23552,7 +23559,6 @@
      ],
      "files": "Mac",
      "status": "⏳ גל 10 — לא התחיל",
-     "verified": "built",
      "notes": "החלטות הרכז 15.11: להוסיף את esbuild 0.28.2 כ-devDependency מדויק (`npm i -D -E esbuild@0.28.2`), כדי שגם CI יריץ את בדיקת הבנייה מחדש ברמת הבייט ב-runnerBundles.test.ts (#684)",
      "auditVerdict": {
       "at": "2026-11-16",
@@ -23600,7 +23606,6 @@
      ],
      "files": "Mac",
      "status": "⏳ גל 10 — לא התחיל",
-     "verified": "built",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -23653,7 +23658,6 @@
      ],
      "files": "Mac",
      "status": "⏳ גל 10 — לא התחיל",
-     "verified": "built",
      "notes": "החלטות הרכז 15.11: סדר מחסנית המובייל: #675 → #774 → #782 (כולל #685) → #791",
      "auditVerdict": {
       "at": "2026-11-16",
@@ -23690,7 +23694,6 @@
      ],
      "files": "Mac",
      "status": "⏳ גל 10 — לא התחיל",
-     "verified": "built",
      "notes": "החלטות הרכז 15.11: להוסיף את src/agents/runtime.ts לרשימת `critical` ב-scripts/mutation/targets.json ‏(#702) — החמרה — ואז ריצת mutation מלאה ב-vitest",
      "auditVerdict": {
       "at": "2026-11-16",
@@ -23734,7 +23737,6 @@
      ],
      "files": "Mac",
      "status": "⏳ גל 10 — לא התחיל",
-     "verified": "built",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -23784,7 +23786,6 @@
      ],
      "files": "Mac",
      "status": "⏳ גל 10 — לא התחיל",
-     "verified": "built",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -23825,7 +23826,6 @@
      ],
      "files": "Mac",
      "status": "⏳ גל 10 — לא התחיל",
-     "verified": "built",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -23868,7 +23868,6 @@
      ],
      "files": "Mac",
      "status": "⏳ גל 10 — לא התחיל",
-     "verified": "built",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -23908,7 +23907,6 @@
      ],
      "files": "Mac",
      "status": "⏳ גל 10 — לא התחיל",
-     "verified": "built",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -23948,7 +23946,6 @@
      ],
      "files": "Mac",
      "status": "⏳ גל 10 — לא התחיל",
-     "verified": "built",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -23988,7 +23985,6 @@
      ],
      "files": "Mac",
      "status": "⏳ גל 10 — לא התחיל",
-     "verified": "built",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -24024,7 +24020,6 @@
      ],
      "files": "Mac",
      "status": "⏳ גל 10 — לא התחיל",
-     "verified": "built",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -24064,7 +24059,6 @@
      ],
      "files": "בעלים",
      "status": "⏳ גל 10 — לא התחיל",
-     "verified": "built",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -24106,7 +24100,6 @@
      ],
      "files": "בעלים",
      "status": "⏳ גל 10 — לא התחיל",
-     "verified": "built",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -24145,7 +24138,6 @@
      ],
      "files": "בעלים",
      "status": "⏳ גל 10 — לא התחיל",
-     "verified": "built",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -24190,7 +24182,6 @@
      ],
      "files": "בעלים",
      "status": "⏳ גל 10 — לא התחיל",
-     "verified": "built",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -24239,7 +24230,6 @@
      ],
      "files": "בעלים",
      "status": "⏳ גל 10 — לא התחיל",
-     "verified": "built",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -24282,7 +24272,6 @@
      ],
      "files": "בעלים",
      "status": "⏳ גל 10 — לא התחיל",
-     "verified": "built",
      "notes": "החלטות הרכז 15.11: לדחוף את 23c997bcfe (תיקוני ה-relay ‏H1/H2) ל-w10/t5b-relay-cpu ‏(#664) אחרי אישור הבעלים",
      "auditVerdict": {
       "at": "2026-11-16",
@@ -24322,7 +24311,6 @@
      ],
      "files": "בעלים",
      "status": "⏳ גל 10 — לא התחיל",
-     "verified": "built",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -24363,7 +24351,6 @@
      ],
      "files": "בעלים",
      "status": "⏳ גל 10 — לא התחיל",
-     "verified": "built",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -24410,7 +24397,6 @@
      ],
      "files": "בעלים",
      "status": "⏳ גל 10 — לא התחיל",
-     "verified": "built",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -24451,7 +24437,6 @@
      ],
      "files": "בעלים",
      "status": "⏳ גל 10 — לא התחיל",
-     "verified": "built",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -24487,7 +24472,6 @@
      ],
      "files": "בעלים",
      "status": "⏳ גל 10 — לא התחיל",
-     "verified": "built",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -24521,7 +24505,6 @@
      ],
      "files": "בעלים",
      "status": "⏳ גל 10 — לא התחיל",
-     "verified": "built",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -27988,7 +27971,6 @@
      "why": "אבן הדרך הראשונה: רק דברים אמיתיים.",
      "kind": "OWNER",
      "status": "⏳ גל 11 — לא התחיל",
-     "verified": "built",
      "stage": "11.L",
      "research": [
       "R6.11",
@@ -28033,7 +28015,6 @@
      "why": "משוב אמיתי לפני קהל פתוח.",
      "kind": "OWNER",
      "status": "⏳ גל 11 — לא התחיל",
-     "verified": "built",
      "stage": "11.L",
      "research": [
       "R6.11"
@@ -28072,7 +28053,6 @@
      "why": "קהל עברי פתוח מוכיח את היתרון לפני השקה גלובלית.",
      "kind": "OWNER",
      "status": "⏳ גל 11 — לא התחיל",
-     "verified": "built",
      "stage": "11.L",
      "research": [
       "R6.11"
@@ -28113,7 +28093,6 @@
      "why": "ההזדמנות היחידה ב-HN וב-PH — רק אחרי שהשערים עברו.",
      "kind": "OWNER",
      "status": "⏳ גל 11 — לא התחיל",
-     "verified": "built",
      "stage": "11.L",
      "research": [
       "R6.11"
@@ -28150,7 +28129,6 @@
      "why": "רשימת היציאה של R6 מגדירה ״השקה מלאה״.",
      "kind": "OWNER",
      "status": "⏳ גל 11 — לא התחיל",
-     "verified": "built",
      "stage": "11.L",
      "research": [
       "R6.11",
@@ -28190,7 +28168,6 @@
      "why": "היום 23.6% בטלפון על סט שכתבנו.",
      "kind": "MAC",
      "status": "⏳ גל 11 — לא התחיל",
-     "verified": "built",
      "stage": "11.M",
      "research": [
       "R1.6",
@@ -28229,7 +28206,6 @@
      "why": "השער שמחליט אם יש קול עברי.",
      "kind": "MAC",
      "status": "⏳ גל 11 — לא התחיל",
-     "verified": "built",
      "stage": "11.M",
      "research": [
       "R2.5"
@@ -28270,7 +28246,6 @@
      "why": "מספרים ציבוריים לשלוש היכולות העבריות.",
      "kind": "MAC",
      "status": "⏳ גל 11 — לא התחיל",
-     "verified": "built",
      "stage": "11.M",
      "research": [
       "R2.6",
@@ -28312,7 +28287,6 @@
      "why": "בחירת מודל לפי ראיות.",
      "kind": "MAC",
      "status": "⏳ גל 11 — לא התחיל",
-     "verified": "built",
      "stage": "11.M",
      "research": [
       "R2.4",
@@ -28352,7 +28326,6 @@
      "why": "החלטות אחזור על סטים שלא רוויים.",
      "kind": "MAC",
      "status": "⏳ גל 11 — לא התחיל",
-     "verified": "built",
      "stage": "11.M",
      "research": [
       "R4.9",
@@ -28395,7 +28368,6 @@
      "why": "הוכחה על מודלים אמיתיים, לא mock.",
      "kind": "MAC",
      "status": "⏳ גל 11 — לא התחיל",
-     "verified": "built",
      "stage": "11.M",
      "research": [
       "R4.7",
@@ -28435,7 +28407,6 @@
      "why": "ה-specs נכתבו בענן ורצים רק כאן.",
      "kind": "MAC",
      "status": "⏳ גל 11 — לא התחיל",
-     "verified": "built",
      "stage": "11.M",
      "research": [
       "R1.3",
@@ -28480,7 +28451,6 @@
      "why": "מספרים שאפשר לשחזר.",
      "kind": "MAC",
      "status": "⏳ גל 11 — לא התחיל",
-     "verified": "built",
      "stage": "11.M",
      "research": [
       "R5.5",
@@ -28524,7 +28494,6 @@
      "why": "קורא מסך ו-mutation שאפשר לבדוק בחוץ.",
      "kind": "MAC",
      "status": "⏳ גל 11 — לא התחיל",
-     "verified": "built",
      "stage": "11.M",
      "research": [
       "R5.7",
@@ -28567,7 +28536,6 @@
      "why": "הלכידה בטלפון היא 8% מהתלונות.",
      "kind": "MAC",
      "status": "⏳ גל 11 — לא התחיל",
-     "verified": "built",
      "stage": "11.M",
      "research": [
       "R6.8",
@@ -28611,7 +28579,6 @@
      "why": "הוכחה שהעדכון לא ניתן להורדה בכוח.",
      "kind": "MAC",
      "status": "⏳ גל 11 — לא התחיל",
-     "verified": "built",
      "stage": "11.M",
      "research": [
       "R3.2",
@@ -28655,7 +28622,6 @@
      "why": "הטענות של הייבוא והפגישה מוכחות על נתונים אמיתיים.",
      "kind": "MAC",
      "status": "⏳ גל 11 — לא התחיל",
-     "verified": "built",
      "stage": "11.M",
      "research": [
       "R6.6",
@@ -28698,7 +28664,6 @@
      "why": "סוגר את משימות ה-P2 העבריות.",
      "kind": "MAC",
      "status": "⏳ גל 11 — לא התחיל",
-     "verified": "built",
      "stage": "11.M",
      "research": [
       "R2.12",
@@ -28734,7 +28699,6 @@
      "why": "החלטת המתאם: SignPath לקוד פתוח לחתימת Windows.",
      "kind": "OWNER",
      "status": "⏳ גל 11 — לא התחיל",
-     "verified": "built",
      "stage": "11.O",
      "research": [
       "R5.10"
@@ -28768,7 +28732,6 @@
      "why": "משקלות MIT לא מספרים מה נכנס לאימון.",
      "kind": "OWNER",
      "status": "⏳ גל 11 — לא התחיל",
-     "verified": "built",
      "stage": "11.O",
      "research": [
       "R2.5"
@@ -28804,7 +28767,6 @@
      "why": "חובה חוקית ועמידה בתיקון 13.",
      "kind": "OWNER",
      "status": "⏳ גל 11 — לא התחיל",
-     "verified": "built",
      "stage": "11.O",
      "research": [
       "R3.10",
@@ -28839,7 +28801,6 @@
      "why": "בלי זה חלק מהמדדים הציבוריים לא ירוצו.",
      "kind": "OWNER",
      "status": "⏳ גל 11 — לא התחיל",
-     "verified": "built",
      "stage": "11.O",
      "research": [
       "R4.9",
@@ -28874,7 +28835,6 @@
      "why": "אין סט ציבורי לתיקון דקדוק בעברית או למשימות פגישה.",
      "kind": "OWNER",
      "status": "⏳ גל 11 — לא התחיל",
-     "verified": "built",
      "stage": "11.O",
      "research": [
       "R1.7",
@@ -28910,7 +28870,6 @@
      "why": "החלטת המתאם: ״לא עבר ביקורת חיצונית״ עד שיש ביקורת.",
      "kind": "OWNER",
      "status": "⏳ גל 11 — לא התחיל",
-     "verified": "built",
      "stage": "11.O",
      "research": [
       "R6.4",
@@ -28946,7 +28905,6 @@
      "why": "תנאי להשקה בחנויות.",
      "kind": "OWNER",
      "status": "⏳ גל 11 — לא התחיל",
-     "verified": "built",
      "stage": "11.O",
      "research": [
       "R6.9",
@@ -28983,7 +28941,6 @@
      "why": "קיימות והפצה מוסדית.",
      "kind": "OWNER",
      "status": "⏳ גל 11 — לא התחיל",
-     "verified": "built",
      "stage": "11.O",
      "research": [
       "R6.12",
@@ -31666,7 +31623,6 @@
      "why": "המספרים האמיתיים נמדדים רק על Mac (כלל הבעלים).",
      "kind": "MAC",
      "status": "⏳ גל 12 — לא התחיל",
-     "verified": "built",
      "stage": "12.M",
      "decision": "M",
      "reuse": [],
@@ -31700,7 +31656,6 @@
      "why": "",
      "kind": "MAC",
      "status": "⏳ גל 12 — לא התחיל",
-     "verified": "built",
      "stage": "12.M",
      "decision": "M",
      "reuse": [],
@@ -31735,7 +31690,6 @@
      "why": "",
      "kind": "MAC",
      "status": "⏳ גל 12 — לא התחיל",
-     "verified": "built",
      "stage": "12.M",
      "decision": "M",
      "reuse": [],
@@ -31767,7 +31721,6 @@
      "why": "בלי רישיון ברור מודדים מקומית ולא מפיצים את הנתונים.",
      "kind": "OWNER",
      "status": "⏳ גל 12 — לא התחיל",
-     "verified": "built",
      "stage": "12.O",
      "decision": "E",
      "reuse": [],
@@ -31798,7 +31751,6 @@
      "why": "השם והלוגו של ספריא הם סימן מסחרי; תג ״powered by״ ניתן לשימוש פתוח, אבל עדיף אישור.",
      "kind": "OWNER",
      "status": "⏳ גל 12 — לא התחיל",
-     "verified": "built",
      "stage": "12.O",
      "decision": "N2",
      "reuse": [],
@@ -31831,7 +31783,6 @@
      "why": "תכונה חדשה לגמרי צריכה משתמשים אמיתיים לפני השקה.",
      "kind": "OWNER",
      "status": "⏳ גל 12 — לא התחיל",
-     "verified": "built",
      "stage": "12.O",
      "decision": "N2",
      "reuse": [],
@@ -31878,7 +31829,6 @@
      "licence": "israelconnect: AGPL-3.0-or-later (קוד) / CC BY 4.0 (נתונים וסכמות) — מותר ל-lumen-md (MIT) רק אחרי R12.1",
      "stage": "12.R",
      "status": "⏳ גל 12 — לא התחיל",
-     "verified": "built",
      "notes": "מוזגו לגל 12: R12.2→W12.E1, R12.4→W12.E2, R12.3→W12.E3, R12.5→W12.E8",
      "auditVerdict": {
       "at": "2026-11-16",
@@ -32571,7 +32521,6 @@
      "why": "Obsidian ו-VS Code נותנים Vim; אצלנו 0 משימות. משתמשי מקלדת כבדים בוחרים עורך לפי זה, ובשורות RTL אף מתחרה לא עושה את זה נכון.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.E",
      "dod": [
       "npx vitest run src/__tests__/vimMode.test.ts",
@@ -32609,7 +32558,6 @@
      "why": "Obsidian ממשיך ללטש רשימות בכל גרסה (1.14.0, 1.15.1). זה מה שמשתמש נוגע בו מאות פעמים ביום, ואין אצלנו סט שמוכיח שוויון.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.E",
      "dod": [
       "npx vitest run src/__tests__/smartListsGolden.test.ts",
@@ -32645,7 +32593,6 @@
      "why": "Obsidian 1.15.1 התחיל להתעלם מסימנים בכל תיבות הסינון. בעברית זה קריטי יותר: טקסט מנוקד (תנ״ך, שירה, ספריא) לא נמצא בחיפוש פשוט.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.E",
      "dod": [
       "npx vitest run src/__tests__/filterNormalize.test.ts"
@@ -32679,7 +32626,6 @@
      "why": "Obsidian 1.13 הוסיף חיפוש וניווט מקלדת להגדרות. יש לנו מאות הגדרות; בלי חיפוש הן לא קיימות למשתמש.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.E",
      "dod": [
       "npx vitest run src/__tests__/settingsSearch.test.ts",
@@ -32715,7 +32661,6 @@
      "why": "יכולת בסיסית בכל עורך קוד ובעורכי Markdown מתקדמים; בעברית בחירה מלבנית נשברת אם לא בודקים.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.E",
      "dod": [
       "npx vitest run src/__tests__/multiCursor.test.ts"
@@ -32751,7 +32696,6 @@
      "why": "Word נותן את הבחירה הזו כבר עשורים, ומשתמשי עברית מתפצלים בה. אף עורך Markdown לא נותן אותה — יתרון ברור וזול.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.H",
      "dod": [
       "npx vitest run src/__tests__/cursorMovementMode.test.ts",
@@ -32787,7 +32731,6 @@
      "why": "9.3 בודק רק את משטחי העורך. קוד חדש — כולל קוד שכותב מודל — מחזיר left/right לפאנלים ולדיאלוגים בלי שמישהו ישים לב.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.H",
      "dod": [
       "node scripts/check-logical-css.mjs",
@@ -32824,7 +32767,6 @@
      "why": "שיקוף עיוור של כל סמל הוא באג נפוץ (Evil Martians). Obsidian 1.14 שיקף את כל ה-workspace — אנחנו צריכים לשקף נכון, לא רק לשקף.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.H",
      "dod": [
       "npx vitest run src/__tests__/iconDirection.test.ts"
@@ -32858,7 +32800,6 @@
      "why": "זה התיקון הראשון שמומלץ לכל אפליקציה עם טקסט חופשי. אצלנו העורך מטופל, אבל המעטפת — שמות, לשוניות והתראות — לא נבדקה כשער.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.H",
      "dod": [
       "npx vitest run src/__tests__/userTextIsolation.test.ts",
@@ -32895,7 +32836,6 @@
      "why": "מסמכים משפטיים, אקדמיים ותורניים בעברית ממוספרים באותיות. Word עושה את זה; עורכי Markdown לא.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.H",
      "dod": [
       "npx vitest run src/__tests__/hebrewListNumbering.test.ts"
@@ -32930,7 +32870,6 @@
      "why": "הציון ״עברית ו-RTL״ נשען על טענה. המבחן המוקלט הופך אותה לראיה שאפשר לשתף ושמתחרים לא יכולים להתווכח איתה.",
      "kind": "MAC",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.H",
      "dod": [
       "npm run docs:audit"
@@ -32966,7 +32905,6 @@
      "why": "Obsidian Importer תומך ב-17 מקורות; ב-W1.26 ובגלים קודמים יש 7. המעבר מ-Roam ו-Craft הוא קהל PKM מובהק.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.F",
      "dod": [
       "npx vitest run src/__tests__/importRoam.test.ts src/__tests__/importCraft.test.ts src/__tests__/importTextbundle.test.ts",
@@ -33002,7 +32940,6 @@
      "why": "סוגר את יתר רשימת המקורות של Obsidian Importer, כך שאין מקור שהמתחרה מייבא ואנחנו לא.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.F",
      "dod": [
       "npx vitest run src/__tests__/importDayOne.test.ts src/__tests__/importJournal.test.ts src/__tests__/importAirtable.test.ts"
@@ -33037,7 +32974,6 @@
      "why": "PDF/UA הוא דרישה במגזר הציבורי באירופה ובאקדמיה; Quarto ו-Typst כבר מייצרים PDF מתויג. Word מייצר PDF מתויג בעברית — זה הרף.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.F",
      "dod": [
       "npx vitest run src/__tests__/taggedPdfExport.test.ts",
@@ -33074,7 +33010,6 @@
      "why": "חוק הנגישות האירופי (EAA) חל על ספרים אלקטרוניים מ-2025; ספר עברי שמיוצא מ-Lumen צריך לעבור את זה.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.F",
      "dod": [
       "npx vitest run src/__tests__/epubA11yMeta.test.ts",
@@ -33110,7 +33045,6 @@
      "why": "Pandoc הוא ה״מוביל״ שהכרטיס מציין. במקום לרדוף אחרי כל פורמט, משתמשים בכלי של המשתמש בלי לשאת את הרישיון.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.F",
      "dod": [
       "npx vitest run src/__tests__/pandocBridge.test.ts",
@@ -33146,7 +33080,6 @@
      "why": "Obsidian Sync שומר חודש או 12 חודשים עם שחזור המוני של קבצים שנמחקו. זה מה שמשתמשים זוכרים כשמשהו נמחק.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.S",
      "dod": [
       "npx vitest run src/__tests__/historyRetention.test.ts",
@@ -33182,7 +33115,6 @@
      "why": "כספת משותפת שמסנכרנת קוד תוספים היא הרצת קוד מרחוק. Obsidian 1.13–1.15.1 סגר את זה; גם אנחנו צריכים, לפני שיתוף משפחה וכיתה.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.S",
      "dod": [
       "npx vitest run src/__tests__/sharedVaultIsolation.test.ts"
@@ -33216,7 +33148,6 @@
      "why": "BeeKEM (ePrint 2026/1434) הוא הראשון שמבטיח עלות לוגריתמית בלי שרת אמין. לפני שיתוף משפחה וכיתה (W12.S4) צריך החלטה מנומקת, לא מימוש עצמי.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.S",
      "dod": [
       "npx vitest run src/__tests__/adrGroupKeys.test.ts"
@@ -33251,7 +33182,6 @@
      "why": "Obsidian Sync עבר שתי ביקורות (Cure53 10/2024, ‏Trail of Bits 12/2025) ופרסם את הדוחות המלאים. חבילה מוכנה מקצרת ימי ביקורת — והם היקרים.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.S",
      "dod": [
       "node scripts/sync-protocol/audit-pack.mjs --check"
@@ -33287,7 +33217,6 @@
      "why": "W11.O6 מזמין ביקורת; המשימה הזו מוסיפה את מי שמממן אותה לקוד פתוח. בלי ביקורת חיצונית ציון הסנכרון לא יעבור 7.",
      "kind": "OWNER",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.S",
      "dod": [
       "npm run owner:session -- status"
@@ -33321,7 +33250,6 @@
      "why": "Notion ו-Google Docs מראים מי נמצא איפה; אצלנו נוכחות קיימת רק בחדר שיתוף.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.S",
      "dod": [
       "npx vitest run src/__tests__/vaultPresence.test.ts"
@@ -33356,7 +33284,6 @@
      "why": "הכרטיס מציין שזה חסר: עד היום הסנכרון נבדק רק בין לקוחות בזיכרון.",
      "kind": "MAC",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.S",
      "dod": [
       "npm run drill:data-safety -- --report reports/drill/sync-3-devices.json"
@@ -33390,7 +33317,6 @@
      "why": "המפרט של 2026-07-28 הופך את אימות ה-iss ל-MUST ומוציא את DCR משימוש. לקוח שלא עושה את זה חשוף להחלפת שרת הרשאה.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.A",
      "dod": [
       "npx vitest run src/__tests__/mcpOauth2026.test.ts"
@@ -33425,7 +33351,6 @@
      "why": "Tasks עברו להרחבה רשמית ב-2026-07-28; בלי תמיכה, כלים ארוכים (תמלול, ייבוא) נתקעים.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.A",
      "dod": [
       "npx vitest run src/__tests__/mcpTasksCache.test.ts"
@@ -33459,7 +33384,6 @@
      "why": "לסוכנים של Notion יש זיכרון בענן. אצלנו הזיכרון הוא קובץ Markdown שהמשתמש רואה ושולט בו — המימוש המקומי של אותה יכולת.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.A",
      "dod": [
       "npx vitest run src/__tests__/agentMemoryFile.test.ts"
@@ -33494,7 +33418,6 @@
      "why": "eval מודד איכות במעבדה; שיעור קבלה מודד אם המשתמש באמת רוצה את ההצעות. זה מה שמבדיל ״AI מציע ואני מאשר״ מקישוט.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.A",
      "dod": [
       "npx vitest run src/__tests__/suggestionOutcomes.test.ts"
@@ -33529,7 +33452,6 @@
      "why": "שקיפות שאף מתחרה בענן לא נותן: המשתמש רואה איזה מודל מקומי כתב את ההצעה ועד כמה הוא טוב.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.A",
      "dod": [
       "npx vitest run src/__tests__/modelCardUi.test.ts"
@@ -33563,7 +33485,6 @@
      "why": "Apple Notes, ‏Standard Notes ו-1Password נועלים ומכסים את התוכן בתצוגת המשימות. בלי זה, ״פרטיות״ בטלפון היא חלקית.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.P",
      "dod": [
       "npx vitest run src/__tests__/appLock.test.ts"
@@ -33596,7 +33517,6 @@
      "why": "הכרטיס מציין חור: worker אחד מחוץ לבדיקה בגלל שם הקובץ. חור קטן, אבל ההבטחה היא 0.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.P",
      "dod": [
       "npm run privacy:ledger",
@@ -33632,7 +33552,6 @@
      "why": "local-first אמיתי (Ink & Switch) = ״הנתונים שלך שורדים גם אם האפליקציה נעלמת״. ההבטחה צריכה בדיקה, לא משפט ב-README.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.P",
      "dod": [
       "npx vitest run src/__tests__/exitTest.test.ts"
@@ -33666,7 +33585,6 @@
      "why": "תיקון 13 לחוק הגנת הפרטיות ו-GDPR נותנים זכות מחיקה; באפליקציה מקומית המשתמש צריך לראות ולמחוק בעצמו.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.P",
      "dod": [
       "npx vitest run src/__tests__/localDataInventory.test.ts"
@@ -33700,7 +33618,6 @@
      "why": "מנהלי סיסמאות עושים את זה; אצלנו יש מפתח שחזור (W11.S9) שמועתק.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.P",
      "dod": [
       "npx vitest run src/__tests__/clipboardHygiene.test.ts"
@@ -33733,7 +33650,6 @@
      "why": "הכרטיס מציין שה-e2e הזה לא רץ בדפדפן אמיתי; ה-spec כבר קיים.",
      "kind": "MAC",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.P",
      "dod": [
       "npx playwright test e2e/local-only-journey.spec.ts --project=webkit",
@@ -33850,7 +33766,6 @@
      "why": "OSPS Baseline הוא הרף של OpenSSF מ-2025; התג הוא אות אמון שעולה שעה.",
      "kind": "OWNER",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.X",
      "dod": [
       "npm run owner:session -- status"
@@ -33885,7 +33800,6 @@
      "why": "הופך את ״אנחנו מאובטחים״ לרשימה ציבורית שאפשר לבדוק, כמו שעושים פרויקטים של OpenSSF.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.X",
      "dod": [
       "npx vitest run src/__tests__/ospsBaseline.test.ts"
@@ -33919,7 +33833,6 @@
      "why": "Obsidian 1.13 הוסיף אישור והיתר ל-URI, ו-1.15.1 אישור לסוג קובץ לא מוכר והפך את ה-callbacks להגדרה לכל מכשיר. זה וקטור תקיפה מתועד.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.X",
      "dod": [
       "npx vitest run src/__tests__/uriConfirm.test.ts"
@@ -33953,7 +33866,6 @@
      "why": "רוב מתקפות npm של 2025–2026 רצו ב-postinstall. זו ההגנה הזולה ביותר, והיא חסרה בתוכנית.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.X",
      "dod": [
       "node scripts/supply/lockfile-check.mjs",
@@ -33991,7 +33903,6 @@
      "why": "עד דצמבר 2025 INP נמדד רק ב-Chromium; מאז Safari 26.2 הוא Baseline. משתמשי iPhone ו-Mac הם חלק גדול מהקהל.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.V",
      "dod": [
       "npm run perf:inp"
@@ -34025,7 +33936,6 @@
      "why": "אפליקציה מקומית פתוחה ימים. Obsidian ו-Electron סובלים מדליפות מתועדות; אצלנו אין מדד בכלל.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.V",
      "dod": [
       "node scripts/perf/leak.mjs --notes 500"
@@ -34060,7 +33970,6 @@
      "why": "Obsidian 1.15.1 שיפר בדיוק את זה (אלפי תוצאות, בלי ריצוד). זה ההבדל המורגש בכספת גדולה.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.V",
      "dod": [
       "npx vitest run src/__tests__/searchStreaming.test.ts",
@@ -34095,7 +34004,6 @@
      "why": "אפליקציה מקומית עם מודלים יכולה לרוקן סוללה; זה מה שמשתמשים כותבים בביקורות בחנות.",
      "kind": "MAC",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.V",
      "dod": [
       "npm run mobile:check"
@@ -34129,7 +34037,6 @@
      "why": "Obsidian מפרסם שיפורי ביצועים בכל גרסה; דף מגמה מקבלות חתומות הוא טענה שאפשר לבדוק.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.V",
      "dod": [
       "npx vitest run src/__tests__/perfPage.test.ts"
@@ -34163,7 +34070,6 @@
      "why": "Obsidian 1.15 מובייל האיץ בדיוק את זה; כספות רבות הן ריפו git.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.V",
      "dod": [
       "npx vitest run src/__tests__/hiddenFolderIndex.test.ts"
@@ -34197,7 +34103,6 @@
      "why": "לפי WebAIM, ‏JAWS+Chrome הוא הצירוף הנפוץ ביותר (24.7%) ו-JAWS הוא 40.5% מהמשתמשים — והוא לא בתוכנית בכלל.",
      "kind": "OWNER",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.Y",
      "dod": [
       "npm run owner:session -- status"
@@ -34231,7 +34136,6 @@
      "why": "W1.23 מזכיר forced-colors, אבל אין שער. משתמשי Windows עם ראייה ירודה תלויים בזה.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.Y",
      "dod": [
       "npx playwright test e2e/a11y-modes.spec.ts --project=chromium"
@@ -34265,7 +34169,6 @@
      "why": "שליטה קולית היא קבוצת המשתמשים שנשכחת בין קורא מסך למקלדת. EN 301 549 v4.1.1 מחייב את 2.5.3.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.Y",
      "dod": [
       "npx vitest run src/__tests__/labelInName.test.ts",
@@ -34301,7 +34204,6 @@
      "why": "v4.1.1 (פורסם 2.9.2026) עיבד מחדש את דרישות העדפות המשתמש; גם Apple Notes מכבד Dynamic Type.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.Y",
      "dod": [
       "npx vitest run src/__tests__/systemTextSize.test.ts",
@@ -34337,7 +34239,6 @@
      "why": "אלה הקריטריונים ש-WCAG 2.2 הוסיף ו-EN 301 549 v4.1.1 אימץ; axe לא תופס את רובם.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.Y",
      "dod": [
       "npx vitest run src/__tests__/wcag22New.test.ts",
@@ -34372,7 +34273,6 @@
      "why": "ACR שנכתב בבית מול Apple ו-Microsoft שמפרסמים בדיקות עם משתמשים.",
      "kind": "OWNER",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.Y",
      "dod": [
       "npm run owner:session -- status"
@@ -34406,7 +34306,6 @@
      "why": "כך Microsoft, ‏Google ו-Android בודקים i18n לפני תרגום. i18n:hardcoded תופס מחרוזות בקוד, לא חיתוכים.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.I",
      "dod": [
       "node scripts/i18n-pseudo.mjs --check",
@@ -34443,7 +34342,6 @@
      "why": "ערבית היא שפת RTL השנייה בישראל ויש לה 6 צורות רבים. בלי זה כל מונה בממשק שגוי.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.I",
      "dod": [
       "npm run i18n:check",
@@ -34479,7 +34377,6 @@
      "why": "Obsidian מיין לפי אותיות ותיקן מיון מספרים רק אחרי שנים של תלונות; בעברית יש גם ניקוד.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.I",
      "dod": [
       "npx vitest run src/__tests__/localeCollation.test.ts"
@@ -34513,7 +34410,6 @@
      "why": "פרויקטים עם 70+ שפות (Obsidian) מחזיקים מונחים אחידים בקהילה; אצלנו תרגום מכונה בלי מילון.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.I",
      "dod": [
       "npx vitest run src/__tests__/glossaryConsistency.test.ts",
@@ -34552,7 +34448,6 @@
      "why": "Notion השיק ערבית מלאה ב-26.1.2026 והוא היחיד מבין המובילים שתומך גם בעברית וגם בערבית. 600M+ כותבים RTL.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.I",
      "dod": [
       "npx vitest run src/__tests__/arabicLocale.test.ts",
@@ -34587,7 +34482,6 @@
      "why": "עברית היא שפת המוצר; טיוטת מכונה בעברית היא באג.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.I",
      "dod": [
       "npm run i18n:review"
@@ -34622,7 +34516,6 @@
      "why": "אחרי שעברית וערבית עובדות, פרסית זולה — וזה קהל של 110M שאין לו עורך Markdown טוב.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.I",
      "dod": [
       "npx vitest run src/__tests__/persianLocale.test.ts"
@@ -34656,7 +34549,6 @@
      "why": "Obsidian Help הוא המוביל; Diátaxis הוא המבנה שרוב פרויקטי התיעוד הבוגרים אימצו. מפריד ״איך עושים״ מ״מה זה״.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.D",
      "dod": [
       "npm run docs:audit"
@@ -34690,7 +34582,6 @@
      "why": "הכרטיס: ״מסמכים שמתארים רק מה שאומת״. זה הופך כנות לחוק בבנייה.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.D",
      "dod": [
       "npx vitest run src/__tests__/docsVerifiedBanner.test.ts",
@@ -34726,7 +34617,6 @@
      "why": "ל-Obsidian יש docs.obsidian.md עם API מלא; בלי זה אין מפתחי תוספים.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.D",
      "dod": [
       "npx vitest run src/__tests__/pluginApiDocs.test.ts"
@@ -34759,7 +34649,6 @@
      "why": "תיעוד שמפגר אחרי הקוד הוא תלונה מספר אחת בפורומים של Obsidian ו-Logseq.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.D",
      "dod": [
       "node scripts/docs-doctest.mjs"
@@ -34793,7 +34682,6 @@
      "why": "אתר תיעוד לא נגיש סותר את הצהרת הנגישות של המוצר.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.D",
      "dod": [
       "npm run lighthouse:a11y -- --site docs"
@@ -34826,7 +34714,6 @@
      "why": "Obsidian ו-Joplin מחזיקים רשימת בעיות ידועות; זה חוסך תמיכה ובונה אמון.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.D",
      "dod": [
       "npx vitest run src/__tests__/knownIssuesPage.test.ts"
@@ -34862,7 +34749,6 @@
      "why": "Chrome, ‏Firefox ו-Play Store מפרסמים בשלבים עם עצירה. בלי זה גרסה שבורה מגיעה לכולם בבת אחת.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.T",
      "dod": [
       "npx vitest run src/__tests__/stagedRollout.test.ts src/__tests__/bootSentinel.test.ts"
@@ -34896,7 +34782,6 @@
      "why": "ה-CRA דורש תקופת תמיכה מוצהרת; משתמשים צריכים לדעת על מה אפשר לסמוך.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.T",
      "dod": [
       "npx vitest run src/__tests__/supportPolicy.test.ts"
@@ -34930,7 +34815,6 @@
      "why": "SLSA 1.2 הוסיף מסלול מקור; ה-build track כבר בתוכנית (W7.22), המקור לא.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.T",
      "dod": [
       "npm run release:verify"
@@ -34963,7 +34847,6 @@
      "why": "Scorecard ו-OSPS בודקים שחרורים חתומים; חתימת התג סוגרת את השרשרת מהמקור לבינארי.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.T",
      "dod": [
       "npm run release:verify"
@@ -34997,7 +34880,6 @@
      "why": "Obsidian 1.15 מסמן כספת שלא נפתחה ומציע restricted mode. בלי זה תוסף אחד שבור נועל את המשתמש מחוץ לפתקים שלו.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.T",
      "dod": [
       "npx vitest run src/__tests__/safeModeBoot.test.ts"
@@ -35032,7 +34914,6 @@
      "why": "ב-API 36 (חובה מ-31.8.2026) Android מתעלם מנעילת כיוון במסכים ≥ 600dp ומבטל את היציאה ממסך מלא.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.M",
      "dod": [
       "npx vitest run src/__tests__/androidAdaptive.test.ts",
@@ -35067,7 +34948,6 @@
      "why": "Obsidian 1.14 iOS הוסיף Live Activity ללכידה; זה משאיר את הלכידה נגישה בזמן עריכה.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.M",
      "dod": [
       "npx vitest run src/__tests__/liveActivityBridge.test.ts"
@@ -35101,7 +34981,6 @@
      "why": "Apple Notes ו-Obsidian 1.15 נמצאים ב-Spotlight וב-Siri; זה ה״חיפוש הגלובלי״ בטלפון.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.M",
      "dod": [
       "npx vitest run src/__tests__/spotlightIndex.test.ts"
@@ -35136,7 +35015,6 @@
      "why": "Apple Notes סורק מסמכים מהיום הראשון; Obsidian Mobile מצלם בלבד (1.14).",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.M",
      "dod": [
       "npx vitest run src/__tests__/docScanner.test.ts"
@@ -35169,7 +35047,6 @@
      "why": "iPadOS 26 הפך את ה-iPad לחלונות; Apple Notes ו-Bear מנצלים את זה.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.M",
      "dod": [
       "npx vitest run src/__tests__/ipadKeyCommands.test.ts"
@@ -35203,7 +35080,6 @@
      "why": "Obsidian 1.15.1 Mobile בנה בדיוק את זה; זה המסך הראשון של כל משתמש מובייל.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.M",
      "dod": [
       "npx vitest run src/__tests__/vaultPicker.test.ts",
@@ -35241,7 +35117,6 @@
      "why": "Obsidian CLI (‏1.12.4, ‏27.2.2026) עם 100+ פקודות הוא עכשיו הרף, והוא מה שסוכני קוד משתמשים בו. ה-CLI שלנו (W2.3) עובד רק מול הדיסק.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.K",
      "dod": [
       "npx vitest run src/__tests__/cliIpc.test.ts"
@@ -35275,7 +35150,6 @@
      "why": "Obsidian הוא המוביל בציון 9.5 עם Quick Look; זה נותן לפתקים קיום מחוץ לאפליקציה.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.K",
      "dod": [
       "npm run tauri:build"
@@ -35308,7 +35182,6 @@
      "why": "Apple Notes נמצא ב-Spotlight מעצם היותו מערכתי; זה מה שמשתמשים מצפים מאפליקציה מקומית.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.K",
      "dod": [
       "npx vitest run src/__tests__/osSearchIndex.test.ts"
@@ -35341,7 +35214,6 @@
      "why": "Copilot+ PCs ו-Mac Apple Silicon: בלי ARM64 האפליקציה רצה באמולציה ואיטית.",
      "kind": "MAC",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.K",
      "dod": [
       "npm run tauri:build -- --target universal-apple-darwin"
@@ -35374,7 +35246,6 @@
      "why": "אפליקציה מקומית ש״מרגישה מקומית״; Bear ו-Drafts נותנים Services.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.K",
      "dod": [
       "npx vitest run src/__tests__/nativeMenuI18n.test.ts"
@@ -35409,7 +35280,6 @@
      "why": "Obsidian מוציא API משימוש בהדרגה (Array#contains ב-1.15.1). בלי חוזה יציב, אקוסיסטם לא נבנה.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.L",
      "dod": [
       "node scripts/plugin-api-report.mjs --check"
@@ -35444,7 +35314,6 @@
      "why": "VS Code מחייב engines.vscode; Obsidian מחייב minAppVersion. זה מה שמונע שבירה שקטה בעדכון.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.L",
      "dod": [
       "npx vitest run src/__tests__/pluginApiVersion.test.ts"
@@ -35478,7 +35347,6 @@
      "why": "4,000+ תוספים ו-120M הורדות הם החפיר של Obsidian. אם 30% מהם רצים אצלנו, הפער באקוסיסטם מצטמצם בסדר גודל.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.L",
      "dod": [
       "npx vitest run src/__tests__/obsidianShimSpike.test.ts"
@@ -35511,7 +35379,6 @@
      "why": "Obsidian הכריז על כלים לצוותים לניהול תוספים מותרים והפצה פרטית; מורים (W5.21) צריכים את זה.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.L",
      "dod": [
       "npx vitest run src/__tests__/pluginPolicy.test.ts"
@@ -35546,7 +35413,6 @@
      "why": "Obsidian מתכנן ״verified author labels״; VS Code הראה שתג מאומת בלי חתימה ניתן לזיוף (OX Security).",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.L",
      "dod": [
       "npm run registry:verify"
@@ -35579,7 +35445,6 @@
      "why": "Obsidian Community (12.5.2026) נותן למפתחים סריקה מקדימה על כל ענף; זה מוריד את זמן הביקורת שלנו לאפס.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.L",
      "dod": [
       "npm run plugins:review -- --ref fixtures/plugins/good"
@@ -35613,7 +35478,6 @@
      "why": "יש לנו עזרי קריאה, ניקוד לתצוגה, פוקוס ומכונת כתיבה — כל אחד בהגדרה משלו. פרופיל אחד לכל פתק הוא מה שהופך אותם למצבי קריאה.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.R",
      "dod": [
       "npx vitest run src/__tests__/readingProfile.test.ts"
@@ -35648,7 +35512,6 @@
      "why": "iA Writer ו-Hemingway הם הרף לכתיבה ממוקדת; יש לנו פוקוס ומכונת כתיבה, בלי עמעום משפט ובלי הדגשות קריאות.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.R",
      "dod": [
       "npx vitest run src/__tests__/focusSentence.test.ts src/__tests__/hemingwayOverlay.test.ts",
@@ -35684,7 +35547,6 @@
      "why": "Spritz ודומיו פופולריים, אבל המחקר (Schotter, ‏Rayner 2016) מראה ירידה בהבנה בלי חזרה — לכן חזרה מובנית.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.R",
      "dod": [
       "npx vitest run src/__tests__/rsvpReader.test.ts"
@@ -35718,7 +35580,6 @@
      "why": "משתמשים מבקשים את זה, הראיות חלשות. נותנים את האפשרות בכנות, ומודדים.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.R",
      "dod": [
       "npx vitest run src/__tests__/anchorEmphasis.test.ts"
@@ -35754,7 +35615,6 @@
      "why": "Immersive Reader של Microsoft הוא הרף לקריאה נגישה, אבל חלקי דיבר והברות לא זמינים בעברית. אצלנו הם מקומיים.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.R",
      "dod": [
       "npx vitest run src/__tests__/immersivePos.test.ts",
@@ -35791,7 +35651,6 @@
      "why": "Apple Books ו-Kindle נותנים שני עמודים; ל-PDF כבר יש (W12.R2), לפתקים ולספרים שלנו לא.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.R",
      "dod": [
       "npx playwright test e2e/book-spread.spec.ts --project=chromium"
@@ -35825,7 +35684,6 @@
      "why": "Typora, ‏VS Code ו-Obsidian מסנכרנים מקור ותצוגה; אצלנו צד לצד קיים רק לתרגום (W12.H6).",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.R",
      "dod": [
       "npx vitest run src/__tests__/scrollSync.test.ts",
@@ -35862,7 +35720,6 @@
      "why": "Word ו-Google Docs משווים מסמכים; ב-Markdown diff מבוסס שורות ושובר עברית.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.R",
      "dod": [
       "npx vitest run src/__tests__/wordDiffBidi.test.ts",
@@ -35898,7 +35755,6 @@
      "why": "Tufte CSS, ‏Quarto ו-Google Docs (תגובות בשוליים) הם הרף לקריאה עם הערות; אצלנו הערות שוליים בתחתית בלבד.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.R",
      "dod": [
       "npx vitest run src/__tests__/sidenotesLayout.test.ts",
@@ -35934,7 +35790,6 @@
      "why": "Word מראה עמודים לפני הדפסה; ב-Markdown רואים את התוצאה רק אחרי ייצוא.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.R",
      "dod": [
       "npx vitest run src/__tests__/pagedPreview.test.ts",
@@ -35972,7 +35827,6 @@
      "why": "אין אפליקציית פתקים שמציגה צורת דף. זה מבדל עברי מובהק, וספרייה מתירה כבר קיימת.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.R",
      "dod": [
       "npx vitest run src/__tests__/dafLayout.test.ts",
@@ -36009,7 +35863,6 @@
      "why": "ספריא ו-Kindle מציגים טקסט דו-לשוני; W12.H6 נותן צד לצד, לא בין השורות ולא גרסה רשמית.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.R",
      "dod": [
       "npx playwright test e2e/interlinear.spec.ts --project=chromium"
@@ -36048,7 +35901,6 @@
      "why": "כמו W12.V7 לתצוגות: מצבים רבים בלי שער אחד נשברים בשקט.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.R",
      "dod": [
       "npx playwright test e2e/reading-modes.spec.ts --project=chromium",
@@ -36083,7 +35935,6 @@
      "why": "מצבים ניסיוניים (RSVP, עוגן קריאה) צריכים ראיה ממשתמשים, לא דעה.",
      "kind": "OWNER",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.R",
      "dod": [
       "npm run owner:session -- status"
@@ -36119,7 +35970,6 @@
      "why": "Grammarly ו-Apple Writing Tools נותנים חוויית ״הצעה → קבל״ אחידה. אצלנו לכל סוכן ממשק משלו; זה מה שמאפשר 15 סוכנים בלי בלגן.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.W",
      "dod": [
       "npx vitest run src/__tests__/writingSuggestions.test.ts src/__tests__/writingNoNetwork.test.ts"
@@ -36155,7 +36005,6 @@
      "why": "בלי מדידה, ״סוכן כתיבה״ הוא פרומפט. הדרישה היא איכות מדודה לכל סוכן, בעברית ובאנגלית.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.W",
      "dod": [
       "npm run eval:card -- --suite writing --check"
@@ -36190,7 +36039,6 @@
      "why": "Hemingway ו-ProWritingAid נותנים בדיוק את זה — באנגלית ובענן. בעברית אין כלי כזה בכלל.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.W",
      "dod": [
       "npx vitest run src/__tests__/styleCoach.test.ts",
@@ -36227,7 +36075,6 @@
      "why": "Grammarly Paraphraser ו-Apple Writing Tools משנים טון בענן או במכשיר; בעברית משלב הוא חלק מהדקדוק, לא רק מהסגנון.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.W",
      "dod": [
       "npx vitest run src/__tests__/toneShifter.test.ts",
@@ -36263,7 +36110,6 @@
      "why": "קיצור הוא הפעולה הנפוצה ביותר ב-Writing Tools; הסכנה היא המצאה — לכן הבדיקה היא חלק מהסוכן.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.W",
      "dod": [
       "npx vitest run src/__tests__/concision.test.ts",
@@ -36300,7 +36146,6 @@
      "why": "ProWritingAid בודק עקביות במסמך אחד; כספת שלמה עם גרף ישויות היא מה שאף אחד לא נותן.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.W",
      "dod": [
       "npx vitest run src/__tests__/vaultConsistency.test.ts",
@@ -36336,7 +36181,6 @@
      "why": "Grammarly Proofreader מדבר על ״structure and flow״; אצלנו יש outliner שבונה, לא מבקר.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.W",
      "dod": [
       "npx vitest run src/__tests__/structureCritic.test.ts"
@@ -36371,7 +36215,6 @@
      "why": "Grammarly Expert Review ו-Reader Reactions עושים את זה בענן; לסטודנט ולעיתונאי זה הערך הגבוה ביותר.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.W",
      "dod": [
       "npx vitest run src/__tests__/argumentChecker.test.ts"
@@ -36405,7 +36248,6 @@
      "why": "אין מדד קריאות עברי מקובל — המחקר מ-2025 כותב במפורש ש״נדרש מדד ייחודי לעברית״. מי שבונה אותו ראשון הוא הרף.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.W",
      "dod": [
       "npx vitest run src/__tests__/hebrewReadability.test.ts"
@@ -36440,7 +36282,6 @@
      "why": "Harper (Automattic) נותן דקדוק אנגלי מקומי במילישניות ובפחות מ-1/50 מהזיכרון של LanguageTool — בדיוק התשובה ל-״בלי כלים חיצוניים״.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.W",
      "dod": [
       "npx vitest run src/__tests__/harperGrammar.test.ts"
@@ -36473,7 +36314,6 @@
      "why": "ProWritingAid ו-Hemingway מסמנים חזרות; בעברית בלי למטיזציה ״ספר״ ו״בספר״ נראות שונות.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.W",
      "dod": [
       "npx vitest run src/__tests__/repetitionDetector.test.ts"
@@ -36508,7 +36348,6 @@
      "why": "Notion AI ו-Apple Writing Tools מסכמים; אצלנו כל משפט בתקציר מוכיח את עצמו.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.W",
      "dod": [
       "npx vitest run src/__tests__/abstractWriter.test.ts",
@@ -36544,7 +36383,6 @@
      "why": "לעבודה משותפת ולהיסטוריה: מה השתנה ולמה זה חשוב, בלי לקרוא diff.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.W",
      "dod": [
       "npx vitest run src/__tests__/explainChange.test.ts"
@@ -36579,7 +36417,6 @@
      "why": "Ulysses ו-Scrivener נותנים יעדים; יעד קריאות וטון הוא מה שמבדיל.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.W",
      "dod": [
       "npx vitest run src/__tests__/writingGoals.test.ts"
@@ -36613,7 +36450,6 @@
      "why": "כותבים אקדמיים ומשפטיים בעברית נדרשים למונחים עבריים; אין כלי שעושה את זה בעורך.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.W",
      "dod": [
       "npx vitest run src/__tests__/loanwordAlternatives.test.ts"
@@ -36648,7 +36484,6 @@
      "why": "״בלי כלים חיצוניים״ = מודל מקומי עם רישיון שמותר להפיץ, נבחר לפי מדידה ולא לפי שם.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.W",
      "dod": [
       "npm run licenses",
@@ -36692,7 +36527,6 @@
      "why": "המספרים האמיתיים נמדדים רק ב-Mac (כלל הבעלים).",
      "kind": "MAC",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.W",
      "dod": [
       "npm run eval:card -- --suite writing --check"
@@ -36725,7 +36559,6 @@
      "why": "סט שכתב מי שכתב את הכללים מודד את עצמו (W10.B8). מתייגים חיצוניים הם התנאי ל-✅.",
      "kind": "OWNER",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.W",
      "dod": [
       "npm run heldout -- --check writing"
@@ -36760,7 +36593,6 @@
      "why": "W1.10 מכוון ל-10k. כספות אמיתיות ו-Obsidian מגיעים ל-100k; ‏cosmos.gl ‏v3 (6/2026) מדבר על מאות אלפי צמתים ב-WebGL2.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.G",
      "dod": [
       "npx vitest run src/__tests__/graphEngineSwitch.test.ts",
@@ -36796,7 +36628,6 @@
      "why": "ספריות גרף מציירות טקסט ב-canvas בלי bidi; תוויות עבריות עם מספרים מתהפכות. אף מתחרה לא בודק את זה.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.G",
      "dod": [
       "npx vitest run src/__tests__/graphBidiLabels.test.ts"
@@ -36831,7 +36662,6 @@
      "why": "Obsidian Bases ו-Notion מציגים מפה מאריחים בענן; מפה מקומית לחלוטין מקובץ אחד היא local-first אמיתי.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.G",
      "dod": [
       "npx vitest run src/__tests__/offlineMap.test.ts",
@@ -36867,7 +36697,6 @@
      "why": "Neo4j Bloom ו-Kumu נותנים ״הראה לי את הקשר בין A ל-B״ — הכלי המרכזי בתחקיר, וחסר בגרף שלנו.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.G",
      "dod": [
       "npx vitest run src/__tests__/pathFinder.test.ts"
@@ -36901,7 +36730,6 @@
      "why": "Aeon Timeline ו-Notion timeline נותנים טווחים ותלויות; R12.7 נותן נקודות.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.G",
      "dod": [
       "npx vitest run src/__tests__/entityGantt.test.ts"
@@ -36935,7 +36763,6 @@
      "why": "Tana ו-Capacities מציגים אובייקט כרטיס; וויקיפדיה הפכה את ה-infobox לסטנדרט.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.G",
      "dod": [
       "npx vitest run src/__tests__/entityInfobox.test.ts"
@@ -36969,7 +36796,6 @@
      "why": "גנאלוגיה היא שימוש חזק בישראל (MyHeritage); אף אפליקציית פתקים לא מציגה עץ משפחה מהישויות.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.G",
      "dod": [
       "npx vitest run src/__tests__/familyTree.test.ts"
@@ -37003,7 +36829,6 @@
      "why": "InfraNodus בנה מוצר שלם על ״פערים מבניים״ בטקסט; אצלנו יש Louvain/Leiden בלי תצוגה ובלי תובנה.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.G",
      "dod": [
       "npx vitest run src/__tests__/clusterGaps.test.ts"
@@ -37037,7 +36862,6 @@
      "why": "Neo4j Bloom ו-Kumu בנויים על תצוגות שמורות; בלי זה כל פתיחה מתחילה מאפס.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.G",
      "dod": [
       "npx vitest run src/__tests__/graphPerspectives.test.ts"
@@ -37070,7 +36894,6 @@
      "why": "מבוקש בקהילת Obsidian (תוסף 3D Graph); אופציונלי ולא ברירת מחדל.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.G",
      "dod": [
       "npx vitest run src/__tests__/graph3d.test.ts"
@@ -37105,7 +36928,6 @@
      "why": "גרף הוא התצוגה הכי לא נגישה בכל אפליקציית PKM. טבלה חלופית קיימת (W12.E7); מסלול ניווט וסיכום — לא.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.G",
      "dod": [
       "npx vitest run src/__tests__/graphTextAlt.test.ts",
@@ -37140,7 +36962,6 @@
      "why": "W12.E8 מייצא נתונים; משתמשים צריכים גם תמונה למצגת ו-GEXF ל-Gephi.",
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.G",
      "dod": [
       "npx vitest run src/__tests__/graphExportImage.test.ts"
@@ -37175,7 +36996,6 @@
      "why": "המספרים האמיתיים נמדדים רק ב-Mac (כלל הבעלים).",
      "kind": "MAC",
      "status": "⏳ גל 13 — לא התחיל",
-     "verified": "built",
      "stage": "13.G",
      "dod": [
       "npm run perf:vault100k -- --graph"
