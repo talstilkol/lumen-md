@@ -110,13 +110,20 @@ async function snapshot(page: Page): Promise<string> {
 /** The snapshot once two reads a second apart agree (the panel's scan may still be writing). */
 async function settled(page: Page): Promise<string> {
   let last = await snapshot(page);
-  for (let i = 0; i < 20; i++) {
-    await page.waitForTimeout(1000);
-    const now = await snapshot(page);
-    if (now === last) return now;
-    last = now;
-  }
-  throw new Error("the entity files kept changing for 20 s after the review panel opened");
+  let stable = "";
+  await expect
+    .poll(
+      async () => {
+        const now = await snapshot(page);
+        const same = now === last;
+        last = now;
+        if (same) stable = now;
+        return same;
+      },
+      { message: "the entity files kept changing for 20 s after the review panel opened", timeout: 20_000, intervals: [1000] },
+    )
+    .toBe(true);
+  return stable;
 }
 
 type Violation = { id: string; impact: string | null; nodes: Array<{ target: string[] }> };
