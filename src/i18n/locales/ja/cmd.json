@@ -551,6 +551,8 @@
   "cmd.view.calendar.hint": "ファイルツリーの下に表示するデイリーノートの月間カレンダー",
   "cmd.view.canvas": "🎨 キャンバス / ホワイトボード",
   "cmd.view.canvas.hint": "ビジュアルノート用の無限キャンバス",
+  "cmd.view.daf": "📜 Page of the Talmud (daf)",
+  "cmd.view.daf.hint": "The note's main text with its commentaries around it, as on a printed daf",
   "cmd.view.findReplace": "検索と置換",
   "cmd.view.grammarCheck.hint": "文法・文体・誤字の問題に下線を引きます。セルフホストするには VITE_LANGUAGETOOL_URL を設定してください。",
   "cmd.view.grammarCheck.off": "無効にする grammar check",

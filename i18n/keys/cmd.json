@@ -2788,6 +2788,16 @@
       "vars": []
     },
     {
+      "key": "cmd.view.daf",
+      "en": "📜 Page of the Talmud (daf)",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.daf.hint",
+      "en": "The note's main text with its commentaries around it, as on a printed daf",
+      "vars": []
+    },
+    {
       "key": "cmd.view.findReplace",
       "en": "Find & Replace",
       "vars": []

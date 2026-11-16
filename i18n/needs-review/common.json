@@ -611,6 +611,158 @@
     "ru": "l899cf",
     "zh-CN": "l899cf"
   },
+  "daf.close": {
+    "ar": "1l0xxoj",
+    "de": "1l0xxoj",
+    "fr": "1l0xxoj",
+    "ja": "1l0xxoj",
+    "ru": "1l0xxoj",
+    "zh-CN": "1l0xxoj"
+  },
+  "daf.empty": {
+    "ar": "1wqnx17",
+    "de": "1wqnx17",
+    "fr": "1wqnx17",
+    "ja": "1wqnx17",
+    "ru": "1wqnx17",
+    "zh-CN": "1wqnx17"
+  },
+  "daf.fromNote": {
+    "ar": "1gjjjo5",
+    "de": "1gjjjo5",
+    "fr": "1gjjjo5",
+    "ja": "1gjjjo5",
+    "ru": "1gjjjo5",
+    "zh-CN": "1gjjjo5"
+  },
+  "daf.inner": {
+    "ar": "s8hsl8",
+    "de": "s8hsl8",
+    "fr": "s8hsl8",
+    "ja": "s8hsl8",
+    "ru": "s8hsl8",
+    "zh-CN": "s8hsl8"
+  },
+  "daf.main": {
+    "ar": "tozwfz",
+    "de": "tozwfz",
+    "fr": "tozwfz",
+    "ja": "tozwfz",
+    "ru": "tozwfz",
+    "zh-CN": "tozwfz"
+  },
+  "daf.mode.linear": {
+    "ar": "1y54q1s",
+    "de": "1y54q1s",
+    "fr": "1y54q1s",
+    "ja": "1y54q1s",
+    "ru": "1y54q1s",
+    "zh-CN": "1y54q1s"
+  },
+  "daf.mode.page": {
+    "ar": "1sfsa6u",
+    "de": "1sfsa6u",
+    "fr": "1sfsa6u",
+    "ja": "1sfsa6u",
+    "ru": "1sfsa6u",
+    "zh-CN": "1sfsa6u"
+  },
+  "daf.myNotes": {
+    "ar": "1izbw9p",
+    "de": "1izbw9p",
+    "fr": "1izbw9p",
+    "ja": "1izbw9p",
+    "ru": "1izbw9p",
+    "zh-CN": "1izbw9p"
+  },
+  "daf.narrow": {
+    "ar": "1j08c4b",
+    "de": "1j08c4b",
+    "fr": "1j08c4b",
+    "ja": "1j08c4b",
+    "ru": "1j08c4b",
+    "zh-CN": "1j08c4b"
+  },
+  "daf.outer": {
+    "ar": "lqvygl",
+    "de": "lqvygl",
+    "fr": "lqvygl",
+    "ja": "lqvygl",
+    "ru": "lqvygl",
+    "zh-CN": "lqvygl"
+  },
+  "daf.print": {
+    "ar": "8dihl0",
+    "de": "8dihl0",
+    "fr": "8dihl0",
+    "ja": "8dihl0",
+    "ru": "8dihl0",
+    "zh-CN": "8dihl0"
+  },
+  "daf.rashi": {
+    "ar": "sltf5e",
+    "de": "sltf5e",
+    "fr": "sltf5e",
+    "ja": "sltf5e",
+    "ru": "sltf5e",
+    "zh-CN": "sltf5e"
+  },
+  "daf.side": {
+    "ar": "1mz1db6",
+    "de": "1mz1db6",
+    "fr": "1mz1db6",
+    "ja": "1mz1db6",
+    "ru": "1mz1db6",
+    "zh-CN": "1mz1db6"
+  },
+  "daf.side.a": {
+    "ar": "9vfiuq",
+    "de": "9vfiuq",
+    "fr": "9vfiuq",
+    "ja": "9vfiuq",
+    "ru": "9vfiuq",
+    "zh-CN": "9vfiuq"
+  },
+  "daf.side.b": {
+    "ar": "1qecyws",
+    "de": "1qecyws",
+    "fr": "1qecyws",
+    "ja": "1qecyws",
+    "ru": "1qecyws",
+    "zh-CN": "1qecyws"
+  },
+  "daf.title": {
+    "ar": "1auqy3h",
+    "de": "1auqy3h",
+    "fr": "1auqy3h",
+    "ja": "1auqy3h",
+    "ru": "1auqy3h",
+    "zh-CN": "1auqy3h"
+  },
+  "daf.toolbar": {
+    "ar": "n2l51d",
+    "de": "n2l51d",
+    "fr": "n2l51d",
+    "ja": "n2l51d",
+    "ru": "n2l51d",
+    "zh-CN": "n2l51d"
+  },
+  "daf.tosafot": {
+    "ar": "193l2yt",
+    "de": "193l2yt",
+    "fr": "193l2yt",
+    "ja": "193l2yt",
+    "ru": "193l2yt",
+    "zh-CN": "193l2yt"
+  },
+  "daf.view": {
+    "ar": "q5w460",
+    "de": "q5w460",
+    "fr": "q5w460",
+    "ja": "q5w460",
+    "ru": "q5w460",
+    "zh-CN": "q5w460"
+  },
   "daily.calendar.allDay": {
     "ar": "dqozwm",
     "de": "dqozwm",

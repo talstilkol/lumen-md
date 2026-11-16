@@ -551,6 +551,8 @@
   "cmd.view.calendar.hint": "Month calendar of daily notes under the file tree",
   "cmd.view.canvas": "🎨 Canvas / Whiteboard",
   "cmd.view.canvas.hint": "Infinite canvas for visual notes",
+  "cmd.view.daf": "📜 Page of the Talmud (daf)",
+  "cmd.view.daf.hint": "The note's main text with its commentaries around it, as on a printed daf",
   "cmd.view.findReplace": "Find & Replace",
   "cmd.view.grammarCheck.hint": "Underlines grammar / style / typo issues. Set VITE_LANGUAGETOOL_URL to self-host.",
   "cmd.view.grammarCheck.off": "Disable grammar check",
