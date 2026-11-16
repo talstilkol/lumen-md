@@ -53,6 +53,7 @@
     "e2e:flake": "node scripts/e2e-flake.mjs",
     "perf:inp": "playwright test --project=inp && node scripts/perf/inp-gate.mjs",
     "perf:inp:gate": "node scripts/perf/inp-gate.mjs",
+    "perf:wysiwyg-ceiling": "playwright test --project=calibrate && node scripts/perf/wysiwyg-ceiling.mjs --check",
     "nightly:full": "node scripts/nightly/plan.mjs --run",
     "check:vercel-ignore": "node scripts/check-vercel-ignore.mjs",
     "gate:estimate": "node scripts/gate-estimate.mjs",
