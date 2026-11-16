@@ -35,12 +35,20 @@ the worker is stopped and the run continues. Failing inputs are saved to
 (8–14 KB) that took 0.5–2.8 s to render: thousands of `[` or `]` in one
 paragraph, or lists nested 231 levels deep, make the parser's work grow with
 the square of the text. A note like that would freeze the editor. Now a
-block (the text between blank lines) with more than 256 brackets or more
-than 32 nesting levels is shown as raw text, in a code block, exactly as
-written (`src/renderer/boundMarkdown.ts`). Every real note stays far inside
-both bounds and renders as before. The live preview also shows a block as
-raw text once its render took more than 200 ms. The seven inputs are pinned
-in `src/__tests__/markdownSlowInputs.test.ts` (each under 50 ms).
+block (the text between blank lines) with more than 1,024 brackets in one
+paragraph or more than 32 nesting levels is shown as raw text, in a code
+block, exactly as written (`src/renderer/boundMarkdown.ts`). Every real note
+stays far inside the bounds and renders as before. The live preview also shows
+a block as raw text once its render took more than 200 ms. The seven inputs
+are pinned in `src/__tests__/markdownSlowInputs.test.ts` (each under 50 ms).
+
+A later run with the real parser packages (plan W10.D21) found four more
+kinds, and three more bounds cover them: more than 1,024 `*`, `_` or `~` in
+one paragraph; raw HTML left open more than 256 levels deep over the whole
+note (deeper overflowed the stack); and lone UTF-16 surrogates, which become
+U+FFFD (one inside an HTML comment made the HTML parser throw). The nesting
+count is now a linear scan: as a regular expression it could backtrack for
+minutes. Those inputs are pinned in `src/__tests__/markdownFuzzBounds.test.ts`.
 
 ## 2. The build is reproducible
 
