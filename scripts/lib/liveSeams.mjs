@@ -38,7 +38,8 @@ export function productionSources(srcDir) {
 
 /** Comments out, strings kept (a name in a string is not a call, but rare enough). */
 function stripComments(text) {
-  return text.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, " ")).replace(/(^|[^:"'`\\])\/\/.*$/gm, "$1");
+  // A block comment keeps only its line breaks, so line numbers stay right.
+  return text.replace(/\/\*[\s\S]*?\*\//g, (m) => "\n".repeat(m.split("\n").length - 1)).replace(/(^|[^:"'`\\])\/\/.*$/gm, "$1");
 }
 
 const DEF = /\bexport\s+(?:async\s+)?(?:function\s*\*?\s*|const\s+|let\s+)((?:register|set)[A-Z]\w*)\b/g;
@@ -50,23 +51,34 @@ export function deadSeams(srcDir) {
   for (const { file, text } of files) {
     for (const m of text.matchAll(DEF)) seams.push({ name: m[1], file, line: text.slice(0, m.index).split("\n").length });
   }
-  const dead = [];
-  for (const s of seams) {
-    const word = new RegExp(`\\b${s.name}\\b`);
-    let used = false;
-    for (const { file, text } of files) {
-      const lines = text.split("\n");
-      for (let i = 0; i < lines.length && !used; i++) {
-        const l = lines[i];
-        if (!word.test(l)) continue;
-        if (file === s.file && i + 1 === s.line) continue; // its definition
-        if (/^\s*export\s*(type\s*)?\{[^}]*\}\s*from\b/.test(l)) continue; // a re-export
-        used = true;
+  // One pass over the tree (W11.I1: the gate stays well under 5 s on a loaded
+  // machine): every line that names a seam and is neither a re-export nor the
+  // seam's own definition marks that name as used. Before, each seam rescanned
+  // every line of every file (seams × lines regex tests, ≈ 2 s idle, 7.5 s
+  // under load).
+  const wanted = new Set(seams.map((s) => s.name));
+  const defAt = new Set(seams.map((s) => `${s.name}\0${s.file}\0${s.line}`));
+  const used = new Set();
+  const IDENT = /\b(?:register|set)[A-Z]\w*/g;
+  const REEXPORT = /^\s*export\s*(type\s*)?\{[^}]*\}\s*from\b/;
+  for (const { file, text } of files) {
+    const lines = text.split("\n");
+    for (let i = 0; i < lines.length; i++) {
+      const l = lines[i];
+      if (!l.includes("set") && !l.includes("register")) continue;
+      const hits = l.match(IDENT);
+      if (!hits) continue;
+      let reexport;
+      for (const name of hits) {
+        if (!wanted.has(name) || used.has(name)) continue;
+        if (defAt.has(`${name}\0${file}\0${i + 1}`)) continue; // its definition
+        reexport ??= REEXPORT.test(l);
+        if (reexport) continue; // a re-export
+        used.add(name);
       }
-      if (used) break;
     }
-    if (!used) dead.push(s);
   }
+  const dead = seams.filter((s) => !used.has(s.name));
   return { seams, dead };
 }
 

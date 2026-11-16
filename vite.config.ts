@@ -344,6 +344,11 @@ export default defineConfig({
     // window.__lumenTest for Playwright (src/testing/e2eHooks.ts): a literal,
     // so a build without VITE_E2E=1 drops the hook and its chunk entirely.
     __LUMEN_E2E__: JSON.stringify(process.env.VITE_E2E === "1"),
+    // window.__lumen.agentReview (src/agents/reviewBridge.ts, plan W1.31): a
+    // literal too. Vite leaves an unset VITE_* as `({}).VITE_…`, which the
+    // minifier does not fold, so the surface stayed in a normal production
+    // build; with the literal false it is dropped (check:test-surface).
+    __LUMEN_TEST_SURFACE__: JSON.stringify(process.env.VITE_LUMEN_TEST_SURFACE === "1"),
   },
   // Worker bundles get only these plugins (plus Vite's own).
   worker: { plugins: () => [dictionaryEn, htmlIsomorphicInWorkers] },

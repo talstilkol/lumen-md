@@ -106,6 +106,26 @@ describe("live seams", () => {
     expect(readFileSync(join(process.cwd(), "scripts/lib/ciLocal.mjs"), "utf8")).toMatch(/id: "hygiene"[^\n]*"run", "-s", "hygiene"/);
   });
 
+  it("the scan is one pass over the tree, not one per seam: 600 seams × 25k lines stay far under the budget", () => {
+    // W11.I1: rescanning every line for every seam took 7.5 s on a loaded
+    // machine; this tree (≈ 1,450 ms with that loop, ≈ 20 ms in one pass)
+    // keeps the gate's cost linear in the size of src/.
+    const files: Record<string, string> = {};
+    for (let f = 0; f < 300; f++) {
+      const lines = [`export function setSeam${f}x0() {}`, `export function setSeam${f}x1() {}`];
+      for (let l = 0; l < 80; l++) lines.push(`const v${l} = compute(${l}); // filler ${l}`);
+      if (f % 2) lines.push(`setSeam${f - 1}x0();`);
+      files[`m/f${f}.ts`] = lines.join("\n");
+    }
+    const dir = src(files);
+    const t0 = performance.now();
+    const { seams, dead } = deadSeams(dir);
+    const ms = performance.now() - t0;
+    expect(seams).toHaveLength(600);
+    expect(dead).toHaveLength(450);
+    expect(ms).toBeLessThan(500);
+  });
+
   it("the gate exits 0 on this tree in under 5 seconds", () => {
     const t0 = Date.now();
     const r = spawnSync(process.execPath, [join(process.cwd(), "scripts/check-live-seams.mjs")], { encoding: "utf8" });
