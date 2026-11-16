@@ -150,9 +150,10 @@ describe("W12.E10 airplane mode", () => {
   it("no command and no dialog", async () => {
     const ctx = { liveDoc: () => ({ workspaceName: PATH, content: NOTE }) } as unknown as CommandContext;
     // entities.graph (W12.E7, #928) is a local view: it stays in airplane mode; only the Wikidata link goes.
-    expect(buildEntityCommands(ctx).map((c) => c.id)).toEqual(["entities.review", "entities.graph", "entities.wikidata"]);
+    expect(buildEntityCommands(ctx).map((c) => c.id)).toEqual(["entities.review", "entities.graph", "entities.contradictions", "entities.wikidata"]);
     __setAirplaneFlag(true);
-    expect(buildEntityCommands(ctx).map((c) => c.id)).toEqual(["entities.review", "entities.graph"]);
+    // The contradiction finder (R12.10) reads the vault on this device: it stays too.
+    expect(buildEntityCommands(ctx).map((c) => c.id)).toEqual(["entities.review", "entities.graph", "entities.contradictions"]);
     render(<WikidataHost />);
     await act(async () => {
       window.dispatchEvent(new CustomEvent(WIKIDATA_EVENT, { detail: { name: "x", path: PATH } }));

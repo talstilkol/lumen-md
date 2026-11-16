@@ -269,6 +269,10 @@
    "origin": "real",
    "why": "Jupyter's own documentation notebooks, copied unchanged, BSD-3-Clause (README)"
   },
+  "israeli-import": {
+   "origin": "synthetic",
+   "why": "written by hand for lane T8 in the shapes Word, Google Docs, Notion, Apple Notes and WhatsApp export; no third-party text (its README); real exports remain W10.O9"
+  },
   "json-canvas": {
    "origin": "real",
    "why": "the JSON Canvas sample, vendored with its upstream licence"
@@ -288,6 +292,10 @@
   "math-he": {
    "origin": "synthetic",
    "why": "written for the tests"
+  },
+  "mcp": {
+   "origin": "synthetic",
+   "why": "stand-in MCP servers written for the stdio and reference-server tests (W10.C1, #728 via #978); no recorded traffic"
   },
   "md-spec": {
    "origin": "real",
@@ -392,6 +400,10 @@
   "tldrawCanvases.ts": {
    "origin": "synthetic",
    "why": "written for the tests"
+  },
+  "yiddish-words.txt": {
+   "origin": "synthetic",
+   "why": "a YIVO-spelling word list written for Lumen's transliteration round trip (W7.9, #576 via #981), CC0 (its header)"
   },
   "zotero-web": {
    "origin": "synthetic",

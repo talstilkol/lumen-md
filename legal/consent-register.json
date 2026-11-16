@@ -814,6 +814,54 @@
         "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
       },
       "status": "meets"
+    },
+    {
+      "id": "crossref-doi",
+      "routes": [
+        "CrossRef DOI lookup: the DOI you asked for only"
+      ],
+      "category": "research",
+      "purpose": "Fill a reference from the DOI the user typed (W10.E38, plan 6.13)",
+      "recipients": [
+        "Crossref (api.crossref.org)"
+      ],
+      "dataSent": "The DOI the user asked for, nothing from notes",
+      "lawfulBasis": "consent",
+      "needsConsent": true,
+      "ppa2026": {
+        "activeOptIn": "The user runs \"Cite from a DOI\" and approves the request in the dialog that names CrossRef; nothing is sent before.",
+        "preTicked": false,
+        "namedRecipients": [
+          "Crossref (api.crossref.org)"
+        ],
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy), except a single request the user explicitly agrees to at that moment, which the ledger records as consented (Wikidata is refused even then).",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "mcp-servers",
+      "routes": [
+        "MCP server "
+      ],
+      "category": "network",
+      "purpose": "List the tools of a remote MCP server the user added and turned on (W10.C2)",
+      "recipients": [
+        "The MCP server the user added, named in Settings → MCP servers"
+      ],
+      "dataSent": "A request for the server's tool list; tool calls are the agent-tools route",
+      "lawfulBasis": "consent",
+      "needsConsent": true,
+      "ppa2026": {
+        "activeOptIn": "The user adds a server, turns it on and presses \"Show tools\" or runs an agent with it; every server is off when added.",
+        "preTicked": false,
+        "namedRecipients": [
+          "The MCP server the user added, named in Settings → MCP servers"
+        ],
+        "withdrawal": "Turn the server off or remove it in Settings → MCP servers; the \"Local only\" AI policy blocks every remote server, and airplane mode closes running server programs that reach the network.",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
     }
   ]
 }

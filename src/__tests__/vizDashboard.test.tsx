@@ -42,7 +42,7 @@ describe("layout: dashboard (W12.V6)", () => {
   it("the preview uses it", () => {
     const src = readFileSync("src/renderer/Preview.tsx", "utf8");
     expect(src).toContain("dashboardProps(dashboardLayout(frontmatter))");
-    expect(src).toContain("<div {...layout}>");
+    expect(src).toMatch(/<div \{\.\.\.layout\}[ >]/);
   });
   it("query, base and tasks blocks route their live refresh through the visibility gate", () => {
     for (const f of ["src/views/QueryBlock.tsx", "src/views/bases/BasesBlock.tsx", "src/plugins/TasksBlock.tsx"]) {

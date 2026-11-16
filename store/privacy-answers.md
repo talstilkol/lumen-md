@@ -45,6 +45,7 @@ Both stores ask about data *the developer* collects. These go only where the use
 | Canvas fonts, icons and translations | Nothing of yours (static files) | Opening a canvas |
 | Error reports (Sentry / GlitchTip) | The error's class name and where in the code it happened; no error message, note text, titles, paths or page address | Turning error reports on in Settings (off by default), in a build made with VITE_SENTRY_DSN; refused under local-only |
 | Plugins' network requests | Whatever the plugin's request carries, to the destination the plugin names | Installing a plugin and granting it network access; refused under local-only |
+| Outside MCP servers you add | A request for the list of that server's tools; what a tool call sends is listed as the agent's tool request | Adding and enabling a remote MCP server in Settings → MCP servers, then "Show tools" or an agent run that uses it; not in airplane mode, and refused under local-only |
 | Other requests in audit mode | Whatever that request carries; listed so an audit can compare | Audit mode only (lumen.privacy.audit) |
 | Encrypted sync (WebDAV, S3, Dropbox, Google Drive) | Ciphertext only, to the storage you chose | Connecting a sync provider |
 | Live collaboration | End-to-end encrypted edits, to your collaborators (and a collab server, if configured) | Starting or joining a session |

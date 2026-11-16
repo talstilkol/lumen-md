@@ -33,7 +33,7 @@ Source: https://github.com/talstilkol/lumen-md
 
 [^rtl-per-line]: Direction is set per line, from its first strong letter. Receipt: `docs/src/content/docs/editor/hebrew.md`.
 [^hebrew-search]: Search folds niqqud, final letters and the prefix letters. Receipt: `docs/src/content/docs/editor/hebrew.md`.
-[^ui-languages]: The interface is in 8 languages; Hebrew and Arabic mirror the layout. Receipt: `docs/src/content/docs/editor/hebrew.md`.
+[^ui-languages]: The interface is in 8 languages, six of them in beta (machine-translated); Hebrew and Arabic mirror the layout. Receipt: `docs/src/content/docs/editor/hebrew.md`.
 [^plugin-no-access]: Every plugin runs with no access by default. Receipt: `docs/src/content/docs/plugins/sandbox.md`.
 [^plugin-quickjs]: Plugin logic runs in QuickJS, a separate engine in its own Web Worker, with no fetch, DOM or storage. Receipt: `docs/src/content/docs/plugins/sandbox.md`.
 [^plugin-ui-data]: A plugin's interface is a tree of known elements, not HTML. Receipt: `docs/src/content/docs/plugins/sandbox.md`.

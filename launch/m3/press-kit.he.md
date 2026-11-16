@@ -43,7 +43,7 @@ OWNER: כתובת לפניות עיתונאים.
 [^plugin-no-access]: Every plugin runs with no access by default. Receipt: `docs/src/content/docs/plugins/sandbox.md`.
 [^rtl-per-line]: Direction is set per line, from its first strong letter. Receipt: `docs/src/content/docs/editor/hebrew.md`.
 [^hebrew-search]: Search folds niqqud, final letters and the prefix letters. Receipt: `docs/src/content/docs/editor/hebrew.md`.
-[^ui-languages]: The interface is in 8 languages; Hebrew and Arabic mirror the layout. Receipt: `docs/src/content/docs/editor/hebrew.md`.
+[^ui-languages]: The interface is in 8 languages, six of them in beta (machine-translated); Hebrew and Arabic mirror the layout. Receipt: `docs/src/content/docs/editor/hebrew.md`.
 [^md-files]: Notes are plain Markdown; the whole vault exports as a .zip or a folder. Receipt: `docs/src/content/docs/workspace/export-import.md`.
 [^no-account]: No account; with the default settings nothing leaves the device. Receipt: `docs/src/content/docs/security/privacy-report.md`.
 [^local-ai]: AI can run entirely on the device (WebGPU), with no per-token cost. Receipt: `docs/src/content/docs/ai/local-llm.md`.

@@ -24,7 +24,6 @@
   "src/sync/e2ee/primitives/lib/argon2.ts": "Audited-crypto adapter (W10.D13): Argon2id over hash-wasm / libsodium, which are not installed (registry blocked); tsconfig excludes this folder. Wired at the Mac run per docs/security/crypto-libs.md.",
   "src/sync/e2ee/primitives/lib/audited.ts": "Audited-crypto adapter (W10.D13): the primitives over @noble/ciphers, @noble/hashes and hash-wasm, none installed (registry blocked); the app still runs the in-house primitives. Wired by usePrimitives(AUDITED) at the Mac run, after cryptoDifferential.",
   "src/sync/gitAsOf.ts": "The git half of 'what did I know then' (W12.S1 step 3: history before install from git log): needs a git log bridge in the app (desktop gitWatch); the asOf search uses the history store only for now.",
-  "src/types/objects.ts": "A barrel of typeSchema/typeRegistry/fieldValues for the typed-objects test; the app imports the three modules directly.",
-  "src/ui/tokens.ts": "The design system's tokens for inline styles (W3.1): components still use the CSS variables directly; adopting it is W3.1's remaining step (its lint rule)."
+  "src/types/objects.ts": "A barrel of typeSchema/typeRegistry/fieldValues for the typed-objects test; the app imports the three modules directly."
  }
 }

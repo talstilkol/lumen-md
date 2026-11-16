@@ -53,6 +53,8 @@ const RECORDERS: Record<string, (src: string) => string[]> = {
   "src/ui/WikidataLink.tsx": () => [],
   // Signed plugin install (W10.B3): every registry download under its one fixed reason.
   "src/plugins/install.ts": (src) => [/const LEDGER_REASON = "([^"]+)"/.exec(src)![1]],
+  // A remote MCP server's tool listing (W10.C2, #978): "MCP server <name>".
+  "src/agents/mcp/registry.ts": (src) => [/reason: `([^`$]+)\$\{/.exec(src)![1]],
 };
 
 function walk(dir: string, out: string[] = []): string[] {

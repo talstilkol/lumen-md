@@ -56,7 +56,10 @@ describe("the palette lists the two commands", () => {
     const cmds = buildReadingCommands(ctxFor("", null));
     expect(cmds.map((c) => c.id)).toEqual(["reading.newFromLibrary", "reading.newFromCapture"]);
     for (const c of cmds) expect(c.label).not.toMatch(/^cmd\./);
-    expect(COMMAND_SECTIONS.at(-1)).toBe(buildReadingCommands);
+    // Sections appended later (T8: screenshot, MCP, Yiddish/Ladino, academic, external agents) come after it, in this order.
+    const at = COMMAND_SECTIONS.indexOf(buildReadingCommands);
+    expect(at).toBeGreaterThan(0);
+    expect(COMMAND_SECTIONS.slice(at + 1).map((f) => f.name)).toEqual(["buildScreenshotCommands", "buildMcpCommands", "buildJewishLanguageCommands", "buildAcademicCommands", "buildExternalAgentCommands"]);
   });
 });
 
