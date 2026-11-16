@@ -551,6 +551,8 @@
   "cmd.view.calendar.hint": "تقويم شهري للملاحظات اليومية أسفل شجرة الملفات",
   "cmd.view.canvas": "🎨 اللوحة / السبّورة",
   "cmd.view.canvas.hint": "لوحة لا نهائية للملاحظات المرئية",
+  "cmd.view.daf": "📜 Page of the Talmud (daf)",
+  "cmd.view.daf.hint": "The note's main text with its commentaries around it, as on a printed daf",
   "cmd.view.findReplace": "بحث واستبدال",
   "cmd.view.grammarCheck.hint": "يضع خطًا تحت مشكلات النحو / الأسلوب / الأخطاء الإملائية. عيّن VITE_LANGUAGETOOL_URL للاستضافة الذاتية.",
   "cmd.view.grammarCheck.off": "تعطيل grammar check",

@@ -551,6 +551,8 @@
   "cmd.view.calendar.hint": "Calendrier mensuel des notes quotidiennes, sous l'arborescence",
   "cmd.view.canvas": "🎨 Canevas / Tableau blanc",
   "cmd.view.canvas.hint": "Canevas infini pour des notes visuelles",
+  "cmd.view.daf": "📜 Page of the Talmud (daf)",
+  "cmd.view.daf.hint": "The note's main text with its commentaries around it, as on a printed daf",
   "cmd.view.findReplace": "Rechercher et remplacer",
   "cmd.view.grammarCheck.hint": "Souligne les problèmes de grammaire / style / fautes de frappe. Définissez VITE_LANGUAGETOOL_URL pour l'auto-héberger.",
   "cmd.view.grammarCheck.off": "Désactiver grammar check",

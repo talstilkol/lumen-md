@@ -295,6 +295,13 @@
       "icon": "Columns2"
     },
     {
+      "id": "view.daf",
+      "label": "📜 Page of the Talmud (daf)",
+      "group": "View",
+      "hint": "The note's main text with its commentaries around it, as on a printed daf",
+      "icon": "Columns2"
+    },
+    {
       "id": "view.preview",
       "label": "Preview only",
       "group": "View",
@@ -2589,6 +2596,13 @@
       "icon": "Columns2"
     },
     {
+      "id": "view.daf",
+      "label": "📜 Page of the Talmud (daf)",
+      "group": "View",
+      "hint": "The note's main text with its commentaries around it, as on a printed daf",
+      "icon": "Columns2"
+    },
+    {
       "id": "view.preview",
       "label": "Preview only",
       "group": "View",
@@ -4737,6 +4751,7 @@
     "view.source",
     "view.split",
     "view.sideBySide",
+    "view.daf",
     "view.preview",
     "view.wysiwyg",
     "view.outline",

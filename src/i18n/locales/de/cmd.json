@@ -551,6 +551,8 @@
   "cmd.view.calendar.hint": "Monatskalender der Tagesnotizen unter dem Dateibaum",
   "cmd.view.canvas": "🎨 Canvas / Whiteboard",
   "cmd.view.canvas.hint": "Unendlicher Canvas für visuelle Notizen",
+  "cmd.view.daf": "📜 Page of the Talmud (daf)",
+  "cmd.view.daf.hint": "The note's main text with its commentaries around it, as on a printed daf",
   "cmd.view.findReplace": "Suchen & Ersetzen",
   "cmd.view.grammarCheck.hint": "Unterstreicht Grammatik-, Stil- und Tippfehler. Setze VITE_LANGUAGETOOL_URL zum Selbst-Hosten.",
   "cmd.view.grammarCheck.off": "Deaktivieren grammar check",
