@@ -12,7 +12,6 @@
 import { fromUtf8, utf8 } from "./bytes";
 import { mergeText } from "../merge/textMerge";
 import { keepBothVersions } from "../merge/keepVersions";
-import "./strings";
 
 export interface ConflictInput {
   path: string;
@@ -85,7 +84,9 @@ const askResolver: ConflictResolver = async (c) => {
   const remote = asText(c.remote);
   if (local === null || remote === null) return { kind: "keepBoth" };
   const base = (c.base && asText(c.base)) ?? "";
-  const [{ openConflictDialog }, { t }] = await Promise.all([import("../cloud/ConflictDialog"), import("../../i18n")]);
+  // The strings load with the dialog, not with the engine: the engine also runs outside Vite (scripts/bench/sync-first.ts under tsx),
+  // where the i18n module's import.meta.glob does not exist.
+  const [{ openConflictDialog }, { t }] = await Promise.all([import("../cloud/ConflictDialog"), import("../../i18n"), import("./strings")]);
   const choice = await openConflictDialog({
     path: c.path,
     base,
