@@ -38,6 +38,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { checkDod } from "../dod.mjs";
 import { checkEvalClaims } from "../lib/evalCard.mjs";
 import { claimGuard } from "./claimGuard.mjs";
+import { RECEIPTS_FILE, checkReceiptClaims } from "./receiptLevels.mjs";
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 export const PLAN_FILE = "plan/plan.json";
@@ -835,7 +836,7 @@ export function formatWip(w) {
 
 // ───────────────────────────── CLI ─────────────────────────────
 
-export function run({ root = ROOT, check = false, wipLimit } = {}) {
+export function run({ root = ROOT, check = false, wipLimit, strictReceipts = false } = {}) {
   const plan = JSON.parse(readFileSync(join(root, PLAN_FILE), "utf8"));
   // Plan 0.7: no ✅ without the commands that prove it.
   // W11.I18: a ✅ that rests on an eval cites a complete public or held-out card.
@@ -850,7 +851,13 @@ export function run({ root = ROOT, check = false, wipLimit } = {}) {
   if (levelProblems.length) throw new Error(`plan: ✅ below browser (W10.G8) —\n  ${levelProblems.join("\n  ")}`);
   const lengthProblems = checkStatusLength(plan);
   if (lengthProblems.length) throw new Error(`plan: status length (W10.G7) —\n  ${lengthProblems.join("\n  ")}`);
+  // W10.G9: a level comes from a receipt. "real" never stands without one; --strict-receipts holds every level to them.
+  const receiptsPath = join(root, RECEIPTS_FILE);
+  const receipts = existsSync(receiptsPath) ? JSON.parse(readFileSync(receiptsPath, "utf8")) : null;
+  const receiptClaims = checkReceiptClaims(plan, receipts, { strict: strictReceipts });
+  if (receiptClaims.problems.length) throw new Error(`plan: levels without a receipt (W10.G9, npm run plan:receipts) —\n  ${receiptClaims.problems.join("\n  ")}`);
   const M = buildModel(plan);
+  M.MANUAL_LEVELS = receiptClaims.manual;
   M.velocity = planVelocity(historyFromGit(root), countPlan(plan));
   const docPath = join(root, DOC_FILE);
   const htmlPath = join(root, HTML_FILE);
@@ -878,7 +885,8 @@ function main(argv) {
   const at = argv.indexOf("--wip-limit");
   const wipLimit = at >= 0 ? Number(argv[at + 1]) : undefined;
   if (at >= 0 && !(Number.isInteger(wipLimit) && wipLimit >= 0)) throw new Error(`plan: --wip-limit takes a whole number, not ${JSON.stringify(argv[at + 1])}`);
-  const { M, stale, wip } = run({ check, wipLimit });
+  const { M, stale, wip } = run({ check, wipLimit, strictReceipts: argv.includes("--strict-receipts") });
+  if (M.MANUAL_LEVELS.length) console.error(`plan: ${M.MANUAL_LEVELS.length} level(s) above what the signed receipts prove (W10.G9; --strict-receipts fails on them): ${M.MANUAL_LEVELS.slice(0, 8).join(", ")}${M.MANUAL_LEVELS.length > 8 ? " …" : ""}`);
   const P0 = M.agent.filter((t) => t.eff === "P0").length;
   const levels = [...VERIFIED_LEVELS.map((k) => `${k} ${M.VERIFIED[k]}`), ...(M.VERIFIED.none ? [`unset ${M.VERIFIED.none}`] : [])].join(", ");
   const summary = `${M.agent.length} tasks, ${M.owner.length} owner items, ${Math.floor(M.EFFORT / 60)} h left; release (P0, ${P0} tasks) ${fmt(M.P0_END)}, end ${fmt(M.END)}; verified: ${levels}`;

@@ -112,6 +112,7 @@
     "lint:prune": "eslint src --prune-suppressions",
     "plan": "node scripts/plan/build.mjs",
     "plan:check": "node scripts/plan/build.mjs --check",
+    "plan:receipts": "node scripts/plan/receipts.mjs",
     "plan:targets": "node scripts/plan-targets.mjs",
     "owner:session": "node scripts/owner/session.mjs",
     "owner:checklist": "node scripts/owner-checklist.mjs",
