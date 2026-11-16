@@ -1,41 +1,53 @@
 /**
- * web-llm (WebGPU) through the app's own path (plan 7.8, W10.E34): the
- * translator agent on the runtime, forced onto the `webllm` executor, on
- * the Hebrew → English set. The model is pinned to Qwen3 0.6B (the
- * multilingual tiny tier) so the numbers belong to one registry entry.
+ * web-llm (WebGPU) through the app's own executor (plan 7.8, W10.E34): the
+ * translator agent's prompt, Hebrew → English, with the model pinned (see
+ * ../llm.ts for why the agent loop is not used). One variant per web-llm
+ * model the app offers: its catalogue (WEBLLM_CATALOG) and the
+ * function-calling models (WEBLLM_TOOL_MODELS). `webllm` alone is Qwen3
+ * 0.6B, the multilingual tiny tier; `webllm:<base>` is any other.
  */
-import { runAgentOrThrow } from "../../agents/runtime";
-import { translatorAgent } from "../../agents/defs";
-import { catalogEntryFor, detectHardware, setWebLlmModel, webLlmModelId, WEBLLM_CATALOG } from "../../ai/modelManager";
-import { localLlmAvailable } from "../../ai/localLlm";
-import type { BenchEngine } from "../types";
+import { webllmExecutor, WEBLLM_TOOL_MODELS } from "../../agents/executors/webllm";
+import { detectHardware, setWebLlmModel, webLlmModelId, WEBLLM_CATALOG } from "../../ai/modelManager";
+import { translateWith } from "../llm";
+import type { BenchEngine, BenchFamily } from "../types";
 
-const MODEL = "Qwen3-0.6B";
+const toolBase = (id: string) => id.replace(/-q4f(16|32)_1-MLC$/, "");
 
-/** A stuck model fails its item instead of hanging the whole bench (T55: every run carries a cancel signal). */
-const ITEM_TIMEOUT_MS = 120_000;
-
-async function translate(text: string): Promise<string> {
-  const signal = AbortSignal.timeout(ITEM_TIMEOUT_MS);
-  return runAgentOrThrow(translatorAgent, { text, extra: { targetLanguage: "English" } }, { executor: "webllm", signal });
+/** The web-llm id the app would download for `base` on this device. */
+async function modelIdFor(base: string): Promise<string> {
+  const { f16 } = await detectHardware();
+  const entry = WEBLLM_CATALOG.find((e) => e.base === base);
+  if (entry) return webLlmModelId(entry, f16);
+  const tools = WEBLLM_TOOL_MODELS.filter((m) => toolBase(m) === base);
+  const id = tools.find((m) => m.includes(f16 ? "q4f16" : "q4f32"));
+  if (!id) throw new Error(`${base}: web-llm has no ${f16 ? "f16" : "f32"} build of it (have: ${tools.join(", ")})`);
+  return id;
 }
 
-export const engine: BenchEngine = {
-  id: "webllm",
-  label: "web-llm Qwen3 0.6B, translator agent he → en",
-  set: "mt-he-en",
-  models: [MODEL],
-  async load() {
-    const status = localLlmAvailable();
-    if (!status.available) throw new Error(`web-llm unavailable: ${status.reason}`);
-    const entry = WEBLLM_CATALOG.find((e) => e.base === MODEL)!;
-    const hw = await detectHardware();
-    const id = webLlmModelId(entry, hw.f16);
-    if (!catalogEntryFor(id)) throw new Error(`not in the web-llm catalog: ${id}`);
-    setWebLlmModel(id);
-    await translate("שלום");
-    return { device: "webgpu", model: MODEL };
-  },
-  run: async (item) => translate((item.input as { text: string }).text),
-  dispose: async () => setWebLlmModel(null),
+function variant(base: string): BenchEngine {
+  let mlcId = "";
+  return {
+    id: `webllm:${base}`,
+    label: `web-llm ${base}, translator prompt he → en`,
+    set: "mt-he-en",
+    models: [base],
+    async load() {
+      mlcId = await modelIdFor(base);
+      // The user's own choice in the AI settings: what makes the executor available under local-first.
+      setWebLlmModel(mlcId);
+      const status = await webllmExecutor.available();
+      if (!status.available) throw new Error(`web-llm unavailable: ${status.reason}${status.detail ? ` (${status.detail})` : ""}`);
+      await translateWith(webllmExecutor, mlcId, "שלום");
+      return { device: "webgpu", model: base };
+    },
+    run: async (item) => translateWith(webllmExecutor, mlcId, (item.input as { text: string }).text),
+    dispose: async () => setWebLlmModel(null),
+  };
+}
+
+export const family: BenchFamily = {
+  variants: [...new Set([...WEBLLM_CATALOG.map((e) => e.base), ...WEBLLM_TOOL_MODELS.map(toolBase)])],
+  variant,
 };
+
+export const engine: BenchEngine = { ...variant("Qwen3-0.6B"), id: "webllm" };
