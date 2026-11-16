@@ -10,6 +10,7 @@
  * strings (no moment.js); recurrence is kept as its text (not expanded);
  * custom statuses map to the plugin's built-in five.
  */
+import { dueFromText } from "./dueFromText";
 
 export type TaskStatus = "TODO" | "DONE" | "IN_PROGRESS" | "CANCELLED" | "NON_TASK";
 export type Priority = "highest" | "high" | "medium" | "none" | "low" | "lowest";
@@ -38,6 +39,17 @@ export interface Task {
   /** `^block-id` at the end of the line, if any. */
   blockLink: string;
   indent: number;
+  /**
+   * A due date the description names in words ("מחר", "by Friday", "עד
+   * 1/2/2027"), when the line has no 📅 and the parse was given today's date
+   * (R12.6, ./dueFromText.ts). A suggestion: nothing writes it unasked.
+   */
+  dueSuggested?: string | null;
+}
+
+/** What a parse may know beyond the line: today's date (YYYY-MM-DD), for a due date in words. */
+export interface ParseOptions {
+  today?: string;
 }
 
 /** Upstream DEFAULT_SYMBOLS. */
@@ -135,7 +147,7 @@ export function parseDetails(text: string): TaskDetails {
 }
 
 /** One line, or null when it isn't a task. */
-export function parseTaskLine(text: string, path = "", line = 0, heading: string | null = null): Task | null {
+export function parseTaskLine(text: string, path = "", line = 0, heading: string | null = null, opts: ParseOptions = {}): Task | null {
   const nested = RE.nestedOnLine.exec(text);
   if (nested) text = `${nested[1]}${" ".repeat(text.length - nested[1].length - nested[2].length)}${nested[2]}`;
   const m = RE.task.exec(text);
@@ -148,7 +160,10 @@ export function parseTaskLine(text: string, path = "", line = 0, heading: string
     blockLink = bl[0].trim();
     body = body.replace(RE.blockLink, "");
   }
-  return { path, line, status: statusOf(symbol), symbol, heading, blockLink, indent: indent.replace(/>/g, "").length, ...parseDetails(body.trim()) };
+  const details = parseDetails(body.trim());
+  const task: Task = { path, line, status: statusOf(symbol), symbol, heading, blockLink, indent: indent.replace(/>/g, "").length, ...details };
+  if (opts.today && !details.due) task.dueSuggested = dueFromText(details.description, opts.today);
+  return task;
 }
 
 /**
@@ -156,7 +171,7 @@ export function parseTaskLine(text: string, path = "", line = 0, heading: string
  * code blocks and the frontmatter are not tasks (as upstream, via the
  * Markdown cache).
  */
-export function tasksInNote(path: string, content: string): Task[] {
+export function tasksInNote(path: string, content: string, opts: ParseOptions = {}): Task[] {
   const out: Task[] = [];
   const lines = content.split(/\r?\n/);
   let fence: string | null = null;
@@ -196,7 +211,7 @@ export function tasksInNote(path: string, content: string): Task[] {
     }
     // Cheap pre-check: most lines are not list items with a checkbox.
     if (!l.includes("[")) continue;
-    const t = parseTaskLine(l, path, i, heading);
+    const t = parseTaskLine(l, path, i, heading, opts);
     if (t) out.push(t);
   }
   return out;

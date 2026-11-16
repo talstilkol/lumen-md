@@ -7,7 +7,7 @@
  *   inboxEntries(text)        the entries, with their line spans
  *   triageEntry(text, today)  one entry → { kind, due, tags } (JSON checked against the schema)
  *   checkDue(due, today)      a date the model gave, kept only if it is a real day near today
- *   triagedEntry(entry, r)    the entry rewritten: a task becomes "- [ ] … 📅 YYYY-MM-DD", tags appended
+ *   triagedEntry(entry, r, today)  the entry rewritten: a task becomes "- [ ] … 📅 YYYY-MM-DD" (the model's day, else the one its words name: tasks/dueFromText), tags appended
  *   triageInbox(text, today)  the whole inbox rewritten, entry by entry, plus what changed
  *
  * Nothing is written here: the command stages the new inbox as one change
@@ -16,6 +16,7 @@
  */
 import { generateStructured, StructuredOutputError, type GenerateOptions, type StructuredEngineId } from "../ai/structured";
 import { normalizeTags } from "../agents/defs/tagger";
+import { dueFromText } from "../tasks/dueFromText";
 
 export type TriageKind = "task" | "event" | "reference" | "note";
 
@@ -106,10 +107,14 @@ export async function triageEntry(text: string, today: string, opts: GenerateOpt
 }
 
 /** The entry with the triage applied: a task becomes a checkbox with its due date, tags go at the end. */
-export function triagedEntry(entry: InboxEntry, r: TriageResult): string {
+export function triagedEntry(entry: InboxEntry, r: TriageResult, today?: string): string {
   const rest = entry.raw.split("\n").slice(1);
   let text = entry.text.trimEnd();
-  if (r.kind === "task") text = `[ ] ${text}${r.due && !text.includes("📅") ? ` 📅 ${r.due}` : ""}`;
+  if (r.kind === "task") {
+    // The model's day, else the one the words name (R12.6: "מחר", "by Friday").
+    const due = r.due ?? (today ? dueFromText(text, today) : null);
+    text = `[ ] ${text}${due && !text.includes("📅") ? ` 📅 ${due}` : ""}`;
+  }
   else if (r.due && !text.includes(r.due)) text = `${text} (${r.due})`;
   const tags = r.tags.filter((t) => !new RegExp(`(?:^|\\s)#${t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?:\\s|$)`, "u").test(text));
   if (tags.length) text = `${text} ${tags.map((t) => `#${t}`).join(" ")}`;
@@ -147,7 +152,7 @@ export async function triageInbox(text: string, today: string, opts: GenerateOpt
     try {
       const r = await classify(e.text, today, opts);
       engines.add(r.engine);
-      const next = triagedEntry(e, r);
+      const next = triagedEntry(e, r, today);
       if (next !== e.raw) replaced.set(e.start, { ...e, next });
     } catch (err) {
       if ((err as Error)?.name === "AbortError") throw err;
