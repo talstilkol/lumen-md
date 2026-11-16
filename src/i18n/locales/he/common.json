@@ -120,7 +120,7 @@
   "airplane.badge.hint": "בלי רשת: לפתוח את צג הרשת",
   "airplane.certificate": "הורדת תעודה",
   "airplane.certificate.hint": "קובץ עם פרק הזמן, כל ניסיון בו, ומה בדיוק הוא סופר (ניסיונות, לא בתים; גם בקשות שהיו בדרך כשהמתג הופעל נספרות), עם SHA-256 שלו.",
-  "airplane.certificate.unsigned": "עוד לא חתומה: התעודה מכילה רק את ה-SHA-256 שלה.",
+  "airplane.certificate.signed": "חתומה במפתח של המכשיר הזה: כל אחד יכול לבדוק את הקובץ עם minisign, ושינוי של בית אחד נכשל בבדיקה.",
   "airplane.close": "סגירה",
   "airplane.col.decision": "החלטה",
   "airplane.col.kind": "סוג",

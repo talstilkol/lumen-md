@@ -120,7 +120,7 @@
   "airplane.badge.hint": "Sans réseau : ouvrir le moniteur réseau",
   "airplane.certificate": "Télécharger le certificat",
   "airplane.certificate.hint": "Un fichier avec la période, chaque tentative qu'elle contient et exactement ce qu'il compte (des tentatives, pas des octets ; les requêtes en cours à l'activation comptent aussi), avec son SHA-256.",
-  "airplane.certificate.unsigned": "Pas encore signé : le certificat ne porte que son SHA-256.",
+  "airplane.certificate.signed": "Signé avec la clé de cet appareil : chacun peut vérifier le fichier avec minisign, et un octet modifié fait échouer la vérification.",
   "airplane.close": "Fermer",
   "airplane.col.decision": "Décision",
   "airplane.col.kind": "Type",

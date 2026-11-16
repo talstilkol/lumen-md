@@ -120,7 +120,7 @@
   "airplane.badge.hint": "No network: open the network monitor",
   "airplane.certificate": "Download certificate",
   "airplane.certificate.hint": "A file with the time span, every attempt in it, and exactly what it counts (attempts, not bytes; requests in flight when the switch went on count too), with its SHA-256.",
-  "airplane.certificate.unsigned": "Not signed yet: the certificate carries its SHA-256 only.",
+  "airplane.certificate.signed": "Signed with this device's key: anyone can check the file with minisign, and a changed byte fails the check.",
   "airplane.close": "Close",
   "airplane.col.decision": "Decision",
   "airplane.col.kind": "Kind",

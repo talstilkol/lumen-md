@@ -681,8 +681,8 @@
       "vars": []
     },
     {
-      "key": "airplane.certificate.unsigned",
-      "en": "Not signed yet: the certificate carries its SHA-256 only.",
+      "key": "airplane.certificate.signed",
+      "en": "Signed with this device's key: anyone can check the file with minisign, and a changed byte fails the check.",
       "vars": []
     },
     {

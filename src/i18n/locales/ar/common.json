@@ -120,7 +120,7 @@
   "airplane.badge.hint": "بلا شبكة: فتح مراقب الشبكة",
   "airplane.certificate": "تنزيل الشهادة",
   "airplane.certificate.hint": "ملف بالفترة الزمنية وكل محاولة فيها وما يُحسب فيه بالضبط (محاولات لا بايتات؛ وتُحسب أيضًا الطلبات التي كانت قيد الإرسال عند التفعيل)، مع SHA-256 الخاص به.",
-  "airplane.certificate.unsigned": "غير موقّعة بعد: تحمل الشهادة SHA-256 الخاص بها فقط.",
+  "airplane.certificate.signed": "موقّعة بمفتاح هذا الجهاز: يمكن لأي شخص التحقق من الملف باستخدام minisign، وأي بايت متغيّر يُفشل التحقق.",
   "airplane.close": "إغلاق",
   "airplane.col.decision": "القرار",
   "airplane.col.kind": "النوع",

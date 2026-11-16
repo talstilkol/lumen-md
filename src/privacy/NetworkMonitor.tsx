@@ -130,7 +130,7 @@ export function NetworkMonitor({ onClose }: { onClose: () => void }) {
               {t("airplane.counts", { attempts: shown.length, blocked: shown.filter((a) => a.decision === "blocked").length, left: shown.filter(reachedNetwork).length })}
             </span>
           </div>
-          {on && <p style={{ ...muted, margin: 0 }}>{t("airplane.certificate.unsigned")}</p>}
+          {on && <p style={{ ...muted, margin: 0 }}>{t("airplane.certificate.signed")}</p>}
           <div style={{ overflow: "auto", border: "1px solid hsl(var(--border))", borderRadius: 6, minHeight: 120 }}>
             {shown.length === 0 ? (
               // empty-action: the airplane-mode on / off buttons above
