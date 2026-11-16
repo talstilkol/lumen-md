@@ -17,7 +17,8 @@
  *                            status is longer than STATUS_MAX (W10.G7);
  *                            warns when a wave is over its work-in-progress limit
  *                            while the next wave has started (plan W6.39, below)
- *   npm run plan:check -- --wip-strict      the WIP warning fails the check
+ *   npm run plan:check -- --wip-strict      any WIP warning fails the check (without it, a task that
+ *                                           starts in a frozen wave fails it: scripts/plan/wipGate.mjs)
  *   npm run plan:check -- --wip-limit 8     another limit than plan.schedule.wipLimit / WIP_LIMIT
  *   npm run plan -- --hours  also print actual hours per task branch (git)
  *
@@ -40,6 +41,7 @@ import { checkEvalClaims } from "../lib/evalCard.mjs";
 import { claimGuard } from "./claimGuard.mjs";
 import { RECEIPTS_FILE, checkReceiptClaims } from "./receiptLevels.mjs";
 import { AREAS_FILE, checkAreas } from "./areas.mjs";
+import { formatGate, readFrozen, wipGate } from "./wipGate.mjs";
 import { checkOriginClaims } from "../golden/origin-claims.mjs";
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
@@ -937,7 +939,8 @@ export function run({ root = ROOT, check = false, wipLimit, strictReceipts = fal
     if (htmlNow !== wantHtml) writeFileSync(htmlPath, wantHtml);
     if (stale.includes(ROADMAP_FILE)) writeFileSync(roadmapPath, wantRoadmap);
   }
-  return { M, stale, wip: wipWarnings(plan, { limit: wipLimit }) };
+  // W6.39: the gate holds at the plan's own limit; --wip-limit only changes the warnings.
+  return { M, stale, wip: wipWarnings(plan, { limit: wipLimit }), gate: wipGate(wipWarnings(plan), readFrozen(root)) };
 }
 
 function main(argv) {
@@ -945,7 +948,7 @@ function main(argv) {
   const at = argv.indexOf("--wip-limit");
   const wipLimit = at >= 0 ? Number(argv[at + 1]) : undefined;
   if (at >= 0 && !(Number.isInteger(wipLimit) && wipLimit >= 0)) throw new Error(`plan: --wip-limit takes a whole number, not ${JSON.stringify(argv[at + 1])}`);
-  const { M, stale, wip } = run({ check, wipLimit, strictReceipts: argv.includes("--strict-receipts") });
+  const { M, stale, wip, gate } = run({ check, wipLimit, strictReceipts: argv.includes("--strict-receipts") });
   if (M.MANUAL_LEVELS.length) console.error(`plan: ${M.MANUAL_LEVELS.length} level(s) above what the signed receipts prove (W10.G9; --strict-receipts fails on them): ${M.MANUAL_LEVELS.slice(0, 8).join(", ")}${M.MANUAL_LEVELS.length > 8 ? " …" : ""}`);
   const P0 = M.agent.filter((t) => t.eff === "P0").length;
   const levels = [...VERIFIED_LEVELS.map((k) => `${k} ${M.VERIFIED[k]}`), ...(M.VERIFIED.none ? [`unset ${M.VERIFIED.none}`] : [])].join(", ");
@@ -958,6 +961,11 @@ function main(argv) {
     for (const w of wip) console.error(formatWip(w));
     if (wip.length && argv.includes("--wip-strict")) {
       console.error(`plan: ${wip.length} wave${wip.length > 1 ? "s" : ""} over the work-in-progress limit (--wip-strict).`);
+      return 1;
+    }
+    const gateLines = formatGate(gate);
+    if (gateLines.length) {
+      for (const l of gateLines) console.error(l);
       return 1;
     }
     if (stale.length) {
