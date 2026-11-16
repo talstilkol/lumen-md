@@ -21,15 +21,32 @@ export const STD_CRATES = [
 ];
 
 /**
- * The counts of a Rust test run's output, or null when it printed no
- * "running N tests" line (not a Rust test run).
+ * Is `cmd` a Rust test run (`cargo test`, `cargo +toolchain test`, `cargo nextest run`,
+ * or `rustc … --test`)? Review 11, L8: such a command is judged by its output even
+ * when that output shows no "running N tests" (`--no-run`, output sent elsewhere).
+ */
+export function isRustTestCommand(cmd) {
+  const c = String(cmd ?? "");
+  return /\bcargo\s+(?:\+\S+\s+)?(?:test|nextest\s+run)\b/.test(c) || /\brustc\b[^;&|]*\s--test\b/.test(c);
+}
+
+/** What cargo prints when it built test binaries (also under --no-run). */
+const CARGO_TEST_BUILD = /^\s*(?:Finished `test` profile|Finished test \[|Executable (?:unittests|tests?\/|doctests)|Running unittests)/m;
+
+/**
+ * The counts of a Rust test run's output, or null when it is not a Rust test
+ * run: it printed no "running N tests" line, cargo built no test binary, and
+ * `cmd` (when given) is not a Rust test command. A Rust test run that shows no
+ * test running (`cargo test --no-run`, `cargo test > log`) counts as 0 run
+ * (review 11, L8). Line endings may be CRLF.
  * @param {string} out
+ * @param {string} [cmd]
  * @returns {{ ran: number, passed: number, failed: number, results: number } | null}
  */
-export function rustCounts(out) {
-  const text = String(out);
-  const running = [...text.matchAll(/^running (\d+) tests?$/gm)];
-  if (!running.length) return null;
+export function rustCounts(out, cmd = "") {
+  const text = String(out).replace(/\r\n?/g, "\n");
+  const running = [...text.matchAll(/^running (\d+) tests?[ \t]*$/gm)];
+  if (!running.length) return CARGO_TEST_BUILD.test(text) || isRustTestCommand(cmd) ? { ran: 0, passed: 0, failed: 0, results: 0 } : null;
   let passed = 0;
   let failed = 0;
   const results = [...text.matchAll(/^test result: \w+\. (\d+) passed; (\d+) failed;/gm)];
