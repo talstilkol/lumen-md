@@ -31,11 +31,16 @@ describe("secure rooms", () => {
     expect(location.hash).toBe("");
   });
 
-  it("signals through Lumen's own server only, unless public servers are opted in", () => {
-    expect(signalingUrls()).toHaveLength(1);
-    expect(signalingUrls()[0]).not.toMatch(/yjs\.dev|herokuapp/);
+  it("ships no signaling server of its own: only a configured one, or public ones when opted in", () => {
+    // No hard-coded host the project doesn't control (the old default domain is gone).
+    expect(signalingUrls()).toEqual([]);
     localStorage.setItem(PUBLIC_SIGNALING_KEY, "1");
-    expect(signalingUrls().length).toBeGreaterThan(1);
+    try {
+      expect(signalingUrls().length).toBeGreaterThan(0);
+      expect(signalingUrls().every((u) => /yjs\.dev|herokuapp/.test(u))).toBe(true);
+    } finally {
+      localStorage.removeItem(PUBLIC_SIGNALING_KEY);
+    }
   });
 
   it("the public fallback opt-in also applies behind a custom signaling server", () => {

@@ -65,16 +65,16 @@ export interface CollabSession {
 }
 
 /**
- * Default signaling-server endpoints. Order matters — the first entry is
- * tried first; the rest are used only if it fails. `signal.lumen.md` is
- * Lumen's own deployed service (`sync-server/`); the public yjs.dev
- * endpoints are kept as last-resort fallbacks for users running off-cluster.
+ * Public signaling endpoints, used only when the user opts in (Collab
+ * settings). There is no built-in default server: a deployment sets its own
+ * (`sync-server/`) with `VITE_WEBRTC_SIGNALING_URL` at build time, and a user
+ * can point at one in settings. A hard-coded host the project doesn't
+ * control would see every room and peer, so none is shipped.
  *
  * Override at runtime via `localStorage["lumen.collab.signaling"]` or the
  * `VITE_WEBRTC_SIGNALING_URL` env var (single URL or comma-separated list).
  */
 const PUBLIC_SIGNALING_FALLBACK = [
-  "wss://signal.lumen.md",
   "wss://signaling.yjs.dev",
   "wss://y-webrtc-signaling-eu.herokuapp.com",
 ];
@@ -87,13 +87,12 @@ const getSignalingUrls = (): string[] => {
     ? (import.meta as ImportMeta & { env?: { VITE_WEBRTC_SIGNALING_URL?: string } }).env?.VITE_WEBRTC_SIGNALING_URL
     : undefined;
   const configured = (custom || envUrl || "").split(",").map((s) => s.trim()).filter(Boolean);
-  // T49: by default only the configured / the project's own signaling
-  // server. The public third-party servers (yjs.dev, heroku) see who meets
-  // whom, so they are used only when the user opts in (Collab settings) —
-  // then also as a fallback behind a custom server.
-  const primary = configured.length ? configured : PUBLIC_SIGNALING_FALLBACK.slice(0, 1);
-  if (!publicSignalingAllowed()) return primary;
-  return [...new Set([...primary, ...PUBLIC_SIGNALING_FALLBACK.slice(1)])];
+  // T49: by default only the configured signaling server (none when the
+  // build sets none). The public third-party servers (yjs.dev, heroku) see
+  // who meets whom, so they are used only when the user opts in (Collab
+  // settings) — then also as a fallback behind a custom server.
+  if (!publicSignalingAllowed()) return configured;
+  return [...new Set([...configured, ...PUBLIC_SIGNALING_FALLBACK])];
 };
 
 export const PUBLIC_SIGNALING_KEY = "lumen.collab.publicSignaling";
