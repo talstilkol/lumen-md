@@ -16,6 +16,14 @@
  * is stale and the PR counts as undecided again. The run fails (exit 1)
  * while any PR head outside the train has no current decision.
  *
+ * One exception (R8 train:missing): dependabot rebases its PRs onto the
+ * default branch on its own, which moves their heads without changing what
+ * they bump. A decision with `"author": "dependabot[bot]"` and the PR's exact
+ * `"title"` holds across such a rebase, but only for a PR whose author really
+ * is dependabot[bot] and whose title is still that title (a new version in
+ * the title is a new bump, and stale). Every other PR is matched by head, as
+ * before.
+ *
  *   npm run train:missing [-- --train verify/train-4] [--decisions plan/train-missing.json] [--json]
  */
 import { execFileSync } from "node:child_process";
@@ -25,6 +33,8 @@ import { pathToFileURL } from "node:url";
 import { currentTrain } from "./lib/trainBase.mjs";
 
 export const DECISIONS = ["in", "rejected", "replaced"];
+/** The one author whose PRs a decision may follow across a rebase (by number, author and title). */
+export const DEPENDABOT = "dependabot[bot]";
 export const DECISIONS_FILE = "plan/train-missing.json";
 
 /** Every open PR, all pages: `api(path)` returns one page (an array). */
@@ -55,8 +65,15 @@ export function checkDecisions(file) {
     if (typeof d?.head !== "string" || !/^[0-9a-f]{10,40}$/.test(d.head)) problems.push(`${at}: head is not a commit sha (10 to 40 hex)`);
     if (d?.decision === "in" && !(typeof d.via === "string" && d.via.trim())) problems.push(`${at}: "in" names the task or PR that brings it (via)`);
     if (d?.decision === "replaced" && !(typeof d.by === "string" && d.by.trim())) problems.push(`${at}: "replaced" names what replaces it (by)`);
+    if (d?.author !== undefined && d.author !== DEPENDABOT) problems.push(`${at}: author may only be "${DEPENDABOT}" (other PRs are decided by head)`);
+    if (d?.author === DEPENDABOT && !(typeof d.title === "string" && d.title.trim())) problems.push(`${at}: a dependabot decision names the PR's title (a new version is a new decision)`);
   }
   return problems;
+}
+
+/** A dependabot PR rebased since its decision: the same number, author and title. */
+function followsRebase(d, p) {
+  return d.author === DEPENDABOT && p.user?.login === DEPENDABOT && typeof d.title === "string" && d.title === p.title;
 }
 
 /**
@@ -78,8 +95,9 @@ export function classify(pulls, file, isAncestor) {
     }
     const d = byPr.get(p.number);
     if (!d) out.undecided.push(row);
-    else if (!head || !head.startsWith(d.head)) out.stale.push({ ...row, decidedHead: d.head, decision: d.decision });
-    else out.decided.push({ ...row, decision: d.decision, reason: d.reason, via: d.via, by: d.by });
+    else if (head && head.startsWith(d.head)) out.decided.push({ ...row, decision: d.decision, reason: d.reason, via: d.via, by: d.by });
+    else if (head && followsRebase(d, p)) out.decided.push({ ...row, decision: d.decision, reason: d.reason, via: d.via, by: d.by, rebasedFrom: d.head });
+    else out.stale.push({ ...row, decidedHead: d.head, decision: d.decision });
   }
   for (const d of byPr.values()) if (!open.has(d.pr)) out.gone.push(d.pr);
   out.ok = !out.problems.length && !out.undecided.length && !out.stale.length;
@@ -92,6 +110,7 @@ export function report(v, train) {
   const count = (d) => v.decided.filter((x) => x.decision === d).length;
   lines.push(`Decisions: in ${count("in")} · rejected ${count("rejected")} · replaced ${count("replaced")}.`);
   for (const p of v.problems) lines.push(`✗ ${DECISIONS_FILE}: ${p}`);
+  for (const r of v.decided.filter((x) => x.rebasedFrom)) lines.push(`· #${r.pr} (dependabot) rebased to ${r.head.slice(0, 10)} since the decision "${r.decision}" about ${r.rebasedFrom.slice(0, 10)}: same PR, author and title, kept`);
   for (const r of v.stale) lines.push(`✗ #${r.pr} moved to ${r.head.slice(0, 10)} since the decision "${r.decision}" about ${r.decidedHead.slice(0, 10)} (${r.title.slice(0, 70)})`);
   for (const r of v.undecided) lines.push(`✗ #${r.pr} (${r.base}) ${r.head?.slice(0, 10)}: no decision — ${r.title.slice(0, 80)}`);
   if (v.gone.length) lines.push(`Decisions about PRs no longer open (can go): ${v.gone.map((x) => `#${x}`).join(" ")}.`);
