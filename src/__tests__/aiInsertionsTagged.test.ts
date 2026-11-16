@@ -237,6 +237,20 @@ describe("AI insertions are tagged where they happen (5.9, W10.E37)", () => {
     expect(run({ "b.ts": writer, "a.ts": `import { put } from "./b";\n${head}  // ai-authorship: the user's own words\n  put(view, text);\n}\n` })).toEqual([]);
   });
 
+  it("the ai-authorship escape hatch has a budget that only goes down (review 11, L9)", () => {
+    const budget = (JSON.parse(readFileSync(join(ROOT, "../security/ai-authorship-budget.json"), "utf8")) as { files: Record<string, number> }).files;
+    const counts: Record<string, number> = {};
+    for (const f of files(ROOT)) {
+      const n = (readFileSync(f, "utf8").match(/ai-authorship:\s*\S/g) ?? []).length;
+      if (n) counts[relative(join(ROOT, ".."), f).replace(/\\/g, "/")] = n;
+    }
+    const over = Object.entries(counts).filter(([f, n]) => n > (budget[f] ?? 0)).map(([f, n]) => `${f}: ${n} tags, budget ${budget[f] ?? 0}`);
+    expect(over, "a new `// ai-authorship:` tag needs a reviewed raise of security/ai-authorship-budget.json").toEqual([]);
+    const lower = Object.entries(budget).filter(([f, n]) => (counts[f] ?? 0) < n).map(([f, n]) => `${f}: ${counts[f] ?? 0} tags, budget ${n}`);
+    expect(lower, "fewer tags than the budget: lower it (it only goes down)").toEqual([]);
+    expect(Object.values(budget).reduce((a, b) => a + b, 0)).toBeLessThanOrEqual(17);
+  });
+
   it("the check sees the files it should (it is not passing on an empty set)", () => {
     const seen = files(ROOT).filter((f) => {
       const src = readFileSync(f, "utf8");

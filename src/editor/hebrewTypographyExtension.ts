@@ -12,7 +12,7 @@
 import { ViewPlugin, type EditorView, type ViewUpdate } from "@codemirror/view";
 import { isolateHistory } from "@codemirror/commands";
 import type { Extension } from "@codemirror/state";
-import { keystrokeEdits, loadTypographySettings, onTypographySettings, type TypographySettings } from "../text/hebrewTypography";
+import { keystrokeEdits, loadTypographySettings, onTypographySettings, type TypoEdit, type TypographySettings } from "../text/hebrewTypography";
 
 const HEBREW = /[א-ת]/;
 
@@ -20,6 +20,8 @@ export function hebrewTypographyExtension(): Extension {
   return ViewPlugin.fromClass(
     class {
       settings: TypographySettings = loadTypographySettings();
+      /** The fix dispatched at the last keystroke that had one (review 11, L3): [] when its dispatch was dropped. */
+      private made: TypoEdit[] = [];
       private off: () => void;
       constructor(readonly view: EditorView) {
         this.off = onTypographySettings((s) => {
@@ -36,11 +38,13 @@ export function hebrewTypographyExtension(): Extension {
         if (head === line.from || !HEBREW.test(line.text)) return;
         const doc = u.state.doc;
         // A fix the previous key already offered and that is still to make was undone: it is not made again.
-        const edits = keystrokeEdits(doc.toString(), this.settings.rules, { from: line.from, to: line.to }, head);
+        const edits = keystrokeEdits(doc.toString(), this.settings.rules, { from: line.from, to: line.to }, head, this.made);
+        this.made = [];
         if (!edits.length) return;
         // Dispatching inside an update is not allowed: right after it, if nothing changed meanwhile.
         setTimeout(() => {
           if (this.view.state.doc !== doc) return;
+          this.made = edits;
           this.view.dispatch({
             changes: edits.map((e) => ({ from: e.from, to: e.to, insert: e.insert })),
             annotations: isolateHistory.of("full"),

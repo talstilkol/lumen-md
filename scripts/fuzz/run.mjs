@@ -34,8 +34,11 @@
  * stop a real hang. Under `--clock cpu` a hang is also confirmed: the input
  * runs again alone in a fresh worker, and counts as a hang only if it stalls
  * again (a "stall" that finishes alone is saved and listed, never hidden).
+ * Review 11, L7: a stall still fails the run, since a stall that finished
+ * alone may be a hang that the re-run missed. `--allow-stalls` lets a run on
+ * a loaded host pass with stalls (they are still listed and saved).
  *
- * Exit code: 0 when no decoder crashed or hung, 1 otherwise.
+ * Exit code: 0 when no decoder crashed, hung or (without --allow-stalls) stalled, 1 otherwise.
  */
 import { spawnSync } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -68,6 +71,7 @@ const from = Number(opt("--from", "0"));
 const slowMs = Number(opt("--slow-ms", "1000"));
 const hangMs = Number(opt("--hang-ms", String(slowMs)));
 const clock = opt("--clock", "wall");
+const allowStalls = args.includes("--allow-stalls");
 if (!["wall", "cpu"].includes(clock) || !(slowMs > 0) || !(hangMs > 0)) {
   console.error("--clock is wall or cpu; --slow-ms and --hang-ms are positive numbers");
   process.exit(2);
@@ -190,6 +194,7 @@ async function runTarget(t) {
   }
   if (r.crashes) r.status = "FAIL";
   else if (r.hangs || r.slow) r.status = knownSlow(t.name) ? "known-slow" : "FAIL";
+  else if (r.stalls && !allowStalls) r.status = "FAIL";
   r.seconds = Math.round((Date.now() - started) / 100) / 10;
   r.examples = r.examples.slice(0, 5);
   return r;
@@ -235,7 +240,7 @@ await Promise.all(
 );
 
 const failed = results.filter((r) => r.status === "FAIL");
-if (json) console.log(JSON.stringify({ seed, runsPerTarget: runs, slowMs, hangMs, clock, engine, results }));
+if (json) console.log(JSON.stringify({ seed, runsPerTarget: runs, slowMs, hangMs, clock, allowStalls, engine, results }));
 else {
   for (const r of failed) for (const e of r.examples ?? []) console.log(`     ${r.name} #${e.index}: ${e.error ?? `${e.ms} ms`}`);
   console.log(failed.length ? `FAIL: ${failed.map((r) => r.name).join(", ")} (inputs in ${out})` : "OK: no decoder crashed or ran longer than the limit");

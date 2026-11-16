@@ -194,7 +194,7 @@ export async function runCommand(cmd, { root, runner = null, run = sh, expect })
   }
   const r = await run("bash", ["-c", cmd], { cwd: root });
   // Review 10, M5: a Rust test run (cargo test, rustc --test) that ran no test checked nothing.
-  const rust = rustCounts(r.out);
+  const rust = rustCounts(r.out, cmd);
   if (r.code === 0 && rust && !rustGreen(rust)) return { cmd, status: "fail", detail: `exit 0 — but ${rust.ran === 0 ? "running 0 tests" : `${rust.passed}/${rust.ran} passed`}: nothing was checked` };
   const outLines = r.out.trim().split("\n").filter((l) => l.trim() && !/^Node\.js v\d/.test(l));
   const want = expectedExit(expect);

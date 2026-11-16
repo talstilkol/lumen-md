@@ -105,6 +105,27 @@ describe("static check (5.5.3)", () => {
     expect(offenders).toEqual([]);
   });
 
+  it("no module outside the executor layer posts to Ollama's /api/generate or /api/embed itself, unless it is listed with its reason (review 11, L1)", () => {
+    // The chat check above did not see these endpoints. Each module that calls them directly is named
+    // here with why it is not a run of the agent runtime; any other module fails.
+    const allowed: Record<string, string> = {
+      "ai/fim.ts": "fill-in-the-middle completion with `suffix`: a raw completion on keystrokes, not a chat run; local Ollama only",
+      "ai/grammarRanker.ts": "scores 2-token grammar candidates (num_predict 2, temperature 0): a ranking call, not a chat run; local only",
+      "ai/speculativeMeasure.ts": "the speculative-decoding benchmark: measures the engine itself, nothing reaches the user",
+      "ai/embeddingProvider.ts": "embeddings for search: vectors, not text; local Ollama only",
+      "ai/ollamaProvider.ts": "the provider layer itself",
+    };
+    for (const why of Object.values(allowed)) expect(why.length).toBeGreaterThan(20);
+    const offenders = files
+      .filter((f) => !(f.path in allowed) && !f.path.startsWith("agents/executors/") && !f.path.startsWith("agents/eval/"))
+      .filter((f) => /["'`][^"'`\n]*\/api\/(generate|embed|embeddings)\b/.test(f.text))
+      .map((f) => f.path);
+    expect(offenders).toEqual([]);
+    // Every listed module still has the call: an entry that is no longer needed is removed.
+    const stale = Object.keys(allowed).filter((p) => !files.some((f) => f.path === p && /\/api\/(generate|embed)\b/.test(f.text)));
+    expect(stale).toEqual([]);
+  });
+
   it("no module outside the runtime calls an executor's chat({...}) itself, whatever the variable is named", () => {
     // `executor.chat(` alone missed `ex.chat({` (ai/structured, 5.5).
     const allowed = new Set(["agents/runtime.ts", "agents/modelCritic.ts"]);

@@ -213,6 +213,14 @@ describe("run, with real git", () => {
     expect(first.ok).toBe(false);
     writeFileSync(join(r.dir, DECISIONS_FILE), JSON.stringify({ decisions: [{ pr: 2, head: r.y, decision: "in", via: "train 5", reason: "goes into the next train" }] }));
     expect(run({ cwd: r.dir, api, git }).ok).toBe(true);
+    // Review 11, L13: a file that names an older train head is stale, even with every PR decided.
+    const decisions = [{ pr: 2, head: r.y, decision: "in", via: "train 5", reason: "goes into the next train" }];
+    writeFileSync(join(r.dir, DECISIONS_FILE), JSON.stringify({ train: "verify/train-4", trainHead: "af2d0d7ce51c8c549ab3dada1e8ce4b6ad5d9545", decisions }));
+    const stale = run({ cwd: r.dir, api, git });
+    expect(stale.ok).toBe(false);
+    expect(stale.lines.join("\n")).toMatch(/decided at verify\/train-4 @ af2d0d7ce5, but verify\/train-4 is at/);
+    writeFileSync(join(r.dir, DECISIONS_FILE), JSON.stringify({ train: "verify/train-4", trainHead: r.train, decisions }));
+    expect(run({ cwd: r.dir, api, git }).ok).toBe(true);
   });
 
   it("a head git does not have is answered by the compare API (behind or identical = in the train)", () => {

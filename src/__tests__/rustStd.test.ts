@@ -7,7 +7,7 @@ import { describe, it, expect } from "vitest";
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 // @ts-expect-error — plain .mjs script without type declarations
-import { STD_CRATES, rustCounts, rustGreen } from "../../scripts/lib/rustStd.mjs";
+import { STD_CRATES, isRustTestCommand, rustCounts, rustGreen } from "../../scripts/lib/rustStd.mjs";
 // @ts-expect-error — plain .mjs script without type declarations
 import { runCrates } from "../../scripts/rust-std-tests.mjs";
 
@@ -27,6 +27,24 @@ describe("reading a Rust test run", () => {
     expect(rustGreen(rustCounts("running 4 tests\n"))).toBe(false);
     expect(rustCounts("plan: ok")).toBeNull();
     expect(rustGreen(null)).toBe(false);
+  });
+
+  it("review 11, L8: --no-run, output sent elsewhere and CRLF are read too", () => {
+    // cargo test --no-run builds the binaries and runs none: 0 run, not green.
+    const noRun = "   Compiling x v0.1.0\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.4s\n  Executable unittests src/lib.rs (target/debug/deps/x-1)\n";
+    expect(rustCounts(noRun)).toEqual({ ran: 0, passed: 0, failed: 0, results: 0 });
+    expect(rustGreen(rustCounts(noRun))).toBe(false);
+    // `cargo test > log`: nothing printed; the command says it was a Rust test run.
+    for (const cmd of ["cargo test --offline > /tmp/log", "cargo +stable test -p x", "rustc --edition 2021 --test src/lib.rs -o t && ./t > /dev/null", "cargo nextest run"]) {
+      expect(isRustTestCommand(cmd), cmd).toBe(true);
+      expect(rustGreen(rustCounts("", cmd)), cmd).toBe(false);
+    }
+    expect(isRustTestCommand("node scripts/plan/build.mjs --check")).toBe(false);
+    expect(rustCounts("", "npm test")).toBeNull();
+    // CRLF (a Windows runner, a log saved there).
+    const crlf = "running 3 tests\r\n...\r\ntest result: ok. 3 passed; 0 failed; 0 ignored\r\n";
+    expect(rustCounts(crlf)).toEqual({ ran: 3, passed: 3, failed: 0, results: 1 });
+    expect(rustGreen(rustCounts("running 0 tests\r\n\r\ntest result: ok. 0 passed; 0 failed;\r\n"))).toBe(false);
   });
 
   it("names the std-only crates the review asked for, and each entry exists", () => {

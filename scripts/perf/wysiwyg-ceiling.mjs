@@ -23,7 +23,8 @@
  * --check exits 1 when the ceiling in src/editor/wysiwygCeiling.ts is above
  * what the measurement supports (too loose: large notes would freeze). A
  * ceiling far below it is reported but not failed: moving it up is a
- * product decision. Without the report it exits 0 and says what is owed.
+ * product decision. Without the report it says what is owed, and --check
+ * exits 1 (review 11, L13: a check with nothing to check is not green).
  */
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
@@ -76,6 +77,10 @@ function main(argv) {
   const cur = currentCeiling();
   if (!existsSync(file)) {
     console.log(`wysiwyg-ceiling: no ${file}. The calibration is owed: npm run perf:wysiwyg-ceiling (Chromium with Milkdown installed). Current ceiling: ${cur.bytes} B / ${cur.blocks} blocks (research R5.6).`);
+    if (argv.includes("--check")) {
+      console.error("✖ --check without a report: nothing was measured, so the ceiling is not checked");
+      return 1;
+    }
     return 0;
   }
   const report = JSON.parse(readFileSync(file, "utf8"));

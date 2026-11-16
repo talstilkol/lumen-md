@@ -22,7 +22,7 @@ import { describe, expect, it } from "vitest";
 import Papa from "papaparse";
 import { edgeId, entityId, ENTITY_TYPES, PREDICATES, type Edge, type Entity } from "../entities/model";
 import { makeProvenance } from "../entities/provenance";
-import { entityIri, edgeIri, splitGraphMLList, toGraphML, toJsonLd, toNeo4jCsv, toTurtle } from "../entities/export";
+import { entityIri, edgeIri, graphmlId, splitGraphMLList, toGraphML, toJsonLd, toNeo4jCsv, toTurtle } from "../entities/export";
 import type { EntityGraph } from "../entities/store";
 import { prepareForExportSync } from "../lib/redaction";
 
@@ -273,6 +273,14 @@ describe("W12.E8 every field round-trips through each format (60 seeded random g
     }
   });
 
+  it("GraphML: ids that differ only in a control character stay different (review 11, L10)", () => {
+    for (const [a, b] of [["a\u0001b", "ab"], ["x\uFFFE", "x"], ["50%", "50%25"], ["p\u0000", "p%00"]]) {
+      expect(graphmlId(a), `${JSON.stringify(a)} vs ${JSON.stringify(b)}`).not.toBe(graphmlId(b));
+      expect(graphmlId(a)).not.toMatch(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]/);
+    }
+    expect(graphmlId("plain-id_1")).toBe("plain-id_1");
+  });
+
   it("GraphML: well-formed for every seed; ids, names, aliases (with | inside), quotes and notes come back", () => {
     for (const seed of SEEDS) {
       const g = randomGraph(seed);
@@ -282,7 +290,7 @@ describe("W12.E8 every field round-trips through each format (60 seeded random g
       const nodes = new Map([...doc.getElementsByTagName("node")].map((n) => [n.getAttribute("id")!, n]));
       expect(nodes.size, `seed ${seed}`).toBe(g.entities.length);
       for (const e of g.entities) {
-        const n = nodes.get(xmlable(e.id));
+        const n = nodes.get(graphmlId(e.id));
         expect(n, `seed ${seed}: ${JSON.stringify(e.id)}`).toBeDefined();
         expect(dataOf(n!, "n_name"), `seed ${seed}`).toBe(xmlable(clean(e.name)));
         expect(sortStr(splitGraphMLList(dataOf(n!, "n_aliases"))), `seed ${seed}`).toEqual(sortStr(e.aliases.map((a) => xmlable(clean(a)))));
@@ -290,9 +298,9 @@ describe("W12.E8 every field round-trips through each format (60 seeded random g
       const edges = new Map([...doc.getElementsByTagName("edge")].map((n) => [n.getAttribute("id")!, n]));
       expect(edges.size, `seed ${seed}`).toBe(g.edges.length);
       for (const x of g.edges) {
-        const el = edges.get(xmlable(x.id));
+        const el = edges.get(graphmlId(x.id));
         expect(el, `seed ${seed}: ${JSON.stringify(x.id)}`).toBeDefined();
-        expect([el!.getAttribute("source"), el!.getAttribute("target")]).toEqual([xmlable(x.subject), xmlable(x.object)]);
+        expect([el!.getAttribute("source"), el!.getAttribute("target")]).toEqual([graphmlId(x.subject), graphmlId(x.object)]);
         expect(nodes.has(el!.getAttribute("source")!) && nodes.has(el!.getAttribute("target")!), `seed ${seed}: the edge ends are nodes`).toBe(true);
         expect([dataOf(el!, "e_quote"), dataOf(el!, "e_note"), dataOf(el!, "e_anchor")], `seed ${seed}`).toEqual([xmlable(clean(x.provenance.quote)), xmlable(x.provenance.note), xmlable(x.provenance.anchor)]);
       }

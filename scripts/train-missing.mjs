@@ -157,6 +157,17 @@ export function report(v, train) {
   return lines;
 }
 
+/**
+ * Review 11, L13: the decisions file records the train and head it was decided at
+ * (`train`, `trainHead`); when the train has moved since, the file is stale even if
+ * every PR still has a decision. Null when it is current (or records neither).
+ */
+export function staleTrainHead(file, train, trainHead) {
+  if (!file || (file.trainHead === undefined && file.train === undefined)) return null;
+  if (file.train === train && file.trainHead === trainHead) return null;
+  return `decided at ${file.train ?? "?"} @ ${String(file.trainHead ?? "?").slice(0, 10)}, but ${train} is at ${trainHead.slice(0, 10)}: re-run train:missing on this head and record it in "trainHead"`;
+}
+
 const gitIn = (cwd) => (...a) => execFileSync("git", a, { cwd, encoding: "utf8", maxBuffer: 1 << 28, stdio: ["ignore", "pipe", "pipe"] }).trim();
 
 /**
@@ -184,6 +195,12 @@ export function run({ cwd = process.cwd(), remote = "origin", train, decisions =
   const trainHead = git("rev-parse", `${remote}/${t}`);
   const file = JSON.parse(readFileSync(resolve(cwd, decisions), "utf8"));
   const v = classify(openPulls(api, repo), file, ancestry({ git, api, repo, trainHead }), (n) => pullCommits(api, repo, n));
+  // Review 11, L13: a file that records the train head it was decided at must name this train's head.
+  const at = staleTrainHead(file, t, trainHead);
+  if (at) {
+    v.problems.push(at);
+    v.ok = false;
+  }
   return { train: t, trainHead, ...v, lines: report(v, t) };
 }
 
