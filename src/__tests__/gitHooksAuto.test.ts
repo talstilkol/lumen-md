@@ -2,7 +2,7 @@
  * W10.E56 (W8.9) and W10.E57 (W8.10): the hooks need no one to install them,
  * and the lane's STATE.md is ticked every hour without anyone starting it.
  *
- * - `npm install` / `npm ci` run `prepare` → scripts/install-git-hooks.mjs,
+ * - `npm install` / `npm ci` run `prepare` → scripts/prepare.mjs → scripts/install-git-hooks.mjs,
  *   which writes the pre-push hook (lockfile drift, then ci:local) and the
  *   reference-transaction hook (lane state) into the clone — never over a
  *   hook that is someone else's, never in CI.
@@ -73,7 +73,9 @@ const env = (extra: Record<string, string> = {}) => {
 describe("the hooks install themselves (W10.E56)", () => {
   it("package.json runs the installer on every npm install / npm ci, and never fails the install on it", () => {
     const pkg = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")) as { scripts: Record<string, string> };
-    expect(pkg.scripts.prepare).toBe("node scripts/install-git-hooks.mjs || exit 0");
+    expect(pkg.scripts.prepare).toBe("node scripts/prepare.mjs || exit 0");
+    // scripts/prepare.mjs runs the installer first (src/__tests__/prepareScript.test.ts runs it in a scratch clone).
+    expect(readFileSync(join(ROOT, "scripts/prepare.mjs"), "utf8")).toContain('"scripts/install-git-hooks.mjs"');
   });
 
   it("plan: a fresh clone gets both hooks; ours are refreshed; someone else's are kept", () => {

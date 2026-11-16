@@ -16,7 +16,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { execFileSync, spawnSync } from "node:child_process";
-import { chmodSync, copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { HOOK_BODY } from "../../scripts/lib/ciLocal.mjs";
@@ -37,6 +37,10 @@ function lab() {
     GIT_COMMITTER_EMAIL: "t@example.com",
     LUMEN_LANE_STATE: "",
     LUMEN_LANE_STATE_DIR: "",
+    // No background tick here: this test is the manual resume path, and a watcher's first tick (it runs
+    // `tick` at start, with ls-remote) would race the "cut" branch into STATE.md before resume looks.
+    // The watcher has its own test (gitHooksAuto.test.ts).
+    LUMEN_LANE_WATCH: "0",
   };
   delete (env as Record<string, string | undefined>).LUMEN_LANE_STATE;
   delete (env as Record<string, string | undefined>).LUMEN_LANE_STATE_DIR;
@@ -104,6 +108,8 @@ describe("lane state: stop anywhere, resume without redoing work (W8.10)", () =>
     try {
       const sha = L.commit("done", "work");
       L.push("done");
+      // LUMEN_LANE_WATCH=0: the hook records, and leaves no watcher behind.
+      for (const at of [L.main, L.wt("done")]) expect(existsSync(resolve(at, L.git(at, "rev-parse", "--git-path", "lumen-lane-watch.json")))).toBe(false);
       const row = parseBranches(readFileSync(L.state, "utf8")).find((r) => r.branch === "done")!;
       expect(row.pushed).toBe(sha.slice(0, row.pushed!.length));
       expect(readFileSync(L.state, "utf8")).toMatch(new RegExp(`## Pushes[\\s\\S]*done[\\s\\S]*${sha.slice(0, 10)}`));

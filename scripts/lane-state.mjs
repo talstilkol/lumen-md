@@ -19,7 +19,8 @@
  *        `tick` now and every N minutes, until stopped
  *   node scripts/lane-state.mjs ensure-watch   what the reference-transaction hook calls: starts
  *        `watch` in the background for the lane's STATE.md unless one already runs (W10.E57),
- *        so the hourly tick needs no one to start it ($LUMEN_LANE_TICK_MIN: the interval)
+ *        so the hourly tick needs no one to start it ($LUMEN_LANE_TICK_MIN: the interval;
+ *        $LUMEN_LANE_WATCH=0: start none)
  *   node scripts/lane-state.mjs tick <STATE.md> [--no-remote]       once: Updated, and any
  *        Branches head that origin moved (ls-remote) recorded
  *   node scripts/lane-state.mjs record <STATE.md> --branch <b> --sha <sha>
@@ -141,6 +142,9 @@ const isAlive = (pid) => {
 };
 
 function ensureWatch() {
+  // $LUMEN_LANE_WATCH=0: this clone records pushes but starts no background tick (a test of the manual
+  // resume path, or a lane that runs `watch` itself); the hook then leaves no process behind.
+  if (process.env.LUMEN_LANE_WATCH === "0") return 0;
   const cfg = laneConfig();
   let running = null;
   try {

@@ -29,7 +29,7 @@ replay.
 
 Two of those writes happen without anyone doing them. `npm install` and
 `npm ci` install both hooks in every clone (the `prepare` script,
-`scripts/install-git-hooks.mjs`; it keeps a hook that is not ours, and does
+`scripts/prepare.mjs`, runs `scripts/install-git-hooks.mjs`; it keeps a hook that is not ours, and does
 nothing in CI or with `LUMEN_NO_HOOKS=1`). The one thing a lane does is say
 where its state lives:
 
@@ -66,7 +66,7 @@ a stop with an unpushed commit; resume, follow it, and no sha arrives twice.
   holds its pid). After a reboot the next ref change starts it again; when
   the STATE.md is deleted the watcher stops. `watch` runs `tick` now and
   every `--every-min` minutes (60 by default; `$LUMEN_LANE_TICK_MIN` for the
-  one the hook starts). A tick writes the Updated time, and records any Branches
+  one the hook starts; `$LUMEN_LANE_WATCH=0` makes the hook start none). A tick writes the Updated time, and records any Branches
   head that origin has moved since. As a cron line instead:
   `0 * * * * cd <clone> && node scripts/lane-state.mjs tick <STATE.md>`.
 

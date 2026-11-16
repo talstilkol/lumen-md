@@ -6,7 +6,7 @@
   "license": "MIT",
   "description": "Lumen — a hybrid markdown editor focused on world-class rendering and turning data into beautiful tables and charts.",
   "scripts": {
-    "prepare": "node scripts/install-git-hooks.mjs || exit 0",
+    "prepare": "node scripts/prepare.mjs || exit 0",
     "predev": "node scripts/copy-pyodide.mjs && node scripts/copy-ruby.mjs && node scripts/copy-ort.mjs && node scripts/copy-quickjs.mjs && node scripts/copy-vad.mjs && node scripts/copy-tesseract.mjs && node scripts/copy-excalidraw.mjs && node scripts/copy-playground-vendor.mjs",
     "dev": "vite",
     "prebuild": "node scripts/copy-pyodide.mjs && node scripts/copy-ruby.mjs && node scripts/copy-ort.mjs && node scripts/copy-quickjs.mjs && node scripts/copy-vad.mjs && node scripts/copy-tesseract.mjs && node scripts/copy-excalidraw.mjs && node scripts/copy-playground-vendor.mjs",
@@ -179,7 +179,6 @@
     "registry:verify": "node scripts/registry-site.mjs --verify",
     "help:check": "node scripts/help-bundle.mjs --check",
     "help:merge-driver": "node scripts/help-merge-driver.mjs --install",
-    "prepare": "node scripts/git-setup.mjs",
     "flags:check": "node scripts/check-flags.mjs",
     "security:audit-claims": "node scripts/security/audit-claims.mjs",
     "bench:models": "node scripts/bench-models.mjs",

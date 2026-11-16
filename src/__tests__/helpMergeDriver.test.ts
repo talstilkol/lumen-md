@@ -109,11 +109,12 @@ describe("help shards and merges (W8.11)", () => {
     }
   });
 
-  it("a clone that ran npm install (prepare → git-setup.mjs) merges with 0 help conflicts, no --install by hand", () => {
+  it("a clone that ran npm install (prepare → prepare.mjs → git-setup.mjs) merges with 0 help conflicts, no --install by hand", () => {
     const r = setup();
     try {
       // package.json's prepare is what npm install runs in every clone.
-      expect(JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")).scripts.prepare).toBe("node scripts/git-setup.mjs");
+      expect(JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")).scripts.prepare).toBe("node scripts/prepare.mjs || exit 0");
+      expect(readFileSync(join(ROOT, "scripts/prepare.mjs"), "utf8")).toContain('"scripts/git-setup.mjs"');
       const gs = (...a: string[]) => spawnSync(process.execPath, ["scripts/git-setup.mjs", ...a], { cwd: r.work, env: r.env, encoding: "utf8" });
       expect(gs("--check").status).toBe(1);
       const first = gs();
