@@ -5,6 +5,7 @@
  *   node scripts/fuzz/run.mjs [--runs 1000000] [--target name,…] [--seed 1]
  *                             [--from 0] [--slow-ms 1000] [--jobs N] [--json]
  *                             [--engine builtin|fast-check] [--out fuzz-findings]
+ *                             [--clock wall|cpu] [--hang-ms <slow-ms>]
  *   npm run fuzz            (1,000,000 inputs per decoder)
  *
  * Each decoder (scripts/fuzz/targets.mjs) runs in its own worker thread on
@@ -21,6 +22,18 @@
  * (`fc.string()` / `fc.json()` arbitraries with shrinking) when the package
  * is installed; it is not in package-lock.json yet (owner command in
  * docs/security/supply-chain).
+ *
+ * `--clock cpu` (W10.D21) times each input by the CPU time of its worker
+ * thread (process.threadCpuUsage) instead of the wall clock. On a shared
+ * machine (a load average of 20+ on 2 cores) the wall clock of a 20 ms parse
+ * reads 100–500 ms, so a slow finding there says more about the neighbours
+ * than about the parser; the thread's CPU time does not move with load. The
+ * default stays the wall clock, so `npm run fuzz` on a quiet machine is
+ * unchanged. `--hang-ms` is the watchdog's wall-clock limit for one input
+ * (default: --slow-ms), so a loaded run can time by CPU at 200 ms and still
+ * stop a real hang. Under `--clock cpu` a hang is also confirmed: the input
+ * runs again alone in a fresh worker, and counts as a hang only if it stalls
+ * again (a "stall" that finishes alone is saved and listed, never hidden).
  *
  * Exit code: 0 when no decoder crashed or hung, 1 otherwise.
  */
@@ -53,6 +66,12 @@ const runs = Number(opt("--runs", "1000000"));
 const seed = Number(opt("--seed", "1"));
 const from = Number(opt("--from", "0"));
 const slowMs = Number(opt("--slow-ms", "1000"));
+const hangMs = Number(opt("--hang-ms", String(slowMs)));
+const clock = opt("--clock", "wall");
+if (!["wall", "cpu"].includes(clock) || !(slowMs > 0) || !(hangMs > 0)) {
+  console.error("--clock is wall or cpu; --slow-ms and --hang-ms are positive numbers");
+  process.exit(2);
+}
 const jobs = Math.max(1, Number(opt("--jobs", String(availableParallelism()))));
 const json = args.includes("--json");
 const engine = opt("--engine", "builtin");
@@ -75,13 +94,13 @@ if (only.length && chosen.length !== only.length) {
 }
 
 /** Run one target from `start` to `end` in a worker; resolves with what happened. */
-function runSlice(t, start, end) {
+function runSlice(t, start, end, { confirm = false } = {}) {
   return new Promise((resolveSlice) => {
     const progress = new SharedArrayBuffer(8);
     const cur = new Int32Array(progress);
     Atomics.store(cur, 0, -1);
     const w = new Worker(join(dirname(SELF), "worker.mjs"), {
-      workerData: { root: ROOT, name: t.name, seed, from: start, to: end, slowMs, progress },
+      workerData: { root: ROOT, name: t.name, seed, from: start, to: end, slowMs, clock, confirm, progress },
       resourceLimits: { maxOldGenerationSizeMb: 1024 },
     });
     let last = -1;
@@ -101,7 +120,7 @@ function runSlice(t, start, end) {
         return;
       }
       // Stuck on one input for longer than the limit (plus a margin for GC).
-      if (i >= 0 && !Atomics.load(cur, 1) && Date.now() - since > slowMs + 500) {
+      if (i >= 0 && !Atomics.load(cur, 1) && Date.now() - since > hangMs + 500) {
         void w.terminate();
         finish({ type: "hang", index: i });
       }
@@ -121,10 +140,23 @@ function save(t, kind, index, error) {
   writeFileSync(`${base}.json`, JSON.stringify({ target: t.name, kind, seed, index, error, replay: `node scripts/fuzz/run.mjs --target ${t.name} --seed ${seed} --from ${index} --runs 1` }, null, 2));
 }
 
+/** Run input `i` alone again: true when it hangs again (or dies), false when it finished within --hang-ms. */
+async function confirmHang(t, i, r) {
+  const m = await runSlice(t, i, i + 1, { confirm: true });
+  if (m.type !== "done" || m.crashes.length > 0) return true;
+  // It finished: still a slow input if it took --slow-ms of CPU.
+  if (m.slow.length) {
+    r.slow += m.slow.length;
+    save(t, "slow", i, `${m.slow[0].ms} ms`);
+  }
+  r.maxMs = Math.max(r.maxMs, m.maxMs);
+  return false;
+}
+
 async function runTarget(t) {
   const started = Date.now();
   if (!present(t, ROOT)) return { name: t.name, status: "not on this branch", lands: t.lands ?? null, about: t.about };
-  const r = { name: t.name, status: "ok", about: t.about, runs: 0, crashes: 0, hangs: 0, slow: 0, maxMs: 0, examples: [] };
+  const r = { name: t.name, status: "ok", about: t.about, runs: 0, crashes: 0, hangs: 0, stalls: 0, slow: 0, maxMs: 0, examples: [] };
   let start = from;
   const end = from + runs;
   while (start < end) {
@@ -144,10 +176,16 @@ async function runTarget(t) {
     // the input, go on after it.
     const i = m.index >= start ? m.index : start;
     r.runs += i - start + 1;
-    if (m.type === "hang") r.hangs++;
+    // --clock cpu: a hang is confirmed by running that input again, alone, in a
+    // fresh worker. On a machine stalled by its neighbours the watchdog can fire
+    // on a 2 ms input (W10.D21: eight such "hangs" in one minute at a load of 38,
+    // each 1–12 ms of CPU replayed); a real hang hangs again, and counts.
+    const stall = m.type === "hang" && clock === "cpu" && (await confirmHang(t, i, r)) === false;
+    if (stall) r.stalls++;
+    else if (m.type === "hang") r.hangs++;
     else r.crashes++;
-    save(t, m.type, i, m.error ?? `stuck for more than ${slowMs} ms`);
-    r.examples.push({ index: i, error: m.error ?? "hang" });
+    save(t, stall ? "stall" : m.type, i, m.error ?? `stuck for more than ${hangMs} ms${stall ? " under load; alone it finished in time (not a hang)" : ""}`);
+    if (!stall) r.examples.push({ index: i, error: m.error ?? "hang" });
     start = i + 1;
   }
   if (r.crashes) r.status = "FAIL";
@@ -189,7 +227,7 @@ await Promise.all(
       results[k] = engine === "fast-check" ? await runFastCheck(chosen[k]) : await runTarget(chosen[k]);
       if (!json) {
         const r = results[k];
-        const line = r.status === "ok" || r.status === "FAIL" || r.status === "known-slow" ? `${r.runs} inputs, ${r.crashes} crashes, ${r.hangs} hangs, ${r.slow} slow (> ${slowMs} ms), slowest ${Math.round(r.maxMs ?? 0)} ms, ${r.seconds ?? "?"} s` : r.status === "not on this branch" ? `not on this branch (lands with plan ${r.lands})` : `unavailable: ${r.error}`;
+        const line = r.status === "ok" || r.status === "FAIL" || r.status === "known-slow" ? `${r.runs} inputs, ${r.crashes} crashes, ${r.hangs} hangs${r.stalls ? ` (+${r.stalls} stalls that finished alone)` : ""}, ${r.slow} slow (> ${slowMs} ms ${clock === "cpu" ? "CPU" : "wall"}), slowest ${Math.round(r.maxMs ?? 0)} ms, ${r.seconds ?? "?"} s` : r.status === "not on this branch" ? `not on this branch (lands with plan ${r.lands})` : `unavailable: ${r.error}`;
         console.log(`${r.status === "FAIL" ? "FAIL" : r.status === "ok" ? "  ok" : r.status === "known-slow" ? "KNOWN" : "  --"} ${r.name.padEnd(16)} ${line}${r.status === "known-slow" ? ` — known finding until ${knownSlow(r.name).expires} (scripts/fuzz/known.json)` : ""}`);
       }
     }
@@ -197,7 +235,7 @@ await Promise.all(
 );
 
 const failed = results.filter((r) => r.status === "FAIL");
-if (json) console.log(JSON.stringify({ seed, runsPerTarget: runs, slowMs, engine, results }));
+if (json) console.log(JSON.stringify({ seed, runsPerTarget: runs, slowMs, hangMs, clock, engine, results }));
 else {
   for (const r of failed) for (const e of r.examples ?? []) console.log(`     ${r.name} #${e.index}: ${e.error ?? `${e.ms} ms`}`);
   console.log(failed.length ? `FAIL: ${failed.map((r) => r.name).join(", ")} (inputs in ${out})` : "OK: no decoder crashed or ran longer than the limit");
