@@ -203,9 +203,11 @@ conflict groups above into checks:
 
 - **Leases.** Before a session starts, the coordinator writes its lane's globs
   into `plan/LEASES.json` (`lanes.<id>.globs`; `shared` lists files every lane
-  may touch). With `LUMEN_LANE=<id>` set and the hook on
-  (`git config core.hooksPath .githooks`), a commit that stages a file outside
-  the lease is refused, with the reason in Hebrew and English.
+  may touch). With `LUMEN_LANE=<id>` set, a commit that stages a file outside
+  the lease is refused by the pre-commit hook, with the reason in Hebrew and
+  English. `scripts/lane.sh` turns the hook on for every lane it opens
+  (`node scripts/lanes/leases.mjs install-hook`: `core.hooksPath=.githooks`,
+  never over another hooksPath you set).
   `node scripts/lanes/leases.mjs lint` reports two lanes holding the same path.
 - **Claims.** `node scripts/lanes/claims.mjs claim <task>` before working on a
   plan task; a second session gets "already claimed by …" and picks another.
