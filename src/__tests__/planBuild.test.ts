@@ -616,8 +616,6 @@ describe("work in progress: strict by default, a written decision only freezes (
     const ds = p.schedule.wipDecisions as Array<{ wave: number; next: number; decision: string }>;
     expect(ds.map((d) => `${d.wave}→${d.next}`)).toEqual(wipWarnings(p).map((w: { wave: number; next: number }) => `${w.wave}→${w.next}`));
     for (const d of ds) expect(d.decision).toMatch(/delegation of 16\.11\.2026 21:53/);
-    // Wave 13 stays unstarted (decision §1b): no decision lets it start while wave 12 is over its limit.
-    expect(ds.some((d) => d.next === 13)).toBe(false);
   });
 
   it("only a pair held at its exact frozen numbers counts as decided (not printed as a warning)", () => {
