@@ -137,11 +137,13 @@ type Open = { name: string; carry: boolean };
  * only when it has that name (`<x></y>` repeated nests in the parser, too);
  * `<x/>` opens x, as the parser reads it, except in svg / math.
  */
-function htmlDepth(text: string, open: readonly Open[], rawAtStart = false): { end: Open[]; max: number } {
+function htmlDepth(text: string, open: readonly Open[], rawAtStart = false, inComment = false): { end: Open[]; max: number } {
   const stack = open.slice();
   let max = stack.length;
   if (!text.includes("<")) return { end: stack, max };
   const rawFrom = rawAtStart ? 0 : htmlBlockOffset(text);
+  // Review 11, L6: what an HTML comment holds is comment text to the parser, not elements.
+  text = blankComments(text, inComment);
   let foreign = stack.filter((e) => e.name === "svg" || e.name === "math").length;
   for (const m of text.matchAll(TAG)) {
     const name = m[2].toLowerCase();
@@ -159,6 +161,33 @@ function htmlDepth(text: string, open: readonly Open[], rawAtStart = false): { e
     if (stack.length > max) max = stack.length;
   }
   return { end: stack.filter((e) => e.carry), max };
+}
+
+/**
+ * `text` with the inside of every HTML comment (`<!--` … `-->`, or to the end
+ * when it is not closed; from the start when `inComment`) replaced by spaces,
+ * so offsets stay where they were.
+ */
+function blankComments(text: string, inComment = false): string {
+  if (!inComment && !text.includes("<!--")) return text;
+  const blank = (t: string) => t.replace(/[^\r\n]/g, " ");
+  let out = "";
+  let at = 0;
+  if (inComment) {
+    const j = text.indexOf("-->");
+    if (j < 0) return blank(text);
+    out = blank(text.slice(0, j)) + "-->";
+    at = j + 3;
+  }
+  for (;;) {
+    const i = text.indexOf("<!--", at);
+    if (i < 0) return out + text.slice(at);
+    // `<!-->` and `<!--->` are whole (empty) comments to the parser too.
+    const j = text.indexOf("-->", i + 2);
+    if (j < 0) return out + text.slice(at, i) + "<!--" + blank(text.slice(i + 4));
+    out += text.slice(at, i) + "<!--" + blank(text.slice(i + 4, Math.max(i + 4, j))) + text.slice(Math.max(i + 4, j), j + 3);
+    at = j + 3;
+  }
 }
 
 /** Quote markers, list markers and indentation before a line's content. */
@@ -300,7 +329,7 @@ function htmlTooDeep(md: string): boolean {
   let open: Open[] = [];
   let pending: RegExp | null = null;
   for (const part of md.split(/(?:\r\n?|\n)[ \t]*(?:\r\n?|\n)/)) {
-    const d = htmlDepth(part, open, pending !== null);
+    const d = htmlDepth(part, open, pending !== null, pending?.source === "-->");
     if (d.max > MAX_HTML_DEPTH) return true;
     open = d.end;
     pending = htmlPending(part, pending);
