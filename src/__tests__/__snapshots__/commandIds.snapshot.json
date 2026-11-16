@@ -2231,6 +2231,20 @@
       "group": "Tools",
       "hint": "The local agent uses your MCP servers' tools, asking before each one that needs it",
       "icon": "Network"
+    },
+    {
+      "id": "text.transliterate",
+      "label": "Transliterate the selection (Yiddish, Ladino)",
+      "group": "Edit",
+      "hint": "Yiddish ↔ YIVO romanisation, Ladino Latin ↔ Hebrew letters",
+      "icon": "Pencil"
+    },
+    {
+      "id": "spell.yiddishDictionary",
+      "label": "Yiddish spelling: word list (download / remove)",
+      "group": "Tools",
+      "hint": "Offline Yiddish spell check (hunspell-yi, 2.4 MB, GPL)",
+      "icon": "Download"
     }
   ],
   "full": [
@@ -4614,6 +4628,20 @@
       "group": "Tools",
       "hint": "The local agent uses your MCP servers' tools, asking before each one that needs it",
       "icon": "Network"
+    },
+    {
+      "id": "text.transliterate",
+      "label": "Transliterate the selection (Yiddish, Ladino)",
+      "group": "Edit",
+      "hint": "Yiddish ↔ YIVO romanisation, Ladino Latin ↔ Hebrew letters",
+      "icon": "Pencil"
+    },
+    {
+      "id": "spell.yiddishDictionary",
+      "label": "Yiddish spelling: word list (download / remove)",
+      "group": "Tools",
+      "hint": "Offline Yiddish spell check (hunspell-yi, 2.4 MB, GPL)",
+      "icon": "Download"
     }
   ],
   "autoSaveOn": [
@@ -4948,6 +4976,8 @@
     "types.studio",
     "ai.screenshotToNote",
     "mcp.settings",
-    "mcp.ask"
+    "mcp.ask",
+    "text.transliterate",
+    "spell.yiddishDictionary"
   ]
 }

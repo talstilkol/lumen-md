@@ -271,6 +271,21 @@ export function Preview({ markdownText, docKey = null, onSourceEdit, focusOffset
   // W12.V6: `layout: dashboard` lays the note's embeds out as a grid.
   const layout = useMemo(() => dashboardProps(dashboardLayout(frontmatter)), [frontmatter]);
 
+  // The note's language tag (plan W7.9): Yiddish, Ladino… from the front matter or the text.
+  const [noteLang, setNoteLang] = useState<string | null>(null);
+  useEffect(() => {
+    let live = true;
+    void import("../text/noteLanguageLoader").then(async ({ documentLanguage, ensureLanguageFont }) => {
+      const tag = await documentLanguage(markdownText);
+      if (!live) return;
+      setNoteLang(tag);
+      void ensureLanguageFont(tag).catch(() => undefined);
+    });
+    return () => {
+      live = false;
+    };
+  }, [markdownText]);
+
   return (
     // `contain: layout` isolates the preview's content growth from
     // shifting siblings. Without it, the async tree state update
@@ -340,7 +355,7 @@ export function Preview({ markdownText, docKey = null, onSourceEdit, focusOffset
           {t("block.renderError", { error })}
         </div>
       )}
-      <div {...layout}>
+      <div {...layout} lang={noteLang ?? undefined}>
         <Frontmatter data={frontmatter} />
         <ErrorBoundary fallback={
           <div style={{ padding: "16px", color: "hsl(0 80% 60%)", border: "1px solid currentColor", borderRadius: "8px", margin: "16px" }}>
