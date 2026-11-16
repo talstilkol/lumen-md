@@ -18,9 +18,9 @@ library**: ChaCha20-Poly1305, BLAKE2b, scrypt and Argon2id are plain
 TypeScript in `src/sync/e2ee/primitives/`. They pass the RFC test vectors,
 the 51 protocol vectors and an independent Python reader, which shows they
 compute the right values, not that they are free of side channels or other
-flaws. The planned move is to `@noble/ciphers` (audited by Cure53) and
-`hash-wasm` for Argon2id, with our code kept only as a test oracle
-([the plan](https://github.com/talstilkol/lumen-md/blob/main/docs/security/crypto-libs.md)).
+flaws. The planned move is to `@noble/ciphers` and `hash-wasm` for
+Argon2id, with our code kept only as a test oracle ([the plan, which
+says why these two](https://github.com/talstilkol/lumen-md/blob/main/docs/security/crypto-libs.md)).
 That move is **blocked for now**: the packages cannot be installed where
 this work is done (no access to the npm registry), so it waits for the
 owner's machine. The wire format does not change with it.

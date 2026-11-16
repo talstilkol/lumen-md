@@ -254,6 +254,8 @@
 # ── Agent tools and MCP: what an agent may do, and what reaches it (review 21) ──
 /mcp-server/src/                         @talstilkol
 /src/agents/mcp/                         @talstilkol
+/src-tauri/mcp-stdio/                    @talstilkol
+/src-tauri/src/mcp_stdio.rs              @talstilkol
 /src/agents/skills/                      @talstilkol
 /src/agents/runtime.ts                   @talstilkol
 /src/agents/untrusted.ts                 @talstilkol

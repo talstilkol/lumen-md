@@ -52,6 +52,7 @@ function configOf(d: Draft): Omit<McpServerConfig, "enabled" | "tools"> {
 
 function ServerLog({ id }: { id: string }) {
   const lines = useSyncExternalStore(subscribeServerLog, () => serverLog(id));
+  // empty-action: the card's "Show tools" button connects to the server, which fills its log
   if (!lines.length) return <p style={muted}>{t("mcpServers.log.empty")}</p>;
   return (
     <pre data-testid={`mcp-log-${id}`} style={{ maxHeight: 160, overflow: "auto", fontSize: 11, direction: "ltr", textAlign: "left", whiteSpace: "pre-wrap" }}>
@@ -141,6 +142,7 @@ export function McpServers({ list = (s: McpServerConfig) => import("../../agents
       <p style={muted}>{t("mcpServers.intro")}</p>
 
       <h3 style={{ fontSize: 14 }}>{t("mcpServers.yours")}</h3>
+      {/* empty-action: the "Add a server" form and the suggested servers below */}
       {!servers.length && <p style={muted}>{t("mcpServers.none")}</p>}
       {servers.map((s) => {
         const listed = tools[s.id];

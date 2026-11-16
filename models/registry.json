@@ -660,9 +660,7 @@
       "runs": "browser",
       "delivery": "user-download",
       "catalog": "YIDDISH_DICT (src/ai/yiddishSpell.ts)",
-      "match": [
-        "alephreish/hunspell-yi"
-      ],
+      "match": ["alephreish/hunspell-yi"],
       "verified": true,
       "notes": "Must never be bundled. The app downloads it from the pinned commit only after an explicit user command, names the licence and authors first (jewishLang.dict.downloadConfirm), and checks each file's SHA-256; that exception is recorded in licenses.allow.json (plan W7.9)."
     },

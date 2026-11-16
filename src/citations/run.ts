@@ -2,6 +2,7 @@
 import "./strings";
 import { t } from "../i18n";
 import { showAiToast } from "../ui/AiToast";
+import { explainError } from "../lib/userError";
 import { ZOTERO_FILE, fromCslJson, invalidateLibrary } from "./library";
 import { desktopZoteroGet, zoteroCslItems } from "./zoteroSync";
 
@@ -112,6 +113,6 @@ export async function citeFromDoi(): Promise<void> {
     window.dispatchEvent(new CustomEvent("lumen-mobile-insert", { detail: { insert: text, cursorOffset: 0 } }));
     showAiToast(t("cite.doi.inserted"), "success");
   } catch (e) {
-    showAiToast(e instanceof DoiNotFoundError ? t("cite.doi.notFound", { doi: e.doi }) : t("cite.doi.failed", { error: (e as Error).message }), "error");
+    showAiToast(e instanceof DoiNotFoundError ? t("cite.doi.notFound", { doi: e.doi }) : t("cite.doi.failed", { error: explainError(e) }), "error");
   }
 }

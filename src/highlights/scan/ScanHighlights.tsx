@@ -16,6 +16,7 @@ import { bookNotePath, safeName } from "../import/notes";
 import { showAiToast } from "../../ui/AiToast";
 import { explainError } from "../../lib/userError";
 import { useFocusTrap } from "../../ui/useFocusTrap";
+import { color } from "../../ui/tokens";
 
 /** Detection runs on a copy this wide; OCR reads the full-size photo. */
 const DETECT_WIDTH = 1400;
@@ -104,7 +105,8 @@ export default function ScanHighlights({ onClose }: Props) {
         g.drawImage(canvas, 0, 0);
         const k = canvas.width / (r.full.width * r.scale);
         g.lineWidth = 2;
-        g.strokeStyle = "#e11d48";
+        // design-allow: a canvas stroke can't read a CSS variable, so the theme's --danger token is resolved here
+        g.strokeStyle = `hsl(${getComputedStyle(document.documentElement).getPropertyValue("--danger").trim()})`;
         for (const m of r.marks) g.strokeRect(m.box.x0 * k, m.box.y0 * k, (m.box.x1 - m.box.x0) * k, (m.box.y1 - m.box.y0) * k);
       }
     } catch (e) {
@@ -168,6 +170,7 @@ export default function ScanHighlights({ onClose }: Props) {
         {busy && <div role="status">{t("hlscan.reading")}</div>}
         {read && !busy && (
           <div role="status" data-testid="scan-found">
+            {/* empty-action: the "Choose a photo" input above takes another page */}
             {passages.length ? t("hlscan.found", { n: passages.length }) : t("hlscan.none")}
           </div>
         )}
@@ -193,7 +196,7 @@ export default function ScanHighlights({ onClose }: Props) {
           <label style={{ ...field, flex: 1 }}>
             {t("hlscan.isbn")}
             <input value={isbn} dir="ltr" inputMode="numeric" onChange={(e) => setIsbn(e.target.value)} aria-invalid={!isbnOk} />
-            {!isbnOk && <span role="alert" style={{ color: "hsl(0 80% 60%)" }}>{t("hlscan.isbnInvalid")}</span>}
+            {!isbnOk && <span role="alert" style={{ color: color.danger }}>{t("hlscan.isbnInvalid")}</span>}
           </label>
           <label style={{ ...field, inlineSize: 90 }}>
             {t("hlscan.page")}

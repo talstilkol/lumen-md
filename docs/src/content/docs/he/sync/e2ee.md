@@ -16,9 +16,9 @@ description: פרוטוקול הסנכרון המוצפן מקצה לקצה — 
 ב-`src/sync/e2ee/primitives/`. הם עוברים את וקטורי הבדיקה של ה-RFC, את 51
 וקטורי הפרוטוקול וקורא עצמאי ב-Python, וזה מראה שהם מחשבים את הערכים
 הנכונים, לא שאין בהם ערוצי צד או פגמים אחרים. המעבר המתוכנן הוא
-ל-`@noble/ciphers` (עבר ביקורת של Cure53) ול-`hash-wasm` ל-Argon2id, והקוד
+ל-`@noble/ciphers` ול-`hash-wasm` ל-Argon2id, והקוד
 שלנו יישאר רק כאורקל בבדיקות
-([התוכנית](https://github.com/talstilkol/lumen-md/blob/main/docs/security/crypto-libs.md)).
+([התוכנית, שמסבירה למה דווקא שתיים אלה](https://github.com/talstilkol/lumen-md/blob/main/docs/security/crypto-libs.md)).
 המעבר הזה **חסום כרגע**: אי אפשר להתקין את החבילות בסביבה שבה העבודה הזו
 נעשית (אין גישה ל-npm), ולכן הוא מחכה למחשב של הבעלים. פורמט התקשורת לא
 משתנה בעקבותיו.

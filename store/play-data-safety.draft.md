@@ -28,6 +28,7 @@ Play counts data the app sends off the device. The routes below are each started
 | Model and dictionary downloads (Hugging Face, GitHub) | Nothing of yours (a download) | Choosing a local model or a dictionary |
 | Canvas fonts, icons and translations | Nothing of yours (static files) | Opening a canvas |
 | Plugins' network requests | Whatever the plugin's request carries, to the destination the plugin names | Installing a plugin and granting it network access; refused under local-only |
+| Outside MCP servers you add | A request for the list of that server's tools; what a tool call sends is listed as the agent's tool request | Adding and enabling a remote MCP server in Settings → MCP servers, then "Show tools" or an agent run that uses it; not in airplane mode, and refused under local-only |
 | Other requests in audit mode | Whatever that request carries; listed so an audit can compare | Audit mode only (lumen.privacy.audit) |
 | Encrypted sync (WebDAV, S3, Dropbox, Google Drive) | Ciphertext only, to the storage you chose | Connecting a sync provider |
 | Diagrams (PlantUML, rendered by kroki.io) | The diagram's source | Confirming the first time a diagram would be sent; refused under local-only |

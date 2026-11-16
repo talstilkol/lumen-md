@@ -14,10 +14,11 @@ import type { BenchEngine, BenchFamily } from "../types";
 
 /**
  * Ollama models the executor runs by name that OLLAMA_CATALOG does not
- * offer: Aya Expanse (non-commercial; modelCatalog.ts names its licence)
- * and the real-model CI's two (scripts/real-tiny-model.mjs).
+ * offer: the real-model CI's two (scripts/real-tiny-model.mjs). Not Aya
+ * Expanse: it is CC-BY-NC (class "forbidden"), and the licence gate fails
+ * on app code that names a forbidden model.
  */
-const ALSO = ["aya-expanse:8b", "qwen3:0.6b", "qwen3:1.7b"];
+const ALSO = ["qwen3:0.6b", "qwen3:1.7b"];
 
 function variant(name: string): BenchEngine {
   return {

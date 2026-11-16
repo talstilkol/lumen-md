@@ -34,6 +34,8 @@ export const RECORDERS = {
   "src/sources/open/gate.ts": () => [],
   // Wikidata entity linking (W12.E10): ledgerFetch with the ledger's own www.wikidata.org rule.
   "src/ui/WikidataLink.tsx": () => [],
+  // W10.C2 (#728 via #978): listing a remote MCP server's tools; its tool calls go through the network gate (agents/network.ts).
+  "src/agents/mcp/registry.ts": (src) => [/reason: `([^`$]+)\$\{/.exec(src)[1]],
 };
 
 /** A call that records into the ledger (or fetches through it). */
