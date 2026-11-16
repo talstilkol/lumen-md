@@ -27,6 +27,12 @@
  * re-export) fails: such a skip would have no call site of its own to carry
  * its reason. Helpers are exported functions or exported const arrow /
  * function expressions, also exported through `export { ... }`.
+ * Review 9, L4: also a default import (`import E from "./_engines"`), a
+ * dynamic import bound to a name or destructured (`const E = await
+ * import("./_engines")`, `const { chromiumOnly } = await import(...)`), and a
+ * call straight off one (`(await import("./_engines")).chromiumOnly(...)`).
+ * Any other use of a dynamic import of ./_engines (`.then(...)`, passed on)
+ * fails like a reference.
  *
  * The check walks the TypeScript AST, so the words in strings and comments
  * do not count. Used by scripts/check-code-hygiene.mjs and
@@ -116,8 +122,28 @@ function engineBindings(sf, helpers) {
   const named = new Map();
   const spaces = new Set();
   const reexports = [];
+  /** Dynamic imports of ./_engines bound to a name or destructured: not references. */
+  const bound = new Set();
+  const visit = (n) => {
+    if (ts.isVariableDeclaration(n) && n.initializer) {
+      const call = enginesImportCall(n.initializer);
+      if (call) {
+        bound.add(call);
+        if (ts.isIdentifier(n.name)) spaces.add(n.name.text);
+        else if (ts.isObjectBindingPattern(n.name))
+          for (const el of n.name.elements) {
+            const key = el.propertyName && ts.isIdentifier(el.propertyName) ? el.propertyName.text : ts.isIdentifier(el.name) ? el.name.text : null;
+            if (key && helpers.has(key) && ts.isIdentifier(el.name)) named.set(el.name.text, key);
+          }
+      }
+    }
+    ts.forEachChild(n, visit);
+  };
+  visit(sf);
   for (const st of sf.statements) {
     if (ts.isImportDeclaration(st) && ts.isStringLiteral(st.moduleSpecifier) && ENGINES_SPEC.test(st.moduleSpecifier.text)) {
+      // A default import holds the module's exports as well (review 9, L4).
+      if (st.importClause?.name) spaces.add(st.importClause.name.text);
       const b = st.importClause?.namedBindings;
       if (b && ts.isNamespaceImport(b)) spaces.add(b.name.text);
       else if (b && ts.isNamedImports(b)) for (const el of b.elements) if (helpers.has((el.propertyName ?? el.name).text)) named.set(el.name.text, (el.propertyName ?? el.name).text);
@@ -127,7 +153,15 @@ function engineBindings(sf, helpers) {
       if (names === null || names.some((n) => helpers.has(n))) reexports.push(st);
     }
   }
-  return { named, spaces, reexports };
+  return { named, spaces, reexports, bound };
+}
+
+/** `import("./_engines")`, also under `await` and parentheses: the import call, else null. */
+function enginesImportCall(e) {
+  while (e && (ts.isParenthesizedExpression(e) || ts.isAwaitExpression(e) || ts.isAsExpression(e))) e = e.expression;
+  if (!e || !ts.isCallExpression(e) || e.expression.kind !== ts.SyntaxKind.ImportKeyword) return null;
+  const a = e.arguments[0];
+  return a && (ts.isStringLiteral(a) || ts.isNoSubstitutionTemplateLiteral(a)) && ENGINES_SPEC.test(a.text) ? e : null;
 }
 
 const REFERENCE = "a skip helper used other than in a call (passed, stored or re-exported): call it where the test skips, with its own `// skip-reason:`";
@@ -142,11 +176,20 @@ export function findSkips(file, text, today = new Date(), helpers = new Set()) {
   const sf = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, kind);
   const lines = text.split(/\r?\n/);
   const out = [];
-  const { named, spaces, reexports } = helpers.size ? engineBindings(sf, helpers) : { named: new Map(), spaces: new Set(), reexports: [] };
-  /** The helper a callee names: `chromiumOnly`, a renamed import, or `E.chromiumOnly`. */
+  const { named, spaces, reexports, bound } = helpers.size ? engineBindings(sf, helpers) : { named: new Map(), spaces: new Set(), reexports: [], bound: new Set() };
+  /** Dynamic imports of ./_engines used in a way this check understands. */
+  const understood = new Set(bound);
+  /** The helper a callee names: `chromiumOnly`, a renamed import, `E.chromiumOnly`, or `(await import("./_engines")).chromiumOnly`. */
   const helperOf = (e) => {
     if (ts.isIdentifier(e)) return named.get(e.text) ?? (helpers.has(e.text) ? e.text : null);
     if (ts.isPropertyAccessExpression(e) && ts.isIdentifier(e.expression) && spaces.has(e.expression.text) && helpers.has(e.name.text)) return e.name.text;
+    if (ts.isPropertyAccessExpression(e) && helpers.has(e.name.text)) {
+      const call = enginesImportCall(e.expression);
+      if (call) {
+        understood.add(call);
+        return e.name.text;
+      }
+    }
     return null;
   };
   const lineOf = (node) => sf.getLineAndCharacterOfPosition(node.getStart(sf)).line + 1;
@@ -155,6 +198,13 @@ export function findSkips(file, text, today = new Date(), helpers = new Set()) {
   const callees = new Set();
   const visit = (node) => {
     if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node) || callees.has(node)) return;
+    if (helpers.size && ts.isCallExpression(node) && enginesImportCall(node) === node && !understood.has(node)) {
+      // (await import("./_engines")).other is not a helper; anything else (.then, passed on) is not understood.
+      const awaited = node.parent && ts.isAwaitExpression(node.parent) ? node.parent : null;
+      const via = awaited?.parent && ts.isParenthesizedExpression(awaited.parent) ? awaited.parent.parent : null;
+      if (!(via && ts.isPropertyAccessExpression(via) && !helpers.has(via.name.text))) reference(node, node.getText(sf));
+      return;
+    }
     if (ts.isCallExpression(node)) {
       const h = helperOf(node.expression);
       const c = skipCallee(node.expression) ?? (h ? { root: node.expression.getText(sf), member: "", helper: true } : null);
