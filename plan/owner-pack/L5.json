@@ -121,7 +121,7 @@
    "src/__tests__/sustainability.test.ts"
   ],
   "changes": ".github/FUNDING.yml (2 lines), public/support.html lines 92, 94, 139, 141, the two tests' 'off' expectations.",
-  "draftPr": "fix/g6-L5-owner-funding",
+  "draftPr": "#1084 (fix/g6-L5-owner-funding)",
   "task": "W5.25"
  }
 ]

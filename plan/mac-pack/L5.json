@@ -254,7 +254,7 @@
    "W11.H14",
    "W11.H18"
   ],
-  "note": "pin-revision.mjs is new in this lane (fix/g6-L5-eval-engine). In the cloud every fetch stops at the proxy (huggingface.co 403, unicode.org 403): the environment, not the script."
+  "note": "pin-revision.mjs is new in this lane (#1081, fix/g6-L5-eval-engine). In the cloud every fetch stops at the proxy (huggingface.co 403, unicode.org 403): the environment, not the script."
  },
  {
   "id": "L5.bidi",
