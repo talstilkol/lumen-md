@@ -112,7 +112,7 @@ describe("running every writing agent with the network trapped (W13.W1)", () => 
   } as const;
 
   it("there are writing agents to run", () => {
-    expect(writingAgents().map((a) => a.id)).toEqual(expect.arrayContaining(["proofreaderHe"]));
+    expect(writingAgents().map((a) => a.id)).toEqual(expect.arrayContaining(["styleCoach", "toneShifter", "concision"]));
   });
 
   for (const lang of ["en", "he"] as const) {

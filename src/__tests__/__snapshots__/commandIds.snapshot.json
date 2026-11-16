@@ -2306,6 +2306,20 @@
       "icon": "Sparkles"
     },
     {
+      "id": "writing.shorten",
+      "label": "Writing: Shorten by 30%",
+      "group": "Tools",
+      "hint": "Within ±10% of the target, with no number or name lost or added",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.expand",
+      "label": "Writing: Bullets → Paragraph",
+      "group": "Tools",
+      "hint": "One paragraph from the selected bullets, nothing invented; marked as AI text",
+      "icon": "Sparkles"
+    },
+    {
       "id": "writing.panel",
       "label": "Writing: Show Suggestions",
       "group": "Tools",
@@ -4779,6 +4793,20 @@
       "icon": "Sparkles"
     },
     {
+      "id": "writing.shorten",
+      "label": "Writing: Shorten by 30%",
+      "group": "Tools",
+      "hint": "Within ±10% of the target, with no number or name lost or added",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.expand",
+      "label": "Writing: Bullets → Paragraph",
+      "group": "Tools",
+      "hint": "One paragraph from the selected bullets, nothing invented; marked as AI text",
+      "icon": "Sparkles"
+    },
+    {
       "id": "writing.panel",
       "label": "Writing: Show Suggestions",
       "group": "Tools",
@@ -5139,6 +5167,8 @@
     "writing.toneFriendly",
     "writing.registerHigh",
     "writing.registerSpoken",
+    "writing.shorten",
+    "writing.expand",
     "writing.panel",
     "types.page",
     "types.studio"
