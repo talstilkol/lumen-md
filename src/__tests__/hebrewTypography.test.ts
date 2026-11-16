@@ -3,7 +3,7 @@
  * code, links or the frontmatter changes, and each rule can be turned off.
  */
 import { describe, it, expect } from "vitest";
-import { applyEdits, editsForKeystroke, hebrewTypography, protectedRanges, RLM, typographyEdits, TYPO_RULES, type TypoRule } from "../text/hebrewTypography";
+import { applyEdits, editsForKeystroke, hebrewTypography, keystrokeEdits, protectedRanges, RLM, typographyEdits, TYPO_RULES, type TypoRule } from "../text/hebrewTypography";
 
 /** [what was typed, what it becomes with every rule on]. */
 const GOLDEN: Array<[string, string]> = [
@@ -139,10 +139,33 @@ function typeOut(s: string): string {
     text += ch;
     const head = text.length;
     const lineStart = text.lastIndexOf("\n", head - 1) + 1;
-    const edits = editsForKeystroke(typographyEdits(text, {}, { from: lineStart, to: head }), head, ch, head);
-    text = applyEdits(text, edits);
+    text = applyEdits(text, keystrokeEdits(text, {}, { from: lineStart, to: head }, head));
   }
   return text;
+}
+
+/**
+ * Type `s`, and when a keystroke brings its first fix, Ctrl+Z it (the text
+ * stays as typed); then type the rest. Returns the text and whether a later
+ * keystroke made that same fix again.
+ */
+function typeUndoFirstFix(s: string): { text: string; fixed: boolean; redone: boolean } {
+  let text = "";
+  let undone: number[] | null = null;
+  let redone = false;
+  for (const ch of s) {
+    text += ch;
+    const head = text.length;
+    const edits = keystrokeEdits(text, {}, { from: 0, to: head }, head);
+    if (!edits.length) continue;
+    if (undone === null) {
+      undone = edits.map((e) => e.from);
+      continue;
+    }
+    if (edits.some((e) => undone!.includes(e.from))) redone = true;
+    text = applyEdits(text, edits);
+  }
+  return { text, fixed: undone !== null, redone };
 }
 
 describe("as you type (W2.9)", () => {
@@ -171,5 +194,35 @@ describe("as you type (W2.9)", () => {
       text = applyEdits(text, editsForKeystroke(typographyEdits(text, {}, { from: 0, to: head }), head, ch, head));
     }
     expect(text).toBe('צה"ל הוא צבא');
+  });
+});
+
+describe("Ctrl+Z on a fix sticks (W2.9)", () => {
+  // Each of these brings a fix as it is typed; undoing it must leave the character as typed for good.
+  const cases: Array<[string, string]> = [
+    ["ג'ירפה", "ג'ירפה"],
+    ['צה"ל הוא', 'צה"ל הוא'],
+    ["בית-ספר", "בית-ספר"],
+    ["אחד - שניים", "אחד - שניים"],
+    ["הנחה של 50 % היום", "הנחה של 50 % היום"],
+    ["הנחה של %50 היום", "הנחה של %50 היום"],
+  ];
+  it.each(cases)("%s: the undone fix is not made again by the next keys", (typed, want) => {
+    const r = typeUndoFirstFix(typed);
+    expect(r.fixed).toBe(true);
+    expect(r.redone).toBe(false);
+    expect(r.text).toBe(want);
+  });
+
+  it("a fix the previous key did not offer is still made (the deferred ״ of צה\"ל, the closing ”)", () => {
+    const text = 'צה"ל';
+    expect(keystrokeEdits(text, {}, { from: 0, to: 4 }, 4)).toEqual([expect.objectContaining({ from: 2, to: 3, insert: "״" })]);
+    const q = 'אמר "שלום" ';
+    expect(applyEdits(q, keystrokeEdits(q, {}, { from: 0, to: q.length }, q.length))).toBe('אמר "שלום” ');
+  });
+
+  it("only the line being typed is looked at", () => {
+    const text = "ג'\nאב";
+    expect(keystrokeEdits(text, {}, { from: 3, to: 5 }, 5)).toEqual([]);
   });
 });

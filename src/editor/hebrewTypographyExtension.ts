@@ -4,14 +4,15 @@
  * character just completed: צה"ל becomes צה״ל when the ל is typed, a
  * closing " becomes ” as it is typed. The fix is its own undo step, so
  * Ctrl+Z right after it gives back the character as typed — and it is not
- * redone, because later keystrokes only fix what they themselves complete.
+ * redone, because later keystrokes only fix what they themselves complete
+ * and never a fix the key before them already offered (keystrokeEdits).
  * Code, links and the frontmatter are never touched.
  */
 
 import { ViewPlugin, type EditorView, type ViewUpdate } from "@codemirror/view";
 import { isolateHistory } from "@codemirror/commands";
 import type { Extension } from "@codemirror/state";
-import { editsForKeystroke, loadTypographySettings, onTypographySettings, typographyEdits, type TypographySettings } from "../text/hebrewTypography";
+import { keystrokeEdits, loadTypographySettings, onTypographySettings, type TypographySettings } from "../text/hebrewTypography";
 
 const HEBREW = /[א-ת]/;
 
@@ -33,10 +34,9 @@ export function hebrewTypographyExtension(): Extension {
         const head = sel.head;
         const line = u.state.doc.lineAt(head);
         if (head === line.from || !HEBREW.test(line.text)) return;
-        const typed = u.state.sliceDoc(head - 1, head);
         const doc = u.state.doc;
-        const text = doc.toString();
-        const edits = editsForKeystroke(typographyEdits(text, this.settings.rules, { from: line.from, to: line.to }), head, typed, line.to);
+        // A fix the previous key already offered and that is still to make was undone: it is not made again.
+        const edits = keystrokeEdits(doc.toString(), this.settings.rules, { from: line.from, to: line.to }, head);
         if (!edits.length) return;
         // Dispatching inside an update is not allowed: right after it, if nothing changed meanwhile.
         setTimeout(() => {
