@@ -13,6 +13,9 @@ const sites = (src: string, file = "e2e/x.spec.ts"): Site[] => findSkips(file, s
 const REASON = "// skip-reason: Playwright's WebKit has no OPFS here | task: 0.5 | until: 2027-05-12";
 const ROOT = join(__dirname, "..", "..");
 
+const ENG = "./_engines";
+const ENG_UP = "../_engines.ts";
+
 describe("skip audit (plan W4.12)", () => {
   it("fails a planted skip without a reason, in every form the runners have", () => {
     const found = sites(
@@ -100,32 +103,35 @@ describe("skip audit (plan W4.12)", () => {
     }
   });
 
+  // The fixtures name the module through ENG, not a literal: the offline train's import
+  // check (scripts/lib/importCheck.mjs) reads TypeScript's pre-processor, which takes an
+  // `import … from "./_engines"` at a line start of a template for a real import.
   it("a helper is seen however it is imported, and one used but not called fails (R8b-L4)", () => {
     const engines = 'import { test } from "@playwright/test";\nexport function chromiumOnly(b: string, w: string): void {\n  ' + REASON + '\n  test.skip(b !== "chromium", w);\n}\nexport const arrowOnly = (b: string): void => {\n  ' + REASON + '\n  test.skip(b !== "chromium");\n};\nconst later = function (): void {\n  ' + REASON + '\n  test.skip(true);\n};\nexport { later as laterOnly };\nexport const notASkip = (): number => 1;\nexport type Gap = "x";\n';
     const h = skipHelpers(engines);
     expect([...h].sort()).toEqual(["arrowOnly", "chromiumOnly", "laterOnly"]);
     const count = (src: string) => findSkips("e2e/x.spec.ts", src, TODAY, h);
     // The reviewer's four cases (review 8b): base saw only the first.
-    expect(count(`import { chromiumOnly } from "./_engines";\ntest("x", ({browserName}) => { chromiumOnly(browserName, "the pixel baseline"); });`)).toHaveLength(1);
-    expect(count(`import * as E from "./_engines";\ntest("x", ({browserName}) => { E.chromiumOnly(browserName, "the pixel baseline"); });`).map((s) => s.call)).toEqual(["E.chromiumOnly"]);
-    expect(count(`import { chromiumOnly as only } from "./_engines";\ntest("x", ({browserName}) => { only(browserName, "the pixel baseline"); });`).map((s) => s.call)).toEqual(["only"]);
-    const ref = count(`import { laterOnly } from "./_engines";\n["a fake microphone"].forEach(laterOnly);`);
+    expect(count(`import { chromiumOnly } from "${ENG}";\ntest("x", ({browserName}) => { chromiumOnly(browserName, "the pixel baseline"); });`)).toHaveLength(1);
+    expect(count(`import * as E from "${ENG}";\ntest("x", ({browserName}) => { E.chromiumOnly(browserName, "the pixel baseline"); });`).map((s) => s.call)).toEqual(["E.chromiumOnly"]);
+    expect(count(`import { chromiumOnly as only } from "${ENG}";\ntest("x", ({browserName}) => { only(browserName, "the pixel baseline"); });`).map((s) => s.call)).toEqual(["only"]);
+    const ref = count(`import { laterOnly } from "${ENG}";\n["a fake microphone"].forEach(laterOnly);`);
     expect(ref).toHaveLength(1);
     expect(ref[0].problems).toEqual([expect.stringMatching(/used other than in a call/)]);
     // An annotated reference still fails: it has no call site of its own.
-    expect(count(`import { chromiumOnly } from "./_engines";\n${REASON}\nconst f = chromiumOnly;`)[0].problems).toEqual([expect.stringMatching(/used other than in a call/)]);
+    expect(count(`import { chromiumOnly } from "${ENG}";\n${REASON}\nconst f = chromiumOnly;`)[0].problems).toEqual([expect.stringMatching(/used other than in a call/)]);
     // The exported const arrow helper, and the namespace in every escaping form.
-    expect(count(`import { arrowOnly } from "../_engines.ts";\n${REASON}\narrowOnly(browserName);`).map((s) => s.problems)).toEqual([[]]);
+    expect(count(`import { arrowOnly } from "${ENG_UP}";\n${REASON}\narrowOnly(browserName);`).map((s) => s.problems)).toEqual([[]]);
     const escapes = ["const f = E.chromiumOnly;", "use(E);", 'E["chromiumOnly"](b, "x");', "const { chromiumOnly: c } = E;", "x({ chromiumOnly });"];
     // Joined, not a template: a template's new lines would put "import" at a line start of the compiled test.
-    const both = (esc: string) => ['import * as E from "./_engines";', 'import { chromiumOnly } from "./_engines";', esc].join("\n");
+    const both = (esc: string) => [`import * as E from "${ENG}";`, `import { chromiumOnly } from "${ENG}";`, esc].join("\n");
     const missed = escapes.filter((esc) => !count(both(esc)).some((s) => s.problems.some((p) => /other than in a call/.test(p))));
     expect(missed).toEqual([]);
     // A re-export moves the helper out of sight.
-    expect(count(`export { chromiumOnly } from "./_engines";`)[0].problems).toEqual([expect.stringMatching(/used other than in a call/)]);
-    expect(count(`export * from "./_engines";`)).toHaveLength(1);
+    expect(count(`export { chromiumOnly } from "${ENG}";`)[0].problems).toEqual([expect.stringMatching(/used other than in a call/)]);
+    expect(count(`export * from "${ENG}";`)).toHaveLength(1);
     // Not helpers: the type, a non-skipping export, an unrelated module's names, a property named like a helper.
-    const plain = ['import { notASkip, type Gap } from "./_engines";', 'import * as E from "./_engines";', 'import { only } from "./other";', 'const g: Gap = "x"; notASkip(); E.notASkip(); only(); const o = { chromiumOnly: 1 }; o.chromiumOnly;'];
+    const plain = [`import { notASkip, type Gap } from "${ENG}";`, `import * as E from "${ENG}";`, 'import { only } from "./other";', 'const g: Gap = "x"; notASkip(); E.notASkip(); only(); const o = { chromiumOnly: 1 }; o.chromiumOnly;'];
     expect(count(plain.join("\n"))).toEqual([]);
     // The same file with a helper call in it is seen (so the empty result above is not a parse failure).
     expect(count([...plain, "E.chromiumOnly(b, \"x\");"].join("\n"))).toHaveLength(1);
@@ -137,7 +143,7 @@ describe("skip audit (plan W4.12)", () => {
     try {
       mkdirSync(join(dir, "e2e"));
       writeFileSync(join(dir, "e2e", "_engines.ts"), engines);
-      writeFileSync(join(dir, "e2e", "a.spec.ts"), 'import * as E from "./_engines";\ntest("x", ({ browserName }) => {\n  E.chromiumOnly(browserName, "x");\n});\n');
+      writeFileSync(join(dir, "e2e", "a.spec.ts"), `import * as E from "${ENG}";\ntest("x", ({ browserName }) => {\n  E.chromiumOnly(browserName, "x");\n});\n`);
       const r = auditSkips(dir, { today: TODAY });
       expect(r.e2eHelperCount).toBe(1);
       expect(r.violations).toEqual([{ file: "e2e/a.spec.ts", line: 3, rule: "skip-reason", text: expect.stringMatching(/^E\.chromiumOnly: no `\/\/ skip-reason:/) }]);
