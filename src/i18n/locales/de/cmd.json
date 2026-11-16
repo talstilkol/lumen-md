@@ -4,7 +4,7 @@
   "cmd.a11y.whereAmI": "Cursorposition ansagen",
   "cmd.a11y.whereAmI.hint": "Zeile, Spalte und die Überschrift darüber, vom Screenreader gelesen",
   "cmd.academic.choose": "Akademischer Kalender: Hochschule wählen…",
-  "cmd.academic.choose.hint": "Semester, Prüfungszeiträume und Ferien in der Tagesnotiz",
+  "cmd.academic.choose.hint": "Semester, Prüfungszeiträume und Ferien in der Tagesnotiz ({{academic}})",
   "cmd.academic.ics": "Akademischen Kalender exportieren (ICS)",
   "cmd.academic.ics.hint": "Das Jahr der Hochschule als Kalenderdatei",
   "cmd.ai.actionItems": "KI: Aufgaben extrahieren",

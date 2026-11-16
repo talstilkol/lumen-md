@@ -4,7 +4,7 @@
   "cmd.a11y.whereAmI": "إعلان موضع المؤشر",
   "cmd.a11y.whereAmI.hint": "السطر والعمود والعنوان أعلاه، بقارئ الشاشة",
   "cmd.academic.choose": "التقويم الأكاديمي: اختيار مؤسسة…",
-  "cmd.academic.choose.hint": "الفصول ومواعيد الامتحانات والعطل في الملاحظة اليومية",
+  "cmd.academic.choose.hint": "الفصول ومواعيد الامتحانات والعطل في الملاحظة اليومية ({{academic}})",
   "cmd.academic.ics": "تصدير التقويم الأكاديمي (ICS)",
   "cmd.academic.ics.hint": "سنة المؤسسة كملف تقويم",
   "cmd.ai.actionItems": "AI: استخراج المهام",
