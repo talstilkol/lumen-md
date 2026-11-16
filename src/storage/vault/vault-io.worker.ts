@@ -3,6 +3,7 @@
  * (sync access handles exist only here). The logic is ./vaultIoFs.ts; this file only
  * wires it to messages. Started by ./opfsSyncWrite.ts.
  */
+import "../../ai/workerLedgerInstall"; // first: what this worker fetches reaches the privacy ledger (plan 2.4, W10.D22)
 import { handleRead, handleWrite, type DirLike, type ReadRequest, type WriteRequest } from "./vaultIoFs";
 
 const scope = self as unknown as { onmessage: ((e: MessageEvent<WriteRequest | ReadRequest>) => void) | null; postMessage(m: unknown, transfer?: Transferable[]): void };

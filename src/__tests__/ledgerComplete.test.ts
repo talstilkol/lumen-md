@@ -100,7 +100,7 @@ describe("worker requests reach the ledger", () => {
     // The six the audit named are among them (2.4), and nothing was missed by the walk.
     const names = workers.map((w) => relative(src, w).replace(/\\/g, "/"));
     for (const w of ["ai/dictation/dictation.worker.ts", "ai/tts/piper.worker.ts", "ai/nikud.worker.ts", "ai/hebrewSpell.worker.ts", "plugins/ruby/ruby.worker.ts", "agents/python/python.worker.ts", "ai/transformers.worker.ts", "ai/webllm.worker.ts"]) expect(names).toContain(w);
-    expect(workers.length).toBeGreaterThanOrEqual(16);
+    expect(workers.length).toBeGreaterThanOrEqual(20); // 16 at W10.D22, +4 on train 7 (extract, render, asOf, vault-io)
     const without: string[] = [];
     for (const w of workers) {
       const text = readFileSync(w, "utf8");

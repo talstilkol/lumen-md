@@ -7,6 +7,7 @@
  * starts a download); otherwise the rules run alone and the reply says
  * `rules-only`, which the UI shows.
  */
+import "../../ai/workerLedgerInstall"; // first: what this worker fetches reaches the privacy ledger (plan 2.4, W10.D22)
 import { extractEntities, type NerModel } from "./run";
 import type { ExtractRequest, ExtractReply } from "./protocol";
 
