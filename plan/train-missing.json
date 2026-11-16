@@ -1,9 +1,9 @@
 {
  "about": "W10.F7: a decision for every open PR whose head is not in the train (npm run train:missing). in = a task or train brings it; rejected = it will not go in, and why; replaced = what carries it instead. A decision is about one head: a PR that moves needs a new one.",
  "train": "verify/train-7",
- "trainHead": "fb75b1dd25885ff91f32170215af18b00899512d",
+ "trainHead": "af2d0d7ce51c8c549ab3dada1e8ce4b6ad5d9545",
  "decided": "2026-11-16",
- "note": "Lane INT2: #999 (#985's first commit 643c440e0f, the plan sync + P0 DoDs) merged into verify/train-7 @ 6516a3586b, so #999 is in the train and needs no decision. #985 is marked 'pending' with its reason: its strict-WIP commit waits for the owner's WIP decisions. 'pending' is not a value the checker accepts, so train:missing and the repo-file test in trainMissing.test.ts fail on it until the owner decides (the check was not loosened). Before: Lane F8 (review 8): re-run against the F8 integration head 2cb1792f1d (13 F8 PRs #986-#998 merged into verify/train-7 @ eba3a0eaee). The five dependabot bumps (#160 #161 #162 #264 #325) were re-keyed to their rebased heads and are now decided by number, author and title; #985 (opened after the T8 push) is decided 'in' via W10.B12. Before: T8 integration (lane INT): re-run against the integration head a878a844f1 after merging the 39 T8 PRs (#946-#984); decisions about PRs now in the train were dropped (train:missing ignores them), and #513/#734 are replaced by their re-applied port. Before: lane A1 (T8) decided every open PR outside verify/train-7 @ 3100c18c43 (ports #957-#983; evidence in the lane's decisions.tsv).",
+ "note": "Lane g2-L2 (W10.F7): re-run against verify/train-7 @ af2d0d7ce5 — 724 open PR heads in the train, 64 outside it, every one decided, 0 stale, 0 undecided; #985 moved from 'pending' (not a valid decision) to 'in' via W10.G6. Before: Lane INT2: #999 (#985's first commit 643c440e0f, the plan sync + P0 DoDs) merged into verify/train-7 @ 6516a3586b, so #999 is in the train and needs no decision. #985 is marked 'pending' with its reason: its strict-WIP commit waits for the owner's WIP decisions. 'pending' is not a value the checker accepts, so train:missing and the repo-file test in trainMissing.test.ts fail on it until the owner decides (the check was not loosened). Before: Lane F8 (review 8): re-run against the F8 integration head 2cb1792f1d (13 F8 PRs #986-#998 merged into verify/train-7 @ eba3a0eaee). The five dependabot bumps (#160 #161 #162 #264 #325) were re-keyed to their rebased heads and are now decided by number, author and title; #985 (opened after the T8 push) is decided 'in' via W10.B12. Before: T8 integration (lane INT): re-run against the integration head a878a844f1 after merging the 39 T8 PRs (#946-#984); decisions about PRs now in the train were dropped (train:missing ignores them), and #513/#734 are replaced by their re-applied port. Before: lane A1 (T8) decided every open PR outside verify/train-7 @ 3100c18c43 (ports #957-#983; evidence in the lane's decisions.tsv).",
  "decisions": [
   {
    "pr": 109,
@@ -432,8 +432,9 @@
   {
    "pr": 985,
    "head": "2a016e18b1e09a8283a90e21ff9f8163686d73bf",
-   "decision": "pending",
-   "reason": "strict-WIP commit awaits owner WIP decisions. Lane INT2: #985's first commit 643c440e0f is in the train via #999 (fix/a6-plan-sync-core); its second commit 2a016e18b1 (--wip-strict by default) turns plan:check red until the owner records plan.schedule.wipDecisions, so it is not decided. The schema has no 'pending' (or 'in, partially'), so train:missing fails on this entry on purpose rather than claim 'in'."
+   "decision": "in",
+   "reason": "#985's first commit 643c440e0f is in verify/train-7 via #999 (fix/a6-plan-sync-core). Its second commit 2a016e18b1 makes the WIP limit strict by default, which turns plan:check red on 11 waves until a wipDecisions entry per wave exists; it is a tightening, so it is brought in, not dropped, by W10.G6 together with those decisions (lane g2-L2, under the owner's delegation of open decisions). Until then the head is outside the train by design.",
+   "via": "W10.G6 (its strict-WIP commit 2a016e18b1 goes in with the per-wave plan.schedule.wipDecisions that W10.G6 records; the first commit 643c440e0f is already in via #999)"
   }
  ]
 }
