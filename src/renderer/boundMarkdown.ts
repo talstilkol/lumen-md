@@ -347,6 +347,11 @@ export function boundMarkdown(input: string): string {
     // container would end inside it, and the rest of the block be parsed.
     if (opens || closes) {
       flush();
+      // A container label past the bounds (`:::note[[[[…`) is raw text, and opens nothing.
+      if (opens && overRuns(line)) {
+        out.push(rawRows([row]));
+        continue;
+      }
       out.push(row);
       if (opens) containers++;
       else containers--;

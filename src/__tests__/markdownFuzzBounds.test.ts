@@ -25,14 +25,15 @@
  * then found: a lone CR read as part of a line (#555134 #196813), a backtick
  * fence with a backtick in its info string and `$$` with text after it
  * taken as fences (#618854 #747704), and lists nested in footnote
- * definitions (#158774 #694468).
+ * definitions (#158774 #694468). The final run: a directive container's
+ * label of thousands of brackets (#21616 #33882 #38881).
  */
 import { describe, it, expect } from "vitest";
 import { generate } from "../../scripts/fuzz/generators";
 import { asRawText, boundMarkdown, MAX_CONTAINER_DEPTH, MAX_DELIMITERS, MAX_HTML_DEPTH, needsBounding } from "../renderer/boundMarkdown";
 import { renderMarkdown } from "../renderer/pipeline";
 
-const FOUND = [655, 17957, 93, 185, 17976, 19495, 9178, 2101, 3877, 12929, 16139, 11087, 1459, 4812, 17461, 21240, 25369, 29767, 72864, 76842, 93948, 555134, 196813, 618854, 747704, 158774, 694468];
+const FOUND = [655, 17957, 93, 185, 17976, 19495, 9178, 2101, 3877, 12929, 16139, 11087, 1459, 4812, 17461, 21240, 25369, 29767, 72864, 76842, 93948, 555134, 196813, 618854, 747704, 158774, 694468, 21616, 33882, 38881];
 
 describe("fuzz findings of W10.D21", () => {
   it.each(FOUND)("#%i renders, in under 100 ms", async (i) => {
@@ -110,6 +111,8 @@ describe("the bounds", () => {
     const bad = "[".repeat(1100);
     const md = `:::note\n~~~\n:::\n${bad}`;
     expect(boundMarkdown(md)).toBe(`:::note\n~~~\n:::\n${asRawText(bad)}`);
+    const label = `:::note${bad}`;
+    expect(boundMarkdown(`${label}\ntext\n:::`)).toBe(`${asRawText(label)}\ntext\n:::`);
     const inside = `:::note\n${bad}\n:::`;
     expect(boundMarkdown(inside)).toBe(`:::note\n${asRawText(bad)}\n:::`);
   });
