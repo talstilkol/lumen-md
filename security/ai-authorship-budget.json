@@ -1,0 +1,9 @@
+{
+  "about": "Review 11, L9: the `// ai-authorship: <why>` escape hatch of aiInsertionsTagged.test.ts has a budget. Each file may hold at most this many tags, and the counts only go down: a file with fewer tags than listed fails until its number is lowered here. A new tag needs a reviewed raise of this file (CODEOWNERS: /security/).",
+  "files": {
+    "src/ai/voiceMemoWrite.ts": 1,
+    "src/editor/wysiwygSlashMenu.ts": 12,
+    "src/meetings/meetingTranscribe.ts": 1,
+    "src/ui/VoiceDictation.tsx": 3
+  }
+}
