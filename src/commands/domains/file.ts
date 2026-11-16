@@ -173,10 +173,13 @@ export function buildTemplateCommands({ installedTemplates }: CommandContext): C
       icon: cmdIcons.FileText,
       group: t("group.templates"),
       action: () =>
-        void import("../../editor/templates").then(({ TEMPLATES }) => {
-          const full = TEMPLATES.find((x) => x.id === tpl.id);
-          if (full) openTemplateDoc(full.name, full.content);
-        }),
+        void import("../../editor/templates")
+          .then(({ TEMPLATES }) => {
+            const full = TEMPLATES.find((x) => x.id === tpl.id);
+            if (full) openTemplateDoc(full.name, full.content);
+          })
+          // A chunk that fails to load (offline after a deploy, a stale cache) says so instead of doing nothing (R8-L6).
+          .catch((e: unknown) => showAiToast(t("templates.loadFailed", { error: explainError(e) }), "error")),
     })),
     // Marketplace templates installed into the workspace (templates/<id>.md).
     ...buildInstalledTemplateCommands(installedTemplates, {
@@ -184,9 +187,9 @@ export function buildTemplateCommands({ installedTemplates }: CommandContext): C
       hint: t("templates.installed.button"),
       apply: (name, content) => {
         // {{title}}, {{date}}, {{time}}, {{hebrewDate}}: as Obsidian's Templates plugin fills them.
-        void import("../../editor/templateVars").then(({ expandTemplate }) =>
-          openTemplateDoc(name, expandTemplate(content, { title: name, locale: getLocale() })),
-        );
+        void import("../../editor/templateVars")
+          .then(({ expandTemplate }) => openTemplateDoc(name, expandTemplate(content, { title: name, locale: getLocale() })))
+          .catch((e: unknown) => showAiToast(t("templates.loadFailed", { error: explainError(e) }), "error"));
       },
       onError: (e) => showAiToast(t("templates.loadFailed", { error: e.message }), "error"),
     }),
