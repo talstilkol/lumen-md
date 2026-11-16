@@ -40,6 +40,7 @@ import { checkEvalClaims } from "../lib/evalCard.mjs";
 import { claimGuard } from "./claimGuard.mjs";
 import { RECEIPTS_FILE, checkReceiptClaims } from "./receiptLevels.mjs";
 import { AREAS_FILE, checkAreas } from "./areas.mjs";
+import { checkOriginClaims } from "../golden/origin-claims.mjs";
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 export const PLAN_FILE = "plan/plan.json";
@@ -881,6 +882,10 @@ export function run({ root = ROOT, check = false, wipLimit, strictReceipts = fal
   // Plan R12.14: and no ✅ without recorded evidence that a check went green.
   const claimProblems = claimGuard(plan);
   if (claimProblems.length) throw new Error(`plan: ✅ without evidence (scripts/plan/claimGuard.mjs) —\n  ${claimProblems.join("\n  ")}`);
+  // W10.B13: no status calls a synthetic golden set or fixture real (eval/origins.json).
+  const originsPath = join(root, "eval/origins.json");
+  const originProblems = existsSync(originsPath) ? checkOriginClaims(plan, JSON.parse(readFileSync(originsPath, "utf8"))) : [];
+  if (originProblems.length) throw new Error(`plan: a synthetic set called real (W10.B13, scripts/golden/origin-claims.mjs) —\n  ${originProblems.join("\n  ")}`);
   const levelProblems = checkDoneLevel(plan);
   if (levelProblems.length) throw new Error(`plan: ✅ below browser (W10.G8) —\n  ${levelProblems.join("\n  ")}`);
   const lengthProblems = checkStatusLength(plan);
