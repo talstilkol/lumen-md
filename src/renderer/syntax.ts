@@ -10,7 +10,9 @@ import remarkFrontmatter from "remark-frontmatter";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import remarkDirective from "remark-directive";
+import { remarkSyntaxBoundaries } from "./syntaxBoundaries";
 
 export const markdownSyntax: Preset = {
-  plugins: [[remarkFrontmatter, ["yaml"]], remarkGfm, remarkMath, remarkDirective],
+  // remarkSyntaxBoundaries: a text directive does not start inside a word, and an autolink literal does not span a backslash escape.
+  plugins: [[remarkFrontmatter, ["yaml"]], remarkGfm, remarkMath, remarkDirective, remarkSyntaxBoundaries],
 };

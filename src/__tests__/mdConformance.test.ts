@@ -37,12 +37,14 @@ function renderer(withBreaks: boolean) {
   const p = withBreaks
     ? unified().use(remarkParse).use(markdownSyntax).use(remarkBreaks).use(remarkRehype, { allowDangerousHtml: true })
     : unified().use(remarkParse).use(markdownSyntax).use(remarkRehype, { allowDangerousHtml: true });
-  return (md: string) => hastToHtml(p.runSync(p.parse(md)) as never);
+  // With the source, as the preview runs it (renderCore's processSync).
+  return (md: string) => hastToHtml(p.runSync(p.parse(md), md) as never);
 }
 
 const core = (() => {
   const p = unified().use(remarkParse).use(remarkRehype, { allowDangerousHtml: true });
-  return (md: string) => hastToHtml(p.runSync(p.parse(md)) as never);
+  // With the source, as the preview runs it (renderCore's processSync).
+  return (md: string) => hastToHtml(p.runSync(p.parse(md), md) as never);
 })();
 
 const cm = parseSpec(cmSpec);
@@ -71,14 +73,15 @@ const AUTOLINK = "GFM autolink literals are on everywhere, so a bare URL or emai
 const KNOWN_DEVIATIONS: Record<string, Record<number, string>> = {
   "CommonMark 0.31.2": {
     96: FRONTMATTER,
+    98: FRONTMATTER,
     602: AUTOLINK,
     608: AUTOLINK,
-    609: AUTOLINK,
     611: AUTOLINK,
     612: AUTOLINK,
   },
   "GFM 0.29": {
     66: FRONTMATTER,
+    68: FRONTMATTER,
     610: AUTOLINK,
     616: AUTOLINK,
     619: AUTOLINK,

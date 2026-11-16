@@ -22,7 +22,7 @@ on its own. What Lumen adds on top changes a handful of results on purpose:
 
 | Where Lumen differs | Why |
 |---|---|
-| A leading `---` block is frontmatter | It holds the note's metadata (title, tags). The spec reads it as a thematic break and text. |
+| A leading `---` block is frontmatter, even an empty one | It holds the note's metadata (title, tags). The spec reads it as thematic breaks and text. |
 | A bare URL or email address becomes a link | GFM autolink literals are always on, including in examples that test plain CommonMark. |
 | `ftp://` addresses are not linked automatically | Matches github.com today. Write `<ftp://…>` to link one. |
 | Disallowed raw HTML (`<script>`, `<title>`, …) is not filtered by the parser | The preview sanitizes all raw HTML afterwards, which removes these tags. |
