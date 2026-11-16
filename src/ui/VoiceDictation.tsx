@@ -23,7 +23,7 @@ import { createRoot } from "react-dom/client";
 import { onTabIdChange, tabIdOf, useAppStore } from "../store/useStore";
 import { showAiToast } from "./AiToast";
 import { t } from "../i18n";
-import { transcribe, summarizeMemo, formatVoiceMemo } from "../ai/transcribe";
+import { transcribe, summarizeMemo } from "../ai/transcribe";
 import { aiOperation, isAbort } from "../ai/aiAbort";
 import { log } from "../lib/logger";
 import { getAiPolicy, onAiPolicyChange, thirdPartyServicesAllowed } from "../ai/policy";
@@ -153,6 +153,7 @@ export function dictationSink(): DictationSink {
     if (!words) return;
     const s = useAppStore.getState();
     if (tabIdOf(s.doc) === origin) {
+      // ai-authorship: the user's own dictated words, not AI-written text
       s.setContent(joinDictated(s.doc.content, words));
     } else if (s.openTabs.some((tab) => tab.id === origin)) {
       useAppStore.setState({
@@ -160,6 +161,7 @@ export function dictationSink(): DictationSink {
       });
     } else if (orphan && s.openTabs.some((tab) => tab.id === orphan)) {
       const id = orphan;
+      // ai-authorship: the user's own dictated words, not AI-written text
       if (tabIdOf(s.doc) === id) s.setContent(joinDictated(s.doc.content, words));
       else useAppStore.setState({ openTabs: s.openTabs.map((tab) => (tab.id === id ? { ...tab, content: joinDictated(tab.content, words), dirty: true } : tab)) });
     } else {
@@ -551,6 +553,7 @@ export async function startVoiceMemo(opts: { language?: string; plain?: boolean;
         const detail = { text };
         if (window.dispatchEvent(new CustomEvent("lumen-dictation-insert", { detail, cancelable: true }))) {
           const current = useAppStore.getState().doc.content;
+          // ai-authorship: the transcript is the user's own words, not AI-written text
           useAppStore.getState().setContent(current + (current && !/\s$/.test(current) ? " " : "") + text);
         }
         return;
@@ -561,8 +564,10 @@ export async function startVoiceMemo(opts: { language?: string; plain?: boolean;
         try {
           const m = await import("../meetings/meetingNotes");
           const res = await m.meetingNotesFrom(result.text, { signal: op.signal, local: result.backend === "local" });
-          const current = useAppStore.getState().doc.content;
-          useAppStore.getState().setContent(current + (current.endsWith("\n") ? "" : "\n") + "\n" + res.markdown);
+          const doc = useAppStore.getState().doc;
+          const current = doc.content;
+          // The meeting notes are the model's output: tagged at the write (5.9, W10.E37).
+          (await import("../ai/aiWrites")).writeAiContent(doc, current + (current.endsWith("\n") ? "" : "\n") + "\n" + res.markdown, useAppStore.getState().setContent);
           showAiToast(t("meeting.inserted", { n: res.notes.tasks.length }), "success");
           void m.offerIcs(res);
           return;
@@ -583,15 +588,8 @@ export async function startVoiceMemo(opts: { language?: string; plain?: boolean;
       op.end();
     }
 
-    const memo = formatVoiceMemo({
-      transcript: result.text,
-      summary,
-      backend: result.backend,
-    });
-    const current = useAppStore.getState().doc.content;
-    useAppStore
-      .getState()
-      .setContent(current + (current.endsWith("\n") ? "" : "\n") + "\n" + memo);
+    // Only the summary is marked as AI text; the transcript is the user's (ai/voiceMemoWrite.ts).
+    (await import("../ai/voiceMemoWrite")).writeVoiceMemo(() => useAppStore.getState().doc, useAppStore.getState().setContent, { transcript: result.text, summary, backend: result.backend });
     showAiToast(t("toast.voiceMemoInsertedMs", { backend: result.backend, ms: Math.round(result.ms) }),
       "success",
     );

@@ -34,7 +34,9 @@ export async function claimsFlow({ getEditorView, liveDoc }: Pick<CommandContext
       }),
     );
     const callout = claimsCallout(r, hasHebrew(p.text) ? "he" : "en");
-    view.dispatch({ changes: { from: p.end, insert: `\n\n${callout}` } });
+    // The callout is the model's output: marked as AI text at the insertion (5.9, W10.E37).
+    const { aiAuthored } = await import("../../editor/aiAuthorship");
+    view.dispatch({ changes: { from: p.end, insert: `\n\n${callout}` }, annotations: aiAuthored.of(true) });
     showAiToast(t("toast.claimsDone", { defaultValue: "{{kept}} candidate claims · {{dropped}} dropped without a quote", kept: r.claims.length, dropped: r.dropped.length }), "success");
   } catch (e) {
     if (isAbort(e)) return;

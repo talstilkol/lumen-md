@@ -309,6 +309,7 @@ export async function renameSpeakerInNote(): Promise<void> {
   const to = (await uiPrompt({ message: t("speakers.renamePrompt", { speaker: from }), defaultValue: from }))?.trim();
   if (!to || to === from) return;
   const next = renameSpeaker(useAppStore.getState().doc.content, from, to);
+  // ai-authorship: a rename the user asked for, not AI-written text
   useAppStore.getState().setContent(next);
   showAiToast(t("speakers.renamed", { from, to: to.replace(/[*\n:]/g, "").trim() }), "success");
 }
