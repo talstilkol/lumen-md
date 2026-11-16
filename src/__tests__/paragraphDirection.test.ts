@@ -2,7 +2,7 @@
  * W11.H4 — an explicit direction per paragraph, saved in the note, and
  * `dir: rtl | ltr | auto` for the whole note.
  */
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { EditorState, EditorSelection } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { markdownLineDirection } from "../lib/bidiDirection";
@@ -109,5 +109,27 @@ describe("the WYSIWYG editor's Markdown layer keeps the mark (remark, as Milkdow
     const out = remark.stringify(remark.parse(md));
     expect(out).toContain(`${RLM}API של השרת`);
     expect(out).toContain(`${LRM}שלום world`);
+  });
+});
+
+describe("W11.H4 the menu and palette path: the edit.toggleDirection command", () => {
+  it("in the source editor it switches the selected paragraph (the Format menu and ⇧⌘X run this command)", async () => {
+    const { buildInsertCommands } = await import("../commands/domains/edit");
+    const view = new EditorView({ state: EditorState.create({ doc: "iPhone 17 יצא היום\nשורה שנייה", selection: EditorSelection.cursor(2) }) });
+    const cmd = buildInsertCommands({ getEditorView: () => view } as never).find((c) => c.id === "edit.toggleDirection");
+    expect(cmd?.shortcut).toBe("⇧⌘X");
+    cmd!.action();
+    await vi.waitFor(() => expect(view.state.doc.line(1).text).toBe(`${RLM}iPhone 17 יצא היום`));
+    expect(view.state.doc.line(2).text).toBe("שורה שנייה");
+    view.destroy();
+  });
+  it("without a source editor (the WYSIWYG editor has the focus) it asks that editor to switch", async () => {
+    const { buildInsertCommands } = await import("../commands/domains/edit");
+    const seen: string[] = [];
+    const on = (e: Event) => seen.push(e.type);
+    window.addEventListener("lumen-toggle-direction", on);
+    buildInsertCommands({ getEditorView: () => null } as never).find((c) => c.id === "edit.toggleDirection")!.action();
+    window.removeEventListener("lumen-toggle-direction", on);
+    expect(seen).toEqual(["lumen-toggle-direction"]);
   });
 });
