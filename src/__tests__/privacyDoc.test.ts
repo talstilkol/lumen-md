@@ -55,6 +55,8 @@ const RECORDERS: Record<string, (src: string) => string[]> = {
   "src/plugins/install.ts": (src) => [/const LEDGER_REASON = "([^"]+)"/.exec(src)![1]],
   // A remote MCP server's tool listing (W10.C2, #978): "MCP server <name>".
   "src/agents/mcp/registry.ts": (src) => [/reason: `([^`$]+)\$\{/.exec(src)![1]],
+  // R8-M1: Tectonic's package downloads for LaTeX to PDF, under its one fixed reason.
+  "src/latex/tectonicDesktop.ts": (src) => [/export const TECTONIC_LEDGER_REASON = "([^"]+)"/.exec(src)![1]],
 };
 
 function walk(dir: string, out: string[] = []): string[] {

@@ -862,6 +862,30 @@
         "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
       },
       "status": "meets"
+    },
+    {
+      "id": "tectonic-packages",
+      "routes": [
+        "Tectonic: TeX packages from its bundle server (LaTeX to PDF)"
+      ],
+      "category": "network",
+      "purpose": "Let Tectonic, the TeX engine the user installed, download the TeX packages it has not cached, to compile a LaTeX export to PDF (R8-M1, W10.E14)",
+      "recipients": [
+        "Tectonic's bundle server (relay.fullyjustified.net)"
+      ],
+      "dataSent": "The user's IP address and the names of the TeX packages; never the document",
+      "lawfulBasis": "consent",
+      "needsConsent": true,
+      "ppa2026": {
+        "activeOptIn": "The first PDF-from-LaTeX export asks once whether Tectonic may download (the dialog names the server); declining compiles from the cache only. Nothing is downloaded in airplane mode or under local-only (--only-cached).",
+        "preTicked": false,
+        "namedRecipients": [
+          "Tectonic's bundle server (relay.fullyjustified.net)"
+        ],
+        "withdrawal": "Settings → Privacy → \"Local only\" (or airplane mode) makes every compile cache-only; clearing the stored answer (lumen.latex.tectonicDownloads) asks again.",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
     }
   ]
 }
