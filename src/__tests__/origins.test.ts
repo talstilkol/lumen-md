@@ -121,6 +121,15 @@ describe("plan:check runs the origin rule (W10.B13)", () => {
       target!.status = "⏳ measured on the synthetic set spell-en/moby: recall 0.99.";
       writeFileSync(join(dir, "plan/plan.json"), JSON.stringify(plan, null, 1) + "\n");
       expect(() => run({ root: dir, check: true })).not.toThrow(/synthetic set called real/);
+      // Review 10, L8: the notes are read too (a status's detail moves there).
+      (target as { notes?: string }).notes = "Measured on real data: spell-en/moby recall 0.99.";
+      writeFileSync(join(dir, "plan/plan.json"), JSON.stringify(plan, null, 1) + "\n");
+      expect(() => run({ root: dir, check: true })).toThrow(/synthetic set called real[\s\S]*\(notes\)[\s\S]*spell-en\/moby/);
+      // And without eval/origins.json the rule cannot run: plan:check fails instead of passing.
+      (target as { notes?: string }).notes = "Measured on the synthetic set.";
+      writeFileSync(join(dir, "plan/plan.json"), JSON.stringify(plan, null, 1) + "\n");
+      rmSync(join(dir, "eval/origins.json"));
+      expect(() => run({ root: dir, check: true })).toThrow(/eval\/origins\.json is missing/);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

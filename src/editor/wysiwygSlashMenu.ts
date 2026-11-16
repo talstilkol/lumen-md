@@ -36,6 +36,7 @@ export function insertCodeFence(v: EditorView, lang: string, body: string): void
   const tr = v.state.tr.replaceSelectionWith(
     node.create({ language: lang }, v.state.schema.text(body)),
   );
+  // ai-authorship: a template the slash menu itself holds (its callers pass fixed text); no model text
   v.dispatch(tr);
 }
 
@@ -90,6 +91,7 @@ export function buildSlashItems(): SlashItem[] {
         // Inject a leading checkbox marker so the round-trip to markdown
         // produces `- [ ] ...` on the new line.
         const tr = v.state.tr.insertText("[ ] ", v.state.selection.from);
+        // ai-authorship: a task-list marker the user picked from the slash menu; no model text
         v.dispatch(tr);
       },
     },
@@ -133,6 +135,7 @@ export function buildSlashItems(): SlashItem[] {
           ":::note\nWrite your callout here.\n:::\n",
           v.state.selection.from,
         );
+        // ai-authorship: a callout template the user picked from the slash menu; no model text
         v.dispatch(tr);
       },
     },
@@ -146,6 +149,7 @@ export function buildSlashItems(): SlashItem[] {
           ":::columns{cols=2}\nLeft column.\n:::\nRight column.\n:::\n",
           v.state.selection.from,
         );
+        // ai-authorship: a columns template the user picked from the slash menu; no model text
         v.dispatch(tr);
       },
     },
@@ -157,6 +161,7 @@ export function buildSlashItems(): SlashItem[] {
       run: (v) => {
         const hr = v.state.schema.nodes.hr;
         if (!hr) return;
+        // ai-authorship: a horizontal rule the user picked from the slash menu; no model text
         v.dispatch(v.state.tr.replaceSelectionWith(hr.create()));
       },
     },
@@ -170,6 +175,7 @@ export function buildSlashItems(): SlashItem[] {
           "| Col 1 | Col 2 | Col 3 |\n| :--- | :---: | ---: |\n| L | C | R |\n| Data | Data | Data |\n",
           v.state.selection.from,
         );
+        // ai-authorship: a table template the user picked from the slash menu; no model text
         v.dispatch(tr);
       },
     },
@@ -219,6 +225,7 @@ export function buildSlashItems(): SlashItem[] {
           "![alt text](https://example.com/image.png)",
           v.state.selection.from,
         );
+        // ai-authorship: an image template the user picked from the slash menu; no model text
         v.dispatch(tr);
       },
     },
@@ -242,6 +249,7 @@ export function buildSlashItems(): SlashItem[] {
         const placeholder = "🤖 Thinking...";
         const { state } = v;
         const insertPos = state.selection.from;
+        // ai-authorship: the app's own "Thinking" placeholder, removed before the model's text goes in
         v.dispatch(state.tr.insertText(placeholder, insertPos));
 
         const { aiOperation, isAbort } = await import("../ai/aiAbort");
@@ -254,6 +262,7 @@ export function buildSlashItems(): SlashItem[] {
           // Remove placeholder before streaming
           const removeTr = v.state.tr;
           removeTr.delete(insertPos, insertPos + placeholder.length);
+          // ai-authorship: removes the placeholder; inserts nothing
           v.dispatch(removeTr);
 
           for await (const chunk of stream) {
@@ -270,6 +279,7 @@ export function buildSlashItems(): SlashItem[] {
           const docText = v.state.doc.textBetween(insertPos, Math.min(insertPos + placeholder.length, v.state.doc.content.size));
           if (isAbort(e)) {
             // Cancelled before the first chunk: take the placeholder out and stop quietly.
+            // ai-authorship: removes the placeholder after a cancel; inserts nothing
             if (docText === placeholder) v.dispatch(v.state.tr.delete(insertPos, insertPos + placeholder.length));
             return;
           }
@@ -281,6 +291,7 @@ export function buildSlashItems(): SlashItem[] {
             const errTr = v.state.tr;
             errTr.delete(insertPos, insertPos + placeholder.length);
             errTr.insertText(e instanceof AiError && e.code === "NO_KEY" ? "⚠️ Configure AI Key (⌘K)" : "❌ AI Failed", insertPos);
+            // ai-authorship: the app's own error text in place of the placeholder; no model text
             v.dispatch(errTr);
           }
           showAiToast(
@@ -350,6 +361,7 @@ export function buildSlashMenu(getView: () => EditorView | null): SlashMenuRoot 
     const slashIdx = text.lastIndexOf("/");
     if (slashIdx >= 0) {
       const from = $from.start() + slashIdx;
+      // ai-authorship: deletes the typed slash command; inserts nothing
       view.dispatch(state.tr.delete(from, $from.pos));
     }
     item.run(view);

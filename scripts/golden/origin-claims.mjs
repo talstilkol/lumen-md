@@ -5,7 +5,8 @@
  *   node scripts/golden/origin-claims.mjs <plan.json>   list the statuses that do (exit 1 when any)
  *
  * `falseRealClaims(text, origins)` is the rule, and `checkOriginClaims(plan,
- * origins)` is what plan:check runs (scripts/plan/build.mjs): a status that names a golden set
+ * origins)` is what plan:check runs (scripts/plan/build.mjs; without
+ * eval/origins.json plan:check fails, review 10 L8): a status or notes that names a golden set
  * or fixture whose origin (eval/origins.json) is synthetic, and in the same
  * sentence calls it real ("real", "אמיתי", "from Obsidian", "מ-Obsidian").
  */
@@ -48,11 +49,17 @@ export function falseRealClaims(text, origins) {
   return hits;
 }
 
-/** Plan W10.B13, for plan:check: one problem line per plan status that calls a synthetic source real. */
+/**
+ * Plan W10.B13, for plan:check: one problem line per plan status, or task
+ * notes (review 10, L8: the detail moved out of a status goes there), that
+ * calls a synthetic source real.
+ */
 export function checkOriginClaims(plan, origins) {
   const problems = [];
   walk(plan, (t) => {
-    for (const h of falseRealClaims(t.status, origins)) problems.push(`${t.id}: calls "${h.name}" real, but its origin is synthetic (eval/origins.json) — ${h.sentence.slice(0, 200)}`);
+    for (const field of ["status", "notes"]) {
+      for (const h of typeof t[field] === "string" ? falseRealClaims(t[field], origins) : []) problems.push(`${t.id}${field === "notes" ? " (notes)" : ""}: calls "${h.name}" real, but its origin is synthetic (eval/origins.json) — ${h.sentence.slice(0, 200)}`);
+    }
   });
   return problems;
 }
