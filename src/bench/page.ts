@@ -3,21 +3,35 @@
  * scripts/bench-models.mjs. Dev server only (bench/models.html is not a
  * build input), so nothing here reaches the app's bundle.
  */
-import type { BenchEngine, BenchEnv, BenchItem, BenchRun } from "./types";
+import type { BenchEngine, BenchEnv, BenchFamily, BenchItem, BenchRun } from "./types";
 
-const adapters = import.meta.glob<{ engine: BenchEngine }>("./engines/*.ts");
+const adapters = import.meta.glob<{ engine: BenchEngine; family?: BenchFamily }>("./engines/*.ts");
 
+const fileOf = (k: string) => k.replace(/^\.\/engines\/|\.ts$/g, "");
+
+/** `<file>` → the file's engine; `<file>:<model>` → that variant of the file's family. */
 async function engineById(id: string): Promise<BenchEngine> {
-  const key = `./engines/${id}.ts`;
-  const load = adapters[key];
-  if (!load) throw new Error(`no engine "${id}" (have: ${list().join(", ")})`);
-  return (await load()).engine;
+  const cut = id.indexOf(":");
+  const file = cut < 0 ? id : id.slice(0, cut);
+  const load = adapters[`./engines/${file}.ts`];
+  if (!load) throw new Error(`no engine "${id}" (have: ${(await list()).join(", ")})`);
+  const mod = await load();
+  if (cut < 0) return mod.engine;
+  const model = id.slice(cut + 1);
+  if (!mod.family?.variants.includes(model)) throw new Error(`no engine "${id}": ${file} has no variant ${model}`);
+  return mod.family.variant(model);
 }
 
-function list(): string[] {
-  return Object.keys(adapters)
-    .map((k) => k.replace(/^\.\/engines\/|\.ts$/g, ""))
-    .sort();
+/** Every engine id: each file, then each variant of a file's family. */
+async function list(): Promise<string[]> {
+  const ids: string[] = [];
+  for (const [k, load] of Object.entries(adapters)) {
+    ids.push(fileOf(k));
+    const { engine, family } = await load();
+    // The file's own engine already covers its one model: no second id for it.
+    for (const v of family?.variants ?? []) if (!(engine.models.length === 1 && engine.models[0] === v)) ids.push(`${fileOf(k)}:${v}`);
+  }
+  return [...new Set(ids)].sort();
 }
 
 async function env(): Promise<BenchEnv> {
@@ -83,14 +97,14 @@ async function run(id: string, payload: { shared?: Record<string, unknown>; item
   return out;
 }
 
-async function describe(id: string): Promise<Pick<BenchEngine, "id" | "label" | "set" | "models">> {
+async function describe(id: string): Promise<Pick<BenchEngine, "id" | "label" | "set" | "task" | "models">> {
   const e = await engineById(id);
-  return { id: e.id, label: e.label, set: e.set, models: e.models };
+  return { id: e.id, label: e.label, set: e.set, task: e.task ?? e.set, models: e.models };
 }
 
 declare global {
   interface Window {
-    lumenBench?: { engines: () => string[]; describe: typeof describe; env: typeof env; run: typeof run };
+    lumenBench?: { engines: typeof list; describe: typeof describe; env: typeof env; run: typeof run };
   }
 }
 

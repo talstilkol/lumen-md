@@ -24,9 +24,14 @@ const rate = ([a, n]) => (n ? a / n : NaN);
 
 export async function score({ items }) {
   const { detectLanguage } = await load();
+  return scoreGuesses(items, (it) => detectLanguage(String(it.text ?? "")).lang);
+}
+
+/** Accuracy per part from `langOf(item)` (the bench passes the page's answers). */
+export function scoreGuesses(items, langOf) {
   const tally = { tatoeba: [0, 0], hard: [0, 0], hard8: [0, 0] };
   for (const it of items) {
-    const got = detectLanguage(String(it.text ?? "")).lang;
+    const got = langOf(it);
     const ok = got === it.lang ? 1 : 0;
     const part = it.part === "tatoeba" || String(it.id ?? "").startsWith("tatoeba") ? "tatoeba" : "hard";
     tally[part][0] += ok;

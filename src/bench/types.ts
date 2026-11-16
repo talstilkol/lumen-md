@@ -23,6 +23,8 @@ export interface BenchEngine {
   label: string;
   /** The golden set it is measured on (eval/golden/<set>). */
   set: string;
+  /** The scorer in scripts/bench/tasks.mjs, when it is not the set's own (default: `set`). */
+  task?: string;
   /** The models/registry.json ids the numbers belong to (empty: a baseline, reported only). */
   models: string[];
   /** Load the model (download on a cold cache); which device the app chose. */
@@ -32,6 +34,18 @@ export interface BenchEngine {
   /** One item; the output is scored in Node (scripts/bench/tasks.mjs). */
   run(item: BenchItem): Promise<unknown>;
   dispose?(): Promise<void>;
+}
+
+/**
+ * One adapter file that benches several registry models the same way (the
+ * web-llm and Ollama LLMs): engine ids `<file>:<model>`, e.g.
+ * `ollama:gemma3:4b`. Each variant is its own engine with one model, so its
+ * numbers are written to that model only.
+ */
+export interface BenchFamily {
+  /** The models this file can bench, from the app's own catalogues. */
+  variants: readonly string[];
+  variant(model: string): BenchEngine;
 }
 
 export interface BenchRun {
