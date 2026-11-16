@@ -106,10 +106,9 @@ describe("FUNDING.yml", () => {
   it("uses only keys GitHub reads, and links the live support page", () => {
     const allowed = ["community_bridge", "github", "issuehunt", "ko_fi", "liberapay", "open_collective", "otechie", "patreon", "tidelift", "polar", "buy_me_a_coffee", "thanks_dev", "lfx_crowdfunding", "custom"];
     for (const l of live) expect(allowed, l).toContain(l.split(":")[0]);
-    expect(live).toEqual(['custom: ["https://lumen-md.vercel.app/support.html"]']);
+    expect(live).toEqual(['custom: ["https://lumen-md.vercel.app/support.html"]', "github: [talstilkol]"]);
     expect(existsSync(join(ROOT, "public/support.html"))).toBe(true);
-    // The two accounts are ready to switch on once they exist.
-    expect(yml).toContain("# github: [talstilkol]");
+    // GitHub Sponsors is on (owner decision W11.O8); Open Collective is ready to switch on once it exists.
     expect(yml).toContain("# open_collective: lumen-md");
   });
 
