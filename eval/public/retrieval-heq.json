@@ -6,16 +6,16 @@
     "hub": "github",
     "id": "NNLP-IL/Hebrew-Question-Answering-Dataset",
     "url": "https://github.com/NNLP-IL/Hebrew-Question-Answering-Dataset",
-    "revision": null,
+    "revision": "f46d2ff1b796a95e897530f167ae0d5bed123fe1",
     "files": [
       {
-        "path": "data/test.json",
-        "sha256": null
+        "path": "data/data v1.1/test v1.1.json",
+        "sha256": "aa3c8107919bb04a95c8fc572121d07c38b23f35ac33630dea32a384d6aea5db"
       }
     ]
   },
   "license": {
-    "id": "CC-BY-4.0 (to confirm at pin)",
+    "id": "CC-BY-4.0",
     "redistribute": false
   },
   "split": "test",
@@ -25,8 +25,7 @@
     "ndcg@10"
   ],
   "owed": [
-    "pin: the repository's commit and the test file's path (written from its SQuAD-style layout, not read)",
-    "run: npm run eval:public -- run retrieval-heq --engine <lemmatizers module> --model shoshan --rev <rev>"
+    "run the A/B with the models: npm run eval:public -- run retrieval-heq --engine <lemmatizers module> --model shoshan --rev <rev> (W11.M3 ONNX exports)"
   ],
   "plan": [
     "W11.H12"

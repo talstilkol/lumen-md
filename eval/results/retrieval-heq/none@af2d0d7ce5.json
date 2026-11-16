@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "task": "retrieval-heq",
+  "dataset": {
+    "id": "NNLP-IL/Hebrew-Question-Answering-Dataset",
+    "revision": "f46d2ff1b796a95e897530f167ae0d5bed123fe1",
+    "split": "test"
+  },
+  "model": {
+    "id": "none",
+    "revision": "af2d0d7ce5"
+  },
+  "engine": "none",
+  "normalizer": "none",
+  "n": 1504,
+  "metrics": {
+    "ndcg10.none": 0.938
+  },
+  "date": "2026-11-16T16:02:41.328Z",
+  "command": "npm run eval:public -- run retrieval-heq --engine scripts/eval-public/engines/lemma-none.mjs --model none --rev af2d0d7ce5",
+  "machine": "linux-x64 node v22.22.0",
+  "synthetic": false
+}

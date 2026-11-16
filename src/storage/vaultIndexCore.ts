@@ -28,6 +28,9 @@ import { noteKey } from "../lib/slug";
 import { hasHebrew, hebrewFind, normalizeForMatch, prefixVariants } from "../text/hebrew";
 import { WIKI_RE } from "./wikiTargets";
 import { Bm25Index } from "../search/bm25";
+import type { Lemmatizer } from "../search/lemma/lemmatizer";
+import type { LemmaLexicon } from "../search/lemma/lemmaIndex";
+import type { QueryTerm } from "../text/searchTokens";
 import { matchesOps, noteTags, opLocation, parseQuery, REGEX_MAX_CHARS, type Matchable } from "../search/queryOps";
 import { relatedNotes, type RelatedHit } from "../related/related";
 import { folderOff } from "../related/prefs";
@@ -222,6 +225,14 @@ export class VaultIndex {
   /** Content ranking (plan 5.2), one document per note, updated with it. */
   private readonly bm25 = new Bm25Index();
   private readonly counters = { indexed: 0, removed: 0, backlinkReads: 0, tokenised: 0, unchanged: 0 };
+  /**
+   * W11.H12: a lemmatizer model's lemmas next to each note's words
+   * (../search/lemma/lemmaIndex.ts), computed after the note is indexed, one
+   * note at a time. Null (no lemmatizer passed W11.M3 yet): search is BM25
+   * over words with the rule-based morphology, as before.
+   */
+  private lemma: { lz: Lemmatizer; lexicon: LemmaLexicon; mod: typeof import("../search/lemma/lemmaIndex") } | null = null;
+  private lemmaQueue: Promise<void> = Promise.resolve();
 
   get size(): number {
     return this.files.size;
@@ -279,6 +290,7 @@ export class VaultIndex {
     if (!this.bm25.isCurrent(input.path, content, bm25Name(input.name))) {
       this.bm25.set(input.path, content, bm25Name(input.name));
       this.counters.tokenised++;
+      if (this.lemma) this.queueLemmas(input.path);
     }
     for (const l of links) {
       let set = this.incoming.get(l.key);
@@ -331,6 +343,46 @@ export class VaultIndex {
   related(paragraph: string, opts: { self?: string | null; offFolders?: readonly string[]; semantic?: ReadonlyArray<{ path: string; score: number }>; limit?: number } = {}): RelatedHit[] {
     const folders = opts.offFolders ?? [];
     return relatedNotes(this.bm25, paragraph, { self: opts.self, semantic: opts.semantic, limit: opts.limit, filter: (p) => !folderOff(p, folders) });
+  }
+
+  /**
+   * W11.H12: use a lemmatizer for the notes' lemmas (every note is lemmatized
+   * again, in the background: `lemmasSettled()`), or none.
+   */
+  async useLemmatizer(lz: Lemmatizer | null): Promise<void> {
+    if (!lz) {
+      const had = this.lemma;
+      this.lemma = null;
+      if (had) for (const e of this.files.values()) this.bm25.set(e.path, e.content, bm25Name(e.name));
+      return;
+    }
+    const mod = await import("../search/lemma/lemmaIndex");
+    this.lemma = { lz, lexicon: new mod.LemmaLexicon(), mod };
+    for (const path of this.files.keys()) this.queueLemmas(path);
+    await this.lemmasSettled();
+  }
+
+  /** Resolves when every queued note has its lemmas. */
+  lemmasSettled(): Promise<void> {
+    return this.lemmaQueue;
+  }
+
+  private queueLemmas(path: string): void {
+    this.lemmaQueue = this.lemmaQueue.then(() => this.lemmatizeNote(path));
+  }
+
+  private async lemmatizeNote(path: string): Promise<void> {
+    const l = this.lemma;
+    const e = this.files.get(path);
+    if (!l || !e) return;
+    let terms: string[];
+    try {
+      terms = await l.mod.documentLemmaTerms(e.content, l.lz, l.lexicon);
+    } catch {
+      return; // why: a model that fails on one note leaves that note on its words; search still finds it
+    }
+    // The note may have changed or gone while the model ran: only the text it was given gets its lemmas.
+    if (this.lemma === l && this.files.get(path) === e) this.bm25.set(path, e.content, bm25Name(e.name), terms);
   }
 
   /** Remove one note. O(its links). */
@@ -482,7 +534,9 @@ export class VaultIndex {
     // The last word may still be typed: it also matches the terms it starts.
     const content = new Map<string, { score: number; matched: string[]; complete: boolean }>();
     const filter = allow ? (id: string) => allow.has(id) : undefined;
-    for (const h of this.bm25.search(query, { limit: Math.max(limit * 3, 100), filter, prefix: true })) content.set(h.id, h);
+    const lemma = this.lemma;
+    const expand = lemma ? (base: QueryTerm[]) => lemma.mod.expandWithLemmas(base, lemma.lexicon) : undefined;
+    for (const h of this.bm25.search(query, { limit: Math.max(limit * 3, 100), filter, prefix: true, expand })) content.set(h.id, h);
     // The whole query as a phrase only means something for several words,
     // and only in a note that has every one of them.
     const multiWord = /\s/.test(q);

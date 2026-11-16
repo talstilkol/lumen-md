@@ -49,6 +49,8 @@ interface Doc {
   length: number;
   /** Its distinct terms (for removal). */
   terms: string[];
+  /** The extra terms it was indexed with (W11.H12: model lemmas), joined; "" for none. */
+  extra: string;
 }
 
 export interface Bm25Hit {
@@ -87,13 +89,22 @@ export class Bm25Index {
     return !!d && d.source === text && d.name === name;
   }
 
-  /** Add or replace one document. */
-  set(id: string, text: string, name = ""): void {
-    if (this.isCurrent(id, text, name)) return;
+  /**
+   * Add or replace one document. `extra`: terms computed elsewhere, each
+   * counted once like a word of the text (W11.H12: the `≃` lemma terms a
+   * lemmatizer model gives, ./lemma/lemmaIndex.ts).
+   */
+  set(id: string, text: string, name = "", extra: readonly string[] = []): void {
+    const key = extra.join("\u0000");
+    if (this.isCurrent(id, text, name) && this.docs.get(id)!.extra === key) return;
     this.remove(id);
     const counts = new Map<string, number>();
     let length = 0;
     for (const t of documentTerms(text)) {
+      counts.set(t, (counts.get(t) ?? 0) + 1);
+      length++;
+    }
+    for (const t of extra) {
       counts.set(t, (counts.get(t) ?? 0) + 1);
       length++;
     }
@@ -102,7 +113,7 @@ export class Bm25Index {
       length += NAME_BOOST;
     }
     const num = this.nextNum++;
-    const doc: Doc = { id, num, source: text, name, length, terms: [...counts.keys()] };
+    const doc: Doc = { id, num, source: text, name, length, terms: [...counts.keys()], extra: key };
     this.docs.set(id, doc);
     this.byNum.set(num, doc);
     this.totalLength += length;
@@ -212,11 +223,16 @@ export class Bm25Index {
     return out;
   }
 
-  search(query: string | QueryTerm[], opts: { limit?: number; filter?: (id: string) => boolean; prefix?: boolean } = {}): Bm25Hit[] {
+  /**
+   * `expand`: more forms of the query's words, from the query's terms (W11.H12:
+   * a lemmatizer's lemmas, ./lemma/lemmaIndex.ts); each keeps its word's group.
+   */
+  search(query: string | QueryTerm[], opts: { limit?: number; filter?: (id: string) => boolean; prefix?: boolean; expand?: (base: QueryTerm[]) => QueryTerm[] } = {}): Bm25Hit[] {
     const base = typeof query === "string" ? queryTerms(query) : query;
     const n = this.docs.size;
     if (!n || !base.length) return [];
-    const withTranslit = typeof query === "string" ? [...base, ...this.transliterations(base)] : base;
+    const expanded = opts.expand ? [...base, ...opts.expand(base)] : base;
+    const withTranslit = typeof query === "string" ? [...expanded, ...this.transliterations(base)] : expanded;
     const terms = opts.prefix ? [...withTranslit, ...this.completions(base)] : withTranslit;
     const groups = new Set(base.map((t) => t.group)).size;
     const avg = this.totalLength / n || 1;
