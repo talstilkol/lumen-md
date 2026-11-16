@@ -57,7 +57,7 @@ describe("C15: a WebDAV server as the backup target", () => {
   it("R8-M2: each plain upload is in the privacy ledger, and local-only refuses it before sending; encrypted is not listed", async () => {
     const server = fakeWebdav({ baseUrl: `${URL_}lumen-backups/`, username: "tal", password: "pw" });
     let puts = 0;
-    const f = fakeFetch((req) => ((puts += req.method === "PUT" ? 1 : 0), server.handle(req)));
+    const f = fakeFetch((req) => ((puts += req.method === "PUT" ? 1 : 0), server.handle(req))) as unknown as typeof fetch;
     await setSecret(WEBDAV_BACKUP_PASSWORD, "pw");
     const vault = createMemoryBackend();
     await vault.write("a.md", "x");
