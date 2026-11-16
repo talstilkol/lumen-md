@@ -36,6 +36,17 @@ describe("the metrics", () => {
     ).metrics;
     expect(m).toEqual({ notes: 2, attachments: 2, links: 3, headings: 2, tasks: 2, hebrew: 3, bidi: 2 });
   });
+
+  it("a destination in angle brackets is a link, spaces and all (how lumen-md writes `[a](<תכנון רבעוני.md>)`), on both sides alike", () => {
+    const links = (md: string) => vaultMetrics(new Map([["a.md", md]])).metrics.links;
+    expect(links("[תכנון](<פרויקטים/תכנון רבעוני.md>) ![x](<a b/c d.png>) [y](<b.md>)")).toBe(3);
+    expect(links("[web](<https://example.org/a b>) [top](<#heading>)")).toBe(0);
+    // The same link written the two ways counts the same, so neither side gains from its style.
+    const one = new Map([["a.md", "[t](<x y.md>)"]]);
+    const other = new Map([["a.md", "[t](x%20y.md)"]]);
+    expect(compareVaults(one, other).pass).toBe(true);
+    expect(compareVaults(other, one).pass).toBe(true);
+  });
 });
 
 describe("the gate", () => {

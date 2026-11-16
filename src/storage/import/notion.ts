@@ -342,9 +342,10 @@ export function convertNotion(files: Map<string, Uint8Array>, opts: NotionOption
       const page = /<div class="page-body">([\s\S]*)<\/div>\s*<\/article>/i.exec(html)?.[1] ?? /<body[^>]*>([\s\S]*)<\/body>/i.exec(html)?.[1] ?? html;
       const fromDir = dirOf(target);
       const body = htmlToNote(`<div>${page}</div>`, {
-        image: (src) => {
+        image: (src, alt) => {
           const to = targetOf(src, p);
-          if (to) return mdEmbed(to.target, fromDir);
+          // The image's text: its caption (htmlToNote moves a figure's caption there), else its file name.
+          if (to) return mdEmbed(to.target, fromDir, alt.trim() || undefined);
           if (!/^[a-z]+:/i.test(src)) vault.warnings.push({ path: target, reason: "missingAttachment", detail: src });
           return null;
         },
