@@ -40,7 +40,8 @@ const notes = manifest.vaults.flatMap((v) =>
 );
 
 const parser = unified().use(remarkParse).use(remarkGfm).use(remarkMath);
-const options: Options = roundTripSafe(keepWikiLinks({ extensions: [gfmToMarkdown(), mathToMarkdown()] })) as Options;
+const syntax: Options = { extensions: [gfmToMarkdown(), mathToMarkdown()] };
+const options: Options = roundTripSafe(keepWikiLinks(syntax)) as Options;
 const parse = (md: string) => parser.parse(protectEscapedWikiLinks(md)) as Root;
 const serialize = (tree: Root) => toMarkdown(tree, options);
 
