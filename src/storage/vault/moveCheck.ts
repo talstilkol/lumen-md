@@ -227,3 +227,35 @@ export async function trashLeftovers(target: VaultBackend, leftBehind: Record<st
   }
   return trashed;
 }
+
+/** One folder inside the other (FileSystemDirectoryHandle.resolve): a vault cannot move into itself, or around itself. */
+export async function foldersNested(a: FileSystemDirectoryHandle, b: FileSystemDirectoryHandle): Promise<boolean> {
+  type Resolving = { resolve?: (o: FileSystemHandle) => Promise<string[] | null> };
+  const inside = async (outer: FileSystemDirectoryHandle, inner: FileSystemDirectoryHandle) => {
+    const r = (outer as Resolving).resolve;
+    if (typeof r !== "function") return false;
+    const path = await r.call(outer, inner).catch(() => null);
+    return !!path && path.length > 0;
+  };
+  return (await inside(a, b)) || (await inside(b, a));
+}
+
+/**
+ * Before the switch: a file an interrupted run copied (`written`) that has
+ * left the source since (deleted or renamed before Resume, so not in
+ * `copied`) would come back in the new vault. The move's own copy goes if it
+ * still holds exactly what the move wrote; one edited in the folder since is
+ * left alone. The source's trash, if the note went there, was copied with the
+ * rest, so nothing is lost. Returns whether `written` changed.
+ */
+export async function dropStaleCopies(target: VaultBackend, written: Record<string, string>, copied: Record<string, string>): Promise<boolean> {
+  let changed = false;
+  for (const [path, hash] of Object.entries(written)) {
+    if (copied[path]) continue;
+    const there = await targetBytes(target, path).catch(() => null);
+    if (there && (await sha256(there)) === hash) await target.remove(path);
+    delete written[path];
+    changed = true;
+  }
+  return changed;
+}
