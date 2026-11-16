@@ -245,6 +245,27 @@ describe("share target → inbox", () => {
 });
 
 describe("desktop global shortcut (feature check)", () => {
+  /**
+   * These cases pick the OS themselves, whatever the host is (4.16):
+   * navigator.platform for desktopShortcut's own check, and the cached
+   * platform of lib/platformKeys — the i18n strings print ⌥⌘N through it,
+   * and on a Linux or Windows host (or in Chromium, whose userAgentData
+   * wins over navigator.platform) it would read Ctrl+Alt+N. Call after
+   * vi.resetModules(), so the modules the next imports load are the ones
+   * set. Returns the undo.
+   */
+  async function onPlatform(platform: string): Promise<() => void> {
+    const own = Object.getOwnPropertyDescriptor(navigator, "platform");
+    Object.defineProperty(navigator, "platform", { configurable: true, get: () => platform });
+    const keys = await import("../lib/platformKeys");
+    keys.__setMacPlatform(/mac/i.test(platform));
+    return () => {
+      keys.__setMacPlatform(null);
+      if (own) Object.defineProperty(navigator, "platform", own);
+      else delete (navigator as unknown as Record<string, unknown>).platform;
+    };
+  }
+
   it("does nothing outside the desktop app", async () => {
     const cb = vi.fn();
     expect(await registerGlobalCapture(cb)).toBe(false);
@@ -267,9 +288,10 @@ describe("desktop global shortcut (feature check)", () => {
     }));
     vi.doMock("@tauri-apps/api/window", () => ({ getCurrentWindow: () => ({ show: async () => {}, unminimize: async () => {}, setFocus: async () => {} }) }));
     (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__ = {};
+    let undo = (): void => {};
     try {
       vi.resetModules();
-      vi.spyOn(navigator, "platform", "get").mockReturnValue("MacIntel");
+      undo = await onPlatform("MacIntel");
       const { registerGlobalCapture: register, GLOBAL_CAPTURE_SHORTCUT } = await import("../capture/desktopShortcut");
       expect(GLOBAL_CAPTURE_SHORTCUT).toBe("Alt+Command+N");
       const cb = vi.fn();
@@ -282,6 +304,7 @@ describe("desktop global shortcut (feature check)", () => {
       expect(cb).toHaveBeenCalledTimes(1);
     } finally {
       delete (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__;
+      undo();
       vi.restoreAllMocks();
       vi.doUnmock("@tauri-apps/api/core");
       vi.doUnmock("@tauri-apps/api/window");
@@ -297,9 +320,10 @@ describe("desktop global shortcut (feature check)", () => {
       },
     }));
     (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__ = {};
+    let undo = (): void => {};
     try {
       vi.resetModules();
-      vi.spyOn(navigator, "platform", "get").mockReturnValue("MacIntel");
+      undo = await onPlatform("MacIntel");
       const m = await import("../capture/desktopShortcut");
       const why: string[] = [];
       expect(await m.registerGlobalCapture(() => {}, (w) => void why.push(w))).toBe(false);
@@ -313,6 +337,7 @@ describe("desktop global shortcut (feature check)", () => {
       expect(m.failureOf(new Error("Failed to register hotkey"))).toBe("taken");
     } finally {
       delete (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__;
+      undo();
       vi.restoreAllMocks();
       vi.doUnmock("@tauri-apps/api/core");
     }
@@ -338,14 +363,16 @@ describe("desktop global shortcut (feature check)", () => {
       },
     }));
     (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__ = {};
+    let undo = (): void => {};
     try {
       vi.resetModules();
-      vi.spyOn(navigator, "platform", "get").mockReturnValue("Win32");
+      undo = await onPlatform("Win32");
       const { registerGlobalCapture: register } = await import("../capture/desktopShortcut");
       expect(await register(() => {})).toBe(false);
       expect(calls).toEqual([]);
     } finally {
       delete (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__;
+      undo();
       vi.restoreAllMocks();
       vi.doUnmock("@tauri-apps/api/core");
     }
@@ -359,13 +386,15 @@ describe("desktop global shortcut (feature check)", () => {
       },
     }));
     (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__ = {};
+    let undo = (): void => {};
     try {
       vi.resetModules();
-      vi.spyOn(navigator, "platform", "get").mockReturnValue("MacIntel");
+      undo = await onPlatform("MacIntel");
       const { registerGlobalCapture: register } = await import("../capture/desktopShortcut");
       expect(await register(() => {})).toBe(false);
     } finally {
       delete (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__;
+      undo();
       vi.restoreAllMocks();
       vi.doUnmock("@tauri-apps/api/core");
     }
