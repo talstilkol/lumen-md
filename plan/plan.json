@@ -9399,7 +9399,7 @@
      "status": "⏳ #436 · (על verify/train; 0 סודות חשופים: ל-Vercel אין משתני סביבה, production ו-3 ה-previews האחרונים נסרקו — רק VITE_VERCEL_* מערכתיים)…",
      "verified": "node",
      "pr": 436,
-     "notes": "⏳ #436 (על verify/train; 0 סודות חשופים: ל-Vercel אין משתני סביבה, production ו-3 ה-previews האחרונים נסרקו — רק VITE_VERCEL_* מערכתיים; secrets:scan-live, רשימה מותרת security/vite-env-allowlist.json, שער build viteEnvGate, שער preview secrets, צ׳קליסט 15.18 לטל; secretsScanLive 13/13, vercelBuild 5/5 ב-Node נקי; בדיקה עצמית: 6 סוגי טוקנים שתולים נמצאו; לא רץ vite build אמיתי, hygiene ו-vitest מלא; סודות GitHub Actions ו-Netlify לא נבדקו — בצ׳קליסט) · stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): blocked: secretsScanLive 12/13: VITE_CONTENT_FRAME_URL not in security/vite-env-allowlist.json; not added (owner item); owed: owner: decide the VITE_CONTENT_FRAME_URL allow-list entry; a live scan of production + 3 previews (the proxy blocks fetches from here)",
+     "notes": "⏳ #436 (על verify/train; 0 סודות חשופים: ל-Vercel אין משתני סביבה, production ו-3 ה-previews האחרונים נסרקו — רק VITE_VERCEL_* מערכתיים; secrets:scan-live, רשימה מותרת security/vite-env-allowlist.json, שער build viteEnvGate, שער preview secrets, צ׳קליסט 15.18 לטל; secretsScanLive 13/13, vercelBuild 5/5 ב-Node נקי; בדיקה עצמית: 6 סוגי טוקנים שתולים נמצאו; לא רץ vite build אמיתי, hygiene ו-vitest מלא; סודות GitHub Actions ו-Netlify לא נבדקו — בצ׳קליסט) · stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): blocked: secretsScanLive 12/13: VITE_CONTENT_FRAME_URL not in security/vite-env-allowlist.json; not added (owner item); owed: owner: decide the VITE_CONTENT_FRAME_URL allow-list entry; a live scan of production + 3 previews (the proxy blocks fetches from here) · D1 16.11 (#1109): VITE_CONTENT_FRAME_URL replaced by the build-only LUMEN_CONTENT_FRAME_URL (checked, inlined by define, origin only); secretsScanLive 12/13, the remaining red is VITE_ONENOTE_CLIENT_ID (owner).",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -22666,10 +22666,10 @@
       "W6.39"
      ],
      "files": "scripts/plan-check.mjs",
-     "status": "⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת; חלקי: מופעל אחרי רכבת 6",
+     "status": "⏳ #1109 — קפדני כברירת מחדל, 10 החלטות WIP כתובות (D1)",
      "verified": "node",
-     "pr": 618,
-     "notes": "⏳ #618 — ״לא התחיל״ לא נחשב התחלה (WIP מ-#502 עם -x); ברירת מחדל קפדנית לא הופעלה: 8 גלים (1→9) עדיין מעל הגבול, צריך החלטה · stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): blocked: --wip-strict still opt-in; making it the default is #985's commit, which waits on the owner's WIP decisions; planBuild 32/32; owed: owner: WIP decisions",
+     "pr": 1109,
+     "notes": "⏳ #618 — ״לא התחיל״ לא נחשב התחלה (WIP מ-#502 עם -x); ברירת מחדל קפדנית לא הופעלה: 8 גלים (1→9) עדיין מעל הגבול, צריך החלטה · stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): blocked: --wip-strict still opt-in; making it the default is #985's commit, which waits on the owner's WIP decisions; planBuild 32/32; owed: owner: WIP decisions · D1 16.11 (#1109, under the owner's delegation of 16.11 21:53): #985's 2a016e18b1 ported beside #1053; plan.schedule.wipDecisions holds 10 dated decisions at frozen counts (1→2 … 8→9, 10→11, 11→12); plan:check prints 0 WIP warnings and exits 0; planBuild 42/42 (shim v4). Record: plan/decisions-2026-11-16-d1.md §1. Owed: browser/real level on the Mac.",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -33813,7 +33813,7 @@
      "kind": "CLOUD-CODE",
      "status": "⏳ גל 13 — לא התחיל",
      "verified": "built",
-     "notes": "Shipped in #1019 (merged into verify/train-7 af2d0d7ce5 by INT4a). On af2d0d7ce5: securityTxt.test.ts 10/10 (offline runner), npm run security:page exit 0 (the page is generated in both languages and unchanged). Review 10 L12, owed by the owner: security.txt's Contact is a public issue, and GitHub private vulnerability reporting is off (turn it on, then point Contact at the advisory form); its Expires is 2027-05-16 (renew before then). Owed: the human-reviewed label and receipts (security). Status (INT5, 16.11): kept at the wave-13 placeholder, not because no work exists (the code above is in the train) but because W6.39's WIP gate (#1053) refuses a new wave-13 start while wave 12 is over its limit, and plan/wip-frozen.json only shrinks. The status moves when wave 12 is verified, or when the owner decides otherwise.",
+     "notes": "Shipped in #1019 (merged into verify/train-7 af2d0d7ce5 by INT4a). On af2d0d7ce5: securityTxt.test.ts 10/10 (offline runner), npm run security:page exit 0 (the page is generated in both languages and unchanged). Review 10 L12, owed by the owner: security.txt's Contact is a public issue, and GitHub private vulnerability reporting is off (turn it on, then point Contact at the advisory form); its Expires is 2027-05-16 (renew before then). Owed: the human-reviewed label and receipts (security). Status (INT5, 16.11): kept at the wave-13 placeholder, not because no work exists (the code above is in the train) but because W6.39's WIP gate (#1053) refuses a new wave-13 start while wave 12 is over its limit, and plan/wip-frozen.json only shrinks. The status moves when wave 12 is verified, or when the owner decides otherwise. · D1 16.11 (#1109): support period decided (≥5 years, not before 2031-12-31, CRA Art. 13(8)-(10)); renewBy 2027-04-16 enforced by security:page --check; PVR PUT refused by the proxy (403), owner turns it on. Status stays at the placeholder (record §1b).",
      "stage": "13.X",
      "dod": [
       "npx vitest run src/__tests__/securityTxt.test.ts",
