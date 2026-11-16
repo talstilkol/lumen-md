@@ -33,6 +33,7 @@ import {
   remarkColumns,
   remarkStripFrontmatter,
 } from "./remarkLumen";
+import { remarkBaseEmbeds } from "../views/bases/embed";
 
 const SPECIAL_LANGS = new Set([
   "mermaid",
@@ -63,6 +64,7 @@ const SPECIAL_LANGS = new Set([
   "bibtex",
   "bib",
   "database",
+  "base",
   // Single-language live previews — render the snippet inside a tiny
   // sandboxed iframe so users can experiment with HTML/CSS/JS/GLSL/SVG
   // without writing the full boilerplate of an `htmlpreview` block.
@@ -166,6 +168,7 @@ function buildBase() {
     .use(remarkDirective)
     .use(remarkAdmonitions)
     .use(remarkColumns)
+    .use(remarkBaseEmbeds)
     .use(remarkWikiLinks)
     .use(remarkLumenBlocks)
     .use(remarkRehype, { allowDangerousHtml: true });

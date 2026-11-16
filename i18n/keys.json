@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-20T14:26:29.537Z",
+  "generated_at": "2026-11-09T22:16:04.017Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1495,
+  "count": 1501,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -6148,6 +6148,47 @@
       "en": "{name} is computed by a formula, so cards can't be moved between its columns.",
       "vars": [
         "name"
+      ]
+    },
+    {
+      "key": "base.error",
+      "en": "Can't read this base: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "base.notFound",
+      "en": "{path} is not in the workspace.",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "base.limited",
+      "en": "Showing {count} of {total}",
+      "vars": [
+        "count",
+        "total"
+      ]
+    },
+    {
+      "key": "base.problems",
+      "en": "Some expressions could not run:",
+      "vars": []
+    },
+    {
+      "key": "base.saveSort",
+      "en": "Save this sort to {file}",
+      "vars": [
+        "file"
+      ]
+    },
+    {
+      "key": "base.saved",
+      "en": "Saved to {file}",
+      "vars": [
+        "file"
       ]
     },
     {

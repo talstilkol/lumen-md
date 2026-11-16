@@ -45,6 +45,7 @@ export default defineConfig({
           items: [
             { label: "Database views", slug: "workspace/database-views" },
             { label: "Database formulas + map", slug: "workspace/database-formulas" },
+            { label: "Obsidian Bases (.base files)", slug: "workspace/obsidian-bases", translations: { he: "Obsidian Bases (קובצי ‎.base)" } },
             { label: "Search (BM25 + Smart)", slug: "workspace/search" },
             { label: "Vault Doctor", slug: "workspace/doctor" },
           ],
