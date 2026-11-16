@@ -244,6 +244,28 @@
       "vars": []
     },
     {
+      "key": "toast.explainChangeFailed",
+      "en": "Could not explain the change: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "toast.explainChangeNoHistory",
+      "en": "This note has no earlier version yet. Save it, edit, and try again.",
+      "vars": []
+    },
+    {
+      "key": "toast.explainChangePick",
+      "en": "Compare the note now with which version?",
+      "vars": []
+    },
+    {
+      "key": "toast.explainChangeWorking",
+      "en": "Comparing the versions…",
+      "vars": []
+    },
+    {
       "key": "toast.extractingActionItems",
       "en": "✅ Extracting action items…",
       "vars": []

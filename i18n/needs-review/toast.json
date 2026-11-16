@@ -1,0 +1,34 @@
+{
+  "toast.explainChangeFailed": {
+    "ar": "kbrs3p",
+    "de": "kbrs3p",
+    "fr": "kbrs3p",
+    "ja": "kbrs3p",
+    "ru": "kbrs3p",
+    "zh-CN": "kbrs3p"
+  },
+  "toast.explainChangeNoHistory": {
+    "ar": "b807oq",
+    "de": "b807oq",
+    "fr": "b807oq",
+    "ja": "b807oq",
+    "ru": "b807oq",
+    "zh-CN": "b807oq"
+  },
+  "toast.explainChangePick": {
+    "ar": "qu814z",
+    "de": "qu814z",
+    "fr": "qu814z",
+    "ja": "qu814z",
+    "ru": "qu814z",
+    "zh-CN": "qu814z"
+  },
+  "toast.explainChangeWorking": {
+    "ar": "195476t",
+    "de": "195476t",
+    "fr": "195476t",
+    "ja": "195476t",
+    "ru": "195476t",
+    "zh-CN": "195476t"
+  }
+}

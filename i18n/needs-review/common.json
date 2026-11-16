@@ -675,6 +675,294 @@
     "ru": "bosydm",
     "zh-CN": "bosydm"
   },
+  "goal.close": {
+    "ar": "1l0xxoj",
+    "de": "1l0xxoj",
+    "fr": "1l0xxoj",
+    "ja": "1l0xxoj",
+    "ru": "1l0xxoj",
+    "zh-CN": "1l0xxoj"
+  },
+  "goal.dialog.local": {
+    "ar": "4ono6v",
+    "de": "4ono6v",
+    "fr": "4ono6v",
+    "ja": "4ono6v",
+    "ru": "4ono6v",
+    "zh-CN": "4ono6v"
+  },
+  "goal.dialog.thisNote": {
+    "ar": "1thqexf",
+    "de": "1thqexf",
+    "fr": "1thqexf",
+    "ja": "1thqexf",
+    "ru": "1thqexf",
+    "zh-CN": "1thqexf"
+  },
+  "goal.dialog.title": {
+    "ar": "8cxudj",
+    "de": "8cxudj",
+    "fr": "8cxudj",
+    "ja": "8cxudj",
+    "ru": "8cxudj",
+    "zh-CN": "8cxudj"
+  },
+  "goal.field.minutes": {
+    "ar": "1upnyyr",
+    "de": "1upnyyr",
+    "fr": "1upnyyr",
+    "ja": "1upnyyr",
+    "ru": "1upnyyr",
+    "zh-CN": "1upnyyr"
+  },
+  "goal.field.readability": {
+    "ar": "a6ics1",
+    "de": "a6ics1",
+    "fr": "a6ics1",
+    "ja": "a6ics1",
+    "ru": "a6ics1",
+    "zh-CN": "a6ics1"
+  },
+  "goal.field.tone": {
+    "ar": "1p7q9i9",
+    "de": "1p7q9i9",
+    "fr": "1p7q9i9",
+    "ja": "1p7q9i9",
+    "ru": "1p7q9i9",
+    "zh-CN": "1p7q9i9"
+  },
+  "goal.field.words": {
+    "ar": "oj38q",
+    "de": "oj38q",
+    "fr": "oj38q",
+    "ja": "oj38q",
+    "ru": "oj38q",
+    "zh-CN": "oj38q"
+  },
+  "goal.level.easy": {
+    "ar": "1h7863",
+    "de": "1h7863",
+    "fr": "1h7863",
+    "ja": "1h7863",
+    "ru": "1h7863",
+    "zh-CN": "1h7863"
+  },
+  "goal.level.hard": {
+    "ar": "1ptbe36",
+    "de": "1ptbe36",
+    "fr": "1ptbe36",
+    "ja": "1ptbe36",
+    "ru": "1ptbe36",
+    "zh-CN": "1ptbe36"
+  },
+  "goal.level.medium": {
+    "ar": "ew9h86",
+    "de": "ew9h86",
+    "fr": "ew9h86",
+    "ja": "ew9h86",
+    "ru": "ew9h86",
+    "zh-CN": "ew9h86"
+  },
+  "goal.none": {
+    "ar": "qipi3j",
+    "de": "qipi3j",
+    "fr": "qipi3j",
+    "ja": "qipi3j",
+    "ru": "qipi3j",
+    "zh-CN": "qipi3j"
+  },
+  "goal.now.readability": {
+    "ar": "2bia3a",
+    "de": "2bia3a",
+    "fr": "2bia3a",
+    "ja": "2bia3a",
+    "ru": "2bia3a",
+    "zh-CN": "2bia3a"
+  },
+  "goal.now.tone": {
+    "ar": "3eynof",
+    "de": "3eynof",
+    "fr": "3eynof",
+    "ja": "3eynof",
+    "ru": "3eynof",
+    "zh-CN": "3eynof"
+  },
+  "goal.now.words": {
+    "ar": "fhubla",
+    "de": "fhubla",
+    "fr": "fhubla",
+    "ja": "fhubla",
+    "ru": "fhubla",
+    "zh-CN": "fhubla"
+  },
+  "goal.provisional": {
+    "ar": "jtxc5v",
+    "de": "jtxc5v",
+    "fr": "jtxc5v",
+    "ja": "jtxc5v",
+    "ru": "jtxc5v",
+    "zh-CN": "jtxc5v"
+  },
+  "goal.save": {
+    "ar": "fljxya",
+    "de": "fljxya",
+    "fr": "fljxya",
+    "ja": "fljxya",
+    "ru": "fljxya",
+    "zh-CN": "fljxya"
+  },
+  "goal.status.label": {
+    "ar": "1plrz3z",
+    "de": "1plrz3z",
+    "fr": "1plrz3z",
+    "ja": "1plrz3z",
+    "ru": "1plrz3z",
+    "zh-CN": "1plrz3z"
+  },
+  "goal.status.readability": {
+    "ar": "98id8x",
+    "de": "98id8x",
+    "fr": "98id8x",
+    "ja": "98id8x",
+    "ru": "98id8x",
+    "zh-CN": "98id8x"
+  },
+  "goal.status.tone": {
+    "ar": "pndsw1",
+    "de": "pndsw1",
+    "fr": "pndsw1",
+    "ja": "pndsw1",
+    "ru": "pndsw1",
+    "zh-CN": "pndsw1"
+  },
+  "goal.status.words": {
+    "ar": "1exo7ma",
+    "de": "1exo7ma",
+    "fr": "1exo7ma",
+    "ja": "1exo7ma",
+    "ru": "1exo7ma",
+    "zh-CN": "1exo7ma"
+  },
+  "goal.title.readability": {
+    "ar": "npx1ly",
+    "de": "npx1ly",
+    "fr": "npx1ly",
+    "ja": "npx1ly",
+    "ru": "npx1ly",
+    "zh-CN": "npx1ly"
+  },
+  "goal.title.tone": {
+    "ar": "za5qdy",
+    "de": "za5qdy",
+    "fr": "za5qdy",
+    "ja": "za5qdy",
+    "ru": "za5qdy",
+    "zh-CN": "za5qdy"
+  },
+  "goal.title.words": {
+    "ar": "kpcutx",
+    "de": "kpcutx",
+    "fr": "kpcutx",
+    "ja": "kpcutx",
+    "ru": "kpcutx",
+    "zh-CN": "kpcutx"
+  },
+  "goal.tone.casual": {
+    "ar": "2tdg1w",
+    "de": "2tdg1w",
+    "fr": "2tdg1w",
+    "ja": "2tdg1w",
+    "ru": "2tdg1w",
+    "zh-CN": "2tdg1w"
+  },
+  "goal.tone.formal": {
+    "ar": "1m5sly2",
+    "de": "1m5sly2",
+    "fr": "1m5sly2",
+    "ja": "1m5sly2",
+    "ru": "1m5sly2",
+    "zh-CN": "1m5sly2"
+  },
+  "goal.tone.neutral": {
+    "ar": "12xcnh4",
+    "de": "12xcnh4",
+    "fr": "12xcnh4",
+    "ja": "12xcnh4",
+    "ru": "12xcnh4",
+    "zh-CN": "12xcnh4"
+  },
+  "goal.tooShort": {
+    "ar": "1vmdypv",
+    "de": "1vmdypv",
+    "fr": "1vmdypv",
+    "ja": "1vmdypv",
+    "ru": "1vmdypv",
+    "zh-CN": "1vmdypv"
+  },
+  "goal.week.caption": {
+    "ar": "197rlk2",
+    "de": "197rlk2",
+    "fr": "197rlk2",
+    "ja": "197rlk2",
+    "ru": "197rlk2",
+    "zh-CN": "197rlk2"
+  },
+  "goal.week.day": {
+    "ar": "kcgjh9",
+    "de": "kcgjh9",
+    "fr": "kcgjh9",
+    "ja": "kcgjh9",
+    "ru": "kcgjh9",
+    "zh-CN": "kcgjh9"
+  },
+  "goal.week.minutes": {
+    "ar": "f7vpn2",
+    "de": "f7vpn2",
+    "fr": "f7vpn2",
+    "ja": "f7vpn2",
+    "ru": "f7vpn2",
+    "zh-CN": "f7vpn2"
+  },
+  "goal.week.note": {
+    "ar": "eodnk8",
+    "de": "eodnk8",
+    "fr": "eodnk8",
+    "ja": "eodnk8",
+    "ru": "eodnk8",
+    "zh-CN": "eodnk8"
+  },
+  "goal.week.reached": {
+    "ar": "1cbiz80",
+    "de": "1cbiz80",
+    "fr": "1cbiz80",
+    "ja": "1cbiz80",
+    "ru": "1cbiz80",
+    "zh-CN": "1cbiz80"
+  },
+  "goal.week.title": {
+    "ar": "1ek4vus",
+    "de": "1ek4vus",
+    "fr": "1ek4vus",
+    "ja": "1ek4vus",
+    "ru": "1ek4vus",
+    "zh-CN": "1ek4vus"
+  },
+  "goal.week.total": {
+    "ar": "1ijsa0b",
+    "de": "1ijsa0b",
+    "fr": "1ijsa0b",
+    "ja": "1ijsa0b",
+    "ru": "1ijsa0b",
+    "zh-CN": "1ijsa0b"
+  },
+  "goal.week.words": {
+    "ar": "oj38q",
+    "de": "oj38q",
+    "fr": "oj38q",
+    "ja": "oj38q",
+    "ru": "oj38q",
+    "zh-CN": "oj38q"
+  },
   "hl.scan": {
     "ar": "qb0k9u",
     "de": "qb0k9u",
@@ -1819,5 +2107,349 @@
     "ja": "1gjpbva",
     "ru": "1gjpbva",
     "zh-CN": "1gjpbva"
+  },
+  "wchk.changed": {
+    "ar": "1815xcq",
+    "de": "1815xcq",
+    "fr": "1815xcq",
+    "ja": "1815xcq",
+    "ru": "1815xcq",
+    "zh-CN": "1815xcq"
+  },
+  "wchk.close": {
+    "ar": "1l0xxoj",
+    "de": "1l0xxoj",
+    "fr": "1l0xxoj",
+    "ja": "1l0xxoj",
+    "ru": "1l0xxoj",
+    "zh-CN": "1l0xxoj"
+  },
+  "wchk.count": {
+    "ar": "7y8irp",
+    "de": "7y8irp",
+    "fr": "7y8irp",
+    "ja": "7y8irp",
+    "ru": "7y8irp",
+    "zh-CN": "7y8irp"
+  },
+  "wchk.cut": {
+    "ar": "f4vydo",
+    "de": "f4vydo",
+    "fr": "f4vydo",
+    "ja": "f4vydo",
+    "ru": "f4vydo",
+    "zh-CN": "f4vydo"
+  },
+  "wchk.goto": {
+    "ar": "1ev0a0g",
+    "de": "1ev0a0g",
+    "fr": "1ev0a0g",
+    "ja": "1ev0a0g",
+    "ru": "1ev0a0g",
+    "zh-CN": "1ev0a0g"
+  },
+  "wchk.ignore": {
+    "ar": "fl3rrm",
+    "de": "fl3rrm",
+    "fr": "fl3rrm",
+    "ja": "fl3rrm",
+    "ru": "fl3rrm",
+    "zh-CN": "fl3rrm"
+  },
+  "wchk.ignoreLabel": {
+    "ar": "euldnh",
+    "de": "euldnh",
+    "fr": "euldnh",
+    "ja": "euldnh",
+    "ru": "euldnh",
+    "zh-CN": "euldnh"
+  },
+  "wchk.kind.all": {
+    "ar": "1rifvwq",
+    "de": "1rifvwq",
+    "fr": "1rifvwq",
+    "ja": "1rifvwq",
+    "ru": "1rifvwq",
+    "zh-CN": "1rifvwq"
+  },
+  "wchk.kind.cliche": {
+    "ar": "lpv1ag",
+    "de": "lpv1ag",
+    "fr": "lpv1ag",
+    "ja": "lpv1ag",
+    "ru": "lpv1ag",
+    "zh-CN": "lpv1ag"
+  },
+  "wchk.kind.doubled": {
+    "ar": "u81u1j",
+    "de": "u81u1j",
+    "fr": "u81u1j",
+    "ja": "u81u1j",
+    "ru": "u81u1j",
+    "zh-CN": "u81u1j"
+  },
+  "wchk.kind.loanword": {
+    "ar": "zoovpq",
+    "de": "zoovpq",
+    "fr": "zoovpq",
+    "ja": "zoovpq",
+    "ru": "zoovpq",
+    "zh-CN": "zoovpq"
+  },
+  "wchk.kind.repetition": {
+    "ar": "1s3iye0",
+    "de": "1s3iye0",
+    "fr": "1s3iye0",
+    "ja": "1s3iye0",
+    "ru": "1s3iye0",
+    "zh-CN": "1s3iye0"
+  },
+  "wchk.loanwords.everyday": {
+    "ar": "1006znr",
+    "de": "1006znr",
+    "fr": "1006znr",
+    "ja": "1006znr",
+    "ru": "1006znr",
+    "zh-CN": "1006znr"
+  },
+  "wchk.loanwords.title": {
+    "ar": "69az60",
+    "de": "69az60",
+    "fr": "69az60",
+    "ja": "69az60",
+    "ru": "69az60",
+    "zh-CN": "69az60"
+  },
+  "wchk.local": {
+    "ar": "1sivnnv",
+    "de": "1sivnnv",
+    "fr": "1sivnnv",
+    "ja": "1sivnnv",
+    "ru": "1sivnnv",
+    "zh-CN": "1sivnnv"
+  },
+  "wchk.none": {
+    "ar": "1vc7z6o",
+    "de": "1vc7z6o",
+    "fr": "1vc7z6o",
+    "ja": "1vc7z6o",
+    "ru": "1vc7z6o",
+    "zh-CN": "1vc7z6o"
+  },
+  "wchk.propose": {
+    "ar": "9obtn5",
+    "de": "9obtn5",
+    "fr": "9obtn5",
+    "ja": "9obtn5",
+    "ru": "9obtn5",
+    "zh-CN": "9obtn5"
+  },
+  "wchk.proposeAll": {
+    "ar": "1x8n89b",
+    "de": "1x8n89b",
+    "fr": "1x8n89b",
+    "ja": "1x8n89b",
+    "ru": "1x8n89b",
+    "zh-CN": "1x8n89b"
+  },
+  "wchk.proposed": {
+    "ar": "1h7wvmv",
+    "de": "1h7wvmv",
+    "fr": "1h7wvmv",
+    "ja": "1h7wvmv",
+    "ru": "1h7wvmv",
+    "zh-CN": "1h7wvmv"
+  },
+  "wchk.proposedOne": {
+    "ar": "1bv6k83",
+    "de": "1bv6k83",
+    "fr": "1bv6k83",
+    "ja": "1bv6k83",
+    "ru": "1bv6k83",
+    "zh-CN": "1bv6k83"
+  },
+  "wchk.register": {
+    "ar": "avtc68",
+    "de": "avtc68",
+    "fr": "avtc68",
+    "ja": "avtc68",
+    "ru": "avtc68",
+    "zh-CN": "avtc68"
+  },
+  "wchk.register.academic": {
+    "ar": "1ppyily",
+    "de": "1ppyily",
+    "fr": "1ppyily",
+    "ja": "1ppyily",
+    "ru": "1ppyily",
+    "zh-CN": "1ppyily"
+  },
+  "wchk.register.everyday": {
+    "ar": "yx43em",
+    "de": "yx43em",
+    "fr": "yx43em",
+    "ja": "yx43em",
+    "ru": "yx43em",
+    "zh-CN": "yx43em"
+  },
+  "wchk.repetition.title": {
+    "ar": "h6xh7y",
+    "de": "h6xh7y",
+    "fr": "h6xh7y",
+    "ja": "h6xh7y",
+    "ru": "h6xh7y",
+    "zh-CN": "h6xh7y"
+  },
+  "wchk.resetIgnored": {
+    "ar": "12qhje2",
+    "de": "12qhje2",
+    "fr": "12qhje2",
+    "ja": "12qhje2",
+    "ru": "12qhje2",
+    "zh-CN": "12qhje2"
+  },
+  "wchk.show": {
+    "ar": "bi2jq4",
+    "de": "bi2jq4",
+    "fr": "bi2jq4",
+    "ja": "bi2jq4",
+    "ru": "bi2jq4",
+    "zh-CN": "bi2jq4"
+  },
+  "wchk.window": {
+    "ar": "cc9b2p",
+    "de": "cc9b2p",
+    "fr": "cc9b2p",
+    "ja": "cc9b2p",
+    "ru": "cc9b2p",
+    "zh-CN": "cc9b2p"
+  },
+  "xchg.absent": {
+    "ar": "14137kw",
+    "de": "14137kw",
+    "fr": "14137kw",
+    "ja": "14137kw",
+    "ru": "14137kw",
+    "zh-CN": "14137kw"
+  },
+  "xchg.against": {
+    "ar": "j8nj5i",
+    "de": "j8nj5i",
+    "fr": "j8nj5i",
+    "ja": "j8nj5i",
+    "ru": "j8nj5i",
+    "zh-CN": "j8nj5i"
+  },
+  "xchg.changes": {
+    "ar": "mwvz4m",
+    "de": "mwvz4m",
+    "fr": "mwvz4m",
+    "ja": "mwvz4m",
+    "ru": "mwvz4m",
+    "zh-CN": "mwvz4m"
+  },
+  "xchg.close": {
+    "ar": "1l0xxoj",
+    "de": "1l0xxoj",
+    "fr": "1l0xxoj",
+    "ja": "1l0xxoj",
+    "ru": "1l0xxoj",
+    "zh-CN": "1l0xxoj"
+  },
+  "xchg.dropped": {
+    "ar": "avz845",
+    "de": "avz845",
+    "fr": "avz845",
+    "ja": "avz845",
+    "ru": "avz845",
+    "zh-CN": "avz845"
+  },
+  "xchg.engine.model": {
+    "ar": "1tt2stx",
+    "de": "1tt2stx",
+    "fr": "1tt2stx",
+    "ja": "1tt2stx",
+    "ru": "1tt2stx",
+    "zh-CN": "1tt2stx"
+  },
+  "xchg.engine.rules": {
+    "ar": "obebd",
+    "de": "obebd",
+    "fr": "obebd",
+    "ja": "obebd",
+    "ru": "obebd",
+    "zh-CN": "obebd"
+  },
+  "xchg.kind.entity": {
+    "ar": "136nuue",
+    "de": "136nuue",
+    "fr": "136nuue",
+    "ja": "136nuue",
+    "ru": "136nuue",
+    "zh-CN": "136nuue"
+  },
+  "xchg.kind.negation": {
+    "ar": "1mmzq2y",
+    "de": "1mmzq2y",
+    "fr": "1mmzq2y",
+    "ja": "1mmzq2y",
+    "ru": "1mmzq2y",
+    "zh-CN": "1mmzq2y"
+  },
+  "xchg.kind.number": {
+    "ar": "7q2940",
+    "de": "7q2940",
+    "fr": "7q2940",
+    "ja": "7q2940",
+    "ru": "7q2940",
+    "zh-CN": "7q2940"
+  },
+  "xchg.meaning": {
+    "ar": "cev1lo",
+    "de": "cev1lo",
+    "fr": "cev1lo",
+    "ja": "cev1lo",
+    "ru": "cev1lo",
+    "zh-CN": "cev1lo"
+  },
+  "xchg.meaningNone": {
+    "ar": "1mwrcra",
+    "de": "1mwrcra",
+    "fr": "1mwrcra",
+    "ja": "1mwrcra",
+    "ru": "1mwrcra",
+    "zh-CN": "1mwrcra"
+  },
+  "xchg.none": {
+    "ar": "rd8ex6",
+    "de": "rd8ex6",
+    "fr": "rd8ex6",
+    "ja": "rd8ex6",
+    "ru": "rd8ex6",
+    "zh-CN": "rd8ex6"
+  },
+  "xchg.stats": {
+    "ar": "12ng0lw",
+    "de": "12ng0lw",
+    "fr": "12ng0lw",
+    "ja": "12ng0lw",
+    "ru": "12ng0lw",
+    "zh-CN": "12ng0lw"
+  },
+  "xchg.summary": {
+    "ar": "1sffb5v",
+    "de": "1sffb5v",
+    "fr": "1sffb5v",
+    "ja": "1sffb5v",
+    "ru": "1sffb5v",
+    "zh-CN": "1sffb5v"
+  },
+  "xchg.title": {
+    "ar": "1ccwmzq",
+    "de": "1ccwmzq",
+    "fr": "1ccwmzq",
+    "ja": "1ccwmzq",
+    "ru": "1ccwmzq",
+    "zh-CN": "1ccwmzq"
   }
 }
