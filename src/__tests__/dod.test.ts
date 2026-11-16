@@ -18,7 +18,7 @@ import {
 // @ts-expect-error — plain .mjs script without type declarations
 import { run } from "../../scripts/plan/build.mjs";
 
-type Task = { id: string; title?: string; status?: string; dod?: string[]; dodMock?: boolean; acceptance?: string[] };
+type Task = { id: string; title?: string; status?: string; priority?: string; dod?: string[]; dodExpect?: unknown; dodMock?: boolean; acceptance?: string[] };
 type Plan = { dodGrandfathered?: string[]; dodRevoked?: string[]; phases: { tasks: Task[] }[] };
 
 const ROOT = resolve(__dirname, "..", "..");
@@ -86,6 +86,28 @@ describe("checkDod", () => {
   it("a dod is a list of non-empty commands", () => {
     expect(check(mini([{ id: "1.1", status: "✅ #1", dod: [" "] }]))[0]).toMatch(/list of commands/);
   });
+
+  it("every P0 task, done or not, has a dod and one expected result per command (W10.Z3, lane A6)", () => {
+    expect(check(mini([{ id: "1.1", priority: "P0", status: "⏳ #1" }]))[0]).toMatch(/1\.1 is P0 without a dod/);
+    expect(check(mini([{ id: "1.1", priority: "P0" }]))[0]).toMatch(/P0 without a dod/);
+    expect(check(mini([{ id: "1.1", priority: "P0", dod: ["true"] }]))[0]).toMatch(/P0 without dodExpect/);
+    expect(check(mini([{ id: "1.1", priority: "P0", dod: ["true", "false"], dodExpect: ["exit 0"] }]))[0]).toMatch(/1 entries for 2 dod command/);
+    expect(check(mini([{ id: "1.1", priority: "P0", dod: ["true"], dodExpect: [" "] }]))[0]).toMatch(/list of expected results/);
+    expect(check(mini([{ id: "1.1", priority: "P0", dod: ["true"], dodExpect: "exit 0" }]))[0]).toMatch(/list of expected results/);
+    expect(check(mini([{ id: "1.1", priority: "P0", dod: ["true"], dodExpect: ["exit 0"] }]))).toEqual([]);
+    // P1 and P2 may stay without a dod until they are ✅; a dodExpect they carry still matches its dod.
+    expect(check(mini([{ id: "1.1", priority: "P1" }]))).toEqual([]);
+    expect(check(mini([{ id: "1.1", priority: "P1", dod: ["true"], dodExpect: [] }]))[0]).toMatch(/0 entries for 1/);
+  });
+
+  it("the checked-in plan: every P0 task has its commands and expected results", () => {
+    const p0 = allTasks(plan()).filter((t: Task) => t.priority === "P0");
+    expect(p0.length).toBeGreaterThan(0);
+    for (const t of p0) {
+      expect(t.dod?.length, t.id).toBeGreaterThan(0);
+      expect((t.dodExpect as string[]).length, t.id).toBe(t.dod!.length);
+    }
+  });
 });
 
 describe("plan:check", () => {
@@ -138,6 +160,7 @@ describe("select and markdown", () => {
   it("the PR checklist lists acceptance and commands", () => {
     const md = markdown([task(plan(), "0.6")]);
     expect(md).toMatch(/^### 0\.6 · /);
-    expect(md).toContain("- [ ] `npm run plan:check` green");
+    expect(md).toContain("- [ ] `npm run plan:check` → exit 0");
+    expect(markdown([{ id: "1.1", title: "x", dod: ["true"] }])).toContain("- [ ] `true` green");
   });
 });
