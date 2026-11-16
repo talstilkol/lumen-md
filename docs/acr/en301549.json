@@ -77,11 +77,16 @@
     {
       "id": "11.5.2.6",
       "name": "Row, column, and headers",
-      "status": "supports",
+      "status": "partially-supports",
       "mirrors": "1.3.1",
       "remarks": {
         "en": "Tables in the preview and in WYSIWYG are HTML tables with header cells, as for 1.3.1.",
         "he": "טבלאות בתצוגה המקדימה וב-WYSIWYG הן טבלאות HTML עם תאי כותרת, כמו ב-1.3.1."
+      },
+      "plan": {
+        "en": "As for 1.3.1: axe (W3.8 run) found the calendar month grid's cells without rows; #522 (W6.30, in the train) gives the grid real rows, and the next axe run on the train turns 1.3.1 and these rows back to supports.",
+        "he": "כמו ב-1.3.1: axe (הרצת W3.8) מצא ברשת החודש של לוח השנה תאים בלי שורות; #522 (W6.30, ברכבת) נותן לרשת שורות אמיתיות, והרצת axe הבאה על הרכבת תחזיר את 1.3.1 ואת השורות האלה ל״נתמך״.",
+        "target": "0.2.0"
       }
     },
     {
@@ -102,21 +107,31 @@
     {
       "id": "11.5.2.8",
       "name": "Label relationships",
-      "status": "supports",
+      "status": "partially-supports",
       "mirrors": "1.3.1",
       "remarks": {
         "en": "Labels are tied to their fields with <label> and aria-labelledby, as for 1.3.1.",
         "he": "תוויות מקושרות לשדות שלהן עם <label> ו-aria-labelledby, כמו ב-1.3.1."
+      },
+      "plan": {
+        "en": "As for 1.3.1: axe (W3.8 run) found the calendar month grid's cells without rows; #522 (W6.30, in the train) gives the grid real rows, and the next axe run on the train turns 1.3.1 and these rows back to supports.",
+        "he": "כמו ב-1.3.1: axe (הרצת W3.8) מצא ברשת החודש של לוח השנה תאים בלי שורות; #522 (W6.30, ברכבת) נותן לרשת שורות אמיתיות, והרצת axe הבאה על הרכבת תחזיר את 1.3.1 ואת השורות האלה ל״נתמך״.",
+        "target": "0.2.0"
       }
     },
     {
       "id": "11.5.2.9",
       "name": "Parent-child relationships",
-      "status": "supports",
+      "status": "partially-supports",
       "mirrors": "1.3.1",
       "remarks": {
         "en": "The file tree is an ARIA tree with nested groups; lists and headings are HTML, as for 1.3.1.",
         "he": "עץ הקבצים הוא עץ ARIA עם קבוצות מקוננות; רשימות וכותרות הן HTML, כמו ב-1.3.1."
+      },
+      "plan": {
+        "en": "As for 1.3.1: axe (W3.8 run) found the calendar month grid's cells without rows; #522 (W6.30, in the train) gives the grid real rows, and the next axe run on the train turns 1.3.1 and these rows back to supports.",
+        "he": "כמו ב-1.3.1: axe (הרצת W3.8) מצא ברשת החודש של לוח השנה תאים בלי שורות; #522 (W6.30, ברכבת) נותן לרשת שורות אמיתיות, והרצת axe הבאה על הרכבת תחזיר את 1.3.1 ואת השורות האלה ל״נתמך״.",
+        "target": "0.2.0"
       }
     },
     {

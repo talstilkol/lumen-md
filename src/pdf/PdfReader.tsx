@@ -36,6 +36,7 @@ import { drainQueue } from "./drainQueue";
 import { companionNotePath, createPdfAnnotation, describeAnnotation, findAll, nextMatchIndex, readAnnotationsNote, parsePdfFragment, shortId, unionRect, upsertAnnotationsNote, withNote, type PdfAnnotation } from "./annotations";
 import { layerText, offsetsToRange, pageTextFromItems, rangePageRects, rangeToOffsets } from "./textMap";
 import { openPdf, type PdfDocument } from "./pdfjs";
+import { PdfListenButton } from "./PdfListenButton";
 import "./PdfReader.css";
 import { HelpButton } from "../ui/HelpButton";
 import { explainError, UserFacingError } from "../lib/userError";
@@ -681,6 +682,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
           >
             {t("pdf.highlight")}
           </button>
+          <PdfListenButton doc={doc} ocrPages={ocrPages} pageTexts={pageTexts} path={path} goToPage={goToPage} />
           <button type="button" className="icon-btn pdf-text-btn" data-testid="pdf-ask" aria-pressed={askOpen} onClick={() => setAskOpen((v) => !v)}>
             {t("pdf.ask")}
           </button>
