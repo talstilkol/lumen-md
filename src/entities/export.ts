@@ -100,8 +100,18 @@ export function toJsonLd(g: EntityGraph): string {
 
 const xml = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/\r/g, "&#13;").replace(/\n/g, "&#10;").replace(/\t/g, "&#9;");
-/** XML 1.0 forbids most control characters even as references; they are dropped. */
+/** XML 1.0 forbids most control characters even as references; they are dropped from text. */
 const xmlText = (s: string) => xml(s.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F￾￿]/g, ""));
+/**
+ * Review 11, L10: an id may not lose characters, or two ids become one (`a\u0001b`
+ * and `ab`). In an id the characters XML cannot carry are percent-escaped
+ * (`%01`, `%uFFFE`), and `%` itself is `%25`, so different ids stay different.
+ */
+export const graphmlId = (s: string) => s.replace(/[%\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]/g, (c) => {
+  const n = c.charCodeAt(0);
+  return n > 0xff ? `%u${n.toString(16).toUpperCase().padStart(4, "0")}` : `%${n.toString(16).toUpperCase().padStart(2, "0")}`;
+});
+const xmlId = (s: string) => xml(graphmlId(s));
 
 /**
  * GraphML has no list type, so aliases are one string joined by `|`. An
@@ -155,13 +165,13 @@ export function toGraphML(g: EntityGraph): string {
   out.push('  <graph id="lumen-entities" edgedefault="directed">');
   const data = (k: string, v: string | number | null | undefined) => (v === null || v === undefined || v === "" ? "" : `<data key="${k}">${xmlText(String(v))}</data>`);
   for (const e of entities) {
-    out.push(`    <node id="${xmlText(e.id)}">${data("n_type", e.type)}${data("n_name", e.name)}${data("n_aliases", joinGraphMLList(e.aliases))}${data("n_schema", TYPE_INFO[e.type].schema)}${data("n_wikidata", e.qid)}</node>`);
+    out.push(`    <node id="${xmlId(e.id)}">${data("n_type", e.type)}${data("n_name", e.name)}${data("n_aliases", joinGraphMLList(e.aliases))}${data("n_schema", TYPE_INFO[e.type].schema)}${data("n_wikidata", e.qid)}</node>`);
   }
   for (const x of edges) {
     const p = x.provenance;
     out.push(
-      // Ids go through the same control-character filter as text: XML 1.0 cannot carry them even in an attribute.
-      `    <edge id="${xmlText(x.id)}" source="${xmlText(x.subject)}" target="${xmlText(x.object)}">` +
+      // Ids are escaped, not filtered (review 11, L10): XML 1.0 cannot carry the control characters even in an attribute.
+      `    <edge id="${xmlId(x.id)}" source="${xmlId(x.subject)}" target="${xmlId(x.object)}">` +
         data("e_predicate", x.predicate) +
         data("e_wikidataProperty", predicateInfo(x.predicate)?.wikidata) +
         data("e_note", p.note) +
