@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { splitFrontmatter } from "../editor/WysiwygEditor";
+import { splitFrontmatter } from "../editor/wysiwygFrontmatter";
 
 describe("splitFrontmatter (WYSIWYG frontmatter preservation)", () => {
   it("splits a leading YAML block verbatim and the body re-concatenates exactly", () => {
