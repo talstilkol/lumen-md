@@ -80,10 +80,12 @@ export function missingRefs({ prs, worktrees, branches, repo }) {
 const cell = (v) => String(v).replace(/\|/g, "\\|");
 
 /** The Markdown document. */
-export function renderHandoff({ now, repo, task, next, prs, worktrees, problems }) {
+export function renderHandoff({ now, repo, task, next, where = null, prs, worktrees, problems }) {
   const o = [];
   o.push(`# Handoff — ${repo}`, "", `Generated ${now} by \`npm run handoff\` (plan 0.13). Regenerate after every PR; do not edit by hand.`, "");
-  o.push("## Now", "", `- **Current task:** ${task || "—"}`, `- **Next step:** ${next || "—"}`, "");
+  o.push("## Now", "", `- **Current task:** ${task || "—"}`);
+  if (where?.path) o.push(`- **Where:** \`${cell(where.path)}\` on ${where.branch ? `\`${cell(where.branch)}\`` : "(detached)"}`);
+  o.push(`- **Next step:** ${next ? `\`${cell(next)}\`` : "—"}`, "");
   o.push(`## Open PRs (${prs.length}) — as a stack`, "", "Indented PRs are based on the PR above them. CI is the latest run on the head branch.", "");
   o.push("| PR | Branch → base | CI | Unanswered review comments | Title |", "|---|---|---|---|---|");
   for (const { depth, pr } of prTree(prs)) {
@@ -96,10 +98,40 @@ export function renderHandoff({ now, repo, task, next, prs, worktrees, problems 
   o.push("", "\"Unanswered\" counts top-level review comments that have no reply yet. GitHub's REST API does not expose whether a thread is resolved, so this is an upper bound.", "");
   o.push(`## Worktrees (${worktrees.length})`, "", "| Path | Branch | HEAD |", "|---|---|---|");
   for (const w of worktrees) o.push(`| \`${w.path}\`${w.prunable ? " (directory gone)" : ""} | ${w.branch ? `\`${w.branch}\`` : "(detached)"} | \`${w.head ?? ""}\` |`);
-  o.push("", "## To continue", "", "```sh", "git fetch origin", "gh pr checks <N>                      # CI of a PR", "npm run ci:local -- --changed       # if plan 0.14 is merged", "scripts/lane.sh <branch> <base>     # a new lane (docs/dev/lanes.md)", "```", "");
+  o.push("", "## To continue", "", "```sh", "git fetch origin", "gh pr checks <N>                      # CI of a PR", "npm run ci:local -- --changed       # the gates, on this machine (plan 0.14)", "scripts/lane.sh <branch> <base>     # a new lane (docs/dev/lanes.md)", "```", "");
   o.push("## Checks", "");
   if (problems.length) for (const p of problems) o.push(`- ⚠️ ${p}`);
   else o.push("- Every branch and worktree named above exists.");
   o.push("");
   return o.join("\n");
+}
+
+/**
+ * Plan 0.13's acceptance: a new agent continues from the document alone. The
+ * problems that would stop it: a task with no next step, or a next step with
+ * no place to run it.
+ */
+export function nextStepProblems({ task, next, where }) {
+  const out = [];
+  if (task && !next) out.push("no next step: a new agent cannot continue from this document (pass --next)");
+  if (next && !where?.path) out.push("the next step names no worktree to run in");
+  return out;
+}
+
+/**
+ * What a new agent reads from the document (and only from it): the task, the
+ * worktree and branch to work in, and the next step's command.
+ * @param {string} md
+ */
+export function readHandoff(md) {
+  const line = (label) => new RegExp(`^- \\*\\*${label}:\\*\\* (.*)$`, "m").exec(md)?.[1] ?? null;
+  const unq = (s) => (s && s.startsWith("`") && s.endsWith("`") ? s.slice(1, -1).replace(/\\\|/g, "|") : s);
+  const task = line("Current task");
+  const next = line("Next step");
+  const w = /^`(.+)` on (?:`(.+)`|\(detached\))$/.exec(line("Where") ?? "");
+  return {
+    task: task === "—" ? null : task,
+    next: next === "—" ? null : unq(next),
+    where: w ? { path: w[1].replace(/\\\|/g, "|"), branch: w[2] ? w[2].replace(/\\\|/g, "|") : null } : null,
+  };
 }
