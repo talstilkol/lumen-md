@@ -27,6 +27,10 @@ const MODULES = {
   "views/bulkEditRun": () => import("../views/bulkEditRun"),
   // e2e/voice-live-partial.spec.ts: a scripted live engine on the capture box's seam (plan W10.C8, 6.1).
   "capture/voiceCapture": () => import("../capture/voiceCapture"),
+  // e2e/as-of.spec.ts: the open note's past versions, filed as autosave files them (W12.S2).
+  "storage/history": () => import("../storage/history"),
+  // e2e/conflict-3way.spec.ts: the conflict dialog as sync opens it (W12.S3).
+  "sync/cloud/ConflictDialog": () => import("../sync/cloud/ConflictDialog"),
 };
 
 export type E2eModuleName = keyof typeof MODULES;
