@@ -3534,6 +3534,7 @@
   "viz.arg.conclusion": "вывод",
   "viz.arg.contradicts": "опровергает",
   "viz.arg.empty": "Пока нет утверждений и источников: задайте заметкам `type: claim` или `type: evidence` и свяжите их через supports:, contradicts: или qualifies:.",
+  "viz.arg.findings": "{{n}} logic findings",
   "viz.arg.noSource": "без источника",
   "viz.arg.qualifies": "уточняет",
   "viz.arg.save": "Сохранить как холст",

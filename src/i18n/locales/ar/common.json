@@ -3534,6 +3534,7 @@
   "viz.arg.conclusion": "استنتاج",
   "viz.arg.contradicts": "يناقض",
   "viz.arg.empty": "لا ادعاءات ولا مصادر بعد: أعطِ الملاحظات `type: claim` أو `type: evidence` واربطها بـ supports: أو contradicts: أو qualifies:.",
+  "viz.arg.findings": "{{n}} logic findings",
   "viz.arg.noSource": "بلا مصدر",
   "viz.arg.qualifies": "يقيّد",
   "viz.arg.save": "حفظ كلوحة",
