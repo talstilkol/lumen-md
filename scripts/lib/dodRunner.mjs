@@ -17,6 +17,7 @@ import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync } 
 import { tmpdir } from "node:os";
 import { join, relative, sep } from "node:path";
 import { rustCounts, rustGreen } from "./rustStd.mjs";
+import { expectedExit, unmetExpect } from "./dodExpect.mjs";
 
 /** [pattern, reason]: commands this runner does not run, and why. */
 export const NOT_HERE = [
@@ -166,9 +167,12 @@ export function vitestJsonSync(files, root, spawn = spawnSync) {
 /**
  * One dod command → { cmd, status: "pass"|"fail"|"skipped"|"not here", detail }.
  * @param {string} cmd
- * @param {{ root: string, runner?: string|null, run?: typeof sh }} o
+ * A shell command is held to its expected result where that is checkable
+ * (./dodExpect.mjs, audit r3): an exit code that matches but an output that
+ * does not ("no wave is over its WIP limit") is red, "expect unmet".
+ * @param {{ root: string, runner?: string|null, run?: typeof sh, expect?: string }} o
  */
-export async function runCommand(cmd, { root, runner = null, run = sh }) {
+export async function runCommand(cmd, { root, runner = null, run = sh, expect }) {
   const why = notHere(cmd);
   if (why) return { cmd, status: "not here", detail: why };
   const files = vitestFiles(cmd, root);
@@ -193,8 +197,11 @@ export async function runCommand(cmd, { root, runner = null, run = sh }) {
   const rust = rustCounts(r.out);
   if (r.code === 0 && rust && !rustGreen(rust)) return { cmd, status: "fail", detail: `exit 0 — but ${rust.ran === 0 ? "running 0 tests" : `${rust.passed}/${rust.ran} passed`}: nothing was checked` };
   const outLines = r.out.trim().split("\n").filter((l) => l.trim() && !/^Node\.js v\d/.test(l));
-  const tail = (r.code !== 0 ? outLines.filter((l) => /error|✗|fail|cannot|not found/i.test(l)).slice(-1)[0] : null) ?? outLines.slice(-1)[0] ?? "";
-  return { cmd, status: r.code === 0 ? "pass" : "fail", detail: `exit ${r.code}${tail ? ` — ${tail.slice(0, 160)}` : ""}` };
+  const want = expectedExit(expect);
+  const unmet = unmetExpect(expect, r);
+  if (r.code === want && unmet.length) return { cmd, status: "fail", detail: `exit ${r.code} — expect unmet: ${unmet.join("; ").slice(0, 200)}` };
+  const tail = (r.code !== want ? outLines.filter((l) => /error|✗|fail|cannot|not found/i.test(l)).slice(-1)[0] : null) ?? outLines.slice(-1)[0] ?? "";
+  return { cmd, status: r.code === want ? "pass" : "fail", detail: `exit ${r.code}${tail ? ` — ${tail.slice(0, 160)}` : ""}` };
 }
 
 /**
@@ -209,8 +216,8 @@ export async function runTasks(tasks, { root, runner = null, jobs = 1, run = sh,
       const i = next++;
       const t = tasks[i];
       const cmds = [];
-      for (const cmd of t.dod ?? []) {
-        cmds.push(await runCommand(cmd, { root, runner, run }));
+      for (const [k, cmd] of (t.dod ?? []).entries()) {
+        cmds.push(await runCommand(cmd, { root, runner, run, expect: t.dodExpect?.[k] }));
         log(`${t.id} ${cmds.at(-1).status} ${cmd.slice(0, 100)}`);
       }
       out[i] = { id: t.id, title: t.title, status: t.status ?? "", verdict: verdictOf(cmds), cmds, expect: t.dodExpect ?? [] };
