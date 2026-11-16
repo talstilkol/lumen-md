@@ -29,9 +29,10 @@ describe("support page and FUNDING.yml agree (W10.B21)", () => {
     });
   }
 
-  it("today: no account is open, so no donation link and no 'may lead to an empty page'", () => {
-    expect(active("github")).toBe(false);
-    expect(active("open_collective")).toBe(false);
+  // OWNER-DECISION draft (wave g6 L5): true only once both accounts exist — see plan/owner-pack/L5.md, W5.25.
+  it("both accounts are open, and no 'may lead to an empty page'", () => {
+    expect(active("github")).toBe(true);
+    expect(active("open_collective")).toBe(true);
     expect(html).not.toMatch(/may lead to an empty page|יכולים להוביל לדף ריק/);
     expect(liveHrefs).toContain("https://github.com/talstilkol/lumen-md");
   });
