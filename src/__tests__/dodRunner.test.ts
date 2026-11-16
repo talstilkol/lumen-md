@@ -48,12 +48,15 @@ describe("runCommand and runTasks", () => {
   const fake = (byFile: Record<string, string>, shell: Record<string, number> = {}) => async (cmd: string, args: string[]): Promise<Res> =>
     cmd === "bash" ? { code: shell[args[1]] ?? 0, out: "done" } : { code: 0, out: byFile[args[1]] ?? "load error" };
 
-  it("a vitest command is green only when every file has a pass and no failure", async () => {
+  it("a vitest command is green only when every file has a pass and no failure; a fully skipped file is not a pass", async () => {
     const run = fake({ "src/__tests__/dod.test.ts": "v4: node pass 17 fail 0", "src/__tests__/handoff.test.ts": "v4: node pass 0 fail 0" });
     const ok = await runCommand("npx vitest run src/__tests__/dod.test.ts", { root, runner: "shim", run });
     expect(ok).toMatchObject({ status: "pass", detail: "dod.test.ts 17/17" });
     const zero = await runCommand("npx vitest run src/__tests__/dod.test.ts src/__tests__/handoff.test.ts", { root, runner: "shim", run });
-    expect(zero.status).toBe("fail");
+    expect(zero).toMatchObject({ status: "skipped", detail: "dod.test.ts 17/17, handoff.test.ts 0/0 (all skipped here)" });
+    expect(verdictOf([zero])).toBe("not here");
+    const red = await runCommand("npx vitest run src/__tests__/dod.test.ts src/__tests__/handoff.test.ts", { root, runner: "shim", run: fake({ "src/__tests__/dod.test.ts": "pass 1 fail 1", "src/__tests__/handoff.test.ts": "pass 0 fail 0" }) });
+    expect(red.status).toBe("fail");
     const missing = await runCommand("npx vitest run src/__tests__/noSuchFile.test.ts", { root, runner: "shim", run });
     expect(missing).toMatchObject({ status: "fail", detail: expect.stringMatching(/no such file/) });
   });

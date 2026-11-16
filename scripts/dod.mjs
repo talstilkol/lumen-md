@@ -16,6 +16,8 @@
  *       every P0 task's dod (W10.Z3, 13.5; not those two, whose dod is this run),
  *       `npx vitest run` one file at a time through the runner, and the table
  *       written to the report (scripts/lib/dodRunner.mjs). Exit 1 when any is red.
+ *   node scripts/dod.mjs --done --runner <shim> [--report <file>]
+ *       the same for every ✅ / ✅* task (plan 0.7: a ✅ whose dod is red shows here)
  *
  * ✅* (green against mocks only — no GPU / Ollama here) is set with
  * `"dodMock": true`: such a task can never be plain ✅ until the real-model
@@ -157,14 +159,14 @@ async function report(plan, argv) {
   const file = val("--report");
   const jobs = Number(val("--jobs") ?? 1);
   const ids = argv.filter((a, i) => !a.startsWith("--") && !["--runner", "--report", "--jobs"].includes(argv[i - 1]));
-  const tasks = argv.includes("--p0") ? p0Tasks(plan) : select(plan, { ids });
+  const tasks = argv.includes("--p0") ? p0Tasks(plan) : select(plan, { ids, done: argv.includes("--done") });
   const git = (...a) => spawnSync("git", a, { cwd: ROOT, encoding: "utf8" }).stdout.trim();
   const rows = await runTasks(tasks, { root: ROOT, runner, jobs, log: (l) => console.log(l) });
   const md = reportMarkdown(rows, { sha: git("rev-parse", "HEAD"), branch: git("rev-parse", "--abbrev-ref", "HEAD"), runner, at: new Date().toISOString() });
   if (file) {
     const { writeFileSync, mkdirSync } = await import("node:fs");
-    mkdirSync(dirname(join(ROOT, file)), { recursive: true });
-    writeFileSync(join(ROOT, file), md);
+    mkdirSync(dirname(resolve(ROOT, file)), { recursive: true });
+    writeFileSync(resolve(ROOT, file), md);
     console.log(`dod: table written to ${file}`);
   } else console.log(md);
   const red = rows.filter((r) => r.verdict === "red").length;
