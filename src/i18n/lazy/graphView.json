@@ -1,5 +1,11 @@
 {
   "graph.ariaLabel": "Knowledge graph of {nodes} notes",
+  "graph.engine": "Engine",
+  "graph.engine.auto": "Automatic",
+  "graph.engine.gpu": "GPU",
+  "graph.engine.list": "Table only",
+  "graph.engine.noGpu": "{nodes} notes are too many to draw without WebGL 2 here, so the graph shows as a table.",
+  "graph.engine.standard": "Standard",
   "graph.filter.property": "Property (key=value)",
   "graph.filters": "Graph filters",
   "graph.groupBy": "Colour by",
