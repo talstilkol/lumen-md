@@ -136,6 +136,7 @@ describe("the outside table (SYNTHETIC table here: hand-written in the table's s
 
 const TABLE = join(__dirname, "fixtures/shabbat-times/2026.json");
 describe("against the outside table, 5 cities, 2026 (built outside the app)", () => {
+  // skip-reason: the outside reference table is built on a machine with network; without the fixture there is nothing to compare | task: W12.H8 | until: 2027-05-16
   it.skipIf(!existsSync(TABLE))("|Δ| ≤ 1 minute in every city", () => {
     const table = JSON.parse(readFileSync(TABLE, "utf8"));
     const cmp = compareTable(table, ours, 1);

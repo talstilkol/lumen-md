@@ -58,6 +58,7 @@ describe("layout: dashboard (W12.V6)", () => {
 const realLayout = typeof navigator !== "undefined" && /Chrome\//.test(navigator.userAgent) && !/HappyDOM/i.test(navigator.userAgent);
 const frame = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
 
+// skip-reason: the budget is measured in a real layout (Chromium); happy-dom has no layout | task: W12.V6 | until: 2027-05-16
 describe.runIf(realLayout)("the budget: a block off screen waits", () => {
   it("a refresh while off screen runs once, the latest, when the block scrolls into view", async () => {
     const spacer = document.createElement("div");

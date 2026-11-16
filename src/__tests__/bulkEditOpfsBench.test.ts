@@ -16,6 +16,7 @@ import { runBulkEdit } from "../views/bulkEditRun";
 const hasOpfs = typeof navigator !== "undefined" && !!navigator.storage?.getDirectory;
 const N = 1000;
 
+// skip-reason: the bench needs a real OPFS (navigator.storage.getDirectory), which Node and happy-dom do not have; it runs in the Chromium runner | task: W10.E51 | until: 2027-05-16
 describe.skipIf(!hasOpfs)("bulk edit on a real OPFS (W10.E51)", () => {
   it("1,000 notes: every one changed, the time per phase reported", async () => {
     const root = await navigator.storage.getDirectory();

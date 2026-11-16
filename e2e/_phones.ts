@@ -1,4 +1,5 @@
 import { test, devices } from "@playwright/test";
+import { chromiumOnlyHere } from "./_engines";
 
 /**
  * The phones the RTL matrices run on (plan 9.5): iPhone 14 and Pixel 7,
@@ -15,8 +16,8 @@ export function onPhones(body: (phone: (typeof PHONES)[number]) => void): void {
       // WebKit's engine itself is covered by the desktop webkit project.
       const { defaultBrowserType: _engine, ...device } = devices[name];
       test.use(device);
-      // skip-reason: Firefox has no mobile emulation (isMobile) in Playwright; WebKit's layout is covered by the desktop webkit project | task: 9.2 | until: 2027-05-12
-      test.skip(({ browserName }) => browserName !== "chromium", "phones are emulated on Chromium");
+      // Firefox has no mobile emulation (isMobile) in Playwright (9.2).
+      chromiumOnlyHere("phone emulation");
       body(name);
     });
   }

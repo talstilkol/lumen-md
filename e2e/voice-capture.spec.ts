@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { chromiumOnlyHere } from "./_engines";
 
 /**
  * Plan W1.13: a voice note from the capture box, under the local-only AI
@@ -11,8 +12,8 @@ import { test, expect } from "@playwright/test";
  */
 
 // Chromium's fake microphone; Firefox and WebKit have no equivalent permission in Playwright.
-// skip-reason: Playwright gives a fake microphone only to Chromium (--use-fake-device-for-media-stream); Firefox and WebKit have none | task: W1.13 | until: 2027-05-12
-test.skip(({ browserName }) => browserName !== "chromium", "fake microphone: Chromium only");
+// Playwright gives a fake microphone only to Chromium (W1.13).
+chromiumOnlyHere("a fake microphone");
 test.use({
   permissions: ["microphone"],
   launchOptions: { args: ["--use-fake-ui-for-media-stream", "--use-fake-device-for-media-stream"] },

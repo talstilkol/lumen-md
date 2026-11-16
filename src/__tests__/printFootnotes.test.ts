@@ -114,6 +114,7 @@ const hasLayout = (() => {
   return h > 0;
 })();
 
+// skip-reason: page layout needs a real layout engine (sizes of laid-out boxes); jsdom and happy-dom report zero | task: W2.23 | until: 2027-05-16
 describe.skipIf(!hasLayout)("layoutFootnotePages (real layout)", () => {
   it("leaves no endnotes: every note is at the bottom of the page of its first reference", () => {
     const pageHeight = 120 * MM; // short pages, so a few paragraphs fill several

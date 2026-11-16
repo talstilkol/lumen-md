@@ -101,6 +101,7 @@ describe.each(runners)("$name", (r) => {
 });
 
 describe("freshness: rebuilding gives the committed bytes", () => {
+  // skip-reason: the freshness check rebuilds with the pinned esbuild, which must be installed at that version; the reason is printed in the title | task: W10.D1 | until: 2027-05-16
   it.skipIf(!esbuild)(`with esbuild ${ESBUILD_VERSION}${esbuild ? "" : ` — skipped: ${reason}`}`, async () => {
     const files = (await expectedFiles(esbuild)) as Record<string, string>;
     expect(Object.keys(files).sort()).toEqual([...runners.flatMap((r) => [r.out, r.page]), "security/policy.json"].sort());

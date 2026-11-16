@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { chromiumOnly } from "./_engines";
 
 /**
  * Visual smoke for the four high-risk surfaces from Round-4 master plan M6:
@@ -69,8 +70,7 @@ test("Mermaid block renders inline SVG inside the preview", async ({ page }) => 
  * commit it — see CONTRIBUTING.md.
  */
 test("Mermaid block matches the pixel baseline", async ({ page, browserName }) => {
-  // skip-reason: the pixel baseline is one engine's rendering; fonts and anti-aliasing differ per engine | task: 0.5 | until: 2027-05-12
-  test.skip(browserName !== "chromium", "pixel baseline is chromium-only");
+  chromiumOnly(browserName, "the pixel baseline");
   test.setTimeout(60_000);
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.keyboard.press("Meta+2");

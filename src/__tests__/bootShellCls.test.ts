@@ -56,6 +56,7 @@ async function start(content: string, typing: number): Promise<{ cls: number; bo
   return { cls, box, chars };
 }
 
+// skip-reason: layout shifts are measured only where the engine reports layout-shift entries (Chromium); jsdom and happy-dom have no layout | task: W10.E20 | until: 2027-05-16
 describe.runIf(canMeasure)("the boot note shifts nothing (Chromium)", () => {
   it("CLS = 0 for a 100-character note and a 10,000-character one, typing 40 lines into each; the same box", async () => {
     const small = await start("# פתק\n\n" + "x".repeat(92), 40);

@@ -7,6 +7,7 @@
 import { describe, expect, it } from "vitest";
 import { appDeps, LIBRARY_INDEX_KEY, type LibraryIndex } from "../research/library/clipIndex";
 
+// skip-reason: the store is IndexedDB; Node has none, the browser runner (and fake-indexeddb where installed) does | task: W10.E36 | until: 2027-05-16
 describe.runIf(typeof indexedDB !== "undefined")("the library index in IndexedDB", () => {
   it("saved and read back as it was, under its own key", async () => {
     const deps = appDeps();

@@ -40,6 +40,7 @@ function run(source: string, prelude = ""): Promise<Msg[]> {
 const errors = (m: Msg[]) => m.filter((x) => x.level === "error").map((x) => (x.parts ?? []).join(" "));
 const logs = (m: Msg[]) => m.filter((x) => x.level === "log").map((x) => (x.parts ?? []).join(" "));
 
+// skip-reason: the lockdown runs in a real blob: Worker, which Node and happy-dom lack; the Chromium runner has one | task: W10.E13 | until: 2027-05-16
 describe.runIf(typeof Worker === "function" && typeof Blob === "function")("live-js worker lockdown (real Worker)", () => {
   it("locks every API and runs: no gap in a normal worker", async () => {
     const m = await run(`let compiled = "compiled"; try { eval("1"); } catch (e) { compiled = "refused"; } console.log(typeof fetch, typeof indexedDB, compiled);`);

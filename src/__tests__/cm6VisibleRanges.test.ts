@@ -158,6 +158,7 @@ describe("CodeMirror plugins decorate the visible ranges only (W11.Q3)", () => {
   };
 
   it.each(cases)("%s", run);
+  // skip-reason: the syntax-tree cases need @codemirror/language, which a partial install may lack; the reason is printed in the title | task: W11.Q3 | until: 2027-05-16
   describe.skipIf(NO_LANGUAGE !== null)(`with the syntax tree${NO_LANGUAGE ? ` — skipped: ${NO_LANGUAGE}` : ""}`, () => {
     it.each(needsTree)("%s", run);
   });
