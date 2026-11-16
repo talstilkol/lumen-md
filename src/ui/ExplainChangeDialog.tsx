@@ -59,8 +59,17 @@ export function ExplainChangeView({ r, versionLabel, lang }: { r: ChangeExplanat
             <summary style={{ cursor: "pointer", fontSize: 13 }}>{t("xchg.changes", { count: r.hunks.length })}</summary>
             <ol style={{ margin: "6px 0 0", paddingInlineStart: 18, fontSize: 12, display: "flex", flexDirection: "column", gap: 4 }}>
               {r.hunks.slice(0, 200).map((h, i) => (
-                <li key={i} dir="auto">
-                  {h.old.text.trim() && <del style={{ background: "hsl(0 80% 50% / 0.12)" }}>{h.old.text}</del>} {h.new.text.trim() && <ins style={{ background: "hsl(140 60% 40% / 0.15)" }}>{h.new.text}</ins>}
+                <li key={i}>
+                  {h.old.text.trim() && (
+                    <bdi>
+                      <del style={{ background: "hsl(0 80% 50% / 0.12)" }}>{h.old.text}</del>
+                    </bdi>
+                  )}{" "}
+                  → {h.new.text.trim() && (
+                    <bdi>
+                      <ins style={{ background: "hsl(140 60% 40% / 0.15)" }}>{h.new.text}</ins>
+                    </bdi>
+                  )}
                 </li>
               ))}
             </ol>

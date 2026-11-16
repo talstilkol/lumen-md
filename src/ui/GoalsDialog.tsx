@@ -127,7 +127,7 @@ export function GoalsDialogImpl({ onClose, now = new Date() }: { onClose: () => 
             <ul style={{ margin: "8px 0 0", paddingInlineStart: 18, fontSize: 12 }} data-testid="goal-week-notes">
               {report.notes.slice(0, 8).map((x) => (
                 <li key={x.note} dir="auto">
-                  {x.note}: {t("goal.week.note", { words: n(x.words), minutes: n(x.minutes) })}
+                  <bdi>{x.note}</bdi>: {t("goal.week.note", { words: n(x.words), minutes: n(x.minutes) })}
                   {x.reached ? ` ✓ ${t("goal.week.reached")}` : ""}
                 </li>
               ))}
