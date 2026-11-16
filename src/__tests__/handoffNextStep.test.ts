@@ -26,6 +26,16 @@ describe("the handoff's Now section", () => {
     expect(readHandoff(renderHandoff({ ...base, task: null, next: null }))).toEqual({ task: null, next: null, where: null });
   });
 
+  it("a line break in the task or the next step is refused: it would not survive the round trip (review 9, L10)", () => {
+    for (const br of ["\n", "\r", "\r\n", "\u2028"]) {
+      const next = `npm run a${br}rm -rf x`;
+      expect(() => renderHandoff({ ...base, task: "t", next, where: { path: "/w", branch: "b" } })).toThrow(/--next must be one line/);
+      expect(() => renderHandoff({ ...base, task: `t${br}u`, next: "make", where: { path: "/w", branch: "b" } })).toThrow(/--task must be one line/);
+      expect(nextStepProblems({ task: "t", next, where: { path: "/w" } })).toEqual([expect.stringMatching(/next step has a line break/)]);
+    }
+    expect(nextStepProblems({ task: "t\nu", next: "make", where: { path: "/w" } })).toEqual([expect.stringMatching(/task has a line break/)]);
+  });
+
   it("a task without a next step, or a step with no worktree, is a problem", () => {
     expect(nextStepProblems({ task: "t", next: null, where: { path: "/w" } })).toEqual([expect.stringMatching(/no next step/)]);
     expect(nextStepProblems({ task: "t", next: "make", where: null })).toEqual([expect.stringMatching(/no worktree/)]);

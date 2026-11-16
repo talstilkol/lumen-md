@@ -13,20 +13,55 @@ import ts from "typescript";
 export const SOURCE_EXT = /\.(m?[jt]sx?|cjs|cts|mts)$/;
 const RESOLVE_EXT = [".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".cjs", ".json", ".d.ts"];
 
+/** The TypeScript script kind for a file name (JSX only where the extension allows it). */
+function scriptKind(fileName) {
+  if (/\.tsx$/.test(fileName)) return ts.ScriptKind.TSX;
+  if (/\.jsx$/.test(fileName)) return ts.ScriptKind.JSX;
+  if (/\.[cm]?js$/.test(fileName)) return ts.ScriptKind.JS;
+  return ts.ScriptKind.TS;
+}
+
+/** A string literal or a template literal without substitutions (through `as string`, parentheses): its text; else null. */
+function literal(n) {
+  while (n && (ts.isAsExpression(n) || ts.isParenthesizedExpression(n) || ts.isSatisfiesExpression(n) || ts.isTypeAssertionExpression(n))) n = n.expression;
+  return n && (ts.isStringLiteral(n) || ts.isNoSubstitutionTemplateLiteral(n)) ? n.text : null;
+}
+
 /**
  * The module specifiers a source names: static imports and re-exports, side-effect
- * imports, `import()` and `require()` with a string literal, and `/// <reference path>`.
- * TypeScript's own pre-processor reads them, so an import written inside a string
- * or a comment (a test fixture, a doc example) is not taken for one.
+ * imports, `import x = require()`, `import()` and `require()` with a literal,
+ * `import("…")` types, and `/// <reference path>`. Read from the syntax tree
+ * (review 9, L3: the pre-processor took an import written inside a template
+ * literal for a real one), so an import in a string, a template, a comment or a
+ * regex (a test fixture, a doc example) is not taken for one.
  * @param {string} text
+ * @param {string} [fileName]  picks the parser (.tsx/.jsx parse JSX)
  * @returns {string[]}
  */
-export function specifiers(text) {
-  const src = String(text);
-  const info = ts.preProcessFile(src, true, true);
-  // A backslash in the raw specifier is a regex literal the pre-processor took for
-  // a string (/^import "\.\/x";/ in a test); a real module path has none.
-  return [...info.importedFiles, ...info.referencedFiles].filter((f) => !src.slice(f.pos, f.end).includes("\\")).map((f) => f.fileName);
+export function specifiers(text, fileName = "module.ts") {
+  const sf = ts.createSourceFile(fileName, String(text), ts.ScriptTarget.Latest, false, scriptKind(fileName));
+  const out = [];
+  const visit = (n) => {
+    if ((ts.isImportDeclaration(n) || ts.isExportDeclaration(n)) && n.moduleSpecifier) {
+      const s = literal(n.moduleSpecifier);
+      if (s !== null) out.push(s);
+    } else if (ts.isImportEqualsDeclaration(n) && ts.isExternalModuleReference(n.moduleReference)) {
+      const s = literal(n.moduleReference.expression);
+      if (s !== null) out.push(s);
+    } else if (ts.isCallExpression(n) && n.arguments.length >= 1) {
+      const isImport = n.expression.kind === ts.SyntaxKind.ImportKeyword;
+      const isRequire = ts.isIdentifier(n.expression) && n.expression.text === "require" && n.arguments.length === 1;
+      const s = isImport || isRequire ? literal(n.arguments[0]) : null;
+      if (s !== null) out.push(s);
+    } else if (ts.isImportTypeNode(n) && ts.isLiteralTypeNode(n.argument)) {
+      const s = literal(n.argument.literal);
+      if (s !== null) out.push(s);
+    }
+    ts.forEachChild(n, visit);
+  };
+  visit(sf);
+  for (const r of sf.referencedFiles) out.push(r.fileName);
+  return out;
 }
 
 /** Whether a specifier is one this check resolves (relative, or the `@/` alias for src/). */
@@ -92,7 +127,7 @@ export function brokenImports(root, dirs = ["src", "security", "scripts"]) {
   const files = sourceFiles(root, dirs);
   const broken = [];
   for (const f of files) {
-    for (const spec of specifiers(readFileSync(f, "utf8"))) {
+    for (const spec of specifiers(readFileSync(f, "utf8"), f)) {
       if (!isLocal(spec) || /[${]/.test(spec)) continue;
       if (!resolves(spec, f, root)) broken.push({ file: relative(root, f), spec });
     }

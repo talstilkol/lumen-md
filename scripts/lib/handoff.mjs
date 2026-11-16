@@ -79,8 +79,12 @@ export function missingRefs({ prs, worktrees, branches, repo }) {
 /** Text for a Markdown table cell: a "|" would end the cell. */
 const cell = (v) => String(v).replace(/\|/g, "\\|");
 
-/** The Markdown document. */
+/** A line break, which would end the document's one-line fields (review 9, L10). */
+const BREAK = /[\n\r\u2028\u2029\u0085]/;
+
+/** The Markdown document. Refuses (throws on) a task or next step with a line break: readHandoff could not read it back. */
 export function renderHandoff({ now, repo, task, next, where = null, prs, worktrees, problems }) {
+  for (const [name, v] of [["task", task], ["next", next]]) if (v && BREAK.test(String(v))) throw new Error(`handoff: --${name} must be one line (a line break would cut it short when the document is read back)`);
   const o = [];
   o.push(`# Handoff — ${repo}`, "", `Generated ${now} by \`npm run handoff\` (plan 0.13). Regenerate after every PR; do not edit by hand.`, "");
   o.push("## Now", "", `- **Current task:** ${task || "—"}`);
@@ -113,6 +117,8 @@ export function renderHandoff({ now, repo, task, next, where = null, prs, worktr
  */
 export function nextStepProblems({ task, next, where }) {
   const out = [];
+  if (task && BREAK.test(task)) out.push("the task has a line break: the document would cut it short (one line only)");
+  if (next && BREAK.test(next)) out.push("the next step has a line break: the document would cut it short (one line only)");
   if (task && !next) out.push("no next step: a new agent cannot continue from this document (pass --next)");
   if (next && !where?.path) out.push("the next step names no worktree to run in");
   return out;

@@ -17,6 +17,78 @@ const section = (name: string) => {
   return next < 0 ? rest : rest.slice(0, next);
 };
 const licences = section("licenses");
+
+/**
+ * Review 9, L5: what deny.toml may say, per table: only these keys, with these values
+ * (`allow` is checked against the gate above). Anything else — another table, an array
+ * of tables such as [[licenses.clarify]], [graph] exclude/targets, an ignore list — is a
+ * problem, so a loosening the old deny-list regex missed can't slip in.
+ */
+const KNOWN: Record<string, Record<string, string | null>> = {
+  graph: { "all-features": "false" },
+  advisories: { version: "2" },
+  licenses: { version: "2", allow: null, exceptions: "[]" },
+  "licenses.private": { ignore: "false" },
+  bans: {},
+  sources: {},
+};
+function denyProblems(text: string): string[] {
+  const out: string[] = [];
+  let table: string | null = null;
+  let key: string | null = null;
+  let value = "";
+  let depth = 0;
+  const seen = new Map<string, Set<string>>();
+  const done = () => {
+    if (key === null || table === null) return;
+    const want = KNOWN[table]?.[key];
+    if (seen.get(table)!.has(key)) out.push(`[${table}] ${key} twice`);
+    seen.get(table)!.add(key);
+    if (want === undefined) out.push(`[${table}] ${key}: not a key this file may set`);
+    else if (want !== null && value.trim() !== want) out.push(`[${table}] ${key} = ${value.trim()}, expected ${want}`);
+    key = null;
+    value = "";
+  };
+  for (const raw of text.split("\n")) {
+    const line = raw.replace(/#.*$/, "").trim();
+    if (!line) continue;
+    if (depth > 0) {
+      value += ` ${line}`;
+      depth += (line.match(/[[{]/g) ?? []).length - (line.match(/[\]}]/g) ?? []).length;
+      if (depth <= 0) done();
+      continue;
+    }
+    const arr = /^\[\[\s*([^\]]+?)\s*\]\]$/.exec(line);
+    if (arr) {
+      out.push(`[[${arr[1]}]]: an array of tables this file may not have`);
+      table = `[[${arr[1]}]]`;
+      seen.set(table, new Set());
+      continue;
+    }
+    const t = /^\[\s*([^\]]+?)\s*\]$/.exec(line);
+    if (t) {
+      table = t[1];
+      if (!(table in KNOWN)) out.push(`[${table}]: a table this file may not have`);
+      if (seen.has(table)) out.push(`[${table}] twice`);
+      seen.set(table, seen.get(table) ?? new Set());
+      continue;
+    }
+    const kv = /^("?)([A-Za-z0-9_.-]+)\1\s*=\s*(.*)$/.exec(line);
+    if (!kv || table === null) {
+      out.push(`not understood: ${line}`);
+      continue;
+    }
+    key = kv[2];
+    value = kv[3];
+    depth = (value.match(/[[{]/g) ?? []).length - (value.match(/[\]}]/g) ?? []).length;
+    if (depth <= 0) done();
+  }
+  for (const [name, keys] of Object.entries(KNOWN)) {
+    if (!seen.has(name)) out.push(`[${name}] is missing`);
+    else for (const k of Object.keys(keys)) if (!seen.get(name)!.has(k)) out.push(`[${name}] ${k} is missing`);
+  }
+  return out;
+}
 const allow = [...(licences.match(/allow\s*=\s*\[([\s\S]*?)\]/)?.[1] ?? "").matchAll(/"([^"]+)"/g)].map((m) => m[1]);
 
 describe("cargo-deny licences mirror the licence gate", () => {
@@ -36,10 +108,28 @@ describe("cargo-deny licences mirror the licence gate", () => {
     expect(licences).toMatch(/\nexceptions = \[\]\n/);
   });
 
-  it("does not loosen cargo-deny's defaults", () => {
+  it("does not loosen cargo-deny's defaults: only known sections and keys, with these values (review 9, L5)", () => {
     expect(section("licenses.private").trim()).toBe("ignore = false");
-    expect(deny).not.toMatch(/confidence-threshold|ignore\s*=\s*\[|allow-git|unknown-registry\s*=\s*"allow"|unknown-git\s*=\s*"allow"|skip\s*=|skip-tree/);
-    expect(deny).not.toMatch(/^\s*(vulnerability|unmaintained|unsound|yanked|notice)\s*=/m);
+    expect(denyProblems(deny)).toEqual([]);
+  });
+
+  it("refuses every key or table it does not know, the ones a deny-list missed too", () => {
+    for (const plant of [
+      '[[licenses.clarify]]\nname = "ring"\nexpression = "MIT"',
+      '[graph]\nexclude = ["openssl"]',
+      'targets = ["x86_64-unknown-linux-gnu"]',
+      '[licenses]\nconfidence-threshold = 0.5',
+      '[advisories]\nignore = ["RUSTSEC-2020-0001"]',
+      '[bans]\nskip-tree = [{ name = "x" }]',
+      '[sources]\nunknown-git = "allow"',
+      '[licenses.private]\nignore = true',
+      '[output]\nfeature-depth = 1',
+    ]) {
+      const planted = plant.startsWith("[") ? `${deny}\n${plant}\n` : deny.replace("all-features = false", `all-features = false\n${plant}`);
+      expect(denyProblems(planted), plant).not.toEqual([]);
+    }
+    expect(denyProblems(deny.replace("all-features = false", "all-features = true"))).toEqual(["[graph] all-features = true, expected false"]);
+    expect(denyProblems(deny.replace("exceptions = []", 'exceptions = [{ allow = ["GPL-3.0"], crate = "x" }]'))).toEqual([expect.stringMatching(/exceptions = \[\{/)]);
   });
 
   it("every crate of ours declares a licence the list allows", () => {

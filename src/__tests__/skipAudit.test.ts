@@ -137,6 +137,24 @@ describe("skip audit (plan W4.12)", () => {
     expect(count([...plain, "E.chromiumOnly(b, \"x\");"].join("\n"))).toHaveLength(1);
   });
 
+  it("a dynamic import, a call off one, and a default import reach the helpers too (review 9, L4)", () => {
+    const engines = 'import { test } from "@playwright/test";\nexport function chromiumOnly(b: string, w: string): void {\n  ' + REASON + '\n  test.skip(b !== "chromium", w);\n}\nexport const other = (): number => 1;\n';
+    const h = skipHelpers(engines);
+    const count = (src: string) => findSkips("e2e/x.spec.ts", src, TODAY, h).map((s: Site) => [s.call, s.problems.length]);
+    // The reviewer's cases: base saw none of the first three.
+    expect(count(`const E = await import("${ENG}");\ntest("x", ({ browserName }) => { E.chromiumOnly(browserName, "w"); });`)).toEqual([["E.chromiumOnly", 1]]);
+    expect(count(`test("x", async ({ browserName }) => { (await import("${ENG}")).chromiumOnly(browserName, "w"); });`)).toEqual([[`(await import("${ENG}")).chromiumOnly`, 1]]);
+    expect(count(`import E from "${ENG}";\nE.chromiumOnly(b, "w");`)).toEqual([["E.chromiumOnly", 1]]);
+    expect(count(`const { chromiumOnly: only } = await import("${ENG_UP}");\nonly(b, "w");`)).toEqual([["only", 1]]);
+    // Annotated, the dynamic forms pass like the static ones.
+    expect(count(`const E = await import("${ENG}");\n${REASON}\nE.chromiumOnly(b, "w");`)).toEqual([["E.chromiumOnly", 0]]);
+    // A dynamic import used any other way fails: the check can't see what it calls.
+    for (const esc of [`import("${ENG}").then((E) => E.chromiumOnly(b, "w"));`, `use(await import("${ENG}"));`, `const p = import("${ENG}");`.replace("const p = ", "")])
+      expect(count(esc), esc).toEqual([[expect.stringMatching(/\(not a call\)$/), 1]]);
+    // Not helpers: another export of the module, another module.
+    expect(count(`(await import("${ENG}")).other();\nconst { other } = await import("${ENG}");\nother();\nconst o = await import("./other");\no.chromiumOnly(b);`)).toEqual([]);
+  });
+
   it("the audit opens a file that reaches a helper only through an alias or a namespace", () => {
     const engines = 'import { test } from "@playwright/test";\nexport function chromiumOnly(b: string, w: string): void {\n  ' + REASON + '\n  test.skip(b !== "chromium", w);\n}\n';
     const dir = mkdtempSync(join(tmpdir(), "skip-audit-ns-"));

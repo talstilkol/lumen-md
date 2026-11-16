@@ -26,6 +26,13 @@ const opt = (n) => {
   return i >= 0 ? argv[i + 1] ?? "" : null;
 };
 const flag = (n) => argv.includes(`--${n}`);
+// review 9, L10: a line break in --task or --next would not survive the round trip; refuse it before writing.
+for (const name of ["task", "next"]) {
+  if (/[\n\r\u2028\u2029\u0085]/.test(opt(name) ?? "")) {
+    console.error(`handoff: --${name} must be one line (no newline or carriage return); nothing written`);
+    process.exit(2);
+  }
+}
 
 function sh(cmd, args) {
   const r = spawnSync(cmd, args, { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
