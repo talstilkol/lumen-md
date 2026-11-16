@@ -28,7 +28,7 @@ import { createTauriBackend, isDesktopApp, loadTauriInvoke, type TauriInvoke } f
 import { createMobileBackend, isMobileApp, loadMobileBridge, mobileFsFor, type MobileBridge, type MobileStore } from "./mobile";
 import { observeDirectoryHandle, watchExternalChanges } from "./watcher";
 import { warnUnreadable } from "./watchNotice";
-import { VaultMoveConflictError, refuseEncryptedMove, VaultPermissionError, allEntries, bytes, desktopRootKey, desktopRootsNested, dropStaleCopies, foldersNested, parentsOf, preflight, saveLateWrites, same, sha256, targetBytes, trashLeftovers } from "./moveCheck";
+import { VaultMoveConflictError, refuseEncryptedMove, VaultPermissionError, allEntries, bytes, desktopRootKey, desktopRootsNestedOnDisk, dropStaleCopies, foldersNested, parentsOf, preflight, saveLateWrites, same, sha256, targetBytes, trashLeftovers } from "./moveCheck";
 import { __resetIdentity, activeVaultId, adoptIdentity, enterIdentity, identityOrNull } from "./identity";
 import type { MoveReport } from "./moveCheck";
 export { VaultMoveConflictError, VaultEncryptedMoveError, VaultPermissionError } from "./moveCheck";
@@ -651,7 +651,7 @@ export async function moveVault(
   if (!source.available()) throw new Error("The current vault is not available.");
   if (await sameLocation(fromLoc, to)) throw new Error("The vault is already there.");
   // A folder inside the vault, or the vault inside the folder: copying would write into the source itself (Codex P2 4575404797).
-  const nested = fromLoc.kind === "folder" && to.kind === "folder" ? await foldersNested(fromLoc.handle, to.handle) : fromLoc.kind === "desktop" && to.kind === "desktop" && desktopRootsNested(fromLoc.root, to.root); // R8-L10
+  const nested = fromLoc.kind === "folder" && to.kind === "folder" ? await foldersNested(fromLoc.handle, to.handle) : fromLoc.kind === "desktop" && to.kind === "desktop" && (await desktopRootsNestedOnDisk(fromLoc.root, to.root, desktopInvoke ?? undefined)); // R8-L10, R8b-L1
   if (nested) throw new Error("The vault cannot move into a folder inside itself, or into a folder that contains it.");
   // The vault keeps its identity where it goes: its history follows it (2.80).
   const fromId = activeVaultId() ?? (await idOf(fromLoc));

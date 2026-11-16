@@ -7,7 +7,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createMemoryBackend, setVaultBackend } from "../storage/vault";
 import { __resetVaultLocation, __setDesktopInvoke, __setLocationStore, getPendingMove, moveVault, type StoredLocation } from "../storage/vault/location";
-import { desktopRootKey, desktopRootsNested } from "../storage/vault/moveCheck";
+import { desktopRootKey, desktopRootsNested, desktopRootsNestedOnDisk } from "../storage/vault/moveCheck";
 
 describe("desktop vault roots", () => {
   it("one spelling per folder: separators, dots, and case where the file system ignores it", () => {
@@ -30,6 +30,48 @@ describe("desktop vault roots", () => {
     expect(desktopRootsNested("/Users/x/Vault", "/users/x/vault/sub", false)).toBe(false);
     expect(desktopRootsNested("/Users/x/Vault/../Vault/sub", "/Users/x/Vault", false)).toBe(true);
     expect(desktopRootsNested("/", "/anything", false)).toBe(true);
+  });
+
+  it("one Unicode form (R8b-L1): macOS's NFD names and Hebrew points in another order are the same text", () => {
+    const nfc = "/Users/x/Caf\u00e9";
+    const nfd = "/Users/x/Cafe\u0301";
+    expect(desktopRootKey(nfc, true)).toBe(desktopRootKey(nfd, true));
+    expect(desktopRootsNested(nfc, `${nfd}/sub`, true)).toBe(true);
+    expect(desktopRootsNested(nfd, `${nfc}/sub`, false)).toBe(true);
+    // shin + shin dot + qamats, typed with the vowel first: the same word after canonical ordering.
+    const a = "/Users/x/\u05e9\u05c1\u05b8\u05dc\u05d5\u05b9\u05dd";
+    const b = "/Users/x/\u05e9\u05b8\u05c1\u05dc\u05d5\u05b9\u05dd";
+    expect(a).not.toBe(b);
+    expect(desktopRootsNested(a, `${b}/sub`, true)).toBe(true);
+    expect(desktopRootKey(a, false)).toBe(desktopRootKey(b, false));
+  });
+
+  it("`..` never climbs above the root, a drive or a share (R8b-L1)", () => {
+    expect(desktopRootKey("/../Users/x", false)).toBe("/Users/x");
+    expect(desktopRootKey("/../../Users/x/../x/Vault", false)).toBe("/Users/x/Vault");
+    expect(desktopRootsNested("/../Users/x", "/Users/x/Vault", false)).toBe(true);
+    expect(desktopRootKey("C:\\..\\Notes", true)).toBe("c:/notes");
+    expect(desktopRootKey("\\\\server\\share\\..\\..\\Vault", true)).toBe("//server/share/vault");
+    expect(desktopRootKey("../a", false)).toBe("../a"); // relative: kept as written
+  });
+
+  it("asks the disk when the spellings differ, and keeps the spelling answer when the app cannot say (R8b-L1)", async () => {
+    const asked: unknown[] = [];
+    const disk = (answer: unknown) => (async (cmd: string, args?: Record<string, unknown>) => {
+      asked.push([cmd, args]);
+      if (answer instanceof Error) throw answer;
+      return answer;
+    }) as never;
+    // /tmp and /private/tmp on macOS: only the disk knows.
+    expect(await desktopRootsNestedOnDisk("/tmp/Vault", "/private/tmp/Vault/sub", disk(true))).toBe(true);
+    expect(asked).toEqual([["vault_roots_nested", { a: "/tmp/Vault", b: "/private/tmp/Vault/sub" }]]);
+    expect(await desktopRootsNestedOnDisk("/a/Vault", "/a/Other", disk(false))).toBe(false);
+    // Not allowed by the isolation app yet, or an older app: no answer, the spelling check stands.
+    expect(await desktopRootsNestedOnDisk("/a/Vault", "/a/Other", disk(new Error("vault_roots_nested is not allowed from the webview")))).toBe(false);
+    expect(await desktopRootsNestedOnDisk("/a/Vault", "/a/Other", disk("yes"))).toBe(false);
+    asked.length = 0;
+    expect(await desktopRootsNestedOnDisk("/a/Vault", "/a/Vault/sub", disk(false))).toBe(true);
+    expect(asked).toEqual([]); // the spelling already says nested: the disk is not asked
   });
 });
 
@@ -61,5 +103,15 @@ describe("moving a desktop vault", () => {
     await expect(moveVault(at("/Users/x/Vault/./sub/.."), { from: at("/Users/x/Vault") })).rejects.toThrow(/already there|inside itself/);
     expect(calls.filter((c) => /write|mkdir|copy|use/.test(c))).toEqual([]);
     expect(getPendingMove()).toBeNull();
+  });
+
+  it("refuses a move the disk says is nested though the spellings differ (R8b-L1)", async () => {
+    __setDesktopInvoke((async (cmd: string) => {
+      calls.push(cmd);
+      return cmd === "vault_roots_nested" ? true : null;
+    }) as never);
+    await expect(moveVault(at("/private/tmp/Vault/sub"), { from: at("/tmp/Vault") })).rejects.toThrow(/inside itself|contains it/);
+    expect(calls).toContain("vault_roots_nested");
+    expect(calls.filter((c) => /write|mkdir|copy|use/.test(c))).toEqual([]);
   });
 });
