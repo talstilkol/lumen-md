@@ -91,6 +91,35 @@ export async function syncZoteroWebLibrary(): Promise<void> {
   }
 }
 
+/** D1 §6: "Cite from a DOI" through OpenAlex while the CrossRef lookup is off (citations/doiOpenAlex.ts). */
+async function citeFromDoiViaOpenAlex(): Promise<void> {
+  const [{ uiConfirm, uiPrompt }, { lookupDoiViaOpenAlex, OpenAlexDoiNotFoundError, OPENALEX_HOST }, { openAlexEnabled }, { formatReference, runsToMarkdown }, { getLocale }] = await Promise.all([
+    import("../ui/PromptDialog"),
+    import("./doiOpenAlex"),
+    import("./openAlexLookup"),
+    import("../data/citationStyles"),
+    import("../i18n"),
+  ]);
+  // Off by default: nothing is asked or sent until the OpenAlex switch is on.
+  if (!openAlexEnabled()) return showAiToast(t("cite.doi.openAlexOff"), "info");
+  // i18n-allow: a DOI's syntax (the DOI Handbook's example), the same in every language
+  const input = await uiPrompt({ message: t("cite.doi.ask"), placeholder: "10.1000/xyz123" });
+  if (!input?.trim()) return;
+  try {
+    const r = await lookupDoiViaOpenAlex(input, {
+      enabled: openAlexEnabled,
+      confirm: (doi) => uiConfirm({ title: t("cite.doi.consent.title.openAlex"), message: t("cite.doi.consent.message.openAlex", { doi, host: OPENALEX_HOST }), okLabel: t("cite.doi.consent.ok") }),
+    });
+    if (r.status === "invalid") return showAiToast(t("cite.doi.invalid", { doi: input }), "error");
+    if (r.status !== "done") return;
+    const text = runsToMarkdown(formatReference(r.record, "apa", getLocale() === "he" ? "he" : "en"));
+    window.dispatchEvent(new CustomEvent("lumen-mobile-insert", { detail: { insert: text, cursorOffset: 0 } }));
+    showAiToast(t("cite.doi.inserted"), "success");
+  } catch (e) {
+    showAiToast(e instanceof OpenAlexDoiNotFoundError ? t("cite.doi.notFound.openAlex", { doi: e.doi }) : t("cite.doi.failed", { error: explainError(e) }), "error");
+  }
+}
+
 /**
  * W10.E38 (plan 6.13): a DOI → the reference, filled from CrossRef after the
  * user approves the request (citations/doi.ts), inserted at the cursor in
@@ -103,8 +132,9 @@ export async function citeFromDoi(): Promise<void> {
     import("../data/citationStyles"),
     import("../i18n"),
   ]);
-  // R8-L1: pending the owner's approval of api.crossref.org in the CSP; nothing is asked or sent.
-  if (!CROSSREF_LOOKUP_ENABLED) return showAiToast(t("cite.doi.pending"), "info");
+  // R8-L1: api.crossref.org is not in the CSP. D1 §6: the DOI goes to OpenAlex instead (already in the
+  // CSP, CC0 data), only with Settings → Privacy → OpenAlex on and the user's yes for this lookup.
+  if (!CROSSREF_LOOKUP_ENABLED) return citeFromDoiViaOpenAlex();
   // i18n-allow: a DOI's syntax (the DOI Handbook's example), the same in every language
   const input = await uiPrompt({ message: t("cite.doi.ask"), placeholder: "10.1000/xyz123" });
   if (!input?.trim()) return;

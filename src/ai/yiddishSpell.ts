@@ -26,6 +26,16 @@ export const YI_SPELL_MESSAGE_KEY = "yiddish.spell.unknown";
  * and setting YIDDISH_DOWNLOAD_ENABLED to true; the pins are to be confirmed on the Mac first.
  */
 export const YIDDISH_DOWNLOAD_ENABLED = false;
+/**
+ * Decision D1 §6 (16.11.2026): the Yiddish list Lumen offers must carry a licence from the licence
+ * gate's own permissive set (scripts/lib/licenses.mjs OK_LICENCE_IDS), so no allow-list exception is
+ * ever needed. hunspell-yi 1.1 (Finkel 2010, McNamara's conversion) is offered under
+ * "LGPL-2.1-or-later OR GPL-2.0-or-later OR MPL-1.1" (Fedora's package), so it can be taken under
+ * MPL-1.1; it replaces the GPL-3.0 pin below once a session that can reach it pins its files
+ * (sha256 + size). Until then the download stays off, and the GPL-3.0 pin is refused even with an address.
+ */
+export const YIDDISH_LIST_LICENCES = Object.freeze(["MPL-1.1", "MPL-2.0", "MIT", "BSD-2-Clause", "BSD-3-Clause", "Apache-2.0", "ISC", "CC0-1.0", "CC-BY-4.0", "Unlicense"]);
+export const yiddishListLicenceOk = (license: string): boolean => YIDDISH_LIST_LICENCES.includes(license);
 
 export const YIDDISH_DICT = {
   commit: "9f537e5a46caf571c91d86e8a3cf5d0f4ac77192",

@@ -518,6 +518,42 @@
     "ru": "p39jit",
     "zh-CN": "p39jit"
   },
+  "cite.doi.consent.message.openAlex": {
+    "he": "rmaybm",
+    "ar": "rmaybm",
+    "de": "rmaybm",
+    "fr": "rmaybm",
+    "ja": "rmaybm",
+    "ru": "rmaybm",
+    "zh-CN": "rmaybm"
+  },
+  "cite.doi.consent.title.openAlex": {
+    "he": "120nkzi",
+    "ar": "120nkzi",
+    "de": "120nkzi",
+    "fr": "120nkzi",
+    "ja": "120nkzi",
+    "ru": "120nkzi",
+    "zh-CN": "120nkzi"
+  },
+  "cite.doi.notFound.openAlex": {
+    "he": "1one0tg",
+    "ar": "1one0tg",
+    "de": "1one0tg",
+    "fr": "1one0tg",
+    "ja": "1one0tg",
+    "ru": "1one0tg",
+    "zh-CN": "1one0tg"
+  },
+  "cite.doi.openAlexOff": {
+    "he": "1s2hhyh",
+    "ar": "1s2hhyh",
+    "de": "1s2hhyh",
+    "fr": "1s2hhyh",
+    "ja": "1s2hhyh",
+    "ru": "1s2hhyh",
+    "zh-CN": "1s2hhyh"
+  },
   "cite.doi.pending": {
     "ar": "pas3ni",
     "de": "pas3ni",

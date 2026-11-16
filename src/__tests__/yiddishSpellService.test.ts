@@ -6,7 +6,9 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { YIDDISH_DICT, YIDDISH_DOWNLOAD_ENABLED } from "../ai/yiddishSpell";
+import { YIDDISH_DICT, YIDDISH_DOWNLOAD_ENABLED, YIDDISH_LIST_LICENCES } from "../ai/yiddishSpell";
+// @ts-expect-error — plain .mjs module without type declarations
+import { OK_LICENCE_IDS } from "../../scripts/lib/licenses.mjs";
 import { YiddishDownloadPendingError, checkPinnedFile, downloadYiddishDictionary, yiddishDictionaryInstalled } from "../ai/yiddishSpellService";
 
 const ROOT = join(__dirname, "..", "..");
@@ -24,13 +26,23 @@ describe("Yiddish word list download (W7.9, R8-M5)", () => {
     for (const f of ["src/ai/yiddishSpell.ts", "src/ai/yiddishSpellService.ts", "src/text/jewishLanguageCommands.ts"]) expect(readFileSync(join(ROOT, f), "utf8"), f).not.toMatch(/alephreish|hunspell-yi-dictionary/);
   });
 
-  it("once re-enabled: the pinned commit, and a file whose SHA-256 differs is refused", async () => {
+  it("D1 §6: only a permissively licensed list (the licence gate's own set) is ever downloaded; the GPL-3.0 pin is refused even with an address", async () => {
+    for (const l of YIDDISH_LIST_LICENCES) expect(OK_LICENCE_IDS, l).toContain(l);
+    expect(YIDDISH_LIST_LICENCES).not.toContain(YIDDISH_DICT.license);
+    let fetched = 0;
+    const fake = (async () => (fetched++, new Response("x"))) as unknown as typeof fetch;
+    await expect(downloadYiddishDictionary(fake, UPSTREAM)).rejects.toBeInstanceOf(YiddishDownloadPendingError);
+    await expect(downloadYiddishDictionary(fake, UPSTREAM, { license: "GPL-3.0-or-later" })).rejects.toBeInstanceOf(YiddishDownloadPendingError);
+    expect(fetched).toBe(0);
+  });
+
+  it("once re-enabled with a permissive list: the pinned commit, and a file whose SHA-256 differs is refused", async () => {
     const asked: string[] = [];
     const fake = (async (url: string) => {
       asked.push(url);
       return new Response(new Uint8Array(YIDDISH_DICT.files.aff.bytes), { status: 200 });
     }) as unknown as typeof fetch;
-    await expect(downloadYiddishDictionary(fake, UPSTREAM)).rejects.toThrow(/SHA-256 differs/);
+    await expect(downloadYiddishDictionary(fake, UPSTREAM, { license: "MPL-1.1" })).rejects.toThrow(/SHA-256 differs/);
     expect(asked).toEqual([UPSTREAM("aff")]);
     expect(await yiddishDictionaryInstalled()).toBe(false);
   });

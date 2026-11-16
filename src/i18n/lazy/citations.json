@@ -76,5 +76,9 @@
   "cite.web.noAccess": "This key can't read your library: edit it on zotero.org and allow library access.",
   "cite.web.rateLimited": "Zotero asked to slow down; try again in a few minutes.",
   "cite.web.blocked": "The AI and privacy policy is local-only, so Lumen doesn't contact zotero.org.",
-  "cite.web.failed": "Couldn't sync from zotero.org: {error}"
+  "cite.web.failed": "Couldn't sync from zotero.org: {error}",
+  "cite.doi.openAlexOff": "Cite from a DOI looks the DOI up in OpenAlex. Turn on OpenAlex in Settings → Privacy first; nothing was sent.",
+  "cite.doi.consent.title.openAlex": "Look up the DOI in OpenAlex?",
+  "cite.doi.consent.message.openAlex": "The DOI {doi}, and nothing else, is sent to {host} (OpenAlex's public API, open CC0 data). The request is listed in the privacy ledger.",
+  "cite.doi.notFound.openAlex": "OpenAlex has no record for {doi}"
 }
