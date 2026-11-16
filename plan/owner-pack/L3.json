@@ -1,0 +1,476 @@
+[
+ {
+  "id": "L3-W4.1",
+  "decision": "Promote main to the train head once the Mac's whole-suite e2e receipt is green, and decide which key signs that receipt.",
+  "options": [
+   {
+    "option": "A. Commit your e2e receipt public key to security/e2e-receipt-keys/<name>.pem on main, run the Mac pack (L3-e2e-run, L3-W4.1-receipt), then `npm run promote:main -- origin/verify/train-7 --push` (fast-forward only).",
+    "cost": "≈15 min of yours + the Mac run"
+   },
+   {
+    "option": "B. Wait for train 8 and promote that instead.",
+    "cost": "main stays 3,164 commits behind for another round"
+   },
+   {
+    "option": "C. Fast-forward main by hand without the receipt.",
+    "cost": "skips the only whole-suite proof; promote:main refuses it on purpose (T6-H1)"
+   }
+  ],
+  "recommendation": "A",
+  "why": "promote:main only accepts reports/e2e-<sha>.json sealed by a key whose public half is already on main (read with git, so a branch cannot bring its own); security/e2e-receipt-keys/ does not exist on main yet, so nothing can be promoted until you add it. The receipt comes from the Mac (pack entry L3-W4.1-receipt); vitest 0-failed is L3-W4.1-vitest.",
+  "sources": [
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/scripts/promote-main.mjs",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/scripts/e2e-gate.mjs",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/scripts/lib/e2eShards.mjs",
+   "plan/mac-pack/L3.json (L3-e2e-run, L3-W4.1-vitest, L3-W4.1-receipt)"
+  ],
+  "changes": [
+   "security/e2e-receipt-keys/<name>.pem on main (new file, the public half of LUMEN_E2E_KEY)",
+   "refs/heads/main → the train head (fast-forward by promote:main --push)"
+  ],
+  "draftPr": null
+ },
+ {
+  "id": "L3-W4.7",
+  "decision": "Cut the 15.x owner list by one more item (18 → 10, −44%; it is 11, −39%, the target is ≥ 40%) and open the free real-Safari account for 15.12.",
+  "options": [
+   {
+    "option": "A. Fold 15.14 (engine measurement in the browser) into the Mac's models day: it is already step bench-models of `npm run models:day` (pack entry L3-7.8), so it needs no owner minutes.",
+    "cost": "0 min of yours"
+   },
+   {
+    "option": "B. Drop 15.6 (monitoring DSN) from the list as optional.",
+    "cost": "no monitoring until someone asks"
+   },
+   {
+    "option": "C. Keep 11 and accept 39%.",
+    "cost": "W4.7 stays PARTIAL"
+   }
+  ],
+  "recommendation": "A, plus a BrowserStack open-source account for 15.12 (`npm run safari:run -- --seal --tasks 15.12`)",
+  "why": "15.14 is measured by a script, not by a person, since bench-models runs inside models:day; moving it leaves the owner nothing to do for it. BrowserStack gives open-source projects free Automate minutes on real iOS Safari, and scripts/safari/ already drives it (BROWSERSTACK_USERNAME / BROWSERSTACK_ACCESS_KEY).",
+  "sources": [
+   "https://www.browserstack.com/open-source",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/scripts/safari/run.mjs",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/scripts/owner/steps.mjs (gpu/models-day lists 15.14 already)",
+   "plan/mac-pack/L3.json (L3-models-day, L3-7.8)"
+  ],
+  "changes": [
+   "plan/plan.json 15.14: status → 'Mac, in models:day' (plan lane, not this PR)",
+   "BROWSERSTACK_USERNAME / BROWSERSTACK_ACCESS_KEY in the Mac's environment"
+  ],
+  "draftPr": null
+ },
+ {
+  "id": "L3-W4.8",
+  "decision": "Deploy the public live-share server where it costs $0/month and stores only encrypted updates.",
+  "options": [
+   {
+    "option": "A. Cloudflare Workers Free + two SQLite Durable Objects: `npx wrangler@4.20.0 login`, then `npm run collab:deploy`; set VITE_YJS_WEBSOCKET_URL and VITE_WEBRTC_SIGNALING_URL in Vercel; check with `npm run share:latency` (p95 < 300 ms from Israel) and `npm run share:scan` (no plaintext in storage).",
+    "cost": "$0; Workers Free daily request limits"
+   },
+   {
+    "option": "B. Fly.io (fly.toml is in the repo).",
+    "cost": "no free allowance for new accounts: a few $/month"
+   },
+   {
+    "option": "C. The owner's own machine as relay.",
+    "cost": "up only while it is on; a home IP exposed"
+   }
+  ],
+  "recommendation": "A",
+  "why": "The script, the worker (edge-workers/collab) and the latency and storage checks are written and tested offline; Durable Objects with SQLite storage are on the Workers Free plan, so the room state lives at Cloudflare without a paid plan. Only the deploy needs your Cloudflare login.",
+  "sources": [
+   "https://developers.cloudflare.com/durable-objects/platform/pricing/",
+   "https://developers.cloudflare.com/workers/platform/limits/",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/scripts/collab-deploy.mjs",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/scripts/share-latency.mjs",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/scripts/share-scan.mjs"
+  ],
+  "changes": [
+   "Vercel project env: VITE_YJS_WEBSOCKET_URL=wss://<worker>/, VITE_WEBRTC_SIGNALING_URL=wss://<worker>/signal (both already on security/vite-env-allowlist.json)",
+   "Cloudflare secret COLLAB_TOKEN_SECRET (the script sets it)"
+  ],
+  "draftPr": null
+ },
+ {
+  "id": "L3-W4.14",
+  "decision": "Host every default model outside Hugging Face: GitHub Releases of this repo behind the model-mirror Worker.",
+  "options": [
+   {
+    "option": "A. GitHub Releases (one prerelease per model, tag models-<slug>) + edge-workers/model-mirror as the CORS proxy: `gh auth login`, `npm run owner:models` (pin → upload → verify --deep → check), deploy the worker, set VITE_MODEL_MIRROR_URL in Vercel.",
+    "cost": "$0; files ≤ 2 GiB each"
+   },
+   {
+    "option": "B. Cloudflare R2 bucket.",
+    "cost": "free tier 10 GB storage, then paid; a second account to manage"
+   },
+   {
+    "option": "C. Stay on Hugging Face only.",
+    "cost": "W4.14 not met: a blocked huggingface.co blocks the AI features"
+   }
+  ],
+  "recommendation": "A, after PR #1078 (owner:models crashed at start-up on train-7)",
+  "why": "The pin/upload/verify script and the proxy exist and are tested; on train-7 `npm run models:mirror` died with ERR_MODULE_NOT_FOUND (src/lib/slug), fixed in #1078. With the fix, `--check` reports 1/27 models downloadable without Hugging Face and 1 pinned file without sha256: the pin step fills the sha256s. Upload only models whose licence allows redistribution (the release notes carry it; scripts/models/mirror.mjs releaseNotes).",
+  "sources": [
+   "https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/scripts/models/mirror.mjs",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/edge-workers/model-mirror/worker.ts",
+   "PR #1078"
+  ],
+  "changes": [
+   "models/registry.json: hosting.revision, files[].sha256 for every default model (written by --pin; review the diff, commit it)",
+   "Vercel env VITE_MODEL_MIRROR_URL (already allow-listed)"
+  ],
+  "draftPr": 1078
+ },
+ {
+  "id": "L3-W4.18",
+  "decision": "Pick the first language to get a native speaker's review, and where to find reviewers; mark it 'reviewed' when done.",
+  "options": [
+   {
+    "option": "A. Arabic first: recruit through a Discussions post + Hosted Weblate (free libre plan), one reviewer signs off; the RTL matrix in ar (e2e/rtl-matrix-ar.spec.ts) runs in the Mac's shared e2e run.",
+    "cost": "≈30 min of yours to post and merge"
+   },
+   {
+    "option": "B. Russian first (the largest non-Hebrew language group in Israel).",
+    "cost": "same; LTR, so it proves less of the RTL work"
+   },
+   {
+    "option": "C. Paid professional review of all six.",
+    "cost": "hundreds of $ per language"
+   }
+  ],
+  "recommendation": "A",
+  "why": "Arabic is the one language whose review also checks the RTL layout the product is built around, and the ar RTL matrix is already a spec; the six beta labels, the 'suggest a better translation' issue form and localeBeta are in place, so the only missing piece is a person.",
+  "sources": [
+   "https://hosted.weblate.org/hosting/",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/src/i18n/review.ts",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/e2e/rtl-matrix-ar.spec.ts",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/scripts/i18n-review.mjs"
+  ],
+  "changes": [
+   "src/i18n/review.ts line 32: `ar: \"beta\"` → `ar: \"reviewed\"` once the reviewer signs off (with their name in the PR)",
+   "node scripts/mac-pack/L3/e2e-summary.mjs --specs e2e/rtl-matrix-ar.spec.ts --label W4.18 after L3-e2e-run"
+  ],
+  "draftPr": null
+ },
+ {
+  "id": "L3-W4.19",
+  "decision": "Register the OAuth apps the two-tap sync needs, then time one new user (≤ 6 taps, ≤ 2 min).",
+  "options": [
+   {
+    "option": "A. Google Drive with the drive.file scope (non-sensitive: no Google verification) + OneNote/OneDrive in Microsoft Entra (personal + work accounts); put VITE_GDRIVE_CLIENT_ID and VITE_ONENOTE_CLIENT_ID in Vercel; then one moderated session with the in-app recorder (W1.29).",
+    "cost": "≈40 min + one 15-min session"
+   },
+   {
+    "option": "B. Skip OAuth: the desktop sync-folder path (iCloud/Dropbox/Drive/OneDrive folders) and the encrypted relay already sync in 2 taps.",
+    "cost": "no browser-only sync to Drive"
+   },
+   {
+    "option": "C. Also register Dropbox.",
+    "cost": "a third console; Dropbox app review for production"
+   }
+  ],
+  "recommendation": "A (Dropbox later, if users ask)",
+  "why": "The wizard, the 13-word key with its check word and the relay path are done (syncSetup 19/19); what is open is accounts only you can create, and the measurement needs a person who has never seen it. drive.file only reaches files the app created, so it stays out of Google's restricted-scope review.",
+  "sources": [
+   "https://developers.google.com/workspace/drive/api/guides/api-specific-auth",
+   "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/src/sync/cloud/gdrive.ts",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/src/storage/import/onenoteGraph.ts"
+  ],
+  "changes": [
+   "Vercel env: VITE_GDRIVE_CLIENT_ID, VITE_GDRIVE_REDIRECT, VITE_ONENOTE_CLIENT_ID (the first two are on the allow-list; VITE_ONENOTE_CLIENT_ID is not: check before setting, the allow-list is not this lane's)",
+   "node scripts/usability-analyze.mjs <session files> --round 1 → the taps and time"
+  ],
+  "draftPr": null
+ },
+ {
+  "id": "L3-W4.25",
+  "decision": "Run usability round 1 with 12 participants (5 moderated, 7 self-guided) and collect their files.",
+  "options": [
+   {
+    "option": "A. Recruit through the beta list / Discussions / a Hebrew Facebook group; self-guided participants use the in-app 'Usability test' mode (U-XXXX code, no name) and send the zip through the Tally form already chosen; analyse with `node scripts/usability-analyze.mjs <folder> --round 1`.",
+    "cost": "≈3 h of yours over a week"
+   },
+   {
+    "option": "B. Moderated only, 5 participants.",
+    "cost": "SUS from 5 people has a wide interval; W4.25 asks ≥ 12"
+   },
+   {
+    "option": "C. A recruiting panel (paid).",
+    "cost": "$ per participant; screen recording tools were rejected for privacy"
+   }
+  ],
+  "recommendation": "A",
+  "why": "Five users find most problems in a moderated round (NN/g), but a SUS ≥ 75 claim needs a sample whose 95% interval the analysis script reports; the unmoderated mode keeps data on the device and sends only answers, matching the privacy choices already made (Maze/Clarity/Hotjar rejected).",
+  "sources": [
+   "https://www.nngroup.com/articles/why-you-only-need-to-test-with-5-users/",
+   "https://measuringu.com/sus/",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/scripts/usability-analyze.mjs"
+  ],
+  "changes": [
+   "reports/usability/round-1.md (the script's output; commit the report, never the raw sessions)",
+   "each severe finding → a plan task (plan lane)"
+  ],
+  "draftPr": null
+ },
+ {
+  "id": "L3-W4.27",
+  "decision": "Put the site on the second host (Cloudflare Pages) at the same commit hash, and write down the monthly cost.",
+  "options": [
+   {
+    "option": "A. Cloudflare Pages, Direct Upload from the Mac: `npx wrangler@4 login`, `bash scripts/pages-deploy.sh --prod`, then `npm run hosts:parity -- --live https://lumen-md.vercel.app https://lumen-md.pages.dev` and compare /.well-known/lumen-build.json on both.",
+    "cost": "$0 (Direct Upload uses none of the 500 builds/month)"
+   },
+   {
+    "option": "B. Netlify (netlify.toml is in the repo).",
+    "cost": "free tier with build minutes; a third account"
+   },
+   {
+    "option": "C. No second host.",
+    "cost": "one provider's outage or account issue takes the app down"
+   }
+  ],
+  "recommendation": "A; the written decision: 'Vercel Hobby + Cloudflare Pages Free, $0/month'",
+  "why": "Everything is scripted (deploy, live:meta before and after upload, header/route parity, the build manifest with this commit's hash); the deploy needs your Cloudflare login and the project name.",
+  "sources": [
+   "https://developers.cloudflare.com/pages/platform/limits/",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/scripts/pages-deploy.sh",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/scripts/host-parity.mjs",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/scripts/supply-chain/dist-manifest.mjs"
+  ],
+  "changes": [
+   "deploy/hosting.json already lists cloudflare-pages (no change); the decision text with the cost goes in plan/plan.json W4.27 (plan lane)",
+   "CF_PAGES_PROJECT=lumen-md in the Mac's environment"
+  ],
+  "draftPr": null
+ },
+ {
+  "id": "L3-W4.28",
+  "decision": "Name a second maintainer (or an external reviewer) for the sensitive paths, and make their review required.",
+  "options": [
+   {
+    "option": "A. Invite one trusted contributor as collaborator; add them next to @talstilkol on each .github/CODEOWNERS line; turn on 'Require review from Code Owners' in the main ruleset; they review the open sensitive PRs (#939–#943) and add the human-reviewed label themselves.",
+    "cost": "finding the person; ≈20 min of settings"
+   },
+   {
+    "option": "B. A paid one-off security review of the crypto paths (e.g. through OSTIF).",
+    "cost": "$$; a report, not an ongoing reviewer"
+   },
+   {
+    "option": "C. Keep reviewing alone.",
+    "cost": "bus factor 1; OpenSSF Scorecard Code-Review stays low"
+   }
+  ],
+  "recommendation": "A (B later, before 1.0, for the e2ee code)",
+  "why": "CODEOWNERS already lists every sensitive path and pr:check already fails a sensitive PR without a human-reviewed label after its last commit; the missing piece is a second human. Labels and receipts are never added by an agent.",
+  "sources": [
+   "https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners",
+   "https://github.com/ossf/scorecard/blob/main/docs/checks.md#code-review",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/.github/CODEOWNERS",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/scripts/lib/humanReview.mjs"
+  ],
+  "changes": [
+   ".github/CODEOWNERS: every line, `@talstilkol` → `@talstilkol @<second>`",
+   "the main ruleset: require code-owner review (GitHub settings)"
+  ],
+  "draftPr": null
+ },
+ {
+  "id": "L3-W4.34",
+  "decision": "Turn on GitHub Discussions, and publish the docs site so Hebrew search is checked live; the GIFs are a Mac command.",
+  "options": [
+   {
+    "option": "A. Settings → Features → Discussions (or `gh api -X PATCH repos/talstilkol/lumen-md -F has_discussions=true`), create the categories in docs/dev/github-discussions.md, `node scripts/discussions-check.mjs`; on the Mac `npm run docs:build` (Pagefind) and `npm run docs:gifs` (30 GIFs), then `node scripts/docs-search.mjs --site docs/dist` for 20/20.",
+    "cost": "≈20 min + a Mac run"
+   },
+   {
+    "option": "B. Issues only, no Discussions.",
+    "cost": "questions mixed with bugs; the discussion forms in .github/ go unused"
+   }
+  ],
+  "recommendation": "A",
+  "why": "The forms, the categories list and the checker are in the repo; GitHub ignores a form whose category does not exist, which is why the check runs after you create them. Search is measured on the built site with Pagefind itself, not on the index model.",
+  "sources": [
+   "https://docs.github.com/en/discussions/quickstart",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/docs/dev/github-discussions.md",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/scripts/discussions-check.mjs",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/scripts/docs-search.mjs"
+  ],
+  "changes": [
+   "repository setting has_discussions=true",
+   "docs/public/gifs/*.gif (written by docs:gifs; commit them)"
+  ],
+  "draftPr": null
+ },
+ {
+  "id": "L3-7.1",
+  "decision": "Hold the held-out evaluator key and build the sealed test split (the archived golden-sets.yml with GOLDEN_SEED is replaced by `npm run heldout`).",
+  "options": [
+   {
+    "option": "A. `npm run heldout -- keygen` on the Mac (key at ~/.config/lumen-heldout/key, never in the repo), commit the printed public half, then `npm run heldout -- build --record`; the Mac's models day adds the held-out step with --heldout-key-file.",
+    "cost": "≈15 min"
+   },
+   {
+    "option": "B. The nightly host holds the key.",
+    "cost": "a second copy of the key to protect"
+   },
+   {
+    "option": "C. No held-out split.",
+    "cost": "every score is on sets the authors can see; 7.1 stays PARTIAL"
+   }
+  ],
+  "recommendation": "A",
+  "why": "The sampler is keyed and deterministic (same key → same sha256), the build refuses a key inside the checkout, and only aggregate numbers are written; the only thing missing is a key that the feature authors (the agents) never see.",
+  "sources": [
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/scripts/heldout.mjs",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/scripts/heldout/sets.mjs",
+   "plan/mac-pack/L3.json (L3-models-day: --heldout-key-file)"
+  ],
+  "changes": [
+   "the held-out public key file the keygen step names (commit it)",
+   "the sealed set records `heldout build --record` writes"
+  ],
+  "draftPr": null
+ },
+ {
+  "id": "L3-7.5",
+  "decision": "Restate 'OCR runs on every PR' for a project without Actions, and get the CER numbers measured on the Mac.",
+  "options": [
+   {
+    "option": "A. 'Every Vercel preview build (the vitest gate runs ocrCer / ocrLangData / ocrLedger) and every night'; the CER figures (clean ≤ 5%, degraded ≤ 12%) from `npx vitest run src/__tests__/ocrCer.test.ts src/__tests__/ocrLangData.test.ts src/__tests__/ocrLedger.test.ts` and e2e/ocr-cer.spec.ts in the Mac's shared run.",
+    "cost": "0 min of yours beyond the decision"
+   },
+   {
+    "option": "B. Bring Actions back for OCR only.",
+    "cost": "reverses the 9.11 no-Actions decision"
+   }
+  ],
+  "recommendation": "A",
+  "why": "The tests are not nightly-only (scripts/test-tiers.mjs does not list them), so the preview build's vitest gate already runs them on every branch Vercel builds; the claim was false only because nothing ran. The CER numbers need the real tesseract data, which the Mac has.",
+  "sources": [
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/src/__tests__/ocrCer.test.ts",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/scripts/test-tiers.mjs",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/e2e/ocr-cer.spec.ts"
+  ],
+  "changes": [
+   "plan/plan.json 7.5 acceptance: 'runs on every PR' → 'runs in every preview build and nightly' (plan lane)",
+   "node scripts/mac-pack/L3/e2e-summary.mjs --specs e2e/ocr-cer.spec.ts,e2e/ocr.spec.ts --label 7.5 after L3-e2e-run"
+  ],
+  "draftPr": null
+ },
+ {
+  "id": "L3-7.7",
+  "decision": "Product decision 15.16 for the daily digest: what 'since' means.",
+  "options": [
+   {
+    "option": "A. Since the last digest (what src/agents/defs/digester.ts does now: 'Changes since <date of the last digest>'; two runs in a day are two parts of the same file).",
+    "cost": "0: already built"
+   },
+   {
+    "option": "B. Since the user's last visit (last app open).",
+    "cost": "a new 'last seen' timestamp to store and define (tab focus? open?); a digest that changes with how the app was opened"
+   },
+   {
+    "option": "C. A fixed window (last 24 h).",
+    "cost": "repeats changes when run twice a day"
+   }
+  ],
+  "recommendation": "A",
+  "why": "It is deterministic, needs no new tracking of the user, and matches the acceptance 'two runs a day = two parts in the same file'; T33's fixes from 1.1 are what it already does, so 7.7 can close on A.",
+  "sources": [
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/src/agents/defs/digester.ts"
+  ],
+  "changes": [
+   "plan/plan.json 7.7: decision recorded, T33 ✅ with the digester tests as evidence (plan lane)"
+  ],
+  "draftPr": null
+ },
+ {
+  "id": "L3-7.10",
+  "decision": "Supply the twelfth small golden set (meetings), or take it out of 7.10.",
+  "options": [
+   {
+    "option": "A. Record three short Hebrew meetings with everyone's consent (15.11, owner session gpu/golden), scripted so they contain known tasks; the set is frozen with sha256 and a licence line.",
+    "cost": "≈60 min (the gpu/golden step)"
+   },
+   {
+    "option": "B. Use a public conversational corpus.",
+    "cost": "no Hebrew meeting corpus with a licence that allows it was found"
+   },
+   {
+    "option": "C. Accept 11/12 and move meetings to 6.16.",
+    "cost": "7.10's acceptance (12 sets) is rewritten"
+   }
+  ],
+  "recommendation": "A",
+  "why": "Eleven sets are frozen with sha256 and licence; the meetings set is the only one that cannot be built from public data, and eval:meetings already reads the owner's bundle (--meetings-dir).",
+  "sources": [
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/scripts/owner/steps.mjs (gpu/golden)",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/src/agents/eval/meetings.eval.ts",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/src/__tests__/golden-sets.test.ts"
+  ],
+  "changes": [
+   "eval/golden/meetings/ (the frozen set, sha256 + licence)",
+   "npm run models:day -- --meetings-dir <bundle>/meetings/owner"
+  ],
+  "draftPr": null
+ },
+ {
+  "id": "L3-0.4",
+  "decision": "Make `npm run lint` a gate of every preview build (plan 0.4: a PR with an unexplained empty catch fails).",
+  "options": [
+   {
+    "option": "A. Merge draft PR #1080 once `npm run lint` is green on the Mac: 'lint' joins PREVIEW_GATES after hygiene, with the suppressions baseline.",
+    "cost": "≈1–2 min per preview build"
+   },
+   {
+    "option": "B. Keep lint in Buildkite only.",
+    "cost": "the Buildkite pipeline has never run: the rule is not enforced"
+   }
+  ],
+  "recommendation": "A",
+  "why": "Tightening only (no rule, baseline or suppression changes); the empty-catch rule and its test exist, and the preview build is the only CI that runs.",
+  "sources": [
+   "https://eslint.org/docs/latest/use/suppressions",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/scripts/vercel-build.mjs",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/eslint-rules/empty-catch-why.js",
+   "PR #1080"
+  ],
+  "changes": [
+   "scripts/vercel-build.mjs: GATES.lint and 'lint' in PREVIEW_GATES (PR #1080)"
+  ],
+  "draftPr": 1080
+ },
+ {
+  "id": "L3-0.19",
+  "decision": "Danger.js + size-limit for the PR gate, or the gates that already exist.",
+  "options": [
+   {
+    "option": "A. No Danger.js / size-limit: `npm run pr:check` (PR body sections, human review on sensitive paths) + the privacy:ledger gate (an unregistered fetch fails every build, production too) + the bundle budget gate already cover the acceptance; install the free Mend Renovate GitHub app for renovate.json.",
+    "cost": "≈5 min (the app)"
+   },
+   {
+    "option": "B. Add Danger.js and size-limit.",
+    "cost": "two new devDependencies; Danger needs a CI runner with a token to comment, and Actions are off"
+   }
+  ],
+  "recommendation": "A, and restate 0.19's acceptance as 'pr:check fails a PR that adds an unregistered fetch; budget fails a size regression'",
+  "why": "Danger's value is the PR comment, which needs a CI with a token — the project chose no Actions (9.11); size-limit duplicates scripts/bundle-budget.mjs. The behaviour the acceptance wants is already enforced by gates that run.",
+  "sources": [
+   "https://danger.systems/js/",
+   "https://github.com/apps/renovate",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/scripts/pr-check.mjs",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/scripts/privacy-ledger-check.mjs",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/scripts/bundle-budget.mjs",
+   "https://github.com/talstilkol/lumen-md/blob/verify/train-7/renovate.json"
+  ],
+  "changes": [
+   "plan/plan.json 0.19 acceptance (plan lane)",
+   "Renovate app installed on talstilkol/lumen-md (GitHub settings)"
+  ],
+  "draftPr": null
+ }
+]
