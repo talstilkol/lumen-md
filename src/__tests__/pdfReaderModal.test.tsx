@@ -91,6 +91,37 @@ const LOAD = { timeout: 15_000 };
 const reader = () => screen.getByTestId("pdf-reader");
 const labels = { title: "Highlights", page: (n: number) => `p. ${n}`, empty: "none" };
 
+/**
+ * Review 11, L12: LOAD allows 15 s so a loaded machine does not fail the file, and that alone could
+ * hide an open that got slower. With its modules loaded (beforeAll), the reader is ready within a
+ * fixed number of event-loop turns: a count of turns, not of milliseconds, so load does not move it,
+ * and a new wait (a timer, a cold import, a slow step) does.
+ */
+const READY_TURNS = 20;
+async function turnsUntilReady(): Promise<number> {
+  for (let turn = 1; turn <= 1000; turn++) {
+    await new Promise((r) => setTimeout(r, 0));
+    if (screen.queryByTestId("pdf-reader")?.getAttribute("data-ready") === "true") return turn;
+  }
+  return Infinity;
+}
+
+describe("review 11, L12: a warm open is ready within a fixed number of turns", () => {
+  it("long.pdf and mixed.pdf are ready within READY_TURNS event-loop turns", { timeout: 30_000 }, async () => {
+    // One open first, so what the reader imports lazily on open is loaded too.
+    render(<PdfReader path="mixed.pdf" openSeq={1} onClose={() => undefined} onOpenNotes={() => undefined} />);
+    await waitFor(() => expect(reader().getAttribute("data-ready")).toBe("true"), LOAD);
+    cleanup();
+    for (const path of ["long.pdf", "mixed.pdf"]) {
+      render(<PdfReader path={path} openSeq={1} onClose={() => undefined} onOpenNotes={() => undefined} />);
+      const turns = await turnsUntilReady();
+      console.log(`pdfReader ${path}: ready after ${turns} turns`);
+      expect(turns, path).toBeLessThanOrEqual(READY_TURNS);
+      cleanup();
+    }
+  });
+});
+
 describe("2.18: a long PDF opens with page 1's size", () => {
   it("doesn't load every page before showing the first", { timeout: 30_000 }, async () => {
     render(<PdfReader path="long.pdf" openSeq={1} onClose={() => undefined} onOpenNotes={() => undefined} />);
