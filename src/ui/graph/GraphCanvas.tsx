@@ -202,11 +202,13 @@ export function GraphCanvas(props: GraphCanvasProps) {
     const r = wrap.current!.getBoundingClientRect();
     return { x: e.clientX - r.left, y: e.clientY - r.top };
   };
-  const pick = (sx: number, sy: number) => {
+  // The node under a screen point: the dot itself, or within 10 px of the
+  // cursor — a finger or a pen is wider, 22 px (plan 10.2.1).
+  const pick = (sx: number, sy: number, coarse = false) => {
     if (!grid) return -1;
     const { w, h } = size.current;
     const p = toWorld(view.current, w, h, sx, sy);
-    return grid.nearest(p.x, p.y, Math.max(6, 10 / view.current.scale));
+    return grid.nearest(p.x, p.y, Math.max(6, (coarse ? 22 : 10) / view.current.scale));
   };
 
   const onKeyDown = (e: ReactKeyboardEvent) => {
@@ -342,7 +344,7 @@ export function GraphCanvas(props: GraphCanvasProps) {
           drag.current = null;
           if (d && !d.moved) {
             const p = local(e);
-            const i = pick(p.x, p.y);
+            const i = pick(p.x, p.y, e.pointerType !== "mouse");
             if (i >= 0) {
               setFocus(i);
               onOpen(i);
