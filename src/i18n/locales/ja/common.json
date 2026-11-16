@@ -120,7 +120,7 @@
   "airplane.badge.hint": "ネットワークなし：ネットワークモニターを開く",
   "airplane.certificate": "証明書をダウンロード",
   "airplane.certificate.hint": "期間、その中のすべての試行、そして数える対象（バイトではなく試行。オンにした時点で送信中だったリクエストも含む）を正確に記したファイルと、その SHA-256。",
-  "airplane.certificate.unsigned": "まだ署名されていません。証明書には SHA-256 のみが含まれます。",
+  "airplane.certificate.signed": "このデバイスの鍵で署名済み：誰でも minisign でファイルを検証でき、1 バイトでも変わると検証に失敗します。",
   "airplane.close": "閉じる",
   "airplane.col.decision": "判定",
   "airplane.col.kind": "種類",

@@ -15,7 +15,7 @@
   "airplane.test.hint": "Tries to reach example.com, so you can watch it appear here (blocked while airplane mode is on).",
   "airplane.certificate": "Download certificate",
   "airplane.certificate.hint": "A file with the time span, every attempt in it, and exactly what it counts (attempts, not bytes; requests in flight when the switch went on count too), with its SHA-256.",
-  "airplane.certificate.unsigned": "Not signed yet: the certificate carries its SHA-256 only.",
+  "airplane.certificate.signed": "Signed with this device's key: anyone can check the file with minisign, and a changed byte fails the check.",
   "airplane.empty": "No network attempts yet.",
   "airplane.col.time": "Time",
   "airplane.col.kind": "Kind",

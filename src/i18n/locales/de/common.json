@@ -120,7 +120,7 @@
   "airplane.badge.hint": "Kein Netz: Netzwerkmonitor öffnen",
   "airplane.certificate": "Bescheinigung herunterladen",
   "airplane.certificate.hint": "Eine Datei mit dem Zeitraum, jedem Versuch darin und genau dem, was sie zählt (Versuche, nicht Bytes; auch Anfragen, die beim Einschalten unterwegs waren), samt SHA-256.",
-  "airplane.certificate.unsigned": "Noch nicht signiert: Die Bescheinigung enthält nur ihr SHA-256.",
+  "airplane.certificate.signed": "Mit dem Schlüssel dieses Geräts signiert: Jeder kann die Datei mit minisign prüfen, und ein geändertes Byte lässt die Prüfung fehlschlagen.",
   "airplane.close": "Schließen",
   "airplane.col.decision": "Entscheidung",
   "airplane.col.kind": "Art",

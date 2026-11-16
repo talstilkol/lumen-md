@@ -120,7 +120,7 @@
   "airplane.badge.hint": "无网络：打开网络监视器",
   "airplane.certificate": "下载证明",
   "airplane.certificate.hint": "一个文件，包含时间段、其中的每次尝试，以及它确切统计的内容（统计尝试而非字节；开启时仍在进行的请求也计入），附带其 SHA-256。",
-  "airplane.certificate.unsigned": "尚未签名：证明只包含其 SHA-256。",
+  "airplane.certificate.signed": "已用本设备的密钥签名：任何人都可以用 minisign 校验该文件，改动任何一个字节都会校验失败。",
   "airplane.close": "关闭",
   "airplane.col.decision": "决定",
   "airplane.col.kind": "类型",

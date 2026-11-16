@@ -303,6 +303,7 @@
   "vault.folder.moved": "The vault is now in the folder “{folder}”: {n} files copied and checked. Your notes in browser storage were not deleted.",
   "vault.folder.movedBack": "The vault is back in browser storage: {n} files copied and checked. The folder “{folder}” was not changed.",
   "vault.folder.moving": "Moving the vault… {done} of {total} files",
+  "vault.folder.nestingUnknown": "The vault was not moved: Lumen could not check on disk whether one of the folders is inside the other. Update Lumen and try again.",
   "vault.folder.opened": "Lumen now works in the folder “{folder}”. Notes in browser storage stay where they are.",
   "vault.folder.permissionDenied": "Lumen didn't get permission to edit the folder “{folder}”.",
   "vault.folder.reconnect": "Reconnect folder",
