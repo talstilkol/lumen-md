@@ -12,12 +12,16 @@ vi.mock("../storage/workspace", () => ({
   workspaceHasFile: async (p: string) => files.has(p),
   isAssetName: () => false,
 }));
-vi.mock("../storage/workspaceIndex", () => ({
-  searchWorkspace: async (q: string) =>
-    [...files.entries()].filter(([, c]) => c.includes(q)).map(([path, c]) => ({ path, name: path, score: 5, snippet: c.slice(0, 40) })),
-  ensureIndex: async () => {},
-  indexedFiles: () => [...files.entries()].map(([path, content]) => ({ path, name: path.split("/").pop() ?? path, content, modified: 0, wikiTargets: [] })),
-}));
+vi.mock("../storage/workspaceIndex", async () => {
+  // W2.22: the index keeps a summary of each note (noteSummary.ts), not its text.
+  const { summarize } = await import("../storage/noteSummary");
+  return {
+    searchWorkspace: async (q: string) =>
+      [...files.entries()].filter(([, c]) => c.includes(q)).map(([path, c]) => ({ path, name: path, score: 5, snippet: c.slice(0, 40) })),
+    ensureIndex: async () => {},
+    indexedFiles: () => [...files.entries()].map(([path, content]) => ({ path, name: path.split("/").pop() ?? path, modified: 0, ...summarize(content) })),
+  };
+});
 const parse = vi.fn();
 vi.mock("mermaid", () => ({ default: { parse } }));
 
