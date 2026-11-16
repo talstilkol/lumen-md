@@ -11,9 +11,17 @@
  *    literal (CommonMark 606, GFM 614: `<foo\+@bar.example.com>` is text in
  *    cmark-gfm too). Needs the source; without it the link stays.
  *
- * A directive becomes the exact source it came from (or, when the
- * processor was run without the source, its name and label); a link becomes
- * its text.
+ * A directive becomes the text it came from, with its label still parsed
+ * (`foo:x[**bold**]` keeps the bold; review 10, L10): the source of `:name[`
+ * and of `]{attributes}` around the label's own nodes. When the processor ran
+ * without the source (runSync on a parsed tree), the name, the label and the
+ * attributes are written back from the node.
+ *
+ * Review 10, L10: a text directive whose name Lumen does not render
+ * (anything but the admonitions, ADMONITION_NAMES) is text wherever it
+ * starts: `(:x)` and `a :b[c]` used to become an empty box and lose the name.
+ *
+ * A link becomes its text.
  */
 import type { Root as MdastRoot } from "mdast";
 
@@ -28,6 +36,9 @@ interface Node {
 }
 
 const WORD = /[\p{L}\p{N}]$/u;
+
+/** The directive names the preview renders (remarkLumen.ts remarkAdmonitions). */
+export const ADMONITION_NAMES: readonly string[] = ["note", "tip", "info", "warning", "danger"];
 
 function textOf(n: Node): string {
   if (typeof n.value === "string") return n.value;
@@ -60,14 +71,40 @@ function literalAutolink(n: Node): boolean {
   return url === text || url === `mailto:${text}` || url === `http://${text}`;
 }
 
+/** A directive's attributes written back as `{#id .a .b k="v"}` (no source to copy them from). */
+function attributesText(attrs: Node["attributes"]): string {
+  const parts: string[] = [];
+  for (const [k, v] of Object.entries(attrs ?? {})) {
+    if (v === null || v === undefined) continue;
+    if (k === "id") parts.push(`#${v}`);
+    else if (k === "class") parts.push(...v.split(/\s+/).filter(Boolean).map((c) => `.${c}`));
+    else parts.push(v === "" ? k : `${k}="${v.replace(/"/g, "&quot;")}"`);
+  }
+  return parts.length ? `{${parts.join(" ")}}` : "";
+}
+
+/** The nodes a text directive becomes when it is text: its source around its label's own nodes. */
+function asText(n: Node, src: string): Node[] {
+  const raw = sourceOf(n, src);
+  const kids = n.children ?? [];
+  const head = `:${n.name ?? ""}`;
+  if (raw === null) return kids.length ? [{ type: "text", value: `${head}[` }, ...kids, { type: "text", value: `]${attributesText(n.attributes)}` }] : [{ type: "text", value: `${head}${attributesText(n.attributes)}` }];
+  const start = n.position!.start.offset!;
+  const lastEnd = kids.at(-1)?.position?.end.offset;
+  const close = lastEnd === undefined ? -1 : raw.indexOf("]", lastEnd - start);
+  if (!kids.length || raw[head.length] !== "[" || close < 0) return [{ type: "text", value: raw, position: n.position }];
+  return [{ type: "text", value: raw.slice(0, head.length + 1) }, ...kids, { type: "text", value: raw.slice(close) }];
+}
+
 function rewrite(parent: Node, src: string, block = ""): void {
   const kids = parent.children;
   if (!kids) return;
   for (let i = 0; i < kids.length; i++) {
     const n = kids[i];
-    if (n.type === "textDirective" && WORD.test(before(parent, i, n, src))) {
-      const raw = sourceOf(n, src);
-      kids[i] = { type: "text", value: raw ?? `:${n.name ?? ""}${textOf(n) ? `[${textOf(n)}]` : ""}`, position: n.position };
+    if (n.type === "textDirective" && (!ADMONITION_NAMES.includes(n.name ?? "") || WORD.test(before(parent, i, n, src)))) {
+      // The label's nodes go back in place and are read again (a directive inside a label too).
+      kids.splice(i, 1, ...asText(n, src));
+      i--;
       continue;
     }
     // The address is not in the block's source as written: an escape (or a character reference) split it.

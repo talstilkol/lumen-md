@@ -3,7 +3,10 @@
  * through the preview's own pipeline.
  */
 import { describe, it, expect } from "vitest";
+import { unified } from "unified";
+import remarkParse from "remark-parse";
 import { renderHastFast } from "../renderer/renderCore";
+import { markdownSyntax } from "../renderer/syntax";
 
 type H = { type: string; tagName?: string; value?: string; properties?: Record<string, unknown>; children?: H[] };
 
@@ -31,5 +34,28 @@ describe("syntax boundaries", () => {
     expect(text(escaped)).toBe("<foo+@bar.example.com>");
     const plain = render("write to foo+x@bar.example.com or www.example.com");
     expect(find(plain, (x) => x.tagName === "a").map((a) => a.properties?.href)).toEqual(["mailto:foo+x@bar.example.com", "http://www.example.com"]);
+  });
+
+  // Review 10, L10.
+  it("a label stays Markdown when its directive is text: foo:x[**bold**] keeps the bold", () => {
+    const h = render("foo:x[**bold** and _em_]{.c}");
+    expect(text(h)).toBe("foo:x[bold and em]{.c}");
+    expect(find(h, (x) => x.tagName === "strong").map(text)).toEqual(["bold"]);
+    expect(find(h, (x) => x.tagName === "em").map(text)).toEqual(["em"]);
+  });
+
+  it("a directive name the preview does not render stays text after punctuation and a space too", () => {
+    const h = render("(:x) and a :b[c] and :smile");
+    expect(text(h)).toBe("(:x) and a :b[c] and :smile");
+    expect(find(h, (x) => x.tagName === "div")).toEqual([]);
+  });
+
+  it("without the source (runSync on a parsed tree) the attributes are written back", () => {
+    const proc = unified().use(remarkParse).use(markdownSyntax);
+    const tree = proc.runSync(proc.parse("Re:x[**y**]{#d .c k=v} and (:z{.q})")) as unknown as H;
+    const mdText = (n: H): string => (n.type === "text" ? (n.value ?? "") : (n.children ?? []).map(mdText).join(""));
+    expect(mdText(tree)).toBe('Re:x[y]{#d .c k="v"} and (:z{.q})');
+    expect(find(tree, (x) => x.type === "strong").length).toBe(1);
+    expect(find(tree, (x) => x.type === "textDirective")).toEqual([]);
   });
 });
