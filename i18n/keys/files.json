@@ -1001,66 +1001,6 @@
       ]
     },
     {
-      "key": "template.blank",
-      "en": "Blank document",
-      "vars": []
-    },
-    {
-      "key": "template.blank.desc",
-      "en": "Start with a clean slate",
-      "vars": []
-    },
-    {
-      "key": "template.blog",
-      "en": "Blog post",
-      "vars": []
-    },
-    {
-      "key": "template.blog.desc",
-      "en": "Title, intro, sections, conclusion",
-      "vars": []
-    },
-    {
-      "key": "template.journal",
-      "en": "Daily journal",
-      "vars": []
-    },
-    {
-      "key": "template.journal.desc",
-      "en": "Gratitude, goals, reflections",
-      "vars": []
-    },
-    {
-      "key": "template.letter",
-      "en": "Formal letter",
-      "vars": []
-    },
-    {
-      "key": "template.letter.desc",
-      "en": "Professional letter format",
-      "vars": []
-    },
-    {
-      "key": "template.meeting",
-      "en": "Meeting notes",
-      "vars": []
-    },
-    {
-      "key": "template.meeting.desc",
-      "en": "Date, attendees, agenda, action items",
-      "vars": []
-    },
-    {
-      "key": "template.readme",
-      "en": "Project README",
-      "vars": []
-    },
-    {
-      "key": "template.readme.desc",
-      "en": "Standard open-source README structure",
-      "vars": []
-    },
-    {
       "key": "templates.allCategories",
       "en": "All",
       "vars": []

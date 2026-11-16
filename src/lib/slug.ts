@@ -61,6 +61,22 @@ export function pageFileSlug(title: string, fallback: string): string {
 }
 
 /**
+ * Words joined by `-` (plan 12.2, audit r3 W10.E27: the copies in
+ * research/clipTemplateStore.ts, research/clipTemplates.ts, capture/voiceCapture.ts
+ * and mobile/captureQueue.ts are this one function): every run of characters
+ * that is not a letter or a digit (any script, so Hebrew stays) becomes one
+ * `-`, none at either end. `lower` lowercases first, `nfc` normalises first,
+ * `max` cuts to that many UTF-16 units and drops a `-` left at the cut.
+ * Template ids and attachment names depend on it: its output must not change.
+ */
+export function wordSlug(text: string, opts: { lower?: boolean; nfc?: boolean; max?: number } = {}): string {
+  let s = opts.nfc ? text.normalize("NFC") : text;
+  if (opts.lower) s = s.toLowerCase();
+  s = s.replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-+|-+$/g, "");
+  return opts.max === undefined ? s : s.slice(0, opts.max).replace(/-+$/, "");
+}
+
+/**
  * A release-tag segment for a model id: "onnx-community/whisper-base" →
  * "onnx-community-whisper-base". ASCII letters, digits, `.`, `_` and `-`;
  * anything else becomes one `-`; no leading or trailing `-`. Published tags

@@ -14,7 +14,7 @@ import { t } from "../i18n";
 import { explainError } from "../lib/userError";
 import { Modal } from "../ui/Modal";
 import { DEFAULT_TEMPLATE, SITE_TEMPLATES, renderClip, type ClipTemplate, type ClipVars } from "./clipTemplates";
-import { importObsidianTemplate, loadUserTemplates, saveUserTemplates, slugId, templateProblems, whichTemplate, type TemplateIo } from "./clipTemplateStore";
+import { importObsidianTemplate, loadUserTemplates, saveUserTemplates, templateId, templateProblems, whichTemplate, type TemplateIo } from "./clipTemplateStore";
 
 /** Sample values for the preview: what a clipped article would give. */
 const SAMPLE: ClipVars = {
@@ -66,7 +66,7 @@ export function ClipTemplatesEditor({ onClose, initial, io }: { onClose: () => v
   };
   const add = (from?: ClipTemplate) => {
     const name = from ? `${from.name} (${t("clipTemplates.copy")})` : t("clipTemplates.untitled");
-    const tpl: ClipTemplate = from ? { ...structuredClone(from), id: uniqueId(slugId(name)), name } : { ...structuredClone(DEFAULT_TEMPLATE), id: uniqueId(slugId(name)), name, triggers: [] };
+    const tpl: ClipTemplate = from ? { ...structuredClone(from), id: uniqueId(templateId(name)), name } : { ...structuredClone(DEFAULT_TEMPLATE), id: uniqueId(templateId(name)), name, triggers: [] };
     setMine((list) => [...list, tpl]);
     setSelected(tpl.id);
   };
