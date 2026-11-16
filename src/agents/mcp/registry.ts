@@ -18,7 +18,7 @@
  *     `askElicitation` (ui/McpDialogs.tsx), unless a caller passes its own.
  */
 import type { AgentTool, ToolContext } from "../types";
-import { getAiPolicy } from "../../ai/policy";
+import { getAiPolicy, onAiPolicyChange } from "../../ai/policy";
 import { airplaneModeOn, onAirplaneOn } from "../../privacy/airplane";
 import { httpTransport, type McpTransport } from "./client";
 import { appendServerLog } from "./log";
@@ -47,15 +47,15 @@ let airplaneHooked = false;
 
 const specKey = (s: McpServerConfig) => JSON.stringify([s.id, s.command, s.args ?? [], s.cwd ?? null, !!s.offline]);
 
-/** Close running server programs (all, or those that may reach the network). */
-export async function closeStdioServers(which: "all" | "remote" = "all"): Promise<number> {
+/** Close running server programs (all, or those that may reach the network). `why`: the log's reason for a remote close. */
+export async function closeStdioServers(which: "all" | "remote" = "all", why = "airplane mode came on"): Promise<number> {
   let n = 0;
   for (const [key, t] of [...pool]) {
     if (which === "remote" && t.reach !== "remote") continue;
     pool.delete(key);
     n++;
     const id = (JSON.parse(key) as [string])[0];
-    appendServerLog(id, "lumen", which === "remote" ? "closed: airplane mode came on" : "closed");
+    appendServerLog(id, "lumen", which === "remote" ? `closed: ${why}` : "closed");
     await t.close().catch(() => {
       /* why: a program that already exited has nothing left to close */
     });
@@ -67,6 +67,10 @@ function hookAirplane(): void {
   if (airplaneHooked) return;
   airplaneHooked = true;
   onAirplaneOn(() => void closeStdioServers("remote"));
+  // R8-L11: local-only too. Calls were re-checked, but a running program kept its own network access.
+  onAiPolicyChange(() => {
+    if (getAiPolicy() === "local-only") void closeStdioServers("remote", "local-only came on");
+  });
 }
 
 function stdioFor(server: McpServerConfig, bridge: StdioBridge): StdioTransport {

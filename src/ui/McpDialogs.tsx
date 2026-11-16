@@ -205,7 +205,8 @@ export function ToolCallDialog({ server, tool, args, info, onResolve }: { server
   const ref = useRef<HTMLDivElement | null>(null);
   const no = () => onResolve(false);
   const pick = (s: ApprovalScope) => onResolve(s);
-  const shownArgs = JSON.stringify(args, null, 2).slice(0, 4000);
+  // R8-L11: the whole payload, scrollable: what is approved is what is shown.
+  const shownArgs = JSON.stringify(args, null, 2) ?? "";
   return (
     <Modal onClose={no} className="prompt-backdrop" aria-labelledby="mcp-call-title" data-testid="mcp-call" onMouseDown={(e) => e.target === e.currentTarget && no()}>
       <div className="prompt-dialog" ref={ref} style={box}>
@@ -224,7 +225,7 @@ export function ToolCallDialog({ server, tool, args, info, onResolve }: { server
           </div>
         ) : null}
         <div style={{ fontSize: 12, fontWeight: 600, marginTop: 8 }}>{t("mcpServers.call.args")}</div>
-        <div style={{ ...mono, maxHeight: 160, overflow: "auto" }} data-testid="mcp-call-args">
+        <div style={{ ...mono, maxHeight: 240, overflow: "auto" }} tabIndex={0} role="region" aria-label={t("mcpServers.call.args")} data-testid="mcp-call-args">
           {shownArgs}
         </div>
         <div className="prompt-actions" style={{ flexWrap: "wrap" }}>
