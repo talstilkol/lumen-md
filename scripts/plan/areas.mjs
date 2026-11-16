@@ -31,6 +31,7 @@ import { join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { BARS } from "./area-bars.mjs";
 import { LEVELS, fingerprint, verifySealed } from "./receiptLevels.mjs";
+import { areaReliability, planTaskIndex } from "./reliability.mjs";
 
 export const AREAS_FILE = "plan/areas.json";
 export const BOARD_JSON = "plan/areas-board.json";
@@ -127,8 +128,11 @@ const round1 = (x) => Math.round(x * 10) / 10;
  *   areas:    plan/areas.json
  *   receipts: [{ report, source }] already verified
  *   levels:   plan/verified-receipts.json (#511) or null
+ *   plan:     plan/plan.json, for each area's reliability (W4.24: the
+ *             `verified` level of its tasks, scripts/plan/reliability.mjs)
  */
-export function computeBoard({ areas, receipts, levels = null, bars = BARS }) {
+export function computeBoard({ areas, receipts, levels = null, bars = BARS, plan = null }) {
+  const byId = plan ? planTaskIndex(plan) : null;
   const dated = receipts.filter((r) => dateOf(r.report)).sort((a, b) => String(dateOf(b.report)).localeCompare(String(dateOf(a.report))));
   const rows = areas.areas.map((a) => {
     const metrics = (bars[a.id] ?? []).map((x) => {
@@ -151,10 +155,13 @@ export function computeBoard({ areas, receipts, levels = null, bars = BARS }) {
     const mine = Object.entries(areas.tasks).filter(([, v]) => v.includes(a.id)).map(([id]) => id);
     const computed = Object.fromEntries([...LEVELS, "none"].map((k) => [k, 0]));
     for (const id of mine) computed[levels?.tasks?.[id]?.computed ?? "none"]++;
-    return { id: a.id, key: a.key, en: a.en, he: a.he, leader: a.leader ?? null, score, measured: metrics.filter((x) => x.status !== "not measured").length, met: metrics.filter((x) => x.status === "met").length, metrics, tasks: { count: mine.length, computed: levels ? computed : null } };
+    const reliability = byId ? areaReliability(mine.map((id) => byId.get(id)).filter(Boolean)) : null;
+    return { id: a.id, key: a.key, en: a.en, he: a.he, leader: a.leader ?? null, score, measured: metrics.filter((x) => x.status !== "not measured").length, met: metrics.filter((x) => x.status === "met").length, metrics, tasks: { count: mine.length, computed: levels ? computed : null }, reliability };
   });
+  const rel = rows.filter((r) => r.reliability?.rated);
   return {
     average: round1(rows.reduce((n, r) => n + r.score, 0) / rows.length),
+    reliability: byId ? (rel.length ? round1(rel.reduce((n, r) => n + r.reliability.score, 0) / rel.length) : 0) : null,
     metrics: rows.reduce((n, r) => n + r.metrics.length, 0),
     measured: rows.reduce((n, r) => n + r.measured, 0),
     met: rows.reduce((n, r) => n + r.met, 0),
@@ -175,10 +182,15 @@ export function renderHtml(board) {
       const rows = a.metrics
         .map((x) => `<tr class="${x.status === "met" ? "met" : x.status === "short" ? "short" : "none"}"><td>${E(x.he)}<div class="en" dir="ltr">${E(x.en)}</div></td><td dir="ltr">${E(fmtTarget(x.target, x.unit))}</td><td dir="ltr">${E(fmtValue(x.value, x.unit))}</td><td><span class="chip">${STATUS_HE[x.status]}</span></td><td dir="ltr">${x.receipt ? `${E(String(x.receipt.at).slice(0, 10))} · <code>${E(String(x.receipt.commit ?? "").slice(0, 9))}</code><div class="en">${E(x.receipt.source)}</div>` : "—"}</td></tr>`)
         .join("\n");
+      const r = a.reliability;
+      const relHtml = r
+        ? `<p class="meta rel"><b>אמינות ${r.score.toFixed(1)}</b> מתוך 10 לפי רמות האימות של ${r.rated} משימות עם סטטוס: אמיתי ${r.levels.real} · דפדפן ${r.levels.browser} · Node ${r.levels.node} · נבנה ${r.levels.built} · מחכה לטל ${r.levels.owner} · בלי רמה ${r.levels.none}. הפער: ${r.gap.doneNotReal} ✅ שלא נבדקו אמיתי${r.gap.doneBelowBrowser.length ? ` · ${r.gap.doneBelowBrowser.length} ✅ מתחת לדפדפן (${E(r.gap.doneBelowBrowser.join(", "))})` : ""}${r.gap.noLevel ? ` · ${r.gap.noLevel} בלי רמה` : ""}</p>\n<div class="bar rel"><i style="inline-size:${r.score * 10}%"></i></div>`
+        : "";
       const lv = a.tasks.computed ? ` · רמות מקבלות: ${LEVELS.map((k) => `${k} ${a.tasks.computed[k]}`).join(", ")}, none ${a.tasks.computed.none}` : "";
       return `<section><h2><span class="score">${a.score.toFixed(1)}</span> ${a.id}. ${E(a.he)} <span class="en" dir="ltr">${E(a.en)}</span></h2>
 <div class="bar"><i style="inline-size:${a.score * 10}%"></i></div>
 <p class="meta">${a.met}/${a.metrics.length} מדדים עומדים ברף · ${a.measured} נמדדו · ${a.tasks.count} משימות${lv}${a.leader ? ` · המוביל: ${E(a.leader)}` : ""}</p>
+${relHtml}
 <div class="scroll"><table><thead><tr><th>מדד</th><th>רף ל-10</th><th>ערך אחרון</th><th>מצב</th><th>קבלה</th></tr></thead><tbody>
 ${rows}
 </tbody></table></div></section>`;
@@ -197,13 +209,13 @@ main{max-inline-size:1100px;margin:0 auto}h1{font-size:1.5rem;margin:0 0 4px}h2{
 section{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin:0 0 14px}
 .score{display:inline-block;min-inline-size:2.6em;text-align:center;font-variant-numeric:tabular-nums}
 .bar{block-size:6px;background:var(--line);border-radius:3px;overflow:hidden;margin:4px 0 6px}.bar i{display:block;block-size:100%;background:var(--fill)}
-.meta{color:var(--muted);font-size:.85rem;margin:0 0 8px}.scroll{overflow-x:auto}
+.meta{color:var(--muted);font-size:.85rem;margin:0 0 8px}.meta.rel{margin:0 0 4px}.bar.rel i{background:var(--met)}.scroll{overflow-x:auto}
 table{border-collapse:collapse;inline-size:100%;font-size:.88rem}th,td{text-align:start;padding:6px 8px;border-block-start:1px solid var(--line);vertical-align:top}
 th{color:var(--muted);font-weight:500}.chip{font-size:.8rem;white-space:nowrap}
 tr.met .chip{color:var(--met)}tr.short .chip{color:var(--short)}tr.none .chip{color:var(--none)}code{font-size:.85em}
 </style></head><body><main>
 <h1>לוח ״עובד אצל משתמש״ — ממוצע ${board.average.toFixed(1)}</h1>
-<p class="lead">כל ציון מחושב מקבלות חתומות בלבד מול הרף ל-10 (W6.44). ${board.met}/${board.metrics} מדדים עומדים ברף, ${board.measured} נמדדו. מדד בלי קבלה מוצג ״לא נמדד״ ולא מקבל נקודות. נוצר ${E(board.generatedAt?.slice(0, 16) ?? "")} · ${board.sources?.counted ?? 0} קבלות נספרו, ${board.sources?.rejected?.length ?? 0} נדחו.</p>
+<p class="lead">כל ציון מחושב מקבלות חתומות בלבד מול הרף ל-10 (W6.44). ${board.met}/${board.metrics} מדדים עומדים ברף, ${board.measured} נמדדו. מדד בלי קבלה מוצג ״לא נמדד״ ולא מקבל נקודות.${board.reliability === null || board.reliability === undefined ? "" : ` אמינות ממוצעת ${board.reliability.toFixed(1)}: עד כמה הסטטוסים של משימות התחום נבדקו (רמת \`verified\`, W4.24 — אמיתי 1, דפדפן 0.75, Node 0.5, נבנה 0.25, מחכה לטל או בלי רמה 0).`} נוצר ${E(board.generatedAt?.slice(0, 16) ?? "")} · ${board.sources?.counted ?? 0} קבלות נספרו, ${board.sources?.rejected?.length ?? 0} נדחו.</p>
 ${areaHtml}
 </main></body></html>
 `;
@@ -278,14 +290,14 @@ function main() {
     generatedAt: new Date().toISOString(),
     method: "score = 10 × mean metric credit; credit from signed, dated receipts only (scripts/plan/areas.mjs)",
     sources: { counted: loaded.receipts.length, rejected: loaded.rejected, trustedKeys: loaded.trustedKeys, pinned: Boolean(pins), levels: levels ? relative(root, levelsPath) : null },
-    ...computeBoard({ areas, receipts: loaded.receipts, levels }),
+    ...computeBoard({ areas, receipts: loaded.receipts, levels, plan }),
   };
   const out = resolve(opt("out") ?? join(root, BOARD_JSON));
   const html = resolve(opt("html") ?? join(root, BOARD_HTML));
   writeFileSync(out, JSON.stringify(board, null, 2) + "\n");
   writeFileSync(html, renderHtml(board));
   console.log(`areas: average ${board.average.toFixed(1)} · ${board.met}/${board.metrics} metrics met, ${board.measured} measured · ${loaded.receipts.length} receipts counted, ${loaded.rejected.length} rejected → ${relative(process.cwd(), out)}, ${relative(process.cwd(), html)}`);
-  for (const a of board.areas) console.log(`  ${String(a.id).padStart(2)} ${a.score.toFixed(1).padStart(4)}  ${a.met}/${a.metrics.length} met  ${a.en}`);
+  for (const a of board.areas) console.log(`  ${String(a.id).padStart(2)} ${a.score.toFixed(1).padStart(4)}  ${a.met}/${a.metrics.length} met  reliability ${a.reliability.score.toFixed(1)}  ${a.en}`);
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main();
