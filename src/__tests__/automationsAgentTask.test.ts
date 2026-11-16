@@ -132,6 +132,37 @@ describe("run an agent", () => {
       expect(vault.get("Inbox/פגישה.md")).toBe("# פגישה\n\nסיכום קצר.\n");
     });
 
+    it("Esc (Cancel AI) aborts a rule's agent: the model sees the signal and nothing is staged (1.4)", async () => {
+      const { cancelAllAi, aiBusy } = await import("../ai/aiAbort");
+      let seen: AbortSignal | undefined;
+      const executor: Executor = {
+        id: "ollama",
+        label: "scripted",
+        available: async () => ({ available: true }),
+        supportsTools: () => false,
+        supportsSchema: () => false,
+        modelFor: (tier) => `scripted-${tier}`,
+        chat: (req) =>
+          new Promise<ExecutorResponse>((_, reject) => {
+            seen = req.signal;
+            req.signal?.addEventListener("abort", () => reject(new DOMException("aborted", "AbortError")));
+          }),
+      };
+      registerExecutor(executor);
+      registerAgent({ id: "e15-slow", description: "test", system: "sys", user: (i) => i.text ?? "" });
+      const before = listStagedChanges().length;
+      const pending = runAgentForRule({ kind: "agent", agent: "e15-slow", path: "Inbox/פגישה.md", prompt: "", rule: "r1" });
+      await vi.waitFor(() => expect(seen).toBeDefined());
+      expect(aiBusy()).toBe(true);
+      expect(cancelAllAi()).toBe(1);
+      const { staged } = await pending;
+      expect(seen!.aborted).toBe(true);
+      expect(staged).toEqual([]);
+      expect(listStagedChanges().length).toBe(before);
+      expect(aiBusy()).toBe(false);
+      expect(writes).toEqual([]);
+    });
+
     it("an unknown agent is an error, not a silent skip", async () => {
       await expect(runAgentForRule({ kind: "agent", agent: "no-such-agent", path: null, prompt: "", rule: "r" })).rejects.toThrow(/no-such-agent/);
     });

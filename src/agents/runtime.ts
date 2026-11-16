@@ -576,7 +576,7 @@ export async function runLocalRequest(executor: Executor, req: Omit<ExecutorRequ
     tokens: { input: 0, output: 0, estimated: true },
   };
   try {
-    const res = await executor.chat({ ...req, tools: undefined });
+    const res = await executor.chat({ ...req, tools: undefined, signal: req.signal });
     run.model = res.model || run.model;
     if (res.usage) run.tokens = { input: res.usage.inputTokens, output: res.usage.outputTokens, estimated: res.usage.estimated };
     run.steps.push({ kind: "model", at: startedAt, ms: Date.now() - startedAt, label: run.model ?? executor.id, ok: true });

@@ -40,11 +40,18 @@ const fs: Fs = {
  * review panel (`agents/staging.ts`) and is written only when approved.
  */
 export async function runAgentForRule(c: Extract<Change, { kind: "agent" }>): Promise<{ staged: string[] }> {
-  const [{ getAgent }, { runAgent }, { stageChange }] = await Promise.all([import("../agents/registry"), import("../agents/runtime"), import("../agents/staging")]);
+  const [{ getAgent }, { runAgent }, { stageChange }, { aiOperation }] = await Promise.all([import("../agents/registry"), import("../agents/runtime"), import("../agents/staging"), import("../ai/aiAbort")]);
   const def = getAgent(c.agent);
   if (!def) throw new Error(t("automations.agent.unknown", { agent: c.agent }));
   const text = c.path ? await readOrNull(c.path) : null;
-  const run = await runAgent(def, { text: text ?? "", path: c.path, extra: c.prompt ? { instruction: c.prompt } : {} }, { path: c.path, document: text ?? undefined, grants: ["write"] });
+  // An AI operation like any other (1.4): Esc / "Cancel AI" stops a rule's agent too.
+  const op = aiOperation();
+  let run: Awaited<ReturnType<typeof runAgent>>;
+  try {
+    run = await runAgent(def, { text: text ?? "", path: c.path, extra: c.prompt ? { instruction: c.prompt } : {} }, { path: c.path, document: text ?? undefined, grants: ["write"], signal: op.signal });
+  } finally {
+    op.end();
+  }
   const staged = [...(run.staged ?? [])];
   if (run.status === "ok" && !staged.length && c.path && text !== null && typeof run.output === "string" && run.output.trim()) {
     const summary = t("automations.agent.summary", { agent: def.id, rule: c.rule });
