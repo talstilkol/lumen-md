@@ -22,5 +22,17 @@ export function buildLatexCommands({ liveDoc }: CommandContext): Command[] {
         await (await import("./latexActions")).exportLatexFor(doc);
       },
     },
+    {
+      // W10.E14 (plan W5.22 step 3): compiled by the user's Tectonic on the desktop.
+      id: "export.latexPdf",
+      label: t("cmd.export.latexPdf"),
+      hint: t("cmd.export.latexPdf.hint"),
+      icon: cmdIcons.Printer,
+      group: t("group.file"),
+      action: async () => {
+        const doc = liveDoc();
+        await (await import("./latexActions")).exportLatexPdfFor(doc);
+      },
+    },
   ];
 }

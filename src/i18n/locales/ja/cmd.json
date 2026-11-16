@@ -169,6 +169,8 @@
   "cmd.entities.wikidata": "エンティティ: Wikidata にリンク…",
   "cmd.entities.wikidata.notEntity": "先にエンティティのノート（ישויות/ の下）を開いてください。",
   "cmd.epub.open": "EPUB を開いて読む…",
+  "cmd.export.latexPdf": "LaTeX から PDF（デスクトップ、Tectonic）…",
+  "cmd.export.latexPdf.hint": "LaTeX エクスポートをこのコンピューターの Tectonic で PDF にコンパイル。失敗時は TeX のエラーと行番号を表示",
   "cmd.export.latexProject": "LaTeX プロジェクトを書き出す（学術、ヘブライ語）…",
   "cmd.export.latexProject.hint": "右から左のヘブライ語、数式、保管庫の .bib からの [@key] 引用、画像を含む LuaLaTeX / XeLaTeX 用 main.tex を ZIP で",
   "cmd.feedback": "ヘルプ: フィードバックを送る",

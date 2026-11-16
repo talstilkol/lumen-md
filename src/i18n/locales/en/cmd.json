@@ -101,6 +101,8 @@
   "cmd.entities.wikidata": "Entity: link to Wikidata…",
   "cmd.entities.wikidata.notEntity": "Open an entity note first (a note under ישויות/).",
   "cmd.epub.open": "Open an EPUB for reading…",
+  "cmd.export.latexPdf": "PDF from LaTeX (desktop, Tectonic)…",
+  "cmd.export.latexPdf.hint": "The LaTeX export compiled to PDF by Tectonic on this computer; TeX's errors with their lines when it fails",
   "cmd.export.latexProject": "Export LaTeX project (academic, Hebrew)…",
   "cmd.feedback": "Help: Send feedback",
   "cmd.file.exportAcademic": "Export for academic submission (Word)…",

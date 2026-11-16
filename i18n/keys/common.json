@@ -10256,6 +10256,30 @@
       ]
     },
     {
+      "key": "latex.pdf.errors",
+      "en": "LaTeX did not compile ({count} errors):",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "latex.pdf.noTectonic",
+      "en": "Tectonic is not installed. Install it (brew install tectonic, or tectonic-typesetting.github.io), or set LUMEN_TECTONIC to its path, then try again.",
+      "vars": []
+    },
+    {
+      "key": "latex.pdf.saved",
+      "en": "{file}: compiled with Tectonic.",
+      "vars": [
+        "file"
+      ]
+    },
+    {
+      "key": "latex.pdf.web",
+      "en": "PDF from LaTeX needs the desktop app with Tectonic installed (tectonic-typesetting.github.io). In the browser, export the LaTeX project and compile it yourself.",
+      "vars": []
+    },
+    {
       "key": "learning.behind",
       "en": "{count} days not marked",
       "vars": [
