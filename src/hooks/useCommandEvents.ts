@@ -7,7 +7,7 @@ import { useEffect, useRef } from "react";
 import type { Command } from "../ui/CommandPalette";
 import { announceCommand } from "../research/usability/commandEvents";
 import { countCommand } from "../metrics/count";
-import { commandSections, loadCommandSections } from "../commands/sectionsLoader";
+import { builtWithSections, loadCommandSections } from "../commands/sectionsLoader";
 
 function findCommand(list: Command[], id: string): Command | undefined {
   for (const c of list) {
@@ -34,15 +34,18 @@ export function useCommandEvents(commands: Command[]): void {
   const commandsRef = useRef(commands);
   commandsRef.current = commands;
   // Plan 0.2: a command asked for before the domains' chunk arrived runs
-  // once the rebuilt list has it.
+  // once the rebuilt list has it. Review 10 M1: "arrived" is decided from the
+  // list this hook was given, not from the loader (the chunk can be there
+  // before the list is rebuilt), and a failed load drops what was waiting.
   const waitingRef = useRef<string[]>([]);
   useEffect(() => {
     if (!waitingRef.current.length) return;
+    const complete = builtWithSections(commands);
     const still: string[] = [];
     for (const id of waitingRef.current) {
       const cmd = findCommand(commands, id);
       if (cmd) run(cmd);
-      else if (!commandSections()) still.push(id);
+      else if (!complete) still.push(id);
     }
     waitingRef.current = still;
   }, [commands]);
@@ -52,9 +55,13 @@ export function useCommandEvents(commands: Command[]): void {
       if (!id) return;
       const cmd = findCommand(commandsRef.current, id);
       if (cmd) run(cmd);
-      else if (!commandSections()) {
+      else if (!builtWithSections(commandsRef.current)) {
         waitingRef.current.push(id);
-        void loadCommandSections().catch((err: unknown) => console.warn("[lumen] command palette chunk failed to load", err));
+        void loadCommandSections().catch((err: unknown) => {
+          // Not run later by surprise when another caller's retry succeeds.
+          waitingRef.current = waitingRef.current.filter((w) => w !== id);
+          console.warn("[lumen] command palette chunk failed to load", err);
+        });
       }
     };
     // The usage dialog (plan W4.26) needs every command id to name the unused ones; the beta panel's report (W6.31) names only these.
