@@ -8995,11 +8995,36 @@
      "pr": 399,
      "notes": "✅* אושר בביקורת קריפטו עצמאית (plan/review7-2026-11-12.md): #399 ‏2c968239ca, #291 ‏5081ea1f6a, #472 ‏615765b71c — קבלות approve לבטא כבוי כברירת מחדל; אין קריטי או גבוה; ההתאמות של מבחני rr5 לגיטימיות; תנאים: (1) לבנות מחדש את release-beta1 (#492 עדיין עם הבאג הקריטי הראשון), (2) בלי ממשק החלפת מפתחות/ביטול/רישום/החלפת סיסמה עד G1 ו-G3, (3) הפעלה כברירת מחדל דורשת ספקים אמיתיים ו-Sandbox מלא; סבב 5: G1/G2/G3/G5 תוקנו — #399 ‏ccceffea0e, ‏#291 ‏a48aef25fc, ‏#472 ‏79195fe155 (r7-1 2/2, r7-2 1/1, r7-5 3/3, r7-4(b) עובר; G4 — מידע, מובנה); ביקורת 6: approve בתנאים; סבב 6 של תיקונים: #399 ‏dd6d757786, ‏#291 ‏75ee8e5d95, ‏#472 ‏e92c7a1f25 — H1 תוקן (rr9-1 a/b עוברים), H3 נעילה בין לשוניות (rr9-3 3/3), H2 זיהוי + הודעה (מובנה), T5 נעילה מנקה את כל הכספות; e2eeNinthReview 7/7; ביקורת 16 (plan/review16-crypto-2026-11-14.md): approve לשלושתם; K6-1/2/3 ו-T5-1 תוקנו: #399 ‏fa0fafd23d, ‏#291 ‏a9022ed90a, ‏#472 ‏5de689995a (rr16-2/3 3/3); אושר בביקורת 34 (הפיצול בלי שינוי התנהגות, אומת לכל מתודה); K34-1/2 תוקנו: #399 ‏44d1f9f6d7, ‏#291 ‏9262efa536, ‏#472 ‏7d29b4a9b5 (המתנה חסומה ל-8 שניות, DeviceBusyError; rr34-1 4/4); e2eeKeyring 10k — הרצה על מכונה שקטה",
      "dod": [
-      "node --experimental-transform-types $S/rr7/*.test.ts (r7-1..r7-5)",
-      "npx vitest run src/sync/__tests__/e2eeFifthReview.test.ts src/sync/__tests__/e2eeThirdReview.test.ts src/sync/__tests__/e2eeRekeyIntegrity.test.ts",
-      "python3 scripts/crypto/vectors.py --check"
+      "npx vitest run security/attacks",
+      "npx vitest run src/__tests__/e2eeFifthReview.test.ts src/__tests__/e2eeThirdReview.test.ts src/__tests__/e2eeRekeyIntegrity.test.ts",
+      "python3 scripts/sync-protocol/check_vectors.py"
      ],
-     "dodMock": true
+     "dodMock": true,
+     "evidence": {
+      "verdict": "PARTIAL",
+      "checks": [
+       {
+        "cmd": "npx vitest run security/attacks",
+        "pass": 42,
+        "total": 42,
+        "ranOn": "verify/train-7 3100c18c43 (shim v4)"
+       },
+       {
+        "cmd": "npx vitest run src/__tests__/e2eeFifthReview.test.ts src/__tests__/e2eeThirdReview.test.ts src/__tests__/e2eeRekeyIntegrity.test.ts",
+        "pass": 41,
+        "total": 41,
+        "ranOn": "verify/train-7 3100c18c43 (shim v4)"
+       },
+       {
+        "cmd": "python3 scripts/sync-protocol/check_vectors.py",
+        "pass": 51,
+        "total": 51,
+        "ranOn": "verify/train-7 3100c18c43"
+       }
+      ],
+      "audit": "W10.Z3 re-review 16.11 (plan/release-review-3100c18c43.md): the old dod ran $S/rr7 outside the repo, named src/sync/__tests__/ for three tests that are in src/__tests__/, and a vectors script that does not exist; dodMock stays until the owner's review",
+      "at": "2026-11-16"
+     }
     },
     {
      "id": "W6.5",
@@ -17173,9 +17198,9 @@
       "W6.44"
      ],
      "files": "scripts/verified.mjs, plan/areas.json",
-     "status": "⏳ ממתין ל-#511 ברכבת",
+     "status": "⏳ קוד ב-PR #955 — נבדק לא מקוון (planReceipts 14/14, ‏planBuild 32/32); ממתין לרכבת; --strict-receipts והציון לתחום — החלטת הרכז",
      "verified": "built",
-     "pr": 511
+     "pr": 955
     },
     {
      "id": "W10.G10",
@@ -17415,8 +17440,36 @@
       "1.8"
      ],
      "files": "reports/release-review-<sha>.md",
-     "status": "⏳ שלב רכבת — אחרי סבב P1",
-     "verified": "built"
+     "status": "⏳ #956: סבב T8-Z3 על רכבת 7 (3100c18c43), 374 פריטים — 181 met, ‏23 partial, ‏1 missing, ‏114 Mac, ‏55 בעלים; האדומים מסיבת קוד ב-#951–#954, לא מוזגו",
+     "verified": "node",
+     "pr": 956,
+     "notes": "plan/release-review-3100c18c43.md: כל משימת P0 (163), כל פקודת dod וכל קריטריון קבלה, מול הקוד על 3100c18c43, ב-shim v4. 140 קובצי בדיקה רצו; 21 לא ירוקים: 5 אדומים מסיבת קוד תוקנו — settingsSchema ‏(#951), ‏skipAudit ו-e2eHooks ו-retries של קונפיג ה-GIF ‏(#952), ‏aiCallsCarrySignal ‏(#953, רגיש: קבלה ותווית אצל הבעלים), סט 50 המסמכים של renderSnapshot ‏(#954); ה-dod של W6.4 הצביע על scratchpad ועל סקריפט שלא קיים — תוקן כאן. פתוחים: 5.5 (3 קריאות executor.chat ישירות), ‏W10.A4 (גבול זמן קשיח בבדיקת יחידה), ‏VITE_CONTENT_FRAME_URL חסר ב-allow-list (החלטת בעלים), ‏helpCoverage (W3.7, לא P0). 11 קבצים אדומים רק ב-shim (חבילות מוחלפות, snapshots, spawn) ו-3 בדיקות זמן על מכונה עמוסה — להרצה ב-Mac.",
+     "evidence": {
+      "verdict": "PARTIAL",
+      "checks": [
+       {
+        "cmd": "v4.sh on the 140 test files the P0 dod and acceptance items name",
+        "pass": 119,
+        "total": 140,
+        "ranOn": "verify/train-7 3100c18c43 (shim v4)"
+       },
+       {
+        "cmd": "npm run plan:check",
+        "pass": 1,
+        "total": 1,
+        "ranOn": "verify/train-7 3100c18c43"
+       },
+       {
+        "cmd": "node scripts/plan/migrate-verified.mjs --check",
+        "pass": 1,
+        "total": 1,
+        "ranOn": "verify/train-7 3100c18c43"
+       }
+      ],
+      "audit": "plan/release-review-3100c18c43.md",
+      "at": "2026-11-16",
+      "pr": 956
+     }
     },
     {
      "id": "W10.Z4",
