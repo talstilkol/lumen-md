@@ -217,7 +217,7 @@
       "SECURITY.md: the 'not turned on yet' sentences (en + he)",
       "src/__tests__/securityChannels.test.ts: the 'not on yet' case"
     ],
-    "draftPr": "OWNER-DECISION draft (see PR list)",
+    "draftPr": "#1101 (OWNER-DECISION: W10.D15, branch fix/g6-L7-owner-pvr; merge only after the PUT)",
     "cmd": "gh api -X PUT repos/talstilkol/lumen-md/private-vulnerability-reporting && gh api repos/talstilkol/lumen-md/private-vulnerability-reporting"
   },
   {
