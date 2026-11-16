@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-11-16T11:16:01.987Z",
+  "generatedAt": "2026-11-16T15:45:20.932Z",
   "method": "score = 10 × mean metric credit; credit from signed, dated receipts only (scripts/plan/areas.mjs)",
   "sources": {
     "counted": 0,
@@ -10,6 +10,7 @@
     "levels": null
   },
   "average": 0,
+  "reliability": 3,
   "metrics": 80,
   "measured": 0,
   "met": 0,
@@ -97,6 +98,23 @@
       "tasks": {
         "count": 46,
         "computed": null
+      },
+      "reliability": {
+        "score": 3.3,
+        "rated": 46,
+        "levels": {
+          "built": 37,
+          "node": 1,
+          "browser": 7,
+          "real": 0,
+          "owner": 1,
+          "none": 0
+        },
+        "gap": {
+          "doneBelowBrowser": [],
+          "doneNotReal": 0,
+          "noLevel": 0
+        }
       }
     },
     {
@@ -181,6 +199,23 @@
       "tasks": {
         "count": 99,
         "computed": null
+      },
+      "reliability": {
+        "score": 2.9,
+        "rated": 99,
+        "levels": {
+          "built": 85,
+          "node": 3,
+          "browser": 8,
+          "real": 0,
+          "owner": 3,
+          "none": 0
+        },
+        "gap": {
+          "doneBelowBrowser": [],
+          "doneNotReal": 0,
+          "noLevel": 0
+        }
       }
     },
     {
@@ -264,6 +299,23 @@
       "tasks": {
         "count": 43,
         "computed": null
+      },
+      "reliability": {
+        "score": 3.8,
+        "rated": 42,
+        "levels": {
+          "built": 30,
+          "node": 3,
+          "browser": 9,
+          "real": 0,
+          "owner": 0,
+          "none": 0
+        },
+        "gap": {
+          "doneBelowBrowser": [],
+          "doneNotReal": 3,
+          "noLevel": 0
+        }
       }
     },
     {
@@ -336,6 +388,23 @@
       "tasks": {
         "count": 47,
         "computed": null
+      },
+      "reliability": {
+        "score": 2.7,
+        "rated": 47,
+        "levels": {
+          "built": 42,
+          "node": 1,
+          "browser": 2,
+          "real": 0,
+          "owner": 2,
+          "none": 0
+        },
+        "gap": {
+          "doneBelowBrowser": [],
+          "doneNotReal": 0,
+          "noLevel": 0
+        }
       }
     },
     {
@@ -393,6 +462,23 @@
       "tasks": {
         "count": 65,
         "computed": null
+      },
+      "reliability": {
+        "score": 2.7,
+        "rated": 65,
+        "levels": {
+          "built": 62,
+          "node": 2,
+          "browser": 1,
+          "real": 0,
+          "owner": 0,
+          "none": 0
+        },
+        "gap": {
+          "doneBelowBrowser": [],
+          "doneNotReal": 0,
+          "noLevel": 0
+        }
       }
     },
     {
@@ -450,6 +536,23 @@
       "tasks": {
         "count": 43,
         "computed": null
+      },
+      "reliability": {
+        "score": 2.8,
+        "rated": 43,
+        "levels": {
+          "built": 38,
+          "node": 2,
+          "browser": 2,
+          "real": 0,
+          "owner": 1,
+          "none": 0
+        },
+        "gap": {
+          "doneBelowBrowser": [],
+          "doneNotReal": 1,
+          "noLevel": 0
+        }
       }
     },
     {
@@ -521,6 +624,23 @@
       "tasks": {
         "count": 38,
         "computed": null
+      },
+      "reliability": {
+        "score": 3,
+        "rated": 38,
+        "levels": {
+          "built": 34,
+          "node": 1,
+          "browser": 3,
+          "real": 0,
+          "owner": 0,
+          "none": 0
+        },
+        "gap": {
+          "doneBelowBrowser": [],
+          "doneNotReal": 0,
+          "noLevel": 0
+        }
       }
     },
     {
@@ -591,6 +711,23 @@
       "tasks": {
         "count": 40,
         "computed": null
+      },
+      "reliability": {
+        "score": 2.9,
+        "rated": 39,
+        "levels": {
+          "built": 35,
+          "node": 1,
+          "browser": 3,
+          "real": 0,
+          "owner": 0,
+          "none": 0
+        },
+        "gap": {
+          "doneBelowBrowser": [],
+          "doneNotReal": 0,
+          "noLevel": 0
+        }
       }
     },
     {
@@ -648,6 +785,23 @@
       "tasks": {
         "count": 13,
         "computed": null
+      },
+      "reliability": {
+        "score": 3.8,
+        "rated": 13,
+        "levels": {
+          "built": 9,
+          "node": 1,
+          "browser": 3,
+          "real": 0,
+          "owner": 0,
+          "none": 0
+        },
+        "gap": {
+          "doneBelowBrowser": [],
+          "doneNotReal": 0,
+          "noLevel": 0
+        }
       }
     },
     {
@@ -706,6 +860,23 @@
       "tasks": {
         "count": 134,
         "computed": null
+      },
+      "reliability": {
+        "score": 3.2,
+        "rated": 132,
+        "levels": {
+          "built": 98,
+          "node": 20,
+          "browser": 10,
+          "real": 0,
+          "owner": 4,
+          "none": 0
+        },
+        "gap": {
+          "doneBelowBrowser": [],
+          "doneNotReal": 1,
+          "noLevel": 0
+        }
       }
     },
     {
@@ -778,6 +949,23 @@
       "tasks": {
         "count": 57,
         "computed": null
+      },
+      "reliability": {
+        "score": 3.2,
+        "rated": 56,
+        "levels": {
+          "built": 41,
+          "node": 8,
+          "browser": 5,
+          "real": 0,
+          "owner": 2,
+          "none": 0
+        },
+        "gap": {
+          "doneBelowBrowser": [],
+          "doneNotReal": 1,
+          "noLevel": 0
+        }
       }
     },
     {
@@ -848,6 +1036,23 @@
       "tasks": {
         "count": 36,
         "computed": null
+      },
+      "reliability": {
+        "score": 2.7,
+        "rated": 36,
+        "levels": {
+          "built": 33,
+          "node": 3,
+          "browser": 0,
+          "real": 0,
+          "owner": 0,
+          "none": 0
+        },
+        "gap": {
+          "doneBelowBrowser": [],
+          "doneNotReal": 0,
+          "noLevel": 0
+        }
       }
     },
     {
@@ -892,6 +1097,23 @@
       "tasks": {
         "count": 23,
         "computed": null
+      },
+      "reliability": {
+        "score": 2.6,
+        "rated": 23,
+        "levels": {
+          "built": 21,
+          "node": 0,
+          "browser": 1,
+          "real": 0,
+          "owner": 1,
+          "none": 0
+        },
+        "gap": {
+          "doneBelowBrowser": [],
+          "doneNotReal": 0,
+          "noLevel": 0
+        }
       }
     },
     {
@@ -978,6 +1200,23 @@
       "tasks": {
         "count": 39,
         "computed": null
+      },
+      "reliability": {
+        "score": 2.8,
+        "rated": 39,
+        "levels": {
+          "built": 37,
+          "node": 0,
+          "browser": 2,
+          "real": 0,
+          "owner": 0,
+          "none": 0
+        },
+        "gap": {
+          "doneBelowBrowser": [],
+          "doneNotReal": 0,
+          "noLevel": 0
+        }
       }
     },
     {
@@ -1062,6 +1301,23 @@
       "tasks": {
         "count": 35,
         "computed": null
+      },
+      "reliability": {
+        "score": 2.6,
+        "rated": 35,
+        "levels": {
+          "built": 33,
+          "node": 0,
+          "browser": 1,
+          "real": 0,
+          "owner": 1,
+          "none": 0
+        },
+        "gap": {
+          "doneBelowBrowser": [],
+          "doneNotReal": 0,
+          "noLevel": 0
+        }
       }
     },
     {
@@ -1133,6 +1389,23 @@
       "tasks": {
         "count": 68,
         "computed": null
+      },
+      "reliability": {
+        "score": 2.6,
+        "rated": 67,
+        "levels": {
+          "built": 65,
+          "node": 2,
+          "browser": 0,
+          "real": 0,
+          "owner": 0,
+          "none": 0
+        },
+        "gap": {
+          "doneBelowBrowser": [],
+          "doneNotReal": 0,
+          "noLevel": 0
+        }
       }
     },
     {
@@ -1205,6 +1478,23 @@
       "tasks": {
         "count": 48,
         "computed": null
+      },
+      "reliability": {
+        "score": 3.1,
+        "rated": 48,
+        "levels": {
+          "built": 39,
+          "node": 3,
+          "browser": 5,
+          "real": 0,
+          "owner": 1,
+          "none": 0
+        },
+        "gap": {
+          "doneBelowBrowser": [],
+          "doneNotReal": 0,
+          "noLevel": 0
+        }
       }
     },
     {
@@ -1314,6 +1604,23 @@
       "tasks": {
         "count": 107,
         "computed": null
+      },
+      "reliability": {
+        "score": 3.1,
+        "rated": 106,
+        "levels": {
+          "built": 87,
+          "node": 7,
+          "browser": 10,
+          "real": 0,
+          "owner": 2,
+          "none": 0
+        },
+        "gap": {
+          "doneBelowBrowser": [],
+          "doneNotReal": 5,
+          "noLevel": 0
+        }
       }
     },
     {
@@ -1411,6 +1718,23 @@
       "tasks": {
         "count": 43,
         "computed": null
+      },
+      "reliability": {
+        "score": 2.6,
+        "rated": 43,
+        "levels": {
+          "built": 42,
+          "node": 0,
+          "browser": 1,
+          "real": 0,
+          "owner": 0,
+          "none": 0
+        },
+        "gap": {
+          "doneBelowBrowser": [],
+          "doneNotReal": 1,
+          "noLevel": 0
+        }
       }
     }
   ]

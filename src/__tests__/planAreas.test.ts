@@ -157,3 +157,67 @@ describe("the board from receipts", () => {
     expect(vault.tasks.computed.none).toBe(vault.tasks.count - 1);
   });
 });
+
+describe("reliability per area (W4.24): from each task's verified level", () => {
+  const mini = {
+    areas: [
+      { id: 1, key: "a", en: "A", he: "א" },
+      { id: 2, key: "b", en: "B", he: "ב" },
+    ],
+    tasks: { t1: [1], t2: [1], t3: [1], t4: [2], t5: [2], t6: [1] },
+  };
+  const miniPlan = {
+    phases: [
+      {
+        tasks: [
+          { id: "t1", status: "✅ #1", verified: "real" },
+          { id: "t2", status: "✅ #2", verified: "node" },
+          { id: "t3", status: "⏳ #3", verified: "built" },
+          { id: "t4", status: "⏳", verified: "owner" },
+          { id: "t5", status: "⏳" },
+          { id: "t6" },
+        ],
+      },
+    ],
+  };
+
+  it("scores 10 × the mean level weight of the tasks with a status, and names the gap", () => {
+    const board = computeBoard({ areas: mini, receipts: [], plan: miniPlan });
+    const [a, b] = board.areas;
+    // (1 + 0.5 + 0.25) / 3 = 0.583 → 5.8; t6 has no status and is not rated
+    expect(a.reliability.score).toBe(5.8);
+    expect(a.reliability.rated).toBe(3);
+    expect(a.reliability.levels).toMatchObject({ real: 1, node: 1, built: 1, browser: 0, owner: 0, none: 0 });
+    expect(a.reliability.gap.doneBelowBrowser).toEqual(["t2"]);
+    expect(a.reliability.gap.doneNotReal).toBe(1);
+    // waiting on the owner and no level both weigh 0
+    expect(b.reliability.score).toBe(0);
+    expect(b.reliability.gap.noLevel).toBe(1);
+    expect(board.reliability).toBe(2.9);
+  });
+
+  it("shows the score and the gap on the page, and no score without the plan", () => {
+    const html = renderHtml({ ...computeBoard({ areas: mini, receipts: [], plan: miniPlan }), generatedAt: "2026-11-16T00:00:00Z", sources: { counted: 0, rejected: [] } });
+    expect(html).toContain("אמינות 5.8");
+    expect(html).toContain("1 ✅ מתחת לדפדפן (t2)");
+    expect(html).toContain("אמינות ממוצעת 2.9");
+    const bare = computeBoard({ areas: mini, receipts: [] });
+    expect(bare.reliability).toBeNull();
+    expect(bare.areas[0].reliability).toBeNull();
+    expect(renderHtml({ ...bare, sources: { counted: 0, rejected: [] } })).not.toContain("אמינות");
+  });
+
+  it("rates every area of the real plan, with the same levels as plan:check", async () => {
+    // @ts-expect-error — plain .mjs script without type declarations
+    const { RELIABILITY_LEVELS } = await import("../../scripts/plan/reliability.mjs");
+    // @ts-expect-error — plain .mjs script without type declarations
+    const { VERIFIED_LEVELS } = await import("../../scripts/plan/build.mjs");
+    expect([...RELIABILITY_LEVELS]).toEqual([...VERIFIED_LEVELS]);
+    const board = computeBoard({ areas, receipts: [], plan });
+    for (const a of board.areas) {
+      expect(a.reliability.rated, `area ${a.id}`).toBeGreaterThan(0);
+      expect(a.reliability.score).toBeGreaterThanOrEqual(0);
+      expect(a.reliability.score).toBeLessThanOrEqual(10);
+    }
+  });
+});
