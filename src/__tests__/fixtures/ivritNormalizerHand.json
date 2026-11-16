@@ -1,0 +1,206 @@
+{
+ "$comment": "W11.H6: 50 inputs for the ivrit.ai leaderboard normaliser port (src/eval/public/normalize.ts). SYNTHETIC inputs (not leaderboard data), chosen to hit every step of HebrewTextNormalizer in ivrit-ai/asr-training evaluate_model.py @ e333b4a0fb, avi-perl/hebrew @ 55d4d6786b (no_niqqud) and openai/whisper @ 86098128c0 (BasicTextNormalizer). The expected strings were worked out by reading that code, one case at a time; the Python original was NOT run here (refused in this environment). The real parity check is npm run eval:public -- parity on 50 eval-d1/eval-whatsapp samples (Mac).",
+ "version": 1,
+ "rows": [
+  {
+   "input": "שלום עולם",
+   "expected": "שלום עולם"
+  },
+  {
+   "input": "שלום, עולם.",
+   "expected": "שלום עולם "
+  },
+  {
+   "input": "  שלום   עולם  ",
+   "expected": " שלום עולם "
+  },
+  {
+   "input": "צה״ל הודיע",
+   "expected": "צהל הודיע"
+  },
+  {
+   "input": "צה\"ל הודיע",
+   "expected": "צהל הודיע"
+  },
+  {
+   "input": "ש״ח",
+   "expected": "שח"
+  },
+  {
+   "input": "מנכ“ל החברה",
+   "expected": "מנכל החברה"
+  },
+  {
+   "input": "«ציטוט»",
+   "expected": "ציטוט"
+  },
+  {
+   "input": "＂מרכאות רחבות＂",
+   "expected": "מרכאות רחבות"
+  },
+  {
+   "input": "רמת־גן",
+   "expected": "רמת גן"
+  },
+  {
+   "input": "בית־ספר",
+   "expected": "בית ספר"
+  },
+  {
+   "input": "ג׳ירפה",
+   "expected": "ג ירפה"
+  },
+  {
+   "input": "צ'יפס",
+   "expected": "ציפס"
+  },
+  {
+   "input": "it's ok",
+   "expected": "its ok"
+  },
+  {
+   "input": "שָׁלוֹם",
+   "expected": "שלום"
+  },
+  {
+   "input": "בְּרֵאשִׁית",
+   "expected": "בראשית"
+  },
+  {
+   "input": "בְּרֵאשִׁ֖ית",
+   "expected": "בראש ית"
+  },
+  {
+   "input": "וּבַיּוֹם",
+   "expected": "וביום"
+  },
+  {
+   "input": "הַֽמֶּלֶךְ",
+   "expected": "ה מלך"
+  },
+  {
+   "input": "בֿ",
+   "expected": "ב "
+  },
+  {
+   "input": "שׁ",
+   "expected": "ש "
+  },
+  {
+   "input": "קׇדְשִׁי",
+   "expected": "קדשי"
+  },
+  {
+   "input": "שלום‏ עולם",
+   "expected": "שלום עולם"
+  },
+  {
+   "input": "‫שלום‬",
+   "expected": "שלום"
+  },
+  {
+   "input": "a‍b",
+   "expected": "ab"
+  },
+  {
+   "input": "​שלום",
+   "expected": "שלום"
+  },
+  {
+   "input": "﻿שלום",
+   "expected": "שלום"
+  },
+  {
+   "input": "؜שלום",
+   "expected": "שלום"
+  },
+  {
+   "input": "⁧שלום⁩",
+   "expected": "שלום"
+  },
+  {
+   "input": "[מוזיקה] שלום",
+   "expected": " שלום"
+  },
+  {
+   "input": "<noise> שלום",
+   "expected": " שלום"
+  },
+  {
+   "input": "(צוחק) שלום",
+   "expected": " שלום"
+  },
+  {
+   "input": "שלום (בערך) עולם",
+   "expected": "שלום עולם"
+  },
+  {
+   "input": "שלום [לא ברור] עולם (צחוק)",
+   "expected": "שלום עולם "
+  },
+  {
+   "input": "Hello World",
+   "expected": "hello world"
+  },
+  {
+   "input": "HELLO, World!",
+   "expected": "hello world "
+  },
+  {
+   "input": "100%",
+   "expected": "100 "
+  },
+  {
+   "input": "3.5 מיליון",
+   "expected": "3 5 מיליון"
+  },
+  {
+   "input": "₪100",
+   "expected": " 100"
+  },
+  {
+   "input": "שלום—עולם",
+   "expected": "שלום עולם"
+  },
+  {
+   "input": "שלום–עולם",
+   "expected": "שלום עולם"
+  },
+  {
+   "input": "שלום…",
+   "expected": "שלום "
+  },
+  {
+   "input": "שלום?!",
+   "expected": "שלום "
+  },
+  {
+   "input": "א\tב\nג",
+   "expected": "א ב ג"
+  },
+  {
+   "input": "א\u001cב",
+   "expected": "א ב"
+  },
+  {
+   "input": "אב",
+   "expected": "א ב"
+  },
+  {
+   "input": "א ב",
+   "expected": "א ב"
+  },
+  {
+   "input": "ﬠין",
+   "expected": "עין"
+  },
+  {
+   "input": "שלום 🙂 עולם",
+   "expected": "שלום עולם"
+  },
+  {
+   "input": "e-mail",
+   "expected": "e mail"
+  }
+ ]
+}
