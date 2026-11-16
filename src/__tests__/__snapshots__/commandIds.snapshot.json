@@ -2217,6 +2217,20 @@
       "group": "Tools",
       "hint": "The image on the clipboard (or a file) as text, read on this device, previewed before it is inserted",
       "icon": "Sparkles"
+    },
+    {
+      "id": "mcp.settings",
+      "label": "MCP servers…",
+      "group": "Tools",
+      "hint": "Add outside MCP servers and choose what their tools may do",
+      "icon": "Network"
+    },
+    {
+      "id": "mcp.ask",
+      "label": "Ask with my MCP servers…",
+      "group": "Tools",
+      "hint": "The local agent uses your MCP servers' tools, asking before each one that needs it",
+      "icon": "Network"
     }
   ],
   "full": [
@@ -4586,6 +4600,20 @@
       "group": "Tools",
       "hint": "The image on the clipboard (or a file) as text, read on this device, previewed before it is inserted",
       "icon": "Sparkles"
+    },
+    {
+      "id": "mcp.settings",
+      "label": "MCP servers…",
+      "group": "Tools",
+      "hint": "Add outside MCP servers and choose what their tools may do",
+      "icon": "Network"
+    },
+    {
+      "id": "mcp.ask",
+      "label": "Ask with my MCP servers…",
+      "group": "Tools",
+      "hint": "The local agent uses your MCP servers' tools, asking before each one that needs it",
+      "icon": "Network"
     }
   ],
   "autoSaveOn": [
@@ -4918,6 +4946,8 @@
     "reading.newFromCapture",
     "types.page",
     "types.studio",
-    "ai.screenshotToNote"
+    "ai.screenshotToNote",
+    "mcp.settings",
+    "mcp.ask"
   ]
 }

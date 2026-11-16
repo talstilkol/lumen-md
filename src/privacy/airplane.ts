@@ -138,6 +138,10 @@ export function egressTally(): Readonly<EgressTally> {
   return { ...tally };
 }
 
+const switchListeners = new Set<() => void>();
+/** Called once the switch is on: for what no fetch wrapper stops, like a running MCP server program (agents/mcp/registry.ts). */
+export const onAirplaneOn = (fn: () => void): (() => boolean) => (switchListeners.add(fn), () => switchListeners.delete(fn));
+
 export function subscribeEgress(fn: () => void): () => void {
   listeners.add(fn);
   return () => listeners.delete(fn);
@@ -233,6 +237,13 @@ export function enableAirplaneMode(): void {
     /* why: storage denied: on for this page only */
   }
   if (typeof document !== "undefined") addAirplaneCsp(document);
+  for (const fn of [...switchListeners]) {
+    try {
+      fn();
+    } catch {
+      /* why: one listener failing must not keep the switch from stopping the rest */
+    }
+  }
   // What was already on the network: counted at this moment, then stopped.
   for (const f of [...inFlight]) {
     record({ kind: f.kind, target: egressTarget(f.url), method: f.method, decision: "in-flight", origin: f.origin, ts: at });

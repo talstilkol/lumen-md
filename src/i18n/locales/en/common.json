@@ -259,6 +259,7 @@
   "settings.calendar": "Calendar",
   "settings.general": "General",
   "settings.language": "Language",
+  "settings.mcp": "MCP servers",
   "settings.privacy": "Privacy",
   "settings.search": "Search settings",
   "settings.telemetryOptOut": "Send no error reports",

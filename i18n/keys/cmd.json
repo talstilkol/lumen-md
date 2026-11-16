@@ -1615,6 +1615,26 @@
       "vars": []
     },
     {
+      "key": "cmd.mcp.ask",
+      "en": "Ask with my MCP servers…",
+      "vars": []
+    },
+    {
+      "key": "cmd.mcp.ask.hint",
+      "en": "The local agent uses your MCP servers' tools, asking before each one that needs it",
+      "vars": []
+    },
+    {
+      "key": "cmd.mcp.settings",
+      "en": "MCP servers…",
+      "vars": []
+    },
+    {
+      "key": "cmd.mcp.settings.hint",
+      "en": "Add outside MCP servers and choose what their tools may do",
+      "vars": []
+    },
+    {
       "key": "cmd.mobile.customizeToolbar",
       "en": "Customize the mobile toolbar",
       "vars": []

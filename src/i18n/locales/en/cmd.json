@@ -189,6 +189,8 @@
   "cmd.lexicon.lookup": "Look up the Hebrew word at the cursor",
   "cmd.lexicon.pack": "Hebrew dictionary and synonyms (download / remove)",
   "cmd.mail.import": "Import mail (.eml, .mbox) or Google Takeout…",
+  "cmd.mcp.ask": "Ask with my MCP servers…",
+  "cmd.mcp.settings": "MCP servers…",
   "cmd.mobile.customizeToolbar": "Customize the mobile toolbar",
   "cmd.mobile.readLongNotes": "Phone: open long notes for reading",
   "cmd.mobile.readLongNotes.off": "Currently OFF",

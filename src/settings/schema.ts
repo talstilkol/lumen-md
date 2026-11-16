@@ -23,13 +23,14 @@
  * Pure data: no imports, so the test and the export code load it alone.
  */
 
-export type SettingsTab = "general" | "appearance" | "ai" | "calendar" | "sync" | "fineTune" | "privacy" | "security" | "org";
+export type SettingsTab = "general" | "appearance" | "ai" | "calendar" | "mcp" | "sync" | "fineTune" | "privacy" | "security" | "org";
 
 export const SETTINGS_TABS: ReadonlyArray<{ id: SettingsTab; label: string }> = [
   { id: "general", label: "settings.general" },
   { id: "appearance", label: "themeSettings.title" },
   { id: "ai", label: "ai.settings.title" },
   { id: "calendar", label: "settings.calendar" },
+  { id: "mcp", label: "settings.mcp" },
   { id: "sync", label: "collab.settings.title" },
   { id: "fineTune", label: "fineTune.title" },
   // Decision 2.41 (#372, W10.E70): the allowed image hosts, with revoke, inside the settings screen too.
@@ -269,6 +270,8 @@ export const SETTINGS: readonly SettingEntry[] = [
   secret("lumen.collab.owner.*", "sync"),
   // Trust, consent and privacy switches: like the trust anchors above, never taken from an imported file.
   data("lumen.mcp.servers"),
+  // Which MCP tool definitions the user allowed to run, per vault (agents/mcp/approvals.ts).
+  data("lumen.mcp.approvals"),
   data("lumen.agents.trustedRepos"),
   data("lumen.skills.allowed"),
   data("lumen.openSources"),

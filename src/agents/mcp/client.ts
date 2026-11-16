@@ -1,19 +1,31 @@
 /**
- * Lumen as an MCP client (plan W7.18): the local agents use tools of
+ * Lumen as an MCP client (plan W7.18, W10.C1): the local agents use tools of
  * outside MCP servers. Dual-era, like our server (W7.17):
  *
  *   • 2026-07-28 first: every request carries the protocol version, the
- *     client's capabilities and identity in `_meta`; `server/discover`
- *     probes the server; results carry `resultType` (absent = "complete").
+ *     client's capabilities and identity in `_meta` (stateless: no session);
+ *     `server/discover` probes the server; results carry `resultType`
+ *     (absent = "complete").
  *   • A server that answers the probe with anything but a modern result or
  *     error is legacy (2025-11-25 and earlier): `initialize`, then
  *     `notifications/initialized`, then requests in its session
  *     (Streamable HTTP: the `Mcp-Session-Id` header).
  *
- * We declare no client capabilities (no elicitation, sampling or roots), so
- * a server cannot ask the user anything through us; an `input_required`
- * answer is reported to the agent as "needs the user", never fulfilled.
+ * Elicitation (MRTR, SEP-2322): with an `elicit` handler the client declares
+ * `elicitation: { form, url }` on every request. A tool call answered with
+ * `resultType: "input_required"` is shown to the user (the handler: the
+ * dialog that meets the spec's MUSTs, elicitation.ts) and retried with a new
+ * id, the user's `inputResponses` and the server's `requestState` echoed
+ * exactly. Without a handler no capability is declared and `input_required`
+ * is reported to the agent as "needs the user", never fulfilled. Sampling
+ * and roots are deprecated (SEP-2577) and never offered.
+ *
+ * Streamable HTTP mirrors `Mcp-Method` and `Mcp-Name` (base64 sentinel for
+ * values that are not plain header text) and each `x-mcp-header` parameter
+ * as `Mcp-Param-{Name}`; a tool whose `x-mcp-header` breaks the spec's rules
+ * is left out of the list on HTTP.
  */
+import type { ElicitationHandler, ElicitationResult } from "./elicitation";
 
 export const CLIENT_INFO = { name: "lumen", version: "1" } as const;
 export const MODERN = "2026-07-28";
@@ -29,22 +41,47 @@ export interface JsonRpcMessage {
 }
 
 /** One request in, its response out (null for a notification). */
+export interface SendMeta {
+  protocolVersion: string;
+  sessionId?: string;
+  /** Streamable HTTP: `Mcp-Param-{Name}` headers for the tool's `x-mcp-header` parameters (already encoded). */
+  paramHeaders?: Record<string, string>;
+}
+
 export interface McpTransport {
   /** "local": stdio or a loopback address; "remote": anything else (blocked in airplane mode). */
   readonly reach: "local" | "remote";
-  send(msg: JsonRpcMessage, meta: { protocolVersion: string; sessionId?: string }): Promise<{ message: JsonRpcMessage | null; sessionId?: string }>;
+  /** "http" mirrors body fields into headers (and so checks `x-mcp-header`); others may ignore them. */
+  readonly binding?: "http" | "stdio" | "memory";
+  send(msg: JsonRpcMessage, meta: SendMeta): Promise<{ message: JsonRpcMessage | null; sessionId?: string }>;
 }
 
 export interface McpTool {
   name: string;
   description?: string;
   inputSchema?: Record<string, unknown>;
-  annotations?: { readOnlyHint?: boolean; destructiveHint?: boolean; openWorldHint?: boolean };
+  title?: string;
+  outputSchema?: Record<string, unknown>;
+  annotations?: { readOnlyHint?: boolean; destructiveHint?: boolean; openWorldHint?: boolean; idempotentHint?: boolean; title?: string };
 }
 
 export type McpCallResult =
   | { kind: "complete"; text: string; isError: boolean; structured?: unknown }
-  | { kind: "input_required"; text: string };
+  | { kind: "input_required"; text: string; declined?: boolean };
+
+export interface ClientOptions {
+  /** Shows an elicitation to the user. With it, the client declares the elicitation capability. */
+  elicit?: ElicitationHandler;
+  /** The server's name as the user gave it (shown as who asks). */
+  serverLabel?: string;
+  /** Most rounds of input_required for one call (each one is a user prompt or a retry). */
+  maxRounds?: number;
+  /** Logs a tool left out of the list (an invalid `x-mcp-header`). */
+  warn?: (message: string) => void;
+}
+
+/** How many times one call may come back input_required before Lumen stops retrying. */
+export const MAX_INPUT_ROUNDS = 6;
 
 export class McpClientError extends Error {
   constructor(
@@ -68,15 +105,26 @@ export class McpClient {
   serverInfo: ServerInfo = {};
   instructions?: string;
 
-  constructor(readonly transport: McpTransport) {}
+  private schemas = new Map<string, Record<string, unknown> | undefined>();
 
-  private meta(): Record<string, unknown> {
-    return { "io.modelcontextprotocol/protocolVersion": this.version, "io.modelcontextprotocol/clientInfo": CLIENT_INFO, "io.modelcontextprotocol/clientCapabilities": {} };
+  constructor(
+    readonly transport: McpTransport,
+    readonly opts: ClientOptions = {},
+  ) {}
+
+  /** The client capabilities sent with every modern request. */
+  capabilities(): Record<string, unknown> {
+    // Both modes: form (in-band, reviewed by the user) and url (opened outside Lumen). Never sampling or roots (deprecated).
+    return this.opts.elicit ? { elicitation: { form: {}, url: {} } } : {};
   }
 
-  private async raw(method: string, params: Record<string, unknown> = {}, notify = false): Promise<JsonRpcMessage | null> {
+  private meta(): Record<string, unknown> {
+    return { "io.modelcontextprotocol/protocolVersion": this.version, "io.modelcontextprotocol/clientInfo": CLIENT_INFO, "io.modelcontextprotocol/clientCapabilities": this.capabilities() };
+  }
+
+  private async raw(method: string, params: Record<string, unknown> = {}, notify = false, extra: Pick<SendMeta, "paramHeaders"> = {}): Promise<JsonRpcMessage | null> {
     const msg: JsonRpcMessage = { jsonrpc: "2.0", method, params, ...(notify ? {} : { id: ++this.seq }) };
-    const r = await this.transport.send(msg, { protocolVersion: this.version, sessionId: this.sessionId });
+    const r = await this.transport.send(msg, { protocolVersion: this.version, sessionId: this.sessionId, ...extra });
     if (r.sessionId) this.sessionId = r.sessionId;
     return r.message;
   }
@@ -84,12 +132,9 @@ export class McpClient {
   /** Decide the server's era once (spec: Versioning, backward compatibility). */
   async connect(): Promise<void> {
     if (this.era) return;
-    let probe: JsonRpcMessage | null = null;
-    try {
-      probe = await this.raw("server/discover", { _meta: this.meta() });
-    } catch {
-      probe = null;
-    }
+    // A transport failure (the program was not approved or did not start, the network is off) is not an
+    // answer: it is thrown, never taken for a legacy server. Only an answer that is not modern falls back.
+    const probe: JsonRpcMessage | null = await this.raw("server/discover", { _meta: this.meta() });
     if (probe?.result && Array.isArray(probe.result.supportedVersions)) {
       const v = probe.result.supportedVersions as string[];
       if (!v.includes(MODERN)) throw new McpClientError(`the server speaks ${v.join(", ")}, not ${MODERN}`);
@@ -113,9 +158,9 @@ export class McpClient {
     this.era = "legacy";
   }
 
-  private async request(method: string, params: Record<string, unknown>): Promise<Record<string, unknown>> {
+  private async request(method: string, params: Record<string, unknown>, extra: Pick<SendMeta, "paramHeaders"> = {}): Promise<Record<string, unknown>> {
     await this.connect();
-    const res = await this.raw(method, this.era === "modern" ? { ...params, _meta: this.meta() } : params);
+    const res = await this.raw(method, this.era === "modern" ? { ...params, _meta: this.meta() } : params, false, extra);
     if (!res) throw new McpClientError(`${method}: no answer`);
     if (res.error) throw new McpClientError(`${method}: ${res.error.message}`, res.error.code);
     const result = res.result ?? {};
@@ -129,23 +174,155 @@ export class McpClient {
     let cursor: string | undefined;
     for (let page = 0; page < 20; page++) {
       const r = await this.request("tools/list", cursor ? { cursor } : {});
-      for (const t of (r.tools as McpTool[] | undefined) ?? []) if (t && typeof t.name === "string") out.push(t);
+      for (const t of (r.tools as McpTool[] | undefined) ?? []) {
+        if (!t || typeof t.name !== "string") continue;
+        // Streamable HTTP clients MUST leave out a tool whose x-mcp-header breaks the rules (spec: Schema Extension).
+        if (this.transport.binding === "http") {
+          const bad = headerAnnotationError(t.inputSchema);
+          if (bad) {
+            this.opts.warn?.(`MCP tool "${t.name.slice(0, 80)}" left out: ${bad}`);
+            continue;
+          }
+        }
+        this.schemas.set(t.name, t.inputSchema);
+        out.push(t);
+      }
       cursor = typeof r.nextCursor === "string" ? r.nextCursor : undefined;
       if (!cursor) break;
     }
     return out;
   }
 
+  /**
+   * Call a tool. An `input_required` answer is shown to the user through
+   * `opts.elicit` and retried (MRTR client rules 1–4): a new JSON-RPC id, the
+   * answers keyed as asked, `requestState` echoed exactly and only when the
+   * server sent one. Without a handler, or after a decline or cancel the
+   * server still waits on, the result is `input_required`.
+   */
   async callTool(name: string, args: Record<string, unknown>): Promise<McpCallResult> {
-    const r = await this.request("tools/call", { name, arguments: args });
-    if (r.resultType === "input_required") return { kind: "input_required", text: "The server needs the user's input to finish this (it was not given)." };
-    const content = Array.isArray(r.content) ? (r.content as Array<{ type?: string; text?: string }>) : [];
-    const text = content
-      .map((c) => (c.type === "text" ? String(c.text ?? "") : `[${c.type ?? "content"} not shown]`))
-      .join("\n")
-      .slice(0, 50_000);
-    return { kind: "complete", text, isError: r.isError === true, ...(r.structuredContent !== undefined ? { structured: r.structuredContent } : {}) };
+    const paramHeaders = this.transport.binding === "http" ? paramHeadersFor(this.schemas.get(name), args) : undefined;
+    const extra = paramHeaders && Object.keys(paramHeaders).length ? { paramHeaders } : {};
+    let params: Record<string, unknown> = { name, arguments: args };
+    let refused: ElicitationResult["action"] | null = null;
+    const rounds = this.opts.maxRounds ?? MAX_INPUT_ROUNDS;
+    for (let round = 0; ; round++) {
+      const r = await this.request("tools/call", params, extra);
+      if (r.resultType !== "input_required") return completeOf(r);
+      const asks = r.inputRequests && typeof r.inputRequests === "object" && !Array.isArray(r.inputRequests) ? (r.inputRequests as Record<string, unknown>) : null;
+      const state = r.requestState;
+      if (!asks && typeof state !== "string") throw new McpClientError("tools/call: input_required without inputRequests or requestState");
+      if (!this.opts.elicit || refused || round >= rounds) {
+        return { kind: "input_required", text: refused ? `The user ${refused === "decline" ? "declined" : "cancelled"} the server's request, and the server still needs it.` : "The server needs the user's input to finish this (it was not given).", ...(refused ? { declined: true } : {}) };
+      }
+      const answers: Record<string, ElicitationResult> = {};
+      if (asks) {
+        const { parseElicitation, ElicitationError } = await import("./elicitation");
+        for (const [key, req] of Object.entries(asks).slice(0, 10)) {
+          const method = req && typeof req === "object" ? (req as { method?: unknown }).method : undefined;
+          // Servers MUST NOT send what we did not declare (MRTR rule 7): sampling and roots are never answered.
+          if (method !== "elicitation/create") throw new McpClientError(`tools/call: the server asked for ${String(method).slice(0, 60)}, which Lumen does not offer`);
+          let ans: ElicitationResult;
+          try {
+            ans = await this.opts.elicit({ server: this.opts.serverLabel ?? this.serverInfo.name ?? "MCP server", key, request: parseElicitation((req as { params?: unknown }).params) });
+          } catch (e) {
+            // A request the spec does not allow (a nested schema, a non-http URL) is declined, not shown.
+            if (e instanceof ElicitationError) ans = { action: "decline" };
+            else throw e;
+          }
+          answers[key] = ans.action === "accept" ? ans : { action: ans.action };
+          if (ans.action !== "accept") refused = refused === "cancel" ? "cancel" : ans.action;
+        }
+      }
+      params = { name, arguments: args, ...(asks ? { inputResponses: answers } : {}), ...(typeof state === "string" ? { requestState: state } : {}) };
+    }
   }
+}
+
+function completeOf(r: Record<string, unknown>): McpCallResult {
+  const content = Array.isArray(r.content) ? (r.content as Array<{ type?: string; text?: string }>) : [];
+  const text = content
+    .map((c) => (c.type === "text" ? String(c.text ?? "") : `[${c.type ?? "content"} not shown]`))
+    .join("\n")
+    .slice(0, 50_000);
+  return { kind: "complete", text, isError: r.isError === true, ...(r.structuredContent !== undefined ? { structured: r.structuredContent } : {}) };
+}
+
+const TOKEN = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/;
+const SENTINEL = /^=\?base64\?.*\?=$/;
+
+/** A header value per the spec's Value Encoding: plain visible ASCII as is, anything else as `=?base64?…?=`. */
+export function encodeHeaderValue(v: string): string {
+  const plain = /^[\x20-\x7E\t]*$/.test(v) && v === v.trim() && !SENTINEL.test(v);
+  if (plain) return v;
+  const bytes = new TextEncoder().encode(v);
+  let bin = "";
+  for (const b of bytes) bin += String.fromCharCode(b);
+  return `=?base64?${btoa(bin)}?=`;
+}
+
+/** Why a tool's `x-mcp-header` annotations are invalid (the tool is left out), or null. */
+export function headerAnnotationError(schema: unknown): string | null {
+  const seen = new Set<string>();
+  const walk = (node: unknown, reachable: boolean, depth: number): string | null => {
+    if (!node || typeof node !== "object" || depth > 12) return null;
+    const n = node as Record<string, unknown>;
+    if ("x-mcp-header" in n) {
+      const h = n["x-mcp-header"];
+      if (!reachable) return "x-mcp-header outside a chain of properties";
+      if (typeof h !== "string" || !h || !TOKEN.test(h)) return "x-mcp-header is not a header token";
+      const k = h.toLowerCase();
+      if (seen.has(k)) return `x-mcp-header "${h}" is used twice`;
+      seen.add(k);
+      if (n.type !== "string" && n.type !== "integer" && n.type !== "boolean") return `x-mcp-header "${h}" is on a ${String(n.type)} (only string, integer, boolean)`;
+    }
+    for (const [key, child] of Object.entries(n)) {
+      if (key === "properties" && child && typeof child === "object") {
+        for (const p of Object.values(child as Record<string, unknown>)) {
+          const e = walk(p, reachable, depth + 1);
+          if (e) return e;
+        }
+      } else if (child && typeof child === "object") {
+        const list = Array.isArray(child) ? child : [child];
+        for (const c of list) {
+          const e = walk(c, false, depth + 1);
+          if (e) return e;
+        }
+      }
+    }
+    return null;
+  };
+  return walk(schema, true, 0);
+}
+
+/** `Mcp-Param-{Name}` headers for one call (values at each annotated property's path; omitted when absent or null). */
+export function paramHeadersFor(schema: unknown, args: Record<string, unknown>): Record<string, string> {
+  const out: Record<string, string> = {};
+  const walk = (node: unknown, value: unknown, depth: number) => {
+    if (!node || typeof node !== "object" || depth > 12) return;
+    const n = node as Record<string, unknown>;
+    const h = n["x-mcp-header"];
+    if (typeof h === "string" && value !== undefined && value !== null) {
+      let s: string | null = null;
+      if (n.type === "string" && typeof value === "string") s = value;
+      else if (n.type === "integer" && typeof value === "number" && Number.isSafeInteger(value)) s = String(value);
+      else if (n.type === "boolean" && typeof value === "boolean") s = value ? "true" : "false";
+      if (s !== null) out[`Mcp-Param-${h}`] = encodeHeaderValue(s);
+    }
+    if (n.properties && typeof n.properties === "object" && value && typeof value === "object" && !Array.isArray(value)) {
+      for (const [k, p] of Object.entries(n.properties as Record<string, unknown>)) walk(p, (value as Record<string, unknown>)[k], depth + 1);
+    }
+  };
+  if (!headerAnnotationError(schema)) walk(schema, args, 0);
+  return out;
+}
+
+/** The `Mcp-Name` source: `params.name` (tools/call, prompts/get) or `params.uri` (resources/read). */
+export function mcpNameOf(msg: JsonRpcMessage): string | undefined {
+  const p = msg.params ?? {};
+  if (msg.method === "tools/call" || msg.method === "prompts/get") return typeof p.name === "string" ? p.name : undefined;
+  if (msg.method === "resources/read") return typeof p.uri === "string" ? p.uri : undefined;
+  return undefined;
 }
 
 /** Is this URL on this machine (localhost, 127.0.0.0/8, ::1)? */
@@ -161,13 +338,16 @@ export function isLoopbackUrl(url: string): boolean {
 /**
  * Streamable HTTP (spec 2026-07-28): POST one JSON-RPC message; the answer
  * is JSON or an SSE stream whose `data:` lines carry it. Standard headers:
- * MCP-Protocol-Version, Mcp-Method, Mcp-Name; Mcp-Session-Id for legacy.
+ * MCP-Protocol-Version, Mcp-Method, Mcp-Name (tools/call, prompts/get,
+ * resources/read; base64 sentinel when not plain), Mcp-Param-{Name} for
+ * `x-mcp-header` parameters; Mcp-Session-Id for legacy.
  */
 export function httpTransport(url: string, fetchImpl: () => typeof fetch, headers: () => Record<string, string> = () => ({})): McpTransport {
   return {
     reach: isLoopbackUrl(url) ? "local" : "remote",
+    binding: "http",
     async send(msg, meta) {
-      const name = typeof msg.params?.name === "string" ? (msg.params.name as string) : undefined;
+      const name = mcpNameOf(msg);
       const res = await fetchImpl()(url, {
         method: "POST",
         headers: {
@@ -175,8 +355,9 @@ export function httpTransport(url: string, fetchImpl: () => typeof fetch, header
           Accept: "application/json, text/event-stream",
           "MCP-Protocol-Version": meta.protocolVersion,
           ...(msg.method ? { "Mcp-Method": msg.method } : {}),
-          ...(name ? { "Mcp-Name": name } : {}),
+          ...(name !== undefined ? { "Mcp-Name": encodeHeaderValue(name) } : {}),
           ...(meta.sessionId ? { "Mcp-Session-Id": meta.sessionId } : {}),
+          ...(meta.paramHeaders ?? {}),
           ...headers(),
         },
         body: JSON.stringify(msg),

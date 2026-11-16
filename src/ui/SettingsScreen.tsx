@@ -39,6 +39,7 @@ const CollabSettings = lazy(() => import("./CollabSettings").then((m) => ({ defa
 const FineTuneSettings = lazy(() => import("./FineTuneSettings").then((m) => ({ default: m.FineTuneSettings })));
 const TrustedKeysSettings = lazy(() => import("./TrustedKeysSettings").then((m) => ({ default: m.TrustedKeysSettings })));
 const CalendarSettings = lazy(() => import("./settings/CalendarSettings").then((m) => ({ default: m.CalendarSettings })));
+const McpServers = lazy(() => import("./settings/McpServers").then((m) => ({ default: m.McpServers })));
 const OrgSettings = lazy(() => import("./OrgSettings").then((m) => ({ default: m.OrgSettings })));
 const ImageHostsSection = lazy(() => import("./ImageHostsPanel").then((m) => ({ default: m.ImageHostsSection })));
 const MonitoringSettings = lazy(() => import("./MonitoringSettings").then((m) => ({ default: m.MonitoringSettings })));
@@ -272,6 +273,8 @@ export function SettingsScreen({ tab: initialTab = "general", onClose, onOpenAud
         return <AiSettingsPanel open embedded onClose={onClose} />;
       case "calendar":
         return <CalendarSettings />;
+      case "mcp":
+        return <McpServers />;
       case "sync":
         return <CollabSettings embedded onClose={onClose} />;
       case "fineTune":
