@@ -81,7 +81,10 @@ describe("plan build", () => {
     const line = before.split("\n").find((l) => l.includes('"status": "✅ #251"'))!;
     writeFileSync(path, before.replace(line, line.replace("✅ #251", "⏳ בעבודה")));
     const after = readFileSync(path, "utf8").split("\n");
-    expect(after.filter((l, i) => l !== before.split("\n")[i])).toEqual([line.replace("✅ #251", "⏳ בעבודה")]);
+    // Split once (review 10, plan 0.6: splitting the 1.7 MB file again for each of its lines took
+    // over a minute, past vitest's 5 s per test and the offline runner's limit).
+    const beforeLines = before.split("\n");
+    expect(after.filter((l, i) => l !== beforeLines[i])).toEqual([line.replace("✅ #251", "⏳ בעבודה")]);
 
     const cli = (...args: string[]) => spawnSync(process.execPath, [join(ROOT, "scripts/plan/build.mjs"), ...args], { cwd: dir, encoding: "utf8" });
     // The CLI works on the repo it lives in, so drive run() for the copy.

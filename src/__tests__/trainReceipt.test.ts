@@ -14,7 +14,7 @@ import { join, resolve } from "node:path";
 // @ts-expect-error — plain .mjs script without type declarations
 import { COMMAND_GATES, TEST_GATES, allGreen, expectedGates, gateCommand, isSha, porcelainFiles, receiptPath, receiptProblems, record, refusal, runGates } from "../../scripts/lib/trainReceipt.mjs";
 // @ts-expect-error — plain .mjs script without type declarations
-import { receiptTestFiles, runnerSha256, testGates } from "../../scripts/train-offline.mjs";
+import { receiptTestFiles, runnerHelpers, runnerSha256, testGates } from "../../scripts/train-offline.mjs";
 // @ts-expect-error — plain .mjs script without type declarations
 import { brokenImports, resolves, specifiers } from "../../scripts/lib/importCheck.mjs";
 
@@ -25,7 +25,9 @@ describe("the gate list", () => {
   it("starts with the fail-fast import check and holds every gate the task names", () => {
     expect(COMMAND_GATES[0]).toMatchObject({ id: "imports", failFast: true });
     const ids = COMMAND_GATES.map((g: { id: string }) => g.id);
-    for (const id of ["typecheck", "code-hygiene", "max-lines", "live-seams", "flags", "plan", "dod-rule", "dod-done", "i18n"]) expect(ids).toContain(id);
+    for (const id of ["typecheck", "code-hygiene", "max-lines", "live-seams", "flags", "plan", "dod-rule", "dod-done", "i18n", "rust-std"]) expect(ids).toContain(id);
+    // Review 10, M5: the std-only Rust crates are built and run (0 tests is red).
+    expect(COMMAND_GATES.find((g: { id: string }) => g.id === "rust-std")).toMatchObject({ cmd: "node scripts/rust-std-tests.mjs" });
     expect(TEST_GATES).toEqual(expect.arrayContaining(["src/__tests__/skipAudit.test.ts", "src/__tests__/codeHealth.test.ts", "src/__tests__/settingsSchema.test.ts"]));
     for (const f of TEST_GATES) expect(existsSync(join(repo, f)), f).toBe(true);
   });
@@ -136,6 +138,26 @@ describe("receiptProblems: not self-asserted (review 9, M1)", () => {
     const full = record({ sha: SHA, tree: TREE, results: greenWithAttack, at: "t", dirty: [] });
     expect(full).toMatchObject({ runner: "vitest", class: "full", runnerSha256: null });
     expect(receiptProblems(full, SHA, { requireFull: true })).toEqual([]);
+  });
+
+  it("the runner's hash covers the helper scripts it runs from its folder (review 10, L9)", () => {
+    const dir = mkdtempSync(join(tmpdir(), "runner-helpers-"));
+    try {
+      mkdirSync(join(dir, "node"));
+      writeFileSync(join(dir, "v.sh"), 'here=$(cd "$(dirname "$0")" && pwd)\nnode --import "$here/node/register.mjs" "$here/node/runner.mjs" "$1"\n');
+      writeFileSync(join(dir, "node", "register.mjs"), 'import { register } from "node:module";\nregister("./hooks.mjs", import.meta.url);\n');
+      writeFileSync(join(dir, "node", "hooks.mjs"), "export {};\n");
+      writeFileSync(join(dir, "node", "runner.mjs"), 'import "./shim.mjs";\nimport "../../outside.mjs";\n');
+      writeFileSync(join(dir, "node", "shim.mjs"), "console.log('pass 1 fail 0');\n");
+      expect(runnerHelpers(join(dir, "v.sh"))).toEqual(["node/hooks.mjs", "node/register.mjs", "node/runner.mjs", "node/shim.mjs"]);
+      const before = runnerSha256(join(dir, "v.sh"));
+      expect(before).not.toBe(createHash("sha256").update(readFileSync(join(dir, "v.sh"))).digest("hex"));
+      // One changed helper (two levels down) changes the hash; the runner file is the same.
+      writeFileSync(join(dir, "node", "shim.mjs"), "console.log('pass 9 fail 0');\n");
+      expect(runnerSha256(join(dir, "v.sh"))).not.toBe(before);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   it("the runner's hash is the sha256 of its file, found by path or on PATH", () => {

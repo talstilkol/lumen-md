@@ -33,6 +33,7 @@ import { join, resolve, dirname } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { spawnSync } from "node:child_process";
 import { vitestFiles, vitestJsonSync } from "./lib/dodRunner.mjs";
+import { rustCounts, rustGreen } from "./lib/rustStd.mjs";
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export const PLAN_FILE = "plan/plan.json";
@@ -158,8 +159,28 @@ function defaultExec(cmd, cwd) {
     if (r.status !== "pass") console.error(`dod: ${cmd} → ${r.status}: ${r.detail}`);
     return r.status === "pass";
   }
-  const r = spawnSync(cmd, { cwd, shell: true, stdio: "inherit" });
-  return r.status === 0;
+  return shellPasses(cmd, cwd);
+}
+
+/**
+ * A shell command of a dod: green on exit 0, except a Rust test run that ran
+ * no test (review 10, M5: `cargo test … <filter>` matching nothing exits 0
+ * with "running 0 tests"). Its output is shown as it is.
+ * @param {string} cmd
+ * @param {string} cwd
+ * @param {typeof spawnSync} [spawn]
+ */
+export function shellPasses(cmd, cwd, spawn = spawnSync) {
+  const r = spawn(cmd, { cwd, shell: true, encoding: "utf8", maxBuffer: 256 * 1024 * 1024 });
+  if (r.stdout) process.stdout.write(r.stdout);
+  if (r.stderr) process.stderr.write(r.stderr);
+  if (r.status !== 0) return false;
+  const rust = rustCounts(`${r.stdout ?? ""}\n${r.stderr ?? ""}`);
+  if (rust && !rustGreen(rust)) {
+    console.error(`dod: ${cmd} → exit 0, but ${rust.ran === 0 ? "running 0 tests" : `${rust.passed}/${rust.ran} passed`}: nothing was checked`);
+    return false;
+  }
+  return true;
 }
 
 /**
