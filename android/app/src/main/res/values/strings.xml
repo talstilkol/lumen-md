@@ -27,4 +27,6 @@
     <string name="capture_saved">Saved to your inbox</string>
     <string name="capture_failed">Could not save. The text is still here.</string>
     <string name="tile_capture">Capture</string>
+    <string name="tile_voice">Lumen voice note</string>
+    <string name="tile_voice_subtitle">Record into the inbox</string>
 </resources>

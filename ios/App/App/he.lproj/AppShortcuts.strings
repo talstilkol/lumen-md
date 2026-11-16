@@ -8,3 +8,5 @@
 "Open today in ${applicationName}" = "פתח את היום ב-${applicationName}";
 "Capture to ${applicationName}" = "לכידה ב-${applicationName}";
 "Capture to my ${applicationName} inbox" = "לכידה לתיבה שלי ב-${applicationName}";
+"Record to ${applicationName} inbox" = "הקלטה לתיבה של ${applicationName}";
+"Record a ${applicationName} voice note" = "פתק קולי חדש ב-${applicationName}";

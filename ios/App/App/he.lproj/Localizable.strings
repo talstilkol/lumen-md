@@ -21,3 +21,6 @@
 "capture.cancel" = "ביטול";
 "capture.saved" = "נשמר בתיבה";
 "capture.failed" = "השמירה נכשלה. הטקסט עדיין כאן.";
+"Record to Lumen inbox" = "הקלטה לתיבה של Lumen";
+"Record to inbox" = "הקלטה לתיבה";
+"Opens Lumen recording a voice note into the inbox." = "פותח את Lumen ומקליט פתק קולי לתיבה.";
