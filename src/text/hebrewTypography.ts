@@ -231,6 +231,27 @@ export function editsForKeystroke(edits: readonly TypoEdit[], head: number, type
   });
 }
 
+const sameEdit = (a: TypoEdit, b: TypoEdit) => a.from === b.from && a.to === b.to && a.insert === b.insert;
+
+/**
+ * The fixes to make for the character typed just before `head` on the line
+ * `line` of `text`: editsForKeystroke, less every fix the previous keystroke
+ * already offered. A fix that was offered then and is still there to make
+ * was undone (Ctrl+Z) — or the text came in another way — so the next key
+ * must not make it again: ג' then Ctrl+Z then י stays ג'י, and 50 % then
+ * Ctrl+Z then a space stays 50 % (W2.9 "Ctrl+Z gives back the character").
+ */
+export function keystrokeEdits(text: string, rules: RuleSettings | ReadonlySet<TypoRule>, line: { from: number; to: number }, head: number): TypoEdit[] {
+  const typed = text.slice(head - 1, head);
+  const now = editsForKeystroke(typographyEdits(text, rules, line), head, typed, line.to);
+  if (!now.length || head - 1 <= line.from) return now;
+  const before = text.slice(0, head - 1) + text.slice(head);
+  const prevLine = { from: line.from, to: line.to - 1 };
+  const offered = editsForKeystroke(typographyEdits(before, rules, prevLine), head - 1, before.slice(head - 2, head - 1), prevLine.to);
+  // Positions before the typed character are the same in both texts; an edit that reaches past it is new.
+  return now.filter((e) => e.to > head - 1 || !offered.some((o) => sameEdit(o, e)));
+}
+
 /* ─── Settings ───────────────────────────────────────────────────────── */
 
 export interface TypographySettings {

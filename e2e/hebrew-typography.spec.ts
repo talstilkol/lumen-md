@@ -32,6 +32,19 @@ test('typing צה"ל gives צה״ל, and undo gives back the " at once', async (
   await expect(editor).toContainText('צה"ל הוא');
 });
 
+test("an undone geresh stays a ' while the word goes on", async ({ page }) => {
+  const editor = page.locator(".cm-content").first();
+  await editor.click();
+  await page.keyboard.press("ControlOrMeta+a");
+  await page.keyboard.press("Delete");
+  await page.keyboard.type("ג'");
+  await expect(editor).toContainText("ג׳", { timeout: 5_000 });
+  await page.keyboard.press("ControlOrMeta+z");
+  await expect(editor).toContainText("ג'", { timeout: 5_000 });
+  await page.keyboard.type("ירפה");
+  await expect(editor).toContainText("ג'ירפה");
+});
+
 test("code stays as typed", async ({ page }) => {
   const editor = page.locator(".cm-content").first();
   await editor.click();
