@@ -6,7 +6,7 @@
  * waited, and a malformed annotation shows as an unreadable block instead of
  * crashing the reader.
  */
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { describe, it, expect, vi, afterEach, beforeAll } from "vitest";
 import { render, screen, fireEvent, waitFor, cleanup } from "@testing-library/react";
 
 /** Pages per fake PDF, and the size of each page (page 2 of "mixed.pdf" is landscape). */
@@ -77,13 +77,24 @@ afterEach(() => {
   vi.mocked(ws.writeWorkspaceFile).mockReset().mockImplementation(async () => undefined);
 });
 
+// W10.F8: the reader imports these on open and on save (PdfReader.tsx: the W6.47 OCR cache, the reading
+// position, the workspace and the open-docs store).
+// Loaded cold inside the first test, under a loaded machine, they outlasted RTL's 1 s waitFor and the
+// file went red at random (5/1, 4/2). They are loaded once here, before any test measures anything.
+beforeAll(async () => {
+  await Promise.all([import("../pdf/ocrPages"), import("../pdf/readingPosition"), import("../reading/progress"), import("../storage/workspace"), import("../store/openDocs"), import("../storage/workspaceEvents"), import("../store/useStore")]);
+}, 120_000);
+
+/** A wait for the reader's own async work (pdf.js, the note): what it waits for, not how fast the machine is (each such test allows 30 s). */
+const LOAD = { timeout: 15_000 };
+
 const reader = () => screen.getByTestId("pdf-reader");
 const labels = { title: "Highlights", page: (n: number) => `p. ${n}`, empty: "none" };
 
 describe("2.18: a long PDF opens with page 1's size", () => {
-  it("doesn't load every page before showing the first", async () => {
+  it("doesn't load every page before showing the first", { timeout: 30_000 }, async () => {
     render(<PdfReader path="long.pdf" openSeq={1} onClose={() => undefined} onOpenNotes={() => undefined} />);
-    await waitFor(() => expect(reader().getAttribute("data-ready")).toBe("true"));
+    await waitFor(() => expect(reader().getAttribute("data-ready")).toBe("true"), LOAD);
     expect(reader().getAttribute("data-page-count")).toBe("200");
     // Page 1 for the placeholder size, then only the pages near the view.
     expect(new Set(FAKE.getPage).size).toBeLessThan(10);
@@ -92,19 +103,19 @@ describe("2.18: a long PDF opens with page 1's size", () => {
     expect(boxes[150].style.height).toBe(boxes[0].style.height);
   });
 
-  it("a page takes its real size once it is loaded", async () => {
+  it("a page takes its real size once it is loaded", { timeout: 30_000 }, async () => {
     render(<PdfReader path="mixed.pdf" fragment="page=2" openSeq={1} onClose={() => undefined} onOpenNotes={() => undefined} />);
-    await waitFor(() => expect(reader().getAttribute("data-ready")).toBe("true"));
+    await waitFor(() => expect(reader().getAttribute("data-ready")).toBe("true"), LOAD);
     const box = (n: number) => document.querySelector<HTMLElement>(`[data-page-number="${n}"]`)!;
     // Page 2 is landscape: wider than tall once it is rendered.
-    await waitFor(() => expect(parseFloat(box(2).style.width)).toBeGreaterThan(parseFloat(box(2).style.height)));
+    await waitFor(() => expect(parseFloat(box(2).style.width)).toBeGreaterThan(parseFloat(box(2).style.height)), LOAD);
     expect(parseFloat(box(1).style.width)).toBeLessThan(parseFloat(box(1).style.height));
     expect(reader().getAttribute("data-current-page")).toBe("2");
   });
 });
 
 describe("2.21: the reader is modal", () => {
-  it("makes the app underneath inert while open and gives focus back on close", async () => {
+  it("makes the app underneath inert while open and gives focus back on close", { timeout: 30_000 }, async () => {
     const editor = document.createElement("textarea");
     editor.setAttribute("data-testid", "editor");
     const toasts = document.createElement("div");
@@ -120,7 +131,7 @@ describe("2.21: the reader is modal", () => {
     expect(document.activeElement).toBe(editor);
 
     const view = render(<PdfReader path="mixed.pdf" openSeq={1} onClose={() => undefined} onOpenNotes={() => undefined} />, { container: host });
-    await waitFor(() => expect(reader().getAttribute("data-ready")).toBe("true"));
+    await waitFor(() => expect(reader().getAttribute("data-ready")).toBe("true"), LOAD);
     expect(editor.hasAttribute("inert")).toBe(true);
     expect(toasts.hasAttribute("inert")).toBe(false);
     expect(host.hasAttribute("inert")).toBe(false);
@@ -154,7 +165,7 @@ describe("2.25: closing waits for every queued write", () => {
     expect(order).toEqual(["first", "second", "drained"]);
   });
 
-  it("a highlight deleted while Close waits is saved before the reader closes", async () => {
+  it("a highlight deleted while Close waits is saved before the reader closes", { timeout: 30_000 }, async () => {
     const a1 = createPdfAnnotation({ id: "11111111-e89b-42d3-a456-426614174000", source: "mixed.pdf", page: 1, text: "alpha two", start: 0, end: 5 });
     const a2 = createPdfAnnotation({ id: "22222222-e89b-42d3-a456-426614174000", source: "mixed.pdf", page: 1, text: "alpha two", start: 6, end: 9 });
     const note = upsertAnnotationsNote(null, "mixed.pdf", [a1, a2], labels);
@@ -164,29 +175,29 @@ describe("2.25: closing waits for every queued write", () => {
     write.mockImplementation(() => new Promise<void>((r) => finish.push(() => r())));
     const onClose = vi.fn();
     render(<PdfReader path="mixed.pdf" openSeq={1} onClose={onClose} onOpenNotes={() => undefined} />);
-    await waitFor(() => expect(screen.getAllByRole("button", { name: "Delete" })).toHaveLength(2));
+    await waitFor(() => expect(screen.getAllByRole("button", { name: "Delete" })).toHaveLength(2), LOAD);
     fireEvent.click(screen.getAllByRole("button", { name: "Delete" })[0]);
-    await waitFor(() => expect(write).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(write).toHaveBeenCalledTimes(1), LOAD);
     fireEvent.click(screen.getByTestId("pdf-close"));
     // While Close waits on the first write, the other highlight is deleted too.
     fireEvent.click(screen.getByRole("button", { name: "Delete" }));
     finish[0]();
-    await waitFor(() => expect(write).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(write).toHaveBeenCalledTimes(2), LOAD);
     await new Promise((r) => setTimeout(r, 0));
     expect(onClose).not.toHaveBeenCalled();
     finish[1]();
-    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1), LOAD);
     expect(String(write.mock.calls[1][1])).not.toContain("22222222");
   });
 });
 
 describe("2.26: a malformed annotation", () => {
-  it("shows the block as unreadable instead of crashing, and nothing is saved over it", async () => {
+  it("shows the block as unreadable instead of crashing, and nothing is saved over it", { timeout: 30_000 }, async () => {
     const good = createPdfAnnotation({ id: "33333333-e89b-42d3-a456-426614174000", source: "mixed.pdf", page: 1, text: "alpha", start: 0, end: 5 });
     const md = `${NOTE_START}\n\n\`\`\`json lumen-pdf-annotations\n${JSON.stringify([{ ...good, body: {} }])}\n\`\`\`\n\n${NOTE_END}\n`;
     vi.mocked(ws.readWorkspaceFile).mockImplementation(async () => md);
     render(<PdfReader path="mixed.pdf" openSeq={1} onClose={() => undefined} onOpenNotes={() => undefined} />);
-    expect((await screen.findByRole("alert")).textContent).toContain("mixed.pdf.md");
+    expect((await screen.findByRole("alert", {}, LOAD)).textContent).toContain("mixed.pdf.md");
     expect(reader().getAttribute("data-ready")).toBeNull();
     expect(ws.writeWorkspaceFile).not.toHaveBeenCalled();
   });
