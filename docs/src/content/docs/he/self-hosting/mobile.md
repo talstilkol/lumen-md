@@ -82,8 +82,10 @@ Connect. כל עוד `ITSAppUsesNonExemptEncryption` לא מוגדר ב-`Info.pl
 ### בלי Mac ובלי Android SDK:‏ Codemagic
 
 ‏`codemagic.yaml` מריץ את אותן שתי פקודות על מכונות macOS M2 של Codemagic.
-אין בו סעיף `triggering:`, ולכן שום build לא מתחיל ב-push. מפעילים כל build
-ביד בממשק של Codemagic. ב-12.11.2026 עמוד המחירים של Codemagic אמר
+את ה-builds החתומים מפעילים ביד בממשק של Codemagic. workflow אחד מתחיל
+מעצמו: **`pr-build`** רץ על כל pull request אל `main` ובונה את ה-APK לדיבאג
+ו-build לסימולטור של iOS, בלי חתימה ובלי קבוצת סביבה, ולכן הוא לא צריך שום
+מפתח. push חדש לאותו pull request מבטל את ההרצה הקודמת. ב-12.11.2026 עמוד המחירים של Codemagic אמר
 ש**לחשבון אישי יש 500 דקות macOS M2 בחינם בחודש**, שמתאפסות ב-1 לחודש. הוא
 גם אמר שאין דקות חינם ב-Linux או ב-Windows, ואין דקות חינם ל-Teams. לכן שני
 ה-workflows משתמשים ב-Mac, ו-build של iOS ‏(15–25 דקות בערך) נכנס הרבה פעמים
