@@ -80,14 +80,16 @@ export function executorEngine(id: "ollama" | "webllm", load: () => Promise<Exec
     },
     generate: async (req) => {
       const ex = await load();
-      const res = await ex.chat({
+      // Through the runtime (plan 5.5): traced like every other model call, never the cloud.
+      const { runLocalRequest } = await import("../../agents/runtime");
+      const res = await runLocalRequest(ex, {
         messages: [...(req.system ? [{ role: "system" as const, content: req.system }] : []), { role: "user" as const, content: req.prompt }],
         schema: req.schema,
         tier: "small",
         temperature: req.temperature ?? 0,
         maxTokens: 800,
         signal: req.signal,
-      });
+      }, { agentId: "structured-output" });
       return res.content;
     },
   };
