@@ -184,3 +184,7 @@ Code was checked on verify/train-4 (fcf760fde8), which contains the heads of all
 - 4.4 #617: Confirm 10.11: the repo stays public; no GitHub Actions; converted models on GitHub Releases. owner-act: set the HF token and GOLDEN_SEED as Vercel environment variables.
 - 5.16 #483: Add the four relay routes to #469's Worker (one public service that only ever holds ciphertext, same retention and no-IP-log rules); owner-act to deploy it and set VITE_SYNC_RELAY_URL in Vercel.
 - 10.53 #488: owner-act: use the public relay from 5.16 once it is deployed; schools may point to their own. Until then the panel keeps saying this build has no relay.
+
+## Later decisions (lane FA, audit r3, 17.11; the owner delegated decisions on 16.11)
+
+- W10.F29 (10.3): visual/ and playwright.visual.config.ts replace the old visual-ci matrix of test/visual-ci (403aa654b7..38101ac039). Its commits are not cherry-picked: they rebuild the same matrix as a GitHub Actions gate (ci.yml "visual", visual-baselines.yml), and there are no Actions here (W1.35). The same 10 surfaces × 4 variants are covered. visual/harness.ts SURFACES has nine of them, plus theme-settings. The tenth, the AI doctor, is ported from that branch with its masks (391786c18c) into visual/ported.visual.ts. Each shot is a baseline comparison with the overflow check. Baselines are made on the machine that compares them (`npm run visual:approve -- visual`, the Mac run), not by a workflow. Proof: src/__tests__/visualCoverage.test.ts.
