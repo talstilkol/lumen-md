@@ -506,6 +506,7 @@ Mac: `npx vitest run src/__tests__/testSurfaceGate.test.ts`
 ## Flakes (d)
 
 - `App.test.tsx` › *backlinks open the linking note and reveal the workspace*: read the lazy BacklinksPanel's props before its chunk resolved, so it passed or failed by timing (green in the lane's own run of the same commit). Fixed as a test bug on fix/t8-shim-ui: the test waits for the chunk. No other failure changed between the runs of the same commit.
+- `e2eeKeyring.test.ts` (green at `3100c18c43`, 6/0): needs about 3 min 20 s alone in Node; with two files running at once it passed the shim's 300 s per-file limit once and was reported as a load error. Rerun alone: 6/0. Not a test or product bug. Mac: `npx vitest run src/__tests__/e2eeKeyring.test.ts`.
 
 ## Cases red in only one runner
 
