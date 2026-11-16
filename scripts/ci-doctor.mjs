@@ -21,7 +21,9 @@
  * -- --all`, .ci-local/runs/ and reports/train-offline-<sha>.json); the
  * target is a commit (default: the newest run). No network. See
  * scripts/lib/ci-doctor-receipts.mjs.
- *   node scripts/ci-doctor.mjs --source local [<sha>] [--max-distance N] [--json]
+ *   node scripts/ci-doctor.mjs --source local [<sha>] [--red] [--max-distance N] [--json]
+ *     --red: the newest run with a red gate (a later green rerun of the same
+ *     commit is then the comparison that says "flaky", not the run picked)
  *
  * Runs come from --source (plan 0.9, W10.E32): `buildkite` (the default: the
  * gates run there since GitHub Actions stopped on 9.11), `vercel` (the gates
@@ -62,7 +64,7 @@ import { readFileSync } from "node:fs";
 import { classify, failureItems, isFailed, nextAction, observe, parseAnnotations, sameTestSetup } from "./lib/ci-doctor.mjs";
 import { annotationsFromLog, bkJobs, bkRun, stepsFromLog, vercelJobs, vercelLog, vercelRun } from "./lib/ci-doctor-sources.mjs";
 
-const usage = "usage: node scripts/ci-doctor.mjs <branch|pr-number> [--source buildkite|vercel|github|local] [--run ID] [--around RUN_ID|latest] [--window HOURS] [--workflow ci.yml] [--peers N] [--max-distance N] [--json]";
+const usage = "usage: node scripts/ci-doctor.mjs <branch|pr-number> [--source buildkite|vercel|github|local] [--red] [--run ID] [--around RUN_ID|latest] [--window HOURS] [--workflow ci.yml] [--peers N] [--max-distance N] [--json]";
 const SOURCES = ["buildkite", "vercel", "github", "local"];
 const argv = process.argv.slice(2);
 if (argv[argv.indexOf("--source") + 1] === "local" && argv.includes("--source")) process.exit(await localDoctor(argv));
@@ -87,9 +89,10 @@ async function localDoctor(args) {
     }
   }
   const runs = localRuns(docs);
-  const run = pickRun(runs, sha);
+  const red = rest.includes("--red");
+  const run = pickRun(runs, sha, { red });
   if (!run) {
-    console.error(`ci-doctor --source local: no run record${sha ? ` at ${sha}` : ""} in .ci-local/runs or reports/ — run \`npm run train:offline -- --all\` first`);
+    console.error(`ci-doctor --source local: no ${red ? "red " : ""}run record${sha ? ` at ${sha}` : ""} in .ci-local/runs or reports/ — run \`npm run train:offline -- --all\` first`);
     return 1;
   }
   const distance = (a, b) => {

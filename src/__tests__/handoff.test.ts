@@ -5,7 +5,7 @@ import { chmodSync, cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeF
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 // @ts-expect-error — plain .mjs helper without types
-import { parseWorktrees, prTree, missingRefs, renderHandoff } from "../../scripts/lib/handoff.mjs";
+import { ciOfHead, parseWorktrees, prTree, missingRefs, renderHandoff } from "../../scripts/lib/handoff.mjs";
 
 const prs = [
   { number: 196, head: "fix/abort-all", base: "fix/honest-small", title: "abort", ci: "success", ciSha: "3ef33e7b", unanswered: 0 },
@@ -141,7 +141,38 @@ describe("handoff review fixes", () => {
     const ci = { name: "CI", status: "completed", conclusion: "failure", head_sha: "c0ffee00".repeat(5), id: 99, head_repository: { full_name: "o/r" } };
     const res = handoffWithFakeGh({ pulls: [{ number: 7, title: "t", head: { ref: "main", repo: { full_name: "o/r" } }, base: { ref: "main" } }], comments, runs: { workflow_runs: tauri }, ciRuns: { workflow_runs: [ci] } });
     expect(res.stderr).toBe("");
-    expect(res.stdout).toMatch(/\| #7 \| `main` → `main` \| ❌ `c0ffee00` \| 3050 \|/);
+    // Actions is retired (9.11): its run is the last resort, and the cell says so.
+    expect(res.stdout).toMatch(/\| #7 \| `main` → `main` \| ❌ `c0ffee00` \(Actions \(retired\)\) \| 3050 \|/);
+  });
+
+  it("CI is the head commit's status (Buildkite, Vercel, lumen/receipt) before any Actions run (0.13 follow-up)", () => {
+    const sha = "abc12345".repeat(5);
+    const ci = { name: "CI", status: "completed", conclusion: "failure", head_sha: sha, id: 99, head_repository: { full_name: "o/r" } };
+    const status = { state: "success", sha, total_count: 2, statuses: [{ context: "buildkite/lumen-md" }, { context: "lumen/receipt" }] };
+    const res = handoffWithFakeGh({ pulls: [{ number: 9, title: "t", head: { ref: "main", sha, repo: { full_name: "o/r" } }, base: { ref: "main" } }], comments: [], runs: { workflow_runs: [] }, ciRuns: { workflow_runs: [ci] }, status });
+    expect(res.stderr).toBe("");
+    expect(res.stdout).toMatch(/\| #9 \| `main` → `main` \| ✅ `abc12345` \(status: buildkite\/lumen-md, lumen\/receipt\) \| 0 \|/);
+  });
+});
+
+describe("ciOfHead (0.13 follow-up: Actions is retired)", () => {
+  const sha = "d".repeat(40);
+  it("the combined status wins; pending is running; error is a failure", () => {
+    expect(ciOfHead({ headSha: sha, status: { state: "pending", sha, total_count: 1, statuses: [{ context: "buildkite/lumen-md" }] } })).toEqual({ ci: null, sha: "dddddddd", via: "status: buildkite/lumen-md" });
+    expect(ciOfHead({ headSha: sha, status: { state: "error", sha, total_count: 1, statuses: [] } }).ci).toBe("failure");
+  });
+  it("without a status, this machine's newest run at that commit", () => {
+    const localRuns = [
+      { sha, at: "2026-11-16T17:02:44Z", green: false, gates: [{ status: "fail" }] },
+      { sha, at: "2026-11-16T17:42:55Z", green: true, gates: [{ status: "pass" }] },
+      { sha: "e".repeat(40), at: "2026-11-16T18:00:00Z", green: false, gates: [] },
+    ];
+    expect(ciOfHead({ headSha: sha, status: { total_count: 0, statuses: [] }, localRuns })).toEqual({ ci: "success", sha: "dddddddd", via: "local run" });
+    expect(ciOfHead({ headSha: sha, localRuns: localRuns.slice(0, 1) }).ci).toBe("failure");
+  });
+  it("the retired Actions run only when nothing else is known; nothing known is undefined", () => {
+    expect(ciOfHead({ headSha: sha, actionsRun: { status: "completed", conclusion: "success", head_sha: sha } })).toEqual({ ci: "success", sha: "dddddddd", via: "Actions (retired)" });
+    expect(ciOfHead({ headSha: null })).toEqual({ ci: undefined, sha: undefined, via: undefined });
   });
 });
 
@@ -172,7 +203,7 @@ const r = JSON.parse(require("fs").readFileSync(${JSON.stringify(join(dir, "rout
 const route = process.argv[process.argv.length - 1];
 const q = new URLSearchParams(route.split("?")[1] || "");
 const page = (list) => { const per = Number(q.get("per_page") || 30), p = Number(q.get("page") || 1); return list.slice((p - 1) * per, p * per); };
-const body = route.includes("/comments") ? page(r.comments) : route.includes("/pulls?") ? page(r.pulls) : route.includes("/workflows/ci.yml/runs") ? r.ciRuns : r.runs;
+const body = route.includes("/comments") ? page(r.comments) : route.includes("/pulls?") ? page(r.pulls) : route.includes("/workflows/ci.yml/runs") ? r.ciRuns : (route.includes("/commits/") && route.endsWith("/status")) ? (r.status ?? { total_count: 0, statuses: [] }) : r.runs;
 process.stdout.write(JSON.stringify(body));
 `,
     );

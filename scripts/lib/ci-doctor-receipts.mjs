@@ -60,10 +60,14 @@ export function localRuns(docs) {
     });
 }
 
-/** The run to diagnose: the newest one at `sha` (any prefix), else the newest of all. */
-export function pickRun(runs, sha = null) {
+/**
+ * The run to diagnose: the newest one at `sha` (any prefix), else the newest
+ * of all. With `red`, the newest one that has a red gate: a later green rerun
+ * of the same commit must not hide the red one it is the evidence about.
+ */
+export function pickRun(runs, sha = null, { red = false } = {}) {
   const at = sha ? runs.filter((r) => r.sha.startsWith(sha)) : runs;
-  return at[0] ?? null;
+  return (red ? at.filter((r) => r.gates.some((g) => g.status === "fail")) : at)[0] ?? null;
 }
 
 const isTestGate = (id) => /\.(test|spec)\.[cm]?[jt]sx?$/.test(id) || id === "vitest";
