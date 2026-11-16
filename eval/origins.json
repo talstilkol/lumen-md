@@ -428,6 +428,10 @@
   "wycheproof": {
    "origin": "real",
    "why": "C2SP/wycheproof's chacha20_poly1305_test.json, copied unchanged at a pinned commit with its sha256, Apache-2.0 (README)"
+  },
+  "writing": {
+   "origin": "synthetic",
+   "why": "W13.W6-W10 writing-agent sets written for lumen-md (synthetic vault, structure docs, labelled arguments, FK texts); dev only"
   }
  }
 }
