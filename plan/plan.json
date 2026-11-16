@@ -17441,7 +17441,7 @@
      ],
      "files": "reports/release-review-<sha>.md",
      "status": "⏳ #956: סבב T8-Z3 על רכבת 7 (3100c18c43), 374 פריטים — 181 met, ‏23 partial, ‏1 missing, ‏114 Mac, ‏55 בעלים; האדומים מסיבת קוד ב-#951–#954, לא מוזגו",
-     "verified": "built",
+     "verified": "node",
      "pr": 956,
      "notes": "plan/release-review-3100c18c43.md: כל משימת P0 (163), כל פקודת dod וכל קריטריון קבלה, מול הקוד על 3100c18c43, ב-shim v4. 140 קובצי בדיקה רצו; 21 לא ירוקים: 5 אדומים מסיבת קוד תוקנו — settingsSchema ‏(#951), ‏skipAudit ו-e2eHooks ו-retries של קונפיג ה-GIF ‏(#952), ‏aiCallsCarrySignal ‏(#953, רגיש: קבלה ותווית אצל הבעלים), סט 50 המסמכים של renderSnapshot ‏(#954); ה-dod של W6.4 הצביע על scratchpad ועל סקריפט שלא קיים — תוקן כאן. פתוחים: 5.5 (3 קריאות executor.chat ישירות), ‏W10.A4 (גבול זמן קשיח בבדיקת יחידה), ‏VITE_CONTENT_FRAME_URL חסר ב-allow-list (החלטת בעלים), ‏helpCoverage (W3.7, לא P0). 11 קבצים אדומים רק ב-shim (חבילות מוחלפות, snapshots, spawn) ו-3 בדיקות זמן על מכונה עמוסה — להרצה ב-Mac.",
      "evidence": {
