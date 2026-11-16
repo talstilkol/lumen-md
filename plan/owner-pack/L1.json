@@ -562,7 +562,7 @@
       "docs/src/content/docs/he/editor/accessibility-statement.md"
     ],
     "changes": "Both statements, section 'Accessibility coordinator' / 'רכז הנגישות'.",
-    "draftPr": null,
+    "draftPr": 1092,
     "check": "grep -n 'Coordinator:' docs/src/content/docs/editor/accessibility-statement.md"
   },
   {
@@ -647,7 +647,7 @@
       "docs/src/content/docs/project/sustainability.md"
     ],
     "changes": ".github/FUNDING.yml `github: [talstilkol]`; public/support.html funding:github markers.",
-    "draftPr": null,
+    "draftPr": 1091,
     "check": "npx vitest run src/__tests__/supportFunding.test.ts"
   },
   {
