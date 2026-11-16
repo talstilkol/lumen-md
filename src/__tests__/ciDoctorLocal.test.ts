@@ -7,6 +7,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -26,6 +27,22 @@ const names = readdirSync(LOGS)
 
 describe("failSig on 10 real train logs, two runs each", () => {
   it("has 10 pairs", () => expect(names).toHaveLength(10));
+
+  it("every log is a real run's output, pinned: PROVENANCE.json names its original and its sha256, and only paths were redacted", () => {
+    const prov = JSON.parse(read("PROVENANCE.json")) as { logs: Array<{ fixture: string; original: string; originalSha256: string; sha256: string; change: string }> };
+    const logs = readdirSync(LOGS).filter((f) => f.endsWith(".log")).sort();
+    expect(prov.logs.map((l) => l.fixture).sort()).toEqual(logs);
+    for (const l of prov.logs) {
+      // The bytes the independent check compared with the original (wave g2): a hand edit since then fails here.
+      expect(createHash("sha256").update(read(l.fixture)).digest("hex"), l.fixture).toBe(l.sha256);
+      const [name, run] = l.fixture.replace(/\.log$/, "").split(".");
+      expect(l.original, l.fixture).toMatch(new RegExp(`^P/v4/meas/${run}/${name}\\.test\\.tsx?\\.log$`));
+      expect(["none (verbatim)", "paths redacted only"]).toContain(l.change);
+      expect(l.change === "none (verbatim)", l.fixture).toBe(l.sha256 === l.originalSha256);
+      // Redacted: no machine path is left.
+      expect(read(l.fixture), l.fixture).not.toMatch(/\/home\/(?!u\/)[a-z]+\/|%2Fhome%2F(?!u%2F)|-home-[a-z]+\/[0-9a-f]{8}-/);
+    }
+  });
 
   it("the same failure gets the same key in both runs, though paths, timings and colours differ", () => {
     const changed: string[] = [];

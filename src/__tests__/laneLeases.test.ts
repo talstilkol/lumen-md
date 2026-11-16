@@ -11,7 +11,7 @@ import { execFileSync, spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync, mkdirSync, copyFileSync, chmodSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
-import { globToRegExp, outsideLease, overlaps, refusalMessage } from "../../scripts/lanes/leases.mjs";
+import { globToRegExp, installHook, outsideLease, overlaps, refusalMessage } from "../../scripts/lanes/leases.mjs";
 import { claim, listClaims, release } from "../../scripts/lanes/claims.mjs";
 import { unionSorted } from "../../scripts/lanes/merge-driver.mjs";
 
@@ -76,6 +76,34 @@ describe("R12.13 leases", () => {
     expect(hook({ LUMEN_LANE: "U" }).status).toBe(0);
     expect(hook({ LUMEN_LANE: "" }).status).toBe(0);
     expect(refusalMessage("A", ["a", "b"])).toMatch(/2 הקבצים/);
+  });
+});
+
+describe("R12.13 the hook is on without a manual step", () => {
+  it("install-hook turns it on, a real commit outside the lease is refused and inside passes; idempotent; another hooksPath is left alone", () => {
+    seedRepo(LEASES);
+    expect(installHook(dir)).toBe("installed");
+    expect(git("config", "--get", "core.hooksPath").trim()).toBe(".githooks");
+    expect(installHook(dir)).toBe("already");
+    const commit = (lane: string) => spawnSync("git", ["-c", "user.name=t", "-c", "user.email=t@example.invalid", "-c", "commit.gpgsign=false", "commit", "-q", "-m", "x"], { cwd: dir, encoding: "utf8", env: { ...process.env, LUMEN_LANE: lane } });
+    put("src/ui/Panel.tsx", "x");
+    git("add", "src/ui/Panel.tsx");
+    const refused = commit("A");
+    expect(refused.status).toBe(1);
+    expect(refused.stderr).toContain("הקומיט נדחה");
+    expect(git("log", "--oneline").trim().split("\n")).toHaveLength(1);
+    expect(commit("U").status).toBe(0);
+    git("config", "core.hooksPath", "my-hooks");
+    expect(installHook(dir)).toBe("other");
+    expect(git("config", "--get", "core.hooksPath").trim()).toBe("my-hooks");
+  });
+
+  it("scripts/lane.sh runs install-hook for every lane it opens", () => {
+    const sh = readFileSync(join(REPO, "scripts/lane.sh"), "utf8");
+    const add = sh.indexOf('git worktree add --quiet -b "$name" "$dir" "$base"');
+    const install = sh.indexOf('scripts/lanes/leases.mjs" install-hook');
+    expect(add).toBeGreaterThan(0);
+    expect(install).toBeGreaterThan(add);
   });
 });
 

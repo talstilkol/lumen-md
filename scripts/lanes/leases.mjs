@@ -68,8 +68,37 @@ function stagedPaths(cwd) {
   return execFileSync("git", ["diff", "--cached", "--name-only", "--diff-filter=ACMRD", "-z"], { cwd, encoding: "utf8" }).split("\0").filter(Boolean);
 }
 
+/** The hooks folder the lease check lives in, relative to the checkout. */
+export const HOOKS_PATH = ".githooks";
+
+/**
+ * Turn the pre-commit lease check on for this checkout (and its worktrees):
+ * core.hooksPath = .githooks. Idempotent; never replaces another hooksPath
+ * the user set (returns "other" and leaves it). scripts/lane.sh runs this for
+ * every lane it opens, so a lane's hook is on without a manual step.
+ * @returns {"installed" | "already" | "other"}
+ */
+export function installHook(cwd = process.cwd()) {
+  let current = "";
+  try {
+    current = execFileSync("git", ["config", "--get", "core.hooksPath"], { cwd, encoding: "utf8" }).trim();
+  } catch {
+    /* why: unset (git exits 1) */
+  }
+  if (current === HOOKS_PATH) return "already";
+  if (current) return "other";
+  execFileSync("git", ["config", "core.hooksPath", HOOKS_PATH], { cwd });
+  return "installed";
+}
+
 export function main(argv, env = process.env, cwd = process.cwd()) {
   const [cmd, ...rest] = argv;
+  if (cmd === "install-hook") {
+    const r = installHook(cwd);
+    if (r === "other") console.error(`leases: core.hooksPath is already set to another folder; not changed. Add ".githooks/pre-commit" to it, or: git config core.hooksPath ${HOOKS_PATH}`);
+    else console.log(r === "installed" ? `leases: pre-commit lease check on (core.hooksPath=${HOOKS_PATH})` : "leases: pre-commit lease check already on");
+    return r === "other" ? 1 : 0;
+  }
   const leases = loadLeases(cwd);
   if (cmd === "lint") {
     if (!leases) return 0;
@@ -88,7 +117,7 @@ export function main(argv, env = process.env, cwd = process.cwd()) {
     }
     return 0;
   }
-  console.error("usage: leases.mjs check --staged | check <path…> | lint");
+  console.error("usage: leases.mjs check --staged | check <path…> | lint | install-hook");
   return 2;
 }
 

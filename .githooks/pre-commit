@@ -1,4 +1,5 @@
 #!/bin/sh
 # Lane leases (plan R12.13): with $LUMEN_LANE set, refuse files outside the
-# lane's lease in plan/LEASES.json. Turn on once: git config core.hooksPath .githooks
+# lane's lease in plan/LEASES.json. On for every lane scripts/lane.sh opens; by hand:
+# node scripts/lanes/leases.mjs install-hook
 exec node scripts/lanes/leases.mjs check --staged

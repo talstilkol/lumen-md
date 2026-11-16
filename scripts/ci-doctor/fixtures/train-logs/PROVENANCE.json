@@ -1,0 +1,150 @@
+{
+ "about": "R12.12: where the 20 train-log fixtures come from, checked independently (wave g2, lane L4, 2026-11-16). Each is the output of one real shim v4 run of one repo test file (the 2026-11-14 measurement runs v4-node and t4-node of the same files), compared byte for byte with the original log: the only change is the redaction below. The originals stay outside the repo (they hold machine paths).",
+ "redaction": [
+  "the agent scratch directory → /tmp/scratch (also URL-encoded)",
+  "the agent home folder (/home/<user>/) → /home/u/ (also URL-encoded once and twice)"
+ ],
+ "originals": "the agent scratchpad, P/v4/meas/<run>/<test file>.log (not committed)",
+ "logs": [
+  {
+   "fixture": "DatabaseBlockRender.t4-node.log",
+   "original": "P/v4/meas/t4-node/DatabaseBlockRender.test.tsx.log",
+   "originalSha256": "74ad319e0577f5dd44abc28365bd1aad7278e0b4aef282489fa69553958c75a9",
+   "sha256": "150c8c1904576e04320362360fadad0ab8f691863b80ea45f28a4051e2bd5697",
+   "change": "paths redacted only"
+  },
+  {
+   "fixture": "DatabaseBlockRender.v4-node.log",
+   "original": "P/v4/meas/v4-node/DatabaseBlockRender.test.tsx.log",
+   "originalSha256": "34338bc162526336e9085e1faa57b1176589536beaad5b8566162cef296254f1",
+   "sha256": "7cab795a9ba115e36e4d8a962f00960e8dcd7d9de8138a8245e7e98b4a42d389",
+   "change": "paths redacted only"
+  },
+  {
+   "fixture": "criticMarkupPreview.t4-node.log",
+   "original": "P/v4/meas/t4-node/criticMarkupPreview.test.tsx.log",
+   "originalSha256": "8c735917c05efc567b5f5d83c79f83efdab418e21be8a0f595a995acbb3136d1",
+   "sha256": "8c735917c05efc567b5f5d83c79f83efdab418e21be8a0f595a995acbb3136d1",
+   "change": "none (verbatim)"
+  },
+  {
+   "fixture": "criticMarkupPreview.v4-node.log",
+   "original": "P/v4/meas/v4-node/criticMarkupPreview.test.tsx.log",
+   "originalSha256": "8c735917c05efc567b5f5d83c79f83efdab418e21be8a0f595a995acbb3136d1",
+   "sha256": "8c735917c05efc567b5f5d83c79f83efdab418e21be8a0f595a995acbb3136d1",
+   "change": "none (verbatim)"
+  },
+  {
+   "fixture": "hoverPreview.t4-node.log",
+   "original": "P/v4/meas/t4-node/hoverPreview.test.tsx.log",
+   "originalSha256": "15393c0156c3de149146be308b3d94c5d0f1f6fbf88d0dd9d64aee0150b3270a",
+   "sha256": "15393c0156c3de149146be308b3d94c5d0f1f6fbf88d0dd9d64aee0150b3270a",
+   "change": "none (verbatim)"
+  },
+  {
+   "fixture": "hoverPreview.v4-node.log",
+   "original": "P/v4/meas/v4-node/hoverPreview.test.tsx.log",
+   "originalSha256": "389741765a63249c6b6a45eb97e372302819aaaff95dd559a81facbd952d397f",
+   "sha256": "389741765a63249c6b6a45eb97e372302819aaaff95dd559a81facbd952d397f",
+   "change": "none (verbatim)"
+  },
+  {
+   "fixture": "iworkImport.t4-node.log",
+   "original": "P/v4/meas/t4-node/iworkImport.test.ts.log",
+   "originalSha256": "78ea83b56e90e817ba705852a88dbbb090776fb64bf377997e6a73d78c445172",
+   "sha256": "78ea83b56e90e817ba705852a88dbbb090776fb64bf377997e6a73d78c445172",
+   "change": "none (verbatim)"
+  },
+  {
+   "fixture": "iworkImport.v4-node.log",
+   "original": "P/v4/meas/v4-node/iworkImport.test.ts.log",
+   "originalSha256": "78ea83b56e90e817ba705852a88dbbb090776fb64bf377997e6a73d78c445172",
+   "sha256": "78ea83b56e90e817ba705852a88dbbb090776fb64bf377997e6a73d78c445172",
+   "change": "none (verbatim)"
+  },
+  {
+   "fixture": "modelCredits.t4-node.log",
+   "original": "P/v4/meas/t4-node/modelCredits.test.ts.log",
+   "originalSha256": "4043a23b4cb4db2641ac3f07fabff167986dbea15fe72e65f19a2f1b67e5771b",
+   "sha256": "4043a23b4cb4db2641ac3f07fabff167986dbea15fe72e65f19a2f1b67e5771b",
+   "change": "none (verbatim)"
+  },
+  {
+   "fixture": "modelCredits.v4-node.log",
+   "original": "P/v4/meas/v4-node/modelCredits.test.ts.log",
+   "originalSha256": "4043a23b4cb4db2641ac3f07fabff167986dbea15fe72e65f19a2f1b67e5771b",
+   "sha256": "4043a23b4cb4db2641ac3f07fabff167986dbea15fe72e65f19a2f1b67e5771b",
+   "change": "none (verbatim)"
+  },
+  {
+   "fixture": "pdfHebrew.t4-node.log",
+   "original": "P/v4/meas/t4-node/pdfHebrew.test.ts.log",
+   "originalSha256": "ec8b6fb3e5f2f1294885f0e48fab4ef7f40f79b32dc922ee722bac36a52e5c07",
+   "sha256": "ed9e3e6b87d968888405bc5ee61df7dbfc3d79d427d44f0d3fd354c6e9bd35a6",
+   "change": "paths redacted only"
+  },
+  {
+   "fixture": "pdfHebrew.v4-node.log",
+   "original": "P/v4/meas/v4-node/pdfHebrew.test.ts.log",
+   "originalSha256": "e3b0f19ed613f9e50c6d9becca335a3bd2a0ef33a4960a49d96105e3d6bc0914",
+   "sha256": "21eccf7ff6e1347b1feda5b7dddde50103c86a6622345ab2f010833abd6f89fe",
+   "change": "paths redacted only"
+  },
+  {
+   "fixture": "searchOps.t4-node.log",
+   "original": "P/v4/meas/t4-node/searchOps.test.ts.log",
+   "originalSha256": "4adcecab09c4c96f4cfca04a67f32d2fc0fe938ff18f2cc8c24ce2c170abbc06",
+   "sha256": "4adcecab09c4c96f4cfca04a67f32d2fc0fe938ff18f2cc8c24ce2c170abbc06",
+   "change": "none (verbatim)"
+  },
+  {
+   "fixture": "searchOps.v4-node.log",
+   "original": "P/v4/meas/v4-node/searchOps.test.ts.log",
+   "originalSha256": "4adcecab09c4c96f4cfca04a67f32d2fc0fe938ff18f2cc8c24ce2c170abbc06",
+   "sha256": "4adcecab09c4c96f4cfca04a67f32d2fc0fe938ff18f2cc8c24ce2c170abbc06",
+   "change": "none (verbatim)"
+  },
+  {
+   "fixture": "settingsSchema.t4-node.log",
+   "original": "P/v4/meas/t4-node/settingsSchema.test.ts.log",
+   "originalSha256": "17e648d3ccb7796a6723553ff7431180d0fed999dedc086ad6361d4ac90cb9aa",
+   "sha256": "17e648d3ccb7796a6723553ff7431180d0fed999dedc086ad6361d4ac90cb9aa",
+   "change": "none (verbatim)"
+  },
+  {
+   "fixture": "settingsSchema.v4-node.log",
+   "original": "P/v4/meas/v4-node/settingsSchema.test.ts.log",
+   "originalSha256": "c6047915ce436da9f0e9d20ce8b24ce2fc0ebc55a62447ec2d957a232a92d897",
+   "sha256": "c6047915ce436da9f0e9d20ce8b24ce2fc0ebc55a62447ec2d957a232a92d897",
+   "change": "none (verbatim)"
+  },
+  {
+   "fixture": "syncExplained.t4-node.log",
+   "original": "P/v4/meas/t4-node/syncExplained.test.tsx.log",
+   "originalSha256": "1b1bca971c1837b9abb4e6e4accaa449a0c5df0a977d5ee69570512658d2e6cc",
+   "sha256": "1b1bca971c1837b9abb4e6e4accaa449a0c5df0a977d5ee69570512658d2e6cc",
+   "change": "none (verbatim)"
+  },
+  {
+   "fixture": "syncExplained.v4-node.log",
+   "original": "P/v4/meas/v4-node/syncExplained.test.tsx.log",
+   "originalSha256": "faf75507553acb49255c2c9b80770194a0fdbd215c4d62639d246c1557cbe6b5",
+   "sha256": "faf75507553acb49255c2c9b80770194a0fdbd215c4d62639d246c1557cbe6b5",
+   "change": "none (verbatim)"
+  },
+  {
+   "fixture": "vaultWorker.t4-node.log",
+   "original": "P/v4/meas/t4-node/vaultWorker.test.ts.log",
+   "originalSha256": "2d7fb824150f74bfa3a06ff815bfa5d13305d09f43b064dc519786ad7002c83b",
+   "sha256": "373f4fd078ad13f9272c79593f1b923c76cc1469f99fb06561b4e9e0bd4ae852",
+   "change": "paths redacted only"
+  },
+  {
+   "fixture": "vaultWorker.v4-node.log",
+   "original": "P/v4/meas/v4-node/vaultWorker.test.ts.log",
+   "originalSha256": "824affb570d856840448529f7f9ba0c94f036e83eec8d601383d6b873f38672d",
+   "sha256": "21fee8920dc32eef8e83c40e388176f0601eb451792a9dea35de3962094502c1",
+   "change": "paths redacted only"
+  }
+ ]
+}
