@@ -1,4 +1,7 @@
 {
+  "toast.abstractFailed": "לא ניתן היה לכתוב את התקציר: {error}",
+  "toast.abstractNoModel": "אף מודל מקומי לא ענה: מוצגים משפטים מתוך הפתק.",
+  "toast.abstractWorking": "כותב כותרות ותקציר…",
   "toast.actionItemsAdded": "✅ המשימות נוספו",
   "toast.actionItemsFailed": "חילוץ המשימות נכשל: {error}",
   "toast.addedTag": "✅ תגיות שנוספו: {count}",

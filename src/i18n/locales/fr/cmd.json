@@ -620,6 +620,8 @@
   "cmd.voice.meetingFile": "🎙 Transcrire l’enregistrement d’une réunion (qui a dit quoi)…",
   "cmd.window.new": "Nouvelle fenêtre",
   "cmd.window.new.hint": "Une autre fenêtre d'édition ; faites glisser les onglets entre fenêtres",
+  "cmd.writing.abstract": "Écriture : titres, résumé et TL;DR",
+  "cmd.writing.abstract.hint": "Trois titres, un résumé de 150 à 250 mots et un TL;DR — chaque phrase rattachée à un paragraphe de la note, sur cet appareil",
   "cmd.writing.explainChange": "Écriture : expliquer ma modification",
   "cmd.writing.explainChange.hint": "Comparer à une version antérieure : un court résumé et chaque changement de nombre, de négation ou de nom — sur cet appareil",
   "cmd.writing.goals": "Écriture : objectifs et bilan hebdomadaire",

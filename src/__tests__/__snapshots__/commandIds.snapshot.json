@@ -2278,6 +2278,13 @@
       "icon": "Sparkles"
     },
     {
+      "id": "writing.abstract",
+      "label": "Writing: titles, abstract and TL;DR",
+      "group": "Edit",
+      "hint": "Three titles, a 150–250 word abstract and a one-line TL;DR — every sentence tied to a paragraph of the note, on this device",
+      "icon": "Sparkles"
+    },
+    {
       "id": "writing.goals",
       "label": "Writing: goals and weekly report",
       "group": "Edit",
@@ -4723,6 +4730,13 @@
       "icon": "Sparkles"
     },
     {
+      "id": "writing.abstract",
+      "label": "Writing: titles, abstract and TL;DR",
+      "group": "Edit",
+      "hint": "Three titles, a 150–250 word abstract and a one-line TL;DR — every sentence tied to a paragraph of the note, on this device",
+      "icon": "Sparkles"
+    },
+    {
       "id": "writing.goals",
       "label": "Writing: goals and weekly report",
       "group": "Edit",
@@ -5079,6 +5093,7 @@
     "writing.repetition",
     "writing.loanwords",
     "writing.explainChange",
+    "writing.abstract",
     "writing.goals",
     "types.page",
     "types.studio"

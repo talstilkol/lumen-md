@@ -5,6 +5,8 @@
  *   npm run eval:card                       every *.json under eval/results and eval/cards
  *   npm run eval:card -- <file|dir> …       these reports
  *   npm run eval:card -- --json             one line of JSON per report
+ *   npm run eval:card -- --agent <id>       only the reports of one agent (`"agent": "<id>"` at the top level, W13.W12);
+ *                                           exit 1 when it has none
  *
  * Exit 1 when any report has no card or its card is missing a field
  * (scripts/lib/evalCard.mjs lists them). Exit 0 with nothing to check.
@@ -45,9 +47,33 @@ export function checkReports(paths, { root = ROOT } = {}) {
   });
 }
 
+/** The agent a report belongs to (its top-level `agent`), or null. */
+function agentOf(root, file) {
+  try {
+    const j = JSON.parse(readFileSync(resolve(root, file), "utf8"));
+    return typeof j?.agent === "string" ? j.agent : null;
+  } catch {
+    return null;
+  }
+}
+
 export function main(argv, { root = ROOT, log = console.log, err = console.error } = {}) {
   const json = argv.includes("--json");
-  const results = checkReports(argv.filter((a) => !a.startsWith("--")), { root });
+  const ai = argv.indexOf("--agent");
+  const agent = ai >= 0 ? argv[ai + 1] : null;
+  if (ai >= 0 && (!agent || agent.startsWith("--"))) {
+    err("eval:card: --agent needs an agent id");
+    return 2;
+  }
+  const paths = argv.filter((a, i) => !a.startsWith("--") && !(ai >= 0 && i === ai + 1));
+  let results = checkReports(paths, { root });
+  if (agent) {
+    results = results.filter((r) => agentOf(root, r.file) === agent);
+    if (!results.length) {
+      err(`eval:card: no report for the agent "${agent}"`);
+      return 1;
+    }
+  }
   for (const r of results) {
     if (json) log(JSON.stringify(r));
     else if (r.problems.length) err(`✗ ${r.file}\n    ${r.problems.join("\n    ")}`);

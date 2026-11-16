@@ -620,6 +620,8 @@
   "cmd.voice.meetingFile": "🎙 会議の録音を文字起こし（誰が何を言ったか）…",
   "cmd.window.new": "新しいウィンドウ",
   "cmd.window.new.hint": "別の編集ウィンドウ。タブをウィンドウ間でドラッグできます",
+  "cmd.writing.abstract": "執筆：タイトル・要旨・TL;DR",
+  "cmd.writing.abstract.hint": "タイトル3案、150〜250語の要旨、一行のTL;DR — 各文はノートの段落に紐づく。この端末上で",
   "cmd.writing.explainChange": "執筆：変更内容を説明",
   "cmd.writing.explainChange.hint": "以前の版と比較：短い要約と、数値・否定・名前の変更をすべて表示 — この端末上で",
   "cmd.writing.goals": "執筆：目標と週間レポート",

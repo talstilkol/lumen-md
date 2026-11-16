@@ -620,6 +620,8 @@
   "cmd.voice.meetingFile": "🎙 תמלול הקלטת פגישה (מי אמר מה)…",
   "cmd.window.new": "חלון חדש",
   "cmd.window.new.hint": "עוד חלון עריכה; אפשר לגרור לשוניות בין חלונות",
+  "cmd.writing.abstract": "כתיבה: כותרת, תקציר ו-TL;DR",
+  "cmd.writing.abstract.hint": "שלוש כותרות, תקציר של 150–250 מילים ושורת סיכום — כל משפט קשור לפסקה בפתק, במכשיר הזה",
   "cmd.writing.explainChange": "כתיבה: הסבר את השינוי שלי",
   "cmd.writing.explainChange.hint": "השוואה לגרסה קודמת: סיכום קצר וכל שינוי של מספר, שלילה או שם — במכשיר הזה",
   "cmd.writing.goals": "כתיבה: יעדים ודוח שבועי",

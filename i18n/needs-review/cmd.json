@@ -47,6 +47,22 @@
     "ru": "l899cf",
     "zh-CN": "l899cf"
   },
+  "cmd.writing.abstract": {
+    "ar": "uia602",
+    "de": "uia602",
+    "fr": "uia602",
+    "ja": "uia602",
+    "ru": "uia602",
+    "zh-CN": "uia602"
+  },
+  "cmd.writing.abstract.hint": {
+    "ar": "1ce6sza",
+    "de": "1ce6sza",
+    "fr": "1ce6sza",
+    "ja": "1ce6sza",
+    "ru": "1ce6sza",
+    "zh-CN": "1ce6sza"
+  },
   "cmd.writing.explainChange": {
     "ar": "iifpym",
     "de": "iifpym",

@@ -620,6 +620,8 @@
   "cmd.voice.meetingFile": "🎙 Besprechungsaufnahme transkribieren (wer hat was gesagt)…",
   "cmd.window.new": "Neues Fenster",
   "cmd.window.new.hint": "Ein weiteres Editorfenster; Tabs zwischen Fenstern ziehen",
+  "cmd.writing.abstract": "Schreiben: Titel, Abstract und TL;DR",
+  "cmd.writing.abstract.hint": "Drei Titel, ein Abstract mit 150–250 Wörtern und ein TL;DR – jeder Satz an einen Absatz der Notiz gebunden, auf diesem Gerät",
   "cmd.writing.explainChange": "Schreiben: meine Änderung erklären",
   "cmd.writing.explainChange.hint": "Mit einer früheren Version vergleichen: kurze Zusammenfassung und jede geänderte Zahl, Verneinung oder jeder Name – auf diesem Gerät",
   "cmd.writing.goals": "Schreiben: Ziele und Wochenbericht",

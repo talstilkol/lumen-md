@@ -3135,6 +3135,16 @@
       "vars": []
     },
     {
+      "key": "cmd.writing.abstract",
+      "en": "Writing: titles, abstract and TL;DR",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.abstract.hint",
+      "en": "Three titles, a 150–250 word abstract and a one-line TL;DR — every sentence tied to a paragraph of the note, on this device",
+      "vars": []
+    },
+    {
       "key": "cmd.writing.explainChange",
       "en": "Writing: explain my change",
       "vars": []

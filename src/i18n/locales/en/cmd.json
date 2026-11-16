@@ -383,6 +383,8 @@
   "cmd.voice.meeting": "🎙 Meeting notes (record on this device)",
   "cmd.voice.meetingFile": "🎙 Transcribe a meeting recording (who said what)…",
   "cmd.window.new": "New window",
+  "cmd.writing.abstract": "Writing: titles, abstract and TL;DR",
+  "cmd.writing.abstract.hint": "Three titles, a 150–250 word abstract and a one-line TL;DR — every sentence tied to a paragraph of the note, on this device",
   "cmd.writing.explainChange": "Writing: explain my change",
   "cmd.writing.explainChange.hint": "Compare with an earlier version: a short summary and every change of a number, a negation or a name — on this device",
   "cmd.writing.goals": "Writing: goals and weekly report",
