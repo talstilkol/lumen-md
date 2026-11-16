@@ -20,6 +20,13 @@
  * (R8-L3): each call site needs its own `// skip-reason:` with a task and a
  * date, and e2e/ may hold at most MAX_E2E_HELPER_SKIPS of them, so a new
  * spec cannot skip WebKit and Firefox through the helper unreviewed.
+ * A helper is found however it is imported from `./_engines` (R8b-L4): by
+ * name, renamed (`{ chromiumOnly as only }`) or through a namespace
+ * (`E.chromiumOnly(...)`). A helper or that namespace used other than in a
+ * call (`.forEach(chromiumOnlyHere)`, `const f = E.chromiumOnly`, a
+ * re-export) fails: such a skip would have no call site of its own to carry
+ * its reason. Helpers are exported functions or exported const arrow /
+ * function expressions, also exported through `export { ... }`.
  *
  * The check walks the TypeScript AST, so the words in strings and comments
  * do not count. Used by scripts/check-code-hygiene.mjs and
@@ -98,25 +105,77 @@ function annotationFor(lines, line) {
   return null;
 }
 
+/** The module specifier of the engine helpers file, as a spec imports it ("./_engines", "../_engines.ts"). */
+const ENGINES_SPEC = /(^|\/)_engines(\.[cm]?[jt]s)?$/;
+
+/**
+ * How a file binds the helpers it imports from ./_engines: local name → helper name
+ * (`{ chromiumOnly as only }`), the namespace locals (`* as E`), and the re-exports.
+ */
+function engineBindings(sf, helpers) {
+  const named = new Map();
+  const spaces = new Set();
+  const reexports = [];
+  for (const st of sf.statements) {
+    if (ts.isImportDeclaration(st) && ts.isStringLiteral(st.moduleSpecifier) && ENGINES_SPEC.test(st.moduleSpecifier.text)) {
+      const b = st.importClause?.namedBindings;
+      if (b && ts.isNamespaceImport(b)) spaces.add(b.name.text);
+      else if (b && ts.isNamedImports(b)) for (const el of b.elements) if (helpers.has((el.propertyName ?? el.name).text)) named.set(el.name.text, (el.propertyName ?? el.name).text);
+    }
+    if (ts.isExportDeclaration(st) && st.moduleSpecifier && ts.isStringLiteral(st.moduleSpecifier) && ENGINES_SPEC.test(st.moduleSpecifier.text)) {
+      const names = st.exportClause && ts.isNamedExports(st.exportClause) ? st.exportClause.elements.map((el) => (el.propertyName ?? el.name).text) : null;
+      if (names === null || names.some((n) => helpers.has(n))) reexports.push(st);
+    }
+  }
+  return { named, spaces, reexports };
+}
+
+const REFERENCE = "a skip helper used other than in a call (passed, stored or re-exported): call it where the test skips, with its own `// skip-reason:`";
+
 /**
  * Every skip/defer call in one file: { line, call, condition, annotation, problems }.
- * `problems` is empty for a call with a complete, in-date skip-reason.
+ * `problems` is empty for a call with a complete, in-date skip-reason. With `helpers`
+ * (the e2e/_engines.ts skip helpers), their calls count too, and a helper used but not called fails.
  */
 export function findSkips(file, text, today = new Date(), helpers = new Set()) {
   const kind = /\.tsx$/.test(file) ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
   const sf = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, kind);
   const lines = text.split(/\r?\n/);
   const out = [];
+  const { named, spaces, reexports } = helpers.size ? engineBindings(sf, helpers) : { named: new Map(), spaces: new Set(), reexports: [] };
+  /** The helper a callee names: `chromiumOnly`, a renamed import, or `E.chromiumOnly`. */
+  const helperOf = (e) => {
+    if (ts.isIdentifier(e)) return named.get(e.text) ?? (helpers.has(e.text) ? e.text : null);
+    if (ts.isPropertyAccessExpression(e) && ts.isIdentifier(e.expression) && spaces.has(e.expression.text) && helpers.has(e.name.text)) return e.name.text;
+    return null;
+  };
+  const lineOf = (node) => sf.getLineAndCharacterOfPosition(node.getStart(sf)).line + 1;
+  const reference = (node, what) => out.push({ line: lineOf(node), call: `${what} (not a call)`, condition: "", annotation: null, problems: [REFERENCE], helper: true, reference: true });
+  for (const st of reexports) reference(st, st.getText(sf).replace(/\s+/g, " "));
+  const callees = new Set();
   const visit = (node) => {
+    if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node) || callees.has(node)) return;
     if (ts.isCallExpression(node)) {
-      const c = skipCallee(node.expression) ?? (ts.isIdentifier(node.expression) && helpers.has(node.expression.text) ? { root: node.expression.text, member: "", helper: true } : null);
+      const h = helperOf(node.expression);
+      const c = skipCallee(node.expression) ?? (h ? { root: node.expression.getText(sf), member: "", helper: true } : null);
+      if (h) callees.add(node.expression);
       if (c) {
-        const line = sf.getLineAndCharacterOfPosition(node.getStart(sf)).line + 1;
+        const line = lineOf(node);
         const annotation = annotationFor(lines, line);
         const problems = annotation === null ? ["no `// skip-reason: <why> | task: <id> | until: YYYY-MM-DD` comment"] : parseAnnotation(annotation, today).problems;
         const first = node.arguments[0];
         const condition = first && !ts.isStringLiteralLike(first) && !ts.isNoSubstitutionTemplateLiteral(first) ? first.getText(sf).replace(/\s+/g, " ") : "";
-        out.push({ line, call: `${c.root}${node.expression.getText(sf).slice(c.root.length)}`, condition, annotation, problems, ...(c.helper ? { helper: true } : {}) });
+        out.push({ line, call: c.helper ? c.root : `${c.root}${node.expression.getText(sf).slice(c.root.length)}`, condition, annotation, problems, ...(c.helper ? { helper: true } : {}) });
+      }
+    } else {
+      // A helper (or the namespace that holds them) that is not called: passed, stored, spread, re-exported.
+      if (ts.isPropertyAccessExpression(node) && ts.isIdentifier(node.expression) && spaces.has(node.expression.text)) {
+        if (helpers.has(node.name.text)) reference(node, node.getText(sf));
+        return; // E.<other export> is not a helper
+      }
+      if (ts.isIdentifier(node) && !isDeclarationName(node)) {
+        if (spaces.has(node.text)) reference(node, node.text);
+        else if (named.has(node.text)) reference(node, node.text);
       }
     }
     ts.forEachChild(node, visit);
@@ -125,13 +184,45 @@ export function findSkips(file, text, today = new Date(), helpers = new Set()) {
   return out;
 }
 
-/** The exported functions of a helper file that contain a skip call (`chromiumOnly`, `chromiumOnlyHere`, …). */
+/** An identifier that names something (a declaration, a property key, a member after a dot), not a use of a binding. */
+function isDeclarationName(id) {
+  const p = id.parent;
+  if (!p) return false;
+  if (ts.isPropertyAccessExpression(p) && p.name === id) return true;
+  if ((ts.isPropertyAssignment(p) || ts.isMethodDeclaration(p) || ts.isPropertyDeclaration(p) || ts.isPropertySignature(p)) && p.name === id) return true;
+  if ((ts.isVariableDeclaration(p) || ts.isFunctionDeclaration(p) || ts.isParameter(p) || ts.isBindingElement(p) || ts.isClassDeclaration(p) || ts.isTypeAliasDeclaration(p) || ts.isInterfaceDeclaration(p)) && p.name === id) return true;
+  if (ts.isQualifiedName(p) || ts.isTypeReferenceNode(p) || ts.isTypeQueryNode(p)) return true;
+  if (ts.isLabeledStatement(p) || ts.isBreakOrContinueStatement(p)) return true;
+  return false;
+}
+
+/**
+ * The exported functions of a helper file that contain a skip call (`chromiumOnly`, `chromiumOnlyHere`, …):
+ * `export function f`, `export const f = () => …` / `function () …`, and local ones exported by `export { f }`.
+ */
 export function skipHelpers(text, file = ENGINE_HELPERS_FILE) {
   const sf = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  const exported = (st) => st.modifiers?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword);
+  const skips = (node) => findSkips(file, node.getText(sf)).length > 0;
+  const local = new Map();
   const names = new Set();
   for (const st of sf.statements) {
-    if (!ts.isFunctionDeclaration(st) || !st.name || !st.modifiers?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword)) continue;
-    if (findSkips(file, st.getText(sf)).length) names.add(st.name.text);
+    if (ts.isFunctionDeclaration(st) && st.name) {
+      local.set(st.name.text, skips(st));
+      if (exported(st) && skips(st)) names.add(st.name.text);
+    } else if (ts.isVariableStatement(st)) {
+      for (const d of st.declarationList.declarations) {
+        if (!ts.isIdentifier(d.name) || !d.initializer) continue;
+        const fn = ts.isArrowFunction(d.initializer) || ts.isFunctionExpression(d.initializer);
+        const s = fn && skips(d.initializer);
+        local.set(d.name.text, s);
+        if (exported(st) && s) names.add(d.name.text);
+      }
+    }
+  }
+  for (const st of sf.statements) {
+    if (!ts.isExportDeclaration(st) || st.moduleSpecifier || !st.exportClause || !ts.isNamedExports(st.exportClause)) continue;
+    for (const el of st.exportClause.elements) if (local.get((el.propertyName ?? el.name).text)) names.add(el.name.text);
   }
   return names;
 }
@@ -170,7 +261,7 @@ export function auditSkips(root, { today = new Date() } = {}) {
       const text = readFileSync(file, "utf8");
       const rel = relative(root, file).split("\\").join("/");
       const own = area === "e2e" && rel !== ENGINE_HELPERS_FILE ? helpers : new Set();
-      if (!/\b(skip|fixme|todo|skipIf|runIf)\b/.test(text) && ![...own].some((h) => text.includes(`${h}(`))) continue;
+      if (!/\b(skip|fixme|todo|skipIf|runIf)\b/.test(text) && !(own.size && (text.includes("_engines") || [...own].some((h) => text.includes(h))))) continue;
       for (const s of findSkips(file, text, today, own)) sites.push({ area, file: rel, ...s });
     }
   }
