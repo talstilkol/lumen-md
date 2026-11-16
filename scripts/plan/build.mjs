@@ -860,10 +860,14 @@ export const isStarted = (task) => {
  */
 export function wipWarnings(plan, { limit } = {}) {
   const max = Number.isInteger(limit) && limit >= 0 ? limit : Number.isInteger(plan.schedule?.wipLimit) ? plan.schedule.wipLimit : WIP_LIMIT;
-  const waves = plan.phases
-    .map((p) => ({ n: waveNumber(p.title), tasks: p.tasks }))
-    .filter((w) => w.n !== null)
-    .sort((a, b) => a.n - b.n);
+  // A part of a wave ("גל 12ב") is that wave: its tasks join wave 12's, so wave 12 is never "followed" by itself.
+  const byWave = new Map();
+  for (const p of plan.phases) {
+    const n = waveNumber(p.title);
+    if (n === null) continue;
+    byWave.set(n, [...(byWave.get(n) ?? []), ...p.tasks]);
+  }
+  const waves = [...byWave].map(([n, tasks]) => ({ n, tasks })).sort((a, b) => a.n - b.n);
   const out = [];
   for (let i = 0; i + 1 < waves.length; i++) {
     const open = waves[i].tasks.filter((t) => belowFloor(t));

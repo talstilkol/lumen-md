@@ -407,6 +407,15 @@ describe("work-in-progress limit (plan W6.39)", () => {
     expect(wipWarnings(verified, { limit: 0 })).toEqual([]);
   });
 
+  it("a part of a wave (גל 12ב) counts with its wave, not as the wave after it", () => {
+    const part = (ts: T[]) => ({ title: "גל 1ב — שימוש חוזר", tasks: ts });
+    const p = { schedule: {}, phases: [wave(1, w1), part([{ id: "R1.1", status: "⏳ #7" }, { id: "R1.2", status: "⏳ #8" }]), wave(2, [{ id: "W2.1", status: "⏳ #9" }])] };
+    // Never "wave 1 … while wave 1 has started"; wave 1 with its part (W1.1, W1.2, R1.1, R1.2) against wave 2.
+    expect(wipWarnings(p, { limit: 1 })).toEqual([{ wave: 1, next: 2, limit: 1, open: ["W1.1", "W1.2", "R1.1", "R1.2"], unlabelled: 3, started: ["W2.1"] }]);
+    expect(wipWarnings(p, { limit: 4 })).toEqual([]);
+    expect(wipWarnings({ schedule: {}, phases: [wave(1, w1), part([{ id: "R1.1", status: "⏳ #7" }])] }, { limit: 0 })).toEqual([]);
+  });
+
   it("run() reports the warnings; the CLI only warns unless --wip-strict", () => {
     const p = plan();
     expect(run({ root: ROOT, check: true, wipLimit: 3 }).wip).toEqual(wipWarnings(p, { limit: 3 }));
@@ -472,6 +481,15 @@ describe("work-in-progress limit (plan W6.39)", () => {
     // Verifying the wave lifts it.
     const verified = mini(w1.map((t) => (t.status?.startsWith("⏳") ? { ...t, verified: "browser" } : t)), [{ id: "W2.1", status: "⏳" }]);
     expect(wipWarnings(verified, { limit: 0 })).toEqual([]);
+  });
+
+  it("a part of a wave (גל 12ב) counts with its wave, not as the wave after it", () => {
+    const part = (ts: T[]) => ({ title: "גל 1ב — שימוש חוזר", tasks: ts });
+    const p = { schedule: {}, phases: [wave(1, w1), part([{ id: "R1.1", status: "⏳ #7" }, { id: "R1.2", status: "⏳ #8" }]), wave(2, [{ id: "W2.1", status: "⏳ #9" }])] };
+    // Never "wave 1 … while wave 1 has started"; wave 1 with its part (W1.1, W1.2, R1.1, R1.2) against wave 2.
+    expect(wipWarnings(p, { limit: 1 })).toEqual([{ wave: 1, next: 2, limit: 1, open: ["W1.1", "W1.2", "R1.1", "R1.2"], unlabelled: 3, started: ["W2.1"] }]);
+    expect(wipWarnings(p, { limit: 4 })).toEqual([]);
+    expect(wipWarnings({ schedule: {}, phases: [wave(1, w1), part([{ id: "R1.1", status: "⏳ #7" }])] }, { limit: 0 })).toEqual([]);
   });
 
   it("run() reports the warnings; the CLI only warns unless --wip-strict", () => {
