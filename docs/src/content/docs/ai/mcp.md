@@ -239,6 +239,13 @@ your files. Nothing is connected until you add a server and turn it on.
 - **Servers:** local ones (a command on this computer, desktop app only, or a
   `127.0.0.1` address) and remote ones (Streamable HTTP). Lumen speaks MCP
   2026-07-28 and falls back to the older handshake for older servers.
+- **A program runs only as you approved it:** the first time, the desktop
+  app shows the program's full path, its sha256, each argument and the
+  folder in its own dialog, and the approval is for exactly that: that file,
+  those arguments, that folder, and every file an argument names (a script,
+  for example). If one byte of them changes, or the arguments do, nothing
+  starts until you approve again. Settings → MCP servers → *Check approval* /
+  *Withdraw approval*.
 - **Permission per server and per tool:** *read* (runs without asking, only
   for tools the server marks read-only), *ask* (you approve each call, the
   default) or *block* (never offered to the model).

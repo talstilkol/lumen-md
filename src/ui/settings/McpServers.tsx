@@ -15,6 +15,10 @@
  *     definitions" pins them; it does not allow any call by itself.
  *   • Suggested servers (C3) list licence, what they reach and how to
  *     install; "Use" fills the form and connects nothing.
+ *   • A program's approval (desktop, W13.X1) is an allow-list entry pinned
+ *     to its full path, its sha256 and the exact arguments: "Check approval"
+ *     says whether this exact command is still on it (a changed program is
+ *     not), "Withdraw approval" takes it off. Neither starts anything.
  */
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { t } from "../../i18n";
@@ -24,6 +28,7 @@ import { SUGGESTED, formFromSuggestion, type SuggestedServer } from "../../agent
 import { serverLog, subscribeServerLog } from "../../agents/mcp/log";
 import { toolApprovals } from "../../agents/mcp/approvals";
 import type { ListedTool } from "../../agents/mcp/registry";
+import { stdioRefusal, type StdioSpec } from "../../agents/mcp/transports/stdio";
 
 type Draft = { id: string; label: string; transport: "http" | "stdio"; url: string; command: string; args: string; cwd: string; offline: boolean; defaultPermission: ToolPermission };
 
@@ -48,6 +53,52 @@ function configOf(d: Draft): Omit<McpServerConfig, "enabled" | "tools"> {
     ...(d.cwd.trim() ? { cwd: d.cwd.trim() } : {}),
     ...(d.offline ? { offline: true } : {}),
   };
+}
+
+/** The desktop allow-list, read and withdrawn (src-tauri/src/mcp_stdio.rs). Never asks, never starts. */
+export interface StdioApprovals {
+  approved(spec: StdioSpec): Promise<boolean>;
+  revoke(spec: StdioSpec): Promise<boolean>;
+}
+
+const tauriApprovals: StdioApprovals = {
+  async approved(spec) {
+    const { invoke } = await import("@tauri-apps/api/core");
+    return (await invoke("mcp_stdio_approved", { command: spec.command, args: spec.args, cwd: spec.cwd ?? null })) === true;
+  },
+  async revoke(spec) {
+    const { invoke } = await import("@tauri-apps/api/core");
+    return (await invoke("mcp_stdio_revoke", { command: spec.command, args: spec.args, cwd: spec.cwd ?? null })) === true;
+  },
+};
+
+const specOf = (s: McpServerConfig): StdioSpec => ({ command: s.command ?? "", args: s.args ?? [], ...(s.cwd ? { cwd: s.cwd } : {}) });
+
+/** An error from connecting, in the user's words when it is the allow-list's refusal. */
+function connectError(message: string): string {
+  const why = stdioRefusal(message);
+  return why ? t(why === "changed" ? "mcpServers.stdio.changed" : "mcpServers.stdio.notApproved") : message;
+}
+
+function StdioApproval({ server, approvals }: { server: McpServerConfig; approvals: StdioApprovals }) {
+  const [state, setState] = useState<"unknown" | "yes" | "no" | "revoked" | string>("unknown");
+  const run = (f: () => Promise<"yes" | "no" | "revoked">) =>
+    void f().then(setState, (e) => setState(String((e as Error)?.message ?? e)));
+  return (
+    <div style={row}>
+      <button type="button" data-testid={`mcp-approval-check-${server.id}`} onClick={() => run(async () => ((await approvals.approved(specOf(server))) ? "yes" : "no"))}>
+        {t("mcpServers.approval.check")}
+      </button>
+      <button type="button" data-testid={`mcp-approval-revoke-${server.id}`} onClick={() => run(async () => (await approvals.revoke(specOf(server)), "revoked"))}>
+        {t("mcpServers.approval.revoke")}
+      </button>
+      {state !== "unknown" && (
+        <span role="status" style={muted} data-testid={`mcp-approval-${server.id}`}>
+          {state === "yes" ? t("mcpServers.approval.yes") : state === "no" ? t("mcpServers.approval.no") : state === "revoked" ? t("mcpServers.approval.revoked") : state}
+        </span>
+      )}
+    </div>
+  );
 }
 
 function ServerLog({ id }: { id: string }) {
@@ -102,7 +153,15 @@ function Tools({ server, list, onChange }: { server: McpServerConfig; list: List
   );
 }
 
-export function McpServers({ list = (s: McpServerConfig) => import("../../agents/mcp/registry").then((m) => m.listServerTools(s)), desktop = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window }: { list?: (s: McpServerConfig) => Promise<ListedTool[]>; desktop?: boolean }) {
+export function McpServers({
+  list = (s: McpServerConfig) => import("../../agents/mcp/registry").then((m) => m.listServerTools(s)),
+  desktop = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window,
+  approvals = tauriApprovals,
+}: {
+  list?: (s: McpServerConfig) => Promise<ListedTool[]>;
+  desktop?: boolean;
+  approvals?: StdioApprovals;
+}) {
   const [servers, setServers] = useState<McpServerConfig[]>(() => readServers());
   const [draft, setDraft] = useState<Draft>(EMPTY);
   const [formError, setFormError] = useState<string | null>(null);
@@ -128,7 +187,7 @@ export function McpServers({ list = (s: McpServerConfig) => import("../../agents
       const listed = await list(s);
       setTools((x) => ({ ...x, [s.id]: listed }));
     } catch (e) {
-      setTools((x) => ({ ...x, [s.id]: String((e as Error)?.message ?? e) }));
+      setTools((x) => ({ ...x, [s.id]: connectError(String((e as Error)?.message ?? e)) }));
     }
   };
 
@@ -153,6 +212,7 @@ export function McpServers({ list = (s: McpServerConfig) => import("../../agents
               <span style={muted}>{s.transport === "http" ? s.url : `${s.command ?? ""} ${(s.args ?? []).join(" ")}`}</span>
             </div>
             {s.transport === "stdio" && !desktop && <p style={muted}>{t("mcpServers.desktopOnly")}</p>}
+            {s.transport === "stdio" && desktop && <StdioApproval server={s} approvals={approvals} />}
             <div style={row}>
               <label style={row}>
                 <input
@@ -288,6 +348,7 @@ export function McpServers({ list = (s: McpServerConfig) => import("../../agents
               {t("mcpServers.offline")}
             </label>
             <p style={muted}>{t("mcpServers.form.stdioNote")}</p>
+            <p style={muted}>{t("mcpServers.form.stdioPinned")}</p>
           </>
         )}
         {formError && (

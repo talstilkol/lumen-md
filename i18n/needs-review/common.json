@@ -915,6 +915,51 @@
     "ru": "1df7h82",
     "zh-CN": "1df7h82"
   },
+  "mcpServers.approval.check": {
+    "ar": "v9zjxi",
+    "de": "v9zjxi",
+    "fr": "v9zjxi",
+    "he": "v9zjxi",
+    "ja": "v9zjxi",
+    "ru": "v9zjxi",
+    "zh-CN": "v9zjxi"
+  },
+  "mcpServers.approval.no": {
+    "ar": "11z5x4p",
+    "de": "11z5x4p",
+    "fr": "11z5x4p",
+    "he": "11z5x4p",
+    "ja": "11z5x4p",
+    "ru": "11z5x4p",
+    "zh-CN": "11z5x4p"
+  },
+  "mcpServers.approval.revoke": {
+    "ar": "vs8xhy",
+    "de": "vs8xhy",
+    "fr": "vs8xhy",
+    "he": "vs8xhy",
+    "ja": "vs8xhy",
+    "ru": "vs8xhy",
+    "zh-CN": "vs8xhy"
+  },
+  "mcpServers.approval.revoked": {
+    "ar": "lyfl26",
+    "de": "lyfl26",
+    "fr": "lyfl26",
+    "he": "lyfl26",
+    "ja": "lyfl26",
+    "ru": "lyfl26",
+    "zh-CN": "lyfl26"
+  },
+  "mcpServers.approval.yes": {
+    "ar": "1w4vcv9",
+    "de": "1w4vcv9",
+    "fr": "1w4vcv9",
+    "he": "1w4vcv9",
+    "ja": "1w4vcv9",
+    "ru": "1w4vcv9",
+    "zh-CN": "1w4vcv9"
+  },
   "mcpServers.ask.problems": {
     "ar": "1hyaz2",
     "de": "1hyaz2",
@@ -1378,6 +1423,15 @@
     "ru": "142ym8i",
     "zh-CN": "142ym8i"
   },
+  "mcpServers.form.stdioPinned": {
+    "ar": "1wm5olu",
+    "de": "1wm5olu",
+    "fr": "1wm5olu",
+    "he": "1wm5olu",
+    "ja": "1wm5olu",
+    "ru": "1wm5olu",
+    "zh-CN": "1wm5olu"
+  },
   "mcpServers.form.transport": {
     "ar": "1doej20",
     "de": "1doej20",
@@ -1512,6 +1566,24 @@
     "ja": "rj7imf",
     "ru": "rj7imf",
     "zh-CN": "rj7imf"
+  },
+  "mcpServers.stdio.changed": {
+    "ar": "140y270",
+    "de": "140y270",
+    "fr": "140y270",
+    "he": "140y270",
+    "ja": "140y270",
+    "ru": "140y270",
+    "zh-CN": "140y270"
+  },
+  "mcpServers.stdio.notApproved": {
+    "ar": "10yf3y7",
+    "de": "10yf3y7",
+    "fr": "10yf3y7",
+    "he": "10yf3y7",
+    "ja": "10yf3y7",
+    "ru": "10yf3y7",
+    "zh-CN": "10yf3y7"
   },
   "mcpServers.suggested": {
     "ar": "cg3318",
