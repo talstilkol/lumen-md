@@ -110,8 +110,15 @@ export interface ParsedEmbed {
   alias: string | null;
 }
 
-/** Split the inside of `![[…]]`. */
-export function parseEmbed(inner: string): ParsedEmbed {
+/**
+ * Split the inside of `![[…]]`. In the Markdown source an embed inside a
+ * table writes its bars as `\|` (Obsidian; Quartz's ofm.ts escapes them the
+ * same way): `![[Note\|alias]]` is the note "Note" with alias "alias", not a
+ * note called "Note\". The parsed tree has the bar already unescaped; the
+ * source scans (embeddedTexts, missingEmbedded) read it raw.
+ */
+export function parseEmbed(raw: string): ParsedEmbed {
+  const inner = raw.replace(/\\\|/g, "|");
   const bar = inner.indexOf("|");
   const target = (bar < 0 ? inner : inner.slice(0, bar)).trim();
   const alias = bar < 0 ? null : inner.slice(bar + 1).trim() || null;
