@@ -14,6 +14,10 @@
  *   • When the process ends, every waiting request fails and the transport
  *     is closed: the next call starts a new one (registry.ts).
  *   • `close()` closes stdin, waits, then kills (the Rust side).
+ *   • A write that fails or times out (the server stopped reading its stdin)
+ *     closes the transport the same way, fails every waiting request and
+ *     tells the pool (`onStuck`), so the next call starts a new process
+ *     instead of writing to a stuck one again (R8b-L6).
  */
 import { McpClientError, type JsonRpcMessage, type McpTransport } from "../client";
 
@@ -44,6 +48,8 @@ export interface StdioOptions {
   timeoutMs?: number;
   onStderr?: (line: string) => void;
   onExit?: (code: number | null) => void;
+  /** A write failed or timed out: the transport closed itself (R8b-L6). */
+  onStuck?: (why: string) => void;
 }
 
 export interface StdioTransport extends McpTransport {
@@ -64,6 +70,29 @@ export function stdioTransport(server: { id: string; label: string }, spec: Stdi
       w.reject(e);
     }
     waiting.clear();
+  };
+
+  /** The server stopped reading: close it, fail what waits, and let the pool drop it (R8b-L6). */
+  const abandon = (why: string) => {
+    if (state === "closed") return;
+    const h = handle;
+    state = "closed";
+    handle = null;
+    failAll(new McpClientError(`the MCP server "${server.label}" stopped reading its input and was closed`));
+    o.onStuck?.(why);
+    void h?.close().catch(() => {
+      /* why: closing kills it; a process already gone has nothing to close */
+    });
+  };
+  /** One line to the server; a failed or timed-out write abandons the server. */
+  const write = async (h: StdioHandle, line: string) => {
+    try {
+      await h.write(line);
+    } catch (e) {
+      const why = (e as Error)?.message ?? String(e);
+      abandon(why);
+      throw new McpClientError(`the MCP server "${server.label}" stopped reading: ${why}`);
+    }
   };
 
   const onEvent = (e: StdioEvent) => {
@@ -131,7 +160,7 @@ export function stdioTransport(server: { id: string; label: string }, spec: Stdi
       // JSON.stringify never emits a raw newline: one message, one line (spec).
       const line = JSON.stringify(msg);
       if (msg.id === undefined || msg.id === null) {
-        await h.write(line);
+        await write(h, line);
         return { message: null };
       }
       const key = String(msg.id);
@@ -139,8 +168,8 @@ export function stdioTransport(server: { id: string; label: string }, spec: Stdi
         const timer = setTimeout(() => {
           waiting.delete(key);
           // stdio cancellation: tell the server, then fail the call.
-          void h.write(JSON.stringify({ jsonrpc: "2.0", method: "notifications/cancelled", params: { requestId: msg.id, reason: "timeout" } })).catch(() => {
-            /* why: the call fails below either way; a dead pipe only means the server is gone */
+          void write(h, JSON.stringify({ jsonrpc: "2.0", method: "notifications/cancelled", params: { requestId: msg.id, reason: "timeout" } })).catch(() => {
+            /* why: the call fails below either way; a failed write has abandoned the server */
           });
           reject(new McpClientError(`${msg.method ?? "request"}: the MCP server "${server.label}" did not answer in ${Math.round((o.timeoutMs ?? DEFAULT_TIMEOUT_MS) / 1000)} s`));
         }, o.timeoutMs ?? DEFAULT_TIMEOUT_MS);
@@ -152,7 +181,9 @@ export function stdioTransport(server: { id: string; label: string }, spec: Stdi
         const w = waiting.get(key);
         if (w) clearTimeout(w.timer);
         waiting.delete(key);
-        throw new McpClientError(`the MCP server "${server.label}" stopped reading: ${(e as Error)?.message ?? e}`);
+        const why = (e as Error)?.message ?? String(e);
+        abandon(why);
+        throw new McpClientError(`the MCP server "${server.label}" stopped reading: ${why}`);
       }
       return { message: await answer };
     },

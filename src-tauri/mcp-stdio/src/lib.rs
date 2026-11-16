@@ -12,17 +12,25 @@
 //!   busybox too), no interpreter given code on the command line (python -c,
 //!   node -e, perl -e, ruby -e, osascript -e, deno eval, ...), no `npx -y`
 //!   (it downloads and runs a package), no control, format (bidi override,
-//!   zero-width) or non-ASCII space characters, bounded sizes. An approval is
+//!   zero-width), other invisible (Default_Ignorable, the Braille blank;
+//!   R8b-L7) or non-ASCII space characters, bounded sizes. An approval is
 //!   for the exact command, arguments and folder (`Spec::canonical`), and the
 //!   dialog shows them quoted, one argument per line (`approval_text`). The
 //!   deny-list narrows what can be asked for; the dialog is the gate (R8-M4).
+//!   The deny-list is known to be incomplete (review 8b, R8b-M1, open): it
+//!   does not catch every way an interpreter or launcher can be handed code,
+//!   so it is not a guarantee that an approved command runs only a script.
 //! - **The process.** A clean environment (PATH, HOME and the few variables a
 //!   program needs to start; never the app's secrets), its own folder, stdin,
 //!   stdout and stderr piped. Lines over the limit are dropped with a note.
 //! - **Writing.** Each session has its own writer thread and queue; a write
 //!   waits at most `WRITE_TIMEOUT` for the server to take it (R8-M3), so a
 //!   server that stops reading cannot hold the caller.
-//! - **Shutdown.** Close stdin, wait for the grace period, then kill.
+//! - **Shutdown.** Close stdin, wait for the grace period, then kill. On Unix
+//!   each server starts in its own process group (`process_group(0)`), and
+//!   closing kills the whole group, so a program the server started itself
+//!   (a grandchild) does not outlive it (R8b-L5). Windows: a Job Object is
+//!   owed (only the server's own process is killed there today).
 //! - **Opening a URL** in the system browser (elicitation URL mode): only
 //!   http and https, so the client and the model never see the page.
 
@@ -65,10 +73,22 @@ fn is_format(c: char) -> bool {
         | 0x110BD | 0x110CD | 0x13430..=0x1343F | 0x1BCA0..=0x1BCA3 | 0x1D173..=0x1D17A | 0xE0001 | 0xE0020..=0xE007F)
 }
 
-/// Anything the dialog could not show as it is: control characters, format characters, the line
-/// and paragraph separators, and any whitespace but a plain ASCII space (R8-M4).
+/// Characters that draw nothing although they are not format characters (R8b-L7): the other
+/// Default_Ignorable_Code_Point ranges (the combining grapheme joiner, the Hangul fillers, the
+/// Mongolian and the other variation selectors, the Khmer inherent vowels, the reserved and the
+/// tag / variation-selector-supplement planes), plus the Braille blank and the musical null
+/// notehead, which most fonts draw empty.
+fn is_blank(c: char) -> bool {
+    matches!(c as u32,
+        0x034F | 0x115F | 0x1160 | 0x17B4 | 0x17B5 | 0x180B..=0x180F | 0x2065 | 0x2800 | 0x3164
+        | 0xFE00..=0xFE0F | 0xFFA0 | 0xFFF0..=0xFFF8 | 0x1D159 | 0xE0000..=0xE0FFF)
+}
+
+/// Anything the dialog could not show as it is: control characters, format characters, other
+/// invisible characters, the line and paragraph separators, and any whitespace but a plain ASCII
+/// space (R8-M4, R8b-L7).
 fn has_hidden(s: &str) -> bool {
-    s.chars().any(|c| c.is_control() || is_format(c) || c == '\u{2028}' || c == '\u{2029}' || (c.is_whitespace() && c != ' '))
+    s.chars().any(|c| c.is_control() || is_format(c) || is_blank(c) || c == '\u{2028}' || c == '\u{2029}' || (c.is_whitespace() && c != ' '))
 }
 
 /// The interpreter family of a program name (without .exe and a version), for the inline-code check.
@@ -212,13 +232,14 @@ pub fn shown_field(s: &str) -> String {
 }
 
 /// The text of the native "Run an MCP server?" dialog (R8-M4): the server's name marked as
-/// the page's claim (the WebView chooses it), the program, then each argument quoted on its own line.
+/// the page's claim (the WebView chooses it) on a line of its own, so it cannot pass for the
+/// dialog's own words (R8b-L7), the program, then each argument quoted on its own line.
 pub fn approval_text(server: &str, spec: &Spec) -> String {
-    let label: String = server.chars().filter(|c| !c.is_control() && !is_format(*c)).take(80).collect();
+    let label: String = server.chars().filter(|c| !c.is_control() && !is_format(*c) && !is_blank(*c) && !(c.is_whitespace() && *c != ' ')).take(80).collect();
     let mut t = String::new();
-    t.push_str("A page in Lumen asks to run a program on your computer for an MCP server it calls ");
+    t.push_str("A page in Lumen asks to run a program on your computer for an MCP server.\n\nThe page names the server (that name comes from the page and is not checked):\n  ");
     t.push_str(&shown_field(&label));
-    t.push_str(" (that name comes from the page and is not checked).\n\nProgram:\n  ");
+    t.push_str("\n\nProgram:\n  ");
     t.push_str(&shown_field(&spec.command));
     if spec.args.is_empty() {
         t.push_str("\n\nNo arguments.");
@@ -401,12 +422,39 @@ fn read_lines<R: Read>(r: R, max: usize, cut: bool, mut emit: impl FnMut(String)
     }
 }
 
+/// SIGKILL to every process of the group `pgid` (the server and what it started; R8b-L5).
+/// The group's leader is the server: its id stays the group's while any member lives.
+#[cfg(unix)]
+fn kill_group(pgid: u32) {
+    extern "C" {
+        fn kill(pid: i32, sig: i32) -> i32;
+    }
+    const SIGKILL: i32 = 9;
+    if let Ok(p) = i32::try_from(pgid) {
+        if p > 1 {
+            // SAFETY: kill(2) with a negative pid signals that process group; no memory is shared.
+            unsafe {
+                kill(-p, SIGKILL);
+            }
+        }
+    }
+}
+
+#[cfg(not(unix))]
+fn kill_group(_pgid: u32) {}
+
 /// Start `spec` (the caller checked `may_spawn`). Events arrive on other threads.
 pub fn spawn(spec: &Spec, env: Vec<(String, String)>, on_event: impl Fn(Event) + Send + Sync + 'static) -> Result<Session, String> {
     let mut cmd = Command::new(&spec.command);
     cmd.args(&spec.args).env_clear().envs(env).stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::piped());
     if let Some(cwd) = &spec.cwd {
         cmd.current_dir(cwd);
+    }
+    // Its own process group, so close() can end what the server started too (R8b-L5).
+    #[cfg(unix)]
+    {
+        use std::os::unix::process::CommandExt;
+        cmd.process_group(0);
     }
     let mut child = cmd.spawn().map_err(|e| format!("could not start {}: {e}", spec.command))?;
     let stdin = child.stdin.take();
@@ -486,9 +534,16 @@ impl Session {
         let until = Instant::now() + grace;
         loop {
             if let Ok(mut c) = self.child.lock() {
+                let pgid = c.id();
                 match c.try_wait() {
-                    Ok(Some(s)) => return s.code(),
+                    Ok(Some(s)) => {
+                        // The server ended on its own: what it started may still run in its group.
+                        kill_group(pgid);
+                        return s.code();
+                    }
                     Ok(None) if Instant::now() >= until => {
+                        // The whole group first, while the leader (so the group id) is still alive.
+                        kill_group(pgid);
                         let _ = c.kill();
                         return c.wait().ok().and_then(|s| s.code());
                     }
@@ -696,6 +751,28 @@ mod tests {
         assert!(approval_text("x", &spec("srv", &[])).contains("No arguments."));
     }
 
+    #[test]
+    fn default_ignorable_and_blank_characters_are_refused_and_the_name_has_its_own_line() {
+        // The reviewer's cases (review 8b, R8b-L7), and the rest of each range.
+        for c in ['\u{3164}', '\u{034F}', '\u{FE0F}', '\u{FE00}', '\u{115F}', '\u{1160}', '\u{2800}', '\u{180B}', '\u{180F}', '\u{E0100}', '\u{E01EF}', '\u{1D159}', '\u{FFA0}', '\u{17B4}', '\u{2065}', '\u{FFF0}'] {
+            let bad = format!("a{c}b");
+            assert!(spec("node", &[&bad]).validate().is_err(), "U+{:04X}", c as u32);
+            assert!(spec(&format!("node{c}"), &[]).validate().is_err(), "command U+{:04X}", c as u32);
+            let mut s = spec("node", &[]);
+            s.cwd = Some(format!("/tmp/{bad}"));
+            assert!(s.validate().is_err(), "folder U+{:04X}", c as u32);
+        }
+        assert!(spec("node", &["server.js\u{034F}"]).validate().is_err());
+        // Visible neighbours still pass: Hebrew with points, a Braille letter, an emoji without a selector.
+        assert!(spec("node", &["/home/u/\u{05E9}\u{05C1}\u{05B8}\u{05DC}\u{05D5}\u{05B9}\u{05DD}/s.js", "\u{2801}", "\u{1F600}"]).validate().is_ok());
+        // The page's name sits alone on its line, quoted, with invisible characters taken out.
+        let t = approval_text("Files \u{05D0}\u{05D1}\" (checked by Lumen)\u{3164}\u{2800}", &spec("node", &["s.js"]));
+        assert!(t.contains("is not checked):\n  \"Files \u{05D0}\u{05D1}\\\" (checked by Lumen)\"\n\nProgram:"), "{t}");
+        assert!(!t.contains('\u{3164}') && !t.contains('\u{2800}'));
+        let first = t.lines().next().unwrap();
+        assert!(!first.contains("Files"), "the first line is Lumen's own words only: {first}");
+    }
+
     #[cfg(unix)]
     #[test]
     fn a_server_that_stops_reading_times_out_the_write_and_still_closes() {
@@ -728,6 +805,76 @@ mod tests {
         assert!(!s.running());
         assert!(s.write_line("late").is_err(), "closed: no more writes");
         other.close(Duration::from_secs(2));
+    }
+
+    /// Is process `pid` still running (a zombie nobody reaped counts as gone)?
+    #[cfg(unix)]
+    fn alive(pid: u32) -> bool {
+        if std::path::Path::new("/proc/self/stat").exists() {
+            return match std::fs::read_to_string(format!("/proc/{pid}/stat")) {
+                Ok(st) => st.rsplit(')').next().and_then(|r| r.trim_start().chars().next()).map(|c| c != 'Z' && c != 'X').unwrap_or(false),
+                Err(_) => false,
+            };
+        }
+        Command::new("kill").args(["-0", &pid.to_string()]).stderr(Stdio::null()).status().map(|s| s.success()).unwrap_or(false)
+    }
+
+    #[cfg(unix)]
+    fn grandchild_after_close(grace: Duration) -> bool {
+        let (tx, rx) = mpsc::channel();
+        let tx = Mutex::new(tx);
+        // A server that starts a program of its own and waits for it (R8b-L5).
+        let s = spawn(&spec("sh", &["-c", "sleep 30 & echo $!; wait"]), clean_env(std::env::vars()), move |e| {
+            let _ = tx.lock().unwrap().send(e);
+        })
+        .unwrap();
+        let pid: u32 = match rx.recv_timeout(Duration::from_secs(5)).unwrap() {
+            Event::Out(l) => l.trim().parse().unwrap(),
+            e => panic!("{e:?}"),
+        };
+        assert!(alive(pid), "the grandchild runs");
+        s.close(grace);
+        let until = Instant::now() + Duration::from_secs(3);
+        while alive(pid) && Instant::now() < until {
+            thread::sleep(Duration::from_millis(20));
+        }
+        let left = alive(pid);
+        if left {
+            let _ = Command::new("kill").args(["-9", &pid.to_string()]).status();
+        }
+        left
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn closing_a_server_ends_what_it_started_too() {
+        assert!(!grandchild_after_close(Duration::from_millis(300)), "a grandchild outlived the server");
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn a_server_that_exits_on_its_own_leaves_no_grandchild_behind() {
+        let (tx, rx) = mpsc::channel();
+        let tx = Mutex::new(tx);
+        // The server reads stdin, starts a helper that ignores it, and exits at EOF: the helper keeps stdout open.
+        let s = spawn(&spec("sh", &["-c", "sleep 30 >/dev/null 2>&1 & echo $!; cat >/dev/null"]), clean_env(std::env::vars()), move |e| {
+            let _ = tx.lock().unwrap().send(e);
+        })
+        .unwrap();
+        let pid: u32 = match rx.recv_timeout(Duration::from_secs(5)).unwrap() {
+            Event::Out(l) => l.trim().parse().unwrap(),
+            e => panic!("{e:?}"),
+        };
+        assert_eq!(s.close(Duration::from_secs(3)), Some(0), "it ended by itself at EOF");
+        let until = Instant::now() + Duration::from_secs(3);
+        while alive(pid) && Instant::now() < until {
+            thread::sleep(Duration::from_millis(20));
+        }
+        let left = alive(pid);
+        if left {
+            let _ = Command::new("kill").args(["-9", &pid.to_string()]).status();
+        }
+        assert!(!left, "the helper was killed with its group");
     }
 
     #[test]
