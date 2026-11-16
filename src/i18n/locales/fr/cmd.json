@@ -116,6 +116,7 @@
   "cmd.chat.import.hint": "Discussion exportée → une note par jour, avec ses médias ; sur cet appareil uniquement",
   "cmd.cite.fillReferencesOpenAlex": "Citations : remplir les références depuis OpenAlex…",
   "cmd.cite.fillReferencesOpenAlex.hint": "Pour une note source avec un DOI : demande d’abord, n’envoie que le DOI et n’écrit rien avant votre approbation",
+  "cmd.cite.fromDoi": "Citer depuis un DOI (CrossRef)…",
   "cmd.cite.insert": "Insérer une citation [@key]…",
   "cmd.cite.legal": "Citations : source juridique (règles uniformes de citation)…",
   "cmd.cite.legal.hint": "Un arrêt, une loi, un règlement, un projet de loi, un livre ou un article, selon les règles israéliennes uniformes de citation (3e éd., 2021)",

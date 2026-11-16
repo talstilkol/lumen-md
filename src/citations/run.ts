@@ -89,3 +89,28 @@ export async function syncZoteroWebLibrary(): Promise<void> {
     showAiToast(t("cite.web.failed", { error: err.message }), "error");
   }
 }
+
+/**
+ * W10.E38 (plan 6.13): a DOI → the reference, filled from CrossRef after the
+ * user approves the request (citations/doi.ts), inserted at the cursor in
+ * APA 7, in the interface's language.
+ */
+export async function citeFromDoi(): Promise<void> {
+  const [{ uiConfirm, uiPrompt }, { lookupDoi, DoiNotFoundError }, { formatReference, runsToMarkdown }, { getLocale }] = await Promise.all([
+    import("../ui/PromptDialog"),
+    import("./doi"),
+    import("../data/citationStyles"),
+    import("../i18n"),
+  ]);
+  const input = await uiPrompt({ message: t("cite.doi.ask"), placeholder: "10.1000/xyz123" });
+  if (!input?.trim()) return;
+  try {
+    const record = await lookupDoi(input, { confirm: (o) => uiConfirm(o), t });
+    if (!record) return;
+    const text = runsToMarkdown(formatReference(record, "apa", getLocale() === "he" ? "he" : "en"));
+    window.dispatchEvent(new CustomEvent("lumen-mobile-insert", { detail: { insert: text, cursorOffset: 0 } }));
+    showAiToast(t("cite.doi.inserted"), "success");
+  } catch (e) {
+    showAiToast(e instanceof DoiNotFoundError ? t("cite.doi.notFound", { doi: e.doi }) : t("cite.doi.failed", { error: (e as Error).message }), "error");
+  }
+}

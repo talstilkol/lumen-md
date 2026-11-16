@@ -97,6 +97,14 @@ export function buildExportCommands({ handleExportHtml, liveDoc, getEditorView }
       action: () => void import("../../citations/CiteDialog").then((m) => m.openCiteDialog()),
     },
     {
+      // W10.E38 (plan 6.13): a DOI fills the reference from CrossRef, after the user approves the request.
+      id: "cite.fromDoi",
+      label: t("cmd.cite.fromDoi"),
+      icon: cmdIcons.FileText,
+      group: t("group.tools"),
+      action: () => void import("../../citations/run").then((m) => m.citeFromDoi()),
+    },
+    {
       id: "cite.legal",
       label: t("cmd.cite.legal"),
       hint: t("cmd.cite.legal.hint"),

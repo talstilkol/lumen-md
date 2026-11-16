@@ -116,6 +116,7 @@
   "cmd.chat.import.hint": "导出的聊天 → 每天一篇笔记，含媒体；仅在此设备上处理",
   "cmd.cite.fillReferencesOpenAlex": "引用：从 OpenAlex 补全参考文献…",
   "cmd.cite.fillReferencesOpenAlex.hint": "用于带 DOI 的来源笔记：先询问，只发送 DOI，在你批准前不写入任何内容",
+  "cmd.cite.fromDoi": "从 DOI 引用（CrossRef）…",
   "cmd.cite.insert": "插入引用 [@key]…",
   "cmd.cite.legal": "引用：法律来源（统一引用规则）…",
   "cmd.cite.legal.hint": "判决、法律、条例、法案、书籍或文章，按以色列统一引用规则（第三版，2021）书写",
