@@ -3752,6 +3752,28 @@
       "vars": []
     },
     {
+      "key": "daily.review.answer",
+      "en": "Answer",
+      "vars": []
+    },
+    {
+      "key": "daily.review.none",
+      "en": "Nothing to review today.",
+      "vars": []
+    },
+    {
+      "key": "daily.review.rate",
+      "en": "Rate them in the review panel (⌘K → Daily review), which keeps the schedule.",
+      "vars": []
+    },
+    {
+      "key": "daily.review.title",
+      "en": "Review ({n})",
+      "vars": [
+        "n"
+      ]
+    },
+    {
       "key": "datagov.badBlock",
       "en": "This dataset block is missing its source, id or snapshot.",
       "vars": []

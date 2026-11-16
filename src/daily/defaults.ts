@@ -4,7 +4,7 @@ export interface DailySettings {
   folder: string;
   /** File name pattern: YYYY, MM, DD (".md" is added when missing). */
   pattern: string;
-  /** New-note template: {{date}}, {{hebrewDate}}, {{weekday}}, {{title}}, {{holiday}}, {{parasha}}, {{learning}}, {{calendar}} (the subscriptions' events, W10.C6). */
+  /** New-note template: {{date}}, {{hebrewDate}}, {{weekday}}, {{title}}, {{holiday}}, {{parasha}}, {{learning}}, {{calendar}} (the subscriptions' events, W10.C6), {{review}} (the day's review cards). */
   template: string;
   /** Holidays and Torah portions as in Israel (true) or the diaspora (false); unset: from the UI language / time zone. */
   israel?: boolean;

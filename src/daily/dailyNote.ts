@@ -8,7 +8,9 @@
  * Hebrew dates come from the browser's own ICU Hebrew calendar
  * (`Intl.DateTimeFormat("he-u-ca-hebrew")`) — no calendar library. Holidays
  * and the week's Torah portion ({{holiday}}, {{parasha}}) come from our own
- * Hebrew calendar (hebrewCalendar.ts, plan W2.10).
+ * Hebrew calendar (hebrewCalendar.ts, plan W2.10). {{review}} is the day's
+ * spaced-repetition queue (plan W3.3, W10.E46): each card's
+ * question with its answer folded under it, and the link to where it came from.
  */
 
 import { t } from "../i18n";
@@ -19,6 +21,8 @@ import { gematria } from "./gematria";
 import { defaultIsrael, holidaysOn, weeklyReading } from "./hebrewCalendar";
 import { holidayLabel, nameLang, readingName } from "./hebrewCalendarNames";
 import { learningLines, type CycleId } from "../learning/plans";
+import type { Entry } from "../srs/cards";
+import "./dailyNoteStrings";
 
 export { DEFAULT_DAILY, isValidDailyPattern, type DailySettings };
 
@@ -147,7 +151,24 @@ export const isIsrael = (settings: Pick<DailySettings, "israel">, locale: string
  * to the day's text on Sefaria.
  */
 export const DEFAULT_LEARNING: readonly CycleId[] = ["dafYomi", "mishnahYomit", "rambam1"];
-export function renderTemplate(template: string, day: Day, locale: string, opts: { israel?: boolean; learning?: readonly CycleId[]; calendar?: string } = {}): string {
+/**
+ * The day's review in the note (plan W3.3): a heading with the count, then
+ * each card's question as a line, its answer in a folded callout (open it
+ * to check yourself) and the link to its place. Rating stays in the review
+ * panel, which keeps the schedule. No cards: one line that says so.
+ */
+export function reviewSection(queue: readonly Entry[]): string {
+  const one = (s: string) => s.replace(/\s*\n\s*/g, " ").trim();
+  const lines = [`## ${t("daily.review.title", { n: String(queue.length) })}`, ""];
+  if (!queue.length) return [...lines, t("daily.review.none"), ""].join("\n");
+  for (const e of queue) {
+    lines.push(`- ${one(e.front)} ([[${e.link}]])`, `  > [!question]- ${t("daily.review.answer")}`, ...e.back.split("\n").map((l) => `  > ${l}`), "");
+  }
+  lines.push(t("daily.review.rate"), "");
+  return lines.join("\n");
+}
+
+export function renderTemplate(template: string, day: Day, locale: string, opts: { israel?: boolean; learning?: readonly CycleId[]; calendar?: string; review?: readonly Entry[] } = {}): string {
   const date = noonUtc(day);
   const israel = opts.israel ?? defaultIsrael(locale);
   const lang = nameLang(locale);
@@ -161,8 +182,21 @@ export function renderTemplate(template: string, day: Day, locale: string, opts:
     learning: () => learningLines(day, opts.learning ?? DEFAULT_LEARNING, lang === "he" ? "he" : "en").join("\n"),
     // W10.C6: the day's events from the calendar subscriptions (read before rendering: calendarBlockFor).
     calendar: () => opts.calendar ?? "",
+    review: () => reviewSection(opts.review ?? []),
   };
-  return template.replace(/\{\{\s*(date|hebrewDate|weekday|title|holiday|parasha|learning|calendar)\s*\}\}/g, (_, k: string) => vars[k]());
+  return template.replace(/\{\{\s*(date|hebrewDate|weekday|title|holiday|parasha|learning|calendar|review)\s*\}\}/g, (_, k: string) => vars[k]());
+}
+
+/**
+ * The day's review queue from the vault's review file (.lumen/review.json),
+ * as the review panel builds it (dailyQueue: due first, then new cards).
+ * No file, or one that can't be read: an empty queue.
+ */
+export async function reviewQueueFor(day: Day, read: (path: string) => Promise<string>): Promise<Entry[]> {
+  const { dailyQueue, parseReviewFile, REVIEW_PATH } = await import("../srs/cards");
+  const file = parseReviewFile(await read(REVIEW_PATH).catch(() => null));
+  // The end of the day: a card due later today is due in today's note.
+  return file ? dailyQueue(file, new Date(Date.UTC(day.y, day.m - 1, day.d, 23, 59, 59))) : [];
 }
 
 // ── Open or create ──────────────────────────────────────────────────────
@@ -193,7 +227,8 @@ export function ensureDailyNote(day: Day, settings: DailySettings, locale: strin
     if (!(await ws.workspaceHasEntry(path))) {
       // {{calendar}}: the subscriptions' events for the day (nothing is fetched when there is none).
       const calendar = /\{\{\s*calendar\s*\}\}/.test(settings.template) ? await dailyCalendarBlock(isoOf(day)) : undefined;
-      await ws.writeWorkspaceFile(path, renderTemplate(settings.template, day, locale, { israel: isIsrael(settings, locale), learning: settings.learning, calendar }));
+      const review = /\{\{\s*review\s*\}\}/.test(settings.template) ? await reviewQueueFor(day, ws.readWorkspaceFile) : undefined;
+      await ws.writeWorkspaceFile(path, renderTemplate(settings.template, day, locale, { israel: isIsrael(settings, locale), learning: settings.learning, calendar, review }));
       const { notifyWorkspaceChanged } = await import("../storage/workspaceEvents");
       notifyWorkspaceChanged({ kind: "structure", paths: [path] });
     }
