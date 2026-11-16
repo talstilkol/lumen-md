@@ -20,7 +20,7 @@
 import { get as idbGet, set as idbSet, del as idbDel } from "idb-keyval";
 import { log } from "../../lib/logger";
 import { notifyWorkspaceChanged } from "../workspaceEvents";
-import { getVaultBackend, setVaultBackend } from "./index";
+import { getVaultBackend, setVaultBackend, vaultEncryptionReady } from "./index";
 import { createDirectoryHandleBackend } from "./handleBackend";
 import { createOpfsBackend } from "./opfs";
 import type { VaultBackend } from "./types";
@@ -387,6 +387,7 @@ export async function chooseDesktopVaultFolder(): Promise<(MoveReport & { backup
   const root = await inv<string | null>("vault_pick_folder");
   if (!root) return null;
   const to: StoredLocation = { kind: "desktop", root, name: folderName(root) };
+  await refuseEncryptedMove();
   const source = getVaultBackend();
   // Only a listing that succeeds and is empty skips the migration: a source
   // that cannot be read stops here, it is not "empty".
@@ -467,6 +468,23 @@ export class VaultMoveConflictError extends Error {
   }
 }
 
+/**
+ * An encrypted vault (plan 11.4) is not moved: the move copies what the
+ * vault layer reads, which is the decrypted notes. Turn encryption off,
+ * move, and turn it on again in the new place.
+ */
+export class VaultEncryptedMoveError extends Error {
+  constructor() {
+    super("An encrypted vault can't be moved. Turn encryption off first, move it, then turn it on again.");
+    this.name = "VaultEncryptedMoveError";
+  }
+}
+
+async function refuseEncryptedMove(): Promise<void> {
+  const state = await vaultEncryptionReady();
+  if (state === "locked" || state === "unlocked") throw new VaultEncryptedMoveError();
+}
+
 /** The browser did not grant read-write access to the folder. */
 export class VaultPermissionError extends Error {
   constructor(readonly folder: string) {
@@ -534,6 +552,7 @@ export async function moveVault(
   }
   if (to.kind === "desktop") await desktop();
   const fromLoc: StoredLocation = opts.from ?? ((await kv.get<StoredLocation>(LOCATION_KEY)) || { kind: "opfs" });
+  await refuseEncryptedMove();
   const source = getVaultBackend();
   if (!source.available()) throw new Error("The current vault is not available.");
   if (await sameLocation(fromLoc, to)) throw new Error("The vault is already there.");

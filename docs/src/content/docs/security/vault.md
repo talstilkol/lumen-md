@@ -5,8 +5,9 @@ description: How Lumen stores API keys and tokens, and how to encrypt a document
 
 Lumen keeps the secrets it needs — AI provider keys, Git and cloud tokens,
 the collaboration room password, the research search key — out of plain
-browser storage. There is **no password-protected vault and no recovery
-phrase**; an earlier draft of these docs described one that was never shipped.
+browser storage. The whole vault can also be encrypted with a passphrase and
+a recovery key — see [Vault encryption at rest](/security/vault-encryption/);
+the secrets described here are kept apart from it.
 
 ## Where secrets live
 

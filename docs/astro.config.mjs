@@ -96,6 +96,7 @@ export default defineConfig({
           label: "Security",
           items: [
             { label: "Secrets and encryption", slug: "security/vault" },
+            { label: "Vault encryption at rest", slug: "security/vault-encryption" },
           ],
         },
         {

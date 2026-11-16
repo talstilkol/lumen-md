@@ -5,10 +5,13 @@
  *
  * Kept in IndexedDB under one key (a small ring buffer), with an in-memory
  * mirror so reads are synchronous once loaded. Outputs are truncated: the
- * trace is for diagnosis, not a second copy of every document.
+ * trace is for diagnosis, not a second copy of every document. In an
+ * encrypted vault (plan 11.4) the list is stored sealed, and not written at
+ * all while the vault is locked.
  */
 
 import { get, set } from "idb-keyval";
+import { forStore, fromStore, isSealedValue } from "../storage/vault/restStore";
 import type { AgentRun } from "./types";
 
 export const TRACE_LIMIT = 50;
@@ -28,22 +31,42 @@ function previewOf(run: AgentRun): AgentRun {
   };
 }
 
+const LABEL = "agent-trace";
+
 export function loadTrace(): Promise<void> {
   if (!loaded) {
-    loaded = get(IDB_KEY)
-      .then((v) => {
-        if (Array.isArray(v)) runs = v as AgentRun[];
+    const p: Promise<void> = get(IDB_KEY)
+      .then(async (stored: unknown) => {
+        const v = await fromStore<unknown>(LABEL, stored);
+        // Sealed and the vault is locked: try again after it is unlocked.
+        if (v === undefined && isSealedValue(stored)) {
+          if (loaded === p) loaded = null;
+          return;
+        }
+        if (Array.isArray(v)) runs = [...(v as AgentRun[]), ...runs].slice(0, TRACE_LIMIT);
       })
       .catch(() => {});
+    loaded = p;
   }
   return loaded;
+}
+
+async function persist(): Promise<void> {
+  const v = await forStore(LABEL, runs);
+  if (v !== undefined) await set(IDB_KEY, v);
 }
 
 export async function recordRun(run: AgentRun): Promise<void> {
   await loadTrace();
   runs = [previewOf(run), ...runs].slice(0, TRACE_LIMIT);
   for (const l of listeners) l(runs);
-  await set(IDB_KEY, runs).catch(() => {});
+  await persist().catch(() => {});
+}
+
+/** Store the list again — sealed now that the vault is encrypted (plan 11.4). */
+export async function resealTrace(): Promise<void> {
+  await loadTrace();
+  await persist();
 }
 
 /** Most recent first. */

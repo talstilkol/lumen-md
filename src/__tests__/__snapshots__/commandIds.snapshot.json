@@ -742,6 +742,13 @@
       "icon": "Save"
     },
     {
+      "id": "vault.encryptAtRest",
+      "label": "🔐 Vault encryption…",
+      "group": "Security",
+      "hint": "Encrypt the whole vault at rest; lock, recovery key",
+      "icon": "Save"
+    },
+    {
       "id": "ai.prompt.en.summarize",
       "label": "📝 Summarize in English",
       "group": "AI Prompts",
@@ -1894,6 +1901,13 @@
       "icon": "Save"
     },
     {
+      "id": "vault.encryptAtRest",
+      "label": "🔐 Vault encryption…",
+      "group": "Security",
+      "hint": "Encrypt the whole vault at rest; lock, recovery key",
+      "icon": "Save"
+    },
+    {
       "id": "ai.prompt.en.summarize",
       "label": "📝 Summarize in English",
       "group": "AI Prompts",
@@ -2333,6 +2347,7 @@
     "voice.dictate",
     "vault.encrypt",
     "vault.decrypt",
+    "vault.encryptAtRest",
     "ai.prompt.he.summarize",
     "ai.prompt.he.improve",
     "ai.prompt.he.translate_to_en",

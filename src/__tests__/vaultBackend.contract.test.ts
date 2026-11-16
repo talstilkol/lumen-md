@@ -3,7 +3,9 @@
  * the OPFS backend on the in-memory fake OPFS, the directory-handle backend
  * on a fake picked folder (what the Chromium real-folder vault and the
  * folder export use), and the pure in-memory backend. A new backend (Tauri
- * fs, 4.2) joins by adding one line to `backends`.
+ * fs, 4.2) joins by adding one line to `backends`. The encrypted layer
+ * (plan 11.4) runs the same suite over each of them: encryption must not
+ * change what a backend promises.
  */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FakeDir, installFakeOpfs } from "./helpers/fakeOpfs";
@@ -20,6 +22,11 @@ import {
 import { createFolderBackend } from "../storage/vault/location";
 import { createTauriBackend } from "../storage/vault/tauri";
 import { fakeTauriVault } from "./helpers/fakeTauriVault";
+import { createEncryptedBackend } from "../storage/vault/encrypted/backend";
+import { createRestHeader } from "../storage/vault/encrypted/format";
+
+const { keys: KEYS } = await createRestHeader("contract passphrase", { pbkdf2Iterations: 1000 });
+const encrypted = (inner: VaultBackend) => createEncryptedBackend(inner, KEYS, { target: () => "encrypted" });
 
 const backends: [string, () => VaultBackend][] = [
   [
@@ -45,6 +52,16 @@ const backends: [string, () => VaultBackend][] = [
     () => createTauriBackend(fakeTauriVault("/home/tal/Notes").invoke, "/home/tal/Notes"),
   ],
   ["memory", () => createMemoryBackend()],
+  [
+    "encrypted at rest (plan 11.4) over OPFS (fake)",
+    () => {
+      installFakeOpfs();
+      return encrypted(createOpfsBackend());
+    },
+  ],
+  ["encrypted at rest over a picked folder (fake)", () => encrypted(createFolderBackend(new FakeDir("Encrypted") as unknown as FileSystemDirectoryHandle))],
+  ["encrypted at rest over the desktop folder (Tauri faked)", () => encrypted(createTauriBackend(fakeTauriVault("/home/tal/Secret").invoke, "/home/tal/Secret"))],
+  ["encrypted at rest over memory", () => encrypted(createMemoryBackend())],
 ];
 
 const bytesOf = async (b: Blob) => [...new Uint8Array(await b.arrayBuffer())];
