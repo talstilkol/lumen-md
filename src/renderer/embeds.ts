@@ -381,7 +381,8 @@ function imageAlias(alias: string | null): { alt: string | null; width?: number;
   return { alt, width, height };
 }
 
-function buildEmbed(inner: string, env: Env, blockAllowed: boolean): Item {
+/** `at`: the embed's offset in the host's source, for drag-to-resize (./imageSize); host images only. */
+function buildEmbed(inner: string, env: Env, blockAllowed: boolean, at?: number): Item {
   const e = parseEmbed(inner);
   const { ctx } = env;
   if (!e.target) return { node: text(`![[${inner}]]`), block: false };
@@ -402,6 +403,11 @@ function buildEmbed(inner: string, env: Env, blockAllowed: boolean): Item {
     if (version !== undefined) props["data-lumen-version"] = String(version);
     if (width) props.width = width;
     if (height) props.height = height;
+    // An embedded note's offsets are in another file: only the host's images can be resized in place.
+    if (at !== undefined && env.depth === 0) {
+      props["data-md-offset"] = at;
+      props["data-md-target"] = e.note;
+    }
     return {
       block: false,
       node: { type: "image", url: path, title: null, alt: alt ?? baseOf(path).replace(/\.[^.]+$/, ""), data: { hProperties: props } },
@@ -510,12 +516,12 @@ function buildEmbed(inner: string, env: Env, blockAllowed: boolean): Item {
 }
 
 /** Text with embeds → text and embed items. */
-function segments(value: string, env: Env, blockAllowed: boolean): Item[] {
+function segments(value: string, env: Env, blockAllowed: boolean, base?: number): Item[] {
   const out: Item[] = [];
   let last = 0;
   for (const m of value.matchAll(embedRe())) {
     if (m.index! > last) out.push({ node: text(value.slice(last, m.index)), block: false });
-    out.push(buildEmbed(m[1], env, blockAllowed));
+    out.push(buildEmbed(m[1], env, blockAllowed, base === undefined ? undefined : base + m.index!));
     last = m.index! + m[0].length;
   }
   if (last < value.length) out.push({ node: text(value.slice(last)), block: false });
@@ -532,7 +538,7 @@ const blank = (n: Node) => n.type === "break" || (n.type === "text" && !n.value?
 function expandParagraph(p: Node, env: Env): Node[] {
   const items: Item[] = [];
   for (const c of p.children ?? []) {
-    if (c.type === "text" && c.value?.includes("![[")) items.push(...segments(c.value, env, true));
+    if (c.type === "text" && c.value?.includes("![[")) items.push(...segments(c.value, env, true, c.position?.start?.offset));
     else {
       if (c.children && !LITERAL.has(c.type)) walk(c, env, false);
       items.push({ node: c, block: false });
@@ -576,7 +582,7 @@ function walk(parent: Node, env: Env, blockAllowed = true): void {
       continue;
     }
     if (child.type === "text" && child.value?.includes("![[")) {
-      const out = segments(child.value, env, false).map((s) => s.node);
+      const out = segments(child.value, env, false, child.position?.start?.offset).map((s) => s.node);
       list.splice(i, 1, ...out);
       i += out.length - 1;
       continue;

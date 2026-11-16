@@ -237,7 +237,8 @@ function hastResult(this: { compiler?: unknown }) {
 }
 
 /** Parse + the Lumen dialect transforms that run before embeds are expanded. */
-function buildDialect() {
+/** `textImageEmbeds: false` for embedded notes: their `![[image]]` is left to remarkEmbeds (plan 4.7). */
+function buildDialect(textImageEmbeds = true) {
   return unified()
     .use(remarkParse)
     .use(remarkRenderHost)
@@ -247,7 +248,7 @@ function buildDialect() {
     // W1.3 — Obsidian callouts, %%comments%%, ==highlights==, ![[image|300]].
     // Before soft breaks (a callout's title ends at the first line break)
     // and before wiki links (an embed is not a link).
-    .use(remarkObsidian, { calloutTitle: (kind: string, type: string) => active.calloutTitle(kind, type) })
+    .use(remarkObsidian, { calloutTitle: (kind: string, type: string) => active.calloutTitle(kind, type), textImageEmbeds })
     .use(remarkBreaks)
     .use(remarkAdmonitions)
     .use(remarkColumns)
@@ -263,7 +264,7 @@ let embedParser: ReturnType<typeof buildDialect> | null = null;
  * the host's remaining passes then run over the spliced-in nodes.
  */
 function parseEmbeddedNote(markdown: string): MdastRoot {
-  embedParser ??= buildDialect();
+  embedParser ??= buildDialect(false);
   return embedParser.runSync(embedParser.parse(prepareCriticMarkup(markdown))) as MdastRoot;
 }
 
