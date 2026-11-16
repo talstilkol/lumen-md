@@ -5,9 +5,15 @@
 //! - `mcp_stdio_approve` asks the user in a **native** dialog (not the WebView)
 //!   to allow one exact command; the approvals live in the app's config folder.
 //!   A page that runs script in the WebView can ask, but cannot answer. The
-//!   dialog shows each argument quoted on its own line, and says that the
-//!   server's name comes from the page (R8-M4).
-//! - `mcp_stdio_spawn` starts only an approved, valid command (`may_spawn`).
+//!   dialog (Hebrew or English, `lang`) shows the program's resolved full path,
+//!   each argument quoted on its own line, the sha256 of the program and of
+//!   every file an argument names, and says that the server's name comes from
+//!   the page (R8-M4).
+//! - The approvals are an **allow-list** (plan W13.X1): absolute path, sha256
+//!   and the full argv, pinned (`lumen_mcp_stdio::AllowList`). One changed byte
+//!   or any other argument is refused before a process starts.
+//! - `mcp_stdio_spawn` starts only through `checked_spawn` (the deny-list, then
+//!   the pin), and starts the resolved file, not a name looked up again.
 //! - Lines come back as `mcp-stdio` events: `{ session, kind: "out" | "err" | "exit", line }`.
 //!   The WebView matches responses to requests by JSON-RPC id (transports/stdio.ts).
 //!   A session whose process exited leaves the map (R8-M3).
@@ -20,7 +26,7 @@
 //! writes through its own writer thread with a timeout (`WRITE_TIMEOUT`), so a
 //! server that stops reading blocks neither the UI nor the other servers.
 
-use lumen_mcp_stdio::{approval_text, clean_env, may_spawn, open_url_command, spawn, Approved, Event, Session, Spec, WRITE_TIMEOUT};
+use lumen_mcp_stdio::{checked_spawn, clean_env, may_spawn, open_url_command, pin, pin_text, revoke_key_of, AllowList, Event, Lang, Session, Spec, WRITE_TIMEOUT};
 use serde::Serialize;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
@@ -29,7 +35,7 @@ use tauri::{AppHandle, Emitter, Manager, State};
 
 #[derive(Default)]
 pub struct McpStdioInner {
-    approved: Option<Approved>,
+    approved: Option<AllowList>,
     sessions: HashMap<u32, Arc<Session>>,
     next: u32,
 }
@@ -44,7 +50,8 @@ struct LineEvent {
     line: String,
 }
 
-const FILE: &str = "mcp-stdio-approved.txt";
+/// The pinned allow-list (format 2). The old command-line-only file is no longer read: approve again.
+const FILE: &str = "mcp-stdio-allowlist.txt";
 
 fn approved_path(app: &AppHandle) -> Result<std::path::PathBuf, String> {
     let dir = app.path().app_config_dir().map_err(|e| e.to_string())?;
@@ -54,12 +61,12 @@ fn approved_path(app: &AppHandle) -> Result<std::path::PathBuf, String> {
 fn load(app: &AppHandle, inner: &mut McpStdioInner) -> Result<(), String> {
     if inner.approved.is_none() {
         let text = std::fs::read_to_string(approved_path(app)?).unwrap_or_default();
-        inner.approved = Some(Approved::parse(&text));
+        inner.approved = Some(AllowList::parse(&text));
     }
     Ok(())
 }
 
-fn save(app: &AppHandle, approved: &Approved) -> Result<(), String> {
+fn save(app: &AppHandle, approved: &AllowList) -> Result<(), String> {
     let path = approved_path(app)?;
     if let Some(dir) = path.parent() {
         std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
@@ -69,6 +76,11 @@ fn save(app: &AppHandle, approved: &Approved) -> Result<(), String> {
 
 fn spec(command: String, args: Vec<String>, cwd: Option<String>) -> Spec {
     Spec { command, args, cwd: cwd.filter(|c| !c.is_empty()) }
+}
+
+/// The PATH a server gets (clean_env keeps it): a bare program name is resolved on it, once, when pinned.
+fn path_var() -> Option<String> {
+    std::env::var("PATH").ok()
 }
 
 /// Run `f` off the main thread and the async workers (it may block on files, a pipe or a process).
@@ -84,41 +96,48 @@ pub async fn mcp_stdio_approved(app: AppHandle, state: State<'_, McpStdio>, comm
     blocking(move || {
         let mut inner = inner.lock().map_err(|_| "EIO: lock")?;
         load(&app, &mut inner)?;
-        Ok(s.validate().is_ok() && inner.approved.as_ref().map(|a| a.contains(&s)).unwrap_or(false))
+        let empty = AllowList::default();
+        Ok(may_spawn(&s, inner.approved.as_ref().unwrap_or(&empty), path_var().as_deref()).is_ok())
     })
     .await
 }
 
-/// Ask the user, in a native dialog, to allow this exact command. Async: the dialog blocks its thread.
+/// Ask the user, in a native dialog, to allow this exact command (pinned: full path, sha256, argv).
+/// `lang` is the UI's language ("he" shows the dialog in Hebrew). Async: the dialog blocks its thread.
 #[tauri::command]
-pub async fn mcp_stdio_approve(app: AppHandle, state: State<'_, McpStdio>, server: String, command: String, args: Vec<String>, cwd: Option<String>) -> Result<bool, String> {
+pub async fn mcp_stdio_approve(app: AppHandle, state: State<'_, McpStdio>, server: String, command: String, args: Vec<String>, cwd: Option<String>, lang: Option<String>) -> Result<bool, String> {
     use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
     let s = spec(command, args, cwd);
     s.validate()?;
+    let lang = Lang::of(lang.as_deref());
     let inner = state.0.clone();
     blocking(move || {
-        {
+        // Resolved and hashed now: what the dialog shows is exactly what gets pinned.
+        let p = pin(&s, path_var().as_deref())?;
+        let changed = {
             let mut guard = inner.lock().map_err(|_| "EIO: lock")?;
             load(&app, &mut guard)?;
-            if guard.approved.as_ref().map(|a| a.contains(&s)).unwrap_or(false) {
+            let list = guard.approved.get_or_insert_with(AllowList::default);
+            if list.allows(&p) {
                 return Ok(true);
             }
-        }
+            list.changed(&p)
+        };
         // The lock is not held while the dialog is open.
         let yes = app
             .dialog()
-            .message(approval_text(&server, &s))
-            .title("Run an MCP server?")
+            .message(pin_text(&server, &p, changed, lang))
+            .title(lang.title())
             .kind(MessageDialogKind::Warning)
-            .buttons(MessageDialogButtons::OkCancelCustom("Allow".into(), "Don't allow".into()))
+            .buttons(MessageDialogButtons::OkCancelCustom(lang.allow().into(), lang.deny().into()))
             .blocking_show();
         if !yes {
             return Ok(false);
         }
         let mut guard = inner.lock().map_err(|_| "EIO: lock")?;
         load(&app, &mut guard)?;
-        let approved = guard.approved.get_or_insert_with(Approved::default);
-        approved.add(&s);
+        let approved = guard.approved.get_or_insert_with(AllowList::default);
+        approved.add(&p);
         save(&app, approved)?;
         Ok(true)
     })
@@ -132,8 +151,8 @@ pub async fn mcp_stdio_revoke(app: AppHandle, state: State<'_, McpStdio>, comman
     blocking(move || {
         let mut inner = inner.lock().map_err(|_| "EIO: lock")?;
         load(&app, &mut inner)?;
-        let approved = inner.approved.get_or_insert_with(Approved::default);
-        let removed = approved.remove(&s);
+        let approved = inner.approved.get_or_insert_with(AllowList::default);
+        let removed = approved.revoke_key(&revoke_key_of(&s, path_var().as_deref()));
         save(&app, approved)?;
         Ok(removed)
     })
@@ -145,17 +164,19 @@ pub async fn mcp_stdio_spawn(app: AppHandle, state: State<'_, McpStdio>, command
     let s = spec(command, args, cwd);
     let inner = state.0.clone();
     blocking(move || {
-        let id = {
+        let (id, list) = {
             let mut guard = inner.lock().map_err(|_| "EIO: lock")?;
             load(&app, &mut guard)?;
-            may_spawn(&s, guard.approved.as_ref().unwrap_or(&Approved::default()))?;
+            let list = guard.approved.clone().unwrap_or_default();
             guard.next = guard.next.wrapping_add(1).max(1);
-            guard.next
+            (guard.next, list)
         };
         let handle = app.clone();
         let map = inner.clone();
-        // Started without the lock held; the exit event removes the session again.
-        let session = spawn(&s, clean_env(std::env::vars()), move |e| {
+        // Started without the lock held (hashing the program takes a moment). checked_spawn refuses,
+        // before any process exists, anything that is not exactly a pin on the allow-list (W13.X1).
+        // The exit event removes the session again.
+        let session = checked_spawn(&s, &list, path_var().as_deref(), clean_env(std::env::vars()), move |e| {
             let (kind, line) = match e {
                 Event::Out(l) => ("out", l),
                 Event::Err(l) => ("err", l),

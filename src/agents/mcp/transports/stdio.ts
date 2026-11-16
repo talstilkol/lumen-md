@@ -4,8 +4,11 @@
  * message per line to its stdin and reads one per line from its stdout.
  * stderr is the server's log: every line goes to the server log (log.ts),
  * shown in Settings → MCP servers. Desktop only: the process is started by
- * the Tauri side (src-tauri/src/mcp_stdio.rs), which runs only a command the
- * user approved in a native dialog.
+ * the Tauri side (src-tauri/src/mcp_stdio.rs), which runs only a command on
+ * its allow-list (plan W13.X1): the program's resolved full path, its sha256,
+ * the exact arguments and folder, and the sha256 of every file an argument
+ * names, approved by the user in a native dialog. Anything else is refused
+ * before a process starts; a program that changed asks again.
  *
  *   • Responses are matched to requests by id; notifications and lines that
  *     are not JSON are logged, not answered.
@@ -200,19 +203,35 @@ export function stdioTransport(server: { id: string; label: string }, spec: Stdi
 type Invoke = <T>(cmd: string, args?: Record<string, unknown>) => Promise<T>;
 type Listen = (event: string, fn: (e: { payload: { session: number; kind: StdioEvent["kind"]; line: string } }) => void) => Promise<() => void>;
 
+/** Why the desktop refused to start a server (the Rust allow-list's words, W13.X1). */
+export type StdioRefusal = "not-approved" | "changed" | null;
+
+/** "changed": the program or a file it is given is not the one approved; "not-approved": never approved (or declined). */
+export function stdioRefusal(message: string): StdioRefusal {
+  const m = message.replace(/^(?:Error|McpClientError):\s*/, "");
+  if (m.startsWith("changed since approval")) return "changed";
+  if (m.startsWith("not approved")) return "not-approved";
+  return null;
+}
+
+/** The UI's language for the native dialog ("he" shows it in Hebrew; the rest read English there). */
+const uiLang = (): string | null => (typeof document !== "undefined" && document.documentElement.lang) || null;
+
 /**
  * The desktop bridge: the Tauri commands of src-tauri/src/mcp_stdio.rs. The
- * native approval dialog comes first when the exact command is not approved
- * yet; a "no" there means nothing runs.
+ * native approval dialog comes first when the exact pinned command is not on
+ * the allow-list (never approved, or changed since); a "no" there means
+ * nothing runs, and `mcp_stdio_spawn` refuses anything else on its own.
  */
-export function tauriStdioBridge(deps?: { invoke: Invoke; listen: Listen }): StdioBridge {
+export function tauriStdioBridge(deps?: { invoke: Invoke; listen: Listen; lang?: () => string | null }): StdioBridge {
   return {
     async spawn(server, spec, onEvent) {
       const invoke = deps?.invoke ?? ((await import("@tauri-apps/api/core")).invoke as Invoke);
       const listen = deps?.listen ?? ((await import("@tauri-apps/api/event")).listen as unknown as Listen);
       const args = { command: spec.command, args: spec.args, cwd: spec.cwd ?? null };
       if (!(await invoke<boolean>("mcp_stdio_approved", args))) {
-        if (!(await invoke<boolean>("mcp_stdio_approve", { server: server.label, ...args }))) throw new McpClientError(`not approved: you did not allow "${spec.command}" to run`);
+        const lang = (deps?.lang ?? uiLang)();
+        if (!(await invoke<boolean>("mcp_stdio_approve", { server: server.label, ...args, lang }))) throw new McpClientError(`not approved: you did not allow "${spec.command}" to run`);
       }
       // Listen before the process starts, so no early line is lost; lines for a session not known yet wait.
       let session: number | null = null;
