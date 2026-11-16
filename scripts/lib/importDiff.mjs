@@ -7,7 +7,8 @@
  * metrics, counted the same way on both sides:
  *   notes        .md files
  *   attachments  every other file
- *   links        internal links and embeds: [[…]], ![[…]], and [..](relative) / ![..](relative)
+ *   links        internal links and embeds: [[…]], ![[…]], and [..](relative) / ![..](relative),
+ *                the destination bare or in angle brackets ([..](<a b.md>), which may hold spaces)
  *   headings     ATX headings outside code fences
  *   tasks        task-list items, open or done
  *   hebrew       Hebrew words, NFC: each word of the oracle must be in lumen-md at least as often
@@ -65,7 +66,11 @@ export function vaultMetrics(vault) {
       if (/^\s{0,3}#{1,6}\s+\S/.test(line)) m.headings++;
       if (/^\s*(?:[-*+]|\d+[.)])\s+\[[ xX]\]\s/.test(line)) m.tasks++;
       m.links += (line.match(/!?\[\[[^\]\n]+\]\]/g) ?? []).length;
-      for (const l of line.matchAll(/!?\[[^\]\n]*\]\(<?([^)\s>]+)>?\)/g)) if (!/^[a-z][a-z0-9+.-]*:/i.test(l[1]) && !l[1].startsWith("#")) m.links++;
+      // A destination in angle brackets may hold spaces (`[a](<My note.md>)`, CommonMark): how lumen-md writes a path with a space.
+      for (const l of line.matchAll(/!?\[[^\]\n]*\]\((?:<([^>\n]+)>|([^)\s>]+))\)/g)) {
+        const dest = l[1] ?? l[2];
+        if (!/^[a-z][a-z0-9+.-]*:/i.test(dest) && !dest.startsWith("#")) m.links++;
+      }
       m.bidi += (line.match(BIDI) ?? []).length;
       for (const w of line.match(HEBREW_WORD) ?? []) words.set(w, (words.get(w) ?? 0) + 1);
     }

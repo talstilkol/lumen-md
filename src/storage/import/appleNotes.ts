@@ -204,7 +204,9 @@ export function noteToMarkdown(body: NoteBody, attachment: (id: string, uti: str
 
   const lines: string[] = [];
   let inCode = false;
-  let number = 0;
+  // One count per indent level: a sub-list numbers from 1 and its parent list goes on where it was
+  // (1. · 1. 2. · 2.), and a dashed sub-item between two numbered items does not restart the count.
+  const counts: number[] = [];
   for (const para of paragraphs) {
     const style = para[0]?.run ?? PLAIN;
     const content = para.map((p) => inline(p, attachment)).join("");
@@ -220,7 +222,14 @@ export function noteToMarkdown(body: NoteBody, attachment: (id: string, uti: str
     }
     const indent = "\t".repeat(Math.max(0, style.indent));
     const quote = style.blockQuote ? "> " : "";
-    number = style.styleType === STYLE.numberedList ? number + 1 : 0;
+    const level = Math.max(0, style.indent);
+    const listItem = style.styleType === STYLE.numberedList || style.styleType === STYLE.dottedList || style.styleType === STYLE.dashedList || style.styleType === STYLE.checklist;
+    if (!listItem) counts.length = 0;
+    else {
+      counts.length = level + 1;
+      counts[level] = style.styleType === STYLE.numberedList ? (counts[level] ?? 0) + 1 : 0;
+    }
+    const number = counts[level] ?? 0;
     switch (style.styleType) {
       case STYLE.title:
         lines.push(content.trim() ? `${quote}# ${content}` : "");
