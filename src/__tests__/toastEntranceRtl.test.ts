@@ -39,6 +39,7 @@ function firstFrameX(dir: "ltr" | "rtl"): number {
   return x;
 }
 
+// skip-reason: the entrance is read from Web Animations in a real browser; jsdom and happy-dom do not run them | task: W10.E22 | until: 2027-05-16
 describe.runIf(typeof document !== "undefined" && typeof Element.prototype.getAnimations === "function" && typeof DOMMatrixReadOnly === "function" && !/happy-?dom/i.test(navigator.userAgent))("toast entrance follows the writing direction", () => {
   it("LTR: from +20px (the right edge)", () => {
     expect(firstFrameX("ltr")).toBe(20);

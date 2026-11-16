@@ -31,7 +31,8 @@ const ROOTS = new Set(["test", "it", "describe", "suite", "bench"]);
 const SKIPPERS = new Set(["skip", "fixme", "todo", "skipIf", "runIf"]);
 
 const ANNOTATION = /\/\/\s*skip-reason:\s*(.*)$/;
-const TASK = /^(?:W?\d+(?:\.\d+)+|#\d+)$/;
+// Plan ids: 0.5, W4.12, and since wave 10 a letter before the number (W10.A6, W12.V5); or a PR.
+const TASK = /^(?:W?\d+(?:\.\d+)+|W\d+\.[A-Z]\d+|#\d+)$/;
 const DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 /** `test.describe.skip` → { root: "test", member: "skip" }; null for anything else. */
@@ -57,7 +58,7 @@ export function parseAnnotation(body, today = new Date()) {
   const until = field("until");
   const problems = [];
   if (why.length < 10) problems.push("the reason is missing or shorter than 10 characters");
-  if (!TASK.test(task)) problems.push(`no task (\`task: W4.12\`, \`task: 0.5\` or \`task: #431\`)${task ? `; got "${task}"` : ""}`);
+  if (!TASK.test(task)) problems.push(`no task (\`task: W4.12\`, \`task: W10.A6\`, \`task: 0.5\` or \`task: #431\`)${task ? `; got "${task}"` : ""}`);
   const m = DATE.exec(until);
   const date = m ? new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]))) : null;
   if (!date || date.toISOString().slice(0, 10) !== until) problems.push(`no review date (\`until: YYYY-MM-DD\`)${until ? `; got "${until}"` : ""}`);

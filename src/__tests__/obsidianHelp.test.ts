@@ -92,6 +92,7 @@ describe("the obsidian-help manifest (W11.P3)", () => {
 });
 
 describe(`open → save over obsidian-help (W11.P3)${when}`, () => {
+  // skip-reason: the obsidian-help corpus is a checkout outside the repo (its own licence); without it the title says so | task: W11.P3 | until: 2027-05-16
   it.runIf(have)("every one of the 762 files is read and written back byte-identical", async () => {
     const differ: string[] = [];
     for (const f of notes) {
@@ -102,6 +103,7 @@ describe(`open → save over obsidian-help (W11.P3)${when}`, () => {
     expect(differ).toEqual([]);
   });
 
+  // skip-reason: the obsidian-help corpus is a checkout outside the repo (its own licence); without it the title says so | task: W11.P3 | until: 2027-05-16
   it.runIf(have)("the same files saved by Windows (CRLF, BOM) keep their CRLF and BOM", async () => {
     const differ: string[] = [];
     for (const f of notes) {
@@ -112,6 +114,7 @@ describe(`open → save over obsidian-help (W11.P3)${when}`, () => {
     expect(differ).toEqual([]);
   });
 
+  // skip-reason: the obsidian-help corpus is a checkout outside the repo (its own licence); without it the title says so | task: W11.P3 | until: 2027-05-16
   it.runIf(have)("0 parse errors: every frontmatter reads, and writing back a value it has changes nothing", () => {
     let withFm = 0;
     let props = 0;
@@ -138,6 +141,7 @@ describe(`open → save over obsidian-help (W11.P3)${when}`, () => {
     expect(props).toBeGreaterThanOrEqual(1000);
   });
 
+  // skip-reason: the obsidian-help corpus is a checkout outside the repo (its own licence); without it the title says so | task: W11.P3 | until: 2027-05-16
   it.runIf(have)("the ```base block in the docs parses as a base", () => {
     const blocks = notes.flatMap((f) => [...text(f).matchAll(/^```base\r?\n([\s\S]*?)^```/gm)].map((m) => ({ path: f.path, src: m[1] })));
     expect(blocks.length).toBeGreaterThanOrEqual(1);
@@ -156,6 +160,7 @@ describe(`open → save over obsidian-help (W11.P3)${when}`, () => {
     for (const c of n.children ?? []) walk(c, f);
   };
 
+  // skip-reason: the obsidian-help corpus is a checkout outside the repo (its own licence); without it the title says so | task: W11.P3 | until: 2027-05-16
   it.runIf(have)("renders every file through the Obsidian layer: callouts, highlights and embeds come out as Obsidian marks them", () => {
     const errors: string[] = [];
     let calloutsIn = 0;
@@ -200,6 +205,7 @@ describe(`open → save over obsidian-help (W11.P3)${when}`, () => {
     expect(imagesOut).toBeGreaterThanOrEqual(imageEmbedsIn);
   });
 
+  // skip-reason: the obsidian-help corpus is a checkout outside the repo (its own licence); without it the title says so | task: W11.P3 | until: 2027-05-16
   it.runIf(have)("renaming a note and renaming it back leaves every linking note byte-identical, except where Obsidian also writes the note's own name", () => {
     let checks = 0;
     const changed: string[] = [];

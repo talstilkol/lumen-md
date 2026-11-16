@@ -44,6 +44,7 @@ describe("compileFile", () => {
     expect(compileFile("App.jsx", "<div", "react", broken)).toEqual({ name: "App.jsx", error: "SyntaxError: Unexpected token (1:5)" });
   });
 
+  // skip-reason: the real-compiler case needs sucrase installed; the reason is printed in the title | task: W10.D1 | until: 2027-05-16
   it.skipIf(!sucrase)(`with the real Sucrase: JSX for react imports the automatic runtime${sucrase ? "" : " — skipped: sucrase not installed"}`, () => {
     const f = compileFile("App.jsx", "export default () => <p>hi</p>;", "react", sucrase!);
     if (!("code" in f)) throw new Error(f.error);

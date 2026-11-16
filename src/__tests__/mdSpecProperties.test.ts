@@ -184,6 +184,7 @@ describe("CommonMark 0.31.2 conformance (W11.Q8)", () => {
   });
 });
 
+// skip-reason: fast-check is not installed until W10.M2 adds it as a dev dependency; the reason is printed in the title | task: W11.Q8 | until: 2027-05-16
 describe.skipIf(NO_FC !== null)(`property tests${NO_FC ? ` — skipped: ${NO_FC}` : ""}`, () => {
   const clean = examples.filter((e: { example: number }) => !(e.example in ROUND_TRIP_EXCEPTIONS)).map((e: { markdown: string }) => e.markdown);
 
@@ -222,6 +223,7 @@ describe.skipIf(NO_FC !== null)(`property tests${NO_FC ? ` — skipped: ${NO_FC}
     );
   });
 
+  // skip-reason: the convergence property needs yjs installed; the reason is printed in the title | task: W11.Q8 | until: 2027-05-16
   it.skipIf(!Y)(`Yjs: two replicas converge whatever order their updates arrive in${Y ? "" : " — skipped: yjs is not installed here"}`, () => {
     const Yjs = Y!;
     fc!.assert(

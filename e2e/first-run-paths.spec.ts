@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { chromiumOnly } from "./_engines";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -83,7 +84,7 @@ test("Bring your notes: six sources, the wizard on Google Keep, report, search a
 });
 
 test("Open an Obsidian folder: the folder becomes the vault, no note is written into it", async ({ page, browserName }) => {
-  test.skip(browserName !== "chromium", "showDirectoryPicker is Chromium-only; the folder here is an OPFS directory handed to the picker");
+  chromiumOnly(browserName, "showDirectoryPicker");
   await page.addInitScript(() => {
     (window as unknown as { showDirectoryPicker: () => Promise<FileSystemDirectoryHandle> }).showDirectoryPicker = async () => {
       const root = await navigator.storage.getDirectory();

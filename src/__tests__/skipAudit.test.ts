@@ -50,6 +50,9 @@ describe("skip audit (plan W4.12)", () => {
     expect(parseAnnotation("a reason that is long enough | task: #431 | until: 2026-11-11", TODAY).problems).toEqual([expect.stringMatching(/has passed/)]);
     expect(parseAnnotation("a reason that is long enough | task: 0.5 | until: 2026-11-12", TODAY).problems).toEqual([]);
     expect(parseAnnotation("a reason that is long enough | task: 0.5 | until: 2028-01-01", TODAY).problems).toEqual([expect.stringMatching(/more than 366 days/)]);
+    // Plan ids since wave 10 carry a letter (W10.A6, W12.V5); a word or a lower-case id is still no task.
+    expect(parseAnnotation("a reason that is long enough | task: W10.A6 | until: 2026-11-12", TODAY).problems).toEqual([]);
+    for (const bad of ["W10.a6", "W10.AB", "later", "W10."]) expect(parseAnnotation(`a reason that is long enough | task: ${bad} | until: 2026-11-12`, TODAY).problems, bad).toEqual([expect.stringMatching(/no task/)]);
   });
 
   it(`e2e/ holds at most ${MAX_E2E_SKIPS} skips, annotated or not`, () => {

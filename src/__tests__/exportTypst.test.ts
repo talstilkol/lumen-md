@@ -107,6 +107,7 @@ describe("10 Hebrew docs pages", () => {
     }
   });
 
+  // skip-reason: pandoc is an outside program, not an npm dependency; the check runs where pandoc is on PATH (the Mac run) | task: W12.F2 | until: 2027-05-16
   it.skipIf(!hasPandoc)("pandoc's Typst reader parses every one, and the Hebrew words come back in order", () => {
     for (const n of notes) {
       const typ = forOldPandoc(markdownToTypst(n.md));

@@ -60,6 +60,7 @@ for (const lang of ["en", "he"] as const) {
   test.describe(`every modal dialog (${lang})`, () => {
     for (const d of DIALOGS as Entry[]) {
       test(d.file, async ({ page }) => {
+        // skip-reason: a dialog that needs a state this spec cannot make yet; each entry's reason is its `fixme` in e2e/dialogs.registry.mjs and is the test's annotation | task: W10.E8 | until: 2027-05-16
         test.fixme(!!d.fixme, d.fixme);
         test.setTimeout(60_000);
         await boot(page, lang, !!d.firstRun);

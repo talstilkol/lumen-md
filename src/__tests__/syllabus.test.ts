@@ -91,6 +91,7 @@ describe("the syllabus note", () => {
 const DIR = join(__dirname, "fixtures/academic-calendar");
 const real = existsSync(DIR) ? readdirSync(DIR).filter((f: string) => f.endsWith(".json")) : [];
 describe("a 13-week syllabus on a university's published calendar (fixture downloaded outside the app)", () => {
+  // skip-reason: the university calendars are downloaded outside the app; without the fixture there is nothing to compare | task: W12.H5 | until: 2027-05-16
   it.skipIf(real.length === 0)("every week falls on the dates the published calendar gives", () => {
     for (const f of real) {
       // meta: { source (URL of the published calendar), institution, ics, start, end, weeks, breaks?: [[from, to]] } — copied by hand from the publication.

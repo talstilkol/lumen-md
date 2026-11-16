@@ -204,6 +204,7 @@ describe("the daily Rambam against the published schedule (hebcal-learning's tes
 
 const FIXTURE = join(__dirname, "fixtures/hebcal-learning/2020-2030.json");
 describe("against hebcal-learning's output, 2020–2030 (fixture built outside the app)", () => {
+  // skip-reason: the hebcal-learning reference table is generated outside the app on a machine with network; without the fixture there is nothing to compare | task: W12.H4 | until: 2027-05-16
   it.skipIf(!existsSync(FIXTURE))("0 differences in Daf Yomi, Mishnah Yomit and both Rambam cycles", () => {
     const fixture = JSON.parse(readFileSync(FIXTURE, "utf8"));
     const cmp = compareLearning(fixture, OURS);

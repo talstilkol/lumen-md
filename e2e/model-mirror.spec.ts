@@ -31,13 +31,6 @@ const ROOT = join(__dirname, "..");
 const registry = JSON.parse(readFileSync(join(ROOT, "models", "registry.json"), "utf8")) as { models: HostedModel[] };
 const REAL = process.env.MODEL_MIRROR_URL?.replace(/\/+$/, "") ?? "";
 
-/** The scenario imports src/ai/modelHosting.ts from the dev server; a production build serves no src/. */
-async function devServerOrSkip(page: import("@playwright/test").Page): Promise<void> {
-  const dev = await page.evaluate(() => !!document.querySelector('script[src*="/@vite/client"]'));
-  // skip-reason: the scenario imports src/ai/modelHosting.ts, which only the dev server serves; the production-build run has no src/ | task: W6.33 | until: 2027-05-12
-  test.skip(!dev, "imports src/ai/modelHosting.ts from the dev server");
-}
-
 test("0 models only on Hugging Face without a message (en, he)", () => {
   const en = JSON.parse(readFileSync(join(ROOT, "src", "i18n", "lazy", "modelSources.json"), "utf8")) as Record<string, string>;
   const he = JSON.parse(readFileSync(join(ROOT, "src", "i18n", "locales", "he", "common.json"), "utf8")) as Record<string, string>;
