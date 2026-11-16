@@ -11634,6 +11634,7 @@
       "npx vitest run src/__tests__/e2eeFifthReview.test.ts src/__tests__/e2eeThirdReview.test.ts src/__tests__/e2eeRekeyIntegrity.test.ts",
       "python3 scripts/sync-protocol/check_vectors.py"
      ],
+     "dodMock": true,
      "evidence": {
       "verdict": "PARTIAL",
       "checks": [
@@ -11656,7 +11657,7 @@
         "ranOn": "verify/train-7 3100c18c43"
        }
       ],
-      "audit": "W10.Z3 re-review 16.11 (plan/release-review-3100c18c43.md): the old dod ran $S/rr7 outside the repo, named src/sync/__tests__/ for three tests that are in src/__tests__/, and a vectors script that does not exist; dodMock stays until the owner's review",
+      "audit": "W10.Z3 re-review 16.11 (plan/release-review-3100c18c43.md): the old dod ran $S/rr7 outside the repo, named src/sync/__tests__/ for three tests that are in src/__tests__/, and a vectors script that does not exist; dodMock stays until the owner's review; review 9 (M6): #1002 had removed it, restored until the owner acknowledges — the dod's tests use no mocks (real crypto: security/attacks, e2eeFifthReview/ThirdReview/RekeyIntegrity, check_vectors), so the owner can lift it",
       "at": "2026-11-16"
      },
      "auditVerdict": {
