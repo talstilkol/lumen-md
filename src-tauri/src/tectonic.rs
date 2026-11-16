@@ -8,8 +8,12 @@
 //! Network (R8-M1): Tectonic itself downloads its TeX support bundle and any
 //! missing package from its bundle server on first use and on a cache miss.
 //! With `offline` (airplane mode or the local-only policy, decided by the
-//! page) it runs with `--only-cached`, so it makes no request and fails on a
-//! package it has not cached. A compile is killed after `timeout` (a TeX file
+//! page) it runs with `--only-cached`, so it fails on a package it has not
+//! cached. `--only-cached` alone is not a hard guarantee (R8b-L2: with a
+//! partial cache Tectonic may still fetch the bundle index), so offline the
+//! child also gets every proxy variable set to a closed local port
+//! (`OFFLINE_PROXY`, the discard port 9) and an empty NO_PROXY: a request it
+//! still makes fails at once instead of leaving the machine. A compile is killed after `timeout` (a TeX file
 //! that loops would otherwise hold the thread forever), and the work folder
 //! is created fresh with mode 0700. Only `std`, so it is unit-tested without
 //! the Tauri crates:
@@ -23,6 +27,35 @@ use std::time::{Duration, Instant};
 
 /// How long one compile may run before it is killed (R8-M1).
 pub const COMPILE_TIMEOUT: Duration = Duration::from_secs(120);
+
+/// Offline, every proxy variable points here: nothing listens on 127.0.0.1:9 (discard), so a request fails locally (R8b-L2).
+pub const OFFLINE_PROXY: &str = "http://127.0.0.1:9";
+
+/// The environment the child gets on top of the app's: offline, all proxies go to `OFFLINE_PROXY` and
+/// nothing bypasses them (both spellings, since curl and Rust HTTP clients read the lower-case ones).
+pub fn child_env(offline: bool) -> Vec<(&'static str, &'static str)> {
+    if !offline {
+        return Vec::new();
+    }
+    let mut v = Vec::new();
+    for k in ["HTTPS_PROXY", "HTTP_PROXY", "ALL_PROXY", "https_proxy", "http_proxy", "all_proxy"] {
+        v.push((k, OFFLINE_PROXY));
+    }
+    v.push(("NO_PROXY", ""));
+    v.push(("no_proxy", ""));
+    v
+}
+
+/// What the app says when a compile was stopped: neutral, since a long document or Tectonic's
+/// first download of its TeX bundle can take as long as a loop does (R8b-L2).
+pub fn timeout_message(secs: u64, offline: bool) -> String {
+    let why = if offline {
+        "The document may be very long or never finish (a loop)."
+    } else {
+        "The document may be very long or never finish (a loop), or Tectonic was still downloading its TeX bundle (the first compile can take minutes on a slow connection)."
+    };
+    format!("Tectonic was stopped after {secs} s. {why} Try again; if it stops again, check the document.")
+}
 
 /// Where to look for the binary, in order.
 pub fn candidates(env_override: Option<&str>, path_var: Option<&str>) -> Vec<PathBuf> {
@@ -164,6 +197,7 @@ pub fn compile(bin: &Path, tex: &str, files: &[(String, Vec<u8>)], work: &Path, 
         let mut child = Command::new(bin)
             .args(args(&main, work, offline))
             .current_dir(work)
+            .envs(child_env(offline))
             .stdin(Stdio::null())
             .stdout(io(".tectonic-stdout")?)
             .stderr(io(".tectonic-stderr")?)
@@ -316,6 +350,39 @@ printf '%%PDF-1.7 cached' > "$5/main.pdf""#);
         let pdf = compile(&bin, "x", &[], &tmp("work-offline"), true, COMPILE_TIMEOUT).expect("compiled from the cache");
         assert_eq!(pdf, b"%PDF-1.7 cached");
         let _ = std::fs::remove_dir_all(&bins);
+    }
+
+    #[test]
+    fn offline_points_every_proxy_at_a_closed_local_port() {
+        let env = child_env(true);
+        for k in ["HTTPS_PROXY", "HTTP_PROXY", "ALL_PROXY", "https_proxy", "http_proxy", "all_proxy"] {
+            assert!(env.contains(&(k, "http://127.0.0.1:9")), "{k}");
+        }
+        assert!(env.contains(&("NO_PROXY", "")) && env.contains(&("no_proxy", "")), "nothing bypasses the proxy");
+        assert!(child_env(false).is_empty(), "online keeps the user's own proxy settings");
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn offline_the_binary_sees_the_closed_proxy_and_no_bypass() {
+        let bins = tmp("bin-proxy");
+        // The stand-in writes the variables it sees into the "PDF".
+        let bin = fake_tectonic(&bins, r#"printf '%s|%s|%s|%s|%s|[%s][%s]' "$HTTPS_PROXY" "$HTTP_PROXY" "$ALL_PROXY" "$https_proxy" "$all_proxy" "${NO_PROXY-unset}" "${no_proxy-unset}" > "$5/main.pdf""#);
+        let pdf = compile(&bin, "x", &[], &tmp("work-proxy"), true, COMPILE_TIMEOUT).expect("compiled");
+        let p = "http://127.0.0.1:9";
+        assert_eq!(String::from_utf8_lossy(&pdf), format!("{p}|{p}|{p}|{p}|{p}|[][]"));
+        // A request through that proxy fails locally: nothing listens on port 9.
+        assert!(std::net::TcpStream::connect_timeout(&"127.0.0.1:9".parse().unwrap(), Duration::from_secs(2)).is_err());
+        let _ = std::fs::remove_dir_all(&bins);
+    }
+
+    #[test]
+    fn the_timeout_message_does_not_blame_the_document_alone() {
+        let on = timeout_message(120, false);
+        assert!(on.contains("120 s") && on.contains("downloading its TeX bundle") && on.contains("may be"), "{on}");
+        let off = timeout_message(120, true);
+        assert!(!off.contains("download"), "offline nothing downloads: {off}");
+        assert!(!on.contains("does the document loop"));
     }
 
     #[cfg(unix)]
