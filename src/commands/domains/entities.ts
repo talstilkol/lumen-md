@@ -25,7 +25,8 @@ import { airplaneFlagOn } from "../../privacy/airplaneBoot";
 import type { CommandContext } from "./context";
 import { openEntityGraph } from "../../entities/graphEvents";
 
-export const WIKIDATA_EVENT = "lumen-wikidata-link";
+import { WIKIDATA_EVENT } from "../wikidataEvent";
+export { WIKIDATA_EVENT };
 
 async function linkOpenEntity(ctx: CommandContext): Promise<void> {
   const doc = ctx.liveDoc();

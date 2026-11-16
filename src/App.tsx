@@ -84,7 +84,7 @@ import { useDesktopShell } from "./desktop/useDesktopShell";
 import { useAppBootEffects } from "./hooks/useAppBootEffects";
 import { useAppShortcuts } from "./hooks/useAppShortcuts";
 import { useAutosave } from "./hooks/useAutosave";
-import { useCommandEvents } from "./hooks/useCommandEvents";
+import { runCommandById, useCommandEvents } from "./hooks/useCommandEvents";
 import { useDocFileActions } from "./hooks/useDocFileActions";
 import { useLaunchActions } from "./hooks/useLaunchActions";
 import { useOpenFileEvent } from "./hooks/useOpenFileEvent";
@@ -395,9 +395,9 @@ export default function App() {
       useAppStore.getState().setTheme(cur === "dark" ? "light" : "dark");
     },
     onSetMode: (mode) => useAppStore.getState().setMode(mode),
-    onExportHtml: () => commands.find((c) => c.id === "file.exportHtml")?.action(),
-    onExportPdf: () => commands.find((c) => c.id === "file.exportPdf")?.action(),
-    onPrint: () => commands.find((c) => c.id === "file.print")?.action(),
+    onExportHtml: () => runCommandById("file.exportHtml"),
+    onExportPdf: () => runCommandById("file.exportPdf"),
+    onPrint: () => runCommandById("file.print"),
     onQuickCapture: () => setCaptureOpen(true),
   });
 
