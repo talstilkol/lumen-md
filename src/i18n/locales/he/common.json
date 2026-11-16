@@ -3534,6 +3534,7 @@
   "viz.arg.conclusion": "מסקנה",
   "viz.arg.contradicts": "סותר",
   "viz.arg.empty": "עדיין אין טענות או מקורות: תנו לפתקים `type: claim` או `type: evidence`, וקשרו אותם ב-supports:, ‏contradicts: או qualifies:.",
+  "viz.arg.findings": "{{n}} ממצאי היגיון",
   "viz.arg.noSource": "בלי מקור",
   "viz.arg.qualifies": "מסייג",
   "viz.arg.save": "שמירה כקנבס",

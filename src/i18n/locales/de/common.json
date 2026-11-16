@@ -3534,6 +3534,7 @@
   "viz.arg.conclusion": "Schluss",
   "viz.arg.contradicts": "widerspricht",
   "viz.arg.empty": "Noch keine Aussagen oder Quellen: gib Notizen `type: claim` oder `type: evidence` und verknüpfe sie mit supports:, contradicts: oder qualifies:.",
+  "viz.arg.findings": "{{n}} logic findings",
   "viz.arg.noSource": "ohne Quelle",
   "viz.arg.qualifies": "schränkt ein",
   "viz.arg.save": "Als Canvas speichern",

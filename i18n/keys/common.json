@@ -19509,6 +19509,13 @@
       "vars": []
     },
     {
+      "key": "viz.arg.findings",
+      "en": "{{n}} logic findings",
+      "vars": [
+        "n"
+      ]
+    },
+    {
       "key": "viz.arg.noSource",
       "en": "no source",
       "vars": []

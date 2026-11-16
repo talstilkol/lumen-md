@@ -3534,6 +3534,7 @@
   "viz.arg.conclusion": "結論",
   "viz.arg.contradicts": "反する",
   "viz.arg.empty": "主張も情報源もまだありません。ノートに `type: claim` か `type: evidence` を付け、supports:・contradicts:・qualifies: でつないでください。",
+  "viz.arg.findings": "{{n}} logic findings",
   "viz.arg.noSource": "情報源なし",
   "viz.arg.qualifies": "限定する",
   "viz.arg.save": "キャンバスとして保存",

@@ -71,7 +71,10 @@ export function relationLabels(): Record<ArgumentRelation, string> {
 }
 
 /** The map's picture: SVG boxes and edges (decorative: the frame's keyboard and the list carry the content). */
-function MapPicture({ g, dir, unsupported }: { g: ArgumentGraph; dir: Dir; unsupported: ReadonlySet<string> }) {
+/** W13.W8: the argument checker's findings per claim note, for a badge on the map and a line in the list. */
+export type MapFindings = ReadonlyMap<string, { count: number; kinds: string[] }>;
+
+function MapPicture({ g, dir, unsupported, findings }: { g: ArgumentGraph; dir: Dir; unsupported: ReadonlySet<string>; findings?: MapFindings }) {
   const lo = useMemo(() => layoutArgument(g), [g]);
   const boxes = useMemo(() => argumentBoxes(lo, dir), [lo, dir]);
   const width = Math.max(NODE_W, ...[...boxes.values()].map((b) => b.x + NODE_W));
@@ -111,6 +114,14 @@ function MapPicture({ g, dir, unsupported }: { g: ArgumentGraph; dir: Dir; unsup
                 {t("viz.arg.noSource")}
               </text>
             )}
+            {findings?.get(n.id) && (
+              <g data-findings={findings.get(n.id)!.count} transform={`translate(${dir === "rtl" ? 4 : NODE_W - 26},4)`}>
+                <rect width={22} height={16} rx={8} fill="hsl(35 90% 45%)" />
+                <text x={11} y={12} textAnchor="middle" fontSize={11} fill="#fff">
+                  {findings.get(n.id)!.count}
+                </text>
+              </g>
+            )}
           </g>
         );
       })}
@@ -119,7 +130,7 @@ function MapPicture({ g, dir, unsupported }: { g: ArgumentGraph; dir: Dir; unsup
 }
 
 /** The alternative: each claim with the notes that support, contradict or qualify it. */
-function MapList({ g, unsupported, onOpen, id, hidden }: { g: ArgumentGraph; unsupported: ReadonlySet<string>; onOpen: (path: string) => void; id: string; hidden: boolean }) {
+function MapList({ g, unsupported, findings, onOpen, id, hidden }: { g: ArgumentGraph; unsupported: ReadonlySet<string>; findings?: MapFindings; onOpen: (path: string) => void; id: string; hidden: boolean }) {
   const label = new Map(g.nodes.map((n) => [n.id, n.label]));
   const claims = g.nodes.filter((n) => n.kind !== "source");
   const sourcesOnly = g.nodes.filter((n) => n.kind === "source" && !g.edges.some((e) => e.from === n.id));
@@ -133,6 +144,7 @@ function MapList({ g, unsupported, onOpen, id, hidden }: { g: ArgumentGraph; uns
             </button>{" "}
             <span className="lumen-viz-note">{c.kind === "conclusion" ? t("viz.arg.conclusion") : t("viz.arg.claim")}</span>
             {unsupported.has(c.id) && <strong className="lumen-viz-claim-missing"> · {t("viz.arg.noSource")}</strong>}
+            {findings?.get(c.id) && <span className="lumen-viz-note" data-findings={findings.get(c.id)!.count}> · {t("viz.arg.findings", { n: findings.get(c.id)!.count })}</span>}
             <ul>
               {g.edges
                 .filter((e) => e.to === c.id)
@@ -161,14 +173,16 @@ async function openNote(path: string) {
   store.openTab({ name: path.split("/").pop() ?? path, content, workspaceName: path });
 }
 
-export function ArgumentMapView({ g, dir, title, onOpen, onSave }: { g: ArgumentGraph; dir: Dir; title: string; onOpen: (path: string) => void; onSave?: () => void }) {
+export function ArgumentMapView({ g, dir, title, onOpen, onSave, findings }: { g: ArgumentGraph; dir: Dir; title: string; onOpen: (path: string) => void; onSave?: () => void; findings?: MapFindings }) {
   const unsupported = useMemo(() => unsupportedClaims(g), [g]);
   const order = useMemo(() => readingOrder(layoutArgument(g)), [g]);
   const byId = new Map(g.nodes.map((n) => [n.id, n]));
   const points = order.map((id) => {
     const n = byId.get(id)!;
     const kind = n.kind === "source" ? t("viz.arg.source") : n.kind === "conclusion" ? t("viz.arg.conclusion") : t("viz.arg.claim");
-    return { label: n.label, value: unsupported.has(id) ? `${kind} · ${t("viz.arg.noSource")}` : kind };
+    const f = findings?.get(id);
+    const value = unsupported.has(id) ? `${kind} · ${t("viz.arg.noSource")}` : kind;
+    return { label: n.label, value: f ? `${value} · ${t("viz.arg.findings", { n: f.count })}` : value };
   });
   return (
     <div className="lumen-viz-arg">
@@ -188,8 +202,8 @@ export function ArgumentMapView({ g, dir, title, onOpen, onSave }: { g: Argument
         onActivate={(i) => onOpen(order[i])}
         showAlternativeLabel={t("viz.arg.showList")}
         showPictureLabel={t("viz.arg.showMap")}
-        picture={<MapPicture g={g} dir={dir} unsupported={unsupported} />}
-        alternative={(id, hidden) => <MapList g={g} unsupported={unsupported} onOpen={onOpen} id={id} hidden={hidden} />}
+        picture={<MapPicture g={g} dir={dir} unsupported={unsupported} findings={findings} />}
+        alternative={(id, hidden) => <MapList g={g} unsupported={unsupported} findings={findings} onOpen={onOpen} id={id} hidden={hidden} />}
       />
     </div>
   );
@@ -198,6 +212,7 @@ export function ArgumentMapView({ g, dir, title, onOpen, onSave }: { g: Argument
 export default function ArgumentMapBlock({ source }: { source: string }) {
   const opts = useMemo(() => parseArgumentBlock(source), [source]);
   const [notes, setNotes] = useState<ArgNoteInput[] | null>(null);
+  const [findings, setFindings] = useState<MapFindings | undefined>(undefined);
   const [saved, setSaved] = useState<string | null>(null);
   const dir: Dir = isRTL() ? "rtl" : "ltr";
   useEffect(() => {
@@ -206,8 +221,14 @@ export default function ArgumentMapBlock({ source }: { source: string }) {
       await ensureIndex();
       const list = (await indexedNotes())
         .filter((n) => !opts.folder || n.path.startsWith(`${opts.folder}/`))
-        .map((n) => ({ path: n.path, fm: frontmatterOf(n.content) }));
-      if (!cancelled) setNotes(list);
+        .map((n) => ({ path: n.path, fm: frontmatterOf(n.content), content: n.content }));
+      if (cancelled) return;
+      setNotes(list.map(({ path, fm }) => ({ path, fm })));
+      // W13.W8: the argument checker's findings on each claim, in their own chunk, after the map is up.
+      const { mapFindings } = await import("../agents/writing/argument/argumentChecker");
+      const sources = list.filter((n) => /^(?:evidence|source|מקור)$/i.test(String(n.fm.type ?? ""))).map((n) => ({ path: n.path, text: n.content }));
+      const f = mapFindings(list.map((n) => ({ path: n.path, text: n.content })), list, sources);
+      if (!cancelled) setFindings(f);
     };
     void run();
     const off = onWorkspaceChanged(() => void run(), { debounceMs: 300 });
@@ -230,7 +251,7 @@ export default function ArgumentMapBlock({ source }: { source: string }) {
     <div className="chart-block lumen-argument-map-block" lang={getLocale()}>
       {!g && <p className="lumen-viz-note">{t("viz.loading")}</p>}
       {g && g.nodes.length === 0 && <EmptyState message={t("viz.arg.empty")} action={learnHow("workspace/literature-review")} />}
-      {g && g.nodes.length > 0 && <ArgumentMapView g={g} dir={dir} title={title} onOpen={(p) => void openNote(p).catch(() => undefined)} onSave={() => void save().catch(() => undefined)} />}
+      {g && g.nodes.length > 0 && <ArgumentMapView g={g} dir={dir} title={title} findings={findings} onOpen={(p) => void openNote(p).catch(() => undefined)} onSave={() => void save().catch(() => undefined)} />}
       {saved && (
         <p className="lumen-viz-note" role="status">
           {t("viz.arg.saved", { path: saved })}
