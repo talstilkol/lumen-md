@@ -179,7 +179,7 @@
 
 **קבלה:** אין קובץ ב-`src/commands` מעל 500 שורות · snapshot זהה · סכום chunks ההפעלה לא גדל
 
-**פירוט הסטטוס:** ✅ #208 · stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): partial: commandIds 1/2 under the shim (toMatchFileSnapshot not in the shim; the snapshot was rewritten by INT in 91dd434a51); largest src/commands file view.ts 494 (<500); startup receipt measured with train4/startupB.mjs: #208's merge 44a4703b13 grew startup 219,580 -> 227,925 B gz (+8,345), the command domains are all static (35 files, 74,925 B raw in startup at HEAD); HEAD 226,449 B gz <= 227,328; owed: cloud code: make the heavy domain builders lazy (step 'heavy domains lazily' never done), so 'startup did not grow' holds; commandIds on a full vitest (Mac)
+**פירוט הסטטוס:** ✅ #208 · stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): commandIds 1/2 under the shim (toMatchFileSnapshot is not in the shim); largest src/commands file view.ts 494 (<500). #1015 (16.11, merged in af2d0d7ce5) made every command domain lazy (one chunk, idle or on the first run-by-id): startup 226,536 -> 204,347 B gz, so 'the startup chunks did not grow' holds. Review 10 M1: a run-by-id before the chunk was dropped when the chunk arrived before the list was rebuilt; fix/f10-commands decides from the list and drops the run on a failed load (commandsLazyQueue 2/2, commandsLazyQueueFail 1/1; the original case was red under the shim only because the first import of the domains took longer than waitFor's 1 s). Owed: commandIds on a full vitest (Mac).
 
 **0.3 · לפצל את קובצי התרגום לפי תחום** — `refactor/i18n-namespaces` · תשתית וביצועים · בוצע (הוערך 2 ש׳ 30 דק׳) · מקור: חיסכון בזמן
 
@@ -8674,8 +8674,8 @@ R12.21.3. כיול: דקות מתוכננות מול זמן בפועל לכל מ
 | W13.P4 | מלאי נתונים מקומי: ״מה שמור במכשיר הזה״ — פתקים, היסטוריה, מודלים, מטמונים ומפתחות — עם גודל ומחיקה לכל קטגוריה, ו-crypto-shredding לכספת מוצפנת | P1 | S | 6 ש׳ 00 דק׳ | 5.7 | ד׳ 16.12 06:20 | ד׳ 16.12 12:20 | ⏳ גל 13 — לא התחיל | נבנה בלבד |
 | W13.P5 | הגיינת לוח: ניקוי אוטומטי של סודות שהועתקו (מפתח שחזור, סיסמה) אחרי 60 שניות, ובלי הדבקה שקטה בטלפון | P2 | S | 3 ש׳ 00 דק׳ | W11.S9 | ד׳ 16.12 12:20 | ד׳ 16.12 15:20 | ⏳ גל 13 — לא התחיל | נבנה בלבד |
 | W13.P6 | Mac: מסע local-only מלא ב-3 דפדפנים (e2e/local-only-journey.spec.ts) — ‏0 בקשות חיצוניות, עם יומן הרשת בקבלה | P1 | S | 2 ש׳ 00 דק׳ | W5.9 | ד׳ 16.12 15:20 | ד׳ 16.12 17:20 | ⏳ גל 13 — לא התחיל | נבנה בלבד |
-| W13.X1 | MCP stdio: רשימת היתר במקום רשימת חסימה — נתיב בינארי מוחלט, sha256 וארגומנטים מדויקים שאושרו, ודחיית קוד בשורה (-c, ‏-e, ‏eval) | P0 | S | 8 ש׳ 00 דק׳ | W10.C1 | ב׳ 23.11 19:35 | ג׳ 24.11 03:35 | ⏳ גל 13 — לא התחיל | נבנה בלבד |
-| W13.X2 | גילוי פגיעויות לפי CRA: ‏security.txt ‏(RFC 9116), תהליך 24 ש׳ / 72 ש׳ / 14 יום, ‏GHSA ו-CVE, ‏safe harbor ותקופת תמיכה מוצהרת | P1 | S | 6 ש׳ 00 דק׳ | W10.D15, W11.S12 | ד׳ 16.12 17:20 | ד׳ 16.12 23:20 | ⏳ גל 13 — לא התחיל | נבנה בלבד |
+| W13.X1 | MCP stdio: רשימת היתר במקום רשימת חסימה — נתיב בינארי מוחלט, sha256 וארגומנטים מדויקים שאושרו, ודחיית קוד בשורה (-c, ‏-e, ‏eval) | P0 | S | 8 ש׳ 00 דק׳ | W10.C1 | ב׳ 23.11 19:35 | ג׳ 24.11 03:35 | ⏳ #1016 · built: allow-list pinned to path, sha256, argv and folder; review 10 gaps fixed in fix/f10-mcp (rustc --test 43/43); cargo test on the Mac | נבנה בלבד · [#1016](https://github.com/talstilkol/lumen-md/pull/1016) |
+| W13.X2 | גילוי פגיעויות לפי CRA: ‏security.txt ‏(RFC 9116), תהליך 24 ש׳ / 72 ש׳ / 14 יום, ‏GHSA ו-CVE, ‏safe harbor ותקופת תמיכה מוצהרת | P1 | S | 6 ש׳ 00 דק׳ | W10.D15, W11.S12 | ד׳ 16.12 17:20 | ד׳ 16.12 23:20 | ⏳ #1019 · built: security.txt (RFC 9116), CRA 24 h / 72 h / 14 d timelines, safe harbor, support period; securityTxt 10/10; contact and PVR owed by the owner | נבנה בלבד · [#1019](https://github.com/talstilkol/lumen-md/pull/1019) |
 | W13.X3 | בעלים: החלטת תחולת CRA (חינמי מול ממסר בתשלום) ותג OpenSSF Baseline רמה 1 ב-bestpractices.dev | P1 | S | 2 ש׳ 00 דק׳ | W13.X2, W13.X4 | א׳ 20.12 11:50 | א׳ 20.12 13:50 | ⏳ גל 13 — לא התחיל | נבנה בלבד |
 | W13.X4 | ‏.bestpractices.json וראיות ל-OSPS Baseline 1–2: כל קריטריון ממופה לקובץ או לבדיקה בריפו | P1 | S | 4 ש׳ 00 דק׳ | W11.S4, W11.S5 | א׳ 20.12 07:50 | א׳ 20.12 11:50 | ⏳ גל 13 — לא התחיל | נבנה בלבד |
 | W13.X5 | קישורי lumen:// וקבצים לא מוכרים: אישור לכל פעולה מקישור, רשימת היתר למקורות, ופתיחת סוג קובץ לא מוכר רק אחרי אישור | P1 | S | 5 ש׳ 00 דק׳ | 4.15 | ד׳ 16.12 23:20 | ה׳ 17.12 04:20 | ⏳ גל 13 — לא התחיל | נבנה בלבד |
@@ -9056,6 +9056,8 @@ W13.X1.4. 44 מקרי הבדיקה מ-R8b הופכים לבדיקות Rust ו-vi
 
 **קבלה:** 44/44 מקרים: מה שלא ברשימה לא רץ · שינוי בייט אחד בבינארי שאושר → נדרש אישור מחדש
 
+**פירוט הסטטוס:** Shipped in #1016 (merged into verify/train-7 af2d0d7ce5 by INT4a): AllowList pins the resolved program, its sha256, the argv, the folder and every file an argument names; checked_spawn refuses anything else before a process starts. On af2d0d7ce5: rustc --test src-tauri/mcp-stdio/src/lib.rs 29/29, mcpStdioAllowlist.test.tsx 9/9 (offline runner). Review 10 found gaps (M4 M6 M7 L1-L5): the list was looked up after hashing, the deny-list read only the typed name, --opt=file and folder arguments were not pinned. fix/f10-mcp: lookup first with one message, 256 MB cap, deny on the resolved file, attached inline-code forms and stdin code refused, --opt=file hashed, a folder where an interpreter takes its program refused, nothing inside a granted vault, package-runner warning (en, he), revoke after a move, PATHEXT; rustc --test 43/43, 22/22 mutants killed; mcpStdioAllowlist 10/10. Review 10 M5: the old dod (cargo test --manifest-path src-tauri/Cargo.toml mcp_stdio) ran 0 tests; it now names the crate's own manifest, and a rustc line runs here. Owed: cargo build and cargo test on the Mac; real servers (npx, uvx, python) through the dialog; the isolation entries for mcp_stdio_* (owner); review receipts and the human-reviewed label (owner, security).
+
 **W13.X2 · גילוי פגיעויות לפי CRA: ‏security.txt ‏(RFC 9116), תהליך 24 ש׳ / 72 ש׳ / 14 יום, ‏GHSA ו-CVE, ‏safe harbor ותקופת תמיכה מוצהרת** — בלי ענף · נתונים ואבטחה · 6 ש׳ 00 דק׳ · מקור: https://www.rfc-editor.org/rfc/rfc9116 · https://ospo-alliance.org/faq/security/12-cyber-resilience-act-open-source-impact/ · https://www.traverssmith.com/knowledge/knowledge-container/the-eu-cyber-resilience-acts-vulnerability-and-incident-reporting-requirements-are-now-live/
 
 W13.X2.1. public/.well-known/security.txt עם Contact, ‏Expires, ‏Policy, ‏Preferred-Languages: he, en — ובדיקה ש-Expires לא עבר
@@ -9064,6 +9066,8 @@ W13.X2.3. מדיניות מחקר בתום לב (safe harbor) והיכל תהי�
 W13.X2.4. תקופת תמיכה: אילו גרסאות מקבלות תיקוני אבטחה ועד מתי (W13.T2)
 
 **קבלה:** security.txt עובר בדיקת RFC 9116 · SECURITY.md ו-/security בשתי השפות
+
+**פירוט הסטטוס:** Shipped in #1019 (merged into verify/train-7 af2d0d7ce5 by INT4a). On af2d0d7ce5: securityTxt.test.ts 10/10 (offline runner), npm run security:page exit 0 (the page is generated in both languages and unchanged). Review 10 L12, owed by the owner: security.txt's Contact is a public issue, and GitHub private vulnerability reporting is off (turn it on, then point Contact at the advisory form); its Expires is 2027-05-16 (renew before then). Owed: the human-reviewed label and receipts (security).
 
 **W13.X3 · בעלים: החלטת תחולת CRA (חינמי מול ממסר בתשלום) ותג OpenSSF Baseline רמה 1 ב-bestpractices.dev** — בלי ענף · נתונים ואבטחה · 2 ש׳ 00 דק׳ · מקור: https://openssf.org/blog/2026/02/25/getting-an-openssf-baseline-badge-with-the-best-practices-badge · https://baseline.openssf.org/
 
