@@ -42,6 +42,8 @@ export const isMockDone = (status = "") => status.startsWith("✅*");
  * - a ✅* task declares `dodMock: true`; without it a later edit could turn ✅* into
  *   plain ✅ and re-run the same mock-only commands as the real check (Codex P1 on #265)
  * - every `dod` entry is a non-empty string
+ * - every P0 task, done or not, has a `dod` and a `dodExpect` with one
+ *   expected result per command (expectProblems, below)
  * @param {any} plan
  * @returns {string[]}
  */
@@ -56,12 +58,34 @@ export function checkDod(plan) {
     if (t.dod !== undefined && (!Array.isArray(t.dod) || t.dod.some((c) => typeof c !== "string" || !c.trim()))) {
       problems.push(`${t.id}: dod must be a list of commands`);
     }
+    problems.push(...expectProblems(t));
     if (!status.startsWith("✅")) continue;
     if (!t.dod?.length) problems.push(`${t.id} is marked ${status.slice(0, 2).trim()} without a dod — add the commands that prove it (plan 0.7)`);
     if (t.dodMock && isFullDone(status)) problems.push(`${t.id} is checked against mocks only (dodMock) — mark it ✅*, not ✅`);
     if (isMockDone(status) && !t.dodMock) problems.push(`${t.id} is ✅* without "dodMock": true — declare it, so the status can't become ✅ before the real-model check replaces the mock`);
   }
   return problems;
+}
+
+/**
+ * W10.Z3 / lane A6 — a P0 task's definition of done is concrete whatever its
+ * status: at least one command, and for each command the result that proves
+ * it (`dodExpect`, the same length as `dod`: "exit 0 — 0 failed", "prints
+ * enabled", …). Any task that has a `dodExpect` keeps it in step with `dod`.
+ * @param {any} t
+ * @returns {string[]}
+ */
+export function expectProblems(t) {
+  const out = [];
+  const cmds = Array.isArray(t.dod) ? t.dod : [];
+  if (t.priority === "P0" && !cmds.length) out.push(`${t.id} is P0 without a dod — add the commands that prove it and their expected results (dodExpect)`);
+  if (t.dodExpect === undefined) {
+    if (t.priority === "P0" && cmds.length) out.push(`${t.id} is P0 without dodExpect — the expected result of each dod command`);
+    return out;
+  }
+  if (!Array.isArray(t.dodExpect) || t.dodExpect.some((e) => typeof e !== "string" || !e.trim())) out.push(`${t.id}: dodExpect must be a list of expected results`);
+  else if (t.dodExpect.length !== cmds.length) out.push(`${t.id}: dodExpect has ${t.dodExpect.length} entries for ${cmds.length} dod command(s) — one expected result per command`);
+  return out;
 }
 
 /**
@@ -85,7 +109,7 @@ export function markdown(tasks) {
   for (const t of tasks) {
     lines.push(`### ${t.id} · ${t.title}`);
     for (const a of t.acceptance ?? []) lines.push(`- [ ] ${a}`);
-    if (t.dod?.length) for (const c of t.dod) lines.push(`- [ ] \`${c}\` green`);
+    if (t.dod?.length) t.dod.forEach((c, i) => lines.push(`- [ ] \`${c}\` ${t.dodExpect?.[i] ? `→ ${t.dodExpect[i]}` : "green"}`));
     else lines.push("- [ ] **no `dod` yet** — add the commands to plan/plan.json");
     if (t.dodMock) lines.push("- [ ] mocks only → ✅*; the real-model check stays with the owner item");
     lines.push("");
