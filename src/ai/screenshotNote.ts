@@ -137,22 +137,25 @@ export async function screenshotToNote(image: Blob, lang: string, deps: Screensh
 
 /** The app's deps: Ollama on this machine, and the browser's Tesseract. Loaded lazily. */
 export async function appScreenshotDeps(): Promise<ScreenshotDeps> {
-  const { getBaseUrl } = await import("./ollamaProvider");
+  const { runLocalRequest } = await import("../agents/runtime");
+  const { ollamaExecutor } = await import("../agents/executors/ollama");
   const { visionModel } = await import("./vision");
   const { ocrImage } = await import("./ocr");
   return {
     model: visionModel,
     chat: async (model, prompt, images, signal) => {
-      // privacy-ledger: Ollama on this machine (getBaseUrl, localhost by default); the ledger lists it when it is not local.
-      const res = await fetch(`${getBaseUrl()}/api/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ model, stream: false, messages: [{ role: "user", content: prompt, images: [images] }], options: { temperature: 0 } }),
-        signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(120_000)]) : AbortSignal.timeout(120_000),
-      });
-      if (!res.ok) return null;
-      const json = (await res.json()) as { message?: { content?: string } };
-      return json.message?.content ?? null;
+      // Through the runtime (plan 5.5): traced, and the Ollama executor's "local only" check applies.
+      const res = await runLocalRequest(
+        ollamaExecutor,
+        {
+          model,
+          messages: [{ role: "user", content: prompt, images: [images] }],
+          temperature: 0,
+          signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(120_000)]) : AbortSignal.timeout(120_000),
+        },
+        { agentId: "screenshot-note" },
+      );
+      return res.content.trim() || null;
     },
     ocr: async (image) => (await ocrImage(image)).text,
   };

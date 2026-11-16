@@ -9,7 +9,7 @@
  *          the trace.
  *   5.5.2  the style profile applies to writer, templater and Rewrite.
  */
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, onTestFinished } from "vitest";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 
@@ -91,6 +91,67 @@ describe("static check (5.5.3)", () => {
     const cloud = fakeExecutor(() => ({ content: "", toolCalls: [], model: "x" }), { id: "chat" });
     await expect(runLocalRequest(cloud, { messages: [] }, { agentId: "knesset-law-answer" })).rejects.toThrow(/local engine only/);
     expect(cloud.calls).toHaveLength(0);
+  });
+
+  it("no module outside the executor layer posts to a chat endpoint itself", () => {
+    // A raw fetch to Ollama's /api/chat (or an OpenAI-style /v1/chat/completions)
+    // is a model call the trace never sees, and one the executor's "local only"
+    // check never refuses (5.5: the image describer and the screenshot note did this).
+    const allowed = new Set(["ai/llm.ts", "ai/ollamaProvider.ts", "ai/mistralProvider.ts", "ai/batch.ts"]);
+    const offenders = files
+      .filter((f) => !allowed.has(f.path) && !f.path.startsWith("agents/executors/") && !f.path.startsWith("agents/eval/"))
+      .filter((f) => /["'`][^"'`\n]*\/(api\/chat|v1\/chat\/completions)\b/.test(f.text))
+      .map((f) => f.path);
+    expect(offenders).toEqual([]);
+  });
+
+  it("no module outside the runtime calls an executor's chat({...}) itself, whatever the variable is named", () => {
+    // `executor.chat(` alone missed `ex.chat({` (ai/structured, 5.5).
+    const allowed = new Set(["agents/runtime.ts", "agents/modelCritic.ts"]);
+    const offenders = files.filter((f) => !allowed.has(f.path) && !f.path.startsWith("agents/executors/") && !f.path.startsWith("agents/eval/") && /\.chat\(\s*\{/.test(f.text)).map((f) => f.path);
+    expect(offenders).toEqual([]);
+  });
+
+  it("an image description, a screenshot note and a structured answer are runs in the trace", async () => {
+    await clearTrace();
+    const { ollamaExecutor } = await import("../agents/executors/ollama");
+    const chat = vi.spyOn(ollamaExecutor, "chat").mockResolvedValue({ content: "  A cat on a mat.  ", toolCalls: [], model: "qwen2.5vl:7b" });
+    onTestFinished(() => chat.mockRestore());
+    const { describeImage } = await import("../ai/vision");
+    const blob = new Blob([new Uint8Array([1, 2, 3])]);
+    expect(await describeImage(blob, "en", "qwen2.5vl:7b")).toBe("A cat on a mat.");
+    expect(chat.mock.calls[0][0]).toMatchObject({ model: "qwen2.5vl:7b", temperature: 0, messages: [{ role: "user", images: ["AQID"] }] });
+    expect(chat.mock.calls[0][0].signal).toBeInstanceOf(AbortSignal);
+    await vi.waitFor(() => expect(listRuns().find((r) => r.agentId === "image-describe")).toMatchObject({ executor: "ollama", status: "ok" }));
+
+    const { appScreenshotDeps } = await import("../ai/screenshotNote");
+    const deps = await appScreenshotDeps();
+    expect(await deps.chat!("qwen2.5vl:7b", "to markdown", "AQID")).toBe("A cat on a mat.");
+    expect(chat.mock.calls[1][0].messages[0].images).toEqual(["AQID"]);
+    await vi.waitFor(() => expect(listRuns().find((r) => r.agentId === "screenshot-note")).toMatchObject({ executor: "ollama", status: "ok" }));
+
+    const { executorEngine } = await import("../ai/structured");
+    const ex = fakeExecutor(() => ({ content: '{"tags":["a"]}', toolCalls: [], model: "qwen3:4b" }), { supportsSchema: () => true });
+    expect(await executorEngine("ollama", async () => ex).generate({ prompt: "tags?", schema: { type: "object" } } as never)).toBe('{"tags":["a"]}');
+    expect(ex.calls[0].tools).toBeUndefined();
+    await vi.waitFor(() => expect(listRuns().find((r) => r.agentId === "structured-output")).toMatchObject({ executor: "ollama", status: "ok" }));
+  });
+
+  it("the image describer obeys \"local only\": a remote Ollama gets no image", async () => {
+    // Before 5.5 it posted to `${getBaseUrl()}/api/chat` itself, whatever the policy.
+    const { setAiPolicy } = await import("../ai/policy");
+    setAiPolicy("local-only");
+    localStorage.setItem("lumen.ollama.baseUrl", "https://ollama.example.com");
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify({ model: "llava", message: { content: "a photo" }, done: true })));
+    try {
+      const { describeImage } = await import("../ai/vision");
+      expect(await describeImage(new Blob([new Uint8Array([1])]), "en", "llava")).toBeNull();
+      expect(fetchSpy.mock.calls.filter(([u]: unknown[]) => String(u).includes("/api/chat"))).toEqual([]);
+    } finally {
+      fetchSpy.mockRestore();
+      localStorage.removeItem("lumen.ollama.baseUrl");
+      localStorage.removeItem("lumen.ai.policy");
+    }
   });
 
   it("the check sees a direct call when there is one", () => {

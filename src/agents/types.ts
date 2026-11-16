@@ -239,6 +239,8 @@ export interface ExecutorMessage {
   toolCallId?: string;
   /** Tool turn: the tool's name. */
   name?: string;
+  /** Images for a vision model, base64 without a data: prefix (Ollama's `images`; other executors ignore them). */
+  images?: string[];
 }
 
 export type ModelTier = "tiny" | "small" | "medium" | "large";

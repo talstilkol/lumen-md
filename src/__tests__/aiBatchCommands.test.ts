@@ -48,13 +48,26 @@ describe("AI: Check Batch Jobs", () => {
   it("reports a job state it couldn't save and writes nothing", async () => {
     saveJobs([job()]);
     results.value = { state: "ended", answers: new Map([["n0", '["roses"]']]), failed: 0 };
-    const spy = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
-      throw new Error("QuotaExceededError");
+    // A full storage: reads work, every write throws. Stubbed as the global
+    // (not a spy on Storage.prototype, which happy-dom's localStorage does not
+    // go through), so it holds under jsdom, happy-dom and a real browser.
+    const real = localStorage;
+    vi.stubGlobal("localStorage", {
+      getItem: (k: string) => real.getItem(k),
+      setItem: () => {
+        throw new DOMException("The quota has been exceeded.", "QuotaExceededError");
+      },
+      removeItem: (k: string) => real.removeItem(k),
+      clear: () => real.clear(),
+      key: (i: number) => real.key(i),
+      get length() {
+        return real.length;
+      },
     });
     try {
       await check();
     } finally {
-      spy.mockRestore();
+      vi.unstubAllGlobals();
     }
     expect(writes).toEqual([]);
     expect(toasts).toEqual([[expect.stringMatching(/batch_7.*storage full/), "error"]]);

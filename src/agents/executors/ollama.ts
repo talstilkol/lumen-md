@@ -230,7 +230,7 @@ export function toOllamaMessages(messages: ExecutorMessage[]): Array<Record<stri
         tool_calls: m.toolCalls.map((c) => ({ function: { name: c.name, arguments: c.args } })),
       };
     }
-    return { role: m.role, content: m.content };
+    return { role: m.role, content: m.content, ...(m.images?.length ? { images: m.images } : {}) };
   });
 }
 

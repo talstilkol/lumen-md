@@ -14,6 +14,8 @@ import { fakeExecutor, sequence } from "./helpers/fakeExecutor";
 import { scriptedAnswer } from "../agents/eval/scripted";
 
 import { installEvalWeb } from "./helpers/evalWeb";
+import { vaultFiles } from "./helpers/evalVault";
+import { clearStagedChanges } from "../agents/staging";
 
 beforeEach(() => {
   resetExecutors();
@@ -121,7 +123,12 @@ describe("agent eval — fixtures", () => {
   for (const c of EVAL_CASES) {
     it(`${c.id}: the expected tool call and the reference answer pass the agent's parser, validators and the checks`, async () => {
       registerExecutor(fakeExecutor((req) => scriptedAnswer(c, req)));
+      clearStagedChanges();
+      const before = [...vaultFiles].sort();
       const r = await runEvalCase(c, { executor: "ollama" });
+      // W10.C12 / 5.3: an agent proposes, the user approves. No case writes,
+      // renames or deletes a note by itself (a write tool only stages).
+      expect([...vaultFiles].sort(), "the vault changed without an approval").toEqual(before);
       expect(r.error).toBeUndefined();
       expect(r.checks.filter((x) => !x.ok)).toEqual([]);
       expect(passed(r)).toBe(true);
