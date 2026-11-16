@@ -210,6 +210,19 @@ mod desktop_vault {
         lock(&state).ok()?.active.clone()
     }
 
+    /// Is one granted vault folder the other or inside it, on disk (realpath and, on Unix, the
+    /// inode; R8b-L1)? Only folders the dialog granted, so the page learns nothing about other paths.
+    /// Needs its entry in src-tauri/isolation/index.js (owner) before the page can call it; until
+    /// then the page's spelling check (moveCheck.ts desktopRootsNested) is the one that runs.
+    #[tauri::command]
+    pub fn vault_roots_nested(state: State<VaultState>, a: String, b: String) -> Result<bool, String> {
+        let g = lock(&state)?;
+        let (Some(x), Some(y)) = (g.roots.get(&a), g.roots.get(&b)) else {
+            return Err("ENOVAULT: this folder was not chosen in the dialog".into());
+        };
+        lumen_vault::nesting::roots_nested(x.root(), y.root()).map_err(|e| format!("EIO: {e}"))
+    }
+
     /// Ask the user for a folder (native dialog) and grant it. Does not make
     /// it the vault (`vault_use` does, after a move). Null when cancelled.
     #[tauri::command]
@@ -710,6 +723,7 @@ pub fn run() {
             desktop_vault::vault_rename,
             desktop_vault::vault_remove,
             desktop_vault::vault_backup,
+            desktop_vault::vault_roots_nested,
             whisper_status,
             whisper_transcribe,
             latex_status,

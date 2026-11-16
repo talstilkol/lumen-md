@@ -14,6 +14,9 @@
 //! move a folder into itself, or to replace a folder that holds the source.
 
 use serde::Serialize;
+
+/// Is one vault folder inside the other, on disk (R8b-L1).
+pub mod nesting;
 use std::fmt;
 use std::fs;
 use std::io::{self, Write};

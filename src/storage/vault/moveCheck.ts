@@ -248,19 +248,26 @@ export function caseInsensitiveDesktop(): boolean {
 }
 
 /**
- * A desktop vault root in one spelling (R8-L10): `\` as `/`, no repeated or
- * trailing separator, `.` and `..` resolved, and lower case where the file
- * system ignores case (macOS, Windows). `/Users/x/Vault/`, `/users/x/./vault`
- * and `/Users/x/A/../Vault` are then the same folder.
+ * A desktop vault root in one spelling (R8-L10, R8b-L1): Unicode NFC (macOS
+ * hands out NFD names, and Hebrew points typed in another order are the same
+ * text), `\` as `/`, no repeated or trailing separator, `.` and `..` resolved
+ * (`..` never climbs above the root or a drive: `/../x` is `/x`), and lower
+ * case where the file system ignores case (macOS, Windows). `/Users/x/Vault/`,
+ * `/users/x/./vault` and `/Users/x/A/../Vault` are then the same folder.
+ * Spelling only: a symlink or `/tmp` vs `/private/tmp` needs the disk
+ * (`desktopRootsNestedOnDisk`).
  */
 export function desktopRootKey(root: string, caseInsensitive = caseInsensitiveDesktop()): string {
-  const s = root.replace(/\\/g, "/");
+  const s = root.normalize("NFC").replace(/\\/g, "/");
   const lead = /^\/\/[^/]/.test(s) ? "//" : s.startsWith("/") ? "/" : "";
   const out: string[] = [];
+  // The part `..` stops at: the root of an absolute path, a drive (`C:`), or a UNC server and share.
+  const floor = lead === "//" ? 2 : /^[A-Za-z]:$/.test(s.split("/")[0]) ? 1 : 0;
   for (const part of s.split("/")) {
     if (part === "" || part === ".") continue;
-    if (part === ".." && out.length && out[out.length - 1] !== "..") out.pop();
-    else out.push(part);
+    if (part !== "..") out.push(part);
+    else if (out.length > floor && out[out.length - 1] !== "..") out.pop();
+    else if (!lead && !floor) out.push(part); // a relative path keeps a leading `..`
   }
   const key = lead + out.join("/");
   return caseInsensitive ? key.toLowerCase() : key;
@@ -271,6 +278,25 @@ export function desktopRootsNested(a: string, b: string, caseInsensitive = caseI
   const [x, y] = [desktopRootKey(a, caseInsensitive), desktopRootKey(b, caseInsensitive)];
   const within = (outer: string, inner: string) => inner === outer || inner.startsWith(outer.endsWith("/") ? outer : `${outer}/`);
   return within(x, y) || within(y, x);
+}
+
+type NestedInvoke = <T>(cmd: string, args?: Record<string, unknown>) => Promise<T>;
+
+/**
+ * The same, asking the disk too (R8b-L1): the desktop app's `vault_roots_nested`
+ * resolves both granted folders (realpath, and the inode on Unix), so a symlink,
+ * `/tmp` vs `/private/tmp`, a junction or a case the platform guess missed is
+ * seen. The spelling check runs first and stays the answer when the app cannot
+ * say (an older app, or the command not yet allowed by the isolation app).
+ */
+export async function desktopRootsNestedOnDisk(a: string, b: string, invoke?: NestedInvoke): Promise<boolean> {
+  if (desktopRootsNested(a, b)) return true;
+  try {
+    const call: NestedInvoke = invoke ?? (await (await import("./tauri")).loadTauriInvoke());
+    return (await call<boolean>("vault_roots_nested", { a, b })) === true;
+  } catch {
+    return false; // why: no answer from the disk; the spelling check above has spoken
+  }
 }
 
 /**
