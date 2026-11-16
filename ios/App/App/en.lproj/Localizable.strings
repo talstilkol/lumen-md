@@ -21,3 +21,6 @@
 "capture.cancel" = "Cancel";
 "capture.saved" = "Saved to your inbox";
 "capture.failed" = "Could not save. The text is still here.";
+"Record to Lumen inbox" = "Record to Lumen inbox";
+"Record to inbox" = "Record to inbox";
+"Opens Lumen recording a voice note into the inbox." = "Opens Lumen recording a voice note into the inbox.";

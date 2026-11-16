@@ -127,6 +127,14 @@ export async function searchOnline(query: string, enabled: Record<OpenSourceId, 
       }),
     );
   }
+  // W10.C28: free text in Sefaria's library (a reference is answered locally, above): the text search, its hits as verses.
+  if (enabled.sefaria && (!kind || kind === "verse") && q && !parseSourceRef(q)) {
+    jobs.push(
+      searchSefariaText(q, fetchImpl).then((hits) => {
+        for (const h of hits) out.push({ key: `sefaria:${h.ref.key}`, source: "sefaria", kind: "verse", title: h.ref.he, detail: h.snippet, rights: "link-only", url: h.ref.url, local: false, payload: { ref: h.ref } });
+      }),
+    );
+  }
   if (enabled.datagov && (!kind || kind === "dataset")) {
     jobs.push(
       searchDatasets(q, fetchImpl).then((hits) => {
@@ -148,6 +156,32 @@ export async function searchOnline(query: string, enabled: Record<OpenSourceId, 
       );
   }
   await Promise.all(jobs);
+  return out;
+}
+
+export const SEFARIA_SEARCH = "https://www.sefaria.org/api/search-wrapper";
+
+/**
+ * Sefaria's text search (POST /api/search-wrapper, an Elasticsearch query over
+ * the library): the query, and only the query, is sent. Each hit's `ref` is
+ * parsed into a reference Lumen knows; others are dropped. The snippet is the
+ * highlight with its markup removed (never rendered as HTML).
+ */
+export async function searchSefariaText(query: string, fetchImpl: typeof fetch, size = 5): Promise<Array<{ ref: SourceRef; snippet: string }>> {
+  const res = await fetchImpl(SEFARIA_SEARCH, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ query, type: "text", field: "naive_lemmatizer", size: size * 2, slop: 10, source_proj: ["ref", "heRef"] }) });
+  if (!res.ok) throw new Error(`Sefaria search: HTTP ${res.status}`);
+  const json = (await res.json()) as { hits?: { hits?: Array<{ _id?: string; _source?: { ref?: unknown; heRef?: unknown }; highlight?: Record<string, unknown> }> } };
+  const out: Array<{ ref: SourceRef; snippet: string }> = [];
+  const seen = new Set<string>();
+  for (const h of json.hits?.hits ?? []) {
+    const raw = typeof h._source?.ref === "string" ? h._source.ref : typeof h._id === "string" ? h._id.replace(/\s*\(.*\)\s*$/, "") : "";
+    const ref = raw ? parseSourceRef(raw) : null;
+    if (!ref || seen.has(ref.key)) continue;
+    seen.add(ref.key);
+    const hl = Object.values(h.highlight ?? {}).flat().find((x): x is string => typeof x === "string") ?? "";
+    out.push({ ref, snippet: hl.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim().slice(0, 200) });
+    if (out.length >= size) break;
+  }
   return out;
 }
 

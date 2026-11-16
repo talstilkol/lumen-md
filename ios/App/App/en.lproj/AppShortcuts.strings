@@ -8,3 +8,5 @@
 "Open today in ${applicationName}" = "Open today in ${applicationName}";
 "Capture to ${applicationName}" = "Capture to ${applicationName}";
 "Capture to my ${applicationName} inbox" = "Capture to my ${applicationName} inbox";
+"Record to ${applicationName} inbox" = "Record to ${applicationName} inbox";
+"Record a ${applicationName} voice note" = "Record a ${applicationName} voice note";

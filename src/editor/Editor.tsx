@@ -44,6 +44,7 @@ import { languages } from "@codemirror/language-data";
 import { tags as t } from "@lezer/highlight";
 import type { Extension } from "@codemirror/state";
 import { embedHintExtension } from "./embedHintExtension";
+import { openSourcesTrigger } from "./triggers";
 import { insertSlashMenuExtension } from "./insertMenu";
 import { wikiLinkAutocomplete } from "./wikiLinkAutocomplete";
 import { wikiHover } from "./wikiHover";
@@ -295,6 +296,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       lineSeparatorCompartment.of(EditorState.lineSeparator.of(lineSeparatorFor(initialDoc))),
       vimCompartment.of([]),
       embedHintExtension(),
+      openSourcesTrigger(), // W7.24: typing "@מקור" opens the open-sources dialog
       // W1.3 — ==highlights==, %%comments%% and callout heads, marked.
       obsidianSourceExtension,
       insertSlashMenuExtension(),
@@ -354,8 +356,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       // extension on demand and reconfigures (starts empty, like collab).
       commentsCompartment.of([]),
       typewriterCompartment.of(typewriterMode ? typewriterModeExtension() : []),
-      // TypeScript checks in ```ts blocks — opt-in; the extension (and the
-      // compiler worker) is loaded only once the setting is on.
+      // TypeScript checks in ```ts blocks — opt-in; the extension (and the compiler worker) is loaded only once the setting is on.
       tsChecksCompartment.of([]),
       // LanguageTool grammar / style — opt-in, debounced 1.5s. Off by
       // default because the public endpoint is rate-limited; users with a
@@ -367,8 +368,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       // mixed-indent, heading-skip, broken wiki-links. Runs every 250 ms
       // after the user stops typing.
       markdownLintExtension(),
-      // Workspace search → editor: when SearchDialog opens a hit, this
-      // extension flashes the matches and scrolls the first one into view.
+      // Workspace search → editor: when SearchDialog opens a hit, this extension flashes the matches and scrolls the first one into view.
       searchHighlightExtension(),
       speechHighlightExtension(),
       // Plan 5.9: text the AI wrote is shown lighter until it is edited.

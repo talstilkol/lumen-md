@@ -79,6 +79,19 @@
             <meta-data android:name="android.service.quicksettings.TOGGLEABLE_TILE" android:value="false" />
         </service>
 
+        <!-- Plan W10.C31: voice capture from Quick Settings (opens the app recording into the inbox). -->
+        <service
+            android:name=".VoiceTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_tile_voice"
+            android:label="@string/tile_voice"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+            <meta-data android:name="android.service.quicksettings.ACTIVE_TILE" android:value="false" />
+        </service>
+
         <!-- Plan W3.4: the home-screen widget. -->
         <receiver android:name=".LumenWidgetProvider" android:exported="false" android:label="@string/app_name">
             <intent-filter>
