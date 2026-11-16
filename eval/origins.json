@@ -152,6 +152,10 @@
   "unlinked/notes": {
    "origin": "synthetic",
    "why": "written for this set"
+  },
+  "related-real/links": {
+   "origin": "real",
+   "why": "links people wrote between their notes in 10 public Obsidian vaults (W4.30 corpus), used as published; only the link to the gold note is removed from the query"
   }
  },
  "synthetic": {

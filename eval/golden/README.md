@@ -40,6 +40,12 @@ Small sets for the feature tasks that come after 7.1, built and frozen before an
 | citations | 20 (5 / 15) | APA 7, in-text and BibTeX from a record | public-domain books and classic papers → **built** | CC0 |
 | meetings | 5 (0 / 5) | the owner's meeting recordings with transcript, summary and action items | ⏳ owner (15.11) | CC0 (owner's consent) |
 
+## Sets of later tasks
+
+| Set | Items (dev / test) | What | Source → status | Licence |
+|---|---|---|---|---|
+| related-real | 489 (122 / 367) | a note's real link to another note, removed from the query; Recall@5 of related notes (W10.B19) | the public Obsidian vaults of W4.30 (src/__tests__/fixtures/obsidian-corpus) → **built** | MIT; CC BY 4.0 |
+
 Where a pool is a short hand-written list (pdf-qa, summarize, citations), the test split is the rest of that list: the secret hides nothing there, and each SOURCES.md says so.
  Each `<set>/SOURCES.md` names every part's source, its pinned commit or version, the sha256 of each upstream file, the licence with the evidence it was checked against, and what the part is still waiting for.
 

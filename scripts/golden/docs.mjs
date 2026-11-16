@@ -12,6 +12,7 @@ import { join } from "node:path";
 import { partWaitsFor, readJson } from "../lib/golden.mjs";
 import { LICENSE_REFS, SPDX, SRC, VERIFIED_ON } from "./defs.mjs";
 import { fetchText, rawUrl } from "./fetch.mjs";
+import { ROOT } from "./common.mjs";
 
 const licenceIds = (expr) => expr.split(/\s+AND\s+|\s+OR\s+|[;,]\s*/).map((s) => s.trim()).filter(Boolean);
 
@@ -25,7 +26,7 @@ function partSource(p) {
 
 function partEvidence(p) {
   if (p.evidence) return p.evidence;
-  if (p.src && SRC[p.src]?.evidence) return `${SRC[p.src].evidence} (checked ${VERIFIED_ON})`;
+  if (p.src && SRC[p.src]?.evidence) return `${SRC[p.src].evidence} (checked ${SRC[p.src].verifiedOn ?? VERIFIED_ON})`;
   if (p.status === "owner-pending") return "The owner's own material, given under CC0 1.0 in CONSENT.md inside the encrypted bundle (15.11).";
   return "Written for this set by the golden-set agent; dedicated under CC0 1.0.";
 }
@@ -108,6 +109,7 @@ function licenceText(id, parts, cache) {
 
 /** The MIT notice of each upstream, verbatim from its own files. */
 function mitNotice(p, cache) {
+  if (p.src === "obsidianCorpus") return corpusNotices(p);
   if (p.src === "faker") {
     const s = SRC.faker;
     return `--- ${p.id}: Faker (data read from src/locales/he) ---\n\n${fetchText(cache, rawUrl(s.repo, s.commit, "LICENSE"), { name: "faker-LICENSE" })}`;
@@ -121,6 +123,13 @@ function mitNotice(p, cache) {
     return `--- ${p.id}: BIPIA attacks and task (microsoft/BIPIA LICENSE) ---\n\n${lic.replace(/^ {4}/gm, "")}\n\n--- ${p.id}: EmailQA contexts, "Invoices data in Openai Evals" (from microsoft/BIPIA NOTICE.md) ---\n\n${mit.trim()}`;
   }
   return `--- ${p.id}: ${p.source} ---\n\nMIT License, as declared by the dataset card (${p.url}). The card names no copyright line of its own; the workflow records the card's licence field in data/${p.id}.json (source.cardLicense).\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.`;
+}
+
+/** W10.B19: the corpus vaults' own licences, verbatim from their LICENSE.upstream (MIT notices; Awesome-Test-Vault's dual licence). */
+function corpusNotices(p) {
+  const dir = join(ROOT, "src/__tests__/fixtures/obsidian-corpus");
+  const m = JSON.parse(readFileSync(join(dir, "manifest.json"), "utf8"));
+  return m.vaults.map((v) => `--- ${p.id}: ${v.id} — https://github.com/${v.repo.replace(/^https:\/\/github\.com\//, "")} @ ${v.commit} (${v.licence}) ---\n\n${readFileSync(join(dir, v.id, "LICENSE.upstream"), "utf8").trim()}`).join("\n\n");
 }
 
 export function writeDocs(def, dir, cache) {
