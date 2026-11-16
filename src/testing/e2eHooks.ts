@@ -21,6 +21,8 @@ const MODULES = {
   "ai/ocr": () => import("../ai/ocr"),
   // e2e/rtl-parity/animations.spec.ts: a toast on demand, to read its entrance (plan 9.9).
   "ui/AiToast": () => import("../ui/AiToast"),
+  // e2e/content-frame-origin.spec.ts: a content frame made as the preview makes it (W6.40).
+  "lib/contentFrame": () => import("../lib/contentFrame"),
 };
 
 export type E2eModuleName = keyof typeof MODULES;

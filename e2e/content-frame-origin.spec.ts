@@ -6,14 +6,17 @@
  * localStorage, IndexedDB or document.
  */
 import { expect, test, type Frame, type Page } from "@playwright/test";
+import { testHooks, type LumenTestWindow } from "./_lumen";
 
 const SECRET = "lumen-e2e-vault-secret";
 const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
 
 /** A content frame made by the app's own module, as the preview makes it. */
 async function contentFrame(page: Page, request: object): Promise<{ tag: string; src: string; frame: Frame | null }> {
+  // The app's own module through window.__lumenTest (W4.2): the build the e2e gate serves has no /src/.
+  await testHooks(page);
   const made = await page.evaluate(async (r) => {
-    const m = await import(/* @vite-ignore */ "/src/lib/contentFrame.ts");
+    const m = await (window as unknown as LumenTestWindow).__lumenTest.load("lib/contentFrame");
     const el = m.createContentFrame(r as Parameters<typeof m.createContentFrame>[0]);
     document.body.append(el);
     return { tag: el.tagName, src: el.getAttribute("src") ?? el.getAttribute("href") ?? "" };
