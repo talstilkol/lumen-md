@@ -250,3 +250,27 @@ export function watchPlan(cfg, candidates, branch, read, running, alive) {
   return { action: "start", file };
 }
 
+
+/**
+ * The watch record (review 11, M2): one file in the repository's common git dir
+ * (`git rev-parse --git-common-dir`, shared by every linked worktree), keyed by
+ * the STATE.md path, so two worktrees of one clone share one watcher per STATE.md.
+ * An older record (`{ pid, file }`, one per worktree) reads as its one entry.
+ * @returns {Record<string, { pid: number; since?: string; repo?: string }>}
+ */
+export function parseWatchRecord(text) {
+  let v;
+  try {
+    v = JSON.parse(text ?? "");
+  } catch {
+    return {};
+  }
+  if (!v || typeof v !== "object" || Array.isArray(v)) return {};
+  if (typeof v.pid === "number" && typeof v.file === "string") return { [v.file]: { pid: v.pid, since: v.since } };
+  const out = {};
+  for (const [k, e] of Object.entries(v)) if (e && typeof e === "object" && typeof e.pid === "number") out[k] = e;
+  return out;
+}
+
+/** The entry of `record` for `file` as watchPlan's `running`, or null. */
+export const runningFor = (record, file) => (file && record[file] ? { pid: record[file].pid, file } : null);

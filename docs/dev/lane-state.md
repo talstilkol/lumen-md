@@ -28,9 +28,12 @@ replay.
 ### Written for you: the hooks and the hourly tick
 
 Two of those writes happen without anyone doing them. `npm install` and
-`npm ci` install both hooks in every clone (the `prepare` script,
+`npm ci` install the reference-transaction hook in every clone (the `prepare` script,
 `scripts/prepare.mjs`, runs `scripts/install-git-hooks.mjs`; it keeps a hook that is not ours, and does
-nothing in CI or with `LUMEN_NO_HOOKS=1`). The one thing a lane does is say
+nothing in CI or with `LUMEN_NO_HOOKS=1`). That hook does nothing until a lane
+state is set, and `prepare` starts no watcher. The ci:local pre-push hook is
+opt-in (it runs the checks on every push): `git config lumen.ciLocalHook true`
+before `npm install`, or `npm run ci:local -- --install-hook`. The one thing a lane does is say
 where its state lives:
 
 ```bash
@@ -62,9 +65,12 @@ a stop with an unpushed commit; resume, follow it, and no sha arrives twice.
 - **Every hour.** The first ref change after the lane state is set (a
   commit, a fetch, a push) makes the reference-transaction hook start
   `lane-state.mjs watch` in the background for the lane's STATE.md, unless a
-  watcher already runs for it (`$(git rev-parse --git-path lumen-lane-watch.json)`
-  holds its pid). After a reboot the next ref change starts it again; when
-  the STATE.md is deleted the watcher stops. `watch` runs `tick` now and
+  watcher already runs for it. The record is
+  `$(git rev-parse --git-common-dir)/lumen-lane-watch.json`, one entry per
+  STATE.md, shared by every linked worktree of the clone, and written under a
+  lock (`lumen-lane-watch.lock` next to it), so worktrees and hooks that fire at
+  once start one watcher. After a reboot the next ref change starts it again; when
+  the STATE.md or the clone is deleted the watcher stops within seconds. `watch` runs `tick` now and
   every `--every-min` minutes (60 by default; `$LUMEN_LANE_TICK_MIN` for the
   one the hook starts; `$LUMEN_LANE_WATCH=0` makes the hook start none). A tick writes the Updated time, and records any Branches
   head that origin has moved since. As a cron line instead:

@@ -3,9 +3,10 @@
  * and the lane's STATE.md is ticked every hour without anyone starting it.
  *
  * - `npm install` / `npm ci` run `prepare` → scripts/prepare.mjs → scripts/install-git-hooks.mjs,
- *   which writes the pre-push hook (lockfile drift, then ci:local) and the
- *   reference-transaction hook (lane state) into the clone — never over a
- *   hook that is someone else's, never in CI.
+ *   which writes the reference-transaction hook (lane state) into the clone —
+ *   never over a hook that is someone else's, never in CI. The pre-push hook
+ *   (lockfile drift, then ci:local) is opt-in (review 11, M2; #1054's design):
+ *   only with `git config lumen.ciLocalHook true` or $LUMEN_CI_LOCAL_HOOK=1.
  * - The reference-transaction hook starts `lane-state.mjs watch` in the
  *   background when a lane state is set and no watcher runs for it; the
  *   watcher rewrites STATE.md every interval. Here the interval is shortened
@@ -18,11 +19,12 @@ import { cpSync, existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, statS
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 // @ts-expect-error — plain .mjs module without type declarations
-import { installPlan, skipReason } from "../../scripts/install-git-hooks.mjs";
+import { installPlan, skipReason, wantsPrePush } from "../../scripts/install-git-hooks.mjs";
 // @ts-expect-error — plain .mjs module without type declarations
 import { hookPlan, HOOK_MARK } from "../../scripts/lib/ciLocal.mjs";
 // @ts-expect-error — plain .mjs module without type declarations
 import { txnHookPlan, TXN_HOOK_MARK, watchPlan } from "../../scripts/lib/lane-state.mjs";
+import { killWatchersUnder } from "./helpers/laneWatchers";
 
 const ROOT = resolve(__dirname, "../..");
 const scratch: string[] = [];
@@ -35,6 +37,7 @@ afterAll(() => {
       // why: the watcher may have stopped on its own when its STATE.md went away
     }
   }
+  killWatchersUnder(scratch);
   for (const d of scratch) rmSync(d, { recursive: true, force: true });
 });
 
@@ -66,7 +69,7 @@ function scratchRepo(): string {
 
 const env = (extra: Record<string, string> = {}) => {
   const e: Record<string, string | undefined> = { ...process.env, ...extra };
-  for (const k of ["CI", "LUMEN_NO_HOOKS", "LUMEN_LANE_STATE", "LUMEN_LANE_STATE_DIR", "npm_config_global", "GIT_DIR", "GIT_INDEX_FILE", "GIT_WORK_TREE"]) if (!(k in extra)) delete e[k];
+  for (const k of ["CI", "LUMEN_NO_HOOKS", "LUMEN_CI_LOCAL_HOOK", "LUMEN_LANE_STATE", "LUMEN_LANE_STATE_DIR", "LUMEN_LANE_WATCH", "npm_config_global", "GIT_DIR", "GIT_INDEX_FILE", "GIT_WORK_TREE"]) if (!(k in extra)) delete e[k];
   return e as NodeJS.ProcessEnv;
 };
 
@@ -78,21 +81,28 @@ describe("the hooks install themselves (W10.E56)", () => {
     expect(readFileSync(join(ROOT, "scripts/prepare.mjs"), "utf8")).toContain('"scripts/install-git-hooks.mjs"');
   });
 
-  it("plan: a fresh clone gets both hooks; ours are refreshed; someone else's are kept", () => {
+  it("plan: a fresh clone gets the lane hook, and the ci:local pre-push hook only when it opted in", () => {
     const fresh = installPlan({});
     expect(fresh.map((s: { name: string; action: string }) => [s.name, s.action])).toEqual([
-      ["pre-push", "write"],
+      ["pre-push", "opt-in"],
       ["reference-transaction", "write"],
     ]);
-    expect(fresh[0].content).toContain(HOOK_MARK);
-    expect(fresh[0].content).toContain("node scripts/lockfile-drift.mjs");
+    expect(fresh[0].hint).toContain("lumen.ciLocalHook");
     expect(fresh[1].content).toContain(TXN_HOOK_MARK);
-    const current = installPlan({ "pre-push": hookPlan(null).content, "reference-transaction": txnHookPlan(null).content });
+    const opted = installPlan({}, { prePush: true });
+    expect(opted.map((s: { action: string }) => s.action)).toEqual(["write", "write"]);
+    expect(opted[0].content).toContain(HOOK_MARK);
+    expect(opted[0].content).toContain("node scripts/lockfile-drift.mjs");
+    const current = installPlan({ "pre-push": hookPlan(null).content, "reference-transaction": txnHookPlan(null).content }, { prePush: true });
     expect(current.map((s: { action: string }) => s.action)).toEqual(["same", "same"]);
-    const older = installPlan({ "pre-push": `#!/bin/sh\n# ${HOOK_MARK}\nold body\n`, "reference-transaction": null });
+    const older = installPlan({ "pre-push": `#!/bin/sh\n# ${HOOK_MARK}\nold body\n`, "reference-transaction": null }, { prePush: true });
     expect(older.map((s: { action: string }) => s.action)).toEqual(["write", "write"]);
-    const theirs = installPlan({ "pre-push": "#!/bin/sh\nnpx lint-staged\n", "reference-transaction": "#!/bin/sh\necho mine\n" });
+    const theirs = installPlan({ "pre-push": "#!/bin/sh\nnpx lint-staged\n", "reference-transaction": "#!/bin/sh\necho mine\n" }, { prePush: true });
     expect(theirs.map((s: { action: string }) => s.action)).toEqual(["keep", "keep"]);
+    expect(wantsPrePush({}, null)).toBe(false);
+    expect(wantsPrePush({}, "false\n")).toBe(false);
+    expect(wantsPrePush({}, "true\n")).toBe(true);
+    expect(wantsPrePush({ LUMEN_CI_LOCAL_HOOK: "1" }, null)).toBe(true);
   });
 
   it("nothing is written in CI, without a checkout, on a global install or when asked not to", () => {
@@ -105,12 +115,18 @@ describe("the hooks install themselves (W10.E56)", () => {
     expect(skipReason({ npm_config_global: "true" }, "/x/.git/hooks")).toBe("a global install");
   });
 
-  it("in a real clone: writes both hooks executable, is idempotent, and keeps a foreign hook", () => {
+  it("in a real clone: writes no pre-push hook unless asked; opted in, writes both executable, is idempotent, and keeps a foreign hook", () => {
     const dir = scratchRepo();
     const run = (e = env()) => spawnSync(process.execPath, ["scripts/install-git-hooks.mjs"], { cwd: dir, encoding: "utf8", env: e });
+    const hooks = join(dir, ".git/hooks");
+    const plain = run();
+    expect(plain.status).toBe(0);
+    expect(plain.stdout).toContain("pre-push not installed (opt-in");
+    expect(existsSync(join(hooks, "pre-push"))).toBe(false);
+    expect(existsSync(join(hooks, "reference-transaction"))).toBe(true);
+    git(dir, "config", "lumen.ciLocalHook", "true");
     const first = run();
     expect(first.status).toBe(0);
-    const hooks = join(dir, ".git/hooks");
     for (const h of ["pre-push", "reference-transaction"]) {
       expect(readFileSync(join(hooks, h), "utf8")).toContain("installed by");
       expect(statSync(join(hooks, h)).mode & 0o111).not.toBe(0);
@@ -155,9 +171,10 @@ describe("the lane's STATE.md is ticked every hour without anyone starting it (W
     const watch = join(dir, ".git/lumen-lane-watch.json");
     const deadline = Date.now() + 10_000;
     while (!existsSync(watch) && Date.now() < deadline) await new Promise((r) => setTimeout(r, 50));
-    const first = JSON.parse(readFileSync(watch, "utf8")) as { pid: number; file: string };
+    const record = JSON.parse(readFileSync(watch, "utf8")) as Record<string, { pid: number }>;
+    expect(Object.keys(record)).toEqual([state]);
+    const first = record[state];
     pids.push(first.pid);
-    expect(first.file).toBe(state);
 
     // Ticks: each one writes the file anew (a new inode), and the Updated line is the tick's time.
     const inodes = new Set<number>();
@@ -172,7 +189,7 @@ describe("the lane's STATE.md is ticked every hour without anyone starting it (W
     // A second ref change does not start a second watcher.
     expect(commit("two").status).toBe(0);
     await new Promise((r) => setTimeout(r, 300));
-    expect((JSON.parse(readFileSync(watch, "utf8")) as { pid: number }).pid).toBe(first.pid);
+    expect((JSON.parse(readFileSync(watch, "utf8")) as Record<string, { pid: number }>)[state].pid).toBe(first.pid);
 
     // The lane is over (its STATE.md is gone): the watcher stops by itself.
     // (Removed again on every poll: a tick already in flight may write it back once.)

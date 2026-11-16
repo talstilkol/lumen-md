@@ -18,7 +18,10 @@
  *   node scripts/lane-state.mjs watch <STATE.md> [--every-min 60]   the hourly timer:
  *        `tick` now and every N minutes, until stopped
  *   node scripts/lane-state.mjs ensure-watch   what the reference-transaction hook calls: starts
- *        `watch` in the background for the lane's STATE.md unless one already runs (W10.E57),
+ *        `watch` in the background for the lane's STATE.md unless one already runs (W10.E57;
+ *        one per STATE.md for the whole clone, its linked worktrees included: the record is in
+ *        `git rev-parse --git-common-dir`, written under a lock, review 11 M2). A watcher stops
+ *        within seconds once its STATE.md or its repository is gone.
  *        so the hourly tick needs no one to start it ($LUMEN_LANE_TICK_MIN: the interval;
  *        $LUMEN_LANE_WATCH=0: start none)
  *   node scripts/lane-state.mjs tick <STATE.md> [--no-remote]       once: Updated, and any
@@ -37,10 +40,10 @@
  * branch needs a person ("look"), or STATE.md is stale ("record").
  */
 import { spawn, spawnSync } from "node:child_process";
-import { chmodSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, closeSync, existsSync, mkdirSync, openSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync, writeSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { PREPUSH_LINE, confirmedPushes, parseBranches, prePushPlan, pushedRefs, recordPush, renderBranches, resumeAction, stateFor, touchUpdated, txnHookPlan, watchPlan } from "./lib/lane-state.mjs";
+import { PREPUSH_LINE, confirmedPushes, parseBranches, parseWatchRecord, prePushPlan, pushedRefs, recordPush, renderBranches, resumeAction, runningFor, stateFor, touchUpdated, txnHookPlan, watchPlan } from "./lib/lane-state.mjs";
 
 const argv = process.argv.slice(2);
 const [cmd, file] = argv;
@@ -131,38 +134,101 @@ function tick(path) {
   writeAtomic(path, md);
 }
 
-const watchFile = () => resolve(sh(["git", "rev-parse", "--git-path", "lumen-lane-watch.json"]) ?? ".git/lumen-lane-watch.json");
+/** The repository's common git dir: one for the clone and all of its linked worktrees (review 11, M2). */
+const commonDir = () => {
+  const d = sh(["git", "rev-parse", "--git-common-dir"]);
+  return d ? resolve(d) : null;
+};
+const watchFile = (repo) => join(repo, "lumen-lane-watch.json");
 const isAlive = (pid) => {
   try {
     process.kill(pid, 0);
-    return true;
   } catch (e) {
-    return e?.code === "EPERM";
+    if (e?.code !== "EPERM") return false;
+  }
+  // A pid the system gave to another program since is not our watcher (/proc where there is one).
+  try {
+    return readFileSync(`/proc/${pid}/cmdline`, "utf8").includes("lane-state.mjs");
+  } catch {
+    return true;
   }
 };
+
+/**
+ * Run `fn` holding the watch lock (a file created exclusively next to the record), so two
+ * hooks that fire at once (two worktrees, a fetch and a commit) start one watcher. A lock
+ * whose holder is gone, or older than a minute, is taken over. Busy: skip, the holder starts it.
+ */
+function withWatchLock(repo, fn) {
+  const lock = join(repo, "lumen-lane-watch.lock");
+  for (let attempt = 0; attempt < 2; attempt++) {
+    let fd;
+    try {
+      fd = openSync(lock, "wx");
+    } catch (e) {
+      if (e?.code !== "EEXIST") throw e;
+      let holder = NaN;
+      let age = 0;
+      try {
+        holder = Number(readFileSync(lock, "utf8"));
+        age = Date.now() - statSync(lock).mtimeMs;
+      } catch {
+        // why: the holder released it between our open and our read; try again
+      }
+      let held = Number.isInteger(holder) && holder > 0;
+      if (held) {
+        try {
+          process.kill(holder, 0);
+        } catch (err) {
+          held = err?.code === "EPERM";
+        }
+      }
+      if (held && age < 60_000) return 0;
+      rmSync(lock, { force: true });
+      continue;
+    }
+    try {
+      writeSync(fd, String(process.pid));
+      closeSync(fd);
+      return fn();
+    } finally {
+      rmSync(lock, { force: true });
+    }
+  }
+  return 0;
+}
 
 function ensureWatch() {
   // $LUMEN_LANE_WATCH=0: this clone records pushes but starts no background tick (a test of the manual
   // resume path, or a lane that runs `watch` itself); the hook then leaves no process behind.
   if (process.env.LUMEN_LANE_WATCH === "0") return 0;
   const cfg = laneConfig();
-  let running = null;
-  try {
-    running = JSON.parse(readFileSync(watchFile(), "utf8"));
-  } catch {
-    running = null;
-  }
-  const plan = watchPlan(cfg, cfg ? stateFiles(cfg) : [], sh(["git", "rev-parse", "--abbrev-ref", "HEAD"]), (f) => readFileSync(f, "utf8"), running, isAlive);
-  if (plan.action === "none") return 0;
-  const every = Number(process.env.LUMEN_LANE_TICK_MIN ?? 60) > 0 ? String(Number(process.env.LUMEN_LANE_TICK_MIN ?? 60)) : "60";
-  const child = spawn(process.execPath, [fileURLToPath(import.meta.url), "watch", plan.file, "--every-min", every, ...(flag("no-remote") ? ["--no-remote"] : [])], {
-    detached: true,
-    stdio: "ignore",
+  const repo = commonDir();
+  if (!cfg || !repo) return 0;
+  const files = stateFiles(cfg);
+  const branch = sh(["git", "rev-parse", "--abbrev-ref", "HEAD"]);
+  const read = (f) => readFileSync(f, "utf8");
+  const target = watchPlan(cfg, files, branch, read, null, isAlive);
+  if (target.action === "none") return 0;
+  return withWatchLock(repo, () => {
+    const rec = parseWatchRecord(existsSync(watchFile(repo)) ? readFileSync(watchFile(repo), "utf8") : "");
+    const plan = watchPlan(cfg, files, branch, read, runningFor(rec, target.file), isAlive);
+    if (plan.action === "none") return 0;
+    const every = Number(process.env.LUMEN_LANE_TICK_MIN ?? 60) > 0 ? String(Number(process.env.LUMEN_LANE_TICK_MIN ?? 60)) : "60";
+    const child = spawn(process.execPath, [fileURLToPath(import.meta.url), "watch", plan.file, "--every-min", every, "--repo", repo, ...(flag("no-remote") ? ["--no-remote"] : [])], {
+      detached: true,
+      stdio: "ignore",
+    });
+    child.unref();
+    // Entries of watchers that are gone are dropped; the others (other STATE.md files) are kept.
+    const keep = Object.fromEntries(Object.entries(rec).filter(([f, e]) => f !== plan.file && isAlive(e.pid)));
+    writeAtomic(watchFile(repo), JSON.stringify({ ...keep, [plan.file]: { pid: child.pid, since: now() } }));
+    return 0;
   });
-  child.unref();
-  writeAtomic(watchFile(), JSON.stringify({ pid: child.pid, file: plan.file, since: now() }));
-  return 0;
 }
+
+/** How often a watcher looks whether its repository and its STATE.md are still there. */
+const GONE_POLL_MS = 2000;
 
 function main() {
   if (cmd === "ensure-watch") return ensureWatch();
@@ -246,16 +312,26 @@ function main() {
     }
     tick(file);
     if (cmd === "tick") return 0;
+    // The repository it ticks for: --repo (what ensure-watch passes), else this checkout's.
+    const repo = opt("repo") ? resolve(opt("repo")) : commonDir();
     console.log(`lane-state: ticking ${file} every ${every} min (Ctrl-C stops)`);
+    const periodMs = every * 60_000;
+    let last = Date.now();
     const timer = setInterval(() => {
-      // The lane's folder went away (the lane is over): stop, rather than tick forever.
-      if (!existsSync(file)) return clearInterval(timer);
+      // The lane is over (its STATE.md went away) or the clone was removed (a test's scratch
+      // repo, a deleted worktree's clone): stop within seconds, rather than tick for an hour.
+      if (!existsSync(file) || (repo && !existsSync(repo))) {
+        clearInterval(timer);
+        process.exit(0);
+      }
+      if (Date.now() - last < periodMs) return;
+      last = Date.now();
       try {
         tick(file);
       } catch (e) {
         console.error(`lane-state: tick failed: ${e instanceof Error ? e.message : String(e)}`);
       }
-    }, every * 60_000);
+    }, Math.min(periodMs, GONE_POLL_MS));
     return null;
   }
   if (!["resume", "table"].includes(cmd) || !file) {

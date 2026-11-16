@@ -20,6 +20,7 @@ import { chmodSync, copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSy
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { HOOK_BODY } from "../../scripts/lib/ciLocal.mjs";
+import { killWatchersUnder } from "./helpers/laneWatchers";
 import { PREPUSH_MARK, parseBranches, prePushPlan, renderBranches } from "../../scripts/lib/lane-state.mjs";
 
 const ROOT = resolve(__dirname, "../..");
@@ -91,7 +92,10 @@ function lab() {
   const resume = () => spawnSync(process.execPath, [join(main, "scripts/lane-state.mjs"), "resume", state, "--no-github"], { cwd: main, env, encoding: "utf8" });
   const actions = (out: string) => Object.fromEntries(out.trim().split("\n").map((l) => { const m = /^(\S+)\s+([^:]+):/.exec(l)!; return [m[2], m[1]]; }));
   const received = () => readFileSync(log, "utf8").trim().split("\n").filter((l) => !l.startsWith("main "));
-  return { dir, wt, git, commit, push, resume, actions, received, state, main, env, done: () => rmSync(dir, { recursive: true, force: true }) };
+  return { dir, wt, git, commit, push, resume, actions, received, state, main, env, done: () => {
+      killWatchersUnder([dir]);
+      rmSync(dir, { recursive: true, force: true });
+    } };
 }
 
 describe("lane state: stop anywhere, resume without redoing work (W8.10)", () => {
