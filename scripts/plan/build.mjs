@@ -47,7 +47,7 @@ import { RECEIPTS_FILE, checkReceiptClaims } from "./receiptLevels.mjs";
 import { AREAS_FILE, checkAreas } from "./areas.mjs";
 import { formatGate, readFrozen, wipGate } from "./wipGate.mjs";
 import { checkOriginClaims } from "../golden/origin-claims.mjs";
-import { lowerOnlyLimit, wipDecisionProblems } from "./wipDecisions.mjs";
+import { decidedPairs, lowerOnlyLimit, wipDecisionProblems } from "./wipDecisions.mjs";
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 export const PLAN_FILE = "plan/plan.json";
@@ -969,6 +969,7 @@ export function run({ root = ROOT, check = false, wipLimit, strictReceipts = fal
   }
   // W6.39: the frozen-wave gate holds at the plan's own limit; W10.G6: the written decisions are checked at `limit` (never above the plan's).
   const wip = wipWarnings(plan, { limit });
+  M.plan = plan;
   return { M, stale, wip, wipProblems: wipDecisionProblems(plan, wip), gate: wipGate(wipWarnings(plan), readFrozen(root)) };
 }
 
@@ -986,7 +987,11 @@ function main(argv) {
     for (const h of actualHours(M, { base })) console.log(`${h.id.padEnd(6)} ${h.branch.padEnd(32)} ${String(h.commits).padStart(3)} commits  ${h.hours.toFixed(2).padStart(6)} h actual  ${h.estimate.toFixed(2).padStart(6)} h estimated`);
   }
   if (check) {
-    for (const w of wip) console.error(formatWip(w));
+    // W6.39 / W10.G6: a wave pair held by a written decision at its frozen numbers is decided, not a warning;
+    // one line says how many. Any other pair over its limit is printed, and fails just below.
+    const decided = decidedPairs(M.plan ?? null, wip, wipProblems);
+    for (const w of wip) if (!decided.has(`${w.wave}→${w.next}`)) console.error(formatWip(w));
+    if (decided.size) console.log(`plan: work in progress — ${decided.size} wave pair${decided.size > 1 ? "s" : ""} over the limit held by a written decision at frozen numbers (plan.schedule.wipDecisions, W10.G6); no new start in them.`);
     // W10.G6: strict by default. A wave over its limit passes only with a written decision that freezes it.
     if (wipProblems.length) {
       console.error(`plan: work-in-progress limit (W6.39, strict by default — W10.G6) —\n  ${wipProblems.join("\n  ")}`);

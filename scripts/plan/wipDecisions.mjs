@@ -58,6 +58,23 @@ export function wipDecisionProblems(plan, warnings) {
   return problems;
 }
 
+/**
+ * The wave pairs ("wave→next") whose warning a decision holds exactly: a decision for the pair, at the
+ * warning's open and started counts, with no problem naming the pair. Only these are not printed as warnings.
+ */
+export function decidedPairs(plan, warnings, problems = wipDecisionProblems(plan ?? {}, warnings)) {
+  const out = new Set();
+  const raw = Array.isArray(plan?.schedule?.wipDecisions) ? plan.schedule.wipDecisions : [];
+  for (const w of warnings) {
+    const k = key(w);
+    const d = raw.find((x) => x && key(x) === k);
+    if (!d || d.open !== w.open.length || d.started !== w.started.length) continue;
+    if (problems.some((p) => p.includes(`wipDecisions ${k}`))) continue;
+    out.add(k);
+  }
+  return out;
+}
+
 /** The limit `--wip-limit` asks for, refused when it is not a whole number or would raise the plan's own limit. */
 export function lowerOnlyLimit(asked, planLimit) {
   if (asked === undefined) return undefined;

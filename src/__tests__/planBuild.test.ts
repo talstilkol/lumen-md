@@ -43,7 +43,7 @@ import {
 import { classify, prOf, migrate } from "../../scripts/plan/migrate-verified.mjs";
 import { WIP_FROZEN_FILE, formatGate, pruned, readFrozen, wipGate } from "../../scripts/plan/wipGate.mjs";
 // @ts-expect-error — plain .mjs script without type declarations
-import { lowerOnlyLimit, wipDecisionProblems } from "../../scripts/plan/wipDecisions.mjs";
+import { decidedPairs, lowerOnlyLimit, wipDecisionProblems } from "../../scripts/plan/wipDecisions.mjs";
 
 const ROOT = resolve(__dirname, "..", "..");
 const plan = () => JSON.parse(readFileSync(join(ROOT, "plan/plan.json"), "utf8"));
@@ -480,7 +480,11 @@ describe("work-in-progress limit (plan W6.39)", () => {
     expect(cli("--wip-strict").status).toBe(red);
     const low = cli("--wip-limit", "0");
     expect(low.status).toBe(wipDecisionProblems(p, wipWarnings(p, { limit: 0 })).length ? 1 : 0);
-    expect(low.stderr.split("\n").filter((l) => l.startsWith("plan: WIP")).length).toBe(wipWarnings(p, { limit: 0 }).length);
+    const lowW = wipWarnings(p, { limit: 0 });
+    expect(low.stderr.split("\n").filter((l) => l.startsWith("plan: WIP")).length).toBe(lowW.length - decidedPairs(p, lowW).size);
+    // On the real plan every pair over the limit is held by a decision: no WIP warning at all (W6.39 audit r3).
+    expect(cli().stderr.split("\n").filter((l) => l.startsWith("plan: WIP"))).toEqual([]);
+    expect(cli().stdout).toMatch(/10 wave pairs over the limit held by a written decision/);
     // --wip-limit only lowers the limit: a higher one is refused, never read.
     const high = cli("--wip-limit", "100000");
     expect(high.status).toBe(1);
@@ -563,7 +567,11 @@ describe("work-in-progress limit (plan W6.39)", () => {
     expect(cli("--wip-strict").status).toBe(red);
     const low = cli("--wip-limit", "0");
     expect(low.status).toBe(wipDecisionProblems(p, wipWarnings(p, { limit: 0 })).length ? 1 : 0);
-    expect(low.stderr.split("\n").filter((l) => l.startsWith("plan: WIP")).length).toBe(wipWarnings(p, { limit: 0 }).length);
+    const lowW = wipWarnings(p, { limit: 0 });
+    expect(low.stderr.split("\n").filter((l) => l.startsWith("plan: WIP")).length).toBe(lowW.length - decidedPairs(p, lowW).size);
+    // On the real plan every pair over the limit is held by a decision: no WIP warning at all (W6.39 audit r3).
+    expect(cli().stderr.split("\n").filter((l) => l.startsWith("plan: WIP"))).toEqual([]);
+    expect(cli().stdout).toMatch(/10 wave pairs over the limit held by a written decision/);
     // --wip-limit only lowers the limit: a higher one is refused, never read.
     const high = cli("--wip-limit", "100000");
     expect(high.status).toBe(1);
@@ -610,6 +618,14 @@ describe("work in progress: strict by default, a written decision only freezes (
     for (const d of ds) expect(d.decision).toMatch(/delegation of 16\.11\.2026 21:53/);
     // Wave 13 stays unstarted (decision §1b): no decision lets it start while wave 12 is over its limit.
     expect(ds.some((d) => d.next === 13)).toBe(false);
+  });
+
+  it("only a pair held at its exact frozen numbers counts as decided (not printed as a warning)", () => {
+    const pd = (p: ReturnType<typeof at>) => decidedPairs(p, wipWarnings(p));
+    expect([...pd(at(open(6), started, [d()]))]).toEqual(["1→2"]);
+    expect(pd(at(open(6), started)).size).toBe(0);
+    expect(pd(at(open(7), started, [d()])).size).toBe(0);
+    expect(pd(at(open(6), started, [d({ decision: "" })])).size).toBe(0);
   });
 
   it("--wip-limit can lower the limit, never raise it", () => {
