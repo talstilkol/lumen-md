@@ -9,6 +9,7 @@ import "../ai/workerLedgerInstall"; // first: what this worker fetches reaches t
 import { VaultIndex } from "./vaultIndexCore";
 import { handleIndexRequest } from "./vaultIndexLocal";
 import type { IndexProgress, IndexRequest } from "./vaultIndexProtocol";
+import { swallowed } from "../lib/logger";
 
 const index = new VaultIndex();
 
@@ -17,8 +18,9 @@ const index = new VaultIndex();
 void import("../search/lemma/lemmaIndex")
   .then((m) => m.chosenLemmatizer())
   .then((lz) => (lz ? index.useLemmatizer(lz) : undefined))
-  .catch(() => {
+  .catch((err: unknown) => {
     // why: without a lemmatizer search is BM25 over words with the rule-based morphology, as before
+    swallowed("storage/vaultIndex.worker: without a lemmatizer search is BM25 over words with the rule-based mor", err);
   });
 
 // Requests run one after another: a snapshot restore finishes before the
@@ -34,11 +36,13 @@ self.onmessage = (e: MessageEvent<IndexRequest>) => {
       // 2.39 (Z6-H1/M4): said right before the regex runs, from the parse that runs it; the main thread's time limit starts here.
       const onRegexStart = () => (self as unknown as Worker).postMessage({ id: req.id, progress: "regexStart" } satisfies IndexProgress);
       (self as unknown as Worker).postMessage(await handleIndexRequest(index, req, (w) => later.push(w), { onRegexStart }));
-      for (const w of later) await w().catch(() => {
+      for (const w of later) await w().catch((err: unknown) => {
         // why: follow-up work of an answered request (the snapshot save) is best effort; the answer was sent
+        swallowed("storage/vaultIndex.worker: follow-up work of an answered request (the snapshot save) is best effo", err);
       });
     })
-    .catch(() => {
+    .catch((err: unknown) => {
       // why: a request that throws is answered by handleIndexRequest itself; the queue goes on
+      swallowed("storage/vaultIndex.worker: a request that throws is answered by handleIndexRequest itself; the qu", err);
     });
 };

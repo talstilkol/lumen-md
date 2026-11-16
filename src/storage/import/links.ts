@@ -7,6 +7,7 @@
  */
 import { dirOf, resolveRel } from "./names";
 import type { ConvertedVault, LinkStats } from "./types";
+import { swallowed } from "../../lib/logger";
 
 const MAX_LISTED = 200;
 
@@ -57,9 +58,10 @@ export function linkStats(vault: Pick<ConvertedVault, "notes" | "attachments">):
         let d = l.target.split(/[?#]/)[0];
         try {
           d = decodeURIComponent(d);
-        } catch {
+        } catch (err) {
           // why: not percent-encoded: the link target is used as written
           /* as written */
+          swallowed("storage/import/links: not percent-encoded: the link target is used as written", err);
         }
         ok = !d || exact.has(key(resolveRel(dirOf(path), d)));
       }

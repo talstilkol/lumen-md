@@ -14,6 +14,7 @@ import { readText } from "./textCodec";
 import { htmlToMarkdown, rtfToMarkdown, csvToMarkdown, tsvToMarkdown, jsonToMarkdown, xmlToMarkdown, mhtmlToMarkdown, opmlToMarkdown, latexToMarkdown, rstToMarkdown, adocToMarkdown, orgToMarkdown, ipynbToMarkdown, wxrToMarkdown, confluenceToMarkdown } from "./markupFormats";
 import { docxToMarkdown, odtToMarkdown, pptxToMarkdown, xlsxToMarkdown, archiveToMarkdown, epubToMarkdown } from "./officeFormats";
 import { fountainToMarkdown } from "./fountain";
+import { swallowed } from "../lib/logger";
 export { fountainToMarkdown } from "./fountain";
 export { docxToMarkdown, odtToMarkdown, pptxToMarkdown, xlsxToMarkdown, archiveToMarkdown, epubToMarkdown } from "./officeFormats";
 export { htmlToMarkdown, rtfToMarkdown, csvToMarkdown, tsvToMarkdown, jsonToMarkdown, xmlToMarkdown, mhtmlToMarkdown, opmlToMarkdown, latexToMarkdown, rstToMarkdown, adocToMarkdown, orgToMarkdown, ipynbToMarkdown, wxrToMarkdown, confluenceToMarkdown } from "./markupFormats";
@@ -229,8 +230,9 @@ export async function pdfToMarkdown(file: File): Promise<string> {
       try {
         const url = (await import("pdfjs-dist/legacy/build/pdf.worker.min.mjs?url")).default;
         if (typeof url === "string" && url) workerSrc = url;
-      } catch {
+      } catch (err) {
         /* why: keep the bare specifier, which Node and the tests resolve */
+        swallowed("storage/fileFormats: keep the bare specifier, which Node and the tests resolve", err);
       }
     }
     pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;

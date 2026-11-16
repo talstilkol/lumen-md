@@ -25,6 +25,7 @@ import type { PendingConflict, PullGit, SafePullResult } from "./gitPull";
 import { authFor, getCorsProxy } from "./gitProxy";
 import { writeIntoMirror } from "./gitMirror";
 import { getVaultBackend } from "../storage/vault";
+import { swallowed } from "../lib/logger";
 
 type Fs = {
   promises: {
@@ -249,13 +250,15 @@ export async function cloneRepo(
   // Ensure parent and target dirs exist.
   try {
     await fs.promises.mkdir("/git");
-  } catch {
+  } catch (err) {
     /* why: the directory already exists */
+    swallowed("sync/git: the directory already exists", err);
   }
   try {
     await fs.promises.mkdir(dir);
-  } catch {
+  } catch (err) {
     /* why: the directory already exists */
+    swallowed("sync/git: the directory already exists", err);
   }
 
   const token = opts.token ?? (await getGitToken());

@@ -20,6 +20,7 @@ import { linkStats } from "./links";
 import { safeName } from "./names";
 import { TYPES_DIR, typeFilePath } from "../../types/typeSchema";
 import type { ConvertedVault, ImportReport, ImportSourceId, LinkStats } from "./types";
+import { swallowed } from "../../lib/logger";
 
 export const IMPORT_ROOT = "Imported";
 const UNDO_KEY = "lumen-last-import";
@@ -172,9 +173,10 @@ export async function addToImport(u: UndoRecord, name: string, text: string): Pr
 export function saveUndo(u: UndoRecord): void {
   try {
     localStorage.setItem(UNDO_KEY, JSON.stringify(u));
-  } catch {
+  } catch (err) {
     // why: storage is blocked or full (private mode, quota): the setting holds for this session only
     /* private mode: undo still works while the wizard is open */
+    swallowed("storage/import/commit: storage is blocked or full (private mode, quota): the setting holds fo", err);
   }
 }
 
@@ -241,8 +243,9 @@ function clearUndo(u: UndoRecord): void {
   try {
     const cur = lastImport();
     if (cur && cur.folder === u.folder && cur.at === u.at) localStorage.removeItem(UNDO_KEY);
-  } catch {
+  } catch (err) {
     // why: storage is blocked or full (private mode, quota): the setting holds for this session only
     /* nothing stored */
+    swallowed("storage/import/commit: storage is blocked or full (private mode, quota): the setting holds fo", err);
   }
 }

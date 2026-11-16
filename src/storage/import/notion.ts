@@ -14,6 +14,7 @@ import { decodeEntities, htmlToNote } from "./html";
 import { splitFrontmatter, withFrontmatter, type Props } from "./frontmatter";
 import { emptyVault, type ConvertedVault } from "./types";
 import { databaseType, databaseTypeId, reportLines, type NotionSchema } from "./notionTypes";
+import { swallowed } from "../../lib/logger";
 
 /* ─── CSV ────────────────────────────────────────────────────────────── */
 
@@ -161,8 +162,9 @@ function notionSchemas(files: Map<string, Uint8Array>, dec: TextDecoder): Map<st
       if (o.object !== "database" || !o.properties) continue;
       const title = (o.title ?? []).map((x) => x.plain_text ?? "").join("").trim();
       if (title) out.set(title.normalize("NFC").toLowerCase(), { properties: o.properties });
-    } catch {
+    } catch (err) {
       /* why: not JSON, or not an API object: an ordinary attachment */
+      swallowed("storage/import/notion: not JSON, or not an API object: an ordinary attachment", err);
     }
   }
   return out;

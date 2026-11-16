@@ -23,6 +23,7 @@ import { t } from "../../i18n";
 import { HelpButton } from "../../ui/HelpButton";
 import "./conflictDialogStrings";
 import { Modal } from "../../ui/Modal";
+import { swallowed } from "../../lib/logger";
 
 export type ConflictChoice =
   | { kind: "merged"; content: string }
@@ -371,8 +372,9 @@ export function openConflictDialog(opts: {
     const cleanup = () => {
       try {
         root.unmount();
-      } catch {
+      } catch (err) {
         /* why: the root may already be unmounted by an earlier close */
+        swallowed("sync/cloud/ConflictDialog: the root may already be unmounted by an earlier close", err);
       }
       host.remove();
     };

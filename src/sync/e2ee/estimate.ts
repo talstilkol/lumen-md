@@ -9,6 +9,7 @@
  */
 
 import type { SyncEvent } from "./activity";
+import { swallowed } from "../../lib/logger";
 
 export interface Progress {
   files: number;
@@ -40,9 +41,10 @@ export function loadSpeed(): Speed | null {
 function saveSpeed(s: Speed): void {
   try {
     localStorage.setItem(SPEED_KEY, JSON.stringify(s));
-  } catch {
+  } catch (err) {
     // why: storage is blocked or full (private mode, quota): the setting holds for this session only
     /* only a convenience */
+    swallowed("sync/e2ee/estimate: storage is blocked or full (private mode, quota): the setting holds fo", err);
   }
 }
 
