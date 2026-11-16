@@ -37,21 +37,27 @@
   },
   {
    "pr": 160,
-   "head": "58797fa3303e9394409c9da531368e443754a824",
+   "head": "be387b87940ff36be8a1c7a452949cf8bb17db4f",
    "decision": "rejected",
-   "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run."
+   "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run. Re-keyed by lane F8 (review 8) after dependabot rebased it on 16.11; decided by number, author and title from now on.",
+   "author": "dependabot[bot]",
+   "title": "chore(deps): Bump the codemirror group across 1 directory with 9 updates"
   },
   {
    "pr": 161,
-   "head": "7a5c4df8b57dbabb5298926fad9a904c240cc07b",
+   "head": "391c306900fa6bca4026de1f0b3d4f47d2bf70ae",
    "decision": "rejected",
-   "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run."
+   "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run. Re-keyed by lane F8 (review 8) after dependabot rebased it on 16.11; decided by number, author and title from now on.",
+   "author": "dependabot[bot]",
+   "title": "chore(deps): Bump the milkdown group across 1 directory with 13 updates"
   },
   {
    "pr": 162,
-   "head": "5b8963441b40667d9d7e5232d9b8b7e15a7875ab",
+   "head": "32169deb10425c4d63b2f65fcaeb45096bb8352e",
    "decision": "rejected",
-   "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run."
+   "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run. Re-keyed by lane F8 (review 8) after dependabot rebased it on 16.11; decided by number, author and title from now on.",
+   "author": "dependabot[bot]",
+   "title": "chore(deps): Bump the yjs group across 1 directory with 2 updates"
   },
   {
    "pr": 164,
@@ -85,9 +91,11 @@
   },
   {
    "pr": 264,
-   "head": "58f5da66049f9c475af003549c3eb8507b678ebf",
+   "head": "ef8639c2bdca0b42434dd9d0d7b2fdc71523fddc",
    "decision": "rejected",
-   "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run."
+   "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run. Re-keyed by lane F8 (review 8) after dependabot rebased it on 16.11; decided by number, author and title from now on.",
+   "author": "dependabot[bot]",
+   "title": "chore(deps-dev): Bump the dev-tools group across 1 directory with 6 updates"
   },
   {
    "pr": 275,
@@ -164,9 +172,11 @@
   },
   {
    "pr": 325,
-   "head": "43050c0baece87ba1feaccfec174d404ec1f1b49",
+   "head": "27052b832aa9e89a9004818b27e20384e90fd640",
    "decision": "rejected",
-   "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run."
+   "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run. Re-keyed by lane F8 (review 8) after dependabot rebased it on 16.11; decided by number, author and title from now on.",
+   "author": "dependabot[bot]",
+   "title": "chore(deps): Bump the renderer-vendors group across 1 directory with 4 updates"
   },
   {
    "pr": 326,

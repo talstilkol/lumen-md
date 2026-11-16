@@ -111,6 +111,35 @@ describe("classify", () => {
   });
 });
 
+describe("dependabot PRs follow a rebase (by number, author and title); no other PR does", () => {
+  const bot = (number: number, sha: string, title: string, login = "dependabot[bot]") => ({ number, title, head: { sha }, base: { ref: "main" }, user: { login } });
+  const T = "chore(deps): Bump the yjs group across 1 directory with 2 updates";
+  const inTrain = () => false;
+
+  it("a dependabot decision with the PR's title holds after the bot rebased the PR", () => {
+    const file = { decisions: [{ pr: 162, head: "5b8963441b", decision: "rejected", author: "dependabot[bot]", title: T, reason: "bumps go in as one lockfile update on the Mac" }] };
+    const v = classify([bot(162, "32169deb10425c4d63b2f65fcaeb45096bb8352e", T)], file, inTrain);
+    expect(v.ok).toBe(true);
+    expect(v.decided[0]).toMatchObject({ pr: 162, decision: "rejected", rebasedFrom: "5b8963441b" });
+    expect(report(v, "t").some((l: string) => l.startsWith("· #162 (dependabot) rebased to 32169deb10"))).toBe(true);
+  });
+
+  it("stale when the title changed (a new bump), when the author is not dependabot, or when the decision does not say dependabot", () => {
+    const file = { decisions: [{ pr: 162, head: "5b8963441b", decision: "rejected", author: "dependabot[bot]", title: T, reason: "bumps go in as one lockfile update on the Mac" }] };
+    expect(classify([bot(162, "32169deb10", T.replace("2 updates", "3 updates"))], file, inTrain).stale.map((r: { pr: number }) => r.pr)).toEqual([162]);
+    expect(classify([bot(162, "32169deb10", T, "someone")], file, inTrain).stale.map((r: { pr: number }) => r.pr)).toEqual([162]);
+    const plain = { decisions: [{ pr: 162, head: "5b8963441b", decision: "rejected", reason: "bumps go in as one lockfile update on the Mac" }] };
+    expect(classify([bot(162, "32169deb10", T)], plain, inTrain).stale.map((r: { pr: number }) => r.pr)).toEqual([162]);
+  });
+
+  it("the file may name only dependabot as an author, and then the title too", () => {
+    const at = (d: Record<string, unknown>) => checkDecisions({ decisions: [{ pr: 7, head: "aaaa000007", decision: "rejected", reason: "a reason long enough", ...d }] });
+    expect(at({ author: "someone" })).toEqual([expect.stringMatching(/author may only be "dependabot\[bot\]"/)]);
+    expect(at({ author: "dependabot[bot]" })).toEqual([expect.stringMatching(/names the PR's title/)]);
+    expect(at({ author: "dependabot[bot]", title: "chore(deps): x" })).toEqual([]);
+  });
+});
+
 describe("openPulls", () => {
   it("reads every page of 100 until a short one", () => {
     const pages: Record<number, Pull[]> = {
