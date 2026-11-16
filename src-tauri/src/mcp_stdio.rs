@@ -160,9 +160,13 @@ pub async fn mcp_stdio_spawn(app: AppHandle, state: State<'_, McpStdio>, command
                 Event::Out(l) => ("out", l),
                 Event::Err(l) => ("err", l),
                 Event::Exit(c) => {
-                    if let Ok(mut g) = map.lock() {
-                        g.sessions.remove(&id);
-                    }
+                    // R8b-L5: take the session out under the lock, drop it after. The last Arc<Session>
+                    // dropped runs Session::drop (a close with a grace wait), which must not hold the map.
+                    let gone = match map.lock() {
+                        Ok(mut g) => g.sessions.remove(&id),
+                        Err(_) => None,
+                    };
+                    drop(gone);
                     ("exit", c.map(|c| c.to_string()).unwrap_or_default())
                 }
             };

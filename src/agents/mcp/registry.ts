@@ -85,6 +85,11 @@ function stdioFor(server: McpServerConfig, bridge: StdioBridge): StdioTransport 
       appendServerLog(server.id, "lumen", `stopped${code === null ? "" : ` (exit ${code})`}`);
       if (pool.get(key) === t) pool.delete(key);
     },
+    // R8b-L6: a server that stopped reading its input is closed and leaves the pool; the next call starts a new one.
+    onStuck: (why) => {
+      appendServerLog(server.id, "lumen", `closed: it stopped reading its input (${why.slice(0, 120)})`);
+      if (pool.get(key) === t) pool.delete(key);
+    },
   });
   pool.set(key, t);
   appendServerLog(server.id, "lumen", `starting ${server.command ?? ""} ${(server.args ?? []).join(" ")}`.trim());
