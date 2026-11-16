@@ -8956,6 +8956,312 @@
       "vars": []
     },
     {
+      "key": "graphAlt.inverse.amends",
+      "en": "Amended by",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.inverse.author",
+      "en": "Wrote",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.inverse.born_in",
+      "en": "Born here",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.inverse.child",
+      "en": "Parents",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.inverse.cites",
+      "en": "Cited by",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.inverse.died_in",
+      "en": "Died here",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.inverse.employer",
+      "en": "Employees",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.inverse.enacted_by",
+      "en": "Enacted",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.inverse.founded_by",
+      "en": "Founded",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.inverse.headquarters",
+      "en": "Headquarters of",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.inverse.located_in",
+      "en": "Located here",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.inverse.main_subject",
+      "en": "Subject of",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.inverse.member_of",
+      "en": "Members",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.inverse.part_of",
+      "en": "Parts",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.inverse.participant_in",
+      "en": "Participants",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.inverse.student_of",
+      "en": "Students",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.kind.concept.one",
+      "en": "1 concept",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.kind.concept.other",
+      "en": "{n} concepts",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "graphAlt.kind.event.one",
+      "en": "1 event",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.kind.event.other",
+      "en": "{n} events",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "graphAlt.kind.law.one",
+      "en": "1 law",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.kind.law.other",
+      "en": "{n} laws",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "graphAlt.kind.organization.one",
+      "en": "1 organization",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.kind.organization.other",
+      "en": "{n} organizations",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "graphAlt.kind.person.one",
+      "en": "1 person",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.kind.person.other",
+      "en": "{n} people",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "graphAlt.kind.place.one",
+      "en": "1 place",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.kind.place.other",
+      "en": "{n} places",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "graphAlt.kind.source.one",
+      "en": "1 source",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.kind.source.other",
+      "en": "{n} sources",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "graphAlt.list.back",
+      "en": "Back",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.list.empty",
+      "en": "No node to show with these filters.",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.list.goTo",
+      "en": "Go to",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.list.in",
+      "en": "Incoming: {relation}",
+      "vars": [
+        "relation"
+      ]
+    },
+    {
+      "key": "graphAlt.list.keys",
+      "en": "↑/↓ move between neighbours · Enter goes there · Backspace goes back",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.list.label",
+      "en": "Graph as a list",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.list.link",
+      "en": "link",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.list.linkedFrom",
+      "en": "Linked from",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.list.links",
+      "en": "{n} neighbours in {groups} groups",
+      "vars": [
+        "n",
+        "groups"
+      ]
+    },
+    {
+      "key": "graphAlt.list.linksTo",
+      "en": "Links to",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.list.none",
+      "en": "No neighbours.",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.list.open",
+      "en": "Open",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.mode.list",
+      "en": "List (one node at a time)",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.summary.clusters.one",
+      "en": "1 cluster",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.summary.clusters.other",
+      "en": "{n} clusters",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "graphAlt.summary.components.one",
+      "en": "1 connected group",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.summary.components.other",
+      "en": "{n} connected groups",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "graphAlt.summary.edges.one",
+      "en": "1 link",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.summary.edges.other",
+      "en": "{n} links",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "graphAlt.summary.empty",
+      "en": "Nothing to show with these filters.",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.summary.hubs",
+      "en": "Most connected: {list}",
+      "vars": [
+        "list"
+      ]
+    },
+    {
+      "key": "graphAlt.summary.nodes.one",
+      "en": "1 node",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.summary.nodes.other",
+      "en": "{n} nodes",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "graphAlt.summary.unconnected.one",
+      "en": "1 with no link",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.summary.unconnected.other",
+      "en": "{n} with no link",
+      "vars": [
+        "n"
+      ]
+    },
+    {
       "key": "havruta.add",
       "en": "Add note",
       "vars": []

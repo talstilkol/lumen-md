@@ -6,7 +6,7 @@
  * colour groups by folder or tag; the keyboard reaches every note.
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { filteredGraph, graphTimeDomain, groupsOf, type GraphDateField, type GraphFilter, type GroupBy } from "../graph/graphModel";
 import { runLayout } from "../graph/layoutClient";
 import { readWorkspaceFile } from "../storage/workspace";
@@ -18,6 +18,12 @@ import { TimeSlider, untilOf } from "./graph/TimeSlider";
 import { EmptyState, runCommand } from "./EmptyState";
 import { groupColor, nodeStyle, resolveColor, useVaultGraph } from "./graph/graphData";
 import "./graphViewStrings";
+import "./graph/graphAltStrings";
+import { GraphSummary } from "./graph/GraphSummary";
+import type { AltGraph } from "../graph/textAlt";
+
+// W13.G11: the note graph as a list you walk, loaded when asked for.
+const GraphListView = lazy(() => import("./graph/GraphListView").then((m) => ({ default: m.GraphListView })));
 
 const field = { fontSize: 12, paddingInline: 6, paddingBlock: 3, borderRadius: 4, border: "1px solid hsl(var(--border))", background: "hsl(var(--bg))", color: "hsl(var(--fg))", inlineSize: 120 } as const;
 
@@ -35,6 +41,7 @@ export function GraphView({ onOpenFile, initialTable = false }: { onOpenFile: (p
   const [laying, setLaying] = useState(false);
   // The text alternative (W10.E60): the same nodes and links as a table.
   const [asTable, setAsTable] = useState(initialTable);
+  const [asList, setAsList] = useState(false);
   // The ready marker (plan W7.25): the layout of the graph on screen has finished (or failed).
   const [laidOut, setLaidOut] = useState<object | null>(null);
 
@@ -51,6 +58,15 @@ export function GraphView({ onOpenFile, initialTable = false }: { onOpenFile: (p
     }
     return adj;
   }, [sub]);
+
+  // W13.G11: the same nodes and links for the summary sentence and the list.
+  const alt: AltGraph | null = useMemo(() => {
+    if (!graph || !sub) return null;
+    const nodes = Array.from(sub.nodes, (i: number) => ({ id: graph.paths[i], label: graph.labels[i] }));
+    const edges: AltGraph["edges"][number][] = [];
+    for (let e = 0; e < sub.edges.length; e += 2) edges.push({ source: nodes[sub.edges[e]].id, target: nodes[sub.edges[e + 1]].id });
+    return { nodes, edges };
+  }, [graph, sub]);
 
   // Lay out in the worker; draw every few steps while it settles.
   useEffect(() => {
@@ -78,6 +94,14 @@ export function GraphView({ onOpenFile, initialTable = false }: { onOpenFile: (p
   const open = async (k: number) => {
     if (!graph || !sub) return;
     const path = graph.paths[sub.nodes[k]];
+    try {
+      onOpenFile(path, await readWorkspaceFile(path));
+    } catch (err) {
+      log.warn("graph view: failed to open file", path, err);
+    }
+  };
+
+  const openPath = async (path: string) => {
     try {
       onOpenFile(path, await readWorkspaceFile(path));
     } catch (err) {
@@ -127,8 +151,11 @@ export function GraphView({ onOpenFile, initialTable = false }: { onOpenFile: (p
           </select>
         </label>
         <TimeSlider domain={domain} value={at} onChange={setUntil} labels={{ until: t("graph.time.until"), play: t("graph.time.play"), pause: t("graph.time.pause") }} testId="graph-time" style={{ ...field, inlineSize: "auto" }} />
-        <button type="button" className="icon-btn" aria-pressed={asTable} onClick={() => setAsTable((v) => !v)} data-testid="graph-as-table" style={{ inlineSize: "auto", paddingInline: 8, fontSize: 12 }}>
+        <button type="button" className="icon-btn" aria-pressed={asTable} onClick={() => (setAsTable((v) => !v), setAsList(false))} data-testid="graph-as-table" style={{ inlineSize: "auto", paddingInline: 8, fontSize: 12 }}>
           {t("graph.table.toggle")}
+        </button>
+        <button type="button" className="icon-btn" aria-pressed={asList} onClick={() => (setAsList((v) => !v), setAsTable(false))} data-testid="graph-as-list" style={{ inlineSize: "auto", paddingInline: 8, fontSize: 12 }}>
+          {t("graphAlt.mode.list")}
         </button>
         {groups && groupBy !== "none" && (
           <ul aria-label={t("graph.groups")} style={{ display: "flex", flexWrap: "wrap", gap: 8, listStyle: "none", margin: 0, padding: 0 }}>
@@ -140,10 +167,16 @@ export function GraphView({ onOpenFile, initialTable = false }: { onOpenFile: (p
             ))}
           </ul>
         )}
+        {alt && <GraphSummary graph={alt} />}
       </div>
-      <div style={{ flex: 1, minBlockSize: 0, position: "relative" }}>
+      <div style={{ flex: 1, minBlockSize: 0, position: "relative", overflow: asList ? "auto" : undefined }}>
+        {alt && asList && (
+          <Suspense fallback={null}>
+            <GraphListView graph={alt} relationLabel={(_, d) => t(d === "out" ? "graphAlt.list.linksTo" : "graphAlt.list.linkedFrom")} onOpen={(path) => void openPath(path)} />
+          </Suspense>
+        )}
         {sub && asTable && <GraphTable labels={labels} neighbors={(i) => adjacency[i] ?? []} onOpen={(k) => void open(k)} />}
-        {sub && style && !asTable && (
+        {sub && style && !asTable && !asList && (
           <GraphCanvas
             labels={labels}
             edges={sub.edges}

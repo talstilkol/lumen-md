@@ -20,19 +20,24 @@ import { GraphCanvas } from "./graph/GraphCanvas";
 import { TimeSlider, untilOf } from "./graph/TimeSlider";
 import { groupColor, resolveColor } from "./graph/graphData";
 import "./entityGraphStrings";
+import "./graph/graphAltStrings";
 import { egoDefault } from "../views/graph/ego";
 import { countedSankey, type FlowInput } from "../views/graph/flows";
 import type { SourceMeta } from "../views/graph/claims";
+import { GraphSummary } from "./graph/GraphSummary";
+import { entityAltGraph, kindCount, relationHeading } from "./graph/entityAlt";
 
 // R12.8 / W12.V2: the Sankey, the matrix and the claim inspector load only when asked for.
 const SankeyView = lazy(() => import("../viz/graph/SankeyView"));
 const AdjacencyMatrixView = lazy(() => import("../viz/graph/AdjacencyMatrixView"));
 const EdgeInspector = lazy(() => import("../viz/graph/EdgeInspector"));
+// W13.G11: the graph as a list you walk, one node and its neighbours at a time.
+const GraphListView = lazy(() => import("./graph/GraphListView").then((m) => ({ default: m.GraphListView })));
 
 /** Above this many entities the view opens as an ego graph (R12.8), never as a hairball. */
 export const EGO_MAX = 50;
 
-export type EntityGraphMode = "graph" | "table" | "sankey" | "flows" | "matrix";
+export type EntityGraphMode = "graph" | "table" | "list" | "sankey" | "flows" | "matrix";
 
 export interface EntityGraphViewProps {
   entities: readonly Entity[];
@@ -71,7 +76,8 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
   const filter: EntityGraphFilter = useMemo(
     () => ({
       types,
-      predicates: preds,
+      // Every relation ticked is no relation filter: an entity with no relation still shows (W13.G11 counts it as unconnected).
+      predicates: preds.size === PREDICATES.length ? undefined : preds,
       folder: folder.trim() || undefined,
       tag: tag.trim().replace(/^#/, "") || undefined,
       minConfidence: minConf > 0 ? minConf : undefined,
@@ -100,6 +106,8 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
     return n ? { reliability: n.reliability, sourceClass: n.sourceClass } : undefined;
   };
   const egoShown = !!ego.center && center === ego.center;
+  // W13.G11: the summary and the list read the same visible graph as the canvas and the table.
+  const alt = useMemo(() => entityAltGraph(visible), [visible]);
 
   const [positions, setPositions] = useState<Float32Array | null>(null);
   useEffect(() => {
@@ -221,11 +229,13 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
           <select style={field} value={mode} onChange={(e) => setMode(e.target.value as EntityGraphMode)} data-testid="entity-graph-mode">
             <option value="graph">{t("entityGraph.view.showGraph")}</option>
             <option value="table">{t("entityGraph.view.showTable")}</option>
+            <option value="list">{t("graphAlt.mode.list")}</option>
             <option value="sankey">{t("entityGraph.view.mode.sankey")}</option>
             <option value="flows">{t("entityGraph.view.mode.flows")}</option>
             <option value="matrix">{t("entityGraph.view.mode.matrix")}</option>
           </select>
         </label>
+        <GraphSummary graph={alt} kindLabel={kindCount} testId="entity-graph-summary" />
         {egoShown && (
           <span data-testid="entity-graph-ego">
             {t("entityGraph.view.egoOf", { name: nameOf.get(ego.center!) ?? "", shown: String(visible.nodes.length), total: String(ego.total) })}{" "}
@@ -259,6 +269,10 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
                 onBand={(ids) => setInspect(ids)}
               />
             )}
+          </Suspense>
+        ) : mode === "list" ? (
+          <Suspense fallback={null}>
+            <GraphListView graph={alt} start={center || undefined} kindLabel={(k) => t(`entityGraph.type.${k}`)} relationLabel={relationHeading} onOpen={onOpenEntity} />
           </Suspense>
         ) : mode === "graph" ? (
           <GraphCanvas
