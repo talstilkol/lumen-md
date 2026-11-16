@@ -412,6 +412,14 @@
   "zotero-web": {
    "origin": "synthetic",
    "why": "shaped like the documented Web API responses (SOURCES.md), not captured"
+  },
+  "ivritNormalizerHand.json": {
+   "origin": "synthetic",
+   "why": "50 inputs written for the ivrit.ai normaliser port (W11.H6) to hit each HebrewTextNormalizer step; expected strings worked out by reading the upstream code, no leaderboard data (the fixture's $comment)"
+  },
+  "spell-en-common.json": {
+   "origin": "synthetic",
+   "why": "modern sentences with well-known everyday misspellings, written for this repo by lane g2-L7 (plan 6.10), CC0-1.0; no third-party corpus (the fixture's about)"
   }
  }
 }

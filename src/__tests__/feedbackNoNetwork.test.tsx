@@ -22,6 +22,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 
 const hasTiming = typeof PerformanceObserver !== "undefined" && typeof performance.getEntriesByType === "function" && PerformanceObserver.supportedEntryTypes?.includes("resource");
 
+// skip-reason: Resource Timing (PerformanceObserver "resource") exists only in a real browser; happy-dom has none, so the file runs in the Chromium runner | task: 14.2 | until: 2027-05-16
 describe.skipIf(!hasTiming)(`feedback in a real browser: 0 requests before the click (14.2)${hasTiming ? "" : " — skipped: no Resource Timing here (happy-dom); runs in Chromium"}`, () => {
   afterEach(() => {
     cleanup();
