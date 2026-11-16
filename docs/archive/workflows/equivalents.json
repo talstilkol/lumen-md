@@ -1,0 +1,200 @@
+{
+ "$comment": "W10.G11 (audit r3): every job of every archived GitHub Actions workflow in this folder, and what runs its gate now — a Buildkite step (.buildkite/pipeline.yml key), a ci:local step (scripts/lib/ciLocal.mjs id), a Vercel build gate (scripts/vercel-build.mjs), a local script, or dropped with the reason. src/__tests__/archivedWorkflows.test.ts checks that each one is mapped and that each target exists. GitHub Actions is not used (owner decision, W1.35).",
+ "asr.yml": {
+  "wer": {
+   "script": "scripts/asr/eval.mjs"
+  }
+ },
+ "ci.yml": {
+  "check": {
+   "buildkite": "static"
+  },
+  "licenses": {
+   "buildkite": "licenses",
+   "ciLocal": "licenses",
+   "vercelBuild": "licenses"
+  },
+  "lint": {
+   "buildkite": "lint",
+   "ciLocal": "lint"
+  },
+  "local-ai": {
+   "buildkite": "local-ai"
+  },
+  "bundle-comment": {
+   "buildkite": "build",
+   "script": "scripts/bundle-diff.mjs"
+  },
+  "lighthouse": {
+   "buildkite": "lighthouse"
+  },
+  "e2e": {
+   "buildkite": "e2e-chromium",
+   "vercelBuild": "e2e"
+  },
+  "visual": {
+   "buildkite": "visual"
+  },
+  "e2e-prod": {
+   "buildkite": "e2e-prod"
+  },
+  "e2e-headers": {
+   "buildkite": "e2e-headers"
+  },
+  "ocr-cer": {
+   "buildkite": "ocr-cer",
+   "ciLocal": "ocr"
+  },
+  "signal-health": {
+   "script": "scripts/collab-health.mjs"
+  }
+ },
+ "codeql.yml": {
+  "codeql": {
+   "buildkite": "security",
+   "ciLocal": "semgrep"
+  }
+ },
+ "deploy.yml": {
+  "fly": {
+   "dropped": "flyctl deploy of the server to Fly.io: a deploy is an owner action (accounts and deploys wait until after the Mac run); no CI job deploys anything now, and the app itself deploys through Vercel."
+  }
+ },
+ "e2e-flake.yml": {
+  "flake": {
+   "script": "scripts/e2e-flake.mjs"
+  },
+  "report": {
+   "script": "scripts/nightly/flake-report.mjs"
+  }
+ },
+ "golden-sets.yml": {
+  "dev": {
+   "script": "scripts/golden.mjs"
+  },
+  "test": {
+   "script": "scripts/golden.mjs"
+  },
+  "record": {
+   "script": "scripts/golden/run-evals.mjs"
+  }
+ },
+ "issue-triage.yml": {
+  "triage": {
+   "script": "scripts/issue-triage.mjs"
+  }
+ },
+ "keychain.yml": {
+  "keychain": {
+   "dropped": "cargo test -p lumen-keychain against the real macOS and Windows credential stores needs those machines; it runs in the owner's Mac run (W10.M3), not in a cloud gate."
+  }
+ },
+ "lighthouse-trend.yml": {
+  "trend": {
+   "script": "scripts/nightly/lighthouse-trend.mjs"
+  }
+ },
+ "mobile.yml": {
+  "android": {
+   "script": "scripts/mobile-build.mjs"
+  },
+  "ios": {
+   "script": "scripts/mobile-build.mjs"
+  }
+ },
+ "model-convert.yml": {
+  "plan": {
+   "script": "scripts/models/convert.mjs"
+  },
+  "siglip-mirror": {
+   "script": "scripts/models/mirror.mjs"
+  },
+  "nakdimon": {
+   "script": "scripts/models/convert.mjs"
+  },
+  "convert": {
+   "script": "scripts/models/convert.mjs"
+  },
+  "smoke": {
+   "script": "scripts/models/smoke.mjs"
+  },
+  "publish": {
+   "script": "scripts/models/mirror.mjs"
+  }
+ },
+ "nightly-perf.yml": {
+  "perf": {
+   "script": "scripts/nightly/run.mjs",
+   "vercelBuild": "perf:gate"
+  }
+ },
+ "real-model.yml": {
+  "real-model": {
+   "buildkite": "real-model-pr"
+  }
+ },
+ "release.yml": {
+  "web": {
+   "script": "scripts/release.mjs"
+  },
+  "tauri": {
+   "dropped": "the signed desktop release build needs the owner's Mac and signing keys (W10.M3, 10.M); it is an owner action, not a CI gate."
+  },
+  "updater-manifest": {
+   "script": "scripts/supply-chain/release.mjs"
+  }
+ },
+ "review-triage.yml": {
+  "triage": {
+   "script": "scripts/nightly/review-triage.mjs"
+  }
+ },
+ "scorecard.yml": {
+  "scorecard": {
+   "dropped": "OpenSSF Scorecard reads GitHub Actions workflows and branch settings; with no workflows it scores nothing useful. The supply-chain gates it stood for run in the security-nightly Buildkite step."
+  }
+ },
+ "security.yml": {
+  "gitleaks": {
+   "ciLocal": "gitleaks",
+   "buildkite": "security"
+  },
+  "audit": {
+   "buildkite": "security-nightly"
+  },
+  "cargo-audit": {
+   "ciLocal": "cargo-audit"
+  },
+  "dependency-review": {
+   "buildkite": "security-nightly"
+  }
+ },
+ "tauri.yml": {
+  "tauri-check": {
+   "script": "scripts/rust-std-tests.mjs"
+  }
+ },
+ "vault-rust.yml": {
+  "vault-tests": {
+   "script": "scripts/rust-std-tests.mjs"
+  },
+  "tauri-check": {
+   "script": "scripts/rust-std-tests.mjs"
+  }
+ },
+ "visual.yml": {
+  "visual": {
+   "buildkite": "visual",
+   "script": "scripts/visual-approve.mjs"
+  }
+ },
+ "weekly-health.yml": {
+  "dependencies": {
+   "script": "scripts/nightly/weekly-health.mjs"
+  },
+  "mutation": {
+   "vercelBuild": "mutation",
+   "script": "scripts/mutation/run.mjs"
+  }
+ }
+}

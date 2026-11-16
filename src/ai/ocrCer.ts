@@ -3,7 +3,8 @@
  *
  * Pure functions, no DOM: used by the unit test (src/__tests__/ocrCer.test.ts)
  * and by the CI measurement against the golden set ocr-he
- * (e2e/ocr-cer.spec.ts, .github/workflows/ci.yml job `ocr-cer`).
+ * (e2e/ocr-cer.spec.ts: the Buildkite step `ocr-cer`, and `ocr` in ci:local,
+ * scripts/ocr/cer-node.mjs; the Actions job it replaced is archived).
  *
  * CER = Levenshtein distance between the reference and the OCR output,
  * counted in grapheme clusters (Intl.Segmenter), divided by the reference's
