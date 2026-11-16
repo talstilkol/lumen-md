@@ -52,23 +52,8 @@ export const RECEIPT_DIR = "reports";
 export const RUNS_DIR = ".ci-local/runs";
 export const receiptPath = (sha) => `${RECEIPT_DIR}/train-offline-${sha}.json`;
 
-/**
- * The uncommitted files from `git status --porcelain -z` (not trimmed: the
- * first entry's leading space is part of its status), leaving out .ci-local/.
- * A rename or copy names its new path (the old one follows it and is skipped).
- * @param {string} out
- */
-export function porcelainFiles(out) {
-  const parts = String(out ?? "").split("\0");
-  const files = [];
-  for (let i = 0; i < parts.length; i++) {
-    const e = parts[i];
-    if (e.length < 4) continue;
-    files.push(e.slice(3));
-    if (/^[RC]/.test(e)) i++;
-  }
-  return files.filter((f) => !f.startsWith(".ci-local/"));
-}
+// Shared with scripts/ci-local.mjs (which copies only lib/ciLocal.mjs in its CLI test).
+export { porcelainFiles } from "./ciLocal.mjs";
 
 /** A full 40-hex commit hash. */
 export const isSha = (s) => /^[0-9a-f]{40}$/.test(String(s ?? ""));

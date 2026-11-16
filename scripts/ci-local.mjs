@@ -26,8 +26,7 @@ import { existsSync, readFileSync, readdirSync, writeFileSync, chmodSync, mkdirS
 import { createServer } from "node:net";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { planSteps, e2eSpecs, i18nDrift, summary, coverageGate, hookPlan, buildState, argErrors, dynamicImportTargets, onPath, prCheckBase } from "./lib/ciLocal.mjs";
-import { porcelainFiles } from "./lib/trainReceipt.mjs";
+import { planSteps, e2eSpecs, i18nDrift, summary, coverageGate, hookPlan, buildState, argErrors, dynamicImportTargets, onPath, prCheckBase, porcelainFiles } from "./lib/ciLocal.mjs";
 
 // fileURLToPath, not `.pathname`: a checkout in "lumen md/" is "lumen%20md/" in the URL.
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
