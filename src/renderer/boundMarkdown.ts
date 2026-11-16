@@ -121,11 +121,16 @@ function withoutCodeSpans(text: string): string {
   return out + text.slice(at);
 }
 
-/** The raw-HTML depth after `text`, starting at `depth`, and the deepest it reached. Code spans are not HTML. */
+/**
+ * The raw-HTML depth after `text`, starting at `depth`, and the deepest it
+ * reached. Code spans are not HTML; they are taken line by line, so a stray
+ * backtick cannot hide the tags of the lines after it (a table row ends a
+ * code span; W10.D21, fuzz #970703).
+ */
 function htmlDepth(text: string, depth: number): { end: number; max: number } {
   let max = depth;
   if (!text.includes("<")) return { end: depth, max };
-  for (const m of withoutCodeSpans(text).matchAll(TAG)) {
+  for (const m of text.split(/\r\n?|\n/).map(withoutCodeSpans).join("\n").matchAll(TAG)) {
     if (m[3] || NO_DEPTH.has(m[2].toLowerCase())) continue;
     depth = m[1] ? Math.max(0, depth - 1) : depth + 1;
     if (depth > max) max = depth;
