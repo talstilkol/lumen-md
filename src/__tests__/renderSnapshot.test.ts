@@ -10,6 +10,8 @@
  * postMessage does), when the pipeline exposes it.
  */
 import { describe, expect, it } from "vitest";
+import { readdirSync } from "node:fs";
+import { join } from "node:path";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { renderMarkdown } from "../renderer/pipeline";
@@ -27,6 +29,11 @@ describe("render snapshots (50 documents)", () => {
   it("is a 50-document set", () => {
     expect(docs.length).toBe(50);
     expect(new Set(docs.map((d) => d.name)).size).toBe(50);
+  });
+
+  it("every document has its snapshot, and every snapshot its document (W10.Z3)", () => {
+    const snaps = readdirSync(join(__dirname, "__snapshots__", "render")).filter((f: string) => f.endsWith(".html")).map((f: string) => f.slice(0, -5)).sort();
+    expect(docs.map((d) => d.name).sort()).toEqual(snaps);
   });
 
   for (const doc of docs) {
