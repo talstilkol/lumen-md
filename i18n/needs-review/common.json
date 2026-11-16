@@ -1,4 +1,267 @@
 {
+  "academic.chosen": {
+    "he": "dp8jvj",
+    "ar": "dp8jvj",
+    "de": "dp8jvj",
+    "fr": "dp8jvj",
+    "ja": "dp8jvj",
+    "ru": "dp8jvj",
+    "zh-CN": "dp8jvj"
+  },
+  "academic.chosenUnverified": {
+    "he": "uh66bb",
+    "ar": "uh66bb",
+    "de": "uh66bb",
+    "fr": "uh66bb",
+    "ja": "uh66bb",
+    "ru": "uh66bb",
+    "zh-CN": "uh66bb"
+  },
+  "academic.exported": {
+    "he": "8dxm0a",
+    "ar": "8dxm0a",
+    "de": "8dxm0a",
+    "fr": "8dxm0a",
+    "ja": "8dxm0a",
+    "ru": "8dxm0a",
+    "zh-CN": "8dxm0a"
+  },
+  "academic.noChoice": {
+    "he": "4kwqwf",
+    "ar": "4kwqwf",
+    "de": "4kwqwf",
+    "fr": "4kwqwf",
+    "ja": "4kwqwf",
+    "ru": "4kwqwf",
+    "zh-CN": "4kwqwf"
+  },
+  "academic.none": {
+    "he": "193b0es",
+    "ar": "193b0es",
+    "de": "193b0es",
+    "fr": "193b0es",
+    "ja": "193b0es",
+    "ru": "193b0es",
+    "zh-CN": "193b0es"
+  },
+  "academic.pick": {
+    "he": "umnr27",
+    "ar": "umnr27",
+    "de": "umnr27",
+    "fr": "umnr27",
+    "ja": "umnr27",
+    "ru": "umnr27",
+    "zh-CN": "umnr27"
+  },
+  "academic.unverified": {
+    "he": "1xxzzbf",
+    "ar": "1xxzzbf",
+    "de": "1xxzzbf",
+    "fr": "1xxzzbf",
+    "ja": "1xxzzbf",
+    "ru": "1xxzzbf",
+    "zh-CN": "1xxzzbf"
+  },
+  "hl.scan": {
+    "ar": "qb0k9u",
+    "de": "qb0k9u",
+    "fr": "qb0k9u",
+    "ja": "qb0k9u",
+    "ru": "qb0k9u",
+    "zh-CN": "qb0k9u"
+  },
+  "hlscan.author": {
+    "ar": "15hxgmu",
+    "de": "15hxgmu",
+    "fr": "15hxgmu",
+    "ja": "15hxgmu",
+    "ru": "15hxgmu",
+    "zh-CN": "15hxgmu"
+  },
+  "hlscan.bookTitle": {
+    "ar": "riy10u",
+    "de": "riy10u",
+    "fr": "riy10u",
+    "ja": "riy10u",
+    "ru": "riy10u",
+    "zh-CN": "riy10u"
+  },
+  "hlscan.cancel": {
+    "ar": "ew9em3",
+    "de": "ew9em3",
+    "fr": "ew9em3",
+    "ja": "ew9em3",
+    "ru": "ew9em3",
+    "zh-CN": "ew9em3"
+  },
+  "hlscan.close": {
+    "ar": "1l0xxoj",
+    "de": "1l0xxoj",
+    "fr": "1l0xxoj",
+    "ja": "1l0xxoj",
+    "ru": "1l0xxoj",
+    "zh-CN": "1l0xxoj"
+  },
+  "hlscan.color.blue": {
+    "ar": "10cd4ul",
+    "de": "10cd4ul",
+    "fr": "10cd4ul",
+    "ja": "10cd4ul",
+    "ru": "10cd4ul",
+    "zh-CN": "10cd4ul"
+  },
+  "hlscan.color.green": {
+    "ar": "b5mm4",
+    "de": "b5mm4",
+    "fr": "b5mm4",
+    "ja": "b5mm4",
+    "ru": "b5mm4",
+    "zh-CN": "b5mm4"
+  },
+  "hlscan.color.orange": {
+    "ar": "jc9giz",
+    "de": "jc9giz",
+    "fr": "jc9giz",
+    "ja": "jc9giz",
+    "ru": "jc9giz",
+    "zh-CN": "jc9giz"
+  },
+  "hlscan.color.pen": {
+    "ar": "uvp3ao",
+    "de": "uvp3ao",
+    "fr": "uvp3ao",
+    "ja": "uvp3ao",
+    "ru": "uvp3ao",
+    "zh-CN": "uvp3ao"
+  },
+  "hlscan.color.pink": {
+    "ar": "9ja92l",
+    "de": "9ja92l",
+    "fr": "9ja92l",
+    "ja": "9ja92l",
+    "ru": "9ja92l",
+    "zh-CN": "9ja92l"
+  },
+  "hlscan.color.yellow": {
+    "ar": "1let6x",
+    "de": "1let6x",
+    "fr": "1let6x",
+    "ja": "1let6x",
+    "ru": "1let6x",
+    "zh-CN": "1let6x"
+  },
+  "hlscan.drop": {
+    "ar": "1ur6jlm",
+    "de": "1ur6jlm",
+    "fr": "1ur6jlm",
+    "ja": "1ur6jlm",
+    "ru": "1ur6jlm",
+    "zh-CN": "1ur6jlm"
+  },
+  "hlscan.failed": {
+    "ar": "xz04a5",
+    "de": "xz04a5",
+    "fr": "xz04a5",
+    "ja": "xz04a5",
+    "ru": "xz04a5",
+    "zh-CN": "xz04a5"
+  },
+  "hlscan.found": {
+    "ar": "4ibfr6",
+    "de": "4ibfr6",
+    "fr": "4ibfr6",
+    "ja": "4ibfr6",
+    "ru": "4ibfr6",
+    "zh-CN": "4ibfr6"
+  },
+  "hlscan.intro": {
+    "ar": "10laa89",
+    "de": "10laa89",
+    "fr": "10laa89",
+    "ja": "10laa89",
+    "ru": "10laa89",
+    "zh-CN": "10laa89"
+  },
+  "hlscan.isbn": {
+    "ar": "1ybfbng",
+    "de": "1ybfbng",
+    "fr": "1ybfbng",
+    "ja": "1ybfbng",
+    "ru": "1ybfbng",
+    "zh-CN": "1ybfbng"
+  },
+  "hlscan.isbnInvalid": {
+    "ar": "10w2wmg",
+    "de": "10w2wmg",
+    "fr": "10w2wmg",
+    "ja": "10w2wmg",
+    "ru": "10w2wmg",
+    "zh-CN": "10w2wmg"
+  },
+  "hlscan.keepPhoto": {
+    "ar": "lnvcfx",
+    "de": "lnvcfx",
+    "fr": "lnvcfx",
+    "ja": "lnvcfx",
+    "ru": "lnvcfx",
+    "zh-CN": "lnvcfx"
+  },
+  "hlscan.none": {
+    "ar": "1fvxkf0",
+    "de": "1fvxkf0",
+    "fr": "1fvxkf0",
+    "ja": "1fvxkf0",
+    "ru": "1fvxkf0",
+    "zh-CN": "1fvxkf0"
+  },
+  "hlscan.page": {
+    "ar": "1sfsa6u",
+    "de": "1sfsa6u",
+    "fr": "1sfsa6u",
+    "ja": "1sfsa6u",
+    "ru": "1sfsa6u",
+    "zh-CN": "1sfsa6u"
+  },
+  "hlscan.pick": {
+    "ar": "lxdxdz",
+    "de": "lxdxdz",
+    "fr": "lxdxdz",
+    "ja": "lxdxdz",
+    "ru": "lxdxdz",
+    "zh-CN": "lxdxdz"
+  },
+  "hlscan.reading": {
+    "ar": "1dhmntb",
+    "de": "1dhmntb",
+    "fr": "1dhmntb",
+    "ja": "1dhmntb",
+    "ru": "1dhmntb",
+    "zh-CN": "1dhmntb"
+  },
+  "hlscan.save": {
+    "ar": "1ysq9vp",
+    "de": "1ysq9vp",
+    "fr": "1ysq9vp",
+    "ja": "1ysq9vp",
+    "ru": "1ysq9vp",
+    "zh-CN": "1ysq9vp"
+  },
+  "hlscan.saved": {
+    "ar": "vcs2gm",
+    "de": "vcs2gm",
+    "fr": "vcs2gm",
+    "ja": "vcs2gm",
+    "ru": "vcs2gm",
+    "zh-CN": "vcs2gm"
+  },
+  "hlscan.title": {
+    "ar": "nir8qt",
+    "de": "nir8qt",
+    "fr": "nir8qt",
+    "ja": "nir8qt",
+    "ru": "nir8qt",
+    "zh-CN": "nir8qt"
+  },
   "locale.beta": {
     "ar": "1bqao9n",
     "de": "1bqao9n",
