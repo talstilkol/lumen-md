@@ -36,6 +36,8 @@ export const RECORDERS = {
   "src/ui/WikidataLink.tsx": () => [],
   // W10.C2 (#728 via #978): listing a remote MCP server's tools; its tool calls go through the network gate (agents/network.ts).
   "src/agents/mcp/registry.ts": (src) => [/reason: `([^`$]+)\$\{/.exec(src)[1]],
+  // R8-M1: a LaTeX-to-PDF compile that may let Tectonic download TeX packages (recordProcessCall).
+  "src/latex/tectonicDesktop.ts": (src) => [/export const TECTONIC_LEDGER_REASON = "([^"]+)"/.exec(src)[1]],
 };
 
 /** A call that records into the ledger (or fetches through it). */

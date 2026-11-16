@@ -614,19 +614,23 @@ fn latex_status() -> LatexStatus {
 }
 
 /// Compile main.tex (and the export's other files) to PDF; the errors with their lines when TeX fails.
+/// `offline` (airplane mode or local-only, from the page): Tectonic uses its cache only, no download (R8-M1).
 #[tauri::command]
-async fn latex_pdf(tex: String, files: Vec<LatexFile>) -> Result<tauri::ipc::Response, LatexFailure> {
+async fn latex_pdf(tex: String, files: Vec<LatexFile>, offline: Option<bool>) -> Result<tauri::ipc::Response, LatexFailure> {
     let bin = tectonic_bin().ok_or(LatexFailure::NoTectonic)?;
     let stamp = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_nanos()).unwrap_or(0);
     let work = std::env::temp_dir().join(format!("lumen-latex-{}-{}", std::process::id(), stamp));
     let files: Vec<(String, Vec<u8>)> = files.into_iter().map(|f| (f.name, f.data)).collect();
-    tauri::async_runtime::spawn_blocking(move || tectonic::compile(&bin, &tex, &files, &work))
+    // A missing flag (an older page) counts as offline: no download without the page's say-so.
+    let offline = offline.unwrap_or(true);
+    tauri::async_runtime::spawn_blocking(move || tectonic::compile(&bin, &tex, &files, &work, offline, tectonic::COMPILE_TIMEOUT))
         .await
         .map_err(|e| LatexFailure::Other { message: e.to_string() })?
         .map_err(|e| match e {
             tectonic::CompileError::Tex { errors, log_tail } => LatexFailure::Tex { errors: errors.into_iter().map(|e| LatexErrorOut { line: e.line, message: e.message }).collect(), log_tail },
             tectonic::CompileError::Spawn(m) | tectonic::CompileError::Io(m) => LatexFailure::Other { message: m },
             tectonic::CompileError::BadName(n) => LatexFailure::Other { message: format!("invalid file name: {n}") },
+            tectonic::CompileError::Timeout(s) => LatexFailure::Other { message: format!("Tectonic was stopped after {s} s (does the document loop?)") },
         })
         // The PDF as raw bytes (an ArrayBuffer in the page), not a JSON array of numbers.
         .map(tauri::ipc::Response::new)

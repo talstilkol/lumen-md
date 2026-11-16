@@ -3,14 +3,26 @@
 //! `tectonic` binary (LUMEN_TECTONIC, then PATH, then the usual install
 //! places), compiles the export's main.tex in a temporary folder with
 //! `--untrusted` (no shell escape), and turns the TeX log into errors with
-//! line numbers for the app to show. Only `std`, so it is unit-tested
-//! without the Tauri crates:
+//! line numbers for the app to show.
+//!
+//! Network (R8-M1): Tectonic itself downloads its TeX support bundle and any
+//! missing package from its bundle server on first use and on a cache miss.
+//! With `offline` (airplane mode or the local-only policy, decided by the
+//! page) it runs with `--only-cached`, so it makes no request and fails on a
+//! package it has not cached. A compile is killed after `timeout` (a TeX file
+//! that loops would otherwise hold the thread forever), and the work folder
+//! is created fresh with mode 0700. Only `std`, so it is unit-tested without
+//! the Tauri crates:
 //!
 //!   rustc --edition 2021 --test src-tauri/src/tectonic.rs -o /tmp/t && /tmp/t
 
 use std::ffi::OsString;
 use std::path::{Component, Path, PathBuf};
 use std::process::{Command, Stdio};
+use std::time::{Duration, Instant};
+
+/// How long one compile may run before it is killed (R8-M1).
+pub const COMPILE_TIMEOUT: Duration = Duration::from_secs(120);
 
 /// Where to look for the binary, in order.
 pub fn candidates(env_override: Option<&str>, path_var: Option<&str>) -> Vec<PathBuf> {
@@ -35,9 +47,10 @@ pub fn find(candidates: &[PathBuf]) -> Option<PathBuf> {
     candidates.iter().find(|p| p.is_file()).cloned()
 }
 
-/// The command line: compile main.tex into `outdir`, keep the log, no shell escape.
-pub fn args(main: &Path, outdir: &Path) -> Vec<OsString> {
-    vec![
+/// The command line: compile main.tex into `outdir`, keep the log, no shell escape;
+/// `offline`: only the packages already cached, no download (R8-M1).
+pub fn args(main: &Path, outdir: &Path, offline: bool) -> Vec<OsString> {
+    let mut a: Vec<OsString> = vec![
         "-X".into(),
         "compile".into(),
         main.as_os_str().to_owned(),
@@ -45,7 +58,22 @@ pub fn args(main: &Path, outdir: &Path) -> Vec<OsString> {
         outdir.as_os_str().to_owned(),
         "--keep-logs".into(),
         "--untrusted".into(),
-    ]
+    ];
+    if offline {
+        a.push("--only-cached".into());
+    }
+    a
+}
+
+/// The work folder: new (never one that already exists) and, on Unix, readable by this user only.
+fn make_work_dir(work: &Path) -> std::io::Result<()> {
+    let mut b = std::fs::DirBuilder::new();
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::DirBuilderExt;
+        b.mode(0o700);
+    }
+    b.create(work)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -104,6 +132,8 @@ pub enum CompileError {
     /// TeX failed: its errors, and the end of the log for anything they miss.
     Tex { errors: Vec<TexError>, log_tail: String },
     Io(String),
+    /// Killed after this many seconds.
+    Timeout(u64),
 }
 
 fn tail(s: &str, n: usize) -> String {
@@ -112,13 +142,13 @@ fn tail(s: &str, n: usize) -> String {
 }
 
 /// Compile `tex` (and its `files`) in `work`, which is created and removed. → the PDF bytes.
-pub fn compile(bin: &Path, tex: &str, files: &[(String, Vec<u8>)], work: &Path) -> Result<Vec<u8>, CompileError> {
+pub fn compile(bin: &Path, tex: &str, files: &[(String, Vec<u8>)], work: &Path, offline: bool, timeout: Duration) -> Result<Vec<u8>, CompileError> {
     for (name, _) in files {
         if !safe_name(name) {
             return Err(CompileError::BadName(name.clone()));
         }
     }
-    std::fs::create_dir_all(work).map_err(|e| CompileError::Io(e.to_string()))?;
+    make_work_dir(work).map_err(|e| CompileError::Io(e.to_string()))?;
     let run = (|| {
         let main = work.join("main.tex");
         std::fs::write(&main, tex).map_err(|e| CompileError::Io(e.to_string()))?;
@@ -129,18 +159,35 @@ pub fn compile(bin: &Path, tex: &str, files: &[(String, Vec<u8>)], work: &Path) 
             }
             std::fs::write(&p, data).map_err(|e| CompileError::Io(e.to_string()))?;
         }
-        let out = Command::new(bin)
-            .args(args(&main, work))
+        // Output to files in the work folder: no pipe to drain while the timeout is watched.
+        let io = |name: &str| std::fs::File::create(work.join(name)).map_err(|e| CompileError::Io(e.to_string()));
+        let mut child = Command::new(bin)
+            .args(args(&main, work, offline))
             .current_dir(work)
             .stdin(Stdio::null())
-            .output()
+            .stdout(io(".tectonic-stdout")?)
+            .stderr(io(".tectonic-stderr")?)
+            .spawn()
             .map_err(|e| CompileError::Spawn(e.to_string()))?;
+        let started = Instant::now();
+        let status = loop {
+            match child.try_wait().map_err(|e| CompileError::Io(e.to_string()))? {
+                Some(s) => break s,
+                None if started.elapsed() >= timeout => {
+                    let _ = child.kill();
+                    let _ = child.wait();
+                    return Err(CompileError::Timeout(timeout.as_secs()));
+                }
+                None => std::thread::sleep(Duration::from_millis(25)),
+            }
+        };
         let pdf = work.join("main.pdf");
-        if out.status.success() && pdf.is_file() {
+        if status.success() && pdf.is_file() {
             return std::fs::read(&pdf).map_err(|e| CompileError::Io(e.to_string()));
         }
         let log = std::fs::read_to_string(work.join("main.log")).unwrap_or_default();
-        let printed = format!("{}{}", String::from_utf8_lossy(&out.stdout), String::from_utf8_lossy(&out.stderr));
+        let read = |name: &str| String::from_utf8_lossy(&std::fs::read(work.join(name)).unwrap_or_default()).into_owned();
+        let printed = format!("{}{}", read(".tectonic-stdout"), read(".tectonic-stderr"));
         let mut errors = parse_log(&log);
         for e in parse_log(&printed) {
             if !errors.contains(&e) {
@@ -176,8 +223,14 @@ mod tests {
 
     #[test]
     fn never_lets_tex_run_shell_commands() {
-        let a: Vec<String> = args(Path::new("/w/main.tex"), Path::new("/w")).iter().map(|s| s.to_string_lossy().into_owned()).collect();
+        let a: Vec<String> = args(Path::new("/w/main.tex"), Path::new("/w"), false).iter().map(|s| s.to_string_lossy().into_owned()).collect();
         assert_eq!(a, ["-X", "compile", "/w/main.tex", "--outdir", "/w", "--keep-logs", "--untrusted"]);
+    }
+
+    #[test]
+    fn offline_compiles_from_the_cache_only() {
+        let a: Vec<String> = args(Path::new("/w/main.tex"), Path::new("/w"), true).iter().map(|s| s.to_string_lossy().into_owned()).collect();
+        assert_eq!(a, ["-X", "compile", "/w/main.tex", "--outdir", "/w", "--keep-logs", "--untrusted", "--only-cached"]);
     }
 
     // A TeX log of the usual shape (synthetic, written for this test).
@@ -204,7 +257,7 @@ mod tests {
         assert!(safe_name("images/a.png") && safe_name("refs.bib"));
         assert!(!safe_name("../x") && !safe_name("/etc/passwd") && !safe_name("") && !safe_name("a/../../b"));
         let bin = PathBuf::from("/bin/true");
-        match compile(&bin, "x", &[("../evil".into(), vec![])], &tmp("bad")) {
+        match compile(&bin, "x", &[("../evil".into(), vec![])], &tmp("bad"), false, COMPILE_TIMEOUT) {
             Err(CompileError::BadName(n)) => assert_eq!(n, "../evil"),
             r => panic!("{:?}", r.map(|_| ())),
         }
@@ -230,7 +283,7 @@ grep -q 'שלום' "$3" || exit 8
 [ -f "$5/images/a.png" ] || exit 7
 printf '%%PDF-1.7 stand-in' > "$5/main.pdf""#);
         let work = tmp("work-ok");
-        let pdf = compile(&bin, "\\documentclass{article}\\begin{document}שלום\\end{document}", &[("images/a.png".into(), vec![0x89, 0x50])], &work).expect("compiled");
+        let pdf = compile(&bin, "\\documentclass{article}\\begin{document}שלום\\end{document}", &[("images/a.png".into(), vec![0x89, 0x50])], &work, false, COMPILE_TIMEOUT).expect("compiled");
         assert_eq!(pdf, b"%PDF-1.7 stand-in");
         assert!(!work.exists(), "the work folder is removed");
         let _ = std::fs::remove_dir_all(&bins);
@@ -242,7 +295,7 @@ printf '%%PDF-1.7 stand-in' > "$5/main.pdf""#);
         let bins = tmp("bin-fail");
         let bin = fake_tectonic(&bins, &format!("cat > \"$5/main.log\" <<'EOF'\n{LOG}EOF\necho 'error: main.tex:7: Undefined control sequence.' >&2\nexit 1"));
         let work = tmp("work-fail");
-        match compile(&bin, "x", &[], &work) {
+        match compile(&bin, "x", &[], &work, false, COMPILE_TIMEOUT) {
             Err(CompileError::Tex { errors, log_tail }) => {
                 assert_eq!(errors[0], TexError { line: Some(7), message: "Undefined control sequence.".into() });
                 assert_eq!(errors.len(), 2, "TeX's and Tectonic's report of the same error count once: {errors:?}");
@@ -254,9 +307,54 @@ printf '%%PDF-1.7 stand-in' > "$5/main.pdf""#);
         let _ = std::fs::remove_dir_all(&bins);
     }
 
+    #[cfg(unix)]
+    #[test]
+    fn offline_passes_only_cached_to_the_binary() {
+        let bins = tmp("bin-offline");
+        let bin = fake_tectonic(&bins, r#"[ "$8" = --only-cached ] || exit 9
+printf '%%PDF-1.7 cached' > "$5/main.pdf""#);
+        let pdf = compile(&bin, "x", &[], &tmp("work-offline"), true, COMPILE_TIMEOUT).expect("compiled from the cache");
+        assert_eq!(pdf, b"%PDF-1.7 cached");
+        let _ = std::fs::remove_dir_all(&bins);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn a_compile_that_never_ends_is_killed_and_cleaned_up() {
+        let bins = tmp("bin-loop");
+        let bin = fake_tectonic(&bins, "sleep 30");
+        let work = tmp("work-loop");
+        let started = std::time::Instant::now();
+        match compile(&bin, "x", &[], &work, false, Duration::from_millis(300)) {
+            Err(CompileError::Timeout(_)) => {}
+            r => panic!("{:?}", r.map(|_| ())),
+        }
+        assert!(started.elapsed() < Duration::from_secs(10), "killed, not waited for");
+        assert!(!work.exists());
+        let _ = std::fs::remove_dir_all(&bins);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn the_work_folder_is_private_and_never_reused() {
+        use std::os::unix::fs::PermissionsExt;
+        let bins = tmp("bin-mode");
+        // The stand-in reports its folder's mode in the "PDF".
+        let bin = fake_tectonic(&bins, r#"stat -c %a "$5" > "$5/main.pdf" 2>/dev/null || stat -f %Lp "$5" > "$5/main.pdf""#);
+        let pdf = compile(&bin, "x", &[], &tmp("work-mode"), false, COMPILE_TIMEOUT).expect("compiled");
+        assert_eq!(String::from_utf8_lossy(&pdf).trim(), "700");
+        // An existing folder (a planted one, say) is refused, not written into.
+        let planted = tmp("work-planted");
+        std::fs::create_dir_all(&planted).unwrap();
+        std::fs::set_permissions(&planted, std::fs::Permissions::from_mode(0o777)).unwrap();
+        assert!(matches!(compile(&bin, "x", &[], &planted, false, COMPILE_TIMEOUT), Err(CompileError::Io(_))));
+        let _ = std::fs::remove_dir_all(&planted);
+        let _ = std::fs::remove_dir_all(&bins);
+    }
+
     #[test]
     fn a_missing_binary_is_a_spawn_error() {
-        match compile(Path::new("/no/such/tectonic"), "x", &[], &tmp("spawn")) {
+        match compile(Path::new("/no/such/tectonic"), "x", &[], &tmp("spawn"), false, COMPILE_TIMEOUT) {
             Err(CompileError::Spawn(_)) => {}
             r => panic!("{:?}", r.map(|_| ())),
         }

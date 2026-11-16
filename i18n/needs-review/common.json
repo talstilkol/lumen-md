@@ -839,6 +839,33 @@
     "ru": "nir8qt",
     "zh-CN": "nir8qt"
   },
+  "latex.pdf.consent.message": {
+    "ar": "6jwp1g",
+    "de": "6jwp1g",
+    "fr": "6jwp1g",
+    "he": "6jwp1g",
+    "ja": "6jwp1g",
+    "ru": "6jwp1g",
+    "zh-CN": "6jwp1g"
+  },
+  "latex.pdf.consent.ok": {
+    "ar": "1m88lx3",
+    "de": "1m88lx3",
+    "fr": "1m88lx3",
+    "he": "1m88lx3",
+    "ja": "1m88lx3",
+    "ru": "1m88lx3",
+    "zh-CN": "1m88lx3"
+  },
+  "latex.pdf.consent.title": {
+    "ar": "dk3gza",
+    "de": "dk3gza",
+    "fr": "dk3gza",
+    "he": "dk3gza",
+    "ja": "dk3gza",
+    "ru": "dk3gza",
+    "zh-CN": "dk3gza"
+  },
   "locale.beta": {
     "ar": "1bqao9n",
     "de": "1bqao9n",

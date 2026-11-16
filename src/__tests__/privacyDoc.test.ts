@@ -57,6 +57,8 @@ const RECORDERS: Record<string, (src: string) => string[]> = {
   "src/agents/mcp/registry.ts": (src) => [/reason: `([^`$]+)\$\{/.exec(src)![1]],
   // A plain WebDAV backup (R8-M2): recordPlainBackup, with the ledger's own fixed reason.
   "src/backup/start.ts": () => [],
+  // R8-M1: Tectonic's package downloads for LaTeX to PDF, under its one fixed reason.
+  "src/latex/tectonicDesktop.ts": (src) => [/export const TECTONIC_LEDGER_REASON = "([^"]+)"/.exec(src)![1]],
 };
 
 function walk(dir: string, out: string[] = []): string[] {
