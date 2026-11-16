@@ -287,7 +287,7 @@ async function chatDirect(
       try {
         charge();
         const localModel = forLocal(opts).model;
-        const text = await chatLocal(messages, { model: localModel, maxTokens: opts.maxTokens, temperature: opts.temperature });
+        const text = await chatLocal(messages, { model: localModel, maxTokens: opts.maxTokens, temperature: opts.temperature, signal: opts.signal });
         opts.onUsage?.({
           provider: "local-webgpu",
           model: localModel ?? PROVIDER_DEFAULT_MODELS["local-webgpu"],
