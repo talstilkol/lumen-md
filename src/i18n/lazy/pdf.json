@@ -42,5 +42,9 @@
   "pdf.ink.hint": "Draw on the page with a pen, a finger or the mouse; the strokes are saved with the highlights",
   "pdf.ink.undo": "Undo stroke",
   "pdf.ink.layer": "Ink on page {n}",
-  "pdf.inkUnreadable": "The ink in {name} can't be read, so it isn't changed. Fix or remove its lumen-pdf-ink block first."
+  "pdf.inkUnreadable": "The ink in {name} can't be read, so it isn't changed. Fix or remove its lumen-pdf-ink block first.",
+  "pdf.listen.page": "Reading page {n}",
+  "pdf.listen.stop": "Stop reading",
+  "pdf.listen.empty": "This PDF has no text to read. Recognise the text of its scanned pages (OCR) first.",
+  "pdf.listen": "Read aloud"
 }

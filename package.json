@@ -167,6 +167,7 @@
     "eval:canvas-draw": "node scripts/canvas-draw-eval.mjs",
     "acr": "node scripts/acr.mjs",
     "acr:check": "node scripts/acr.mjs --check",
+    "acr:axe": "node scripts/acr-axe-run.mjs",
     "md:conformance": "vitest run src/__tests__/mdConformance.test.ts src/__tests__/mdRoundTrip.test.ts src/__tests__/sourcePreserve.test.ts",
     "md:results": "node scripts/md-conformance.mjs",
     "help:bundle": "node scripts/help-bundle.mjs",
@@ -233,7 +234,8 @@
     "ci:selftest": "bash scripts/buildkite/selftest.sh",
     "fuzz:redaction": "node scripts/fuzz/redaction-nightly.mjs",
     "skills:validate": "node --experimental-strip-types --no-warnings=ExperimentalWarning scripts/skills-validate.mjs",
-    "eval:skills": "LUMEN_EVAL_SKILLS=1 vitest run --config vitest.eval.config.ts src/agents/eval/skills.eval.ts"
+    "eval:skills": "LUMEN_EVAL_SKILLS=1 vitest run --config vitest.eval.config.ts src/agents/eval/skills.eval.ts",
+    "tts:voice": "node --experimental-strip-types --no-warnings scripts/tts-voice.mjs"
   },
   "dependencies": {
     "@bjorn3/browser_wasi_shim": "0.4.2",

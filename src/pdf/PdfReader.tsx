@@ -36,13 +36,13 @@ import { drainQueue } from "./drainQueue";
 import { companionNotePath, createPdfAnnotation, describeAnnotation, findAll, nextMatchIndex, readAnnotationsNote, parsePdfFragment, shortId, unionRect, upsertAnnotationsNote, withNote, type PdfAnnotation } from "./annotations";
 import { layerText, offsetsToRange, pageTextFromItems, rangePageRects, rangeToOffsets } from "./textMap";
 import { openPdf, type PdfDocument } from "./pdfjs";
+import { PdfListenButton } from "./PdfListenButton";
 import "./PdfReader.css";
 import { HelpButton } from "../ui/HelpButton";
 import { explainError, UserFacingError } from "../lib/userError";
 import { EmptyState, learnHow } from "../ui/EmptyState";
-import { PdfPageView, withPageSize } from "./PdfPageView";
+import { PdfPageView, withPageSize, type PageSize } from "./PdfPageView";
 import { usePdfInk } from "./usePdfInk";
-import type { PageSize } from "./PdfPageView";
 import type { OcrPage } from "./ocrPages";
 import { positionAt, scrollTopFor } from "./readingPosition";
 import { SpreadControls, SpreadRows, useSpread } from "./PdfSpread";
@@ -536,20 +536,8 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
     if (!doc || ocrAllBusy) return;
     setOcrAllBusy(true);
     try {
-      const { ocrPdfPage } = await import("./ocrPages");
-      let done = 0;
-      for (let p = 1; p <= doc.numPages; p++) {
-        if (ocrPages[p]) continue;
-        let text = pageTexts.current.get(p);
-        if (text === undefined) {
-          text = pageTextFromItems((await (await doc.getPage(p)).getTextContent()).items);
-          pageTexts.current.set(p, text);
-        }
-        if (text.trim()) continue;
-        showAiToast(t("pdf.ocr.allRunning", { n: p, total: doc.numPages }), "info");
-        onOcr(p, await ocrPdfPage(doc, p));
-        done++;
-      }
+      const { ocrScannedPages } = await import("./ocrAll");
+      const done = await ocrScannedPages(doc, ocrPages, pageTexts.current, onOcr, (n, total) => showAiToast(t("pdf.ocr.allRunning", { n, total }), "info"));
       showAiToast(done ? t("pdf.ocr.allDone", { n: done }) : t("pdf.ocr.none"), "success");
     } catch (e) {
       showAiToast(t("pdf.failed", { error: explainError(e) }), "error");
@@ -681,6 +669,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
           >
             {t("pdf.highlight")}
           </button>
+          <PdfListenButton doc={doc} ocrPages={ocrPages} pageTexts={pageTexts} path={path} goToPage={goToPage} />
           <button type="button" className="icon-btn pdf-text-btn" data-testid="pdf-ask" aria-pressed={askOpen} onClick={() => setAskOpen((v) => !v)}>
             {t("pdf.ask")}
           </button>
