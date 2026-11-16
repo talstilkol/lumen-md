@@ -153,10 +153,16 @@ function isExempt(s) {
   return /^(OWNER:|Source: https:\/\/github\.com\/talstilkol\/lumen-md$)/.test(s);
 }
 
-/** The generated Sources list for a file: each marker it uses, with its receipt. */
+/**
+ * The generated Sources list for a file: each marker it uses, with its receipt.
+ * A Hebrew file (its title in Hebrew) takes a claim's `he` text where claims.json
+ * has one (R8-L8), and the English otherwise.
+ */
 export function sourcesBlock(md, claims) {
   const ids = [...new Set([...body(md).matchAll(MARK)].map((m) => m[1]))];
-  const lines = ids.map((id) => (claims[id] ? `[^${id}]: ${claims[id].en} Receipt: \`${claims[id].source}\`.` : `[^${id}]: (not in claims.json)`));
+  const hebrew = /[\u05D0-\u05EA]/.test(md.split("\n", 1)[0] ?? "");
+  const line = (id) => (hebrew && claims[id].he ? `[^${id}]: ${claims[id].he} קבלה: \`${claims[id].source}\`.` : `[^${id}]: ${claims[id].en} Receipt: \`${claims[id].source}\`.`);
+  const lines = ids.map((id) => (claims[id] ? line(id) : `[^${id}]: (not in claims.json)`));
   return `<!-- launch-kit:sources -->\n${lines.length ? `\n## Sources\n\n${lines.join("\n")}\n\n` : ""}<!-- /launch-kit:sources -->`;
 }
 

@@ -16,7 +16,7 @@ Most note apps treat Hebrew as an afterthought. Lumen starts from it: direction 
 
 - Open source, MIT licence.[^mit]
 - Works offline as an installed web app;[^offline] a desktop app too.[^desktop]
-- Interface in 8 languages.[^ui-languages]
+- Interface in 8 languages, six of them in beta.[^ui-languages]
 - Plugin logic in QuickJS inside its own Web Worker, with no fetch, DOM or storage.[^plugin-quickjs]
 - A public review scorecard with a privacy label for each listed plugin.[^plugin-scorecards]
 - Optional vault encryption at rest with AES-256-GCM,[^vault-encryption] and a passphrase key from Argon2id.[^argon2id]

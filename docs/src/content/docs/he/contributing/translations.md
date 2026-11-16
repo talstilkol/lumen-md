@@ -8,6 +8,11 @@ Lumen יוצא עם שתי שפות **מלאות**: **אנגלית**, שפת ה�
 אם עוד לא בדקו אותן. Lumen מסמן כל אחת מהן **בטא (תרגום מכונה, ממתין לבדיקת דובר/ת שפת
 אם)**, וצפויים בהן ניסוחים שגויים או מסורבלים:
 
+גם מחרוזת עברית חדשה יכולה להתחיל כטיוטת מכונה. עד שדובר/ת שפת אם מאשרים אותה
+(`npm run i18n:draft -- --approve=he`), היא רשומה תחת `he` ב-`i18n/needs-review/`. כרגע אלה
+7 מחרוזות, כולן מחלון הייצוא האקדמי: `academic.chosen`, ‏`academic.chosenUnverified`,
+‏`academic.exported`, ‏`academic.noChoice`, ‏`academic.none`, ‏`academic.pick` ו-`academic.unverified`.
+
 | שפה | מצב |
 |---|---|
 | English (אנגלית) | מלאה (מקור) |
