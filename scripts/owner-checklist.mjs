@@ -2,13 +2,14 @@
 /**
  * Plan W9.3 — one owner checklist.
  *
- * Reads every open PR body (gh) and plan/plan.json (chore/dod), pulls out each
+ * Reads every open PR body (gh) and plan/plan.json (this checkout's; chore/dod's
+ * when it has none), pulls out each
  * owner step, groups the steps by the resource they need (Mac, second host,
  * Cloudflare, Vercel, accounts, models, devices, people, legal/decisions),
  * orders them by dependency into sessions, and writes docs/owner/checklist.md
  * (Hebrew, with an English section).
  *
- *   npm run owner:checklist                      # gh + origin/chore/dod → docs/owner/checklist.md
+ *   npm run owner:checklist                      # gh + plan/plan.json → docs/owner/checklist.md
  *   npm run owner:checklist -- --check           # exit 1 when an open PR's owner steps are not listed
  *   npm run owner:checklist -- --prs prs.json --plan plan.json --out /tmp/c.md   # offline
  *
@@ -577,15 +578,23 @@ export function loadPrs() {
     return out;
   }
 }
-export function loadPlan() {
+/**
+ * The plan to read: this checkout's plan/plan.json first (the train carries
+ * the plan; chore/dod stopped being its home, and a re-run from there listed
+ * a stale plan), then chore/dod for a checkout that has none.
+ */
+export function loadPlan(root = ROOT) {
+  const local = resolve(root, "plan/plan.json");
+  if (existsSync(local)) return { plan: JSON.parse(readFileSync(local, "utf8")), from: "plan/plan.json" };
   for (const ref of ["origin/chore/dod", "chore/dod"]) {
     try {
-      return { plan: JSON.parse(sh("git", ["show", `${ref}:plan/plan.json`])), from: `${ref}:plan/plan.json` };
+      const plan = JSON.parse(execFileSync("git", ["show", `${ref}:plan/plan.json`], { cwd: root, encoding: "utf8", maxBuffer: 256 * 1024 * 1024, stdio: ["ignore", "pipe", "pipe"] }));
+      return { plan, from: `${ref}:plan/plan.json` };
     } catch {
       /* next */
     }
   }
-  return { plan: JSON.parse(readFileSync(resolve(ROOT, "plan/plan.json"), "utf8")), from: "plan/plan.json" };
+  throw new Error(`owner:checklist: no plan/plan.json in ${root} and no chore/dod branch`);
 }
 
 function main(argv) {

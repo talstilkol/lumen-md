@@ -121,6 +121,23 @@ describe("statuses", () => {
     }
   });
 
+  it("with --runner, a vitest target runs through the offline runner (`<cmd> <root> <file>`), and its exit decides", () => {
+    const t = tmp();
+    try {
+      mkdirSync(join(t.root, "src/__tests__"), { recursive: true });
+      writeFileSync(join(t.root, "src/__tests__/x.test.ts"), "");
+      const ran: string[] = [];
+      const record = (code: number) => (cmd: string) => (ran.push(cmd), code);
+      const ev = { type: "vitest", file: "src/__tests__/x.test.ts" };
+      expect(evaluate(ev, { root: t.root, run: true, runner: "/opt/shim v4.sh", exec: record(0) })).toMatchObject({ status: PASS });
+      expect(ran).toEqual([`'/opt/shim v4.sh' '${t.root}' 'src/__tests__/x.test.ts'`]);
+      expect(evaluate(ev, { root: t.root, run: true, runner: "/opt/v4.sh", exec: record(1) }).status).toBe(FAIL);
+      expect(evaluate(ev, { root: t.root, run: true, exec: record(0) }).detail).toBe("`npx vitest run src/__tests__/x.test.ts` exit 0");
+    } finally {
+      t.done();
+    }
+  });
+
   it("e2e: from the signed report for HEAD; only chromium is known, a failure in the spec fails it", () => {
     const t = tmp();
     try {
