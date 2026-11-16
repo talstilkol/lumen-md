@@ -10,7 +10,9 @@
  * in the text as JSON and held to them (every name must be in the text).
  * Without either, `namesEngine` says "none", and the redactor's preview
  * says that names are not hidden — it never lets the user think they are.
- * English text uses bert-base-NER when that model is cached.
+ * The engine is chosen by the text's language, not by what is cached
+ * (audit r3): English text uses bert-base-NER, Hebrew DictaBERT-NER, and a
+ * text whose language no engine here reads gets no finder (and the warning).
  */
 import { alignNer, type NerFn } from "./pii";
 import { CONVERTED_MODELS_BASE, loadConvertedRegistry } from "./convertedModels";
@@ -82,18 +84,72 @@ export function ollamaNamesFinder(ask: NamesAsk = ollamaAsk): NerFn {
 }
 
 export type NamesEngine = "dictabert" | "bert-base-ner" | "ollama" | "none";
+export type NamesLanguage = "he" | "en";
+
+/** Thrown by the finder for a text whose language no engine on this device covers. */
+export class NamesUnsupportedError extends Error {
+  constructor(readonly languages: NamesLanguage[]) {
+    super(`No name finder on this device for ${languages.join(", ")} text`);
+    this.name = "NamesUnsupportedError";
+  }
+}
 
 /**
- * The best name finder this device has: a cached converted model, else
- * Ollama on this machine, else none (and the caller says so).
+ * The languages whose names a text may hold (audit r3, W10.C23): Hebrew when
+ * it has a Hebrew word, English when it has a capitalised Latin word outside
+ * a link or an address. Fail closed: a mixed text needs both.
+ */
+export function namesLanguages(text: string): NamesLanguage[] {
+  const out: NamesLanguage[] = [];
+  if (/\p{Script=Hebrew}{2,}/u.test(text)) out.push("he");
+  const latin = text.replace(/\b(?:https?:\/\/|www\.)\S+/gi, " ").replace(/\S+@\S+/g, " ");
+  if (/(?:^|[^\p{L}])\p{Lu}[a-z]+/u.test(latin)) out.push("en");
+  return out;
+}
+
+/** What each engine reads: DictaBERT is Hebrew, bert-base-NER English, a local Ollama model both. */
+const COVERS: Record<Exclude<NamesEngine, "none">, readonly NamesLanguage[]> = { dictabert: ["he"], "bert-base-ner": ["en"], ollama: ["he", "en"] };
+
+/**
+ * The name finder this device has, chosen by each text's language (audit r3,
+ * W10.C23): a cached converted model for that language (DictaBERT-NER for
+ * Hebrew, bert-base-NER for English), else Ollama on this machine. A text in
+ * a language no engine here covers gets no finder: the call throws
+ * NamesUnsupportedError, the redactor keeps patterns only and its preview
+ * says names are not hidden. Nothing is claimed for a language it can't read.
+ * `engine` is the best engine found, "none" when there is none at all; with
+ * a cached model, Ollama is asked for only when a text needs it.
  */
 export async function namesEngine(deps: { cached?: (id: string) => Promise<NerFn | null>; ollamaUp?: () => Promise<boolean>; ask?: NamesAsk } = {}): Promise<{ engine: NamesEngine; ner: NerFn | null }> {
   const cached = deps.cached ?? ((id: string) => nerIfCached(CONVERTED_MODELS_BASE, id));
-  const he = await cached(NER_MODEL_ID).catch(() => null);
-  if (he) return { engine: "dictabert", ner: he };
-  const en = await cached(NER_MODEL_ID_EN).catch(() => null);
-  if (en) return { engine: "bert-base-ner", ner: en };
   const up = deps.ollamaUp ?? (async () => !!(await (await import("../agents/executors")).pickExecutor(["ollama"])).executor);
-  if (await up().catch(() => false)) return { engine: "ollama", ner: ollamaNamesFinder(deps.ask) };
-  return { engine: "none", ner: null };
+  const engines: Array<[Exclude<NamesEngine, "none">, NerFn]> = [];
+  const he = await cached(NER_MODEL_ID).catch(() => null);
+  if (he) engines.push(["dictabert", he]);
+  const en = await cached(NER_MODEL_ID_EN).catch(() => null);
+  if (en) engines.push(["bert-base-ner", en]);
+  let ollama: Promise<boolean> | null = null;
+  const withOllama = async () => {
+    ollama ??= up().catch(() => false);
+    if ((await ollama) && !engines.some(([id]) => id === "ollama")) engines.push(["ollama", ollamaNamesFinder(deps.ask)]);
+  };
+  if (!engines.length) {
+    await withOllama();
+    if (!engines.length) return { engine: "none", ner: null };
+  }
+  const engine = engines[0][0];
+  const covered = (l: NamesLanguage) => engines.some(([id]) => COVERS[id].includes(l));
+  const ner: NerFn = async (text, signal) => {
+    const langs = namesLanguages(text);
+    if (!langs.every(covered)) await withOllama();
+    const missing = langs.filter((l) => !covered(l));
+    if (missing.length) throw new NamesUnsupportedError(missing);
+    // One engine per language, the first that covers it; an engine that covers several runs once.
+    const picked = new Set<NerFn>();
+    for (const l of langs) picked.add(engines.find(([id]) => COVERS[id].includes(l))![1]);
+    const spans: Awaited<ReturnType<NerFn>> = [];
+    for (const f of picked) for (const s of await f(text, signal)) if (!spans.some((o) => s.start < o.end && s.end > o.start)) spans.push(s);
+    return spans.sort((a, b) => a.start - b.start);
+  };
+  return { engine, ner };
 }
