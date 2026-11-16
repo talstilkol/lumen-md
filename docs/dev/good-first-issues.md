@@ -1,7 +1,8 @@
 # משימות ראשונות (good first issues)
 
 חמש־עשרה משימות קטנות, כל אחת בקובץ אחד או שניים. כל אחת נבדקה מול הקוד
-של `verify/train-5` (15.11.2026): הבעיה קיימת שם. כל משימה אומרת איפה הבעיה,
+של `verify/train-7` ‏(f090c20812, ‏17.11.2026): הבעיה קיימת שם. (בביקורת r3
+הוחלפו שש משימות שכבר נעשו או שהקבצים שלהן נמחקו: 1, 2, 9–12.) כל משימה אומרת איפה הבעיה,
 מה לא בסדר בה, ומה נחשב "גמור". ההנחיות הכלליות (ענפים, `[skip ci]`,
 ‏`pr:check`) נמצאות ב־[CONTRIBUTING.he.md](../../CONTRIBUTING.he.md).
 
@@ -12,28 +13,25 @@
 
 ## קוד
 
-### 1. ‏Ctrl+Z בתוך Excalidraw לא אמור לשחזר קובץ שנמחק (S)
-*(Trash undo: treat Excalidraw as an editing surface)*
+### 1. רווח לא רגיל בביטוי של `storage/exportPptx.ts` (S)
+*(Replace the irregular whitespace literal in exportPptx.ts)*
 
-- **איפה:** `src/ui/trashUndoShortcut.ts:15`, הבורר `EDITING`.
-- **מה לא בסדר:** הבורר כולל את `.tl-container` של tldraw, אבל לא את
-  Excalidraw. ‏Ctrl+Z על הקנבס מגיע לקיצור של הסל אם Excalidraw לא עוצר את
-  האירוע קודם, ואז במקום לבטל קו, האפליקציה משחזרת קובץ שנמחק.
-- **גמור כש:** ‏`.excalidraw` נמצא ב־`EDITING`, ו־`src/__tests__/trashUndo.test.ts`
-  כולל בדיקה שבה Ctrl+Z עם פוקוס בתוך `.excalidraw` לא משחזר כלום. הבדיקה
-  נכשלת לפני השינוי.
+- **איפה:** `src/storage/exportPptx.ts:140`, ‏`RTL_RE`; הפרה של `no-irregular-whitespace` ב־`eslint-suppressions.json`.
+- **מה לא בסדר:** אותו ביטוי כמו `RTL_CHAR` ב־`lib/textDirection.ts` (משימה 6), כתוב
+  בתווים עצמם, ואחד מהם הוא U+FEFF. שני עותקים של אותו טווח יכולים להיפרד.
+- **גמור כש:** הטווח כתוב ב־escapes (‏`\u0590-\u08FF` וכן הלאה), או ש־`exportPptx.ts`
+  מייבא את הטווח מ־`lib/textDirection.ts`; הבדיקות של ייצוא PPTX ירוקות,
+  ו־`npm run lint:prune` הקטין את ה־baseline.
 
-### 2. ‏`slugify` ב־`lib/utils.ts` לא בשימוש, ומוחק עברית (S)
-*(Remove the unused, Hebrew-dropping slugify)*
+### 2. ‏`\xa0` כתו ממשי ב־`plugins/liveJsScope.ts` (S)
+*(Write the identifier ranges in liveJsScope.ts as escapes)*
 
-- **איפה:** `src/lib/utils.ts:26`.
-- **מה לא בסדר:** אף קובץ ייצור לא קורא לפונקציה, רק הבדיקה שלה. ‏`[^\w\s\-]` מוחק כל אות
-  עברית, כך ש־`slugify("שלום עולם")` מחזיר `"-"`. היא גם אחת משלוש הפונקציות
-  `slug` בקוד (לצד `renderer/remarkLumen.ts:234` ו־`ai/modelHosting.ts:109`).
-  ההפרה היחידה של `no-useless-escape` בקובץ רשומה בשבילה ב־`eslint-suppressions.json`.
-- **גמור כש:** הפונקציה והבדיקות שלה ב־`src/__tests__/utils.test.ts` נמחקו
-  (אף קוד ייצור לא קורא לה), ‏`npm run lint:prune` הוריד את השורה שלה
-  מ־`eslint-suppressions.json`, ו־`npm run lint` ירוק.
+- **איפה:** `src/plugins/liveJsScope.ts:58-59` (‏`isIdStart`, ‏`isIdPart`); שתי הפרות של
+  `no-irregular-whitespace` ב־baseline.
+- **מה לא בסדר:** הטווח מתחיל ברווח קשיח (U+00A0) שכתוב כתו, ולא כ־`\xa0`, כך שבעורך
+  נראה כאילו הטווח מתחיל ברווח רגיל.
+- **גמור כש:** שני הביטויים כתובים `/[A-Za-z_$\xa0-\uffff]/` ו־`/[\w$\xa0-\uffff]/` ב־escapes,
+  הבדיקות של live JS ירוקות, ו־`npm run lint:prune` הקטין את ה־baseline.
 
 ### 3. ‏`no-useless-escape` ב־`storage/fileFormats.ts` (S)
 *(Fix the recorded no-useless-escape in fileFormats.ts)*
@@ -86,37 +84,44 @@
   מוסיפים אותו), עם הסבר שההורדה תהיה בשימוש הראשון ובהסכמה. בדיקה
   ב־`src/__tests__/aiDoctorComplete.test.ts`.
 
-### 9. למחוק את `plugins/sandbox.ts`, שאף אחד לא מייבא (S)
-*(Delete the unused plugin sandbox with the weak CSP)*
+### 9. תפריט החשבון ב־`components/AuthButton.tsx` לא מקבל פוקוס (S)
+*(Make the account menu in AuthButton.tsx focusable)*
 
-- **איפה:** `src/plugins/sandbox.ts`, רשום ב־`scripts/unused-files.baseline.json`.
-- **מה לא בסדר:** הקובץ לא בשימוש. ה־CSP שבו חלש (`script-src https:`,
-  ‏`connect-src https:`), ומי שיחפש איך תוספים מבודדים ימצא אותו ויטעה.
-  הארגז האמיתי הוא `src/plugins/runtime/`.
-- **גמור כש:** הקובץ נמחק, ‏`node scripts/check-unused-files.mjs --prune` הוריד
-  אותו מה־baseline, ו־`npm run unused` ירוק.
+- **איפה:** `src/components/AuthButton.tsx:89-90`, ה־`<div role="menu">`; הפרה של
+  `jsx-a11y/interactive-supports-focus` ב־baseline.
+- **מה לא בסדר:** ‏`role="menu"` בלי `tabIndex`, כך שאי אפשר להגיע לתפריט במקלדת
+  כשהוא נפתח, ו־Escape לא סוגר אותו.
+- **גמור כש:** לתפריט יש `tabIndex={-1}` והפוקוס עובר אליו (או לפריט הראשון) כשהוא נפתח,
+  Escape סוגר אותו ומחזיר פוקוס לכפתור, בדיקה ב־`src/__tests__/` שמוכיחה את זה,
+  ו־`npm run lint:prune` הקטין את ה־baseline.
 
-### 10. ‏`hooks/useGit.ts` שאף אחד לא מייבא (S)
-*(Delete or wire src/hooks/useGit.ts)*
+### 10. תפקידים כפולים ב־`ui/BacklinksPanel.tsx` (S)
+*(Decide the redundant list roles in BacklinksPanel.tsx)*
 
-- **איפה:** `src/hooks/useGit.ts`, רשום ב־`scripts/unused-files.baseline.json`.
-- **גמור כש:** הקובץ נמחק, או מיובא ממקום שבאמת צריך אותו (עם בדיקה).
-  אחר כך `--prune` כמו במשימה 9.
+- **איפה:** `src/ui/BacklinksPanel.tsx:94` ו־`:96`: ‏`<ul role="list">` ו־`<li role="listitem">`;
+  שתי הפרות של `jsx-a11y/no-redundant-roles` ב־baseline.
+- **מה לא בסדר:** אלה התפקידים שהאלמנטים כבר נושאים. יש סיבה ידועה להשאיר את `role="list"`
+  (Safari ו־VoiceOver מורידים את הסמנטיקה של רשימה עם `list-style: none`), אבל אז
+  היא צריכה להיכתב בקוד ולא להסתתר ב־baseline.
+- **גמור כש:** או שהתפקידים הוסרו, או ש־`role="list"` נשאר עם `// eslint-disable-next-line
+  jsx-a11y/no-redundant-roles -- Safari: list-style none drops list semantics` ו־`role="listitem"`
+  הוסר; ‏`npm run lint:prune` הקטין את ה־baseline.
 
-### 11. ‏`lib/cryptoStorage.ts` שאף אחד לא מייבא (S)
-*(Delete or wire src/lib/cryptoStorage.ts)*
+### 11. ‏`autoFocus` בחיפוש של `ui/AiFab.tsx` (S)
+*(Replace autoFocus in AiFab.tsx with focus on open)*
 
-- **איפה:** `src/lib/cryptoStorage.ts`, רשום ב־baseline הקבצים הלא מיובאים.
-- **שימו לב:** קובץ קריפטו נמצא ב־`.github/CODEOWNERS`, ולכן מחיקה שלו
-  צריכה סקירה אנושית (`human-reviewed`). זה עדיין שינוי קטן.
-- **גמור כש:** כמו במשימה 10.
+- **איפה:** `src/ui/AiFab.tsx:155`; הפרה של `jsx-a11y/no-autofocus` ב־baseline.
+- **מה לא בסדר:** ‏`autoFocus` קופץ גם כשהרכיב מוצג מחדש, וקוראי מסך מאבדים את המקום.
+- **גמור כש:** הפוקוס עובר לשדה ב־`useEffect` רק כשהלוח נפתח (ref), בדיקה ב־`src/__tests__/`
+  שהפוקוס בשדה אחרי פתיחה, ו־`npm run lint:prune` הקטין את ה־baseline.
 
-### 12. ‏`ui/CanvasWhiteboard.tsx` שאף אחד לא מייבא (S)
-*(Delete or wire src/ui/CanvasWhiteboard.tsx)*
+### 12. ‏`autoFocus` ותפקיד כפול ב־`ui/CommentsPanel.tsx` (S)
+*(Focus the reply box in CommentsPanel.tsx without autoFocus)*
 
-- **איפה:** `src/ui/CanvasWhiteboard.tsx`, רשום ב־baseline.
-- **גמור כש:** כמו במשימה 10. אם יש בו משהו שהקנבס הנוכחי צריך, מעבירים
-  אותו לשם עם בדיקה.
+- **איפה:** `src/ui/CommentsPanel.tsx:290` (שדה התשובה), ו־`jsx-a11y/no-redundant-roles` אחת;
+  שתיהן ב־baseline.
+- **גמור כש:** כמו במשימה 11 לשדה התשובה (פוקוס כש־"השב" נלחץ), התפקיד הכפול הוסר,
+  ו־`npm run lint:prune` הקטין את ה־baseline.
 
 ### 13. גישה ממקלדת ב־`components/AuthDialog.tsx` (S)
 *(Keyboard access in AuthDialog.tsx)*

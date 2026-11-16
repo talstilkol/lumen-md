@@ -19,7 +19,13 @@ What is protected, who we defend against, and the known gaps: [Threat model](/se
 
 ## Fuzzing
 
-The decoders are fuzzed (`npm run fuzz`, 1,000,000 inputs per decoder); how and what is covered: [Supply chain](/security/supply-chain/). Results per release are not published on this page yet.
+The decoders are fuzzed (`npm run fuzz`, 1,000,000 inputs per decoder); how and what is covered: [Supply chain](/security/supply-chain/). The published runs, from `security/fuzz-results.json` (a run passes with 0 crashes, 0 hangs and nothing over the slow limit):
+
+| date | commit | decoder | inputs | seed | clock | crashes | hangs | over the slow limit | slowest |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-11-16 | `b6b7741e4e` | markdown | 1,000,000 | 1 | CPU | 0 | 0 | 0 (> 200 ms) | 69 ms |
+
+Only the decoders listed here have a published run; the others are fuzzed by `npm run fuzz` but their results are not on this page yet.
 
 ## Release provenance (SLSA)
 

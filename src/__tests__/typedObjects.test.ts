@@ -14,24 +14,9 @@
  */
 import { describe, expect, it } from "vitest";
 import YAML from "yaml";
-import {
-  buildTypeRegistry,
-  checkFieldValue,
-  checkNote,
-  defaultsOf,
-  fieldsOfNote,
-  loadTypeRegistry,
-  newObjectText,
-  noteIsA,
-  parseTypeFile,
-  relationTargetOk,
-  typeDefFromObject,
-  typeIdFromPath,
-  typesOfNote,
-  typeToYaml,
-  type FieldDef,
-  type TypeDef,
-} from "../types/objects";
+import { buildTypeRegistry, fieldsOfNote, loadTypeRegistry, noteIsA, typesOfNote } from "../types/typeRegistry";
+import { checkFieldValue, checkNote, defaultsOf, newObjectText, relationTargetOk } from "../types/fieldValues";
+import { parseTypeFile, typeDefFromObject, typeIdFromPath, typeToYaml, type FieldDef, type TypeDef } from "../types/typeSchema";
 import { basesFileFromText } from "../views/bases/base";
 import { joinTextEnvelope, splitTextEnvelope } from "../storage/textCodec";
 import { readProperties, setProperty, type PropertyValue } from "../properties/frontmatter";

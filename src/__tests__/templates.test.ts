@@ -1,58 +1,11 @@
 /**
- * Tests for the built-in document templates and code-block snippets.
- * Templates are user-visible starting points; we lock down their shape so
- * a careless edit can't ship a broken template.
+ * Tests for the code-block snippets. (The old built-in template list,
+ * storage/templates.ts, was deleted in audit r3 / W10.E27: the gallery reads
+ * public/templates, covered by templateMeta.test.ts and hebrewContent.test.ts.)
  */
 
 import { describe, it, expect } from "vitest";
-import { getTemplates } from "../storage/templates";
 import { BLOCK_SNIPPETS } from "../snippets";
-
-describe("getTemplates", () => {
-  it("returns all six built-in templates", () => {
-    const t = getTemplates();
-    const ids = t.map((x) => x.id);
-    expect(ids).toEqual(
-      expect.arrayContaining(["blank", "meeting", "journal", "blog", "readme", "letter"]),
-    );
-  });
-
-  it("every template has a non-empty name, description, emoji, and content", () => {
-    for (const t of getTemplates()) {
-      expect(t.id).toBeTruthy();
-      expect(t.name).toBeTruthy();
-      expect(t.description).toBeTruthy();
-      expect(t.emoji).toBeTruthy();
-      expect(t.content.length).toBeGreaterThan(0);
-    }
-  });
-
-  it("every template starts with markdown content (header or bold name)", () => {
-    for (const t of getTemplates()) {
-      const trimmed = t.content.trimStart();
-      // Headers start with #, the letter template leads with a bolded name.
-      expect(trimmed.startsWith("#") || trimmed.startsWith("**")).toBe(true);
-    }
-  });
-
-  it("the meeting template stamps today's date", () => {
-    const today = new Date().toISOString().slice(0, 10);
-    const meeting = getTemplates().find((t) => t.id === "meeting")!;
-    expect(meeting.content).toContain(today);
-  });
-
-  it("the journal template includes a gratitude section", () => {
-    const j = getTemplates().find((t) => t.id === "journal")!;
-    expect(j.content).toMatch(/Gratitude/);
-  });
-
-  it("the readme template includes Installation, Usage, Contributing, and License headings", () => {
-    const r = getTemplates().find((t) => t.id === "readme")!;
-    for (const heading of ["Installation", "Usage", "Contributing", "License"]) {
-      expect(r.content).toContain(heading);
-    }
-  });
-});
 
 describe("BLOCK_SNIPPETS", () => {
   it("exposes a non-empty snippet for every documented block type", () => {

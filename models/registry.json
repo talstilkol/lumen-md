@@ -1155,7 +1155,7 @@
       },
       "catalog": "CONVERTED_MODELS (src/ai/convertedModels.ts)",
       "verified": false,
-      "notes": "English names for the PII redactor (plan 2.6, audit W10.C23), next to DictaBERT-NER for Hebrew. Converted by .github/workflows/model-convert.yml (plan 6.0); its sha256 is recorded from the first conversion run on the Mac (10.M). Downloaded only with consent; not downloadable until the host is chosen (15.9)."
+      "notes": "English names for the PII redactor (plan 2.6, audit W10.C23), next to DictaBERT-NER for Hebrew. Converted by scripts/models/convert.mjs (plan 6.0; the archived Actions workflow model-convert.yml is mapped in docs/archive/workflows/equivalents.json); its sha256 is recorded from the first conversion run on the Mac (10.M). Downloaded only with consent; not downloadable until the host is chosen (15.9)."
     },
     {
       "id": "siglip-base-patch16-256-multilingual",

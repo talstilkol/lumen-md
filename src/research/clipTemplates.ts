@@ -16,6 +16,7 @@
  * and GitHub join Wikipedia, ynet and Haaretz.
  */
 import type { Extracted } from "./clipExtract";
+import { wordSlug } from "../lib/slug";
 
 export interface ClipTemplate {
   id: string;
@@ -272,7 +273,7 @@ export function fill(text: string, vars: ClipVars): string {
         v = v.trim();
         break;
       case "slug":
-        v = v.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "");
+        v = wordSlug(v, { lower: true });
         break;
       case "safe":
         v = safeName(v);

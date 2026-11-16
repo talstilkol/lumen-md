@@ -72,6 +72,9 @@ const T = {
     threatBody: "What is protected, who we defend against, and the known gaps: [Threat model](/security/threat-model/).",
     fuzz: "Fuzzing",
     fuzzBody: "The decoders are fuzzed (`npm run fuzz`, 1,000,000 inputs per decoder); how and what is covered: [Supply chain](/security/supply-chain/). Results per release are not published on this page yet.",
+    fuzzRunsBody: "The decoders are fuzzed (`npm run fuzz`, 1,000,000 inputs per decoder); how and what is covered: [Supply chain](/security/supply-chain/). The published runs, from `security/fuzz-results.json` (a run passes with 0 crashes, 0 hangs and nothing over the slow limit):",
+    fuzzCols: "| date | commit | decoder | inputs | seed | clock | crashes | hangs | over the slow limit | slowest |",
+    fuzzNote: "Only the decoders listed here have a published run; the others are fuzzed by `npm run fuzz` but their results are not on this page yet.",
     slsa: "Release provenance (SLSA)",
     slsaBody: "Releases are built to carry signatures and SLSA provenance (`npm run release:sign`, `npm run release:verify`, plan W7.22); see [Supply chain](/security/supply-chain/). No signed release has been published yet: the first is 0.2.0-beta.1 (launch gate M0).",
     open: "Open findings",
@@ -116,6 +119,9 @@ const T = {
     threatBody: "מה מוגן, ממי אנחנו מתגוננים, והפערים הידועים: [מודל האיום](/he/security/threat-model/).",
     fuzz: "Fuzzing",
     fuzzBody: "המפענחים עוברים fuzzing ‏(`npm run fuzz`, מיליון קלטים לכל מפענח); איך ומה מכוסה: [שרשרת האספקה](/he/security/supply-chain/). התוצאות לכל גרסה עוד לא מתפרסמות בדף הזה.",
+    fuzzRunsBody: "המפענחים עוברים fuzzing ‏(`npm run fuzz`, מיליון קלטים לכל מפענח); איך ומה מכוסה: [שרשרת האספקה](/he/security/supply-chain/). ההרצות שפורסמו, מתוך `security/fuzz-results.json` (הרצה עוברת עם 0 קריסות, 0 תקיעות ושום קלט מעל מגבלת האיטיות):",
+    fuzzCols: "| תאריך | commit | מפענח | קלטים | seed | שעון | קריסות | תקיעות | מעל מגבלת האיטיות | האיטי ביותר |",
+    fuzzNote: "רק למפענחים שמופיעים כאן יש הרצה שפורסמה; האחרים עוברים fuzzing ב-`npm run fuzz`, אבל התוצאות שלהם עוד לא בדף הזה.",
     slsa: "מקור הגרסאות (SLSA)",
     slsaBody: "הגרסאות נבנות כך שיישאו חתימות ו-SLSA provenance ‏(`npm run release:sign`, ‏`npm run release:verify`, משימה W7.22); ראו [שרשרת האספקה](/he/security/supply-chain/). עוד לא פורסמה גרסה חתומה: הראשונה היא 0.2.0-beta.1 (שער ההשקה M0).",
     open: "ממצאים פתוחים",
@@ -154,7 +160,32 @@ const T = {
 const cell = (s) => String(s).replace(/\|/g, "\\|").replace(/\n/g, " ");
 
 /** The page in one language. `cards` are scorecards (W11.S14). */
-export function renderSecurityPage(findings, cards, lang, cryptoAudit = null, disclosure = null) {
+/**
+ * The published fuzz runs (W11.S12): one row per run of security/fuzz-results.json.
+ * @param {{ runs: Array<{ date: string, commit: string, target: string, inputs: number, seed: number, clock: string, crashes: number, hangs: number, slow: number, slowMs: number, maxMs: number }> } | null} fuzz
+ */
+export function fuzzRows(fuzz, lang) {
+  const n = (x) => x.toLocaleString(lang === "he" ? "he-IL" : "en-US");
+  return (fuzz?.runs ?? []).map((r) => `| ${r.date} | \`${r.commit}\` | ${r.target} | ${n(r.inputs)} | ${r.seed} | ${r.clock === "cpu" ? "CPU" : r.clock} | ${r.crashes} | ${r.hangs} | ${r.slow} (> ${r.slowMs} ms) | ${Math.round(r.maxMs)} ms |`);
+}
+
+/** Problems with the fuzz results register: a run without its numbers, or one that did not pass and is not a finding. */
+export function fuzzResultsProblems(fuzz) {
+  if (fuzz === null) return [];
+  const out = [];
+  if (!Array.isArray(fuzz?.runs) || !fuzz.runs.length) return ["security/fuzz-results.json: runs must be a non-empty list"];
+  for (const [i, r] of fuzz.runs.entries()) {
+    const at = `security/fuzz-results.json runs[${i}]`;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(r.date ?? "")) out.push(`${at}: date must be YYYY-MM-DD`);
+    if (!/^[0-9a-f]{10,40}$/.test(r.commit ?? "")) out.push(`${at}: commit must be a sha`);
+    for (const k of ["inputs", "seed", "crashes", "hangs", "slow", "slowMs", "maxMs"]) if (typeof r[k] !== "number" || r[k] < 0) out.push(`${at}: ${k} must be a number`);
+    if (typeof r.target !== "string" || !r.target) out.push(`${at}: target missing`);
+    if ((r.crashes || r.hangs || r.slow) && !r.finding) out.push(`${at}: a run with crashes, hangs or slow inputs names its finding (LUM-…)`);
+  }
+  return out;
+}
+
+export function renderSecurityPage(findings, cards, lang, cryptoAudit = null, disclosure = null, fuzz = null) {
   const t = T[lang];
   const open = findings.findings.filter((f) => f.status !== "fixed").sort((a, b) => SEVERITIES.indexOf(a.severity) - SEVERITIES.indexOf(b.severity) || (a.id < b.id ? -1 : 1));
   const listed = [...cards].filter((c) => c.passed).sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : a.version < b.version ? -1 : 1));
@@ -180,7 +211,7 @@ export function renderSecurityPage(findings, cards, lang, cryptoAudit = null, di
     "",
     `## ${t.fuzz}`,
     "",
-    t.fuzzBody,
+    ...(fuzz?.runs?.length ? [t.fuzzRunsBody, "", t.fuzzCols, `|${" --- |".repeat(10)}`, ...fuzzRows(fuzz, lang), "", t.fuzzNote] : [t.fuzzBody]),
     "",
     `## ${t.slsa}`,
     "",
