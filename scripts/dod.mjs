@@ -12,6 +12,10 @@
  *   node scripts/dod.mjs --list        which tasks have a DoD, and the rule's problems
  *   node scripts/dod.mjs 0.6 --dry     print the commands, run nothing
  *   node scripts/dod.mjs 0.6 --markdown  the PR checklist for these tasks
+ *   node scripts/dod.mjs --p0 --runner <shim> --report reports/dod-p0-<sha>.md [--jobs N]
+ *       every P0 task's dod (W10.Z3, 13.5; not those two, whose dod is this run),
+ *       `npx vitest run` one file at a time through the runner, and the table
+ *       written to the report (scripts/lib/dodRunner.mjs). Exit 1 when any is red.
  *
  * ✅* (green against mocks only — no GPU / Ollama here) is set with
  * `"dodMock": true`: such a task can never be plain ✅ until the real-model
@@ -143,8 +147,34 @@ function defaultExec(cmd, cwd) {
   return r.status === 0;
 }
 
-function main(argv) {
+/** The P0 tasks whose dod the release review runs: all but 13.5 and W10.Z3, whose dod is that run. */
+export const p0Tasks = (plan) => allTasks(plan).filter((t) => t.priority === "P0" && !["13.5", "W10.Z3"].includes(t.id));
+
+async function report(plan, argv) {
+  const { runTasks, reportMarkdown } = await import("./lib/dodRunner.mjs");
+  const val = (name) => (argv.indexOf(name) >= 0 ? argv[argv.indexOf(name) + 1] : null);
+  const runner = val("--runner");
+  const file = val("--report");
+  const jobs = Number(val("--jobs") ?? 1);
+  const ids = argv.filter((a, i) => !a.startsWith("--") && !["--runner", "--report", "--jobs"].includes(argv[i - 1]));
+  const tasks = argv.includes("--p0") ? p0Tasks(plan) : select(plan, { ids });
+  const git = (...a) => spawnSync("git", a, { cwd: ROOT, encoding: "utf8" }).stdout.trim();
+  const rows = await runTasks(tasks, { root: ROOT, runner, jobs, log: (l) => console.log(l) });
+  const md = reportMarkdown(rows, { sha: git("rev-parse", "HEAD"), branch: git("rev-parse", "--abbrev-ref", "HEAD"), runner, at: new Date().toISOString() });
+  if (file) {
+    const { writeFileSync, mkdirSync } = await import("node:fs");
+    mkdirSync(dirname(join(ROOT, file)), { recursive: true });
+    writeFileSync(join(ROOT, file), md);
+    console.log(`dod: table written to ${file}`);
+  } else console.log(md);
+  const red = rows.filter((r) => r.verdict === "red").length;
+  console.log(`dod: ${rows.length} tasks — ${rows.filter((r) => r.verdict === "green").length} green, ${red} red, ${rows.filter((r) => r.verdict === "not here").length} not here`);
+  return red ? 1 : 0;
+}
+
+async function main(argv) {
   const plan = JSON.parse(readFileSync(join(ROOT, PLAN_FILE), "utf8"));
+  if (argv.includes("--p0") || argv.includes("--report") || argv.includes("--runner")) return report(plan, argv);
   const flags = new Set(argv.filter((a) => a.startsWith("--")));
   const ids = argv.filter((a) => !a.startsWith("--"));
   if (flags.has("--list")) {
@@ -178,7 +208,7 @@ function main(argv) {
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   try {
-    process.exit(main(process.argv.slice(2)));
+    process.exit(await main(process.argv.slice(2)));
   } catch (e) {
     console.error(String(e?.message ?? e));
     process.exit(1);
