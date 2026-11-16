@@ -166,8 +166,10 @@ describe("```dataview blocks — 20 common blocks from real vaults", () => {
   });
 
   it("says what it does not support instead of guessing", () => {
-    expect(() => parseDataview("TASK FROM #project")).toThrow(DataviewError);
-    expect(() => parseDataview("LIST FROM #a GROUP BY status")).toThrow(/not supported/);
+    expect(() => parseDataview("CALENDAR file.day FROM #project")).toThrow(DataviewError);
+    expect(() => parseDataview("LIST FROM #a GROUP status")).toThrow(/GROUP BY/);
+    expect(() => parseDataview("LIST WHERE x FROM #a")).toThrow(/FROM comes once/);
+    expect(() => runDataview(parseDataview("LIST WHERE (x) => x"), notes(), NOW)).toThrow(/goes only inside/);
     expect(() => parseDataview('LIST WHERE nosuch(x)')).not.toThrow();
     expect(() => runDataview(parseDataview("LIST WHERE nosuch(x)"), notes(), NOW)).toThrow(/unknown function/);
   });
