@@ -675,6 +675,134 @@
     "ru": "bosydm",
     "zh-CN": "bosydm"
   },
+  "focusLayer.controls": {
+    "ar": "y3vc3g",
+    "de": "y3vc3g",
+    "fr": "y3vc3g",
+    "ja": "y3vc3g",
+    "ru": "y3vc3g",
+    "zh-CN": "y3vc3g"
+  },
+  "focusLayer.hemingway": {
+    "ar": "15p0n2m",
+    "de": "15p0n2m",
+    "fr": "15p0n2m",
+    "ja": "15p0n2m",
+    "ru": "15p0n2m",
+    "zh-CN": "15p0n2m"
+  },
+  "focusLayer.kind.adverb": {
+    "ar": "1bfxokt",
+    "de": "1bfxokt",
+    "fr": "1bfxokt",
+    "ja": "1bfxokt",
+    "ru": "1bfxokt",
+    "zh-CN": "1bfxokt"
+  },
+  "focusLayer.kind.complex": {
+    "ar": "9z74d3",
+    "de": "9z74d3",
+    "fr": "9z74d3",
+    "ja": "9z74d3",
+    "ru": "9z74d3",
+    "zh-CN": "9z74d3"
+  },
+  "focusLayer.kind.long": {
+    "ar": "1bjfqmj",
+    "de": "1bjfqmj",
+    "fr": "1bjfqmj",
+    "ja": "1bjfqmj",
+    "ru": "1bjfqmj",
+    "zh-CN": "1bjfqmj"
+  },
+  "focusLayer.kind.passive": {
+    "ar": "26wopo",
+    "de": "26wopo",
+    "fr": "26wopo",
+    "ja": "26wopo",
+    "ru": "26wopo",
+    "zh-CN": "26wopo"
+  },
+  "focusLayer.kind.veryLong": {
+    "ar": "11undlh",
+    "de": "11undlh",
+    "fr": "11undlh",
+    "ja": "11undlh",
+    "ru": "11undlh",
+    "zh-CN": "11undlh"
+  },
+  "focusLayer.legend": {
+    "ar": "1bx5ptu",
+    "de": "1bx5ptu",
+    "fr": "1bx5ptu",
+    "ja": "1bx5ptu",
+    "ru": "1bx5ptu",
+    "zh-CN": "1bx5ptu"
+  },
+  "focusLayer.note": {
+    "ar": "rvl46x",
+    "de": "rvl46x",
+    "fr": "rvl46x",
+    "ja": "rvl46x",
+    "ru": "rvl46x",
+    "zh-CN": "rvl46x"
+  },
+  "focusLayer.toSource": {
+    "ar": "ehlklb",
+    "de": "ehlklb",
+    "fr": "ehlklb",
+    "ja": "ehlklb",
+    "ru": "ehlklb",
+    "zh-CN": "ehlklb"
+  },
+  "focusLayer.total": {
+    "ar": "1rp12mo",
+    "de": "1rp12mo",
+    "fr": "1rp12mo",
+    "ja": "1rp12mo",
+    "ru": "1rp12mo",
+    "zh-CN": "1rp12mo"
+  },
+  "focusLayer.unit": {
+    "ar": "ebu1d0",
+    "de": "ebu1d0",
+    "fr": "ebu1d0",
+    "ja": "ebu1d0",
+    "ru": "ebu1d0",
+    "zh-CN": "ebu1d0"
+  },
+  "focusLayer.unit.line": {
+    "ar": "eaikm",
+    "de": "eaikm",
+    "fr": "eaikm",
+    "ja": "eaikm",
+    "ru": "eaikm",
+    "zh-CN": "eaikm"
+  },
+  "focusLayer.unit.off": {
+    "ar": "1unt64g",
+    "de": "1unt64g",
+    "fr": "1unt64g",
+    "ja": "1unt64g",
+    "ru": "1unt64g",
+    "zh-CN": "1unt64g"
+  },
+  "focusLayer.unit.paragraph": {
+    "ar": "38r53m",
+    "de": "38r53m",
+    "fr": "38r53m",
+    "ja": "38r53m",
+    "ru": "38r53m",
+    "zh-CN": "38r53m"
+  },
+  "focusLayer.unit.sentence": {
+    "ar": "k9nc8h",
+    "de": "k9nc8h",
+    "fr": "k9nc8h",
+    "ja": "k9nc8h",
+    "ru": "k9nc8h",
+    "zh-CN": "k9nc8h"
+  },
   "hl.scan": {
     "ar": "qb0k9u",
     "de": "qb0k9u",

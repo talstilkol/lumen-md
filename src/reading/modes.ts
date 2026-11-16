@@ -36,7 +36,8 @@ export const MODE_DEFS: ReadingModeDef[] = [
     id: "focus",
     label: "readingMode.mode.focus",
     hint: "readingMode.mode.focus.hint",
-    fields: [],
+    // W13.R2: what stays bright, and readability highlights.
+    fields: ["focusUnit", "hemingway"],
     open: async () => {
       window.dispatchEvent(new Event("lumen-open-focus"));
     },

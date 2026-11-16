@@ -1,5 +1,6 @@
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect, useCallback, useRef } from "react";
 import { t } from "../i18n";
+import { FocusLayerBar } from "./FocusLayerBar";
 
 /**
  * FocusMode overlay.
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export function FocusMode({ active, onExit, children }: Props) {
+  const areaRef = useRef<HTMLDivElement>(null);
   const handleKey = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -53,7 +55,9 @@ export function FocusMode({ active, onExit, children }: Props) {
           width: "100%",
           padding: "6px 16px",
           display: "flex",
-          justifyContent: "flex-end",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: 12,
           opacity: 0.3,
           transition: "opacity var(--duration-base) var(--ease-out)",
         }}
@@ -61,9 +65,17 @@ export function FocusMode({ active, onExit, children }: Props) {
           (e.currentTarget as HTMLElement).style.opacity = "1";
         }}
         onMouseLeave={(e) => {
-          (e.currentTarget as HTMLElement).style.opacity = "0.3";
+          if (!e.currentTarget.contains(document.activeElement)) (e.currentTarget as HTMLElement).style.opacity = "0.3";
+        }}
+        // Keyboard users see the bar they tab into (W13.R2).
+        onFocus={(e) => {
+          (e.currentTarget as HTMLElement).style.opacity = "1";
+        }}
+        onBlur={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget as Node | null)) (e.currentTarget as HTMLElement).style.opacity = "0.3";
         }}
       >
+        <FocusLayerBar area={areaRef} />
         <button
           onClick={onExit}
           title={t("focusMode.exit")}
@@ -83,6 +95,7 @@ export function FocusMode({ active, onExit, children }: Props) {
       </div>
       {/* Centered editor area */}
       <div
+        ref={areaRef}
         style={{
           flex: 1,
           width: "min(780px, 92vw)",
