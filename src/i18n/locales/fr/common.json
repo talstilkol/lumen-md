@@ -1891,6 +1891,7 @@
   "jewishLang.dict.downloadConfirm": "Télécharger sur cet appareil la liste orthographique yiddish (hunspell-yi, 2,4 Mo, GPL-3.0, de Raphael A. Finkel, Simche Taub et Andrey Rozenberg) depuis GitHub ? Elle ne fait pas partie de Lumen et n’est conservée qu’ici.",
   "jewishLang.dict.failed": "La liste orthographique yiddish n’a pas été téléchargée : {error}",
   "jewishLang.dict.installed": "L’orthographe yiddish est activée ({count} mots).",
+  "jewishLang.dict.pending": "La liste orthographique yiddish est désactivée dans cette version : sa licence (GPL-3.0) attend la décision du responsable du projet. Rien n’a été téléchargé.",
   "jewishLang.dict.removeConfirm": "Supprimer la liste orthographique yiddish de cet appareil ?",
   "jewishLang.dict.removed": "La liste orthographique yiddish est supprimée.",
   "jewishLang.translit.done": "Translittéré.",

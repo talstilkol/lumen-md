@@ -662,7 +662,7 @@
       "catalog": "YIDDISH_DICT (src/ai/yiddishSpell.ts)",
       "match": ["alephreish/hunspell-yi"],
       "verified": true,
-      "notes": "Must never be bundled. The app downloads it from the pinned commit only after an explicit user command, names the licence and authors first (jewishLang.dict.downloadConfirm), and checks each file's SHA-256; that exception is recorded in licenses.allow.json (plan W7.9)."
+      "notes": "Must never be bundled. Download OFF pending the owner (R8-M5): the licences.allow.json exception #981 added was removed (no lane may loosen an allow-list), and the app holds no upstream address. To re-enable: approve the exception (check GPL-3.0-only vs -or-later upstream), restore the address in src/ai/yiddishSpell.ts, set YIDDISH_DOWNLOAD_ENABLED, and confirm both pins on the Mac. The download then checks each file's size and SHA-256 on the raw bytes (plan W7.9)."
     },
     {
       "id": "frequencywords-he-50k",

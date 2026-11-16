@@ -3,8 +3,8 @@
  * are Yiddish prose, the spellings a word may be written in (pointed alef
  * typed as a precomposed letter, ligature digraphs, YIVO's ייִ where the
  * word list has יי), and the matches for the words a Hunspell list does not
- * know. The list itself is never bundled (GPL-3.0); the user downloads it
- * (yiddishSpellService.ts).
+ * know. The list itself is never bundled (GPL-3.0); downloading it is off
+ * pending the owner's licence decision (YIDDISH_DOWNLOAD_ENABLED below).
  */
 import type { GrammarMatch } from "./grammar";
 import { maskNonProse } from "./englishSpell";
@@ -13,9 +13,21 @@ import { normalizeYiddish } from "../text/yiddish";
 export const YI_SPELL_RULE = "YI_SPELL";
 export const YI_SPELL_MESSAGE_KEY = "yiddish.spell.unknown";
 
-/** The word list, pinned: the source, its commit, and each file's SHA-256 (checked after download). */
+/**
+ * The word list, pinned: its commit, and each file's SHA-256 and size (checked on the raw bytes after
+ * download). Where it comes from is recorded in models/registry.json, not in the app.
+ *
+ * R8-M5: the download is OFF, pending the owner. The list is GPL-3.0 and the licence gate refuses a
+ * forbidden-class model the app code fetches; #981 let it through with a warn entry in
+ * licenses.allow.json, which a lane may not add (no loosening of an allow-list). A default-off flag
+ * cannot satisfy the gate either: it reads the code, not a setting. So the entry is gone and so is
+ * the upstream address. The owner may re-enable it by approving the licences.allow.json entry
+ * (GPL-3.0-only vs -or-later checked upstream), putting the address back as `YIDDISH_DICT_SOURCE`,
+ * and setting YIDDISH_DOWNLOAD_ENABLED to true; the pins are to be confirmed on the Mac first.
+ */
+export const YIDDISH_DOWNLOAD_ENABLED = false;
+
 export const YIDDISH_DICT = {
-  repo: "https://github.com/alephreish/hunspell-yi",
   commit: "9f537e5a46caf571c91d86e8a3cf5d0f4ac77192",
   license: "GPL-3.0",
   credit: "Raphael A. Finkel, Simche Taub, Andrey Rozenberg (hunspell-yi)",
@@ -25,9 +37,6 @@ export const YIDDISH_DICT = {
   },
 } as const;
 
-export function yiddishDictUrl(file: "aff" | "dic"): string {
-  return `https://raw.githubusercontent.com/alephreish/hunspell-yi/${YIDDISH_DICT.commit}/${YIDDISH_DICT.files[file].name}`;
-}
 
 export interface SpellChecker {
   correct(word: string): boolean;

@@ -1,6 +1,7 @@
 /**
  * Yiddish spelling service (plan W7.9): the word list download (the user's
- * own command, once; checked against its pinned SHA-256), where it is kept
+ * own command, once; checked against its pinned size and SHA-256 on the raw
+ * bytes; off pending the owner, R8-M5), where it is kept
  * (IndexedDB on this device), and the worker that checks. The list is
  * GPL-3.0, so it is never part of the app: the licence gate keeps it out
  * of dist, and the app only downloads it when asked.
@@ -8,7 +9,7 @@
 import { del, get, set } from "idb-keyval";
 import "../text/jewishLanguagesStrings";
 import type { GrammarMatch } from "./grammar";
-import { YIDDISH_DICT, YI_SPELL_MESSAGE_KEY, yiddishDictUrl } from "./yiddishSpell";
+import { YIDDISH_DICT, YI_SPELL_MESSAGE_KEY } from "./yiddishSpell";
 
 const KEY = "lumen.dict.yi.v1";
 export const YIDDISH_DICTIONARY_CHANGED_EVENT = "lumen-yiddish-dictionary-changed";
@@ -31,20 +32,40 @@ export async function yiddishDictionaryInstalled(): Promise<boolean> {
   }
 }
 
-async function sha256Hex(text: string): Promise<string> {
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+async function sha256Hex(bytes: Uint8Array): Promise<string> {
+  const buf = await crypto.subtle.digest("SHA-256", bytes);
   return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-/** Download the two files from the pinned commit, check their hashes, keep them. Returns the word count. */
-export async function downloadYiddishDictionary(fetchImpl: typeof fetch = fetch): Promise<number> {
+/** The download is off until the owner approves the GPL-3.0 list (R8-M5, YIDDISH_DOWNLOAD_ENABLED). */
+export class YiddishDownloadPendingError extends Error {
+  constructor() {
+    super("the Yiddish word list download is off, pending the owner's licence decision");
+    this.name = "YiddishDownloadPendingError";
+  }
+}
+
+/** A downloaded file against its pin: the exact size, then the SHA-256 of the bytes as they came (not of decoded text). */
+export async function checkPinnedFile(f: "aff" | "dic", bytes: Uint8Array): Promise<string> {
+  const pin = YIDDISH_DICT.files[f];
+  if (bytes.byteLength !== pin.bytes) throw new Error(`${pin.name}: not the pinned file (${bytes.byteLength} bytes, expected ${pin.bytes})`);
+  if ((await sha256Hex(bytes)) !== pin.sha256) throw new Error(`${pin.name}: not the pinned file (SHA-256 differs)`);
+  return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+}
+
+/**
+ * Download the two files from the pinned commit, check their size and hashes, keep them. Returns the
+ * word count. `source` (the upstream address of a file) is given only once the owner has re-enabled
+ * the download; without it this throws YiddishDownloadPendingError and sends nothing.
+ */
+export async function downloadYiddishDictionary(fetchImpl: typeof fetch = fetch, source?: (file: "aff" | "dic") => string): Promise<number> {
+  // Off (YIDDISH_DOWNLOAD_ENABLED is false): the address is not in the app until the owner restores it.
+  if (!source) throw new YiddishDownloadPendingError();
   const texts: Record<"aff" | "dic", string> = { aff: "", dic: "" };
   for (const f of ["aff", "dic"] as const) {
-    const res = await fetchImpl(yiddishDictUrl(f));
+    const res = await fetchImpl(source(f));
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const text = await res.text();
-    if ((await sha256Hex(text)) !== YIDDISH_DICT.files[f].sha256) throw new Error(`${YIDDISH_DICT.files[f].name}: not the pinned file (SHA-256 differs)`);
-    texts[f] = text;
+    texts[f] = await checkPinnedFile(f, new Uint8Array(await res.arrayBuffer()));
   }
   await set(KEY, { ...texts, commit: YIDDISH_DICT.commit } satisfies Stored);
   resetWorker();

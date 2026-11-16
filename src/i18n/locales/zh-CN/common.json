@@ -1891,6 +1891,7 @@
   "jewishLang.dict.downloadConfirm": "要从 GitHub 将意第绪语拼写词表（hunspell-yi，2.4 MB，GPL-3.0，作者 Raphael A. Finkel、Simche Taub、Andrey Rozenberg）下载到此设备吗？它不属于 Lumen，只保存在此设备上。",
   "jewishLang.dict.failed": "意第绪语词表未能下载：{error}",
   "jewishLang.dict.installed": "意第绪语拼写检查已开启（{count} 个词）。",
+  "jewishLang.dict.pending": "此版本中意第绪语词表已关闭：其许可证（GPL-3.0）正在等待项目所有者决定。未下载任何内容。",
   "jewishLang.dict.removeConfirm": "要从此设备删除意第绪语词表吗？",
   "jewishLang.dict.removed": "已删除意第绪语词表。",
   "jewishLang.translit.done": "已转写。",

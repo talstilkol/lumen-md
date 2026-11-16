@@ -1891,6 +1891,7 @@
   "jewishLang.dict.downloadConfirm": "Скачать на это устройство список слов идиша (hunspell-yi, 2,4 МБ, GPL-3.0, авторы Рафаэль Финкель, Симхе Тауб и Андрей Розенберг) с GitHub? Он не входит в Lumen и хранится только здесь.",
   "jewishLang.dict.failed": "Список слов идиша не скачался: {error}",
   "jewishLang.dict.installed": "Проверка идиша включена ({count} слов).",
+  "jewishLang.dict.pending": "Список слов идиша в этой версии отключён: его лицензия (GPL-3.0) ждёт решения владельца проекта. Ничего не скачано.",
   "jewishLang.dict.removeConfirm": "Удалить список слов идиша с этого устройства?",
   "jewishLang.dict.removed": "Список слов идиша удалён.",
   "jewishLang.translit.done": "Готово.",

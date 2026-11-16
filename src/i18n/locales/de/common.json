@@ -1891,6 +1891,7 @@
   "jewishLang.dict.downloadConfirm": "Die jiddische Wortliste (hunspell-yi, 2,4 MB, GPL-3.0, von Raphael A. Finkel, Simche Taub und Andrey Rozenberg) von GitHub auf dieses Gerät laden? Sie ist nicht Teil von Lumen und wird nur hier gespeichert.",
   "jewishLang.dict.failed": "Die jiddische Wortliste wurde nicht geladen: {error}",
   "jewishLang.dict.installed": "Jiddische Rechtschreibung ist an ({count} Wörter).",
+  "jewishLang.dict.pending": "Die jiddische Wortliste ist in dieser Version aus: Ihre Lizenz (GPL-3.0) wartet auf die Entscheidung des Projektinhabers. Es wurde nichts heruntergeladen.",
   "jewishLang.dict.removeConfirm": "Die jiddische Wortliste von diesem Gerät entfernen?",
   "jewishLang.dict.removed": "Die jiddische Wortliste ist entfernt.",
   "jewishLang.translit.done": "Transliteriert.",

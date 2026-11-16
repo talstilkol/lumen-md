@@ -10431,6 +10431,11 @@
       ]
     },
     {
+      "key": "jewishLang.dict.pending",
+      "en": "The Yiddish spelling list is off in this version: its licence (GPL-3.0) is waiting for the owner's decision. Nothing was downloaded.",
+      "vars": []
+    },
+    {
       "key": "jewishLang.dict.removeConfirm",
       "en": "Remove the Yiddish spelling list from this device?",
       "vars": []

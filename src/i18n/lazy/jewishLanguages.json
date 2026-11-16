@@ -12,5 +12,6 @@
   "jewishLang.dict.removeConfirm": "Remove the Yiddish spelling list from this device?",
   "jewishLang.dict.removed": "The Yiddish spelling list is removed.",
   "jewishLang.dict.failed": "The Yiddish spelling list did not download: {error}",
+  "jewishLang.dict.pending": "The Yiddish spelling list is off in this version: its licence (GPL-3.0) is waiting for the owner's decision. Nothing was downloaded.",
   "yiddish.spell.unknown": "Not in the Yiddish word list"
 }

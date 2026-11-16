@@ -1891,6 +1891,7 @@
   "jewishLang.dict.downloadConfirm": "להוריד למכשיר הזה את רשימת האיות של יידיש (hunspell-yi, ‏2.4MB, ‏GPL-3.0, מאת רפאל פינקל, שמחה טאַוב ואנדריי רוזנברג) מ-GitHub? היא לא חלק מ-Lumen, והיא נשמרת רק כאן.",
   "jewishLang.dict.failed": "רשימת האיות של יידיש לא ירדה: {error}",
   "jewishLang.dict.installed": "איות יידיש פעיל ({count} מילים).",
+  "jewishLang.dict.pending": "רשימת האיות של יידיש כבויה בגרסה הזו: הרישיון שלה (GPL-3.0) ממתין להחלטת הבעלים. שום דבר לא ירד.",
   "jewishLang.dict.removeConfirm": "להסיר את רשימת האיות של יידיש מהמכשיר הזה?",
   "jewishLang.dict.removed": "רשימת האיות של יידיש הוסרה.",
   "jewishLang.translit.done": "התעתיק בוצע.",

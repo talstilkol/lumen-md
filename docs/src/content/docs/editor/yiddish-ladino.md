@@ -37,6 +37,10 @@ Sans Hebrew). It ships with Lumen and loads only for such notes.
 
 Command palette → **Yiddish spelling: word list (download / remove)**.
 
+> **Off in this version.** The word list is GPL-3.0, and offering its download
+> is waiting for the owner's licence decision. Until then the command says so
+> and downloads nothing. What follows is how it works once it is on.
+
 The word list is
 [hunspell-yi](https://github.com/alephreish/hunspell-yi), by Raphael A.
 Finkel, Simche Taub and Andrey Rozenberg. It is 2.4 MB and licensed under
