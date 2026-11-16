@@ -281,6 +281,8 @@ export const SETTINGS: readonly SettingEntry[] = [
   data("lumen.openSources"),
   // Z7-M3: "always" for the Wikidata entity search; a consent, so never taken from an imported file.
   data("lumen.wikidata.always"),
+  // Tectonic's package downloads for LaTeX to PDF on the desktop (latex/tectonicDesktop.ts): a consent, asked once, never imported.
+  data("lumen.latex.tectonicDownloads"),
   data("lumen.airplane"),
   // W12.X3: the OpenAlex reference lookup, off by default; shown in the Privacy tab (so search finds it), never imported.
   local("lumen.openAlex.enabled", { kind: "data", tab: "privacy", label: "openAlex.switch", type: "boolean", values: ["", "1"] }),
