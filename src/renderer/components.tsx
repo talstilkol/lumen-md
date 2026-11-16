@@ -1,6 +1,7 @@
 import { Component, createContext, lazy, Suspense, useContext, useEffect, useRef, useState, useSyncExternalStore, type ComponentType } from "react";
 import type { JSX } from "react";
 import { isAssetName, readWorkspaceBlob } from "../storage/workspace";
+import { blobUrlScope, cachedBlobUrl, storeBlobUrl } from "./blobUrlCache";
 import { log } from "../lib/logger";
 import { scheduleIdle } from "../lib/idle";
 import { t } from "../i18n";
@@ -419,15 +420,9 @@ const LiveSql = withSuspense<BlockProps>(
  * URLs survive across re-renders within the page lifetime (no revoke); OPFS
  * assets are tiny relative to a long-lived editor session, so this is a fair
  * trade. `![[image.png]]` embeds carry the file's version (mtime): an image
- * saved over at the same path is read again.
+ * saved over at the same path is read again. The cache is scoped by vault
+ * (./blobUrlCache.ts, Codex P2 on #235).
  */
-const blobUrlCache = new Map<string, { url: string; version: string }>();
-
-/** The cached URL for `key`, if it was made from this version of the file. */
-function cachedBlobUrl(key: string, version: string): string | undefined {
-  const c = blobUrlCache.get(key);
-  return c && c.version === version ? c.url : undefined;
-}
 
 function isOpfsAssetSrc(src: string | undefined): src is string {
   if (!src) return false;
@@ -543,7 +538,9 @@ function LumenImg(props: ImgProps) {
   // old value — not even for the one render before the effect runs (it may be
   // another site's image the gate has since stopped judging). Other srcs
   // render straight from the prop.
-  const tag = `${key ?? ""}|${version}`;
+  // The vault is part of the tag: after a switch the same path is another file.
+  const vault = key ? blobUrlScope() : "";
+  const tag = `${vault}|${key ?? ""}|${version}`;
   const [resolved, setResolved] = useState<{ for: string; url: string | undefined }>(() => ({
     for: tag,
     url: key ? cachedBlobUrl(key, version) : undefined,
@@ -560,8 +557,8 @@ function LumenImg(props: ImgProps) {
       .then((blob) => {
         if (cancelled) return;
         const url = URL.createObjectURL(imageBlob(blob, key));
-        blobUrlCache.set(key, { url, version });
-        setResolved({ for: tag, url });
+        // Read in a vault that is no longer open: neither kept nor shown.
+        setResolved({ for: tag, url: storeBlobUrl(key, version, url, vault) ? url : undefined });
       })
       .catch(() => {
         if (!cancelled) setResolved({ for: tag, url: undefined });
@@ -569,7 +566,7 @@ function LumenImg(props: ImgProps) {
     return () => {
       cancelled = true;
     };
-  }, [key, version, tag]);
+  }, [key, version, tag, vault]);
   const shown = !key ? src : resolved.for === tag ? resolved.url : cachedBlobUrl(key, version);
   // The author-supplied `alt` is forwarded via {...rest}. We default to
   // the basename of the src when nothing is provided so screen-readers

@@ -32,6 +32,13 @@ export { createOpfsBackend, isOpfsSupported } from "./opfs";
 
 let active: VaultBackend | null = null;
 let unsubscribe: (() => void) | null = null;
+/** Bumped on every backend switch: what is cached by path belongs to one generation (Codex P2 on #235). */
+let generation = 0;
+
+/** Which backend switch the active vault is from; state kept by path is scoped by it (and by the vault's identity). */
+export function vaultGeneration(): number {
+  return generation;
+}
 const listeners = new Set<VaultListener>();
 
 function forward(event: VaultEvent): void {
@@ -214,6 +221,7 @@ export function getVaultBackend(): VaultBackend {
  */
 export function setVaultBackend(backend: VaultBackend | null): VaultBackend | null {
   const previous = active ? unwrapVaultBackend(active) : null;
+  generation += 1;
   unsubscribe?.();
   unsubscribe = null;
   active = null;
