@@ -1,0 +1,3476 @@
+[
+ {
+  "id": "L8-setup",
+  "task": "-",
+  "kind": "command",
+  "cmd": "npm ci && npx playwright install chromium firefox webkit && mkdir -p reports/mac-pack/L8",
+  "expect": {
+   "exit": 0
+  },
+  "needs": [
+   "mac",
+   "network"
+  ],
+  "minutes": 10,
+  "what": "Install dependencies and the three Playwright browsers once."
+ },
+ {
+  "id": "L8-6.0-convert",
+  "task": "6.0",
+  "kind": "command",
+  "cmd": "npm run models:convert -- --out out/models && npm run models:registry -- --dir out/models --smoke out/models/smoke-results.json",
+  "expect": {
+   "exit": 0,
+   "json": "out/models/smoke-results.json",
+   "checks": [
+    {
+     "path": [],
+     "op": "count",
+     "where": {
+      "dtype": "q8",
+      "required": true,
+      "ok": true
+     },
+     "gte": 4
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "python3",
+   "git",
+   "network (Hugging Face, GitHub)",
+   "HF_TOKEN"
+  ],
+  "minutes": 90,
+  "what": "Convert the 5 self-hosted models to ONNX (Opus-MT ×2, DictaBERT-NER, bert-base-NER, SigLIP) and smoke-test them in transformers.js 4.3 in Chromium; q8 must load for ≥ 4. Writes the sha256 into models/registry.json for the owner to publish (owner pack L8-6.0)."
+ },
+ {
+  "id": "L8-golden",
+  "task": "6.1,6.3,6.4,6.5,2.6",
+  "kind": "golden",
+  "cmd": "MT_MODELS_DIR=out/models IMAGE_SEARCH_MODELS_DIR=out/models NAKDIMON_ONNX=out/models/nakdimon/Nakdimon.onnx MENAKED_DIR=out/dictabert-char-menaked bash scripts/mac-pack/L8-golden-test.sh",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/golden-scores.json",
+   "checks": [
+    {
+     "path": [
+      "split"
+     ],
+     "op": "==",
+     "value": "test"
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "L8-6.0-convert",
+   "L8-6.3-menaked",
+   "GOLDEN_SEED",
+   "HF_TOKEN",
+   "python3",
+   "ffmpeg",
+   "network"
+  ],
+  "minutes": 45,
+  "batch": "L8-golden",
+  "what": "Build the held-out golden test split outside the repo and run every harness (the retired golden-sets workflow, locally). One run serves every entry with batch L8-golden."
+ },
+ {
+  "id": "L8-6.1-day",
+  "task": "6.1",
+  "kind": "models-day",
+  "cmd": "npm run models:day -- --only asr-zipformer,asr-web --fresh --yes --out reports/mac-pack/L8/day-L8-6.1-day && cp \"reports/mac-pack/L8/day-L8-6.1-day/$(node -p \"require('./reports/mac-pack/L8/day-L8-6.1-day/latest.json').runId\")/report.json\" reports/mac-pack/L8/L8-6.1-day.day.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-6.1-day.day.json",
+   "checks": [
+    {
+     "path": [
+      "kind"
+     ],
+     "op": "==",
+     "value": "model"
+    },
+    {
+     "path": [
+      "finished"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "path": [
+      "steps",
+      {
+       "id": "asr-zipformer"
+      },
+      "status"
+     ],
+     "op": "==",
+     "value": "pass"
+    },
+    {
+     "path": [
+      "steps",
+      {
+       "id": "asr-web"
+      },
+      "status"
+     ],
+     "op": "==",
+     "value": "pass"
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "python3",
+   "ffmpeg",
+   "network (first download)"
+  ],
+  "minutes": 35,
+  "what": "Dictation WER on FLEURS-he validation: the streaming Zipformer2 (target ≤ 15 %, 23.6 % in CI) and the browser Whisper models incl. ivrit.ai turbo (15.3)."
+ },
+ {
+  "id": "L8-6.1-golden",
+  "task": "6.1",
+  "kind": "golden",
+  "cmd": "MT_MODELS_DIR=out/models IMAGE_SEARCH_MODELS_DIR=out/models NAKDIMON_ONNX=out/models/nakdimon/Nakdimon.onnx MENAKED_DIR=out/dictabert-char-menaked bash scripts/mac-pack/L8-golden-test.sh",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/golden-scores.json",
+   "checks": [
+    {
+     "path": [
+      "sets",
+      "asr-he",
+      "status"
+     ],
+     "op": "==",
+     "value": "scored"
+    },
+    {
+     "path": [
+      "sets",
+      "asr-he",
+      "scores",
+      "wer.fleurs"
+     ],
+     "op": "<=",
+     "value": 0.15
+    },
+    {
+     "path": [
+      "sets",
+      "asr-he",
+      "scores",
+      "items.common-voice"
+     ],
+     "op": ">=",
+     "value": 30
+    },
+    {
+     "path": [
+      "sets",
+      "asr-he",
+      "scores",
+      "wer.common-voice"
+     ],
+     "op": ">=",
+     "value": 0
+    }
+   ]
+  },
+  "needs": [
+   "L8-golden"
+  ],
+  "minutes": 45,
+  "batch": "L8-golden",
+  "what": "WER per source on the held-out split: FLEURS ≤ 15 %, and Common Voice measured on its own (30 clips)."
+ },
+ {
+  "id": "L8-6.3-menaked",
+  "task": "6.3",
+  "kind": "command",
+  "cmd": "python3 -I scripts/models/export-menaked.py --revision \"$MENAKED_REVISION\" --out out/dictabert-char-menaked && python3 -I scripts/golden/hf_build.py fetch-local --set nikud && node scripts/golden/evals/nikud.mjs --dev --menaked out/dictabert-char-menaked > reports/mac-pack/L8/6.3.dev.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/6.3.dev.json",
+   "checks": [
+    {
+     "path": [
+      "models_measured"
+     ],
+     "op": "==",
+     "value": 1
+    },
+    {
+     "path": [
+      "engine"
+     ],
+     "op": "==",
+     "value": "menaked"
+    },
+    {
+     "path": [
+      "nakdimon_word_acc"
+     ],
+     "op": ">=",
+     "value": 0.9
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "python3",
+   "network (Hugging Face)",
+   "MENAKED_REVISION (owner pack L8-6.3)"
+  ],
+  "minutes": 30,
+  "what": "Export DictaBERT-large-char-menaked to ONNX at the pinned commit and score it on the Nakdimon dev part (target ≥ 90 % word accuracy)."
+ },
+ {
+  "id": "L8-6.3-golden",
+  "task": "6.3",
+  "kind": "golden",
+  "cmd": "MT_MODELS_DIR=out/models IMAGE_SEARCH_MODELS_DIR=out/models NAKDIMON_ONNX=out/models/nakdimon/Nakdimon.onnx MENAKED_DIR=out/dictabert-char-menaked bash scripts/mac-pack/L8-golden-test.sh",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/golden-scores.json",
+   "checks": [
+    {
+     "path": [
+      "sets",
+      "nikud",
+      "status"
+     ],
+     "op": "==",
+     "value": "scored"
+    },
+    {
+     "path": [
+      "sets",
+      "nikud",
+      "scores",
+      "nakdimon_word_acc"
+     ],
+     "op": ">=",
+     "value": 0.9
+    }
+   ]
+  },
+  "needs": [
+   "L8-golden"
+  ],
+  "minutes": 45,
+  "batch": "L8-golden",
+  "what": "Nikud on the held-out Nakdimon test set: ≥ 90 % words fully right (Ben-Yehuda reported apart), with the high-quality model (MENAKED_DIR from L8-6.3-menaked)."
+ },
+ {
+  "id": "L8-6.4-golden",
+  "task": "6.4",
+  "kind": "golden",
+  "cmd": "MT_MODELS_DIR=out/models IMAGE_SEARCH_MODELS_DIR=out/models NAKDIMON_ONNX=out/models/nakdimon/Nakdimon.onnx MENAKED_DIR=out/dictabert-char-menaked bash scripts/mac-pack/L8-golden-test.sh",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/golden-scores.json",
+   "checks": [
+    {
+     "path": [
+      "sets",
+      "mt-he-en",
+      "status"
+     ],
+     "op": "==",
+     "value": "scored"
+    },
+    {
+     "path": [
+      "sets",
+      "mt-he-en",
+      "scores",
+      "layers_measured"
+     ],
+     "op": ">=",
+     "value": 1
+    },
+    {
+     "path": [
+      "sets",
+      "mt-he-en",
+      "scores",
+      "chrf_opus_he_en"
+     ],
+     "op": ">",
+     "value": 0
+    }
+   ]
+  },
+  "needs": [
+   "L8-golden"
+  ],
+  "minutes": 45,
+  "batch": "L8-golden",
+  "what": "chrF on NTREX per layer (Opus-MT from L8-6.0-convert); the number is compared with the spike's Opus-MT baseline."
+ },
+ {
+  "id": "L8-6.5-unit",
+  "task": "6.5",
+  "kind": "vitest",
+  "cmd": "npx vitest run src/__tests__/langId.test.ts --reporter=json --outputFile=reports/mac-pack/L8/L8-6.5-unit.vitest.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-6.5-unit.vitest.json",
+   "checks": [
+    {
+     "path": [
+      "success"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "path": [
+      "numFailedTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numPendingTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numTotalTests"
+     ],
+     "op": ">=",
+     "value": 12
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup"
+  ],
+  "minutes": 3,
+  "what": "The detector's unit tests (12; 12/12 in the offline shim)."
+ },
+ {
+  "id": "L8-6.5-golden",
+  "task": "6.5",
+  "kind": "golden",
+  "cmd": "MT_MODELS_DIR=out/models IMAGE_SEARCH_MODELS_DIR=out/models NAKDIMON_ONNX=out/models/nakdimon/Nakdimon.onnx MENAKED_DIR=out/dictabert-char-menaked bash scripts/mac-pack/L8-golden-test.sh",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/golden-scores.json",
+   "checks": [
+    {
+     "path": [
+      "sets",
+      "langid",
+      "status"
+     ],
+     "op": "==",
+     "value": "scored"
+    },
+    {
+     "path": [
+      "sets",
+      "langid",
+      "scores",
+      "tatoeba_accuracy"
+     ],
+     "op": ">=",
+     "value": 0.95
+    }
+   ]
+  },
+  "needs": [
+   "L8-golden"
+  ],
+  "minutes": 45,
+  "batch": "L8-golden",
+  "what": "Tatoeba accuracy over the 8 UI languages ≥ 95 % (the test part needs 152 sentences; the cloud run had 0)."
+ },
+ {
+  "id": "L8-6.7-dev",
+  "task": "6.7",
+  "kind": "command",
+  "cmd": "node scripts/golden/build.mjs caption image-search --split dev --reason \"Mac pack L8: dev images (xm3600-images)\" && node scripts/golden/evals/image-search.mjs --dev --models out/models --out reports/mac-pack/L8/6.7.dev.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/6.7.dev.json",
+   "checks": [
+    {
+     "path": [
+      "pass"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "path": [
+      "he",
+      "recallAt5"
+     ],
+     "op": ">=",
+     "value": 0.8
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "L8-6.0-convert"
+  ],
+  "minutes": 15,
+  "what": "SigLIP recall@5 on the Hebrew golden queries ≥ 80 % (dev split, real converted model). The first command adds the Crossmodal-3600 dev images to eval/golden (the workflow job xm3600-images): commit them on a branch."
+ },
+ {
+  "id": "L8-6.8-day",
+  "task": "6.8",
+  "kind": "models-day",
+  "cmd": "npm run models:day -- --only pdf-chat --fresh --yes --out reports/mac-pack/L8/day-L8-6.8-day && cp \"reports/mac-pack/L8/day-L8-6.8-day/$(node -p \"require('./reports/mac-pack/L8/day-L8-6.8-day/latest.json').runId\")/report.json\" reports/mac-pack/L8/L8-6.8-day.day.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-6.8-day.day.json",
+   "checks": [
+    {
+     "path": [
+      "kind"
+     ],
+     "op": "==",
+     "value": "model"
+    },
+    {
+     "path": [
+      "finished"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "path": [
+      "steps",
+      {
+       "id": "pdf-chat"
+      },
+      "status"
+     ],
+     "op": "==",
+     "value": "pass"
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "ollama",
+   "qwen2.5:7b",
+   "nomic-embed-text"
+  ],
+  "minutes": 10,
+  "what": "PDF chat on a real model: ≥ 85 % answers cited to the right page (15.17)."
+ },
+ {
+  "id": "L8-6.8-unit",
+  "task": "6.8",
+  "kind": "vitest",
+  "cmd": "npx vitest run src/__tests__/pdfChat.test.ts --reporter=json --outputFile=reports/mac-pack/L8/L8-6.8-unit.vitest.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-6.8-unit.vitest.json",
+   "checks": [
+    {
+     "path": [
+      "success"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "path": [
+      "numFailedTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numPendingTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numTotalTests"
+     ],
+     "op": ">=",
+     "value": 10
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup"
+  ],
+  "minutes": 3,
+  "what": "pdfChat unit tests (10/10 in the shim)."
+ },
+ {
+  "id": "L8-6.8-e2e",
+  "task": "6.8",
+  "kind": "playwright",
+  "cmd": "PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L8/L8-6.8-e2e.pw.json npx playwright test e2e/pdf-chat.spec.ts --project=chromium --reporter=json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-6.8-e2e.pw.json",
+   "checks": [
+    {
+     "path": [
+      "stats",
+      "unexpected"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "flaky"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "skipped"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "expected"
+     ],
+     "op": ">=",
+     "value": 1
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "playwright browsers"
+  ],
+  "minutes": 5,
+  "what": "e2e/pdf-chat.spec.ts in Chromium (never run before)."
+ },
+ {
+  "id": "L8-6.9-day",
+  "task": "6.9",
+  "kind": "models-day",
+  "cmd": "npm run models:day -- --only fim --fresh --yes --out reports/mac-pack/L8/day-L8-6.9-day && cp \"reports/mac-pack/L8/day-L8-6.9-day/$(node -p \"require('./reports/mac-pack/L8/day-L8-6.9-day/latest.json').runId\")/report.json\" reports/mac-pack/L8/L8-6.9-day.day.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-6.9-day.day.json",
+   "checks": [
+    {
+     "path": [
+      "kind"
+     ],
+     "op": "==",
+     "value": "model"
+    },
+    {
+     "path": [
+      "finished"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "path": [
+      "steps",
+      {
+       "id": "fim"
+      },
+      "status"
+     ],
+     "op": "==",
+     "value": "pass"
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "ollama",
+   "qwen2.5-coder:1.5b"
+  ],
+  "minutes": 5,
+  "what": "Autocomplete latency on Ollama: p50 < 300 ms (wiring run in the cloud passed against the fake server)."
+ },
+ {
+  "id": "L8-6.9-unit",
+  "task": "6.9",
+  "kind": "vitest",
+  "cmd": "npx vitest run src/__tests__/fim.test.ts --reporter=json --outputFile=reports/mac-pack/L8/L8-6.9-unit.vitest.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-6.9-unit.vitest.json",
+   "checks": [
+    {
+     "path": [
+      "success"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "path": [
+      "numFailedTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numPendingTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numTotalTests"
+     ],
+     "op": ">=",
+     "value": 11
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup"
+  ],
+  "minutes": 3,
+  "what": "fim unit tests (11; the shim fails 1-2 on its fetch stand-in)."
+ },
+ {
+  "id": "L8-6.9-e2e",
+  "task": "6.9",
+  "kind": "playwright",
+  "cmd": "PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L8/L8-6.9-e2e.pw.json npx playwright test e2e/fim.spec.ts --project=chromium --reporter=json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-6.9-e2e.pw.json",
+   "checks": [
+    {
+     "path": [
+      "stats",
+      "unexpected"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "flaky"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "skipped"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "expected"
+     ],
+     "op": ">=",
+     "value": 1
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "playwright browsers"
+  ],
+  "minutes": 5,
+  "what": "e2e/fim.spec.ts: ghost text, 0 cloud calls under local-only."
+ },
+ {
+  "id": "L8-6.11-day",
+  "task": "6.11",
+  "kind": "models-day",
+  "cmd": "npm run models:day -- --only summarize --fresh --yes --out reports/mac-pack/L8/day-L8-6.11-day && cp \"reports/mac-pack/L8/day-L8-6.11-day/$(node -p \"require('./reports/mac-pack/L8/day-L8-6.11-day/latest.json').runId\")/report.json\" reports/mac-pack/L8/L8-6.11-day.day.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-6.11-day.day.json",
+   "checks": [
+    {
+     "path": [
+      "kind"
+     ],
+     "op": "==",
+     "value": "model"
+    },
+    {
+     "path": [
+      "finished"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "path": [
+      "steps",
+      {
+       "id": "summarize"
+      },
+      "status"
+     ],
+     "op": "==",
+     "value": "pass"
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "ollama",
+   "qwen2.5:7b"
+  ],
+  "minutes": 10,
+  "what": "Local summaries on 20 golden docs: ≥ 95 % of sentences grounded (quoteContained)."
+ },
+ {
+  "id": "L8-6.11-unit",
+  "task": "6.11",
+  "kind": "vitest",
+  "cmd": "npx vitest run src/__tests__/summarize.test.ts --reporter=json --outputFile=reports/mac-pack/L8/L8-6.11-unit.vitest.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-6.11-unit.vitest.json",
+   "checks": [
+    {
+     "path": [
+      "success"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "path": [
+      "numFailedTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numPendingTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numTotalTests"
+     ],
+     "op": ">=",
+     "value": 12
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup"
+  ],
+  "minutes": 3,
+  "what": "summarize unit tests (12/12 in the shim)."
+ },
+ {
+  "id": "L8-6.12-lora",
+  "task": "6.12",
+  "kind": "command",
+  "cmd": "node scripts/lora/export.mjs --vault \"$LUMEN_VAULT\" --out out/lumen-lora --platform mac && (cd out/lumen-lora && bash train-mac.sh) && node scripts/lora/style-eval.mjs --heldout out/lumen-lora/heldout.json --base mistral:7b-instruct --tuned lumen-style > reports/mac-pack/L8/6.12.style.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/6.12.style.json",
+   "checks": [
+    {
+     "path": [
+      "pass"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "path": [
+      "heldOut"
+     ],
+     "op": ">=",
+     "value": 1
+    }
+   ]
+  },
+  "needs": [
+   "mac (Apple silicon, ≥ 16 GB)",
+   "L8-setup",
+   "ollama",
+   "mistral:7b-instruct",
+   "nomic-embed-text",
+   "python3",
+   "LUMEN_VAULT (the owner's notes)",
+   "fix/g6-L8-lora"
+  ],
+  "minutes": 90,
+  "what": "Export → train the LoRA with MLX → style-eval: the tuned model's cosine to the held-out notes ≥ 10 % above the base (exit 0 = pass)."
+ },
+ {
+  "id": "L8-6.14-unit",
+  "task": "6.14",
+  "kind": "vitest",
+  "cmd": "npx vitest run src/__tests__/agentRunPython.test.ts src/__tests__/agentToolsNew.test.ts --reporter=json --outputFile=reports/mac-pack/L8/L8-6.14-unit.vitest.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-6.14-unit.vitest.json",
+   "checks": [
+    {
+     "path": [
+      "success"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "path": [
+      "numFailedTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numPendingTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numTotalTests"
+     ],
+     "op": ">=",
+     "value": 48
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup"
+  ],
+  "minutes": 3,
+  "what": "run_python unit tests (14/14; agentToolsNew 27/34 in the shim, shim limits)."
+ },
+ {
+  "id": "L8-6.14-e2e",
+  "task": "6.14",
+  "kind": "playwright",
+  "cmd": "PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L8/L8-6.14-e2e.pw.json npx playwright test e2e/live-exec.spec.ts --project=chromium --reporter=json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-6.14-e2e.pw.json",
+   "checks": [
+    {
+     "path": [
+      "stats",
+      "unexpected"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "flaky"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "skipped"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "expected"
+     ],
+     "op": ">=",
+     "value": 9
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "playwright browsers"
+  ],
+  "minutes": 5,
+  "what": "e2e/live-exec.spec.ts on real Pyodide (webR served by the dev server's webr:local)."
+ },
+ {
+  "id": "L8-6.15-model",
+  "task": "6.15",
+  "kind": "command",
+  "cmd": "OLLAMA_URL=http://127.0.0.1:11434 ANALYST_MODEL=qwen2.5:7b node scripts/golden/evals/data-analysis.mjs --dev --programs model --out reports/mac-pack/L8/6.15.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/6.15.json",
+   "checks": [
+    {
+     "path": [
+      "programs"
+     ],
+     "op": "==",
+     "value": "model"
+    },
+    {
+     "path": [
+      "accuracy"
+     ],
+     "op": ">=",
+     "value": 0.85
+    },
+    {
+     "path": [
+      "items"
+     ],
+     "op": ">=",
+     "value": 20
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "ollama",
+   "qwen2.5:7b",
+   "CODE OWED: --programs model is a stub today (prints notRunnable)"
+  ],
+  "minutes": 15,
+  "what": "Data analyst on the 20 golden questions with a real model: ≥ 85 % numeric answers right. Blocked until the model mode is written (see TSV)."
+ },
+ {
+  "id": "L8-6.16-day",
+  "task": "6.16",
+  "kind": "models-day",
+  "cmd": "npm run models:day -- --only meetings --fresh --yes --out reports/mac-pack/L8/day-L8-6.16-day --meetings-dir \"$LUMEN_GOLDEN_DIR/meetings/owner\" && cp \"reports/mac-pack/L8/day-L8-6.16-day/$(node -p \"require('./reports/mac-pack/L8/day-L8-6.16-day/latest.json').runId\")/report.json\" reports/mac-pack/L8/L8-6.16-day.day.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-6.16-day.day.json",
+   "checks": [
+    {
+     "path": [
+      "kind"
+     ],
+     "op": "==",
+     "value": "model"
+    },
+    {
+     "path": [
+      "finished"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "path": [
+      "steps",
+      {
+       "id": "meetings"
+      },
+      "status"
+     ],
+     "op": "==",
+     "value": "pass"
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "ollama",
+   "owner recordings (15.11)"
+  ],
+  "minutes": 10,
+  "what": "Meeting tasks found in the owner's 5 golden recordings: ≥ 90 %."
+ },
+ {
+  "id": "L8-6.17-unit",
+  "task": "6.17",
+  "kind": "vitest",
+  "cmd": "npx vitest run src/__tests__/cloudRoutes.test.ts src/__tests__/aiPolicyGates.test.ts src/__tests__/VoiceDictationUnit.test.ts --reporter=json --outputFile=reports/mac-pack/L8/L8-6.17-unit.vitest.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-6.17-unit.vitest.json",
+   "checks": [
+    {
+     "path": [
+      "success"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "path": [
+      "numFailedTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numPendingTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numTotalTests"
+     ],
+     "op": ">=",
+     "value": 42
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "fix/g6-L8-tests"
+  ],
+  "minutes": 3,
+  "what": "The cloud-route audit (fixed in fix/g6-L8-tests: the Sefaria row failed on the base) and the policy gates."
+ },
+ {
+  "id": "L8-6.17-e2e",
+  "task": "6.17",
+  "kind": "playwright",
+  "cmd": "PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L8/L8-6.17-e2e.pw.json npx playwright test e2e/local-only-all-commands.spec.ts --project=chromium --reporter=json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-6.17-e2e.pw.json",
+   "checks": [
+    {
+     "path": [
+      "stats",
+      "unexpected"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "flaky"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "skipped"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "expected"
+     ],
+     "op": ">=",
+     "value": 1
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "playwright browsers"
+  ],
+  "minutes": 10,
+  "what": "Every command under local-only: 0 cloud routes in the full journey."
+ },
+ {
+  "id": "L8-4.2-unit",
+  "task": "4.2",
+  "kind": "vitest",
+  "cmd": "npx vitest run src/__tests__/vaultBackend.contract.test.ts src/__tests__/vaultLocation.test.ts --reporter=json --outputFile=reports/mac-pack/L8/L8-4.2-unit.vitest.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-4.2-unit.vitest.json",
+   "checks": [
+    {
+     "path": [
+      "success"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "path": [
+      "numFailedTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numPendingTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numTotalTests"
+     ],
+     "op": ">=",
+     "value": 511
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup"
+  ],
+  "minutes": 3,
+  "what": "Vault contract + location (511/511 in the shim)."
+ },
+ {
+  "id": "L8-4.2-e2e",
+  "task": "4.2",
+  "kind": "playwright",
+  "cmd": "PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L8/L8-4.2-e2e.pw.json npx playwright test e2e/vault-folder.spec.ts --project=chromium --reporter=json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-4.2-e2e.pw.json",
+   "checks": [
+    {
+     "path": [
+      "stats",
+      "unexpected"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "flaky"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "skipped"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "expected"
+     ],
+     "op": ">=",
+     "value": 4
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "playwright browsers"
+  ],
+  "minutes": 5,
+  "what": "Real folder in the browser, read back byte for byte. Then open the folder in Obsidian (15.8, manual)."
+ },
+ {
+  "id": "L8-4.3-cargo",
+  "task": "4.3",
+  "kind": "command",
+  "cmd": "cargo test --manifest-path src-tauri/vault/Cargo.toml --locked 2>&1 | tee reports/mac-pack/L8/4.3.cargo.txt",
+  "expect": {
+   "exit": 0,
+   "file": "reports/mac-pack/L8/4.3.cargo.txt",
+   "regex": "test result: ok\\. (\\d+) passed; 0 failed",
+   "group1Gte": 23
+  },
+  "needs": [
+   "mac",
+   "rust"
+  ],
+  "minutes": 5,
+  "what": "The desktop vault crate's tests (23/23 in the cloud with rustc --test after removing serde; cargo itself never ran)."
+ },
+ {
+  "id": "L8-4.3-unit",
+  "task": "4.3",
+  "kind": "vitest",
+  "cmd": "npx vitest run src/__tests__/vaultDesktop.test.ts --reporter=json --outputFile=reports/mac-pack/L8/L8-4.3-unit.vitest.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-4.3-unit.vitest.json",
+   "checks": [
+    {
+     "path": [
+      "success"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "path": [
+      "numFailedTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numPendingTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numTotalTests"
+     ],
+     "op": ">=",
+     "value": 11
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup"
+  ],
+  "minutes": 3,
+  "what": "Desktop migration of 1,000 notes, 0 loss (11/11 in the shim). Then: edit in Lumen, see it in Obsidian (15.8, manual)."
+ },
+ {
+  "id": "L8-4.4-unit",
+  "task": "4.4",
+  "kind": "vitest",
+  "cmd": "npx vitest run src/__tests__/externalChanges.test.ts src/__tests__/vaultWatcher.test.ts --reporter=json --outputFile=reports/mac-pack/L8/L8-4.4-unit.vitest.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-4.4-unit.vitest.json",
+   "checks": [
+    {
+     "path": [
+      "success"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "path": [
+      "numFailedTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numPendingTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numTotalTests"
+     ],
+     "op": ">=",
+     "value": 32
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup"
+  ],
+  "minutes": 3,
+  "what": "Watcher and conflict tests (32/32 in the shim). The Tauri watch path needs the desktop app (manual, 15.8)."
+ },
+ {
+  "id": "L8-4.6-e2e",
+  "task": "4.6",
+  "kind": "playwright",
+  "cmd": "npm run build && (npx vite preview --port 4173 --strictPort &) && sleep 3 && PLAYWRIGHT_BASE_URL=http://localhost:4173 PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L8/L8-4.6-e2e.pw.json npx playwright test e2e/hover-preview.spec.ts --project=chromium --reporter=json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-4.6-e2e.pw.json",
+   "checks": [
+    {
+     "path": [
+      "stats",
+      "unexpected"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "flaky"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "skipped"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "expected"
+     ],
+     "op": ">=",
+     "value": 2
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "playwright browsers"
+  ],
+  "minutes": 5,
+  "what": "Hover preview < 150 ms on a production build (the spec asserts it and records hover-ms), keyboard reachable."
+ },
+ {
+  "id": "L8-4.8-e2e",
+  "task": "4.8",
+  "kind": "playwright",
+  "cmd": "PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L8/L8-4.8-e2e.pw.json npx playwright test e2e/block-refs.spec.ts --project=chromium --reporter=json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-4.8-e2e.pw.json",
+   "checks": [
+    {
+     "path": [
+      "stats",
+      "unexpected"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "flaky"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "skipped"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "expected"
+     ],
+     "op": ">=",
+     "value": 2
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "playwright browsers"
+  ],
+  "minutes": 5,
+  "what": "A ^block reference survives rename and move."
+ },
+ {
+  "id": "L8-4.10-unit",
+  "task": "4.10",
+  "kind": "vitest",
+  "cmd": "npx vitest run src/__tests__/databaseFilter.test.ts --reporter=json --outputFile=reports/mac-pack/L8/L8-4.10-unit.vitest.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-4.10-unit.vitest.json",
+   "checks": [
+    {
+     "path": [
+      "success"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "path": [
+      "numFailedTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numPendingTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numTotalTests"
+     ],
+     "op": ">=",
+     "value": 10
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup"
+  ],
+  "minutes": 3,
+  "what": "Database filter tests (10/10 in the shim)."
+ },
+ {
+  "id": "L8-4.10-e2e",
+  "task": "4.10",
+  "kind": "playwright",
+  "cmd": "PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L8/L8-4.10-e2e.pw.json npx playwright test e2e/database-edit.spec.ts --project=chromium --reporter=json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-4.10-e2e.pw.json",
+   "checks": [
+    {
+     "path": [
+      "stats",
+      "unexpected"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "flaky"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "skipped"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "expected"
+     ],
+     "op": ">=",
+     "value": 1
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "playwright browsers"
+  ],
+  "minutes": 5,
+  "what": "Editing 100 notes in kanban: 0 unwanted file changes."
+ },
+ {
+  "id": "L8-4.13-unit",
+  "task": "4.13",
+  "kind": "vitest",
+  "cmd": "npx vitest run src/__tests__/vaultTasks.test.ts --reporter=json --outputFile=reports/mac-pack/L8/L8-4.13-unit.vitest.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-4.13-unit.vitest.json",
+   "checks": [
+    {
+     "path": [
+      "success"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "path": [
+      "numFailedTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numPendingTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numTotalTests"
+     ],
+     "op": ">=",
+     "value": 40
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup"
+  ],
+  "minutes": 3,
+  "what": "Vault tasks incl. 1,000-task timing (40/40 in the shim)."
+ },
+ {
+  "id": "L8-4.13-e2e",
+  "task": "4.13",
+  "kind": "playwright",
+  "cmd": "PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L8/L8-4.13-e2e.pw.json npx playwright test e2e/vault-tasks.spec.ts --project=chromium --reporter=json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-4.13-e2e.pw.json",
+   "checks": [
+    {
+     "path": [
+      "stats",
+      "unexpected"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "flaky"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "skipped"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "expected"
+     ],
+     "op": ">=",
+     "value": 1
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "playwright browsers"
+  ],
+  "minutes": 5,
+  "what": "A tasks block gathers and ticks across notes."
+ },
+ {
+  "id": "L8-4.14-unit",
+  "task": "4.14",
+  "kind": "vitest",
+  "cmd": "npx vitest run src/__tests__/pdfAnnotations.test.ts src/__tests__/pdfCompanionMove.test.ts src/__tests__/pdfReader.test.tsx --reporter=json --outputFile=reports/mac-pack/L8/L8-4.14-unit.vitest.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-4.14-unit.vitest.json",
+   "checks": [
+    {
+     "path": [
+      "success"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "path": [
+      "numFailedTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numPendingTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numTotalTests"
+     ],
+     "op": ">=",
+     "value": 59
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup"
+  ],
+  "minutes": 3,
+  "what": "PDF annotation tests (51/51 in the shim; pdfReader.test.tsx 0/8 there: pdf.js needs a real DOM)."
+ },
+ {
+  "id": "L8-4.14-e2e",
+  "task": "4.14",
+  "kind": "playwright",
+  "cmd": "PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L8/L8-4.14-e2e.pw.json npx playwright test e2e/pdf-reader.spec.ts --project=chromium --reporter=json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-4.14-e2e.pw.json",
+   "checks": [
+    {
+     "path": [
+      "stats",
+      "unexpected"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "flaky"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "skipped"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "expected"
+     ],
+     "op": ">=",
+     "value": 2
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "playwright browsers"
+  ],
+  "minutes": 5,
+  "what": "A highlight becomes a link that opens the right page."
+ },
+ {
+  "id": "L8-4.15-e2e",
+  "task": "4.15",
+  "kind": "playwright",
+  "cmd": "PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L8/L8-4.15-e2e.pw.json npx playwright test e2e/clipper-v2.spec.ts --project=chromium --reporter=json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-4.15-e2e.pw.json",
+   "checks": [
+    {
+     "path": [
+      "stats",
+      "unexpected"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "flaky"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "skipped"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "expected"
+     ],
+     "op": ">=",
+     "value": 1
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "playwright browsers"
+  ],
+  "minutes": 5,
+  "what": "Clipper v2 in Chromium. The 20-golden-page ≥ 90 % measurement has no harness yet (clipper set: 5 dev pages, no scripts/golden/evals/clipper.mjs)."
+ },
+ {
+  "id": "L8-4.16-unit",
+  "task": "4.16",
+  "kind": "vitest",
+  "cmd": "npx vitest run src/__tests__/quickCapture.test.ts src/__tests__/pwaLaunch.test.ts --reporter=json --outputFile=reports/mac-pack/L8/L8-4.16-unit.vitest.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-4.16-unit.vitest.json",
+   "checks": [
+    {
+     "path": [
+      "success"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "path": [
+      "numFailedTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numPendingTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numTotalTests"
+     ],
+     "op": ">=",
+     "value": 39
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "fix/g6-L8-tests"
+  ],
+  "minutes": 3,
+  "what": "Quick capture (the macOS label case made host-independent in fix/g6-L8-tests; browser shim 33/33)."
+ },
+ {
+  "id": "L8-4.16-e2e",
+  "task": "4.16",
+  "kind": "playwright",
+  "cmd": "PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L8/L8-4.16-e2e.pw.json npx playwright test e2e/quick-capture.spec.ts e2e/pwa.spec.ts --project=chromium --reporter=json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-4.16-e2e.pw.json",
+   "checks": [
+    {
+     "path": [
+      "stats",
+      "unexpected"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "flaky"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "skipped"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "expected"
+     ],
+     "op": ">=",
+     "value": 6
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "playwright browsers"
+  ],
+  "minutes": 5,
+  "what": "Capture in 2 clicks, the PWA launch paths."
+ },
+ {
+  "id": "L8-4.19-unit",
+  "task": "4.19",
+  "kind": "vitest",
+  "cmd": "npx vitest run src/__tests__/tldrawToExcalidraw.test.ts src/__tests__/excalidrawFile.test.ts --reporter=json --outputFile=reports/mac-pack/L8/L8-4.19-unit.vitest.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-4.19-unit.vitest.json",
+   "checks": [
+    {
+     "path": [
+      "success"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "path": [
+      "numFailedTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numPendingTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numTotalTests"
+     ],
+     "op": ">=",
+     "value": 200
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup"
+  ],
+  "minutes": 3,
+  "what": "tldraw → Excalidraw and the .excalidraw file (200/200 in the shim; real @excalidraw/excalidraw on the Mac)."
+ },
+ {
+  "id": "L8-4.19-e2e",
+  "task": "4.19",
+  "kind": "playwright",
+  "cmd": "PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L8/L8-4.19-e2e.pw.json npx playwright test e2e/canvas-excalidraw.spec.ts --project=chromium --reporter=json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-4.19-e2e.pw.json",
+   "checks": [
+    {
+     "path": [
+      "stats",
+      "unexpected"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "flaky"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "skipped"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "expected"
+     ],
+     "op": ">=",
+     "value": 3
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "playwright browsers"
+  ],
+  "minutes": 5,
+  "what": "The canvas renders with the real package and makes 0 network requests under local-only (privacy ledger)."
+ },
+ {
+  "id": "L8-4.20-unit",
+  "task": "4.20",
+  "kind": "vitest",
+  "cmd": "npx vitest run src/__tests__/vaultBackend.contract.test.ts src/__tests__/vaultMobile.test.ts --reporter=json --outputFile=reports/mac-pack/L8/L8-4.20-unit.vitest.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-4.20-unit.vitest.json",
+   "checks": [
+    {
+     "path": [
+      "success"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "path": [
+      "numFailedTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numPendingTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numTotalTests"
+     ],
+     "op": ">=",
+     "value": 485
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup"
+  ],
+  "minutes": 3,
+  "what": "Contract rows over the fakes (485/485 in the shim)."
+ },
+ {
+  "id": "L8-4.20-android",
+  "task": "4.20",
+  "kind": "command",
+  "cmd": "npm run android:sync && (cd android && ./gradlew --no-daemon lint assembleDebug)",
+  "expect": {
+   "exit": 0
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "Android SDK + JDK 21"
+  ],
+  "minutes": 20,
+  "what": "Compile the folder-vault plugin (LumenVaultFolderPlugin.java) and lint the manifest. The Files-app check (15.13) stays manual."
+ },
+ {
+  "id": "L8-W11.P3-corpus",
+  "task": "W11.P3",
+  "kind": "command",
+  "cmd": "npm run corpus:obsidian-help && npx vitest run src/__tests__/obsidianHelp.test.ts src/__tests__/basesObsidianParity.test.ts --reporter=json --outputFile=reports/mac-pack/L8/W11.P3.vitest.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/W11.P3.vitest.json",
+   "checks": [
+    {
+     "path": [
+      "success"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "path": [
+      "numFailedTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numPendingTests"
+     ],
+     "op": "==",
+     "value": 0
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "network (GitHub)"
+  ],
+  "minutes": 10,
+  "what": "Fetch obsidian-help at the pinned commit (outside the repo), then open → save every file: 0 changed bytes, 0 parse errors, .base and .canvas included."
+ },
+ {
+  "id": "L8-W11.P5-ttfv",
+  "task": "W11.P5",
+  "kind": "playwright",
+  "cmd": "npm run build && (npx vite preview --port 4173 --strictPort &) && sleep 3 && PLAYWRIGHT_BASE_URL=http://localhost:4173 PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L8/L8-W11.P5-ttfv.pw.json npx playwright test e2e/ttfv.spec.ts --project=ttfv-chromium --project=ttfv-firefox --project=ttfv-webkit --reporter=json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-W11.P5-ttfv.pw.json",
+   "checks": [
+    {
+     "path": [
+      "stats",
+      "unexpected"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "flaky"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "skipped"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "expected"
+     ],
+     "op": ">=",
+     "value": 6
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "playwright browsers"
+  ],
+  "minutes": 15,
+  "what": "TTFV on a production build with no network, 3 browsers: TTFV-1 ≤ 2 s p75, first note ≤ 4 s (the spec asserts)."
+ },
+ {
+  "id": "L8-W11.P6-e2e",
+  "task": "W11.P6",
+  "kind": "playwright",
+  "cmd": "PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L8/L8-W11.P6-e2e.pw.json npx playwright test e2e/first-run-paths.spec.ts --project=chromium --reporter=json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-W11.P6-e2e.pw.json",
+   "checks": [
+    {
+     "path": [
+      "stats",
+      "unexpected"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "flaky"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "skipped"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "expected"
+     ],
+     "op": ">=",
+     "value": 3
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "playwright browsers"
+  ],
+  "minutes": 10,
+  "what": "Empty note / bring your notes / open an Obsidian folder, incl. 1,000 Keep notes searchable ≤ 3 min."
+ },
+ {
+  "id": "L8-W11.P8-ios",
+  "task": "W11.P8,W11.P9",
+  "kind": "command",
+  "cmd": "npx vitest run src/__tests__/iosProject.test.ts src/__tests__/storeReadiness.test.ts && npm run ios:sync && xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' build CODE_SIGNING_ALLOWED=NO -skipPackagePluginValidation 2>&1 | tee reports/mac-pack/L8/ios-build.txt",
+  "expect": {
+   "exit": 0,
+   "file": "reports/mac-pack/L8/ios-build.txt",
+   "regex": "\\*\\* BUILD SUCCEEDED \\*\\*"
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "Xcode 26"
+  ],
+  "minutes": 25,
+  "what": "Compile the app with its App Intent, ControlWidget, lock-screen widget and share extension targets (Swift never compiled before). Device runs stay W11.M10."
+ },
+ {
+  "id": "L8-W11.P10-android",
+  "task": "W11.P10",
+  "kind": "command",
+  "cmd": "npx vitest run src/__tests__/androidCapture.test.ts && npm run android:sync && (cd android && ./gradlew --no-daemon lint assembleDebug)",
+  "expect": {
+   "exit": 0
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "Android SDK + JDK 21"
+  ],
+  "minutes": 20,
+  "what": "SEND / SEND_MULTIPLE and the home-screen widget: the unit test and a Gradle lint + build."
+ },
+ {
+  "id": "L8-W11.P11-store",
+  "task": "W11.P11",
+  "kind": "command",
+  "cmd": "npx vitest run src/__tests__/storeReadiness.test.ts && npm run store:check && npm run android:sync && (cd android && ./gradlew --no-daemon bundleRelease) && node scripts/check-16kb.mjs android/app/build/outputs/bundle/release/app-release.aab --allow-none",
+  "expect": {
+   "exit": 0
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "Android SDK + JDK 21"
+  ],
+  "minutes": 25,
+  "what": "targetSdk 36, PrivacyInfo, 16 KB alignment of the release AAB. Archive and submission stay with the owner (W11.M10, W11.O7)."
+ },
+ {
+  "id": "L8-W11.P13-e2e",
+  "task": "W11.P13",
+  "kind": "playwright",
+  "cmd": "PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L8/L8-W11.P13-e2e.pw.json npx playwright test e2e/pwa-install.spec.ts --project=chromium --project=firefox --project=webkit --reporter=json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-W11.P13-e2e.pw.json",
+   "checks": [
+    {
+     "path": [
+      "stats",
+      "unexpected"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "flaky"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "skipped"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "expected"
+     ],
+     "op": ">=",
+     "value": 15
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "fix/g6-L8-e2e"
+  ],
+  "minutes": 5,
+  "what": "New spec (fix/g6-L8-e2e): every install way faked at the browser's surface, in 3 engines."
+ },
+ {
+  "id": "L8-W11.P13-chrome",
+  "task": "W11.P13",
+  "kind": "playwright",
+  "cmd": "PW_CHROMIUM=\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L8/L8-W11.P13-chrome.pw.json npx playwright test e2e/pwa-install.spec.ts --project=chromium --reporter=json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-W11.P13-chrome.pw.json",
+   "checks": [
+    {
+     "path": [
+      "stats",
+      "unexpected"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "flaky"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "skipped"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "expected"
+     ],
+     "op": ">=",
+     "value": 5
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "Google Chrome 148+",
+   "fix/g6-L8-e2e"
+  ],
+  "minutes": 5,
+  "what": "The same spec in Google Chrome 148+ (PW_CHROMIUM): the unfaked case records which way Chrome offers (an origin-trial token or chrome://flags is needed for <install>)."
+ },
+ {
+  "id": "L8-W11.P14-pdf",
+  "task": "W11.P14",
+  "kind": "command",
+  "cmd": "npm run edu:pdf && npx vitest run src/__tests__/eduKit.test.ts",
+  "expect": {
+   "exit": 0
+  },
+  "needs": [
+   "mac",
+   "L8-setup"
+  ],
+  "minutes": 5,
+  "what": "The teacher PDF builds (it also builds in the cloud: 41 KB). The MSIX offline pack needs Windows (makeappx); offline search/OCR/TTS stays W11.M13."
+ },
+ {
+  "id": "L8-W11.Q1-corpus",
+  "task": "W11.Q1",
+  "kind": "command",
+  "cmd": "for n in 10000 50000 100000; do node scripts/perf/corpus-vault.mjs --fetch --cache ~/.cache/lumen-corpus --notes $n --out out/vault-$n || exit 1; done && node -e \"const m=require('./out/vault-100000/corpus-manifest.json');process.exit(m.origin==='real'&&m.notes>=100000?0:1)\"",
+  "expect": {
+   "exit": 0,
+   "json": "out/vault-100000/corpus-manifest.json",
+   "checks": [
+    {
+     "path": [
+      "origin"
+     ],
+     "op": "==",
+     "value": "real"
+    },
+    {
+     "path": [
+      "notes"
+     ],
+     "op": ">=",
+     "value": 100000
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "network (dumps.wikimedia.org, GitHub)",
+   "≈ 30 GB disk"
+  ],
+  "minutes": 120,
+  "what": "Real 10k/50k/100k vaults from the Hebrew/English Wikipedia dumps and Ben-Yehuda, origin real."
+ },
+ {
+  "id": "L8-W11.Q2-large",
+  "task": "W11.Q2",
+  "kind": "command",
+  "cmd": "npm run perf:large-vault -- --vault out/vault-100000 --targets --report reports/mac-pack/L8/large-vault.md",
+  "expect": {
+   "exit": 0
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "L8-W11.Q1-corpus"
+  ],
+  "minutes": 30,
+  "what": "The 7 metrics on the real 100k vault; --targets exits non-zero when one misses (warm ≤ 2 s, cold ≤ 8 s, search p95 ≤ 200 ms, save→index ≤ 50 ms, idle CPU ≤ 2 %). The Obsidian 1.15.1 side stays W11.M8."
+ },
+ {
+  "id": "L8-W11.Q5-inp",
+  "task": "W11.Q5",
+  "kind": "playwright",
+  "cmd": "npm run perf:editor-corpus -- --benyehuda \"$BENYEHUDA_DUMP\" && npm run build && (npx vite preview --port 4173 --strictPort &) && sleep 3 && PLAYWRIGHT_BASE_URL=http://localhost:4173 PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L8/L8-W11.Q5-inp.pw.json npx playwright test e2e/inp-budget.spec.ts --project=inp --reporter=json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-W11.Q5-inp.pw.json",
+   "checks": [
+    {
+     "path": [
+      "stats",
+      "unexpected"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "flaky"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "skipped"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "expected"
+     ],
+     "op": ">=",
+     "value": 4
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "BENYEHUDA_DUMP (a public_domain_dump checkout)"
+  ],
+  "minutes": 20,
+  "what": "Keypress → paint on Moby-Dick and 2 MB of Ben-Yehuda, CPU 4×, production build; 0 skipped means the corpus was there."
+ },
+ {
+  "id": "L8-W11.Q6-voiceover",
+  "task": "W11.Q6",
+  "kind": "command",
+  "cmd": "npm install --no-save @guidepup/guidepup @guidepup/playwright @guidepup/setup && npx @guidepup/setup && PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L8/W11.Q6.pw.json npm run test:sr -- --project=voiceover --reporter=json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/W11.Q6.pw.json",
+   "checks": [
+    {
+     "path": [
+      "stats",
+      "unexpected"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "skipped"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "expected"
+     ],
+     "op": ">=",
+     "value": 2
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "VoiceOver automation allowed (System Settings)"
+  ],
+  "minutes": 20,
+  "what": "10 VoiceOver steps in Hebrew and English (sr/voiceover.sr.ts); it takes over the Mac's audio and keyboard while it runs."
+ },
+ {
+  "id": "L8-W11.Q7-evidence",
+  "task": "W11.Q7",
+  "kind": "playwright",
+  "cmd": "PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L8/L8-W11.Q7-evidence.pw.json npx playwright test e2e/a11y.spec.ts e2e/reflow.spec.ts --project=chromium --reporter=json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-W11.Q7-evidence.pw.json",
+   "checks": [
+    {
+     "path": [
+      "stats",
+      "unexpected"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "flaky"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "skipped"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "expected"
+     ],
+     "op": ">=",
+     "value": 4
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "playwright browsers"
+  ],
+  "minutes": 5,
+  "what": "The evidence the ACR names (axe and reflow) actually runs. The coordinator's contact stays owner W11.O3."
+ },
+ {
+  "id": "L8-W11.Q9-stryker",
+  "task": "W11.Q9",
+  "kind": "command",
+  "cmd": "npm install --no-save @stryker-mutator/core@10 @stryker-mutator/vitest-runner@10 && npm run mutation:calibrate",
+  "expect": {
+   "exit": 0
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "network (npm)"
+  ],
+  "minutes": 60,
+  "what": "Stryker 10 on the three calibration modules vs our mutation tool (scripts/mutation/calibrate.mjs prints both scores; exit 0 = within tolerance)."
+ },
+ {
+  "id": "L8-W11.Q10-selftest",
+  "task": "W11.Q10",
+  "kind": "command",
+  "cmd": "node scripts/perf/opfs-bench.mjs --selftest --engines chromium,firefox,webkit --report reports/mac-pack/L8/W11.Q10.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/W11.Q10.json",
+   "checks": [
+    {
+     "path": [
+      "results",
+      "chromium",
+      "content"
+     ],
+     "op": "==",
+     "value": "שלום, second"
+    },
+    {
+     "path": [
+      "results",
+      "firefox",
+      "content"
+     ],
+     "op": "==",
+     "value": "שלום, second"
+    },
+    {
+     "path": [
+      "results",
+      "webkit",
+      "content"
+     ],
+     "op": "==",
+     "value": "שלום, second"
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup"
+  ],
+  "minutes": 5,
+  "what": "The real worker's atomic save, end to end, in 3 engines (Chromium passed in the cloud)."
+ },
+ {
+  "id": "L8-W11.Q11-bench",
+  "task": "W11.Q11",
+  "kind": "command",
+  "cmd": "node scripts/perf/opfs-bench.mjs --files 10000 --report reports/mac-pack/L8/W11.Q11.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/W11.Q11.json",
+   "checks": [
+    {
+     "path": [
+      "results",
+      "chromium",
+      "opfsReadWorker",
+      "ms"
+     ],
+     "op": "<=",
+     "value": 1500
+    },
+    {
+     "path": [
+      "results",
+      "chromium",
+      "opfsWrite",
+      "longTasks"
+     ],
+     "op": "==",
+     "value": 0
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup"
+  ],
+  "minutes": 15,
+  "what": "10k files in OPFS vs IndexedDB, 3 engines: read ≤ 1.5 s in Chromium, 0 long tasks while importing (cloud, 2 cores: 1k files read in 2.9 s by the worker; 10k crashed the page)."
+ },
+ {
+  "id": "L8-2.3-unit",
+  "task": "2.3",
+  "kind": "vitest",
+  "cmd": "npx vitest run src/__tests__/liveJsIsolation.test.ts --reporter=json --outputFile=reports/mac-pack/L8/L8-2.3-unit.vitest.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-2.3-unit.vitest.json",
+   "checks": [
+    {
+     "path": [
+      "success"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "path": [
+      "numFailedTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numPendingTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numTotalTests"
+     ],
+     "op": ">=",
+     "value": 3
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup"
+  ],
+  "minutes": 3,
+  "what": "live-js isolation (3/3 in the shim)."
+ },
+ {
+  "id": "L8-2.3-e2e",
+  "task": "2.3",
+  "kind": "playwright",
+  "cmd": "PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L8/L8-2.3-e2e.pw.json npx playwright test e2e/security.spec.ts --project=chromium --project=firefox --project=webkit --reporter=json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-2.3-e2e.pw.json",
+   "checks": [
+    {
+     "path": [
+      "stats",
+      "unexpected"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "flaky"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "skipped"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "expected"
+     ],
+     "op": ">=",
+     "value": 18
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "playwright browsers"
+  ],
+  "minutes": 15,
+  "what": "security.spec green in 3 browsers."
+ },
+ {
+  "id": "L8-2.5-keychain",
+  "task": "2.5",
+  "kind": "command",
+  "cmd": "cargo test --manifest-path src-tauri/Cargo.toml -p lumen-keychain --locked -- --test-threads=1 2>&1 | tee reports/mac-pack/L8/2.5.cargo.txt",
+  "expect": {
+   "exit": 0,
+   "file": "reports/mac-pack/L8/2.5.cargo.txt",
+   "regex": "test result: ok\\. (\\d+) passed; 0 failed",
+   "group1Gte": 7
+  },
+  "needs": [
+   "mac",
+   "rust"
+  ],
+  "minutes": 10,
+  "what": "Keychain tests on macOS (≥ 7: 3 chunking + 4 real keychain). Windows stays open (no Windows machine)."
+ },
+ {
+  "id": "L8-2.5-unit",
+  "task": "2.5",
+  "kind": "vitest",
+  "cmd": "npx vitest run src/__tests__/secretStore.test.ts --reporter=json --outputFile=reports/mac-pack/L8/L8-2.5-unit.vitest.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-2.5-unit.vitest.json",
+   "checks": [
+    {
+     "path": [
+      "success"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "path": [
+      "numFailedTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numPendingTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numTotalTests"
+     ],
+     "op": ">=",
+     "value": 8
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup"
+  ],
+  "minutes": 3,
+  "what": "secretStore (8/8 in the shim)."
+ },
+ {
+  "id": "L8-2.5-e2e",
+  "task": "2.5",
+  "kind": "playwright",
+  "cmd": "PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L8/L8-2.5-e2e.pw.json npx playwright test e2e/secrets.spec.ts --project=chromium --reporter=json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-2.5-e2e.pw.json",
+   "checks": [
+    {
+     "path": [
+      "stats",
+      "unexpected"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "flaky"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "skipped"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "expected"
+     ],
+     "op": ">=",
+     "value": 1
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "playwright browsers"
+  ],
+  "minutes": 5,
+  "what": "Storage scan after entering a key: 0 plain tokens."
+ },
+ {
+  "id": "L8-2.6-golden",
+  "task": "2.6",
+  "kind": "golden",
+  "cmd": "MT_MODELS_DIR=out/models IMAGE_SEARCH_MODELS_DIR=out/models NAKDIMON_ONNX=out/models/nakdimon/Nakdimon.onnx MENAKED_DIR=out/dictabert-char-menaked bash scripts/mac-pack/L8-golden-test.sh",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/golden-scores.json",
+   "checks": [
+    {
+     "path": [
+      "sets",
+      "ner-pii",
+      "status"
+     ],
+     "op": "==",
+     "value": "scored"
+    },
+    {
+     "path": [
+      "sets",
+      "ner-pii",
+      "scores",
+      "recall.patterns"
+     ],
+     "op": ">=",
+     "value": 0.98
+    }
+   ]
+  },
+  "needs": [
+   "L8-golden"
+  ],
+  "minutes": 45,
+  "batch": "L8-golden",
+  "what": "PII patterns on the 250-item set: recall ≥ 98 %. Names ≥ 85 % needs DictaBERT-NER in the redactor (converted by L8-6.0-convert, not wired: code owed)."
+ },
+ {
+  "id": "L8-2.6-e2e",
+  "task": "2.6",
+  "kind": "playwright",
+  "cmd": "PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L8/L8-2.6-e2e.pw.json npx playwright test e2e/pii-redaction.spec.ts --project=chromium --reporter=json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-2.6-e2e.pw.json",
+   "checks": [
+    {
+     "path": [
+      "stats",
+      "unexpected"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "flaky"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "skipped"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "expected"
+     ],
+     "op": ">=",
+     "value": 2
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "playwright browsers"
+  ],
+  "minutes": 5,
+  "what": "0 set items in the captured cloud requests."
+ },
+ {
+  "id": "L8-2.7-unit",
+  "task": "2.7",
+  "kind": "vitest",
+  "cmd": "npx vitest run src/__tests__/injectionGuard.test.ts src/__tests__/agentDojo.test.ts --reporter=json --outputFile=reports/mac-pack/L8/L8-2.7-unit.vitest.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-2.7-unit.vitest.json",
+   "checks": [
+    {
+     "path": [
+      "success"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "path": [
+      "numFailedTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numPendingTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numTotalTests"
+     ],
+     "op": ">=",
+     "value": 29
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup"
+  ],
+  "minutes": 3,
+  "what": "130 cases against a fooled model (the worst case): 0 unapproved writes. The ProtectAI v2 classifier is not implemented (needs a 6.0 conversion)."
+ },
+ {
+  "id": "L8-2.8-scanners",
+  "task": "2.8",
+  "kind": "command",
+  "cmd": "for s in gitleaks npm-audit cargo-audit semgrep; do LUMEN_CI=1 node scripts/security-scan.mjs $s || exit 1; done && npm run audit:lock && npm run hygiene",
+  "expect": {
+   "exit": 0
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "brew install gitleaks semgrep; cargo install cargo-audit"
+  ],
+  "minutes": 15,
+  "what": "The PR scanners once on the Mac with every binary present (LUMEN_CI=1: a missing binary fails instead of skipping). Every-PR runs need the owner's Buildkite agent (owner pack L8-2.8)."
+ },
+ {
+  "id": "L8-10.1-unit",
+  "task": "10.1",
+  "kind": "vitest",
+  "cmd": "npx vitest run src/__tests__/useFocusTrap.test.tsx src/__tests__/AiDoctorPanelRender.test.tsx --reporter=json --outputFile=reports/mac-pack/L8/L8-10.1-unit.vitest.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-10.1-unit.vitest.json",
+   "checks": [
+    {
+     "path": [
+      "success"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "path": [
+      "numFailedTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numPendingTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numTotalTests"
+     ],
+     "op": ">=",
+     "value": 16
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup"
+  ],
+  "minutes": 3,
+  "what": "Focus trap and panel render (16/16 in the shim)."
+ },
+ {
+  "id": "L8-10.1-e2e",
+  "task": "10.1",
+  "kind": "playwright",
+  "cmd": "PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L8/L8-10.1-e2e.pw.json npx playwright test e2e/a11y.spec.ts --project=chromium --reporter=json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-10.1-e2e.pw.json",
+   "checks": [
+    {
+     "path": [
+      "stats",
+      "unexpected"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "flaky"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "skipped"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "expected"
+     ],
+     "op": ">=",
+     "value": 2
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "playwright browsers"
+  ],
+  "minutes": 5,
+  "what": "axe: 0 serious/critical; the keyboard journey."
+ },
+ {
+  "id": "L8-10.2-unit",
+  "task": "10.2",
+  "kind": "vitest",
+  "cmd": "npx vitest run src/__tests__/touchLayout.test.tsx src/__tests__/sidebarResizer.test.tsx --reporter=json --outputFile=reports/mac-pack/L8/L8-10.2-unit.vitest.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-10.2-unit.vitest.json",
+   "checks": [
+    {
+     "path": [
+      "success"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "path": [
+      "numFailedTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numPendingTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numTotalTests"
+     ],
+     "op": ">=",
+     "value": 10
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup"
+  ],
+  "minutes": 3,
+  "what": "Touch layout and resizer (10/10 in the shim)."
+ },
+ {
+  "id": "L8-10.2-e2e",
+  "task": "10.2",
+  "kind": "playwright",
+  "cmd": "PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L8/L8-10.2-e2e.pw.json npx playwright test e2e/touch.spec.ts --project=chromium --reporter=json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-10.2-e2e.pw.json",
+   "checks": [
+    {
+     "path": [
+      "stats",
+      "unexpected"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "flaky"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "skipped"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "expected"
+     ],
+     "op": ">=",
+     "value": 1
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "playwright browsers"
+  ],
+  "minutes": 5,
+  "what": "The full touch journey on the phone profiles the spec emulates."
+ },
+ {
+  "id": "L8-10.3-visual",
+  "task": "10.3",
+  "kind": "command",
+  "cmd": "npm run test:visual:update && npm run test:visual && npx playwright test -c playwright.visual.config.ts visual/selftest.visual.ts && test \"$(find visual -path '*__baselines__/darwin*' -name '*.png' | wc -l)\" -ge 40",
+  "expect": {
+   "exit": 0
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "the owner looks at the PNGs before committing visual/__baselines__/darwin/"
+  ],
+  "minutes": 15,
+  "what": "Write the first baselines, pass the visual run and its self-test (an unintended pixel change is caught). The owner looks at the ~40 PNGs before they are committed."
+ },
+ {
+  "id": "L8-10.4-coverage",
+  "task": "10.4",
+  "kind": "command",
+  "cmd": "npx vitest run --coverage",
+  "expect": {
+   "exit": 0,
+   "json": "coverage/coverage-summary.json",
+   "checks": [
+    {
+     "path": [
+      "total",
+      "lines",
+      "pct"
+     ],
+     "op": ">=",
+     "value": 60
+    },
+    {
+     "path": [
+      "total",
+      "statements",
+      "pct"
+     ],
+     "op": ">=",
+     "value": 60
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup"
+  ],
+  "minutes": 40,
+  "what": "The first measured coverage number on the train: lines ≥ 60 %, 0 excluded folders (vite.config.ts already scopes it to src/)."
+ },
+ {
+  "id": "L8-W12.F2-typst",
+  "task": "W12.F2",
+  "kind": "command",
+  "cmd": "brew install typst poppler && node scripts/mac-pack/L8-office-check.mjs --typst --out reports/mac-pack/L8/W12.F2.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/W12.F2.json",
+   "checks": [
+    {
+     "path": [
+      "typst",
+      "status"
+     ],
+     "op": "==",
+     "value": "pass"
+    },
+    {
+     "path": [
+      "typst",
+      "compiled"
+     ],
+     "op": "==",
+     "value": 10
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "Homebrew"
+  ],
+  "minutes": 5,
+  "what": "10 Hebrew notes → .typ → typst compile → pdftotext: every line's words in order. The in-browser typst.ts wasm chunk is still not vendored (npm, code owed)."
+ },
+ {
+  "id": "L8-W12.F3-odt",
+  "task": "W12.F3",
+  "kind": "command",
+  "cmd": "node scripts/mac-pack/L8-office-check.mjs --odt --out reports/mac-pack/L8/W12.F3.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/W12.F3.json",
+   "checks": [
+    {
+     "path": [
+      "odt",
+      "status"
+     ],
+     "op": "==",
+     "value": "pass"
+    },
+    {
+     "path": [
+      "odt",
+      "ok"
+     ],
+     "op": "==",
+     "value": 10
+    },
+    {
+     "path": [
+      "odt",
+      "wrongTables"
+     ],
+     "op": "==",
+     "value": 0
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "LibreOffice"
+  ],
+  "minutes": 5,
+  "what": "10 Hebrew/mixed notes → ODT → LibreOffice opens and re-saves → every paragraph's writing mode matches its text; the RTL table stays rl-tb. Passed in the cloud on LibreOffice 24.2 (10/10, 38 paragraphs, 0 wrong)."
+ },
+ {
+  "id": "L8-W12.F3-unit",
+  "task": "W12.F3",
+  "kind": "vitest",
+  "cmd": "npx vitest run src/__tests__/officeRoundTrip.test.ts --reporter=json --outputFile=reports/mac-pack/L8/L8-W12.F3-unit.vitest.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-W12.F3-unit.vitest.json",
+   "checks": [
+    {
+     "path": [
+      "success"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "path": [
+      "numFailedTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numPendingTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numTotalTests"
+     ],
+     "op": ">=",
+     "value": 11
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup"
+  ],
+  "minutes": 3,
+  "what": "DOCX/ODT/EPUB round trip: an RTL table stays RTL."
+ },
+ {
+  "id": "L8-W12.F8-e2e",
+  "task": "W12.F8",
+  "kind": "playwright",
+  "cmd": "PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L8/L8-W12.F8-e2e.pw.json npx playwright test e2e/media-transcript.spec.ts --project=chromium --reporter=json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-W12.F8-e2e.pw.json",
+   "checks": [
+    {
+     "path": [
+      "stats",
+      "unexpected"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "flaky"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "skipped"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "stats",
+      "expected"
+     ],
+     "op": ">=",
+     "value": 1
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup",
+   "fix/g6-L8-e2e"
+  ],
+  "minutes": 5,
+  "what": "New spec (fix/g6-L8-e2e): clicking a transcript line moves the real <audio>'s currentTime and marks the line."
+ },
+ {
+  "id": "L8-W12.F8-unit",
+  "task": "W12.F8",
+  "kind": "vitest",
+  "cmd": "npx vitest run src/__tests__/webvttTranscript.test.tsx --reporter=json --outputFile=reports/mac-pack/L8/L8-W12.F8-unit.vitest.json",
+  "expect": {
+   "exit": 0,
+   "json": "reports/mac-pack/L8/L8-W12.F8-unit.vitest.json",
+   "checks": [
+    {
+     "path": [
+      "success"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "path": [
+      "numFailedTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numPendingTests"
+     ],
+     "op": "==",
+     "value": 0
+    },
+    {
+     "path": [
+      "numTotalTests"
+     ],
+     "op": ">=",
+     "value": 9
+    }
+   ]
+  },
+  "needs": [
+   "mac",
+   "L8-setup"
+  ],
+  "minutes": 3,
+  "what": "WebVTT writing and validation (a Hebrew .vtt passes the validator)."
+ }
+]
