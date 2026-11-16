@@ -2208,16 +2208,6 @@
       "icon": "Link"
     },
     {
-      "id": "types.page",
-      "label": "Types: all objects by type",
-      "icon": "Table"
-    },
-    {
-      "id": "types.studio",
-      "label": "Types: Object Studio (new type, fields, rename)",
-      "icon": "Box"
-    },
-    {
       "id": "ai.screenshotToNote",
       "label": "Screenshot to note…",
       "group": "Tools",
@@ -2265,6 +2255,16 @@
       "group": "Tools",
       "hint": "The chosen institution's year as a calendar file for Google Calendar or Apple Calendar",
       "icon": "Download"
+    },
+    {
+      "id": "types.page",
+      "label": "Types: all objects by type",
+      "icon": "Table"
+    },
+    {
+      "id": "types.studio",
+      "label": "Types: Object Studio (new type, fields, rename)",
+      "icon": "Box"
     }
   ],
   "full": [
@@ -4625,16 +4625,6 @@
       "icon": "Link"
     },
     {
-      "id": "types.page",
-      "label": "Types: all objects by type",
-      "icon": "Table"
-    },
-    {
-      "id": "types.studio",
-      "label": "Types: Object Studio (new type, fields, rename)",
-      "icon": "Box"
-    },
-    {
       "id": "ai.screenshotToNote",
       "label": "Screenshot to note…",
       "group": "Tools",
@@ -4682,6 +4672,16 @@
       "group": "Tools",
       "hint": "The chosen institution's year as a calendar file for Google Calendar or Apple Calendar",
       "icon": "Download"
+    },
+    {
+      "id": "types.page",
+      "label": "Types: all objects by type",
+      "icon": "Table"
+    },
+    {
+      "id": "types.studio",
+      "label": "Types: Object Studio (new type, fields, rename)",
+      "icon": "Box"
     }
   ],
   "autoSaveOn": [
@@ -5009,11 +5009,10 @@
     "sources.open",
     "entities.review",
     "entities.graph",
+    "entities.contradictions",
     "entities.wikidata",
     "reading.newFromLibrary",
     "reading.newFromCapture",
-    "types.page",
-    "types.studio",
     "ai.screenshotToNote",
     "mcp.settings",
     "mcp.ask",
@@ -5021,6 +5020,7 @@
     "spell.yiddishDictionary",
     "academic.choose",
     "academic.ics",
-    "entities.contradictions"
+    "types.page",
+    "types.studio"
   ]
 }
