@@ -65,6 +65,38 @@
   "minutes": 3
  },
  {
+  "id": "L3-W4.1-receipt",
+  "cmd": "for i in 1 2 3 4 5 6; do LUMEN_E2E_SHARD=$i/6 node scripts/e2e-gate.mjs --full || true; done; node scripts/e2e-gate.mjs merge --total 6 --dir ci-out --sha \"$(git rev-parse HEAD)\"",
+  "expect": {
+   "exit": 0,
+   "json": [
+    {
+     "file": "reports/e2e-*.json",
+     "path": [
+      "ok"
+     ],
+     "op": "==",
+     "value": true
+    },
+    {
+     "file": "reports/e2e-*.json",
+     "path": [
+      "receipt",
+      "alg"
+     ],
+     "op": "==",
+     "value": "ed25519"
+    }
+   ],
+   "says": "the sealed whole-suite chromium receipt promote:main accepts (every shard under SHARD_MINUTES = 10); its public key goes to security/e2e-receipt-keys/ on main (owner, W4.1)"
+  },
+  "needs": [
+   "L3-e2e-run",
+   "LUMEN_E2E_KEY: the owner's e2e receipt key (outside the checkout)"
+  ],
+  "minutes": 70
+ },
+ {
   "id": "L3-W4.10",
   "cmd": "node scripts/mac-pack/L3/e2e-summary.mjs --specs e2e/hebrew-first-load.spec.ts,e2e/first-run-language.spec.ts --label W4.10",
   "expect": {
