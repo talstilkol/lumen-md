@@ -9,7 +9,7 @@
  *   runAgentOrThrow(...)       → the output, or AgentRunError carrying the run
  */
 
-import type { AgentDefinition, AgentInput, AgentRun, AgentStep, ExecutorMessage, ExecutorId, ModelTier, RetryPatch, RunOptions, ToolCall, ToolContext, ToolScope } from "./types";
+import type { AgentDefinition, AgentInput, AgentRun, AgentStep, Executor, ExecutorMessage, ExecutorId, ExecutorRequest, ExecutorResponse, ModelTier, RetryPatch, RunOptions, ToolCall, ToolContext, ToolScope } from "./types";
 import { DEFAULT_EXECUTOR_ORDER, getExecutor, listExecutors, measuredModel, pickExecutor } from "./executors";
 import { parseProtocolTurn, protocolSchema, toolResultMessage } from "./protocol";
 import { repairCall, retryMessage } from "./toolRepair";
@@ -548,6 +548,50 @@ export async function callTool<R = unknown>(name: string, args: Record<string, u
     throw new ToolError(code, r.error);
   }
   return r.result as R;
+}
+
+/**
+ * One request to a model on this device for a module that is not an agent
+ * definition (the entity-relation extractor, the HeRE eval adapter, "Ask the
+ * law"): it still goes through the runtime (plan 5.5.3), so it is in the
+ * trace like any run — the engine, the model, how long, and whether it
+ * failed; never the prompt or the answer. No tools are passed (the request
+ * cannot write or reach the network), and a cloud executor is refused.
+ */
+export async function runLocalRequest(executor: Executor, req: Omit<ExecutorRequest, "tools">, meta: { agentId: string; commandId?: string }): Promise<ExecutorResponse> {
+  if (executor.id === "chat") throw new Error(`${meta.agentId}: a local engine only, not the cloud`);
+  const startedAt = Date.now();
+  const run: AgentRun = {
+    id: newRunId(),
+    agentId: meta.agentId,
+    commandId: meta.commandId,
+    executor: executor.id,
+    model: req.model ?? null,
+    startedAt,
+    endedAt: 0,
+    status: "ok",
+    attempts: 1,
+    steps: [],
+    suggestions: [],
+    tokens: { input: 0, output: 0, estimated: true },
+  };
+  try {
+    const res = await executor.chat({ ...req, tools: undefined });
+    run.model = res.model || run.model;
+    if (res.usage) run.tokens = { input: res.usage.inputTokens, output: res.usage.outputTokens, estimated: res.usage.estimated };
+    run.steps.push({ kind: "model", at: startedAt, ms: Date.now() - startedAt, label: run.model ?? executor.id, ok: true });
+    return res;
+  } catch (e) {
+    const aborted = isAbort(e, req.signal);
+    run.status = aborted ? "aborted" : "failed";
+    run.errorCode = aborted ? "aborted" : "error";
+    run.error = aborted ? "aborted" : e instanceof Error ? e.name : "error";
+    run.steps.push({ kind: "model", at: startedAt, ms: Date.now() - startedAt, label: run.model ?? executor.id, ok: false });
+    throw e;
+  } finally {
+    run.endedAt = Date.now();
+    void recordRun(run).catch(() => undefined); // why: a trace that can't be stored never fails the request
+  }
 }
 
 export async function runAgentOrThrow<I extends AgentInput, O = string>(def: AgentDefinition<I, O>, input: I, opts: RunOptions = {}): Promise<O> {

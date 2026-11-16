@@ -114,7 +114,9 @@ export async function extractRelations(p: ParagraphInput, executor: Executor | n
   const { system, user } = await buildMessages(p);
   const model = opts.model ?? executor.modelFor("small");
   // No `tools`: the extractor cannot write or reach the network, whatever the paragraph says.
-  const res = await executor.chat({
+  // Through the runtime (plan 5.5.3): the request is in the trace like any run.
+  const { runLocalRequest } = await import("../agents/runtime");
+  const res = await runLocalRequest(executor, {
     messages: [
       { role: "system", content: system },
       { role: "user", content: user },
@@ -124,7 +126,7 @@ export async function extractRelations(p: ParagraphInput, executor: Executor | n
     temperature: 0,
     seed: opts.seed ?? 7,
     think: false,
-  });
+  }, { agentId: "entity-relations" });
   dropped["tool-call"] += res.toolCalls?.length ?? 0;
   // The paragraph went out datamarked (agents/untrusted, W11.I3); a quote copied from it may carry the marks.
   const { unmarkData } = await import("../agents/untrusted");

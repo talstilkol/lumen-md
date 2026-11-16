@@ -17,7 +17,7 @@ vi.mock("../store/useStore", () => ({ useAppStore: { getState: () => ({ aiKey: n
 vi.mock("../billing/aiQuota", () => ({ chargeAiCommandDispatch: vi.fn(), consumeAiPrompt: vi.fn(() => true), aiQuotaStatus: () => ({ allowed: true, limit: Infinity }), AiQuotaExceededError: class extends Error {} }));
 
 import { registerExecutor, resetExecutors } from "../agents/executors";
-import { runAgent } from "../agents/runtime";
+import { runAgent, runLocalRequest } from "../agents/runtime";
 import { clearTrace, listRuns, loadTrace } from "../agents/trace";
 import {
   answererAgent,
@@ -72,6 +72,25 @@ describe("static check (5.5.3)", () => {
     const allowed = new Set(["ai/llm.ts", "ai/anthropicProvider.ts", "ai/ollamaProvider.ts", "ai/localLlm.ts"]);
     const offenders = files.filter((f) => !allowed.has(f.path) && !f.path.startsWith("agents/executors/") && /\b(chatAnthropic|chatAnthropicStream|chatOllama|chatOllamaStream|chatLocal|chatLocalStream)\(/.test(f.text)).map((f) => f.path);
     expect(offenders).toEqual([]);
+  });
+
+  it("a module's own local request goes through the runtime: traced, no tools, never the cloud", async () => {
+    await clearTrace();
+    const ex = fakeExecutor(() => ({ content: '{"ok":true}', toolCalls: [], model: "qwen3:4b" }));
+    const res = await runLocalRequest(ex, { messages: [{ role: "user", content: "paragraph" }], temperature: 0, seed: 7, ...({ tools: [{ name: "write_file" }] } as object) }, { agentId: "entity-relations" });
+    expect(res.content).toBe('{"ok":true}');
+    expect(ex.calls[0].tools).toBeUndefined();
+    expect(ex.calls[0].seed).toBe(7);
+    await vi.waitFor(() => expect(listRuns()[0]).toMatchObject({ agentId: "entity-relations", executor: "ollama", model: "qwen3:4b", status: "ok" }));
+    expect(JSON.stringify(listRuns()[0])).not.toContain("paragraph");
+    const failing = fakeExecutor(() => {
+      throw new Error("engine down");
+    });
+    await expect(runLocalRequest(failing, { messages: [] }, { agentId: "eval-here" })).rejects.toThrow("engine down");
+    await vi.waitFor(() => expect(listRuns()[0]).toMatchObject({ agentId: "eval-here", status: "failed", errorCode: "error" }));
+    const cloud = fakeExecutor(() => ({ content: "", toolCalls: [], model: "x" }), { id: "chat" });
+    await expect(runLocalRequest(cloud, { messages: [] }, { agentId: "knesset-law-answer" })).rejects.toThrow(/local engine only/);
+    expect(cloud.calls).toHaveLength(0);
   });
 
   it("the check sees a direct call when there is one", () => {

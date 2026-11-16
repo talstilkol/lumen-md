@@ -232,7 +232,9 @@ export async function verifyTriple(executor: Executor, row: HereRow, model?: str
   // A dynamic import: agents/untrusted brings its lazy strings (i18nLazyEnglish).
   const { guardUntrusted, unmarkData } = await import("../../../agents/untrusted");
   const passage = guardUntrusted(row.text, ["dataset:HeRE"]).text;
-  const res = await executor.chat({
+  // Through the runtime (plan 5.5.3): the request is in the trace like any run.
+  const { runLocalRequest } = await import("../../../agents/runtime");
+  const res = await runLocalRequest(executor, {
     messages: [
       { role: "system", content: HERE_SYSTEM },
       { role: "user", content: `Subject: ${row.subject}\nPredicate: ${row.predicate}\nObject: ${row.object}\n\nPassage:\n${passage}` },
@@ -242,7 +244,7 @@ export async function verifyTriple(executor: Executor, row: HereRow, model?: str
     temperature: 0,
     seed: 7,
     think: false,
-  });
+  }, { agentId: "eval-here" });
   try {
     // The passage went out datamarked (W11.I3): a quote copied from it may carry the marks.
     const content = unmarkData(res.content);
