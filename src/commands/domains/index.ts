@@ -30,6 +30,7 @@ import { buildBenYehudaCommands } from "./benyehuda";
 import { buildOpenSourceCommands } from "./openSources";
 import { buildEntityCommands } from "./entities";
 import { buildReadingCommands } from "./reading";
+import { buildJewishLanguageCommands } from "./jewishLanguages";
 
 export const COMMAND_SECTIONS: ReadonlyArray<(ctx: CommandContext) => Command[]> = [
   buildRecentCommands,
@@ -92,4 +93,6 @@ export const COMMAND_SECTIONS: ReadonlyArray<(ctx: CommandContext) => Command[]>
   buildOpenSourceCommands,
   buildEntityCommands,
   buildReadingCommands,
+  // Appended (plan W7.9).
+  buildJewishLanguageCommands,
 ];

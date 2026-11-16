@@ -1760,6 +1760,19 @@
   "israeliTime.moved": "Falls on {reason}: suggested {date}",
   "israeliTime.overdue.one": "{n} working day overdue",
   "israeliTime.overdue.other": "{n} working days overdue",
+  "jewishLang.dict.downloadConfirm": "Download the Yiddish spelling list (hunspell-yi, 2.4 MB, GPL-3.0, by Raphael A. Finkel, Simche Taub and Andrey Rozenberg) from GitHub to this device? It is not part of Lumen; it is kept only here.",
+  "jewishLang.dict.failed": "The Yiddish spelling list did not download: {error}",
+  "jewishLang.dict.installed": "Yiddish spelling is on ({count} words).",
+  "jewishLang.dict.removeConfirm": "Remove the Yiddish spelling list from this device?",
+  "jewishLang.dict.removed": "The Yiddish spelling list is removed.",
+  "jewishLang.translit.done": "Transliterated.",
+  "jewishLang.translit.guessed": "Transliterated. {count} vowels were read from י or ו, which can stand for two vowels: please check them.",
+  "jewishLang.translit.ladToHebrew": "Ladino: Latin letters → Hebrew letters",
+  "jewishLang.translit.ladToLatin": "Ladino: Hebrew letters → Latin letters",
+  "jewishLang.translit.latinToYi": "YIVO romanisation → Yiddish",
+  "jewishLang.translit.noSelection": "Select the text to transliterate first.",
+  "jewishLang.translit.title": "Transliterate the selection",
+  "jewishLang.translit.yiToLatin": "Yiddish → YIVO romanisation",
   "knesset.answerLabel": "Answer (local model)",
   "knesset.answerNotVerified": "Not verified: the critic could not confirm this answer from section {section}. Rely on the quote.",
   "knesset.answerVerified": "Checked by the critic: section {section} supports this answer.",
@@ -3411,5 +3424,6 @@
   "wikiComplete.create": "Create note «{name}»",
   "wikiComplete.createFailed": "Couldn't create the note «{name}»: {error}",
   "wikiComplete.created": "Created note «{name}»",
-  "wikiComplete.listLabel": "Link suggestions"
+  "wikiComplete.listLabel": "Link suggestions",
+  "yiddish.spell.unknown": "Not in the Yiddish word list"
 }

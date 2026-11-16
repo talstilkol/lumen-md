@@ -35,6 +35,7 @@ import {
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { bidiExtension } from "./bidi";
 import { paragraphDirectionKeymap } from "./paragraphDirection";
+import { noteLangExtension } from "./noteLang";
 import { hebrewTypographyExtension } from "./hebrewTypographyExtension";
 import { bidiMarksExtension } from "./bidiMarks";
 import { sefariaRefTrigger } from "./refTrigger";
@@ -325,6 +326,8 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       bidiExtension(),
       // W11.H4 — Mod+Shift+X switches the selected paragraphs' direction (saved as a mark in the note).
       paragraphDirectionKeymap,
+      // The note's language tag (Yiddish, Ladino…) on the content element (plan W7.9).
+      noteLangExtension(),
       // Hebrew typography as you type: ״ ׳ „” ־ – (plan W2.9).
       hebrewTypographyExtension(),
       bidiMarksExtension(),
