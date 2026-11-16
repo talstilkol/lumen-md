@@ -78,7 +78,9 @@ export async function localLawChat(): Promise<import("./answer").LawChat | null>
   const { pickExecutor } = await import("../../agents/executors");
   const { executor } = await pickExecutor(["ollama", "webllm"]);
   if (!executor || executor.id === "chat") return null;
-  return async (messages, signal) => (await executor.chat({ messages, tier: "small", temperature: 0, maxTokens: 200, signal })).content;
+  // Through the runtime (plan 5.5.3): each request is in the trace like any run; the cancel signal reaches the model (1.4).
+  const { runLocalRequest } = await import("../../agents/runtime");
+  return async (messages, signal) => (await runLocalRequest(executor, { messages, tier: "small", temperature: 0, maxTokens: 200, signal }, { agentId: "knesset-law-answer" })).content;
 }
 
 /** A protocol quote from the open note (a protocol's text) and the selected words; null when the words are not in a speaker's turn. */
