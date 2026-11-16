@@ -20353,6 +20353,322 @@
       "vars": []
     },
     {
+      "key": "writing.accept",
+      "en": "Accept",
+      "vars": []
+    },
+    {
+      "key": "writing.acceptAll",
+      "en": "Accept all ({{n}})",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "writing.acceptEdit",
+      "en": "Accept my edit",
+      "vars": []
+    },
+    {
+      "key": "writing.agent.concision",
+      "en": "Shorten & expand",
+      "vars": []
+    },
+    {
+      "key": "writing.agent.proofreaderHe",
+      "en": "Hebrew proofreading",
+      "vars": []
+    },
+    {
+      "key": "writing.agent.styleCoach",
+      "en": "Clarity & style",
+      "vars": []
+    },
+    {
+      "key": "writing.agent.toneShifter",
+      "en": "Tone",
+      "vars": []
+    },
+    {
+      "key": "writing.blocked",
+      "en": "Not offered as is: {{why}}. Edit it to use it.",
+      "vars": [
+        "why"
+      ]
+    },
+    {
+      "key": "writing.busy",
+      "en": "Reading the text on this device…",
+      "vars": []
+    },
+    {
+      "key": "writing.byModel",
+      "en": "local model {{model}}",
+      "vars": [
+        "model"
+      ]
+    },
+    {
+      "key": "writing.byRules",
+      "en": "a local rule",
+      "vars": []
+    },
+    {
+      "key": "writing.changes",
+      "en": "{{n}} changes: keep the ones you want",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "writing.close",
+      "en": "Close writing suggestions",
+      "vars": []
+    },
+    {
+      "key": "writing.confidence",
+      "en": "Confidence",
+      "vars": []
+    },
+    {
+      "key": "writing.count",
+      "en": "{{n}} open",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "writing.deleted",
+      "en": "deleted:",
+      "vars": []
+    },
+    {
+      "key": "writing.dismiss",
+      "en": "Dismiss",
+      "vars": []
+    },
+    {
+      "key": "writing.edit",
+      "en": "Edit",
+      "vars": []
+    },
+    {
+      "key": "writing.editLabel",
+      "en": "Your version",
+      "vars": []
+    },
+    {
+      "key": "writing.empty",
+      "en": "No suggestions here. Nothing to change.",
+      "vars": []
+    },
+    {
+      "key": "writing.failed",
+      "en": "The writing agent stopped: {{error}}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "writing.inserted",
+      "en": "inserted:",
+      "vars": []
+    },
+    {
+      "key": "writing.keys",
+      "en": "↑ ↓ move · Enter accept · Delete reject · E edit · Esc close",
+      "vars": []
+    },
+    {
+      "key": "writing.kind.clarity",
+      "en": "Clarity",
+      "vars": []
+    },
+    {
+      "key": "writing.kind.concision",
+      "en": "Concision",
+      "vars": []
+    },
+    {
+      "key": "writing.kind.consistency",
+      "en": "Consistency",
+      "vars": []
+    },
+    {
+      "key": "writing.kind.expansion",
+      "en": "Expansion",
+      "vars": []
+    },
+    {
+      "key": "writing.kind.grammar",
+      "en": "Grammar",
+      "vars": []
+    },
+    {
+      "key": "writing.kind.hedge",
+      "en": "Hedge",
+      "vars": []
+    },
+    {
+      "key": "writing.kind.logic",
+      "en": "Logic",
+      "vars": []
+    },
+    {
+      "key": "writing.kind.nominalization",
+      "en": "Action noun",
+      "vars": []
+    },
+    {
+      "key": "writing.kind.passive",
+      "en": "Passive",
+      "vars": []
+    },
+    {
+      "key": "writing.kind.readability",
+      "en": "Readability",
+      "vars": []
+    },
+    {
+      "key": "writing.kind.redundancy",
+      "en": "Redundant",
+      "vars": []
+    },
+    {
+      "key": "writing.kind.register",
+      "en": "Register",
+      "vars": []
+    },
+    {
+      "key": "writing.kind.repetition",
+      "en": "Repetition",
+      "vars": []
+    },
+    {
+      "key": "writing.kind.spelling",
+      "en": "Spelling",
+      "vars": []
+    },
+    {
+      "key": "writing.kind.structure",
+      "en": "Structure",
+      "vars": []
+    },
+    {
+      "key": "writing.kind.tone",
+      "en": "Tone",
+      "vars": []
+    },
+    {
+      "key": "writing.kind.wordChoice",
+      "en": "Word choice",
+      "vars": []
+    },
+    {
+      "key": "writing.kind.wordiness",
+      "en": "Wordy",
+      "vars": []
+    },
+    {
+      "key": "writing.level",
+      "en": "Level",
+      "vars": []
+    },
+    {
+      "key": "writing.level.academic",
+      "en": "Academic",
+      "vars": []
+    },
+    {
+      "key": "writing.level.everyday",
+      "en": "Everyday",
+      "vars": []
+    },
+    {
+      "key": "writing.level.professional",
+      "en": "Professional",
+      "vars": []
+    },
+    {
+      "key": "writing.listLabel",
+      "en": "Suggestions",
+      "vars": []
+    },
+    {
+      "key": "writing.noEditor",
+      "en": "Open a note in the editor first.",
+      "vars": []
+    },
+    {
+      "key": "writing.noModel",
+      "en": "This needs a model on this device (Ollama, LM Studio or WebLLM): {{error}}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "writing.noText",
+      "en": "Select some text, or put the cursor in a paragraph.",
+      "vars": []
+    },
+    {
+      "key": "writing.rank",
+      "en": "Rank with the local model",
+      "vars": []
+    },
+    {
+      "key": "writing.reject",
+      "en": "Reject",
+      "vars": []
+    },
+    {
+      "key": "writing.rejectAll",
+      "en": "Reject all",
+      "vars": []
+    },
+    {
+      "key": "writing.statusAccepted",
+      "en": "Applied {{n}}. One undo (Ctrl+Z) puts it all back.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "writing.statusAcceptedSkipped",
+      "en": "Applied {{n}}; {{skipped}} skipped (the text changed or they overlap).",
+      "vars": [
+        "n",
+        "skipped"
+      ]
+    },
+    {
+      "key": "writing.statusRejected",
+      "en": "Rejected.",
+      "vars": []
+    },
+    {
+      "key": "writing.title",
+      "en": "Writing suggestions",
+      "vars": []
+    },
+    {
+      "key": "writing.version",
+      "en": "Version {{n}}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "writing.versions",
+      "en": "Versions",
+      "vars": []
+    },
+    {
+      "key": "writing.why",
+      "en": "Why",
+      "vars": []
+    },
+    {
       "key": "yiddish.spell.unknown",
       "en": "Not in the Yiddish word list",
       "vars": []
