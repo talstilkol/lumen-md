@@ -137,13 +137,13 @@ describe("W10.D20: a snapshot changes only with what produces it", () => {
   });
 
   it("a vitest snapshot needs a source, test, Markdown input or package change; a Playwright image its spec or the app", () => {
-    const doc = "src/__tests__/__snapshots__/render/doc-privacy.html";
+    const doc = "src/__tests__/__snapshots__/render-docs/doc-privacy.html";
     const png = "e2e/visual-smoke.spec.ts-snapshots/mermaid-flowchart-chromium-linux.png";
     expect(handEditedSnapshots([doc])).toEqual([doc]);
     expect(handEditedSnapshots([doc, "docs/other.json", "e2e/visual-smoke.spec.ts"])).toEqual([doc]);
     expect(handEditedSnapshots([doc, "PRIVACY.md"])).toEqual([]);
-    expect(handEditedSnapshots([doc, "src/renderer/render.ts"])).toEqual([]);
-    expect(handEditedSnapshots([doc, "src/__tests__/renderSnapshot.test.ts"])).toEqual([]);
+    expect(handEditedSnapshots([doc, "src/renderer/pipeline.ts"])).toEqual([]);
+    expect(handEditedSnapshots([doc, "src/__tests__/renderSnapshotDocs.test.ts"])).toEqual([]);
     expect(handEditedSnapshots([doc, "package-lock.json"])).toEqual([]);
     expect(handEditedSnapshots([png])).toEqual([png]);
     expect(handEditedSnapshots([png, "PRIVACY.md", "src/__tests__/x.test.ts"])).toEqual([png]);
@@ -154,5 +154,50 @@ describe("W10.D20: a snapshot changes only with what produces it", () => {
     // Two snapshots changing together don't vouch for each other; a deleted one isn't checked.
     expect(handEditedSnapshots([doc, png])).toEqual([doc, png]);
     expect(handEditedSnapshots([doc], () => false)).toEqual([]);
+  });
+});
+
+describe("W10.D20 (audit r3): each snapshot is produced only by its own test, imports and inputs", () => {
+  const ids = "src/__tests__/__snapshots__/commandIds.snapshot.json";
+  const render = "src/__tests__/__snapshots__/render/syn-math.html";
+  const docs = "src/__tests__/__snapshots__/render-docs/doc-privacy.html";
+  const base = "visual/__baselines__/linux/rtl-preview--he-light--tables.png";
+
+  it("the reviewer's repro: a README edit does not vouch for a hand-edited commandIds snapshot", () => {
+    expect(handEditedSnapshots(["README.md", ids])).toEqual([ids]);
+    expect(handEditedSnapshots(["docs/dev/anything.md", ids])).toEqual([ids]);
+    expect(handEditedSnapshots(["src/__tests__/renderSnapshot.test.ts", ids])).toEqual([ids]); // another snapshot's test
+    expect(handEditedSnapshots(["src/__tests__/commandIds.test.ts", ids])).toEqual([]);
+    expect(handEditedSnapshots(["src/commands/useCommands.ts", ids])).toEqual([]); // in the test's import closure
+  });
+
+  it("a rendered snapshot moves with its own input documents, not any Markdown", () => {
+    expect(handEditedSnapshots(["PRIVACY.md", docs])).toEqual([]);
+    expect(handEditedSnapshots(["README.md", docs])).toEqual([docs]);
+    expect(handEditedSnapshots(["PRIVACY.md", render])).toEqual([render]); // PRIVACY.md is not in the 50-document set
+    expect(handEditedSnapshots(["public/templates/rfc.md", render])).toEqual([]);
+    expect(handEditedSnapshots(["src/renderer/pipeline.ts", render])).toEqual([]);
+    expect(handEditedSnapshots(["src/i18n/locales/en/cmd.json", render])).toEqual([]); // through import.meta.glob
+    expect(handEditedSnapshots(["src/__tests__/commandIds.test.ts", render])).toEqual([render]);
+  });
+
+  it("the visual/ baselines are snapshots too: their specs, the harness or the app produce them", () => {
+    expect(isSnapshot(base)).toBe(true);
+    expect(handEditedSnapshots([base])).toEqual([base]);
+    expect(handEditedSnapshots(["README.md", base])).toEqual([base]);
+    expect(handEditedSnapshots(["src/__tests__/x.test.ts", base])).toEqual([base]);
+    expect(handEditedSnapshots(["visual/rtl.visual.ts", base])).toEqual([]);
+    expect(handEditedSnapshots(["playwright.visual.config.ts", base])).toEqual([]);
+    expect(handEditedSnapshots(["src/styles/app.css", base])).toEqual([]);
+  });
+
+  it("a .snap beside its test is produced by that test's closure; an unknown snapshot only by the packages", () => {
+    const read = (f: string) => ({ "src/a/__tests__/x.test.ts": 'import { f } from "../f";', "src/a/f.ts": "export const f = 1;" })[f] ?? null;
+    const snap = "src/a/__tests__/__snapshots__/x.test.ts.snap";
+    expect(handEditedSnapshots(["src/a/f.ts", snap], () => true, { read })).toEqual([]);
+    expect(handEditedSnapshots(["src/a/g.ts", snap], () => true, { read })).toEqual([snap]);
+    const odd = "src/b/__snapshots__/mystery.json";
+    expect(handEditedSnapshots(["src/b/index.ts", odd], () => true, { read })).toEqual([odd]);
+    expect(handEditedSnapshots(["package-lock.json", odd], () => true, { read })).toEqual([]);
   });
 });
