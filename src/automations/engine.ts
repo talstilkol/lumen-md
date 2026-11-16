@@ -9,7 +9,9 @@
  *         · an object of a type is created · a field of a type changes (W12.U2)
  *   unless: Shabbat or a yom tov (W12.U2): the rule waits for the next weekday
  *   then: move to a folder · add a tag · apply a template · add a line to
- *         the daily note
+ *         the daily note · add a task (W10.E15: `- [ ]` in a tasks note) ·
+ *         run an agent (W10.E15: its changes wait in the review panel; the
+ *         automation itself writes nothing for it)
  *
  * Pure: `plan` reads a snapshot of the vault and returns the changes; the
  * caller writes them (`applyPlan`) through an injected file system.
@@ -43,7 +45,11 @@ export type Action =
   | { kind: "move"; folder: string }
   | { kind: "tag"; tag: string }
   | { kind: "template"; template: string }
-  | { kind: "appendDaily"; text: string };
+  | { kind: "appendDaily"; text: string }
+  /** W10.E15: a `- [ ] …` line in a tasks note (`file`, default TASKS_PATH); `{{link}}` etc. as in appendDaily. */
+  | { kind: "createTask"; text: string; file?: string }
+  /** W10.E15: run an agent on the note; what it proposes is staged for approval, never written by the rule. */
+  | { kind: "runAgent"; agent: string; prompt?: string };
 
 export interface Rule {
   id: string;
@@ -66,7 +72,12 @@ export type VaultEvent =
 
 export type Change =
   | { kind: "write"; path: string; before: string | null; after: string; rule: string }
-  | { kind: "move"; from: string; to: string; rule: string };
+  | { kind: "move"; from: string; to: string; rule: string }
+  /** An agent run: nothing is written by the automation, so there is nothing to undo; the agent's proposals wait for review. */
+  | { kind: "agent"; agent: string; path: string | null; prompt: string; rule: string };
+
+/** Where "add a task" writes when the rule names no note. */
+export const TASKS_PATH = "Tasks.md";
 
 /** What a rule may read: the vault as it is now. */
 export interface VaultView {
@@ -312,6 +323,18 @@ export function plan(rules: readonly Rule[], event: VaultEvent, ctx: PlanContext
           if (!cur.split("\n").includes(line)) write(daily, cur ? `${cur.replace(/\s*$/, "")}\n${line}\n` : `${line}\n`, rule.id, depth, false);
           continue;
         }
+        if (a.kind === "createTask") {
+          const file = cleanFolder(a.file ?? "") || TASKS_PATH;
+          const cur = read(file) ?? "";
+          const line = `- [ ] ${fill(a.text, path, ctx.today).trim()}`;
+          // A task is a to-do, not an edit of a note: it triggers nothing, and the same task is not added twice.
+          if (!cur.split("\n").includes(line)) write(file, cur ? `${cur.replace(/\s*$/, "")}\n${line}\n` : `${line}\n`, rule.id, depth, false);
+          continue;
+        }
+        if (a.kind === "runAgent") {
+          out.changes.push({ kind: "agent", agent: a.agent, path, prompt: fill(a.prompt ?? "", path, ctx.today), rule: rule.id });
+          continue;
+        }
         if (!path) continue; // a daily rule has no note of its own
         const text = read(path);
         if (text === null) continue;
@@ -343,6 +366,8 @@ export interface Fs {
   write(path: string, text: string): Promise<void>;
   move(from: string, to: string): Promise<void>;
   remove(path: string): Promise<void>;
+  /** Start an agent run (W10.E15). Its changes are staged for review; without it an agent change is only planned. */
+  runAgent?(change: Extract<Change, { kind: "agent" }>): Promise<void>;
 }
 
 export interface RunLogEntry {
@@ -362,6 +387,9 @@ export async function applyPlan(p: Plan, fs: Fs, id: string, event: string, now:
       const before = await fs.read(c.path);
       await fs.write(c.path, c.after);
       done.push({ ...c, before });
+    } else if (c.kind === "agent") {
+      await fs.runAgent?.(c);
+      done.push(c);
     } else {
       await fs.move(c.from, c.to);
       done.push(c);
@@ -376,6 +404,8 @@ export async function undoRun(entry: RunLogEntry, fs: Fs): Promise<{ ok: true } 
   const overlay = new Map<string, string | null>();
   const cur = async (p: string) => (overlay.has(p) ? overlay.get(p)! : await fs.read(p));
   for (const c of [...entry.changes].reverse()) {
+    // An agent run wrote nothing itself: its proposals are approved or rejected in the review panel.
+    if (c.kind === "agent") continue;
     if (c.kind === "write") {
       if ((await cur(c.path)) !== c.after) return { ok: false, path: c.path };
       overlay.set(c.path, c.before);
@@ -387,6 +417,7 @@ export async function undoRun(entry: RunLogEntry, fs: Fs): Promise<{ ok: true } 
     }
   }
   for (const c of [...entry.changes].reverse()) {
+    if (c.kind === "agent") continue;
     if (c.kind === "write") {
       if (c.before === null) await fs.remove(c.path);
       else await fs.write(c.path, c.before);

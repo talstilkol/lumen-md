@@ -13,6 +13,13 @@ anywhere.
 | a tag is added (in the frontmatter or as `#tag`) | add a tag |
 | a property changes (to any value, or to one value) | apply a template (its text, and frontmatter keys the note does not have) |
 | every day (once a day) | add a line to today's daily note (`{{link}}`, `{{title}}`, `{{date}}`) |
+| | add a task: a `- [ ] …` line in `Tasks.md`, or in a note you name |
+| | run an agent on the note |
+
+**Run an agent** doesn't change anything by itself. The agent's changes, or
+its answer added to the note, wait in the review panel until you approve
+them, as any agent's changes do. The dry run lists the agent it would start,
+and undo has nothing of its own to take back for it.
 
 ## Make a rule
 
@@ -91,7 +98,7 @@ A rule's own changes can trigger other rules (tag → move → the move's
 "created in Done" → tag), but a rule runs at most once per note in one
 chain, and a chain stops after three steps. Two rules that would bounce a
 note between folders forever stop after one round. A line added to the
-daily note triggers nothing.
+daily note, or a task added to the tasks note, triggers nothing.
 
 ## How it was checked
 
