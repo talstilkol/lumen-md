@@ -7,6 +7,12 @@ party has audited them. This plan moves every primitive to an audited library.
 Our own code stays only as a differential oracle in the tests. The choices
 follow research R3 (§1.2 and R3.5, 14.11).
 
+**Status (16.11.2026, audit A4 item 5): blocked on the npm registry.** The
+cloud lanes cannot reach registry.npmjs.org, and the packages are not in the
+offline `node_modules`, so `IN_HOUSE` stays the default and the users' docs
+say so (sync/e2ee, "our own implementation, not an audited library"). Nothing
+here was installed from any other source. The steps below run on the Mac.
+
 ## One door, two implementations
 
 - `src/sync/e2ee/primitives/index.ts` is the only module that callers import (`kdf.ts`, `age.ts`, the vector generator). `cryptoPrimitivesDoor.test.ts` fails on any direct import of `primitives/{argon2,blake2b,chacha20poly1305,scrypt}.ts` from outside that folder.
