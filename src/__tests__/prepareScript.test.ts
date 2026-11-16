@@ -2,21 +2,24 @@
  * One `prepare` script (INT5): #1035 (git hooks) and #1054 (merge drivers)
  * each added a "prepare" key to package.json; JSON keeps only the last, so
  * one of the two silently never ran. scripts/prepare.mjs runs both, never
- * fails the install, does nothing in CI, and starts no process: the
+ * fails the install, does nothing in CI, and leaves no process running: the
  * lane-state watcher stays opt-in (it is started later by the
- * reference-transaction hook, and only with a lane state set).
+ * reference-transaction hook, and only with a lane state set). The ci:local
+ * pre-push hook is opt-in too (review 11, M2; #1054's design).
  */
 import { afterAll, describe, expect, it } from "vitest";
 import { spawnSync } from "node:child_process";
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import { killWatchersUnder, watchersUnder } from "./helpers/laneWatchers";
 // @ts-expect-error — plain .mjs module without type declarations
 import { inCI, STEPS } from "../../scripts/prepare.mjs";
 
 const ROOT = resolve(__dirname, "../..");
 const scratch: string[] = [];
 afterAll(() => {
+  killWatchersUnder(scratch);
   for (const d of scratch) rmSync(d, { recursive: true, force: true });
 });
 
@@ -43,7 +46,7 @@ function clone(): string {
 
 const env = (extra: Record<string, string> = {}) => {
   const e: Record<string, string | undefined> = { ...process.env, ...extra };
-  for (const k of ["CI", "LUMEN_NO_HOOKS", "LUMEN_NO_GIT_SETUP", "LUMEN_LANE_STATE", "LUMEN_LANE_STATE_DIR", "npm_config_global", "GIT_DIR", "GIT_INDEX_FILE", "GIT_WORK_TREE"])
+  for (const k of ["CI", "LUMEN_NO_HOOKS", "LUMEN_CI_LOCAL_HOOK", "LUMEN_NO_GIT_SETUP", "LUMEN_LANE_STATE", "LUMEN_LANE_STATE_DIR", "npm_config_global", "GIT_DIR", "GIT_INDEX_FILE", "GIT_WORK_TREE"])
     if (!(k in extra)) delete e[k];
   return e as NodeJS.ProcessEnv;
 };
@@ -69,13 +72,24 @@ describe("package.json prepare: one script for hooks and merge drivers", () => {
     expect(inCI({})).toBe(false);
   });
 
-  it("a fresh clone gets both hooks and both drivers from one run", () => {
+  it("a fresh clone gets the lane hook and both drivers from one run, and no pre-push hook", () => {
     const dir = clone();
     const r = prepare(dir);
     expect(r.status).toBe(0);
-    expect(existsSync(hook(dir, "pre-push"))).toBe(true);
+    expect(existsSync(hook(dir, "pre-push"))).toBe(false);
+    expect(r.stdout).toContain("pre-push not installed (opt-in");
     expect(existsSync(hook(dir, "reference-transaction"))).toBe(true);
     expect(cfg(dir, "merge.lumen-help.driver")).toBe("node scripts/help-merge-driver.mjs %O %A %B %P");
+  });
+
+  it("the ci:local pre-push hook only in a clone that opted in", () => {
+    const dir = clone();
+    git(dir, "config", "lumen.ciLocalHook", "true");
+    expect(prepare(dir).status).toBe(0);
+    expect(readFileSync(hook(dir, "pre-push"), "utf8")).toContain("ci:local");
+    const other = clone();
+    expect(prepare(other, { LUMEN_CI_LOCAL_HOOK: "1" }).status).toBe(0);
+    expect(existsSync(hook(other, "pre-push"))).toBe(true);
   });
 
   it("in CI it writes nothing and exits 0", () => {
@@ -94,7 +108,8 @@ describe("package.json prepare: one script for hooks and merge drivers", () => {
     writeFileSync(state, "# lane\n");
     git(dir, "config", "lumen.laneState", state);
     expect(prepare(dir).status).toBe(0);
-    expect(existsSync(join(dir, git(dir, "rev-parse", "--git-path", "lumen-lane-watch.json").stdout.trim()))).toBe(false);
+    expect(existsSync(join(dir, git(dir, "rev-parse", "--git-common-dir").stdout.trim(), "lumen-lane-watch.json"))).toBe(false);
+    expect(watchersUnder(dir)).toEqual([]);
   });
 
   it("a failing step does not fail the install, and the other step still runs", () => {

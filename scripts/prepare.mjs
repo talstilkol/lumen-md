@@ -3,8 +3,8 @@
  * npm's `prepare` script: what `npm install` / `npm ci` run in a checkout of
  * this repo. One script for both clone set-ups that used to want the slot:
  *
- *   1. scripts/install-git-hooks.mjs   the pre-push and reference-transaction
- *                                      hooks (W10.E56 / W10.E57)
+ *   1. scripts/install-git-hooks.mjs   the reference-transaction hook, and the
+ *                                      pre-push hook when opted in (W10.E56 / W10.E57)
  *   2. scripts/git-setup.mjs           the lumen-help and lumen-lanes merge
  *                                      drivers in the clone's local config (W8.11)
  *
@@ -12,11 +12,16 @@
  *   - never fails the install: a step that fails, hangs or is missing is one
  *     line, and this exits 0;
  *   - nothing at all in CI ($CI set and not "false"/"0");
- *   - no network and no process left running: both steps only write files
- *     under the clone's hooks folder and keys in its local git config. The
- *     hourly lane-state watcher is not started here; the reference-transaction
- *     hook starts it on a later ref change, and only in a clone that opted in
- *     (git config lumen.laneState / lumen.laneStateDir, or $LUMEN_LANE_STATE(_DIR)).
+ *   - no network, and no process left running when it returns: each step is
+ *     a node child process that it waits for (git is run to read the hooks
+ *     path and the config), and they only write files under the clone's hooks
+ *     folder and keys in its local git config. The ci:local pre-push hook is
+ *     written only in a clone that opted in (git config lumen.ciLocalHook true,
+ *     or $LUMEN_CI_LOCAL_HOOK=1; review 11, M2). The hourly lane-state watcher is
+ *     never started here. The reference-transaction hook starts it on a later
+ *     ref change, and only in a clone with a lane state (git config
+ *     lumen.laneState / lumen.laneStateDir, or $LUMEN_LANE_STATE(_DIR)); that
+ *     watcher does run `git ls-remote` against origin every hour.
  *
  *   node scripts/prepare.mjs
  */

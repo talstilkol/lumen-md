@@ -1,16 +1,20 @@
 #!/usr/bin/env node
 /**
- * The repo's git hooks, installed in every clone without anyone doing it
- * (W10.E56 / W8.9, W10.E57 / W8.10): `npm install` and `npm ci` run this as
- * the `prepare` script.
+ * The repo's git hooks for a clone (W10.E56 / W8.9, W10.E57 / W8.10):
+ * `npm install` and `npm ci` run this as the `prepare` script.
  *
- *   pre-push               lockfile drift (W8.9), then `ci:local --changed --skip e2e`;
- *                          it also notes the push for the lane-state hook
- *                          (the same hook as `npm run ci:local -- --install-hook`)
  *   reference-transaction  records a push in the lane's STATE.md and keeps the
  *                          lane's hourly tick running (W8.10); does nothing in a
  *                          clone without a lane state
  *                          (the same hook as `node scripts/lane-state.mjs install-hook`)
+ *   pre-push               OPT-IN (review 11, M2; #1054's design): lockfile drift (W8.9),
+ *                          then `ci:local --changed --skip e2e`, on every push. Written
+ *                          only when the clone asked for it: `git config lumen.ciLocalHook true`
+ *                          or $LUMEN_CI_LOCAL_HOOK=1 (or by hand: `npm run ci:local -- --install-hook`).
+ *
+ * Nothing here starts a process that outlives it: the lane watcher is started
+ * by the reference-transaction hook on a later ref change, and only in a clone
+ * with a lane state set.
  *
  * Never fails the install: a clone whose hook is someone else's keeps it (one
  * line says how to add ours), and nothing is written in CI, outside a git
@@ -35,17 +39,28 @@ export function skipReason(env, gitHooksDir) {
   return null;
 }
 
+/** Did this clone opt in to the ci:local pre-push hook? (`git config lumen.ciLocalHook true`, or $LUMEN_CI_LOCAL_HOOK=1.) */
+export function wantsPrePush(env, gitConfigValue) {
+  if (env.LUMEN_CI_LOCAL_HOOK === "1") return true;
+  return ["true", "1", "yes", "on"].includes(String(gitConfigValue ?? "").trim().toLowerCase());
+}
+
+export const PRE_PUSH_OPT_IN = "git config lumen.ciLocalHook true && npm run prepare (or: npm run ci:local -- --install-hook)";
+
 /**
  * What to do with each hook file, given what is there now.
  * @param {Record<string, string | null>} existing  hook name → its current text (null: none)
- * @returns {Array<{ name: string; action: "write" | "same" | "keep"; content: string; hint?: string }>}
+ * @param {{ prePush?: boolean }} [opts]  prePush: the clone opted in to the ci:local pre-push hook
+ * @returns {Array<{ name: string; action: "write" | "same" | "keep" | "opt-in"; content: string; hint?: string }>}
  */
-export function installPlan(existing) {
+export function installPlan(existing, { prePush = false } = {}) {
   const wanted = [
-    { name: "pre-push", plan: hookPlan(existing["pre-push"] ?? null), hint: "npm run ci:local -- --install-hook --force" },
-    { name: "reference-transaction", plan: txnHookPlan(existing["reference-transaction"] ?? null), hint: "node scripts/lane-state.mjs install-hook --state <STATE.md> --force" },
+    { name: "pre-push", plan: hookPlan(existing["pre-push"] ?? null), hint: "npm run ci:local -- --install-hook --force", optIn: true },
+    { name: "reference-transaction", plan: txnHookPlan(existing["reference-transaction"] ?? null), hint: "node scripts/lane-state.mjs install-hook --state <STATE.md> --force", optIn: false },
   ];
-  return wanted.map(({ name, plan, hint }) => {
+  return wanted.map(({ name, plan, hint, optIn }) => {
+    // The pre-push hook runs the checks on every push: never without the clone asking (#1054).
+    if (optIn && !prePush) return { name, action: "opt-in", content: plan.content, hint: PRE_PUSH_OPT_IN };
     if (plan.action !== "write") return { name, action: "keep", content: plan.content, hint };
     return { name, action: existing[name] === plan.content ? "same" : "write", content: plan.content };
   });
@@ -63,9 +78,12 @@ function main() {
   const names = ["pre-push", "reference-transaction"];
   const existing = Object.fromEntries(names.map((n) => [n, existsSync(join(hooks, n)) ? readFileSync(join(hooks, n), "utf8") : null]));
   const dry = process.argv.includes("--dry");
-  for (const step of installPlan(existing)) {
+  const cfg = spawnSync("git", ["config", "--get", "lumen.ciLocalHook"], { cwd: root, encoding: "utf8" });
+  const prePush = wantsPrePush(process.env, cfg.status === 0 ? cfg.stdout : null);
+  for (const step of installPlan(existing, { prePush })) {
     const file = join(hooks, step.name);
-    if (step.action === "keep") console.log(`git hooks: ${file} is not ours; kept. To use ours instead: ${step.hint}`);
+    if (step.action === "opt-in") console.log(`git hooks: ${step.name} not installed (opt-in: ${step.hint})`);
+    else if (step.action === "keep") console.log(`git hooks: ${file} is not ours; kept. To use ours instead: ${step.hint}`);
     else if (step.action === "same") console.log(`git hooks: ${step.name} up to date`);
     else if (dry) console.log(`git hooks: would write ${file}`);
     else {
