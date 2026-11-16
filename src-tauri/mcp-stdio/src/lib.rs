@@ -49,7 +49,9 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 mod allowlist;
-pub use allowlist::{approval_pin, checked_spawn, may_spawn, may_spawn_in, pin, pin_in, pin_text, resolve_program, sha256_file, sha256_hex, AllowList, Lang, Pin, Sha256, MAX_PINNED_BYTES, NOT_APPROVED};
+#[cfg(test)]
+mod review11;
+pub use allowlist::{approval_pin, checked_spawn, may_spawn, may_spawn_in, page_writable_roots, pin, pin_in, pin_text, resolve_program, sha256_file, sha256_hex, AllowList, Lang, Pin, Sha256, MAX_PINNED_BYTES, NOT_APPROVED};
 
 /// Longest stdout line (one JSON-RPC message) we accept.
 pub const MAX_LINE: usize = 4 * 1024 * 1024;
@@ -61,6 +63,8 @@ pub const MAX_FIELD: usize = 4096;
 /// Programs that would run whatever their arguments say. Windows names too (Git for Windows' bash.exe, WSL).
 const SHELLS: &[&str] = &[
     "sh", "sh.exe", "bash", "bash.exe", "zsh", "zsh.exe", "dash", "fish", "fish.exe", "ksh", "csh", "tcsh", "cmd", "cmd.exe", "powershell", "powershell.exe", "pwsh", "pwsh.exe", "env", "env.exe", "wsl", "wsl.exe", "busybox", "busybox.exe",
+    // Review 11, L2: programs that run the command they are given (or a program in their own language).
+    "nohup", "timeout", "nice", "ionice", "stdbuf", "setsid", "sudo", "doas", "xargs", "awk", "gawk", "mawk", "nawk", "awk.exe", "gawk.exe", "xargs.exe", "timeout.exe",
 ];
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -183,10 +187,69 @@ fn inline_code(family: &str, arg: &str) -> bool {
     }
 }
 
-/// Does this interpreter read its program from stdin? With no argument, or with `-` (the script
-/// is stdin), it runs whatever is written to it: the page writes the server's stdin.
+/// What an option does with the argument after it (review 11, M1).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum NextArg {
+    /// Nothing: it is a flag, or its value is attached (`-Wignore`, `--require=x`).
+    Free,
+    /// It is the option's value (`-W ignore`, `-r pre.js`, `--import x`).
+    Value,
+    /// It is the program itself (`python -m mod`, `php -f script.php`).
+    Program,
+    /// This argument names the program itself (`python -mmod`).
+    ProgramHere,
+}
+
+/// Per interpreter family: the short options whose value may be the next argument, the one(s)
+/// whose value is the program, and the long options that take a separate value.
+fn value_options(family: &str) -> (&'static str, &'static str, &'static [&'static str]) {
+    match family {
+        "python" => ("WXQ", "m", &["--check-hash-based-pycs"]),
+        "node" => ("rC", "", &["--require", "--import", "--loader", "--experimental-loader", "--conditions", "--input-type", "--env-file", "--env-file-if-exists", "--title", "--inspect-port", "--redirect-warnings", "--icu-data-dir", "--openssl-config", "--disable-warning", "--watch-path", "--experimental-policy", "--diagnostic-dir", "--report-dir", "--report-directory", "--report-filename", "--max-http-header-size", "--stack-trace-limit", "--experimental-config-file"]),
+        "deno" => ("cL", "", &["--config", "--import-map", "--lock", "--cert", "--location", "--seed", "--env-file", "--log-level", "--ext", "--watch-exclude", "--inspect-wait"]),
+        "bun" => ("r", "", &["--preload", "--require", "--import", "--cwd", "--config", "--env-file", "--tsconfig-override", "--define", "--loader", "--conditions", "--port"]),
+        "perl" => ("I", "", &[]),
+        "ruby" => ("CEFIr", "", &["--encoding", "--external-encoding", "--internal-encoding", "--enable", "--disable"]),
+        "php" => ("cdtz", "f", &["--php-ini", "--define", "--docroot", "--zend-extension"]),
+        "lua" => ("l", "", &[]),
+        _ => ("", "", &[]),
+    }
+}
+
+/// What option `arg` of an interpreter in `family` does with the next argument. A short-option
+/// cluster is read up to its first value-taking letter: the value is the rest of the cluster, or
+/// the next argument when the letter ends it.
+pub(crate) fn next_arg(family: &str, arg: &str) -> NextArg {
+    let (short, program, long) = value_options(family);
+    if let Some(name) = arg.strip_prefix("--") {
+        if name.contains('=') || name.is_empty() {
+            return NextArg::Free;
+        }
+        return if long.contains(&arg) { NextArg::Value } else { NextArg::Free };
+    }
+    let Some(cluster) = arg.strip_prefix('-') else { return NextArg::Free };
+    let mut chars = cluster.char_indices();
+    while let Some((i, ch)) = chars.next() {
+        let last = i + ch.len_utf8() == cluster.len();
+        if program.contains(ch) {
+            return if last { NextArg::Program } else { NextArg::ProgramHere };
+        }
+        if short.contains(ch) {
+            return if last { NextArg::Value } else { NextArg::Free };
+        }
+        if !ch.is_ascii_alphanumeric() {
+            return NextArg::Free;
+        }
+    }
+    NextArg::Free
+}
+
+/// Does this interpreter read its program from stdin? With `-` (the script is stdin), or with no
+/// script or module argument at all (review 11, M1: `python3 -u`, `node --no-warnings` and
+/// `node -r pre.js` read their program from stdin too), it runs whatever is written to it: the
+/// page writes the server's stdin.
 fn reads_code_from_stdin(family: &str, args: &[String]) -> bool {
-    family != "osascript" && (args.is_empty() || args.iter().any(|a| a == "-"))
+    family != "osascript" && (args.iter().any(|a| a == "-") || allowlist::program_position(family, args) >= args.len())
 }
 
 /// A program that downloads a package (or a URL) and runs it: what it runs is fetched when it
@@ -854,9 +917,11 @@ mod tests {
             assert!(e.contains("code written in the command line"), "{cmd} {a}: {e}");
         }
         // A value-taking option ends the cluster: these are not code.
-        for (cmd, a) in [("python3", "-mcalendar"), ("python3", "-Wignore"), ("python3", "-Xdev"), ("perl", "-MFile::Temp"), ("perl", "-Ilib"), ("perl", "-pi.bak"), ("perl", "-0777"), ("ruby", "-Eutf-8"), ("ruby", "-rjson"), ("node", "-r"), ("node", "--require=x")] {
+        for (cmd, a) in [("python3", "-mcalendar"), ("python3", "-Wignore"), ("python3", "-Xdev"), ("perl", "-MFile::Temp"), ("perl", "-Ilib"), ("perl", "-pi.bak"), ("perl", "-0777"), ("ruby", "-Eutf-8"), ("ruby", "-rjson"), ("node", "--require=x")] {
             assert!(spec(cmd, &[a, "s"]).validate().is_ok(), "{cmd} {a}");
         }
+        // `node -r s` preloads s and reads its program from stdin (review 11, M1); with a script it runs.
+        assert!(spec("node", &["-r", "x", "s"]).validate().is_ok());
         // No script, or `-`: the interpreter reads its code from stdin, which the page writes.
         for (cmd, args) in [("python3", &[][..]), ("node", &["-"]), ("python3", &["-u", "-"]), ("deno", &[]), ("ruby", &[])] {
             let e = spec(cmd, args).validate().unwrap_err();

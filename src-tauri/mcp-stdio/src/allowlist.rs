@@ -147,14 +147,19 @@ thread_local! {
 
 /// The sha256 of a file's bytes, read in pieces; at most `MAX_PINNED_BYTES`.
 pub fn sha256_file(path: &Path) -> Result<String, String> {
+    sha256_file_within(path, MAX_PINNED_BYTES)
+}
+
+/// `sha256_file` with the bound `max` (tests use a small one).
+pub(crate) fn sha256_file_within(path: &Path, max: u64) -> Result<String, String> {
     let f = std::fs::File::open(path).map_err(|e| format!("cannot read {}: {e}", path.display()))?;
     let len = f.metadata().map_err(|e| format!("cannot read {}: {e}", path.display()))?.len();
-    let too_big = || format!("{} is larger than {} MB: it is not pinned", path.display(), MAX_PINNED_BYTES / (1024 * 1024));
-    if len > MAX_PINNED_BYTES {
+    let too_big = || format!("{} is larger than {} MB: it is not pinned", path.display(), max / (1024 * 1024));
+    if len > max {
         return Err(too_big());
     }
-    // A file that grows while it is read stops at the bound too.
-    let mut f = f.take(MAX_PINNED_BYTES + 1);
+    // A file that grows while it is read (or whose size the file system does not report) stops at the bound too.
+    let mut f = f.take(max + 1);
     let mut s = Sha256::default();
     let mut buf = vec![0u8; 256 * 1024];
     let mut total = 0u64;
@@ -164,7 +169,7 @@ pub fn sha256_file(path: &Path) -> Result<String, String> {
             break;
         }
         total += n as u64;
-        if total > MAX_PINNED_BYTES {
+        if total > max {
             return Err(too_big());
         }
         #[cfg(test)]
@@ -313,6 +318,20 @@ fn inside(path: &Path, root: &Path, ignore_case: bool) -> bool {
     }
 }
 
+/// The folders a page can write to, for `pin_in`'s `vaults` (review 11, L2): the granted vault
+/// roots and the app's `backups` folder (`vault_backup` writes the page's bytes there), each made
+/// canonical when it exists (a root given through a symlink still matches).
+pub fn page_writable_roots(vault_roots: &[String], app_data_dir: Option<&Path>) -> Vec<String> {
+    let canon = |p: PathBuf| std::fs::canonicalize(&p).unwrap_or(p).to_string_lossy().into_owned();
+    let mut out: Vec<String> = vault_roots.iter().filter(|v| !v.is_empty()).map(|v| canon(PathBuf::from(v))).collect();
+    if let Some(d) = app_data_dir {
+        let base = std::fs::canonicalize(d).unwrap_or_else(|_| d.to_path_buf());
+        out.push(canon(base.join("backups")));
+    }
+    out.dedup();
+    out
+}
+
 /// The granted vault `path` is in, if any (`path` canonical when it exists).
 fn in_vault<'a>(path: &Path, vaults: &'a [String]) -> Option<&'a str> {
     let real = std::fs::canonicalize(path).unwrap_or_else(|_| path.to_path_buf());
@@ -321,19 +340,28 @@ fn in_vault<'a>(path: &Path, vaults: &'a [String]) -> Option<&'a str> {
 }
 
 /// Where an interpreter takes its program (review 10, M4): the index of the first argument that is
-/// not an option (after `deno run` / `bun run`), or of python's `-m`. A folder at or before it
-/// would be run (`python pkg/`, `node dir`, `node -r dir`); after it a folder is the script's data.
-fn program_position(family: &str, args: &[String]) -> usize {
+/// not an option nor an option's value (after `deno run` / `bun run`), of python's `-mmod`, or of
+/// the module after `-m` (review 11, M1: per family, `-W ignore`, `-X dev`, `-r pre.js` take the
+/// next argument as their value). A folder at or before it would be run (`python pkg/`,
+/// `node dir`, `node -r dir`, `python -W ignore dir`); after it a folder is the script's data.
+/// `args.len()` when there is no program argument.
+pub(crate) fn program_position(family: &str, args: &[String]) -> usize {
     let mut skip_subcommand = matches!(family, "deno" | "bun");
-    for (i, a) in args.iter().enumerate() {
-        if a.starts_with('-') {
-            if family == "python" && a.len() >= 2 && !a.starts_with("--") && a[1..].contains('m') {
-                return i;
+    let mut i = 0;
+    while i < args.len() {
+        let a = &args[i];
+        if a.starts_with('-') && a != "-" {
+            match crate::next_arg(family, a) {
+                crate::NextArg::Free => i += 1,
+                crate::NextArg::Value => i += 2,
+                crate::NextArg::Program => return i + 1,
+                crate::NextArg::ProgramHere => return i,
             }
             continue;
         }
         if skip_subcommand && matches!(a.as_str(), "run" | "serve" | "test" | "x") {
             skip_subcommand = false;
+            i += 1;
             continue;
         }
         return i;

@@ -86,7 +86,9 @@ fn path_var() -> Option<String> {
 /// The folders the user granted as vaults (canonical paths): a program, a file it is given or its
 /// working folder may not be inside one (review 10, M4: the page can write there).
 fn vaults(app: &AppHandle) -> Vec<String> {
-    crate::desktop_vault::known_roots(&app.state::<crate::desktop_vault::VaultState>())
+    let roots = crate::desktop_vault::known_roots(&app.state::<crate::desktop_vault::VaultState>());
+    // Review 11, L2: the app's backups folder holds bytes the page wrote (vault_backup).
+    lumen_mcp_stdio::page_writable_roots(&roots, app.path().app_data_dir().ok().as_deref())
 }
 
 /// Run `f` off the main thread and the async workers (it may block on files, a pipe or a process).
