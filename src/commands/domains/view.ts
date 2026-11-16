@@ -166,6 +166,15 @@ export function buildViewCommands({ setSearchOpen, setRuntimeMetricsOpen, vimEna
       action: () => void import("../../epub/openEpub").then((m) => m.pickAndOpenEpub()),
     },
     {
+      id: "view.readingProfile",
+      label: t("cmd.reading.profile"),
+      hint: t("desc.reading.profile"),
+      icon: cmdIcons.FileText,
+      group: t("group.file"),
+      // Plan W13.R1: one menu for every reading mode and the note's reading profile.
+      action: () => void import("../../ui/ReadingModeMenu").then((m) => m.openReadingModeMenu()),
+    },
+    {
       id: "view.reading",
       label: t("cmd.reading.mode"),
       icon: cmdIcons.FileText,

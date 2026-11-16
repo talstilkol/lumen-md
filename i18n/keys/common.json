@@ -15449,6 +15449,343 @@
       "vars": []
     },
     {
+      "key": "readingMode.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "readingMode.common",
+      "en": "Text and aids",
+      "vars": []
+    },
+    {
+      "key": "readingMode.experimental",
+      "en": "Experimental",
+      "vars": []
+    },
+    {
+      "key": "readingMode.field.aids",
+      "en": "Dyslexia-friendly layout",
+      "vars": []
+    },
+    {
+      "key": "readingMode.field.anchor",
+      "en": "Anchor emphasis (bold word starts)",
+      "vars": []
+    },
+    {
+      "key": "readingMode.field.dyslexiaLatin",
+      "en": "Dyslexia-friendly font for English text",
+      "vars": []
+    },
+    {
+      "key": "readingMode.field.focusUnit",
+      "en": "Keep bright",
+      "vars": []
+    },
+    {
+      "key": "readingMode.field.font",
+      "en": "Hebrew font",
+      "vars": []
+    },
+    {
+      "key": "readingMode.field.hemingway",
+      "en": "Readability highlights",
+      "vars": []
+    },
+    {
+      "key": "readingMode.field.layout",
+      "en": "Layout",
+      "vars": []
+    },
+    {
+      "key": "readingMode.field.lineFocus",
+      "en": "Line focus",
+      "vars": []
+    },
+    {
+      "key": "readingMode.field.lineHeight",
+      "en": "Line height",
+      "vars": []
+    },
+    {
+      "key": "readingMode.field.nikud",
+      "en": "Niqqud",
+      "vars": []
+    },
+    {
+      "key": "readingMode.field.pos",
+      "en": "Colour the parts of speech",
+      "vars": []
+    },
+    {
+      "key": "readingMode.field.rate",
+      "en": "Read-aloud speed",
+      "vars": []
+    },
+    {
+      "key": "readingMode.field.size",
+      "en": "Text size",
+      "vars": []
+    },
+    {
+      "key": "readingMode.field.spacedHebrew",
+      "en": "Spaced Hebrew (room for niqqud)",
+      "vars": []
+    },
+    {
+      "key": "readingMode.field.syllables",
+      "en": "Syllables (English) and niqqud (Hebrew)",
+      "vars": []
+    },
+    {
+      "key": "readingMode.field.tint",
+      "en": "Page colour",
+      "vars": []
+    },
+    {
+      "key": "readingMode.field.voice",
+      "en": "Voice",
+      "vars": []
+    },
+    {
+      "key": "readingMode.field.width",
+      "en": "Column width",
+      "vars": []
+    },
+    {
+      "key": "readingMode.field.wpm",
+      "en": "Words per minute",
+      "vars": []
+    },
+    {
+      "key": "readingMode.focusUnit.line",
+      "en": "The line",
+      "vars": []
+    },
+    {
+      "key": "readingMode.focusUnit.paragraph",
+      "en": "The paragraph",
+      "vars": []
+    },
+    {
+      "key": "readingMode.focusUnit.sentence",
+      "en": "The sentence",
+      "vars": []
+    },
+    {
+      "key": "readingMode.font.default",
+      "en": "The app's font",
+      "vars": []
+    },
+    {
+      "key": "readingMode.from.device",
+      "en": "this device",
+      "vars": []
+    },
+    {
+      "key": "readingMode.from.file",
+      "en": "from the file",
+      "vars": []
+    },
+    {
+      "key": "readingMode.layout.sideBySide",
+      "en": "Beside its translation",
+      "vars": []
+    },
+    {
+      "key": "readingMode.layout.single",
+      "en": "One column",
+      "vars": []
+    },
+    {
+      "key": "readingMode.layout.spread",
+      "en": "Two-page spread",
+      "vars": []
+    },
+    {
+      "key": "readingMode.lineFocus.0",
+      "en": "Off",
+      "vars": []
+    },
+    {
+      "key": "readingMode.lineFocus.1",
+      "en": "1 line",
+      "vars": []
+    },
+    {
+      "key": "readingMode.lineFocus.3",
+      "en": "3 lines",
+      "vars": []
+    },
+    {
+      "key": "readingMode.lineFocus.5",
+      "en": "5 lines",
+      "vars": []
+    },
+    {
+      "key": "readingMode.mode",
+      "en": "Mode",
+      "vars": []
+    },
+    {
+      "key": "readingMode.mode.focus",
+      "en": "Focus",
+      "vars": []
+    },
+    {
+      "key": "readingMode.mode.focus.hint",
+      "en": "A distraction-free screen for the editor.",
+      "vars": []
+    },
+    {
+      "key": "readingMode.mode.page",
+      "en": "Page",
+      "vars": []
+    },
+    {
+      "key": "readingMode.mode.page.hint",
+      "en": "The note as a clean page to read and highlight, alone or beside its translation.",
+      "vars": []
+    },
+    {
+      "key": "readingMode.modeOptions",
+      "en": "{mode}: options",
+      "vars": [
+        "mode"
+      ]
+    },
+    {
+      "key": "readingMode.nikud.asWritten",
+      "en": "As written",
+      "vars": []
+    },
+    {
+      "key": "readingMode.nikud.show",
+      "en": "Add for reading (on-device model, the note is not changed)",
+      "vars": []
+    },
+    {
+      "key": "readingMode.open",
+      "en": "Open {mode}",
+      "vars": [
+        "mode"
+      ]
+    },
+    {
+      "key": "readingMode.research",
+      "en": "What the research says",
+      "vars": []
+    },
+    {
+      "key": "readingMode.reset",
+      "en": "Back to the settings for all notes",
+      "vars": []
+    },
+    {
+      "key": "readingMode.saveAll",
+      "en": "Save for all notes",
+      "vars": []
+    },
+    {
+      "key": "readingMode.saveNote",
+      "en": "Save for this note",
+      "vars": []
+    },
+    {
+      "key": "readingMode.saved.device",
+      "en": "Reading profile saved on this device; the file is unchanged.",
+      "vars": []
+    },
+    {
+      "key": "readingMode.saved.file",
+      "en": "Reading profile saved in the note (lumen-reading).",
+      "vars": []
+    },
+    {
+      "key": "readingMode.saved.global",
+      "en": "Saved as the reading settings for all notes.",
+      "vars": []
+    },
+    {
+      "key": "readingMode.saved.invalidFrontmatter",
+      "en": "The note's frontmatter has a YAML error, so it was not changed. Fix it, or save on this device only.",
+      "vars": []
+    },
+    {
+      "key": "readingMode.saved.noPath",
+      "en": "Save the note in the vault first to keep a profile for it on this device.",
+      "vars": []
+    },
+    {
+      "key": "readingMode.savedShort",
+      "en": "Saved.",
+      "vars": []
+    },
+    {
+      "key": "readingMode.sources",
+      "en": "This note has its own reading profile: {file} setting(s) in its file, {device} on this device. The rest follow the settings for all notes.",
+      "vars": [
+        "file",
+        "device"
+      ]
+    },
+    {
+      "key": "readingMode.sources.none",
+      "en": "This note follows the reading settings for all notes.",
+      "vars": []
+    },
+    {
+      "key": "readingMode.tint.blue",
+      "en": "Pale blue",
+      "vars": []
+    },
+    {
+      "key": "readingMode.tint.cream",
+      "en": "Cream",
+      "vars": []
+    },
+    {
+      "key": "readingMode.tint.gray",
+      "en": "Light grey",
+      "vars": []
+    },
+    {
+      "key": "readingMode.tint.green",
+      "en": "Pale green",
+      "vars": []
+    },
+    {
+      "key": "readingMode.tint.none",
+      "en": "The theme's own",
+      "vars": []
+    },
+    {
+      "key": "readingMode.title",
+      "en": "Reading mode",
+      "vars": []
+    },
+    {
+      "key": "readingMode.voice.auto",
+      "en": "This device's voice for the note's language",
+      "vars": []
+    },
+    {
+      "key": "readingMode.where",
+      "en": "“Save for this note” keeps it",
+      "vars": []
+    },
+    {
+      "key": "readingMode.where.device",
+      "en": "On this device only (the file is not changed)",
+      "vars": []
+    },
+    {
+      "key": "readingMode.where.file",
+      "en": "In the note's file, as",
+      "vars": []
+    },
+    {
       "key": "redact.empty",
       "en": "Select the text to redact first.",
       "vars": []

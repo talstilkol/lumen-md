@@ -10,7 +10,7 @@
  * then (./fonts.ts) — never at startup unless chosen.
  */
 import { DYSLEXIA_FONT, HEBREW_FONTS, loadReadingFont, type ReadingFont, type ReadingFontId } from "./fonts";
-import { loadAids, AIDS_TINTS, AIDS_LIMITS, type AidsTint } from "./readingAids";
+import { loadAids, AIDS_KEY, AIDS_TINTS, AIDS_LIMITS, type AidsTint } from "./readingAids";
 
 export interface ReadingSettings {
   font: ReadingFontId;
@@ -327,10 +327,21 @@ export function profileDiff(p: Readonly<ReadingProfile>, base: Readonly<ReadingP
   return out as Partial<ReadingProfile>;
 }
 
+function hasStoredAids(): boolean {
+  try {
+    return localStorage.getItem(AIDS_KEY) !== null;
+  } catch {
+    return false;
+  }
+}
+
 /** The global profile. The aids' own settings (W5.6, `lumen-reading-aids`) seed the aids fields until the profile sets them. */
 export function globalProfile(): ReadingProfile {
-  const a = loadAids();
-  const fromAids: Partial<ReadingProfile> = { aids: a.dyslexia, tint: a.tint, rate: a.rate, lineFocus: a.dyslexia && a.lineFocus ? 1 : 0 };
+  let fromAids: Partial<ReadingProfile> = {};
+  if (hasStoredAids()) {
+    const a = loadAids();
+    fromAids = { aids: a.dyslexia, tint: a.tint, rate: a.rate, lineFocus: a.dyslexia && a.lineFocus ? 1 : 0 };
+  }
   return normalizeProfile({ ...fromAids, ...read().global });
 }
 

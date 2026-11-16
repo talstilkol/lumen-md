@@ -114,3 +114,10 @@ describe("“this device only” never changes the file", () => {
     expect(sha(writeFileProfile(md, { mode: "rsvp", wpm: 420, nikud: "show", width: 60 }))).not.toBe(before);
   });
 });
+
+describe("no aids used yet", () => {
+  it("the global profile does not take the aids' defaults (cream page) when the aids were never set", () => {
+    expect(globalProfile().tint).toBe("none");
+    expect(globalProfile().aids).toBe(false);
+  });
+});
