@@ -167,7 +167,8 @@ function defaultExec(cmd, cwd, expect) {
  * A shell command of a dod: green on its expected exit code (0 unless
  * `dodExpect` names another), except a Rust test run that ran no test
  * (review 10, M5: `cargo test … <filter>` matching nothing exits 0 with
- * "running 0 tests"), and except an expected result it does not meet where a
+ * "running 0 tests"; review 11, L8: a Rust test command whose output shows no
+ * test running, such as `cargo test --no-run` or output sent to a file), and except an expected result it does not meet where a
  * machine can tell (audit r3, ./lib/dodExpect.mjs: "expect unmet").
  * Its output is shown as it is.
  * @param {string} cmd
@@ -185,7 +186,7 @@ export function shellPasses(cmd, cwd, spawn = spawnSync, expect) {
     console.error(`dod: ${cmd} → exit ${r.status}, but expect unmet: ${unmet.join("; ")}`);
     return false;
   }
-  const rust = rustCounts(`${r.stdout ?? ""}\n${r.stderr ?? ""}`);
+  const rust = rustCounts(`${r.stdout ?? ""}\n${r.stderr ?? ""}`, cmd);
   if (rust && !rustGreen(rust)) {
     console.error(`dod: ${cmd} → exit 0, but ${rust.ran === 0 ? "running 0 tests" : `${rust.passed}/${rust.ran} passed`}: nothing was checked`);
     return false;

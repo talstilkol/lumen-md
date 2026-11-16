@@ -174,4 +174,10 @@ describe("a shell command of a dod (review 10, M5)", () => {
     expect(shellPasses("npm run plan:check", ".", fake(0, "plan: ok\n"))).toBe(true);
     expect(shellPasses("npm run plan:check", ".", fake(1, ""))).toBe(false);
   });
+  it("a Rust test command whose output shows no test running is not green (review 11, L8)", () => {
+    expect(shellPasses("cargo test --offline > /tmp/log", ".", fake(0, ""))).toBe(false);
+    expect(shellPasses("cargo test --no-run", ".", fake(0, "   Compiling x v0.1.0\n"))).toBe(false);
+    expect(shellPasses("d=$(mktemp -d) && rustc --edition 2021 --test a.rs -o \"$d/t\"", ".", fake(0, ""))).toBe(false);
+    expect(shellPasses("echo cargo", ".", fake(0, ""))).toBe(true);
+  });
 });
