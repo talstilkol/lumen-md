@@ -1,5 +1,6 @@
 /** Yiddish and Ladino (plan W7.9): transliterate the selection; the Yiddish spelling list. */
-import { cmdIcons, type Command } from "../../ui/CommandPalette";
+import type { Command } from "../../ui/CommandPalette";
+import { cmdIcons } from "../../ui/cmdIcons";
 import { t } from "../../i18n";
 import type { CommandContext } from "./context";
 
