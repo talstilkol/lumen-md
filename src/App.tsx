@@ -54,13 +54,11 @@ import { useTauriMenu } from "./hooks/useTauriMenu";
 import { useAgentReview } from "./hooks/useAgentReview";
 import { EditorLayout } from "./layouts/EditorLayout";
 import { useAuth } from "./auth/useAuth";
+import { useConfigHealth } from "./hooks/useConfigHealth";
 import { docIdentity } from "./renderer/previewDoc";
 import { auditScope } from "./ui/auditScope";
-import { useEntitlement } from "./billing/useEntitlement";
 import { useAppStore, isNarrowScreen } from "./store/useStore";
 import { t } from "./i18n";
-import { localLlmAvailable } from "./ai/localLlm";
-import { assessConfigHealth } from "./lib/configHealth";
 import { historyKey } from "./storage/history";
 import { isOPFSAvailable, readWorkspaceFile } from "./storage/workspace";
 import { ErrorBoundary } from "./ui/ErrorBoundary";
@@ -133,21 +131,9 @@ export default function App() {
   const grammarCheck = useAppStore((s) => s.grammarCheck);
   const typewriterMode = useAppStore((s) => s.typewriterMode);
   const suggestingMode = useAppStore((s) => s.suggestingMode);
-  const aiKey = useAppStore((s) => s.aiKey);
-  const useLocalAi = useAppStore((s) => s.useLocalAi);
   const editorRef = useRef<EditorHandle | null>(null);
-  const authStatus = useAuth((s) => s.status);
-  const authProviderName = useAuth((s) => s.provider.name);
-  const authError = useAuth((s) => s.error);
   const authUserId = useAuth((s) => s.user?.id);
   const authOrgId = useAuth((s) => s.user?.orgId);
-  const entitlementLoading = useEntitlement((s) => s.loading);
-  const entitlement = useEntitlement((s) => s.entitlement);
-  const capabilitiesCloudSync = useEntitlement((s) => s.capabilities.cloudSync);
-  const hasWebGPU = useMemo(() => {
-    if (typeof window === "undefined" || typeof navigator === "undefined") return false;
-    return localLlmAvailable().available;
-  }, []);
   // A usability session (W1.29, self-guided W4.25) survives a reload: reopen its panel.
   const [usabilityOpen, setUsabilityOpen] = useState<null | "moderated" | "unmoderated">(() => {
     try {
@@ -207,33 +193,8 @@ export default function App() {
   // Share targets, shortcuts, files opened with Lumen, phone widgets; the Welcome note and first-run setup (W6.25).
   useLaunchActions({ setCaptureOpen, setCaptureVoice, setPaletteOpen, setSearchQuery, setSearchOpen, setSetupOpen });
 
-  const configHealth = useMemo(
-    () =>
-      assessConfigHealth({
-        authStatus,
-        authProviderName,
-        authError,
-        userId: authUserId,
-        entitlementLoading,
-        entitlement,
-        capabilitiesCloudSync,
-        aiKey,
-        useLocalAi,
-        hasWebGPU,
-      }),
-    [
-      authStatus,
-      authProviderName,
-      authError,
-      authUserId,
-      entitlementLoading,
-      entitlement,
-      capabilitiesCloudSync,
-      aiKey,
-      useLocalAi,
-      hasWebGPU,
-    ],
-  );
+  // The configuration health report: sign-in, plan, AI key or local model (W10.E28: its own hook).
+  const configHealth = useConfigHealth();
 
   // Open, save, new, export and workspace actions, and the recent files (W6.25).
   const {
