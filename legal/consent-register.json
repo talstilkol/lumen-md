@@ -743,6 +743,30 @@
       "status": "meets"
     },
     {
+      "id": "webdav-plain-backup",
+      "routes": [
+        "Plain backup to your WebDAV server (the vault archive, not encrypted)"
+      ],
+      "category": "third-party",
+      "purpose": "Keep a backup of the vault on the user's own WebDAV server, unencrypted because the user chose plain (R8-M2, W10.C15)",
+      "recipients": [
+        "The user's own WebDAV server"
+      ],
+      "dataSent": "The vault archive as it is (not encrypted): readable by whoever runs the server",
+      "lawfulBasis": "consent",
+      "needsConsent": true,
+      "ppa2026": {
+        "activeOptIn": "The user types the server, user name and password in Backups and presses the second button, \"Use this server\", under the warning that the archive is not encrypted; \"Use this server, encrypted\" is the first choice.",
+        "preTicked": false,
+        "namedRecipients": [
+          "The user's own WebDAV server"
+        ],
+        "withdrawal": "Settings → Privacy → \"Local only\" refuses every plain upload (the third-party category); or remove the target in Backups.",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
       "id": "audit-mode",
       "routes": [
         "Other request (audit mode)"

@@ -691,6 +691,16 @@ export function recordStyleRequest(url: string): LedgerEntry {
   return entries.find((x) => x.id === id)!;
 }
 
+/** A plain (readable) backup archive to the user's WebDAV server (R8-M2); "blocked" under local-only, and then not sent. */
+export function recordPlainBackup(url: string, bytesOut: number): LedgerEntry {
+  const policy = getAiPolicy();
+  const decision = blockedByPolicy("third-party", policy) ? "blocked" : "allowed";
+  const id = record({ host: hostOf(url), method: "PUT", bytesOut, bytesIn: null, category: "third-party", reason: "Plain backup to your WebDAV server (the vault archive, not encrypted)", policy, decision });
+  const entry = entries.find((x) => x.id === id)!;
+  if (decision === "blocked") onBlocked?.(entry);
+  return entry;
+}
+
 /** Response size and status of a recorded request. */
 export function completeLedgerEntry(id: number, status: number, bytesIn: number | null): void {
   patch(id, { status, bytesIn });

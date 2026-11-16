@@ -102,6 +102,24 @@
     "ru": "cf437c",
     "zh-CN": "cf437c"
   },
+  "backup.webdav.plainLocalOnly": {
+    "ar": "11ld40h",
+    "de": "11ld40h",
+    "fr": "11ld40h",
+    "he": "11ld40h",
+    "ja": "11ld40h",
+    "ru": "11ld40h",
+    "zh-CN": "11ld40h"
+  },
+  "backup.webdav.plainWarning": {
+    "ar": "i9nwr4",
+    "de": "i9nwr4",
+    "fr": "i9nwr4",
+    "he": "i9nwr4",
+    "ja": "i9nwr4",
+    "ru": "i9nwr4",
+    "zh-CN": "i9nwr4"
+  },
   "backup.webdav.title": {
     "ar": "1i5ybib",
     "de": "1i5ybib",

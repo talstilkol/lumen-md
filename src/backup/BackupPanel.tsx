@@ -53,7 +53,8 @@ function Panel({ onClose }: { onClose: () => void }) {
   const [dav, setDav] = useState({ url: "", username: "", password: "" });
 
   const refresh = async (c: BackupConfig | null) => {
-    setBackups(c ? await listBackups(await targetFor(c)).catch(() => []) : []);
+    // A target that cannot be built (the WebDAV password not on this device) lists nothing, as an unreachable one does.
+    setBackups(c ? await targetFor(c).then(listBackups).catch(() => []) : []);
   };
   useEffect(() => {
     void loadBackupConfig().then((c) => {
@@ -93,6 +94,8 @@ function Panel({ onClose }: { onClose: () => void }) {
     }
     if (u.protocol !== "https:") return setError(t("backup.webdav.badUrl"));
     if (!dav.username.trim() || !dav.password) return setError(t("backup.webdav.missing"));
+    // R8-M2: a plain archive is readable on the server; under local-only it is refused before anything is saved.
+    if (!encrypted && (await import("../ai/policy")).getAiPolicy() === "local-only") return setError(t("backup.webdav.plainLocalOnly"));
     const { setSecret } = await import("../lib/secretStore");
     await setSecret(WEBDAV_BACKUP_PASSWORD, dav.password);
     let mode: BackupConfig["mode"] = { kind: "plain" };
@@ -159,13 +162,17 @@ function Panel({ onClose }: { onClose: () => void }) {
             <input dir="ltr" aria-label={t("backup.webdav.user")} placeholder={t("backup.webdav.user")} value={dav.username} autoComplete="username" onChange={(e) => setDav({ ...dav, username: e.target.value })} style={field} data-testid="backup-webdav-user" />
             <input dir="ltr" type="password" aria-label={t("backup.webdav.password")} placeholder={t("backup.webdav.password")} value={dav.password} autoComplete="current-password" onChange={(e) => setDav({ ...dav, password: e.target.value })} style={field} data-testid="backup-webdav-password" />
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              <button type="button" onClick={() => void chooseWebdav(false).catch(fail)} data-testid="backup-webdav-plain">
-                {t("backup.webdav.usePlain")}
-              </button>
-              <button type="button" onClick={() => void chooseWebdav(true).catch(fail)} data-testid="backup-webdav-age">
+              {/* R8-M2: encrypted is the first, primary choice; plain comes second, with its warning. */}
+              <button type="button" className="btn btn-primary" onClick={() => void chooseWebdav(true).catch(fail)} data-testid="backup-webdav-age">
                 {t("backup.webdav.useAge")}
               </button>
+              <button type="button" onClick={() => void chooseWebdav(false).catch(fail)} data-testid="backup-webdav-plain" aria-describedby="backup-webdav-plain-warning">
+                {t("backup.webdav.usePlain")}
+              </button>
             </div>
+            <p id="backup-webdav-plain-warning" role="note" style={muted} data-testid="backup-webdav-plain-warning">
+              {t("backup.webdav.plainWarning")}
+            </p>
             <p style={muted}>{t("backup.webdav.note")}</p>
           </div>
         </details>
@@ -258,6 +265,7 @@ export function openBackupPanel(): void {
     document.body.appendChild(host);
     root = createRoot(host);
   }
+  if (!host.isConnected) document.body.appendChild(host); // the page body was replaced since (tests, a re-mounted shell)
   const close = () => root?.render(null);
   root!.render(<Panel onClose={close} />);
 }

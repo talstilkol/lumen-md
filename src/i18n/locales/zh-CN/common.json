@@ -303,6 +303,8 @@
   "backup.webdav.noPassword": "此设备上没有 WebDAV 密码：请在“备份”中重新设置服务器。",
   "backup.webdav.note": "归档会存放在该服务器的 lumen-backups 文件夹中。密码保存在密钥库里，而不是与备份设置放在一起。",
   "backup.webdav.password": "密码",
+  "backup.webdav.plainLocalOnly": "在“仅本地”隐私策略下，拒绝向 WebDAV 服务器进行未加密的备份。请选择加密备份，或其他策略。",
+  "backup.webdav.plainWarning": "未加密：运营服务器的人可以读取你的笔记。在“仅本地”隐私策略下，此选项会被拒绝。",
   "backup.webdav.title": "备份到 WebDAV 服务器",
   "backup.webdav.url": "WebDAV 地址（https）",
   "backup.webdav.useAge": "使用此服务器（加密）",

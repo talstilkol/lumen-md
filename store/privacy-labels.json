@@ -155,6 +155,15 @@
       ]
     },
     {
+      "feature": "Backups to your WebDAV server",
+      "ledgerCategory": "third-party",
+      "sends": "The vault archive, encrypted (age) or plain as you choose, to the server you set; a plain one is readable there",
+      "turnedOnBy": "Setting up a WebDAV backup in Backups (encrypted is the first choice); a plain backup is refused under local-only",
+      "routes": [
+        "Plain backup to your WebDAV server (the vault archive, not encrypted)"
+      ]
+    },
+    {
       "feature": "Live collaboration",
       "ledgerCategory": null,
       "sends": "End-to-end encrypted edits, to your collaborators (and a collab server, if configured)",
