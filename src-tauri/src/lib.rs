@@ -643,7 +643,7 @@ async fn latex_pdf(tex: String, files: Vec<LatexFile>, offline: Option<bool>) ->
             tectonic::CompileError::Tex { errors, log_tail } => LatexFailure::Tex { errors: errors.into_iter().map(|e| LatexErrorOut { line: e.line, message: e.message }).collect(), log_tail },
             tectonic::CompileError::Spawn(m) | tectonic::CompileError::Io(m) => LatexFailure::Other { message: m },
             tectonic::CompileError::BadName(n) => LatexFailure::Other { message: format!("invalid file name: {n}") },
-            tectonic::CompileError::Timeout(s) => LatexFailure::Other { message: format!("Tectonic was stopped after {s} s (does the document loop?)") },
+            tectonic::CompileError::Timeout(s) => LatexFailure::Other { message: tectonic::timeout_message(s, offline) },
         })
         // The PDF as raw bytes (an ArrayBuffer in the page), not a JSON array of numbers.
         .map(tauri::ipc::Response::new)
