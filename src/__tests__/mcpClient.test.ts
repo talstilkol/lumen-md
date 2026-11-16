@@ -131,8 +131,9 @@ describe("the client, both eras", () => {
 
 describe("permissions per server and tool", () => {
   it("suggested servers are added off; nothing is offered until enabled", async () => {
-    expect(SUGGESTED_SERVERS.map((s) => s.id)).toEqual(["knesset", "data-gov-il", "zotero", "files"]);
-    const s = addServer(SUGGESTED_SERVERS[2]!);
+    // W11.H17 added the built-in Sefaria server.
+    expect(SUGGESTED_SERVERS.map((s) => s.id)).toEqual(["knesset", "data-gov-il", "sefaria", "zotero", "files"]);
+    const s = addServer(SUGGESTED_SERVERS.find((x) => x.id === "zotero")!);
     expect(s.enabled).toBe(false);
     expect(readServers()).toHaveLength(1);
     const tools = await serverAgentTools(s, () => legacyServer([{ name: "search" }], () => ""), { reach: () => REACH, confirmCall: () => true });
