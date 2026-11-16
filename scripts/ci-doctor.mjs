@@ -16,6 +16,13 @@
  * and prints the failing test names with a suggested next action.
  * Read-only.
  *
+ * `--source local` (plan 0.9 after Actions and the hosted CI stopped): the
+ * run records and receipts this machine's gates wrote (`npm run train:offline
+ * -- --all`, .ci-local/runs/ and reports/train-offline-<sha>.json); the
+ * target is a commit (default: the newest run). No network. See
+ * scripts/lib/ci-doctor-receipts.mjs.
+ *   node scripts/ci-doctor.mjs --source local [<sha>] [--max-distance N] [--json]
+ *
  * Runs come from --source (plan 0.9, W10.E32): `buildkite` (the default: the
  * gates run there since GitHub Actions stopped on 9.11), `vercel` (the gates
  * of scripts/vercel-build.mjs in each deployment), or `github` (the Actions
@@ -55,9 +62,49 @@ import { readFileSync } from "node:fs";
 import { classify, failureItems, isFailed, nextAction, observe, parseAnnotations, sameTestSetup } from "./lib/ci-doctor.mjs";
 import { annotationsFromLog, bkJobs, bkRun, stepsFromLog, vercelJobs, vercelLog, vercelRun } from "./lib/ci-doctor-sources.mjs";
 
-const usage = "usage: node scripts/ci-doctor.mjs <branch|pr-number> [--source buildkite|vercel|github] [--run ID] [--around RUN_ID|latest] [--window HOURS] [--workflow ci.yml] [--peers N] [--max-distance N] [--json]";
-const SOURCES = ["buildkite", "vercel", "github"];
+const usage = "usage: node scripts/ci-doctor.mjs <branch|pr-number> [--source buildkite|vercel|github|local] [--run ID] [--around RUN_ID|latest] [--window HOURS] [--workflow ci.yml] [--peers N] [--max-distance N] [--json]";
+const SOURCES = ["buildkite", "vercel", "github", "local"];
 const argv = process.argv.slice(2);
+if (argv[argv.indexOf("--source") + 1] === "local" && argv.includes("--source")) process.exit(await localDoctor(argv));
+
+/** plan 0.9: diagnose this machine's own runs (no network). */
+async function localDoctor(args) {
+  const { existsSync, readdirSync } = await import("node:fs");
+  const { localRuns, pickRun, diagnoseLocal, formatLocal } = await import("./lib/ci-doctor-receipts.mjs");
+  const rest = args.filter((a, i) => a !== "--source" && args[i - 1] !== "--source");
+  const md = rest.indexOf("--max-distance");
+  const maxDistance = md >= 0 ? Number(rest[md + 1]) : 30;
+  const sha = rest.find((a, i) => !a.startsWith("--") && rest[i - 1] !== "--max-distance") ?? null;
+  const docs = [];
+  for (const [dir, keep] of [[".ci-local/runs", () => true], ["reports", (f) => /^train-offline-[0-9a-f]{40}\.json$/.test(f)]]) {
+    if (!existsSync(dir)) continue;
+    for (const f of readdirSync(dir).filter((n) => n.endsWith(".json") && keep(n))) {
+      try {
+        docs.push({ file: `${dir}/${f}`, json: JSON.parse(readFileSync(`${dir}/${f}`, "utf8")) });
+      } catch {
+        console.error(`ci-doctor: ${dir}/${f} is not JSON; skipped`);
+      }
+    }
+  }
+  const runs = localRuns(docs);
+  const run = pickRun(runs, sha);
+  if (!run) {
+    console.error(`ci-doctor --source local: no run record${sha ? ` at ${sha}` : ""} in .ci-local/runs or reports/ — run \`npm run train:offline -- --all\` first`);
+    return 1;
+  }
+  const distance = (a, b) => {
+    try {
+      return Number(execFileSync("git", ["rev-list", "--count", `${a}...${b}`], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim());
+    } catch {
+      return null;
+    }
+  };
+  const items = diagnoseLocal(run, runs, { distance, maxDistance });
+  if (rest.includes("--json")) console.log(JSON.stringify({ run: { sha: run.sha, at: run.at, file: run.file }, items }, null, 2));
+  else console.log(formatLocal(run, items));
+  return rest.includes("--json") && items.some((i) => i.verdict === "real") ? 1 : 0;
+}
+
 let target = null;
 let peersWanted = 20;
 let maxDistance = 30;

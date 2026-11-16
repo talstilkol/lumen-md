@@ -162,3 +162,4 @@ scripts/drill/tauri-writer/target/
 # Plan W11.P14: the teacher PDF is built (npm run edu:pdf), not kept
 edu/dist/
 .ci-doctor/
+.ci-local/
