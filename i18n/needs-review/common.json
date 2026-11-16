@@ -675,6 +675,86 @@
     "ru": "bosydm",
     "zh-CN": "bosydm"
   },
+  "graphExport.empty": {
+    "ar": "s3et0b",
+    "de": "s3et0b",
+    "fr": "s3et0b",
+    "ja": "s3et0b",
+    "ru": "s3et0b",
+    "zh-CN": "s3et0b"
+  },
+  "graphExport.failed": {
+    "ar": "y4up0l",
+    "de": "y4up0l",
+    "fr": "y4up0l",
+    "ja": "y4up0l",
+    "ru": "y4up0l",
+    "zh-CN": "y4up0l"
+  },
+  "graphExport.gexf": {
+    "ar": "6zux97",
+    "de": "6zux97",
+    "fr": "6zux97",
+    "ja": "6zux97",
+    "ru": "6zux97",
+    "zh-CN": "6zux97"
+  },
+  "graphExport.label": {
+    "ar": "1993ttg",
+    "de": "1993ttg",
+    "fr": "1993ttg",
+    "ja": "1993ttg",
+    "ru": "1993ttg",
+    "zh-CN": "1993ttg"
+  },
+  "graphExport.png": {
+    "ar": "l1skx2",
+    "de": "l1skx2",
+    "fr": "l1skx2",
+    "ja": "l1skx2",
+    "ru": "l1skx2",
+    "zh-CN": "l1skx2"
+  },
+  "graphExport.saved": {
+    "ar": "cdehw1",
+    "de": "cdehw1",
+    "fr": "cdehw1",
+    "ja": "cdehw1",
+    "ru": "cdehw1",
+    "zh-CN": "cdehw1"
+  },
+  "graphExport.svg": {
+    "ar": "27vtuz",
+    "de": "27vtuz",
+    "fr": "27vtuz",
+    "ja": "27vtuz",
+    "ru": "27vtuz",
+    "zh-CN": "27vtuz"
+  },
+  "graphExport.title.entities": {
+    "ar": "dl901i",
+    "de": "dl901i",
+    "fr": "dl901i",
+    "ja": "dl901i",
+    "ru": "dl901i",
+    "zh-CN": "dl901i"
+  },
+  "graphExport.title.notes": {
+    "ar": "9g2fg5",
+    "de": "9g2fg5",
+    "fr": "9g2fg5",
+    "ja": "9g2fg5",
+    "ru": "9g2fg5",
+    "zh-CN": "9g2fg5"
+  },
+  "graphExport.working": {
+    "ar": "1es4c4k",
+    "de": "1es4c4k",
+    "fr": "1es4c4k",
+    "ja": "1es4c4k",
+    "ru": "1es4c4k",
+    "zh-CN": "1es4c4k"
+  },
   "hl.scan": {
     "ar": "qb0k9u",
     "de": "qb0k9u",

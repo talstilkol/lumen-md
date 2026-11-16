@@ -20,6 +20,9 @@ import { GraphCanvas } from "./graph/GraphCanvas";
 import { TimeSlider, untilOf } from "./graph/TimeSlider";
 import { groupColor, resolveColor } from "./graph/graphData";
 import "./entityGraphStrings";
+import "./graph/graphExportStrings";
+import { GraphExportMenu } from "./graph/GraphExportMenu";
+import { entityScene } from "./graph/entityScene";
 import { egoDefault } from "../views/graph/ego";
 import { countedSankey, type FlowInput } from "../views/graph/flows";
 import type { SourceMeta } from "../views/graph/claims";
@@ -127,6 +130,21 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
   }, [visible]);
   const adjacency = useMemo(() => visible.nodes.map((n) => neighbours(visible, n.id).map((x) => render.index.get(x)!)), [visible, render]);
 
+  // W13.G12: the view as it is now, for "Export view" (laid out first when the view is a table).
+  const exportScene = async () => {
+    const at = positions && positions.length === visible.nodes.length * 2 ? positions : await runLayout(visible.nodes.length, render.pairs);
+    return entityScene({
+      title: t("graphExport.title.entities"),
+      description: t("entityGraph.view.stats", { nodes: String(visible.nodes.length), edges: String(visible.edges.length) }),
+      lang: document.documentElement.lang || undefined,
+      nodes: visible.nodes,
+      edges: visible.edges,
+      positions: at,
+      colors: style.colors,
+      sizes: style.sizes,
+    });
+  };
+
   const toggle = <T,>(set: Set<T>, v: T, put: (s: Set<T>) => void) => put(set.has(v) ? new Set([...set].filter((x) => x !== v)) : new Set([...set, v]));
   const focusRow = (i: number) => {
     setRow(i);
@@ -226,6 +244,7 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
             <option value="matrix">{t("entityGraph.view.mode.matrix")}</option>
           </select>
         </label>
+        <GraphExportMenu scene={exportScene} testId="entity-graph-export-view" style={field} />
         {egoShown && (
           <span data-testid="entity-graph-ego">
             {t("entityGraph.view.egoOf", { name: nameOf.get(ego.center!) ?? "", shown: String(visible.nodes.length), total: String(ego.total) })}{" "}
