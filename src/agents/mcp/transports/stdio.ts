@@ -139,7 +139,9 @@ export function stdioTransport(server: { id: string; label: string }, spec: Stdi
         const timer = setTimeout(() => {
           waiting.delete(key);
           // stdio cancellation: tell the server, then fail the call.
-          void h.write(JSON.stringify({ jsonrpc: "2.0", method: "notifications/cancelled", params: { requestId: msg.id, reason: "timeout" } })).catch(() => {});
+          void h.write(JSON.stringify({ jsonrpc: "2.0", method: "notifications/cancelled", params: { requestId: msg.id, reason: "timeout" } })).catch(() => {
+            /* why: the call fails below either way; a dead pipe only means the server is gone */
+          });
           reject(new McpClientError(`${msg.method ?? "request"}: the MCP server "${server.label}" did not answer in ${Math.round((o.timeoutMs ?? DEFAULT_TIMEOUT_MS) / 1000)} s`));
         }, o.timeoutMs ?? DEFAULT_TIMEOUT_MS);
         waiting.set(key, { resolve, reject, timer });

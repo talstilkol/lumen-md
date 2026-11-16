@@ -19,11 +19,11 @@ import { createRoot } from "react-dom/client";
 import { t } from "../i18n";
 import "./PromptDialog.css";
 import "./mcpServersStrings";
-import { useFocusTrap } from "./useFocusTrap";
 import { describeUrl, initialValues, openElicitationUrl, secretFields, validateForm, type ElicitationAsk, type ElicitationResult, type FormField } from "../agents/mcp/elicitation";
 import type { ApprovalScope } from "../agents/mcp/approvals";
 import type { CallAnswer, CallInfo } from "../agents/mcp/tools";
 import type { McpServerConfig } from "../agents/mcp/servers";
+import { Modal } from "./Modal";
 
 const box: React.CSSProperties = { maxWidth: 560, width: "min(560px, 94vw)" };
 const mono: React.CSSProperties = { fontFamily: "var(--font-mono, monospace)", fontSize: 12, wordBreak: "break-all", whiteSpace: "pre-wrap", direction: "ltr", textAlign: "left", unicodeBidi: "isolate" };
@@ -113,7 +113,6 @@ export function ElicitationDialog({ ask, onResolve, openUrl = openElicitationUrl
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [failed, setFailed] = useState<string | null>(null);
   const cancel = () => onResolve({ action: "cancel" });
-  useFocusTrap(ref, { onEscape: cancel });
   const view = req.mode === "url" ? describeUrl(req.url) : null;
 
   const send = async () => {
@@ -135,7 +134,7 @@ export function ElicitationDialog({ ask, onResolve, openUrl = openElicitationUrl
   };
 
   return (
-    <div className="prompt-backdrop" role="dialog" aria-modal="true" aria-labelledby="mcp-el-title" data-testid="mcp-elicitation" onMouseDown={(e) => e.target === e.currentTarget && cancel()}>
+    <Modal onClose={cancel} className="prompt-backdrop" aria-labelledby="mcp-el-title" data-testid="mcp-elicitation" onMouseDown={(e) => e.target === e.currentTarget && cancel()}>
       <div className="prompt-dialog" ref={ref} style={box}>
         <div id="mcp-el-title" className="prompt-title">
           {t("mcpServers.elicit.title", { server: ask.server })}
@@ -198,18 +197,17 @@ export function ElicitationDialog({ ask, onResolve, openUrl = openElicitationUrl
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 
 export function ToolCallDialog({ server, tool, args, info, onResolve }: { server: McpServerConfig; tool: string; args: Record<string, unknown>; info: CallInfo; onResolve: (a: CallAnswer) => void }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const no = () => onResolve(false);
-  useFocusTrap(ref, { onEscape: no });
   const pick = (s: ApprovalScope) => onResolve(s);
   const shownArgs = JSON.stringify(args, null, 2).slice(0, 4000);
   return (
-    <div className="prompt-backdrop" role="dialog" aria-modal="true" aria-labelledby="mcp-call-title" data-testid="mcp-call" onMouseDown={(e) => e.target === e.currentTarget && no()}>
+    <Modal onClose={no} className="prompt-backdrop" aria-labelledby="mcp-call-title" data-testid="mcp-call" onMouseDown={(e) => e.target === e.currentTarget && no()}>
       <div className="prompt-dialog" ref={ref} style={box}>
         <div id="mcp-call-title" className="prompt-title">
           {t("mcpServers.call.title", { server: server.label, tool })}
@@ -244,7 +242,7 @@ export function ToolCallDialog({ server, tool, args, info, onResolve }: { server
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

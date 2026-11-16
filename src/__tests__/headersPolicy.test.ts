@@ -181,7 +181,8 @@ describe("the real policy", () => {
     const origin = "https://lumen-auth.acme.workers.dev";
     const runner = renderHeaderLine(policy, "livejs-runner");
     expect(extendHeadersFileCsp(`  ${runner}`, [origin])).toBe(`  ${runner}`);
-    expect(addConnectSrc(renderCsp(policy, "app", "cloudflare"), [origin])).toContain(`https://fonts.gstatic.com ${origin};`);
+    // Appended at the end of connect-src, after the policy's own last origin (api.crossref.org since #975).
+    expect(addConnectSrc(renderCsp(policy, "app", "cloudflare"), [origin])).toContain(`https://api.crossref.org ${origin};`);
   });
 });
 

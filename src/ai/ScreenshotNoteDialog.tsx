@@ -12,8 +12,8 @@ import { createRoot } from "react-dom/client";
 import { t } from "../i18n";
 import "../ui/PromptDialog.css";
 import "./screenshotNoteStrings";
-import { useFocusTrap } from "../ui/useFocusTrap";
 import type { ScreenshotDeps, ScreenshotNote } from "./screenshotNote";
+import { Modal } from "../ui/Modal";
 
 export function ScreenshotNoteDialog({ run, onResolve }: { run: (signal: AbortSignal) => Promise<ScreenshotNote>; onResolve: (markdown: string | null) => void }) {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -21,7 +21,6 @@ export function ScreenshotNoteDialog({ run, onResolve }: { run: (signal: AbortSi
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const cancel = () => onResolve(null);
-  useFocusTrap(ref, { onEscape: cancel });
   useEffect(() => {
     const ac = new AbortController();
     run(ac.signal).then(
@@ -34,7 +33,7 @@ export function ScreenshotNoteDialog({ run, onResolve }: { run: (signal: AbortSi
     return () => ac.abort();
   }, [run]);
   return (
-    <div className="prompt-backdrop" role="dialog" aria-modal="true" aria-labelledby="shot-title" data-testid="screenshot-note">
+    <Modal onClose={cancel} className="prompt-backdrop" aria-labelledby="shot-title" data-testid="screenshot-note">
       <div className="prompt-dialog" ref={ref} style={{ maxWidth: 640, width: "min(640px, 94vw)" }}>
         <div id="shot-title" className="prompt-title">
           {t("screenshotNote.title")}
@@ -67,7 +66,7 @@ export function ScreenshotNoteDialog({ run, onResolve }: { run: (signal: AbortSi
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

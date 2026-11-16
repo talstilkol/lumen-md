@@ -56,7 +56,9 @@ export async function closeStdioServers(which: "all" | "remote" = "all"): Promis
     n++;
     const id = (JSON.parse(key) as [string])[0];
     appendServerLog(id, "lumen", which === "remote" ? "closed: airplane mode came on" : "closed");
-    await t.close().catch(() => {});
+    await t.close().catch(() => {
+      /* why: a program that already exited has nothing left to close */
+    });
   }
   return n;
 }

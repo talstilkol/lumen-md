@@ -15,8 +15,8 @@ import { cleanIsbn, groupPassages, pageNumberOf, scannedBook, type ScannedMark }
 import { bookNotePath, safeName } from "../import/notes";
 import { showAiToast } from "../../ui/AiToast";
 import { explainError } from "../../lib/userError";
-import { useFocusTrap } from "../../ui/useFocusTrap";
 import { color } from "../../ui/tokens";
+import { Modal } from "../../ui/Modal";
 
 /** Detection runs on a copy this wide; OCR reads the full-size photo. */
 const DETECT_WIDTH = 1400;
@@ -83,8 +83,6 @@ export default function ScanHighlights({ onClose }: Props) {
   const [keep, setKeep] = useState(false);
   const photo = useRef<{ file: Blob; started: number } | null>(null);
   const preview = useRef<HTMLCanvasElement | null>(null);
-  const trap = useRef<HTMLDivElement | null>(null);
-  useFocusTrap(trap, { active: true, onEscape: onClose });
 
   const take = async (file: Blob | undefined | null) => {
     if (!file) return;
@@ -151,7 +149,7 @@ export default function ScanHighlights({ onClose }: Props) {
 
   const field = { display: "grid", gap: 2, fontSize: 12 } as const;
   return (
-    <div className="cmd-palette-backdrop" onClick={onClose} ref={trap} role="dialog" aria-modal="true" aria-label={t("hlscan.title")} data-testid="scan-highlights">
+    <Modal onClose={onClose} className="cmd-palette-backdrop" onClick={onClose} aria-label={t("hlscan.title")} data-testid="scan-highlights">
       <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 560, padding: 16, display: "grid", gap: 10, maxHeight: "85vh", overflowY: "auto" }}>
         <h2 style={{ margin: 0, fontSize: 15 }}>{t("hlscan.title")}</h2>
         <p style={{ margin: 0, fontSize: 12, color: "hsl(var(--fg-muted))" }}>{t("hlscan.intro")}</p>
@@ -214,6 +212,6 @@ export default function ScanHighlights({ onClose }: Props) {
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

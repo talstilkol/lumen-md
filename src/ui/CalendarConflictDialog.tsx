@@ -11,10 +11,10 @@ import { useRef } from "react";
 import { createRoot } from "react-dom/client";
 import { t } from "../i18n";
 import "./PromptDialog.css";
-import { useFocusTrap } from "./useFocusTrap";
 import type { Choice, Conflict } from "../calendar/taskSync";
 import type { Todo } from "../calendar/ical";
 import "./calendarConflictStrings";
+import { Modal } from "./Modal";
 
 function describe(todo: Omit<Todo, "uid"> | null): string[] {
   if (!todo) return [t("calendar.conflict.deleted")];
@@ -25,11 +25,10 @@ const side: React.CSSProperties = { flex: "1 1 200px", border: "1px solid hsl(va
 
 export function CalendarConflictDialog({ conflict, onResolve }: { conflict: Conflict; onResolve: (c: Choice | null) => void }) {
   const ref = useRef<HTMLDivElement | null>(null);
-  useFocusTrap(ref, { onEscape: () => onResolve(null) });
   const mine = describe(conflict.local?.todo ?? null);
   const theirs = describe(conflict.remote?.todo ?? null);
   return (
-    <div className="prompt-backdrop" role="dialog" aria-modal="true" aria-labelledby="cal-conflict-title" aria-describedby="cal-conflict-why" data-testid="calendar-conflict">
+    <Modal onClose={() => onResolve(null)} className="prompt-backdrop" aria-labelledby="cal-conflict-title" aria-describedby="cal-conflict-why" data-testid="calendar-conflict">
       <div className="prompt-dialog" ref={ref} style={{ maxWidth: 600, width: "min(600px, 94vw)" }}>
         <div id="cal-conflict-title" className="prompt-title">
           {t("calendar.conflict.title")}
@@ -71,7 +70,7 @@ export function CalendarConflictDialog({ conflict, onResolve }: { conflict: Conf
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

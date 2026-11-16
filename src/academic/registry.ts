@@ -27,7 +27,7 @@ export function choose(c: AcademicYear | null, storage: Pick<Storage, "setItem" 
     if (c) storage?.setItem(KEY, JSON.stringify({ institution: c.institution.id, year: c.year }));
     else storage?.removeItem(KEY);
   } catch {
-    /* private mode: the choice lasts for this session only */
+    /* why: private mode or full storage: the choice lasts for this session only */
   }
 }
 

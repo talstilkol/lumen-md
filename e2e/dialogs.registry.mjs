@@ -14,12 +14,14 @@
  */
 export const DIALOGS = [
   { file: "src/ai/mt/openSideBySide.tsx", command: "view.sideBySide", fixme: "W12.H6: needs an open note and a local translation engine" },
+  { file: "src/ai/ScreenshotNoteDialog.tsx", command: "ai.screenshotToNote", fixme: "W10.C22: needs an image on the clipboard or a picked file before the preview opens" },
   { file: "src/backup/BackupPanel.tsx", command: "vault.backups" },
   { file: "src/book/BookDialog.tsx", command: "book.open" },
   { file: "src/canvas/DiagramDialog.tsx", command: "view.canvas", then: "canvas-diagram", fixme: "the diagram button needs a loaded Excalidraw scene" },
   { file: "src/citations/CiteDialog.tsx", command: "cite.insert" },
   { file: "src/citations/LegalCiteDialog.tsx", command: "cite.legal" },
   { file: "src/components/AuthDialog.tsx", fixme: "shown only with a sign-in provider configured (VITE_ auth settings)" },
+  { file: "src/highlights/scan/ScanHighlights.tsx", fixme: "W7.2 (#982): opened by the highlights panel's \"Scan a page\" button" },
   { file: "src/ink/InkPad.tsx", command: "insert.ink" },
   { file: "src/learning/LearningPlansDialog.tsx", command: "learning.plans" },
   { file: "src/lexicon/LexiconPopover.tsx", command: "lexicon.lookup", fixme: "needs the Hebrew lexicon pack and a Hebrew word at the cursor" },
@@ -68,6 +70,8 @@ export const DIALOGS = [
   { file: "src/ui/OrgSettings.tsx", command: "settings.organization", embedded: true },
   { file: "src/ui/OrganizerPanel.tsx", command: "ai.organize" },
   { file: "src/ui/PluginGallery.tsx", command: "view.plugins" },
+  { file: "src/ui/CalendarConflictDialog.tsx", fixme: "W10.C5: shown when a CalDAV sync finds a task changed on both sides" },
+  { file: "src/ui/McpDialogs.tsx", fixme: "W10.C2/W11.I6: shown when an MCP server asks for input (elicitation) or a tool call waits for approval" },
   { file: "src/ui/PrivacyLedgerPanel.tsx", command: "ai.privacyLedger" },
   { file: "src/ui/PromptDialog.tsx", command: "tools.writingGoal" },
   { file: "src/ui/PublishSiteDialog.tsx", command: "file.publishSite" },
