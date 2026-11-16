@@ -9,7 +9,7 @@
 import { del, get, set } from "idb-keyval";
 import "../text/jewishLanguagesStrings";
 import type { GrammarMatch } from "./grammar";
-import { YIDDISH_DICT, YI_SPELL_MESSAGE_KEY } from "./yiddishSpell";
+import { YIDDISH_DICT, YI_SPELL_MESSAGE_KEY, yiddishListLicenceOk } from "./yiddishSpell";
 
 const KEY = "lumen.dict.yi.v1";
 export const YIDDISH_DICTIONARY_CHANGED_EVENT = "lumen-yiddish-dictionary-changed";
@@ -59,9 +59,11 @@ export async function checkPinnedFile(f: "aff" | "dic", bytes: Uint8Array): Prom
  * word count. `source` (the upstream address of a file) is given only once the owner has re-enabled
  * the download; without it this throws YiddishDownloadPendingError and sends nothing.
  */
-export async function downloadYiddishDictionary(fetchImpl: typeof fetch = fetch, source?: (file: "aff" | "dic") => string): Promise<number> {
+export async function downloadYiddishDictionary(fetchImpl: typeof fetch = fetch, source?: (file: "aff" | "dic") => string, dict: { license: string } = YIDDISH_DICT): Promise<number> {
   // Off (YIDDISH_DOWNLOAD_ENABLED is false): the address is not in the app until the owner restores it.
   if (!source) throw new YiddishDownloadPendingError();
+  // D1 §6: only a list under a permissive licence the licence gate accepts as it is; the GPL-3.0 pin never.
+  if (!yiddishListLicenceOk(dict.license)) throw new YiddishDownloadPendingError();
   const texts: Record<"aff" | "dic", string> = { aff: "", dic: "" };
   for (const f of ["aff", "dic"] as const) {
     const res = await fetchImpl(source(f));

@@ -1,5 +1,5 @@
 /**
- * Review t5 (L4): a deployment's own frame site (VITE_CONTENT_FRAME_URL) must keep its embeds'
+ * Review t5 (L4): a deployment's own frame site (LUMEN_CONTENT_FRAME_URL) must keep its embeds'
  * `allow-same-origin`, as the official one does: the frame guard trusts the build's frame origin.
  */
 import { afterEach, describe, expect, it } from "vitest";
@@ -20,7 +20,7 @@ describe("the frame guard and a self-hosted frame site (review t5, L4)", () => {
     expect(isKnownEmbedOrigin("https://frames.example.net")).toBe(true);
     expect(guardedSandbox(embed, "https://other.example.net/content-frame.html", base, false)).not.toContain("allow-same-origin");
     // The CSP side (frame-src) derives the same origin from the same variable.
-    expect(contentFrameOrigins({ VITE_CONTENT_FRAME_URL: "https://frames.example.net/content-frame.html" })).toEqual(["https://frames.example.net"]);
+    expect(contentFrameOrigins({ LUMEN_CONTENT_FRAME_URL: "https://frames.example.net/content-frame.html" })).toEqual(["https://frames.example.net"]);
   });
 
   it("without the variable only EMBED_ORIGINS are trusted; a bad URL adds nothing", () => {

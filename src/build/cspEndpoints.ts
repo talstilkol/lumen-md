@@ -126,18 +126,27 @@ export function addConnectSrc(csp: string, origins: readonly string[]): string {
  * name: http://127.0.0.1:5173/content-frame.html for http://localhost:5173).
  * Only an https: URL, or http: on a loopback host.
  */
-export const CONTENT_FRAME_ENV_VAR = "VITE_CONTENT_FRAME_URL";
-export function contentFrameOrigins(env: Record<string, string | undefined>): string[] {
-  const raw = env[CONTENT_FRAME_ENV_VAR]?.trim();
-  if (!raw || raw.includes("#") || raw.includes("?")) return [];
+// D1 §7 (16.11): not a VITE_* variable. Vite would inline any VITE_* value as it is, so the name would
+// need a place on security/vite-env-allowlist.json. A build-only variable inlines only what
+// contentFramePage() lets through (an https origin with "/" or "/content-frame.html"), via `define`.
+export const CONTENT_FRAME_ENV_VAR = "LUMEN_CONTENT_FRAME_URL";
+/** The frame site's page as the app is built with it: origin + "/" or "/content-frame.html", or "" (none, or not that shape). */
+export function contentFramePage(raw: string | undefined): string {
+  const s = raw?.trim();
+  if (!s || s.includes("#") || s.includes("?")) return "";
   try {
-    const u = new URL(raw);
+    const u = new URL(s);
     const loopback = ["127.0.0.1", "localhost", "[::1]"].includes(u.hostname);
-    if (u.username || u.password || !(u.protocol === "https:" || (u.protocol === "http:" && loopback))) return [];
-    return [u.origin];
+    if (u.username || u.password || !(u.protocol === "https:" || (u.protocol === "http:" && loopback))) return "";
+    if (u.pathname !== "/" && u.pathname !== "/content-frame.html") return "";
+    return u.origin + u.pathname;
   } catch {
-    return [];
+    return "";
   }
+}
+export function contentFrameOrigins(env: Record<string, string | undefined>): string[] {
+  const page = contentFramePage(env[CONTENT_FRAME_ENV_VAR]);
+  return page ? [new URL(page).origin] : [];
 }
 
 /** Append `origins` to the `frame-src` directive of a CSP string (no duplicates). */

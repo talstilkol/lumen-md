@@ -12,6 +12,8 @@ declare module "virtual:lumen-whats-new" {
   const notes: import("../scripts/lib/whats-new.mjs").WhatsNew | null;
   export default notes;
 }
+/** The content frame site's page (LUMEN_CONTENT_FRAME_URL, checked by contentFramePage; "" when none): vite.config.ts `define`, D1 §7. */
+declare const __LUMEN_CONTENT_FRAME_URL__: string;
 /** True in a build made with VITE_E2E=1: install window.__lumenTest (vite.config.ts `define`). */
 declare const __LUMEN_E2E__: boolean;
 /** VITE_LUMEN_TEST_SURFACE=1 at build time (the e2e-prod build): window.__lumen.agentReview stays (plan W1.31). */

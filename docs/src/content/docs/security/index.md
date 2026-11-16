@@ -92,6 +92,8 @@ We will not take legal action against research, or ask a host to act against it,
 
 ### Supported versions
 
+Lumen gets security updates for at least five years from its first public release, and never ending before 31 December 2031 (CRA Art. 13(8)). They ship in the newest release line, which every user can move to free of charge (Art. 13(10)); each security update stays downloadable for at least ten years (Art. 13(9)).
+
 | Release line | Status | Security fixes |
 |---|---|---|
 | 0.1.x | current | While it is the newest release line, and for critical and high severity for 90 days after the next minor line ships. |

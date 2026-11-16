@@ -13,7 +13,7 @@ import { readFileSync } from "node:fs";
 // @ts-expect-error — plain .mjs module without type declarations
 import { securityTxtProblems, securityTxtValues } from "../../scripts/lib/securityTxt.mjs";
 // @ts-expect-error — plain .mjs module without type declarations
-import { disclosureProblems, renderSecurityPage } from "../../scripts/lib/securityPage.mjs";
+import { disclosureProblems, renderSecurityPage, renewalProblems } from "../../scripts/lib/securityPage.mjs";
 
 const read = (p: string) => readFileSync(p, "utf8");
 const disclosure = JSON.parse(read("security/disclosure.json"));
@@ -71,6 +71,39 @@ describe("the disclosure policy (CRA Article 14)", () => {
     expect(disclosure.cra).toMatchObject({ earlyWarningHours: 24, notificationHours: 72, finalReportDays: 14 });
     expect(disclosureProblems({ ...disclosure, cra: { ...disclosure.cra, notificationHours: 96 } })).toEqual([expect.stringMatching(/notificationHours: at most 72/)]);
     expect(disclosureProblems({ ...disclosure, support: [] })).toEqual([expect.stringMatching(/status current/)]);
+  });
+
+  it("the product support period (D1 §3): at least five years, an end year, ten years of downloads, a free newest line (CRA Art. 13(8)-(10))", () => {
+    const sp = disclosure.supportPeriod;
+    expect(sp).toMatchObject({ minYears: 5, notBefore: "2031-12-31", updatesAvailableYears: 10, newestLineFree: true });
+    const bad = (o: object) => disclosureProblems({ ...disclosure, supportPeriod: { ...sp, ...o } });
+    expect(disclosureProblems({ ...disclosure, supportPeriod: undefined })).toEqual([expect.stringMatching(/Art\. 13\(8\)/)]);
+    expect(bad({ minYears: 2 })).toEqual([expect.stringMatching(/minYears: at least 5/)]);
+    expect(bad({ notBefore: "2028-01-01" })[0]).toMatch(/five years after the decision/);
+    expect(bad({ updatesAvailableYears: 5 })).toEqual([expect.stringMatching(/at least 10/)]);
+    expect(bad({ newestLineFree: false })).toEqual([expect.stringMatching(/13\(10\)/)]);
+    expect(bad({ he: "" })).toEqual([expect.stringMatching(/English and Hebrew/)]);
+    const s = read("SECURITY.md");
+    expect(s).toContain(sp.en);
+    expect(s.slice(s.indexOf("### בעברית"))).toContain(sp.he);
+    for (const lang of ["en", "he"]) expect(renderSecurityPage(findings, [], lang, null, disclosure)).toContain(sp[lang]);
+  });
+
+  it("security.txt is renewed a month ahead (D1 §4): renewBy is ≥ 30 days before Expires, and the check fails from renewBy on", () => {
+    const expires = securityTxtValues(txt, "Expires")[0];
+    expect(disclosure.securityTxt.renewBy).toBe("2027-04-16");
+    expect(renewalProblems(disclosure, expires, NOW)).toEqual([]);
+    expect(renewalProblems(disclosure, expires, Date.parse("2027-04-16T00:00:00Z"))).toEqual([expect.stringMatching(/due for renewal since 2027-04-16/)]);
+    expect(renewalProblems({ securityTxt: { renewBy: "2027-05-01" } }, expires, NOW)).toEqual([expect.stringMatching(/less than 30 days/)]);
+    expect(renewalProblems({ securityTxt: {} }, expires, NOW)).toHaveLength(1);
+    expect(disclosureProblems({ ...disclosure, securityTxt: { ...disclosure.securityTxt, renewBy: undefined } })).toEqual([expect.stringMatching(/renewBy/)]);
+  });
+
+  it("security.txt names the private channel to come, but its Contact stays on a channel that is on (D1 §4: PVR is off)", () => {
+    const pvr = channels.find((c) => c.url === "https://github.com/talstilkol/lumen-md/security/advisories/new")!;
+    expect(pvr.status).toBe("off");
+    expect(securityTxtValues(txt, "Contact")).not.toContain(pvr.url);
+    expect(txt).toContain("# (https://github.com/talstilkol/lumen-md/security/advisories/new) once it is");
   });
 
   it("SECURITY.md states the timelines, safe harbor, support period and hall of fame in English and Hebrew", () => {

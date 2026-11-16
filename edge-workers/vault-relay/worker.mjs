@@ -376,7 +376,7 @@ export class VaultRelay {
       maxSpaceBytes: num(e.VAULT_RELAY_MAX_SPACE, 128 * 1024 * 1024),
       maxTotalBytes: num(e.VAULT_RELAY_MAX_TOTAL, 768 * 1024 * 1024),
       ratePerMinute: num(e.VAULT_RELAY_RATE, 600),
-      retentionDays: num(e.VAULT_RELAY_RETENTION_DAYS, 180),
+      retentionDays: num(e.VAULT_RELAY_RETENTION_DAYS, 90),
       newSpacesPerDay: num(e.VAULT_RELAY_NEW_SPACES_PER_DAY, 5),
       newSpacesPer48: e.VAULT_RELAY_NEW_SPACES_PER_48 ? num(e.VAULT_RELAY_NEW_SPACES_PER_48, 80) : undefined,
       addressBytesPerDay: num(e.VAULT_RELAY_ADDRESS_BYTES_PER_DAY, 128 * 1024 * 1024),

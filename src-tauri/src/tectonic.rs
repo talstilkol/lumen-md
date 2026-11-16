@@ -34,6 +34,40 @@ use std::time::{Duration, Instant};
 /// How long one compile may run before it is killed (R8-M1).
 pub const COMPILE_TIMEOUT: Duration = Duration::from_secs(120);
 
+/// Decision D1 §5 (16.11.2026): the first online compile may run 10 minutes. On a cold cache
+/// Tectonic downloads its bundle index, the XeTeX formats and every package and font the
+/// document needs; a Hebrew document (polyglossia, fontspec, a Hebrew font) comes to tens of MB,
+/// which at 1 Mbit/s is several minutes, and 120 s would kill it half way, every time. Once one
+/// online compile has succeeded the cache is warm and the 120 s loop guard is back. Offline nothing
+/// can download (`--only-cached`), so a longer wait only delays the error.
+pub const FIRST_DOWNLOAD_TIMEOUT: Duration = Duration::from_secs(600);
+
+/// The marker (in the app's cache folder) that one online compile has succeeded: Tectonic's own cache is warm.
+pub const WARM_MARKER: &str = "tectonic-warm";
+
+/// The timeout for a compile: `FIRST_DOWNLOAD_TIMEOUT` online on a cold cache, else `COMPILE_TIMEOUT`.
+pub fn compile_timeout(offline: bool, warm: bool) -> Duration {
+    if offline || warm {
+        COMPILE_TIMEOUT
+    } else {
+        FIRST_DOWNLOAD_TIMEOUT
+    }
+}
+
+/// `compile` with the timeout `compile_timeout` picks from `marker` (None: no app cache folder, so
+/// every online compile counts as cold); after an online compile that succeeds, the marker is written.
+pub fn compile_with_marker(bin: &Path, tex: &str, files: &[(String, Vec<u8>)], work: &Path, offline: bool, marker: Option<&Path>) -> Result<Vec<u8>, CompileError> {
+    let warm = marker.map(|m| m.is_file()).unwrap_or(false);
+    let out = compile(bin, tex, files, work, offline, compile_timeout(offline, warm));
+    if let (Ok(_), false, false, Some(m)) = (&out, offline, warm, marker) {
+        if let Some(dir) = m.parent() {
+            let _ = std::fs::create_dir_all(dir);
+        }
+        let _ = std::fs::write(m, b"");
+    }
+    out
+}
+
 /// Offline, every proxy variable points here (R8b-L2, review 9 M3): port 0 on the loopback, which no
 /// process can listen on, so a client that honours the proxy fails locally whatever runs on the machine.
 pub const OFFLINE_PROXY: &str = "http://127.0.0.1:0";
@@ -395,6 +429,37 @@ printf '%%PDF-1.7 cached' > "$5/main.pdf""#);
         drop(l);
         // So a connection to it fails at once, with a listener on any other port or not.
         assert!(std::net::TcpStream::connect_timeout(&sock, Duration::from_secs(2)).is_err());
+    }
+
+    #[test]
+    fn the_first_online_compile_gets_ten_minutes_then_the_loop_guard_is_back() {
+        assert_eq!(FIRST_DOWNLOAD_TIMEOUT, Duration::from_secs(600));
+        assert_eq!(compile_timeout(false, false), FIRST_DOWNLOAD_TIMEOUT);
+        assert_eq!(compile_timeout(false, true), COMPILE_TIMEOUT);
+        assert_eq!(compile_timeout(true, false), COMPILE_TIMEOUT);
+        assert_eq!(compile_timeout(true, true), COMPILE_TIMEOUT);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn a_successful_online_compile_warms_the_marker_and_an_offline_or_failed_one_does_not() {
+        let bins = tmp("bins-warm");
+        let ok = fake_tectonic(&bins, r#"printf pdf > "$5/main.pdf""#);
+        let cache = tmp("cache-warm");
+        let marker = cache.join(WARM_MARKER);
+        // Offline: compiled, but the cache is not proven warm for downloads.
+        compile_with_marker(&ok, "x", &[], &tmp("w1"), true, Some(&marker)).expect("compiled");
+        assert!(!marker.exists());
+        // A failed online compile does not warm it either.
+        let bad = fake_tectonic(&tmp("bins-warm-bad"), "exit 1");
+        assert!(compile_with_marker(&bad, "x", &[], &tmp("w2"), false, Some(&marker)).is_err());
+        assert!(!marker.exists());
+        // The first online compile that succeeds does.
+        compile_with_marker(&ok, "x", &[], &tmp("w3"), false, Some(&marker)).expect("compiled");
+        assert!(marker.is_file());
+        // No cache folder: still compiles, nothing written.
+        compile_with_marker(&ok, "x", &[], &tmp("w4"), false, None).expect("compiled");
+        let _ = std::fs::remove_dir_all(&cache);
     }
 
     #[test]

@@ -6,6 +6,8 @@
 |---------|-----------|----------------|
 | 0.1.x   | ✅ Current | While it is the newest release line, and for critical and high severity for 90 days after the next minor line ships. |
 
+**Support period:** Lumen gets security updates for at least five years from its first public release, and never ending before 31 December 2031 (CRA Art. 13(8)). They ship in the newest release line, which every user can move to free of charge (Art. 13(10)); each security update stays downloadable for at least ten years (Art. 13(9)).
+
 The same table is on the public security page (written from `security/disclosure.json`).
 
 ## Reporting a vulnerability
@@ -71,7 +73,7 @@ We will not take legal action against research, or ask a host to act against it,
 
 **מחקר בתום לב:** לא ננקוט צעדים משפטיים נגד מחקר שפועל לפי המדיניות הזו, בודק רק על הנתונים וההתקנות שלכם, לא נוגע בנתונים של אחרים ולא פוגע בשירות, ונותן לנו את הזמן שלמעלה לפני פרסום.
 
-**תקופת תמיכה:** קו הגרסאות 0.1.x מקבל תיקוני אבטחה כל עוד הוא החדש ביותר, ותיקונים בחומרה קריטית וגבוהה עוד 90 יום אחרי שקו הגרסאות הבא יוצא.
+**תקופת תמיכה:** קו הגרסאות 0.1.x מקבל תיקוני אבטחה כל עוד הוא החדש ביותר, ותיקונים בחומרה קריטית וגבוהה עוד 90 יום אחרי שקו הגרסאות הבא יוצא. Lumen מקבל עדכוני אבטחה לפחות חמש שנים מהגרסה הציבורית הראשונה, ובכל מקרה לא פחות מעד 31 בדצמבר 2031 (CRA סעיף 13(8)). העדכונים יוצאים בקו הגרסאות החדש ביותר, שכל משתמש יכול לעבור אליו בחינם (סעיף 13(10)), וכל עדכון אבטחה נשאר זמין להורדה לפחות עשר שנים (סעיף 13(9)).
 
 ## Maintainers and keys
 

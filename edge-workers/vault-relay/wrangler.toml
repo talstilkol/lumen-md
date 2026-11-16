@@ -27,7 +27,9 @@ VAULT_RELAY_MAX_TOTAL = "805306368"
 VAULT_RELAY_NEW_SPACES_PER_DAY = "5"
 VAULT_RELAY_ADDRESS_BYTES_PER_DAY = "134217728"
 VAULT_RELAY_RATE = "600"
-VAULT_RELAY_RETENTION_DAYS = "180"
+# The same retention as lumen-collab's rooms (RETENTION_DAYS = "90"): one
+# public service, one privacy policy (decisions 5.16 and D1 §2, 16.11).
+VAULT_RELAY_RETENTION_DAYS = "90"
 # A new space costs a proof of work of this many bits (the app solves it; at most 24).
 VAULT_RELAY_POW_BITS = "18"
 

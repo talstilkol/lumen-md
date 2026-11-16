@@ -4,7 +4,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { join, resolve } from "node:path";
 import {
   endpointOrigins,
   addConnectSrc,
@@ -18,6 +18,8 @@ import {
   NGINX_PLACEHOLDER,
   addFrameSrc,
   contentFrameOrigins,
+  contentFramePage,
+  CONTENT_FRAME_ENV_VAR,
 } from "../build/cspEndpoints";
 
 const ROOT = resolve(__dirname, "..", "..");
@@ -152,11 +154,28 @@ describe("the error tracker (plan 12.4)", () => {
 });
 
 describe("the content frame's own site (plan W6.40)", () => {
+  it("is a build-only variable, never VITE_* (D1 §7), and only an origin with / or /content-frame.html reaches the bundle", () => {
+    expect(CONTENT_FRAME_ENV_VAR).toBe("LUMEN_CONTENT_FRAME_URL");
+    expect(contentFrameOrigins({ VITE_CONTENT_FRAME_URL: "https://lumen-md-frame.pages.dev/" })).toEqual([]);
+    expect(contentFramePage("https://lumen-md-frame.pages.dev/")).toBe("https://lumen-md-frame.pages.dev/");
+    expect(contentFramePage(" http://127.0.0.1:5173/content-frame.html ")).toBe("http://127.0.0.1:5173/content-frame.html");
+    // A path could carry anything (a token); none is inlined.
+    for (const bad of ["https://frame.example.org/sk-live-abc123/", "https://frame.example.org/a/content-frame.html", "https://frame.example.org/x", "https://u:p@frame.example.org/", "https://frame.example.org/?t=1", undefined, ""]) {
+      expect(contentFramePage(bad), String(bad)).toBe("");
+    }
+    // vite.config.ts inlines the checked value under a define, and the app reads nothing from import.meta.env for it.
+    const cfg = readFileSync(join(ROOT, "vite.config.ts"), "utf8");
+    expect(cfg).toContain("__LUMEN_CONTENT_FRAME_URL__: JSON.stringify(contentFramePage(process.env.LUMEN_CONTENT_FRAME_URL))");
+    const app = readFileSync(join(ROOT, "src/lib/contentFrame.ts"), "utf8");
+    expect(app).not.toMatch(/import\.meta\.env\??\.VITE_CONTENT_FRAME_URL/);
+    expect(app).toContain("__LUMEN_CONTENT_FRAME_URL__");
+  });
+
   it("takes the origin of an https: page URL, or http: on loopback; nothing else", () => {
-    expect(contentFrameOrigins({ VITE_CONTENT_FRAME_URL: "https://lumen-md-frame.pages.dev/" })).toEqual(["https://lumen-md-frame.pages.dev"]);
-    expect(contentFrameOrigins({ VITE_CONTENT_FRAME_URL: "http://127.0.0.1:5173/content-frame.html" })).toEqual(["http://127.0.0.1:5173"]);
+    expect(contentFrameOrigins({ LUMEN_CONTENT_FRAME_URL: "https://lumen-md-frame.pages.dev/" })).toEqual(["https://lumen-md-frame.pages.dev"]);
+    expect(contentFrameOrigins({ LUMEN_CONTENT_FRAME_URL: "http://127.0.0.1:5173/content-frame.html" })).toEqual(["http://127.0.0.1:5173"]);
     for (const bad of ["http://frame.example.org/", "https://frame.example.org/?x=1", "https://frame.example.org/#x", "https://u:p@frame.example.org/", "not a url", ""]) {
-      expect(contentFrameOrigins({ VITE_CONTENT_FRAME_URL: bad }), bad).toEqual([]);
+      expect(contentFrameOrigins({ LUMEN_CONTENT_FRAME_URL: bad }), bad).toEqual([]);
     }
   });
 

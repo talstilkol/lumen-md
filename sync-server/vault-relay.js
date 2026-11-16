@@ -37,7 +37,8 @@
  *
  * Limits (env or options): VAULT_RELAY_MAX_OBJECT (25 MiB), VAULT_RELAY_MAX_SPACE
  * (1 GiB), VAULT_RELAY_RATE (600 requests per minute per address),
- * VAULT_RELAY_RETENTION_DAYS (180: a space nobody read or wrote that long is
+ * VAULT_RELAY_RETENTION_DAYS (90, the same as the share server's rooms,
+ * decision D1 §2 of 16.11: a space nobody read or wrote that long is
  * deleted; reads count, review 12.11).
  * VAULT_RELAY_DIR keeps the objects on disk; without it they live in memory.
  *
@@ -412,7 +413,7 @@ function createVaultRelay(opts = {}) {
   const maxDropCount = num(opts.maxDropCount ?? env.VAULT_RELAY_MAX_DROP_COUNT, 2000);
   const maxSpace = num(opts.maxSpaceBytes ?? env.VAULT_RELAY_MAX_SPACE, 1024 * 1024 * 1024);
   const rate = num(opts.ratePerMinute ?? env.VAULT_RELAY_RATE, 600);
-  const retentionDays = num(opts.retentionDays ?? env.VAULT_RELAY_RETENTION_DAYS, 180);
+  const retentionDays = num(opts.retentionDays ?? env.VAULT_RELAY_RETENTION_DAYS, 90);
   const dir = opts.dir ?? env.VAULT_RELAY_DIR;
   const store = opts.store ?? (dir ? diskStore(dir) : memoryStore());
   /** Role spaces (W12.S4): the writer-signature gate. */

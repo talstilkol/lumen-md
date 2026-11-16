@@ -1,8 +1,9 @@
 {
-  "$comment": "Plan W13.X2 (with W11.S12): what the public security page and SECURITY.md promise about disclosure. scripts/security-page.mjs renders the 'Reporting and disclosure' section of /security and /he/security from this file; src/__tests__/securityTxt.test.ts checks that SECURITY.md states the same numbers in English and Hebrew and that public/.well-known/security.txt passes RFC 9116. The support period is a proposal for the owner to confirm in review (lane B2c).",
+  "$comment": "Plan W13.X2 (with W11.S12): what the public security page and SECURITY.md promise about disclosure. scripts/security-page.mjs renders the 'Reporting and disclosure' section of /security and /he/security from this file; src/__tests__/securityTxt.test.ts checks that SECURITY.md states the same numbers in English and Hebrew and that public/.well-known/security.txt passes RFC 9116. The product support period was decided by Claude under the owner's delegation of 16.11.2026 21:53 (plan/decisions-2026-11-16-d1.md §3); securityTxt.renewBy is the renewal date of security.txt's Expires (§4).",
   "securityTxt": {
     "path": "public/.well-known/security.txt",
-    "canonical": "https://lumen-md.vercel.app/.well-known/security.txt"
+    "canonical": "https://lumen-md.vercel.app/.well-known/security.txt",
+    "renewBy": "2027-04-16"
   },
   "cra": {
     "article": "Regulation (EU) 2024/2847 (Cyber Resilience Act), Article 14",
@@ -11,6 +12,15 @@
     "notificationHours": 72,
     "finalReportDays": 14,
     "severeIncidentFinalReportDays": 30
+  },
+  "supportPeriod": {
+    "minYears": 5,
+    "notBefore": "2031-12-31",
+    "updatesAvailableYears": 10,
+    "newestLineFree": true,
+    "decided": "2026-11-16",
+    "en": "Lumen gets security updates for at least five years from its first public release, and never ending before 31 December 2031 (CRA Art. 13(8)). They ship in the newest release line, which every user can move to free of charge (Art. 13(10)); each security update stays downloadable for at least ten years (Art. 13(9)).",
+    "he": "Lumen מקבל עדכוני אבטחה לפחות חמש שנים מהגרסה הציבורית הראשונה, ובכל מקרה לא פחות מעד 31 בדצמבר 2031 (CRA סעיף 13(8)). העדכונים יוצאים בקו הגרסאות החדש ביותר, שכל משתמש יכול לעבור אליו בחינם (סעיף 13(10)), וכל עדכון אבטחה נשאר זמין להורדה לפחות עשר שנים (סעיף 13(9))."
   },
   "support": [
     {

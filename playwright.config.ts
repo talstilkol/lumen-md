@@ -116,7 +116,7 @@ export default defineConfig({
         // The page may reach the loopback collab server of e2e/collab-persist.spec.ts
         // (an e2e build adds the same origin: scripts/vercel-build.mjs).
         env: {
-          VITE_CONTENT_FRAME_URL: `http://127.0.0.1:${PORT}/content-frame.html`,
+          LUMEN_CONTENT_FRAME_URL: `http://127.0.0.1:${PORT}/content-frame.html`,
           VITE_CSP_CONNECT_EXTRA: [process.env.VITE_CSP_CONNECT_EXTRA, E2E_COLLAB_WS].filter(Boolean).join(" "),
         },
         url: BASE_URL,
