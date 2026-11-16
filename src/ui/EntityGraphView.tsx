@@ -28,11 +28,13 @@ import type { SourceMeta } from "../views/graph/claims";
 const SankeyView = lazy(() => import("../viz/graph/SankeyView"));
 const AdjacencyMatrixView = lazy(() => import("../viz/graph/AdjacencyMatrixView"));
 const EdgeInspector = lazy(() => import("../viz/graph/EdgeInspector"));
+// W13.G4: the path finder, also on demand.
+const PathFinderPanel = lazy(() => import("../viz/graph/PathFinderPanel"));
 
 /** Above this many entities the view opens as an ego graph (R12.8), never as a hairball. */
 export const EGO_MAX = 50;
 
-export type EntityGraphMode = "graph" | "table" | "sankey" | "flows" | "matrix";
+export type EntityGraphMode = "graph" | "table" | "sankey" | "flows" | "matrix" | "paths";
 
 export interface EntityGraphViewProps {
   entities: readonly Entity[];
@@ -45,11 +47,13 @@ export interface EntityGraphViewProps {
   start?: string;
   /** Open a note at a paragraph (the claim card's source link). */
   onOpenSource?: (note: string, anchor: string) => void;
+  /** The notes' text (W13.G4: the path finder shows each link's paragraph as it is now). */
+  texts?: ReadonlyMap<string, string>;
 }
 
 const field: React.CSSProperties = { fontSize: 12, padding: "2px 6px", borderRadius: 4, border: "1px solid hsl(var(--border))", background: "hsl(var(--bg))", color: "hsl(var(--fg))" };
 
-export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialMode = "graph", start, onOpenSource }: EntityGraphViewProps) {
+export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialMode = "graph", start, onOpenSource, texts }: EntityGraphViewProps) {
   const [types, setTypes] = useState<Set<EntityType>>(new Set(ENTITY_TYPES));
   const [preds, setPreds] = useState<Set<string>>(new Set(PREDICATES.map((p) => p.id)));
   const [folder, setFolder] = useState("");
@@ -83,6 +87,7 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
   );
   const visible = useMemo(() => visibleGraph(entities, edges, notes, filter), [entities, edges, notes, filter]);
   const render = useMemo(() => toRenderEdges(visible), [visible]);
+  const pathEdges = useMemo(() => (mode === "paths" ? visibleGraph(entities, edges, notes, { ...filter, center: undefined }).edges : []), [mode, entities, edges, notes, filter]);
   const nameOf = useMemo(() => new Map(entities.map((e) => [e.id, e.name])), [entities]);
   const byId = useMemo(() => new Map(entities.map((e) => [e.id, e])), [entities]);
   const rtl = isRTL();
@@ -224,6 +229,7 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
             <option value="sankey">{t("entityGraph.view.mode.sankey")}</option>
             <option value="flows">{t("entityGraph.view.mode.flows")}</option>
             <option value="matrix">{t("entityGraph.view.mode.matrix")}</option>
+            <option value="paths">{t("entityGraph.paths.mode")}</option>
           </select>
         </label>
         {egoShown && (
@@ -241,7 +247,12 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
         </Suspense>
       )}
       <div style={{ flex: 1, minBlockSize: 0, position: "relative", overflow: "auto" }}>
-        {mode === "sankey" || mode === "flows" || mode === "matrix" ? (
+        {mode === "paths" ? (
+          <Suspense fallback={null}>
+            {/* The type and confidence filters apply; the neighbourhood does not (a path may leave it). */}
+            <PathFinderPanel entities={entities} edges={pathEdges} texts={texts} from={center || undefined} onOpenEntity={onOpenEntity} onOpenSource={onOpenSource} />
+          </Suspense>
+        ) : mode === "sankey" || mode === "flows" || mode === "matrix" ? (
           <Suspense fallback={null}>
             {mode === "matrix" ? (
               <AdjacencyMatrixView

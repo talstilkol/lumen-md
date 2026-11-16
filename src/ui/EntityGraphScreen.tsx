@@ -137,7 +137,7 @@ export function EntityGraphScreen({ onClose, vault, initialMode }: EntityGraphSc
                 onBack={() => setPage(null)}
               />
             ) : (
-              <EntityGraphView entities={data.entities} edges={data.edges} notes={data.notes} onOpenEntity={setPage} initialMode={initialMode} />
+              <EntityGraphView entities={data.entities} edges={data.edges} notes={data.notes} texts={data.texts} onOpenEntity={setPage} onOpenSource={(note, anchor) => void openAt(note, anchor)} initialMode={initialMode} />
             )}
           </Suspense>
         )}

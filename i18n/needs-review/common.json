@@ -675,6 +675,186 @@
     "ru": "bosydm",
     "zh-CN": "bosydm"
   },
+  "entityGraph.paths.anyLength": {
+    "ar": "13li50t",
+    "de": "13li50t",
+    "fr": "13li50t",
+    "ja": "13li50t",
+    "ru": "13li50t",
+    "zh-CN": "13li50t",
+    "he": "13li50t"
+  },
+  "entityGraph.paths.count": {
+    "ar": "1f1nnzz",
+    "de": "1f1nnzz",
+    "fr": "1f1nnzz",
+    "ja": "1f1nnzz",
+    "ru": "1f1nnzz",
+    "zh-CN": "1f1nnzz",
+    "he": "1f1nnzz"
+  },
+  "entityGraph.paths.find": {
+    "ar": "1mpsgle",
+    "de": "1mpsgle",
+    "fr": "1mpsgle",
+    "ja": "1mpsgle",
+    "ru": "1mpsgle",
+    "zh-CN": "1mpsgle",
+    "he": "1mpsgle"
+  },
+  "entityGraph.paths.found": {
+    "ar": "mx3a0a",
+    "de": "mx3a0a",
+    "fr": "mx3a0a",
+    "ja": "mx3a0a",
+    "ru": "mx3a0a",
+    "zh-CN": "mx3a0a",
+    "he": "mx3a0a"
+  },
+  "entityGraph.paths.from": {
+    "ar": "6s9hn9",
+    "de": "6s9hn9",
+    "fr": "6s9hn9",
+    "ja": "6s9hn9",
+    "ru": "6s9hn9",
+    "zh-CN": "6s9hn9",
+    "he": "6s9hn9"
+  },
+  "entityGraph.paths.inverse": {
+    "ar": "1wrekb8",
+    "de": "1wrekb8",
+    "fr": "1wrekb8",
+    "ja": "1wrekb8",
+    "ru": "1wrekb8",
+    "zh-CN": "1wrekb8",
+    "he": "1wrekb8"
+  },
+  "entityGraph.paths.maxHops": {
+    "ar": "1pzgaws",
+    "de": "1pzgaws",
+    "fr": "1pzgaws",
+    "ja": "1pzgaws",
+    "ru": "1pzgaws",
+    "zh-CN": "1pzgaws",
+    "he": "1pzgaws"
+  },
+  "entityGraph.paths.mode": {
+    "ar": "1exo3km",
+    "de": "1exo3km",
+    "fr": "1exo3km",
+    "ja": "1exo3km",
+    "ru": "1exo3km",
+    "zh-CN": "1exo3km",
+    "he": "1exo3km"
+  },
+  "entityGraph.paths.more": {
+    "ar": "5w5c64",
+    "de": "5w5c64",
+    "fr": "5w5c64",
+    "ja": "5w5c64",
+    "ru": "5w5c64",
+    "zh-CN": "5w5c64",
+    "he": "5w5c64"
+  },
+  "entityGraph.paths.moved": {
+    "ar": "kbnf7i",
+    "de": "kbnf7i",
+    "fr": "kbnf7i",
+    "ja": "kbnf7i",
+    "ru": "kbnf7i",
+    "zh-CN": "kbnf7i",
+    "he": "kbnf7i"
+  },
+  "entityGraph.paths.none": {
+    "ar": "1xfpz59",
+    "de": "1xfpz59",
+    "fr": "1xfpz59",
+    "ja": "1xfpz59",
+    "ru": "1xfpz59",
+    "zh-CN": "1xfpz59",
+    "he": "1xfpz59"
+  },
+  "entityGraph.paths.openSource": {
+    "ar": "gsj64o",
+    "de": "gsj64o",
+    "fr": "gsj64o",
+    "ja": "gsj64o",
+    "ru": "gsj64o",
+    "zh-CN": "gsj64o",
+    "he": "gsj64o"
+  },
+  "entityGraph.paths.relations": {
+    "ar": "102p5ji",
+    "de": "102p5ji",
+    "fr": "102p5ji",
+    "ja": "102p5ji",
+    "ru": "102p5ji",
+    "zh-CN": "102p5ji",
+    "he": "102p5ji"
+  },
+  "entityGraph.paths.results": {
+    "ar": "1f1nnzz",
+    "de": "1f1nnzz",
+    "fr": "1f1nnzz",
+    "ja": "1f1nnzz",
+    "ru": "1f1nnzz",
+    "zh-CN": "1f1nnzz",
+    "he": "1f1nnzz"
+  },
+  "entityGraph.paths.same": {
+    "ar": "sjjo2o",
+    "de": "sjjo2o",
+    "fr": "sjjo2o",
+    "ja": "sjjo2o",
+    "ru": "sjjo2o",
+    "zh-CN": "sjjo2o",
+    "he": "sjjo2o"
+  },
+  "entityGraph.paths.summary": {
+    "ar": "15ysxlr",
+    "de": "15ysxlr",
+    "fr": "15ysxlr",
+    "ja": "15ysxlr",
+    "ru": "15ysxlr",
+    "zh-CN": "15ysxlr",
+    "he": "15ysxlr"
+  },
+  "entityGraph.paths.swap": {
+    "ar": "kcgyw6",
+    "de": "kcgyw6",
+    "fr": "kcgyw6",
+    "ja": "kcgyw6",
+    "ru": "kcgyw6",
+    "zh-CN": "kcgyw6",
+    "he": "kcgyw6"
+  },
+  "entityGraph.paths.title": {
+    "ar": "1i3uzun",
+    "de": "1i3uzun",
+    "fr": "1i3uzun",
+    "ja": "1i3uzun",
+    "ru": "1i3uzun",
+    "zh-CN": "1i3uzun",
+    "he": "1i3uzun"
+  },
+  "entityGraph.paths.to": {
+    "ar": "iaukp0",
+    "de": "iaukp0",
+    "fr": "iaukp0",
+    "ja": "iaukp0",
+    "ru": "iaukp0",
+    "zh-CN": "iaukp0",
+    "he": "iaukp0"
+  },
+  "entityGraph.paths.unknown": {
+    "ar": "tku16y",
+    "de": "tku16y",
+    "fr": "tku16y",
+    "ja": "tku16y",
+    "ru": "tku16y",
+    "zh-CN": "tku16y",
+    "he": "tku16y"
+  },
   "hl.scan": {
     "ar": "qb0k9u",
     "de": "qb0k9u",
