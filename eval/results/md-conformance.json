@@ -2,11 +2,13 @@
   "schema": 1,
   "generator": "scripts/md-conformance.mjs",
   "origin": "real",
-  "source": "src/__tests__/fixtures/md-spec/commonmark-0.31.2.txt (commonmark/commonmark-spec 0.31.2, CC BY-SA 4.0)",
+  "source": "src/__tests__/fixtures/md-spec/commonmark-0.31.2.txt (commonmark/commonmark-spec 0.31.2, CC BY-SA 4.0); src/__tests__/fixtures/md-spec/gfm-0.29.txt (github/cmark-gfm 0.29-gfm, CC BY-SA 4.0)",
   "versions": {
     "micromark": "4.0.2",
     "mdast-util-from-markdown": "2.0.3",
-    "mdast-util-to-markdown": "2.1.2"
+    "mdast-util-to-markdown": "2.1.2",
+    "micromark-extension-gfm": "3.0.0",
+    "mdast-util-gfm": "3.1.0"
   },
   "card": {
     "schema": 1,
@@ -95,6 +97,64 @@
           "resamples": 1000
         }
       }
+    },
+    "gfm-parser": {
+      "schema": 1,
+      "tag": "public",
+      "model": {
+        "name": "micromark 4.0.2 + micromark-extension-gfm 3.0.0",
+        "digest": "npm:micromark@4.0.2+micromark-extension-gfm@3.0.0"
+      },
+      "seed": 1,
+      "temperature": 0,
+      "dataset": {
+        "name": "gfm-spec",
+        "version": "0.29-gfm",
+        "license": "CC-BY-SA-4.0",
+        "source": "https://github.github.com/gfm/",
+        "split": "the published GFM 0.29 spec without its 2 disabled examples and the ones CommonMark 0.31.2 superseded; micromark is tested against it, so this is a conformance check"
+      },
+      "n": 661,
+      "metrics": {
+        "html_exact": {
+          "value": 0.986384,
+          "ci95": [
+            0.977307,
+            0.993949
+          ],
+          "method": "bootstrap",
+          "resamples": 1000
+        }
+      }
+    },
+    "gfm-round-trip": {
+      "schema": 1,
+      "tag": "dev",
+      "model": {
+        "name": "mdast round trip with mdast-util-gfm and src/editor/markdownSerialize.mjs",
+        "digest": "npm:mdast-util-from-markdown@2.0.3+mdast-util-to-markdown@2.1.2+mdast-util-gfm@3.1.0"
+      },
+      "seed": 1,
+      "temperature": 0,
+      "dataset": {
+        "name": "gfm-spec",
+        "version": "0.29-gfm",
+        "license": "CC-BY-SA-4.0",
+        "source": "https://github.github.com/gfm/",
+        "split": "as the GFM parser row; dev, because the round-trip handlers were fixed on the spec's examples"
+      },
+      "n": 661,
+      "metrics": {
+        "html_kept": {
+          "value": 0.98941,
+          "ci95": [
+            0.981846,
+            0.995461
+          ],
+          "method": "bootstrap",
+          "resamples": 1000
+        }
+      }
     }
   },
   "rows": [
@@ -143,6 +203,142 @@
           "reason": "a backslash inside an autolink is escaped again, so the link's URL changes"
         }
       ]
+    },
+    {
+      "kind": "gfm-parser",
+      "what": "micromark with micromark-extension-gfm 3.0.0 to HTML, byte for byte",
+      "spec": "GFM 0.29",
+      "total": 661,
+      "passed": 652,
+      "rate": 0.9864,
+      "target": 0.99,
+      "exceptions": [
+        {
+          "example": 140,
+          "section": "HTML blocks",
+          "reason": "the GFM tag filter (example 652, gfmHtml) escapes <script>; this core example was written without the filter"
+        },
+        {
+          "example": 141,
+          "section": "HTML blocks",
+          "reason": "the GFM tag filter (example 652) escapes </style>; this core example was written without the filter"
+        },
+        {
+          "example": 145,
+          "section": "HTML blocks",
+          "reason": "the GFM tag filter (example 652) escapes <style>; this core example was written without the filter"
+        },
+        {
+          "example": 147,
+          "section": "HTML blocks",
+          "reason": "the GFM tag filter (example 652) escapes <script>; this core example was written without the filter"
+        },
+        {
+          "example": 610,
+          "section": "Autolinks",
+          "reason": "the autolink-literal extension links the bare URL inside; this core example was written without the extension"
+        },
+        {
+          "example": 616,
+          "section": "Autolinks",
+          "reason": "the autolink-literal extension links the bare URL inside; this core example was written without the extension"
+        },
+        {
+          "example": 619,
+          "section": "Autolinks",
+          "reason": "the autolink-literal extension links a bare URL; this core example was written without the extension"
+        },
+        {
+          "example": 620,
+          "section": "Autolinks",
+          "reason": "the autolink-literal extension links a bare email address; this core example was written without the extension"
+        },
+        {
+          "example": 628,
+          "section": "Autolinks (extension)",
+          "reason": "ftp:// is not an autolink literal: micromark follows github.com, which dropped it after the 0.29 spec"
+        }
+      ],
+      "leftOut": {
+        "disabled": [
+          279,
+          280
+        ],
+        "superseded": [
+          398,
+          426,
+          434,
+          435,
+          436,
+          473,
+          474,
+          475,
+          477
+        ]
+      }
+    },
+    {
+      "kind": "gfm-round-trip",
+      "what": "mdast-util-from-markdown → mdast-util-to-markdown with mdast-util-gfm 3.1.0 and src/editor/markdownSerialize.mjs → micromark with GFM, HTML compared with the parser's",
+      "spec": "GFM 0.29",
+      "total": 661,
+      "passed": 654,
+      "rate": 0.9894,
+      "target": 0.99,
+      "exceptions": [
+        {
+          "example": 118,
+          "section": "HTML blocks",
+          "reason": "a line ending inside raw HTML is written as a space (as CommonMark 148)"
+        },
+        {
+          "example": 156,
+          "section": "HTML blocks",
+          "reason": "a soft line break before inline raw HTML is written as a space (as CommonMark 187)"
+        },
+        {
+          "example": 204,
+          "section": "Tables (extension)",
+          "reason": "a table row with more cells than the header: the extra cell is dropped when rendered but written back as a new column"
+        },
+        {
+          "example": 316,
+          "section": "Backslash escapes",
+          "reason": "a backslash inside an autolink is escaped again, so the link's URL changes (as CommonMark 20)"
+        },
+        {
+          "example": 335,
+          "section": "Entity and numeric character references",
+          "reason": "&#10; is decoded to a newline and written raw, so two blank-separated lines become two paragraphs (as CommonMark 39)"
+        },
+        {
+          "example": 611,
+          "section": "Autolinks",
+          "reason": "a backslash inside an autolink is escaped again, so the link's URL changes (as CommonMark 603)"
+        },
+        {
+          "example": 614,
+          "section": "Autolinks",
+          "reason": "an escaped character in <foo\\+@…> is written unescaped, and the text becomes an email autolink"
+        }
+      ],
+      "leftOut": {
+        "disabled": [
+          279,
+          280
+        ],
+        "superseded": [
+          398,
+          426,
+          434,
+          435,
+          436,
+          473,
+          474,
+          475,
+          477
+        ]
+      }
     }
   ]
 }
