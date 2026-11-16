@@ -64,9 +64,13 @@ describe("decoder fuzzing", () => {
       return { code: r.status, res: (JSON.parse(r.stdout.trim().split("\n").pop()!) as { results: Array<{ status: string; runs: number; hangs: number; stalls?: number; slow: number }> }).results[0] };
     };
     // Input 5 is blocked for 2.5 s of wall time and no CPU (what a loaded machine does to a worker).
+    // Review 11, L7: a stall fails the run unless --allow-stalls (it could hide a hang the re-run missed).
     const stalled = run("5:2500", "--clock", "cpu");
-    expect(stalled.res).toMatchObject({ status: "ok", runs: 20, hangs: 0, stalls: 1, slow: 0 });
-    expect(stalled.code).toBe(0);
+    expect(stalled.res).toMatchObject({ status: "FAIL", runs: 20, hangs: 0, stalls: 1, slow: 0 });
+    expect(stalled.code).toBe(1);
+    const allowed = run("5:2500", "--clock", "cpu", "--allow-stalls");
+    expect(allowed.res).toMatchObject({ status: "ok", runs: 20, hangs: 0, stalls: 1, slow: 0 });
+    expect(allowed.code).toBe(0);
     // Blocked again when run alone: a hang, and the run fails.
     const hung = run("5:2500:always", "--clock", "cpu");
     expect(hung.res).toMatchObject({ status: "FAIL", runs: 20, hangs: 1, stalls: 0 });
