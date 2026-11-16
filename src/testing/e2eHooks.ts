@@ -19,6 +19,8 @@ const MODULES = {
   "store/gitPullDocs": () => import("../store/gitPullDocs"),
   "store/useStore": () => import("../store/useStore"),
   "ai/ocr": () => import("../ai/ocr"),
+  // e2e/content-frame-origin.spec.ts: a content frame made by the app's own module (W6.40).
+  "lib/contentFrame": () => import("../lib/contentFrame"),
   // e2e/rtl-parity/animations.spec.ts: a toast on demand, to read its entrance (plan 9.9).
   "ui/AiToast": () => import("../ui/AiToast"),
 };
