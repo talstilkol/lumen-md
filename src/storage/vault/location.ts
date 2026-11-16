@@ -28,7 +28,7 @@ import { createTauriBackend, isDesktopApp, loadTauriInvoke, type TauriInvoke } f
 import { createMobileBackend, isMobileApp, loadMobileBridge, mobileFsFor, type MobileBridge, type MobileStore } from "./mobile";
 import { observeDirectoryHandle, watchExternalChanges } from "./watcher";
 import { warnUnreadable } from "./watchNotice";
-import { VaultMoveConflictError, refuseEncryptedMove, VaultPermissionError, allEntries, bytes, parentsOf, preflight, saveLateWrites, same, sha256, targetBytes, trashLeftovers } from "./moveCheck";
+import { VaultMoveConflictError, refuseEncryptedMove, VaultPermissionError, allEntries, bytes, dropStaleCopies, foldersNested, parentsOf, preflight, saveLateWrites, same, sha256, targetBytes, trashLeftovers } from "./moveCheck";
 import { __resetIdentity, activeVaultId, adoptIdentity, enterIdentity, identityOrNull } from "./identity";
 import type { MoveReport } from "./moveCheck";
 export { VaultMoveConflictError, VaultEncryptedMoveError, VaultPermissionError } from "./moveCheck";
@@ -650,6 +650,8 @@ export async function moveVault(
   const source = getVaultBackend();
   if (!source.available()) throw new Error("The current vault is not available.");
   if (await sameLocation(fromLoc, to)) throw new Error("The vault is already there.");
+  // A folder inside the vault, or the vault inside the folder: copying would write into the source itself (Codex P2 4575404797).
+  if (fromLoc.kind === "folder" && to.kind === "folder" && (await foldersNested(fromLoc.handle, to.handle))) throw new Error("The vault cannot move into a folder inside itself, or into a folder that contains it.");
   // The vault keeps its identity where it goes: its history follows it (2.80).
   const fromId = activeVaultId() ?? (await idOf(fromLoc));
   const target = backendFor(to);
@@ -722,6 +724,8 @@ export async function moveVault(
       const there = await targetBytes(target, path);
       if (!there || !same(there, await bytes(source, path))) throw new Error(`“${path}” changed or went missing during the move; resume to copy it again.`);
     }
+    // A copy an interrupted run made of a note gone from the source since must not come back (Codex P2 4575404801).
+    if (await dropStaleCopies(target, written, copied)) await kv.set(MOVE_KEY, record);
     // The desktop app remembers its folder too (or forgets it when the vault leaves it).
     if (to.kind === "desktop") await (await desktop())("vault_use", { root: to.root });
     else await releaseDesktopFolder();
