@@ -81,6 +81,7 @@ export default defineConfig({
             { label: "Git sync", slug: "sync/git" },
             { label: "Cloud sync (Dropbox, Drive)", slug: "sync/cloud" },
             { label: "Encrypted sync (E2EE)", slug: "sync/e2ee" },
+            { label: "Automatic merging", slug: "sync/merge" },
             { label: "Read-mode publishing", slug: "sync/publish" },
           ],
         },
