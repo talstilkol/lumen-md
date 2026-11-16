@@ -14295,6 +14295,72 @@
       ]
     },
     {
+      "key": "screenshotNote.byModel",
+      "en": "Read by the vision model {model} on this computer. Check it before you insert it.",
+      "vars": [
+        "model"
+      ]
+    },
+    {
+      "key": "screenshotNote.byOcr",
+      "en": "Read by text recognition on this device (no vision model). Check it before you insert it.",
+      "vars": []
+    },
+    {
+      "key": "screenshotNote.cancel",
+      "en": "Cancel",
+      "vars": []
+    },
+    {
+      "key": "screenshotNote.failed",
+      "en": "The image could not be read: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "screenshotNote.flagged",
+      "en": "{n} passage(s) looked like instructions to an AI and were marked. They are text, not commands.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "screenshotNote.insert",
+      "en": "Insert",
+      "vars": []
+    },
+    {
+      "key": "screenshotNote.noImage",
+      "en": "There is no image on the clipboard.",
+      "vars": []
+    },
+    {
+      "key": "screenshotNote.offer",
+      "en": "Image pasted.",
+      "vars": []
+    },
+    {
+      "key": "screenshotNote.offerAction",
+      "en": "Turn it into text",
+      "vars": []
+    },
+    {
+      "key": "screenshotNote.reading",
+      "en": "Reading the image on this device…",
+      "vars": []
+    },
+    {
+      "key": "screenshotNote.text",
+      "en": "The note's text",
+      "vars": []
+    },
+    {
+      "key": "screenshotNote.title",
+      "en": "Screenshot to note",
+      "vars": []
+    },
+    {
       "key": "scroll.page",
       "en": "page {current}/{total}",
       "vars": [

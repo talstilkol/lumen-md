@@ -394,6 +394,8 @@
   "cmd.roleVault.open": "כספת משפחה או כיתה…",
   "cmd.save": "שמירה",
   "cmd.saveAs": "שמירה בשם…",
+  "cmd.screenshotToNote": "צילום מסך לפתק…",
+  "cmd.screenshotToNote.hint": "התמונה שבלוח ההעתקה (או קובץ) כטקסט, נקראת במכשיר הזה, עם תצוגה מקדימה לפני ההוספה",
   "cmd.search": "חיפוש במרחב העבודה…",
   "cmd.security.decrypt": "🔓 פענוח מסמך",
   "cmd.security.decrypt.hint": "הזן סיסמה לפענוח",

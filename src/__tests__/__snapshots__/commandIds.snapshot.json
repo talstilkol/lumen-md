@@ -2197,6 +2197,13 @@
       "id": "types.studio",
       "label": "Types: Object Studio (new type, fields, rename)",
       "icon": "Box"
+    },
+    {
+      "id": "ai.screenshotToNote",
+      "label": "Screenshot to note…",
+      "group": "Tools",
+      "hint": "The image on the clipboard (or a file) as text, read on this device, previewed before it is inserted",
+      "icon": "Sparkles"
     }
   ],
   "full": [
@@ -4546,6 +4553,13 @@
       "id": "types.studio",
       "label": "Types: Object Studio (new type, fields, rename)",
       "icon": "Box"
+    },
+    {
+      "id": "ai.screenshotToNote",
+      "label": "Screenshot to note…",
+      "group": "Tools",
+      "hint": "The image on the clipboard (or a file) as text, read on this device, previewed before it is inserted",
+      "icon": "Sparkles"
     }
   ],
   "autoSaveOn": [
@@ -4875,6 +4889,7 @@
     "reading.newFromLibrary",
     "reading.newFromCapture",
     "types.page",
-    "types.studio"
+    "types.studio",
+    "ai.screenshotToNote"
   ]
 }

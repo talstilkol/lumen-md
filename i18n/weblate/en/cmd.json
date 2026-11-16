@@ -394,6 +394,8 @@
   "cmd.roleVault.open": "Family or classroom vault…",
   "cmd.save": "Save",
   "cmd.saveAs": "Save as…",
+  "cmd.screenshotToNote": "Screenshot to note…",
+  "cmd.screenshotToNote.hint": "The image on the clipboard (or a file) as text, read on this device, previewed before it is inserted",
   "cmd.search": "Search workspace…",
   "cmd.security.decrypt": "🔓 Decrypt Document",
   "cmd.security.decrypt.hint": "Enter password to decrypt",

@@ -394,6 +394,8 @@
   "cmd.roleVault.open": "Familien- oder Klassen-Tresor…",
   "cmd.save": "Speichern",
   "cmd.saveAs": "Speichern as…",
+  "cmd.screenshotToNote": "Screenshot to note…",
+  "cmd.screenshotToNote.hint": "The image on the clipboard (or a file) as text, read on this device, previewed before it is inserted",
   "cmd.search": "Suchen workspace…",
   "cmd.security.decrypt": "🔓 Dokument entschlüsseln",
   "cmd.security.decrypt.hint": "Passwort zum Entschlüsseln eingeben",

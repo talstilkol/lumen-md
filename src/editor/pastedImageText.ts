@@ -14,6 +14,7 @@ export interface PlacedImage {
 }
 
 export async function fillPastedImageText(view: EditorView, placed: PlacedImage[], lang: string): Promise<void> {
+  void offerScreenshotNote(view, placed, lang).catch(() => undefined);
   const { imageText, escapeAlt, escapeTitle, documentLanguage } = await import("../ai/vision");
   // Captions follow the note's language; `lang` (the UI's) when it is unclear.
   lang = await documentLanguage(view.state.doc.toString(), lang);
@@ -29,3 +30,32 @@ export async function fillPastedImageText(view: EditorView, placed: PlacedImage[
     }),
   );
 }
+
+/**
+ * W10.C22: after an image is pasted, offer to turn it into text (screenshot
+ * to note). Nothing is read until the user clicks; the preview shows the
+ * text before it is inserted, after the image.
+ */
+export async function offerScreenshotNote(view: EditorView, placed: PlacedImage[], lang: string): Promise<void> {
+  if (!placed.length) return;
+  const [{ useToastStore }, { t }] = await Promise.all([import("../store/useToastStore"), import("../i18n"), import("../ai/screenshotNoteStrings")]);
+  const p = placed[placed.length - 1]!;
+  useToastStore.getState().push({
+    kind: "info",
+    title: t("screenshotNote.offer"),
+    ttlMs: 10_000,
+    action: {
+      label: t("screenshotNote.offerAction"),
+      run: () =>
+        void import("../ai/ScreenshotNoteDialog").then(async (m) => {
+          const md = await m.previewScreenshotNote(p.file, lang);
+          if (!md) return;
+          const target = `](${p.url}`;
+          const at = view.state.doc.toString().indexOf(target);
+          const end = at < 0 ? view.state.selection.main.head : view.state.doc.lineAt(at).to;
+          view.dispatch({ changes: { from: end, insert: `\n\n${md}\n` }, userEvent: "input" });
+        }),
+    },
+  });
+}
+

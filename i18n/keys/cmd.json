@@ -1985,6 +1985,16 @@
       "vars": []
     },
     {
+      "key": "cmd.screenshotToNote",
+      "en": "Screenshot to note…",
+      "vars": []
+    },
+    {
+      "key": "cmd.screenshotToNote.hint",
+      "en": "The image on the clipboard (or a file) as text, read on this device, previewed before it is inserted",
+      "vars": []
+    },
+    {
       "key": "cmd.search",
       "en": "Search workspace…",
       "vars": []
