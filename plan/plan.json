@@ -698,7 +698,7 @@
      "status": "⏳ #204 · ביקורת 14.11: חלקי — תיקון --around רק ב-#204, לא ברכבת · (הכלי + 35 בדיקות ✓; --around/--window נוסף ב-42c8474: על #189 עכשיו 100 ריצות מאותו חלון זמן)…",
      "verified": "node",
      "pr": 204,
-     "notes": "⏳ #204 (הכלי + 35 בדיקות ✓; --around/--window נוסף ב-42c8474: על #189 עכשיו 100 ריצות מאותו חלון זמן, 50 בקומיטים דומים → FLAKY (עבר רק ב-retry ב-#191 ועוד 9) במקום UNKNOWN; הקבלה כפי שנוסחה (״עבר ב-#191 על אותו קוד״) לא מתקיימת מילולית — ב-#191 עבר רק ב-retry) · ביקורת 1.8 · stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): fixed: Actions retired, so ci-doctor --source local (lib/ci-doctor-receipts.mjs) classifies the red gates of train:offline/ci:local run records (.ci-local/runs) and receipts, with no network; ciDoctorReceipts 7/7, ciDoctor 50/50, ciDoctorCli 7/7, ciDoctorLocal 27/27; fix #1000, merged into verify/train-7 (063d3d2c82)",
+     "notes": "⏳ #204 (הכלי + 35 בדיקות ✓; --around/--window נוסף ב-42c8474: על #189 עכשיו 100 ריצות מאותו חלון זמן, 50 בקומיטים דומים → FLAKY (עבר רק ב-retry ב-#191 ועוד 9) במקום UNKNOWN; הקבלה כפי שנוסחה (״עבר ב-#191 על אותו קוד״) לא מתקיימת מילולית — ב-#191 עבר רק ב-retry) · ביקורת 1.8 · stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): fixed: Actions retired, so ci-doctor --source local (lib/ci-doctor-receipts.mjs) classifies the red gates of train:offline/ci:local run records (.ci-local/runs) and receipts, with no network; ciDoctorReceipts 7/7, ciDoctor 50/50, ciDoctorCli 7/7, ciDoctorLocal 27/27; fix #1000, merged into verify/train-7 (063d3d2c82) · INT6b 17.11 (lane FA, audit r3 A1): the acceptance's #189 run was GitHub Actions only (retired); its local equivalent: ci-doctor on ci:local / train-offline receipts says a gate red in one clean run and green on the same commit in another clean run is flaky (\"passed on the same code\"); proven by src/__tests__/ciDoctorReceipts.test.ts \"a code-only gate that passed on this same commit in another clean run is flaky\" (no GitHub Actions)",
      "new": true,
      "was": "0.8",
      "source": "תהליך",
@@ -719,9 +719,13 @@
       "missing": "Acceptance targets GitHub Actions runs (#189 zip failure) — Actions are retired, so the tool diagnoses a CI that no longer runs; no Buildkite adapter evidence."
      },
      "dod": [
-      "npx vitest run src/__tests__/ciDoctor.test.ts src/__tests__/ciDoctorCli.test.ts"
+      "npx vitest run src/__tests__/ciDoctor.test.ts src/__tests__/ciDoctorCli.test.ts",
+      "npx vitest run src/__tests__/ciDoctorReceipts.test.ts",
+      "npx vitest run src/__tests__/ciDoctorLocal.test.ts"
      ],
      "dodExpect": [
+      "exit 0 — 0 failed, 0 skipped without a reason",
+      "exit 0 — 0 failed, 0 skipped without a reason",
       "exit 0 — 0 failed, 0 skipped without a reason"
      ]
     },
@@ -901,7 +905,8 @@
       "סוכן חדש מבצע את הצעד הבא נכון מהמסמך בלבד"
      ],
      "dod": [
-      "npx vitest run src/__tests__/handoff.test.ts"
+      "npx vitest run src/__tests__/handoff.test.ts",
+      "npx vitest run src/__tests__/handoffNextStep.test.ts"
      ],
      "evidence": {
       "verdict": "PARTIAL",
@@ -928,6 +933,7 @@
      },
      "notes": "עד 16.11: ✅ #211 (verified browser); מ-16.11 ⏳ ו-verified built — מה שהטקסט מתעד שרץ, לפי migrate-verified · ביקורת r2 16.11 (audit/r2-all.json): PARTIAL (80/100); נשאר: 'A new agent does the next step from the doc alone' is untested. · stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): fixed: Where line + next step as command + readHandoff(); a task without --next is refused (exit 1); handoffNextStep 5/5 (an agent with only HANDOFF.md runs the step in the named worktree, the commit lands on the task branch); handoff 12/12; fix #1001, merged into verify/train-7 (063d3d2c82); owed: the PR table's CI column still reads GitHub Actions (retired): follow-up",
      "dodExpect": [
+      "exit 0 — 0 failed, 0 skipped without a reason",
       "exit 0 — 0 failed, 0 skipped without a reason"
      ]
     },
@@ -2243,7 +2249,8 @@
       "history"
      ],
      "dod": [
-      "npx vitest run src/__tests__/versionHistory.test.ts"
+      "npx vitest run src/__tests__/versionHistory.test.ts",
+      "npx vitest run src/__tests__/historyComplete.test.ts"
      ],
      "evidence": {
       "verdict": "PARTIAL",
@@ -2270,6 +2277,7 @@
      },
      "notes": "עד 16.11: ✅ #229 (verified browser); מ-16.11 ⏳ ו-verified built — מה שהטקסט מתעד שרץ, לפי migrate-verified · ביקורת r2 16.11 (audit/r2-all.json): PARTIAL (80/100); נשאר: historyComplete (the real acceptance test) cannot run offline (fake-indexeddb not installed: 0/16 load as stubs), so ≤10% over 1,000 versions is unverified by me; the ✅ rests on a dod that tests unrelated helpers. · stage B1b 16.11 (verify/train-7 1a184547ae, shim v4): met: historyComplete 16/16 in a headless browser in the lane harness with REAL IndexedDB (outside the repo, no receipt; not the plan’s browser check) (lane shim: fake-indexeddb -> real IDB under a fresh name prefix per test; toFake respected): 1000 versions stored 446,846 B for 7,647,248 B of text = 5.8% (<=10%), all read back; collab snapshots, pruning, MAX_PER_DOC, migration green. versionHistory 10/10; owed: historyComplete with the real fake-indexeddb on the Mac (package not installed here)",
      "dodExpect": [
+      "exit 0 — 0 failed, 0 skipped without a reason",
       "exit 0 — 0 failed, 0 skipped without a reason"
      ]
     },
@@ -3790,7 +3798,8 @@
       "editor"
      ],
      "dod": [
-      "npx vitest run src/__tests__/aiAuthorship.test.ts"
+      "npx vitest run src/__tests__/aiAuthorship.test.ts",
+      "npx vitest run src/__tests__/aiInsertionsTagged.test.ts"
      ],
      "auditVerdict": {
       "at": "2026-11-16",
@@ -6162,9 +6171,11 @@
       "missing": "Page content accuracy vs code is not checked by these gates."
      },
      "dod": [
-      "npx vitest run src/__tests__/docsComplete.test.ts src/__tests__/docsSync.test.ts"
+      "npx vitest run src/__tests__/docsComplete.test.ts src/__tests__/docsSync.test.ts",
+      "npx vitest run src/__tests__/docsCodeRefs.test.ts"
      ],
      "dodExpect": [
+      "exit 0 — 0 failed, 0 skipped without a reason",
       "exit 0 — 0 failed, 0 skipped without a reason"
      ]
     },
@@ -7791,7 +7802,10 @@
       "score": 80,
       "who": "cloud-code",
       "missing": "Nothing material."
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/trustedRepos.test.tsx"
+     ]
     },
     {
      "id": "W1.34",
@@ -8350,7 +8364,10 @@
       "score": 75,
       "who": "cloud-code",
       "missing": "20 Dataview blocks are from fixtures, not real vaults; <100 ms update only unit-timed."
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/embeddedQueries.test.ts"
+     ]
     },
     {
      "id": "W2.13",
@@ -9153,10 +9170,10 @@
      ],
      "why": "Obsidian ו-Typora מתנהגים כאפליקציות מקוריות לגמרי; פערים כאלה מורגשים מיד.",
      "branch": "feat/desktop-native",
-     "status": "⏳ #422 · ביקורת 14.11: חלקי — 9dad38fda3 רק ב-#422; ה-glue של Tauri לא קומפל · (על #314; crate חדש בלי תלויות src-tauri/desktop: deep links קפדניים (אין יציאה מהכספת))…",
+     "status": "⏳ #422 · ביקורת 14.11: חלקי — 9dad38fda3 ‏(#422) אב של הרכבת; ה-glue של Tauri לא קומפל · (על #314; crate חדש בלי תלויות src-tauri/desktop: deep links קפדניים (אין יציאה מהכספת))…",
      "verified": "built",
      "pr": 422,
-     "notes": "⏳ #422 (על #314; crate חדש בלי תלויות src-tauri/desktop: deep links קפדניים (אין יציאה מהכספת), שיוך קבצים md/base/excalidraw, מגש ולכידה מהירה, העברת לשונית בין חלונות דו-שלבית; cargo test --offline 12/12, desktopShell 10/10; ה-glue של Tauri לא קומפל; לא נבדק ב-Sandbox (חסום עד 1.12)); 14.11: manifest/resolver/lock עוברים ב-cargo אמיתי, השגיאות היו רק במיזוג train-2 (תוקנו ב-#542); חסר: קומפילציה מול crates אמיתיים/Gradle/Xcode אצל הבעלים",
+     "notes": "⏳ #422 (על #314; crate חדש בלי תלויות src-tauri/desktop: deep links קפדניים (אין יציאה מהכספת), שיוך קבצים md/base/excalidraw, מגש ולכידה מהירה, העברת לשונית בין חלונות דו-שלבית; cargo test --offline 12/12, desktopShell 10/10; ה-glue של Tauri לא קומפל; לא נבדק ב-Sandbox (חסום עד 1.12)); 14.11: manifest/resolver/lock עוברים ב-cargo אמיתי, השגיאות היו רק במיזוג train-2 (תוקנו ב-#542); חסר: קומפילציה מול crates אמיתיים/Gradle/Xcode אצל הבעלים · INT6b 17.11: correction — #422 head 9dad38fda3 is an ancestor of verify/train-7 (merged into verify/train-5 in bb21a828e7, W10.F26); still owed: the Tauri glue compiled against real crates, and the manual checks on 3 systems (owner/Mac).",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -9713,7 +9730,11 @@
       "score": 35,
       "who": "cloud-code",
       "missing": "On HEAD today auditSkips reports 20 e2e skips (>15) and 36 violations (e.g. e2e/inp-budget.spec.ts:229/244, first-run-paths.spec.ts:86, a11y-dialogs.spec.ts:63 have no reason) — `npm run skips` exits 1, so hygiene is red, although the lane's 15.11 gate log claimed '15 of at most 15'."
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/skipAudit.test.ts",
+      "node scripts/skip-report.mjs"
+     ]
     },
     {
      "id": "W4.13",
@@ -10136,7 +10157,11 @@
       "score": 70,
       "who": "cloud-code",
       "missing": "Per-area 'reliability score' on the board not shown; note 'real 0' — no task is verified on real hardware/models."
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/planBuild.test.ts",
+      "npx vitest run src/__tests__/planAreas.test.ts"
+     ]
     },
     {
      "id": "W4.25",
@@ -10205,7 +10230,12 @@
       "score": 80,
       "who": "cloud-code",
       "missing": "Nothing material; static endpoint is a prepared issue/copy."
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/usageMetrics.test.ts",
+      "npx vitest run src/__tests__/activationTtfv.test.ts",
+      "npx vitest run src/__tests__/betaProgramme.test.ts"
+     ]
     },
     {
      "id": "W4.27",
@@ -11710,7 +11740,7 @@
      "status": "⏳ ביקורת 14.11: חלקי — בדיקות התקיפה ב-scratchpad מחוץ לריפו; security/attacks לא קיים; dodMock · אושר בביקורת קריפטו עצמאית (plan/review7-2026-11-12.md): #399 ‏2c968239ca, #291 ‏5081ea1f6a…",
      "verified": "owner",
      "pr": 399,
-     "notes": "✅* אושר בביקורת קריפטו עצמאית (plan/review7-2026-11-12.md): #399 ‏2c968239ca, #291 ‏5081ea1f6a, #472 ‏615765b71c — קבלות approve לבטא כבוי כברירת מחדל; אין קריטי או גבוה; ההתאמות של מבחני rr5 לגיטימיות; תנאים: (1) לבנות מחדש את release-beta1 (#492 עדיין עם הבאג הקריטי הראשון), (2) בלי ממשק החלפת מפתחות/ביטול/רישום/החלפת סיסמה עד G1 ו-G3, (3) הפעלה כברירת מחדל דורשת ספקים אמיתיים ו-Sandbox מלא; סבב 5: G1/G2/G3/G5 תוקנו — #399 ‏ccceffea0e, ‏#291 ‏a48aef25fc, ‏#472 ‏79195fe155 (r7-1 2/2, r7-2 1/1, r7-5 3/3, r7-4(b) עובר; G4 — מידע, מובנה); ביקורת 6: approve בתנאים; סבב 6 של תיקונים: #399 ‏dd6d757786, ‏#291 ‏75ee8e5d95, ‏#472 ‏e92c7a1f25 — H1 תוקן (rr9-1 a/b עוברים), H3 נעילה בין לשוניות (rr9-3 3/3), H2 זיהוי + הודעה (מובנה), T5 נעילה מנקה את כל הכספות; e2eeNinthReview 7/7; ביקורת 16 (plan/review16-crypto-2026-11-14.md): approve לשלושתם; K6-1/2/3 ו-T5-1 תוקנו: #399 ‏fa0fafd23d, ‏#291 ‏a9022ed90a, ‏#472 ‏5de689995a (rr16-2/3 3/3); אושר בביקורת 34 (הפיצול בלי שינוי התנהגות, אומת לכל מתודה); K34-1/2 תוקנו: #399 ‏44d1f9f6d7, ‏#291 ‏9262efa536, ‏#472 ‏7d29b4a9b5 (המתנה חסומה ל-8 שניות, DeviceBusyError; rr34-1 4/4); e2eeKeyring 10k — הרצה על מכונה שקטה",
+     "notes": "✅* אושר בביקורת קריפטו עצמאית (plan/review7-2026-11-12.md): #399 ‏2c968239ca, #291 ‏5081ea1f6a, #472 ‏615765b71c — קבלות approve לבטא כבוי כברירת מחדל; אין קריטי או גבוה; ההתאמות של מבחני rr5 לגיטימיות; תנאים: (1) לבנות מחדש את release-beta1 (#492 עדיין עם הבאג הקריטי הראשון), (2) בלי ממשק החלפת מפתחות/ביטול/רישום/החלפת סיסמה עד G1 ו-G3, (3) הפעלה כברירת מחדל דורשת ספקים אמיתיים ו-Sandbox מלא; סבב 5: G1/G2/G3/G5 תוקנו — #399 ‏ccceffea0e, ‏#291 ‏a48aef25fc, ‏#472 ‏79195fe155 (r7-1 2/2, r7-2 1/1, r7-5 3/3, r7-4(b) עובר; G4 — מידע, מובנה); ביקורת 6: approve בתנאים; סבב 6 של תיקונים: #399 ‏dd6d757786, ‏#291 ‏75ee8e5d95, ‏#472 ‏e92c7a1f25 — H1 תוקן (rr9-1 a/b עוברים), H3 נעילה בין לשוניות (rr9-3 3/3), H2 זיהוי + הודעה (מובנה), T5 נעילה מנקה את כל הכספות; e2eeNinthReview 7/7; ביקורת 16 (plan/review16-crypto-2026-11-14.md): approve לשלושתם; K6-1/2/3 ו-T5-1 תוקנו: #399 ‏fa0fafd23d, ‏#291 ‏a9022ed90a, ‏#472 ‏5de689995a (rr16-2/3 3/3); אושר בביקורת 34 (הפיצול בלי שינוי התנהגות, אומת לכל מתודה); K34-1/2 תוקנו: #399 ‏44d1f9f6d7, ‏#291 ‏9262efa536, ‏#472 ‏7d29b4a9b5 (המתנה חסומה ל-8 שניות, DeviceBusyError; rr34-1 4/4); e2eeKeyring 10k — הרצה על מכונה שקטה · INT6b 17.11 (g6 L1): the dod already runs npx vitest run security/attacks and python3 scripts/sync-protocol/check_vectors.py (51/51 vectors here); no scratchpad path or scripts/crypto/vectors.py left in it.",
      "dod": [
       "npx vitest run security/attacks",
       "npx vitest run src/__tests__/e2eeFifthReview.test.ts src/__tests__/e2eeThirdReview.test.ts src/__tests__/e2eeRekeyIntegrity.test.ts",
@@ -12200,7 +12230,10 @@
       "score": 75,
       "who": "cloud-code",
       "missing": "bug count per module not recorded in plan; real vitest"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/blind"
+     ]
     },
     {
      "id": "W6.16",
@@ -13083,7 +13116,7 @@
      "status": "⏳ #502 · ביקורת 14.11: חלקי — רק אזהרה, לא ב-chore/dod; שום גל לא נעצר · → chore/dod (אזהרה ב-plan:check כשגל מתחיל לפני שהקודם אומת, --wip-strict מכשיל; היום 5 אזהרות — כל הגלים)",
      "verified": "node",
      "pr": 502,
-     "notes": "⏳ #502 → chore/dod (אזהרה ב-plan:check כשגל מתחיל לפני שהקודם אומת, --wip-strict מכשיל; היום 5 אזהרות — כל הגלים) · stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): blocked: plan:check exit 0 with 5 WIP warnings (waves 7,8,10,11,12); the strict-WIP commit is #985, pending the owner's WIP decisions; owed: owner: plan.schedule.wipDecisions, then integrate #985",
+     "notes": "⏳ #502 → chore/dod (אזהרה ב-plan:check כשגל מתחיל לפני שהקודם אומת, --wip-strict מכשיל; היום 5 אזהרות — כל הגלים) · stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): blocked: plan:check exit 0 with 5 WIP warnings (waves 7,8,10,11,12); the strict-WIP commit is #985, pending the owner's WIP decisions; owed: owner: plan.schedule.wipDecisions, then integrate #985 · INT6b 17.11 (lane FA): PR #1118 makes dod.mjs enforce dodExpect; W6.39 now red (expect unmet: 10 waves over WIP)",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -13097,7 +13130,7 @@
       "npx vitest run src/__tests__/planBuild.test.ts"
      ],
      "dodExpect": [
-      "exit 0 with no flag — strict by default, and no wave is over its WIP limit while the next wave has started (today it exits 1: 11 waves over)",
+      "exit 0 — prints no `plan: WIP —` (no wave is over its WIP limit while the next wave has started)",
       "exit 0 — 0 failed, 0 skipped without a reason"
      ]
     },
@@ -14617,7 +14650,12 @@
       "score": 75,
       "who": "cloud-code",
       "missing": "—"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/embedProviders.test.ts",
+      "npx vitest run src/__tests__/headersPolicy.test.ts",
+      "npx vitest run src/__tests__/EmbedBlock.test.tsx"
+     ]
     },
     {
      "id": "W8.8",
@@ -14875,7 +14913,11 @@
       "score": 60,
       "who": "cloud-code",
       "missing": "real vitest; re-run updating statuses"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/ownerChecklist.test.ts",
+      "node scripts/owner-checklist.mjs --check"
+     ]
     },
     {
      "id": "W9.4",
@@ -15411,9 +15453,11 @@
       "missing": "real vitest"
      },
      "dod": [
-      "npx vitest run src/__tests__/codeHealth.test.ts"
+      "npx vitest run src/__tests__/codeHealth.test.ts",
+      "npx vitest run src/__tests__/loggerSwallowed.test.ts"
      ],
      "dodExpect": [
+      "exit 0 — 0 failed, 0 skipped without a reason",
       "exit 0 — 0 failed, 0 skipped without a reason"
      ]
     },
@@ -15842,7 +15886,10 @@
       "score": 90,
       "who": "cloud-code",
       "missing": "—"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/noWeakPluginCsp.test.ts"
+     ]
     },
     {
      "id": "W10.B5",
@@ -15915,7 +15962,11 @@
       "score": 85,
       "who": "cloud-code",
       "missing": "—"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/hebrewMorph.test.ts",
+      "npx vitest run src/__tests__/crossLingualStatus.test.ts"
+     ]
     },
     {
      "id": "W10.B7",
@@ -15984,7 +16035,11 @@
       "score": 80,
       "who": "cloud-code",
       "missing": "—"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/grammarEval.test.ts",
+      "npx vitest run src/__tests__/hebrewGrammar.test.ts"
+     ]
     },
     {
      "id": "W10.B9",
@@ -16055,7 +16110,10 @@
       "score": 85,
       "who": "cloud-code",
       "missing": "—"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/knessetAnswer.test.ts"
+     ]
     },
     {
      "id": "W10.B11",
@@ -16147,10 +16205,12 @@
      },
      "dod": [
       "npm run plan:check",
-      "npx vitest run src/__tests__/honestStatus.test.ts src/__tests__/dod.test.ts"
+      "npx vitest run src/__tests__/honestStatus.test.ts src/__tests__/dod.test.ts",
+      "npx vitest run src/__tests__/auditGuard.test.ts"
      ],
      "dodExpect": [
       "exit 0 — 0 ✅ on a task the audit did not call DONE",
+      "exit 0 — 0 failed, 0 skipped without a reason",
       "exit 0 — 0 failed, 0 skipped without a reason"
      ]
     },
@@ -16196,7 +16256,10 @@
       "score": 70,
       "who": "cloud-code",
       "missing": "scripts/plan-check.mjs named in the task does not exist; the plan-status claim scan is scripts/golden/origin-claims.mjs — not wired into plan:check"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/origins.test.ts"
+     ]
     },
     {
      "id": "W10.B14",
@@ -16266,7 +16329,10 @@
       "score": 85,
       "who": "cloud-code",
       "missing": "—"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/realCargo.test.ts"
+     ]
     },
     {
      "id": "W10.B16",
@@ -16418,7 +16484,8 @@
       "score": 60,
       "who": "cloud-code",
       "missing": "eval/golden/related-real/ named in the task missing; Recall@5 number on real links not recorded in plan"
-     }
+     },
+     "notes": "INT6b 17.11 (lane FA): PR #1127: ratchet at 69/489 (14.1%), dev 18/122; Mac half (typing→paint) still owed"
     },
     {
      "id": "W10.B20",
@@ -16453,7 +16520,10 @@
       "score": 75,
       "who": "cloud-code",
       "missing": "src/commands/domains/help.ts named in task does not exist (credits command lives elsewhere)"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/creditsCommand.test.ts"
+     ]
     },
     {
      "id": "W10.B21",
@@ -16947,7 +17017,10 @@
       "score": 80,
       "who": "cloud-code",
       "missing": "—"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/airplaneCertificateSigned.test.tsx"
+     ]
     },
     {
      "id": "W10.C12",
@@ -17165,7 +17238,10 @@
       "score": 85,
       "who": "cloud-code",
       "missing": "—"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/trashUndo.test.ts"
+     ]
     },
     {
      "id": "W10.C18",
@@ -17198,7 +17274,10 @@
       "score": 80,
       "who": "cloud-code",
       "missing": "—"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/imageHosts.test.tsx"
+     ]
     },
     {
      "id": "W10.C19",
@@ -17266,7 +17345,11 @@
       "score": 75,
       "who": "cloud-code",
       "missing": "key never logged checked by reading only"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/qr.test.ts",
+      "npx vitest run src/__tests__/syncSetupWizard.test.tsx"
+     ]
     },
     {
      "id": "W10.C21",
@@ -17302,7 +17385,11 @@
       "score": 5,
       "who": "cloud-code",
       "missing": "wire structured output into tags, dates, classification"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/structuredWiring.test.ts",
+      "npx vitest run src/__tests__/structuredOutput.test.ts"
+     ]
     },
     {
      "id": "W10.C22",
@@ -17373,7 +17460,10 @@
       "score": 50,
       "who": "cloud-code",
       "missing": "src/privacy/piiNer.ts, CloudSendDialog fallback named in task absent; the \"user thinks names are hidden\" check not evidenced"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/piiNamesLanguage.test.ts"
+     ]
     },
     {
      "id": "W10.C24",
@@ -17620,9 +17710,11 @@
       "missing": "—"
      },
      "dod": [
-      "npx vitest run src/__tests__/takenDomain.test.ts"
+      "npx vitest run src/__tests__/takenDomain.test.ts",
+      "npx vitest run src/__tests__/codeHygieneMain.test.ts"
      ],
      "dodExpect": [
+      "exit 0 — 0 failed, 0 skipped without a reason",
       "exit 0 — 0 failed, 0 skipped without a reason"
      ]
     },
@@ -18324,7 +18416,12 @@
       "score": 85,
       "who": "cloud-code",
       "missing": "—"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/privacyLedgerRules.test.ts",
+      "npx vitest run src/__tests__/ledgerGaps.test.ts",
+      "node scripts/privacy-ledger-check.mjs"
+     ]
     },
     {
      "id": "W10.D17",
@@ -18393,7 +18490,13 @@
       "score": 75,
       "who": "cloud-code",
       "missing": "—"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/blind/blindE2eeKeyring.test.ts",
+      "npx vitest run src/__tests__/blind/blindE2eeEngine.test.ts",
+      "npx vitest run src/__tests__/blind/blindE2eeManifest.test.ts",
+      "npx vitest run src/__tests__/blind/blindE2eeHeader.test.ts"
+     ]
     },
     {
      "id": "W10.D19",
@@ -18427,7 +18530,13 @@
       "score": 75,
       "who": "cloud-code",
       "missing": "—"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/blind/blindLockedNote.test.ts",
+      "npx vitest run src/__tests__/blind/blindImageMetadata.test.ts",
+      "npx vitest run src/__tests__/blind/blindAirplane.test.ts",
+      "npx vitest run src/__tests__/blind/blindWorkerLedger.test.ts"
+     ]
     },
     {
      "id": "W10.D20",
@@ -18460,7 +18569,8 @@
       "score": 75,
       "who": "cloud-code",
       "missing": "—"
-     }
+     },
+     "notes": "INT6b 17.11 (lane FA): PR #1117: prGate.test 18/18 (base 14/18), prCheck 12/12"
     },
     {
      "id": "W10.D21",
@@ -19060,7 +19170,10 @@
       "score": 70,
       "who": "cloud-code",
       "missing": "—"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/planTargets.test.ts"
+     ]
     },
     {
      "id": "W10.E14",
@@ -19558,7 +19671,10 @@
       "score": 80,
       "who": "cloud-code",
       "missing": "—"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/slugUnifiedWords.test.ts"
+     ]
     },
     {
      "id": "W10.E28",
@@ -19634,7 +19750,10 @@
       "score": 85,
       "who": "cloud-code",
       "missing": "—"
-     }
+     },
+     "dod": [
+      "node scripts/check-max-lines.mjs"
+     ]
     },
     {
      "id": "W10.E30",
@@ -19670,7 +19789,10 @@
       "score": 85,
       "who": "cloud-code",
       "missing": "—"
-     }
+     },
+     "dod": [
+      "node scripts/check-max-lines.mjs"
+     ]
     },
     {
      "id": "W10.E31",
@@ -19710,7 +19832,10 @@
       "score": 85,
       "who": "cloud-code",
       "missing": "—"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/codeHealth.test.ts"
+     ]
     },
     {
      "id": "W10.E32",
@@ -20143,7 +20268,10 @@
       "score": 85,
       "who": "cloud-code",
       "missing": "—"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/menaked.test.ts"
+     ]
     },
     {
      "id": "W10.E44",
@@ -20700,7 +20828,11 @@
       "score": 75,
       "who": "cloud-code",
       "missing": "—"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/trainBase.test.ts",
+      "npx vitest run src/__tests__/prCheck.test.ts"
+     ]
     },
     {
      "id": "W10.E60",
@@ -20836,7 +20968,10 @@
       "score": 80,
       "who": "cloud-code",
       "missing": "—"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/goodFirstIssuesFresh.test.ts"
+     ]
     },
     {
      "id": "W10.E64",
@@ -21056,7 +21191,11 @@
       "score": 40,
       "who": "cloud-code",
       "missing": "a table mapping each #618 row to a commit+test"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/imageHosts.test.tsx",
+      "npx vitest run src/__tests__/w98Ledger.test.ts"
+     ]
     },
     {
      "id": "W10.E71",
@@ -21092,7 +21231,11 @@
       "score": 35,
       "who": "cloud-code",
       "missing": "row-by-row proof"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/decisions618Rows.test.ts",
+      "npx vitest run src/__tests__/relayRetention.test.ts"
+     ]
     },
     {
      "id": "W10.E72",
@@ -21692,7 +21835,10 @@
       "score": 85,
       "who": "cloud-code",
       "missing": "-"
-     }
+     },
+     "dod": [
+      "git merge-base --is-ancestor 42c847468c HEAD"
+     ]
     },
     {
      "id": "W10.F10",
@@ -21906,7 +22052,13 @@
       "score": 85,
       "who": "cloud-code",
       "missing": "-"
-     }
+     },
+     "dod": [
+      "git merge-base --is-ancestor 29c9559111 HEAD",
+      "git merge-base --is-ancestor f6acf9ba34 HEAD",
+      "git merge-base --is-ancestor d5518751ab HEAD",
+      "npx vitest run src/__tests__/e2eePairingSas.test.ts"
+     ]
     },
     {
      "id": "W10.F16",
@@ -21974,7 +22126,12 @@
       "score": 70,
       "who": "cloud-code",
       "missing": "e2eHooks.test.ts is red on HEAD (2/1: e2e/content-frame-origin.spec.ts imports app sources) - one of this PR's tests"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/e2eHooks.test.ts",
+      "npx vitest run src/__tests__/lockfileDrift.test.ts",
+      "npx vitest run src/__tests__/laneState.test.ts"
+     ]
     },
     {
      "id": "W10.F18",
@@ -22039,7 +22196,12 @@
       "score": 82,
       "who": "cloud-code",
       "missing": "-"
-     }
+     },
+     "dod": [
+      "git merge-base --is-ancestor 7e3ad362a5 HEAD",
+      "npx vitest run src/__tests__/supplyChain.test.ts",
+      "npx vitest run src/__tests__/supplyChainProvenance.test.ts"
+     ]
     },
     {
      "id": "W10.F20",
@@ -22071,7 +22233,11 @@
       "score": 82,
       "who": "cloud-code",
       "missing": "-"
-     }
+     },
+     "dod": [
+      "git merge-base --is-ancestor 330817b7ed HEAD",
+      "npx vitest run src/__tests__/ownerChecklist.test.ts"
+     ]
     },
     {
      "id": "W10.F21",
@@ -22269,7 +22435,13 @@
       "score": 5,
       "who": "cloud-code",
       "missing": "merge #796 (Cargo.lock conflict)"
-     }
+     },
+     "dod": [
+      "git merge-base --is-ancestor 87624fb27e HEAD",
+      "git merge-base --is-ancestor a43a7141c2 HEAD",
+      "git merge-base --is-ancestor 9dad38fda3 HEAD",
+      "git merge-base --is-ancestor c507977bee HEAD"
+     ]
     },
     {
      "id": "W10.F27",
@@ -22305,7 +22477,12 @@
       "score": 45,
       "who": "cloud-code",
       "missing": "merge #511->#513 (receipts, area board)"
-     }
+     },
+     "dod": [
+      "git merge-base --is-ancestor 90422ade2a HEAD",
+      "git merge-base --is-ancestor 4aca2ac6fd HEAD",
+      "node scripts/train-missing.mjs"
+     ]
     },
     {
      "id": "W10.F28",
@@ -22337,7 +22514,8 @@
       "score": 85,
       "who": "cloud-code",
       "missing": "w-NC-316 note not found"
-     }
+     },
+     "notes": "INT6b 17.11 (lane FA): PR #1130: plan/w10-f28-worktrees.md (w-NC-316 never existed; 0 local-only work)"
     },
     {
      "id": "W10.F29",
@@ -22368,7 +22546,10 @@
       "score": 35,
       "who": "cloud-code",
       "missing": "cherry-pick the matrix or record the decision in plan; baselines (W10.M9)"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/visualCoverage.test.ts"
+     ]
     },
     {
      "id": "W10.G1",
@@ -22639,9 +22820,11 @@
       "missing": "-"
      },
      "dod": [
-      "npx vitest run src/__tests__/migrateEvidence.test.ts"
+      "npx vitest run src/__tests__/migrateEvidence.test.ts",
+      "npx vitest run src/__tests__/dod.test.ts"
      ],
      "dodExpect": [
+      "exit 0 — 0 failed, 0 skipped without a reason",
       "exit 0 — 0 failed, 0 skipped without a reason"
      ]
     },
@@ -22721,7 +22904,10 @@
       "score": 88,
       "who": "cloud-code",
       "missing": "-"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/planBuild.test.ts"
+     ]
     },
     {
      "id": "W10.G8",
@@ -22757,7 +22943,10 @@
       "score": 85,
       "who": "cloud-code",
       "missing": "-"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/planBuild.test.ts"
+     ]
     },
     {
      "id": "W10.G9",
@@ -22828,7 +23017,10 @@
       "score": 70,
       "who": "cloud-code",
       "missing": "3 open; planned scripts/p2-ledger.mjs + plan/p2-ledger.json do not exist (md only, not regenerable)"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/blobUrlVaultScope.test.tsx"
+     ]
     },
     {
      "id": "W10.G11",
@@ -22870,7 +23062,10 @@
       "score": 85,
       "who": "cloud-code",
       "missing": "-"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/archivedWorkflows.test.ts"
+     ]
     },
     {
      "id": "W10.G12",
@@ -22908,7 +23103,10 @@
       "score": 88,
       "who": "cloud-code",
       "missing": "-"
-     }
+     },
+     "dod": [
+      "npm run plan:check"
+     ]
     },
     {
      "id": "W10.Z1",
@@ -25287,7 +25485,11 @@
       "score": 75,
       "who": "cloud-code",
       "missing": "real-model behaviour unmeasured (AgentDojo on Mac)"
-     }
+     },
+     "notes": "INT6b 17.11 (lane FA): ⏳ fix in PR #1110 (vault read = private whatever its trust class); dod+ npx vitest run src/__tests__/ruleOfTwoVaultRead.test.ts",
+     "dod": [
+      "npx vitest run src/__tests__/ruleOfTwoVaultRead.test.ts"
+     ]
     },
     {
      "id": "W11.I3",
@@ -25324,7 +25526,11 @@
       "score": 75,
       "who": "cloud-code",
       "missing": "-"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/spotlighting.test.ts",
+      "npx vitest run src/__tests__/injectionGuard.test.ts"
+     ]
     },
     {
      "id": "W11.I4",
@@ -25401,7 +25607,10 @@
       "score": 35,
       "who": "cloud-code",
       "missing": "tool-definition hash pinning with re-approval and once/session/vault scopes are in #728 (approvals.ts, registry.ts) which is NOT in the train"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/mcpClientStdio.test.ts"
+     ]
     },
     {
      "id": "W11.I6",
@@ -25546,7 +25755,10 @@
       "score": 78,
       "who": "cloud-code",
       "missing": "-"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/privacyMcpLedger.test.tsx"
+     ]
     },
     {
      "id": "W11.I10",
@@ -26550,7 +26762,10 @@
       "score": 65,
       "who": "cloud-code",
       "missing": "SLSA provenance and fuzz results are placeholders until real runs"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/securityFuzzResults.test.ts"
+     ]
     },
     {
      "id": "W11.S13",
@@ -26589,7 +26804,10 @@
       "score": 75,
       "who": "cloud-code",
       "missing": "Z7 M3: drafts said Wikidata refused under local-only (fixed in #941)"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/storeLabelsLedger.test.ts"
+     ]
     },
     {
      "id": "W11.S14",
@@ -27411,7 +27629,11 @@
       "score": 72,
       "who": "cloud-code",
       "missing": "-"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/activationTtfv.test.ts",
+      "npx vitest run src/__tests__/launchGateGa.test.ts"
+     ]
     },
     {
      "id": "W11.P5",
@@ -27709,7 +27931,11 @@
       "score": 78,
       "who": "cloud-code",
       "missing": "-"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/pricingPage.test.ts",
+      "npx vitest run src/__tests__/sustainability.test.ts"
+     ]
     },
     {
      "id": "W11.P13",
@@ -27901,7 +28127,10 @@
       "score": 75,
       "who": "cloud-code",
       "missing": "-"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/launchGateGa.test.ts"
+     ]
     },
     {
      "id": "W11.L3",
@@ -29150,7 +29379,11 @@
       "score": 75,
       "who": "cloud-code",
       "missing": "200-note byte round trip runs on synthetic notes (no real typed vault)"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/typedObjectsReal.test.ts",
+      "npx vitest run src/__tests__/typedObjects.test.ts"
+     ]
     },
     {
      "id": "W12.T2",
@@ -29355,7 +29588,13 @@
       "score": 72,
       "who": "cloud-code",
       "missing": "-"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/typeBases.test.ts",
+      "npx vitest run src/__tests__/workdaysRollup.test.ts",
+      "npx vitest run src/__tests__/basesRelations.test.ts",
+      "npx vitest run src/__tests__/typeBaseTable.test.tsx"
+     ]
     },
     {
      "id": "W12.T7",
@@ -29905,7 +30144,10 @@
       "score": 45,
       "who": "cloud-code",
       "missing": "askVaultScope.test.ts cannot load offline (mcp-server .js imports): the 20 hostile questions / deny-tag-not-in-prompt checks were not seen passing"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/askVaultScope.test.ts"
+     ]
     },
     {
      "id": "W12.A3",
@@ -31870,7 +32112,10 @@
       "score": 70,
       "who": "cloud-code",
       "missing": "clean-room vs israelconnect extract_dates.py not independently checked"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/dueFromText.test.ts"
+     ]
     },
     {
      "id": "R12.7",
@@ -32039,7 +32284,11 @@
       "score": 35,
       "who": "cloud-code",
       "missing": "runContradictor() is called by no production code: no command or agent entry reaches it"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/contradictions.test.ts",
+      "npx vitest run src/__tests__/contradictionsCommand.test.ts"
+     ]
     },
     {
      "id": "R12.11",
@@ -32123,7 +32372,12 @@
       "score": 60,
       "who": "cloud-code",
       "missing": "'10 real (redacted) train logs give stable signatures': fixtures not confirmed real"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/ciDoctorLocal.test.ts",
+      "npx vitest run src/__tests__/ciDoctor.test.ts",
+      "npx vitest run src/__tests__/ciDoctorCli.test.ts"
+     ]
     },
     {
      "id": "R12.13",
@@ -32163,7 +32417,10 @@
       "score": 72,
       "who": "cloud-code",
       "missing": "hook only active when the user runs git config core.hooksPath"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/laneLeases.test.ts"
+     ]
     },
     {
      "id": "R12.14",
@@ -32205,7 +32462,10 @@
       "score": 75,
       "who": "cloud-code",
       "missing": "-"
-     }
+     },
+     "dod": [
+      "npx vitest run src/__tests__/honestStatus.test.ts"
+     ]
     },
     {
      "id": "R12.15",
