@@ -159,8 +159,7 @@ export function restackCommands({ branch, oldBase, train, remote = "origin", pr 
 
 // ───────────── the stack limit (plan W6.22 acceptance) ─────────────
 
-/** The deepest a stack may be: a PR on main or a train is depth 1, a PR on that PR is 2 (plan W6.22: "maximum stack depth: 1"). */
-export const MAX_STACK_DEPTH = 1;
+// MAX_STACK_DEPTH (depth 1: a PR on main or a train) is declared above, with stackDepth.
 /** The day the rule started (#506, 12.11.2026): PRs opened from then on are the "new PRs" of the acceptance. */
 export const RULE_SINCE = "2026-11-12";
 
