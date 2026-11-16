@@ -2587,6 +2587,78 @@
       "vars": []
     },
     {
+      "key": "calendar.conflict.both",
+      "en": "Keep both",
+      "vars": []
+    },
+    {
+      "key": "calendar.conflict.deleted",
+      "en": "(deleted)",
+      "vars": []
+    },
+    {
+      "key": "calendar.conflict.done",
+      "en": "Done",
+      "vars": []
+    },
+    {
+      "key": "calendar.conflict.due",
+      "en": "Due {date}",
+      "vars": [
+        "date"
+      ]
+    },
+    {
+      "key": "calendar.conflict.here",
+      "en": "In Lumen",
+      "vars": []
+    },
+    {
+      "key": "calendar.conflict.keepHere",
+      "en": "Keep mine",
+      "vars": []
+    },
+    {
+      "key": "calendar.conflict.keepThere",
+      "en": "Keep theirs",
+      "vars": []
+    },
+    {
+      "key": "calendar.conflict.later",
+      "en": "Decide later",
+      "vars": []
+    },
+    {
+      "key": "calendar.conflict.open",
+      "en": "Not done",
+      "vars": []
+    },
+    {
+      "key": "calendar.conflict.there",
+      "en": "On the calendar server",
+      "vars": []
+    },
+    {
+      "key": "calendar.conflict.title",
+      "en": "This task changed in both places",
+      "vars": []
+    },
+    {
+      "key": "calendar.conflict.why.both-changed",
+      "en": "You changed it here, and it was changed on the server too.",
+      "vars": []
+    },
+    {
+      "key": "calendar.conflict.why.changed-here-deleted-there",
+      "en": "You changed it here, and it was deleted on the server.",
+      "vars": []
+    },
+    {
+      "key": "calendar.conflict.why.deleted-here-changed-there",
+      "en": "You deleted it here, and it was changed on the server.",
+      "vars": []
+    },
+    {
       "key": "calendar.deadlineMove",
       "en": "A deadline on Shabbat or a chag",
       "vars": []
@@ -2666,6 +2738,173 @@
     {
       "key": "calendar.settings",
       "en": "Daily note settings",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.add",
+      "en": "Add",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.caldav",
+      "en": "CalDAV account (tasks)",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.choose",
+      "en": "Choose a calendar",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.fail.auth",
+      "en": "The server refused the user name or password.",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.fail.cors",
+      "en": "The server did not answer this app. It may not allow Lumen's address (CORS); the desktop app is not affected.",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.fail.no-account",
+      "en": "Set up a CalDAV account first.",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.fail.not-found",
+      "en": "There is no calendar at that address.",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.fail.server",
+      "en": "The server answered with an error. Try again later.",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.fail.url",
+      "en": "Use an https address.",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.find",
+      "en": "Find my calendars",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.forget",
+      "en": "Forget the account",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.forgotten",
+      "en": "The account and its password are gone from this device.",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.home",
+      "en": "Calendar home (to find calendars)",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.ics",
+      "en": "Subscriptions (read only)",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.icsName",
+      "en": "Name",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.icsNote",
+      "en": "Events from these calendars appear in the daily note when its template has the calendar field. Nothing is ever written back.",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.icsUrl",
+      "en": "ICS address",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.inbox",
+      "en": "Note for tasks from the server",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.intro",
+      "en": "Sync dated tasks with a CalDAV calendar, and show events from calendar subscriptions in the daily note. Lumen asks nothing of a server until you set it up here.",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.noTasks",
+      "en": "(events only, no tasks)",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.noneFound",
+      "en": "No calendars found at that address.",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.ok",
+      "en": "Connected. The calendar has {n} tasks.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "calendar.settings.password",
+      "en": "App password",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.passwordKept",
+      "en": "kept in the secret store",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.remove",
+      "en": "Remove",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.save",
+      "en": "Save",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.saved",
+      "en": "Saved. The password is in the secret store, not in settings.",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.syncNow",
+      "en": "Sync tasks now",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.synced",
+      "en": "Synced: {pushed} sent, {pulled} received, {conflicts} conflicts left, {errors} errors.",
+      "vars": [
+        "pushed",
+        "pulled",
+        "conflicts",
+        "errors"
+      ]
+    },
+    {
+      "key": "calendar.settings.test",
+      "en": "Test the connection",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.url",
+      "en": "Calendar address",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.user",
+      "en": "User name",
       "vars": []
     },
     {
@@ -3479,6 +3718,28 @@
       "vars": []
     },
     {
+      "key": "daily.calendar.allDay",
+      "en": "All day",
+      "vars": []
+    },
+    {
+      "key": "daily.calendar.failed",
+      "en": "{name}: could not be read",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "daily.calendar.heading",
+      "en": "Today's calendar",
+      "vars": []
+    },
+    {
+      "key": "daily.calendar.none",
+      "en": "No events",
+      "vars": []
+    },
+    {
       "key": "daily.failed",
       "en": "Couldn't open the daily note: {error}",
       "vars": [
@@ -3489,6 +3750,28 @@
       "key": "daily.noWorkspace",
       "en": "Daily notes need the workspace, which this browser can't provide.",
       "vars": []
+    },
+    {
+      "key": "daily.review.answer",
+      "en": "Answer",
+      "vars": []
+    },
+    {
+      "key": "daily.review.none",
+      "en": "Nothing to review today.",
+      "vars": []
+    },
+    {
+      "key": "daily.review.rate",
+      "en": "Rate them in the review panel (⌘K → Daily review), which keeps the schedule.",
+      "vars": []
+    },
+    {
+      "key": "daily.review.title",
+      "en": "Review ({n})",
+      "vars": [
+        "n"
+      ]
     },
     {
       "key": "datagov.badBlock",
@@ -14286,6 +14569,11 @@
         "current",
         "total"
       ]
+    },
+    {
+      "key": "settings.calendar",
+      "en": "Calendar",
+      "vars": []
     },
     {
       "key": "settings.empty",
