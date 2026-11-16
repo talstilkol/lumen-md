@@ -229,6 +229,15 @@ for (const s of steps) {
   results.push({ id: s.id, title: s.title, status, ms: Date.now() - t0 });
 }
 const shown = results.filter((r) => !r.hidden);
+// plan 0.9: a run record for `ci-doctor --source local` (.ci-local/ is not committed).
+try {
+  const sha = git("rev-parse", "HEAD");
+  mkdirSync(".ci-local/runs", { recursive: true });
+  const steps = shown.map((r) => ({ id: r.id ?? r.title, status: r.status }));
+  writeFileSync(`.ci-local/runs/${sha ?? "nosha"}-${Date.now()}.json`, `${JSON.stringify({ kind: "ci-local", sha, at: new Date().toISOString(), changed: changed !== null, steps }, null, 2)}\n`);
+} catch (e) {
+  console.error(`ci:local: no run record written (${e?.message ?? e})`);
+}
 // A gate that ran nothing (every selected step skipped or "not here") is not a pass.
 if (!failed && !shown.some((r) => r.status === "pass")) {
   console.error(`\nci:local: no step ran\n${summary(shown)}`);
