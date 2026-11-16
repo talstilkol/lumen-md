@@ -57,8 +57,10 @@ export const aiMeetingNotes = async () => {
   showAiToast(t("toast.summarising"), "info");
   try {
     const res = await meetingNotesFrom(transcript, { signal: op.signal, local: getAiPolicy() === "local-only" });
-    const current = useAppStore.getState().doc.content;
-    useAppStore.getState().setContent(current + (current.endsWith("\n") ? "" : "\n") + "\n" + res.markdown);
+    const doc = useAppStore.getState().doc;
+    const current = doc.content;
+    // The meeting notes are the model's output: tagged at the write (5.9, W10.E37).
+    (await import("../../ai/aiWrites")).writeAiContent(doc, current + (current.endsWith("\n") ? "" : "\n") + "\n" + res.markdown, useAppStore.getState().setContent);
     showAiToast(t("meeting.inserted", { n: res.notes.tasks.length }), "success");
     void offerIcs(res);
   } catch (e) {
