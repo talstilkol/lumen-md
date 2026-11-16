@@ -516,6 +516,33 @@ export async function readAloudCommand(deps: {
         return;
       }
     }
+    // Plan 6.2 (W10.E65): a pinned Kokoro voice for English, when one exists (none yet — decision 15.10). On the device.
+    if (hebrewRatio(content) < 0.2) {
+      const kokoro = await import("./tts/kokoro");
+      const pack = kokoro.ENGLISH_VOICES.length ? await kokoro.englishNeuralVoice() : null;
+      if (!isCurrentRun(run)) return;
+      if (pack) {
+        const ctl = new AbortController();
+        neuralAbort = ctl;
+        try {
+          const { uiConfirm } = await import("../ui/PromptDialog");
+          const engine = await kokoro.loadKokoro(pack, {
+            consent: (p, bytes) => uiConfirm({ title: deps.t("tts.kokoro.title"), message: deps.t("tts.kokoro.body", { voice: p.id, mb: String(Math.round(bytes / 1e6)), license: p.license }), okLabel: deps.t("tts.kokoro.ok") }),
+          });
+          if (startAt > 0) deps.toast(deps.t("tts.resumed", { n: startAt + 1, total: sentences.length }), "info");
+          await kokoro.speakKokoro(engine, sentences, { rate, startAt, source: content, signal: ctl.signal, wordRanges, onSentence, onWord: (_s, w) => word({ from: w.from, to: w.to }), onFirstAudio: (ms) => log.info(`kokoro read-aloud: first audio after ${Math.round(ms)} ms`) });
+          if (last === sentences.length - 1 && !ctl.signal.aborted) savePosition(key, null, 0);
+          return;
+        } catch (e) {
+          // why: no consent, no phonemizer or a bad file — the system voices read it instead, below
+          log.info("kokoro read-aloud not used", e);
+        } finally {
+          if (neuralAbort === ctl) neuralAbort = null;
+          range(null);
+          word(null);
+        }
+      }
+    }
     // No voice on this device, but the browser offers network voices: ask once (never under local-only).
     if (deps.confirmNetworkVoice && !hasLocalVoiceFor(content, deps.uiLang) && offersNetworkVoices() && !networkVoicesAllowed() && thirdPartyServicesAllowed()) {
       if (await deps.confirmNetworkVoice()) allowNetworkVoices();
