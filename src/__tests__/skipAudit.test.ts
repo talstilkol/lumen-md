@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 // @ts-expect-error — plain .mjs module without type declarations
-import { auditSkips, findSkips, MAX_E2E_SKIPS, parseAnnotation } from "../../scripts/lib/skipAudit.mjs";
+import { auditSkips, findSkips, MAX_E2E_HELPER_SKIPS, MAX_E2E_SKIPS, parseAnnotation, skipHelpers } from "../../scripts/lib/skipAudit.mjs";
 // @ts-expect-error — plain .mjs script without type declarations
 import { classify, vaultGatedTests } from "../../scripts/skip-report.mjs";
 
@@ -74,10 +74,39 @@ describe("skip audit (plan W4.12)", () => {
     }
   });
 
+  it("a call of an e2e/_engines.ts skip helper is a skip of its own: it needs its own reason and counts (R8-L3)", () => {
+    const helpers = 'import { test } from "@playwright/test";\nexport function chromiumOnly(b: string, what: string): void {\n  ' + REASON + '\n  test.skip(b !== "chromium", what);\n}\nexport function notASkip(): number {\n  return 1;\n}\nfunction privateSkip(): void {\n  ' + REASON + '\n  test.skip(true);\n}\n';
+    expect([...skipHelpers(helpers)]).toEqual(["chromiumOnly"]);
+    const dir = mkdtempSync(join(tmpdir(), "skip-audit-h-"));
+    try {
+      mkdirSync(join(dir, "e2e"));
+      writeFileSync(join(dir, "e2e", "_engines.ts"), helpers);
+      // Unannotated: the call site fails on its own line, even though the helper's own skip has a reason.
+      writeFileSync(join(dir, "e2e", "a.spec.ts"), 'test("x", async ({ browserName }) => {\n  chromiumOnly(browserName, "the pixel baseline");\n  notASkip();\n});\n');
+      let r = auditSkips(dir, { today: TODAY });
+      expect(r.e2eHelperCount).toBe(1);
+      expect(r.e2eCount).toBe(2); // the two test.skip calls in the helper file
+      expect(r.violations).toEqual([{ file: "e2e/a.spec.ts", line: 2, rule: "skip-reason", text: expect.stringMatching(/^chromiumOnly: no `\/\/ skip-reason:/) }]);
+      // Annotated: passes; one more than the cap of helper calls fails the count.
+      const body = (n: number) => Array.from({ length: n }, () => `${REASON}\nchromiumOnly(browserName, "x");`).join("\n");
+      writeFileSync(join(dir, "e2e", "a.spec.ts"), body(MAX_E2E_HELPER_SKIPS));
+      expect(auditSkips(dir, { today: TODAY }).violations).toEqual([]);
+      writeFileSync(join(dir, "e2e", "a.spec.ts"), body(MAX_E2E_HELPER_SKIPS + 1));
+      r = auditSkips(dir, { today: TODAY });
+      expect(r.e2eHelperCount).toBe(MAX_E2E_HELPER_SKIPS + 1);
+      expect(r.violations.map((v: { rule: string }) => v.rule)).toEqual(["skip-count"]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it("the repository passes: every skip has a reason, and e2e/ is within the cap", () => {
     const r = auditSkips(ROOT);
     expect(r.violations).toEqual([]);
     expect(r.e2eCount).toBeLessThanOrEqual(MAX_E2E_SKIPS);
+    // Every chromiumOnly / chromiumOnlyHere call site is seen and annotated (R8-L3).
+    expect(r.e2eHelperCount).toBeGreaterThanOrEqual(8);
+    expect(r.e2eHelperCount).toBeLessThanOrEqual(MAX_E2E_HELPER_SKIPS);
   });
 
   it("the report sorts skips by what they leave out, and lists the vault flows WebKit does not run", () => {

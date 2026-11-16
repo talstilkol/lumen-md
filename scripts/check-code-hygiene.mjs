@@ -64,7 +64,7 @@ import { join, relative, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
 import postcss from "postcss";
-import { auditSkips, MAX_E2E_SKIPS } from "./lib/skipAudit.mjs";
+import { auditSkips, MAX_E2E_HELPER_SKIPS, MAX_E2E_SKIPS } from "./lib/skipAudit.mjs";
 import { domainInTree } from "./lib/takenDomain.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -426,7 +426,7 @@ function main() {
       `no direct file-system calls outside the vault layer and ${Object.keys(DIRECT_FS_ALLOWLIST).length} allowlisted files); ` +
       `${sheets.length} stylesheets use logical properties in .prose-lumen / .cm-* rules; ` +
       `${e2eFiles.length} e2e files without waitForTimeout; ` +
-      `${skips.sites.length} skipped tests each with a reason, task and date (${skips.e2eCount} of at most ${MAX_E2E_SKIPS} in e2e); ` +
+      `${skips.sites.length} skipped tests each with a reason, task and date (${skips.e2eCount} of at most ${MAX_E2E_SKIPS} in e2e, and ${skips.e2eHelperCount} of at most ${MAX_E2E_HELPER_SKIPS} engine-helper calls); ` +
       "the taken domain appears nowhere in the tree.",
   );
 }

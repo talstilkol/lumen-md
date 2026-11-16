@@ -17,6 +17,7 @@ export function onPhones(body: (phone: (typeof PHONES)[number]) => void): void {
       const { defaultBrowserType: _engine, ...device } = devices[name];
       test.use(device);
       // Firefox has no mobile emulation (isMobile) in Playwright (9.2).
+      // skip-reason: Firefox has no mobile emulation (isMobile) in Playwright; WebKit's layout is covered by the desktop webkit project | task: 9.2 | until: 2027-05-16
       chromiumOnlyHere("phone emulation");
       body(name);
     });

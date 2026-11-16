@@ -84,6 +84,7 @@ test("Bring your notes: six sources, the wizard on Google Keep, report, search a
 });
 
 test("Open an Obsidian folder: the folder becomes the vault, no note is written into it", async ({ page, browserName }) => {
+  // skip-reason: showDirectoryPicker is Chromium-only; Firefox and WebKit have no folder picker to open the Obsidian folder with | task: W4.12 | until: 2027-05-16
   chromiumOnly(browserName, "showDirectoryPicker");
   await page.addInitScript(() => {
     (window as unknown as { showDirectoryPicker: () => Promise<FileSystemDirectoryHandle> }).showDirectoryPicker = async () => {
