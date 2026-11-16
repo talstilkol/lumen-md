@@ -11,7 +11,7 @@ import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFile
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 // @ts-expect-error — plain .mjs script without type declarations
-import { COMMAND_GATES, TEST_GATES, allGreen, isSha, receiptPath, receiptProblems, record, refusal, runGates } from "../../scripts/lib/trainReceipt.mjs";
+import { COMMAND_GATES, TEST_GATES, allGreen, gateCommand, isSha, receiptPath, receiptProblems, record, refusal, runGates } from "../../scripts/lib/trainReceipt.mjs";
 // @ts-expect-error — plain .mjs script without type declarations
 import { brokenImports, resolves, specifiers } from "../../scripts/lib/importCheck.mjs";
 
@@ -22,9 +22,20 @@ describe("the gate list", () => {
   it("starts with the fail-fast import check and holds every gate the task names", () => {
     expect(COMMAND_GATES[0]).toMatchObject({ id: "imports", failFast: true });
     const ids = COMMAND_GATES.map((g: { id: string }) => g.id);
-    for (const id of ["typecheck", "code-hygiene", "max-lines", "live-seams", "flags", "plan", "dod-rule", "i18n"]) expect(ids).toContain(id);
+    for (const id of ["typecheck", "code-hygiene", "max-lines", "live-seams", "flags", "plan", "dod-rule", "dod-done", "i18n"]) expect(ids).toContain(id);
     expect(TEST_GATES).toEqual(expect.arrayContaining(["src/__tests__/skipAudit.test.ts", "src/__tests__/codeHealth.test.ts", "src/__tests__/settingsSchema.test.ts"]));
     for (const f of TEST_GATES) expect(existsSync(join(repo, f)), f).toBe(true);
+  });
+
+  it("runs every ✅ task's dod (plan 0.7), through the offline runner when one is given", () => {
+    const g = COMMAND_GATES.find((x: { id: string }) => x.id === "dod-done");
+    expect(g).toMatchObject({ cmd: "node scripts/dod.mjs --done", withRunner: true });
+    expect(g.failFast).toBeFalsy();
+    expect(gateCommand(g, null)).toBe("node scripts/dod.mjs --done");
+    expect(gateCommand(g, "/x/v4.sh")).toBe("node scripts/dod.mjs --done --runner '/x/v4.sh'");
+    expect(gateCommand(g, "/a b/it's.sh")).toBe("node scripts/dod.mjs --done --runner '/a b/it'\\''s.sh'");
+    // the other command gates do not take the runner
+    expect(gateCommand(COMMAND_GATES[0], "/x/v4.sh")).toBe(COMMAND_GATES[0].cmd);
   });
 
   it("names the receipt after the full commit hash", () => {

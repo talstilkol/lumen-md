@@ -18,7 +18,8 @@
  *   node scripts/train-offline.mjs --all [--runner <cmd>]
  *       the command gates (scripts/lib/trainReceipt.mjs COMMAND_GATES: imports
  *       first and fail-fast, typecheck, hygiene's checks, flags, i18n, plan,
- *       the dod rule), then the attack and gate test files and TEST_GATES.
+ *       the dod rule, every ✅ task's dod (plan 0.7; through the --runner when
+ *       one is given)), then the attack and gate test files and TEST_GATES.
  *       All green on a clean tree → reports/train-offline-<HEAD sha>.json;
  *       anything red (or a dirty tree) → no receipt, exit 1. Every run leaves
  *       a record in .ci-local/runs/ for `ci-doctor --source local` (plan 0.9).
@@ -31,7 +32,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { COMMAND_GATES, RUNS_DIR, TEST_GATES, receiptPath, record, refusal, runGates } from "./lib/trainReceipt.mjs";
+import { COMMAND_GATES, RUNS_DIR, TEST_GATES, gateCommand, receiptPath, record, refusal, runGates } from "./lib/trainReceipt.mjs";
 
 export const ATTACK_DIR = "security/attacks";
 
@@ -99,8 +100,9 @@ function all(root, argv) {
   const tests = only.length ? [] : testGates(root, [...gateFiles(root), ...TEST_GATES.filter((f) => existsSync(join(root, f)))], runner);
   const results = runGates([...commands, ...tests], (g) => {
     const t0 = Date.now();
-    console.log(`\n▶ ${g.id}${g.cmd ? `: ${g.cmd}` : ""}`);
-    const r = g.cmd ? { ok: spawnSync(g.cmd, { cwd: root, shell: true, stdio: "inherit" }).status === 0 } : g.run();
+    const cmd = g.cmd ? gateCommand(g, runner) : null;
+    console.log(`\n▶ ${g.id}${cmd ? `: ${cmd}` : ""}`);
+    const r = cmd ? { ok: spawnSync(cmd, { cwd: root, shell: true, stdio: "inherit" }).status === 0 } : g.run();
     const out = typeof r === "boolean" ? { ok: r } : r;
     return { ...out, ms: Date.now() - t0 };
   });

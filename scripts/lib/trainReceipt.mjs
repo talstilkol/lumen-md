@@ -27,7 +27,23 @@ export const COMMAND_GATES = [
   { id: "i18n", cmd: "npm run -s i18n:check" },
   { id: "plan", cmd: "node scripts/plan/build.mjs --check" },
   { id: "dod-rule", cmd: "node scripts/dod.mjs --list" },
+  // Plan 0.7: every ✅ / ✅* task's dod is run, so a ✅ whose dod went red blocks the receipt.
+  // `withRunner`: with --runner the dod's vitest files go through that runner (gateCommand).
+  { id: "dod-done", cmd: "node scripts/dod.mjs --done", withRunner: true },
 ];
+
+/** A shell-quoted argument. */
+const shq = (s) => `'${String(s).replace(/'/g, "'\\''")}'`;
+
+/**
+ * The shell command of a command gate: its `cmd`, plus `--runner <runner>` when
+ * the gate takes the offline runner (`withRunner`) and one was given.
+ * @param {{ cmd: string, withRunner?: boolean }} g
+ * @param {string|null} [runner]
+ */
+export function gateCommand(g, runner = null) {
+  return g.withRunner && runner ? `${g.cmd} --runner ${shq(runner)}` : g.cmd;
+}
 
 /** Test files the receipt covers besides security/attacks and the OFFLINE_GATES. */
 export const TEST_GATES = ["src/__tests__/skipAudit.test.ts", "src/__tests__/codeHealth.test.ts", "src/__tests__/settingsSchema.test.ts"];
