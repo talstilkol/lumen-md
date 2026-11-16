@@ -94,3 +94,18 @@
   color: hsl(var(--fg));
   opacity: 1;
 }
+
+/* The virtual tree of a large vault (W10.E16): every row the same height, so the spacers are exact. */
+.file-tree-virtual {
+  padding: 0;
+}
+.file-tree-virtual .file-tree-item {
+  height: 26px;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.file-tree-virtual .file-tree-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
