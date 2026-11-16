@@ -179,6 +179,7 @@
     "registry:verify": "node scripts/registry-site.mjs --verify",
     "help:check": "node scripts/help-bundle.mjs --check",
     "help:merge-driver": "node scripts/help-merge-driver.mjs --install",
+    "prepare": "node scripts/git-setup.mjs",
     "flags:check": "node scripts/check-flags.mjs",
     "security:audit-claims": "node scripts/security/audit-claims.mjs",
     "bench:models": "node scripts/bench-models.mjs",
