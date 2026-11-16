@@ -9,15 +9,22 @@
  *      real nested lists (the bullet glyph or number picks `ul` or `ol`);
  *      `MsoTitle` / `MsoHeading` become headings; conditional comments,
  *      `<o:p>` and other Office tags go.
+ *      A numbered list Word continues after a paragraph keeps its number
+ *      (`3.` stays 3).
  *    - Google Docs: the `docs-internal-guid` wrapper goes; spans styled
  *      bold / italic / struck become `strong` / `em` / `del`; flat lists with
- *      `aria-level` are nested again.
+ *      `aria-level` are nested again; a checklist item (`role=checkbox`,
+ *      `aria-checked`) becomes a task, without the checkbox picture and the
+ *      strike Docs draws through a done item.
  *    - Websites: scripts, styles, forms, Wikipedia's edit links and
  *      citation markers go; Gmail's quoted reply becomes a quote.
  *    - Every `style`, `class`, `dir`, `align` and `lang` goes: the Markdown
  *      carries no inline style and no direction (each block finds its own).
  * 2. `domToMarkdown` writes GFM: headings, paragraphs, emphasis, links,
- *   images, code, nested lists, tables and quotes.
+ *   images, code, nested lists, tasks, tables and quotes. A table cell of
+ *   several paragraphs keeps them apart (`<br>`); a merged cell (`rowspan`)
+ *   leaves its column empty in the rows below, so the other cells stay in
+ *   their columns.
  *
  * Invisible direction controls are removed (`cleanBidiControls`): the
  * embeddings and overrides always (LRE, RLE, PDF, LRO, RLO, LRI, RLI, FSI,
@@ -121,6 +128,9 @@ function wordLists(body: HTMLElement): void {
       let cur = stack[stack.length - 1];
       if (!cur || cur.level < level) {
         const list = doc.createElement(ordered ? "ol" : "ul");
+        // Word numbers on across a paragraph between the items (1. 2. — text — 3.): keep the number.
+        const n = ordered ? /^\(?(\d+)[.)]$/.exec(markerText)?.[1] : undefined;
+        if (n && n !== "1") list.setAttribute("start", n);
         if (cur) {
           const lastLi = cur.list.lastElementChild ?? cur.list.appendChild(doc.createElement("li"));
           lastLi.appendChild(list);
@@ -187,7 +197,19 @@ export function cleanPastedDom(body: HTMLElement): void {
       else el.remove();
     }
   }
-  body.querySelectorAll(DROP).forEach((n) => n.remove());
+  // Google Docs checklists: the item says whether it is done; the checkbox is a picture, the strike is Docs' drawing of "done".
+  for (const li of Array.from(body.querySelectorAll("li[role=checkbox][aria-checked]"))) {
+    li.querySelectorAll("img[aria-roledescription=checkbox]").forEach((i) => i.remove());
+    for (const el of [li, ...Array.from(li.querySelectorAll("[style]"))]) el.setAttribute("style", styleOf(el).replace(/text-decoration:\s*line-through/g, "text-decoration:none"));
+    const box = doc.createElement("input");
+    box.setAttribute("type", "checkbox");
+    if (li.getAttribute("aria-checked") === "true") box.setAttribute("checked", "");
+    li.prepend(box);
+  }
+  // A task's checkbox (Docs above, a web page's task list) is content; every other form control goes.
+  body.querySelectorAll(DROP).forEach((n) => {
+    if (!(n.tagName === "INPUT" && (n.getAttribute("type") ?? "").toLowerCase() === "checkbox" && n.parentElement?.tagName === "LI")) n.remove();
+  });
   body.querySelectorAll(SITE_NOISE).forEach((n) => n.remove());
 
   wordLists(body);
@@ -325,17 +347,26 @@ function inline(node: Node): string {
 
 function cellText(td: Element): string {
   const parts: string[] = [];
+  // Blocks in a cell (Word writes a <p> per paragraph) stay apart: GFM has <br> for a line inside a cell.
+  let block = false;
+  const push = (t: string, isBlock: boolean) => {
+    if (!t.trim()) return;
+    if (parts.length) parts.push(isBlock || block ? "<br>" : "");
+    parts.push(t);
+    block = isBlock;
+  };
   for (const c of Array.from(td.childNodes)) {
     if (c.nodeType === 1 && BLOCK_TAGS.has((c as Element).tagName)) {
       if ((c as Element).tagName === "UL" || (c as Element).tagName === "OL")
-        parts.push(Array.from((c as Element).children).map((li) => "• " + inline(li).trim()).join("<br>"));
-      else parts.push(inline(c).trim());
-    } else parts.push(inline(c));
+        push(Array.from((c as Element).children).map((li) => "• " + inline(li).trim()).join("<br>"), true);
+      else push(inline(c).trim(), true);
+    } else push(inline(c), false);
   }
   return parts
-    .join(" ")
+    .join("")
     .replace(/\\\n/g, "<br>")
     .replace(/\s+/g, " ")
+    .replace(/\s*<br>\s*/g, "<br>")
     .replace(/\|/g, "\\|")
     .trim();
 }
@@ -343,12 +374,28 @@ function cellText(td: Element): string {
 function table(t: HTMLTableElement): string {
   const rows = Array.from(t.rows);
   if (!rows.length) return "";
+  // A cell merged down (rowspan) holds its columns in the rows below: those stay empty there.
+  const held: number[] = [];
   const grid = rows.map((r) => {
     const cells: string[] = [];
+    const take = (text: string, span: number) => {
+      const col = cells.length;
+      cells.push(text);
+      if (span > 1) held[col] = Math.max(held[col] ?? 0, span - 1);
+    };
+    const skipHeld = () => {
+      while ((held[cells.length] ?? 0) > 0) {
+        held[cells.length]--;
+        cells.push("");
+      }
+    };
     for (const c of Array.from(r.cells)) {
-      cells.push(cellText(c));
-      for (let k = 1; k < (c.colSpan || 1); k++) cells.push("");
+      skipHeld();
+      const span = Math.max(1, Number(c.getAttribute("rowspan")) || 1);
+      take(cellText(c), span);
+      for (let k = 1; k < (c.colSpan || 1); k++) take("", span);
     }
+    skipHeld();
     return cells;
   });
   const width = Math.max(...grid.map((r) => r.length));
