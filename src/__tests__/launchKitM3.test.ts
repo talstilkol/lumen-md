@@ -48,7 +48,7 @@ describe("the M3 launch kit (W11.L3)", () => {
 
   it("refuses an unbacked claim, an unknown marker, a receipt whose quote is gone, and a URL as a receipt", () => {
     expect(check(edit("show-hn.md", "It is MIT-licensed.[^mit]", "It is MIT-licensed."))).toContain('show-hn.md: a claim without a receipt: "It is MIT-licensed."');
-    expect(check(edit("press-kit.he.md", "הממשק ב-8 שפות.[^ui-languages]", "הממשק ב-9 שפות."))).toContain('press-kit.he.md: a claim without a receipt: "הממשק ב-9 שפות."');
+    expect(check(edit("press-kit.he.md", "הממשק ב-8 שפות, שש מהן בבטא.[^ui-languages]", "הממשק ב-9 שפות."))).toContain('press-kit.he.md: a claim without a receipt: "הממשק ב-9 שפות."');
     expect(check(edit("show-hn.md", "[^mit]", "[^gpl]")).join("\n")).toContain("show-hn.md: [^gpl] is not in claims.json");
     const docsChanged = (p: string) => (p === "docs/src/content/docs/editor/hebrew.md" ? readRepo(p)!.replace("English and Hebrew in full", "English in full") : readRepo(p));
     expect(check(files, ledger, docsChanged)).toContain('claims.json ui-languages: docs/src/content/docs/editor/hebrew.md no longer says "English and Hebrew in full, and Arabic, Russian, French, German, Japanese and Chinese in beta"');
@@ -82,6 +82,9 @@ describe("the M3 launch kit (W11.L3)", () => {
 
   it("each file's Sources list is generated from its markers and current", () => {
     for (const f of KIT_FILES as string[]) expect(withSources(files[f], ledger.claims), f).toBe(files[f]);
+    // R8-L8: the Hebrew kit's footnote is in Hebrew where claims.json has the text, and the headline says "beta".
+    expect(files["press-kit.he.md"]).toContain("[^ui-languages]: הממשק ב-8 שפות, שש מהן בבטא");
+    expect(files["press-kit.en.md"]).toContain("- Interface in 8 languages, six of them in beta.[^ui-languages]");
     const stale = edit("show-hn.md", "It is MIT-licensed.[^mit]", "It is MIT-licensed.[^mit][^compare]");
     expect(check(stale).join("\n")).toContain("show-hn.md: the Sources list is out of date");
   });

@@ -9,6 +9,12 @@ translated by machine (plan 9.1) and no native speaker has reviewed them yet. Lu
 each of them **Beta (machine translation, awaiting native review)**, and you should expect
 wrong or awkward wording in them:
 
+A new Hebrew string can start as a machine draft too. Until a native speaker approves it
+(`npm run i18n:draft -- --approve=he`), it is listed under `he` in
+`i18n/needs-review/`. Today that is 7 strings, all from the academic export dialog:
+`academic.chosen`, `academic.chosenUnverified`, `academic.exported`, `academic.noChoice`,
+`academic.none`, `academic.pick` and `academic.unverified`.
+
 | Language | Status |
 |---|---|
 | English | full (source) |

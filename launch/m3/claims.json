@@ -34,6 +34,7 @@
   },
   "ui-languages": {
    "en": "The interface is in 8 languages, six of them in beta (machine-translated); Hebrew and Arabic mirror the layout.",
+   "he": "הממשק ב-8 שפות, שש מהן בבטא (תרגום מכונה); בעברית ובערבית הממשק מתהפך.",
    "source": "docs/src/content/docs/editor/hebrew.md",
    "quote": "English and Hebrew in full, and Arabic, Russian, French, German, Japanese and Chinese in beta"
   },
