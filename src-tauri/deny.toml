@@ -1,0 +1,65 @@
+# cargo-deny for the Rust crates (plan W6.14, W10.M3: `cd src-tauri && cargo deny check`).
+#
+# Licences mirror the licence gate (scripts/lib/licenses.mjs, OK_LICENCE_IDS) and its
+# exceptions file (licenses.allow.json), with nothing looser:
+# - `allow` is exactly OK_LICENCE_IDS, minus "Public Domain", which is not an SPDX id.
+#   src/__tests__/cargoDeny.test.ts fails when the two lists differ.
+# - licenses.allow.json has no cargo entries, so `exceptions` is empty. A crate the gate would
+#   only warn about (LGPL, MPL-style restricted, an unknown id, GPL with a linking exception)
+#   is refused here: cargo-deny has no "warn" level for licences, so it is the stricter side.
+# - Our own crates are checked too (no `private.ignore`); they are MIT, like the repository.
+# Everything else keeps cargo-deny's defaults (advisories: vulnerabilities, unmaintained and
+# unsound crates are errors; bans and sources: the default warnings).
+
+[graph]
+all-features = false
+
+[advisories]
+version = 2
+
+[licenses]
+version = 2
+allow = [
+    "MIT",
+    "MIT-0",
+    "ISC",
+    "0BSD",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "BSD-3-Clause-Clear",
+    "Apache-2.0",
+    "Apache-1.1",
+    "Unlicense",
+    "CC0-1.0",
+    "CC-BY-3.0",
+    "CC-BY-4.0",
+    "BlueOak-1.0.0",
+    "Zlib",
+    "Python-2.0",
+    "PSF-2.0",
+    "OFL-1.1",
+    "BSL-1.0",
+    "WTFPL",
+    "MPL-1.1",
+    "MPL-2.0",
+    "EPL-1.0",
+    "EPL-2.0",
+    "CDDL-1.0",
+    "CDDL-1.1",
+    "Artistic-2.0",
+    "X11",
+    "W3C",
+    "Ruby",
+    "Unicode-DFS-2016",
+    "Unicode-3.0",
+    "AFL-2.1",
+    "AFL-3.0",
+]
+exceptions = []
+
+[licenses.private]
+ignore = false
+
+[bans]
+
+[sources]

@@ -3,6 +3,7 @@ name = "lumen-keychain"
 version = "0.1.0"
 edition = "2021"
 description = "Lumen's OS keychain access (T36): Keychain on macOS, Credential Manager on Windows"
+license = "MIT"
 publish = false
 
 # A crate of its own so CI can build and test it on macOS and Windows in a
