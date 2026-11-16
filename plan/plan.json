@@ -33691,7 +33691,7 @@
      "verified": "built",
      "stage": "13.X",
      "dod": [
-      "npx vitest run src/__tests__/mcpStdioAllowlist.test.ts",
+      "npx vitest run src/__tests__/mcpStdioAllowlist.test.tsx",
       "cargo test --manifest-path src-tauri/Cargo.toml mcp_stdio"
      ],
      "dodExpect": [
