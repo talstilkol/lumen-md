@@ -302,3 +302,22 @@
 # P1 round (train 6): sensitive files the merges added (codeowners-coverage)
 /src/agents/defs/piiNames.ts             @talstilkol
 /src/agents/executors/lmstudio.ts        @talstilkol
+
+# ── Review 11 (L11, M4): what runs on npm install, how a clone is set up, and the plan's ratchets ──
+#   npm install runs `prepare` (package.json) → these scripts, in every contributor's clone
+/package.json                            @talstilkol
+/scripts/prepare.mjs                     @talstilkol
+/scripts/install-git-hooks.mjs           @talstilkol
+/scripts/git-setup.mjs                   @talstilkol
+/scripts/lane-state.mjs                  @talstilkol
+/scripts/lib/lane-state.mjs              @talstilkol
+/scripts/lib/ciLocal.mjs                 @talstilkol
+#   Merge drivers and line endings for every clone
+/.gitattributes                          @talstilkol
+#   The audit ledger and the WIP gate's exemptions: append-only and shrink-only (scripts/plan/ledgerRatchet.mjs)
+/plan/audit-verdicts.json                @talstilkol
+/plan/wip-frozen.json                    @talstilkol
+/plan/ledger-snapshot.json               @talstilkol
+/scripts/plan/wipGate.mjs                @talstilkol
+/scripts/plan/auditGuard.mjs             @talstilkol
+/scripts/plan/ledgerRatchet.mjs          @talstilkol
