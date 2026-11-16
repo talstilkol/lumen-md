@@ -295,6 +295,13 @@
       "icon": "Columns2"
     },
     {
+      "id": "view.bilingual",
+      "label": "📖 Bilingual reader (columns / line under line)",
+      "group": "View",
+      "hint": "A Sefaria text with its official translation, or a note with its translation file, aligned verse by verse",
+      "icon": "Columns2"
+    },
+    {
       "id": "view.preview",
       "label": "Preview only",
       "group": "View",
@@ -2589,6 +2596,13 @@
       "icon": "Columns2"
     },
     {
+      "id": "view.bilingual",
+      "label": "📖 Bilingual reader (columns / line under line)",
+      "group": "View",
+      "hint": "A Sefaria text with its official translation, or a note with its translation file, aligned verse by verse",
+      "icon": "Columns2"
+    },
+    {
       "id": "view.preview",
       "label": "Preview only",
       "group": "View",
@@ -4737,6 +4751,7 @@
     "view.source",
     "view.split",
     "view.sideBySide",
+    "view.bilingual",
     "view.preview",
     "view.wysiwyg",
     "view.outline",

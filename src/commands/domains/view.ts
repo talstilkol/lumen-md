@@ -37,6 +37,15 @@ export function buildViewCommands({ setSearchOpen, setRuntimeMetricsOpen, vimEna
       action: () => void import("../../ai/mt/openSideBySide").then((m) => m.openSideBySide()),
     },
     {
+      id: "view.bilingual",
+      label: t("cmd.view.bilingual"),
+      hint: t("cmd.view.bilingual.hint"),
+      icon: cmdIcons.Columns2,
+      group: t("group.view"),
+      // W13.R12: official versions or the W12.H6 sidecar, by verse; columns, interlinear, source only.
+      action: () => void import("../../reading/bilingual/openBilingual").then((m) => m.openBilingual()),
+    },
+    {
       id: "view.preview",
       label: t("cmd.view.preview"),
       shortcut: "⌘3",

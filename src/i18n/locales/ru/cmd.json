@@ -547,6 +547,8 @@
   "cmd.view.bidiMarks.hint": "Помечать невидимые символы, задающие направление текста (RLM, LRM, изоляты…)",
   "cmd.view.bidiMarks.off": "Скрыть знаки направления",
   "cmd.view.bidiMarks.on": "Показать знаки направления",
+  "cmd.view.bilingual": "📖 Bilingual reader (columns / line under line)",
+  "cmd.view.bilingual.hint": "A Sefaria text with its official translation, or a note with its translation file, aligned verse by verse",
   "cmd.view.calendar": "Показать / скрыть календарь",
   "cmd.view.calendar.hint": "Месячный календарь ежедневных заметок под деревом файлов",
   "cmd.view.canvas": "🎨 Холст / Доска",
