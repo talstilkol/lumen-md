@@ -45,7 +45,7 @@ describe.skipIf(!process.env.LUMEN_EVAL_STRUCTURED)(`structured output conforman
     const date = new Date().toISOString().slice(0, 10);
     mkdirSync(outDir, { recursive: true });
     const file = join(outDir, `structured-${model.replace(/[^\w.-]+/g, "_")}-${date}.json`);
-    writeFileSync(file, `${JSON.stringify({ task: "W7.14", engine: "ollama", model, url, date, seconds: Math.round((Date.now() - t0) / 1000), ...report, shortScore }, null, 2)}\n`);
+    writeFileSync(file, `${JSON.stringify({ task: "W7.14", model, url, date, seconds: Math.round((Date.now() - t0) / 1000), ...report, shortScore }, null, 2)}\n`);
     // hygiene-allow: the result line of a CLI eval run
     console.log(`structured output on ${model}: ${report.valid}/${report.total} valid (${(report.rate * 100).toFixed(1)} %), short-task score ${(shortScore * 100).toFixed(1)} % → ${file}`);
     expect(report.total).toBe(250);

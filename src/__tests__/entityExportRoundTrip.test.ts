@@ -360,11 +360,12 @@ describe("W12.E8 every field round-trips through each format (60 seeded random g
 
 // ------------------------------------------------------------ n3 (owed until installed)
 
-let n3: { Parser: new (o?: { format?: string }) => { parse(t: string): Array<{ subject: { value: string }; predicate: { value: string }; object: { value: string; termType: string } }> } } | null = null;
+type N3 = { Parser: new (o?: { format?: string }) => { parse(t: string): Array<{ subject: { value: string }; predicate: { value: string }; object: { value: string; termType: string } }> } };
+let n3: N3 | null = null;
 try {
   const m = (await import(/* @vite-ignore */ ["n", "3"].join(""))) as { Parser?: unknown; default?: { Parser?: unknown } };
   const Parser = typeof m.Parser === "function" ? m.Parser : m.default?.Parser;
-  const probe = typeof Parser === "function" ? ({ Parser } as NonNullable<typeof n3>) : null;
+  const probe = typeof Parser === "function" ? ({ Parser } as N3) : null;
   // A stand-in module (an offline runner stubs unknown packages) is not n3: it must really parse.
   n3 = probe && new probe.Parser({ format: "text/turtle" }).parse("<urn:a> <urn:b> <urn:c> .\n").length === 1 ? probe : null;
 } catch {

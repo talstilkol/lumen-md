@@ -379,7 +379,8 @@ function call(fn: string, args: Value[], now: number): Value {
     case "sort":
       return Array.isArray(a) ? [...a].sort(compare) : (a ?? null);
     case "flat":
-      return Array.isArray(a) ? a.flat(typeof b === "number" ? b : 1) as Value[] : (a ?? null);
+      // why: unknown[] keeps FlatArray from expanding the recursive Value type (TS2589)
+      return Array.isArray(a) ? ((a as unknown[]).flat(typeof b === "number" ? b : 1) as Value[]) : (a ?? null);
     case "nonnull":
       return (Array.isArray(a) ? a : args).filter((x) => x !== null);
     case "firstvalue":
