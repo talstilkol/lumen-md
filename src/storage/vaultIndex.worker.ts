@@ -5,6 +5,7 @@
  * notes through the VaultBackend and sends their text here; queries come
  * back as plain results. See ./vaultIndexProtocol.ts.
  */
+import "../ai/workerLedgerInstall"; // first: what this worker fetches reaches the privacy ledger (plan 2.4, W10.D22)
 import { VaultIndex } from "./vaultIndexCore";
 import { handleIndexRequest } from "./vaultIndexLocal";
 import type { IndexProgress, IndexRequest } from "./vaultIndexProtocol";
