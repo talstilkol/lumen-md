@@ -1,0 +1,13 @@
+# Lumen (lumen-md): how to report a security vulnerability (RFC 9116).
+# Plan W13.X2. The policy, the timelines and the support period are in SECURITY.md.
+# Do not put the details of a vulnerability in a public issue: the contact
+# below asks for a private channel first, with no details.
+# Checked by `npm run security:page -- --check` and src/__tests__/securityTxt.test.ts;
+# renew Expires before it passes (the check fails on the day it does).
+
+Contact: https://github.com/talstilkol/lumen-md/issues/new?title=Security%20contact%20request
+Expires: 2027-05-16T00:00:00.000Z
+Policy: https://github.com/talstilkol/lumen-md/blob/main/SECURITY.md
+Acknowledgments: https://github.com/talstilkol/lumen-md/blob/main/SECURITY.md#hall-of-fame
+Preferred-Languages: he, en
+Canonical: https://lumen-md.vercel.app/.well-known/security.txt
