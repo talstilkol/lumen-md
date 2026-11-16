@@ -16,7 +16,7 @@ export default defineConfig({
   expect: { timeout: 10_000 },
   fullyParallel: false,
   workers: 1,
-  retries: 1,
+  retries: 0, // plan 0.5 / W10.A5: no retries in any Playwright config; a flaky recording is fixed, not retried
   reporter: "list",
   use: {
     ...devices["Desktop Chrome"],
