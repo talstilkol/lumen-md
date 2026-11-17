@@ -8,8 +8,9 @@
  * Reads every plan/owner-pack/L*.json. Several lanes ask for the same owner
  * action (switch Buildkite on, the e2e receipt key, the GitHub security
  * settings…): those become ONE row that lists every lane item it answers.
- * Items no topic claims stay one row each, merged only when two lanes name
- * the same plan task. The "do these first" order is the TOPICS order below:
+ * An item that names several shared actions is listed under each of them
+ * (review 12, L1). Items no topic claims stay one row each, merged only when
+ * two lanes name the same plan task. The "do these first" order is the TOPICS order below:
  * each of those unblocks other rows. Everything else follows, the rows that
  * answer the most items first.
  *
@@ -77,10 +78,13 @@ export function group(items) {
   const rows = new Map();
   for (const x of items) {
     const text = `${x.decision ?? ""}`;
-    const t = TOPICS.find((tp) => tp.re.test(text));
-    const key = t ? t.key : `task:${taskOf(x) ?? x.id}`;
-    if (!rows.has(key)) rows.set(key, t ? { key, topic: t, first: !!t.first, items: [] } : { key, topic: null, first: false, items: [] });
-    rows.get(key).items.push(x);
+    // Review 12, L1: an item that asks for several shared actions is listed under each of them, not only the first.
+    const ts = TOPICS.filter((tp) => tp.re.test(text));
+    const keys = ts.length ? ts.map((t) => [t.key, t]) : [[`task:${taskOf(x) ?? x.id}`, null]];
+    for (const [key, t] of keys) {
+      if (!rows.has(key)) rows.set(key, t ? { key, topic: t, first: !!t.first, items: [] } : { key, topic: null, first: false, items: [] });
+      rows.get(key).items.push(x);
+    }
   }
   const firsts = TOPICS.filter((t) => t.first).map((t) => rows.get(t.key)).filter(Boolean);
   const rest = [...rows.values()].filter((r) => !r.first).sort((a, b) => b.items.length - a.items.length || new Set(b.items.map((i) => i.lane)).size - new Set(a.items.map((i) => i.lane)).size || a.items[0].id.localeCompare(b.items[0].id, "en"));

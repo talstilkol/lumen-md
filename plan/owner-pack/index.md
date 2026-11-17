@@ -102,7 +102,7 @@ Rows that answer the most lane items come first.
 
 ### 8. Recruit people: usability rounds, the closed Hebrew beta, reviewers
 
-- **Lane items:** L1 `L1/W6.30` (W6.30), L1 `L1/W6.31` (W6.31), L1 `L1/W11.O5` (W11.O5), L3 `L3-W4.25` (W4.25), L4 `W1.29` (W1.29), L4 `W10.O8` (W10.O8), L6 `L6-W11.L5-m1` (W11.L5), L7 `L7-W8.5` (W8.5), L7 `L7-W8.12` (W8.12)
+- **Lane items:** L1 `L1/W6.30` (W6.30), L1 `L1/W6.31` (W6.31), L1 `L1/W11.O5` (W11.O5), L3 `L3-W4.25` (W4.25), L4 `W1.29` (W1.29), L4 `W10.O8` (W10.O8), L6 `L6-W11.L5-m1` (W11.L5), L7 `L7-W2.25` (W2.25), L7 `L7-W8.5` (W8.5), L7 `L7-W8.12` (W8.12)
 - **Recommendation:** `L1/W6.30` A · `W1.29` B (5 sessions find most severe problems; the second round measures SUS ≥ 80 after the fixes) · `L6-W11.L5-m1` A + B mixed (25/25), weekly opt-in report only (launch:gate --beta-metrics).
 - **Check:** `npm run test:sr`
 - **Check:** `node scripts/usability-analyze.mjs`
@@ -115,6 +115,7 @@ Rows that answer the most lane items come first.
   - `W1.29`: Hold the Hebrew usability rounds (5–8 sessions per round).
   - `W10.O8`: Recruit people: usability participants, language reviewers, a labelled grammar set, external crypto review, plugin developers, beta audience.
   - `L6-W11.L5-m1`: Recruit the closed Hebrew beta of 50 and run the 12 unmoderated sessions.
+  - `L7-W2.25`: Recruit the Hebrew beta (≥ 50 active testers) and open Discussions for feedback; settle the 4 comparison claims still unverified (W10.B22).
   - `L7-W8.5`: Run the 5-user SAS usability test (each compares the 5 emoji correctly in < 20 s).
   - `L7-W8.12`: Recruit 12 participants for the unmoderated usability tests (#487 is clean on the train).
 
@@ -132,7 +133,23 @@ Rows that answer the most lane items come first.
   - `L7-W8.2`: Provide 20 real Notion exports (owner's or volunteers', with consent) to measure 18/20 scenarios after import.
   - `L8-O-W11.P2`: Provide the real exports (W10.O9) and run `npm run import:diff` on each: the same export imported by lumen-md and by Obsidian Importer.
 
-### 10. Deploy the separate sites: the content frame on its own origin, the share server and the relay
+### 10. Set up the second host (Cloudflare) for the site and the nightly factory
+
+- **Lane items:** L1 `L1/W6.5` (W6.5), L1 `L1/W6.9` (W6.9), L3 `L3-W4.27` (W4.27), L6 `L6-W7.21-buildkite` (W7.21), L6 `L6-W7.23-cloudflare` (W7.23), L7 `L7-W10.D4` (W10.D4)
+- **Recommendation:** `L1/W6.5` A · `L3-W4.27` A; the written decision: 'Vercel Hobby + Cloudflare Pages Free, $0/month' · `L6-W7.21-buildkite` A now (owner checklist items 1.42–1.46), B in parallel. · `L6-W7.23-cloudflare` A, per scripts/supply-chain/cf-build.sh; compare each main commit with npm run repro:compare.
+- **Check:** `npm run owner:session -- check accounts`
+- **Check:** `npm run hosts:parity && npm run hosting:gate`
+- **Check:** `npm run ci:selftest && npm run ci:pipeline`
+- **Check:** `npm run repro:compare -- https://<worker>/lumen-build.json origin:https://lumen-md.vercel.app`
+- **Check:** `bash scripts/buildkite/agent-bootstrap.sh  (after creating the org and an agent token)`
+  - `L1/W6.5`: Create the free second host for the nightly factory.
+  - `L1/W6.9`: Pick the second deployment host and when to leave Vercel Hobby.
+  - `L3-W4.27`: Put the site on the second host (Cloudflare Pages) at the same commit hash, and write down the monthly cost.
+  - `L6-W7.21-buildkite`: Open the Buildkite Free organisation and connect the agents (second host + Mac).
+  - `L6-W7.23-cloudflare`: Create the Cloudflare Workers Builds project that rebuilds main and serves only the manifest, then watch 10 commits.
+  - `L7-W10.D4`: Give PRs an automatic pr:check: create a Buildkite organisation and run one self-hosted agent (the Mac or the second host).
+
+### 11. Deploy the separate sites: the content frame on its own origin, the share server and the relay
 
 - **Lane items:** L1 `L1/W6.23` (W6.23), L1 `L1/W6.40` (W6.40), L3 `L3-W4.8` (W4.8), L4 `W10.O6` (W10.O6), L7 `L7-W10.D1` (W10.D1)
 - **Recommendation:** `L1/W6.23` A · `W10.O6` B: relay first (fixes H1/H2 in 23c997bcfe pushed to #664 after approval), then content frame (lumen-md-frame.pages.dev in the CSP), then share server and mirror
@@ -145,7 +162,42 @@ Rows that answer the most lane items come first.
   - `W10.O6`: Deploy the content-frame site, the share server + relay, the mirror Worker; request a rescan.
   - `L7-W10.D1`: Run Google's CSP Evaluator on every route policy and deploy the content frame on its own origin (a second static site).
 
-### 11. Choose the Hebrew voice whose weights and training data allow shipping
+### 12. Order the external crypto review and accept the audited-library switch
+
+- **Lane items:** L1 `L1/W6.4` (W6.4), L1 `L1/W11.O6` (W11.O6), L4 `W1.7` (W1.7), L4 `W10.O8` (W10.O8), L6 `L6-3.4-crypto` (3.4)
+- **Recommendation:** `L1/W6.4` A, with C as the state until a report exists · `L1/W11.O6` A · `W1.7` A, plus run cryptoDifferential.test.ts on the Mac (it compares against @noble and typage once installed) · `L6-3.4-crypto` A, and keep E2EE off and labelled "not externally audited" (launch gate M0 e2ee-off-and-labelled) until the differential run is green and the mutation gate for…
+- **Check:** `npx vitest run security/attacks && python3 scripts/sync-protocol/check_vectors.py`
+- **Check:** `npx playwright test e2e/e2ee-unaudited.spec.ts`
+- **Check:** `npx vitest run src/__tests__/cryptoDifferential.test.ts src/__tests__/cryptoPrimitivesDoor.test.ts src/__tests__/e2eeRandom.test.ts src/__tests__/e2eeSync.test.ts src/__tests__/e2eeCrypto.test.ts`
+  - `L1/W6.4`: Commission the third independent crypto review, and acknowledge PR #1025's flag before it is lifted.
+  - `L1/W11.O6`: Order an external security review of the sync protocol and keyring.
+  - `W1.7`: Invite a public review of the sync crypto (spec + vectors + Python decoder), and decide hand-rolled vs hash-wasm/typage.
+  - `W10.O8`: Recruit people: usability participants, language reviewers, a labelled grammar set, external crypto review, plugin developers, beta audience.
+  - `L6-3.4-crypto`: Accept the switch of the E2EE primitives from the hand-written code to the audited libraries (@noble/ciphers, @noble/hashes, hash-wasm Argon2id, libsodium fallback, age-encryption), and keep E2EE off and labelled until…
+
+### 13. Dependencies: clear the dependabot PRs, run a real audit, install Renovate
+
+- **Lane items:** L1 `L1/W6.14` (W6.14), L2 `L2-O-W10.E25` (W10.E25), L4 `W10.O11` (W10.O11), L7 `L7-W10.D10` (W10.D10)
+- **Recommendation:** A
+- **Check:** `npm audit --audit-level=high && npm run audit:lock && (cd src-tauri && cargo audit && cargo deny check)`
+- **Check:** `npm audit --omit=dev --json > reports/npm-audit.json && npm run audit:lock`
+  - `L1/W6.14`: Clear the advisories: merge or close the dependabot PRs down to ≤ 5, and run the audits where the registry is reachable.
+  - `L2-O-W10.E25`: Give Buildkite's `pr-check` job a way to comment, and turn Renovate on: (1) create a fine-grained GitHub token for talstilkol/lumen-md with only 'Pull requests: write', save it in a file on the linux agent and set LUMEN…
+  - `W10.O11`: Install Renovate, enable OpenSSF Scorecard + badge, request an external review.
+  - `L7-W10.D10`: Close the dependabot PRs per docs/security/dependabot.md after one dependency train; run a real `npm audit`.
+
+### 14. Open the BrowserStack open-source plan (Percy and Automate), or decide not to use it
+
+- **Lane items:** L1 `L1/W6.6` (W6.6), L2 `L2-O-W10.E55` (W10.E55), L4 `W10.O7` (W10.O7), L6 `L6-W7.25-percy` (W7.25)
+- **Recommendation:** `L1/W6.6` A · `L2-O-W10.E55` B · `L6-W7.25-percy` A if the OSS application (W4.7) is approved; otherwise B and mark W7.25 dropped.
+- **Check:** `node scripts/safari/run.mjs --dry-run`
+- **Check:** `PERCY_TOKEN=… npm run visual:percy && PERCY_TOKEN=… npm run visual:percy -- --canary`
+  - `L1/W6.6`: Apply for BrowserStack's open-source plan and store the Automate keys on the Mac.
+  - `L2-O-W10.E55`: Percy: open a BrowserStack Percy account and give the linux agent PERCY_TOKEN, or decide not to use Percy.
+  - `W10.O7`: Store and service accounts: TestFlight, Play, Codemagic, BrowserStack/Percy, package managers, Sponsors.
+  - `L6-W7.25-percy`: Create the Percy project under the BrowserStack open-source plan and approve the first baseline.
+
+### 15. Choose the Hebrew voice whose weights and training data allow shipping
 
 - **Lane items:** L5 `L5.O-W5.6` (W5.6), L6 `L6-W7.10-voice` (W7.10), L7 `L7-W2.6` (W2.6), L8 `L8-O-6.2` (6.2)
 - **Recommendation:** `L5.O-W5.6` Postpone the claim (option 2) until the W6.31 user programme: the code is done and byte-safe; the speed claim alone waits. · `L6-W7.10-voice` A. Run the Chatterbox CER test on the Mac first (models day, W10.M7); recruit only if it fails. · `L7-W2.6` C now, A as the follow-up task · `L8-O-6.2` B
@@ -155,31 +207,7 @@ Rows that answer the most lane items come first.
   - `L7-W2.6`: Choose a Hebrew neural TTS voice whose weights AND training data allow shipping it; #611 is already in verify/train-7.
   - `L8-O-6.2`: Which English neural voice ships for read-aloud: pin Kokoro-82M and choose its English grapheme-to-phoneme step.
 
-### 12. Order the external crypto review and accept the audited-library switch
-
-- **Lane items:** L1 `L1/W6.4` (W6.4), L1 `L1/W11.O6` (W11.O6), L4 `W1.7` (W1.7), L6 `L6-3.4-crypto` (3.4)
-- **Recommendation:** `L1/W6.4` A, with C as the state until a report exists · `L1/W11.O6` A · `W1.7` A, plus run cryptoDifferential.test.ts on the Mac (it compares against @noble and typage once installed) · `L6-3.4-crypto` A, and keep E2EE off and labelled "not externally audited" (launch gate M0 e2ee-off-and-labelled) until the differential run is green and the mutation gate for…
-- **Check:** `npx vitest run security/attacks && python3 scripts/sync-protocol/check_vectors.py`
-- **Check:** `npx playwright test e2e/e2ee-unaudited.spec.ts`
-- **Check:** `npx vitest run src/__tests__/cryptoDifferential.test.ts src/__tests__/cryptoPrimitivesDoor.test.ts src/__tests__/e2eeRandom.test.ts src/__tests__/e2eeSync.test.ts src/__tests__/e2eeCrypto.test.ts`
-  - `L1/W6.4`: Commission the third independent crypto review, and acknowledge PR #1025's flag before it is lifted.
-  - `L1/W11.O6`: Order an external security review of the sync protocol and keyring.
-  - `W1.7`: Invite a public review of the sync crypto (spec + vectors + Python decoder), and decide hand-rolled vs hash-wasm/typage.
-  - `L6-3.4-crypto`: Accept the switch of the E2EE primitives from the hand-written code to the audited libraries (@noble/ciphers, @noble/hashes, hash-wasm Argon2id, libsodium fallback, age-encryption), and keep E2EE off and labelled until…
-
-### 13. Set up the second host (Cloudflare) for the site and the nightly factory
-
-- **Lane items:** L1 `L1/W6.5` (W6.5), L1 `L1/W6.9` (W6.9), L3 `L3-W4.27` (W4.27), L6 `L6-W7.23-cloudflare` (W7.23)
-- **Recommendation:** `L1/W6.5` A · `L3-W4.27` A; the written decision: 'Vercel Hobby + Cloudflare Pages Free, $0/month' · `L6-W7.23-cloudflare` A, per scripts/supply-chain/cf-build.sh; compare each main commit with npm run repro:compare.
-- **Check:** `npm run owner:session -- check accounts`
-- **Check:** `npm run hosts:parity && npm run hosting:gate`
-- **Check:** `npm run repro:compare -- https://<worker>/lumen-build.json origin:https://lumen-md.vercel.app`
-  - `L1/W6.5`: Create the free second host for the nightly factory.
-  - `L1/W6.9`: Pick the second deployment host and when to leave Vercel Hobby.
-  - `L3-W4.27`: Put the site on the second host (Cloudflare Pages) at the same commit hash, and write down the monthly cost.
-  - `L6-W7.23-cloudflare`: Create the Cloudflare Workers Builds project that rebuilds main and serves only the manifest, then watch 10 commits.
-
-### 14. Open GitHub Sponsors and Open Collective, then merge the prepared switch
+### 16. Open GitHub Sponsors and Open Collective, then merge the prepared switch
 
 - **Lane items:** L1 `L1/W11.O8` (W11.O8), L4 `W10.O7` (W10.O7), L5 `L5.O-W5.25` (W5.25)
 - **Recommendation:** `L1/W11.O8` A · `L5.O-W5.25` Option 1; the paid relay (Polar, Cloudflare R2) only after the hosting move (owner step 4).
@@ -188,26 +216,6 @@ Rows that answer the most lane items come first.
   - `L1/W11.O8`: Open GitHub Sponsors and Open Collective; test the relay payment in sandbox; start pilots; check NetFree.
   - `W10.O7`: Store and service accounts: TestFlight, Play, Codemagic, BrowserStack/Percy, package managers, Sponsors.
   - `L5.O-W5.25`: Open GitHub Sponsors and the Open Collective 'lumen-md', then merge the prepared switch.
-
-### 15. Dependencies: clear the dependabot PRs, run a real audit, install Renovate
-
-- **Lane items:** L1 `L1/W6.14` (W6.14), L4 `W10.O11` (W10.O11), L7 `L7-W10.D10` (W10.D10)
-- **Recommendation:** A
-- **Check:** `npm audit --audit-level=high && npm run audit:lock && (cd src-tauri && cargo audit && cargo deny check)`
-- **Check:** `npm audit --omit=dev --json > reports/npm-audit.json && npm run audit:lock`
-  - `L1/W6.14`: Clear the advisories: merge or close the dependabot PRs down to ≤ 5, and run the audits where the registry is reachable.
-  - `W10.O11`: Install Renovate, enable OpenSSF Scorecard + badge, request an external review.
-  - `L7-W10.D10`: Close the dependabot PRs per docs/security/dependabot.md after one dependency train; run a real `npm audit`.
-
-### 16. Open the BrowserStack open-source plan (Percy and Automate), or decide not to use it
-
-- **Lane items:** L1 `L1/W6.6` (W6.6), L2 `L2-O-W10.E55` (W10.E55), L6 `L6-W7.25-percy` (W7.25)
-- **Recommendation:** `L1/W6.6` A · `L2-O-W10.E55` B · `L6-W7.25-percy` A if the OSS application (W4.7) is approved; otherwise B and mark W7.25 dropped.
-- **Check:** `node scripts/safari/run.mjs --dry-run`
-- **Check:** `PERCY_TOKEN=… npm run visual:percy && PERCY_TOKEN=… npm run visual:percy -- --canary`
-  - `L1/W6.6`: Apply for BrowserStack's open-source plan and store the Automate keys on the Mac.
-  - `L2-O-W10.E55`: Percy: open a BrowserStack Percy account and give the linux agent PERCY_TOKEN, or decide not to use Percy.
-  - `L6-W7.25-percy`: Create the Percy project under the BrowserStack open-source plan and approve the first baseline.
 
 ### 17. Turn on GitHub Discussions and publish the docs site
 
