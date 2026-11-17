@@ -389,6 +389,8 @@
   "cmd.reading.newFromLibrary": "阅读清单：从引文库新建资料…",
   "cmd.reading.newFromLibrary.hint": "把 Zotero、BibTeX 或 CSL-JSON 条目变成资料笔记",
   "cmd.reading.profile": "Reading mode…",
+  "cmd.reading.sidenotes": "阅读：旁注（脚注、评论、建议）",
+  "cmd.reading.sidenotes.hint": "每条注释位于其所在行旁：英文在右，希伯来文在左；窄屏时位于段落下方",
   "cmd.related.folderOff": "相关笔记：在此文件夹中开启 / 关闭",
   "cmd.related.toggle": "相关笔记：显示 / 隐藏",
   "cmd.related.toggle.hint": "与你正在写的段落相近的笔记，以及它提到但未链接的笔记",

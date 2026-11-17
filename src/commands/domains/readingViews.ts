@@ -1,6 +1,7 @@
 /**
  * Reading views in the palette (plan W13.R6–R9): the linked three-column
- * view and the keyboard between columns (R7). The bodies load on use.
+ * view and the keyboard between columns (R7), the margins mode (R9). The
+ * bodies load on use.
  */
 import { t } from "../../i18n";
 import type { Command } from "../../ui/CommandPalette";
@@ -31,6 +32,14 @@ export function buildReadingViewCommands(_ctx: CommandContext): Command[] {
       hint: t("cmd.view.columnPrev.hint"),
       group,
       action: () => import("../../reading/readingColumns").then((m) => m.moveColumn(document.documentElement.dir === "rtl" ? "ArrowRight" : "ArrowLeft")),
+    },
+    {
+      id: "reading.sidenotes",
+      label: t("cmd.reading.sidenotes"),
+      hint: t("cmd.reading.sidenotes.hint"),
+      icon: cmdIcons.Columns2,
+      group,
+      action: () => import("../../reading/sidenotes").then((m) => m.toggleSidenotes()),
     },
   ];
 }

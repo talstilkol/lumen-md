@@ -389,6 +389,8 @@
   "cmd.reading.newFromLibrary": "読書リスト: 引用ライブラリから新しい資料…",
   "cmd.reading.newFromLibrary.hint": "Zotero・BibTeX・CSL-JSON の項目を資料ノートにします",
   "cmd.reading.profile": "Reading mode…",
+  "cmd.reading.sidenotes": "読書: 傍注（脚注・コメント・提案）",
+  "cmd.reading.sidenotes.hint": "各注を該当行の横に表示: 英語では右、ヘブライ語では左。狭い画面では段落の下",
   "cmd.related.folderOff": "関連ノート: このフォルダーでオン / オフ",
   "cmd.related.toggle": "関連ノート: 表示 / 非表示",
   "cmd.related.toggle.hint": "書いている段落に近いノートと、リンクなしで言及しているノート",

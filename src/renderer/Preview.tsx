@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { renderMarkdown, renderMarkdownFast, extractFrontmatter, RenderSuperseded } from "./pipeline";
 import { registerLineBases } from "./sourceLineRegistry";
+import { useSidenotes } from "../reading/sidenotesSetting";
 import { dashboardLayout, dashboardProps } from "./dashboard";
 import { nextVersion, renderWorkerWarm } from "./renderClient";
 import { subscribePluginLangs } from "../plugins/runtime/rendererRegistry";
@@ -58,6 +59,8 @@ function safeFastRender(markdownText: string): React.ReactElement | null {
 
 export function Preview({ markdownText, docKey = null, onSourceEdit, focusOffset = 0 }: Props) {
   const rootRef = useRef<HTMLDivElement | null>(null);
+  // The margins reading mode (plan W13.R9), loaded when switched on.
+  useSidenotes(rootRef);
   const textRef = useRef(markdownText);
   textRef.current = markdownText;
   const editRef = useRef(onSourceEdit);

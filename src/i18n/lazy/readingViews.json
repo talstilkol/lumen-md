@@ -25,5 +25,17 @@
   "readingViews.compare.title": "Compare",
   "readingViews.compare.tools": "Compare tools",
   "readingViews.compare.unchanged": "Show {n} unchanged paragraphs",
+  "readingViews.sidenotes.comment": "Comment",
+  "readingViews.sidenotes.commentBy": "Comment by {name}",
+  "readingViews.sidenotes.delete": "Delete “{text}”",
+  "readingViews.sidenotes.footnote": "Footnote {n}",
+  "readingViews.sidenotes.insert": "Insert “{text}”",
+  "readingViews.sidenotes.off": "Margin notes off",
+  "readingViews.sidenotes.on": "Margin notes on",
+  "readingViews.sidenotes.replace": "Replace “{old}” with “{new}”",
+  "readingViews.sidenotes.suggestDelete": "Suggested deletion",
+  "readingViews.sidenotes.suggestInsert": "Suggested insertion",
+  "readingViews.sidenotes.suggestReplace": "Suggested replacement",
+  "readingViews.sidenotes.title": "Side notes",
   "readingViews.triple.on": "Three columns: source, preview and outline, scroll linked"
 }

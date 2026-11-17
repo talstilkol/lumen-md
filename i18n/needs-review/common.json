@@ -2736,6 +2736,102 @@
     "ru": "1s2az6w",
     "zh-CN": "1s2az6w"
   },
+  "readingViews.sidenotes.comment": {
+    "ar": "169e4n2",
+    "de": "169e4n2",
+    "fr": "169e4n2",
+    "ja": "169e4n2",
+    "ru": "169e4n2",
+    "zh-CN": "169e4n2"
+  },
+  "readingViews.sidenotes.commentBy": {
+    "ar": "yc9yy0",
+    "de": "yc9yy0",
+    "fr": "yc9yy0",
+    "ja": "yc9yy0",
+    "ru": "yc9yy0",
+    "zh-CN": "yc9yy0"
+  },
+  "readingViews.sidenotes.delete": {
+    "ar": "14evbse",
+    "de": "14evbse",
+    "fr": "14evbse",
+    "ja": "14evbse",
+    "ru": "14evbse",
+    "zh-CN": "14evbse"
+  },
+  "readingViews.sidenotes.footnote": {
+    "ar": "18mcm7x",
+    "de": "18mcm7x",
+    "fr": "18mcm7x",
+    "ja": "18mcm7x",
+    "ru": "18mcm7x",
+    "zh-CN": "18mcm7x"
+  },
+  "readingViews.sidenotes.insert": {
+    "ar": "ogjqv0",
+    "de": "ogjqv0",
+    "fr": "ogjqv0",
+    "ja": "ogjqv0",
+    "ru": "ogjqv0",
+    "zh-CN": "ogjqv0"
+  },
+  "readingViews.sidenotes.off": {
+    "ar": "yicivr",
+    "de": "yicivr",
+    "fr": "yicivr",
+    "ja": "yicivr",
+    "ru": "yicivr",
+    "zh-CN": "yicivr"
+  },
+  "readingViews.sidenotes.on": {
+    "ar": "1nhabn7",
+    "de": "1nhabn7",
+    "fr": "1nhabn7",
+    "ja": "1nhabn7",
+    "ru": "1nhabn7",
+    "zh-CN": "1nhabn7"
+  },
+  "readingViews.sidenotes.replace": {
+    "ar": "1oh96b2",
+    "de": "1oh96b2",
+    "fr": "1oh96b2",
+    "ja": "1oh96b2",
+    "ru": "1oh96b2",
+    "zh-CN": "1oh96b2"
+  },
+  "readingViews.sidenotes.suggestDelete": {
+    "ar": "1u6c4s6",
+    "de": "1u6c4s6",
+    "fr": "1u6c4s6",
+    "ja": "1u6c4s6",
+    "ru": "1u6c4s6",
+    "zh-CN": "1u6c4s6"
+  },
+  "readingViews.sidenotes.suggestInsert": {
+    "ar": "u7xc0x",
+    "de": "u7xc0x",
+    "fr": "u7xc0x",
+    "ja": "u7xc0x",
+    "ru": "u7xc0x",
+    "zh-CN": "u7xc0x"
+  },
+  "readingViews.sidenotes.suggestReplace": {
+    "ar": "1ut4r7k",
+    "de": "1ut4r7k",
+    "fr": "1ut4r7k",
+    "ja": "1ut4r7k",
+    "ru": "1ut4r7k",
+    "zh-CN": "1ut4r7k"
+  },
+  "readingViews.sidenotes.title": {
+    "ar": "1igoq33",
+    "de": "1igoq33",
+    "fr": "1igoq33",
+    "ja": "1igoq33",
+    "ru": "1igoq33",
+    "zh-CN": "1igoq33"
+  },
   "readingViews.triple.on": {
     "ar": "jorirw",
     "de": "jorirw",
