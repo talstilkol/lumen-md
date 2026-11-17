@@ -19,8 +19,10 @@
  * 0.950 (dev) / 0.952 (held-out), and the lexical reranker lowers that to
  * 0.918 / 0.907. src/__tests__/rerankHard.test.ts re-measures both and pins
  * the default to the winner. The model may become the default only with a
- * Mac receipt that beats BM25 by ≥ 3 points on both splits
- * (scripts/golden/evals/rerank.mjs `modelDefaultAllowed`).
+ * Mac receipt that beats BM25 by ≥ 3 points on both splits, by ≥ 2 points on
+ * WebFAQ-heb and on Belebele (fetched with a checked licence), and reranks
+ * the top 20 within 150 ms at p95 (scripts/golden/evals/rerank.mjs
+ * `modelDefaultAllowed`, W10.B18).
  */
 import { normalizeForMatch, prefixVariants, words } from "../text/hebrew";
 

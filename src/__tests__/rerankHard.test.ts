@@ -22,7 +22,7 @@ import { join } from "node:path";
 import { Bm25Index } from "../search/bm25";
 import { DEFAULT_RERANK_MODE, RERANK_DEFAULT_EVIDENCE, getRerankMode, rerank, setRerankMode, type RerankMode } from "../ai/reranker";
 // @ts-expect-error the harness is plain JavaScript
-import { compareRerank, rerankDecision, modelDefaultAllowed, rerankCardInput, MODEL_DEFAULT_MIN_GAIN_POINTS } from "../../scripts/golden/evals/rerank.mjs";
+import { compareRerank, rerankDecision, modelDefaultAllowed, rerankCardInput, MODEL_DEFAULT_MIN_GAIN_POINTS, PUBLIC_MIN_GAIN_POINTS, PUBLIC_RERANK_SETS, RERANK_MAX_P95_MS } from "../../scripts/golden/evals/rerank.mjs";
 // @ts-expect-error plain JavaScript
 import { makeCard, validateCard } from "../../scripts/lib/evalCard.mjs";
 
@@ -92,15 +92,42 @@ describe("the default is pinned to the measured winner (W10.B18)", () => {
 
   it("the model may become the default only from a Mac receipt that beats BM25 by ≥ 3 points on both splits", () => {
     expect(MODEL_DEFAULT_MIN_GAIN_POINTS).toBe(3);
-    const row = (part: string, bm25: number, reranked: number) => ({ split: "eval/synthetic/retrieval-hard", part, items: 90, bm25, reranked, gain: Math.round((reranked - bm25) * 10000) / 100 });
+    const row = (part: string, bm25: number, reranked: number, p95Ms = 80) => ({ split: "eval/synthetic/retrieval-hard", part, items: 90, bm25, reranked, gain: Math.round((reranked - bm25) * 10000) / 100, p95Ms });
+    const pub = (name: string, bm25: number, reranked: number, p95Ms = 90) => ({ split: `public/${name}`, part: name, items: 500, bm25, reranked, gain: Math.round((reranked - bm25) * 10000) / 100, p95Ms });
     const mac = { platform: "darwin", arch: "arm64", cpu: "Apple M1" };
-    const ok = { model: "onnx-community/bge-reranker-v2-m3-ONNX", machine: mac, rows: [row("dev", 0.9479, 0.98), row("heldout", 0.9521, 0.99)] };
+    const publicRows = [pub("webfaq-heb", 0.61, 0.66), pub("belebele-heb", 0.7, 0.75)];
+    const ok = { model: "onnx-community/bge-reranker-v2-m3-ONNX", machine: mac, rows: [row("dev", 0.9479, 0.98), row("heldout", 0.9521, 0.99), ...publicRows] };
     expect(modelDefaultAllowed(ok)).toEqual({ ok: true, why: "" });
     expect(modelDefaultAllowed(null).ok).toBe(false);
     expect(modelDefaultAllowed({ ...ok, machine: { ...mac, platform: "linux" } }).why).toMatch(/Mac/);
-    expect(modelDefaultAllowed({ ...ok, rows: [row("dev", 0.9479, 0.98), row("heldout", 0.9521, 0.98)] }).why).toMatch(/heldout: gain 2\.79 < 3/);
+    expect(modelDefaultAllowed({ ...ok, rows: [row("dev", 0.9479, 0.98), row("heldout", 0.9521, 0.98), ...publicRows] }).why).toMatch(/heldout: gain 2\.79 < 3/);
     expect(modelDefaultAllowed({ ...ok, rows: [row("dev", 0.9479, 0.98)] }).why).toMatch(/no retrieval-hard heldout/);
     expect(modelDefaultAllowed({ ...ok, model: "some-other-model" }).ok).toBe(false);
+  });
+
+  it("W10.B18: and by ≥ 2 points on WebFAQ-heb and on Belebele, with a top-20 rerank p95 ≤ 150 ms on every row", () => {
+    expect([PUBLIC_MIN_GAIN_POINTS, RERANK_MAX_P95_MS]).toEqual([2, 150]);
+    expect(Object.keys(PUBLIC_RERANK_SETS)).toEqual(["webfaq-heb", "belebele-heb"]);
+    const row = (part: string, p95Ms = 80) => ({ split: "eval/synthetic/retrieval-hard", part, items: 90, bm25: 0.95, reranked: 0.99, p95Ms });
+    const pub = (name: string, bm25: number, reranked: number, p95Ms = 90) => ({ split: `public/${name}`, part: name, items: 500, bm25, reranked, p95Ms });
+    const base = { model: "onnx-community/bge-reranker-v2-m3-ONNX", machine: { platform: "darwin" } };
+    const hard = [row("dev"), row("heldout")];
+    expect(modelDefaultAllowed({ ...base, rows: hard }).why).toBe("no public/webfaq-heb row (W10.B18: WebFAQ-heb and Belebele)");
+    expect(modelDefaultAllowed({ ...base, rows: [...hard, pub("webfaq-heb", 0.6, 0.63)] }).why).toBe("no public/belebele-heb row (W10.B18: WebFAQ-heb and Belebele)");
+    expect(modelDefaultAllowed({ ...base, rows: [...hard, pub("webfaq-heb", 0.6, 0.619), pub("belebele-heb", 0.7, 0.75)] }).why).toBe("public/webfaq-heb: gain 1.9 < 2 points");
+    expect(modelDefaultAllowed({ ...base, rows: [...hard, pub("webfaq-heb", 0.6, 0.62), pub("belebele-heb", 0.7, 0.75, 151)] }).why).toBe("public/belebele-heb belebele-heb: top-20 rerank p95 151 ms > 150 ms");
+    expect(modelDefaultAllowed({ ...base, rows: [row("dev"), { ...row("heldout"), p95Ms: undefined }, pub("webfaq-heb", 0.6, 0.62), pub("belebele-heb", 0.7, 0.75)] }).why).toBe("eval/synthetic/retrieval-hard heldout: no p95 latency");
+    expect(modelDefaultAllowed({ ...base, rows: [...hard, pub("webfaq-heb", 0.6, 0.62), pub("belebele-heb", 0.7, 0.75, 150)] })).toEqual({ ok: true, why: "" });
+  });
+
+  it("compareRerank times every top-20 rerank and reports its p95", async () => {
+    // Start and end stamps of the five reranks: 10, 20, 30, 40 and 200 ms.
+    const stamps = [0, 10, 0, 20, 0, 30, 0, 40, 0, 200];
+    let k = 0;
+    const set = load("dev.json");
+    const res = (await compareRerank(Bm25Index, async (_q: string, docs: Array<{ id: string; text: string }>) => docs, { items: set.items.slice(0, 5), documents: set.corpus, candidates: 20, now: () => stamps[k++] })) as Res & { p95Ms: number };
+    expect(res.p95Ms).toBe(200);
+    expect(res.gain).toBe(0);
   });
 });
 

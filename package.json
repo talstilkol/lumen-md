@@ -142,6 +142,7 @@
     "eval:voice-commands": "node --experimental-strip-types scripts/voice-commands-eval.mjs",
     "eval:pdf-chat": "LUMEN_EVAL_PDF=1 vitest run --config vitest.eval.config.ts src/agents/eval/pdfChat.eval.ts",
     "eval:summarize": "LUMEN_EVAL_SUMMARY=1 vitest run --config vitest.eval.config.ts src/agents/eval/summarize.eval.ts",
+    "eval:clip-interpreter": "LUMEN_EVAL_CLIP=1 vitest run --config vitest.eval.config.ts src/agents/eval/clipInterpreter.eval.ts",
     "eval:structured": "LUMEN_EVAL_STRUCTURED=1 vitest run --config vitest.eval.config.ts src/agents/eval/structured.eval.ts",
     "eval:mcp-client": "LUMEN_EVAL_MCP=1 vitest run --config vitest.eval.config.ts src/agents/eval/mcpClient.eval.ts",
     "eval:retrieval-public": "LUMEN_EVAL_RETRIEVAL=1 vitest run --config vitest.eval.config.ts src/agents/eval/retrievalPublic.eval.ts",

@@ -6,7 +6,6 @@
   "src/agents/eval/askVaultEval.ts": "Eval harness (W11.I13/I14, W12.A1–A3: Ask-the-vault retrieval and citations on HeQ/SQuAD): run by evals only.",
   "src/agents/eval/bfcl.ts": "Eval harness (W11.I15, the BFCL v4 tool-calling benchmark): run by evals only.",
   "src/agents/eval/promptCases.ts": "Eval fixture (the prompt cases of the agents' eval, plan 7.3): data for the eval suite only.",
-  "src/agents/eval/retrievalPublic.ts": "Eval harness (W11.I13, public retrieval sets BEIR/Belebele, nDCG and recall): run by evals only.",
   "src/agents/eval/scripted.ts": "Eval fixture (a scripted stand-in answerer for the eval harnesses): test support only.",
   "src/agents/mcp/oauth.ts": "MCP OAuth for remote servers (W7.18 step 1: iss check, client metadata, PKCE): no UI asks for it yet; the MCP settings tab (W10.C2) adds HTTP servers without auth. Wire it when the tab offers 'Sign in' for a remote server.",
   "src/ai/dictation/polish.ts": "Dictation's optional local-model punctuation pass (plan 6.1): no setting turns it on yet; wire it into the dictation flow behind an AI-settings switch.",
