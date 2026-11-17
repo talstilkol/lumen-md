@@ -20,7 +20,7 @@ import remarkParse from "remark-parse";
 import { CALLOUT_KINDS, defaultCalloutTitle, isKnownCallout } from "./remarkObsidian";
 import { t } from "../i18n";
 import { visit } from "unist-util-visit";
-import YAML from "yaml";
+import { parseFrontmatterYaml } from "../lib/yamlBounds";
 import type { Root as MdastRoot } from "mdast";
 import type { Root as HastRoot } from "hast";
 import { stripCriticDelimiters } from "./criticMarkup";
@@ -172,7 +172,7 @@ export function extractFrontmatter(
   const m = markdownText.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n/);
   if (!m) return null;
   try {
-    const parsed = YAML.parse(m[1]);
+    const parsed = parseFrontmatterYaml(m[1]);
     return parsed && typeof parsed === "object"
       ? (parsed as Record<string, unknown>)
       : null;

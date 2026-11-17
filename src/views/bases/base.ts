@@ -33,6 +33,7 @@ import { typedSortKey } from "../../properties/valueTypes";
 import { equalValues, fromYaml, isEmptyValue, isTagged, parseWikiLink, sortCompare, toText, truthy, type BasesFile, type BValue } from "./values";
 import { builtinSummary, compileFilter, sortDate } from "./fastFilters";
 import { workdaysUntil } from "../workdays";
+import { MAX_YAML_FLOW_DEPTH, parseFrontmatterYaml, yamlFlowDepth } from "../../lib/yamlBounds";
 export { builtinSummary, compileFilter } from "./fastFilters";
 
 export type BasesFilter = string | { and: BasesFilter[] } | { or: BasesFilter[] } | { not: BasesFilter[] };
@@ -156,30 +157,16 @@ function readSort(v: unknown): BasesSort | null {
 }
 
 /**
- * The deepest a `.base` file's flow collections (`[…]`, `{…}`) may nest. Real
- * files nest two or three levels; the YAML parser's cost grows steeply with
- * depth (a 3 KB file of nested `[` took 0.6–2 s in the fuzz run, W4.16), so a
- * deeper file is refused before it is parsed, like any other invalid file.
+ * The deepest a `.base` file's flow collections (`[…]`, `{…}`) may nest: the
+ * shared YAML bound (src/lib/yamlBounds.ts). A 3 KB file of nested `[` took
+ * 0.6–2 s in the fuzz run (W4.16), so a deeper file is refused before it is parsed.
  */
-export const MAX_BASE_NESTING = 64;
-
-/** The deepest run of unclosed `[` / `{` in `text` (quotes not considered: an over-count only). */
-function flowDepth(text: string): number {
-  let depth = 0;
-  let max = 0;
-  for (let i = 0; i < text.length; i++) {
-    const c = text.charCodeAt(i);
-    if (c === 91 || c === 123) {
-      if (++depth > max) max = depth;
-    } else if ((c === 93 || c === 125) && depth > 0) depth--;
-  }
-  return max;
-}
+export const MAX_BASE_NESTING = MAX_YAML_FLOW_DEPTH;
 
 /** Parse a `.base` file. Never throws. */
 export function parseBase(text: string): BaseParse {
   let doc: Document;
-  if (flowDepth(text) > MAX_BASE_NESTING) return { ok: false, error: `nested deeper than ${MAX_BASE_NESTING} levels` };
+  if (yamlFlowDepth(text) > MAX_BASE_NESTING) return { ok: false, error: `nested deeper than ${MAX_BASE_NESTING} levels` };
   try {
     doc = parseDocument(text, { prettyErrors: false });
   } catch (e) {
@@ -345,7 +332,7 @@ export function basesFileFromText(path: string, text: string | null, meta: { siz
     const m = FM.exec(text);
     if (m) {
       try {
-        const parsed: unknown = YAML.parse(m[1]);
+        const parsed: unknown = parseFrontmatterYaml(m[1]);
         if (isRecord(parsed)) fm = parsed;
       } catch {
         // why: unreadable frontmatter: the note has no properties, as Obsidian shows it
