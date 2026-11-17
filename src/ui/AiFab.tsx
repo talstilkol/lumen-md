@@ -4,6 +4,7 @@ import type { Command } from "./CommandPalette";
 import { t } from "../i18n";
 import { countCommand } from "../metrics/count";
 import { shownHint, useCommandHints } from "../commands/hints";
+import { matchesAnyFilter } from "../text/filterMatch";
 
 /**
  * Floating "AI Prompts" button anchored beside the document body.
@@ -52,11 +53,8 @@ export function AiFab({ commands }: Props) {
   );
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return aiCommands;
-    return aiCommands.filter((c) =>
-      `${c.label} ${shownHint(c.hint) ?? ""}`.toLowerCase().includes(q),
-    );
+    if (!query.trim()) return aiCommands;
+    return aiCommands.filter((c) => matchesAnyFilter([c.label, shownHint(c.hint)], query));
   }, [aiCommands, query]);
 
   function run(cmd: Command) {

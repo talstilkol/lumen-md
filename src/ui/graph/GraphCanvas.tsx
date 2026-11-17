@@ -15,6 +15,7 @@ import { PointGrid } from "../../graph/layout";
 import { createRenderer, fitView, toScreen, toWorld, type GraphRenderer, type GraphView } from "../../graph/renderer";
 import { prepareLabel, type LabelDir, type PreparedLabel } from "../../graph/labels";
 import { t } from "../../i18n";
+import { normalizeForFilter } from "../../text/filterMatch";
 
 export interface GraphCanvasProps {
   labels: readonly string[];
@@ -263,10 +264,10 @@ export function GraphCanvas(props: GraphCanvasProps) {
   };
 
   const matches = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = normalizeForFilter(query.trim());
     if (!q) return [];
     const out: number[] = [];
-    for (let i = 0; i < n && out.length < 8; i++) if (labels[i].toLowerCase().includes(q)) out.push(i);
+    for (let i = 0; i < n && out.length < 8; i++) if (normalizeForFilter(labels[i]).includes(q)) out.push(i);
     return out;
   }, [query, labels, n]);
 

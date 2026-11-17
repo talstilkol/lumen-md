@@ -3,6 +3,8 @@
  * that users can insert to quickly start structured documents.
  */
 
+import { matchesAnyFilter } from "../text/filterMatch";
+
 export interface Template {
   id: string;
   name: string;
@@ -324,12 +326,7 @@ export function filterTemplates(category?: string, query?: string): Template[] {
   let results = TEMPLATES;
   if (category) results = results.filter((t) => t.category === category);
   if (query) {
-    const lower = query.toLowerCase();
-    results = results.filter(
-      (t) =>
-        t.name.toLowerCase().includes(lower) ||
-        t.description.toLowerCase().includes(lower),
-    );
+    results = results.filter((t) => matchesAnyFilter([t.name, t.description], query));
   }
   return results;
 }

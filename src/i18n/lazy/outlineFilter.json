@@ -1,0 +1,5 @@
+{
+  "outline.filter": "Filter headings",
+  "outline.filterCount": "{n} of {total} headings",
+  "outline.filterNoMatch": "No heading matches “{q}”."
+}

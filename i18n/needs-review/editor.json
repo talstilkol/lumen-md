@@ -71,5 +71,32 @@
   },
   "mode.split": {
     "fa": "6a1ocj"
+  },
+  "outline.filter": {
+    "ar": "api0n6",
+    "de": "api0n6",
+    "fr": "api0n6",
+    "he": "api0n6",
+    "ja": "api0n6",
+    "ru": "api0n6",
+    "zh-CN": "api0n6"
+  },
+  "outline.filterCount": {
+    "ar": "1czgge7",
+    "de": "1czgge7",
+    "fr": "1czgge7",
+    "he": "1czgge7",
+    "ja": "1czgge7",
+    "ru": "1czgge7",
+    "zh-CN": "1czgge7"
+  },
+  "outline.filterNoMatch": {
+    "ar": "1ssj0iz",
+    "de": "1ssj0iz",
+    "fr": "1ssj0iz",
+    "he": "1ssj0iz",
+    "ja": "1ssj0iz",
+    "ru": "1ssj0iz",
+    "zh-CN": "1ssj0iz"
   }
 }

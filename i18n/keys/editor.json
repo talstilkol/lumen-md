@@ -1967,6 +1967,26 @@
       "vars": []
     },
     {
+      "key": "outline.filter",
+      "en": "Filter headings",
+      "vars": []
+    },
+    {
+      "key": "outline.filterCount",
+      "en": "{n} of {total} headings",
+      "vars": [
+        "n",
+        "total"
+      ]
+    },
+    {
+      "key": "outline.filterNoMatch",
+      "en": "No heading matches “{q}”.",
+      "vars": [
+        "q"
+      ]
+    },
+    {
       "key": "outline.fold",
       "en": "Fold",
       "vars": []

@@ -20,8 +20,11 @@
  * The schema test (settingsSchema.test.ts) scans the sources and fails
  * when a stored key or persisted field is missing here.
  *
- * Pure data: no imports, so the test and the export code load it alone.
+ * Pure data: one pure import (the filter fold, W13.E3), so the test and the
+ * export code load it alone.
  */
+
+import { normalizeForFilter } from "../text/filterMatch";
 
 export type SettingsTab = "general" | "appearance" | "ai" | "calendar" | "mcp" | "sync" | "fineTune" | "privacy" | "security" | "org";
 
@@ -407,13 +410,14 @@ export function searchSettings(
   query: string,
   translate: (key: string) => string,
 ): { entries: SettingEntry[]; tabs: Set<SettingsTab> } {
-  const q = query.trim().toLocaleLowerCase();
+  const q = normalizeForFilter(query.trim());
   const tabs = new Set<SettingsTab>();
   if (!q) {
     for (const tab of SETTINGS_TABS) tabs.add(tab.id);
     return { entries: SETTINGS.filter((e) => e.kind === "setting" && e.label), tabs };
   }
-  const hit = (s: string | undefined) => !!s && s.toLocaleLowerCase().includes(q);
+  // Niqqud, accents and geresh do not count (W13.E3).
+  const hit = (s: string | undefined) => !!s && normalizeForFilter(s).includes(q);
   for (const tab of SETTINGS_TABS) if (hit(translate(tab.label))) tabs.add(tab.id);
   const entries = SETTINGS.filter(
     (e) => !!e.label && !!e.tab && (hit(translate(e.label)) || hit(e.id)),

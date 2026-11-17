@@ -8,6 +8,7 @@
 import { EditorView, keymap } from "@codemirror/view";
 import type { Extension } from "@codemirror/state";
 import { safeSetHtml } from "../lib/trustedTypes";
+import { matchesAnyFilter } from "../text/filterMatch";
 
 interface MenuEntry {
   id: string;
@@ -412,11 +413,8 @@ function onDocMouseDown(e: MouseEvent) {
 }
 
 function filtered(query: string): MenuEntry[] {
-  const q = query.trim().toLowerCase();
-  if (!q) return ENTRIES;
-  return ENTRIES.filter((e) =>
-    `${e.label} ${e.hint} ${e.group} ${e.id}`.toLowerCase().includes(q),
-  );
+  if (!query.trim()) return ENTRIES;
+  return ENTRIES.filter((e) => matchesAnyFilter([e.label, e.hint, e.group, e.id], query));
 }
 
 function insertEntry(view: EditorView, entry: MenuEntry, replaceFrom: number) {

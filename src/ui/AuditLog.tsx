@@ -25,6 +25,7 @@ import { EmptyState } from "./EmptyState";
 import { HelpButton } from "./HelpButton";
 import "./auditLogStrings";
 import { Modal } from "./Modal";
+import { matchesFilter } from "../text/filterMatch";
 
 interface Props {
   open: boolean;
@@ -116,8 +117,7 @@ export function AuditLog({ open, onClose, orgId }: Props) {
 
   const visible = useMemo(() => {
     if (!userFilter.trim()) return rows;
-    const q = userFilter.trim().toLowerCase();
-    return rows.filter((r) => r.user_id.toLowerCase().includes(q));
+    return rows.filter((r) => matchesFilter(r.user_id, userFilter));
   }, [rows, userFilter]);
 
   const handleExport = useCallback(() => {
