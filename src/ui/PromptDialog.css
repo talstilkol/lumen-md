@@ -84,7 +84,8 @@
 }
 .prompt-btn-ok {
   background: hsl(var(--accent));
-  color: white;
+  /* The accent's own text colour: white on the light theme's accent, dark on the dark theme's lighter one (4.5:1 in both). */
+  color: hsl(var(--accent-fg, 0 0% 100%));
 }
 .prompt-btn-ok:hover {
   filter: brightness(1.08);

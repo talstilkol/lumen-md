@@ -30,5 +30,14 @@
   "calendar.settings.synced": "Synced: {pushed} sent, {pulled} received, {conflicts} conflicts left, {errors} errors.",
   "calendar.settings.test": "Test the connection",
   "calendar.settings.url": "Calendar address",
-  "calendar.settings.user": "User name"
+  "calendar.settings.user": "User name",
+  "calendar.settings.busy.test": "Testing the connection…",
+  "calendar.settings.busy.sync": "Syncing tasks…",
+  "calendar.settings.busy.find": "Looking for calendars…",
+  "calendar.settings.fail.error": "That did not work: {error}",
+  "calendar.settings.lastSync": "Last sync: {when} — sent {pushed}, received {pulled}, conflicts left {conflicts}.",
+  "calendar.settings.removed": "Removed: {name}",
+  "calendar.settings.added": "Added: {name}. Its events appear in the daily note's calendar field.",
+  "calendar.settings.removeLabel": "Remove the subscription {name}",
+  "calendar.settings.icsEmpty": "No subscriptions yet. Paste a calendar's ICS address (https:// or webcal://) below."
 }
