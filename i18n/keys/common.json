@@ -5666,6 +5666,61 @@
       ]
     },
     {
+      "key": "embedEdit.cancel",
+      "en": "Cancel",
+      "vars": []
+    },
+    {
+      "key": "embedEdit.changed",
+      "en": "The source changed since this was shown; it will refresh, then edit again",
+      "vars": []
+    },
+    {
+      "key": "embedEdit.label",
+      "en": "Editing the source: {note}",
+      "vars": [
+        "note"
+      ]
+    },
+    {
+      "key": "embedEdit.open",
+      "en": "Edit this block in {note}",
+      "vars": [
+        "note"
+      ]
+    },
+    {
+      "key": "embedEdit.save",
+      "en": "Save",
+      "vars": []
+    },
+    {
+      "key": "embedEdit.saved",
+      "en": "Saved in {note}",
+      "vars": [
+        "note"
+      ]
+    },
+    {
+      "key": "embedEdit.undo",
+      "en": "Undo",
+      "vars": []
+    },
+    {
+      "key": "embedEdit.undoChanged",
+      "en": "{note} changed since, so it was not undone",
+      "vars": [
+        "note"
+      ]
+    },
+    {
+      "key": "embedEdit.undone",
+      "en": "{note} is back as it was",
+      "vars": [
+        "note"
+      ]
+    },
+    {
       "key": "empty.learnHow",
       "en": "Show me how",
       "vars": []

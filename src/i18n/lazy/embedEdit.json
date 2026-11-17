@@ -1,0 +1,11 @@
+{
+  "embedEdit.cancel": "Cancel",
+  "embedEdit.changed": "The source changed since this was shown; it will refresh, then edit again",
+  "embedEdit.label": "Editing the source: {note}",
+  "embedEdit.open": "Edit this block in {note}",
+  "embedEdit.save": "Save",
+  "embedEdit.saved": "Saved in {note}",
+  "embedEdit.undo": "Undo",
+  "embedEdit.undoChanged": "{note} changed since, so it was not undone",
+  "embedEdit.undone": "{note} is back as it was"
+}

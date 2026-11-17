@@ -65,6 +65,25 @@ In the preview, drag an image's edge (the right edge in English, the left
 in Hebrew) to resize it. The new width is written into the note, as in
 Obsidian 1.12.
 
+## Editing an embedded block in place
+
+An embed of a block or a section of another note, `![[Note#^id]]` or
+`![[Note#Heading]]`, has a ✎ button in its title. It opens a small editor
+on that block's Markdown, framed and labelled **Editing the source: Note**.
+
+- **Save** (or Ctrl+Enter / ⌘Enter) changes the block in the source note,
+  and only that block. The `^id` marker stays, so links to it keep working.
+  The embed shows the new text right away.
+- **Undo** (or Ctrl+Z / ⌘Z on the control) puts the source back, as long as
+  nothing changed it since.
+- If the source changed after the embed was shown, the edit is refused. The
+  embed then refreshes, so you never overwrite text you didn't see.
+- **What can't be edited here:**
+  - an embed inside another embed;
+  - a section of the note you are in;
+  - a whole-note embed;
+  - a circular embed, which shows its notice instead.
+
 ## Tested
 
 Forty golden notes covering all of the above, in English and Hebrew, are

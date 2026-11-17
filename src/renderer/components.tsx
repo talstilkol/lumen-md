@@ -32,6 +32,7 @@ const HtmlPreviewBlock = lazy(() => import("../plugins/HtmlPreviewBlock"));
 const BibtexBlock = lazy(() => import("../plugins/BibtexBlock"));
 const PluginBlockView = lazy(() => import("../plugins/runtime/PluginBlock"));
 const TasksBlock = lazy(() => import("../plugins/TasksBlock"));
+const EmbedEditor = lazy(() => import("../editor/EmbedEditor"));
 const DataBlock = lazy(() => import("../plugins/DataBlock"));
 const DatabaseBlock = lazy(() => import("../views/DatabaseBlock"));
 const BasesBlock = lazy(() => import("../views/bases/BasesBlock"));
@@ -493,6 +494,17 @@ function gatedMedia(Tag: "video" | "audio") {
     return <Tag {...(props as React.HTMLAttributes<HTMLElement>)} />;
   };
 }
+/** W12.U1: edit an embedded block in place (only in the live preview, never in a static or hover render). */
+function LumenEmbedEdit(props: { path?: string; range?: string; note?: string }) {
+  const isStatic = useContext(StaticRenderContext);
+  if (isStatic || !props.path || !props.range) return null;
+  return (
+    <Suspense fallback={null}>
+      <EmbedEditor path={String(props.path)} range={String(props.range)} note={String(props.note ?? "")} />
+    </Suspense>
+  );
+}
+
 const LumenVideo = gatedMedia("video");
 const LumenAudio = gatedMedia("audio");
 
@@ -711,6 +723,7 @@ export const components: Record<string, LumenBlock> = {
   iframe: LumenIframe as unknown as LumenBlock,
   // `![[file.pdf]]` card.
   "lumen-embed-file": LumenEmbedFile as unknown as LumenBlock,
+  "lumen-embed-edit": LumenEmbedEdit as unknown as LumenBlock,
   // GFM task-list checkboxes get an aria-label so they aren't announced bare.
   input: LumenInput as unknown as LumenBlock,
 };
