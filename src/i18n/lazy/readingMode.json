@@ -45,7 +45,7 @@
   "readingMode.field.focusUnit": "Keep bright",
   "readingMode.field.hemingway": "Readability highlights",
   "readingMode.field.wpm": "Words per minute",
-  "readingMode.field.anchor": "Anchor emphasis (bold word starts)",
+  "readingMode.field.anchor": "Anchor emphasis: word starts heavier (experimental — weak evidence)",
   "readingMode.field.pos": "Colour the parts of speech",
   "readingMode.field.syllables": "Syllables (English) and niqqud (Hebrew)",
   "readingMode.nikud.asWritten": "As written",
