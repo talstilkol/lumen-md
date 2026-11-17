@@ -28,6 +28,7 @@ import {
   Link,
   SquarePlay as Youtube,
 } from "lucide-react";
+import { dirIcon } from "./icons/direction";
 
 export const cmdIcons = {
   FileText,
@@ -44,9 +45,9 @@ export const cmdIcons = {
   Network,
   Table,
   Calculator,
-  Quote,
+  Quote: dirIcon(Quote),
   Download,
-  PanelRightOpen,
+  PanelRightOpen: dirIcon(PanelRightOpen),
   Printer,
   Music2,
   Box,

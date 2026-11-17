@@ -129,7 +129,7 @@ export function rowOf(node: WorkspaceNode, depth: number, ctx: RenderCtx): React
             title={isOpen ? t("tree.collapse") : t("tree.expand")}
             aria-label={isOpen ? t("tree.collapse") : t("tree.expand")}
           >
-            {isOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+            {isOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} className="icon-dir" />}
           </button>
         ) : (
           <span style={{ width: 14, display: "inline-block" }} />

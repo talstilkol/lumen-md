@@ -138,9 +138,6 @@ export function CalendarPanel() {
   }, [month, israel, lang]);
   const dayLabel = new Intl.DateTimeFormat(locale, { dateStyle: "full", timeZone: "UTC" });
   const dayNumber = new Intl.DateTimeFormat(locale, { day: "numeric", timeZone: "UTC" });
-  const rtl = typeof document !== "undefined" && document.documentElement.dir === "rtl";
-  const Prev = rtl ? ChevronRight : ChevronLeft;
-  const Next = rtl ? ChevronLeft : ChevronRight;
   const shift = (n: number) =>
     setMonth(({ y, m }) => {
       const k = y * 12 + (m - 1) + n;
@@ -157,13 +154,13 @@ export function CalendarPanel() {
         <CalendarDays size={13} aria-hidden />
         <span style={{ fontWeight: 600, flex: 1 }} data-testid="calendar-title">{title}</span>
         <button type="button" style={btn} onClick={() => shift(-1)} aria-label={t("calendar.prev")} title={t("calendar.prev")}>
-          <Prev size={14} aria-hidden />
+          <ChevronLeft size={14} aria-hidden className="icon-dir" />
         </button>
         <button type="button" style={{ ...btn, fontSize: 11 }} onClick={() => setMonth({ y: today.y, m: today.m })}>
           {t("calendar.today")}
         </button>
         <button type="button" style={btn} onClick={() => shift(1)} aria-label={t("calendar.next")} title={t("calendar.next")}>
-          <Next size={14} aria-hidden />
+          <ChevronRight size={14} aria-hidden className="icon-dir" />
         </button>
         <button type="button" style={btn} onClick={() => setEditing((v) => !v)} aria-label={t("calendar.settings")} title={t("calendar.settings")} aria-expanded={editing}>
           <Settings2 size={13} aria-hidden />

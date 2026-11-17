@@ -287,8 +287,8 @@ export function Toolbar({
           onHover={() => openMenu && setOpenMenu("edit")}
         >
           <MenuSection label={t("toolbar.section.history")} />
-          <MenuItem icon={<Undo2 size={14} />} label={t("toolbar.undo")} description={t("desc.undo")} hint="⌘Z" onClick={() => exec(() => document.execCommand("undo"))} />
-          <MenuItem icon={<Redo2 size={14} />} label={t("toolbar.redo")} description={t("desc.redo")} hint="⇧⌘Z" onClick={() => exec(() => document.execCommand("redo"))} />
+          <MenuItem icon={<Undo2 size={14} className="icon-dir" />} label={t("toolbar.undo")} description={t("desc.undo")} hint="⌘Z" onClick={() => exec(() => document.execCommand("undo"))} />
+          <MenuItem icon={<Redo2 size={14} className="icon-dir" />} label={t("toolbar.redo")} description={t("desc.redo")} hint="⇧⌘Z" onClick={() => exec(() => document.execCommand("redo"))} />
           <MenuDivider />
           <MenuSection label={t("toolbar.section.clipboard")} />
           <MenuItem icon={<Scissors size={14} />} label={t("toolbar.cut")} description={t("desc.cut")} hint="⌘X" onClick={() => exec(() => document.execCommand("cut"))} />
@@ -416,7 +416,7 @@ export function Toolbar({
           <MenuDivider />
           <MenuSection label={t("toolbar.panels")} />
           <MenuItem
-            icon={showOutline ? <PanelRightClose size={14} /> : <PanelRightOpen size={14} />}
+            icon={showOutline ? <PanelRightClose size={14} className="icon-dir" /> : <PanelRightOpen size={14} className="icon-dir" />}
             label={showOutline ? t("toolbar.outline.hide") : t("toolbar.outline.show")}
             description={t("desc.outline")}
             onClick={() => exec(toggleOutline)}
@@ -700,7 +700,7 @@ function SubMenuItem({
         {description && (
           <span style={{ fontSize: 11, color: "hsl(var(--fg-muted))" }}>{description}</span>
         )}
-        <ChevronRight size={14} aria-hidden style={{ flexShrink: 0, opacity: 0.7 }} />
+        <ChevronRight size={14} aria-hidden className="icon-dir" style={{ flexShrink: 0, opacity: 0.7 }} />
       </button>
       {open && pos &&
         createPortal(

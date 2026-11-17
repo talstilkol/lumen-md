@@ -124,7 +124,7 @@ export function AuthButton() {
               }}
               style={menuItemStyle}
             >
-              <LogOut size={13} aria-hidden /> {t("auth.signOut")}
+              <LogOut size={13} aria-hidden className="icon-dir" /> {t("auth.signOut")}
             </button>
           </div>
         )}
@@ -162,7 +162,7 @@ export function AuthButton() {
         {isError ? (
           <AlertTriangle size={13} aria-hidden style={{ color: "hsl(var(--danger))" }} />
         ) : (
-          <LogIn size={13} aria-hidden />
+          <LogIn size={13} aria-hidden className="icon-dir" />
         )}{" "}
         {t("auth.signIn")}
       </button>
