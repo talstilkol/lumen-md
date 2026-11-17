@@ -191,12 +191,35 @@ describe("the status bar while the index is read", () => {
     });
     const el = container.querySelector('[data-testid="index-progress"]');
     expect(el?.textContent).toMatch(/3,2\d\d \/ 10,000/);
-    expect(el?.querySelector('[role="status"]')?.textContent).toMatch(/25%/);
+    expect(container.querySelector('[role="status"]')?.textContent).toMatch(/25%/);
     await act(async () => {
       release();
       await run;
     });
     expect(container.querySelector('[data-testid="index-progress"]')).toBeNull();
+  });
+
+  it("review 14 Low 8: the live region is mounted before indexing starts, and the same element speaks", async () => {
+    const { container } = render(createElement(IndexProgressStatus));
+    const region = container.querySelector('[role="status"]');
+    expect(region).not.toBeNull();
+    expect(region?.textContent).toBe("");
+    let release!: () => void;
+    const gate = new Promise<void>((r) => (release = r));
+    const run = mapLimit(Array.from({ length: 1_000 }, (_, i) => i), 8, async (i) => {
+      if (i >= 300) await gate;
+    });
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 20));
+    });
+    expect(container.querySelector('[role="status"]')).toBe(region);
+    expect(region?.textContent).toMatch(/25%/);
+    await act(async () => {
+      release();
+      await run;
+    });
+    expect(container.querySelector('[role="status"]')).toBe(region);
+    expect(region?.textContent).toBe("");
   });
 
   it("is in the status bar", () => {
