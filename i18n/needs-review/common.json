@@ -11511,5 +11511,77 @@
     "ru": "jyp9ab",
     "zh-CN": "jyp9ab",
     "fa": "jyp9ab"
+  },
+  "osSearch.title": {
+    "ar": "l86xyl",
+    "de": "l86xyl",
+    "fa": "l86xyl",
+    "fr": "l86xyl",
+    "ja": "l86xyl",
+    "ru": "l86xyl",
+    "zh-CN": "l86xyl"
+  },
+  "osSearch.switch": {
+    "ar": "ejqykm",
+    "de": "ejqykm",
+    "fa": "ejqykm",
+    "fr": "ejqykm",
+    "ja": "ejqykm",
+    "ru": "ejqykm",
+    "zh-CN": "ejqykm"
+  },
+  "osSearch.note": {
+    "ar": "5259su",
+    "de": "5259su",
+    "fa": "5259su",
+    "fr": "5259su",
+    "ja": "5259su",
+    "ru": "5259su",
+    "zh-CN": "5259su"
+  },
+  "osSearch.perVault": {
+    "ar": "rwa51p",
+    "de": "rwa51p",
+    "fa": "rwa51p",
+    "fr": "rwa51p",
+    "ja": "rwa51p",
+    "ru": "rwa51p",
+    "zh-CN": "rwa51p"
+  },
+  "osSearch.unavailable": {
+    "ar": "rl7g6z",
+    "de": "rl7g6z",
+    "fa": "rl7g6z",
+    "fr": "rl7g6z",
+    "ja": "rl7g6z",
+    "ru": "rl7g6z",
+    "zh-CN": "rl7g6z"
+  },
+  "osSearch.indexed": {
+    "ar": "1trtfsd",
+    "de": "1trtfsd",
+    "fa": "1trtfsd",
+    "fr": "1trtfsd",
+    "ja": "1trtfsd",
+    "ru": "1trtfsd",
+    "zh-CN": "1trtfsd"
+  },
+  "osSearch.cleared": {
+    "ar": "1nin9uh",
+    "de": "1nin9uh",
+    "fa": "1nin9uh",
+    "fr": "1nin9uh",
+    "ja": "1nin9uh",
+    "ru": "1nin9uh",
+    "zh-CN": "1nin9uh"
+  },
+  "osSearch.failed": {
+    "ar": "1j67175",
+    "de": "1j67175",
+    "fa": "1j67175",
+    "fr": "1j67175",
+    "ja": "1j67175",
+    "ru": "1j67175",
+    "zh-CN": "1j67175"
   }
 }

@@ -1,0 +1,10 @@
+{
+  "osSearch.title": "Notes in the system search",
+  "osSearch.switch": "Show this vault's notes in Spotlight or Windows Search",
+  "osSearch.note": "Only the title, a short excerpt, the tags and a link go in. Locked, encrypted, private and hidden notes never do. Turning this off deletes everything Lumen put in the system search for this vault.",
+  "osSearch.perVault": "This choice is for this vault only.",
+  "osSearch.unavailable": "Not available yet:",
+  "osSearch.indexed": "Notes in the system search: {n}.",
+  "osSearch.cleared": "This vault's notes were removed from the system search.",
+  "osSearch.failed": "Could not change the system search: {error}"
+}
