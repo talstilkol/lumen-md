@@ -7,7 +7,7 @@ import type { EditorView } from "@codemirror/view";
 import { exportReadyText } from "../../storage/exportReady";
 
 /** The formats exported as one file from the open note's text. */
-export type ExportKind = "rtf" | "latex" | "typst" | "rst" | "adoc" | "org" | "opml" | "odt" | "reveal" | "epub" | "ipynb" | "site" | "pptx";
+export type ExportKind = "rtf" | "latex" | "typst" | "typst-pdf" | "rst" | "adoc" | "org" | "opml" | "odt" | "reveal" | "epub" | "ipynb" | "site" | "pptx";
 
 /** Export `doc` (read by the command before any await) as `kind`. */
 export async function exportAs(doc: { name: string; content: string }, kind: ExportKind): Promise<void> {
@@ -22,6 +22,18 @@ export async function exportAs(doc: { name: string; content: string }, kind: Exp
     case "typst": {
       const { markdownToTypst } = await import("../../storage/exportTypst");
       return f.downloadText(`${baseName}.typ`, markdownToTypst(content, { title: baseName }), "text/vnd.typst");
+    }
+    case "typst-pdf": {
+      // W12.F2: the vendored typst.ts compiler, loaded only now (./storage/typstPdf.ts).
+      const { markdownToTypstPdf, TypstUnavailableError } = await import("../../storage/typstPdf");
+      try {
+        return f.downloadBytes(`${baseName}.pdf`, await markdownToTypstPdf(content, baseName), "application/pdf");
+      } catch (e) {
+        const [{ showAiToast }, { t }] = await Promise.all([import("../../ui/AiToast"), import("../../i18n")]);
+        if (e instanceof TypstUnavailableError) return showAiToast(t("typstPdf.unavailable"), "error");
+        const { explainError } = await import("../../lib/userError");
+        return showAiToast(t("typstPdf.failed", { error: explainError(e) }), "error");
+      }
     }
     case "rst":
       return f.downloadText(`${baseName}.rst`, f.markdownToRst(content), "text/x-rst");

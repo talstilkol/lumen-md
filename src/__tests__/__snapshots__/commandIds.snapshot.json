@@ -172,6 +172,13 @@
       "icon": "Download"
     },
     {
+      "id": "file.exportTypstPdf",
+      "label": "Export to PDF with Typst",
+      "group": "File",
+      "hint": "Compiled on this device by typst.ts, with a Hebrew font; nothing is sent",
+      "icon": "Download"
+    },
+    {
       "id": "file.exportRst",
       "label": "Export to reStructuredText",
       "group": "File",
@@ -2484,6 +2491,13 @@
       "icon": "Download"
     },
     {
+      "id": "file.exportTypstPdf",
+      "label": "Export to PDF with Typst",
+      "group": "File",
+      "hint": "Compiled on this device by typst.ts, with a Hebrew font; nothing is sent",
+      "icon": "Download"
+    },
+    {
       "id": "file.exportRst",
       "label": "Export to reStructuredText",
       "group": "File",
@@ -4756,6 +4770,7 @@
     "file.exportMarkdownAiMarks",
     "file.exportLatex",
     "file.exportTypst",
+    "file.exportTypstPdf",
     "file.exportRst",
     "file.exportAdoc",
     "file.exportOrg",

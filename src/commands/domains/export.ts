@@ -225,6 +225,15 @@ export function buildExportCommands({ handleExportHtml, liveDoc, getEditorView }
       action: () => exportAs(liveDoc(), "typst"),
     },
     {
+      // W12.F2: PDF through typst.ts in the browser, loaded on demand from this origin.
+      id: "file.exportTypstPdf",
+      label: t("cmd.file.exportTypstPdf"),
+      hint: t("cmd.file.exportTypstPdf.hint"),
+      icon: cmdIcons.Download,
+      group: t("group.file"),
+      action: () => exportAs(liveDoc(), "typst-pdf"),
+    },
+    {
       id: "file.exportRst",
       label: t("cmd.file.exportRst"),
       hint: t("cmd.file.exportRst.hint"),

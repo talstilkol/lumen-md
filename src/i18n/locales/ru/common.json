@@ -3341,6 +3341,8 @@
   "typo.rule.numbers": "Числа: 50 % → 50%, %50 → 50%, 10–20 → 10-20",
   "typo.rule.quotes": "Ивритские кавычки: \"שלום\" → „שלום”",
   "typo.title": "Ивритская типографика",
+  "typstPdf.failed": "Typst could not make the PDF: {error}",
+  "typstPdf.unavailable": "Typst PDF is not installed in this build. Export the .typ file and compile it with typst instead.",
   "update.available": "Доступна новая версия Lumen.",
   "update.available.body": "У вас {current}. Скачать, проверить и установить {version}? Lumen перезапустится.",
   "update.available.title": "Доступен Lumen {version}",

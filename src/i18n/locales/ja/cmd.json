@@ -227,6 +227,8 @@
   "cmd.file.exportSite.hint": "サイドバーナビと RSS 付きの複数ページ HTML サイト (H1 でページを分割)",
   "cmd.file.exportTypst": "エクスポート to Typst (.typ)",
   "cmd.file.exportTypst.hint": "ヘブライ語を右から左に組む Typst ソース (typst でコンパイル)",
+  "cmd.file.exportTypstPdf": "Export to PDF with Typst",
+  "cmd.file.exportTypstPdf.hint": "Compiled on this device by typst.ts, with a Hebrew font; nothing is sent",
   "cmd.file.exportVcard": "人物を vCard に書き出す",
   "cmd.file.exportVcard.hint": "すべての人物ノートを 1 つの vCard 4.0 ファイルとしてこの端末に保存",
   "cmd.file.importVcard": "連絡先を読み込む (vCard)…",

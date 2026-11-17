@@ -3341,6 +3341,8 @@
   "typo.rule.numbers": "Numbers: 50 % → 50%, %50 → 50%, 10–20 → 10-20",
   "typo.rule.quotes": "Hebrew quotation marks: \"שלום\" → „שלום”",
   "typo.title": "Hebrew typography",
+  "typstPdf.failed": "Typst could not make the PDF: {error}",
+  "typstPdf.unavailable": "Typst PDF is not installed in this build. Export the .typ file and compile it with typst instead.",
   "update.available": "A new version of Lumen is available.",
   "update.available.body": "You have {current}. Download, verify and install {version}? Lumen restarts afterwards.",
   "update.available.title": "Lumen {version} is available",

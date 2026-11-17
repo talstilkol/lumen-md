@@ -73,5 +73,23 @@
     "ja": "18aclrs",
     "ru": "18aclrs",
     "zh-CN": "18aclrs"
+  },
+  "cmd.file.exportTypstPdf": {
+    "he": "cf5i90",
+    "ar": "cf5i90",
+    "de": "cf5i90",
+    "fr": "cf5i90",
+    "ja": "cf5i90",
+    "ru": "cf5i90",
+    "zh-CN": "cf5i90"
+  },
+  "cmd.file.exportTypstPdf.hint": {
+    "he": "l02o2q",
+    "ar": "l02o2q",
+    "de": "l02o2q",
+    "fr": "l02o2q",
+    "ja": "l02o2q",
+    "ru": "l02o2q",
+    "zh-CN": "l02o2q"
   }
 }

@@ -227,6 +227,8 @@
   "cmd.file.exportSite.hint": "Многостраничный HTML-сайт с боковой навигацией и RSS (страницы разбиваются по H1)",
   "cmd.file.exportTypst": "Экспорт to Typst (.typ)",
   "cmd.file.exportTypst.hint": "Исходник Typst с ивритом справа налево; компилируется typst",
+  "cmd.file.exportTypstPdf": "Export to PDF with Typst",
+  "cmd.file.exportTypstPdf.hint": "Compiled on this device by typst.ts, with a Hebrew font; nothing is sent",
   "cmd.file.exportVcard": "Экспорт людей в vCard",
   "cmd.file.exportVcard.hint": "Все заметки о людях одним файлом vCard 4.0, загружается на это устройство",
   "cmd.file.importVcard": "Импорт контактов (vCard)…",

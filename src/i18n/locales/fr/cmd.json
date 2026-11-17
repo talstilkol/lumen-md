@@ -227,6 +227,8 @@
   "cmd.file.exportSite.hint": "Site HTML multi-pages avec navigation latérale + RSS (pages découpées sur les H1)",
   "cmd.file.exportTypst": "Exporter to Typst (.typ)",
   "cmd.file.exportTypst.hint": "Source Typst avec l'hébreu de droite à gauche ; à compiler avec typst",
+  "cmd.file.exportTypstPdf": "Export to PDF with Typst",
+  "cmd.file.exportTypstPdf.hint": "Compiled on this device by typst.ts, with a Hebrew font; nothing is sent",
   "cmd.file.exportVcard": "Exporter les personnes en vCard",
   "cmd.file.exportVcard.hint": "Toutes les notes de personnes dans un fichier vCard 4.0, téléchargé sur cet appareil",
   "cmd.file.importVcard": "Importer des contacts (vCard)…",
