@@ -63,6 +63,8 @@ export interface GanttLayout {
   missing: Array<{ item: string; dep: string }>;
   /** Items on a dependency cycle. */
   cycle: string[];
+  /** The whole range in day numbers [from, to) (the zoom's bounds); absent when nothing is placed. */
+  full?: GanttWindow;
 }
 
 const DAY = 86_400_000;
@@ -113,8 +115,36 @@ export function ganttFromTasks(tasks: readonly Task[]): GanttItem[] {
   });
 }
 
-/** Lay the items out: sorted by start (then end, then id), ticks for the span, arrows for the dependencies. */
-export function ganttLayout(items: readonly GanttItem[]): GanttLayout {
+/** The shortest span a zoom shows (a week). */
+export const MIN_ZOOM_DAYS = 7;
+
+/** A visible time window, in day numbers [from, to) (the time zoom, audit r4 A3 #9). */
+export interface GanttWindow {
+  from: number;
+  to: number;
+}
+
+/** Zoom by `factor` (½: in, 2: out) around the window's middle, kept inside `full`; null = the whole range. */
+export function zoomWindow(win: GanttWindow, full: GanttWindow, factor: number): GanttWindow | null {
+  const span = Math.max(MIN_ZOOM_DAYS, Math.round((win.to - win.from) * factor));
+  if (span >= full.to - full.from) return null;
+  const mid = (win.from + win.to) / 2;
+  const from = Math.round(Math.min(Math.max(full.from, mid - span / 2), full.to - span));
+  return { from, to: from + span };
+}
+
+/** Move the window by `fraction` of its span (negative: earlier), kept inside `full`. */
+export function panWindow(win: GanttWindow, full: GanttWindow, fraction: number): GanttWindow {
+  const span = win.to - win.from;
+  const from = Math.round(Math.min(Math.max(full.from, win.from + span * fraction), full.to - span));
+  return { from, to: from + span };
+}
+
+/**
+ * Lay the items out: sorted by start (then end, then id), ticks for the span, arrows for the dependencies.
+ * With `view`, positions and ticks are for that window (bars outside it fall outside 0..1; the view clips them).
+ */
+export function ganttLayout(items: readonly GanttItem[], view?: GanttWindow | null): GanttLayout {
   const placed = items.filter((i) => valid(i.start) && valid(i.end) && i.start <= i.end);
   const undated = items.filter((i) => !placed.includes(i));
   placed.sort((a, b) => (a.start < b.start ? -1 : a.start > b.start ? 1 : a.end < b.end ? -1 : a.end > b.end ? 1 : a.id < b.id ? -1 : 1));
@@ -130,6 +160,11 @@ export function ganttLayout(items: readonly GanttItem[]): GanttLayout {
   const pad = Math.max(1, Math.round((hi - lo) * 0.02));
   lo -= pad;
   hi += pad;
+  const full = { from: lo, to: hi };
+  if (view && view.to > view.from) {
+    lo = Math.max(full.from, view.from);
+    hi = Math.min(full.to, Math.max(view.to, lo + 1));
+  }
   const span = hi - lo;
   const x = (d: number) => (d - lo) / span;
   const rows = placed.map((item) => ({ item, x0: x(dayNumber(item.start)), x1: x(dayNumber(item.end) + 1) }));
@@ -145,7 +180,7 @@ export function ganttLayout(items: readonly GanttItem[]): GanttLayout {
       }
       arrows.push({ from, to: k, conflict: rows[k].item.start <= rows[from].item.end });
     }
-  return { rows, arrows, ticks: ticksFor(lo, hi), from: dayString(lo), to: dayString(hi - 1), undated, missing, cycle: cycleOf(items) };
+  return { rows, arrows, ticks: ticksFor(lo, hi), from: dayString(lo), to: dayString(hi - 1), undated, missing, cycle: cycleOf(items), full };
 }
 
 /** Axis ticks: weeks, months, years or decades, whichever gives 3–14 of them. */

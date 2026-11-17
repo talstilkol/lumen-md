@@ -269,6 +269,60 @@ describe("in the app: embed and hover read the vault", () => {
     render(el!);
     const box = screen.getByTestId("entity-infobox");
     expect(box.className).toContain("is-hover");
-    expect(within(box).getByText("1886-10-16")).toBeTruthy();
+    expect(box.querySelector('time[datetime="1886-10-16"]')).toBeTruthy(); // written the reader's way (audit r4 A3 #10), machine-readable in <time>
+  });
+});
+
+describe("audit r4 A3 #10: dates and numbers the reader's way; inverse relations by name", () => {
+  afterEach(async () => {
+    cleanup();
+    const { applyLocale } = await import("../i18n");
+    applyLocale("en");
+  });
+  it("formatInfoValue: an ISO date, a year-month, a number; a year or a free date stays as written", async () => {
+    const { formatInfoValue } = await import("../entities/infobox");
+    expect(formatInfoValue({ text: "1886-10-16", kind: "date" }, "en")).toEqual({ text: "October 16, 1886", iso: "1886-10-16" });
+    expect(formatInfoValue({ text: "1886-10-16", kind: "date" }, "he").text).toMatch(/16 באוקטובר 1886/);
+    expect(formatInfoValue({ text: "1948-05", kind: "date" }, "en")).toEqual({ text: "May 1948", iso: "1948-05" });
+    expect(formatInfoValue({ text: "1930", kind: "date" }, "en")).toEqual({ text: "1930", iso: "1930" }); // never "1,930"
+    expect(formatInfoValue({ text: "ABT 1900", kind: "date" }, "en")).toEqual({ text: "ABT 1900" });
+    expect(formatInfoValue({ text: "1886-13-40", kind: "date" }, "en")).toEqual({ text: "1886-13-40" });
+    expect(formatInfoValue({ text: "290000", kind: "number" }, "en").text).toBe("290,000");
+    expect(formatInfoValue({ text: "290000", kind: "number" }, "de").text).toBe("290.000");
+    expect(formatInfoValue({ text: "9,500,000", kind: "number" }, "en").text).toBe("9,500,000");
+    expect(formatInfoValue({ text: "about 3000", kind: "number" }, "en").text).toBe("about 3000");
+    expect(formatInfoValue({ text: "2024-01-01" }, "en").text).toBe("2024-01-01"); // not a date field
+  });
+  it("the card writes born and population the reader's way, the date kept machine-readable", () => {
+    const ctx = entityContext(new Map([["ישויות/אנשים/דוד בן-גוריון.md", NOTE_DAVID], ["ישויות/מקומות/חיפה.md", NOTE_HAIFA], [EDGES_PATH, toJsonl(EDGES)]]));
+    const { container, unmount } = render(infoboxFor(ctx, "ישויות/אנשים/דוד בן-גוריון.md", NOTE_DAVID)!);
+    const born = container.querySelector('time[datetime="1886-10-16"]');
+    expect(born?.textContent).toBe("October 16, 1886");
+    unmount();
+    const haifaCard = render(infoboxFor(ctx, "ישויות/מקומות/חיפה.md", NOTE_HAIFA)!);
+    expect(haifaCard.container.textContent).toContain("290,000");
+  });
+  it("a relation that points at the entity is named from its side: Płońsk ← born in — “born here”, not “(reversed) born in”", async () => {
+    const m = infoboxModel({ entity: plonsk, edges: EDGES, nameOf, idOf });
+    const k = m.key.find((x) => x.other === david.id)!;
+    expect(k.outgoing).toBe(false);
+    const { container, unmount } = render(h(EntityInfobox, { model: m }));
+    expect(container.querySelector(".lumen-infobox-rel")!.textContent).toBe("born here");
+    unmount();
+    const { applyLocale, loadLocale } = await import("../i18n");
+    await loadLocale("he");
+    applyLocale("he");
+    const he = render(h(EntityInfobox, { model: m }));
+    expect(he.container.querySelector(".lumen-infobox-rel")!.textContent).toBe("נולד/ה כאן");
+  });
+  it("every predicate has its inverse name, in every language", async () => {
+    const { PREDICATES } = await import("../entities/model");
+    const { readFileSync } = await import("node:fs");
+    const en = JSON.parse(readFileSync("src/i18n/lazy/entityGraph.json", "utf8")) as Record<string, string>;
+    for (const p of PREDICATES) expect(en[`entityGraph.inverse.${p.id}`], p.id).toBeTruthy();
+    for (const lang of ["he", "ar", "de", "fr", "ja", "ru", "zh-CN"]) {
+      const loc = JSON.parse(readFileSync(`src/i18n/locales/${lang}/common.json`, "utf8")) as Record<string, string>;
+      for (const p of PREDICATES) expect(loc[`entityGraph.inverse.${p.id}`], `${lang} ${p.id}`).toBeTruthy();
+    }
   });
 });

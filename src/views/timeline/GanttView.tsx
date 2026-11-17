@@ -9,10 +9,15 @@
  * the source), each named with its dates and what it comes after; the
  * arrows are decoration (aria-hidden) because the names carry them; and the
  * same data is one click away as a table (W12.V7).
+ *
+ * Time zoom (audit r4 A3 #9): zoom in / out around the middle, earlier /
+ * later by a quarter of the window, back to the whole range — buttons, and
+ * + / − / 0 on the bars; the window is announced. Bars outside it are cut
+ * at its edges.
  */
 import { memo, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { getLocale, t } from "../../i18n";
-import { ganttLayout, type GanttItem, type GanttLayout } from "./gantt";
+import { dayString, ganttLayout, panWindow, zoomWindow, type GanttItem, type GanttLayout, type GanttWindow } from "./gantt";
 import "./timelineStrings";
 
 export interface GanttViewProps {
@@ -54,7 +59,12 @@ const range = (i: GanttItem) => (i.start === i.end || (i.precision !== "day" && 
 
 export default function GanttView({ items, onOpen, initialTable = false, dir }: GanttViewProps) {
   const rtl = (dir ?? (typeof document !== "undefined" ? (document.documentElement.dir as "rtl" | "ltr") : "ltr")) === "rtl";
-  const layout = useMemo(() => ganttLayout(items), [items]);
+  const [zoom, setZoom] = useState<GanttWindow | null>(null);
+  useEffect(() => setZoom(null), [items]);
+  const layout = useMemo(() => ganttLayout(items, zoom), [items, zoom]);
+  const full = layout.full;
+  const zoomBy = (factor: number) => full && setZoom((z) => zoomWindow(z ?? full, full, factor));
+  const panBy = (fraction: number) => full && setZoom((z) => (z ? panWindow(z, full, fraction) : z));
   const titleId = useId();
   const [table, setTable] = useState(initialTable);
   const track = useRef<HTMLDivElement>(null);
@@ -113,6 +123,11 @@ export default function GanttView({ items, onOpen, initialTable = false, dir }: 
 
   const onKey = (e: KeyboardEvent<HTMLOListElement>) => {
     if (!n) return;
+    const z: Record<string, () => void> = { "+": () => zoomBy(0.5), "=": () => zoomBy(0.5), "-": () => zoomBy(2), "0": () => setZoom(null) };
+    if (z[e.key] && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      e.preventDefault();
+      return z[e.key]();
+    }
     const next = e.key === "ArrowDown" ? Math.min(n - 1, active + 1) : e.key === "ArrowUp" ? Math.max(0, active - 1) : e.key === "Home" ? 0 : e.key === "End" ? n - 1 : e.key === "PageDown" ? Math.min(n - 1, active + 10) : e.key === "PageUp" ? Math.max(0, active - 10) : -1;
     if (next < 0) return;
     e.preventDefault();
@@ -130,7 +145,7 @@ export default function GanttView({ items, onOpen, initialTable = false, dir }: 
               <span dir="auto" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={item.label}>
                 {item.label}
               </span>
-              <span style={{ position: "relative", blockSize: ROW }}>
+              <span style={{ position: "relative", blockSize: ROW, overflow: zoom ? "hidden" : undefined }}>
                 <button
                   type="button"
                   ref={(b) => void (buttons.current[k] = b)}
@@ -152,13 +167,37 @@ export default function GanttView({ items, onOpen, initialTable = false, dir }: 
         })}
       </ol>
     ),
-    [layout, names, onOpen, first, last, active], // eslint-disable-line react-hooks/exhaustive-deps
+    [layout, names, onOpen, first, last, active, zoom], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const toggle = (
     <button type="button" aria-pressed={table} onClick={() => setTable((v) => !v)} data-testid="gantt-table-toggle" style={{ fontSize: 12, padding: "2px 8px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit" }}>
       {t("timeline.gantt.asTable")}
     </button>
+  );
+
+  const small = { fontSize: 12, padding: "2px 8px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit" } as const;
+  const zoomBar = full && layout.rows.length > 0 && !table && (
+    <span role="group" aria-label={t("timeline.gantt.zoom")} style={{ display: "inline-flex", gap: 4, alignItems: "center", flexWrap: "wrap" }} data-testid="gantt-zoom">
+      <button type="button" style={small} onClick={() => zoomBy(0.5)} disabled={!!zoom && zoom.to - zoom.from <= 7} data-testid="gantt-zoom-in">
+        {t("timeline.gantt.zoomIn")}
+      </button>
+      <button type="button" style={small} onClick={() => zoomBy(2)} disabled={!zoom} data-testid="gantt-zoom-out">
+        {t("timeline.gantt.zoomOut")}
+      </button>
+      <button type="button" style={small} onClick={() => panBy(-0.25)} disabled={!zoom || zoom.from <= full.from} data-testid="gantt-earlier">
+        {t("timeline.gantt.earlier")}
+      </button>
+      <button type="button" style={small} onClick={() => panBy(0.25)} disabled={!zoom || zoom.to >= full.to} data-testid="gantt-later">
+        {t("timeline.gantt.later")}
+      </button>
+      <button type="button" style={small} onClick={() => setZoom(null)} disabled={!zoom} data-testid="gantt-zoom-fit">
+        {t("timeline.gantt.zoomFit")}
+      </button>
+      <span role="status" aria-live="polite" data-testid="gantt-window" style={{ color: "hsl(var(--fg-muted))" }}>
+        {zoom ? t("timeline.gantt.showing", { from: fmt(dayString(zoom.from), "day"), to: fmt(dayString(zoom.to - 1), "day") }) : ""}
+      </span>
+    </span>
   );
 
   if (!layout.rows.length && !layout.undated.length) return <p data-testid="gantt-empty">{t("timeline.empty")}</p>;
@@ -170,6 +209,7 @@ export default function GanttView({ items, onOpen, initialTable = false, dir }: 
           {t("timeline.gantt.title", { n: String(layout.rows.length) })}
         </h3>
         {toggle}
+        {zoomBar}
         {layout.cycle.length > 0 && <span role="note" data-testid="gantt-cycle">{t("timeline.gantt.cycle", { n: String(layout.cycle.length) })}</span>}
       </div>
       {table ? (
@@ -214,7 +254,7 @@ export default function GanttView({ items, onOpen, initialTable = false, dir }: 
           </div>
           <div ref={scroller} onScroll={onScroll} style={{ gridColumn: "1 / -1", position: "relative", maxBlockSize: VIEW, overflowY: "auto" }} data-testid="gantt-scroller">
             {rowsEl}
-            {layout.arrows.length > 0 && <Arrows layout={layout} width={width} rtl={rtl} first={first} last={last} />}
+            {layout.arrows.length > 0 && <Arrows layout={layout} width={width} rtl={rtl} first={first} last={last} clip={!!zoom} />}
           </div>
         </div>
       )}
@@ -231,10 +271,10 @@ export default function GanttView({ items, onOpen, initialTable = false, dir }: 
  * The dependency arrows, in physical pixels of the track (mirrored in RTL).
  * Its own component: a new track width redraws the arrows, not 500 bars.
  */
-const Arrows = memo(function Arrows({ layout, width, rtl, first, last }: { layout: GanttLayout; width: number; rtl: boolean; first: number; last: number }) {
+const Arrows = memo(function Arrows({ layout, width, rtl, first, last, clip }: { layout: GanttLayout; width: number; rtl: boolean; first: number; last: number; clip?: boolean }) {
   const px = (f: number) => (rtl ? (1 - f) * width : f * width);
   return (
-              <svg aria-hidden="true" data-testid="gantt-arrows" width={width} height={layout.rows.length * ROW} style={{ position: "absolute", insetBlockStart: 0, insetInlineEnd: 0, pointerEvents: "none", overflow: "visible" }}>
+              <svg aria-hidden="true" data-testid="gantt-arrows" width={width} height={layout.rows.length * ROW} style={{ position: "absolute", insetBlockStart: 0, insetInlineEnd: 0, pointerEvents: "none", overflow: clip ? "hidden" : "visible" }}>
                 <defs>
                   <marker id="gantt-head" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
                     <path d="M0,0 L8,4 L0,8 z" fill="hsl(var(--fg-muted))" />

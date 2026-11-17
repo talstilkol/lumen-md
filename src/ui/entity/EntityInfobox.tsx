@@ -6,8 +6,8 @@
  * Presentational: ./EntityInfoboxBlock.tsx loads the data.
  */
 import { useEffect, useId, useState } from "react";
-import { t } from "../../i18n";
-import type { InfoboxModel, InfoValue } from "../../entities/infobox";
+import { getLocale, t } from "../../i18n";
+import { formatInfoValue, type InfoboxModel, type InfoValue } from "../../entities/infobox";
 import "./entityInfobox.css";
 
 export interface EntityInfoboxProps {
@@ -23,13 +23,30 @@ export interface EntityInfoboxProps {
 
 function Value({ v, linkOf }: { v: InfoValue; linkOf?: EntityInfoboxProps["linkOf"] }) {
   const target = v.id ? linkOf?.(v.id) : undefined;
-  return target ? (
-    <a className="wiki-link" data-wiki-target={target} href={`#${encodeURIComponent(target)}`} dir="auto">
-      {v.text}
-    </a>
+  if (target)
+    return (
+      <a className="wiki-link" data-wiki-target={target} href={`#${encodeURIComponent(target)}`} dir="auto">
+        {v.text}
+      </a>
+    );
+  // Dates and numbers the reader's way (audit r4 A3 #10); the machine-readable date stays in <time>.
+  const f = formatInfoValue(v, getLocale() || "en");
+  return f.iso ? (
+    <time dateTime={f.iso} dir="auto">
+      {f.text}
+    </time>
   ) : (
-    <span dir="auto">{v.text}</span>
+    <span dir="auto">{f.text}</span>
   );
+}
+
+/** The other entity's role, read from this entity: the forward name, or the relation's own inverse name ("parent", "born here"). */
+function roleOf(predicate: string, outgoing: boolean): string {
+  const forward = t(`entityGraph.predicate.${predicate}`);
+  if (outgoing) return forward;
+  const key = `entityGraph.inverse.${predicate}`;
+  const named = t(key);
+  return named !== key ? named : t("entityGraph.infobox.inverse", { relation: forward });
 }
 
 export function EntityInfobox({ model, resolveImage, linkOf, hover, dir }: EntityInfoboxProps) {
@@ -103,8 +120,8 @@ export function EntityInfobox({ model, resolveImage, linkOf, hover, dir }: Entit
                       <li key={k.other}>
                         <Value v={{ text: model.names.get(k.other) ?? k.other, id: k.other }} linkOf={linkOf} />{" "}
                         <span className="lumen-infobox-rel">
-                          {k.outgoing ? t(`entityGraph.predicate.${k.edge.predicate}`) : t("entityGraph.infobox.inverse", { relation: t(`entityGraph.predicate.${k.edge.predicate}`) })}
-                          {k.count > 1 && ` · ${t("entityGraph.infobox.times", { n: String(k.count) })}`}
+                          {roleOf(k.edge.predicate, k.outgoing)}
+                          {k.count > 1 && ` · ${t("entityGraph.infobox.times", { n: formatInfoValue({ text: String(k.count), kind: "number" }, getLocale() || "en").text })}`}
                         </span>
                       </li>
                     ))}

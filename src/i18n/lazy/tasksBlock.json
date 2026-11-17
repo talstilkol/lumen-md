@@ -5,5 +5,6 @@
   "tasks.error.regex": "Not a regular expression: {text}",
   "tasks.group.done": "Done",
   "tasks.group.none": "(none)",
-  "tasks.group.todo": "To do"
+  "tasks.group.todo": "To do",
+  "tasks.view.gantt": "Gantt chart"
 }

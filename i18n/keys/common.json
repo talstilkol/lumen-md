@@ -7657,6 +7657,106 @@
       "vars": []
     },
     {
+      "key": "entityGraph.inverse.amends",
+      "en": "amended by",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.inverse.author",
+      "en": "written by this",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.inverse.born_in",
+      "en": "born here",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.inverse.child",
+      "en": "parent",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.inverse.cites",
+      "en": "cited by",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.inverse.died_in",
+      "en": "died here",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.inverse.employer",
+      "en": "employee",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.inverse.enacted_by",
+      "en": "enacted by this",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.inverse.founded_by",
+      "en": "founded by this",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.inverse.headquarters",
+      "en": "headquartered here",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.inverse.located_in",
+      "en": "located here",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.inverse.main_subject",
+      "en": "about this",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.inverse.member_of",
+      "en": "member",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.inverse.part_of",
+      "en": "part of this",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.inverse.participant_in",
+      "en": "participant",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.inverse.point_in_time",
+      "en": "at the time of this",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.inverse.position_held",
+      "en": "holder",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.inverse.related_to",
+      "en": "related to",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.inverse.spouse",
+      "en": "spouse",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.inverse.student_of",
+      "en": "student",
+      "vars": []
+    },
+    {
       "key": "entityGraph.merge.action",
       "en": "Merge",
       "vars": []
@@ -20254,6 +20354,11 @@
       ]
     },
     {
+      "key": "tasks.view.gantt",
+      "en": "Gantt chart",
+      "vars": []
+    },
+    {
       "key": "time.daysAgo",
       "en": "{n}d ago",
       "vars": [
@@ -20341,6 +20446,11 @@
       "vars": []
     },
     {
+      "key": "timeline.gantt.earlier",
+      "en": "Earlier",
+      "vars": []
+    },
+    {
       "key": "timeline.gantt.end",
       "en": "End",
       "vars": []
@@ -20356,6 +20466,11 @@
       "vars": []
     },
     {
+      "key": "timeline.gantt.later",
+      "en": "Later",
+      "vars": []
+    },
+    {
       "key": "timeline.gantt.list",
       "en": "Items in time order",
       "vars": []
@@ -20364,6 +20479,14 @@
       "key": "timeline.gantt.show",
       "en": "Gantt",
       "vars": []
+    },
+    {
+      "key": "timeline.gantt.showing",
+      "en": "Showing {from} – {to}",
+      "vars": [
+        "from",
+        "to"
+      ]
     },
     {
       "key": "timeline.gantt.start",
@@ -20383,6 +20506,26 @@
       "vars": [
         "n"
       ]
+    },
+    {
+      "key": "timeline.gantt.zoom",
+      "en": "Time zoom",
+      "vars": []
+    },
+    {
+      "key": "timeline.gantt.zoomFit",
+      "en": "Whole range",
+      "vars": []
+    },
+    {
+      "key": "timeline.gantt.zoomIn",
+      "en": "Zoom in",
+      "vars": []
+    },
+    {
+      "key": "timeline.gantt.zoomOut",
+      "en": "Zoom out",
+      "vars": []
     },
     {
       "key": "timeline.gap.after-death",
