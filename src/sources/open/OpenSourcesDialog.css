@@ -15,3 +15,12 @@
 .os-light-green::before { color: hsl(142 60% 38%); }
 .os-light-amber::before { color: hsl(38 90% 45%); }
 .os-light-red::before { color: hsl(0 70% 48%); }
+/* W11.H16: importing the user's own copy of the Open Book of Laws. */
+.os-openlaw { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; padding: 0.25rem 0 0.15rem; padding-inline-start: 1.5rem; }
+.os-openlaw button { padding-block: 3px; padding-inline: 9px; border: 1px solid hsl(var(--border)); border-radius: 4px; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+.os-openlaw button:focus-visible { outline: 2px solid hsl(var(--ring, var(--accent, 220 90% 56%))); outline-offset: 1px; }
+/* The switches grew (W11.H16): the results keep room for at least two rows, and the dialog may be taller. */
+.os-dialog { max-block-size: 84vh; }
+.os-dialog .cite-list { min-block-size: 7.5rem; flex: 1 1 auto; }
+/* The muted meta line on the selected row had 4.37:1 against the accent tint (axe): full text colour there. */
+.os-dialog .cite-item.sel .cite-meta { color: hsl(var(--fg)); }

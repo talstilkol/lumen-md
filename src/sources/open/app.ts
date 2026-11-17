@@ -37,11 +37,13 @@ export function dialogFetch(confirm: () => Promise<boolean>): typeof fetch {
 
 export async function loadLocal(): Promise<Omit<LocalSources, "enabled">> {
   const on = enabledSources();
-  const [laws, library] = await Promise.all([
+  const [laws, library, openLaw] = await Promise.all([
     on.knesset ? import("../knesset/app").then((m) => m.savedLawsInVault()) : Promise.resolve([]),
     on.benyehuda ? import("../benyehuda/app").then((m) => m.library()) : Promise.resolve(null),
+    // W11.H16: the imported Open Book of Laws (an index on this device; nothing is sent).
+    on.openlaw ? import("../openlaw/app").then((m) => m.openLawIndex()) : Promise.resolve(null),
   ]);
-  return { laws, library };
+  return { laws, library, openLaw };
 }
 
 export function searchOnlineGated(q: string, enabled: Record<OpenSourceId, boolean>, kind: Kind | null): Promise<OpenResult[] | null> {
@@ -92,6 +94,10 @@ export async function insertion(r: OpenResult): Promise<string | null> {
     const { saveSourceNote } = await import("../registers/app");
     const saved = await saveSourceNote(r.payload.record);
     return `${saved.link} — ${attributionOf(r)}`;
+  }
+  if (r.source === "openlaw" && r.payload.openLaw) {
+    const { openLawInsertion } = await import("../openlaw/app");
+    return openLawInsertion(r.payload.openLaw);
   }
   if (r.kind === "gazette" && r.payload.yalkut) {
     const { yalkutCitation } = await import("../reshumot/yalkut");

@@ -25,10 +25,12 @@ import { formatNumber, lookup, registerNumber, type RegisterConfig, type Registe
 import { AMUTOT } from "../amutot/register";
 import { COMPANIES } from "../companies/register";
 import { parseYalkutRef, yalkutUrl, type YalkutRef } from "../reshumot/yalkut";
+import { matchOpenLaw, type OpenLawIndex } from "../openlaw/store";
+import { verdictLink, VERDICT_RIGHTS, OPEN_LAW_RIGHTS } from "../openlaw/book";
 
-export type Kind = "verse" | "law" | "work" | "dataset" | "series" | "register" | "gazette";
+export type Kind = "verse" | "law" | "work" | "dataset" | "series" | "register" | "gazette" | "ruling";
 
-export const KINDS: readonly Kind[] = ["verse", "law", "work", "dataset", "series", "register", "gazette"];
+export const KINDS: readonly Kind[] = ["verse", "law", "work", "dataset", "series", "register", "gazette", "ruling"];
 
 export interface OpenResult {
   /** Unique within one search. */
@@ -42,7 +44,7 @@ export interface OpenResult {
   url: string;
   /** True when the item came from this device (no request was made). */
   local: boolean;
-  payload: { ref?: SourceRef; lawId?: number; lawName?: string; savedLaw?: SavedLaw; work?: Work; dataset?: DatasetHit; seriesId?: string; record?: RegisterRecord; yalkut?: YalkutRef };
+  payload: { ref?: SourceRef; lawId?: number; lawName?: string; savedLaw?: SavedLaw; work?: Work; dataset?: DatasetHit; seriesId?: string; record?: RegisterRecord; yalkut?: YalkutRef; openLaw?: { id: number; name: string; section: string | null } };
   /** R12.19: the register's licence light and terms of use, shown with the result. */
   terms?: SourceTerms;
 }
@@ -51,6 +53,8 @@ export interface LocalSources {
   enabled: Record<OpenSourceId, boolean>;
   laws: readonly SavedLaw[];
   library: Library | null;
+  /** W11.H16: the Open Book of Laws the user imported (sources/openlaw/store), or null. */
+  openLaw?: OpenLawIndex | null;
 }
 
 /** CBS series Lumen knows by name (the id is what the series API takes). */
@@ -90,6 +94,19 @@ export function searchLocal(query: string, src: LocalSources, kind: Kind | null 
       const saved = src.laws.find((l) => l.law.id === m.law.id)!;
       out.push({ key: `knesset:${m.law.id}`, source: "knesset", kind: "law", title: m.law.name, detail: saved.text ? "סעיף 6" : "", rights: "section-6", url: recordUrl("KNS_IsraelLaw", m.law.id), local: true, payload: { lawId: m.law.id, lawName: m.law.name, savedLaw: saved } });
     }
+  }
+  if (src.enabled.openlaw && want("law") && src.openLaw) {
+    // W11.H16: from the index on this device; the text is read only when the result is chosen.
+    const m = matchOpenLaw(q, src.openLaw);
+    if (m) {
+      const { entry, section } = m;
+      out.push({ key: `openlaw:${entry.id}:${section ?? ""}`, source: "openlaw", kind: "law", title: section ? `סעיף ${section} ל${entry.name}` : entry.name, detail: "ויקיטקסט · לא מקור רשמי", rights: OPEN_LAW_RIGHTS, url: entry.url, local: true, payload: { openLaw: { id: entry.id, name: entry.name, section } } });
+    }
+  }
+  if (src.enabled.openlaw && want("ruling")) {
+    // W11.H16: a Supreme Court ruling is a link and a title until its licence is clear; nothing is copied or fetched.
+    const v = verdictLink(q);
+    if (v) out.push({ key: `ruling:${v.title}`, source: "openlaw", kind: "ruling", title: v.title, detail: "בית המשפט העליון", rights: VERDICT_RIGHTS, url: v.url, local: true, payload: {} });
   }
   if (src.enabled.benyehuda && want("work") && src.library) {
     for (const h of src.library.search(q, 5))
@@ -209,7 +226,7 @@ export function insertionFor(r: OpenResult, content: string | null): string {
 export function attributionFor(r: OpenResult): string {
   const deed = RIGHTS_URL[r.rights];
   const mark = RIGHTS_LABEL_HE[r.rights];
-  const where = { sefaria: "Sefaria", knesset: "הכנסת", datagov: r.kind === "series" ? 'הלמ"ס' : "data.gov.il", benyehuda: "פרויקט בן־יהודה", registers: r.terms?.he ?? "data.gov.il" }[r.source];
+  const where = { sefaria: "Sefaria", knesset: "הכנסת", openlaw: r.kind === "ruling" ? "בית המשפט העליון" : "ספר החוקים הפתוח, ויקיטקסט", datagov: r.kind === "series" ? 'הלמ"ס' : "data.gov.il", benyehuda: "פרויקט בן־יהודה", registers: r.terms?.he ?? "data.gov.il" }[r.source];
   return `מקור: [${where}](${r.url}) · ${deed ? `[${mark}](${deed})` : mark}`;
 }
 

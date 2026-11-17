@@ -1783,6 +1783,114 @@
     "ru": "1qjiuwu",
     "zh-CN": "1qjiuwu"
   },
+  "openSources.kind.ruling": {
+    "ar": "ocm3fp",
+    "de": "ocm3fp",
+    "fa": "ocm3fp",
+    "fr": "ocm3fp",
+    "ja": "ocm3fp",
+    "ru": "ocm3fp",
+    "zh-CN": "ocm3fp"
+  },
+  "openSources.openLaw.cancel": {
+    "ar": "w58dco",
+    "de": "w58dco",
+    "fa": "w58dco",
+    "fr": "w58dco",
+    "ja": "w58dco",
+    "ru": "w58dco",
+    "zh-CN": "w58dco"
+  },
+  "openSources.openLaw.cancelled": {
+    "ar": "1w2ipn5",
+    "de": "1w2ipn5",
+    "fa": "1w2ipn5",
+    "fr": "1w2ipn5",
+    "ja": "1w2ipn5",
+    "ru": "1w2ipn5",
+    "zh-CN": "1w2ipn5"
+  },
+  "openSources.openLaw.failed": {
+    "ar": "i50dt5",
+    "de": "i50dt5",
+    "fa": "i50dt5",
+    "fr": "i50dt5",
+    "ja": "i50dt5",
+    "ru": "i50dt5",
+    "zh-CN": "i50dt5"
+  },
+  "openSources.openLaw.have": {
+    "ar": "127vx4p",
+    "de": "127vx4p",
+    "fa": "127vx4p",
+    "fr": "127vx4p",
+    "ja": "127vx4p",
+    "ru": "127vx4p",
+    "zh-CN": "127vx4p"
+  },
+  "openSources.openLaw.import": {
+    "ar": "1x5mm4f",
+    "de": "1x5mm4f",
+    "fa": "1x5mm4f",
+    "fr": "1x5mm4f",
+    "ja": "1x5mm4f",
+    "ru": "1x5mm4f",
+    "zh-CN": "1x5mm4f"
+  },
+  "openSources.openLaw.imported": {
+    "ar": "x4dhza",
+    "de": "x4dhza",
+    "fa": "x4dhza",
+    "fr": "x4dhza",
+    "ja": "x4dhza",
+    "ru": "x4dhza",
+    "zh-CN": "x4dhza"
+  },
+  "openSources.openLaw.importing": {
+    "ar": "73qgy2",
+    "de": "73qgy2",
+    "fa": "73qgy2",
+    "fr": "73qgy2",
+    "ja": "73qgy2",
+    "ru": "73qgy2",
+    "zh-CN": "73qgy2"
+  },
+  "openSources.openLaw.none": {
+    "ar": "wsgtj8",
+    "de": "wsgtj8",
+    "fa": "wsgtj8",
+    "fr": "wsgtj8",
+    "ja": "wsgtj8",
+    "ru": "wsgtj8",
+    "zh-CN": "wsgtj8"
+  },
+  "openSources.openLaw.replace": {
+    "ar": "anukra",
+    "de": "anukra",
+    "fa": "anukra",
+    "fr": "anukra",
+    "ja": "anukra",
+    "ru": "anukra",
+    "zh-CN": "anukra"
+  },
+  "openSources.sends.openlaw": {
+    "ar": "1urs0cd",
+    "de": "1urs0cd",
+    "fa": "1urs0cd",
+    "fr": "1urs0cd",
+    "ja": "1urs0cd",
+    "ru": "1urs0cd",
+    "zh-CN": "1urs0cd"
+  },
+  "openSources.source.openlaw": {
+    "ar": "1to6eda",
+    "de": "1to6eda",
+    "fa": "1to6eda",
+    "fr": "1to6eda",
+    "ja": "1to6eda",
+    "ru": "1to6eda",
+    "zh-CN": "1to6eda"
+  },
   "pdfUa.failed": {
     "ar": "1n0dmr3",
     "de": "1n0dmr3",
