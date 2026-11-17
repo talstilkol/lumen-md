@@ -1,0 +1,133 @@
+[
+ {
+  "id": "FC1/setup",
+  "task": "(setup)",
+  "cmd": "npm ci && npx playwright install chromium firefox webkit && mkdir -p reports/mac-pack/FC1",
+  "expect": {
+   "exit": 0
+  },
+  "needs": [],
+  "minutes": 10
+ },
+ {
+  "id": "FC1/units",
+  "task": "FUZZ W4.20 W6.3 W11.I2 W10.A8 W6.36 W11.Q11 sync-bench",
+  "cmd": "npx vitest run src/__tests__/fuzzYamlJsonBounds.test.ts src/__tests__/syncBenchStreaming.test.ts src/__tests__/opfsBench.test.ts src/__tests__/argon2Wasm.test.ts src/__tests__/macPackL3.test.ts src/__tests__/e2eeBulkSaves.test.ts src/__tests__/e2eeKeyring.test.ts src/__tests__/ruleOfTwoRemoteMcp.test.ts src/__tests__/ruleOfTwoVaultRead.test.ts src/__tests__/fallbackCatchReview.test.ts src/__tests__/codeHealth.test.ts src/__tests__/vaultIndexProbe.test.ts",
+  "expect": {
+   "exit": 0
+  },
+  "needs": [
+   "FC1/setup"
+  ],
+  "minutes": 6
+ },
+ {
+  "id": "FC1/fuzz",
+  "task": "W1.27 (FUZZ frontmatter s1#6, json-doctor s1#27)",
+  "cmd": "node scripts/fuzz/run.mjs --target frontmatter,json-doctor,base --seed 1 --runs 1000000 --clock cpu --json > reports/mac-pack/FC1/fuzz.json",
+  "expect": "exit 0",
+  "needs": [
+   "FC1/setup"
+  ],
+  "minutes": 40
+ },
+ {
+  "id": "FC1/argon2",
+  "task": "W4.20",
+  "cmd": "node --experimental-strip-types --no-warnings --import ./scripts/lib/ts-register.mjs scripts/mac-pack/L3/argon2-bench.mjs --runs 5 --out reports/mac-pack/FC1/argon2.json",
+  "expect": "exit 0 and reports/mac-pack/FC1/argon2.json .ok == true && .impls.in-house.medianMs < 1000",
+  "needs": [
+   "FC1/setup"
+  ],
+  "minutes": 2
+ },
+ {
+  "id": "FC1/argon2-wasm-reproducible",
+  "task": "W4.20",
+  "cmd": "CLANG=\"${CLANG:-$(brew --prefix llvm)/bin/clang}\" node scripts/crypto/build-argon2-wasm.mjs --check",
+  "expect": "exit 0",
+  "needs": [
+   "FC1/setup"
+  ],
+  "minutes": 1,
+  "note": "brew install llvm first: Xcode's clang has no wasm32 target"
+ },
+ {
+  "id": "FC1/sync-bench-1g",
+  "task": "sync bench OOM (L4), W1.8",
+  "cmd": "npx tsx scripts/bench/sync-first.ts --notes 10000 --attachments-mb 1024 --json > reports/mac-pack/FC1/sync-bench.json",
+  "expect": "exit 0 and reports/mac-pack/FC1/sync-bench.json .ok == true && .attachmentsMatch == true && .peakRssMB < 1536 && .firstSyncUpSeconds < 600",
+  "needs": [
+   "FC1/setup"
+  ],
+  "minutes": 15
+ },
+ {
+  "id": "FC1/opfs-10k",
+  "task": "W11.Q11",
+  "cmd": "node scripts/perf/opfs-bench.mjs --report reports/mac-pack/FC1/opfs-bench.json",
+  "expect": "exit 0; reports/mac-pack/FC1/opfs-bench.json: .results.chromium.opfsReadWorker.value > 0 && .results.firefox.opfsReadWorker.value > 0 && .results.webkit.opfsReadWorker.value > 0",
+  "needs": [
+   "FC1/setup"
+  ],
+  "minutes": 15
+ },
+ {
+  "id": "FC1/e2e",
+  "task": "W1.12 W1.21 W12.T2 W12.T5",
+  "cmd": "PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/FC1/e2e.json npx playwright test e2e/bases-calendar-table.spec.ts e2e/themes-axe-switch.spec.ts e2e/object-studio.spec.ts e2e/bases-kanban-rtl.spec.ts --project=chromium --project=firefox --reporter=json; node scripts/mac-pack/pw-slice.mjs reports/mac-pack/FC1/e2e.json e2e/bases-calendar-table.spec.ts e2e/themes-axe-switch.spec.ts e2e/object-studio.spec.ts e2e/bases-kanban-rtl.spec.ts --total 18 --out reports/mac-pack/FC1/e2e-slice.json",
+  "expect": {
+   "exit": 0,
+   "json": {
+    "file": "reports/mac-pack/FC1/e2e-slice.json",
+    "ok": true,
+    "total": 18,
+    "unexpected": 0,
+    "skipped": 0
+   }
+  },
+  "needs": [
+   "FC1/setup"
+  ],
+  "minutes": 15
+ },
+ {
+  "id": "FC1/e2e-webkit-themes",
+  "task": "W1.21",
+  "cmd": "PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/FC1/e2e-webkit.json npx playwright test e2e/themes-axe-switch.spec.ts --project=webkit --reporter=json; node scripts/mac-pack/pw-slice.mjs reports/mac-pack/FC1/e2e-webkit.json e2e/themes-axe-switch.spec.ts --total 5 --out reports/mac-pack/FC1/e2e-webkit-slice.json",
+  "expect": {
+   "exit": 0,
+   "json": {
+    "file": "reports/mac-pack/FC1/e2e-webkit-slice.json",
+    "ok": true,
+    "total": 5,
+    "unexpected": 0,
+    "skipped": 0
+   }
+  },
+  "needs": [
+   "FC1/setup"
+  ],
+  "minutes": 5,
+  "note": "the vault specs skip on Playwright's Linux WebKit only (no OPFS, e2e/_opfs.ts); on the Mac they can run on webkit too"
+ },
+ {
+  "id": "FC1/e2e-nightly",
+  "task": "W6.36 W1.12 (W1.10's fps test is e2e/perf-vault.spec.ts, run by L1/W6.36-perf)",
+  "cmd": "PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/FC1/e2e-nightly.json npx playwright test e2e/encrypted-reopen.spec.ts e2e/bases-calendar-table.spec.ts --project=perf --reporter=json; node scripts/mac-pack/pw-slice.mjs reports/mac-pack/FC1/e2e-nightly.json e2e/encrypted-reopen.spec.ts e2e/bases-calendar-table.spec.ts --total 2 --out reports/mac-pack/FC1/e2e-nightly-slice.json",
+  "expect": {
+   "exit": 0,
+   "json": {
+    "file": "reports/mac-pack/FC1/e2e-nightly-slice.json",
+    "ok": true,
+    "total": 2,
+    "unexpected": 0,
+    "skipped": 0
+   }
+  },
+  "needs": [
+   "FC1/setup"
+  ],
+  "minutes": 45
+ }
+]
