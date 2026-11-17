@@ -38,6 +38,7 @@
  * inside the key), so the signing and verification paths still run end to end.
  */
 import { execFileSync, spawnSync } from "node:child_process";
+import { createPublicKey, generateKeyPairSync } from "node:crypto";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -76,7 +77,9 @@ import { verifyFile } from "./windows/verify-signature.mjs";
 import { filesUnder } from "./supply-chain/lib.mjs";
 import { formatPublicKey, generateKeys, parsePublicKey, rawPublicKey, readSecretKey, signData, verifyData } from "./supply-chain/minisign.mjs";
 import { buildSbom, sourceDate } from "./supply-chain/sbom.mjs";
-import { verifyRelease } from "./supply-chain/verify-release.mjs";
+import { sourceProblems, verifyRelease } from "./supply-chain/verify-release.mjs";
+import { attest } from "./supply-chain/source-vsa-lib.mjs";
+import { factsFor, fetchLive } from "./supply-chain/source-vsa.mjs";
 import { ENGINE_ENV, provenanceGate, releaseEngine, witnessProblems, witnessRefusal } from "./supply-chain/release-gate.mjs";
 
 const ROOT = process.cwd();
@@ -188,7 +191,29 @@ function facts(o, repo) {
     releaseKey: !!releaseKey,
     releasePub,
     signPath: windowsSigningPlan().configured,
+    ...sourceKeyFacts(),
   };
+}
+
+/** W13.T3/T4: the tag key is in security/allowed_signers, and the source key in security/source-vsa.json. */
+function sourceKeyFacts() {
+  const tagKey = (process.env.LUMEN_TAG_SIGNING_KEY ?? "").replace(/^~(?=\/)/, process.env.HOME ?? "~");
+  let tagSigner = false;
+  try {
+    const pubLine = readFileSync(tagKey.endsWith(".pub") ? tagKey : `${tagKey}.pub`, "utf8").trim().split(/\s+/).slice(0, 2).join(" ");
+    tagSigner = !!tagKey && read("security/allowed_signers").split("\n").some((l) => !l.trim().startsWith("#") && l.includes(pubLine));
+  } catch {
+    tagSigner = false;
+  }
+  const vsaKey = (process.env.LUMEN_SOURCE_VSA_KEY ?? "").replace(/^~(?=\/)/, process.env.HOME ?? "~");
+  let sourceSigner = false;
+  try {
+    const pub = createPublicKey(readFileSync(vsaKey, "utf8")).export({ type: "spki", format: "pem" }).toString().trim();
+    sourceSigner = JSON.parse(read("security/source-vsa.json")).keys.some((k) => String(k).trim() === pub);
+  } catch {
+    sourceSigner = false;
+  }
+  return { tagSigner, sourceSigner };
 }
 
 function bundlesFromTarget(version) {
@@ -265,7 +290,8 @@ export async function main(argv) {
       step(3, `commit and tag ${tag}`);
       git("add", ...original.keys());
       git("-c", "core.hooksPath=/dev/null", "commit", "-m", `chore(release): ${v}`);
-      git("tag", "-a", tag, "-m", `Lumen ${v}`);
+      // W13.T4: an SSH-signed tag, by a key in security/allowed_signers (release:verify checks it).
+      git("-c", "gpg.format=ssh", "-c", `user.signingkey=${process.env.LUMEN_TAG_SIGNING_KEY}`, "tag", "-s", tag, "-m", `Lumen ${v}`);
       original.clear(); // committed: nothing to put back
       committed = true;
     } else step(3, "commit and tag — skipped (dry run)");
@@ -389,6 +415,27 @@ export async function main(argv) {
       console.log("RELEASE_NOTES.md written");
     } else warn(`no ${nf.he} / ${nf.en}: a publish refuses this`);
 
+    // W13.T3: SLSA source track — provenance and a VSA for the commit being released (level 2 needs the server's rulesets).
+    step("8b", `source provenance and VSA (SLSA 1.2 source track)${o.publish ? "" : " — TEST key"}`);
+    const headCommit = git("rev-parse", "HEAD");
+    const sourceKey = o.publish ? readFileSync(process.env.LUMEN_SOURCE_VSA_KEY, "utf8") : generateKeyPairSync("ed25519").privateKey.export({ type: "pkcs8", format: "pem" }).toString();
+    let previousRelease = null;
+    try {
+      previousRelease = git("describe", "--tags", "--abbrev=0", `${headCommit}^`);
+      previousRelease = git("rev-list", "-n", "1", previousRelease);
+    } catch {
+      /* the first release: no previous head to descend from */
+    }
+    const sourceFacts = factsFor(ROOT, { ref: "refs/heads/main", commit: headCommit, previous: previousRelease, live: o.publish ? fetchLive(repo) : null });
+    const source = attest(sourceFacts, sourceKey);
+    writeFileSync(path.join(OUT, "source-vsa.json"), JSON.stringify(source.vsa, null, 2) + "\n");
+    writeFileSync(path.join(OUT, "source-provenance.json"), JSON.stringify(source.provenance, null, 2) + "\n");
+    for (const c of source.evaluation.checks) console.log(`  ${c.ok ? "✓" : "✗"} ${c.id}: ${c.detail}`);
+    if (source.evaluation.level < 2) {
+      if (o.publish) throw new Error("the release commit does not reach SLSA source level 2 (see the checks above)");
+      warn(`source VSA: level ${source.evaluation.level} in a dry run (the server's rulesets are read only on --publish)`);
+    }
+
     step(9, "SHA256SUMS, signed (minisign)");
     writeFileSync(path.join(OUT, "release-key.pub"), releasePubText);
     const assets = readdirSync(OUT).filter((n) => !n.startsWith(".") && !n.startsWith("SHA256SUMS") && !n.endsWith(".minisig") && n !== "RELEASE_NOTES.md" && n !== "DRY-RUN.md");
@@ -401,6 +448,14 @@ export async function main(argv) {
     }
     const r = verifyRelease({ dir: OUT, root: ROOT, pub: releasePubText });
     if (!r.ok) throw new Error(`the release does not verify: ${r.errors.join("; ")}`);
+    // W13.T3/T4: what release:verify will ask of it — the VSA for this commit, and on --publish the signed tag.
+    {
+      const trusted = [createPublicKey(sourceKey).export({ type: "spki", format: "pem" }).toString()];
+      const src = sourceProblems({ identity: r.identity, vsa: JSON.parse(readFileSync(path.join(OUT, "source-vsa.json"), "utf8")), trustedPems: trusted, tagRaw: o.publish ? git("cat-file", "tag", tag) + "\n" : null, allowedSigners: exists("security/allowed_signers") ? read("security/allowed_signers") : "" });
+      const shown = o.publish ? src : src.filter((p) => !/^tag /.test(p) && !/SLSA_SOURCE_LEVEL_2|result is FAILED/.test(p));
+      if (shown.length) throw new Error(`source checks: ${shown.join("; ")}`);
+      console.log(o.publish ? `source: VSA for ${r.identity.commit.slice(0, 12)} at SLSA_SOURCE_LEVEL_2; tag ${tag} signed by an allowed signer` : "source: the VSA names this commit and verifies with the TEST key (level 2 and the signed tag are checked on --publish)");
+    }
     const tampered = Buffer.from(sums.replace(/^./, (c) => (c === "0" ? "1" : "0")));
     let sumsRefused = false;
     try {
