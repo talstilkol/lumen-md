@@ -23,6 +23,7 @@ import { charLogical, cursorMovementExtension, editorCursorMovement, groupLogica
 import { buildBidiMarksCommands } from "../editor/bidiMarksCommands";
 import { SETTINGS } from "../settings/schema";
 import { CARET_SCENARIOS } from "../../e2e/cursor-scenarios";
+import { markdownLineDirection } from "../lib/bidiDirection";
 
 const ROOT = resolve(__dirname, "..", "..");
 
@@ -195,5 +196,29 @@ describe("the WYSIWYG editor follows the same setting", () => {
   it("leaves the arrows to the browser in visual mode and moves logically only in logical mode", () => {
     const src = readFileSync(join(ROOT, "src/editor/wysiwygBidi.ts"), "utf8");
     expect(src).toMatch(/if \(cursorMovement\(\) !== "logical"\) return false;\s*return logicalArrow\(/);
+  });
+});
+
+/**
+ * F14 (W11.H3): e2e/rtl-caret.spec.ts gives each of its 10 edge lines the
+ * direction Home/End are checked against. It must be the direction the editor
+ * gives the line (lib/bidiDirection, the golden set's rule), and the table's:
+ * the bare-URL line is Latin first, so it is LTR, not RTL.
+ */
+describe("rtl-caret.spec's line directions (W11.H3)", () => {
+  const spec = readFileSync(join(ROOT, "e2e/rtl-caret.spec.ts"), "utf8");
+  const block = spec.slice(spec.indexOf("const LINES"), spec.indexOf("];", spec.indexOf("const LINES")));
+  const lines = [...block.matchAll(/\[\s*"((?:[^"\\]|\\.)*)",\s*"(rtl|ltr)"\s*\]/g)].map((m) => [JSON.parse(`"${m[1]}"`), m[2]] as const);
+
+  it("lists the 10 lines of the table", () => {
+    expect(lines.map(([t]) => t)).toEqual(CARET_SCENARIOS.map((c) => c.text));
+  });
+
+  it("each line's direction is the editor's and the table's", () => {
+    for (const [text, dir] of lines) {
+      expect(dir, text).toBe(markdownLineDirection(text));
+      expect(dir, text).toBe(CARET_SCENARIOS.find((c) => c.text === text)?.dir);
+    }
+    expect(Object.fromEntries(lines)["https://lumen-md.vercel.app היא הכתובת"]).toBe("ltr");
   });
 });
