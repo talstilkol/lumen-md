@@ -35,7 +35,6 @@ export interface Graph3DViewProps {
   labelColor?: string;
 }
 
-const RTL = /[֐-ࣿיִ-﷿ﹰ-﻿]/;
 const MAX_LABELS = 80;
 
 const VS = `
