@@ -30,6 +30,8 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "learning.json": { module: "learning/learningStrings.ts", users: ["learning/LearningPlansDialog.tsx"], prefixes: ["learning."] },
   // The native menu bar (plan W13.K5): desktop/shell.ts loads nativeMenu.ts with a dynamic import, on the desktop only.
   "nativeMenu.json": { module: "desktop/nativeMenuStrings.ts", users: ["desktop/nativeMenu.ts"], prefixes: ["nativeMenu."] },
+  // The system-search switch in Settings → Privacy (plan W13.K3): SettingsScreen loads it with React.lazy.
+  "osSearch.json": { module: "ui/osSearchStrings.ts", users: ["ui/settings/OsSearchIndexSwitch.tsx"], prefixes: ["osSearch."] },
   // MCP server tasks in the batch panel (plan W13.A2): BatchPanel loads ServerTasksSection with React.lazy.
   "serverTasks.json": { module: "ui/serverTasksStrings.ts", users: ["ui/ServerTasksSection.tsx"], prefixes: ["serverTasks."] },
   // Settings > AI's suggestion report (plan W13.A4): AiSettingsPanel loads the section with React.lazy.

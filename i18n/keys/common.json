@@ -16603,6 +16603,50 @@
       "vars": []
     },
     {
+      "key": "osSearch.cleared",
+      "en": "This vault's notes were removed from the system search.",
+      "vars": []
+    },
+    {
+      "key": "osSearch.failed",
+      "en": "Could not change the system search: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "osSearch.indexed",
+      "en": "Notes in the system search: {n}.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "osSearch.note",
+      "en": "Only the title, a short excerpt, the tags and a link go in. Locked, encrypted, private and hidden notes never do. Turning this off deletes everything Lumen put in the system search for this vault.",
+      "vars": []
+    },
+    {
+      "key": "osSearch.perVault",
+      "en": "This choice is for this vault only.",
+      "vars": []
+    },
+    {
+      "key": "osSearch.switch",
+      "en": "Show this vault's notes in Spotlight or Windows Search",
+      "vars": []
+    },
+    {
+      "key": "osSearch.title",
+      "en": "Notes in the system search",
+      "vars": []
+    },
+    {
+      "key": "osSearch.unavailable",
+      "en": "Not available yet:",
+      "vars": []
+    },
+    {
       "key": "outcomes.clear",
       "en": "Clear the counts",
       "vars": []

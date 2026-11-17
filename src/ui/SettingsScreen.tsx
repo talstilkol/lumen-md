@@ -54,6 +54,8 @@ const OrgSettings = lazy(() => import("./OrgSettings").then((m) => ({ default: m
 const ImageHostsSection = lazy(() => import("./ImageHostsPanel").then((m) => ({ default: m.ImageHostsSection })));
 const MonitoringSettings = lazy(() => import("./MonitoringSettings").then((m) => ({ default: m.MonitoringSettings })));
 const OpenAlexSwitch = lazy(() => import("../citations/OpenAlexSwitch").then((m) => ({ default: m.OpenAlexSwitch })));
+// W13.K3: the per-vault consent for the system search (Spotlight / Windows Search), in its own chunk.
+const OsSearchIndexSwitch = lazy(() => import("./settings/OsSearchIndexSwitch"));
 
 /** Every setting with a label: what an empty search shows. */
 const SETTINGS_ENTRIES = SETTINGS.filter((e) => e.kind === "setting" && !!e.label);
@@ -430,6 +432,7 @@ export function SettingsScreen({ tab: initialTab = "general", focus, onClose, on
           <>
             <ImageHostsSection />
             <OpenAlexSwitch />
+            <OsSearchIndexSwitch />
           </>
         );
       case "security":
