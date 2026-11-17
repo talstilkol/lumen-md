@@ -22,14 +22,14 @@ vi.mock("../ui/AiToast", () => ({ showAiToast: vi.fn() }));
 
 const ROOT = resolve(__dirname, "..", "..");
 const read = (p: string) => readFileSync(join(ROOT, p), "utf8");
-const BETA: Locale[] = ["ar", "de", "fr", "ja", "ru", "zh-CN"];
+const BETA: Locale[] = ["ar", "de", "fa", "fr", "ja", "ru", "zh-CN"];
 const MARK = "Beta (machine translation, awaiting native review)";
 const KEYS = ["locale.beta", "locale.betaLabel", "locale.betaHint", "locale.betaHelp"];
 
 afterEach(cleanup);
 
 describe("the one list of full and beta languages", () => {
-  it("covers every UI language: en and he are full, the six machine-translated ones are beta", () => {
+  it("covers every UI language: en and he are full, the seven machine-translated ones are beta (W13.I7: Persian)", () => {
     expect(Object.keys(LOCALE_REVIEW).sort()).toEqual(SUPPORTED_LOCALES.map((l) => l.code).sort());
     expect(fullLocales().sort()).toEqual(["en", "he"]);
     expect(betaLocales().sort()).toEqual(BETA);

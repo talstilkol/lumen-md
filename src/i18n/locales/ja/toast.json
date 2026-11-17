@@ -36,6 +36,7 @@
   "toast.dictate.stoppedLocalOnly": "音声入力を停止しました: AI ポリシーがローカルのみになりました（ブラウザーの音声サービスは音声を外部に送ります）",
   "toast.dictate.webSpeechActive": "ブラウザーの音声サービスで音声入力中 — 音声はその提供元に送信されます",
   "toast.digest.readFailed": "ダイジェストは保存されませんでした: 変更されたノート {count} 件を読み込めませんでした。もう一度お試しください。",
+  "toast.digits": "数値は次のように表示されます: {sample}",
   "toast.dismiss": "閉じる",
   "toast.documentDecrypted": "🔓 ドキュメントを復号しました",
   "toast.documentEncrypted": "🔒 ドキュメントを暗号化しました",

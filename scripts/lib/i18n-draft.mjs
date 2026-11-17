@@ -25,7 +25,7 @@ import { ROOT, domainOf, formatJson, placeholders, sortedObject } from "./i18n-f
 import { glossaryPrompt } from "./i18n-glossary.mjs";
 
 export const REVIEW_DIR = join(ROOT, "i18n", "needs-review");
-export const DRAFT_LOCALES = ["ar", "de", "fr", "he", "ja", "ru", "zh-CN"];
+export const DRAFT_LOCALES = ["ar", "de", "fa", "fr", "he", "ja", "ru", "zh-CN"];
 
 /** FNV-1a of the English text: a draft goes stale when its source changes. */
 export function sourceHash(text) {
@@ -151,7 +151,7 @@ export function approve(review, lang, keys) {
 
 // ── Engines ─────────────────────────────────────────────────────────────
 
-const LANGUAGE_NAMES = { ar: "Arabic", de: "German", fr: "French", he: "Hebrew", ja: "Japanese", ru: "Russian", "zh-CN": "Simplified Chinese" };
+const LANGUAGE_NAMES = { ar: "Arabic", de: "German", fr: "French", he: "Hebrew", ja: "Japanese", ru: "Russian", "zh-CN": "Simplified Chinese", fa: "Persian (Farsi)" };
 
 /**
  * Ollama on this machine (`OLLAMA_HOST`, default http://127.0.0.1:11434).

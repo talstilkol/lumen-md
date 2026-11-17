@@ -775,5 +775,83 @@
     "ja": "svyhbp",
     "ru": "svyhbp",
     "zh-CN": "svyhbp"
+  },
+  "group.ai": {
+    "fa": "g8gdqo"
+  },
+  "group.collab": {
+    "fa": "1f1w5u8"
+  },
+  "group.edit": {
+    "fa": "1i1lcq9"
+  },
+  "group.file": {
+    "fa": "bygjtv"
+  },
+  "group.insert": {
+    "fa": "47reiw"
+  },
+  "group.plugins": {
+    "fa": "10renyj"
+  },
+  "group.recent": {
+    "fa": "mg65fi"
+  },
+  "group.security": {
+    "fa": "1i3q76j"
+  },
+  "group.templates": {
+    "fa": "it5x1k"
+  },
+  "group.tools": {
+    "fa": "15cdqf0"
+  },
+  "group.view": {
+    "fa": "q5w460"
+  },
+  "palette.close": {
+    "fa": "b1hmw3"
+  },
+  "palette.layoutHint": {
+    "fa": "vim9lb"
+  },
+  "palette.navigate": {
+    "fa": "10b9wna"
+  },
+  "palette.noMatch": {
+    "fa": "1jz4cft"
+  },
+  "palette.placeholder": {
+    "fa": "1g68bpc"
+  },
+  "palette.select": {
+    "fa": "4xe5v1"
+  },
+  "cmd.view.digits.native": {
+    "ar": "1fmo0rn",
+    "de": "1fmo0rn",
+    "fr": "1fmo0rn",
+    "ja": "1fmo0rn",
+    "ru": "1fmo0rn",
+    "zh-CN": "1fmo0rn",
+    "fa": "1fmo0rn"
+  },
+  "cmd.view.digits.latin": {
+    "ar": "nkay1b",
+    "de": "nkay1b",
+    "fr": "nkay1b",
+    "ja": "nkay1b",
+    "ru": "nkay1b",
+    "zh-CN": "nkay1b",
+    "fa": "nkay1b"
+  },
+  "cmd.view.digits.hint": {
+    "ar": "1i8bv0m",
+    "de": "1i8bv0m",
+    "fr": "1i8bv0m",
+    "ja": "1i8bv0m",
+    "ru": "1i8bv0m",
+    "zh-CN": "1i8bv0m",
+    "fa": "1i8bv0m"
   }
 }

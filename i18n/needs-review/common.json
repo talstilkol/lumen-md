@@ -967,7 +967,8 @@
     "fr": "1bqao9n",
     "ja": "1bqao9n",
     "ru": "1bqao9n",
-    "zh-CN": "1bqao9n"
+    "zh-CN": "1bqao9n",
+    "fa": "1bqao9n"
   },
   "locale.betaHelp": {
     "ar": "1h7kmbr",
@@ -975,7 +976,8 @@
     "fr": "1h7kmbr",
     "ja": "1h7kmbr",
     "ru": "1h7kmbr",
-    "zh-CN": "1h7kmbr"
+    "zh-CN": "1h7kmbr",
+    "fa": "1h7kmbr"
   },
   "locale.betaHint": {
     "ar": "1ntzrfx",
@@ -983,7 +985,8 @@
     "fr": "1ntzrfx",
     "ja": "1ntzrfx",
     "ru": "1ntzrfx",
-    "zh-CN": "1ntzrfx"
+    "zh-CN": "1ntzrfx",
+    "fa": "1ntzrfx"
   },
   "locale.betaLabel": {
     "ar": "1m06cjj",
@@ -991,7 +994,8 @@
     "fr": "1m06cjj",
     "ja": "1m06cjj",
     "ru": "1m06cjj",
-    "zh-CN": "1m06cjj"
+    "zh-CN": "1m06cjj",
+    "fa": "1m06cjj"
   },
   "map.offline.none": {
     "ar": "1d9u2hv",
@@ -9478,5 +9482,389 @@
   },
   "backlinksList.search": {
     "de": "8mzu85"
+  },
+  "toolbar.appearance": {
+    "fa": "dli9wf"
+  },
+  "toolbar.commandPalette": {
+    "fa": "1n6dh2p"
+  },
+  "toolbar.copy": {
+    "fa": "s6g5lw"
+  },
+  "toolbar.cut": {
+    "fa": "onu7hf"
+  },
+  "toolbar.darkMode": {
+    "fa": "y9khdk"
+  },
+  "toolbar.delete": {
+    "fa": "oay2cq"
+  },
+  "toolbar.editMenu": {
+    "fa": "1i1lcq9"
+  },
+  "toolbar.exportHtml": {
+    "fa": "k9k01"
+  },
+  "toolbar.exportPdf": {
+    "fa": "eapow6"
+  },
+  "toolbar.fileMenu": {
+    "fa": "bygjtv"
+  },
+  "toolbar.files": {
+    "fa": "1s4j38w"
+  },
+  "toolbar.focusMode": {
+    "fa": "1m4odfq"
+  },
+  "toolbar.helpMenu": {
+    "fa": "1f8350a"
+  },
+  "toolbar.insertMenu": {
+    "fa": "47reiw"
+  },
+  "toolbar.insertSmart": {
+    "fa": "38agik"
+  },
+  "toolbar.insertText": {
+    "fa": "3415tn"
+  },
+  "toolbar.lightMode": {
+    "fa": "15qgioa"
+  },
+  "toolbar.menu": {
+    "fa": "7q5wa"
+  },
+  "toolbar.menuTooltip.edit": {
+    "fa": "1uc7r7s"
+  },
+  "toolbar.menuTooltip.file": {
+    "fa": "3yy8y5"
+  },
+  "toolbar.menuTooltip.help": {
+    "fa": "1mq6pe7"
+  },
+  "toolbar.menuTooltip.insert": {
+    "fa": "1ol1d25"
+  },
+  "toolbar.menuTooltip.view": {
+    "fa": "3u4h9l"
+  },
+  "toolbar.new": {
+    "fa": "12ludo1"
+  },
+  "toolbar.open": {
+    "fa": "17fgpad"
+  },
+  "toolbar.openWelcome": {
+    "fa": "1rytq4j"
+  },
+  "toolbar.outline": {
+    "fa": "4l1jz1"
+  },
+  "toolbar.outline.hide": {
+    "fa": "yhyd0z"
+  },
+  "toolbar.outline.show": {
+    "fa": "17fug2q"
+  },
+  "toolbar.pageView.off": {
+    "fa": "6rt0rz"
+  },
+  "toolbar.pageView.on": {
+    "fa": "1ws3ky3"
+  },
+  "toolbar.panels": {
+    "fa": "1gtmeqq"
+  },
+  "toolbar.paste": {
+    "fa": "1dqva14"
+  },
+  "toolbar.print": {
+    "fa": "1sfc3s8"
+  },
+  "toolbar.redo": {
+    "fa": "w7fg15"
+  },
+  "toolbar.save": {
+    "fa": "lewgh4"
+  },
+  "toolbar.saveAs": {
+    "fa": "k2jye2"
+  },
+  "toolbar.scrollIndependent": {
+    "fa": "1x9f5uk"
+  },
+  "toolbar.scrollLinked": {
+    "fa": "1cbfhlr"
+  },
+  "toolbar.section.clipboard": {
+    "fa": "t4by5t"
+  },
+  "toolbar.section.diagrams": {
+    "fa": "itouof"
+  },
+  "toolbar.section.documents": {
+    "fa": "oz47lx"
+  },
+  "toolbar.section.export": {
+    "fa": "1sh99lf"
+  },
+  "toolbar.section.history": {
+    "fa": "yugfpb"
+  },
+  "toolbar.section.mathRefs": {
+    "fa": "b99f5"
+  },
+  "toolbar.section.media": {
+    "fa": "1m09bj7"
+  },
+  "toolbar.section.selection": {
+    "fa": "1gp08mt"
+  },
+  "toolbar.section.specific": {
+    "fa": "ad89av"
+  },
+  "toolbar.section.tablesCharts": {
+    "fa": "x96ud3"
+  },
+  "toolbar.section.tools": {
+    "fa": "15cdqf0"
+  },
+  "toolbar.section.workspace": {
+    "fa": "aw4cba"
+  },
+  "toolbar.selectAll": {
+    "fa": "to8z8y"
+  },
+  "toolbar.settings": {
+    "fa": "ktdb8o"
+  },
+  "toolbar.shareMenu": {
+    "fa": "m2bcgo"
+  },
+  "toolbar.shortcuts": {
+    "fa": "dum0fr"
+  },
+  "toolbar.splitAxis": {
+    "fa": "1nf5qoe"
+  },
+  "toolbar.splitAxis.auto": {
+    "fa": "ig7tt3"
+  },
+  "toolbar.splitAxis.horizontal": {
+    "fa": "83mdja"
+  },
+  "toolbar.splitAxis.vertical": {
+    "fa": "szwx5p"
+  },
+  "toolbar.tagline": {
+    "fa": "okzfd6"
+  },
+  "toolbar.theme": {
+    "fa": "12b5ivk"
+  },
+  "toolbar.tour": {
+    "fa": "c2igz9"
+  },
+  "toolbar.undo": {
+    "fa": "vmlwpb"
+  },
+  "toolbar.viewMode": {
+    "fa": "w92efv"
+  },
+  "toolbar.workspace": {
+    "fa": "421vqc"
+  },
+  "onboard.back": {
+    "fa": "1hzmxtu"
+  },
+  "onboard.failed": {
+    "fa": "1996373"
+  },
+  "onboard.finish": {
+    "fa": "1wd2q0n"
+  },
+  "onboard.import.done": {
+    "fa": "1qns916"
+  },
+  "onboard.import.failed": {
+    "fa": "i50dt5"
+  },
+  "onboard.import.notion": {
+    "fa": "1xsixja"
+  },
+  "onboard.import.obsidian": {
+    "fa": "ie6s1z"
+  },
+  "onboard.import.title": {
+    "fa": "l7a06"
+  },
+  "onboard.lang.change": {
+    "fa": "18wuq59"
+  },
+  "onboard.lang.current": {
+    "fa": "z9upa7"
+  },
+  "onboard.lang.write": {
+    "fa": "1ioqha0"
+  },
+  "onboard.lang.write.body": {
+    "fa": "1ml5h30"
+  },
+  "onboard.next": {
+    "fa": "1padbm0"
+  },
+  "onboard.skip": {
+    "fa": "sfg6xf"
+  },
+  "onboard.start.empty": {
+    "fa": "73h0kf"
+  },
+  "onboard.start.empty.desc": {
+    "fa": "1cvrmk2"
+  },
+  "onboard.start.sample": {
+    "fa": "faez4m"
+  },
+  "onboard.start.sample.desc": {
+    "fa": "its1b1"
+  },
+  "onboard.start.title": {
+    "fa": "1dbwd4h"
+  },
+  "onboard.step": {
+    "fa": "q5va4g"
+  },
+  "onboard.style.dark": {
+    "fa": "j8m6w5"
+  },
+  "onboard.style.light": {
+    "fa": "12iob7z"
+  },
+  "onboard.style.palette": {
+    "fa": "yyw94w"
+  },
+  "onboard.style.system": {
+    "fa": "18aqxor"
+  },
+  "onboard.style.theme": {
+    "fa": "ltytua"
+  },
+  "onboard.subtitle": {
+    "fa": "10do0dr"
+  },
+  "onboard.title": {
+    "fa": "1mgr0j5"
+  },
+  "onboard.vault.folder": {
+    "fa": "l2mi90"
+  },
+  "onboard.vault.folder.chosen": {
+    "fa": "1xlun5r"
+  },
+  "onboard.vault.folder.denied": {
+    "fa": "e0v2d2"
+  },
+  "onboard.vault.folder.desc": {
+    "fa": "iiysgc"
+  },
+  "onboard.vault.folder.unsupported": {
+    "fa": "1lrks4q"
+  },
+  "onboard.vault.opfs": {
+    "fa": "c3cs0i"
+  },
+  "onboard.vault.opfs.desc": {
+    "fa": "8a6oc"
+  },
+  "onboard.vault.title": {
+    "fa": "46eeqg"
+  },
+  "onboard.working": {
+    "fa": "19l3jfa"
+  },
+  "onboard.start.import": {
+    "fa": "w26drb"
+  },
+  "onboard.start.import.desc": {
+    "fa": "1c3xqx4"
+  },
+  "onboard.start.folder": {
+    "fa": "ybqq5f"
+  },
+  "onboard.start.folder.desc": {
+    "fa": "1tkkeun"
+  },
+  "onboard.start.folder.current": {
+    "fa": "15k03uu"
+  },
+  "onboard.import.from": {
+    "fa": "1j9ctu5"
+  },
+  "onboard.finish.import": {
+    "fa": "19j0rrr"
+  },
+  "onboard.finish.folder": {
+    "fa": "1jg6fwy"
+  },
+  "onboard.tour.skip": {
+    "fa": "goc2eg"
+  },
+  "tour.done": {
+    "fa": "1agmvce"
+  },
+  "tour.next": {
+    "fa": "k27e4u"
+  },
+  "tour.step.editor.body": {
+    "fa": "f7tixw"
+  },
+  "tour.step.editor.title": {
+    "fa": "1vdfe8y"
+  },
+  "tour.step.menu.body": {
+    "fa": "1gyhkig"
+  },
+  "tour.step.menu.title": {
+    "fa": "1ed7uu9"
+  },
+  "tour.step.statusBar.body": {
+    "fa": "1w7drzs"
+  },
+  "tour.step.statusBar.title": {
+    "fa": "1hjhvgx"
+  },
+  "tour.step.viewModes.body": {
+    "fa": "z60n14"
+  },
+  "tour.step.viewModes.title": {
+    "fa": "twtld5"
+  },
+  "tour.step.workspace.body": {
+    "fa": "945llp"
+  },
+  "tour.step.workspace.title": {
+    "fa": "1kb75qq"
+  },
+  "locale.betaNote": {
+    "fa": "1i22mam"
+  },
+  "onboard.firstNote.body": {
+    "fa": "943bjt"
+  },
+  "onboard.firstNote.name": {
+    "fa": "r5ddjn"
+  },
+  "onboard.lang.body": {
+    "fa": "tq29el"
+  },
+  "onboard.lang.title": {
+    "fa": "16us7mj"
+  },
+  "tour.action.openRuntimeMetrics": {
+    "fa": "11joekw"
   }
 }

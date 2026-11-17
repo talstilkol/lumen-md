@@ -26,7 +26,7 @@ import {
 
 const SCRIPT = join(ROOT, "scripts", "i18n-draft.mjs");
 
-describe("npm run i18n:draft (acceptance: 10 keys → 70 drafts)", () => {
+describe("npm run i18n:draft (acceptance: 10 keys → 70 drafts; 80 with Persian, W13.I7)", () => {
   let dir = "";
   const run = (...args: string[]) =>
     execFileSync(process.execPath, [SCRIPT, `--locales=${join(dir, "locales")}`, `--review=${join(dir, "review")}`, ...args], { encoding: "utf8" });
@@ -42,9 +42,9 @@ describe("npm run i18n:draft (acceptance: 10 keys → 70 drafts)", () => {
   });
   afterAll(() => rmSync(dir, { recursive: true, force: true }));
 
-  it("drafts the 10 new keys in all 7 languages in one command", () => {
+  it("drafts the 10 new keys in all 8 languages in one command", () => {
     const out = run("--engine=fake");
-    expect(out).toContain("70 draft(s) written");
+    expect(out).toContain("80 draft(s) written");
     for (const lang of DRAFT_LOCALES) {
       const data = readLocale(lang, join(dir, "locales"));
       for (let i = 0; i < 10; i++) expect(data[`zzdraft.k${i}`], `${lang} k${i}`).toMatch(new RegExp(`^\\[${lang}\\] `));
@@ -56,7 +56,7 @@ describe("npm run i18n:draft (acceptance: 10 keys → 70 drafts)", () => {
   it("lists every draft as needs-review, per domain file", () => {
     const review = readNeedsReview(join(dir, "review"));
     expect(Object.keys(review)).toHaveLength(10);
-    expect(Object.values(review).flatMap((langs) => Object.keys(langs))).toHaveLength(70);
+    expect(Object.values(review).flatMap((langs) => Object.keys(langs))).toHaveLength(80);
     expect(review["zzdraft.k3"].he).toBe(sourceHash("Saved {n} notes in `vault/`"));
     expect(readFileSync(join(dir, "review", "common.json"), "utf8")).toContain('"zzdraft.k0"');
   });
@@ -68,7 +68,7 @@ describe("npm run i18n:draft (acceptance: 10 keys → 70 drafts)", () => {
     const en = readLocale("en", join(dir, "locales"));
     expect(unreviewed("he", en, review)).toEqual([]);
     expect(unreviewed("fr", en, review)).toHaveLength(10);
-    expect(run("--list")).toContain("60 draft(s) need review");
+    expect(run("--list")).toContain("70 draft(s) need review");
   });
 });
 

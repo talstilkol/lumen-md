@@ -6,9 +6,9 @@ import { findStrings, suggestionBody, suggestionLink, suggestionTitle } from "..
 import { MAX_ISSUE_URL } from "../feedback/feedback";
 
 describe("locale review status", () => {
-  it("every UI language has a status; the six without a native speaker are beta", () => {
+  it("every UI language has a status; the seven without a native speaker are beta", () => {
     expect(Object.keys(LOCALE_REVIEW).sort()).toEqual(SUPPORTED_LOCALES.map((l) => l.code).sort());
-    expect(betaLocales().sort()).toEqual(["ar", "de", "fr", "ja", "ru", "zh-CN"]);
+    expect(betaLocales().sort()).toEqual(["ar", "de", "fa", "fr", "ja", "ru", "zh-CN"]);
     expect(isBetaLocale("he")).toBe(false);
     expect(isBetaLocale("en")).toBe(false);
     expect(isBetaLocale("ru")).toBe(true);

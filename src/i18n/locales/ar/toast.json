@@ -36,6 +36,7 @@
   "toast.dictate.stoppedLocalOnly": "توقف الإملاء: سياسة الذكاء الاصطناعي الآن محلي فقط، وخدمة الكلام في المتصفح ترسل الصوت للخارج",
   "toast.dictate.webSpeechActive": "الإملاء عبر خدمة الكلام في المتصفح — يُرسَل الصوت إلى مزوّدها",
   "toast.digest.readFailed": "لم يُحفظ الملخص: تعذّرت قراءة {count} من الملاحظات المعدّلة. حاول مرة أخرى.",
+  "toast.digits": "تبدو الأرقام الآن هكذا: {sample}",
   "toast.dismiss": "تجاهل",
   "toast.documentDecrypted": "🔓 تم فك تشفير المستند",
   "toast.documentEncrypted": "🔒 تم تشفير المستند",

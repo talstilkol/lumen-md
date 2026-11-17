@@ -36,6 +36,7 @@
   "toast.dictate.stoppedLocalOnly": "ההכתבה נעצרה: מדיניות ה-AI היא עכשיו מקומי בלבד, ושירות הדיבור של הדפדפן שולח את האודיו החוצה",
   "toast.dictate.webSpeechActive": "מכתיב דרך שירות הדיבור של הדפדפן — האודיו נשלח לספק שלו",
   "toast.digest.readFailed": "הסיכום לא נשמר: לא ניתן היה לקרוא {count} פתקים שהשתנו. נסו שוב.",
+  "toast.digits": "כך נראים מספרים עכשיו: {sample}",
   "toast.dismiss": "סגור",
   "toast.documentDecrypted": "🔓 המסמך פוענח",
   "toast.documentEncrypted": "🔒 המסמך הוצפן",

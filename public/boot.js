@@ -16,7 +16,7 @@
 // Mirrors detectLocale() in src/i18n/detect.ts (src/__tests__/
 // hebrewFirstLoad.test.ts runs both on the same inputs).
 (function () {
-  var SUPPORTED = { en: "ltr", he: "rtl", ar: "rtl", ru: "ltr", fr: "ltr", de: "ltr", ja: "ltr", "zh-CN": "ltr" };
+  var SUPPORTED = { en: "ltr", he: "rtl", ar: "rtl", ru: "ltr", fr: "ltr", de: "ltr", ja: "ltr", "zh-CN": "ltr", fa: "rtl" };
   function pick(saved, languages) {
     if (saved && Object.prototype.hasOwnProperty.call(SUPPORTED, saved)) return saved;
     // Plan W4.35: Hebrew anywhere in the system's list wins.

@@ -93,7 +93,7 @@ export const SETTINGS: readonly SettingEntry[] = [
     // Labels are the languages' own names (SUPPORTED_LOCALES), not i18n keys.
     options: [
       { value: "en" }, { value: "he" }, { value: "ar" }, { value: "ru" },
-      { value: "fr" }, { value: "de" }, { value: "ja" }, { value: "zh-CN" },
+      { value: "fr" }, { value: "de" }, { value: "ja" }, { value: "zh-CN" }, { value: "fa" },
     ],
   }),
   app("rtl", { kind: "setting", tab: "general", label: "cmd.view.rtl.on", type: "boolean" }),
@@ -266,6 +266,9 @@ export const SETTINGS: readonly SettingEntry[] = [
   local("lumen-reading", { kind: "setting", tab: "general", type: "json" }),
   local("lumen-reading-aids", { kind: "setting", tab: "general", type: "json" }),
   local("lumen-hebrew-typography", { kind: "setting", tab: "general", type: "json" }),
+  // W13.I5 / W13.I7: the digits of an Arabic or a Persian UI.
+  local("lumen-numerals-ar", { kind: "setting", tab: "general", type: "choice", options: [{ value: "latn" }, { value: "native" }] }),
+  local("lumen-numerals-fa", { kind: "setting", tab: "general", type: "choice", options: [{ value: "latn" }, { value: "native" }] }),
   // Secrets: account passwords and tokens, never exported or imported.
   secret("lumen.calendar.caldav.password", "sync"),
   secret("lumen.zotero.apiKey", "general"),

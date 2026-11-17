@@ -84,7 +84,7 @@ export function sceneStamp(elements: readonly SceneElement[], appState: SceneApp
 
 /** Excalidraw's language code for the app's locale. */
 export function excalidrawLangOf(locale: string): string {
-  const map: Record<string, string> = { en: "en", he: "he-IL", ar: "ar-SA", ru: "ru-RU", fr: "fr-FR", de: "de-DE", ja: "ja-JP", "zh-CN": "zh-CN" };
+  const map: Record<string, string> = { en: "en", he: "he-IL", ar: "ar-SA", ru: "ru-RU", fr: "fr-FR", de: "de-DE", ja: "ja-JP", "zh-CN": "zh-CN", fa: "fa-IR" };
   return map[locale] ?? "en";
 }
 
