@@ -14,6 +14,7 @@
  */
 import { claimPath, safeName, stemOf } from "./names";
 import { emptyVault, type ConvertedVault } from "./types";
+import { swallowed } from "../../lib/logger";
 
 export type Invoke = <T>(cmd: string, args?: Record<string, unknown>) => Promise<T>;
 
@@ -58,7 +59,8 @@ export async function pandocStatus(deps: { desktop?: boolean; invoke?: Invoke } 
     if (!s.version) return { kind: "missing" };
     if (s.tooOld) return { kind: "old", version: s.version };
     return { kind: "ready", version: s.version, readers: s.readers };
-  } catch {
+  } catch (e) {
+    swallowed("import/pandoc: no Pandoc bridge or binary; the source stays hidden", e);
     // No such command (an app built without the bridge) or no binary: the source stays hidden.
     return { kind: "missing" };
   }
@@ -109,6 +111,7 @@ export async function convertWithPandoc(
       }
     } catch (e) {
       const msg = typeof e === "object" && e && "message" in e ? String((e as { message: unknown }).message) : String(e);
+      swallowed("import/pandoc: Pandoc did not convert a file; it is listed as skipped", e);
       vault.skipped.push({ path: p, reason: "unreadable", detail: msg.slice(0, 200) });
     }
   }

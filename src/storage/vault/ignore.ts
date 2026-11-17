@@ -14,6 +14,7 @@
  * Settings → General → "Folders the index skips" (`lumen.index.ignore`, a
  * list): extra names or paths, and `!name` to walk a default again.
  */
+import { swallowed } from "../../lib/logger";
 
 export const DEFAULT_IGNORED_DIRS: readonly string[] = [".git", ".hg", ".svn", "node_modules", ".venv", "__pycache__", ".obsidian/cache"];
 export const IGNORE_SETTING_KEY = "lumen.index.ignore";
@@ -23,7 +24,8 @@ let cached: { raw: string | null; names: Set<string>; paths: string[] } | null =
 function readSetting(): string | null {
   try {
     return localStorage.getItem(IGNORE_SETTING_KEY);
-  } catch {
+  } catch (e) {
+    swallowed("vault/ignore: setting unreadable", e);
     return null;
   }
 }
@@ -35,7 +37,8 @@ export function ignoreRule(raw: string | null = readSetting()): { names: Set<str
   try {
     const v = raw ? JSON.parse(raw) : [];
     if (Array.isArray(v)) extra = v.filter((x): x is string => typeof x === "string");
-  } catch {
+  } catch (e) {
+    swallowed("vault/ignore: setting unreadable", e);
     extra = (raw ?? "").split(/[\n,]/);
   }
   const all = new Set<string>(DEFAULT_IGNORED_DIRS);

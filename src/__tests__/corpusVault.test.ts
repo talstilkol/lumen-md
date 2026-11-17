@@ -272,11 +272,14 @@ describe("large-vault harness (W11.Q2)", () => {
   });
 
   it("fails the run when a 100k target is missed, and the targets are the task's", () => {
-    expect(TARGETS).toEqual({ warmOpenMs: 2000, coldOpenMs: 8000, searchP95Ms: 200, saveToIndexMs: 50, idleCpuPct: 2, idleMaxStallMs: 50 });
+    expect(TARGETS).toEqual({ warmOpenMs: 2000, coldOpenMs: 8000, searchP95Ms: 200, saveToIndexMs: 50, idleCpuPct: 2, idleMaxStallMs: 50, streamFirstP95Ms: 50, streamAllP95Ms: 1000 });
     const ok = { warmOpenMs: 100, coldOpenMs: 100, search: { p95Ms: 10 }, saveToIndexMs: 1, saveFound: true, idle: { cpuPct: 0.1, maxStallMs: 5 } };
     expect(missedTargets(ok as never)).toEqual([]);
     expect(missedTargets({ ...ok, search: { p95Ms: 201 }, idle: { cpuPct: 3, maxStallMs: 280 } } as never)).toEqual(["search p95 201 ms > 200", "idle CPU 3% > 2%", "idle stall 280 ms > 50"]);
     expect(missedTargets({ ...ok, saveFound: false } as never)[0]).toMatch(/edit not found/);
+    // W13.V3: streamed search, first page p95 <= 50 ms and all results p95 <= 1 s.
+    expect(missedTargets({ ...ok, stream: { firstP95Ms: 50, allP95Ms: 1000, results: 5000 } } as never)).toEqual([]);
+    expect(missedTargets({ ...ok, stream: { firstP95Ms: 51, allP95Ms: 1001, results: 5000 } } as never)).toEqual(["streamed search first page p95 51 ms > 50", "streamed search, all 5000, p95 1001 ms > 1000"]);
   });
 
   it("takes nearest-rank percentiles", () => {

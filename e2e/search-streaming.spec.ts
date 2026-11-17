@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { testHooks, type LumenTestWindow } from "./_lumen";
 
 /**
  * Plan W13.V3: a search with thousands of matches in the real app — the
@@ -13,9 +14,10 @@ test("thousands of results: virtual rows, and CLS 0 while typing", async ({ page
   });
   await page.goto("/");
   await expect(page.locator(".cm-content").first()).toBeVisible({ timeout: 20_000 });
+  await testHooks(page);
   // 3,000 notes that all mention the word, written through the app's own vault.
   await page.evaluate(async () => {
-    const ws = (await import("/src/storage/workspace.ts")) as { writeWorkspaceFile(p: string, s: string): Promise<void> };
+    const ws = await (window as unknown as LumenTestWindow).__lumenTest.load("storage/workspace");
     for (let i = 0; i < 3000; i++) await ws.writeWorkspaceFile(`bulk/n${i}.md`, `# פתק ${i}\n\nפרויקט ${"מילה ".repeat(i % 40)}\n`);
   });
   await page.evaluate(() => {

@@ -65,7 +65,8 @@ export function getRetention(vault: string): RetentionSettings {
     if (!raw) return { ...DEFAULT_RETENTION };
     const parsed = JSON.parse(raw) as unknown;
     return valid(parsed) ? { notes: parsed.notes, attachmentDays: parsed.attachmentDays } : { ...DEFAULT_RETENTION };
-  } catch {
+  } catch (e) {
+    swallowed("storage/historyRetention: the retention setting is not JSON; the defaults apply", e);
     return { ...DEFAULT_RETENTION };
   }
 }

@@ -2,6 +2,7 @@ import { test, expect, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { SURFACES as WCAG22_SURFACES, openSurface } from "./_surfaces";
+import { testHooks, type LumenTestWindow } from "./_lumen";
 
 /**
  * Accessibility (plan 10.1.5, 10.1.6). axe-core (WCAG 2.0/2.1 A + AA,
@@ -54,6 +55,7 @@ async function boot(page: Page, lang: "en" | "he", theme: "light" | "dark") {
   await page.goto("/");
   await expect(page.locator(".cm-content").first()).toBeVisible({ timeout: 20_000 });
   await expect(page.locator("html")).toHaveAttribute("dir", lang === "he" ? "rtl" : "ltr");
+  await testHooks(page);
 }
 
 /** The surfaces: the main screen, then each modal opened from the palette. */
@@ -145,7 +147,7 @@ for (const lang of ["en", "he"] as const) {
       const close = await openSurface(page, s);
       const scope = s.modal ? '[role="dialog"][aria-modal="true"]' : "body";
       const r = await page.evaluate(async (sel) => {
-        const w = await import("/src/__tests__/helpers/wcag22.ts");
+        const w = await (window as unknown as LumenTestWindow).__lumenTest.load("testing/wcag22");
         const root = document.querySelector(sel) ?? document.body;
         return {
           label: w.labelInNameViolations(root).map((v: { visible: string; name: string }) => `“${v.visible}” named “${v.name}”`),
@@ -155,7 +157,7 @@ for (const lang of ["en", "he"] as const) {
       for (let i = 0; i < 10; i++) {
         await page.keyboard.press("Tab");
         const hidden = await page.evaluate(async () => {
-          const w = await import("/src/__tests__/helpers/wcag22.ts");
+          const w = await (window as unknown as LumenTestWindow).__lumenTest.load("testing/wcag22");
           const el = document.activeElement;
           return el && el !== document.body && w.focusObscured(el) ? el.outerHTML.slice(0, 90) : null;
         });

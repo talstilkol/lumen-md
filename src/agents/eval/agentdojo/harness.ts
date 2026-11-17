@@ -322,7 +322,7 @@ export function isLoopback(url: string): boolean {
 /** The executor's chat with the run's pins applied; the runtime's signal passes through. */
 export function pinnedChat(base: Executor, pin: PinnedModel): (req: ExecutorRequest) => Promise<ExecutorResponse> {
   const cap = pin.maxTokens ?? 512;
-  return (req) => base.chat({ ...req, model: pin.model, temperature: 0, seed: pin.seed ?? 42, think: false, maxTokens: Math.min(req.maxTokens ?? cap, cap) });
+  return (req) => base.chat({ ...req, model: pin.model, temperature: 0, seed: pin.seed ?? 42, think: false, maxTokens: Math.min(req.maxTokens ?? cap, cap), signal: req.signal });
 }
 
 /** The report's name for the run. */

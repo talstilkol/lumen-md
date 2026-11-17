@@ -25,6 +25,8 @@ const RECORDERS: Record<string, (src: string) => string[]> = {
   "src/ai/privacyLedger.ts": (src) => [
     ...[...src.matchAll(/reason: "([^"]+)"/g)].map((m) => m[1]),
     ...[...src.matchAll(/reason: `([^`$]+)\$\{/g)].map((m) => m[1]).filter((p) => !/^\s*$/.test(p)),
+    // A recorder's default reason (recordOnDeviceModel's "Runs on this device; …").
+    ...[...src.matchAll(/\breason = "([^"]+)"/g)].map((m) => m[1]),
     /export const MONITORING_REASON = "([^"]+)"/.exec(src)![1],
     // Audit mode: what it calls a request no rule names (auditReason's fallback).
     /\?\.reason \?\? "([^"]+)"/.exec(src)![1],
@@ -59,6 +61,14 @@ const RECORDERS: Record<string, (src: string) => string[]> = {
   "src/backup/start.ts": () => [],
   // R8-M1: Tectonic's package downloads for LaTeX to PDF, under its one fixed reason.
   "src/latex/tectonicDesktop.ts": (src) => [/export const TECTONIC_LEDGER_REASON = "([^"]+)"/.exec(src)![1]],
+  // Review 14 H1: the browser's built-in model, under recordOnDeviceModel's default reason (above).
+  "src/ai/structured/index.ts": () => [],
+  // Review 14 H1 (W13.F5): Pandoc, a program the user installed, run sandboxed: "Pandoc <version> (installed by you): …".
+  "src/storage/import/pandocBridge.ts": (src) => [/record\("pandoc", `([^`$]+)\$\{/.exec(src)![1]],
+  // Review 14 H1: the Android scanner's service line; the reason is docScanner.ts's.
+  "src/mobile/docScanActions.ts": () => [...read("src/mobile/docScanner.ts").matchAll(/ledger\.service\("[^"]+", "([^"]+)"\)/g)].map((m) => m[1]),
+  // Review 14 H1 (W13.X5): every lumen:// link decision, by LINK_REASONS.
+  "src/security/linkConfirm.ts": (src) => [.../export const LINK_REASONS = \{([^}]+)\}/.exec(src)![1].matchAll(/: "([^"]+)"/g)].map((m) => m[1]),
 };
 
 function walk(dir: string, out: string[] = []): string[] {
@@ -71,7 +81,7 @@ function walk(dir: string, out: string[] = []): string[] {
   return out;
 }
 
-const RECORDING_CALL = /\b(recordBrowserService|recordBlockedRequest|recordPluginRequest|recordAppUpdateCheck|recordSpeechVoice|recordSpeechRecognition|recordPlainBackup|guardedFetch|ledgerFetch)\(/;
+const RECORDING_CALL = /\b(recordBrowserService|recordBlockedRequest|recordPluginRequest|recordAppUpdateCheck|recordSpeechVoice|recordSpeechRecognition|recordPlainBackup|recordOnDeviceModel|recordLocalProcess|guardedFetch|ledgerFetch)\(/;
 
 describe("PRIVACY.he.md / PRIVACY.md map every privacy-ledger route (plan W4.29)", () => {
   it("every module that records into the ledger is known here", () => {

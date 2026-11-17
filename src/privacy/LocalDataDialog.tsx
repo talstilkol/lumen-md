@@ -9,6 +9,7 @@ import { createRoot } from "react-dom/client";
 import { getLocale, t } from "../i18n";
 
 const formatNumber = (n: number) => new Intl.NumberFormat(getLocale()).format(n);
+import { Modal } from "../ui/Modal";
 import { uiConfirm } from "../ui/PromptDialog";
 import "./localDataStrings";
 import { browserStorage, CATEGORIES, inventory, reportJson, wipe, type DataCategory, type InventoryReport, type StorageDeps } from "./localData";
@@ -34,8 +35,9 @@ export function LocalDataDialog({ deps, onClose, save }: { deps: StorageDeps; on
     refresh();
   };
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 1000, display: "grid", placeItems: "center", background: "rgb(0 0 0 / 0.4)" }} onKeyDown={(e) => e.key === "Escape" && onClose()}>
-      <div role="dialog" aria-modal="true" aria-labelledby="local-data-title" data-testid="local-data" style={{ background: "hsl(var(--bg))", color: "hsl(var(--fg))", borderRadius: 10, padding: 20, width: "min(560px, 94vw)", maxHeight: "86vh", overflow: "auto", display: "grid", gap: 12 }} tabIndex={-1}>
+    // Review 14 M6: the real Modal — a native <dialog> in the top layer, the page behind inert, focus trapped, Escape closes.
+    <Modal aria-labelledby="local-data-title" onClose={onClose} style={{ display: "grid", placeItems: "center", background: "rgb(0 0 0 / 0.4)" }}>
+      <div data-testid="local-data" style={{ background: "hsl(var(--bg))", color: "hsl(var(--fg))", borderRadius: 10, padding: 20, width: "min(560px, 94vw)", maxHeight: "86vh", overflow: "auto", display: "grid", gap: 12 }}>
         <h2 id="local-data-title" ref={title} tabIndex={-1} style={{ margin: 0, fontSize: 18 }}>
           {t("localData.title")}
         </h2>
@@ -73,7 +75,7 @@ export function LocalDataDialog({ deps, onClose, save }: { deps: StorageDeps; on
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

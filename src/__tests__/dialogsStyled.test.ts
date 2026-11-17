@@ -39,7 +39,9 @@ describe("the shared dialog look (F13)", () => {
   });
 
   it("a class-less button inside any dialog is styled: border, padding, background, disabled, pressed, focus ring", () => {
-    const sel = String.raw`:where\(\.cmd-palette, dialog\.lumen-modal, \[role="dialog"\], \[role="alertdialog"\]\) :where\(button:not\(\[class\]\)\)`;
+    // Review 14 / F15: the button part has the specificity of one element (the preflight's own `button`), so the rule
+    // wins over the preflight; with zero specificity (`:where(button:not([class]))`) the preflight won.
+    const sel = String.raw`:where\(\.cmd-palette, dialog\.lumen-modal, \[role="dialog"\], \[role="alertdialog"\]\) button:where\(:not\(\[class\]\)\)`;
     const base = rule(new RegExp(sel));
     expect(base).toMatch(/border:\s*1px solid/);
     expect(base).toMatch(/padding-block:/);
@@ -48,5 +50,7 @@ describe("the shared dialog look (F13)", () => {
     expect(base).toMatch(/cursor:\s*pointer/);
     for (const state of [String.raw`:hover:not\(:disabled\)`, String.raw`\[aria-pressed="true"\]`, ":disabled", ":focus-visible"]) expect(rule(new RegExp(sel + state)), state).not.toBeNull();
     expect(rule(new RegExp(sel + ":focus-visible"))).toMatch(/outline:\s*2px solid/);
+    // Never the zero-specificity form again.
+    expect(css.includes(":where(button:not([class]))")).toBe(false);
   });
 });

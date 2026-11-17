@@ -2308,7 +2308,9 @@ dialog.lumen-modal:is([data-reading-mode="side-by-side"], [data-reading-mode="da
  *    open before the palette has loaded src/ui/CommandPalette.css — they were a bare, transparent page;
  *  - a button inside any dialog (Modal's dialog.lumen-modal, role=dialog/alertdialog, .cmd-palette) that
  *    has no class of its own: under the preflight it had no border, padding or background, so it read as
- *    plain text. Zero specificity: a class, an inline style or a dialog's own rule still wins.
+ *    plain text. The specificity of one element, the preflight's own `button`, and later in the sheet, so it
+ *    beats the preflight (review 14: with zero specificity the preflight won and these buttons stayed bare);
+ *    a class, an inline style or a dialog's own rule with a class still wins.
  */
 .cmd-palette-backdrop {
   position: fixed;
@@ -2334,7 +2336,7 @@ dialog.lumen-modal:is([data-reading-mode="side-by-side"], [data-reading-mode="da
   overflow: hidden;
   animation: cmdSlideIn var(--duration-fast) var(--ease-out);
 }
-:where(.cmd-palette, dialog.lumen-modal, [role="dialog"], [role="alertdialog"]) :where(button:not([class])) {
+:where(.cmd-palette, dialog.lumen-modal, [role="dialog"], [role="alertdialog"]) button:where(:not([class])) {
   border: 1px solid hsl(var(--border-strong));
   border-radius: 6px;
   padding-block: 4px;
@@ -2346,18 +2348,18 @@ dialog.lumen-modal:is([data-reading-mode="side-by-side"], [data-reading-mode="da
   line-height: 1.4;
   cursor: pointer;
 }
-:where(.cmd-palette, dialog.lumen-modal, [role="dialog"], [role="alertdialog"]) :where(button:not([class])):hover:not(:disabled) {
+:where(.cmd-palette, dialog.lumen-modal, [role="dialog"], [role="alertdialog"]) button:where(:not([class])):hover:not(:disabled) {
   background: hsl(var(--bg-muted));
 }
-:where(.cmd-palette, dialog.lumen-modal, [role="dialog"], [role="alertdialog"]) :where(button:not([class]))[aria-pressed="true"] {
+:where(.cmd-palette, dialog.lumen-modal, [role="dialog"], [role="alertdialog"]) button:where(:not([class]))[aria-pressed="true"] {
   background: hsl(var(--accent) / 0.14);
   border-color: hsl(var(--accent));
 }
-:where(.cmd-palette, dialog.lumen-modal, [role="dialog"], [role="alertdialog"]) :where(button:not([class])):disabled {
+:where(.cmd-palette, dialog.lumen-modal, [role="dialog"], [role="alertdialog"]) button:where(:not([class])):disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
-:where(.cmd-palette, dialog.lumen-modal, [role="dialog"], [role="alertdialog"]) :where(button:not([class])):focus-visible {
+:where(.cmd-palette, dialog.lumen-modal, [role="dialog"], [role="alertdialog"]) button:where(:not([class])):focus-visible {
   outline: 2px solid hsl(var(--accent));
   outline-offset: 2px;
 }

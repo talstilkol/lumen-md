@@ -176,13 +176,21 @@ export async function confirmLink(a: LinkAction, deps: ConfirmDeps): Promise<boo
   return answer.ok;
 }
 
+/** The ledger's reasons for a link decision (PRIVACY.md and PRIVACY.he.md list each one by this text). */
+export const LINK_REASONS = {
+  remembered: "A lumen:// link, allowed by your “always allow” on this device",
+  allowed: "A lumen:// link; you allowed it",
+  refused: "A lumen:// link; you did not allow it",
+  noAsk: "A lumen:// link that only moves around in Lumen",
+} as const;
+
 /**
  * The privacy-ledger entry for a link decision (nothing goes over the network; the line names the action, never
  * the note's text): an allowed link as a share the user made, a refused one as a blocked request.
  */
 export async function recordLinkDecision(a: LinkAction, decision: "allowed" | "blocked", how: "asked" | "remembered" | "no-ask"): Promise<void> {
   const { recordUserShare, recordBlockedRequest } = await import("../ai/privacyLedger");
-  const reason = how === "remembered" ? "A lumen:// link, allowed by your “always allow” on this device" : how === "asked" ? `A lumen:// link; you ${decision === "allowed" ? "allowed" : "did not allow"} it` : "A lumen:// link that only moves around in Lumen";
+  const reason = how === "remembered" ? LINK_REASONS.remembered : how === "asked" ? (decision === "allowed" ? LINK_REASONS.allowed : LINK_REASONS.refused) : LINK_REASONS.noAsk;
   if (decision === "allowed") recordUserShare(ledgerLine(a), 0, reason);
   else recordBlockedRequest(ledgerLine(a), "third-party", reason, "LINK");
 }

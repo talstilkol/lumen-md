@@ -313,7 +313,7 @@ export class McpClient {
               pushed = parseTask(m.params);
               wake?.();
             } catch {
-              /* a malformed notification: the next poll decides */
+              /* why: a malformed notification; the next poll decides */
             }
           } else this.onNotification(m);
         }, local.signal)
