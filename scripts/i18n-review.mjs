@@ -20,6 +20,10 @@
  *                 the product's own language, so a machine draft there is a bug
  *                 (plan W13.I6). Approve it after review with
  *                 `npm run i18n:draft -- --approve=he --keys=…`             (error)
+ *   he-model-reviewed  a Hebrew string a model approved in place of a native
+ *                 reviewer (i18n/model-reviewed.json, review 14 M2): native
+ *                 review is owed; the line goes when a native speaker has read
+ *                 it                                                         (warning)
  *
  * Exit status 1 when there is any error (a variable missing or extra), so CI
  * and the tests hold "0 missing variables". Warnings only go to the report.
@@ -123,10 +127,17 @@ export function hebrewDrafts(root) {
   return out.sort();
 }
 
+/** The Hebrew keys a model approved, each with the commit that did (i18n/model-reviewed.json): native review owed. */
+export function modelReviewed(root) {
+  const file = join(root, "i18n/model-reviewed.json");
+  return existsSync(file) ? JSON.parse(readFileSync(file, "utf8")).he ?? {} : {};
+}
+
 /** Review every locale. `back(locale, texts)` → English texts (optional back-translation). */
 export async function review(root, { back = null, deviationBelow = 25, sample = Infinity } = {}) {
   const en = englishStrings(root);
   const findings = hebrewDrafts(root).map((key) => ({ locale: "he", key, kind: "he-draft", level: "error", detail: "machine draft, not reviewed" }));
+  for (const [key, commit] of Object.entries(modelReviewed(root))) findings.push({ locale: "he", key, kind: "he-model-reviewed", level: "warning", detail: `approved by a model (${commit}); native review owed` });
   const stats = {};
   for (const locale of LOCALES) {
     const tr = localeStrings(root, locale);
@@ -153,11 +164,11 @@ export async function review(root, { back = null, deviationBelow = 25, sample = 
 
 export function formatReport({ findings, stats }) {
   const count = (kind, locale) => findings.filter((f) => f.kind === kind && (!locale || f.locale === locale)).length;
-  const kinds = ["missing-var", "extra-var", "he-draft", "length", "untranslated", "deviation", "missing-key"];
+  const kinds = ["missing-var", "extra-var", "he-draft", "he-model-reviewed", "length", "untranslated", "deviation", "missing-key"];
   const lines = [
     "# Translation review (plan 9.4)",
     "",
-    `Missing variables: **${count("missing-var")}** · extra variables: **${count("extra-var")}** · unreviewed Hebrew drafts: **${count("he-draft")}**`,
+    `Missing variables: **${count("missing-var")}** · extra variables: **${count("extra-var")}** · unreviewed Hebrew drafts: **${count("he-draft")}** · Hebrew approved by a model, native review owed: **${count("he-model-reviewed")}**`,
     "",
     `| locale | translated | ${kinds.join(" | ")} |`,
     `|---|---|${kinds.map(() => "---").join("|")}|`,
