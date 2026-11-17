@@ -290,6 +290,39 @@ The vault is `--vault <dir>`, else `$LUMEN_VAULT`, else the current folder.
 (logged as client `cli`). Install with `npm i -g @lumen-md/mcp-server`, or
 run from a clone with `npm run lumen -- search …`.
 
+### Talking to the running app
+
+Forty more commands, in eight groups (files, links, tags, properties,
+search, tasks, daily notes, vault), go through the running app over a
+private socket, so they see what the app sees and their changes land in the
+app's review screen:
+
+```bash
+lumen help                                   # every command; lumen help move
+lumen move "Recipes/Cake.md" "Baking/"       # updates every link to it
+lumen backlinks Cake --json                  # JSON for every command
+lumen tags:rename work job                   # nested tags too (#work/a → #job/a)
+lumen property:set "Plan" status done
+lumen orphans | lumen unresolved | lumen deadends
+lumen changes                                # what waits for your review
+lumen approve <id>                           # at a terminal: shows it, asks for yes
+```
+
+- **Writes are proposals.** A command that changes the vault proposes one
+  change set; nothing is written until you approve it, and it is written
+  only if every file still has the text it was computed from. `--yes`
+  writes at once only when you turned that on in Lumen's settings.
+- **The socket is yours alone.** A Unix socket (a named pipe on Windows)
+  and a 256-bit token in a file only your user can read. Nothing listens on
+  the network.
+- **No `eval`.** Running code inside the app would bypass the review screen,
+  so every command is a fixed operation.
+- **The app closed?** Read commands answer from the disk; a write starts
+  Lumen and waits for it, or with `--offline` leaves the change in the vault
+  for review. `lumen host --vault <dir>` serves the same commands without the
+  app (a server, a CI machine).
+- `--lang he` (or a Hebrew `LANG`) gives Hebrew help and messages.
+
 ## Speed
 
 Search keeps an index in memory, built on the first search and brought up

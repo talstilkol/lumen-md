@@ -45,4 +45,6 @@ await build("src/views/bases/api.ts", out);
 console.log(`bundle-bases: ${path.relative(process.cwd(), out)}`);
 const typesOut = path.join(path.dirname(out), "types-engine.js");
 await build("src/types/api.ts", typesOut);
+// W13.K1: the app's link rewrite, for `lumen move` / `lumen rename`.
+await build("src/cli/linksEngine.ts", path.join(path.dirname(out), "links-engine.js"));
 console.log(`bundle-bases: ${path.relative(process.cwd(), typesOut)}`);

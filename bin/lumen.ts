@@ -6,6 +6,9 @@
  *   lumen formats                    list supported import/export formats
  *   lumen publish <dir|file> --out <dir> [--title <name>]
  *                                    render .md files to a static website
+ *   lumen help | read | move | backlinks | tags:rename | property:set …
+ *                                    40 commands through the running app
+ *                                    (plan W13.K1) — see mcp-server/src/ipc/
  *   lumen search|open|new|append|daily|mcp …
  *                                    the vault on disk (plan W2.3) — see
  *                                    mcp-server/src/cli.ts
@@ -17,12 +20,18 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { convert, convertBinary, isBinaryTarget, listFormats } from "../src/cli/convert";
 import { publishSite } from "../src/cli/publish";
 import { runVaultCli, USAGE as VAULT_USAGE, VAULT_COMMANDS } from "../mcp-server/src/cli";
+import { IPC_COMMANDS, runIpcCli } from "../mcp-server/src/ipc/client";
+import { runHost } from "../mcp-server/src/ipc/serveCli";
+import { setLinksEngine } from "../mcp-server/src/ipc/links";
+import * as linksEngine from "../src/cli/linksEngine";
 
 const USAGE = [
   "usage: lumen convert <input> [output]",
   "       lumen formats",
   "       lumen publish <dir|file> --out <dir> [--title <name>]",
   VAULT_USAGE.replace(/^usage: /, "       "),
+  "       lumen <command> …   the running app (plan W13.K1): lumen help",
+  "       lumen host [--vault <dir>]   serve those commands for a vault on disk",
 ].join("\n");
 
 /** Parse `--flag value` / `--flag=value` pairs; returns flags + positionals. */
@@ -44,6 +53,12 @@ async function main(argv: string[]): Promise<number> {
 
   if ((VAULT_COMMANDS as readonly string[]).includes(cmd)) {
     return runVaultCli(argv, { out: (l) => console.log(l), err: (l) => console.error(l), env: process.env, cwd: process.cwd() });
+  }
+
+  if (cmd === "host" || IPC_COMMANDS.includes(cmd)) {
+    setLinksEngine(linksEngine); // the app's own link rewrite, straight from the source
+    const io = { out: (l: string) => console.log(l), err: (l: string) => console.error(l), env: process.env, cwd: process.cwd() };
+    return cmd === "host" ? runHost(rest, io) : runIpcCli(argv, io);
   }
 
   if (cmd === "formats") {
