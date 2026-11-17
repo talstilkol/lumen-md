@@ -29,6 +29,7 @@ import { DARK_DATA_KEY, SLUG_PLACEHOLDER } from "./renderProtocol";
 import { markdownSyntax } from "./syntax";
 import { defaultCalloutTitle, remarkObsidian } from "./remarkObsidian";
 import { rehypeDirAuto } from "./rehypeDirAuto";
+import { rehypeSourceLines, SOURCE_LINES_KEY } from "./rehypeSourceLines";
 import { rehypeMathIsolate } from "../lib/mathIsolate";
 import { rehypeSanitizeRaw } from "./rehypeSanitizeRaw";
 // rehype-raw is dynamically imported in buildFullProcessor() — it pulls in
@@ -377,7 +378,7 @@ async function buildFullProcessor(
   // so heading ids are computed from the rendered text.
   p = p.use(rehypeCriticMarkup);
   p = blockSlugs ? p.use(blockSlugs) : p.use(rehypeSlug);
-  p = p.use(rehypeDirAuto);
+  p = p.use(rehypeDirAuto).use(rehypeSourceLines);
   // W5.14 — each formula an LTR isolate, so it keeps its order inside Hebrew.
   // Plan 8.1 step 2: rehype-katex runs once per distinct formula (./math.ts).
   if (rehypeKatex) p = p.use(rehypeKatexCached(rehypeKatex)).use(rehypeMathIsolate);
@@ -419,8 +420,9 @@ function hasMath(source: string): boolean {
 }
 
 /** The vfile input: the prepared source, plus the embed context for remarkEmbeds. */
-function input(markdownText: string, embeds?: EmbedContext, renderHost?: RenderHost, dark?: boolean) {
+function input(markdownText: string, embeds?: EmbedContext, renderHost?: RenderHost, dark?: boolean, lines?: boolean) {
   const data: Record<string, unknown> = {};
+  if (lines) data[SOURCE_LINES_KEY] = true;
   if (dark !== undefined) data[DARK_DATA_KEY] = dark;
   if (embeds) data[EMBEDS_DATA_KEY] = embeds;
   if (renderHost) data[HOST_DATA_KEY] = renderHost;
@@ -433,9 +435,9 @@ function input(markdownText: string, embeds?: EmbedContext, renderHost?: RenderH
  * loaded when the text (or a note it embeds) needs them. Citations are
  * expanded by the caller (they need the vault's library).
  */
-export async function renderHast(markdownText: string, isDark: () => boolean, embeds?: EmbedContext, variant?: Variant, renderHost?: RenderHost): Promise<HastRoot> {
+export async function renderHast(markdownText: string, isDark: () => boolean, embeds?: EmbedContext, variant?: Variant, renderHost?: RenderHost, lines?: boolean): Promise<HastRoot> {
   const proc = await getFullProcessor(isDark, variant ?? (await documentVariant(markdownText, embeds)));
-  const file = await proc.process(input(markdownText, embeds, renderHost, isDark()));
+  const file = await proc.process(input(markdownText, embeds, renderHost, isDark(), lines));
   return file.result as HastRoot;
 }
 
@@ -456,7 +458,7 @@ export async function documentVariant(markdownText: string, embeds?: EmbedContex
  * tree and heading ids as `renderHast`, minus everything that needs a lazy
  * chunk — no Shiki, no KaTeX, no rehype-raw.
  */
-export function renderHastFast(markdownText: string, embeds?: EmbedContext, renderHost?: RenderHost): HastRoot {
-  fastProcessor ??= toHast(buildBase().use(rehypeCriticMarkup).use(rehypeSlug).use(rehypeDirAuto));
-  return fastProcessor.processSync(input(markdownText, embeds, renderHost)).result as HastRoot;
+export function renderHastFast(markdownText: string, embeds?: EmbedContext, renderHost?: RenderHost, lines?: boolean): HastRoot {
+  fastProcessor ??= toHast(buildBase().use(rehypeCriticMarkup).use(rehypeSlug).use(rehypeDirAuto).use(rehypeSourceLines));
+  return fastProcessor.processSync(input(markdownText, embeds, renderHost, undefined, lines)).result as HastRoot;
 }

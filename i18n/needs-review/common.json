@@ -2528,6 +2528,38 @@
     "ru": "jrssml",
     "zh-CN": "jrssml"
   },
+  "readingViews.column.editor": {
+    "ar": "jtcvte",
+    "de": "jtcvte",
+    "fr": "jtcvte",
+    "ja": "jtcvte",
+    "ru": "jtcvte",
+    "zh-CN": "jtcvte"
+  },
+  "readingViews.column.outline": {
+    "ar": "131800l",
+    "de": "131800l",
+    "fr": "131800l",
+    "ja": "131800l",
+    "ru": "131800l",
+    "zh-CN": "131800l"
+  },
+  "readingViews.column.preview": {
+    "ar": "17xgkl3",
+    "de": "17xgkl3",
+    "fr": "17xgkl3",
+    "ja": "17xgkl3",
+    "ru": "17xgkl3",
+    "zh-CN": "17xgkl3"
+  },
+  "readingViews.triple.on": {
+    "ar": "jorirw",
+    "de": "jorirw",
+    "fr": "jorirw",
+    "ja": "jorirw",
+    "ru": "jorirw",
+    "zh-CN": "jorirw"
+  },
   "rsvp.back": {
     "ar": "183043c",
     "de": "183043c",

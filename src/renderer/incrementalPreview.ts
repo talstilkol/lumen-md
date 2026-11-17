@@ -30,6 +30,7 @@ import { hastToReact } from "./hastToReact";
 import { hostData } from "./pipeline";
 import { nextVersion, renderBlockInWorker, STALE } from "./renderClient";
 import { DARK_DATA_KEY, SLUG_PLACEHOLDER } from "./renderProtocol";
+import { SOURCE_LINES_KEY, stampBlockKey } from "./rehypeSourceLines";
 import { blockAt, estimateBlockHeight, firstScreen, RenderQueue } from "./viewport";
 
 /** A block whose render takes longer than this is shown as raw text on its next render (plan W4.16). */
@@ -185,6 +186,9 @@ export class IncrementalPreview {
   /** Pending blocks the reader scrolled to: they render next. */
   private readonly jump = new Set<number>();
   private pendingCount = 0;
+  /** The last composed preview: each block's key and where it starts (plan W13.R7). */
+  private layout: { markdown: string; starts: number[]; keys: string[] } = { markdown: "", starts: [], keys: [] };
+  private bases: { for: unknown; map: Map<string, number> } | null = null;
   /** Blocks rendered since this preview was created (a test counter). */
   rendered = 0;
   /** Blocks rendered in the render worker (a test counter). */
@@ -238,6 +242,7 @@ export class IncrementalPreview {
     const values = this.values.slice(0, u.head).concat(middle, this.values.slice(u.oldTail));
     this.values = values;
     const texts = u.blocks.map((b) => markdown.slice(b.start, b.end));
+    this.layout = { markdown, starts: u.blocks.map((b) => b.start), keys: [] };
 
     // Viewport first: the block at the focus and a screen after it, then the rest in order.
     const pendingIdx = values.flatMap((v, i) => (v ? [] : [i]));
@@ -292,19 +297,24 @@ export class IncrementalPreview {
    */
   private compose(values: (Rendered | null)[], texts: string[], heights: number[]): ReactElement {
     const running = headingSlugger();
+    const keys: string[] = [];
     const children = values.map((v, i) => {
       if (!v) {
-        return jsx("div", { "data-lumen-pending": String(i), "aria-busy": "true", style: { minHeight: heights[i] } }, `p${i}:${texts[i].length}`);
+        keys.push(`p${i}`);
+        return jsx("div", { "data-lumen-pending": String(i), "data-sl": 1, "data-sle": 1, "data-sb": `p${i}`, "aria-busy": "true", style: { minHeight: heights[i] } }, `p${i}:${texts[i].length}`);
       }
       const ids = v.slugTexts.map((t) => running.slug(t));
       if (ids.some((id, k) => id !== v.ids[k])) {
         // A heading above it changed how its repeats are numbered.
         v.ids = ids;
         v.key = `b${++this.nextKey}`;
-        v.element = jsx(Fragment, { children: hastToReact(withIds(v.hast!, ids)) }, v.key);
+        v.element = jsx(Fragment, { children: hastToReact(stampBlockKey(withIds(v.hast!, ids), v.key)) }, v.key);
       }
+      keys.push(v.key);
       return v.element;
     });
+    this.layout.keys = keys;
+    this.bases = null;
     return jsx(Fragment, { children });
   }
 
@@ -313,7 +323,7 @@ export class IncrementalPreview {
     // took longer than its deadline, is shown as raw text — so editing a
     // note with such a block stays responsive.
     const asRaw = this.slowBlocks.has(text);
-    const fromWorker = await renderBlockInWorker({ type: "block", channel: this.channel, version: ctx.version, dark: ctx.dark, host: hostData(), text, ...ctx.opts, asRaw });
+    const fromWorker = await renderBlockInWorker({ type: "block", channel: this.channel, version: ctx.version, dark: ctx.dark, host: hostData(), text, ...ctx.opts, asRaw, lines: true });
     if (fromWorker === STALE) return STALE;
     let hast: HastRoot;
     let slugTexts: string[];
@@ -326,7 +336,7 @@ export class IncrementalPreview {
       if (this.processor?.variant !== variant) this.processor = { variant, proc: buildBlockProcessor(ctx.isDark, ctx.opts, blockSlugs) };
       const proc = await this.processor.proc;
       const started = now();
-      const file = await proc.process({ value: prepareCriticMarkup(asRaw ? asRawText(text) : boundMarkdown(text)), data: { [DARK_DATA_KEY]: ctx.dark } });
+      const file = await proc.process({ value: prepareCriticMarkup(asRaw ? asRawText(text) : boundMarkdown(text)), data: { [DARK_DATA_KEY]: ctx.dark, [SOURCE_LINES_KEY]: true } });
       hast = withoutPositions(file.result as HastRoot);
       slugTexts = (file.data[SLUG_TEXTS_KEY] as string[] | undefined) ?? [];
       ms = now() - started;
@@ -337,6 +347,27 @@ export class IncrementalPreview {
     // Heading ids are given in compose(), in document order: a block with
     // headings gets its element there (its ids here never match a slug).
     if (slugTexts.length) return { text, key, hast, slugTexts, ids: slugTexts.map(() => SLUG_PLACEHOLDER), element: jsx(Fragment, {}, key) };
-    return { text, key, hast: null, slugTexts, ids: [], element: jsx(Fragment, { children: hastToReact(hast) }, key) };
+    return { text, key, hast: null, slugTexts, ids: [], element: jsx(Fragment, { children: hastToReact(stampBlockKey(hast, key)) }, key) };
+  }
+
+  /**
+   * Block key (`data-sb`) → the block's first line in the note (1-based),
+   * for the preview last composed (plan W13.R7). Counted on demand, once per
+   * composed preview: a 2 MB note is one pass over its newlines.
+   */
+  lineBases(): ReadonlyMap<string, number> {
+    if (this.bases) return this.bases.map;
+    const { markdown, starts, keys } = this.layout;
+    const map = new Map<string, number>();
+    let line = 1;
+    let at = 0;
+    for (let i = 0; i < starts.length && i < keys.length; i++) {
+      const to = starts[i];
+      for (let k = markdown.indexOf("\n", at); k !== -1 && k < to; k = markdown.indexOf("\n", k + 1)) line++;
+      at = to;
+      map.set(keys[i], line);
+    }
+    this.bases = { for: this.layout, map };
+    return map;
   }
 }

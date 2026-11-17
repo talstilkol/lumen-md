@@ -16,6 +16,7 @@ import { prepareCriticMarkup } from "./criticMarkup";
 import { asRawText, boundMarkdown } from "./boundMarkdown";
 import { DARK_DATA_KEY, type HostData, type RenderBlockRequest, type RenderDocRequest, type RenderHoverRequest, type RenderReply, type RenderRequest } from "./renderProtocol";
 import { previewMarkdown } from "./hoverMarkdown";
+import { SOURCE_LINES_KEY } from "./rehypeSourceLines";
 import type { EmbedContext } from "./embeds";
 
 export interface RenderHandler {
@@ -55,7 +56,7 @@ export function createRenderHandler(): RenderHandler {
         notice: (kind, vars) => fillTemplate(strings[`embed.${kind}`] ?? kind, vars),
       });
     }
-    const hast = await renderHast(r.markdown, isDark, embeds, r.variant, requestHost);
+    const hast = await renderHast(r.markdown, isDark, embeds, r.variant, requestHost, r.lines);
     return { hast, used: embeds ? [...embeds.used] : undefined };
   }
 
@@ -68,7 +69,7 @@ export function createRenderHandler(): RenderHandler {
       proc.catch(() => blockProcessors.delete(variant));
     }
     const p = await proc;
-    const file = await p.process({ value: prepareCriticMarkup(r.asRaw ? asRawText(r.text) : boundMarkdown(r.text)), data: { [HOST_DATA_KEY]: requestHost, [DARK_DATA_KEY]: r.dark } });
+    const file = await p.process({ value: prepareCriticMarkup(r.asRaw ? asRawText(r.text) : boundMarkdown(r.text)), data: { [HOST_DATA_KEY]: requestHost, [DARK_DATA_KEY]: r.dark, [SOURCE_LINES_KEY]: r.lines === true } });
     return { hast: withoutPositions(file.result as HastRoot), slugTexts: (file.data[SLUG_TEXTS_KEY] as string[] | undefined) ?? [] };
   }
 

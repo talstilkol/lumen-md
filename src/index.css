@@ -2246,3 +2246,16 @@
 dialog.lumen-modal::backdrop {
   background: transparent;
 }
+
+/* W13.R7: the preview block that holds the source caret (scroll-linked panes). */
+[data-preview-root] [data-sync-caret] {
+  box-shadow: -3px 0 0 0 hsl(var(--accent) / 0.55);
+  border-radius: 2px;
+}
+[data-preview-root] [data-sync-caret]:dir(rtl) {
+  box-shadow: 3px 0 0 0 hsl(var(--accent) / 0.55);
+}
+[data-preview-root]:focus-visible {
+  outline: 2px solid hsl(var(--accent));
+  outline-offset: -2px;
+}

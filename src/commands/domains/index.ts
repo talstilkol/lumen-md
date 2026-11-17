@@ -33,6 +33,7 @@ import { buildReadingCommands } from "./reading";
 import { buildJewishLanguageCommands } from "./jewishLanguages";
 import { buildAcademicCommands } from "./academic";
 import { buildWritingCommands } from "./writing";
+import { buildReadingViewCommands } from "./readingViews";
 
 export const COMMAND_SECTIONS: ReadonlyArray<(ctx: CommandContext) => Command[]> = [
   buildRecentCommands,
@@ -103,4 +104,6 @@ export const COMMAND_SECTIONS: ReadonlyArray<(ctx: CommandContext) => Command[]>
   buildExternalAgentCommands,
   // Appended (plan W13.W1): the local writing agents.
   buildWritingCommands,
+  // Appended (plan W13.R7): reading views.
+  buildReadingViewCommands,
 ];

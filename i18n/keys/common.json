@@ -21290,6 +21290,31 @@
       "key": "yiddish.spell.unknown",
       "en": "Not in the Yiddish word list",
       "vars": []
+    },
+    {
+      "key": "airplane.certificate.unsigned",
+      "en": "Not signed yet: the certificate carries its SHA-256 only.",
+      "vars": []
+    },
+    {
+      "key": "readingViews.column.editor",
+      "en": "Source column",
+      "vars": []
+    },
+    {
+      "key": "readingViews.column.outline",
+      "en": "Outline column",
+      "vars": []
+    },
+    {
+      "key": "readingViews.column.preview",
+      "en": "Preview column",
+      "vars": []
+    },
+    {
+      "key": "readingViews.triple.on",
+      "en": "Three columns: source, preview and outline, scroll linked",
+      "vars": []
     }
   ]
 }

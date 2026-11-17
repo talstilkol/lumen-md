@@ -41,6 +41,8 @@ export interface RenderDocRequest extends Base {
   /** rehype-raw / KaTeX: decided by the window from the text before citations were expanded. */
   variant: { raw: boolean; math: boolean };
   embeds?: EmbedData;
+  /** Stamp source lines on the blocks (plan W13.R7, ./rehypeSourceLines.ts): the preview asks, exports do not. */
+  lines?: boolean;
 }
 
 /**
@@ -56,6 +58,8 @@ export interface RenderBlockRequest extends Base {
   math: boolean;
   /** Show the block as raw text: it took longer than its deadline before (plan W4.16). */
   asRaw: boolean;
+  /** Stamp block-relative source lines (plan W13.R7). */
+  lines?: boolean;
 }
 
 /** A hover card (plan 4.6, W10.E4): the part of `content` the link's fragment names, rendered without lazy chunks. */
