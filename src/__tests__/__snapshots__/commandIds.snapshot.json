@@ -120,6 +120,24 @@
       "icon": "FileText"
     },
     {
+      "id": "cite.importZoteroFile",
+      "label": "Citations: import a Zotero export file (CSL JSON, BibTeX, RIS)",
+      "group": "Tools",
+      "icon": "FileText"
+    },
+    {
+      "id": "cite.exportForZotero",
+      "label": "Citations: export the vault's sources for Zotero (CSL JSON)",
+      "group": "Tools",
+      "icon": "Download"
+    },
+    {
+      "id": "cite.exportRis",
+      "label": "Citations: export the vault's sources as RIS",
+      "group": "Tools",
+      "icon": "Download"
+    },
+    {
       "id": "cite.fillReferencesOpenAlex",
       "label": "Citations: fill references from OpenAlex…",
       "group": "Tools",
@@ -2412,6 +2430,24 @@
       "label": "Citations: sync the Zotero library from zotero.org (read-only)",
       "group": "Tools",
       "icon": "FileText"
+    },
+    {
+      "id": "cite.importZoteroFile",
+      "label": "Citations: import a Zotero export file (CSL JSON, BibTeX, RIS)",
+      "group": "Tools",
+      "icon": "FileText"
+    },
+    {
+      "id": "cite.exportForZotero",
+      "label": "Citations: export the vault's sources for Zotero (CSL JSON)",
+      "group": "Tools",
+      "icon": "Download"
+    },
+    {
+      "id": "cite.exportRis",
+      "label": "Citations: export the vault's sources as RIS",
+      "group": "Tools",
+      "icon": "Download"
     },
     {
       "id": "cite.fillReferencesOpenAlex",
@@ -4712,6 +4748,9 @@
     "cite.syncZotero",
     "file.exportAcademic",
     "cite.syncZoteroWeb",
+    "cite.importZoteroFile",
+    "cite.exportForZotero",
+    "cite.exportRis",
     "cite.fillReferencesOpenAlex",
     "file.exportRtf",
     "file.exportMarkdownAiMarks",

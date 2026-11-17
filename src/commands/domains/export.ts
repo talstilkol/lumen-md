@@ -154,6 +154,29 @@ export function buildExportCommands({ handleExportHtml, liveDoc, getEditorView }
       action: () => void import("../../citations/run").then((m) => m.syncZoteroWebLibrary()),
     },
     {
+      // Plan W5.23: Zotero by file — no api.zotero.org, nothing fetched. The user exports from Zotero and imports here.
+      id: "cite.importZoteroFile",
+      label: t("cmd.cite.importZoteroFile"),
+      icon: cmdIcons.FileText,
+      group: t("group.tools"),
+      action: () => void import("../../citations/zoteroFileRun").then((m) => m.importZoteroFile()),
+    },
+    {
+      // Plan W5.23: the vault's sources as CSL JSON (or RIS) for Zotero's File → Import.
+      id: "cite.exportForZotero",
+      label: t("cmd.cite.exportForZotero"),
+      icon: cmdIcons.Download,
+      group: t("group.tools"),
+      action: () => void import("../../citations/zoteroFileRun").then((m) => m.exportForZotero("csl-json")),
+    },
+    {
+      id: "cite.exportRis",
+      label: t("cmd.cite.exportRis"),
+      icon: cmdIcons.Download,
+      group: t("group.tools"),
+      action: () => void import("../../citations/zoteroFileRun").then((m) => m.exportForZotero("ris")),
+    },
+    {
       // Plan W12.X3: the gated OpenAlex lookup for the open source note's DOI; the result waits in the review queue.
       id: "cite.fillReferencesOpenAlex",
       label: t("cmd.cite.fillReferencesOpenAlex"),

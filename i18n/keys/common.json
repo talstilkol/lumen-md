@@ -3511,6 +3511,71 @@
       "vars": []
     },
     {
+      "key": "cite.file.empty",
+      "en": "The file has no sources.",
+      "vars": []
+    },
+    {
+      "key": "cite.file.exported",
+      "en": "{n} sources written to {name}. In Zotero choose File → Import… to add them.",
+      "vars": [
+        "n",
+        "name"
+      ]
+    },
+    {
+      "key": "cite.file.failed",
+      "en": "The Zotero import failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "cite.file.format",
+      "en": "This is not a Zotero export Lumen can read. In Zotero choose File → Export Library… and the format CSL JSON, BibTeX or RIS.",
+      "vars": []
+    },
+    {
+      "key": "cite.file.imported",
+      "en": "Zotero file imported ({format}): {added} added, {updated} updated, {removed} removed, {unchanged} unchanged.",
+      "vars": [
+        "format",
+        "added",
+        "updated",
+        "removed",
+        "unchanged"
+      ]
+    },
+    {
+      "key": "cite.file.json",
+      "en": "The CSL JSON file is damaged: it is not valid JSON.",
+      "vars": []
+    },
+    {
+      "key": "cite.file.missingBody",
+      "en": "{n} sources in Lumen's Zotero copy are not in this file. Remove them? Choose Cancel if you exported only one collection.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "cite.file.missingTitle",
+      "en": "Remove sources that are not in the file?",
+      "vars": []
+    },
+    {
+      "key": "cite.file.noSources",
+      "en": "The vault has no sources to export yet.",
+      "vars": []
+    },
+    {
+      "key": "cite.file.nothing",
+      "en": "Nothing new in this file: all {n} sources are already in the vault.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
       "key": "cite.keys",
       "en": "Enter [@key] · ⇧Enter @key · Tab locator · Esc",
       "vars": []
