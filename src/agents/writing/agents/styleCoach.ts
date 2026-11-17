@@ -102,13 +102,17 @@ export function coachRules(text: string, lang: "he" | "en", level: WritingLevel)
 
 function coachPlain(text: string, lang: "he" | "en", level: WritingLevel): WritingSuggestion[] {
   const out: WritingSuggestion[] = [];
-  const taken: Array<[number, number]> = [];
-  const free = (a: number, b: number) => !taken.some(([x, y]) => a < y && x < b);
+  // Which characters a finding already covers: a lookup per character, not per finding (a 10 000-paragraph note has 20 000 findings).
+  const taken = new Uint8Array(text.length + 1);
+  const free = (a: number, b: number) => {
+    for (let i = a; i < b; i++) if (taken[i]) return false;
+    return true;
+  };
   const add = (r: { id: string; kind: WritingSuggestion["kind"]; confidence: number; en: string; he: string }, from: number, to: number, replacement: string | null, rationale: string) => {
     if (!free(from, to) || to <= from) return;
     try {
       out.push(makeSuggestion(text, { range: { from, to }, kind: r.kind, message: lang === "he" ? r.he : r.en, rationale, confidence: r.confidence, replacement, agentId: STYLE_COACH_ID, model: "rules", ruleId: r.id }));
-      taken.push([from, to]);
+      taken.fill(1, from, to);
     } catch {
       /* why: a fix equal to the original (case-only) is not a suggestion */
     }
