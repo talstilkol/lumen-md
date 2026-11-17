@@ -107,6 +107,8 @@
   "cmd.audit.open.hint": "記録されたすべての変更を確認し、コンプライアンス用に CSV をエクスポートします",
   "cmd.automations.dryRun": "自動化: このノートで試運転",
   "cmd.automations.dryRun.hint": "このノートに対してルールが何を変更するか — 何も書き込みません",
+  "cmd.automations.manage": "Automations: manage rules, dry run and run log…",
+  "cmd.automations.manage.hint": "Every rule with an on/off switch, a dry run that shows the lines it would write, and undo for each run",
   "cmd.automations.new": "自動化: 新しいルール（もし…なら…）…",
   "cmd.automations.new.hint": "いくつかの選択でルールを作成: ノート作成・タグ追加・プロパティ変更・毎日 → 移動・タグ・テンプレート・デイリーノートに1行",
   "cmd.automations.undo": "自動化: 最後の実行を取り消す",

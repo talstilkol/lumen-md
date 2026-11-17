@@ -11511,5 +11511,374 @@
     "ru": "jyp9ab",
     "zh-CN": "jyp9ab",
     "fa": "jyp9ab"
+  },
+  "automations.manager.title": {
+    "ar": "1qlte4b",
+    "de": "1qlte4b",
+    "fa": "1qlte4b",
+    "fr": "1qlte4b",
+    "ja": "1qlte4b",
+    "ru": "1qlte4b",
+    "zh-CN": "1qlte4b"
+  },
+  "automations.manager.intro": {
+    "ar": "1j68xun",
+    "de": "1j68xun",
+    "fa": "1j68xun",
+    "fr": "1j68xun",
+    "ja": "1j68xun",
+    "ru": "1j68xun",
+    "zh-CN": "1j68xun"
+  },
+  "automations.manager.noNote": {
+    "ar": "ss09rr",
+    "de": "ss09rr",
+    "fa": "ss09rr",
+    "fr": "ss09rr",
+    "ja": "ss09rr",
+    "ru": "ss09rr",
+    "zh-CN": "ss09rr"
+  },
+  "automations.manager.noNoteName": {
+    "ar": "1hc6crv",
+    "de": "1hc6crv",
+    "fa": "1hc6crv",
+    "fr": "1hc6crv",
+    "ja": "1hc6crv",
+    "ru": "1hc6crv",
+    "zh-CN": "1hc6crv"
+  },
+  "automations.manager.newRule": {
+    "ar": "npcvep",
+    "de": "npcvep",
+    "fa": "npcvep",
+    "fr": "npcvep",
+    "ja": "npcvep",
+    "ru": "npcvep",
+    "zh-CN": "npcvep"
+  },
+  "automations.manager.dryAll": {
+    "ar": "1wzo28w",
+    "de": "1wzo28w",
+    "fa": "1wzo28w",
+    "fr": "1wzo28w",
+    "ja": "1wzo28w",
+    "ru": "1wzo28w",
+    "zh-CN": "1wzo28w"
+  },
+  "automations.manager.rules": {
+    "ar": "1fx3pxm",
+    "de": "1fx3pxm",
+    "fa": "1fx3pxm",
+    "fr": "1fx3pxm",
+    "ja": "1fx3pxm",
+    "ru": "1fx3pxm",
+    "zh-CN": "1fx3pxm"
+  },
+  "automations.manager.rulesEmpty": {
+    "ar": "1qmff0o",
+    "de": "1qmff0o",
+    "fa": "1qmff0o",
+    "fr": "1qmff0o",
+    "ja": "1qmff0o",
+    "ru": "1qmff0o",
+    "zh-CN": "1qmff0o"
+  },
+  "automations.manager.loading": {
+    "ar": "cwepyb",
+    "de": "cwepyb",
+    "fa": "cwepyb",
+    "fr": "cwepyb",
+    "ja": "cwepyb",
+    "ru": "cwepyb",
+    "zh-CN": "cwepyb"
+  },
+  "automations.manager.when": {
+    "ar": "l5nax",
+    "de": "l5nax",
+    "fa": "l5nax",
+    "fr": "l5nax",
+    "ja": "l5nax",
+    "ru": "l5nax",
+    "zh-CN": "l5nax"
+  },
+  "automations.manager.then": {
+    "ar": "s3y93q",
+    "de": "s3y93q",
+    "fa": "s3y93q",
+    "fr": "s3y93q",
+    "ja": "s3y93q",
+    "ru": "s3y93q",
+    "zh-CN": "s3y93q"
+  },
+  "automations.manager.dryOne": {
+    "ar": "14v32pn",
+    "de": "14v32pn",
+    "fa": "14v32pn",
+    "fr": "14v32pn",
+    "ja": "14v32pn",
+    "ru": "14v32pn",
+    "zh-CN": "14v32pn"
+  },
+  "automations.manager.dryOneLabel": {
+    "ar": "vi23e",
+    "de": "vi23e",
+    "fa": "vi23e",
+    "fr": "vi23e",
+    "ja": "vi23e",
+    "ru": "vi23e",
+    "zh-CN": "vi23e"
+  },
+  "automations.manager.delete": {
+    "ar": "oay2cq",
+    "de": "oay2cq",
+    "fa": "oay2cq",
+    "fr": "oay2cq",
+    "ja": "oay2cq",
+    "ru": "oay2cq",
+    "zh-CN": "oay2cq"
+  },
+  "automations.manager.deleteLabel": {
+    "ar": "194xyuq",
+    "de": "194xyuq",
+    "fa": "194xyuq",
+    "fr": "194xyuq",
+    "ja": "194xyuq",
+    "ru": "194xyuq",
+    "zh-CN": "194xyuq"
+  },
+  "automations.manager.deleted": {
+    "ar": "et21id",
+    "de": "et21id",
+    "fa": "et21id",
+    "fr": "et21id",
+    "ja": "et21id",
+    "ru": "et21id",
+    "zh-CN": "et21id"
+  },
+  "automations.manager.undoDelete": {
+    "ar": "vmlwpb",
+    "de": "vmlwpb",
+    "fa": "vmlwpb",
+    "fr": "vmlwpb",
+    "ja": "vmlwpb",
+    "ru": "vmlwpb",
+    "zh-CN": "vmlwpb"
+  },
+  "automations.manager.restored": {
+    "ar": "l4o936",
+    "de": "l4o936",
+    "fa": "l4o936",
+    "fr": "l4o936",
+    "ja": "l4o936",
+    "ru": "l4o936",
+    "zh-CN": "l4o936"
+  },
+  "automations.manager.turnedOn": {
+    "ar": "15303i7",
+    "de": "15303i7",
+    "fa": "15303i7",
+    "fr": "15303i7",
+    "ja": "15303i7",
+    "ru": "15303i7",
+    "zh-CN": "15303i7"
+  },
+  "automations.manager.turnedOff": {
+    "ar": "462fmd",
+    "de": "462fmd",
+    "fa": "462fmd",
+    "fr": "462fmd",
+    "ja": "462fmd",
+    "ru": "462fmd",
+    "zh-CN": "462fmd"
+  },
+  "automations.manager.dryTitleOne": {
+    "ar": "40s3fm",
+    "de": "40s3fm",
+    "fa": "40s3fm",
+    "fr": "40s3fm",
+    "ja": "40s3fm",
+    "ru": "40s3fm",
+    "zh-CN": "40s3fm"
+  },
+  "automations.manager.dryTitleAll": {
+    "ar": "uff3hf",
+    "de": "uff3hf",
+    "fa": "uff3hf",
+    "fr": "uff3hf",
+    "ja": "uff3hf",
+    "ru": "uff3hf",
+    "zh-CN": "uff3hf"
+  },
+  "automations.manager.nothingWritten": {
+    "ar": "1rv1tpp",
+    "de": "1rv1tpp",
+    "fa": "1rv1tpp",
+    "fr": "1rv1tpp",
+    "ja": "1rv1tpp",
+    "ru": "1rv1tpp",
+    "zh-CN": "1rv1tpp"
+  },
+  "automations.manager.newNote": {
+    "ar": "z5vncz",
+    "de": "z5vncz",
+    "fa": "z5vncz",
+    "fr": "z5vncz",
+    "ja": "z5vncz",
+    "ru": "z5vncz",
+    "zh-CN": "z5vncz"
+  },
+  "automations.manager.lines": {
+    "ar": "ehbpda",
+    "de": "ehbpda",
+    "fa": "ehbpda",
+    "fr": "ehbpda",
+    "ja": "ehbpda",
+    "ru": "ehbpda",
+    "zh-CN": "ehbpda"
+  },
+  "automations.manager.movedFrom": {
+    "ar": "2j9aoc",
+    "de": "2j9aoc",
+    "fa": "2j9aoc",
+    "fr": "2j9aoc",
+    "ja": "2j9aoc",
+    "ru": "2j9aoc",
+    "zh-CN": "2j9aoc"
+  },
+  "automations.manager.agentWaits": {
+    "ar": "ekmbgt",
+    "de": "ekmbgt",
+    "fa": "ekmbgt",
+    "fr": "ekmbgt",
+    "ja": "ekmbgt",
+    "ru": "ekmbgt",
+    "zh-CN": "ekmbgt"
+  },
+  "automations.manager.diffLabel": {
+    "ar": "18mj7ro",
+    "de": "18mj7ro",
+    "fa": "18mj7ro",
+    "fr": "18mj7ro",
+    "ja": "18mj7ro",
+    "ru": "18mj7ro",
+    "zh-CN": "18mj7ro"
+  },
+  "automations.manager.added": {
+    "ar": "u2bmkt",
+    "de": "u2bmkt",
+    "fa": "u2bmkt",
+    "fr": "u2bmkt",
+    "ja": "u2bmkt",
+    "ru": "u2bmkt",
+    "zh-CN": "u2bmkt"
+  },
+  "automations.manager.removed": {
+    "ar": "156dq2b",
+    "de": "156dq2b",
+    "fa": "156dq2b",
+    "fr": "156dq2b",
+    "ja": "156dq2b",
+    "ru": "156dq2b",
+    "zh-CN": "156dq2b"
+  },
+  "automations.manager.runs": {
+    "ar": "ryca6w",
+    "de": "ryca6w",
+    "fa": "ryca6w",
+    "fr": "ryca6w",
+    "ja": "ryca6w",
+    "ru": "ryca6w",
+    "zh-CN": "ryca6w"
+  },
+  "automations.manager.runsEmpty": {
+    "ar": "1apwugn",
+    "de": "1apwugn",
+    "fa": "1apwugn",
+    "fr": "1apwugn",
+    "ja": "1apwugn",
+    "ru": "1apwugn",
+    "zh-CN": "1apwugn"
+  },
+  "automations.manager.runChanges": {
+    "ar": "1yubek1",
+    "de": "1yubek1",
+    "fa": "1yubek1",
+    "fr": "1yubek1",
+    "ja": "1yubek1",
+    "ru": "1yubek1",
+    "zh-CN": "1yubek1"
+  },
+  "automations.manager.undo": {
+    "ar": "vmlwpb",
+    "de": "vmlwpb",
+    "fa": "vmlwpb",
+    "fr": "vmlwpb",
+    "ja": "vmlwpb",
+    "ru": "vmlwpb",
+    "zh-CN": "vmlwpb"
+  },
+  "automations.manager.undoLabel": {
+    "ar": "p54u27",
+    "de": "p54u27",
+    "fa": "p54u27",
+    "fr": "p54u27",
+    "ja": "p54u27",
+    "ru": "p54u27",
+    "zh-CN": "p54u27"
+  },
+  "automations.manager.undone": {
+    "ar": "159f82q",
+    "de": "159f82q",
+    "fa": "159f82q",
+    "fr": "159f82q",
+    "ja": "159f82q",
+    "ru": "159f82q",
+    "zh-CN": "159f82q"
+  },
+  "automations.manager.undoDone": {
+    "ar": "t49gfn",
+    "de": "t49gfn",
+    "fa": "t49gfn",
+    "fr": "t49gfn",
+    "ja": "t49gfn",
+    "ru": "t49gfn",
+    "zh-CN": "t49gfn"
+  },
+  "automations.manager.close": {
+    "ar": "1l0xxoj",
+    "de": "1l0xxoj",
+    "fa": "1l0xxoj",
+    "fr": "1l0xxoj",
+    "ja": "1l0xxoj",
+    "ru": "1l0xxoj",
+    "zh-CN": "1l0xxoj"
+  },
+  "automations.manager.event.created": {
+    "ar": "18siu20",
+    "de": "18siu20",
+    "fa": "18siu20",
+    "fr": "18siu20",
+    "ja": "18siu20",
+    "ru": "18siu20",
+    "zh-CN": "18siu20"
+  },
+  "automations.manager.event.changed": {
+    "ar": "91nrew",
+    "de": "91nrew",
+    "fa": "91nrew",
+    "fr": "91nrew",
+    "ja": "91nrew",
+    "ru": "91nrew",
+    "zh-CN": "91nrew"
+  },
+  "automations.manager.event.daily": {
+    "ar": "1vn1a1r",
+    "de": "1vn1a1r",
+    "fa": "1vn1a1r",
+    "fr": "1vn1a1r",
+    "ja": "1vn1a1r",
+    "ru": "1vn1a1r",
+    "zh-CN": "1vn1a1r"
   }
 }

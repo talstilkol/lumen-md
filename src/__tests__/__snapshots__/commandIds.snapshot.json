@@ -2182,6 +2182,13 @@
       "icon": "Printer"
     },
     {
+      "id": "automations.manage",
+      "label": "Automations: manage rules, dry run and run log…",
+      "group": "Tools",
+      "hint": "Every rule with an on/off switch, a dry run that shows the lines it would write, and undo for each run",
+      "icon": "Workflow"
+    },
+    {
       "id": "automations.new",
       "label": "Automations: new rule (when… then…)…",
       "group": "Tools",
@@ -4888,6 +4895,13 @@
       "icon": "Printer"
     },
     {
+      "id": "automations.manage",
+      "label": "Automations: manage rules, dry run and run log…",
+      "group": "Tools",
+      "hint": "Every rule with an on/off switch, a dry run that shows the lines it would write, and undo for each run",
+      "icon": "Workflow"
+    },
+    {
       "id": "automations.new",
       "label": "Automations: new rule (when… then…)…",
       "group": "Tools",
@@ -5587,6 +5601,7 @@
     "book.addChapter",
     "export.latexProject",
     "export.latexPdf",
+    "automations.manage",
     "automations.new",
     "automations.dryRun",
     "automations.undo",

@@ -107,6 +107,8 @@
   "cmd.audit.open.hint": "Просмотр всех записанных изменений; экспорт в CSV для соответствия требованиям",
   "cmd.automations.dryRun": "Автоматизации: пробный запуск для этой заметки",
   "cmd.automations.dryRun.hint": "Что правила изменили бы в этой заметке — ничего не записывается",
+  "cmd.automations.manage": "Automations: manage rules, dry run and run log…",
+  "cmd.automations.manage.hint": "Every rule with an on/off switch, a dry run that shows the lines it would write, and undo for each run",
   "cmd.automations.new": "Автоматизации: новое правило (когда… то…)…",
   "cmd.automations.new.hint": "Правило в несколько шагов: создана заметка, добавлен тег, изменено свойство или ежедневно → переместить, тег, шаблон или строка в ежедневной заметке",
   "cmd.automations.undo": "Автоматизации: отменить последний запуск",

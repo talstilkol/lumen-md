@@ -107,6 +107,8 @@
   "cmd.audit.open.hint": "Jede aufgezeichnete Änderung prüfen; CSV für Compliance exportieren",
   "cmd.automations.dryRun": "Automationen: Probelauf für diese Notiz",
   "cmd.automations.dryRun.hint": "Was die Regeln an dieser Notiz ändern würden — nichts wird geschrieben",
+  "cmd.automations.manage": "Automations: manage rules, dry run and run log…",
+  "cmd.automations.manage.hint": "Every rule with an on/off switch, a dry run that shows the lines it would write, and undo for each run",
   "cmd.automations.new": "Automationen: neue Regel (wenn… dann…)…",
   "cmd.automations.new.hint": "Eine Regel in wenigen Schritten: Notiz erstellt, Tag hinzugefügt, Eigenschaft geändert oder täglich → verschieben, taggen, Vorlage oder Zeile in der Tagesnotiz",
   "cmd.automations.undo": "Automationen: letzten Lauf rückgängig machen",

@@ -108,6 +108,15 @@ export async function dryRunAutomations(doc: { workspaceName?: string | null; co
   }
 }
 
+/** The manager: every rule with its switch, a dry run with the lines it would write, and the log with undo per run. */
+export async function manageAutomations(doc: { workspaceName?: string | null; content: string }): Promise<void> {
+  try {
+    await (await import("../../automations/openPanel")).openAutomationsPanel(doc, newAutomation);
+  } catch (e) {
+    fail(e);
+  }
+}
+
 export async function undoLastAutomation(): Promise<void> {
   try {
     const r = await (await load()).undoLast();

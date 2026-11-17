@@ -107,6 +107,8 @@
   "cmd.audit.open.hint": "Inspect every recorded mutation; export CSV for compliance",
   "cmd.automations.dryRun": "Automations: dry run on this note",
   "cmd.automations.dryRun.hint": "What the rules would change for this note — nothing is written",
+  "cmd.automations.manage": "Automations: manage rules, dry run and run log…",
+  "cmd.automations.manage.hint": "Every rule with an on/off switch, a dry run that shows the lines it would write, and undo for each run",
   "cmd.automations.new": "Automations: new rule (when… then…)…",
   "cmd.automations.new.hint": "A rule in a few choices: note created, tag added, property changed or daily → move, tag, template or a line in the daily note",
   "cmd.automations.undo": "Automations: undo the last run",

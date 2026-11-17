@@ -107,6 +107,8 @@
   "cmd.audit.open.hint": "查看所有已记录的变更;可导出 CSV 用于合规",
   "cmd.automations.dryRun": "自动化：在此笔记上试运行",
   "cmd.automations.dryRun.hint": "规则会对此笔记做哪些更改——不写入任何内容",
+  "cmd.automations.manage": "Automations: manage rules, dry run and run log…",
+  "cmd.automations.manage.hint": "Every rule with an on/off switch, a dry run that shows the lines it would write, and undo for each run",
   "cmd.automations.new": "自动化：新规则（当…则…）…",
   "cmd.automations.new.hint": "几步即可创建规则：创建笔记、添加标签、属性变化或每天 → 移动、加标签、应用模板或在每日笔记中加一行",
   "cmd.automations.undo": "自动化：撤销上次运行",

@@ -180,14 +180,59 @@ export async function replayPostponed(): Promise<number> {
   return ran;
 }
 
+/** Turn a rule on or off (the manager's switch). Returns the rules as saved. */
+export async function setRuleEnabled(id: string, enabled: boolean): Promise<Rule[]> {
+  const rules = (await loadRules()).map((r) => (r.id === id ? { ...r, enabled } : r));
+  await saveRules(rules);
+  return rules;
+}
+
+/** Delete a rule; returns it and where it was, so the manager can put it back (undo). */
+export async function deleteRule(id: string): Promise<{ rule: Rule; index: number } | null> {
+  const rules = await loadRules();
+  const index = rules.findIndex((r) => r.id === id);
+  if (index < 0) return null;
+  const [rule] = rules.splice(index, 1);
+  await saveRules(rules);
+  return { rule, index };
+}
+
+/** Put a deleted rule back where it was. */
+export async function restoreRule(rule: Rule, index: number): Promise<Rule[]> {
+  const rules = (await loadRules()).filter((r) => r.id !== rule.id);
+  rules.splice(Math.min(Math.max(0, index), rules.length), 0, rule);
+  await saveRules(rules);
+  return rules;
+}
+
+type UndoResult = { ok: true; entry: RunLogEntry } | { ok: false; reason: "none" } | { ok: false; reason: "changed"; path: string };
+
 /** Undo the newest run that is not undone yet. */
-export async function undoLast(): Promise<{ ok: true; entry: RunLogEntry } | { ok: false; reason: "none" } | { ok: false; reason: "changed"; path: string }> {
+export async function undoLast(): Promise<UndoResult> {
+  return undoRunById();
+}
+
+/** Undo one run of the log (the newest not undone when `id` is not given): every byte back, or nothing if a file changed since. */
+export async function undoRunById(id?: string): Promise<UndoResult> {
   const log = await readLog();
-  const entry = log.find((e) => !e.undone);
+  const entry = id === undefined ? log.find((e) => !e.undone) : log.find((e) => e.id === id && !e.undone);
   if (!entry) return { ok: false, reason: "none" };
   for (const c of entry.changes) if (c.kind === "write") ours.set(c.path, c.before ?? "");
   const r = await undoRun(entry, fs);
-  if (!r.ok) return { ok: false, reason: "changed", path: r.path };
+  if (!r.ok) {
+    for (const c of entry.changes) if (c.kind === "write") ours.delete(c.path);
+    return { ok: false, reason: "changed", path: r.path };
+  }
+  // The notes as they are again: a dry run right after an undo reads these, not the undone text.
+  for (const c of [...entry.changes].reverse()) {
+    if (c.kind === "write") {
+      if (c.before === null) seen.delete(c.path);
+      else seen.set(c.path, c.before);
+    } else if (c.kind === "move" && seen.has(c.to)) {
+      seen.set(c.from, seen.get(c.to)!);
+      seen.delete(c.to);
+    }
+  }
   entry.undone = true;
   await writeWorkspaceFile(LOG_PATH, JSON.stringify(log, null, 1) + "\n");
   return { ok: true, entry };
