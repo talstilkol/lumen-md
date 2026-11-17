@@ -6118,6 +6118,36 @@
       "vars": []
     },
     {
+      "key": "e2ee.presence.device",
+      "en": "The name the others see for this device",
+      "vars": []
+    },
+    {
+      "key": "e2ee.presence.devicePlaceholder",
+      "en": "For example: Dana's laptop",
+      "vars": []
+    },
+    {
+      "key": "e2ee.presence.intro",
+      "en": "The other members of a shared vault see a dot next to the note you have open, with your device's name, and you see theirs. The relay sees sealed bytes only — no names, no notes. Nothing is sent in airplane mode. Off until you turn it on.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.presence.needName",
+      "en": "Choose a device name first: presence starts once this device has one.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.presence.on",
+      "en": "Show the other members which note I have open",
+      "vars": []
+    },
+    {
+      "key": "e2ee.presence.title",
+      "en": "Show where I am",
+      "vars": []
+    },
+    {
       "key": "e2ee.progress",
       "en": "{done} of {total} files · {bytesDone} of {bytes}",
       "vars": [
@@ -17384,6 +17414,13 @@
       "key": "plugins.panel.close",
       "en": "Close the plugin panel",
       "vars": []
+    },
+    {
+      "key": "presence.openOn",
+      "en": "Open on: {devices}",
+      "vars": [
+        "devices"
+      ]
     },
     {
       "key": "preview.footnote.label",
