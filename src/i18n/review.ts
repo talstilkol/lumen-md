@@ -18,9 +18,8 @@
  *
  * "native" is the status of the language, not a promise for every string: a
  * new Hebrew string may start as a machine draft and is then listed under
- * `he` in i18n/needs-review/ until a native speaker approves it (R8-L8:
- * 7 today, the academic.* strings of the academic export dialog; the docs
- * page names them).
+ * `he` in i18n/needs-review/ until a native speaker approves it; Hebrew is the
+ * source language, so `npm run i18n:review` fails while one is listed (W13.I6).
  */
 import type { Locale } from "./index";
 
