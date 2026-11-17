@@ -177,7 +177,7 @@ export function PagedPreview({ markdownText, docName, delay = 350 }: Props) {
   const frameH = viewport.height ? viewport.height / scale : 600;
 
   return (
-    <div data-testid="page-view" data-ready={String(status === "ready" || status === "empty")} data-pages={pages} data-laid={laid} style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0, width: "100%" }}>
+    <div data-testid="page-view" data-reading-mode="page-view" data-ready={String(status === "ready" || status === "empty")} data-pages={pages} data-laid={laid} style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0, width: "100%" }}>
       <div role="toolbar" aria-label={t("paged.toolbar")} onKeyDown={onNavKey} style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, padding: "6px 12px", borderBottom: "1px solid hsl(var(--border))", background: "hsl(var(--bg))", fontSize: 12, color: "hsl(var(--fg-muted))", flexShrink: 0 }}>
         <button type="button" className="icon-btn" onClick={() => goTo(current - 1)} disabled={current <= 1 || status !== "ready"} aria-label={t("pageView.prev")} title={t("pageView.prev")} style={{ padding: "2px 8px" }}>
           <span aria-hidden>{dir === "rtl" ? "▶" : "◀"}</span>

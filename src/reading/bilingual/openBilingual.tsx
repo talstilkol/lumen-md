@@ -47,7 +47,7 @@ export async function openBilingual(): Promise<void> {
   const root = createRoot(host);
   mounted = { root, host };
   root.render(
-    <Modal aria-label={t("bilingual.title")} onClose={closeBilingual} data-testid="bilingual-dialog" style={{ inlineSize: "min(1100px, 96vw)", maxBlockSize: "92vh", overflow: "auto" }}>
+    <Modal aria-label={t("bilingual.title")} onClose={closeBilingual} data-testid="bilingual-dialog" data-reading-mode="bilingual" style={{ inlineSize: "min(1100px, 96vw)", maxBlockSize: "92vh", overflow: "auto" }}>
       {data ? (
         <BilingualView data={data} />
       ) : (

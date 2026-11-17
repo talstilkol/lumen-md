@@ -62,7 +62,7 @@ export async function openDaf(): Promise<void> {
   const root = createRoot(host);
   mounted = { root, host };
   root.render(
-    <Modal aria-label={t("daf.title")} onClose={closeDaf} data-testid="daf-dialog" style={{ inlineSize: "min(1180px, 96vw)", maxBlockSize: "94vh", overflow: "auto" }}>
+    <Modal aria-label={t("daf.title")} onClose={closeDaf} data-testid="daf-dialog" data-reading-mode="daf" style={{ inlineSize: "min(1180px, 96vw)", maxBlockSize: "94vh", overflow: "auto" }}>
       <DafView
         content={content}
         myNotes={myNotes}
