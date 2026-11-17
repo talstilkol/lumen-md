@@ -16,6 +16,7 @@
  */
 import { stripNiqqud } from "../../text/hebrew";
 import type { WritingLang } from "./agent";
+import { heNamesIn } from "./heGazetteer";
 
 export interface FactSet {
   numbers: string[];
@@ -37,9 +38,9 @@ export interface FactReport {
 export type EntityFinder = (text: string) => string[];
 
 const NUMBER_WORDS_EN: Record<string, string> = {
-  zero: "0", one: "1", two: "2", three: "3", four: "4", five: "5", six: "6", seven: "7", eight: "8", nine: "9", ten: "10",
+  zero: "0", two: "2", three: "3", four: "4", five: "5", six: "6", seven: "7", eight: "8", nine: "9", ten: "10",
   eleven: "11", twelve: "12", twenty: "20", thirty: "30", forty: "40", fifty: "50", hundred: "100", thousand: "1000", million: "1000000", dozen: "12",
-  first: "1st", second: "2nd", third: "3rd", half: "0.5",
+  first: "1st", third: "3rd", half: "0.5",
 };
 const NUMBER_WORDS_HE: Record<string, string> = {
   אפס: "0", אחד: "1", אחת: "1", שניים: "2", שתיים: "2", שני: "2", שתי: "2", שלושה: "3", שלוש: "3", ארבעה: "4", ארבע: "4", חמישה: "5", חמש: "5",
@@ -49,8 +50,8 @@ const NUMBER_WORDS_HE: Record<string, string> = {
 const HE_PREFIX = /^[והבלמשכ]{1,3}(?=[א-ת]{2,})/;
 
 /** Negating words; "n't" counts once per contraction. */
-const NEG_EN = /\b(?:not|no|never|none|nobody|nothing|neither|nor|without|nowhere|cannot)\b|n['’]t\b/gi;
-const NEG_HE = /(?:^|[\s(«"״'׳\-־])(?:[וש]?(?:לא|אין|אינו|אינה|אינם|אינן|אינני|איני|אל|בלי|ללא|מבלי|אף|שום|מעולם|לעולם))(?=$|[\s.,;:!?)»"״\-־])/g;
+const NEG_EN = /\b(?:not|no|never|none|nobody|nothing|neither|nor|without|nowhere|cannot|unable|impossible)\b|n['’]t\b/gi;
+const NEG_HE = /(?:^|[\s(«"״'׳\-־])(?:[וש]?(?:אי אפשר|אי־אפשר|בלתי|לא|אין|אינו|אינה|אינם|אינן|אינני|איני|אל|בלי|ללא|מבלי))(?=$|[\s.,;:!?)»"״\-־])/g;
 
 /** The words a text writes in lower case (a capitalised form of one of them is not a name). */
 export function lowerWords(...texts: string[]): Set<string> {
@@ -86,7 +87,7 @@ export function numbersIn(text: string, lang: WritingLang): string[] {
 
 const TITLES_HE = /(?:^|\s)(?:ד["״]ר|פרופ['׳]?|פרופסור|מר|גב['׳]|גברת|עו["״]ד|רו["״]ח|הרב|רב|השר|השרה|ח["״]כ|סגן|רס["״]ן|אלוף|תא["״]ל|נשיא|נשיאת)\s+([א-ת][א-ת'׳"״\-]+(?:\s+[א-ת][א-ת'׳"״\-]+)?)/g;
 const ACRONYM_HE = /[א-ת]+[״"][א-ת]/g;
-const STOP_CAPS = new Set(["I", "The", "A", "An", "This", "That", "These", "Those", "It", "We", "You", "He", "She", "They", "In", "On", "At", "For", "But", "And", "Or", "If", "When", "While", "As", "So", "To", "Of", "By", "With", "Our", "My", "Your", "Their", "His", "Her", "Its", "Please", "Thanks", "Hi", "Hello", "Dear", "Yes", "No", "OK", "Also", "However", "Then", "There", "Here", "What", "Why", "How", "Who", "Each", "Every", "All", "Some", "Most", "Many", "After", "Before", "Since", "Because", "Although", "Even", "Just", "Only", "Not", "Yesterday", "Today", "Tomorrow", "Now", "Later", "Soon", "Still", "Yet", "Next", "Last", "Finally", "First", "Second", "Third", "Overall", "Unfortunately", "Fortunately", "Honestly", "Basically", "Actually", "Really", "Perhaps", "Maybe", "Hey", "Sorry", "Kindly", "Note", "Let", "Let's", "Don't", "Do", "Does", "Did", "Is", "Are", "Was", "Were", "Will", "Would", "Can", "Could", "Should", "Must", "May", "Might", "One", "Two", "Three", "Both", "Either", "Neither", "Nor", "Other", "Another", "Such", "Thus", "Therefore", "Moreover", "Furthermore", "Meanwhile", "Instead", "Otherwise", "Indeed", "Of", "From", "Into", "About", "During", "Without", "Within", "Through", "Under", "Over", "Again", "Once", "Very", "Quite", "Too", "Much", "More", "Less", "Few", "Several", "Any", "Anyone", "Everyone", "Someone", "Nobody", "Nothing", "Everything", "Something", "Which", "Where", "Whose", "Whom"]);
+const STOP_CAPS = new Set(["I", "The", "A", "An", "This", "That", "These", "Those", "It", "We", "You", "He", "She", "They", "In", "On", "At", "For", "But", "And", "Or", "If", "When", "While", "As", "So", "To", "Of", "By", "With", "Our", "My", "Your", "Their", "His", "Her", "Its", "Please", "Thanks", "Hi", "Hello", "Dear", "Yes", "No", "OK", "Also", "However", "Then", "There", "Here", "What", "Why", "How", "Who", "Each", "Every", "All", "Some", "Most", "Many", "After", "Before", "Since", "Because", "Although", "Even", "Just", "Only", "Not", "Yesterday", "Today", "Tomorrow", "Now", "Later", "Soon", "Still", "Yet", "Next", "Last", "Finally", "First", "Second", "Third", "Overall", "Unfortunately", "Fortunately", "Honestly", "Basically", "Actually", "Really", "Perhaps", "Maybe", "Hey", "Sorry", "Kindly", "Note", "Let", "Let's", "Don't", "Do", "Does", "Did", "Is", "Are", "Was", "Were", "Will", "Would", "Can", "Could", "Should", "Must", "May", "Might", "One", "Two", "Three", "Both", "Either", "Neither", "Nor", "Other", "Another", "Such", "Thus", "Therefore", "Moreover", "Furthermore", "Meanwhile", "Instead", "Otherwise", "Indeed", "Of", "From", "Into", "About", "During", "Without", "Within", "Through", "Under", "Over", "Again", "Once", "Very", "Quite", "Too", "Much", "More", "Less", "Few", "Several", "Any", "Anyone", "Everyone", "Someone", "Nobody", "Nothing", "Everything", "Something", "Which", "Where", "Whose", "Whom", "Due", "Owing", "Given", "Despite", "Thank", "Thanks", "Kindly", "Trains", "Call", "Give", "Send", "Bring", "Read", "Write", "Check", "Keep", "Make", "Take", "Use", "Try"]);
 const DAYS_MONTHS = /^(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday|January|February|March|April|May|June|July|August|September|October|November|December)$/;
 
 /** The names a text mentions (see the file note), lower-cased, Hebrew prefixes kept as written. */
@@ -108,12 +109,13 @@ export function namesIn(text: string, lang: WritingLang, entities?: EntityFinder
       if (atStart && STOP_CAPS.has(words[0])) words = words.slice(1);
       if (!words.length) continue;
       const phrase = words.join(" ").replace(/['’]s$/, "");
-      if (STOP_CAPS.has(phrase) || DAYS_MONTHS.test(phrase)) continue;
-      if (atStart && words.length === 1 && m[0].split(/\s+/).length === 1 && (vocab.has(phrase.toLowerCase()) || /(?:ly|ing|ed)$/.test(phrase))) continue;
+      if (STOP_CAPS.has(phrase) || DAYS_MONTHS.test(phrase) || /^(?:I|We|You|They|He|She|It|There|That|What|Let|Here|Who)['’]/.test(phrase)) continue;
+      if (atStart && words.length === 1 && m[0].split(/\s+/).length === 1 && (vocab.has(phrase.toLowerCase()) || vocab.has(phrase.toLowerCase().replace(/e?s$/, "")) || /(?:ly|ing|ed)$/.test(phrase))) continue;
       out.add(phrase.toLowerCase());
     }
   }
   if (lang === "he") {
+    for (const n of heNamesIn(t)) out.add(n);
     for (const m of t.matchAll(TITLES_HE)) out.add(m[1].replace(/\s+/g, " ").toLowerCase());
     for (const m of t.matchAll(ACRONYM_HE)) out.add(m[0].replace(/"/g, "״"));
     // Latin words inside Hebrew text are names or terms (iPhone, Python, NASA).
@@ -144,12 +146,12 @@ function minus(a: readonly string[], b: readonly string[]): string[] {
   return out;
 }
 
-/** A name of `a` that `text` still contains (a name may be inflected with a Hebrew prefix: "לדנה" has "דנה"). */
+/** A name of `a` that `text` still contains as a word (a Hebrew name may carry a prefix: "לדנה" has "דנה"; "Aviv" does not have "Avi"). */
 function contains(text: string, name: string): boolean {
   const t = norm(text).toLowerCase();
-  if (t.includes(name)) return true;
+  const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const bare = name.replace(HE_PREFIX, "");
-  return bare !== name && t.includes(bare);
+  return new RegExp(`(?<![\\p{L}\\p{M}\\p{N}])[והבכלמש]{0,2}(?:${esc(name)}|${esc(bare)})(?![\\p{L}\\p{M}])`, "u").test(t);
 }
 
 export interface FactCheckOptions {

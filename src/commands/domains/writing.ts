@@ -19,6 +19,11 @@ export function buildWritingCommands(ctx: CommandContext): Command[] {
   return [
     entry("coach", { agent: "styleCoach" }),
     entry("proofreadHe", { agent: "proofreaderHe" }),
+    entry("toneFormal", { agent: "toneShifter", options: { tone: "formal" } }),
+    entry("toneNeutral", { agent: "toneShifter", options: { tone: "neutral" } }),
+    entry("toneFriendly", { agent: "toneShifter", options: { tone: "friendly" } }),
+    entry("registerHigh", { agent: "toneShifter", options: { tone: "formal", register: "high" } }),
+    entry("registerSpoken", { agent: "toneShifter", options: { tone: "neutral", register: "spoken" } }),
     {
       id: "writing.panel",
       label: t("cmd.writing.panel"),
