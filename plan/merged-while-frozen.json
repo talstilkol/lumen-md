@@ -5,6 +5,9 @@
   { "id": "W13.X2", "prs": [1019], "mergeSha": "b53b34e7e19c4d28997d20da3341ea9d5ec34003", "at": "2026-11-16" },
   { "id": "W9.8", "prs": [1069], "mergeSha": "e1005049bc8965c5aa8314af04139681d2b485f0", "at": "2026-11-16" },
   { "id": "W9.4", "prs": [649], "mergeSha": "b96853d37b58624ba07e85337fd8b39cabff7705", "at": "2026-11-15" },
-  { "id": "W6.12", "prs": [630], "mergeSha": "b9f68c111a5410e2148c8af97ed29f6421dbb842", "at": "2026-11-15" }
+  { "id": "W6.12", "prs": [630], "mergeSha": "b9f68c111a5410e2148c8af97ed29f6421dbb842", "at": "2026-11-15" },
+  { "id": "W11.M3", "prs": [1195], "mergeSha": "e4cc81f3223e2aa5b3e1e89c9f59548ee8f30b5a", "at": "2026-11-17" },
+  { "id": "W11.M6", "prs": [1192], "mergeSha": "2caab9a85fa4dc0f34e7c66d2194751c77084946", "at": "2026-11-17" },
+  { "id": "W12.M1", "prs": [1195], "mergeSha": "e4cc81f3223e2aa5b3e1e89c9f59548ee8f30b5a", "at": "2026-11-17" }
  ]
 }

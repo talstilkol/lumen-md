@@ -472,9 +472,9 @@
    "wave": 10,
    "next": 11,
    "open": 233,
-   "started": 92,
+   "started": 94,
    "at": "2026-11-16",
-   "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 10's 233 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 11's 92 started tasks keep going, but nothing grows: no new start in wave 11 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 10 is verified.",
+   "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 10's 233 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 11's 92 started tasks keep going, but nothing grows: no new start in wave 11 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 10 is verified. Raised 92→94 on 17.11 by INT8 (review 12, M2 rule): W11.M3 (#1195) and W11.M6 (#1192) were merged into the train while wave 11 was frozen, and are recorded in plan/merged-while-frozen.json, the one growth the ratchet allows.",
    "openIds": [
     "W10.A1",
     "W10.A2",
@@ -802,16 +802,18 @@
     "W11.L2",
     "W11.L3",
     "W11.Q13",
-    "W11.Q14"
+    "W11.Q14",
+    "W11.M3",
+    "W11.M6"
    ]
   },
   {
    "wave": 11,
    "next": 12,
    "open": 91,
-   "started": 78,
+   "started": 79,
    "at": "2026-11-16",
-   "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 11's 91 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 12's 78 started tasks keep going, but nothing grows: no new start in wave 12 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 11 is verified. Lowered 118→92 on 17.11 by INT6b: 26 wave-11 placeholders with no work lost their status (review 11, M4).",
+   "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 11's 91 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 12's 78 started tasks keep going, but nothing grows: no new start in wave 12 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 11 is verified. Lowered 118→92 on 17.11 by INT6b: 26 wave-11 placeholders with no work lost their status (review 11, M4). Raised 78→79 on 17.11 by INT8 (review 12, M2 rule): W12.M1 (#1195) was merged into the train while wave 12 was frozen, and is recorded in plan/merged-while-frozen.json.",
    "openIds": [
     "W11.H1",
     "W11.H2",
@@ -983,7 +985,8 @@
     "R12.18",
     "R12.19",
     "R12.20",
-    "R12.21"
+    "R12.21",
+    "W12.M1"
    ]
   },
   {

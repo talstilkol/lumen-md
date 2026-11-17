@@ -150,7 +150,7 @@
 | 0.10 | שער רישיונות למודלים, נתונים וחבילות 🆕 | P0 | S | בוצע (הוערך 2 ש׳ 00 דק׳) | 0.1 | — | — | ✅ #199 | דפדפן · [#199](https://github.com/talstilkol/lumen-md/pull/199) |
 | 0.11 | ריצות לילה אוטונומיות 🆕 | P0 (נדרש ל-P0) | D | 1 ש׳ 00 דק׳ | 0.5, 0.8 | ב׳ 16.11 23:35 | ג׳ 17.11 00:35 | ⏳ #245 (4 ה-workflows מוכנים; 0 ריצות מתוזמנות — לא מוזג ו-GitHub Actions לא בשימוש מ-9.11; צריך מקבילה מקומית / Sandbox) · ביקורת 1.8 | נבנה בלבד · [#245](https://github.com/talstilkol/lumen-md/pull/245) |
 | 0.12 | restack אוטומטי 🆕 | P0 | S | בוצע (הוערך 45 דק׳) | 0.1 | — | — | ✅ #201 | דפדפן · [#201](https://github.com/talstilkol/lumen-md/pull/201) |
-| 0.13 | מחולל מסירה (handoff) 🆕 | P0 | D | 45 דק׳ | 0.1 | ג׳ 17.11 00:35 | ג׳ 17.11 01:20 | ⏳ #211 · ביקורת r2 16.11: PARTIAL 80 — החסר ב-notes | Node · [#211](https://github.com/talstilkol/lumen-md/pull/211) |
+| 0.13 | מחולל מסירה (handoff) 🆕 | P0 | D | 45 דק׳ | 0.1 | ג׳ 17.11 00:35 | ג׳ 17.11 01:20 | ⏳ #1175 · cloud-complete (INT8 17.11 (lane FC3 #1175)); owed: re-audit | Node · [#211](https://github.com/talstilkol/lumen-md/pull/211) |
 | 0.14 | CI מקומי בפקודה אחת 🆕 | P0 | D | 1 ש׳ 00 דק׳ | 0.1 | ג׳ 17.11 01:20 | ג׳ 17.11 02:20 | ⏳ #210 (ci:local, --changed ו-hook ✓; מדידת 20 ה-PR-ים לא התחילה) · ביקורת 1.8 | נבנה בלבד · [#210](https://github.com/talstilkol/lumen-md/pull/210) |
 | 0.15 | mutation testing למודולים קריטיים 🆕 | P1 | D | 3 ש׳ 00 דק׳ | 0.5 | ב׳ 30.11 22:20 | ג׳ 1.12 01:20 | ⏳ #427 · ביקורת 14.11: חלקי — agents/runtime ‏58.3 מתחת ל-70 וחסר בקבלה · (על #402; מריץ mutation משלנו על המהדר של TypeScript (Stryker לא בלוקפייל), סף 70%)… | נבנה בלבד · [#427](https://github.com/talstilkol/lumen-md/pull/427) |
 | 0.16 | knip: קוד מת ותלויות מיותרות 🆕 | P1 | D | 30 דק׳ | 0.4 | ג׳ 1.12 01:20 | ג׳ 1.12 01:50 | ⏳ ביקורת 14.11: חלקי — לא מחובר לאף CI · קוד גמור — ממוזג ב-train-2 וברכבת 3; בדיקות יחידה לא מקוון: unusedFiles 14/14 עם #578; חסר: knip (Mac) | נבנה בלבד · [#578](https://github.com/talstilkol/lumen-md/pull/578) |
@@ -287,7 +287,7 @@
 
 **קבלה:** סוכן חדש מבצע את הצעד הבא נכון מהמסמך בלבד
 
-**פירוט הסטטוס:** עד 16.11: ✅ #211 (verified browser); מ-16.11 ⏳ ו-verified built — מה שהטקסט מתעד שרץ, לפי migrate-verified · ביקורת r2 16.11 (audit/r2-all.json): PARTIAL (80/100); נשאר: 'A new agent does the next step from the doc alone' is untested. · stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): fixed: Where line + next step as command + readHandoff(); a task without --next is refused (exit 1); handoffNextStep 5/5 (an agent with only HANDOFF.md runs the step in the named worktree, the commit lands on the task branch); handoff 12/12; fix #1001, merged into verify/train-7 (063d3d2c82); owed: the PR table's CI column still reads GitHub Actions (retired): follow-up
+**פירוט הסטטוס:** עד 16.11: ✅ #211 (verified browser); מ-16.11 ⏳ ו-verified built — מה שהטקסט מתעד שרץ, לפי migrate-verified · ביקורת r2 16.11 (audit/r2-all.json): PARTIAL (80/100); נשאר: 'A new agent does the next step from the doc alone' is untested. · stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): fixed: Where line + next step as command + readHandoff(); a task without --next is refused (exit 1); handoffNextStep 5/5 (an agent with only HANDOFF.md runs the step in the named worktree, the commit lands on the task branch); handoff 12/12; fix #1001, merged into verify/train-7 (063d3d2c82); owed: the PR table's CI column still reads GitHub Actions (retired): follow-up · INT8 17.11 (lane FC3 #1175): handoffAfterPush 3/3 (0/3 on base): a push confirmed by origin rewrites HANDOFF.md through the reference-transaction hook; owed: re-audit · status before: ⏳ #211 · ביקורת r2 16.11: PARTIAL 80 — החסר ב-notes · INT8 17.11: dod += handoffAfterPush.test.ts (FC3 proposal)
 
 **0.14 · CI מקומי בפקודה אחת** — `chore/ci-local` · תשתית וביצועים · 1 ש׳ 00 דק׳ · מקור: תהליך · היה 0.13
 
@@ -484,8 +484,8 @@
 | 2.3 | e2e/security.spec.ts | P0 | S | 1 ש׳ 00 דק׳ | 1.1, 0.17 | ג׳ 17.11 14:05 | ג׳ 17.11 15:05 | ⏳ #222 · ביקורת r2 16.11: PARTIAL 65 — החסר ב-notes | נבנה בלבד · [#222](https://github.com/talstilkol/lumen-md/pull/222) |
 | 2.4 | יומן פרטיות מלא (כולל workers) | P0 | S | 2 ש׳ 00 דק׳ | 1.1 | ג׳ 17.11 07:05 | ג׳ 17.11 09:05 | ⏳ #212 · ביקורת r2 16.11: PARTIAL 78 — החסר ב-notes | Node · [#212](https://github.com/talstilkol/lumen-md/pull/212) |
 | 2.5 | סודות: לסגור את הפינות | P0 | S | 2 ש׳ 00 דק׳ | 1.1 | ג׳ 17.11 09:05 | ג׳ 17.11 11:05 | ⏳ #230 + #243 (אין סודות מ-VITE_*; טוקן המחקר ב-secret store; החלפת מפתחות — 15.18) · ביקורת r2 16.11: PARTIAL 70 — החסר ב-notes | נבנה בלבד · [#230](https://github.com/talstilkol/lumen-md/pull/230) |
-| 2.6 | סוכן הסתרת מידע אישי לפני ענן 🆕 | P0 (נדרש ל-P0) | S | 3 ש׳ 00 דק׳ | 7.1, 6.0 | ג׳ 17.11 21:05 | ד׳ 18.11 00:05 | ⏳ ביקורת 14.11: חלקי · קוד גמור — ממוזג ב-train-2 וברכבת 3; בדיקות יחידה לא מקוון: piiRedactor 12/12, piiGolden 4/4; חסר: מודל NER אמיתי | נבנה בלבד |
-| 2.7 | סוכן הגנה מ-prompt injection 🆕 | P0 (נדרש ל-P0) | S | 2 ש׳ 30 דק׳ | 5.1, 7.1 | ד׳ 18.11 00:05 | ד׳ 18.11 02:35 | ⏳ #242 · ביקורת 14.11: חלקי — מסווג ProtectAI v2 לא מומש; 130 המקרים מול מודל מדומה בלבד · (130 מקרים מול מודל מדומה שמציית: 0 כתיבות לא מאושרות; סט הזהב הרשמי + 30 בעברית — 15.11) | מחכה לטל · [#242](https://github.com/talstilkol/lumen-md/pull/242) |
+| 2.6 | סוכן הסתרת מידע אישי לפני ענן 🆕 | P0 (נדרש ל-P0) | S | 3 ש׳ 00 דק׳ | 7.1, 6.0 | ג׳ 17.11 21:05 | ד׳ 18.11 00:05 | ⏳ #1195 · cloud-complete (INT8 17.11 (lane FC2 #1195)); owed: Mac FC2-2.6-pii-names | נבנה בלבד |
+| 2.7 | סוכן הגנה מ-prompt injection 🆕 | P0 (נדרש ל-P0) | S | 2 ש׳ 30 דק׳ | 5.1, 7.1 | ד׳ 18.11 00:05 | ד׳ 18.11 02:35 | ⏳ #1195 · cloud-complete (INT8 17.11 (lane FC2 #1195)); owed: Mac FC2-2.7-protectai (the model); receipts+label (security) | מחכה לטל · [#242](https://github.com/talstilkol/lumen-md/pull/242) |
 | 2.8 | סורקי אבטחה ב-CI 🆕 | P0 | D | 1 ש׳ 00 דק׳ | 0.17 | ג׳ 17.11 02:50 | ג׳ 17.11 03:50 | ⏳ #236 · ביקורת 14.11: חלקי — gitleaks, ‏dependency-review, ‏CodeQL ו-Scorecard רצים רק ב-Actions, שלא בשימוש · (CodeQL/Scorecard ירוצו רק על main) | דפדפן · [#236](https://github.com/talstilkol/lumen-md/pull/236) |
 
 **2.1 · Tauri CSP הדוק** — `fix/tauri-csp` · נתונים ואבטחה · בוצע (הוערך 1 ש׳ 30 דק׳) · מקור: F4, T48 · **מחכה לטל: 15.8**
@@ -547,7 +547,7 @@
 
 **קבלה:** סט PII (250, 7.1): recall ≥ 98% בתבניות, ≥ 85% בשמות עם NER · 0 פריטים מהסט בבקשות ענן שנלכדו ב-e2e
 
-**פירוט הסטטוס:** ⏳ קוד גמור — ממוזג ב-train-2 וברכבת 3; בדיקות יחידה לא מקוון: piiRedactor 12/12, piiGolden 4/4; חסר: מודל NER אמיתי
+**פירוט הסטטוס:** ⏳ קוד גמור — ממוזג ב-train-2 וברכבת 3; בדיקות יחידה לא מקוון: piiRedactor 12/12, piiGolden 4/4; חסר: מודל NER אמיתי · INT8 17.11 (lane FC2 #1195): ner-pii.mjs LUMEN_PII_NER_ENGINE: names recall 0→1 on test items; with review 12 H2 (#1178) names in other scripts are never claimed hidden; owed: Mac FC2-2.6-pii-names · status before: ⏳ ביקורת 14.11: חלקי · קוד גמור — ממוזג ב-train-2 וברכבת 3; בדיקות יחידה לא מקוון: piiRedactor 12/12, piiGolden 4/4; חסר: מודל NER אמיתי
 
 **2.7 · סוכן הגנה מ-prompt injection** — `feat/injection-guard` · נתונים ואבטחה · 2 ש׳ 30 דק׳ · מקור: אבטחת AI · **מחכה לטל: 15.11**
 
@@ -558,7 +558,7 @@
 
 **קבלה:** סט injection (130, כולל 30 בעברית): 0 כתיבות לא מאושרות
 
-**פירוט הסטטוס:** ✅* #242 (130 מקרים מול מודל מדומה שמציית: 0 כתיבות לא מאושרות; סט הזהב הרשמי + 30 בעברית — 15.11)
+**פירוט הסטטוס:** ✅* #242 (130 מקרים מול מודל מדומה שמציית: 0 כתיבות לא מאושרות; סט הזהב הרשמי + 30 בעברית — 15.11) · INT8 17.11 (lane FC2 #1195): ProtectAI v2 seam: protectAi.ts + worker seqLogits; protectAi 7/7, injectionGuard 159/159; seams.allow tightened; owed: Mac FC2-2.7-protectai (the model); receipts+label (security) · status before: ⏳ #242 · ביקורת 14.11: חלקי — מסווג ProtectAI v2 לא מומש; 130 המקרים מול מודל מדומה בלבד · (130 מקרים מול מודל מדומה שמציית: 0 כתיבות לא מאושרות; סט הזהב הרשמי + 30 בעברית — 15.11)
 
 **2.8 · סורקי אבטחה ב-CI** — `chore/security-ci` · תשתית וביצועים · 1 ש׳ 00 דק׳ · מקור: אבטחה
 
@@ -682,8 +682,8 @@
 | 4.3 | שולחן עבודה: הכספת כתיקייה + הגירה | P0 | S | 6 ש׳ 00 דק׳ | 4.1, 2.1 | ד׳ 18.11 11:35 | ד׳ 18.11 17:35 | ⏳ #247 (Obsidian והאפליקציה עצמה — 15.8) · ביקורת r2 16.11: PARTIAL 70 — החסר ב-notes | נבנה בלבד · [#247](https://github.com/talstilkol/lumen-md/pull/247) |
 | 4.4 | שינויים מבחוץ: מעקב ויישוב 🆕 | P0 | S | 5 ש׳ 00 דק׳ | 4.2, 4.3 | ד׳ 18.11 17:35 | ד׳ 18.11 22:35 | ⏳ #258 · ביקורת 14.11: חלקי — באג מחיקה המונית ב-listSnapshot ברכבת; התיקון רק ב-#258 (aeb77482) | דפדפן · [#258](https://github.com/talstilkol/lumen-md/pull/258) |
 | 4.5 | `[[` עם השלמה 🆕 | P0 | U | 6 ש׳ 00 דק׳ | 1.1 | ג׳ 17.11 00:50 | ג׳ 17.11 06:50 | ⏳ #217 · ביקורת r2 16.11: PARTIAL 80 — החסר ב-notes | Node · [#217](https://github.com/talstilkol/lumen-md/pull/217) |
-| 4.6 | תצוגה מקדימה בריחוף ואזכורים לא מקושרים 🆕 | P1 | U | 5 ש׳ 00 דק׳ | 4.5, 7.10 | ו׳ 20.11 18:50 | ו׳ 20.11 23:50 | ⏳ #250 · ביקורת 14.11: חלקי — הרינדור ב-main thread, לא ב-worker · (0.9–1.3ms במטמון; 8/8 מקרי dev, 22 ה-test — 15.9; רינדור ב-main thread, לא ב-worker — 15.16) | דפדפן · [#250](https://github.com/talstilkol/lumen-md/pull/250) |
-| 4.7 | הטמעות (`![[פתק]]`) 🆕 | P0 | U | 7 ש׳ 00 דק׳ | 1.1 | ג׳ 17.11 06:50 | ג׳ 17.11 13:50 | ⏳ #224 · cloud-complete (audit r3 PARTIAL); owed: e2e embeds; KaTeX offline; Quartz ofm.ts port step not done | דפדפן · [#224](https://github.com/talstilkol/lumen-md/pull/224) |
+| 4.6 | תצוגה מקדימה בריחוף ואזכורים לא מקושרים 🆕 | P1 | U | 5 ש׳ 00 דק׳ | 4.5, 7.10 | ו׳ 20.11 18:50 | ו׳ 20.11 23:50 | ⏳ #1196 · cloud-complete (INT8 17.11 (lane FC2 #1196)); owed: Mac FC2-4.6-unlinked; test split | דפדפן · [#250](https://github.com/talstilkol/lumen-md/pull/250) |
+| 4.7 | הטמעות (`![[פתק]]`) 🆕 | P0 | U | 7 ש׳ 00 דק׳ | 1.1 | ג׳ 17.11 06:50 | ג׳ 17.11 13:50 | ⏳ #1175 · cloud-complete (INT8 17.11 (lane FC3 #1175)); owed: Mac: e2e embeds, KaTeX offline | דפדפן · [#224](https://github.com/talstilkol/lumen-md/pull/224) |
 | 4.8 | הפניות לבלוקים (`^id`) 🆕 | P1 | U | 6 ש׳ 00 דק׳ | 4.7 | ו׳ 20.11 23:50 | שבת 21.11 05:50 | ⏳ #238 · ביקורת 14.11: הושלם; ה-dod לא ירוק לא מקוון: blockRefs 15/21 | דפדפן · [#238](https://github.com/talstilkol/lumen-md/pull/238) |
 | 4.9 | עורך מאפיינים (frontmatter) 🆕 | P0 (נדרש ל-P0) | U | בוצע (הוערך 6 ש׳ 00 דק׳) | 1.1 | — | — | ✅ #228 | דפדפן · [#228](https://github.com/talstilkol/lumen-md/pull/228) |
 | 4.10 | מסד נתונים שאפשר לערוך 🆕 | P0 (נדרש ל-P0) | U | 10 ש׳ 00 דק׳ | 4.9 | ב׳ 16.11 14:50 | ג׳ 17.11 00:50 | ⏳ #231 · ביקורת r2 16.11: PARTIAL 75 — החסר ב-notes | נבנה בלבד · [#231](https://github.com/talstilkol/lumen-md/pull/231) |
@@ -691,7 +691,7 @@
 | 4.12 | פתק יומי ולוח שנה 🆕 | P0 | U | 7 ש׳ 00 דק׳ | 1.1, 7.10 | ד׳ 18.11 02:50 | ד׳ 18.11 09:50 | ⏳ #249 · ביקורת r2 16.11: PARTIAL 85 — החסר ב-notes | Node · [#249](https://github.com/talstilkol/lumen-md/pull/249) |
 | 4.13 | משימות בכל הכספת 🆕 | P1 | S | 8 ש׳ 00 דק׳ | 8.4 | ד׳ 25.11 08:50 | ד׳ 25.11 16:50 | ⏳ #331 feat/vault-tasks (משימות בכל הכספת, סימון משנה רק את התיבה והתאריך, רק קובצי md) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox; Codex לא סקר (מכסה) | Node · [#331](https://github.com/talstilkol/lumen-md/pull/331) |
 | 4.14 | קורא PDF עם הערות 🆕 | P0 (נדרש ל-P0) | A | 11 ש׳ 00 דק׳ | 1.1 | ב׳ 16.11 22:50 | ג׳ 17.11 09:50 | ⏳ #272 · ביקורת 14.11: חלקי · (קורא PDF על pdf.js, הדגשות כ-W3C Web Annotation, העברה/שכפול בטוחים; CI ירוק על dcaa8d51; 10 ממצאי P2 לרשימת המשך בגוף ה-PR; ✅ אחרי המיזוג) | דפדפן · [#272](https://github.com/talstilkol/lumen-md/pull/272) |
-| 4.15 | קוצץ רשת v2 (התוסף הקיים, עובד באמת) | P1 | S | 10 ש׳ 00 דק׳ | 2.7, 7.10 | ד׳ 25.11 16:50 | ה׳ 26.11 02:50 | ⏳ ביקורת 14.11: חלקי — לא fork של Web Clipper; ‏dev עם 5 עמודים, לא 20 · קוד גמור — ממוזג ב-train-2 וברכבת 3; בדיקות יחידה לא מקוון: clipperV2 9/13 (חבילות חסרות לא מקוון)… | נבנה בלבד |
+| 4.15 | קוצץ רשת v2 (התוסף הקיים, עובד באמת) | P1 | S | 10 ש׳ 00 דק׳ | 2.7, 7.10 | ד׳ 25.11 16:50 | ה׳ 26.11 02:50 | ⏳ #1196 · cloud-complete (INT8 17.11 (lane FC2 #1196)); owed: Mac FC2-4.15-clipper (Defuddle/Readability) | נבנה בלבד |
 | 4.16 | לכידה מהירה (inbox) 🆕 | P1 | D | 6 ש׳ 00 דק׳ | 4.12 | ג׳ 1.12 04:20 | ג׳ 1.12 10:20 | ⏳ #268 · ביקורת 14.11: חלקי · (inbox.md: חלון לכידה ⌥⌘N, share target, קיצור PWA, תפריט; CI ירוק על c52a2c71, startup 459.9/460 KB)… | דפדפן · [#268](https://github.com/talstilkol/lumen-md/pull/268) |
 | 4.17 | תאימות JSON Canvas 🆕 | P2 | D | 4 ש׳ 00 דק׳ | 1.1, 4.19 | ג׳ 1.12 10:20 | ג׳ 1.12 14:20 | ⏳ #351 · feat/json-canvas (על #283; JSON Canvas ↔ Excalidraw עם round-trip ללא שינוי, מה שלא ניתן להביע מדווח; Vercel build ירוק (tsc -b מחמיר כולל בדיקות + vite build))… | Node · [#351](https://github.com/talstilkol/lumen-md/pull/351) |
 | 4.18 | פרסום לאתר סטטי משלך 🆕 | P2 | D | 5 ש׳ 00 דק׳ | 3.3 | ג׳ 1.12 14:20 | ג׳ 1.12 19:20 | ⏳ #354 · feat/publish-own (על #269; Publish site: עמוד לכל פתק, ניווט, חיפוש בלי ניקוד, RTL, 404, deploy ל-GitHub Pages ב-REST בלי force או zip)… | Node · [#354](https://github.com/talstilkol/lumen-md/pull/354) |
@@ -757,7 +757,7 @@
 
 **קבלה:** ריחוף < 150ms · אזכורים לא מקושרים נכונים על 30 מקרי זהב
 
-**פירוט הסטטוס:** ✅ #250 (0.9–1.3ms במטמון; 8/8 מקרי dev, 22 ה-test — 15.9; רינדור ב-main thread, לא ב-worker — 15.16)
+**פירוט הסטטוס:** ✅ #250 (0.9–1.3ms במטמון; 8/8 מקרי dev, 22 ה-test — 15.9; רינדור ב-main thread, לא ב-worker — 15.16) · INT8 17.11 (lane FC2 #1196): unlinked dev split: P=R=F1=1 on 10 mentions (shim); owed: Mac FC2-4.6-unlinked; test split · status before: ⏳ #250 · ביקורת 14.11: חלקי — הרינדור ב-main thread, לא ב-worker · (0.9–1.3ms במטמון; 8/8 מקרי dev, 22 ה-test — 15.9; רינדור ב-main thread, לא ב-worker — 15.16)
 
 **4.7 · הטמעות (`![[פתק]]`)** — `feat/embeds` · ממשק, עברית וידע · 7 ש׳ 00 דק׳ · מקור: מחקר פערים #3
 
@@ -769,7 +769,7 @@
 
 **קבלה:** תאימות לתחביר Obsidian על 20 קבצי בדיקה · מחזור = הודעה, לא קריסה
 
-**פירוט הסטטוס:** ✅ #224 · stage B1b 16.11 (verify/train-7 1a184547ae, shim v4): fixed: regression: W1.3 remarkObsidian turned ![[img]] into a bare <img src> before remarkEmbeds, so image embeds skipped workspace resolution / notFound / version / live tracking. After: embeds 48/56 -> 55/57 (2 left = shim's temml stand-in; 57/57 with temml absent as vite aliases it), embedsLive 3/4 -> 4/4, safeFiles 27/30 -> 28/30, all other Markdown-rendering tests unchanged vs base; startup 226,531 B gz; fix #1011, merged into verify/train-7 (063d3d2c82); owed: e2e/embeds.spec.ts in a browser; Quartz ofm.ts port not done (own implementation kept) · INT6b 17.11: status before → ⏳ #224 · ביקורת 14.11: הושלם; ה-dod לא ירוק לא מקוון: embeds 5/56
+**פירוט הסטטוס:** ✅ #224 · stage B1b 16.11 (verify/train-7 1a184547ae, shim v4): fixed: regression: W1.3 remarkObsidian turned ![[img]] into a bare <img src> before remarkEmbeds, so image embeds skipped workspace resolution / notFound / version / live tracking. After: embeds 48/56 -> 55/57 (2 left = shim's temml stand-in; 57/57 with temml absent as vite aliases it), embedsLive 3/4 -> 4/4, safeFiles 27/30 -> 28/30, all other Markdown-rendering tests unchanged vs base; startup 226,531 B gz; fix #1011, merged into verify/train-7 (063d3d2c82); owed: e2e/embeds.spec.ts in a browser; Quartz ofm.ts port not done (own implementation kept) · INT6b 17.11: status before → ⏳ #224 · ביקורת 14.11: הושלם; ה-dod לא ירוק לא מקוון: embeds 5/56 · INT8 17.11 (lane FC3 #1175): ofmConformance 24/24 (8 fail on base): ofm.ts v4.5.2 callout/wikilink/block-ref regexes vs Lumen; callout metadata [!tip|wide] read; owed: Mac: e2e embeds, KaTeX offline · status before: ⏳ #224 · cloud-complete (audit r3 PARTIAL); owed: e2e embeds; KaTeX offline; Quartz ofm.ts port step not done
 
 **4.8 · הפניות לבלוקים (`^id`)** — `feat/block-refs` · ממשק, עברית וידע · 6 ש׳ 00 דק׳ · מקור: מחקר פערים #3
 
@@ -855,7 +855,7 @@
 
 **קבלה:** קיצוץ 20 דפי זהב (7.10: ויקיפדיה CC BY-SA, נחלת הכלל, דפים שלנו): כותרת + גוף נכונים ב-≥ 90%
 
-**פירוט הסטטוס:** ⏳ קוד גמור — ממוזג ב-train-2 וברכבת 3; בדיקות יחידה לא מקוון: clipperV2 9/13 (חבילות חסרות לא מקוון); חסר: vitest אמיתי ו-15 דפי בדיקה
+**פירוט הסטטוס:** ⏳ קוד גמור — ממוזג ב-train-2 וברכבת 3; בדיקות יחידה לא מקוון: clipperV2 9/13 (חבילות חסרות לא מקוון); חסר: vitest אמיתי ו-15 דפי בדיקה · INT8 17.11 (lane FC2 #1196): scripts/golden/evals/clipper.mjs; scoring tested; owed: Mac FC2-4.15-clipper (Defuddle/Readability) · status before: ⏳ ביקורת 14.11: חלקי — לא fork של Web Clipper; ‏dev עם 5 עמודים, לא 20 · קוד גמור — ממוזג ב-train-2 וברכבת 3; בדיקות יחידה לא מקוון: clipperV2 9/13 (חבילות חסרות לא מקוון)…
 
 **4.16 · לכידה מהירה (inbox)** — `feat/quick-capture` · תשתית וביצועים · 6 ש׳ 00 דק׳ · מקור: מחקר פערים #10
 
@@ -1046,11 +1046,11 @@
 |---|---|---|---|---|---|---|---|---|---|
 | 6.0 | צינור המרת מודלים ל-ONNX ואירוח 🆕 | P0 (נדרש ל-P0) | D | 4 ש׳ 00 דק׳ | 0.10 | ג׳ 17.11 03:50 | ג׳ 17.11 07:50 | ⏳ #260 · ביקורת 14.11: הושלם בקוד; ה-workflow לא הורץ, ברישום אין קבצים ו-sha256 (W10.G8) · (צינור, רישום ושער; ריצת ההוכחה של 4 המודלים — אחרי 15.9(0)) | מחכה לטל · [#260](https://github.com/talstilkol/lumen-md/pull/260) |
 | 6.1 | הכתבה חיה מקומית 🆕 | P0 (נדרש ל-P0) | A | 10 ש׳ 00 דק׳ | 1.3, 7.1 | ד׳ 18.11 15:50 | ה׳ 19.11 01:50 | ⏳ #255 · ביקורת 14.11: חלקי — FLEURS validation WER ‏23.6%, מעל יעד 15%; Common Voice לא נמדד · (CI ב-WASM: FLEURS dev WER 8.9%, validation 23.6% — מעל יעד ה-15% (עברית בלבד 13.8%))… | מחכה לטל · [#255](https://github.com/talstilkol/lumen-md/pull/255) |
-| 6.2 | הקראה מקומית: החלטת רישוי וקול אנגלי 🆕 | P2 | A | 4 ש׳ 00 דק׳ | 1.5, 0.10 | ב׳ 23.11 00:35 | ב׳ 23.11 04:35 | ⏳ ביקורת 14.11: חלקי · קוד גמור — ממוזג בשלוש הרכבות; בדיקות היחידה על train-2 (shim עם vi.mock): 3/3 (מסלול קולות המערכת); חסר: החלטת רישוי לקול אנגלי (15.10) | Node |
+| 6.2 | הקראה מקומית: החלטת רישוי וקול אנגלי 🆕 | P2 | A | 4 ש׳ 00 דק׳ | 1.5, 0.10 | ב׳ 23.11 00:35 | ב׳ 23.11 04:35 | ⏳ #1200 · cloud-complete (INT8 17.11 (lane FC2 #1200)); owed: Mac FC2-6.2-misaki-pack; voice pin (15.10) | Node |
 | 6.3 | סוכן ניקוד עברי מקומי 🆕 | P0 (נדרש ל-P0) | A | 6 ש׳ 00 דק׳ | 7.1 | ה׳ 19.11 01:50 | ה׳ 19.11 07:50 | ⏳ ביקורת 14.11: חלקי · קוד גמור — ממוזג בשלוש הרכבות; בדיקות היחידה על train-2 (shim עם vi.mock): 26/26 שלב 1; שלב 2 (DictaBERT) לא בוצע — HF ומארח מודלים | Node |
 | 6.4 | תרגום מקומי בשלוש שכבות 🆕 | P0 (נדרש ל-P0) | A | 4 ש׳ 00 דק׳ | 6.5, 7.1, 6.0 | ה׳ 19.11 08:05 | ה׳ 19.11 12:05 | ⏳ קוד גמור — ממוזג בשלוש הרכבות; בדיקות היחידה על train-2 (shim עם vi.mock): 47/47 + #584; חסר: chrF למודלים מומרים (15.9) | Node · [#584](https://github.com/talstilkol/lumen-md/pull/584) |
 | 6.5 | זיהוי שפה מקומי 🆕 | P0 | A | 15 דק׳ | 1.1, 7.1 | ה׳ 19.11 07:50 | ה׳ 19.11 08:05 | ⏳ #256 (נבנה; 10/10 dev, 96.5% על 4,298 מחרוזות UI; CI ירוק מ-20.10 — בדיקת הפתק היומי של 4.12 מסננת `.crswap` ועושה polling; Tatoeba ≥ 95% נמדד רק אחרי 15.9(0), ואז ✅) | דפדפן · [#256](https://github.com/talstilkol/lumen-md/pull/256) |
-| 6.6 | תיאור תמונות מקומי 🆕 | P0 (נדרש ל-P0) | A | 4 ש׳ 00 דק׳ | 6.4 | ה׳ 19.11 12:05 | ה׳ 19.11 16:05 | ⏳ קוד גמור — ממוזג בשלוש הרכבות; בדיקות היחידה על train-2 (shim עם vi.mock): 15/15; חסר: מודלים אמיתיים ודירוג של טל | Node |
+| 6.6 | תיאור תמונות מקומי 🆕 | P0 (נדרש ל-P0) | A | 4 ש׳ 00 דק׳ | 6.4 | ה׳ 19.11 12:05 | ה׳ 19.11 16:05 | ⏳ #1196 · cloud-complete (INT8 17.11 (lane FC2 #1196)); owed: Mac FC2-6.6-caption-sheet, then the owner rates 50 | Node |
 | 6.7 | חיפוש תמונות לפי טקסט 🆕 | P2 | A | 3 ש׳ 00 דק׳ | 6.4, 8.4, 6.0, 7.10 | א׳ 22.11 11:35 | א׳ 22.11 14:35 | ⏳ קוד גמור — ממוזג בשלוש הרכבות; בדיקות היחידה על train-2 (shim עם vi.mock): 11/11; חסר: SigLIP וסט תמונות | Node |
 | 6.8 | שיחה עם PDF מקומית 🆕 | P0 (נדרש ל-P0) | A | 4 ש׳ 00 דק׳ | 5.5, 4.14, 7.10 | ה׳ 19.11 16:05 | ה׳ 19.11 20:05 | ⏳ #339 · feat/pdf-chat (BM25 עברי + embeddings מקומיים, ציטוטים מאומתים לעמוד ושורה; BM25 בלבד: 8/8 שאלות dev ב-top 3 על טקסט; ✅* — 15.17: npm run eval:pdf-chat) — נבדק רק ב-Node נקי… | דפדפן · [#339](https://github.com/talstilkol/lumen-md/pull/339) |
 | 6.9 | השלמה אוטומטית מקומית (FIM) 🆕 | P0 (נדרש ל-P0) | A | 3 ש׳ 00 דק׳ | 5.5, 5.7 | ה׳ 19.11 20:05 | ה׳ 19.11 23:05 | ⏳ #336 · feat/local-fim (Ollama suffix על qwen2.5-coder, debounce 150ms, אף הקשה לא מתחילה הורדה; ✅* — 15.17: npm run bench:fim -- --assert 300) — נבדק רק ב-Node נקי… | דפדפן · [#336](https://github.com/talstilkol/lumen-md/pull/336) |
@@ -1059,7 +1059,7 @@
 | 6.12 | fine-tune מקומי (LoRA) 🆕 | P2 | S | 4 ש׳ 00 דק׳ | 5.5 | ג׳ 24.11 20:05 | ד׳ 25.11 00:05 | ⏳ קוד גמור — ממוזג בשלוש הרכבות; בדיקות היחידה על train-2 (shim עם vi.mock): 18/18 עם #583 (בדיקה לחצה על כפתור העזרה); חסר: Mac של טל | Node · [#583](https://github.com/talstilkol/lumen-md/pull/583) |
 | 6.13 | ציטוטים: להרחיב את BibtexBlock הקיים 🆕 | P2 | U | 3 ש׳ 00 דק׳ | 8.1, 0.10, 7.10 | שבת 21.11 10:50 | שבת 21.11 13:50 | ⏳ #341 feat/citations (APA 7, Chicago, MLA 9 בעברית ובאנגלית, אופליין; DOI ו-citation-js לא נוספו) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox; Codex לא סקר (מכסה) | Node · [#341](https://github.com/talstilkol/lumen-md/pull/341) |
 | 6.14 | כלי `run_python` לסוכנים (על Pyodide הקיים) 🆕 | P2 | A | 1 ש׳ 00 דק׳ | 5.1 | א׳ 22.11 16:35 | א׳ 22.11 17:35 | ⏳ #279 (run_python על Pyodide ב-worker לכל קריאה, ערוצי רשת/אחסון/התקנים חסומים ונרשמים ביומן; e2e על Pyodide אמיתי ב-3 דפדפנים ו-prod: 0 בקשות; CI ירוק על 4f22348c; ✅ אחרי המיזוג) | דפדפן · [#279](https://github.com/talstilkol/lumen-md/pull/279) |
-| 6.15 | סוכן ניתוח נתונים 🆕 | P2 | A | 3 ש׳ 00 דק׳ | 6.14, 5.3, 7.10 | א׳ 22.11 17:35 | א׳ 22.11 20:35 | ⏳ קוד גמור — ממוזג בשלוש הרכבות; בדיקות היחידה על train-2 (shim עם vi.mock): 10/10; חסר: ציון מודל אמיתי | Node |
+| 6.15 | סוכן ניתוח נתונים 🆕 | P2 | A | 3 ש׳ 00 דק׳ | 6.14, 5.3, 7.10 | א׳ 22.11 17:35 | א׳ 22.11 20:35 | ⏳ #1196 · cloud-complete (INT8 17.11 (lane FC2 #1196)); owed: Mac FC2-6.15-data-analysis-model | Node |
 | 6.16 | סיכום פגישה מקומי 🆕 | P2 | A | 1 ש׳ 30 דק׳ | 6.1, 5.5, 4.13, 7.10 | ה׳ 26.11 06:50 | ה׳ 26.11 08:20 | ⏳ #353 · feat/meeting-notes (על #331; סוכן meeting-writer: החלטות, משימות עם אחראי ותאריך בפורמט 4.13, שאלות פתוחות, ייצוא .ics; meetingCore.test.ts עבר תחת ה-shim 4/0)… | Node · [#353](https://github.com/talstilkol/lumen-md/pull/353) |
 | 6.17 | ענן רק בבחירה — ביקורת כל המסלולים 🆕 | P0 | A | 1 ש׳ 30 דק׳ | 6.1, 5.4, 6.4, 6.10, 2.4 | ה׳ 19.11 23:05 | ו׳ 20.11 00:35 | ⏳ קוד גמור — ממוזג בשלוש הרכבות; בדיקות היחידה על train-2 (shim עם vi.mock): 37/37; חסר: e2e local-only | Node |
 
@@ -1098,7 +1098,7 @@
 
 **קבלה:** החלטה 15.10 מיושמת ומתועדת · 0 רכיבי GPL ב-bundle (שער 0.10) · 0 בקשות רשת
 
-**פירוט הסטטוס:** ⏳ קוד גמור — ממוזג בשלוש הרכבות; בדיקות היחידה על train-2 (shim עם vi.mock): 3/3 (מסלול קולות המערכת); חסר: החלטת רישוי לקול אנגלי (15.10)
+**פירוט הסטטוס:** ⏳ קוד גמור — ממוזג בשלוש הרכבות; בדיקות היחידה על train-2 (shim עם vi.mock): 3/3 (מסלול קולות המערכת); חסר: החלטת רישוי לקול אנגלי (15.10) · INT8 17.11 (lane FC2 #1200): English G2P port of misaki's lexicon; englishG2P 9/9; full dicts: rules vs silver 81.7% of 22,792 inflections (a parity run vs misaki's Python was denied here); owed: Mac FC2-6.2-misaki-pack; voice pin (15.10) · status before: ⏳ ביקורת 14.11: חלקי · קוד גמור — ממוזג בשלוש הרכבות; בדיקות היחידה על train-2 (shim עם vi.mock): 3/3 (מסלול קולות המערכת); חסר: החלטת רישוי לקול אנגלי (15.10)
 
 **6.3 · סוכן ניקוד עברי מקומי** — `feat/nikud` · AI וסוכנים · 6 ש׳ 00 דק׳ · מקור: מחליף Dicta Nakdan, נספח 19 · **מחכה לטל: 15.11** · היה 5.3
 
@@ -1136,6 +1136,8 @@
 6.6.3. מאמת: לא ריק, לא שם קובץ
 
 **קבלה:** על כל 50 התמונות של סט התיאורים (30 Crossmodal-3600 עם הפניות בעברית + 20 מ-Commons עם ההפניות שטל הכין ב-15.11): ≥ 80% מקבלים ≥ 4 מתוך 5 בדירוג טל (15.15)
+
+**פירוט הסטטוס:** INT8 17.11 (lane FC2 #1196): scripts/caption/rating-sheet.mjs; bench:models --captions-out; owed: Mac FC2-6.6-caption-sheet, then the owner rates 50 · status before: ⏳ קוד גמור — ממוזג בשלוש הרכבות; בדיקות היחידה על train-2 (shim עם vi.mock): 15/15; חסר: מודלים אמיתיים ודירוג של טל
 
 **6.7 · חיפוש תמונות לפי טקסט** — `feat/image-search` · AI וסוכנים · 3 ש׳ 00 דק׳ · מקור: יכולת חדשה, נספח 19 · היה 5.7
 
@@ -1224,6 +1226,8 @@
 
 **קבלה:** ≥ 85% תשובות מספריות נכונות על 20 שאלות זהב (מודל אמיתי, טל 15.13)
 
+**פירוט הסטטוס:** INT8 17.11 (lane FC2 #1196): data-analysis.model.mjs: loopback only, temp 0, seed 42, one repair turn; tested with a fake fetch; owed: Mac FC2-6.15-data-analysis-model · status before: ⏳ קוד גמור — ממוזג בשלוש הרכבות; בדיקות היחידה על train-2 (shim עם vi.mock): 10/10; חסר: ציון מודל אמיתי
+
 **6.16 · סיכום פגישה מקומי** — `feat/meeting-notes` · AI וסוכנים · 1 ש׳ 30 דק׳ · מקור: מחליף Otter · **מחכה לטל: 15.11** · היה 5.16
 
 6.16.1. voice.memo → writer: החלטות, משימות + אחראי + תאריך, שאלות פתוחות
@@ -1254,7 +1258,7 @@
 | 7.3 | eval לכל 14 הסוכנים | P0 | A | 3 ש׳ 00 דק׳ | 5.3, 7.1, 5.4 | ו׳ 20.11 00:35 | ו׳ 20.11 03:35 | ⏳ קוד גמור — ממוזג בשלוש הרכבות; בדיקות היחידה על train-2 (shim עם vi.mock): 162/162; חסר: eval חי | Node |
 | 7.4 | רופא AI שלם | P1 | U | 2 ש׳ 00 דק׳ | 6.1, 6.3, 6.4, 6.6 | שבת 21.11 13:50 | שבת 21.11 15:50 | ⏳ קוד גמור — ממוזג בשלוש הרכבות; בדיקות היחידה על train-2 (shim עם vi.mock): 18/18; חסר: e2e ai-doctor ומכונת טל | Node |
 | 7.5 | OCR ב-CI | P1 | S | 2 ש׳ 00 דק׳ | 7.1 | ד׳ 25.11 00:05 | ד׳ 25.11 02:05 | ⏳ קוד גמור — ממוזג בשלוש הרכבות; בדיקות היחידה על train-2 (shim עם vi.mock): 46/46 + #582 (שלב ocr ב-ci:local); חסר: cer-node עם tesseract.js | Node · [#582](https://github.com/talstilkol/lumen-md/pull/582) |
-| 7.6 | ה-reranker הקיים: למדוד ולהחליט, וספריית קריאה | P0 (נדרש ל-P0) | A | 2 ש׳ 30 דק׳ | 5.2, 8.4, 7.1 | ו׳ 20.11 03:35 | ו׳ 20.11 06:05 | ⏳ #345 · cloud-complete (audit r3 PARTIAL); owed: bge-reranker-v2-m3 not measured; real embedding model | נבנה בלבד · [#345](https://github.com/talstilkol/lumen-md/pull/345) |
+| 7.6 | ה-reranker הקיים: למדוד ולהחליט, וספריית קריאה | P0 (נדרש ל-P0) | A | 2 ש׳ 30 דק׳ | 5.2, 8.4, 7.1 | ו׳ 20.11 03:35 | ו׳ 20.11 06:05 | ⏳ #1172 · cloud-complete (INT8 17.11 (lane FC3 #1172)); owed: Mac bge-reranker-v2-m3 measurement (FC3-W10.B18-rerank) | נבנה בלבד · [#345](https://github.com/talstilkol/lumen-md/pull/345) |
 | 7.7 | סיכום יומי: אימות שהתיקונים מ-1.1 סוגרים את T33 | P1 | A | 15 דק׳ | 1.1 | ב׳ 23.11 04:35 | ב׳ 23.11 04:50 | ⏳ #254 (תיקייה קבועה תוקנה + בדיקת הקבלה; ״מאז הביקור האחרון״ = החלטת מוצר — 15.16) | נבנה בלבד · [#254](https://github.com/talstilkol/lumen-md/pull/254) |
 | 7.8 | רתמת מדידה בדפדפן אמיתי 🆕 | P0 (נדרש ל-P0) | D | 2 ש׳ 00 דק׳ | 6.1, 6.3, 6.4, 6.6, 6.9, 7.6, 2.6 | ו׳ 20.11 08:50 | ו׳ 20.11 10:50 | ⏳ #421 · ביקורת 14.11: חלקי · (על #345; npm run bench:models ב-Chromium אמיתי עם WebGPU או WASM: זמן טעינה, p50/p95, זיכרון, איכות; כותב measured רק בריצה מלאה ואמיתית (מסרב ל-SwiftShader וחלקי))… | נבנה בלבד · [#421](https://github.com/talstilkol/lumen-md/pull/421) |
 | 7.9 | עיבוד ה-eval האמיתי של טל | P0 | A | 3 ש׳ 00 דק׳ | 7.3, 15.3 | שבת 21.11 01:05 | שבת 21.11 04:05 | ⬜ | — |
@@ -1319,7 +1323,7 @@
 
 **קבלה:** nDCG@10 עם reranker ≥ +5 נקודות, או החלטה מתועדת להסיר / לכבות
 
-**פירוט הסטטוס:** ⏳ #345 + W10.B18 #706 (על feat/embed-compete): ברירת המחדל היא BM25 לבד — על הסט הקשה (eval/golden/retrieval-hard) ה-reranker המילולי מוריד nDCG@10: פיתוח 0.948→0.918, מוחזק 0.952→0.907; המילולי נשאר הגדרה להפעלה; rerankHard.test.ts מצמיד את ברירת המחדל למנצח; bge-reranker לא נמדד — יהפוך לברירת מחדל רק עם קבלת מדידה מ-Mac שעוברת את BM25 ב-3 נקודות לפחות בפיתוח ובמוחזק · INT6b 17.11: status before → ⏳ #345 + W10.B18 #706 (על feat/embed-compete): ברירת המחדל היא BM25 לבד — על הסט הקשה (eval/golden/retrieval-hard) ה-reranker המילולי מוריד nDCG@10: פיתוח 0.948→0.918, מוחזק 0.952→0.907…
+**פירוט הסטטוס:** ⏳ #345 + W10.B18 #706 (על feat/embed-compete): ברירת המחדל היא BM25 לבד — על הסט הקשה (eval/golden/retrieval-hard) ה-reranker המילולי מוריד nDCG@10: פיתוח 0.948→0.918, מוחזק 0.952→0.907; המילולי נשאר הגדרה להפעלה; rerankHard.test.ts מצמיד את ברירת המחדל למנצח; bge-reranker לא נמדד — יהפוך לברירת מחדל רק עם קבלת מדידה מ-Mac שעוברת את BM25 ב-3 נקודות לפחות בפיתוח ובמוחזק · INT6b 17.11: status before → ⏳ #345 + W10.B18 #706 (על feat/embed-compete): ברירת המחדל היא BM25 לבד — על הסט הקשה (eval/golden/retrieval-hard) ה-reranker המילולי מוריד nDCG@10: פיתוח 0.948→0.918, מוחזק 0.952→0.907… · INT8 17.11 (lane FC3 #1172): scripts/eval/lib/crossEncoder.ts: any cross-encoder by id, excluded licences refused; rerank.eval.ts records p95; owed: Mac bge-reranker-v2-m3 measurement (FC3-W10.B18-rerank) · status before: ⏳ #345 · cloud-complete (audit r3 PARTIAL); owed: bge-reranker-v2-m3 not measured; real embedding model
 
 **7.7 · סיכום יומי: אימות שהתיקונים מ-1.1 סוגרים את T33** — `fix/digest` · AI וסוכנים · 15 דק׳ · מקור: T33 · **מחכה לטל: 15.16** · היה 6.5
 
@@ -1865,7 +1869,7 @@
 | W1.9 | מיזוג תלת-כיווני אוטומטי לפני דיאלוג קונפליקט | P1 | S | 4 ש׳ 00 דק׳ | 3.3, 3.4, 4.4 | ה׳ 26.11 23:50 | ו׳ 27.11 03:50 | ⏳ #366 · **מוכן למיזוג** — (על #275 + safe-git; מיזוג תלת-כיווני לפני דיאלוג: 459/500 עריכות מקבילות (91.8%) בלי דיאלוג, front matter תקין תמיד)… | Node · [#366](https://github.com/talstilkol/lumen-md/pull/366) |
 | W1.10 | גרף שמחזיק 10,000 פתקים וגרף מקומי | P1 | U | 5 ש׳ 00 דק׳ | 8.4 | ב׳ 23.11 16:35 | ב׳ 23.11 21:35 | ⏳ #400 · ביקורת 14.11: חלקי — 13–14 fps מול ≥30 הנדרש; ‏graph10k 12/14 ב-shim; אין axe לגרף · (על #274; גרף WebGL עם Barnes–Hut ב-worker, גרף מקומי לעומק 1–3, מסננים; graph10k 14/14)… | נבנה בלבד · [#400](https://github.com/talstilkol/lumen-md/pull/400) |
 | W1.11 | תאימות לקובצי Obsidian Bases (.base) | P1 | U | 7 ש׳ 00 דק׳ | 4.10, 4.11 | ב׳ 23.11 21:35 | ג׳ 24.11 04:35 | ⏳ #358 · ביקורת 14.11: חלקי — קובצי הזהב נגזרו מהתיעוד, לא יוצאו מ-Obsidian · feat/obsidian-bases (על #267; קריאה, תצוגה ועריכה של קובצי .base, 66/68 פונקציות, round-trip 20/20)… | מחכה לטל · [#358](https://github.com/talstilkol/lumen-md/pull/358) |
-| W1.12 | קשרים, rollups, לוח שנה וציר זמן במסד הנתונים | P1 | U | 7 ש׳ 00 דק׳ | 4.10, W1.11 | ג׳ 24.11 04:35 | ג׳ 24.11 11:35 | ⏳ #397 (על #358; קשרים, rollups (count/sum/avg/min/max/earliest/latest), לוח שנה וציר זמן; basesRelations 41/41, מיון rollup 220→35–60ms; לא נבדק ב-Sandbox (חסום עד 1.12)) | נבנה בלבד · [#397](https://github.com/talstilkol/lumen-md/pull/397) |
+| W1.12 | קשרים, rollups, לוח שנה וציר זמן במסד הנתונים | P1 | U | 7 ש׳ 00 דק׳ | 4.10, W1.11 | ג׳ 24.11 04:35 | ג׳ 24.11 11:35 | ⏳ #1190 · cloud-complete (INT8 17.11 (lane FC1 #1190)); owed: Mac FC1/e2e, FC1/e2e-nightly | נבנה בלבד · [#397](https://github.com/talstilkol/lumen-md/pull/397) |
 | W1.13 | לכידה קולית מקומית ל-inbox | P1 | A | 5 ש׳ 00 דק׳ | 4.16, 6.1 | ג׳ 1.12 16:20 | ג׳ 1.12 21:20 | ⏳ #376 · (על #268; הקלטה ותמלול מקומי לתיבת הלכידה, /?capture=voice וקיצור PWA; Vercel Sandbox (Node 24): vitest 317/3152, dod 27/27, e2e chromium 4/4 (964ms ללחיצה→הקלטה, 0 בקשות יוצאות))… | דפדפן · [#376](https://github.com/talstilkol/lumen-md/pull/376) |
 | W1.14 | קורא EPUB ומצב קריאה לקיצוצים | P1 | U | 7 ש׳ 00 דק׳ | 4.14, 4.15 | ה׳ 26.11 04:35 | ה׳ 26.11 11:35 | ⏳ #391 (על #272; קורא EPUB עם מפענח משלנו (ZIP על DecompressionStream, בלי חבילה חדשה) + מצב קריאה לקליפים; epub 15/15, reader 2/2 ב-Chromium; לא נבדק ב-Sandbox (חסום עד 1.12)) | דפדפן · [#391](https://github.com/talstilkol/lumen-md/pull/391) |
 | W1.15 | כל ההדגשות במקום אחד: חיפוש, תגיות וייצוא לפתק | P1 | U | 4 ש׳ 00 דק׳ | 4.14, W1.14 | ה׳ 26.11 11:35 | ה׳ 26.11 15:35 | ⏳ #393 (על #391; כל ההדגשות במקום אחד: חיפוש ב-5,000 הדגשות < 100ms, תגיות, ייצוא לפתק עם קישור לעמוד/פרק; 7/7 + 1/1; לא נבדק ב-Sandbox (חסום עד 1.12)) | נבנה בלבד · [#393](https://github.com/talstilkol/lumen-md/pull/393) |
@@ -1874,7 +1878,7 @@
 | W1.18 | OCR: מילים לועזיות בתוך שורות עבריות ופריסת עמודות | P1 | A | 5 ש׳ 00 דק׳ | 7.5 | ד׳ 25.11 04:50 | ד׳ 25.11 09:50 | ⏳ #357 · ביקורת 14.11: חלקי — יעדי העמודות לא הושגו (סדר מילים 85.1% מול ≥95%) · feat/ocr-mixed-layout (על #278; קריאה חוזרת של מילים לועזיות, חיתוך עמודות וסדר RTL, שכבת טקסט)… | דפדפן · [#357](https://github.com/talstilkol/lumen-md/pull/357) |
 | W1.19 | שיתוף אמיתי: הרשאות, שרשורי תגובות וקישורים עם תפוגה | P1 | S | 8 ש׳ 00 דק׳ | 3.6 | ו׳ 27.11 03:50 | ו׳ 27.11 11:50 | ⏳ #381 · (על #237; תפקידים נאכפים בשרת, שרשורי תגובות, קישורים עם תפוגה וביטול (ניתוק תוך ~1s), @mentions, תיקוני RTL; לוגיקת שרת plain-Node 26/26, לקוח 11/11; לא נבדק ב-Sandbox (חסום עד 1.12))… | Node · [#381](https://github.com/talstilkol/lumen-md/pull/381) |
 | W1.20 | גילוי הרשאות לפני התקנה וסריקה אוטומטית של כל גרסת תוסף | P1 | S | 5 ש׳ 00 דק׳ | 11.2 | ו׳ 27.11 11:50 | ו׳ 27.11 16:50 | ⏳ #367 · **מוכן למיזוג** — (על #289; מסך הרשאות לפני התקנה + סריקה לכל גרסה; גם מחזיר את #289 מתחת לתקציב (460.4→459.2))… | מחכה לטל · [#367](https://github.com/talstilkol/lumen-md/pull/367) |
-| W1.21 | ערכות נושא ו-CSS snippets בטוחים | P1 | U | 4 ש׳ 00 דק׳ | 11.2, W3.1 | ב׳ 14.12 02:35 | ב׳ 14.12 06:35 | ⏳ #403 · (על #367 + #389; 5 ערכות נושא AA בבהיר וכהה, snippets מ-.lumen ו-.obsidian; מנקה CSS עמד ב-32 מקרים עוינים; בדפדפן אמיתי: snippet מנוקה 0 בקשות מול 7 בגרסה הגולמית)… | נבנה בלבד · [#403](https://github.com/talstilkol/lumen-md/pull/403) |
+| W1.21 | ערכות נושא ו-CSS snippets בטוחים | P1 | U | 4 ש׳ 00 דק׳ | 11.2, W3.1 | ב׳ 14.12 02:35 | ב׳ 14.12 06:35 | ⏳ #1190 · cloud-complete (INT8 17.11 (lane FC1 #1190)); owed: Mac FC1/e2e, FC1/e2e-webkit-themes | נבנה בלבד · [#403](https://github.com/talstilkol/lumen-md/pull/403) |
 | W1.22 | תקציב תגובתיות: INP ומהקשה עד ציור | P1 | D | 5 ש׳ 00 דק׳ | 8.1, 8.4, 8.3 | ד׳ 2.12 20:20 | ה׳ 3.12 01:20 | ⏳ #385 (על #274; e2e INP ב-CPU 4×: p75 < 100ms, מקש→ציור p95 < 16/33ms ב-50KB/2MB, שער רגרסיה 10%; אין baseline עד ריצה ראשונה; לא נבדק — אין דפדפנים/vitest) | נבנה בלבד · [#385](https://github.com/talstilkol/lumen-md/pull/385) |
 | W1.23 | קורא מסך אמיתי בעברית ועמידה בתקנות הנגישות בישראל | P1 | U | 7 ש׳ 00 דק׳ | 10.1 | ג׳ 24.11 11:35 | ג׳ 24.11 18:35 | ⏳ #360 · feat/a11y-hebrew-sr (על #290; הכרזות לקורא מסך בעברית, reflow ב-320px תוקן, הצהרת נגישות לפי ת״י 5568)… | מחכה לטל · [#360](https://github.com/talstilkol/lumen-md/pull/360) |
 | W1.24 | בנייה והפצה בלי GitHub Actions: חנויות ומנהלי חבילות | P2 | D | 6 ש׳ 00 דק׳ | 11.5, 13.3, 13.4, 13.7 | ה׳ 3.12 01:20 | ה׳ 3.12 07:20 | ⏳ #423 · (על #355; release.mjs packages: Homebrew cask, winget 1.6 (נבדק מול הסכמות הרשמיות), Flathub + AppStream, AUR — לעולם לא hash מזויף; packaging 16/16 עם ruby -c ו-bash -n)… | נבנה בלבד · [#423](https://github.com/talstilkol/lumen-md/pull/423) |
@@ -2001,7 +2005,7 @@ W1.10.4. מדידה ב-e2e/perf-vault
 
 **קבלה:** 10,000 צמתים ו-50,000 קשתות: ≥ 30fps בגלילה וזום, פריסה ראשונה < 3 שניות · גרף מקומי נפתח < 200ms · axe נקי על הגרף, כל צומת נגיש במקלדת
 
-**פירוט הסטטוס:** ⏳ #400 (על #274; גרף WebGL עם Barnes–Hut ב-worker, גרף מקומי לעומק 1–3, מסננים; graph10k 14/14; 13–14 fps ב-SwiftShader בלי GPU — fps על GPU אמיתי לא נמדד; לא נבדק ב-Sandbox (חסום עד 1.12))
+**פירוט הסטטוס:** ⏳ #400 (על #274; גרף WebGL עם Barnes–Hut ב-worker, גרף מקומי לעומק 1–3, מסננים; graph10k 14/14; 13–14 fps ב-SwiftShader בלי GPU — fps על GPU אמיתי לא נמדד; לא נבדק ב-Sandbox (חסום עד 1.12)) · INT8 17.11 (lane FC1): e2e/perf-vault.spec.ts already measures 10k notes/50k links ≥30 fps (@nightly); the L4 pack's "no e2e" note is out of date; owed: Mac L1/W6.36-perf run · status before: ⏳ #400 · ביקורת 14.11: חלקי — 13–14 fps מול ≥30 הנדרש; ‏graph10k 12/14 ב-shim; אין axe לגרף · (על #274; גרף WebGL עם Barnes–Hut ב-worker, גרף מקומי לעומק 1–3, מסננים; graph10k 14/14)…
 
 **W1.11 · תאימות לקובצי Obsidian Bases (.base)** — `feat/obsidian-bases` · ממשק, עברית וידע · 7 ש׳ 00 דק׳ · מקור: Obsidian 1.9 Bases, 1.10, 1.14 kanban; alternativeto 8.2025
 
@@ -2022,6 +2026,8 @@ W1.12.3. תצוגות לוח שנה וציר זמן (react-big-calendar `rtl`, M
 W1.12.4. וירטואליזציה ל-10,000 שורות; ייבוא וייצוא CSV
 
 **קבלה:** 30 מקרי זהב של rollup נכונים · 10,000 שורות: גלילה ≥ 55fps, סינון < 100ms · גרירה בלוח שנה משנה רק את מאפיין התאריך בקובץ (round-trip)
+
+**פירוט הסטטוס:** INT8 17.11 (lane FC1 #1190): e2e/bases-calendar-table.spec.ts (drag round trip; @nightly 10k scroll ≥55 fps) written, listed; owed: Mac FC1/e2e, FC1/e2e-nightly · status before: ⏳ #397 (על #358; קשרים, rollups (count/sum/avg/min/max/earliest/latest), לוח שנה וציר זמן; basesRelations 41/41, מיון rollup 220→35–60ms; לא נבדק ב-Sandbox (חסום עד 1.12))
 
 **W1.13 · לכידה קולית מקומית ל-inbox** — `feat/voice-capture` · AI וסוכנים · 5 ש׳ 00 דק׳ · מקור: obsidian.md/changelog 2026-10-22 mobile 1.15.0; Heptabase widget v1.34
 
@@ -2116,7 +2122,7 @@ W1.21.4. 5 ערכות נושא מובנות, אחת עם טיפוגרפיה עב
 
 **קבלה:** snippet עם url חיצוני לא יוצר בקשת רשת (יומן הפרטיות) · 5/5 ערכות נושא עוברות axe בניגודיות AA בעברית ובאנגלית · החלפת ערכת נושא < 100ms בלי רענון
 
-**פירוט הסטטוס:** ⏳ #403 (על #367 + #389; 5 ערכות נושא AA בבהיר וכהה, snippets מ-.lumen ו-.obsidian; מנקה CSS עמד ב-32 מקרים עוינים; בדפדפן אמיתי: snippet מנוקה 0 בקשות מול 7 בגרסה הגולמית; לא נבדק ב-Sandbox (חסום עד 1.12))
+**פירוט הסטטוס:** ⏳ #403 (על #367 + #389; 5 ערכות נושא AA בבהיר וכהה, snippets מ-.lumen ו-.obsidian; מנקה CSS עמד ב-32 מקרים עוינים; בדפדפן אמיתי: snippet מנוקה 0 בקשות מול 7 בגרסה הגולמית; לא נבדק ב-Sandbox (חסום עד 1.12)) · INT8 17.11 (lane FC1 #1190): e2e/themes-axe-switch.spec.ts (5 themes × light/dark × he/en; switch timing) written, listed; owed: Mac FC1/e2e, FC1/e2e-webkit-themes · status before: ⏳ #403 · (על #367 + #389; 5 ערכות נושא AA בבהיר וכהה, snippets מ-.lumen ו-.obsidian; מנקה CSS עמד ב-32 מקרים עוינים; בדפדפן אמיתי: snippet מנוקה 0 בקשות מול 7 בגרסה הגולמית)…
 
 **W1.22 · תקציב תגובתיות: INP ומהקשה עד ציור** — `perf/inp-budget` · תשתית וביצועים · 5 ש׳ 00 דק׳ · מקור: performance.dev — How is Linear so fast (6.2026)
 
@@ -2290,14 +2296,14 @@ W1.36.3. להוריד את כלל vendor: excalidraw core בחזרה ל-700 KB
 | W2.11 | חיפוש עברי עם מורפולוגיה והרחבת שאילתה | P1 | A | 5 ש׳ 00 דק׳ | 5.2, 7.6 | ג׳ 24.11 13:50 | ג׳ 24.11 18:50 | ⏳ #362 feat/hebrew-search-morph (על #345; למטיזציה, כתיב מלא/חסר, מילים נרדפות; HeQ dev 1.0000→1.0000, probe מורפולוגיה 0.9004→0.9544, מלא/חסר 2/30→30/30)… | נבנה בלבד · [#362](https://github.com/talstilkol/lumen-md/pull/362) |
 | W2.12 | שאילתות מוטמעות וחיפושים שמורים | P1 | U | בוצע (הוערך 5 ש׳ 00 דק׳) | 11.3, 4.13 | — | — | ✅ #371 · audit r3 DONE; dod green in Node and browser (shim chromium) (INT6b 17.11) | דפדפן · [#371](https://github.com/talstilkol/lumen-md/pull/371) |
 | W2.13 | מצב מתאר ופעולות בלוק על Markdown רגיל | P1 | U | 6 ש׳ 00 דק׳ | 9.7 | ה׳ 26.11 20:35 | ו׳ 27.11 02:35 | ⏳ #370 · **מוכן למיזוג** — (על #252; מצב מתאר: 10 פעולות בלוק בשני העורכים, קיפולים לכל פתק מחוץ לקובץ)… | מחכה לטל · [#370](https://github.com/talstilkol/lumen-md/pull/370) |
-| W2.14 | פרשן קיצוץ על מודל מקומי ותבניות לאתרים עבריים | P1 | A | 4 ש׳ 00 דק׳ | 4.15, 2.7 | ה׳ 26.11 13:20 | ה׳ 26.11 17:20 | ⏳ #364 · feat/clip-interpreter (על #308; משתני פרומפט במודל מקומי בלבד, guard להזרקה, תבניות YouTube/arXiv/GitHub; chunk הקליפ פוצל 103→99.6 KB)… | Node · [#364](https://github.com/talstilkol/lumen-md/pull/364) |
+| W2.14 | פרשן קיצוץ על מודל מקומי ותבניות לאתרים עבריים | P1 | A | 4 ש׳ 00 דק׳ | 4.15, 2.7 | ה׳ 26.11 13:20 | ה׳ 26.11 17:20 | ⏳ #1172 · cloud-complete (INT8 17.11 (lane FC3 #1172)); owed: Mac FC3-W2.14-clip-interpreter (qwen2.5:3b) | Node · [#364](https://github.com/talstilkol/lumen-md/pull/364) |
 | W2.15 | ייבוא הדגשות מ-Kindle, Kobo, Readwise ו-Zotero | P2 | S | 4 ש׳ 00 דק׳ | W1.15 | ו׳ 27.11 22:50 | שבת 28.11 02:50 | ⏳ #408 · (על #393; ייבוא מ-Kindle, Kobo (sql.js), Readwise (CSV) ו-Zotero (דרך שולחן העבודה, רק 127.0.0.1:23119) בלי כפילויות; 10/10 בשני אזורי זמן, ייבוא שני לא הוסיף כלום)… | נבנה בלבד · [#408](https://github.com/talstilkol/lumen-md/pull/408) |
 | W2.16 | ציטוטים ברמת Zotero: דיאלוג מאוחד ו-[@key] | P2 | U | 5 ש׳ 00 דק׳ | 6.13, W2.15 | שבת 28.11 03:35 | שבת 28.11 08:35 | ⏳ #411 · (על ענף 6.13; דיאלוג ציטוט מאוחד ו-[@key], תבניות משלנו APA/Chicago/MLA/ישראלי (החלטה 15.10, בלי citeproc), ייצוא pandoc/DOCX; pandoc 11/11, דיאלוג ב-2 הקשות 3/3)… | נבנה בלבד · [#411](https://github.com/talstilkol/lumen-md/pull/411) |
 | W2.17 | מצגות מפתקים ומקנבס | P2 | U | 5 ש׳ 00 דק׳ | W1.16 | ד׳ 2.12 06:05 | ד׳ 2.12 11:05 | ⏳ #406 · (על #401; מצגות מפתקים (כותרות ו----, Note:/הערות:) ומ-frames בקנבס, חצים לפי כיוון, PDF דרך print, תצוגת מציג מסונכרנת, מסך שני בשולחן העבודה)… | נבנה בלבד · [#406](https://github.com/talstilkol/lumen-md/pull/406) |
 | W2.18 | Mermaid לקנבס ודיאגרמה מ-AI מקומי | P2 | A | 3 ש׳ 00 דק׳ | W1.16 | ד׳ 2.12 07:20 | ד׳ 2.12 10:20 | ⏳ #404 · (על #401; Mermaid לצורות קנבס + ״צייר לי״ במודל מקומי בלבד (agent עם executors מוגדרים לא נוגע בענן); mermaidGolden 21/21 עם Mermaid 11.16.1 אמיתי)… | נבנה בלבד · [#404](https://github.com/talstilkol/lumen-md/pull/404) |
 | W2.19 | סנכרון ברשת המקומית בלי ענן | P2 | S | 8 ש׳ 00 דק׳ | 3.4, 3.5 | שבת 28.11 02:50 | שבת 28.11 10:50 | ⏳ #609 · ביקורת 14.11: חלקי — אין mDNS במובייל ואין בדיקה ל-1,000 סבבים · ‏8d7d277b05 (על #392) — mDNS בשולחן העבודה (crate Rust בלי תלויות): שם אקראי בזמן חלון ההצמדה… | נבנה בלבד · [#609](https://github.com/talstilkol/lumen-md/pull/609) |
-| W2.20 | שיתוף חי מוצפן מקצה לקצה עם שרת שלא רואה תוכן | P2 | S | 6 ש׳ 00 דק׳ | 3.6, W1.19 | שבת 28.11 10:50 | שבת 28.11 16:50 | ⏳ #387 · (על #381; שמות, צבעים וסמנים מוצפנים במפתח החדר; ״חדרים חתומים״ בשרת דוחים כל עדכון קריא; קישורי שיתוף רק לחדרים מוצפנים; תוקן פער ב-W1.19 (הודעת sync מסוג 4 ככתיבה))… | Node · [#387](https://github.com/talstilkol/lumen-md/pull/387) |
-| W2.21 | פתיחה קרה מהירה: מעטפת מוכנה והידרציה עצלה | P1 | D | 5 ש׳ 00 דק׳ | 8.1, 8.2, 8.4 | ה׳ 3.12 19:20 | ו׳ 4.12 00:20 | ⏳ #386 · ביקורת 14.11: חלקי — הצביעה לקריאה בלבד; אין בדיקת 10k מול 100 ואין CLS · (על #248; note-boot.js מצייר את 4,000 התווים הראשונים של הפתק האחרון לפני ה-bundle)… | נבנה בלבד · [#386](https://github.com/talstilkol/lumen-md/pull/386) |
+| W2.20 | שיתוף חי מוצפן מקצה לקצה עם שרת שלא רואה תוכן | P2 | S | 6 ש׳ 00 דק׳ | 3.6, W1.19 | שבת 28.11 10:50 | שבת 28.11 16:50 | ⏳ #1174 · cloud-complete (INT8 17.11 (lane FC3 #1174)); owed: receipts+label (sync); Mac FC3-W2.20-soak, FC3-W2.20-lan-latency (two machines) | Node · [#387](https://github.com/talstilkol/lumen-md/pull/387) |
+| W2.21 | פתיחה קרה מהירה: מעטפת מוכנה והידרציה עצלה | P1 | D | 5 ש׳ 00 דק׳ | 8.1, 8.2, 8.4 | ה׳ 3.12 19:20 | ו׳ 4.12 00:20 | ⏳ #1173 · cloud-complete (INT8 17.11 (lane FC3 #1173)); owed: Mac FC3-W2.21-coldstart (production build) | נבנה בלבד · [#386](https://github.com/talstilkol/lumen-md/pull/386) |
 | W2.22 | כספת של 100,000 פתקים | P2 | D | 6 ש׳ 00 דק׳ | 8.4, W11.Q2 | א׳ 20.12 19:20 | ב׳ 21.12 01:20 | ⏳ #420 · (על #400; אינדקס קומפקטי: ב-100,000 פתקים חיפוש 300–420→73–148ms (יעד < 200), שמירה→אינדקס 8.6ms, זיכרון אינדקס 4,335→757 MB, בנייה 29→7s, soak 2 דק׳ 0 שגיאות; תוצאות זהות לאינדקס הישן)… | נבנה בלבד · [#420](https://github.com/talstilkol/lumen-md/pull/420) |
 | W2.23 | ייצוא PDF והדפסה ברמת Word לעברית | P1 | U | 5 ש׳ 00 דק׳ | W1.3 | ו׳ 27.11 02:35 | ו׳ 27.11 07:35 | ⏳ #414 · (על #410; הדפסה/PDF: כותרת, מספרי עמודים עבריים (א/ה), בלי שבירת טבלאות ותמונות, כותרות טבלה חוזרות, \newpage, תוכן עניינים, כיוון לפי הפתק)… | נבנה בלבד · [#414](https://github.com/talstilkol/lumen-md/pull/414) |
 | W2.24 | דוח פרטיות שאפשר להוכיח | P2 | S | 3 ש׳ 00 דק׳ | 2.4, 6.17, W1.27 | שבת 28.11 16:50 | שבת 28.11 19:50 | ⏳ #395 · (על #361; דוח פרטיות חתום Ed25519 בפורמט minisign + verify-report, מצב ביקורת, השוואה ל-mitmproxy, טבלת תוצאות לכל גרסה, privacy-labels לחנויות; 15/15 ב-shim)… | Node · [#395](https://github.com/talstilkol/lumen-md/pull/395) |
@@ -2453,7 +2459,7 @@ W2.14.4. שומר prompt injection (2.7) על תוכן הדף
 
 **קבלה:** ≥ 85% שדות נכונים על 20 דפי זהב · 0 בקשות ענן ב-local-only (יומן הפרטיות) · קיצוץ עם פרשנות < 10s במודל 3B על מחשב נייד
 
-**פירוט הסטטוס:** ⏳ #364 feat/clip-interpreter (על #308; משתני פרומפט במודל מקומי בלבד, guard להזרקה, תבניות YouTube/arXiv/GitHub; chunk הקליפ פוצל 103→99.6 KB; בדיקה מלאה ב-Vercel Sandbox (Node 24): typecheck 0, vitest 322 קבצים, startup 444.2/460, clipper-v2 1/1; ✅* לכל היותר — בעלים: Ollama qwen2.5:3b על 3 אתרים אמיתיים)
+**פירוט הסטטוס:** ⏳ #364 feat/clip-interpreter (על #308; משתני פרומפט במודל מקומי בלבד, guard להזרקה, תבניות YouTube/arXiv/GitHub; chunk הקליפ פוצל 103→99.6 KB; בדיקה מלאה ב-Vercel Sandbox (Node 24): typecheck 0, vitest 322 קבצים, startup 444.2/460, clipper-v2 1/1; ✅* לכל היותר — בעלים: Ollama qwen2.5:3b על 3 אתרים אמיתיים) · INT8 17.11 (lane FC3 #1172): npm run eval:clip-interpreter on 20 golden pages via localInterpreter(); clipInterpreterEval 10/10, clipInterpreter 11/11; owed: Mac FC3-W2.14-clip-interpreter (qwen2.5:3b) · status before: ⏳ #364 · feat/clip-interpreter (על #308; משתני פרומפט במודל מקומי בלבד, guard להזרקה, תבניות YouTube/arXiv/GitHub; chunk הקליפ פוצל 103→99.6 KB)…
 
 **W2.15 · ייבוא הדגשות מ-Kindle, Kobo, Readwise ו-Zotero** — `feat/highlight-import` · נתונים ואבטחה · 4 ש׳ 00 דק׳ · מקור: wiki.heptabase.com/changelog v1.84.0 (Zotero beta)
 
@@ -2519,7 +2525,7 @@ W2.20.4. בדיקה: שרת מדומה שמחפש plaintext
 
 **קבלה:** 0 מחרוזות plaintext מהמסמך באחסון ובתעבורה של השרת (בדיקה) · השהיה בין שני משתתפים < 150ms ב-LAN · מסמך 1MB עם 5 משתתפים: 0 אובדן ב-1,000 עריכות אקראיות
 
-**פירוט הסטטוס:** ⏳ #387 (על #381; שמות, צבעים וסמנים מוצפנים במפתח החדר; ״חדרים חתומים״ בשרת דוחים כל עדכון קריא; קישורי שיתוף רק לחדרים מוצפנים; תוקן פער ב-W1.19 (הודעת sync מסוג 4 ככתיבה); plain-Node 66/66 + 26/26 + 11/11; לא נבדק ב-Sandbox (חסום עד 1.12))
+**פירוט הסטטוס:** ⏳ #387 (על #381; שמות, צבעים וסמנים מוצפנים במפתח החדר; ״חדרים חתומים״ בשרת דוחים כל עדכון קריא; קישורי שיתוף רק לחדרים מוצפנים; תוקן פער ב-W1.19 (הודעת sync מסוג 4 ככתיבה); plain-Node 66/66 + 26/26 + 11/11; לא נבדק ב-Sandbox (חסום עד 1.12)) · INT8 17.11 (lane FC3 #1174): collab soak: 1 MB note, 5 participants, 1,000 edits, 3 seeds, 0 lost; real bug fixed (E2EE compaction overflowed the 4 MB room: 4.11 MB → 1.04 MB peak); collabSoak 7/7 (real yjs); owed: receipts+label (sync); Mac FC3-W2.20-soak, FC3-W2.20-lan-latency (two machines) · status before: ⏳ #387 · (על #381; שמות, צבעים וסמנים מוצפנים במפתח החדר; ״חדרים חתומים״ בשרת דוחים כל עדכון קריא; קישורי שיתוף רק לחדרים מוצפנים; תוקן פער ב-W1.19 (הודעת sync מסוג 4 ככתיבה))…
 
 **W2.21 · פתיחה קרה מהירה: מעטפת מוכנה והידרציה עצלה** — `perf/cold-start` · תשתית וביצועים · 5 ש׳ 00 דק׳ · מקור: performance.dev — How is Linear so fast (6.2026)
 
@@ -2530,7 +2536,7 @@ W2.21.4. מדידה בשולחן העבודה ובשני הטלפונים
 
 **קבלה:** פתיחה קרה עד פתק אחרון ניתן לעריכה: < 800ms בשולחן העבודה, < 1.5s בטלפון · כספת של 10,000 פתקים נפתחת מהר כמו של 100 (הפרש < 15%) · 0 קפיצות פריסה (CLS < 0.05)
 
-**פירוט הסטטוס:** ⏳ #386 (על #248; note-boot.js מצייר את 4,000 התווים הראשונים של הפתק האחרון לפני ה-bundle; e2e cold-start: < 800ms שולחן עבודה, < 1.5s Pixel 7; modulepreload והידרציה עצלה ממתינים למדידה; לא נבדק)
+**פירוט הסטטוס:** ⏳ #386 (על #248; note-boot.js מצייר את 4,000 התווים הראשונים של הפתק האחרון לפני ה-bundle; e2e cold-start: < 800ms שולחן עבודה, < 1.5s Pixel 7; modulepreload והידרציה עצלה ממתינים למדידה; לא נבדק) · INT8 17.11 (lane FC3 #1173): cold-start.spec now checks each start opened its seeded vault and asserts the 100-note CLS (non-vacuous); owed: Mac FC3-W2.21-coldstart (production build) · status before: ⏳ #386 · ביקורת 14.11: חלקי — הצביעה לקריאה בלבד; אין בדיקת 10k מול 100 ואין CLS · (על #248; note-boot.js מצייר את 4,000 התווים הראשונים של הפתק האחרון לפני ה-bundle)…
 
 **W2.22 · כספת של 100,000 פתקים** — `feat/vault-100k` · תשתית וביצועים · 6 ש׳ 00 דק׳ · מקור: Obsidian 1.14 (fix for input lag in large vaults)
 
@@ -2738,8 +2744,8 @@ W3.11.5. נשארים על Yjs 13 (החלטה, W11.S16); ‏attribution דרך �
 | W4.16 | 7 קלטי Markdown איטיים מה-fuzzing ו-sourcemaps שמשתחזרים | P1 | S | 5 ש׳ 00 דק׳ | W1.27 | א׳ 29.11 08:50 | א׳ 29.11 13:50 | ⏳ #460 · ביקורת 14.11: חלקי — fuzz של מיליון קלטים לא רץ; ‏.map לא דטרמיניסטי · (על #361; הסיבה: אלפי [ ] בפסקה ורשימות בעומק 231)… | נבנה בלבד · [#460](https://github.com/talstilkol/lumen-md/pull/460) |
 | W4.17 | mutation ≥ 80 במודולים הקריטיים | P1 | D | 5 ש׳ 00 דק׳ | 0.15 | שבת 5.12 20:20 | א׳ 6.12 01:20 | ⏳ #474 · (על verify/train + 2 commits של #427; ‏9 מודולים קריטיים ≥ 80: manifest 97.5, privacyLedger 85, sanitizer 93.8, encryption 85.7, conflict 92; שער mutation:check עם קבלה ו-hash של המקור)… | נבנה בלבד · [#474](https://github.com/talstilkol/lumen-md/pull/474) |
 | W4.18 | 6 שפות בלי דובר: לסמן ״בטא״ ולבקש סקירה מהקהילה | P1 | U | 4 ש׳ 00 דק׳ | 9.1, 9.5 | ב׳ 14.12 06:35 | ב׳ 14.12 10:35 | ⏳ #459 · (על verify/train; ar, ru, fr, de, ja, zh-CN מסומנות ״בטא״ בהגדרות ובלוח הפקודות, ״הצע תרגום טוב יותר״ פותח issue מוכן בלי שרת; localeBeta 5/5)… | נבנה בלבד · [#459](https://github.com/talstilkol/lumen-md/pull/459) |
-| W4.19 | סנכרון בשתי לחיצות למשתמש לא טכני | P1 | S | 8 ש׳ 00 דק׳ | 3.5, W1.8 | א׳ 29.11 13:50 | א׳ 29.11 21:50 | ⏳ #483 · (על #378; אשף בעברית קודם: תיקיית סנכרון של שולחן העבודה (iCloud/Dropbox/Drive/OneDrive) בלי OAuth, אחר כך relay מוצפן, אחר כך WebDAV; מפתח של 13 מילים עבריות עם מילת בדיקה)… | מחכה לטל · [#483](https://github.com/talstilkol/lumen-md/pull/483) |
-| W4.20 | הצפנת כספת במנוחה עם ה-Argon2id שכבר כתבנו ב-W1.7 | P2 | S | 4 ש׳ 00 דק׳ | 11.4, W1.7 | א׳ 29.11 21:50 | ב׳ 30.11 01:50 | ⏳ #472 · (על verify/train + #399; Argon2id מכויל למכשיר (46 MiB×1 או 19 MiB×2), כספת PBKDF2 עוברת ל-Argon2id בפתיחה הבאה; נמצא ב-#399: 3 מ-5 הפרמטרים של OWASP מתחת לרצפה שלו — הוצעו רק 2 שעוברים)… | נבנה בלבד · [#472](https://github.com/talstilkol/lumen-md/pull/472) |
+| W4.19 | סנכרון בשתי לחיצות למשתמש לא טכני | P1 | S | 8 ש׳ 00 דק׳ | 3.5, W1.8 | א׳ 29.11 13:50 | א׳ 29.11 21:50 | ⏳ #1193 · cloud-complete (INT8 17.11 (lane FC2 #1193)); owed: owner: Entra app + /lumen-runtime.json; receipts+label (sign-in) | מחכה לטל · [#483](https://github.com/talstilkol/lumen-md/pull/483) |
+| W4.20 | הצפנת כספת במנוחה עם ה-Argon2id שכבר כתבנו ב-W1.7 | P2 | S | 4 ש׳ 00 דק׳ | 11.4, W1.7 | א׳ 29.11 21:50 | ב׳ 30.11 01:50 | ⏳ #1186 · cloud-complete (INT8 17.11 (lane FC1 #1186)); owed: Mac FC1/argon2 + FC1/argon2-wasm-reproducible; Pixel 7 timing (owner/device); receipts+label (crypto) | נבנה בלבד · [#472](https://github.com/talstilkol/lumen-md/pull/472) |
 | W4.21 | קורא מסך אוטומטי: VoiceOver ו-NVDA דרך Guidepup | P1 | U | 7 ש׳ 00 דק׳ | W1.23 | שבת 28.11 11:35 | שבת 28.11 18:35 | ⏳ #467 · ביקורת 14.11: חלקי — ‎@guidepup/playwright לא ב-package.json, אז test:sr לא רץ · (על verify/train; toMatchAriaSnapshot לזרימות העבריות בשער ה-e2e)… | נבנה בלבד · [#467](https://github.com/talstilkol/lumen-md/pull/467) |
 | W4.22 | בניית Android ב-Sandbox ו-iOS ב-Mac בפקודה אחת, עד TestFlight פנימי | P1 | D | 8 ש׳ 00 דק׳ | 13.4 | א׳ 6.12 01:20 | א׳ 6.12 09:20 | ⏳ #493 · (על verify/train-2; npm run mobile:android (cap sync + Gradle: AAB ו-APK חתומים, דחיית מפתח debug) ו-mobile:ios (xcodebuild archive + העלאה ל-TestFlight דרך מפתח API של App Store Connect))… | נבנה בלבד · [#493](https://github.com/talstilkol/lumen-md/pull/493) |
 | W4.23 | לקמפל את קוד ה-Rust וה-native שלא קומפל | P2 | D | 6 ש׳ 00 דק׳ | W3.9, W1.17 | א׳ 6.12 09:20 | א׳ 6.12 15:20 | ⏳ #548 ‏c237772fe9 — ההרתמה דוחה מפתחות כפולים; real-cargo.sh (cargo check --locked + test ל-crates בלי תלויות). חסר: Swift ו-Gradle | נבנה בלבד · [#548](https://github.com/talstilkol/lumen-md/pull/548) |
@@ -2956,7 +2962,7 @@ W4.19.4. מצב לכל קובץ (W1.8) גלוי מהאשף
 
 **קבלה:** משתמש חדש מסנכרן שני מכשירים ב-≤ 6 הקשות וב-≤ 2 דקות (נמדד ב-W1.29) · אובדן מפתח מוסבר לפני הסיום; שחזור עם המפתח עובד
 
-**פירוט הסטטוס:** ⏳ #483 (על #378; אשף בעברית קודם: תיקיית סנכרון של שולחן העבודה (iCloud/Dropbox/Drive/OneDrive) בלי OAuth, אחר כך relay מוצפן, אחר כך WebDAV; מפתח של 13 מילים עבריות עם מילת בדיקה; סטטוס לכל קובץ; 2 לחיצות במכשיר 1, 3 במכשיר 2 (Chromium); syncSetup 15/15 כולל 2 מכשירים דרך שרת relay אמיתי — 0 טקסט פתקים בבקשות; חסר: OAuth של Drive/Dropbox ושרת relay ציבורי (טל); dodMock) · ביקורת 12.11: תוקן ב-aa47bbb20 — תקרת דיסק גלובלית, מגבלה יומית לכתובת (hash מתחלף, בלי IP), הזמנה או proof-of-work ל-relay ציבורי, קריאה נחשבת פעילות; syncSetup 19/19
+**פירוט הסטטוס:** ⏳ #483 (על #378; אשף בעברית קודם: תיקיית סנכרון של שולחן העבודה (iCloud/Dropbox/Drive/OneDrive) בלי OAuth, אחר כך relay מוצפן, אחר כך WebDAV; מפתח של 13 מילים עבריות עם מילת בדיקה; סטטוס לכל קובץ; 2 לחיצות במכשיר 1, 3 במכשיר 2 (Chromium); syncSetup 15/15 כולל 2 מכשירים דרך שרת relay אמיתי — 0 טקסט פתקים בבקשות; חסר: OAuth של Drive/Dropbox ושרת relay ציבורי (טל); dodMock) · ביקורת 12.11: תוקן ב-aa47bbb20 — תקרת דיסק גלובלית, מגבלה יומית לכתובת (hash מתחלף, בלי IP), הזמנה או proof-of-work ל-relay ציבורי, קריאה נחשבת פעילות; syncSetup 19/19 · INT8 17.11 (lane FC2 #1193): OneNote client id at run time (/lumen-runtime.json or the user's own app), no VITE_ name, allow-list untouched; onenoteClientId 6/6 (4 fail on old), onenoteSignIn 14/14, secretsScanLive 13/13; owner checklist 1.79/10.155 updated (INT8); owed: owner: Entra app + /lumen-runtime.json; receipts+label (sign-in) · status before: ⏳ #483 · (על #378; אשף בעברית קודם: תיקיית סנכרון של שולחן העבודה (iCloud/Dropbox/Drive/OneDrive) בלי OAuth, אחר כך relay מוצפן, אחר כך WebDAV; מפתח של 13 מילים עבריות עם מילת בדיקה)…
 
 **W4.20 · הצפנת כספת במנוחה עם ה-Argon2id שכבר כתבנו ב-W1.7** — `feat/vault-argon2id` · נתונים ואבטחה · 4 ש׳ 00 דק׳ · מקור: status 11.4, W1.7
 
@@ -2966,7 +2972,7 @@ W4.20.3. הגירה של כספות קיימות עם PBKDF2
 
 **קבלה:** 11.4 ✅ על hash-wasm · יעד m=64MiB, ‏t=3: פתיחה ≤ 1s במחשב, ≤ 2s ב-Pixel 7 · וקטורי RFC 9106 עוברים
 
-**פירוט הסטטוס:** ⏳ #472 (על verify/train + #399; Argon2id מכויל למכשיר (46 MiB×1 או 19 MiB×2), כספת PBKDF2 עוברת ל-Argon2id בפתיחה הבאה; נמצא ב-#399: 3 מ-5 הפרמטרים של OWASP מתחת לרצפה שלו — הוצעו רק 2 שעוברים; vaultArgon2 6/6, vaultEncryption 27/28 (מגבלת harness); כישלון ה-e2e לא מהקוד — ה-spec מייבא /src; חסר: מדידה ב-Pixel 7) · ביקורת 12.11: תוקן ב-7f0bfc789 — המעבר ל-Argon2id רק בהסכמה (כפתור עם אזהרה לעדכן כל המכשירים), פתיחה לא כותבת כלום; כספות חדשות עדיין Argon2id
+**פירוט הסטטוס:** ⏳ #472 (על verify/train + #399; Argon2id מכויל למכשיר (46 MiB×1 או 19 MiB×2), כספת PBKDF2 עוברת ל-Argon2id בפתיחה הבאה; נמצא ב-#399: 3 מ-5 הפרמטרים של OWASP מתחת לרצפה שלו — הוצעו רק 2 שעוברים; vaultArgon2 6/6, vaultEncryption 27/28 (מגבלת harness); כישלון ה-e2e לא מהקוד — ה-spec מייבא /src; חסר: מדידה ב-Pixel 7) · ביקורת 12.11: תוקן ב-7f0bfc789 — המעבר ל-Argon2id רק בהסכמה (כפתור עם אזהרה לעדכן כל המכשירים), פתיחה לא כותבת כלום; כספות חדשות עדיין Argon2id · INT8 17.11 (lane FC1 #1186): in-repo C→WASM Argon2 fill: 64 MiB t=3 5,579→458 ms (L3 bench median 220 ms); RFC 9106 §5.3 both paths; argon2Wasm 5/5, macPackL3 13/13; L3 verdict: same 1,000 ms budget, the in-house impl must meet it when hash-wasm is absent; owed: Mac FC1/argon2 + FC1/argon2-wasm-reproducible; Pixel 7 timing (owner/device); receipts+label (crypto) · status before: ⏳ #472 · (על verify/train + #399; Argon2id מכויל למכשיר (46 MiB×1 או 19 MiB×2), כספת PBKDF2 עוברת ל-Argon2id בפתיחה הבאה; נמצא ב-#399: 3 מ-5 הפרמטרים של OWASP מתחת לרצפה שלו — הוצעו רק 2 שעוברים)…
 
 **W4.21 · קורא מסך אוטומטי: VoiceOver ו-NVDA דרך Guidepup** — `feat/sr-automation` · ממשק, עברית וידע · 7 ש׳ 00 דק׳ · מקור: status W1.23, W3.8 (axe לא רץ)
 
@@ -3135,7 +3141,7 @@ W4.36.3. 0.14: לספור אוטומטית ב-20 ה-PR-ים הבאים כמה כ
 | W5.2 | ★ כללי האזכור האחיד וציטוט אקדמי ישראלי | P2 | U | 8 ש׳ 00 דק׳ | W2.16 | ב׳ 30.11 09:05 | ב׳ 30.11 17:05 | ⏳ #457 · (על #411; כללי האזכור האחיד מהדורה 3 (2021): פסיקה, חקיקה, תקנות, הצעות חוק, ספרים ומאמרים; זיהוי 30 סוגי הליכים; דיאלוג בחירה מהמספר שליד הסמן)… | נבנה בלבד · [#457](https://github.com/talstilkol/lumen-md/pull/457) |
 | W5.3 | ★ בודק דקדוק וסגנון עברי מקומי (לא רק איות) | P1 | A | 15 ש׳ 00 דק׳ | 9.2, W2.4 | ד׳ 25.11 15:50 | ה׳ 26.11 06:50 | ⏳ #437 (על #257; כללי מספר ומין, הכי…ביותר, את/עם, ה׳ הידיעה בסמיכות, משלב; 14/14; כיסוי כללים 200/200 (בדיקה מחוללת, לא recall), שגיאות שווא 0/200 ו-0/1,302 משפטי HeQ אמיתיים… | נבנה בלבד · [#437](https://github.com/talstilkol/lumen-md/pull/437) |
 | W5.4 | ★ תצוגת בידי (bidi): לראות ולתקן סימני כיוון בלתי נראים | P1 | U | 6 ש׳ 00 דק׳ | 9.7 | ב׳ 30.11 17:05 | ב׳ 30.11 23:05 | ⏳ #439 · (על #252; תגיות ל-12 סימני כיוון בשני העורכים, Trojan Source באדום, אזהרה בהדבקה, ניקוי בצעד undo אחד; bidiMarks 15/15, 30/30 שורות מסומנות, 30 שורות הזהב זהות אחרי ניקוי ב-Chromium)… | דפדפן · [#439](https://github.com/talstilkol/lumen-md/pull/439) |
-| W5.5 | ★ הדבקה מ-PDF עברי: תיקון טקסט הפוך ומשובש | P1 | U | 7 ש׳ 00 דק׳ | W1.4 | ב׳ 30.11 23:05 | ג׳ 1.12 06:05 | ⏳ #442 · (על feat/paste-fidelity; 100 שורות סינתטיות דרך PDF אמיתי ו-pdf.js: 96/100 שורות הפוכות תוקנו, 0 הצעות על 1,400+ מחרוזות עבריות תקינות, אותיות סופיות 46/47)… | דפדפן · [#442](https://github.com/talstilkol/lumen-md/pull/442) |
+| W5.5 | ★ הדבקה מ-PDF עברי: תיקון טקסט הפוך ומשובש | P1 | U | 7 ש׳ 00 דק׳ | W1.4 | ב׳ 30.11 23:05 | ג׳ 1.12 06:05 | ⏳ #1196 · cloud-complete (INT8 17.11 (lane FC2 #1196)); owed: Mac FC2-W5.5-real-pdfs (owner's PDFs + review sheet) | דפדפן · [#442](https://github.com/talstilkol/lumen-md/pull/442) |
 | W5.6 | ★ קריאה נגישה בעברית: ניקוד לתצוגה בלבד, גופנים לדיסלקציה והקראה מסונכרנת | P1 | U | 7 ש׳ 00 דק׳ | 6.3 | ג׳ 1.12 06:05 | ג׳ 1.12 13:05 | ⏳ #447 · (על verify/train; ניקוד לתצוגה בלבד (הקובץ לא משתנה, נבדק בבייטים), פריסה לדיסלקציה (Noto Sans Hebrew — אין גופן דיסלקציה פתוח עם עברית; OpenDyslexic ללטינית), הקראה עם הדגשת מילה)… | דפדפן · [#447](https://github.com/talstilkol/lumen-md/pull/447) |
 | W5.7 | ★ לכידה מ-WhatsApp ו-Telegram: ייבוא שיחה ושיתוף הודעה לכספת | P1 | D | 7 ש׳ 00 דק׳ | 4.16 | ב׳ 7.12 03:20 | ב׳ 7.12 10:20 | ⏳ #478 · (על verify/train; WhatsApp ‏Android/iOS בעברית/אנגלית/ערבית (שני סדרי תאריך, לפנה״צ/אחה״צ, סימני כיוון) ו-Telegram JSON; פתק ליום או לשיחה עם מדיה; הודעה בודדת לתיבת הדואר)… | נבנה בלבד · [#478](https://github.com/talstilkol/lumen-md/pull/478) |
 | W5.8 | מצב כתיבת ספר: פרקים, יעדי מילים, הרכבה ל-EPUB ול-PDF עבריים | P1 | U | 10 ש׳ 00 דק׳ | 4.1, W2.23 | ג׳ 1.12 13:05 | ג׳ 1.12 23:05 | ⏳ #465 · (על verify/train; ספר = פתק אינדקס בפורמט Longform (נפתח גם ב-Obsidian), יעדי מילים לפרק ולספר, ספירת מילים עברית; EPUB 3 RTL — epubcheck 5.3.0 על ספר של 30 פרקים: 0 שגיאות, 0 אזהרות)… | נבנה בלבד · [#465](https://github.com/talstilkol/lumen-md/pull/465) |
@@ -3143,7 +3149,7 @@ W4.36.3. 0.14: לספור אוטומטית ב-20 ה-PR-ים הבאים כמה כ
 | W5.10 | ★ קישור שיתוף מוצפן בלי שרת: הפתק בתוך ה-URL, המפתח ב-# | P1 | S | 5 ש׳ 00 דק׳ | 2.4, 3.4 | ב׳ 30.11 19:50 | ג׳ 1.12 00:50 | ⏳ #448 · (על verify/train; פתק ומפתח ב-#fragment בלבד (AES-GCM-256 + deflate), צפייה בלי חשבון, תפוגה אופציונלית, תקרה 32,768 תווים ומעליה קובץ .lumenshare מוצפן; linkShare 8/8)… | נבנה בלבד · [#448](https://github.com/talstilkol/lumen-md/pull/448) |
 | W5.11 | מצב עיתונאי: ניקוי EXIF, השחרה אמיתית ופתקים מוצפנים בנפרד | P2 | S | 7 ש׳ 00 דק׳ | 2.6, W2.23 | ג׳ 1.12 00:50 | ג׳ 1.12 07:50 | ⏳ #473 · (כל 3 החלקים; השחרה אמיתית ב-DOCX, HTML, PDF ו-MD דרך נקודת ייצוא אחת, נכשלת סגור; pdftotext: 0/50 קבצים עם סוד (בקרה: 50/50 דולפים), DOCX XML: 0/50; ניקוי מטא-דאטה של תמונות בייצוא)… | נבנה בלבד · [#473](https://github.com/talstilkol/lumen-md/pull/473) |
 | W5.12 | מטריצת סקירת ספרות מה-PDF-ים בכספת | P1 | A | 10 ש׳ 00 דק׳ | 6.8, W1.11 | ה׳ 26.11 22:20 | ו׳ 27.11 08:20 | ⏳ #438 · (על #339; 5 שדות למאמר, ערך נשמר רק עם ציטוט שנמצא בעמוד, אחרת null; קובץ Literature review.base; ‏10/10; סט פיתוח 24/25 שדות, 0 ערכים בלי ציטוט; חסר: מודל אמיתי ו-20 מאמרי זהב (בעלים))… | נבנה בלבד · [#438](https://github.com/talstilkol/lumen-md/pull/438) |
-| W5.13 | ★ מצב סטודנט: הקלטת הרצאה → תמליל עם זמנים → סיכום → כרטיסי חזרה | P2 | A | 10 ש׳ 00 דק׳ | W1.13, W3.3, 6.11 | ג׳ 1.12 21:20 | ד׳ 2.12 07:20 | ⏳ #441 · (על #376; הקלטה → תמלול עם חותמות זמן → סיכום מתוך התמלול → כרטיסי cloze עם ▶ לרגע; סימון ״חשוב!״; ‏studentMode 10/10, מקליט 2/2 ב-Chromium offline)… | דפדפן · [#441](https://github.com/talstilkol/lumen-md/pull/441) |
+| W5.13 | ★ מצב סטודנט: הקלטת הרצאה → תמליל עם זמנים → סיכום → כרטיסי חזרה | P2 | A | 10 ש׳ 00 דק׳ | W1.13, W3.3, 6.11 | ג׳ 1.12 21:20 | ד׳ 2.12 07:20 | ⏳ #1196 · cloud-complete (INT8 17.11 (lane FC2 #1196)); owed: Mac FC2-W5.13-lecture-timing (90-min recording) | דפדפן · [#441](https://github.com/talstilkol/lumen-md/pull/441) |
 | W5.14 | ★ מתמטיקה בתוך טקסט עברי: נוסחאות LTR בשורה RTL בלי שבירה | P1 | U | 7 ש׳ 00 דק׳ | 9.7, W2.8 | ד׳ 2.12 14:05 | ד׳ 2.12 21:05 | ⏳ #446 · (על #252, בלי W2.8 — שתי ערימות שהתפצלו; נוסחה = בידוד LTR בתצוגה, בעורך ובהדפסה, OMML ב-DOCX 50/50; 50 שורות זהב 0/50 → 50/50 בתצוגה, 11/50 → 50/50 בעורך; Ctrl+M; 3 תבניות לימוד)… | נבנה בלבד · [#446](https://github.com/talstilkol/lumen-md/pull/446) |
 | W5.15 | ★ זמן ישראלי: שבוע א׳–ה׳, תאריך עברי במאפיינים ודדליינים שמכבדים חגים | P2 | U | 5 ש׳ 00 דק׳ | W2.10, W1.12 | ה׳ 3.12 01:05 | ה׳ 3.12 06:05 | ⏳ #450 · ביקורת 14.11: חלקי — ימי עבודה לא ב-rollups · (על #396; ימי עבודה א׳–ה׳, דדליין שזז ליום העבודה הבא עם הסבר (חוק הפרשנות §10), תאריך עברי במאפיינים וב-DB)… | נבנה בלבד · [#450](https://github.com/talstilkol/lumen-md/pull/450) |
 | W5.16 | ★ תבניות הגשה אקדמיות ישראליות ב-DOCX | P2 | U | 6 ש׳ 00 דק׳ | W2.23, W2.16 | ה׳ 3.12 06:05 | ה׳ 3.12 12:05 | ⏳ #464 · (על verify/train; 5 פרופילי מוסדות מהנחיות שנקראו (העברית, בר-אילן, חיפה, הפתוחה, ת״א רפואה); דף שער, תוכן עניינים של Word, מספור, RTL, ביבליוגרפיה; הערות שוליים אמיתיות בכל ייצוא)… | נבנה בלבד · [#464](https://github.com/talstilkol/lumen-md/pull/464) |
@@ -3153,7 +3159,7 @@ W4.36.3. 0.14: לספור אוטומטית ב-20 ה-PR-ים הבאים כמה כ
 | W5.20 | פקודות קוליות בעברית (״צור פתק״, ״חפש…״) מקומית | P2 | A | 7 ש׳ 00 דק׳ | W4.13 | ו׳ 27.11 13:20 | ו׳ 27.11 20:20 | ⏳ #458 · (על #454; פקודה ״פקודה קולית״ — כפתור, לא מילת הפעלה; דקדוק של 20 כוונות בעברית ובאנגלית; ״מחק פתק״ שואל לפני; voiceIntents 7/7; סט הפיתוח 200/200 ו-0/20 שגיאות שווא (לא סט מוחזק))… | נבנה בלבד · [#458](https://github.com/talstilkol/lumen-md/pull/458) |
 | W5.21 | ★ כיתה פרטית: מורה משתף תבנית, תלמידים מגישים, הערות מוצפנות | P2 | S | 12 ש׳ 00 דק׳ | W2.20, W2.19 | ג׳ 1.12 07:50 | ג׳ 1.12 19:50 | ⏳ #488 · (על #483; קופסאות חתומות ב-WebCrypto בלבד (ECDH P-256 חד-פעמי, HKDF, AES-GCM, ריפוד לגדלים), מצב תיבת-הגשה append-only ב-relay (אין דריסה ומחיקה), מפתח לכל תלמיד ומשימה)… | נבנה בלבד · [#488](https://github.com/talstilkol/lumen-md/pull/488) |
 | W5.22 | ייצוא אקדמי ל-LaTeX עם עברית (XeLaTeX + polyglossia) | P2 | U | 7 ש׳ 00 דק׳ | W2.16 | ה׳ 3.12 12:05 | ה׳ 3.12 19:05 | ⏳ #468 · (על verify/train; babel (bidi=basic ב-LuaLaTeX, default ב-XeLaTeX) במקום polyglossia; ציטוטים ל-natbib, רשימת מקורות APA בכיוון לכל פריט)… | נבנה בלבד · [#468](https://github.com/talstilkol/lumen-md/pull/468) |
-| W5.23 | סנכרון Zotero דרך ה-Web API, בלי Zotero Desktop | P2 | D | 5 ש׳ 00 דק׳ | W2.15 | ב׳ 7.12 17:20 | ב׳ 7.12 22:20 | ⏳ #485 · (על #411; סנכרון קריאה בלבד ומצטבר (If-Modified-Since-Version, 304), 50 פריטים לבקשה, Backoff/429; המפתח באחסון הסודות, קטגוריית research ביומן הפרטיות)… | נבנה בלבד · [#485](https://github.com/talstilkol/lumen-md/pull/485) |
+| W5.23 | סנכרון Zotero דרך ה-Web API, בלי Zotero Desktop | P2 | D | 5 ש׳ 00 דק׳ | W2.15 | ב׳ 7.12 17:20 | ב׳ 7.12 22:20 | ⏳ #1194 · cloud-complete (INT8 17.11 (lane FC2 #1194)); owed: Mac FC2-W5.23-zotero-file (owner's real export) | נבנה בלבד · [#485](https://github.com/talstilkol/lumen-md/pull/485) |
 | W5.24 | אוטומציות בלי קוד: ״כש… אז…״ עם הרצת ניסיון | P2 | U | 8 ש׳ 00 דק׳ | 4.1, 5.11 | ה׳ 3.12 19:05 | ו׳ 4.12 03:05 | ⏳ #471 · (על verify/train; טריגרים: פתק נוצר, תגית, מאפיין, יומי; פעולות: העברה, תגית, תבנית, הוספה ליומי; הרצת ניסיון = המתכנן עצמו, undo מדויק בבייט, הגנת לולאות (עומק 3))… | נבנה בלבד · [#471](https://github.com/talstilkol/lumen-md/pull/471) |
 | W5.25 | קיימות: ממסר סנכרון מוצפן בתשלום אופציונלי ו-Open Collective | P2 | D | 5 ש׳ 00 דק׳ | W4.8, W4.27 | ב׳ 7.12 22:20 | ג׳ 8.12 03:20 | ⏳ #490 · (על #469; דף תמיכה ועלויות בעברית ובאנגלית בלי סקריפטים; GitHub Sponsors (0%) ו-Open Collective דרך Open Source Collective (10%))… | נבנה בלבד · [#490](https://github.com/talstilkol/lumen-md/pull/490) |
 | W5.26 | מילון, אוצר מילים ומילים נרדפות בעברית בתוך העורך, offline | P2 | U | 5 ש׳ 00 דק׳ | 1.7, 9.2 | ו׳ 4.12 03:05 | ו׳ 4.12 08:05 | ⏳ #453 · (על verify/train; Wiktionary עברי (CC BY-SA, קובץ נפרד; Hspell נדחה — AGPL), חיפוש עם קילוף תחיליות, הורדה לפי בקשה עם sha256, מילים נרדפות/הגדרה/ניקוד בקליק ימני)… | נבנה בלבד · [#453](https://github.com/talstilkol/lumen-md/pull/453) |
@@ -3209,7 +3215,7 @@ W5.5.3. הצעה ״נראה שהטקסט הפוך — לתקן?״ עם תצוג�
 
 **קבלה:** 100 קטעים מ-PDF-ים עבריים אמיתיים (פסקי דין, מאמרים, טפסים): ≥ 95% תוקנו נכון · 0 שינויים בטקסט עברי תקין (100 קטעי ביקורת)
 
-**פירוט הסטטוס:** ⏳ #442 (על feat/paste-fidelity; 100 שורות סינתטיות דרך PDF אמיתי ו-pdf.js: 96/100 שורות הפוכות תוקנו, 0 הצעות על 1,400+ מחרוזות עבריות תקינות, אותיות סופיות 46/47; pdfHebrew 12/12, pdfPaste 8/8 ב-Chromium; חסר: PDF-ים אמיתיים מ-Word/InDesign, e2e)
+**פירוט הסטטוס:** ⏳ #442 (על feat/paste-fidelity; 100 שורות סינתטיות דרך PDF אמיתי ו-pdf.js: 96/100 שורות הפוכות תוקנו, 0 הצעות על 1,400+ מחרוזות עבריות תקינות, אותיות סופיות 46/47; pdfHebrew 12/12, pdfPaste 8/8 ב-Chromium; חסר: PDF-ים אמיתיים מ-Word/InDesign, e2e) · INT8 17.11 (lane FC2 #1196): scripts/pdf-paste/real-corpus.mjs; 14 LibreOffice PDFs: the fix restores 37/100 glyph-order lines (geometric reference 50/100) — a code finding on mixed Latin/⌘/bracket lines; owed: Mac FC2-W5.5-real-pdfs (owner's PDFs + review sheet) · status before: ⏳ #442 · (על feat/paste-fidelity; 100 שורות סינתטיות דרך PDF אמיתי ו-pdf.js: 96/100 שורות הפוכות תוקנו, 0 הצעות על 1,400+ מחרוזות עבריות תקינות, אותיות סופיות 46/47)…
 
 **W5.6 · ★ קריאה נגישה בעברית: ניקוד לתצוגה בלבד, גופנים לדיסלקציה והקראה מסונכרנת** — `feat/accessible-reading` · ממשק, עברית וידע · 7 ש׳ 00 דק׳ · מקור: Nakdimon/Dicta; W2.5
 
@@ -3289,7 +3295,7 @@ W5.13.3. סיכום מאומת (6.11) וכרטיסי FSRS (W3.3) מהקטעים 
 
 **קבלה:** הרצאה של 90 דק׳ מעובדת ב-≤ 20 דק׳ על מחשב נייד עם GPU · כל כרטיס מקושר לרגע בהקלטה · 0 בקשות רשת
 
-**פירוט הסטטוס:** ⏳ #441 (על #376; הקלטה → תמלול עם חותמות זמן → סיכום מתוך התמלול → כרטיסי cloze עם ▶ לרגע; סימון ״חשוב!״; ‏studentMode 10/10, מקליט 2/2 ב-Chromium offline; המודל Whisper יורד פעם אחת מ-Hugging Face; חסר: Whisper אמיתי ב-WebGPU, יעד 90 דק׳ ≤ 20 דק׳ (בעלים); dodMock)
+**פירוט הסטטוס:** ⏳ #441 (על #376; הקלטה → תמלול עם חותמות זמן → סיכום מתוך התמלול → כרטיסי cloze עם ▶ לרגע; סימון ״חשוב!״; ‏studentMode 10/10, מקליט 2/2 ב-Chromium offline; המודל Whisper יורד פעם אחת מ-Hugging Face; חסר: Whisper אמיתי ב-WebGPU, יעד 90 דק׳ ≤ 20 דק׳ (בעלים); dodMock) · INT8 17.11 (lane FC2 #1196): scripts/student/lecture-timing.mjs; goldenHarnessesFc2 9/9; owed: Mac FC2-W5.13-lecture-timing (90-min recording) · status before: ⏳ #441 · (על #376; הקלטה → תמלול עם חותמות זמן → סיכום מתוך התמלול → כרטיסי cloze עם ▶ לרגע; סימון ״חשוב!״; ‏studentMode 10/10, מקליט 2/2 ב-Chromium offline)…
 
 **W5.14 · ★ מתמטיקה בתוך טקסט עברי: נוסחאות LTR בשורה RTL בלי שבירה** — `feat/math-in-hebrew` · ממשק, עברית וידע · 7 ש׳ 00 דק׳ · מקור: KaTeX RTL issues (לא אומת)
 
@@ -3389,7 +3395,7 @@ W5.23.3. ביומן הפרטיות כמסלול ענן בהסכמה
 
 **קבלה:** ספרייה של 1,000 פריטים מסונכרנת ב-≤ 60s · סנכרון שני מוסיף רק שינויים
 
-**פירוט הסטטוס:** ⏳ #485 (על #411; סנכרון קריאה בלבד ומצטבר (If-Modified-Since-Version, 304), 50 פריטים לבקשה, Backoff/429; המפתח באחסון הסודות, קטגוריית research ביומן הפרטיות; zoteroWeb 8/8: ספרייה של 1,000 פריטים ב-25 בקשות; fixtures מהתיעוד, לא מוקלטים (הפרוקסי חוסם); חסר: סנכרון אמיתי, api.zotero.org ב-vercel.json; dodMock)
+**פירוט הסטטוס:** ⏳ #485 (על #411; סנכרון קריאה בלבד ומצטבר (If-Modified-Since-Version, 304), 50 פריטים לבקשה, Backoff/429; המפתח באחסון הסודות, קטגוריית research ביומן הפרטיות; zoteroWeb 8/8: ספרייה של 1,000 פריטים ב-25 בקשות; fixtures מהתיעוד, לא מוקלטים (הפרוקסי חוסם); חסר: סנכרון אמיתי, api.zotero.org ב-vercel.json; dodMock) · INT8 17.11 (lane FC2 #1194): Zotero by file, import and export, no api.zotero.org, no CSP change; zoteroFile 10/10 (1,000 items <5 s, fetch never called), zoteroWeb 8/8; owed: Mac FC2-W5.23-zotero-file (owner's real export) · status before: ⏳ #485 · (על #411; סנכרון קריאה בלבד ומצטבר (If-Modified-Since-Version, 304), 50 פריטים לבקשה, Backoff/429; המפתח באחסון הסודות, קטגוריית research ביומן הפרטיות)…
 
 **W5.24 · אוטומציות בלי קוד: ״כש… אז…״ עם הרצת ניסיון** — `feat/automations` · ממשק, עברית וידע · 8 ש׳ 00 דק׳ · מקור: notion.com/releases
 
@@ -3451,7 +3457,7 @@ W5.28.3. סט זהב: 50 שאלות עבריות על מאמרים באנגלי�
 |---|---|---|---|---|---|---|---|---|---|
 | W6.1 | לקדם את main בשלבים: רכבת 1 ועוד #356 ו-#432, רק אחרי e2e מלא ותרגיל נתונים | P0 | D | 10 ש׳ 00 דק׳ | W4.2, W4.33, W4.3 | א׳ 22.11 14:50 | ב׳ 23.11 00:50 | ⬜ | — |
 | W6.2 | הדומיין הזר יוצא מהייצור היום, ובדיקה חיה אחרי כל פריסה | P0 | S | 1 ש׳ 30 דק׳ | W4.3 | ה׳ 19.11 07:50 | ה׳ 19.11 09:20 | ⏳ #498 · (על #455; npm run live:meta בודק canonical, og, twitter, JSON-LD, robots ו-sitemap; בדיקה עצמית: 6/6 הפניות זרות נתפסו; על production היום: 18 בעיות (צפוי), על הקבצים של #432: 0)… | נבנה בלבד · [#498](https://github.com/talstilkol/lumen-md/pull/498) |
-| W6.3 | סבב קריפטו 2 עד הסוף: למחוק את נתיב ה-keyring הישן, לבדוק keyring שונה באותו epoch, ושרשרת hash | P0 | S | 12 ש׳ 00 דק׳ | 3.4, W1.1 | ה׳ 19.11 14:20 | ו׳ 20.11 02:20 | ⏳ סבב 3 נדחף: #399 ‏7807f3bf28, #291 ‏d660d47aea (מכיל את #399 — ספקים וקריפטו רצים יחד לראשונה, syncProviders 30/30), #472 ‏5bf4ab519e — עוגן מכשיר קשור ל-HMAC תחת סוד ה-epoch (N1)… | נבנה בלבד · [#399](https://github.com/talstilkol/lumen-md/pull/399) |
+| W6.3 | סבב קריפטו 2 עד הסוף: למחוק את נתיב ה-keyring הישן, לבדוק keyring שונה באותו epoch, ושרשרת hash | P0 | S | 12 ש׳ 00 דק׳ | 3.4, W1.1 | ה׳ 19.11 14:20 | ו׳ 20.11 02:20 | ⏳ #1187 · cloud-complete (INT8 17.11 (lane FC1 #1187)); owed: receipts+label (sync) | נבנה בלבד · [#399](https://github.com/talstilkol/lumen-md/pull/399) |
 | W6.4 | ביקורת קריפטו עצמאית שלישית, ומבחני ההתקפה כשער קבוע | P0 | S | 5 ש׳ 00 דק׳ | 3.4 | ה׳ 19.11 09:20 | ה׳ 19.11 14:20 | ⏳ ביקורת 14.11: חלקי — בדיקות התקיפה ב-scratchpad מחוץ לריפו; security/attacks לא קיים; dodMock · אושר בביקורת קריפטו עצמאית (plan/review7-2026-11-12.md): #399 ‏2c968239ca, #291 ‏5081ea1f6a… | מחכה לטל · [#399](https://github.com/talstilkol/lumen-md/pull/399) |
 | W6.5 | מפעל אימות: מארח שני בחינם שמריץ כל לילה את כל הבדיקות בשלושה דפדפנים | P0 | D | 10 ש׳ 00 דק׳ | W4.36, W4.2 | ב׳ 23.11 00:50 | ב׳ 23.11 10:50 | ⏳ #509 · (על #484 + #455; מארח: Oracle Cloud Always Free ‏Ampere A1 — עכשיו 2 OCPU / 12 GB (חצי מבעבר, יוני 2026), 200 GB)… | נבנה בלבד · [#509](https://github.com/talstilkol/lumen-md/pull/509) |
 | W6.6 | WebKit ו-Safari אמיתי לפני כל קידום: WebKit במארח השני, Safari ב-BrowserStack | P0 | D | 5 ש׳ 00 דק׳ | W4.2 | ב׳ 23.11 10:50 | ב׳ 23.11 15:50 | ⏳ #510 · (על #509; WebKit במארח השני, Safari אמיתי ב-BrowserStack open-source (5 משתמשים, 5 במקביל); promote:check מסרב לקידום main בלי קבלות WebKit/Safari — בלי עקיפה; self-test 46/46)… | נבנה בלבד · [#510](https://github.com/talstilkol/lumen-md/pull/510) |
@@ -3484,7 +3490,7 @@ W5.28.3. סט זהב: 50 שאלות עבריות על מאמרים באנגלי�
 | W6.33 | מודלים בלי Hugging Face בפועל: 24/24 נעוצים ומראה פרוס | P1 | A | 4 ש׳ 00 דק׳ | W4.14 | שבת 5.12 23:50 | א׳ 6.12 03:50 | ⏳ #535 · ‏48787b1fda (על #476) — Whisper turbo: מקודד fp16 במקום fp32 של 2.5GB; הודעה לכל מודל שרק ב-HF (23 + וריאנט אחד, 0 בלי הודעה)… | נבנה בלבד · [#535](https://github.com/talstilkol/lumen-md/pull/535) |
 | W6.34 | תאימות Obsidian מול Obsidian עצמו, כולל השינויים של 1.15 | P1 | U | 4 ש׳ 00 דק׳ | W4.30 | ו׳ 4.12 20:05 | שבת 5.12 00:05 | ⏳ #526 · ביקורת 14.11: חלקי — obsidian115 אדום ב-train-4 (BASES_MAX_LENGTH חסר) ושובר tsc; לא 14/14 · ‏adabc1f18 — תאימות Obsidian 1.15 (groupOrder, moveFilter, ציטוט ערכי מסנן)… | נבנה בלבד · [#526](https://github.com/talstilkol/lumen-md/pull/526) |
 | W6.35 | אקוסיסטם אמיתי: 10 התוספים ב-QuickJS אמיתי ו-5 מפתחים מבחוץ | P2 | U | 8 ש׳ 00 דק׳ | W4.32 | שבת 5.12 00:05 | שבת 5.12 08:05 | ⏳ #536 · ‏a09cc63859 — דליפת handles ב-sandbox.ts תוקנה; 10 התוספים ב-QuickJS אמיתי (25/25 ב-Chromium, גרסה 0.23 מקומית), אתר רישום סטטי עם SHA-256, ערכה ל-5 מפתחים. חסר: quickjs 0.32 ב-vitest… | דפדפן · [#536](https://github.com/talstilkol/lumen-md/pull/536) |
-| W6.36 | כספת מוצפנת גדולה נפתחת מהר: snapshot חתום ב-worker, ושאילתות ממוקדות | P2 | D | 4 ש׳ 00 דק׳ | W2.22 | ב׳ 21.12 01:20 | ב׳ 21.12 05:20 | ⏳ שרשרת #529→#560→#573→#585→#604 ‏6194c8f069 — אושרה בביקורת 33 (plan/review33-604-2026-11-14.md): 0 כתיבות טקסט גלוי ל-IndexedDB בכל תרחישי קריסת worker, נעילה והחלפה… | נבנה בלבד · [#529](https://github.com/talstilkol/lumen-md/pull/529) |
+| W6.36 | כספת מוצפנת גדולה נפתחת מהר: snapshot חתום ב-worker, ושאילתות ממוקדות | P2 | D | 4 ש׳ 00 דק׳ | W2.22 | ב׳ 21.12 01:20 | ב׳ 21.12 05:20 | ⏳ #1190 · cloud-complete (INT8 17.11 (lane FC1 #1190)); owed: Mac FC1/e2e-nightly | נבנה בלבד · [#529](https://github.com/talstilkol/lumen-md/pull/529) |
 | W6.37 | בדיקה משפטית חינמית: תיקון 13, תנאי Sefaria ורישיונות נתוני דיבור | P2 | S | 3 ש׳ 00 דק׳ | W4.29 | ה׳ 3.12 08:50 | ה׳ 3.12 11:50 | ⏳ #554 ‏d8799fcbd3 — חבילה משפטית (15 מסמכים ב-SHA-256, data-licences.md), 3 טיוטות פנייה (TAU קודם), 8 שאלות; legalPacket 3/3. חסר: שליחה לקליניקה (בעלים) | נבנה בלבד · [#554](https://github.com/talstilkol/lumen-md/pull/554) |
 | W6.38 | קורפוס סינתטי לייבוא ולהדבקה: Word, ‏Google Docs, ‏PDF עבריים, ייצואי Notion ו-Evernote, ‏WhatsApp | P1 | U | 6 ש׳ 00 דק׳ | W1.4, W1.26, W5.5 | שבת 5.12 08:05 | שבת 5.12 14:05 | ⏳ #697 (W10.B5): קורפוס סינתטי (שלנו): 210/210; ‏Evernote (צד שלישי, נתוני הבדיקה של yarle): N/35 — 33/35 ב-happy-dom, ‏35/35 ב-Chromium, המספר הקובע מ-vitest/jsdom (Mac)… | דפדפן · [#697](https://github.com/talstilkol/lumen-md/pull/697) |
 | W6.39 | מגבלת עבודה פתוחה: אין גל חדש לפני שהגל הקודם אומת | P0 | D | 2 ש׳ 00 דק׳ | W4.24 | ג׳ 24.11 05:50 | ג׳ 24.11 07:50 | ⏳ #502 · held by decision: 11 wave pairs over the WIP limit are frozen by plan/wip-decisions.json; done when plan:check --wip-none exits 0 | Node · [#502](https://github.com/talstilkol/lumen-md/pull/502) |
@@ -3530,7 +3536,7 @@ W6.3.6. לבנות מחדש את chore/release-beta1 מהקוד המתוקן, כ
 
 **קבלה:** כל 8 מבחני ההתקפה ב-rr12 עוברים (t1 ×2, ‏t3, ‏t4, ‏t5, ‏t6, ‏t8), וגם rev12/r472-* · check_vectors.py ו-TS מסכימים על כל הווקטורים, כולל 5 הווקטורים החדשים · git merge-base מראה שאין ב-chore/release-beta1 קוד keyring מלפני התיקון · e2eeRekeyIntegrity, ‏e2eeKeyring ו-lanSync עוברים ב-vitest אמיתי במארח השני
 
-**פירוט הסטטוס:** ⏳ סבב 3 נדחף: #399 ‏7807f3bf28, #291 ‏d660d47aea (מכיל את #399 — ספקים וקריפטו רצים יחד לראשונה, syncProviders 30/30), #472 ‏5bf4ab519e — עוגן מכשיר קשור ל-HMAC תחת סוד ה-epoch (N1), קריאה חוזרת אחרי כל כתיבת keyring (N2), צימוד דו-כיווני (N3), מכשיר לא מאומת לא מעלה (N6), Drive במצב סנכרון בלבד (אין CAS אטומי); כל מבחני rr3 עוברים כפי שנכתבו; t8 (ספק משקר) — מוגבל עקרונית בלי CAS בצד שרת, מתוקן בסבב הבא של המכשיר המבטל; החלטות מתאם: (1) העלאות מוחזקות מתקבלות — האשף וזרימת LAN צריכים שלב צימוד (lane S); (2) החלפת מפתחות ממכשיר לא מאומת מוחקת את רשימת המכשירים — מתקבל עם אזהרה ואישור ב-UI; ביקורת קריפטו רביעית בעבודה · סבב 4: #399 ‏2c968239ca, #291 ‏5081ea1f6a, #472 ‏615765b71c — F1 (סוג ההודעה בתוך ה-MAC, תשובה נושאת hash של הבקשה), הגנת freeze ל-t8, F2 (ביטול חוזר בכל epoch + רשימת מבוטלים מקומית), F3 (בלי הורדה לא-מאומת; הסרת מכשירים דורשת הסכמה), F4–F7, ביטול צימוד ויכולות ספק; e2eeFifthReview 16/16, Python 31/31; 3 ממבחני rr5 הותאמו לשינויי ההתנהגות — ביקורת קריפטו נוספת בודקת
+**פירוט הסטטוס:** ⏳ סבב 3 נדחף: #399 ‏7807f3bf28, #291 ‏d660d47aea (מכיל את #399 — ספקים וקריפטו רצים יחד לראשונה, syncProviders 30/30), #472 ‏5bf4ab519e — עוגן מכשיר קשור ל-HMAC תחת סוד ה-epoch (N1), קריאה חוזרת אחרי כל כתיבת keyring (N2), צימוד דו-כיווני (N3), מכשיר לא מאומת לא מעלה (N6), Drive במצב סנכרון בלבד (אין CAS אטומי); כל מבחני rr3 עוברים כפי שנכתבו; t8 (ספק משקר) — מוגבל עקרונית בלי CAS בצד שרת, מתוקן בסבב הבא של המכשיר המבטל; החלטות מתאם: (1) העלאות מוחזקות מתקבלות — האשף וזרימת LAN צריכים שלב צימוד (lane S); (2) החלפת מפתחות ממכשיר לא מאומת מוחקת את רשימת המכשירים — מתקבל עם אזהרה ואישור ב-UI; ביקורת קריפטו רביעית בעבודה · סבב 4: #399 ‏2c968239ca, #291 ‏5081ea1f6a, #472 ‏615765b71c — F1 (סוג ההודעה בתוך ה-MAC, תשובה נושאת hash של הבקשה), הגנת freeze ל-t8, F2 (ביטול חוזר בכל epoch + רשימת מבוטלים מקומית), F3 (בלי הורדה לא-מאומת; הסרת מכשירים דורשת הסכמה), F4–F7, ביטול צימוד ויכולות ספק; e2eeFifthReview 16/16, Python 31/31; 3 ממבחני rr5 הותאמו לשינויי ההתנהגות — ביקורת קריפטו נוספת בודקת · INT8 17.11 (lane FC1 #1187): 10k re-key: quadratic state saves + tree check fixed; tests 262 s→30 s; e2eeBulkSaves 3/3; keyring 6/6 in shim; owed: receipts+label (sync) · status before: ⏳ סבב 3 נדחף: #399 ‏7807f3bf28, #291 ‏d660d47aea (מכיל את #399 — ספקים וקריפטו רצים יחד לראשונה, syncProviders 30/30), #472 ‏5bf4ab519e — עוגן מכשיר קשור ל-HMAC תחת סוד ה-epoch (N1)…
 
 **W6.4 · ביקורת קריפטו עצמאית שלישית, ומבחני ההתקפה כשער קבוע** — בלי ענף · נתונים ואבטחה · 5 ש׳ 00 דק׳ · מקור: E3, E13; ‏rereview-2026-11-12.md (התיקון הראשון נמצא חלקי); ‏rev12, ‏rr12
 
@@ -3881,7 +3887,7 @@ W6.36.3. מדידה ב-10,000 ו-100,000 פתקים מוצפנים
 
 **קבלה:** פתיחה חוזרת של כספת מוצפנת של 10,000 פתקים < 2 ש׳ · 0 טקסט גלוי ב-IndexedDB (סריקה) · בניית embeds: זמן יורד ב-≥ 50%
 
-**פירוט הסטטוס:** ⏳ שרשרת #529→#560→#573→#585→#604 ‏6194c8f069 — אושרה בביקורת 33 (plan/review33-604-2026-11-14.md): 0 כתיבות טקסט גלוי ל-IndexedDB בכל תרחישי קריסת worker, נעילה והחלפה; פתיחת כספת מוצפנת 10k ב-0.38s (היה 32.5s); נכנסת לרכבת 4. נמוך Z7 (אינדקס ריק עד החלפה הבאה בתרחיש נדיר) בתיקון. חסר: Mac של טל, 100k, כספת תיקייה/שולחן עבודה אמיתית, typecheck/build
+**פירוט הסטטוס:** ⏳ שרשרת #529→#560→#573→#585→#604 ‏6194c8f069 — אושרה בביקורת 33 (plan/review33-604-2026-11-14.md): 0 כתיבות טקסט גלוי ל-IndexedDB בכל תרחישי קריסת worker, נעילה והחלפה; פתיחת כספת מוצפנת 10k ב-0.38s (היה 32.5s); נכנסת לרכבת 4. נמוך Z7 (אינדקס ריק עד החלפה הבאה בתרחיש נדיר) בתיקון. חסר: Mac של טל, 100k, כספת תיקייה/שולחן עבודה אמיתית, typecheck/build · INT8 17.11 (lane FC1 #1190): e2e/encrypted-reopen.spec.ts @nightly written, listed by Playwright; vaultIndexProbe test; not run here (no Vite); owed: Mac FC1/e2e-nightly · status before: ⏳ שרשרת #529→#560→#573→#585→#604 ‏6194c8f069 — אושרה בביקורת 33 (plan/review33-604-2026-11-14.md): 0 כתיבות טקסט גלוי ל-IndexedDB בכל תרחישי קריסת worker, נעילה והחלפה…
 
 **W6.37 · בדיקה משפטית חינמית: תיקון 13, תנאי Sefaria ורישיונות נתוני דיבור** — `docs/legal-review-packet` · נתונים ואבטחה · 3 ש׳ 00 דק׳ · מקור: E46, E64; ‏#456 (לא ייעוץ משפטי), ‏#452 (תנאי Sefaria לא אומתו), ‏#454 ‏(Ozen)
 
@@ -4008,10 +4014,10 @@ W6.48.3. פתקים חיים בקנבס נשמרים בפורמט JSON Canvas
 |---|---|---|---|---|---|---|---|---|---|
 | W7.1 | מיומנויות סוכן (Agent Skills) כקבצים בכספת: ״/״ בצ׳אט, וחבילת מיומנויות לסוכנים חיצוניים | P1 | A | 9 ש׳ 00 דק׳ | 5.3, W2.3, 5.11 | שבת 28.11 14:20 | שבת 28.11 23:20 | ⏳ #599 · ‏c8da00ca64 — מיומנויות סוכן כקבצים בכספת, ״/״ בצ׳אט, כלים מקומיים בלבד; agentSkills 14/14 (0/50 קריאות לא מוצהרות). חסר: eval:skills ו-10 ניסיונות ב-Claude Code; ביקורת אבטחה… | נבנה בלבד · [#599](https://github.com/talstilkol/lumen-md/pull/599) |
 | W7.2 | סריקת הדגשות מספר מודפס: צילום עמוד עם מרקר או עט, והטקסט המודגש נכנס כהדגשה עם מספר עמוד | P2 | U | 7 ש׳ 00 דק׳ | W1.15, W1.18 | א׳ 6.12 05:05 | א׳ 6.12 12:05 | ⏳ #595 ‏79d32daeb3 — סריקת הדגשות מספר מודפס: ≥90% מהסימונים ב-30 עמודים סינתטיים; scanHighlights 7/7. חסר: e2e, 30 צילומים אמיתיים (בעלים) | נבנה בלבד · [#595](https://github.com/talstilkol/lumen-md/pull/595) |
-| W7.3 | פערי עורך מול Obsidian 1.12 ו-Heptabase: שינוי גודל תמונה בגרירה, ניקוי קבצים מצורפים, העתקה כ-HTML וחיפוש ב-backlinks | P2 | U | 6 ש׳ 00 דק׳ | W1.3, 4.6 | א׳ 6.12 12:05 | א׳ 6.12 18:05 | ⏳ #559 ‏49b3682e4f — פערי עורך מול Obsidian 1.12/Heptabase; editorGaps 23/23 (כולל 200 כספות אקראיות), editorGapsDom 4/4. חסר: e2e ב-chromium/firefox, הדבקה ל-Word/Google Docs (בעלים) | נבנה בלבד · [#559](https://github.com/talstilkol/lumen-md/pull/559) |
+| W7.3 | פערי עורך מול Obsidian 1.12 ו-Heptabase: שינוי גודל תמונה בגרירה, ניקוי קבצים מצורפים, העתקה כ-HTML וחיפוש ב-backlinks | P2 | U | 6 ש׳ 00 דק׳ | W1.3, 4.6 | א׳ 6.12 12:05 | א׳ 6.12 18:05 | ⏳ #1173 · cloud-complete (INT8 17.11 (lane FC3 #1173)); owed: owner: real paste into Word/Google Docs (FC3-W7.3-office-paste) | נבנה בלבד · [#559](https://github.com/talstilkol/lumen-md/pull/559) |
 | W7.4 | עריכת מאפיינים בכמות: בחירת שורות רבות בתצוגת מסד נתונים ושינוי שדה לכולן בבת אחת | P2 | U | 5 ש׳ 00 דק׳ | 4.10, W1.11 | א׳ 6.12 18:05 | א׳ 6.12 23:05 | ⏳ #571 · ‏3429b8e783 — עריכת מאפיינים בכמות + קריאה/כתיבה באצוות (readMany/writeMany, כתיבה רק אם הקובץ לא השתנה, תחת נעילה); OPFS אמיתי: ‏17.3s→12.1s; יעד 3s לא עומד במכונה עמוסה (עומס 28–33)… | נבנה בלבד · [#571](https://github.com/talstilkol/lumen-md/pull/571) |
 | W7.5 | ★ חקיקה ודברי הכנסת: חוק לפי שם, הצעת חוק ופרוטוקול ועדה כמקור מצוטט, עם מטמון offline | P1 | U | 12 ש׳ 00 דק׳ | W5.1, 2.4 | ב׳ 7.12 04:05 | ב׳ 7.12 16:05 | ⏳ #589 · ‏8df3112ecb — חוק לפי שם (50/50 צורות), שמירת חוק/הצעה/פרוטוקול כמקור עם תאריך ורישיון, OData V4 עם נפילה ל-V3, הכול דרך יומן הפרטיות באישור… | נבנה בלבד · [#589](https://github.com/talstilkol/lumen-md/pull/589) |
-| W7.6 | ★ נתונים ממשלתיים בתוך פתק: בלוק data.gov.il ולמ״ס עם snapshot מקומי וייחוס שנוצר אוטומטית | P2 | U | 8 ש׳ 00 דק׳ | 4.10, 2.4 | ב׳ 7.12 16:05 | ג׳ 8.12 00:05 | ⏳ #591 · ‏a95bb328fe — בלוק data.gov.il ולמ״ס עם snapshot מקומי (0 בקשות בפתיחה) וייחוס; datagovSources 8/8. חסר: בדיקה חיה, ייצוא PDF/DOCX אמיתי, build… | נבנה בלבד · [#591](https://github.com/talstilkol/lumen-md/pull/591) |
+| W7.6 | ★ נתונים ממשלתיים בתוך פתק: בלוק data.gov.il ולמ״ס עם snapshot מקומי וייחוס שנוצר אוטומטית | P2 | U | 8 ש׳ 00 דק׳ | 4.10, 2.4 | ב׳ 7.12 16:05 | ג׳ 8.12 00:05 | ⏳ #1173 · cloud-complete (INT8 17.11 (lane FC3 #1173)); owed: Mac FC3-W7.6-pdf; 10 live datasets (L6-W7.6-live10) | נבנה בלבד · [#591](https://github.com/talstilkol/lumen-md/pull/591) |
 | W7.7 | ★ ספריית פרויקט בן-יהודה offline: חיפוש וציטוט מספרות עברית ברשות הציבור | P2 | U | 7 ש׳ 00 דק׳ | W5.1, W1.14 | ג׳ 8.12 00:05 | ג׳ 8.12 07:05 | ⏳ #592 · ‏133b2d3a28 — ספריית בן-יהודה מקומית מה-dump (הורדה לפי מחבר), 20/20 שאילתות זהב ב-3 הראשונים, 0 בקשות אחרי הורדה; benyehudaLibrary 7/7. חסר: הורדה אמיתית, build… | נבנה בלבד · [#592](https://github.com/talstilkol/lumen-md/pull/592) |
 | W7.8 | ★ לוח אקדמי ישראלי: סמסטרים, מועדי א׳ ו-ב׳ וחופשות לכל מוסד, בתוך הפתק היומי ובדדליינים | P2 | U | 6 ש׳ 00 דק׳ | W5.15, W5.13 | ג׳ 8.12 07:05 | ג׳ 8.12 13:05 | ⏳ #594 · ביקורת 14.11: חלקי — ארבעת קובצי הנתונים ריקים (verified: false) · ‏36b6856347 — מנוע הלוח האקדמי (שבוע בסמסטר, ימים למועד, ICS, {{academic}}) עובד על לוח סינתטי… | נבנה בלבד · [#594](https://github.com/talstilkol/lumen-md/pull/594) |
 | W7.9 | ★ יידיש ולדינו: איות יידיש לפי YIVO, תעתיק YIVO, ולדינו בכתב לטיני ובכתב עברי | P2 | U | 7 ש׳ 00 דק׳ | 9.2, 9.5 | ג׳ 15.12 03:35 | ג׳ 15.12 10:35 | ⏳ #576 · ‏1b44f97896 — תגי שפה yi/lad, תעתיק YIVO דו-כיווני (239/239 הלוך-חזור), לדינו לטיני↔עברי, איות יידיש (hunspell-yi, GPL, הורדה ביוזמת המשתמש בלבד — חריגת רישיון כמו Hspell, החלטת מתאם)… | נבנה בלבד · [#576](https://github.com/talstilkol/lumen-md/pull/576) |
@@ -4062,6 +4068,8 @@ W7.3.4. פאנל backlinks: חיפוש, מיון (שם, תאריך שינוי) �
 
 **קבלה:** e2e ב-RTL וב-LTR לכל אחת מ-4 היכולות, ב-chromium וב-firefox · הדבקה של העתקה מ-Lumen ל-Word ול-Google Docs שומרת כותרות, הדגשה וכיוון ב-10/10 מקרים · 0 קבצים מצורפים שמקושרים מפתק אחר נמחקים ב-200 תרחישים אקראיים
 
+**פירוט הסטטוס:** INT8 17.11 (lane FC3 #1173): officePasteRoundTrip 13/13 (Chromium shim): 10/10 cases from Lumen, Word and Docs clipboard HTML; owed: owner: real paste into Word/Google Docs (FC3-W7.3-office-paste) · status before: ⏳ #559 ‏49b3682e4f — פערי עורך מול Obsidian 1.12/Heptabase; editorGaps 23/23 (כולל 200 כספות אקראיות), editorGapsDom 4/4. חסר: e2e ב-chromium/firefox, הדבקה ל-Word/Google Docs (בעלים)
+
 **W7.4 · עריכת מאפיינים בכמות: בחירת שורות רבות בתצוגת מסד נתונים ושינוי שדה לכולן בבת אחת** — `feat/bulk-properties` · ממשק, עברית וידע · 5 ש׳ 00 דק׳ · מקור: https://capacities.io/whats-new
 
 W7.4.1. בחירה מרובה בתצוגת טבלה ולוח (Shift, Ctrl, ״בחר הכול לפי מסנן״)
@@ -4096,7 +4104,7 @@ W7.6.5. אזהרה כשמאגר כולל שדות שנראים כמו מידע �
 
 **קבלה:** 10 מאגרים נפוצים (אוכלוסייה ביישובים, מדד המחירים, תאונות דרכים ועוד) נשלפים ומוצגים, עם ייחוס מלא ב-10/10 · פתיחה offline של פתק עם snapshot: 0 בקשות רשת · ייצוא PDF ו-DOCX כולל את שורת הייחוס
 
-**פירוט הסטטוס:** ⏳ #591 ‏a95bb328fe — בלוק data.gov.il ולמ״ס עם snapshot מקומי (0 בקשות בפתיחה) וייחוס; datagovSources 8/8. חסר: בדיקה חיה, ייצוא PDF/DOCX אמיתי, build; ביקורת 20: שער האישור ומצב טיסה מחזיקים, CSP מינימלי; ביקורת 20 תוקנה (G1–G4, I1–I3, P1–P2 עוברים; מצב טיסה עוצר גם בקשה בתהליך, כולל ספריא; הצמדת SHA-256 להורדות; תקרות גודל וביטול); אושר בביקורת 25 (נמוכים RR25-2/3 בהמשך)
+**פירוט הסטטוס:** ⏳ #591 ‏a95bb328fe — בלוק data.gov.il ולמ״ס עם snapshot מקומי (0 בקשות בפתיחה) וייחוס; datagovSources 8/8. חסר: בדיקה חיה, ייצוא PDF/DOCX אמיתי, build; ביקורת 20: שער האישור ומצב טיסה מחזיקים, CSP מינימלי; ביקורת 20 תוקנה (G1–G4, I1–I3, P1–P2 עוברים; מצב טיסה עוצר גם בקשה בתהליך, כולל ספריא; הצמדת SHA-256 להורדות; תקרות גודל וביטול); אושר בביקורת 25 (נמוכים RR25-2/3 בהמשך) · INT8 17.11 (lane FC3 #1173): datagovExportPdf 1/1; e2e/datagov-pdf.spec.ts (pdftotext) listed; owed: Mac FC3-W7.6-pdf; 10 live datasets (L6-W7.6-live10) · status before: ⏳ #591 · ‏a95bb328fe — בלוק data.gov.il ולמ״ס עם snapshot מקומי (0 בקשות בפתיחה) וייחוס; datagovSources 8/8. חסר: בדיקה חיה, ייצוא PDF/DOCX אמיתי, build…
 
 **W7.7 · ★ ספריית פרויקט בן-יהודה offline: חיפוש וציטוט מספרות עברית ברשות הציבור** — `feat/benyehuda-library` · ממשק, עברית וידע · 7 ש׳ 00 דק׳ · מקור: https://benyehuda.org/page/english ; https://relatedrepos.com/gh/projectbenyehuda/public_domain_dump
 
@@ -4545,7 +4553,7 @@ W9.9.3. פקודת Mac אחת ורשימת בדיקה
 | W10.A5 | hygiene: שתי קריאות waitForTimeout ו-retries 1 בקונפיג ה-GIF | P0 | D | בוצע (הוערך 1 ש׳ 30 דק׳) | 0.1 | — | — | ✅ #640 · audit r3 DONE; dod green in Node and browser (shim chromium) (INT6b 17.11) | דפדפן · [#640](https://github.com/talstilkol/lumen-md/pull/640) |
 | W10.A6 | skipAudit אדום: 248 שורות דילוג בלי skip-reason ב-src/__tests__/blind | P0 | D | 3 ש׳ 00 דק׳ | 0.1 | ד׳ 25.11 05:50 | ד׳ 25.11 08:50 | ⏳ #654 · cloud-complete (audit r3 DONE); owed: bulkEditOpfsBench in a real browser (real OPFS, Mac); then W10.G8's browser level | Node · [#654](https://github.com/talstilkol/lumen-md/pull/654) |
 | W10.A7 | catch ריקים חלק 1: App.tsx, ‏src/ui, ‏a11y — 50 בלי why: | P0 | U | 3 ש׳ 00 דק׳ | 0.1 | ד׳ 18.11 16:50 | ד׳ 18.11 19:50 | ⏳ #640 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof | Node · [#640](https://github.com/talstilkol/lumen-md/pull/640) |
-| W10.A8 | catch ריקים חלק 2: lib, ‏ai, ‏storage, ‏sync והשאר — codeHealth ירוק | P0 | S | 3 ש׳ 00 דק׳ | 0.1 | שבת 21.11 07:05 | שבת 21.11 10:05 | ⏳ #640 · cloud-complete (audit r3 PARTIAL); owed: re-audit of the fix in #1129 (loggerSwallowed; codeHealth's W10.A8 check) | נבנה בלבד · [#640](https://github.com/talstilkol/lumen-md/pull/640) |
+| W10.A8 | catch ריקים חלק 2: lib, ‏ai, ‏storage, ‏sync והשאר — codeHealth ירוק | P0 | S | 3 ש׳ 00 דק׳ | 0.1 | שבת 21.11 07:05 | שבת 21.11 10:05 | ⏳ #1189 · cloud-complete (INT8 17.11 (lane FC1 #1189)); owed: re-audit; receipts+label | נבנה בלבד · [#640](https://github.com/talstilkol/lumen-md/pull/640) |
 | W10.A9 | settingsSchema: 50 מפתחות שמורים ו-5 שדות store שאינם בסכמה | P0 | U | 3 ש׳ 00 דק׳ | 0.1 | ד׳ 18.11 19:50 | ד׳ 18.11 22:50 | ⏳ #640 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof | Node · [#640](https://github.com/talstilkol/lumen-md/pull/640) |
 | W10.A10 | תווית הלשונית fineTune.title מופיעה כמפתח גולמי עד שהרכיב נטען | P0 | U | 1 ש׳ 30 דק׳ | 0.1 | ה׳ 19.11 13:20 | ה׳ 19.11 14:50 | ⏳ קוד ב-PR #790, #844 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#790](https://github.com/talstilkol/lumen-md/pull/790) |
 | W10.A11 | flags:check קורא רק את locales/en ונכשל מסיבה שגויה | P0 | D | 1 ש׳ 30 דק׳ | 0.1 | ד׳ 25.11 22:50 | ה׳ 26.11 00:20 | ⏳ #640 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof | Node · [#640](https://github.com/talstilkol/lumen-md/pull/640) |
@@ -4569,7 +4577,7 @@ W9.9.3. פקודת Mac אחת ורשימת בדיקה
 | W10.B15 | real-cargo.sh מדפיס ״ok״ כש-cargo נכשל בהורדה | P1 | D | 1 ש׳ 00 דק׳ | 0.1 | ו׳ 11.12 19:20 | ו׳ 11.12 20:20 | ⏳ #641 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof | Node · [#641](https://github.com/talstilkol/lumen-md/pull/641) |
 | W10.B16 | baseline חזותי שחסר = כשלון, אף פעם לא אישור עצמי בריצה ראשונה | P1 | D | 2 ש׳ 00 דק׳ | 0.1 | ו׳ 11.12 20:20 | ו׳ 11.12 22:20 | ⏳ קוד ב-PR #662, #777, #862, #902 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#662](https://github.com/talstilkol/lumen-md/pull/662) |
 | W10.B17 | 3.7: מטריצת אובדן הנתונים — בדיקת יחידה שבודקת רק כותרות, ו-G3 שמדולג | P0 | S | 2 ש׳ 00 דק׳ | 0.1 | שבת 21.11 15:35 | שבת 21.11 17:35 | ⏳ קוד ב-PR #633, #662, #844 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#633](https://github.com/talstilkol/lumen-md/pull/633) |
-| W10.B18 | 7.6: ההחלטה על ה-reranker נשענת על סט רווי (1.0 מול 1.0) — למדוד על הסט הקשה | P1 | A | 2 ש׳ 00 דק׳ | W10.F16 | א׳ 6.12 14:50 | א׳ 6.12 16:50 | ⏳ קוד ב-PR #706 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#706](https://github.com/talstilkol/lumen-md/pull/706) |
+| W10.B18 | 7.6: ההחלטה על ה-reranker נשענת על סט רווי (1.0 מול 1.0) — למדוד על הסט הקשה | P1 | A | 2 ש׳ 00 דק׳ | W10.F16 | א׳ 6.12 14:50 | א׳ 6.12 16:50 | ⏳ #1172 · cloud-complete (INT8 17.11 (lane FC3 #1172)); owed: Mac FC3-W10.B18-fetch then FC3-W10.B18-rerank; commit eval/retrieval-public.pins.json if the licences pass | נבנה בלבד · [#706](https://github.com/talstilkol/lumen-md/pull/706) |
 | W10.B19 | W2.2: זוגות ״פתקים קשורים״ מתוך הקישורים בקורפוס האמיתי, לא נוצרים | P1 | A | 4 ש׳ 00 דק׳ | 0.1 | ד׳ 2.12 23:20 | ה׳ 3.12 03:20 | ⏳ #704 · cloud-complete (audit r3 PARTIAL); owed: the typing→paint test on the Mac; record Recall@5 on a real set; re-audit of the #1127 ratchet | נבנה בלבד · [#704](https://github.com/talstilkol/lumen-md/pull/704) |
 | W10.B20 | תיקוני נתונים קטנים בקטלוג: רישיון 24B ב-dictalm3.json ומסך הקרדיטים מחוץ לדומיין הקול | P1 | A | 1 ש׳ 30 דק׳ | 0.1 | ה׳ 3.12 07:20 | ה׳ 3.12 08:50 | ⏳ #656 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof | Node · [#656](https://github.com/talstilkol/lumen-md/pull/656) |
 | W10.B21 | W5.25: דף התמיכה מקשר לחשבונות שעוד לא קיימים | P2 | U | 1 ש׳ 00 דק׳ | 0.1 | ד׳ 9.12 09:35 | ד׳ 9.12 10:35 | ⏳ קוד ב-PR #718 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#718](https://github.com/talstilkol/lumen-md/pull/718) |
@@ -4583,7 +4591,7 @@ W9.9.3. פקודת Mac אחת ורשימת בדיקה
 | W10.C6 | CalDAV ו-ICS בפתק היומי | P2 | U | 4 ש׳ 00 דק׳ | W10.C4 | ד׳ 9.12 22:35 | ה׳ 10.12 02:35 | ⏳ קוד ב-PR #751 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#751](https://github.com/talstilkol/lumen-md/pull/751) |
 | W10.C7 | iOS: להכניס את LumenIntents, ‏LumenNative ו-LumenWidgets ל-project.pbxproj, ויעד הרחבה לווידג׳ט | P1 | D | 5 ש׳ 00 דק׳ | 0.1 | ו׳ 11.12 22:20 | שבת 12.12 03:20 | ⏳ קוד ב-PR #675, #766, #857 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#675](https://github.com/talstilkol/lumen-md/pull/675) |
 | W10.C8 | לכידה קולית: לרשום setVoiceTranscriber לתמלול חי (6.1) | P1 | A | 3 ש׳ 00 דק׳ | W11.H7 | ב׳ 7.12 12:50 | ב׳ 7.12 15:50 | ⏳ קוד ב-PR #632, #634, #639, #812 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#632](https://github.com/talstilkol/lumen-md/pull/632) |
-| W10.C9 | מצב סטודנט: לרשום setLectureSummarizer לסיכום מאומת (6.11) | P2 | A | 3 ש׳ 00 דק׳ | 0.1 | ה׳ 3.12 17:50 | ה׳ 3.12 20:50 | ⏳ קוד ב-PR #632, #639, #669, #812 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#632](https://github.com/talstilkol/lumen-md/pull/632) |
+| W10.C9 | מצב סטודנט: לרשום setLectureSummarizer לסיכום מאומת (6.11) | P2 | A | 3 ש׳ 00 דק׳ | 0.1 | ה׳ 3.12 17:50 | ה׳ 3.12 20:50 | ⏳ #1172 · cloud-complete (INT8 17.11 (lane FC3 #1172)); owed: Mac FC3-W10.C9-rouge; FC3-W10.C9-hebsummaries after owner W11.O4 | נבנה בלבד · [#632](https://github.com/talstilkol/lumen-md/pull/632) |
 | W10.C10 | שיתוף מ-WhatsApp: share target עובר דרך chatShareText ושומר כותב ומקור | P1 | U | 2 ש׳ 00 דק׳ | 0.1 | ה׳ 10.12 02:35 | ה׳ 10.12 04:35 | ⏳ קוד ב-PR #647 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#647](https://github.com/talstilkol/lumen-md/pull/647) |
 | W10.C11 | מצב טיסה: לחתום את התעודה עם החותם שכבר ברכבת (W2.24) | P1 | S | 2 ש׳ 00 דק׳ | 0.1 | שבת 5.12 12:50 | שבת 5.12 14:50 | ⏳ #652 · cloud-complete (audit r3 PARTIAL); owed: re-audit of the fix in #1119 (airplaneCertificateSigned) | נבנה בלבד · [#652](https://github.com/talstilkol/lumen-md/pull/652) |
 | W10.C12 | productAgent כותב דרך write_file מדורג ומסך האישור, לא ישירות | P0 | A | 4 ש׳ 00 דק׳ | 0.1 | שבת 21.11 04:05 | שבת 21.11 08:05 | ⏳ #627 · cloud-complete (audit r3 PARTIAL); owed: 5.3 eval with real model | Node · [#627](https://github.com/talstilkol/lumen-md/pull/627) |
@@ -4599,7 +4607,7 @@ W9.9.3. פקודת Mac אחת ורשימת בדיקה
 | W10.C22 | צילום מסך לפתק: הדבקה וקיצור | P2 | A | 3 ש׳ 00 דק׳ | W10.B11 | ו׳ 4.12 00:50 | ו׳ 4.12 03:50 | ⏳ קוד ב-PR #772 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#772](https://github.com/talstilkol/lumen-md/pull/772) |
 | W10.C23 | הסתרת שמות (2.6): גיבוי כשאין מודל NER מומר, ורשומת NER לאנגלית | P1 | A | 4 ש׳ 00 דק׳ | 0.1 | ו׳ 4.12 03:50 | ו׳ 4.12 07:50 | ⏳ #678 · cloud-complete (audit r3 PARTIAL); owed: bert-base-NER sha256 on the Mac; CloudSendDialog.tsx (audit r3); re-audit of the #1111 fix (piiNamesLanguage) | נבנה בלבד · [#678](https://github.com/talstilkol/lumen-md/pull/678) |
 | W10.C24 | ספריא: הקלדת הפניה מושכת טקסט, ופאנל ״ההערות שלי על הפסוק״ | P1 | U | 5 ש׳ 00 דק׳ | 0.1 | ה׳ 10.12 04:35 | ה׳ 10.12 09:35 | ⏳ #736 · cloud-complete (audit r3 PARTIAL); owed: live Sefaria behind consent (network); ref trigger only in source editor, not WYSIWYG | נבנה בלבד · [#736](https://github.com/talstilkol/lumen-md/pull/736) |
-| W10.C25 | אינדקס ההדגשות ב-vault worker | P1 | U | 4 ש׳ 00 דק׳ | 0.1 | ה׳ 10.12 09:35 | ה׳ 10.12 13:35 | ⏳ קוד ב-PR #682 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#682](https://github.com/talstilkol/lumen-md/pull/682) |
+| W10.C25 | אינדקס ההדגשות ב-vault worker | P1 | U | 4 ש׳ 00 דק׳ | 0.1 | ה׳ 10.12 09:35 | ה׳ 10.12 13:35 | ⏳ #1173 · cloud-complete (INT8 17.11 (lane FC3 #1173)); owed: Mac FC3-W10.C25-worker | נבנה בלבד · [#682](https://github.com/talstilkol/lumen-md/pull/682) |
 | W10.C26 | ימי עבודה א׳–ה׳ ב-rollups ובנוסחאות | P2 | U | 3 ש׳ 00 דק׳ | 0.1 | ה׳ 10.12 13:35 | ה׳ 10.12 16:35 | ⏳ קוד ב-PR #755, #831 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#755](https://github.com/talstilkol/lumen-md/pull/755) |
 | W10.C27 | לוח אקדמי: לחבר לדדליינים (W5.15) ולמצב סטודנט (W5.13) | P2 | U | 3 ש׳ 00 דק׳ | W10.F24 | ה׳ 17.12 15:35 | ה׳ 17.12 18:35 | ⏳ בעבודה | נבנה בלבד |
 | W10.C28 | מקורות פתוחים: הטריגר @מקור, קיצור Ctrl+Shift+S וחיפוש חופשי בספריא | P2 | U | 4 ש׳ 00 דק׳ | 0.1 | ה׳ 10.12 16:35 | ה׳ 10.12 20:35 | ⏳ קוד ב-PR #758 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#758](https://github.com/talstilkol/lumen-md/pull/758) |
@@ -4702,7 +4710,7 @@ W9.9.3. פקודת Mac אחת ורשימת בדיקה
 | W10.E73 | W9.8 תיקוני הקוד מההחלטות (#618), קבוצת #483 | P1 | S | 5 ש׳ 00 דק׳ | W10.F28 | ג׳ 8.12 12:50 | ג׳ 8.12 17:50 | ⏳ קוד ב-PR #469 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#469](https://github.com/talstilkol/lumen-md/pull/469) |
 | W10.E74 | W9.8 תיקוני הקוד מההחלטות (#618), קבוצת #602 | P1 | S | 5 ש׳ 00 דק׳ | W10.F28 | ג׳ 8.12 17:50 | ג׳ 8.12 22:50 | ⏳ קוד ב-PR #602 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#602](https://github.com/talstilkol/lumen-md/pull/602) |
 | W10.E75 | W4.18 מטריצת RTL מלאה לערבית (spec) | P1 | U | 3 ש׳ 00 דק׳ | 0.1 | ג׳ 15.12 20:35 | ג׳ 15.12 23:35 | ⏳ קוד ב-PR #773 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#773](https://github.com/talstilkol/lumen-md/pull/773) |
-| W10.E76 | W2.10 harness ללוח העברי 2010–2030 מול טבלה חיצונית | P2 | U | 2 ש׳ 00 דק׳ | 0.1 | ג׳ 15.12 23:35 | ד׳ 16.12 01:35 | ⏳ קוד ב-PR #805, #859, #866, #872 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#805](https://github.com/talstilkol/lumen-md/pull/805) |
+| W10.E76 | W2.10 harness ללוח העברי 2010–2030 מול טבלה חיצונית | P2 | U | 2 ש׳ 00 דק׳ | 0.1 | ג׳ 15.12 23:35 | ד׳ 16.12 01:35 | ⏳ #1175 · cloud-complete (INT8 17.11 (lane FC3 #1175)); owed: Mac: the 2010–2030 Hebcal table (scripts/calendar/reference-from-hebcal.mjs) | נבנה בלבד · [#805](https://github.com/talstilkol/lumen-md/pull/805) |
 | W10.E77 | W1.3 מתמטיקה ב-Temml בטעינה עצלה (KaTeX נשאר גיבוי) | P2 | U | 5 ש׳ 00 דק׳ | W10.E2 | ד׳ 16.12 01:35 | ד׳ 16.12 06:35 | ⏳ קוד ב-PR #861 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#861](https://github.com/talstilkol/lumen-md/pull/861) |
 | W10.E78 | 13.3 Codemagic: טריגר על PR | P2 | D | 1 ש׳ 00 דק׳ | 0.1 | ג׳ 15.12 06:50 | ג׳ 15.12 07:50 | ⏳ קוד ב-PR #860 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#860](https://github.com/talstilkol/lumen-md/pull/860) |
 | W10.F1 | 11 ה-commits של verify/train (רכבת 1) שלא הגיעו לרכבות 2–4 | P0 | D | 5 ש׳ 00 דק׳ | W10.F14 | שבת 28.11 02:20 | שבת 28.11 07:20 | ⏳ #626 · cloud-complete (audit r3 PARTIAL); owed: #985 pending in train-missing | נבנה בלבד · [#626](https://github.com/talstilkol/lumen-md/pull/626) |
@@ -4715,7 +4723,7 @@ W9.9.3. פקודת Mac אחת ורשימת בדיקה
 | W10.F8 | 4.14 תיקוני ביקורת קורא ה-PDF מ-#272 ‏fa8cd877 (769 שורות) | P1 | U | 4 ש׳ 00 דק׳ | 0.1 | ד׳ 16.12 06:35 | ד׳ 16.12 10:35 | ⏳ #665 · cloud-complete (audit r3 PARTIAL); owed: PDF reader e2e | נבנה בלבד · [#665](https://github.com/talstilkol/lumen-md/pull/665) |
 | W10.F9 | 0.9 ‏--around/--window מ-#204 ‏42c8474 | P1 | D | 1 ש׳ 30 דק׳ | 0.1 | ג׳ 15.12 07:50 | ג׳ 15.12 09:20 | ⏳ #646 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof | Node · [#646](https://github.com/talstilkol/lumen-md/pull/646) |
 | W10.F10 | 11.2 ‏e2e של התוספים מ-#608 | P1 | U | 2 ש׳ 00 דק׳ | W10.B1, W10.B2 | ד׳ 16.12 16:35 | ד׳ 16.12 18:35 | ⏳ קוד ב-PR #653 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#653](https://github.com/talstilkol/lumen-md/pull/653) |
-| W10.F11 | W4.12 הפחתת הדילוגים ב-e2e מ-#546 ‏(44 → 15) | P1 | D | 3 ש׳ 00 דק׳ | W10.A6 | ג׳ 15.12 13:20 | ג׳ 15.12 16:20 | ⏳ #654 · cloud-complete (audit r3 PARTIAL); owed: e2e not run; true skip points ~21 (engine helpers counted separately) | נבנה בלבד · [#654](https://github.com/talstilkol/lumen-md/pull/654) |
+| W10.F11 | W4.12 הפחתת הדילוגים ב-e2e מ-#546 ‏(44 → 15) | P1 | D | 3 ש׳ 00 דק׳ | W10.A6 | ג׳ 15.12 13:20 | ג׳ 15.12 16:20 | ⏳ #1175 · cloud-complete (INT8 17.11 (lane FC3 #1175)); owed: remove 4 skip points to reach 15; e2e run on the Mac | נבנה בלבד · [#654](https://github.com/talstilkol/lumen-md/pull/654) |
 | W10.F12 | W4.9 ‏#605 ‏(startup 218 KB) ברכבת | P1 | D | 2 ש׳ 00 דק׳ | 0.1 | ג׳ 15.12 16:20 | ג׳ 15.12 18:20 | ⏳ #686 · cloud-complete (audit r3 PARTIAL); owed: real vite build + npm run budget | נבנה בלבד · [#686](https://github.com/talstilkol/lumen-md/pull/686) |
 | W10.F13 | W6.16 ריצת vitest mutation השבועית מ-#455 ‏d124512a27 | P1 | D | 2 ש׳ 00 דק׳ | 0.1 | ד׳ 16.12 06:20 | ד׳ 16.12 08:20 | ⏳ #651 · cloud-complete (audit r3 PARTIAL); owed: nightly never ran unattended (W10.M12) | נבנה בלבד · [#651](https://github.com/talstilkol/lumen-md/pull/651) |
 | W10.F14 | בסיס רכבת 6: ‏verify/train-5 המקומי (20 commits עד c92553af4b) נדחף ונבדק | P0 | D | 2 ש׳ 00 דק׳ | 0.1 | שבת 28.11 00:20 | שבת 28.11 02:20 | ⏳ #640 · cloud-complete (audit r3 PARTIAL); owed: train:offline receipt | נבנה בלבד · [#640](https://github.com/talstilkol/lumen-md/pull/640) |
@@ -4853,7 +4861,7 @@ W10.A8.3. codeHealth.test מלא
 
 **קבלה:** codeHealth.test ירוק על הרכבת · 0 catch שקטים ב-storage ו-sync
 
-**פירוט הסטטוס:** INT6b 17.11: status before → ⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת; ברכבת 5
+**פירוט הסטטוס:** INT6b 17.11: status before → ⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת; ברכבת 5 · INT8 17.11 (lane FC1 #1189): ~200 storage/sync fallback catches reviewed, 37 report now (+3 Argon2 loader); per-file ratchet fallbackCatchReview 3/3 (INT8 added the reviewed counts of #1193/#1201); owed: re-audit; receipts+label · status before: ⏳ #640 · cloud-complete (audit r3 PARTIAL); owed: re-audit of the fix in #1129 (loggerSwallowed; codeHealth's W10.A8 check)
 
 **W10.A9 · settingsSchema: 50 מפתחות שמורים ו-5 שדות store שאינם בסכמה** — בלי ענף · ממשק, עברית וידע · 3 ש׳ 00 דק׳ · מקור: ביקורת הקוד 14.11 (audit/merged.json): 11.1
 
@@ -5070,6 +5078,8 @@ W10.B18.2. סטטוס: ״bge לא נמדד״; ההחלטה ״כבוי״ זמני
 
 **קבלה:** תוצאה על סט שבו BM25 < 1.0 · reranker נדלק רק ב-≥ +2 nDCG וב-≤ 150ms p95 ל-top-20, גם על WebFAQ-heb ו-Belebele (W11.M5)
 
+**פירוט הסטטוס:** INT8 17.11 (lane FC3 #1172): public-set gate needs +2 on webfaq-heb and belebele-heb and p95 ≤150 ms (tightened); fetch.py refuses other licences, pins revision+sha256; rerankHard 11/11, crossEncoderSeam 6/6; licence not pinned (HF unreachable here); owed: Mac FC3-W10.B18-fetch then FC3-W10.B18-rerank; commit eval/retrieval-public.pins.json if the licences pass · status before: ⏳ קוד ב-PR #706 — נבדק לא מקוון; ממתין לרכבת
+
 **W10.B19 · W2.2: זוגות ״פתקים קשורים״ מתוך הקישורים בקורפוס האמיתי, לא נוצרים** — בלי ענף · AI וסוכנים · 4 ש׳ 00 דק׳ · מקור: ביקורת הקוד 14.11 (audit/merged.json): W2.2
 
 W10.B19.1. מ-7 הכספות הציבוריות של W4.30 (333 פתקים): קישור קיים = זוג זהב, הקישור מוסר מהטקסט לפני המדידה
@@ -5185,6 +5195,8 @@ W10.C9.1. רישום הסוכם המאומת כשיש מודל; אחרת החי�
 W10.C9.2. בדיקה עם סוכם מדומה + מבקר
 
 **קבלה:** setLectureSummarizer נקרא מחוץ לבדיקות · הממשק מציין איזה סיכום התקבל · במודל אמיתי (Mac): ‏ROUGE-L ונאמנות ≥ 95% על 100 מאמרי test של HebSummaries, אחרי בדיקת רישיון (W11.O4)
+
+**פירוט הסטטוס:** INT8 17.11 (lane FC3 #1172): ROUGE-L / ROUGE-Lsum in eval:summarize; rougeL 10/10 (rouge-score README example, Lin 2004 cases, Hebrew tokens); owed: Mac FC3-W10.C9-rouge; FC3-W10.C9-hebsummaries after owner W11.O4 · status before: ⏳ קוד ב-PR #632, #639, #669, #812 — נבדק לא מקוון; ממתין לרכבת
 
 **W10.C10 · שיתוף מ-WhatsApp: share target עובר דרך chatShareText ושומר כותב ומקור** — בלי ענף · ממשק, עברית וידע · 2 ש׳ 00 דק׳ · מקור: ביקורת הקוד 14.11 (audit/merged.json): W5.7
 
@@ -5325,6 +5337,8 @@ W10.C25.1. להעביר את loadIndex ל-worker דרך hub.ts
 W10.C25.2. בדיקת סנכרון: הדגשה נשמרת אחרי סבב
 
 **קבלה:** 0 בניית אינדקס ב-main thread
+
+**פירוט הסטטוס:** INT8 17.11 (lane FC3 #1173): e2e/highlights-worker.spec.ts: engine=worker, vaultIndexLocal never on the main thread, buildIndex calls = 0 by V8 coverage; owed: Mac FC3-W10.C25-worker · status before: ⏳ קוד ב-PR #682 — נבדק לא מקוון; ממתין לרכבת
 
 **W10.C26 · ימי עבודה א׳–ה׳ ב-rollups ובנוסחאות** — בלי ענף · ממשק, עברית וידע · 3 ש׳ 00 דק׳ · מקור: ביקורת הקוד 14.11 (audit/merged.json): W5.15
 
@@ -6200,6 +6214,8 @@ W10.E76.2. דוח פערים
 
 **קבלה:** ה-harness מוכן
 
+**פירוט הסטטוס:** INT8 17.11 (lane FC3 #1175): anchor rows as an outside reference (see R12.6); owed: Mac: the 2010–2030 Hebcal table (scripts/calendar/reference-from-hebcal.mjs) · status before: ⏳ קוד ב-PR #805, #859, #866, #872 — נבדק לא מקוון; ממתין לרכבת
+
 **W10.E77 · W1.3 מתמטיקה ב-Temml בטעינה עצלה (KaTeX נשאר גיבוי)** — בלי ענף · ממשק, עברית וידע · 5 ש׳ 00 דק׳ · מקור: ביקורת הקוד 14.11 (audit/merged.json): W1.3
 
 W10.E77.1. seam שבוחר Temml אם החבילה מותקנת
@@ -6304,7 +6320,7 @@ W10.F11.1. merge של #546 על skipAudit הירוק
 
 **קבלה:** ≤15 ‏.skip ב-e2e
 
-**פירוט הסטטוס:** INT6b 17.11: status before → ⏳ קוד ב-PR #654 — נבדק לא מקוון; ממתין לרכבת
+**פירוט הסטטוס:** INT6b 17.11: status before → ⏳ קוד ב-PR #654 — נבדק לא מקוון; ממתין לרכבת · INT8 17.11 (lane FC3 #1175): e2e skip points counted once (direct + helper calls), ratchet MAX_E2E_SKIP_POINTS; on the merged INT8 tree the count is 19 points (11 skip calls outside _engines.ts + 8 helper calls; 20 before INT8 replaced the dead @nightly browserName skip in entity-graph.spec.ts); target ≤15 NOT met; owed: remove 4 skip points to reach 15; e2e run on the Mac · status before: ⏳ #654 · cloud-complete (audit r3 PARTIAL); owed: e2e not run; true skip points ~21 (engine helpers counted separately)
 
 **W10.F12 · W4.9 ‏#605 ‏(startup 218 KB) ברכבת** — בלי ענף · תשתית וביצועים · 2 ש׳ 00 דק׳ · מקור: ביקורת הקוד 14.11 (audit/merged.json): W4.9
 
@@ -6846,13 +6862,13 @@ W10.O12.1. החלטה על יעד WER אחרי M7
 | W11.H11 | זיהוי ישויות בעברית: ‏DictaBERT-NER ב-worker, מחובר ל-PII ול״אזכורים לא מקושרים״, ומתאם NEMO/BMC | P1 | A | 6 ש׳ 00 דק׳ | W11.H5, W10.C23 | שבת 12.12 17:20 | שבת 12.12 23:20 | ⏳ קוד ב-PR #707, #838 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#707](https://github.com/talstilkol/lumen-md/pull/707) |
 | W11.H12 | למטיזציה לחיפוש: ‏Shoshan מול DictaBERT-lex, עם A/B על HeQ ועל אחזור עברי של MMTEB | P1 | A | 5 ש׳ 00 דק׳ | W2.11, W11.H5 | שבת 12.12 23:20 | א׳ 13.12 04:20 | ⏳ #708 · cloud-complete (audit r3 PARTIAL); owed: ONNX export, HeQ/MMTEB A/B result, W11.M3 winner; shoshan/dictaLex not reachable from index | נבנה בלבד · [#708](https://github.com/talstilkol/lumen-md/pull/708) |
 | W11.H13 | דף ציבורי ״מדד עברית בפתקים״: ‏bidi, ‏WER, ניקוד ו-OCR מול Obsidian, ‏Notion ו-Apple Notes | P1 | U | 5 ש׳ 00 דק׳ | W11.H1, W11.H6, W11.H10 | א׳ 20.12 05:35 | א׳ 20.12 10:35 | ⏳ קוד ב-PR #712 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#712](https://github.com/talstilkol/lumen-md/pull/712) |
-| W11.H14 | כתב יד: מדד כתב היד הציבורי של ivrit.ai במקום גיוס 20 כותבים | P2 | A | 3 ש׳ 00 דק׳ | W7.11, W11.H5 | א׳ 20.12 07:35 | א׳ 20.12 10:35 | ⏳ קוד ב-PR #661, #911 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#661](https://github.com/talstilkol/lumen-md/pull/661) |
+| W11.H14 | כתב יד: מדד כתב היד הציבורי של ivrit.ai במקום גיוס 20 כותבים | P2 | A | 3 ש׳ 00 דק׳ | W7.11, W11.H5 | א׳ 20.12 07:35 | א׳ 20.12 10:35 | ⏳ #1198 · cloud-complete (INT8 17.11 (lane FC2 #1198)); owed: Mac FC2-W11.H14-handwriting (CER on ivrit.ai) | נבנה בלבד · [#661](https://github.com/talstilkol/lumen-md/pull/661) |
 | W11.H15 | ציטוט אקדמי בעברית: מעצב APA7 לפי כללי הספריות של בר-אילן וחיפה, בלי citeproc | P2 | U | 6 ש׳ 00 דק׳ | 6.13, W2.16 | א׳ 20.12 10:35 | א׳ 20.12 16:35 | ⏳ קוד ב-PR #661, #689 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#661](https://github.com/talstilkol/lumen-md/pull/661) |
 | W11.H16 | ספר החוקים הפתוח כמקור לא מקוון ב-W7.5, ופסקי דין כ״קישור בלבד״ | P2 | U | 6 ש׳ 00 דק׳ | W7.5 | א׳ 20.12 16:35 | א׳ 20.12 22:35 | ⏳ קוד ב-PR #695 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#695](https://github.com/talstilkol/lumen-md/pull/695) |
 | W11.H17 | ספריא לסוכן: ארבעת הכלים של שרת ה-MCP של ספריא (MIT) כתובים מחדש ב-TS | P2 | A | 4 ש׳ 00 דק׳ | W10.C2, W5.1 | ב׳ 7.12 21:50 | ג׳ 8.12 01:50 | ⏳ קוד ב-PR #699, #835, #880 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#699](https://github.com/talstilkol/lumen-md/pull/699) |
 | W11.H18 | תמלול יידיש בשולחן העבודה: רישום ivrit-ai/yi-whisper-large-v3-turbo | P2 | A | 2 ש׳ 00 דק׳ | W7.9, W1.17 | ג׳ 15.12 18:20 | ג׳ 15.12 20:20 | ⏳ קוד ב-PR #661 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#661](https://github.com/talstilkol/lumen-md/pull/661) |
 | W11.I1 | שער ״seam חי״: אין export של register*/set* בלי קורא מחוץ לבדיקות | P0 | D | 3 ש׳ 00 דק׳ | 0.1 | א׳ 29.11 13:50 | א׳ 29.11 16:50 | ⏳ #655 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof | Node · [#655](https://github.com/talstilkol/lumen-md/pull/655) |
-| W11.I2 | עקרון השניים ב-runtime: סשן נגוע, ואישור לכל קריאה של כלי כתיבה או יציאה לרשת | P1 | S | 6 ש׳ 00 דק׳ | 2.7, 5.11, W10.C12 | ג׳ 8.12 22:50 | ד׳ 9.12 04:50 | ⏳ #692 · cloud-complete (audit r3 PARTIAL); owed: re-audit of the fix in #1110 (ruleOfTwoVaultRead); review receipts and the human-reviewed label (owner, security) | נבנה בלבד · [#692](https://github.com/talstilkol/lumen-md/pull/692) |
+| W11.I2 | עקרון השניים ב-runtime: סשן נגוע, ואישור לכל קריאה של כלי כתיבה או יציאה לרשת | P1 | S | 6 ש׳ 00 דק׳ | 2.7, 5.11, W10.C12 | ג׳ 8.12 22:50 | ד׳ 9.12 04:50 | ⏳ #1188 · cloud-complete (INT8 17.11 (lane FC1 #1188)); owed: receipts+label (privacy); re-audit | נבנה בלבד · [#692](https://github.com/talstilkol/lumen-md/pull/692) |
 | W11.I3 | spotlighting ו-plan-then-execute: סימון קטעים לא אמינים לפני הפרומפט, ורשימת כלים קבועה למיומנויות | P1 | S | 4 ש׳ 00 דק׳ | W11.I2, W7.1 | ד׳ 9.12 04:50 | ד׳ 9.12 08:50 | ⏳ #692 · cloud-complete; owed: an adversarial eval with the AgentDojo harness on a real model (r3b 17.11: PARTIAL) | דפדפן · [#692](https://github.com/talstilkol/lumen-md/pull/692) |
 | W11.I4 | AgentDojo על משטח הכלים של Lumen: סוויטות workspace ו-slack, ועוד התקפה אדפטיבית | P1 | S | 6 ש׳ 00 דק׳ | W11.I2, W11.I3 | ד׳ 9.12 08:50 | ד׳ 9.12 14:50 | ⏳ קוד ב-PR #703 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#703](https://github.com/talstilkol/lumen-md/pull/703) |
 | W11.I5 | לקוח MCP לפי המפרט: כותרות Mcp-Method/Mcp-Name, ‏_meta, נעיצת הגדרות כלים והיקפי אישור | P1 | A | 5 ש׳ 00 דק׳ | W10.C2, W7.18 | ג׳ 8.12 12:50 | ג׳ 8.12 17:50 | ⏳ #728 · cloud-complete (audit r3 PARTIAL); owed: e2e against real servers (W11.M6) | נבנה בלבד · [#728](https://github.com/talstilkol/lumen-md/pull/728) |
@@ -6903,7 +6919,7 @@ W10.O12.1. החלטה על יעד WER אחרי M7
 | W11.Q8 | תאימות ל-CommonMark 0.31.2 ול-GFM: ‏652 הדוגמאות של spec.json, ובדיקות תכונה | P1 | D | 5 ש׳ 00 דק׳ | W10.A14 | ב׳ 21.12 05:20 | ב׳ 21.12 10:20 | ⏳ #847 · cloud-complete (audit r3 PARTIAL); owed: fast-check runs; GFM 98.79% < 99% target | נבנה בלבד · [#847](https://github.com/talstilkol/lumen-md/pull/847) |
 | W11.Q9 | כיול ה-mutation שלנו מול Stryker 10 על שלושה מודולים | P1 | D | 4 ש׳ 00 דק׳ | W10.B14 | ב׳ 21.12 10:20 | ב׳ 21.12 14:20 | ⏳ קוד ב-PR #853 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#853](https://github.com/talstilkol/lumen-md/pull/853) |
 | W11.Q10 | נתיב כתיבה ב-OPFS: ‏SyncAccessHandle ב-worker ייעודי, ‏persist() והודעת מכסה | P1 | S | 6 ש׳ 00 דק׳ | W10.A14 | ו׳ 11.12 22:20 | שבת 12.12 04:20 | ⏳ קוד ב-PR #856 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#856](https://github.com/talstilkol/lumen-md/pull/856) |
-| W11.Q11 | מדידת OPFS מול IndexedDB: ‏10k קבצים בשלושה מנועים | P1 | S | 4 ש׳ 00 דק׳ | W11.Q10 | שבת 12.12 04:20 | שבת 12.12 08:20 | ⏳ קוד ב-PR #856 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#856](https://github.com/talstilkol/lumen-md/pull/856) |
+| W11.Q11 | מדידת OPFS מול IndexedDB: ‏10k קבצים בשלושה מנועים | P1 | S | 4 ש׳ 00 דק׳ | W11.Q10 | שבת 12.12 04:20 | שבת 12.12 08:20 | ⏳ #1185 · cloud-complete (INT8 17.11 (lane FC1 #1185)); owed: Mac FC1/opfs-10k (3 engines) | נבנה בלבד · [#856](https://github.com/talstilkol/lumen-md/pull/856) |
 | W11.Q12 | ניסוי ב-Vercel CI (Beta) ל-lint ולבדיקות יחידה בלבד, מאחורי Buildkite | P2 | D | 3 ש׳ 00 דק׳ | W7.21 | ב׳ 21.12 14:20 | ב׳ 21.12 17:20 | ⏳ קוד ב-PR #858 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#858](https://github.com/talstilkol/lumen-md/pull/858) |
 | W11.P1 | ממירים מ-Obsidian Importer ‏(MIT): ‏Google Keep (Takeout JSON) ותיקוני תאריכים מקומיים ב-Notion | P1 | U | 5 ש׳ 00 דק׳ | W1.26 | ב׳ 21.12 18:35 | ב׳ 21.12 23:35 | ⏳ קוד ב-PR #690, #696 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#690](https://github.com/talstilkol/lumen-md/pull/690) |
 | W11.P2 | npm run import:diff: אותו ייצוא דרך lumen-md ודרך Obsidian Importer, והשוואה | P1 | U | 5 ש׳ 00 דק׳ | W11.P1, W10.E48, W10.E49 | ב׳ 21.12 23:35 | ג׳ 22.12 04:35 | ⏳ קוד ב-PR #690, #696 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#690](https://github.com/talstilkol/lumen-md/pull/690) |
@@ -6917,7 +6933,7 @@ W10.O12.1. החלטה על יעד WER אחרי M7
 | W11.P10 | Android: ‏SEND ו-SEND_MULTIPLE דרך chatShareText, ווידג׳ט במסך הבית | P1 | D | 4 ש׳ 00 דק׳ | W10.C10, W10.C31 | ג׳ 22.12 10:20 | ג׳ 22.12 14:20 | ⏳ קוד ב-PR #774, #782 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#774](https://github.com/talstilkol/lumen-md/pull/774) |
 | W11.P11 | מוכנות לחנויות בקוד: ‏targetSdk 36, ‏PrivacyInfo.xcprivacy, יישור 16KB ודפי חנות בעברית | P1 | D | 4 ש׳ 00 דק׳ | W10.C7 | ג׳ 22.12 14:20 | ג׳ 22.12 18:20 | ⏳ קוד ב-PR #791 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#791](https://github.com/talstilkol/lumen-md/pull/791) |
 | W11.P12 | החלטה: דף תמחור — חינם ו-MIT לתמיד, וממסר מוצפן אופציונלי ב-$4 לחודש | P1 | U | 4 ש׳ 00 דק׳ | 0.1 | ג׳ 22.12 18:35 | ג׳ 22.12 22:35 | ⏳ #705 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof | Node · [#705](https://github.com/talstilkol/lumen-md/pull/705) |
-| W11.P13 | התקנת PWA: ‏<install> ו-navigator.install עם זיהוי יכולות, ומדריך ל-iOS 26 | P2 | U | 3 ש׳ 00 דק׳ | 0.1 | ג׳ 22.12 22:35 | ד׳ 23.12 01:35 | ⏳ קוד ב-PR #808 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#808](https://github.com/talstilkol/lumen-md/pull/808) |
+| W11.P13 | התקנת PWA: ‏<install> ו-navigator.install עם זיהוי יכולות, ומדריך ל-iOS 26 | P2 | U | 3 ש׳ 00 דק׳ | 0.1 | ג׳ 22.12 22:35 | ד׳ 23.12 01:35 | ⏳ #1202 · cloud-complete (INT8 17.11 (lane FC2 #1202)); owed: owner: register the trials and headers; Mac L8-W11.P13-chrome | נבנה בלבד · [#808](https://github.com/talstilkol/lumen-md/pull/808) |
 | W11.P14 | ערכת חינוך: דף למורה לפי חוזר משרד החינוך, וחבילה לא מקוונת לישיבות | P2 | U | 4 ש׳ 00 דק׳ | W5.13, W7.24 | ד׳ 23.12 01:35 | ד׳ 23.12 05:35 | ⏳ קוד ב-PR #813 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#813](https://github.com/talstilkol/lumen-md/pull/813) |
 | W11.P15 | לולאות שימור: סיכום שבועי מקומי, ״ביום הזה״ ומראה קלאסי לבחירה | P2 | U | 5 ש׳ 00 דק׳ | W4.26 | ד׳ 23.12 05:35 | ד׳ 23.12 10:35 | ⏳ קוד ב-PR #811 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#811](https://github.com/talstilkol/lumen-md/pull/811) |
 | W11.L1 | שערי השקה כקוד: ‏npm run launch:gate -- M0 ומסגרת לכל אבן דרך | P0 | D | 3 ש׳ 00 דק׳ | W11.S1, W10.B1, W10.B2 | א׳ 29.11 16:50 | א׳ 29.11 19:50 | ⏳ #650 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof | Node · [#650](https://github.com/talstilkol/lumen-md/pull/650) |
@@ -6930,10 +6946,10 @@ W10.O12.1. החלטה על יעד WER אחרי M7
 | W11.L8 | M4 — השקה מלאה 1.0 GA: חנויות בייצור, תמחור ודוח ביקורת | P2 | D | 6 ש׳ 00 דק׳ | W11.L7, W11.P12, W10.O7 | ה׳ 24.12 11:20 | ה׳ 24.12 17:20 | ⬜ | — |
 | W11.M1 | Mac: הכתבה — ‏sha256 ל-zipformer2-66m, ‏WER על eval-d1, ‏eval-whatsapp ו-FLEURS לכל מנוע | P1 | A | 4 ש׳ 00 דק׳ | W11.Q13, W10.M2, W11.H6, W11.H7 | ד׳ 23.12 17:20 | ד׳ 23.12 21:20 | ⬜ | — |
 | W11.M2 | Mac: ‏Chatterbox — הרצת ONNX, מבחן CER בסבב ASR, ‏RTF והחלטה | P1 | A | 3 ש׳ 00 דק׳ | W11.Q13, W10.M2, W11.H9 | ד׳ 23.12 21:20 | ה׳ 24.12 00:20 | ⬜ | — |
-| W11.M3 | Mac: ייצוא ומדידה — ניקוד (Nakdimon, ‏MILIM), ‏DictaBERT-NER (NEMO) ו-Shoshan | P1 | A | 4 ש׳ 00 דק׳ | W11.Q13, W10.M8, W11.H10, W11.H11, W11.H12 | ה׳ 24.12 00:20 | ה׳ 24.12 04:20 | ⬜ | — |
+| W11.M3 | Mac: ייצוא ומדידה — ניקוד (Nakdimon, ‏MILIM), ‏DictaBERT-NER (NEMO) ו-Shoshan | P1 | A | 4 ש׳ 00 דק׳ | W11.Q13, W10.M8, W11.H10, W11.H11, W11.H12 | ה׳ 24.12 00:20 | ה׳ 24.12 04:20 | ⬜ · merged, held by frozen wave | — |
 | W11.M4 | Mac: יום מודלים של גל 11 — ‏AlephBench, ‏HeQ, ‏BFCL v4, ‏tok/s ו-RAM, ובחירת ברירות מחדל | P1 | A | 4 ש׳ 00 דק׳ | W11.Q13, W10.M7, W11.I12, W11.I15 | ה׳ 24.12 04:20 | ה׳ 24.12 08:20 | ⬜ | — |
 | W11.M5 | Mac או Kaggle: יום אחזור — ‏WebFAQ-heb, ‏Belebele, ‏BEIR, ‏MAFAT וחיתוך לפי כותרות | P1 | A | 3 ש׳ 00 דק׳ | W11.Q13, W11.I13, W11.I14 | ה׳ 24.12 08:20 | ה׳ 24.12 11:20 | ⬜ | — |
-| W11.M6 | Mac: ‏AgentDojo על מודלים אמיתיים, ‏MCP Inspector וה-SDK הרשמי | P1 | S | 3 ש׳ 00 דק׳ | W11.Q13, W11.I4, W11.I5, W11.I7, W11.I8, W11.M4 | ה׳ 24.12 08:20 | ה׳ 24.12 11:20 | ⬜ | — |
+| W11.M6 | Mac: ‏AgentDojo על מודלים אמיתיים, ‏MCP Inspector וה-SDK הרשמי | P1 | S | 3 ש׳ 00 דק׳ | W11.Q13, W11.I4, W11.I5, W11.I7, W11.I8, W11.M4 | ה׳ 24.12 08:20 | ה׳ 24.12 11:20 | ⬜ · merged, held by frozen wave | — |
 | W11.M7 | Mac: ‏e2e של גל 11 בשלושה דפדפנים — סמן RTL, ‏TTFV, סולם מנועים ומצב קובץ קונפליקט | P1 | U | 3 ש׳ 00 דק׳ | W11.Q13, W11.H3, W11.P5, W11.I16, W11.S6 | ד׳ 23.12 19:35 | ד׳ 23.12 22:35 | ⬜ | — |
 | W11.M8 | Mac: יום ביצועים ושרשרת אספקה — כספת 100k מול Obsidian 1.15.1, מהקשה עד ציור, ‏OPFS ו-Scorecard | P1 | D | 4 ש׳ 00 דק׳ | W11.Q13, W10.M6, W11.Q2, W11.Q5, W11.Q11, W11.S5 | ד׳ 23.12 17:20 | ד׳ 23.12 21:20 | ⬜ | — |
 | W11.M9 | Mac: ‏VoiceOver בעברית, ‏Stryker ובדיקות תכונה | P1 | U | 3 ש׳ 00 דק׳ | W11.Q13, W10.M2, W11.Q6, W11.Q8, W11.Q9 | ד׳ 23.12 22:35 | ה׳ 24.12 01:35 | ⬜ | — |
@@ -7076,6 +7092,8 @@ W11.H14.3. היכולת נחשפת רק ב-CER חציוני ≤ 20%
 
 **קבלה:** המתאם רץ על 5 שורות עם מנוע מדומה · השער מסתיר את היכולת בבדיקת יחידה כש-CER מעל הסף
 
+**פירוט הסטטוס:** INT8 17.11 (lane FC2 #1198): src/ink/inkText.ts recognizeNote, tesseract + model seam; handwritingRecognizer 7/7; the gate opens only from the eval card; owed: Mac FC2-W11.H14-handwriting (CER on ivrit.ai) · status before: ⏳ קוד ב-PR #661, #911 — נבדק לא מקוון; ממתין לרכבת
+
 **W11.H15 · ציטוט אקדמי בעברית: מעצב APA7 לפי כללי הספריות של בר-אילן וחיפה, בלי citeproc** — בלי ענף · ממשק, עברית וידע · 6 ש׳ 00 דק׳ · מקור: https://lib.biu.ac.il/en/Education/APA7 · https://lib.haifa.ac.il/en/bibliography-rules/
 
 W11.H15.1. מעצב MIT: ״ואחרים״, ״ו״ במקום &, עברית לפני אנגלית ברשימה, FSI/PDI סביב כל סוגריים ב-RTL
@@ -7124,7 +7142,7 @@ W11.I2.3. הנגיעה מוצגת במסך האישור ונרשמת ביומן 
 
 **קבלה:** בדיקה: סשן שקרא PDF לא כותב ולא שולח בלי אישור, 20/20 · סשן נקי שומר את התנהגות האישור הקיימת
 
-**פירוט הסטטוס:** INT6b 17.11 (lane FA): ⏳ fix in PR #1110 (vault read = private whatever its trust class); dod+ npx vitest run src/__tests__/ruleOfTwoVaultRead.test.ts · INT6b 17.11: status before → ⏳ קוד ב-PR #692, #703, #844 — נבדק לא מקוון; ממתין לרכבת
+**פירוט הסטטוס:** INT6b 17.11 (lane FA): ⏳ fix in PR #1110 (vault read = private whatever its trust class); dod+ npx vitest run src/__tests__/ruleOfTwoVaultRead.test.ts · INT6b 17.11: status before → ⏳ קוד ב-PR #692, #703, #844 — נבדק לא מקוון; ממתין לרכבת · INT8 17.11 (lane FC1 #1188): remote MCP answers are private under the Rule of Two: exploit reproduced (2 out, 0 asks) → 0 out; ruleOfTwoRemoteMcp 3/3 (fail before); merged with review 12 M4 (#1179) in readsUserData; owed: receipts+label (privacy); re-audit · status before: ⏳ #692 · cloud-complete (audit r3 PARTIAL); owed: re-audit of the fix in #1110 (ruleOfTwoVaultRead); review receipts and the human-reviewed label (owner, security)
 
 **W11.I3 · spotlighting ו-plan-then-execute: סימון קטעים לא אמינים לפני הפרומפט, ורשימת כלים קבועה למיומנויות** — בלי ענף · נתונים ואבטחה · 4 ש׳ 00 דק׳ · מקור: https://arxiv.org/abs/2503.18813 · https://arxiv.org/html/2403.14720v1
 
@@ -7568,7 +7586,7 @@ W11.Q11.2. ההרצה ב-W11.M8
 
 **קבלה:** קריאה של 10k קבצים ≤ 1.5s ב-Chromium על ה-Mac · 0 משימות מעל 50ms ב-main thread בזמן ייבוא
 
-**פירוט הסטטוס:** בעבודה (X-Q)
+**פירוט הסטטוס:** בעבודה (X-Q) · INT8 17.11 (lane FC1 #1185): OPFS bench streams the 10k files; 10k run completes in the cloud, peak tree RSS 1,132→864 MB, crash phase reported; opfsBench 7/7; owed: Mac FC1/opfs-10k (3 engines) · status before: ⏳ קוד ב-PR #856 — נבדק לא מקוון; ממתין לרכבת
 
 **W11.Q12 · ניסוי ב-Vercel CI (Beta) ל-lint ולבדיקות יחידה בלבד, מאחורי Buildkite** — בלי ענף · תשתית וביצועים · 3 ש׳ 00 דק׳ · מקור: https://vercel.com/blog/introducing-vercel-ci
 
@@ -7693,6 +7711,8 @@ W11.P13.2. מדריך ל-iOS 26; מונה התקנות מקומי בלבד
 
 **קבלה:** כפתור ההתקנה עובד ב-Chrome 148+, ב-Edge וב-Chrome ישן; בשאר מוצג מדריך
 
+**פירוט הסטטוס:** INT8 17.11 (lane FC2 #1202): origin-trial plan (plan/origin-trials-W11.P13.md/.he.md) and token checker; originTrialToken 2/2; owed: owner: register the trials and headers; Mac L8-W11.P13-chrome · status before: ⏳ קוד ב-PR #808 — נבדק לא מקוון; ממתין לרכבת
+
 **W11.P14 · ערכת חינוך: דף למורה לפי חוזר משרד החינוך, וחבילה לא מקוונת לישיבות** — בלי ענף · ממשק, עברית וידע · 4 ש׳ 00 דק׳ · מקור: https://meyda.education.gov.il/files/Pop/0files/lemida-metukshevet/shimush-kelim-digitalim-beit-sefer.pdf · https://github.com/sivan22/otzaria
 
 W11.P14.1. PDF למורה: ״בלי חשבון, בלי מידע אישי, עובד בלי רשת״ — סעיף מול סעיף בחוזר מ-5.1.2022
@@ -7800,6 +7820,8 @@ W11.M3.3. ייצוא Shoshan ו-A/B
 
 **קבלה:** ניקוד: ״איכות גבוהה״ ≥ 95% ברמת מילה, או שהטענה יורדת · NER: ‏F1 ≥ 85 ב-int8, ‏≤ 60MB, ‏≤ 150ms לפסקה · Shoshan: ‏≥ 92% מחוץ לתחום ו-nDCG@10 לא יורד
 
+**פירוט הסטטוס:** INT8 17.11 (lane FC2 #1195): dictabert-ner.mjs, gliner.mjs, ner-core.mjs engines; nerEngines 10/10; owed: Mac FC2-W11.M3-dictabert-ner (NEMO F1)
+
 **W11.M4 · Mac: יום מודלים של גל 11 — ‏AlephBench, ‏HeQ, ‏BFCL v4, ‏tok/s ו-RAM, ובחירת ברירות מחדל** — בלי ענף · AI וסוכנים · 4 ש׳ 00 דק׳ · מקור: https://huggingface.co/datasets/HebArabNlpProject/AlephBench
 
 W11.M4.1. DictaLM-3.0-1.7B, ‏Gemma 4 E2B/E4B, ‏Qwen3 1.7B/4B, ‏Qwen3.5 4B; בשולחן העבודה 24B מול 26B-A4B
@@ -7822,6 +7844,8 @@ W11.M6.2. MCP Inspector על השרת בהיקף; לקוח ה-SDK של TypeScrip
 W11.M6.3. server-everything ו-server-filesystem אמיתיים
 
 **קבלה:** AgentDojo: ‏0 שינויי מצב ו-0 יציאות בלי אישור; ‏utility ≥ 70% מהמערכת בלי הגנה · Inspector מציג רק פתקים בהיקף; ה-SDK עובר 100% · ≥ 9/10 משימות בכלי הנכון
+
+**פירוט הסטטוס:** INT8 17.11 (lane FC2 #1192): Ollama executor for AgentDojo, loopback only, temp 0/seed 42; agentDojo 12/12 (4 new fail on the old harness); owed: Mac FC2-W11.M6-agentdojo (qwen3:8b real run); receipts+label (agents)
 
 **W11.M7 · Mac: ‏e2e של גל 11 בשלושה דפדפנים — סמן RTL, ‏TTFV, סולם מנועים ומצב קובץ קונפליקט** — בלי ענף · ממשק, עברית וידע · 3 ש׳ 00 דק׳ · מקור: research/R1.md R1.3
 
@@ -7958,10 +7982,10 @@ W11.Q14.2. train:offline
 | # | משימה | עדיפות | מסלול | הערכה | תלוי ב- | התחלה | סיום | מצב | אימות |
 |---|---|---|---|---|---|---|---|---|---|
 | W12.T1 | סוגים (supertags): סכמת סוג בקובץ, שדות מוקלדים וירושה אחת | P1 | U | 5 ש׳ 00 דק׳ | W1.12 | ד׳ 23.12 14:35 | ד׳ 23.12 19:35 | ⏳ #820 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof | Node · [#820](https://github.com/talstilkol/lumen-md/pull/820) |
-| W12.T2 | סוגים בממשק: טופס שדות בפאנל המאפיינים, אימות, ותבנית לכל סוג | P1 | U | 5 ש׳ 00 דק׳ | W12.T1 | ה׳ 24.12 04:35 | ה׳ 24.12 09:35 | ⏳ קוד ב-PR #820, #849 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#820](https://github.com/talstilkol/lumen-md/pull/820) |
+| W12.T2 | סוגים בממשק: טופס שדות בפאנל המאפיינים, אימות, ותבנית לכל סוג | P1 | U | 5 ש׳ 00 דק׳ | W12.T1 | ה׳ 24.12 04:35 | ה׳ 24.12 09:35 | ⏳ #1190 #1197 · cloud-complete (INT8 17.11 (lane FC1+FC2 #1190, #1197)); owed: Mac FC1/e2e, FC2-e2e-wave12 | נבנה בלבד · [#820](https://github.com/talstilkol/lumen-md/pull/820) |
 | W12.T3 | Base אוטומטי לכל סוג: טבלה, כרטיסים ולוח kanban שנוצרים מהסכמה | P1 | U | 4 ש׳ 00 דק׳ | W12.T1 | ה׳ 24.12 09:35 | ה׳ 24.12 13:35 | ⏳ קוד ב-PR #831, #839, #842, #865, #892, #898 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#831](https://github.com/talstilkol/lumen-md/pull/831) |
 | W12.T4 | סוגים ב-MCP וב-CLI: ‏list_types, ‏get_type ו-create_object דרך מסך האישור | P1 | A | 3 ש׳ 00 דק׳ | W12.T1, W11.I7 | ה׳ 24.12 11:20 | ה׳ 24.12 14:20 | ⏳ #820 · cloud-complete (audit r3 PARTIAL); owed: MCP Inspector run (W11.M6) | נבנה בלבד · [#820](https://github.com/talstilkol/lumen-md/pull/820) |
-| W12.T5 | Bases מול Obsidian 1.14/1.15: ‏kanban, כרטיסים עם תמונת שער, וגרירת סדר מסננים — לפי דפי העזרה | P1 | U | 5 ש׳ 00 דק׳ | W11.P3, W12.T3 | ה׳ 24.12 13:35 | ה׳ 24.12 18:35 | ⏳ קוד ב-PR #842 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#842](https://github.com/talstilkol/lumen-md/pull/842) |
+| W12.T5 | Bases מול Obsidian 1.14/1.15: ‏kanban, כרטיסים עם תמונת שער, וגרירת סדר מסננים — לפי דפי העזרה | P1 | U | 5 ש׳ 00 דק׳ | W11.P3, W12.T3 | ה׳ 24.12 13:35 | ה׳ 24.12 18:35 | ⏳ #1190 · cloud-complete (INT8 17.11 (lane FC1 #1190)); owed: Mac FC1/e2e | נבנה בלבד · [#842](https://github.com/talstilkol/lumen-md/pull/842) |
 | W12.T6 | קשרים ו-rollups בין סוגים: שדה relation→סוג, קשר הפוך אוטומטי ו-rollup לפי שדה | P1 | U | 5 ש׳ 00 דק׳ | W12.T1, W1.12 | ה׳ 24.12 18:35 | ה׳ 24.12 23:35 | ⏳ #820 · cloud-complete; owed: real-browser and e2e runs of the typed bases (r3b 17.11: PARTIAL) | דפדפן · [#820](https://github.com/talstilkol/lumen-md/pull/820) |
 | W12.T7 | ייבוא מסד נתונים מ-Notion לסוג ול-.base: קשרים ו-rollups נשמרים | P2 | S | 5 ש׳ 00 דק׳ | W12.T6, W8.2 | ה׳ 24.12 23:35 | ו׳ 25.12 04:35 | ⏳ קוד ב-PR #898 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#898](https://github.com/talstilkol/lumen-md/pull/898) |
 | W12.E1 | גרף ישויות, חלק 1: מודל נתונים — ישות, קשר מוקלד ומקור לכל קשת | P1 | S | 5 ש׳ 00 דק׳ | W12.T1 | ד׳ 23.12 20:20 | ה׳ 24.12 01:20 | ⏳ #820 · cloud-complete (audit r3 PARTIAL); owed: owner review with R12.1 | נבנה בלבד · [#820](https://github.com/talstilkol/lumen-md/pull/820) |
@@ -7974,19 +7998,19 @@ W11.Q14.2. train:offline
 | W12.E8 | גרף ישויות, חלק 8: ייצוא JSON-LD, ‏GraphML, ‏RDF/Turtle ו-CSV של Neo4j | P1 | S | 4 ש׳ 00 דק׳ | W12.E1 | ה׳ 24.12 01:20 | ה׳ 24.12 05:20 | ⏳ #837 · cloud-complete (audit r3 PARTIAL); owed: n3 round trip | נבנה בלבד · [#837](https://github.com/talstilkol/lumen-md/pull/837) |
 | W12.E9 | גרף ישויות, חלק 9: מדידה כנה — ‏NEMO ו-BMC לישויות, ‏HeRE ליחסים, ומורפמות NEMO לאיחוד | P1 | A | 5 ש׳ 00 דק׳ | W12.E2, W12.E3, W12.E4, W11.H5, W11.I18 | ו׳ 25.12 11:20 | ו׳ 25.12 16:20 | ⏳ קוד ב-PR #838 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#838](https://github.com/talstilkol/lumen-md/pull/838) |
 | W12.E10 | גרף ישויות, חלק 10: קישור ל-Wikidata — בהסכמה, ביומן הפרטיות | P2 | A | 3 ש׳ 00 דק׳ | W12.E5 | ו׳ 25.12 20:20 | ו׳ 25.12 23:20 | ⏳ קוד ב-PR #869 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#869](https://github.com/talstilkol/lumen-md/pull/869) |
-| W12.A1 | שאל את הכספת: ציטוט ברמת פסקה עם עוגן ^id, ולחיצה שקופצת לפסקה | P1 | A | 5 ש׳ 00 דק׳ | W11.I14, 4.8 | ב׳ 14.12 03:20 | ב׳ 14.12 08:20 | ⏳ קוד ב-PR #825, #826, #879, #884, #885, #895 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#825](https://github.com/talstilkol/lumen-md/pull/825) |
+| W12.A1 | שאל את הכספת: ציטוט ברמת פסקה עם עוגן ^id, ולחיצה שקופצת לפסקה | P1 | A | 5 ש׳ 00 דק׳ | W11.I14, 4.8 | ב׳ 14.12 03:20 | ב׳ 14.12 08:20 | ⏳ #1197 · cloud-complete (INT8 17.11 (lane FC2 #1197)); owed: Mac FC2-e2e-wave12 | נבנה בלבד · [#825](https://github.com/talstilkol/lumen-md/pull/825) |
 | W12.A2 | שאל את הכספת בהיקף: אותם allow/deny של MCP (תיקייה ותגית) גם בתוך האפליקציה | P1 | A | 4 ש׳ 00 דק׳ | W12.A1, W11.I7 | ב׳ 14.12 08:20 | ב׳ 14.12 12:20 | ⏳ #825 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof | Node · [#825](https://github.com/talstilkol/lumen-md/pull/825) |
 | W12.A3 | מדידת שאל את הכספת: אחזור על WebFAQ-heb ו-Belebele, ודיוק ציטוט על HeQ | P1 | A | 5 ש׳ 00 דק׳ | W12.A1, W11.I13, W11.I18 | ב׳ 14.12 12:20 | ב׳ 14.12 17:20 | ⏳ קוד ב-PR #826, #884 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#826](https://github.com/talstilkol/lumen-md/pull/826) |
 | W12.A4 | חיפושים שמורים בתוך הכספת, ושאילתה שמורה כ-Base או כתצוגה בדשבורד | P2 | U | 3 ש׳ 00 דק׳ | W2.12 | ה׳ 24.12 23:35 | ו׳ 25.12 02:35 | ⏳ קוד ב-PR #848, #875 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#848](https://github.com/talstilkol/lumen-md/pull/848) |
 | W12.H1 | חברותא, חלק 1: חדר לימוד משותף על הפניה בספריא, מוצפן דרך הממסר | P1 | S | 5 ש׳ 00 דק׳ | 3.6, W6.23, W10.C24 | שבת 12.12 12:20 | שבת 12.12 17:20 | ⏳ #835 · cloud-complete (audit r3 PARTIAL); owed: no acceptance item seen passing here (L8 ran it 6/6 with $S/g2w/L8-runner.sh) | נבנה בלבד · [#835](https://github.com/talstilkol/lumen-md/pull/835) |
-| W12.H2 | חברותא, חלק 2: מסך לימוד — טקסט ומפרשים, הערות משותפות לכל קטע, וסמן של החבר | P1 | U | 6 ש׳ 00 דק׳ | W12.H1 | ו׳ 25.12 02:35 | ו׳ 25.12 08:35 | ⏳ קוד ב-PR #845, #881 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#845](https://github.com/talstilkol/lumen-md/pull/845) |
+| W12.H2 | חברותא, חלק 2: מסך לימוד — טקסט ומפרשים, הערות משותפות לכל קטע, וסמן של החבר | P1 | U | 6 ש׳ 00 דק׳ | W12.H1 | ו׳ 25.12 02:35 | ו׳ 25.12 08:35 | ⏳ #1197 · cloud-complete (INT8 17.11 (lane FC2 #1197)); owed: Mac FC2-e2e-wave12 | נבנה בלבד · [#845](https://github.com/talstilkol/lumen-md/pull/845) |
 | W12.H3 | חברותא, חלק 3: מצב לא מקוון ורשת מקומית, ומחיקת החדר בסוף | P1 | S | 3 ש׳ 00 דק׳ | W12.H1 | שבת 12.12 17:20 | שבת 12.12 20:20 | ⏳ #835 · cloud-complete (audit r3 PARTIAL); owed: offline merge and 404-after-end not seen here (L8 ran 7/7 with L8-runner) | נבנה בלבד · [#835](https://github.com/talstilkol/lumen-md/pull/835) |
 | W12.H4 | תוכניות לימוד: דף יומי, משנה יומית, רמב״ם יומי ופרשה — חישוב מקומי ושורה בפתק היומי | P2 | U | 5 ש׳ 00 דק׳ | W2.10 | ו׳ 25.12 08:35 | ו׳ 25.12 13:35 | ⏳ קוד ב-PR #859 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#859](https://github.com/talstilkol/lumen-md/pull/859) |
 | W12.H5 | תוכנית לימוד אקדמית: סילבוס לפי שבועות הסמסטר מהלוח האקדמי, עם קריאות ודדליינים | P2 | U | 3 ש׳ 00 דק׳ | W12.H4, W7.8 | שבת 26.12 04:35 | שבת 26.12 07:35 | ⏳ קוד ב-PR #874 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#874](https://github.com/talstilkol/lumen-md/pull/874) |
 | W12.H6 | תרגום צד לצד עברית↔אנגלית במודל מקומי, מיושר לפי פסקה, עם מדידת chrF על FLORES | P2 | A | 5 ש׳ 00 דק׳ | 6.4 | ה׳ 10.12 15:20 | ה׳ 10.12 20:20 | ⏳ קוד ב-PR #876 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#876](https://github.com/talstilkol/lumen-md/pull/876) |
 | W12.H7 | תכנון זמן: בלוקים בפתק היומי, ציר יום, ושבת וחגים כזמן חסום | P2 | U | 5 ש׳ 00 דק׳ | W5.15 | שבת 26.12 07:35 | שבת 26.12 12:35 | ⏳ קוד ב-PR #871 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#871](https://github.com/talstilkol/lumen-md/pull/871) |
 | W12.H8 | זמני כניסת שבת וצאתה מקומית: חישוב שקיעה לפי עיר שנבחרה ביד | P2 | U | 4 ש׳ 00 דק׳ | W12.H7 | שבת 26.12 12:35 | שבת 26.12 16:35 | ⏳ קוד ב-PR #871, #894 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#871](https://github.com/talstilkol/lumen-md/pull/871) |
-| W12.R1 | קנבס מחקר מ-PDF: גרירת הדגשה לקנבס יוצרת כרטיס שמקשר למיקום המדויק במקור | P2 | U | 5 ש׳ 00 דק׳ | 4.14, 4.19 | שבת 26.12 16:35 | שבת 26.12 21:35 | ⏳ בעבודה | נבנה בלבד |
+| W12.R1 | קנבס מחקר מ-PDF: גרירת הדגשה לקנבס יוצרת כרטיס שמקשר למיקום המדויק במקור | P2 | U | 5 ש׳ 00 דק׳ | 4.14, 4.19 | שבת 26.12 16:35 | שבת 26.12 21:35 | ⏳ #1173 · cloud-complete (INT8 17.11 (lane FC3 #1173)); owed: Mac FC3-W12.R1-scanned; e2e on a scanned PDF (OCR models) | נבנה בלבד |
 | W12.R2 | PDF: תצוגת שני עמודים לספר עברי (עמוד 1 מימין) ובחירת אי-זוגי/זוגי | P2 | U | 4 ש׳ 00 דק׳ | 4.14 | שבת 26.12 21:35 | א׳ 27.12 01:35 | ⏳ בעבודה | נבנה בלבד |
 | W12.R3 | הדגשות PDF כציטוט APA עברי: ייצוא עם עמוד ורשימת מקורות | P2 | U | 3 ש׳ 00 דק׳ | W11.H15, 4.14 | א׳ 27.12 01:35 | א׳ 27.12 04:35 | ⏳ בעבודה | נבנה בלבד |
 | W12.R4 | כתב יד: שכבת טקסט נסתרת לבלוק דיו, רק אם המזהה עובר את הסף של W11.H14 | P2 | A | 4 ש׳ 00 דק׳ | W7.11, W11.H14 | א׳ 20.12 14:35 | א׳ 20.12 18:35 | ⏳ בעבודה | נבנה בלבד |
@@ -7997,7 +8021,7 @@ W11.Q14.2. train:offline
 | W12.S5 | גן דיגיטלי ב-RTL: backlinks, תצוגה מקדימה בריחוף, גרף מקומי וחיפוש עברי באתר שמתפרסם | P2 | D | 4 ש׳ 00 דק׳ | 4.18 | ה׳ 24.12 21:20 | ו׳ 25.12 01:20 | ⏳ בעבודה | נבנה בלבד |
 | W12.S6 | ערכות נושא שנבדקו ב-RTL: בדיקה אוטומטית לכל ערכה בגלריה, ותג ״נבדק ב-RTL״ | P2 | D | 5 ש׳ 00 דק׳ | W11.S14 | ו׳ 25.12 01:20 | ו׳ 25.12 06:20 | ⏳ בעבודה | נבנה בלבד |
 | W12.F1 | מבחן הלוך-חזור לכל פורמט טקסט: Org, ‏AsciiDoc, ‏LaTeX, ‏OPML, ‏RST ו-ipynb על 652 דוגמאות CommonMark | P2 | D | 5 ש׳ 00 דק׳ | W11.Q8 | ו׳ 25.12 06:20 | ו׳ 25.12 11:20 | ⏳ קוד ב-PR #855 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#855](https://github.com/talstilkol/lumen-md/pull/855) |
-| W12.F2 | Typst: ייצוא מקור .typ עם עברית ו-RTL, ו-PDF דרך typst.ts ב-wasm שנטען לפי דרישה | P2 | D | 5 ש׳ 00 דק׳ | 0.1 | ו׳ 25.12 11:20 | ו׳ 25.12 16:20 | ⏳ קוד ב-PR #873 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#873](https://github.com/talstilkol/lumen-md/pull/873) |
+| W12.F2 | Typst: ייצוא מקור .typ עם עברית ו-RTL, ו-PDF דרך typst.ts ב-wasm שנטען לפי דרישה | P2 | D | 5 ש׳ 00 דק׳ | 0.1 | ו׳ 25.12 11:20 | ו׳ 25.12 16:20 | ⏳ #1201 · cloud-complete (INT8 17.11 (lane FC2 #1201)); owed: Mac FC2-W12.F2-typst-vendor (npm install of typst.ts; check the bundle opens no remote font/package fetch) | נבנה בלבד · [#873](https://github.com/talstilkol/lumen-md/pull/873) |
 | W12.F3 | ODT בייצוא, ומבחן הלוך-חזור עברי ל-DOCX, ‏ODT ו-EPUB | P2 | D | 5 ש׳ 00 דק׳ | 0.1 | ו׳ 25.12 16:20 | ו׳ 25.12 21:20 | ⏳ קוד ב-PR #863 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#863](https://github.com/talstilkol/lumen-md/pull/863) |
 | W12.F4 | מחברת Jupyter נפתחת לקריאה: תאים, פלטים, תמונות וגרפים — בלי להריץ ובלי HTML לא מסונן | P2 | U | 4 ש׳ 00 דק׳ | 0.1 | א׳ 27.12 12:35 | א׳ 27.12 16:35 | ⏳ קוד ב-PR #887 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#887](https://github.com/talstilkol/lumen-md/pull/887) |
 | W12.F5 | קובצי נתונים כ-Base: ‏CSV, ‏TSV, ‏XLSX, ‏JSON ו-YAML נפתחים כטבלה, kanban וגרף | P2 | U | 5 ש׳ 00 דק׳ | W12.T3 | א׳ 27.12 16:35 | א׳ 27.12 21:35 | ⏳ קוד ב-PR #887 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#887](https://github.com/talstilkol/lumen-md/pull/887) |
@@ -8019,7 +8043,7 @@ W11.Q14.2. train:offline
 | W12.U2 | אוטומציות לסוגים ולשבת: טריגר ״אובייקט מסוג נוצר״, ותנאי ״לא בשבת ובחג״ | P2 | S | 3 ש׳ 00 דק׳ | W5.24, W12.T1 | ה׳ 24.12 11:20 | ה׳ 24.12 14:20 | ⏳ קוד ב-PR #894 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#894](https://github.com/talstilkol/lumen-md/pull/894) |
 | W12.L1 | רכבת 8, שלב P1: כל משימות ה-P1 בענן של גל 12 על ענף verify, וקבלת train:offline | P1 | D | 6 ש׳ 00 דק׳ | W12.T1, W12.T2, W12.T3, W12.T4, W12.T5, W12.T6, W12.E1, W12.E2, W12.E3, W12.E4, W12.E5, W12.E6, W12.E7, W12.E8, W12.E9, W12.A1, W12.A2, W12.A3, W12.H1, W12.H2, W12.H3 | שבת 26.12 05:20 | שבת 26.12 11:20 | ⏳ שלב רכבת — אחרי סבב P1 | נבנה בלבד |
 | W12.L2 | רכבת 8, שלב P2: משימות ה-P2 בענן של גל 12 | P2 | D | 4 ש׳ 00 דק׳ | W12.L1 | שבת 26.12 11:20 | שבת 26.12 15:20 | ⏳ שלב רכבת — אחרי סבב P1 | נבנה בלבד |
-| W12.M1 | Mac: יום מודלים לגרף ולשאלות — ‏DictaBERT-NER ו-GLiNER ב-ONNX, ‏F1 על NEMO, ‏BMC ו-HeRE, ושאל את הכספת על HeQ | P1 | A | 4 ש׳ 00 דק׳ | W12.E9, W12.A3, W11.M3 | ו׳ 25.12 16:20 | ו׳ 25.12 20:20 | ⬜ | — |
+| W12.M1 | Mac: יום מודלים לגרף ולשאלות — ‏DictaBERT-NER ו-GLiNER ב-ONNX, ‏F1 על NEMO, ‏BMC ו-HeRE, ושאל את הכספת על HeQ | P1 | A | 4 ש׳ 00 דק׳ | W12.E9, W12.A3, W11.M3 | ו׳ 25.12 16:20 | ו׳ 25.12 20:20 | ⬜ · merged, held by frozen wave | — |
 | W12.M2 | Mac: ‏e2e של גל 12 בשלושה דפדפנים — חברותא בשני דפדפנים מול ממסר מקומי, ‏kanban, סוגים, ו-.base מול Obsidian 1.15.1 | P1 | D | 3 ש׳ 00 דק׳ | W12.L1 | שבת 26.12 15:20 | שבת 26.12 18:20 | ⬜ | — |
 | W12.M3 | Mac: ‏P2 של גל 12 — chrF ב-FLORES, ‏ODT ב-LibreOffice, ‏Typst PDF ו-baselines של התצוגות | P2 | D | 3 ש׳ 00 דק׳ | W12.L2 | שבת 26.12 18:20 | שבת 26.12 21:20 | ⬜ | — |
 | W12.O1 | בעלים: רישיונות לגרף הישויות — ‏HeRE (לא מצוין), ‏NEMO-Corpus (לא מצוין), ומשקלי GLiNER | P1 | S | 1 ש׳ 00 דק׳ | 0.1 | א׳ 13.12 09:20 | א׳ 13.12 10:20 | ⬜ | — |
@@ -8045,6 +8069,8 @@ W12.T2.3. תבנית לכל סוג מתוך מנוע התבניות הקיים (
 W12.T2.4. ״Object Studio״ קטן ב-⌘K: יצירת סוג, הוספת שדה, שינוי שם שמעדכן את כל הפתקים דרך מסך הסקירה
 
 **קבלה:** e2e ב-RTL: יצירת סוג ״אדם״, פתק חדש ממנו, מילוי 5 שדות, ושמירה · שינוי שם שדה ב-100 פתקים עובר דרך מסך הסקירה ומתבטל ב-Ctrl+Z אחד · axe נקי על הטופס
+
+**פירוט הסטטוס:** INT8 17.11 (lane FC1+FC2 #1190, #1197): e2e/object-studio.spec.ts (RTL, 5 fields, axe, save) and the typed-note form spec written, listed; owed: Mac FC1/e2e, FC2-e2e-wave12 · status before: ⏳ קוד ב-PR #820, #849 — נבדק לא מקוון; ממתין לרכבת
 
 **W12.T3 · Base אוטומטי לכל סוג: טבלה, כרטיסים ולוח kanban שנוצרים מהסכמה** — בלי ענף · ממשק, עברית וידע · 4 ש׳ 00 דק׳ · מקור: https://outliner.tana.inc/docs/supertags · https://obsidian.md/help/bases/views/kanban
 
@@ -8073,6 +8099,8 @@ W12.T5.3. גרירה לשינוי סדר מסננים (1.15) ושמירה ב-.ba
 W12.T5.4. כל התנהגות מקבלת בדיקה עם קישור לפסקה בעזרה של Obsidian, על קבצי .base של הקורפוס obsidian-help
 
 **קבלה:** כל ההתנהגויות בדף העזרה של kanban מכוסות בבדיקה, כל אחת עם מקור · קובץ .base שנשמר אצלנו נפתח ב-Obsidian 1.15.1 בלי שינוי (W12.M2) · e2e ב-RTL: גרירת כרטיס בין עמודות במקלדת ובעכבר
+
+**פירוט הסטטוס:** INT8 17.11 (lane FC1 #1190): e2e/bases-kanban-rtl.spec.ts (mouse drag + Alt+arrows RTL) written, listed; owed: Mac FC1/e2e · status before: ⏳ קוד ב-PR #842 — נבדק לא מקוון; ממתין לרכבת
 
 **W12.T6 · קשרים ו-rollups בין סוגים: שדה relation→סוג, קשר הפוך אוטומטי ו-rollup לפי שדה** — בלי ענף · ממשק, עברית וידע · 5 ש׳ 00 דק׳ · מקור: https://www.notion.com/help/relations-and-rollups · research/R1.md §2.4
 
@@ -8202,6 +8230,8 @@ W12.A1.4. תשובה בעברית עם מקור באנגלית ולהפך (W5.28
 
 **קבלה:** e2e: שאלה על כספת בדיקה מחזירה ≥ 1 ציטוט, והלחיצה מגיעה לפסקה הנכונה · ציטוט שאינו בפסקה (בדיקה עם תשובת מודל מזויפת ומתויגת) מסומן ״לא נתמך״
 
+**פירוט הסטטוס:** INT8 17.11 (lane FC2 #1197): e2e/ask-vault-jump.spec.ts (routed local model, ¶2 selection) written; owed: Mac FC2-e2e-wave12 · status before: ⏳ קוד ב-PR #825, #826, #879, #884, #885, #895 — נבדק לא מקוון; ממתין לרכבת
+
 **W12.A2 · שאל את הכספת בהיקף: אותם allow/deny של MCP (תיקייה ותגית) גם בתוך האפליקציה** — בלי ענף · AI וסוכנים · 4 ש׳ 00 דק׳ · מקור: https://alternativeto.net/news/2026/7/bear-2-9-launches-with-tag-based-workspace-feature-and-note-scoping-for-the-mcp-server/
 
 W12.A2.1. מודול היקף אחד שמשמש גם את שרת ה-MCP (W11.I7) וגם את ״שאל את הכספת״ בתוך האפליקציה: פתק מחוץ להיקף לא נכנס לאחזור, לא לפרומפט ולא לציטוט
@@ -8247,6 +8277,8 @@ W12.H2.3. שמירה לכספת: בסוף המפגש נוצר פתק ״חברו�
 W12.H2.4. RTL מלא: טקסט ארמי בלי ניקוד, ניקוד לתצוגה בלבד אם רוצים (W5.6)
 
 **קבלה:** e2e בשני דפדפנים מול ממסר מקומי: הערה, בחירה, ״עקוב״ ושמירה לפתק · axe נקי וניווט מקלדת בין קטעים
+
+**פירוט הסטטוס:** INT8 17.11 (lane FC2 #1197): e2e/havruta-relay.spec.ts + e2e/_relay.ts written, typechecked; not run (no Vite here); owed: Mac FC2-e2e-wave12 · status before: ⏳ קוד ב-PR #845, #881 — נבדק לא מקוון; ממתין לרכבת
 
 **W12.H3 · חברותא, חלק 3: מצב לא מקוון ורשת מקומית, ומחיקת החדר בסוף** — בלי ענף · נתונים ואבטחה · 3 ש׳ 00 דק׳ · מקור: research/R6.md §1.8
 
@@ -8308,6 +8340,8 @@ W12.R1.3. גם ב-JSON Canvas (4.17) כצומת file עם subpath
 W12.R1.4. הדגשה שנמחקה: הכרטיס מסומן ״המקור נמחק״ ולא נעלם
 
 **קבלה:** e2e: הדגשה → גרירה → לחיצה מגיעה לאותו עמוד ולאותו קטע · PDF סרוק עם שכבת OCR (W6.47) עובד באותה דרך
+
+**פירוט הסטטוס:** INT8 17.11 (lane FC3 #1173): pdfHighlightCardScanned 3/3: 20/20 real scanned pages, highlight → sidecar → card → reader anchor after a second OCR run; owed: Mac FC3-W12.R1-scanned; e2e on a scanned PDF (OCR models) · status before: ⏳ בעבודה
 
 **W12.R2 · PDF: תצוגת שני עמודים לספר עברי (עמוד 1 מימין) ובחירת אי-זוגי/זוגי** — בלי ענף · ממשק, עברית וידע · 4 ש׳ 00 דק׳ · מקור: https://connect.mozilla.org/t5/ideas/pdf-view-preferences-i-want-all-pdfs-to-display-odd-spreads-not/idi-p/5498 · https://www.nutrient.io/blog/implement-pdf-viewer-pdf-js/
 
@@ -8399,6 +8433,8 @@ W12.F2.2. PDF: typst.ts (Apache-2.0; לאמת את קובץ הרישיון וא�
 W12.F2.3. בלי רשת: ה-wasm והגופנים מקומיים
 
 **קבלה:** 10 פתקים עבריים מתקמפלים ל-PDF בלי שגיאה ובסדר נכון (בדיקת טקסט מה-PDF) · החבילה הראשית לא גדלה (chunk נפרד)
+
+**פירוט הסטטוס:** INT8 17.11 (lane FC2 #1201): Typst → PDF loader: same-origin /vendor/typst/ only (fonts.json, fonts, typst.mjs, compiler.wasm), no remote URL, CSP unchanged, nothing in startup; typstPdf 5/5; owed: Mac FC2-W12.F2-typst-vendor (npm install of typst.ts; check the bundle opens no remote font/package fetch) · status before: ⏳ קוד ב-PR #873 — נבדק לא מקוון; ממתין לרכבת
 
 **W12.F3 · ODT בייצוא, ומבחן הלוך-חזור עברי ל-DOCX, ‏ODT ו-EPUB** — בלי ענף · תשתית וביצועים · 5 ש׳ 00 דק׳ · מקור: https://docs.oasis-open.org/office/OpenDocument/v1.3/
 
@@ -8576,6 +8612,8 @@ W12.M1.3. כרטיסי eval public ל-plan
 
 **קבלה:** כרטיסי public ל-NER, ‏RE, איחוד ושאל את הכספת · fps ≥ 30 ל-5,000 ישויות או ממצא פתוח
 
+**פירוט הסטטוס:** INT8 17.11 (lane FC2 #1195): GLiNER prompt/words_mask/span decode tested with stand-ins; owed: Mac FC2-W12.M1-gliner (ONNX export)
+
 **W12.M2 · Mac: ‏e2e של גל 12 בשלושה דפדפנים — חברותא בשני דפדפנים מול ממסר מקומי, ‏kanban, סוגים, ו-.base מול Obsidian 1.15.1** — בלי ענף · תשתית וביצועים · 3 ש׳ 00 דק׳ · מקור: W11.M7
 
 W12.M2.1. e2e של W12.H2, ‏W12.T2, ‏W12.T5, ‏W12.A1 ו-W12.E7 ב-Chromium, ‏Firefox ו-WebKit
@@ -8622,7 +8660,7 @@ W12.O3.2. רשימת בעיות לפי תדירות
 | # | משימה | עדיפות | מסלול | הערכה | תלוי ב- | התחלה | סיום | מצב | אימות |
 |---|---|---|---|---|---|---|---|---|---|
 | R12.1 | בעלים: רישוי לשימוש חוזר: היתר MIT מטל לקבצים שמועברים מ-israelconnect, ו-LICENSE ל-tasker | P1 | S | 30 דק׳ | 0.1 | א׳ 13.12 10:50 | א׳ 13.12 11:20 | ⬜ | — |
-| R12.6 | חילוץ תאריכים בעברית מטקסט: לועזי, עברי, תחיליות, צורות PDF דבוקות ו״אתמול/היום״ לפי תאריך הפתק | P1 | U | 6 ש׳ 00 דק׳ | R12.1 | ג׳ 29.12 23:35 | ד׳ 30.12 05:35 | ⏳ קוד ב-PR #866, #867, #870 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#866](https://github.com/talstilkol/lumen-md/pull/866) |
+| R12.6 | חילוץ תאריכים בעברית מטקסט: לועזי, עברי, תחיליות, צורות PDF דבוקות ו״אתמול/היום״ לפי תאריך הפתק | P1 | U | 6 ש׳ 00 דק׳ | R12.1 | ג׳ 29.12 23:35 | ד׳ 30.12 05:35 | ⏳ #1175 · cloud-complete (INT8 17.11 (lane FC3 #1175)); owed: re-audit | נבנה בלבד · [#866](https://github.com/talstilkol/lumen-md/pull/866) |
 | R12.7 | ציר זמן לישות ולתיק, ובודק זמנים: תאריך בלתי אפשרי, תפקידים חופפים וסדר סותר | P1 | U | 8 ש׳ 00 דק׳ | W12.E1, R12.6, R12.1 | ד׳ 30.12 05:35 | ד׳ 30.12 13:35 | ⏳ #866 · cloud-complete (audit r3 PARTIAL); owed: real-browser axe; case-level timeline | נבנה בלבד · [#866](https://github.com/talstilkol/lumen-md/pull/866) |
 | R12.8 | תצוגות גרף: Sankey של זרימות, גרף אגו כברירת מחדל, כרטיס טענה, ״למה הקשת הזו כאן״ ו-Leiden אינקרמנטלי | P2 | U | 8 ש׳ 00 דק׳ | W12.E1, W1.10, W12.E7, R12.1 | ד׳ 30.12 13:35 | ד׳ 30.12 21:35 | ⏳ קוד ב-PR #886, #889, #902 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#886](https://github.com/talstilkol/lumen-md/pull/886) |
 | R12.9 | שער ציטוטים לסוכן המחקר: כל משפט קשור לציטוט מעוגן (פתק, offset, hash) — או נמחק | P1 | A | 7 ש׳ 00 דק׳ | 5.4, R12.1 | ב׳ 14.12 17:20 | ג׳ 15.12 00:20 | ⏳ קוד ב-PR #885, #895 — נבדק לא מקוון; ממתין לרכבת | נבנה בלבד · [#885](https://github.com/talstilkol/lumen-md/pull/885) |
@@ -8661,7 +8699,7 @@ R12.6.5. gold: לקחת רק את 11 שורות hebrew-anchor (חגים) ולכ�
 
 **קבלה:** ≥ 98% על ה-gold הסינתטי · 2023 לבד בלי מילת הקשר לא נקרא · שורות העוגן משמשות גם את W10.E76
 
-**פירוט הסטטוס:** תלויות שהוסרו (W2.10, W5.15): src/daily/hebrewCalendar.ts ו-src/tasks/taskParser.ts כבר בקוד; W2.10 ו-W5.15 (P2) צרכנים ולא תלויות — כלל קו החיתוך · חופף ל-W12.E2 (כללי תאריכים בחילוץ): לבנות מעל המשימות האלה, לא מודול שני
+**פירוט הסטטוס:** תלויות שהוסרו (W2.10, W5.15): src/daily/hebrewCalendar.ts ו-src/tasks/taskParser.ts כבר בקוד; W2.10 ו-W5.15 (P2) צרכנים ולא תלויות — כלל קו החיתוך · חופף ל-W12.E2 (כללי תאריכים בחילוץ): לבנות מעל המשימות האלה, לא מודול שני · INT8 17.11 (lane FC3 #1175): hebcalReference 5/5: 15 anchor rows on their dates (Lag BaOmer +1 day fails); owed: re-audit · status before: ⏳ קוד ב-PR #866, #867, #870 — נבדק לא מקוון; ממתין לרכבת
 
 **R12.7 · ציר זמן לישות ולתיק, ובודק זמנים: תאריך בלתי אפשרי, תפקידים חופפים וסדר סותר** — בלי ענף · ממשק, עברית וידע · 8 ש׳ 00 דק׳ · מקור: israelconnect:tools/timeline/timeline_build.py · israelconnect:tools/timeline/temporal_reasoner.py · israelconnect:app/js/uncertainty.js · israelconnect:app/js/unified_timeline.js · israelconnect:app/js/time_slider.js · israelconnect:tools/research/bitemporal_claims.py
 

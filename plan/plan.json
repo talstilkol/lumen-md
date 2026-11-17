@@ -808,7 +808,7 @@
       "0.1"
      ],
      "priority": "P0",
-     "status": "⏳ #211 · ביקורת r2 16.11: PARTIAL 80 — החסר ב-notes",
+     "status": "⏳ #1175 · cloud-complete (INT8 17.11 (lane FC3 #1175)); owed: re-audit",
      "verified": "node",
      "pr": 211,
      "new": true,
@@ -824,7 +824,8 @@
      ],
      "dod": [
       "npx vitest run src/__tests__/handoff.test.ts",
-      "npx vitest run src/__tests__/handoffNextStep.test.ts"
+      "npx vitest run src/__tests__/handoffNextStep.test.ts",
+      "npx vitest run src/__tests__/handoffAfterPush.test.ts"
      ],
      "evidence": {
       "verdict": "PARTIAL",
@@ -849,8 +850,9 @@
       "who": "cloud-code",
       "missing": "'A new agent does the next step from the doc alone' is untested."
      },
-     "notes": "עד 16.11: ✅ #211 (verified browser); מ-16.11 ⏳ ו-verified built — מה שהטקסט מתעד שרץ, לפי migrate-verified · ביקורת r2 16.11 (audit/r2-all.json): PARTIAL (80/100); נשאר: 'A new agent does the next step from the doc alone' is untested. · stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): fixed: Where line + next step as command + readHandoff(); a task without --next is refused (exit 1); handoffNextStep 5/5 (an agent with only HANDOFF.md runs the step in the named worktree, the commit lands on the task branch); handoff 12/12; fix #1001, merged into verify/train-7 (063d3d2c82); owed: the PR table's CI column still reads GitHub Actions (retired): follow-up",
+     "notes": "עד 16.11: ✅ #211 (verified browser); מ-16.11 ⏳ ו-verified built — מה שהטקסט מתעד שרץ, לפי migrate-verified · ביקורת r2 16.11 (audit/r2-all.json): PARTIAL (80/100); נשאר: 'A new agent does the next step from the doc alone' is untested. · stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): fixed: Where line + next step as command + readHandoff(); a task without --next is refused (exit 1); handoffNextStep 5/5 (an agent with only HANDOFF.md runs the step in the named worktree, the commit lands on the task branch); handoff 12/12; fix #1001, merged into verify/train-7 (063d3d2c82); owed: the PR table's CI column still reads GitHub Actions (retired): follow-up · INT8 17.11 (lane FC3 #1175): handoffAfterPush 3/3 (0/3 on base): a push confirmed by origin rewrites HANDOFF.md through the reference-transaction hook; owed: re-audit · status before: ⏳ #211 · ביקורת r2 16.11: PARTIAL 80 — החסר ב-notes · INT8 17.11: dod += handoffAfterPush.test.ts (FC3 proposal)",
      "dodExpect": [
+      "exit 0 — 0 failed, 0 skipped without a reason",
       "exit 0 — 0 failed, 0 skipped without a reason",
       "exit 0 — 0 failed, 0 skipped without a reason"
      ]
@@ -1959,9 +1961,9 @@
       "6.0"
      ],
      "priority": "P1",
-     "status": "⏳ ביקורת 14.11: חלקי · קוד גמור — ממוזג ב-train-2 וברכבת 3; בדיקות יחידה לא מקוון: piiRedactor 12/12, piiGolden 4/4; חסר: מודל NER אמיתי",
+     "status": "⏳ #1195 · cloud-complete (INT8 17.11 (lane FC2 #1195)); owed: Mac FC2-2.6-pii-names",
      "verified": "built",
-     "notes": "⏳ קוד גמור — ממוזג ב-train-2 וברכבת 3; בדיקות יחידה לא מקוון: piiRedactor 12/12, piiGolden 4/4; חסר: מודל NER אמיתי",
+     "notes": "⏳ קוד גמור — ממוזג ב-train-2 וברכבת 3; בדיקות יחידה לא מקוון: piiRedactor 12/12, piiGolden 4/4; חסר: מודל NER אמיתי · INT8 17.11 (lane FC2 #1195): ner-pii.mjs LUMEN_PII_NER_ENGINE: names recall 0→1 on test items; with review 12 H2 (#1178) names in other scripts are never claimed hidden; owed: Mac FC2-2.6-pii-names · status before: ⏳ ביקורת 14.11: חלקי · קוד גמור — ממוזג ב-train-2 וברכבת 3; בדיקות יחידה לא מקוון: piiRedactor 12/12, piiGolden 4/4; חסר: מודל NER אמיתי",
      "new": true,
      "was": "2.6",
      "source": "פרטיות, נספח 19",
@@ -1995,10 +1997,10 @@
       "7.1"
      ],
      "priority": "P1",
-     "status": "⏳ #242 · ביקורת 14.11: חלקי — מסווג ProtectAI v2 לא מומש; 130 המקרים מול מודל מדומה בלבד · (130 מקרים מול מודל מדומה שמציית: 0 כתיבות לא מאושרות; סט הזהב הרשמי + 30 בעברית — 15.11)",
+     "status": "⏳ #1195 · cloud-complete (INT8 17.11 (lane FC2 #1195)); owed: Mac FC2-2.7-protectai (the model); receipts+label (security)",
      "verified": "owner",
      "pr": 242,
-     "notes": "✅* #242 (130 מקרים מול מודל מדומה שמציית: 0 כתיבות לא מאושרות; סט הזהב הרשמי + 30 בעברית — 15.11)",
+     "notes": "✅* #242 (130 מקרים מול מודל מדומה שמציית: 0 כתיבות לא מאושרות; סט הזהב הרשמי + 30 בעברית — 15.11) · INT8 17.11 (lane FC2 #1195): ProtectAI v2 seam: protectAi.ts + worker seqLogits; protectAi 7/7, injectionGuard 159/159; seams.allow tightened; owed: Mac FC2-2.7-protectai (the model); receipts+label (security) · status before: ⏳ #242 · ביקורת 14.11: חלקי — מסווג ProtectAI v2 לא מומש; 130 המקרים מול מודל מדומה בלבד · (130 מקרים מול מודל מדומה שמציית: 0 כתיבות לא מאושרות; סט הזהב הרשמי + 30 בעברית — 15.11)",
      "new": true,
      "was": "2.7",
      "source": "אבטחת AI",
@@ -2728,10 +2730,10 @@
       "7.10"
      ],
      "priority": "P1",
-     "status": "⏳ #250 · ביקורת 14.11: חלקי — הרינדור ב-main thread, לא ב-worker · (0.9–1.3ms במטמון; 8/8 מקרי dev, 22 ה-test — 15.9; רינדור ב-main thread, לא ב-worker — 15.16)",
+     "status": "⏳ #1196 · cloud-complete (INT8 17.11 (lane FC2 #1196)); owed: Mac FC2-4.6-unlinked; test split",
      "verified": "browser",
      "pr": 250,
-     "notes": "✅ #250 (0.9–1.3ms במטמון; 8/8 מקרי dev, 22 ה-test — 15.9; רינדור ב-main thread, לא ב-worker — 15.16)",
+     "notes": "✅ #250 (0.9–1.3ms במטמון; 8/8 מקרי dev, 22 ה-test — 15.9; רינדור ב-main thread, לא ב-worker — 15.16) · INT8 17.11 (lane FC2 #1196): unlinked dev split: P=R=F1=1 on 10 mentions (shim); owed: Mac FC2-4.6-unlinked; test split · status before: ⏳ #250 · ביקורת 14.11: חלקי — הרינדור ב-main thread, לא ב-worker · (0.9–1.3ms במטמון; 8/8 מקרי dev, 22 ה-test — 15.9; רינדור ב-main thread, לא ב-worker — 15.16)",
      "new": true,
      "source": "מחקר פערים #2",
      "steps": [
@@ -2767,10 +2769,10 @@
       "1.1"
      ],
      "priority": "P0",
-     "status": "⏳ #224 · cloud-complete (audit r3 PARTIAL); owed: e2e embeds; KaTeX offline; Quartz ofm.ts port step not done",
+     "status": "⏳ #1175 · cloud-complete (INT8 17.11 (lane FC3 #1175)); owed: Mac: e2e embeds, KaTeX offline",
      "verified": "browser",
      "pr": 224,
-     "notes": "✅ #224 · stage B1b 16.11 (verify/train-7 1a184547ae, shim v4): fixed: regression: W1.3 remarkObsidian turned ![[img]] into a bare <img src> before remarkEmbeds, so image embeds skipped workspace resolution / notFound / version / live tracking. After: embeds 48/56 -> 55/57 (2 left = shim's temml stand-in; 57/57 with temml absent as vite aliases it), embedsLive 3/4 -> 4/4, safeFiles 27/30 -> 28/30, all other Markdown-rendering tests unchanged vs base; startup 226,531 B gz; fix #1011, merged into verify/train-7 (063d3d2c82); owed: e2e/embeds.spec.ts in a browser; Quartz ofm.ts port not done (own implementation kept) · INT6b 17.11: status before → ⏳ #224 · ביקורת 14.11: הושלם; ה-dod לא ירוק לא מקוון: embeds 5/56",
+     "notes": "✅ #224 · stage B1b 16.11 (verify/train-7 1a184547ae, shim v4): fixed: regression: W1.3 remarkObsidian turned ![[img]] into a bare <img src> before remarkEmbeds, so image embeds skipped workspace resolution / notFound / version / live tracking. After: embeds 48/56 -> 55/57 (2 left = shim's temml stand-in; 57/57 with temml absent as vite aliases it), embedsLive 3/4 -> 4/4, safeFiles 27/30 -> 28/30, all other Markdown-rendering tests unchanged vs base; startup 226,531 B gz; fix #1011, merged into verify/train-7 (063d3d2c82); owed: e2e/embeds.spec.ts in a browser; Quartz ofm.ts port not done (own implementation kept) · INT6b 17.11: status before → ⏳ #224 · ביקורת 14.11: הושלם; ה-dod לא ירוק לא מקוון: embeds 5/56 · INT8 17.11 (lane FC3 #1175): ofmConformance 24/24 (8 fail on base): ofm.ts v4.5.2 callout/wikilink/block-ref regexes vs Lumen; callout metadata [!tip|wide] read; owed: Mac: e2e embeds, KaTeX offline · status before: ⏳ #224 · cloud-complete (audit r3 PARTIAL); owed: e2e embeds; KaTeX offline; Quartz ofm.ts port step not done",
      "new": true,
      "source": "מחקר פערים #3",
      "steps": [
@@ -3132,9 +3134,9 @@
       "7.10"
      ],
      "priority": "P1",
-     "status": "⏳ ביקורת 14.11: חלקי — לא fork של Web Clipper; ‏dev עם 5 עמודים, לא 20 · קוד גמור — ממוזג ב-train-2 וברכבת 3; בדיקות יחידה לא מקוון: clipperV2 9/13 (חבילות חסרות לא מקוון)…",
+     "status": "⏳ #1196 · cloud-complete (INT8 17.11 (lane FC2 #1196)); owed: Mac FC2-4.15-clipper (Defuddle/Readability)",
      "verified": "built",
-     "notes": "⏳ קוד גמור — ממוזג ב-train-2 וברכבת 3; בדיקות יחידה לא מקוון: clipperV2 9/13 (חבילות חסרות לא מקוון); חסר: vitest אמיתי ו-15 דפי בדיקה",
+     "notes": "⏳ קוד גמור — ממוזג ב-train-2 וברכבת 3; בדיקות יחידה לא מקוון: clipperV2 9/13 (חבילות חסרות לא מקוון); חסר: vitest אמיתי ו-15 דפי בדיקה · INT8 17.11 (lane FC2 #1196): scripts/golden/evals/clipper.mjs; scoring tested; owed: Mac FC2-4.15-clipper (Defuddle/Readability) · status before: ⏳ ביקורת 14.11: חלקי — לא fork של Web Clipper; ‏dev עם 5 עמודים, לא 20 · קוד גמור — ממוזג ב-train-2 וברכבת 3; בדיקות יחידה לא מקוון: clipperV2 9/13 (חבילות חסרות לא מקוון)…",
      "was": "5.11",
      "source": "T34, מחקר פערים #9",
      "steps": [
@@ -3908,9 +3910,9 @@
       "0.10"
      ],
      "priority": "P2",
-     "status": "⏳ ביקורת 14.11: חלקי · קוד גמור — ממוזג בשלוש הרכבות; בדיקות היחידה על train-2 (shim עם vi.mock): 3/3 (מסלול קולות המערכת); חסר: החלטת רישוי לקול אנגלי (15.10)",
+     "status": "⏳ #1200 · cloud-complete (INT8 17.11 (lane FC2 #1200)); owed: Mac FC2-6.2-misaki-pack; voice pin (15.10)",
      "verified": "node",
-     "notes": "⏳ קוד גמור — ממוזג בשלוש הרכבות; בדיקות היחידה על train-2 (shim עם vi.mock): 3/3 (מסלול קולות המערכת); חסר: החלטת רישוי לקול אנגלי (15.10)",
+     "notes": "⏳ קוד גמור — ממוזג בשלוש הרכבות; בדיקות היחידה על train-2 (shim עם vi.mock): 3/3 (מסלול קולות המערכת); חסר: החלטת רישוי לקול אנגלי (15.10) · INT8 17.11 (lane FC2 #1200): English G2P port of misaki's lexicon; englishG2P 9/9; full dicts: rules vs silver 81.7% of 22,792 inflections (a parity run vs misaki's Python was denied here); owed: Mac FC2-6.2-misaki-pack; voice pin (15.10) · status before: ⏳ ביקורת 14.11: חלקי · קוד גמור — ממוזג בשלוש הרכבות; בדיקות היחידה על train-2 (shim עם vi.mock): 3/3 (מסלול קולות המערכת); חסר: החלטת רישוי לקול אנגלי (15.10)",
      "new": true,
      "was": "5.2",
      "source": "מחליף TTS בענן, נספח 19",
@@ -4065,7 +4067,7 @@
       "6.4"
      ],
      "priority": "P1",
-     "status": "⏳ קוד גמור — ממוזג בשלוש הרכבות; בדיקות היחידה על train-2 (shim עם vi.mock): 15/15; חסר: מודלים אמיתיים ודירוג של טל",
+     "status": "⏳ #1196 · cloud-complete (INT8 17.11 (lane FC2 #1196)); owed: Mac FC2-6.6-caption-sheet, then the owner rates 50",
      "verified": "node",
      "new": true,
      "was": "5.6",
@@ -4086,7 +4088,8 @@
       "score": 40,
       "who": "owner",
       "missing": "Real models never run; 50-image owner rating (15.15) not done."
-     }
+     },
+     "notes": "INT8 17.11 (lane FC2 #1196): scripts/caption/rating-sheet.mjs; bench:models --captions-out; owed: Mac FC2-6.6-caption-sheet, then the owner rates 50 · status before: ⏳ קוד גמור — ממוזג בשלוש הרכבות; בדיקות היחידה על train-2 (shim עם vi.mock): 15/15; חסר: מודלים אמיתיים ודירוג של טל"
     },
     {
      "id": "6.7",
@@ -4424,7 +4427,7 @@
       "7.10"
      ],
      "priority": "P2",
-     "status": "⏳ קוד גמור — ממוזג בשלוש הרכבות; בדיקות היחידה על train-2 (shim עם vi.mock): 10/10; חסר: ציון מודל אמיתי",
+     "status": "⏳ #1196 · cloud-complete (INT8 17.11 (lane FC2 #1196)); owed: Mac FC2-6.15-data-analysis-model",
      "verified": "node",
      "new": true,
      "was": "5.15",
@@ -4445,7 +4448,8 @@
       "score": 50,
       "who": "Mac",
       "missing": "≥85% numeric answers with a real model (15.13) not run."
-     }
+     },
+     "notes": "INT8 17.11 (lane FC2 #1196): data-analysis.model.mjs: loopback only, temp 0, seed 42, one repair turn; tested with a fake fetch; owed: Mac FC2-6.15-data-analysis-model · status before: ⏳ קוד גמור — ממוזג בשלוש הרכבות; בדיקות היחידה על train-2 (shim עם vi.mock): 10/10; חסר: ציון מודל אמיתי"
     },
     {
      "id": "6.16",
@@ -4771,10 +4775,10 @@
       "7.1"
      ],
      "priority": "P1",
-     "status": "⏳ #345 · cloud-complete (audit r3 PARTIAL); owed: bge-reranker-v2-m3 not measured; real embedding model",
+     "status": "⏳ #1172 · cloud-complete (INT8 17.11 (lane FC3 #1172)); owed: Mac bge-reranker-v2-m3 measurement (FC3-W10.B18-rerank)",
      "verified": "built",
      "pr": 345,
-     "notes": "⏳ #345 + W10.B18 #706 (על feat/embed-compete): ברירת המחדל היא BM25 לבד — על הסט הקשה (eval/golden/retrieval-hard) ה-reranker המילולי מוריד nDCG@10: פיתוח 0.948→0.918, מוחזק 0.952→0.907; המילולי נשאר הגדרה להפעלה; rerankHard.test.ts מצמיד את ברירת המחדל למנצח; bge-reranker לא נמדד — יהפוך לברירת מחדל רק עם קבלת מדידה מ-Mac שעוברת את BM25 ב-3 נקודות לפחות בפיתוח ובמוחזק · INT6b 17.11: status before → ⏳ #345 + W10.B18 #706 (על feat/embed-compete): ברירת המחדל היא BM25 לבד — על הסט הקשה (eval/golden/retrieval-hard) ה-reranker המילולי מוריד nDCG@10: פיתוח 0.948→0.918, מוחזק 0.952→0.907…",
+     "notes": "⏳ #345 + W10.B18 #706 (על feat/embed-compete): ברירת המחדל היא BM25 לבד — על הסט הקשה (eval/golden/retrieval-hard) ה-reranker המילולי מוריד nDCG@10: פיתוח 0.948→0.918, מוחזק 0.952→0.907; המילולי נשאר הגדרה להפעלה; rerankHard.test.ts מצמיד את ברירת המחדל למנצח; bge-reranker לא נמדד — יהפוך לברירת מחדל רק עם קבלת מדידה מ-Mac שעוברת את BM25 ב-3 נקודות לפחות בפיתוח ובמוחזק · INT6b 17.11: status before → ⏳ #345 + W10.B18 #706 (על feat/embed-compete): ברירת המחדל היא BM25 לבד — על הסט הקשה (eval/golden/retrieval-hard) ה-reranker המילולי מוריד nDCG@10: פיתוח 0.948→0.918, מוחזק 0.952→0.907… · INT8 17.11 (lane FC3 #1172): scripts/eval/lib/crossEncoder.ts: any cross-encoder by id, excluded licences refused; rerank.eval.ts records p95; owed: Mac bge-reranker-v2-m3 measurement (FC3-W10.B18-rerank) · status before: ⏳ #345 · cloud-complete (audit r3 PARTIAL); owed: bge-reranker-v2-m3 not measured; real embedding model",
      "was": "6.4",
      "source": "T29, T34, נספח 19",
      "steps": [
@@ -6891,7 +6895,7 @@
      "status": "⏳ #400 · ביקורת 14.11: חלקי — 13–14 fps מול ≥30 הנדרש; ‏graph10k 12/14 ב-shim; אין axe לגרף · (על #274; גרף WebGL עם Barnes–Hut ב-worker, גרף מקומי לעומק 1–3, מסננים; graph10k 14/14)…",
      "verified": "built",
      "pr": 400,
-     "notes": "⏳ #400 (על #274; גרף WebGL עם Barnes–Hut ב-worker, גרף מקומי לעומק 1–3, מסננים; graph10k 14/14; 13–14 fps ב-SwiftShader בלי GPU — fps על GPU אמיתי לא נמדד; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "notes": "⏳ #400 (על #274; גרף WebGL עם Barnes–Hut ב-worker, גרף מקומי לעומק 1–3, מסננים; graph10k 14/14; 13–14 fps ב-SwiftShader בלי GPU — fps על GPU אמיתי לא נמדד; לא נבדק ב-Sandbox (חסום עד 1.12)) · INT8 17.11 (lane FC1): e2e/perf-vault.spec.ts already measures 10k notes/50k links ≥30 fps (@nightly); the L4 pack's \"no e2e\" note is out of date; owed: Mac L1/W6.36-perf run · status before: ⏳ #400 · ביקורת 14.11: חלקי — 13–14 fps מול ≥30 הנדרש; ‏graph10k 12/14 ב-shim; אין axe לגרף · (על #274; גרף WebGL עם Barnes–Hut ב-worker, גרף מקומי לעומק 1–3, מסננים; graph10k 14/14)…",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -6962,7 +6966,7 @@
      ],
      "why": "Notion ו-Tana מנצחים במסדי נתונים בזכות קשרים ו-rollups; Bases עדיין בלי זה — הזדמנות לעבור את Obsidian.",
      "branch": "feat/bases-relations",
-     "status": "⏳ #397 (על #358; קשרים, rollups (count/sum/avg/min/max/earliest/latest), לוח שנה וציר זמן; basesRelations 41/41, מיון rollup 220→35–60ms; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "status": "⏳ #1190 · cloud-complete (INT8 17.11 (lane FC1 #1190)); owed: Mac FC1/e2e, FC1/e2e-nightly",
      "verified": "built",
      "pr": 397,
      "auditVerdict": {
@@ -6972,7 +6976,8 @@
       "score": 60,
       "who": "Mac",
       "missing": "10,000 rows ≥55 fps not measured in a browser; calendar drag round-trip e2e not run; react-big-calendar not used."
-     }
+     },
+     "notes": "INT8 17.11 (lane FC1 #1190): e2e/bases-calendar-table.spec.ts (drag round trip; @nightly 10k scroll ≥55 fps) written, listed; owed: Mac FC1/e2e, FC1/e2e-nightly · status before: ⏳ #397 (על #358; קשרים, rollups (count/sum/avg/min/max/earliest/latest), לוח שנה וציר זמן; basesRelations 41/41, מיון rollup 220→35–60ms; לא נבדק ב-Sandbox (חסום עד 1.12))"
     },
     {
      "id": "W1.13",
@@ -7290,10 +7295,10 @@
      ],
      "why": "חלק גדול מאלפי פרויקטי הקהילה של Obsidian הם ערכות נושא ו-snippets; זה הדבר הראשון שמשתמשים מתאימים.",
      "branch": "feat/safe-themes",
-     "status": "⏳ #403 · (על #367 + #389; 5 ערכות נושא AA בבהיר וכהה, snippets מ-.lumen ו-.obsidian; מנקה CSS עמד ב-32 מקרים עוינים; בדפדפן אמיתי: snippet מנוקה 0 בקשות מול 7 בגרסה הגולמית)…",
+     "status": "⏳ #1190 · cloud-complete (INT8 17.11 (lane FC1 #1190)); owed: Mac FC1/e2e, FC1/e2e-webkit-themes",
      "verified": "built",
      "pr": 403,
-     "notes": "⏳ #403 (על #367 + #389; 5 ערכות נושא AA בבהיר וכהה, snippets מ-.lumen ו-.obsidian; מנקה CSS עמד ב-32 מקרים עוינים; בדפדפן אמיתי: snippet מנוקה 0 בקשות מול 7 בגרסה הגולמית; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "notes": "⏳ #403 (על #367 + #389; 5 ערכות נושא AA בבהיר וכהה, snippets מ-.lumen ו-.obsidian; מנקה CSS עמד ב-32 מקרים עוינים; בדפדפן אמיתי: snippet מנוקה 0 בקשות מול 7 בגרסה הגולמית; לא נבדק ב-Sandbox (חסום עד 1.12)) · INT8 17.11 (lane FC1 #1190): e2e/themes-axe-switch.spec.ts (5 themes × light/dark × he/en; switch timing) written, listed; owed: Mac FC1/e2e, FC1/e2e-webkit-themes · status before: ⏳ #403 · (על #367 + #389; 5 ערכות נושא AA בבהיר וכהה, snippets מ-.lumen ו-.obsidian; מנקה CSS עמד ב-32 מקרים עוינים; בדפדפן אמיתי: snippet מנוקה 0 בקשות מול 7 בגרסה הגולמית)…",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -8384,10 +8389,10 @@
      ],
      "why": "Interpreter של Obsidian Web Clipper תומך ב-Ollama אבל דורש הגדרת OLLAMA_ORIGINS וחלון 2048; אצלנו זה יכול לעבוד מהקופסה.",
      "branch": "feat/clip-interpreter",
-     "status": "⏳ #364 · feat/clip-interpreter (על #308; משתני פרומפט במודל מקומי בלבד, guard להזרקה, תבניות YouTube/arXiv/GitHub; chunk הקליפ פוצל 103→99.6 KB)…",
+     "status": "⏳ #1172 · cloud-complete (INT8 17.11 (lane FC3 #1172)); owed: Mac FC3-W2.14-clip-interpreter (qwen2.5:3b)",
      "verified": "node",
      "pr": 364,
-     "notes": "⏳ #364 feat/clip-interpreter (על #308; משתני פרומפט במודל מקומי בלבד, guard להזרקה, תבניות YouTube/arXiv/GitHub; chunk הקליפ פוצל 103→99.6 KB; בדיקה מלאה ב-Vercel Sandbox (Node 24): typecheck 0, vitest 322 קבצים, startup 444.2/460, clipper-v2 1/1; ✅* לכל היותר — בעלים: Ollama qwen2.5:3b על 3 אתרים אמיתיים)",
+     "notes": "⏳ #364 feat/clip-interpreter (על #308; משתני פרומפט במודל מקומי בלבד, guard להזרקה, תבניות YouTube/arXiv/GitHub; chunk הקליפ פוצל 103→99.6 KB; בדיקה מלאה ב-Vercel Sandbox (Node 24): typecheck 0, vitest 322 קבצים, startup 444.2/460, clipper-v2 1/1; ✅* לכל היותר — בעלים: Ollama qwen2.5:3b על 3 אתרים אמיתיים) · INT8 17.11 (lane FC3 #1172): npm run eval:clip-interpreter on 20 golden pages via localInterpreter(); clipInterpreterEval 10/10, clipInterpreter 11/11; owed: Mac FC3-W2.14-clip-interpreter (qwen2.5:3b) · status before: ⏳ #364 · feat/clip-interpreter (על #308; משתני פרומפט במודל מקומי בלבד, guard להזרקה, תבניות YouTube/arXiv/GitHub; chunk הקליפ פוצל 103→99.6 KB)…",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -8603,10 +8608,10 @@
      ],
      "why": "Google Docs ו-Notion רואים הכול; שיתוף בזמן אמת מוצפן הוא מבדל אמיתי מול כולם חוץ מ-Anytype.",
      "branch": "feat/e2ee-live-sharing",
-     "status": "⏳ #387 · (על #381; שמות, צבעים וסמנים מוצפנים במפתח החדר; ״חדרים חתומים״ בשרת דוחים כל עדכון קריא; קישורי שיתוף רק לחדרים מוצפנים; תוקן פער ב-W1.19 (הודעת sync מסוג 4 ככתיבה))…",
+     "status": "⏳ #1174 · cloud-complete (INT8 17.11 (lane FC3 #1174)); owed: receipts+label (sync); Mac FC3-W2.20-soak, FC3-W2.20-lan-latency (two machines)",
      "verified": "node",
      "pr": 387,
-     "notes": "⏳ #387 (על #381; שמות, צבעים וסמנים מוצפנים במפתח החדר; ״חדרים חתומים״ בשרת דוחים כל עדכון קריא; קישורי שיתוף רק לחדרים מוצפנים; תוקן פער ב-W1.19 (הודעת sync מסוג 4 ככתיבה); plain-Node 66/66 + 26/26 + 11/11; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "notes": "⏳ #387 (על #381; שמות, צבעים וסמנים מוצפנים במפתח החדר; ״חדרים חתומים״ בשרת דוחים כל עדכון קריא; קישורי שיתוף רק לחדרים מוצפנים; תוקן פער ב-W1.19 (הודעת sync מסוג 4 ככתיבה); plain-Node 66/66 + 26/26 + 11/11; לא נבדק ב-Sandbox (חסום עד 1.12)) · INT8 17.11 (lane FC3 #1174): collab soak: 1 MB note, 5 participants, 1,000 edits, 3 seeds, 0 lost; real bug fixed (E2EE compaction overflowed the 4 MB room: 4.11 MB → 1.04 MB peak); collabSoak 7/7 (real yjs); owed: receipts+label (sync); Mac FC3-W2.20-soak, FC3-W2.20-lan-latency (two machines) · status before: ⏳ #387 · (על #381; שמות, צבעים וסמנים מוצפנים במפתח החדר; ״חדרים חתומים״ בשרת דוחים כל עדכון קריא; קישורי שיתוף רק לחדרים מוצפנים; תוקן פער ב-W1.19 (הודעת sync מסוג 4 ככתיבה))…",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -8641,10 +8646,10 @@
      ],
      "why": "Linear מציג עבודה מקומית לפני שהקוד נטען כולו; Obsidian ו-Bear נפתחים מיד.",
      "branch": "perf/cold-start",
-     "status": "⏳ #386 · ביקורת 14.11: חלקי — הצביעה לקריאה בלבד; אין בדיקת 10k מול 100 ואין CLS · (על #248; note-boot.js מצייר את 4,000 התווים הראשונים של הפתק האחרון לפני ה-bundle)…",
+     "status": "⏳ #1173 · cloud-complete (INT8 17.11 (lane FC3 #1173)); owed: Mac FC3-W2.21-coldstart (production build)",
      "verified": "built",
      "pr": 386,
-     "notes": "⏳ #386 (על #248; note-boot.js מצייר את 4,000 התווים הראשונים של הפתק האחרון לפני ה-bundle; e2e cold-start: < 800ms שולחן עבודה, < 1.5s Pixel 7; modulepreload והידרציה עצלה ממתינים למדידה; לא נבדק)",
+     "notes": "⏳ #386 (על #248; note-boot.js מצייר את 4,000 התווים הראשונים של הפתק האחרון לפני ה-bundle; e2e cold-start: < 800ms שולחן עבודה, < 1.5s Pixel 7; modulepreload והידרציה עצלה ממתינים למדידה; לא נבדק) · INT8 17.11 (lane FC3 #1173): cold-start.spec now checks each start opened its seeded vault and asserts the 100-note CLS (non-vacuous); owed: Mac FC3-W2.21-coldstart (production build) · status before: ⏳ #386 · ביקורת 14.11: חלקי — הצביעה לקריאה בלבד; אין בדיקת 10k מול 100 ואין CLS · (על #248; note-boot.js מצייר את 4,000 התווים הראשונים של הפתק האחרון לפני ה-bundle)…",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -9930,10 +9935,10 @@
      ],
      "why": "Obsidian Sync ו-Anytype עובדים מיד. אצלנו Drive ו-Dropbox תלויים ב-client IDs שלא נרשמו, ו-WebDAV/S3 לא מתאימים לרוב המשתמשים.",
      "branch": "feat/sync-two-clicks",
-     "status": "⏳ #483 · (על #378; אשף בעברית קודם: תיקיית סנכרון של שולחן העבודה (iCloud/Dropbox/Drive/OneDrive) בלי OAuth, אחר כך relay מוצפן, אחר כך WebDAV; מפתח של 13 מילים עבריות עם מילת בדיקה)…",
+     "status": "⏳ #1193 · cloud-complete (INT8 17.11 (lane FC2 #1193)); owed: owner: Entra app + /lumen-runtime.json; receipts+label (sign-in)",
      "verified": "owner",
      "pr": 483,
-     "notes": "⏳ #483 (על #378; אשף בעברית קודם: תיקיית סנכרון של שולחן העבודה (iCloud/Dropbox/Drive/OneDrive) בלי OAuth, אחר כך relay מוצפן, אחר כך WebDAV; מפתח של 13 מילים עבריות עם מילת בדיקה; סטטוס לכל קובץ; 2 לחיצות במכשיר 1, 3 במכשיר 2 (Chromium); syncSetup 15/15 כולל 2 מכשירים דרך שרת relay אמיתי — 0 טקסט פתקים בבקשות; חסר: OAuth של Drive/Dropbox ושרת relay ציבורי (טל); dodMock) · ביקורת 12.11: תוקן ב-aa47bbb20 — תקרת דיסק גלובלית, מגבלה יומית לכתובת (hash מתחלף, בלי IP), הזמנה או proof-of-work ל-relay ציבורי, קריאה נחשבת פעילות; syncSetup 19/19",
+     "notes": "⏳ #483 (על #378; אשף בעברית קודם: תיקיית סנכרון של שולחן העבודה (iCloud/Dropbox/Drive/OneDrive) בלי OAuth, אחר כך relay מוצפן, אחר כך WebDAV; מפתח של 13 מילים עבריות עם מילת בדיקה; סטטוס לכל קובץ; 2 לחיצות במכשיר 1, 3 במכשיר 2 (Chromium); syncSetup 15/15 כולל 2 מכשירים דרך שרת relay אמיתי — 0 טקסט פתקים בבקשות; חסר: OAuth של Drive/Dropbox ושרת relay ציבורי (טל); dodMock) · ביקורת 12.11: תוקן ב-aa47bbb20 — תקרת דיסק גלובלית, מגבלה יומית לכתובת (hash מתחלף, בלי IP), הזמנה או proof-of-work ל-relay ציבורי, קריאה נחשבת פעילות; syncSetup 19/19 · INT8 17.11 (lane FC2 #1193): OneNote client id at run time (/lumen-runtime.json or the user's own app), no VITE_ name, allow-list untouched; onenoteClientId 6/6 (4 fail on old), onenoteSignIn 14/14, secretsScanLive 13/13; owner checklist 1.79/10.155 updated (INT8); owed: owner: Entra app + /lumen-runtime.json; receipts+label (sign-in) · status before: ⏳ #483 · (על #378; אשף בעברית קודם: תיקיית סנכרון של שולחן העבודה (iCloud/Dropbox/Drive/OneDrive) בלי OAuth, אחר כך relay מוצפן, אחר כך WebDAV; מפתח של 13 מילים עבריות עם מילת בדיקה)…",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -9966,10 +9971,10 @@
      ],
      "why": "11.4 תקוע על חבילה שלא בלוקפייל, בזמן ש-W1.7 כבר מימש Argon2id בעצמו.",
      "branch": "feat/vault-argon2id",
-     "status": "⏳ #472 · (על verify/train + #399; Argon2id מכויל למכשיר (46 MiB×1 או 19 MiB×2), כספת PBKDF2 עוברת ל-Argon2id בפתיחה הבאה; נמצא ב-#399: 3 מ-5 הפרמטרים של OWASP מתחת לרצפה שלו — הוצעו רק 2 שעוברים)…",
+     "status": "⏳ #1186 · cloud-complete (INT8 17.11 (lane FC1 #1186)); owed: Mac FC1/argon2 + FC1/argon2-wasm-reproducible; Pixel 7 timing (owner/device); receipts+label (crypto)",
      "verified": "built",
      "pr": 472,
-     "notes": "⏳ #472 (על verify/train + #399; Argon2id מכויל למכשיר (46 MiB×1 או 19 MiB×2), כספת PBKDF2 עוברת ל-Argon2id בפתיחה הבאה; נמצא ב-#399: 3 מ-5 הפרמטרים של OWASP מתחת לרצפה שלו — הוצעו רק 2 שעוברים; vaultArgon2 6/6, vaultEncryption 27/28 (מגבלת harness); כישלון ה-e2e לא מהקוד — ה-spec מייבא /src; חסר: מדידה ב-Pixel 7) · ביקורת 12.11: תוקן ב-7f0bfc789 — המעבר ל-Argon2id רק בהסכמה (כפתור עם אזהרה לעדכן כל המכשירים), פתיחה לא כותבת כלום; כספות חדשות עדיין Argon2id",
+     "notes": "⏳ #472 (על verify/train + #399; Argon2id מכויל למכשיר (46 MiB×1 או 19 MiB×2), כספת PBKDF2 עוברת ל-Argon2id בפתיחה הבאה; נמצא ב-#399: 3 מ-5 הפרמטרים של OWASP מתחת לרצפה שלו — הוצעו רק 2 שעוברים; vaultArgon2 6/6, vaultEncryption 27/28 (מגבלת harness); כישלון ה-e2e לא מהקוד — ה-spec מייבא /src; חסר: מדידה ב-Pixel 7) · ביקורת 12.11: תוקן ב-7f0bfc789 — המעבר ל-Argon2id רק בהסכמה (כפתור עם אזהרה לעדכן כל המכשירים), פתיחה לא כותבת כלום; כספות חדשות עדיין Argon2id · INT8 17.11 (lane FC1 #1186): in-repo C→WASM Argon2 fill: 64 MiB t=3 5,579→458 ms (L3 bench median 220 ms); RFC 9106 §5.3 both paths; argon2Wasm 5/5, macPackL3 13/13; L3 verdict: same 1,000 ms budget, the in-house impl must meet it when hash-wasm is absent; owed: Mac FC1/argon2 + FC1/argon2-wasm-reproducible; Pixel 7 timing (owner/device); receipts+label (crypto) · status before: ⏳ #472 · (על verify/train + #399; Argon2id מכויל למכשיר (46 MiB×1 או 19 MiB×2), כספת PBKDF2 עוברת ל-Argon2id בפתיחה הבאה; נמצא ב-#399: 3 מ-5 הפרמטרים של OWASP מתחת לרצפה שלו — הוצעו רק 2 שעוברים)…",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -10716,10 +10721,10 @@
      ],
      "why": "העתקת עברית מ-PDF ממשלתי או אקדמי נותנת טקסט הפוך — בעיה יומיומית של סטודנטים ועורכי דין.",
      "branch": "feat/pdf-paste-reversed",
-     "status": "⏳ #442 · (על feat/paste-fidelity; 100 שורות סינתטיות דרך PDF אמיתי ו-pdf.js: 96/100 שורות הפוכות תוקנו, 0 הצעות על 1,400+ מחרוזות עבריות תקינות, אותיות סופיות 46/47)…",
+     "status": "⏳ #1196 · cloud-complete (INT8 17.11 (lane FC2 #1196)); owed: Mac FC2-W5.5-real-pdfs (owner's PDFs + review sheet)",
      "verified": "browser",
      "pr": 442,
-     "notes": "⏳ #442 (על feat/paste-fidelity; 100 שורות סינתטיות דרך PDF אמיתי ו-pdf.js: 96/100 שורות הפוכות תוקנו, 0 הצעות על 1,400+ מחרוזות עבריות תקינות, אותיות סופיות 46/47; pdfHebrew 12/12, pdfPaste 8/8 ב-Chromium; חסר: PDF-ים אמיתיים מ-Word/InDesign, e2e)",
+     "notes": "⏳ #442 (על feat/paste-fidelity; 100 שורות סינתטיות דרך PDF אמיתי ו-pdf.js: 96/100 שורות הפוכות תוקנו, 0 הצעות על 1,400+ מחרוזות עבריות תקינות, אותיות סופיות 46/47; pdfHebrew 12/12, pdfPaste 8/8 ב-Chromium; חסר: PDF-ים אמיתיים מ-Word/InDesign, e2e) · INT8 17.11 (lane FC2 #1196): scripts/pdf-paste/real-corpus.mjs; 14 LibreOffice PDFs: the fix restores 37/100 glyph-order lines (geometric reference 50/100) — a code finding on mixed Latin/⌘/bracket lines; owed: Mac FC2-W5.5-real-pdfs (owner's PDFs + review sheet) · status before: ⏳ #442 · (על feat/paste-fidelity; 100 שורות סינתטיות דרך PDF אמיתי ו-pdf.js: 96/100 שורות הפוכות תוקנו, 0 הצעות על 1,400+ מחרוזות עבריות תקינות, אותיות סופיות 46/47)…",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -10996,10 +11001,10 @@
      ],
      "why": "Capacities ו-Notion הוסיפו הקלטה ותמלול בענן. לסטודנט עברי אין שרשרת מקומית מהרצאה לחזרה.",
      "branch": "feat/student-mode",
-     "status": "⏳ #441 · (על #376; הקלטה → תמלול עם חותמות זמן → סיכום מתוך התמלול → כרטיסי cloze עם ▶ לרגע; סימון ״חשוב!״; ‏studentMode 10/10, מקליט 2/2 ב-Chromium offline)…",
+     "status": "⏳ #1196 · cloud-complete (INT8 17.11 (lane FC2 #1196)); owed: Mac FC2-W5.13-lecture-timing (90-min recording)",
      "verified": "browser",
      "pr": 441,
-     "notes": "⏳ #441 (על #376; הקלטה → תמלול עם חותמות זמן → סיכום מתוך התמלול → כרטיסי cloze עם ▶ לרגע; סימון ״חשוב!״; ‏studentMode 10/10, מקליט 2/2 ב-Chromium offline; המודל Whisper יורד פעם אחת מ-Hugging Face; חסר: Whisper אמיתי ב-WebGPU, יעד 90 דק׳ ≤ 20 דק׳ (בעלים); dodMock)",
+     "notes": "⏳ #441 (על #376; הקלטה → תמלול עם חותמות זמן → סיכום מתוך התמלול → כרטיסי cloze עם ▶ לרגע; סימון ״חשוב!״; ‏studentMode 10/10, מקליט 2/2 ב-Chromium offline; המודל Whisper יורד פעם אחת מ-Hugging Face; חסר: Whisper אמיתי ב-WebGPU, יעד 90 דק׳ ≤ 20 דק׳ (בעלים); dodMock) · INT8 17.11 (lane FC2 #1196): scripts/student/lecture-timing.mjs; goldenHarnessesFc2 9/9; owed: Mac FC2-W5.13-lecture-timing (90-min recording) · status before: ⏳ #441 · (על #376; הקלטה → תמלול עם חותמות זמן → סיכום מתוך התמלול → כרטיסי cloze עם ▶ לרגע; סימון ״חשוב!״; ‏studentMode 10/10, מקליט 2/2 ב-Chromium offline)…",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -11343,10 +11348,10 @@
      ],
      "why": "W2.15 ו-W2.16 דורשים Zotero Desktop פתוח. במובייל ובדפדפן זה לא אפשרי.",
      "branch": "feat/zotero-web-api",
-     "status": "⏳ #485 · (על #411; סנכרון קריאה בלבד ומצטבר (If-Modified-Since-Version, 304), 50 פריטים לבקשה, Backoff/429; המפתח באחסון הסודות, קטגוריית research ביומן הפרטיות)…",
+     "status": "⏳ #1194 · cloud-complete (INT8 17.11 (lane FC2 #1194)); owed: Mac FC2-W5.23-zotero-file (owner's real export)",
      "verified": "built",
      "pr": 485,
-     "notes": "⏳ #485 (על #411; סנכרון קריאה בלבד ומצטבר (If-Modified-Since-Version, 304), 50 פריטים לבקשה, Backoff/429; המפתח באחסון הסודות, קטגוריית research ביומן הפרטיות; zoteroWeb 8/8: ספרייה של 1,000 פריטים ב-25 בקשות; fixtures מהתיעוד, לא מוקלטים (הפרוקסי חוסם); חסר: סנכרון אמיתי, api.zotero.org ב-vercel.json; dodMock)",
+     "notes": "⏳ #485 (על #411; סנכרון קריאה בלבד ומצטבר (If-Modified-Since-Version, 304), 50 פריטים לבקשה, Backoff/429; המפתח באחסון הסודות, קטגוריית research ביומן הפרטיות; zoteroWeb 8/8: ספרייה של 1,000 פריטים ב-25 בקשות; fixtures מהתיעוד, לא מוקלטים (הפרוקסי חוסם); חסר: סנכרון אמיתי, api.zotero.org ב-vercel.json; dodMock) · INT8 17.11 (lane FC2 #1194): Zotero by file, import and export, no api.zotero.org, no CSP change; zoteroFile 10/10 (1,000 items <5 s, fetch never called), zoteroWeb 8/8; owed: Mac FC2-W5.23-zotero-file (owner's real export) · status before: ⏳ #485 · (על #411; סנכרון קריאה בלבד ומצטבר (If-Modified-Since-Version, 304), 50 פריטים לבקשה, Backoff/429; המפתח באחסון הסודות, קטגוריית research ביומן הפרטיות)…",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -11651,10 +11656,10 @@
      ],
      "why": "זה החוסם של השחרור. הקריטי עדיין פתוח לכל כספת שהייתה לה keyring מלפני התיקון, והפתרון הנקי הוא למחוק את הנתיב, כי אף אחד עוד לא משתמש בו.",
      "branch": "feat/sync-crypto",
-     "status": "⏳ סבב 3 נדחף: #399 ‏7807f3bf28, #291 ‏d660d47aea (מכיל את #399 — ספקים וקריפטו רצים יחד לראשונה, syncProviders 30/30), #472 ‏5bf4ab519e — עוגן מכשיר קשור ל-HMAC תחת סוד ה-epoch (N1)…",
+     "status": "⏳ #1187 · cloud-complete (INT8 17.11 (lane FC1 #1187)); owed: receipts+label (sync)",
      "verified": "built",
      "pr": 399,
-     "notes": "⏳ סבב 3 נדחף: #399 ‏7807f3bf28, #291 ‏d660d47aea (מכיל את #399 — ספקים וקריפטו רצים יחד לראשונה, syncProviders 30/30), #472 ‏5bf4ab519e — עוגן מכשיר קשור ל-HMAC תחת סוד ה-epoch (N1), קריאה חוזרת אחרי כל כתיבת keyring (N2), צימוד דו-כיווני (N3), מכשיר לא מאומת לא מעלה (N6), Drive במצב סנכרון בלבד (אין CAS אטומי); כל מבחני rr3 עוברים כפי שנכתבו; t8 (ספק משקר) — מוגבל עקרונית בלי CAS בצד שרת, מתוקן בסבב הבא של המכשיר המבטל; החלטות מתאם: (1) העלאות מוחזקות מתקבלות — האשף וזרימת LAN צריכים שלב צימוד (lane S); (2) החלפת מפתחות ממכשיר לא מאומת מוחקת את רשימת המכשירים — מתקבל עם אזהרה ואישור ב-UI; ביקורת קריפטו רביעית בעבודה · סבב 4: #399 ‏2c968239ca, #291 ‏5081ea1f6a, #472 ‏615765b71c — F1 (סוג ההודעה בתוך ה-MAC, תשובה נושאת hash של הבקשה), הגנת freeze ל-t8, F2 (ביטול חוזר בכל epoch + רשימת מבוטלים מקומית), F3 (בלי הורדה לא-מאומת; הסרת מכשירים דורשת הסכמה), F4–F7, ביטול צימוד ויכולות ספק; e2eeFifthReview 16/16, Python 31/31; 3 ממבחני rr5 הותאמו לשינויי ההתנהגות — ביקורת קריפטו נוספת בודקת",
+     "notes": "⏳ סבב 3 נדחף: #399 ‏7807f3bf28, #291 ‏d660d47aea (מכיל את #399 — ספקים וקריפטו רצים יחד לראשונה, syncProviders 30/30), #472 ‏5bf4ab519e — עוגן מכשיר קשור ל-HMAC תחת סוד ה-epoch (N1), קריאה חוזרת אחרי כל כתיבת keyring (N2), צימוד דו-כיווני (N3), מכשיר לא מאומת לא מעלה (N6), Drive במצב סנכרון בלבד (אין CAS אטומי); כל מבחני rr3 עוברים כפי שנכתבו; t8 (ספק משקר) — מוגבל עקרונית בלי CAS בצד שרת, מתוקן בסבב הבא של המכשיר המבטל; החלטות מתאם: (1) העלאות מוחזקות מתקבלות — האשף וזרימת LAN צריכים שלב צימוד (lane S); (2) החלפת מפתחות ממכשיר לא מאומת מוחקת את רשימת המכשירים — מתקבל עם אזהרה ואישור ב-UI; ביקורת קריפטו רביעית בעבודה · סבב 4: #399 ‏2c968239ca, #291 ‏5081ea1f6a, #472 ‏615765b71c — F1 (סוג ההודעה בתוך ה-MAC, תשובה נושאת hash של הבקשה), הגנת freeze ל-t8, F2 (ביטול חוזר בכל epoch + רשימת מבוטלים מקומית), F3 (בלי הורדה לא-מאומת; הסרת מכשירים דורשת הסכמה), F4–F7, ביטול צימוד ויכולות ספק; e2eeFifthReview 16/16, Python 31/31; 3 ממבחני rr5 הותאמו לשינויי ההתנהגות — ביקורת קריפטו נוספת בודקת · INT8 17.11 (lane FC1 #1187): 10k re-key: quadratic state saves + tree check fixed; tests 262 s→30 s; e2eeBulkSaves 3/3; keyring 6/6 in shim; owed: receipts+label (sync) · status before: ⏳ סבב 3 נדחף: #399 ‏7807f3bf28, #291 ‏d660d47aea (מכיל את #399 — ספקים וקריפטו רצים יחד לראשונה, syncProviders 30/30), #472 ‏5bf4ab519e — עוגן מכשיר קשור ל-HMAC תחת סוד ה-epoch (N1)…",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -12969,10 +12974,10 @@
      ],
      "why": "משתמש שמצפין נענש היום בפתיחה איטית.",
      "branch": "perf/encrypted-snapshot",
-     "status": "⏳ שרשרת #529→#560→#573→#585→#604 ‏6194c8f069 — אושרה בביקורת 33 (plan/review33-604-2026-11-14.md): 0 כתיבות טקסט גלוי ל-IndexedDB בכל תרחישי קריסת worker, נעילה והחלפה…",
+     "status": "⏳ #1190 · cloud-complete (INT8 17.11 (lane FC1 #1190)); owed: Mac FC1/e2e-nightly",
      "verified": "built",
      "pr": 529,
-     "notes": "⏳ שרשרת #529→#560→#573→#585→#604 ‏6194c8f069 — אושרה בביקורת 33 (plan/review33-604-2026-11-14.md): 0 כתיבות טקסט גלוי ל-IndexedDB בכל תרחישי קריסת worker, נעילה והחלפה; פתיחת כספת מוצפנת 10k ב-0.38s (היה 32.5s); נכנסת לרכבת 4. נמוך Z7 (אינדקס ריק עד החלפה הבאה בתרחיש נדיר) בתיקון. חסר: Mac של טל, 100k, כספת תיקייה/שולחן עבודה אמיתית, typecheck/build",
+     "notes": "⏳ שרשרת #529→#560→#573→#585→#604 ‏6194c8f069 — אושרה בביקורת 33 (plan/review33-604-2026-11-14.md): 0 כתיבות טקסט גלוי ל-IndexedDB בכל תרחישי קריסת worker, נעילה והחלפה; פתיחת כספת מוצפנת 10k ב-0.38s (היה 32.5s); נכנסת לרכבת 4. נמוך Z7 (אינדקס ריק עד החלפה הבאה בתרחיש נדיר) בתיקון. חסר: Mac של טל, 100k, כספת תיקייה/שולחן עבודה אמיתית, typecheck/build · INT8 17.11 (lane FC1 #1190): e2e/encrypted-reopen.spec.ts @nightly written, listed by Playwright; vaultIndexProbe test; not run here (no Vite); owed: Mac FC1/e2e-nightly · status before: ⏳ שרשרת #529→#560→#573→#585→#604 ‏6194c8f069 — אושרה בביקורת 33 (plan/review33-604-2026-11-14.md): 0 כתיבות טקסט גלוי ל-IndexedDB בכל תרחישי קריסת worker, נעילה והחלפה…",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -13533,7 +13538,7 @@
      ],
      "why": "Obsidian 1.12 (2.2026) הוסיף גרירת גודל תמונה, ניקוי מצורפים ושמירת HTML בהעתקה. ‏Heptabase הוסיפו חיפוש ומיון ב-backlinks וחיפוש בתוך בלוקי קוד (8.2026). אלה פעולות יומיומיות שמשתמש שעובר מ-Obsidian מצפה להן.",
      "branch": "feat/editor-gaps-112",
-     "status": "⏳ #559 ‏49b3682e4f — פערי עורך מול Obsidian 1.12/Heptabase; editorGaps 23/23 (כולל 200 כספות אקראיות), editorGapsDom 4/4. חסר: e2e ב-chromium/firefox, הדבקה ל-Word/Google Docs (בעלים)",
+     "status": "⏳ #1173 · cloud-complete (INT8 17.11 (lane FC3 #1173)); owed: owner: real paste into Word/Google Docs (FC3-W7.3-office-paste)",
      "verified": "built",
      "pr": 559,
      "auditVerdict": {
@@ -13543,7 +13548,8 @@
       "score": 50,
       "who": "Mac",
       "missing": "e2e in chromium/firefox; Word/Docs paste check"
-     }
+     },
+     "notes": "INT8 17.11 (lane FC3 #1173): officePasteRoundTrip 13/13 (Chromium shim): 10/10 cases from Lumen, Word and Docs clipboard HTML; owed: owner: real paste into Word/Google Docs (FC3-W7.3-office-paste) · status before: ⏳ #559 ‏49b3682e4f — פערי עורך מול Obsidian 1.12/Heptabase; editorGaps 23/23 (כולל 200 כספות אקראיות), editorGapsDom 4/4. חסר: e2e ב-chromium/firefox, הדבקה ל-Word/Google Docs (בעלים)"
     },
     {
      "id": "W7.4",
@@ -13647,10 +13653,10 @@
      ],
      "why": "עיתונאים, סטודנטים ומורים משתמשים בנתוני הלמ״ס ו-data.gov.il ומעתיקים אותם ידנית. רישיון הלמ״ס (גרסה 2.1) מתיר שימוש מסחרי, אבל דורש ייחוס בנוסח קבוע שקל לטעות בו. אף כלי פתקים לא שולף אותם ומייחס אוטומטית.",
      "branch": "feat/datagov-sources",
-     "status": "⏳ #591 · ‏a95bb328fe — בלוק data.gov.il ולמ״ס עם snapshot מקומי (0 בקשות בפתיחה) וייחוס; datagovSources 8/8. חסר: בדיקה חיה, ייצוא PDF/DOCX אמיתי, build…",
+     "status": "⏳ #1173 · cloud-complete (INT8 17.11 (lane FC3 #1173)); owed: Mac FC3-W7.6-pdf; 10 live datasets (L6-W7.6-live10)",
      "verified": "built",
      "pr": 591,
-     "notes": "⏳ #591 ‏a95bb328fe — בלוק data.gov.il ולמ״ס עם snapshot מקומי (0 בקשות בפתיחה) וייחוס; datagovSources 8/8. חסר: בדיקה חיה, ייצוא PDF/DOCX אמיתי, build; ביקורת 20: שער האישור ומצב טיסה מחזיקים, CSP מינימלי; ביקורת 20 תוקנה (G1–G4, I1–I3, P1–P2 עוברים; מצב טיסה עוצר גם בקשה בתהליך, כולל ספריא; הצמדת SHA-256 להורדות; תקרות גודל וביטול); אושר בביקורת 25 (נמוכים RR25-2/3 בהמשך)",
+     "notes": "⏳ #591 ‏a95bb328fe — בלוק data.gov.il ולמ״ס עם snapshot מקומי (0 בקשות בפתיחה) וייחוס; datagovSources 8/8. חסר: בדיקה חיה, ייצוא PDF/DOCX אמיתי, build; ביקורת 20: שער האישור ומצב טיסה מחזיקים, CSP מינימלי; ביקורת 20 תוקנה (G1–G4, I1–I3, P1–P2 עוברים; מצב טיסה עוצר גם בקשה בתהליך, כולל ספריא; הצמדת SHA-256 להורדות; תקרות גודל וביטול); אושר בביקורת 25 (נמוכים RR25-2/3 בהמשך) · INT8 17.11 (lane FC3 #1173): datagovExportPdf 1/1; e2e/datagov-pdf.spec.ts (pdftotext) listed; owed: Mac FC3-W7.6-pdf; 10 live datasets (L6-W7.6-live10) · status before: ⏳ #591 · ‏a95bb328fe — בלוק data.gov.il ולמ״ס עם snapshot מקומי (0 בקשות בפתיחה) וייחוס; datagovSources 8/8. חסר: בדיקה חיה, ייצוא PDF/DOCX אמיתי, build…",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -15433,7 +15439,7 @@
       "W4.11"
      ],
      "files": "src/lib/**, src/ai/**, src/storage/**, src/sync/**",
-     "status": "⏳ #640 · cloud-complete (audit r3 PARTIAL); owed: re-audit of the fix in #1129 (loggerSwallowed; codeHealth's W10.A8 check)",
+     "status": "⏳ #1189 · cloud-complete (INT8 17.11 (lane FC1 #1189)); owed: re-audit; receipts+label",
      "verified": "built",
      "pr": 640,
      "auditVerdict": {
@@ -15452,7 +15458,7 @@
       "exit 0 — 0 failed, 0 skipped without a reason",
       "exit 0 — 0 failed, 0 skipped without a reason"
      ],
-     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת; ברכבת 5"
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת; ברכבת 5 · INT8 17.11 (lane FC1 #1189): ~200 storage/sync fallback catches reviewed, 37 report now (+3 Argon2 loader); per-file ratchet fallbackCatchReview 3/3 (INT8 added the reviewed counts of #1193/#1201); owed: re-audit; receipts+label · status before: ⏳ #640 · cloud-complete (audit r3 PARTIAL); owed: re-audit of the fix in #1129 (loggerSwallowed; codeHealth's W10.A8 check)"
     },
     {
      "id": "W10.A9",
@@ -16456,7 +16462,7 @@
       "7.6"
      ],
      "files": "scripts/golden/evals/rerank.mjs, eval/golden/retrieval-hard/",
-     "status": "⏳ קוד ב-PR #706 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #1172 · cloud-complete (INT8 17.11 (lane FC3 #1172)); owed: Mac FC3-W10.B18-fetch then FC3-W10.B18-rerank; commit eval/retrieval-public.pins.json if the licences pass",
      "verified": "built",
      "pr": 706,
      "auditVerdict": {
@@ -16466,7 +16472,8 @@
       "score": 55,
       "who": "Mac",
       "missing": "WebFAQ-heb and Belebele measurement (W11.M5) and a real reranker run not done; decision rule untested on real models"
-     }
+     },
+     "notes": "INT8 17.11 (lane FC3 #1172): public-set gate needs +2 on webfaq-heb and belebele-heb and p95 ≤150 ms (tightened); fetch.py refuses other licences, pins revision+sha256; rerankHard 11/11, crossEncoderSeam 6/6; licence not pinned (HF unreachable here); owed: Mac FC3-W10.B18-fetch then FC3-W10.B18-rerank; commit eval/retrieval-public.pins.json if the licences pass · status before: ⏳ קוד ב-PR #706 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W10.B19",
@@ -16960,7 +16967,7 @@
       "W5.13"
      ],
      "files": "src/student/lecture.ts:19, src/agents/summary/*",
-     "status": "⏳ קוד ב-PR #632, #639, #669, #812 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #1172 · cloud-complete (INT8 17.11 (lane FC3 #1172)); owed: Mac FC3-W10.C9-rouge; FC3-W10.C9-hebsummaries after owner W11.O4",
      "verified": "built",
      "pr": 632,
      "auditVerdict": {
@@ -16970,7 +16977,8 @@
       "score": 55,
       "who": "Mac",
       "missing": "ROUGE-L/faithfulness ≥95% on HebSummaries with a real model (acceptance 3)"
-     }
+     },
+     "notes": "INT8 17.11 (lane FC3 #1172): ROUGE-L / ROUGE-Lsum in eval:summarize; rougeL 10/10 (rouge-score README example, Lin 2004 cases, Hebrew tokens); owed: Mac FC3-W10.C9-rouge; FC3-W10.C9-hebsummaries after owner W11.O4 · status before: ⏳ קוד ב-PR #632, #639, #669, #812 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W10.C10",
@@ -17597,7 +17605,7 @@
       "W1.15"
      ],
      "files": "src/highlights/HighlightsPanel.tsx, src/highlights/hub.ts",
-     "status": "⏳ קוד ב-PR #682 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #1173 · cloud-complete (INT8 17.11 (lane FC3 #1173)); owed: Mac FC3-W10.C25-worker",
      "verified": "built",
      "pr": 682,
      "auditVerdict": {
@@ -17607,7 +17615,8 @@
       "score": 75,
       "who": "Mac",
       "missing": "main-thread profile in a browser"
-     }
+     },
+     "notes": "INT8 17.11 (lane FC3 #1173): e2e/highlights-worker.spec.ts: engine=worker, vaultIndexLocal never on the main thread, buildIndex calls = 0 by V8 coverage; owed: Mac FC3-W10.C25-worker · status before: ⏳ קוד ב-PR #682 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W10.C26",
@@ -21535,7 +21544,7 @@
       "W2.10"
      ],
      "files": "src/__tests__/hebcalReference.test.ts",
-     "status": "⏳ קוד ב-PR #805, #859, #866, #872 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #1175 · cloud-complete (INT8 17.11 (lane FC3 #1175)); owed: Mac: the 2010–2030 Hebcal table (scripts/calendar/reference-from-hebcal.mjs)",
      "verified": "built",
      "pr": 805,
      "auditVerdict": {
@@ -21545,7 +21554,8 @@
       "score": 60,
       "who": "cloud-code",
       "missing": "the 2010–2030 external table"
-     }
+     },
+     "notes": "INT8 17.11 (lane FC3 #1175): anchor rows as an outside reference (see R12.6); owed: Mac: the 2010–2030 Hebcal table (scripts/calendar/reference-from-hebcal.mjs) · status before: ⏳ קוד ב-PR #805, #859, #866, #872 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W10.E77",
@@ -22038,7 +22048,7 @@
       "W4.12"
      ],
      "files": "e2e/**",
-     "status": "⏳ #654 · cloud-complete (audit r3 PARTIAL); owed: e2e not run; true skip points ~21 (engine helpers counted separately)",
+     "status": "⏳ #1175 · cloud-complete (INT8 17.11 (lane FC3 #1175)); owed: remove 4 skip points to reach 15; e2e run on the Mac",
      "verified": "built",
      "pr": 654,
      "auditVerdict": {
@@ -22049,7 +22059,7 @@
       "who": "cloud-code",
       "missing": "acceptance <=15 .skip not met as counted (20, some conditional helpers); e2e not run"
      },
-     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #654 — נבדק לא מקוון; ממתין לרכבת"
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #654 — נבדק לא מקוון; ממתין לרכבת · INT8 17.11 (lane FC3 #1175): e2e skip points counted once (direct + helper calls), ratchet MAX_E2E_SKIP_POINTS; on the merged INT8 tree the count is 19 points (11 skip calls outside _engines.ts + 8 helper calls; 20 before INT8 replaced the dead @nightly browserName skip in entity-graph.spec.ts); target ≤15 NOT met; owed: remove 4 skip points to reach 15; e2e run on the Mac · status before: ⏳ #654 · cloud-complete (audit r3 PARTIAL); owed: e2e not run; true skip points ~21 (engine helpers counted separately)"
     },
     {
      "id": "W10.F12",
@@ -25456,7 +25466,7 @@
      ],
      "why": "חוסך עבודת בעלים ונותן מספר שאפשר להשוות.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #661, #911 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #1198 · cloud-complete (INT8 17.11 (lane FC2 #1198)); owed: Mac FC2-W11.H14-handwriting (CER on ivrit.ai)",
      "verified": "built",
      "pr": 661,
      "stage": "11.H",
@@ -25471,7 +25481,8 @@
       "score": 50,
       "who": "Mac",
       "missing": "no recogniser in the app (W7.11/#603 not in train); no run"
-     }
+     },
+     "notes": "INT8 17.11 (lane FC2 #1198): src/ink/inkText.ts recognizeNote, tesseract + model seam; handwritingRecognizer 7/7; the gate opens only from the eval card; owed: Mac FC2-W11.H14-handwriting (CER on ivrit.ai) · status before: ⏳ קוד ב-PR #661, #911 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W11.H15",
@@ -25689,7 +25700,7 @@
      ],
      "why": "הכספת תמיד [B]. רק מגבלה ארכיטקטונית מחזיקה מול הזרקה; 12 הגנות סינון נשברו ביותר מ-90%.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ #692 · cloud-complete (audit r3 PARTIAL); owed: re-audit of the fix in #1110 (ruleOfTwoVaultRead); review receipts and the human-reviewed label (owner, security)",
+     "status": "⏳ #1188 · cloud-complete (INT8 17.11 (lane FC1 #1188)); owed: receipts+label (privacy); re-audit",
      "verified": "built",
      "pr": 692,
      "stage": "11.I",
@@ -25704,7 +25715,7 @@
       "who": "cloud-code",
       "missing": "real-model behaviour unmeasured (AgentDojo on Mac)"
      },
-     "notes": "INT6b 17.11 (lane FA): ⏳ fix in PR #1110 (vault read = private whatever its trust class); dod+ npx vitest run src/__tests__/ruleOfTwoVaultRead.test.ts · INT6b 17.11: status before → ⏳ קוד ב-PR #692, #703, #844 — נבדק לא מקוון; ממתין לרכבת",
+     "notes": "INT6b 17.11 (lane FA): ⏳ fix in PR #1110 (vault read = private whatever its trust class); dod+ npx vitest run src/__tests__/ruleOfTwoVaultRead.test.ts · INT6b 17.11: status before → ⏳ קוד ב-PR #692, #703, #844 — נבדק לא מקוון; ממתין לרכבת · INT8 17.11 (lane FC1 #1188): remote MCP answers are private under the Rule of Two: exploit reproduced (2 out, 0 asks) → 0 out; ruleOfTwoRemoteMcp 3/3 (fail before); merged with review 12 M4 (#1179) in readsUserData; owed: receipts+label (privacy); re-audit · status before: ⏳ #692 · cloud-complete (audit r3 PARTIAL); owed: re-audit of the fix in #1110 (ruleOfTwoVaultRead); review receipts and the human-reviewed label (owner, security)",
      "dod": [
       "npx vitest run src/__tests__/ruleOfTwoVaultRead.test.ts"
      ]
@@ -27674,14 +27685,14 @@
      ],
      "why": "בחירת ה-backend לפי מספרים.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #856 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #1185 · cloud-complete (INT8 17.11 (lane FC1 #1185)); owed: Mac FC1/opfs-10k (3 engines)",
      "verified": "built",
      "pr": 856,
      "stage": "11.Q",
      "research": [
       "R5.12"
      ],
-     "notes": "בעבודה (X-Q)",
+     "notes": "בעבודה (X-Q) · INT8 17.11 (lane FC1 #1185): OPFS bench streams the 10k files; 10k run completes in the cloud, peak tree RSS 1,132→864 MB, crash phase reported; opfsBench 7/7; owed: Mac FC1/opfs-10k (3 engines) · status before: ⏳ קוד ב-PR #856 — נבדק לא מקוון; ממתין לרכבת",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -28206,7 +28217,7 @@
      ],
      "why": "שני ניסויי origin trial מחליפים את beforeinstallprompt.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #808 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #1202 · cloud-complete (INT8 17.11 (lane FC2 #1202)); owed: owner: register the trials and headers; Mac L8-W11.P13-chrome",
      "verified": "built",
      "pr": 808,
      "stage": "11.P",
@@ -28220,7 +28231,8 @@
       "score": 60,
       "who": "Mac",
       "missing": "works-in-Chrome-148 acceptance needs a browser"
-     }
+     },
+     "notes": "INT8 17.11 (lane FC2 #1202): origin-trial plan (plan/origin-trials-W11.P13.md/.he.md) and token checker; originTrialToken 2/2; owed: owner: register the trials and headers; Mac L8-W11.P13-chrome · status before: ⏳ קוד ב-PR #808 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W11.P14",
@@ -28727,7 +28739,8 @@
       "score": 5,
       "who": "Mac",
       "missing": "export + measure"
-     }
+     },
+     "notes": "INT8 17.11 (lane FC2 #1195): dictabert-ner.mjs, gliner.mjs, ner-core.mjs engines; nerEngines 10/10; owed: Mac FC2-W11.M3-dictabert-ner (NEMO F1)"
     },
     {
      "id": "W11.M4",
@@ -28846,7 +28859,8 @@
       "score": 5,
       "who": "Mac",
       "missing": "run"
-     }
+     },
+     "notes": "INT8 17.11 (lane FC2 #1192): Ollama executor for AgentDojo, loopback only, temp 0/seed 42; agentDojo 12/12 (4 new fail on the old harness); owed: Mac FC2-W11.M6-agentdojo (qwen3:8b real run); receipts+label (agents)"
     },
     {
      "id": "W11.M7",
@@ -29637,7 +29651,7 @@
      ],
      "why": "בלי ממשק, סוג הוא רק YAML. Capacities ו-Tana מנצחים בזה שהשדות מופיעים לבד כשמסמנים אובייקט.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #820, #849 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #1190 #1197 · cloud-complete (INT8 17.11 (lane FC1+FC2 #1190, #1197)); owed: Mac FC1/e2e, FC2-e2e-wave12",
      "verified": "built",
      "pr": 820,
      "stage": "12.T",
@@ -29654,7 +29668,8 @@
       "score": 55,
       "who": "Mac",
       "missing": "acceptance is e2e (RTL create type + 5 fields), 100-note rename with one Ctrl+Z, axe: none ran in a browser"
-     }
+     },
+     "notes": "INT8 17.11 (lane FC1+FC2 #1190, #1197): e2e/object-studio.spec.ts (RTL, 5 fields, axe, save) and the typed-note form spec written, listed; owed: Mac FC1/e2e, FC2-e2e-wave12 · status before: ⏳ קוד ב-PR #820, #849 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W12.T3",
@@ -29762,7 +29777,7 @@
      ],
      "why": "Bases כבר מציג table/cards/list/kanban/map/calendar/timeline (BasesBlock.tsx). הפער הוא התאמה מדויקת לקובץ של Obsidian, שהוא ערוץ המעבר העיקרי (R1 #7, #8).",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #842 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #1190 · cloud-complete (INT8 17.11 (lane FC1 #1190)); owed: Mac FC1/e2e",
      "verified": "built",
      "pr": 842,
      "stage": "12.T",
@@ -29778,7 +29793,8 @@
       "score": 55,
       "who": "Mac",
       "missing": "each behaviour linked to Obsidian help paragraph only on fixtures (obsidian-help corpus not in repo); e2e drag RTL not run"
-     }
+     },
+     "notes": "INT8 17.11 (lane FC1 #1190): e2e/bases-kanban-rtl.spec.ts (mouse drag + Alt+arrows RTL) written, listed; owed: Mac FC1/e2e · status before: ⏳ קוד ב-PR #842 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W12.T6",
@@ -30351,7 +30367,7 @@
      ],
      "why": "Heptabase MCP 0.11 הוסיף ציטוטים ברמת פסקה (R1). אצלנו הקוד מאמת ציטוטים כבר, אבל ברמת שורה ובלי עוגן יציב.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #825, #826, #879, #884, #885, #895 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #1197 · cloud-complete (INT8 17.11 (lane FC2 #1197)); owed: Mac FC2-e2e-wave12",
      "verified": "built",
      "pr": 825,
      "stage": "12.A",
@@ -30368,7 +30384,8 @@
       "score": 55,
       "who": "Mac",
       "missing": "e2e (click jumps to paragraph) not run"
-     }
+     },
+     "notes": "INT8 17.11 (lane FC2 #1197): e2e/ask-vault-jump.spec.ts (routed local model, ¶2 selection) written; owed: Mac FC2-e2e-wave12 · status before: ⏳ קוד ב-PR #825, #826, #879, #884, #885, #895 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W12.A2",
@@ -30562,7 +30579,7 @@
      ],
      "why": "החלק הגלוי של חברותא. הכול מורכב מרכיבים שכבר בקוד: ספריא, חדרים מוצפנים, ניקוד לתצוגה.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #845, #881 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #1197 · cloud-complete (INT8 17.11 (lane FC2 #1197)); owed: Mac FC2-e2e-wave12",
      "verified": "built",
      "pr": 845,
      "stage": "12.H",
@@ -30579,7 +30596,8 @@
       "score": 55,
       "who": "Mac",
       "missing": "e2e in two browsers vs a local relay, axe in a browser"
-     }
+     },
+     "notes": "INT8 17.11 (lane FC2 #1197): e2e/havruta-relay.spec.ts + e2e/_relay.ts written, typechecked; not run (no Vite here); owed: Mac FC2-e2e-wave12 · status before: ⏳ קוד ב-PR #845, #881 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W12.H3",
@@ -30840,7 +30858,7 @@
      ],
      "why": "Heptabase מוביל בקריאה (9/10 ב-R1) בזכות הדגשות שהופכות לכרטיסים על לוח. אצלנו ההדגשות והקנבס קיימים; חסר החיבור.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ בעבודה",
+     "status": "⏳ #1173 · cloud-complete (INT8 17.11 (lane FC3 #1173)); owed: Mac FC3-W12.R1-scanned; e2e on a scanned PDF (OCR models)",
      "verified": "built",
      "stage": "12.R",
      "decision": "N4",
@@ -30857,7 +30875,8 @@
       "score": 55,
       "who": "Mac",
       "missing": "e2e highlight->drag->click not run; plan status still 'in progress' though code is in train"
-     }
+     },
+     "notes": "INT8 17.11 (lane FC3 #1173): pdfHighlightCardScanned 3/3: 20/20 real scanned pages, highlight → sidecar → card → reader anchor after a second OCR run; owed: Mac FC3-W12.R1-scanned; e2e on a scanned PDF (OCR models) · status before: ⏳ בעבודה"
     },
     {
      "id": "W12.R2",
@@ -31266,7 +31285,7 @@
      ],
      "why": "Typst הוא תחליף מודרני ל-LaTeX עם RTL טוב, והקומפיילר רץ בדפדפן. P2 כי LaTeX כבר קיים.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #873 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #1201 · cloud-complete (INT8 17.11 (lane FC2 #1201)); owed: Mac FC2-W12.F2-typst-vendor (npm install of typst.ts; check the bundle opens no remote font/package fetch)",
      "verified": "built",
      "pr": 873,
      "stage": "12.F",
@@ -31281,7 +31300,8 @@
       "score": 55,
       "who": "Mac",
       "missing": "typst.ts wasm not vendored (no typst package): PDF compile of 10 Hebrew notes never ran"
-     }
+     },
+     "notes": "INT8 17.11 (lane FC2 #1201): Typst → PDF loader: same-origin /vendor/typst/ only (fonts.json, fonts, typst.mjs, compiler.wasm), no remote URL, CSP unchanged, nothing in startup; typstPdf 5/5; owed: Mac FC2-W12.F2-typst-vendor (npm install of typst.ts; check the bundle opens no remote font/package fetch) · status before: ⏳ קוד ב-PR #873 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W12.F3",
@@ -32133,7 +32153,8 @@
       "score": 5,
       "who": "Mac",
       "missing": "model day"
-     }
+     },
+     "notes": "INT8 17.11 (lane FC2 #1195): GLiNER prompt/words_mask/span decode tested with stand-ins; owed: Mac FC2-W12.M1-gliner (ONNX export)"
     },
     {
      "id": "W12.M2",
@@ -32361,10 +32382,10 @@
      "hoursSaved": 6,
      "licence": "israelconnect: AGPL-3.0-or-later (קוד) / CC BY 4.0 (נתונים וסכמות) — מותר ל-lumen-md (MIT) רק אחרי R12.1",
      "stage": "12.R",
-     "status": "⏳ קוד ב-PR #866, #867, #870 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #1175 · cloud-complete (INT8 17.11 (lane FC3 #1175)); owed: re-audit",
      "verified": "built",
      "pr": 866,
-     "notes": "תלויות שהוסרו (W2.10, W5.15): src/daily/hebrewCalendar.ts ו-src/tasks/taskParser.ts כבר בקוד; W2.10 ו-W5.15 (P2) צרכנים ולא תלויות — כלל קו החיתוך · חופף ל-W12.E2 (כללי תאריכים בחילוץ): לבנות מעל המשימות האלה, לא מודול שני",
+     "notes": "תלויות שהוסרו (W2.10, W5.15): src/daily/hebrewCalendar.ts ו-src/tasks/taskParser.ts כבר בקוד; W2.10 ו-W5.15 (P2) צרכנים ולא תלויות — כלל קו החיתוך · חופף ל-W12.E2 (כללי תאריכים בחילוץ): לבנות מעל המשימות האלה, לא מודול שני · INT8 17.11 (lane FC3 #1175): hebcalReference 5/5: 15 anchor rows on their dates (Lag BaOmer +1 day fails); owed: re-audit · status before: ⏳ קוד ב-PR #866, #867, #870 — נבדק לא מקוון; ממתין לרכבת",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
