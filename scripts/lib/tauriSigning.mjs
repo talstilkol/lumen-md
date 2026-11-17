@@ -28,6 +28,18 @@ export function withWindowsThumbprint(conf, thumbprint) {
 }
 
 /** The updater platform key for a bundle file name. */
+/**
+ * Every updater platform a signed bundle serves (W13.K4): a universal macOS
+ * build serves Apple Silicon and Intel alike; an arch-specific bundle, one.
+ * An arch-specific bundle wins over the universal one for its platform.
+ */
+export function platformsOf(file) {
+  const f = file.toLowerCase();
+  if (/universal/.test(f) && f.endsWith(".app.tar.gz.sig")) return ["darwin-aarch64", "darwin-x86_64"];
+  const p = platformOf(file);
+  return p ? [p] : [];
+}
+
 export function platformOf(file) {
   const f = file.toLowerCase();
   const arch = /aarch64|arm64/.test(f) ? "aarch64" : /i686|x86(?!_64)/.test(f) ? "i686" : "x86_64";
@@ -52,12 +64,18 @@ export const MANIFEST_CHANNELS = ["stable", "beta"];
  */
 export function latestJson({ tag, repo, sigs, notes = "", date = new Date(), channel = null, now = new Date(), ttlDays = MANIFEST_TTL_DAYS }) {
   const platforms = {};
+  const universal = new Set();
   for (const { name, signature } of sigs) {
-    const p = platformOf(name);
-    if (!p) continue;
-    // NSIS (.exe) is preferred over MSI for updates, as tauri does.
-    if (platforms[p] && p.startsWith("windows") && !name.toLowerCase().includes(".exe")) continue;
-    platforms[p] = { signature: signature.trim(), url: `https://github.com/${repo}/releases/download/${tag}/${encodeURIComponent(name.replace(/\.sig$/, ""))}` };
+    const isUniversal = /universal/i.test(name);
+    for (const p of platformsOf(name)) {
+      // NSIS (.exe) is preferred over MSI for updates, as tauri does.
+      if (platforms[p] && p.startsWith("windows") && !name.toLowerCase().includes(".exe")) continue;
+      // An arch-specific macOS bundle wins over the universal one (smaller download).
+      if (platforms[p] && isUniversal && !universal.has(p)) continue;
+      if (isUniversal) universal.add(p);
+      else universal.delete(p);
+      platforms[p] = { signature: signature.trim(), url: `https://github.com/${repo}/releases/download/${tag}/${encodeURIComponent(name.replace(/\.sig$/, ""))}` };
+    }
   }
   const version = tag.replace(/^v/, "");
   return stampManifest({ version, notes, pub_date: date.toISOString(), platforms }, { channel: channel ?? (/-beta\.\d+$/.test(version) ? "beta" : "stable"), now, ttlDays });

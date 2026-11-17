@@ -11,5 +11,42 @@
   <array>
     <string>_lumen-lan._tcp</string>
   </array>
+  <!-- Plan W13.K2: Lumen's own file types, so Finder hands them to the Quick Look extension (and the app). -->
+  <key>UTExportedTypeDeclarations</key>
+  <array>
+    <dict>
+      <key>UTTypeIdentifier</key>
+      <string>app.lumen.editor.excalidraw</string>
+      <key>UTTypeDescription</key>
+      <string>Excalidraw drawing</string>
+      <key>UTTypeConformsTo</key>
+      <array><string>public.json</string></array>
+      <key>UTTypeTagSpecification</key>
+      <dict><key>public.filename-extension</key><array><string>excalidraw</string></array></dict>
+    </dict>
+    <dict>
+      <key>UTTypeIdentifier</key>
+      <string>app.lumen.editor.base</string>
+      <key>UTTypeDescription</key>
+      <string>Lumen base</string>
+      <key>UTTypeConformsTo</key>
+      <array><string>public.plain-text</string></array>
+      <key>UTTypeTagSpecification</key>
+      <dict><key>public.filename-extension</key><array><string>base</string></array></dict>
+    </dict>
+  </array>
+  <key>UTImportedTypeDeclarations</key>
+  <array>
+    <dict>
+      <key>UTTypeIdentifier</key>
+      <string>net.daringfireball.markdown</string>
+      <key>UTTypeDescription</key>
+      <string>Markdown document</string>
+      <key>UTTypeConformsTo</key>
+      <array><string>public.plain-text</string></array>
+      <key>UTTypeTagSpecification</key>
+      <dict><key>public.filename-extension</key><array><string>md</string><string>markdown</string></array></dict>
+    </dict>
+  </array>
 </dict>
 </plist>

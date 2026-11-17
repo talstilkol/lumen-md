@@ -189,6 +189,14 @@ export async function setTrayMenu(labels: { capture: string; new_note: string; r
   await invoke("tray_set_menu", { labels, recent });
 }
 
+/** W13.K5: the native menu bar in the UI language (the tray's list is left as it is). */
+export async function setNativeMenu(lang: import("../i18n").Locale): Promise<void> {
+  if (!isDesktop()) return;
+  const [{ invoke }, { applyNativeMenu }] = await Promise.all([tauri(), import("./nativeMenu")]);
+  const ua = typeof navigator === "undefined" ? "" : navigator.userAgent;
+  await applyNativeMenu((c, a) => invoke(c, a), lang, /Mac/.test(ua) ? "macos" : /Win/.test(ua) ? "windows" : "linux");
+}
+
 /** Quick capture: the inbox's new text with `text` added (Rust formats the entry), or null. */
 export async function formatCapture(text: string, existing: string): Promise<string | null> {
   const { invoke } = await tauri();

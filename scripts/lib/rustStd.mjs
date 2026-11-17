@@ -19,6 +19,7 @@ export const STD_CRATES = [
   ["zotero-local", "src-tauri/src/zotero_local.rs"],
   ["manifest-sig", "src-tauri/src/manifest_sig.rs"],
   ["desktop", "src-tauri/desktop/src/lib.rs"],
+  ["preview", "src-tauri/preview/src/lib.rs"],
 ];
 
 /**

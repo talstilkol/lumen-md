@@ -13,11 +13,11 @@
 //! - `capture` only appends to the inbox, written by the WebView's own vault layer.
 
 use crate::desktop_vault::VaultState;
-use lumen_desktop::{deeplink, fileopen, tray, windows};
+use lumen_desktop::{appmenu, deeplink, fileopen, tray, windows};
 use serde::Serialize;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
-use tauri::menu::{MenuBuilder, MenuItemBuilder};
+use tauri::menu::{AboutMetadataBuilder, MenuBuilder, MenuItemBuilder, PredefinedMenuItem, SubmenuBuilder};
 use tauri::tray::TrayIconBuilder;
 use tauri::{AppHandle, Emitter, Manager, State, WebviewUrl, WebviewWindowBuilder};
 
@@ -300,16 +300,115 @@ pub fn tab_cancel(state: State<Shell>, tab: String) -> Result<(), String> {
 
 /// The tray's labels (UI language) and recent notes (name, vault path).
 #[tauri::command]
-pub fn tray_set_menu(app: AppHandle, state: State<Shell>, labels: Option<TrayLabels>, recent: Vec<(String, String)>) -> Result<(), String> {
+///
+/// W13.K5: `app_menu` (optional) is the native menu bar in the UI language
+/// (src/desktop/nativeMenu.ts), checked by `appmenu::validate`; `recent` is
+/// optional so the menu can be sent without touching the tray's list.
+pub fn tray_set_menu(app: AppHandle, state: State<Shell>, labels: Option<TrayLabels>, recent: Option<Vec<(String, String)>>, app_menu: Option<AppMenuIn>) -> Result<(), String> {
+    let menu = match app_menu {
+        Some(m) => Some(appmenu::validate(m.sections.into_iter().map(AppSectionIn::into_section).collect(), cfg!(target_os = "macos"), cfg!(windows))?),
+        None => None,
+    };
     {
         let mut s = lock(&state)?;
         if let Some(l) = labels {
             s.tray_labels = tray::Labels { capture: l.capture, new_note: l.new_note, recent: l.recent, show: l.show, quit: l.quit };
         }
-        s.recent = recent.into_iter().filter(|(_, p)| deeplink::safe_rel_path(p).is_ok()).take(tray::MAX_RECENT).collect();
+        if let Some(recent) = recent {
+            s.recent = recent.into_iter().filter(|(_, p)| deeplink::safe_rel_path(p).is_ok()).take(tray::MAX_RECENT).collect();
+        }
+    }
+    if let Some(m) = menu {
+        build_app_menu(&app, &m).map_err(|e| e.to_string())?;
     }
     rebuild_tray_menu(&app).map_err(|e| e.to_string())
 }
+
+#[derive(serde::Deserialize)]
+pub struct AppMenuIn {
+    sections: Vec<AppSectionIn>,
+}
+
+#[derive(serde::Deserialize)]
+pub struct AppSectionIn {
+    id: String,
+    label: String,
+    items: Vec<AppItemIn>,
+}
+
+#[derive(serde::Deserialize)]
+pub struct AppItemIn {
+    id: Option<String>,
+    role: Option<String>,
+    label: Option<String>,
+    accel: Option<String>,
+    separator: Option<bool>,
+}
+
+impl AppSectionIn {
+    fn into_section(self) -> appmenu::Section {
+        let items = self
+            .items
+            .into_iter()
+            .map(|i| match (i.separator, i.role, i.id) {
+                (Some(true), _, _) => appmenu::Entry::Separator,
+                (_, Some(role), _) => appmenu::Entry::Role { role, label: i.label.unwrap_or_default() },
+                (_, _, id) => appmenu::Entry::Command { id: id.unwrap_or_default(), label: i.label.unwrap_or_default(), accel: i.accel },
+            })
+            .collect();
+        appmenu::Section { id: self.id, label: self.label, items }
+    }
+}
+
+/// The native menu bar from a checked model, replacing the English startup
+/// menu. System items are the system's own (so Services, Hide and the edit
+/// items behave natively); a command item's click goes to the WebView as
+/// `lumen-menu`, through the app's `on_menu_event` (lib.rs).
+fn build_app_menu(app: &AppHandle, sections: &[appmenu::Section]) -> tauri::Result<()> {
+    let mut bar = MenuBuilder::new(app);
+    for s in sections {
+        let mut sub = SubmenuBuilder::new(app, &s.label);
+        for e in &s.items {
+            sub = match e {
+                appmenu::Entry::Separator => sub.separator(),
+                appmenu::Entry::Command { id, label, accel } => {
+                    // The same ids as the startup menu (lib.rs `build_menu`): its `on_menu_event` handles them.
+                    let mut b = MenuItemBuilder::with_id(id.as_str(), label);
+                    if let Some(a) = accel {
+                        b = b.accelerator(a);
+                    }
+                    sub.item(&b.build(app)?)
+                }
+                appmenu::Entry::Role { role, label } => {
+                    let t = Some(label.as_str());
+                    let item = match role.as_str() {
+                        "about" => PredefinedMenuItem::about(app, t, Some(AboutMetadataBuilder::new().name(Some("Lumen")).version(Some(app.package_info().version.to_string())).build()))?,
+                        "services" => PredefinedMenuItem::services(app, t)?,
+                        "hide" => PredefinedMenuItem::hide(app, t)?,
+                        "hideOthers" => PredefinedMenuItem::hide_others(app, t)?,
+                        "showAll" => PredefinedMenuItem::show_all(app, t)?,
+                        "quit" => PredefinedMenuItem::quit(app, t)?,
+                        "undo" => PredefinedMenuItem::undo(app, t)?,
+                        "redo" => PredefinedMenuItem::redo(app, t)?,
+                        "cut" => PredefinedMenuItem::cut(app, t)?,
+                        "copy" => PredefinedMenuItem::copy(app, t)?,
+                        "paste" => PredefinedMenuItem::paste(app, t)?,
+                        "selectAll" => PredefinedMenuItem::select_all(app, t)?,
+                        "minimize" => PredefinedMenuItem::minimize(app, t)?,
+                        "zoom" => PredefinedMenuItem::maximize(app, t)?,
+                        "fullscreen" => PredefinedMenuItem::fullscreen(app, t)?,
+                        _ => PredefinedMenuItem::close_window(app, t)?,
+                    };
+                    sub.item(&item)
+                }
+            };
+        }
+        bar = bar.item(&sub.build()?);
+    }
+    app.set_menu(bar.build()?)?;
+    Ok(())
+}
+
 
 #[derive(serde::Deserialize)]
 pub struct TrayLabels {

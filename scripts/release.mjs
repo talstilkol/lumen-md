@@ -15,7 +15,7 @@
  *   node scripts/release.mjs prepare [--beta] [--version X] [--commit] [--tag]
  *                                                  bump every manifest, write CHANGELOG.md
  *                                                  (--beta: the next x.y.z-beta.n; --commit: commit it; --tag: and tag vX)
- *   node scripts/release.mjs build [--desktop] [--mobile] [--skip-checks]
+ *   node scripts/release.mjs build [--desktop [--targets t1,t2]] [--mobile] [--skip-checks]
  *                                                  typecheck, tests, web build, budget, no source maps,
  *                                                  web .tgz, desktop bundles (with --desktop), Android AAB/APK
  *                                                  and, on a Mac, the iOS IPA (with --mobile: scripts/mobile-build.mjs), SHA256SUMS,
@@ -65,6 +65,7 @@ import { createHash } from "node:crypto";
 import { deploymentUrlFrom } from "./lib/liveMeta.mjs";
 import { liveMetaAlert, liveMetaReport } from "./live-meta.mjs";
 import { downloadsManifest } from "./lib/downloads.mjs";
+import { bundleDir, missingRustTargets, releaseName, targetsFor } from "./lib/desktopTargets.mjs";
 
 const ROOT = process.cwd();
 const OUT = path.join(ROOT, "release");
@@ -241,10 +242,19 @@ const commands = {
         else warn("WINDOWS_CERTIFICATE_THUMBPRINT not set — the Windows installer is NOT signed (plan 15.7)");
       }
       run("node", ["scripts/tauri-signing.mjs", "updater-config"]);
-      // Windows MSI takes only numeric pre-release versions: a beta ships the NSIS installer alone.
-      run("npm", ["run", "tauri:build", ...(isBeta(version) && process.platform === "win32" ? ["--", "--bundles", "nsis"] : [])], channelEnv);
-      const bundles = filesIn(path.join(ROOT, "src-tauri", "target")).filter((f) => /[/\\]release[/\\]bundle[/\\]/.test(f) && /\.(dmg|msi|exe|deb|rpm|AppImage|tar\.gz|sig)$/i.test(f));
-      for (const f of bundles) copyFileSync(f, path.join(OUT, path.basename(f)));
+      // W13.K4: every CPU — a universal macOS app, Windows x64 + ARM64, Linux for this CPU (--targets a,b for others).
+      const targets = targetsFor(process.platform, process.arch, opt("--targets"));
+      const missing = missingRustTargets(spawnSync("rustup", ["target", "list", "--installed"], { encoding: "utf8" }).stdout ?? "", targets);
+      if (missing.length) run("rustup", ["target", "add", ...missing]);
+      for (const target of targets) {
+        // Windows MSI takes only numeric pre-release versions: a beta ships the NSIS installer alone.
+        run("npm", ["run", "tauri:build", "--", "--target", target, ...(isBeta(version) && process.platform === "win32" ? ["--bundles", "nsis"] : [])], channelEnv);
+        const dir = path.join(ROOT, "src-tauri", "target", ...bundleDir(target).split("/"));
+        const bundles = filesIn(dir).filter((f) => /\.(dmg|msi|exe|deb|rpm|AppImage|tar\.gz|sig)$/i.test(f));
+        if (!bundles.length) throw new Error(`no bundles for ${target} in ${path.relative(ROOT, dir)}`);
+        // The updater bundle has no CPU in its name: it gets one, so two targets never overwrite each other.
+        for (const f of bundles) copyFileSync(f, path.join(OUT, releaseName(path.basename(f), target, version)));
+      }
       const sigs = readdirSync(OUT).filter((n) => n.endsWith(".sig")).map((name) => ({ name, signature: readFileSync(path.join(OUT, name), "utf8") }));
       const repo = repoSlug();
       if (sigs.length && repo) {
