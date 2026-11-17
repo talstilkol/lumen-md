@@ -24,6 +24,8 @@ const RECORDERS: Record<string, (src: string) => string[]> = {
   // template reason is checked by its fixed start ("Plugin ", "Read aloud (").
   "src/ai/privacyLedger.ts": (src) => [
     ...[...src.matchAll(/reason: "([^"]+)"/g)].map((m) => m[1]),
+    // A recorder's default reason (recordOnDeviceModel's "Runs on this device; nothing is sent").
+    ...[...src.matchAll(/\breason = "([^"]+)"/g)].map((m) => m[1]),
     ...[...src.matchAll(/reason: `([^`$]+)\$\{/g)].map((m) => m[1]).filter((p) => !/^\s*$/.test(p)),
     /export const MONITORING_REASON = "([^"]+)"/.exec(src)![1],
     // Audit mode: what it calls a request no rule names (auditReason's fallback).
@@ -57,6 +59,13 @@ const RECORDERS: Record<string, (src: string) => string[]> = {
   "src/agents/mcp/registry.ts": (src) => [/reason: `([^`$]+)\$\{/.exec(src)![1]],
   // A plain WebDAV backup (R8-M2): recordPlainBackup, with the ledger's own fixed reason.
   "src/backup/start.ts": () => [],
+  // W13.M5 document scanner: ML Kit (Play services) through recordBrowserService, its reason in docScanner.ts.
+  "src/mobile/docScanActions.ts": () => [...read("src/mobile/docScanner.ts").matchAll(/ledger\.service\("[^"]+", "([^"]+)"\)/g)].map((m) => m[1]),
+  // lumen:// link decisions (W13.S): no request; the ledger lists each allowed or refused link, the action only.
+  "src/security/linkConfirm.ts": (src) => {
+    const line = /const reason = how === "remembered" \? "([^"]+)" : how === "asked" \? `([^`$]+)\$\{[^}]+\}[^`]*` : "([^"]+)"/.exec(src)!;
+    return [line[1], line[2], line[3]];
+  },
   // R8-M1: Tectonic's package downloads for LaTeX to PDF, under its one fixed reason.
   "src/latex/tectonicDesktop.ts": (src) => [/export const TECTONIC_LEDGER_REASON = "([^"]+)"/.exec(src)![1]],
 };
