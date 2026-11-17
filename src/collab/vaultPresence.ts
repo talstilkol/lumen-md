@@ -23,6 +23,7 @@
 import { wireE2EAwareness, type AwarenessLike, type E2EAwarenessBridge } from "./e2eAwareness";
 import { setPresence, type PresencePeer } from "./presenceStore";
 import { swallowed } from "../lib/logger";
+import { compareNames } from "../i18n/collate";
 
 export const PRESENCE_TTL_MS = 30_000;
 export const PRESENCE_HEARTBEAT_MS = 15_000;
@@ -166,7 +167,7 @@ export function startVaultPresence(o: VaultPresenceOptions): VaultPresence | nul
       if (!p || p.v !== 1 || typeof p.device !== "string") continue;
       out.push({ clientID: id, device: cleanDeviceName(p.device), note: typeof p.note === "string" ? p.note : null, heardAt: at });
     }
-    return out.sort((a, b) => a.device.localeCompare(b.device) || a.clientID - b.clientID);
+    return out.sort((a, b) => compareNames(a.device, b.device) || a.clientID - b.clientID);
   }
 
   const prune = () => {
