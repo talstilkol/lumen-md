@@ -1,0 +1,1119 @@
+{
+  "generated": "2026-11-17",
+  "engine": "QuickJS (quickjs-emscripten 0.23 offline build; the app pins 0.32) in Lumen's plugin sandbox, default limits (32 MB, 250 ms per entry); statusSpikeLimits: 256 MB, 10 s",
+  "plugins": [
+    {
+      "id": "advanced-canvas",
+      "name": "Advanced Canvas",
+      "version": "6.0.1",
+      "bytes": 368463,
+      "license": "GPL-3.0",
+      "licenseSource": "LICENSE of the plugin's source repository, on disk (Developer-Mike/obsidian-advanced-canvas)",
+      "status": "fails",
+      "reason": "evaluate: Error: require('@codemirror/view') is not available in Lumen's sandbox",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "require(@codemirror/view)"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "advanced-cursors",
+      "name": "Advanced Cursors",
+      "version": "0.5.1",
+      "bytes": 800661,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "loads",
+      "reason": "7/11 commands failed: open-regex-match-modal: TypeError: not a function",
+      "commands": 11,
+      "commandsOk": 4,
+      "missing": [
+        "HTMLElement.select"
+      ],
+      "statusSpikeLimits": "loads"
+    },
+    {
+      "id": "ai_llm",
+      "name": "AI LLM",
+      "version": "1.1.3",
+      "bytes": 31838,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "evaluate: Error: require('fs') is not available in Lumen's sandbox",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "require(fs)"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "buttons",
+      "name": "Buttons",
+      "version": "0.9.13",
+      "bytes": 190877,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "evaluate: Error: require('@codemirror/view') is not available in Lumen's sandbox",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "obsidian.__esModule",
+        "require(@codemirror/view)"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "calendar",
+      "name": "Calendar",
+      "version": "1.5.10",
+      "bytes": 141494,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "loads",
+      "reason": "settings tab: TypeError: not a function",
+      "commands": 3,
+      "commandsOk": 1,
+      "missing": [],
+      "statusSpikeLimits": "loads"
+    },
+    {
+      "id": "calendar-bases",
+      "name": "Calendar Bases",
+      "version": "0.2.8",
+      "bytes": 431498,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "evaluate: TypeError: cannot read property 'cssRules' of undefined",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "HTMLElement.oninput",
+        "HTMLElement.sheet"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "cm-editor-syntax-highlight-obsidian",
+      "name": "Editor Syntax Highlight",
+      "version": "0.1.3",
+      "bytes": 4298096,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "evaluate: ReferenceError: 'CodeMirror' is not defined",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "cmdr",
+      "name": "Commander",
+      "version": "0.5.4",
+      "bytes": 140094,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "works",
+      "reason": "",
+      "commands": 1,
+      "commandsOk": 1,
+      "missing": [
+        "HTMLElement.__k",
+        "HTMLElement.l",
+        "HTMLElement.ownerSVGElement",
+        "app.statusBar"
+      ],
+      "statusSpikeLimits": "works"
+    },
+    {
+      "id": "cooklang-viewer-and-editor",
+      "name": "Cooklang",
+      "version": "0.1.0",
+      "bytes": 475924,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "works",
+      "reason": "",
+      "commands": 3,
+      "commandsOk": 3,
+      "missing": [],
+      "statusSpikeLimits": "works"
+    },
+    {
+      "id": "customjs",
+      "name": "CustomJS",
+      "version": "1.0.12",
+      "bytes": 23490,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "loads",
+      "reason": "adds nothing runnable",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [],
+      "statusSpikeLimits": "loads"
+    },
+    {
+      "id": "darlal-switcher-plus",
+      "name": "Quick Switcher++",
+      "version": "2.0.4",
+      "bytes": 247842,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "loads",
+      "reason": "settings tab: TypeError: cannot read property 'viewByType' of undefined",
+      "commands": 8,
+      "commandsOk": 8,
+      "missing": [
+        "app.viewRegistry"
+      ],
+      "statusSpikeLimits": "loads"
+    },
+    {
+      "id": "dataview",
+      "name": "Dataview",
+      "version": "0.5.41",
+      "bytes": 2341578,
+      "license": "MIT",
+      "licenseSource": "LICENSE of the plugin's source repository, on disk (blacksmithgu/obsidian-dataview)",
+      "status": "fails",
+      "reason": "onload: ReferenceError: 'atob' is not defined",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "doc-preview",
+      "name": "Doc Preview",
+      "version": "1.0.15",
+      "bytes": 2175847,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "evaluate: Error: require('child_process') is not available in Lumen's sandbox",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "require(child_process)"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "dynamic-outline",
+      "name": "Dynamic Outline",
+      "version": "1.19.0",
+      "bytes": 37499,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "loads",
+      "reason": "1/1 commands failed: toggle-dynamic-outline: TypeError: not a function",
+      "commands": 1,
+      "commandsOk": 0,
+      "missing": [
+        "HTMLElement.isConnected"
+      ],
+      "statusSpikeLimits": "loads"
+    },
+    {
+      "id": "editing-toolbar",
+      "name": "Editing Toolbar",
+      "version": "4.1.10",
+      "bytes": 830296,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "evaluate: Error: require('@codemirror/language') is not available in Lumen's sandbox",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "require(@codemirror/language)"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "file-explorer-note-count",
+      "name": "File Explorer Note Count",
+      "version": "1.2.4",
+      "bytes": 33586,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "loads",
+      "reason": "adds nothing runnable",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [],
+      "statusSpikeLimits": "loads"
+    },
+    {
+      "id": "file-explorer-plus",
+      "name": "File Explorer++",
+      "version": "1.3.1",
+      "bytes": 117561,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "loads",
+      "reason": "2/4 commands failed: toggle-global-pin-filters: TypeError: not a function",
+      "commands": 4,
+      "commandsOk": 2,
+      "missing": [],
+      "statusSpikeLimits": "loads"
+    },
+    {
+      "id": "folder-notes",
+      "name": "Folder notes",
+      "version": "1.8.26",
+      "bytes": 331723,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "loads",
+      "reason": "1/15 commands failed: create-folder-note: Error: renaming files is not available to Obsidian plugins in Lumen",
+      "commands": 15,
+      "commandsOk": 14,
+      "missing": [],
+      "statusSpikeLimits": "loads"
+    },
+    {
+      "id": "frontmatter-links",
+      "name": "Frontmatter Links",
+      "version": "1.2.7",
+      "bytes": 59386,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "evaluate: Error: require('@codemirror/language') is not available in Lumen's sandbox",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "require(@codemirror/language)"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "frontmatter-modified-date",
+      "name": "Update modified date",
+      "version": "1.5.2",
+      "bytes": 14120,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "evaluate: Error: require('@codemirror/view') is not available in Lumen's sandbox",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "require(@codemirror/view)"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "graph-banner",
+      "name": "Graph Banner",
+      "version": "2.3.0",
+      "bytes": 9914,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "loads",
+      "reason": "adds nothing runnable",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [],
+      "statusSpikeLimits": "loads"
+    },
+    {
+      "id": "heatmap-calendar",
+      "name": "Heatmap Calendar",
+      "version": "0.7.1",
+      "bytes": 15963,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "loads",
+      "reason": "adds nothing runnable",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [],
+      "statusSpikeLimits": "loads"
+    },
+    {
+      "id": "highlightr-plugin",
+      "name": "Highlightr",
+      "version": "1.2.2",
+      "bytes": 149585,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "onload: ReferenceError: 'addEventListener' is not defined",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "document.getElementsByTagName"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "homepage",
+      "name": "Homepage",
+      "version": "4.4.0",
+      "bytes": 59582,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "evaluate: TypeError: parent class must be constructor",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "obsidian.SettingGroup"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "hot-reload",
+      "name": "Hot Reload",
+      "version": "0.1.8",
+      "bytes": 4294,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "evaluate: Error: require('fs') is not available in Lumen's sandbox",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "require(fs)"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "hotkeysplus-obsidian",
+      "name": "Hotkeys++",
+      "version": "0.2.7",
+      "bytes": 55917,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "loads",
+      "reason": "1/11 commands failed: toggle-readable-length: TypeError: not a function",
+      "commands": 11,
+      "commandsOk": 10,
+      "missing": [
+        "app.vault.setConfig"
+      ],
+      "statusSpikeLimits": "loads"
+    },
+    {
+      "id": "image-converter",
+      "name": "Image Converter",
+      "version": "1.4.3",
+      "bytes": 2732974,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "evaluate: Error: require('path') is not available in Lumen's sandbox",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "require(path)"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "journals",
+      "name": "Journals",
+      "version": "3.6.0",
+      "bytes": 2345919,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "load: plugin obsidian.journals failed to load: SyntaxError: invalid escape sequence in regular expression",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "js-engine",
+      "name": "JS Engine",
+      "version": "0.3.3",
+      "bytes": 246352,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "load: plugin obsidian.js-engine failed to load: InternalError: unconsistent stack size: 2 3 (pc=191)",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "local-media-embedder",
+      "name": "Local Media Embedder",
+      "version": "0.1.4",
+      "bytes": 122444,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "evaluate: Error: require('fs') is not available in Lumen's sandbox",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "require(fs)"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "longform",
+      "name": "Longform",
+      "version": "2.0.1",
+      "bytes": 1186910,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "loads",
+      "reason": "1/13 commands failed: longform-show-view: TypeError: not a function",
+      "commands": 13,
+      "commandsOk": 12,
+      "missing": [],
+      "statusSpikeLimits": "loads"
+    },
+    {
+      "id": "meld-calc",
+      "name": "Meld Calc",
+      "version": "1.0.2",
+      "bytes": 1025277,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "works",
+      "reason": "",
+      "commands": 1,
+      "commandsOk": 1,
+      "missing": [],
+      "statusSpikeLimits": "works"
+    },
+    {
+      "id": "metadata-menu",
+      "name": "Metadata Menu",
+      "version": "0.8.11",
+      "bytes": 1003048,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "evaluate: Error: require('@codemirror/state') is not available in Lumen's sandbox",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "require(@codemirror/state)"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "metaedit",
+      "name": "MetaEdit",
+      "version": "1.8.4",
+      "bytes": 175358,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "evaluate: Error: require('fs') is not available in Lumen's sandbox",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "require(fs)"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "obsidian-admonition",
+      "name": "Admonition",
+      "version": "9.0.3",
+      "bytes": 1356575,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "works",
+      "reason": "",
+      "commands": 4,
+      "commandsOk": 4,
+      "missing": [
+        "HTMLElement.doScroll",
+        "document.readyState",
+        "obsidian.__esModule"
+      ],
+      "statusSpikeLimits": "works"
+    },
+    {
+      "id": "obsidian-banners",
+      "name": "Banners",
+      "version": "1.3.3",
+      "bytes": 150580,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "evaluate: Error: require('@codemirror/view') is not available in Lumen's sandbox",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "obsidian.__esModule",
+        "require(@codemirror/view)"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "obsidian-contextual-typography",
+      "name": "Contextual Typography",
+      "version": "2.2.5",
+      "bytes": 16526,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "works",
+      "reason": "",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [],
+      "statusSpikeLimits": "works"
+    },
+    {
+      "id": "obsidian-dynamic-toc",
+      "name": "Dynamic Table of Contents",
+      "version": "0.0.27",
+      "bytes": 10738,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "works",
+      "reason": "",
+      "commands": 1,
+      "commandsOk": 1,
+      "missing": [
+        "obsidian.__esModule"
+      ],
+      "statusSpikeLimits": "works"
+    },
+    {
+      "id": "obsidian-excalidraw-plugin",
+      "name": "Excalidraw",
+      "version": "1.7.8",
+      "bytes": 2058257,
+      "license": "AGPL-3.0",
+      "licenseSource": "LICENSE of the plugin's source repository, on disk (zsviczian/obsidian-excalidraw-plugin)",
+      "status": "fails",
+      "reason": "timed out while loading",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "obsidian-excel-to-markdown-table",
+      "name": "Excel to Markdown Table",
+      "version": "0.4.0",
+      "bytes": 7657,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "works",
+      "reason": "",
+      "commands": 1,
+      "commandsOk": 1,
+      "missing": [
+        "obsidian.__esModule"
+      ],
+      "statusSpikeLimits": "works"
+    },
+    {
+      "id": "obsidian-icon-folder",
+      "name": "Iconize",
+      "version": "2.14.7",
+      "bytes": 408344,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "evaluate: Error: require('@codemirror/view') is not available in Lumen's sandbox",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "require(@codemirror/view)"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "obsidian-image-toolkit",
+      "name": "Image Toolkit",
+      "version": "1.4.3",
+      "bytes": 149421,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "evaluate: Error: require('crypto') is not available in Lumen's sandbox",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "require(crypto)"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "obsidian-jupyter",
+      "name": "Jupyter plugin",
+      "version": "0.8.1",
+      "bytes": 288670,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "evaluate: Error: require('child_process') is not available in Lumen's sandbox",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "require(child_process)"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "obsidian-kanban",
+      "name": "Kanban",
+      "version": "1.3.11",
+      "bytes": 692392,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "onload: TypeError: not a function",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "app.commands.executeCommand",
+        "app.workspace.registerHoverLinkSource",
+        "obsidian.__esModule"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "obsidian-latex",
+      "name": "Extended MathJax",
+      "version": "0.3.0",
+      "bytes": 32417,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "onload: ReferenceError: 'MathJax' is not defined",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "obsidian-meta-bind-plugin",
+      "name": "Meta Bind",
+      "version": "1.4.6",
+      "bytes": 1322824,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "load: plugin obsidian.obsidian-meta-bind-plugin failed to load: InternalError: unconsistent stack size: 2 3 (pc=150)",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "obsidian-minimal-settings",
+      "name": "Minimal Theme Settings",
+      "version": "8.2.1",
+      "bytes": 31816,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "onload: TypeError: not a function",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "document.getElementsByTagName"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "obsidian-reminder-plugin",
+      "name": "Reminder",
+      "version": "1.1.12",
+      "bytes": 1472538,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "evaluate: Error: require('@codemirror/state') is not available in Lumen's sandbox",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "require(@codemirror/state)"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "obsidian-show-file-path",
+      "name": "Show Current File Path",
+      "version": "0.5.2",
+      "bytes": 40690,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "evaluate: Error: require('path') is not available in Lumen's sandbox",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "require(path)"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "obsidian-sortable",
+      "name": "Sortable",
+      "version": "0.3.1",
+      "bytes": 17997,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "loads",
+      "reason": "adds nothing runnable",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [],
+      "statusSpikeLimits": "loads"
+    },
+    {
+      "id": "obsidian-style-settings",
+      "name": "Style Settings",
+      "version": "1.0.9",
+      "bytes": 154579,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "onload: TypeError: not a function",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "document.getElementsByTagName"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "obsidian-tasks-plugin",
+      "name": "Tasks",
+      "version": "1.11.0",
+      "bytes": 303542,
+      "license": "MIT",
+      "licenseSource": "licence header inside the bundle (main.js)",
+      "status": "fails",
+      "reason": "evaluate: Error: require('@codemirror/view') is not available in Lumen's sandbox",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "require(@codemirror/view)"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "obsidian-zotero-desktop-connector",
+      "name": "Zotero Integration",
+      "version": "3.2.1",
+      "bytes": 1000466,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "evaluate: Error: require('node:process'): unknown module",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "require(node:process)"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "omnisearch",
+      "name": "Omnisearch",
+      "version": "1.32.0",
+      "bytes": 726856,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "load: plugin obsidian.omnisearch failed to load: SyntaxError: invalid property name",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "open-vscode",
+      "name": "Open vault in VS Code",
+      "version": "1.4.2",
+      "bytes": 8233,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "evaluate: Error: require('child_process') is not available in Lumen's sandbox",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "require(child_process)"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "oz-clear-unused-images",
+      "name": "Clear Unused Images",
+      "version": "1.1.1",
+      "bytes": 8158,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "works",
+      "reason": "",
+      "commands": 2,
+      "commandsOk": 2,
+      "missing": [],
+      "statusSpikeLimits": "works"
+    },
+    {
+      "id": "oz-image-plugin",
+      "name": "Ozan's Image in Editor Plugin",
+      "version": "2.1.3",
+      "bytes": 151912,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "evaluate: Error: require('@codemirror/state') is not available in Lumen's sandbox",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "obsidian.__esModule",
+        "require(@codemirror/state)"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "pdf-plus",
+      "name": "PDF++",
+      "version": "0.40.31",
+      "bytes": 1088824,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "evaluate: TypeError: out-of-bound numeric index",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "periodic-notes",
+      "name": "Periodic Notes",
+      "version": "0.0.17",
+      "bytes": 180561,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "loads",
+      "reason": "settings tab: TypeError: not a function",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "app.commands.removeCommand"
+      ],
+      "statusSpikeLimits": "loads"
+    },
+    {
+      "id": "pexels-banner",
+      "name": "Pixel Banner",
+      "version": "3.6.18",
+      "bytes": 1140599,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "loads",
+      "reason": "settings tab: TypeError: cannot set property 'type' of null",
+      "commands": 10,
+      "commandsOk": 10,
+      "missing": [],
+      "statusSpikeLimits": "loads"
+    },
+    {
+      "id": "quick-latex",
+      "name": "Quick Latex for Obsidian",
+      "version": "2.3.3",
+      "bytes": 286602,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "evaluate: Error: require('@codemirror/state') is not available in Lumen's sandbox",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "require(@codemirror/state)"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "quickadd",
+      "name": "QuickAdd",
+      "version": "2.12.0",
+      "bytes": 4264859,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "loads",
+      "reason": "settings tab: TypeError: cannot read property 'getElementById' of undefined",
+      "commands": 3,
+      "commandsOk": 3,
+      "missing": [
+        "app.secretStorage",
+        "obsidian.SettingGroup",
+        "obsidian.__esModule"
+      ],
+      "statusSpikeLimits": "loads"
+    },
+    {
+      "id": "recent-files-obsidian",
+      "name": "Recent Files",
+      "version": "1.7.6",
+      "bytes": 54513,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "onload: TypeError: not a function",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "app.workspace.registerHoverLinkSource"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "scales-chords",
+      "name": "Scales and Chords",
+      "version": "1.0.1",
+      "bytes": 38984,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "works",
+      "reason": "",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [],
+      "statusSpikeLimits": "works"
+    },
+    {
+      "id": "simple-canvasearch",
+      "name": "Simple CanvaSearch",
+      "version": "1.0.2",
+      "bytes": 6577,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "works",
+      "reason": "",
+      "commands": 1,
+      "commandsOk": 1,
+      "missing": [],
+      "statusSpikeLimits": "works"
+    },
+    {
+      "id": "table-editor-obsidian",
+      "name": "Advanced Tables",
+      "version": "0.17.3",
+      "bytes": 2770600,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "evaluate: Error: require('@codemirror/state') is not available in Lumen's sandbox",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "require(@codemirror/state)"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "tag-many",
+      "name": "TagMany",
+      "version": "0.2.7",
+      "bytes": 3364,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "loads",
+      "reason": "adds nothing runnable",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [],
+      "statusSpikeLimits": "loads"
+    },
+    {
+      "id": "tag-wrangler",
+      "name": "Tag Wrangler",
+      "version": "0.5.3",
+      "bytes": 1059157,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "onload: TypeError: not a function",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "document.on"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "tasknotes",
+      "name": "TaskNotes",
+      "version": "4.16.0",
+      "bytes": 4347563,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "load: plugin obsidian.tasknotes failed to load: SyntaxError: invalid escape sequence in regular expression",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "templater-obsidian",
+      "name": "Templater",
+      "version": "1.12.0",
+      "bytes": 221826,
+      "license": "AGPL-3.0",
+      "licenseSource": "LICENSE of the plugin's source repository, on disk (SilentVoid13/Templater)",
+      "status": "fails",
+      "reason": "evaluate: Error: require('child_process') is not available in Lumen's sandbox",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "obsidian.__esModule",
+        "require(child_process)"
+      ],
+      "statusSpikeLimits": "fails"
+    },
+    {
+      "id": "text-extractor",
+      "name": "Text Extractor",
+      "version": "0.7.0",
+      "bytes": 3037723,
+      "license": "unverified",
+      "licenseSource": "not checked: no licence file ships with an installed plugin, and the network to GitHub was refused here",
+      "status": "fails",
+      "reason": "evaluate: Error: require('os') is not available in Lumen's sandbox",
+      "commands": 0,
+      "commandsOk": 0,
+      "missing": [
+        "require(os)"
+      ],
+      "statusSpikeLimits": "fails"
+    }
+  ],
+  "summary": {
+    "total": 71,
+    "works": 10,
+    "loads": 17,
+    "fails": 44,
+    "mit": {
+      "total": 2,
+      "works": 0,
+      "loads": 0,
+      "fails": 2
+    },
+    "spikeLimits": {
+      "works": 10,
+      "loads": 17,
+      "fails": 44
+    }
+  }
+}

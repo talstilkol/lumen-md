@@ -1,0 +1,8 @@
+{
+  "name": "lumen-obsidian-shim",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Spike (W13.L3): Obsidian's plugin API over Lumen's sandboxed plugin API, to measure which Obsidian plugins could run in Lumen. A porting aid, not a product feature.",
+  "license": "MIT",
+  "type": "module"
+}
