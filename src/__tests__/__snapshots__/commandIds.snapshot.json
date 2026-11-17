@@ -2257,6 +2257,13 @@
       "icon": "Download"
     },
     {
+      "id": "writing.coach",
+      "label": "Writing: Clarity & Style Coach",
+      "group": "Tools",
+      "hint": "Long sentences, passives, action nouns, hedges and wordy phrases, on this device",
+      "icon": "Sparkles"
+    },
+    {
       "id": "writing.proofreadHe",
       "label": "Writing: Hebrew Proofreading",
       "group": "Tools",
@@ -4688,6 +4695,13 @@
       "icon": "Download"
     },
     {
+      "id": "writing.coach",
+      "label": "Writing: Clarity & Style Coach",
+      "group": "Tools",
+      "hint": "Long sentences, passives, action nouns, hedges and wordy phrases, on this device",
+      "icon": "Sparkles"
+    },
+    {
       "id": "writing.proofreadHe",
       "label": "Writing: Hebrew Proofreading",
       "group": "Tools",
@@ -5048,6 +5062,7 @@
     "spell.yiddishDictionary",
     "academic.choose",
     "academic.ics",
+    "writing.coach",
     "writing.proofreadHe",
     "writing.panel",
     "types.page",

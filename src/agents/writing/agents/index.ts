@@ -4,3 +4,4 @@
  * and the eval suite see it.
  */
 export { proofreaderHe, PROOFREADER_HE_ID } from "./proofreaderHe";
+export { styleCoach, coachRules, STYLE_COACH_ID } from "./styleCoach";
