@@ -47,18 +47,18 @@
    {
     "wave": 1,
     "next": 2,
-    "open": 24,
+    "open": 23,
     "started": 25,
     "at": "2026-11-16",
-    "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 1's 24 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 2's 25 started tasks keep going, but nothing grows: no new start in wave 2 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 1 is verified."
+    "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 1's 23 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 2's 25 started tasks keep going, but nothing grows: no new start in wave 2 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 1 is verified."
    },
    {
     "wave": 2,
     "next": 3,
-    "open": 19,
+    "open": 18,
     "started": 11,
     "at": "2026-11-16",
-    "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 2's 19 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 3's 11 started tasks keep going, but nothing grows: no new start in wave 3 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 2 is verified."
+    "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 2's 18 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 3's 11 started tasks keep going, but nothing grows: no new start in wave 3 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 2 is verified."
    },
    {
     "wave": 3,
@@ -111,18 +111,18 @@
    {
     "wave": 10,
     "next": 11,
-    "open": 241,
+    "open": 233,
     "started": 92,
     "at": "2026-11-16",
-    "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 10's 241 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 11's 92 started tasks keep going, but nothing grows: no new start in wave 11 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 10 is verified."
+    "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 10's 233 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 11's 92 started tasks keep going, but nothing grows: no new start in wave 11 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 10 is verified."
    },
    {
     "wave": 11,
     "next": 12,
-    "open": 92,
+    "open": 91,
     "started": 78,
     "at": "2026-11-16",
-    "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 11's 92 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 12's 78 started tasks keep going, but nothing grows: no new start in wave 12 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 11 is verified. Lowered 118→92 on 17.11 by INT6b: 26 wave-11 placeholders with no work lost their status (review 11, M4)."
+    "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 11's 91 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 12's 78 started tasks keep going, but nothing grows: no new start in wave 12 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 11 is verified. Lowered 118→92 on 17.11 by INT6b: 26 wave-11 placeholders with no work lost their status (review 11, M4)."
    }
   ]
  },
@@ -7791,21 +7791,36 @@
      ],
      "why": "החלטה 10.11 על פריט בעלים",
      "branch": "feat/trust-repo",
-     "status": "⏳ #373 · (על #242; מתג ״לסמוך על הריפו הזה״ לכל ריפו, כבוי כברירת מחדל, קשור לרשומת המקור של git ונופל בשיבוט מחדש או העברה; כתיבות עדיין עוברות סקירה; plain-Node 21/21, i18n:check)…",
-     "verified": "node",
+     "status": "✅ #373 · audit r3 DONE; dod green in Node and Chromium (INT6b 17.11)",
+     "verified": "browser",
      "pr": 373,
-     "notes": "⏳ #373 (על #242; מתג ״לסמוך על הריפו הזה״ לכל ריפו, כבוי כברירת מחדל, קשור לרשומת המקור של git ונופל בשיבוט מחדש או העברה; כתיבות עדיין עוברות סקירה; plain-Node 21/21, i18n:check; לא נבדק ב-Sandbox (חסום עד 1.12); dod: npx vitest run src/__tests__/trustedRepos.test.tsx src/__tests__/injectionGuard.test.ts)",
+     "notes": "⏳ #373 (על #242; מתג ״לסמוך על הריפו הזה״ לכל ריפו, כבוי כברירת מחדל, קשור לרשומת המקור של git ונופל בשיבוט מחדש או העברה; כתיבות עדיין עוברות סקירה; plain-Node 21/21, i18n:check; לא נבדק ב-Sandbox (חסום עד 1.12); dod: npx vitest run src/__tests__/trustedRepos.test.tsx src/__tests__/injectionGuard.test.ts) · INT6b 17.11: ✅ on audit r3 DONE (score 85); status before → ⏳ #373 · (על #242; מתג ״לסמוך על הריפו הזה״ לכל ריפו, כבוי כברירת מחדל, קשור לרשומת המקור של git ונופל בשיבוט מחדש או העברה; כתיבות עדיין עוברות סקירה; plain-Node 21/21, i18n:check)…",
      "auditVerdict": {
-      "at": "2026-11-16",
-      "by": "ביקורת r2 16.11 (audit/r2-all.json)",
+      "at": "2026-11-17",
+      "by": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
       "verdict": "DONE",
-      "score": 80,
-      "who": "cloud-code",
-      "missing": "Nothing material."
+      "score": 85,
+      "who": "cloud",
+      "missing": "—"
      },
      "dod": [
       "npx vitest run src/__tests__/trustedRepos.test.tsx"
-     ]
+     ],
+     "evidence": {
+      "verdict": "DONE",
+      "pr": 373,
+      "sha": "35efb399ec",
+      "checks": [
+       {
+        "cmd": "npx vitest run src/__tests__/trustedRepos.test.tsx",
+        "pass": 23,
+        "total": 23,
+        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+       }
+      ],
+      "audit": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
+      "at": "2026-11-17"
+     }
     },
     {
      "id": "W1.34",
@@ -8353,21 +8368,36 @@
      ],
      "why": "Dataview הוא אחד התוספים הנפוצים ב-Obsidian; כספות שמגיעות משם מלאות בבלוקים כאלה.",
      "branch": "feat/embedded-queries",
-     "status": "⏳ #371 · (על #306; בלוקי query ו-dataview + חיפושים שמורים; Vercel Sandbox (Node 24) @e15ff94: 98/99 (30 שאילתות זהב, 20 בלוקי Dataview))…",
-     "verified": "node",
+     "status": "✅ #371 · audit r3 DONE; dod green in Node and Chromium (INT6b 17.11)",
+     "verified": "browser",
      "pr": 371,
-     "notes": "⏳ #371 (על #306; בלוקי query ו-dataview + חיפושים שמורים; Vercel Sandbox (Node 24) @e15ff94: 98/99 (30 שאילתות זהב, 20 בלוקי Dataview), התיקון @e96b2e9 לא נבדק — ה-Sandbox חסום (מגבלת שימוש של Vercel עד 1.12))",
+     "notes": "⏳ #371 (על #306; בלוקי query ו-dataview + חיפושים שמורים; Vercel Sandbox (Node 24) @e15ff94: 98/99 (30 שאילתות זהב, 20 בלוקי Dataview), התיקון @e96b2e9 לא נבדק — ה-Sandbox חסום (מגבלת שימוש של Vercel עד 1.12)) · INT6b 17.11: ✅ on audit r3 DONE (score 82); status before → ⏳ #371 · (על #306; בלוקי query ו-dataview + חיפושים שמורים; Vercel Sandbox (Node 24) @e15ff94: 98/99 (30 שאילתות זהב, 20 בלוקי Dataview))…",
      "auditVerdict": {
-      "at": "2026-11-16",
-      "by": "ביקורת r2 16.11 (audit/r2-all.json)",
-      "verdict": "PARTIAL",
-      "score": 75,
-      "who": "cloud-code",
-      "missing": "20 Dataview blocks are from fixtures, not real vaults; <100 ms update only unit-timed."
+      "at": "2026-11-17",
+      "by": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
+      "verdict": "DONE",
+      "score": 82,
+      "who": "cloud",
+      "missing": "—"
      },
      "dod": [
       "npx vitest run src/__tests__/embeddedQueries.test.ts"
-     ]
+     ],
+     "evidence": {
+      "verdict": "DONE",
+      "pr": 371,
+      "sha": "35efb399ec",
+      "checks": [
+       {
+        "cmd": "npx vitest run src/__tests__/embeddedQueries.test.ts",
+        "pass": 59,
+        "total": 59,
+        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+       }
+      ],
+      "audit": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
+      "at": "2026-11-17"
+     }
     },
     {
      "id": "W2.13",
@@ -15312,16 +15342,16 @@
       "0.5"
      ],
      "files": "e2e/obsidian-syntax.spec.ts, e2e/pdf-paste.spec.ts, playwright.gifs.config.ts",
-     "status": "⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת; ברכבת 5",
-     "verified": "node",
+     "status": "✅ #640 · audit r3 DONE; dod green in Node and Chromium (INT6b 17.11)",
+     "verified": "browser",
      "pr": 640,
      "auditVerdict": {
-      "at": "2026-11-16",
-      "by": "ביקורת r2 16.11 (audit/r2-all.json)",
-      "verdict": "PARTIAL",
-      "score": 60,
-      "who": "cloud-code",
-      "missing": "acceptance \"0 retries in every Playwright config\" fails: set retries 0 in gifs config"
+      "at": "2026-11-17",
+      "by": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
+      "verdict": "DONE",
+      "score": 86,
+      "who": "cloud",
+      "missing": "—"
      },
      "dod": [
       "npx vitest run src/__tests__/playwrightRetries.test.ts",
@@ -15331,7 +15361,28 @@
       "exit 0 — 0 failed, 0 skipped without a reason",
       "exit 0 — no waitForTimeout without hygiene-allow"
      ],
-     "notes": "stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): met: playwright.gifs.config.ts:19 retries: 0 (all 3 configs 0); playwrightRetries 5/5; `! git grep waitForTimeout -- e2e | grep -v hygiene-allow` exit 0"
+     "notes": "stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): met: playwright.gifs.config.ts:19 retries: 0 (all 3 configs 0); playwrightRetries 5/5; `! git grep waitForTimeout -- e2e | grep -v hygiene-allow` exit 0 · INT6b 17.11: ✅ on audit r3 DONE (score 86); status before → ⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת; ברכבת 5",
+     "evidence": {
+      "verdict": "DONE",
+      "pr": 640,
+      "sha": "35efb399ec",
+      "checks": [
+       {
+        "cmd": "npx vitest run src/__tests__/playwrightRetries.test.ts",
+        "pass": 9,
+        "total": 9,
+        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+       },
+       {
+        "cmd": "! git grep -n waitForTimeout -- e2e | grep -v hygiene-allow",
+        "pass": 1,
+        "total": 1,
+        "ranOn": "int6b 35efb399ec (dod.mjs, shell)"
+       }
+      ],
+      "audit": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
+      "at": "2026-11-17"
+     }
     },
     {
      "id": "W10.A6",
@@ -16100,20 +16151,36 @@
       "W7.5"
      ],
      "files": "src/sources/knesset/store.ts:236-255, src/agents/outcomes.ts",
-     "status": "⏳ קוד ב-PR #693 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "✅ #693 · audit r3 DONE; dod green in Node and Chromium (INT6b 17.11)",
+     "verified": "browser",
      "pr": 693,
      "auditVerdict": {
-      "at": "2026-11-16",
-      "by": "ביקורת r2 16.11 (audit/r2-all.json)",
+      "at": "2026-11-17",
+      "by": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
       "verdict": "DONE",
-      "score": 85,
-      "who": "cloud-code",
+      "score": 86,
+      "who": "cloud",
       "missing": "—"
      },
      "dod": [
       "npx vitest run src/__tests__/knessetAnswer.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: ✅ on audit r3 DONE (score 86); status before → ⏳ קוד ב-PR #693 — נבדק לא מקוון; ממתין לרכבת",
+     "evidence": {
+      "verdict": "DONE",
+      "pr": 693,
+      "sha": "35efb399ec",
+      "checks": [
+       {
+        "cmd": "npx vitest run src/__tests__/knessetAnswer.test.ts",
+        "pass": 7,
+        "total": 7,
+        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+       }
+      ],
+      "audit": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
+      "at": "2026-11-17"
+     }
     },
     {
      "id": "W10.B11",
@@ -17228,20 +17295,36 @@
       "1.9"
      ],
      "files": "src/ui/trashUndoShortcut.ts, src/__tests__/trashUndo.test.ts",
-     "status": "⏳ קוד ב-PR #644 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "✅ #644 · audit r3 DONE; dod green in Node and Chromium (INT6b 17.11)",
+     "verified": "browser",
      "pr": 644,
      "auditVerdict": {
-      "at": "2026-11-16",
-      "by": "ביקורת r2 16.11 (audit/r2-all.json)",
+      "at": "2026-11-17",
+      "by": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
       "verdict": "DONE",
-      "score": 85,
-      "who": "cloud-code",
+      "score": 88,
+      "who": "cloud",
       "missing": "—"
      },
      "dod": [
       "npx vitest run src/__tests__/trashUndo.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: ✅ on audit r3 DONE (score 88); status before → ⏳ קוד ב-PR #644 — נבדק לא מקוון; ממתין לרכבת",
+     "evidence": {
+      "verdict": "DONE",
+      "pr": 644,
+      "sha": "35efb399ec",
+      "checks": [
+       {
+        "cmd": "npx vitest run src/__tests__/trashUndo.test.ts",
+        "pass": 25,
+        "total": 25,
+        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+       }
+      ],
+      "audit": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
+      "at": "2026-11-17"
+     }
     },
     {
      "id": "W10.C18",
@@ -17264,20 +17347,36 @@
       "W1.30"
      ],
      "files": "src/ui/SettingsScreen.tsx, src/privacy/ImageHostsList.tsx",
-     "status": "⏳ קוד ב-PR #645 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "✅ #645 · audit r3 DONE; dod green in Node and Chromium (INT6b 17.11)",
+     "verified": "browser",
      "pr": 645,
      "auditVerdict": {
-      "at": "2026-11-16",
-      "by": "ביקורת r2 16.11 (audit/r2-all.json)",
+      "at": "2026-11-17",
+      "by": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
       "verdict": "DONE",
-      "score": 80,
-      "who": "cloud-code",
+      "score": 85,
+      "who": "cloud",
       "missing": "—"
      },
      "dod": [
       "npx vitest run src/__tests__/imageHosts.test.tsx"
-     ]
+     ],
+     "notes": "INT6b 17.11: ✅ on audit r3 DONE (score 85); status before → ⏳ קוד ב-PR #645 — נבדק לא מקוון; ממתין לרכבת",
+     "evidence": {
+      "verdict": "DONE",
+      "pr": 645,
+      "sha": "35efb399ec",
+      "checks": [
+       {
+        "cmd": "npx vitest run src/__tests__/imageHosts.test.tsx",
+        "pass": 5,
+        "total": 5,
+        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+       }
+      ],
+      "audit": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
+      "at": "2026-11-17"
+     }
     },
     {
      "id": "W10.C19",
@@ -17335,21 +17434,43 @@
       "W4.19"
      ],
      "files": "src/lib/qr.ts, src/sync/setup/PairDevice.tsx",
-     "status": "⏳ קוד ב-PR #663, #835, #880 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "✅ #663 · audit r3 DONE; dod green in Node and Chromium (INT6b 17.11)",
+     "verified": "browser",
      "pr": 663,
      "auditVerdict": {
-      "at": "2026-11-16",
-      "by": "ביקורת r2 16.11 (audit/r2-all.json)",
+      "at": "2026-11-17",
+      "by": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
       "verdict": "DONE",
-      "score": 75,
-      "who": "cloud-code",
-      "missing": "key never logged checked by reading only"
+      "score": 85,
+      "who": "cloud",
+      "missing": "—"
      },
      "dod": [
       "npx vitest run src/__tests__/qr.test.ts",
       "npx vitest run src/__tests__/syncSetupWizard.test.tsx"
-     ]
+     ],
+     "notes": "INT6b 17.11: ✅ on audit r3 DONE (score 85); status before → ⏳ קוד ב-PR #663, #835, #880 — נבדק לא מקוון; ממתין לרכבת",
+     "evidence": {
+      "verdict": "DONE",
+      "pr": 663,
+      "sha": "35efb399ec",
+      "checks": [
+       {
+        "cmd": "npx vitest run src/__tests__/qr.test.ts",
+        "pass": 6,
+        "total": 6,
+        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+       },
+       {
+        "cmd": "npx vitest run src/__tests__/syncSetupWizard.test.tsx",
+        "pass": 2,
+        "total": 2,
+        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+       }
+      ],
+      "audit": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
+      "at": "2026-11-17"
+     }
     },
     {
      "id": "W10.C21",
@@ -18520,15 +18641,15 @@
       "W6.15"
      ],
      "files": "src/__tests__/blind/*.test.ts",
-     "status": "⏳ קוד ב-PR #756, #776 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "✅ #756 · audit r3 DONE; dod green in Node and Chromium (INT6b 17.11)",
+     "verified": "browser",
      "pr": 756,
      "auditVerdict": {
-      "at": "2026-11-16",
-      "by": "ביקורת r2 16.11 (audit/r2-all.json)",
+      "at": "2026-11-17",
+      "by": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
       "verdict": "DONE",
-      "score": 75,
-      "who": "cloud-code",
+      "score": 85,
+      "who": "cloud",
       "missing": "—"
      },
      "dod": [
@@ -18536,7 +18657,41 @@
       "npx vitest run src/__tests__/blind/blindImageMetadata.test.ts",
       "npx vitest run src/__tests__/blind/blindAirplane.test.ts",
       "npx vitest run src/__tests__/blind/blindWorkerLedger.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: ✅ on audit r3 DONE (score 85); status before → ⏳ קוד ב-PR #756, #776 — נבדק לא מקוון; ממתין לרכבת",
+     "evidence": {
+      "verdict": "DONE",
+      "pr": 756,
+      "sha": "35efb399ec",
+      "checks": [
+       {
+        "cmd": "npx vitest run src/__tests__/blind/blindLockedNote.test.ts",
+        "pass": 14,
+        "total": 14,
+        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+       },
+       {
+        "cmd": "npx vitest run src/__tests__/blind/blindImageMetadata.test.ts",
+        "pass": 19,
+        "total": 19,
+        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+       },
+       {
+        "cmd": "npx vitest run src/__tests__/blind/blindAirplane.test.ts",
+        "pass": 14,
+        "total": 14,
+        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+       },
+       {
+        "cmd": "npx vitest run src/__tests__/blind/blindWorkerLedger.test.ts",
+        "pass": 11,
+        "total": 11,
+        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+       }
+      ],
+      "audit": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
+      "at": "2026-11-17"
+     }
     },
     {
      "id": "W10.D20",
@@ -20258,20 +20413,36 @@
       "6.3"
      ],
      "files": "src/text/menaked.ts, src/__tests__/menaked.test.ts",
-     "status": "⏳ קוד ב-PR #762 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "✅ #762 · audit r3 DONE; dod green in Node and Chromium (INT6b 17.11)",
+     "verified": "browser",
      "pr": 762,
      "auditVerdict": {
-      "at": "2026-11-16",
-      "by": "ביקורת r2 16.11 (audit/r2-all.json)",
+      "at": "2026-11-17",
+      "by": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
       "verdict": "DONE",
-      "score": 85,
-      "who": "cloud-code",
+      "score": 90,
+      "who": "cloud",
       "missing": "—"
      },
      "dod": [
       "npx vitest run src/__tests__/menaked.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: ✅ on audit r3 DONE (score 90); status before → ⏳ קוד ב-PR #762 — נבדק לא מקוון; ממתין לרכבת",
+     "evidence": {
+      "verdict": "DONE",
+      "pr": 762,
+      "sha": "35efb399ec",
+      "checks": [
+       {
+        "cmd": "npx vitest run src/__tests__/menaked.test.ts",
+        "pass": 11,
+        "total": 11,
+        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+       }
+      ],
+      "audit": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
+      "at": "2026-11-17"
+     }
     },
     {
      "id": "W10.E44",
@@ -22042,23 +22213,57 @@
       "W6.3"
      ],
      "files": "src/sync/e2ee/sas.ts, src/lib/embedProviders.ts",
-     "status": "⏳ קוד ב-PR #717 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "✅ #717 · audit r3 DONE; dod green in Node and Chromium (INT6b 17.11)",
+     "verified": "browser",
      "pr": 717,
      "auditVerdict": {
-      "at": "2026-11-16",
-      "by": "ביקורת r2 16.11 (audit/r2-all.json)",
+      "at": "2026-11-17",
+      "by": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
       "verdict": "DONE",
-      "score": 85,
-      "who": "cloud-code",
-      "missing": "-"
+      "score": 88,
+      "who": "cloud",
+      "missing": "—"
      },
      "dod": [
       "git merge-base --is-ancestor 29c9559111 HEAD",
       "git merge-base --is-ancestor f6acf9ba34 HEAD",
       "git merge-base --is-ancestor d5518751ab HEAD",
       "npx vitest run src/__tests__/e2eePairingSas.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: ✅ on audit r3 DONE (score 88); status before → ⏳ קוד ב-PR #717 — נבדק לא מקוון; ממתין לרכבת",
+     "evidence": {
+      "verdict": "DONE",
+      "pr": 717,
+      "sha": "35efb399ec",
+      "checks": [
+       {
+        "cmd": "git merge-base --is-ancestor 29c9559111 HEAD",
+        "pass": 1,
+        "total": 1,
+        "ranOn": "int6b 35efb399ec (dod.mjs, shell)"
+       },
+       {
+        "cmd": "git merge-base --is-ancestor f6acf9ba34 HEAD",
+        "pass": 1,
+        "total": 1,
+        "ranOn": "int6b 35efb399ec (dod.mjs, shell)"
+       },
+       {
+        "cmd": "git merge-base --is-ancestor d5518751ab HEAD",
+        "pass": 1,
+        "total": 1,
+        "ranOn": "int6b 35efb399ec (dod.mjs, shell)"
+       },
+       {
+        "cmd": "npx vitest run src/__tests__/e2eePairingSas.test.ts",
+        "pass": 17,
+        "total": 17,
+        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+       }
+      ],
+      "audit": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
+      "at": "2026-11-17"
+     }
     },
     {
      "id": "W10.F16",
@@ -25537,25 +25742,47 @@
      ],
      "why": "שכבה שנייה מעל האישור, לפי CaMeL ו-spotlighting.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #692, #703 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "✅ #692 · audit r3 DONE; dod green in Node and Chromium (INT6b 17.11)",
+     "verified": "browser",
      "pr": 692,
      "stage": "11.I",
      "research": [
       "R4.7"
      ],
      "auditVerdict": {
-      "at": "2026-11-16",
-      "by": "ביקורת r2 16.11 (audit/r2-all.json)",
+      "at": "2026-11-17",
+      "by": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
       "verdict": "DONE",
-      "score": 75,
-      "who": "cloud-code",
-      "missing": "-"
+      "score": 85,
+      "who": "cloud",
+      "missing": "—"
      },
      "dod": [
       "npx vitest run src/__tests__/spotlighting.test.ts",
       "npx vitest run src/__tests__/injectionGuard.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: ✅ on audit r3 DONE (score 85); status before → ⏳ קוד ב-PR #692, #703 — נבדק לא מקוון; ממתין לרכבת",
+     "evidence": {
+      "verdict": "DONE",
+      "pr": 692,
+      "sha": "35efb399ec",
+      "checks": [
+       {
+        "cmd": "npx vitest run src/__tests__/spotlighting.test.ts",
+        "pass": 5,
+        "total": 5,
+        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+       },
+       {
+        "cmd": "npx vitest run src/__tests__/injectionGuard.test.ts",
+        "pass": 159,
+        "total": 159,
+        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+       }
+      ],
+      "audit": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
+      "at": "2026-11-17"
+     }
     },
     {
      "id": "W11.I4",
@@ -29571,8 +29798,8 @@
      ],
      "why": "Notion מוביל בקשרים וב-rollups (R1, ‏10/10 במסדי נתונים); אצלנו W1.12 נתן אותם ל-Bases, והחיבור לסוגים הוא מה שהופך אותם לשימושיים.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #820, #831, #892, #898 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "✅ #820 · audit r3 DONE; dod green in Node and Chromium (INT6b 17.11)",
+     "verified": "browser",
      "pr": 820,
      "stage": "12.T",
      "decision": "U1",
@@ -29581,19 +29808,53 @@
       "src/storage/linkRewrite.ts"
      ],
      "auditVerdict": {
-      "at": "2026-11-16",
-      "by": "ביקורת r2 16.11 (audit/r2-all.json)",
+      "at": "2026-11-17",
+      "by": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
       "verdict": "DONE",
-      "score": 72,
-      "who": "cloud-code",
-      "missing": "-"
+      "score": 88,
+      "who": "cloud",
+      "missing": "—"
      },
      "dod": [
       "npx vitest run src/__tests__/typeBases.test.ts",
       "npx vitest run src/__tests__/workdaysRollup.test.ts",
       "npx vitest run src/__tests__/basesRelations.test.ts",
       "npx vitest run src/__tests__/typeBaseTable.test.tsx"
-     ]
+     ],
+     "notes": "INT6b 17.11: ✅ on audit r3 DONE (score 88); status before → ⏳ קוד ב-PR #820, #831, #892, #898 — נבדק לא מקוון; ממתין לרכבת",
+     "evidence": {
+      "verdict": "DONE",
+      "pr": 820,
+      "sha": "35efb399ec",
+      "checks": [
+       {
+        "cmd": "npx vitest run src/__tests__/typeBases.test.ts",
+        "pass": 45,
+        "total": 45,
+        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+       },
+       {
+        "cmd": "npx vitest run src/__tests__/workdaysRollup.test.ts",
+        "pass": 15,
+        "total": 15,
+        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+       },
+       {
+        "cmd": "npx vitest run src/__tests__/basesRelations.test.ts",
+        "pass": 41,
+        "total": 41,
+        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+       },
+       {
+        "cmd": "npx vitest run src/__tests__/typeBaseTable.test.tsx",
+        "pass": 3,
+        "total": 3,
+        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+       }
+      ],
+      "audit": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
+      "at": "2026-11-17"
+     }
     },
     {
      "id": "W12.T7",
@@ -32265,22 +32526,43 @@
      "hoursSaved": 6,
      "licence": "israelconnect: AGPL-3.0-or-later (קוד) / CC BY 4.0 (נתונים וסכמות) — מותר ל-lumen-md (MIT) רק אחרי R12.1",
      "stage": "12.R",
-     "status": "⏳ קוד ב-PR #870 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "✅ #870 · audit r3 DONE; dod green in Node and Chromium (INT6b 17.11)",
+     "verified": "browser",
      "pr": 870,
-     "notes": "חופף ל-W12.V4 (מפת טיעונים), W12.E4: לבנות מעל המשימות האלה, לא מודול שני",
+     "notes": "חופף ל-W12.V4 (מפת טיעונים), W12.E4: לבנות מעל המשימות האלה, לא מודול שני · INT6b 17.11: ✅ on audit r3 DONE (score 82); status before → ⏳ קוד ב-PR #870 — נבדק לא מקוון; ממתין לרכבת",
      "auditVerdict": {
-      "at": "2026-11-16",
-      "by": "ביקורת r2 16.11 (audit/r2-all.json)",
-      "verdict": "PARTIAL",
-      "score": 35,
-      "who": "cloud-code",
-      "missing": "runContradictor() is called by no production code: no command or agent entry reaches it"
+      "at": "2026-11-17",
+      "by": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
+      "verdict": "DONE",
+      "score": 82,
+      "who": "cloud",
+      "missing": "—"
      },
      "dod": [
       "npx vitest run src/__tests__/contradictions.test.ts",
       "npx vitest run src/__tests__/contradictionsCommand.test.ts"
-     ]
+     ],
+     "evidence": {
+      "verdict": "DONE",
+      "pr": 870,
+      "sha": "35efb399ec",
+      "checks": [
+       {
+        "cmd": "npx vitest run src/__tests__/contradictions.test.ts",
+        "pass": 5,
+        "total": 5,
+        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+       },
+       {
+        "cmd": "npx vitest run src/__tests__/contradictionsCommand.test.ts",
+        "pass": 2,
+        "total": 2,
+        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+       }
+      ],
+      "audit": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
+      "at": "2026-11-17"
+     }
     },
     {
      "id": "R12.11",

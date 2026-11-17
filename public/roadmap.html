@@ -6,7 +6,7 @@
     <title>Lumen — מפת דרכים</title>
     <meta name="description" content="מפת הדרכים הפתוחה של Lumen: מה הושלם, מה בעבודה ומה מתוכנן. Lumen's open roadmap, generated from plan/plan.json." />
     <meta property="og:title" content="Lumen — מפת דרכים" />
-    <meta property="og:description" content="16 מתוך 950 משימות הושלמו." />
+    <meta property="og:description" content="29 מתוך 950 משימות הושלמו." />
     <meta name="theme-color" content="#0c0f17" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <style>
@@ -40,7 +40,7 @@
       .links a.primary { background: var(--accent); color: #0c0f17; border-color: transparent; font-weight: 600; }
       main { max-width: 1100px; margin: 0 auto; padding: 24px 16px 40px; }
       .progress { height: 8px; border-radius: 999px; background: var(--bg-card); overflow: hidden; margin: 6px 0 18px; }
-      .progress span { display: block; height: 100%; background: var(--done); inline-size: 2%; }
+      .progress span { display: block; height: 100%; background: var(--done); inline-size: 3%; }
       .legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; color: var(--fg-mute); margin-block-end: 24px; }
       .dot { display: inline-block; inline-size: 9px; block-size: 9px; border-radius: 50%; margin-inline-end: 6px; vertical-align: middle; }
       .dot.done { background: var(--done); } .dot.partial { background: var(--partial); } .dot.planned { background: var(--planned); }
@@ -61,15 +61,15 @@
   <body>
     <section class="hero">
       <h1>Lumen — מפת דרכים</h1>
-      <p>950 משימות ב-29 שלבים: <span style="color: var(--done)">16 הושלמו</span>, <span style="color: var(--partial)">759 בעבודה</span>, <span style="color: var(--planned)">175 מתוכננות</span>. מתעדכן מ-<code>plan/plan.json</code> בכל שינוי בתוכנית (עודכן ב׳ 16.11 13:05).</p>
-      <p class="en">Lumen's open roadmap — 16 of 950 tasks done. Titles and status only; the full plan with its measured acceptance criteria is in the repository.</p>
+      <p>950 משימות ב-29 שלבים: <span style="color: var(--done)">29 הושלמו</span>, <span style="color: var(--partial)">746 בעבודה</span>, <span style="color: var(--planned)">175 מתוכננות</span>. מתעדכן מ-<code>plan/plan.json</code> בכל שינוי בתוכנית (עודכן ב׳ 16.11 13:05).</p>
+      <p class="en">Lumen's open roadmap — 29 of 950 tasks done. Titles and status only; the full plan with its measured acceptance criteria is in the repository.</p>
       <div class="links">
         <a class="primary" href="/">לעורך</a>
         <a href="https://github.com/talstilkol/lumen-md" target="_blank" rel="noopener">GitHub</a>
       </div>
     </section>
     <main>
-      <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="950" aria-valuenow="16" aria-label="משימות שהושלמו"><span></span></div>
+      <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="950" aria-valuenow="29" aria-label="משימות שהושלמו"><span></span></div>
       <div class="legend" role="list">
         <div role="listitem"><span class="dot done"></span>הושלם — PR עם CI ירוק</div>
         <div role="listitem"><span class="dot partial"></span>בעבודה — נבנה, המדידה עוד פתוחה</div>
@@ -272,7 +272,7 @@
 ["W1.30","partial","מסך שרתי תמונות מותרים עם ביטול ״תמיד לאפשר״"],
 ["W1.31","partial","window.__lumen.agentReview רק בפיתוח ובבדיקות"],
 ["W1.32","partial","סבב ניקוי P2 שנשארו פתוחים (15.16 סעיף 11)"],
-["W1.33","partial","מתג ״לסמוך על הריפו הזה״ לכתיבות סוכן בריפו משוכפל"],
+["W1.33","done","מתג ״לסמוך על הריפו הזה״ לכתיבות סוכן בריפו משוכפל"],
 ["W1.34","partial","webR כהורדה ביוזמת המשתמש — בלי בינארי GPL בבנייה"],
 ["W1.35","partial","השערים בלי GitHub Actions: בניית ה-preview של Vercel מריצה את כל הבדיקות"],
 ["W1.36","partial","ליבת Excalidraw קטנה יותר והורדת כלל התקציב שלה ל-700"]]],
@@ -288,7 +288,7 @@
 ["W2.9","partial","טיפוגרפיה עברית אוטומטית"],
 ["W2.10","partial","לוח עברי מלא: חגים ופרשות בלי ספריות GPL"],
 ["W2.11","partial","חיפוש עברי עם מורפולוגיה והרחבת שאילתה"],
-["W2.12","partial","שאילתות מוטמעות וחיפושים שמורים"],
+["W2.12","done","שאילתות מוטמעות וחיפושים שמורים"],
 ["W2.13","partial","מצב מתאר ופעולות בלוק על Markdown רגיל"],
 ["W2.14","partial","פרשן קיצוץ על מודל מקומי ותבניות לאתרים עבריים"],
 ["W2.15","partial","ייבוא הדגשות מ-Kindle, Kobo, Readwise ו-Zotero"],
@@ -483,7 +483,7 @@
 ["W10.A2","partial","בדיקות שקוראות את he.json שנמחק: עוזר אחד שקורא את locales/he/*.json"],
 ["W10.A3","partial","Frank Ruhl Libre: עיגון ניקוד נכשל — לתקן או להוציא את הגופן ממצב ״ניקוד מעוגן״"],
 ["W10.A4","partial","שאר הבדיקות האדומות האמיתיות: קרדיט המילון, respectfulMessages ו-bookEpub"],
-["W10.A5","partial","hygiene: שתי קריאות waitForTimeout ו-retries 1 בקונפיג ה-GIF"],
+["W10.A5","done","hygiene: שתי קריאות waitForTimeout ו-retries 1 בקונפיג ה-GIF"],
 ["W10.A6","partial","skipAudit אדום: 248 שורות דילוג בלי skip-reason ב-src/__tests__/blind"],
 ["W10.A7","partial","catch ריקים חלק 1: App.tsx, ‏src/ui, ‏a11y — 50 בלי why"],
 ["W10.A8","partial","catch ריקים חלק 2: lib, ‏ai, ‏storage, ‏sync והשאר — codeHealth ירוק"],
@@ -502,7 +502,7 @@
 ["W10.B7","partial","W2.7: ״DER \u003c 5%״ נמדד מול fakeOrt — לשנות שם ולהכין מדידת DER אמיתית ל-Mac"],
 ["W10.B8","partial","W5.3: probe הדקדוק נוצר מאותן תבניות כמו הכללים — לתייג ככיסוי כללים"],
 ["W10.B9","partial","W5.3: לחבר את מדרג הדקדוק (registerGrammarRanker) לנתיב שנשלח"],
-["W10.B10","partial","W7.5: ״verified״ של ״שאל את החוק״ תמיד true — להפסיק לקרוא לזה אימות"],
+["W10.B10","done","W7.5: ״verified״ של ״שאל את החוק״ תמיד true — להפסיק לקרוא לזה אימות"],
 ["W10.B11","partial","W7.16: ״gold CER 0%״ משווה את הזהב לעצמו — לבדוק את הפלט האמיתי"],
 ["W10.B12","partial","סטטוסים כנים בתוכנית: 12 ✅ שהביקורת לא אישרה יורדים ל-⏳ עם הסבר"],
 ["W10.B13","partial","תווית origin לכל סט זהב ו-fixture: סינתטי או אמיתי"],
@@ -532,10 +532,10 @@
 ["W10.C14","partial","כספת בטלפון: @capacitor/filesystem ורישום LumenVaultFolderPlugin ב-Android"],
 ["W10.C15","partial","גיבוי ל-WebDAV מהממשק (providerTarget)"],
 ["W10.C16","partial","סוכן הארגון: לחבר setOrganizerModel למודל מקומי ולמבקר 5.6"],
-["W10.C17","partial","Ctrl+Z בקנבס: ה-selector של Excalidraw במקום .tl-container"],
-["W10.C18","partial","שרתי תמונות מותרים בהגדרות > פרטיות"],
+["W10.C17","done","Ctrl+Z בקנבס: ה-selector של Excalidraw במקום .tl-container"],
+["W10.C18","done","שרתי תמונות מותרים בהגדרות > פרטיות"],
 ["W10.C19","partial","אשף הסנכרון: Google Drive ו-Dropbox (הקוד קיים)"],
-["W10.C20","partial","QR למפתח הסנכרון (מקודד QR משלנו, בלי חבילה)"],
+["W10.C20","done","QR למפתח הסנכרון (מקודד QR משלנו, בלי חבילה)"],
 ["W10.C21","partial","פלט מובנה (W7.14): לחבר לתגיות, תאריכים וסיווג"],
 ["W10.C22","partial","צילום מסך לפתק: הדבקה וקיצור"],
 ["W10.C23","partial","הסתרת שמות (2.6): גיבוי כשאין מודל NER מומר, ורשומת NER לאנגלית"],
@@ -565,7 +565,7 @@
 ["W10.D16","partial","קריאות רשת בלי הערה ביומן הפרטיות: 86 → 43"],
 ["W10.D17","partial","קריאות רשת בלי הערה: 43 → 0, ושער Vercel נפרד"],
 ["W10.D18","partial","בדיקות עיוורות: keyring, ‏engine, ‏manifest, ‏header"],
-["W10.D19","partial","בדיקות עיוורות: lockedNote, ‏imageMetadata, ‏airplane, ‏workerLedger"],
+["W10.D19","done","בדיקות עיוורות: lockedNote, ‏imageMetadata, ‏airplane, ‏workerLedger"],
 ["W10.D20","partial","pr:check: אסור snapshot שנערך ביד"],
 ["W10.D21","partial","fuzz: 7 קלטי Markdown איטיים ו-sourcemaps שמשתחזרים"],
 ["W10.D22","partial","ledger בכל ה-workers (dictation, ‏piper, ‏nikud, ‏hebrewSpell, ‏ruby, ‏python)"],
@@ -611,7 +611,7 @@
 ["W10.E40","partial","W4.33 תרגיל נתונים על הקוד שנשלח, לא על מימוש מחדש ב-Node"],
 ["W10.E41","partial","W1.18 OCR: סדר מילים בעמודות 85% → 95%"],
 ["W10.E42","partial","W2.5 ניקוד חלקי: רק שמות עצם / רק פעלים"],
-["W10.E43","partial","6.3 בדיקה למנקד שלב 2 (menaked.ts)"],
+["W10.E43","done","6.3 בדיקה למנקד שלב 2 (menaked.ts)"],
 ["W10.E44","partial","W2.19 סנכרון ברשת המקומית: 1,000 סבבים, 0 אובדן, \u003c 2s"],
 ["W10.E45","partial","W2.19 mDNS במובייל"],
 ["W10.E46","partial","W3.3 חזרה מרווחת בתוך הפתק היומי, ו-harness מוכן ל-fixture של ts-fsrs"],
@@ -660,7 +660,7 @@
 ["W10.F12","partial","W4.9 ‏(startup 218 KB) ברכבת"],
 ["W10.F13","partial","W6.16 ריצת vitest mutation השבועית"],
 ["W10.F14","partial","בסיס רכבת 6: ‏verify/train-5 המקומי (20 commits עד) נדחף ונבדק"],
-["W10.F15","partial","SAS ו-embedProviders לרכבת"],
+["W10.F15","done","SAS ו-embedProviders לרכבת"],
 ["W10.F16","partial","(embeddings, פלט מובנה, speculative) לרכבת"],
 ["W10.F17","partial","‏(lockfile drift ו-lane state) לרכבת — 9 קונפליקטים"],
 ["W10.F18","partial","W8.12 על רכבת 6 — 7 קונפליקטים"],
@@ -741,7 +741,7 @@
 ["W11.H18","partial","תמלול יידיש בשולחן העבודה: רישום ivrit-ai/yi-whisper-large-v3-turbo"],
 ["W11.I1","partial","שער ״seam חי״: אין export של register*/set* בלי קורא מחוץ לבדיקות"],
 ["W11.I2","partial","עקרון השניים ב-runtime: סשן נגוע, ואישור לכל קריאה של כלי כתיבה או יציאה לרשת"],
-["W11.I3","partial","spotlighting ו-plan-then-execute: סימון קטעים לא אמינים לפני הפרומפט, ורשימת כלים קבועה למיומנויות"],
+["W11.I3","done","spotlighting ו-plan-then-execute: סימון קטעים לא אמינים לפני הפרומפט, ורשימת כלים קבועה למיומנויות"],
 ["W11.I4","partial","AgentDojo על משטח הכלים של Lumen: סוויטות workspace ו-slack, ועוד התקפה אדפטיבית"],
 ["W11.I5","partial","לקוח MCP לפי המפרט: כותרות Mcp-Method/Mcp-Name, ‏_meta, נעיצת הגדרות כלים והיקפי אישור"],
 ["W11.I6","partial","elicitation לפי ה-MUST של המפרט: ‏MRTR input_required ← דיאלוג"],
@@ -845,7 +845,7 @@
 ["W12.T3","partial","Base אוטומטי לכל סוג: טבלה, כרטיסים ולוח kanban שנוצרים מהסכמה"],
 ["W12.T4","partial","סוגים ב-MCP וב-CLI: ‏list_types, ‏get_type ו-create_object דרך מסך האישור"],
 ["W12.T5","partial","Bases מול Obsidian 1.14/1.15: ‏kanban, כרטיסים עם תמונת שער, וגרירת סדר מסננים — לפי דפי העזרה"],
-["W12.T6","partial","קשרים ו-rollups בין סוגים: שדה relation→סוג, קשר הפוך אוטומטי ו-rollup לפי שדה"],
+["W12.T6","done","קשרים ו-rollups בין סוגים: שדה relation→סוג, קשר הפוך אוטומטי ו-rollup לפי שדה"],
 ["W12.T7","partial","ייבוא מסד נתונים מ-Notion לסוג ול-.base: קשרים ו-rollups נשמרים"],
 ["W12.E1","partial","גרף ישויות, חלק 1: מודל נתונים — ישות, קשר מוקלד ומקור לכל קשת"],
 ["W12.E2","partial","גרף ישויות, חלק 2: חילוץ ישויות — ‏DictaBERT-NER לעברית, ‏GLiNER לאנגלית, וכללים לתאריכים, חוקים ופסוקים"],
@@ -914,7 +914,7 @@
 ["R12.7","partial","ציר זמן לישות ולתיק, ובודק זמנים: תאריך בלתי אפשרי, תפקידים חופפים וסדר סותר"],
 ["R12.8","partial","תצוגות גרף: Sankey של זרימות, גרף אגו כברירת מחדל, כרטיס טענה, ״למה הקשת הזו כאן״ ו-Leiden אינקרמנטלי"],
 ["R12.9","partial","שער ציטוטים לסוכן המחקר: כל משפט קשור לציטוט מעוגן (פתק, offset, hash) — או נמחק"],
-["R12.10","partial","סוכן ״גרסה אחרת״: מוצא בכספת הכחשה, סתירה או תיקון לטענה — עם הציטוט המדויק, כמועמד"],
+["R12.10","done","סוכן ״גרסה אחרת״: מוצא בכספת הכחשה, סתירה או תיקון לטענה — עם הציטוט המדויק, כמועמד"],
 ["R12.11","partial","חילוץ טענות שאפשר לבדוק (Claimify/VeriScore) מתוך פתק, כל טענה עם ציטוט"],
 ["R12.12","partial","ci-doctor מקומי: חתימת כשל (Drain), מאגר שגיאות ידועות, סיווג flaky, מציאת הקומיט האשם ומסנן פלט"],
 ["R12.13","partial","חכירות קבצים לסשנים מקבילים ו-hook לפני commit, וכללי קונפליקט לפי סוג קובץ"],
