@@ -190,6 +190,8 @@
   "ai.settings.ollama.unreachable": "تعذّر الوصول إلى Ollama. ثبّته واسمح لهذا الموقع: OLLAMA_ORIGINS=https://lumen-md.vercel.app",
   "ai.settings.ollama.url": "العنوان",
   "ai.settings.recheck": "تحقق مجددًا",
+  "ai.settings.referenceStyle": "References",
+  "ai.settings.referenceStyle.hint": "The style of the reference list at the end of a research answer: APA 7, Chicago (author-date) or MLA 9.",
   "ai.settings.research": "البحث",
   "ai.settings.researchToken": "رمز البحث (RESEARCH_TOKEN)",
   "ai.settings.researchToken.placeholder": "الرمز المشترك، إذا طلبته خدمة البحث",

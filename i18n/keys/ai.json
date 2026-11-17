@@ -1055,6 +1055,16 @@
       "vars": []
     },
     {
+      "key": "ai.settings.referenceStyle",
+      "en": "References",
+      "vars": []
+    },
+    {
+      "key": "ai.settings.referenceStyle.hint",
+      "en": "The style of the reference list at the end of a research answer: APA 7, Chicago (author-date) or MLA 9.",
+      "vars": []
+    },
+    {
       "key": "ai.settings.research",
       "en": "Research",
       "vars": []

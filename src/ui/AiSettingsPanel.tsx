@@ -18,6 +18,8 @@ import { t } from "../i18n";
 import { ollamaLicenceNotice } from "../ai/modelCatalog";
 import { getSecret } from "../lib/secretStore";
 import { RESEARCH_SERVICE_TOKEN } from "../research/client";
+import { CITATION_STYLES, type CitationStyle } from "../data/citationStyles";
+import { researchReferenceStyle, setResearchReferenceStyle } from "../research/references";
 import type { AgentRun, ExecutorId } from "../agents/types";
 import type { AiPolicy } from "../ai/policy";
 import type { Hardware } from "../ai/modelManager";
@@ -109,6 +111,7 @@ export function AiSettingsPanel({ open, onClose, embedded = false }: Props) {
   const [grammarUrl, setGrammarUrl] = useState("");
   const [researchUrl, setResearchUrl] = useState("");
   const [researchToken, setResearchToken] = useState("");
+  const [refStyle, setRefStyle] = useState<CitationStyle>(researchReferenceStyle);
   /** The token as loaded: an unchanged token isn't moved to a new endpoint. */
   const loadedToken = useRef("");
   const [endpointError, setEndpointError] = useState("");
@@ -195,6 +198,7 @@ export function AiSettingsPanel({ open, onClose, embedded = false }: Props) {
       setOllamaModel(ls("lumen.ollama.model") || getOllamaConfigModel());
       setGrammarUrl(ls("lumen.grammar.endpoint") || grammarEndpoint());
       setResearchUrl(ls("lumen.research.endpoint"));
+      setRefStyle(researchReferenceStyle());
       const saved = getSecret(RESEARCH_SERVICE_TOKEN) ?? "";
       loadedToken.current = saved;
       setResearchToken(saved);
@@ -368,6 +372,12 @@ export function AiSettingsPanel({ open, onClose, embedded = false }: Props) {
     setResearchToken(kept);
     const { clearGrammarCache } = await import("../ai/grammar");
     clearGrammarCache();
+    flash();
+  };
+
+  const changeRefStyle = (style: CitationStyle) => {
+    setResearchReferenceStyle(style);
+    setRefStyle(style);
     flash();
   };
 
@@ -633,6 +643,15 @@ export function AiSettingsPanel({ open, onClose, embedded = false }: Props) {
                 placeholder={t("ai.settings.researchToken.placeholder")}
               />
             </label>
+            <label style={row}>
+              <span style={{ minWidth: 90 }}>{t("ai.settings.referenceStyle")}</span>
+              <select style={input} value={refStyle} onChange={(e) => changeRefStyle(e.target.value as CitationStyle)} data-testid="ai-set-reference-style">
+                {CITATION_STYLES.map((s) => (
+                  <option key={s.id} value={s.id}>{s.label}</option>
+                ))}
+              </select>
+            </label>
+            <div style={muted}>{t("ai.settings.referenceStyle.hint")}</div>
             <div style={muted}>{t("ai.settings.endpoints.hint")}</div>
             {endpointError && (
               <div role="alert" style={{ fontSize: 12, color: "hsl(var(--danger, 0 72% 51%))" }}>

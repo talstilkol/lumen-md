@@ -190,6 +190,8 @@
   "ai.settings.ollama.unreachable": "无法连接 Ollama。请安装并允许本站点：OLLAMA_ORIGINS=https://lumen-md.vercel.app",
   "ai.settings.ollama.url": "地址",
   "ai.settings.recheck": "重新检查",
+  "ai.settings.referenceStyle": "References",
+  "ai.settings.referenceStyle.hint": "The style of the reference list at the end of a research answer: APA 7, Chicago (author-date) or MLA 9.",
   "ai.settings.research": "研究",
   "ai.settings.researchToken": "研究令牌（RESEARCH_TOKEN）",
   "ai.settings.researchToken.placeholder": "研究服务要求时使用的共享令牌",

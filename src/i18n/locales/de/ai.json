@@ -190,6 +190,8 @@
   "ai.settings.ollama.unreachable": "Ollama ist nicht erreichbar. Installieren und diese Seite erlauben: OLLAMA_ORIGINS=https://lumen-md.vercel.app",
   "ai.settings.ollama.url": "Adresse",
   "ai.settings.recheck": "Erneut prüfen",
+  "ai.settings.referenceStyle": "References",
+  "ai.settings.referenceStyle.hint": "The style of the reference list at the end of a research answer: APA 7, Chicago (author-date) or MLA 9.",
   "ai.settings.research": "Recherche",
   "ai.settings.researchToken": "Recherche-Token (RESEARCH_TOKEN)",
   "ai.settings.researchToken.placeholder": "Gemeinsames Token, falls der Recherchedienst eines verlangt",

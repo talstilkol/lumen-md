@@ -15,7 +15,8 @@
  *
  * Caps: sources and answer length; every model call is in the run's trace.
  */
-import { answerLang, referenceSection } from "./references";
+import { answerLang, referenceSection, researchReferenceStyle } from "./references";
+import type { CitationStyle } from "../data/citationStyles";
 import { anthropicWebResearch, type CitedBlock } from "../ai/anthropicProvider";
 import { getActiveProvider, getProviderKey, parseJsonResponse } from "../ai/llm";
 import { recordUsage } from "../ai/usage";
@@ -34,6 +35,8 @@ export interface ResearchOptions {
   maxSources?: number;
   /** Search requests — default 4 (proxy) / 5 (Claude). */
   maxSearches?: number;
+  /** The reference list's style (APA 7 / Chicago author-date / MLA 9); default: the user's setting (researchReferenceStyle). */
+  referenceStyle?: CitationStyle;
   /** Injected for tests: the research settings (the agent's tools read the service through the runtime's gate). */
   deps?: { settings?: ResearchSettings };
 }
@@ -105,6 +108,7 @@ export function citedBlocksToMarkdown(
   question: string,
   blocks: readonly CitedBlock[],
   now = new Date(),
+  style: CitationStyle = researchReferenceStyle(),
 ): { markdown: string; sources: number; unverified: number } {
   let unverified = 0;
   const ids = new Map<string, number>(); // url + quote → footnote number
@@ -143,8 +147,8 @@ export function citedBlocksToMarkdown(
     "",
     body.trim(),
     "",
-    // W10.E38: the reference list (APA by default), every cited page once.
-    ...referenceSection(blocks.flatMap((b) => b.citations), "apa", answerLang(question)),
+    // W10.E38: the reference list in the user's style (APA 7 by default), every cited page once.
+    ...referenceSection(blocks.flatMap((b) => b.citations), style, answerLang(question)),
     ...defs,
     "",
   ].join("\n");
@@ -169,7 +173,7 @@ async function claudeResearch(o: ResearchOptions): Promise<ResearchResult> {
       onUsage: (u) => recordUsage({ ...u, provider: "anthropic" }),
     },
   );
-  const { markdown, sources, unverified } = citedBlocksToMarkdown(o.question, blocks);
+  const { markdown, sources, unverified } = citedBlocksToMarkdown(o.question, blocks, new Date(), o.referenceStyle ?? researchReferenceStyle());
   // An answer without web citations isn't research (Claude answered from memory).
   if (!sources) throw new Error("Claude answered without citing any web source — try again or rephrase the question.");
   return { markdown, route: "claude", sources, unverified };
@@ -419,7 +423,7 @@ export async function agentResearch(o: ResearchOptions, settings: ResearchSettin
     kept ? body : lang === "he" ? "_אף משפט בתשובה לא נקשר לציטוט מדויק, ולכן לא מוצג דבר._" : "_No sentence of the answer could be tied to an exact quote, so none is shown._",
     "",
     // W10.E38: the cited web sources as a reference list (a library note is a [[link]], not a reference).
-    ...(mode === "library" ? [] : referenceSection(read.filter((s) => cited.has(s.n)).map((s) => ({ title: s.title, url: s.link })), "apa", answerLang(o.question))),
+    ...(mode === "library" ? [] : referenceSection(read.filter((s) => cited.has(s.n)).map((s) => ({ title: s.title, url: s.link })), o.referenceStyle ?? researchReferenceStyle(), answerLang(o.question))),
     ...(uncited.length ? ["## Also read", "", ...uncited.map((s) => (mode === "library" ? `- ${s.link}` : `- [${s.title}](${s.link})`)), ""] : []),
     ...defs,
     "",
