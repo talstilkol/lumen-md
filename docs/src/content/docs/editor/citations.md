@@ -95,8 +95,10 @@ APA 7. Only the DOI is sent, to `api.crossref.org`, and the request appears in
 the privacy ledger. Under the local-only policy it is blocked, like the other
 research services.
 
-Research answers (**Research: …**) now end with a **References** list in APA 7:
-each web page the answer cites, once. The footnotes with their quotes stay.
+Research answers (**Research: …**) now end with a **References** list: each
+web page the answer cites, once. The footnotes with their quotes stay. The
+list is in APA 7 unless you pick Chicago (author-date) or MLA 9 under
+**AI settings → Research → References**.
 
 ## Pandoc syntax
 

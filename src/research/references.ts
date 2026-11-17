@@ -6,6 +6,31 @@
  */
 import { formatReference, runsToMarkdown, type CitationLang, type CitationStyle } from "../data/citationStyles";
 
+/** The user's style for research answers' reference lists (Settings → AI → Research references). */
+export const REFERENCE_STYLE_KEY = "lumen.research.referenceStyle";
+const STYLES: readonly CitationStyle[] = ["apa", "chicago", "mla"];
+
+/** The chosen reference style; APA 7 when none is set, the value is unknown or storage is unavailable. */
+export function researchReferenceStyle(): CitationStyle {
+  try {
+    const v = localStorage.getItem(REFERENCE_STYLE_KEY) as CitationStyle | null;
+    return v && STYLES.includes(v) ? v : "apa";
+  } catch {
+    return "apa";
+  }
+}
+
+/** Store the style (an unknown value is refused); "apa", the default, is stored as no value. */
+export function setResearchReferenceStyle(style: CitationStyle): void {
+  if (!STYLES.includes(style)) return;
+  try {
+    if (style === "apa") localStorage.removeItem(REFERENCE_STYLE_KEY);
+    else localStorage.setItem(REFERENCE_STYLE_KEY, style);
+  } catch {
+    /* storage unavailable: the default stays */
+  }
+}
+
 export interface CitedSource {
   title: string;
   url: string;

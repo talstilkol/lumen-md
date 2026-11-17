@@ -7,6 +7,8 @@
   "ai.settings.checking": "Checking…",
   "ai.settings.endpoints": "Local services",
   "ai.settings.endpoints.hint": "Start both with: docker compose -f docker/local-ai.yml up -d. Empty = the default.",
+  "ai.settings.referenceStyle": "References",
+  "ai.settings.referenceStyle.hint": "The style of the reference list at the end of a research answer: APA 7, Chicago (author-date) or MLA 9.",
   "ai.settings.executor.auto": "Automatic (Ollama → in the browser → chat provider)",
   "ai.settings.executor.chat": "Chat provider (follows the policy)",
   "ai.settings.executor.ollama": "Ollama on this computer",

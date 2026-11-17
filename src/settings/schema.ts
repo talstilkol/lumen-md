@@ -161,6 +161,8 @@ export const SETTINGS: readonly SettingEntry[] = [
   local("lumen.grammar.endpoint", { kind: "setting", tab: "ai", label: "ai.settings.grammar", type: "text" }),
   local("lumen.research.endpoint", { kind: "setting", tab: "ai", label: "ai.settings.research", type: "text" }),
   local("lumen.research.provider", { kind: "setting", tab: "ai", type: "text" }),
+  // W10.E38: the style of a research answer's reference list.
+  local("lumen.research.referenceStyle", { kind: "setting", tab: "ai", label: "ai.settings.referenceStyle", type: "choice", options: [{ value: "apa" }, { value: "chicago" }, { value: "mla" }] }),
   // A consent: like the other opt-ins, never taken from an imported file.
   data("lumen.research.webConsent"),
   local("lumen.ai.rerank", { kind: "setting", tab: "ai", label: "cmd.ai.rerankModel", type: "choice", options: [{ value: "off" }, { value: "lexical" }, { value: "model" }] }),

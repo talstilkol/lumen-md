@@ -30,5 +30,23 @@
     "de": "1ii0ct2",
     "ja": "1ii0ct2",
     "zh-CN": "1ii0ct2"
+  },
+  "ai.settings.referenceStyle": {
+    "ar": "1p1yprf",
+    "de": "1p1yprf",
+    "fa": "1p1yprf",
+    "fr": "1p1yprf",
+    "ja": "1p1yprf",
+    "ru": "1p1yprf",
+    "zh-CN": "1p1yprf"
+  },
+  "ai.settings.referenceStyle.hint": {
+    "ar": "1f65m4u",
+    "de": "1f65m4u",
+    "fa": "1f65m4u",
+    "fr": "1f65m4u",
+    "ja": "1f65m4u",
+    "ru": "1f65m4u",
+    "zh-CN": "1f65m4u"
   }
 }
