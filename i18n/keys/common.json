@@ -11912,6 +11912,77 @@
       ]
     },
     {
+      "key": "map.offline.about",
+      "en": "Bring a regional basemap as one .pmtiles file: every map then draws from it, with no request to a tile server, and its labels follow the app's language.",
+      "vars": []
+    },
+    {
+      "key": "map.offline.bad",
+      "en": "Not imported: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "map.offline.import",
+      "en": "Import a .pmtiles file…",
+      "vars": []
+    },
+    {
+      "key": "map.offline.imported",
+      "en": "{name} is the offline map now",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "map.offline.importing",
+      "en": "Copying {name} into the vault…",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "map.offline.none",
+      "en": "No offline map in the vault. Maps use the online tiles (none in airplane mode).",
+      "vars": []
+    },
+    {
+      "key": "map.offline.remove",
+      "en": "Remove",
+      "vars": []
+    },
+    {
+      "key": "map.offline.removed",
+      "en": "Removed {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "map.offline.title",
+      "en": "Offline map",
+      "vars": []
+    },
+    {
+      "key": "map.offline.toggle",
+      "en": "Offline map",
+      "vars": []
+    },
+    {
+      "key": "map.offline.where",
+      "en": "Where to get one: Protomaps publishes the whole world as one file; cut a region with the pmtiles tool, for example:",
+      "vars": []
+    },
+    {
+      "key": "map.offline.zooms",
+      "en": "zoom {min}–{max}",
+      "vars": [
+        "min",
+        "max"
+      ]
+    },
+    {
       "key": "mcpServers.add",
       "en": "Add a server",
       "vars": []

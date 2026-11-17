@@ -1998,6 +1998,114 @@
     "ru": "1m06cjj",
     "zh-CN": "1m06cjj"
   },
+  "map.offline.about": {
+    "ar": "179ijj0",
+    "de": "179ijj0",
+    "fr": "179ijj0",
+    "ja": "179ijj0",
+    "ru": "179ijj0",
+    "zh-CN": "179ijj0",
+    "he": "179ijj0"
+  },
+  "map.offline.bad": {
+    "ar": "1980r1s",
+    "de": "1980r1s",
+    "fr": "1980r1s",
+    "ja": "1980r1s",
+    "ru": "1980r1s",
+    "zh-CN": "1980r1s",
+    "he": "1980r1s"
+  },
+  "map.offline.import": {
+    "ar": "upv3fz",
+    "de": "upv3fz",
+    "fr": "upv3fz",
+    "ja": "upv3fz",
+    "ru": "upv3fz",
+    "zh-CN": "upv3fz",
+    "he": "upv3fz"
+  },
+  "map.offline.imported": {
+    "ar": "mvg1r6",
+    "de": "mvg1r6",
+    "fr": "mvg1r6",
+    "ja": "mvg1r6",
+    "ru": "mvg1r6",
+    "zh-CN": "mvg1r6",
+    "he": "mvg1r6"
+  },
+  "map.offline.importing": {
+    "ar": "yhvo28",
+    "de": "yhvo28",
+    "fr": "yhvo28",
+    "ja": "yhvo28",
+    "ru": "yhvo28",
+    "zh-CN": "yhvo28",
+    "he": "yhvo28"
+  },
+  "map.offline.none": {
+    "ar": "t05ewh",
+    "de": "t05ewh",
+    "fr": "t05ewh",
+    "ja": "t05ewh",
+    "ru": "t05ewh",
+    "zh-CN": "t05ewh",
+    "he": "t05ewh"
+  },
+  "map.offline.remove": {
+    "ar": "9c35st",
+    "de": "9c35st",
+    "fr": "9c35st",
+    "ja": "9c35st",
+    "ru": "9c35st",
+    "zh-CN": "9c35st",
+    "he": "9c35st"
+  },
+  "map.offline.removed": {
+    "ar": "eo8z4",
+    "de": "eo8z4",
+    "fr": "eo8z4",
+    "ja": "eo8z4",
+    "ru": "eo8z4",
+    "zh-CN": "eo8z4",
+    "he": "eo8z4"
+  },
+  "map.offline.title": {
+    "ar": "19f3mni",
+    "de": "19f3mni",
+    "fr": "19f3mni",
+    "ja": "19f3mni",
+    "ru": "19f3mni",
+    "zh-CN": "19f3mni",
+    "he": "19f3mni"
+  },
+  "map.offline.toggle": {
+    "ar": "19f3mni",
+    "de": "19f3mni",
+    "fr": "19f3mni",
+    "ja": "19f3mni",
+    "ru": "19f3mni",
+    "zh-CN": "19f3mni",
+    "he": "19f3mni"
+  },
+  "map.offline.where": {
+    "ar": "7tu2kt",
+    "de": "7tu2kt",
+    "fr": "7tu2kt",
+    "ja": "7tu2kt",
+    "ru": "7tu2kt",
+    "zh-CN": "7tu2kt",
+    "he": "7tu2kt"
+  },
+  "map.offline.zooms": {
+    "ar": "15i67ub",
+    "de": "15i67ub",
+    "fr": "15i67ub",
+    "ja": "15i67ub",
+    "ru": "15i67ub",
+    "zh-CN": "15i67ub",
+    "he": "15i67ub"
+  },
   "mcpServers.add": {
     "ar": "1df7h82",
     "de": "1df7h82",
