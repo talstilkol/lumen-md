@@ -167,6 +167,22 @@
     "ru": "1wfkeuq",
     "zh-CN": "1wfkeuq"
   },
+  "cmd.writing.argument": {
+    "ar": "ivo2nv",
+    "de": "ivo2nv",
+    "fr": "ivo2nv",
+    "ja": "ivo2nv",
+    "ru": "ivo2nv",
+    "zh-CN": "ivo2nv"
+  },
+  "cmd.writing.argument.hint": {
+    "ar": "1hrlxft",
+    "de": "1hrlxft",
+    "fr": "1hrlxft",
+    "ja": "1hrlxft",
+    "ru": "1hrlxft",
+    "zh-CN": "1hrlxft"
+  },
   "cmd.writing.coach": {
     "ar": "d95pdy",
     "de": "d95pdy",
@@ -183,6 +199,22 @@
     "ru": "gkzm3t",
     "zh-CN": "gkzm3t"
   },
+  "cmd.writing.consistency": {
+    "ar": "cjubm2",
+    "de": "cjubm2",
+    "fr": "cjubm2",
+    "ja": "cjubm2",
+    "ru": "cjubm2",
+    "zh-CN": "cjubm2"
+  },
+  "cmd.writing.consistency.hint": {
+    "ar": "g14d6p",
+    "de": "g14d6p",
+    "fr": "g14d6p",
+    "ja": "g14d6p",
+    "ru": "g14d6p",
+    "zh-CN": "g14d6p"
+  },
   "cmd.writing.expand": {
     "ar": "1g4lfse",
     "de": "1g4lfse",
@@ -198,6 +230,22 @@
     "ja": "1g99fgq",
     "ru": "1g99fgq",
     "zh-CN": "1g99fgq"
+  },
+  "cmd.writing.harper": {
+    "ar": "1cutlg2",
+    "de": "1cutlg2",
+    "fr": "1cutlg2",
+    "ja": "1cutlg2",
+    "ru": "1cutlg2",
+    "zh-CN": "1cutlg2"
+  },
+  "cmd.writing.harper.hint": {
+    "ar": "auaop3",
+    "de": "auaop3",
+    "fr": "auaop3",
+    "ja": "auaop3",
+    "ru": "auaop3",
+    "zh-CN": "auaop3"
   },
   "cmd.writing.panel": {
     "ar": "38e2pt",
@@ -230,6 +278,22 @@
     "ja": "1d2dd7e",
     "ru": "1d2dd7e",
     "zh-CN": "1d2dd7e"
+  },
+  "cmd.writing.readability": {
+    "ar": "1osfmi2",
+    "de": "1osfmi2",
+    "fr": "1osfmi2",
+    "ja": "1osfmi2",
+    "ru": "1osfmi2",
+    "zh-CN": "1osfmi2"
+  },
+  "cmd.writing.readability.hint": {
+    "ar": "142qlz7",
+    "de": "142qlz7",
+    "fr": "142qlz7",
+    "ja": "142qlz7",
+    "ru": "142qlz7",
+    "zh-CN": "142qlz7"
   },
   "cmd.writing.registerHigh": {
     "ar": "tn58fp",
@@ -278,6 +342,22 @@
     "ja": "4i87j1",
     "ru": "4i87j1",
     "zh-CN": "4i87j1"
+  },
+  "cmd.writing.structure": {
+    "ar": "t3xrdh",
+    "de": "t3xrdh",
+    "fr": "t3xrdh",
+    "ja": "t3xrdh",
+    "ru": "t3xrdh",
+    "zh-CN": "t3xrdh"
+  },
+  "cmd.writing.structure.hint": {
+    "ar": "13meg37",
+    "de": "13meg37",
+    "fr": "13meg37",
+    "ja": "13meg37",
+    "ru": "13meg37",
+    "zh-CN": "13meg37"
   },
   "cmd.writing.toneFormal": {
     "ar": "1esfcd3",

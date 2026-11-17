@@ -34,6 +34,7 @@ import { buildJewishLanguageCommands } from "./jewishLanguages";
 import { buildAcademicCommands } from "./academic";
 import { buildWritingCommands } from "./writing";
 import { buildReadingViewCommands } from "./readingViews";
+import { buildWritingCheckCommands } from "./writingChecks";
 
 export const COMMAND_SECTIONS: ReadonlyArray<(ctx: CommandContext) => Command[]> = [
   buildRecentCommands,
@@ -106,4 +107,6 @@ export const COMMAND_SECTIONS: ReadonlyArray<(ctx: CommandContext) => Command[]>
   buildWritingCommands,
   // Appended (plan W13.R7): reading views.
   buildReadingViewCommands,
+  // Appended (plan W13.W6–W10): the local writing checkers.
+  buildWritingCheckCommands,
 ];

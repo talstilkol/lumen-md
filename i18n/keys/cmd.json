@@ -3580,6 +3580,56 @@
       "key": "cmd.view.daf.hint",
       "en": "The note's main text with its commentaries around it, as on a printed daf",
       "vars": []
+    },
+    {
+      "key": "cmd.writing.argument",
+      "en": "Writing: Check the argument",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.argument.hint",
+      "en": "Claims without a source, logical leaps and common fallacies, each with its reason",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.consistency",
+      "en": "Writing: Check the vault's consistency",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.consistency.hint",
+      "en": "Names, dates, numbers and your glossary terms across all notes, against the entity graph — suggestions to review",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.harper",
+      "en": "Writing: English grammar (Harper, on this device)",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.harper.hint",
+      "en": "Local English grammar for the English parts of the note — suggestions to review",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.readability",
+      "en": "Writing: Readability of this note",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.readability.hint",
+      "en": "A Hebrew readability level (Flesch–Kincaid for English) and what raises it",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.structure",
+      "en": "Writing: Review the note's structure",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.structure.hint",
+      "en": "Heading levels, opening and closing, long paragraphs and topic sentences — comments only",
+      "vars": []
     }
   ]
 }

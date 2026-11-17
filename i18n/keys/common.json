@@ -21892,6 +21892,300 @@
       "key": "readingViews.spread.toolbar",
       "en": "Book pages",
       "vars": []
+    },
+    {
+      "key": "writingCheck.band.easy",
+      "en": "easy",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.band.hard",
+      "en": "hard",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.band.medium",
+      "en": "medium",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.count",
+      "en": "{{n}} findings",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "writingCheck.done",
+      "en": "{{staged}} suggested edits to review · {{comments}} comments in the report",
+      "vars": [
+        "staged",
+        "comments"
+      ]
+    },
+    {
+      "key": "writingCheck.failed",
+      "en": "The check failed: {{error}}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "writingCheck.harperMissing",
+      "en": "Harper is not installed in this build; the other English checks still run.",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.kind.ad-hominem",
+      "en": "Ad hominem",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.kind.appeal-to-popularity",
+      "en": "Appeal to popularity",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.kind.duplicate-heading",
+      "en": "Duplicate heading",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.kind.empty-section",
+      "en": "Empty section",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.kind.fact-conflict",
+      "en": "Conflicting facts",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.kind.false-dilemma",
+      "en": "False dilemma",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.kind.foreign-script-name",
+      "en": "Latin name in Hebrew text",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.kind.grammar",
+      "en": "English grammar",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.kind.hasty-generalization",
+      "en": "Hasty generalization",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.kind.heading-skip",
+      "en": "Skipped heading level",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.kind.logical-leap",
+      "en": "Logical leap",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.kind.lone-subheading",
+      "en": "Single subsection",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.kind.long-paragraph",
+      "en": "Long paragraph",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.kind.map-unsupported",
+      "en": "Unsupported in the argument map",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.kind.name-variant",
+      "en": "Name written two ways",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.kind.no-conclusion",
+      "en": "No conclusion",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.kind.no-intro",
+      "en": "No opening",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.kind.post-hoc",
+      "en": "Post hoc",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.kind.slippery-slope",
+      "en": "Slippery slope",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.kind.straw-man",
+      "en": "Straw man",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.kind.term-variant",
+      "en": "Not your glossary term",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.kind.topic-sentence",
+      "en": "No topic sentence",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.kind.unsupported-claim",
+      "en": "Claim without a source",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.noNote",
+      "en": "Open a note with text first.",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.none",
+      "en": "Nothing to suggest.",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.readability.en",
+      "en": "Readability: {{band}} · Flesch–Kincaid grade {{score}} ({{stage}}) — raised most by {{reason}}",
+      "vars": [
+        "band",
+        "score",
+        "stage",
+        "reason"
+      ]
+    },
+    {
+      "key": "writingCheck.readability.he",
+      "en": "Readability: {{band}} · {{score}} of 5 ({{stage}}) — raised most by {{reason}}",
+      "vars": [
+        "band",
+        "score",
+        "stage",
+        "reason"
+      ]
+    },
+    {
+      "key": "writingCheck.reason.ambiguous",
+      "en": "words that are ambiguous without niqqud ({{value}}%)",
+      "vars": [
+        "value"
+      ]
+    },
+    {
+      "key": "writingCheck.reason.none",
+      "en": "nothing stands out",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.reason.rare",
+      "en": "rare words ({{value}}%)",
+      "vars": [
+        "value"
+      ]
+    },
+    {
+      "key": "writingCheck.reason.sentLen",
+      "en": "long sentences ({{value}} words each)",
+      "vars": [
+        "value"
+      ]
+    },
+    {
+      "key": "writingCheck.reason.wordLen",
+      "en": "long words ({{value}} letters a word)",
+      "vars": [
+        "value"
+      ]
+    },
+    {
+      "key": "writingCheck.reasonEn.wordLen",
+      "en": "long words ({{value}} syllables a word)",
+      "vars": [
+        "value"
+      ]
+    },
+    {
+      "key": "writingCheck.running",
+      "en": "Checking…",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.sources",
+      "en": "Sources",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.stage.academic",
+      "en": "academic",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.stage.grade1-2",
+      "en": "grades 1–2",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.stage.grade10-12",
+      "en": "grades 10–12",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.stage.grade3-5",
+      "en": "grades 3–5",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.stage.grade6-9",
+      "en": "grades 6–9",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.stagedLine",
+      "en": "{{n}} suggested edits are waiting in the review panel.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "writingCheck.title.argument",
+      "en": "Argument check",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.title.consistency",
+      "en": "Vault consistency",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.title.harper",
+      "en": "English grammar (Harper)",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.title.structure",
+      "en": "Structure review",
+      "vars": []
+    },
+    {
+      "key": "writingCheck.why",
+      "en": "Why",
+      "vars": []
     }
   ]
 }
