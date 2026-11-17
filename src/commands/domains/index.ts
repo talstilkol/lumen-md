@@ -2,6 +2,8 @@
  * The palette's sections in palette order. Domains interleave because the
  * single-file list did (plan 0.2 kept its order); commandIds.test.ts pins it.
  */
+// F14: the domains' English first, so every builder below finds its labels.
+import "./commandLabelsStrings";
 import type { Command } from "../../ui/CommandPalette";
 import type { CommandContext } from "./context";
 import { buildFileCommands, buildRecentCommands, buildSyncCommands, buildTemplateCommands, buildTaskCommands, buildTrashCommands, buildWorkspaceFileCommands } from "./file";

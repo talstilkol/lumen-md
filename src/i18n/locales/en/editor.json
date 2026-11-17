@@ -166,6 +166,5 @@
   "suggesting.noWysiwyg": "Suggesting mode tracks changes in the source editor, so WYSIWYG is unavailable while it is on — showing Split view instead.",
   "suggesting.untrackable": "That text contains suggestion markup ({++, ++}, ~>, …) and can't be tracked. Turn off suggesting mode to insert it.",
   "writingGoal.done": "🎉 Daily goal reached — {{words}} / {{goal}}",
-  "writingGoal.progress": "{{words}} / {{goal}} words · {{pct}}%",
-  "writingGoal.prompt": "Daily writing goal in words (0 to disable):"
+  "writingGoal.progress": "{{words}} / {{goal}} words · {{pct}}%"
 }

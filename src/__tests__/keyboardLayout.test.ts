@@ -10,6 +10,7 @@ import { activeLayout, matchShortcut, noteTypedKey, resetLayoutMemory, shortcutK
 import { appShortcutFor, formatCombo, SHORTCUTS } from "../lib/shortcuts";
 import { mergeLayoutHits, rankCommands } from "../ui/paletteSearch";
 import { readLocale } from "../../scripts/lib/i18n-files.mjs";
+import { lazyEnglish } from "./helpers/i18nLazy";
 
 /** [typed with the wrong layout, what was meant, the command it should find]. */
 const GOLDEN: Array<[string, string, string]> = [
@@ -70,7 +71,8 @@ function corpus(): Array<{ id: string; label: string; hint?: string; group?: str
   const snap = JSON.parse(readFileSync(join(__dirname, "__snapshots__", "commandIds.snapshot.json"), "utf8")) as { minimal: Array<{ id: string; label: string; hint?: string; group?: string }> };
   // The English and Hebrew bundles, per domain (src/i18n/locales/<lang>/*.json).
   const byValue = new Map<string, string>();
-  for (const [k, v] of Object.entries(readLocale("en"))) if (!byValue.has(v)) byValue.set(v, k);
+  // The palette's English: the startup bundle and the lazy domains (the command labels travel with their chunk, F14).
+  for (const [k, v] of Object.entries({ ...lazyEnglish(), ...readLocale("en") })) if (!byValue.has(v)) byValue.set(v, k);
   const he = readLocale("he");
   const tr = (s?: string) => (s === undefined ? undefined : (he[byValue.get(s) ?? ""] ?? s));
   return [...snap.minimal, ...snap.minimal.map((c) => ({ id: c.id, label: tr(c.label) ?? c.label, hint: tr(c.hint), group: tr(c.group) }))];

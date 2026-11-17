@@ -302,6 +302,8 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "rsvp.json": { module: "reading/rsvpStrings.ts", users: ["ui/RsvpReader.tsx"], prefixes: ["rsvp."] },
   "writingChecksDialog.json": { module: "ui/writingChecksDialogStrings.ts", users: ["ui/WritingChecksDialog.tsx"], prefixes: ["wchk."] },
   "writingGoals.json": { module: "ui/goalsDialogStrings.ts", users: ["ui/GoalsDialog.tsx", "ui/NoteGoalStatus.tsx"], prefixes: ["goal."] },
+  // F14: the labels and toasts only the palette's command domains use; sectionsLoader loads commands/domains/index.ts (which imports the strings first) with a dynamic import.
+  "commandLabels.json": { module: "commands/domains/commandLabelsStrings.ts", users: ["commands/domains/index.ts"], prefixes: ["agent.", "ai.", "batch.", "blockLink.", "clip.", "cmd.", "collab.", "git.", "grammar.", "group.", "sample.", "sources.", "templates.", "toast.", "typstPdf.", "vault.", "writingGoal."] },
   "writingPanel.json": { module: "ui/writingPanelStrings.ts", users: ["commands/domains/writingActions.ts", "ui/WritingSuggestionsPanel.tsx"], prefixes: ["writing."] },
 };
 
