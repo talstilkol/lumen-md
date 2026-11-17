@@ -392,6 +392,29 @@ export const SETTINGS: readonly SettingEntry[] = [
   data("lumen.academic"),
   data("lumen.dict.yi.v1"),
   data("lumen-vault-location"),
+  // Wave g5 (W10.Z5 / W11.Q14): keys the train stored since INT7 that no entry held (settingsSchema red on 6c942c49c8).
+  // Consents and trust decisions: never taken from an imported file (an import must not grant them).
+  data("lumen.map.onlineTiles"),
+  data("lumen.links.allow.v1"),
+  data("lumen.plugins.device-policy"),
+  data("lumen.plugins.policy-keys"),
+  data("lumen.plugins.vaultApproved.v1"),
+  data("lumen.agentOutcomes.share"),
+  data("lumen.agentMemory.readers"),
+  data("lumen.sharedVault.consent.v1.*"),
+  // Device identity and per-device state.
+  data("lumen.presence.vault.v1"),
+  data("lumen.presence.deviceName.v1"),
+  data("lumen.onenote.clientId"),
+  data("lumen-install-id"),
+  // Boot, support and index bookkeeping.
+  data("lumen-boot-sentinel"),
+  data("lumen-safe-mode"),
+  data("lumen-support-notice"),
+  data("lumen-spotlight"),
+  data("lumen-spotlight-indexed"),
+  data("lumen.agentMemory.reads"),
+  data("lumen.agentOutcomes.v1"),
 ];
 
 /** True when `key` is the entry's id, or matches it with `*` as a wildcard. */
