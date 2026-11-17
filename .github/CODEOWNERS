@@ -321,3 +321,6 @@
 /scripts/plan/wipGate.mjs                @talstilkol
 /scripts/plan/auditGuard.mjs             @talstilkol
 /scripts/plan/ledgerRatchet.mjs          @talstilkol
+
+# ── Review 12, L4: the OpenAlex DOI lookup is a network path (codeowners-coverage) ──
+/src/citations/doiOpenAlex.ts            @talstilkol
