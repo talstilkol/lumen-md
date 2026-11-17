@@ -45,6 +45,19 @@ describe("identity: the certificate must be the manifest's GitHub account", () =
     expect(identityMatches({ san: "x", issuer: GITHUB_OAUTH }, "-bad-").ok).toBe(false);
   });
 
+  it("review 14 Low 7: a look-alike prefix before the identity is refused (both patterns are anchored at the start)", () => {
+    for (const san of ["mallory.alice@users.noreply.github.com", "mallory+alice@users.noreply.github.com", "x 1+alice@users.noreply.github.com", "evil@x.example,alice@users.noreply.github.com"]) {
+      expect([san, identityMatches({ san, issuer: GITHUB_OAUTH }, "alice").ok]).toEqual([san, false]);
+    }
+    for (const san of [
+      "https://evil.example/?https://github.com/alice/hello/.github/workflows/release.yml@refs/tags/v1",
+      "xhttps://github.com/alice/hello/.github/workflows/release.yml@refs/tags/v1",
+      "https://github.com/mallory/x/blob/https://github.com/alice/hello/.github/workflows/release.yml@refs/tags/v1",
+    ]) {
+      expect([san, identityMatches({ san, issuer: GITHUB_ACTIONS }, "alice").ok]).toEqual([san, false]);
+    }
+  });
+
   it("the manifest's publisher is validated", () => {
     expect(parseManifest({ schema: 1, id: "org.a.b", name: "n", version: "1.0.0", description: "d", author: "a", license: "MIT", main: "main.js", capabilities: [], publisher: { github: "alice" } }).publisher).toEqual({ github: "alice" });
     expect(() => parseManifest({ schema: 1, id: "org.a.b", name: "n", version: "1.0.0", description: "d", author: "a", license: "MIT", main: "main.js", capabilities: [], publisher: { github: "a b" } })).toThrow(/publisher/);
