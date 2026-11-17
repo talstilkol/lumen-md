@@ -25,6 +25,19 @@ import { mergeOutputs, splitText } from "./runtimeText";
 import { freezeTools, guardUntrustedResult, loadGuard, logTainted, unmarkDelta, unmarkReply } from "./ruleOfTwo";
 import { createRunGuard, stops, type GuardVerdict } from "./runGuard";
 import { isAbort, truncate, type ToolEnv, execTool, modelTools, systemPrompt, inputTextOf, languageMode, sameLanguage, inputKeyOf } from "./runtimeSteps";
+
+/** The agent's memory block, or null (not allowed, no file, or no workspace here). */
+async function agentMemoryFor(agentId: string): Promise<string | null> {
+  try {
+    const m = await import("./memory/agentMemory");
+    if (!m.memoryReaders().has(agentId)) return null;
+    const ws = await import("../storage/workspace");
+    return await m.memoryFor(agentId, async (p) => ((await ws.workspaceHasFile(p)) ? ws.readWorkspaceFile(p) : null));
+  } catch {
+    return null; // why: the memory is optional; a run never fails for it
+  }
+}
+
 export { sameScript, sameLanguage, inputKeyOf } from "./runtimeSteps";
 export { mergeOutputs, splitText } from "./runtimeText";
 
@@ -300,8 +313,10 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     // A model without native tools speaks JSON-ReAct; where the executor can
     // constrain output, every turn is held to the protocol's schema (5.3.5).
     const turnSchema = offered.length && !nativeTools && executor.supportsSchema(model) ? protocolSchema(offered, def.outputSchema) : undefined;
+    // W13.A3: the facts in AGENT-MEMORY.md, only for an agent the user allowed (the file is not read otherwise; each read is logged).
+    const memory = await agentMemoryFor(def.id);
     const messages: ExecutorMessage[] = [
-      { role: "system", content: systemPrompt(def, modelInput, nativeTools, patch) + (toolEnv.taint.length ? `\n\n${guard.UNTRUSTED_NOTICE}` : "") },
+      { role: "system", content: systemPrompt(def, modelInput, nativeTools, patch) + (memory ? `\n\n${memory}` : "") + (toolEnv.taint.length ? `\n\n${guard.UNTRUSTED_NOTICE}` : "") },
       { role: "user", content: def.user(modelInput) + (patch.promptSuffix ? `\n\n${patch.promptSuffix}` : "") },
       ...context,
     ];

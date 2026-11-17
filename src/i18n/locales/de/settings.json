@@ -169,6 +169,7 @@
   "privacy.report.failed": "Bericht konnte nicht exportiert werden: {error}",
   "privacy.staticAssets": "Statische Dateien: {n}",
   "privacy.tab.mcp": "MCP-Clients",
+  "privacy.tab.memory": "Agent memory",
   "privacy.tab.requests": "Netzwerkanfragen",
   "privacy.title": "Datenschutz-Protokoll",
   "runtimeMetrics.clear": "Leeren",

@@ -169,6 +169,7 @@
   "privacy.report.failed": "تعذّر تصدير التقرير: {error}",
   "privacy.staticAssets": "ملفات ثابتة: {n}",
   "privacy.tab.mcp": "عملاء MCP",
+  "privacy.tab.memory": "Agent memory",
   "privacy.tab.requests": "طلبات الشبكة",
   "privacy.title": "سجل الخصوصية",
   "runtimeMetrics.clear": "مسح",

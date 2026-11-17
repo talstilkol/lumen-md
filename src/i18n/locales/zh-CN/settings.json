@@ -169,6 +169,7 @@
   "privacy.report.failed": "无法导出报告：{error}",
   "privacy.staticAssets": "静态文件：{n}",
   "privacy.tab.mcp": "MCP 客户端",
+  "privacy.tab.memory": "Agent memory",
   "privacy.tab.requests": "网络请求",
   "privacy.title": "隐私记录",
   "runtimeMetrics.clear": "清空",

@@ -10,7 +10,7 @@
  * pending list as they are withdrawn.
  */
 
-import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useState } from "react";
 import { FileDiff, X } from "lucide-react";
 import { getLocale, t } from "../i18n";
 import { approveStagedChange, listStagedChanges, onStagedChanges, rejectStagedChange } from "../agents/staging";
@@ -21,6 +21,8 @@ import { HelpButton } from "./HelpButton";
 import { EmptyState, learnHow } from "./EmptyState";
 import { Modal } from "./Modal";
 import { EntityReviewHost } from "./EntityReviewHost";
+// W13.A5: the proposing agent's model card, with its strings and data, in its own chunk.
+const ModelCardToggle = lazy(() => import("./ModelCardToggle"));
 
 interface Props {
   open: boolean;
@@ -173,6 +175,11 @@ function GroupHeader({ group }: { group: RunGroup }) {
         <code style={{ ...muted, ...code, direction: "ltr", unicodeBidi: "isolate" }} title={group.runId}>
           {t("agentReview.run", { run: group.runId.slice(-8) })}
         </code>
+      )}
+      {group.agentId && !group.agentId.startsWith("mcp:") && (
+        <Suspense fallback={null}>
+          <ModelCardToggle agent={group.agentId} runId={group.runId} />
+        </Suspense>
       )}
     </div>
   );

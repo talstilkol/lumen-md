@@ -169,6 +169,7 @@
   "privacy.report.failed": "לא הצלחנו לייצא את הדוח: {error}",
   "privacy.staticAssets": "קבצים סטטיים: {n}",
   "privacy.tab.mcp": "לקוחות MCP",
+  "privacy.tab.memory": "זיכרון הסוכנים",
   "privacy.tab.requests": "בקשות רשת",
   "privacy.title": "יומן פרטיות",
   "runtimeMetrics.clear": "ניקוי",

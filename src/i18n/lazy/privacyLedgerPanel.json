@@ -52,5 +52,6 @@
   "privacy.staticAssets": "Static files: {n}",
   "privacy.tab.mcp": "MCP clients",
   "privacy.tab.requests": "Network requests",
-  "privacy.title": "Privacy ledger"
+  "privacy.title": "Privacy ledger",
+  "privacy.tab.memory": "Agent memory"
 }

@@ -13,7 +13,9 @@
  *  - in development and tests only, adds `agentReview` to the e2e test
  *    surface (`window.__lumen`); see the test-surface note below (plan W1.31);
  *  - stages the proposals of MCP clients from `.lumen/mcp/pending`
- *    (plan W2.3, `mcpInbox.ts`).
+ *    (plan W2.3, `mcpInbox.ts`);
+ *  - counts each agent's accepted / rejected / edited / cancelled
+ *    suggestions (plan W13.A4, metrics/suggestionOutcomes.ts).
  */
 
 import type { RefObject } from "react";
@@ -142,9 +144,19 @@ export function startAgentReview(opts: { editorRef: RefObject<EditorHandle | nul
     .catch(() => {
       // why: the MCP inbox is optional: without it the review panel works as before
     });
+  // W13.A4: count what happens to each agent's suggestions (this device only).
+  let stopOutcomes: (() => void) | null = null;
+  void import("../metrics/suggestionOutcomes")
+    .then((m) => {
+      if (!stopped) stopOutcomes = m.trackOutcomes(onStagedChanges);
+    })
+    .catch(() => {
+      // why: counting is optional; the review panel works without it
+    });
   return () => {
     stopped = true;
     inbox?.stop();
+    stopOutcomes?.();
     off();
     if (timer) clearTimeout(timer);
     setDocumentApplier(null);

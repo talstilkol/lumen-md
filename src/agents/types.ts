@@ -115,6 +115,8 @@ export type StagedChange = ChangeProposal & {
   noUndo?: true;
   /** Applied as a tracked change (CriticMarkup) because suggesting mode was on. */
   asSuggestion?: true;
+  /** The user edited the proposed text before deciding (`editStagedChange`, plan W13.A4). */
+  edited?: true;
 };
 
 /** What a write tool returns: the receipt of the staged change, never the write itself. */

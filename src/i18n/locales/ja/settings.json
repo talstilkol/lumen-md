@@ -169,6 +169,7 @@
   "privacy.report.failed": "レポートを書き出せませんでした：{error}",
   "privacy.staticAssets": "静的ファイル: {n}",
   "privacy.tab.mcp": "MCP クライアント",
+  "privacy.tab.memory": "Agent memory",
   "privacy.tab.requests": "ネットワーク要求",
   "privacy.title": "プライバシー記録",
   "runtimeMetrics.clear": "クリア",
