@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 import { X, FileText } from "lucide-react";
 import type { DocFile } from "../store/useStore";
 import { t } from "../i18n";
+import { PresenceDot } from "./PresenceDot";
 import { inlineDirectionOf, rovingIndex } from "../lib/logicalKeys";
 import { matchShortcut } from "../lib/keyboardLayout";
 import { droppedOutside } from "../desktop/window";
@@ -241,6 +242,7 @@ export const DocTabs = React.memo(function DocTabs({
                 {tab.dirty ? "● " : ""}
                 {tab.name}
               </span>
+              <PresenceDot path={tab.workspaceName} />
             </button>
             <button
               type="button"

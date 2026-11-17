@@ -437,5 +437,11 @@
   "e2ee.roles.fresh.confirm": "Yes, it's current",
   "e2ee.roles.fresh.done": "Confirmed. You won't be asked again on this device.",
   "e2ee.roles.readOnly": "This device reads the vault. Its changes outside a personal folder aren't sent.",
-  "e2ee.rules.unreadable": "This device's sync rules can't be read, so nothing was synced: open Sync → What syncs on this device and save them again."
+  "e2ee.rules.unreadable": "This device's sync rules can't be read, so nothing was synced: open Sync → What syncs on this device and save them again.",
+  "e2ee.presence.title": "Show where I am",
+  "e2ee.presence.intro": "The other members of a shared vault see a dot next to the note you have open, with your device's name, and you see theirs. The relay sees sealed bytes only — no names, no notes. Nothing is sent in airplane mode. Off until you turn it on.",
+  "e2ee.presence.on": "Show the other members which note I have open",
+  "e2ee.presence.device": "The name the others see for this device",
+  "e2ee.presence.devicePlaceholder": "For example: Dana's laptop",
+  "e2ee.presence.needName": "Choose a device name first: presence starts once this device has one."
 }

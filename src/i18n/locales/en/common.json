@@ -238,6 +238,7 @@
   "plugins.block.failed": "The plugin could not render this block: {error}",
   "plugins.block.loading": "Rendering with the plugin…",
   "plugins.panel.close": "Close the plugin panel",
+  "presence.openOn": "Open on: {devices}",
   "preview.footnote.label": "Footnote {n}",
   "preview.imageResize.hint": "Drag the edge to resize; double-click it to reset. The width is saved in the note.",
   "print.toc": "Contents",
