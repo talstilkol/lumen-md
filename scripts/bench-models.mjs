@@ -22,6 +22,10 @@
  *   --headless         default: a window (GPUs are more reliable headed)
  *   --channel chrome   use installed Chrome instead of Playwright's Chromium
  *   --no-prime         measure the first load (cold cache: download included)
+ *   --captions-out F   also write each caption engine's captions, { engine: { id: caption } },
+ *                      for the owner's rating sheet (scripts/caption/rating-sheet.mjs, plan 6.6).
+ *                      The only outputs ever written; with --split test they are held-out
+ *                      data: keep the file off the repo.
  *
  * Only numbers leave the page: no item, input or output is printed or
  * written (the test split is held out).
@@ -60,6 +64,7 @@ export function parseArgs(argv) {
     headless: has("--headless"),
     channel: opt("--channel"),
     prime: !has("--no-prime"),
+    captionsOut: opt("--captions-out"),
   };
 }
 
@@ -88,6 +93,9 @@ async function openPage(browser, url, backend) {
 }
 
 /** One engine on one backend → a result row (numbers only). */
+/** Captions kept for the rating sheet (--captions-out): "<engine>@<backend>" → { id: caption }. */
+const captionsOf = {};
+
 async function measure({ browser, url, pid, id, backend, opts }) {
   const probe = await openPage(browser, url, backend);
   const meta = await probe.page.evaluate((e) => window.lumenBench.describe(e), id);
@@ -125,6 +133,7 @@ async function measure({ browser, url, pid, id, backend, opts }) {
     const m = mem.stop();
     if (r.error) return { ...row, status: "error", device: r.device, error: r.error };
     const quality = await task.score(items, r.outputs);
+    if (opts.captionsOut && meta.set === "caption") captionsOf[`${id}@${backend}`] = Object.fromEntries(Object.entries(r.outputs ?? {}).filter(([, v]) => typeof v === "string"));
     return {
       ...row,
       status: missing.length ? "partial" : "measured",
@@ -200,6 +209,11 @@ async function main() {
   mkdirSync(dirname(out), { recursive: true });
   writeFileSync(out, JSON.stringify({ generatedAt: new Date().toISOString(), split: opts.split, env, rows: rows.map(({ env: _e, ...r }) => r) }, null, 2) + "\n");
   console.log(`numbers → ${out}`);
+  if (opts.captionsOut) {
+    mkdirSync(dirname(opts.captionsOut), { recursive: true });
+    writeFileSync(opts.captionsOut, JSON.stringify(captionsOf, null, 1) + "\n");
+    console.log(`captions for the rating sheet → ${opts.captionsOut}${opts.split === "test" ? " (held-out test data: do not commit)" : ""}`);
+  }
   if (opts.write) {
     const path = join(ROOT, "models", "registry.json");
     const { registry, written, skipped } = applyMeasurements(JSON.parse(readFileSync(path, "utf8")), rows, env ?? {});
