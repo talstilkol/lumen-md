@@ -19,12 +19,16 @@
  * Never fails the install: a clone whose hook is someone else's keeps it (one
  * line says how to add ours), and nothing is written in CI, outside a git
  * checkout, or with LUMEN_NO_HOOKS=1. A hook of ours from an older checkout
- * is rewritten with the current text.
+ * is rewritten with the current text. A pre-push hook of ours that an older
+ * checkout installed automatically, before it became opt-in, is removed when
+ * the clone has not opted in, but only while it is byte for byte one we
+ * wrote (OUR_PRE_PUSH_SHA256); one the user edited is kept (review 12, L3).
  *
  *   node scripts/install-git-hooks.mjs [--dry]
  */
 import { spawnSync } from "node:child_process";
-import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { chmodSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { hookPlan } from "./lib/ciLocal.mjs";
@@ -45,13 +49,27 @@ export function wantsPrePush(env, gitConfigValue) {
   return ["true", "1", "yes", "on"].includes(String(gitConfigValue ?? "").trim().toLowerCase());
 }
 
+/**
+ * The sha256 of every pre-push hook text this repo has written (hookPlan in
+ * scripts/lib/ciLocal.mjs and, before it, scripts/ci-local.mjs, over their
+ * git history): the first `exec npm run -s ci:local …` one, and the one with
+ * the lane-state note and the lockfile-drift check.
+ */
+export const OUR_PRE_PUSH_SHA256 = Object.freeze(["c39e0039e3775c0787fc73f9db24e1227398379ea8d533df09721631d89aab9b", "8a101179c433ae40eb442fe376e3be9400ef91c3afb6b7e8d0899b8201db204b"]);
+
+/** A pre-push hook exactly as this repo wrote it (any version), so removing it loses nothing of the user's. */
+export function isOurUnchangedPrePush(text) {
+  if (typeof text !== "string") return false;
+  return OUR_PRE_PUSH_SHA256.includes(createHash("sha256").update(text).digest("hex")) || text === hookPlan(null).content;
+}
+
 export const PRE_PUSH_OPT_IN = "git config lumen.ciLocalHook true && npm run prepare (or: npm run ci:local -- --install-hook)";
 
 /**
  * What to do with each hook file, given what is there now.
  * @param {Record<string, string | null>} existing  hook name → its current text (null: none)
  * @param {{ prePush?: boolean }} [opts]  prePush: the clone opted in to the ci:local pre-push hook
- * @returns {Array<{ name: string; action: "write" | "same" | "keep" | "opt-in"; content: string; hint?: string }>}
+ * @returns {Array<{ name: string; action: "write" | "same" | "keep" | "opt-in" | "remove"; content: string; hint?: string }>}
  */
 export function installPlan(existing, { prePush = false } = {}) {
   const wanted = [
@@ -60,7 +78,8 @@ export function installPlan(existing, { prePush = false } = {}) {
   ];
   return wanted.map(({ name, plan, hint, optIn }) => {
     // The pre-push hook runs the checks on every push: never without the clone asking (#1054).
-    if (optIn && !prePush) return { name, action: "opt-in", content: plan.content, hint: PRE_PUSH_OPT_IN };
+    // An old automatic install of ours, unchanged, goes; anything else stays (review 12, L3).
+    if (optIn && !prePush) return { name, action: isOurUnchangedPrePush(existing[name]) ? "remove" : "opt-in", content: plan.content, hint: PRE_PUSH_OPT_IN };
     if (plan.action !== "write") return { name, action: "keep", content: plan.content, hint };
     return { name, action: existing[name] === plan.content ? "same" : "write", content: plan.content };
   });
@@ -82,7 +101,13 @@ function main() {
   const prePush = wantsPrePush(process.env, cfg.status === 0 ? cfg.stdout : null);
   for (const step of installPlan(existing, { prePush })) {
     const file = join(hooks, step.name);
-    if (step.action === "opt-in") console.log(`git hooks: ${step.name} not installed (opt-in: ${step.hint})`);
+    if (step.action === "remove") {
+      if (dry) console.log(`git hooks: would remove ${file} (ours, unchanged, and this clone did not opt in)`);
+      else {
+        rmSync(file, { force: true });
+        console.log(`git hooks: removed ${file}: an older checkout installed it before it became opt-in, and it was unchanged (opt in again: ${step.hint})`);
+      }
+    } else if (step.action === "opt-in") console.log(`git hooks: ${step.name} not installed (opt-in: ${step.hint})`);
     else if (step.action === "keep") console.log(`git hooks: ${file} is not ours; kept. To use ours instead: ${step.hint}`);
     else if (step.action === "same") console.log(`git hooks: ${step.name} up to date`);
     else if (dry) console.log(`git hooks: would write ${file}`);
