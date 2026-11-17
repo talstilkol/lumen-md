@@ -344,6 +344,8 @@
   "cmd.mobile.readLongNotes": "טלפון: פתקים ארוכים נפתחים לקריאה",
   "cmd.mobile.readLongNotes.off": "כבוי כרגע",
   "cmd.mobile.readLongNotes.on": "פעיל כרגע (הקשה על הטקסט עוברת לעריכה)",
+  "cmd.mobile.spotlight": "Spotlight ו-Siri: אילו פתקים…",
+  "cmd.mobile.spotlight.hint": "כבוי, 50 האחרונים, או כל הפתקים; פתקים נעולים ופרטיים אף פעם לא",
   "cmd.new": "מסמך חדש",
   "cmd.nikud.add": "עברית: הוספת ניקוד",
   "cmd.nikud.add.hint": "ניקוד הבחירה (או הפתק כולו) במכשיר",

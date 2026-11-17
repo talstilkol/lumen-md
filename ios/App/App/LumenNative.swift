@@ -70,6 +70,8 @@ public class LumenNativePlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "startCaptureActivity", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "updateCaptureActivity", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "endCaptureActivity", returnType: CAPPluginReturnPromise),
+        // W13.M3: the notes Spotlight and Siri may know (the WebView chooses).
+        CAPPluginMethod(name: "updateSpotlight", returnType: CAPPluginReturnPromise),
     ]
 
     override public func load() {
@@ -102,6 +104,20 @@ public class LumenNativePlugin: CAPPlugin, CAPBridgedPlugin {
     @objc func updateCaptureActivity(_ call: CAPPluginCall) {
         LiveCapture.update(mode: Self.mode(call), since: Self.since(call))
         call.resolve()
+    }
+
+    /// W13.M3: { upsert: [{path, title, snippet, modified}], remove: [path], reset }.
+    @objc func updateSpotlight(_ call: CAPPluginCall) {
+        let upsert: [NoteStore.Note] = (call.getArray("upsert", JSObject.self) ?? []).compactMap { o in
+            guard let path = o["path"] as? String, let title = o["title"] as? String else { return nil }
+            return NoteStore.Note(path: path, title: String(title.prefix(200)), snippet: String(((o["snippet"] as? String) ?? "").prefix(200)), modified: (o["modified"] as? Double) ?? 0)
+        }
+        let remove = call.getArray("remove", String.self) ?? []
+        let reset = call.getBool("reset") ?? false
+        DispatchQueue.global(qos: .utility).async {
+            NoteStore.apply(upsert: upsert, remove: remove, reset: reset)
+            call.resolve()
+        }
     }
 
     @objc func endCaptureActivity(_ call: CAPPluginCall) {

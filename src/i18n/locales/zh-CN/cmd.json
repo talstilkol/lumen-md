@@ -344,6 +344,8 @@
   "cmd.mobile.readLongNotes": "手机：长笔记以阅读模式打开",
   "cmd.mobile.readLongNotes.off": "当前关闭",
   "cmd.mobile.readLongNotes.on": "当前开启（点按文字即可编辑）",
+  "cmd.mobile.spotlight": "Spotlight and Siri: which notes…",
+  "cmd.mobile.spotlight.hint": "off, the 50 most recent, or all notes; locked and private notes never",
   "cmd.new": "新建 document",
   "cmd.nikud.add": "希伯来语：添加元音符号",
   "cmd.nikud.add.hint": "在本设备上为所选内容（或整篇笔记）加元音符号",

@@ -7335,5 +7335,41 @@
     "ja": "732qw0",
     "ru": "732qw0",
     "zh-CN": "732qw0"
+  },
+  "spotlight.mode.off": {
+    "ar": "3dbdv3",
+    "de": "3dbdv3",
+    "fr": "3dbdv3",
+    "he": "3dbdv3",
+    "ja": "3dbdv3",
+    "ru": "3dbdv3",
+    "zh-CN": "3dbdv3"
+  },
+  "spotlight.mode.recent": {
+    "ar": "11575za",
+    "de": "11575za",
+    "fr": "11575za",
+    "he": "11575za",
+    "ja": "11575za",
+    "ru": "11575za",
+    "zh-CN": "11575za"
+  },
+  "spotlight.mode.all": {
+    "ar": "b80r3q",
+    "de": "b80r3q",
+    "fr": "b80r3q",
+    "he": "b80r3q",
+    "ja": "b80r3q",
+    "ru": "b80r3q",
+    "zh-CN": "b80r3q"
+  },
+  "spotlight.notSaved": {
+    "ar": "awl5zq",
+    "de": "awl5zq",
+    "fr": "awl5zq",
+    "he": "awl5zq",
+    "ja": "awl5zq",
+    "ru": "awl5zq",
+    "zh-CN": "awl5zq"
   }
 }

@@ -185,6 +185,10 @@ export interface LumenNativePlugin {
   setBackState?(o: { overlay: boolean }): Promise<void>;
   /** W13.M5 (iPad): another window, for a vault path or empty; `opened` is false where windows are not supported. */
   openWindow?(o: { note?: string }): Promise<{ opened: boolean }>;
+  /** W13.M3 (iOS): the notes Spotlight and Siri may know. */
+  updateSpotlight?(o: { upsert: Array<{ path: string; title: string; snippet: string; modified: number }>; remove: string[]; reset?: boolean }): Promise<void>;
+  /** W13.M3 (Android): the most recent notes as dynamic App Shortcuts. */
+  setRecentNotes?(o: { notes: Array<{ path: string; title: string }> }): Promise<void>;
 }
 
 const isNativeApp = () => typeof window !== "undefined" && !!(window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.();
@@ -231,6 +235,12 @@ export async function initNativeBridge(h: NativeHandlers, plugin?: LumenNativePl
   const android = (window as unknown as { Capacitor?: { getPlatform?: () => string } }).Capacitor?.getPlatform?.() === "android";
   document.documentElement.dataset.native = android ? "android" : "ios";
   if (android && p.setBackState) stops.push(back.installBackNavigation({ setBackState: (o) => p.setBackState!(o) }));
+  // W13.M3: Spotlight / Siri (iOS) and recent-note App Shortcuts (Android), only what the person chose.
+  {
+    const { startSpotlightSync } = await import("./spotlightIndex");
+    const noop = async () => undefined;
+    stops.push(await startSpotlightSync(android ? { updateSpotlight: noop, setRecentNotes: (o) => p.setRecentNotes?.(o) ?? noop() } : { updateSpotlight: (o) => p.updateSpotlight?.(o) ?? noop() }));
+  }
   // W13.M5: the iPad's UIKeyCommands arrive as "lumen:key-command" and run as the same key presses.
   if (!android) {
     const { installKeyCommandBridge } = await import("./keyCommands");

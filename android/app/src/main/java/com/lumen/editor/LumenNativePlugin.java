@@ -1,6 +1,9 @@
 package com.lumen.editor;
 
 import android.content.Intent;
+import androidx.core.content.pm.ShortcutInfoCompat;
+import androidx.core.content.pm.ShortcutManagerCompat;
+import androidx.core.graphics.drawable.IconCompat;
 import android.net.Uri;
 import android.util.Base64;
 import com.getcapacitor.JSArray;
@@ -60,6 +63,45 @@ public class LumenNativePlugin extends Plugin {
     public void setBackState(PluginCall call) {
         boolean overlay = Boolean.TRUE.equals(call.getBoolean("overlay", false));
         if (getActivity() instanceof MainActivity) ((MainActivity) getActivity()).setBackState(overlay);
+        call.resolve();
+    }
+
+    /**
+     * Plan W13.M3: the most recent notes as dynamic App Shortcuts (long-press the
+     * icon). The WebView chooses them (never a locked or private note) and sends
+     * only the path and title; each opens lumen://open?path=…
+     */
+    @PluginMethod
+    public void setRecentNotes(PluginCall call) {
+        if (getActivity() == null) {
+            call.resolve();
+            return;
+        }
+        List<ShortcutInfoCompat> list = new ArrayList<>();
+        try {
+            JSArray notes = call.getArray("notes", new JSArray());
+            int max = Math.min(notes.length(), 4);
+            for (int i = 0; i < max; i++) {
+                org.json.JSONObject n = notes.getJSONObject(i);
+                String path = n.optString("path", "");
+                String title = n.optString("title", path);
+                if (path.isEmpty()) continue;
+                Uri link = new Uri.Builder().scheme("lumen").authority("open").appendQueryParameter("path", path).build();
+                Intent open = new Intent(Intent.ACTION_VIEW, link, getContext(), MainActivity.class);
+                String shortLabel = title.length() > 24 ? title.substring(0, 23) + "…" : title;
+                list.add(new ShortcutInfoCompat.Builder(getContext(), "note:" + Integer.toHexString(path.hashCode()))
+                    .setShortLabel(shortLabel.isEmpty() ? path : shortLabel)
+                    .setLongLabel(title.length() > 60 ? title.substring(0, 59) + "…" : title)
+                    .setIcon(IconCompat.createWithResource(getContext(), R.drawable.ic_shortcut_note))
+                    .setIntent(open)
+                    .setRank(i)
+                    .build());
+            }
+        } catch (JSONException e) {
+            call.reject("bad notes");
+            return;
+        }
+        ShortcutManagerCompat.setDynamicShortcuts(getContext(), list);
         call.resolve();
     }
 

@@ -5,6 +5,7 @@
 // in its user activity; the WebView of that window alone opens it.
 
 import Capacitor
+import CoreSpotlight
 import UIKit
 
 enum LumenWindows {
@@ -53,6 +54,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
+        // W13.M3: a note found in Spotlight (before iOS 18: a CSSearchableItem) opens in this window.
+        if userActivity.activityType == CSSearchableItemActionType,
+           let path = userActivity.userInfo?[CSSearchableItemActivityIdentifier] as? String,
+           let url = NoteStore.openURL(path) {
+            LumenLaunch.deliver(url)
+            return
+        }
         _ = ApplicationDelegateProxy.shared.application(UIApplication.shared, continue: userActivity, restorationHandler: { _ in })
     }
 

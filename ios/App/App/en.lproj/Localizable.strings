@@ -25,3 +25,6 @@
 "Record to inbox" = "Record to inbox";
 "Opens Lumen recording a voice note into the inbox." = "Opens Lumen recording a voice note into the inbox.";
 "live.stop" = "Stop";
+"spotlight.note" = "Note";
+"spotlight.open" = "Open in Lumen";
+"spotlight.preview" = "Preview a note";

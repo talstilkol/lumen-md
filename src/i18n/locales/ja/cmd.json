@@ -344,6 +344,8 @@
   "cmd.mobile.readLongNotes": "スマートフォン：長いノートは閲覧モードで開く",
   "cmd.mobile.readLongNotes.off": "現在オフ",
   "cmd.mobile.readLongNotes.on": "現在オン（テキストをタップすると編集）",
+  "cmd.mobile.spotlight": "Spotlight and Siri: which notes…",
+  "cmd.mobile.spotlight.hint": "off, the 50 most recent, or all notes; locked and private notes never",
   "cmd.new": "新規 document",
   "cmd.nikud.add": "ヘブライ語：ニクードを付ける",
   "cmd.nikud.add.hint": "選択範囲（またはノート全体）にこのデバイスで付ける",

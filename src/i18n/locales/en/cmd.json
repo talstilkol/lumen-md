@@ -207,6 +207,7 @@
   "cmd.mobile.readLongNotes": "Phone: open long notes for reading",
   "cmd.mobile.readLongNotes.off": "Currently OFF",
   "cmd.mobile.readLongNotes.on": "Currently ON (tap the text to edit)",
+  "cmd.mobile.spotlight": "Spotlight and Siri: which notes…",
   "cmd.new": "New document",
   "cmd.nikud.add": "Hebrew: add niqqud",
   "cmd.nikud.display": "Show niqqud (display only)",
