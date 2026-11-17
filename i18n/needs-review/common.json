@@ -1,63 +1,63 @@
 {
   "academic.chosen": {
-    "he": "dp8jvj",
     "ar": "dp8jvj",
     "de": "dp8jvj",
     "fr": "dp8jvj",
+    "he": "dp8jvj",
     "ja": "dp8jvj",
     "ru": "dp8jvj",
     "zh-CN": "dp8jvj"
   },
   "academic.chosenUnverified": {
-    "he": "uh66bb",
     "ar": "uh66bb",
     "de": "uh66bb",
     "fr": "uh66bb",
+    "he": "uh66bb",
     "ja": "uh66bb",
     "ru": "uh66bb",
     "zh-CN": "uh66bb"
   },
   "academic.exported": {
-    "he": "8dxm0a",
     "ar": "8dxm0a",
     "de": "8dxm0a",
     "fr": "8dxm0a",
+    "he": "8dxm0a",
     "ja": "8dxm0a",
     "ru": "8dxm0a",
     "zh-CN": "8dxm0a"
   },
   "academic.noChoice": {
-    "he": "4kwqwf",
     "ar": "4kwqwf",
     "de": "4kwqwf",
     "fr": "4kwqwf",
+    "he": "4kwqwf",
     "ja": "4kwqwf",
     "ru": "4kwqwf",
     "zh-CN": "4kwqwf"
   },
   "academic.none": {
-    "he": "193b0es",
     "ar": "193b0es",
     "de": "193b0es",
     "fr": "193b0es",
+    "he": "193b0es",
     "ja": "193b0es",
     "ru": "193b0es",
     "zh-CN": "193b0es"
   },
   "academic.pick": {
-    "he": "umnr27",
     "ar": "umnr27",
     "de": "umnr27",
     "fr": "umnr27",
+    "he": "umnr27",
     "ja": "umnr27",
     "ru": "umnr27",
     "zh-CN": "umnr27"
   },
   "academic.unverified": {
-    "he": "1xxzzbf",
     "ar": "1xxzzbf",
     "de": "1xxzzbf",
     "fr": "1xxzzbf",
+    "he": "1xxzzbf",
     "ja": "1xxzzbf",
     "ru": "1xxzzbf",
     "zh-CN": "1xxzzbf"
@@ -519,37 +519,37 @@
     "zh-CN": "p39jit"
   },
   "cite.doi.consent.message.openAlex": {
-    "he": "rmaybm",
     "ar": "rmaybm",
     "de": "rmaybm",
     "fr": "rmaybm",
+    "he": "rmaybm",
     "ja": "rmaybm",
     "ru": "rmaybm",
     "zh-CN": "rmaybm"
   },
   "cite.doi.consent.title.openAlex": {
-    "he": "120nkzi",
     "ar": "120nkzi",
     "de": "120nkzi",
     "fr": "120nkzi",
+    "he": "120nkzi",
     "ja": "120nkzi",
     "ru": "120nkzi",
     "zh-CN": "120nkzi"
   },
   "cite.doi.notFound.openAlex": {
-    "he": "1one0tg",
     "ar": "1one0tg",
     "de": "1one0tg",
     "fr": "1one0tg",
+    "he": "1one0tg",
     "ja": "1one0tg",
     "ru": "1one0tg",
     "zh-CN": "1one0tg"
   },
   "cite.doi.openAlexOff": {
-    "he": "1s2hhyh",
     "ar": "1s2hhyh",
     "de": "1s2hhyh",
     "fr": "1s2hhyh",
+    "he": "1s2hhyh",
     "ja": "1s2hhyh",
     "ru": "1s2hhyh",
     "zh-CN": "1s2hhyh"
@@ -562,54 +562,6 @@
     "ja": "pas3ni",
     "ru": "pas3ni",
     "zh-CN": "pas3ni"
-  },
-  "cmd.mcp.ask": {
-    "ar": "vubk2m",
-    "de": "vubk2m",
-    "fr": "vubk2m",
-    "ja": "vubk2m",
-    "ru": "vubk2m",
-    "zh-CN": "vubk2m"
-  },
-  "cmd.mcp.ask.hint": {
-    "ar": "upymcb",
-    "de": "upymcb",
-    "fr": "upymcb",
-    "ja": "upymcb",
-    "ru": "upymcb",
-    "zh-CN": "upymcb"
-  },
-  "cmd.mcp.settings": {
-    "ar": "x0ihz7",
-    "de": "x0ihz7",
-    "fr": "x0ihz7",
-    "ja": "x0ihz7",
-    "ru": "x0ihz7",
-    "zh-CN": "x0ihz7"
-  },
-  "cmd.mcp.settings.hint": {
-    "ar": "1b01jxe",
-    "de": "1b01jxe",
-    "fr": "1b01jxe",
-    "ja": "1b01jxe",
-    "ru": "1b01jxe",
-    "zh-CN": "1b01jxe"
-  },
-  "cmd.screenshotToNote": {
-    "ar": "11kn380",
-    "de": "11kn380",
-    "fr": "11kn380",
-    "ja": "11kn380",
-    "ru": "11kn380",
-    "zh-CN": "11kn380"
-  },
-  "cmd.screenshotToNote.hint": {
-    "ar": "l899cf",
-    "de": "l899cf",
-    "fr": "l899cf",
-    "ja": "l899cf",
-    "ru": "l899cf",
-    "zh-CN": "l899cf"
   },
   "daily.calendar.allDay": {
     "ar": "dqozwm",
@@ -1726,6 +1678,190 @@
     "ru": "17xgkl3",
     "zh-CN": "17xgkl3"
   },
+  "readingViews.compare.after": {
+    "ar": "1pnpdvu",
+    "de": "1pnpdvu",
+    "fr": "1pnpdvu",
+    "ja": "1pnpdvu",
+    "ru": "1pnpdvu",
+    "zh-CN": "1pnpdvu"
+  },
+  "readingViews.compare.before": {
+    "ar": "fy9jwp",
+    "de": "fy9jwp",
+    "fr": "fy9jwp",
+    "ja": "fy9jwp",
+    "ru": "fy9jwp",
+    "zh-CN": "fy9jwp"
+  },
+  "readingViews.compare.body": {
+    "ar": "c1fver",
+    "de": "c1fver",
+    "fr": "c1fver",
+    "ja": "c1fver",
+    "ru": "c1fver",
+    "zh-CN": "c1fver"
+  },
+  "readingViews.compare.close": {
+    "ar": "1l0xxoj",
+    "de": "1l0xxoj",
+    "fr": "1l0xxoj",
+    "ja": "1l0xxoj",
+    "ru": "1l0xxoj",
+    "zh-CN": "1l0xxoj"
+  },
+  "readingViews.compare.columns": {
+    "ar": "uwpmdu",
+    "de": "uwpmdu",
+    "fr": "uwpmdu",
+    "ja": "uwpmdu",
+    "ru": "uwpmdu",
+    "zh-CN": "uwpmdu"
+  },
+  "readingViews.compare.count": {
+    "ar": "h6eyld",
+    "de": "h6eyld",
+    "fr": "h6eyld",
+    "ja": "h6eyld",
+    "ru": "h6eyld",
+    "zh-CN": "h6eyld"
+  },
+  "readingViews.compare.ignoreNiqqud": {
+    "ar": "n12xuz",
+    "de": "n12xuz",
+    "fr": "n12xuz",
+    "ja": "n12xuz",
+    "ru": "n12xuz",
+    "zh-CN": "n12xuz"
+  },
+  "readingViews.compare.ignoreWhitespace": {
+    "ar": "q8ygem",
+    "de": "q8ygem",
+    "fr": "q8ygem",
+    "ja": "q8ygem",
+    "ru": "q8ygem",
+    "zh-CN": "q8ygem"
+  },
+  "readingViews.compare.inline": {
+    "ar": "1uh05lg",
+    "de": "1uh05lg",
+    "fr": "1uh05lg",
+    "ja": "1uh05lg",
+    "ru": "1uh05lg",
+    "zh-CN": "1uh05lg"
+  },
+  "readingViews.compare.inlineLabel": {
+    "ar": "1ljqnl",
+    "de": "1ljqnl",
+    "fr": "1ljqnl",
+    "ja": "1ljqnl",
+    "ru": "1ljqnl",
+    "zh-CN": "1ljqnl"
+  },
+  "readingViews.compare.layout": {
+    "ar": "1woj3tr",
+    "de": "1woj3tr",
+    "fr": "1woj3tr",
+    "ja": "1woj3tr",
+    "ru": "1woj3tr",
+    "zh-CN": "1woj3tr"
+  },
+  "readingViews.compare.next": {
+    "ar": "ahe95c",
+    "de": "ahe95c",
+    "fr": "ahe95c",
+    "ja": "ahe95c",
+    "ru": "ahe95c",
+    "zh-CN": "ahe95c"
+  },
+  "readingViews.compare.niqqudChange": {
+    "ar": "3mzo7w",
+    "de": "3mzo7w",
+    "fr": "3mzo7w",
+    "ja": "3mzo7w",
+    "ru": "3mzo7w",
+    "zh-CN": "3mzo7w"
+  },
+  "readingViews.compare.none": {
+    "ar": "se7wiy",
+    "de": "se7wiy",
+    "fr": "se7wiy",
+    "ja": "se7wiy",
+    "ru": "se7wiy",
+    "zh-CN": "se7wiy"
+  },
+  "readingViews.compare.position": {
+    "ar": "1ikkgzr",
+    "de": "1ikkgzr",
+    "fr": "1ikkgzr",
+    "ja": "1ikkgzr",
+    "ru": "1ikkgzr",
+    "zh-CN": "1ikkgzr"
+  },
+  "readingViews.compare.prev": {
+    "ar": "1ilpx8w",
+    "de": "1ilpx8w",
+    "fr": "1ilpx8w",
+    "ja": "1ilpx8w",
+    "ru": "1ilpx8w",
+    "zh-CN": "1ilpx8w"
+  },
+  "readingViews.compare.sayChange": {
+    "ar": "1gub13",
+    "de": "1gub13",
+    "fr": "1gub13",
+    "ja": "1gub13",
+    "ru": "1gub13",
+    "zh-CN": "1gub13"
+  },
+  "readingViews.compare.sayDeleted": {
+    "ar": "1so0oe",
+    "de": "1so0oe",
+    "fr": "1so0oe",
+    "ja": "1so0oe",
+    "ru": "1so0oe",
+    "zh-CN": "1so0oe"
+  },
+  "readingViews.compare.sayInserted": {
+    "ar": "1bdf217",
+    "de": "1bdf217",
+    "fr": "1bdf217",
+    "ja": "1bdf217",
+    "ru": "1bdf217",
+    "zh-CN": "1bdf217"
+  },
+  "readingViews.compare.sayPrefix": {
+    "ar": "1sb79uq",
+    "de": "1sb79uq",
+    "fr": "1sb79uq",
+    "ja": "1sb79uq",
+    "ru": "1sb79uq",
+    "zh-CN": "1sb79uq"
+  },
+  "readingViews.compare.title": {
+    "ar": "1n8cxuc",
+    "de": "1n8cxuc",
+    "fr": "1n8cxuc",
+    "ja": "1n8cxuc",
+    "ru": "1n8cxuc",
+    "zh-CN": "1n8cxuc"
+  },
+  "readingViews.compare.tools": {
+    "ar": "10z88un",
+    "de": "10z88un",
+    "fr": "10z88un",
+    "ja": "10z88un",
+    "ru": "10z88un",
+    "zh-CN": "10z88un"
+  },
+  "readingViews.compare.unchanged": {
+    "ar": "1s2az6w",
+    "de": "1s2az6w",
+    "fr": "1s2az6w",
+    "ja": "1s2az6w",
+    "ru": "1s2az6w",
+    "zh-CN": "1s2az6w"
+  },
   "readingViews.triple.on": {
     "ar": "jorirw",
     "de": "jorirw",
@@ -1828,28 +1964,12 @@
     "ru": "195b0jb",
     "zh-CN": "195b0jb"
   },
-  "tts.kokoro.body": {
-    "ar": "15pi4g7",
-    "de": "15pi4g7",
-    "fr": "15pi4g7",
-    "ja": "15pi4g7",
-    "ru": "15pi4g7",
-    "zh-CN": "15pi4g7"
-  },
-  "tts.kokoro.ok": {
-    "ar": "1ot74o",
-    "de": "1ot74o",
-    "fr": "1ot74o",
-    "ja": "1ot74o",
-    "ru": "1ot74o",
-    "zh-CN": "1ot74o"
-  },
-  "tts.kokoro.title": {
-    "ar": "1gjpbva",
-    "de": "1gjpbva",
-    "fr": "1gjpbva",
-    "ja": "1gjpbva",
-    "ru": "1gjpbva",
-    "zh-CN": "1gjpbva"
+  "sync.conflict.compareWords": {
+    "ar": "49wgbr",
+    "de": "49wgbr",
+    "fr": "49wgbr",
+    "ja": "49wgbr",
+    "ru": "49wgbr",
+    "zh-CN": "49wgbr"
   }
 }

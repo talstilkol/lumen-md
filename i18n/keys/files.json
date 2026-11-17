@@ -240,6 +240,13 @@
       "vars": []
     },
     {
+      "key": "contextMenu.compareWith",
+      "en": "Compare with “{name}”",
+      "vars": [
+        "name"
+      ]
+    },
+    {
       "key": "contextMenu.copyPath",
       "en": "Copy path",
       "vars": []
@@ -262,6 +269,11 @@
     {
       "key": "contextMenu.newSubfolder",
       "en": "New subfolder",
+      "vars": []
+    },
+    {
+      "key": "contextMenu.pickForCompare",
+      "en": "Select for compare",
       "vars": []
     },
     {
@@ -1824,6 +1836,23 @@
       "key": "versionHistory.close",
       "en": "Close",
       "vars": []
+    },
+    {
+      "key": "versionHistory.compare",
+      "en": "Compare with the current text",
+      "vars": []
+    },
+    {
+      "key": "versionHistory.compareCurrent",
+      "en": "Current text",
+      "vars": []
+    },
+    {
+      "key": "versionHistory.compareOld",
+      "en": "Version of {when}",
+      "vars": [
+        "when"
+      ]
     },
     {
       "key": "versionHistory.diffChars",

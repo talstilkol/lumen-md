@@ -1,4 +1,20 @@
 {
+  "contextMenu.compareWith": {
+    "ar": "o4pip4",
+    "de": "o4pip4",
+    "fr": "o4pip4",
+    "ja": "o4pip4",
+    "ru": "o4pip4",
+    "zh-CN": "o4pip4"
+  },
+  "contextMenu.pickForCompare": {
+    "ar": "ynj3q5",
+    "de": "ynj3q5",
+    "fr": "ynj3q5",
+    "ja": "ynj3q5",
+    "ru": "ynj3q5",
+    "zh-CN": "ynj3q5"
+  },
   "vault.folder.nestingUnknown": {
     "ar": "14z9nj7",
     "de": "14z9nj7",
@@ -7,5 +23,29 @@
     "ja": "14z9nj7",
     "ru": "14z9nj7",
     "zh-CN": "14z9nj7"
+  },
+  "versionHistory.compare": {
+    "ar": "6cq139",
+    "de": "6cq139",
+    "fr": "6cq139",
+    "ja": "6cq139",
+    "ru": "6cq139",
+    "zh-CN": "6cq139"
+  },
+  "versionHistory.compareCurrent": {
+    "ar": "1niksh9",
+    "de": "1niksh9",
+    "fr": "1niksh9",
+    "ja": "1niksh9",
+    "ru": "1niksh9",
+    "zh-CN": "1niksh9"
+  },
+  "versionHistory.compareOld": {
+    "ar": "8jwirs",
+    "de": "8jwirs",
+    "fr": "8jwirs",
+    "ja": "8jwirs",
+    "ru": "8jwirs",
+    "zh-CN": "8jwirs"
   }
 }

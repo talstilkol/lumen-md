@@ -32,3 +32,25 @@ goes from the source to the preview. A screen reader announces the column
 that got the focus. In the preview, the arrow keys and Page Up / Page Down
 scroll it. (Ctrl+Alt+← / → without Shift stay outline mode's indent and
 outdent.)
+
+## Compare two notes or two versions
+
+The compare view shows two texts word by word, the way Word and Google Docs
+compare documents, and it is right for Hebrew:
+
+- **Open it** from the **version history** (pick a version → **Compare with
+  the current text**), from a **sync conflict** (**Compare word by word**),
+  or from the **file tree**: right-click a note → **Select for compare**, then
+  right-click another → **Compare with “…”**.
+- **Side by side** (the old text on the right in Hebrew, on the left in
+  English) or **inline** (deletions struck through, insertions underlined).
+  Long unchanged stretches fold into a "Show N unchanged paragraphs" bar.
+- **Hebrew-aware.** Words are split the way the browser reads each language
+  (`Intl.Segmenter`); צה״ל and ג'ירפה stay one word. When only a prefix
+  changed (הבית → ובית) only the prefix is marked. A word whose letters stayed
+  and only its niqqud changed is marked with a dotted underline. **Ignore
+  niqqud** and **Ignore spaces** hide those differences.
+- **Mixed direction.** The marks never move a letter: a line with English,
+  numbers and Hebrew reads exactly as it does without them.
+- **Keys.** F7 goes to the next change and Shift+F7 to the previous one. A
+  screen reader hears each change ("Change 3 of 12: deleted …, inserted …").

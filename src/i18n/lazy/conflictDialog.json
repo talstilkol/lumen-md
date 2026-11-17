@@ -3,6 +3,7 @@
   "sync.conflict.base": "base",
   "sync.conflict.body": "Both sides changed since the last sync. Pick what to keep, or take one side wholesale.",
   "sync.conflict.both": "both",
+  "sync.conflict.compareWords": "Compare word by word",
   "sync.conflict.empty": "(empty)",
   "sync.conflict.hunk": "Conflict {n} of {total}",
   "sync.conflict.local": "local",

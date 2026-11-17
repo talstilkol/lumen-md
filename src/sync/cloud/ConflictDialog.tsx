@@ -158,6 +158,14 @@ function ConflictDialogImpl({ path, base, local, remote, labels, hunks: given, o
                 </button>
               </>
             )}
+            <button
+              type="button"
+              style={btnSecondary}
+              data-testid="conflict-compare"
+              onClick={() => void import("../../reading/openCompare").then((m) => m.openCompare({ label: L.local, text: local }, { label: L.remote, text: remote }))}
+            >
+              {t("sync.conflict.compareWords")}
+            </button>
             <HelpButton topic="editor/tools#sync-conflicts" />
           </div>
           <div style={{ fontSize: 12, color: "hsl(var(--fg-muted))", marginTop: 2 }}>

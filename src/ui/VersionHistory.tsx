@@ -186,6 +186,21 @@ export function VersionHistory({ fileName, currentContent, onRestore, onClose }:
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             {selected && (
+              <button
+                type="button"
+                data-testid="version-compare"
+                className="icon-btn"
+                style={{ width: "auto", padding: "4px 12px", fontSize: 12 }}
+                onClick={() => {
+                  const old = { label: t("versionHistory.compareOld", { when: new Date(selected.timestamp).toLocaleString(getLocale()) }), text: selected.content };
+                  const now = { label: t("versionHistory.compareCurrent"), text: currentContent };
+                  void import("../reading/openCompare").then((m) => m.openCompare(old, now));
+                }}
+              >
+                {t("versionHistory.compare")}
+              </button>
+            )}
+            {selected && (
               <button onClick={() => void handleRestore()} style={{
                 padding: "4px 12px",
                 fontSize: 12,

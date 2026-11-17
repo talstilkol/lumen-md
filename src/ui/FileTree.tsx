@@ -19,6 +19,7 @@ import type { WorkspaceNode } from "../storage/workspace";
 import { t } from "../i18n";
 import { uiAlert, uiConfirm, uiPrompt } from "./PromptDialog";
 import { FileContextMenu, buildFileActions } from "./FileContextMenu";
+import { compareWithPicked, pickForCompare, pickedForCompare } from "../reading/comparePick";
 import { useAppStore } from "../store/useStore";
 import { duplicateFile, movedPath, renamedFileName, safeMoveWithCompanion, undoTrash, withoutCompanions, type MoveResult } from "../storage/fileOps";
 import { flushActiveWorkspaceDoc, syncOpenDocsAfterMove, trashWithOpenEdits } from "../store/openDocs";
@@ -706,6 +707,15 @@ export function FileTree({
               contextMenu.node.kind === "directory"
                 ? () => newFolder(contextMenu.node.path)
                 : undefined,
+            // Plan W13.R8: pick a note, then compare another with it, word by word.
+            onPickForCompare: () => pickForCompare(contextMenu.node.path, contextMenu.node.name),
+            compareWith: (() => {
+              const kept = pickedForCompare();
+              const node = contextMenu.node;
+              return kept && kept.path !== node.path
+                ? { label: kept.label, onSelect: () => void compareWithPicked(node.path, node.name, readWorkspaceFile).catch((e: unknown) => toast.error(explainError(e, "open"))) }
+                : undefined;
+            })(),
           })}
         />
       )}
