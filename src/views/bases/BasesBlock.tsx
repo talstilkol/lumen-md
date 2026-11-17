@@ -39,6 +39,8 @@ import { downloadCsv, importCsv } from "./basesCsv";
 import { nameCell, openFile, type ViewProps } from "./basesCells";
 import { CalendarView, TimelineView } from "./basesTimeViews";
 import { useVisibleRefresh } from "../../lib/visibleRefresh";
+// W13.G9: "Open as graph" — the dialog loads when the button is pressed.
+import { OpenAsGraph } from "../../ui/graph/OpenAsGraph";
 
 const DatabaseMapView = lazy(() => import("../DatabaseMapView"));
 // Bulk property editing (W7.4): the same bar as the database block, loaded on the first selection.
@@ -240,6 +242,7 @@ export default function BasesBlock({ source, meta, select }: { source: string; m
           <button type="button" onClick={() => void importCsv(base, fileLabel ?? result.view.name, files)} style={{ fontSize: 11 }} data-testid="base-csv-import">
             {t("base.csv.import")}
           </button>
+          {result.rows.length > 0 && <OpenAsGraph label={t("base.openAsGraph")} title={fileLabel ? fileLabel.replace(/^.*\//, "").replace(/\.base$/i, "") : result.view.name} rows={() => result.rows.map((r) => r.file)} testId="base-open-graph" />}
         </span>
         {base.views.length > 1 && (
           <div className="chart-block-tabs" role="tablist" aria-label={t("db.views")}>

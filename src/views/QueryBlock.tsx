@@ -19,6 +19,7 @@ import { useAppStore } from "../store/useStore";
 import { MAX_LIMIT, parseEmbeddedQuery, rowsFor, splitChartOptions, type QueryChart, type QueryNote, type QueryRow } from "../search/embeddedQuery";
 import { DataviewError, parseDataview, runDataview, show, type DvResult, type Value } from "../search/dataview";
 import "./queryBlockStrings";
+import { OpenAsGraph } from "../ui/graph/OpenAsGraph";
 import { useVisibleRefresh } from "../lib/visibleRefresh";
 import { EmptyState, learnHow } from "../ui/EmptyState";
 
@@ -133,6 +134,8 @@ export default function QueryBlock({ source, lang }: Props) {
             {isDataview ? t("query.dataviewTitle") : parsed.q?.query || t("query.title")}
           </span>
           {out && out.kind !== "error" && <span style={{ fontSize: 11, color: "hsl(var(--fg-muted))" }}>{t("query.count", { count })}</span>}
+          {/* W13.G9: the result as a graph (the vault's links between these notes). */}
+          {out?.kind === "query" && count > 0 && <OpenAsGraph label={t("query.openAsGraph")} title={title} paths={() => out.rows.map((r) => r.path)} testId="query-open-graph" />}
         </span>
       </div>
       <div style={{ padding: 8 }}>

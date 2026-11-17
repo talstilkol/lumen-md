@@ -10,5 +10,6 @@
   "query.error": "Can't run this query: {error}",
   "query.loading": "Running the query…",
   "query.none": "No notes match.",
+  "query.openAsGraph": "Open as graph",
   "query.title": "Query"
 }

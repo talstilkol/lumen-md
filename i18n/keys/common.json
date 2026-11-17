@@ -1904,6 +1904,11 @@
       ]
     },
     {
+      "key": "base.openAsGraph",
+      "en": "Open as graph",
+      "vars": []
+    },
+    {
       "key": "base.problems",
       "en": "Some expressions could not run:",
       "vars": []
@@ -8956,6 +8961,213 @@
       "vars": []
     },
     {
+      "key": "graphPersp.aria",
+      "en": "Graph of {title}: {nodes} notes",
+      "vars": [
+        "title",
+        "nodes"
+      ]
+    },
+    {
+      "key": "graphPersp.asTable",
+      "en": "As a table",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.color",
+      "en": "Colour",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.colorOf",
+      "en": "Colour of {kind}",
+      "vars": [
+        "kind"
+      ]
+    },
+    {
+      "key": "graphPersp.delete",
+      "en": "Delete view",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.deleted",
+      "en": "Deleted the view “{name}”",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "graphPersp.empty",
+      "en": "No note to show with these kinds.",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.includeOutside",
+      "en": "Notes they link to outside",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.kind",
+      "en": "Kind",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.kinds",
+      "en": "Kinds shown",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.label",
+      "en": "Saved views",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.loadFailed",
+      "en": "Saved views could not be read",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.loadGraphFailed",
+      "en": "The graph could not be built: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "graphPersp.loading",
+      "en": "Building the graph…",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.name",
+      "en": "Name of the view",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.none",
+      "en": "(unsaved)",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.opened",
+      "en": "Opened the view “{name}”",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "graphPersp.outside",
+      "en": "Linked, outside",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.problems",
+      "en": "{n} saved views could not be read and were skipped",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "graphPersp.restored",
+      "en": "The view is back",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.save",
+      "en": "Save",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.saveAs",
+      "en": "Save view as…",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.saveFailed",
+      "en": "The view was not saved",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.saved",
+      "en": "Saved the view “{name}”",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "graphPersp.scale",
+      "en": "Scale",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.scaleOf",
+      "en": "Scale of {kind}",
+      "vars": [
+        "kind"
+      ]
+    },
+    {
+      "key": "graphPersp.size",
+      "en": "Size",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.size.degree",
+      "en": "By number of links",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.size.fixed",
+      "en": "Fixed",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.sizeOf",
+      "en": "Size of {kind}",
+      "vars": [
+        "kind"
+      ]
+    },
+    {
+      "key": "graphPersp.stats",
+      "en": "{nodes} notes · {edges} links",
+      "vars": [
+        "nodes",
+        "edges"
+      ]
+    },
+    {
+      "key": "graphPersp.style",
+      "en": "Colours and sizes",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.toolbar",
+      "en": "Graph of the rows",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.undo",
+      "en": "Undo",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.update",
+      "en": "Update view",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.view",
+      "en": "Saved view",
+      "vars": []
+    },
+    {
       "key": "havruta.add",
       "en": "Add note",
       "vars": []
@@ -15154,6 +15366,11 @@
     {
       "key": "query.none",
       "en": "No notes match.",
+      "vars": []
+    },
+    {
+      "key": "query.openAsGraph",
+      "en": "Open as graph",
       "vars": []
     },
     {

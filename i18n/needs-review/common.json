@@ -160,6 +160,14 @@
     "ru": "p39jit",
     "zh-CN": "p39jit"
   },
+  "base.openAsGraph": {
+    "ar": "gzj9xz",
+    "de": "gzj9xz",
+    "fr": "gzj9xz",
+    "ja": "gzj9xz",
+    "ru": "gzj9xz",
+    "zh-CN": "gzj9xz"
+  },
   "calendar.conflict.both": {
     "ar": "y0o6qf",
     "de": "y0o6qf",
@@ -674,6 +682,302 @@
     "ja": "bosydm",
     "ru": "bosydm",
     "zh-CN": "bosydm"
+  },
+  "graphPersp.aria": {
+    "ar": "n5a77m",
+    "de": "n5a77m",
+    "fr": "n5a77m",
+    "ja": "n5a77m",
+    "ru": "n5a77m",
+    "zh-CN": "n5a77m"
+  },
+  "graphPersp.asTable": {
+    "ar": "1bt92uy",
+    "de": "1bt92uy",
+    "fr": "1bt92uy",
+    "ja": "1bt92uy",
+    "ru": "1bt92uy",
+    "zh-CN": "1bt92uy"
+  },
+  "graphPersp.close": {
+    "ar": "1l0xxoj",
+    "de": "1l0xxoj",
+    "fr": "1l0xxoj",
+    "ja": "1l0xxoj",
+    "ru": "1l0xxoj",
+    "zh-CN": "1l0xxoj"
+  },
+  "graphPersp.color": {
+    "ar": "czgs9p",
+    "de": "czgs9p",
+    "fr": "czgs9p",
+    "ja": "czgs9p",
+    "ru": "czgs9p",
+    "zh-CN": "czgs9p"
+  },
+  "graphPersp.colorOf": {
+    "ar": "1nl17xk",
+    "de": "1nl17xk",
+    "fr": "1nl17xk",
+    "ja": "1nl17xk",
+    "ru": "1nl17xk",
+    "zh-CN": "1nl17xk"
+  },
+  "graphPersp.delete": {
+    "ar": "16z09nj",
+    "de": "16z09nj",
+    "fr": "16z09nj",
+    "ja": "16z09nj",
+    "ru": "16z09nj",
+    "zh-CN": "16z09nj"
+  },
+  "graphPersp.deleted": {
+    "ar": "ziyus2",
+    "de": "ziyus2",
+    "fr": "ziyus2",
+    "ja": "ziyus2",
+    "ru": "ziyus2",
+    "zh-CN": "ziyus2"
+  },
+  "graphPersp.empty": {
+    "ar": "1x0dv2q",
+    "de": "1x0dv2q",
+    "fr": "1x0dv2q",
+    "ja": "1x0dv2q",
+    "ru": "1x0dv2q",
+    "zh-CN": "1x0dv2q"
+  },
+  "graphPersp.includeOutside": {
+    "ar": "fayoqq",
+    "de": "fayoqq",
+    "fr": "fayoqq",
+    "ja": "fayoqq",
+    "ru": "fayoqq",
+    "zh-CN": "fayoqq"
+  },
+  "graphPersp.kind": {
+    "ar": "hqumoz",
+    "de": "hqumoz",
+    "fr": "hqumoz",
+    "ja": "hqumoz",
+    "ru": "hqumoz",
+    "zh-CN": "hqumoz"
+  },
+  "graphPersp.kinds": {
+    "ar": "1oenbad",
+    "de": "1oenbad",
+    "fr": "1oenbad",
+    "ja": "1oenbad",
+    "ru": "1oenbad",
+    "zh-CN": "1oenbad"
+  },
+  "graphPersp.label": {
+    "ar": "176v11u",
+    "de": "176v11u",
+    "fr": "176v11u",
+    "ja": "176v11u",
+    "ru": "176v11u",
+    "zh-CN": "176v11u"
+  },
+  "graphPersp.loadFailed": {
+    "ar": "dg2heh",
+    "de": "dg2heh",
+    "fr": "dg2heh",
+    "ja": "dg2heh",
+    "ru": "dg2heh",
+    "zh-CN": "dg2heh"
+  },
+  "graphPersp.loadGraphFailed": {
+    "ar": "8flc1l",
+    "de": "8flc1l",
+    "fr": "8flc1l",
+    "ja": "8flc1l",
+    "ru": "8flc1l",
+    "zh-CN": "8flc1l"
+  },
+  "graphPersp.loading": {
+    "ar": "7ybsow",
+    "de": "7ybsow",
+    "fr": "7ybsow",
+    "ja": "7ybsow",
+    "ru": "7ybsow",
+    "zh-CN": "7ybsow"
+  },
+  "graphPersp.name": {
+    "ar": "l1ds9l",
+    "de": "l1ds9l",
+    "fr": "l1ds9l",
+    "ja": "l1ds9l",
+    "ru": "l1ds9l",
+    "zh-CN": "l1ds9l"
+  },
+  "graphPersp.none": {
+    "ar": "1wuqkvy",
+    "de": "1wuqkvy",
+    "fr": "1wuqkvy",
+    "ja": "1wuqkvy",
+    "ru": "1wuqkvy",
+    "zh-CN": "1wuqkvy"
+  },
+  "graphPersp.opened": {
+    "ar": "1vjuvr4",
+    "de": "1vjuvr4",
+    "fr": "1vjuvr4",
+    "ja": "1vjuvr4",
+    "ru": "1vjuvr4",
+    "zh-CN": "1vjuvr4"
+  },
+  "graphPersp.outside": {
+    "ar": "1uizdh7",
+    "de": "1uizdh7",
+    "fr": "1uizdh7",
+    "ja": "1uizdh7",
+    "ru": "1uizdh7",
+    "zh-CN": "1uizdh7"
+  },
+  "graphPersp.problems": {
+    "ar": "1fh6go9",
+    "de": "1fh6go9",
+    "fr": "1fh6go9",
+    "ja": "1fh6go9",
+    "ru": "1fh6go9",
+    "zh-CN": "1fh6go9"
+  },
+  "graphPersp.restored": {
+    "ar": "fvoy3i",
+    "de": "fvoy3i",
+    "fr": "fvoy3i",
+    "ja": "fvoy3i",
+    "ru": "fvoy3i",
+    "zh-CN": "fvoy3i"
+  },
+  "graphPersp.save": {
+    "ar": "lewgh4",
+    "de": "lewgh4",
+    "fr": "lewgh4",
+    "ja": "lewgh4",
+    "ru": "lewgh4",
+    "zh-CN": "lewgh4"
+  },
+  "graphPersp.saveAs": {
+    "ar": "1pflyz7",
+    "de": "1pflyz7",
+    "fr": "1pflyz7",
+    "ja": "1pflyz7",
+    "ru": "1pflyz7",
+    "zh-CN": "1pflyz7"
+  },
+  "graphPersp.saveFailed": {
+    "ar": "1xu1kj2",
+    "de": "1xu1kj2",
+    "fr": "1xu1kj2",
+    "ja": "1xu1kj2",
+    "ru": "1xu1kj2",
+    "zh-CN": "1xu1kj2"
+  },
+  "graphPersp.saved": {
+    "ar": "zefj7g",
+    "de": "zefj7g",
+    "fr": "zefj7g",
+    "ja": "zefj7g",
+    "ru": "zefj7g",
+    "zh-CN": "zefj7g"
+  },
+  "graphPersp.scale": {
+    "ar": "b6rpxt",
+    "de": "b6rpxt",
+    "fr": "b6rpxt",
+    "ja": "b6rpxt",
+    "ru": "b6rpxt",
+    "zh-CN": "b6rpxt"
+  },
+  "graphPersp.scaleOf": {
+    "ar": "gmknas",
+    "de": "gmknas",
+    "fr": "gmknas",
+    "ja": "gmknas",
+    "ru": "gmknas",
+    "zh-CN": "gmknas"
+  },
+  "graphPersp.size": {
+    "ar": "1a4x3zw",
+    "de": "1a4x3zw",
+    "fr": "1a4x3zw",
+    "ja": "1a4x3zw",
+    "ru": "1a4x3zw",
+    "zh-CN": "1a4x3zw"
+  },
+  "graphPersp.size.degree": {
+    "ar": "u9wja7",
+    "de": "u9wja7",
+    "fr": "u9wja7",
+    "ja": "u9wja7",
+    "ru": "u9wja7",
+    "zh-CN": "u9wja7"
+  },
+  "graphPersp.size.fixed": {
+    "ar": "pkncex",
+    "de": "pkncex",
+    "fr": "pkncex",
+    "ja": "pkncex",
+    "ru": "pkncex",
+    "zh-CN": "pkncex"
+  },
+  "graphPersp.sizeOf": {
+    "ar": "19rpjvt",
+    "de": "19rpjvt",
+    "fr": "19rpjvt",
+    "ja": "19rpjvt",
+    "ru": "19rpjvt",
+    "zh-CN": "19rpjvt"
+  },
+  "graphPersp.stats": {
+    "ar": "l7rc9n",
+    "de": "l7rc9n",
+    "fr": "l7rc9n",
+    "ja": "l7rc9n",
+    "ru": "l7rc9n",
+    "zh-CN": "l7rc9n"
+  },
+  "graphPersp.style": {
+    "ar": "zaknfh",
+    "de": "zaknfh",
+    "fr": "zaknfh",
+    "ja": "zaknfh",
+    "ru": "zaknfh",
+    "zh-CN": "zaknfh"
+  },
+  "graphPersp.toolbar": {
+    "ar": "o988cc",
+    "de": "o988cc",
+    "fr": "o988cc",
+    "ja": "o988cc",
+    "ru": "o988cc",
+    "zh-CN": "o988cc"
+  },
+  "graphPersp.undo": {
+    "ar": "vmlwpb",
+    "de": "vmlwpb",
+    "fr": "vmlwpb",
+    "ja": "vmlwpb",
+    "ru": "vmlwpb",
+    "zh-CN": "vmlwpb"
+  },
+  "graphPersp.update": {
+    "ar": "y8pin9",
+    "de": "y8pin9",
+    "fr": "y8pin9",
+    "ja": "y8pin9",
+    "ru": "y8pin9",
+    "zh-CN": "y8pin9"
+  },
+  "graphPersp.view": {
+    "ar": "4i3dh",
+    "de": "4i3dh",
+    "fr": "4i3dh",
+    "ja": "4i3dh",
+    "ru": "4i3dh",
+    "zh-CN": "4i3dh"
   },
   "hl.scan": {
     "ar": "qb0k9u",
@@ -1701,6 +2005,14 @@
     "ja": "1qjiuwu",
     "ru": "1qjiuwu",
     "zh-CN": "1qjiuwu"
+  },
+  "query.openAsGraph": {
+    "ar": "gzj9xz",
+    "de": "gzj9xz",
+    "fr": "gzj9xz",
+    "ja": "gzj9xz",
+    "ru": "gzj9xz",
+    "zh-CN": "gzj9xz"
   },
   "screenshotNote.byModel": {
     "ar": "2ujuaq",
