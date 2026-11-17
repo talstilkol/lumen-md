@@ -33,6 +33,8 @@ export interface GraphCanvasProps {
   compact?: boolean;
   /** Re-fit the view when this changes (a new graph, not a layout frame). */
   fitKey: string | number;
+  /** W13.G8: drawn under the labels in screen space (cluster hulls); `at` maps world to screen. */
+  underlay?: (ctx: CanvasRenderingContext2D, at: (x: number, y: number) => { x: number; y: number }) => void;
 }
 
 /** While zooming or panning a graph with more links than this, frames draw a sample of them. */
@@ -78,6 +80,7 @@ export function GraphCanvas(props: GraphCanvasProps) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
     const v = view.current;
+    props.underlay?.(ctx, (x, y) => toScreen(v, w, h, x, y));
     const tl = toWorld(v, w, h, 0, 0);
     const br = toWorld(v, w, h, w, h);
     // Visible nodes, biggest first; plus the focused / hovered note and its neighbours.
@@ -108,7 +111,7 @@ export function GraphCanvas(props: GraphCanvasProps) {
       ctx.direction = RTL.test(label) ? "rtl" : "ltr";
       ctx.fillText(label.length > 40 ? `${label.slice(0, 38)}…` : label, p.x, p.y - Math.max(3, sizes[i] * v.scale) - 2);
     }
-  }, [positions, labels, sizes, neighbors, focus, hover, n, compact, labelColor]);
+  }, [positions, labels, sizes, neighbors, focus, hover, n, compact, labelColor, props.underlay]);
 
   const schedule = useCallback(() => {
     if (frame.current) return;

@@ -8956,6 +8956,136 @@
       "vars": []
     },
     {
+      "key": "graphClusters.again",
+      "en": "Analyse again",
+      "vars": []
+    },
+    {
+      "key": "graphClusters.bridge",
+      "en": "Proposed link:",
+      "vars": []
+    },
+    {
+      "key": "graphClusters.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "graphClusters.clusters",
+      "en": "Clusters",
+      "vars": []
+    },
+    {
+      "key": "graphClusters.done",
+      "en": "Clusters: {clusters} · gaps: {gaps}",
+      "vars": [
+        "clusters",
+        "gaps"
+      ]
+    },
+    {
+      "key": "graphClusters.failed",
+      "en": "The analysis did not finish: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "graphClusters.gapWhy",
+      "en": "Shared words: {shared} · {links} links where about {expected} would be expected",
+      "vars": [
+        "shared",
+        "links",
+        "expected"
+      ]
+    },
+    {
+      "key": "graphClusters.gaps",
+      "en": "Gaps: related, but barely linked",
+      "vars": []
+    },
+    {
+      "key": "graphClusters.intro",
+      "en": "Finds the groups your notes form, names each by its most telling words, and points out groups about related things that barely link. A link is added only after you approve it in the review panel.",
+      "vars": []
+    },
+    {
+      "key": "graphClusters.modularity",
+      "en": "Modularity {q} · {clusters} clusters shown of {communities} communities",
+      "vars": [
+        "q",
+        "clusters",
+        "communities"
+      ]
+    },
+    {
+      "key": "graphClusters.noGaps",
+      "en": "No gaps: every pair of related clusters is linked.",
+      "vars": []
+    },
+    {
+      "key": "graphClusters.propose",
+      "en": "Propose links for review ({n})",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "graphClusters.run",
+      "en": "Find clusters and gaps",
+      "vars": []
+    },
+    {
+      "key": "graphClusters.seeAlso",
+      "en": "See also: {link} (shared: {terms})",
+      "vars": [
+        "link",
+        "terms"
+      ]
+    },
+    {
+      "key": "graphClusters.size",
+      "en": "{n} notes",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "graphClusters.staged",
+      "en": "Links proposed: {n}. Approve or reject each in the review panel.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "graphClusters.summary",
+      "en": "Link “{from}” to “{to}” across a gap between clusters",
+      "vars": [
+        "from",
+        "to"
+      ]
+    },
+    {
+      "key": "graphClusters.title",
+      "en": "Clusters and gaps",
+      "vars": []
+    },
+    {
+      "key": "graphClusters.toggle",
+      "en": "Clusters and gaps",
+      "vars": []
+    },
+    {
+      "key": "graphClusters.unnamed",
+      "en": "(no telling words)",
+      "vars": []
+    },
+    {
+      "key": "graphClusters.working",
+      "en": "Reading the notes and finding clusters…",
+      "vars": []
+    },
+    {
       "key": "havruta.add",
       "en": "Add note",
       "vars": []
