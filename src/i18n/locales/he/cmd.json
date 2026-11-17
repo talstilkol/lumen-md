@@ -194,6 +194,8 @@
   "cmd.file.exportRtf.hint": "פתיח ב-Pages, Word, TextEdit",
   "cmd.file.exportSite": "ייצוא לאתר סטטי",
   "cmd.file.exportSite.hint": "אתר HTML רב-עמודים עם ניווט צד + RSS (עמודים מפוצלים לפי H1)",
+  "cmd.file.exportTypst": "ייצוא ל-Typst ‏(‎.typ)",
+  "cmd.file.exportTypst.hint": "מקור Typst עם עברית מימין לשמאל; מקמפלים אותו עם typst",
   "cmd.file.new": "מסמך חדש",
   "cmd.file.notePassword": "סיסמת פתק…",
   "cmd.file.notePassword.hint": "נעילת הפתק הזה בסיסמה משלו",

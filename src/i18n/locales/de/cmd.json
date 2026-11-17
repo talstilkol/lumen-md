@@ -194,6 +194,8 @@
   "cmd.file.exportRtf.hint": "Rich Text Format — öffnet in Pages, Word, TextEdit",
   "cmd.file.exportSite": "Als statische Website exportieren",
   "cmd.file.exportSite.hint": "Mehrseitige HTML-Website mit Seitenleiste + RSS (Seiten bei H1 getrennt)",
+  "cmd.file.exportTypst": "Exportieren to Typst (.typ)",
+  "cmd.file.exportTypst.hint": "Typst-Quelle mit Hebräisch von rechts nach links; mit typst kompilieren",
   "cmd.file.new": "Neu document",
   "cmd.file.notePassword": "Notizpasswort…",
   "cmd.file.notePassword.hint": "diese Notiz mit einem eigenen Passwort sperren",

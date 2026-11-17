@@ -176,6 +176,15 @@ export function buildExportCommands({ handleExportHtml, liveDoc, getEditorView }
       action: () => exportAs(liveDoc(), "latex"),
     },
     {
+      id: "file.exportTypst",
+      label: t("cmd.file.exportTypst"),
+      hint: t("cmd.file.exportTypst.hint"),
+      icon: cmdIcons.Download,
+      group: t("group.file"),
+      // Snapshot first: a tab switch while the chunk loads must not export another note.
+      action: () => exportAs(liveDoc(), "typst"),
+    },
+    {
       id: "file.exportRst",
       label: t("cmd.file.exportRst"),
       hint: t("cmd.file.exportRst.hint"),

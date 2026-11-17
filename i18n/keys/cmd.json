@@ -981,6 +981,16 @@
       "vars": []
     },
     {
+      "key": "cmd.file.exportTypst",
+      "en": "Export to Typst (.typ)",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportTypst.hint",
+      "en": "Typst source with Hebrew right to left; compile it with typst",
+      "vars": []
+    },
+    {
       "key": "cmd.file.new",
       "en": "New document",
       "vars": []

@@ -194,6 +194,8 @@
   "cmd.file.exportRtf.hint": "リッチテキスト形式 — Pages、Word、TextEdit で開けます",
   "cmd.file.exportSite": "静的サイトにエクスポート",
   "cmd.file.exportSite.hint": "サイドバーナビと RSS 付きの複数ページ HTML サイト (H1 でページを分割)",
+  "cmd.file.exportTypst": "エクスポート to Typst (.typ)",
+  "cmd.file.exportTypst.hint": "ヘブライ語を右から左に組む Typst ソース (typst でコンパイル)",
   "cmd.file.new": "新規 document",
   "cmd.file.notePassword": "ノートのパスワード…",
   "cmd.file.notePassword.hint": "このノートを専用のパスワードでロック",

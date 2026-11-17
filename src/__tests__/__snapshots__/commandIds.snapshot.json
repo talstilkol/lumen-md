@@ -120,6 +120,13 @@
       "icon": "Download"
     },
     {
+      "id": "file.exportTypst",
+      "label": "Export to Typst (.typ)",
+      "group": "File",
+      "hint": "Typst source with Hebrew right to left; compile it with typst",
+      "icon": "Download"
+    },
+    {
       "id": "file.exportRst",
       "label": "Export to reStructuredText",
       "group": "File",
@@ -2192,6 +2199,13 @@
       "label": "Export to LaTeX (.tex)",
       "group": "File",
       "hint": "Article-class LaTeX with hyperref + listings",
+      "icon": "Download"
+    },
+    {
+      "id": "file.exportTypst",
+      "label": "Export to Typst (.typ)",
+      "group": "File",
+      "hint": "Typst source with Hebrew right to left; compile it with typst",
       "icon": "Download"
     },
     {
@@ -4274,6 +4288,7 @@
     "file.exportRtf",
     "file.exportMarkdownAiMarks",
     "file.exportLatex",
+    "file.exportTypst",
     "file.exportRst",
     "file.exportAdoc",
     "file.exportOrg",

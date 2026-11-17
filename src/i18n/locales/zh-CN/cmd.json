@@ -194,6 +194,8 @@
   "cmd.file.exportRtf.hint": "富文本格式 — 可在 Pages、Word、TextEdit 中打开",
   "cmd.file.exportSite": "导出为静态网站",
   "cmd.file.exportSite.hint": "带侧边栏导航和 RSS 的多页 HTML 网站(按 H1 拆分页面)",
+  "cmd.file.exportTypst": "导出 to Typst (.typ)",
+  "cmd.file.exportTypst.hint": "希伯来语从右到左的 Typst 源文件,用 typst 编译",
   "cmd.file.new": "新建 document",
   "cmd.file.notePassword": "笔记密码…",
   "cmd.file.notePassword.hint": "用单独的密码锁定此笔记",

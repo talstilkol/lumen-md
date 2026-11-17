@@ -194,6 +194,8 @@
   "cmd.file.exportRtf.hint": "Rich Text Format — открывается в Pages, Word, TextEdit",
   "cmd.file.exportSite": "Экспорт в статический сайт",
   "cmd.file.exportSite.hint": "Многостраничный HTML-сайт с боковой навигацией и RSS (страницы разбиваются по H1)",
+  "cmd.file.exportTypst": "Экспорт to Typst (.typ)",
+  "cmd.file.exportTypst.hint": "Исходник Typst с ивритом справа налево; компилируется typst",
   "cmd.file.new": "Новый document",
   "cmd.file.notePassword": "Пароль заметки…",
   "cmd.file.notePassword.hint": "защитить эту заметку отдельным паролем",

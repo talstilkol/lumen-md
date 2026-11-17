@@ -194,6 +194,8 @@
   "cmd.file.exportRtf.hint": "Rich Text Format — s'ouvre dans Pages, Word, TextEdit",
   "cmd.file.exportSite": "Exporter en site statique",
   "cmd.file.exportSite.hint": "Site HTML multi-pages avec navigation latérale + RSS (pages découpées sur les H1)",
+  "cmd.file.exportTypst": "Exporter to Typst (.typ)",
+  "cmd.file.exportTypst.hint": "Source Typst avec l'hébreu de droite à gauche ; à compiler avec typst",
   "cmd.file.new": "Nouveau document",
   "cmd.file.notePassword": "Mot de passe de la note…",
   "cmd.file.notePassword.hint": "verrouiller cette note avec son propre mot de passe",

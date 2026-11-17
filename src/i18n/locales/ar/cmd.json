@@ -194,6 +194,8 @@
   "cmd.file.exportRtf.hint": "Rich Text Format — يُفتح في Pages وWord وTextEdit",
   "cmd.file.exportSite": "تصدير كموقع ثابت",
   "cmd.file.exportSite.hint": "موقع HTML متعدد الصفحات مع تنقل جانبي وRSS (تُقسَّم الصفحات عند H1)",
+  "cmd.file.exportTypst": "تصدير to Typst (.typ)",
+  "cmd.file.exportTypst.hint": "مصدر Typst مع العبرية من اليمين إلى اليسار؛ يُترجَم بـ typst",
   "cmd.file.new": "جديد document",
   "cmd.file.notePassword": "كلمة مرور الملاحظة…",
   "cmd.file.notePassword.hint": "قفل هذه الملاحظة بكلمة مرور خاصة بها",
