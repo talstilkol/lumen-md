@@ -458,6 +458,42 @@
       "vars": []
     },
     {
+      "key": "agentMemory.intro",
+      "en": "Facts you approved live in {file} in your vault: read it, edit it, delete a line to forget. An agent adds a fact only through the review screen, and reads the file only if you allow it here.",
+      "vars": [
+        "file"
+      ]
+    },
+    {
+      "key": "agentMemory.readers",
+      "en": "Agents that may read it",
+      "vars": []
+    },
+    {
+      "key": "agentMemory.reads.none",
+      "en": "No agent has read the agent memory.",
+      "vars": []
+    },
+    {
+      "key": "agentMemory.reads.row",
+      "en": "{agent} read {n} facts · {time}",
+      "vars": [
+        "agent",
+        "n",
+        "time"
+      ]
+    },
+    {
+      "key": "agentMemory.reads.title",
+      "en": "When agents read the agent memory",
+      "vars": []
+    },
+    {
+      "key": "agentMemory.title",
+      "en": "Agent memory",
+      "vars": []
+    },
+    {
       "key": "agentReview.approve",
       "en": "Approve",
       "vars": []
@@ -14863,6 +14899,100 @@
       "vars": []
     },
     {
+      "key": "modelCard.benchmark",
+      "en": "How Lumen is measured: the public benchmark page",
+      "vars": []
+    },
+    {
+      "key": "modelCard.ci",
+      "en": "95% interval {lo}–{hi}",
+      "vars": [
+        "lo",
+        "hi"
+      ]
+    },
+    {
+      "key": "modelCard.dataset",
+      "en": "Dataset",
+      "vars": []
+    },
+    {
+      "key": "modelCard.dateUnknown",
+      "en": "date unknown",
+      "vars": []
+    },
+    {
+      "key": "modelCard.evalModel",
+      "en": "evaluated with",
+      "vars": []
+    },
+    {
+      "key": "modelCard.licence",
+      "en": "Licence",
+      "vars": []
+    },
+    {
+      "key": "modelCard.licenceUnknown",
+      "en": "Not in the model list",
+      "vars": []
+    },
+    {
+      "key": "modelCard.measuredOn",
+      "en": "measured {date}",
+      "vars": [
+        "date"
+      ]
+    },
+    {
+      "key": "modelCard.model",
+      "en": "Model",
+      "vars": []
+    },
+    {
+      "key": "modelCard.modelFromSettings",
+      "en": "The model chosen in Settings > AI",
+      "vars": []
+    },
+    {
+      "key": "modelCard.n",
+      "en": "{n} items",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "modelCard.notMeasured",
+      "en": "Not measured: no eval card for this agent yet.",
+      "vars": []
+    },
+    {
+      "key": "modelCard.open",
+      "en": "Model card",
+      "vars": []
+    },
+    {
+      "key": "modelCard.tag.dev",
+      "en": "Developer set (written by us, not a quality claim)",
+      "vars": []
+    },
+    {
+      "key": "modelCard.tag.heldout",
+      "en": "Held-out set",
+      "vars": []
+    },
+    {
+      "key": "modelCard.tag.public",
+      "en": "Public benchmark",
+      "vars": []
+    },
+    {
+      "key": "modelCard.title",
+      "en": "Model card: {agent}",
+      "vars": [
+        "agent"
+      ]
+    },
+    {
       "key": "modelSources.about",
       "en": "Models download from Hugging Face first, then from Lumen's mirror, then from your own copy. Every file is checked against its checksum in the model registry, whichever source it came from.",
       "vars": []
@@ -16475,6 +16605,76 @@
     {
       "key": "organizer.title",
       "en": "Organize the vault",
+      "vars": []
+    },
+    {
+      "key": "outcomes.clear",
+      "en": "Clear the counts",
+      "vars": []
+    },
+    {
+      "key": "outcomes.col.accepted",
+      "en": "Accepted",
+      "vars": []
+    },
+    {
+      "key": "outcomes.col.agent",
+      "en": "Agent",
+      "vars": []
+    },
+    {
+      "key": "outcomes.col.cancelled",
+      "en": "Cancelled",
+      "vars": []
+    },
+    {
+      "key": "outcomes.col.edited",
+      "en": "Edited first",
+      "vars": []
+    },
+    {
+      "key": "outcomes.col.median",
+      "en": "Time to decide",
+      "vars": []
+    },
+    {
+      "key": "outcomes.col.proposed",
+      "en": "Proposed",
+      "vars": []
+    },
+    {
+      "key": "outcomes.col.rejected",
+      "en": "Rejected",
+      "vars": []
+    },
+    {
+      "key": "outcomes.flagged",
+      "en": "For eval review",
+      "vars": []
+    },
+    {
+      "key": "outcomes.intro",
+      "en": "Counted on this device only, from the review screen. An agent accepted less than {below} of the time after {min} decisions is marked for the eval to check.",
+      "vars": [
+        "below",
+        "min"
+      ]
+    },
+    {
+      "key": "outcomes.seconds",
+      "en": "{n} s",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "outcomes.share",
+      "en": "Include these counts in the weekly usage report I send",
+      "vars": []
+    },
+    {
+      "key": "outcomes.title",
+      "en": "What happens to each agent's suggestions",
       "vars": []
     },
     {

@@ -170,6 +170,7 @@
   "privacy.secretCopy.hint": "Copied as a secret: marked sensitive, and cleared from the clipboard after 60 seconds",
   "privacy.staticAssets": "Static files: {n}",
   "privacy.tab.mcp": "MCP clients",
+  "privacy.tab.memory": "Agent memory",
   "privacy.tab.requests": "Network requests",
   "privacy.title": "Privacy ledger",
   "runtimeMetrics.clear": "Clear",

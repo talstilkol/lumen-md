@@ -914,6 +914,11 @@
       "vars": []
     },
     {
+      "key": "privacy.tab.memory",
+      "en": "Agent memory",
+      "vars": []
+    },
+    {
       "key": "privacy.tab.requests",
       "en": "Network requests",
       "vars": []
