@@ -8,7 +8,7 @@ import type { ReadingModeId, ReadingProfile } from "./settings";
 
 export interface ReadingModeDef {
   id: ReadingModeId;
-  /** i18n keys (src/i18n/lazy/readingMode.json). */
+  /** i18n keys (the readingMode lazy chunk, ./readingModeStrings.ts). */
   label: string;
   hint: string;
   /** Shown with an "experimental" badge and a link to the research. */

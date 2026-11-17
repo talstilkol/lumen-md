@@ -9,7 +9,6 @@
 import { useEffect, useState, type KeyboardEvent } from "react";
 import { registerEnglish, t } from "../i18n";
 import english from "../i18n/lazy/bilingual.json";
-import "../ai/mt/strings";
 import { BILINGUAL_MODES, readMode, saveMode, type Bilingual, type BilingualMode } from "../reading/bilingual/bilingual";
 
 registerEnglish(english);

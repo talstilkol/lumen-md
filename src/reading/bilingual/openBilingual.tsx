@@ -5,14 +5,15 @@
  * translation, which makes a sidecar. Reads the vault only; no request.
  */
 import { createRoot, type Root } from "react-dom/client";
-import { registerEnglish, t } from "../../i18n";
-import english from "../../i18n/lazy/bilingual.json";
+import { t } from "../../i18n";
 import { useAppStore } from "../../store/useStore";
 import { Modal } from "../../ui/Modal";
 import { BilingualView } from "../../ui/BilingualView";
+// The machine translation layers' names (mt.layer.name.*), which the view shows: the mt strings load with this opener.
+import "../../ai/mt/strings";
 import { fromSidecar, fromSourceNote, type Bilingual } from "./bilingual";
 
-registerEnglish(english);
+// The English of this view comes with ../../ui/BilingualView (its strings, registered when it loads).
 
 let mounted: { root: Root; host: HTMLElement } | null = null;
 

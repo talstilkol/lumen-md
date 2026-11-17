@@ -12,6 +12,8 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { createRoot } from "react-dom/client";
 import "../reading/immersiveStrings";
+// The line-focus names are the reading menu's (the readingMode chunk).
+import "../reading/readingModeStrings";
 import { getLocale, t } from "../i18n";
 import { useAppStore } from "../store/useStore";
 import { immersiveParagraphs, lexiconTranslation, syllables, POS_COLORS } from "../reading/immersive";

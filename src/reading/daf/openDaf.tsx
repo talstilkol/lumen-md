@@ -7,14 +7,13 @@
  * from the vault: no request is made. The note is never changed.
  */
 import { createRoot, type Root } from "react-dom/client";
-import { registerEnglish, t } from "../../i18n";
-import english from "../../i18n/lazy/daf.json";
+import { t } from "../../i18n";
 import { useAppStore } from "../../store/useStore";
 import { Modal } from "../../ui/Modal";
 import { DafView, type DafChoice, type DafNoteRef } from "../../ui/DafView";
 import { commentaryFromNote, dafFromNote, defaultCommentaryPaths, type DafText } from "./dafSources";
 
-registerEnglish(english);
+// The English of this view comes with ../../ui/DafView (its strings, registered when it loads).
 
 let mounted: { root: Root; host: HTMLElement } | null = null;
 

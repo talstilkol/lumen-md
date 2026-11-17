@@ -1,6 +1,7 @@
 import React, { useEffect, useCallback, useRef } from "react";
 import { t } from "../i18n";
-import { FocusLayerBar } from "./FocusLayerBar";
+// W13.R2's controls load with their strings (the focusLayer lazy chunk), after focus mode itself.
+const FocusLayerBar = React.lazy(() => import("./FocusLayerBar").then((m) => ({ default: m.FocusLayerBar })));
 
 /**
  * FocusMode overlay.
@@ -76,7 +77,9 @@ export function FocusMode({ active, onExit, children }: Props) {
           if (!e.currentTarget.contains(e.relatedTarget as Node | null)) (e.currentTarget as HTMLElement).style.opacity = "0.3";
         }}
       >
-        <FocusLayerBar area={areaRef} />
+        <React.Suspense fallback={null}>
+          <FocusLayerBar area={areaRef} />
+        </React.Suspense>
         <button
           onClick={onExit}
           title={t("focusMode.exit")}

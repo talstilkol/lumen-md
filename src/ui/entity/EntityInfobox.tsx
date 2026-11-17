@@ -8,7 +8,6 @@
 import { useEffect, useId, useState } from "react";
 import { t } from "../../i18n";
 import type { InfoboxModel, InfoValue } from "../../entities/infobox";
-import "../entityGraphStrings";
 import "./entityInfobox.css";
 
 export interface EntityInfoboxProps {

@@ -16,6 +16,8 @@ import { ENTITY_ROOT, type Edge, type Entity } from "../../entities/model";
 import { parseEntityNote } from "../../entities/notes";
 import { EDGES_PATH, readEdges } from "../../entities/store";
 import { EntityInfobox } from "./EntityInfobox";
+// The infobox's strings (the entityGraph lazy chunk) load with this block, the only way the infobox is shown.
+import "../entityGraphStrings";
 
 export interface EntityContext {
   entities: Map<string, Entity>;
