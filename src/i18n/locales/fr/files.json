@@ -313,6 +313,8 @@
   "vault.export.folder": "Dans un dossier de cet ordinateur",
   "vault.export.where": "Exporter en…",
   "vault.export.zip": "Un fichier .zip",
+  "vault.exportEverything.done": "{n} fichiers exportés avec manifest.json (SHA-256 de chacun) et OBSIDIAN.md.",
+  "vault.exportEverything.failed": "L’export n’a pas abouti : {error}",
   "vault.folder.alreadyBrowser": "Le coffre est déjà dans le stockage du navigateur.",
   "vault.folder.browserStorage": "stockage du navigateur",
   "vault.folder.cancelMove": "Annuler le déplacement",

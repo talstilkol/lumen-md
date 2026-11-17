@@ -409,5 +409,21 @@
   },
   "vault.folder.restoring": {
     "fa": "1vhydj6"
+  },
+  "vault.exportEverything.done": {
+    "ar": "16upmkw",
+    "de": "16upmkw",
+    "fr": "16upmkw",
+    "ja": "16upmkw",
+    "ru": "16upmkw",
+    "zh-CN": "16upmkw"
+  },
+  "vault.exportEverything.failed": {
+    "ar": "y4up0l",
+    "de": "y4up0l",
+    "fr": "y4up0l",
+    "ja": "y4up0l",
+    "ru": "y4up0l",
+    "zh-CN": "y4up0l"
   }
 }

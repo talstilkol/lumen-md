@@ -60,6 +60,8 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   // playground and live-js blocks (lazily rendered) say why they don't run while it is on.
   // W13.P1: the lock screen's English travels with its chunk.
   "appLock.json": { module: "privacy/appLockStrings.ts", users: ["privacy/appLockUi.tsx"], prefixes: ["appLock."] },
+  // W13.P4: the on-device data inventory's English travels with its dialog.
+  "localData.json": { module: "privacy/localDataStrings.ts", users: ["privacy/LocalDataDialog.tsx"], prefixes: ["localData."] },
   "airplane.json": { module: "privacy/airplaneStrings.ts", users: ["plugins/LiveJsBlock.tsx", "plugins/PlaygroundBlock.tsx", "privacy/NetworkMonitor.tsx"], prefixes: ["airplane."] },
   // The Hebrew lexicon (plan W5.26): its popover and palette actions, both loaded with a dynamic import.
   "lexicon.json": { module: "lexicon/strings.ts", users: ["lexicon/LexiconPopover.tsx", "lexicon/commands.ts"], prefixes: ["lexicon."] },

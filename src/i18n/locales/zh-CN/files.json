@@ -313,6 +313,8 @@
   "vault.export.folder": "到此电脑上的文件夹",
   "vault.export.where": "导出为…",
   "vault.export.zip": "一个 .zip 文件",
+  "vault.exportEverything.done": "已导出 {n} 个文件，附 manifest.json（每个文件的 SHA-256）和 OBSIDIAN.md。",
+  "vault.exportEverything.failed": "导出未完成：{error}",
   "vault.folder.alreadyBrowser": "库已经在浏览器存储中。",
   "vault.folder.browserStorage": "浏览器存储",
   "vault.folder.cancelMove": "取消移动",

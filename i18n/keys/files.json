@@ -1796,6 +1796,20 @@
       "vars": []
     },
     {
+      "key": "vault.exportEverything.done",
+      "en": "Exported {n} files with manifest.json (SHA-256 of each) and OBSIDIAN.md.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "vault.exportEverything.failed",
+      "en": "The export did not finish: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
       "key": "vault.folder.alreadyBrowser",
       "en": "The vault is already in browser storage.",
       "vars": []

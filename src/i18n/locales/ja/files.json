@@ -313,6 +313,8 @@
   "vault.export.folder": "このコンピュータのフォルダへ",
   "vault.export.where": "書き出し方法…",
   "vault.export.zip": "1つの .zip ファイル",
+  "vault.exportEverything.done": "{n} 件のファイルを manifest.json（各 SHA-256）と OBSIDIAN.md 付きで書き出しました。",
+  "vault.exportEverything.failed": "書き出しが完了しませんでした: {error}",
   "vault.folder.alreadyBrowser": "保管庫はすでにブラウザーストレージにあります。",
   "vault.folder.browserStorage": "ブラウザーストレージ",
   "vault.folder.cancelMove": "移動をキャンセル",

@@ -906,6 +906,13 @@
       "icon": "Save"
     },
     {
+      "id": "vault.exportEverything",
+      "label": "Vault: export everything (exit test)",
+      "group": "File",
+      "hint": "Notes, attachments, history, settings and AI profiles in open formats, with a SHA-256 manifest and what Obsidian shows differently",
+      "icon": "Save"
+    },
+    {
       "id": "vault.import",
       "label": "Import notes from another app (Obsidian, Notion, Evernote, Bear, Keep, Logseq, OneNote…)…",
       "group": "File",
@@ -1409,6 +1416,13 @@
       "label": "Airplane mode (no network)…",
       "group": "Security",
       "hint": "Off: stop every network request and list every attempt",
+      "icon": "Network"
+    },
+    {
+      "id": "privacy.localData",
+      "label": "Privacy: what is stored on this device",
+      "group": "Security",
+      "hint": "Sizes per category; delete each one, or everything; save the report",
       "icon": "Network"
     },
     {
@@ -3454,6 +3468,13 @@
       "icon": "Save"
     },
     {
+      "id": "vault.exportEverything",
+      "label": "Vault: export everything (exit test)",
+      "group": "File",
+      "hint": "Notes, attachments, history, settings and AI profiles in open formats, with a SHA-256 manifest and what Obsidian shows differently",
+      "icon": "Save"
+    },
+    {
       "id": "vault.import",
       "label": "Import notes from another app (Obsidian, Notion, Evernote, Bear, Keep, Logseq, OneNote…)…",
       "group": "File",
@@ -4006,6 +4027,13 @@
       "label": "Airplane mode (no network)…",
       "group": "Security",
       "hint": "Off: stop every network request and list every attempt",
+      "icon": "Network"
+    },
+    {
+      "id": "privacy.localData",
+      "label": "Privacy: what is stored on this device",
+      "group": "Security",
+      "hint": "Sizes per category; delete each one, or everything; save the report",
       "icon": "Network"
     },
     {
@@ -5319,6 +5347,7 @@
     "arabic.removeTashkeel",
     "vault.backups",
     "vault.export",
+    "vault.exportEverything",
     "vault.import",
     "app.install",
     "vault.importUndo",
@@ -5392,6 +5421,7 @@
     "view.readingOptions",
     "privacy.appLock",
     "privacy.airplane",
+    "privacy.localData",
     "privacy.networkMonitor",
     "template.meeting-notes",
     "template.blog-post",

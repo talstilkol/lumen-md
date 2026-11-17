@@ -893,5 +893,37 @@
     "ja": "1bb6whw",
     "ru": "1bb6whw",
     "zh-CN": "1bb6whw"
+  },
+  "cmd.privacy.localData": {
+    "ar": "uzfx7n",
+    "de": "uzfx7n",
+    "fr": "uzfx7n",
+    "ja": "uzfx7n",
+    "ru": "uzfx7n",
+    "zh-CN": "uzfx7n"
+  },
+  "cmd.privacy.localData.hint": {
+    "ar": "1fmc95s",
+    "de": "1fmc95s",
+    "fr": "1fmc95s",
+    "ja": "1fmc95s",
+    "ru": "1fmc95s",
+    "zh-CN": "1fmc95s"
+  },
+  "cmd.vault.exportEverything": {
+    "ar": "1ij7bnn",
+    "de": "1ij7bnn",
+    "fr": "1ij7bnn",
+    "ja": "1ij7bnn",
+    "ru": "1ij7bnn",
+    "zh-CN": "1ij7bnn"
+  },
+  "cmd.vault.exportEverything.hint": {
+    "ar": "j6a11n",
+    "de": "j6a11n",
+    "fr": "j6a11n",
+    "ja": "j6a11n",
+    "ru": "j6a11n",
+    "zh-CN": "j6a11n"
   }
 }

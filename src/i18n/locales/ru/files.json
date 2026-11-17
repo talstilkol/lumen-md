@@ -313,6 +313,8 @@
   "vault.export.folder": "В папку на этом компьютере",
   "vault.export.where": "Экспортировать как…",
   "vault.export.zip": "Один .zip",
+  "vault.exportEverything.done": "Экспортировано файлов: {n}, с manifest.json (SHA-256 каждого) и OBSIDIAN.md.",
+  "vault.exportEverything.failed": "Экспорт не завершён: {error}",
   "vault.folder.alreadyBrowser": "Хранилище уже в памяти браузера.",
   "vault.folder.browserStorage": "память браузера",
   "vault.folder.cancelMove": "Отменить перемещение",

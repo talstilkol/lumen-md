@@ -313,6 +313,8 @@
   "vault.export.folder": "לתיקייה במחשב",
   "vault.export.where": "לייצא כ…",
   "vault.export.zip": "קובץ zip אחד",
+  "vault.exportEverything.done": "יוצאו {n} קבצים עם manifest.json ‏(SHA-256 לכל קובץ) ו-OBSIDIAN.md.",
+  "vault.exportEverything.failed": "הייצוא לא הסתיים: {error}",
   "vault.folder.alreadyBrowser": "הכספת כבר נמצאת באחסון הדפדפן.",
   "vault.folder.browserStorage": "אחסון הדפדפן",
   "vault.folder.cancelMove": "ביטול ההעברה",
