@@ -13,7 +13,7 @@ const MCP = "https://mcp.example.com/mcp";
 const AS = "https://auth.example.com";
 
 /** A mock MCP server + authorization server. Every request is logged. */
-function world(opts: { cimd?: boolean; dcr?: boolean; asIssuer?: string; prmResource?: string } = {}) {
+function world(opts: { cimd?: boolean; dcr?: boolean; asIssuer?: string; prmResource?: string; endpoints?: Record<string, string> } = {}) {
   const log: Array<{ url: string; method: string; body?: string; redirect?: string }> = [];
   const meta = {
     issuer: opts.asIssuer ?? AS,
@@ -23,6 +23,7 @@ function world(opts: { cimd?: boolean; dcr?: boolean; asIssuer?: string; prmReso
     code_challenge_methods_supported: ["S256"],
     ...(opts.cimd !== false ? { client_id_metadata_document_supported: true } : {}),
     ...(opts.dcr ? { registration_endpoint: `${AS}/register` } : {}),
+    ...opts.endpoints,
   };
   const fetchImpl: Fetch = async (url, init) => {
     log.push({ url, method: init?.method ?? "GET", body: init?.body as string | undefined, redirect: init?.redirect as string | undefined });
@@ -93,6 +94,31 @@ describe("discovery", () => {
     await expect(discover(MCP, world({ prmResource: "https://evil.example.com/mcp" }).fetchImpl)).rejects.toThrow(/not https:\/\/mcp\.example\.com\/mcp/);
     await expect(discover(MCP, world({ asIssuer: "https://evil.example.com" }).fetchImpl)).rejects.toThrow(/names https:\/\/evil\.example\.com/);
     await expect(discover(MCP, w.fetchImpl, 'Bearer resource_metadata="http://mcp.example.com/prm"')).rejects.toThrow(/https/);
+  });
+});
+
+describe("review 14 Low 1: every endpoint is https", () => {
+  it.each([
+    ["authorization_endpoint", "http://auth.example.com/authorize"],
+    ["token_endpoint", "http://auth.example.com/token"],
+    ["registration_endpoint", "http://auth.example.com/register"],
+    ["token_endpoint", "not a url"],
+  ])("an %s of %s is refused at discovery, and nothing is posted", async (k, v) => {
+    const w = world({ dcr: true, endpoints: { [k]: v } });
+    await expect(discover(MCP, w.fetchImpl)).rejects.toThrow(/https|not a URL/);
+    await expect(startAuthorization(MCP, { fetchImpl: w.fetchImpl, surface: "desktop", registry: new ClientRegistry(), allowLegacyDcr: true })).rejects.toThrow(/refused/);
+    expect(w.log.filter((l) => l.method === "POST")).toEqual([]);
+  });
+
+  it("a token request to an http endpoint is refused before it is sent (redeem and refresh)", async () => {
+    const w = world();
+    const started = await startAuthorization(MCP, { fetchImpl: w.fetchImpl, surface: "desktop", registry: new ClientRegistry() });
+    const plain = { ...w.meta, token_endpoint: "http://auth.example.com/token" };
+    const pending = { ...started.pending, tokenEndpoint: plain.token_endpoint };
+    const params = new URLSearchParams({ code: "c", state: started.pending.state, iss: AS });
+    await expect(finishAuthorization(params, pending, plain, w.fetchImpl)).rejects.toThrow(/token endpoint is not on https/);
+    await expect(refresh({ issuer: AS, resource: MCP, accessToken: "a", refreshToken: "r" }, plain, "cid", w.fetchImpl)).rejects.toThrow(/token endpoint is not on https/);
+    expect(w.calls("/token")).toEqual([]);
   });
 });
 

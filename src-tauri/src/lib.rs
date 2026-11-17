@@ -17,6 +17,10 @@ mod tectonic;
 // command needs the isolation app's allow-list (src-tauri/isolation/index.js), reviewed by its owner.
 #[allow(dead_code)]
 mod pandoc;
+// Review 14 Low 1: the MCP OAuth loopback redirect listener (std only, tested with rustc --test). Its Tauri
+// command is owed with the sign-in UI, for the same reason as Pandoc's: the isolation app's allow-list.
+#[allow(dead_code)]
+mod oauth_loopback;
 
 /// Build the native menu bar and emit `lumen-menu` events when an item fires.
 /// The frontend listens for these events in `useTauriMenu` and dispatches the
