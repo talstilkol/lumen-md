@@ -27,7 +27,8 @@
  */
 import { get as idbGet, set as idbSet } from "idb-keyval";
 import { withLedger } from "../ai/privacyLedger";
-import { verifyPluginSignature } from "./signing";
+import { verifyPluginSignature, verifyWithKey, fingerprintOf } from "./signing";
+import { decide, loadPolicies, policyRegistryKey, type LoadedPolicy } from "./policy";
 import type { Grants } from "./runtime/capabilities";
 import type { PluginManifest } from "./runtime/manifest";
 import type { PluginInstance } from "./runtime/pluginHost";
@@ -45,6 +46,7 @@ export type InstallRefusal =
   | "sha256-code"
   | "sha256-manifest"
   | "manifest"
+  | "policy"
   | "scan";
 
 export class InstallRefused extends Error {
@@ -105,6 +107,21 @@ export interface InstallDeps {
   fetch?: typeof fetch;
   /** For tests: the worker that hosts the QuickJS sandbox. */
   createWorker?: () => Worker;
+  /** W13.L4: the plugin policies in force. Default: this device's, then the vault's (`.lumen/plugin-policy.json`). */
+  policies?: LoadedPolicy[];
+}
+
+/** The policies in force for an install: given (tests), or read from this device and the open vault. */
+async function policiesFor(deps: InstallDeps): Promise<LoadedPolicy[]> {
+  if (deps.policies) return deps.policies;
+  const { readWorkspaceFile } = await import("../storage/workspace");
+  return loadPolicies(async (path) => {
+    try {
+      return await readWorkspaceFile(path);
+    } catch {
+      return null;
+    }
+  });
 }
 
 async function sha256Hex(bytes: Uint8Array): Promise<string> {
@@ -167,7 +184,7 @@ function parseIndex(bytes: Uint8Array): RegistryIndex {
  * Check a downloaded registry: the signature over the exact index bytes,
  * then its shape. Throws `InstallRefused`; returns the parsed index.
  */
-export async function verifyRegistry(indexBytes: Uint8Array, sigBytes: Uint8Array | null): Promise<RegistryIndex> {
+export async function verifyRegistry(indexBytes: Uint8Array, sigBytes: Uint8Array | null, policyKey?: { key: string } | null): Promise<RegistryIndex> {
   if (!sigBytes) throw new InstallRefused("registry-unsigned", "the registry has no index.json.sig");
   let sig: Partial<RegistrySignature>;
   try {
@@ -176,6 +193,12 @@ export async function verifyRegistry(indexBytes: Uint8Array, sigBytes: Uint8Arra
     throw new InstallRefused("registry-signature", "index.json.sig is not JSON");
   }
   if (sig.alg !== "Ed25519" || typeof sig.signature !== "string" || typeof sig.signedBy !== "string") throw new InstallRefused("registry-signature", "index.json.sig is not an Ed25519 signature");
+  // W13.L4: a private registry named by a policy in force is trusted with the key the policy gives for it, and only that key.
+  if (policyKey) {
+    if ((await fingerprintOf(policyKey.key).catch(() => "")) !== sig.signedBy) throw new InstallRefused("registry-untrusted-signer", `signed by ${sig.signedBy}, not the key the plugin policy names for this registry`);
+    if (!(await verifyWithKey(indexBytes, sig.signature, policyKey.key))) throw new InstallRefused("registry-signature", "the signature does not match index.json");
+    return parseIndex(indexBytes);
+  }
   const ok = await verifyPluginSignature(indexBytes, { signature: sig.signature, signedBy: sig.signedBy });
   if (ok === "untrusted-signer") throw new InstallRefused("registry-untrusted-signer", `signed by ${sig.signedBy}, a key this app does not trust`);
   if (ok !== true) throw new InstallRefused("registry-signature", "the signature does not match index.json");
@@ -209,7 +232,7 @@ export async function loadSignedRegistry(base: string, deps: InstallDeps = {}): 
   const indexBytes = await required(f, join(base, "index.json"));
   // No signature: a 404, or a dev server's HTML page for a missing file. Anything else that fails is an error.
   const sigBytes = await download(f, join(base, "index.json.sig"), { html: "absent" });
-  const index = await verifyRegistry(indexBytes, sigBytes);
+  const index = await verifyRegistry(indexBytes, sigBytes, policyRegistryKey(deps.policies ?? [], base));
   await checkSerial(base, index);
   return index;
 }
@@ -267,7 +290,11 @@ export interface InstallResult {
  * index.json, index.json.sig and one folder per version). The latest listed
  * version unless `version` is given.
  */
-export async function installFromRegistry(base: string, id: string, version?: string, deps: InstallDeps = {}): Promise<InstallResult> {
+export async function installFromRegistry(base: string, id: string, version?: string, deps0: InstallDeps = {}): Promise<InstallResult> {
+  const deps = { ...deps0, policies: await policiesFor(deps0) };
+  // W13.L4: a policy that cannot be read blocks everything, before any download.
+  const broken = decide(deps.policies, { id, version: version ?? "0.0.0", registry: base });
+  if (!broken.allowed && broken.rule === "invalid-policy") throw new InstallRefused("policy", broken.reason ?? "the plugin policy cannot be used");
   const index = await loadSignedRegistry(base, deps);
   const entry = index.plugins.find((p) => p.id === id);
   const live = entry ? installableVersions(entry.versions) : [];
@@ -277,6 +304,9 @@ export async function installFromRegistry(base: string, id: string, version?: st
     if (down && (version || !live.length)) throw new InstallRefused("delisted", `${id}@${down.version} was taken down after its review failed (${down.delisted!.rules.join(", ")})`);
     throw new InstallRefused("not-listed", `${id}${version ? `@${version}` : ""} is not in the signed registry`);
   }
+
+  const policy = decide(deps.policies, { id, version: v.version, registry: base });
+  if (!policy.allowed) throw new InstallRefused("policy", `${policy.reason}${policy.policyName ? ` (${policy.policyName})` : ""}`);
 
   const f = ledgerFetch(deps);
   const manifestBytes = await required(f, join(base, `${v.path}/lumen-plugin.json`));

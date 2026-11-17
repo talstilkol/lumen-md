@@ -135,7 +135,7 @@ export function pagesProblems(files) {
  * Check a built or hosted site. `get(path)` → Promise<Buffer|null>. `scanVersion({manifest, main, ui})` → the scan result.
  * Returns { ok, problems, versions } — every file's hash, SHA256SUMS, and a fresh scan of every listed version.
  */
-export async function verifySite({ get, scanVersion }) {
+export async function verifySite({ get, scanVersion, verifyAuthor = null, authorStatement = null }) {
   const problems = [];
   const raw = await get("v1/index.json");
   if (!raw) return { ok: false, problems: ["v1/index.json is missing"], versions: 0 };
@@ -163,6 +163,13 @@ export async function verifySite({ get, scanVersion }) {
       const r = await scanVersion({ manifest: manifestText, main: texts[v.main], ...(manifest.ui && texts[manifest.ui] !== undefined ? { ui: texts[manifest.ui] } : {}) });
       if (!r.passed) problems.push(`${p.id}@${v.version}: fails the scan here (${r.findings.map((f) => f.rule).join(", ")})`);
       if (r.id !== p.id || r.version !== v.version) problems.push(`${p.id}@${v.version}: the manifest says ${r.id}@${r.version}`);
+      // W13.L5: every version carries its author's Sigstore signature, by the GitHub account its manifest names.
+      if (verifyAuthor) {
+        const bundleText = texts["author.sigstore.json"] ?? (await get(at + "author.sigstore.json"))?.toString();
+        const statement = authorStatement({ id: p.id, version: v.version, manifestBytes: Buffer.from(manifestText), codeBytes: Buffer.from(texts[v.main]) });
+        const a = await verifyAuthor({ bundle: bundleText ? JSON.parse(bundleText) : null, statement, github: manifest.publisher?.github });
+        if (!a.ok) problems.push(`${p.id}@${v.version}: author: ${a.reason}`);
+      }
     }
   }
   const sums = await get("SHA256SUMS");

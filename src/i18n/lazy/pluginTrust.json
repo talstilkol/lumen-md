@@ -55,5 +55,11 @@
   "pluginTrust.bases.title": "“{name}” wants to change {n} notes",
   "pluginTrust.bases.body": "Properties: {properties}. Nothing is written unless you allow it.",
   "pluginTrust.bases.more": "…and {n} more",
-  "pluginTrust.bases.ok": "Change {n} notes"
+  "pluginTrust.bases.ok": "Change {n} notes",
+  "pluginTrust.policy.unnamed": "this vault",
+  "pluginTrust.policy.denied": "The plugin policy “{name}” blocks {id}.",
+  "pluginTrust.policy.notAllowed": "{id} {version} is not on the allow list of the plugin policy “{name}”.",
+  "pluginTrust.policy.registry": "The plugin policy “{name}” allows plugins only from its own registries.",
+  "pluginTrust.policy.invalid": "Plugins cannot be installed until whoever manages this vault fixes its plugin policy:",
+  "pluginTrust.verifiedAuthor": "Verified author: @{github} (signed with Sigstore)"
 }

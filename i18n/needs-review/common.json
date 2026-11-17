@@ -7317,5 +7317,53 @@
     "ja": "1ccwmzq",
     "ru": "1ccwmzq",
     "zh-CN": "1ccwmzq"
+  },
+  "pluginTrust.policy.unnamed": {
+    "ar": "111ow2d",
+    "de": "111ow2d",
+    "fr": "111ow2d",
+    "ja": "111ow2d",
+    "ru": "111ow2d",
+    "zh-CN": "111ow2d"
+  },
+  "pluginTrust.policy.denied": {
+    "ar": "1wi1eiq",
+    "de": "1wi1eiq",
+    "fr": "1wi1eiq",
+    "ja": "1wi1eiq",
+    "ru": "1wi1eiq",
+    "zh-CN": "1wi1eiq"
+  },
+  "pluginTrust.policy.notAllowed": {
+    "ar": "1d8xhur",
+    "de": "1d8xhur",
+    "fr": "1d8xhur",
+    "ja": "1d8xhur",
+    "ru": "1d8xhur",
+    "zh-CN": "1d8xhur"
+  },
+  "pluginTrust.policy.registry": {
+    "ar": "3olasi",
+    "de": "3olasi",
+    "fr": "3olasi",
+    "ja": "3olasi",
+    "ru": "3olasi",
+    "zh-CN": "3olasi"
+  },
+  "pluginTrust.policy.invalid": {
+    "ar": "1reppb9",
+    "de": "1reppb9",
+    "fr": "1reppb9",
+    "ja": "1reppb9",
+    "ru": "1reppb9",
+    "zh-CN": "1reppb9"
+  },
+  "pluginTrust.verifiedAuthor": {
+    "ar": "o46ock",
+    "de": "o46ock",
+    "fr": "o46ock",
+    "ja": "o46ock",
+    "ru": "o46ock",
+    "zh-CN": "o46ock"
   }
 }

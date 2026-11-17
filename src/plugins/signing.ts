@@ -241,3 +241,16 @@ async function importEd25519(spkiBase64: string): Promise<CryptoKey> {
     ["verify"],
   );
 }
+
+/**
+ * Verify an Ed25519 signature with a key given by the caller (W13.L4): a plugin policy or a private
+ * registry names its own key, and the caller decides whether that key is trusted.
+ */
+export async function verifyWithKey(bytes: Uint8Array, signatureBase64: string, spkiBase64: string): Promise<boolean> {
+  try {
+    const key = await importEd25519(spkiBase64);
+    return await crypto.subtle.verify("Ed25519", key, new Uint8Array(b64ToBytes(signatureBase64)), new Uint8Array(bytes));
+  } catch {
+    return false;
+  }
+}

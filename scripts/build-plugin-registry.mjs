@@ -69,7 +69,10 @@ if (process.argv.includes("--keygen")) {
   console.log(`VITE_PLUGIN_TRUSTED_KEYS=${trustedKeysEnv(k.spkiBase64)}`);
   process.exit(0);
 }
-const ALLOWED_EXTRA = new Set(["LICENSE", "LICENSE.md", "README.md"]);
+// W13.L5: author.sigstore.json is the author's keyless Sigstore signature of the version (scripts/lib/plugin-author.mjs).
+const ALLOWED_EXTRA = new Set(["LICENSE", "LICENSE.md", "README.md", "author.sigstore.json"]);
+const { verifyAuthor, versionFiles } = await import(pathToFileURL(join(ROOT, "scripts/lib/plugin-author.mjs")).href);
+const trustedRoot = process.env.LUMEN_SIGSTORE_TRUSTED_ROOT ? JSON.parse(readFileSync(process.env.LUMEN_SIGSTORE_TRUSTED_ROOT, "utf8")) : null;
 
 const problems = [];
 const found = new Map();
@@ -91,7 +94,16 @@ for (const name of readdirSync(DIR).sort()) {
   if (twin) problems.push(`${name}: ${manifest.id}@${manifest.version} is also in ${twin.path}`);
   const sha256 = existsSync(join(at, manifest.main)) ? createHash("sha256").update(readFileSync(join(at, manifest.main), "utf8")).digest("hex") : "";
   const manifestSha256 = createHash("sha256").update(readFileSync(join(at, "lumen-plugin.json"))).digest("hex");
-  found.set(manifest.id, [...versions, { name: manifest.name, version: manifest.version, path: name, sha256, manifestSha256 }]);
+  // W13.L5: a version with an author signature is listed as "verified author" only when the signature verifies and its
+  // identity is the manifest's publisher.github. A signature that does not verify fails the build.
+  let author;
+  if (existsSync(join(at, "author.sigstore.json"))) {
+    const f = versionFiles(at);
+    const r = await verifyAuthor({ bundle: f.bundle, statement: f.statement, github: f.manifest.publisher?.github, trustedRoot });
+    if (r.ok) author = { github: r.github, issuer: r.issuer };
+    else problems.push(`${name}: author signature: ${r.reason}`);
+  }
+  found.set(manifest.id, [...versions, { name: manifest.name, version: manifest.version, path: name, sha256, manifestSha256, ...(author ? { author } : {}) }]);
 }
 
 /** Semantic-version order (pre-releases before their release). */
@@ -120,7 +132,7 @@ const index = {
     // W11.S14: a takedown (review-plugins.mjs --takedown) stays until the version's folder is removed.
     const before = previous.plugins.find((p) => p.id === id)?.versions ?? [];
     const delisted = (v) => before.find((b) => b.version === v.version && b.path === v.path)?.delisted;
-    return { id, name: versions[versions.length - 1].name, versions: versions.map((v) => ({ version: v.version, path: v.path, sha256: v.sha256, manifestSha256: v.manifestSha256, ...(delisted(v) ? { delisted: delisted(v) } : {}) })) };
+    return { id, name: versions[versions.length - 1].name, versions: versions.map((v) => ({ version: v.version, path: v.path, sha256: v.sha256, manifestSha256: v.manifestSha256, ...(v.author ? { author: v.author } : {}), ...(delisted(v) ? { delisted: delisted(v) } : {}) })) };
   }),
 };
 // Review 11, M5: the serial goes up with every change to what the index lists (the app refuses an older

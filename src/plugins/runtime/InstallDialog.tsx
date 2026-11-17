@@ -11,8 +11,9 @@ import type { PluginManifest } from "./manifest";
 import type { ScanResult } from "./scan";
 import { HelpButton } from "../../ui/HelpButton";
 import { Modal } from "../../ui/Modal";
+import type { PolicyDecision } from "../policy";
 
-export function InstallDialog(props: { manifest: PluginManifest; scan: ScanResult; busy?: boolean; onInstall: () => void; onCancel: () => void }) {
+export function InstallDialog(props: { manifest: PluginManifest; scan: ScanResult; busy?: boolean; onInstall: () => void; onCancel: () => void; policy?: PolicyDecision | null }) {
   const { manifest: m, scan } = props;
   const cancelRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
@@ -59,6 +60,18 @@ export function InstallDialog(props: { manifest: PluginManifest; scan: ScanResul
         <p data-testid="install-scan" style={{ fontSize: 12, margin: "0 0 6px" }}>
           {t("pluginTrust.card.grade", { grade: scan.grade, score: scan.score })} — {notes}
         </p>
+        {props.policy && !props.policy.allowed && (
+          // W13.L4: the managed policy decides before anything is downloaded; Install is off and the reason is said.
+          <p data-testid="install-policy" role="alert" style={{ fontSize: 12, margin: "0 0 6px", color: "hsl(var(--danger))" }}>
+            {props.policy.rule === "invalid-policy" ? (
+              <>
+                {t("pluginTrust.policy.invalid")} <bdi dir="ltr">{props.policy.reason}</bdi>
+              </>
+            ) : (
+              t(props.policy.rule === "denied" ? "pluginTrust.policy.denied" : props.policy.rule === "registry" ? "pluginTrust.policy.registry" : "pluginTrust.policy.notAllowed", { id: m.id, version: m.version, name: props.policy.policyName ?? t("pluginTrust.policy.unnamed") })
+            )}
+          </p>
+        )}
         <p style={{ fontSize: 12, color: "hsl(var(--fg-muted))", margin: "0 0 14px" }}>{t("pluginTrust.dialog.sandbox")}</p>
         <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", alignItems: "center", flexWrap: "wrap" }}>
           <a href={reportUrl(m.id, m.version)} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, marginInlineEnd: "auto", color: "hsl(var(--accent))" }}>
@@ -67,7 +80,7 @@ export function InstallDialog(props: { manifest: PluginManifest; scan: ScanResul
           <button ref={cancelRef} type="button" className="btn" onClick={props.onCancel}>
             {t("pluginTrust.dialog.cancel")}
           </button>
-          <button type="button" className="btn btn-primary" disabled={props.busy || !scan.passed} onClick={props.onInstall}>
+          <button type="button" className="btn btn-primary" disabled={props.busy || !scan.passed || props.policy?.allowed === false} onClick={props.onInstall}>
             {t("pluginTrust.dialog.confirm")}
           </button>
         </div>

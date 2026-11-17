@@ -60,6 +60,8 @@ export interface PluginManifest {
   /** Lowest Lumen version the plugin needs. */
   minLumen?: string;
   homepage?: string;
+  /** W13.L5: the GitHub account that signs this plugin's versions (keyless Sigstore); the registry checks the signature against it. */
+  publisher?: { github: string };
 }
 
 export class ManifestError extends Error {
@@ -142,6 +144,13 @@ export function parseManifest(input: string | unknown): PluginManifest {
     }
     if (!u || u.protocol !== "https:") throw new ManifestError('manifest: "homepage" must be an https URL');
   }
+  let publisher: { github: string } | undefined;
+  if (o.publisher !== undefined) {
+    const pub = o.publisher as Record<string, unknown> | null;
+    const gh = pub && typeof pub === "object" ? pub.github : undefined;
+    if (typeof gh !== "string" || !/^[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?$/.test(gh)) throw new ManifestError('manifest: "publisher" must be { "github": "<GitHub login>" }');
+    publisher = { github: gh };
+  }
   const caps = o.capabilities;
   if (!Array.isArray(caps)) throw new ManifestError('manifest: "capabilities" must be an array (empty when none are needed)');
   if (caps.length > MAX_CAPABILITIES) throw new ManifestError(`manifest: more than ${MAX_CAPABILITIES} capabilities`);
@@ -169,6 +178,7 @@ export function parseManifest(input: string | unknown): PluginManifest {
     capabilities,
     ...(minLumen !== undefined ? { minLumen } : {}),
     ...(homepage !== undefined ? { homepage } : {}),
+    ...(publisher ? { publisher } : {}),
   };
 }
 

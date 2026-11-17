@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "id": "org.example.calc",
+  "name": "Calculator",
+  "version": "1.0.0",
+  "description": "Fixture for the developer preview scan (W13.L6): evaluates the selection with eval (a failing fixture).",
+  "author": "Lumen fixtures",
+  "license": "MIT",
+  "main": "main.js",
+  "repository": "https://github.com/example/reading-time",
+  "targetApiVersion": "1.1.0",
+  "publisher": { "github": "example" },
+  "capabilities": [
+    { "id": "commands", "reason": "Adds the “Reading time” command" },
+    { "id": "document:read", "reason": "Counts the words of the open note" },
+    { "id": "notifications", "reason": "Shows the result" }
+  ]
+}
