@@ -107,6 +107,6 @@ export const COMMAND_SECTIONS: ReadonlyArray<(ctx: CommandContext) => Command[]>
   buildWritingCommands,
   // Appended (plan W13.R7): reading views.
   buildReadingViewCommands,
-  // Appended (plan W13.W6–W10): the local writing checkers.
+  // Appended (plan W13.W6–W15): the local writing checkers.
   buildWritingCheckCommands,
 ];

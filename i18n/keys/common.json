@@ -22186,6 +22186,458 @@
       "key": "writingCheck.why",
       "en": "Why",
       "vars": []
+    },
+    {
+      "key": "goal.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "goal.dialog.local",
+      "en": "Kept on this device only. No comparison with anyone else.",
+      "vars": []
+    },
+    {
+      "key": "goal.dialog.thisNote",
+      "en": "This note",
+      "vars": []
+    },
+    {
+      "key": "goal.dialog.title",
+      "en": "Writing goals",
+      "vars": []
+    },
+    {
+      "key": "goal.field.minutes",
+      "en": "Minutes of writing",
+      "vars": []
+    },
+    {
+      "key": "goal.field.readability",
+      "en": "Readability",
+      "vars": []
+    },
+    {
+      "key": "goal.field.tone",
+      "en": "Tone",
+      "vars": []
+    },
+    {
+      "key": "goal.field.words",
+      "en": "Words",
+      "vars": []
+    },
+    {
+      "key": "goal.level.easy",
+      "en": "easy",
+      "vars": []
+    },
+    {
+      "key": "goal.level.hard",
+      "en": "demanding",
+      "vars": []
+    },
+    {
+      "key": "goal.level.medium",
+      "en": "medium",
+      "vars": []
+    },
+    {
+      "key": "goal.none",
+      "en": "No target",
+      "vars": []
+    },
+    {
+      "key": "goal.now.readability",
+      "en": "readability {level} ({score})",
+      "vars": [
+        "level",
+        "score"
+      ]
+    },
+    {
+      "key": "goal.now.tone",
+      "en": "tone {tone}",
+      "vars": [
+        "tone"
+      ]
+    },
+    {
+      "key": "goal.now.words",
+      "en": "Now: {n} words",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "goal.provisional",
+      "en": "(provisional Hebrew estimate)",
+      "vars": []
+    },
+    {
+      "key": "goal.save",
+      "en": "Save the goal",
+      "vars": []
+    },
+    {
+      "key": "goal.status.label",
+      "en": "Writing goal of this note",
+      "vars": []
+    },
+    {
+      "key": "goal.status.readability",
+      "en": "readability",
+      "vars": []
+    },
+    {
+      "key": "goal.status.tone",
+      "en": "tone",
+      "vars": []
+    },
+    {
+      "key": "goal.status.words",
+      "en": "{n} / {goal} words",
+      "vars": [
+        "n",
+        "goal"
+      ]
+    },
+    {
+      "key": "goal.title.readability",
+      "en": "Readability: target {want}, now {now}",
+      "vars": [
+        "want",
+        "now"
+      ]
+    },
+    {
+      "key": "goal.title.tone",
+      "en": "Tone: target {want}, now {now}",
+      "vars": [
+        "want",
+        "now"
+      ]
+    },
+    {
+      "key": "goal.title.words",
+      "en": "{n} of {goal} words ({pct}%)",
+      "vars": [
+        "n",
+        "goal",
+        "pct"
+      ]
+    },
+    {
+      "key": "goal.tone.casual",
+      "en": "casual",
+      "vars": []
+    },
+    {
+      "key": "goal.tone.formal",
+      "en": "formal",
+      "vars": []
+    },
+    {
+      "key": "goal.tone.neutral",
+      "en": "neutral",
+      "vars": []
+    },
+    {
+      "key": "goal.tooShort",
+      "en": "too short to tell",
+      "vars": []
+    },
+    {
+      "key": "goal.week.caption",
+      "en": "Words and minutes of writing per day",
+      "vars": []
+    },
+    {
+      "key": "goal.week.day",
+      "en": "Day",
+      "vars": []
+    },
+    {
+      "key": "goal.week.minutes",
+      "en": "Minutes",
+      "vars": []
+    },
+    {
+      "key": "goal.week.note",
+      "en": "{words} words, {minutes} min",
+      "vars": [
+        "words",
+        "minutes"
+      ]
+    },
+    {
+      "key": "goal.week.reached",
+      "en": "goal reached",
+      "vars": []
+    },
+    {
+      "key": "goal.week.title",
+      "en": "This week ({from} – {to})",
+      "vars": [
+        "from",
+        "to"
+      ]
+    },
+    {
+      "key": "goal.week.total",
+      "en": "{words} words written · {minutes} minutes · {streak} days in a row",
+      "vars": [
+        "words",
+        "minutes",
+        "streak"
+      ]
+    },
+    {
+      "key": "goal.week.words",
+      "en": "Words",
+      "vars": []
+    },
+    {
+      "key": "wchk.changed",
+      "en": "The note changed — the checks were run again.",
+      "vars": []
+    },
+    {
+      "key": "wchk.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "wchk.count",
+      "en": "{count} findings in this note",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "wchk.cut",
+      "en": "(cut)",
+      "vars": []
+    },
+    {
+      "key": "wchk.goto",
+      "en": "Go to",
+      "vars": []
+    },
+    {
+      "key": "wchk.ignore",
+      "en": "Ignore from now on",
+      "vars": []
+    },
+    {
+      "key": "wchk.ignoreLabel",
+      "en": "Ignore “{what}” from now on",
+      "vars": [
+        "what"
+      ]
+    },
+    {
+      "key": "wchk.kind.all",
+      "en": "Everything ({count})",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "wchk.kind.cliche",
+      "en": "Clichés ({count})",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "wchk.kind.doubled",
+      "en": "Doubled words ({count})",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "wchk.kind.loanword",
+      "en": "Loanwords ({count})",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "wchk.kind.repetition",
+      "en": "Repeated words ({count})",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "wchk.loanwords.everyday",
+      "en": "Everyday register: loanwords are fine here. Switch to the academic register to see Hebrew alternatives.",
+      "vars": []
+    },
+    {
+      "key": "wchk.loanwords.title",
+      "en": "Hebrew alternatives to loanwords",
+      "vars": []
+    },
+    {
+      "key": "wchk.local",
+      "en": "Checked on this device by rules — no model, nothing sent. Fixes are only proposed: you accept or reject each one in the review panel.",
+      "vars": []
+    },
+    {
+      "key": "wchk.none",
+      "en": "Nothing to flag in this note.",
+      "vars": []
+    },
+    {
+      "key": "wchk.propose",
+      "en": "Propose the fix",
+      "vars": []
+    },
+    {
+      "key": "wchk.proposeAll",
+      "en": "Propose all fixes ({count})",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "wchk.proposed",
+      "en": "{count} fixes proposed — review them in the review panel",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "wchk.proposedOne",
+      "en": "Proposed",
+      "vars": []
+    },
+    {
+      "key": "wchk.register",
+      "en": "Register",
+      "vars": []
+    },
+    {
+      "key": "wchk.register.academic",
+      "en": "Academic / legal",
+      "vars": []
+    },
+    {
+      "key": "wchk.register.everyday",
+      "en": "Everyday",
+      "vars": []
+    },
+    {
+      "key": "wchk.repetition.title",
+      "en": "Repetition and clichés",
+      "vars": []
+    },
+    {
+      "key": "wchk.resetIgnored",
+      "en": "Show ignored items again",
+      "vars": []
+    },
+    {
+      "key": "wchk.show",
+      "en": "Show",
+      "vars": []
+    },
+    {
+      "key": "wchk.window",
+      "en": "Window (words)",
+      "vars": []
+    },
+    {
+      "key": "xchg.absent",
+      "en": "(none)",
+      "vars": []
+    },
+    {
+      "key": "xchg.against",
+      "en": "Compared with the version of {version}",
+      "vars": [
+        "version"
+      ]
+    },
+    {
+      "key": "xchg.changes",
+      "en": "All {count} changes",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "xchg.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "xchg.dropped",
+      "en": "{count} lines of the model's summary were left out: they spoke of changes that did not happen.",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "xchg.engine.model",
+      "en": "summary by a local model, every line checked against the change",
+      "vars": []
+    },
+    {
+      "key": "xchg.engine.rules",
+      "en": "summary by rules (no local model)",
+      "vars": []
+    },
+    {
+      "key": "xchg.kind.entity",
+      "en": "name",
+      "vars": []
+    },
+    {
+      "key": "xchg.kind.negation",
+      "en": "negation",
+      "vars": []
+    },
+    {
+      "key": "xchg.kind.number",
+      "en": "number",
+      "vars": []
+    },
+    {
+      "key": "xchg.meaning",
+      "en": "Changes of meaning",
+      "vars": []
+    },
+    {
+      "key": "xchg.meaningNone",
+      "en": "No number, negation or name changed.",
+      "vars": []
+    },
+    {
+      "key": "xchg.none",
+      "en": "Nothing changed between the two versions.",
+      "vars": []
+    },
+    {
+      "key": "xchg.stats",
+      "en": "+{added} / −{removed} words",
+      "vars": [
+        "added",
+        "removed"
+      ]
+    },
+    {
+      "key": "xchg.summary",
+      "en": "What changed",
+      "vars": []
+    },
+    {
+      "key": "xchg.title",
+      "en": "Explain my change",
+      "vars": []
     }
   ]
 }
