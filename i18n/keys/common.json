@@ -9,6 +9,11 @@
       "vars": []
     },
     {
+      "key": "a11y.sidebarResizerHint",
+      "en": "Drag to resize, or click for the next width (160, 240, 320, 400 px)",
+      "vars": []
+    },
+    {
       "key": "a11y.skipToContent",
       "en": "Skip to content",
       "vars": []
@@ -11704,7 +11709,7 @@
     },
     {
       "key": "imageHosts.revokeHost",
-      "en": "Stop always allowing {host}",
+      "en": "Revoke always allowing {host}",
       "vars": [
         "host"
       ]
@@ -23937,7 +23942,7 @@
     },
     {
       "key": "wchk.ignoreLabel",
-      "en": "Ignore “{what}” from now on",
+      "en": "Ignore from now on: “{what}”",
       "vars": [
         "what"
       ]

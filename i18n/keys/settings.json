@@ -516,7 +516,7 @@
     },
     {
       "key": "pluginGallery.close",
-      "en": "Close plugin gallery",
+      "en": "Close plugin gallery (Esc)",
       "vars": []
     },
     {
