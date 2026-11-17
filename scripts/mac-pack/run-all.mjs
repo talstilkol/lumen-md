@@ -22,21 +22,31 @@
  *     An entry that moves the checked-out branch (`git switch`, `git pull`)
  *     never runs inside the aggregate: run it alone with --only.
  *  3. Each entry's `expect`, in whatever shape its lane wrote it, is checked
- *     (scripts/mac-pack/lib/expect.mjs). A result file counts only when it was
- *     written during this run. What only a person can judge is listed, never
+ *     (scripts/mac-pack/lib/expect.mjs). Every entry that runs must exit 0
+ *     unless its expect names another exit code. A result file counts only
+ *     when it was written during this run: a JSON or file check reads only
+ *     fresh files, and before an entry runs, the older files its shell
+ *     `check` would read are moved aside and put back afterwards
+ *     (scripts/mac-pack/lib/fresh.mjs), so a committed or left-over result
+ *     never passes. The shared e2e step holds only when its report was
+ *     written by this run. What only a person can judge is listed, never
  *     counted as a pass.
  *  4. reports/mac-pack/summary.json and summary.md; logs in reports/mac-pack/logs/.
- *     Exit 1 when any entry failed or was blocked, else 0.
+ *     The result is "ok" only when every picked entry passed on machine
+ *     checks alone; "not ok" when any failed or was blocked (exit 1);
+ *     "incomplete" when none failed but some still need their own run or a
+ *     person (exit 3). Only "ok" exits 0.
  *
  * reports/ is git-ignored by .gitignore (/reports/*), not only by a clone's
  * .git/info/exclude; the run checks that with `git check-ignore` and says so
  * in the summary when it is not.
  */
 import { spawn, spawnSync } from "node:child_process";
-import { createWriteStream, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { createWriteStream, existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { judge, normalize } from "./lib/expect.mjs";
+import { CLOCK_SLACK_MS, restoreAll, restoreAside, setAside } from "./lib/fresh.mjs";
 import { SHARED_CMDS, movesHead, parsePlaywright, rewrite, sharedKind, splitTop } from "./lib/shell.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -71,6 +81,9 @@ export function loadPacks(root) {
 const isSetup = (e) => /(^|[/.-])setup$/i.test(e.id);
 const nodeCall = (cmd) => cmd.trim().match(/^node (\S+\.mjs) (\S+)(?: (--[\w-]+))?$/);
 
+/** Every entry that runs must exit 0 unless its expect names another exit code. */
+const withExit = (e) => (e.norm.checks.some((c) => c.kind === "exit") ? e : { ...e, norm: { ...e.norm, checks: [{ kind: "exit", value: 0, implicit: true }, ...e.norm.checks] } });
+
 /** How each entry runs: run | setup | covered (by an umbrella `node X all`) | own-run. */
 export function classify(entries) {
   const umbrellas = new Map();
@@ -81,12 +94,12 @@ export function classify(entries) {
   const ids = new Set(entries.map((e) => e.id));
   return entries.map((e) => {
     const needIds = (e.needs ?? []).filter((n) => ids.has(n));
-    if (isSetup(e)) return { ...e, mode: "setup", needIds };
+    if (isSetup(e)) return { ...withExit(e), mode: "setup", needIds };
     const m = nodeCall(e.cmd);
     const um = m && umbrellas.get(`${e.lane} ${m[1]}`);
     if (um && um !== e.id) return { ...e, mode: "covered", coveredBy: um, needIds: [...new Set([...needIds, um])] };
-    if (movesHead(e.cmd)) return { ...e, mode: "own-run", needIds };
-    return { ...e, mode: "run", needIds };
+    if (movesHead(e.cmd)) return { ...withExit(e), mode: "own-run", needIds };
+    return { ...withExit(e), mode: "run", needIds };
   });
 }
 
@@ -174,6 +187,7 @@ export async function runAll({ root = DEFAULT_ROOT, only = [], exec, now = Date.
   for (const lane of new Set(all.map((e) => e.lane))) {
     for (const d of [`${OUT_DIR}/${lane}`, `.mac-pack/${lane}`]) if (!dry) mkdirSync(join(root, d), { recursive: true });
   }
+  if (!dry) restoreAll(root); // why: an interrupted earlier run may have left committed files aside
   for (const kind of ["setup", "e2e", "modelsDay"]) {
     if (!need[kind]) continue;
     const prev = reuse?.shared?.find((s) => s.id === kind);
@@ -191,8 +205,9 @@ export async function runAll({ root = DEFAULT_ROOT, only = [], exec, now = Date.
     log(`── shared ${kind}: ${cmd}`);
     const t0 = now();
     const r = await exec(cmd, { logFile: join(root, OUT_DIR, "logs", `shared-${kind}.log`) });
-    // Playwright exits 1 on any failing test; the shared report is still the evidence each entry slices.
-    const ok = kind === "e2e" ? existsSync(join(root, SHARED_REPORT)) : r.code === 0;
+    // Playwright exits 1 on any failing test; the shared report is still the evidence each entry slices,
+    // but only a report this step wrote: one left by an earlier run is not.
+    const ok = kind === "e2e" ? freshSince(join(root, SHARED_REPORT), t0) : r.code === 0;
     shared[kind] = { ok, report: SHARED_REPORT };
     sharedRuns.push({ id: kind, cmd, code: r.code, ok, ms: now() - t0 });
   }
@@ -243,6 +258,7 @@ export async function runAll({ root = DEFAULT_ROOT, only = [], exec, now = Date.
       const t0 = now();
       if (memo.has(cmd)) run = { ...memo.get(cmd), reusedFrom: memo.get(cmd).id };
       else {
+        for (const c of checks) if (c.kind === "shell") setAside(root, e.id, c.cmd, since);
         log(`── ${e.id}`);
         run = await exec(cmd, { logFile: join(root, OUT_DIR, "logs", `${safe(e.id)}.log`) });
         memo.set(cmd, { ...run, id: e.id });
@@ -253,7 +269,12 @@ export async function runAll({ root = DEFAULT_ROOT, only = [], exec, now = Date.
       results.set(e.id, { ...base, status: "dry", cmd, checks: [] });
       continue;
     }
-    const judged = await judge(checks, run, { root, since, shell: (c) => shell(c, e.id) });
+    let judged;
+    try {
+      judged = await judge(checks, run, { root, since, shell: (c) => shell(c, e.id) });
+    } finally {
+      restoreAside(root, e.id);
+    }
     if (e.mode === "covered" && judged.length === 0) {
       // Nothing of its own to read (L4.e2e): it holds exactly when its umbrella held.
       const u = results.get(e.coveredBy)?.status;
@@ -265,7 +286,8 @@ export async function runAll({ root = DEFAULT_ROOT, only = [], exec, now = Date.
 
   const entries = all.map((e) => results.get(e.id)).filter(Boolean);
   const count = (s) => entries.filter((r) => r.status === s).length;
-  const counts = { pass: count("pass"), fail: count("fail"), blocked: count("blocked"), manual: count("manual"), ownRun: count("own-run"), dry: count("dry"), total: entries.length };
+  const counts = { pass: count("pass"), fail: count("fail"), blocked: count("blocked"), manual: count("manual"), ownRun: count("own-run"), dry: count("dry"), forPerson: entries.filter((r) => r.manual?.length).length, total: entries.length };
+  const result = counts.fail || counts.blocked ? "not ok" : counts.manual || counts.ownRun || counts.forPerson || counts.dry ? "incomplete" : "ok";
   return {
     schema: "lumen.mac-pack.summary/1",
     sha: gitOut(root, ["rev-parse", "HEAD"]),
@@ -275,9 +297,19 @@ export async function runAll({ root = DEFAULT_ROOT, only = [], exec, now = Date.
     ignored: { reports: gitIgnored(root, `${OUT_DIR}/summary.json`), macPack: gitIgnored(root, ".mac-pack/x") },
     shared: sharedRuns,
     counts,
-    ok: counts.fail === 0 && counts.blocked === 0,
+    result,
+    ok: result === "ok",
     entries,
   };
+}
+
+/** true when `file` exists and was written at or after `t0`. */
+function freshSince(file, t0) {
+  try {
+    return statSync(file).mtimeMs >= t0 - CLOCK_SLACK_MS;
+  } catch {
+    return false; // why: no report at all is not evidence either
+  }
 }
 
 function gitOut(root, args) {
@@ -306,8 +338,8 @@ export function renderMarkdown(sum) {
     "",
     `Started ${sum.startedAt}, finished ${sum.finishedAt}${sum.only.length ? `; only ${sum.only.join(", ")}` : ""}.`,
     "",
-    `**${sum.ok ? "OK" : "NOT OK"}**: ${c.pass} pass, ${c.fail} fail, ${c.blocked} blocked, ${c.manual} for a person only, ${c.ownRun} need their own run (of ${c.total}).`,
-    "A pass means every machine check of the entry held on files written by this run. The \"still for a person\" lines are not checked by anything.",
+    `**${sum.result.toUpperCase()}**: ${c.pass} pass, ${c.fail} fail, ${c.blocked} blocked, ${c.manual} for a person only, ${c.ownRun} need their own run, ${c.forPerson} with parts still for a person (of ${c.total}).`,
+    "A pass means the entry exited as expected and every machine check held on files written by this run. The \"still for a person\" lines are not checked by anything, so the run is incomplete until a person has done them.",
     "",
   ];
   if (sum.ignored.reports === false || sum.ignored.macPack === false) lines.push("> **Warning:** reports/mac-pack/ or .mac-pack/ is not git-ignored in this checkout; do not commit them.", "");
@@ -403,9 +435,9 @@ export async function main(argv) {
   writeFileSync(join(out, "summary.json"), `${JSON.stringify(sum, null, 2)}\n`);
   writeFileSync(join(out, "summary.md"), renderMarkdown(sum));
   const c = sum.counts;
-  console.log(`\nmac:pack ${sum.ok ? "OK" : "NOT OK"}: ${c.pass} pass, ${c.fail} fail, ${c.blocked} blocked, ${c.manual} person only, ${c.ownRun} own run → ${OUT_DIR}/summary.md`);
+  console.log(`\nmac:pack ${sum.result.toUpperCase()}: ${c.pass} pass, ${c.fail} fail, ${c.blocked} blocked, ${c.manual} person only, ${c.ownRun} own run, ${c.forPerson} with parts for a person → ${OUT_DIR}/summary.md`);
   if (sum.ignored.reports === false) console.log(`warning: ${OUT_DIR}/ is not git-ignored here; do not commit it`);
-  return sum.ok ? 0 : 1;
+  return sum.result === "ok" ? 0 : sum.result === "incomplete" ? 3 : 1;
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main(process.argv.slice(2)).then((code) => process.exit(code));
