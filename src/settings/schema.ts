@@ -337,6 +337,8 @@ export const SETTINGS: readonly SettingEntry[] = [
   local("lumen.compare", { kind: "setting", tab: "general", type: "json" }),
   local("lumen-bilingual-mode", { kind: "setting", tab: "general", type: "text" }),
   local("lumen.graph.engine", { kind: "setting", tab: "general", type: "choice", options: [{ value: "auto" }, { value: "gpu" }, { value: "standard" }, { value: "list" }] }),
+  // W13.I3: dates in the Hebrew calendar (src/i18n/format.ts).
+  local("lumen-date-calendar", { kind: "setting", tab: "general", type: "choice", options: [{ value: "hebrew" }] }),
   // W13.R9's switch before it moved into the reading profile (lumen-reading): read once, then removed.
   data("lumen.reading.sidenotes"),
   // Secrets: the LM Studio API key, and the OneNote sign-in kept for one OAuth round trip.
