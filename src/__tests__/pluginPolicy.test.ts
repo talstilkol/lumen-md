@@ -11,7 +11,11 @@ import { createHash } from "node:crypto";
 import { generateSigningKey, signRegistryBytes } from "../../scripts/lib/plugin-registry-sign.mjs";
 // @ts-expect-error — a plain .mjs script
 import { canonicalJson as cliCanonical, checkPolicyFile, signPolicy } from "../../scripts/plugin-policy.mjs";
-import { canonicalJson, decide, entryMatches, loadPolicies, loadVaultPolicy, parsePolicy, setDevicePolicy, trustPolicyKey, type LoadedPolicy, type PluginPolicy } from "../plugins/policy";
+import { canonicalJson, decide, entryMatches, loadPolicies, loadVaultPolicy, parsePolicy, trustPolicyKey, type LoadedPolicy, type PluginPolicy } from "../plugins/policy";
+import { set as idbSet } from "idb-keyval";
+
+/** The device policy as an administrator would leave it on this device (policy.ts has no setter: W13.L4 owes the screen). */
+const setDevicePolicy = (p: PluginPolicy | null) => idbSet("lumen.plugins.device-policy", p ? parsePolicy(p) : null);
 import { installFromRegistry, installedPlugins, uninstallPlugin, InstallRefused } from "../plugins/install";
 import { trustKey, untrustKey } from "../plugins/signing";
 import { __resetLedger } from "../ai/privacyLedger";

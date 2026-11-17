@@ -140,6 +140,30 @@ export async function saveFile(
 }
 
 /**
+ * Save a built file (an export: a finished PDF/UA, W13.F3) where the user picks, through the save
+ * dialog when the browser has one; else a download. Cancelling the dialog throws AbortError.
+ */
+export async function saveBlobAs(blob: Blob, name: string, type: { description: string; accept: Record<string, string[]> }): Promise<void> {
+  if (window.showSaveFilePicker) {
+    try {
+      const handle = await window.showSaveFilePicker({ suggestedName: name, types: [type] });
+      const out = await handle.createWritable();
+      await out.write(blob);
+      await out.close();
+      return;
+    } catch (err) {
+      if ((err as Error).name === "AbortError") throw err;
+      swallowed("storage/fs: save dialog failed, download instead", err);
+    }
+  }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10_000);
+}
+
+/**
  * Single entry point for importing any supported file.
  *
  * Tabular/markup formats (csv, tsv, json, rtf, html, xml) keep their special

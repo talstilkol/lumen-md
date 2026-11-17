@@ -362,6 +362,7 @@ function TabMenu(p: { x: number; y: number; label: string; menuRef: React.RefObj
       role="menu"
       aria-label={t("docTabs.menu", { name: p.label })}
       data-testid="doc-tab-menu"
+      // logical-allow: the menu opens at the pointer, whose clientX is a physical coordinate in both directions
       style={{ position: "fixed", left: Math.min(p.x, window.innerWidth - 200), top: Math.min(p.y, window.innerHeight - 90), zIndex: 1000, minWidth: 180, padding: 4, background: "hsl(var(--bg))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border))", borderRadius: 8, boxShadow: "var(--shadow-md, 0 6px 20px rgba(0,0,0,.15))" }}
       onKeyDown={(e) => {
         const items = [...(p.menuRef.current?.querySelectorAll<HTMLButtonElement>("[role=menuitem]") ?? [])];

@@ -87,6 +87,7 @@ describe("install without scripts (real npm, offline)", () => {
   const npm = (cwd: string, ...a: string[]) => spawnSync("npm", a, { cwd, encoding: "utf8", env: { ...process.env, npm_config_cache: join(cwd, ".cache"), npm_config_offline: "true", npm_config_audit: "false", npm_config_fund: "false", npm_config_update_notifier: "false" }, timeout: 120_000 });
   const hasNpm = spawnSync("npm", ["--version"], { encoding: "utf8" }).status === 0;
 
+  // skip-reason: needs a real npm on PATH (absent in some sandboxes); runs wherever npm is installed | task: W13.X6 | until: 2027-02-17
   it.skipIf(!hasNpm)("a dependency's postinstall runs without the repo's .npmrc, and does not run with it (skipped only where npm is absent)", () => {
     const work = mkdtempSync(join(tmpdir(), "noscripts-"));
     const dep = join(work, "evil-dep");

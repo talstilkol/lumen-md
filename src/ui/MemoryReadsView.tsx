@@ -10,7 +10,7 @@ export default function MemoryReadsView() {
   const reads = [...memoryReads()].reverse();
   if (!reads.length) return <p style={{ padding: "12px 16px", margin: 0, fontSize: 13 }}>{t("agentMemory.reads.none")}</p>;
   return (
-    <ul tabIndex={0} aria-label={t("agentMemory.reads.title")} style={{ margin: 0, padding: "8px 16px 8px 32px", fontSize: 12.5, overflow: "auto", flex: 1 }} data-testid="memory-reads">
+    <ul tabIndex={0} aria-label={t("agentMemory.reads.title")} style={{ margin: 0, paddingBlock: 8, paddingInlineStart: 32, paddingInlineEnd: 16, fontSize: 12.5, overflow: "auto", flex: 1 }} data-testid="memory-reads">
       {reads.map((r, i) => (
         <li key={`${r.at}-${i}`}>{t("agentMemory.reads.row", { agent: r.agentId, n: r.facts, time: new Date(r.at).toLocaleString(getLocale()) })}</li>
       ))}

@@ -200,9 +200,8 @@ export async function getDevicePolicy(): Promise<PluginPolicy | null> {
   }
 }
 
-export async function setDevicePolicy(p: PluginPolicy | null): Promise<void> {
-  await idbSet(DEVICE_POLICY_KEY, p ? parsePolicy(p) : null);
-}
+// No setter yet: the app has no screen or managed import that writes a device policy (W13.L4, owed);
+// getDevicePolicy reads what is stored under DEVICE_POLICY_KEY. The tests seed that key directly.
 
 export async function trustedPolicyKeys(device: PluginPolicy | null): Promise<Set<string>> {
   const own = ((await idbGet(TRUSTED_POLICY_KEYS).catch(() => undefined)) as string[] | undefined) ?? [];

@@ -92,7 +92,8 @@ for (const code of ["en-XA", "ar-XB"] as const) {
       if (s.open) {
         await s.open(page);
         if (s.scope === dialog) await expect(page.locator(dialog).first()).toBeVisible({ timeout: 10_000 });
-        else await page.waitForTimeout(400);
+        // a panel has no dialog to wait for: two frames, so it has rendered
+        else await page.evaluate(() => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))));
       }
       const findings = await page.evaluate(([scope, ignore]) => (window as unknown as { __pseudoScan: typeof pseudoScan }).__pseudoScan(scope, ignore), [s.scope ?? null, IGNORE] as const).catch(async () => {
         await page.evaluate(`window.__pseudoScan = ${pseudoScan.toString()}`);

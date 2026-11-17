@@ -63,7 +63,8 @@ test.describe("reduced motion", () => {
   for (const s of SURFACES) {
     test(`${s.name}: no running CSS animation or transition`, async ({ page }) => {
       const close = await openSurface(page, s);
-      await page.waitForTimeout(50);
+      // two frames: any transition the surface starts has begun
+      await page.evaluate(() => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))));
       const running = await page.evaluate(() =>
         document
           .getAnimations()

@@ -109,3 +109,24 @@ export function createOpfsBackend(): VaultBackend {
     writesPending: () => pendingWrites > 0,
   });
 }
+
+/**
+ * Plan W13.P4 (Settings › Privacy, the data on this device): the OPFS root, to count what this
+ * browser keeps there, and the removal of the top-level entries `pick` names (notes, model files).
+ */
+export const opfsRoot = (): Promise<FileSystemDirectoryHandle> => navigator.storage.getDirectory();
+
+export interface OpfsDirLike {
+  entries(): AsyncIterable<[string, unknown]>;
+  removeEntry(name: string, o?: { recursive?: boolean }): Promise<void>;
+}
+export async function removeOpfsTop(root: OpfsDirLike, pick: (name: string) => boolean): Promise<string[]> {
+  const names: string[] = [];
+  for await (const [name] of root.entries()) names.push(name);
+  const removed: string[] = [];
+  for (const name of names.filter(pick)) {
+    await root.removeEntry(name, { recursive: true });
+    removed.push(name);
+  }
+  return removed;
+}

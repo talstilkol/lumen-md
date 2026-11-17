@@ -41,7 +41,8 @@ export async function openSurface(page: Page, s: Surface): Promise<() => Promise
   if (s.name === "command palette") await page.keyboard.press("ControlOrMeta+k");
   else if (s.command) await page.evaluate((id) => window.dispatchEvent(new CustomEvent("lumen-run-command", { detail: { id } })), s.command);
   if (s.modal) await expect(page.locator('[role="dialog"][aria-modal="true"]').first()).toBeVisible({ timeout: 10_000 });
-  else await page.waitForTimeout(300);
+  // a side panel has no dialog to wait for: two frames, so it has rendered
+  else await page.evaluate(() => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))));
   return async () => {
     if (s.modal) {
       await page.keyboard.press("Escape");

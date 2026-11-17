@@ -26,24 +26,8 @@ function pickPdf(): Promise<File | null> {
 }
 
 async function savePdf(bytes: Uint8Array, name: string): Promise<void> {
-  const blob = new Blob([bytes as unknown as BlobPart], { type: "application/pdf" });
-  const w = window as Window & { showSaveFilePicker?: (o: unknown) => Promise<FileSystemFileHandle> };
-  if (w.showSaveFilePicker) {
-    try {
-      const handle = await w.showSaveFilePicker({ suggestedName: name, types: [{ description: "PDF", accept: { "application/pdf": [".pdf"] } }] });
-      const out = await handle.createWritable();
-      await out.write(blob);
-      await out.close();
-      return;
-    } catch (err) {
-      if ((err as Error).name === "AbortError") throw err;
-    }
-  }
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = name;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 10_000);
+  const { saveBlobAs } = await import("../storage/fs");
+  await saveBlobAs(new Blob([bytes as unknown as BlobPart], { type: "application/pdf" }), name, { description: "PDF", accept: { "application/pdf": [".pdf"] } });
 }
 
 /** Pick a PDF, finish it as PDF/UA-1 and save it. `lang` is the note's language; `title` its title. */

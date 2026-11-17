@@ -51,6 +51,7 @@ describe("identity: the certificate must be the manifest's GitHub account", () =
   });
 });
 
+// skip-reason: sigstore-js (npm's verifier) is absent from some overlays; runs wherever it is installed | task: W13.L5 | until: 2027-02-17
 describe.skipIf(!sjs)("keyless signing and verification (sigstore-js; skipped only where npm's verifier is absent)", () => {
   const fake = localSigstore();
   const sign = async (dir: string, email: string) => signAuthor({ dir, local: { sigstore: fake, email } });

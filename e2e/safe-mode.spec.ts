@@ -40,8 +40,8 @@ test.describe("safe mode", () => {
       // Focus is somewhere sensible, never <body>.
       expect(await page.evaluate(() => document.activeElement?.tagName)).not.toBe("BODY");
       // Same page, no reload: the marker of the first start is still the one this page wrote.
-      await page.waitForTimeout(5500);
-      expect(await page.evaluate(() => JSON.parse(localStorage.getItem("lumen-boot-sentinel") ?? "{}").pending)).toBe(false);
+      // The start counts as good after 5 s of running: wait for that mark, not for a fixed time.
+      await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem("lumen-boot-sentinel") ?? "{}").pending), { timeout: 15_000 }).toBe(false);
       await page.reload();
       await expect(page.getByTestId("safe-mode-banner")).toHaveCount(0);
     });

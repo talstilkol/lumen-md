@@ -186,10 +186,7 @@ export function tEnglish(id: string): string {
  * The BCP 47 tag numbers are written with: the UI language, plus the digits
  * the user chose (W13.I5: `-u-nu-arab` for Arabic-Indic digits, ./numerals.ts).
  */
-let numberTag: () => string = () => numeralsTag(activeLocale);
-export function setNumberLocale(tag: () => string): void {
-  numberTag = tag;
-}
+const numberTag = (): string => numeralsTag(activeLocale);
 export function numberLocale(): string {
   return numberTag();
 }

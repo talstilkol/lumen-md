@@ -86,6 +86,7 @@ describe.each([
 describe("Milkdown (WYSIWYG)", () => {
   // @milkdown/* is not installed in this offline checkout; the WYSIWYG runner
   // runs on the Mac (W10.M1). Listed so the count of skipped is never silent.
+  // skip-reason: @milkdown/* is not installed offline; the WYSIWYG runner runs on the Mac (W10.M1) | task: W13.E2 | until: 2027-02-17
   it.skip("runs the 60 golden behaviours in Milkdown — skipped: @milkdown/* not installed offline (runs on the Mac, W10.M1)", () => {});
 });
 

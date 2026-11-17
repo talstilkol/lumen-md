@@ -443,23 +443,14 @@ export function addSpeechVoiceBytes(id: number, bytes: number): boolean {
   return true;
 }
 
-/**
- * A program the user installed, run on this device by Lumen (plan W13.F5: Pandoc, sandboxed, no network):
- * listed so the ledger shows every process Lumen starts, not only its requests.
- */
-export function recordLocalProcess(name: string, reason: string, bytesOut: number): void {
-  record({ host: `on-device: ${name}`, method: "PROCESS", bytesOut, bytesIn: null, category: "local-ai", reason, policy: getAiPolicy(), decision: "allowed" });
-}
-
 /** A prompt to a model built into the browser (Chrome's, plan W7.14): it runs on this device and sends nothing. */
-export function recordOnDeviceModel(name: string): void {
-  record({ host: `on-device: ${name}`, method: "PROMPT", bytesOut: 0, bytesIn: null, category: "local-ai", reason: "Runs on this device; nothing is sent", policy: getAiPolicy(), decision: "allowed" });
+export function recordOnDeviceModel(name: string, method = "PROMPT", bytesOut = 0, reason = "Runs on this device; nothing is sent"): void {
+  record({ host: `on-device: ${name}`, method, bytesOut, bytesIn: null, category: "local-ai", reason, policy: getAiPolicy(), decision: "allowed" });
 }
+/** A program the user installed, run here by Lumen (W13.F5: Pandoc, sandboxed, no network): the ledger lists every process Lumen starts. */
+export const recordLocalProcess = (name: string, reason: string, bytesOut: number): void => recordOnDeviceModel(name, "PROCESS", bytesOut, reason);
 
-/**
- * Record use of the browser's speech recognition service (Chrome sends the audio
- * to Google). "blocked" when local-only refused it.
- */
+/** Record use of the browser's speech recognition service (Chrome sends the audio to Google). "blocked" when local-only refused it. */
 export function recordSpeechRecognition(decision: "allowed" | "blocked"): LedgerEntry | null {
   const id = record({ host: "browser speech recognition", method: "AUDIO", bytesOut: 0, bytesIn: null, category: "cloud-text", reason: "Dictation through the browser's speech service", policy: getAiPolicy(), decision });
   return entries.find((x) => x.id === id) ?? null;

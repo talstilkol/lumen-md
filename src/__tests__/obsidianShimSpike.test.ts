@@ -102,6 +102,7 @@ describe("the measurement (research/obsidian-shim-spike.json)", () => {
   });
 
   const list = process.env.OBSIDIAN_SPIKE_LIST;
+  // skip-reason: the 71 measured bundles are third-party and not in the repo; set OBSIDIAN_SPIKE_LIST to re-measure | task: W13.L3 | until: 2027-02-17
   it.skipIf(!list)("re-measure from the plugin folders listed in OBSIDIAN_SPIKE_LIST (skipped: the bundles are third-party and not in the repo)", async () => {
     const dirs = readFileSync(list!, "utf8").split("\n").map((l) => l.trim()).filter(Boolean);
     const rows: Row[] = [];

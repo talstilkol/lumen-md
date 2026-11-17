@@ -14,6 +14,8 @@
  *   settings  preferences (localStorage)
  */
 
+import { isOpfsSupported, opfsRoot, removeOpfsTop } from "../storage/vault/opfs";
+
 export type DataCategory = "notes" | "history" | "models" | "caches" | "keyring" | "settings";
 export const CATEGORIES: readonly DataCategory[] = ["notes", "history", "models", "caches", "keyring", "settings"];
 
@@ -116,16 +118,8 @@ export async function wipe(category: DataCategory | "all", deps: StorageDeps): P
   const removed: string[] = [];
   const want = (c: DataCategory) => category === "all" || category === c;
   if (deps.opfs && (want("notes") || want("models"))) {
-    const root = await deps.opfs();
-    const names: string[] = [];
-    for await (const [name] of root.entries()) names.push(name);
-    for (const name of names) {
-      const isModel = MODEL_DIR.test(name);
-      if ((isModel && want("models")) || (!isModel && want("notes"))) {
-        await root.removeEntry(name, { recursive: true });
-        removed.push(`opfs:${name}`);
-      }
-    }
+    const gone = await removeOpfsTop(await deps.opfs(), (name) => (MODEL_DIR.test(name) ? want("models") : want("notes")));
+    for (const name of gone) removed.push(`opfs:${name}`);
   }
   if (deps.caches) {
     for (const name of await deps.caches.keys()) {
@@ -191,7 +185,7 @@ export function browserStorage(): StorageDeps {
           r.onblocked = () => ok();
         }),
     },
-    opfs: navigator.storage?.getDirectory ? () => navigator.storage.getDirectory() as unknown as Promise<DirLike> : undefined,
+    opfs: isOpfsSupported() ? async () => (await opfsRoot()) as unknown as DirLike : undefined,
     local: globalThis.localStorage,
   };
 }
