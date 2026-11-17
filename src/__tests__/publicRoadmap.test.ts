@@ -113,7 +113,8 @@ describe("public roadmap docs", () => {
   it("has an English and a Hebrew page, both in the sidebar", () => {
     for (const p of ["docs/src/content/docs/project/roadmap.md", "docs/src/content/docs/he/project/roadmap.md"]) {
       const md = readFileSync(join(ROOT, p), "utf8");
-      expect(md).toMatch(/^---\ntitle: .+\ndescription: .+\n---/);
+      // title and description lead the front matter; further keys (the Diátaxis `type:`, W13.D1) may follow
+      expect(md).toMatch(/^---\ntitle: .+\ndescription: .+\n(?:[a-z][\w-]*: .+\n)*---\n/);
       for (const s of ["plan/plan.json", "npm run plan:check", "public/roadmap.js"]) expect(md).toContain(s);
     }
     expect(readFileSync(join(ROOT, "docs/astro.config.mjs"), "utf8")).toContain('slug: "project/roadmap"');
