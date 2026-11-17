@@ -11,6 +11,8 @@ import { checkRegistryEntry, hasSignedBundle, isRemoteInstallable } from "../plu
 import type { RegistryTrust } from "../plugins/registryTrust";
 // The sandboxed-plugin list loads with its section (it brings the trust and developer strings).
 const SandboxedPlugins = lazy(() => import("../plugins/runtime/SandboxedPlugins").then((m) => ({ default: m.SandboxedPlugins })));
+// W13.S2: plugins found as files in the vault: listed, never run, each routed through the install screen.
+const VaultPluginsSection = lazy(() => import("../plugins/runtime/VaultPluginsSection").then((m) => ({ default: m.VaultPluginsSection })));
 import { HelpButton } from "./HelpButton";
 import "./pluginGalleryStrings";
 import { Modal } from "./Modal";
@@ -684,6 +686,9 @@ export function PluginGallery({ open, onClose }: Props) {
         {/* Sandboxed plugins: permissions shown before install, every version scanned (W1.20). */}
         <Suspense fallback={null}>
           <SandboxedPlugins />
+        </Suspense>
+        <Suspense fallback={null}>
+          <VaultPluginsSection />
         </Suspense>
 
         {/* Footer */}

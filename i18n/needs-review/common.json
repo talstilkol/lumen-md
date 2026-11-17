@@ -11511,5 +11511,122 @@
     "ru": "jyp9ab",
     "zh-CN": "jyp9ab",
     "fa": "jyp9ab"
+  },
+  "pluginTrust.vault.title": {
+    "ar": "c67hfa",
+    "de": "c67hfa",
+    "fa": "c67hfa",
+    "fr": "c67hfa",
+    "ja": "c67hfa",
+    "ru": "c67hfa",
+    "zh-CN": "c67hfa"
+  },
+  "pluginTrust.vault.about": {
+    "ar": "q3hjhl",
+    "de": "q3hjhl",
+    "fa": "q3hjhl",
+    "fr": "q3hjhl",
+    "ja": "q3hjhl",
+    "ru": "q3hjhl",
+    "zh-CN": "q3hjhl"
+  },
+  "pluginTrust.vault.none": {
+    "ar": "ho5ta5",
+    "de": "ho5ta5",
+    "fa": "ho5ta5",
+    "fr": "ho5ta5",
+    "ja": "ho5ta5",
+    "ru": "ho5ta5",
+    "zh-CN": "ho5ta5"
+  },
+  "pluginTrust.vault.loadFailed": {
+    "ar": "1qfk5z8",
+    "de": "1qfk5z8",
+    "fa": "1qfk5z8",
+    "fr": "1qfk5z8",
+    "ja": "1qfk5z8",
+    "ru": "1qfk5z8",
+    "zh-CN": "1qfk5z8"
+  },
+  "pluginTrust.vault.notApproved": {
+    "ar": "1jpphow",
+    "de": "1jpphow",
+    "fa": "1jpphow",
+    "fr": "1jpphow",
+    "ja": "1jpphow",
+    "ru": "1jpphow",
+    "zh-CN": "1jpphow"
+  },
+  "pluginTrust.vault.changed": {
+    "ar": "1i675dx",
+    "de": "1i675dx",
+    "fa": "1i675dx",
+    "fr": "1i675dx",
+    "ja": "1i675dx",
+    "ru": "1i675dx",
+    "zh-CN": "1i675dx"
+  },
+  "pluginTrust.vault.approved": {
+    "ar": "awr8aa",
+    "de": "awr8aa",
+    "fa": "awr8aa",
+    "fr": "awr8aa",
+    "ja": "awr8aa",
+    "ru": "awr8aa",
+    "zh-CN": "awr8aa"
+  },
+  "pluginTrust.vault.asks": {
+    "ar": "wm16ae",
+    "de": "wm16ae",
+    "fa": "wm16ae",
+    "fr": "wm16ae",
+    "ja": "wm16ae",
+    "ru": "wm16ae",
+    "zh-CN": "wm16ae"
+  },
+  "pluginTrust.vault.invalid": {
+    "ar": "1vetf0k",
+    "de": "1vetf0k",
+    "fa": "1vetf0k",
+    "fr": "1vetf0k",
+    "ja": "1vetf0k",
+    "ru": "1vetf0k",
+    "zh-CN": "1vetf0k"
+  },
+  "pluginTrust.vault.review": {
+    "ar": "9uxlwk",
+    "de": "9uxlwk",
+    "fa": "9uxlwk",
+    "fr": "9uxlwk",
+    "ja": "9uxlwk",
+    "ru": "9uxlwk",
+    "zh-CN": "9uxlwk"
+  },
+  "pluginTrust.vault.revoke": {
+    "ar": "vs8xhy",
+    "de": "vs8xhy",
+    "fa": "vs8xhy",
+    "fr": "vs8xhy",
+    "ja": "vs8xhy",
+    "ru": "vs8xhy",
+    "zh-CN": "vs8xhy"
+  },
+  "pluginTrust.vault.revoked": {
+    "ar": "1wz4ea9",
+    "de": "1wz4ea9",
+    "fa": "1wz4ea9",
+    "fr": "1wz4ea9",
+    "ja": "1wz4ea9",
+    "ru": "1wz4ea9",
+    "zh-CN": "1wz4ea9"
+  },
+  "pluginTrust.vault.failed": {
+    "ar": "18kxeqk",
+    "de": "18kxeqk",
+    "fa": "18kxeqk",
+    "fr": "18kxeqk",
+    "ja": "18kxeqk",
+    "ru": "18kxeqk",
+    "zh-CN": "18kxeqk"
   }
 }
