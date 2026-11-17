@@ -192,6 +192,33 @@ describe("W5.18 mbox, threads and labels", () => {
     expect(ms).toBeLessThan(120_000);
     console.log(`W5.18: 5,000-message mbox read + planned in ${Math.round(ms)} ms`);
   });
+
+  it("acceptance, end to end (audit r2: not timed): 5,000 messages read, converted with the app's own HTML converter and written as notes, under 2 minutes", async () => {
+    const { htmlToMarkdown } = await import("../storage/markupFormats");
+    const { writeChatImport } = await import("../capture/chats/importChats");
+    const parts: string[] = [];
+    for (let i = 0; i < 5000; i++) {
+      const html = `<div dir="rtl"><p>שלום ${i},</p><p>${SENTENCES[i % 10]} <b>חשוב</b> <a href="https://example.com/${i}">קישור</a></p><ul><li>א</li><li>ב</li></ul><table><tr><td>${i}</td><td>שורה</td></tr></table></div>`;
+      parts.push(`From x@y Thu Nov 12 14:03:00 2026\r\nMessage-ID: <e${i}@x>\r\n${i % 10 === 0 ? "" : `References: <e${i - 1}@x>\r\n`}From: Sender ${i % 13} <s${i % 13}@example.com>\r\nSubject: =?utf-8?B?${Buffer.from(`שרשור ${Math.floor(i / 10)}`).toString("base64")}?=\r\nDate: Thu, 12 Nov 2026 14:${String(i % 60).padStart(2, "0")}:00 +0000\r\nX-Gmail-Labels: Inbox,${i % 3 ? "Work" : "Home"}\r\nContent-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: base64\r\n\r\n${Buffer.from(html).toString("base64")}\r\n\r\n`);
+    }
+    const mbox = new Uint8Array(Buffer.from(parts.join(""), "latin1"));
+    const written = new Map<string, string>();
+    const vault = { exists: async (p: string) => [...written.keys()].some((k) => k.startsWith(`${p}/`)), mkdir: async () => undefined, writeText: async (p: string, t: string) => void written.set(p, t), writeBytes: async () => undefined, markUntrusted: () => undefined };
+    const t0 = performance.now();
+    const read = await readMailFiles([{ name: "Takeout-all.mbox", bytes: mbox }], unzip);
+    const plan = await planMailImport(read, { ...opts, htmlToMarkdown });
+    const report = await writeChatImport(plan.folders, vault);
+    const ms = performance.now() - t0;
+    expect(read.messages).toHaveLength(5000);
+    expect(report.messages).toBe(5000);
+    expect(plan.threads).toBe(500);
+    expect(written.size).toBe(500);
+    const sample = [...written.values()][0];
+    expect(sample).toContain("**חשוב**");
+    expect(sample).toContain("[קישור](https://example.com/");
+    expect(ms).toBeLessThan(120_000);
+    console.log(`W5.18 end to end: 5,000 messages -> ${written.size} notes in ${Math.round(ms)} ms`);
+  }, 180_000);
 });
 
 describe("W5.18 Google Takeout", () => {

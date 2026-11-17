@@ -818,10 +818,11 @@
     {
       "id": "openalex",
       "routes": [
-        "OpenAlex: the references of a DOI (citation graph, only when you turn it on)"
+        "OpenAlex: the references of a DOI (citation graph, only when you turn it on)",
+        "OpenAlex: cite from a DOI (the DOI you approved only, when you turn it on)"
       ],
       "category": "research",
-      "purpose": "Fill the references of a library item for the citation graph (W12.X3)",
+      "purpose": "Fill the references of a library item for the citation graph (W12.X3); and fill one citation from a DOI the user typed and approved (cite from a DOI)",
       "recipients": [
         "OurResearch (api.openalex.org)"
       ],
@@ -907,6 +908,56 @@
           "Tectonic's bundle server (relay.fullyjustified.net)"
         ],
         "withdrawal": "Settings → Privacy → \"Local only\" (or airplane mode) makes every compile cache-only; clearing the stored answer (lumen.latex.tectonicDownloads) asks again.",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "mlkit-doc-scanner",
+      "routes": [
+        "Scans on this device; Play services may download the scanner once"
+      ],
+      "category": "cloud-ai",
+      "purpose": "Scan paper pages into a note with Android's document scanner (W13.M5); the pages are processed on the device",
+      "recipients": [
+        "Google Play services (on the device; it may download the scanner module once)"
+      ],
+      "dataSent": "Nothing from the pages or the notes; Play services may download its scanner module (Google sees the device's request)",
+      "lawfulBasis": "performance of the action the user asked for",
+      "needsConsent": false,
+      "ppa2026": {
+        "activeOptIn": "The user runs \"Scan a document\" on Android and picks the document scanner.",
+        "preTicked": false,
+        "namedRecipients": [
+          "Google Play services (on the device; it may download the scanner module once)"
+        ],
+        "withdrawal": "Settings → Privacy → \"Local only\" (or airplane mode): the scanner is told not to use Play services, and only the photo picker is offered.",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "lumen-links",
+      "routes": [
+        "A lumen:// link, allowed by your “always allow” on this device",
+        "A lumen:// link; you ",
+        "A lumen:// link that only moves around in Lumen"
+      ],
+      "category": "third-party",
+      "purpose": "Record what a lumen:// link from outside the app did, or that it was refused (W13.S); nothing is sent",
+      "recipients": [
+        "Nobody: the decision is listed on this device only"
+      ],
+      "dataSent": "Nothing leaves the device; the ledger keeps the action's name, never the note's text",
+      "lawfulBasis": "performance of the action the user asked for",
+      "needsConsent": false,
+      "ppa2026": {
+        "activeOptIn": "The user opens a lumen:// link and answers the dialog that names its action.",
+        "preTicked": false,
+        "namedRecipients": [
+          "Nobody: the decision is listed on this device only"
+        ],
+        "withdrawal": "Settings → Privacy → \"Local only\" does not change it (nothing is sent); \"always allow\" is cleared from the same dialog's settings, and every link asks again.",
         "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
       },
       "status": "meets"
