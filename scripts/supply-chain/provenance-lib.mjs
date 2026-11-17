@@ -189,6 +189,18 @@ export const versionAtLeast = (v, min) => {
   return true;
 };
 
+/**
+ * The policy sigstore-js checks a certificate against. sigstore-js matches the
+ * certificate's identity with `san.match(policy.subjectAlternativeName)`, so a
+ * plain string is an unanchored regular expression: "tal@example.com" would
+ * also accept "evil-tal@example.com", "tal@example.com.attacker.test" and
+ * "talXexample.com". The pinned identity is escaped and anchored, so only that
+ * exact identity passes, as with cosign's --certificate-identity (F14). The
+ * issuer is compared for equality by sigstore-js already.
+ */
+export const escapeRegExp = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+export const sigstorePolicy = ({ identity, issuer }) => ({ subjectAlternativeName: `^${escapeRegExp(identity)}$`, extensions: { issuer } });
+
 /** The cosign commands (argv) for one file: keyless signing on the Mac, and the check anyone runs. */
 export const cosignSignArgs = (file) => ["sign-blob", "--yes", "--bundle", `${file}.sigstore.json`, file];
 export const cosignVerifyArgs = (file, { identity, issuer }, { trustedRoot = null } = {}) => ["verify-blob", file, "--bundle", `${file}.sigstore.json`, "--certificate-identity", identity, "--certificate-oidc-issuer", issuer, ...(trustedRoot ? ["--trusted-root", trustedRoot, "--offline"] : [])];

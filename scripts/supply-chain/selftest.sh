@@ -91,7 +91,12 @@ cp "$T/sbom.bak" "$R/release/sbom.cdx.json"
 cp "$R/release/SHA256SUMS.sigstore.json" "$R/release/sbom.cdx.json.sigstore.json"
 expect "verify: another file's valid bundle is refused" '[ "$(vcode "${V[@]}" release/sbom.cdx.json)" = 1 ]'
 ( cd "$R" && PATH="$T/bin:$PATH" FAKE_EMAIL=mallory@example.com cosign sign-blob --yes --bundle release/sbom.cdx.json.sigstore.json release/sbom.cdx.json )
-expect "verify: a valid signature by another identity is refused" '[ "$(vcode "${V[@]}" release/sbom.cdx.json)" = 1 ] && grep -q "expected tal@example.com, got mallory@example.com" "$T/v.log"'
+expect "verify: a valid signature by another identity is refused" '[ "$(vcode "${V[@]}" release/sbom.cdx.json)" = 1 ] && grep -q "expected ^tal@example\\\\.com\$, got mallory@example.com" "$T/v.log"'
+# F14: sigstore-js matches the identity as a regular expression; look-alikes of the pinned identity are refused too.
+for look in evil-tal@example.com tal@example.com.attacker.test tal@exampleXcom; do
+  ( cd "$R" && PATH="$T/bin:$PATH" FAKE_EMAIL=$look cosign sign-blob --yes --bundle release/sbom.cdx.json.sigstore.json release/sbom.cdx.json )
+  expect "verify: a valid signature by the look-alike identity $look is refused" '[ "$(vcode "${V[@]}" release/sbom.cdx.json)" = 1 ] && grep -q "UNTRUSTED_SIGNER_ERROR" "$T/v.log"'
+done
 ( cd "$R" && PATH="$T/bin:$PATH" cosign sign-blob --yes --bundle release/sbom.cdx.json.sigstore.json release/sbom.cdx.json )
 node --input-type=module -e "
 import { localSigstore } from '$R/scripts/supply-chain/sigstore-local.mjs';

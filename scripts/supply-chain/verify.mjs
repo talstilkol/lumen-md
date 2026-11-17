@@ -32,7 +32,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { createRequire } from "node:module";
 import { basename, dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { COSIGN_MIN, NOT_SUBJECT, cosignVerifyArgs, cosignVersion, identityProblems, sha256, verifyProvenance, versionAtLeast, witnessVerifyArgs } from "./provenance-lib.mjs";
+import { COSIGN_MIN, NOT_SUBJECT, cosignVerifyArgs, cosignVersion, identityProblems, sha256, sigstorePolicy, verifyProvenance, versionAtLeast, witnessVerifyArgs } from "./provenance-lib.mjs";
 
 const root = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 const argv = process.argv.slice(2);
@@ -139,7 +139,7 @@ async function checkBundle(file) {
   try {
     const v = await sigstoreVerifier();
     const entity = sjs.verify.toSignedEntity(sjs.bundle.bundleFromJSON(readJson(b)), readFileSync(file));
-    v.verify(entity, { subjectAlternativeName: identity.identity, extensions: { issuer: identity.issuer } });
+    v.verify(entity, sigstorePolicy(identity));
     return null;
   } catch (e) {
     return `Sigstore: ${e.code ? `${e.code}: ` : ""}${e.message}`;
