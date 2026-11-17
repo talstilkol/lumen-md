@@ -29,8 +29,10 @@ const result = (task: string, metrics: Record<string, number>, over: Partial<Pub
 
 describe("the committed page", () => {
   it("is what the generator makes from the committed results (none yet) and claims (none yet)", () => {
-    expect(readFileSync("docs/src/content/docs/project/hebrew-benchmark.md", "utf8")).toBe(renderBenchmarkPage([], comp, "en"));
-    expect(readFileSync("docs/src/content/docs/he/project/hebrew-benchmark.md", "utf8")).toBe(renderBenchmarkPage([], comp, "he"));
+    // W13.H6: and the recorded RTL test's ledger (launch/rtl-benchmark.json).
+    const rtl = JSON.parse(readFileSync("launch/rtl-benchmark.json", "utf8"));
+    expect(readFileSync("docs/src/content/docs/project/hebrew-benchmark.md", "utf8")).toBe(renderBenchmarkPage([], comp, "en", rtl));
+    expect(readFileSync("docs/src/content/docs/he/project/hebrew-benchmark.md", "utf8")).toBe(renderBenchmarkPage([], comp, "he", rtl));
   });
   it("has no number at all today: every Lumen cell is 'not measured yet', every competitor 'not tested'", () => {
     const md = renderBenchmarkPage([], comp, "en");

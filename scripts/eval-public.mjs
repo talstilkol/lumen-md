@@ -291,7 +291,10 @@ const PAGES = { en: "docs/src/content/docs/project/hebrew-benchmark.md", he: "do
 function pageState() {
   const comp = readJson(join(root, "launch/hebrew-benchmark.json"));
   const res = results().map((r) => r.json).filter((r) => r.schema === 1);
-  const want = Object.fromEntries(Object.entries(PAGES).map(([lang, p]) => [p, renderBenchmarkPage(res, comp, lang)]));
+  // W13.H6: the recorded RTL test's ledger, when there is one.
+  const rtlPath = join(root, "launch/rtl-benchmark.json");
+  const rtl = existsSync(rtlPath) ? readJson(rtlPath) : undefined;
+  const want = Object.fromEntries(Object.entries(PAGES).map(([lang, p]) => [p, renderBenchmarkPage(res, comp, lang, rtl)]));
   const stale = Object.entries(want).filter(([p, text]) => !existsSync(join(root, p)) || readFileSync(join(root, p), "utf8") !== text).map(([p]) => p);
   return { problems: pageProblems(res, comp), want, stale };
 }
