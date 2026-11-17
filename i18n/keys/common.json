@@ -17647,6 +17647,11 @@
       "vars": []
     },
     {
+      "key": "readingMode.field.sidenotes",
+      "en": "Notes in the margins",
+      "vars": []
+    },
+    {
       "key": "readingMode.field.size",
       "en": "Text size",
       "vars": []
