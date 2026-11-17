@@ -30,4 +30,4 @@
 | `FC2-shoshan-inventory` | W11.H12 | #1199 | 10 | git-lfs |
 | `FC2-6.2-misaki-pack` | 6.2 | #1200 | 5 | — |
 | `FC2-W12.F2-typst-vendor` | W12.F2 | #1201 | 30 | network for npm and the font |
-| `FC2-W11.P13-origin-trials` | W11.P13 | — | 30 | — |
+| `FC2-W11.P13-origin-trials` | W11.P13 | #1202 | 30 | — |
