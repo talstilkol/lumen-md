@@ -8,6 +8,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { DROP_NOTE, droppedStatus, migrateEvidence, passFail, vitestFiles, whereToRun } from "../../scripts/plan/migrate-evidence.mjs";
 
 const ROOT = resolve(__dirname, "../..");

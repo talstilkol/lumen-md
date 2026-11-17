@@ -26,7 +26,7 @@ const CONTAINER = new Set(["ul", "ol", "dl", "li", "blockquote", "details"]);
 const LTR = new Set(["pre", "math", "svg", "kbd", "samp"]);
 
 const isFormulaOrCode = (n: Element) => {
-  const c = n.properties?.className;
+  const c: unknown = n.properties?.className;
   const classes = Array.isArray(c) ? c.map(String) : typeof c === "string" ? c.split(/\s+/) : [];
   return n.tagName === "code" || classes.some((x) => x === "math-inline" || x === "math-display" || x.startsWith("katex"));
 };
@@ -73,7 +73,7 @@ export function rehypeDirAuto() {
         // A callout reads in its content's direction: a default title ("Tip")
         // must not turn a Hebrew callout left-to-right.
         const content = node.children.find(
-          (c) => c.type === "element" && Array.isArray(c.properties?.className) && c.properties.className.includes("callout-content"),
+          (c): c is Element => c.type === "element" && Array.isArray(c.properties?.className) && c.properties.className.includes("callout-content"),
         );
         props.dir = firstStrongDirection(proseText(content ?? node)) ?? firstStrongDirection(toString(node)) ?? "auto";
       } else if (CONTAINER.has(node.tagName) || cls.includes("callout-content"))

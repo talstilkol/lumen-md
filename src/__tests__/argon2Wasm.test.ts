@@ -63,7 +63,7 @@ describe("Argon2id: the WebAssembly memory fill (W4.20)", () => {
 
   it("derives m = 64 MiB, t = 3, p = 1 well under 1 s of CPU (the TypeScript fill: ~5.6 s)", () => {
     const input: Argon2Input = { password: new TextEncoder().encode("correct horse battery staple"), salt: new Uint8Array(16).fill(7), memoryKiB: 64 * 1024, iterations: 3, parallelism: 1, tagLength: 32 };
-    let tag = new Uint8Array();
+    let tag: Uint8Array = new Uint8Array();
     const ms = cpuMs(() => (tag = argon2id(input)));
     expect(tag).toHaveLength(32);
     expect(ms).toBeLessThan(1500);

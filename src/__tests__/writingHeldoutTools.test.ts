@@ -7,8 +7,11 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { applyCards } from "../../scripts/writing-defaults-update.mjs";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { checkWritingSet } from "../../scripts/lib/heldoutCheck.mjs";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { agreement, readLabels } from "../../scripts/writing-agreement.mjs";
 import { writingDefault, type WritingTable } from "../agents/writing/modelDefaults";
 
@@ -29,7 +32,7 @@ describe("W13.W17 defaults from the Mac's numbers", () => {
       { file: "e.json", report: { ...card("heldout", "gemma4:e2b", SHA("a"), 0.9), agent: "repetition" } },
     ]);
     expect(r.applied).toHaveLength(2);
-    expect(r.skipped.map((s) => s.split(":")[0])).toEqual(["c.json", "d.json", "e.json"]);
+    expect(r.skipped.map((s: string) => s.split(":")[0])).toEqual(["c.json", "d.json", "e.json"]);
     const t = r.table as WritingTable;
     expect(writingDefault("abstractWriter", 8, "he", t)).toMatchObject({ model: "gemma4:e2b", score: 0.82, reason: "measured" });
     // The committed table is not changed by a dry run.

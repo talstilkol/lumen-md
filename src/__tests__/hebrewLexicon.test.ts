@@ -10,6 +10,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { join } from "node:path";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { buildPack, pagesOf, parsePage, plainText } from "../../scripts/lib/hewiktionary.mjs";
 import { buildIndex, candidates, lookup, type LexiconPack, type PackEntry } from "../lexicon/lexicon";
 import { LEXICON_CACHE, LEXICON_PACK_PATH, LexiconUnavailableError, __resetLexicon, downloadLexicon, lexiconManifest, loadLexicon, removeLexicon } from "../lexicon/store";

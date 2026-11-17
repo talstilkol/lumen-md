@@ -23,6 +23,7 @@ describe("scripts/lora/export.mjs (6.12)", () => {
     const report = JSON.parse(r.stdout);
     expect(report.ok).toBe(true);
     expect(readdirSync(out).sort()).toEqual(["heldout.json", "train-mac.sh", "train.jsonl", "valid.jsonl"]);
+    // @ts-expect-error — plain .mjs module without type declarations (#1304)
     const { readNotes } = (await import("../../scripts/lora/readNotes.mjs")) as { readNotes(root: string): Array<{ path: string; text: string }> };
     const ds = buildLoraDataset(readNotes(VAULT), { prose: proseOfNote, profile: null });
     expect(readFileSync(join(out, "train.jsonl"), "utf8")).toBe(ds.train);

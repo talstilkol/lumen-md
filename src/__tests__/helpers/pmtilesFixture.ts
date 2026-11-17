@@ -65,7 +65,7 @@ export async function buildArchive(tiles: ReadonlyMap<string, Uint8Array>, o: Ar
   });
   const pack = async (b: Uint8Array) => (o.gzipDirs ? gzip(b) : b);
   let root: Uint8Array;
-  let leaves = new Uint8Array(0);
+  let leaves: Uint8Array = new Uint8Array(0);
   if (o.leaf) {
     leaves = await pack(encodeDirectory(entries));
     root = await pack(encodeDirectory([{ tileId: entries[0]?.tileId ?? 0, offset: 0, length: leaves.length, runLength: 0 }]));

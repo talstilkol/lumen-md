@@ -7,6 +7,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { androidAdaptiveItems } from "../../scripts/lib/mobileBuild.mjs";
 import { isNativeShell, narrowQuery, trackWindowClass, windowClassOf } from "../mobile/windowClass";
 import { closeTopOverlay, installBackNavigation, topOverlay } from "../mobile/backNavigation";

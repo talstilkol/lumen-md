@@ -167,7 +167,7 @@ describe("W13.G9 Base or query → graph", () => {
     // Best of three runs (the shared test machine is loaded; the first run also pays the JIT warm-up).
     const runs: number[] = [];
     let g = baseToGraph(rows);
-    let pos = new Float32Array();
+    let pos: Float32Array = new Float32Array();
     for (let k = 0; k < 3; k++) {
       const t0 = performance.now();
       g = baseToGraph(rows);

@@ -22,5 +22,6 @@ export function draftMissing(opts: {
   review?: Review;
 }): Promise<{ drafts: Record<string, Strings>; rejected: Array<{ lang: string; key: string; reason: string }>; review: Review }>;
 export function approve(review: Review, lang: string, keys?: string[]): number;
-export function ollamaEngine(opts?: { host?: string; model?: string; fetchImpl?: typeof fetch }): Engine;
+/** `glossary`: i18n/glossary.json as scripts/lib/i18n-glossary.mjs reads it (its terms go into the system prompt, W13.I4). */
+export function ollamaEngine(opts?: { host?: string; model?: string; fetchImpl?: typeof fetch; glossary?: unknown }): Engine;
 export function fakeEngine(): Engine;

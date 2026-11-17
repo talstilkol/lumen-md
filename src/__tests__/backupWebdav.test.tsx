@@ -5,7 +5,7 @@
  * server is the in-memory WebDAV fake the sync tests use.
  */
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, screen } from "@testing-library/react";
 import { createMemoryBackend } from "../storage/vault/memory";
 import { listBackups, restore, runBackup } from "../backup/backup";
 import { targetFor } from "../backup/start";

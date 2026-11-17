@@ -123,7 +123,8 @@ function slotOf(rest: string): string | undefined {
 export function parseIntent(transcript: string): Intent | null {
   const base = stripFillers(normalizeCommand(transcript));
   if (!base) return null;
-  let best: { def: IntentDef; trigger: string; rest: string } | null = null;
+  // why: the `as` keeps TS from narrowing `best` to null at its declaration (assigned in the loop below)
+  let best = null as { def: IntentDef; trigger: string; rest: string } | null;
   for (const text of variants(base)) {
     for (const def of INTENTS) {
       for (const trigger of [...def.he, ...def.en]) {

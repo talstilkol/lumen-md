@@ -41,7 +41,7 @@ describe("Israeli import: Apple Notes exports", () => {
       const detected = detectImportSource([...input.keys()]);
       const store = [...input.keys()].some((p) => /(^|\/)NoteStore\.sqlite$/i.test(p));
       const v = store ? await convertAppleNotesStore(input) : convertExport("appleNotes", input, `Imported/${c}`);
-      const lumen: Vault = new Map([...v.notes, ...v.attachments]);
+      const lumen: Vault = new Map<string, string | Uint8Array>([...v.notes, ...v.attachments]);
       const r = scoreVault(c, lumen, asVault(files(join(DIR, c, "expected"))));
       return detected === "appleNotes" ? r : { ...r, pass: false, problems: [`detected as ${detected}`, ...r.problems] };
     }),

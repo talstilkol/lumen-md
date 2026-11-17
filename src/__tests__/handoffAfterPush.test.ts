@@ -13,7 +13,9 @@ import { execFileSync, spawnSync } from "node:child_process";
 import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync, appendFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { readHandoff, refreshFields, renderHandoff } from "../../scripts/lib/handoff.mjs";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { handoffRefreshArgs, renderBranches } from "../../scripts/lib/lane-state.mjs";
 import { killWatchersUnder } from "./helpers/laneWatchers";
 

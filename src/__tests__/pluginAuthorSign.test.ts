@@ -15,7 +15,6 @@ import { join } from "node:path";
 import { authorStatement, certificateIdentity, identityMatches, signAuthor, sigstoreJs, verifyAuthor, versionFiles, GITHUB_ACTIONS, GITHUB_OAUTH } from "../../scripts/lib/plugin-author.mjs";
 // @ts-expect-error — as above
 import { localSigstore } from "../../scripts/supply-chain/sigstore-local.mjs";
-// @ts-expect-error — as above
 import { SITE_SCHEMA, verifySite } from "../../scripts/lib/registrySite.mjs";
 // @ts-expect-error — as above
 import { generateSigningKey, signRegistryBytes, verifyRegistryBytes } from "../../scripts/lib/plugin-registry-sign.mjs";

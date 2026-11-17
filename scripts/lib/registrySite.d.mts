@@ -17,4 +17,8 @@ export declare function pagesProblems(files: Map<string, Buffer>): string[];
 export declare function verifySite(opts: {
   get(path: string): Promise<Buffer | null>;
   scanVersion(v: { manifest: string; main: string; ui?: string }): Promise<{ passed: boolean; id: string; version: string; findings: { rule: string }[] }>;
+  /** W13.L5: checks each version's author signature (scripts/lib/plugin-author.mjs verifyAuthor); without it, not checked. */
+  verifyAuthor?: ((o: { bundle: unknown; statement: unknown; github: string | undefined }) => Promise<{ ok: boolean; reason?: string }>) | null;
+  /** The statement the author signed (plugin-author.mjs authorStatement); needed with verifyAuthor. */
+  authorStatement?: ((o: { id: string; version: string; manifestBytes: Buffer; codeBytes: Buffer }) => unknown) | null;
 }): Promise<{ ok: boolean; problems: string[]; versions: number }>;

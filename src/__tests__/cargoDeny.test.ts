@@ -6,6 +6,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { OK_LICENCE_IDS, classifyId } from "../../scripts/lib/licenses.mjs";
 
 const deny = readFileSync("src-tauri/deny.toml", "utf8");

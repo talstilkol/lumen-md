@@ -7,7 +7,9 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { detected, matrixProblems, missingAt, scan, stripComments } from "../../scripts/lib/supportPolicy.mjs";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { browserslistFor, problems } from "../../scripts/support-policy.mjs";
 import { missingFeatures, shouldNotify } from "../boot/supportCheck";
 

@@ -49,7 +49,8 @@ async function type(view: EditorView, text: string): Promise<void> {
     view.focus();
     if (realInput) {
       document.execCommand("insertText", false, ch);
-      view.observer.flush();
+      // why: the DOM observer is CodeMirror internals (no public flush); the real-input path needs it read now
+      (view as unknown as { observer: { flush(): void } }).observer.flush();
     } else {
       const at = view.state.selection.main.head;
       view.dispatch({ changes: { from: at, insert: ch }, selection: { anchor: at + ch.length }, userEvent: "input.type", scrollIntoView: true });

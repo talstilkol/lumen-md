@@ -16,6 +16,7 @@ import { newSelfCode, outcomeOf, SCRIPTS, SEED_FOLDER, SENTENCE_6, seedPracticeN
 import { endSession, exportFile, record, setSeq, startSession, validParticipant, type Session } from "../research/usability/sessionRecorder";
 import { TASKS } from "../research/usability/study";
 import { zip } from "../storage/zip";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { acceptanceMixed, analyze, parseFindings, parseSession, report, zipJsonEntries } from "../../scripts/lib/usability.mjs";
 
 const root = resolve(__dirname, "../..");
@@ -147,7 +148,7 @@ describe("analysis of a mixed round (W4.25)", () => {
         { name: "README.txt", data: "no text, no names", store },
       ]);
       const entries = zipJsonEntries(bytes, inflateRawSync);
-      expect(entries.map(([n]) => n)).toEqual([f.name]);
+      expect(entries.map(([n]: [string, unknown]) => n)).toEqual([f.name]);
       expect(parseSession(entries[0][1]).participant).toBe("U-7K3F");
     }
     expect(f.name).toMatch(/^usability-U-7K3F-r1-\d{4}-\d{2}-\d{2}\.json$/);

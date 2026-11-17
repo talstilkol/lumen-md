@@ -21,7 +21,7 @@ describe("primitives", () => {
       const pt = randomBytes(len);
       const aad = randomBytes(len % 40);
       const c = createCipheriv("chacha20-poly1305", k, n, { authTagLength: 16 });
-      c.setAAD(aad);
+      c.setAAD(aad, { plaintextLength: pt.length });
       const ref = Buffer.concat([c.update(pt), c.final(), c.getAuthTag()]);
       const mine = chachaSeal(k, n, pt, aad);
       expect(Buffer.from(mine).equals(ref), `len ${len}`).toBe(true);

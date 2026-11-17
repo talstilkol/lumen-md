@@ -6,7 +6,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { CROSSREF_HOST, CROSSREF_LOOKUP_ENABLED, DoiLookupPendingError, DoiNotFoundError, lookupDoi, normalizeDoi, recordFromCrossref, type CrossrefWork } from "../citations/doi";
+import { CROSSREF_HOST, CROSSREF_LOOKUP_ENABLED, DoiLookupPendingError, DoiNotFoundError, lookupDoi, normalizeDoi, recordFromCrossref, type CrossrefWork, type DoiDeps } from "../citations/doi";
 import { formatReference, runsToMarkdown } from "../data/citationStyles";
 import { classify, blockedByPolicy } from "../ai/privacyLedger";
 import { answerLang, referenceSection } from "../research/references";
@@ -67,7 +67,7 @@ describe("lookupDoi", () => {
 
   it("asks first; a declined request sends nothing", async () => {
     const fetch = vi.fn();
-    const confirm = vi.fn(async () => false);
+    const confirm = vi.fn<DoiDeps["confirm"]>(async () => false);
     expect(await lookupDoi("10.5555/example.2024.001", { confirm, t, fetch, enabled: true })).toBeNull();
     expect(confirm.mock.calls[0][0].message).toContain("10.5555/example.2024.001");
     expect(confirm.mock.calls[0][0].message).toContain(CROSSREF_HOST);

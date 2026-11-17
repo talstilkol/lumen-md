@@ -10,7 +10,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { EditorState } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
-import { runNikudCommand } from "../editor/nikudCommand";
+import { runNikudCommand, type NikudCommandDeps } from "../editor/nikudCommand";
 import { __resetNikud, pointHebrewDetailed } from "../ai/nikudService";
 import { addNikud, addNikudDetailed, type NikudEngine } from "../text/nikudRun";
 import { keepWordsOfClass, lexiconTagger, posClass, PARTIAL_MODES } from "../text/nikudPos";
@@ -146,7 +146,7 @@ describe("nouns / verbs through the service and the editor action (W10.E42)", ()
 
   it("the editor action passes the mode through", async () => {
     const view = new EditorView({ state: EditorState.create({ doc: "ספר בית" }) });
-    const point = vi.fn(async (t: string) => t);
+    const point = vi.fn<NikudCommandDeps["point"]>(async (t) => t);
     await runNikudCommand(view, "verbs", { point, unpoint: removeNikud });
     await runNikudCommand(view, "nouns", { point, unpoint: removeNikud });
     await runNikudCommand(view, "partial", { point, unpoint: removeNikud });

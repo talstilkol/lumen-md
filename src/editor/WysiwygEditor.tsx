@@ -39,6 +39,7 @@ import { registerPendingEdits, useAppStore } from "../store/useStore";
 import { useAuth } from "../auth/useAuth";
 import { type SlashMenuRoot, buildSlashMenu } from "./wysiwygSlashMenu";
 import { splitFrontmatter } from "./wysiwygFrontmatter";
+import { t } from "../i18n";
 export { splitFrontmatter };
 
 // Suggesting mode (track changes) works in WYSIWYG too: CriticMarkup ↔

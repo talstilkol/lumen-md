@@ -8,6 +8,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { abstractMarkdown, abstractWriterAgent, anchorSentences, checkTitles, isAcademic, numberedNote, parseDraft, writeAbstract, type AbstractDraft } from "../agents/writing/abstractWriter";
 import { noteParagraphs } from "../ai/paragraphAnchors";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { bootstrapCi, validateCard } from "../../scripts/lib/evalCard.mjs";
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -218,6 +219,7 @@ describe("W13.W12 eval card", () => {
 
 describe("W13.W12 eval:card --agent", () => {
   it("checks only the named agent's reports, and fails when it has none", async () => {
+    // @ts-expect-error — plain .mjs module without type declarations (#1304)
     const { main } = await import("../../scripts/eval-card.mjs");
     const out: string[] = [];
     const log = (s: string) => out.push(s);

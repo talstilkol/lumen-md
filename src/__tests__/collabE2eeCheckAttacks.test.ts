@@ -38,7 +38,7 @@ const isEnvelope = (x: unknown): boolean => {
   if (Object.keys(o).some((k) => k !== "v" && k !== "iv" && k !== "ct" && k !== "s")) return false;
   return typeof o.v === "number" && Number.isInteger(o.v) && o.iv instanceof Uint8Array && o.iv.byteLength === 12 && o.ct instanceof Uint8Array && o.ct.byteLength >= 16 && (o.s === undefined || o.s === 1);
 };
-const hasContent = (t: Y.AbstractType<unknown>) => t._start !== null || t._map.size > 0;
+const hasContent = <T,>(t: Y.AbstractType<T>) => t._start !== null || t._map.size > 0;
 
 /** The check as #469 shipped it (the oracle): apply the room and the update to a probe and look at everything. */
 function probeCheck(doc: Y.Doc, update: Uint8Array): string | null {

@@ -12,7 +12,7 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 vi.mock("../lib/logger", () => ({ log: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));
 vi.mock("../storage/workspace", () => ({ listWorkspace: vi.fn().mockResolvedValue([]), readWorkspaceFile: vi.fn(async (p: string) => `# ${p}`) }));
 const day = (s: string) => Date.parse(`${s}T12:00:00Z`);
-const FILES = [
+const FILES: GraphNoteInput[] = [
   { path: "בית.md", modified: day("2026-01-10"), wikiTargets: ["פרויקטים", "יומן"], meta: { tags: ["hub"], props: { created: "2025-12-01" } } },
   { path: "פרויקטים.md", modified: day("2026-03-01"), wikiTargets: ["יומן"], meta: { tags: [], props: { created: "2026-02-15" } } },
   { path: "יומן.md", modified: day("2026-05-20"), wikiTargets: [], meta: { tags: ["hub"], props: { date: "2026-05-01" } } },
@@ -20,7 +20,7 @@ const FILES = [
 ];
 vi.mock("../storage/workspaceIndex", () => ({ ensureIndex: vi.fn().mockResolvedValue(undefined), indexedFiles: vi.fn(() => FILES) }));
 
-import { buildGraph, filteredGraph, graphTimeDomain, noteDay } from "../graph/graphModel";
+import { buildGraph, filteredGraph, graphTimeDomain, noteDay, type GraphNoteInput } from "../graph/graphModel";
 import { untilOf } from "../ui/graph/TimeSlider";
 
 const g = buildGraph(FILES);

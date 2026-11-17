@@ -8,9 +8,13 @@ import { describe, expect, it } from "vitest";
 import { mkdirSync, mkdtempSync, readFileSync, utimesSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { checkExpect, expectErrors, getPath, normalizeSpec, packErrors, specVerdict, summarizePlaywright } from "../../scripts/mac-pack/L3/lib.mjs";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { missingRefs, readJsonGlob } from "../../scripts/mac-pack/L3/run.mjs";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { wholeRun } from "../../scripts/mac-pack/L3/e2e-summary.mjs";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { median, verdict as argonVerdict } from "../../scripts/mac-pack/L3/argon2-bench.mjs";
 
 const PACK = JSON.parse(readFileSync("plan/mac-pack/L3.json", "utf8"));

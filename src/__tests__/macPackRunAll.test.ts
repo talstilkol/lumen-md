@@ -197,8 +197,8 @@ describe("mac:pack pieces", () => {
     expect(new Set(all.map((e: { lane: string }) => e.lane)).size).toBeGreaterThanOrEqual(8);
     const ordered = order(classify(all));
     expect(ordered).toHaveLength(all.length);
-    const pos = new Map(ordered.map((e: { id: string }, i: number) => [e.id, i]));
-    for (const e of ordered) for (const n of e.needIds) expect(pos.get(n)).toBeLessThan(pos.get(e.id));
+    const pos = new Map<string, number>(ordered.map((e: { id: string }, i: number) => [e.id, i]));
+    for (const e of ordered) for (const n of e.needIds) expect(pos.get(n)).toBeLessThan(pos.get(e.id)!);
   });
 });
 

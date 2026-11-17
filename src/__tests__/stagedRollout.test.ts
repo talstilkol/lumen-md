@@ -9,7 +9,9 @@ import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import vectors from "../update/rolloutVectors.json";
 import { BUCKETS, admit, bucketOf, installId, newInstallId, parseRollout, threshold } from "../update/stagedRollout";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { describeRollout, firstStage, nextStage, parseRolloutArgs, rolloutCommand, withRollout } from "../../scripts/lib/rollout.mjs";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { parseRunArgs } from "../../scripts/lib/releaseRun.mjs";
 
 const digest = async (d: Uint8Array) => new Uint8Array(createHash("sha256").update(d).digest()).buffer;

@@ -28,7 +28,7 @@ describe("docs Pagefind", () => {
     expect(releaseAsset("darwin", "arm64")?.file).toContain("aarch64-apple-darwin");
     expect(releaseAsset("win32", "x64")?.exe).toBe("pagefind.exe");
     expect(releaseAsset("freebsd", "x64")).toBeNull();
-    for (const a of Object.values(ASSETS)) expect(a.sha256).toMatch(/^[0-9a-f]{64}$/);
+    for (const a of Object.values(ASSETS as Record<string, { sha256: string }>)) expect(a.sha256).toMatch(/^[0-9a-f]{64}$/);
   });
 
   it("sees whether the site is already indexed", () => {

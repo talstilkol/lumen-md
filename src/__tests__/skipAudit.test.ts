@@ -110,7 +110,7 @@ describe("skip audit (plan W4.12)", () => {
     const engines = 'import { test } from "@playwright/test";\nexport function chromiumOnly(b: string, w: string): void {\n  ' + REASON + '\n  test.skip(b !== "chromium", w);\n}\nexport const arrowOnly = (b: string): void => {\n  ' + REASON + '\n  test.skip(b !== "chromium");\n};\nconst later = function (): void {\n  ' + REASON + '\n  test.skip(true);\n};\nexport { later as laterOnly };\nexport const notASkip = (): number => 1;\nexport type Gap = "x";\n';
     const h = skipHelpers(engines);
     expect([...h].sort()).toEqual(["arrowOnly", "chromiumOnly", "laterOnly"]);
-    const count = (src: string) => findSkips("e2e/x.spec.ts", src, TODAY, h);
+    const count = (src: string): Site[] => findSkips("e2e/x.spec.ts", src, TODAY, h);
     // The reviewer's four cases (review 8b): base saw only the first.
     expect(count(`import { chromiumOnly } from "${ENG}";\ntest("x", ({browserName}) => { chromiumOnly(browserName, "the pixel baseline"); });`)).toHaveLength(1);
     expect(count(`import * as E from "${ENG}";\ntest("x", ({browserName}) => { E.chromiumOnly(browserName, "the pixel baseline"); });`).map((s) => s.call)).toEqual(["E.chromiumOnly"]);

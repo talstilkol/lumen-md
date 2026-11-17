@@ -276,15 +276,21 @@ describe("the GPU engine is a lazy chunk", () => {
     expect(src).not.toMatch(/^import[^;]*from\s+"\.\/gpu/m);
     const view = readFileSync(join(root, "src/ui/GraphView.tsx"), "utf8");
     expect(view).not.toMatch(/from\s+"\.\.\/graph\/gpu/);
-    const esbuild = await import("esbuild");
-    const r = await esbuild.build({ entryPoints: [join(root, "src/graph/engine.ts")], bundle: true, splitting: true, format: "esm", outdir: "/out", write: false, metafile: true, packages: "external", logLevel: "silent" });
-    const outs = Object.values(r.metafile!.outputs);
-    const entry = outs.find((o) => o.entryPoint?.endsWith("src/graph/engine.ts"))!;
-    expect(Object.keys(entry.inputs).some((f) => f.includes("graph/gpu/"))).toBe(false);
-    const gpuChunk = outs.find((o) => Object.keys(o.inputs).some((f) => f.endsWith("graph/gpu/gpuLayout.ts")));
+    // The app's own bundler (Vite; esbuild is not a dependency of this project), packages left out.
+    const { build } = await import("vite");
+    const built = await build({
+      configFile: false,
+      root,
+      logLevel: "silent",
+      build: { write: false, minify: false, rollupOptions: { input: join(root, "src/graph/engine.ts"), external: (id: string) => !/^(\.|\/|\0)/.test(id) } },
+    });
+    const chunks = (Array.isArray(built) ? built : [built]).flatMap((b) => ("output" in b ? b.output : [])).flatMap((o) => (o.type === "chunk" ? [o] : []));
+    const entry = chunks.find((c) => c.isEntry)!;
+    expect(entry.moduleIds.some((f) => f.includes("graph/gpu/"))).toBe(false);
+    const gpuChunk = chunks.find((c) => c.moduleIds.some((f) => f.endsWith("graph/gpu/gpuLayout.ts")));
     expect(gpuChunk).toBeDefined();
     expect(gpuChunk).not.toBe(entry);
-    expect(entry.imports.some((im) => im.kind === "dynamic-import")).toBe(true);
+    expect(entry.dynamicImports.length).toBeGreaterThan(0);
   });
 });
 

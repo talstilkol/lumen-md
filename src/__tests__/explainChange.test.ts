@@ -106,7 +106,7 @@ describe("W13.W13 the summary", () => {
   it("a model line about a change that did not happen is dropped (grounding check)", async () => {
     const o = "The budget is 15 million. We will ship on Monday.";
     const n = "The budget is 150 million. We will not ship on Monday.";
-    const model = vi.fn(async () => [
+    const model = vi.fn(async (_input: unknown) => [
       "The budget grew from 15 to 150 million.",
       "Shipping on Monday is now cancelled: not shipping.",
       "The deadline moved to 2027.",

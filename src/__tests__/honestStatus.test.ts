@@ -10,10 +10,15 @@ import { describe, expect, it } from "vitest";
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import * as guard from "../../scripts/plan/claimGuard.mjs";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { claimGuard, evidenceProblems, overclaimReport, overclaims, verifyShas } from "../../scripts/plan/claimGuard.mjs";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { run } from "../../scripts/plan/build.mjs";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { judgePerf, measure } from "../../scripts/plan/perfHonesty.mjs";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { lintRunPlan } from "../../scripts/plan/planLint.mjs";
 
 const ROOT = resolve(__dirname, "../..");
@@ -38,7 +43,7 @@ describe("R12.14 claim guard", () => {
     t01.status = "✅ #202";
     delete t01.evidence;
     expect(claimGuard(plan)).toContain("0.1 is ✅ with no evidence");
-    expect(claimGuard({ ...withTask({ status: "✅", evidence: GOOD }), receiptGrandfathered: ["R12.99"] }).filter((p) => p.startsWith("receiptGrandfathered:"))).toEqual(["receiptGrandfathered: no task is exempt from the evidence rule (W10.G5) — remove the list; a ✅ task needs its evidence, or goes back to ⏳"]);
+    expect(claimGuard({ ...withTask({ status: "✅", evidence: GOOD }), receiptGrandfathered: ["R12.99"] }).filter((p: string) => p.startsWith("receiptGrandfathered:"))).toEqual(["receiptGrandfathered: no task is exempt from the evidence rule (W10.G5) — remove the list; a ✅ task needs its evidence, or goes back to ⏳"]);
     expect(claimGuard(withTask({ status: "✅", evidenceExempt: true }))).toContain('R12.99: "evidenceExempt" — no task is exempt from the evidence rule (W10.G5)');
   });
 
@@ -71,13 +76,13 @@ describe("R12.14 claim guard", () => {
 
   it("the overclaim report: by evidence only, the weak back to ⏳, in Hebrew", () => {
     const plan = withTask({ status: "✅", evidence: { ...GOOD, checks: [] } });
-    const row = overclaims(plan).find((r) => r.id === "R12.99")!;
+    const row = overclaims(plan).find((r: { id: string }) => r.id === "R12.99")!;
     expect(row).toMatchObject({ level: 1, suggest: "⏳" });
     expect(row).not.toHaveProperty("grandfathered");
     const md = overclaimReport(plan);
     expect(md).toContain("# דוח טענות-יתר");
     expect(md).toContain("| R12.99 | חלקית | לא נרשמה אף בדיקה | ⏳ |");
-    expect(overclaims(withTask({ status: "✅", evidence: GOOD })).find((r) => r.id === "R12.99")!.level).toBe(2);
+    expect(overclaims(withTask({ status: "✅", evidence: GOOD })).find((r: { id: string }) => r.id === "R12.99")!.level).toBe(2);
   });
 
   it("a shallow clone: a missing sha is not checkable here, not a failure", () => {

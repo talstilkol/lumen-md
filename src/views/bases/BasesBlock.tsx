@@ -36,7 +36,7 @@ import "./basesBlockStrings";
 import { explainError } from "../../lib/userError";
 import { EmptyState, learnHow } from "../../ui/EmptyState";
 import { downloadCsv, importCsv } from "./basesCsv";
-import { nameCell, openFile, type ViewProps } from "./basesCells";
+import { Cell, nameCell, openFile, type ViewProps } from "./basesCells";
 import { CalendarView, TimelineView } from "./basesTimeViews";
 import { useVisibleRefresh } from "../../lib/visibleRefresh";
 // W13.G9: "Open as graph" — the dialog loads when the button is pressed.

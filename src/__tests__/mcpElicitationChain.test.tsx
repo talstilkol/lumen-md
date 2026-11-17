@@ -31,7 +31,7 @@ beforeEach(() => {
 });
 
 /** Start a tool call that elicits; `user` acts on the dialog once it is up. */
-async function callWith(tool: string, args: Record<string, unknown>, user: () => Promise<void> | void) {
+async function callWith(tool: string, args: Record<string, unknown>, user: () => unknown) {
   const srv = everythingServer() as Fixture;
   const client = new McpClient(inProcess(srv), { serverLabel: "My everything", elicit: askElicitation });
   const pending = client.callTool(tool, args);

@@ -7,7 +7,9 @@ import { describe, expect, it } from "vitest";
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { appendAudit, AUDIT_FILE, auditGuard, latestVerdicts, ledgerProblems, readLedger } from "../../scripts/plan/auditGuard.mjs";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { run } from "../../scripts/plan/build.mjs";
 
 const ROOT = resolve(__dirname, "../..");

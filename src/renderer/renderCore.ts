@@ -221,15 +221,25 @@ function remarkLumenBlocks() {
   };
 }
 
+/**
+ * The pipeline's result is the HAST tree itself (`hastResult` below), as
+ * unified's compile result. Branded: with a plain HAST root in
+ * CompileResultMap, unified's Plugin type took every plugin that returns a
+ * HAST root (remark-rehype, rehype-raw, every rehype transformer) for a
+ * compiler and refused it (tsc -b on Vercel: TS2345 / TS2769 in this file,
+ * its tests and packages/vscode-lumen, since the augmentation is global).
+ */
+declare const hastResultBrand: unique symbol;
+export type HastResult = HastRoot & { readonly [hastResultBrand]: true };
+
 declare module "unified" {
-  // The pipeline's result is the HAST tree itself (`hastResult` below).
   interface CompileResultMap {
-    HastRoot: HastRoot;
+    LumenHastResult: HastResult;
   }
 }
 
 /** A processor whose result is the HAST tree itself (no compiler to React or HTML). */
-export type HastProcessor = Processor<MdastRoot, MdastRoot, HastRoot, HastRoot, HastRoot>;
+export type HastProcessor = Processor<MdastRoot, MdastRoot, HastRoot, HastRoot, HastResult>;
 type RehypeKatex = typeof import("./katexPlugin").default;
 
 /** The terminal step: the result of `process` is the tree (structured-cloneable, for postMessage). */

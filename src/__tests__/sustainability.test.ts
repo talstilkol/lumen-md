@@ -7,6 +7,7 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { breakEven, fixedMonthly, model, perUserMonthly, PRICES, USAGE } from "../../scripts/cost-model.mjs";
 
 const ROOT = resolve(__dirname, "../..");
