@@ -5,10 +5,14 @@
  * into a list of machine checks plus the parts only a person can judge
  * (`manual`); `judge` runs the checks against one entry's run. A result file
  * only counts when it was written after `since` (the start of the run): a
- * file left over from an earlier run is not evidence.
+ * file left over from an earlier run, or committed to the repo, is not
+ * evidence. That holds for the files a shell `check` reads too
+ * (scripts/mac-pack/lib/fresh.mjs): a check that would read an older file
+ * fails as stale without running.
  */
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { join, relative, resolve } from "node:path";
+import { staleReads } from "./fresh.mjs";
 
 // ── glob ──────────────────────────────────────────────────────────────────
 
@@ -175,6 +179,7 @@ function parseCond(text) {
 
 /**
  * The string form: clauses split on ";". "exit N" is the exit check;
+ * "[then] exit 0 of: <cmd>" is a shell check;
  * "<file>.json: .a == 1 && .b >= 2" and "exit 0 and <file>.json .ok == true"
  * are JSON checks; "e2e: …" and "commands: …" describe what the entry's own
  * runner judges; anything else is for a person.
@@ -187,6 +192,11 @@ export function parseExpectString(s) {
   for (const raw of s.split(/;\s+/)) {
     let clause = raw.trim().replace(/\.$/, "");
     if (!clause) continue;
+    const sh = clause.match(/^(?:then\s+)?exit 0 of:\s*(.+)$/);
+    if (sh) {
+      checks.push({ kind: "shell", cmd: sh[1] });
+      continue;
+    }
     const ex = clause.match(/^exit (\d+)\b\s*(.*)$/);
     if (ex) {
       exit = Number(ex[1]);
@@ -252,7 +262,7 @@ export function normalize(expect) {
 const describe = (c) => {
   switch (c.kind) {
     case "exit":
-      return c.value === 0 ? "exit 0" : "exit ≠ 0 (a planted failure must be refused)";
+      return `${c.value === 0 ? "exit 0" : "exit ≠ 0 (a planted failure must be refused)"}${c.implicit ? " (every run must exit 0 unless its expect says otherwise)" : ""}`;
     case "json":
       return `${c.file}: ${Array.isArray(c.path) ? c.path.join(".") || "(root)" : c.path} ${c.op} ${JSON.stringify(c.value)}${c.where ? ` where ${JSON.stringify(c.where)}` : ""}`;
     case "regex":
@@ -331,8 +341,14 @@ export async function judge(checks, run, { root, since = 0, shell }) {
         r.actual = last;
         r.ok = last !== "" && compare(Number(last), c.op, c.value);
       } else if (c.kind === "shell") {
-        r.actual = await shell(c.cmd);
-        r.ok = r.actual === 0;
+        const stale = staleReads(root, c.cmd, since);
+        if (stale.length) {
+          const rel = relative(root, stale[0]);
+          r.actual = `stale: ${rel.startsWith("..") ? stale[0] : rel} is older than this run`;
+        } else {
+          r.actual = await shell(c.cmd);
+          r.ok = r.actual === 0;
+        }
       }
     } catch (e) {
       r.ok = false;
