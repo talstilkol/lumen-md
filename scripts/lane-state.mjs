@@ -43,7 +43,7 @@ import { spawn, spawnSync } from "node:child_process";
 import { chmodSync, closeSync, existsSync, mkdirSync, openSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync, writeSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { PREPUSH_LINE, confirmedPushes, parseBranches, parseWatchRecord, prePushPlan, pushedRefs, recordPush, renderBranches, resumeAction, runningFor, stateFor, touchUpdated, txnHookPlan, watchPlan } from "./lib/lane-state.mjs";
+import { PREPUSH_LINE, confirmedPushes, handoffRefreshArgs, parseBranches, parseWatchRecord, prePushPlan, pushedRefs, recordPush, renderBranches, resumeAction, runningFor, stateFor, touchUpdated, txnHookPlan, watchPlan } from "./lib/lane-state.mjs";
 
 const argv = process.argv.slice(2);
 const [cmd, file] = argv;
@@ -250,10 +250,12 @@ function main() {
     const input = readStdinCache();
     const remotes = [...new Set(pending.map((p) => p.remote ?? "origin"))];
     let left = pending;
+    let confirmed = 0;
     for (const remote of remotes) {
       const r = confirmedPushes(input, left, remote);
       left = r.pending;
       for (const c of r.confirmed) {
+        confirmed++;
         const files = stateFiles(cfg);
         const target = cfg.file ? files[0] : stateFor(c.branch, files.map((p) => [p, readFileSync(p, "utf8")]));
         if (target) record(target, { ...c, at: now() });
@@ -261,6 +263,10 @@ function main() {
     }
     if (left.length) writeAtomic(pendingFile(), JSON.stringify(left));
     else rmSync(pendingFile(), { force: true });
+    // Plan 0.13 step 2: the end of a PR's push regenerates this worktree's handoff (never fails the hook).
+    const top = sh(["git", "rev-parse", "--show-toplevel"]);
+    const args = top ? handoffRefreshArgs(confirmed, existsSync(join(top, "scripts/handoff.mjs"))) : null;
+    if (args) spawnSync(process.execPath, args, { cwd: top, stdio: "ignore", timeout: 30_000 });
     return 0;
   }
   if (cmd === "install-hook") {

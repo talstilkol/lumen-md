@@ -22,7 +22,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
-import { auditSkips, MAX_E2E_HELPER_SKIPS, MAX_E2E_SKIPS, parseAnnotation, testSourceFiles } from "./lib/skipAudit.mjs";
+import { auditSkips, E2E_SKIP_POINTS_TARGET, MAX_E2E_HELPER_SKIPS, MAX_E2E_SKIP_POINTS, MAX_E2E_SKIPS, parseAnnotation, testSourceFiles } from "./lib/skipAudit.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -63,13 +63,14 @@ export function vaultGatedTests(dir = join(root, "e2e")) {
 }
 
 function main() {
-  const { sites, violations, e2eCount, e2eHelperCount } = auditSkips(root);
+  const { sites, violations, e2eCount, e2eHelperCount, e2eSkipPoints } = auditSkips(root);
   const rows = sites.map((s) => ({ ...s, kind: classify(s), ...(s.annotation ? parseAnnotation(s.annotation) : { why: "", task: "", until: "" }) }));
   const gated = vaultGatedTests();
   if (process.argv.includes("--json")) {
-    console.log(JSON.stringify({ e2eCount, max: MAX_E2E_SKIPS, e2eHelperCount, maxHelper: MAX_E2E_HELPER_SKIPS, sites: rows.map(({ problems: _p, ...r }) => r), vaultGated: gated, violations }, null, 2));
+    console.log(JSON.stringify({ e2eCount, max: MAX_E2E_SKIPS, e2eHelperCount, maxHelper: MAX_E2E_HELPER_SKIPS, e2eSkipPoints, maxPoints: MAX_E2E_SKIP_POINTS, targetPoints: E2E_SKIP_POINTS_TARGET, sites: rows.map(({ problems: _p, ...r }) => r), vaultGated: gated, violations }, null, 2));
   } else {
     console.log(`# Skipped tests (${sites.length}: ${e2eCount} in e2e/, at most ${MAX_E2E_SKIPS}; ${e2eHelperCount} engine-helper calls in e2e/, at most ${MAX_E2E_HELPER_SKIPS}; ${sites.length - e2eCount - e2eHelperCount} in src/)\n`);
+    console.log(`e2e skip points, each counted once (W10.F11): ${e2eSkipPoints}, at most ${MAX_E2E_SKIP_POINTS}; target ${E2E_SKIP_POINTS_TARGET}\n`);
     console.log("| Where | Call | Kind | Why | Task | Until |\n|---|---|---|---|---|---|");
     for (const r of rows) console.log(`| ${r.file}:${r.line} | \`${r.call}\` | ${r.kind} | ${r.why.replace(/\|/g, "\\|")} | ${r.task} | ${r.until} |`);
     console.log(`\n## Flows that run only in a special setup (not in the default run)\n`);

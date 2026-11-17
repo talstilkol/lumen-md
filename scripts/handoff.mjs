@@ -7,6 +7,10 @@
  *   npm run handoff -- --task "4.5 [[ autocomplete" --next "push and open the PR"
  *   npm run handoff -- --stdout          print instead of writing the file
  *   npm run handoff -- --no-github       local data only (no gh calls)
+ *   npm run handoff -- --refresh         regenerate, keeping the task and next step of the
+ *                                        document it replaces (step 2: the lane's
+ *                                        reference-transaction hook runs it after each push
+ *                                        origin confirmed, with --no-github)
  *
  * Needs `gh` signed in for the PR part. Exits 1 when a branch or worktree it
  * names does not exist, after writing the file (the problems are listed in it).
@@ -15,7 +19,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { ciOfHead, missingRefs, nextStepProblems, parseWorktrees, renderHandoff } from "./lib/handoff.mjs";
+import { ciOfHead, missingRefs, nextStepProblems, parseWorktrees, refreshFields, renderHandoff } from "./lib/handoff.mjs";
 
 // fileURLToPath, not `.pathname`: a checkout in "lumen md/" is "lumen%20md/" in the URL.
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
@@ -132,12 +136,14 @@ if (!flag("no-github")) {
 
 // Where the next step runs: this checkout (the worktree the handoff is written from).
 const where = { path: sh("git", ["rev-parse", "--show-toplevel"]).trim(), branch: sh("git", ["branch", "--show-current"]).trim() || null };
-const problems = [...missingRefs({ prs, worktrees, branches, repo }), ...nextStepProblems({ task: opt("task"), next: opt("next"), where })];
+const handoffFile = resolve(root, "docs/dev/HANDOFF.md");
+const { task, next } = flag("refresh") ? refreshFields(existsSync(handoffFile) ? readFileSync(handoffFile, "utf8") : null, { task: opt("task"), next: opt("next") }) : { task: opt("task"), next: opt("next") };
+const problems = [...missingRefs({ prs, worktrees, branches, repo }), ...nextStepProblems({ task, next, where })];
 const md = renderHandoff({
   now: new Date().toISOString().replace(/\.\d+Z$/, "Z"),
   repo,
-  task: opt("task"),
-  next: opt("next"),
+  task,
+  next,
   where,
   prs,
   worktrees,
@@ -145,7 +151,7 @@ const md = renderHandoff({
 });
 if (flag("stdout")) process.stdout.write(md);
 else {
-  const file = resolve(root, "docs/dev/HANDOFF.md");
+  const file = handoffFile;
   mkdirSync(dirname(file), { recursive: true });
   writeFileSync(file, md);
   console.log(`handoff: wrote docs/dev/HANDOFF.md (${prs.length} PRs, ${worktrees.length} worktrees${problems.length ? `, ${problems.length} problems` : ""})`);

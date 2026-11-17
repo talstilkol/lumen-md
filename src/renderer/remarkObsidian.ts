@@ -3,8 +3,10 @@
  * tree after parsing. It is shared by the preview pipeline and the WYSIWYG
  * editor (which turns highlights into a mark).
  *
- * - Callouts: `> [!type] Title`. A `+` or `-` after the type makes the callout
- *   foldable (`+` open, `-` closed). The type aliases are Obsidian's.
+ * - Callouts: `> [!type] Title`, or `> [!type|metadata] Title` (the metadata
+ *   goes to `data-callout-metadata`, as in Obsidian). A `+` or `-` after the
+ *   type makes the callout foldable (`+` open, `-` closed). The type aliases
+ *   are Obsidian's.
  * - Comments: `%%hidden%%`, inline or across blocks. Hidden in the preview.
  *   An unclosed `%%` hides the rest of the note, as in Obsidian.
  * - Highlights: `==text==`. A colour emoji at the start (🔴 🟠 🟡 🟢 🔵 🟣)
@@ -90,7 +92,13 @@ export const HIGHLIGHT_COLORS: Record<string, string> = {
   "🟣": "purple",
 };
 
-export const CALLOUT_HEAD = /^\[!([\w-]+)\]([+-]?)[ \t]*/;
+/**
+ * `[!type]`, `[!type|metadata]` (Obsidian's callout metadata, read by CSS
+ * snippets: `data-callout-metadata`), then `+`/`-` to fold. Groups: 1 type,
+ * 2 metadata, 3 fold. Quartz's ofm.ts calloutRegex reads the same
+ * (src/__tests__/ofmConformance.test.ts).
+ */
+export const CALLOUT_HEAD = /^\[!([\w-]+)(?:\|([^\]\n]*))?\]([+-]?)[ \t]*/;
 
 const SKIP = new Set(["code", "inlineCode", "math", "inlineMath", "html", "yaml"]);
 const IMAGE_EXT = /\.(png|jpe?g|gif|webp|svg|bmp|avif|ico|tiff?)$/i;
@@ -366,7 +374,8 @@ export function transformCallouts(tree: Root, title: ObsidianOptions["calloutTit
       if (!m) continue;
       const type = m[1];
       const kind = calloutKind(type);
-      const fold = m[2];
+      const meta = m[2]?.trim();
+      const fold = m[3];
       t.value = t.value.slice(m[0].length);
       const [head, rest] = splitFirstLine(p.children);
       const titleKids = head.filter((n) => !(n.type === "text" && n.value === ""));
@@ -376,6 +385,7 @@ export function transformCallouts(tree: Root, title: ObsidianOptions["calloutTit
         hProperties: {
           className: ["callout", `callout-${kind}`],
           "data-callout": type.toLowerCase(),
+          ...(meta ? { "data-callout-metadata": meta } : {}),
           ...(fold ? { "data-callout-fold": fold, open: fold === "+" } : {}),
         },
       };

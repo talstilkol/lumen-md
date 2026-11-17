@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 // @ts-expect-error — plain .mjs module without type declarations
-import { auditSkips, findSkips, MAX_E2E_HELPER_SKIPS, MAX_E2E_SKIPS, parseAnnotation, skipHelpers } from "../../scripts/lib/skipAudit.mjs";
+import { auditSkips, E2E_SKIP_POINTS_TARGET, findSkips, MAX_E2E_HELPER_SKIPS, MAX_E2E_SKIP_POINTS, MAX_E2E_SKIPS, parseAnnotation, skipHelpers } from "../../scripts/lib/skipAudit.mjs";
 // @ts-expect-error — plain .mjs script without type declarations
 import { classify, vaultGatedTests } from "../../scripts/skip-report.mjs";
 
@@ -170,6 +170,30 @@ describe("skip audit (plan W4.12)", () => {
     }
   });
 
+  it("W10.F11: e2e skip points count each place once: skips outside _engines.ts plus helper calls, not the helpers' own bodies", () => {
+    expect([MAX_E2E_SKIP_POINTS, E2E_SKIP_POINTS_TARGET]).toEqual([19, 15]);
+    const helpers = 'import { test } from "@playwright/test";\nexport function chromiumOnly(b: string, what: string): void {\n  ' + REASON + '\n  test.skip(b !== "chromium", what);\n}\n';
+    const dir = mkdtempSync(join(tmpdir(), "skip-audit-p-"));
+    try {
+      mkdirSync(join(dir, "e2e"));
+      writeFileSync(join(dir, "e2e", "_engines.ts"), helpers);
+      writeFileSync(join(dir, "e2e", "a.spec.ts"), `${REASON}\ntest.skip(!ok, "x");\n${REASON}\nchromiumOnly(browserName, "x");\n${REASON}\nchromiumOnly(browserName, "y");\n`);
+      const r = auditSkips(dir, { today: TODAY });
+      // 1 direct + 2 helper calls; the helper's own test.skip is not a third place.
+      expect([r.e2eCount, r.e2eHelperCount, r.e2eSkipPoints]).toEqual([2, 2, 3]);
+      // Past the ratchet: the points fail even while each separate cap holds.
+      const many = Array.from({ length: 12 }, (_, i) => `${REASON}\ntest.skip(!ok${i}, "x");`).join("\n") + "\n" + Array.from({ length: 8 }, () => `${REASON}\nchromiumOnly(browserName, "x");`).join("\n");
+      writeFileSync(join(dir, "e2e", "a.spec.ts"), many);
+      const r2 = auditSkips(dir, { today: TODAY });
+      expect(r2.e2eCount).toBeLessThanOrEqual(MAX_E2E_SKIPS);
+      expect(r2.e2eHelperCount).toBeLessThanOrEqual(MAX_E2E_HELPER_SKIPS);
+      expect(r2.e2eSkipPoints).toBe(20);
+      expect(r2.violations).toEqual([{ file: "e2e/", line: 0, rule: "skip-count", text: expect.stringMatching(/^20 skip points in e2e\//) }]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it("the repository passes: every skip has a reason, and e2e/ is within the cap", () => {
     const r = auditSkips(ROOT);
     expect(r.violations).toEqual([]);
@@ -177,6 +201,7 @@ describe("skip audit (plan W4.12)", () => {
     // Every chromiumOnly / chromiumOnlyHere call site is seen and annotated (R8-L3).
     expect(r.e2eHelperCount).toBeGreaterThanOrEqual(8);
     expect(r.e2eHelperCount).toBeLessThanOrEqual(MAX_E2E_HELPER_SKIPS);
+    expect(r.e2eSkipPoints).toBeLessThanOrEqual(MAX_E2E_SKIP_POINTS);
   });
 
   it("the report sorts skips by what they leave out, and lists the vault flows WebKit does not run", () => {
