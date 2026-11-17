@@ -1,9 +1,9 @@
 {
  "about": "W10.F7: a decision for every open PR whose head is not in the train (npm run train:missing). in = a task or train brings it; rejected = it will not go in, and why; replaced = what carries it instead. A decision is about one head: a PR that moves needs a new one.",
  "train": "verify/train-7",
- "trainHead": "03731e4fc359b639e6d9dc1610bc05404b69809e",
+ "trainHead": "c47476b3f97454c7e1f7c4ed2ee0a1b6a9ed3bee",
  "decided": "2026-11-17",
- "note": "Integrator INT7 (17.11): wave g3 (#1131-#1171, 41 PRs) is merged into verify/train-7 from a6ef1580a2; their heads are in the train. W13 statuses stay as plan.json has them (the WIP gate refuses wave-13 starts). trainHead is the integration head this file was checked against (before this commit).",
+ "note": "Integrator INT7 (17.11): wave g3 (#1131-#1171, 41 PRs) is merged into verify/train-7 from a6ef1580a2; their heads are in the train. W13 statuses stay as plan.json has them (the WIP gate refuses wave-13 starts). trainHead is the integration head this file was checked against (before this commit). Integrator INT8 (17.11): the 31 drafts of lanes F12, FC3, FC1 and FC2 (#1172-#1202) are merged into verify/int8-stage on top of INT7's 53dd679c5e and pushed to verify/train-7 with it; trainHead is the stage head this file was checked against (before this commit).",
  "decisions": [
   {
    "pr": 109,
@@ -894,217 +894,217 @@
    "pr": 1172,
    "head": "ad81597bb878860c1e9aa2481b5c6ecfd85bb9c1",
    "decision": "in",
-   "reason": "Integrator INT7 (17.11): an open draft of lane FC3 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane FC3"
   },
   {
    "pr": 1173,
    "head": "87fec937164aa67e49a65a482abd2ecb0d1e48b6",
    "decision": "in",
-   "reason": "Integrator INT7 (17.11): an open draft of lane FC3 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane FC3"
   },
   {
    "pr": 1174,
    "head": "ec8d60d0a20fb2ea77c907445c9370176b017380",
    "decision": "in",
-   "reason": "Integrator INT7 (17.11): an open draft of lane FC3 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane FC3"
   },
   {
    "pr": 1175,
    "head": "5d8be30cadcdcffc7c799565d7c5cd993e5f932f",
    "decision": "in",
-   "reason": "Integrator INT7 (17.11): an open draft of lane FC3 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane FC3"
   },
   {
    "pr": 1176,
    "head": "0ebb315ad1fa81d8231e9176cca0ac48d9b09ea8",
    "decision": "in",
-   "reason": "Integrator INT7 (17.11): an open draft of lane FC3 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane FC3"
   },
   {
    "pr": 1177,
    "head": "7084197b8c883d42df0323e8688a50313a0b0b09",
    "decision": "in",
-   "reason": "Integrator INT7 (17.11): an open draft of lane F12 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane F12"
   },
   {
    "pr": 1178,
    "head": "40e5881afa1a2383b5f5d130e063622f6747211e",
    "decision": "in",
-   "reason": "Integrator INT7 (17.11): an open draft of lane F12 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane F12"
   },
   {
    "pr": 1179,
    "head": "8270f0753a1e5e866601a7cb8150df71323620cb",
    "decision": "in",
-   "reason": "Integrator INT7 (17.11): an open draft of lane F12 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane F12"
   },
   {
    "pr": 1180,
    "head": "095bde8c7166057b202f35c6730c813895ca591b",
    "decision": "in",
-   "reason": "Integrator INT7 (17.11): an open draft of lane F12 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane F12"
   },
   {
    "pr": 1181,
    "head": "fcbddecac4f5543cb22989de9d8e59d2441bd85e",
    "decision": "in",
-   "reason": "Integrator INT7 (17.11): an open draft of lane F12 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane F12"
   },
   {
    "pr": 1182,
    "head": "b2583dd3662f9c744ab0783ddb883a74a2bb5c5a",
    "decision": "in",
-   "reason": "Integrator INT7 (17.11): an open draft of lane F12 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane F12"
   },
   {
    "pr": 1183,
    "head": "ac2edaa40598ecb4b84ba6e36bf14f0d60266f7e",
    "decision": "in",
-   "reason": "Integrator INT7 (17.11): an open draft of lane FC1 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane FC1"
   },
   {
    "pr": 1184,
    "head": "9c34bd559de3b51f73cbf98ad76daaff4d21dc69",
    "decision": "in",
-   "reason": "Integrator INT7 (17.11): an open draft of lane FC1 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane FC1"
   },
   {
    "pr": 1185,
    "head": "fa98cae75759a7001eafa57aa419e03ee6aac47b",
    "decision": "in",
-   "reason": "Integrator INT7 (17.11): an open draft of lane FC1 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane FC1"
   },
   {
    "pr": 1186,
    "head": "2fa02c0447ec4a4750ffa97299d1a8b40dabb1bf",
    "decision": "in",
-   "reason": "Integrator INT7 (17.11): an open draft of lane FC1 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane FC1"
   },
   {
    "pr": 1187,
    "head": "d1924f63309ab2acae12ae673007483b68c4b78c",
    "decision": "in",
-   "reason": "Integrator INT7 (17.11): an open draft of lane FC1 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane FC1"
   },
   {
    "pr": 1188,
    "head": "134f63895d2604941e154a86493479cb308def35",
    "decision": "in",
-   "reason": "Integrator INT7 (17.11): an open draft of lane FC1 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane FC1"
   },
   {
    "pr": 1189,
    "head": "6c5557476ade5a5b1fd0f4c4c2a6f3d001866f3d",
    "decision": "in",
-   "reason": "Integrator INT7 (17.11): an open draft of lane FC1 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane FC1"
   },
   {
    "pr": 1190,
    "head": "2c8da392f4d654e9c69e479bfbcf008c79668398",
    "decision": "in",
-   "reason": "Integrator INT7 (17.11): an open draft of lane FC1 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane FC1"
   },
   {
    "pr": 1191,
    "head": "3e30f694dc7c301d9f160b71841bfff7b9fa3935",
    "decision": "in",
-   "reason": "Integrator INT7 (17.11): an open draft of lane FC1 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane FC1"
   },
   {
    "pr": 1192,
    "head": "556b8590f316ebff51b8e14ca9efce2e31bb254b",
    "decision": "in",
-   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane FC2"
   },
   {
    "pr": 1193,
    "head": "ff98cf6fb789a7d7f7c211315fd342d5c733c63b",
    "decision": "in",
-   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane FC2"
   },
   {
    "pr": 1194,
    "head": "f252529e456b2cce02d9bf6e81ef391a124d4594",
    "decision": "in",
-   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane FC2"
   },
   {
    "pr": 1195,
    "head": "a7ebbe9eea4a3f5dfa816e0418d749ff9477843d",
    "decision": "in",
-   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane FC2"
   },
   {
    "pr": 1196,
    "head": "1afce28c4e23d277aa22c814419360577fcecb73",
    "decision": "in",
-   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane FC2"
   },
   {
    "pr": 1197,
    "head": "3b954767c84506234a3a8b0b44ba8381cb29d72b",
    "decision": "in",
-   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane FC2"
   },
   {
    "pr": 1198,
    "head": "06def6f303ffbd16ebbe92060e96f38972ae53fa",
    "decision": "in",
-   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane FC2"
   },
   {
    "pr": 1199,
    "head": "b247b6b0a545d4e4d0e04f5e743974d394ea1956",
    "decision": "in",
-   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane FC2"
   },
   {
    "pr": 1200,
    "head": "6bea42e3a035c2ee277d0ae0b32747f9b3aefc70",
    "decision": "in",
-   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane FC2"
   },
   {
    "pr": 1201,
    "head": "35adf4b53a1498c90ca859a3bcab127ee2ab0650",
    "decision": "in",
-   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane FC2"
   },
   {
    "pr": 1202,
    "head": "ecf22466348ddbc29d788aae3ee663773dc9a8f7",
    "decision": "in",
-   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane FC2"
   }
  ]
