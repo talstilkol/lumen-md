@@ -1,0 +1,417 @@
+{
+  "$comment": "W13.R14 reading study protocol: 6 readers (2 with dyslexia), each reads the 6 invented passages, one per mode, in a Latin-square order; time, 3 comprehension questions and a 1-5 preference per mode. Results: eval/results/reading/<reader>.json; summary and decisions: node scripts/owner/readingStudy.mjs summary.",
+  "readers": 6,
+  "dyslexicReaders": 2,
+  "modes": [
+    {
+      "id": "baseline",
+      "plan": "W3.5",
+      "how": "the preview with the reader's usual reading settings"
+    },
+    {
+      "id": "focus",
+      "plan": "W13.R2",
+      "how": "sentence focus (dim the rest)"
+    },
+    {
+      "id": "rsvp",
+      "plan": "W13.R3",
+      "how": "one word at a time with rewind, 250 wpm to start",
+      "experimental": true
+    },
+    {
+      "id": "anchor",
+      "plan": "W13.R4",
+      "how": "anchor emphasis on word starts",
+      "experimental": true
+    },
+    {
+      "id": "immersive",
+      "plan": "W13.R5",
+      "how": "parts of speech in colour, display niqqud, line focus 3"
+    },
+    {
+      "id": "page-view",
+      "plan": "W13.R10",
+      "how": "the page view at fit-page zoom"
+    }
+  ],
+  "passages": [
+    {
+      "id": "p1",
+      "lang": "he",
+      "synthetic": true,
+      "text": "בכפר קטן ליד הים גרה אופה בשם נועה. בכל בוקר אפתה שלושים כיכרות לחם, ובימי שישי גם עוגת תפוחים. יום אחד נשבר התנור, ונועה אפתה את הלחם בתנור של השכן, הדייג אמיר. מאז הם אופים יחד בכל יום שישי.",
+      "questions": [
+        {
+          "q": "כמה כיכרות אפתה נועה בכל בוקר?",
+          "options": [
+            "עשרים",
+            "שלושים",
+            "ארבעים"
+          ],
+          "answer": 1
+        },
+        {
+          "q": "מה קרה לתנור?",
+          "options": [
+            "הוא נשבר",
+            "הוא נגנב",
+            "הוא נמכר"
+          ],
+          "answer": 0
+        },
+        {
+          "q": "מה מקצועו של אמיר?",
+          "options": [
+            "נגר",
+            "אופה",
+            "דייג"
+          ],
+          "answer": 2
+        }
+      ]
+    },
+    {
+      "id": "p2",
+      "lang": "he",
+      "synthetic": true,
+      "text": "הספרייה העירונית פתחה חדר חדש לילדים. בחדר יש מדפים נמוכים, שטיח כחול ושלוש מנורות בצורת ירח. הספרנית, רות, מקריאה סיפור בכל יום שלישי בשעה ארבע. הילדים מביאים כריות מהבית ויושבים במעגל.",
+      "questions": [
+        {
+          "q": "באיזה צבע השטיח?",
+          "options": [
+            "ירוק",
+            "כחול",
+            "אדום"
+          ],
+          "answer": 1
+        },
+        {
+          "q": "מתי רות מקריאה סיפור?",
+          "options": [
+            "ביום שלישי",
+            "ביום ראשון",
+            "ביום חמישי"
+          ],
+          "answer": 0
+        },
+        {
+          "q": "מה הילדים מביאים מהבית?",
+          "options": [
+            "ספרים",
+            "כריות",
+            "עוגיות"
+          ],
+          "answer": 1
+        }
+      ]
+    },
+    {
+      "id": "p3",
+      "lang": "he",
+      "synthetic": true,
+      "text": "בגינה הקהילתית שתלו השכנים עגבניות, נענע וחמניות. הגנן הוותיק, יוסף, לימד את כולם להשקות מוקדם בבוקר כדי שהמים לא יתאדו. בסוף הקיץ חילקו את היבול בין כל הבתים ברחוב, וכל משפחה קיבלה סל.",
+      "questions": [
+        {
+          "q": "מה לא נשתל בגינה?",
+          "options": [
+            "נענע",
+            "תפוחי אדמה",
+            "חמניות"
+          ],
+          "answer": 1
+        },
+        {
+          "q": "מתי כדאי להשקות לפי יוסף?",
+          "options": [
+            "בצהריים",
+            "בערב",
+            "מוקדם בבוקר"
+          ],
+          "answer": 2
+        },
+        {
+          "q": "מה קיבלה כל משפחה?",
+          "options": [
+            "סל",
+            "צנצנת",
+            "זרעים"
+          ],
+          "answer": 0
+        }
+      ]
+    },
+    {
+      "id": "p4",
+      "lang": "he",
+      "synthetic": true,
+      "text": "רכבת הלילה יוצאת מהתחנה המרכזית בשעה אחת עשרה ומגיעה לעיר הצפונית עם הזריחה. בקרון האחרון יש מיטות מתקפלות. הכרטיסנית, דנה, מעירה את הנוסעים חצי שעה לפני התחנה ומגישה להם תה חם.",
+      "questions": [
+        {
+          "q": "מתי יוצאת הרכבת?",
+          "options": [
+            "בעשר",
+            "באחת עשרה",
+            "בחצות"
+          ],
+          "answer": 1
+        },
+        {
+          "q": "איפה המיטות המתקפלות?",
+          "options": [
+            "בקרון הראשון",
+            "בקרון האחרון",
+            "בקרון האמצעי"
+          ],
+          "answer": 1
+        },
+        {
+          "q": "מה מגישה דנה?",
+          "options": [
+            "קפה",
+            "מיץ",
+            "תה חם"
+          ],
+          "answer": 2
+        }
+      ]
+    },
+    {
+      "id": "p5",
+      "lang": "he",
+      "synthetic": true,
+      "text": "תלמידי כיתה ה׳ בנו מגדל מקרטון לתערוכת המדע. המגדל היה גבוה שני מטרים ועמד על בסיס של קופסאות נעליים. כדי שלא ייפול, הוסיפו התלמידים חוטים שקשרו אותו לשולחן. המגדל זכה במקום השני.",
+      "questions": [
+        {
+          "q": "מאיזה חומר נבנה המגדל?",
+          "options": [
+            "עץ",
+            "קרטון",
+            "פלסטיק"
+          ],
+          "answer": 1
+        },
+        {
+          "q": "מה הגובה של המגדל?",
+          "options": [
+            "מטר אחד",
+            "שני מטרים",
+            "שלושה מטרים"
+          ],
+          "answer": 1
+        },
+        {
+          "q": "באיזה מקום זכה המגדל?",
+          "options": [
+            "ראשון",
+            "שני",
+            "שלישי"
+          ],
+          "answer": 1
+        }
+      ]
+    },
+    {
+      "id": "p6",
+      "lang": "he",
+      "synthetic": true,
+      "text": "בחורף האחרון ירד שלג על ההר בפעם הראשונה מזה עשר שנים. משפחת לוי עלתה להר ברכב, בנתה איש שלג עם כובע אדום, ושתתה שוקו מתרמוס. בדרך חזרה נתקעו בפקק ארוך והגיעו הביתה רק בלילה.",
+      "questions": [
+        {
+          "q": "מתי ירד שלג על ההר לפני כן?",
+          "options": [
+            "לפני שנתיים",
+            "לפני עשר שנים",
+            "בשנה שעברה"
+          ],
+          "answer": 1
+        },
+        {
+          "q": "באיזה צבע הכובע של איש השלג?",
+          "options": [
+            "אדום",
+            "כחול",
+            "שחור"
+          ],
+          "answer": 0
+        },
+        {
+          "q": "למה הגיעו מאוחר?",
+          "options": [
+            "הרכב התקלקל",
+            "פקק ארוך",
+            "שלג על הכביש"
+          ],
+          "answer": 1
+        }
+      ]
+    }
+  ],
+  "order": [
+    [
+      {
+        "mode": "baseline",
+        "passage": "p1"
+      },
+      {
+        "mode": "focus",
+        "passage": "p2"
+      },
+      {
+        "mode": "rsvp",
+        "passage": "p3"
+      },
+      {
+        "mode": "anchor",
+        "passage": "p4"
+      },
+      {
+        "mode": "immersive",
+        "passage": "p5"
+      },
+      {
+        "mode": "page-view",
+        "passage": "p6"
+      }
+    ],
+    [
+      {
+        "mode": "focus",
+        "passage": "p1"
+      },
+      {
+        "mode": "rsvp",
+        "passage": "p2"
+      },
+      {
+        "mode": "anchor",
+        "passage": "p3"
+      },
+      {
+        "mode": "immersive",
+        "passage": "p4"
+      },
+      {
+        "mode": "page-view",
+        "passage": "p5"
+      },
+      {
+        "mode": "baseline",
+        "passage": "p6"
+      }
+    ],
+    [
+      {
+        "mode": "rsvp",
+        "passage": "p1"
+      },
+      {
+        "mode": "anchor",
+        "passage": "p2"
+      },
+      {
+        "mode": "immersive",
+        "passage": "p3"
+      },
+      {
+        "mode": "page-view",
+        "passage": "p4"
+      },
+      {
+        "mode": "baseline",
+        "passage": "p5"
+      },
+      {
+        "mode": "focus",
+        "passage": "p6"
+      }
+    ],
+    [
+      {
+        "mode": "anchor",
+        "passage": "p1"
+      },
+      {
+        "mode": "immersive",
+        "passage": "p2"
+      },
+      {
+        "mode": "page-view",
+        "passage": "p3"
+      },
+      {
+        "mode": "baseline",
+        "passage": "p4"
+      },
+      {
+        "mode": "focus",
+        "passage": "p5"
+      },
+      {
+        "mode": "rsvp",
+        "passage": "p6"
+      }
+    ],
+    [
+      {
+        "mode": "immersive",
+        "passage": "p1"
+      },
+      {
+        "mode": "page-view",
+        "passage": "p2"
+      },
+      {
+        "mode": "baseline",
+        "passage": "p3"
+      },
+      {
+        "mode": "focus",
+        "passage": "p4"
+      },
+      {
+        "mode": "rsvp",
+        "passage": "p5"
+      },
+      {
+        "mode": "anchor",
+        "passage": "p6"
+      }
+    ],
+    [
+      {
+        "mode": "page-view",
+        "passage": "p1"
+      },
+      {
+        "mode": "baseline",
+        "passage": "p2"
+      },
+      {
+        "mode": "focus",
+        "passage": "p3"
+      },
+      {
+        "mode": "rsvp",
+        "passage": "p4"
+      },
+      {
+        "mode": "anchor",
+        "passage": "p5"
+      },
+      {
+        "mode": "immersive",
+        "passage": "p6"
+      }
+    ]
+  ],
+  "decisionRule": {
+    "experimental": [
+      "rsvp",
+      "anchor"
+    ],
+    "keepIf": "comprehension ≥ baseline − 10 points (all readers) and median preference ≥ 3; for the dyslexic readers, also not worse than baseline by more than 10 points",
+    "otherwise": "drop (the mode leaves the menu; its code stays behind a flag)"
+  }
+}
