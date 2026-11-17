@@ -144,7 +144,8 @@ describe("npm run import:diff", () => {
       const bad = spawnSync(process.execPath, [script, "--lumen", join(dir, "lumen"), "--oracle", join(dir, "oracle"), "--json"], { encoding: "utf8" });
       expect(bad.status).toBe(1);
       expect(JSON.parse(bad.stdout).pass).toBe(false);
-      expect(spawnSync(process.execPath, [script], { encoding: "utf8" }).status).toBe(2);
+      // One folder without the other is a usage error (no folders at all runs the golden table: importTextbundle.test.ts).
+      expect(spawnSync(process.execPath, [script, "--lumen", join(dir, "lumen")], { encoding: "utf8" }).status).toBe(2);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

@@ -11,11 +11,14 @@ import { convertHtmlNotes } from "./htmlNotes";
 import { convertKeep } from "./keep";
 import { convertLogseq } from "./logseq";
 import { convertNotion, looksLikeNotion } from "./notion";
+import { convertRoam, looksLikeRoam } from "./roam";
+import { convertCraft } from "./craft";
+import { convertTextBundle } from "./textbundle";
 import { claimPath } from "./names";
 import { emptyVault, type ConvertedVault, type ImportSourceId } from "./types";
 
 /** Every source the wizard offers, in the order it shows them. */
-export const IMPORT_SOURCES: readonly ImportSourceId[] = ["obsidian", "notion", "evernote", "bear", "appleNotes", "keep", "logseq", "onenote", "lumen"];
+export const IMPORT_SOURCES: readonly ImportSourceId[] = ["obsidian", "notion", "evernote", "bear", "appleNotes", "keep", "logseq", "onenote", "roam", "craft", "textbundle", "lumen"];
 
 /** Brand names stay as they are in every language. */
 export const SOURCE_NAMES: Record<ImportSourceId, string> = {
@@ -27,6 +30,9 @@ export const SOURCE_NAMES: Record<ImportSourceId, string> = {
   keep: "Google Keep",
   logseq: "Logseq",
   onenote: "OneNote",
+  roam: "Roam Research",
+  craft: "Craft",
+  textbundle: "TextBundle",
   lumen: "Lumen",
 };
 
@@ -40,10 +46,13 @@ export const SOURCE_ACCEPT: Record<ImportSourceId, string> = {
   keep: ".zip,.json",
   logseq: ".zip",
   onenote: ".mht,.mhtml,.zip",
+  roam: ".json,.zip",
+  craft: ".zip,.md,.textbundle,.textpack",
+  textbundle: ".textbundle,.textpack,.zip",
   lumen: ".zip",
 };
 
-const ARCHIVE = /\.(zip|bearbk)$/i;
+const ARCHIVE = /\.(zip|bearbk|textpack)$/i;
 
 /** `a\b/../c` → `a/c`; `..` never climbs above the export. Null for a name with nothing left. */
 export function cleanArchivePath(p: string): string | null {
@@ -71,7 +80,8 @@ export async function expandArchives(files: Map<string, Uint8Array>, depth = 0):
         continue;
       }
       // A .bearbk / a single top-level archive opens in place; a nested one in its own folder.
-      const prefix = depth === 0 && files.size === 1 ? "" : clean.replace(ARCHIVE, "") + "/";
+      // A .textpack is one bundle already named after it: it opens in its own folder's place.
+      const prefix = depth === 0 && files.size === 1 ? "" : /\.textpack$/i.test(clean) ? (clean.includes("/") ? clean.slice(0, clean.lastIndexOf("/") + 1) : "") : clean.replace(ARCHIVE, "") + "/";
       const opened = await expandArchives(new Map([...inner].map(([k, v]) => [prefix + k, v])), depth + 1);
       for (const [k, v] of opened) out.set(k, v);
     } else out.set(clean, data);
@@ -93,18 +103,54 @@ export function stripWrapper(files: Map<string, Uint8Array>): Map<string, Uint8A
   return new Map([...files].filter(([p]) => p.startsWith(top)).map(([p, v]) => [p.slice(top.length), v]));
 }
 
-/** Which tool wrote this export (the wizard preselects it; the person can change it). */
-export function detectImportSource(paths: string[]): ImportSourceId {
+/** The first bytes of a file as text (enough to tell one JSON or Markdown dialect from another). */
+function head(files: Map<string, Uint8Array> | undefined, p: string, n = 4096): string {
+  const data = files?.get(p);
+  return data ? new TextDecoder().decode(data.subarray(0, n)) : "";
+}
+
+/** Is this the JSON of a Roam export (an array of pages)? Read whole only when it starts like one. */
+function isRoamJson(files: Map<string, Uint8Array> | undefined, p: string): boolean {
+  if (!/^\s*\[\s*\{[\s\S]*"title"/.test(head(files, p, 2048))) return false;
+  try {
+    return looksLikeRoam(JSON.parse(new TextDecoder().decode(files!.get(p))));
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Which tool wrote this export (the wizard preselects it; the person can
+ * change it). With `files`, the contents are sniffed too: a Roam JSON, a
+ * Craft document, a TextBundle's creator.
+ */
+export function detectImportSource(paths: string[], files?: Map<string, Uint8Array>): ImportSourceId {
   if (paths.some((p) => /(^|\/)NoteStore\.sqlite$/i.test(p))) return "appleNotes"; // the Notes database (W10.E48)
   if (paths.some((p) => /(^|\/)\.obsidian\//.test(p))) return "obsidian";
   if (paths.some((p) => /(^|\/)logseq\/config\.edn$/.test(p))) return "logseq";
   if (paths.some((p) => /\.enex$/i.test(p))) return "evernote";
-  if (paths.some((p) => /\.textbundle\//i.test(p))) return "bear";
+  if (paths.some((p) => /\.textbundle\//i.test(p))) {
+    const infos = paths.filter((p) => /\.textbundle\/info\.json$/i.test(p)).map((p) => head(files, p));
+    if (infos.some((j) => /shinyfrog/i.test(j))) return "bear";
+    if (infos.some((j) => /craft|lukilabs/i.test(j)) || paths.some((p) => /\.textbundle\/text\.(md|markdown)$/i.test(p) && head(files, p, 1 << 16).includes("craftdocs://"))) return "craft";
+    return files ? "textbundle" : "bear";
+  }
+  const json = paths.filter((p) => /\.json$/i.test(p));
+  if (files && json.length && json.length <= 4 && !paths.some((p) => /(^|\/)Keep\//.test(p)) && json.some((p) => isRoamJson(files, p))) return "roam";
+  if (files && paths.some((p) => /\.md$/i.test(p) && head(files, p, 1 << 16).includes("craftdocs://open?"))) return "craft";
   if (paths.some((p) => /\.(mht|mhtml)$/i.test(p))) return "onenote";
   if (paths.some((p) => /(^|\/)Keep\/[^/]+\.json$/.test(p))) return "keep";
   if (looksLikeNotion(paths)) return "notion";
   if (paths.some((p) => /\.html?$/i.test(p)) && !paths.some((p) => /\.md$/i.test(p))) return "appleNotes";
   return "lumen";
+}
+
+/** The picked files as the converters see them: archives opened, the wrapper folder gone, macOS junk set aside. */
+export async function openExport(picked: Map<string, Uint8Array>): Promise<{ opened: Map<string, Uint8Array>; junk: string[] }> {
+  const opened = stripWrapper(await expandArchives(picked));
+  const junk = [...opened.keys()].filter((p) => /(^|\/)__MACOSX(\/|$)|(^|\/)\.DS_Store$/.test(p));
+  for (const p of junk) opened.delete(p);
+  return { opened, junk };
 }
 
 const APP = /(^|\/)(\.obsidian|\.trash|\.git|\.lumen|__MACOSX)(\/|$)|(^|\/)\.DS_Store$/;
@@ -154,6 +200,12 @@ export function convertExport(source: ImportSourceId, files: Map<string, Uint8Ar
       return convertBear(files);
     case "logseq":
       return convertLogseq(files);
+    case "roam":
+      return convertRoam(files);
+    case "craft":
+      return convertCraft(files);
+    case "textbundle":
+      return convertTextBundle(files);
     case "appleNotes":
     case "onenote":
       return convertHtmlNotes(files, source);
