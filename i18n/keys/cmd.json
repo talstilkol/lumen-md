@@ -833,6 +833,21 @@
       "vars": []
     },
     {
+      "key": "cmd.edit.cursorMovement.hint",
+      "en": "Arrow keys in mixed Hebrew/English lines: visual (as drawn) or logical (text order). This device only.",
+      "vars": []
+    },
+    {
+      "key": "cmd.edit.cursorMovement.toLogical",
+      "en": "Cursor movement: switch to logical",
+      "vars": []
+    },
+    {
+      "key": "cmd.edit.cursorMovement.toVisual",
+      "en": "Cursor movement: switch to visual",
+      "vars": []
+    },
+    {
       "key": "cmd.edit.fixPdfHebrew",
       "en": "Fix reversed Hebrew (from a PDF)",
       "vars": []

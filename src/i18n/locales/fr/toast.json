@@ -33,6 +33,8 @@
   "toast.claimsFailed": "Impossible d'extraire les affirmations : {{error}}",
   "toast.claimsNoParagraph": "Placez d'abord le curseur dans un paragraphe.",
   "toast.completed": "✅ {name} terminé",
+  "toast.cursorMovement.logical": "Cursor movement: logical — arrows follow the text order",
+  "toast.cursorMovement.visual": "Cursor movement: visual — arrows follow the screen",
   "toast.diagramFailed": "Échec du diagramme : {error}",
   "toast.diagramInserted": "✅ Diagramme inséré",
   "toast.dictate.localFailed": "Dictée sur l’appareil arrêtée : {error}",

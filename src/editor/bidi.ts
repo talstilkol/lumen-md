@@ -18,20 +18,18 @@
  * let "> `iPhone` שלום" run left-to-right. A line with no strong character
  * (a time, a number) takes the note's direction.
  *
- * Arrow keys move in logical order (plan 9.7): the key that points toward
- * the end of the line — Left in a right-to-left line, Right in a
- * left-to-right one — goes to the next character in the text, through
- * embedded runs of the other direction, numbers and brackets, instead of
- * jumping around them visually. Shift extends the selection the same way,
- * and Ctrl (Alt on macOS) moves by word.
+ * Arrow keys follow the cursor-movement setting (W13.H1, ./cursorMovement):
+ * visual by default, or logical (plan 9.7) — the key that points toward
+ * the end of the line goes to the next character in the text.
  */
 
-import { Decoration, Direction, EditorView, ViewPlugin, keymap, type DecorationSet, type ViewUpdate } from "@codemirror/view";
+import { Decoration, EditorView, ViewPlugin, type DecorationSet, type ViewUpdate } from "@codemirror/view";
 import { syntaxTree } from "@codemirror/language";
-import { CharCategory, EditorSelection, Prec, findClusterBreak, type EditorState, type SelectionRange } from "@codemirror/state";
+import type { EditorState } from "@codemirror/state";
 import { markdownLineDirection } from "../lib/bidiDirection";
 import { explicitDirection, frontmatterDir, frontmatterEnd, type Dir } from "../lib/paragraphDirection";
 import { displayMathLines } from "../lib/mathIsolate";
+import { cursorMovementExtension } from "./cursorMovement";
 
 export { firstStrongDirection } from "../lib/textDirection";
 
@@ -143,81 +141,16 @@ function build(view: EditorView): DecorationSet {
   return Decoration.set(ranges, true);
 }
 
-// ── Logical arrow keys (plan 9.7) ───────────────────────────────────────
-
-/** One grapheme cluster forward or back in the text, across line breaks. */
-function charLogical(state: EditorState, pos: number, forward: boolean): number {
-  const line = state.doc.lineAt(pos);
-  if (forward ? pos === line.to : pos === line.from) return forward ? Math.min(state.doc.length, pos + 1) : Math.max(0, pos - 1);
-  return line.from + findClusterBreak(line.text, pos - line.from, forward);
-}
-
-/** One word forward or back in the text: skip spaces, then a run of one character category. */
-function groupLogical(state: EditorState, pos: number, forward: boolean): number {
-  const line = state.doc.lineAt(pos);
-  if (forward ? pos === line.to : pos === line.from) return charLogical(state, pos, forward);
-  const cat = state.charCategorizer(pos);
-  const text = line.text;
-  let at = pos - line.from;
-  const next = () => (forward ? findClusterBreak(text, at, true) : findClusterBreak(text, at, false));
-  const charAt = (i: number, j: number) => text.slice(Math.min(i, j), Math.max(i, j));
-  // Spaces first.
-  while (forward ? at < text.length : at > 0) {
-    const n = next();
-    if (cat(charAt(at, n)) !== CharCategory.Space) break;
-    at = n;
-  }
-  let group: CharCategory | null = null;
-  while (forward ? at < text.length : at > 0) {
-    const n = next();
-    const c = cat(charAt(at, n));
-    if (c === CharCategory.Space || (group !== null && c !== group)) break;
-    group = c;
-    at = n;
-  }
-  return line.from + at;
-}
-
-type Step = (state: EditorState, pos: number, forward: boolean) => number;
-
 /**
- * The command for a horizontal arrow: `towardRight` is the key's side.
- * Toward the end of the line is Left in an RTL line, Right in an LTR one.
- */
-function arrow(towardRight: boolean, step: Step, extend: boolean) {
-  return (view: EditorView): boolean => {
-    const { state } = view;
-    const move = (r: SelectionRange): SelectionRange => {
-      const rtl = view.textDirectionAt(r.head) === Direction.RTL;
-      const forward = towardRight !== rtl;
-      if (extend) return EditorSelection.range(r.anchor, step(state, r.head, forward));
-      // A selection collapses to its start or end, the way the plain arrow keys do.
-      if (!r.empty) return EditorSelection.cursor(forward ? r.to : r.from);
-      return EditorSelection.cursor(step(state, r.head, forward));
-    };
-    view.dispatch(state.update({ selection: EditorSelection.create(state.selection.ranges.map(move), state.selection.mainIndex), scrollIntoView: true, userEvent: "select" }));
-    return true;
-  };
-}
-
-const logicalArrows = Prec.high(
-  keymap.of([
-    { key: "ArrowLeft", run: arrow(false, charLogical, false), shift: arrow(false, charLogical, true), preventDefault: true },
-    { key: "ArrowRight", run: arrow(true, charLogical, false), shift: arrow(true, charLogical, true), preventDefault: true },
-    { key: "Mod-ArrowLeft", mac: "Alt-ArrowLeft", run: arrow(false, groupLogical, false), shift: arrow(false, groupLogical, true), preventDefault: true },
-    { key: "Mod-ArrowRight", mac: "Alt-ArrowRight", run: arrow(true, groupLogical, false), shift: arrow(true, groupLogical, true), preventDefault: true },
-  ]),
-);
-
-/**
- * The extension: per-line direction from each line's own text, logical
- * arrow keys. Code and frontmatter stay LTR; a frontmatter `dir:` key pins
+ * The extension: per-line direction from each line's own text, arrow keys
+ * in the cursor-movement mode the user chose (W13.H1: visual by default,
+ * logical as plan 9.7 built it). Code and frontmatter stay LTR; a frontmatter `dir:` key pins
  * the whole note.
  */
 export function bidiExtension() {
   return [
     EditorView.perLineTextDirection.of(true),
-    logicalArrows,
+    cursorMovementExtension(),
     ViewPlugin.fromClass(
       class {
         decorations: DecorationSet;

@@ -207,6 +207,16 @@
       ]
     },
     {
+      "key": "toast.cursorMovement.logical",
+      "en": "Cursor movement: logical — arrows follow the text order",
+      "vars": []
+    },
+    {
+      "key": "toast.cursorMovement.visual",
+      "en": "Cursor movement: visual — arrows follow the screen",
+      "vars": []
+    },
+    {
       "key": "toast.diagramFailed",
       "en": "Diagram failed: {error}",
       "vars": [

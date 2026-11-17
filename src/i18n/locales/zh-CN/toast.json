@@ -33,6 +33,8 @@
   "toast.claimsFailed": "无法提取论断：{{error}}",
   "toast.claimsNoParagraph": "请先把光标放在一个段落中。",
   "toast.completed": "✅ {name} 已完成",
+  "toast.cursorMovement.logical": "Cursor movement: logical — arrows follow the text order",
+  "toast.cursorMovement.visual": "Cursor movement: visual — arrows follow the screen",
   "toast.diagramFailed": "图示生成失败：{error}",
   "toast.diagramInserted": "✅ 已插入图示",
   "toast.dictate.localFailed": "设备上的听写已停止：{error}",

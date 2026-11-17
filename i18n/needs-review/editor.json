@@ -63,6 +63,30 @@
     "ru": "1mepiyu",
     "zh-CN": "1mepiyu"
   },
+  "editor.cursorMovement": {
+    "ar": "x3n27l",
+    "de": "x3n27l",
+    "fr": "x3n27l",
+    "ja": "x3n27l",
+    "ru": "x3n27l",
+    "zh-CN": "x3n27l"
+  },
+  "editor.cursorMovement.logical": {
+    "ar": "pptv79",
+    "de": "pptv79",
+    "fr": "pptv79",
+    "ja": "pptv79",
+    "ru": "pptv79",
+    "zh-CN": "pptv79"
+  },
+  "editor.cursorMovement.visual": {
+    "ar": "91tcut",
+    "de": "91tcut",
+    "fr": "91tcut",
+    "ja": "91tcut",
+    "ru": "91tcut",
+    "zh-CN": "91tcut"
+  },
   "mode.preview": {
     "fa": "1yfnwtz"
   },

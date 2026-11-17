@@ -33,6 +33,8 @@
   "toast.claimsFailed": "主張を抽出できませんでした: {{error}}",
   "toast.claimsNoParagraph": "まずカーソルを段落に置いてください。",
   "toast.completed": "✅ {name} が完了しました",
+  "toast.cursorMovement.logical": "Cursor movement: logical — arrows follow the text order",
+  "toast.cursorMovement.visual": "Cursor movement: visual — arrows follow the screen",
   "toast.diagramFailed": "図の生成に失敗しました: {error}",
   "toast.diagramInserted": "✅ 図を挿入しました",
   "toast.dictate.localFailed": "端末での音声入力が停止しました: {error}",

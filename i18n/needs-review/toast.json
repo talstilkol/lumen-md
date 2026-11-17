@@ -127,5 +127,21 @@
     "ja": "2u1mgz",
     "ru": "2u1mgz",
     "zh-CN": "2u1mgz"
+  },
+  "toast.cursorMovement.visual": {
+    "ar": "13eyveq",
+    "de": "13eyveq",
+    "fr": "13eyveq",
+    "ja": "13eyveq",
+    "ru": "13eyveq",
+    "zh-CN": "13eyveq"
+  },
+  "toast.cursorMovement.logical": {
+    "ar": "ulxoyc",
+    "de": "ulxoyc",
+    "fr": "ulxoyc",
+    "ja": "ulxoyc",
+    "ru": "ulxoyc",
+    "zh-CN": "ulxoyc"
   }
 }

@@ -108,6 +108,7 @@ export default defineConfig({
             { label: "Pasting from Word and the web", slug: "editor/paste", translations: { he: "הדבקה מ-Word ומהרשת" } },
             { label: "Widgets, Shortcuts and Siri", slug: "editor/widgets", translations: { he: "ווידג'טים, קיצורים ו-Siri" } },
             { label: "Direction marks (bidi)", translations: { he: "סימני כיוון (בידי)" }, slug: "editor/direction-marks" },
+            { label: "Cursor movement in Hebrew and English", translations: { he: "תזוזת הסמן בעברית ובאנגלית" }, slug: "editor/cursor-movement" },
             { label: "Hebrew pasted from a PDF", slug: "editor/pdf-paste", translations: { he: "הדבקת עברית מ-PDF" } },
             { label: "Legal citations (Israel)", slug: "editor/legal-citations", translations: { he: "אזכורים משפטיים (ישראל)" } },
             { label: "Arabic (beta)", translations: { he: "ערבית (בטא)" }, slug: "editor/arabic" },
