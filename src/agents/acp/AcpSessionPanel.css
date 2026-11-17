@@ -1,0 +1,37 @@
+/* W11.I23: the live panel of a hosted ACP agent. Logical properties: it mirrors under dir="rtl". */
+.acp-panel {
+  position: fixed;
+  inset-block-end: 16px;
+  inset-inline-end: 16px;
+  z-index: 350;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  inline-size: min(420px, calc(100vw - 32px));
+  max-block-size: min(70vh, 560px);
+  padding: 12px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  background: hsl(var(--bg));
+  color: hsl(var(--fg));
+  box-shadow: var(--shadow-md);
+  font-size: 0.875rem;
+}
+.acp-panel-head h2 { margin: 0; font-size: 0.95rem; font-weight: 600; }
+.acp-panel-prompt { margin: 2px 0 0; color: hsl(var(--fg-muted)); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.acp-panel-log { flex: 1 1 auto; min-block-size: 6rem; overflow: auto; padding: 6px 8px; border: 1px solid hsl(var(--border)); border-radius: 6px; }
+.acp-panel-log:focus-visible { outline: 2px solid hsl(var(--accent)); outline-offset: 1px; }
+.acp-panel-log p { margin: 0 0 6px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.acp-thought { font-style: italic; color: hsl(var(--fg-muted)); }
+.acp-label { font-weight: 600; font-style: normal; color: hsl(var(--fg)); }
+.acp-muted { color: hsl(var(--fg-muted)); }
+.acp-tool-failed { color: hsl(var(--danger, 0 70% 45%)); }
+.acp-plan ol { margin: 2px 0 6px; padding-inline-start: 1.25rem; }
+.acp-plan li[data-status="completed"] { text-decoration: line-through; color: hsl(var(--fg-muted)); }
+.acp-panel-status { margin: 0; min-block-size: 1.2em; color: hsl(var(--fg-muted)); }
+.acp-panel-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.acp-btn { padding-block: 4px; padding-inline: 10px; border: 1px solid hsl(var(--border)); border-radius: 4px; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+.acp-btn:hover { background: hsl(var(--accent) / 0.08); }
+.acp-btn:focus-visible { outline: 2px solid hsl(var(--accent)); outline-offset: 1px; }
+.acp-btn:disabled { opacity: 0.6; cursor: default; }
+.acp-btn-stop { border-color: hsl(var(--danger, 0 70% 45%) / 0.6); }
