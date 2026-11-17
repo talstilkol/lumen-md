@@ -11,6 +11,8 @@ import type { PluginManifest } from "./manifest";
 import type { ScanResult } from "./scan";
 import { HelpButton } from "../../ui/HelpButton";
 import { Modal } from "../../ui/Modal";
+import { apiCompatNote } from "./apiCompatNote";
+import { BTN, BTN_PRIMARY } from "./buttons";
 
 export function InstallDialog(props: { manifest: PluginManifest; scan: ScanResult; busy?: boolean; onInstall: () => void; onCancel: () => void }) {
   const { manifest: m, scan } = props;
@@ -18,6 +20,7 @@ export function InstallDialog(props: { manifest: PluginManifest; scan: ScanResul
   useEffect(() => {
     cancelRef.current?.focus();
   }, [props]);
+  const api = apiCompatNote(m);
   const notes = scan.findings.length ? t("pluginTrust.card.notes", { list: describeFindings(scan.findings) }) : t("pluginTrust.card.clean");
   return (
     <Modal
@@ -59,15 +62,21 @@ export function InstallDialog(props: { manifest: PluginManifest; scan: ScanResul
         <p data-testid="install-scan" style={{ fontSize: 12, margin: "0 0 6px" }}>
           {t("pluginTrust.card.grade", { grade: scan.grade, score: scan.score })} — {notes}
         </p>
+        {api && (
+          // W13.L2: compatibility mode is a note; a version this Lumen cannot run is the reason Install is off.
+          <p data-testid="install-api-version" data-tone={api.tone} role={api.tone === "error" ? "alert" : undefined} style={{ fontSize: 12, margin: "0 0 6px", color: api.tone === "error" ? "hsl(var(--danger))" : "hsl(var(--fg-subtle))" }}>
+            {api.text}
+          </p>
+        )}
         <p style={{ fontSize: 12, color: "hsl(var(--fg-muted))", margin: "0 0 14px" }}>{t("pluginTrust.dialog.sandbox")}</p>
         <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", alignItems: "center", flexWrap: "wrap" }}>
           <a href={reportUrl(m.id, m.version)} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, marginInlineEnd: "auto", color: "hsl(var(--accent))" }}>
             {t("pluginTrust.report")}
           </a>
-          <button ref={cancelRef} type="button" className="btn" onClick={props.onCancel}>
+          <button ref={cancelRef} type="button" className={BTN} onClick={props.onCancel}>
             {t("pluginTrust.dialog.cancel")}
           </button>
-          <button type="button" className="btn btn-primary" disabled={props.busy || !scan.passed} onClick={props.onInstall}>
+          <button type="button" className={BTN_PRIMARY} disabled={props.busy || !scan.passed || api?.installable === false} onClick={props.onInstall}>
             {t("pluginTrust.dialog.confirm")}
           </button>
         </div>

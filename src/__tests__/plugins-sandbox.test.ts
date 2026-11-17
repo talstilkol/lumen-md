@@ -7,6 +7,7 @@ import { describe, it, expect, vi } from "vitest";
 import { createSandbox, type SandboxHost } from "../plugins/runtime/sandbox";
 import { grantsFrom, METHOD_CAPABILITY, NO_GRANTS } from "../plugins/runtime/capabilities";
 import { CAPABILITIES, parseManifest } from "../plugins/runtime/manifest";
+import { deprecationOf, PLUGIN_API_VERSION } from "../plugins/api/version";
 
 const manifest = parseManifest({
   schema: 1,
@@ -17,6 +18,8 @@ const manifest = parseManifest({
   author: "a",
   license: "MIT",
   main: "main.js",
+  // W13.L2: built for the current plugin API, so the whole method table exists inside.
+  targetApiVersion: PLUGIN_API_VERSION,
   capabilities: [...CAPABILITIES.map((id) => ({ id, reason: "test" })), { id: "network:https://api.example.com", reason: "test" }],
 });
 
@@ -72,8 +75,11 @@ describe("plugin sandbox — default deny", () => {
     const { sb, h } = await boot(`
       lumen.${ns}.${fn}(${arg}).then(() => console.log("allowed"), (e) => console.log("denied " + e.name));
     `);
-    await vi.waitFor(() => expect(h.logs.length).toBe(1));
-    expect(h.logs[0]).toBe("log:denied PluginDenied");
+    // W13.L1: a deprecated method warns once first, refused or not.
+    const warn = deprecationOf(method) ? 1 : 0;
+    await vi.waitFor(() => expect(h.logs.length).toBe(1 + warn));
+    if (warn) expect(h.logs[0]).toMatch(new RegExp(`^warn:plugin test.plugin: lumen.${method} is deprecated since plugin API`));
+    expect(h.logs[warn]).toBe("log:denied PluginDenied");
     expect(h.call).not.toHaveBeenCalled();
     const cap = METHOD_CAPABILITY[method] === "network" ? "network:https://api.example.com" : METHOD_CAPABILITY[method];
     expect(sb.denied.get(cap)).toBe(1);

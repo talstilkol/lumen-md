@@ -76,6 +76,14 @@ export function useSourceEditorEvents(viewRef: RefObject<EditorView | null>, ass
       const { from, to } = view.state.selection.main;
       view.dispatch({ changes: { from, to, insert: text }, selection: { anchor: from + text.length } });
     }
+    // Plugin API 1.1.0 (W13.L1): `lumen-plugin-edits` {edits} — validated, sorted, in the coordinates of the text before the batch: one transaction, one undo step.
+    function onPluginEdits(e: Event) {
+      const view = viewRef.current;
+      const edits = (e as CustomEvent<{ edits?: { from: number; to: number; insert: string }[] }>).detail?.edits;
+      if (!view || !Array.isArray(edits) || edits.some((x) => x.to > view.state.doc.length)) return;
+      e.preventDefault();
+      view.dispatch({ changes: edits.map((x) => ({ from: x.from, to: x.to, insert: x.insert })), userEvent: "input.plugin" });
+    }
     function onSelection(e: Event) {
       const view = viewRef.current;
       const detail = (e as CustomEvent<{ result?: { from: number; to: number; text: string } | null }>).detail;
@@ -85,7 +93,9 @@ export function useSourceEditorEvents(viewRef: RefObject<EditorView | null>, ass
     }
     window.addEventListener("lumen-plugin-insert", onPluginInsert);
     window.addEventListener("lumen-editor-selection", onSelection);
+    window.addEventListener("lumen-plugin-edits", onPluginEdits);
     return () => {
+      window.removeEventListener("lumen-plugin-edits", onPluginEdits);
       window.removeEventListener("lumen-plugin-insert", onPluginInsert);
       window.removeEventListener("lumen-editor-selection", onSelection);
     };

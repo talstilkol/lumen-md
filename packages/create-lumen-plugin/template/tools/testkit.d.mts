@@ -1,5 +1,7 @@
 /** Types of the Lumen plugin test kit (testkit.mjs), for editors and TypeScript tests. */
 export declare const METHODS: Readonly<Record<string, string>>;
+export declare const API_VERSION: string;
+export declare const DEPRECATED: Readonly<Record<string, { since: string; removeIn: string; use: string }>>;
 
 export declare class PluginDenied extends Error {
   readonly capability: string;

@@ -45,6 +45,7 @@ export type InstallRefusal =
   | "sha256-code"
   | "sha256-manifest"
   | "manifest"
+  | "api-version"
   | "scan";
 
 export class InstallRefused extends Error {
@@ -289,6 +290,10 @@ export async function installFromRegistry(base: string, id: string, version?: st
     throw new InstallRefused("manifest", (e as Error).message);
   }
   if (manifest.id !== id || manifest.version !== v.version) throw new InstallRefused("manifest", `the manifest is ${manifest.id}@${manifest.version}, the registry lists ${id}@${v.version}`);
+  // W13.L2: below its minApiVersion, or another major: refused with the reason, before any code is downloaded.
+  const { checkApiCompat } = await import("./api/version");
+  const compat = checkApiCompat(manifest);
+  if (!compat.ok) throw new InstallRefused("api-version", compat.message);
 
   const codeBytes = await required(f, join(base, `${v.path}/${manifest.main}`));
   if ((await sha256Hex(codeBytes)) !== v.sha256) throw new InstallRefused("sha256-code", `${id}@${v.version}: the code is not the code the registry signed`);

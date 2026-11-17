@@ -56,7 +56,8 @@ describe("plugin host", () => {
     const p = await load(`lumen.on("go", () => lumen.document.setText("x").catch((e) => console.log(e.name)));`, ["document:write"], { "document.setText": write });
     p.onLog((_, text) => logs.push(text));
     p.emit("go");
-    await vi.waitFor(() => expect(logs).toEqual(["PluginDenied"]));
+    // W13.L1: setText is deprecated, so its first call also says when it goes away.
+    await vi.waitFor(() => expect(logs).toEqual(["plugin test.host: lumen.document.setText is deprecated since plugin API 1.1.0 and will be removed in 2.0.0; use lumen.document.applyEdits", "PluginDenied"]));
     expect(p.grants.size).toBe(0);
     expect(write).not.toHaveBeenCalled();
   });

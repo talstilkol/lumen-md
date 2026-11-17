@@ -8385,5 +8385,61 @@
     "ja": "v6zpak",
     "ru": "v6zpak",
     "zh-CN": "v6zpak"
+  },
+  "pluginTrust.api.compat": {
+    "ar": "2gast7",
+    "de": "2gast7",
+    "fr": "2gast7",
+    "ja": "2gast7",
+    "ru": "2gast7",
+    "zh-CN": "2gast7"
+  },
+  "pluginTrust.api.belowMin": {
+    "ar": "1az9gul",
+    "de": "1az9gul",
+    "fr": "1az9gul",
+    "ja": "1az9gul",
+    "ru": "1az9gul",
+    "zh-CN": "1az9gul"
+  },
+  "pluginTrust.api.newerMajor": {
+    "ar": "13vo25n",
+    "de": "13vo25n",
+    "fr": "13vo25n",
+    "ja": "13vo25n",
+    "ru": "13vo25n",
+    "zh-CN": "13vo25n"
+  },
+  "pluginTrust.api.unsupported": {
+    "ar": "18sf16f",
+    "de": "18sf16f",
+    "fr": "18sf16f",
+    "ja": "18sf16f",
+    "ru": "18sf16f",
+    "zh-CN": "18sf16f"
+  },
+  "pluginTrust.api.invalid": {
+    "ar": "1o0jtym",
+    "de": "1o0jtym",
+    "fr": "1o0jtym",
+    "ja": "1o0jtym",
+    "ru": "1o0jtym",
+    "zh-CN": "1o0jtym"
+  },
+  "pluginDev.api": {
+    "ar": "1mgjq6c",
+    "de": "1mgjq6c",
+    "fr": "1mgjq6c",
+    "ja": "1mgjq6c",
+    "ru": "1mgjq6c",
+    "zh-CN": "1mgjq6c"
+  },
+  "pluginDev.apiCompat": {
+    "ar": "1x4ui22",
+    "de": "1x4ui22",
+    "fr": "1x4ui22",
+    "ja": "1x4ui22",
+    "ru": "1x4ui22",
+    "zh-CN": "1x4ui22"
   }
 }
