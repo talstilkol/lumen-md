@@ -1,0 +1,69 @@
+{
+ "metadata": {
+  "version": "1.0"
+ },
+ "entries": [
+  {
+   "uuid": "A1B2C3D4E5F60718293A4B5C6D7E8F90",
+   "creationDate": "2026-11-03T07:15:00Z",
+   "modifiedDate": "2026-11-03T09:00:00Z",
+   "timeZone": "Asia/Jerusalem",
+   "text": "# בוקר בירושלים\n\nטיול קצר ב‏Old City‏ עם הקפה הראשון\\.\n\n![](dayone-moment://11111111111111111111111111111111)\n\n1\\. לכתוב\n2\\. לקרוא\n\n\\- לא רשימה",
+   "tags": [
+    "טיולים",
+    "בוקר טוב"
+   ],
+   "starred": true,
+   "location": {
+    "placeName": "שער יפו",
+    "localityName": "ירושלים",
+    "country": "ישראל",
+    "latitude": 31.7767,
+    "longitude": 35.2275
+   },
+   "weather": {
+    "conditionsDescription": "Partly Cloudy",
+    "temperatureCelsius": 18.4
+   },
+   "photos": [
+    {
+     "identifier": "11111111111111111111111111111111",
+     "md5": "57da6f2e0f139e118c7930ae76570491",
+     "type": "jpeg"
+    },
+    {
+     "identifier": "22222222222222222222222222222222",
+     "md5": "2cd8bde463f5d82aae0f0cec061d6b8f",
+     "type": "png"
+    }
+   ],
+   "creationDevice": "iPhone"
+  },
+  {
+   "uuid": "B1",
+   "creationDate": "2026-11-04T20:00:00Z",
+   "modifiedDate": "2026-11-04T20:10:00Z",
+   "text": "ערב עם מסמך מצורף [החוזה](dayone-moment:/pdfAttachment/33333333333333333333333333333333)\n\n```\nקוד \\. לא נוגעים\n```",
+   "pdfAttachments": [
+    {
+     "identifier": "33333333333333333333333333333333",
+     "md5": "f05285f24eb4ca080ccbd573c23954ea",
+     "type": "pdf"
+    }
+   ],
+   "photos": [
+    {
+     "identifier": "44444444444444444444444444444444",
+     "md5": "00000000000000000000000000000000",
+     "type": "jpeg"
+    }
+   ]
+  },
+  {
+   "uuid": "C1",
+   "creationDate": "2026-11-05T06:00:00Z",
+   "text": "",
+   "tags": []
+  }
+ ]
+}

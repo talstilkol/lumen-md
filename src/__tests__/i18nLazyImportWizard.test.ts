@@ -34,8 +34,8 @@ describe("i18n: the import wizard's lazy English", () => {
 
   it("every reason, warning and source the code can name has its words", () => {
     for (const r of ["appFolder", "trashed", "duplicate", "unsupported", "empty", "unreadable", "encrypted"]) expect(lazy[`importWizard.reason.${r}`], r).toBeDefined();
-    for (const w of ["missingAttachment", "encryptedPart", "noDates", "remoteAttachment", "craftLink"]) expect(lazy[`importWizard.warn.${w}`], w).toBeDefined();
-    for (const s of ["obsidian", "notion", "evernote", "bear", "appleNotes", "keep", "logseq", "onenote", "roam", "craft", "textbundle", "lumen"]) expect(lazy[`importWizard.how.${s}`], s).toBeDefined();
+    for (const w of ["missingAttachment", "encryptedPart", "noDates", "remoteAttachment", "craftLink", "pdfOnly"]) expect(lazy[`importWizard.warn.${w}`], w).toBeDefined();
+    for (const s of ["obsidian", "notion", "evernote", "bear", "appleNotes", "keep", "logseq", "onenote", "roam", "craft", "textbundle", "dayOne", "appleJournal", "samsungNotes", "airtable", "tomboy", "lumen"]) expect(lazy[`importWizard.how.${s}`], s).toBeDefined();
   });
 
   it("is imported only by its strings module, which only lazily loaded modules import", () => {

@@ -64,7 +64,7 @@ describe("golden: a Craft space exported as Markdown (Hebrew, synthetic)", () =>
     expect(plan).toContain("==לוח הזמנים==");
     expect(plan).not.toContain("craftdocs://");
     expect(v.notes.get("גרסה 2.md")).toContain("נשיק בחורף. ^dddd0000-1111-4222-8333-444455556666");
-    expect(v.notes.get("גרסה 2.md")).toContain("‏2.0‏");
+    expect(v.notes.get("גרסה 2.md")).toContain("\u200f2.0\u200f");
   });
 
   it("a link to a document that is not in the export keeps its text and is reported", () => {

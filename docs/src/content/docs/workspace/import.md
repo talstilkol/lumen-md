@@ -1,6 +1,6 @@
 ---
 title: Import from other apps
-description: Bring notes from Obsidian, Notion, Evernote, Bear, Apple Notes, Google Keep, Logseq, OneNote, Roam, Craft or any TextBundle app — into a new folder, with a report, undone in one click.
+description: Bring notes from Obsidian, Notion, Evernote, Bear, Apple Notes, Google Keep, Logseq, OneNote, Roam, Craft, Day One, Apple Journal, Samsung Notes, Airtable, Tomboy or any TextBundle app — into a new folder, with a report, undone in one click.
 ---
 
 **File → Import notes from another app…** (or the command palette) opens
@@ -36,6 +36,11 @@ is taken. One click — **Undo the import** in the wizard, or the command
 | Roam Research | ⋯ → *Export All* → *JSON*: the `.json`, or the .zip as it came | a note per page; the blocks stay an outline (a heading block becomes a heading, `{{table}}` a table); `Name:: value` at the top of a page becomes a property; a block something refers to gets a `^id` and `((uid))`, `{{embed: ((uid))}}`, `[text](((uid)))` become `![[Page#^id]]` / `[[Page#^id\|text]]`; daily notes go to `journal/2021-01-02.md` and every link follows; `a/b` pages become folders; files Roam keeps on its servers stay links (nothing is downloaded) and the report says so |
 | Craft | *Export* → *Markdown* (or *TextBundle*), the .zip or the folder | a note per document, images next to it; `craftdocs://` links to a document of the export become `[[wikilinks]]`, and to a block `[[Document#^id]]` when the export carries the block's id; a link to something not in the export keeps its text and is reported; `<mark>` → `==…==` |
 | TextBundle | `.textbundle` folders or `.textpack` files (Ulysses, iA Writer and other editors), or a .zip of them | a note per bundle, named after it, its `assets/` in `assets/<note>/` with every link (Markdown or `<img>`) following; an asset no link points at is listed at the end of the note, so none is lost; the app that wrote it as the property `source` |
+| Day One | *File → Export → JSON*, the .zip as it came | a note per entry in `<journal>/<year>/`; photos, videos, audio and PDFs (by their MD5) where the entry shows them, the rest listed below it; place, `coordinates` (shown on the map), weather, tags, star and dates as properties; a file the export lacks is reported |
+| Apple Journal | the exported folder (`Entries/`, `Resources/`), or a .zip | a note per entry, dated from its header (English or Hebrew); the prompt as a quote; photos and audio embedded; place, state of mind, activity, contact and media as properties |
+| Samsung Notes | notes shared as *Text file* or *PDF file* | a text note per file (☑ / □ become tasks); a PDF gets a note that shows it; Samsung's own `.sdocx` is reported (share as text or PDF instead) |
+| Airtable | each table's *Download CSV*, picked together; or a base saved from Airtable's API as JSON | a folder per table with a note per record and a `.base` that shows them; numbers and checkboxes typed, multiple selects as lists, a linked record as a `[[link]]`; attachments stay links to Airtable (nothing is fetched) |
+| Tomboy / Gnote | the notes folder, or its `.note` files | a note per note; notebooks as folders; bold, italic, strikethrough, highlight, monospace, links; lists, and tasks in a TODO note; a template to `Templates/` |
 
 Dates are kept as the properties `created` and `updated` (a browser cannot
 set a file's own dates). Hebrew names — files, folders, tags, properties —
@@ -84,8 +89,10 @@ the folder to the trash instead, so nothing of yours is lost.
 same columns and rows, and an undo that gives back the same vault hash.
 `e2e/import-wizard.spec.ts` runs the wizard in the browser. Roam, Craft and
 TextBundle have their own tests (`importRoam`, `importCraft`,
-`importTextbundle`), and `npm run import:diff` with no folders converts
-Obsidian Importer's own test exports (Keep, Roam, TextBundle) and compares
+`importTextbundle`), as do Day One, Apple Journal, Samsung Notes, Tomboy and
+Airtable (`importDayOne`, `importJournal`, `importAirtable`), and `npm run
+import:diff` with no folders converts Obsidian Importer's own test exports
+(Keep, Roam, TextBundle, Tomboy, Apple Journal, Airtable, CSV) and compares
 lumen-md's output with the importer's recorded output, metric by metric. The golden
 exports are written from each app's documented format; real exports from
 the apps are the owner's check.

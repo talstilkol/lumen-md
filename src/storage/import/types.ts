@@ -7,7 +7,7 @@
  * into a new folder, counts the links, and keeps what it needs to undo.
  */
 
-export type ImportSourceId = "obsidian" | "notion" | "evernote" | "bear" | "appleNotes" | "keep" | "logseq" | "onenote" | "roam" | "craft" | "textbundle" | "lumen";
+export type ImportSourceId = "obsidian" | "notion" | "evernote" | "bear" | "appleNotes" | "keep" | "logseq" | "onenote" | "roam" | "craft" | "textbundle" | "dayOne" | "appleJournal" | "samsungNotes" | "airtable" | "tomboy" | "lumen";
 
 /** Why a file of the export did not become a note or an attachment. */
 export type SkipReason =
@@ -30,7 +30,8 @@ export type WarningReason =
   | "notionColumnLost" // W12.T7: a column did not become a type field (the detail says why)
   | "typeExists" // W12.T7: a type file of that id is already in the vault; it was left as it is
   | "remoteAttachment" // W13.F1: a file the app keeps on its servers (Roam's firebasestorage): the link is kept, nothing downloaded
-  | "craftLink"; // W13.F1: a link into Craft (craftdocs://) to something the export does not hold: its text is kept
+  | "craftLink" // W13.F1: a link into Craft (craftdocs://) to something the export does not hold: its text is kept
+  | "pdfOnly"; // W13.F2: a note exported as PDF (Samsung Notes): the PDF is shown in a note, its text not converted
 
 export interface ImportIssue<R extends string> {
   path: string;

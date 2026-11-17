@@ -75,5 +75,11 @@
   "importWizard.how.craft": "In Craft: select the documents or the space → Export → Markdown (or TextBundle). Pick the .zip or the folder. Links between documents become wikilinks.",
   "importWizard.how.textbundle": "TextBundle or TextPack from Ulysses, iA Writer and other editors: pick the .textbundle folders, the .textpack files, or a .zip of them. Images in assets/ come along.",
   "importWizard.warn.remoteAttachment": "a file the app keeps on its own servers: the link to it is kept, nothing was downloaded",
-  "importWizard.warn.craftLink": "a link into Craft points at something not in the export: its text is kept"
+  "importWizard.warn.craftLink": "a link into Craft points at something not in the export: its text is kept",
+  "importWizard.how.dayOne": "In Day One: File → Export → JSON. Pick the .zip as it came. Photos and files come along; place, weather and tags become properties.",
+  "importWizard.how.appleJournal": "In Journal on iPhone: Settings → Export → choose the entries. Pick the exported folder (Entries and Resources) or a .zip of it.",
+  "importWizard.how.samsungNotes": "In Samsung Notes: select notes → Share → Text file (or PDF file), then pick the files. Notes in Samsung's own .sdocx format cannot be read.",
+  "importWizard.how.airtable": "In Airtable: in each table's view → Download CSV, then pick the .csv files together (links between tables follow). A base saved from Airtable's API as JSON works too. Nothing is fetched from Airtable.",
+  "importWizard.how.tomboy": "Pick the notes folder of Tomboy (~/.local/share/tomboy) or Gnote (~/.local/share/gnote), or its .note files. Notebooks become folders, TODO lists become tasks.",
+  "importWizard.warn.pdfOnly": "exported as PDF: the PDF is shown in the note, its text is not converted"
 }

@@ -28,6 +28,13 @@ export const CASES = [
   { id: "roam-help", format: "Roam (JSON)", source: "roam", input: "roam", only: /^help-graph-excerpt\.json$/, oracle: "roam-expected/help-graph-excerpt" },
   { id: "roam-theme", format: "Roam (JSON)", source: "roam", input: "roam", only: /^small-test-graph\.json$/, oracle: "roam-expected/small-test-graph" },
   { id: "textbundle", format: "TextBundle / TextPack", source: "textbundle", input: "textbundle", oracle: "textbundle-expected" },
+  { id: "tomboy", format: "Tomboy / Gnote", source: "tomboy", input: "tomboy", oracle: "tomboy-expected" },
+  { id: "apple-journal", format: "Apple Journal (HTML)", source: "appleJournal", input: "journal", prefix: "Entries/", oracle: "journal-expected" },
+  { id: "airtable-api", format: "Airtable (saved API JSON)", source: "airtable", input: "airtable", oracle: "airtable-expected" },
+  // Obsidian imports a CSV (Airtable's download) with its CSV importer: a note per row.
+  { id: "airtable-csv-sample", format: "Airtable (CSV)", source: "airtable", input: "csv", only: /^sample\.csv$/, oracle: "csv-expected/sample" },
+  { id: "airtable-csv-comprehensive", format: "Airtable (CSV)", source: "airtable", input: "csv", only: /^comprehensive-test\.csv$/, oracle: "csv-expected/comprehensive-test" },
+  { id: "airtable-csv-semicolon", format: "Airtable (CSV)", source: "airtable", input: "csv", only: /^semicolon\.csv$/, oracle: "csv-expected/semicolon" },
   // Obsidian Importer has no Craft converter: its help sends Craft through the Markdown import, which
   // copies the files as they are. So the oracle of Craft is the export itself (our golden, synthetic).
   { id: "craft", format: "Craft (Markdown)", source: "craft", root: GOLDEN, input: "craft", oracle: "craft", oracleIs: "the export as it is (Obsidian's Markdown import)" },

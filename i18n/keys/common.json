@@ -11717,6 +11717,16 @@
       ]
     },
     {
+      "key": "importWizard.how.airtable",
+      "en": "In Airtable: in each table's view → Download CSV, then pick the .csv files together (links between tables follow). A base saved from Airtable's API as JSON works too. Nothing is fetched from Airtable.",
+      "vars": []
+    },
+    {
+      "key": "importWizard.how.appleJournal",
+      "en": "In Journal on iPhone: Settings → Export → choose the entries. Pick the exported folder (Entries and Resources) or a .zip of it.",
+      "vars": []
+    },
+    {
       "key": "importWizard.how.appleNotes",
       "en": "Apple Notes has no export of its own: save the notes as HTML or Markdown with an exporter app, then pick the folder or a .zip of it. Images inside the notes come along.",
       "vars": []
@@ -11729,6 +11739,11 @@
     {
       "key": "importWizard.how.craft",
       "en": "In Craft: select the documents or the space → Export → Markdown (or TextBundle). Pick the .zip or the folder. Links between documents become wikilinks.",
+      "vars": []
+    },
+    {
+      "key": "importWizard.how.dayOne",
+      "en": "In Day One: File → Export → JSON. Pick the .zip as it came. Photos and files come along; place, weather and tags become properties.",
       "vars": []
     },
     {
@@ -11772,8 +11787,18 @@
       "vars": []
     },
     {
+      "key": "importWizard.how.samsungNotes",
+      "en": "In Samsung Notes: select notes → Share → Text file (or PDF file), then pick the files. Notes in Samsung's own .sdocx format cannot be read.",
+      "vars": []
+    },
+    {
       "key": "importWizard.how.textbundle",
       "en": "TextBundle or TextPack from Ulysses, iA Writer and other editors: pick the .textbundle folders, the .textpack files, or a .zip of them. Images in assets/ come along.",
+      "vars": []
+    },
+    {
+      "key": "importWizard.how.tomboy",
+      "en": "Pick the notes folder of Tomboy (~/.local/share/tomboy) or Gnote (~/.local/share/gnote), or its .note files. Notebooks become folders, TODO lists become tasks.",
       "vars": []
     },
     {
@@ -12079,6 +12104,11 @@
     {
       "key": "importWizard.warn.notionUnparsed",
       "en": "a Notion value that does not fit its column's type was kept as text",
+      "vars": []
+    },
+    {
+      "key": "importWizard.warn.pdfOnly",
+      "en": "exported as PDF: the PDF is shown in the note, its text is not converted",
       "vars": []
     },
     {
