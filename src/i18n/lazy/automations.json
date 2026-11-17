@@ -28,5 +28,14 @@
   "automations.trigger.rowChanged": "a row of a base view changes",
   "automations.ask.base": "Base file (for example Projects/Tasks.base)",
   "automations.ask.view": "View name (empty: the first view)",
-  "automations.ask.rowProperty": "Property to watch (empty: any property)"
+  "automations.ask.rowProperty": "Property to watch (empty: any property)",
+  "automations.ask.type": "Type (its id or name, as in type: of the note)",
+  "automations.ask.typeField": "Field to watch (empty: any field)",
+  "automations.dryRun.postponedShabbat": "⏸ {rule}: today is Shabbat; it runs on {until}",
+  "automations.dryRun.postponedYomTov": "⏸ {rule}: today is a holiday; it runs on {until}",
+  "automations.pick.restDays": "On Shabbat and holidays…",
+  "automations.restDays.any": "run as on any day",
+  "automations.restDays.notOnRestDays": "wait: not on Shabbat or a holiday",
+  "automations.trigger.typeCreated": "an object of a type is created",
+  "automations.trigger.typeFieldChanged": "a field of a type changes"
 }
