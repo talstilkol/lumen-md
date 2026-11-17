@@ -1,0 +1,8 @@
+{
+  "appLock.body": "Unlock with Face ID, Touch ID, your fingerprint or the device's own lock. Nothing leaves this device.",
+  "appLock.checking": "Checking…",
+  "appLock.failed": "That didn't unlock it. Try again.",
+  "appLock.failedMany": "Still locked after three tries. Your notes stay hidden until the device's check passes.",
+  "appLock.title": "Lumen is locked",
+  "appLock.unlock": "Unlock"
+}

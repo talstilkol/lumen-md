@@ -280,6 +280,8 @@ export const SETTINGS: readonly SettingEntry[] = [
   // Which MCP tool definitions the user allowed to run, per vault (agents/mcp/approvals.ts).
   data("lumen.mcp.approvals"),
   data("lumen.agents.trustedRepos"),
+  // W13.P1: the app lock (on / delay / this device's credential id): a privacy switch, never imported.
+  data("lumen-app-lock"),
   data("lumen.skills.allowed"),
   data("lumen.openSources"),
   // Z7-M3: "always" for the Wikidata entity search; a consent, so never taken from an imported file.

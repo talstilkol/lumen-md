@@ -1398,6 +1398,13 @@
       "icon": "FileText"
     },
     {
+      "id": "privacy.appLock",
+      "label": "Privacy: lock the app with Face ID / fingerprint",
+      "group": "Security",
+      "hint": "Hides your notes while Lumen is in the background; the device's own check unlocks it",
+      "icon": "Network"
+    },
+    {
       "id": "privacy.airplane",
       "label": "Airplane mode (no network)…",
       "group": "Security",
@@ -3988,6 +3995,13 @@
       "icon": "Link"
     },
     {
+      "id": "privacy.appLock",
+      "label": "Privacy: lock the app with Face ID / fingerprint",
+      "group": "Security",
+      "hint": "Hides your notes while Lumen is in the background; the device's own check unlocks it",
+      "icon": "Network"
+    },
+    {
       "id": "privacy.airplane",
       "label": "Airplane mode (no network)…",
       "group": "Security",
@@ -5376,6 +5390,7 @@
     "view.plugins",
     "settings.trustedRepos",
     "view.readingOptions",
+    "privacy.appLock",
     "privacy.airplane",
     "privacy.networkMonitor",
     "template.meeting-notes",

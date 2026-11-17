@@ -54,6 +54,7 @@ export function setUserClientId(id: string): boolean {
 }
 
 /** Reads the deployment's runtime config once; null when it has no (valid) OneNote client id. */
+// privacy-ledger: the default fetcher only ever gets RUNTIME_CONFIG_PATH, the app's own same-origin config file
 export function loadDeployedClientId(fetcher: typeof fetch = (...a) => fetch(...a)): Promise<string | null> {
   loading ??= (async () => {
     try {

@@ -853,5 +853,45 @@
     "ru": "1i8bv0m",
     "zh-CN": "1i8bv0m",
     "fa": "1i8bv0m"
+  },
+  "cmd.appLock.on": {
+    "ar": "1whd33t",
+    "de": "1whd33t",
+    "fr": "1whd33t",
+    "ja": "1whd33t",
+    "ru": "1whd33t",
+    "zh-CN": "1whd33t"
+  },
+  "cmd.appLock.off": {
+    "ar": "sapj48",
+    "de": "sapj48",
+    "fr": "sapj48",
+    "ja": "sapj48",
+    "ru": "sapj48",
+    "zh-CN": "sapj48"
+  },
+  "cmd.appLock.now": {
+    "ar": "1ljuzee",
+    "de": "1ljuzee",
+    "fr": "1ljuzee",
+    "ja": "1ljuzee",
+    "ru": "1ljuzee",
+    "zh-CN": "1ljuzee"
+  },
+  "cmd.appLock.after": {
+    "ar": "e1coge",
+    "de": "e1coge",
+    "fr": "e1coge",
+    "ja": "e1coge",
+    "ru": "e1coge",
+    "zh-CN": "e1coge"
+  },
+  "cmd.appLock.hint": {
+    "ar": "1bb6whw",
+    "de": "1bb6whw",
+    "fr": "1bb6whw",
+    "ja": "1bb6whw",
+    "ru": "1bb6whw",
+    "zh-CN": "1bb6whw"
   }
 }

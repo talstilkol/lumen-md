@@ -167,6 +167,7 @@
   "privacy.report.done": "Подписанный отчёт сохранён ({n} запросов, {left} покинули это устройство). Проверьте: node scripts/privacy/verify-report.mjs.",
   "privacy.report.export": "Экспортировать подписанный отчёт",
   "privacy.report.failed": "Не удалось экспортировать отчёт: {error}",
+  "privacy.secretCopy.hint": "Копируется как секрет: помечается как конфиденциальное и стирается из буфера через 60 секунд",
   "privacy.staticAssets": "Статические файлы: {n}",
   "privacy.tab.mcp": "Клиенты MCP",
   "privacy.tab.requests": "Сетевые запросы",

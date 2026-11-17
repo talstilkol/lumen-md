@@ -51,12 +51,14 @@ let loading: Promise<TypstCompiler> | null = null;
 export function loadTypstCompiler(deps: TypstDeps = defaultDeps()): Promise<TypstCompiler> {
   loading ??= (async () => {
     const base = deps.base ?? TYPST_BASE;
+    // privacy-ledger: same origin — TYPST_BASE is this app's own vendored folder (defaultDeps above)
     const list = await deps.fetch(`${base}fonts.json`).catch(() => null);
     if (!list?.ok) throw new TypstUnavailableError("not-installed");
     const { fonts } = (await list.json()) as { fonts: Array<{ file: string }> };
     const bytes = await Promise.all(
       (fonts ?? []).map(async (f) => {
         if (!/^[\w.-]+\.(ttf|otf)$/i.test(f.file)) throw new TypstUnavailableError("no-fonts");
+        // privacy-ledger: same origin — a font file of the vendored folder listed in its fonts.json
         const r = await deps.fetch(`${base}fonts/${f.file}`);
         if (!r.ok) throw new TypstUnavailableError("no-fonts");
         return new Uint8Array(await r.arrayBuffer());

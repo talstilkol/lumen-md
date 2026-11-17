@@ -51,6 +51,7 @@
   "plugin.chart.refetch": "Refetch chart data",
   "plugin.map": "Map",
   "privacy.close": "Close",
+  "privacy.secretCopy.hint": "Copied as a secret: marked sensitive, and cleared from the clipboard after 60 seconds",
   "theme.toggle": "Toggle theme",
   "themeSettings.accent": "Accent color",
   "themeSettings.accent.hex": "Accent color (hex)",

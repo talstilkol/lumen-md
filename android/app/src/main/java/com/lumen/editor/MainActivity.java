@@ -42,6 +42,8 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(LumenVaultFolderPlugin.class);
         // Plan W2.19 (W10.E45): LAN discovery for pairing without a code.
         registerPlugin(LumenLanPlugin.class);
+        // Plans W13.P1 / W13.P5: FLAG_SECURE for locked notes, and secrets copied as sensitive and cleared.
+        registerPlugin(LumenPrivacyPlugin.class);
         super.onCreate(savedInstanceState);
         getOnBackPressedDispatcher().addCallback(this, back);
     }

@@ -100,6 +100,40 @@
       "vars": []
     },
     {
+      "key": "toast.appLock.afterPrompt",
+      "en": "Lock after how long in the background?",
+      "vars": []
+    },
+    {
+      "key": "toast.appLock.atOnce",
+      "en": "at once",
+      "vars": []
+    },
+    {
+      "key": "toast.appLock.minutes",
+      "en": "{n} min",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "toast.appLock.off",
+      "en": "App lock off.",
+      "vars": []
+    },
+    {
+      "key": "toast.appLock.on",
+      "en": "App lock on: Lumen locks after {after} in the background, and at every start.",
+      "vars": [
+        "after"
+      ]
+    },
+    {
+      "key": "toast.appLock.unavailable",
+      "en": "This device offers no Face ID, Touch ID, fingerprint or Windows Hello to the app, so the app lock can't be turned on here.",
+      "vars": []
+    },
+    {
       "key": "toast.appliedLink",
       "en": "✅ Links applied: {count}",
       "vars": [

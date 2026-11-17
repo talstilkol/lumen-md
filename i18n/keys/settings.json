@@ -897,6 +897,11 @@
       ]
     },
     {
+      "key": "privacy.secretCopy.hint",
+      "en": "Copied as a secret: marked sensitive, and cleared from the clipboard after 60 seconds",
+      "vars": []
+    },
+    {
       "key": "privacy.staticAssets",
       "en": "Static files: {n}",
       "vars": [
