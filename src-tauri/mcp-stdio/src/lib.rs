@@ -51,6 +51,8 @@ use std::time::{Duration, Instant};
 mod allowlist;
 #[cfg(test)]
 mod review11;
+#[cfg(test)]
+mod review12;
 pub use allowlist::{approval_pin, checked_spawn, may_spawn, may_spawn_in, page_writable_roots, pin, pin_in, pin_text, resolve_program, sha256_file, sha256_hex, AllowList, Lang, Pin, Sha256, MAX_PINNED_BYTES, NOT_APPROVED};
 
 /// Longest stdout line (one JSON-RPC message) we accept.
