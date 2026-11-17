@@ -1,0 +1,160 @@
+{"id":"tone-he-000","lang":"he","split":"heldout","origin":"synthetic","source":"הרכבת לאילת יוצאת כל 36 דקות.","rewrite":"הרכבות לאילת יוצאות מדי 36 דקות.","change":null,"label":"kept"}
+{"id":"tone-he-001","lang":"he","split":"heldout","origin":"synthetic","source":"אי אפשר לפתוח את המשרד באילת לפני ה־2 במאי.","rewrite":"לא ניתן לפתוח את המשרד באילת לפני ה־2 במאי.","change":null,"label":"kept"}
+{"id":"tone-he-002","lang":"he","split":"heldout","origin":"synthetic","source":"37 המחשבים החדשים לא הגיעו לאילת.","rewrite":"37 המחשבים החדשים פשוט לא הגיעו לאילת.","change":null,"label":"kept"}
+{"id":"tone-he-003","lang":"he","split":"heldout","origin":"synthetic","source":"41 המחשבים החדשים לא הגיעו לתל אביב.","rewrite":"41 המחשבים החדשים פשוט לא הגיעו לתל אביב.","change":null,"label":"kept"}
+{"id":"tone-he-004","lang":"he","split":"heldout","origin":"synthetic","source":"הפגישה באילת מתחילה ב־37:00.","rewrite":"הפגישה באילת תיפתח בשעה 37:00.","change":null,"label":"kept"}
+{"id":"tone-he-005","lang":"he","split":"heldout","origin":"synthetic","source":"הרכבת לאילת יוצאת כל 34 דקות.","rewrite":"הרכבות לא לאילת יוצאות מדי 34 דקות.","change":"negation","label":"changed"}
+{"id":"tone-he-006","lang":"he","split":"heldout","origin":"synthetic","source":"הפגישה בתל אביב מתחילה ב־28:00.","rewrite":"נתחיל בתל אביב ב־28:00.","change":null,"label":"kept"}
+{"id":"tone-he-007","lang":"he","split":"heldout","origin":"synthetic","source":"עומר שילם 39 שקלים על 6 כרטיסים.","rewrite":"עומר שילם 43 שקלים על 6 כרטיסים, יופי!","change":"number","label":"changed"}
+{"id":"tone-he-008","lang":"he","split":"heldout","origin":"synthetic","source":"עומר שילם 3 שקלים על 4 כרטיסים.","rewrite":"עומר שילם 3 שקלים על 4 כרטיסים, יופי!","change":null,"label":"kept"}
+{"id":"tone-he-009","lang":"he","split":"heldout","origin":"synthetic","source":"26 המחשבים החדשים לא הגיעו לתל אביב.","rewrite":"26 המחשבים החדשים פשוט לא הגיעו לתל אביב.","change":null,"label":"kept"}
+{"id":"tone-he-010","lang":"he","split":"heldout","origin":"synthetic","source":"יוסי שילם 12 שקלים על 9 כרטיסים.","rewrite":"יוסי שילם סך של 12 שקלים עבור 9 כרטיסים.","change":null,"label":"kept"}
+{"id":"tone-he-011","lang":"he","split":"heldout","origin":"synthetic","source":"9 המחשבים החדשים לא הגיעו לבאר שבע.","rewrite":"12 המחשבים החדשים פשוט לא הגיעו לבאר שבע.","change":"number","label":"changed"}
+{"id":"tone-he-012","lang":"he","split":"heldout","origin":"synthetic","source":"הפגישה בבאר שבע מתחילה ב־40:00.","rewrite":"נתחיל בבאר שבע ב־40:00.","change":null,"label":"kept"}
+{"id":"tone-he-013","lang":"he","split":"heldout","origin":"synthetic","source":"הרכבת לבאר שבע יוצאת כל 32 דקות.","rewrite":"יש לא רכבת לבאר שבע כל 32 דקות.","change":"negation","label":"changed"}
+{"id":"tone-he-014","lang":"he","split":"heldout","origin":"synthetic","source":"הפגישה בתל אביב מתחילה ב־5:00.","rewrite":"הפגישה בתל אביב תיפתח בשעה 5:00.","change":null,"label":"kept"}
+{"id":"tone-he-015","lang":"he","split":"heldout","origin":"synthetic","source":"הרכבת לבאר שבע יוצאת כל 22 דקות.","rewrite":"הרכבות לבאר שבע יוצאות מדי 22 דקות.","change":null,"label":"kept"}
+{"id":"tone-he-016","lang":"he","split":"heldout","origin":"synthetic","source":"יוסי שילם 22 שקלים על 4 כרטיסים.","rewrite":"יוסי שילם סך של 22 שקלים עבור 4 כרטיסים.","change":null,"label":"kept"}
+{"id":"tone-he-017","lang":"he","split":"heldout","origin":"synthetic","source":"אי אפשר לפתוח את המשרד בבאר שבע לפני ה־11 במאי.","rewrite":"לא ניתן לפתוח את המשרד בבאר שבע לפני ה־11 במאי. גם איתן מסכים.","change":"added-name","label":"changed"}
+{"id":"tone-he-018","lang":"he","split":"heldout","origin":"synthetic","source":"אי אפשר לפתוח את המשרד בבאר שבע לפני ה־21 במאי.","rewrite":"אי אפשר לפתוח את המשרד בבאר שבע לפני ה־21 במאי, סליחה.","change":null,"label":"kept"}
+{"id":"tone-he-019","lang":"he","split":"heldout","origin":"synthetic","source":"הרכבת לתל אביב יוצאת כל 19 דקות.","rewrite":"הרכבות לאילת יוצאות מדי 19 דקות.","change":"place","label":"changed"}
+{"id":"tone-he-020","lang":"he","split":"heldout","origin":"synthetic","source":"אי אפשר לפתוח את המשרד בבאר שבע לפני ה־3 במאי.","rewrite":"לא ניתן לפתוח את המשרד בבאר שבע לפני ה־3 במאי.","change":null,"label":"kept"}
+{"id":"tone-he-021","lang":"he","split":"heldout","origin":"synthetic","source":"הרכבת לאילת יוצאת כל 6 דקות.","rewrite":"יש רכבת לאילת כל 10 דקות.","change":"number","label":"changed"}
+{"id":"tone-he-022","lang":"he","split":"heldout","origin":"synthetic","source":"אבי שילם 16 שקלים על 3 כרטיסים.","rewrite":"אבי שילם 16 שקלים על 3 כרטיסים, יופי!","change":null,"label":"kept"}
+{"id":"tone-he-023","lang":"he","split":"heldout","origin":"synthetic","source":"הרכבת לבאר שבע יוצאת כל 38 דקות.","rewrite":"הרכבות לא לבאר שבע יוצאות מדי 38 דקות.","change":"negation","label":"changed"}
+{"id":"tone-he-024","lang":"he","split":"heldout","origin":"synthetic","source":"עומר שילם 2 שקלים על 6 כרטיסים.","rewrite":"עומר שילם סך של 2 שקלים עבור 6 כרטיסים.","change":null,"label":"kept"}
+{"id":"tone-he-025","lang":"he","split":"heldout","origin":"synthetic","source":"אי אפשר לפתוח את המשרד באילת לפני ה־12 במאי.","rewrite":"לא ניתן לפתוח את המשרד בנצרת לפני ה־12 במאי.","change":"place","label":"changed"}
+{"id":"tone-he-026","lang":"he","split":"heldout","origin":"synthetic","source":"הפגישה בתל אביב מתחילה ב־37:00.","rewrite":"נתחיל בתל אביב ב־37:00.","change":null,"label":"kept"}
+{"id":"tone-he-027","lang":"he","split":"heldout","origin":"synthetic","source":"עומר שילם 17 שקלים על 7 כרטיסים.","rewrite":"עומר שילם סך של 34 שקלים עבור 7 כרטיסים.","change":"place","label":"changed"}
+{"id":"tone-he-028","lang":"he","split":"heldout","origin":"synthetic","source":"41 המחשבים החדשים לא הגיעו לתל אביב.","rewrite":"41 המחשבים החדשים מעולם לא הגיעו לתל אביב.","change":null,"label":"kept"}
+{"id":"tone-he-029","lang":"he","split":"heldout","origin":"synthetic","source":"הפגישה בתל אביב מתחילה ב־11:00.","rewrite":"הפגישה בתל אביב תיפתח בשעה 15:00.","change":"number","label":"changed"}
+{"id":"tone-he-030","lang":"he","split":"heldout","origin":"synthetic","source":"14 המחשבים החדשים לא הגיעו לתל אביב.","rewrite":"14 המחשבים החדשים פשוט לא הגיעו לתל אביב.","change":null,"label":"kept"}
+{"id":"tone-he-031","lang":"he","split":"heldout","origin":"synthetic","source":"אי אפשר לפתוח את המשרד בבאר שבע לפני ה־15 במאי.","rewrite":"לא ניתן לפתוח את המשרד בבאר שבע לפני ה־15 במאי.","change":null,"label":"kept"}
+{"id":"tone-he-032","lang":"he","split":"heldout","origin":"synthetic","source":"7 המחשבים החדשים לא הגיעו לבאר שבע.","rewrite":"7 המחשבים החדשים פשוט לא הגיעו לבאר שבע.","change":null,"label":"kept"}
+{"id":"tone-he-033","lang":"he","split":"heldout","origin":"synthetic","source":"35 המחשבים החדשים לא הגיעו לתל אביב.","rewrite":"35 המחשבים החדשים מעולם לא הגיעו לתל יוסיב.","change":"name","label":"changed"}
+{"id":"tone-he-034","lang":"he","split":"heldout","origin":"synthetic","source":"עומר שילם 29 שקלים על 4 כרטיסים.","rewrite":"עומר שילם סך של 29 שקלים עבור 4 כרטיסים.","change":null,"label":"kept"}
+{"id":"tone-he-035","lang":"he","split":"heldout","origin":"synthetic","source":"עומר שילם 14 שקלים על 7 כרטיסים.","rewrite":"עומר שילם 14 שקלים על 7 כרטיסים, יופי! גם ליאור מסכים.","change":"added-name","label":"changed"}
+{"id":"tone-he-036","lang":"he","split":"heldout","origin":"synthetic","source":"ליאור שילם 14 שקלים על 8 כרטיסים.","rewrite":"ליאור שילם 14 שקלים על 8 כרטיסים, יופי!","change":null,"label":"kept"}
+{"id":"tone-he-037","lang":"he","split":"heldout","origin":"synthetic","source":"הפגישה באילת מתחילה ב־35:00.","rewrite":"נתחיל לא באילת ב־35:00.","change":"negation","label":"changed"}
+{"id":"tone-he-038","lang":"he","split":"heldout","origin":"synthetic","source":"הרכבת לתל אביב יוצאת כל 23 דקות.","rewrite":"הרכבות לתל אביב יוצאות מדי 23 דקות.","change":null,"label":"kept"}
+{"id":"tone-he-039","lang":"he","split":"heldout","origin":"synthetic","source":"הפגישה באילת מתחילה ב־20:00.","rewrite":"נתחיל לא באילת ב־20:00.","change":"negation","label":"changed"}
+{"id":"tone-he-040","lang":"he","split":"heldout","origin":"synthetic","source":"הרכבת לבאר שבע יוצאת כל 13 דקות.","rewrite":"יש רכבת לבאר שבע כל 13 דקות.","change":null,"label":"kept"}
+{"id":"tone-he-041","lang":"he","split":"heldout","origin":"synthetic","source":"27 המחשבים החדשים לא הגיעו לבאר שבע.","rewrite":"27 המחשבים החדשים פשוט הגיעו לבאר שבע.","change":"negation","label":"changed"}
+{"id":"tone-he-042","lang":"he","split":"heldout","origin":"synthetic","source":"הפגישה בבאר שבע מתחילה ב־25:00.","rewrite":"נתחיל בבאר שבע ב־25:00.","change":null,"label":"kept"}
+{"id":"tone-he-043","lang":"he","split":"heldout","origin":"synthetic","source":"אי אפשר לפתוח את המשרד בתל אביב לפני ה־40 במאי.","rewrite":"לא ניתן לפתוח את המשרד בתל אביב לפני ה־41 במאי.","change":"number","label":"changed"}
+{"id":"tone-he-044","lang":"he","split":"heldout","origin":"synthetic","source":"הרכבת לתל אביב יוצאת כל 38 דקות.","rewrite":"יש רכבת לתל אביב כל 38 דקות.","change":null,"label":"kept"}
+{"id":"tone-he-045","lang":"he","split":"heldout","origin":"synthetic","source":"אבי שילם 20 שקלים על 3 כרטיסים.","rewrite":"אבי שילם סך של 20 שקלים עבור 3 כרטיסים. גם עומר מסכים.","change":"added-name","label":"changed"}
+{"id":"tone-he-046","lang":"he","split":"heldout","origin":"synthetic","source":"אי אפשר לפתוח את המשרד בבאר שבע לפני ה־29 במאי.","rewrite":"לא ניתן לפתוח את המשרד בבאר שבע לפני ה־29 במאי.","change":null,"label":"kept"}
+{"id":"tone-he-047","lang":"he","split":"heldout","origin":"synthetic","source":"הרכבת לאילת יוצאת כל 33 דקות.","rewrite":"הרכבות לאילת יוצאות מדי 33 דקות. גם ליאור מסכים.","change":"added-name","label":"changed"}
+{"id":"tone-he-048","lang":"he","split":"dev","origin":"synthetic","source":"תתקשרו לשירה לפני שאתם יוצאים מירושלים.","rewrite":"תרימו טלפון לשירה לפני שאתם יוצאים מירושלים.","change":null,"label":"kept"}
+{"id":"tone-he-049","lang":"he","split":"dev","origin":"synthetic","source":"תודה, נועה, 26 הקבצים תוקנו.","rewrite":"תודה רבה, נועה; 52 הקבצים תוקנו.","change":"place","label":"changed"}
+{"id":"tone-he-050","lang":"he","split":"dev","origin":"synthetic","source":"דנה עובד כאן 22 שנים.","rewrite":"דנה מועסק כאן זה 22 שנים.","change":null,"label":"kept"}
+{"id":"tone-he-051","lang":"he","split":"dev","origin":"synthetic","source":"תתקשרו לנועה לפני שאתם יוצאים מחיפה.","rewrite":"תרימו טלפון לנועה לפני שאתם יוצאים מחיפה.","change":null,"label":"kept"}
+{"id":"tone-he-052","lang":"he","split":"dev","origin":"synthetic","source":"לא אישרנו את 12 החשבוניות של מאיה.","rewrite":"החשבוניות של מאיה, 12 במספר, אינן מאושרות.","change":null,"label":"kept"}
+{"id":"tone-he-053","lang":"he","split":"dev","origin":"synthetic","source":"תתקשרו לתמר לפני שאתם יוצאים מנצרת.","rewrite":"תרימו לא טלפון לתמר לפני שאתם יוצאים מנצרת.","change":"negation","label":"changed"}
+{"id":"tone-he-054","lang":"he","split":"dev","origin":"synthetic","source":"שירה עובד כאן 18 שנים.","rewrite":"שירה מועסק כאן זה 18 שנים.","change":null,"label":"kept"}
+{"id":"tone-he-055","lang":"he","split":"dev","origin":"synthetic","source":"לא אישרנו את 14 החשבוניות של תמר.","rewrite":"החשבוניות של תמר, 14 במספר, אינן מאושרות. לפי עומר מסכים.","change":"added-name","label":"changed"}
+{"id":"tone-he-056","lang":"he","split":"dev","origin":"synthetic","source":"תתקשרו לדנה לפני שאתם יוצאים מירושלים.","rewrite":"תרימו טלפון לדנה לפני שאתם יוצאים מירושלים.","change":null,"label":"kept"}
+{"id":"tone-he-057","lang":"he","split":"dev","origin":"synthetic","source":"תתקשרו לשירה לפני שאתם יוצאים מירושלים.","rewrite":"תרימו טלפון לדנה לפני שאתם יוצאים מירושלים.","change":"name","label":"changed"}
+{"id":"tone-he-058","lang":"he","split":"dev","origin":"synthetic","source":"תודה, תמר, 34 הקבצים תוקנו.","rewrite":"תודה רבה, תמר; 34 הקבצים תוקנו.","change":null,"label":"kept"}
+{"id":"tone-he-059","lang":"he","split":"dev","origin":"synthetic","source":"תודה, מאיה, 23 הקבצים תוקנו.","rewrite":"תודה רבה, מאיה; 28 הקבצים תוקנו.","change":"number","label":"changed"}
+{"id":"tone-he-060","lang":"he","split":"dev","origin":"synthetic","source":"דנה עובד כאן 5 שנים.","rewrite":"דנה איתנו כבר 5 שנים.","change":null,"label":"kept"}
+{"id":"tone-he-061","lang":"he","split":"dev","origin":"synthetic","source":"תתקשרו לדנה לפני שאתם יוצאים מחיפה.","rewrite":"נא לא ליצור קשר עם דנה בטרם תצאו מחיפה.","change":"negation","label":"changed"}
+{"id":"tone-he-062","lang":"he","split":"dev","origin":"synthetic","source":"לא אישרנו את 31 החשבוניות של נועה.","rewrite":"עוד לא אישרנו את 31 החשבוניות של נועה.","change":null,"label":"kept"}
+{"id":"tone-he-063","lang":"he","split":"dev","origin":"synthetic","source":"שירה עובד כאן 6 שנים.","rewrite":"שירה איתנו כבר 12 שנים.","change":"place","label":"changed"}
+{"id":"tone-he-064","lang":"he","split":"dev","origin":"synthetic","source":"תודה, שירה, 10 הקבצים תוקנו.","rewrite":"תודה ענקית, שירה! כל 10 הקבצים מתוקנים.","change":null,"label":"kept"}
+{"id":"tone-he-065","lang":"he","split":"dev","origin":"synthetic","source":"לא אישרנו את 32 החשבוניות של נועה.","rewrite":"עוד לא אישרנו את 32 החשבוניות של נועה. גם איתן מסכים.","change":"added-name","label":"changed"}
+{"id":"tone-he-066","lang":"he","split":"dev","origin":"synthetic","source":"מאיה עובד כאן 7 שנים.","rewrite":"מאיה מועסק כאן זה 7 שנים.","change":null,"label":"kept"}
+{"id":"tone-he-067","lang":"he","split":"dev","origin":"synthetic","source":"תודה, דנה, 2 הקבצים תוקנו.","rewrite":"תודה רבה, דנה; 4 הקבצים תוקנו.","change":"place","label":"changed"}
+{"id":"tone-he-068","lang":"he","split":"dev","origin":"synthetic","source":"לא אישרנו את 13 החשבוניות של שירה.","rewrite":"עוד לא אישרנו את 13 החשבוניות של שירה.","change":null,"label":"kept"}
+{"id":"tone-he-069","lang":"he","split":"dev","origin":"synthetic","source":"לא אישרנו את 12 החשבוניות של נועה.","rewrite":"עוד לא אישרנו את 12 החשבוניות של נועה. לפי דנה מסכים.","change":"added-name","label":"changed"}
+{"id":"tone-he-070","lang":"he","split":"dev","origin":"synthetic","source":"לא אישרנו את 23 החשבוניות של נועה.","rewrite":"החשבוניות של נועה, 23 במספר, אינן מאושרות.","change":null,"label":"kept"}
+{"id":"tone-he-071","lang":"he","split":"dev","origin":"synthetic","source":"תתקשרו לתמר לפני שאתם יוצאים מנצרת.","rewrite":"תרימו טלפון לתמר לפני שאתם יוצאים מבאר שבע.","change":"place","label":"changed"}
+{"id":"tone-he-072","lang":"he","split":"dev","origin":"synthetic","source":"תודה, נועה, 2 הקבצים תוקנו.","rewrite":"תודה רבה, נועה; 2 הקבצים תוקנו.","change":null,"label":"kept"}
+{"id":"tone-he-073","lang":"he","split":"dev","origin":"synthetic","source":"תתקשרו למאיה לפני שאתם יוצאים מירושלים.","rewrite":"נא ליצור קשר עם מאיה בטרם תצאו מירושלים.","change":null,"label":"kept"}
+{"id":"tone-he-074","lang":"he","split":"dev","origin":"synthetic","source":"לא אישרנו את 20 החשבוניות של מאיה.","rewrite":"החשבוניות של מאיה, 20 במספר, אינן מאושרות.","change":null,"label":"kept"}
+{"id":"tone-he-075","lang":"he","split":"dev","origin":"synthetic","source":"לא אישרנו את 19 החשבוניות של מאיה.","rewrite":"עוד לא אישרנו את 19 החשבוניות של מאיה. גם שירה מסכים.","change":"added-name","label":"changed"}
+{"id":"tone-he-076","lang":"he","split":"dev","origin":"synthetic","source":"תתקשרו לנועה לפני שאתם יוצאים מירושלים.","rewrite":"נא ליצור קשר עם נועה בטרם תצאו מירושלים.","change":null,"label":"kept"}
+{"id":"tone-he-077","lang":"he","split":"dev","origin":"synthetic","source":"לא אישרנו את 3 החשבוניות של שירה.","rewrite":"עוד לא אישרנו את 6 החשבוניות של שירה.","change":"place","label":"changed"}
+{"id":"tone-he-078","lang":"he","split":"dev","origin":"synthetic","source":"נועה עובד כאן 33 שנים.","rewrite":"נועה מועסק כאן זה 33 שנים.","change":null,"label":"kept"}
+{"id":"tone-he-079","lang":"he","split":"dev","origin":"synthetic","source":"תתקשרו לתמר לפני שאתם יוצאים מנצרת.","rewrite":"נא ליצור קשר עם תמר בטרם תצאו מבאר שבע.","change":"place","label":"changed"}
+{"id":"tone-he-080","lang":"he","split":"dev","origin":"synthetic","source":"תמר תשלח את 38 הדוחות ביום שני.","rewrite":"תמר תגיש את 38 הדוחות ביום שני.","change":null,"label":"kept"}
+{"id":"tone-he-081","lang":"he","split":"dev","origin":"synthetic","source":"לא אישרנו את 39 החשבוניות של מאיה.","rewrite":"החשבוניות של מאיה, 39 במספר, אינן מאושרות. לפי תמר מסכים.","change":"added-name","label":"changed"}
+{"id":"tone-he-082","lang":"he","split":"dev","origin":"synthetic","source":"תתקשרו לשירה לפני שאתם יוצאים מנצרת.","rewrite":"נא ליצור קשר עם שירה בטרם תצאו מנצרת.","change":null,"label":"kept"}
+{"id":"tone-he-083","lang":"he","split":"dev","origin":"synthetic","source":"נועה עובד כאן 38 שנים.","rewrite":"נועה מועסק כאן זה 38 שנים. לפי אבי מסכים.","change":"added-name","label":"changed"}
+{"id":"tone-he-084","lang":"he","split":"dev","origin":"synthetic","source":"תודה, תמר, 22 הקבצים תוקנו.","rewrite":"תודה רבה, תמר; 22 הקבצים תוקנו.","change":null,"label":"kept"}
+{"id":"tone-he-085","lang":"he","split":"dev","origin":"synthetic","source":"מאיה תשלח את 2 הדוחות ביום שני.","rewrite":"מאיה שולחת את 4 הדוחות ביום שני!","change":"place","label":"changed"}
+{"id":"tone-he-086","lang":"he","split":"dev","origin":"synthetic","source":"לא אישרנו את 19 החשבוניות של תמר.","rewrite":"החשבוניות של תמר, 19 במספר, אינן מאושרות.","change":null,"label":"kept"}
+{"id":"tone-he-087","lang":"he","split":"dev","origin":"synthetic","source":"תמר תשלח את 29 הדוחות ביום שני.","rewrite":"שירה תגיש את 29 הדוחות ביום שני.","change":"name","label":"changed"}
+{"id":"tone-he-088","lang":"he","split":"dev","origin":"synthetic","source":"שירה עובד כאן 15 שנים.","rewrite":"שירה מועסק כאן זה 15 שנים.","change":null,"label":"kept"}
+{"id":"tone-he-089","lang":"he","split":"dev","origin":"synthetic","source":"לא אישרנו את 24 החשבוניות של שירה.","rewrite":"עוד אישרנו את 24 החשבוניות של שירה.","change":"negation","label":"changed"}
+{"id":"tone-he-090","lang":"he","split":"dev","origin":"synthetic","source":"תתקשרו לתמר לפני שאתם יוצאים מחיפה.","rewrite":"נא ליצור קשר עם תמר בטרם תצאו מחיפה.","change":null,"label":"kept"}
+{"id":"tone-he-091","lang":"he","split":"dev","origin":"synthetic","source":"תמר תשלח את 39 הדוחות ביום שני.","rewrite":"עומר שולחת את 39 הדוחות ביום שני!","change":"name","label":"changed"}
+{"id":"tone-he-092","lang":"he","split":"dev","origin":"synthetic","source":"דנה עובד כאן 25 שנים.","rewrite":"דנה מועסק כאן זה 25 שנים.","change":null,"label":"kept"}
+{"id":"tone-he-093","lang":"he","split":"dev","origin":"synthetic","source":"לא אישרנו את 6 החשבוניות של תמר.","rewrite":"עוד לא אישרנו את 12 החשבוניות של תמר.","change":"place","label":"changed"}
+{"id":"tone-he-094","lang":"he","split":"dev","origin":"synthetic","source":"תמר עובד כאן 17 שנים.","rewrite":"תמר איתנו כבר 17 שנים.","change":null,"label":"kept"}
+{"id":"tone-he-095","lang":"he","split":"dev","origin":"synthetic","source":"תתקשרו לתמר לפני שאתם יוצאים מנצרת.","rewrite":"נא ליצור קשר עם שירה בטרם תצאו מנצרת.","change":"name","label":"changed"}
+{"id":"tone-he-096","lang":"he","split":"dev","origin":"synthetic","source":"תודה, נועה, 10 הקבצים תוקנו.","rewrite":"תודה ענקית, נועה! כל 10 הקבצים מתוקנים.","change":null,"label":"kept"}
+{"id":"tone-he-097","lang":"he","split":"dev","origin":"synthetic","source":"לא אישרנו את 9 החשבוניות של תמר.","rewrite":"עוד לא אישרנו את 14 החשבוניות של תמר.","change":"number","label":"changed"}
+{"id":"tone-he-098","lang":"he","split":"dev","origin":"synthetic","source":"מאיה עובד כאן 3 שנים.","rewrite":"מאיה מועסק כאן זה 3 שנים.","change":null,"label":"kept"}
+{"id":"tone-he-099","lang":"he","split":"dev","origin":"synthetic","source":"תתקשרו למאיה לפני שאתם יוצאים מחיפה.","rewrite":"נא ליצור קשר עם מאיה בטרם תצאו מחיפה. גם איתן מסכים.","change":"added-name","label":"changed"}
+{"id":"tone-he-100","lang":"he","split":"dev","origin":"synthetic","source":"מאיה עובד כאן 3 שנים.","rewrite":"מאיה איתנו כבר 3 שנים.","change":null,"label":"kept"}
+{"id":"tone-he-101","lang":"he","split":"dev","origin":"synthetic","source":"לא אישרנו את 14 החשבוניות של מאיה.","rewrite":"עוד לא אישרנו את 14 החשבוניות של שירה.","change":"name","label":"changed"}
+{"id":"tone-he-102","lang":"he","split":"dev","origin":"synthetic","source":"לא אישרנו את 7 החשבוניות של נועה.","rewrite":"עוד לא אישרנו את 7 החשבוניות של נועה.","change":null,"label":"kept"}
+{"id":"tone-he-103","lang":"he","split":"dev","origin":"synthetic","source":"לא אישרנו את 30 החשבוניות של נועה.","rewrite":"החשבוניות של נועה, 30 במספר, אינן מאושרות. לפי תמר מסכים.","change":"added-name","label":"changed"}
+{"id":"tone-he-104","lang":"he","split":"dev","origin":"synthetic","source":"נועה עובד כאן 39 שנים.","rewrite":"נועה איתנו כבר 39 שנים.","change":null,"label":"kept"}
+{"id":"tone-he-105","lang":"he","split":"dev","origin":"synthetic","source":"דנה עובד כאן 7 שנים.","rewrite":"דנה איתנו כבר 14 שנים.","change":"place","label":"changed"}
+{"id":"tone-he-106","lang":"he","split":"dev","origin":"synthetic","source":"תודה, שירה, 25 הקבצים תוקנו.","rewrite":"תודה ענקית, שירה! כל 25 הקבצים מתוקנים.","change":null,"label":"kept"}
+{"id":"tone-he-107","lang":"he","split":"dev","origin":"synthetic","source":"תתקשרו לשירה לפני שאתם יוצאים מירושלים.","rewrite":"נא ליצור קשר עם שירה בטרם תצאו מבאר שבע.","change":"place","label":"changed"}
+{"id":"tone-he-108","lang":"he","split":"dev","origin":"synthetic","source":"לא אישרנו את 26 החשבוניות של נועה.","rewrite":"החשבוניות של נועה, 26 במספר, אינן מאושרות.","change":null,"label":"kept"}
+{"id":"tone-he-109","lang":"he","split":"dev","origin":"synthetic","source":"מאיה תשלח את 28 הדוחות ביום שני.","rewrite":"מאיה תגיש את 56 הדוחות ביום שני.","change":"place","label":"changed"}
+{"id":"tone-he-110","lang":"he","split":"dev","origin":"synthetic","source":"תמר עובד כאן 19 שנים.","rewrite":"תמר איתנו כבר 19 שנים.","change":null,"label":"kept"}
+{"id":"tone-he-111","lang":"he","split":"dev","origin":"synthetic","source":"שירה תשלח את 2 הדוחות ביום שני.","rewrite":"נועה תגיש את 2 הדוחות ביום שני.","change":"name","label":"changed"}
+{"id":"tone-he-112","lang":"he","split":"dev","origin":"synthetic","source":"תמר עובד כאן 37 שנים.","rewrite":"תמר איתנו כבר 37 שנים.","change":null,"label":"kept"}
+{"id":"tone-he-113","lang":"he","split":"dev","origin":"synthetic","source":"לא אישרנו את 22 החשבוניות של שירה.","rewrite":"עוד אישרנו את 22 החשבוניות של שירה.","change":"negation","label":"changed"}
+{"id":"tone-he-114","lang":"he","split":"dev","origin":"synthetic","source":"תמר עובד כאן 12 שנים.","rewrite":"תמר מועסק כאן זה 12 שנים.","change":null,"label":"kept"}
+{"id":"tone-he-115","lang":"he","split":"dev","origin":"synthetic","source":"לא אישרנו את 18 החשבוניות של נועה.","rewrite":"החשבוניות של נועה, 18 במספר, מאושרות.","change":"negation","label":"changed"}
+{"id":"tone-he-116","lang":"he","split":"dev","origin":"synthetic","source":"תודה, תמר, 32 הקבצים תוקנו.","rewrite":"תודה ענקית, תמר! כל 32 הקבצים מתוקנים.","change":null,"label":"kept"}
+{"id":"tone-he-117","lang":"he","split":"dev","origin":"synthetic","source":"לא אישרנו את 40 החשבוניות של שירה.","rewrite":"החשבוניות של שירה, 40 במספר, מאושרות.","change":"negation","label":"changed"}
+{"id":"tone-he-118","lang":"he","split":"dev","origin":"synthetic","source":"שירה עובד כאן 5 שנים.","rewrite":"שירה איתנו כבר 5 שנים.","change":null,"label":"kept"}
+{"id":"tone-he-119","lang":"he","split":"dev","origin":"synthetic","source":"תודה, מאיה, 36 הקבצים תוקנו.","rewrite":"תודה רבה, מאיה; 72 הקבצים תוקנו.","change":"place","label":"changed"}
+{"id":"tone-he-120","lang":"he","split":"dev","origin":"synthetic","source":"לא אישרנו את 22 החשבוניות של שירה.","rewrite":"עוד לא אישרנו את 22 החשבוניות של שירה.","change":null,"label":"kept"}
+{"id":"tone-he-121","lang":"he","split":"dev","origin":"synthetic","source":"לא אישרנו את 4 החשבוניות של שירה.","rewrite":"עוד לא אישרנו את 8 החשבוניות של שירה.","change":"number","label":"changed"}
+{"id":"tone-he-122","lang":"he","split":"dev","origin":"synthetic","source":"תתקשרו למאיה לפני שאתם יוצאים מנצרת.","rewrite":"נא ליצור קשר עם מאיה בטרם תצאו מנצרת.","change":null,"label":"kept"}
+{"id":"tone-he-123","lang":"he","split":"dev","origin":"synthetic","source":"תתקשרו לדנה לפני שאתם יוצאים מחיפה.","rewrite":"תרימו טלפון לשירה לפני שאתם יוצאים מחיפה.","change":"name","label":"changed"}
+{"id":"tone-he-124","lang":"he","split":"dev","origin":"synthetic","source":"שירה תשלח את 23 הדוחות ביום שני.","rewrite":"שירה שולחת את 23 הדוחות ביום שני!","change":null,"label":"kept"}
+{"id":"tone-he-125","lang":"he","split":"dev","origin":"synthetic","source":"תודה, נועה, 39 הקבצים תוקנו.","rewrite":"תודה ענקית, אבי! כל 39 הקבצים מתוקנים.","change":"name","label":"changed"}
+{"id":"tone-he-126","lang":"he","split":"dev","origin":"synthetic","source":"תודה, מאיה, 8 הקבצים תוקנו.","rewrite":"תודה רבה, מאיה; 8 הקבצים תוקנו.","change":null,"label":"kept"}
+{"id":"tone-he-127","lang":"he","split":"dev","origin":"synthetic","source":"נועה תשלח את 24 הדוחות ביום שני.","rewrite":"נועה שולחת את 48 הדוחות ביום שני!","change":"place","label":"changed"}
+{"id":"tone-he-128","lang":"he","split":"dev","origin":"synthetic","source":"תתקשרו לשירה לפני שאתם יוצאים מירושלים.","rewrite":"תרימו טלפון לשירה לפני שאתם יוצאים מירושלים.","change":null,"label":"kept"}
+{"id":"tone-he-129","lang":"he","split":"dev","origin":"synthetic","source":"תמר עובד כאן 21 שנים.","rewrite":"תמר לא איתנו כבר 21 שנים.","change":"negation","label":"changed"}
+{"id":"tone-he-130","lang":"he","split":"dev","origin":"synthetic","source":"נועה עובד כאן 27 שנים.","rewrite":"נועה איתנו כבר 27 שנים.","change":null,"label":"kept"}
+{"id":"tone-he-131","lang":"he","split":"dev","origin":"synthetic","source":"תודה, תמר, 21 הקבצים תוקנו.","rewrite":"תודה ענקית, תמר! כל 42 הקבצים מתוקנים.","change":"place","label":"changed"}
+{"id":"tone-he-132","lang":"he","split":"dev","origin":"synthetic","source":"לא אישרנו את 20 החשבוניות של נועה.","rewrite":"עוד לא אישרנו את 20 החשבוניות של נועה.","change":null,"label":"kept"}
+{"id":"tone-he-133","lang":"he","split":"dev","origin":"synthetic","source":"לא אישרנו את 17 החשבוניות של דנה.","rewrite":"החשבוניות של תמר, 17 במספר, אינן מאושרות.","change":"name","label":"changed"}
+{"id":"tone-he-134","lang":"he","split":"dev","origin":"synthetic","source":"תתקשרו לנועה לפני שאתם יוצאים מנצרת.","rewrite":"תרימו טלפון לנועה לפני שאתם יוצאים מנצרת.","change":null,"label":"kept"}
+{"id":"tone-he-135","lang":"he","split":"dev","origin":"synthetic","source":"תתקשרו לנועה לפני שאתם יוצאים מחיפה.","rewrite":"נא לא ליצור קשר עם נועה בטרם תצאו מחיפה.","change":"negation","label":"changed"}
+{"id":"tone-he-136","lang":"he","split":"dev","origin":"synthetic","source":"לא אישרנו את 18 החשבוניות של דנה.","rewrite":"עוד לא אישרנו את 18 החשבוניות של דנה.","change":null,"label":"kept"}
+{"id":"tone-he-137","lang":"he","split":"dev","origin":"synthetic","source":"תתקשרו לשירה לפני שאתם יוצאים מחיפה.","rewrite":"תרימו לא טלפון לשירה לפני שאתם יוצאים מחיפה.","change":"negation","label":"changed"}
+{"id":"tone-he-138","lang":"he","split":"dev","origin":"synthetic","source":"תתקשרו למאיה לפני שאתם יוצאים מחיפה.","rewrite":"תרימו טלפון למאיה לפני שאתם יוצאים מחיפה.","change":null,"label":"kept"}
+{"id":"tone-he-139","lang":"he","split":"dev","origin":"synthetic","source":"תודה, נועה, 7 הקבצים תוקנו.","rewrite":"תודה ענקית, נועה! כל 14 הקבצים מתוקנים.","change":"place","label":"changed"}
+{"id":"tone-he-140","lang":"he","split":"dev","origin":"synthetic","source":"לא אישרנו את 31 החשבוניות של דנה.","rewrite":"עוד לא אישרנו את 31 החשבוניות של דנה.","change":null,"label":"kept"}
+{"id":"tone-he-141","lang":"he","split":"dev","origin":"synthetic","source":"שירה עובד כאן 16 שנים.","rewrite":"שירה לא איתנו כבר 16 שנים.","change":"negation","label":"changed"}
+{"id":"tone-he-142","lang":"he","split":"dev","origin":"synthetic","source":"תודה, נועה, 17 הקבצים תוקנו.","rewrite":"תודה רבה, נועה; 17 הקבצים תוקנו.","change":null,"label":"kept"}
+{"id":"tone-he-143","lang":"he","split":"dev","origin":"synthetic","source":"תודה, מאיה, 2 הקבצים תוקנו.","rewrite":"תודה לא ענקית, מאיה! כל 2 הקבצים מתוקנים.","change":"negation","label":"changed"}
+{"id":"tone-he-144","lang":"he","split":"dev","origin":"synthetic","source":"תודה, שירה, 22 הקבצים תוקנו.","rewrite":"תודה ענקית, שירה! כל 22 הקבצים מתוקנים.","change":null,"label":"kept"}
+{"id":"tone-he-145","lang":"he","split":"dev","origin":"synthetic","source":"דנה עובד כאן 9 שנים.","rewrite":"שירה איתנו כבר 9 שנים.","change":"name","label":"changed"}
+{"id":"tone-he-146","lang":"he","split":"dev","origin":"synthetic","source":"תודה, מאיה, 24 הקבצים תוקנו.","rewrite":"תודה ענקית, מאיה! כל 24 הקבצים מתוקנים.","change":null,"label":"kept"}
+{"id":"tone-he-147","lang":"he","split":"dev","origin":"synthetic","source":"תתקשרו לדנה לפני שאתם יוצאים מירושלים.","rewrite":"תרימו טלפון לדנה לפני שאתם יוצאים מירושלים. לפי מאיה מסכים.","change":"added-name","label":"changed"}
+{"id":"tone-he-148","lang":"he","split":"dev","origin":"synthetic","source":"תתקשרו לדנה לפני שאתם יוצאים מירושלים.","rewrite":"נא ליצור קשר עם דנה בטרם תצאו מירושלים.","change":null,"label":"kept"}
+{"id":"tone-he-149","lang":"he","split":"dev","origin":"synthetic","source":"שירה עובד כאן 26 שנים.","rewrite":"שירה מועסק כאן זה 30 שנים.","change":"number","label":"changed"}
+{"id":"tone-he-150","lang":"he","split":"dev","origin":"synthetic","source":"נועה תשלח את 35 הדוחות ביום שני.","rewrite":"נועה שולחת את 35 הדוחות ביום שני!","change":null,"label":"kept"}
+{"id":"tone-he-151","lang":"he","split":"dev","origin":"synthetic","source":"לא אישרנו את 36 החשבוניות של תמר.","rewrite":"עוד לא אישרנו את 72 החשבוניות של תמר.","change":"place","label":"changed"}
+{"id":"tone-he-152","lang":"he","split":"dev","origin":"synthetic","source":"דנה תשלח את 2 הדוחות ביום שני.","rewrite":"דנה שולחת את 2 הדוחות ביום שני!","change":null,"label":"kept"}
+{"id":"tone-he-153","lang":"he","split":"dev","origin":"synthetic","source":"תודה, מאיה, 38 הקבצים תוקנו.","rewrite":"תודה ענקית, מאיה! כל 42 הקבצים מתוקנים.","change":"number","label":"changed"}
+{"id":"tone-he-154","lang":"he","split":"dev","origin":"synthetic","source":"תתקשרו לדנה לפני שאתם יוצאים מחיפה.","rewrite":"נא ליצור קשר עם דנה בטרם תצאו מחיפה.","change":null,"label":"kept"}
+{"id":"tone-he-155","lang":"he","split":"dev","origin":"synthetic","source":"דנה תשלח את 32 הדוחות ביום שני.","rewrite":"דנה שולחת את 37 הדוחות ביום שני!","change":"number","label":"changed"}
+{"id":"tone-he-156","lang":"he","split":"dev","origin":"synthetic","source":"תודה, דנה, 32 הקבצים תוקנו.","rewrite":"תודה רבה, דנה; 32 הקבצים תוקנו.","change":null,"label":"kept"}
+{"id":"tone-he-157","lang":"he","split":"dev","origin":"synthetic","source":"תודה, מאיה, 32 הקבצים תוקנו.","rewrite":"תודה רבה, מאיה; 32 הקבצים תוקנו. לפי שירה מסכים.","change":"added-name","label":"changed"}
+{"id":"tone-he-158","lang":"he","split":"dev","origin":"synthetic","source":"תתקשרו לנועה לפני שאתם יוצאים מירושלים.","rewrite":"תרימו טלפון לנועה לפני שאתם יוצאים מירושלים.","change":null,"label":"kept"}
+{"id":"tone-he-159","lang":"he","split":"dev","origin":"synthetic","source":"תמר עובד כאן 27 שנים.","rewrite":"תמר מועסק כאן זה 54 שנים.","change":"place","label":"changed"}

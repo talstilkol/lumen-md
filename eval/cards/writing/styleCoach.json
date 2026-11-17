@@ -1,0 +1,51 @@
+{
+  "plan": "W13.W2",
+  "agent": "styleCoach",
+  "notes": {
+    "he.dev.precision": 0.965,
+    "he.dev.recall": 0.986,
+    "he.heldout.precision": 1,
+    "he.heldout.recall": 0.75,
+    "en.dev.precision": 0.914,
+    "en.dev.recall": 0.886,
+    "en.heldout.precision": 0.904,
+    "en.heldout.recall": 0.81
+  },
+  "card": {
+    "schema": 1,
+    "tag": "dev",
+    "model": {
+      "name": "rules (styleCoach, no model)",
+      "digest": "sha256:aa333c36d0352da0eb0df915d99373cad19e86534db1360cefeec23df2129826"
+    },
+    "seed": 13,
+    "temperature": 0,
+    "dataset": {
+      "name": "eval/writing/styleCoach",
+      "version": "1+f8325d343b36",
+      "license": "CC0-1.0",
+      "origin": "synthetic"
+    },
+    "n": 110,
+    "metrics": {
+      "heldout_precision": {
+        "value": 0.945055,
+        "ci95": [
+          0.89011,
+          0.989011
+        ],
+        "method": "bootstrap",
+        "resamples": 1000
+      },
+      "heldout_recall": {
+        "value": 0.781818,
+        "ci95": [
+          0.709091,
+          0.854545
+        ],
+        "method": "bootstrap",
+        "resamples": 1000
+      }
+    }
+  }
+}
