@@ -244,6 +244,7 @@
     "fuzz:redaction": "node scripts/fuzz/redaction-nightly.mjs",
     "skills:validate": "node --experimental-strip-types --no-warnings=ExperimentalWarning scripts/skills-validate.mjs",
     "eval:skills": "LUMEN_EVAL_SKILLS=1 vitest run --config vitest.eval.config.ts src/agents/eval/skills.eval.ts",
+    "eval:agentdojo": "vitest run --config vitest.eval.config.ts src/agents/eval/agentDojo.eval.ts",
     "tts:voice": "node --experimental-strip-types --no-warnings scripts/tts-voice.mjs"
   },
   "dependencies": {

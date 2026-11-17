@@ -37,6 +37,7 @@ import { __resetLedger } from "../ai/privacyLedger";
 import { setAiPolicy } from "../ai/policy";
 import { agentDojoReport, approves, obedientModel, runPair, STATIC_ATTACKS, type HarnessDeps } from "../agents/eval/agentdojo/harness";
 import { INJECTION_TASKS, slackEnv, USER_TASKS, vectorsSeenBy } from "../agents/eval/agentdojo/slack";
+import { isLoopback, ollamaDeps } from "../agents/eval/agentdojo/harness";
 
 const deps: HarnessDeps = {
   runAgent: runAgent as unknown as HarnessDeps["runAgent"],
@@ -142,4 +143,55 @@ describe("report (static attack important_instructions, then the adaptive search
     expect(report.notTested.join(" ")).toContain("real models");
     expect(report.notTested.join(" ")).toContain("workspace suite");
   }, 600_000);
+});
+
+describe("W11.M6: a real local model through the same runtime", () => {
+  const t1 = USER_TASKS[1]!;
+
+  it("runPair uses the model the harness is given, not the obedient mock", async () => {
+    const seen: string[] = [];
+    const refusing: HarnessDeps = { ...deps, modelName: "refuser", model: (task) => async () => (seen.push(task.id), { content: JSON.stringify({ final: "I won't." }), toolCalls: [], model: "refuser", usage: { inputTokens: 1, outputTokens: 1, estimated: true } }) };
+    const r = await runPair(refusing, "none", t1, null, null, null);
+    expect(seen[0]).toBe(t1.id);
+    expect(r.utility).toBe(false); // the task needed tool calls the refuser never made
+    expect(r.violations).toBe(0);
+  });
+
+  it("a report on a real model names it, and refuses to run without a name", async () => {
+    await expect(agentDojoReport({ ...deps, model: (t, i, p) => obedientModel(t, i, p) })).rejects.toThrow(/modelName/);
+  });
+
+  it("ollamaDeps refuses a non-loopback Ollama and pins temperature, seed, thinking and tokens", async () => {
+    const calls: ExecutorRequest[] = [];
+    const base: Executor = { id: "ollama", label: "fake ollama", available: async () => ({ available: true }), supportsTools: () => false, supportsSchema: () => false, modelFor: () => "m", chat: async () => ({ content: "{}", toolCalls: [], model: "m" }) };
+    const install = (ex: Executor) => {
+      resetExecutors();
+      registerExecutor(ex);
+    };
+    expect(() => ollamaDeps({ runAgent: deps.runAgent, base, install, url: "http://192.168.1.5:11434", pin: { model: "qwen3:8b" } })).toThrow(/local models only/);
+    expect(() => ollamaDeps({ runAgent: deps.runAgent, base, install, url: "http://localhost:11434", pin: { model: "" } })).toThrow(/name the Ollama model/);
+    expect(isLoopback("http://127.0.0.1:11434")).toBe(true);
+    expect(isLoopback("http://ollama.local:11434")).toBe(false);
+
+    // A fake Ollama that answers like the obedient mock: the pair runs end to end through runAgent.
+    const pre = slackEnv({});
+    const script = obedientModel(t1, null, pre);
+    base.chat = async (req) => (calls.push(req), script(req));
+    const od = ollamaDeps({ runAgent: deps.runAgent, base, install, url: "http://127.0.0.1:11434", pin: { model: "qwen3:8b", maxTokens: 256 } });
+    expect(od.modelName).toBe("ollama qwen3:8b, temperature 0, seed 42, <= 256 tokens a turn");
+    const r = await runPair(od, "attentive", t1, null, null, null);
+    expect(r).toMatchObject({ utility: true, violations: 0 });
+    expect(calls.length).toBeGreaterThan(1);
+    for (const c of calls) expect(c).toMatchObject({ model: "qwen3:8b", temperature: 0, seed: 42, think: false });
+    for (const c of calls) expect(c.maxTokens).toBeLessThanOrEqual(256);
+  });
+
+  it("an aborted signal stops the run before the model is called", async () => {
+    const ac = new AbortController();
+    ac.abort();
+    let called = 0;
+    const stopped: HarnessDeps = { ...deps, signal: ac.signal, modelName: "x", model: () => async () => (called++, { content: "{}", toolCalls: [], model: "x" }) };
+    await expect(runPair(stopped, "none", t1, null, null, null)).rejects.toThrow(/stopped/);
+    expect(called).toBe(0);
+  });
 });
