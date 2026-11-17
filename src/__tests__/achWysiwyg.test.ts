@@ -29,7 +29,8 @@ import { join } from "node:path";
 import { parseAch, scoreAch } from "../research/ach";
 
 const parser = unified().use(remarkParse).use(remarkGfm).use(remarkMath);
-const options = roundTripSafe(keepWikiLinks({ extensions: [gfmToMarkdown(), mathToMarkdown()] })) as Options;
+const syntax: Options = { extensions: [gfmToMarkdown(), mathToMarkdown()] };
+const options = roundTripSafe(keepWikiLinks(syntax)) as Options;
 const parse = (md: string) => parser.parse(protectEscapedWikiLinks(md)) as Root;
 const serialize = (tree: Root) => toMarkdown(tree, options);
 
