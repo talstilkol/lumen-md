@@ -65,6 +65,7 @@ uniform int u_nside;
 uniform int u_F;
 uniform float u_R;
 uniform float u_k;
+uniform float u_springPower;
 uniform float u_gravity;
 uniform float u_temp;
 out vec4 o;
@@ -117,7 +118,7 @@ void main() {
     int j = start + k;
     int nb = int(texelFetch(u_nbr, ivec2(j % u_nside, j / u_nside), 0).x);
     vec2 d = texelFetch(u_state, ivec2(nb % u_side, nb / u_side), 0).xy - p;
-    f += d * length(d) * float(stride) / u_k;
+    f += d * pow(max(length(d), 1e-9) / u_k, u_springPower - 1.0) * float(stride);
   }
   f -= p * u_gravity;
   float len = length(f);

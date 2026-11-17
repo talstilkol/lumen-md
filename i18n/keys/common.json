@@ -10379,6 +10379,18 @@
       "vars": []
     },
     {
+      "key": "graphClusters.basis.embeddings",
+      "en": "Clusters compared by meaning: the smart-search index ({model})",
+      "vars": [
+        "model"
+      ]
+    },
+    {
+      "key": "graphClusters.basis.tfidf",
+      "en": "Clusters compared by shared words (TF-IDF). Build the smart-search index to compare them by meaning.",
+      "vars": []
+    },
+    {
       "key": "graphClusters.bridge",
       "en": "Proposed link:",
       "vars": []

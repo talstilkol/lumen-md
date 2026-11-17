@@ -57,7 +57,7 @@ describe("W13.G12 SVG", () => {
     expect(doc.getElementsByTagName("line")).toHaveLength(1000);
     const texts = Array.from(doc.getElementsByTagName("text"));
     expect(texts).toHaveLength(500);
-    const byText = new Map(texts.map((t) => [t.textContent!, t.getAttribute("direction")]));
+    const byText = new Map(texts.map((t) => [t.textContent!.replace(/[\u2066-\u2069]/g, ""), t.getAttribute("direction")]));
     expect(byText.get("תל אביב 2026 2")).toBe("rtl");
     expect(byText.get("iPhone של דנה 3")).toBe("ltr");
     expect(byText.get("Tel Aviv 1")).toBe("ltr");
@@ -140,7 +140,8 @@ describe("W13.G12 export menu", () => {
     const scene = entityScene({ title: "גרף ישויות", nodes: [dana, haifa], edges: [born], positions: new Float32Array([0, 0, 10, 10]), colors: new Float32Array(8).fill(1), sizes: new Float32Array([4, 4]) });
     const { unmount } = render(h(GraphExportMenu, { scene: async () => scene, onFile: (blob: Blob, name: string) => got.push({ blob, name }) }));
     for (const [i, f] of ["svg", "gexf"].entries()) {
-      await act(async () => void fireEvent.change(screen.getByTestId("graph-export-view"), { target: { value: f } }));
+      await act(async () => void fireEvent.click(screen.getByTestId("graph-export-view")));
+      await act(async () => void fireEvent.click(screen.getByRole("menuitem", { name: f === "svg" ? /SVG/ : /GEXF/ })));
       await waitFor(() => expect(got).toHaveLength(i + 1));
     }
     expect(got.map((g) => g.name)).toEqual(["גרף-ישויות.svg", "גרף-ישויות.gexf"]);
@@ -151,7 +152,8 @@ describe("W13.G12 export menu", () => {
     expect(screen.getByTestId("graph-export-view-status").textContent).toContain("גרף-ישויות.gexf");
     unmount();
     render(h(GraphExportMenu, { scene: async () => ({ title: "x", nodes: [], edges: [] }), onFile: () => got.push({ blob: new Blob(), name: "no" }) }));
-    await act(async () => void fireEvent.change(screen.getByTestId("graph-export-view"), { target: { value: "svg" } }));
+    await act(async () => void fireEvent.click(screen.getByTestId("graph-export-view")));
+    await act(async () => void fireEvent.click(screen.getAllByRole("menuitem")[0]));
     await waitFor(() => expect(screen.getByTestId("graph-export-view-status").textContent).not.toBe(""));
     await waitFor(() => expect(screen.getByTestId("graph-export-view-status").textContent).not.toMatch(/working|מכין/i));
     expect(got).toHaveLength(2);
@@ -159,7 +161,87 @@ describe("W13.G12 export menu", () => {
 
   it("the entity graph view offers it", () => {
     render(h(EntityGraphView, { entities: [dana, haifa], edges: [born], notes: new Map([["יומן/א.md", { tags: [] }]]), initialMode: "table" }));
-    const sel = screen.getByTestId("entity-graph-export-view") as HTMLSelectElement;
-    expect([...sel.options].map((o) => o.value)).toEqual(["", "svg", "png", "gexf"]);
+    const button = screen.getByTestId("entity-graph-export-view");
+    expect(button.getAttribute("aria-haspopup")).toBe("menu");
+    fireEvent.click(button);
+    expect(screen.getAllByRole("menuitem").map((o) => o.getAttribute("data-format"))).toEqual(["svg", "png", "gexf"]);
+  });
+});
+
+describe("audit r4 A3 #2: SVG labels go through G2's prepareLabel", () => {
+  it("a Latin run in a Hebrew label is isolated, so C++ is not drawn ++C", () => {
+    const node = (id: string, label: string, x: number) => ({ id, label, x, y: 0, color: [0, 0, 0, 1] as const, size: 4 });
+    const svg = sceneToSvg({ title: "x", lang: "he", nodes: [node("a", "מדריך C++", 0), node("b", "Python מדריך", 10), node("c", "יתרה -500", 20)], edges: [] });
+    const texts = Array.from(parse(svg, "image/svg+xml").getElementsByTagName("text"));
+    expect(texts.map((t) => [t.textContent, t.getAttribute("direction")])).toEqual([
+      ["מדריך \u2068C++\u2069", "rtl"],
+      ["Python \u2068מדריך\u2069", "ltr"],
+      ["יתרה \u2068-500\u2069", "rtl"],
+    ]);
+  });
+});
+
+describe("review-13 L3: GEXF with awkward values", () => {
+  const node = (attrs: Record<string, string | number | boolean>, label = "a", x = 0) => ({ id: "a", label, x, y: 0, color: [0, 0, 0, 1] as const, size: 1, attrs });
+  it("a newline or a tab in an attribute survives the parser", () => {
+    const doc = parse(sceneToGexf({ title: "x", nodes: [node({ note: "שורה 1\nשורה 2\tסוף" }, "שם\nשני")], edges: [] }, "2026-11-17"), "application/xml");
+    expect(gexf13Problems(doc)).toEqual([]);
+    const n = doc.getElementsByTagNameNS("http://gexf.net/1.3", "node")[0];
+    expect(n.getAttribute("label")).toBe("שם\nשני");
+    expect(doc.getElementsByTagNameNS("http://gexf.net/1.3", "attvalue")[0].getAttribute("value")).toBe("שורה 1\nשורה 2\tסוף");
+  });
+  it("a lone surrogate becomes U+FFFD instead of breaking the file", () => {
+    const text = sceneToGexf({ title: "t\uD83D", nodes: [node({ s: "x\uDE00y" }, "a\uD800b")], edges: [] }, "2026-11-17");
+    expect(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/.test(text)).toBe(false);
+    const doc = parse(text, "application/xml");
+    expect(gexf13Problems(doc)).toEqual([]);
+    expect(doc.getElementsByTagNameNS("http://gexf.net/1.3", "node")[0].getAttribute("label")).toBe("a\uFFFDb");
+    const svg = sceneToSvg({ title: "t", nodes: [node({}, "a\uD800b")], edges: [] });
+    expect(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/.test(svg)).toBe(false);
+  });
+  it("Infinity and NaN are left out of typed attributes and positions", () => {
+    const text = sceneToGexf({ title: "x", nodes: [node({ score: Infinity, rank: 2, bad: NaN }, "a", Infinity)], edges: [] }, "2026-11-17");
+    expect(text).not.toMatch(/Infinity|NaN/);
+    const doc = parse(text, "application/xml");
+    expect(gexf13Problems(doc)).toEqual([]);
+    const titles = Array.from(doc.getElementsByTagNameNS("http://gexf.net/1.3", "attribute")).map((a) => a.getAttribute("title"));
+    expect(titles).toEqual(["rank"]);
+    const svg = sceneToSvg({ title: "x", nodes: [node({}, "a", Infinity), { ...node({}, "b", 5), id: "b" }], edges: [] });
+    expect(svg).not.toMatch(/Infinity|NaN/);
+  });
+});
+
+describe("audit r4 A3 #3: Export view is a menu button (WCAG 3.2.2)", () => {
+  const scene = async (): Promise<Scene> => ({ title: "g", nodes: [{ id: "a", label: "a", x: 0, y: 0, color: [0, 0, 0, 1], size: 1 }], edges: [] });
+  it("ArrowDown opens the menu and moves; it never exports; Enter does; Escape returns focus", async () => {
+    const got: string[] = [];
+    render(h(GraphExportMenu, { scene, onFile: (_b: Blob, name: string) => got.push(name) }));
+    const button = screen.getByTestId("graph-export-view");
+    expect(button.tagName).toBe("BUTTON");
+    expect(button.getAttribute("aria-expanded")).toBe("false");
+    button.focus();
+    await act(async () => void fireEvent.keyDown(button, { key: "ArrowDown" }));
+    expect(button.getAttribute("aria-expanded")).toBe("true");
+    const items = screen.getAllByRole("menuitem");
+    expect(document.activeElement).toBe(items[0]);
+    const menu = screen.getByRole("menu");
+    await act(async () => void fireEvent.keyDown(menu, { key: "ArrowDown" }));
+    expect(document.activeElement).toBe(items[1]);
+    await act(async () => void fireEvent.keyDown(menu, { key: "ArrowDown" }));
+    await act(async () => void fireEvent.keyDown(menu, { key: "ArrowDown" }));
+    expect(document.activeElement).toBe(items[0]); // wraps
+    await act(async () => void fireEvent.keyDown(menu, { key: "End" }));
+    expect(document.activeElement).toBe(items[2]);
+    await new Promise((r) => setTimeout(r, 20));
+    expect(got).toEqual([]); // moving never downloads
+    await act(async () => void fireEvent.keyDown(menu, { key: "Escape" }));
+    expect(screen.queryByRole("menu")).toBeNull();
+    expect(document.activeElement).toBe(button);
+    await act(async () => void fireEvent.keyDown(button, { key: "ArrowUp" }));
+    expect(document.activeElement).toBe(screen.getAllByRole("menuitem")[2]);
+    await act(async () => void fireEvent.click(screen.getAllByRole("menuitem")[2]));
+    await waitFor(() => expect(got).toEqual(["g.gexf"]));
+    expect(screen.queryByRole("menu")).toBeNull();
+    expect(document.activeElement).toBe(button);
   });
 });

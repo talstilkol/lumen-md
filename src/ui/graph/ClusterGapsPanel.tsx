@@ -7,11 +7,15 @@
  * panel shows each diff, and nothing is written without approval.
  *
  * Loaded by GraphView with a dynamic import only; the notes' text is read
- * from the vault index when the analysis is asked for.
+ * from the vault index when the analysis is asked for. The analysis runs in
+ * a worker (review-13 L4). Clusters are compared by the notes' embeddings
+ * when the smart-search index is on this device (read, never computed
+ * here: no model call), else by shared words (TF-IDF); the panel says which.
  */
-import { useState } from "react";
-import { t } from "../../i18n";
-import { analyzeClusters, type ClusterAnalysis, type GapNode } from "../../graph/clusterGaps";
+import { useRef, useState } from "react";
+import { isRTL, t } from "../../i18n";
+import type { ClusterAnalysis, GapInput, GapNode } from "../../graph/clusterGaps";
+import { analyzeClustersOffThread, type WorkerAnalyzeOptions } from "../../graph/clusterGapsClient";
 import { stageGapLinks } from "../../graph/clusterGapsStage";
 import "./clusterGapsStrings";
 
@@ -28,6 +32,10 @@ export interface ClusterGapsPanelProps {
   onFocus?: (path: string) => void;
   colorOf: (cluster: number) => string;
   onClose: () => void;
+  /** The notes' stored embeddings (the smart-search index by default); null: none, TF-IDF is used. */
+  noteVectors?: (paths: string[]) => Promise<{ embedding: string; vectors: ReadonlyMap<string, ArrayLike<number>> } | null>;
+  /** The analysis (a worker by default). */
+  analyze?: (input: GapInput, opts: WorkerAnalyzeOptions) => Promise<ClusterAnalysis>;
 }
 
 async function indexTexts(paths: string[]): Promise<Map<string, string>> {
@@ -37,24 +45,36 @@ async function indexTexts(paths: string[]): Promise<Map<string, string>> {
 async function readNote(path: string): Promise<string> {
   return (await import("../../storage/workspace")).readWorkspaceFile(path);
 }
+async function indexVectors(paths: string[]) {
+  try {
+    return await (await import("../../ai/semanticSearch")).storedNoteVectors(paths);
+  } catch {
+    return null; // no index (or it cannot be read): TF-IDF
+  }
+}
 
-export function ClusterGapsPanel({ nodes, edges, texts = indexTexts, read = readNote, onAnalysis, onFocus, colorOf, onClose }: ClusterGapsPanelProps) {
+export function ClusterGapsPanel({ nodes, edges, texts = indexTexts, read = readNote, onAnalysis, onFocus, colorOf, onClose, noteVectors = indexVectors, analyze = analyzeClustersOffThread }: ClusterGapsPanelProps) {
   const [busy, setBusy] = useState(false);
   const [a, setA] = useState<ClusterAnalysis | null>(null);
+  const [model, setModel] = useState("");
   const [chosen, setChosen] = useState<Set<number>>(new Set());
   const [status, setStatus] = useState("");
+  const runButton = useRef<HTMLButtonElement>(null);
   const labelOf = new Map(nodes.map((n) => [n.id, n.label]));
+  const rtl = isRTL();
 
   const run = async () => {
+    // aria-disabled, not disabled, while it runs: a disabled button drops the keyboard focus to <body> (audit r4 A3 #4).
+    if (busy || nodes.length < 2) return;
     setBusy(true);
     setStatus(t("graphClusters.working"));
     try {
-      const tx = await texts(nodes.map((n) => n.id));
+      const paths = nodes.map((n) => n.id);
+      const [tx, emb] = await Promise.all([texts(paths), noteVectors(paths)]);
       const input: GapNode[] = nodes.map((n) => ({ id: n.id, label: n.label, text: tx.get(n.id) ?? "" }));
-      // Let the status paint before the analysis takes the thread.
-      await new Promise((r) => setTimeout(r, 0));
-      const res = analyzeClusters({ nodes: input, edges });
+      const res = await analyze({ nodes: input, edges }, emb && emb.vectors.size ? { noteVectors: emb.vectors } : {});
       setA(res);
+      setModel(res.basis === "embeddings" && emb ? emb.embedding : "");
       setChosen(new Set(res.gaps.map((_, i) => i)));
       onAnalysis(res);
       setStatus(t("graphClusters.done", { clusters: res.clusters.length, gaps: res.gaps.length }));
@@ -62,6 +82,8 @@ export function ClusterGapsPanel({ nodes, edges, texts = indexTexts, read = read
       setStatus(t("graphClusters.failed", { error: e instanceof Error ? e.message : String(e) }));
     } finally {
       setBusy(false);
+      // The button's label changes ("Analyse again"); the focus stays on it.
+      if (document.activeElement === document.body || document.activeElement === null) runButton.current?.focus();
     }
   };
 
@@ -99,7 +121,7 @@ export function ClusterGapsPanel({ nodes, edges, texts = indexTexts, read = read
         </button>
       </div>
       <p style={{ color: "hsl(var(--fg-muted))" }}>{t("graphClusters.intro")}</p>
-      <button type="button" onClick={() => void run()} disabled={busy || nodes.length < 2} data-testid="cluster-gaps-run">
+      <button ref={runButton} type="button" onClick={() => void run()} aria-disabled={busy || nodes.length < 2} aria-busy={busy} data-testid="cluster-gaps-run">
         {a ? t("graphClusters.again") : t("graphClusters.run")}
       </button>
       <p role="status" aria-live="polite" data-testid="cluster-gaps-status">
@@ -108,6 +130,9 @@ export function ClusterGapsPanel({ nodes, edges, texts = indexTexts, read = read
       {a && (
         <>
           <p data-testid="cluster-gaps-modularity">{t("graphClusters.modularity", { q: a.modularity.toFixed(3), clusters: a.clusters.length, communities: a.communities })}</p>
+          <p data-testid="cluster-gaps-basis" style={{ color: "hsl(var(--fg-muted))" }}>
+            {a.basis === "embeddings" ? t("graphClusters.basis.embeddings", { model }) : t("graphClusters.basis.tfidf")}
+          </p>
           <h4 style={{ margin: "8px 0 4px" }}>{t("graphClusters.clusters")}</h4>
           <ol style={{ margin: 0, paddingInlineStart: 20, display: "grid", gap: 2 }} data-testid="cluster-gaps-clusters">
             {a.clusters.map((c) => (
@@ -130,12 +155,15 @@ export function ClusterGapsPanel({ nodes, edges, texts = indexTexts, read = read
                     <span style={{ color: "hsl(var(--fg-muted))" }}>{t("graphClusters.gapWhy", { shared: g.shared.slice(0, 3).join(", "), links: g.links, expected: g.expected.toFixed(1) })}</span>
                   </span>
                 </label>
-                <div style={{ paddingInlineStart: 22 }}>
+                <div role="group" aria-label={t("graphClusters.summary", { from: labelOf.get(g.from) ?? g.from, to: labelOf.get(g.to) ?? g.to })} data-testid="cluster-gaps-bridge" style={{ paddingInlineStart: 22 }}>
                   {t("graphClusters.bridge")}{" "}
                   <button type="button" onClick={() => onFocus?.(g.from)} style={{ background: "none", border: 0, padding: 0, color: "inherit", textDecoration: "underline", cursor: "pointer" }}>
                     <bdi>{labelOf.get(g.from)}</bdi>
                   </button>{" "}
-                  →{" "}
+                  {/* From → to in reading order: the arrow points the way the line reads (audit r4 A3 #4). */}
+                  <span aria-hidden="true" data-testid="cluster-gaps-arrow">
+                    {rtl ? "←" : "→"}
+                  </span>{" "}
                   <button type="button" onClick={() => onFocus?.(g.to)} style={{ background: "none", border: 0, padding: 0, color: "inherit", textDecoration: "underline", cursor: "pointer" }}>
                     <bdi>{labelOf.get(g.to)}</bdi>
                   </button>

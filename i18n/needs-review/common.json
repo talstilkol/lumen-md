@@ -636,6 +636,24 @@
     "ru": "bosydm",
     "zh-CN": "bosydm"
   },
+  "graphClusters.basis.embeddings": {
+    "ar": "1j705cg",
+    "de": "1j705cg",
+    "fr": "1j705cg",
+    "he": "1j705cg",
+    "ja": "1j705cg",
+    "ru": "1j705cg",
+    "zh-CN": "1j705cg"
+  },
+  "graphClusters.basis.tfidf": {
+    "ar": "1ruurci",
+    "de": "1ruurci",
+    "fr": "1ruurci",
+    "he": "1ruurci",
+    "ja": "1ruurci",
+    "ru": "1ruurci",
+    "zh-CN": "1ruurci"
+  },
   "hl.scan": {
     "ar": "qb0k9u",
     "de": "qb0k9u",

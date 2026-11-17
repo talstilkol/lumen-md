@@ -1879,6 +1879,8 @@
   "graphAlt.summary.unconnected.one": "1 with no link",
   "graphAlt.summary.unconnected.other": "{n} with no link",
   "graphClusters.again": "Analyse again",
+  "graphClusters.basis.embeddings": "意味でクラスターを比較：スマート検索インデックス（{model}）",
+  "graphClusters.basis.tfidf": "共通語でクラスターを比較（TF-IDF）。意味で比較するにはスマート検索インデックスを作成してください。",
   "graphClusters.bridge": "Proposed link:",
   "graphClusters.close": "Close",
   "graphClusters.clusters": "Clusters",

@@ -1879,6 +1879,8 @@
   "graphAlt.summary.unconnected.one": "1 with no link",
   "graphAlt.summary.unconnected.other": "{n} with no link",
   "graphClusters.again": "Analyse again",
+  "graphClusters.basis.embeddings": "Groupes comparés par le sens : l’index de recherche intelligente ({model})",
+  "graphClusters.basis.tfidf": "Groupes comparés par mots communs (TF-IDF). Créez l’index de recherche intelligente pour les comparer par le sens.",
   "graphClusters.bridge": "Proposed link:",
   "graphClusters.close": "Close",
   "graphClusters.clusters": "Clusters",

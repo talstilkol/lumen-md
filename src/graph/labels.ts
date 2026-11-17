@@ -79,6 +79,43 @@ const GERESH = /[\u05F3\u05F4]/;
 /** Anything that can join code points into one grapheme: marks, joiners, variation selectors, surrogates, CR LF. */
 const CLUSTERING = /[\p{M}\u200C\u200D\uFE00-\uFE0F\uD800-\uDFFF\r\u1100-\u11FF]/u;
 
+/** A sign that may start a signed number: + - − ±. */
+const SIGN = /[+\-\u2212\u00B1]/;
+const SIGN_TEST = /(?:^|[\s([{«“"'])[+\-\u2212\u00B1]\p{Nd}/u;
+/** Separators inside a number ("1,000.50", "555-1234", "10:30"). */
+const NUM_SEP = /[.,:\/\-\u2010\u2011\u2212\u066B\u066C]/;
+/** Units that stick to a number's end ("-5°", "+3%"). */
+const NUM_UNIT = /[%\u2030\u00B0\u2032\u2033]/;
+
+/**
+ * In a right-to-left label, a number with a leading sign ("-500", "+3%",
+ * "-5°") or an international phone number ("+972-3-555-1234", "+1 555
+ * 0100"): the sign is a European separator that, outside two digits, takes
+ * the paragraph's direction and lands on the wrong side ("500-"), and the
+ * spaces of a phone number reverse its groups. The index of the number's
+ * last code point when one starts at `i` (preceded by the label's start, a
+ * space or an opening bracket), else -1. Isolated in FSI … PDI, which
+ * resolves to left to right (no strong character inside).
+ */
+function signedNumberEnd(cps: readonly string[], i: number): number {
+  if (!SIGN.test(cps[i]) || !DIGIT.test(cps[i + 1] ?? "")) return -1;
+  const prev = cps[i - 1];
+  if (prev !== undefined && !/[\s([{«“"']/u.test(prev)) return -1;
+  const phone = cps[i] === "+";
+  let last = i + 1;
+  let j = i + 2;
+  while (j < cps.length) {
+    const ch = cps[j];
+    if (DIGIT.test(ch)) last = j;
+    else if (NUM_SEP.test(ch) || (phone && ch === " ")) {
+      if (!DIGIT.test(cps[j + 1] ?? "")) break;
+    } else break;
+    j++;
+  }
+  while (last + 1 < cps.length && NUM_UNIT.test(cps[last + 1])) last++;
+  return last;
+}
+
 /**
  * Wrap every run in the direction opposite to `dir` in FSI … PDI. A run
  * starts at an opposite strong letter and takes everything up to the last
@@ -91,7 +128,8 @@ export function isolateRuns(text: string, dir: LabelDir): string {
   const base = dir === "rtl" ? "R" : "L";
   const other = base === "R" ? "L" : "R";
   const cls = cps.map(strongOf);
-  if (!cls.includes(other)) return text;
+  const signs = base === "R" && SIGN_TEST.test(text);
+  if (!signs && !cls.includes(other)) return text;
   const out: string[] = [];
   let i = 0;
   let depth = 0;
@@ -99,6 +137,14 @@ export function isolateRuns(text: string, dir: LabelDir): string {
     const c = cps[i];
     if (ISOLATE_OPEN.test(c)) depth++;
     else if (c === PDI) depth = Math.max(0, depth - 1);
+    if (signs && depth === 0) {
+      const end = signedNumberEnd(cps, i);
+      if (end > i) {
+        out.push(FSI, ...cps.slice(i, end + 1), PDI);
+        i = end + 1;
+        continue;
+      }
+    }
     if (depth > 0 || cls[i] !== other) {
       out.push(c);
       i++;

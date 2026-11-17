@@ -69,6 +69,8 @@ export interface ClusterAnalysis {
   /** Node id → cluster index (−1: in a community smaller than minSize). */
   clusterOf: Map<string, number>;
   gaps: Gap[];
+  /** What the clusters' similarity came from: embeddings (a model's vectors) or shared words (TF-IDF). */
+  basis: "embeddings" | "tfidf";
 }
 
 const STOP = new Set(
@@ -109,6 +111,38 @@ export interface AnalyzeOptions {
   gaps?: number;
   /** Optional: a vector per cluster text (a local embedding model). Default: the TF-IDF vectors. */
   vectors?: (clusterTexts: string[]) => number[][];
+  /**
+   * Optional (W13.G8, audit r4 A3 #11): an embedding per note, e.g. from the
+   * smart-search index already on this device. A cluster's vector is then the
+   * mean of its notes' unit vectors. Used only when every kept cluster has at
+   * least one note with a vector and all vectors have one length; otherwise
+   * the TF-IDF vectors (the fallback). Plain data, so it crosses to a worker.
+   */
+  noteVectors?: ReadonlyMap<string, ArrayLike<number>>;
+}
+
+/** Each cluster's mean note embedding (unit length), or null when some cluster has none or the lengths differ. */
+export function clusterEmbeddings(kept: readonly string[][], noteVectors: ReadonlyMap<string, ArrayLike<number>>): number[][] | null {
+  let dims = -1;
+  const out: number[][] = [];
+  for (const m of kept) {
+    let sum: number[] | null = null;
+    for (const id of m) {
+      const v = noteVectors.get(id);
+      if (!v || !v.length) continue;
+      if (dims < 0) dims = v.length;
+      if (v.length !== dims) return null;
+      let n = 0;
+      for (let k = 0; k < dims; k++) n += v[k] * v[k];
+      n = Math.sqrt(n);
+      if (!n || !Number.isFinite(n)) continue;
+      sum ??= new Array<number>(dims).fill(0);
+      for (let k = 0; k < dims; k++) sum[k] += v[k] / n;
+    }
+    if (!sum) return null;
+    out.push(sum);
+  }
+  return out;
 }
 
 export function analyzeClusters(input: GapInput, opts: AnalyzeOptions = {}): ClusterAnalysis {
@@ -159,7 +193,17 @@ export function analyzeClusters(input: GapInput, opts: AnalyzeOptions = {}): Clu
 
   // Cluster content vectors for similarity: TF-IDF by default, or the caller's embeddings.
   let sim: (i: number, j: number) => number = (i, j) => cosine(vec[i], vec[j]);
-  if (opts.vectors && kept.length) {
+  let basis: ClusterAnalysis["basis"] = "tfidf";
+  const fromNotes = opts.noteVectors && kept.length ? clusterEmbeddings(kept, opts.noteVectors) : null;
+  if (fromNotes) {
+    const unit = fromNotes.map((v) => {
+      const n = Math.sqrt(v.reduce((s, x) => s + x * x, 0)) || 1;
+      return v.map((x) => x / n);
+    });
+    sim = (i, j) => unit[i].reduce((s, x, k) => s + x * (unit[j][k] ?? 0), 0);
+    basis = "embeddings";
+  } else if (opts.vectors && kept.length) {
+    basis = "embeddings";
     const labelOf = new Map(input.nodes.map((n) => [n.id, n.label]));
     const emb = opts.vectors(kept.map((m) => m.map((id) => `${labelOf.get(id) ?? ""} ${(tokens.get(id) ?? []).join(" ")}`).join("\n")));
     const unit = emb.map((v) => {
@@ -209,5 +253,5 @@ export function analyzeClusters(input: GapInput, opts: AnalyzeOptions = {}): Clu
     return pick;
   };
   for (const g of top) (g.from = best(g.a, g.shared)), (g.to = best(g.b, g.shared));
-  return { modularity: r.modularity, communities: r.numCommunities, clusters, clusterOf, gaps: top };
+  return { modularity: r.modularity, communities: r.numCommunities, clusters, clusterOf, gaps: top, basis };
 }

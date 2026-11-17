@@ -1879,6 +1879,8 @@
   "graphAlt.summary.unconnected.one": "אחד בלי קשרים",
   "graphAlt.summary.unconnected.other": "{n} בלי קשרים",
   "graphClusters.again": "ניתוח מחדש",
+  "graphClusters.basis.embeddings": "האשכולות הושוו לפי משמעות: אינדקס החיפוש החכם ({model})",
+  "graphClusters.basis.tfidf": "האשכולות הושוו לפי מילים משותפות (TF-IDF). בנו את אינדקס החיפוש החכם כדי להשוות לפי משמעות.",
   "graphClusters.bridge": "קישור מוצע:",
   "graphClusters.close": "סגירה",
   "graphClusters.clusters": "אשכולות",

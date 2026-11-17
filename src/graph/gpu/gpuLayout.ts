@@ -193,6 +193,7 @@ export class GpuLayout {
     gl.uniform1i(u("u_F"), F);
     gl.uniform1f(u("u_R"), p.R);
     gl.uniform1f(u("u_k"), p.k);
+    gl.uniform1f(u("u_springPower"), p.springPower);
     gl.uniform1f(u("u_gravity"), p.gravity);
     gl.uniform1f(u("u_temp"), temperatureAt(this.stepIndex, p));
     gl.drawArrays(gl.TRIANGLES, 0, 3);
