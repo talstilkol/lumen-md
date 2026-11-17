@@ -14,6 +14,8 @@ import { t } from "../i18n";
 import { useAppStore } from "../store/useStore";
 import { RSVP_RESEARCH, WPM, keyAction, minutesLeft, rewindSentence, rsvpWords, sentenceAround, wordDuration } from "../reading/rsvp";
 import { Modal } from "./Modal";
+// The palette's dialog look (.cmd-palette): loaded with this dialog too, which can open before the palette ever has (INT7).
+import "./CommandPalette.css";
 
 const btn: CSSProperties = { border: "1px solid hsl(var(--border-strong))", borderRadius: 8, padding: "6px 12px", background: "hsl(var(--bg))", color: "hsl(var(--fg))", font: "inherit", fontSize: 13, cursor: "pointer" };
 

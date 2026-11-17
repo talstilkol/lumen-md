@@ -25,6 +25,14 @@ export interface DafChoice {
   label: string;
 }
 
+/** The toolbar's controls as the app's (INT7: plain buttons had no border or padding, and "Page" ran into "Continuous"). */
+const TOOLBAR_CSS = `
+.daf-toolbar button, .daf-toolbar select { font: inherit; padding: 3px 10px; min-height: 28px; border: 1px solid hsl(var(--border)); border-radius: 6px; background: hsl(var(--bg)); color: inherit; cursor: pointer; }
+.daf-toolbar [role="group"] button[aria-pressed="true"] { background: hsl(var(--accent)); border-color: transparent; color: hsl(var(--accent-fg, 0 0% 100%)); }
+.daf-toolbar button:disabled { opacity: 0.5; cursor: default; }
+.daf-toolbar button:focus-visible, .daf-toolbar select:focus-visible { outline: 2px solid hsl(var(--accent)); outline-offset: 1px; }
+`;
+
 interface Props {
   content: DafContent;
   /** The vault's notes that cite this passage (W10.C24). */
@@ -182,8 +190,8 @@ export function DafView({ content, myNotes = [], choices = [], loadCommentary, i
 
   return (
     <div data-testid="daf-view" data-ready={String(linear || laid)} data-mode={linear ? "linear" : "page"} data-inner-side={side} style={{ display: "flex", flexDirection: "column", gap: 8, minHeight: 0 }}>
-      <style>{DAF_CSS}</style>
-      <div role="toolbar" aria-label={t("daf.toolbar")} style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", fontSize: 13 }}>
+      <style>{DAF_CSS + TOOLBAR_CSS}</style>
+      <div role="toolbar" className="daf-toolbar" aria-label={t("daf.toolbar")} style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", fontSize: 13 }}>
         <div role="group" aria-label={t("daf.view")} style={{ display: "inline-flex", gap: 2 }}>
           <button type="button" data-testid="daf-mode-page" aria-pressed={!linear} disabled={narrow} onClick={() => setLinearChosen(false)}>
             {t("daf.mode.page")}

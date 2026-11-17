@@ -22,6 +22,8 @@ import { COMMON_FIELDS, MODE_DEFS, modeDef } from "../reading/modes";
 import { Modal } from "./Modal";
 import { HelpButton } from "./HelpButton";
 import { showAiToast } from "./AiToast";
+// The palette's dialog look (.cmd-palette): loaded with this dialog too, which can open before the palette ever has (INT7).
+import "./CommandPalette.css";
 
 type Where = "file" | "device";
 
