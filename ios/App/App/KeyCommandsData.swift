@@ -18,6 +18,7 @@ extension LumenKeyCommands {
         .init(id: "view.preview", input: "3", modifiers: [.command], menu: .view, en: "Preview only", he: "תצוגה מקדימה בלבד"),
         .init(id: "view.wysiwyg", input: "4", modifiers: [.command], menu: .view, en: "WYSIWYG", he: "WYSIWYG"),
         .init(id: "help.shortcuts", input: "/", modifiers: [.command], menu: .help, en: "Keyboard shortcuts", he: "קיצורי מקלדת"),
+        .init(id: "settings.open", input: ",", modifiers: [.command], menu: .go, en: "Settings", he: "הגדרות"),
         .init(id: "note.today", input: "d", modifiers: [.command, .alternate], menu: .go, en: "Today's note", he: "הפתק של היום"),
         .init(id: "note.capture", input: "n", modifiers: [.command, .alternate], menu: .file, en: "Quick capture", he: "לכידה מהירה"),
         .init(id: "cite.insert", input: "c", modifiers: [.command, .alternate], menu: .go, en: "Insert a citation [@key]…", he: "הוספת ציטוט ‎[@key]…"),

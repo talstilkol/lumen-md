@@ -1945,7 +1945,7 @@
   "graphClusters.seeAlso": "ראו גם: {link} (משותף: {terms})",
   "graphClusters.size": "{n} פתקים",
   "graphClusters.staged": "קישורים שהוצעו: {n}. אשר או דחה כל אחד בחלונית הסקירה.",
-  "graphClusters.summary": "קישור ״{from}״ אל ״{to}״ מעל פער בין אשכולות",
+  "graphClusters.summary": "קישור מוצע: ״{from}״ אל ״{to}״, מעל פער בין אשכולות",
   "graphClusters.title": "אשכולות ופערים",
   "graphClusters.toggle": "אשכולות ופערים",
   "graphClusters.unnamed": "(אין מילים מאפיינות)",

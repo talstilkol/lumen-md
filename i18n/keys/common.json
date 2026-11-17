@@ -10728,7 +10728,7 @@
     },
     {
       "key": "graphClusters.summary",
-      "en": "Link “{from}” to “{to}” across a gap between clusters",
+      "en": "Proposed link: “{from}” to “{to}”, across a gap between clusters",
       "vars": [
         "from",
         "to"

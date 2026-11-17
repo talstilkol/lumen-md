@@ -17,7 +17,7 @@
   "graphClusters.seeAlso": "See also: {link} (shared: {terms})",
   "graphClusters.size": "{n} notes",
   "graphClusters.staged": "Links proposed: {n}. Approve or reject each in the review panel.",
-  "graphClusters.summary": "Link “{from}” to “{to}” across a gap between clusters",
+  "graphClusters.summary": "Proposed link: “{from}” to “{to}”, across a gap between clusters",
   "graphClusters.title": "Clusters and gaps",
   "graphClusters.toggle": "Clusters and gaps",
   "graphClusters.unnamed": "(no telling words)",

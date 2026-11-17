@@ -37,6 +37,8 @@ export const KEY_COMMAND_TITLES: Record<string, string> = {
   "help.open": "cmd.help.open",
   "tab.close": "ipad.key.closeTab",
   "window.new": "cmd.window.new",
+  // ⌘, (W13.E4, #1208): the settings screen, as every Mac and iPad app has it.
+  "settings.open": "settings.title",
 };
 
 /** The menu each command sits under in the iPadOS menu bar. */
