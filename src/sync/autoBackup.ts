@@ -10,7 +10,7 @@
  */
 
 import { useAppStore } from "../store/useStore";
-import { log } from "../lib/logger";
+import { log, swallowed } from "../lib/logger";
 import { getHistoryVault, historyKey, recordSnapshot } from "../storage/history";
 
 const AUTO_BACKUP_INTERVAL_MS = 30_000;
@@ -47,7 +47,7 @@ export function startAutoBackup(): void {
       flushNow();
       // A vault pass too (plan 3.2) — best effort: a hidden tab usually
       // keeps running long enough; a closed one may cut it short.
-      void snapshotVault().catch(() => 0);
+      void snapshotVault().catch((e: unknown) => (swallowed("sync/autoBackup: the vault snapshot on hiding the tab failed", e), 0));
     }
   };
   window.addEventListener("pagehide", onPageHide);
@@ -251,10 +251,10 @@ export function startVaultSnapshots(): () => void {
       void migrateLegacyBackups()
         .catch((e) => log.warn("[history] backup migration failed", (e as Error).message))
         .then(() => snapshotVault())
-        .catch(() => 0),
+        .catch((e: unknown) => (swallowed("sync/autoBackup: the first vault snapshot failed", e), 0)),
     60_000,
   );
-  vaultTimer = setInterval(() => void snapshotVault().catch(() => 0), VAULT_SNAPSHOT_EVERY_MS);
+  vaultTimer = setInterval(() => void snapshotVault().catch((e: unknown) => (swallowed("sync/autoBackup: a periodic vault snapshot failed", e), 0)), VAULT_SNAPSHOT_EVERY_MS);
   return () => {
     clearTimeout(first);
     if (vaultTimer) clearInterval(vaultTimer);

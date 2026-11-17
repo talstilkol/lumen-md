@@ -18,6 +18,7 @@ import {
   writeWorkspaceFile,
 } from "./workspace";
 import { VaultNotFoundError } from "./vault/types";
+import { swallowed } from "../lib/logger";
 
 export const TRASH_DIR = ".trash";
 const INDEX = `${TRASH_DIR}/index.json`;
@@ -34,7 +35,9 @@ async function readIndex(): Promise<TrashItem[]> {
   try {
     const parsed = JSON.parse(await readWorkspaceFile(INDEX)) as unknown;
     return Array.isArray(parsed) ? (parsed as TrashItem[]) : [];
-  } catch {
+  } catch (e) {
+    // An index that is missing is an empty trash; one that can't be read or parsed hides what is in it.
+    if (!(e instanceof VaultNotFoundError)) swallowed("storage/trash: the trash index could not be read; the trash shows as empty", e);
     return [];
   }
 }
@@ -184,7 +187,7 @@ async function restoreNow(id: string): Promise<string | null> {
     }
   }
   await renameWorkspaceFile(`${TRASH_DIR}/${id}/${basename(item.originalPath)}`, target);
-  await deleteWorkspaceFile(`${TRASH_DIR}/${id}`).catch(() => undefined);
+  await deleteWorkspaceFile(`${TRASH_DIR}/${id}`).catch((e: unknown) => swallowed("storage/trash: a trashed file could not be deleted; it stays in .trash", e));
   await writeIndex(items.filter((i) => i.id !== id));
   lastTrashed = lastTrashed.filter((i) => i.id !== id);
   return target;
@@ -195,7 +198,7 @@ export function emptyTrash(opts: { id?: string; olderThanMs?: number } = {}, now
   return serialized(async () => {
     const items = await readIndex();
     const doomed = items.filter((i) => (opts.id ? i.id === opts.id : now - i.trashedAt >= (opts.olderThanMs ?? 0)));
-    for (const i of doomed) await deleteWorkspaceFile(`${TRASH_DIR}/${i.id}`).catch(() => undefined);
+    for (const i of doomed) await deleteWorkspaceFile(`${TRASH_DIR}/${i.id}`).catch((e: unknown) => swallowed("storage/trash: an expired trashed file could not be deleted; it stays in .trash", e));
     await writeIndex(items.filter((i) => !doomed.includes(i)));
     return doomed.length;
   });

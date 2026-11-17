@@ -235,7 +235,8 @@ export async function listWorkspaceFolder(path: string): Promise<string[]> {
 export async function workspaceHasEntry(path: string): Promise<boolean> {
   try {
     return (await vault().stat(path)) !== null;
-  } catch {
+  } catch (e) {
+    if (!(e instanceof VaultNotFoundError)) swallowed("storage/workspace: stat failed (not a missing path); the entry reads as absent", e);
     return false;
   }
 }
@@ -274,7 +275,8 @@ export async function renameWorkspaceFile(
 export async function workspaceHasFile(path: string): Promise<boolean> {
   try {
     return (await vault().stat(path))?.kind === "file";
-  } catch {
+  } catch (e) {
+    if (!(e instanceof VaultNotFoundError)) swallowed("storage/workspace: stat failed (not a missing path); the file reads as absent", e);
     return false;
   }
 }

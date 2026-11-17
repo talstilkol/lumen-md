@@ -206,7 +206,8 @@ export async function readSnapshotManifest(raw: unknown, vault: string, keys: Sn
   try {
     const entries = decodeManifest(parseUtf8(await (await seal()).openSnapshot(keys, vault, raw, "manifest")), vault);
     return { entries, refused: !entries };
-  } catch {
+  } catch (e) {
+    swallowed("storage/indexSnapshot: the search snapshot's manifest did not open; the index is rebuilt", e);
     return { entries: null, refused: true };
   }
 }
@@ -215,7 +216,8 @@ export async function readSnapshotManifest(raw: unknown, vault: string, keys: Sn
 export async function readSnapshotBody(raw: unknown, vault: string, keys: SnapshotKeys, n: number): Promise<string[] | null> {
   try {
     return decodeBody(parseUtf8(await (await seal()).openSnapshot(keys, vault, raw, "body")), vault, n);
-  } catch {
+  } catch (e) {
+    swallowed("storage/indexSnapshot: the search snapshot's body did not open; the index is rebuilt", e);
     return null;
   }
 }
@@ -244,7 +246,8 @@ export async function readSnapshotRecord(raw: unknown, vault: string, keys?: Sna
 export async function snapshotRaw(): Promise<unknown> {
   try {
     return await get(KEY, db());
-  } catch {
+  } catch (e) {
+    swallowed("storage/indexSnapshot: the search snapshot could not be read from IndexedDB; the index is rebuilt", e);
     return undefined;
   }
 }
@@ -262,7 +265,8 @@ export async function loadSnapshot(vault: string, keys?: SnapshotKeys): Promise<
       });
     } else if (snap) lastSnapshotOutcome = "restored";
     return snap;
-  } catch {
+  } catch (e) {
+    swallowed("storage/indexSnapshot: the search snapshot could not be loaded; the index is rebuilt", e);
     return null;
   }
 }

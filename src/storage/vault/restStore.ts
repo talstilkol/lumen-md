@@ -15,6 +15,7 @@
 
 import { getVaultBackend, vaultEncryptionReady } from "./index";
 import type { SnapshotKeys } from "../snapshotSeal";
+import { swallowed } from "../../lib/logger";
 
 export interface SealedValue {
   lumenSealed: 1;
@@ -62,11 +63,13 @@ export async function forStore<T>(label: string, value: T): Promise<T | SealedVa
 /** A stored value back; undefined when it is sealed and the vault is locked (or it does not decrypt). */
 export async function fromStore<T>(label: string, stored: T | SealedValue | undefined): Promise<T | undefined> {
   if (!isSealedValue(stored)) return stored;
-  if (!sealer) await vaultEncryptionReady().catch(() => undefined);
+  if (!sealer) await vaultEncryptionReady().catch((e: unknown) => swallowed("storage/vault/restStore: the vault's encryption state could not be read; sealed values read as missing", e));
   if (!sealer) return undefined;
   try {
     return (await sealer.open(label, stored)) as T;
-  } catch {
+  } catch (e) {
+    // A sealed value that does not open under the vault's key is damaged or from another vault: it reads as missing.
+    swallowed("storage/vault/restStore: a sealed value did not decrypt; it reads as missing", e);
     return undefined;
   }
 }

@@ -12,6 +12,7 @@
 import { fromUtf8, utf8 } from "./bytes";
 import { mergeText } from "../merge/textMerge";
 import { keepBothVersions } from "../merge/keepVersions";
+import { swallowed } from "../../lib/logger";
 
 export interface ConflictInput {
   path: string;
@@ -179,7 +180,7 @@ export function fileModeResolver(keep: (path: string, ours: string, theirs: stri
 
 async function keepLocalVersion(path: string, text: string): Promise<void> {
   const { recordSnapshot } = await import("../../storage/history");
-  await recordSnapshot(path, text, "merge").catch(() => false);
+  await recordSnapshot(path, text, "merge").catch((e: unknown) => (swallowed("sync/e2ee/conflict: this device's version could not be kept in the note's history before a merge", e), false));
 }
 
 /** The resolver for this device's mode (./conflictMode.ts), read at every conflict, so a change applies at once. */

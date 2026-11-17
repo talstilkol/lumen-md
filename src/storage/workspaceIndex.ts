@@ -329,8 +329,8 @@ async function snapshotMode(): Promise<{ keys?: SnapshotKeys } | null> {
     const { restSnapshotKeys } = await import("./vault/restStore");
     const keys = restSnapshotKeys();
     return keys ? { keys } : null;
-  } catch {
-    return null;
+  } catch (e) {
+    return (swallowed("storage/workspaceIndex: the snapshot keys could not be read; no snapshot is kept", e), null);
   }
 }
 

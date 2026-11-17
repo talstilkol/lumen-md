@@ -63,7 +63,7 @@ async function moveEntry(from: string, to: string, confirmReplace?: (path: strin
   try {
     await renameWorkspaceFile(from, to);
   } catch (e) {
-    if (replaced) await restoreFromTrash(replaced.id).catch(() => undefined);
+    if (replaced) await restoreFromTrash(replaced.id).catch((e: unknown) => swallowed("storage/fileOps: the replaced file could not be restored from the trash after a failed move (it is still in the trash)", e));
     if (e instanceof WorkspaceConflictError) return null;
     throw e;
   }
@@ -361,7 +361,7 @@ export async function safeMoveWithCompanion(
   if (!noteMoved) {
     // Put the file back where it was, next to its note; nothing was relinked.
     await renameWorkspaceFile(to, from);
-    if (pdfMoved.replaced) await restoreFromTrash(pdfMoved.replaced.id).catch(() => undefined);
+    if (pdfMoved.replaced) await restoreFromTrash(pdfMoved.replaced.id).catch((e: unknown) => swallowed("storage/fileOps: the replaced PDF could not be restored from the trash after a failed move (it is still in the trash)", e));
     if (failure) throw failure;
     return null;
   }
