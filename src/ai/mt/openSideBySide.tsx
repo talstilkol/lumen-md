@@ -54,7 +54,7 @@ export async function openSideBySide(deps: { translate?: TranslateTexts } = {}):
   mounted = { root, host };
   const render = () =>
     root.render(
-      <Modal aria-label={t("mt.sideBySide.title")} onClose={closeSideBySide} data-testid="side-by-side-dialog" style={{ maxInlineSize: 1100, inlineSize: "100%", maxBlockSize: "90vh", overflow: "auto" }}>
+      <Modal aria-label={t("mt.sideBySide.title")} onClose={closeSideBySide} data-testid="side-by-side-dialog" data-reading-mode="side-by-side" style={{ maxInlineSize: 1100, inlineSize: "100%", maxBlockSize: "90vh", overflow: "auto" }}>
         <SideBySideTranslation
           sourcePath={path}
           sourceMd={doc.content}

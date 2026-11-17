@@ -37,6 +37,7 @@ export function FocusMode({ active, onExit, children }: Props) {
 
   return (
     <div
+      data-reading-mode="focus"
       style={{
         position: "fixed",
         inset: 0,
