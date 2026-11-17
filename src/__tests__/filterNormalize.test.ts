@@ -137,9 +137,12 @@ describe("filterMatch", () => {
 
   it("filters 10,000 items in well under a frame budget per keystroke", () => {
     const names = Array.from({ length: 10_000 }, (_, i) => (i % 3 ? `פֶּתֶק ${i} café` : `Note ${i} Łódź`));
-    const t0 = performance.now();
+    // Review 14 Low 10: the CPU time this process spends, not the wall clock, which a loaded machine
+    // stretches (the test went red under load); the bound is the same 400 ms.
+    const cpu0 = process.cpuUsage();
     const hits = filterList(names, "lodz", (x) => x);
-    const ms = performance.now() - t0;
+    const cpu = process.cpuUsage(cpu0);
+    const ms = (cpu.user + cpu.system) / 1000;
     expect(hits.length).toBe(3334);
     expect(ms).toBeLessThan(400);
   });
