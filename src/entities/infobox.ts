@@ -26,6 +26,48 @@ export interface InfoValue {
   text: string;
   /** The entity it names, when it is one (a link in the card). */
   id?: string;
+  /** A date or a number field: the card writes it the reader's way (formatInfoValue). */
+  kind?: "date" | "number";
+}
+
+/** Scalar fields whose values are dates, and the one that is a number. */
+const DATE_LABELS = new Set(["born", "died", "founded", "date", "end", "enacted"].map((k) => `entityGraph.infobox.${k}`));
+const NUMBER_LABELS = new Set(["entityGraph.infobox.population"]);
+
+/**
+ * A field's value in the reader's language (audit r4 A3 #10): an ISO date
+ * ("1948-05-14") as that locale writes it ("14 במאי 1948", "May 14, 1948"),
+ * a year-month as month and year, a plain number with the locale's digits
+ * and grouping ("9,500,000"). A year alone and anything else ("ABT 1900",
+ * "c. 1850") stay as written. `iso` is set for a full or partial date.
+ */
+export function formatInfoValue(v: InfoValue, locale: string): { text: string; iso?: string } {
+  const s = v.text.trim();
+  const make = <T>(f: () => T): T | null => {
+    try {
+      return f();
+    } catch {
+      return null; // why: an unknown locale tag: the value as written
+    }
+  };
+  if (v.kind === "date") {
+    const d = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+    const m = /^(\d{4})-(\d{2})$/.exec(s);
+    if (d || m) {
+      const [y, mo, day] = d ? [d[1], d[2], d[3]] : [m![1], m![2], "01"];
+      const date = new Date(Date.UTC(+y, +mo - 1, +day));
+      if (date.getUTCMonth() !== +mo - 1) return { text: s };
+      const text = make(() => new Intl.DateTimeFormat(locale, d ? { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" } : { year: "numeric", month: "long", timeZone: "UTC" }).format(date));
+      return text ? { text, iso: s } : { text: s };
+    }
+    if (/^\d{3,4}$/.test(s)) return { text: s, iso: s.padStart(4, "0") };
+    return { text: s };
+  }
+  if (v.kind === "number") {
+    const plain = s.replace(/[,_\s](?=\d{3}\b)/g, "");
+    if (/^-?\d+(\.\d+)?$/.test(plain)) return { text: make(() => new Intl.NumberFormat(locale).format(Number(plain))) ?? s };
+  }
+  return { text: s };
 }
 
 export interface InfoRow {
@@ -162,7 +204,8 @@ export function infoboxModel(input: InfoboxInput): InfoboxModel {
   for (const [keys, label] of SCALARS[entity.type]) {
     const v = keys.map((k) => lower.get(k.toLowerCase())).find((x) => asText(Array.isArray(x) ? x[0] : x) !== null);
     if (v === undefined) continue;
-    const values = (Array.isArray(v) ? v : [v]).map(asText).filter((x): x is string => !!x).map((text) => ({ text: unlink(text) }));
+    const kind = DATE_LABELS.has(label) ? ("date" as const) : NUMBER_LABELS.has(label) ? ("number" as const) : undefined;
+    const values = (Array.isArray(v) ? v : [v]).map(asText).filter((x): x is string => !!x).map((text) => ({ text: unlink(text), ...(kind ? { kind } : {}) }));
     if (values.length) rows.push({ label, values });
   }
   const live = edges.filter((e) => e.status !== "rejected");
