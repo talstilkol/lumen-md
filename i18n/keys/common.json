@@ -7786,6 +7786,73 @@
       ]
     },
     {
+      "key": "learning.behind",
+      "en": "{count} days not marked",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "learning.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "learning.follow",
+      "en": "Follow",
+      "vars": []
+    },
+    {
+      "key": "learning.learned",
+      "en": "Learned today",
+      "vars": []
+    },
+    {
+      "key": "learning.none",
+      "en": "No reading today",
+      "vars": []
+    },
+    {
+      "key": "learning.progress",
+      "en": "{done} of {due} days",
+      "vars": [
+        "done",
+        "due"
+      ]
+    },
+    {
+      "key": "learning.review",
+      "en": "Review later",
+      "vars": []
+    },
+    {
+      "key": "learning.reviewMarked",
+      "en": "Marked for review",
+      "vars": []
+    },
+    {
+      "key": "learning.saveFailed",
+      "en": "Could not save the plans: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "learning.title",
+      "en": "Learning plans",
+      "vars": []
+    },
+    {
+      "key": "learning.today",
+      "en": "Today:",
+      "vars": []
+    },
+    {
+      "key": "learning.upToDate",
+      "en": "Up to date",
+      "vars": []
+    },
+    {
       "key": "legalCite.cancel",
       "en": "Cancel",
       "vars": []

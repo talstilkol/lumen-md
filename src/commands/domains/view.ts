@@ -96,6 +96,15 @@ export function buildViewCommands({ setSearchOpen, setRuntimeMetricsOpen, vimEna
       action: () => window.dispatchEvent(new CustomEvent("lumen-open-today")),
     },
     {
+      id: "learning.plans",
+      label: t("cmd.learning.plans"),
+      hint: t("cmd.learning.plans.hint"),
+      icon: cmdIcons.FileText,
+      group: t("group.file"),
+      // Plan W12.H4: follow Daf Yomi, Mishnah Yomit or the daily Rambam, with progress.
+      action: () => void import("../../learning/open").then((m) => m.openLearningPlans()),
+    },
+    {
       id: "pdf.open",
       label: t("cmd.pdf.open"),
       hint: t("cmd.pdf.open.hint"),

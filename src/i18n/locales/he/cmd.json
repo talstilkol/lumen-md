@@ -288,6 +288,8 @@
   "cmd.insert.table": "הוספת טבלה (עורך)",
   "cmd.insert.table.hint": "בונה טבלאות חזותי",
   "cmd.insert.wikilink": "הוספת קישור wiki",
+  "cmd.learning.plans": "תוכניות לימוד…",
+  "cmd.learning.plans.hint": "מעקב אחרי דף יומי, משנה יומית או רמב״ם יומי: הלימוד של היום, סימון ״למדתי״, התקדמות וכרטיסיות לחזרה",
   "cmd.lexicon.lookup": "חפש במילון את המילה שליד הסמן",
   "cmd.lexicon.lookup.hint": "מילים נרדפות, הגדרה וניקוד של המילה, מהמילון שבמכשיר",
   "cmd.lexicon.pack": "מילון עברי ומילים נרדפות (הורדה / הסרה)",

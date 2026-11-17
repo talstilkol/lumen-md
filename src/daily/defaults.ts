@@ -4,7 +4,7 @@ export interface DailySettings {
   folder: string;
   /** File name pattern: YYYY, MM, DD (".md" is added when missing). */
   pattern: string;
-  /** New-note template: {{date}}, {{hebrewDate}}, {{weekday}}, {{title}}, {{holiday}}, {{parasha}}. */
+  /** New-note template: {{date}}, {{hebrewDate}}, {{weekday}}, {{title}}, {{holiday}}, {{parasha}}, {{learning}}. */
   template: string;
   /** Holidays and Torah portions as in Israel (true) or the diaspora (false); unset: from the UI language / time zone. */
   israel?: boolean;
@@ -16,6 +16,8 @@ export interface DailySettings {
   hebrewDates?: boolean;
   /** A deadline on Shabbat or a chag: suggest the next working day, the previous one, or don't move it. Unset: next. */
   deadlineMove?: "next" | "previous" | "off";
+  /** The study cycles {{learning}} lists (plan W12.H4); unset: Daf Yomi, Mishnah Yomit and one chapter of Rambam. */
+  learning?: Array<"dafYomi" | "mishnahYomit" | "rambam1" | "rambam3">;
 }
 
 /** The Hebrew-date setting, with its default. */

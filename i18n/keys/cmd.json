@@ -1455,6 +1455,16 @@
       "vars": []
     },
     {
+      "key": "cmd.learning.plans",
+      "en": "Learning plans…",
+      "vars": []
+    },
+    {
+      "key": "cmd.learning.plans.hint",
+      "en": "Follow Daf Yomi, Mishnah Yomit or the daily Rambam: today's reading, a day marked learned, progress and review cards",
+      "vars": []
+    },
+    {
       "key": "cmd.lexicon.lookup",
       "en": "Look up the Hebrew word at the cursor",
       "vars": []

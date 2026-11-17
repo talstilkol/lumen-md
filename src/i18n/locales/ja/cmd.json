@@ -288,6 +288,8 @@
   "cmd.insert.table": "挿入 Table (Editor)",
   "cmd.insert.table.hint": "ビジュアルなテーブルビルダー",
   "cmd.insert.wikilink": "挿入 wiki-リンク",
+  "cmd.learning.plans": "Learning plans…",
+  "cmd.learning.plans.hint": "Follow Daf Yomi, Mishnah Yomit or the daily Rambam: today's reading, a day marked learned, progress and review cards",
   "cmd.lexicon.lookup": "カーソル位置のヘブライ語を調べる",
   "cmd.lexicon.lookup.hint": "オフライン辞書から単語の類義語・定義・ニクード",
   "cmd.lexicon.pack": "ヘブライ語辞書と類義語（ダウンロード / 削除）",

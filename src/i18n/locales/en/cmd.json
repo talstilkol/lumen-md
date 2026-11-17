@@ -287,6 +287,8 @@
   "cmd.insert.table": "Insert Table (Editor)",
   "cmd.insert.table.hint": "visual table builder",
   "cmd.insert.wikilink": "Insert wiki-link",
+  "cmd.learning.plans": "Learning plans…",
+  "cmd.learning.plans.hint": "Follow Daf Yomi, Mishnah Yomit or the daily Rambam: today's reading, a day marked learned, progress and review cards",
   "cmd.lexicon.lookup": "Look up the Hebrew word at the cursor",
   "cmd.lexicon.lookup.hint": "Synonyms, definition and niqqud of the word, from the offline dictionary",
   "cmd.lexicon.pack": "Hebrew dictionary and synonyms (download / remove)",

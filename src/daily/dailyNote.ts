@@ -18,6 +18,7 @@ import { DEFAULT_DAILY, isValidDailyPattern, type DailySettings } from "./defaul
 import { gematria } from "./gematria";
 import { defaultIsrael, holidaysOn, weeklyReading } from "./hebrewCalendar";
 import { holidayLabel, nameLang, readingName } from "./hebrewCalendarNames";
+import { learningLines, type CycleId } from "../learning/plans";
 
 export { DEFAULT_DAILY, isValidDailyPattern, type DailySettings };
 
@@ -141,9 +142,12 @@ export const isIsrael = (settings: Pick<DailySettings, "israel">, locale: string
  * Fill a daily-note template. `locale` names the weekday and the title's
  * date, and picks Hebrew or English names for {{holiday}} (the day's holidays,
  * " · " between them, or nothing) and {{parasha}} (this week's portion: the
- * Shabbat on or after the day, or the holiday read instead).
+ * Shabbat on or after the day, or the holiday read instead). {{learning}}
+ * (plan W12.H4) is one line per study cycle in `opts.learning`, with a link
+ * to the day's text on Sefaria.
  */
-export function renderTemplate(template: string, day: Day, locale: string, opts: { israel?: boolean } = {}): string {
+export const DEFAULT_LEARNING: readonly CycleId[] = ["dafYomi", "mishnahYomit", "rambam1"];
+export function renderTemplate(template: string, day: Day, locale: string, opts: { israel?: boolean; learning?: readonly CycleId[] } = {}): string {
   const date = noonUtc(day);
   const israel = opts.israel ?? defaultIsrael(locale);
   const lang = nameLang(locale);
@@ -154,8 +158,9 @@ export function renderTemplate(template: string, day: Day, locale: string, opts:
     title: () => new Intl.DateTimeFormat(locale, { dateStyle: "full", timeZone: "UTC" }).format(date),
     holiday: () => holidaysOn(day, { israel }).map((h) => holidayLabel(h, lang)).join(" · "),
     parasha: () => readingName(weeklyReading(day, { israel }), lang),
+    learning: () => learningLines(day, opts.learning ?? DEFAULT_LEARNING, lang === "he" ? "he" : "en").join("\n"),
   };
-  return template.replace(/\{\{\s*(date|hebrewDate|weekday|title|holiday|parasha)\s*\}\}/g, (_, k: string) => vars[k]());
+  return template.replace(/\{\{\s*(date|hebrewDate|weekday|title|holiday|parasha|learning)\s*\}\}/g, (_, k: string) => vars[k]());
 }
 
 // ── Open or create ──────────────────────────────────────────────────────
@@ -174,7 +179,7 @@ export function ensureDailyNote(day: Day, settings: DailySettings, locale: strin
   const job = (async () => {
     const ws = await import("../storage/workspace");
     if (!(await ws.workspaceHasEntry(path))) {
-      await ws.writeWorkspaceFile(path, renderTemplate(settings.template, day, locale, { israel: isIsrael(settings, locale) }));
+      await ws.writeWorkspaceFile(path, renderTemplate(settings.template, day, locale, { israel: isIsrael(settings, locale), learning: settings.learning }));
       const { notifyWorkspaceChanged } = await import("../storage/workspaceEvents");
       notifyWorkspaceChanged({ kind: "structure", paths: [path] });
     }

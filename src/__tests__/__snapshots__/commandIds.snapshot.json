@@ -292,6 +292,13 @@
       "icon": "FileText"
     },
     {
+      "id": "learning.plans",
+      "label": "Learning plans…",
+      "group": "File",
+      "hint": "Follow Daf Yomi, Mishnah Yomit or the daily Rambam: today's reading, a day marked learned, progress and review cards",
+      "icon": "FileText"
+    },
+    {
       "id": "pdf.open",
       "label": "Open a PDF for reading…",
       "group": "File",
@@ -2367,6 +2374,13 @@
       "icon": "FileText"
     },
     {
+      "id": "learning.plans",
+      "label": "Learning plans…",
+      "group": "File",
+      "hint": "Follow Daf Yomi, Mishnah Yomit or the daily Rambam: today's reading, a day marked learned, progress and review cards",
+      "icon": "FileText"
+    },
+    {
       "id": "pdf.open",
       "label": "Open a PDF for reading…",
       "group": "File",
@@ -4298,6 +4312,7 @@
     "view.pageView",
     "view.workspace",
     "note.today",
+    "learning.plans",
     "pdf.open",
     "student.lecture",
     "note.capture",

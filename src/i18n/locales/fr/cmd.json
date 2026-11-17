@@ -288,6 +288,8 @@
   "cmd.insert.table": "Insertion Table (Editor)",
   "cmd.insert.table.hint": "constructeur de tableau visuel",
   "cmd.insert.wikilink": "Insertion wiki-lien",
+  "cmd.learning.plans": "Learning plans…",
+  "cmd.learning.plans.hint": "Follow Daf Yomi, Mishnah Yomit or the daily Rambam: today's reading, a day marked learned, progress and review cards",
   "cmd.lexicon.lookup": "Chercher le mot hébreu sous le curseur",
   "cmd.lexicon.lookup.hint": "Synonymes, définition et niqqud du mot, depuis le dictionnaire hors ligne",
   "cmd.lexicon.pack": "Dictionnaire hébreu et synonymes (télécharger / supprimer)",

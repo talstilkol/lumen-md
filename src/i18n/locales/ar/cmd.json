@@ -288,6 +288,8 @@
   "cmd.insert.table": "إدراج Table (Editor)",
   "cmd.insert.table.hint": "منشئ جداول مرئي",
   "cmd.insert.wikilink": "إدراج wiki-رابط",
+  "cmd.learning.plans": "Learning plans…",
+  "cmd.learning.plans.hint": "Follow Daf Yomi, Mishnah Yomit or the daily Rambam: today's reading, a day marked learned, progress and review cards",
   "cmd.lexicon.lookup": "البحث عن الكلمة العبرية عند المؤشر",
   "cmd.lexicon.lookup.hint": "مرادفات الكلمة وتعريفها وتشكيلها من القاموس دون اتصال",
   "cmd.lexicon.pack": "القاموس العبري والمرادفات (تنزيل / إزالة)",

@@ -288,6 +288,8 @@
   "cmd.insert.table": "插入 Table (Editor)",
   "cmd.insert.table.hint": "可视化表格构建器",
   "cmd.insert.wikilink": "插入 wiki-链接",
+  "cmd.learning.plans": "Learning plans…",
+  "cmd.learning.plans.hint": "Follow Daf Yomi, Mishnah Yomit or the daily Rambam: today's reading, a day marked learned, progress and review cards",
   "cmd.lexicon.lookup": "查找光标处的希伯来语单词",
   "cmd.lexicon.lookup.hint": "从离线词典查看该词的同义词、释义和尼库德",
   "cmd.lexicon.pack": "希伯来语词典和同义词（下载 / 删除）",
