@@ -1,6 +1,6 @@
 {
   "format": "lumen-model-reviewed/1",
-  "about": "Hebrew strings a model (Claude, INT9 and the W13.I6 lane) approved or rewrote in place of a native reviewer: 6c0784430c (123 machine drafts, 14 rewrites) and 545bbf02b8 (202 lane drafts, 2 rewrites). i18n:review reports each as he-model-reviewed until a native Hebrew speaker reads it and removes its line here (review 14 M2). Never remove a key without that review.",
+  "about": "Hebrew strings a model (Claude, INT9 and the W13.I6 lane) approved or rewrote in place of a native reviewer: 6c0784430c (123 machine drafts, 14 rewrites) and 545bbf02b8 (202 lane drafts, 2 rewrites); later model-written Hebrew is listed with its branch (f15-applock: the app lock recovery strings). i18n:review reports each as he-model-reviewed until a native Hebrew speaker reads it and removes its line here (review 14 M2). Never remove a key without that review.",
   "he": {
     "academic.chosen": "6c0784430c",
     "academic.chosenUnverified": "6c0784430c",
@@ -328,6 +328,15 @@
     "viz.kind.sankey": "6c0784430c",
     "writing.suggestModel": "545bbf02b8",
     "xchg.absentAfter": "545bbf02b8",
-    "xchg.absentBefore": "545bbf02b8"
+    "xchg.absentBefore": "545bbf02b8",
+    "appLock.recover": "f15-applock",
+    "appLock.recover.done": "f15-applock",
+    "appLock.recover.label": "f15-applock",
+    "appLock.recover.none": "f15-applock",
+    "appLock.recover.show.body": "f15-applock",
+    "appLock.recover.show.title": "f15-applock",
+    "appLock.recover.submit": "f15-applock",
+    "appLock.recover.wait": "f15-applock",
+    "appLock.recover.wrong": "f15-applock"
   }
 }
