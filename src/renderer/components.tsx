@@ -18,6 +18,7 @@ import {
 const ChartBlock = lazy(() => import("../plugins/ChartBlock"));
 const MermaidBlock = lazy(() => import("../plugins/MermaidBlock"));
 const CsvBlock = lazy(() => import("../plugins/CsvBlock"));
+const SheetBlock = lazy(() => import("../plugins/SheetBlock"));
 const DatasetBlock = lazy(() => import("../plugins/DatasetBlock"));
 const JsonTableBlock = lazy(() => import("../plugins/JsonTableBlock"));
 const InsightsBlock = lazy(() => import("../plugins/InsightsBlock"));
@@ -246,6 +247,9 @@ const Csv = withSuspense<BlockProps>(
   ),
   "data",
 );
+
+// A ```sheet block (plan W12.X1): CSV with A1 formulas on the formula engine.
+const Sheet = withSuspense<BlockProps>((props) => <SheetBlock source={getText(props.children)} />, "data");
 
 // A ```dataset block (plan W7.6): the table or chart of its local CSV snapshot.
 const Dataset = withSuspense<BlockProps>((props) => <DatasetBlock source={getText(props.children)} />, "data");
@@ -674,6 +678,7 @@ export const components: Record<string, LumenBlock> = {
   "lumen-mermaid": Mermaid as unknown as LumenBlock,
   "lumen-csv": Csv as unknown as LumenBlock,
   "lumen-tsv": Csv as unknown as LumenBlock,
+  "lumen-sheet": Sheet as unknown as LumenBlock,
   "lumen-jsontable": JsonTable as unknown as LumenBlock,
   "lumen-insights": Insights as unknown as LumenBlock,
   "lumen-code-doctor": CodeDoctor as unknown as LumenBlock,

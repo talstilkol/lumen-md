@@ -12146,6 +12146,26 @@
       "vars": []
     },
     {
+      "key": "sheet.empty",
+      "en": "This sheet is empty. Write rows of CSV in the block; a cell that starts with = is a formula.",
+      "vars": []
+    },
+    {
+      "key": "sheet.errors",
+      "en": "{n} cells show an error; focus one to see why.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "sheet.label",
+      "en": "Sheet, {rows} rows by {cols} columns",
+      "vars": [
+        "rows",
+        "cols"
+      ]
+    },
+    {
       "key": "skills.answerSummary",
       "en": "The answer of the skill “{name}”",
       "vars": [

@@ -1,0 +1,5 @@
+{
+  "sheet.empty": "This sheet is empty. Write rows of CSV in the block; a cell that starts with = is a formula.",
+  "sheet.errors": "{n} cells show an error; focus one to see why.",
+  "sheet.label": "Sheet, {rows} rows by {cols} columns"
+}

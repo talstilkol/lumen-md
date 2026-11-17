@@ -78,6 +78,7 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "pluginTrust.json": { module: "plugins/runtime/trustStrings.ts", users: ["plugins/runtime/permissions.ts"], prefixes: ["pluginTrust."], within: "plugins/runtime/", shared: ["plugins/runtime/rendererRegistry.ts"] },
   "privacy.json": { module: "privacy/strings.ts", users: ["ui/PrivacyLedgerPanel.tsx"], prefixes: ["privacy."] },
   "reading.json": { module: "reading/strings.ts", users: ["ui/ReadingSettings.tsx"], prefixes: ["reading."] },
+  "sheetBlock.json": { module: "plugins/sheetBlockStrings.ts", users: ["plugins/SheetBlock.tsx"], prefixes: ["sheet."] },
   "sharing.json": { module: "collab/sharingStrings.ts", users: ["collab/sessionExtras.ts", "ui/ShareDialog.tsx"], prefixes: ["collab.", "share."] },
   "slides.json": { module: "slides/strings.ts", users: ["slides/Presentation.tsx", "slides/PresenterView.tsx"], prefixes: ["slides.", "canvas."], within: "slides/" },
   "srs.json": { module: "srs/strings.ts", users: ["srs/ReviewPanel.tsx"], prefixes: ["srs."] },
