@@ -153,6 +153,7 @@ export default defineConfig({
             { label: "Israeli time", slug: "workspace/israeli-time", translations: { he: "זמן ישראלי" } },
             { label: "Writing a book", slug: "workspace/book", translations: { he: "כתיבת ספר" } },
             { label: "Academic LaTeX export (Hebrew)", slug: "workspace/latex-export", translations: { he: "ייצוא LaTeX אקדמי (עברית)" } },
+            { label: "Text formats: what survives a round trip", slug: "workspace/format-roundtrip", translations: { he: "פורמטי טקסט: מה שורד הלוך-חזור" } },
             { label: "Automations (when… then…)", slug: "workspace/automations", translations: { he: "אוטומציות (כש… אז…)" } },
           ],
         },
