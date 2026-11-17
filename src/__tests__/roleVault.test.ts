@@ -1,7 +1,9 @@
 /**
  * W12.S4: family and classroom vaults with roles, without accounts. Three
- * clients in memory, three roles, on the real engine and the real Node relay
- * (sync-server/vault-relay.js over HTTP on 127.0.0.1): invites by link,
+ * clients in memory, three roles, on the real engine and on BOTH relays the
+ * app ships: the Node relay (sync-server/vault-relay.js over HTTP on
+ * 127.0.0.1) and the Cloudflare Worker (edge-workers/vault-relay, in the
+ * Durable Object simulation). Invites by link,
  * join requests, the per-device sealed read key, personal folders, and the
  * client's envelope and ACL formats against the relay's own parser.
  * @vitest-environment node
@@ -17,7 +19,7 @@ import { memoryStateStore } from "../sync/e2ee/state";
 import { AclError, checkNext, firstAcl, openAcl, signAcl, withMember, withoutMember } from "../sync/e2ee/roles/acl";
 import { newSigner, parseEnvelope, sealEnvelope, verifyEnvelope } from "../sync/e2ee/roles/envelope";
 import { acceptJoin, inviteHash, newInvite, newMemberKeys, openRoleSpace, parseInviteHash, pendingJoins, putPersonal, readPersonal, requestJoin } from "../sync/e2ee/roles/vault";
-import { memberClient, nodeRelay, type RelayHost } from "./helpers/roleRelay";
+import { memberClient, nodeRelay, workerRelay, type RelayHost } from "./helpers/roleRelay";
 import { PASSPHRASE, TEST_ITERATIONS } from "./helpers/e2ee";
 
 const require = createRequire(import.meta.url);
@@ -33,8 +35,9 @@ afterEach(async () => {
 });
 
 describe("role vault: invites, joins and three roles", () => {
-  it("an admin invites a writer and a reader by link; each joins with its own keys; the roles hold", async () => {
-    const relay = await nodeRelay();
+  for (const [kind, makeRelay] of [["Node relay", nodeRelay], ["Worker relay", workerRelay]] as const)
+  it(`${kind}: an admin invites a writer and a reader by link; each joins with its own keys; the roles hold`, async () => {
+    const relay = await makeRelay();
     hosts.push(relay);
     const { ref, admin, provider } = await openRoleSpace(relay.url, { fetch: relay.fetch });
     const { keys, anchor } = await createVault(provider, PASSPHRASE, { pbkdf2Iterations: TEST_ITERATIONS });
