@@ -35,7 +35,7 @@ const muted: React.CSSProperties = { fontSize: 12, color: "hsl(var(--fg-muted))"
 /** A vault-lock failure in words (never the error's own text: explainError). */
 const describeVaultError = (err: unknown) => (err instanceof WrongPassphraseError ? t("vaultEnc.wrong") : explainError(err, "vault-encryption"));
 
-function Field({ label, value, onChange, autoComplete = "new-password" }: { label: string; value: string; onChange: (v: string) => void; autoComplete?: string }) {
+function Field({ label, value, onChange, autoComplete = "new-password" }: { label: string; value: string; onChange: (v: string) => void; autoComplete?: "new-password" | "current-password" }) {
   return (
     <label style={{ display: "grid", gap: 4, fontSize: 13 }}>
       {label}

@@ -98,7 +98,7 @@
   "pluginGallery.builtIn": "מובנה ב-Lumen",
   "pluginGallery.categories": "קטגוריות",
   "pluginGallery.categoriesLabel": "קטגוריות תוספים",
-  "pluginGallery.close": "סגור גלריית תוספים",
+  "pluginGallery.close": "סגור גלריית תוספים (Esc)",
   "pluginGallery.comingSoon": "תוספים נוספים יגיעו בקרוב ·",
   "pluginGallery.counts": "{installed} מותקנים · {available} זמינים",
   "pluginGallery.homepage": "דף הבית של {name}",

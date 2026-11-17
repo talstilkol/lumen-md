@@ -41,7 +41,7 @@ test("allow a host, revoke it, and its image is blocked again", async ({ page })
   await page.evaluate(() => window.dispatchEvent(new CustomEvent("lumen-run-command", { detail: { id: "privacy.imageHosts" } })));
   const dialog = page.getByRole("dialog", { name: "Allowed image hosts" });
   await expect(dialog.getByTestId("image-hosts")).toContainText(HOST);
-  await dialog.getByRole("button", { name: `Stop always allowing ${HOST}` }).click();
+  await dialog.getByRole("button", { name: `Revoke always allowing ${HOST}` }).click();
   await expect(dialog.getByTestId("image-hosts-empty")).toBeVisible();
   await page.keyboard.press("Escape");
 

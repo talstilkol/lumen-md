@@ -2165,6 +2165,46 @@
   .cm-editor .cm-selectionBackground {
     background: Highlight !important;
   }
+  /* W13.Y2: a selected row or checked item says so without colour (system outline). */
+  [data-selected],
+  [aria-checked="true"]:not(input) {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+  /* The sidebar edge is transparent by design: in forced colours it is a visible line. */
+  .sidebar-resizer {
+    background: CanvasText;
+    inline-size: 2px;
+  }
+  /* Icons draw with currentColor, so they follow the system text colour. */
+  svg {
+    forced-color-adjust: auto;
+  }
+}
+
+/* ── More contrast (plan W13.Y2): prefers-contrast: more ────────────────
+   macOS "Increase contrast" and Windows' contrast preference without a
+   forced palette: borders and muted text darken (lighten in dark), the focus
+   ring thickens. The High contrast theme already goes further. */
+@media (prefers-contrast: more) {
+  :root:not(.high-contrast) {
+    --border: 220 13% 45%;
+    --border-strong: 220 13% 35%;
+    --fg-muted: 220 10% 28%;
+  }
+  :root.dark:not(.high-contrast),
+  .dark:not(.high-contrast) {
+    --border: 220 10% 62%;
+    --border-strong: 220 10% 72%;
+    --fg-muted: 220 10% 80%;
+  }
+  :focus-visible {
+    outline-width: 3px !important;
+  }
+  .icon-btn,
+  .seg-btn {
+    color: hsl(var(--fg));
+  }
 }
 
 /* 400 % zoom is a 320 px-wide window (WCAG 1.4.10): media and wide blocks

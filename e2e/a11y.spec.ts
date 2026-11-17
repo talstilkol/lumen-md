@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
+import { SURFACES as WCAG22_SURFACES, openSurface } from "./_surfaces";
 
 /**
  * Accessibility (plan 10.1.5, 10.1.6). axe-core (WCAG 2.0/2.1 A + AA,
@@ -129,3 +130,41 @@ test("keyboard only: palette, a dialog that keeps focus and gives it back, the s
   const sidebar = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--sidebar-width").trim());
   expect(sidebar).toBe("160px");
 });
+
+/**
+ * Plan W13.Y3 / W13.Y5: the WCAG 2.2 checks axe can't make (src/a11y/wcag22.ts),
+ * on the ten surfaces of e2e/_surfaces.ts, in English and Hebrew:
+ * 2.5.3 label in name, 2.5.8 target size, 2.4.11 focus not obscured while tabbing.
+ */
+
+for (const lang of ["en", "he"] as const) {
+  test(`WCAG 2.2: label in name, target size, focus not obscured — ${lang === "he" ? "Hebrew RTL" : "English LTR"}`, async ({ page }) => {
+    await boot(page, lang, "light");
+    const found: string[] = [];
+    for (const s of WCAG22_SURFACES) {
+      const close = await openSurface(page, s);
+      const scope = s.modal ? '[role="dialog"][aria-modal="true"]' : "body";
+      const r = await page.evaluate(async (sel) => {
+        const w = await import("/src/a11y/wcag22.ts");
+        const root = document.querySelector(sel) ?? document.body;
+        return {
+          label: w.labelInNameViolations(root).map((v: { visible: string; name: string }) => `“${v.visible}” named “${v.name}”`),
+          target: w.targetSizeViolations(root).map((e: Element) => e.outerHTML.slice(0, 90)),
+        };
+      }, scope);
+      for (let i = 0; i < 10; i++) {
+        await page.keyboard.press("Tab");
+        const hidden = await page.evaluate(async () => {
+          const w = await import("/src/a11y/wcag22.ts");
+          const el = document.activeElement;
+          return el && el !== document.body && w.focusObscured(el) ? el.outerHTML.slice(0, 90) : null;
+        });
+        if (hidden) found.push(`— ${s.name}: focus hidden: ${hidden}`);
+      }
+      for (const l of r.label) found.push(`— ${s.name}: 2.5.3 ${l}`);
+      for (const t of r.target) found.push(`— ${s.name}: 2.5.8 ${t}`);
+      await close();
+    }
+    expect(found.join("\n"), "WCAG 2.2 violations").toBe("");
+  });
+}

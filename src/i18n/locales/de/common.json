@@ -1,5 +1,6 @@
 {
   "a11y.sidebarResizer": "Seitenleiste in der Breite ändern",
+  "a11y.sidebarResizerHint": "Drag to resize, or click for the next width (160, 240, 320, 400 px)",
   "a11y.skipToContent": "Zum Inhalt springen",
   "about.a11yStatement": "Erklärung zur Barrierefreiheit",
   "about.a11yStatement.hint": "Lumens Erklärung zur Barrierefreiheit: Norm, was funktioniert, bekannte Lücken und wie man eine Barriere meldet",

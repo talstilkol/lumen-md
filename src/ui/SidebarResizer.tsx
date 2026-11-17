@@ -7,6 +7,13 @@ const MAX = 480;
 /** Arrow-key step (Shift: 3×). */
 const STEP = 16;
 
+/** W13.Y5 (WCAG 2.5.7): a click on the edge, without dragging, steps through these widths (then back to the narrowest). */
+export const CLICK_WIDTHS = [160, 240, 320, 400] as const;
+/** The next width a click gives after `w`. */
+export function nextClickWidth(w: number): number {
+  return CLICK_WIDTHS.find((x) => x > w + 1) ?? CLICK_WIDTHS[0];
+}
+
 const currentWidth = () => parseInt(getComputedStyle(document.documentElement).getPropertyValue("--sidebar-width"), 10) || 240;
 
 function setWidth(px: number): number {
@@ -29,6 +36,7 @@ export function SidebarResizer() {
   const [width, setWidthState] = useState(240);
   const startXRef = useRef(0);
   const startWidthRef = useRef(240);
+  const movedRef = useRef(false);
 
   // Restore saved width on mount.
   useEffect(() => {
@@ -46,6 +54,7 @@ export function SidebarResizer() {
   useEffect(() => {
     if (!dragging) return;
     function onMove(e: PointerEvent) {
+      if (Math.abs(e.clientX - startXRef.current) >= 3) movedRef.current = true;
       const isRTL = document.documentElement.getAttribute("dir") === "rtl";
       const delta = (e.clientX - startXRef.current) * (isRTL ? -1 : 1);
       const next = Math.max(MIN, Math.min(MAX, startWidthRef.current + delta));
@@ -56,6 +65,11 @@ export function SidebarResizer() {
     }
     function onUp() {
       setDragging(false);
+      // A click without a drag: the next width, one click each (no dragging needed).
+      if (!movedRef.current) {
+        setWidthState(setWidth(nextClickWidth(currentWidth())));
+        return;
+      }
       const cur = getComputedStyle(document.documentElement).getPropertyValue(
         "--sidebar-width",
       );
@@ -86,6 +100,7 @@ export function SidebarResizer() {
       // Shift moves 3×, Home / End go to the narrowest / widest.
       tabIndex={0}
       aria-label={t("a11y.sidebarResizer")}
+      title={t("a11y.sidebarResizerHint")}
       aria-valuemin={MIN}
       aria-valuemax={MAX}
       aria-valuenow={width}
@@ -104,6 +119,7 @@ export function SidebarResizer() {
       onPointerDown={(e) => {
         if (e.pointerType === "mouse" && e.button !== 0) return;
         startXRef.current = e.clientX;
+        movedRef.current = false;
         const cur = getComputedStyle(
           document.documentElement,
         ).getPropertyValue("--sidebar-width");

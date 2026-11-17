@@ -1,5 +1,6 @@
 {
   "a11y.sidebarResizer": "Изменить ширину боковой панели",
+  "a11y.sidebarResizerHint": "Drag to resize, or click for the next width (160, 240, 320, 400 px)",
   "a11y.skipToContent": "Перейти к содержимому",
   "about.a11yStatement": "Заявление о доступности",
   "about.a11yStatement.hint": "Заявление Lumen о доступности: стандарт, что работает, известные пробелы и как сообщить о барьере",

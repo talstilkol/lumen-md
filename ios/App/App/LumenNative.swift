@@ -64,6 +64,8 @@ public class LumenNativePlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "pendingCaptures", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "removeCaptures", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "captureFile", returnType: CAPPluginReturnPromise),
+        // W13.Y4: the system text size (Dynamic Type) as a scale of the default.
+        CAPPluginMethod(name: "getTextScale", returnType: CAPPluginReturnPromise),
     ]
 
     override public func load() {
@@ -81,6 +83,16 @@ public class LumenNativePlugin: CAPPlugin, CAPBridgedPlugin {
 
     @objc func onResume() {
         notifyListeners("resume", data: [:])
+    }
+
+    /// W13.Y4 (EN 301 549 v4.1.1 user preferences): Dynamic Type as a scale —
+    /// the body style's size at the user's content size category over its
+    /// size at the default (17 pt), e.g. 1.0 at Large, about 3.1 at AX5.
+    @objc func getTextScale(_ call: CAPPluginCall) {
+        DispatchQueue.main.async {
+            let scaled = UIFontMetrics(forTextStyle: .body).scaledValue(for: 17, compatibleWith: UITraitCollection(preferredContentSizeCategory: UIApplication.shared.preferredContentSizeCategory))
+            call.resolve(["scale": Double(scaled / 17), "category": UIApplication.shared.preferredContentSizeCategory.rawValue])
+        }
     }
 
     @objc func getLaunchUrl(_ call: CAPPluginCall) {
