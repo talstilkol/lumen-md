@@ -27,6 +27,7 @@
  * without a zone, computed in UTC so the machine's zone never matters.
  */
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { countPlan, historyFromGit, planVelocity, velocityLine, VELOCITY_END, VELOCITY_START, withoutVelocity } from "./velocity.mjs";
 import { execFileSync } from "node:child_process";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -524,6 +525,8 @@ export function renderHtml(M) {
 <div class="stat"><b>${M.owner.length} פעולות · ${dur(sum(M.owner))}</b><span>מחכות לך (שלב 15) · ${M.TAL_P0.length} מהן לפני השחרור</span></div>
 <div class="stat"><b>${M.VERIFIED.real} אמיתי · ${M.VERIFIED.browser} דפדפן</b><span>רמת אימות: ${E(verifiedSummary(M))}</span></div>
 </div>`);
+  // R12.21: pace and ETA from the git history of plan.json (scripts/plan/velocity.mjs).
+  H.push(`<p class="sub velocity">${VELOCITY_START}${M.velocity ? E(velocityLine(M.velocity)) : ""}${VELOCITY_END}</p>`);
   H.push(`<section class="card"><header><h2>אבני דרך</h2></header><div class="tbl"><table class="ms"><thead><tr><th>#</th><th>אבן דרך</th><th>בתזמון</th><th>עם מרווח ${B}%</th></tr></thead><tbody>`);
   M.milestones.forEach((m, k) => H.push(`<tr><td>${k + 1}</td><td>${E(m.title)}</td><td>${fmt(m.at)}</td><td>${fmt(M.stretch(m.at))}</td></tr>`));
   H.push("</tbody></table></div></section>");
@@ -802,6 +805,7 @@ export function run({ root = ROOT, check = false, wipLimit } = {}) {
   const verifiedProblems = checkVerified(plan);
   if (verifiedProblems.length) throw new Error(`plan: verified / pr (W4.24) —\n  ${verifiedProblems.join("\n  ")}`);
   const M = buildModel(plan);
+  M.velocity = planVelocity(historyFromGit(root), countPlan(plan));
   const docPath = join(root, DOC_FILE);
   const htmlPath = join(root, HTML_FILE);
   const doc = readFileSync(docPath, "utf8");
@@ -811,11 +815,13 @@ export function run({ root = ROOT, check = false, wipLimit } = {}) {
   const wantRoadmap = renderRoadmap(M);
   const stale = [];
   if (doc !== wantDoc) stale.push(DOC_FILE);
-  if (!existsSync(htmlPath) || readFileSync(htmlPath, "utf8") !== wantHtml) stale.push(HTML_FILE);
+  const htmlNow = existsSync(htmlPath) ? readFileSync(htmlPath, "utf8") : null;
+  // The velocity line follows git history, not plan.json: --check compares the board without it.
+  if (htmlNow === null || withoutVelocity(htmlNow) !== withoutVelocity(wantHtml)) stale.push(HTML_FILE);
   if (!existsSync(roadmapPath) || readFileSync(roadmapPath, "utf8") !== wantRoadmap) stale.push(ROADMAP_FILE);
   if (!check) {
     if (stale.includes(DOC_FILE)) writeFileSync(docPath, wantDoc);
-    if (stale.includes(HTML_FILE)) writeFileSync(htmlPath, wantHtml);
+    if (htmlNow !== wantHtml) writeFileSync(htmlPath, wantHtml);
     if (stale.includes(ROADMAP_FILE)) writeFileSync(roadmapPath, wantRoadmap);
   }
   return { M, stale, wip: wipWarnings(plan, { limit: wipLimit }) };
