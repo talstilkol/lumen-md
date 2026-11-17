@@ -56,12 +56,19 @@ function testsUnder(root, dir) {
   return out.sort();
 }
 
-/** Pass/fail counts from the runner's last "pass N fail M" line. */
+/**
+ * Pass/fail counts from the runner's last "pass N fail M" line. The shim's last
+ * line names the runner that gave them ("v4: browser pass …"): its Chromium is a
+ * headless browser with a small React Testing Library stand-in, not a real-browser
+ * e2e run, so that level is labelled "browser (shim chromium)" (review 12, M5).
+ */
+export const SHIM_BROWSER = "browser (shim chromium)";
 export function counts(out) {
   const lines = String(out).trim().split("\n");
   for (let i = lines.length - 1; i >= 0; i--) {
     const m = /pass (\d+) fail (\d+)/.exec(lines[i]);
-    if (m) return { pass: Number(m[1]), fail: Number(m[2]) };
+    if (!m) continue;
+    return { pass: Number(m[1]), fail: Number(m[2]), ...(/\bv4: browser pass/.test(lines[i]) ? { level: SHIM_BROWSER } : {}) };
   }
   return null;
 }
@@ -133,7 +140,7 @@ export function judgeFiles(files, root, counts) {
     const empty = !!c && c.pass === 0 && c.fail === 0;
     if (empty) skippedOnly++;
     else if (!green) ok = false;
-    parts.push(`${f.split("/").pop()} ${c ? (empty ? "0/0 (all skipped here)" : `${c.pass}/${c.pass + c.fail}`) : "load error"}`);
+    parts.push(`${f.split("/").pop()} ${c ? (empty ? "0/0 (all skipped here)" : `${c.pass}/${c.pass + c.fail}`) : "load error"}${c?.level ? ` in ${c.level}` : ""}`);
   }
   const status = !ok ? "fail" : skippedOnly ? "skipped" : "pass";
   return { status, detail: parts.join(", ") || "no files" };

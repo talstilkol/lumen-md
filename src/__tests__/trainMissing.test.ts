@@ -67,7 +67,7 @@ describe("the decisions file", () => {
       ],
     });
     expect(bad).toEqual([
-      'decisions[0] (#5): decision "later" is not one of in, rejected, replaced',
+      'decisions[0] (#5): decision "later" is not one of in, deferred, rejected, replaced',
       "decisions[1] (#6): no reason (at least a sentence)",
       "decisions[2] (#7): head is not a commit sha (10 to 40 hex)",
       'decisions[3] (#8): "in" names the task or PR that brings it (via)',
