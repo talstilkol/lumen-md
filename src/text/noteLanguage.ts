@@ -60,7 +60,9 @@ function hebrewProse(doc: string): string {
     .slice(0, 4000)
     .replace(/```[\s\S]*?```/g, " ")
     .replace(/`[^`\n]*`/g, " ")
-    .replace(/\]\([^)]*\)/g, " ");
+    .replace(/\]\([^)]*\)/g, " ")
+    // A block tagged with its own language (`<div lang="yi">…</div>`) speaks for itself, not for the note.
+    .replace(/<(div|p|section|blockquote|span)\b[^>]*\blang=["'][^"']*["'][^>]*>[\s\S]*?<\/\1>/gi, " ");
 }
 
 export function noteLanguage(doc: string): NoteLanguage | null {
@@ -76,7 +78,10 @@ export function noteLanguage(doc: string): NoteLanguage | null {
     }
   }
   const prose = hebrewProse(doc);
-  if (/[א-ת]/.test(prose) && isYiddishText(prose)) return { tag: "yi", dir: "rtl", source: "detected" };
+  // Yiddish only when Hebrew letters carry the note: an English note quoting a Yiddish line stays untagged.
+  const hebrew = (prose.match(/[א-ת]/g) ?? []).length;
+  const latin = (prose.match(/[A-Za-z]/g) ?? []).length;
+  if (hebrew > 0 && hebrew >= latin && isYiddishText(prose)) return { tag: "yi", dir: "rtl", source: "detected" };
   return null;
 }
 

@@ -11,6 +11,7 @@ import { test, expect, type Page } from "@playwright/test";
 
 const YIDDISH = "# ייִדיש\n\nמיר וווינען אין דער שטאָט און לייענען ביכער אויף ייִדיש.\n\nA line in English inside a Yiddish note.\n\n- אַ ליד\n- אַ מעשׂה\n";
 const LADINO_LATN = "---\nlang: lad\n---\n# Djudeo-espanyol\n\nKe haber? Aki Yerushalayim es una revista en ladino.\n";
+const TAGGED_BLOCKS = '# Family letters\n\nAn English note with tagged passages.\n\n<div lang="yi">\n\nליבע קינדער, איך שרייַב אייַך דעם בריוו.\n\n</div>\n\n<p lang="lad-Latn">Ke haber? Aki Yerushalayim.</p>\n';
 const LADINO_HEBR = "---\nlang: lad\n---\n# ג׳ודיאו-איספאנייול\n\nקי חאבֿיר? אקי ירושלים איס אונה ריב׳יסטה.\n";
 
 async function open(page: Page, content: string, locale: "en" | "he") {
@@ -54,6 +55,17 @@ for (const locale of ["en", "he"] as const) {
       await expect(preview.locator("h1")).toContainText("איספאנייול", { timeout: 15_000 });
       await expect(preview).toHaveAttribute("lang", "lad-Hebr");
       expect(await dirOf(page, "p")).toBe("rtl");
+    });
+
+    test("a block tagged yi inside an English note: the block is yi, right to left, in the pointed face; the note stays untagged", async ({ page }) => {
+      await open(page, TAGGED_BLOCKS, locale);
+      const preview = page.locator(".prose-lumen").first();
+      await expect(preview.locator("h1")).toContainText("Family letters", { timeout: 15_000 });
+      await expect(preview).not.toHaveAttribute("lang", "yi");
+      const block = preview.locator('div[lang="yi"] p').first();
+      expect(await block.evaluate((el) => getComputedStyle(el).direction)).toBe("rtl");
+      expect(await block.evaluate((el) => getComputedStyle(el).fontFamily)).toContain("Lumen Noto Sans Hebrew");
+      expect(await preview.locator('p[lang="lad-Latn"]').evaluate((el) => getComputedStyle(el).direction)).toBe("ltr");
     });
   });
 }
