@@ -2822,7 +2822,7 @@
   "readingMode.common": "Text and aids",
   "readingMode.experimental": "Experimental",
   "readingMode.field.aids": "Dyslexia-friendly layout",
-  "readingMode.field.anchor": "Anchor emphasis (bold word starts)",
+  "readingMode.field.anchor": "Anchor emphasis: word starts heavier (experimental — weak evidence)",
   "readingMode.field.dyslexiaLatin": "Dyslexia-friendly font for English text",
   "readingMode.field.focusUnit": "Keep bright",
   "readingMode.field.font": "Hebrew font",

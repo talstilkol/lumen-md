@@ -74,6 +74,30 @@ letters or more the prefix letters (ו ה ב כ ל מ ש) are skipped, leaving a
 least three — ״וכשהבית״ is read from ״בית״. A word that only looks prefixed
 (״מחשבה״) puts the point one letter later. Niqqud stays on its letter.
 
+## Anchor emphasis — experimental, weak evidence
+
+*Anchor emphasis* draws the first 40% of every word a little heavier (at
+least one letter), in English and in Hebrew — the idea sold elsewhere as
+"bionic reading". Some readers like it, but **the evidence that it speeds
+reading or helps comprehension is weak**: the published replications found
+no reliable gain. So it is off by default, labelled experimental in the
+menu, and measured in our own reading study (below).
+
+It is drawn as a highlight over the text, not by changing it: the note and
+the page's text stay exactly as they are, a word is never split, so the
+browser shapes it as one piece, and the cut always falls between whole
+letters — niqqud and cantillation marks stay on their letters. Code, keys,
+math and the editor are never marked. It needs the CSS Custom Highlight API
+(Chromium 105+, Safari 17.2+, Firefox 140+); elsewhere it shows nothing.
+
+**The A/B test.** In the owner's reading study (six readers), each reader
+reads four comparable passages — two Hebrew, two English — two with anchor
+emphasis and two without, the order and the passage–condition pairing
+counterbalanced. We record the reading time per passage and three
+comprehension questions per passage, and ask which they preferred. The
+result will be written here; until then the option stays experimental.
+*Result: not yet measured.*
+
 ## The reading profile
 
 Every mode reads the same profile: the Hebrew font, text size, line height,
@@ -134,4 +158,5 @@ are clamped (a `width: 200` reads as the widest column).
 | `rate` | 0.5–2 |
 | `focusUnit` | `line`, `sentence`, `paragraph` (with `mode: focus`) |
 | `hemingway` | `true` / `false` |
+| `anchor` | `true` / `false` (anchor emphasis, off by default) |
 | `wpm` | 150–600 (RSVP) |

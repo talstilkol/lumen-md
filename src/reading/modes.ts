@@ -19,7 +19,7 @@ export interface ReadingModeDef {
 }
 
 /** The fields every mode reads (the menu shows them once). */
-export const COMMON_FIELDS: Array<keyof ReadingProfile> = ["font", "size", "lineHeight", "width", "spacedHebrew", "dyslexiaLatin", "nikud", "aids", "lineFocus", "tint", "voice", "rate"];
+export const COMMON_FIELDS: Array<keyof ReadingProfile> = ["font", "size", "lineHeight", "width", "spacedHebrew", "dyslexiaLatin", "nikud", "aids", "lineFocus", "tint", "voice", "rate", "anchor"];
 
 export const MODE_DEFS: ReadingModeDef[] = [
   {

@@ -2822,7 +2822,7 @@
   "readingMode.common": "טקסט ועזרים",
   "readingMode.experimental": "ניסיוני",
   "readingMode.field.aids": "פריסה ידידותית לדיסלקציה",
-  "readingMode.field.anchor": "עוגן קריאה (תחילת מילה מודגשת)",
+  "readingMode.field.anchor": "עוגן קריאה: תחילת מילה מודגשת (ניסיוני — ראיות חלשות)",
   "readingMode.field.dyslexiaLatin": "גופן ידידותי לדיסלקציה לטקסט באנגלית",
   "readingMode.field.focusUnit": "להשאיר בהיר",
   "readingMode.field.font": "גופן עברי",

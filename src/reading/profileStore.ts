@@ -127,6 +127,8 @@ export async function applyProfile(p: Readonly<ReadingProfile>, doc: Document = 
     const a = m.loadAids();
     m.applyAids({ ...a, dyslexia: p.aids, tint: p.tint, lineFocus: p.lineFocus > 0, rate: p.rate }, doc);
   }
+  // W13.R4: anchor emphasis — its module loads only once it is on.
+  if (p.anchor || doc.getElementById("lumen-anchor-css")) (await import("./anchorEmphasis")).setAnchor(p.anchor, doc);
   doc.documentElement.setAttribute("data-reading-line-focus", String(p.lineFocus));
   if (!p.lineFocus) doc.documentElement.removeAttribute("data-reading-line-focus");
 }

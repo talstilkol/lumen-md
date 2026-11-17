@@ -15552,7 +15552,7 @@
     },
     {
       "key": "readingMode.field.anchor",
-      "en": "Anchor emphasis (bold word starts)",
+      "en": "Anchor emphasis: word starts heavier (experimental — weak evidence)",
       "vars": []
     },
     {
