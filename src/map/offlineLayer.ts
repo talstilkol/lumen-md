@@ -31,10 +31,13 @@ export async function drawArchiveTile(archive: PMTiles, header: Header, canvas: 
   const bytes = await archive.getTile(pz, px, py);
   if (!bytes) return false;
   ctx.save();
-  ctx.translate(-(x - px * f) * size, -(y - py * f) * size);
+  const ox = (x - px * f) * size;
+  const oy = (y - py * f) * size;
+  ctx.translate(-ox, -oy);
   try {
     if (header.tileType === TileType.Mvt) {
-      drawTile(ctx, decodeTile(bytes), size * f, { lang: opts.lang, palette: opts.dark ? DARK : LIGHT, zoom: z });
+      // The visible part of the (larger) covering tile: its labels fit inside it (audit r4 A3 #7).
+      drawTile(ctx, decodeTile(bytes), size * f, { lang: opts.lang, palette: opts.dark ? DARK : LIGHT, zoom: z, view: [ox, oy, ox + size, oy + size] });
     } else {
       const type = MIME[header.tileType];
       if (!type) return false;

@@ -70,8 +70,16 @@ export interface DrawnLabel {
 /**
  * Draw `layers` into a size × size area of `ctx` at (0, 0). Returns the
  * labels drawn (for tests and screen-reader summaries).
+ *
+ * Labels are never cut at the tile's edge (audit r4 A3 #7): each tile is a
+ * canvas of its own, so a label that ran over the edge lost its end. A
+ * label whose point is in the visible part (`view`: x0, y0, x1, y1 in this
+ * area's pixels; the whole tile by default, a quarter of it and less when
+ * overzoomed) is moved inward just enough to fit there, and one wider than
+ * the tile is left out. The neighbouring tile does not draw it (the point
+ * is not in its view), so it is drawn once, whole.
  */
-export function drawTile(ctx: CanvasRenderingContext2D, layers: readonly Layer[], size: number, opts: { lang: string; palette?: Palette; zoom: number }): DrawnLabel[] {
+export function drawTile(ctx: CanvasRenderingContext2D, layers: readonly Layer[], size: number, opts: { lang: string; palette?: Palette; zoom: number; view?: readonly [number, number, number, number] }): DrawnLabel[] {
   const pal = opts.palette ?? LIGHT;
   ctx.save();
   ctx.fillStyle = pal.earth;
@@ -122,6 +130,7 @@ export function drawTile(ctx: CanvasRenderingContext2D, layers: readonly Layer[]
   const places = byName.get("places");
   if (places) {
     const s = size / places.extent;
+    const [v0, v1, v2, v3] = opts.view ?? [0, 0, size, size];
     const boxes: Array<[number, number, number, number]> = [];
     const ranked = places.features
       .filter((f) => f.type === GeomType.Point && f.geometry[0]?.length >= 2)
@@ -130,9 +139,9 @@ export function drawTile(ctx: CanvasRenderingContext2D, layers: readonly Layer[]
     for (const { f } of ranked) {
       const text = labelOf(f.properties, opts.lang);
       if (!text) continue;
-      const x = f.geometry[0][0] * s;
-      const y = f.geometry[0][1] * s;
-      if (x < 0 || y < 0 || x > size || y > size) continue;
+      const px0 = f.geometry[0][0] * s;
+      const py0 = f.geometry[0][1] * s;
+      if (px0 < v0 || py0 < v1 || px0 >= v2 || py0 >= v3) continue;
       const big = f.properties.kind === "country" || f.properties.kind === "region";
       const px = big ? 13 : f.properties.kind === "locality" ? 12 : 11;
       ctx.font = `${big ? 600 : 500} ${px}px system-ui, "Noto Sans Hebrew", "Noto Sans Arabic", sans-serif`;
@@ -141,6 +150,12 @@ export function drawTile(ctx: CanvasRenderingContext2D, layers: readonly Layer[]
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       const w = ctx.measureText(text).width;
+      // Half the box (the text, its halo, a pixel to spare); moved inward to fit the view.
+      const hw = w / 2 + 3;
+      const hh = px / 2 + 3;
+      if (2 * hw > v2 - v0 || 2 * hh > v3 - v1) continue;
+      const x = Math.min(Math.max(px0, v0 + hw), v2 - hw);
+      const y = Math.min(Math.max(py0, v1 + hh), v3 - hh);
       const box: [number, number, number, number] = [x - w / 2 - 2, y - px / 2 - 2, x + w / 2 + 2, y + px / 2 + 2];
       if (boxes.some((b) => box[0] < b[2] && box[2] > b[0] && box[1] < b[3] && box[3] > b[1])) continue;
       boxes.push(box);

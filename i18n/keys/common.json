@@ -13362,7 +13362,7 @@
     },
     {
       "key": "map.offline.none",
-      "en": "No offline map in the vault. Maps use the online tiles (none in airplane mode).",
+      "en": "No offline map in the vault. Maps show online tiles only if you allow them (never in airplane mode).",
       "vars": []
     },
     {
@@ -13399,6 +13399,21 @@
         "min",
         "max"
       ]
+    },
+    {
+      "key": "map.tiles.allow",
+      "en": "Load map tiles from OpenStreetMap",
+      "vars": []
+    },
+    {
+      "key": "map.tiles.stop",
+      "en": "Stop online map tiles",
+      "vars": []
+    },
+    {
+      "key": "map.tiles.why",
+      "en": "Off until you allow it: the tiles tell tile.openstreetmap.org which area you are viewing. An offline map in the vault needs no network.",
+      "vars": []
     },
     {
       "key": "mcpServers.add",

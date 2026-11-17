@@ -19,6 +19,7 @@ import { drawArchiveTile } from "../map/offlineLayer";
 import { clusterPoints, parseLocation, project } from "../map/cluster";
 import { entityPoints } from "../map/entityMarkers";
 import { addBaseTiles, TILE_URL } from "../plugins/map/tiles";
+import { onlineTilesAllowed, setOnlineTilesAllowed } from "../privacy/mapTiles";
 import OfflineMapPanel from "../map/OfflineMapPanel";
 
 // The vault the store reaches through "../storage/workspace", and airplane mode, both under the test's control.
@@ -205,6 +206,43 @@ describe("drawing a tile, labels in the UI's language", () => {
   });
 });
 
+describe("audit r4 A3 #7: labels are never cut at a tile's edge", () => {
+  const edgeTile = () =>
+    decodeTile(
+      encodeTile({
+        places: [
+          { type: 1, parts: [[30, 2000]], props: { kind: "locality", name: "ראש הנקרה הצפונית", min_zoom: 4 } },
+          { type: 1, parts: [[4080, 4060]], props: { kind: "locality", name: "Eilat Port South", min_zoom: 5 } },
+          { type: 1, parts: [[2000, 10]], props: { kind: "locality", name: "מטולה", min_zoom: 6 } },
+        ],
+      }),
+    );
+  const inside = (l: { x: number; y: number }, w: number, px: number, view: readonly number[]) => l.x - w / 2 - 2 >= view[0] && l.x + w / 2 + 2 <= view[2] && l.y - px / 2 - 2 >= view[1] && l.y + px / 2 + 2 <= view[3];
+  it("a label near an edge is moved inward, whole, inside the tile", () => {
+    const { ctx } = recorder();
+    const drawn = drawTile(ctx, edgeTile(), 256, { lang: "he", zoom: 9 });
+    expect(drawn.map((l) => l.text).sort()).toEqual(["Eilat Port South", "מטולה", "ראש הנקרה הצפונית"].sort());
+    for (const l of drawn) expect(inside(l, l.text.length * 6, 12, [0, 0, 256, 256])).toBe(true);
+  });
+  it("overzoomed: only the labels whose point is in the visible quarter, each whole inside it", async () => {
+    const a = new PMTiles(bytesSource(await buildArchive(new Map([["7/76/52", israelTile()]]))));
+    const h = await a.getHeader();
+    // Zoom 8, the tile 153/105: the covering zoom-7 tile at 2×, its bottom-right quarter visible.
+    const { ctx, calls } = recorder();
+    const translate: number[][] = [];
+    const rec = new Proxy(ctx as unknown as Record<string, unknown>, { get: (t, k: string) => (k === "translate" ? (x: number, y: number) => translate.push([x, y]) : (t as Record<string, unknown>)[k]), set: (t, k: string, v) => (((t as Record<string, unknown>)[k] = v), true) });
+    expect(await drawArchiveTile(a, h, { getContext: () => rec } as unknown as HTMLCanvasElement, 8, 153, 105, 256, { lang: "he" })).toBe(true);
+    const [[tx, ty]] = translate;
+    const view = [-tx, -ty, -tx + 256, -ty + 256];
+    const texts = calls.filter((c) => c.op === "fillText");
+    expect(texts.length).toBeGreaterThan(0);
+    for (const c of texts) {
+      const [text, x, y] = c.args as [string, number, number];
+      expect(inside({ x, y }, text.length * 6, 12, view)).toBe(true);
+    }
+  });
+});
+
 describe("the vault store", () => {
   beforeEach(() => localStorage.removeItem(OFFLINE_FLAG));
   it("imports a PMTiles file into .lumen/maps, lists it with its region and credit, removes it; refuses anything else", async () => {
@@ -250,10 +288,18 @@ describe("drawing from the file, overzoom, no network", () => {
   });
 });
 
-/** Just enough Leaflet for addBaseTiles: records the layers added. */
+/** Just enough Leaflet for addBaseTiles: records the layers added and removed, with a container for the consent button. */
 function fakeLeaflet() {
   const added: string[] = [];
-  const map = { _container: {}, eachLayer: () => undefined, removeLayer: () => undefined } as never;
+  const layers = new Set<{ url: string; getTileUrl: () => string }>();
+  const container = document.createElement("div");
+  document.body.append(container);
+  const map = {
+    _container: container,
+    getContainer: () => container,
+    eachLayer: (f: (l: unknown) => void) => [...layers].forEach(f),
+    removeLayer: (l: { url: string }) => (layers.delete(l as never), added.push(`-${l.url}`)),
+  } as never;
   class GridLayer {
     static extend(proto: object) {
       return class extends GridLayer {
@@ -267,15 +313,23 @@ function fakeLeaflet() {
     }
   }
   const L = {
-    tileLayer: (url: string) => ({ addTo: () => void added.push(url) }),
+    tileLayer: (url: string) => {
+      const layer = { url, getTileUrl: () => url, addTo: () => (layers.add(layer), added.push(url), layer) };
+      return layer;
+    },
     GridLayer,
     latLngBounds: (a: unknown, b: unknown) => [a, b],
   } as unknown as typeof import("leaflet");
-  return { L, map, added };
+  return { L, map, added, container };
 }
+const settle = () => new Promise((r) => setTimeout(r, 30));
 
 describe("the background: the file first, the network never while there is one", () => {
-  afterEach(() => localStorage.removeItem(OFFLINE_FLAG));
+  afterEach(() => {
+    localStorage.removeItem(OFFLINE_FLAG);
+    setOnlineTilesAllowed(false);
+    document.body.innerHTML = "";
+  });
   it("with a basemap in the vault and airplane mode on: drawn from the file, 0 tile requests", async () => {
     const vault = memVault();
     await importOfflineMap(Object.assign(new Blob([(await buildArchive(new Map([["7/76/52", israelTile()]]))) as BlobPart]), { name: "israel.pmtiles" }), vault);
@@ -286,8 +340,9 @@ describe("the background: the file first, the network never while there is one",
       expect(addBaseTiles(L, map)).toBe(true);
       await waitFor(() => expect(added).toEqual(["offline:lumen-offline-basemap"]));
       expect(added).not.toContain(TILE_URL);
-      // And with airplane mode off: still only the file.
+      // And with airplane mode off, even with consent: still only the file.
       env.airplane = false;
+      setOnlineTilesAllowed(true);
       const second = fakeLeaflet();
       addBaseTiles(second.L, second.map);
       await waitFor(() => expect(second.added).toEqual(["offline:lumen-offline-basemap"]));
@@ -296,19 +351,59 @@ describe("the background: the file first, the network never while there is one",
       env.vault = null;
     }
   });
-  it("no basemap: the online tiles (none in airplane mode) — the W12.F7 behaviour", async () => {
+  it("local first: a basemap synced from another device (no hint yet) is used without asking the tile server at all", async () => {
     const vault = memVault();
+    await importOfflineMap(Object.assign(new Blob([(await buildArchive(new Map([["7/76/52", israelTile()]]))) as BlobPart]), { name: "israel.pmtiles" }), vault);
+    localStorage.removeItem(OFFLINE_FLAG);
     env.vault = vault as never;
-    env.airplane = false;
+    setOnlineTilesAllowed(true);
+    try {
+      const { L, map, added } = fakeLeaflet();
+      addBaseTiles(L, map);
+      await waitFor(() => expect(added).toEqual(["offline:lumen-offline-basemap"]));
+      await settle();
+      expect(added).toEqual(["offline:lumen-offline-basemap"]); // never a network layer, not even for a moment
+    } finally {
+      env.vault = null;
+    }
+  });
+  it("no basemap, no consent: 0 tile requests and a button that asks; allowing loads the tiles, stopping removes them", async () => {
+    env.vault = memVault() as never;
+    try {
+      const { L, map, added, container } = fakeLeaflet();
+      expect(addBaseTiles(L, map)).toBe(true);
+      await waitFor(() => expect(container.querySelector("[data-testid=map-tiles-consent]")).not.toBeNull());
+      await settle();
+      expect(added).toEqual([]);
+      const button = container.querySelector("[data-testid=map-tiles-consent]") as HTMLButtonElement;
+      expect(button.tagName).toBe("BUTTON");
+      expect(button.getAttribute("aria-pressed")).toBe("false");
+      expect(button.textContent).toMatch(/OpenStreetMap/);
+      expect(container.textContent).toMatch(/tile\.openstreetmap\.org/);
+      fireEvent.click(button);
+      expect(added).toEqual([TILE_URL]);
+      expect(button.getAttribute("aria-pressed")).toBe("true");
+      expect(onlineTilesAllowed()).toBe(true);
+      fireEvent.click(button);
+      expect(added).toEqual([TILE_URL, `-${TILE_URL}`]);
+      expect(onlineTilesAllowed()).toBe(false);
+    } finally {
+      env.vault = null;
+    }
+  });
+  it("no basemap, consent given: the online tiles; in airplane mode none, and no button", async () => {
+    env.vault = memVault() as never;
+    setOnlineTilesAllowed(true);
     try {
       const a = fakeLeaflet();
       expect(addBaseTiles(a.L, a.map)).toBe(true);
-      expect(a.added).toEqual([TILE_URL]);
+      await waitFor(() => expect(a.added).toEqual([TILE_URL]));
       env.airplane = true;
       const b = fakeLeaflet();
       expect(addBaseTiles(b.L, b.map)).toBe(false);
-      await new Promise((r) => setTimeout(r, 20));
+      await settle();
       expect(b.added).toEqual([]);
+      expect(b.container.querySelector("[data-testid=map-tiles-consent]")).toBeNull();
     } finally {
       env.airplane = false;
       env.vault = null;
@@ -376,6 +471,24 @@ describe("the panel", () => {
       fireEvent.click(screen.getByRole("button", { name: /Remove|הסרה/ }));
     });
     await screen.findByTestId("offline-map-none");
+  });
+  it("audit r4 A3 #13: in Hebrew each part of a map's line is isolated (size, zoom range, region, credit)", async () => {
+    const { readFileSync } = await import("node:fs");
+    const vault = memVault();
+    await importOfflineMap(Object.assign(new Blob([(await buildArchive(new Map([["7/76/52", israelTile()]]), { metadata: { attribution: "© OpenStreetMap (ODbL)" } })) as BlobPart]), { name: "israel.pmtiles" }), vault);
+    const { container } = render(h(OfflineMapPanel, { vault }));
+    await waitFor(() => expect(container.querySelector("[data-map]")).not.toBeNull());
+    const li = container.querySelector("[data-map]")!;
+    expect(li.querySelector('bdi[data-part="size"]')?.getAttribute("dir")).toBe("ltr");
+    expect(li.querySelector('bdi[data-part="size"]')?.textContent).toMatch(/^\d+(\.\d+)? MB$/);
+    expect(li.querySelector('bdi[data-part="bbox"]')?.getAttribute("dir")).toBe("ltr");
+    expect(li.querySelector("bdi[data-part=zooms]")).not.toBeNull();
+    expect(li.querySelector("small bdi")?.textContent).toBe("© OpenStreetMap (ODbL)");
+    // The right-to-left translations keep the numeric range left to right (LRI … PDI), so "7–9" never reads "9–7".
+    for (const lang of ["he", "ar"]) {
+      const zooms = JSON.parse(readFileSync(`src/i18n/locales/${lang}/common.json`, "utf8"))["map.offline.zooms"] as string;
+      expect(zooms).toContain("\u2066{min}–{max}\u2069");
+    }
   });
   it("the gzip helper round-trips (DecompressionStream is there)", async () => {
     const { decompress } = await import("../map/pmtiles");
