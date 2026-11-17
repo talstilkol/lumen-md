@@ -11,6 +11,8 @@ import { useAppStore } from "../store/useStore";
 import { goalProgress, parseGoal, recordProgress } from "../agents/writing/goals/goals";
 import { loadGoalLog, saveGoalLog } from "./writingGoalLog";
 import "./goalsDialogStrings";
+// Hebrew readability from W13.W9's index, not the provisional stand-in (INT7).
+import "../agents/writing/goals/hebrewIndex";
 
 export default function NoteGoalStatus({ text }: { text: string }) {
   const goal = useMemo(() => parseGoal(text), [text]);

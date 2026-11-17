@@ -70,7 +70,9 @@ describe("W13.W14 readability and tone targets", () => {
     expect(readabilityOf(hardEn.repeat(2))?.level).toBe("hard");
   });
 
-  it("Hebrew: provisional estimate until W13.W9 plugs in its index", () => {
+  it("Hebrew: provisional estimate when no index is plugged in", () => {
+    // The goal UI plugs in W13.W9's index (INT7: ./goals/hebrewIndex); this is the stand-in without it.
+    setReadabilityEngine(null);
     const easyHe = "הילד רץ לגן. הוא ראה כלב. הכלב היה גדול. הילד צחק. אמא באה. הם הלכו הביתה. היה טוב. השמש זרחה. הם אכלו. הם שתו. ";
     const hardHe = "ההתפתחויות הטכנולוגיות המואצות בתחומי התקשורת והמחשוב השפיעו השפעה מכרעת על התמורות החברתיות והכלכליות שהתרחשו במדינות המתועשות במהלך העשורים האחרונים, ובכללן הגירה פנימית מתמשכת. ";
     const e = readabilityOf(easyHe.repeat(2))!;
@@ -158,5 +160,20 @@ describe("W13.W14 stays on this device", () => {
       const src = readFileSync(join(__dirname, "..", f), "utf8");
       expect(src, f).not.toMatch(/\bfetch\(|XMLHttpRequest|WebSocket|sendBeacon|EventSource/);
     }
+  });
+});
+
+describe("W13.W14 reads Hebrew readability from W13.W9 (INT7)", () => {
+  it("the goal UI plugs in W9's index: a Hebrew note's level is W9's band, not provisional", async () => {
+    const he = "הילד הלך לבית הספר בבוקר. הוא פגש את חבריו בכיתה. המורה סיפרה להם סיפור על ים גדול. כולם הקשיבו בשקט. אחר כך יצאו לחצר לשחק. השמש זרחה והיה נעים מאוד בחוץ.";
+    setReadabilityEngine(null);
+    expect(readabilityOf(he)?.provisional).toBe(true);
+    const { hebrewIndexEngine } = await import("../agents/writing/goals/hebrewIndex");
+    setReadabilityEngine(hebrewIndexEngine);
+    const { readability } = await import("../agents/writing/readability/readability");
+    const r = readabilityOf(he)!;
+    expect(r).toEqual({ level: readability(he).band, score: readability(he).score, provisional: false });
+    for (const f of ["ui/NoteGoalStatus.tsx", "ui/GoalsDialog.tsx"]) expect(readFileSync(join(__dirname, "..", f), "utf8"), f).toMatch(/import "\.\.\/agents\/writing\/goals\/hebrewIndex";/);
+    setReadabilityEngine(null);
   });
 });

@@ -13,6 +13,8 @@ import { goalProgress, parseGoal, removeGoal, weeklyReport, type NoteGoal } from
 import { loadGoalLog } from "./writingGoalLog";
 import { setFrontmatterField } from "../ai/batchWrites";
 import "./goalsDialogStrings";
+// Hebrew readability from W13.W9's index, not the provisional stand-in (INT7).
+import "../agents/writing/goals/hebrewIndex";
 
 export function goalValue(g: NoteGoal): string | null {
   const parts = [g.words ? `words: ${g.words}` : "", g.minutes ? `minutes: ${g.minutes}` : "", g.readability ? `readability: ${g.readability}` : "", g.tone ? `tone: ${g.tone}` : ""].filter(Boolean);
