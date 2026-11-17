@@ -6,12 +6,31 @@ import { t } from "../../i18n";
 import "../../automations/automationStrings";
 import { uiAlert, uiPrompt, uiSelect } from "../../ui/PromptDialog";
 import { useToastStore } from "../../store/useToastStore";
-import type { Action, Rule, Trigger } from "../../automations/engine";
+import type { Action, Change, Rule, Trigger } from "../../automations/engine";
+import { isRTL } from "../../i18n";
+import { FSI, PDI } from "../../graph/labels";
 import { explainError } from "../../lib/userError";
 
 const load = () => import("../../automations/app");
 const ask = async (key: string, defaultValue = "") => (await uiPrompt({ message: t(key), defaultValue }))?.trim() ?? null;
 const fail = (e: unknown) => useToastStore.getState().push({ kind: "error", title: t("automations.failed", { error: explainError(e) }) });
+
+/** "from → to" in the reading direction: ← in a right-to-left UI, where the line reads from the right. */
+export const flowArrow = (dir: "ltr" | "rtl"): string => (dir === "rtl" ? "←" : "→");
+/** A path or a name inside a line of the other direction keeps its own order (Projects/חתונה.md, not md.חתונה/Projects). */
+const iso = (s: string): string => `${FSI}${s}${PDI}`;
+
+/** The default name of a new rule: "<trigger> → <action>", its arrow in the UI's direction. */
+export function defaultRuleName(trigger: string, action: string, dir: "ltr" | "rtl"): string {
+  return `${trigger} ${flowArrow(dir)} ${action}`;
+}
+
+/** One dry-run line per change: the rule, then what it would do; paths isolated, the arrow in the UI's direction. */
+export function dryRunLine(c: Change, dir: "ltr" | "rtl"): string {
+  if (c.kind === "move") return `• ${iso(c.rule)}: ${iso(c.from)} ${flowArrow(dir)} ${iso(c.to)}`;
+  if (c.kind === "agent") return `• ${iso(c.rule)}: ${t("automations.dryRun.agent", { agent: iso(c.agent), path: iso(c.path ?? "") })}`;
+  return `• ${iso(c.rule)}: ${iso(c.path)}`;
+}
 
 /** The actions the picker offers (W10.E15: six, with "run an agent" and "add a task"). */
 export const ACTIONS = ["move", "tag", "template", "appendDaily", "createTask", "runAgent"] as const;
@@ -68,7 +87,7 @@ async function buildRule(): Promise<Rule | null> {
   if (!a) return null;
   const action = await buildAction(a);
   if (!action) return null;
-  const name = (await ask("automations.ask.name", `${t(`automations.trigger.${w}`)} → ${t(`automations.action.${a}`)}`)) || w;
+  const name = (await ask("automations.ask.name", defaultRuleName(t(`automations.trigger.${w}`), t(`automations.action.${a}`), isRTL() ? "rtl" : "ltr"))) || w;
   // W12.U2: not on Shabbat or a yom tov.
   const rest = await uiSelect({ message: t("automations.pick.restDays"), choices: ["any", "notOnRestDays"].map((v) => ({ value: v, label: t(`automations.restDays.${v}`) })) });
   if (!rest) return null;
@@ -97,9 +116,8 @@ export async function dryRunAutomations(doc: { workspaceName?: string | null; co
       await uiAlert({ message: t("automations.dryRun.none") });
       return;
     }
-    const lines = p.changes.map((c) =>
-      c.kind === "move" ? `• ${c.rule}: ${c.from} → ${c.to}` : c.kind === "agent" ? `• ${c.rule}: ${t("automations.dryRun.agent", { agent: c.agent, path: c.path ?? "" })}` : `• ${c.rule}: ${c.path}`,
-    );
+    const dir = isRTL() ? "rtl" : "ltr";
+    const lines = p.changes.map((c) => dryRunLine(c, dir));
     // W12.U2: rules that wait for the end of Shabbat or a yom tov.
     const waits = p.postponed.map((x) => t(x.why.reason === "shabbat" ? "automations.dryRun.postponedShabbat" : "automations.dryRun.postponedYomTov", { rule: x.rule, until: x.until }));
     await uiAlert({ message: [t("automations.dryRun.title"), ...lines, ...waits, ...(p.stopped.length ? [t("automations.dryRun.stopped", { count: p.stopped.length })] : [])].join("\n") });
