@@ -1,0 +1,37 @@
+# Held-out set (English), written after the last change to the rules and scored once. Never tune on it.
+# N noun · V verb · A adjective · O other (function words, pronouns, adverbs, numbers, modals)
+Mix/V the/O flour/N with/O warm/A water/N and/O a/O little/A yeast/N
+Leave/V the/O bowl/N in/O a/O warm/A place/N for/O an/O hour/N
+When/O the/O dough/N rises/V divide/V it/O into/O small/A balls/N
+The/O oven/N must/O be/V very/O hot/A
+Bake/V the/O bread/N for/O twenty/O minutes/N until/O it/O turns/V golden/A
+Fresh/A bread/N smells/V wonderful/A
+The/O big/A technology/N company/N presented/V a/O new/A smart/A phone/N yesterday/O
+The/O device/N is/V lighter/A than/O the/O previous/A model/N
+Its/O battery/N lasts/V two/O full/A days/N
+The/O camera/N takes/V sharp/A pictures/N even/O in/O the/O dark/N
+The/O price/N is/V still/O high/A and/O customers/N are/V waiting/V for/O discounts/N
+Critics/N wrote/V that/O the/O design/N looks/V pretty/A but/O boring/A
+Once/O upon/O a/O time/N a/O clever/A fox/N lived/V in/O the/O forest/N
+One/O day/N the/O fox/N saw/V a/O black/A crow/N on/O a/O branch/N
+In/O its/O beak/N the/O crow/N held/V a/O piece/N of/O yellow/A cheese/N
+The/O fox/N told/V the/O crow/N that/O its/O voice/N was/V the/O most/O beautiful/A in/O the/O forest/N
+The/O crow/N opened/V its/O beak/N to/O sing/V
+The/O cheese/N fell/V and/O the/O fox/N grabbed/V it/O at/O once/O
+Parliament/N passed/V a/O new/A law/N on/O rent/N last/A week/N
+Under/O the/O law/N landlords/N must/O repair/V every/O defect/N within/O a/O month/N
+Tenants/N may/O go/V to/O court/N if/O the/O repair/N is/V delayed/V
+Tenant/N groups/N welcomed/V the/O decision/N
+Doctors/N recommend/V walking/V for/O at/O least/O half/N an/O hour/N a/O day/N
+Regular/A walking/N strengthens/V the/O heart/N and/O improves/V mood/N
+It/O is/V important/A to/O drink/V water/N even/O when/O you/O are/V not/O thirsty/A
+Older/A people/N should/O check/V their/O blood/N pressure/N regularly/O
+Many/O diseases/N can/O be/V prevented/V with/O a/O healthy/A diet/N
+The/O train/N left/V the/O central/A station/N at/O eight/O in/O the/O morning/N
+The/O passengers/N sat/V quietly/O and/O read/V newspapers/N
+By/O the/O window/N sat/V a/O little/A girl/N with/O her/O grandfather/N
+She/O asked/V him/O where/O they/O were/V going/V
+He/O smiled/V and/O answered/V that/O they/O were/V going/V to/O the/O sea/N
+At/O the/O next/A stop/N many/O soldiers/N got/V on/O with/O heavy/A bags/N
+This/O summer/N was/V the/O hottest/A ever/O recorded/V in/O the/O country/N
+The/O lake/N dropped/V to/O a/O low/A level/N

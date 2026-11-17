@@ -1,0 +1,23 @@
+{
+  "immersive.title": "Immersive reader",
+  "immersive.pos": "Parts of speech:",
+  "immersive.pos.noun": "Nouns",
+  "immersive.pos.verb": "Verbs",
+  "immersive.pos.adj": "Adjectives",
+  "immersive.label.noun": "n",
+  "immersive.label.verb": "v",
+  "immersive.label.adj": "adj",
+  "immersive.labels": "Show labels",
+  "immersive.syllables": "Syllables (English)",
+  "immersive.nikud": "Niqqud for reading (Hebrew)",
+  "immersive.lineFocus": "Line focus",
+  "immersive.close": "Close the immersive reader",
+  "immersive.page": "The note. Arrows move between words and lines; Enter opens a word.",
+  "immersive.word": "Word",
+  "immersive.translating": "Looking it up…",
+  "immersive.translate": "Translate on this device",
+  "immersive.translateFailed": "No translation on this device.",
+  "immersive.speak": "Read aloud",
+  "immersive.noVoice": "This device has no voice for this language.",
+  "immersive.closeWord": "Close"
+}

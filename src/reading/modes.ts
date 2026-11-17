@@ -51,6 +51,14 @@ export const MODE_DEFS: ReadingModeDef[] = [
     fields: ["wpm"],
     open: async (p) => (await import("../ui/RsvpReader")).openRsvpReader(p.wpm),
   },
+  {
+    id: "immersive",
+    label: "readingMode.mode.immersive",
+    hint: "readingMode.mode.immersive.hint",
+    // W13.R5: parts of speech (tagged on this device), syllables / niqqud, line focus.
+    fields: ["pos", "syllables", "lineFocus"],
+    open: async (p) => (await import("../ui/ImmersiveReader")).openImmersiveReader(p),
+  },
 ];
 
 export const modeDef = (id: ReadingModeId): ReadingModeDef => MODE_DEFS.find((m) => m.id === id) ?? MODE_DEFS[0];

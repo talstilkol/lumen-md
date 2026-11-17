@@ -9831,6 +9831,111 @@
       ]
     },
     {
+      "key": "immersive.close",
+      "en": "Close the immersive reader",
+      "vars": []
+    },
+    {
+      "key": "immersive.closeWord",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "immersive.label.adj",
+      "en": "adj",
+      "vars": []
+    },
+    {
+      "key": "immersive.label.noun",
+      "en": "n",
+      "vars": []
+    },
+    {
+      "key": "immersive.label.verb",
+      "en": "v",
+      "vars": []
+    },
+    {
+      "key": "immersive.labels",
+      "en": "Show labels",
+      "vars": []
+    },
+    {
+      "key": "immersive.lineFocus",
+      "en": "Line focus",
+      "vars": []
+    },
+    {
+      "key": "immersive.nikud",
+      "en": "Niqqud for reading (Hebrew)",
+      "vars": []
+    },
+    {
+      "key": "immersive.noVoice",
+      "en": "This device has no voice for this language.",
+      "vars": []
+    },
+    {
+      "key": "immersive.page",
+      "en": "The note. Arrows move between words and lines; Enter opens a word.",
+      "vars": []
+    },
+    {
+      "key": "immersive.pos",
+      "en": "Parts of speech:",
+      "vars": []
+    },
+    {
+      "key": "immersive.pos.adj",
+      "en": "Adjectives",
+      "vars": []
+    },
+    {
+      "key": "immersive.pos.noun",
+      "en": "Nouns",
+      "vars": []
+    },
+    {
+      "key": "immersive.pos.verb",
+      "en": "Verbs",
+      "vars": []
+    },
+    {
+      "key": "immersive.speak",
+      "en": "Read aloud",
+      "vars": []
+    },
+    {
+      "key": "immersive.syllables",
+      "en": "Syllables (English)",
+      "vars": []
+    },
+    {
+      "key": "immersive.title",
+      "en": "Immersive reader",
+      "vars": []
+    },
+    {
+      "key": "immersive.translate",
+      "en": "Translate on this device",
+      "vars": []
+    },
+    {
+      "key": "immersive.translateFailed",
+      "en": "No translation on this device.",
+      "vars": []
+    },
+    {
+      "key": "immersive.translating",
+      "en": "Looking it up…",
+      "vars": []
+    },
+    {
+      "key": "immersive.word",
+      "en": "Word",
+      "vars": []
+    },
+    {
       "key": "importWizard.back",
       "en": "Back",
       "vars": []
@@ -15723,6 +15828,16 @@
     {
       "key": "readingMode.mode.focus.hint",
       "en": "A distraction-free screen for the editor.",
+      "vars": []
+    },
+    {
+      "key": "readingMode.mode.immersive",
+      "en": "Immersive reader",
+      "vars": []
+    },
+    {
+      "key": "readingMode.mode.immersive.hint",
+      "en": "Parts of speech in colour, syllables or niqqud, a word's translation and sound, and line focus — all on this device.",
       "vars": []
     },
     {
