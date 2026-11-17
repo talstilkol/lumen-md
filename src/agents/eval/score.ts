@@ -37,6 +37,7 @@ export function textOf(output: unknown): string {
 
 /** Share of letters that are Hebrew (0 when there are no letters). */
 export { hebrewRatio } from "../../text/hebrew";
+import { rateText } from "./conformal";
 import { hebrewRatio } from "../../text/hebrew";
 
 function at(value: unknown, path: string): unknown {
@@ -141,7 +142,7 @@ export function formatEvalHtml(results: CaseResult[], meta: { model: string; url
     .map((a) => {
       const mine = ran.filter((r) => r.agent === a);
       const pass = mine.filter(passed).length;
-      return `<tr><td>${esc(a)}</td><td>${pass}/${mine.length}</td><td class="${pass === mine.length ? "ok" : "bad"}">${pass === mine.length ? "pass" : "FAIL"}</td></tr>`;
+      return `<tr><td>${esc(a)}</td><td>${pass}/${mine.length}</td><td>${esc(rateText(pass, mine.length))}</td><td class="${pass === mine.length ? "ok" : "bad"}">${pass === mine.length ? "pass" : "FAIL"}</td></tr>`;
     })
     .join("\n");
   const cases = results
@@ -156,9 +157,9 @@ export function formatEvalHtml(results: CaseResult[], meta: { model: string; url
 <style>body{font:14px system-ui,sans-serif;margin:24px;color:#1f2328}table{border-collapse:collapse;margin:12px 0}td,th{border:1px solid #d0d7de;padding:4px 8px;text-align:start;vertical-align:top}th{background:#f6f8fa}.ok{color:#1a7f37}.bad{color:#cf222e;font-weight:600}</style>
 </head><body>
 <h1>Agent eval — ${esc(meta.model)}</h1>
-<p>${esc(meta.date)} · ${esc(meta.url)} · <strong>${ok}/${ran.length} passed</strong> · ${agents.length} agents</p>
+<p>${esc(meta.date)} · ${esc(meta.url)} · <strong>${ok}/${ran.length} passed</strong> · pass rate ${esc(rateText(ok, ran.length))} · ${agents.length} agents</p>
 <h2>By agent</h2>
-<table><tr><th>agent</th><th>passed</th><th></th></tr>
+<table><tr><th>agent</th><th>passed</th><th>rate (Wilson 95%)</th><th></th></tr>
 ${rows}
 </table>
 <h2>Cases</h2>
@@ -176,7 +177,7 @@ export function formatEvalReport(results: CaseResult[], meta: { model: string; u
   const lines = [
     `# Agent eval — ${meta.model}`,
     "",
-    `${meta.date} · ${meta.url} · **${ok}/${ran.length} passed** · ${(ms / 1000).toFixed(1)} s total`,
+    `${meta.date} · ${meta.url} · **${ok}/${ran.length} passed** · pass rate ${rateText(ok, ran.length)} · ${(ms / 1000).toFixed(1)} s total`,
     "",
     "| Case | Agent | Result | Attempts | Time | Notes |",
     "|---|---|---|---|---|---|",
