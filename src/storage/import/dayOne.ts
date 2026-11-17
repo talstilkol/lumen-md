@@ -15,6 +15,7 @@
 import { claimPath, mdDest, relativeTo, safeName } from "./names";
 import { isoDate, withFrontmatter, type Props } from "./frontmatter";
 import { emptyVault, type ConvertedVault } from "./types";
+import { swallowed } from "../../lib/logger";
 
 interface Media {
   identifier?: string;
@@ -91,7 +92,8 @@ export function convertDayOne(files: Map<string, Uint8Array>): ConvertedVault {
     let json: unknown;
     try {
       json = JSON.parse(dec.decode(data));
-    } catch {
+    } catch (e) {
+      swallowed("import/dayOne: a file is not JSON; it is listed as skipped", e);
       vault.skipped.push({ path: p, reason: "unreadable" });
       continue;
     }

@@ -40,7 +40,7 @@ async function read(): Promise<RenameEntry[]> {
 let queue: Promise<unknown> = Promise.resolve();
 function serialized<T>(fn: () => Promise<T>): Promise<T> {
   const run = queue.then(fn, fn);
-  queue = run.catch(() => undefined);
+  queue = run.catch((e: unknown) => swallowed("storage/renameLog: a rename-log write failed; its caller has the error, the next one still runs", e));
   return run;
 }
 

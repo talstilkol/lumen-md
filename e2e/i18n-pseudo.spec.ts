@@ -18,7 +18,7 @@ import { pseudoScan, type PseudoFinding } from "./_pseudoScan";
  * other specs that use e2e/_lumen.ts.
  */
 
-const ROOT = join(__dirname, "..");
+const ROOT = join(import.meta.dirname, "..");
 execFileSync(process.execPath, [join(ROOT, "scripts/i18n-pseudo.mjs")], { cwd: ROOT, stdio: "pipe" });
 const PSEUDO = {
   "en-XA": JSON.parse(readFileSync(join(ROOT, ".pseudo/en-XA.json"), "utf8")) as { dir: "ltr" | "rtl"; strings: Record<string, string> },

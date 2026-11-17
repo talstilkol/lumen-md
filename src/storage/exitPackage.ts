@@ -14,6 +14,7 @@
  *   manifest.json                format, counts, and { path, bytes, sha256 } per file
  *   OBSIDIAN.md                  what Obsidian shows differently, file by file
  */
+import { swallowed } from "../lib/logger";
 
 export const EXIT_FORMAT = "lumen-exit/1";
 
@@ -88,7 +89,8 @@ export async function verifyExitPackage(files: Map<string, Uint8Array> | ExitFil
   let manifest: ExitManifest | null = null;
   try {
     manifest = raw ? (JSON.parse(new TextDecoder().decode(raw)) as ExitManifest) : null;
-  } catch {
+  } catch (e) {
+    swallowed("storage/exitPackage: manifest.json is not JSON; the check lists it as missing", e);
     manifest = null;
   }
   if (!manifest || manifest.format !== EXIT_FORMAT || !Array.isArray(manifest.files)) return { ok: false, checked: 0, problems: ["manifest.json missing or not a Lumen exit package"], manifest: null };

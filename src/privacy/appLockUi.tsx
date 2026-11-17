@@ -7,6 +7,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { t } from "../i18n";
+import { Modal } from "../ui/Modal";
 import "./appLockStrings";
 import { AppLock, readSettings, webAuthnSeam, type LockState, type NativePrivacy } from "./appLock";
 import { BOOT_CLASS } from "./appLockBoot";
@@ -73,8 +74,9 @@ export function LockOverlay({ lock: l, doc = document }: { lock: AppLock; doc?: 
     if (!ok) setError(t(l.failedAttempts >= 3 ? "appLock.failedMany" : "appLock.failed"));
   };
   return (
-    <div style={cover}>
-      <div role="dialog" aria-modal="true" aria-labelledby="app-lock-title" aria-describedby="app-lock-body" data-testid="app-lock" style={{ display: "grid", gap: 12, justifyItems: "center", padding: 24, maxWidth: 360, textAlign: "center" }}>
+    // Review 14 M6: the real Modal (top layer, the rest inert, focus trapped); nothing dismisses it but an unlock.
+    <Modal aria-labelledby="app-lock-title" aria-describedby="app-lock-body" closedBy="none" restoreFocus={false} style={cover}>
+      <div data-testid="app-lock" style={{ display: "grid", gap: 12, justifyItems: "center", padding: 24, maxWidth: 360, textAlign: "center" }}>
         <div aria-hidden="true" style={{ fontSize: 40 }}>🔒</div>
         <h2 id="app-lock-title" style={{ margin: 0, fontSize: 20, fontWeight: 600 }}>
           {t("appLock.title")}
@@ -89,7 +91,7 @@ export function LockOverlay({ lock: l, doc = document }: { lock: AppLock; doc?: 
           {error}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 
