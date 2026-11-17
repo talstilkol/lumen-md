@@ -1,0 +1,80 @@
+/* Settings → Calendar (plan W7.20). Logical properties: the same in RTL and LTR. */
+.cal-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: hsl(var(--fg));
+}
+.cal-muted {
+  margin: 0;
+  font-size: 12px;
+  color: hsl(var(--fg-muted));
+}
+.cal-card {
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.cal-h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+}
+.cal-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 13px;
+}
+.cal-input {
+  flex: 1 1 240px;
+  min-width: 0;
+  padding: 6px 8px;
+  border: 1px solid hsl(var(--border-strong));
+  border-radius: 6px;
+  background: hsl(var(--bg-subtle));
+  color: hsl(var(--fg));
+  font-size: 13px;
+}
+.cal-input-short {
+  flex: 0 1 160px;
+}
+.cal-input:focus-visible {
+  outline: 2px solid hsl(var(--accent));
+  outline-offset: 1px;
+}
+.cal-btn {
+  padding: 5px 12px;
+}
+.cal-btn:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+.cal-danger {
+  color: hsl(var(--danger));
+}
+.cal-status {
+  margin: 0;
+  font-size: 13px;
+}
+.cal-subs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+.cal-sub {
+  justify-content: space-between;
+  border: 1px solid hsl(var(--border));
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+.cal-sub-name {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
