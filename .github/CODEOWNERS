@@ -291,6 +291,7 @@
 /src/book/app.ts                         @talstilkol
 /src/citations/run.ts                    @talstilkol
 /src/citations/openAlexLookup.ts         @talstilkol
+/src/citations/doiOpenAlex.ts            @talstilkol
 /src/commands/domains/exportActions.ts   @talstilkol
 /src/commands/domains/journalistActions.ts @talstilkol
 /src/pdf/zoteroSend.ts                   @talstilkol
@@ -321,6 +322,3 @@
 /scripts/plan/wipGate.mjs                @talstilkol
 /scripts/plan/auditGuard.mjs             @talstilkol
 /scripts/plan/ledgerRatchet.mjs          @talstilkol
-
-# ── Review 12, L4: the OpenAlex DOI lookup is a network path (codeowners-coverage) ──
-/src/citations/doiOpenAlex.ts            @talstilkol
