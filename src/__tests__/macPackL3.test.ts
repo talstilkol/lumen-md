@@ -143,6 +143,9 @@ describe("the Argon2 bench's verdict (W4.20)", () => {
     expect(argonVerdict({ "in-house": inHouse, "hash-wasm": { rfc9106: true, runs: [600, 700, 650], medianMs: 650 } }, 1000).ok).toBe(true);
     expect(argonVerdict({ "in-house": inHouse, "hash-wasm": { rfc9106: true, runs: [1200], medianMs: 1200 } }, 1000).problems).toEqual(["hash-wasm: median 1200 ms > 1000 ms"]);
     expect(argonVerdict({ "in-house": { ...inHouse, rfc9106: false }, "hash-wasm": { rfc9106: true, runs: [1], medianMs: 1 } }, 1000).ok).toBe(false);
+    // FC1: the in-house Argon2id (WebAssembly fill) meets the budget on its own.
+    expect(argonVerdict({ "in-house": { rfc9106: true, runs: [450, 470, 460], medianMs: 460 }, "hash-wasm": null }, 1000)).toEqual({ ok: true, problems: [] });
+    expect(argonVerdict({ "in-house": { rfc9106: false, runs: [460], medianMs: 460 }, "hash-wasm": null }, 1000).ok).toBe(false);
     expect(median([3, 1, 2])).toBe(2);
     expect(median([4, 1, 2, 3])).toBe(2.5);
   });

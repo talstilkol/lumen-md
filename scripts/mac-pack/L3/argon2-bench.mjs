@@ -10,8 +10,9 @@
  *     scripts/mac-pack/L3/argon2-bench.mjs [--runs 3] [--budget-ms 1000] [--out reports/mac-pack/L3-argon2.json]
  *
  * Writes { impls: { "in-house": { rfc9106, medianMs, runs }, "hash-wasm": … | null }, ok }.
- * ok (exit 0): hash-wasm is installed, both pass RFC 9106, and hash-wasm's
- * median is within --budget-ms (the plan's "≤ 1 s on a desktop"). The
+ * ok (exit 0): every impl present passes RFC 9106, and the in-house median
+ * (WebAssembly fill, FC1) is within --budget-ms (the plan's "≤ 1 s on a
+ * desktop"); when hash-wasm is installed its median must be within it too. The
  * Pixel 7 figure (≤ 2 s) needs the phone: the app measures it itself
  * (src/sync/e2ee/kdfCalibrate.ts) — owner/device step, not this script.
  */
@@ -32,13 +33,18 @@ export const median = (xs) => {
   return s.length ? (s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2) : null;
 };
 
-/** The verdict from the measured impls (pure, tested). */
+/**
+ * The verdict from the measured impls (pure, tested). The in-house Argon2id
+ * fills memory in WebAssembly built in the repo since FC1 (W4.20), so it can
+ * meet the budget itself; hash-wasm, when installed, must meet it too.
+ */
 export function verdict(impls, budgetMs) {
   const problems = [];
   const hw = impls["hash-wasm"];
-  if (!hw) problems.push("hash-wasm is not installed (npm i --no-save hash-wasm, or the owner's lockfile change)");
+  const ih = impls["in-house"];
   for (const [name, r] of Object.entries(impls)) if (r && !r.rfc9106) problems.push(`${name}: RFC 9106 §5.3 vector does not match`);
   if (hw && !(hw.medianMs <= budgetMs)) problems.push(`hash-wasm: median ${hw.medianMs} ms > ${budgetMs} ms`);
+  if (!hw && !(ih?.medianMs <= budgetMs)) problems.push(`in-house: median ${ih?.medianMs ?? "?"} ms > ${budgetMs} ms, and hash-wasm is not installed (npm i --no-save hash-wasm, or the owner's lockfile change)`);
   return { ok: problems.length === 0, problems };
 }
 
