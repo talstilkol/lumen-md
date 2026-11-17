@@ -12,7 +12,8 @@
  * says that names are not hidden — it never lets the user think they are.
  * The engine is chosen by the text's language, not by what is cached
  * (audit r3): English text uses bert-base-NER, Hebrew DictaBERT-NER, and a
- * text whose language no engine here reads gets no finder (and the warning).
+ * text whose language no engine here reads (another script, or Latin with
+ * no capitalised word) gets no finder (and the warning).
  */
 import { alignNer, type NerFn } from "./pii";
 import { CONVERTED_MODELS_BASE, loadConvertedRegistry } from "./convertedModels";
@@ -84,26 +85,36 @@ export function ollamaNamesFinder(ask: NamesAsk = ollamaAsk): NerFn {
 }
 
 export type NamesEngine = "dictabert" | "bert-base-ner" | "ollama" | "none";
-export type NamesLanguage = "he" | "en";
+/** "other": a script no engine here reads (Arabic, Cyrillic, …), or Latin with no case to go by. */
+export type NamesLanguage = "he" | "en" | "other";
 
 /** Thrown by the finder for a text whose language no engine on this device covers. */
 export class NamesUnsupportedError extends Error {
   constructor(readonly languages: NamesLanguage[]) {
-    super(`No name finder on this device for ${languages.join(", ")} text`);
+    super(`No name finder on this device for ${languages.map((l) => (l === "other" ? "other-script or all-caps/lowercase" : l)).join(", ")} text`);
     this.name = "NamesUnsupportedError";
   }
 }
 
+const OTHER_SCRIPT = /(?:(?!\p{Script=Hebrew}|\p{Script=Latin})\p{L}){2,}/u;
+
 /**
- * The languages whose names a text may hold (audit r3, W10.C23): Hebrew when
- * it has a Hebrew word, English when it has a capitalised Latin word outside
- * a link or an address. Fail closed: a mixed text needs both.
+ * The languages whose names a text may hold (audit r3, W10.C23; review 12,
+ * H2), outside links, addresses and inline code: Hebrew when it has a Hebrew
+ * word; English when it has a Latin word of 2+ letters; "other" when it has
+ * a word in any other script, or Latin words none of which is capitalised
+ * (all-caps or all-lowercase text: the cased English model can't tell a
+ * name there). No engine covers "other", so such a text is never claimed to
+ * have its names hidden. Fail closed: a mixed text needs every language.
  */
 export function namesLanguages(text: string): NamesLanguage[] {
   const out: NamesLanguage[] = [];
-  if (/\p{Script=Hebrew}{2,}/u.test(text)) out.push("he");
-  const latin = text.replace(/\b(?:https?:\/\/|www\.)\S+/gi, " ").replace(/\S+@\S+/g, " ");
-  if (/(?:^|[^\p{L}])\p{Lu}[a-z]+/u.test(latin)) out.push("en");
+  const plain = text.replace(/`[^`\n]*`/g, " ").replace(/\b(?:https?:\/\/|www\.)\S+/gi, " ").replace(/\S+@\S+/g, " ");
+  if (/\p{Script=Hebrew}{2,}/u.test(plain)) out.push("he");
+  const latin = plain.match(/\p{Script=Latin}{2,}/gu) ?? [];
+  if (latin.length) out.push("en");
+  const caseless = latin.length > 0 && !latin.some((w) => /^\p{Lu}\p{Ll}/u.test(w));
+  if (caseless || OTHER_SCRIPT.test(plain)) out.push("other");
   return out;
 }
 
