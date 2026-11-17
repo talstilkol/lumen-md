@@ -15,7 +15,7 @@ const [en, he] = doc.split(/\n---\n/);
 /** The findings W9.5 accepted rather than fixed (the PR's table lists the fixed ones and their tests). */
 const ACCEPTED = [
   "rr7-4(a) / G4", "rr9-1(c) / H2", "rr9-2(b) / H4", "RR6-469-3", "V2",
-  "RR18-469-2", "M2", "B1r", "R12-15", "RR2-483-5", "RR8-469-5", "RR20-596-3", "RR20-596-4", "RR20-596-5",
+  "RR18-469-2", "RR11-469-3", "M2", "B1r", "R12-15", "RR2-483-5", "RR8-469-5", "RR20-596-3", "RR20-596-4", "RR20-596-5",
   "X6 / RR11-451-2", "RR6-451-2 E7", "Z3", "S2", "S4 / T6", "Z2", "Z4", "Q3", "R4", "H5", "K6-4",
   "RR8-473-3", "C1", "C2", "C4", "D1", "RR30", "RR25", "RR23-587-3", "T5-1",
   "RR11-473-1", "RR14-469-3", "RR18-469-3", "S13-3", "S27-3", "S27-4", "S13-4", "N3",
