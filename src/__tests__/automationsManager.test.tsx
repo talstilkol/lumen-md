@@ -26,6 +26,7 @@ vi.mock("../storage/workspace", () => ({
   isOPFSAvailable: () => true,
 }));
 
+import axe from "axe-core";
 import * as app from "../automations/app";
 import { AutomationsPanel, type AutomationsApi } from "../automations/AutomationsPanel";
 import { dryRunEventFor, previewLines } from "../automations/describe";
@@ -196,6 +197,19 @@ describe("the run log and undo", () => {
     await waitFor(() => expect(screen.getByTestId("automations-status").textContent).toMatch(/Tasks\.md was edited after the run/));
     expect(screen.getByTestId(`automation-run-${entry!.id}`).getAttribute("data-undone")).toBe("false");
     expect(vault.get("Tasks.md")).toContain("edited by hand");
+  });
+});
+
+describe("accessibility", () => {
+  it("axe: no serious or critical violation with rules, a dry run and the log on screen", async () => {
+    await app.runFor({ kind: "created", path: NOTE, text: TEXT });
+    const { container } = mount();
+    const row = await screen.findByTestId("automation-rule-r2");
+    await act(async () => void fireEvent.click(within(row).getByRole("button", { name: /Dry run of Task/ })));
+    await screen.findByTestId("automations-dry");
+    const r = await axe.run(container.ownerDocument.body, { resultTypes: ["violations"], rules: { "color-contrast": { enabled: false } } });
+    const bad = r.violations.filter((v) => v.impact === "serious" || v.impact === "critical").map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`);
+    expect(bad).toEqual([]);
   });
 });
 
