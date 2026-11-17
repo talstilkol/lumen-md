@@ -1,0 +1,40 @@
+{
+ "card": {
+  "schema": 1,
+  "tag": "dev",
+  "agent": "consistency",
+  "model": {
+   "name": "rules (no model)",
+   "digest": "n/a (no model weights)"
+  },
+  "seed": 13,
+  "temperature": 0,
+  "dataset": {
+   "name": "eval/writing/consistency/synthetic-vault",
+   "version": "1",
+   "license": "MIT (written for lumen-md; synthetic)",
+   "origin": "synthetic"
+  },
+  "n": 50,
+  "metrics": {
+   "precision": {
+    "value": 1,
+    "ci95": [
+     1,
+     1
+    ],
+    "method": "bootstrap"
+   },
+   "recall": {
+    "value": 1,
+    "ci95": [
+     1,
+     1
+    ],
+    "method": "bootstrap"
+   }
+  }
+ },
+ "suggestions": 50,
+ "planted": 50
+}

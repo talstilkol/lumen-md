@@ -10,6 +10,8 @@
  *                                           every writing eval set (eval/writing/<agent>) has a complete,
  *                                           current card: its dataset version is the set's manifest, and the
  *                                           set has ≥ 150 items in Hebrew and in English
+ *                                           an agent without an eval set (eval/writing/<id>): its card in
+ *                                           eval/cards/writing/<id>.json, or any report whose card.agent is <id>
  *
  * Exit 1 when any report has no card or its card is missing a field
  * (scripts/lib/evalCard.mjs lists them). Exit 0 with nothing to check.
@@ -83,16 +85,40 @@ export function writingAgentsWithSets(root = ROOT) {
   return existsSync(dir) ? readdirSync(dir, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name).sort() : [];
 }
 
+/**
+ * The reports that carry one agent's card: its file under eval/cards/writing,
+ * and every report in the default folders whose card names the agent.
+ * @param {string} agent
+ * @param {{ root?: string }} [o]
+ */
+export function agentReports(agent, { root = ROOT } = {}) {
+  const own = join(root, "eval/cards/writing", `${agent}.json`);
+  const named = DEFAULT_DIRS.flatMap((d) => jsonFiles(resolve(root, d))).filter((f) => {
+    try {
+      return JSON.parse(readFileSync(f, "utf8"))?.card?.agent === agent;
+    } catch {
+      return false;
+    }
+  });
+  return [...new Set([...(existsSync(own) ? [own] : []), ...named])].map((f) => relative(root, f));
+}
+
 export function main(argv, { root = ROOT, log = console.log, err = console.error } = {}) {
   const json = argv.includes("--json");
   const at = (flag) => (argv.includes(flag) ? argv[argv.indexOf(flag) + 1] : undefined);
+  const ai = argv.indexOf("--agent");
   const agent = at("--agent");
   const suite = at("--suite");
+  if (ai >= 0 && (!agent || agent.startsWith("--"))) {
+    err("eval:card: --agent needs an agent id");
+    return 1;
+  }
   if (suite !== undefined && suite !== "writing") {
     err(`eval:card: unknown suite ${suite} (known: writing)`);
     return 1;
   }
-  if (agent !== undefined || suite === "writing") {
+  // An agent with an eval set (W13.W2) is held to its set; one without (W13.W6–W10) to its card alone.
+  if (suite === "writing" || (agent !== undefined && existsSync(join(root, "eval/writing", agent, "manifest.json")))) {
     const agents = agent !== undefined ? [agent] : writingAgentsWithSets(root);
     const results = agents.map((a) => checkWritingAgent(a, { root }));
     for (const r of results) {
@@ -103,6 +129,14 @@ export function main(argv, { root = ROOT, log = console.log, err = console.error
     const bad = results.filter((r) => r.problems.length).length;
     if (!json) log(`eval:card: ${results.length - bad}/${results.length} writing agents carry a complete, current card`);
     return bad || !results.length ? 1 : 0;
+  }
+  if (agent !== undefined) {
+    const files = agentReports(agent, { root });
+    if (!files.length) {
+      err(`eval:card: no card for agent "${agent}" (expected eval/cards/writing/${agent}.json)`);
+      return 1;
+    }
+    argv = [...argv.slice(0, ai), ...argv.slice(ai + 2), ...files];
   }
   const skip = new Set(["--json", "--check"]);
   const results = checkReports(argv.filter((a) => !a.startsWith("--") && !skip.has(a)), { root });
