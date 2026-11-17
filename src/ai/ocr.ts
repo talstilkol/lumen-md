@@ -110,6 +110,25 @@ function singleWordWorker(lang: "heb" | "eng"): Promise<TesseractWorker> {
   })();
 }
 
+let linePromise: Promise<TesseractWorker> | null = null;
+function getLineWorker(): Promise<TesseractWorker> {
+  return (linePromise ??= (async () => {
+    const T = await import("tesseract.js");
+    const w = (await T.createWorker([...LANGS], T.OEM.LSTM_ONLY, {
+      workerPath: `${base()}worker.min.js`,
+      corePath: base(),
+      langPath: langPath(),
+      gzip: true,
+      workerBlobURL: false,
+    })) as unknown as TesseractWorker;
+    await w.setParameters?.({ tessedit_pageseg_mode: T.PSM.SINGLE_LINE });
+    return w;
+  })().catch((e) => {
+    linePromise = null;
+    throw e;
+  }));
+}
+
 function getHebWorker(): Promise<TesseractWorker> {
   return (hebPromise ??= singleWordWorker("heb").catch((e) => {
     hebPromise = null;
@@ -127,7 +146,8 @@ function getLatinWorker(): Promise<TesseractWorker> {
 function scheduleIdle(): void {
   if (idleTimer) clearTimeout(idleTimer);
   idleTimer = setTimeout(() => {
-    for (const p of [workerPromise, hebPromise, latinPromise]) void p?.then((w) => w.terminate()).catch(() => undefined);
+    for (const p of [workerPromise, hebPromise, latinPromise, linePromise]) void p?.then((w) => w.terminate()).catch(() => undefined);
+    linePromise = null;
     workerPromise = null;
     hebPromise = null;
     latinPromise = null;
@@ -208,6 +228,26 @@ export function ocrBoxes(image: Blob | HTMLCanvasElement | OffscreenCanvas, boxe
         out.push({ text: cleanOcrText(r.data.text), confidence: r.data.confidence });
       }
       return out;
+    } finally {
+      scheduleIdle();
+    }
+  });
+  queue = job.catch(() => undefined);
+  return job;
+}
+
+/**
+ * Read one line (a table cell of a screenshot, plan W7.16): single-line page
+ * segmentation, the text as read — a cell may be "3" or "—", which the noise
+ * filter of a page would drop. Same queue and idle shutdown as ocrImage.
+ */
+export function ocrLine(image: Blob | HTMLCanvasElement | OffscreenCanvas): Promise<string> {
+  const job = queue.then(async () => {
+    // Its own worker, made for single lines: the page worker's settings are never changed under another caller.
+    const w = await getLineWorker();
+    try {
+      const r = await w.recognize(image as Blob);
+      return r.data.text.replace(/\s+/g, " ").trim();
     } finally {
       scheduleIdle();
     }

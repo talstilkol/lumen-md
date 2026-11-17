@@ -135,12 +135,29 @@ export async function screenshotToNote(image: Blob, lang: string, deps: Screensh
   return { ...(await toNoteMarkdown(text)), source: "ocr", model: null, ms: now() - t0 };
 }
 
+/** The image's pixels (the browser decodes it; nothing is sent anywhere). */
+async function decodePixels(image: Blob): Promise<{ width: number; height: number; data: Uint8ClampedArray }> {
+  const bmp = await createImageBitmap(image);
+  const c = new OffscreenCanvas(bmp.width, bmp.height);
+  const ctx = c.getContext("2d")!;
+  ctx.drawImage(bmp, 0, 0);
+  bmp.close();
+  const d = ctx.getImageData(0, 0, c.width, c.height);
+  return { width: d.width, height: d.height, data: d.data };
+}
+
+function toCanvas(p: { width: number; height: number; data: Uint8ClampedArray | Uint8Array }): OffscreenCanvas {
+  const c = new OffscreenCanvas(p.width, p.height);
+  c.getContext("2d")!.putImageData(new ImageData(new Uint8ClampedArray(p.data), p.width, p.height), 0, 0);
+  return c;
+}
+
 /** The app's deps: Ollama on this machine, and the browser's Tesseract. Loaded lazily. */
 export async function appScreenshotDeps(): Promise<ScreenshotDeps> {
   const { runLocalRequest } = await import("../agents/runtime");
   const { ollamaExecutor } = await import("../agents/executors/ollama");
   const { visionModel } = await import("./vision");
-  const { ocrImage } = await import("./ocr");
+  const [{ ocrImage, ocrLine }, { screenshotOcr }] = await Promise.all([import("./ocr"), import("./screenshotLayout")]);
   return {
     model: visionModel,
     chat: async (model, prompt, images, signal) => {
@@ -157,7 +174,14 @@ export async function appScreenshotDeps(): Promise<ScreenshotDeps> {
       );
       return res.content.trim() || null;
     },
-    ocr: async (image) => (await ocrImage(image)).text,
+    // W7.16: enlarged, tables cell by cell, code read inverted (./screenshotLayout); one image of the region at a time.
+    ocr: async (image) => {
+      const px = await decodePixels(image);
+      return screenshotOcr(px, async (p, mode) => {
+        const canvas = toCanvas(p);
+        return mode === "line" ? ocrLine(canvas) : (await ocrImage(canvas)).text;
+      });
+    },
   };
 }
 

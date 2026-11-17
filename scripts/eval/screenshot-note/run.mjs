@@ -11,7 +11,9 @@
  *       language (src/ai/ocrCer.ts on the text a reader sees), tables right,
  *       seconds per screenshot, and requests that left this machine.
  *       ollama: the real model (owner step: a Mac M1 with `ollama pull qwen3-vl:2b`).
- *       tesseract-cli: the fallback path's engine (Tesseract 5 on the app's models).
+ *       tesseract-cli: Tesseract 5 on the app's models, on the whole screenshot as it is.
+ *       tesseract-app: the app's on-device path (src/ai/screenshotLayout.ts: enlarged,
+ *       tables cell by cell, code inverted) with the Tesseract CLI as the recogniser.
  *       There is no "gold" engine (W10.B11): scoring the gold against itself
  *       gives CER 0% and says nothing about recognition. A run is refused
  *       (exit 1, no report) when the engine did not run on every screenshot
@@ -40,6 +42,8 @@ const flag = (name, dflt) => {
 };
 
 async function make(dir) {
+  // --set probe: the held-out probe screens (./probe.mjs) instead of the 50 development fixtures.
+  const set = flag("--set", "dev") === "probe" ? await import("./probe.mjs") : { cases, page };
   const require = createRequire(join(ROOT, "package.json"));
   const { chromium } = require("playwright");
   mkdirSync(dir, { recursive: true });
@@ -48,14 +52,14 @@ async function make(dir) {
   const p = await ctx.newPage();
   await p.route("**/*", (route) => route.abort());
   const font = pathToFileURL(join(ROOT, "public/fonts/reading/assistant.woff2")).href;
-  for (const c of cases()) {
-    await p.setContent(page(c, font), { waitUntil: "load" });
+  for (const c of set.cases()) {
+    await p.setContent(set.page(c, font), { waitUntil: "load" });
     await p.evaluate(() => document.fonts.ready);
     await p.locator(".win").screenshot({ path: join(dir, `${c.id}.png`) });
   }
   await browser.close();
-  writeFileSync(join(dir, "cases.json"), JSON.stringify(cases().map(({ id, lang, kind, gold }) => ({ id, lang, kind, gold })), null, 1) + "\n");
-  console.log(`screenshot-note: ${cases().length} screenshots in ${dir}`);
+  writeFileSync(join(dir, "cases.json"), JSON.stringify(set.cases().map(({ id, lang, kind, gold }) => ({ id, lang, kind, gold })), null, 1) + "\n");
+  console.log(`screenshot-note: ${set.cases().length} screenshots in ${dir}`);
 }
 
 function tesseractCli() {
@@ -66,6 +70,36 @@ function tesseractCli() {
     if (r.status !== 0) throw new Error(r.stderr.slice(0, 200));
     return r.stdout;
   };
+}
+
+/**
+ * The app's on-device path (W7.16): src/ai/screenshotLayout.ts plans the
+ * regions, enlarges and inverts them, and puts the note together; only the
+ * recogniser differs from the app — the Tesseract CLI on the same models
+ * instead of tesseract.js in the browser (blocks: psm 6; cells: psm 7, heb+eng, and eng alone for a
+ * cell read without Hebrew).
+ * ImageMagick only decodes and encodes PNG; every pixel operation is the
+ * app's own TypeScript.
+ */
+function tesseractApp(L) {
+  const tess = mkdtempSync(join(tmpdir(), "shot-tessdata-"));
+  for (const l of ["heb", "eng"]) writeFileSync(join(tess, `${l}.traineddata`), gunzipSync(readFileSync(join(ROOT, `public/tesseract/lang/${l}.traineddata.gz`))));
+  const work = mkdtempSync(join(tmpdir(), "shot-regions-"));
+  let n = 0;
+  const decode = (file) => {
+    const size = spawnSync("identify", ["-format", "%w %h", file], { encoding: "utf8" }).stdout.trim().split(" ").map(Number);
+    const raw = spawnSync("convert", [file, "-alpha", "on", "rgba:-"], { maxBuffer: 1 << 28 }).stdout;
+    return { width: size[0], height: size[1], data: new Uint8Array(raw) };
+  };
+  const recognise = async (px, mode) => {
+    const f = join(work, `r${n++}.png`);
+    const r0 = spawnSync("convert", ["-size", `${px.width}x${px.height}`, "-depth", "8", "rgba:-", f], { input: Buffer.from(px.data.buffer, px.data.byteOffset, px.data.byteLength) });
+    if (r0.status !== 0) throw new Error(String(r0.stderr).slice(0, 200));
+    const r = spawnSync("tesseract", [f, "stdout", "-l", mode === "line-latin" ? "eng" : "heb+eng", "--tessdata-dir", tess, "--oem", "1", "--psm", mode === "block" ? "6" : "7"], { encoding: "utf8" });
+    if (r.status !== 0) throw new Error(r.stderr.slice(0, 200));
+    return r.stdout;
+  };
+  return async (file) => L.screenshotOcr(decode(file), recognise);
 }
 
 function ollama(model, prompt) {
@@ -82,7 +116,7 @@ function ollama(model, prompt) {
   };
 }
 
-const ENGINES = ["ollama", "tesseract-cli"];
+const ENGINES = ["ollama", "tesseract-cli", "tesseract-app"];
 
 async function measure(dir) {
   const engine = flag("--engine", "ollama");
@@ -95,7 +129,7 @@ async function measure(dir) {
   const C = await tsImport("../../../src/ai/ocrCer.ts", import.meta.url);
   const items = JSON.parse(readFileSync(join(dir, "cases.json"), "utf8"));
   const model = flag("--model", S.SCREENSHOT_MODEL);
-  const run = engine === "tesseract-cli" ? tesseractCli() : ollama(model, S.screenshotPrompt);
+  const run = engine === "tesseract-cli" ? tesseractCli() : engine === "tesseract-app" ? tesseractApp(await tsImport("../../../src/ai/screenshotLayout.ts", import.meta.url)) : ollama(model, S.screenshotPrompt);
   const result = await measureCases(items, run, { S, C, fileOf: (it) => join(dir, `${it.id}.png`) });
   const problems = refuseSelfMeasurement(items, result);
   if (problems.length) {
@@ -113,6 +147,6 @@ const [cmd, dir] = process.argv.slice(2);
 if (cmd === "make" && dir) await make(dir);
 else if (cmd === "measure" && dir) await measure(dir);
 else {
-  console.error("usage: run.mjs make <dir> | measure <dir> [--engine ollama|tesseract-cli]");
+  console.error("usage: run.mjs make <dir> | measure <dir> [--engine ollama|tesseract-cli|tesseract-app]");
   process.exit(2);
 }
