@@ -119,6 +119,8 @@ export function highlighterMarks(px: Pixels, opts: DetectOptions = {}): Mark[] {
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
       const i = (y * w + x) * 4;
+      // A highlighter is light ink over the paper; a ballpoint's blue or red is dark: that is a pen line, not a band.
+      if (dark(data, i)) continue;
       const c = inkOf(data[i], data[i + 1], data[i + 2]);
       if (!c) continue;
       ink[y * w + x] = INKS.findIndex((k) => k.color === c) + 1;
@@ -158,12 +160,26 @@ const dark = (data: Pixels["data"], i: number) => data[i] + data[i + 1] + data[i
 export function underlineMarks(px: Pixels, opts: DetectOptions = {}): Mark[] {
   const { width: w, height: h, data } = px;
   const minW = Math.max(12, Math.round(w * Math.max(0.08, (opts.minWidth ?? 0.03) * 2)));
-  const BAND = 7;
+  // Pen ink: dark, or a saturated red or blue that is not light — a fine ballpoint line goes pale in a photo but
+  // stays far more saturated and darker than highlighter over paper.
   const isDark = new Uint8Array(w * h);
-  for (let k = 0; k < w * h; k++) isDark[k] = dark(data, k * 4) ? 1 : 0;
-  const count = new Uint8Array(w);
+  for (let k = 0; k < w * h; k++) {
+    const i = k * 4;
+    if (dark(data, i)) isDark[k] = 1;
+    else {
+      const [hue, sat, val] = rgbToHsv(data[i], data[i + 1], data[i + 2]);
+      // Only a pen's own hues (red, blue): a highlighter's edge over print is saturated and mid-dark too, in its ink's hue.
+      const penHue = hue >= 345 || hue <= 15 || (hue >= 205 && hue <= 250);
+      isDark[k] = penHue && sat >= 0.35 && val <= 0.82 ? 1 : 0;
+    }
+  }
   const marks: Mark[] = [];
   const taken: Box[] = [];
+  // A fine line first (7 rows, at most 4 px of ink a column); then a wavy or thick one — a felt pen's wave
+  // leaves a 7-row band, so it is looked for in a band of about a line's height, with more ink a column.
+  const lineH0 = Math.max(8, Math.round(h / 60));
+  for (const [BAND, MAX_INK] of [[7, 4], [Math.max(10, Math.round(lineH0 * 0.9)), 7]] as const) {
+  const count = new Uint8Array(w);
   for (let yy = 0; yy < Math.min(BAND, h); yy++) for (let x = 0; x < w; x++) count[x] += isDark[yy * w + x];
   for (let y = 0; y + BAND <= h; y++) {
     // The band slides down one row: add the new bottom row, drop the old top one.
@@ -176,7 +192,7 @@ export function underlineMarks(px: Pixels, opts: DetectOptions = {}): Mark[] {
         covered++;
         ink += count[x];
       }
-      if (covered / (x1 - x0 + 1) < 0.9 || ink / covered > 4) continue;
+      if (covered / (x1 - x0 + 1) < 0.9 || ink / covered > MAX_INK) continue;
       // The band must start at the line: no ink in the row above it across most of the stretch.
       let above = 0;
       if (y > 0) for (let x = x0; x <= x1; x++) above += isDark[(y - 1) * w + x];
@@ -206,10 +222,12 @@ export function underlineMarks(px: Pixels, opts: DetectOptions = {}): Mark[] {
           blank = 0;
         } else if (yBottom >= 0 && ++blank > 2) break;
       }
-      if (yBottom < 0) continue;
+      // Text, not the crest of the line's own wave: a band that starts inside a wavy line sees one inked row above.
+      if (yBottom < 0 || yBottom - yTop + 1 < Math.max(4, Math.round(lineH * 0.4))) continue;
       taken.push({ x0, y0: y, x1, y1: y + BAND });
       marks.push({ box: { x0, y0: yTop, x1, y1: yBottom }, color: "pen" });
     }
+  }
   }
   // A hand-drawn line found in pieces (it wandered out of the band): one mark per text line.
   marks.sort((a, b) => a.box.x0 - b.box.x0);
