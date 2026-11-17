@@ -137,3 +137,24 @@ describe("W13.W13 the summary", () => {
     expect(model).not.toHaveBeenCalled();
   });
 });
+
+describe("one word diff for reading and writing (INT7)", () => {
+  it("explain my change uses W13.R8's bidi word diff, not the W3.11 one", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const src = readFileSync(join(__dirname, "../agents/writing/explainChange.ts"), "utf8");
+    expect(src).toMatch(/from "\.\.\/\.\.\/reading\/wordDiffBidi"/);
+    expect(src).not.toMatch(/collab\/wordDiff/);
+  });
+
+  it("a Hebrew prefix change is one hunk on the whole word, in both versions", () => {
+    const older = "הלכנו לבית הספר מוקדם.";
+    const newer = "הלכנו ובבית הספר מוקדם.";
+    const [h, ...rest] = changeHunks(older, newer);
+    expect(rest).toEqual([]);
+    expect(h.old.text).toBe("לבית");
+    expect(h.new.text).toBe("ובבית");
+    expect(older.slice(h.old.from, h.old.to)).toBe("לבית");
+    expect(newer.slice(h.new.from, h.new.to)).toBe("ובבית");
+  });
+});

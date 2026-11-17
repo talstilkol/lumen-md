@@ -2,9 +2,10 @@
  * "Explain my change" (plan W13.W13): what changed between two versions of a
  * note and why it matters — without reading a diff.
  *
- *  1. The diff: word level, right for Hebrew (collab/wordDiff.ts, the
- *     W3.11 engine the W13.R8 compare view builds on), grouped into hunks
- *     with their offsets in both versions.
+ *  1. The diff: word level, right for bidi text and Hebrew prefixes — the
+ *     W13.R8 compare view's (reading/wordDiffBidi.ts; one word diff for
+ *     reading and writing, INT7) — grouped into hunks with their offsets in
+ *     both versions.
  *  2. Meaning changes, found by rules BEFORE any model: a number that
  *     changed, appeared or disappeared (digits, percentages, Hebrew and
  *     English number words); a negation added or removed (לא, אין, אינו,
@@ -21,7 +22,7 @@
  * Pure (no I/O); the command (commands/domains/writingChecks.ts) picks the
  * older version from the note's history.
  */
-import { wordDiff } from "../../collab/wordDiff";
+import { wordDiff as bidiWordDiff } from "../../reading/wordDiffBidi";
 import { normalizeForMatch, stripNiqqud } from "../../text/hebrew";
 import { englishStem } from "./repetition";
 import type { AgentDefinition, AgentInput } from "../types";
@@ -59,9 +60,22 @@ export interface ChangeExplanation {
   stats: { added: number; removed: number };
 }
 
+type Op = { type: "equal" | "insert" | "delete"; text: string; oldText?: string };
+
+/** R8's word diff as equal / delete / insert runs: a prefix-only or niqqud-only change of a word is that word deleted and inserted. */
+export function wordOps(older: string, newer: string): Op[] {
+  const out: Op[] = [];
+  for (const p of bidiWordDiff(older, newer)) {
+    if (p.type === "prefix") out.push({ type: "delete", text: p.oldPrefix + p.oldStem }, { type: "insert", text: p.newPrefix + p.stem });
+    else if (p.type === "niqqud") out.push({ type: "delete", text: p.oldText }, { type: "insert", text: p.text });
+    else out.push(p);
+  }
+  return out;
+}
+
 /** Hunks of a word diff: runs of insertions / deletions, joined across a single space. */
 export function changeHunks(older: string, newer: string): ChangeHunk[] {
-  const ops = wordDiff(older, newer);
+  const ops = wordOps(older, newer);
   const hunks: ChangeHunk[] = [];
   let oi = 0;
   let ni = 0;
@@ -78,7 +92,7 @@ export function changeHunks(older: string, newer: string): ChangeHunk[] {
         hunks.push(cur);
         cur = null;
       }
-      oi += op.text.length;
+      oi += (op.oldText ?? op.text).length;
       ni += op.text.length;
       continue;
     }
