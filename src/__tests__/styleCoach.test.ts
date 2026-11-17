@@ -123,13 +123,14 @@ describe("latency without a model (W13.W3)", () => {
     }
   });
 
-  it("a 10 000-paragraph note (the whole note at once) is checked in well under a second per thousand paragraphs", () => {
+  it("a 10 000-paragraph note checked at once stays linear (< 3 s for 20 000 findings; it took 10 s with a per-finding overlap scan)", () => {
     const para = "We met in order to plan the launch. The end result was fine.\n\n";
     const doc = para.repeat(10_000);
     const t0 = performance.now();
     const found = coachRules(doc, "en", "professional");
     const ms = performance.now() - t0;
     expect(found.length).toBe(20_000);
-    expect(ms / 10).toBeLessThan(1000);
+    expect(ms).toBeLessThan(3000);
   });
+});
 });
