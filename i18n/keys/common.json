@@ -16276,6 +16276,11 @@
       "vars": []
     },
     {
+      "key": "openSources.kind.ruling",
+      "en": "Rulings",
+      "vars": []
+    },
+    {
       "key": "openSources.kind.series",
       "en": "Statistics",
       "vars": []
@@ -16318,6 +16323,58 @@
     {
       "key": "openSources.online",
       "en": "Search online",
+      "vars": []
+    },
+    {
+      "key": "openSources.openLaw.cancel",
+      "en": "Cancel import",
+      "vars": []
+    },
+    {
+      "key": "openSources.openLaw.cancelled",
+      "en": "Import cancelled; the previous copy is kept.",
+      "vars": []
+    },
+    {
+      "key": "openSources.openLaw.failed",
+      "en": "Import failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "openSources.openLaw.have",
+      "en": "{count, plural, one {# law on this device, imported {date}} other {# laws on this device, imported {date}}}",
+      "vars": [
+        "date"
+      ]
+    },
+    {
+      "key": "openSources.openLaw.import",
+      "en": "Import a file…",
+      "vars": []
+    },
+    {
+      "key": "openSources.openLaw.imported",
+      "en": "{count, plural, one {# law imported. It is searched on this device only.} other {# laws imported. They are searched on this device only.}}",
+      "vars": []
+    },
+    {
+      "key": "openSources.openLaw.importing",
+      "en": "Importing laws: {done} of {total}…",
+      "vars": [
+        "done",
+        "total"
+      ]
+    },
+    {
+      "key": "openSources.openLaw.none",
+      "en": "No copy yet. Download gkour/israeli_law (CC BY-SA 4.0, from Wikisource) as JSON lines, then import the file.",
+      "vars": []
+    },
+    {
+      "key": "openSources.openLaw.replace",
+      "en": "Replace with another file…",
       "vars": []
     },
     {
@@ -16391,6 +16448,11 @@
       "vars": []
     },
     {
+      "key": "openSources.sends.openlaw",
+      "en": "sends nothing: the copy you import is searched on this device; rulings are links only",
+      "vars": []
+    },
+    {
       "key": "openSources.sends.registers",
       "en": "Sends the non-profit or company name or number you type to data.gov.il; Reshumot references are links only",
       "vars": []
@@ -16413,6 +16475,11 @@
     {
       "key": "openSources.source.knesset",
       "en": "Knesset",
+      "vars": []
+    },
+    {
+      "key": "openSources.source.openlaw",
+      "en": "Open Book of Laws (offline)",
       "vars": []
     },
     {

@@ -9,9 +9,11 @@
  *    the Knesset source's right), but this edition is Wikisource's, so a text
  *    from it is kept as **cc-by-sa** with Wikisource's credit and a link to
  *    the page. Every stored text carries that tag in its frontmatter.
- *  - Download only when the user asks, at a pinned dataset revision (the pin
- *    is owed: Hugging Face is not reachable where this was written, so
- *    OPEN_LAW_REVISION is null and nothing is offered until it is set).
+ *  - Lumen does not download it: the user imports an export they downloaded
+ *    themselves (store.ts, the open-sources dialog), and the copy's sha256
+ *    is its revision. A pinned Hub revision for an in-app download is still
+ *    owed (Hugging Face is not reachable where this was written), so
+ *    OPEN_LAW_REVISION stays null and no download is offered.
  *  - Lookups are local: "סעיף 12 לחוק החוזים (חלק כללי)" finds the law with
  *    the Knesset name matcher (W7.5 lawNames) and the section with
  *    lawSections, on the device.
@@ -25,7 +27,7 @@ import { matchLaw, type LawRecord } from "../knesset/lawNames";
 import { lawSections, type Section } from "../knesset/store";
 
 export const OPEN_LAW_DATASET = "gkour/israeli_law";
-/** The Hub commit the corpus is downloaded at. Null: not pinned yet, so the source is not offered (owed, Mac). */
+/** The Hub commit an in-app download would use. Null: not pinned, so Lumen offers no download, only the import of a file (owed, Mac). */
 export const OPEN_LAW_REVISION: string | null = null;
 export const OPEN_LAW_RIGHTS: Rights = "cc-by-sa";
 export const OPEN_LAW_LICENSE = "CC-BY-SA-4.0";
@@ -55,13 +57,36 @@ export function parseOpenLawRows(jsonl: string): OpenLawRow[] {
   return jsonl
     .split(/\r?\n/)
     .filter((l) => l.trim())
-    .map((l, i) => {
-      const o = JSON.parse(l) as Record<string, unknown>;
-      const title = TITLE_FIELDS.map((k) => o[k]).find((v) => typeof v === "string") as string | undefined;
-      const text = TEXT_FIELDS.map((k) => o[k]).find((v) => typeof v === "string") as string | undefined;
-      if (!title || text === undefined) throw new Error(`israeli_law row ${i + 1}: no title/text among its fields (${Object.keys(o).join(", ")})`);
-      return { title, text, url: typeof o.url === "string" ? o.url : undefined };
-    });
+    .map((l, i) => rowOf(JSON.parse(l) as Record<string, unknown>, i));
+}
+
+/** One page of the dataset; the Hub's datasets-server wraps it as `{ row: {…} }`. */
+function rowOf(raw: Record<string, unknown>, i: number): OpenLawRow {
+  const o = raw && typeof raw.row === "object" && raw.row !== null ? (raw.row as Record<string, unknown>) : raw;
+  const title = TITLE_FIELDS.map((k) => o[k]).find((v) => typeof v === "string") as string | undefined;
+  const text = TEXT_FIELDS.map((k) => o[k]).find((v) => typeof v === "string") as string | undefined;
+  if (!title || text === undefined) throw new Error(`israeli_law row ${i + 1}: no title/text among its fields (${Object.keys(o).join(", ")})`);
+  return { title, text, url: typeof o.url === "string" ? o.url : undefined };
+}
+
+/**
+ * The file the user chose: JSON lines (the dataset exported with
+ * `to_json(lines=True)`), a JSON array of rows, or a datasets-server page
+ * (`{ "rows": [{ "row": {…} }] }`). Anything else fails with what it found.
+ */
+export function parseOpenLawFile(text: string): OpenLawRow[] {
+  const s = text.replace(/^\uFEFF/, "").trimStart();
+  if (s.startsWith("[") || /^\{\s*"rows"\s*:/.test(s)) {
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(s);
+    } catch {
+      parsed = undefined;
+    }
+    const list = Array.isArray(parsed) ? parsed : parsed && typeof parsed === "object" && Array.isArray((parsed as { rows?: unknown }).rows) ? (parsed as { rows: unknown[] }).rows : null;
+    if (list) return list.map((o, i) => rowOf(o as Record<string, unknown>, i));
+  }
+  return parseOpenLawRows(s);
 }
 
 /** The Wikisource page of a law (its title, spaces as underscores). */

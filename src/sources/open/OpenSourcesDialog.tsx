@@ -8,7 +8,7 @@
  * ledgered fetch. Keyboard: type, ↑/↓, Enter inserts, Alt+O searches online,
  * Esc closes; Tab reaches the filters and the switches.
  */
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { getLocale, t } from "../../i18n";
 import "./strings";
@@ -30,9 +30,11 @@ export interface DialogDeps {
   insertion: (r: OpenResult) => Promise<string | null>;
   onInsert: (markdown: string) => void;
   onClose: () => void;
+  /** W11.H16: import a file of the Open Book of Laws the user chose (stays on the device). */
+  importOpenLaw?: (file: File, signal: AbortSignal, onProgress: (p: { done: number; total: number }) => void) => Promise<NonNullable<LocalSources["openLaw"]>>;
 }
 
-const SOURCES: readonly OpenSourceId[] = ["sefaria", "knesset", "datagov", "benyehuda", "registers"];
+const SOURCES: readonly OpenSourceId[] = ["sefaria", "knesset", "openlaw", "datagov", "benyehuda", "registers"];
 
 export function OpenSourcesDialog(d: DialogDeps) {
   const [query, setQuery] = useState("");
@@ -44,6 +46,9 @@ export function OpenSourcesDialog(d: DialogDeps) {
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState("");
   const input = useRef<HTMLInputElement>(null);
+  const lawFile = useRef<HTMLInputElement>(null);
+  const lawButton = useRef<HTMLButtonElement>(null);
+  const [importing, setImporting] = useState<AbortController | null>(null);
 
   useEffect(() => {
     input.current?.focus();
@@ -94,6 +99,25 @@ export function OpenSourcesDialog(d: DialogDeps) {
   const toggle = (id: OpenSourceId) => {
     setSourceEnabled(id, !enabled[id]);
     setEnabled(enabledSources());
+  };
+
+  // W11.H16: the user's own copy of the Open Book of Laws, read from a file on this device.
+  const importLaw = async (file: File | undefined) => {
+    if (!file || !d.importOpenLaw || importing) return;
+    const ac = new AbortController();
+    setImporting(ac);
+    setStatus(t("openSources.openLaw.importing", { done: 0, total: "…" }));
+    try {
+      const index = await d.importOpenLaw(file, ac.signal, (p) => setStatus(t("openSources.openLaw.importing", { done: p.done, total: p.total })));
+      setLocal((l) => ({ laws: l?.laws ?? [], library: l?.library ?? null, openLaw: index }));
+      setStatus(t("openSources.openLaw.imported", { count: index.count }));
+    } catch (e) {
+      setStatus(ac.signal.aborted ? t("openSources.openLaw.cancelled") : t("openSources.openLaw.failed", { error: explainError(e, "open-sources") }));
+    } finally {
+      setImporting(null);
+      if (lawFile.current) lawFile.current.value = "";
+      lawButton.current?.focus();
+    }
   };
 
   const onKey = (e: KeyboardEvent) => {
@@ -193,11 +217,30 @@ export function OpenSourcesDialog(d: DialogDeps) {
         <fieldset className="os-switches">
           <legend>{t("openSources.switches")}</legend>
           {SOURCES.map((id) => (
-            <label key={id} className="os-switch">
-              <input type="checkbox" checked={enabled[id]} onChange={() => toggle(id)} data-testid={`open-sources-switch-${id}`} />
-              <span>{t(`openSources.source.${id}`)}</span>
-              <span className="os-sends">{t(`openSources.sends.${id}`)}</span>
-            </label>
+            <Fragment key={id}>
+              <label className="os-switch">
+                <input type="checkbox" checked={enabled[id]} onChange={() => toggle(id)} data-testid={`open-sources-switch-${id}`} />
+                <span>{t(`openSources.source.${id}`)}</span>
+                <span className="os-sends">{t(`openSources.sends.${id}`)}</span>
+              </label>
+              {id === "openlaw" && enabled.openlaw && d.importOpenLaw && (
+                <div className="os-openlaw" data-testid="open-law-import">
+                  <span className="os-sends" dir="auto">
+                    {local?.openLaw ? t("openSources.openLaw.have", { count: local.openLaw.count, date: local.openLaw.imported.slice(0, 10) }) : t("openSources.openLaw.none")}
+                  </span>
+                  <input ref={lawFile} type="file" accept=".jsonl,.json,.ndjson,application/json" hidden tabIndex={-1} aria-hidden="true" onChange={(e) => void importLaw(e.target.files?.[0])} data-testid="open-law-file" />
+                  {importing ? (
+                    <button type="button" ref={lawButton} onClick={() => importing.abort()} data-testid="open-law-cancel">
+                      {t("openSources.openLaw.cancel")}
+                    </button>
+                  ) : (
+                    <button type="button" ref={lawButton} onClick={() => lawFile.current?.click()} data-testid="open-law-pick">
+                      {local?.openLaw ? t("openSources.openLaw.replace") : t("openSources.openLaw.import")}
+                    </button>
+                  )}
+                </div>
+              )}
+            </Fragment>
           ))}
         </fieldset>
         <div className="cite-foot">
@@ -234,6 +277,7 @@ export async function openSourcesDialog(): Promise<void> {
       searchOnline={app.searchOnlineGated}
       insertion={app.insertion}
       onClose={close}
+      importOpenLaw={(file, signal, onProgress) => import("../openlaw/app").then((m) => m.importOpenLawFile(file, { signal, onProgress }))}
       onInsert={(text) => window.dispatchEvent(new CustomEvent("lumen-mobile-insert", { detail: { insert: `\n\n${text}\n`, cursorOffset: 0 } }))}
     />,
   );

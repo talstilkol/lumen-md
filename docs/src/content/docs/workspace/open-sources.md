@@ -2,7 +2,7 @@
 title: Open sources
 description: One search over Sefaria, the Knesset, data.gov.il and the CBS, and the Ben-Yehuda library, with the rights of every result and the right way to quote it.
 type: reference
-tasks: ["W7.24"]
+tasks: ["W7.24", "W11.H16"]
 ---
 
 Every open Hebrew source comes with its own terms. The **Open sources**
@@ -43,6 +43,27 @@ translation's own licence decides what is copied.
 The switches at the bottom of the dialog turn each source on or off. A
 source that is off gets nothing at all. Sefaria starts on; the Knesset,
 government data and the Ben-Yehuda library start off.
+
+## The Open Book of Laws, on this device
+
+**Open Book of Laws (offline)** searches Israeli laws as Hebrew Wikisource
+edits them (the dataset `gkour/israeli_law`, CC BY-SA 4.0). Lumen does not
+download it: download the dataset yourself as JSON lines (a JSON array or a
+datasets-server page also works), turn the source on, and choose
+**Import a file…** under its switch. The file is read on this device and
+kept in the vault, in `.lumen/openlaw/`; nothing is sent, before or after.
+
+- Type a law or a section the way you write it: `סעיף 12 לחוק החוזים (חלק
+  כללי)`, `חוק המכר, סעיף 11`, `ס' 2 לחוק הגנת הפרטיות`, a Basic Law.
+- A section goes into the note as a quote with its citation, the CC BY-SA
+  licence, Wikisource's credit and a link to the page. A whole law goes in
+  as a citation link with the same credit.
+- It is **not an official source**: every insertion says so. For the
+  official text, cite the law from the Knesset.
+- A Supreme Court reference (`בג"ץ 6821/93 …`) is a ruling: a title and a
+  link only, until the rulings' licence is clear.
+- **Replace with another file…** imports a newer copy; the old one stays
+  in use until the new one is complete, and **Cancel import** keeps it.
 
 ## Keyboard
 
