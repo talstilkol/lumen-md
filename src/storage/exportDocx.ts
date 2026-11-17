@@ -184,8 +184,56 @@ function rPrXml(r: Run, hyperlink = false): string {
   return parts.length ? `<w:rPr>${parts.join("")}</w:rPr>` : "";
 }
 
+/**
+ * The text cut at its bidi isolates (FSI/LRI/RLI … PDI): each isolate is a run
+ * of its own, so an English citation "(Melville, 1851; Darwin, 1859)" inside a
+ * Hebrew sentence is an LTR run (no <w:rtl/>) and keeps its parentheses at a
+ * line break. Word and LibreOffice decide a run's neutrals by <w:rtl/>, and do
+ * not honour the isolate characters themselves (W2.16 visual check).
+ */
+export function isolatePieces(text: string): string[] {
+  const out: string[] = [];
+  const re = /[\u2066\u2067\u2068][^\u2066-\u2069]*\u2069/g;
+  let last = 0;
+  for (let m = re.exec(text); m; m = re.exec(text)) {
+    if (m.index > last) out.push(text.slice(last, m.index));
+    out.push(m[0]);
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) out.push(text.slice(last));
+  // Only a change of direction makes a new run: an isolate of digits and
+  // punctuation ("(2022)") stays in the run around it.
+  const kind = (t: string) => (RTL_RUN.test(t) ? "r" : /\p{L}/u.test(t) ? "l" : "");
+  const merged: { text: string; kind: string }[] = [];
+  for (const t of out) {
+    const k = kind(t);
+    const prev = merged[merged.length - 1];
+    if (prev && (!k || !prev.kind || prev.kind === k)) {
+      prev.text += t;
+      prev.kind ||= k;
+    } else merged.push({ text: t, kind: k });
+  }
+  // An LTR piece among RTL ones is fenced with LRM on both sides: a reader that drops the isolate
+  // (LibreOffice) still keeps its brackets with it at a line break, as Word does with the run's direction.
+  const mixed = merged.some((m) => m.kind === "r");
+  return merged.length ? merged.map((m) => (mixed && m.kind === "l" ? `\u200E${m.text}\u200E` : m.text)) : [text];
+}
+
+/**
+ * In a right-to-left run a number range with an en or em dash ("עמ׳ 50–52")
+ * would show reversed ("52–50"): the dash is a neutral between two numbers in
+ * an RTL run. LRM on both sides of the dash keeps the range left to right, as
+ * a Hebrew reader reads numbers. (A hyphen-minus is already kept by the bidi rules.)
+ */
+export const rtlRanges = (text: string) => (RTL_RUN.test(text) ? text.replace(/(\d)([\u2013\u2014])(?=\d)/g, "$1\u200E$2\u200E") : text);
+
 function bareRunXml(r: Run): string {
-  return `<w:r>${rPrXml(r)}<w:t xml:space="preserve">${esc(r.text)}</w:t></w:r>`;
+  return isolatePieces(r.text)
+    .map((piece) => {
+      const text = rtlRanges(piece);
+      return `<w:r>${rPrXml({ ...r, text })}<w:t xml:space="preserve">${esc(text)}</w:t></w:r>`;
+    })
+    .join("");
 }
 
 /** The Word id of footnote `key`, rendering the note on its first reference. */
@@ -628,7 +676,9 @@ function tocXml(body: string, lang: "he" | "en"): string {
 
 function buildDocxParts(content: string, opts: DocxOptions = {}): { name: string; data: string }[] {
   const academic = opts.academic;
-  const md = academic ? splitCover(content).body : content;
+  // The YAML frontmatter is the note's metadata, not its text: Word never shows it (as pandoc). W2.16's
+  // visual check found `citation-style: il` printed between two rules at the top of every exported note.
+  const md = academic ? splitCover(content).body : content.replace(/^\uFEFF?---\r?\n[\s\S]*?\r?\n(?:---|\.\.\.)[ \t]*(?:\r?\n|$)/, "");
   const baseDir = markdownBaseDirection(content);
   const ctx = newCtx(baseDir, academic);
   const body = markdownToBody(md, ctx);

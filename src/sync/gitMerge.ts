@@ -27,6 +27,7 @@
 import type { DiffHunk } from "./cloud/diff";
 import { mergeText as mergeDocument } from "./merge/textMerge";
 import { isLfsPointer } from "./gitText";
+import { mergeReviewFiles, REVIEW_FILE_PATH } from "../srs/reviewMerge";
 
 // Small text checks shared with git.ts / gitMirror.ts (./gitText.ts keeps them out of the merge chunk).
 export { hasConflictMarkers, isLfsPointer, LFS_POINTER_PREFIX } from "./gitText";
@@ -212,6 +213,14 @@ export function planPull(entries: PullEntry[], labels?: MergeLabels): PullAction
     const b = base === null ? "" : decoder.decode(base);
     const o = decoder.decode(ours);
     const t = decoder.decode(theirs);
+    // W3.3: the review file is merged card by card (both devices' reviews kept), never line by line.
+    if (path === REVIEW_FILE_PATH || path.endsWith(`/${REVIEW_FILE_PATH}`)) {
+      const review = mergeReviewFiles(base === null ? null : b, o, t);
+      if (review !== null) {
+        if (review !== o) actions.push({ kind: "write", path, data: encoder.encode(review), why: "merged", theirs: t });
+        continue;
+      }
+    }
     const merged = mergeText(b, o, t, labels);
     if (merged.clean) {
       // `theirs` goes with it: both versions are kept in the note's history (W1.9).

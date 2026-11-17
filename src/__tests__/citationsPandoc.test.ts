@@ -205,5 +205,35 @@ describe("DOCX with the bibliography (W2.16)", () => {
     const bytes = await markdownToDocxBytes(md);
     const text = noIso(docxText(bytes));
     for (const s of ["(דרשן, 2022, עמ׳ 4)", "מקורות בעברית", "דרשן, ד׳ (2022)", "Austen, J. (1813)", "Pride and prejudice"]) expect(text, s).toContain(s);
+    // The frontmatter is metadata: not printed in the document (the visual check found it was).
+    expect(text).not.toContain("citation-style");
+  });
+
+  it("an English citation in a Hebrew sentence is a run of its own, left to right (no <w:rtl/>), so Word keeps its parentheses", async () => {
+    const { docxPartsForTest } = await import("../storage/exportDocx");
+    const lib = [...gold, { key: "d", record: { type: "book", authors: [{ family: "דרשן", given: "דוד" }], year: "2022", title: "ילד אמיץ", publisher: "הוצאה" } as CitationRecord }];
+    const md = expandCitations("---\ncitation-style: il\nlang: he\n---\nכפי שנכתב [@d, עמ׳ 4] וגם [@austen1813; @darwin1859] בספרות.", lookupOf(lib)).markdown;
+    const xml = docxPartsForTest(md)["word/document.xml"];
+    const runs = [...xml.matchAll(/<w:r>(<w:rPr>.*?<\/w:rPr>)?<w:t xml:space="preserve">(.*?)<\/w:t><\/w:r>/g)].map((m) => ({ rtl: /<w:rtl\/>/.test(m[1] ?? ""), text: noIso(m[2]) }));
+    // Fenced with LRM, so a reader that ignores the isolate (LibreOffice) still keeps ")" with "1859" at a line break.
+    expect(runs).toContainEqual({ rtl: false, text: "\u200E(Austen, 1813; Darwin, 1859)\u200E" });
+    // The Hebrew citation is in the Hebrew run (same direction: no new run).
+    expect(runs).toContainEqual({ rtl: true, text: "כפי שנכתב (דרשן, 2022, עמ׳ 4) וגם " });
+    expect(runs).toContainEqual({ rtl: true, text: " בספרות." });
+  });
+
+  it("a page range in a Hebrew run keeps its order (LRM around the dash); an English one is left as it is", async () => {
+    const { rtlRanges } = await import("../storage/exportDocx");
+    expect(rtlRanges("(כהן ולוי, 2019, עמ׳ 50–52)")).toBe("(כהן ולוי, 2019, עמ׳ 50\u200E–\u200E52)");
+    expect(rtlRanges("12(3), 45–67. עיונים")).toBe("12(3), 45\u200E–\u200E67. עיונים");
+    expect(rtlRanges("pp. 45–67")).toBe("pp. 45–67");
+    expect(rtlRanges("שנים 2019-2020")).toBe("שנים 2019-2020");
+  });
+
+  it("no exported note prints its YAML frontmatter; a rule in the text (---) stays", async () => {
+    const { markdownToDocxBytes } = await import("../storage/exportDocx");
+    const text = docxText(await markdownToDocxBytes("---\ntitle: מסמך\ntags: [a, b]\nlang: he\n---\n# כותרת\n\nפסקה.\n\n---\n\nעוד פסקה: tags stay here.\n"));
+    expect(text).not.toMatch(/title: מסמך|tags: \[a, b\]|lang: he/);
+    for (const s of ["כותרת", "פסקה.", "עוד פסקה: tags stay here."]) expect(text).toContain(s);
   });
 });
