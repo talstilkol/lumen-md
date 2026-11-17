@@ -1,7 +1,7 @@
 {
  "about": "W10.F7: a decision for every open PR whose head is not in the train (npm run train:missing). in = a task or train brings it; rejected = it will not go in, and why; replaced = what carries it instead. A decision is about one head: a PR that moves needs a new one.",
  "train": "verify/train-7",
- "trainHead": "44dc5d9a8c91598823126717311843488f49dec0",
+ "trainHead": "03731e4fc359b639e6d9dc1610bc05404b69809e",
  "decided": "2026-11-17",
  "note": "Integrator INT7 (17.11): wave g3 (#1131-#1171, 41 PRs) is merged into verify/train-7 from a6ef1580a2; their heads are in the train. W13 statuses stay as plan.json has them (the WIP gate refuses wave-13 starts). trainHead is the integration head this file was checked against (before this commit).",
  "decisions": [
@@ -1023,6 +1023,83 @@
    "decision": "in",
    "reason": "Integrator INT7 (17.11): an open draft of lane FC1 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
    "via": "lane FC1"
+  },
+  {
+   "pr": 1192,
+   "head": "556b8590f316ebff51b8e14ca9efce2e31bb254b",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC2"
+  },
+  {
+   "pr": 1193,
+   "head": "ff98cf6fb789a7d7f7c211315fd342d5c733c63b",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC2"
+  },
+  {
+   "pr": 1194,
+   "head": "f252529e456b2cce02d9bf6e81ef391a124d4594",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC2"
+  },
+  {
+   "pr": 1195,
+   "head": "a7ebbe9eea4a3f5dfa816e0418d749ff9477843d",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC2"
+  },
+  {
+   "pr": 1196,
+   "head": "1afce28c4e23d277aa22c814419360577fcecb73",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC2"
+  },
+  {
+   "pr": 1197,
+   "head": "3b954767c84506234a3a8b0b44ba8381cb29d72b",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC2"
+  },
+  {
+   "pr": 1198,
+   "head": "06def6f303ffbd16ebbe92060e96f38972ae53fa",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC2"
+  },
+  {
+   "pr": 1199,
+   "head": "b247b6b0a545d4e4d0e04f5e743974d394ea1956",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC2"
+  },
+  {
+   "pr": 1200,
+   "head": "6bea42e3a035c2ee277d0ae0b32747f9b3aefc70",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC2"
+  },
+  {
+   "pr": 1201,
+   "head": "35adf4b53a1498c90ca859a3bcab127ee2ab0650",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC2"
+  },
+  {
+   "pr": 1202,
+   "head": "ecf22466348ddbc29d788aae3ee663773dc9a8f7",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC2"
   }
  ]
 }
