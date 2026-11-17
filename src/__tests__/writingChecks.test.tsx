@@ -38,6 +38,8 @@ vi.mock("../ui/AiToast", () => ({ showAiToast: (m: string) => toasts.push(m) }))
 
 import { approveStagedChange, clearStagedChanges, listStagedChanges } from "../agents/staging";
 import { argumentFlow, consistencyFlow, harperFlow, readabilityFlow, readabilityLine, reportLabels, structureFlow } from "../commands/domains/writingChecksActions";
+// The domains' English, which commands/domains/index.ts registers first in the app (F14).
+import "../commands/domains/commandLabelsStrings";
 import { buildWritingCheckCommands } from "../commands/domains/writingChecks";
 import { MAX_STAGED, REPORT_DIR, renderLink, stageWritingSuggestions } from "../agents/writingReview";
 import { AgentReviewPanel } from "../ui/AgentReviewPanel";
