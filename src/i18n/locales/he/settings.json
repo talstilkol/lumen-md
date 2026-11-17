@@ -167,6 +167,7 @@
   "privacy.report.done": "הדוח החתום נשמר ({n} בקשות, {left} יצאו מהמכשיר). בדיקה: node scripts/privacy/verify-report.mjs.",
   "privacy.report.export": "ייצוא דוח חתום",
   "privacy.report.failed": "לא הצלחנו לייצא את הדוח: {error}",
+  "privacy.secretCopy.hint": "מועתק כסוד: מסומן כרגיש, ונמחק מהלוח אחרי 60 שניות",
   "privacy.staticAssets": "קבצים סטטיים: {n}",
   "privacy.tab.mcp": "לקוחות MCP",
   "privacy.tab.requests": "בקשות רשת",

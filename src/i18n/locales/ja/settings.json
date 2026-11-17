@@ -167,6 +167,7 @@
   "privacy.report.done": "署名付きレポートを保存しました（{n} 件のリクエスト、{left} 件がこのデバイスの外へ）。node scripts/privacy/verify-report.mjs で確認できます。",
   "privacy.report.export": "署名付きレポートを書き出す",
   "privacy.report.failed": "レポートを書き出せませんでした：{error}",
+  "privacy.secretCopy.hint": "秘密としてコピー: 機密としてマークされ、60 秒後にクリップボードから消去されます",
   "privacy.staticAssets": "静的ファイル: {n}",
   "privacy.tab.mcp": "MCP クライアント",
   "privacy.tab.requests": "ネットワーク要求",

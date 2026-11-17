@@ -975,6 +975,36 @@
       "vars": []
     },
     {
+      "key": "appLock.body",
+      "en": "Unlock with Face ID, Touch ID, your fingerprint or the device's own lock. Nothing leaves this device.",
+      "vars": []
+    },
+    {
+      "key": "appLock.checking",
+      "en": "Checking…",
+      "vars": []
+    },
+    {
+      "key": "appLock.failed",
+      "en": "That didn't unlock it. Try again.",
+      "vars": []
+    },
+    {
+      "key": "appLock.failedMany",
+      "en": "Still locked after three tries. Your notes stay hidden until the device's check passes.",
+      "vars": []
+    },
+    {
+      "key": "appLock.title",
+      "en": "Lumen is locked",
+      "vars": []
+    },
+    {
+      "key": "appLock.unlock",
+      "en": "Unlock",
+      "vars": []
+    },
+    {
       "key": "asOf.added",
       "en": "New since",
       "vars": []

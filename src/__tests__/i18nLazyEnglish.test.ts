@@ -58,6 +58,8 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "shareLink.json": { module: "share/shareStrings.ts", users: ["share/ShareLinkDialog.tsx", "share/SharedNoteView.tsx"], prefixes: ["shareLink."] },
   // Airplane mode's network monitor (plan W5.9), opened with a dynamic import; the
   // playground and live-js blocks (lazily rendered) say why they don't run while it is on.
+  // W13.P1: the lock screen's English travels with its chunk.
+  "appLock.json": { module: "privacy/appLockStrings.ts", users: ["privacy/appLockUi.tsx"], prefixes: ["appLock."] },
   "airplane.json": { module: "privacy/airplaneStrings.ts", users: ["plugins/LiveJsBlock.tsx", "plugins/PlaygroundBlock.tsx", "privacy/NetworkMonitor.tsx"], prefixes: ["airplane."] },
   // The Hebrew lexicon (plan W5.26): its popover and palette actions, both loaded with a dynamic import.
   "lexicon.json": { module: "lexicon/strings.ts", users: ["lexicon/LexiconPopover.tsx", "lexicon/commands.ts"], prefixes: ["lexicon."] },

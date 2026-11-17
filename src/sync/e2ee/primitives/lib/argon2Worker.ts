@@ -1,4 +1,5 @@
 /** The Argon2id Worker (W10.D13; excluded from tsconfig until 10.M): hash-wasm off the main thread. */
+import "../../../../ai/workerLedgerInstall";
 import { argon2idHere } from "./argon2";
 import type { Argon2Input } from "../index";
 

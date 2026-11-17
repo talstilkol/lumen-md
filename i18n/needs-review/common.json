@@ -7317,5 +7317,53 @@
     "ja": "1ccwmzq",
     "ru": "1ccwmzq",
     "zh-CN": "1ccwmzq"
+  },
+  "appLock.body": {
+    "ar": "8gy32m",
+    "de": "8gy32m",
+    "fr": "8gy32m",
+    "ja": "8gy32m",
+    "ru": "8gy32m",
+    "zh-CN": "8gy32m"
+  },
+  "appLock.checking": {
+    "ar": "vyewnp",
+    "de": "vyewnp",
+    "fr": "vyewnp",
+    "ja": "vyewnp",
+    "ru": "vyewnp",
+    "zh-CN": "vyewnp"
+  },
+  "appLock.failed": {
+    "ar": "vnv4ak",
+    "de": "vnv4ak",
+    "fr": "vnv4ak",
+    "ja": "vnv4ak",
+    "ru": "vnv4ak",
+    "zh-CN": "vnv4ak"
+  },
+  "appLock.failedMany": {
+    "ar": "1pdevtf",
+    "de": "1pdevtf",
+    "fr": "1pdevtf",
+    "ja": "1pdevtf",
+    "ru": "1pdevtf",
+    "zh-CN": "1pdevtf"
+  },
+  "appLock.title": {
+    "ar": "1ap3poo",
+    "de": "1ap3poo",
+    "fr": "1ap3poo",
+    "ja": "1ap3poo",
+    "ru": "1ap3poo",
+    "zh-CN": "1ap3poo"
+  },
+  "appLock.unlock": {
+    "ar": "17ezgqd",
+    "de": "17ezgqd",
+    "fr": "17ezgqd",
+    "ja": "17ezgqd",
+    "ru": "17ezgqd",
+    "zh-CN": "17ezgqd"
   }
 }

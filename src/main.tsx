@@ -4,6 +4,8 @@ import "./lib/trustedTypesInit";
 import "./privacy/airplaneBoot";
 // After a host move, before anything writes localStorage (plan W6.9; inert without VITE_MOVED_TO).
 import "./pwa/hostMoveBoot";
+// App lock (plan W13.P1): when it is on, the content stays hidden until the device's check passes.
+import { bootAppLock } from "./privacy/appLockBoot";
 import "./fonts";
 import React, { Suspense } from "react";
 import ReactDOM from "react-dom/client";
@@ -221,6 +223,7 @@ function renderApp() {
 // W10.E20: what was typed in the boot shell's note goes into the open note before React replaces the shell.
 const bootEdit = IS_PRESENTER || showShare || windowLabel() === "capture" ? null : takeBootEdit();
 if (bootEdit) applyBootEdit(bootEdit, useAppStore);
+bootAppLock();
 ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
       <ErrorBoundary fallback={

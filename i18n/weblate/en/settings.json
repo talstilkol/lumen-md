@@ -167,6 +167,7 @@
   "privacy.report.done": "Saved the signed report ({n} requests, {left} left this device). Check it with node scripts/privacy/verify-report.mjs.",
   "privacy.report.export": "Export signed report",
   "privacy.report.failed": "Couldn't export the report: {error}",
+  "privacy.secretCopy.hint": "Copied as a secret: marked sensitive, and cleared from the clipboard after 60 seconds",
   "privacy.staticAssets": "Static files: {n}",
   "privacy.tab.mcp": "MCP clients",
   "privacy.tab.requests": "Network requests",

@@ -493,6 +493,31 @@
       "vars": []
     },
     {
+      "key": "cmd.appLock.after",
+      "en": "Privacy: lock the app after…",
+      "vars": []
+    },
+    {
+      "key": "cmd.appLock.hint",
+      "en": "Hides your notes while Lumen is in the background; the device's own check unlocks it",
+      "vars": []
+    },
+    {
+      "key": "cmd.appLock.now",
+      "en": "Privacy: lock the app now",
+      "vars": []
+    },
+    {
+      "key": "cmd.appLock.off",
+      "en": "Privacy: turn the app lock off",
+      "vars": []
+    },
+    {
+      "key": "cmd.appLock.on",
+      "en": "Privacy: lock the app with Face ID / fingerprint",
+      "vars": []
+    },
+    {
       "key": "cmd.arabic.removeTashkeel",
       "en": "Remove Arabic tashkeel (selection or note)",
       "vars": []

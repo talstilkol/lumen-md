@@ -17,6 +17,7 @@ import { announcePairing, discoveryAvailable, DiscoveryError, findDevices, joinF
 import type { LanPeerInfo } from "../lan/rpc";
 import { explainError } from "../../../lib/userError";
 import { EmptyState } from "../../../ui/EmptyState";
+import { copySecret } from "../../../privacy/secretClipboard";
 
 const field: React.CSSProperties = { width: "100%", padding: "6px 8px", border: "1px solid hsl(var(--border))", borderRadius: 6, background: "transparent", color: "inherit", font: "inherit", fontSize: 12 };
 const muted: React.CSSProperties = { fontSize: 12, color: "hsl(var(--fg-muted))" };
@@ -93,10 +94,7 @@ function CodeBox({ code, testId }: { code: string; testId: string }) {
         type="button"
         style={{ justifySelf: "start" }}
         onClick={() =>
-          void navigator.clipboard?.writeText(code).then(
-            () => setCopied(true),
-            () => undefined,
-          )
+          void copySecret(code).then((ok) => setCopied(ok))
         }
       >
         {copied ? t("e2ee.lan.copied") : t("e2ee.lan.copy")}
