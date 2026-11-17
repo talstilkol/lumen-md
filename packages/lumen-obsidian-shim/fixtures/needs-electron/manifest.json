@@ -1,0 +1,1 @@
+{ "id": "needs-electron", "name": "Open in shell", "version": "1.0.0", "description": "Fixture: a desktop-only plugin.", "author": "Lumen", "isDesktopOnly": true }
