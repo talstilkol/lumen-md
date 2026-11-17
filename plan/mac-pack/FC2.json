@@ -1,0 +1,523 @@
+[
+ {
+  "id": "FC2-W11.M6-agentdojo",
+  "task": "W11.M6",
+  "pr": 1192,
+  "cmd": "ollama pull qwen3:8b && LUMEN_EVAL_AGENTDOJO_MODEL=qwen3:8b npm run eval:agentdojo",
+  "expect": {
+   "exit": 0,
+   "json": [
+    {
+     "file": "eval/results/agentdojo-*-qwen3_8b.json",
+     "path": [
+      "modes",
+      "attentive",
+      "violations"
+     ],
+     "equals": 0
+    },
+    {
+     "file": "eval/results/agentdojo-*-qwen3_8b.json",
+     "path": [
+      "modes",
+      "none",
+      "violations"
+     ],
+     "equals": 0
+    }
+   ],
+   "note": "AgentDojo Slack (9 user x 5 injection tasks, 3 defence modes + adaptive) on a real local model; utility and ASR are reported, the run gates only on 0 unapproved changes",
+   "after": "copy utility/ASR per mode from the .md next to the JSON into W11.M6's status"
+  },
+  "needs": [
+   "the train head with FC2's PRs (#1192-#1201) checked out, npm ci done (W10.M1 first)",
+   "Ollama running at http://127.0.0.1:11434"
+  ],
+  "minutes": 240
+ },
+ {
+  "id": "FC2-W4.19-onenote",
+  "task": "W4.19",
+  "pr": 1193,
+  "cmd": "npx vitest run src/__tests__/onenoteClientId.test.tsx src/__tests__/onenoteSignIn.test.tsx src/__tests__/secretsScanLive.test.ts",
+  "expect": {
+   "exit": 0,
+   "after": "owner: register the Entra SPA app (redirect https://lumen-md.vercel.app/oauth/onenote, Notes.Read + offline_access) and serve /lumen-runtime.json {\"onenote\":{\"clientId\":\"<id>\"}} from the host; no VITE_ variable; then one real OneNote import"
+  },
+  "needs": [
+   "the train head with FC2's PRs (#1192-#1201) checked out, npm ci done (W10.M1 first)"
+  ],
+  "minutes": 5
+ },
+ {
+  "id": "FC2-W5.23-zotero-file",
+  "task": "W5.23",
+  "pr": 1194,
+  "cmd": "npx vitest run src/__tests__/zoteroFile.test.ts",
+  "expect": {
+   "exit": 0,
+   "after": "owner: Zotero → File → Export Library… (CSL JSON) → ⌘K 'Citations: import a Zotero export file' twice; the second says 'Nothing new'; then 'export the vault's sources for Zotero' and File → Import in Zotero"
+  },
+  "needs": [
+   "the train head with FC2's PRs (#1192-#1201) checked out, npm ci done (W10.M1 first)",
+   "Zotero 7 with the owner's library"
+  ],
+  "minutes": 15
+ },
+ {
+  "id": "FC2-W11.M3-dictabert-ner",
+  "task": "W11.M3",
+  "pr": 1195,
+  "cmd": "npm run models:convert -- --models dictabert-ner --out .mac-pack/models && LUMEN_NER_MODEL=.mac-pack/models/dictabert-ner npm run eval:public -- run ner-nemo --engine scripts/eval-public/engines/dictabert-ner.mjs --model dictabert-ner --rev $(jq -r '.models[]|select(.id==\"dictabert-ner\")|.hosting.revision // \"unpinned\"' models/registry.json)",
+  "expect": {
+   "exit": 0,
+   "files": [
+    "eval/results/ner-nemo/*.json"
+   ],
+   "note": "DictaBERT-NER (q8 ONNX) on NEMO through transformers.js in Node, local folder only"
+  },
+  "needs": [
+   "the train head with FC2's PRs (#1192-#1201) checked out, npm ci done (W10.M1 first)",
+   "ner-nemo pinned by hand (its manifest's open question)",
+   "network for the one-time conversion download"
+  ],
+  "minutes": 45
+ },
+ {
+  "id": "FC2-W12.M1-gliner",
+  "task": "W12.M1",
+  "pr": 1195,
+  "cmd": "git clone https://github.com/urchade/GLiNER .mac-pack/GLiNER && python3 -m pip install -e .mac-pack/GLiNER onnx onnxruntime && python3 .mac-pack/GLiNER/convert_to_onnx.py --model_path urchade/gliner_multi-v2.1 --save_path .mac-pack/models/gliner --quantize True && LUMEN_GLINER_DIR=.mac-pack/models/gliner npx tsx scripts/eval-entity-graph.mjs ner --test eval/public/.data/nemo/token-single_gold_test.bmes --engine scripts/eval-public/engines/gliner.mjs",
+  "expect": {
+   "exit": 0,
+   "files": [
+    "eval/results/entity-graph/ner@gliner*.json"
+   ],
+   "note": "GLiNER multi v2.1 (Apache-2.0) exported to ONNX by its own script; the engine builds the prompt and decodes spans",
+   "after": "if convert_to_onnx.py has moved or renamed its flags, read its --help and keep the output folder layout (model.onnx, tokenizer.json, gliner_config.json); record the git commit used"
+  },
+  "needs": [
+   "the train head with FC2's PRs (#1192-#1201) checked out, npm ci done (W10.M1 first)",
+   "the local NEMO copy (W12.O1: never committed)",
+   "network for the clone and the checkpoint"
+  ],
+  "minutes": 60
+ },
+ {
+  "id": "FC2-2.6-pii-names",
+  "task": "2.6",
+  "pr": 1195,
+  "cmd": "LUMEN_PII_NER_ENGINE=scripts/eval-public/engines/dictabert-ner.mjs LUMEN_NER_MODEL=.mac-pack/models/dictabert-ner node scripts/golden/run-evals.mjs --dir $LUMEN_GOLDEN_TEST_DIR --out reports/mac-pack/FC2/golden-ner.json",
+  "expect": {
+   "exit": 0,
+   "json": [
+    {
+     "file": "reports/mac-pack/FC2/golden-ner.json",
+     "path": [
+      "sets",
+      "ner-pii",
+      "scores",
+      "names.model"
+     ],
+     "equals": 1
+    }
+   ],
+   "after": "read recall.names next to recall.patterns in the same file"
+  },
+  "needs": [
+   "the train head with FC2's PRs (#1192-#1201) checked out, npm ci done (W10.M1 first)",
+   "FC2-W11.M3-dictabert-ner",
+   "LUMEN_GOLDEN_TEST_DIR: the test split built by the L8 golden step"
+  ],
+  "minutes": 20
+ },
+ {
+  "id": "FC2-2.7-protectai",
+  "task": "2.7",
+  "pr": 1195,
+  "cmd": "git clone https://huggingface.co/protectai/deberta-v3-base-prompt-injection-v2 .mac-pack/models/protectai && LUMEN_INJECTION_ENGINE=scripts/eval-public/engines/protectai.mjs LUMEN_INJECTION_MODEL=.mac-pack/models/protectai node scripts/golden/run-evals.mjs --dir $LUMEN_GOLDEN_TEST_DIR --out reports/mac-pack/FC2/golden-injection.json",
+  "expect": {
+   "exit": 0,
+   "json": [
+    {
+     "file": "reports/mac-pack/FC2/golden-injection.json",
+     "path": [
+      "sets",
+      "injection",
+      "scores",
+      "classifier.model"
+     ],
+     "equals": 1
+    }
+   ],
+   "after": "record the clone's commit (git -C .mac-pack/models/protectai rev-parse HEAD) and recall/FPR in 2.7's status"
+  },
+  "needs": [
+   "the train head with FC2's PRs (#1192-#1201) checked out, npm ci done (W10.M1 first)",
+   "git-lfs",
+   "LUMEN_GOLDEN_TEST_DIR"
+  ],
+  "minutes": 25
+ },
+ {
+  "id": "FC2-4.6-unlinked",
+  "task": "4.6",
+  "pr": 1196,
+  "cmd": "node scripts/golden/evals/unlinked.mjs --dev",
+  "expect": {
+   "exit": 0,
+   "stdout": "\"recall\": 1"
+  },
+  "needs": [
+   "the train head with FC2's PRs (#1192-#1201) checked out, npm ci done (W10.M1 first)"
+  ],
+  "minutes": 2
+ },
+ {
+  "id": "FC2-4.15-clipper",
+  "task": "4.15",
+  "pr": 1196,
+  "cmd": "node scripts/golden/evals/clipper.mjs --dev",
+  "expect": {
+   "exit": 0,
+   "stdout": "\"noise.pages\": 0"
+  },
+  "needs": [
+   "the train head with FC2's PRs (#1192-#1201) checked out, npm ci done (W10.M1 first)"
+  ],
+  "minutes": 3
+ },
+ {
+  "id": "FC2-6.6-caption-sheet",
+  "task": "6.6",
+  "pr": 1196,
+  "cmd": "npm run bench:models -- --engines caption --captions-out reports/mac-pack/FC2/captions.json && node scripts/caption/rating-sheet.mjs make --captions reports/mac-pack/FC2/captions.json --split dev --out reports/mac-pack/FC2/caption-sheet",
+  "expect": {
+   "exit": 0,
+   "files": [
+    "reports/mac-pack/FC2/caption-sheet/sheet.csv",
+    "reports/mac-pack/FC2/caption-sheet/key.json"
+   ],
+   "after": "owner rates sheet.csv (1-5) with sheet.html open, then: node scripts/caption/rating-sheet.mjs score --sheet reports/mac-pack/FC2/caption-sheet/sheet.csv --key reports/mac-pack/FC2/caption-sheet/key.json — pass is >= 80 % rated >= 4 over 50"
+  },
+  "needs": [
+   "the train head with FC2's PRs (#1192-#1201) checked out, npm ci done (W10.M1 first)",
+   "the caption engines' models (bench:models downloads with consent)"
+  ],
+  "minutes": 30
+ },
+ {
+  "id": "FC2-6.15-data-analysis-model",
+  "task": "6.15",
+  "pr": 1196,
+  "cmd": "ollama pull qwen2.5-coder:7b && ANALYST_MODEL=qwen2.5-coder:7b node scripts/golden/evals/data-analysis.mjs --dev --programs model --out reports/mac-pack/FC2/data-analysis.json",
+  "expect": {
+   "exit": 0,
+   "json": [
+    {
+     "file": "reports/mac-pack/FC2/data-analysis.json",
+     "path": [
+      "pass"
+     ],
+     "equals": true
+    }
+   ],
+   "note": "the analyst agent's prompt and validator, Pyodide sandbox twice per program"
+  },
+  "needs": [
+   "the train head with FC2's PRs (#1192-#1201) checked out, npm ci done (W10.M1 first)",
+   "Ollama running at http://127.0.0.1:11434"
+  ],
+  "minutes": 15
+ },
+ {
+  "id": "FC2-W5.5-real-pdfs",
+  "task": "W5.5",
+  "pr": 1196,
+  "cmd": "node scripts/pdf-paste/real-corpus.mjs build --pdfs $LUMEN_HEBREW_PDFS --out reports/mac-pack/FC2/pdf-corpus.json && node scripts/pdf-paste/real-corpus.mjs score --corpus reports/mac-pack/FC2/pdf-corpus.json --review-out reports/mac-pack/FC2/pdf-review.csv --out reports/mac-pack/FC2/pdf-guess.json; test -f reports/mac-pack/FC2/pdf-review.csv",
+  "expect": {
+   "exit": 0,
+   "files": [
+    "reports/mac-pack/FC2/pdf-review.csv"
+   ],
+   "after": "owner fixes the 'correct' column where it is wrong, then: node scripts/pdf-paste/real-corpus.mjs score --corpus reports/mac-pack/FC2/pdf-corpus.json --truth reports/mac-pack/FC2/pdf-review.csv --out reports/mac-pack/FC2/pdf-score.json (pass: fixedShare >= 0.95, controlsChanged 0)"
+  },
+  "needs": [
+   "the train head with FC2's PRs (#1192-#1201) checked out, npm ci done (W10.M1 first)",
+   "LUMEN_HEBREW_PDFS: a folder of real Hebrew PDFs (rulings, articles, forms; kept local)"
+  ],
+  "minutes": 60
+ },
+ {
+  "id": "FC2-W5.13-lecture-timing",
+  "task": "W5.13",
+  "pr": 1196,
+  "cmd": "LUMEN_ASR_CMD='whisper-cli -m models/ggml-ivrit-ai-whisper-large-v3-turbo.bin -l he -oj -of {out} -f {in}' LUMEN_SUMMARY_MODEL=qwen2.5:7b node scripts/student/lecture-timing.mjs --audio $LUMEN_LECTURE_AUDIO --markers 600,1800,3600 --out reports/mac-pack/FC2/lecture.json",
+  "expect": {
+   "exit": 0,
+   "json": [
+    {
+     "file": "reports/mac-pack/FC2/lecture.json",
+     "path": [
+      "pass"
+     ],
+     "equals": true
+    },
+    {
+     "file": "reports/mac-pack/FC2/lecture.json",
+     "path": [
+      "network",
+      "remote"
+     ],
+     "equals": 0
+    }
+   ],
+   "note": "90-minute lecture <= 20 min total on the laptop GPU (whisper.cpp Metal)"
+  },
+  "needs": [
+   "the train head with FC2's PRs (#1192-#1201) checked out, npm ci done (W10.M1 first)",
+   "whisper.cpp + the ivrit turbo ggml",
+   "Ollama running at http://127.0.0.1:11434",
+   "LUMEN_LECTURE_AUDIO: a 90-minute Hebrew lecture recording"
+  ],
+  "minutes": 30
+ },
+ {
+  "id": "FC2-W12.M3-office",
+  "task": "W12.M3",
+  "pr": 1196,
+  "cmd": "node scripts/mac-pack/L8-office-check.mjs --out reports/mac-pack/FC2/office.json",
+  "expect": {
+   "exit": 0,
+   "json": [
+    {
+     "file": "reports/mac-pack/FC2/office.json",
+     "path": [
+      "odt",
+      "status"
+     ],
+     "equals": "pass"
+    },
+    {
+     "file": "reports/mac-pack/FC2/office.json",
+     "path": [
+      "typst",
+      "status"
+     ],
+     "equals": "pass"
+    }
+   ],
+   "note": "the ODT half already passed in the cloud (LibreOffice 24.2: 10/10, 0 wrong directions)"
+  },
+  "needs": [
+   "the train head with FC2's PRs (#1192-#1201) checked out, npm ci done (W10.M1 first)",
+   "brew install --cask libreoffice; brew install typst poppler"
+  ],
+  "minutes": 10
+ },
+ {
+  "id": "FC2-e2e-wave12",
+  "task": "W12.H2,W12.A1,W12.T2",
+  "pr": 1197,
+  "cmd": "mkdir -p reports/mac-pack/FC2 && npx playwright test e2e/havruta-relay.spec.ts e2e/ask-vault-jump.spec.ts e2e/types-form.spec.ts --reporter=json > reports/mac-pack/FC2/e2e.json",
+  "expect": {
+   "exit": 0,
+   "files": [
+    "reports/mac-pack/FC2/e2e.json"
+   ]
+  },
+  "needs": [
+   "the train head with FC2's PRs (#1192-#1201) checked out, npm ci done (W10.M1 first)",
+   "npx playwright install chromium firefox webkit"
+  ],
+  "minutes": 15
+ },
+ {
+  "id": "FC2-W11.H14-handwriting",
+  "task": "W11.H14",
+  "pr": 1198,
+  "cmd": "mkdir -p .mac-pack/tessdata && for f in heb eng; do gunzip -c public/tesseract/lang/$f.traineddata.gz > .mac-pack/tessdata/$f.traineddata; done && LUMEN_TESSDATA=.mac-pack/tessdata npm run eval:public -- run ocr-handwriting-ivrit --engine scripts/eval-public/engines/handwriting-tesseract.mjs --model tesseract-heb+eng --rev $(shasum -a 256 .mac-pack/tessdata/heb.traineddata | cut -c1-12) && npm run eval:public -- verdicts",
+  "expect": {
+   "exit": 0,
+   "files": [
+    "eval/results/ocr-handwriting-ivrit/*.json"
+   ],
+   "after": "src/ink/inkRecognitionGate.json is set from the eval card only (status passed only when median CER is under the gate); never by hand"
+  },
+  "needs": [
+   "the train head with FC2's PRs (#1192-#1201) checked out, npm ci done (W10.M1 first)",
+   "the ivrit.ai handwriting benchmark export (L5.pin)",
+   "ffmpeg"
+  ],
+  "minutes": 40
+ },
+ {
+  "id": "FC2-asr-sherpa",
+  "task": "W11.M1,W11.H7",
+  "pr": 1199,
+  "cmd": "python3 -m pip install sherpa-onnx && for set in asr-ivrit-eval-d1 asr-fleurs-he; do LUMEN_ENGINE_ID=sherpa-onnx:zipformer2-66m-int8 LUMEN_ASR_CMD='python3 tools/models/sherpa_asr.py --dir models/zipformer2-66m-streaming-he {in}' npm run eval:public -- run $set --engine scripts/eval-public/engines/cmd.mjs --model ivrit-ai/zipformer2-66m-streaming-he --rev ee769a2a13b887f91572eec349458bfb0fe79e7a; done",
+  "expect": {
+   "exit": 0,
+   "files": [
+    "eval/results/asr-fleurs-he/ivrit-ai__zipformer2-66m-streaming-he@*.json"
+   ],
+   "note": "replaces the <sherpa-onnx wrapper> TEMPLATE of L5.asr"
+  },
+  "needs": [
+   "the train head with FC2's PRs (#1192-#1201) checked out, npm ci done (W10.M1 first)",
+   "the pinned sherpa-onnx files (registry: encoder/decoder/joiner int8 + tokens.txt) in models/zipformer2-66m-streaming-he/sherpa-onnx/",
+   "ffmpeg"
+  ],
+  "minutes": 40
+ },
+ {
+  "id": "FC2-tts-chatterbox",
+  "task": "W11.M2,W11.H9",
+  "pr": 1199,
+  "cmd": "python3 -m pip install chatterbox-tts && python3 -c \"from huggingface_hub import snapshot_download; print(snapshot_download('ResembleAI/chatterbox'))\" && LUMEN_ENGINE_ID=chatterbox-multilingual LUMEN_TTS_CMD='python3 tools/models/chatterbox_say.py --lang he --out {out}' LUMEN_JUDGE_ID=whisper.cpp:ivrit-turbo LUMEN_JUDGE_CMD='whisper-cli -m models/ggml-ivrit-ai-whisper-large-v3-turbo.bin -l he -nt -np -f {in}' npm run eval:public -- run tts-insva-fleurs-he --engine scripts/eval-public/engines/cmd.mjs --model chatterbox-multilingual --rev $(cat ~/.cache/huggingface/hub/models--ResembleAI--chatterbox/refs/main)",
+  "expect": {
+   "exit": 0,
+   "files": [
+    "eval/results/tts-insva-fleurs-he/*.json"
+   ],
+   "note": "replaces L5.tts's TEMPLATE; the wrapper runs offline from the cache after the one download"
+  },
+  "needs": [
+   "the train head with FC2's PRs (#1192-#1201) checked out, npm ci done (W10.M1 first)",
+   "whisper.cpp + the ivrit turbo ggml"
+  ],
+  "minutes": 60
+ },
+ {
+  "id": "FC2-nikud-nakdimon",
+  "task": "W11.M3",
+  "pr": 1199,
+  "cmd": "LUMEN_ENGINE_ID=nakdimon:onnx LUMEN_NIKUD_CMD='node tools/models/nakdimon_dot.mjs --model models/nakdimon/Nakdimon.onnx' npm run eval:public -- run nikud-nakdimon-test --engine scripts/eval-public/engines/cmd.mjs --model nakdimon --rev $(jq -r '.models[]|select(.id==\"nakdimon\")|.hosting.revision // \"unpinned\"' models/registry.json)",
+  "expect": {
+   "exit": 0,
+   "files": [
+    "eval/results/nikud-nakdimon-test/*.json"
+   ]
+  },
+  "needs": [
+   "the train head with FC2's PRs (#1192-#1201) checked out, npm ci done (W10.M1 first)",
+   "models/nakdimon/Nakdimon.onnx (the registry's pinned file)"
+  ],
+  "minutes": 20
+ },
+ {
+  "id": "FC2-g2p-phonikud",
+  "task": "W11.M3,W11.H10",
+  "pr": 1199,
+  "cmd": "python3 -m pip install phonikud phonikud-onnx && LUMEN_ENGINE_ID=phonikud-onnx LUMEN_G2P_CMD='python3 tools/models/phonikud_g2p.py --model models/phonikud/phonikud-1.0.int8.onnx' npm run eval:public -- run g2p-milim --engine scripts/eval-public/engines/cmd.mjs --model phonikud-onnx --rev $(shasum -a 256 models/phonikud/phonikud-1.0.int8.onnx | cut -c1-12)",
+  "expect": {
+   "exit": 0,
+   "files": [
+    "eval/results/g2p-milim/*.json"
+   ],
+   "after": "add a registry entry for the phonikud code (its own licence) before any app use"
+  },
+  "needs": [
+   "the train head with FC2's PRs (#1192-#1201) checked out, npm ci done (W10.M1 first)",
+   "models/phonikud/phonikud-1.0.int8.onnx from Phonikud/phonikud-onnx at a pinned revision"
+  ],
+  "minutes": 20
+ },
+ {
+  "id": "FC2-yiddish-ggml",
+  "task": "W11.M13,W11.H18",
+  "pr": 1199,
+  "cmd": "REV=$(git ls-remote https://huggingface.co/ivrit-ai/yi-whisper-large-v3-turbo HEAD | cut -f1) WHISPER_CPP=$HOME/src/whisper.cpp sh tools/models/yi_whisper_ggml.sh models/ > reports/mac-pack/FC2/yi-ggml.json && LUMEN_ENGINE_ID=whisper.cpp:yi-turbo LUMEN_ASR_CMD='whisper-cli -m models/ggml-yi-whisper-large-v3-turbo.bin -l yi -nt -np -f {in}' npm run eval:public -- run asr-fleurs-yi --engine scripts/eval-public/engines/cmd.mjs --model ivrit-ai/yi-whisper-large-v3-turbo --rev $(jq -r .revision reports/mac-pack/FC2/yi-ggml.json)",
+  "expect": {
+   "exit": 0,
+   "json": [
+    {
+     "file": "reports/mac-pack/FC2/yi-ggml.json",
+     "path": [
+      "bytes"
+     ],
+     "op": ">",
+     "value": 100000000
+    }
+   ],
+   "files": [
+    "eval/results/asr-fleurs-yi/*.json"
+   ],
+   "after": "pin the ggml's sha256, size and revision in models/registry.json (W11.M13)"
+  },
+  "needs": [
+   "the train head with FC2's PRs (#1192-#1201) checked out, npm ci done (W10.M1 first)",
+   "a whisper.cpp checkout at $HOME/src/whisper.cpp",
+   "git-lfs",
+   "python3 with torch and transformers"
+  ],
+  "minutes": 60
+ },
+ {
+  "id": "FC2-shoshan-inventory",
+  "task": "W11.H12",
+  "pr": 1199,
+  "cmd": "git clone https://huggingface.co/HebArabNlpProject/shoshan .mac-pack/shoshan && ls -la .mac-pack/shoshan/model > reports/mac-pack/FC2/shoshan-model.txt && git -C .mac-pack/shoshan rev-parse HEAD >> reports/mac-pack/FC2/shoshan-model.txt",
+  "expect": {
+   "exit": 0,
+   "files": [
+    "reports/mac-pack/FC2/shoshan-model.txt"
+   ],
+   "after": "read model/'s edit-script inventory format and adapt src/search/lemma/shoshan.ts parseInventory if it differs (a code task); only then a Shoshan wrapper"
+  },
+  "needs": [
+   "the train head with FC2's PRs (#1192-#1201) checked out, npm ci done (W10.M1 first)",
+   "git-lfs"
+  ],
+  "minutes": 10
+ },
+ {
+  "id": "FC2-6.2-misaki-pack",
+  "task": "6.2",
+  "pr": 1200,
+  "cmd": "git clone https://github.com/hexgrad/misaki .mac-pack/misaki && git -C .mac-pack/misaki checkout fba1236595f2d2bf21d414ba6e57d25256afada3 && node scripts/tts/build-misaki-dict.mjs --misaki .mac-pack/misaki --out .mac-pack/misaki-us.json",
+  "expect": {
+   "exit": 0,
+   "stdout": "2dde61cadbb9c9e6931ebe1e13b5c361db0140e4860d1d46b8a8c72fadaf1a75",
+   "note": "the same pack the cloud built (5,354,028 B); it ships with the pinned Kokoro voice (decision 15.10)"
+  },
+  "needs": [
+   "the train head with FC2's PRs (#1192-#1201) checked out, npm ci done (W10.M1 first)"
+  ],
+  "minutes": 5
+ },
+ {
+  "id": "FC2-W12.F2-typst-vendor",
+  "task": "W12.F2",
+  "pr": 1201,
+  "cmd": "V=$(npm view @myriaddreamin/typst.ts version) && npm i -D -E @myriaddreamin/typst.ts@$V @myriaddreamin/typst-ts-web-compiler@$(npm view @myriaddreamin/typst-ts-web-compiler version) && mkdir -p .mac-pack/fonts && curl -fL -o .mac-pack/fonts/DavidLibre-Regular.ttf https://github.com/google/fonts/raw/main/ofl/davidlibre/DavidLibre-Regular.ttf && curl -fL -o .mac-pack/fonts/OFL.txt https://github.com/google/fonts/raw/main/ofl/davidlibre/OFL.txt && node scripts/typst/vendor.mjs --fonts .mac-pack/fonts",
+  "expect": {
+   "exit": 0,
+   "files": [
+    "public/vendor/typst/typst.mjs",
+    "public/vendor/typst/compiler.wasm",
+    "public/vendor/typst/fonts.json"
+   ],
+   "after": "check typst.ts's LICENSE is Apache-2.0 and both package versions are the same release; commit package.json + package-lock.json only (public/vendor/typst is git-ignored; add `node scripts/typst/vendor.mjs` to predev/prebuild in the same PR); then in the app: ⌘K 'Export to PDF with Typst' on the 10 Hebrew notes of L8-office-check and compare with typst CLI output; startup B must not change"
+  },
+  "needs": [
+   "the train head with FC2's PRs (#1192-#1201) checked out, npm ci done (W10.M1 first)",
+   "network for npm and the font"
+  ],
+  "minutes": 30
+ },
+ {
+  "id": "FC2-W11.P13-origin-trials",
+  "task": "W11.P13",
+  "pr": 1202,
+  "cmd": "test -f plan/origin-trials-W11.P13.md",
+  "expect": {
+   "exit": 0,
+   "after": "owner: follow plan/origin-trials-W11.P13.md (register both trials for https://lumen-md.vercel.app, put the tokens in the Origin-Trial header, then run L8-W11.P13-chrome in Chrome 148+)"
+  },
+  "needs": [
+   "the train head with FC2's PRs (#1192-#1201) checked out, npm ci done (W10.M1 first)"
+  ],
+  "minutes": 30
+ }
+]
