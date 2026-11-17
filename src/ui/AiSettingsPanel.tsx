@@ -417,7 +417,9 @@ export function AiSettingsPanel({ open, onClose, embedded = false }: Props) {
       <div
         className={embedded ? undefined : "cmd-palette"}
         onClick={(e) => e.stopPropagation()}
-        style={embedded ? { display: "flex", flexDirection: "column" } : { maxWidth: 600, padding: 0, display: "flex", flexDirection: "column", maxHeight: "85vh" }}
+        data-testid="ai-settings-surface"
+        // F16: its own text colour from the theme tokens (it inherited none: low contrast in dark mode).
+        style={embedded ? { display: "flex", flexDirection: "column", color: "hsl(var(--fg))" } : { maxWidth: 600, padding: 0, display: "flex", flexDirection: "column", maxHeight: "85vh", color: "hsl(var(--fg))", background: "hsl(var(--bg))" }}
       >
         <header style={{ padding: "14px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <Cpu size={18} style={{ color: "hsl(var(--accent))" }} />

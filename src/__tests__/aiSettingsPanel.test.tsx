@@ -156,4 +156,15 @@ describe("AiSettingsPanel", () => {
     await waitFor(() => expect(screen.getByRole("alert").textContent).toContain("not a url"));
     expect(localStorage.getItem("lumen.research.endpoint")).toBeNull();
   });
+
+  // F16: the dialog had no text colour of its own, so in dark mode its text inherited the page's default (near black).
+  it("sets its own text colour (and, as a dialog, its surface) from the theme tokens", async () => {
+    const { unmount } = render(<AiSettingsPanel open onClose={() => {}} />);
+    const surface = await screen.findByTestId("ai-settings-surface");
+    expect(surface.style.color).toBe("hsl(var(--fg))");
+    expect(surface.style.background).toBe("hsl(var(--bg))");
+    unmount();
+    render(<AiSettingsPanel open embedded onClose={() => {}} />);
+    expect((await screen.findByTestId("ai-settings-surface")).style.color).toBe("hsl(var(--fg))");
+  });
 });
