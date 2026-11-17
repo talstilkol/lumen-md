@@ -986,6 +986,16 @@
     "W8.7": "DONE",
     "W9.3": "DONE"
    }
+  },
+  {
+   "name": "r3b 17.11 (review 12, M5)",
+   "at": "2026-11-17",
+   "verdicts": {
+    "R12.10": "PARTIAL",
+    "W11.I3": "PARTIAL",
+    "W12.T6": "PARTIAL"
+   },
+   "note": "Review 12, M5: three of the 13 r3 DONE rows are not world-class done: R12.10 needs a real-model eval, W11.I3 an adversarial AgentDojo eval, W12.T6 real-browser and e2e runs. Appended; the r3 rows stay as they were."
   }
  ],
  "about": "Verdicts of the independent audits, by task id. plan:check refuses a ✅ the latest audit did not call DONE (W10.B12, scripts/plan/auditGuard.mjs). Append a new audit with --import; never edit a verdict by hand."

@@ -42,89 +42,7 @@
   "cutLineExempt": [
    "13.6"
   ],
-  "releaseTask": "13.5",
-  "wipDecisions": [
-   {
-    "wave": 1,
-    "next": 2,
-    "open": 23,
-    "started": 25,
-    "at": "2026-11-16",
-    "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 1's 23 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 2's 25 started tasks keep going, but nothing grows: no new start in wave 2 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 1 is verified."
-   },
-   {
-    "wave": 2,
-    "next": 3,
-    "open": 18,
-    "started": 11,
-    "at": "2026-11-16",
-    "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 2's 18 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 3's 11 started tasks keep going, but nothing grows: no new start in wave 3 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 2 is verified."
-   },
-   {
-    "wave": 3,
-    "next": 4,
-    "open": 11,
-    "started": 36,
-    "at": "2026-11-16",
-    "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 3's 11 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 4's 36 started tasks keep going, but nothing grows: no new start in wave 4 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 3 is verified."
-   },
-   {
-    "wave": 4,
-    "next": 5,
-    "open": 30,
-    "started": 28,
-    "at": "2026-11-16",
-    "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 4's 30 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 5's 28 started tasks keep going, but nothing grows: no new start in wave 5 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 4 is verified."
-   },
-   {
-    "wave": 5,
-    "next": 6,
-    "open": 22,
-    "started": 46,
-    "at": "2026-11-16",
-    "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 5's 22 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 6's 46 started tasks keep going, but nothing grows: no new start in wave 6 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 5 is verified."
-   },
-   {
-    "wave": 6,
-    "next": 7,
-    "open": 41,
-    "started": 25,
-    "at": "2026-11-16",
-    "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 6's 41 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 7's 25 started tasks keep going, but nothing grows: no new start in wave 7 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 6 is verified."
-   },
-   {
-    "wave": 7,
-    "next": 8,
-    "open": 25,
-    "started": 12,
-    "at": "2026-11-16",
-    "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 7's 25 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 8's 12 started tasks keep going, but nothing grows: no new start in wave 8 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 7 is verified."
-   },
-   {
-    "wave": 8,
-    "next": 9,
-    "open": 11,
-    "started": 3,
-    "at": "2026-11-16",
-    "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 8's 11 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 9's 3 started tasks keep going, but nothing grows: no new start in wave 9 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 8 is verified."
-   },
-   {
-    "wave": 10,
-    "next": 11,
-    "open": 233,
-    "started": 92,
-    "at": "2026-11-16",
-    "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 10's 233 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 11's 92 started tasks keep going, but nothing grows: no new start in wave 11 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 10 is verified."
-   },
-   {
-    "wave": 11,
-    "next": 12,
-    "open": 91,
-    "started": 78,
-    "at": "2026-11-16",
-    "decision": "Decided by Claude (lane D1) under the owner's delegation of 16.11.2026 21:53 (\"decide alone, without stopping\"); record: plan/decisions-2026-11-16-d1.md §1. Wave 11's 91 open tasks are built and tested in Node; lifting them to browser or real needs the Mac run, which the owner set after every cloud task. So wave 12's 78 started tasks keep going, but nothing grows: no new start in wave 12 (the frozen-wave gate, plan/wip-frozen.json, blocks it too), and every task verified lowers these numbers. Remove this once wave 11 is verified. Lowered 118→92 on 17.11 by INT6b: 26 wave-11 placeholders with no work lost their status (review 11, M4)."
-   }
-  ]
+  "releaseTask": "13.5"
  },
  "milestones": [
   {
@@ -6354,7 +6272,10 @@
       "score": 5,
       "who": "cloud-code",
       "missing": "Every §14 target measured or a task with reason."
-     }
+     },
+     "status": "⏳ partial: plan:targets maps and measures the 49 clauses of appendix 14 (fb504049e2, 4322cea2f5); owed: the final audit itself, after the owner's items",
+     "verified": "built",
+     "notes": "review 12 M2 17.11 (lane F12): status restored from the merged work; the evidence that was stripped in 35efb399ec/68d01a6351 is back"
     },
     {
      "id": "13.7",
@@ -7795,7 +7716,7 @@
      ],
      "why": "החלטה 10.11 על פריט בעלים",
      "branch": "feat/trust-repo",
-     "status": "✅ #373 · audit r3 DONE; dod green in Node and Chromium (INT6b 17.11)",
+     "status": "✅ #373 · audit r3 DONE; dod green in Node and browser (shim chromium) (INT6b 17.11)",
      "verified": "browser",
      "pr": 373,
      "notes": "⏳ #373 (על #242; מתג ״לסמוך על הריפו הזה״ לכל ריפו, כבוי כברירת מחדל, קשור לרשומת המקור של git ונופל בשיבוט מחדש או העברה; כתיבות עדיין עוברות סקירה; plain-Node 21/21, i18n:check; לא נבדק ב-Sandbox (חסום עד 1.12); dod: npx vitest run src/__tests__/trustedRepos.test.tsx src/__tests__/injectionGuard.test.ts) · INT6b 17.11: ✅ on audit r3 DONE (score 85); status before → ⏳ #373 · (על #242; מתג ״לסמוך על הריפו הזה״ לכל ריפו, כבוי כברירת מחדל, קשור לרשומת המקור של git ונופל בשיבוט מחדש או העברה; כתיבות עדיין עוברות סקירה; plain-Node 21/21, i18n:check)… · dod green in the shim v4, in Node and in Chromium",
@@ -7819,7 +7740,7 @@
         "cmd": "npx vitest run src/__tests__/trustedRepos.test.tsx",
         "pass": 23,
         "total": 23,
-        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+        "ranOn": "int6b cccf70c8ea (shim v4, browser (shim chromium): headless Chromium with a small RTL stand-in, not a real-browser e2e; dod.mjs --runner shim green in Node on 35efb399ec)"
        }
       ],
       "audit": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
@@ -8372,7 +8293,7 @@
      ],
      "why": "Dataview הוא אחד התוספים הנפוצים ב-Obsidian; כספות שמגיעות משם מלאות בבלוקים כאלה.",
      "branch": "feat/embedded-queries",
-     "status": "✅ #371 · audit r3 DONE; dod green in Node and Chromium (INT6b 17.11)",
+     "status": "✅ #371 · audit r3 DONE; dod green in Node and browser (shim chromium) (INT6b 17.11)",
      "verified": "browser",
      "pr": 371,
      "notes": "⏳ #371 (על #306; בלוקי query ו-dataview + חיפושים שמורים; Vercel Sandbox (Node 24) @e15ff94: 98/99 (30 שאילתות זהב, 20 בלוקי Dataview), התיקון @e96b2e9 לא נבדק — ה-Sandbox חסום (מגבלת שימוש של Vercel עד 1.12)) · INT6b 17.11: ✅ on audit r3 DONE (score 82); status before → ⏳ #371 · (על #306; בלוקי query ו-dataview + חיפושים שמורים; Vercel Sandbox (Node 24) @e15ff94: 98/99 (30 שאילתות זהב, 20 בלוקי Dataview))… · dod green in the shim v4, in Node and in Chromium",
@@ -8396,7 +8317,7 @@
         "cmd": "npx vitest run src/__tests__/embeddedQueries.test.ts",
         "pass": 59,
         "total": 59,
-        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+        "ranOn": "int6b cccf70c8ea (shim v4, browser (shim chromium): headless Chromium with a small RTL stand-in, not a real-browser e2e; dod.mjs --runner shim green in Node on 35efb399ec)"
        }
       ],
       "audit": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
@@ -12146,7 +12067,11 @@
       "exit 0 — private reporting is on",
       "exit 0 — prints human-reviewed",
       "exit 0 — 0 failed, 0 skipped without a reason"
-     ]
+     ],
+     "status": "⏳ #630 · partial, merged, held by frozen wave (5→6): SECURITY.md channel, channels.json; owed: owner: GitHub protections, PVR and the review label",
+     "verified": "built",
+     "pr": 630,
+     "notes": "review 12 M2 17.11 (lane F12): status restored from the merged work and recorded in plan/merged-while-frozen.json; the evidence that was stripped in 35efb399ec/68d01a6351 is back"
     },
     {
      "id": "W6.13",
@@ -13149,10 +13074,10 @@
      ],
      "why": "הקצב של הבנייה עבר את קצב האימות פי כמה. בלי מגבלה, החוב רק גדל.",
      "branch": "chore/plan-wip-limit",
-     "status": "⏳ #502 · cloud-complete (audit r3 NOT DONE); owed: re-audit: plan:check now exits 0 with no WIP warning, so the dodExpect is met (INT6b)",
+     "status": "⏳ #502 · held by decision: 11 wave pairs over the WIP limit are frozen by plan/wip-decisions.json; done when plan:check --wip-none exits 0",
      "verified": "node",
      "pr": 502,
-     "notes": "⏳ #502 → chore/dod (אזהרה ב-plan:check כשגל מתחיל לפני שהקודם אומת, --wip-strict מכשיל; היום 5 אזהרות — כל הגלים) · stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): blocked: plan:check exit 0 with 5 WIP warnings (waves 7,8,10,11,12); the strict-WIP commit is #985, pending the owner's WIP decisions; owed: owner: plan.schedule.wipDecisions, then integrate #985 · INT6b 17.11 (lane FA): PR #1118 makes dod.mjs enforce dodExpect; W6.39 now red (expect unmet: 10 waves over WIP) · INT6b 17.11: status before → ⏳ #502 · ביקורת 14.11: חלקי — רק אזהרה, לא ב-chore/dod; שום גל לא נעצר · → chore/dod (אזהרה ב-plan:check כשגל מתחיל לפני שהקודם אומת, --wip-strict מכשיל; היום 5 אזהרות — כל הגלים)",
+     "notes": "review 12 17.11 (lane F12): dod was green only because plan:check's wording changed (the parenthesised WIP phrase was stripped); now the exit code of plan:check --wip-none; status → held by decision · ⏳ #502 → chore/dod (אזהרה ב-plan:check כשגל מתחיל לפני שהקודם אומת, --wip-strict מכשיל; היום 5 אזהרות — כל הגלים) · stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): blocked: plan:check exit 0 with 5 WIP warnings (waves 7,8,10,11,12); the strict-WIP commit is #985, pending the owner's WIP decisions; owed: owner: plan.schedule.wipDecisions, then integrate #985 · INT6b 17.11 (lane FA): PR #1118 makes dod.mjs enforce dodExpect; W6.39 now red (expect unmet: 10 waves over WIP) · INT6b 17.11: status before → ⏳ #502 · ביקורת 14.11: חלקי — רק אזהרה, לא ב-chore/dod; שום גל לא נעצר · → chore/dod (אזהרה ב-plan:check כשגל מתחיל לפני שהקודם אומת, --wip-strict מכשיל; היום 5 אזהרות — כל הגלים)",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -13162,11 +13087,11 @@
       "missing": "the rule only warns; nothing is blocked; ≥80% P0/P1 at browser/real unmet"
      },
      "dod": [
-      "npm run plan:check",
+      "npm run plan:check -- --wip-none",
       "npx vitest run src/__tests__/planBuild.test.ts"
      ],
      "dodExpect": [
-      "exit 0 — prints no `plan: WIP —` (no wave is over its WIP limit while the next wave has started)",
+      "exit 0 — no wave is over its WIP limit, decided or not (--wip-none exits 1 on any wave pair over the limit, even one held by a written decision)",
       "exit 0 — 0 failed, 0 skipped without a reason"
      ]
     },
@@ -14988,7 +14913,11 @@
      ],
      "dodExpect": [
       "exit 0 — 0 failed, 0 skipped without a reason"
-     ]
+     ],
+     "status": "⏳ #649 · partial, merged, held by frozen wave (8→9): receipts only from collaborators, signed; owed: receipts on 100% of sensitive PRs (owner)",
+     "verified": "built",
+     "pr": 649,
+     "notes": "review 12 M2 17.11 (lane F12): status restored from the merged work and recorded in plan/merged-while-frozen.json; the evidence that was stripped in 35efb399ec/68d01a6351 is back"
     },
     {
      "id": "W9.5",
@@ -15105,7 +15034,11 @@
       "score": 40,
       "who": "cloud-code",
       "missing": "no row-by-row proof that every needs-code=y row has a commit + test"
-     }
+     },
+     "status": "⏳ #1069 · merged, held by frozen wave (8→9): row-by-row proof of the 48 rows (31 done, 15 deps train, 1 owner, 1 open); owed: those 17 rows",
+     "verified": "built",
+     "pr": 1069,
+     "notes": "review 12 M2 17.11 (lane F12): status restored from the merged work and recorded in plan/merged-while-frozen.json; the evidence that was stripped in 35efb399ec/68d01a6351 is back"
     },
     {
      "id": "W9.9",
@@ -15349,7 +15282,7 @@
       "0.5"
      ],
      "files": "e2e/obsidian-syntax.spec.ts, e2e/pdf-paste.spec.ts, playwright.gifs.config.ts",
-     "status": "✅ #640 · audit r3 DONE; dod green in Node and Chromium (INT6b 17.11)",
+     "status": "✅ #640 · audit r3 DONE; dod green in Node and browser (shim chromium) (INT6b 17.11)",
      "verified": "browser",
      "pr": 640,
      "auditVerdict": {
@@ -15378,7 +15311,7 @@
         "cmd": "npx vitest run src/__tests__/playwrightRetries.test.ts",
         "pass": 9,
         "total": 9,
-        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+        "ranOn": "int6b cccf70c8ea (shim v4, browser (shim chromium): headless Chromium with a small RTL stand-in, not a real-browser e2e; dod.mjs --runner shim green in Node on 35efb399ec)"
        },
        {
         "cmd": "! git grep -n waitForTimeout -- e2e | grep -v hygiene-allow",
@@ -16164,7 +16097,7 @@
       "W7.5"
      ],
      "files": "src/sources/knesset/store.ts:236-255, src/agents/outcomes.ts",
-     "status": "✅ #693 · audit r3 DONE; dod green in Node and Chromium (INT6b 17.11)",
+     "status": "✅ #693 · audit r3 DONE; dod green in Node and browser (shim chromium) (INT6b 17.11)",
      "verified": "browser",
      "pr": 693,
      "auditVerdict": {
@@ -16188,7 +16121,7 @@
         "cmd": "npx vitest run src/__tests__/knessetAnswer.test.ts",
         "pass": 7,
         "total": 7,
-        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+        "ranOn": "int6b cccf70c8ea (shim v4, browser (shim chromium): headless Chromium with a small RTL stand-in, not a real-browser e2e; dod.mjs --runner shim green in Node on 35efb399ec)"
        }
       ],
       "audit": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
@@ -17315,7 +17248,7 @@
       "1.9"
      ],
      "files": "src/ui/trashUndoShortcut.ts, src/__tests__/trashUndo.test.ts",
-     "status": "✅ #644 · audit r3 DONE; dod green in Node and Chromium (INT6b 17.11)",
+     "status": "✅ #644 · audit r3 DONE; dod green in Node and browser (shim chromium) (INT6b 17.11)",
      "verified": "browser",
      "pr": 644,
      "auditVerdict": {
@@ -17339,7 +17272,7 @@
         "cmd": "npx vitest run src/__tests__/trashUndo.test.ts",
         "pass": 25,
         "total": 25,
-        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+        "ranOn": "int6b cccf70c8ea (shim v4, browser (shim chromium): headless Chromium with a small RTL stand-in, not a real-browser e2e; dod.mjs --runner shim green in Node on 35efb399ec)"
        }
       ],
       "audit": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
@@ -17367,7 +17300,7 @@
       "W1.30"
      ],
      "files": "src/ui/SettingsScreen.tsx, src/privacy/ImageHostsList.tsx",
-     "status": "✅ #645 · audit r3 DONE; dod green in Node and Chromium (INT6b 17.11)",
+     "status": "✅ #645 · audit r3 DONE; dod green in Node and browser (shim chromium) (INT6b 17.11)",
      "verified": "browser",
      "pr": 645,
      "auditVerdict": {
@@ -17391,7 +17324,7 @@
         "cmd": "npx vitest run src/__tests__/imageHosts.test.tsx",
         "pass": 5,
         "total": 5,
-        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+        "ranOn": "int6b cccf70c8ea (shim v4, browser (shim chromium): headless Chromium with a small RTL stand-in, not a real-browser e2e; dod.mjs --runner shim green in Node on 35efb399ec)"
        }
       ],
       "audit": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
@@ -17454,7 +17387,7 @@
       "W4.19"
      ],
      "files": "src/lib/qr.ts, src/sync/setup/PairDevice.tsx",
-     "status": "✅ #663 · audit r3 DONE; dod green in Node and Chromium (INT6b 17.11)",
+     "status": "✅ #663 · audit r3 DONE; dod green in Node and browser (shim chromium) (INT6b 17.11)",
      "verified": "browser",
      "pr": 663,
      "auditVerdict": {
@@ -17479,13 +17412,13 @@
         "cmd": "npx vitest run src/__tests__/qr.test.ts",
         "pass": 6,
         "total": 6,
-        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+        "ranOn": "int6b cccf70c8ea (shim v4, browser (shim chromium): headless Chromium with a small RTL stand-in, not a real-browser e2e; dod.mjs --runner shim green in Node on 35efb399ec)"
        },
        {
         "cmd": "npx vitest run src/__tests__/syncSetupWizard.test.tsx",
         "pass": 2,
         "total": 2,
-        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+        "ranOn": "int6b cccf70c8ea (shim v4, browser (shim chromium): headless Chromium with a small RTL stand-in, not a real-browser e2e; dod.mjs --runner shim green in Node on 35efb399ec)"
        }
       ],
       "audit": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
@@ -18667,7 +18600,7 @@
       "W6.15"
      ],
      "files": "src/__tests__/blind/*.test.ts",
-     "status": "✅ #756 · audit r3 DONE; dod green in Node and Chromium (INT6b 17.11)",
+     "status": "✅ #756 · audit r3 DONE; dod green in browser (shim chromium); in Node blindAirplane is 13/14 (A8, same-origin GET from a cache) (INT6b 17.11; F12)",
      "verified": "browser",
      "pr": 756,
      "auditVerdict": {
@@ -18684,7 +18617,7 @@
       "npx vitest run src/__tests__/blind/blindAirplane.test.ts",
       "npx vitest run src/__tests__/blind/blindWorkerLedger.test.ts"
      ],
-     "notes": "INT6b 17.11: ✅ on audit r3 DONE (score 85); status before → ⏳ קוד ב-PR #756, #776 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4, in Node and in Chromium",
+     "notes": "review 12 M5 17.11 (lane F12): the claim 'green in Node and Chromium' was overstated — blindAirplane.test.ts is 13/14 in Node (A8), 14/14 only in the shim's Chromium · INT6b 17.11: ✅ on audit r3 DONE (score 85); status before → ⏳ קוד ב-PR #756, #776 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4, in Node and in Chromium",
      "evidence": {
       "verdict": "DONE",
       "pr": 756,
@@ -18694,25 +18627,25 @@
         "cmd": "npx vitest run src/__tests__/blind/blindLockedNote.test.ts",
         "pass": 14,
         "total": 14,
-        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+        "ranOn": "int6b cccf70c8ea (shim v4, browser (shim chromium): headless Chromium with a small RTL stand-in, not a real-browser e2e; dod.mjs --runner shim green in Node on 35efb399ec)"
        },
        {
         "cmd": "npx vitest run src/__tests__/blind/blindImageMetadata.test.ts",
         "pass": 19,
         "total": 19,
-        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+        "ranOn": "int6b cccf70c8ea (shim v4, browser (shim chromium): headless Chromium with a small RTL stand-in, not a real-browser e2e; dod.mjs --runner shim green in Node on 35efb399ec)"
        },
        {
         "cmd": "npx vitest run src/__tests__/blind/blindAirplane.test.ts",
         "pass": 14,
         "total": 14,
-        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+        "ranOn": "int6b cccf70c8ea (shim v4, browser (shim chromium): headless Chromium with a small RTL stand-in, not a real-browser e2e; dod.mjs --runner shim green in Node on 35efb399ec); in Node 13/14 (A8 fetch to the app's own origin fails), lane F12 a6ef1580a2"
        },
        {
         "cmd": "npx vitest run src/__tests__/blind/blindWorkerLedger.test.ts",
         "pass": 11,
         "total": 11,
-        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+        "ranOn": "int6b cccf70c8ea (shim v4, browser (shim chromium): headless Chromium with a small RTL stand-in, not a real-browser e2e; dod.mjs --runner shim green in Node on 35efb399ec)"
        }
       ],
       "audit": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
@@ -20441,7 +20374,7 @@
       "6.3"
      ],
      "files": "src/text/menaked.ts, src/__tests__/menaked.test.ts",
-     "status": "✅ #762 · audit r3 DONE; dod green in Node and Chromium (INT6b 17.11)",
+     "status": "✅ #762 · audit r3 DONE; dod green in Node and browser (shim chromium) (INT6b 17.11)",
      "verified": "browser",
      "pr": 762,
      "auditVerdict": {
@@ -20465,7 +20398,7 @@
         "cmd": "npx vitest run src/__tests__/menaked.test.ts",
         "pass": 11,
         "total": 11,
-        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+        "ranOn": "int6b cccf70c8ea (shim v4, browser (shim chromium): headless Chromium with a small RTL stand-in, not a real-browser e2e; dod.mjs --runner shim green in Node on 35efb399ec)"
        }
       ],
       "audit": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
@@ -22253,7 +22186,7 @@
       "W6.3"
      ],
      "files": "src/sync/e2ee/sas.ts, src/lib/embedProviders.ts",
-     "status": "✅ #717 · audit r3 DONE; dod green in Node and Chromium (INT6b 17.11)",
+     "status": "✅ #717 · audit r3 DONE; dod green in Node and browser (shim chromium) (INT6b 17.11)",
      "verified": "browser",
      "pr": 717,
      "auditVerdict": {
@@ -22298,7 +22231,7 @@
         "cmd": "npx vitest run src/__tests__/e2eePairingSas.test.ts",
         "pass": 17,
         "total": 17,
-        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+        "ranOn": "int6b cccf70c8ea (shim v4, browser (shim chromium): headless Chromium with a small RTL stand-in, not a real-browser e2e; dod.mjs --runner shim green in Node on 35efb399ec)"
        }
       ],
       "audit": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
@@ -25797,7 +25730,7 @@
      ],
      "why": "שכבה שנייה מעל האישור, לפי CaMeL ו-spotlighting.",
      "kind": "CLOUD-CODE",
-     "status": "✅ #692 · audit r3 DONE; dod green in Node and Chromium (INT6b 17.11)",
+     "status": "⏳ #692 · cloud-complete; owed: an adversarial eval with the AgentDojo harness on a real model (r3b 17.11: PARTIAL)",
      "verified": "browser",
      "pr": 692,
      "stage": "11.I",
@@ -25816,9 +25749,9 @@
       "npx vitest run src/__tests__/spotlighting.test.ts",
       "npx vitest run src/__tests__/injectionGuard.test.ts"
      ],
-     "notes": "INT6b 17.11: ✅ on audit r3 DONE (score 85); status before → ⏳ קוד ב-PR #692, #703 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4, in Node and in Chromium",
+     "notes": "review 12 M5 17.11 (lane F12): ✅ reverted — the dod is green in Node and browser (shim chromium), but world-class done needs an adversarial eval with the AgentDojo harness on a real model; r3b row in plan/audit-verdicts.json · INT6b 17.11: ✅ on audit r3 DONE (score 85); status before → ⏳ קוד ב-PR #692, #703 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4, in Node and in Chromium",
      "evidence": {
-      "verdict": "DONE",
+      "verdict": "PARTIAL",
       "pr": 692,
       "sha": "35efb399ec",
       "checks": [
@@ -25826,16 +25759,16 @@
         "cmd": "npx vitest run src/__tests__/spotlighting.test.ts",
         "pass": 5,
         "total": 5,
-        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+        "ranOn": "int6b cccf70c8ea (shim v4, browser (shim chromium): headless Chromium with a small RTL stand-in, not a real-browser e2e; dod.mjs --runner shim green in Node on 35efb399ec)"
        },
        {
         "cmd": "npx vitest run src/__tests__/injectionGuard.test.ts",
         "pass": 159,
         "total": 159,
-        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+        "ranOn": "int6b cccf70c8ea (shim v4, browser (shim chromium): headless Chromium with a small RTL stand-in, not a real-browser e2e; dod.mjs --runner shim green in Node on 35efb399ec)"
        }
       ],
-      "audit": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
+      "audit": "r3b 17.11 (review 12, M5)",
       "at": "2026-11-17"
      }
     },
@@ -29869,7 +29802,7 @@
      ],
      "why": "Notion מוביל בקשרים וב-rollups (R1, ‏10/10 במסדי נתונים); אצלנו W1.12 נתן אותם ל-Bases, והחיבור לסוגים הוא מה שהופך אותם לשימושיים.",
      "kind": "CLOUD-CODE",
-     "status": "✅ #820 · audit r3 DONE; dod green in Node and Chromium (INT6b 17.11)",
+     "status": "⏳ #820 · cloud-complete; owed: real-browser and e2e runs of the typed bases (r3b 17.11: PARTIAL)",
      "verified": "browser",
      "pr": 820,
      "stage": "12.T",
@@ -29892,9 +29825,9 @@
       "npx vitest run src/__tests__/basesRelations.test.ts",
       "npx vitest run src/__tests__/typeBaseTable.test.tsx"
      ],
-     "notes": "INT6b 17.11: ✅ on audit r3 DONE (score 88); status before → ⏳ קוד ב-PR #820, #831, #892, #898 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4, in Node and in Chromium",
+     "notes": "review 12 M5 17.11 (lane F12): ✅ reverted — the dod is green in Node and browser (shim chromium), but world-class done needs real-browser and e2e runs of the typed bases; r3b row in plan/audit-verdicts.json · INT6b 17.11: ✅ on audit r3 DONE (score 88); status before → ⏳ קוד ב-PR #820, #831, #892, #898 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4, in Node and in Chromium",
      "evidence": {
-      "verdict": "DONE",
+      "verdict": "PARTIAL",
       "pr": 820,
       "sha": "35efb399ec",
       "checks": [
@@ -29902,28 +29835,28 @@
         "cmd": "npx vitest run src/__tests__/typeBases.test.ts",
         "pass": 45,
         "total": 45,
-        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+        "ranOn": "int6b cccf70c8ea (shim v4, browser (shim chromium): headless Chromium with a small RTL stand-in, not a real-browser e2e; dod.mjs --runner shim green in Node on 35efb399ec)"
        },
        {
         "cmd": "npx vitest run src/__tests__/workdaysRollup.test.ts",
         "pass": 15,
         "total": 15,
-        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+        "ranOn": "int6b cccf70c8ea (shim v4, browser (shim chromium): headless Chromium with a small RTL stand-in, not a real-browser e2e; dod.mjs --runner shim green in Node on 35efb399ec)"
        },
        {
         "cmd": "npx vitest run src/__tests__/basesRelations.test.ts",
         "pass": 41,
         "total": 41,
-        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+        "ranOn": "int6b cccf70c8ea (shim v4, browser (shim chromium): headless Chromium with a small RTL stand-in, not a real-browser e2e; dod.mjs --runner shim green in Node on 35efb399ec)"
        },
        {
         "cmd": "npx vitest run src/__tests__/typeBaseTable.test.tsx",
         "pass": 3,
         "total": 3,
-        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+        "ranOn": "int6b cccf70c8ea (shim v4, browser (shim chromium): headless Chromium with a small RTL stand-in, not a real-browser e2e; dod.mjs --runner shim green in Node on 35efb399ec)"
        }
       ],
-      "audit": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
+      "audit": "r3b 17.11 (review 12, M5)",
       "at": "2026-11-17"
      }
     },
@@ -32600,10 +32533,10 @@
      "hoursSaved": 6,
      "licence": "israelconnect: AGPL-3.0-or-later (קוד) / CC BY 4.0 (נתונים וסכמות) — מותר ל-lumen-md (MIT) רק אחרי R12.1",
      "stage": "12.R",
-     "status": "✅ #870 · audit r3 DONE; dod green in Node and Chromium (INT6b 17.11)",
+     "status": "⏳ #870 · cloud-complete; owed: a real-model eval of the contradiction finder (r3b 17.11: PARTIAL)",
      "verified": "browser",
      "pr": 870,
-     "notes": "חופף ל-W12.V4 (מפת טיעונים), W12.E4: לבנות מעל המשימות האלה, לא מודול שני · INT6b 17.11: ✅ on audit r3 DONE (score 82); status before → ⏳ קוד ב-PR #870 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4, in Node and in Chromium",
+     "notes": "review 12 M5 17.11 (lane F12): ✅ reverted — the dod is green in Node and browser (shim chromium), but world-class done needs a real-model eval of the contradiction finder; r3b row in plan/audit-verdicts.json · חופף ל-W12.V4 (מפת טיעונים), W12.E4: לבנות מעל המשימות האלה, לא מודול שני · INT6b 17.11: ✅ on audit r3 DONE (score 82); status before → ⏳ קוד ב-PR #870 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4, in Node and in Chromium",
      "auditVerdict": {
       "at": "2026-11-17",
       "by": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
@@ -32617,7 +32550,7 @@
       "npx vitest run src/__tests__/contradictionsCommand.test.ts"
      ],
      "evidence": {
-      "verdict": "DONE",
+      "verdict": "PARTIAL",
       "pr": 870,
       "sha": "35efb399ec",
       "checks": [
@@ -32625,16 +32558,16 @@
         "cmd": "npx vitest run src/__tests__/contradictions.test.ts",
         "pass": 5,
         "total": 5,
-        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+        "ranOn": "int6b cccf70c8ea (shim v4, browser (shim chromium): headless Chromium with a small RTL stand-in, not a real-browser e2e; dod.mjs --runner shim green in Node on 35efb399ec)"
        },
        {
         "cmd": "npx vitest run src/__tests__/contradictionsCommand.test.ts",
         "pass": 2,
         "total": 2,
-        "ranOn": "int6b cccf70c8ea (shim v4, Chromium; dod.mjs --runner shim green in Node on 35efb399ec)"
+        "ranOn": "int6b cccf70c8ea (shim v4, browser (shim chromium): headless Chromium with a small RTL stand-in, not a real-browser e2e; dod.mjs --runner shim green in Node on 35efb399ec)"
        }
       ],
-      "audit": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
+      "audit": "r3b 17.11 (review 12, M5)",
       "at": "2026-11-17"
      }
     },
@@ -34254,7 +34187,7 @@
      ],
      "why": "הכרטיס: ״רשימת החסימה של MCP stdio עדיין דולפת״. רשימת חסימה למפרשים לא נסגרת לעולם; רשימת היתר לפקודה מדויקת כן. זה החוסם הראשון באבטחה.",
      "kind": "CLOUD-CODE",
-     "notes": "Shipped in #1016 (merged into verify/train-7 af2d0d7ce5 by INT4a): AllowList pins the resolved program, its sha256, the argv, the folder and every file an argument names; checked_spawn refuses anything else before a process starts. On af2d0d7ce5: rustc --test src-tauri/mcp-stdio/src/lib.rs 29/29, mcpStdioAllowlist.test.tsx 9/9 (offline runner). Review 10 found gaps (M4 M6 M7 L1-L5): the list was looked up after hashing, the deny-list read only the typed name, --opt=file and folder arguments were not pinned. fix/f10-mcp: lookup first with one message, 256 MB cap, deny on the resolved file, attached inline-code forms and stdin code refused, --opt=file hashed, a folder where an interpreter takes its program refused, nothing inside a granted vault, package-runner warning (en, he), revoke after a move, PATHEXT; rustc --test 43/43, 22/22 mutants killed; mcpStdioAllowlist 10/10. Review 10 M5: the old dod (cargo test --manifest-path src-tauri/Cargo.toml mcp_stdio) ran 0 tests; it now names the crate's own manifest, and a rustc line runs here. Owed: cargo build and cargo test on the Mac; real servers (npx, uvx, python) through the dialog; the isolation entries for mcp_stdio_* (owner); review receipts and the human-reviewed label (owner, security). Status (INT5, 16.11): kept at the wave-13 placeholder, not because no work exists (the code above is in the train) but because W6.39's WIP gate (#1053) refuses a new wave-13 start while wave 12 is over its limit, and plan/wip-frozen.json only shrinks. The status moves when wave 12 is verified, or when the owner decides otherwise. · INT6b 17.11: review 11 M4 (#1123) made a placeholder with verified:\"built\" count as started; the frozen-wave gate (plan/wip-frozen.json, which only shrinks) then refuses W13.X1/X2 while wave 12 is over its limit, and a 12→13 decision does not lift that gate. So verified is dropped, and with it the placeholder status (planBuild W4.24: a status needs a level), as INT5 did with pr: the board shows it not started; the code above is still in the train. Lifting it needs wave 12 verified, or the owner changing the gate.",
+     "notes": "review 12 M2 17.11 (lane F12): status restored from the merged work and recorded in plan/merged-while-frozen.json; its dod re-run in plain-Node with shim v4 on a6ef1580a2 (evidence); the evidence that was stripped in 35efb399ec/68d01a6351 is back · Shipped in #1016 (merged into verify/train-7 af2d0d7ce5 by INT4a): AllowList pins the resolved program, its sha256, the argv, the folder and every file an argument names; checked_spawn refuses anything else before a process starts. On af2d0d7ce5: rustc --test src-tauri/mcp-stdio/src/lib.rs 29/29, mcpStdioAllowlist.test.tsx 9/9 (offline runner). Review 10 found gaps (M4 M6 M7 L1-L5): the list was looked up after hashing, the deny-list read only the typed name, --opt=file and folder arguments were not pinned. fix/f10-mcp: lookup first with one message, 256 MB cap, deny on the resolved file, attached inline-code forms and stdin code refused, --opt=file hashed, a folder where an interpreter takes its program refused, nothing inside a granted vault, package-runner warning (en, he), revoke after a move, PATHEXT; rustc --test 43/43, 22/22 mutants killed; mcpStdioAllowlist 10/10. Review 10 M5: the old dod (cargo test --manifest-path src-tauri/Cargo.toml mcp_stdio) ran 0 tests; it now names the crate's own manifest, and a rustc line runs here. Owed: cargo build and cargo test on the Mac; real servers (npx, uvx, python) through the dialog; the isolation entries for mcp_stdio_* (owner); review receipts and the human-reviewed label (owner, security). Status (INT5, 16.11): kept at the wave-13 placeholder, not because no work exists (the code above is in the train) but because W6.39's WIP gate (#1053) refuses a new wave-13 start while wave 12 is over its limit, and plan/wip-frozen.json only shrinks. The status moves when wave 12 is verified, or when the owner decides otherwise. · INT6b 17.11: review 11 M4 (#1123) made a placeholder with verified:\"built\" count as started; the frozen-wave gate (plan/wip-frozen.json, which only shrinks) then refuses W13.X1/X2 while wave 12 is over its limit, and a 12→13 decision does not lift that gate. So verified is dropped, and with it the placeholder status (planBuild W4.24: a status needs a level), as INT5 did with pr: the board shows it not started; the code above is still in the train. Lifting it needs wave 12 verified, or the owner changing the gate.",
      "stage": "13.X",
      "dod": [
       "npx vitest run src/__tests__/mcpStdioAllowlist.test.tsx",
@@ -34269,7 +34202,29 @@
      "research": [
       "w13/research.md §X"
      ],
-     "files": "src-tauri/src/mcp_stdio.rs"
+     "files": "src-tauri/src/mcp_stdio.rs",
+     "status": "⏳ #1016 #1072 · merged, held by frozen wave (12→13); cloud-complete; owed: cargo test on the Mac, review receipts (owner)",
+     "verified": "node",
+     "pr": 1016,
+     "evidence": {
+      "pr": 1016,
+      "sha": "50e64805c4",
+      "checks": [
+       {
+        "cmd": "npx vitest run src/__tests__/mcpStdioAllowlist.test.tsx",
+        "pass": 10,
+        "total": 10,
+        "ranOn": "lane F12 a6ef1580a2 (shim v4, Node)"
+       },
+       {
+        "cmd": "d=$(mktemp -d) && rustc --edition 2021 --test src-tauri/mcp-stdio/src/lib.rs -o \"$d/t\" && \"$d/t\"",
+        "pass": 50,
+        "total": 50,
+        "ranOn": "lane F12 a6ef1580a2 (rustc --test, std only)"
+       }
+      ],
+      "at": "2026-11-17"
+     }
     },
     {
      "id": "W13.X2",
@@ -34294,7 +34249,7 @@
      ],
      "why": "חובות הדיווח של ה-CRA חלות מ-11.9.2026. פרויקט חינמי פטור, אבל ממסר בתשלום (W5.25) עלול להפוך אותו ליצרן — עדיף להיות מוכנים.",
      "kind": "CLOUD-CODE",
-     "notes": "Shipped in #1019 (merged into verify/train-7 af2d0d7ce5 by INT4a). On af2d0d7ce5: securityTxt.test.ts 10/10 (offline runner), npm run security:page exit 0 (the page is generated in both languages and unchanged). Review 10 L12, owed by the owner: security.txt's Contact is a public issue, and GitHub private vulnerability reporting is off (turn it on, then point Contact at the advisory form); its Expires is 2027-05-16 (renew before then). Owed: the human-reviewed label and receipts (security). Status (INT5, 16.11): kept at the wave-13 placeholder, not because no work exists (the code above is in the train) but because W6.39's WIP gate (#1053) refuses a new wave-13 start while wave 12 is over its limit, and plan/wip-frozen.json only shrinks. The status moves when wave 12 is verified, or when the owner decides otherwise. · D1 16.11 (#1109): support period decided (≥5 years, not before 2031-12-31, CRA Art. 13(8)-(10)); renewBy 2027-04-16 enforced by security:page --check; PVR PUT refused by the proxy (403), owner turns it on. Status stays at the placeholder (record §1b). · INT6b 17.11: review 11 M4 (#1123) made a placeholder with verified:\"built\" count as started; the frozen-wave gate (plan/wip-frozen.json, which only shrinks) then refuses W13.X1/X2 while wave 12 is over its limit, and a 12→13 decision does not lift that gate. So verified is dropped, and with it the placeholder status (planBuild W4.24: a status needs a level), as INT5 did with pr: the board shows it not started; the code above is still in the train. Lifting it needs wave 12 verified, or the owner changing the gate.",
+     "notes": "review 12 M2 17.11 (lane F12): status restored from the merged work and recorded in plan/merged-while-frozen.json; its dod re-run in plain-Node with shim v4 on a6ef1580a2 (evidence); the evidence that was stripped in 35efb399ec/68d01a6351 is back · Shipped in #1019 (merged into verify/train-7 af2d0d7ce5 by INT4a). On af2d0d7ce5: securityTxt.test.ts 10/10 (offline runner), npm run security:page exit 0 (the page is generated in both languages and unchanged). Review 10 L12, owed by the owner: security.txt's Contact is a public issue, and GitHub private vulnerability reporting is off (turn it on, then point Contact at the advisory form); its Expires is 2027-05-16 (renew before then). Owed: the human-reviewed label and receipts (security). Status (INT5, 16.11): kept at the wave-13 placeholder, not because no work exists (the code above is in the train) but because W6.39's WIP gate (#1053) refuses a new wave-13 start while wave 12 is over its limit, and plan/wip-frozen.json only shrinks. The status moves when wave 12 is verified, or when the owner decides otherwise. · D1 16.11 (#1109): support period decided (≥5 years, not before 2031-12-31, CRA Art. 13(8)-(10)); renewBy 2027-04-16 enforced by security:page --check; PVR PUT refused by the proxy (403), owner turns it on. Status stays at the placeholder (record §1b). · INT6b 17.11: review 11 M4 (#1123) made a placeholder with verified:\"built\" count as started; the frozen-wave gate (plan/wip-frozen.json, which only shrinks) then refuses W13.X1/X2 while wave 12 is over its limit, and a 12→13 decision does not lift that gate. So verified is dropped, and with it the placeholder status (planBuild W4.24: a status needs a level), as INT5 did with pr: the board shows it not started; the code above is still in the train. Lifting it needs wave 12 verified, or the owner changing the gate.",
      "stage": "13.X",
      "dod": [
       "npx vitest run src/__tests__/securityTxt.test.ts",
@@ -34307,7 +34262,29 @@
      "research": [
       "w13/research.md §X"
      ],
-     "files": "public/.well-known/security.txt (חדש)"
+     "files": "public/.well-known/security.txt (חדש)",
+     "status": "⏳ #1019 · merged, held by frozen wave (12→13); cloud-complete; owed: owner: turn on private vulnerability reporting and point Contact at it (review 10 L12)",
+     "verified": "node",
+     "pr": 1019,
+     "evidence": {
+      "pr": 1019,
+      "sha": "b53b34e7e1",
+      "checks": [
+       {
+        "cmd": "npx vitest run src/__tests__/securityTxt.test.ts",
+        "pass": 13,
+        "total": 13,
+        "ranOn": "lane F12 a6ef1580a2 (shim v4, Node)"
+       },
+       {
+        "cmd": "npm run security:page",
+        "pass": 1,
+        "total": 1,
+        "ranOn": "lane F12 a6ef1580a2 (exit 0)"
+       }
+      ],
+      "at": "2026-11-17"
+     }
     },
     {
      "id": "W13.X3",
