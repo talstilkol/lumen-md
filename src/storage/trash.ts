@@ -193,6 +193,58 @@ async function restoreNow(id: string): Promise<string | null> {
   return target;
 }
 
+/**
+ * Bulk restore (plan W13.S1): put every item of `ids` back where it was, in
+ * one turn of the queue — no delete or empty can interleave — and with one
+ * index write at the end instead of one per item, so 200 files come back in
+ * one go. An item that fails stays in the trash (and in the index); the
+ * others are restored. Returns where each restored item went, and what failed.
+ */
+export function restoreManyFromTrash(
+  ids: readonly string[],
+  onProgress?: (done: number, total: number) => void,
+): Promise<{ restored: Array<{ id: string; path: string }>; failed: Array<{ id: string; error: unknown }> }> {
+  return serialized(async () => {
+    const items = await readIndex();
+    const want = new Set(ids);
+    const restored: Array<{ id: string; path: string }> = [];
+    const failed: Array<{ id: string; error: unknown }> = [];
+    const gone = new Set<string>();
+    const todo = items.filter((i) => want.has(i.id));
+    // Parents first, so a folder and a file that was inside it both land where they were.
+    todo.sort((a, b) => a.originalPath.split("/").length - b.originalPath.split("/").length || a.trashedAt - b.trashedAt);
+    let n = 0;
+    try {
+      for (const item of todo) {
+        try {
+          let target = item.originalPath;
+          if (await workspaceHasEntry(target)) {
+            if (item.kind === "file") target = await uniqueWorkspaceName(target);
+            else {
+              let k = 2;
+              while (await workspaceHasEntry(`${item.originalPath} ${k}`)) k++;
+              target = `${item.originalPath} ${k}`;
+            }
+          }
+          await renameWorkspaceFile(`${TRASH_DIR}/${item.id}/${basename(item.originalPath)}`, target);
+          gone.add(item.id);
+          restored.push({ id: item.id, path: target });
+          await deleteWorkspaceFile(`${TRASH_DIR}/${item.id}`).catch((e: unknown) => swallowed("storage/trash: a trashed folder could not be deleted after its restore; it stays in .trash", e));
+        } catch (error) {
+          failed.push({ id: item.id, error });
+        }
+        onProgress?.(++n, todo.length);
+      }
+    } finally {
+      if (gone.size) {
+        await writeIndex(items.filter((i) => !gone.has(i.id)));
+        lastTrashed = lastTrashed.filter((i) => !gone.has(i.id));
+      }
+    }
+    return { restored, failed };
+  });
+}
+
 /** Delete for good: one item, or everything older than `olderThanMs`. */
 export function emptyTrash(opts: { id?: string; olderThanMs?: number } = {}, now = Date.now()): Promise<number> {
   return serialized(async () => {

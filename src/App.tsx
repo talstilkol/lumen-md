@@ -316,6 +316,8 @@ export default function App() {
     // Trash older than 30 days is deleted for good, once per start.
     const purge = window.setTimeout(() => {
       void import("./storage/trash").then((m) => (isOPFSAvailable() ? m.purgeExpiredTrash() : 0)).catch(() => 0);
+      // W13.S1: old versions past the vault's retention go too (the newest version of every file always stays).
+      void import("./storage/historyRetention").then((m) => m.runRetention()).catch(() => null);
     }, 5000);
     return () => {
       window.removeEventListener("lumen-open-trash", onOpen);

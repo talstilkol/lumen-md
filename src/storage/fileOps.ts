@@ -71,7 +71,7 @@ async function moveEntry(from: string, to: string, confirmReplace?: (path: strin
 }
 
 /** Rewrite the links after a move that `moveEntry` made. */
-async function relink(from: string, to: string, folder: boolean | undefined, moved: Moved): Promise<MoveResult> {
+async function relink(from: string, to: string, folder: boolean | undefined, moved: Moved, noLog = false): Promise<MoveResult> {
   // The entry has moved: report that even when a link rewrite fails, so
   // the caller still retargets the open note instead of autosaving it back
   // to the old path.
@@ -90,6 +90,8 @@ async function relink(from: string, to: string, folder: boolean | undefined, mov
     /* no storage: nothing to move */
     swallowed("storage/fileOps: storage is blocked: there are no per-note reading options to move", err);
   }
+  // W13.S1: the "Deleted and renamed files" screen lists it (off the startup path).
+  if (!noLog) await import("./renameLog").then((m) => m.recordRename(from, to, !!folder)).catch((e: unknown) => swallowed("storage/fileOps: the rename log did not load; the move itself happened", e));
   window.dispatchEvent(new Event("lumen-workspace-changed"));
   const vault = moved.vault;
   const rewrite = (content: string, notePrevPath: string) =>
@@ -105,11 +107,11 @@ async function relink(from: string, to: string, folder: boolean | undefined, mov
 export async function safeMove(
   from: string,
   to: string,
-  opts: { folder?: boolean; confirmReplace?: (path: string) => Promise<boolean> } = {},
+  opts: { folder?: boolean; confirmReplace?: (path: string) => Promise<boolean>; /** Undoing a logged rename: don't log the way back. */ noLog?: boolean } = {},
 ): Promise<MoveResult | null> {
   if (from === to) return { path: to, linksUpdated: [], rewrite: (c) => c };
   const moved = await moveEntry(from, to, opts.confirmReplace);
-  return moved ? relink(from, to, opts.folder, moved) : null;
+  return moved ? relink(from, to, opts.folder, moved, opts.noLog) : null;
 }
 
 /**
