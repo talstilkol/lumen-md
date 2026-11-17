@@ -19732,6 +19732,49 @@
       ]
     },
     {
+      "key": "serverTasks.cancel",
+      "en": "Cancel",
+      "vars": []
+    },
+    {
+      "key": "serverTasks.cancelLabel",
+      "en": "Cancel {tool} on {server}",
+      "vars": [
+        "tool",
+        "server"
+      ]
+    },
+    {
+      "key": "serverTasks.status.cancelled",
+      "en": "Cancelled",
+      "vars": []
+    },
+    {
+      "key": "serverTasks.status.completed",
+      "en": "Done",
+      "vars": []
+    },
+    {
+      "key": "serverTasks.status.failed",
+      "en": "Failed",
+      "vars": []
+    },
+    {
+      "key": "serverTasks.status.input_required",
+      "en": "Waiting for your answer",
+      "vars": []
+    },
+    {
+      "key": "serverTasks.status.working",
+      "en": "Working",
+      "vars": []
+    },
+    {
+      "key": "serverTasks.title",
+      "en": "Tasks on MCP servers",
+      "vars": []
+    },
+    {
       "key": "settings.calendar",
       "en": "Calendar",
       "vars": []
