@@ -28,6 +28,8 @@ export interface LinkedPane {
   markLine?(line: number | null): void;
   /** The caret's line, for a pane that has one (the source editor). */
   caretLine?(): number | null;
+  /** Call `cb` when the pane's line map changed (a re-render, blocks of a long note coming in). */
+  onMapChange?(cb: () => void): () => void;
   dispose?(): void;
 }
 
@@ -109,8 +111,13 @@ interface Box extends LineBox {
  */
 export function previewPane(root: HTMLElement, getText: () => string): LinkedPane {
   let cache: { points: LinePoint[]; boxes: Box[] } | null = null;
+  const listeners = new Set<() => void>();
+  let notify: ReturnType<typeof setTimeout> | undefined;
   const invalidate = () => {
     cache = null;
+    // Tell the link once the burst of mutations is over (a long note's blocks arrive in slices).
+    clearTimeout(notify);
+    notify = setTimeout(() => listeners.forEach((cb) => cb()), 60);
   };
   const mo = typeof MutationObserver !== "undefined" ? new MutationObserver(invalidate) : null;
   mo?.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ["data-sl", "data-sb", "style", "class"] });
@@ -183,7 +190,13 @@ export function previewPane(root: HTMLElement, getText: () => string): LinkedPan
         marked.setAttribute("data-sync-caret", "");
       }
     },
+    onMapChange(cb) {
+      listeners.add(cb);
+      return () => listeners.delete(cb);
+    },
     dispose() {
+      clearTimeout(notify);
+      listeners.clear();
       mo?.disconnect();
       ro?.disconnect();
       if (marked) marked.removeAttribute("data-sync-caret");
@@ -246,6 +259,15 @@ export function linkPanes(a: LinkedPane, b: LinkedPane, opts: { followCaret?: bo
       },
       { passive: true },
     );
+  }
+
+  // A pane re-rendered under the reader (blocks of a long note coming in, an edit above): the pane
+  // that leads stays put and the other follows it again, so the two never drift apart while rendering.
+  for (const pane of [a, b]) {
+    const off = pane.onMapChange?.(() => {
+      if (active && active !== pane) sync(active);
+    });
+    if (off) listeners.push(off);
   }
 
   if (opts.followCaret) {
