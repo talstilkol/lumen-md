@@ -39,7 +39,7 @@ export default function HebrewCalendarPanel({ items, activity, israel, lang, loc
   const title = t("viz.hcal.activity", { year: hebrewYearLabel(year, lang) });
   return (
     <div className="lumen-viz-hcal-panel">
-      <HebrewMonthView year={start.year} month={start.month} israel={israel} lang={lang} locale={locale} dir={dir} items={items} onDay={onDay} onItem={onItem} focusIso={today} />
+      <HebrewMonthView year={start.year} month={start.month} israel={israel} lang={lang} locale={locale} dir={dir} items={items} onDay={onDay} onItem={onItem} focusIso={today} today={today} />
       {heatmap && (
         <>
           <div className="lumen-viz-bar">

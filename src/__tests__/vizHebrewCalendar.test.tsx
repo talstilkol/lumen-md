@@ -143,6 +143,31 @@ describe("the month grid: keyboard and axe", () => {
       expect((await axe.run(container, { resultTypes: ["violations"] })).violations.map((v) => v.id)).toEqual([]);
     });
 
+  it("today is marked (aria-current=date) and \"Today\" comes back to it from another month, focus on the day", async () => {
+    const { container } = render(
+      <div dir="rtl" lang="he">
+        <HebrewMonthView year={5787} month={ADAR_II} israel lang="he" locale="he" dir="rtl" focusIso="2027-03-23" today="2027-03-23" />
+      </div>,
+    );
+    const current = () => [...container.querySelectorAll('[aria-current="date"]')].map((c) => (c as HTMLElement).dataset.iso);
+    expect(current()).toEqual(["2027-03-23"]); // 14 Adar II, Purim
+    const todayBtn = container.querySelector("[data-hcal-today]") as HTMLButtonElement;
+    expect(todayBtn.disabled).toBe(true); // already there
+    act(() => {
+      fireEvent.click(container.querySelector("[data-hcal-next]")!);
+    });
+    expect(container.querySelector("[data-hebrew-month]")!.getAttribute("data-hebrew-month")).not.toBe(`5787-${ADAR_II}`);
+    expect(current()).toEqual([]);
+    expect(todayBtn.disabled).toBe(false);
+    act(() => {
+      fireEvent.click(todayBtn);
+    });
+    expect(container.querySelector("[data-hebrew-month]")!.getAttribute("data-hebrew-month")).toBe(`5787-${ADAR_II}`);
+    expect(current()).toEqual(["2027-03-23"]);
+    expect((document.activeElement as HTMLElement).dataset.iso).toBe("2027-03-23");
+    expect((await axe.run(container, { resultTypes: ["violations"] })).violations.map((v) => v.id)).toEqual([]);
+  });
+
   it("the panel with the heatmap and its table is axe clean (RTL)", async () => {
     const items = new Map([["2026-09-15", [{ path: "daily/2026-09-15.md", name: "2026-09-15" }]]]);
     const { container } = render(
