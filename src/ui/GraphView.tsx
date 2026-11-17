@@ -12,6 +12,7 @@
 
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { filteredGraph, graphTimeDomain, groupsOf, type GraphDateField, type GraphFilter, type GroupBy } from "../graph/graphModel";
+import { runLayout } from "../graph/layoutClient";
 import { chooseEngine, layoutWithEngine, probeCaps, type GraphEngineKind, type GraphEnginePref } from "../graph/engine";
 import { readWorkspaceFile } from "../storage/workspace";
 import { log } from "../lib/logger";
@@ -28,6 +29,10 @@ import { convexHull } from "../graph/hull";
 import "./graph/graphAltStrings";
 import { GraphSummary } from "./graph/GraphSummary";
 import type { AltGraph } from "../graph/textAlt";
+
+import "./graph/graphExportStrings";
+import { GraphExportMenu } from "./graph/GraphExportMenu";
+import type { Scene } from "../graph/exportImage";
 
 // W13.G8: clusters and structural gaps, loaded when asked for.
 const ClusterGapsPanel = lazy(() => import("./graph/ClusterGapsPanel"));
@@ -166,6 +171,24 @@ export function GraphView({ onOpenFile, initialTable = false }: { onOpenFile: (p
     };
   }, [sub, engineKind]);
 
+  // W13.G12: the note graph as it is now, for "Export view" (laid out first when it is shown as a table).
+  const exportScene = async (): Promise<Scene> => {
+    if (!graph || !sub || !style) return { title: t("graphExport.title.notes"), nodes: [], edges: [] };
+    const at = positions && positions.length === sub.nodes.length * 2 ? positions : await runLayout(sub.nodes.length, sub.edges);
+    const nodes = Array.from(sub.nodes, (g: number, k: number) => ({
+      id: graph.paths[g],
+      label: graph.labels[g],
+      x: at[2 * k],
+      y: at[2 * k + 1],
+      color: [style.colors[4 * k], style.colors[4 * k + 1], style.colors[4 * k + 2], style.colors[4 * k + 3]] as const,
+      size: style.sizes[k] || 4,
+      attrs: { path: graph.paths[g] },
+    }));
+    const edges: Scene["edges"][number][] = [];
+    for (let e = 0; e < sub.edges.length; e += 2) edges.push({ source: nodes[sub.edges[e]].id, target: nodes[sub.edges[e + 1]].id });
+    return { title: t("graphExport.title.notes"), description: t("graphView.stats", { nodes: String(sub.nodes.length), edges: String(sub.edges.length / 2) }), lang: document.documentElement.lang || undefined, nodes, edges, background: [1, 1, 1, 1] };
+  };
+
   const edgeColor = useMemo(() => resolveColor("hsl(var(--fg-muted))", 0.18), []);
   const ring = useMemo(() => resolveColor("hsl(var(--fg))"), []);
   const labelColor = "hsl(var(--fg))";
@@ -258,6 +281,7 @@ export function GraphView({ onOpenFile, initialTable = false }: { onOpenFile: (p
         <button type="button" className="icon-btn" aria-pressed={asList} onClick={() => (setAsList((v) => !v), setAsTable(false))} data-testid="graph-as-list" style={{ inlineSize: "auto", paddingInline: 8, fontSize: 12 }}>
           {t("graphAlt.mode.list")}
         </button>
+        <GraphExportMenu scene={exportScene} testId="graph-export-view" style={{ ...field, inlineSize: "auto" }} />
         {groups && groupBy !== "none" && (
           <ul aria-label={t("graph.groups")} style={{ display: "flex", flexWrap: "wrap", gap: 8, listStyle: "none", margin: 0, padding: 0 }}>
             {groups.names.map((name, k) => (

@@ -23839,6 +23839,61 @@
       "vars": [
         "n"
       ]
+    },
+    {
+      "key": "graphExport.empty",
+      "en": "Nothing to export: no node is shown.",
+      "vars": []
+    },
+    {
+      "key": "graphExport.failed",
+      "en": "The export did not finish: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "graphExport.gexf",
+      "en": "GEXF for Gephi",
+      "vars": []
+    },
+    {
+      "key": "graphExport.label",
+      "en": "Export view",
+      "vars": []
+    },
+    {
+      "key": "graphExport.png",
+      "en": "PNG picture",
+      "vars": []
+    },
+    {
+      "key": "graphExport.saved",
+      "en": "Saved {file} ({nodes} nodes)",
+      "vars": [
+        "file",
+        "nodes"
+      ]
+    },
+    {
+      "key": "graphExport.svg",
+      "en": "SVG picture",
+      "vars": []
+    },
+    {
+      "key": "graphExport.title.entities",
+      "en": "Entity graph",
+      "vars": []
+    },
+    {
+      "key": "graphExport.title.notes",
+      "en": "Note graph",
+      "vars": []
+    },
+    {
+      "key": "graphExport.working",
+      "en": "Preparing the file…",
+      "vars": []
     }
   ]
 }
