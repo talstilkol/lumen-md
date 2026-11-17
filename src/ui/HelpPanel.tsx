@@ -90,14 +90,14 @@ export function HelpPanel({ topic, initialQuery = "", onClose }: { topic: string
         <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderBlockEnd: "1px solid hsl(var(--border))" }}>
           {page && (
             <button type="button" onClick={() => setPage(null)} aria-label={t("help.back")} title={t("help.back")} style={iconBtn}>
-              <ArrowLeft size={15} aria-hidden="true" style={{ transform: lang === "he" ? "scaleX(-1)" : undefined }} />
+              <ArrowLeft size={15} aria-hidden="true" className="icon-dir" />
             </button>
           )}
           <h2 id="help-title" style={{ margin: 0, fontSize: 15, flex: 1 }} dir="auto">
             {page ? page.title : t("help.title")}
           </h2>
           <a href={webUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: "hsl(var(--accent))", display: "inline-flex", gap: 4, alignItems: "center" }}>
-            <ExternalLink size={12} aria-hidden="true" /> {t("help.web")}
+            <ExternalLink size={12} aria-hidden="true" className="icon-dir" /> {t("help.web")}
           </a>
           <button type="button" onClick={onClose} aria-label={t("help.close")} title={t("help.close")} style={iconBtn}>
             <X size={15} aria-hidden="true" />

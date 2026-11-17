@@ -340,7 +340,7 @@ function ValueEditor({
               title={t("props.openLink", { target: inner })}
               onClick={() => (isUrl ? window.open(s, "_blank", "noopener,noreferrer") : void openNote(inner))}
             >
-              <ExternalLink size={12} aria-hidden />
+              <ExternalLink size={12} aria-hidden className="icon-dir" />
             </button>
           )}
         </div>

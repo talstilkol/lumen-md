@@ -2409,3 +2409,9 @@ dialog.lumen-modal:is([data-reading-mode="side-by-side"], [data-reading-mode="da
     cursor: pointer;
   }
 }
+
+/* W13.H3: a directional icon (src/ui/icons/direction.json — back/forward, undo/redo,
+   a side panel, bullets) mirrors in RTL; a fixed one (media, clocks, check marks,
+   code) never does. `scale` composes with a rotate transform, and :dir() follows
+   the nearest dir, so an icon inside an LTR island (code, an English note) stays. */
+.icon-dir:dir(rtl) { scale: -1 1; }

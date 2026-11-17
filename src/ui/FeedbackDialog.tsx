@@ -176,7 +176,7 @@ export function FeedbackDialog({ options, onClose }: { options: FeedbackOptions;
     <Modal onClose={onClose} aria-label={t("feedback.title")} className="cmd-palette-backdrop">
       <div className="cmd-palette" data-testid="feedback-dialog" style={{ maxWidth: 600, padding: 0, display: "flex", flexDirection: "column", maxHeight: "88vh" }}>
         <header style={{ padding: "14px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
-          <MessageSquareWarning size={18} style={{ color: "hsl(var(--accent))" }} />
+          <MessageSquareWarning size={18} className="icon-dir" style={{ color: "hsl(var(--accent))" }} />
           <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600, flex: 1 }}>{t("feedback.title")}</h2>
           <HelpButton topic="getting-started/feedback" />
           <button type="button" style={ghost} onClick={onClose} aria-label={t("feedback.close")}>

@@ -203,7 +203,7 @@ export default function DatabaseBlock({ source, meta }: Props) {
           <ViewTab cur={view} v="table" set={setView}><Table2 size={12} /> {t("db.view.table")}</ViewTab>
           <ViewTab cur={view} v="cards" set={setView}><LayoutGrid size={12} /> {t("db.view.cards")}</ViewTab>
           <ViewTab cur={view} v="kanban" set={setView}><Columns3 size={12} /> {t("db.view.kanban")}</ViewTab>
-          <ViewTab cur={view} v="list" set={setView}><ListIcon size={12} /> {t("db.view.list")}</ViewTab>
+          <ViewTab cur={view} v="list" set={setView}><ListIcon size={12} className="icon-dir" /> {t("db.view.list")}</ViewTab>
           <ViewTab cur={view} v="calendar" set={setView}><CalendarIcon size={12} /> {t("db.view.calendar")}</ViewTab>
           <ViewTab cur={view} v="map" set={setView}><MapPin size={12} /> {t("db.view.map")}</ViewTab>
         </div>

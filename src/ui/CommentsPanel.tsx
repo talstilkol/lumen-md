@@ -114,7 +114,7 @@ export function CommentsPanel({ open, onClose, collab, onJump }: Props) {
           borderBottom: "1px solid hsl(var(--border))",
         }}
       >
-        <MessageSquare size={14} aria-hidden />
+        <MessageSquare size={14} aria-hidden className="icon-dir" />
         <span style={{ fontWeight: 600, fontSize: 13 }}>
           {t("commentsPanel.title")}
         </span>
@@ -320,7 +320,7 @@ export function CommentsPanel({ open, onClose, collab, onJump }: Props) {
                     gap: 4,
                   }}
                 >
-                  <Reply size={11} />
+                  <Reply size={11} className="icon-dir" />
                   {t("commentsPanel.reply")}
                 </button>
               ) : null}

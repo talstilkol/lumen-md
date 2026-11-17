@@ -669,7 +669,7 @@ export function PluginGallery({ open, onClose }: Props) {
                               textDecoration: "none",
                             }}
                           >
-                            <ExternalLink size={12} />
+                            <ExternalLink size={12} className="icon-dir" />
                           </a>
                         );
                       })()}
