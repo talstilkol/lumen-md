@@ -13811,6 +13811,108 @@
       "vars": []
     },
     {
+      "key": "paged.empty",
+      "en": "This note is empty: there are no pages yet.",
+      "vars": []
+    },
+    {
+      "key": "paged.error",
+      "en": "The pages could not be laid out: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "paged.frame",
+      "en": "Pages of {title}",
+      "vars": [
+        "title"
+      ]
+    },
+    {
+      "key": "paged.laying",
+      "en": "Laying out pages…",
+      "vars": []
+    },
+    {
+      "key": "paged.margins",
+      "en": "Margins",
+      "vars": []
+    },
+    {
+      "key": "paged.margins.narrow",
+      "en": "Narrow",
+      "vars": []
+    },
+    {
+      "key": "paged.margins.normal",
+      "en": "Normal",
+      "vars": []
+    },
+    {
+      "key": "paged.margins.wide",
+      "en": "Wide",
+      "vars": []
+    },
+    {
+      "key": "paged.numbering",
+      "en": "Page numbers",
+      "vars": []
+    },
+    {
+      "key": "paged.numbering.decimal",
+      "en": "1, 2, 3",
+      "vars": []
+    },
+    {
+      "key": "paged.numbering.hebrew",
+      "en": "Hebrew (א, ב, ג)",
+      "vars": []
+    },
+    {
+      "key": "paged.numbering.none",
+      "en": "None",
+      "vars": []
+    },
+    {
+      "key": "paged.pageOf",
+      "en": "Page {n} of {total}",
+      "vars": [
+        "n",
+        "total"
+      ]
+    },
+    {
+      "key": "paged.print",
+      "en": "Print / Save as PDF",
+      "vars": []
+    },
+    {
+      "key": "paged.size",
+      "en": "Size",
+      "vars": []
+    },
+    {
+      "key": "paged.toolbar",
+      "en": "Page view controls",
+      "vars": []
+    },
+    {
+      "key": "paged.zoom",
+      "en": "Zoom",
+      "vars": []
+    },
+    {
+      "key": "paged.zoom.fit",
+      "en": "Fit page",
+      "vars": []
+    },
+    {
+      "key": "paged.zoom.two",
+      "en": "Two pages",
+      "vars": []
+    },
+    {
       "key": "paste.clipboardDenied",
       "en": "Lumen can't read the clipboard. Allow clipboard access, or paste with Ctrl+V.",
       "vars": []

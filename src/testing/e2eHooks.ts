@@ -33,6 +33,8 @@ const MODULES = {
   "sync/cloud/ConflictDialog": () => import("../sync/cloud/ConflictDialog"),
   // e2e/immersive-reader.spec.ts: the Reading mode menu, as the toolbar opens it (W13.R1, W13.R5).
   "ui/ReadingModeMenu": () => import("../ui/ReadingModeMenu"),
+  // e2e/paged-preview.spec.ts: the PDF export's document, printed to count its pages (W13.R10).
+  "ui/PrintExport": () => import("../ui/PrintExport"),
 };
 
 export type E2eModuleName = keyof typeof MODULES;
