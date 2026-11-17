@@ -418,6 +418,8 @@
   "cmd.split": "تقسيم المحرر + المعاينة",
   "cmd.student.lecture": "وضع الطالب: تسجيل محاضرة",
   "cmd.student.lecture.hint": "سجّل واضغط «مهم!» واحصل على نص بزر ▶ لكل جملة وملخص وبطاقات مراجعة — على هذا الجهاز.",
+  "cmd.student.syllabus": "Create a syllabus…",
+  "cmd.student.syllabus.hint": "A note with one heading per teaching week of the semester, from your institution's academic calendar, with its dates and days off",
   "cmd.suggest.accept": "قبول الاقتراح عند المؤشر",
   "cmd.suggest.accept.hint": "تطبيق التغيير المتتبَّع تحت المؤشر",
   "cmd.suggest.acceptAll": "قبول كل الاقتراحات",

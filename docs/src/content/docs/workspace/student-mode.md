@@ -41,3 +41,21 @@ first time it is used, and then comes from the browser's cache.
 - The summary picks sentences; it does not write new ones. When the local
   summarizer (plan 6.11) is installed, it can choose them instead. Whatever
   it returns must be sentences of the transcript.
+
+## A syllabus by the semester's weeks
+
+`⌘K → Create a syllabus…` makes a note with one heading per teaching week
+of the semester, from your institution's academic calendar:
+
+1. Save the academic calendar (`.ics`) in the vault. If there is more than
+   one, you pick which.
+2. Type the course name. The note is created as `Syllabus/<course>.md`.
+
+The semester is the first one in the calendar that hasn't ended yet. The
+weeks run from its first day to its last, by your work week (Sunday to
+Thursday in Israel). A week that is all break is skipped and not counted;
+a week with a holiday or a break day lists those days as no classes. Write
+each week's readings as task items (`- [ ] chapter 3`) and its deadlines as
+`- Deadline: 2026-12-20 Exercise 2`. A deadline on Shabbat or a chag gets a
+suggested working day; the date you wrote stays. Nothing is fetched: the
+calendar is read from the vault.

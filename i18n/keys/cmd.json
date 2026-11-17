@@ -2105,6 +2105,16 @@
       "vars": []
     },
     {
+      "key": "cmd.student.syllabus",
+      "en": "Create a syllabus…",
+      "vars": []
+    },
+    {
+      "key": "cmd.student.syllabus.hint",
+      "en": "A note with one heading per teaching week of the semester, from your institution's academic calendar, with its dates and days off",
+      "vars": []
+    },
+    {
       "key": "cmd.suggest.accept",
       "en": "Accept suggestion at cursor",
       "vars": []

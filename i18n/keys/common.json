@@ -13031,6 +13031,56 @@
       "vars": []
     },
     {
+      "key": "syllabus.created",
+      "en": "Syllabus created: {weeks} teaching weeks, {from} to {to}",
+      "vars": [
+        "weeks",
+        "from",
+        "to"
+      ]
+    },
+    {
+      "key": "syllabus.defaultTitle",
+      "en": "Syllabus",
+      "vars": []
+    },
+    {
+      "key": "syllabus.failed",
+      "en": "Could not create the syllabus: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "syllabus.noCalendar",
+      "en": "There is no academic calendar in the vault. Save your institution's calendar (.ics) in the vault and try again.",
+      "vars": []
+    },
+    {
+      "key": "syllabus.noSemester",
+      "en": "{calendar} has no semester that hasn't ended yet (no start and end events found).",
+      "vars": [
+        "calendar"
+      ]
+    },
+    {
+      "key": "syllabus.noWeeks",
+      "en": "{calendar}: the semester has no teaching weeks (every week is a break).",
+      "vars": [
+        "calendar"
+      ]
+    },
+    {
+      "key": "syllabus.pickCalendar",
+      "en": "Which academic calendar?",
+      "vars": []
+    },
+    {
+      "key": "syllabus.titlePrompt",
+      "en": "Course name",
+      "vars": []
+    },
+    {
       "key": "sync.conflict.apply",
       "en": "Apply merge",
       "vars": []

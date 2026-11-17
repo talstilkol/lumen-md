@@ -418,6 +418,8 @@
   "cmd.split": "エディタ + プレビューを分割表示",
   "cmd.student.lecture": "学生モード：講義を録音",
   "cmd.student.lecture.hint": "録音して「重要！」をタップすると、各文に ▶ の付いた文字起こし、要約、復習カードができます（この端末で）。",
+  "cmd.student.syllabus": "Create a syllabus…",
+  "cmd.student.syllabus.hint": "A note with one heading per teaching week of the semester, from your institution's academic calendar, with its dates and days off",
   "cmd.suggest.accept": "カーソル位置の提案を承認",
   "cmd.suggest.accept.hint": "カーソル位置の変更を反映します",
   "cmd.suggest.acceptAll": "すべての提案を承認",

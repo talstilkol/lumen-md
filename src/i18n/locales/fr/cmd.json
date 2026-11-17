@@ -418,6 +418,8 @@
   "cmd.split": "Éditeur + aperçu côte à côte",
   "cmd.student.lecture": "Mode étudiant : enregistrer un cours",
   "cmd.student.lecture.hint": "Enregistrez, touchez « Important ! » et obtenez une transcription avec ▶ pour chaque phrase, un résumé et des cartes de révision — sur cet appareil.",
+  "cmd.student.syllabus": "Create a syllabus…",
+  "cmd.student.syllabus.hint": "A note with one heading per teaching week of the semester, from your institution's academic calendar, with its dates and days off",
   "cmd.suggest.accept": "Accepter la suggestion sous le curseur",
   "cmd.suggest.accept.hint": "Appliquer la modification suivie sous le curseur",
   "cmd.suggest.acceptAll": "Accepter toutes les suggestions",

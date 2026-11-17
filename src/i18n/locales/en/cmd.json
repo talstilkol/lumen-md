@@ -417,6 +417,8 @@
   "cmd.split": "Split editor + preview",
   "cmd.student.lecture": "Student mode: record a lecture",
   "cmd.student.lecture.hint": "Record, tap “Important!”, and get a transcript with ▶ for each sentence, a summary and review cards — on this device.",
+  "cmd.student.syllabus": "Create a syllabus…",
+  "cmd.student.syllabus.hint": "A note with one heading per teaching week of the semester, from your institution's academic calendar, with its dates and days off",
   "cmd.suggest.accept": "Accept suggestion at cursor",
   "cmd.suggest.accept.hint": "Apply the tracked change under the cursor",
   "cmd.suggest.acceptAll": "Accept all suggestions",

@@ -306,6 +306,13 @@
       "icon": "FileText"
     },
     {
+      "id": "student.syllabus",
+      "label": "Create a syllabus…",
+      "group": "File",
+      "hint": "A note with one heading per teaching week of the semester, from your institution's academic calendar, with its dates and days off",
+      "icon": "FileText"
+    },
+    {
       "id": "note.capture",
       "label": "Quick capture",
       "group": "File",
@@ -2381,6 +2388,13 @@
       "icon": "FileText"
     },
     {
+      "id": "student.syllabus",
+      "label": "Create a syllabus…",
+      "group": "File",
+      "hint": "A note with one heading per teaching week of the semester, from your institution's academic calendar, with its dates and days off",
+      "icon": "FileText"
+    },
+    {
       "id": "note.capture",
       "label": "Quick capture",
       "group": "File",
@@ -4300,6 +4314,7 @@
     "note.today",
     "pdf.open",
     "student.lecture",
+    "student.syllabus",
     "note.capture",
     "epub.open",
     "view.reading",

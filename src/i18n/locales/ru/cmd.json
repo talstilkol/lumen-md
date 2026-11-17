@@ -418,6 +418,8 @@
   "cmd.split": "Редактор + просмотр",
   "cmd.student.lecture": "Режим студента: запись лекции",
   "cmd.student.lecture.hint": "Записывайте, нажимайте «Важно!» и получайте расшифровку с ▶ для каждого предложения, конспект и карточки для повторения — на этом устройстве.",
+  "cmd.student.syllabus": "Create a syllabus…",
+  "cmd.student.syllabus.hint": "A note with one heading per teaching week of the semester, from your institution's academic calendar, with its dates and days off",
   "cmd.suggest.accept": "Принять предложение под курсором",
   "cmd.suggest.accept.hint": "Применить отслеживаемое изменение под курсором",
   "cmd.suggest.acceptAll": "Принять все предложения",

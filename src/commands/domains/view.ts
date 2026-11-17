@@ -114,6 +114,15 @@ export function buildViewCommands({ setSearchOpen, setRuntimeMetricsOpen, vimEna
       action: () => void import("../../student/LectureRecorder").then((m) => m.openLectureRecorder()),
     },
     {
+      id: "student.syllabus",
+      label: t("cmd.student.syllabus"),
+      hint: t("cmd.student.syllabus.hint"),
+      icon: cmdIcons.FileText,
+      group: t("group.file"),
+      // Plan W12.H5: the semester's teaching weeks from the academic calendar (an .ics in the vault).
+      action: () => void import("../../academic/createSyllabus").then((m) => m.createSyllabus()),
+    },
+    {
       id: "note.capture",
       label: t("capture.title"),
       shortcut: "⌥⌘N",
