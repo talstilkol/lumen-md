@@ -20,6 +20,9 @@ import { GraphCanvas } from "./graph/GraphCanvas";
 import { TimeSlider, untilOf } from "./graph/TimeSlider";
 import { groupColor, resolveColor } from "./graph/graphData";
 import "./entityGraphStrings";
+import "./graph/perspectiveStrings";
+import { PerspectiveBar } from "./graph/PerspectiveBar";
+import { rgbaToHex, styleNodes, type KindRule, type Perspective, type PerspectiveFilter } from "../graph/perspectives";
 import { egoDefault } from "../views/graph/ego";
 import { countedSankey, type FlowInput } from "../views/graph/flows";
 import type { SourceMeta } from "../views/graph/claims";
@@ -49,11 +52,13 @@ export interface EntityGraphViewProps {
   onOpenSource?: (note: string, anchor: string) => void;
   /** The notes' text (W13.G4: the path finder shows each link's paragraph as it is now). */
   texts?: ReadonlyMap<string, string>;
+  /** W13.G9: where perspectives are kept (tests pass a vault; the app uses the workspace). */
+  perspectiveVault?: import("../graph/perspectives").PerspectiveVault;
 }
 
 const field: React.CSSProperties = { fontSize: 12, padding: "2px 6px", borderRadius: 4, border: "1px solid hsl(var(--border))", background: "hsl(var(--bg))", color: "hsl(var(--fg))" };
 
-export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialMode = "graph", start, onOpenSource, texts }: EntityGraphViewProps) {
+export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialMode = "graph", start, onOpenSource, texts, perspectiveVault }: EntityGraphViewProps) {
   const [types, setTypes] = useState<Set<EntityType>>(new Set(ENTITY_TYPES));
   const [preds, setPreds] = useState<Set<string>>(new Set(PREDICATES.map((p) => p.id)));
   const [folder, setFolder] = useState("");
@@ -69,6 +74,9 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
   const [inspect, setInspect] = useState<readonly string[] | null>(null);
   const [rowState, setRow] = useState(0);
   const table = useRef<HTMLTableSectionElement>(null);
+  // W13.G9: the perspective's style rules per entity type, and the root Alt+1…9 listens on.
+  const [rules, setRules] = useState<Record<string, KindRule>>({});
+  const root = useRef<HTMLDivElement>(null);
 
   useEffect(() => setUntil(domain.length - 1), [domain.length]);
 
@@ -121,16 +129,34 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
       off = true;
     };
   }, [mode, visible, render]);
-  const style = useMemo(() => {
-    const colors = new Float32Array(visible.nodes.length * 4);
-    const sizes = new Float32Array(visible.nodes.length);
-    visible.nodes.forEach((n, i) => {
-      colors.set(resolveColor(groupColor(ENTITY_TYPES.indexOf(n.type))), i * 4);
-      sizes[i] = 4;
-    });
-    return { colors, sizes };
-  }, [visible]);
   const adjacency = useMemo(() => visible.nodes.map((n) => neighbours(visible, n.id).map((x) => render.index.get(x)!)), [visible, render]);
+  const style = useMemo(
+    () => styleNodes(visible.nodes.map((n, i) => ({ kind: n.type, degree: adjacency[i]?.length ?? 0 })), rules, (k) => resolveColor(groupColor(ENTITY_TYPES.indexOf(k as EntityType)))),
+    [visible, adjacency, rules],
+  );
+
+  // W13.G9: the view's state as a perspective, and back.
+  const snapshot = (): PerspectiveFilter => ({
+    ...(types.size < ENTITY_TYPES.length ? { kinds: [...types] } : {}),
+    ...(preds.size < PREDICATES.length ? { predicates: [...preds] } : {}),
+    ...(folder.trim() ? { folder: folder.trim() } : {}),
+    ...(tag.trim() ? { tag: tag.trim() } : {}),
+    ...(minConf > 0 ? { minConfidence: minConf } : {}),
+    ...(center ? { center, depth } : {}),
+    mode,
+  });
+  const applyPerspective = (p: Perspective) => {
+    const f = p.filter;
+    setTypes(new Set(f.kinds ? ENTITY_TYPES.filter((x) => f.kinds!.includes(x)) : ENTITY_TYPES));
+    setPreds(new Set(f.predicates ? PREDICATES.map((x) => x.id).filter((x) => f.predicates!.includes(x)) : PREDICATES.map((x) => x.id)));
+    setFolder(f.folder ?? "");
+    setTag(f.tag ?? "");
+    setMinConf(f.minConfidence ?? 0);
+    setCenter(f.center && byId.has(f.center) ? f.center : "");
+    setDepth(f.depth ?? 1);
+    if (f.mode && ["graph", "table", "sankey", "flows", "matrix"].includes(f.mode)) setMode(f.mode as EntityGraphMode);
+    setRules({ ...p.rules });
+  };
 
   const toggle = <T,>(set: Set<T>, v: T, put: (s: Set<T>) => void) => put(set.has(v) ? new Set([...set].filter((x) => x !== v)) : new Set([...set, v]));
   const focusRow = (i: number) => {
@@ -160,7 +186,7 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
   };
 
   return (
-    <div data-testid="entity-graph" style={{ display: "flex", flexDirection: "column", blockSize: "100%", fontSize: 12 }}>
+    <div ref={root} data-testid="entity-graph" style={{ display: "flex", flexDirection: "column", blockSize: "100%", fontSize: 12 }}>
       <div role="toolbar" aria-label={t("entityGraph.view.filters")} style={{ display: "flex", flexWrap: "wrap", gap: 8, padding: "6px 12px", borderBlockEnd: "1px solid hsl(var(--border))", alignItems: "center" }}>
         <span data-testid="entity-graph-stats">{t("entityGraph.view.stats", { nodes: String(visible.nodes.length), edges: String(visible.edges.length) })}</span>
         <fieldset style={{ border: 0, padding: 0, margin: 0, display: "flex", gap: 6 }}>
@@ -168,7 +194,7 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
           {ENTITY_TYPES.map((ty, k) => (
             <label key={ty} style={{ display: "inline-flex", gap: 3, alignItems: "center" }}>
               <input type="checkbox" checked={types.has(ty)} onChange={() => toggle(types, ty, setTypes)} />
-              <span aria-hidden style={{ inlineSize: 8, blockSize: 8, borderRadius: 4, background: groupColor(k) }} />
+              <span aria-hidden style={{ inlineSize: 8, blockSize: 8, borderRadius: 4, background: rules[ty]?.color ?? groupColor(k) }} />
               {t(`entityGraph.type.${ty}`)}
             </label>
           ))}
@@ -232,6 +258,19 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
             <option value="paths">{t("entityGraph.paths.mode")}</option>
           </select>
         </label>
+        <PerspectiveBar
+          scope="entities"
+          kinds={ENTITY_TYPES}
+          kindLabel={(k) => t(`entityGraph.type.${k}`)}
+          defaultColor={(k) => rgbaToHex(resolveColor(groupColor(ENTITY_TYPES.indexOf(k as EntityType))))}
+          rules={rules}
+          onRules={setRules}
+          snapshot={snapshot}
+          onApply={applyPerspective}
+          hotkeyRoot={root}
+          vault={perspectiveVault}
+          style={field}
+        />
         {egoShown && (
           <span data-testid="entity-graph-ego">
             {t("entityGraph.view.egoOf", { name: nameOf.get(ego.center!) ?? "", shown: String(visible.nodes.length), total: String(ego.total) })}{" "}

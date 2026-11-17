@@ -171,6 +171,8 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "calendarConflict.json": { module: "ui/calendarConflictStrings.ts", users: ["ui/CalendarConflictDialog.tsx"], prefixes: ["calendar.conflict."] },
   // W13.G8: clusters and structural gaps beside the note graph.
   "graphClusters.json": { module: "ui/graph/clusterGapsStrings.ts", users: ["ui/GraphView.tsx", "ui/graph/ClusterGapsPanel.tsx"], prefixes: ["graphClusters."] },
+  // W13.G9: saved graph views (perspectives) and "Open as graph" from a Base or a query.
+  "graphPersp.json": { module: "ui/graph/perspectiveStrings.ts", users: ["ui/EntityGraphView.tsx", "ui/graph/SetGraphDialog.tsx"], prefixes: ["graphPersp."] },
   "graphView.json": { module: "ui/graphViewStrings.ts", users: ["ui/GraphView.tsx"], prefixes: ["graph.ariaLabel", "graph.filter.property", "graph.filters", "graph.groupBy", "graph.groupBy.folder", "graph.groupBy.none", "graph.groupBy.tag", "graph.groups", "graph.layingOut", "graph.table.caption", "graph.table.linkedTo", "graph.table.links", "graph.table.more", "graph.table.none", "graph.table.note", "graph.table.toggle", "graphView.empty", "graphView.openWorkspace", "graphView.stats", "graph.time."] },
   "imageHostsPanel.json": { module: "ui/imageHostsPanelStrings.ts", users: ["ui/ImageHostsPanel.tsx"], prefixes: ["imageHosts."] },
   "pdfChatPanel.json": { module: "pdf/pdfChatPanelStrings.ts", users: ["pdf/PdfChatPanel.tsx"], prefixes: ["pdf.ask.cite", "pdf.ask.dropped", "pdf.ask.indexing", "pdf.ask.notFound", "pdf.ask.ocr", "pdf.ask.placeholder", "pdf.ask.submit", "pdf.ask.thinking", "pdf.ask.title", "pdf.summarize", "pdf.summary.title"] },
