@@ -2257,6 +2257,41 @@
       "icon": "Download"
     },
     {
+      "id": "writing.consistency",
+      "label": "Writing: Check the vault's consistency",
+      "group": "Tools",
+      "hint": "Names, dates, numbers and your glossary terms across all notes, against the entity graph — suggestions to review",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.structure",
+      "label": "Writing: Review the note's structure",
+      "group": "Tools",
+      "hint": "Heading levels, opening and closing, long paragraphs and topic sentences — comments only",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.argument",
+      "label": "Writing: Check the argument",
+      "group": "Tools",
+      "hint": "Claims without a source, logical leaps and common fallacies, each with its reason",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.readability",
+      "label": "Writing: Readability of this note",
+      "group": "Tools",
+      "hint": "A Hebrew readability level (Flesch–Kincaid for English) and what raises it",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.harper",
+      "label": "Writing: English grammar (Harper, on this device)",
+      "group": "Tools",
+      "hint": "Local English grammar for the English parts of the note — suggestions to review",
+      "icon": "Sparkles"
+    },
+    {
       "id": "types.page",
       "label": "Types: all objects by type",
       "icon": "Table"
@@ -4674,6 +4709,41 @@
       "icon": "Download"
     },
     {
+      "id": "writing.consistency",
+      "label": "Writing: Check the vault's consistency",
+      "group": "Tools",
+      "hint": "Names, dates, numbers and your glossary terms across all notes, against the entity graph — suggestions to review",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.structure",
+      "label": "Writing: Review the note's structure",
+      "group": "Tools",
+      "hint": "Heading levels, opening and closing, long paragraphs and topic sentences — comments only",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.argument",
+      "label": "Writing: Check the argument",
+      "group": "Tools",
+      "hint": "Claims without a source, logical leaps and common fallacies, each with its reason",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.readability",
+      "label": "Writing: Readability of this note",
+      "group": "Tools",
+      "hint": "A Hebrew readability level (Flesch–Kincaid for English) and what raises it",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.harper",
+      "label": "Writing: English grammar (Harper, on this device)",
+      "group": "Tools",
+      "hint": "Local English grammar for the English parts of the note — suggestions to review",
+      "icon": "Sparkles"
+    },
+    {
       "id": "types.page",
       "label": "Types: all objects by type",
       "icon": "Table"
@@ -5020,6 +5090,11 @@
     "spell.yiddishDictionary",
     "academic.choose",
     "academic.ics",
+    "writing.consistency",
+    "writing.structure",
+    "writing.argument",
+    "writing.readability",
+    "writing.harper",
     "types.page",
     "types.studio"
   ]

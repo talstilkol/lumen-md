@@ -1827,5 +1827,429 @@
     "ja": "18ri4nb",
     "ru": "18ri4nb",
     "zh-CN": "18ri4nb"
+  },
+  "writingCheck.band.easy": {
+    "ar": "1h7863",
+    "de": "1h7863",
+    "fr": "1h7863",
+    "ja": "1h7863",
+    "ru": "1h7863",
+    "zh-CN": "1h7863"
+  },
+  "writingCheck.band.hard": {
+    "ar": "1rh1u58",
+    "de": "1rh1u58",
+    "fr": "1rh1u58",
+    "ja": "1rh1u58",
+    "ru": "1rh1u58",
+    "zh-CN": "1rh1u58"
+  },
+  "writingCheck.band.medium": {
+    "ar": "ew9h86",
+    "de": "ew9h86",
+    "fr": "ew9h86",
+    "ja": "ew9h86",
+    "ru": "ew9h86",
+    "zh-CN": "ew9h86"
+  },
+  "writingCheck.count": {
+    "ar": "xvj1mx",
+    "de": "xvj1mx",
+    "fr": "xvj1mx",
+    "ja": "xvj1mx",
+    "ru": "xvj1mx",
+    "zh-CN": "xvj1mx"
+  },
+  "writingCheck.done": {
+    "ar": "1yj5zjh",
+    "de": "1yj5zjh",
+    "fr": "1yj5zjh",
+    "ja": "1yj5zjh",
+    "ru": "1yj5zjh",
+    "zh-CN": "1yj5zjh"
+  },
+  "writingCheck.failed": {
+    "ar": "3ilqin",
+    "de": "3ilqin",
+    "fr": "3ilqin",
+    "ja": "3ilqin",
+    "ru": "3ilqin",
+    "zh-CN": "3ilqin"
+  },
+  "writingCheck.harperMissing": {
+    "ar": "ex6nj9",
+    "de": "ex6nj9",
+    "fr": "ex6nj9",
+    "ja": "ex6nj9",
+    "ru": "ex6nj9",
+    "zh-CN": "ex6nj9"
+  },
+  "writingCheck.kind.ad-hominem": {
+    "ar": "y76h1l",
+    "de": "y76h1l",
+    "fr": "y76h1l",
+    "ja": "y76h1l",
+    "ru": "y76h1l",
+    "zh-CN": "y76h1l"
+  },
+  "writingCheck.kind.appeal-to-popularity": {
+    "ar": "1tkm1gu",
+    "de": "1tkm1gu",
+    "fr": "1tkm1gu",
+    "ja": "1tkm1gu",
+    "ru": "1tkm1gu",
+    "zh-CN": "1tkm1gu"
+  },
+  "writingCheck.kind.duplicate-heading": {
+    "ar": "7dkh4c",
+    "de": "7dkh4c",
+    "fr": "7dkh4c",
+    "ja": "7dkh4c",
+    "ru": "7dkh4c",
+    "zh-CN": "7dkh4c"
+  },
+  "writingCheck.kind.empty-section": {
+    "ar": "vkyw4l",
+    "de": "vkyw4l",
+    "fr": "vkyw4l",
+    "ja": "vkyw4l",
+    "ru": "vkyw4l",
+    "zh-CN": "vkyw4l"
+  },
+  "writingCheck.kind.fact-conflict": {
+    "ar": "1hznwhu",
+    "de": "1hznwhu",
+    "fr": "1hznwhu",
+    "ja": "1hznwhu",
+    "ru": "1hznwhu",
+    "zh-CN": "1hznwhu"
+  },
+  "writingCheck.kind.false-dilemma": {
+    "ar": "wp1o5d",
+    "de": "wp1o5d",
+    "fr": "wp1o5d",
+    "ja": "wp1o5d",
+    "ru": "wp1o5d",
+    "zh-CN": "wp1o5d"
+  },
+  "writingCheck.kind.foreign-script-name": {
+    "ar": "ow1nrl",
+    "de": "ow1nrl",
+    "fr": "ow1nrl",
+    "ja": "ow1nrl",
+    "ru": "ow1nrl",
+    "zh-CN": "ow1nrl"
+  },
+  "writingCheck.kind.grammar": {
+    "ar": "jsl6ga",
+    "de": "jsl6ga",
+    "fr": "jsl6ga",
+    "ja": "jsl6ga",
+    "ru": "jsl6ga",
+    "zh-CN": "jsl6ga"
+  },
+  "writingCheck.kind.hasty-generalization": {
+    "ar": "1w78aho",
+    "de": "1w78aho",
+    "fr": "1w78aho",
+    "ja": "1w78aho",
+    "ru": "1w78aho",
+    "zh-CN": "1w78aho"
+  },
+  "writingCheck.kind.heading-skip": {
+    "ar": "1kx3c1r",
+    "de": "1kx3c1r",
+    "fr": "1kx3c1r",
+    "ja": "1kx3c1r",
+    "ru": "1kx3c1r",
+    "zh-CN": "1kx3c1r"
+  },
+  "writingCheck.kind.logical-leap": {
+    "ar": "y8mrwu",
+    "de": "y8mrwu",
+    "fr": "y8mrwu",
+    "ja": "y8mrwu",
+    "ru": "y8mrwu",
+    "zh-CN": "y8mrwu"
+  },
+  "writingCheck.kind.lone-subheading": {
+    "ar": "ca86gq",
+    "de": "ca86gq",
+    "fr": "ca86gq",
+    "ja": "ca86gq",
+    "ru": "ca86gq",
+    "zh-CN": "ca86gq"
+  },
+  "writingCheck.kind.long-paragraph": {
+    "ar": "1oohblp",
+    "de": "1oohblp",
+    "fr": "1oohblp",
+    "ja": "1oohblp",
+    "ru": "1oohblp",
+    "zh-CN": "1oohblp"
+  },
+  "writingCheck.kind.map-unsupported": {
+    "ar": "1twep7h",
+    "de": "1twep7h",
+    "fr": "1twep7h",
+    "ja": "1twep7h",
+    "ru": "1twep7h",
+    "zh-CN": "1twep7h"
+  },
+  "writingCheck.kind.name-variant": {
+    "ar": "iein9t",
+    "de": "iein9t",
+    "fr": "iein9t",
+    "ja": "iein9t",
+    "ru": "iein9t",
+    "zh-CN": "iein9t"
+  },
+  "writingCheck.kind.no-conclusion": {
+    "ar": "1550gb5",
+    "de": "1550gb5",
+    "fr": "1550gb5",
+    "ja": "1550gb5",
+    "ru": "1550gb5",
+    "zh-CN": "1550gb5"
+  },
+  "writingCheck.kind.no-intro": {
+    "ar": "ivs77m",
+    "de": "ivs77m",
+    "fr": "ivs77m",
+    "ja": "ivs77m",
+    "ru": "ivs77m",
+    "zh-CN": "ivs77m"
+  },
+  "writingCheck.kind.post-hoc": {
+    "ar": "1rm7qj5",
+    "de": "1rm7qj5",
+    "fr": "1rm7qj5",
+    "ja": "1rm7qj5",
+    "ru": "1rm7qj5",
+    "zh-CN": "1rm7qj5"
+  },
+  "writingCheck.kind.slippery-slope": {
+    "ar": "hn09x6",
+    "de": "hn09x6",
+    "fr": "hn09x6",
+    "ja": "hn09x6",
+    "ru": "hn09x6",
+    "zh-CN": "hn09x6"
+  },
+  "writingCheck.kind.straw-man": {
+    "ar": "cihc9s",
+    "de": "cihc9s",
+    "fr": "cihc9s",
+    "ja": "cihc9s",
+    "ru": "cihc9s",
+    "zh-CN": "cihc9s"
+  },
+  "writingCheck.kind.term-variant": {
+    "ar": "15piqpb",
+    "de": "15piqpb",
+    "fr": "15piqpb",
+    "ja": "15piqpb",
+    "ru": "15piqpb",
+    "zh-CN": "15piqpb"
+  },
+  "writingCheck.kind.topic-sentence": {
+    "ar": "1qect1u",
+    "de": "1qect1u",
+    "fr": "1qect1u",
+    "ja": "1qect1u",
+    "ru": "1qect1u",
+    "zh-CN": "1qect1u"
+  },
+  "writingCheck.kind.unsupported-claim": {
+    "ar": "3yzi1x",
+    "de": "3yzi1x",
+    "fr": "3yzi1x",
+    "ja": "3yzi1x",
+    "ru": "3yzi1x",
+    "zh-CN": "3yzi1x"
+  },
+  "writingCheck.noNote": {
+    "ar": "111tn5n",
+    "de": "111tn5n",
+    "fr": "111tn5n",
+    "ja": "111tn5n",
+    "ru": "111tn5n",
+    "zh-CN": "111tn5n"
+  },
+  "writingCheck.none": {
+    "ar": "2x7uhx",
+    "de": "2x7uhx",
+    "fr": "2x7uhx",
+    "ja": "2x7uhx",
+    "ru": "2x7uhx",
+    "zh-CN": "2x7uhx"
+  },
+  "writingCheck.readability.en": {
+    "ar": "jkznou",
+    "de": "jkznou",
+    "fr": "jkznou",
+    "ja": "jkznou",
+    "ru": "jkznou",
+    "zh-CN": "jkznou"
+  },
+  "writingCheck.readability.he": {
+    "ar": "wpl29e",
+    "de": "wpl29e",
+    "fr": "wpl29e",
+    "ja": "wpl29e",
+    "ru": "wpl29e",
+    "zh-CN": "wpl29e"
+  },
+  "writingCheck.reason.ambiguous": {
+    "ar": "1hg367w",
+    "de": "1hg367w",
+    "fr": "1hg367w",
+    "ja": "1hg367w",
+    "ru": "1hg367w",
+    "zh-CN": "1hg367w"
+  },
+  "writingCheck.reason.none": {
+    "ar": "hw27ar",
+    "de": "hw27ar",
+    "fr": "hw27ar",
+    "ja": "hw27ar",
+    "ru": "hw27ar",
+    "zh-CN": "hw27ar"
+  },
+  "writingCheck.reason.rare": {
+    "ar": "y0kj8f",
+    "de": "y0kj8f",
+    "fr": "y0kj8f",
+    "ja": "y0kj8f",
+    "ru": "y0kj8f",
+    "zh-CN": "y0kj8f"
+  },
+  "writingCheck.reason.sentLen": {
+    "ar": "k34txj",
+    "de": "k34txj",
+    "fr": "k34txj",
+    "ja": "k34txj",
+    "ru": "k34txj",
+    "zh-CN": "k34txj"
+  },
+  "writingCheck.reason.wordLen": {
+    "ar": "1v13kdy",
+    "de": "1v13kdy",
+    "fr": "1v13kdy",
+    "ja": "1v13kdy",
+    "ru": "1v13kdy",
+    "zh-CN": "1v13kdy"
+  },
+  "writingCheck.reasonEn.wordLen": {
+    "ar": "8eub62",
+    "de": "8eub62",
+    "fr": "8eub62",
+    "ja": "8eub62",
+    "ru": "8eub62",
+    "zh-CN": "8eub62"
+  },
+  "writingCheck.running": {
+    "ar": "vyewnp",
+    "de": "vyewnp",
+    "fr": "vyewnp",
+    "ja": "vyewnp",
+    "ru": "vyewnp",
+    "zh-CN": "vyewnp"
+  },
+  "writingCheck.sources": {
+    "ar": "195ydw1",
+    "de": "195ydw1",
+    "fr": "195ydw1",
+    "ja": "195ydw1",
+    "ru": "195ydw1",
+    "zh-CN": "195ydw1"
+  },
+  "writingCheck.stage.academic": {
+    "ar": "1obvo8q",
+    "de": "1obvo8q",
+    "fr": "1obvo8q",
+    "ja": "1obvo8q",
+    "ru": "1obvo8q",
+    "zh-CN": "1obvo8q"
+  },
+  "writingCheck.stage.grade1-2": {
+    "ar": "hyxvkb",
+    "de": "hyxvkb",
+    "fr": "hyxvkb",
+    "ja": "hyxvkb",
+    "ru": "hyxvkb",
+    "zh-CN": "hyxvkb"
+  },
+  "writingCheck.stage.grade10-12": {
+    "ar": "1trt50w",
+    "de": "1trt50w",
+    "fr": "1trt50w",
+    "ja": "1trt50w",
+    "ru": "1trt50w",
+    "zh-CN": "1trt50w"
+  },
+  "writingCheck.stage.grade3-5": {
+    "ar": "of1ie8",
+    "de": "of1ie8",
+    "fr": "of1ie8",
+    "ja": "of1ie8",
+    "ru": "of1ie8",
+    "zh-CN": "of1ie8"
+  },
+  "writingCheck.stage.grade6-9": {
+    "ar": "15eq6bn",
+    "de": "15eq6bn",
+    "fr": "15eq6bn",
+    "ja": "15eq6bn",
+    "ru": "15eq6bn",
+    "zh-CN": "15eq6bn"
+  },
+  "writingCheck.stagedLine": {
+    "ar": "tzsa5q",
+    "de": "tzsa5q",
+    "fr": "tzsa5q",
+    "ja": "tzsa5q",
+    "ru": "tzsa5q",
+    "zh-CN": "tzsa5q"
+  },
+  "writingCheck.title.argument": {
+    "ar": "1gm3ide",
+    "de": "1gm3ide",
+    "fr": "1gm3ide",
+    "ja": "1gm3ide",
+    "ru": "1gm3ide",
+    "zh-CN": "1gm3ide"
+  },
+  "writingCheck.title.consistency": {
+    "ar": "14cbrkv",
+    "de": "14cbrkv",
+    "fr": "14cbrkv",
+    "ja": "14cbrkv",
+    "ru": "14cbrkv",
+    "zh-CN": "14cbrkv"
+  },
+  "writingCheck.title.harper": {
+    "ar": "11zc4z3",
+    "de": "11zc4z3",
+    "fr": "11zc4z3",
+    "ja": "11zc4z3",
+    "ru": "11zc4z3",
+    "zh-CN": "11zc4z3"
+  },
+  "writingCheck.title.structure": {
+    "ar": "1agxfyi",
+    "de": "1agxfyi",
+    "fr": "1agxfyi",
+    "ja": "1agxfyi",
+    "ru": "1agxfyi",
+    "zh-CN": "1agxfyi"
+  },
+  "writingCheck.why": {
+    "ar": "y9m5zt",
+    "de": "y9m5zt",
+    "fr": "y9m5zt",
+    "ja": "y9m5zt",
+    "ru": "y9m5zt",
+    "zh-CN": "y9m5zt"
   }
 }
