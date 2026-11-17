@@ -12,7 +12,8 @@ import { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { History, X } from "lucide-react";
 import { getLocale, t } from "../i18n";
-import { coverageFrom, vaultAsOf, type AsOfVault } from "../storage/asOf";
+import { coverageFrom, type AsOfVault } from "../storage/asOf";
+import { makeAsOfLoad } from "../storage/asOfLoad";
 import { restoreHunks, type RestoreHunk } from "../storage/asOfRestore";
 import { searchAsOf, type AsOfHit } from "../search/asOfSearch";
 import { wordDiff } from "../collab/wordDiff";
@@ -31,16 +32,17 @@ export interface AsOfDialogProps {
   applyRestore?: (h: RestoreHunk) => boolean;
   /** "Now" (tests pass a fixed clock). */
   now?: number;
-  /** Reads the vault as of a date (default: the history store, S1). */
+  /** Reads the vault as of a date (default: the history store and the git log of every cloned repository, S1). */
   load?: (date: number) => Promise<AsOfVault>;
 }
-
-const historyLoad = (d: number) => vaultAsOf(d);
 
 /** End of the day `days` days after the epoch, so a day's last save is included. */
 const endOfDay = (days: number) => (days + 1) * DAY - 1;
 
-export function AsOfDialog({ onClose, activeName = null, applyRestore, now: nowProp, load = historyLoad }: AsOfDialogProps) {
+export function AsOfDialog({ onClose, activeName = null, applyRestore, now: nowProp, load: loadProp }: AsOfDialogProps) {
+  // One loader per dialog: it lists the repositories once.
+  const [defaultLoad] = useState(() => makeAsOfLoad());
+  const load = loadProp ?? defaultLoad;
   const [now] = useState(() => nowProp ?? Date.now());
   const today = Math.floor(now / DAY);
   const [day, setDay] = useState(today);
