@@ -98,7 +98,7 @@ research services.
 Research answers (**Research: …**) now end with a **References** list: each
 web page the answer cites, once. The footnotes with their quotes stay. The
 list is in APA 7 unless you pick Chicago (author-date) or MLA 9 under
-**Settings → AI → Local services → References**.
+**AI settings → Research → References**.
 
 ## Pandoc syntax
 

@@ -643,15 +643,6 @@ export function AiSettingsPanel({ open, onClose, embedded = false }: Props) {
                 placeholder={t("ai.settings.researchToken.placeholder")}
               />
             </label>
-            <label style={row}>
-              <span style={{ minWidth: 90 }}>{t("ai.settings.referenceStyle")}</span>
-              <select style={input} value={refStyle} onChange={(e) => changeRefStyle(e.target.value as CitationStyle)} data-testid="ai-set-reference-style">
-                {CITATION_STYLES.map((s) => (
-                  <option key={s.id} value={s.id}>{s.label}</option>
-                ))}
-              </select>
-            </label>
-            <div style={muted}>{t("ai.settings.referenceStyle.hint")}</div>
             <div style={muted}>{t("ai.settings.endpoints.hint")}</div>
             {endpointError && (
               <div role="alert" style={{ fontSize: 12, color: "hsl(var(--danger, 0 72% 51%))" }}>
@@ -661,6 +652,20 @@ export function AiSettingsPanel({ open, onClose, embedded = false }: Props) {
             <div style={row}>
               <button type="button" style={primary} onClick={() => void saveEndpoints()}>{t("ai.settings.save")}</button>
             </div>
+          </section>
+
+          {/* W10.E38: the style of a research answer's reference list; saved on change. */}
+          <section style={box} aria-labelledby="ai-set-research-refs">
+            <div id="ai-set-research-refs" style={caption}>{t("ai.settings.research")}</div>
+            <label style={row}>
+              <span style={{ minWidth: 90 }}>{t("ai.settings.referenceStyle")}</span>
+              <select style={input} value={refStyle} onChange={(e) => changeRefStyle(e.target.value as CitationStyle)} data-testid="ai-set-reference-style">
+                {CITATION_STYLES.map((s) => (
+                  <option key={s.id} value={s.id}>{s.label}</option>
+                ))}
+              </select>
+            </label>
+            <div style={muted}>{t("ai.settings.referenceStyle.hint")}</div>
           </section>
 
           <section style={box} aria-labelledby="ai-set-style">
